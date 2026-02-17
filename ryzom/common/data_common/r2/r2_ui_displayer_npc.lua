@@ -291,6 +291,13 @@ function npcCustomPropertySheetDisplayerTable:updateAllPrivate(instance)
 		editNotes.input_string = ""
 	end
 
+	-- reset "all equipment" checkbox
+	r2.allEquipmentEnabled = false
+	local allEquipToggle = npcUI:find("all_equipment")
+	if allEquipToggle then
+		allEquipToggle.toggle_butt.pushed = true
+	end
+
 	-- update avoidable equipment
 	r2:updateEquipment(instance, false)
 
@@ -511,7 +518,14 @@ function npcCustomPropertySheetDisplayerTable:onAttrModified(instance, attribute
 			comboBox = npcUI:find(cbbName):find("combo_box")
 			assert(comboBox)
 
-			local CBText = r2.itemIndexEquipmentToSelectionText[instance.Equipment][cbbName][instance[attributeName]]	
+			local effId = r2:getEffectiveEquipmentId(instance, cbbName)
+			local CBText = r2.itemIndexEquipmentToSelectionText[effId][cbbName][instance[attributeName]]
+			if CBText==nil then
+				local origLookup = r2.itemIndexEquipmentToSelectionText[instance.Equipment]
+				if origLookup and origLookup[cbbName] then
+					CBText = origLookup[cbbName][instance[attributeName]]
+				end
+			end
 			if CBText==nil then CBText= r2.noPiece end
 			if attributeName == "HairType" then				
 				slider = npcUI:find("slider_haircut")
@@ -567,15 +581,16 @@ function npcCustomPropertySheetDisplayerTable:onAttrModified(instance, attribute
 				slider = npcUI:find(v1):find("slider")
 				local comboBox = npcUI:find(cbbName):find("combo_box")
 				local propName = r2.equipmentEnv[v1].propName
+				local effId = r2:getEffectiveEquipmentId(instance, v1)
 				local comboText 
 				if propName=="HairType" then
 					if r2.hasHelmet then
-						comboText = r2.itemIndexEquipmentToSelectionText[instance.Equipment][v1][instance[propName]]
+						comboText = r2.itemIndexEquipmentToSelectionText[effId][v1][instance[propName]]
 					else
 						comboText = r2.noPiece
 					end
 				else
-					comboText = r2.itemIndexEquipmentToSelectionText[instance.Equipment][v1][instance[propName]]
+					comboText = r2.itemIndexEquipmentToSelectionText[effId][v1][instance[propName]]
 				end
 			end
 			return 
@@ -2042,6 +2057,8 @@ r2.equipmentPalette = {}
 r2.itemIndexEquipmentToSelectionText = {}
 r2.equipmentEnv = {}
 r2.noPiece = i18n.get("uiR2EdNoPiece")
+r2.allEquipmentEnabled = false
+r2.allEquipmentId = "r2_all_equipment"
 
 r2.equipmentAttNb = 6
 
@@ -2134,6 +2151,9 @@ function r2:initEquipmentEnv()
 			r2.itemIndexEquipmentToSelectionText[equId][comboName][0] = r2.noPiece
 		end
 	end
+
+	-- Build the merged "all equipment" palette after all individual palettes are initialized
+	r2:buildAllEquipmentPalette()
 end
 
 -----------------------------------------------------------------------------------------------
@@ -2183,6 +2203,68 @@ function r2.addR2PlayerEquipment(paletteElt, equipmentTable)
 end
 
 -----------------------------------------------------------------------------------------------
+-- Build a merged equipment palette containing all outfit items from every equipment palette.
+-- Weapons (hands) are excluded because melee, range, and magic require different action profiles.
+function r2:buildAllEquipmentPalette()
+	local outfitSlots = { "helmet", "chest_plate", "legs", "boots", "gloves", "arms_guard" }
+	local merged = {}
+	for _, slot in pairs(outfitSlots) do
+		merged[slot] = {}
+		local seen = {} -- track by itemFile to avoid duplicates
+		for equId, equTable in pairs(r2.equipmentPalette) do
+			if equTable[slot] then
+				for _, item in pairs(equTable[slot]) do
+					if item.itemFile and not seen[item.itemFile] then
+						seen[item.itemFile] = true
+						table.insert(merged[slot], {["trad"]=item.trad, ["itemFile"]=item.itemFile})
+					end
+				end
+			end
+		end
+	end
+	r2.equipmentPalette[r2.allEquipmentId] = merged
+
+	-- Build lookup tables for the merged palette
+	r2.itemIndexEquipmentToSelectionText[r2.allEquipmentId] = {}
+	for _, slot in pairs(outfitSlots) do
+		r2.itemIndexEquipmentToSelectionText[r2.allEquipmentId][slot] = {}
+		for _, item in pairs(merged[slot]) do
+			local itemIndex = getSheetId(item.itemFile)
+			r2.itemIndexEquipmentToSelectionText[r2.allEquipmentId][slot][itemIndex] = item.trad
+		end
+		r2.itemIndexEquipmentToSelectionText[r2.allEquipmentId][slot][0] = r2.noPiece
+	end
+end
+
+-----------------------------------------------------------------------------------------------
+-- Returns the effective equipment ID for outfit (non-weapon) slots.
+-- When "all equipment" is enabled, returns the merged palette ID for outfit slots.
+-- Always returns the NPC's actual equipment ID for weapon slots.
+function r2:getEffectiveEquipmentId(instance, slotName)
+	if r2.allEquipmentEnabled and slotName ~= "hands" then
+		return r2.allEquipmentId
+	end
+	return instance.Equipment
+end
+
+-----------------------------------------------------------------------------------------------
+-- Toggle the "all equipment" checkbox: repopulate outfit combo boxes accordingly.
+function r2:toggleAllEquipment()
+
+	local npcUI = getUI("ui:interface:r2ed_npc")
+	assert(npcUI)
+
+	local toggleB = npcUI:find("all_equipment").toggle_butt
+	assert(toggleB)
+	r2.allEquipmentEnabled = not toggleB.pushed
+
+	local selection = r2:getSelectedInstance()
+	if selection then
+		r2:updateEquipment(selection, false)
+	end
+end
+
+-----------------------------------------------------------------------------------------------
 
 function r2:updateEquipment(instance, init)
 
@@ -2197,14 +2279,18 @@ function r2:updateEquipment(instance, init)
 	if r2.equipmentPalette[equipmentId] then
 
 		for k, v in pairs(r2.equipmentPalette[equipmentId]) do
+			local effId = r2:getEffectiveEquipmentId(instance, k)
+			local effTable = r2.equipmentPalette[effId]
 			comboBox = npcUI:find(k):find("combo_box")
 			assert(comboBox)
 			
 			comboBox:resetTexts()
 			
-			for k1, v1 in pairs(v) do
-				comboBox:addText(v1.trad)
-			end	
+			if effTable and effTable[k] then
+				for k1, v1 in pairs(effTable[k]) do
+					comboBox:addText(v1.trad)
+				end
+			end
 		end
 
 		if init then r2.hasHelmet = false end
@@ -2243,7 +2329,15 @@ function r2:updateEquipment(instance, init)
 		slider = npcUI:find(k):find("slider")
 		local line = npcUI:find(k):find("line_slider")
 
-		local CBText = r2.itemIndexEquipmentToSelectionText[instance.Equipment][comboBox.Env.nameComboBox][instance[v.propName] ]
+		local effId = r2:getEffectiveEquipmentId(instance, comboBox.Env.nameComboBox)
+		local CBText = r2.itemIndexEquipmentToSelectionText[effId][comboBox.Env.nameComboBox][instance[v.propName] ]
+		if CBText==nil then
+			-- try original equipment ID as fallback
+			local origLookup = r2.itemIndexEquipmentToSelectionText[instance.Equipment]
+			if origLookup and origLookup[comboBox.Env.nameComboBox] then
+				CBText = origLookup[comboBox.Env.nameComboBox][instance[v.propName] ]
+			end
+		end
 		if CBText==nil then CBText=r2.noPiece end
 		comboBox.Env.locked = true
 		comboBox.selection_text = CBText
@@ -2324,7 +2418,8 @@ function r2:updatePieceEquipment()
 			assert(sliderHairColor)
 		end
 		local itemFile = ""
-		for k, v in pairs(r2.equipmentPalette[selection.Equipment][nameComboBox]) do
+		local effId = r2:getEffectiveEquipmentId(selection, nameComboBox)
+		for k, v in pairs(r2.equipmentPalette[effId][nameComboBox]) do
 			if v.trad == equipmentType then itemFile = v.itemFile break end
 		end
 
