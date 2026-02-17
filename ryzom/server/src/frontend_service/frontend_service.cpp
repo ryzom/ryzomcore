@@ -1710,13 +1710,11 @@ void CFrontEndService::setClientsToSynchronizeState()
 
 void CFrontEndService::newCookieCallback(const NLNET::CLoginCookie &cookie)
 {
-	// update the last UPD packet date 
-	if (CFEReceiveTask::LastUDPPacketReceived == 0)
-	{
-		// set the date to 'now'. If no UPD traffic is detected after
-		// a predetermined timer, an alert is set in the service status line.
-		CFEReceiveTask::LastUDPPacketReceived = CTime::getSecondsSince1970();
-	}
+	// update the last UPD packet date to 'now'. If no UPD traffic is detected after
+	// a predetermined timer, an alert is set in the service status line.
+	// Always reset so that a new connection attempt after a long idle period
+	// does not immediately trigger the CheckUDPComm alert.
+	CFEReceiveTask::LastUDPPacketReceived = CTime::getSecondsSince1970();
 }
 
 

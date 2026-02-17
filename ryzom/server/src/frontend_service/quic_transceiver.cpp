@@ -711,6 +711,9 @@ void CQuicTransceiver::datagramReceived(CQuicUserContext *user, const uint8 *buf
 	// Increase reference for FIFO copy
 	user->increaseRef();
 
+	// Update the last datagram receive date (also used by UDP path)
+	CFEReceiveTask::LastUDPPacketReceived = NLMISC::CTime::getSecondsSince1970();
+
 	// Locked block
 	{
 		NLMISC::CAtomicLockYield lock(m->BufferMutex);
