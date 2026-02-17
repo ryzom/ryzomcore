@@ -628,18 +628,7 @@ void AISHEETS::CCreature::readGeorges(NLMISC::CSmartPtr<NLGEORGES::UForm> const&
 		{
 			std::string	scriptCompStr;
 			scriptCompNode->getArrayValue(scriptCompStr, arrayIndex);
-#ifndef NO_AI_COMP
-			CFightScriptComp* scriptComp;
-			try
-			{
-				scriptComp = CFightScriptCompReader::createScriptComp(scriptCompStr);
-				registerScriptComp(scriptComp);
-			}
-			catch (const ReadFightActionException& ex)
-			{
-				nlwarning("script read error (ignored): %s", ex.what());
-			}
-#endif
+			onScriptComp(scriptCompStr);
 		}
 	}
 	// Creature race
@@ -652,25 +641,6 @@ void AISHEETS::CCreature::readGeorges(NLMISC::CSmartPtr<NLGEORGES::UForm> const&
 			_Race = EGSPD::CPeople::Unknown;
 	}
 }
-
-#ifndef NO_AI_COMP
-void AISHEETS::CCreature::registerScriptComp(CFightScriptComp* scriptComp)
-{
-	_ScriptCompList.push_back(scriptComp);
-	
-	CFightSelectFilter* filter = dynamic_cast<CFightSelectFilter*>(scriptComp);
-	if (!filter)
-		return;
-	
-	std::string const& param = filter->getParam();
-	if (param=="ON_UPDATE")
-		_UpdateScriptList.push_back(scriptComp);
-	if (param=="ON_DEATH")
-		_DeathScriptList.push_back(scriptComp);
-	if (param=="ON_BIRTH")
-		_BirthScriptList.push_back(scriptComp);
-}
-#endif
 
 
 uint AISHEETS::CCreature::getVersion()
@@ -768,19 +738,7 @@ void AISHEETS::CCreature::serial(NLMISC::IStream &s)
 		{
 			string scriptCompStr;
 			s.serial(scriptCompStr);
-			
-#ifndef NO_AI_COMP
-			CFightScriptComp* scriptComp;
-			try
-			{
-				scriptComp = CFightScriptCompReader::createScriptComp(scriptCompStr);
-				registerScriptComp(scriptComp);
-			}
-			catch (const ReadFightActionException& ex)
-			{
-				nlwarning("script read error (ignored): %s", ex.what());
-			}
-#endif
+			onScriptComp(scriptCompStr);
 		}
 	}
 	else
@@ -872,6 +830,11 @@ void AISHEETS::CSheets::destroyInstance()
 {
 	delete _Instance;
 	_Instance = NULL;
+}
+
+void AISHEETS::CSheets::setInstance(CSheets* instance)
+{
+	_Instance = instance;
 }
 
 AISHEETS::CSheets::CSheets()
