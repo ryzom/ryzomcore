@@ -91,6 +91,23 @@ public:
 	static const std::string &getWriteDirectory();
 
 	/**
+	 * Set whether to load with a minimal set of features (EGS Light mode).
+	 * Must be called before init(). Default is false.
+	 */
+	static void setEGSLight(bool light);
+
+	/**
+	 * Get whether EGS Light mode is enabled.
+	 */
+	static bool getEGSLight();
+
+	/**
+	 * Set whether outposts should be loaded.
+	 * Must be called before init(). Default is true.
+	 */
+	static void setLoadOutposts(bool load);
+
+	/**
 	 * Init the manager (register callbacks)
 	 */
 	static void init();
@@ -307,6 +324,8 @@ private:
 	static bool _Initialised;		//default =false - set true by constructor
 	static bool _Destroyed;			//default =false - set true by destructor
 	static std::string _WriteDirectory;	// write directory for packed sheets
+	static bool _EGSLight;			//default =false - load with minimal features
+	static bool _LoadOutposts;		//default =true - load outpost sheets
 };
 
 #endif // SHEETS_H

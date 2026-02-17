@@ -47,8 +47,6 @@ using namespace NLMISC;
 using namespace NLGEORGES;
 
 //extern CPlayerManager PlayerManager;
-extern CVariable<bool> LoadOutposts;
-extern CVariable<bool> EGSLight;
 
 
 //------------------------------------------------------------------------------------------
@@ -59,6 +57,8 @@ CSheets CSheets::_StaticSheets;		// the singleton instance
 bool CSheets::_Initialised=false;	// - set true by constructor
 bool CSheets::_Destroyed=false;		// - set true by destructor
 std::string CSheets::_WriteDirectory;
+bool CSheets::_EGSLight=false;
+bool CSheets::_LoadOutposts=true;
 
 void CSheets::setWriteDirectory(const std::string &dir)
 {
@@ -68,6 +68,21 @@ void CSheets::setWriteDirectory(const std::string &dir)
 const std::string &CSheets::getWriteDirectory()
 {
 	return _WriteDirectory;
+}
+
+void CSheets::setEGSLight(bool light)
+{
+	_EGSLight = light;
+}
+
+bool CSheets::getEGSLight()
+{
+	return _EGSLight;
+}
+
+void CSheets::setLoadOutposts(bool load)
+{
+	_LoadOutposts = load;
 }
 
 static std::string writeDirectory()
@@ -268,7 +283,7 @@ void CSheets::init()
 	loadSheetSet( "continent",				"egs_continents.packed_sheets",				_StaticSheets._StaticContinents);
 
 	// only load outpost sheets if outpost system is activated
-	if (LoadOutposts.get())
+	if (_LoadOutposts)
 	{
 		loadSheetSet( "outpost_building",		"egs_outpost_building.packed_sheets",		_StaticSheets._StaticOutpostBuilding);
 		loadSheetSet( "outpost_squad",			"egs_outpost_squads.packed_sheets",			_StaticSheets._StaticOutpostSquads);
@@ -296,7 +311,7 @@ void CSheets::init()
 		}
 	}
 
-	if (!EGSLight)
+	if (!_EGSLight)
 	{
 		// Emotes
 		std::map< NLMISC::CSheetId, CStaticTextEmotes > emoteTexts;
@@ -320,7 +335,7 @@ void CSheets::init()
 
 	// Encyclopedia
 	_StaticSheets._Encyclopedia = new CStaticEncyclo;
-	if (!EGSLight)
+	if (!_EGSLight)
 	{
 		loadSheetSet( "encyclo_album",	"egs_encyclo_album.packed_sheets",	_StaticSheets._Encyclopedia->_AlbumsFromSheet);
 		loadSheetSet( "encyclo_thema",	"egs_encyclo_thema.packed_sheets",	_StaticSheets._Encyclopedia->_ThemasFromSheet);

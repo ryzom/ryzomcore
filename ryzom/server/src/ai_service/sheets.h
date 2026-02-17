@@ -621,7 +621,9 @@ public:
 	void addActionConfig(std::string const& sheetIdName, NLMISC::CDbgPtr<CActionList>& actionConfigList);
 	bool addActionConfig(NLMISC::CSheetId const& sheetId, NLMISC::CDbgPtr<CActionList>& actionConfigList);
 	void removed() { }
+#ifndef NO_AI_COMP
 	void registerScriptComp(CFightScriptComp* scriptComp);
+#endif
 	
 	TGroupPropertiesLine _GroupPropertiesTbl;
 	

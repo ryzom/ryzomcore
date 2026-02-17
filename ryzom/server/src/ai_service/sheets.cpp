@@ -653,6 +653,7 @@ void AISHEETS::CCreature::readGeorges(NLMISC::CSmartPtr<NLGEORGES::UForm> const&
 	}
 }
 
+#ifndef NO_AI_COMP
 void AISHEETS::CCreature::registerScriptComp(CFightScriptComp* scriptComp)
 {
 	_ScriptCompList.push_back(scriptComp);
@@ -669,6 +670,7 @@ void AISHEETS::CCreature::registerScriptComp(CFightScriptComp* scriptComp)
 	if (param=="ON_BIRTH")
 		_BirthScriptList.push_back(scriptComp);
 }
+#endif
 
 
 uint AISHEETS::CCreature::getVersion()

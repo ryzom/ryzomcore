@@ -48,9 +48,6 @@ namespace {
 
 } /* anonymous namespace */
 
-// EGS
-NLMISC::CVariable<bool> EGSLight("egs","EGSLight", "Load EGS with a minimal set of feature loaded", false, 0, true);
-NLMISC::CVariable<bool> LoadOutposts("egs", "LoadOutposts", "If false outposts won't be loaded", true, 0, true );
 static std::string s_WriteDirectory;
 
 ////////////////////////////////////////////////////////////////////////

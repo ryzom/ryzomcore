@@ -1,5 +1,10 @@
 FILE(GLOB SRC ${CMAKE_SOURCE_DIR}/ryzom/server/src/entities_game_service/egs_sheets/*.cpp ${CMAKE_SOURCE_DIR}/ryzom/server/src/entities_game_service/egs_sheets/*.h)
 
+LIST(APPEND SRC
+        ${CMAKE_SOURCE_DIR}/ryzom/server/src/entities_game_service/entity_structure/resists.cpp
+        ${CMAKE_SOURCE_DIR}/ryzom/server/src/entities_game_service/entity_structure/resists.h
+)
+
 NL_TARGET_LIB(ryzom_egs_sheets ${SRC})
 
 TARGET_INCLUDE_DIRECTORIES(ryzom_egs_sheets PRIVATE ${CMAKE_SOURCE_DIR}/ryzom/common/src ${CMAKE_SOURCE_DIR}/ryzom/server/src ${CMAKE_SOURCE_DIR}/ryzom/server/src/entities_game_service)
