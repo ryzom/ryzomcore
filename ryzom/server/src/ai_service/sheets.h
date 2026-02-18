@@ -37,7 +37,7 @@
 
 #include "game_share/visual_slot_manager.h"
 
-#include	"ai_script_comp.h"
+#include	"ai_script_comp_base.h"
 
 #include "game_share/people_pd.h"
 
