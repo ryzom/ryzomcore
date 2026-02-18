@@ -74,10 +74,16 @@ void FileBrowserDock::refresh()
 	_dfnTree->clear();
 	_formTree->clear();
 
-	// Read paths from CConfiguration (matching MFC georges.cfg variable names)
+	// Read paths from CConfiguration. Config values are relative to the project
+	// root (the folder containing .nel), matching the planar_reflection pattern.
 	NLQT::CConfiguration &config = _mainWindow->getConfiguration();
+	std::string projectRoot = _mainWindow->getProjectRoot();
 	QString rootPath = QString::fromUtf8(config.getValue("RootSearchDirectory", std::string("")).c_str());
 	QString subDir = QString::fromUtf8(config.getValue("TypDfnSubFolder", std::string("")).c_str());
+
+	// Resolve relative to project root
+	if (!rootPath.isEmpty() && !projectRoot.empty())
+		rootPath = QDir::cleanPath(QString::fromUtf8(projectRoot.c_str()) + "/" + rootPath);
 
 	QString searchDir = rootPath;
 	if (!subDir.isEmpty())

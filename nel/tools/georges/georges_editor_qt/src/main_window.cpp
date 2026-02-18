@@ -32,6 +32,7 @@
 // NeL includes
 #include <nel/misc/debug.h>
 #include <nel/misc/path.h>
+#include <nel/misc/file.h>
 
 // Project includes
 #include "georges_editor_qt_config.h"
@@ -47,6 +48,24 @@
 
 using namespace NLQT;
 
+// Find the project root by walking up from the current working directory
+// looking for a ".nel" marker folder (same pattern as planar_reflection sample).
+static std::string findProjectRoot()
+{
+	std::string rootPath = NLMISC::CPath::standardizePath(NLMISC::CPath::getCurrentPath(), false);
+
+	while (!rootPath.empty())
+	{
+		if (NLMISC::CFile::isDirectory(rootPath + "/.nel"))
+			return rootPath;
+		std::string::size_type sep = NLMISC::CFile::getLastSeparator(rootPath);
+		if (sep == std::string::npos)
+			break;
+		rootPath = rootPath.substr(0, sep);
+	}
+	return std::string();
+}
+
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent),
 	_mdiArea(NULL),
@@ -57,6 +76,30 @@ MainWindow::MainWindow(QWidget *parent)
 
 	// Initialize NeL configuration (loads .cfg file, sets up search paths)
 	m_Configuration.init(NLQT_CONFIG_FILE);
+
+	// Discover project root by walking up from CWD looking for .nel marker
+	// (same pattern as planar_reflection sample). Config paths are relative to this root.
+	m_ProjectRoot = findProjectRoot();
+	if (m_ProjectRoot.empty())
+		nlwarning("Project root not found (no .nel marker folder in parent directories)");
+	else
+		nlinfo("Project root: %s", m_ProjectRoot.c_str());
+
+	// Re-add SearchPaths relative to the project root.
+	// CConfiguration::init() already tried them relative to CWD; re-add
+	// relative to the discovered root so language data files are found.
+	if (!m_ProjectRoot.empty())
+	{
+		NLMISC::CConfigFile::CVar *searchVar = m_Configuration.getConfigFile().getVarPtr("SearchPaths");
+		if (searchVar)
+		{
+			for (uint i = 0; i < searchVar->size(); ++i)
+			{
+				std::string path = NLMISC::CPath::standardizePath(m_ProjectRoot + "/" + searchVar->asString(i), false);
+				NLMISC::CPath::addSearchPath(path, true, false);
+			}
+		}
+	}
 
 	// Save original palette before any style changes
 	m_OriginalPalette = QApplication::palette();
@@ -138,12 +181,21 @@ void MainWindow::cfcbQtPalette(NLMISC::CConfigFile::CVar &var)
 
 void MainWindow::cfcbRootSearchDirectory(NLMISC::CConfigFile::CVar &var)
 {
-	// Matches MFC initCfg() — add root search directory recursively
+	// Resolve RootSearchDirectory relative to the project root (the folder containing .nel).
+	// Matches the planar_reflection sample pattern: config values are relative to project root,
+	// not relative to the current working directory.
 	NLMISC::CPath::removeAllAlternativeSearchPath();
 	std::string rootDir = var.asString();
-	if (!rootDir.empty())
+	if (!rootDir.empty() && !m_ProjectRoot.empty())
 	{
-		nlinfo("Adding search path: %s", rootDir.c_str());
+		std::string fullPath = NLMISC::CPath::standardizePath(m_ProjectRoot + "/" + rootDir, false);
+		nlinfo("Adding search path: %s (resolved from project root)", fullPath.c_str());
+		NLMISC::CPath::addSearchPath(fullPath, true, true);
+	}
+	else if (!rootDir.empty())
+	{
+		// Fallback: no project root found, use path as-is (may be absolute or relative to CWD)
+		nlwarning("No project root found, using RootSearchDirectory as-is: %s", rootDir.c_str());
 		NLMISC::CPath::addSearchPath(rootDir, true, true);
 	}
 }

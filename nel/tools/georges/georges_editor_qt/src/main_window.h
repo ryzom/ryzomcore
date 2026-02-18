@@ -52,6 +52,7 @@ public:
 	void createNewForm(const QString &dfnName = QString());
 
 	NLQT::CConfiguration &getConfiguration() { return m_Configuration; }
+	const std::string &getProjectRoot() const { return m_ProjectRoot; }
 
 protected:
 	void closeEvent(QCloseEvent *event) override;
@@ -113,6 +114,7 @@ private:
 	NLQT::CConfiguration m_Configuration;
 	NLQT::CInternationalization m_Internationalization;
 	QPalette m_OriginalPalette;
+	std::string m_ProjectRoot;
 
 	QMdiArea *_mdiArea;
 	FileBrowserDock *_fileBrowser;
