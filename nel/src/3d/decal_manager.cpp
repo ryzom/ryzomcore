@@ -219,8 +219,9 @@ void CDecalManager::flush(CScene *sc)
 		// Sort decals by priority within this material group (lower priority first)
 		std::sort(decals.begin(), decals.end(), decalPriorityCompare);
 
-		// Track current texture for batching: flush only on texture change or VB overflow
+		// Track current texture and material for batching
 		ITexture *curTex = NULL;
+		CMaterial *batchMat = NULL;
 		uint32 vbOffset = 0;
 
 		for (uint d = 0; d < decals.size(); ++d)
@@ -242,10 +243,11 @@ void CDecalManager::flush(CScene *sc)
 			if (tex != curTex && vbOffset > 0)
 			{
 				nlassert(vbOffset % 3 == 0);
-				drv->renderRawTriangles(decals[d > 0 ? d - 1 : d]->getMaterial(), 0, vbOffset / 3);
+				drv->renderRawTriangles(*batchMat, 0, vbOffset / 3);
 				vbOffset = 0;
 			}
 			curTex = tex;
+			batchMat = &mat;
 
 			uint32 length = (uint32)verts.size();
 			uint32 srcOffset = 0;
@@ -287,12 +289,10 @@ void CDecalManager::flush(CScene *sc)
 		}
 
 		// Flush remaining vertices for this material group
-		if (vbOffset > 0)
+		if (vbOffset > 0 && batchMat)
 		{
 			nlassert(vbOffset % 3 == 0);
-			// Use the last decal's material (they all share the same texture in a group)
-			CMaterial &lastMat = decals.back()->getMaterial();
-			drv->renderRawTriangles(lastMat, 0, vbOffset / 3);
+			drv->renderRawTriangles(*batchMat, 0, vbOffset / 3);
 			vbOffset = 0;
 		}
 	}
