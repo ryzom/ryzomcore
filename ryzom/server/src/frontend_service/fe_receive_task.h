@@ -160,7 +160,11 @@ public:
 	/// External datagram socket
 	NLNET::CUdpSock								*DataSock;
 
-	/// The date of the last UPD packet recevied
+	/// The date of the last UDP packet received.
+	/// uint32 seconds since Unix epoch (1970). Overflows on Feb 7, 2106.
+	/// Unsigned subtraction (now - LastUDPPacketReceived) is safe for
+	/// elapsed time measurement and wraps correctly across the overflow boundary,
+	/// as long as the actual elapsed time is less than ~136 years (2^32 seconds).
 	static volatile	uint32						LastUDPPacketReceived;
 
 };

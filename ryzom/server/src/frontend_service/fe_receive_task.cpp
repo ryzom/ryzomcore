@@ -123,6 +123,11 @@ CFEReceiveTask::CFEReceiveTask( uint16 firstAcceptablePort, uint16 lastAcceptabl
 	nlinfo( "Binding all network interfaces on port %hu (%hu asked)", actualPort, firstAcceptablePort );
 
 	setRecvTimeout();
+
+	// Initialize to current time so that (now - LastUDPPacketReceived) starts
+	// at 0 rather than at the full epoch time. This avoids relying on the
+	// outer guard conditions to prevent false triggering at startup.
+	LastUDPPacketReceived = CTime::getSecondsSince1970();
 }
 
 
