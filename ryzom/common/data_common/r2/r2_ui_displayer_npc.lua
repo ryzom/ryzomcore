@@ -298,6 +298,14 @@ function npcCustomPropertySheetDisplayerTable:updateAllPrivate(instance)
 		allEquipToggle.toggle_butt.pushed = not r2.allEquipmentEnabled
 	end
 
+	-- update color slider range based on all equipment state
+	local maxVal = r2:getColorSliderMax()
+	for i=1, r2.equipmentAttNb do
+		local slider = npcUI:find(r2.equipementComboB[i]):find("slider")
+		assert(slider)
+		slider.max = maxVal
+	end
+
 	-- update avoidable equipment
 	r2:updateEquipment(instance, false)
 
@@ -622,6 +630,12 @@ function npcCustomPropertySheetDisplayerTable:onAttrModified(instance, attribute
 		if allEquipToggle then
 			allEquipToggle.toggle_butt.pushed = not r2.allEquipmentEnabled
 		end
+		local maxVal = r2:getColorSliderMax()
+		for i=1, r2.equipmentAttNb do
+			local slider = npcUI:find(r2.equipementComboB[i]):find("slider")
+			assert(slider)
+			slider.max = maxVal
+		end
 		r2:updateEquipment(instance, false)
 	end
 
@@ -825,9 +839,7 @@ function r2:initNpcEditor()
 	local npcUI = getUI("ui:interface:r2ed_npc")
 
 	-- equipment color sliders
-	local levelDesignEnabled = getClientCfgVar("LevelDesignEnabled")
-	local maxVal = 5
-	if tonumber(levelDesignEnabled)==1 then maxVal = 7 end
+	local maxVal = r2:getColorSliderMax()
 
 	for i=1, r2.equipmentAttNb do 
 		local slider = npcUI:find(r2.equipementComboB[i]):find("slider")
@@ -2096,6 +2108,18 @@ r2.equipmentSets = {}
 r2.linkColorB = false
 r2.linkedColor = 0
 
+-----------------------------------------------------------------------------------------------
+-- Returns the maximum color index for equipment color sliders.
+-- Normally limited to 5 (6 choices), but expanded to 7 (8 choices) when
+-- LevelDesignEnabled is set or when "all equipment" mode is enabled.
+function r2:getColorSliderMax()
+	local levelDesignEnabled = getClientCfgVar("LevelDesignEnabled")
+	if tonumber(levelDesignEnabled) == 1 or r2.allEquipmentEnabled then
+		return 7
+	end
+	return 5
+end
+
 function r2:initEquipmentEnv()
 
 	local npcUI = getUI("ui:interface:r2ed_npc")
@@ -2264,7 +2288,7 @@ function r2:buildAllEquipmentPalette()
 		for equId, equTable in pairs(r2.equipmentPalette) do
 			if equId ~= r2.allEquipmentId and not string.find(equId, "r2_all_weapons_") and equTable[slot] then
 				for _, item in ipairs(equTable[slot]) do
-					if item.itemFile and not seen[item.itemFile] then
+					if item.itemFile and item.itemFile ~= "" and not seen[item.itemFile] then
 						seen[item.itemFile] = true
 						table.insert(merged[slot], {["trad"]=item.trad, ["itemFile"]=item.itemFile})
 					end
@@ -2370,6 +2394,14 @@ function r2:toggleAllEquipment()
 	local toggleB = npcUI:find("all_equipment").toggle_butt
 	assert(toggleB)
 	r2.allEquipmentEnabled = not toggleB.pushed
+
+	-- update color slider range
+	local maxVal = r2:getColorSliderMax()
+	for i=1, r2.equipmentAttNb do
+		local slider = npcUI:find(r2.equipementComboB[i]):find("slider")
+		assert(slider)
+		slider.max = maxVal
+	end
 
 	-- persist the state to the NPC instance
 	local selection = r2:getSelectedInstance()
@@ -2540,7 +2572,11 @@ function r2:updatePieceEquipment()
 			if v.trad == equipmentType then itemFile = v.itemFile break end
 		end
 
-		itemIndex = getSheetId(itemFile)
+		if itemFile == "" then
+			itemIndex = 0
+		else
+			itemIndex = getSheetId(itemFile)
+		end
 		if not getUICaller().Env.locked then
 			r2:setNpcAttribute(selection.InstanceId, r2.equipmentEnv[nameComboBox].propName, itemIndex)
 		end
@@ -2820,9 +2856,7 @@ function r2:randomColor()
 	local npcUI = getUI("ui:interface:r2ed_npc")
 	assert(npcUI)
 
-	local levelDesignEnabled = getClientCfgVar("LevelDesignEnabled")
-	local maxVal = 5
-	if tonumber(levelDesignEnabled)==1 then maxVal = 7 end
+	local maxVal = r2:getColorSliderMax()
 
 	if r2.linkColorB then
 		local randomColor = math.random(0, maxVal)
@@ -2937,9 +2971,7 @@ function r2:randomNPCEquipment(equipmentId, result)
 	result["WeaponLeftHand"] = weaponLH
 
 	-- random equipment color
-	local levelDesignEnabled = getClientCfgVar("LevelDesignEnabled")
-	local maxVal = 5
-	if tonumber(levelDesignEnabled)==1 then maxVal = 7 end
+	local maxVal = r2:getColorSliderMax()
 	result["JacketColor"] = math.random(0, maxVal)
 	result["ArmColor"] = math.random(0, maxVal)
 	result["HandsColor"] = math.random(0, maxVal)
