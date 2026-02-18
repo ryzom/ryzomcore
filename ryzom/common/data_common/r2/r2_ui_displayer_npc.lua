@@ -2110,7 +2110,7 @@ r2.linkedColor = 0
 
 -----------------------------------------------------------------------------------------------
 -- Returns the maximum color index for equipment color sliders.
--- Normally limited to 5 (6 choices), but expanded to 7 (8 choices) when
+-- Default range is 0..5 (6 colors); expanded to 0..7 (8 colors) when
 -- LevelDesignEnabled is set or when "all equipment" mode is enabled.
 function r2:getColorSliderMax()
 	local levelDesignEnabled = getClientCfgVar("LevelDesignEnabled")
