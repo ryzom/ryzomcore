@@ -1131,7 +1131,7 @@ inline void	CPSRibbon::updateUntexturedMaterial()
 	// UNTEXTURED RIBBON //
 	///////////////////////
 
-	static NLMISC::CRefPtr<ITexture> ptGradTexture;
+	static NLMISC::CRefPtr<ITexture> ptGradTexture; // STATIC GPU RESOURCE: Blocks multiple driver instances
 
 	CParticleSystem &ps = *(_Owner->getOwner());
 	if (_ColorScheme)
@@ -1204,7 +1204,7 @@ inline void	CPSRibbon::updateTexturedMaterial()
 		//_Tex->setWrapS(ITexture::Clamp);
 		//_Tex->setWrapT(ITexture::Clamp);
 	}
-	static NLMISC::CRefPtr<ITexture> ptGradTexture;
+	static NLMISC::CRefPtr<ITexture> ptGradTexture; // STATIC GPU RESOURCE: Blocks multiple driver instances
 	CParticleSystem &ps = *(_Owner->getOwner());
 	if (_ColorScheme)
 	{	// PER RIBBON COLOR

@@ -56,6 +56,7 @@ CClipTrav::CClipTrav() : ViewPyramid(6), WorldPyramid(6)
 	ForceNoFrustumClip= false;
 	_QuadGridClipManager= NULL;
 	_TrackClusterVisibility= false;
+	_LastShadowFadeFrameId= 0;
 }
 
 // ***************************************************************************
@@ -564,7 +565,17 @@ void	CClipTrav::clipShadowCasters()
 
 	CScene::ItShadowCasterList		itShadowCaster;
 
-	float	dFade= NL3D_SMM_FADE_SPEED * Scene->getEllapsedTime();
+	// Only accumulate shadow fades once per real frame (avoid double-accumulation in stereo)
+	float	dFade;
+	if (Scene->getFrameId() != _LastShadowFadeFrameId)
+	{
+		dFade= NL3D_SMM_FADE_SPEED * Scene->getEllapsedTime();
+		_LastShadowFadeFrameId= Scene->getFrameId();
+	}
+	else
+	{
+		dFade= 0.f;
+	}
 	float	distFadeStart= Scene->getShadowMapDistFadeStart();
 	float	distFadeEnd= Scene->getShadowMapDistFadeEnd();
 	float	OODeltaDistFade;

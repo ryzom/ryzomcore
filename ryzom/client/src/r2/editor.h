@@ -657,7 +657,7 @@ private:
 	CInstance::TRefPtr							_CurrentAct;
 	CInstance::TRefPtr							_BaseAct;
 	CInstance::TRefPtr							_ScenarioInstance;
-	CObjectTable								*_Scenario;
+	CObject::TSmartPtr							_Scenario;
 	std::string									_WantedActOnInit;
 	//
 	friend class CDynamicMapClientEventForwarder;
@@ -727,7 +727,7 @@ private:
 	bool										_WaitScenarioScreenWanted;	// lua requests that we display the 'wait scenario' screen
 	bool										_WaitScenarioScreenActive;	// the 'wait scenario' screen is being displayed
 	bool										_EditionModeDisconnectedFlag;
-	CObject										*_NewScenario; // new scenario that will be updated just after the wait screen is over
+	CObject::TSmartPtr							_NewScenario; // new scenario that will be updated just after the wait screen is over
 	uint32										_NewScenarioInitialAct;// the start at which the user start an edition session (can be ~= from 1 after a test session)
 	bool										_PostponeScenarioUpdated;
 
@@ -1042,7 +1042,7 @@ extern bool ConnectionWanted;
 NLMISC::CVector getVector(const CObject *obj);
 NLMISC::CVectorD getVectorD(const CObject *obj);
 //helper : build a CObject from a NLMISC::CVectorD
-CObject *buildVector(const NLMISC::CVectorD &v, const std::string &instanceId = "");
+CObject::TSmartPtr buildVector(const NLMISC::CVectorD &v, const std::string &instanceId = "");
 
 
 

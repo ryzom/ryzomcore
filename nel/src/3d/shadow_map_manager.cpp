@@ -684,8 +684,8 @@ void			CShadowMapManager::renderProject(CScene *scene)
 	vp.init (0, 0, 0.5f, 0.5f);
 	driver->setupViewport(vp);
 
-	static CVertexBuffer CopyQuads;
-	static CMaterial CopyMaterial;
+	static CVertexBuffer CopyQuads; // STATIC GPU RESOURCE: Blocks multiple driver instances
+	static CMaterial CopyMaterial; // STATIC GPU RESOURCE: Blocks multiple driver instances
 	CopyMaterial.initUnlit();
 	CopyMaterial.setColor(CRGBA::White);
 	CopyMaterial.setZWrite(false);

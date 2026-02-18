@@ -32,8 +32,11 @@
 #include <nel/misc/smart_ptr.h>
 
 // Project includes
+#include <nel/3d/uniform_buffer_format.h>
 
 namespace NL3D {
+
+static const uint32 IDRV_PROGRAM_MAXSAMPLERS = 32;
 
 // List typedef.
 class	IDriver;
@@ -72,27 +75,80 @@ public:
 // Note: May need additional flags related to scene sorting, etcetera.
 struct CProgramFeatures
 {
-	CProgramFeatures() : DriverFlags(0), MaterialFlags(0) { }
+	CProgramFeatures() : DriverFlags(0), MaterialFlags(0), VPVertexFormat(0), OutputsSpecularColor(false), OutputsWorldSpacePosition(false), InputsWorldSpaceNormal(false), InputsWorldSpacePosition(false), SupportPPL(false), UsesLightTableUBO(false), UsesCameraUBO(false), UsesObjectUBO(false), UsesMaterialUBO(false) { }
 
 	// Driver builtin parameters
 	enum TDriverFlags
 	{
 		// Matrices
-		Matrices								= 0x00000001, 
+		Matrices								= 0x00000001,
 
 		// Fog
-		Fog										= 0x00000002, 
+		Fog										= 0x00000002,
 	};
 	uint32 DriverFlags;
 
 	enum TMaterialFlags
 	{
 		/// Use the CMaterial texture stages as the textures for a Pixel Program
-		TextureStages							= 0x00000001, 
-		TextureMatrices							= 0x00000002, 
+		TextureStages							= 0x00000001,
+		TextureMatrices							= 0x00000002,
 	};
 	// Material builtin parameters
 	uint32 MaterialFlags;
+
+	/// VP output varyings as CVertexBuffer vertex format flags.
+	/// When a user VP is active, the builtin PP uses this to declare matching inputs.
+	uint16 VPVertexFormat;
+
+	/// Whether this VP outputs a separate specular color varying (for post-texture addition).
+	bool OutputsSpecularColor;
+
+	/// Whether this VP outputs world-space position at location 0 (instead of eye-space ecPos).
+	/// When set, the builtin PP computes fog from radial world-space distance.
+	/// When false, location 0 carries eye-space position and fog uses planar depth.
+	/// Also used for PPL activation: when the builtin PP is paired with a user VP
+	/// that does not use UsesObjectUBO, per-pixel lighting is only activated if this
+	/// flag is set (indicating the VP outputs the world-space data PPL needs).
+	bool OutputsWorldSpacePosition;
+
+	/// Whether this PP requires a world-space normal varying at location 2 from the VP.
+	/// When set, the builtin VP transforms the normal to world space before output.
+	/// When false, the VP still outputs the normal varying (object-space) if the VB
+	/// has normals — user PPs may consume it directly. The builtin PP only supports
+	/// world-space normals as input; object-space normals are only used by user PPs.
+	/// Also used for PPL activation: see InputsWorldSpacePosition.
+	bool InputsWorldSpaceNormal;
+
+	/// Whether this PP requires world-space position at location 0 from the VP.
+	/// When set, the builtin VP outputs PZB-relative world-space position.
+	/// When false, the VP still outputs eye-space ecPos at location 0 when fog is enabled.
+	/// Also used for PPL activation: when the builtin VP is paired with a user PP
+	/// that does not use UsesObjectUBO, per-pixel lighting is only activated if both
+	/// InputsWorldSpacePosition and InputsWorldSpaceNormal are set.
+	bool InputsWorldSpacePosition;
+
+	/// Whether this program supports per-pixel lighting
+	/// If this is false, per-pixel lighting will not be used while this program is active,
+	/// otherwise it depends on the availability of the Object UBO and world space varyings.
+	bool SupportPPL;
+
+	// UBO flags
+	/// Whether this VP reads lights from a UBO light table + per-object indices/factors.
+	bool UsesLightTableUBO;
+
+	/// Whether this program reads camera/fog/clip state from a UBO (binding 0).
+	bool UsesCameraUBO;
+
+	/// Whether this program reads per-object state (matrices, light indices, etc.) from a UBO (binding 2).
+	/// Programs with UsesObjectUBO are assumed to support per-pixel lighting dynamically
+	/// at runtime via the nlWorldSpacePosition, nlWorldSpaceNormal, and nlNumPerPixelLights
+	/// uniforms in the NlModel UBO block. The driver will activate PPL for such programs
+	/// whenever lights request it, without requiring the static world-space feature flags.
+	bool UsesObjectUBO;
+
+	/// Whether this program reads material properties from a UBO (binding 3).
+	bool UsesMaterialUBO;
 };
 
 // Stucture used to cache the indices of builtin parameters which are used by the drivers
@@ -114,9 +170,328 @@ struct CProgramIndex
 		ModelViewProjection, 
 		ModelViewProjectionInverse, 
 		ModelViewProjectionTranspose, 
-		ModelViewProjectionInverseTranspose, 
+		ModelViewProjectionInverseTranspose,
 
-		Fog, 
+		NormalMatrix,
+		ViewMatrix,
+
+		Fog,
+		FogParams,
+		FogColor,
+		FogDensity,
+
+		Color,
+		//DiffuseColor,
+
+		AlphaRef,
+
+		Constant0,
+		Constant1,
+		Constant2,
+		Constant3,
+		Constant4,
+		Constant5,
+		Constant6,
+		Constant7,
+		Constant8,
+		Constant9,
+		Constant10,
+		Constant11,
+		Constant12,
+		Constant13,
+		Constant14,
+		Constant15,
+		Constant16,
+		Constant17,
+		Constant18,
+		Constant19,
+		Constant20,
+		Constant21,
+		Constant22,
+		Constant23,
+		Constant24,
+		Constant25,
+		Constant26,
+		Constant27,
+		Constant28,
+		Constant29,
+		Constant30,
+		Constant31,
+
+		Sampler0,
+		Sampler1,
+		Sampler2,
+		Sampler3,
+		Sampler4,
+		Sampler5,
+		Sampler6,
+		Sampler7,
+		Sampler8,
+		Sampler9,
+		Sampler10,
+		Sampler11,
+		Sampler12,
+		Sampler13,
+		Sampler14,
+		Sampler15,
+		Sampler16,
+		Sampler17,
+		Sampler18,
+		Sampler19,
+		Sampler20,
+		Sampler21,
+		Sampler22,
+		Sampler23,
+		Sampler24,
+		Sampler25,
+		Sampler26,
+		Sampler27,
+		Sampler28,
+		Sampler29,
+		Sampler30,
+		Sampler31,
+
+		TexMatrix0,
+		TexMatrix1,
+		TexMatrix2,
+		TexMatrix3,
+
+		TexGen0ObjectPlaneS,
+		TexGen0ObjectPlaneT,
+		TexGen0ObjectPlaneP,
+		TexGen0ObjectPlaneQ,
+
+		TexGen1ObjectPlaneS,
+		TexGen1ObjectPlaneT,
+		TexGen1ObjectPlaneP,
+		TexGen1ObjectPlaneQ,
+
+		TexGen2ObjectPlaneS,
+		TexGen2ObjectPlaneT,
+		TexGen2ObjectPlaneP,
+		TexGen2ObjectPlaneQ,
+
+		TexGen3ObjectPlaneS,
+		TexGen3ObjectPlaneT,
+		TexGen3ObjectPlaneP,
+		TexGen3ObjectPlaneQ,
+
+		TexGen0EyePlaneS,
+		TexGen0EyePlaneT,
+		TexGen0EyePlaneP,
+		TexGen0EyePlaneQ,
+
+		TexGen1EyePlaneS,
+		TexGen1EyePlaneT,
+		TexGen1EyePlaneP,
+		TexGen1EyePlaneQ,
+
+		TexGen2EyePlaneS,
+		TexGen2EyePlaneT,
+		TexGen2EyePlaneP,
+		TexGen2EyePlaneQ,
+
+		TexGen3EyePlaneS,
+		TexGen3EyePlaneT,
+		TexGen3EyePlaneP,
+		TexGen3EyePlaneQ,
+
+		SelfIllumination,
+
+		Light0DirOrPos,
+		Light1DirOrPos,
+		Light2DirOrPos,
+		Light3DirOrPos,
+		Light4DirOrPos,
+		Light5DirOrPos,
+		Light6DirOrPos,
+		Light7DirOrPos,
+
+		Light0ColAmb,
+		Light1ColAmb,
+		Light2ColAmb,
+		Light3ColAmb,
+		Light4ColAmb,
+		Light5ColAmb,
+		Light6ColAmb,
+		Light7ColAmb,
+
+		Light0ColDiff,
+		Light1ColDiff,
+		Light2ColDiff,
+		Light3ColDiff,
+		Light4ColDiff,
+		Light5ColDiff,
+		Light6ColDiff,
+		Light7ColDiff,
+
+		Light0ColSpec,
+		Light1ColSpec,
+		Light2ColSpec,
+		Light3ColSpec,
+		Light4ColSpec,
+		Light5ColSpec,
+		Light6ColSpec,
+		Light7ColSpec,
+
+		Light0Shininess,
+		Light1Shininess,
+		Light2Shininess,
+		Light3Shininess,
+		Light4Shininess,
+		Light5Shininess,
+		Light6Shininess,
+		Light7Shininess,
+
+		Light0ConstAttn,
+		Light1ConstAttn,
+		Light2ConstAttn,
+		Light3ConstAttn,
+		Light4ConstAttn,
+		Light5ConstAttn,
+		Light6ConstAttn,
+		Light7ConstAttn,
+
+		Light0LinAttn,
+		Light1LinAttn,
+		Light2LinAttn,
+		Light3LinAttn,
+		Light4LinAttn,
+		Light5LinAttn,
+		Light6LinAttn,
+		Light7LinAttn,
+
+		Light0QuadAttn,
+		Light1QuadAttn,
+		Light2QuadAttn,
+		Light3QuadAttn,
+		Light4QuadAttn,
+		Light5QuadAttn,
+		Light6QuadAttn,
+		Light7QuadAttn,
+
+		Light0SpotDir,
+		Light1SpotDir,
+		Light2SpotDir,
+		Light3SpotDir,
+		Light4SpotDir,
+		Light5SpotDir,
+		Light6SpotDir,
+		Light7SpotDir,
+
+		Light0SpotCutoff,
+		Light1SpotCutoff,
+		Light2SpotCutoff,
+		Light3SpotCutoff,
+		Light4SpotCutoff,
+		Light5SpotCutoff,
+		Light6SpotCutoff,
+		Light7SpotCutoff,
+
+		Light0SpotExp,
+		Light1SpotExp,
+		Light2SpotExp,
+		Light3SpotExp,
+		Light4SpotExp,
+		Light5SpotExp,
+		Light6SpotExp,
+		Light7SpotExp,
+
+		ClipPlane0,
+		ClipPlane1,
+		ClipPlane2,
+		ClipPlane3,
+		ClipPlane4,
+		ClipPlane5,
+
+		EmbmMatrix0,
+		EmbmMatrix1,
+		EmbmMatrix2,
+		EmbmMatrix3,
+
+		Bump0ScaleBias,
+		Bump1ScaleBias,
+
+		// Megashader control uniforms
+		NlLighting,
+		NlLightMode0,
+		NlLightMode1,
+		NlLightMode2,
+		NlLightMode3,
+		NlLightMode4,
+		NlLightMode5,
+		NlLightMode6,
+		NlLightMode7,
+		NlTexGenMode0,
+		NlTexGenMode1,
+		NlTexGenMode2,
+		NlTexGenMode3,
+		NlVertexColorLighted,
+		NlVertexFormat,
+		NlClipPlaneMask,
+		NlShader,
+		NlTextureActive,
+		NlTexEnvMode0,
+		NlTexEnvMode1,
+		NlTexEnvMode2,
+		NlTexEnvMode3,
+		NlAlphaTest,
+		NlFogMode,
+		NlWorldSpaceNormal,
+		NlWorldSpacePosition,
+		NlNumPerPixelLights,
+		NlFogEnabled,
+		CameraForward,
+		SamplerCube0,
+		SamplerCube1,
+		SamplerCube2,
+		SamplerCube3,
+
+		// Light table per-object uniforms
+		NlLightIndex0,
+		NlLightIndex1,
+		NlLightIndex2,
+		NlLightIndex3,
+		NlLightIndex4,
+		NlLightIndex5,
+		NlLightIndex6,
+		NlLightIndex7,
+		NlLightFactor0,
+		NlLightFactor1,
+		NlLightFactor2,
+		NlLightFactor3,
+		NlLightFactor4,
+		NlLightFactor5,
+		NlLightFactor6,
+		NlLightFactor7,
+		NlMaterialDiffuse,
+		NlMaterialSpecular,
+		NlMaterialShininess,
+		PzbCameraPos,
+		CameraWorldPos,
+		NlLightMapScale,
+
+		// Per-pixel lighting uniforms for pixel programs (raw values, not pre-multiplied)
+		NlPpLightMode0, NlPpLightMode1, NlPpLightMode2, NlPpLightMode3,
+		NlPpLightMode4, NlPpLightMode5, NlPpLightMode6, NlPpLightMode7,
+		PpLight0DirOrPos, PpLight1DirOrPos, PpLight2DirOrPos, PpLight3DirOrPos,
+		PpLight4DirOrPos, PpLight5DirOrPos, PpLight6DirOrPos, PpLight7DirOrPos,
+		PpLight0ColDiff, PpLight1ColDiff, PpLight2ColDiff, PpLight3ColDiff,
+		PpLight4ColDiff, PpLight5ColDiff, PpLight6ColDiff, PpLight7ColDiff,
+		PpLight0ColSpec, PpLight1ColSpec, PpLight2ColSpec, PpLight3ColSpec,
+		PpLight4ColSpec, PpLight5ColSpec, PpLight6ColSpec, PpLight7ColSpec,
+		PpLight0ConstAttn, PpLight1ConstAttn, PpLight2ConstAttn, PpLight3ConstAttn,
+		PpLight4ConstAttn, PpLight5ConstAttn, PpLight6ConstAttn, PpLight7ConstAttn,
+		PpLight0LinAttn, PpLight1LinAttn, PpLight2LinAttn, PpLight3LinAttn,
+		PpLight4LinAttn, PpLight5LinAttn, PpLight6LinAttn, PpLight7LinAttn,
+		PpLight0QuadAttn, PpLight1QuadAttn, PpLight2QuadAttn, PpLight3QuadAttn,
+		PpLight4QuadAttn, PpLight5QuadAttn, PpLight6QuadAttn, PpLight7QuadAttn,
+		PpLight0SpotDir, PpLight1SpotDir, PpLight2SpotDir, PpLight3SpotDir,
+		PpLight4SpotDir, PpLight5SpotDir, PpLight6SpotDir, PpLight7SpotDir,
+		PpLight0SpotCutoff, PpLight1SpotCutoff, PpLight2SpotCutoff, PpLight3SpotCutoff,
+		PpLight4SpotCutoff, PpLight5SpotCutoff, PpLight6SpotCutoff, PpLight7SpotCutoff,
+		PpLight0SpotExp, PpLight1SpotExp, PpLight2SpotExp, PpLight3SpotExp,
+		PpLight4SpotExp, PpLight5SpotExp, PpLight6SpotExp, PpLight7SpotExp,
 
 		NUM_UNIFORMS
 	};
@@ -206,6 +581,10 @@ public:
 		/// CVertexProgramInfo/CPixelProgramInfo/... NeL features
 		CProgramFeatures Features;
 
+		/// User UBO formats: binding point -> format.
+		/// The driver generates GLSL block declarations from these during compilation.
+		std::map<sint, NLMISC::CSmartPtr<CUniformBufferFormat> > UniformBufferFormats;
+
 		/// Map with known parameter indices, used for assembly programs
 		std::map<std::string, uint> ParamIndices;
 		
@@ -242,15 +621,18 @@ public:
 
 protected:
 	/// The progam source
-	std::vector<NLMISC::CSmartPtr<CSource> >				m_Sources;
+	std::vector<NLMISC::CSmartPtr<CSource> > m_Sources;
 
 	/// The source used for compilation
-	NLMISC::CSmartPtr<CSource>								m_Source;
-	CProgramIndex										m_Index;
+	NLMISC::CSmartPtr<CSource> m_Source;
+	CProgramIndex m_Index;
 
 public:
 	/// The driver information. For the driver implementation only.
-	NLMISC::CRefPtr<IProgramDrvInfos>					m_DrvInfo;
+	NLMISC::CRefPtr<IProgramDrvInfos> m_DrvInfo;
+
+	/// Set by the driver when compilation fails. Prevents repeated recompilation attempts.
+	bool m_CompileFailed;
 
 }; /* class IProgram */
 

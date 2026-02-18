@@ -647,6 +647,7 @@ void initMainLoop()
 		// Setup the global Wind from cfg.
 		Scene->setGlobalWindPower(ClientCfg.GlobalWindPower);
 		Scene->setGlobalWindDirection(ClientCfg.GlobalWindDirection);
+		Scene->setForceWaterEnvMap(ClientCfg.ForceWaterEnvMap);
 
 		// init the clustered sound system
 		if (SoundMngr != NULL)
@@ -1388,6 +1389,7 @@ void initMainLoop()
 
 	// Re-initialise the mouse (will be now in hardware mode, if required)
 	SetMousePosFirstTime = true;
+	ResetMouseCaptureState();
 	InitMouseWithCursor (ClientCfg.HardwareCursor && !StereoDisplayAttached); // the return value of enableLowLevelMouse() has already been tested at startup
 
 	// Re-initialise the keyboard, now in low-level mode, if required

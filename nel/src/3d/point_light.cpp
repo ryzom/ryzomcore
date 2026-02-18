@@ -85,6 +85,7 @@ CPointLight::CPointLight() : _LightedModels(/*&_LightedModelListMemory*/)
 	}
 
 	_AddAmbientWithSun= false;
+	_TableIndex= -1;
 }
 
 
@@ -120,6 +121,9 @@ CPointLight &CPointLight::operator=(const CPointLight &o)
 	_SpotExponent= o._SpotExponent;
 
 	_AddAmbientWithSun= o._AddAmbientWithSun;
+
+	// Note: _TableIndex is NOT copied — it is specific to the light instance's position in the table
+	// _TableIndex= o._TableIndex;
 
 	return *this;
 }
@@ -393,6 +397,25 @@ void			CPointLight::setupDriverLightUserAttenuation(CLight &light, uint8 factor)
 	// NB: setup a pointLight even if it is a SpotLight because already attenuated
 	light.setupPointLight(ambient, diffuse, specular, _Position, CVector::Null,
 		1, 0, 0);
+}
+
+
+// ***************************************************************************
+void			CPointLight::setupDriverLightRaw(CLight &light) const
+{
+	// setup the pointLight without any factor modulation (raw colors)
+	if(_Type == SpotLight )
+	{
+		light.setupSpotLight(_Ambient, _Diffuse, _Specular, _Position, _SpotDirection,
+			_SpotExponent, float(NLMISC::Pi/2) ,
+			_ConstantAttenuation, _LinearAttenuation, _QuadraticAttenuation);
+	}
+	// PointLight or AmbientLight
+	else
+	{
+		light.setupPointLight(_Ambient, _Diffuse, _Specular, _Position, CVector::Null,
+			_ConstantAttenuation, _LinearAttenuation, _QuadraticAttenuation);
+	}
 }
 
 

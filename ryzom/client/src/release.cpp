@@ -556,10 +556,10 @@ void releaseStereoDisplayDevice()
 			UCamera cam = SceneRoot->getCam();
 			StereoDisplay->getOriginalFrustum(1, &cam);
 		}
-		nlassert(Driver);
-		Driver->setViewport(NL3D::CViewport());
-		nlassert(Scene);
-		Scene->setViewport(NL3D::CViewport());
+		if (Driver)
+			Driver->setViewport(NL3D::CViewport());
+		if (Scene)
+			Scene->setViewport(NL3D::CViewport());
 		delete StereoDisplay;
 		StereoDisplay = NULL;
 		StereoHMD = NULL;

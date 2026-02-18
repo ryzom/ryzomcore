@@ -480,7 +480,7 @@ void	CPSTailDot::updateMaterial()
 	NL_PS_FUNC(CPSTailDot_updateMaterial)
 	if (!_Touch) return;
 
-	static NLMISC::CRefPtr<ITexture> ptGradTexture;
+	static NLMISC::CRefPtr<ITexture> ptGradTexture; // STATIC GPU RESOURCE: Blocks multiple driver instances
 
 	CParticleSystem &ps = *(_Owner->getOwner());
 	if (_ColorScheme)

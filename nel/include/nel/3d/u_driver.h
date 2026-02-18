@@ -28,6 +28,7 @@
 #include "frustum.h"
 #include "nel/misc/geom_ext.h"
 #include "nel/misc/matrix.h"
+#include "nel/misc/plane.h"
 #include "nel/misc/rgba.h"
 #include "nel/misc/rect.h"
 #include "nel/misc/bitmap.h"
@@ -145,7 +146,7 @@ public:
 	enum TStencilFunc { never = 0, less, lessequal, equal, notequal, greaterequal, greater, always};
 
 	// Existing drivers
-	enum TDriver { Direct3d = 0, OpenGl, OpenGlEs };
+	enum TDriver { Direct3d = 0, OpenGl, OpenGlEs, OpenGl3 };
 
 public:
 	/// The EventServer of this driver. Init after setDisplay()!!
@@ -268,8 +269,10 @@ public:
 	// @{
 	virtual	bool			fogEnabled()=0;
 	virtual	void			enableFog(bool enable)=0;
-	/// $ fog parameters. fog must enabled to see result. start and end are in [0,1] range.
+	/// setup fog parameters. fog must enabled to see result. start and end are in [0,1] range.
 	virtual	void			setupFog(float start, float end, CRGBA color)=0;
+	/// setup fog mode and density. mode/density are orthogonal to start/end/color.
+	virtual	void			setupFogMode(uint mode = 0, float density = 1.f)=0;
 	// @}
 
 	/// \name Light support.
@@ -292,6 +295,12 @@ public:
 	virtual void			stencilFunc(TStencilFunc stencilFunc, int ref, uint mask) = 0;
 	virtual void			stencilOp(TStencilOp fail, TStencilOp zfail, TStencilOp zpass) = 0;
 	virtual void			stencilMask(uint mask) = 0;
+	// @}
+
+	/// \name Clip planes
+	// @{
+	virtual void			enableClipPlane(uint index, bool enable) = 0;
+	virtual void			setClipPlane(uint index, const NLMISC::CPlane &plane) = 0;
 	// @}
 
 	/// \name Scene gestion.
@@ -673,6 +682,10 @@ public:
 	 *	NB: this is done only on TextureFile
 	 */
 	virtual void			forceTextureResize(uint divisor)=0;
+
+	/** Return true if the driver supports monitor color properties (gamma, contrast, luminosity).
+	  */
+	virtual bool			supportMonitorColorProperties () const = 0;
 
 	/** Setup monitor color properties.
 	  *

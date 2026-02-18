@@ -572,7 +572,7 @@ void clearBuffers()
 void renderScene(bool forceFullDetail, bool bloom)
 {
 	CTextureUser *effectRenderTarget = NULL;
-	if (bloom)
+	if (bloom && Driver->supportBloomEffect())
 	{
 		// set bloom parameters before applying bloom effect
 		CBloomEffect::getInstance().setSquareBloom(ClientCfg.SquareBloom);
@@ -592,7 +592,7 @@ void renderScene(bool forceFullDetail, bool bloom)
 	{
 		s_ForceFullDetail.restore();
 	}
-	if (bloom)
+	if (bloom && Driver->supportBloomEffect())
 	{
 		// apply bloom effect
 		CBloomEffect::getInstance().applyBloom();
@@ -607,7 +607,7 @@ void renderScene(bool forceFullDetail, bool bloom)
 void updateWaterEnvMap()
 {
 	#ifdef USE_WATER_ENV_MAP
-	if (WaterEnvMapRefCount > 0) // water env map needed
+	if (WaterEnvMapRefCount > 0 || ClientCfg.ForceWaterEnvMap) // water env map needed
 	{
 		if (!WaterEnvMap)
 		{
@@ -638,7 +638,7 @@ void updateWaterEnvMap()
 		WaterEnvMapRdr.CurrTime = TimeInSec - FirstTimeInSec;
 		WaterEnvMapRdr.CurrWeather = WeatherManager.getWeatherValue();
 		CSky &sky = ContinentMngr.cur()->CurrentSky;
-		WaterEnvMap->setAlpha(sky.getWaterEnvMapAlpha());
+		WaterEnvMap->setAlpha(ClientCfg.ForceWaterEnvMap ? 128 : 255); // Not useful and does not work under D3D, use alpha map instead on your water shape! // sky.getWaterEnvMapAlpha())
 		Scene->updateWaterEnvMaps(TimeInSec - FirstTimeInSec);
 	}
 	#endif
@@ -1448,14 +1448,11 @@ bool mainLoop()
 				SoundMngr->setListenerOrientation(mat.getJ(), mat.getK());
 			}
 		}
-		if (StereoDisplay)
+		StereoDisplay->updateCamera(0, &MainCam);
+		if (SceneRoot)
 		{
-			StereoDisplay->updateCamera(0, &MainCam);
-			if (SceneRoot)
-			{
-				UCamera cam = SceneRoot->getCam();
-				StereoDisplay->updateCamera(1, &cam);
-			}
+			UCamera cam = SceneRoot->getCam();
+			StereoDisplay->updateCamera(1, &cam);
 		}
 
 		// see if camera is below water (useful for sort order)
@@ -1656,15 +1653,11 @@ bool mainLoop()
 		uint i = 0;
 		CTextureUser *effectRenderTarget = NULL;
 		bool haveEffects = Render && Driver->getPolygonMode() == UDriver::Filled
+			&& Driver->supportBloomEffect()
 			&& (ClientCfg.Bloom || FXAA);
 		bool defaultRenderTarget = false;
 		if (haveEffects)
 		{
-			if (!StereoDisplay)
-			{
-				Driver->beginDefaultRenderTarget();
-				defaultRenderTarget = true;
-			}
 			if (ClientCfg.Bloom)
 			{
 				CBloomEffect::getInstance().setSquareBloom(ClientCfg.SquareBloom);
@@ -1672,14 +1665,13 @@ bool mainLoop()
 			}
 		}
 		bool fullDetail = false;
-		while ((!StereoDisplay && i == 0) || (StereoDisplay && StereoDisplay->nextPass()))
+		while (StereoDisplay->nextPass())
 		{
 			++i;
 			///////////////////
 			// SETUP CAMERAS //
 			///////////////////
 
-			if (StereoDisplay)
 			{
 				// modify cameras for stereo display
 				const CViewport &vp = StereoDisplay->getCurrentViewport();
@@ -1704,23 +1696,37 @@ bool mainLoop()
 			// Commit camera changes
 			commitCamera();
 
+			// Set flare context for this pass (separate context per eye for stereo)
+			Scene->setFlareContext(StereoDisplay->getFlareContext());
+
 			//////////////////////////
 			// RENDER THE FRAME  3D //
 			//////////////////////////
 
-			bool stereoRenderTarget = (StereoDisplay != NULL) && StereoDisplay->beginRenderTarget();
+			bool stereoRenderTarget = StereoDisplay->beginRenderTarget();
+			if (!stereoRenderTarget && haveEffects && !defaultRenderTarget && StereoDisplay->wantClear())
+			{
+				Driver->beginDefaultRenderTarget();
+				defaultRenderTarget = true;
+			}
 
-			if (!StereoDisplay || StereoDisplay->wantClear())
+			if (StereoDisplay->wantClear())
 			{
 				// Clear buffers
 				clearBuffers();
 			}
 
-			if (!StereoDisplay || StereoDisplay->wantScene())
+			if (StereoDisplay->wantSceneReflections())
+			{
+				// Render water planar reflections to RTT
+				// TODO: water reflection system renders here
+			}
+
+			if (StereoDisplay->wantScene())
 			{
 				if (!ClientCfg.Light && Render)
 				{
-					if (!StereoDisplay || StereoDisplay->isSceneFirst())
+					if (StereoDisplay->isSceneFirst())
 					{
 						// nb : force full detail if a screenshot is asked
 						// todo : move outside render code
@@ -1736,11 +1742,11 @@ bool mainLoop()
 					}
 
 					// Render scene
-					bool wantTraversals = !StereoDisplay || StereoDisplay->isSceneFirst();
-					bool keepTraversals = StereoDisplay && !StereoDisplay->isSceneLast();
+					bool wantTraversals = StereoDisplay->isSceneFirst();
+					bool keepTraversals = !StereoDisplay->isSceneLast();
 					doRenderScene(wantTraversals, keepTraversals);
 
-					if (!StereoDisplay || StereoDisplay->isSceneLast())
+					if (StereoDisplay->isSceneLast())
 					{
 						if (fullDetail)
 						{
@@ -1751,21 +1757,21 @@ bool mainLoop()
 				}
 			}
 
-			if (!StereoDisplay || StereoDisplay->wantSceneEffects())
+			if (StereoDisplay->wantSceneEffects())
 			{
 				if (!ClientCfg.Light && Render && haveEffects)
 				{
-					if (StereoDisplay) Driver->setViewport(NL3D::CViewport());
+					Driver->setViewport(NL3D::CViewport());
 					UCamera	pCam = Scene->getCam();
 					Driver->setMatrixMode2D11();
 					if (FXAA) FXAA->applyEffect();
 					if (ClientCfg.Bloom) CBloomEffect::instance().applyBloom();
 					Driver->setMatrixMode3D(pCam);
-					if (StereoDisplay) Driver->setViewport(StereoDisplay->getCurrentViewport());
+					Driver->setViewport(StereoDisplay->getCurrentViewport());
 				}
 			}
 
-			if (!StereoDisplay || StereoDisplay->wantInterface3D())
+			if (StereoDisplay->wantInterface3D())
 			{
 				if (!ClientCfg.Light)
 				{
@@ -1846,9 +1852,9 @@ bool mainLoop()
 					CGraph::render (ShowInfos);
 				}
 
-			} /* if (!StereoDisplay || StereoDisplay->wantInterface3D()) */
+			} /* if (StereoDisplay->wantInterface3D()) */
 
-			if (!StereoDisplay || StereoDisplay->wantInterface2D())
+			if (StereoDisplay->wantInterface2D())
 			{
 				// Render in 2D Mode to display 2D Interfaces and 2D texts.
 				Driver->setMatrixMode2D11();
@@ -1893,9 +1899,9 @@ bool mainLoop()
 					/*if (!ClientCfg.Light && ClientCfg.Bloom && Render && bloomStage == 2) // NO VR BLOOMZ
 					{
 						// End bloom effect system after drawing the 3d interface (z buffer related).
-						if (StereoDisplay) Driver->setViewport(NL3D::CViewport());
+						Driver->setViewport(NL3D::CViewport());
 						CBloomEffect::instance().endInterfacesDisplayBloom();
-						if (StereoDisplay) Driver->setViewport(StereoDisplay->getCurrentViewport());
+						Driver->setViewport(StereoDisplay->getCurrentViewport());
 						bloomStage = 0;
 					}*/
 				}
@@ -2204,12 +2210,9 @@ bool mainLoop()
 							SoundMngr->drawSounds(camHeigh);
 					}
 				}
-			} /* if (!StereoDisplay || StereoDisplay->wantInterface2D()) */
+			} /* if (StereoDisplay->wantInterface2D()) */
 
-			if (StereoDisplay)
-			{
-				StereoDisplay->endRenderTarget();
-			}
+			StereoDisplay->endRenderTarget();
 		} /* stereo pass */
 
 		if (defaultRenderTarget)

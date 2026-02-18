@@ -241,6 +241,7 @@ void CDynamicMapClientEventForwarder::nodeInserted(const std::string& instanceId
 		&& getEditor().getMode() != CEditor::AnimationModeLoading /* Loading animation scenario from terminal, ghost nodes created by translator */)
 	{
 		nldebug("Node inserted, but not in edition mode");
+		delete value;
 		return;
 	}
 	getEditor().nodeInserted(instanceId, attrName, position, key, value);
@@ -531,7 +532,7 @@ void CEditor::requestSetLocalNode(const std::string& instanceId, const std::stri
 					nlwarning("Can't find attribute %s inside object (or is base) with InstanceId =  %s", attrName.c_str(), instanceId.c_str());
 					return;
 				}
-				CObject *valueClone = valueBase->clone();
+				CObject::TSmartPtr valueClone = valueBase->clone();
 				valueClone->setParent(0);
 				src->setObject(attrName, valueClone);
 				subObj = src->getAttr(attrName);
@@ -583,7 +584,7 @@ void CEditor::requestCommitLocalNode(const std::string& instanceId, const std::s
 		obj->dump();
 		return;
 	}
-	CObject *localValueBackup = localValue->clone();
+	CObject::TSmartPtr localValueBackup = localValue->clone();
 	getDMC().getPropertyAccessor().rollbackValue(obj);
 	getDMC().requestSetNode(instanceId, attrName, localValueBackup);
 
@@ -1104,13 +1105,12 @@ int CEditor::luaRequestSetLocalNode(CLuaState &ls)
 	CLuaIHM::checkArgCount(ls, funcName, 3);
 	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
 	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
-	CObject *object = CComLuaModule::getObjectFromLua(ls.getStatePointer());
+	CObject::TSmartPtr object = CComLuaModule::getObjectFromLua(ls.getStatePointer());
 	if (!object)
 	{
 		CLuaIHM::fails(ls, "%s : can't read object from parameter 3", funcName);
 	}
 	getEditor().requestSetLocalNode(ls.toString(1), ls.toString(2), object);
-	delete object;
 	return 0;
 }
 
@@ -3954,8 +3954,7 @@ void CEditor::clearContent()
 	if (_CurrentTool) _CurrentTool->cancel();
 	CTool::releaseMouse();
 
-	delete _NewScenario; // will be not NULL only if quit is called during the scenario connection screen
-	_NewScenario = NULL;
+	_NewScenario = NULL; // will be not NULL only if quit is called during the scenario connection screen
 
 	eraseScenario();
 
@@ -5346,7 +5345,6 @@ void  CEditor::onEditionModeDisconnected()
 {
 	//H_AUTO(R2_CEditor_onEditionModeDisconnected)
 	_EditionModeDisconnectedFlag = true;
-	delete _NewScenario;
 	_NewScenario = NULL;
 	CHECK_EDITOR
 	// Useful only for the pionner that does not do requestTranslateFeatures()
@@ -5541,7 +5539,7 @@ void CEditor::createNewInstanceForObjectTableInternal(const CObject *obj)
 	CHECK_EDITOR
 	if (!obj) return;
 	if (!obj->isTable()) return; // not a table ...
-	const CObjectTable *table = (const CObjectTable *) obj;
+	CObjectTable *table = (CObjectTable *) obj;
 	std::string id = getString(obj, "InstanceId");
 	if (!id.empty())
 	{
@@ -5808,7 +5806,7 @@ void CEditor::scenarioUpdated(CObject* highLevel, bool willTP, uint32 initialAct
 	*/
 	createNewInstanceForObjectTableInternal(_DMC->getHighLevel());
 	nlassert(highLevel->isTable());
-	_Scenario = (CObjectTable *) _DMC->getHighLevel();
+	_Scenario = _DMC->getHighLevel();
 	if (_Scenario->getAttr("InstanceId"))
 	{
 		_ScenarioInstance = getInstanceFromId(_Scenario->getAttr("InstanceId")->toString());
@@ -5826,7 +5824,7 @@ void CEditor::scenarioUpdated(CObject* highLevel, bool willTP, uint32 initialAct
 		_Scenario->dump();
 	}
 	//
-	projectInLua(_Scenario); // push on the lua stack
+	projectInLua(static_cast<CObjectTable *>(_Scenario.getPtr())); // push on the lua stack
 	getLua().push(initialActIndex); // example reconnect after test in act4
 	// update value in the framework
 	callEnvFunc("onScenarioUpdated", 2);
@@ -6691,9 +6689,9 @@ NLMISC::CVectorD getVectorD(const CObject *obj)
 
 
 // *********************************************************************************************************
-CObject *buildVector(const NLMISC::CVectorD &vector, const std::string &instanceId /*= ""*/)
+CObject::TSmartPtr buildVector(const NLMISC::CVectorD &vector, const std::string &instanceId /*= ""*/)
 {
-	CObject *table;
+	CObject::TSmartPtr table;
 	if (instanceId.empty())
 	{
 		table = getEditor().getDMC().newComponent("Position");
@@ -7823,11 +7821,11 @@ NLMISC_COMMAND(saveScenarioRtData, "save scenario RtData to file", "<filename>")
 	}
 
 	nlinfo("translating current scenario");
-	R2::CObject *pHighLevel = scenario->clone();
+	R2::CObject::TSmartPtr pHighLevel = scenario->clone();
 	nlassert( pHighLevel );
 
-	R2::CObject *pRtData = R2::getEditor().getDMC().translateScenario( pHighLevel );
-	delete pHighLevel;
+	R2::CObject::TSmartPtr pRtData = R2::getEditor().getDMC().translateScenario( pHighLevel );
+	pHighLevel = NULL;
 	if( !pRtData )
 	{
 		nlwarning("Failed to translate high-level scenario into rtdata");

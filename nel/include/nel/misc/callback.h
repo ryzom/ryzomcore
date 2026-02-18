@@ -75,9 +75,9 @@ class NLMISC_CALLBACK_ARGS_CLASS \
 				delete this; \
 		} \
 		 \
-		virtual TReturn callback(NLMISC_CALLBACK_ARGS_DECL) = 0; \
+		virtual TReturn callback(NLMISC_CALLBACK_ARGS_DECL) const = 0; \
 		 \
-		virtual bool equals(const CCallbackBase *callbackBase) = 0; \
+		virtual bool equals(const CCallbackBase *callbackBase) const = 0; \
 		 \
 		/* disable copy */ \
 		CCallbackBase(const CCallbackBase &); \
@@ -101,12 +101,12 @@ class NLMISC_CALLBACK_ARGS_CLASS \
 			m_CallbackFunction = NULL; \
 		} \
 		 \
-		virtual TReturn callback(NLMISC_CALLBACK_ARGS_DECL) \
+		virtual TReturn callback(NLMISC_CALLBACK_ARGS_DECL) const \
 		{ \
 			return m_CallbackFunction(NLMISC_CALLBACK_ARGS_IMPL); \
 		} \
 		 \
-		virtual bool equals(const CCallbackBase *callbackBase) \
+		virtual bool equals(const CCallbackBase *callbackBase) const \
 		{ \
 			const CCallbackFunction *callbackFunction = \
 				dynamic_cast<const CCallbackFunction *>(callbackBase); \
@@ -135,12 +135,12 @@ class NLMISC_CALLBACK_ARGS_CLASS \
 			m_CallbackMethod = NULL; \
 		} \
 		 \
-		virtual TReturn callback(NLMISC_CALLBACK_ARGS_DECL) \
+		virtual TReturn callback(NLMISC_CALLBACK_ARGS_DECL) const \
 		{ \
 			return (m_CallbackObject->*m_CallbackMethod)(NLMISC_CALLBACK_ARGS_IMPL); \
 		} \
 		 \
-		virtual bool equals(const CCallbackBase *callbackBase) \
+		virtual bool equals(const CCallbackBase *callbackBase) const \
 		{ \
 			const CCallbackMethod *callbackMethod = \
 				dynamic_cast<const CCallbackMethod *>(callbackBase); \
@@ -202,13 +202,13 @@ public: \
 		} \
 	} \
 	 \
-	TReturn callback(NLMISC_CALLBACK_ARGS_DECL) \
+	TReturn callback(NLMISC_CALLBACK_ARGS_DECL) const \
 	{ \
 		nlassert(m_CallbackBase); \
 		return m_CallbackBase->callback(NLMISC_CALLBACK_ARGS_IMPL); \
 	} \
 	 \
-	TReturn operator()(NLMISC_CALLBACK_ARGS_DECL) \
+	TReturn operator()(NLMISC_CALLBACK_ARGS_DECL) const \
 	{ \
 		nlassert(m_CallbackBase); \
 		return m_CallbackBase->callback(NLMISC_CALLBACK_ARGS_IMPL); \
@@ -224,7 +224,7 @@ public: \
 		return m_CallbackBase != NULL; \
 	} \
 	 \
-	bool operator==(const CCallback &callback) \
+	bool operator==(const CCallback &callback) const \
 	{ \
 		return m_CallbackBase->equals(callback.m_CallbackBase); \
 	} \

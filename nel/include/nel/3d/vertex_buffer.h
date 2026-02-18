@@ -139,7 +139,8 @@ public:
 		Weight			=12,
 		PaletteSkin		=13,
 		Fog				=14,
-		Empty			=15,
+		Tangent			=15,
+		Empty			=Tangent, // Deprecated alias
 		NumValue		=16
 	};
 
@@ -172,7 +173,8 @@ public:
 		WeightFlag			=	1<<Weight,
 		PaletteSkinFlag		=	(1<<PaletteSkin)|(1<<Weight),
 		FogFlag				=	1<<Fog,
-		EmptyFlag			=	1<<Empty
+		TangentFlag			=	1<<Tangent,
+		EmptyFlag			=	TangentFlag // Deprecated alias
 	};
 
 
@@ -1202,7 +1204,6 @@ inline void CVertexBuffer::lock (CVertexBufferRead &accessor, uint first, uint l
 			if (last == 0)
 				last = _NbVerts;
 			// Can read it ?
-			nlassertex (_Location==RAMResident, ("Try to read a write only vertex buffer"));
 			_LockedBuffer = DrvInfos->lock (first*_VertexSize, last*_VertexSize, true);
 		}
 		else

@@ -53,7 +53,7 @@ void updateCameraPerspective()
 
 void buildCameraClippingPyramid(std::vector<CPlane> &planes)
 {
-	if (StereoDisplay) StereoDisplay->getClippingFrustum(0, &MainCam);
+	StereoDisplay->getClippingFrustum(0, &MainCam);
 
 	// Compute pyramid in view basis.
 	CVector		pfoc(0,0,0);

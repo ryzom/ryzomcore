@@ -57,7 +57,7 @@ using std::string;
 //---------------------------------------------------
 struct CClientConfig
 {
-	enum TDriver3D { DrvAuto = 0, OpenGL, Direct3D, OpenGLES };
+	enum TDriver3D { DrvAuto = 0, OpenGL, Direct3D, OpenGLES, OpenGL3 };
 	enum TDriverSound { SoundDrvAuto = 0, SoundDrvFMod, SoundDrvOpenAL, SoundDrvDirectSound, SoundDrvXAudio2 };
 	enum TStageLCTUsage { StageUseNoLCT = 0, StageUseAllLCT, StageUsePosOnlyLCT };
 
@@ -778,6 +778,9 @@ struct CClientConfig
 
 	// Time to update water envmap
 	float			WaterEnvMapUpdateTime;
+
+	// Force all water bodies to use scene water envmap (DEV)
+	bool			ForceWaterEnvMap;
 
 	// number of frames to profile (0 for start/stop scheme)
 	uint			NumFrameForProfile;

@@ -18,38 +18,15 @@
 #   * To build binary archive, use the 'package' target.
 #     To build source archive, use the 'package_source' target.
 
-CMAKE_MINIMUM_REQUIRED(VERSION 3.22)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.28)
 
 #-----------------------------------------------------------------------------
 # Load some macros.
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/CMakeModules")
 #-----------------------------------------------------------------------------
-# Set CMake 2.6 Policies.
-IF(COMMAND cmake_policy)
-  # Works around warnings libraries linked against that don't
-  # have absolute paths (e.g. -lpthread)
-  cmake_policy(SET CMP0003 NEW)
-
-  # allow to link to qtmain automatically under Windows
-  IF(POLICY CMP0020)
-    CMAKE_POLICY(SET CMP0020 NEW)
-  ENDIF()
-
-  IF (POLICY CMP0048)
-    cmake_policy(SET CMP0048 NEW)
-  ENDIF ()
-ENDIF()
-
-
-#-----------------------------------------------------------------------------
-# Downloads and install Hunger into HUNTER_ROOT directory.
+# Downloads and install Hunter into HUNTER_ROOT directory.
 OPTION(HUNTER_ENABLED "Enable Hunter package manager" OFF)
 IF(HUNTER_ENABLED)
-  cmake_minimum_required(VERSION 3.24)
-
-  IF (POLICY CMP0144)
-    cmake_policy(SET CMP0144 NEW)
-  ENDIF ()
 
   INCLUDE("CMakeModules/HunterGate.cmake")
   HunterGate(

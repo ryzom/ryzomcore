@@ -69,6 +69,10 @@ const char *IDRV_VERSION_PROC_NAME = "NL3D_interfaceVersion";
 extern IDriver* createGlDriverInstance ();
 #endif
 
+#ifdef NL_OPENGL3_AVAILABLE
+extern IDriver* createGl3DriverInstance ();
+#endif
+
 #if defined(NL_OS_WINDOWS) && defined(NL_DIRECT3D_AVAILABLE)
 extern IDriver* createD3DDriverInstance ();
 #endif
@@ -127,6 +131,60 @@ IDriver		*CDRU::createGlDriver()
 	if (ret == NULL)
 	{
 		throw EDruOpenglDriverCantCreateDriver();
+	}
+
+	return ret;
+#endif
+}
+
+// ***************************************************************************
+IDriver		*CDRU::createGl3Driver()
+{
+#ifdef NL_STATIC
+
+#ifdef NL_OPENGL3_AVAILABLE
+	return createGl3DriverInstance ();
+#else
+	return NULL;
+#endif // NL_OPENGL3_AVAILABLE
+
+#else
+
+	IDRV_CREATE_PROC	createDriver = NULL;
+	IDRV_VERSION_PROC	versionDriver = NULL;
+
+	CLibrary	driverLib;
+
+#if defined(NL_OS_UNIX) && defined(NL_DRIVER_PREFIX)
+	driverLib.addLibPath(NL_DRIVER_PREFIX);
+#endif
+
+	if (!driverLib.loadLibrary(NL3D_GL3_DLL_NAME, true, true, false))
+	{
+		throw EDruOpengl3DriverNotFound();
+	}
+
+	nlinfo ("Using the library '" NL3D_GL3_DLL_NAME "' that is in the directory: '%s'", driverLib.getLibFileName().c_str());
+
+	createDriver = (IDRV_CREATE_PROC) driverLib.getSymbolAddress(IDRV_CREATE_PROC_NAME);
+	if (createDriver == NULL)
+	{
+		throw EDruOpengl3DriverCorrupted();
+	}
+
+	versionDriver = (IDRV_VERSION_PROC) driverLib.getSymbolAddress(IDRV_VERSION_PROC_NAME);
+	if (versionDriver != NULL)
+	{
+		if (versionDriver()<IDriver::InterfaceVersion)
+			throw EDruOpengl3DriverOldVersion();
+		else if (versionDriver()>IDriver::InterfaceVersion)
+			throw EDruOpengl3DriverUnknownVersion();
+	}
+
+	IDriver		*ret= createDriver();
+	if (ret == NULL)
+	{
+		throw EDruOpengl3DriverCantCreateDriver();
 	}
 
 	return ret;
@@ -242,6 +300,8 @@ IDriver		*CDRU::createD3DDriver()
 #endif // NL_OS_WINDOWS
 
 // ***************************************************************************
+// NOTE: CDRU functions below use function-local static VBs, IBs, and CMaterials.
+// These are STATIC GPU RESOURCES that block multiple driver instances.
 
 void	CDRU::drawBitmap (float x, float y, float width, float height, ITexture& texture, IDriver& driver, CViewport viewport, bool blend)
 {

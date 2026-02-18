@@ -40,6 +40,8 @@
 
 // tmp
 #include "nel/3d/particle_system_model.h"
+#include "nel/3d/scene.h"
+#include "nel/3d/ps_attrib_maker_iterators.h" // for lowbias32
 
 
 #ifdef NL_DEBUG
@@ -67,6 +69,7 @@ TAnimationTime CParticleSystem::EllapsedTime = 0.f;
 TAnimationTime CParticleSystem::InverseTotalEllapsedTime = 0.f;
 TAnimationTime CParticleSystem::RealEllapsedTime = 0.f;
 float CParticleSystem::RealEllapsedTimeRatio = 1.f;
+uint32 CParticleSystem::RandomSeed = 0;
 bool CParticleSystem::InsideSimLoop = false;
 bool CParticleSystem::InsideRemoveLoop = false;
 bool CParticleSystem::InsideNewElementsLoop = false;;
@@ -112,10 +115,13 @@ CParticleSystem::CParticleSystem() : _Driver(NULL),
 	_UserCoordSystemInfo(NULL),
 	_Date(0),
 	_LastUpdateDate(-1),
+	_LastAnimFrameId(0),
+	_LastRenderFrameId(0),
 	_CurrEditedElementLocated(NULL),
 	_CurrEditedElementLocatedBindable(NULL),
 	_CurrEditedElementIndex(0),
 	_Scene(NULL),
+	_NextAttribMakerId(0),
 	_TimeThreshold(0.15f),
 	_SystemDate(0.f),
 	_MaxNbIntegrations(2),
@@ -441,41 +447,58 @@ void CParticleSystem::step(TPass pass, TAnimationTime ellapsedTime, CParticleSys
 	switch (pass)
 	{
 		case SolidRender:
+		{
 			EllapsedTime = RealEllapsedTime = ellapsedTime;
 			RealEllapsedTimeRatio = 1.f;
-			/// When shared, the LOD ratio must be computed there
-			if (_Sharing)
+			// Set deterministic random seed from frame ID for CRandomIterator
+			RandomSeed = lowbias32((uint32)(_Scene ? _Scene->getFrameId() : 0));
+			// Only update state once per frame (dedup for stereo rendering)
+			uint64 frameId = _Scene ? _Scene->getFrameId() : 0;
+			if (!_Scene || frameId != _LastRenderFrameId)
 			{
-				float dist = updateLODRatio();
-				updateColor(dist);
+				_LastRenderFrameId = frameId;
+				/// When shared, the LOD ratio must be computed there
+				if (_Sharing)
+				{
+					float dist = updateLODRatio();
+					updateColor(dist);
+				}
+				else
+				{
+					updateColor(getDistFromViewer());
+				}
+				// update time
+				++_Date;
 			}
-			else
-			{
-				updateColor(getDistFromViewer());
-			}
-			// update time
-			++_Date;
-			// update global color
+			// always render
 			stepLocated(PSSolidRender);
-
+		}
 		break;
 		case BlendRender:
+		{
 			EllapsedTime = RealEllapsedTime = ellapsedTime;
 			RealEllapsedTimeRatio = 1.f;
-			/// When shared, the LOD ratio must be computed there
-			/// When shared, the LOD ratio must be computed there
-			if (_Sharing)
+			// Set deterministic random seed from frame ID for CRandomIterator
+			RandomSeed = lowbias32((uint32)(_Scene ? _Scene->getFrameId() : 0));
+			// Only update state once per frame (dedup for stereo rendering)
+			uint64 frameId = _Scene ? _Scene->getFrameId() : 0;
+			if (!_Scene || frameId != _LastRenderFrameId)
 			{
-				float dist = updateLODRatio();
-				updateColor(dist);
+				_LastRenderFrameId = frameId;
+				/// When shared, the LOD ratio must be computed there
+				if (_Sharing)
+				{
+					float dist = updateLODRatio();
+					updateColor(dist);
+				}
+				else
+				{
+					updateColor(getDistFromViewer());
+				}
+				// update time
+				++_Date;
 			}
-			else
-			{
-				updateColor(getDistFromViewer());
-			}
-			// update time
-			++_Date;
-			// update global color
+			// always render
 			stepLocated(PSBlendRender);
 			if (_ForceDisplayBBox)
 			{
@@ -484,14 +507,19 @@ void CParticleSystem::step(TPass pass, TAnimationTime ellapsedTime, CParticleSys
 				getDriver()->setupModelMatrix(*_CoordSystemInfo.Matrix);
 				CPSUtil::displayBBox(getDriver(), box);
 			}
+		}
 		break;
 		case ToolRender:
 			EllapsedTime = RealEllapsedTime = ellapsedTime;
 			RealEllapsedTimeRatio = 1.f;
+			RandomSeed = lowbias32((uint32)(_Scene ? _Scene->getFrameId() : 0));
 			stepLocated(PSToolRender);
 		break;
 		case Anim:
 		{
+			// Deduplicate animation: only process once per frame
+			if (_Scene && _Scene->getFrameId() == _LastAnimFrameId) return;
+			if (_Scene) _LastAnimFrameId = _Scene->getFrameId();
 			if (ellapsedTime <= 0.f) return;
 			// update user param from global value if needed, unless this behaviour is bypassed has indicated by a flag in _BypassGlobalUserParam
 			if (_UserParamGlobalValue)

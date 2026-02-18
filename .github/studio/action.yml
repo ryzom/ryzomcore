@@ -30,7 +30,7 @@ runs:
           bison autoconf automake \
           libpng-dev \
           libjpeg-dev \
-          libgif-dev libfreetype6-dev \
+          libgif-dev libfreetype-dev \
           freeglut3-dev \
           liblua5.2-dev libluabind-dev libcpptest-dev \
           libogg-dev libvorbis-dev libopenal-dev \

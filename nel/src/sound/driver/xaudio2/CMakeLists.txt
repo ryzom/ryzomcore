@@ -1,5 +1,13 @@
 FILE(GLOB SRC *.cpp *.h *.def *.rc)
 
+SOURCE_GROUP("" FILES
+		sound_driver_xaudio2.cpp
+		sound_driver_xaudio2.h
+		stdxaudio2.cpp
+		stdxaudio2.h
+		driver_xaudio2.def
+		resources.rc)
+
 SOURCE_GROUP(sfx FILES
         buffer_xaudio2.cpp
         buffer_xaudio2.h
@@ -11,16 +19,6 @@ SOURCE_GROUP(sfx FILES
 SOURCE_GROUP(sfx\\utility FILES
         adpcm_xaudio2.cpp
 		adpcm_xaudio2.h)
-
-SOURCE_GROUP(music_remove FILES
-        music_channel_xaudio2.cpp
-		music_channel_xaudio2.h)
-		
-SOURCE_GROUP(music_remove\\utility FILES
-        music_buffer.cpp
-		music_buffer.h
-		music_buffer_vorbis.cpp
-		music_buffer_vorbis.h)
 
 SOURCE_GROUP(efx FILES
         effect_xaudio2.cpp

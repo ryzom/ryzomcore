@@ -340,8 +340,8 @@ void	CFlareModel::traverseRender()
 	}
 	if (_Intensity[flareContext] == 0.f) return;
 	//
-	static CMaterial material;
-	static CVertexBuffer vb;
+	static CMaterial material; // STATIC GPU RESOURCE: Blocks multiple driver instances
+	static CVertexBuffer vb; // STATIC GPU RESOURCE: Blocks multiple driver instances
 	static bool setupDone = false;
 	if (!setupDone)
 	{

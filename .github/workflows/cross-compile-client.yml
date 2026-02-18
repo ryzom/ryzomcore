@@ -84,6 +84,7 @@ jobs:
         -DHUNTER_ROOT=${{ steps.strings.outputs.hunter-dir }}
         -DWITH_DRIVER_OPENAL=ON
         -DWITH_DRIVER_OPENGL=ON
+        -DWITH_DRIVER_OPENGL3=ON
         -DWITH_INSTALL_LIBRARIES=OFF
         -DWITH_NEL_SAMPLES=OFF
         -DWITH_NEL_TESTS=OFF

@@ -3028,7 +3028,16 @@ technique two_stages_2												\n\
 																	\n\
 ";
 
-static const char *Water_diffuseFx =  
+// Water ps_2_0 pixel shaders compiled from shaders/water_fp.cg
+// Compiled with: cgc -profile ps_2_0 -O3 -fastmath -fastprecision [-DUSE_DIFFUSE]
+// Post-processing applied to cgc output:
+//   1. Strip cgc comment header (//vendor, //version, //semantic, //var lines)
+//   2. Constant layout: c[0].x = 2*factor (scale), c[0].y = -factor (bias)
+//      Must match the ps >= 2.0 constant packing in driver_direct3d_material.cpp
+// Note: ps_1_4 and ps_1_1 techniques below are hand-written with different
+//       constant layouts and are NOT compiled from the Cg source
+
+static const char *Water_diffuseFx =
 "																	\n\
 texture texture0; // bumpmap0										\n\
 texture texture1; // bumpmap1										\n\
@@ -3042,31 +3051,24 @@ float  scalarFloat0; // bump scale for 1_1 version					\n\
 pixelshader water_diffuse_2_0 = asm									\n\
 {																	\n\
 	ps_2_0;															\n\
-	dcl t0.xy;														\n\
-	dcl t1.xy;														\n\
-	dcl t2.xy;														\n\
-	dcl t3.xy;														\n\
 	dcl_2d s0;														\n\
 	dcl_2d s1;														\n\
 	dcl_2d s2;														\n\
 	dcl_2d s3;														\n\
-	//read bump map 0												\n\
-	texld   r0, t0, s0;												\n\
-	//bias result (include scaling)									\n\
-	mad    r0.xy, r0, c0.z, c0;										\n\
-	add    r0.xy, r0, t1;											\n\
-	//read bump map 1												\n\
-	texld  r0, r0, s1;												\n\
-	//bias result (include scaling)									\n\
-	mad    r0.xy, r0, c1.z, c1;										\n\
-	//add envmap coord												\n\
-	add	   r0.xy, r0, t2;											\n\
-	// read envmap													\n\
-	texld  r0, r0, s2;												\n\
-	// read diffuse													\n\
-	texld  r1, t3, s3;												\n\
-	mul r0, r0, r1;													\n\
-	mov oC0, r0														\n\
+	dcl t0.xy;														\n\
+	dcl t1.xy;														\n\
+	dcl t2.xy;														\n\
+	dcl t3.xy;														\n\
+	texld r0, t0, s0;												\n\
+	mad r0.xy, r0, c0.x, c0.y;										\n\
+	add r0.xy, r0, t1;												\n\
+	texld r0, r0, s1;												\n\
+	mad r0.xy, r0, c1.x, c1.y;										\n\
+	add r1.xy, r0, t2;												\n\
+	texld r0, t3, s3;												\n\
+	texld r1, r1, s2;												\n\
+	mul r0, r1, r0;													\n\
+	mov oC0, r0;													\n\
 };																	\n\
 																	\n\
 technique technique_water_diffuse_2_0								\n\
@@ -3140,7 +3142,7 @@ technique technique_water_diffuse_1_1								\n\
 																	\n\
 ";
 
-static const char *Water_no_diffuseFx =  
+static const char *Water_no_diffuseFx =
 "																	\n\
 texture texture0; // bumpmap0										\n\
 texture texture1; // bumpmap1										\n\
@@ -3153,25 +3155,19 @@ float  scalarFloat0; // bump scale for 1_1 version					\n\
 pixelshader water_no_diffuse_2_0 = asm								\n\
 {																	\n\
 	ps_2_0;															\n\
-	dcl t0.xy;														\n\
-	dcl t1.xy;														\n\
-	dcl t2.xy;														\n\
 	dcl_2d s0;														\n\
 	dcl_2d s1;														\n\
 	dcl_2d s2;														\n\
-	//read bump map 0												\n\
-	texld   r0, t0, s0;												\n\
-	//bias result (include scaling)									\n\
-	mad    r0.xy, r0, c0.z, c0;										\n\
-	add    r0.xy, r0, t1;											\n\
-	//read bump map 1												\n\
-	texld  r0, r0, s1;												\n\
-	//bias result (include scaling)									\n\
-	mad    r0.xy, r0, c1.z, c1;										\n\
-	//add envmap coord												\n\
-	add	   r0.xy, r0, t2;											\n\
-	//read envmap													\n\
-	texld  r0, r0, s2;												\n\
+	dcl t0.xy;														\n\
+	dcl t1.xy;														\n\
+	dcl t2.xy;														\n\
+	texld r0, t0, s0;												\n\
+	mad r0.xy, r0, c0.x, c0.y;										\n\
+	add r0.xy, r0, t1;												\n\
+	texld r0, r0, s1;												\n\
+	mad r0.xy, r0, c1.x, c1.y;										\n\
+	add r0.xy, r0, t2;												\n\
+	texld r0, r0, s2;												\n\
 	mov oC0, r0;													\n\
 };																	\n\
 																	\n\

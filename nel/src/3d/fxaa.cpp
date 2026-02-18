@@ -33,8 +33,10 @@
 // Project includes
 #include "nel/3d/u_camera.h"
 #include "nel/3d/u_driver.h"
+#include "nel/3d/vertex_program.h"
+#include "nel/3d/pixel_program.h"
 #include "nel/3d/material.h"
-#include "nel/3d/texture_bloom.h"
+#include "nel/3d/texture_offscreen.h"
 #include "nel/3d/texture_user.h"
 #include "nel/3d/driver_user.h"
 #include "nel/3d/u_texture.h"
@@ -48,6 +50,69 @@ namespace NL3D {
 namespace {
 #include "fxaa_program.h"
 } /* anonymous namespace */
+
+class CVertexProgramFXAA : public CVertexProgram
+{
+public:
+	struct CIdx
+	{
+		uint ModelViewProjection;
+	};
+
+	virtual void buildInfo()
+	{
+		CVertexProgram::buildInfo();
+		if (profile() == nelvp || profile() == arbvp1 || profile() == vs_2_0)
+		{
+			m_Idx.ModelViewProjection = 0;
+		}
+		else
+		{
+			m_Idx.ModelViewProjection = getUniformIndex("modelViewProjection");
+		}
+	}
+
+	const CIdx &idx() const { return m_Idx; }
+
+private:
+	CIdx m_Idx;
+};
+
+class CPixelProgramFXAA : public CPixelProgram
+{
+public:
+	struct CIdx
+	{
+		uint RcpFrame;
+		uint Subpix;
+		uint EdgeThreshold;
+		uint EdgeThresholdMin;
+	};
+
+	virtual void buildInfo()
+	{
+		CPixelProgram::buildInfo();
+		if (profile() == arbfp1 || profile() == ps_2_0)
+		{
+			m_Idx.RcpFrame = 0;
+			m_Idx.Subpix = 1;
+			m_Idx.EdgeThreshold = 2;
+			m_Idx.EdgeThresholdMin = 3;
+		}
+		else
+		{
+			m_Idx.RcpFrame = getUniformIndex("fxaaQualityRcpFrame");
+			m_Idx.Subpix = getUniformIndex("fxaaQualitySubpix");
+			m_Idx.EdgeThreshold = getUniformIndex("fxaaQualityEdgeThreshold");
+			m_Idx.EdgeThresholdMin = getUniformIndex("fxaaQualityEdgeThresholdMin");
+		}
+	}
+
+	const CIdx &idx() const { return m_Idx; }
+
+private:
+	CIdx m_Idx;
+};
 
 }
 
@@ -66,7 +131,15 @@ CFXAA::CFXAA(NL3D::UDriver *driver) : m_Driver(driver), m_VP(NULL), m_PP(NULL), 
 
 	if (drv->supportBloomEffect() && drv->supportNonPowerOfTwoTextures())
 	{
-		m_PP = new CPixelProgram();
+		m_PP = new CPixelProgramFXAA();
+		// glsl330f
+		{
+			IProgram::CSource *source = new IProgram::CSource();
+			source->Features.MaterialFlags = CProgramFeatures::TextureStages;
+			source->Profile = IProgram::glsl330f;
+			source->setSourcePtr(a_glsl330f);
+			m_PP->addSource(source);
+		}
 		// arbfp1
 		{
 			IProgram::CSource *source = new IProgram::CSource();
@@ -103,7 +176,15 @@ CFXAA::CFXAA(NL3D::UDriver *driver) : m_Driver(driver), m_VP(NULL), m_PP(NULL), 
 
 	// create vp
 	{
-		m_VP = new CVertexProgram();
+		m_VP = new CVertexProgramFXAA();
+		// glsl330v
+		{
+			IProgram::CSource *source = new IProgram::CSource();
+			source->Features.MaterialFlags = CProgramFeatures::TextureStages;
+			source->Profile = IProgram::glsl330v;
+			source->setSourcePtr(a_glsl330v);
+			m_VP->addSource(source);
+		}
 		// nelvp
 		{
 			IProgram::CSource *source = new IProgram::CSource();
@@ -208,11 +289,11 @@ void CFXAA::applyEffect()
 
 	NL3D::ITexture *renderTarget = drv->getRenderTarget();
 	nlassert(renderTarget);
-	nlassert(renderTarget->isBloomTexture());
+	nlassert(renderTarget->isOffscreenTexture());
 
 	uint width = renderTarget->getWidth();
 	uint height = renderTarget->getHeight();
-	bool mode2D = static_cast<CTextureBloom *>(renderTarget)->isMode2D();
+	bool needsDepthStencil = static_cast<CTextureOffscreen *>(renderTarget)->needsDepthStencil();
 	nlassert(renderTarget->getUploadFormat() == ITexture::Auto);
 
 	float fwidth = (float)width;
@@ -245,7 +326,7 @@ void CFXAA::applyEffect()
 	}*/
 
 	// create render target
-	CTextureUser *otherRenderTarget = m_Driver->getRenderTargetManager().getRenderTarget(width, height, mode2D);
+	CTextureUser *otherRenderTarget = m_Driver->getRenderTargetManager().getRenderTarget(width, height, needsDepthStencil);
 	nlassert(otherRenderTarget);
 
 	// swap render target
@@ -263,14 +344,12 @@ void CFXAA::applyEffect()
 	nlassert(vpok);
 	bool ppok = drv->activePixelProgram(m_PP);
 	nlassert(ppok);
-	/*drv->setUniform4f(IDriver::PixelProgram, 0, -n / fwidth, -n / fheight, n / fwidth, n / fheight); // fxaaConsoleRcpFrameOpt
-	drv->setUniform4f(IDriver::PixelProgram, 1, -2.0f / fwidth, -2.0f / fheight, 2.0f / fwidth, 2.0f / fheight); // fxaaConsoleRcpFrameOpt2*/
-	drv->setUniform2f(IDriver::PixelProgram, 0, 1.0f / fwidth, 1.0f / fheight); // fxaaQualityRcpFrame
-	drv->setUniform1f(IDriver::PixelProgram, 1, 0.75f); // fxaaQualitySubpix
-	drv->setUniform1f(IDriver::PixelProgram, 2, 0.166f); // fxaaQualityEdgeThreshold
-	drv->setUniform1f(IDriver::PixelProgram, 3, 0.0833f); // fxaaQualityEdgeThresholdMin
-	drv->setUniformMatrix(IDriver::VertexProgram, 0, IDriver::ModelViewProjection, IDriver::Identity);
-	// drv->setUniform4f(IDriver::VertexProgram, 9, -hpwidth, -hpheight, hpwidth, hpheight);
+	const CPixelProgramFXAA::CIdx &ppIdx = static_cast<CPixelProgramFXAA *>(m_PP)->idx();
+	drv->setUniform2f(IDriver::PixelProgram, ppIdx.RcpFrame, 1.0f / fwidth, 1.0f / fheight);
+	drv->setUniform1f(IDriver::PixelProgram, ppIdx.Subpix, 0.75f);
+	drv->setUniform1f(IDriver::PixelProgram, ppIdx.EdgeThreshold, 0.166f);
+	drv->setUniform1f(IDriver::PixelProgram, ppIdx.EdgeThresholdMin, 0.0833f);
+	drv->setUniformMatrix(IDriver::VertexProgram, static_cast<CVertexProgramFXAA *>(m_VP)->idx().ModelViewProjection, IDriver::ModelViewProjection, IDriver::Identity);
 
 	// render effect
 	m_Mat.getObjectPtr()->setTexture(0, otherRenderTarget->getITexture());

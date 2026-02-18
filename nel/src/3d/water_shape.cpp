@@ -118,13 +118,52 @@ CVertexProgramWaterVPNoWave::CVertexProgramWaterVPNoWave(bool diffuse)
 	}
 	// glsl330v
 	{
-		// TODO_VP_GLSL
-		// CSource *source = new CSource();
-		// source->Profile = glsl330v;
-		// source->DisplayName = "WaterVPNoWave/glsl330v";
-		// if (diffuse) source->DisplayName += "/diffuse";
-		// source->setSource...
-		// addSource(source);
+		CSource *source = new CSource();
+		source->Profile = glsl330v;
+		source->DisplayName = "WaterVPNoWave/glsl330v";
+		if (diffuse) source->DisplayName += "/diffuse";
+		std::string src =
+			"#version 330\n"
+			"#extension GL_ARB_separate_shader_objects : enable\n";
+		if (diffuse) src += "#define USE_DIFFUSE\n";
+		src +=
+			"layout(location = 0) in vec4 vposition;\n"
+			"out gl_PerVertex { vec4 gl_Position; };\n"
+			"layout(location = 8) smooth out vec4 texCoord0;\n"
+			"layout(location = 9) smooth out vec4 texCoord1;\n"
+			"layout(location = 10) smooth out vec4 texCoord2;\n"
+			"#ifdef USE_DIFFUSE\n"
+			"layout(location = 11) smooth out vec4 texCoord3;\n"
+			"#endif\n"
+			"layout(location = 0) smooth out vec4 ecPos;\n"
+			"uniform mat4 modelViewProjection;\n"
+			"uniform mat4 modelView;\n"
+			"uniform vec4 bumpMap0Scale;\n"
+			"uniform vec4 bumpMap0Offset;\n"
+			"uniform vec4 bumpMap1Scale;\n"
+			"uniform vec4 bumpMap1Offset;\n"
+			"uniform vec4 observerHeight;\n"
+			"uniform vec4 scaleReflectedRay;\n"
+			"#ifdef USE_DIFFUSE\n"
+			"uniform vec4 diffuseMapVector0;\n"
+			"uniform vec4 diffuseMapVector1;\n"
+			"#endif\n"
+			"void main()\n"
+			"{\n"
+			"  gl_Position = modelViewProjection * vposition;\n"
+			"  ecPos = modelView * vposition;\n"
+			"  texCoord0 = vposition * bumpMap0Scale + bumpMap0Offset;\n"
+			"  texCoord1 = vposition * bumpMap1Scale + bumpMap1Offset;\n"
+			"  vec4 toObs = observerHeight - vposition;\n"
+			"  float invLen = inversesqrt(dot(toObs.xyz, toObs.xyz));\n"
+			"  toObs *= invLen;\n"
+			"  texCoord2 = -toObs * scaleReflectedRay + scaleReflectedRay;\n"
+			"#ifdef USE_DIFFUSE\n"
+			"  texCoord3 = vec4(dot(vposition, diffuseMapVector0), dot(vposition, diffuseMapVector1), 0.0, 0.0);\n"
+			"#endif\n"
+			"}\n";
+		source->setSource(src);
+		addSource(source);
 	}
 }
 

@@ -14,8 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef NL_TEXTURE_BLOOM_H
-#define NL_TEXTURE_BLOOM_H
+#ifndef NL_TEXTURE_OFFSCREEN_H
+#define NL_TEXTURE_OFFSCREEN_H
 
 #include "nel/misc/types_nl.h"
 #include "nel/3d/texture_blank.h"
@@ -25,30 +25,32 @@ namespace NL3D {
 
 
 /**
- * This texture does generate nothing, and it is releasable. It is used for bloom effect.
+ * Offscreen render target texture. Renders directly into the texture
+ * via FBO (GL) or render target surface (D3D), rather than copying
+ * from the framebuffer.
  */
-class CTextureBloom : public CTextureBlank
+class CTextureOffscreen : public CTextureBlank
 {
 public:
-NLMISC_DECLARE_CLASS(CTextureBloom);
+NLMISC_DECLARE_CLASS(CTextureOffscreen);
 
-	CTextureBloom() {Mode2D=false;}
-	virtual ~CTextureBloom() {}
+	CTextureOffscreen() { m_NeedsDepthStencil = true; }
+	virtual ~CTextureOffscreen() {}
 
-	virtual bool isBloomTexture() const { return true; }
+	virtual bool isOffscreenTexture() const { return true; }
 
-	void mode2D(bool isMode2D) {Mode2D=isMode2D;}
-	bool isMode2D() {return Mode2D;}
+	void setNeedsDepthStencil(bool b) { m_NeedsDepthStencil = b; }
+	bool needsDepthStencil() const { return m_NeedsDepthStencil; }
 
 private:
 
-	bool	Mode2D;
+	bool	m_NeedsDepthStencil;
 };
 
 
 } // NL3D
 
 
-#endif // NL_TEXTURE_BLOOM_H
+#endif // NL_TEXTURE_OFFSCREEN_H
 
-/* End of texture_bloom.h */
+/* End of texture_offscreen.h */

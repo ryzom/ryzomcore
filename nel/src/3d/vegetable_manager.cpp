@@ -173,8 +173,9 @@ void		CVegetableManager::createVegetableBlendLayersModels(CScene *scene)
 		_ZSortModelLayers[i]->VegetableManager= this;
 		_ZSortModelLayersUW[i]->VegetableManager= this;
 
-		// Set UnderWater layer for _ZSortModelLayersUW
-		_ZSortModelLayersUW[i]->setOrderingLayer(2);
+		// Set UnderWater layer 0 so that with reversed layer ordering (underwater camera),
+		// vegetation renders after water (layer 1) and appears on top.
+		_ZSortModelLayersUW[i]->setOrderingLayer(0);
 	}
 }
 

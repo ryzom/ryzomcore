@@ -82,6 +82,10 @@ void			CDriverGLStates::init(bool supportTextureCubeMap, bool supportTextureRect
 	{
 		_CurLight[i]= false;
 	}
+	for(i=0; i<MaxClipPlanes; i++)
+	{
+		_CurClipPlaneEnabled[i]= false;
+	}
 }
 
 
@@ -99,6 +103,15 @@ void			CDriverGLStates::forceDefaults(uint nbStages)
 	_CurZWrite= true;
 	_CurStencilTest=false;
 	_CurMultisample= false;
+
+	// Clip planes.
+#ifndef USE_OPENGLES
+	for (uint i = 0; i < MaxClipPlanes; ++i)
+	{
+		_CurClipPlaneEnabled[i] = false;
+		glDisable(GL_CLIP_PLANE0 + i);
+	}
+#endif
 
 	// setup GLStates.
 	glDisable(GL_FOG);
@@ -1135,6 +1148,35 @@ CDriverGLStates::TCullMode CDriverGLStates::getCullMode() const
 {
 	H_AUTO_OGL(CDriverGLStates_CDriverGLStates)
 	return _CullMode;
+}
+
+// ***************************************************************************
+void CDriverGLStates::enableClipPlane(uint index, bool enable)
+{
+	H_AUTO_OGL(CDriverGLStates_enableClipPlane)
+	nlassert(index < MaxClipPlanes);
+#ifndef USE_OPENGLES
+#ifndef NL3D_GLSTATE_DISABLE_CACHE
+	if (enable != _CurClipPlaneEnabled[index])
+#endif
+	{
+		_CurClipPlaneEnabled[index] = enable;
+		if (enable)
+			glEnable(GL_CLIP_PLANE0 + index);
+		else
+			glDisable(GL_CLIP_PLANE0 + index);
+	}
+#endif
+}
+
+// ***************************************************************************
+void CDriverGLStates::setClipPlane(uint index, double equation[4])
+{
+	H_AUTO_OGL(CDriverGLStates_setClipPlane)
+	nlassert(index < MaxClipPlanes);
+#ifndef USE_OPENGLES
+	glClipPlane(GL_CLIP_PLANE0 + index, equation);
+#endif
 }
 
 #ifdef NL_STATIC

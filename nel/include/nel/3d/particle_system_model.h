@@ -350,6 +350,7 @@ private:
 	CScene							  	   *_Scene;
 	TAnimationTime						    _EllapsedTime;
 	float									_EllapsedTimeRatio;
+	uint64									_LastFrameId; // avoid double-animation in stereo
 
 	// old animation mode for the system
 	CParticleSystem::TAnimType				_AnimType;

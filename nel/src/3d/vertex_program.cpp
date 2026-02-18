@@ -34,7 +34,7 @@ namespace NL3D
 
 CVertexProgram::CVertexProgram()
 {
-	
+
 }
 
 // ***************************************************************************
@@ -49,7 +49,7 @@ CVertexProgram::CVertexProgram(const char *nelvp)
 
 // ***************************************************************************
 
-CVertexProgram::~CVertexProgram ()
+CVertexProgram::~CVertexProgram()
 {
 	
 }

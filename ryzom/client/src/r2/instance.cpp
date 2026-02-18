@@ -55,7 +55,7 @@ namespace R2
 }
 
 // *********************************************************************************************************
-CInstance::CInstance(const CObjectTable *objectTable, CLuaState &ls)
+CInstance::CInstance(CObjectTable *objectTable, CLuaState &ls)
 {
 	CLuaStackChecker lsc(&ls);
 	nlassert(objectTable);
@@ -155,7 +155,7 @@ void CInstance::visit(IInstanceVisitor &visitor)
 	};
 	CInstanceVisitor instanceVisitor;
 	instanceVisitor.Visitor = &visitor;
-	const_cast<CObjectTable *>(_ObjectTable)->visit(instanceVisitor); // 'const' is respected here, because CInstanceVisitor gives a reference to CInstance
+	getObjectTable()->visit(instanceVisitor); // 'const' is respected here, because CInstanceVisitor gives a reference to CInstance
 	                                                                  // which in turn only allow a const reference on CObjectTable
 	TEST_LUA_PROJ;
 }

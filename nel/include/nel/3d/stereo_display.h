@@ -118,13 +118,15 @@ public:
 	virtual void getCurrentMatrix(uint cid, NL3D::UCamera *camera) const = 0;
 
 	/// At the start of a new render target
-	virtual bool wantClear() = 0;		
+	virtual bool wantClear() = 0;
+	/// Render scene reflections (water planar reflections)
+	virtual bool wantSceneReflections() = 0;
 	/// The 3D scene
 	virtual bool wantScene() = 0;
 	/// Scene post processing effects
 	virtual bool wantSceneEffects() = 0;
 	/// Interface within the 3D scene
-	virtual bool wantInterface3D() = 0;	
+	virtual bool wantInterface3D() = 0;
 	/// 2D Interface
 	virtual bool wantInterface2D() = 0;
 
@@ -132,6 +134,9 @@ public:
 	virtual bool isSceneFirst() = 0;
 	/// Is this the last 3D scene of the frame
 	virtual bool isSceneLast() = 0;
+
+	/// Get the flare context for the current pass (0-3). Different eyes must use different contexts.
+	virtual uint getFlareContext() = 0;
 
 	/// Returns true if a new render target was set, always fase if not using render targets
 	virtual bool beginRenderTarget() = 0;
