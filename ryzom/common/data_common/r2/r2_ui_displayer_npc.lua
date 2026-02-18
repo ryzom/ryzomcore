@@ -291,11 +291,11 @@ function npcCustomPropertySheetDisplayerTable:updateAllPrivate(instance)
 		editNotes.input_string = ""
 	end
 
-	-- restore "all equipment" checkbox from NPC state
-	r2.allEquipmentEnabled = (instance.UseAllEquipment == 1)
+	-- reset "all equipment" checkbox (UI-only state, not persisted)
+	r2.allEquipmentEnabled = false
 	local allEquipToggle = npcUI:find("all_equipment")
 	if allEquipToggle then
-		allEquipToggle.toggle_butt.pushed = not r2.allEquipmentEnabled
+		allEquipToggle.toggle_butt.pushed = true
 	end
 
 	-- update color slider range based on all equipment state
@@ -621,22 +621,6 @@ function npcCustomPropertySheetDisplayerTable:onAttrModified(instance, attribute
 		local link = false
 		if instance.LinkColor==1 then link=true end
 		toggleB.pushed = not link
-	end
-
-	-- USE ALL EQUIPMENT
-	if attributeName == "UseAllEquipment" then
-		r2.allEquipmentEnabled = (instance.UseAllEquipment == 1)
-		local allEquipToggle = npcUI:find("all_equipment")
-		if allEquipToggle then
-			allEquipToggle.toggle_butt.pushed = not r2.allEquipmentEnabled
-		end
-		local maxVal = r2:getColorSliderMax()
-		for i=1, r2.equipmentAttNb do
-			local slider = npcUI:find(r2.equipementComboB[i]):find("slider")
-			assert(slider)
-			slider.max = maxVal
-		end
-		r2:updateEquipment(instance, false)
 	end
 
 	-- BODY SETS / FACE SETS/ FACE MORPH
@@ -2388,6 +2372,7 @@ end
 
 -----------------------------------------------------------------------------------------------
 -- Toggle the "all equipment" checkbox: repopulate outfit combo boxes accordingly.
+-- This is a UI-only toggle that does not modify NPC data or create undo actions.
 function r2:toggleAllEquipment()
 
 	local npcUI = getUI("ui:interface:r2ed_npc")
@@ -2405,12 +2390,9 @@ function r2:toggleAllEquipment()
 		slider.max = maxVal
 	end
 
-	-- persist the state to the NPC instance
+	-- repopulate equipment combo boxes with the new palette
 	local selection = r2:getSelectedInstance()
 	if selection then
-		local val = 0
-		if r2.allEquipmentEnabled then val = 1 end
-		r2:setNpcAttribute(selection.InstanceId, "UseAllEquipment", val)
 		r2:updateEquipment(selection, false)
 	end
 end
