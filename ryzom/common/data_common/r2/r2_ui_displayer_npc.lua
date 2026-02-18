@@ -2388,7 +2388,8 @@ end
 
 -------------------------------------------------------------------------------------------------------
 -- Toggle the "all equipment" checkbox: persist and repopulate combo boxes.
--- Creates exactly one undo entry for the UseAllEquipment property change.
+-- All property changes (UseAllEquipment + any equipment reversions) are grouped
+-- into a single undo action using requestNewAction/requestEndAction.
 function r2:toggleAllEquipment()
 
 	local npcUI = getUI("ui:interface:r2ed_npc")
@@ -2406,15 +2407,20 @@ function r2:toggleAllEquipment()
 		slider.max = maxVal
 	end
 
-	-- persist the state to the NPC instance (single undo entry)
+	-- persist the state and repopulate combo boxes in a single undo action
 	local selection = r2:getSelectedInstance()
 	if selection then
 		r2.requestNewAction(i18n.get("uiR2EDUpdateEquipmentPieceAction"))
+		-- prevent updatePieceEquipment from creating separate undo entries
+		-- when equipment is reverted during combo box repopulation
+		r2.selectEquipmentSet = true
 		local val = 0
 		if r2.allEquipmentEnabled then val = 1 end
 		r2:setNpcAttribute(selection.InstanceId, "UseAllEquipment", val)
 		-- repopulate equipment combo boxes without resetting link color
 		r2:updateEquipment(selection, false, true)
+		r2.selectEquipmentSet = false
+		r2.requestEndAction()
 	end
 end
 
