@@ -291,11 +291,11 @@ function npcCustomPropertySheetDisplayerTable:updateAllPrivate(instance)
 		editNotes.input_string = ""
 	end
 
-	-- reset "all equipment" checkbox (UI-only state, not persisted)
-	r2.allEquipmentEnabled = false
+	-- restore "all equipment" checkbox from NPC state
+	r2.allEquipmentEnabled = (instance.UseAllEquipment == 1)
 	local allEquipToggle = npcUI:find("all_equipment")
 	if allEquipToggle then
-		allEquipToggle.toggle_butt.pushed = true
+		allEquipToggle.toggle_butt.pushed = not r2.allEquipmentEnabled
 	end
 
 	-- update color slider range based on all equipment state
@@ -621,6 +621,22 @@ function npcCustomPropertySheetDisplayerTable:onAttrModified(instance, attribute
 		local link = false
 		if instance.LinkColor==1 then link=true end
 		toggleB.pushed = not link
+	end
+
+	-- USE ALL EQUIPMENT
+	if attributeName == "UseAllEquipment" then
+		r2.allEquipmentEnabled = (instance.UseAllEquipment == 1)
+		local allEquipToggle = npcUI:find("all_equipment")
+		if allEquipToggle then
+			allEquipToggle.toggle_butt.pushed = not r2.allEquipmentEnabled
+		end
+		local maxVal = r2:getColorSliderMax()
+		for i=1, r2.equipmentAttNb do
+			local slider = npcUI:find(r2.equipementComboB[i]):find("slider")
+			assert(slider)
+			slider.max = maxVal
+		end
+		r2:updateEquipment(instance, false, true)
 	end
 
 	-- BODY SETS / FACE SETS/ FACE MORPH
@@ -2370,9 +2386,9 @@ function r2:getEffectiveEquipmentId(instance, slotName)
 	return instance.Equipment
 end
 
------------------------------------------------------------------------------------------------
--- Toggle the "all equipment" checkbox: repopulate outfit combo boxes accordingly.
--- This is a UI-only toggle that does not modify NPC data or create undo actions.
+-------------------------------------------------------------------------------------------------------
+-- Toggle the "all equipment" checkbox: persist and repopulate combo boxes.
+-- Creates exactly one undo entry for the UseAllEquipment property change.
 function r2:toggleAllEquipment()
 
 	local npcUI = getUI("ui:interface:r2ed_npc")
@@ -2390,16 +2406,21 @@ function r2:toggleAllEquipment()
 		slider.max = maxVal
 	end
 
-	-- repopulate equipment combo boxes with the new palette
+	-- persist the state to the NPC instance (single undo entry)
 	local selection = r2:getSelectedInstance()
 	if selection then
-		r2:updateEquipment(selection, false)
+		r2.requestNewAction(i18n.get("uiR2EDUpdateEquipmentPieceAction"))
+		local val = 0
+		if r2.allEquipmentEnabled then val = 1 end
+		r2:setNpcAttribute(selection.InstanceId, "UseAllEquipment", val)
+		-- repopulate equipment combo boxes without resetting link color
+		r2:updateEquipment(selection, false, true)
 	end
 end
 
 -----------------------------------------------------------------------------------------------
 
-function r2:updateEquipment(instance, init)
+function r2:updateEquipment(instance, init, skipLinkColor)
 
 	local equipmentId = instance.Equipment
 
@@ -2448,10 +2469,12 @@ function r2:updateEquipment(instance, init)
 	comboBox.view_text = r2.emptyComboLine
 	comboBoxPopup.view_text = r2.emptyComboLine
 
-	local toggleB = npcUI:find("color_link").toggle_butt
-	assert(toggleB)
-	toggleB.pushed = true
-	r2:linkColor()
+	if not skipLinkColor then
+		local toggleB = npcUI:find("color_link").toggle_butt
+		assert(toggleB)
+		toggleB.pushed = true
+		r2:linkColor()
+	end
 
 	-- update selection texts
 	local comboBox, slider
