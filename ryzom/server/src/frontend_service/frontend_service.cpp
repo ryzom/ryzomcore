@@ -1537,41 +1537,43 @@ bool CFrontEndService::update()
 
 
 	uint32 now = CTime::getSecondsSince1970();
-	bool noRecentComm = now - CFEReceiveTask::LastUDPPacketReceived > DelayBeforeUPDAlert;
-	// check for potential communication problem
-	if (CLoginServer::getNbPendingUsers() != 0
-		|| this->_ReceiveSub.getNbClient() != 0)
+
+	// Detect communication failure: a login cookie has been pending for longer
+	// than the alert delay without any UDP/QUIC packet being received.
+	// PendingCookieReceived is set when a cookie arrives and cleared when a
+	// packet is received, so this only triggers when comms are truly broken.
+	uint32 pendingCookie = CFEReceiveTask::PendingCookieReceived;
+	bool commsFailure = pendingCookie != 0 && (now - pendingCookie > DelayBeforeUPDAlert);
+
+	if (commsFailure)
 	{
-		if (noRecentComm)
+		// raise the alert
+		addStatusTag("CheckUDPComm");
+
+		// notify the WS to stop routing new clients to this FES
+		if (_UDPAlive)
 		{
-			// raise the alert for a limited time
-			addStatusTag("CheckUDPComm");
+			_UDPAlive = false;
+			CMessage	msgout("FS_UDP_ALIVE");
+			bool		alive = false;
+			msgout.serial(alive);
+			CUnifiedNetwork::getInstance()->send("WS", msgout);
+			nlwarning("UDP communication failure detected, notified WS to stop routing clients");
 
-			// notify the WS to stop routing new clients to this FES
-			if (_UDPAlive)
+			// Request the receive task to rebind its socket to recover
+			// from persistent kernel socket state corruption
+			_ReceiveSub.receiveTask()->requireRebind();
+
+			// Also restart the QUIC listener in case it has failed
+			CQuicTransceiver *quic = _ReceiveSub.quicTransceiver();
+			if (quic && quic->isConfigEnabled() && !quic->listening())
 			{
-				_UDPAlive = false;
-				CMessage	msgout("FS_UDP_ALIVE");
-				bool		alive = false;
-				msgout.serial(alive);
-				CUnifiedNetwork::getInstance()->send("WS", msgout);
-				nlwarning("UDP communication failure detected, notified WS to stop routing clients");
-
-				// Request the receive task to rebind its socket to recover
-				// from persistent kernel socket state corruption
-				_ReceiveSub.receiveTask()->requireRebind();
-
-				// Also restart the QUIC listener in case it has failed
-				CQuicTransceiver *quic = _ReceiveSub.quicTransceiver();
-				if (quic && quic->isConfigEnabled() && !quic->listening())
-				{
-					quic->restart();
-				}
+				quic->restart();
 			}
 		}
 	}
 
-	if (!noRecentComm)
+	if (!commsFailure)
 	{
 		// clear the UDP alert tag (if set)
 		removeStatusTag("CheckUDPComm");
@@ -1760,11 +1762,11 @@ void CFrontEndService::setClientsToSynchronizeState()
 
 void CFrontEndService::newCookieCallback(const NLNET::CLoginCookie &cookie)
 {
-	// update the last UPD packet date to 'now'. If no UPD traffic is detected after
-	// a predetermined timer, an alert is set in the service status line.
-	// Always reset so that a new connection attempt after a long idle period
-	// does not immediately trigger the CheckUDPComm alert.
-	CFEReceiveTask::LastUDPPacketReceived = CTime::getSecondsSince1970();
+	// Record that a login cookie has arrived — a client is trying to connect.
+	// Only set if not already pending (first pending cookie starts the timer).
+	// This will be cleared when a UDP/QUIC packet is successfully received.
+	if (CFEReceiveTask::PendingCookieReceived == 0)
+		CFEReceiveTask::PendingCookieReceived = CTime::getSecondsSince1970();
 }
 
 
@@ -2026,8 +2028,10 @@ NLMISC_CLASS_COMMAND_IMPL(CFrontEndService, dump)
 
 NLMISC_COMMAND( simulateCommsFailure, "Simulate a UDP communication failure to test the recovery mechanism (rebind UDP socket, restart QUIC, notify WS)", "" )
 {
-	CFEReceiveTask::LastUDPPacketReceived = 0;
-	log.displayNL("Simulated comms failure: LastUDPPacketReceived set to 0. Recovery will trigger on next update cycle.");
+	// Simulate a pending cookie that's been waiting long enough to trigger
+	uint32 now = CTime::getSecondsSince1970();
+	CFEReceiveTask::PendingCookieReceived = now - (uint32)DelayBeforeUPDAlert - 1;
+	log.displayNL("Simulated comms failure: PendingCookieReceived set to trigger. Recovery will fire on next update cycle.");
 	return true;
 }
 

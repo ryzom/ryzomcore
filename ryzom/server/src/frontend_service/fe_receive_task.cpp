@@ -50,6 +50,7 @@ using namespace NLNET;
 
 
 volatile uint32 CFEReceiveTask::LastUDPPacketReceived = 0;
+volatile uint32 CFEReceiveTask::PendingCookieReceived = 0;
 
 /*
  * TReceivedMessage
@@ -123,11 +124,6 @@ CFEReceiveTask::CFEReceiveTask( uint16 firstAcceptablePort, uint16 lastAcceptabl
 	nlinfo( "Binding all network interfaces on port %hu (%hu asked)", actualPort, firstAcceptablePort );
 
 	setRecvTimeout();
-
-	// Initialize to current time so that (now - LastUDPPacketReceived) starts
-	// at 0 rather than at the full epoch time. This avoids relying on the
-	// outer guard conditions to prevent false triggering at startup.
-	LastUDPPacketReceived = CTime::getSecondsSince1970();
 }
 
 
@@ -203,10 +199,10 @@ void CFEReceiveTask::run()
 			_ReceivedMessage.setTypeEvent( TReceivedMessage::User );
 			DataSock->receivedFrom( _ReceivedMessage.userDataW(), _DatagramLength, _ReceivedMessage.AddrFrom );
 
-			// Only update the last datagram receive date on successful receive.
-			// On socket errors, the timestamp stays stale so that CheckUDPComm
-			// can detect persistent socket failures and notify the WS.
+			// Successfully received a packet — comms are working.
+			// Update the last receive timestamp and clear any pending cookie.
 			LastUDPPacketReceived = CTime::getSecondsSince1970();
+			PendingCookieReceived = 0;
 		}
 		catch (const ESocket&)
 		{

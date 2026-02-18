@@ -713,8 +713,9 @@ void CQuicTransceiver::datagramReceived(CQuicUserContext *user, const uint8 *buf
 	// Increase reference for FIFO copy
 	user->increaseRef();
 
-	// Update the last datagram receive date (also used by UDP path)
+	// Successfully received a QUIC datagram — comms are working.
 	CFEReceiveTask::LastUDPPacketReceived = NLMISC::CTime::getSecondsSince1970();
+	CFEReceiveTask::PendingCookieReceived = 0;
 
 	// Locked block
 	{
