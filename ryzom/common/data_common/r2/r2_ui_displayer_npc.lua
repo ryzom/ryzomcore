@@ -2284,6 +2284,8 @@ function r2:buildAllEquipmentPalette()
 	local merged = {}
 	for _, slot in ipairs(outfitSlots) do
 		merged[slot] = {}
+		-- add "None" entry at the beginning so users can unequip any slot
+		table.insert(merged[slot], {["trad"]=r2.noPiece, ["itemFile"]=""})
 		local seen = {} -- track by itemFile to avoid duplicates
 		for equId, equTable in pairs(r2.equipmentPalette) do
 			if equId ~= r2.allEquipmentId and not string.find(equId, "r2_all_weapons_") and equTable[slot] then

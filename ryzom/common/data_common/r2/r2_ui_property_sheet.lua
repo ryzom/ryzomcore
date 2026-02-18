@@ -1703,7 +1703,9 @@ function r2:buildPropertySheetXml(class, className, id, title, isForm)
 			-- syntaxic sugar : 'setter' function for simple set operation
 			function propertySheet.Env.setter(attributeName, value)
 				table.clear(eventArgs)
-				table.insert(eventArgs, value)
+				if value ~= nil then
+					table.insert(eventArgs, value)
+				end
 				handleEventFunction("onSet", attributeName, eventArgs)
 			end
 			local setter = propertySheet.Env.setter
