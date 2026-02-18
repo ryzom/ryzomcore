@@ -2024,6 +2024,14 @@ NLMISC_CLASS_COMMAND_IMPL(CFrontEndService, dump)
 }
 
 
+NLMISC_COMMAND( simulateCommsFailure, "Simulate a UDP communication failure to test the recovery mechanism (rebind UDP socket, restart QUIC, notify WS)", "" )
+{
+	CFEReceiveTask::LastUDPPacketReceived = 0;
+	log.displayNL("Simulated comms failure: LastUDPPacketReceived set to 0. Recovery will trigger on next update cycle.");
+	return true;
+}
+
+
 /*
  * Declare a service with the class CFrontEndService, the names "FS" (short) and "frontend_service" (long).
  * The port is set to 37000 and the main callback array is CallbackArray.
