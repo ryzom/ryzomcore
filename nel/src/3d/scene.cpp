@@ -55,6 +55,7 @@
 #include "nel/3d/async_texture_manager.h"
 #include "nel/3d/water_env_map.h"
 #include "nel/3d/skeleton_spawn_script.h"
+#include "nel/3d/decal.h"
 
 
 #include <memory>
@@ -121,6 +122,7 @@ void	CScene::registerBasics()
 	CPointLightModel::registerBasic();
 	CSegRemanence::registerBasic();
 	CQuadGridClipManager::registerBasic();
+	CDecal::registerBasic();
 }
 
 

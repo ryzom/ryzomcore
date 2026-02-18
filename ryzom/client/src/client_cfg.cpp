@@ -405,6 +405,8 @@ CClientConfig::CClientConfig()
 	SquareBloom			= true;
 	DensityBloom		= 255.f;
 
+	NewDecalSystem		= false;
+
 	GlobalWindPower		= 0.10f;					// Default is 0.25
 	GlobalWindDirection	= CVector(1,0,0);			// Default direction is X>0
 
@@ -1030,6 +1032,9 @@ void CClientConfig::setValues()
 	READ_BOOL_FV(Bloom)
 	READ_BOOL_FV(SquareBloom)
 	READ_FLOAT_FV(DensityBloom)
+
+	// Decal system
+	READ_BOOL_FV(NewDecalSystem)
 
 	// FXAA
 	READ_BOOL_FV(FXAA)

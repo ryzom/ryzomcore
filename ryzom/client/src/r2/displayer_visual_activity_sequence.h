@@ -18,7 +18,7 @@
 #define R2_DISPLAYER_VISUAL_ACTIVITY_SEQUENCE_H
 
 #include "displayer_visual.h"
-#include "../decal.h"
+#include "../legacy_decal.h"
 #include "editor.h"
 #include "nel/misc/line.h"
 //
@@ -52,7 +52,7 @@ private:
 	bool _AddedToWorldMap;
 	bool _Touched;
 	bool _Active;
-	std::vector<CDecal::TSmartPtr>					_Decals;
+	std::vector<CLegacyDecal::TSmartPtr>					_Decals;
 	std::vector<CCtrlQuad *>						_WorldMapEdges;
 	std::vector<CEditor::TInstanceObserverHandle>	_ObserverHandles;
 	// need to know when one of the component world pos is changed (no notification message reach us if

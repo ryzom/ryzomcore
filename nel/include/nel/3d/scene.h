@@ -69,6 +69,8 @@ class	CRootModel;
 class	CVisualCollisionManager;
 class   CTextureCube;
 class	CWaterEnvMap;
+class	CDecal;
+class	CDecalManager;
 
 // ***************************************************************************
 /**

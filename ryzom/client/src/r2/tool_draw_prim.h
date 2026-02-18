@@ -22,7 +22,7 @@
 
 #include "tool.h"
 #include "prim_render.h"
-#include "../decal.h"
+#include "../legacy_decal.h"
 //
 #include "nel/misc/vector.h"
 
@@ -90,7 +90,7 @@ private:
 	bool				 _Extending;
 	bool				 _Commited;
 	bool				 _ForceShowPrims;
-	CDecal				 _TestDecal;
+	CLegacyDecal				 _TestDecal;
 private:
 	void commit();
 	void setPrimLook(bool closed, bool lastSegmentValid, bool valid);

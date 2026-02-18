@@ -252,7 +252,7 @@ void CDisplayerVisualActivitySequence::update()
 void CDisplayerVisualActivitySequence::addFootSteps(const NLMISC::CLine &line)
 {
 	//H_AUTO(R2_CDisplayerVisualActivitySequence_addFootSteps)
-	CDecal *decal = new CDecal;
+	CLegacyDecal *decal = new CLegacyDecal;
 	decal->setTexture(CV_FootStepDecalTexture.get(),  false,  true);
 	CVector2f start2f(line.V0.x,  line.V0.y);
 	CVector2f end2f(line.V1.x,  line.V1.y);
@@ -272,7 +272,7 @@ void CDisplayerVisualActivitySequence::addFootSteps(const NLMISC::CLine &line)
 void CDisplayerVisualActivitySequence::addWanderSteps(const CVector &pos)
 {
 	//H_AUTO(R2_CDisplayerVisualActivitySequence_addWanderSteps)
-	CDecal *decal = new CDecal;
+	CLegacyDecal *decal = new CLegacyDecal;
 	decal->setTexture(CV_WanderDecalTexture.get(),  true,  true);
 	decal->setWorldMatrixForSpot(CVector2f(pos.x, pos.y), CV_WanderDecalSize.get());
 	_Decals.push_back(decal);

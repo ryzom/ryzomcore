@@ -20,6 +20,7 @@
 #include "nel/misc/polygon.h"
 #include "nel/3d/shadow_poly_receiver.h"
 #include "nel/3d/shadow_map.h"
+#include "nel/3d/decal.h"
 #include "nel/3d/driver.h"
 #include "nel/3d/camera_col.h"
 
@@ -540,6 +541,121 @@ void			CShadowPolyReceiver::renderWithPolyClip(IDriver *drv, CMaterial &shadowMa
 
 	selectPolygon(poly);
 	renderSelection(drv, shadowMat, shadowMap, casterPos, vertDelta);
+}
+
+// ***************************************************************************
+void CShadowPolyReceiver::receiveDecal(CDecalContext &cdc, const CVector &vertDelta)
+{
+	// Select triangles from the quad grid using the decal's bounding box
+	_TriangleGrid.select(cdc.WorldBBox.getMin(), cdc.WorldBBox.getMax());
+	if (_TriangleGrid.begin() == _TriangleGrid.end()) return;
+
+	nlassert(cdc.DestTris != NULL);
+
+	uint i, j;
+
+	// Reset vertex flags for selected triangles
+	TTriangleGrid::CIterator it;
+	for (it = _TriangleGrid.begin(); it != _TriangleGrid.end(); it++)
+	{
+		CTriangleId &triId = *it;
+		for (i = 0; i < 3; i++)
+		{
+			_Vertices[triId.Vertex[i]].Flags = 0;
+		}
+	}
+
+	// Clip planes from decal context (max NL3D_SPR_NUM_CLIP_PLANE)
+	uint numClipPlanes = std::min((uint)cdc.WorldClipPlanes.size(), (uint)NL3D_SPR_NUM_CLIP_PLANE);
+
+	// Collect visible triangles (those not fully clipped by all planes)
+	static std::vector<CTriangleId*> visibleTris;
+	visibleTris.clear();
+
+	for (it = _TriangleGrid.begin(); it != _TriangleGrid.end(); it++)
+	{
+		CTriangleId &triId = *it;
+		uint triFlag = NL3D_SPR_NUM_CLIP_PLANE_MASK;
+
+		CVectorId *vid[3] = {
+			&_Vertices[triId.Vertex[0]],
+			&_Vertices[triId.Vertex[1]],
+			&_Vertices[triId.Vertex[2]]
+		};
+
+		for (i = 0; i < 3; i++)
+		{
+			if (!vid[i]->Flags)
+			{
+				for (j = 0; j < numClipPlanes; j++)
+				{
+					bool out = cdc.WorldClipPlanes[j] * *vid[i] > 0;
+					vid[i]->Flags |= ((uint)out) << j;
+				}
+				vid[i]->Flags |= NL3D_SPR_NUM_CLIP_PLANE_SHIFT;
+			}
+			triFlag &= vid[i]->Flags;
+		}
+
+		// If triangle not fully clipped (at least one vertex inside all planes)
+		if ((triFlag & NL3D_SPR_NUM_CLIP_PLANE_MASK) == 0)
+		{
+			visibleTris.push_back(&triId);
+		}
+	}
+
+	// Clip and output triangles based on decal clipping mode
+	if (cdc.ClipMode == DecalClipGeometry)
+	{
+		// Geometry clipping: clip each triangle's polygon against the clip planes
+		static NLMISC::CPolygon clippedTri;
+
+		for (uint triIndex = 0; triIndex < visibleTris.size(); ++triIndex)
+		{
+			CTriangleId &triId = *visibleTris[triIndex];
+
+			// Skip down-facing triangles if requested
+			if (cdc.ClipDownFacing)
+			{
+				CVector triNormal = (_Vertices[triId.Vertex[1]] - _Vertices[triId.Vertex[0]]) ^ (_Vertices[triId.Vertex[2]] - _Vertices[triId.Vertex[0]]);
+				if (triNormal.z < 0.f) continue;
+			}
+
+			clippedTri.Vertices.resize(3);
+			clippedTri.Vertices[0] = _Vertices[triId.Vertex[0]];
+			clippedTri.Vertices[1] = _Vertices[triId.Vertex[1]];
+			clippedTri.Vertices[2] = _Vertices[triId.Vertex[2]];
+			clippedTri.clip(cdc.WorldClipPlanes);
+			if (clippedTri.Vertices.size() >= 3)
+			{
+				for (uint k = 0; k < clippedTri.Vertices.size() - 2; ++k)
+				{
+					cdc.DestTris->push_back(clippedTri.Vertices[0] + vertDelta);
+					cdc.DestTris->push_back(clippedTri.Vertices[k + 1] + vertDelta);
+					cdc.DestTris->push_back(clippedTri.Vertices[k + 2] + vertDelta);
+				}
+			}
+		}
+	}
+	else
+	{
+		// No clipping or mask clipping: output full triangles
+		for (uint triIndex = 0; triIndex < visibleTris.size(); ++triIndex)
+		{
+			CTriangleId &triId = *visibleTris[triIndex];
+
+			// Skip down-facing triangles if requested
+			if (cdc.ClipDownFacing)
+			{
+				CVector triNormal = (_Vertices[triId.Vertex[1]] - _Vertices[triId.Vertex[0]]) ^ (_Vertices[triId.Vertex[2]] - _Vertices[triId.Vertex[0]]);
+				if (triNormal.z < 0.f) continue;
+			}
+
+			cdc.DestTris->push_back(_Vertices[triId.Vertex[0]] + vertDelta);
+			cdc.DestTris->push_back(_Vertices[triId.Vertex[1]] + vertDelta);
+			cdc.DestTris->push_back(_Vertices[triId.Vertex[2]] + vertDelta);
+		}
+	}
 }
 
 // ***************************************************************************
