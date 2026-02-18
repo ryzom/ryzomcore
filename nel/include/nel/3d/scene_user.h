@@ -304,6 +304,8 @@ public:
 	virtual void		  setWaterEnvMap(UWaterEnvMap *waterEnvMap);
 	virtual UWaterEnvMap *getWaterEnvMap() const { return _WaterEnvMap; }
 	virtual void		  updateWaterEnvMaps(TGlobalAnimationTime time);
+	virtual void		  setForceWaterEnvMap(bool force) { _Scene.setForceWaterEnvMap(force); }
+	virtual bool		  getForceWaterEnvMap() const { return _Scene.getForceWaterEnvMap(); }
 	// @}
 
 public:

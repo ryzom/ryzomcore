@@ -1,0 +1,45 @@
+ps_2_0
+// cgc version 3.1.0013, build date Apr 18 2012
+// command line args: -profile ps_2_0 -O3 -fastmath -fastprecision
+// source file: stereo_debug_pp.cg
+//vendor NVIDIA Corporation
+//version 3.1.0.13
+//profile ps_2_0
+//program stereo_debug_pp
+//semantic stereo_debug_pp.cTex0 : TEX0
+//semantic stereo_debug_pp.cTex1 : TEX1
+//var float2 texCoord : $vin.TEXCOORD0 : TEX0 : 0 : 1
+//var sampler2D cTex0 : TEX0 : texunit 0 : 1 : 1
+//var sampler2D cTex1 : TEX1 : texunit 1 : 2 : 1
+//var float4 oCol : $vout.COLOR : COL : 3 : 1
+//const c[0] = 0.5 -0.0099999998 1 0
+dcl_2d s0
+dcl_2d s1
+def c0, 0.50000000, -0.01000000, 1.00000000, 0.00000000
+dcl t0.xy
+texld r0, t0, s1
+texld r1, t0, s0
+add r2.xyz, r1, -r0
+add r1, r1, r0
+mul r5, r1, c0.x
+abs r2.xyz, r2
+max r0.x, r2, r2.y
+max r0.x, r0, r2.z
+cmp r1.x, -r0, c0.w, c0.z
+add r3.x, r0, c0.y
+abs_pp r4.x, r1
+cmp r3.x, r3, c0.z, c0.w
+abs_pp r3.x, r3
+cmp_pp r3.x, -r3, c0.z, c0.w
+cmp_pp r4.x, -r4, c0.z, c0.w
+mad r2.x, r5.y, c0, c0
+mul_pp r4.x, r3, r4
+cmp r0.y, -r4.x, r5, r2.x
+mul_pp r1.x, r3, r1
+mad r2.x, r5.z, c0, c0
+cmp r0.z, -r1.x, r5, r2.x
+mov r0.w, r5
+mad r1.x, r5, c0, c0
+add r0.x, r0, c0.y
+cmp r0.x, r0, r1, r5
+mov oC0, r0

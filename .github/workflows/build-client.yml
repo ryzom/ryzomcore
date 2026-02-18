@@ -37,7 +37,8 @@ jobs:
          - ubuntu-22.04
          - windows-2025
          - windows-2022
-         - macos-13
+         # TODO: Re-enable macOS when Hunter ships a PNG version compatible with Xcode 16+ (fp.h removed)
+         # - macos-15
         include:
           - os: windows-2022
             cmake_preset: windows-client
@@ -49,9 +50,6 @@ jobs:
           - os: ubuntu-24.04
             ubuntu_version: 24.04
             cmake_preset: linux-client
-          - os: macos-13
-            cmake_preset: macos-client
-            cmake_options: -DHUNTER_USE_CACHE_SERVERS=NO
 
     steps:
     - uses: actions/checkout@v4

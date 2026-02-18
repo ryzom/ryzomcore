@@ -1991,7 +1991,7 @@ void			CMeshMRMSkinnedGeom::renderShadowSkinPrimitives(CMeshMRMSkinnedInstance	*
 	// NB: the normalize flag has already been setuped by CSkeletonModel
 
 	// TODO_SHADOW: optim: Special triangle cache for shadow!
-	static	CIndexBuffer		shiftedTris;
+	static	CIndexBuffer		shiftedTris; // STATIC GPU RESOURCE: Blocks multiple driver instances
 	shiftedTris.setPreferredMemory(CIndexBuffer::RAMVolatile, false);
 	if (shiftedTris.getName().empty()) NL_SET_IB_NAME(shiftedTris, "CMeshMRMSkinnedGeom::renderShadowSkinPrimitives::shiftedTris");
 	//if(shiftedTris.getNumIndexes()<_ShadowSkin.Triangles.size())

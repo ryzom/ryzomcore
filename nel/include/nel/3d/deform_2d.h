@@ -73,7 +73,7 @@ protected:
 	static uint _YGranularity;
 	static uint _XQuad;
 	static uint _YQuad;
-	static NLMISC::CSmartPtr<ITexture> _Tex ; // the texture used to get back datas from the framebuffer
+	static NLMISC::CSmartPtr<ITexture> _Tex ; // the texture used to get back datas from the framebuffer. STATIC GPU RESOURCE: Blocks multiple driver instances
 
 };
 

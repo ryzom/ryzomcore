@@ -56,13 +56,14 @@ def FindDockerGCC(image):
 	
 	cmd = baseCmd + [ "python3", DockerRootPath("code/tool/quick_start/dump_gcc.py") ]
 	try:
-		output = subprocess.check_output(cmd, stderr=subprocess.DEVNULL, text=True)
+		output = subprocess.check_output(cmd, stderr=subprocess.STDOUT, text=True)
 	except subprocess.CalledProcessError as e:
-		# print(e.output)
-		if "Failed" in e.output:
+		if e.output and "Failed" in e.output:
 			print("FAILED: PYTHON: " + str(json.loads(e.output)["Failed"]))
 		else:
 			print("FAILED: " + str(cmd))
+			if e.output:
+				print(e.output.strip())
 		return
 	except FileNotFoundError as e:
 		print("FAILED: " + str(cmd))

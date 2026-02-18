@@ -17,6 +17,7 @@
         "WITH_NEL_TOOLS": true,
         "WITH_DRIVER_OPENAL": true,
         "WITH_DRIVER_OPENGL": true,
+        "WITH_DRIVER_OPENGL3": true,
         "WITH_NELNS": false,
         "WITH_LUA51": false,
         "WITH_LUA52": true,

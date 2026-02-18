@@ -111,6 +111,7 @@ CParticleSystemModel::CParticleSystemModel() : _ParticleSystem(NULL),
 											   _Scene(NULL),
 											   _EllapsedTime(0.01f),
 											   _EllapsedTimeRatio(1.f),
+											   _LastFrameId(0),
 											   _AnimType(CParticleSystem::AnimVisible),
 											   _AutoGetEllapsedTime(true),
 											   _ToolDisplayEnabled(false),
@@ -664,7 +665,9 @@ void	CParticleSystemModel::doAnimate()
 		}
 		if (isAutoGetEllapsedTimeEnabled())
 		{
-			setEllapsedTime(ps->getScene()->getEllapsedTime() * getEllapsedTimeRatio());
+			// Always pass real elapsed time; CParticleSystem::step(Anim) deduplicates via frame ID
+			CScene *scene = ps->getScene();
+			setEllapsedTime(scene->getEllapsedTime() * getEllapsedTimeRatio());
 		}
 	}
 	{
@@ -676,7 +679,8 @@ void	CParticleSystemModel::doAnimate()
 		{
 			pss->_ProcessOrder.clear(); // force to eval each frame because ps could be modified
 		}
-		ps->step(CParticleSystem::Anim, delay, *pss, *this);
+		if (delay > 0.f)
+			ps->step(CParticleSystem::Anim, delay, *pss, *this);
 	}
 }
 

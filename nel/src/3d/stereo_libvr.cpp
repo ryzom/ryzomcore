@@ -44,7 +44,7 @@ extern "C" {
 #include "nel/3d/u_camera.h"
 #include "nel/3d/u_driver.h"
 #include "nel/3d/material.h"
-#include "nel/3d/texture_bloom.h"
+#include "nel/3d/texture_offscreen.h"
 #include "nel/3d/texture_user.h"
 #include "nel/3d/driver_user.h"
 #include "nel/3d/u_texture.h"
@@ -167,7 +167,7 @@ void CStereoLibVR::setDriver(NL3D::UDriver *driver)
 	{
 		m_Driver = driver;
 
-		m_BarrelTex = new CTextureBloom(); // lol bloom
+		m_BarrelTex = new CTextureOffscreen();
 		m_BarrelTex->setRenderTarget(true);
 		m_BarrelTex->setReleasable(false);
 		m_BarrelTex->resize(m_DevicePtr->HMDInfo.h_resolution, m_DevicePtr->HMDInfo.v_resolution);
@@ -390,7 +390,12 @@ bool CStereoLibVR::wantClear()
 	}
 	return m_Driver->getPolygonMode() != UDriver::Filled;
 }
-	
+
+bool CStereoLibVR::wantSceneReflections()
+{
+	return false;
+}
+
 bool CStereoLibVR::wantScene()
 {
 	switch (m_Stage)
@@ -398,6 +403,16 @@ bool CStereoLibVR::wantScene()
 	case 1:
 	case 2:
 		m_SubStage = 2;
+		return true;
+	}
+	return m_Driver->getPolygonMode() != UDriver::Filled;
+}
+
+bool CStereoLibVR::wantSceneEffects()
+{
+	switch (m_Stage)
+	{
+	case 2:
 		return true;
 	}
 	return m_Driver->getPolygonMode() != UDriver::Filled;
@@ -427,6 +442,21 @@ bool CStereoLibVR::wantInterface2D()
 	return m_Driver->getPolygonMode() != UDriver::Filled;
 }
 
+
+bool CStereoLibVR::isSceneFirst()
+{
+	return m_Stage == 1;
+}
+
+bool CStereoLibVR::isSceneLast()
+{
+	return m_Stage == 2;
+}
+
+uint CStereoLibVR::getFlareContext()
+{
+	return (m_Stage % 2) ? 0 : 2;
+}
 
 /// Returns non-NULL if a new render target was set
 bool CStereoLibVR::beginRenderTarget()

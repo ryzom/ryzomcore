@@ -97,14 +97,14 @@ void CDeform2d::doDeform(const TPoint2DVect &surf, IDriver *drv, IPerturbUV *uvp
 
 
 
-	static CMaterial mat;
+	static CMaterial mat; // STATIC GPU RESOURCE: Blocks multiple driver instances
 	mat.setDoubleSided(true);
 	mat.setLighting(false);
 	mat.setZFunc(CMaterial::always);
 /*	mat.setColor(CRGBA::Red);
 	mat.texEnvOpRGB(0, CMaterial::Add); */
 
-	static CVertexBuffer  vb;
+	static CVertexBuffer  vb; // STATIC GPU RESOURCE: Blocks multiple driver instances
 	vb.setName("CDeform2d");
 	vb.setVertexFormat(CVertexBuffer::PositionFlag | CVertexBuffer::TexCoord0Flag);
 

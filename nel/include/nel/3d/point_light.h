@@ -182,6 +182,14 @@ public:
 	 */
 	void			setupDriverLightUserAttenuation(CLight &light, uint8 factor);
 
+	/// setup the CLight with current pointLight state, without factor modulation (raw colors).
+	void			setupDriverLightRaw(CLight &light) const;
+
+	/// Get the index of this light in the global light table, -1 when not in table.
+	sint16			getTableIndex() const { return _TableIndex; }
+	/// Set the index of this light in the global light table.
+	void			setTableIndex(sint16 idx) { _TableIndex = idx; }
+
 	/// Dirt all models this light influence
 	void			resetLightedModels();
 
@@ -231,6 +239,9 @@ private:
 
 	// Ambient specific
 	bool			_AddAmbientWithSun;
+
+	// Index in global light table, -1 when not in table
+	sint16			_TableIndex;
 
 	// The memory for list of LightedModels
 	//static	NLMISC::CBlockMemory<CTransform*, false>		_LightedModelListMemory;

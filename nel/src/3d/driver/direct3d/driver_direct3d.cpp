@@ -263,6 +263,7 @@ CDriverD3D::CDriverD3D()
 	// default for lightmap
 	_LightMapDynamicLightDirty= false;
 	_LightMapDynamicLightEnabled= false;
+	_LightTableMode= false;
 	_CurrentMaterialSupportedShader= CMaterial::Normal;
 	// to avoid any problem if light0 never setuped, and ligthmap rendered
 	_UserLight0.setupDirectional(CRGBA::Black, CRGBA::White, CRGBA::White, CVector::K);
@@ -284,6 +285,7 @@ CDriverD3D::CDriverD3D()
 	_CurStencilOpZFail = D3DSTENCILOP_KEEP;
 	_CurStencilOpZPass = D3DSTENCILOP_KEEP;
 	_CurStencilWriteMask = std::numeric_limits<DWORD>::max();
+	_CurClipPlaneEnable = 0;
 
 
 	for(uint k = 0; k < MaxTexture; ++k)
@@ -329,6 +331,8 @@ CDriverD3D::CDriverD3D()
 	_FrustumPerspective= false;
 	_FogStart = 0;
 	_FogEnd = 1;
+	_FogMode = FogLinear;
+	_FogDensity = 1.f;
 
 	_SumTextureMemoryUsed = false;
 
@@ -613,8 +617,12 @@ void CDriverD3D::initRenderVariables()
 	// Fog default values
 	_FogStart = 0;
 	_FogEnd = 1;
+	_FogMode = FogLinear;
+	_FogDensity = 1.f;
 	setRenderState (D3DRS_FOGSTART, *((DWORD*) (&_FogStart)));
 	setRenderState (D3DRS_FOGEND, *((DWORD*) (&_FogEnd)));
+	setRenderState (D3DRS_FOGVERTEXMODE, D3DFOG_LINEAR);
+	setRenderState (D3DRS_FOGDENSITY, *((DWORD*) (&_FogDensity)));
 	setRenderState (D3DRS_FOGVERTEXMODE, D3DFOG_LINEAR);
 
 	// Alpha render states
@@ -1618,7 +1626,9 @@ bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool r
 	_NbNeLTextureStages = min ((uint)NL_FORCE_TEXTURE_STAGE_COUNT, (uint)IDRV_MAT_MAXTEXTURES);
 #endif // NL_FORCE_TEXTURE_STAGE_COUNT
 
-	_VertexProgram = !_DisableHardwareVertexProgram && ((caps.VertexShaderVersion&0xffff) >= 0x0100);
+	_VertexProgramVersion = _DisableHardwareVertexProgram ? 0x0000 : caps.VertexShaderVersion & 0xffff;
+	nldebug("Vertex Program Version: %i.%i", (uint32)((_VertexProgramVersion & 0xFF00) >> 8), (uint32)(_VertexProgramVersion & 0xFF));
+	_VertexProgram = _VertexProgramVersion >= 0x0100;
 	_PixelProgramVersion = _DisableHardwareVertexProgram ? 0x0000 : caps.PixelShaderVersion & 0xffff;
 	nldebug("Pixel Program Version: %i.%i", (uint32)((_PixelProgramVersion & 0xFF00) >> 8), (uint32)(_PixelProgramVersion & 0xFF));
 	_PixelProgram = _PixelProgramVersion >= 0x0101;
@@ -1986,7 +1996,7 @@ bool CDriverD3D::clearZBuffer(float zval)
 
 // ***************************************************************************
 
-bool CDriverD3D::clearStencilBuffer(float stencilval)
+bool CDriverD3D::clearStencilBuffer(sint stencilval)
 {
 	H_AUTO_D3D(CDriverD3D_clearStencilBuffer);
 	nlassert (_DeviceInterface);
@@ -2231,6 +2241,38 @@ float CDriverD3D::getFogEnd() const
 CRGBA CDriverD3D::getFogColor() const
 {
 	return D3DCOLOR_NL_RGBA(_RenderStateCache[D3DRS_FOGCOLOR].Value);
+}
+
+// ***************************************************************************
+
+void CDriverD3D::setupFogMode(TFogMode mode, float density)
+{
+	H_AUTO_D3D(CDriverD3D_setupFogMode);
+	_FogMode = mode;
+	_FogDensity = density;
+	DWORD d3dMode;
+	switch (mode)
+	{
+	case FogExp:  d3dMode = D3DFOG_EXP; break;
+	case FogExp2: d3dMode = D3DFOG_EXP2; break;
+	default:      d3dMode = D3DFOG_LINEAR; break;
+	}
+	setRenderState(D3DRS_FOGVERTEXMODE, d3dMode);
+	setRenderState(D3DRS_FOGDENSITY, *((DWORD *)(&density)));
+}
+
+// ***************************************************************************
+
+IDriver::TFogMode CDriverD3D::getFogMode() const
+{
+	return _FogMode;
+}
+
+// ***************************************************************************
+
+float CDriverD3D::getFogDensity() const
+{
+	return _FogDensity;
 }
 
 // ***************************************************************************
@@ -2922,12 +2964,101 @@ const char *CDriverD3D::getVideocardInformation ()
 
 // ***************************************************************************
 
+// Minimal DXGI declarations for dynamic loading.
+// We avoid #include <dxgi.h> so this builds with the XP SDK and VS2008.
+namespace
+{
+
+// {7b7166ec-21c7-44ae-b21a-c9ae321ae369}
+static const GUID NL_IID_IDXGIFactory =
+	{ 0x7b7166ec, 0x21c7, 0x44ae, { 0xb2, 0x1a, 0xc9, 0xae, 0x32, 0x1a, 0xe3, 0x69 } };
+
+struct NL_DXGI_ADAPTER_DESC
+{
+	WCHAR  Description[128];
+	UINT   VendorId;
+	UINT   DeviceId;
+	UINT   SubSysId;
+	UINT   Revision;
+	SIZE_T DedicatedVideoMemory;
+	SIZE_T DedicatedSystemMemory;
+	SIZE_T SharedSystemMemory;
+	LUID   AdapterLuid;
+};
+
+// Minimal COM vtable layout for IDXGIAdapter (inherits IDXGIObject <- IUnknown).
+// IUnknown:    QueryInterface, AddRef, Release          (indices 0-2)
+// IDXGIObject: SetPrivateData, ..., GetParent           (indices 3-6)
+// IDXGIAdapter: EnumOutputs, GetDesc, CheckInterfaceSupport (indices 7-9)
+struct NL_IDXGIAdapter
+{
+	struct Vtbl
+	{
+		void *methods[8]; // 0..7: skip to GetDesc
+		HRESULT (STDMETHODCALLTYPE *GetDesc)(NL_IDXGIAdapter *This, NL_DXGI_ADAPTER_DESC *pDesc);
+	};
+	Vtbl *lpVtbl;
+
+	ULONG Release() { return ((ULONG (STDMETHODCALLTYPE *)(NL_IDXGIAdapter *))lpVtbl->methods[2])(this); }
+	HRESULT GetDesc(NL_DXGI_ADAPTER_DESC *pDesc) { return lpVtbl->GetDesc(this, pDesc); }
+};
+
+// Minimal COM vtable layout for IDXGIFactory (inherits IDXGIObject <- IUnknown).
+// IDXGIFactory: EnumAdapters is index 7
+struct NL_IDXGIFactory
+{
+	struct Vtbl
+	{
+		void *methods[7]; // 0..6: skip to EnumAdapters
+		HRESULT (STDMETHODCALLTYPE *EnumAdapters)(NL_IDXGIFactory *This, UINT Adapter, NL_IDXGIAdapter **ppAdapter);
+	};
+	Vtbl *lpVtbl;
+
+	ULONG Release() { return ((ULONG (STDMETHODCALLTYPE *)(NL_IDXGIFactory *))lpVtbl->methods[2])(this); }
+	HRESULT EnumAdapters(UINT Adapter, NL_IDXGIAdapter **ppAdapter) { return lpVtbl->EnumAdapters(this, Adapter, ppAdapter); }
+};
+
+typedef HRESULT (WINAPI *PFN_CreateDXGIFactory)(REFIID riid, void **ppFactory);
+
+} // anonymous namespace
+
 sint CDriverD3D::getTotalVideoMemory () const
 {
 	H_AUTO_D3D(CDriverD3D_getTotalVideoMemory);
 
-	// Can't use _DeviceInterface->GetAvailableTextureMem() because it's not reliable
-	// Returns 4 GiB instead of 2 with my GPU
+	// Try DXGI (available on Vista+). Dynamic load so we still run on XP.
+	HMODULE hDXGI = LoadLibraryW(L"dxgi.dll");
+	if (hDXGI)
+	{
+		sint result = -1;
+		PFN_CreateDXGIFactory pCreateFactory = (PFN_CreateDXGIFactory)GetProcAddress(hDXGI, "CreateDXGIFactory1");
+		if (!pCreateFactory)
+			pCreateFactory = (PFN_CreateDXGIFactory)GetProcAddress(hDXGI, "CreateDXGIFactory");
+
+		if (pCreateFactory)
+		{
+			NL_IDXGIFactory *factory = NULL;
+			if (SUCCEEDED(pCreateFactory(NL_IID_IDXGIFactory, (void **)&factory)))
+			{
+				NL_IDXGIAdapter *adapter = NULL;
+				if (SUCCEEDED(factory->EnumAdapters(0, &adapter)))
+				{
+					NL_DXGI_ADAPTER_DESC desc;
+					if (SUCCEEDED(adapter->GetDesc(&desc)))
+					{
+						result = (sint)(desc.DedicatedVideoMemory / 1024);
+						nlinfo("3D: DXGI DedicatedVideoMemory = %u MiB", (uint32)(desc.DedicatedVideoMemory / (1024 * 1024)));
+					}
+					adapter->Release();
+				}
+				factory->Release();
+			}
+		}
+		FreeLibrary(hDXGI);
+		if (result > 0)
+			return result;
+	}
+
 	return -1;
 }
 
@@ -3204,6 +3335,13 @@ void CDriverD3D::flush()
 	endScene();
 	//nldebug("BeginScene");
 	beginScene();
+}
+
+// ***************************************************************************
+
+bool CDriverD3D::supportMonitorColorProperties () const
+{
+	return _DesktopGammaRampValid;
 }
 
 // ***************************************************************************
@@ -3553,6 +3691,45 @@ void CDriverD3D::stencilMask(uint mask)
 
 	_CurStencilWriteMask = (DWORD)mask;
 	setRenderState (D3DRS_STENCILWRITEMASK, _CurStencilWriteMask);
+}
+
+// ***************************************************************************
+void CDriverD3D::enableClipPlane(uint index, bool enable)
+{
+	H_AUTO_D3D(CDriverD3D_enableClipPlane);
+	nlassert(index < 6);
+
+	DWORD bit = 1 << index;
+	DWORD newValue;
+	if (enable)
+		newValue = _CurClipPlaneEnable | bit;
+	else
+		newValue = _CurClipPlaneEnable & ~bit;
+	if (newValue != _CurClipPlaneEnable)
+	{
+		_CurClipPlaneEnable = newValue;
+		setRenderState(D3DRS_CLIPPLANEENABLE, _CurClipPlaneEnable);
+	}
+}
+
+// ***************************************************************************
+void CDriverD3D::setClipPlane(uint index, const NLMISC::CPlane &plane)
+{
+	H_AUTO_D3D(CDriverD3D_setClipPlane);
+	nlassert(index < 6);
+
+	// Plane is in NeL world space. The D3D World matrix operates in NeL
+	// space (basis conversion is in the View matrix), so no basis
+	// conversion is needed on the plane coefficients.
+	// Adjust d for _PZBCameraPos precision optimization.
+	float equation[4];
+	equation[0] = plane.a;
+	equation[1] = plane.b;
+	equation[2] = plane.c;
+	equation[3] = plane.d + plane.a * _PZBCameraPos.x
+	                      + plane.b * _PZBCameraPos.y
+	                      + plane.c * _PZBCameraPos.z;
+	_DeviceInterface->SetClipPlane(index, equation);
 }
 
 // volatile bool preciseStateProfile = false;

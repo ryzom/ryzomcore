@@ -34,6 +34,7 @@ namespace NL3D
  */
 template<class T> class COrderingTable
 {
+	struct CNode;
 
 public:
 
@@ -101,6 +102,23 @@ public:
 	 * Move selection pointer to the next element
 	 */
 	void next();
+
+	/**
+	 * Opaque iterator for saving and restoring traversal position.
+	 */
+	struct CIterator
+	{
+		CIterator() : _Node(NULL) {}
+	private:
+		friend class COrderingTable<T>;
+		CNode *_Node;
+	};
+
+	/// Save the current traversal position.
+	CIterator iterator() const { CIterator it; it._Node = _SelNode; return it; }
+
+	/// Restore a previously saved traversal position.
+	void setIterator(CIterator it) { _SelNode = it._Node; }
 
 // =================
 // =================

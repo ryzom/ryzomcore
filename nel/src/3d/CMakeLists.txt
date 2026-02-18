@@ -283,8 +283,7 @@ SOURCE_GROUP(Textures FILES
         texture_blank.cpp
         ../../include/nel/3d/texture_blank.h
         texture_blend.cpp
-        ../../include/nel/3d/texture_bloom.h
-        texture_bloom.cpp
+        ../../include/nel/3d/texture_offscreen.h
         ../../include/nel/3d/texture_blend.h
         texture_bump.cpp
         ../../include/nel/3d/texture_bump.h
@@ -711,7 +710,9 @@ SOURCE_GROUP(Stereo FILES
 		stereo_libvr.cpp
         ../../include/nel/3d/stereo_libvr.h
 		stereo_debugger.cpp
-		../../include/nel/3d/stereo_debugger.h)
+		../../include/nel/3d/stereo_debugger.h
+		stereo_passthrough.cpp
+		../../include/nel/3d/stereo_passthrough.h)
 
 NL_TARGET_LIB(nel3d ${HEADERS} ${SRC})
 add_project_library_alias(nel3d 3d)

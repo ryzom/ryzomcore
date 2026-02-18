@@ -196,6 +196,10 @@ public:
 	void			setCullMode(TCullMode cullMode);
 	TCullMode       getCullMode() const;
 
+	enum			{ MaxClipPlanes = 6 };
+	void			enableClipPlane(uint index, bool enable);
+	void			setClipPlane(uint index, double equation[4]);
+
 private:
 	bool			_CurBlend;
 	bool			_CurFog;
@@ -256,6 +260,8 @@ private:
 	enum	{MaxLight=8};
 	uint			_MaxDriverLight;
 	bool			_CurLight[MaxLight];
+
+	bool			_CurClipPlaneEnabled[MaxClipPlanes];
 };
 
 #ifdef NL_STATIC

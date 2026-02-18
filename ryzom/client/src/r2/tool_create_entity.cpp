@@ -234,9 +234,9 @@ std::string CToolCreateEntity::cloneEntityIntoScenario(CEntityCL *clonee,
 		getDMC().newAction(NLMISC::CI18N::get("uiR2EDCreateAction") + readableName);
 	}
 	// send network commands to create entity on server
-	CUniquePtr<CObject> desc(getDMC().newComponent(className));
+	CObject::TSmartPtr desc = getDMC().newComponent(className);
 
-	if (desc.get())
+	if (desc)
 	{
 		// TMP FIX : if the created entity is a custom npc, then retrieve look from the clonee visual properties
 		if (className == "NpcCustom")
@@ -270,7 +270,7 @@ std::string CToolCreateEntity::cloneEntityIntoScenario(CEntityCL *clonee,
 			vB.PropertyB = leafB->getValue64();
 			vC.PropertyC = leafC->getValue64();
 			nlassert(desc->isTable());
-			CObjectTable *props = (CObjectTable *) desc.get();
+			CObjectTable *props = (CObjectTable *) desc.getPtr();
 
 			props->set("GabaritHeight",     (double)vC.PropertySubData.CharacterHeight);
 			props->set("GabaritTorsoWidth", (double)vC.PropertySubData.TorsoWidth);
@@ -494,7 +494,7 @@ std::string CToolCreateEntity::cloneEntityIntoScenario(CEntityCL *clonee,
 		desc->set("Angle", createAngle);
 		//desc->set("Name", readableName.toUtf8());
 
-		instanceId = getString(desc.get(), "InstanceId");
+		instanceId = getString(desc.getPtr(), "InstanceId");
 		if (!instanceId.empty())
 		{
 			if (!createGhost)
@@ -526,7 +526,7 @@ std::string CToolCreateEntity::cloneEntityIntoScenario(CEntityCL *clonee,
 				if (_AutoGroup.getGroupingCandidate())
 				{
 					nlassert(!createGhost); // either autogroup or arraymode, both at the same time not supported
-					_AutoGroup.group(desc.get(), createPosition);
+					_AutoGroup.group(desc.getPtr(), createPosition);
 				}
 				else
 				{
@@ -536,7 +536,7 @@ std::string CToolCreateEntity::cloneEntityIntoScenario(CEntityCL *clonee,
 											   "Components",
 											   -1,
 											   "",
-											   desc.get());
+											   desc.getPtr());
 				}
 			}
 		}
@@ -771,9 +771,8 @@ void CToolCreateEntity::updateArray(CEntityCL *clonee)
 				CVector worldPos = _ArrayElements[k]->getWorldPos();
 				if (pos != worldPos)
 				{
-					CObject *newPos = buildVector(pos, _ArrayElements[k]->getDisplayedInstance()->getPosInstanceId());
+					CObject::TSmartPtr newPos = buildVector(pos, _ArrayElements[k]->getDisplayedInstance()->getPosInstanceId());
 					getEditor().getDMC().requestSetNode(instanceId, "Position", newPos);
-					delete newPos;
 				}
 				if (angle != _ArrayElements[k]->getAngle())
 				{

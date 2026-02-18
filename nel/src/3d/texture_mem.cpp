@@ -65,7 +65,7 @@ static NLMISC::CRGBA WhitePix(255, 255, 255, 255); // the texture datas ... :)
 ///===========================================================================
 ITexture *CTextureMem::Create1x1WhiteTex()
 {
-	static NLMISC::CSmartPtr<ITexture> tex  = NULL;
+	static NLMISC::CSmartPtr<ITexture> tex  = NULL; // STATIC GPU RESOURCE: Blocks multiple driver instances
 	if (!tex)
 	{
 		tex = new CTextureMem((uint8 *) &WhitePix,

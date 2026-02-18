@@ -50,7 +50,7 @@ void cbsNewConnection (TSockId from, void *data)
 //	server->sendAllMyAssociations (from);
 
 	// call the client callback if necessary
-	if (server->_ConnectionCallback != NULL)
+	if (server->_ConnectionCallback)
 		server->_ConnectionCallback (from, server->_ConnectionCbArg);
 }
 
@@ -61,7 +61,7 @@ void cbsNewConnection (TSockId from, void *data)
 CCallbackServer::CCallbackServer( TRecordingState rec, const string& recfilename, bool recordall, bool initPipeForDataAvailable ) :
 	CCallbackNetBase( rec, recfilename, recordall ),
 	CBufServer( DEFAULT_STRATEGY, DEFAULT_MAX_THREADS, DEFAULT_MAX_SOCKETS_PER_THREADS, true, rec==Replay, initPipeForDataAvailable ),
-	_ConnectionCallback(NULL),
+	_ConnectionCallback(),
 	_ConnectionCbArg(NULL)
 {
 #ifndef USE_MESSAGE_RECORDER
@@ -72,7 +72,7 @@ CCallbackServer::CCallbackServer( TRecordingState rec, const string& recfilename
 	CBufServer::setConnectionCallback (cbsNewConnection, this);
 
 	_IsAServer = true;
-	_DefaultCallback = NULL;
+	_DefaultCallback = TMsgCallback();
 }
 
 

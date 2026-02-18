@@ -92,10 +92,14 @@ const float MaxInputValue = 1.0f;
 class CPSAttribMakerBase : public NLMISC::IStreamable
 {
 public:
+	CPSAttribMakerBase() : m_RandomId(~0u) {}
+	CPSAttribMakerBase(const CPSAttribMakerBase &) : m_RandomId(~0u) {} // clones get fresh IDs
 	// get the type of this attribute maker
 	virtual const char *getType() = 0;
 	// duplicate this attribute maker
 	virtual CPSAttribMakerBase *clone() const = 0;
+	/// Sequential ID for deterministic random generation, assigned lazily from CParticleSystem counter
+	mutable uint32 m_RandomId;
 	// fast alloc for attrib makers
 	PS_FAST_OBJ_ALLOC
 };

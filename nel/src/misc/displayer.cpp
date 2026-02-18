@@ -110,6 +110,8 @@ IDisplayer::IDisplayer(const char *displayerName)
 
 IDisplayer::~IDisplayer()
 {
+	_Mutex->enter();
+	_Mutex->leave();
 	delete _Mutex;
 }
 

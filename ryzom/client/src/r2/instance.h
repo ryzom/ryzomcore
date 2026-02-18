@@ -82,9 +82,9 @@ public:
 	CLuaObject         &getLuaProjection();
 	// Advanced : get the counterpart CObjectTable object	(which is wrapped by the object
 	// returned by 'getLuaProjection').
-	const CObjectTable *getObjectTable() const { return _ObjectTable; }
+	const CObjectTable *getObjectTable() const { return static_cast<const CObjectTable *>(_ObjectTable.getPtr()); }
 	// TMP TMP TMP for lag compensation (should never write in object properties directly...)
-	CObjectTable *getObjectTable() { return const_cast<CObjectTable *>(_ObjectTable); }
+	CObjectTable *getObjectTable() { return const_cast<CObjectTable *>(static_cast<const CObjectTable *>(_ObjectTable.getPtr())); }
 	// get id in the palette
 	std::string getPaletteId();
 	// Get this instance parent
@@ -231,7 +231,7 @@ private:
 		virtual void executeHandler(const CLuaString &eventName, int numArgs);
 	};
 	CToLua									   _ToLua;
-	const CObjectTable						   *_ObjectTable;	// the real datas for that object
+	CObject::TSmartPtr						   _ObjectTable;	// the real datas for that object
 	mutable TInstanceId						   _Id;				// cache for this object instance id
 	bool									   _Selectable;
 	sint									   _ClassIndex;
@@ -245,7 +245,7 @@ private:
 private:
 	friend class CEditor;
 	// For editor : Create this object from the CObjectTable it materialize in the editor
-	CInstance(const CObjectTable *objectTable, CLuaState &ls);
+	CInstance(CObjectTable *objectTable, CLuaState &ls);
 	// copy not supported
 	CInstance(const CInstance &/* other */):NLMISC::CRefCount() { nlassert(0); }
 	CInstance &operator = (const CInstance &/* other */) { nlassert(0); return *this; }

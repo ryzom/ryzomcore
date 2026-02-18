@@ -300,6 +300,9 @@ public:
 	/// get the number of time render has been called
 	uint64				getNumRender() const { return _NumRender; }
 
+	/// get the frame id, incremented once per animate() call (i.e. once per real frame, not per stereo eye)
+	uint64				getFrameId() const { return _FrameId; }
+
 	/// true if currently rendering
 	bool				isRendering() const {return _IsRendering;}
 
@@ -576,8 +579,13 @@ public:
 
 	/** \name Flare contexts
 	  * The flare objects are designed to work with a single scene, because they simulate 'retinian persistence' based on the visibility in the current scene.
-	  * Several context allow to deals with a flare rendered from several points of views.
-	  * There's a limited number of contexts (MaxNumFlareContexts)
+	  * Several contexts allow to deal with a flare rendered from several points of view.
+	  * There's a limited number of contexts (MaxNumFlareContexts).
+	  * Context allocation:
+	  *   0 - Main scene (default)
+	  *   1 - Interface 3D scenes (character/item previews)
+	  *   2 - Stereo right eye (via IStereoDisplay::getFlareContext)
+	  *   3 - Reserved
 	  */
 	// @{
 		// The max number of contexts for flares
@@ -643,6 +651,9 @@ public:
 	void		  setWaterEnvMap(CWaterEnvMap *waterEnvMap) { _WaterEnvMap = waterEnvMap; }
 	// Get currenlty used water envmap for that scene.
 	CWaterEnvMap *getWaterEnvMap() const { return _WaterEnvMap; }
+	// Force all water surfaces to use the scene water envmap, regardless of per-shape flag
+	void		  setForceWaterEnvMap(bool force) { _ForceWaterEnvMap = force; }
+	bool		  getForceWaterEnvMap() const { return _ForceWaterEnvMap; }
 	/** Update water envmaps. Water textures that need to be updated includes UWaterEnvMap textures & Day/Night textures (as defined in the water material).
 	  * Should be called at the beginning of the frame before anything is rendered.
 	  */
@@ -672,6 +683,8 @@ private:
 	double	_DeltaSystemTimeBetweenRender;
 	double	_GlobalSystemTime;
 	uint64  _NumRender; // the number of time render has been called
+	uint64  _FrameId;  // incremented once per animate() call (once per real frame)
+	uint64  _LastRenderFrameId; // last _FrameId seen by renderPart (for once-per-frame operations)
 
 
 	/// \name The traversals
@@ -824,6 +837,7 @@ private:
 	UScene::TRenderPart	_RenderedPart;
 	void	renderOcclusionTestMeshsWithCurrMaterial();
 	CWaterEnvMap	*_WaterEnvMap;
+	bool			_ForceWaterEnvMap;
 	/// Delayed model creation For skeleton spawn script animation
 	std::vector<CSSSModelRequest>		_SSSModelRequests;
 	void									flushSSSModelRequests();

@@ -282,8 +282,8 @@ private:
 	static NLMISC::CSmartPtr<CVertexProgram>	_VertexProgramNoBump;
 	static NLMISC::CSmartPtr<CVertexProgram>	_VertexProgramNoBumpDiffuse;*/
 	//
-	static NLMISC::CSmartPtr<CVertexProgramWaterVPNoWave>    _VertexProgramNoWave;
-	static NLMISC::CSmartPtr<CVertexProgramWaterVPNoWave>    _VertexProgramNoWaveDiffuse;
+	static NLMISC::CSmartPtr<CVertexProgramWaterVPNoWave>    _VertexProgramNoWave; // STATIC GPU RESOURCE: Blocks multiple driver instances
+	static NLMISC::CSmartPtr<CVertexProgramWaterVPNoWave>    _VertexProgramNoWaveDiffuse; // STATIC GPU RESOURCE: Blocks multiple driver instances
 };
 
 

@@ -85,6 +85,9 @@ private:
 	/// The last rotation computed (in LocalSkeleton Space). Used to smooth transition
 	NLMISC::CQuat		_LastLSRotation;
 
+	/// Last frame id when rotation was accumulated (avoid double-accumulation in stereo)
+	uint64				_LastFrameId;
+
 	/// This tells that a Enable/Disable transition is in progress.
 	bool				_LastEnabled;
 	bool				_EnableToDisableTransition;

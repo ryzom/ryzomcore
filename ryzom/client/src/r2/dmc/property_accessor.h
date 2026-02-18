@@ -98,9 +98,8 @@ namespace R2
 			class CShadowedValue
 			{
 			public:
-				CShadowedValue() : LocalValue(NULL) {}
 				CObject::TRefPtr ShadowedValue;
-				CObject          *LocalValue;
+				CObject::TSmartPtr LocalValue;
 			};
 			// usually there isn't more than a few shadowed value at a time.
 		private:

@@ -429,7 +429,7 @@ void CCloud::disp ()
 	qc.V1 = CVector(w/800.0f,		0.0f/600.0f,	0.0f);
 	qc.V2 = CVector(w/800.0f,		h/600.0f,		0.0f);
 	qc.V3 = CVector(0.0f/800.0f,	h/600.0f,		0.0f);
-	static CMaterial *dispMat = NULL;
+	static CMaterial *dispMat = NULL; // STATIC GPU RESOURCE: Blocks multiple driver instances
 	if (dispMat == NULL)
 	{
 		dispMat = new CMaterial;
@@ -814,7 +814,7 @@ void CCloud::dispBill (CCamera *pCam)
 	// Debug
 	if (_CloudScape->isDebugQuadEnabled())
 	{
-		static CMaterial *mTmp = NULL;
+		static CMaterial *mTmp = NULL; // STATIC GPU RESOURCE: Blocks multiple driver instances
 		if (mTmp == NULL)
 		{
 			mTmp = new CMaterial();

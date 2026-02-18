@@ -25,6 +25,7 @@
 #include "nel/misc/smart_ptr.h"
 #include "nel/misc/rgba.h"
 #include "nel/misc/matrix.h"
+#include "nel/misc/plane.h"
 #include "nel/misc/stream.h"
 #include "nel/misc/uv.h"
 #include "nel/misc/hierarchical_timer.h"
@@ -38,6 +39,7 @@
 #include "nel/3d/material.h"
 #include "nel/misc/mutex.h"
 #include "nel/3d/primitive_profile.h"
+#include "nel/3d/uniform_buffer.h"
 
 #include <vector>
 #include <list>
@@ -162,9 +164,13 @@ public:
 
 	enum TProgram
 	{
-		VertexProgram = 0,
-		PixelProgram = 1,
-		GeometryProgram = 2
+		ShaderProgram = 0, // Monolithic shader program, must contain a matching VP/PP pair at minimum
+
+		VertexProgram = 1,
+		PixelProgram = 2,
+		// GeometryProgram = 3,
+
+		ProgramNb
 	};
 
 protected:
@@ -174,6 +180,7 @@ protected:
 	TVBDrvInfoPtrList					_VBDrvInfos;
 	TIBDrvInfoPtrList					_IBDrvInfos;
 	TGPUPrgDrvInfoPtrList				_GPUPrgDrvInfos;
+	TUBDrvInfoPtrList					_UBDrvInfos;
 
 	TPolygonMode			_PolygonMode;
 
@@ -252,6 +259,9 @@ public:
 	// Must be a HWND for Windows (WIN32).
 	virtual nlWindow		getDisplay() = 0;
 
+	/// Return true if the driver supports monitor color properties (gamma, contrast, luminosity)
+	virtual bool			supportMonitorColorProperties() const = 0;
+
 	/// Setup monitor color properties. Return false if setup failed
 	virtual bool			setMonitorColorProperties(const CMonitorColorProperties &properties) = 0;
 
@@ -298,7 +308,7 @@ public:
 	virtual bool			clearZBuffer(float zval=1) = 0;
 
 	/// Clear the current target surface stencil buffer. The function ignores the viewport settings but uses the scissor.
-	virtual bool			clearStencilBuffer(float stencilval=0) = 0;
+	virtual bool			clearStencilBuffer(sint stencilval=0) = 0;
 
 	/// Set the color mask filter through where the operation done will pass
 	virtual void			setColorMask(bool bRed, bool bGreen, bool bBlue, bool bAlpha) = 0;
@@ -487,8 +497,17 @@ public:
 	virtual void			endMaterialMultiPass() = 0;
 	// @}
 
-	// Does the driver support the per-pixel lighting shader ?
+	// Does the driver support the per-pixel lighting shader ? (legacy fixed-function technique)
 	virtual bool supportPerPixelLighting(bool specular) const = 0;
+
+	/// Does the driver's builtin VP/PP support per-pixel lighting features?
+	/// When true, user shader programs may use the following CProgramFeatures:
+	///   - InputsWorldSpaceNormal:    Request world-space normal at varying location 2.
+	///   - InputsWorldSpacePosition:  Request PZB-relative world-space position at varying location 0.
+	///   - OutputsWorldSpacePosition: Indicate that a user VP outputs world-space position at location 0.
+	/// These enable GLSL per-pixel lighting in user PPs (light direction, attenuation, etc.).
+	/// The builtin PP adapts fog to use world-space distance when position is in world space.
+	virtual bool supportWorldSpacePPL() const = 0;
 	// @}
 
 
@@ -580,7 +599,7 @@ public:
 	bool					getStaticMemoryToVRAM() const { return _StaticMemoryToVRAM; }
 
 	/* Set to true if static vertex and index buffers must by allocated in VRAM, false in AGP.
-	 * Default is false.
+	 * Default is true.
 	 */
 	void					setStaticMemoryToVRAM(bool staticMemoryToVRAM);
 
@@ -816,14 +835,20 @@ public:
 
 	/// \name Fog support.
 	// @{
+	enum TFogMode { FogLinear = 0, FogExp, FogExp2 };
+
 	virtual	bool			fogEnabled() = 0;
 	virtual	void			enableFog(bool enable = true) = 0;
 	/// setup fog parameters. fog must enabled to see result. start and end are distance values.
 	virtual	void			setupFog(float start, float end, NLMISC::CRGBA color) = 0;
+	/// setup fog mode and density. mode/density are orthogonal to start/end/color.
+	virtual	void			setupFogMode(TFogMode mode = FogLinear, float density = 1.f) = 0;
 	/// Get.
 	virtual	float			getFogStart() const = 0;
 	virtual	float			getFogEnd() const = 0;
 	virtual	NLMISC::CRGBA	getFogColor() const = 0;
+	virtual	TFogMode		getFogMode() const = 0;
+	virtual	float			getFogDensity() const = 0;
 	// @}
 
 
@@ -1079,6 +1104,58 @@ public:
 	// @}
 
 
+	/** \name Light Table
+	  *
+	  * The light table is a resizable array of CLight entries in the driver,
+	  * populated once per frame. Each unique scene light (sun, point lights)
+	  * is uploaded once via setLightTableEntry(). Per-object rendering then
+	  * references lights by table index + influence factor through setLights(),
+	  * rather than uploading fully modulated CLight data per draw call.
+	  *
+	  * Two modes:
+	  * - **Table mode** (scene rendering): enableLightTableMode(true). Lights
+	  *   are set up via setLightTableEntry() and selected per object via
+	  *   setLights(). The legacy setLight()/enableLight() calls are not used.
+	  * - **Legacy mode** (samples, UI, debug): enableLightTableMode(false).
+	  *   setLight()/enableLight() work as before.
+	  *
+	  * setLights() applies per-object factor modulation internally: each
+	  * factor (0-255) scales the table entry's diffuse and specular colors.
+	  * The ambient parameter replaces the ambient of slot 0 (sun); point
+	  * light slots receive black ambient.
+	  */
+	// @{
+
+	/// Return the maximum number of entries the light table can hold.
+	/// Drivers without a fixed limit (legacy, no UBO) return UINT_MAX.
+	virtual uint getMaxLightTableSize() const { return (uint)~0; }
+
+	/// Enable or disable light table mode. When disabled, legacy setLight()/enableLight() resumes.
+	virtual void enableLightTableMode(bool enable) = 0;
+
+	/// Resize the light table. Existing entries beyond the new size are discarded.
+	virtual void setLightTableSize(uint count) = 0;
+
+	/// Set a light table entry. The light is stored as-is (no factor modulation).
+	virtual void setLightTableEntry(uint index, const CLight &light) = 0;
+
+	/** Set the active lights for the current object from the light table.
+	  * \param tableIndices       Array of indices into the light table. Slot 0 is the sun.
+	  * \param factors            Parallel array of influence factors (0-255) per light.
+	  * \param numLights          Number of entries in tableIndices/factors.
+	  * \param numPerPixelLights  First N lights evaluated per-pixel in PP (0 = all VP).
+	  * \param ambient            Per-object ambient color, written to slot 0's ambient.
+	  */
+	virtual void setLights(
+		const sint16 *tableIndices,
+		const uint8 *factors,
+		uint numLights,
+		uint numPerPixelLights,
+		NLMISC::CRGBA ambient) = 0;
+
+	// @}
+
+
 
 	/// \name Vertex Program
 	// @{
@@ -1092,6 +1169,12 @@ public:
 	  * Does the driver supports vertex program, but emulated by CPU ?
 	  */
 	virtual bool			isVertexProgramEmulated() const = 0;
+
+	/** Return true if the driver supports builtin UBOs for vertex programs
+	  * (NlCamera, NlLightTable, NlModel). When true, user VPs can use
+	  * UsesObjectUBO/UsesLightTableUBO/UsesCameraUBO feature flags.
+	  */
+	virtual bool			supportBuiltinUBO() const { return false; }
 
 	/** Return true if the driver supports the specified vertex program profile.
 	  */
@@ -1216,6 +1299,10 @@ public:
 	virtual void			setUniformFog(TProgram program, uint index) = 0;
     // Set feature parameters
 	virtual bool			isUniformProgramState() = 0;
+
+	/// Bind a user uniform buffer to a binding point. Creates GPU buffer on first use,
+	/// uploads if dirty. Pass NULL to unbind.
+	virtual bool			bindUniformBuffer(TUBBinding binding, CUniformBuffer *ub) { return false; }
 	// @}
 
 
@@ -1252,6 +1339,9 @@ public:
 	virtual bool			supportTextureShaders() const = 0;
 	// Is the shader water supported ? If not, the driver caller should implement its own version
 	virtual bool			supportWaterShader() const = 0;
+	/// Does the cubemap face convention use +Z as forward? (D3D: true, GL: false)
+	/// GL cubemaps map forward (-Z) to NEGATIVE_Z face, D3D maps forward (+Z) to POSITIVE_Z face.
+	virtual bool			cubemapZPositiveForward() const = 0;
 	//
 	/// test whether a texture addressing mode is supported
 	virtual bool			supportTextureAddrMode(CMaterial::TTexAddressingMode mode) const = 0;
@@ -1423,6 +1513,13 @@ public:
 	virtual void			stencilOp(TStencilOp fail, TStencilOp zfail, TStencilOp zpass) = 0;
 	virtual void			stencilMask(uint mask) = 0;
 
+	/** Set clip planes. Plane is in NeL world space.
+	  * The driver handles coordinate system conversion internally.
+	  * Useful for water reflections to clip geometry below the water surface.
+	  */
+	virtual void			enableClipPlane(uint index, bool enable) = 0;
+	virtual void			setClipPlane(uint index, const NLMISC::CPlane &plane) = 0;
+
 protected:
 	friend	class			IVBDrvInfos;
 	friend	class			IIBDrvInfos;
@@ -1431,6 +1528,7 @@ protected:
 	friend	class			IMaterialDrvInfos;
 	friend	class			IProgramDrvInfos;
 	friend	class			IProgramParamsDrvInfos;
+	friend	class			IUBDrvInfos;
 
 	/// remove ptr from the lists in the driver.
 	void					removeVBDrvInfoPtr(ItVBDrvInfoPtrList vbDrvInfoIt);
@@ -1439,6 +1537,7 @@ protected:
 	void					removeTextureDrvSharePtr(ItTexDrvSharePtrList texDrvShareIt);
 	void					removeMatDrvInfoPtr(ItMatDrvInfoPtrList shaderIt);
 	void					removeGPUPrgDrvInfoPtr(ItGPUPrgDrvInfoPtrList gpuPrgDrvInfoIt);
+	void					removeUBDrvInfoPtr(ItUBDrvInfoPtrList ubDrvInfoIt);
 
 private:
 	bool					_StaticMemoryToVRAM;

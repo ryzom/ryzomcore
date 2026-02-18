@@ -162,6 +162,8 @@ CScene::CScene(bool bSmallScene) : LightTrav(bSmallScene)
 	_AsyncTextureManager= NULL;
 
 	_NumRender = 0;
+	_FrameId = 0;
+	_LastRenderFrameId = 0;
 
 	_MaxSkeletonsInNotCLodForm= 20;
 
@@ -196,6 +198,7 @@ CScene::CScene(bool bSmallScene) : LightTrav(bSmallScene)
 	//_WaterEnvMap = new CTextureCube;
 
 	_WaterEnvMap = NULL;
+	_ForceWaterEnvMap = false;
 
 	_GlobalSystemTime= 0.0;
 
@@ -394,8 +397,9 @@ void	CScene::endPartRender(bool keepTrav)
 	drv->activePixelProgram(NULL);
 	drv->activeGeometryProgram(NULL);
 
-	// Ensure nothing animates on subsequent renders
-	_EllapsedTime = 0.f;
+	// Ensure nothing animates on subsequent renders (but keep for stereo second eye)
+	if (!keepTrav)
+		_EllapsedTime = 0.f;
 
 	/*
 	uint64 total = PSStatsRegisterPSModelObserver +
@@ -580,12 +584,15 @@ void	CScene::renderPart(UScene::TRenderPart rp, bool	doHrcPass, bool doTrav, boo
 	if (_RenderedPart == UScene::RenderNothing)
 	{
 		RenderTrav.clearWaterModelList();
+		_FirstFlare = NULL;
 
-		if (doTrav)
+		// Update system time once per real frame
+		if (_FrameId != _LastRenderFrameId)
 		{
+			_LastRenderFrameId = _FrameId;
+
 			// update water envmap
 			//updateWaterEnvmap();
-			_FirstFlare = NULL;
 
 			double fNewGlobalSystemTime = NLMISC::CTime::ticksToSecond(NLMISC::CTime::getPerformanceTime());
 			if(_GlobalSystemTime==0)
@@ -640,14 +647,11 @@ void	CScene::renderPart(UScene::TRenderPart rp, bool	doHrcPass, bool doTrav, boo
 		// loadBalance
 		LoadBalancingTrav.traverse();
 
-		if (doTrav)
+		// Animate particles once per frame (_RequestParticlesAnimate is set in animate(), cleared after use)
+		if (_RequestParticlesAnimate)
 		{
-			//
-			if (_RequestParticlesAnimate)
-			{
-				_ParticleSystemManager.processAnimate(_EllapsedTime); // deals with permanently animated particle systems
-				_RequestParticlesAnimate = false;
-			}
+			_ParticleSystemManager.processAnimate(_EllapsedTime);
+			_RequestParticlesAnimate = false;
 		}
 
 		// Light
@@ -665,25 +669,18 @@ void	CScene::renderPart(UScene::TRenderPart rp, bool	doHrcPass, bool doTrav, boo
 	// render flare
 	if (rp & UScene::RenderFlare)
 	{
-		if (doTrav)
+		if (_FirstFlare)
 		{
-			if (_FirstFlare)
+			IDriver *drv = getDriver();
+			CFlareModel::updateOcclusionQueryBegin(drv);
+			CFlareModel	*currFlare = _FirstFlare;
+			do
 			{
-				IDriver *drv = getDriver();
-				CFlareModel::updateOcclusionQueryBegin(drv);
-				CFlareModel	*currFlare = _FirstFlare;
-				do
-				{
-					currFlare->updateOcclusionQuery(drv);
-					currFlare = currFlare->Next;
-				}
-				while(currFlare);
-				CFlareModel::updateOcclusionQueryEnd(drv);
+				currFlare->updateOcclusionQuery(drv);
+				currFlare = currFlare->Next;
 			}
-		}
-		else
-		{
-			_FirstFlare = NULL;
+			while(currFlare);
+			CFlareModel::updateOcclusionQueryEnd(drv);
 		}
 	}
 	_RenderedPart = (UScene::TRenderPart) (_RenderedPart | rp);
@@ -859,6 +856,8 @@ void CScene::deleteInstance(CTransformShape *pTrfmShp)
 // ***************************************************************************
 void CScene::animate( TGlobalAnimationTime atTime )
 {
+	++_FrameId;
+
 	// todo hulud remove
 	if (_FirstAnimateCall)
 	{

@@ -50,7 +50,7 @@ CBufNetBase::CBufNetBase( bool isDataAvailablePipeSelfManaged ) :
 CBufNetBase::CBufNetBase() :
 #endif
 	_RecvFifo("CBufNetBase::_RecvFifo"),
-	_DisconnectionCallback( NULL ),
+	_DisconnectionCallback(),
 	_DisconnectionCbArg( NULL ),
 	_MaxExpectedBlockSize( DefaultMaxExpectedBlockSize ),
 	_MaxSentBlockSize( DefaultMaxSentBlockSize ),

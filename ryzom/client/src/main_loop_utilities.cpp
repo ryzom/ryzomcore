@@ -64,15 +64,14 @@ void updateFromClientCfg()
 	{
 		nldebug("Apply VR device change");
 		// detach display mode
-		if (StereoDisplay && StereoDisplayAttached)
+		if (StereoDisplayAttached)
 			StereoDisplay->detachFromDisplay();
 		StereoDisplayAttached = false;
 		// re-init
 		releaseStereoDisplayDevice();
 		initStereoDisplayDevice();
 		// try attach display mode
-		if (StereoDisplay)
-			StereoDisplayAttached = StereoDisplay->attachToDisplay();
+		StereoDisplayAttached = StereoDisplay->attachToDisplay();
 		// set latest config display mode if not attached
 		if (!StereoDisplayAttached)
 			setVideoMode(UDriver::CMode(ClientCfg.Width, ClientCfg.Height, (uint8)ClientCfg.Depth,

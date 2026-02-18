@@ -641,6 +641,9 @@ public:
 	  * Should be called at the beginning of the frame before anything is rendered.
 	  */
 	virtual void		  updateWaterEnvMaps(TGlobalAnimationTime time) = 0;
+	/// Force all water surfaces in the scene to use the scene water envmap
+	virtual void		  setForceWaterEnvMap(bool force) = 0;
+	virtual bool		  getForceWaterEnvMap() const = 0;
 	// @}
 };
 

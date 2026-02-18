@@ -35,6 +35,8 @@ void CDriverD3D::setUniform4f(TProgram program, uint index, float f0, float f1, 
 {
 	H_AUTO_D3D(CDriverD3D_setUniform4f);
 
+	if (index == ~0u) return; // getUniformIndex returns ~0 when uniform not found
+
 	const float tabl[4] = { f0, f1, f2, f3 };
 	switch (program)
 	{
@@ -56,6 +58,8 @@ void CDriverD3D::setUniform4f(TProgram program, uint index, float f0, float f1, 
 void CDriverD3D::setUniform4fv(TProgram program, uint index, size_t num, const float *src)
 {
 	H_AUTO_D3D(CDriverD3D_setUniform4fv);
+
+	if (index == ~0u) return; // getUniformIndex returns ~0 when uniform not found
 
 	switch (program)
 	{

@@ -74,8 +74,8 @@ protected:
 	virtual void draw(bool opaque);
 	virtual CPSLocated *getColorOwner(void) { return _Owner; }
 	void	init(void);
-	static CVertexBuffer _DotVb;
-	static CVertexBuffer _DotVbColor;
+	static CVertexBuffer _DotVb; // STATIC GPU RESOURCE: Blocks multiple driver instances
+	static CVertexBuffer _DotVbColor; // STATIC GPU RESOURCE: Blocks multiple driver instances
 
 	/// update the material and the vb so that they match the color scheme
 	virtual void updateMatAndVbForColor(void);

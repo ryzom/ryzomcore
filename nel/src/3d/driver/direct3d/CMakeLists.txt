@@ -1,5 +1,32 @@
 FILE(GLOB SRC *.cpp *.h *.def *.rc)
 
+SOURCE_GROUP("" FILES
+		driver_direct3d.cpp
+		driver_direct3d.h
+		driver_direct3d.def
+		stddirect3d.cpp
+		stddirect3d.h
+		resources.rc)
+
+SOURCE_GROUP(rendering FILES
+		driver_direct3d_render.cpp
+		driver_direct3d_material.cpp
+		driver_direct3d_texture.cpp
+		driver_direct3d_light.cpp
+		driver_direct3d_matrix.cpp
+		driver_direct3d_uniform.cpp
+		driver_direct3d_shader.cpp
+		driver_direct3d_index.cpp
+		driver_direct3d_profile.cpp
+		driver_direct3d_inputs.cpp)
+
+SOURCE_GROUP(program FILES
+		driver_direct3d_vertex_program.cpp
+		driver_direct3d_pixel_program.cpp)
+
+SOURCE_GROUP(vertex FILES
+		driver_direct3d_vertex.cpp)
+
 NL_TARGET_DRIVER(nel_drv_direct3d_win ${SRC})
 
 TARGET_INCLUDE_DIRECTORIES(nel_drv_direct3d_win BEFORE PRIVATE ${DXSDK_INCLUDE_DIR})

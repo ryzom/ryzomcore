@@ -353,7 +353,7 @@ static void DrawPoly2D(CVertexBuffer &vb, IDriver *drv, const NLMISC::CMatrix &m
 			vba.setValueFloat2Ex (WATER_VB_DX,  k, 0, 0);
 		}
 	}
-	static CIndexBuffer ib;
+	static CIndexBuffer ib; // STATIC GPU RESOURCE: Blocks multiple driver instances
 	ib.setNumIndexes(3 * p.Vertices.size());
 	{
 		CIndexBufferReadWrite ibaWrite;
@@ -921,7 +921,7 @@ void CWaterModel::setupMaterialNVertexShader(IDriver *drv, CWaterShape *shape, c
 	CScene *scene = getOwnerScene();
 	if (!above && shape->_EnvMap[1])
 	{
-		if (shape->_UsesSceneWaterEnvMap[1])
+		if (shape->_UsesSceneWaterEnvMap[1] || scene->getForceWaterEnvMap())
 		{
 			if (scene->getWaterEnvMap())
 			{
@@ -939,7 +939,7 @@ void CWaterModel::setupMaterialNVertexShader(IDriver *drv, CWaterShape *shape, c
 	}
 	else
 	{
-		if (shape->_UsesSceneWaterEnvMap[0])
+		if (shape->_UsesSceneWaterEnvMap[0] || scene->getForceWaterEnvMap())
 		{
 			if (scene->getWaterEnvMap())
 			{
@@ -1015,7 +1015,7 @@ void CWaterModel::setupSimpleRender(CWaterShape *shape, const NLMISC::CVector &o
 	CScene *scene = getOwnerScene();
 	if (!above && shape->_EnvMap[1])
 	{
-		if (shape->_UsesSceneWaterEnvMap[1])
+		if (shape->_UsesSceneWaterEnvMap[1] || scene->getForceWaterEnvMap())
 		{
 			if (scene->getWaterEnvMap())
 			{
@@ -1033,7 +1033,7 @@ void CWaterModel::setupSimpleRender(CWaterShape *shape, const NLMISC::CVector &o
 	}
 	else
 	{
-		if (shape->_UsesSceneWaterEnvMap[0])
+		if (shape->_UsesSceneWaterEnvMap[0] || scene->getForceWaterEnvMap())
 		{
 			if (scene->getWaterEnvMap())
 			{
@@ -1627,7 +1627,7 @@ void	CWaterModel::traverseRender()
 	{
 		// not supported, simple uniform render
 		drv->setupModelMatrix(getWorldMatrix());
-		static CMaterial waterMat;
+		static CMaterial waterMat; // STATIC GPU RESOURCE: Blocks multiple driver instances
 		static bool initDone = false;
 		if (!initDone)
 		{
@@ -1800,7 +1800,7 @@ void CWaterModel::doSimpleRender(IDriver *drv)
 	}
 	//
 	static std::vector<CSimpleVertexInfo> verts;
-	static CIndexBuffer indices;
+	static CIndexBuffer indices; // STATIC GPU RESOURCE: Blocks multiple driver instances
 	//
 	NLMISC::CPolygon2D &poly = shape->_Poly;
 	uint numVerts = poly.Vertices.size();
@@ -1965,7 +1965,7 @@ void CWaterModel::debugClearClippedPoly()
 //							wave maker implementation
 //=======================================================================================
 
-CWaveMakerModel::CWaveMakerModel() : _Time(0)
+CWaveMakerModel::CWaveMakerModel() : _Time(0), _LastFrameId(0)
 {
 	// AnimDetail behavior: Must be traversed in AnimDetail, even if no channel mixer registered
 	CTransform::setIsForceAnimDetail(true);
@@ -2004,8 +2004,12 @@ void	CWaveMakerModel::traverseAnimDetail()
 	const CVector2f pos2d(worldPos.x, worldPos.y);
 	/// get the water height map
 	CWaterHeightMap &whm = GetWaterPoolManager().getPoolByID(wms->_PoolID);
-	// get the time delta
-	const TAnimationTime deltaT  = std::min(getOwnerScene()->getEllapsedTime(), (TAnimationTime) whm.getPropagationTime());
+	// get the time delta. Only accumulate once per real frame (avoid double in stereo).
+	CScene *ownerScene = getOwnerScene();
+	if (ownerScene->getFrameId() == _LastFrameId)
+		return;
+	_LastFrameId = ownerScene->getFrameId();
+	const TAnimationTime deltaT  = std::min(ownerScene->getEllapsedTime(), (TAnimationTime) whm.getPropagationTime());
 	_Time += deltaT;
 	if (!wms->_ImpulsionMode)
 	{

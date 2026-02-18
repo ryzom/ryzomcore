@@ -1487,9 +1487,8 @@ void		CDriverGL::setupGlArraysForEXTVertexShader(CVertexBufferInfo &vb)
 						nglVariantArrayObjectATI(drvInfo->Variants[CDriverGL::EVSPaletteSkinVariant], GLType[type], vb.VertexSize, vb.VertexObjectId, (ptrdiff_t) vb.ValuePtr[CVertexBuffer::PaletteSkin]);
 					}
 					break;
-					case CVertexBuffer::Empty: // empty
-						nlstop;
-						break;
+					case CVertexBuffer::Tangent: // ignored in legacy GL
+					break;
 					case CVertexBuffer::TexCoord0:
 					case CVertexBuffer::TexCoord1:
 					case CVertexBuffer::TexCoord2:
@@ -1566,8 +1565,7 @@ void		CDriverGL::setupGlArraysForEXTVertexShader(CVertexBufferInfo &vb)
 #endif
 					}
 					break;
-					case CVertexBuffer::Empty: // empty
-						nlstop;
+					case CVertexBuffer::Tangent: // ignored in legacy GL
 					break;
 					case CVertexBuffer::TexCoord0:
 					case CVertexBuffer::TexCoord1:

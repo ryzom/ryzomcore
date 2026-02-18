@@ -55,7 +55,7 @@
 #include "nel/3d/u_camera.h"
 #include "nel/3d/u_driver.h"
 #include "nel/3d/material.h"
-#include "nel/3d/texture_bloom.h"
+#include "nel/3d/texture_offscreen.h"
 #include "nel/3d/texture_user.h"
 #include "nel/3d/driver_user.h"
 #include "nel/3d/u_texture.h"
@@ -686,7 +686,12 @@ bool CStereoOVR::wantClear()
 	}
 	return m_Driver->getPolygonMode() != UDriver::Filled;
 }
-	
+
+bool CStereoOVR::wantSceneReflections()
+{
+	return false;
+}
+
 bool CStereoOVR::wantScene()
 {
 	switch (m_Stage)
@@ -756,6 +761,11 @@ bool CStereoOVR::isSceneLast()
 	return m_Driver->getPolygonMode() != UDriver::Filled;
 }
 
+uint CStereoOVR::getFlareContext()
+{
+	return (m_Stage % 2) ? 0 : 2;
+}
+
 /// Returns non-NULL if a new render target was set
 bool CStereoOVR::beginRenderTarget()
 {
@@ -768,7 +778,7 @@ bool CStereoOVR::beginRenderTarget()
 		nlassert(!m_GUITexture);
 		uint32 width, height;
 		m_Driver->getWindowSize(width, height);
-		m_GUITexture = m_Driver->getRenderTargetManager().getRenderTarget(width, height, true, UTexture::RGBA8888);
+		m_GUITexture = m_Driver->getRenderTargetManager().getRenderTarget(width, height, false, UTexture::RGBA8888);
 		static_cast<CDriverUser *>(m_Driver)->setRenderTarget(*m_GUITexture);
 		m_Driver->clearBuffers(NLMISC::CRGBA(0, 0, 0, 0));
 		return true;
@@ -892,9 +902,9 @@ void CStereoOVR::renderGUI()
 		quadUV.Uv3 = CUV(0.f,  1.f);
 		
 		const uint nbQuads = 128;
-		static CVertexBuffer vb;
-		static CIndexBuffer ib;
-		
+		static CVertexBuffer vb; // STATIC GPU RESOURCE: Blocks multiple driver instances
+		static CIndexBuffer ib; // STATIC GPU RESOURCE: Blocks multiple driver instances
+
 		vb.setVertexFormat(CVertexBuffer::PositionFlag | CVertexBuffer::TexCoord0Flag);
 		vb.setPreferredMemory(CVertexBuffer::RAMVolatile, false);
 		vb.setNumVertices((nbQuads + 1) * 2);

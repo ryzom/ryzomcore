@@ -93,6 +93,7 @@
 // Game Config
 #include "nel/gui/dbgroup_combo_box.h"
 #include "nel/gui/ctrl_button.h"
+#include "nel/gui/ctrl_scroll.h"
 #include "../global.h"
 
 #include "nel/sound/u_audio_mixer.h"
@@ -2986,6 +2987,11 @@ static vector<UDriver::CMode> VideoModes;
 #define GAME_CONFIG_ANISOTROPIC_COMBO	"ui:interface:game_config:content:fx:anisotropic_gr:anisotropic"
 #define GAME_CONFIG_ANISOTROPIC_DB		"UI:TEMP:ANISOTROPIC"
 
+// Monitor color properties (gamma, contrast, luminosity)
+#define GAME_CONFIG_CONTRAST_SCROLL		"ui:interface:game_config:content:general:con:c"
+#define GAME_CONFIG_LUMINOSITY_SCROLL	"ui:interface:game_config:content:general:lum:c"
+#define GAME_CONFIG_GAMMA_SCROLL		"ui:interface:game_config:content:general:gam:c"
+
 // Sound driver
 #define GAME_CONFIG_SOUND_DRIVER_COMBO	"ui:interface:game_config:content:sound:driver_gr:driver"
 #define GAME_CONFIG_SOUND_DRIVER_DB		"UI:TEMP:SOUND_DRIVER"
@@ -3213,6 +3219,18 @@ public:
 		}
 
 		updateVRDevicesComboUI(ClientCfg.VREnable);
+
+		// Gray out gamma/contrast/luminosity if unsupported by driver
+		{
+			bool gammaFrozen = !(Driver && Driver->supportMonitorColorProperties());
+			CCtrlScroll *pScroll;
+			pScroll = dynamic_cast<CCtrlScroll *>(CWidgetManager::getInstance()->getElementFromId(GAME_CONFIG_CONTRAST_SCROLL));
+			if (pScroll) pScroll->setFrozen(gammaFrozen);
+			pScroll = dynamic_cast<CCtrlScroll *>(CWidgetManager::getInstance()->getElementFromId(GAME_CONFIG_LUMINOSITY_SCROLL));
+			if (pScroll) pScroll->setFrozen(gammaFrozen);
+			pScroll = dynamic_cast<CCtrlScroll *>(CWidgetManager::getInstance()->getElementFromId(GAME_CONFIG_GAMMA_SCROLL));
+			if (pScroll) pScroll->setFrozen(gammaFrozen);
+		}
 
 		// init the mode in DB
 		TTextureMode	texMode;

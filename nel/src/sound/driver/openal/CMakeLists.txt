@@ -6,6 +6,14 @@ ELSE()
   SET(NLDRV_AL_LIB "nel_drv_openal")
 ENDIF()
 
+SOURCE_GROUP("" FILES
+		sound_driver_al.cpp
+		sound_driver_al.h
+		stdopenal.cpp
+		stdopenal.h
+		driver_openal.def
+		resources.rc)
+
 SOURCE_GROUP(efx FILES
         effect_al.cpp
         effect_al.h)
@@ -15,10 +23,12 @@ SOURCE_GROUP(sfx FILES
         buffer_al.h
         listener_al.cpp
         listener_al.h
-        music_channel_al.cpp
-        music_channel_al.h
         source_al.cpp
         source_al.h)
+
+SOURCE_GROUP(music FILES
+        music_channel_al.cpp
+        music_channel_al.h)
 
 SOURCE_GROUP(util FILES
         ext_al.cpp

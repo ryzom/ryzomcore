@@ -2,6 +2,7 @@
 
 set(_@PROJECT_NAME@_supported_components @package_components@)
 set(_@PROJECT_NAME@_gui_dependencies @package_gui_dependencies@)
+set(_@PROJECT_NAME@_sound_dependencies @package_sound_dependencies@)
 
 foreach(_comp ${@PROJECT_NAME@_FIND_COMPONENTS})
   if (NOT _comp IN_LIST _@PROJECT_NAME@_supported_components)
@@ -19,12 +20,11 @@ foreach(_dependency IN ITEMS @package_required_dependencies@)
 endforeach()
 
 
-foreach(_comp ${@PROJECT_NAME@_FIND_COMPONENTS})
-  if (@PROJECT_NAME@_${_comp}_FOUND)
-    foreach(_dependency IN ITEMS ${_@PROJECT_NAME@_${_comp}_dependencies})
-        find_dependency(${_dependency} REQUIRED)
-    endforeach()
-  endif()
+# Dependencies for components
+foreach(_comp ${_@PROJECT_NAME@_supported_components})
+  foreach(_dependency IN ITEMS ${_@PROJECT_NAME@_${_comp}_dependencies})
+    find_dependency(${_dependency} REQUIRED)
+  endforeach()
 endforeach()
 
 include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@-targets.cmake")

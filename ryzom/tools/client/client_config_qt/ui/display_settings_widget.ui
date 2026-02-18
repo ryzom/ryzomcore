@@ -42,6 +42,13 @@
        </widget>
       </item>
       <item>
+       <widget class="QRadioButton" name="opengl3RadioButton">
+        <property name="text">
+         <string>OpenGL3</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QRadioButton" name="direct3dRadioButton">
         <property name="text">
          <string>Direct3D</string>

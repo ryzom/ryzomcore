@@ -1274,28 +1274,29 @@ bool CDriverD3D::setupMaterial(CMaterial &mat)
 				}
 				else
 				{
-					// setup the constant
+					// ps_2_0 constant layout: c[n] = {scale, bias, 0, 0}
+					// where scale = 2*factor, bias = -factor
+					// Matches Cg-compiled water_fp.cg: mad r0.xy, r0, c0.x, c0.y
 					if (mat.getTexture(0) && mat.getTexture(0)->isBumpMap())
 					{
 						float factor = 0.25f * NLMISC::safe_cast<CTextureBump *>(mat.getTexture(0))->getNormalizationFactor();
-						float bmScale[4] = { -1.f * factor, -1.f * factor, 2.f * factor, 0.f };
+						float bmScale[4] = { 2.f * factor, -1.f * factor, 0.f, 0.f };
 						setShaderParam(pShader, 0, bmScale);
 					}
 					else
 					{
-						float bmScale[4] = { -1.f, -1.f, 2.f, 0.f };
+						float bmScale[4] = { 2.f, -1.f, 0.f, 0.f };
 						setShaderParam(pShader, 0, bmScale);
 					}
-					// setup the constant
 					if (mat.getTexture(1) && mat.getTexture(1)->isBumpMap())
 					{
 						float factor = NLMISC::safe_cast<CTextureBump *>(mat.getTexture(1))->getNormalizationFactor();
-						float bmScale[4] = { -1.f * factor, -1.f * factor, 2.f * factor, 0.f };
+						float bmScale[4] = { 2.f * factor, -1.f * factor, 0.f, 0.f };
 						setShaderParam(pShader, 1, bmScale);
 					}
 					else
 					{
-						float bmScale[4] = { -1.f, -1.f, 2.f, 0.f };
+						float bmScale[4] = { 2.f, -1.f, 0.f, 0.f };
 						setShaderParam(pShader, 1, bmScale);
 					}
 				}
