@@ -1545,48 +1545,36 @@ bool CFrontEndService::update()
 	uint32 pendingCookie = CFEReceiveTask::PendingCookieReceived;
 	bool commsFailure = pendingCookie != 0 && (now - pendingCookie > DelayBeforeUPDAlert);
 
-	if (commsFailure)
+	// Self-recovery: when comms failure is detected, rebind UDP socket and
+	// restart QUIC listener. Only trigger recovery once per failure episode.
 	{
-		// raise the alert
-		addStatusTag("CheckUDPComm");
+		static bool recoveryPending = false;
 
-		// notify the WS to stop routing new clients to this FES
-		if (_UDPAlive)
+		if (commsFailure)
 		{
-			_UDPAlive = false;
-			CMessage	msgout("FS_UDP_ALIVE");
-			bool		alive = false;
-			msgout.serial(alive);
-			CUnifiedNetwork::getInstance()->send("WS", msgout);
-			nlwarning("UDP communication failure detected, notified WS to stop routing clients");
+			addStatusTag("CheckUDPComm");
 
-			// Request the receive task to rebind its socket to recover
-			// from persistent kernel socket state corruption
-			_ReceiveSub.receiveTask()->requireRebind();
-
-			// Also restart the QUIC listener in case it has failed
-			CQuicTransceiver *quic = _ReceiveSub.quicTransceiver();
-			if (quic && quic->isConfigEnabled() && !quic->listening())
+			if (!recoveryPending)
 			{
-				quic->restart();
+				recoveryPending = true;
+				nlwarning("UDP communication failure detected, attempting self-recovery");
+
+				// Request the receive task to rebind its socket to recover
+				// from persistent kernel socket state corruption
+				_ReceiveSub.receiveTask()->requireRebind();
+
+				// Also restart the QUIC listener in case it has failed
+				CQuicTransceiver *quic = _ReceiveSub.quicTransceiver();
+				if (quic && quic->isConfigEnabled() && !quic->listening())
+				{
+					quic->restart();
+				}
 			}
 		}
-	}
-
-	if (!commsFailure)
-	{
-		// clear the UDP alert tag (if set)
-		removeStatusTag("CheckUDPComm");
-
-		// notify the WS to resume routing new clients to this FES
-		if (!_UDPAlive)
+		else
 		{
-			_UDPAlive = true;
-			CMessage	msgout("FS_UDP_ALIVE");
-			bool		alive = true;
-			msgout.serial(alive);
-			CUnifiedNetwork::getInstance()->send("WS", msgout);
-			nlinfo("UDP communication restored, notified WS to resume routing clients");
+			removeStatusTag("CheckUDPComm");
+			recoveryPending = false;
 		}
 	}
 
