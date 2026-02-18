@@ -55,9 +55,9 @@ extern CGenericXmlMsgHeaderManager GenericXmlMsgHeaderMngr;
 /*
  * Init
  */
-void CFeSendSub::init( NLNET::CUdpSock *datasock, THostMap *clientmap, CHistory *history, CPrioSub *priosub )
+void CFeSendSub::init( NLNET::CUdpSock **datasock, THostMap *clientmap, CHistory *history, CPrioSub *priosub )
 {
-	nlassert( datasock && history );
+	nlassert( datasock && *datasock && history );
 
 	_DataSock = datasock;
 
@@ -381,7 +381,7 @@ void	CFeSendSub::flushMessages()
 		{
 			try
 			{
-				(*isb).sendOutBox( _DataSock );
+				(*isb).sendOutBox( *_DataSock );
 				++_SendCounter;
 				//nldebug( "%u: SENDING NOW %u bytes to %s", CTickEventHandler::getGameCycle(), (*isb).OutBox.length(), (*isb).DestAddress.asString().c_str() );
 			}

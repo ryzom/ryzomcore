@@ -106,7 +106,7 @@ public:
 		{}
 
 	/// Init
-	void	init( NLNET::CUdpSock *datasock, THostMap *clientmap, CHistory *history, CPrioSub *priosub );
+	void	init( NLNET::CUdpSock **datasock, THostMap *clientmap, CHistory *history, CPrioSub *priosub );
 
 	/// Update
 	void	update();
@@ -190,8 +190,8 @@ public:
 
 private:
 
-	/// Socket access
-	NLNET::CUdpSock			*_DataSock;
+	/// Socket access (pointer-to-pointer so it always reflects the current socket after rebind)
+	NLNET::CUdpSock			**_DataSock;
 
 	/** Client id container (insert()/erase() are done by the receive subsystem who manages the clients).
 	 * For a vector, there are as many elements as possibles clients, non-attributed elements are set to NULL.

@@ -1311,7 +1311,7 @@ void CFrontEndService::init()
 #else
 		nlinfo( " Full-frequency mode" );
 #endif
-		_SendSub.init( _ReceiveSub.dataSock(), &_ReceiveSub.clientMap(), &_History, &PrioSub );
+		_SendSub.init( &_ReceiveSub.receiveTask()->DataSock, &_ReceiveSub.clientMap(), &_History, &PrioSub );
 		installConfigVar( ConfigFile, "ClientBandwidth", cfcbClientBandwidth );
 		installConfigVar( ConfigFile, "TotalBandwidth", cfcbTotalBandwidth );
 
