@@ -206,10 +206,22 @@ void CFEReceiveTask::run()
 		}
 		catch (const ESocket&)
 		{
-			// This can be triggered by SO_RCVTIMEO timeout (EAGAIN/EWOULDBLOCK)
-			// or by a real socket error. In both cases, just continue the loop.
-			// The SO_RCVTIMEO ensures we don't block forever, allowing the thread
-			// to check for exit/rebind requests.
+			// Originally, this catch block generated a RemoveClient event:
+			//   _ReceivedMessage.setTypeEvent( TReceivedMessage::RemoveClient );
+			//   _DatagramLength = 0;
+			// That was intended to disconnect a client whose address caused the
+			// error (e.g. ICMP "port unreachable"). However, on an unconnected
+			// UDP socket (which serves all clients), recvfrom() errors don't
+			// carry a valid source address — AddrFrom retains the stale value
+			// from the previous successful receive. The RemoveClient event would
+			// disconnect the wrong client. With SO_RCVTIMEO, the timeout
+			// (EAGAIN) also triggers this path every second, which would flood
+			// the queue with spurious disconnect events.
+			//
+			// Instead, we just continue the loop. The SO_RCVTIMEO ensures we
+			// periodically return here to check for exit/rebind requests, and
+			// the comms failure watchdog (PendingCookieReceived) handles the
+			// case where the socket is persistently broken.
 			continue;
 		}
 
