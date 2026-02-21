@@ -81,8 +81,7 @@ jobs:
           libxrandr-dev \
           libxrender-dev \
           libxxf86vm-dev \
-          libmsquic \
-          gcc-12 g++-12
+          libmsquic
         wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic.h
         wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic_posix.h
         wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/quic_sal_stub.h
