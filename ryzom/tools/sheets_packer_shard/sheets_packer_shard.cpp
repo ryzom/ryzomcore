@@ -48,14 +48,7 @@ namespace {
 
 } /* anonymous namespace */
 
-// EGS
-NLMISC::CVariable<bool> EGSLight("egs","EGSLight", "Load EGS with a minimal set of feature loaded", false, 0, true);
-NLMISC::CVariable<bool> LoadOutposts("egs", "LoadOutposts", "If false outposts won't be loaded", true, 0, true );
 static std::string s_WriteDirectory;
-std::string writeDirectory()
-{
-	return s_WriteDirectory;
-}
 
 ////////////////////////////////////////////////////////////////////////
 // note: *.packed_sheets files are placed in <build_packed_sheets>    //
@@ -155,6 +148,7 @@ int main(int nNbArg, char **ppArgs)
 
 	// EGS
 	{
+		CSheets::setWriteDirectory(s_WriteDirectory);
 		CSheets::init();
 	}
 

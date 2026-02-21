@@ -23,7 +23,6 @@
 
 #include "egs_sheets/egs_static_harvestable.h"
 #include "egs_sheets/egs_sheets.h"
-#include "../egs_variables.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -31,26 +30,6 @@ using namespace NLGEORGES;
 
 const uint8 NbRawMaterials = 10;
 
-
-const float QuarteringForcedQuantities [6] = { 0, 1.0f, 2.0f, 3.0f, 4.0f, 0.5f };
-
-#ifndef NO_EGS_VARS
-const float *QuarteringQuantityByVariable [NBRMQuantityVariables] =
-{
-	&QuarteringQuantityAverageForCraftHerbivore.get(),
-	&QuarteringQuantityAverageForCraftCarnivore.get(),
-	&QuarteringQuantityAverageForBoss5.get(),
-	&QuarteringQuantityAverageForBoss7.get(),
-	&QuarteringQuantityForInvasion5.get(),
-	&QuarteringQuantityForInvasion7.get(),
-	&QuarteringForcedQuantities[0],
-	&QuarteringForcedQuantities[1],
-	&QuarteringForcedQuantities[2],
-	&QuarteringForcedQuantities[3],
-	&QuarteringForcedQuantities[4],
-	&QuarteringForcedQuantities[5]
-};
-#endif
 
 CVariable<bool> VerboseQuartering( "egs", "VerboseQuartering", "", false, 0, true );
 

@@ -27,7 +27,7 @@ using namespace NLMISC;
 using namespace NLGEORGES;
 using namespace std;
 
-extern CVariable<bool> EGSLight;
+#include "egs_sheets/egs_sheets.h"
 
 NL_INSTANCE_COUNTER_IMPL(CStaticEncyclo);
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -123,7 +123,7 @@ void CStaticEncyclo::init()
 {
 	_OrderedAlbums.clear();
 
-	if (EGSLight)
+	if (CSheets::getEGSLight())
 		return;
 
 	// Get the higher album number

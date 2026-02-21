@@ -37,7 +37,7 @@
 
 #include "game_share/visual_slot_manager.h"
 
-#include	"ai_script_comp.h"
+#include	"ai_script_comp_base.h"
 
 #include "game_share/people_pd.h"
 
@@ -494,12 +494,14 @@ private:
 	
 	std::string _BotName;
 	
+protected:
 	TScriptCompList _ScriptCompList;
 	
 	TScriptCompList _UpdateScriptList;
 	TScriptCompList _DeathScriptList;
 	TScriptCompList _BirthScriptList;
 	
+private:
 	// Character Race
 	EGSPD::CPeople::TPeople _Race;
 	
@@ -607,8 +609,8 @@ public:
 	//@}
 	
 public:
-	void readGeorges(NLMISC::CSmartPtr<NLGEORGES::UForm> const& form, NLMISC::CSheetId const& sheetId);
-	void serial(NLMISC::IStream& s);
+	virtual void readGeorges(NLMISC::CSmartPtr<NLGEORGES::UForm> const& form, NLMISC::CSheetId const& sheetId);
+	virtual void serial(NLMISC::IStream& s);
 	
 	uint32 minFightDist() const { return MinFightDist(); }
 	void calcFightAndVisualValues(std::string* left = NULL, std::string* right = NULL);
@@ -621,8 +623,12 @@ public:
 	void addActionConfig(std::string const& sheetIdName, NLMISC::CDbgPtr<CActionList>& actionConfigList);
 	bool addActionConfig(NLMISC::CSheetId const& sheetId, NLMISC::CDbgPtr<CActionList>& actionConfigList);
 	void removed() { }
-	void registerScriptComp(CFightScriptComp* scriptComp);
 	
+protected:
+	/// Called for each script comp string read from sheets. Override to create script comps.
+	virtual void onScriptComp(const std::string &scriptCompStr) { }
+	
+public:
 	TGroupPropertiesLine _GroupPropertiesTbl;
 	
 private:
@@ -688,11 +694,12 @@ private:
 public:
 	static CSheets* getInstance();
 	static void destroyInstance();
+	static void setInstance(CSheets* instance);
 	
 public:
 	// load the creature data from the george files
 	void init();
-	void packSheets(const std::string &writeFilesDirectoryName);
+	virtual void packSheets(const std::string &writeFilesDirectoryName);
 	
 	// display the creature data for all known creature types
 	void display(NLMISC::CSmartPtr<CStringWriter> stringWriter, uint infoSelect = 0);
@@ -710,14 +717,16 @@ public:
 	
 	uint32 playerGroupIndex() { return _PlayerGroupIndex; }
 	
-private:
+	virtual ~CSheets() { }
+	
+protected:
 	friend class CCreature;
 	
-private:
+protected:
 	// prohibit cnstructor as this is a singleton
 	CSheets();
 	
-private:
+protected:
 	CDefaultGroupProperties _DefaultGroupProp;
 	
 	std::map<NLMISC::CSheetId, CCreaturePtr>	_Sheets;

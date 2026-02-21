@@ -153,6 +153,7 @@ void foo()
 
 extern void cbClientReady(NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId);
 extern CVariable<bool> EGSLight;
+extern CVariable<bool> LoadOutposts;
 
 // Local use variable
 CVariable<uint32> MonkeyLoadEnable("egs","MonkeyLoadEnable","1 enabling fixed sequence monkey simulation, 2 enabling random sequence monkey simulation, 3 restart Monkey 2/ 0 disabling the Monkey Load simulation", 0, 0, true);
@@ -1487,6 +1488,9 @@ nlassert(nodeLeaf->getType() == ICDBStructNode::TEXT);
 	CDynamicSheetManager::getInstance();
 
 	// Init Sheets manager
+	CSheets::setWriteDirectory(IService::getInstance()->WriteFilesDirectory.toString());
+	CSheets::setEGSLight(EGSLight.get());
+	CSheets::setLoadOutposts(LoadOutposts.get());
 	CSheets::init();
 	//CCharacter::initMountInventoryBulkMax(); // must be called after CSheets::init()
 	// Init item manager

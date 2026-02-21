@@ -37,6 +37,7 @@
 #include "aids_interface.h"
 #include "game_share/fame.h"
 #include "visual_properties_interface.h"
+#include "ai_sheets_creature.h"
 
 #include "ais_user_models.h"
 
@@ -208,6 +209,7 @@ void CAIService::init (void)
 	CAIKeywords::init();
 	CMirrors::init(cbTick, NULL, cbTickRelease);
 	CMessages::init();
+	AISHEETS::CSheetsAI::initInstance();
 	AISHEETS::CSheets::getInstance()->init();
 
 	// initialise the AI_SHARE library

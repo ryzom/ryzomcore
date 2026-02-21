@@ -32,8 +32,6 @@
 // georges
 #include "nel/georges/u_type.h"
 
-#include "game_item_manager/weapon_craft_parameters.h"
-
 #include "egs_sheets/egs_sheets.h"
 
 //--------------------
@@ -1909,121 +1907,6 @@ void CStaticItem::reloadSheet(const CStaticItem &o)
 	// set ptrs to NULL, to avoid destruct in dtor
 	const_cast<CStaticItem&>(o).clearPtrs(false);
 }
-
-#ifndef NO_EGS_VARS
-// ***************************************************************************
-float CStaticItem::getBaseWeight() const
-{
-	switch( Type )
-	{
-		// melee weapons
-	case ITEM_TYPE::DAGGER:
-		return CWeaponCraftParameters::DaggerWeight;
-	case ITEM_TYPE::SWORD:
-		return CWeaponCraftParameters::SwordWeight;
-	case ITEM_TYPE::MACE:
-		return CWeaponCraftParameters::MaceWeight;
-	case ITEM_TYPE::AXE:
-		return CWeaponCraftParameters::AxeWeight;
-	case ITEM_TYPE::SPEAR:
-		return CWeaponCraftParameters::SpearWeight;
-	case ITEM_TYPE::STAFF:
-		return CWeaponCraftParameters::StaffWeight;
-	case ITEM_TYPE::MAGICIAN_STAFF:
-		return CWeaponCraftParameters::MagicianStaffWeight;
-	case ITEM_TYPE::TWO_HAND_SWORD:
-		return CWeaponCraftParameters::TwoHandSwordWeight;
-	case ITEM_TYPE::TWO_HAND_AXE:
-		return CWeaponCraftParameters::TwoHandAxeWeight;
-	case ITEM_TYPE::PIKE:
-		return CWeaponCraftParameters::PikeWeight;
-	case ITEM_TYPE::TWO_HAND_MACE:
-		return CWeaponCraftParameters::TwoHandMaceWeight;
-	
-	// range weapon
-	case ITEM_TYPE::AUTOLAUCH:
-		return CWeaponCraftParameters::AutolauchWeight;
-	case ITEM_TYPE::BOWRIFLE:
-		return CWeaponCraftParameters::BowrifleWeight;
-	case ITEM_TYPE::LAUNCHER:
-		return CWeaponCraftParameters::LauncherWeight;
-	case ITEM_TYPE::PISTOL:
-		return CWeaponCraftParameters::PistolWeight;
-	case ITEM_TYPE::BOWPISTOL:
-		return CWeaponCraftParameters::BowpistolWeight;
-	case ITEM_TYPE::RIFLE:
-		return CWeaponCraftParameters::RifleWeight;
-	
-	// ammo
-	case ITEM_TYPE::AUTOLAUNCH_AMMO:
-		return CWeaponCraftParameters::AutolaunchAmmoWeight;
-	case ITEM_TYPE::BOWRIFLE_AMMO:
-		return CWeaponCraftParameters::BowrifleAmmoWeight;
-	case ITEM_TYPE::LAUNCHER_AMMO:
-		return CWeaponCraftParameters::LauncherAmmoWeight;
-	case ITEM_TYPE::PISTOL_AMMO:
-		return CWeaponCraftParameters::PistolAmmoWeight;
-	case ITEM_TYPE::BOWPISTOL_AMMO:
-		return CWeaponCraftParameters::BowpistolAmmoWeight;
-	case ITEM_TYPE::RIFLE_AMMO:
-		return CWeaponCraftParameters::RifleAmmoWeight;
-	
-	// armor and shield
-	case ITEM_TYPE::SHIELD:
-		return CWeaponCraftParameters::ShieldWeight;
-	case ITEM_TYPE::BUCKLER:
-		return CWeaponCraftParameters::BucklerWeight;
-	case ITEM_TYPE::LIGHT_BOOTS:
-		return CWeaponCraftParameters::LightBootsWeight;
-	case ITEM_TYPE::LIGHT_GLOVES:
-		return CWeaponCraftParameters::LightGlovesWeight;
-	case ITEM_TYPE::LIGHT_PANTS:
-		return CWeaponCraftParameters::LightPantsWeight;
-	case ITEM_TYPE::LIGHT_SLEEVES:
-		return CWeaponCraftParameters::LightSleevesWeight;
-	case ITEM_TYPE::LIGHT_VEST:
-		return CWeaponCraftParameters::LightVestWeight;
-	case ITEM_TYPE::MEDIUM_BOOTS:
-		return CWeaponCraftParameters::MediumBootsWeight;
-	case ITEM_TYPE::MEDIUM_GLOVES:
-		return CWeaponCraftParameters::MediumGlovesWeight;
-	case ITEM_TYPE::MEDIUM_PANTS:
-		return CWeaponCraftParameters::MediumPantsWeight;
-	case ITEM_TYPE::MEDIUM_SLEEVES:
-		return CWeaponCraftParameters::MediumSleevesWeight;
-	case ITEM_TYPE::MEDIUM_VEST:
-		return CWeaponCraftParameters::MediumVestWeight;
-	case ITEM_TYPE::HEAVY_BOOTS:
-		return CWeaponCraftParameters::HeavyBootsWeight;
-	case ITEM_TYPE::HEAVY_GLOVES:
-		return CWeaponCraftParameters::HeavyGlovesWeight;
-	case ITEM_TYPE::HEAVY_PANTS:
-		return CWeaponCraftParameters::HeavyPantsWeight;
-	case ITEM_TYPE::HEAVY_SLEEVES:
-		return CWeaponCraftParameters::HeavySleevesWeight;
-	case ITEM_TYPE::HEAVY_VEST:
-		return CWeaponCraftParameters::HeavyVestWeight;
-	case ITEM_TYPE::HEAVY_HELMET:
-		return CWeaponCraftParameters::HeavyHelmetWeight;
-	
-	// jewel
-	case ITEM_TYPE::ANKLET:
-		return CWeaponCraftParameters::AnkletWeight;
-	case ITEM_TYPE::BRACELET:
-		return CWeaponCraftParameters::BraceletWeight;
-	case ITEM_TYPE::DIADEM:
-		return CWeaponCraftParameters::DiademWeight;
-	case ITEM_TYPE::EARING:
-		return CWeaponCraftParameters::EaringWeight;
-	case ITEM_TYPE::PENDANT:
-		return CWeaponCraftParameters::PendantWeight;
-	case ITEM_TYPE::RING:
-		return CWeaponCraftParameters::RingWeight;
-	default:
-		return 0;
-	}
-}
-#endif
 
 
 uint32 CStaticItem::getMaxStackSize() const
