@@ -662,7 +662,7 @@ ENDMACRO()
 
 MACRO(FIND_LIBCURL)
   IF(NOT CURL_FOUND)
-    FIND_PACKAGE(CURL REQUIRED)
+    FIND_PACKAGE(CURL REQUIRED COMPONENTS HTTPS SSL)
 
     IF(WIN32 OR CURL_LIBRARY MATCHES "\\.a" OR WITH_STATIC_CURL)
       SET(CURL_STATIC ON)
@@ -694,25 +694,6 @@ MACRO(FIND_LIBCURL)
                     ${INTL_LIBRARY}
             )
           ENDIF()
-        ELSE()
-          # Only used by libcurl under Linux
-          FIND_PACKAGE(OpenSSL REQUIRED)
-
-          #IF(WIN32)
-          #  SET(OPENSSL_LIBRARIES ${OPENSSL_LIBRARIES} Crypt32.lib)
-          #ENDIF()
-
-          # Only Linux version of libcurl depends on OpenSSL
-          set_property(TARGET CURL::libcurl
-                  APPEND
-                  PROPERTY INTERFACE_INCLUDE_DIRECTORIES
-                  ${OPENSSL_INCLUDE_DIR}
-          )
-          set_property(TARGET CURL::libcurl
-                  APPEND
-                  PROPERTY INTERFACE_LINK_LIBRARIES
-                  ${OPENSSL_LIBRARIES}
-          )
         ENDIF()
       ENDIF()
     ENDIF()

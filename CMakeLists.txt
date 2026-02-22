@@ -181,9 +181,7 @@ IF(HUNTER_ENABLED)
   IF(NOT CMAKE_CROSSCOMPILING)
     HUNTER_ADD_PACKAGE(OpenSSL)
   ENDIF()
-  FIND_PACKAGE(OpenSSL REQUIRED)
-  # TODO: is OpenSSL::Crypto only needed for WIN32?
-  SET(OPENSSL_LIBRARIES OpenSSL::SSL OpenSSL::Crypto)
+  FIND_PACKAGE(OpenSSL REQUIRED COMPONENTS Crypto SSL)
 
   # for precompiled headers, not needed if using TARGET_PRECOMPILE_HEADERS() from cmake 3.16+
   SET(ZLIB_INCLUDE_DIR ZLIB_ROOT/include)
@@ -195,9 +193,6 @@ FIND_PACKAGE(OpenSSL REQUIRED)
 FIND_PACKAGE(GIF)
 FIND_PACKAGE(JPEG)
 
-IF(WIN32)
-  SET(OPENSSL_LIBRARIES ${OPENSSL_LIBRARIES} Crypt32.lib)
-ENDIF()
 ENDIF() #hunter
 
 IF(WITH_LIBOVR)
@@ -356,13 +351,8 @@ IF(WITH_NEL)
       )
       set_property(TARGET CURL::libcurl
               APPEND
-              PROPERTY INTERFACE_INCLUDE_DIRECTORIES
-              ${OPENSSL_INCLUDE_DIR}
-      )
-      set_property(TARGET CURL::libcurl
-              APPEND
               PROPERTY INTERFACE_LINK_LIBRARIES
-              ${OPENSSL_LIBRARIES}
+              # OpenSSL::Crypto OpenSSL::SSL
       )
 
       IF(WIN32)
