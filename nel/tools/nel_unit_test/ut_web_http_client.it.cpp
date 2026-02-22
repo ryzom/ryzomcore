@@ -1,24 +1,12 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include <ostream>
 #include <string>
-#include <set>
-#include <vector>
 
 #include <nel/web/http_client_curl.h>
 
-using std::set;
 using std::string;
-using std::vector;
 
-using ::testing::Contains;
-using ::testing::EndsWith;
-using ::testing::Eq;
-using ::testing::Field;
-using ::testing::NotNull;
-using ::testing::Property;
-using ::testing::StrEq;
 using ::testing::HasSubstr;
 
 using namespace NLWEB;
