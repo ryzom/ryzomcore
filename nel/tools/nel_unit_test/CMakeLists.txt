@@ -43,3 +43,12 @@ target_link_libraries(nel_net_module_test
         NeL::misc
         NeL::net
 )
+
+
+add_test_executable(nel_web_http_client_it
+        ut_web_http_client.it.cpp
+)
+target_link_libraries(nel_web_http_client_it
+        PRIVATE
+        NeL::web
+)
