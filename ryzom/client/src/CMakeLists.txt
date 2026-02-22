@@ -204,7 +204,6 @@ IF(WITH_RYZOM_CLIENT)
         ${LUA_INCLUDE_DIR}
         ${LUABIND_INCLUDE_DIR}
         ${CURL_INCLUDE_DIRS}
-        ${OPENSSL_INCLUDE_DIR}
   )
 
   TARGET_INCLUDE_DIRECTORIES(ryzom_client PRIVATE ${CMAKE_SOURCE_DIR}/nel/3rdparty)
@@ -223,6 +222,7 @@ IF(WITH_RYZOM_CLIENT)
               NeL::gui
               NeL::sound
               NeL::sevenzip
+              NeL::web
               ryzom_clientsheets
               ryzom_gameshare
               NeL::pacs
@@ -230,7 +230,6 @@ IF(WITH_RYZOM_CLIENT)
               ${LUA_LIBRARIES}
               ${LUABIND_LIBRARIES}
               CURL::libcurl
-              ${OPENSSL_LIBRARIES}
               ZLIB::ZLIB
   )
 
