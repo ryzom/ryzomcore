@@ -52,3 +52,17 @@ target_link_libraries(nel_web_http_client_it
         PRIVATE
         NeL::web
 )
+
+if(WITH_DRIVER_OPENAL)
+    add_test_executable(nel_sound_openal_it
+            ut_sound_openal.it.cpp
+    )
+    target_link_libraries(nel_sound_openal_it
+            PRIVATE
+            NeL::misc
+            NeL::sound
+    )
+    add_dependencies(nel_sound_openal_it
+            NeL::sound::OpenAL
+    )
+endif()
