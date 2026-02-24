@@ -54,29 +54,30 @@ jobs:
       matrix:
         include:
           - os: ubuntu-22.04
-            build-type: ci-linux-nel-static
+            cmake-preset: ci-linux-nel-static
           - os: ubuntu-24.04
-            build-type: ci-linux-nel-static
+            cmake-preset: ci-linux-nel-static
+            build-type: static
           - os: ubuntu-24.04
-            build-type: ci-linux-nel-dynamic
+            cmake-preset: ci-linux-nel-dynamic
           - os: ubuntu-24.04
-            build-type: ci-linux-nel-dynamic
+            cmake-preset: ci-linux-nel-dynamic
           - os: windows-2025
-            build-type: ci-windows-nel-hunter
+            cmake-preset: ci-windows-nel-hunter
     steps:
       - uses: actions/checkout@v4
 
       - id: cache
         uses: actions/cache@v4
         with:
-          key: nel-${{ matrix.os }}-${{ matrix.build-type }}-${{ hashFiles('nel/**', '.github/nel/**', 'cmake/**', 'CMakeModules/**', 'CMakeLists.txt', 'CMakePresets.json') }}
+          key: nel-${{ matrix.os }}-${{ matrix.cmake-preset }}-${{ hashFiles('nel/**', '.github/nel/**', 'cmake/**', 'CMakeModules/**', 'CMakeLists.txt', 'CMakePresets.json') }}
           path: ${{ needs.strings.outputs.build-dir }}/nel/nel-*
 
       - uses: ./.github/nel
         if: steps.cache.outputs.cache-hit != 'true'
         with:
           os: ${{ matrix.os }}
-          build-type: ${{ matrix.build-type }}
+          cmake-preset: ${{ matrix.cmake-preset }}
           build-dir: ${{ needs.strings.outputs.build-dir }}
           build-version: ${{ needs.strings.outputs.build-version }}
 
