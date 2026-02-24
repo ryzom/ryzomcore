@@ -52,11 +52,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-22.04, ubuntu-24.04 ]
-        build-type: ["static", "dynamic"]
-        exclude:
+        include:
           - os: ubuntu-22.04
-            build-type: dynamic
+            build-type: ci-linux-nel-static
+          - os: ubuntu-24.04
+            build-type: ci-linux-nel-static
+          - os: ubuntu-24.04
+            build-type: ci-linux-nel-dynamic
+          - os: ubuntu-24.04
+            build-type: ci-linux-nel-dynamic
+          - os: windows-2025
+            build-type: ci-windows-nel-hunter
     steps:
       - uses: actions/checkout@v4
 
