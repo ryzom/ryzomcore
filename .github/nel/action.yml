@@ -44,7 +44,13 @@ runs:
           qtbase5-dev qttools5-dev qttools5-dev-tools
 
     - name: Configure CMake
+      if: runner.os == 'Linux'
       shell: bash
+      run: cmake --preset ${{ inputs.cmake-preset }}
+
+    - name: Configure CMake
+      if: runner.os == 'Windows'
+      shell: powershell
       run: cmake --preset ${{ inputs.cmake-preset }}
 
     - uses: actions/upload-artifact@v4
