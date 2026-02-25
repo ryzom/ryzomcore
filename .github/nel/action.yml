@@ -64,6 +64,12 @@ runs:
         if-no-files-found: error
         path: ${{ inputs.build-dir }}/reports/*.xml
 
+    - uses: actions/upload-artifact@v4
+      if: ( failure() )
+      with:
+        name: nel-${{ inputs.os }}-${{ github.sha }}-hunter
+        path: ${{ inputs.build-dir }}/.hunter/_Base/**/Build/**/*-configure-*.log
+
     - name: Package
       shell: bash
       run: cpack --preset nel -R "${{ inputs.build-version }}"
