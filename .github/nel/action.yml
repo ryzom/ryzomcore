@@ -51,7 +51,7 @@ runs:
       if: ( failure() )
       with:
         name: nel-${{ inputs.os }}-${{ github.sha }}-hunter
-        path: ${{ inputs.build-dir }}/.hunter/_Base/**/*-configure-*.log
+        path: build/.hunter/_Base/**/*-configure-*.log
 
     - name: Build
       shell: bash
