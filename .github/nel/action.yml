@@ -49,7 +49,9 @@ runs:
 
     - name: Build
       shell: bash
-      run: cmake --build --preset nel
+      run: |
+        cmake --build --preset nel
+        cmake --build --preset nel --target install
 
     - name: Test
       shell: bash
