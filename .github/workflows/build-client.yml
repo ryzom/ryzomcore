@@ -90,7 +90,7 @@ jobs:
     - uses: actions/cache/restore@v4
       with:
         path: ${{ steps.strings.outputs.hunter-dir }}
-        key: ${{ matrix.os }}-hunter
+        key: ${{ matrix.os }}-hunter-${{ hashFiles('CMakeModules/Hunter*') }}
 
     - uses: actions/cache/restore@v4
       if: runner.os == 'Windows'
@@ -122,7 +122,7 @@ jobs:
     - uses: actions/cache/save@v4
       with:
         path: ${{ steps.strings.outputs.hunter-dir }}
-        key: ${{ matrix.os }}-hunter
+        key: ${{ matrix.os }}-hunter-${{ hashFiles('CMakeModules/Hunter*') }}
 
     - name: Build
       env:
