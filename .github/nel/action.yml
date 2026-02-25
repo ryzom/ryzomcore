@@ -47,6 +47,12 @@ runs:
       shell: bash
       run: cmake --preset ${{ inputs.cmake-preset }}
 
+    - uses: actions/upload-artifact@v4
+      if: ( failure() )
+      with:
+        name: nel-${{ inputs.os }}-${{ github.sha }}-hunter
+        path: ${{ inputs.build-dir }}/.hunter/_Base/**/*-configure-*.log
+
     - name: Build
       shell: bash
       run: |
@@ -63,12 +69,6 @@ runs:
         name: nel-${{ inputs.os }}-${{ github.sha }}-test-results
         if-no-files-found: error
         path: ${{ inputs.build-dir }}/reports/*.xml
-
-    - uses: actions/upload-artifact@v4
-      if: ( failure() )
-      with:
-        name: nel-${{ inputs.os }}-${{ github.sha }}-hunter
-        path: ${{ inputs.build-dir }}/.hunter/_Base/**/Build/**/*-configure-*.log
 
     - name: Package
       shell: bash
