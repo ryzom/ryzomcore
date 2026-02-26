@@ -133,6 +133,11 @@ jobs:
       run: |
         choco install nsis
 
+    - name: Dependencies macOS
+      if: runner.os == 'macOS'
+      run: |
+        brew install autoconf
+
     - name: Configure CMake
       env:
         MACOSX_DEPLOYMENT_TARGET: 10.13
