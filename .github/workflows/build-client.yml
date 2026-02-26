@@ -138,15 +138,15 @@ jobs:
       run: |
         brew install autoconf || cat vcpkg/buildtrees/libbacktrace/autoconf-arm64-osx-err.log
 
-    - if: runner.os == 'macOS' && failure()
-      run: |
-        cat vcpkg/buildtrees/libbacktrace/autoconf-arm64-osx-err.log
-
     - name: Configure CMake
       env:
         MACOSX_DEPLOYMENT_TARGET: 10.13
       run: >
         cmake --preset ${{ matrix.cmake_preset }}
+
+    - if: runner.os == 'macOS' && failure()
+      run: |
+        cat vcpkg/buildtrees/libbacktrace/autoconf-arm64-osx-err.log
 
     - uses: actions/cache/save@v4
       with:
