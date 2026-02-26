@@ -92,7 +92,12 @@
         "hunter",
         "ryzom-client",
         "linux"
-      ]
+      ],
+      "cacheVariables": {
+        "CMAKE_C_COMPILER_LAUNCHER": "ccache",
+        "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
+        "WITH_PCH": "OFF"
+      }
     },
     {
       "name": "ci-windows-ryzom-client-hunter",
@@ -103,13 +108,14 @@
       ],
       "cacheVariables": {
         "WITH_DRIVER_DIRECT3D": true,
-        "WITH_DRIVER_XAUDIO2": true
+        "WITH_DRIVER_XAUDIO2": true,
+        "DXSDK_DIR": "C:/DXSDK"
       }
     },
     {
-      "name": "ci-macos-ryzom-client-hunter",
+      "name": "ci-macos-ryzom-client-vcpkg",
       "inherits": [
-        "hunter",
+        "vcpkg",
         "ryzom-client",
         "macos"
       ],

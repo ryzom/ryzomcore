@@ -35,6 +35,7 @@ RUN apt update && \
         libxml2-dev \
         mingw-w64 \
         mingw-w64-tools \
+        nasm \
         ninja-build \
         qtbase5-dev \
         qttools5-dev \
@@ -55,6 +56,10 @@ RUN apt install --yes \
         wget \
         sudo
 
+
+# vcpkg
+RUN apt install --yes \
+        curl zip unzip tar
 
 # work arround as there is no debug version available
 RUN cp /lib/x86_64-linux-gnu/libcpptest.so /lib/x86_64-linux-gnu/libcpptestd.so
@@ -90,3 +95,10 @@ RUN groupadd --gid $USER_GID $USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME
 
 USER $USERNAME
+
+ENV VCPKG_ROOT="/home/$USERNAME/vcpkg"
+ENV PATH="$PATH:$VCPKG_ROOT"
+
+RUN git clone https://github.com/microsoft/vcpkg.git $VCPKG_ROOT \
+    && $VCPKG_ROOT/bootstrap-vcpkg.sh -disableMetrics \
+    && vcpkg --version
