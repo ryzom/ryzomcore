@@ -136,7 +136,11 @@ jobs:
     - name: Dependencies macOS
       if: runner.os == 'macOS'
       run: |
-        brew install autoconf
+        brew install autoconf || cat vcpkg/buildtrees/libbacktrace/autoconf-arm64-osx-err.log
+
+    - if: runner.os == 'macOS' && failure()
+      run: |
+        cat vcpkg/buildtrees/libbacktrace/autoconf-arm64-osx-err.log
 
     - name: Configure CMake
       env:
