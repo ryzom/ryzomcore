@@ -76,8 +76,12 @@ jobs:
 
     - uses: lukka/run-vcpkg@v11
       if: matrix.vcpkg == true
+
+    - uses: actions/cache/restore@v4
+      if: matrix.vcpkg == true
       with:
-        runVcpkgInstall: true
+        path: ~/cache/vcpkg/archives
+        key: vcpkg-${{ matrix.os }}--${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
 
     - name: Dependencies Linux
       if: runner.os == 'Linux'
@@ -158,6 +162,11 @@ jobs:
       with:
         path: ${{ steps.strings.outputs.hunter-dir }}
         key: ${{ matrix.os }}-hunter-${{ steps.strings.outputs.week }}-${{ github.sha }}
+
+    - uses: actions/cache/save@v4
+      with:
+        path: ~/cache/vcpkg/archives
+        key: vcpkg-${{ matrix.os }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
 
     - name: Build
       env:
