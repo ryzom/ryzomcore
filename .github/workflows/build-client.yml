@@ -30,6 +30,9 @@ on:
       - vcpkg.json
       - vcpkg-configuration.json
 
+env:
+  VCPKG_BINARY_SOURCES: "clear;files,~/.vcpkg-cache,readwrite"
+
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -80,7 +83,7 @@ jobs:
     - uses: actions/cache/restore@v4
       if: matrix.vcpkg == true
       with:
-        path: $HOME/cache/vcpkg/archives
+        path: ~/.vcpkg-cache
         key: vcpkg-${{ matrix.os }}--${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
 
     - name: Dependencies Linux
@@ -165,7 +168,7 @@ jobs:
 
     - uses: actions/cache/save@v4
       with:
-        path: $HOME/cache/vcpkg/archives
+        path: ~/.vcpkg-cache
         key: vcpkg-${{ matrix.os }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
 
     - name: Build
