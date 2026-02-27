@@ -105,6 +105,11 @@ jobs:
         wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/quic_sal_stub.h
         sudo mv msquic.h msquic_posix.h quic_sal_stub.h /usr/include/
 
+    - name: Dependencies macOS
+      if: runner.os == 'macOS'
+      run: |
+        brew install autoconf autoconf-archive automake libtool ccache
+
     - uses: actions/cache@v4
       if: matrix.ccache == true
       with:
@@ -145,11 +150,6 @@ jobs:
       if: runner.os == 'Windows'
       run: |
         choco install nsis
-
-    - name: Dependencies macOS
-      if: runner.os == 'macOS'
-      run: |
-        brew install autoconf autoconf-archive automake libtool ccache
 
     - name: Configure CMake
       env:
