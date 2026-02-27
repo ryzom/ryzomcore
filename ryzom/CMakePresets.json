@@ -120,7 +120,12 @@
         "macos"
       ],
       "cacheVariables": {
-        "WITH_LIBXML2_ICONV": false
+        "WITH_LIBXML2_ICONV": false,
+        "CMAKE_THREAD_LIBS_INIT": "-lpthread",
+        "CMAKE_HAVE_THREADS_LIBRARY": true,
+        "CMAKE_USE_WIN32_THREADS_INIT": false,
+        "CMAKE_USE_PTHREADS_INIT": true,
+        "THREADS_PREFER_PTHREAD_FLAG": true
       }
     }
   ],
