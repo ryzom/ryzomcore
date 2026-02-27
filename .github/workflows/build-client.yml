@@ -75,7 +75,7 @@ jobs:
         cmakeVersion: 3.31.11
 
     - uses: lukka/run-vcpkg@v11
-      if: matrix.vcpkg == 'true'
+      if: matrix.vcpkg == true
       with:
         runVcpkgInstall: true
 
