@@ -32,6 +32,7 @@ on:
 
 env:
   VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}/.vcpkg,readwrite"
+  CCACHE_DIR: "${{ github.workspace }}/.ccache"
 
 jobs:
   build:
@@ -113,7 +114,7 @@ jobs:
     - uses: actions/cache@v4
       if: matrix.ccache == true
       with:
-        path: ~/.cache/ccache
+        path: ${{ env.CCACHE_DIR }}
         key: ccache-client-${{ matrix.os }}-${{ steps.strings.outputs.week }}-${{ github.sha }}
         restore-keys: ccache-client-${{ matrix.os }}-${{ steps.strings.outputs.week }}-
 
