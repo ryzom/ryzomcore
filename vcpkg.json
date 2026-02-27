@@ -3,7 +3,6 @@
   "name": "ryzom-core",
   "version-string": "4.1.0.0",
   "dependencies": [
-    "cpptest",
     "curl",
     {
       "name": "freetype",
@@ -13,7 +12,6 @@
       ]
     },
     "giflib",
-    "gtest",
     "libogg",
     "libvorbis",
     "libpng",
@@ -31,7 +29,6 @@
     "openal-soft",
     "opengl",
     "openssl",
-    "qt",
     "zlib"
   ],
   "overrides": [
@@ -39,5 +36,21 @@
       "name": "openal-soft",
       "version": "1.24.3"
     }
-  ]
+  ],
+  "default-features": ["testing"],
+  "features": {
+    "qt": {
+      "description": "Builds with QT",
+      "dependencies": [
+        "qt"
+      ]
+    },
+    "testing": {
+      "description": "Builds tests",
+      "dependencies": [
+        "cpptest",
+        "gtest"
+      ]
+    }
+  }
 }
