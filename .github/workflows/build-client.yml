@@ -58,6 +58,7 @@ jobs:
             cmake_preset: ci-linux-ryzom-client-hunter
           - os: macos-15
             cmake_preset: ci-macos-ryzom-client-vcpkg
+            vcpkg: true
 
     steps:
     - uses: actions/checkout@v4
@@ -74,6 +75,9 @@ jobs:
         cmakeVersion: 3.31.11
 
     - uses: lukka/run-vcpkg@v11
+      if: matrix.vcpkg == 'true'
+      with:
+        runVcpkgInstall: true
 
     - name: Dependencies Linux
       if: runner.os == 'Linux'
