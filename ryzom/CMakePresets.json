@@ -127,7 +127,9 @@
         "CMAKE_HAVE_THREADS_LIBRARY": true,
         "CMAKE_USE_WIN32_THREADS_INIT": false,
         "CMAKE_USE_PTHREADS_INIT": true,
-        "THREADS_PREFER_PTHREAD_FLAG": true
+        "THREADS_PREFER_PTHREAD_FLAG": true,
+        "CMAKE_C_COMPILER_LAUNCHER": "ccache",
+        "CMAKE_CXX_COMPILER_LAUNCHER": "ccache"
       }
     }
   ],

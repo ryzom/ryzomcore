@@ -41,13 +41,6 @@ jobs:
       fail-fast: false
 
       matrix:
-        os:
-         - ubuntu-24.04
-         - ubuntu-22.04
-         - windows-2025
-         - windows-2022
-         # TODO: Re-enable macOS when Hunter ships a PNG version compatible with Xcode 16+ (fp.h removed)
-         # - macos-15
         include:
           - os: windows-2022
             cmake_preset: ci-windows-ryzom-client-hunter
@@ -56,12 +49,15 @@ jobs:
           - os: ubuntu-22.04
             ubuntu_version: 22.04
             cmake_preset: ci-linux-ryzom-client-hunter
+            ccache: true
           - os: ubuntu-24.04
             ubuntu_version: 24.04
             cmake_preset: ci-linux-ryzom-client-hunter
+            ccache: true
           - os: macos-15
             cmake_preset: ci-macos-ryzom-client-vcpkg
             vcpkg: true
+            ccache: true
 
     steps:
     - uses: actions/checkout@v4
@@ -110,14 +106,14 @@ jobs:
         sudo mv msquic.h msquic_posix.h quic_sal_stub.h /usr/include/
 
     - uses: actions/cache@v4
-      if: runner.os == 'Linux'
+      if: matrix.ccache == true
       with:
         path: ~/.cache/ccache
         key: ccache-client-${{ matrix.os }}-${{ steps.strings.outputs.week }}-${{ github.sha }}
         restore-keys: ccache-client-${{ matrix.os }}-${{ steps.strings.outputs.week }}-
 
     - name: Configure ccache
-      if: runner.os == 'Linux'
+      if: matrix.ccache == true
       run: |
         ccache --set-config=max_size=1G
         ccache --set-config=compression=true
@@ -153,7 +149,7 @@ jobs:
     - name: Dependencies macOS
       if: runner.os == 'macOS'
       run: |
-        brew install autoconf autoconf-archive automake libtool
+        brew install autoconf autoconf-archive automake libtool ccache
 
     - name: Configure CMake
       env:
@@ -177,7 +173,7 @@ jobs:
       run: cmake --build --preset ci-ryzom-client
 
     - name: ccache stats
-      if: always() && runner.os == 'Linux'
+      if: matrix.ccache == true
       run: ccache -s -v || ccache -s
 
     - name: Package
