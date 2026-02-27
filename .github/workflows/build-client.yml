@@ -84,7 +84,7 @@ jobs:
       if: matrix.vcpkg == true
       with:
         path: ${{ github.workspace }}/.vcpkg
-        key: vcpkg-${{ matrix.os }}--${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
+        key: vcpkg-${{ matrix.os }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
 
     - name: Dependencies Linux
       if: runner.os == 'Linux'
