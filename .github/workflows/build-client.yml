@@ -12,6 +12,9 @@ on:
       - CMakeModules/**
       - CMakeLists.txt
       - CMakePresets.json
+      - vcpkg/**
+      - vcpkg.json
+      - vcpkg-configuration.json
   pull_request:
     branches: [ "core4" ]
     paths:
@@ -23,6 +26,9 @@ on:
       - CMakeModules/**
       - CMakeLists.txt
       - CMakePresets.json
+      - vcpkg/**
+      - vcpkg.json
+      - vcpkg-configuration.json
 
 jobs:
   build:
