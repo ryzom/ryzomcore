@@ -31,7 +31,7 @@ on:
       - vcpkg-configuration.json
 
 env:
-  VCPKG_BINARY_SOURCES: "clear;files,~/.vcpkg-cache,readwrite"
+  VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}/.vcpkg,readwrite"
 
 jobs:
   build:
@@ -83,7 +83,7 @@ jobs:
     - uses: actions/cache/restore@v4
       if: matrix.vcpkg == true
       with:
-        path: ~/.vcpkg-cache
+        path: ${{ github.workspace }}/.vcpkg
         key: vcpkg-${{ matrix.os }}--${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
 
     - name: Dependencies Linux
@@ -168,7 +168,7 @@ jobs:
 
     - uses: actions/cache/save@v4
       with:
-        path: ~/.vcpkg-cache
+        path: ${{ github.workspace }}/.vcpkg
         key: vcpkg-${{ matrix.os }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
 
     - name: Build
