@@ -100,7 +100,11 @@ jobs:
       if: always()
       run: ccache -s -v || ccache -s
 
+    - name: Package
+      run: cpack --preset ci-ryzom-client
+
     - uses: actions/upload-artifact@v4
       with:
         name: ryzom-client-win32-${{ steps.strings.outputs.version }}
-        path: ${{ steps.strings.outputs.build-output-dir }}/bin
+        path: build/ryzom-client/ryzom-client-*
+        if-no-files-found: error

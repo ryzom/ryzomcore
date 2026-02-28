@@ -188,5 +188,5 @@ jobs:
     - uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.os }}-client-package
-        path: build/ryzom-client/ryzomcore-*
+        path: build/ryzom-client/ryzom-client-*
         if-no-files-found: error
