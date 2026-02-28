@@ -122,6 +122,7 @@
         "WITH_LIBXML2_ICONV": false,
         "WITH_SSE2": false,
         "WITH_SSE3": false,
+        "WITH_DRIVER_OPENGL3": false,
         "CMAKE_THREAD_LIBS_INIT": "-lpthread",
         "CMAKE_HAVE_THREADS_LIBRARY": true,
         "CMAKE_USE_WIN32_THREADS_INIT": false,
