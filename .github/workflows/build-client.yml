@@ -33,6 +33,7 @@ on:
 env:
   VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}/.vcpkg,readwrite"
   CCACHE_DIR: "${{ github.workspace }}/.ccache"
+  HUNTER_ROOT: "${{ github.workspace }}/.hunter"
 
 jobs:
   build:
@@ -66,7 +67,6 @@ jobs:
       shell: bash
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
-        echo "hunter-dir=${{ github.workspace }}/build/.hunter" >> "$GITHUB_OUTPUT"
         echo "week=$(date +%YW%V)" >> "$GITHUB_OUTPUT"
 
     - uses: lukka/get-cmake@latest
@@ -126,7 +126,7 @@ jobs:
 
     - uses: actions/cache/restore@v4
       with:
-        path: ${{ steps.strings.outputs.hunter-dir }}
+        path: ${{ env.HUNTER_ROOT }}
         key: ${{ matrix.os }}-hunter-${{ steps.strings.outputs.week }}-${{ github.sha }}
         restore-keys: ${{ matrix.os }}-hunter-${{ steps.strings.outputs.week }}-
 
@@ -159,7 +159,7 @@ jobs:
 
     - uses: actions/cache/save@v4
       with:
-        path: ${{ steps.strings.outputs.hunter-dir }}
+        path: ${{ env.HUNTER_ROOT }}
         key: ${{ matrix.os }}-hunter-${{ steps.strings.outputs.week }}-${{ github.sha }}
 
     - uses: actions/cache/save@v4

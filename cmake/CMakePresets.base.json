@@ -14,7 +14,6 @@
       "hidden": true,
       "cacheVariables": {
         "HUNTER_ENABLED": true,
-        "HUNTER_ROOT": "${sourceDir}/build/.hunter",
         "HUNTER_CONFIGURATION_TYPES": "Release",
         "CMAKE_FIND_PACKAGE_PREFER_CONFIG": true
       }
