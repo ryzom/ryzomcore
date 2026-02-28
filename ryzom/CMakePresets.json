@@ -90,14 +90,10 @@
       "name": "ci-linux-ryzom-client-hunter",
       "inherits": [
         "hunter",
+        "ccache",
         "ryzom-client",
         "linux"
-      ],
-      "cacheVariables": {
-        "CMAKE_C_COMPILER_LAUNCHER": "ccache",
-        "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
-        "WITH_PCH": "OFF"
-      }
+      ]
     },
     {
       "name": "ci-windows-ryzom-client-hunter",
@@ -127,9 +123,7 @@
         "CMAKE_HAVE_THREADS_LIBRARY": true,
         "CMAKE_USE_WIN32_THREADS_INIT": false,
         "CMAKE_USE_PTHREADS_INIT": true,
-        "THREADS_PREFER_PTHREAD_FLAG": true,
-        "CMAKE_C_COMPILER_LAUNCHER": "ccache",
-        "CMAKE_CXX_COMPILER_LAUNCHER": "ccache"
+        "THREADS_PREFER_PTHREAD_FLAG": true
       }
     }
   ],

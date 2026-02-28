@@ -58,7 +58,6 @@ jobs:
           - os: macos-15
             cmake_preset: ci-macos-ryzom-client-vcpkg
             vcpkg: true
-            ccache: true
 
     steps:
     - uses: actions/checkout@v4
@@ -109,7 +108,7 @@ jobs:
     - name: Dependencies macOS
       if: runner.os == 'macOS'
       run: |
-        brew install autoconf autoconf-archive automake libtool ccache
+        brew install autoconf autoconf-archive automake libtool
 
     - uses: actions/cache@v4
       if: matrix.ccache == true
