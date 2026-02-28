@@ -27,6 +27,7 @@ on:
 
 env:
   CCACHE_DIR: "${{ github.workspace }}/.ccache"
+  HUNTER_ROOT: "${{ github.workspace }}/.hunter"
 
 jobs:
   build:
@@ -38,8 +39,6 @@ jobs:
       id: strings
       shell: bash
       run: |
-        echo "build-output-dir=${{ github.workspace }}/build/ryzom-client" >> "$GITHUB_OUTPUT"
-        echo "hunter-dir=${{ github.workspace }}/.hunter" >> "$GITHUB_OUTPUT"
         COMMIT_HASH=${{ github.sha }}
         echo "version=sha.${COMMIT_HASH:0:8}" >> "$GITHUB_OUTPUT"
         echo "week=$(date +%YW%V)" >> "$GITHUB_OUTPUT"
@@ -86,7 +85,7 @@ jobs:
     - name: Cache Hunter Dependencies
       uses: actions/cache@v4
       with:
-        path: ${{ steps.strings.outputs.hunter-dir }}
+        path: ${{ env.HUNTER_ROOT }}
         key: hunter-ubuntu-24.04-mingw-${{ steps.strings.outputs.week }}-${{ github.sha }}
         restore-keys: hunter-ubuntu-24.04-mingw-${{ steps.strings.outputs.week }}-
 
