@@ -109,7 +109,6 @@ jobs:
         -DWITH_RYZOM_TOOLS=OFF
         -DCMAKE_C_COMPILER_LAUNCHER=ccache
         -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
-        -DWITH_PCH=OFF
         -S ${{ github.workspace }}
 
     - name: Build
