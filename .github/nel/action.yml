@@ -4,8 +4,8 @@ inputs:
   os:
     description: os
     required: true
-  build-type:
-    description: link statically or dynamically value  should be static | dynamic
+  cmake-preset:
+    description: cmake preset to use for configure step
     required: true
   build-dir:
     description: build directory
@@ -53,11 +53,7 @@ runs:
     - name: Configure CMake
       if: runner.os == 'Linux'
       shell: bash
-      run: >
-        cmake --preset ci-linux-nel-${{ inputs.build-type }}
-        -DCMAKE_C_COMPILER_LAUNCHER=ccache
-        -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
-        -DWITH_PCH=OFF
+      run: cmake --preset ${{ inputs.cmake-preset }}
 
     - name: Build
       shell: bash
@@ -75,7 +71,7 @@ runs:
     - uses: actions/upload-artifact@v4
       if: ( !cancelled() )
       with:
-        name: nel-${{ inputs.os }}-${{ inputs.build-type }}-test-results
+        name: nel-${{ inputs.os }}-${{ inputs.cmake-preset }}-${{ github.sha }}-test-results
         if-no-files-found: error
         path: ${{ inputs.build-dir }}/reports/*.xml
 

@@ -54,11 +54,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-22.04, ubuntu-24.04 ]
-        build-type: ["static", "dynamic"]
-        exclude:
+        include:
           - os: ubuntu-22.04
-            build-type: dynamic
+            cmake-preset: ci-linux-nel-static
+          - os: ubuntu-24.04
+            cmake-preset: ci-linux-nel-static
+            build-type: static
+          - os: ubuntu-24.04
+            cmake-preset: ci-linux-nel-dynamic
     steps:
       - uses: actions/checkout@v4
 
@@ -71,18 +74,19 @@ jobs:
       - id: cache
         uses: actions/cache@v4
         with:
-          key: nel-${{ matrix.os }}-${{ matrix.build-type }}-${{ hashFiles('nel/**', '.github/nel/**', 'cmake/**', 'CMakeModules/**', 'CMakeLists.txt', 'CMakePresets.json') }}
+          key: nel-${{ matrix.os }}-${{ matrix.cmake-preset }}-${{ hashFiles('nel/**', '.github/nel/**', 'cmake/**', 'CMakeModules/**', 'CMakeLists.txt', 'CMakePresets.json') }}
           path: ${{ needs.strings.outputs.build-dir }}/nel/nel-*
 
       - uses: ./.github/nel
         if: steps.cache.outputs.cache-hit != 'true'
         with:
           os: ${{ matrix.os }}
-          build-type: ${{ matrix.build-type }}
+          cmake-preset: ${{ matrix.cmake-preset }}
           build-dir: ${{ needs.strings.outputs.build-dir }}
           build-version: ${{ needs.strings.outputs.build-version }}
 
       - uses: actions/upload-artifact@v4
+        if: matrix.build-type == 'static'
         with:
           name: nel-${{ matrix.os }}-${{ matrix.build-type }}-${{ needs.strings.outputs.build-version }}
           path: ${{ needs.strings.outputs.build-dir }}/nel/nel-*
