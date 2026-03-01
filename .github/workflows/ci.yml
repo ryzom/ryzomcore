@@ -63,6 +63,7 @@ jobs:
             build-type: static
           - os: ubuntu-24.04
             cmake-preset: ci-linux-nel-dynamic
+            build-type: dynamic
     steps:
       - uses: actions/checkout@v4
 
@@ -87,7 +88,7 @@ jobs:
           build-version: ${{ needs.strings.outputs.build-version }}
 
       - uses: actions/upload-artifact@v4
-        if: matrix.build-type == 'static'
+        if: matrix.build-type
         with:
           name: nel-${{ matrix.os }}-${{ matrix.build-type }}-${{ needs.strings.outputs.build-version }}
           path: ${{ needs.strings.outputs.build-dir }}/nel/nel-*
