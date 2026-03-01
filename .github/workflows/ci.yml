@@ -57,6 +57,7 @@ jobs:
         include:
           - os: ubuntu-22.04
             cmake-preset: ci-linux-nel-static
+            build-type: static
           - os: ubuntu-24.04
             cmake-preset: ci-linux-nel-static
             build-type: static
