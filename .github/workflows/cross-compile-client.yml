@@ -63,11 +63,21 @@ jobs:
         mingw-w64-tools \
         nsis \
         ninja-build
-        git clone --depth 1 --branch openssl-3.0.12 https://github.com/openssl/openssl.git
-        cd openssl
-        ./Configure mingw --cross-compile-prefix=i686-w64-mingw32- --prefix=/usr/i686-w64-mingw32
+
+    - uses: actions/cache@v4
+      with:
+        path: |
+          ${{ github.workspace }}/build/install
+          ${{ github.workspace }}/build/openssl
+        key: openssl
+
+    - name: openssl
+      run: |
+        git clone --depth 1 --branch openssl-3.0.12 https://github.com/openssl/openssl.git ${{ github.workspace }}/build/install
+        cd ${{ github.workspace }}/build/install
+        ./Configure mingw --cross-compile-prefix=i686-w64-mingw32- --prefix=${{ github.workspace }}/build/install
         make
-        sudo make install
+        make install
 
     - name: Set up ccache
       uses: actions/cache@v4
