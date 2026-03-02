@@ -28,6 +28,7 @@ on:
 env:
   CCACHE_DIR: "${{ github.workspace }}/.ccache"
   HUNTER_ROOT: "${{ github.workspace }}/.hunter"
+  OPENSSL_ROOT_DIR: "${{ github.workspace }}/build/install/openssl"
 
 jobs:
   build:
@@ -64,19 +65,25 @@ jobs:
         nsis \
         ninja-build
 
-    - uses: actions/cache@v4
+    - uses: actions/cache/restore@v4
       with:
         path: |
-          ${{ github.workspace }}/build/install
+          ${{ env.OPENSSL_ROOT_DIR }}
           ${{ github.workspace }}/build/openssl
         key: openssl
-
     - name: openssl
       run: |
         git clone --depth 1 --branch openssl-3.0.12 https://github.com/openssl/openssl.git ${{ github.workspace }}/build/openssl
         cd ${{ github.workspace }}/build/openssl
-        ./Configure mingw --cross-compile-prefix=i686-w64-mingw32- --prefix="${{ github.workspace }}/build/install/openssl"
+        ./Configure mingw --cross-compile-prefix=i686-w64-mingw32- --prefix="${{ env.OPENSSL_ROOT_DIR }}"
         make install
+
+    - uses: actions/cache/save@v4
+      with:
+        path: |
+          ${{ env.OPENSSL_ROOT_DIR }}
+          ${{ github.workspace }}/build/openssl
+        key: openssl
 
     - name: Set up ccache
       uses: actions/cache@v4
