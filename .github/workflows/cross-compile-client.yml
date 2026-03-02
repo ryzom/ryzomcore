@@ -73,8 +73,8 @@ jobs:
 
     - name: openssl
       run: |
-        git clone --depth 1 --branch openssl-3.0.12 https://github.com/openssl/openssl.git ${{ github.workspace }}/build/install
-        cd ${{ github.workspace }}/build/install
+        git clone --depth 1 --branch openssl-3.0.12 https://github.com/openssl/openssl.git ${{ github.workspace }}/build/openssl
+        cd ${{ github.workspace }}/build/openssl
         ./Configure mingw --cross-compile-prefix=i686-w64-mingw32- --prefix=${{ github.workspace }}/build/install
         make
         make install
