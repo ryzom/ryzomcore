@@ -66,12 +66,14 @@ jobs:
         ninja-build
 
     - uses: actions/cache/restore@v4
+      id: openssl
       with:
         path: |
           ${{ env.OPENSSL_ROOT_DIR }}
           ${{ github.workspace }}/build/openssl
         key: openssl
     - name: openssl
+      if: steps.openssl.outputs.cache-hit != 'true'
       run: |
         git clone --depth 1 --branch openssl-3.0.12 https://github.com/openssl/openssl.git ${{ github.workspace }}/build/openssl
         cd ${{ github.workspace }}/build/openssl
@@ -79,6 +81,7 @@ jobs:
         make install
 
     - uses: actions/cache/save@v4
+      if: steps.openssl.outputs.cache-hit != 'true'
       with:
         path: |
           ${{ env.OPENSSL_ROOT_DIR }}
