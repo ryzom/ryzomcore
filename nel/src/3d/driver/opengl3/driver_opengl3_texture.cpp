@@ -248,6 +248,21 @@ bool CTextureDrvInfosGL3::activeFrameBufferObject(ITexture * tex)
 		{
 			_Driver->_DriverGLStates.forceBindTexture(TextureMode, 0);
 			_Driver->_DriverGLStates.forceBindFramebuffer(FBOId);
+
+			// Invalidate depth/stencil after binding the FBO.
+			// Tells ANGLE not to load previous depth/stencil data into the
+			// new render pass (LOAD_OP_DONT_CARE), avoiding an expensive blit.
+			// The application is expected to clear depth/stencil before use.
+			if (AttachDepthStencil)
+			{
+				const GLenum attachments[2] = { GL_DEPTH_ATTACHMENT, GL_STENCIL_ATTACHMENT };
+#ifdef USE_OPENGLES3
+				nglInvalidateFramebuffer(GL_FRAMEBUFFER, 2, attachments);
+#else
+				if (nglInvalidateFramebuffer)
+					nglInvalidateFramebuffer(GL_FRAMEBUFFER, 2, attachments);
+#endif
+			}
 		}
 		else
 			return false;
