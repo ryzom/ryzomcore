@@ -183,6 +183,7 @@ PFNGLGENERATEMIPMAPPROC							nglGenerateMipmap;
 PFNGLBLITFRAMEBUFFERPROC						nglBlitFramebuffer;
 PFNGLRENDERBUFFERSTORAGEMULTISAMPLEPROC			nglRenderbufferStorageMultisample;
 PFNGLFRAMEBUFFERTEXTURELAYERPROC				nglFramebufferTextureLayer;
+PFNGLINVALIDATEFRAMEBUFFERPROC					nglInvalidateFramebuffer;
 
 PFNGLACTIVETEXTUREPROC							nglActiveTexture;
 
@@ -502,6 +503,9 @@ static bool setupGLCore(std::vector<const char *> &glext)
 	CHECK_ADDRESS(PFNGLBLITFRAMEBUFFERPROC, glBlitFramebuffer);
 	CHECK_ADDRESS(PFNGLRENDERBUFFERSTORAGEMULTISAMPLEPROC, glRenderbufferStorageMultisample);
 	CHECK_ADDRESS(PFNGLFRAMEBUFFERTEXTURELAYERPROC, glFramebufferTextureLayer);
+
+	// GL 4.3 / ARB_invalidate_subdata: optional on GL 3.3, always available on GLES 3.0
+	nglInvalidateFramebuffer = (PFNGLINVALIDATEFRAMEBUFFERPROC)nglGetProcAddress("glInvalidateFramebuffer");
 
 	CHECK_ADDRESS(PFNGLACTIVETEXTUREPROC, glActiveTexture);
 

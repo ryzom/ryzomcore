@@ -284,6 +284,7 @@ namespace NLDRIVERGL3 {
 #define nglBlitFramebuffer glBlitFramebuffer
 #define nglRenderbufferStorageMultisample glRenderbufferStorageMultisample
 #define nglFramebufferTextureLayer glFramebufferTextureLayer
+#define nglInvalidateFramebuffer glInvalidateFramebuffer
 
 #define nglActiveTexture glActiveTexture
 
@@ -491,6 +492,7 @@ extern PFNGLGENERATEMIPMAPPROC							nglGenerateMipmap;
 extern PFNGLBLITFRAMEBUFFERPROC							nglBlitFramebuffer;
 extern PFNGLRENDERBUFFERSTORAGEMULTISAMPLEPROC			nglRenderbufferStorageMultisample;
 extern PFNGLFRAMEBUFFERTEXTURELAYERPROC					nglFramebufferTextureLayer;
+extern PFNGLINVALIDATEFRAMEBUFFERPROC					nglInvalidateFramebuffer;
 
 extern PFNGLACTIVETEXTUREPROC							nglActiveTexture;
 
