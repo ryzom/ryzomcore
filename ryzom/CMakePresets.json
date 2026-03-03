@@ -139,7 +139,8 @@
       ],
       "cacheVariables": {
         "WITH_EXTERNAL": false,
-        "WITH_STATIC_CURL": false
+        "WITH_STATIC_CURL": false,
+        "OPENSSL_ROOT_DIR": "${sourceDir}/build/install/openssl"
       }
     }
   ],
