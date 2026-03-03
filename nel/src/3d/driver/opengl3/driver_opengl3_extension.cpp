@@ -608,6 +608,14 @@ static bool setupAMDPinnedMemory(std::vector<const char *> &glext)
 }
 
 // *********************************
+static bool setupARBInvalidateSubdata(std::vector<const char *> &glext)
+{
+	CHECK_EXT_2("GL_ARB_invalidate_subdata");
+
+	return true;
+}
+
+// *********************************
 static bool	setupNVXGPUMemoryInfo(std::vector<const char *> &glext)
 {
 	H_AUTO_OGL(setupNVXGPUMemoryInfo);
@@ -704,6 +712,9 @@ bool	registerGlExtensions(CGlExtensions &ext)
 
 	// Check GL_AMD_pinned_memory
 	ext.AMDPinnedMemory = false; // setupAMDPinnedMemory(glext); // TODO: Proper frame sync check
+
+	// Check GL_ARB_invalidate_subdata (GL 4.3 core; optional on GL 3.3)
+	ext.ARBInvalidateSubdata = setupARBInvalidateSubdata(glext);
 
 	// Memory info extensions
 	ext.NVXGPUMemoryInfo = setupNVXGPUMemoryInfo(glext);

@@ -52,6 +52,7 @@ struct	CGlExtensions
 	bool	EXTTextureCompressionS3TC;
 	bool	EXTTextureFilterAnisotropic;
 	float	EXTTextureFilterAnisotropicMaximum;
+	bool	ARBInvalidateSubdata;
 	bool	AMDPinnedMemory;
 
 	// Extensions to get memory info
@@ -95,6 +96,7 @@ public:
 		EXTTextureCompressionS3TC = false;
 		EXTTextureFilterAnisotropic = false;
 		EXTTextureFilterAnisotropicMaximum = 0.f;
+		ARBInvalidateSubdata = false;
 		AMDPinnedMemory = false;
 
 		NVXGPUMemoryInfo = false;
@@ -133,6 +135,7 @@ public:
 
 		result += "\n  Buffers: ";
 		result += AMDPinnedMemory ? "AMDPinnedMemory " : "";
+		result += ARBInvalidateSubdata ? "ARBInvalidateSubdata " : "";
 
 		result += "\n  Memory info: ";
 		result += NVXGPUMemoryInfo ? "NVXGPUMemoryInfo " : "";

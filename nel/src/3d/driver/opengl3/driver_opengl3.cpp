@@ -714,11 +714,12 @@ bool CDriverGL3::activeFrameBufferObject(ITexture * tex)
 			// On ANGLE (Windows/Android WebGL), switching away from an FBO without
 			// invalidating forces an expensive depth/stencil resolve/copy. This hint
 			// tells the driver the data is no longer needed, avoiding the stall.
+			// (STORE_OP_DONT_CARE on Vulkan, DiscardView on D3D11)
 			const GLenum attachments[2] = { GL_DEPTH_ATTACHMENT, GL_STENCIL_ATTACHMENT };
 #ifdef USE_OPENGLES3
 			nglInvalidateFramebuffer(GL_FRAMEBUFFER, 2, attachments);
 #else
-			if (nglInvalidateFramebuffer)
+			if (_Extensions.ARBInvalidateSubdata)
 				nglInvalidateFramebuffer(GL_FRAMEBUFFER, 2, attachments);
 #endif
 			_DriverGLStates.forceBindFramebuffer(0);

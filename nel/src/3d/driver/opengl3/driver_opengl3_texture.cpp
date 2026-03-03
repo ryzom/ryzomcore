@@ -248,21 +248,11 @@ bool CTextureDrvInfosGL3::activeFrameBufferObject(ITexture * tex)
 		{
 			_Driver->_DriverGLStates.forceBindTexture(TextureMode, 0);
 			_Driver->_DriverGLStates.forceBindFramebuffer(FBOId);
-
-			// Invalidate depth/stencil after binding the FBO.
-			// Tells ANGLE not to load previous depth/stencil data into the
-			// new render pass (LOAD_OP_DONT_CARE), avoiding an expensive blit.
-			// The application is expected to clear depth/stencil before use.
-			if (AttachDepthStencil)
-			{
-				const GLenum attachments[2] = { GL_DEPTH_ATTACHMENT, GL_STENCIL_ATTACHMENT };
-#ifdef USE_OPENGLES3
-				nglInvalidateFramebuffer(GL_FRAMEBUFFER, 2, attachments);
-#else
-				if (nglInvalidateFramebuffer)
-					nglInvalidateFramebuffer(GL_FRAMEBUFFER, 2, attachments);
-#endif
-			}
+			// Do NOT invalidate depth/stencil here at bind time.
+			// The application clears depth/stencil immediately after binding,
+			// which allows ANGLE to use LOAD_OP_CLEAR for the render pass.
+			// An invalidation here would downgrade that to LOAD_OP_DONT_CARE
+			// followed by a mid-pass vkCmdClearAttachments, which is slower.
 		}
 		else
 			return false;
@@ -273,13 +263,14 @@ bool CTextureDrvInfosGL3::activeFrameBufferObject(ITexture * tex)
 		// On ANGLE (Windows/Android WebGL), switching away from an FBO without
 		// invalidating forces an expensive depth/stencil resolve/copy. This hint
 		// tells the driver the data is no longer needed, avoiding the stall.
+		// (STORE_OP_DONT_CARE on Vulkan, DiscardView on D3D11)
 		if (AttachDepthStencil)
 		{
 			const GLenum attachments[2] = { GL_DEPTH_ATTACHMENT, GL_STENCIL_ATTACHMENT };
 #ifdef USE_OPENGLES3
 			nglInvalidateFramebuffer(GL_FRAMEBUFFER, 2, attachments);
 #else
-			if (nglInvalidateFramebuffer)
+			if (_Driver->_Extensions.ARBInvalidateSubdata)
 				nglInvalidateFramebuffer(GL_FRAMEBUFFER, 2, attachments);
 #endif
 		}
