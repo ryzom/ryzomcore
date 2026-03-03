@@ -318,6 +318,9 @@ public:
 	/// Clear the current target surface stencil buffer. The function ignores the viewport settings but uses the scissor.
 	virtual bool			clearStencilBuffer(sint stencilval=0) = 0;
 
+	/// Clear both the depth and stencil buffers in one call. Drivers may override for efficiency.
+	virtual bool			clearDepthStencil(float zval=1, sint stencilval=0) { clearZBuffer(zval); clearStencilBuffer(stencilval); return true; }
+
 	/// Set the color mask filter through where the operation done will pass
 	virtual void			setColorMask(bool bRed, bool bGreen, bool bBlue, bool bAlpha) = 0;
 	// @}

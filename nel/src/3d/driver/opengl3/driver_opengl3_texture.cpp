@@ -1785,7 +1785,10 @@ bool CDriverGL3::setRenderTarget (ITexture *tex, uint32 x, uint32 y, uint32 widt
 	}
 	else if (_RenderTargetFBO)
 	{
-		activeFrameBufferObject(NULL);
+		// Deactivate through the texture-level method so it can use per-FBO
+		// state (e.g. AttachDepthStencil) for conditional invalidation.
+		CTextureDrvInfosGL3* gltext = (CTextureDrvInfosGL3*)(ITextureDrvInfos*)(_RenderTargetFBO->TextureDrvShare->DrvTexture);
+		gltext->activeFrameBufferObject(NULL);
 		setupViewport(_OldViewport);
 		_OldViewport = _CurrViewport;
 

@@ -1357,8 +1357,7 @@ void			CDriverUser::clearBuffers(CRGBA col)
 	NL3D_HAUTO_CLEAR_DRIVER;
 
 	_Driver->clear2D(col);
-	_Driver->clearZBuffer();
-	_Driver->clearStencilBuffer();
+	_Driver->clearDepthStencil();
 }
 // ***************************************************************************
 void			CDriverUser::swapBuffers()
