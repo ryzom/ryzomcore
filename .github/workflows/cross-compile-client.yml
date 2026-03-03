@@ -108,6 +108,9 @@ jobs:
         key: hunter-ubuntu-24.04-mingw-${{ steps.strings.outputs.week }}-${{ github.sha }}
         restore-keys: hunter-ubuntu-24.04-mingw-${{ steps.strings.outputs.week }}-
 
+    - run: |
+        find "${{ env.OPENSSL_ROOT_DIR }}"
+
     - name: Configure CMake
       run: >
         cmake --preset ryzom-client-x86-mingw-hunter
