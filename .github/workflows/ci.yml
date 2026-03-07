@@ -64,6 +64,8 @@ jobs:
           - os: ubuntu-24.04
             cmake-preset: ci-linux-nel-dynamic
             build-type: dynamic
+          - os: windows-2025
+            cmake-preset: ci-windows-nel-hunter
     steps:
       - uses: actions/checkout@v4
 

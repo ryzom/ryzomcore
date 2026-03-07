@@ -67,6 +67,18 @@
         "nel"
       ],
       "name": "windows-nel"
+    },
+    {
+      "name": "ci-windows-nel-hunter",
+      "inherits": [
+        "hunter",
+        "nel",
+        "windows"
+      ],
+      "cacheVariables": {
+        "WITH_NEL_SAMPLES": false,
+        "WITH_NEL_TOOLS": false
+      }
     }
   ],
   "buildPresets": [
