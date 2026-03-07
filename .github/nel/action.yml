@@ -22,7 +22,7 @@ runs:
 
     - uses: lukka/run-vcpkg@v11
 
-    - name: Dependencies ${{ runner.os }
+    - name: Dependencies ${{ runner.os }}
       if: runner.os == 'Linux'
       shell: bash
       run: |
@@ -45,7 +45,7 @@ runs:
           libgsf-1-dev \
           qtbase5-dev qttools5-dev qttools5-dev-tools
 
-    - name: Dependencies ${{ runner.os }
+    - name: Dependencies ${{ runner.os }}
       if: runner.os == 'Windows'
       shell: powershell
       run: |
