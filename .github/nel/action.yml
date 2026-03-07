@@ -20,6 +20,8 @@ runs:
       with:
         cmakeVersion: "^3.31.11"
 
+    - uses: lukka/run-vcpkg@v11
+
     - name: Dependencies Linux
       if: runner.os == 'Linux'
       shell: bash
@@ -59,12 +61,6 @@ runs:
       if: runner.os == 'Windows'
       shell: powershell
       run: cmake --preset ${{ inputs.cmake-preset }}
-
-    - uses: actions/upload-artifact@v4
-      if: failure()
-      with:
-        name: nel-${{ inputs.os }}-${{ github.sha }}-hunter
-        path: build/.hunter/_Base/**/*-configure-*.log
 
     - name: Build
       shell: bash

@@ -69,15 +69,18 @@
       "name": "windows-nel"
     },
     {
-      "name": "ci-windows-nel-hunter",
+      "name": "ci-windows-nel-vcpkg",
       "inherits": [
-        "hunter",
+        "vcpkg",
         "nel",
         "windows"
       ],
       "cacheVariables": {
         "WITH_NEL_SAMPLES": false,
-        "WITH_NEL_TOOLS": false
+        "WITH_NEL_TOOLS": false,
+        "WITH_TESTING": false,
+        "WITH_NEL_TESTS": false,
+        "VCPKG_MANIFEST_NO_DEFAULT_FEATURES": true
       }
     }
   ],
