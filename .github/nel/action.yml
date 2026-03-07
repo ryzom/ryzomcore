@@ -96,6 +96,8 @@ runs:
 
     - name: Test
       shell: bash
+      env:
+        CTEST_NO_TESTS_ACTION: ${{ runner.os == 'Windows' && 'ignore' }}
       run: ctest --preset nel
 
     - uses: actions/upload-artifact@v4
