@@ -49,7 +49,7 @@ jobs:
             cmake_preset: ci-windows-ryzom-client-hunter
           - os: windows-2025
             cmake_preset: ci-windows-ryzom-client-hunter
-          - os: windows-latest
+          - os: windows-2025
             cmake_preset: ci-windows-ryzom-client-vcpkg
             vcpkg: true
           - os: ubuntu-22.04
@@ -185,11 +185,11 @@ jobs:
     - uses: actions/upload-artifact@v4
       if: ${{ failure() }}
       with:
-        name: ${{ matrix.os }}-logs
+        name: ${{ matrix.os }}-build-logs
         path: build/**/*.log
 
     - uses: actions/upload-artifact@v4
       with:
-        name: ${{ matrix.os }}-client-package
+        name: ${{ matrix.os }}-client-package${{ matrix.vcpkg && '-vcpkg' }}
         path: build/ryzom-client/ryzom-client-*
         if-no-files-found: error
