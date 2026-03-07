@@ -13,6 +13,10 @@ inputs:
   build-version:
     description: build version
     required: true
+  tests:
+    description: run tests
+    required: false
+    default: 'true'
 runs:
   using: composite
   steps:
@@ -95,9 +99,8 @@ runs:
       run: ccache -s -v || ccache -s
 
     - name: Test
+      if: inputs.tests == 'true'
       shell: bash
-      env:
-        CTEST_NO_TESTS_ACTION: ${{ runner.os == 'Windows' && 'ignore' }}
       run: ctest --preset nel
 
     - uses: actions/upload-artifact@v4
