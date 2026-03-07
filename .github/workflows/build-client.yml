@@ -48,6 +48,9 @@ jobs:
             cmake_preset: ci-windows-ryzom-client-hunter
           - os: windows-2025
             cmake_preset: ci-windows-ryzom-client-hunter
+          - os: windows-2025
+            cmake_preset: ci-windows-ryzom-client-vcpkg
+            vcpkg: true
           - os: ubuntu-22.04
             ubuntu_version: 22.04
             cmake_preset: ci-linux-ryzom-client-hunter
