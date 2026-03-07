@@ -121,6 +121,7 @@
       "cacheVariables": {
         "WITH_DRIVER_DIRECT3D": true,
         "WITH_DRIVER_XAUDIO2": true,
+        "WITH_STATIC_LIBXML2": true,
         "VCPKG_MANIFEST_NO_DEFAULT_FEATURES": true,
         "DXSDK_DIR": "C:/DXSDK"
       }
