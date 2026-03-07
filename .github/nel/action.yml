@@ -78,7 +78,7 @@ runs:
       run: cmake --preset ${{ inputs.cmake-preset }}
 
     - uses: actions/cache/save@v4
-      if: ! cancelled()
+      if: ( ! cancelled() )
       with:
         path: ${{ github.workspace }}/.vcpkg
         key: vcpkg-${{ inputs.os }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
