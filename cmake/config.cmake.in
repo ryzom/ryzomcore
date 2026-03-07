@@ -1,6 +1,7 @@
 @PACKAGE_INIT@
 
 set(_@PROJECT_NAME@_supported_components @package_components@)
+set(_@PROJECT_NAME@_georges_dependencies @package_georges_dependencies@)
 set(_@PROJECT_NAME@_gui_dependencies @package_gui_dependencies@)
 set(_@PROJECT_NAME@_sound_dependencies @package_sound_dependencies@)
 
