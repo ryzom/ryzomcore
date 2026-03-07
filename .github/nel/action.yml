@@ -55,17 +55,6 @@ runs:
       shell: bash
       run: cmake --preset ${{ inputs.cmake-preset }}
 
-    - name: Configure CMake
-      if: runner.os == 'Windows'
-      shell: powershell
-      run: cmake --preset ${{ inputs.cmake-preset }}
-
-    - uses: actions/upload-artifact@v4
-      if: failure()
-      with:
-        name: nel-${{ inputs.os }}-${{ github.sha }}-hunter
-        path: build/.hunter/_Base/**/*-configure-*.log
-
     - name: Build
       shell: bash
       run: |
