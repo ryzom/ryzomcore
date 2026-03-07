@@ -19,6 +19,8 @@
 
 #include "stdmisc.h"
 
+#ifndef NL_NO_LIBXML2
+
 #include "nel/misc/o_xml.h"
 #include "nel/misc/i_xml.h"
 
@@ -674,3 +676,5 @@ std::string COXml::getErrorString()
 } // NLMISC
 
 #endif // NL_DONT_USE_EXTERNAL_CODE
+
+#endif // NL_NO_LIBXML2

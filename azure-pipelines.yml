@@ -33,16 +33,34 @@ jobs:
         wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/quic_sal_stub.h
         sudo mv msquic.h msquic_posix.h quic_sal_stub.h /usr/include/
       displayName: 'Dependencies'
+    - script: echo "##vso[task.setvariable variable=weekKey]$(date +%YW%V)"
+      displayName: 'Week key'
+    - task: Cache@2
+      inputs:
+        key: 'ccache | ubuntu24 | "$(weekKey)"'
+        path: '$(HOME)/.cache/ccache'
+      displayName: 'ccache cache'
+    - script: |
+        ccache --set-config=max_size=1G
+        ccache --set-config=compression=true
+        ccache -z
+      displayName: 'Configure ccache'
     - script: >
         cmake --preset linux-default
         -DCMAKE_SUPPRESS_REGENERATION=ON
         -DWITH_MSQUIC=ON
+        -DCMAKE_C_COMPILER_LAUNCHER=ccache
+        -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+        -DWITH_PCH=OFF
       displayName: 'CMake'
     - script: |
         cat build/CMakeCache.txt
     - script: |
         cmake --build --preset release
       displayName: 'Make'
+    - script: ccache -s -v || ccache -s
+      displayName: 'ccache stats'
+      condition: always()
     - script: |
         ctest --preset default
       displayName: 'Unit Tests'
@@ -85,16 +103,34 @@ jobs:
         wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/quic_sal_stub.h
         sudo mv msquic.h msquic_posix.h quic_sal_stub.h /usr/include/
       displayName: 'Dependencies'
+    - script: echo "##vso[task.setvariable variable=weekKey]$(date +%YW%V)"
+      displayName: 'Week key'
+    - task: Cache@2
+      inputs:
+        key: 'ccache | ubuntu22 | "$(weekKey)"'
+        path: '$(HOME)/.cache/ccache'
+      displayName: 'ccache cache'
+    - script: |
+        ccache --set-config=max_size=1G
+        ccache --set-config=compression=true
+        ccache -z
+      displayName: 'Configure ccache'
     - script: >
         cmake --preset linux-default
         -DCMAKE_SUPPRESS_REGENERATION=ON
         -DWITH_MSQUIC=ON
+        -DCMAKE_C_COMPILER_LAUNCHER=ccache
+        -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+        -DWITH_PCH=OFF
       displayName: 'CMake'
     - script: |
         cat build/CMakeCache.txt
     - script: |
         cmake --build --preset release
       displayName: 'Make'
+    - script: ccache -s -v || ccache -s
+      displayName: 'ccache stats'
+      condition: always()
     - script: |
         ctest --preset default
       displayName: 'Unit Tests'
@@ -116,6 +152,9 @@ jobs:
             libmsquic
           cmakeExtra: >-
             -DCMAKE_INSTALL_LIBDIR=lib
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+            -DWITH_PCH=OFF
         win2022:
           vmImage: 'windows-2022'
           releaseName: 'Win64'
@@ -143,7 +182,7 @@ jobs:
         sudo dpkg -i packages-microsoft-prod.deb
         sudo apt update
         sudo apt remove -y man-db
-        sudo apt install -y --no-install-recommends $(aptPackages)
+        sudo apt install -y --no-install-recommends ccache $(aptPackages)
         wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic.h
         wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic_posix.h
         wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/quic_sal_stub.h
@@ -151,6 +190,21 @@ jobs:
         sudo mv msquic_posix.h /usr/include/msquic_posix.h
         sudo mv quic_sal_stub.h /usr/include/quic_sal_stub.h
       displayName: '(ubuntu) Dependencies'
+      condition: eq(variables['Agent.JobName'], 'client ubuntu')
+    - script: echo "##vso[task.setvariable variable=weekKey]$(date +%YW%V)"
+      displayName: '(ubuntu) Week key'
+      condition: eq(variables['Agent.JobName'], 'client ubuntu')
+    - task: Cache@2
+      inputs:
+        key: 'ccache | client-ubuntu | "$(weekKey)"'
+        path: '$(HOME)/.cache/ccache'
+      displayName: '(ubuntu) ccache cache'
+      condition: eq(variables['Agent.JobName'], 'client ubuntu')
+    - script: |
+        ccache --set-config=max_size=1G
+        ccache --set-config=compression=true
+        ccache -z
+      displayName: '(ubuntu) Configure ccache'
       condition: eq(variables['Agent.JobName'], 'client ubuntu')
     - task: Cache@2
       inputs:
@@ -200,6 +254,9 @@ jobs:
       inputs:
         workingDirectory: $(Build.BinariesDirectory)
         cmakeArgs: '--build . --config Release'
+    - script: ccache -s -v || ccache -s
+      displayName: '(ubuntu) ccache stats'
+      condition: and(always(), eq(variables['Agent.JobName'], 'client ubuntu'))
     #- task: CMake@1
     #  displayName: 'Install'
     #  inputs:

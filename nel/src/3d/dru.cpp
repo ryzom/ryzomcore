@@ -81,6 +81,10 @@ extern IDriver* createD3DDriverInstance ();
 extern IDriver* createGlEsDriverInstance ();
 #endif
 
+#ifdef NL_OPENGLES3_AVAILABLE
+extern IDriver* createGlEs3DriverInstance ();
+#endif
+
 #endif
 
 // ***************************************************************************
@@ -219,6 +223,60 @@ IDriver		*CDRU::createGlEsDriver()
 	}
 
 	nlinfo ("Using the library '" NL3D_GLES_DLL_NAME "' that is in the directory: '%s'", driverLib.getLibFileName().c_str());
+
+	createDriver = (IDRV_CREATE_PROC) driverLib.getSymbolAddress(IDRV_CREATE_PROC_NAME);
+	if (createDriver == NULL)
+	{
+		throw EDruOpenglDriverCorrupted();
+	}
+
+	versionDriver = (IDRV_VERSION_PROC) driverLib.getSymbolAddress(IDRV_VERSION_PROC_NAME);
+	if (versionDriver != NULL)
+	{
+		if (versionDriver()<IDriver::InterfaceVersion)
+			throw EDruOpenglDriverOldVersion();
+		else if (versionDriver()>IDriver::InterfaceVersion)
+			throw EDruOpenglDriverUnknownVersion();
+	}
+
+	IDriver		*ret= createDriver();
+	if (ret == NULL)
+	{
+		throw EDruOpenglEsDriverCantCreateDriver();
+	}
+
+	return ret;
+#endif
+}
+
+// ***************************************************************************
+IDriver		*CDRU::createGlEs3Driver()
+{
+#ifdef NL_STATIC
+
+#ifdef NL_OPENGLES3_AVAILABLE
+	return createGlEs3DriverInstance ();
+#else
+	return NULL;
+#endif // NL_OPENGLES3_AVAILABLE
+
+#else
+
+	IDRV_CREATE_PROC	createDriver = NULL;
+	IDRV_VERSION_PROC	versionDriver = NULL;
+
+	CLibrary	driverLib;
+
+#if defined(NL_OS_UNIX) && defined(NL_DRIVER_PREFIX)
+	driverLib.addLibPath(NL_DRIVER_PREFIX);
+#endif
+
+	if (!driverLib.loadLibrary(NL3D_GLES3_DLL_NAME, true, true, false))
+	{
+		throw EDruOpenglEsDriverNotFound();
+	}
+
+	nlinfo ("Using the library '" NL3D_GLES3_DLL_NAME "' that is in the directory: '%s'", driverLib.getLibFileName().c_str());
 
 	createDriver = (IDRV_CREATE_PROC) driverLib.getSymbolAddress(IDRV_CREATE_PROC_NAME);
 	if (createDriver == NULL)

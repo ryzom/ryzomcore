@@ -117,6 +117,10 @@
 #include <nel/3d/texture_user.h>
 #include <nel/3d/render_target_manager.h>
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
 #ifdef NL_OS_WINDOWS
 #ifndef NL_COMP_MINGW
 #define NOMINMAX
@@ -326,6 +330,7 @@ public:
 	CPlanarReflectionDemo();
 	~CPlanarReflectionDemo();
 	void run();
+	void renderOneFrame();
 
 	virtual void operator()(const CEvent &event) NL_OVERRIDE;
 
@@ -348,6 +353,13 @@ private:
 	UMaterial m_SkyMat;
 	UMaterial m_CubeMat;
 	UMaterial m_FloorMat;
+	float m_CamAngle;
+	float m_CubeAngleZ;
+	float m_CubeAngleX;
+	float m_SkyAngle;
+	float m_CamDist;
+	double m_LastTime;
+	float m_SmoothFps;
 };
 
 CPlanarReflectionDemo::CPlanarReflectionDemo()
@@ -365,8 +377,19 @@ CPlanarReflectionDemo::CPlanarReflectionDemo()
 	, m_KeyForward(false)
 	, m_KeyBackward(false)
 	, m_TextContext(NULL)
+	, m_CamAngle(0.f)
+	, m_CubeAngleZ(0.f)
+	, m_CubeAngleX(0.f)
+	, m_SkyAngle(0.f)
+	, m_CamDist(8.f)
+	, m_LastTime(0.0)
+	, m_SmoothFps(60.f)
 {
+#ifdef __EMSCRIPTEN__
+	m_Driver = UDriver::createDriver(0, UDriver::OpenGlEs3);
+#else
 	m_Driver = UDriver::createDriver(0, UDriver::OpenGl3);
+#endif
 	if (!m_Driver)
 	{
 		nlerror("Failed to create driver");
@@ -460,9 +483,23 @@ void CPlanarReflectionDemo::operator()(const CEvent &event)
 
 void CPlanarReflectionDemo::run()
 {
+	m_LastTime = CTime::ticksToSecond(CTime::getPerformanceTime());
+
+#ifndef __EMSCRIPTEN__
+	while (m_Driver->isActive() && !m_CloseWindow)
+	{
+		renderOneFrame();
+	}
+#endif
+}
+
+void CPlanarReflectionDemo::renderOneFrame()
+{
+	if (!m_Driver->isFrameReady())
+		return; // GPU busy, skip frame to avoid blocking browser event loop
+
 	CFrustum frustum;
 
-	float camDist = 8.f;
 	float camHeight = 4.f;
 	float cubeHeight = 2.f;
 	float cubeHalfSize = 1.0f;
@@ -484,40 +521,31 @@ void CPlanarReflectionDemo::run()
 	// CDriverUser provides setRenderTarget, which is not on the UDriver interface
 	CDriverUser *dru = static_cast<CDriverUser *>(m_Driver);
 
-	float camAngle = 0.f;
-	float cubeAngleZ = 0.f;
-	float cubeAngleX = 0.f;
-	float skyAngle = 0.f;
-
-	double lastTime = CTime::ticksToSecond(CTime::getPerformanceTime());
-	float smoothFps = 60.f;
-
-	while (m_Driver->isActive() && !m_CloseWindow)
 	{
 		m_Driver->EventServer.pump();
 
 		uint32 screenW, screenH;
 		m_Driver->getWindowSize(screenW, screenH);
-		if (screenW == 0 || screenH == 0) { nlSleep(10); continue; }
+		if (screenW == 0 || screenH == 0) { nlSleep(10); return; }
 		frustum.initPerspective(float(Pi / 3.0), float(screenW) / float(screenH), 0.1f, 100.f);
 
 		double now = CTime::ticksToSecond(CTime::getPerformanceTime());
-		float dt = float(now - lastTime);
-		lastTime = now;
-		if (dt > 0.f) smoothFps += (1.f / dt - smoothFps) * min(1.f, dt * 5.f);
+		float dt = float(now - m_LastTime);
+		m_LastTime = now;
+		if (dt > 0.f) m_SmoothFps += (1.f / dt - m_SmoothFps) * min(1.f, dt * 5.f);
 
-		if (m_AnimCamera) camAngle += dt * 0.3f;
-		if (m_AnimCube) { cubeAngleZ += dt * 0.5f; cubeAngleX += dt * 0.3f; }
-		if (m_AnimSkybox) skyAngle += dt * 0.1f;
-		if (m_KeyForward) camDist -= dt * 4.f;
-		if (m_KeyBackward) camDist += dt * 4.f;
-		if (camDist < 1.f) camDist = 1.f;
+		if (m_AnimCamera) m_CamAngle += dt * 0.3f;
+		if (m_AnimCube) { m_CubeAngleZ += dt * 0.5f; m_CubeAngleX += dt * 0.3f; }
+		if (m_AnimSkybox) m_SkyAngle += dt * 0.1f;
+		if (m_KeyForward) m_CamDist -= dt * 4.f;
+		if (m_KeyBackward) m_CamDist += dt * 4.f;
+		if (m_CamDist < 1.f) m_CamDist = 1.f;
 
 		m_Driver->setPolygonMode(m_Wireframe ? UDriver::Line : UDriver::Filled);
 
 		// --- Phase 1: Per-frame setup ---
 
-		CVector eye(cosf(camAngle) * camDist, sinf(camAngle) * camDist, camHeight);
+		CVector eye(cosf(m_CamAngle) * m_CamDist, sinf(m_CamAngle) * m_CamDist, camHeight);
 		CVector target(0.f, 0.f, cubeHeight * 0.5f);
 		CVector up(0.f, 0.f, 1.f);
 
@@ -527,8 +555,8 @@ void CPlanarReflectionDemo::run()
 		CMatrix cubeTransform;
 		cubeTransform.identity();
 		cubeTransform.setPos(CVector(0.f, 0.f, cubeHeight));
-		cubeTransform.rotateZ(cubeAngleZ);
-		cubeTransform.rotateX(cubeAngleX);
+		cubeTransform.rotateZ(m_CubeAngleZ);
+		cubeTransform.rotateX(m_CubeAngleX);
 
 		CMatrix modelMatrix;
 		modelMatrix.identity();
@@ -676,7 +704,7 @@ void CPlanarReflectionDemo::run()
 		m_Driver->setClipPlane(0, CPlane(0.f, 0.f, 1.f, 0.f));
 		m_Driver->enableClipPlane(0, true);
 
-		drawSkybox(m_Driver, m_SkyMat, reflectedEye, skyAngle);
+		drawSkybox(m_Driver, m_SkyMat, reflectedEye, m_SkyAngle);
 		drawCube(m_Driver, m_CubeMat, cubeTransform, cubeHalfSize);
 
 		m_Driver->enableClipPlane(0, false);
@@ -701,7 +729,7 @@ void CPlanarReflectionDemo::run()
 		m_Driver->setViewMatrix(viewMatrix);
 		m_Driver->setModelMatrix(modelMatrix);
 
-		drawSkybox(m_Driver, m_SkyMat, eye, skyAngle);
+		drawSkybox(m_Driver, m_SkyMat, eye, m_SkyAngle);
 		drawCube(m_Driver, m_CubeMat, cubeTransform, cubeHalfSize);
 
 		// --- Phase 6: Render floor with reflection texture ---
@@ -962,12 +990,12 @@ void CPlanarReflectionDemo::run()
 			y -= lineH;
 			m_TextContext->printfAt(x, y, "[V] VSync: %s", m_VSync ? "ON" : "OFF");
 			y -= lineH;
-			m_TextContext->printfAt(x, y, "[Up/Down] Camera dist: %.1f", camDist);
+			m_TextContext->printfAt(x, y, "[Up/Down] Camera dist: %.1f", m_CamDist);
 			y -= lineH * 1.5f;
 			m_TextContext->printfAt(x, y, "RT: %ux%u  Active: %ux%u  UV scale: %.3f x %.3f",
 				rtW, rtH, activeW, activeH, uvScale.U, uvScale.V);
 			y -= lineH;
-			m_TextContext->printfAt(x, y, "FPS: %.1f  (%.2f ms)", smoothFps, dt * 1000.f);
+			m_TextContext->printfAt(x, y, "FPS: %.1f  (%.2f ms)", m_SmoothFps, dt * 1000.f);
 		}
 
 		// --- Phase 7: Cleanup and swap ---
@@ -979,6 +1007,16 @@ void CPlanarReflectionDemo::run()
 	}
 }
 
+#ifdef __EMSCRIPTEN__
+static CPlanarReflectionDemo *s_Demo = NULL;
+
+static void emscriptenMainLoop()
+{
+	if (s_Demo)
+		s_Demo->renderOneFrame();
+}
+#endif
+
 #ifdef NL_OS_WINDOWS
 sint WINAPI WinMain(HINSTANCE /* hInstance */, HINSTANCE /* hPrevInstance */, LPSTR /* cmdline */, int /* nCmdShow */)
 #else
@@ -987,8 +1025,16 @@ sint main(int /* argc */, char ** /* argv */)
 {
 	CApplicationContext applicationContext;
 
+#ifdef __EMSCRIPTEN__
+	// Emscripten: demo must persist since emscripten_set_main_loop never returns
+	static CPlanarReflectionDemo demo;
+	s_Demo = &demo;
+	EM_ASM({ if (window.nlLoadingComplete) window.nlLoadingComplete(); });
+	emscripten_set_main_loop(emscriptenMainLoop, 0, 1);
+#else
 	CPlanarReflectionDemo demo;
 	demo.run();
+#endif
 
 	return EXIT_SUCCESS;
 }

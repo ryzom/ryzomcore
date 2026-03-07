@@ -265,21 +265,30 @@ uint			CDriverGL3::getMaxVerticesByVertexBufferHard() const
 // TODO: Move this to CVertexBufferGL3
 GLenum CDriverGL3::vertexBufferUsageGL3(CVertexBuffer::TBufferUsage usage)
 {
+	// According to an NVIDIA developer guide, the preferred choice should be STATIC_DRAW,
+	// unless the other options give better performance.
+
+	// While there is no official meaning, in relative terms, it seems that STATIC is equivalent
+	// to single buffered, dynamic means triple buffered, and stream means ring buffered.
+	// These are not exact behaviors, and dependent on the GPU driver, but from a usage 
+	// point of view, this should be a more useful mental model of the behavior than whatever
+	// vague non-explanations the GL wiki offers.
+
 	switch (usage)
 	{
-	case CVertexBuffer::CpuReadWrite:
+	case CVertexBuffer::CpuReadWrite: // Shadow buffer and orphaning
 		return GL_DYNAMIC_DRAW; // Shadow buffer: orphan + full upload, drawn from many times
-	case CVertexBuffer::FullRewrite:
-		return GL_DYNAMIC_DRAW;
+	case CVertexBuffer::FullRewrite: // Triple buffered
+		return GL_STATIC_DRAW;
 	case CVertexBuffer::UnsynchronizedWrite:
-		return GL_DYNAMIC_DRAW; // Caller manages sync via deferred freeing
-	case CVertexBuffer::PartialWrite:
+		return GL_STATIC_DRAW; // Caller manages sync via deferred freeing
+	case CVertexBuffer::PartialWrite: // Single buffer with intermediate orphaned staging buffers for partial writes
 		return GL_STATIC_DRAW; // Only written by GPU-side CopyBufferSubData from staging
 	case CVertexBuffer::Immutable:
-		return getStaticMemoryToVRAM() ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW;
+		return GL_STATIC_DRAW;
 	case CVertexBuffer::SmallStream:
 	case CVertexBuffer::FullStream:
-		return GL_STREAM_DRAW;
+		return GL_STATIC_DRAW; // These are currently implemented as triple buffered rather than a strict "use once" ring buffer
 	default:
 		nlerror("Invalid buffer usage");
 		return GL_DYNAMIC_DRAW;

@@ -65,6 +65,9 @@ void inGamePatchUncompleteWarning();
 // enable/disable bloom config interface
 void initBloomConfigUI();
 
+// enable/disable GPU skinning config interface
+void initGPUSkinningConfigUI();
+
 #endif // CL_MAIN_LOOP_H
 
 /* End of main_loop.h */

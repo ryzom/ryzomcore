@@ -30,6 +30,14 @@
         "lhs": "${hostSystemName}",
         "rhs": "Darwin"
       }
+    },
+    {
+      "name": "x86-mingw",
+      "hidden": true,
+      "cacheVariables": {
+        "MINGW": true,
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/CMakeModules/toolchain-mingw.cmake"
+      }
     }
   ]
 }

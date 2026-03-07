@@ -178,7 +178,12 @@ public:
 	/// @name Clip planes
 	/// @{
 
+	/// Set PP clip plane mode. When true, all GL_CLIP_DISTANCE calls are skipped
+	/// because clip planes are handled in the pixel program via discard.
+	void setPPClipPlanes(bool pp) { m_PPClipPlanes = pp; }
+
 	/// glEnable/glDisable(GL_CLIP_DISTANCE0 + index). Index must be < 6.
+	/// Skipped when PP clip plane mode is active.
 	void enableClipDistance(uint index, bool enable);
 
 	/// @}
@@ -330,6 +335,7 @@ private:
 	// Clip planes
 	enum { MaxClipDistances = 6 };
 	bool m_CurClipDistance[MaxClipDistances];
+	bool m_PPClipPlanes;
 
 	// =========================================================================
 	// Geometry state (NOT reset by forceDefaults)

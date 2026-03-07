@@ -65,6 +65,7 @@ static inline GLsizei vbgl3BufferForType(CVertexBuffer::TBufferUsage mem)
 	{
 	case CVertexBuffer::FullStream:
 	case CVertexBuffer::SmallStream:
+	case CVertexBuffer::FullRewrite:
 		return NL3D_GL3_BUFFER_QUEUE_MAX;
 	default:
 		return 1;
@@ -240,6 +241,7 @@ void *CVertexBufferGL3::lock()
 	{
 	case CVertexBuffer::FullStream:
 	case CVertexBuffer::SmallStream:
+	case CVertexBuffer::FullRewrite:
 	{
 		if (m_CurrentInFlight)
 		{
@@ -265,7 +267,12 @@ void *CVertexBufferGL3::lock()
 			++m_ReuseCount;
 			nldebug("GL: Vertex buffer can be reused (reused: %u, invalidated: %u)", m_ReuseCount, m_InvalidateCount);
 #endif
+#ifdef __EMSCRIPTEN__
+			// WebGL 2.0 only supports MAP_WRITE|INVALIDATE_BUFFER for glMapBufferRange
+			m_VertexPtr = nglMapBufferRange(GL_ARRAY_BUFFER, 0, size, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+#else
 			m_VertexPtr = nglMapBufferRange(GL_ARRAY_BUFFER, 0, size, GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT);
+#endif
 		}
 		break;
 	}
@@ -273,13 +280,17 @@ void *CVertexBufferGL3::lock()
 		m_Driver->_DriverGLStates.bindArrayBuffer(m_VertexObjectId[m_CurrentIndex]);
 		m_VertexPtr = nglMapBufferRange(GL_ARRAY_BUFFER, 0, size, GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT);
 		break;
-	case CVertexBuffer::FullRewrite:
-		m_Driver->_DriverGLStates.bindArrayBuffer(m_VertexObjectId[m_CurrentIndex]);
-		m_VertexPtr = nglMapBufferRange(GL_ARRAY_BUFFER, 0, size, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
-		break;
+	// case CVertexBuffer::FullRewrite:
+	// 	m_Driver->_DriverGLStates.bindArrayBuffer(m_VertexObjectId[m_CurrentIndex]);
+	// 	m_VertexPtr = nglMapBufferRange(GL_ARRAY_BUFFER, 0, size, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+	// 	break;
 	default:
 		m_Driver->_DriverGLStates.bindArrayBuffer(m_VertexObjectId[m_CurrentIndex]);
+#ifdef USE_OPENGLES3
+		m_VertexPtr = nglMapBufferRange(GL_ARRAY_BUFFER, 0, size, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+#else
 		m_VertexPtr = nglMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+#endif
 		break;
 	}
 
@@ -626,10 +637,18 @@ void *CVertexBufferAMDPinned::lock()
 		m_VertexPtr = NULL;
 		break;
 	case CVertexBuffer::CpuReadWrite:
+#ifdef USE_OPENGLES3
+		m_VertexPtr = nglMapBufferRange(GL_ARRAY_BUFFER, 0, VB->getNumVertices() * VB->getVertexSize(), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+#else
 		m_VertexPtr = nglMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
+#endif
 		break;
 	default:
+#ifdef USE_OPENGLES3
+		m_VertexPtr = nglMapBufferRange(GL_ARRAY_BUFFER, 0, VB->getNumVertices() * VB->getVertexSize(), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+#else
 		m_VertexPtr = nglMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+#endif
 		break;
 	}
 	m_Driver->_DriverGLStates.forceBindArrayBuffer(0);

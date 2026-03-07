@@ -1058,6 +1058,18 @@ bool			CSceneUser::getEnableShadowPolySmooth() const
 }
 
 // ***************************************************************************
+void			CSceneUser::enableGPUSkinning(bool enable)
+{
+	_Scene.enableGPUSkinning(enable);
+}
+
+// ***************************************************************************
+bool			CSceneUser::isGPUSkinningEnabled() const
+{
+	return _Scene.isGPUSkinningEnabled();
+}
+
+// ***************************************************************************
 void			CSceneUser::setShadowMapDistFadeStart(float dist)
 {
 	_Scene.setShadowMapDistFadeStart(dist);

@@ -67,6 +67,10 @@
 #include <nel/3d/material.h>
 #include <nel/3d/vertex_program.h>
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
 #ifdef NL_OS_WINDOWS
 #ifndef NL_COMP_MINGW
 #define NOMINMAX
@@ -338,6 +342,7 @@ public:
 	CNelvpDemo();
 	~CNelvpDemo();
 	void run();
+	void renderOneFrame();
 
 	virtual void operator()(const CEvent &event) NL_OVERRIDE;
 
@@ -355,6 +360,13 @@ private:
 
 	CMaterial m_Mat;
 	CVertexProgram *m_VP;
+
+	CFrustum m_Frustum;
+	float m_CamDist;
+	float m_CamHeight;
+	float m_CamAngle;
+	double m_StartTime;
+	double m_LastTime;
 };
 
 CNelvpDemo::CNelvpDemo()
@@ -364,8 +376,17 @@ CNelvpDemo::CNelvpDemo()
 	, m_Amplitude(0.15f)
 	, m_Frequency(3.f)
 	, m_VP(NULL)
+	, m_CamDist(7.f)
+	, m_CamHeight(3.f)
+	, m_CamAngle(0.f)
+	, m_StartTime(0.0)
+	, m_LastTime(0.0)
 {
+#ifdef __EMSCRIPTEN__
+	m_Driver = UDriver::createDriver(0, UDriver::OpenGlEs3);
+#else
 	m_Driver = UDriver::createDriver(0, UDriver::OpenGl3);
+#endif
 	if (!m_Driver)
 	{
 		nlerror("Failed to create driver");
@@ -388,6 +409,10 @@ CNelvpDemo::CNelvpDemo()
 
 	// Create vertex program from nelvp source
 	m_VP = new CVertexProgram(s_NelvpSource);
+
+	m_Frustum.initPerspective(float(Pi / 3.0), 800.f / 600.f, 0.1f, 100.f);
+	m_StartTime = CTime::ticksToSecond(CTime::getPerformanceTime());
+	m_LastTime = m_StartTime;
 }
 
 CNelvpDemo::~CNelvpDemo()
@@ -419,149 +444,159 @@ void CNelvpDemo::operator()(const CEvent &event)
 	}
 }
 
-void CNelvpDemo::run()
+void CNelvpDemo::renderOneFrame()
 {
-	CFrustum frustum;
-	frustum.initPerspective(float(Pi / 3.0), 800.f / 600.f, 0.1f, 100.f);
+	if (!m_Driver->isFrameReady())
+		return; // GPU busy, skip frame to avoid blocking browser event loop
 
 	IDriver *drv = static_cast<CDriverUser *>(m_Driver)->getDriver();
 
-	float camDist = 7.f;
-	float camHeight = 3.f;
-	float camAngle = 0.f;
+	m_Driver->EventServer.pump();
 
-	double startTime = CTime::ticksToSecond(CTime::getPerformanceTime());
-	double lastTime = startTime;
+	double now = CTime::ticksToSecond(CTime::getPerformanceTime()) - m_StartTime;
+	double dt = now - (m_LastTime - m_StartTime);
+	m_LastTime = now + m_StartTime;
 
+	// Camera orbit
+	if (m_AnimCamera)
+		m_CamAngle += float(dt * 0.4);
+
+	CVector eye(cosf(m_CamAngle) * m_CamDist, sinf(m_CamAngle) * m_CamDist, m_CamHeight);
+	CVector target(0.f, 0.f, 0.f);
+	CVector up(0.f, 0.f, 1.f);
+	CMatrix viewMatrix = buildViewMatrix(eye, target, up);
+
+	m_Driver->clearBuffers(CRGBA(25, 25, 30));
+
+	m_Driver->setFrustum(m_Frustum);
+	m_Driver->setViewMatrix(viewMatrix);
+
+	// Model matrix: identity (sphere at origin)
+	CMatrix modelMatrix;
+	modelMatrix.identity();
+	m_Driver->setModelMatrix(modelMatrix);
+
+	// Wireframe toggle
+	if (m_Wireframe)
+		m_Driver->setPolygonMode(UDriver::Line);
+	else
+		m_Driver->setPolygonMode(UDriver::Filled);
+
+	// Activate vertex program BEFORE vertex buffer (driver requirement)
+	nlverify(drv->activeVertexProgram(m_VP));
+
+	// --- Set VP constant registers ---
+
+	// c[0]-c[3]: ModelViewProjection matrix
+	drv->setUniformMatrix(IDriver::VertexProgram, 0,
+		IDriver::ModelViewProjection, IDriver::Identity);
+
+	// c[4]-c[7]: ModelView matrix (for eye-space position)
+	drv->setUniformMatrix(IDriver::VertexProgram, 4,
+		IDriver::ModelView, IDriver::Identity);
+
+	// c[8]-c[11]: ModelView inverse-transpose (for normal transform)
+	drv->setUniformMatrix(IDriver::VertexProgram, 8,
+		IDriver::ModelView, IDriver::InverseTranspose);
+
+	// c[12]: Wobble parameters (time, amplitude, frequency1, phase_scale)
+	float phaseScale = 1.5f;
+	drv->setUniform4f(IDriver::VertexProgram, 12,
+		(float)now, m_Amplitude, m_Frequency, phaseScale);
+
+	// c[13]: Taylor coefficients for cos: (1, -1/2!, 1/4!, -1/6!)
+	drv->setUniform4f(IDriver::VertexProgram, 13,
+		1.f, -0.5f, 1.f / 24.f, -1.f / 720.f);
+
+	// c[14]: Trig constants: (2*Pi, 1/(2*Pi), Pi, 1/8!)
+	drv->setUniform4f(IDriver::VertexProgram, 14,
+		2.f * (float)Pi, 1.f / (2.f * (float)Pi),
+		(float)Pi, 1.f / 40320.f);
+
+	// c[15]: Utility constants (0, 0.5, 1, 2)
+	drv->setUniform4f(IDriver::VertexProgram, 15,
+		0.f, 0.5f, 1.f, 2.f);
+
+	// Orbiting lights
+	float light0Angle = float(now * 0.7);
+	float light1Angle = float(now * 0.5) + (float)Pi;
+
+	CVector light0World(
+		cosf(light0Angle) * 5.f,
+		sinf(light0Angle) * 5.f,
+		2.f + sinf(float(now * 0.3f)) * 2.f);
+	CVector light1World(
+		cosf(light1Angle) * 6.f,
+		sinf(light1Angle) * 6.f,
+		1.f + cosf(float(now * 0.4f)) * 2.f);
+
+	// Transform light positions to eye space
+	CVector light0Eye = viewMatrix * light0World;
+	CVector light1Eye = viewMatrix * light1World;
+
+	// c[16]: Light 0 position (eye space)
+	drv->setUniform4f(IDriver::VertexProgram, 16,
+		light0Eye.x, light0Eye.y, light0Eye.z, 1.f);
+
+	// c[17]: Light 0 diffuse color (warm orange-red)
+	drv->setUniform4f(IDriver::VertexProgram, 17,
+		0.9f, 0.4f, 0.15f, 1.f);
+
+	// c[18]: Light 0 specular color (bright white-orange)
+	drv->setUniform4f(IDriver::VertexProgram, 18,
+		1.0f, 0.7f, 0.4f, 1.f);
+
+	// c[19]: Light 1 position (eye space)
+	drv->setUniform4f(IDriver::VertexProgram, 19,
+		light1Eye.x, light1Eye.y, light1Eye.z, 1.f);
+
+	// c[20]: Light 1 diffuse color (cool blue-cyan)
+	drv->setUniform4f(IDriver::VertexProgram, 20,
+		0.15f, 0.4f, 0.9f, 1.f);
+
+	// c[21]: Light 1 specular color (bright white-blue)
+	drv->setUniform4f(IDriver::VertexProgram, 21,
+		0.4f, 0.7f, 1.0f, 1.f);
+
+	// c[22]: Ambient color (dim cool gray)
+	drv->setUniform4f(IDriver::VertexProgram, 22,
+		0.05f, 0.05f, 0.08f, 1.f);
+
+	// c[23]: (specular_power, frequency2, 0, 0)
+	// frequency2 = frequency1 * 1.3 for temporal decoherence between waves
+	drv->setUniform4f(IDriver::VertexProgram, 23,
+		32.f, m_Frequency * 1.3f, 0.f, 0.f);
+
+	// Activate buffers and render
+	drv->activeVertexBuffer(m_SphereVB);
+	drv->activeIndexBuffer(m_SphereIB);
+	drv->renderTriangles(m_Mat, 0, m_SphereIB.getNumIndexes() / 3);
+
+	// Deactivate vertex program
+	drv->activeVertexProgram(NULL);
+
+	m_Driver->swapBuffers();
+}
+
+void CNelvpDemo::run()
+{
+#ifndef __EMSCRIPTEN__
 	while (m_Driver->isActive() && !m_CloseWindow)
 	{
-		m_Driver->EventServer.pump();
-
-		double now = CTime::ticksToSecond(CTime::getPerformanceTime()) - startTime;
-		double dt = now - (lastTime - startTime);
-		lastTime = now + startTime;
-
-		// Camera orbit
-		if (m_AnimCamera)
-			camAngle += float(dt * 0.4);
-
-		CVector eye(cosf(camAngle) * camDist, sinf(camAngle) * camDist, camHeight);
-		CVector target(0.f, 0.f, 0.f);
-		CVector up(0.f, 0.f, 1.f);
-		CMatrix viewMatrix = buildViewMatrix(eye, target, up);
-
-		m_Driver->clearBuffers(CRGBA(25, 25, 30));
-
-		m_Driver->setFrustum(frustum);
-		m_Driver->setViewMatrix(viewMatrix);
-
-		// Model matrix: identity (sphere at origin)
-		CMatrix modelMatrix;
-		modelMatrix.identity();
-		m_Driver->setModelMatrix(modelMatrix);
-
-		// Wireframe toggle
-		if (m_Wireframe)
-			m_Driver->setPolygonMode(UDriver::Line);
-		else
-			m_Driver->setPolygonMode(UDriver::Filled);
-
-		// Activate vertex program BEFORE vertex buffer (driver requirement)
-		nlverify(drv->activeVertexProgram(m_VP));
-
-		// --- Set VP constant registers ---
-
-		// c[0]-c[3]: ModelViewProjection matrix
-		drv->setUniformMatrix(IDriver::VertexProgram, 0,
-			IDriver::ModelViewProjection, IDriver::Identity);
-
-		// c[4]-c[7]: ModelView matrix (for eye-space position)
-		drv->setUniformMatrix(IDriver::VertexProgram, 4,
-			IDriver::ModelView, IDriver::Identity);
-
-		// c[8]-c[11]: ModelView inverse-transpose (for normal transform)
-		drv->setUniformMatrix(IDriver::VertexProgram, 8,
-			IDriver::ModelView, IDriver::InverseTranspose);
-
-		// c[12]: Wobble parameters (time, amplitude, frequency1, phase_scale)
-		float phaseScale = 1.5f;
-		drv->setUniform4f(IDriver::VertexProgram, 12,
-			(float)now, m_Amplitude, m_Frequency, phaseScale);
-
-		// c[13]: Taylor coefficients for cos: (1, -1/2!, 1/4!, -1/6!)
-		drv->setUniform4f(IDriver::VertexProgram, 13,
-			1.f, -0.5f, 1.f / 24.f, -1.f / 720.f);
-
-		// c[14]: Trig constants: (2*Pi, 1/(2*Pi), Pi, 1/8!)
-		drv->setUniform4f(IDriver::VertexProgram, 14,
-			2.f * (float)Pi, 1.f / (2.f * (float)Pi),
-			(float)Pi, 1.f / 40320.f);
-
-		// c[15]: Utility constants (0, 0.5, 1, 2)
-		drv->setUniform4f(IDriver::VertexProgram, 15,
-			0.f, 0.5f, 1.f, 2.f);
-
-		// Orbiting lights
-		float light0Angle = float(now * 0.7);
-		float light1Angle = float(now * 0.5) + (float)Pi;
-
-		CVector light0World(
-			cosf(light0Angle) * 5.f,
-			sinf(light0Angle) * 5.f,
-			2.f + sinf(float(now * 0.3f)) * 2.f);
-		CVector light1World(
-			cosf(light1Angle) * 6.f,
-			sinf(light1Angle) * 6.f,
-			1.f + cosf(float(now * 0.4f)) * 2.f);
-
-		// Transform light positions to eye space
-		CVector light0Eye = viewMatrix * light0World;
-		CVector light1Eye = viewMatrix * light1World;
-
-		// c[16]: Light 0 position (eye space)
-		drv->setUniform4f(IDriver::VertexProgram, 16,
-			light0Eye.x, light0Eye.y, light0Eye.z, 1.f);
-
-		// c[17]: Light 0 diffuse color (warm orange-red)
-		drv->setUniform4f(IDriver::VertexProgram, 17,
-			0.9f, 0.4f, 0.15f, 1.f);
-
-		// c[18]: Light 0 specular color (bright white-orange)
-		drv->setUniform4f(IDriver::VertexProgram, 18,
-			1.0f, 0.7f, 0.4f, 1.f);
-
-		// c[19]: Light 1 position (eye space)
-		drv->setUniform4f(IDriver::VertexProgram, 19,
-			light1Eye.x, light1Eye.y, light1Eye.z, 1.f);
-
-		// c[20]: Light 1 diffuse color (cool blue-cyan)
-		drv->setUniform4f(IDriver::VertexProgram, 20,
-			0.15f, 0.4f, 0.9f, 1.f);
-
-		// c[21]: Light 1 specular color (bright white-blue)
-		drv->setUniform4f(IDriver::VertexProgram, 21,
-			0.4f, 0.7f, 1.0f, 1.f);
-
-		// c[22]: Ambient color (dim cool gray)
-		drv->setUniform4f(IDriver::VertexProgram, 22,
-			0.05f, 0.05f, 0.08f, 1.f);
-
-		// c[23]: (specular_power, frequency2, 0, 0)
-		// frequency2 = frequency1 * 1.3 for temporal decoherence between waves
-		drv->setUniform4f(IDriver::VertexProgram, 23,
-			32.f, m_Frequency * 1.3f, 0.f, 0.f);
-
-		// Activate buffers and render
-		drv->activeVertexBuffer(m_SphereVB);
-		drv->activeIndexBuffer(m_SphereIB);
-		drv->renderTriangles(m_Mat, 0, m_SphereIB.getNumIndexes() / 3);
-
-		// Deactivate vertex program
-		drv->activeVertexProgram(NULL);
-
-		m_Driver->swapBuffers();
+		renderOneFrame();
 	}
+#endif
 }
+
+#ifdef __EMSCRIPTEN__
+static CNelvpDemo *s_Demo = NULL;
+
+static void emscriptenMainLoop()
+{
+	if (s_Demo)
+		s_Demo->renderOneFrame();
+}
+#endif
 
 #ifdef NL_OS_WINDOWS
 sint WINAPI WinMain(HINSTANCE /* hInstance */, HINSTANCE /* hPrevInstance */, LPSTR /* cmdline */, int /* nCmdShow */)
@@ -571,8 +606,16 @@ sint main(int /* argc */, char ** /* argv */)
 {
 	CApplicationContext applicationContext;
 
+#ifdef __EMSCRIPTEN__
+	// Emscripten: demo must persist since emscripten_set_main_loop never returns
+	static CNelvpDemo demo;
+	s_Demo = &demo;
+	EM_ASM({ if (window.nlLoadingComplete) window.nlLoadingComplete(); });
+	emscripten_set_main_loop(emscriptenMainLoop, 0, 1);
+#else
 	CNelvpDemo demo;
 	demo.run();
+#endif
 
 	return EXIT_SUCCESS;
 }

@@ -1,0 +1,56 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "ryzom-core",
+  "version-string": "4.1.0.0",
+  "dependencies": [
+    "curl",
+    {
+      "name": "freetype",
+      "default-features": false,
+      "features": [
+        "error-strings"
+      ]
+    },
+    "giflib",
+    "libogg",
+    "libvorbis",
+    "libpng",
+    "libjpeg-turbo",
+    {
+      "name": "libxml2",
+      "default-features": false,
+      "features": [
+        "zlib"
+      ]
+    },
+    "lua",
+    "luabind",
+    "msquic",
+    "openal-soft",
+    "opengl",
+    "openssl",
+    "zlib"
+  ],
+  "overrides": [
+    {
+      "name": "openal-soft",
+      "version": "1.24.3"
+    }
+  ],
+  "default-features": ["testing"],
+  "features": {
+    "qt": {
+      "description": "Builds with QT",
+      "dependencies": [
+        "qt"
+      ]
+    },
+    "testing": {
+      "description": "Builds tests",
+      "dependencies": [
+        "cpptest",
+        "gtest"
+      ]
+    }
+  }
+}

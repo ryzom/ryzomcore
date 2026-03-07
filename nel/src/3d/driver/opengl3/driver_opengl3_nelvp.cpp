@@ -400,34 +400,56 @@ bool CDriverGL3::convertNelvpToGLSL(CVertexProgram *program, bool linked)
 	if (!linked)
 		ss << "out gl_PerVertex { vec4 gl_Position; float gl_PointSize; };\n\n";
 
-	// Input attributes
+	// Input attributes — always use layout(location) for vertex inputs,
+	// even in linked mode. GLSL ES 3.00 supports layout(location) on
+	// vertex shader inputs. The locations must match the vertex buffer
+	// attribute bindings (0=position, 2=normal, etc.).
 	for (int i = 0; i < 16; i++)
 	{
 		if (inputUsed[i])
 		{
-			if (!linked)
-				ss << "layout(location = " << i << ") ";
+			ss << "layout(location = " << i << ") ";
 			ss << "in vec4 v" << i << ";\n";
 		}
 	}
 	ss << "\n";
 
 	// Output varyings
-	// Always output ecPos at location 0 (synthesized for fog)
-	if (!linked)
-		ss << "layout(location = " << VaryingLocationEcPos << ") ";
-	ss << "smooth out vec4 ecPos;\n";
-
-	for (int i = 0; i < CVPOperand::OutputRegisterCount; i++)
+	if (linked)
 	{
-		if (!outputUsed[i]) continue;
-		if (s_OutputVaryingName[i] == NULL) continue; // gl_Position, gl_PointSize, or unsupported
-		int loc = s_OutputVaryingLocation[i];
-		if (loc < 0) continue;
+		// In linked mode (WebGL 2.0 / GLES 3.0), the nelvp VP is linked with
+		// the mega PP. WebGL 2.0 requires ALL fragment shader inputs to have
+		// matching vertex shader outputs (hard link error otherwise). Declare
+		// all varyings the mega PP might expect. Unused ones are initialized
+		// to vec4(0.0) in main().
+		ss << "smooth out vec4 ecPos;\n";
+		ss << "smooth out vec4 vertexColor;\n";
+		ss << "smooth out vec4 worldPos;\n";
+		for (int i = Weight; i < NumOffsets; ++i)
+		{
+			if (i == PrimaryColor || i == SecondaryColor)
+				continue;
+			ss << "smooth out vec4 " << g_AttribNames[i] << ";\n";
+		}
+		ss << "smooth out vec4 diffuseColor;\n";
+		ss << "smooth out vec4 specularColor;\n";
+	}
+	else
+	{
+		// SSO mode: only declare varyings the nelvp program actually uses
+		ss << "layout(location = " << VaryingLocationEcPos << ") ";
+		ss << "smooth out vec4 ecPos;\n";
 
-		if (!linked)
+		for (int i = 0; i < CVPOperand::OutputRegisterCount; i++)
+		{
+			if (!outputUsed[i]) continue;
+			if (s_OutputVaryingName[i] == NULL) continue;
+			int loc = s_OutputVaryingLocation[i];
+			if (loc < 0) continue;
+
 			ss << "layout(location = " << loc << ") ";
-		ss << "smooth out vec4 " << s_OutputVaryingName[i] << ";\n";
+			ss << "smooth out vec4 " << s_OutputVaryingName[i] << ";\n";
+		}
 	}
 	ss << "\n";
 

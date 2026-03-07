@@ -280,6 +280,8 @@ public:
 	virtual	void			setShadowMapBlurSize(uint bs);
 	virtual	void			enableShadowPolySmooth(bool enable);
 	virtual	bool			getEnableShadowPolySmooth() const;
+	virtual	void			enableGPUSkinning(bool enable);
+	virtual	bool			isGPUSkinningEnabled() const;
 	virtual	void			setShadowMapDistFadeStart(float dist);
 	virtual	float			getShadowMapDistFadeStart() const;
 	virtual	void			setShadowMapDistFadeEnd(float dist);

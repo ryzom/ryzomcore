@@ -80,10 +80,17 @@ namespace NL3D {
 
 #ifdef NL_STATIC
 
+#ifdef USE_OPENGLES3
+IDriver* createGlEs3DriverInstance ()
+{
+	return new NLDRIVERGL3::CDriverGL3;
+}
+#else
 IDriver* createGl3DriverInstance ()
 {
 	return new NLDRIVERGL3::CDriverGL3;
 }
+#endif
 
 #else
 
@@ -190,7 +197,7 @@ CDriverGL3::CDriverGL3()
 	// finish the application launching
 	[NSApp finishLaunching];
 
-#elif defined (NL_OS_UNIX)
+#elif defined (NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
 
 	_dpy = 0;
 	_visual_info = NULL;
@@ -311,6 +318,11 @@ CDriverGL3::CDriverGL3()
 		_SwapBufferSync[i] = 0;
 	_PixelUploadPBO = 0;
 
+#ifdef USE_OPENGLES3
+	_ScratchElementBuffer = 0;
+	_ScratchElementBufferSize = 0;
+#endif
+
 	_LightMapDynamicLightEnabled = false;
 	_LightMapDynamicLightDirty= false;
 	_LightMapDynUBOId = 0;
@@ -322,6 +334,7 @@ CDriverGL3::CDriverGL3()
 	_LightTableDirty = false;
 	_UserLightUBODirty = true;
 	_LightTableUBOCapacity = 0;
+	_MaxLightTableSize = NL_OPENGL3_MAX_LIGHT_TABLE_CAPACITY;
 	_CameraUBOId = 0;
 	_CameraUBODirty = true;
 	_CameraUBOUploadDirty = false;
@@ -352,10 +365,16 @@ CDriverGL3::CDriverGL3()
 	m_VPBuiltinTouched = true;
 	
 	// for GL ES 3.0 compatibility
-	m_PPClipPlanes = false; // false for GL 3.3, true for GL ES 3.0, switches to using PP for clip plane discard, since no driver support
-	m_LinkedMegaShaders = false; // not required but also useful under GL 3.3, set true for both
-	m_SupportSSO = true; // true for GL 3.3, false for GL ES 3.0, false if we want to be strict :)
-	// set sso and linked shaders opposite to each other to test exclusive modes
+#ifdef USE_OPENGLES3
+	m_PPClipPlanes = true; // GL ES 3.0: use PP-based clip plane discard, no native gl_ClipDistance
+	m_LinkedMegaShaders = true; // GL ES 3.0: always use linked VP+PP programs, SSO not available
+	m_SupportSSO = false; // GL ES 3.0: SSO not available (no GL_ARB_separate_shader_objects)
+#else
+	m_PPClipPlanes = false; // GL 3.3: use native gl_ClipDistance
+	m_LinkedMegaShaders = true; // GL 3.3: also useful, set true for both
+	m_SupportSSO = true; // GL 3.3: separable shader objects supported
+#endif
+	_DriverGLStates.setPPClipPlanes(m_PPClipPlanes);
 	// m_SupportNonUBOs = false; // testing strict mode, linked-only always implies ubo-only // TODO
 
 #if !FINAL_VERSION && defined(NL_DEBUG)
@@ -420,9 +439,24 @@ bool CDriverGL3::setupDisplay()
 #if defined(NL_OS_WINDOWS)
 	registerWGlExtensions(_Extensions, _hDC);
 #elif defined(NL_OS_MAC)
-#elif defined(NL_OS_UNIX)
+#elif defined(NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
 	registerGlXExtensions(_Extensions, _dpy, DefaultScreen(_dpy));
 #endif // NL_OS_WINDOWS
+
+	// Determine runtime light table size based on ANGLE/platform detection
+	_MaxLightTableSize = NL_OPENGL3_MAX_LIGHT_TABLE_CAPACITY;
+#ifdef __EMSCRIPTEN__
+	if (_Extensions.IsWindowsPlatform || _Extensions.IsAndroidPlatform) // WebGL on Windows/Android: assume poor GLES translation
+		_MaxLightTableSize = NL_OPENGL3_ANGLE_MAX_LIGHT_TABLE;
+#else
+	if (_Extensions.IsANGLE) // Desktop: only if ANGLE detected via GL_RENDERER
+		_MaxLightTableSize = NL_OPENGL3_ANGLE_MAX_LIGHT_TABLE;
+#endif
+	nlinfo("3D: Light table size: %d (ANGLE: %s, Windows: %s, Android: %s)",
+		_MaxLightTableSize,
+		_Extensions.IsANGLE ? "yes" : "no",
+		_Extensions.IsWindowsPlatform ? "yes" : "no",
+		_Extensions.IsAndroidPlatform ? "yes" : "no");
 
 	// Check required extensions!!
 	if (!_Extensions.GLCore)
@@ -531,6 +565,37 @@ bool CDriverGL3::setupDisplay()
 	nglGenBuffers(1, &_ObjectUBOId);
 	// nglGenBuffers(1, &_OverrideMaterialUBOId); // Replaced by per-material UBO slots
 	nglGenBuffers(1, &_PixelUploadPBO);
+
+#ifdef USE_OPENGLES3
+	// WebGL 2.0 does not support client-side index arrays.
+	// Create a scratch element buffer for uploading index data before draw calls.
+	nglGenBuffers(1, &_ScratchElementBuffer);
+#endif
+
+	// Pre-allocate UBOs to their full declared sizes.
+	// WebGL 2.0 requires bound UBOs to be at least as large as the
+	// corresponding uniform block in the shader, even before first use.
+	{
+		// NlLightTable: _MaxLightTableSize × NlLightInfo (96 bytes each)
+		_DriverGLStates.forceBindUniformBuffer(_LightTableUBOId);
+		nglBufferData(GL_UNIFORM_BUFFER, _MaxLightTableSize * sizeof(CLightTableUBOEntry), NULL, GL_STREAM_DRAW);
+		_LightTableUBOCapacity = _MaxLightTableSize;
+
+		// NlLightTable binding for lightmap dynamic UBO (1 entry)
+		_DriverGLStates.forceBindUniformBuffer(_LightMapDynUBOId);
+		nglBufferData(GL_UNIFORM_BUFFER, sizeof(CLightTableUBOEntry), NULL, GL_STREAM_DRAW);
+
+		// NlCamera UBO
+		_DriverGLStates.forceBindUniformBuffer(_CameraUBOId);
+		nglBufferData(GL_UNIFORM_BUFFER, sizeof(CCameraUBOData), NULL, GL_STREAM_DRAW);
+		_CameraUBOCapacity = sizeof(CCameraUBOData);
+
+		// NlModel (object) UBO
+		_DriverGLStates.forceBindUniformBuffer(_ObjectUBOId);
+		nglBufferData(GL_UNIFORM_BUFFER, sizeof(CObjectUBOData), NULL, GL_STREAM_DRAW);
+
+		_DriverGLStates.forceBindUniformBuffer(0);
+	}
 
 	if (m_UseMegaShaders)
 	{
@@ -712,6 +777,22 @@ void CDriverGL3::setColorMask (bool bRed, bool bGreen, bool bBlue, bool bAlpha)
 }
 
 // --------------------------------------------------
+bool CDriverGL3::isFrameReady()
+{
+	size_t syncI = _SwapBufferCounter % NL3D_GL3_FRAME_QUEUE_MAX;
+	if (_SwapBufferSync[syncI])
+	{
+		// Non-blocking check: is the oldest fence signaled?
+		GLint status = GL_UNSIGNALED;
+		GLsizei len = 0;
+		nglGetSynciv(_SwapBufferSync[syncI], GL_SYNC_STATUS, 1, &len, &status);
+		if (len == 0 || status != GL_SIGNALED)
+			return false; // GPU still processing or query failed, skip this frame
+	}
+	return true;
+}
+
+// --------------------------------------------------
 bool CDriverGL3::swapBuffers()
 {
 	H_AUTO_OGL(CDriverGL3_swapBuffers);
@@ -723,6 +804,17 @@ bool CDriverGL3::swapBuffers()
 #if NL3D_GL3_FRAME_IN_FLIGHT_DEBUG
 		nldebug("Wait for oldest fence");
 #endif
+#ifdef __EMSCRIPTEN__
+		// On Emscripten, we cannot block. Callers should check isFrameReady() first.
+		// If the sync is still unsignaled (caller didn't check), log a warning.
+		{
+			GLint status = GL_UNSIGNALED;
+			GLsizei len = 0;
+			nglGetSynciv(_SwapBufferSync[syncI], GL_SYNC_STATUS, 1, &len, &status);
+			if (status != GL_SIGNALED)
+				nldebug("GL3: swapBuffers called while GPU sync not yet signaled (caller should check isFrameReady())");
+		}
+#else
 		GLenum syncR = nglClientWaitSync(_SwapBufferSync[syncI], 0, 1000000000ULL);
 		switch (syncR)
 		{
@@ -738,6 +830,7 @@ bool CDriverGL3::swapBuffers()
 		default:
 			nlwarning("Unknown glClientWaitSync result");
 		}
+#endif
 		nglDeleteSync(_SwapBufferSync[syncI]);
 		++_SwapBufferInFlight;
 	}
@@ -769,7 +862,9 @@ bool CDriverGL3::swapBuffers()
 
 #elif defined (NL_OS_UNIX)
 
+#ifndef __EMSCRIPTEN__
 	glXSwapBuffers(_dpy, _win);
+#endif
 
 #endif // NL_OS_WINDOWS
 
@@ -912,6 +1007,14 @@ bool CDriverGL3::release()
 		nglDeleteBuffers(1, &_PixelUploadPBO);
 		_PixelUploadPBO = 0;
 	}
+
+#ifdef USE_OPENGLES3
+	if (_ScratchElementBuffer)
+	{
+		nglDeleteBuffers(1, &_ScratchElementBuffer);
+		_ScratchElementBuffer = 0;
+	}
+#endif
 
 	// Call IDriver::release() before, to destroy textures, shaders and VBs...
 	IDriver::release();
@@ -1406,7 +1509,7 @@ void	CDriverGL3::setSwapVBLInterval(uint interval)
 		res = nwglSwapIntervalEXT(interval) == TRUE;
 	}
 #elif defined(NL_OS_MAC)
-#elif defined(NL_OS_UNIX)
+#elif defined(NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
 	if (_win && _Extensions.GLXEXTSwapControl)
 	{
 		res = nglXSwapIntervalEXT(_dpy, _win, interval) == 0;
@@ -1442,7 +1545,7 @@ uint	CDriverGL3::getSwapVBLInterval()
 		return nwglGetSwapIntervalEXT();
 	}
 #elif defined(NL_OS_MAC)
-#elif defined(NL_OS_UNIX)
+#elif defined(NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
 	if (_win && _Extensions.GLXEXTSwapControl)
 	{
 		uint swap, maxSwap;
@@ -1639,6 +1742,12 @@ bool CDriverGL3::supportMADOperator() const
 	H_AUTO_OGL(CDriverGL3_supportMADOperator)
 
 	return _Extensions.GLCore;
+}
+
+// ***************************************************************************
+bool CDriverGL3::supportLargeUBOArrays() const
+{
+	return _MaxLightTableSize >= NL_OPENGL3_MAX_LIGHT_TABLE_CAPACITY;
 }
 
 // ***************************************************************************

@@ -298,6 +298,13 @@ void updateFromClientCfg()
 		// Don't reload Texture, will be done at next Game Start
 	}
 
+	//---------------------------------------------------
+	if (ClientCfg.GPUSkinning != LastClientCfg.GPUSkinning)
+	{
+		if (Scene)
+			Scene->enableGPUSkinning(ClientCfg.GPUSkinning);
+	}
+
 	// INTERFACE works
 
 

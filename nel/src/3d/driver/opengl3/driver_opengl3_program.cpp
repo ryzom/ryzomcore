@@ -17,6 +17,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "stdopengl3.h"
 #include "driver_opengl3.h"
 #include "driver_opengl3_program.h"
 #include "driver_opengl3_vertex_buffer.h"
@@ -27,7 +28,7 @@ namespace NLDRIVERGL3 {
 
 // Insert builtin UBO headers after leading preprocessor and precision lines
 static std::string insertBuiltinHeaders(const char *source, bool lightTable, bool camera, bool object, bool material,
-	const std::map<sint, NLMISC::CSmartPtr<CUniformBufferFormat> > &userUBOs)
+	const std::map<sint, NLMISC::CSmartPtr<CUniformBufferFormat> > &userUBOs, sint maxLightTableSize)
 {
 	const char *p = source;
 
@@ -51,7 +52,7 @@ static std::string insertBuiltinHeaders(const char *source, bool lightTable, boo
 	if (camera)
 		result.append(GLSLCameraHeader);
 	if (lightTable)
-		result.append(GLSLLightTableHeader);
+		result.append(buildGLSLLightTableHeader(maxLightTableSize));
 	if (object)
 		result.append(GLSLObjectHeader);
 	if (material)
@@ -64,6 +65,7 @@ static std::string insertBuiltinHeaders(const char *source, bool lightTable, boo
 		static const sint s_UBBindingToGLSL[] = {
 			NL_USER_VERTEX_PROGRAM_BINDING,  // UBBindingVertexProgram
 			NL_USER_PIXEL_PROGRAM_BINDING,   // UBBindingPixelProgram
+			NL_USER_SKELETON_BINDING,        // UBBindingSkeleton
 		};
 		std::stringstream ss;
 		for (std::map<sint, NLMISC::CSmartPtr<CUniformBufferFormat> >::const_iterator it = userUBOs.begin(); it != userUBOs.end(); ++it)
@@ -193,7 +195,7 @@ static bool programHasNonUBOUniforms(GLuint programId)
 
 bool CDriverGL3::supportVertexProgram(CVertexProgram::TProfile profile) const
 {
-	return (profile == IProgram::glsl330v) || (profile == IProgram::glsl300esv) || (profile == IProgram::nelvp);
+	return (profile == IProgram::glsl330v) || (profile == IProgram::glsl300esv) || (profile == IProgram::nelvp) || (profile == IProgram::glsl3vi);
 }
 
 bool CDriverGL3::compileProgram(IProgram *program, GLenum shaderType,
@@ -248,7 +250,7 @@ bool CDriverGL3::compileProgram(IProgram *program, GLenum shaderType,
 		fullSource = insertBuiltinHeaders(src->SourcePtr,
 			src->Features.UsesLightTableUBO, src->Features.UsesCameraUBO,
 			src->Features.UsesObjectUBO, src->Features.UsesMaterialUBO,
-			src->UniformBufferFormats);
+			src->UniformBufferFormats, _MaxLightTableSize);
 		s = fullSource.c_str();
 	}
 	else
@@ -291,23 +293,34 @@ bool CDriverGL3::compileProgram(IProgram *program, GLenum shaderType,
 
 		id = nglCreateProgram();
 		nglAttachShader(id, shader);
-		nglLinkProgram(id);
 
-		GLint linkOk;
-		nglGetProgramiv(id, GL_LINK_STATUS, &linkOk);
-		if (linkOk == 0)
+		// Under GL ES 3.0 / WebGL 2.0, single-stage programs cannot be linked
+		// (both vertex and fragment shaders are required). Skip the link here;
+		// the final link happens in linkPrograms() which combines VP + PP.
+		// Under desktop GL 3.3, we can link single-stage programs and use the
+		// result for uniform introspection.
+#ifndef USE_OPENGLES3
+		if (m_SupportSSO)
 		{
-			char errorLog[1024];
-			nglGetProgramInfoLog(id, 1024, NULL, errorLog);
-			nlwarning("GL3: %s link failed (pipeline stage): %s", stageName, errorLog);
-			nglDeleteShader(shader);
-			nglDeleteProgram(id);
-			program->m_CompileFailed = true;
+			nglLinkProgram(id);
+
+			GLint linkOk;
+			nglGetProgramiv(id, GL_LINK_STATUS, &linkOk);
+			if (linkOk == 0)
+			{
+				char errorLog[1024];
+				nglGetProgramInfoLog(id, 1024, NULL, errorLog);
+				nlwarning("GL3: %s link failed (pipeline stage): %s", stageName, errorLog);
+				nglDeleteShader(shader);
+				nglDeleteProgram(id);
+				program->m_CompileFailed = true;
 #ifdef NL_DEBUG
-			nlerror("GL3: %s program link failed (pipeline stage)", stageName);
+				nlerror("GL3: %s program link failed (pipeline stage)", stageName);
 #endif
-			return false;
+				return false;
+			}
 		}
+#endif
 		// NOTE: do NOT detach/delete the shader — keep it attached for later extraction
 	}
 	else
@@ -350,7 +363,12 @@ bool CDriverGL3::compileProgram(IProgram *program, GLenum shaderType,
 		{ isNelvp = true; break; }
 	}
 
-	// Override OnlyUBOs based on actual program introspection
+	// Override OnlyUBOs based on actual program introspection.
+	// On GLES3, linked-profile programs aren't linked yet at this point
+	// (single-stage link is skipped at line ~301); they are combined and
+	// linked later in linkPrograms(). programHasNonUBOUniforms returns
+	// false trivially for unlinked programs — correct since the linked
+	// path only uses UBOs.
 	bool hasNonUBO = programHasNonUBOUniforms(id);
 	if (src->Features.OnlyUBOs && hasNonUBO)
 	{
@@ -388,15 +406,127 @@ bool CDriverGL3::compileProgram(IProgram *program, GLenum shaderType,
 		drvInfo->NelvpParamIndices = src->ParamIndices;
 	}
 
-	program->buildInfo(src);
+	// buildInfo resolves and caches uniform locations via getUniformIndex.
+	// Under GL ES 3.0, single-stage pipeline programs aren't linked yet
+	// (linking happens in linkPrograms()), so uniform queries would fail.
+	// Defer uniform resolution to linkPrograms() for these programs, but
+	// still associate the source so features()/source() are available.
+	if (src->Profile != linkedProfile || m_SupportSSO)
+		program->buildInfo(src);
+	else
+		program->setBuildSrc(src);
 
-	setupInitialUniforms(program);
+	// Setup initial uniforms (sampler bindings, UBO block bindings).
+	// Under GL ES 3.0 pipeline stages, the single-stage program isn't linked,
+	// so uniform setup is deferred to linkPrograms().
+	if (src->Profile != linkedProfile || m_SupportSSO)
+		setupInitialUniforms(program);
+
+	return true;
+}
+
+bool CDriverGL3::compileInsertVertexProgram(CVertexProgram *program)
+{
+	if (program->m_DrvInfo != NULL)
+		return true;
+
+	if (program->m_CompileFailed)
+		return false;
+
+	// Find the glsl3vi source
+	IProgram::CSource *insertSrc = NULL;
+	for (int i = 0; i < program->getSourceNb(); i++)
+	{
+		IProgram::CSource *s = program->getSource(i);
+		if (s->Profile == IProgram::glsl3vi)
+		{ insertSrc = s; break; }
+	}
+	if (!insertSrc)
+	{
+		program->m_CompileFailed = true;
+		return false;
+	}
+
+	// Create drvInfo for the insert program (no GL program of its own)
+	ItGPUPrgDrvInfoPtrList it = _GPUPrgDrvInfos.insert(_GPUPrgDrvInfos.end(), (NL3D::IProgramDrvInfos*)NULL);
+	CProgramDrvInfosGL3 *drvInfo = new CProgramDrvInfosGL3(this, it);
+	*it = drvInfo;
+	program->m_DrvInfo = drvInfo;
+	drvInfo->isInsertProgram = true;
+	drvInfo->InsertSource.assign(insertSrc->SourcePtr, insertSrc->SourceLen);
+
+	// Build info from insert source (for features, UBO formats)
+	program->buildInfo(insertSrc);
+
+	// Compile mega VP variants with this insert spliced in
+	// Always all-UBO for insert programs
+	for (int linked = 0; linked < 2; ++linked)
+	{
+		if (!linked && !m_SupportSSO) continue;
+		if (linked && !m_LinkedMegaShaders) continue;
+
+		for (int fogOrPpl = 0; fogOrPpl < 2; ++fogOrPpl)
+		{
+			for (int hwClip = 0; hwClip < 2; ++hwClip)
+			{
+				// Skip hwClip=1 when PP handles clip planes
+				if (hwClip && m_PPClipPlanes) continue;
+				// Skip linked non-all-UBO (insert is always all-UBO)
+				// Skip SSO variants that won't be selected (insert always all-UBO)
+				if (!linked && !m_BuildUnusedPrograms)
+				{
+					// Only build the currently active UBO config
+					if (!m_UseMegaObjectUBO) continue; // Insert requires all-UBO
+				}
+
+				std::string result;
+				megaVPGenerate(result, fogOrPpl != 0, hwClip != 0,
+					/*tableUBO=*/true, /*cameraUBO=*/true, /*objectUBO=*/true, /*materialUBO=*/true,
+					linked != 0, drvInfo->InsertSource.c_str());
+
+				CVertexProgram *innerVP = new CVertexProgram();
+				IProgram::CSource *src = new IProgram::CSource();
+				src->Profile = linked ? IProgram::glsl300esv : IProgram::glsl330v;
+				src->DisplayName = NLMISC::toString("Insert Mega VP (linked=%d, fogOrPpl=%d, hwClip=%d)", linked, fogOrPpl, hwClip);
+				src->Features.UsesLightTableUBO = true;
+				src->Features.UsesCameraUBO = true;
+				src->Features.UsesObjectUBO = true;
+				src->Features.UsesMaterialUBO = true;
+				src->Features.OnlyUBOs = true;
+				// Copy insert's UBO formats so the user VP UBO gets declared
+				src->UniformBufferFormats = insertSrc->UniformBufferFormats;
+				src->setSource(result);
+				innerVP->addSource(src);
+
+				nldebug("GL3: Compile '%s'", src->DisplayName.c_str());
+
+				if (!compileProgram(innerVP, GL_VERTEX_SHADER,
+					IProgram::glsl300esv, IProgram::glsl330v, "VP"))
+				{
+					nlwarning("GL3: Insert mega VP compilation failed (%s)", src->DisplayName.c_str());
+					delete innerVP;
+					// Don't fail the whole insert — skip this variant
+					continue;
+				}
+
+				drvInfo->InsertMegaVP[linked][fogOrPpl][hwClip] = innerVP;
+			}
+		}
+	}
 
 	return true;
 }
 
 bool CDriverGL3::compileVertexProgram(CVertexProgram *program)
 {
+	// Check for VP insert profile (glsl3vi)
+	for (int i = 0; i < program->getSourceNb(); i++)
+	{
+		IProgram::CSource *s = program->getSource(i);
+		if (s->Profile == IProgram::glsl3vi)
+			return compileInsertVertexProgram(program);
+	}
+
 	// If the program has nelvp source but no GLSL source, convert nelvp to GLSL
 	bool hasGLSL = false;
 	bool hasNelvp = false;
@@ -454,7 +584,15 @@ bool CDriverGL3::activeVertexProgram(CVertexProgram *program)
 
 bool CDriverGL3::activeVertexProgram(CVertexProgram *program, bool driver)
 {
-	if (driver) nlassert(m_UserVertexProgram == NULL);
+	// When the driver activates an inner VP (driver=true), the user VP must be
+	// either NULL (normal mega VP path) or an insert program whose inner variant
+	// is being materialized.
+	if (driver)
+	{
+		nlassert(m_UserVertexProgram == NULL
+			|| (m_UserVertexProgram->m_DrvInfo
+				&& static_cast<CProgramDrvInfosGL3 *>((IProgramDrvInfos *)m_UserVertexProgram->m_DrvInfo)->isInsertProgram));
+	}
 
 	if (m_DriverVertexProgram == program)
 	{
@@ -499,7 +637,10 @@ bool CDriverGL3::activeVertexProgram(CVertexProgram *program, bool driver)
 	}
 	CProgramDrvInfosGL3 *drvInfo = static_cast<CProgramDrvInfosGL3 *>(di);
 
-	nglUseProgramStages(ppoId, GL_VERTEX_SHADER_BIT, drvInfo->getProgramId());
+	// Insert programs have no GL program of their own — the inner variant will be
+	// activated by setupBuiltinVertexProgram. Skip the PPO stage bind here.
+	if (!drvInfo->isInsertProgram)
+		nglUseProgramStages(ppoId, GL_VERTEX_SHADER_BIT, drvInfo->getProgramId());
 
 	if (!driver) m_UserVertexProgram = program;
 	m_DriverVertexProgram = program;
@@ -1127,6 +1268,9 @@ bool CDriverGL3::setupBuiltinPrograms()
 		if (setupUserLinkedPrograms(effectiveVP, effectivePP))
 			return setupUniforms();
 		// Fall through to SSO if linking not possible
+#ifdef USE_OPENGLES3
+		nlwarning("GL3: GLES3 unreachable: setupUserLinkedPrograms failed, no SSO fallback available");
+#endif
 	}
 
 	return setupBuiltinVertexProgram(effectiveVP, effectivePP)
@@ -1136,6 +1280,13 @@ bool CDriverGL3::setupBuiltinPrograms()
 
 bool CDriverGL3::setupBuiltinVertexProgram(CVertexProgram *effectiveVP, CPixelProgram *effectivePP)
 {
+#ifdef USE_OPENGLES3
+	// Builtin non-mega shaders are not supported under GLES 3.0;
+	// they generate #version 330 which cannot compile on this target.
+	// This path should be unreachable when m_LinkedMegaShaders is true.
+	nlwarning("GL3: GLES3 unreachable: setupBuiltinVertexProgram called (effectiveVP=%p, effectivePP=%p)", (void *)effectiveVP, (void *)effectivePP);
+	return false;
+#endif
 	touchVertexFormatVP(); // Always update — PP builtin depends on vertex format
 
 	// Resolve PPL support: both VP and PP must support it
@@ -1156,6 +1307,72 @@ bool CDriverGL3::setupBuiltinVertexProgram(CVertexProgram *effectiveVP, CPixelPr
 
 	if (effectiveVP)
 	{
+		// Check if this is a VP insert program — route to mega VP variant selection
+		CProgramDrvInfosGL3 *vpDrvInfo = static_cast<CProgramDrvInfosGL3 *>(
+			(IProgramDrvInfos *)effectiveVP->m_DrvInfo);
+		if (vpDrvInfo && vpDrvInfo->isInsertProgram)
+		{
+			// Insert VP: select appropriate inner mega VP variant with insert spliced in
+			m_VPSpecularOutput = true; // Inner mega VP always outputs specularColor
+			m_VPNormalOutput = false;
+			m_VPWorldSpacePositionOutput = false;
+			m_NelvpActiveUB = NULL;
+
+			// Determine PPL activation (same logic as setupMegaVertexProgram)
+			bool pplActive = false;
+			if (m_VPBuiltinCurrent.NumPerPixelLights > 0)
+			{
+				if (effectivePP)
+				{
+					if (effectivePP->features().UsesObjectUBO)
+						pplActive = true;
+					else if (effectivePP->features().InputsWorldSpacePosition
+					      && effectivePP->features().InputsWorldSpaceNormal)
+						pplActive = true;
+				}
+				else
+					pplActive = true; // Mega PP always supports PPL
+			}
+			if (pplActive)
+			{
+				m_VPWorldSpacePositionOutput = true;
+				m_VPNormalOutput = true;
+			}
+			if (effectivePP)
+			{
+				if (effectivePP->features().InputsWorldSpaceNormal)
+					m_VPNormalOutput = true;
+				if (effectivePP->features().InputsWorldSpacePosition)
+					m_VPWorldSpacePositionOutput = true;
+			}
+
+			int fogOrPpl = (m_VPBuiltinCurrent.Fog || pplActive || m_VPBuiltinCurrent.PPClipPlane) ? 1 : 0;
+			int hwClip = (m_VPBuiltinCurrent.ClipPlaneMask != 0) ? 1 : 0;
+			int linked = 0; // SSO path; linked handled by setupUserLinkedPrograms
+
+			CVertexProgram *innerVP = vpDrvInfo->InsertMegaVP[linked][fogOrPpl][hwClip];
+			if (!innerVP)
+			{
+				nlwarning("GL3: Insert mega VP variant [%d][%d][%d] not available", linked, fogOrPpl, hwClip);
+				return false;
+			}
+
+			// Set program flags (insert mega VPs are always all-UBO)
+			m_ProgramNoUniforms[VertexProgram] = false;
+			m_ProgramNoBuiltinUniforms[VertexProgram] = false;
+			m_ProgramOnlyUBOs[VertexProgram] = true;
+			m_ProgramUsesLightTableUBO[VertexProgram] = true;
+			m_ProgramUsesCameraUBO[VertexProgram] = true;
+			m_ProgramUsesObjectUBO[VertexProgram] = true;
+			m_ProgramUsesMaterialUBO[VertexProgram] = true;
+
+			if (!activeVertexProgram(innerVP, true))
+				return false;
+
+			return true;
+		}
+
+		// Regular (non-insert) user/material VP
 		// If this is a material VP (not already activated externally as user VP), activate on PPO
 		if (!m_UserVertexProgram && m_MaterialVertexProgram)
 		{
@@ -2048,7 +2265,17 @@ void CDriverGL3::setupInitialUniforms(IProgram *program)
 		{
 			uint samplerIdx = program->getUniformIndex((CProgramIndex::TName)(CProgramIndex::Sampler0 + i));
 			if (samplerIdx >= 0)
+			{
+#ifdef USE_OPENGLES3
+				// GLES 3.0: nglProgramUniform1i is a no-op (SSO not available).
+				// Use glUseProgram + glUniform1i instead.
+				nglUseProgram(id);
+				glUniform1i(samplerIdx, i);
+				nglUseProgram(0);
+#else
 				nglProgramUniform1i(id, samplerIdx, i);
+#endif
+			}
 		}
 
 		// Resolve and cache NlLightTable UBO block index, bind to its binding point
@@ -2082,6 +2309,7 @@ void CDriverGL3::setupInitialUniforms(IProgram *program)
 			static const sint s_UBBindingToGL[] = {
 				NL_USER_VERTEX_PROGRAM_BINDING,  // UBBindingVertexProgram
 				NL_USER_PIXEL_PROGRAM_BINDING,   // UBBindingPixelProgram
+				NL_USER_SKELETON_BINDING,        // UBBindingSkeleton
 			};
 			for (std::map<sint, NLMISC::CSmartPtr<CUniformBufferFormat> >::const_iterator
 				it = src->UniformBufferFormats.begin(); it != src->UniformBufferFormats.end(); ++it)
@@ -2280,8 +2508,15 @@ bool CDriverGL3::setupUserLinkedPrograms(CVertexProgram *vpProg, CPixelProgram *
 	}
 
 	// --- Check linkability ---
+	// Insert VPs are linkable via their pre-compiled linked inner variants
+	bool vpIsInsert = false;
+	if (vpProg && vpProg->m_DrvInfo)
+	{
+		CProgramDrvInfosGL3 *vpDi = static_cast<CProgramDrvInfosGL3 *>((IProgramDrvInfos *)vpProg->m_DrvInfo);
+		vpIsInsert = vpDi->isInsertProgram;
+	}
 	bool vpLinkable = vpProg
-		? (vpProg->source() && vpProg->source()->Profile == IProgram::glsl300esv)
+		? (vpIsInsert || (vpProg->source() && vpProg->source()->Profile == IProgram::glsl300esv))
 		: true; // Mega VP linked=1 variants always linkable
 	bool ppLinkable = ppProg
 		? (ppProg->source() && ppProg->source()->Profile == IProgram::glsl300esf)
@@ -2319,7 +2554,25 @@ bool CDriverGL3::setupUserLinkedPrograms(CVertexProgram *vpProg, CPixelProgram *
 
 	CShaderProgram *sp = NULL;
 
-	if (vpProg && !ppProg)
+	if (vpIsInsert && !ppProg)
+	{
+		// Case: Insert VP + Mega PP — use pre-compiled linked inner VP, link with mega PP
+		CProgramDrvInfosGL3 *vpDrv = static_cast<CProgramDrvInfosGL3 *>((IProgramDrvInfos *)vpProg->m_DrvInfo);
+		sp = vpDrv->InsertLinkedVPMegaPP[fogOrPpl][cube][specular][ppClip];
+		if (!sp)
+		{
+			CVertexProgram *innerVP = vpDrv->InsertMegaVP[1][fogOrPpl][hwClip];
+			if (!innerVP || !innerVP->m_DrvInfo) return false;
+			int ppTableUBO = fogOrPpl ? 1 : 0;
+			CPixelProgram *megaPP = m_MegaPP[1][fogOrPpl][cube][specular][ppClip][ppTableUBO][1][1][1];
+			if (!megaPP || !megaPP->m_DrvInfo) return false;
+			sp = linkPrograms(innerVP, innerVP->source()->Features,
+				megaPP, megaPP->source()->Features);
+			if (!sp) return false;
+			vpDrv->InsertLinkedVPMegaPP[fogOrPpl][cube][specular][ppClip] = sp;
+		}
+	}
+	else if (vpProg && !ppProg)
 	{
 		// Case A: User/Material VP + Mega PP
 		CProgramDrvInfosGL3 *vpDrv = static_cast<CProgramDrvInfosGL3 *>((IProgramDrvInfos *)vpProg->m_DrvInfo);
@@ -2432,6 +2685,26 @@ bool CDriverGL3::initMegaLinkedPrograms()
 	int objectUBO = 1;
 	int materialUBO = 1;
 
+#ifdef __EMSCRIPTEN__
+	{
+		int linkCount = 0;
+		for (int fogOrPpl = 0; fogOrPpl < 2; ++fogOrPpl)
+		for (int hwClip = 0; hwClip < 2; ++hwClip)
+		{
+			if (hwClip && m_PPClipPlanes) continue;
+			for (int cube = 0; cube < 2; ++cube)
+			for (int specular = 0; specular < 2; ++specular)
+			for (int ppClip = 0; ppClip < 2; ++ppClip)
+			{
+				if (ppClip && !fogOrPpl) continue;
+				if (ppClip && !m_PPClipPlanes) continue;
+				linkCount++;
+			}
+		}
+		EM_ASM({ window.nlBeginTask('Linking shader programs', $0); }, linkCount);
+	}
+#endif
+
 	for (int fogOrPpl = 0; fogOrPpl < 2; ++fogOrPpl)
 	{
 		for (int hwClip = 0; hwClip < 2; ++hwClip)
@@ -2469,6 +2742,10 @@ bool CDriverGL3::initMegaLinkedPrograms()
 							nlwarning("GL3: Failed to link mega program (fogOrPpl=%d, hwClip=%d, cube=%d, specular=%d, ppClip=%d)", fogOrPpl, hwClip, cube, specular, ppClip);
 							return false;
 						}
+#ifdef __EMSCRIPTEN__
+						EM_ASM({ window.nlStepTask('Linking shader programs'); });
+						emscripten_sleep(0); // Yield to browser to prevent WebGL context timeout
+#endif
 
 						m_MegaLinked[fogOrPpl][hwClip][cube][specular][ppClip] = sp;
 					}
@@ -2570,6 +2847,9 @@ bool CDriverGL3::initProgramPipeline()
 {
 	ppoId = 0;
 
+	if (!m_SupportSSO)
+		return true;
+
 	nglGenProgramPipelines(1, &ppoId);
 	if (ppoId == 0)
 		return false;
@@ -2592,6 +2872,7 @@ IProgramDrvInfos(drv, it)
 	objectBlockIndex = GL_INVALID_INDEX;
 	materialBlockIndex = GL_INVALID_INDEX;
 	isNelvpConverted = false;
+	isInsertProgram = false;
 }
 
 CProgramDrvInfosGL3::~CProgramDrvInfosGL3()

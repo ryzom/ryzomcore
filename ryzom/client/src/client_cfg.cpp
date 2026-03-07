@@ -602,6 +602,7 @@ CClientConfig::CClientConfig()
 	TrykerScale			= 0.88f;
 	ZoraiScale			= 1.25f;
 	EnableRacialAnimation = true;
+	GPUSkinning = true;
 
 	// OPTIONS
 	RunAtTheBeginning	= true;
@@ -1234,6 +1235,9 @@ void CClientConfig::setValues()
 	// EnableRacialAnimation
 	READ_BOOL_FV(EnableRacialAnimation);
 
+	// GPUSkinning
+	READ_BOOL_FV(GPUSkinning);
+
 #if !FINAL_VERSION
 	READ_FLOAT_DEV(FyrosScale);
 	READ_FLOAT_DEV(MatisScale);
@@ -1817,9 +1821,11 @@ void CClientConfig::setValues()
 		// Run speed and camera dist max are set according to R2 char mode
 		UserEntity->flushR2CharMode();
 	}
-
-	// Initialize the camera distance (after camera dist max)
-	View.setCameraDistanceMaxForPlayer();
+	else
+	{
+		// No user entity yet (initial load) — default to player distance
+		View.setCameraDistanceMaxForPlayer();
+	}
 
 	// draw in client light?
 	if(ClientCfg.Light)

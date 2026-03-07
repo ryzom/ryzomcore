@@ -170,7 +170,9 @@ SOURCE_GROUP(Driver FILES
         program.cpp
         ../../include/nel/3d/program.h
         gpu_program_params.cpp
-        ../../include/nel/3d/gpu_program_params.h)
+        ../../include/nel/3d/gpu_program_params.h
+        gpu_skin_vp.cpp
+        ../../include/nel/3d/gpu_skin_vp.h)
 
 SOURCE_GROUP(Font FILES
         computed_string.cpp
@@ -722,7 +724,13 @@ TARGET_INCLUDE_DIRECTORIES(nel3d
         ${LIBVR_INCLUDE_DIR}
 )
 
+IF(FREETYPE_FOUND)
 TARGET_LINK_LIBRARIES(nel3d nelmisc Freetype::Freetype ${LIBOVR_LIBRARIES} ${LIBVR_LIBRARY})
+TARGET_COMPILE_DEFINITIONS(nel3d PRIVATE HAVE_FREETYPE)
+ELSE()
+TARGET_LINK_LIBRARIES(nel3d nelmisc ${LIBOVR_LIBRARIES} ${LIBVR_LIBRARY})
+TARGET_COMPILE_DEFINITIONS(nel3d PRIVATE NL_DONT_USE_EXTERNAL_CODE)
+ENDIF()
 NL_DEFAULT_PROPS(nel3d "NeL, Library: NeL 3D")
 NL_ADD_RUNTIME_FLAGS(nel3d)
 NL_ADD_STATIC_VID_DRIVERS(nel3d)

@@ -27,6 +27,29 @@
 namespace NL3D {
 namespace NLDRIVERGL3 {
 
+#ifdef USE_OPENGLES3
+// WebGL 2.0 does not support client-side index arrays.
+// Upload index data to a scratch element buffer before calling glDrawElements.
+void CDriverGL3::drawElementsWebGL(GLenum mode, GLsizei count, GLenum type, const void *indices)
+{
+	GLsizeiptr indexSize = (type == GL_UNSIGNED_SHORT) ? sizeof(uint16) : sizeof(uint32);
+	GLsizeiptr dataSize = count * indexSize;
+
+	nglBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ScratchElementBuffer);
+	if (dataSize > _ScratchElementBufferSize)
+	{
+		nglBufferData(GL_ELEMENT_ARRAY_BUFFER, dataSize, indices, GL_STREAM_DRAW);
+		_ScratchElementBufferSize = dataSize;
+	}
+	else
+	{
+		nglBufferData(GL_ELEMENT_ARRAY_BUFFER, dataSize, indices, GL_STREAM_DRAW);
+	}
+	glDrawElements(mode, count, type, (const void *)0);
+	nglBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+#endif
+
 // ***************************************************************************
 
 bool CDriverGL3::renderLines(CMaterial& mat, uint32 firstIndex, uint32 nlines)
@@ -55,12 +78,20 @@ bool CDriverGL3::renderLines(CMaterial& mat, uint32 firstIndex, uint32 nlines)
 		{
 			if (_LastIB._Format == CIndexBuffer::Indices16)
 			{
+#ifdef USE_OPENGLES3
+				drawElementsWebGL(GL_LINES,2*nlines,GL_UNSIGNED_SHORT,((uint16 *) _LastIB._Values)+firstIndex);
+#else
 				glDrawElements(GL_LINES,2*nlines,GL_UNSIGNED_SHORT,((uint16 *) _LastIB._Values)+firstIndex);
+#endif
 			}
 			else
 			{
 				nlassert(_LastIB._Format == CIndexBuffer::Indices32);
+#ifdef USE_OPENGLES3
+				drawElementsWebGL(GL_LINES,2*nlines,GL_UNSIGNED_INT,((uint32 *) _LastIB._Values)+firstIndex);
+#else
 				glDrawElements(GL_LINES,2*nlines,GL_UNSIGNED_INT,((uint32 *) _LastIB._Values)+firstIndex);
+#endif
 			}
 		}
 	}
@@ -108,12 +139,20 @@ bool CDriverGL3::renderTriangles(CMaterial& mat, uint32 firstIndex, uint32 ntris
 		{
 			if (_LastIB._Format == CIndexBuffer::Indices16)
 			{
+#ifdef USE_OPENGLES3
+				drawElementsWebGL(GL_TRIANGLES,3*ntris,GL_UNSIGNED_SHORT, ((uint16 *) _LastIB._Values)+firstIndex);
+#else
 				glDrawElements(GL_TRIANGLES,3*ntris,GL_UNSIGNED_SHORT, ((uint16 *) _LastIB._Values)+firstIndex);
+#endif
 			}
 			else
 			{
 				nlassert(_LastIB._Format == CIndexBuffer::Indices32);
+#ifdef USE_OPENGLES3
+				drawElementsWebGL(GL_TRIANGLES,3*ntris,GL_UNSIGNED_INT, ((uint32 *) _LastIB._Values)+firstIndex);
+#else
 				glDrawElements(GL_TRIANGLES,3*ntris,GL_UNSIGNED_INT, ((uint32 *) _LastIB._Values)+firstIndex);
+#endif
 			}
 		}
 	}
@@ -151,12 +190,20 @@ bool CDriverGL3::renderSimpleTriangles(uint32 firstTri, uint32 ntris)
 
 	if (_LastIB._Format == CIndexBuffer::Indices16)
 	{
+#ifdef USE_OPENGLES3
+		drawElementsWebGL(GL_TRIANGLES,3*ntris,GL_UNSIGNED_SHORT, ((uint16 *) _LastIB._Values)+firstTri);
+#else
 		glDrawElements(GL_TRIANGLES,3*ntris,GL_UNSIGNED_SHORT, ((uint16 *) _LastIB._Values)+firstTri);
+#endif
 	}
 	else
 	{
 		nlassert(_LastIB._Format == CIndexBuffer::Indices32);
+#ifdef USE_OPENGLES3
+		drawElementsWebGL(GL_TRIANGLES,3*ntris,GL_UNSIGNED_INT, ((uint32 *) _LastIB._Values)+firstTri);
+#else
 		glDrawElements(GL_TRIANGLES,3*ntris,GL_UNSIGNED_INT, ((uint32 *) _LastIB._Values)+firstTri);
+#endif
 	}
 
 	// Profiling.
@@ -348,7 +395,11 @@ bool CDriverGL3::renderRawQuads(CMaterial& mat, uint32 startIndex, uint32 numQua
 		{
 			// draw first quads (as pair of tri to have guaranteed orientation)
 			uint numQuadsToDraw = std::min(QUAD_BATCH_SIZE - startIndex, numQuads);
+#ifdef USE_OPENGLES3
+			drawElementsWebGL(GL_TRIANGLES, 6 * numQuadsToDraw, GL_UNSIGNED_SHORT, defaultIndices + 6 * startIndex);
+#else
 			glDrawElements(GL_TRIANGLES, 6 * numQuadsToDraw, GL_UNSIGNED_SHORT, defaultIndices + 6 * startIndex);
+#endif
 			numLeftQuads -= numQuadsToDraw;
 			currIndex += 4 * numQuadsToDraw;
 		}
@@ -377,7 +428,11 @@ bool CDriverGL3::renderRawQuads(CMaterial& mat, uint32 startIndex, uint32 numQua
 					vertexIndex += 4;
 				}
 				while (curr != end);
+#ifdef USE_OPENGLES3
+				drawElementsWebGL(GL_TRIANGLES, 6 * numQuadsToDraw, GL_UNSIGNED_SHORT, indices);
+#else
 				glDrawElements(GL_TRIANGLES, 6 * numQuadsToDraw, GL_UNSIGNED_SHORT, indices);
+#endif
 			}
 			else
 			{
@@ -397,7 +452,11 @@ bool CDriverGL3::renderRawQuads(CMaterial& mat, uint32 startIndex, uint32 numQua
 					vertexIndex += 4;
 				}
 				while (curr != end);
+#ifdef USE_OPENGLES3
+				drawElementsWebGL(GL_TRIANGLES, 6 * numQuadsToDraw, GL_UNSIGNED_INT, indices);
+#else
 				glDrawElements(GL_TRIANGLES, 6 * numQuadsToDraw, GL_UNSIGNED_INT, indices);
+#endif
 			}
 			numLeftQuads -= numQuadsToDraw;
 			currIndex += 4 * numQuadsToDraw;

@@ -216,8 +216,8 @@ inline std::string toString(const long unsigned int &val)
 #if (SIZEOF_SIZE_T) == 8
 inline std::string toString(const size_t &val) { return toString("%" NL_I64 "u", val); }
 #else
-#ifdef NL_OS_MAC
-inline std::string toString(const size_t &val) { return toString("%u", val); }
+#if defined(NL_OS_MAC) || defined(__EMSCRIPTEN__)
+inline std::string toString(const size_t &val) { return toString("%u", (uint32)val); }
 #endif
 #endif
 

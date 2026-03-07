@@ -21,7 +21,7 @@
 //#include "stdopengl3.h"
 #include "unix_event_emitter.h"
 
-#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC) && !defined(__EMSCRIPTEN__)
 
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
@@ -829,4 +829,4 @@ bool CUnixEventEmitter::pasteTextFromClipboard(std::string &text)
 
 } // NLMISC
 
-#endif // defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+#endif // defined(NL_OS_UNIX) && !defined(NL_OS_MAC) && !defined(__EMSCRIPTEN__)

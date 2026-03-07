@@ -149,6 +149,9 @@ CDriverUser::CDriverUser (uintptr_t windowIcon, TDriver driver, emptyProc exitFu
 	if( !_Driver && driver == OpenGl3 )
 		_Driver = CDRU::createGl3Driver();
 
+	if( !_Driver && driver == OpenGlEs3 )
+		_Driver = CDRU::createGlEs3Driver();
+
 	nlassert(_Driver);
 	_Driver->init (windowIcon, exitFunc);
 
@@ -1367,6 +1370,12 @@ void			CDriverUser::swapBuffers()
 }
 
 // ***************************************************************************
+bool CDriverUser::isFrameReady()
+{
+	return _Driver->isFrameReady();
+}
+
+// ***************************************************************************
 void CDriverUser::finish()
 {
 	NL3D_HAUTO_SWAP_DRIVER;
@@ -1812,6 +1821,22 @@ bool CDriverUser::supportBloomEffect() const
 	NL3D_HAUTO_UI_DRIVER
 
 	return _Driver->supportBloomEffect();
+}
+
+// ***************************************************************************
+bool CDriverUser::supportGPUSkinning() const
+{
+	NL3D_HAUTO_UI_DRIVER
+
+	return _Driver->supportVertexProgram(CVertexProgram::glsl3vi) && _Driver->supportLargeUBOArrays();
+}
+
+// ***************************************************************************
+bool CDriverUser::supportLargeUBOArrays() const
+{
+	NL3D_HAUTO_UI_DRIVER
+
+	return _Driver->supportLargeUBOArrays();
 }
 
 // ***************************************************************************

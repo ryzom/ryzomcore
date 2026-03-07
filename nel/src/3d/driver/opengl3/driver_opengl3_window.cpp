@@ -26,11 +26,30 @@
 // by default, we disable the windows menu keys (F10, ALT and ALT+SPACE key doesn't freeze or open the menu)
 #define NL_DISABLE_MENU
 
+#ifdef USE_OPENGLES3
+#ifdef __EMSCRIPTEN__
+#	include <emscripten.h>
+#	include <emscripten/html5.h>
+#elif defined(NL_OS_MAC)
+#	import "mac/cocoa_window_delegate.h"
+#	import "mac/cocoa_application_delegate.h"
+#elif defined(NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
+#	ifdef HAVE_XRANDR
+#		include <X11/extensions/Xrandr.h>
+#	endif
+#	ifdef HAVE_XRENDER
+#		include <X11/extensions/Xrender.h>
+#	endif
+#	include <X11/Xatom.h>
+#	define _NET_WM_STATE_REMOVE	0
+#	define _NET_WM_STATE_ADD	1
+#endif
+#else // !USE_OPENGLES3
 #ifdef NL_OS_MAC
 #	import "mac/cocoa_window_delegate.h"
 #	import "mac/cocoa_application_delegate.h"
 #	import <OpenGL/OpenGL.h>
-#elif defined (NL_OS_UNIX)
+#elif defined (NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
 #	ifdef HAVE_XRANDR
 #		include <X11/extensions/Xrandr.h>
 #	endif // HAVE_XRANDR
@@ -41,6 +60,7 @@
 #	define _NET_WM_STATE_REMOVE	0
 #	define _NET_WM_STATE_ADD	1
 #endif // NL_OS_UNIX
+#endif // USE_OPENGLES3
 
 #include "nel/3d/u_driver.h"
 #include "nel/misc/file.h"
@@ -182,7 +202,7 @@ bool GlWndProc(CDriverGL3 *driver, const void* e)
 	return driver->_EventEmitter.processMessage(event);
 }
 
-#elif defined (NL_OS_UNIX)
+#elif defined (NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
 
 static Atom XA_WM_STATE = 0;
 static Atom XA_WM_STATE_FULLSCREEN = 0;
@@ -329,10 +349,11 @@ bool CDriverGL3::init(uintptr_t windowIcon, emptyProc exitFunc)
 	// nothing to do
 	nlunreferenced(windowIcon);
 
-#elif defined (NL_OS_UNIX)
+#elif defined (NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
 
 	nlunreferenced(windowIcon);
 
+#ifndef __EMSCRIPTEN__
 	_dpy = XOpenDisplay(NULL);
 
 	if (_dpy == NULL)
@@ -411,6 +432,7 @@ bool CDriverGL3::init(uintptr_t windowIcon, emptyProc exitFunc)
 	XA_WM_WINDOW_TYPE = XInternAtom(_dpy, "_NET_WM_WINDOW_TYPE", False);
 	XA_WM_WINDOW_TYPE_NORMAL = XInternAtom(_dpy, "_NET_WM_WINDOW_TYPE_NORMAL", False);
 	XA_FRAME_EXTENTS = XInternAtom(_dpy, "_NET_FRAME_EXTENTS", False);
+#endif // !__EMSCRIPTEN__
 
 #endif
 
@@ -452,13 +474,15 @@ bool CDriverGL3::unInit()
 
 	// nothing to do
 
-#elif defined (NL_OS_UNIX)
+#elif defined (NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
 
+#ifndef __EMSCRIPTEN__
 	// restore default X errors handler
 	XSetErrorHandler(NULL);
 
 	XCloseDisplay(_dpy);
 	_dpy = NULL;
+#endif
 
 #endif // NL_OS_UNIX
 
@@ -536,7 +560,7 @@ void CDriverGL3::setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps)
 
 	// nothing to do, on Mac OS X, only windows representing a file have icons
 
-#elif defined(NL_OS_UNIX)
+#elif defined(NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
 
 	std::vector<long> icon_data;
 
@@ -579,7 +603,48 @@ bool CDriverGL3::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool r
 	_Resizable = resizeable;
 	_DestroyWindow = false;
 
-#ifdef NL_OS_WINDOWS
+#if defined(__EMSCRIPTEN__)
+
+	// Emscripten / WebGL 2.0 context creation
+	// Uses the default canvas element "#canvas" as per Emscripten convention.
+	// Define NL_EMSCRIPTEN_CANVAS to override (e.g. "#myCanvas").
+#ifndef NL_EMSCRIPTEN_CANVAS
+#define NL_EMSCRIPTEN_CANVAS "#canvas"
+#endif
+	{
+		EmscriptenWebGLContextAttributes attrs;
+		emscripten_webgl_init_context_attributes(&attrs);
+		attrs.majorVersion = 2;
+		attrs.minorVersion = 0;
+		attrs.alpha = false;
+		attrs.depth = true;
+		attrs.stencil = true;
+		attrs.antialias = true;
+		attrs.preserveDrawingBuffer = true;
+
+		_ctx = emscripten_webgl_create_context(NL_EMSCRIPTEN_CANVAS, &attrs);
+		if (_ctx <= 0)
+		{
+			nlwarning("CDriverGL3::setDisplay: emscripten_webgl_create_context failed (%d)", _ctx);
+			return false;
+		}
+
+		EMSCRIPTEN_RESULT res = emscripten_webgl_make_context_current(_ctx);
+		if (res != EMSCRIPTEN_RESULT_SUCCESS)
+		{
+			nlwarning("CDriverGL3::setDisplay: emscripten_webgl_make_context_current failed (%d)", res);
+			return false;
+		}
+
+		// Set canvas size
+		emscripten_set_canvas_element_size(NL_EMSCRIPTEN_CANVAS, mode.Width, mode.Height);
+
+		// Mark window as valid so isActive() returns true
+		_win = 1;
+		_WindowVisible = true;
+	}
+
+#elif defined(NL_OS_WINDOWS)
 
 	// Init pointers
 	_PBuffer = NULL;
@@ -984,7 +1049,7 @@ bool CDriverGL3::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool r
 
 	_EventEmitter.init(this, _glView, _DestroyWindow);
 
-#elif defined(NL_OS_UNIX)
+#elif defined(NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
 
 	static int sAttribList16bpp[] =
 	{
@@ -1092,7 +1157,7 @@ bool CDriverGL3::saveScreenMode()
 
 	// no need to store because the screen mode is never really changed
 
-#elif defined(NL_OS_UNIX)
+#elif defined(NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
 
 	int screen = DefaultScreen(_dpy);
 	res = false;
@@ -1153,7 +1218,7 @@ bool CDriverGL3::restoreScreenMode()
 	// no need to restore because the screen mode was never really changed
 	res = true;
 
-#elif defined(NL_OS_UNIX)
+#elif defined(NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
 
 	int screen = DefaultScreen(_dpy);
 
@@ -1288,7 +1353,7 @@ bool CDriverGL3::setScreenMode(const GfxMode &mode)
 
 	// no need to do anything here, on mac os, the screen mode is never changed
 
-#elif defined(NL_OS_UNIX)
+#elif defined(NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
 
 	bool found = false;
 
@@ -1474,7 +1539,7 @@ bool CDriverGL3::createWindow(const GfxMode &mode)
 		return false;
 	}
 
-#elif defined (NL_OS_UNIX)
+#elif defined (NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
 
 	if (_visual_info == NULL)
 		return false;
@@ -1580,7 +1645,7 @@ bool CDriverGL3::destroyWindow()
 	}
 
 #elif defined(NL_OS_MAC)
-#elif defined(NL_OS_UNIX)
+#elif defined(NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
 
 	if (_DestroyWindow && _ctx)
 		glXDestroyContext(_dpy, _ctx);
@@ -1606,7 +1671,7 @@ bool CDriverGL3::destroyWindow()
 
 	_ctx = nil;
 
-#elif defined (NL_OS_UNIX)
+#elif defined (NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
 
 	_EventEmitter.closeIM();
 
@@ -1746,7 +1811,7 @@ bool CDriverGL3::setWindowStyle(EWindowStyle windowStyle)
 		[[containerView() window] makeFirstResponder:_glView];
 	}
 
-#elif defined(NL_OS_UNIX)
+#elif defined(NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
 
 	XWindowAttributes attr;
 	XGetWindowAttributes(_dpy, _win, &attr);
@@ -1985,7 +2050,7 @@ bool CDriverGL3::getModes(std::vector<GfxMode> &modes)
 		}
 	}
 
-#elif defined (NL_OS_UNIX)
+#elif defined (NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
 
 	bool found = false;
 	int screen = DefaultScreen(_dpy);
@@ -2119,7 +2184,7 @@ bool CDriverGL3::getCurrentScreenMode(GfxMode &mode)
 		mode.Height    = (uint16)[screen frame].size.height;
 	}
 
-#elif defined(NL_OS_UNIX)
+#elif defined(NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
 
 	bool found = false;
 	int screen = DefaultScreen(_dpy);
@@ -2228,7 +2293,7 @@ void CDriverGL3::setWindowTitle(const ucstring &title)
 	[[containerView() window] setTitle:
 		[NSString stringWithUTF8String:title.toUtf8().c_str()]];
 
-#elif defined (NL_OS_UNIX)
+#elif defined (NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
 
 #ifdef X_HAVE_UTF8_STRING
 	// UTF8 properties
@@ -2289,7 +2354,7 @@ void CDriverGL3::setWindowPos(sint32 x, sint32 y)
 	// tell cocoa to move the window
 	[[containerView() window] setFrameTopLeftPoint:NSMakePoint(x, y)];
 
-#elif defined (NL_OS_UNIX)
+#elif defined (NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
 
 	if (_CurrentMode.Windowed)
 	{
@@ -2325,7 +2390,7 @@ void CDriverGL3::showWindow(bool show)
 
 # warning "OpenGL Driver: Missing Mac Implementation for showWindow"
 
-#elif defined (NL_OS_UNIX)
+#elif defined (NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
 
 	if (show)
 	{
@@ -2347,7 +2412,11 @@ emptyProc CDriverGL3::getWindowProc()
 {
 	H_AUTO_OGL(CDriverGL3_getWindowProc)
 
+#ifdef __EMSCRIPTEN__
+	return NULL;
+#else
 	return (emptyProc)GlWndProc;
+#endif
 }
 
 // --------------------------------------------------
@@ -2448,7 +2517,7 @@ bool CDriverGL3::activate()
 	if ([NSOpenGLContext currentContext] != _ctx)
 		[_ctx makeCurrentContext];
 
-#elif defined (NL_OS_UNIX)
+#elif defined (NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
 
 	GLXContext nctx = glXGetCurrentContext();
 
@@ -2601,7 +2670,7 @@ void CDriverGL3::setWindowSize(uint32 width, uint32 height)
 		}
 	}
 
-#elif defined(NL_OS_UNIX)
+#elif defined(NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
 
 	if (!_Resizable)
 	{
@@ -2666,7 +2735,7 @@ bool CDriverGL3::isActive()
 
 #elif defined(NL_OS_MAC)
 # warning "OpenGL Driver: Missing Mac Implementation for isActive (always true if a window is set)"
-#elif defined (NL_OS_UNIX)
+#elif defined (NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
 
 	// check if our window is still active
 	XWindowAttributes attr;
@@ -2841,7 +2910,7 @@ bool CDriverGL3::convertBitmapToIcon(const NLMISC::CBitmap &bitmap, HICON &icon,
 
 #elif defined(NL_OS_MAC)
 
-#elif defined(NL_OS_UNIX)
+#elif defined(NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
 
 bool CDriverGL3::convertBitmapToIcon(const NLMISC::CBitmap &bitmap, std::vector<long> &icon)
 {

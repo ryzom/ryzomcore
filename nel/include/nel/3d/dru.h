@@ -31,16 +31,19 @@
 # define NL3D_GL_DLL_NAME "libnel_drv_opengl_win"
 # define NL3D_GL3_DLL_NAME "libnel_drv_opengl3_win"
 # define NL3D_GLES_DLL_NAME "libnel_drv_opengles_win"
+# define NL3D_GLES3_DLL_NAME "libnel_drv_opengles3_win"
 # define NL3D_D3D_DLL_NAME "libnel_drv_direct3d_win"
 #elif defined (NL_OS_WINDOWS)
 # define NL3D_GL_DLL_NAME "nel_drv_opengl_win"
 # define NL3D_GL3_DLL_NAME "nel_drv_opengl3_win"
 # define NL3D_GLES_DLL_NAME "nel_drv_opengles_win"
+# define NL3D_GLES3_DLL_NAME "nel_drv_opengles3_win"
 # define NL3D_D3D_DLL_NAME "nel_drv_direct3d_win"
 #elif defined (NL_OS_UNIX)
 # define NL3D_GL_DLL_NAME "nel_drv_opengl"
 # define NL3D_GL3_DLL_NAME "nel_drv_opengl3"
 # define NL3D_GLES_DLL_NAME "nel_drv_opengles"
+# define NL3D_GLES3_DLL_NAME "nel_drv_opengles3"
 #else
 # error "Unknown system"
 #endif
@@ -173,6 +176,9 @@ public:
 
 	/// Portable Function which create a GL ES Driver (using gl dll...).
 	static IDriver		*createGlEsDriver();
+
+	/// Portable Function which create a GL ES 3.0 Driver (using gl dll...).
+	static IDriver		*createGlEs3Driver();
 
 #ifdef NL_OS_WINDOWS
 	/// Windows Function which create a Direct3d Driver.

@@ -38,7 +38,7 @@
 #elif defined NL_OS_UNIX
 #	include <unistd.h>
 #	define IsDebuggerPresent() false
-#   ifndef NL_OS_MAC
+#   if !defined(NL_OS_MAC) && !defined(__EMSCRIPTEN__)
 #	    include <execinfo.h>
 #   endif
 //#	include <malloc.h>
@@ -608,7 +608,7 @@ public:
 		}
 		SymCleanup(getProcessHandle());
 		*/
-#elif !defined(NL_OS_MAC)
+#elif !defined(NL_OS_MAC) && !defined(__EMSCRIPTEN__)
 		// Make place for stack frames and function names
 		const uint MaxFrame=64;
 		void *trace[MaxFrame];
@@ -1036,14 +1036,11 @@ void getCallStack(std::string &result, sint skipNFirst)
 	{
 		result += e.what();
 	}
-#elif !defined(NL_OS_MAC)
-	// Make place for stack frames and function names
-	const uint MaxFrame=64;
+#elif !defined(NL_OS_MAC) && !defined(__EMSCRIPTEN__)
+	const int MaxFrame = 64;
 	void *trace[MaxFrame];
 	char **messages = (char **)NULL;
 	int i, trace_size = 0;
-
-	// on mac, require at least os 10.5
 	trace_size = backtrace(trace, MaxFrame);
 	messages = backtrace_symbols(trace, trace_size);
 	result += "Dumping call stack :\n";

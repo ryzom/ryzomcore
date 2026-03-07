@@ -360,6 +360,7 @@
 			<instance template="tgcw_scrollbarint" id="maxnotclod" text="uiCharMaxNotCLod" posparent="maxpoly" posref="BL TL" x="0" y="-2" />
 			<instance template="tgcw_scrollbarfloat" id="farclip" text="uiCharFarClip" posparent="maxnotclod" posref="BL TL" x="0" y="-2" />
 			<instance template="tgcw_checkbox" id="race_anim" text="uiEnableRacialAnimation" posparent="farclip" posref="BL TL" x="-20" y="-12" />
+			<instance template="tgcw_checkbox" id="gpu_skinning" text="uiGPUSkinning" posparent="race_anim" posref="BL TL" x="0" y="-12" />
 		</group>
 		<ctrl style="skin_scroll" id="sb_char" align="T" target="char" posparent="crop" posref="TL TR" x="-8" y="0" />
 
@@ -771,6 +772,7 @@
 			<param ui="char:maxnotclod:c" type="cfg" widget="sbint" realtime="true" ui_view="char:maxnotclod:c_res" ui_unit="uigcUnitChar" link="NbMaxSkeletonNotCLod" preset="UI:TEMP:PRESET_CHAR" />
 			<param ui="char:farclip:c" type="cfg" widget="sbfloat_round" realtime="true" ui_view="char:farclip:c_res" ui_unit="uigcUnitMeters" link="CharacterFarClip" preset="UI:TEMP:PRESET_CHAR" />
 			<param ui="char:race_anim:c" type="cfg" widget="boolbut" realtime="true" link="EnableRacialAnimation" />
+			<param ui="char:gpu_skinning:c" type="cfg" widget="boolbut" realtime="true" link="GPUSkinning" preset="UI:TEMP:PRESET_CHAR" />
 
 			<param ui="fx:maxpoly:c" type="cfg" widget="sbint" realtime="true" ui_view="fx:maxpoly:c_res" link="FxNbMaxPoly" preset="UI:TEMP:PRESET_FX" />
 			<param ui="fx:cloud:c" type="cfg" widget="boolbut" realtime="true" link="Cloud" preset="UI:TEMP:PRESET_FX" />

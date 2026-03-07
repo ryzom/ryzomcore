@@ -185,12 +185,27 @@ IF(HUNTER_ENABLED)
   # for precompiled headers, not needed if using TARGET_PRECOMPILE_HEADERS() from cmake 3.16+
   SET(ZLIB_INCLUDE_DIR ZLIB_ROOT/include)
 ELSE()
-FIND_PACKAGE(ZLIB REQUIRED)
-FIND_PACKAGE(LibXml2 REQUIRED)
-FIND_PACKAGE(PNG REQUIRED)
-FIND_PACKAGE(OpenSSL REQUIRED)
-FIND_PACKAGE(GIF)
-FIND_PACKAGE(JPEG)
+IF(EMSCRIPTEN)
+  # For Emscripten builds, zlib/libpng/libxml2 are not required for the sample demos.
+  # Create stub ZLIB::ZLIB imported target so nelmisc's TARGET_LINK_LIBRARIES doesn't
+  # error out. No actual zlib is linked; the stub is intentionally empty.
+  ADD_LIBRARY(ZLIB::ZLIB INTERFACE IMPORTED)
+  SET(ZLIB_FOUND TRUE)
+  SET(ZLIB_INCLUDE_DIRS "")
+  SET(ZLIB_LIBRARIES "")
+  # Do NOT create PNG::PNG - no libpng available, bitmap_png.cpp will be compiled out
+  SET(PNG_FOUND FALSE)
+  SET(LIBXML2_FOUND FALSE)
+  SET(LIBXML2_INCLUDE_DIR "")
+  SET(LIBXML2_LIBRARIES "")
+ELSE()
+  FIND_PACKAGE(ZLIB REQUIRED)
+  FIND_PACKAGE(LibXml2 REQUIRED)
+  FIND_PACKAGE(PNG REQUIRED)
+  FIND_PACKAGE(OpenSSL REQUIRED)
+  FIND_PACKAGE(GIF)
+  FIND_PACKAGE(JPEG)
+ENDIF()
 
 ENDIF() #hunter
 
@@ -205,13 +220,13 @@ ENDIF()
 NL_CONFIGURE_CHECKS()
 
 IF(WITH_STATIC_LIBXML2)
-  if(HUNTER_ENABLED)
+  if(HUNTER_ENABLED AND TARGET libxml2::libxml2)
       set_property(TARGET libxml2::libxml2
               APPEND
               PROPERTY INTERFACE_COMPILE_DEFINITIONS
               LIBXML_STATIC
       )
-  else()
+  elseif(TARGET LibXml2::LibXml2)
       set_property(TARGET LibXml2::LibXml2
               APPEND
               PROPERTY INTERFACE_COMPILE_DEFINITIONS
@@ -220,7 +235,9 @@ IF(WITH_STATIC_LIBXML2)
   endif ()
 ENDIF()
 
-FIND_PACKAGE(Iconv QUIET)
+IF(NOT EMSCRIPTEN)
+  FIND_PACKAGE(Iconv QUIET)
+ENDIF()
 IF(Iconv_FOUND)
   if(TARGET LibXml2::LibXml2 AND NOT HUNTER_ENABLED)
       set_property(TARGET LibXml2::LibXml2
@@ -334,7 +351,11 @@ IF(WITH_NEL)
       FIND_PACKAGE(Luabind REQUIRED)
     ENDIF()
 
+    IF(EMSCRIPTEN)
+      # CURL not needed for Emscripten builds
+    ELSE()
     FIND_PACKAGE(CURL REQUIRED)
+    ENDIF() # !EMSCRIPTEN
   ENDIF() #hunter
 
   INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/nel/include)

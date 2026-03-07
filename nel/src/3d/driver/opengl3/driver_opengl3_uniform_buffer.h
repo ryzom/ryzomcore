@@ -36,10 +36,11 @@ namespace NLDRIVERGL3 {
 #define NL_BUILTIN_MATERIAL_BINDING 3      // Builtin: per-material properties
 #define NL_USER_VERTEX_PROGRAM_BINDING 4   // User VP UBO
 #define NL_USER_PIXEL_PROGRAM_BINDING 5    // User PP UBO
+#define NL_USER_SKELETON_BINDING 6         // User skeleton bones UBO
 
 // Driver-side GLSL headers prepended to shaders (after #version and preprocessor lines).
 // Each header is inserted independently based on CProgramFeatures flags.
-extern const char *GLSLLightTableHeader; // NlLightTable UBO block (UsesLightTableUBO)
+std::string buildGLSLLightTableHeader(sint maxLights); // NlLightTable UBO block (UsesLightTableUBO)
 extern const char *GLSLCameraHeader;     // NlCamera UBO block (UsesCameraUBO)
 extern const char *GLSLObjectHeader;     // NlModel UBO block (UsesObjectUBO)
 extern const char *GLSLMaterialHeader;   // NlMaterial UBO block (UsesMaterialUBO)

@@ -154,8 +154,8 @@ void	CDriverGL3::enableLightInternal(uint8 num, bool enable)
 // ***************************************************************************
 uint	CDriverGL3::getMaxLightTableSize() const
 {
-	// Must match nlLights[] array size in GLSLBuiltinHeader
-	return 128;
+	// Must match nlLights[] array size in GLSLBuiltinHeader (runtime-determined)
+	return _MaxLightTableSize;
 }
 
 // ***************************************************************************
@@ -468,7 +468,7 @@ void CDriverGL3::uploadLightTableUBO()
 		if (_LightTableDirty)
 		{
 			sint count = (sint)_LightTable.size();
-			const sint maxLights = 128;
+			const sint maxLights = _MaxLightTableSize;
 			if (count > maxLights)
 				count = maxLights;
 

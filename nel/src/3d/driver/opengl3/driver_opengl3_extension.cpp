@@ -27,11 +27,18 @@
 
 #include "nel/3d/material.h"
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
 using namespace std;
 using namespace NLMISC;
 
 // ***************************************************************************
-#if defined(NL_OS_WINDOWS)
+#ifdef USE_OPENGLES3
+// For GLES 3.0, all core functions are linked directly.
+// No function pointer loading is needed.
+#elif defined(NL_OS_WINDOWS)
 #define	nglGetProcAddress wglGetProcAddress
 #elif defined(NL_OS_MAC)
 // #include <mach-o/dyld.h>
@@ -69,6 +76,8 @@ static void (*nglGetProcAddress(const char *procName))()
 
 namespace NL3D {
 namespace NLDRIVERGL3 {
+
+#ifndef USE_OPENGLES3
 
 // Core 3.30
 PFNGLGETSTRINGIPROC								nglGetStringi;
@@ -300,14 +309,18 @@ NEL_PFNGLXGETSWAPINTERVALMESAPROC				nglXGetSwapIntervalMESA;
 
 #endif
 
+#endif // !USE_OPENGLES3
+
 // ***************************************************************************
 // ***************************************************************************
 // ***************************************************************************
 // ***************************************************************************
 
 
+#ifndef USE_OPENGLES3
 #define CHECK_EXT(ext_str) \
 	if (strstr(glext, ext_str)==NULL) { nlwarning("3D: OpengGL extension '%s' was not found", ext_str); return false; } else { nldebug("3D: OpengGL Extension '%s' found", ext_str); }
+#endif
 
 bool checkExt2(std::vector<const char *> &glext, const char *ext_str)
 {
@@ -322,14 +335,18 @@ bool checkExt2(std::vector<const char *> &glext, const char *ext_str)
 #define CHECK_EXT_2(ext_str) \
 	if (!checkExt2(glext, ext_str)) { nlwarning("3D: OpengGL extension '%s' was not found", ext_str); return false; } else { nldebug("3D: OpengGL Extension '%s' found", ext_str); }
 
+#ifndef USE_OPENGLES3
 // Debug: don't return false if the procaddr returns 0
 // It means that it can crash if nel calls this extension but at least we have a warning to know why the extension is available but not the procaddr
 #define CHECK_ADDRESS(type, ext) \
 	n##ext=(type)nglGetProcAddress(#ext); \
 	if (!n##ext) { nlwarning("3D: GetProcAddress(\"%s\") returns NULL", #ext); return false; } else { /*nldebug("3D: GetProcAddress(\"%s\") succeed", #ext);*/ }
+#endif
 
 // ***************************************************************************
 // Extensions registrations, and Windows function Registration.
+
+#ifndef USE_OPENGLES3
 
 // *********************************
 static bool	setupEXTTextureCompressionS3TC(std::vector<const char *> &glext)
@@ -622,6 +639,13 @@ bool	registerGlExtensions(CGlExtensions &ext)
 	}
 
 	nldebug("OpenGL version is OK");
+
+	// Query renderer/vendor strings for driver detection
+	const char *nglRenderer = (const char *)glGetString(GL_RENDERER);
+	const char *nglVendor = (const char *)glGetString(GL_VENDOR);
+	ext.GLRenderer = nglRenderer ? nglRenderer : "";
+	ext.GLVendor = nglVendor ? nglVendor : "";
+	ext.IsANGLE = (ext.GLRenderer.find("ANGLE") != std::string::npos);
 	
 	// Extensions.
 	/*const char	*glext= (const char*)glGetString(GL_EXTENSIONS);
@@ -849,6 +873,87 @@ bool registerGlXExtensions(CGlExtensions &ext, Display *dpy, sint screen)
 	return true;
 }
 #endif
+
+#else // USE_OPENGLES3
+
+// ***************************************************************************
+// OpenGL ES 3.0 Extension Check.
+bool	registerGlExtensions(CGlExtensions &ext)
+{
+	H_AUTO_OGL(registerGlExtensions);
+
+	nldebug("Register OpenGL ES 3.0 extensions");
+
+	const char	*nglVersion= (const char *)glGetString(GL_VERSION);
+	ext.GLVersion = nglVersion;
+	nldebug("GL Version: %s", nglVersion);
+
+	// Query renderer/vendor strings for driver detection
+	const char *nglRenderer = (const char *)glGetString(GL_RENDERER);
+	const char *nglVendor = (const char *)glGetString(GL_VENDOR);
+	ext.GLRenderer = nglRenderer ? nglRenderer : "";
+	ext.GLVendor = nglVendor ? nglVendor : "";
+	ext.IsANGLE = (ext.GLRenderer.find("ANGLE") != std::string::npos);
+
+#ifdef __EMSCRIPTEN__
+	// Detect Windows platform via navigator.platform (for ANGLE+D3D11 workarounds)
+	ext.IsWindowsPlatform = EM_ASM_INT({ return navigator.platform.indexOf('Win') >= 0 ? 1 : 0; }) != 0;
+	// Detect Android platform via userAgent (for GLES driver workarounds)
+	ext.IsAndroidPlatform = EM_ASM_INT({ return navigator.userAgent.indexOf('Android') >= 0 ? 1 : 0; }) != 0;
+#endif
+
+	// All core GLES 3.0 functions are directly linked
+	ext.GLCore = true;
+
+	// SSO not available in GLES 3.0 core
+	ext.ARBSeparateShaderObjects = false;
+
+	// S3TC may be available as extension on some ES implementations
+	ext.EXTTextureCompressionS3TC = false;
+
+	// Check for anisotropic filtering extension
+	std::vector<const char *> glext;
+	GLint numExt = 0;
+	glGetIntegerv(GL_NUM_EXTENSIONS, &numExt);
+	glext.resize(numExt);
+	for (GLint i = 0; i < numExt; ++i)
+	{
+		glext[i] = reinterpret_cast<const char *>(glGetStringi(GL_EXTENSIONS, i));
+	}
+
+	nldebug("3D: Available OpenGL ES Extensions:");
+	if (DebugLog)
+	{
+		for (uint i = 0; i < glext.size(); i++)
+		{
+			if (i%5==0) DebugLog->displayRaw("3D:     ");
+			DebugLog->displayRaw(string(string(glext[i]) + " ").c_str());
+			if (i%5==4) DebugLog->displayRaw("\n");
+		}
+		DebugLog->displayRaw("\n");
+	}
+
+	ext.EXTTextureFilterAnisotropic = checkExt2(glext, "GL_EXT_texture_filter_anisotropic");
+	if (ext.EXTTextureFilterAnisotropic)
+	{
+		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &ext.EXTTextureFilterAnisotropicMaximum);
+	}
+
+	ext.AMDPinnedMemory = false;
+	ext.NVXGPUMemoryInfo = false;
+	ext.ATIMeminfo = false;
+
+	// Get the maximum fragment texture units
+	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &ext.MaxFragmentTextureImageUnits);
+	if (ext.MaxFragmentTextureImageUnits < 8)
+	{
+		nlwarning("GL_MAX_TEXTURE_IMAGE_UNITS must be greater than or equal to 8, value returned by driver is %i", ext.MaxFragmentTextureImageUnits);
+	}
+
+	return true;
+}
+
+#endif // USE_OPENGLES3
 
 } // NLDRIVERGL3
 } // NL3D

@@ -35,6 +35,12 @@ extern "C" {
 // ***************************************************************************
 // ***************************************************************************
 
+#ifdef USE_OPENGLES3
+
+// OpenGL ES 3.0 does not need platform-specific extension definitions
+
+#else
+
 #define WGL_COVERAGE_SAMPLES_NV            0x2042
 #define WGL_COLOR_SAMPLES_NV               0x20B9
 
@@ -72,6 +78,8 @@ typedef void (APIENTRY * NEL_PFNGLXFREEMEMORYNVPROC) (void *pointer);
 #endif // NL_GLX_NV_vertex_array_range
 
 #endif // NL_OS_MAC
+
+#endif // USE_OPENGLES3
 
 #ifdef __cplusplus
 }

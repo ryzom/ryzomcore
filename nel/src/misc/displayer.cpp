@@ -139,13 +139,13 @@ void CStdDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mess
 	bool needSpace = false;
 	//stringstream ss;
 	string str;
-#ifdef NL_OS_UNIX
+#if defined(NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
 	bool colorSet = false;
 #endif
 
 	if (args.LogType != CLog::LOG_NO)
 	{
-#ifdef NL_OS_UNIX
+#if defined(NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
 		if (StdDisplayerColor.get())
 		{
 			if (args.LogType == CLog::LOG_ERROR || args.LogType == CLog::LOG_ASSERT) { str += "\e[0;30m\e[41m"; colorSet = true; } // black text, red background
@@ -229,7 +229,7 @@ void CStdDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mess
 	}
 #endif // NL_OS_WINDOWS
 
-#ifdef NL_OS_UNIX
+#if defined(NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
 	if (colorSet)
 	{
 		str += "\e[0m";

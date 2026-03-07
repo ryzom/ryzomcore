@@ -62,8 +62,6 @@ namespace NLDRIVERGL3 {
 
 namespace /* anonymous */ {
 
-
-
 // Packed accessors for light indices/factors in object UBO
 static const char *s_LightIdxAccess[8] = {
 	"nlLightIndices01.x", "nlLightIndices01.y", "nlLightIndices01.z", "nlLightIndices01.w",
@@ -77,17 +75,14 @@ static const char *s_TexGenAccess[4] = {
 	"nlTexGenMode.x", "nlTexGenMode.y", "nlTexGenMode.z", "nlTexGenMode.w"
 };
 
-void megaVPGenerate(std::string &result, bool fogOrPpl, bool hwClip, bool tableUBO, bool cameraUBO, bool objectUBO, bool materialUBO, bool linked = false)
+} /* anonymous namespace */
+
+void megaVPGenerate(std::string &result, bool fogOrPpl, bool hwClip, bool tableUBO, bool cameraUBO, bool objectUBO, bool materialUBO, bool linked, const char *insertSource)
 {
 	// Object UBO implies tableUBO and camera UBO
 	if (objectUBO) { tableUBO = true; cameraUBO = true; }
 
 	std::stringstream ss;
-	ss << "// Megashader Vertex Program";
-	ss << " (fogOrPpl=" << (int)fogOrPpl << ", hwClip=" << (int)hwClip << ", tableUBO=" << (int)tableUBO
-	   << ", cameraUBO=" << (int)cameraUBO << ", objectUBO=" << (int)objectUBO
-	   << ", materialUBO=" << (int)materialUBO << ", linked=" << (int)linked << ")" << std::endl;
-	ss << std::endl;
 	if (linked)
 	{
 		ss << "#version 300 es" << std::endl;
@@ -95,9 +90,18 @@ void megaVPGenerate(std::string &result, bool fogOrPpl, bool hwClip, bool tableU
 			ss << "#extension GL_EXT_clip_cull_distance : enable" << std::endl;
 		ss << "precision highp float;" << std::endl;
 		ss << "precision highp int;" << std::endl;
+		ss << "// Megashader Vertex Program";
+		ss << " (fogOrPpl=" << (int)fogOrPpl << ", hwClip=" << (int)hwClip << ", tableUBO=" << (int)tableUBO
+		   << ", cameraUBO=" << (int)cameraUBO << ", objectUBO=" << (int)objectUBO
+		   << ", materialUBO=" << (int)materialUBO << ", linked=" << (int)linked << ")" << std::endl;
 	}
 	else
 	{
+		ss << "// Megashader Vertex Program";
+		ss << " (fogOrPpl=" << (int)fogOrPpl << ", hwClip=" << (int)hwClip << ", tableUBO=" << (int)tableUBO
+		   << ", cameraUBO=" << (int)cameraUBO << ", objectUBO=" << (int)objectUBO
+		   << ", materialUBO=" << (int)materialUBO << ", linked=" << (int)linked << ")" << std::endl;
+		ss << std::endl;
 		ss << "#version 330" << std::endl;
 		ss << "#extension GL_ARB_separate_shader_objects : enable" << std::endl;
 	}
@@ -275,6 +279,15 @@ void megaVPGenerate(std::string &result, bool fogOrPpl, bool hwClip, bool tableU
 	ss << "smooth out vec4 specularColor;" << std::endl;
 	ss << std::endl;
 
+	// VP insert source: UBO declaration + nlPreTransform function
+	if (insertSource)
+	{
+		ss << "// --- VP Insert ---" << std::endl;
+		ss << insertSource << std::endl;
+		ss << "// --- End VP Insert ---" << std::endl;
+		ss << std::endl;
+	}
+
 	// Light computation function (handles all modes via switch)
 	ss << "void computeLight(int lightMode, vec3 dirOrPos, vec4 colDiff, vec4 colSpec, float shininess," << std::endl;
 	ss << "                   float constAttn, float linAttn, float quadAttn," << std::endl;
@@ -318,11 +331,21 @@ void megaVPGenerate(std::string &result, bool fogOrPpl, bool hwClip, bool tableU
 	// Main function
 	ss << "void main(void)" << std::endl;
 	ss << "{" << std::endl;
-	ss << "  gl_Position = modelViewProjection * vposition;" << std::endl;
+
+	// Local variables for insert pre-transform hook
+	ss << "  vec4 nlPos = v" << g_AttribNames[Position] << ";" << std::endl;
+	ss << "  vec3 nlNorm = v" << g_AttribNames[Normal] << ".xyz;" << std::endl;
+	ss << "  vec4 nlTC0 = v" << g_AttribNames[TexCoord0] << ";" << std::endl;
+	ss << "  vec4 nlTangent = v" << g_AttribNames[Tangent] << ";" << std::endl;
+	if (insertSource)
+		ss << "  nlPreTransform(nlPos, nlNorm, nlTC0, nlTangent);" << std::endl;
+	ss << std::endl;
+
+	ss << "  gl_Position = modelViewProjection * nlPos;" << std::endl;
 	ss << std::endl;
 
 	// Eye-space position (always needed: lighting, texgen, clip, fog)
-	ss << "  vec4 ecPos4 = modelView * vposition;" << std::endl;
+	ss << "  vec4 ecPos4 = modelView * nlPos;" << std::endl;
 	if (fogOrPpl)
 	{
 		ss << "  ecPos = ecPos4;" << std::endl;
@@ -337,7 +360,8 @@ void megaVPGenerate(std::string &result, bool fogOrPpl, bool hwClip, bool tableU
 
 	// UV routing: build local array of VB texcoord inputs for indexed access
 	ss << "  vec4 vtc[" << IDRV_MAT_MAXTEXTURES << "];" << std::endl;
-	for (int i = 0; i < IDRV_MAT_MAXTEXTURES; ++i)
+	ss << "  vtc[0] = nlTC0;" << std::endl;
+	for (int i = 1; i < IDRV_MAT_MAXTEXTURES; ++i)
 		ss << "  vtc[" << i << "] = v" << g_AttribNames[TexCoord0 + i] << ";" << std::endl;
 	ss << std::endl;
 
@@ -355,12 +379,14 @@ void megaVPGenerate(std::string &result, bool fogOrPpl, bool hwClip, bool tableU
 			ss << "  if ((nlVertexFormat & NL_VP_NORMAL_FLAG) != 0) {" << std::endl;
 			ss << "    if (nlWorldSpaceNormal != 0)" << std::endl;
 			// World-space normal: eye-space via normalMatrix, then undo view rotation
-			ss << "      " << g_AttribNames[i] << " = vec4(transpose(mat3(viewMatrix)) * normalize(normalMatrix * (v" << g_AttribNames[i] << ".xyz / v" << g_AttribNames[i] << ".w)), 0.0);" << std::endl;
+			ss << "      " << g_AttribNames[i] << " = vec4(transpose(mat3(viewMatrix)) * normalize(normalMatrix * nlNorm), 0.0);" << std::endl;
 			ss << "    else" << std::endl;
-			ss << "      " << g_AttribNames[i] << " = vec4(normalize(v" << g_AttribNames[i] << ".xyz), 0.0);" << std::endl;
+			ss << "      " << g_AttribNames[i] << " = vec4(normalize(nlNorm), 0.0);" << std::endl;
 			ss << "  } else" << std::endl;
 			ss << "    " << g_AttribNames[i] << " = vec4(0.0, 0.0, 0.0, 0.0);" << std::endl;
 		}
+		else if (i == Tangent)
+			ss << "  " << g_AttribNames[i] << " = nlTangent;" << std::endl;
 		else if (i >= TexCoord0 && i <= TexCoord3)
 			ss << "  " << g_AttribNames[i] << " = texMatrix" << (i - TexCoord0) << " * vtc[nlUVRouting[" << (i - TexCoord0) << "]];" << std::endl;
 		else
@@ -375,7 +401,7 @@ void megaVPGenerate(std::string &result, bool fogOrPpl, bool hwClip, bool tableU
 	ss << std::endl;
 
 	ss << "  if (doLighting) {" << std::endl;
-	ss << "    vec3 normal3 = normalize(normalMatrix * (vnormal.xyz / vnormal.w));" << std::endl;
+	ss << "    vec3 normal3 = normalize(normalMatrix * nlNorm);" << std::endl;
 	ss << "    vec3 ecPos3 = ecPos4.xyz / ecPos4.w;" << std::endl;
 	ss << "    vec3 eyeDir = normalize(-ecPos3);" << std::endl;
 	ss << "    diffuseVertex = vec4(0.0);" << std::endl;
@@ -506,7 +532,7 @@ void megaVPGenerate(std::string &result, bool fogOrPpl, bool hwClip, bool tableU
 	// Compute reflection vector for texgen (shared by reflection/sphere stages)
 	ss << "  vec3 refl_r;" << std::endl;
 	ss << "  if ((nlVertexFormat & NL_VP_NORMAL_FLAG) != 0) {" << std::endl;
-	ss << "    vec3 refl_n = normalize(normalMatrix * (vnormal.xyz / vnormal.w));" << std::endl;
+	ss << "    vec3 refl_n = normalize(normalMatrix * nlNorm);" << std::endl;
 	ss << "    vec3 refl_u = normalize(ecPos4.xyz);" << std::endl;
 	ss << "    refl_r = reflect(refl_u, refl_n);" << std::endl;
 	ss << "  } else {" << std::endl;
@@ -524,7 +550,7 @@ void megaVPGenerate(std::string &result, bool fogOrPpl, bool hwClip, bool tableU
 			ss << "  if (" << tgmAccess << " == " << TexGenObjectLinear << ")" << std::endl;
 		else
 			ss << "  if (nlTexGenMode" << i << " == " << TexGenObjectLinear << ")" << std::endl;
-		ss << "    texCoord" << i << " = texMatrix" << i << " * vposition;" << std::endl;
+		ss << "    texCoord" << i << " = texMatrix" << i << " * nlPos;" << std::endl;
 		if (objectUBO)
 			ss << "  else if (" << tgmAccess << " == " << TexGenEyeLinear << ")" << std::endl;
 		else
@@ -563,8 +589,6 @@ void megaVPGenerate(std::string &result, bool fogOrPpl, bool hwClip, bool tableU
 	result = ss.str();
 }
 
-} /* anonymous namespace */
-
 bool CDriverGL3::initMegaVertexPrograms()
 {
 	// Determine which UBO/ppClip splits are active at init time
@@ -572,6 +596,34 @@ bool CDriverGL3::initMegaVertexPrograms()
 	int activeCameraUBO = (m_UseMegaCameraUBO || m_UseMegaObjectUBO) ? 1 : 0;
 	int activeObjectUBO = m_UseMegaObjectUBO ? 1 : 0;
 	int activeMaterialUBO = m_UseMegaMaterialUBO ? 1 : 0;
+
+#ifdef __EMSCRIPTEN__
+	{
+		int vpCount = 0;
+		for (int linked = 0; linked < 2; ++linked)
+		{
+			if (!linked && !m_SupportSSO) continue;
+			if (linked && !m_LinkedMegaShaders) continue;
+			for (int fogOrPpl = 0; fogOrPpl < 2; ++fogOrPpl)
+			for (int hwClip = 0; hwClip < 2; ++hwClip)
+			for (int tableUBO = 0; tableUBO < 2; ++tableUBO)
+			for (int cameraUBO = 0; cameraUBO < 2; ++cameraUBO)
+			for (int objectUBO = 0; objectUBO < 2; ++objectUBO)
+			for (int materialUBO = 0; materialUBO < 2; ++materialUBO)
+			{
+				if (objectUBO && (!tableUBO || !cameraUBO)) continue;
+				if (!m_BuildUnusedPrograms)
+				{
+					if (hwClip && m_PPClipPlanes) continue;
+					if (linked) { if (!tableUBO || !cameraUBO || !objectUBO || !materialUBO) continue; }
+					else { if (tableUBO != activeTableUBO || cameraUBO != activeCameraUBO || objectUBO != activeObjectUBO || materialUBO != activeMaterialUBO) continue; }
+				}
+				vpCount++;
+			}
+		}
+		EM_ASM({ window.nlBeginTask('Compiling vertex shaders', $0); }, vpCount);
+	}
+#endif
 
 	for (int linked = 0; linked < 2; ++linked)
 	{
@@ -638,6 +690,10 @@ bool CDriverGL3::initMegaVertexPrograms()
 									delete vp;
 									return false;
 								}
+#ifdef __EMSCRIPTEN__
+								EM_ASM({ window.nlStepTask('Compiling vertex shaders'); });
+								emscripten_sleep(0); // Yield to browser to prevent WebGL context timeout
+#endif
 
 								m_MegaVP[linked][fogOrPpl][hwClip][tableUBO][cameraUBO][objectUBO][materialUBO] = vp;
 							}

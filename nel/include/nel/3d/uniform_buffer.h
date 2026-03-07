@@ -70,6 +70,7 @@ enum TUBBinding
 {
 	UBBindingVertexProgram = 0,
 	UBBindingPixelProgram,
+	UBBindingSkeleton,
 	UBBindingCount
 };
 

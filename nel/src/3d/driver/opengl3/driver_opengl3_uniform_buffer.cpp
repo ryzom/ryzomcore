@@ -25,26 +25,33 @@
 namespace NL3D {
 namespace NLDRIVERGL3 {
 
-const char *GLSLLightTableHeader =
+std::string buildGLSLLightTableHeader(sint maxLights)
+{
 	// Light table UBO: shared across all objects, uploaded once when lights change.
 	// User VPs can reference nlLights[] directly when UsesLightTableUBO is set.
 	// Binding point is set from the CPU via glUniformBlockBinding in setupInitialUniforms.
-	"struct NlLightInfo {\n"
-	"    vec3  dirOrPos;\n"
-	"    int   mode;\n"        // 0=directional, 1=point, 2=spot
-	"    vec4  diffuse;\n"
-	"    vec4  specular;\n"
-	"    float constAttn;\n"
-	"    float linAttn;\n"
-	"    float quadAttn;\n"
-	"    float spotExp;\n"
-	"    vec3  spotDir;\n"
-	"    float spotCutoff;\n"  // cos(cutoff angle)
-	"    vec4  ambient;\n"
-	"};\n"
-	"layout(std140) uniform NlLightTable {\n"
-	"    NlLightInfo nlLights[128];\n"
-	"};\n";
+	std::string result =
+		"struct NlLightInfo {\n"
+		"    vec3  dirOrPos;\n"
+		"    int   mode;\n"        // 0=directional, 1=point, 2=spot
+		"    vec4  diffuse;\n"
+		"    vec4  specular;\n"
+		"    float constAttn;\n"
+		"    float linAttn;\n"
+		"    float quadAttn;\n"
+		"    float spotExp;\n"
+		"    vec3  spotDir;\n"
+		"    float spotCutoff;\n"  // cos(cutoff angle)
+		"    vec4  ambient;\n"
+		"};\n"
+		"layout(std140) uniform NlLightTable {\n"
+		"    NlLightInfo nlLights[";
+	result += NLMISC::toString(maxLights);
+	result +=
+		"];\n"
+		"};\n";
+	return result;
+}
 
 const char *GLSLCameraHeader =
 	// Camera/global state UBO: shared across all objects, uploaded once per frame.
@@ -231,6 +238,7 @@ static GLenum usageHintToGL(CUniformBuffer::TUsageHint hint)
 static const sint s_UBBindingToGL[] = {
 	NL_USER_VERTEX_PROGRAM_BINDING,  // UBBindingVertexProgram
 	NL_USER_PIXEL_PROGRAM_BINDING,   // UBBindingPixelProgram
+	NL_USER_SKELETON_BINDING,        // UBBindingSkeleton
 };
 
 bool CDriverGL3::bindUniformBuffer(TUBBinding binding, CUniformBuffer *ub)

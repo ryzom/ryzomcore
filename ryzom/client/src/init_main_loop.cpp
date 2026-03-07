@@ -638,6 +638,7 @@ void initMainLoop()
 		Scene->setGroupLoadMaxPolygon("Skin", ClientCfg.SkinNbMaxPoly);
 		Scene->setGroupLoadMaxPolygon("Fx", ClientCfg.FxNbMaxPoly);
 		Scene->setMaxSkeletonsInNotCLodForm(ClientCfg.NbMaxSkeletonNotCLod);
+		Scene->enableGPUSkinning(ClientCfg.GPUSkinning);
 		// separate group for mouse/target selection reticle
 		Scene->setGroupLoadMaxPolygon("SelectionFx", 10000);
 		// enable Scene Lighting
@@ -1466,6 +1467,9 @@ void initMainLoop()
 	// enable/disable bloom config interface
 	initBloomConfigUI();
 
+	// enable/disable GPU skinning config interface
+	initGPUSkinningConfigUI();
+
 	// popup to offer hardware cursor activation
 	initHardwareCursor();
 
@@ -1733,5 +1737,22 @@ void initBloomConfigUI()
 	{
 		if(group)
 			group->setDefaultContextHelp(std::string());
+	}
+}
+
+// ***************************************************************************
+void initGPUSkinningConfigUI()
+{
+	bool supported = Driver->supportGPUSkinning();
+
+	CCtrlBaseButton *button = dynamic_cast<CCtrlBaseButton *>(
+		CWidgetManager::getInstance()->getElementFromId(
+			"ui:interface:game_config:content:char:gpu_skinning:c"));
+	if (button)
+		button->setFrozen(!supported);
+
+	if (!supported)
+	{
+		ClientCfg.writeBool("GPUSkinning", false);
 	}
 }

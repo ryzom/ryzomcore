@@ -35,11 +35,18 @@ namespace NLDRIVERGL3 {
 struct	CGlExtensions
 {
 	std::string GLVersion;
+	std::string GLRenderer;
+	std::string GLVendor;
 
 	// Required extensions
 	bool	GLCore;
 	bool	ARBSeparateShaderObjects;
 	GLint	MaxFragmentTextureImageUnits;
+
+	// Platform/driver detection
+	bool	IsANGLE;           // ANGLE renderer detected (via GL_RENDERER)
+	bool	IsWindowsPlatform; // Running on Windows (compile-time or navigator.platform)
+	bool	IsAndroidPlatform; // Running on Android (compile-time or navigator.userAgent)
 
 	// Optional extensions
 	bool	EXTTextureCompressionS3TC;
@@ -72,6 +79,18 @@ public:
 		GLCore = false;
 		ARBSeparateShaderObjects = false;
 		MaxFragmentTextureImageUnits = 0;
+
+		IsANGLE = false;
+#ifdef NL_OS_WINDOWS
+		IsWindowsPlatform = true;
+#else
+		IsWindowsPlatform = false;
+#endif
+#ifdef NL_OS_ANDROID
+		IsAndroidPlatform = true;
+#else
+		IsAndroidPlatform = false;
+#endif
 
 		EXTTextureCompressionS3TC = false;
 		EXTTextureFilterAnisotropic = false;
@@ -119,6 +138,15 @@ public:
 		result += NVXGPUMemoryInfo ? "NVXGPUMemoryInfo " : "";
 		result += ATIMeminfo ? "ATIMeminfo " : "";
 
+		result += "\n  Renderer: ";
+		result += GLRenderer;
+		result += "\n  Vendor: ";
+		result += GLVendor;
+		result += "\n  Platform: ";
+		result += IsANGLE ? "ANGLE " : "";
+		result += IsWindowsPlatform ? "Windows " : "";
+		result += IsAndroidPlatform ? "Android " : "";
+
 #ifdef NL_OS_WINDOWS
 		result += "\n  WindowsGL: ";
 		result += WGLARBPBuffer ? "WGLARBPBuffer " : "";
@@ -144,7 +172,7 @@ public:
 /// This function will test and register WGL functions before than the gl context is created
 bool registerWGlExtensions(CGlExtensions &ext, HDC hDC);
 #elif defined(NL_OS_MAC)
-#elif defined(NL_OS_UNIX)
+#elif defined(NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
 /// This function will test and register GLX functions before than the gl context is created
 bool registerGlXExtensions(CGlExtensions &ext, Display *dpy, sint screen);
 #endif // NL_OS_WINDOWS
@@ -166,6 +194,198 @@ bool registerGlExtensions(CGlExtensions &ext);
 
 namespace NL3D {
 namespace NLDRIVERGL3 {
+
+#ifdef USE_OPENGLES3
+
+// For GLES 3.0, core functions are directly linked - map ngl* to gl*
+
+// Core 3.00 ES
+#define nglGetStringi glGetStringi
+
+#define nglClearBufferiv glClearBufferiv
+#define nglClearBufferuiv glClearBufferuiv
+#define nglClearBufferfv glClearBufferfv
+#define nglClearBufferfi glClearBufferfi
+
+#define nglAttachShader glAttachShader
+#define nglCompileShader glCompileShader
+#define nglCreateProgram glCreateProgram
+#define nglCreateShader glCreateShader
+#define nglDeleteProgram glDeleteProgram
+#define nglDeleteShader glDeleteShader
+#define nglDetachShader glDetachShader
+#define nglDisableVertexAttribArray glDisableVertexAttribArray
+#define nglEnableVertexAttribArray glEnableVertexAttribArray
+#define nglGetAttachedShaders glGetAttachedShaders
+#define nglGetProgramiv glGetProgramiv
+#define nglGetProgramInfoLog glGetProgramInfoLog
+#define nglGetShaderiv glGetShaderiv
+#define nglGetShaderInfoLog glGetShaderInfoLog
+#define nglGetActiveUniform glGetActiveUniform
+#define nglGetActiveUniformsiv glGetActiveUniformsiv
+#define nglGetUniformLocation glGetUniformLocation
+#define nglIsProgram glIsProgram
+#define nglIsShader glIsShader
+#define nglLinkProgram glLinkProgram
+#define nglShaderSource glShaderSource
+#define nglUseProgram glUseProgram
+#define nglValidateProgram glValidateProgram
+#define nglVertexAttribPointer glVertexAttribPointer
+
+#define nglGenVertexArrays glGenVertexArrays
+#define nglDeleteVertexArrays glDeleteVertexArrays
+#define nglBindVertexArray glBindVertexArray
+
+#define nglBindBuffer glBindBuffer
+#define nglBindBufferBase glBindBufferBase
+#define nglGetUniformBlockIndex glGetUniformBlockIndex
+#define nglUniformBlockBinding glUniformBlockBinding
+#define nglDeleteBuffers glDeleteBuffers
+#define nglGenBuffers glGenBuffers
+#define nglIsBuffer glIsBuffer
+#define nglBufferData glBufferData
+#define nglBufferSubData glBufferSubData
+// glGetBufferSubData not available in GLES 3.0
+// glMapBuffer not available in GLES 3.0, use glMapBufferRange
+#define nglUnmapBuffer glUnmapBuffer
+#define nglGetBufferParameteriv glGetBufferParameteriv
+#define nglGetBufferPointerv glGetBufferPointerv
+
+#define nglMapBufferRange glMapBufferRange
+#define nglFlushMappedBufferRange glFlushMappedBufferRange
+#define nglCopyBufferSubData glCopyBufferSubData
+
+#define nglGenQueries glGenQueries
+#define nglDeleteQueries glDeleteQueries
+#define nglIsQuery glIsQuery
+#define nglBeginQuery glBeginQuery
+#define nglEndQuery glEndQuery
+#define nglGetQueryiv glGetQueryiv
+// glGetQueryObjectiv not available in GLES 3.0, use glGetQueryObjectuiv
+#define nglGetQueryObjectuiv glGetQueryObjectuiv
+
+#define nglIsRenderbuffer glIsRenderbuffer
+#define nglBindRenderbuffer glBindRenderbuffer
+#define nglDeleteRenderbuffers glDeleteRenderbuffers
+#define nglGenRenderbuffers glGenRenderbuffers
+#define nglRenderbufferStorage glRenderbufferStorage
+#define nglGetRenderbufferParameteriv glGetRenderbufferParameteriv
+#define nglIsFramebuffer glIsFramebuffer
+#define nglBindFramebuffer glBindFramebuffer
+#define nglDeleteFramebuffers glDeleteFramebuffers
+#define nglGenFramebuffers glGenFramebuffers
+#define nglCheckFramebufferStatus glCheckFramebufferStatus
+// glFramebufferTexture1D not available in GLES 3.0
+#define nglFramebufferTexture2D glFramebufferTexture2D
+// glFramebufferTexture3D not available in GLES 3.0
+#define nglFramebufferRenderbuffer glFramebufferRenderbuffer
+#define nglGetFramebufferAttachmentParameteriv glGetFramebufferAttachmentParameteriv
+#define nglGenerateMipmap glGenerateMipmap
+#define nglBlitFramebuffer glBlitFramebuffer
+#define nglRenderbufferStorageMultisample glRenderbufferStorageMultisample
+#define nglFramebufferTextureLayer glFramebufferTextureLayer
+
+#define nglActiveTexture glActiveTexture
+
+#define nglCompressedTexImage3D glCompressedTexImage3D
+#define nglCompressedTexImage2D glCompressedTexImage2D
+// glCompressedTexImage1D not available in GLES 3.0
+#define nglCompressedTexSubImage3D glCompressedTexSubImage3D
+#define nglCompressedTexSubImage2D glCompressedTexSubImage2D
+// glCompressedTexSubImage1D not available in GLES 3.0
+// glGetCompressedTexImage not available in GLES 3.0
+
+#define nglBlendColor glBlendColor
+
+#define nglFenceSync glFenceSync
+#define nglIsSync glIsSync
+#define nglDeleteSync glDeleteSync
+#define nglClientWaitSync glClientWaitSync
+#define nglWaitSync glWaitSync
+#define nglGetInteger64v glGetInteger64v
+#define nglGetSynciv glGetSynciv
+
+// GL_ARB_separate_shader_objects not available in GLES 3.0 core
+// Provide functional stubs using core GLES 3.0 calls where possible
+inline void _nglUseProgramStages(GLuint, GLbitfield, GLuint) { }
+inline void _nglActiveShaderProgram(GLuint, GLuint) { }
+inline GLuint _nglCreateShaderProgramv(GLenum type, GLsizei count, const GLchar *const* strings)
+{
+	GLuint shader = glCreateShader(type);
+	if (!shader) return 0;
+	glShaderSource(shader, count, strings, NULL);
+	glCompileShader(shader);
+	GLuint program = glCreateProgram();
+	if (program)
+	{
+		GLint compiled = GL_FALSE;
+		glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
+		glAttachShader(program, shader);
+		if (compiled)
+		{
+			glLinkProgram(program);
+		}
+	}
+	glDeleteShader(shader);
+	return program;
+}
+inline void _nglProgramParameteri(GLuint, GLenum, GLint) { }
+inline void _nglBindProgramPipeline(GLuint) { }
+inline void _nglDeleteProgramPipelines(GLsizei, const GLuint *) { }
+inline void _nglGenProgramPipelines(GLsizei n, GLuint *pipelines) { for (GLsizei i = 0; i < n; ++i) pipelines[i] = 1; }
+inline GLboolean _nglIsProgramPipeline(GLuint) { return GL_FALSE; }
+inline void _nglGetProgramPipelineiv(GLuint, GLenum, GLint *) { }
+inline void _nglProgramUniform1f(GLuint, GLint, GLfloat) { }
+inline void _nglProgramUniform1fv(GLuint, GLint, GLsizei, const GLfloat *) { }
+inline void _nglProgramUniform2f(GLuint, GLint, GLfloat, GLfloat) { }
+inline void _nglProgramUniform2fv(GLuint, GLint, GLsizei, const GLfloat *) { }
+inline void _nglProgramUniform3f(GLuint, GLint, GLfloat, GLfloat, GLfloat) { }
+inline void _nglProgramUniform4f(GLuint, GLint, GLfloat, GLfloat, GLfloat, GLfloat) { }
+inline void _nglProgramUniform4fv(GLuint, GLint, GLsizei, const GLfloat *) { }
+inline void _nglProgramUniform1i(GLuint, GLint, GLint) { }
+inline void _nglProgramUniform1iv(GLuint, GLint, GLsizei, const GLint *) { }
+inline void _nglProgramUniform2i(GLuint, GLint, GLint, GLint) { }
+inline void _nglProgramUniform3i(GLuint, GLint, GLint, GLint, GLint) { }
+inline void _nglProgramUniform4i(GLuint, GLint, GLint, GLint, GLint, GLint) { }
+inline void _nglProgramUniform4iv(GLuint, GLint, GLsizei, const GLint *) { }
+inline void _nglProgramUniform1ui(GLuint, GLint, GLuint) { }
+inline void _nglProgramUniform2ui(GLuint, GLint, GLuint, GLuint) { }
+inline void _nglProgramUniform3ui(GLuint, GLint, GLuint, GLuint, GLuint) { }
+inline void _nglProgramUniform4ui(GLuint, GLint, GLuint, GLuint, GLuint, GLuint) { }
+inline void _nglProgramUniform4uiv(GLuint, GLint, GLsizei, const GLuint *) { }
+inline void _nglProgramUniformMatrix3fv(GLuint, GLint, GLsizei, GLboolean, const GLfloat *) { }
+inline void _nglProgramUniformMatrix4fv(GLuint, GLint, GLsizei, GLboolean, const GLfloat *) { }
+#define nglUseProgramStages _nglUseProgramStages
+#define nglActiveShaderProgram _nglActiveShaderProgram
+#define nglCreateShaderProgramv _nglCreateShaderProgramv
+#define nglProgramParameteri _nglProgramParameteri
+#define nglBindProgramPipeline _nglBindProgramPipeline
+#define nglDeleteProgramPipelines _nglDeleteProgramPipelines
+#define nglGenProgramPipelines _nglGenProgramPipelines
+#define nglIsProgramPipeline _nglIsProgramPipeline
+#define nglGetProgramPipelineiv _nglGetProgramPipelineiv
+#define nglProgramUniform1i _nglProgramUniform1i
+#define nglProgramUniform1iv _nglProgramUniform1iv
+#define nglProgramUniform2i _nglProgramUniform2i
+#define nglProgramUniform3i _nglProgramUniform3i
+#define nglProgramUniform4i _nglProgramUniform4i
+#define nglProgramUniform4iv _nglProgramUniform4iv
+#define nglProgramUniform1ui _nglProgramUniform1ui
+#define nglProgramUniform2ui _nglProgramUniform2ui
+#define nglProgramUniform3ui _nglProgramUniform3ui
+#define nglProgramUniform4ui _nglProgramUniform4ui
+#define nglProgramUniform4uiv _nglProgramUniform4uiv
+#define nglProgramUniform1f _nglProgramUniform1f
+#define nglProgramUniform1fv _nglProgramUniform1fv
+#define nglProgramUniform2f _nglProgramUniform2f
+#define nglProgramUniform2fv _nglProgramUniform2fv
+#define nglProgramUniform3f _nglProgramUniform3f
+#define nglProgramUniform4f _nglProgramUniform4f
+#define nglProgramUniform4fv _nglProgramUniform4fv
+#define nglProgramUniformMatrix3fv _nglProgramUniformMatrix3fv
+#define nglProgramUniformMatrix4fv _nglProgramUniformMatrix4fv
+
+#else // !USE_OPENGLES3
 
 // Core 3.30
 extern PFNGLGETSTRINGIPROC								nglGetStringi;
@@ -399,6 +619,8 @@ extern NEL_PFNGLXSWAPINTERVALMESAPROC			nglXSwapIntervalMESA;
 extern NEL_PFNGLXGETSWAPINTERVALMESAPROC		nglXGetSwapIntervalMESA;
 
 #endif
+
+#endif // !USE_OPENGLES3
 
 } // NLDRIVERGL3
 } // NL3D

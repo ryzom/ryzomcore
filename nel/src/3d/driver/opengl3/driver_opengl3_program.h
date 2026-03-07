@@ -137,6 +137,9 @@ extern const char *g_AttribNames[CVertexBuffer::NumValue];
 extern const char *g_TexelNames[IDRV_PROGRAM_MAXSAMPLERS];
 extern const char *g_ConstantNames[IDRV_PROGRAM_MAXSAMPLERS];
 
+/// Generate a mega VP source string. Called from initMegaVertexPrograms and compileInsertVertexProgram.
+void megaVPGenerate(std::string &result, bool fogOrPpl, bool hwClip, bool tableUBO, bool cameraUBO, bool objectUBO, bool materialUBO, bool linked = false, const char *insertSource = NULL);
+
 namespace /* anonymous */ {
 
 inline bool hasFlag(uint32 data, uint32 flag)

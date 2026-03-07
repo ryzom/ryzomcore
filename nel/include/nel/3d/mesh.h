@@ -49,6 +49,7 @@ using	NLMISC::CMatrix;
 
 
 class CMeshGeom;
+class CMeshInstance;
 class CSkeletonModel;
 class CMatrix3x4;
 
@@ -464,6 +465,13 @@ public:
 	// @}
 
 
+	/// \name GPU Skinning
+	// @{
+	bool			supportGPUSkinning() const { return _GPUSkinBuilt; }
+	void			renderGPUSkin(CMeshInstance *mi, CSkeletonModel *skeleton);
+	// @}
+
+
 	/** render the mesh geometry with a single material. Render is said "Simple" because no special features are used:
 	 *		- mesh is rendered without VertexProgram (if it has one).
 	 *		- mesh is rendered without Skinning.
@@ -853,6 +861,27 @@ private:
 	// build the shadow skin, from the VertexBuffer/IndexBuffer
 	void	buildShadowSkin();
 
+	// @}
+
+
+	/// \name GPU Skinning
+	// @{
+	/// GPU skinning vertex buffer (bind-pose data). Immutable once built.
+	CVertexBuffer			_GPUSkinVB;
+	/// GPU skinning combined index buffer for all matrix blocks. Immutable once built.
+	CIndexBuffer			_GPUSkinIB;
+	/// True once _GPUSkinVB and _GPUSkinIB are built.
+	bool					_GPUSkinBuilt;
+	/// Per-material pass info for the GPU IB.
+	struct GPURdrPass
+	{
+		uint32 MaterialId;
+		uint32 IBOffset;	///< First index in _GPUSkinIB
+		uint32 IBCount;		///< Number of indices
+	};
+	std::vector<GPURdrPass>	_GPUSkinPasses;
+	/// Build the GPU skinning VB and IB from the standard vertex data.
+	void	buildGPUSkinVB();
 	// @}
 
 };

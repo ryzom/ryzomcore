@@ -612,6 +612,11 @@ public:
 	/// get Enable Polygon Smoothing flag
 	bool			getEnableShadowPolySmooth() const;
 
+	/// Enable/Disable GPU Skinning
+	void			enableGPUSkinning(bool enable) { _GPUSkinningEnabled = enable; }
+	/// get GPU Skinning enabled flag
+	bool			isGPUSkinningEnabled() const { return _GPUSkinningEnabled; }
+
 	/// ShadowMap Distance Fade Start (40 default)
 	void			setShadowMapDistFadeStart(float dist);
 	float			getShadowMapDistFadeStart() const {return _ShadowMapDistFadeStart;}
@@ -829,6 +834,9 @@ private:
 	uint			_ShadowMapMaxCasterInScreen;
 	uint			_ShadowMapMaxCasterAround;
 	CVisualCollisionManager		*_VisualCollisionManagerForShadow;
+
+	// GPU Skinning
+	bool			_GPUSkinningEnabled;
 
 	// Delayed model delete
 	bool			_IsRendering;

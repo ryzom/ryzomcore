@@ -332,9 +332,17 @@ GLint	CDriverGL3::getGlTextureFormat(ITexture& tex, bool &compressed)
 		case ITexture::RGBA5551: return GL_RGB5_A1;
 		case ITexture::RGB888: return GL_RGB8;
 		case ITexture::RGB565: return GL_RGB5;
+#ifdef USE_OPENGLES3
+		// WebGL 2.0: No texture swizzle support, so Alpha/Luminance textures
+		// must be uploaded as RGBA and converted on the CPU side.
+		case ITexture::Luminance: return GL_RGBA8;
+		case ITexture::Alpha: return GL_RGBA8;
+		case ITexture::AlphaLuminance: return GL_RGBA8;
+#else
 		case ITexture::Luminance: return GL_R8; // GL_LUMINANCE8;
 		case ITexture::Alpha: return GL_R8; // GL_ALPHA8;
 		case ITexture::AlphaLuminance: return GL_RG8; // GL_LUMINANCE8_ALPHA8;
+#endif
 		case ITexture::DsDt:
 			return GL_RG8_SNORM; // Signed normalized for du/dv bump map data
 		break;
@@ -650,15 +658,20 @@ void CDriverGL3::setupTextureBasicParameters(ITexture &tex)
 		case ITexture::Luminance:
 		case ITexture::Alpha:
 		{
+#ifndef USE_OPENGLES3
+			// Desktop GL3.3: Use texture swizzle to replicate R channel to all RGBA
 			static const GLint swizzleMask[] = { GL_RED, GL_RED, GL_RED, GL_RED };
 			glTexParameteriv(gltext->TextureMode, GL_TEXTURE_SWIZZLE_RGBA, swizzleMask);
+#endif
 			break;
 		}
 		case ITexture::AlphaLuminance:
 		case ITexture::DsDt:
 		{
+#ifndef USE_OPENGLES3
 			static const GLint swizzleMask[] = { GL_RED, GL_GREEN, GL_RED, GL_GREEN };
 			glTexParameteriv(gltext->TextureMode, GL_TEXTURE_SWIZZLE_RGBA, swizzleMask);
+#endif
 			break;
 		}
 	}
@@ -950,26 +963,42 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 					else
 					{
 						sint	nMipMaps;
+#ifdef USE_OPENGLES3
+						// WebGL 2.0: No texture swizzle. Convert Alpha/Luminance to RGBA
+						// using a temporary copy so the original texture data is preserved.
+						CBitmap::TType origFormat = tex.getPixelFormat();
+						bool needsConvert = (glSrcFmt == GL_RGBA && origFormat != CBitmap::RGBA);
+						CBitmap tmpTex;
+						if (needsConvert)
+						{
+							bUpload = true;
+							tmpTex = tex;
+							tmpTex.convertToType(CBitmap::RGBA);
+						}
+						CBitmap &uploadTex = needsConvert ? tmpTex : tex;
+#else
 						if (glSrcFmt==GL_RGBA && tex.getPixelFormat()!=CBitmap::RGBA)
 						{
 							bUpload = true; // Force all upload
 							tex.convertToType(CBitmap::RGBA);
 						}
+						CBitmap &uploadTex = tex;
+#endif
 
 						// Degradation in Size.
 						if (_ForceTextureResizePower>0 && tex.allowDegradation())
 						{
-							uint	w= tex.getWidth(0) >> _ForceTextureResizePower;
-							uint	h= tex.getHeight(0) >> _ForceTextureResizePower;
+							uint	w= uploadTex.getWidth(0) >> _ForceTextureResizePower;
+							uint	h= uploadTex.getHeight(0) >> _ForceTextureResizePower;
 							w= max(1U, w);
 							h= max(1U, h);
-							tex.resample(w, h);
+							uploadTex.resample(w, h);
 						}
 
 						if (tex.mipMapOn())
 						{
-							tex.buildMipMaps();
-							nMipMaps= tex.getMipMapCount();
+							uploadTex.buildMipMaps();
+							nMipMaps= uploadTex.getMipMapCount();
 						}
 						else
 							nMipMaps= 1;
@@ -980,9 +1009,9 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 						// Fill mipmaps.
 						for (sint i=0;i<nMipMaps;i++)
 						{
-							void	*ptr= tex.getPixels(i).getPtr();
-							uint	w= tex.getWidth(i);
-							uint	h= tex.getHeight(i);
+							void	*ptr= uploadTex.getPixels(i).getPtr();
+							uint	w= uploadTex.getWidth(i);
+							uint	h= uploadTex.getHeight(i);
 
 							if (bUpload)
 							{
@@ -1013,6 +1042,8 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 		// Uses a PBO (Pixel Buffer Object) for async upload. Each rect is orphaned+mapped into
 		// the PBO, then glTexSubImage2D reads from the PBO asynchronously via DMA, avoiding
 		// pipeline stalls that occur with raw CPU pointer uploads.
+		// NOTE: WebGL 2.0 / GLES 3.0 does not support glMapBufferRange on GL_PIXEL_UNPACK_BUFFER,
+		// so we use direct glTexSubImage2D uploads instead.
 		else if (mustLoadPart && !gltext->Compressed)
 		{
 			// Regenerate wanted part of the texture.
@@ -1028,8 +1059,10 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 				GLenum glSrcType = getGlSrcTextureComponentType(tex, glSrcFmt);
 
 				sint nMipMaps;
+#ifndef USE_OPENGLES3
 				if (glSrcFmt == GL_RGBA && tex.getPixelFormat() != CBitmap::RGBA)
 					tex.convertToType(CBitmap::RGBA);
+#endif
 				if (tex.mipMapOn())
 				{
 					bool hadMipMap = tex.getMipMapCount() > 1;
@@ -1041,6 +1074,116 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 				else
 					nMipMaps = 1;
 
+#ifdef USE_OPENGLES3
+				// WebGL 2.0: No MapBufferRange on PBOs and no texture swizzle.
+				// For Alpha/Luminance textures, convert rect data to RGBA on the fly.
+				for (list<NLMISC::CRect>::iterator itRect = tex._ListInvalidRect.begin(); itRect != tex._ListInvalidRect.end(); itRect++)
+				{
+					CRect &rect = *itRect;
+					sint x0 = rect.X;
+					sint y0 = rect.Y;
+					sint x1 = rect.X + rect.Width;
+					sint y1 = rect.Y + rect.Height;
+
+					for (sint i = 0; i < nMipMaps; i++)
+					{
+						uint8 *ptr = (uint8 *)tex.getPixels(i).getPtr();
+						sint w = tex.getWidth(i);
+						sint h = tex.getHeight(i);
+						clamp(x0, 0, w);
+						clamp(y0, 0, h);
+						clamp(x1, x0, w);
+						clamp(y1, y0, h);
+
+						sint rectW = x1 - x0;
+						sint rectH = y1 - y0;
+						if (rectW <= 0 || rectH <= 0)
+							goto next_mipmap_gles;
+
+						if (bUpload)
+						{
+							sint pixelSize = (sint)(tex.getPixels(i).size() / (w * h));
+
+							// Check if we need to convert Alpha/Luminance to RGBA
+							if (pixelSize == 1 && glSrcFmt == GL_RGBA)
+							{
+								// Convert rect data from Alpha (1 byte) to RGBA (4 bytes) in temp buffer
+								bool isAlpha = (tex.getUploadFormat() == ITexture::Alpha);
+								std::vector<uint8> tmpBuf(rectW * rectH * 4);
+								for (sint row = 0; row < rectH; ++row)
+								{
+									uint8 *src = ptr + (y0 + row) * w + x0;
+									uint8 *dst = &tmpBuf[row * rectW * 4];
+									for (sint col = 0; col < rectW; ++col)
+									{
+										if (isAlpha)
+										{
+											// Alpha: R=255, G=255, B=255, A=alpha_value
+											dst[0] = 255;
+											dst[1] = 255;
+											dst[2] = 255;
+											dst[3] = src[col];
+										}
+										else
+										{
+											// Luminance: R=lum, G=lum, B=lum, A=255
+											dst[0] = src[col];
+											dst[1] = src[col];
+											dst[2] = src[col];
+											dst[3] = 255;
+										}
+										dst += 4;
+									}
+								}
+								glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+								glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
+								glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
+								glTexSubImage2D(GL_TEXTURE_2D, i, x0, y0, rectW, rectH, GL_RGBA, GL_UNSIGNED_BYTE, &tmpBuf[0]);
+							}
+							else if (pixelSize == 2 && glSrcFmt == GL_RGBA)
+							{
+								// AlphaLuminance: convert 2 bytes to RGBA
+								std::vector<uint8> tmpBuf(rectW * rectH * 4);
+								for (sint row = 0; row < rectH; ++row)
+								{
+									uint8 *src = ptr + ((y0 + row) * w + x0) * 2;
+									uint8 *dst = &tmpBuf[row * rectW * 4];
+									for (sint col = 0; col < rectW; ++col)
+									{
+										dst[0] = src[0]; // lum
+										dst[1] = src[0]; // lum
+										dst[2] = src[0]; // lum
+										dst[3] = src[1]; // alpha
+										src += 2;
+										dst += 4;
+									}
+								}
+								glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+								glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
+								glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
+								glTexSubImage2D(GL_TEXTURE_2D, i, x0, y0, rectW, rectH, GL_RGBA, GL_UNSIGNED_BYTE, &tmpBuf[0]);
+							}
+							else
+							{
+								// Standard format: upload directly
+								glPixelStorei(GL_UNPACK_ROW_LENGTH, w);
+								glPixelStorei(GL_UNPACK_SKIP_ROWS, y0);
+								glPixelStorei(GL_UNPACK_SKIP_PIXELS, x0);
+								glTexSubImage2D(GL_TEXTURE_2D, i, x0, y0, rectW, rectH, glSrcFmt, glSrcType, ptr);
+							}
+						}
+
+					next_mipmap_gles:
+						x0 = x0 / 2;
+						y0 = y0 / 2;
+						x1 = (x1 + 1) / 2;
+						y1 = (y1 + 1) / 2;
+					}
+				}
+				glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+				glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
+				glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
+#else
 				// Bind PBO for async upload
 				_DriverGLStates.forceBindPixelUnpackBuffer(_PixelUploadPBO);
 
@@ -1116,6 +1259,7 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 				glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 				glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
 				glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
+#endif
 			}
 		}
 

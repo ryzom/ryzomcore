@@ -71,6 +71,7 @@ CDriverGLStates3::CDriverGLStates3()
 	// Clip planes
 	for (uint i = 0; i < MaxClipDistances; ++i)
 		m_CurClipDistance[i] = false;
+	m_PPClipPlanes = false;
 
 	// --- Geometry state (NOT reset by forceDefaults) ---
 
@@ -188,7 +189,8 @@ void CDriverGLStates3::forceDefaults()
 	for (uint i = 0; i < MaxClipDistances; ++i)
 	{
 		m_CurClipDistance[i] = false;
-		glDisable(GL_CLIP_DISTANCE0 + i);
+		if (!m_PPClipPlanes)
+			glDisable(GL_CLIP_DISTANCE0 + i);
 	}
 
 }
@@ -456,6 +458,8 @@ void CDriverGLStates3::enableClipDistance(uint index, bool enable)
 {
 	H_AUTO_OGL(CDriverGLStates3_enableClipDistance)
 	nlassert(index < MaxClipDistances);
+	if (m_PPClipPlanes)
+		return;
 #ifndef NL3D_GLSTATE_DISABLE_CACHE
 	if (enable != m_CurClipDistance[index])
 #endif

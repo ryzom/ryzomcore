@@ -43,6 +43,13 @@ runs:
           libgsf-1-dev \
           qtbase5-dev qttools5-dev qttools5-dev-tools
 
+    - name: Configure ccache
+      shell: bash
+      run: |
+        ccache --set-config=max_size=1G
+        ccache --set-config=compression=true
+        ccache -z
+
     - name: Configure CMake
       if: runner.os == 'Linux'
       shell: bash
@@ -54,7 +61,7 @@ runs:
       run: cmake --preset ${{ inputs.cmake-preset }}
 
     - uses: actions/upload-artifact@v4
-      if: ( failure() )
+      if: failure()
       with:
         name: nel-${{ inputs.os }}-${{ github.sha }}-hunter
         path: build/.hunter/_Base/**/*-configure-*.log
@@ -64,6 +71,11 @@ runs:
       run: |
         cmake --build --preset nel
         cmake --build --preset nel --target install
+
+    - name: ccache stats
+      if: always()
+      shell: bash
+      run: ccache -s -v || ccache -s
 
     - name: Test
       shell: bash

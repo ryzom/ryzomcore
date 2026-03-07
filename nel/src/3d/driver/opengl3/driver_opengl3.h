@@ -30,7 +30,13 @@
 #	define H_AUTO_OGL(label)
 #endif
 
-#ifdef NL_OS_MAC
+#ifdef USE_OPENGLES3
+// OpenGL ES 3.0 / Emscripten - no platform-specific windowing headers needed here
+#ifdef __EMSCRIPTEN__
+#	include <emscripten.h>
+#	include <emscripten/html5.h>
+#endif
+#elif defined(NL_OS_MAC)
 #	import  <Cocoa/Cocoa.h>
 #	import  "mac/cocoa_opengl3_view.h"
 #elif defined (NL_OS_UNIX)
@@ -68,7 +74,18 @@
 #include "driver_opengl3_program.h"
 
 
-#ifdef NL_OS_WINDOWS
+#ifdef USE_OPENGLES3
+// OpenGL ES 3.0 - event handling via Emscripten or platform-specific code
+#	ifndef __EMSCRIPTEN__
+#		ifdef NL_OS_WINDOWS
+#			include "nel/misc/win_event_emitter.h"
+#		elif defined(NL_OS_MAC)
+#			include "mac/cocoa_event_emitter.h"
+#		elif defined (NL_OS_UNIX)
+#			include "unix_event_emitter.h"
+#		endif
+#	endif
+#elif defined(NL_OS_WINDOWS)
 #include "nel/misc/win_event_emitter.h"
 #elif defined(NL_OS_MAC)
 #include "mac/cocoa_event_emitter.h"
@@ -98,6 +115,26 @@ class   COcclusionQueryGL3;
 
 void displayGLError(GLenum error);
 
+#ifdef USE_OPENGLES3
+#ifdef __EMSCRIPTEN__
+// Emscripten doesn't need traditional window procedures
+typedef void* nlCursor;
+#define EmptyCursor (nlCursor)NULL
+#elif defined(NL_OS_WINDOWS)
+bool GlWndProc(CDriverGL3 *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+typedef HCURSOR nlCursor;
+#define EmptyCursor (nlCursor)NULL
+#elif defined(NL_OS_MAC)
+bool GlWndProc(CDriverGL3 *driver, const void* e);
+typedef void* nlCursor;
+#define EmptyCursor (nlCursor)NULL
+#elif defined(NL_OS_UNIX)
+bool GlWndProc(CDriverGL3 *driver, XEvent &e);
+typedef Cursor nlCursor;
+#define EmptyCursor None
+#endif
+#else // !USE_OPENGLES3
+
 #ifdef NL_OS_WINDOWS
 
 bool GlWndProc(CDriverGL3 *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -117,6 +154,8 @@ typedef Cursor nlCursor;
 #define EmptyCursor None
 
 #endif
+
+#endif // USE_OPENGLES3
 
 typedef std::list<COcclusionQueryGL3 *> TOcclusionQueryList;
 
@@ -633,6 +672,8 @@ public:
 
 	virtual bool			swapBuffers();
 
+	virtual bool			isFrameReady();
+
 	virtual void			setSwapVBLInterval(uint interval);
 
 	virtual uint			getSwapVBLInterval();
@@ -938,7 +979,7 @@ private:
 		nlCursor		Cursor;
 		NLMISC::CRGBA	Col;
 		uint8			Rot;
-#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC) && !defined(__EMSCRIPTEN__)
 		Display			*Dpy;
 #endif
 	public:
@@ -960,6 +1001,35 @@ private:
 	typedef std::map<std::string, CCursor, CStrCaseUnsensitiveCmp> TCursorMap;
 
 	TCursorMap					_Cursors;
+
+#ifdef USE_OPENGLES3
+#ifdef __EMSCRIPTEN__
+	// Emscripten WebGL context - managed by the HTML5 canvas
+	EMSCRIPTEN_WEBGL_CONTEXT_HANDLE	_ctx;
+#elif defined(NL_OS_WINDOWS)
+	HGLRC						_hRC;
+	HDC							_hDC;
+	PIXELFORMATDESCRIPTOR		_pfd;
+	HPBUFFERARB					_PBuffer;
+#elif defined(NL_OS_UNIX)
+	// EGL context for native GLES 3.0
+	void*						_ctx;
+#endif
+
+#ifdef __EMSCRIPTEN__
+	// Emscripten event handling is done through HTML5 API
+	NLMISC::CEventEmitterMulti	_EventEmitter;
+#elif defined(NL_OS_WINDOWS)
+	bool						convertBitmapToIcon(const NLMISC::CBitmap &bitmap, HICON &icon, uint iconWidth, uint iconHeight, uint iconDepth, const NLMISC::CRGBA &col = NLMISC::CRGBA::White, sint hotSpotX = 0, sint hotSpotY = 0, bool cursor = false);
+	friend bool GlWndProc(CDriverGL3 *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+	static uint					_Registered;
+	DEVMODE						_OldScreenMode;
+	NLMISC::CEventEmitterMulti	_EventEmitter;
+#elif defined(NL_OS_UNIX)
+	NLMISC::CEventEmitterMulti	_EventEmitter;
+#endif
+
+#else // !USE_OPENGLES3
 
 #if defined(NL_OS_WINDOWS)
 	HGLRC						_hRC;
@@ -1020,6 +1090,8 @@ private:
 #endif //XF86VIDMODE
 
 #endif // NL_OS_UNIX
+
+#endif // USE_OPENGLES3
 
 	bool					_Initialized;
 
@@ -1113,7 +1185,8 @@ private:
 	bool						_LightTableDirty; // Light table entries changed
 	bool						_UserLightUBODirty; // _UserLight[] changed (for non-table UBO mode)
 	sint						_LightTableUBOCapacity; // Current GPU buffer capacity (entries)
-	CLightTableUBOEntry			_LightTableUBOStaging[128]; // Persistent staging buffer (avoids per-frame heap alloc)
+	sint						_MaxLightTableSize; // Runtime maximum (reduced on ANGLE/D3D11)
+	CLightTableUBOEntry			_LightTableUBOStaging[NL_OPENGL3_MAX_LIGHT_TABLE_CAPACITY]; // Persistent staging buffer (avoids per-frame heap alloc)
 	void						uploadLightTableUBO();
 
 	// Per-object light table selection (set by setLights, used by setupUniforms)
@@ -1289,6 +1362,13 @@ private:
 	CVertexBufferInfo		_LastVB;
 	CIndexBufferInfo		_LastIB;
 
+#ifdef USE_OPENGLES3
+	/// Scratch element buffer for WebGL 2.0 (client-side index arrays not supported)
+	GLuint					_ScratchElementBuffer;
+	GLsizeiptr				_ScratchElementBufferSize;
+	void					drawElementsWebGL(GLenum mode, GLsizei count, GLenum type, const void *indices);
+#endif
+
 	/// Sets up the rendering parameters for the normal shader
 	void setupNormalMaterial();
 	/// Sets up the rendering parameters for the specular shader
@@ -1410,6 +1490,7 @@ private:
 	bool			supportVertexProgram(CVertexProgram::TProfile profile) const;
 
 	bool			compileVertexProgram(CVertexProgram *program);
+	bool			compileInsertVertexProgram(CVertexProgram *program);
 	bool			convertNelvpToGLSL(CVertexProgram *program, bool linked);
 	CUniformBuffer	*getNelvpUB(TProgram program) const;
 	void			flushNelvpUserVP();
@@ -1468,6 +1549,7 @@ private:
 	bool		    supportVertexProgramDoubleSidedColor() const { return false; }
 
 	virtual	bool			supportMADOperator() const ;
+	virtual	bool			supportLargeUBOArrays() const ;
 
 
 	/// \fallback for material shaders
@@ -1703,6 +1785,16 @@ public:
 	bool isNelvpConverted;                                // True if this VP was converted from nelvp
 	NLMISC::CSmartPtr<CUniformBuffer> NelvpConstantUB;   // UBO for nelvp constant registers (96 + 4 modelView)
 	std::map<std::string, uint> NelvpParamIndices;        // ParamIndices from nelvp source (name → register index)
+
+	// VP insert program state (glsl3vi profile)
+	bool isInsertProgram;                                 // True if this VP is a VP insert
+	std::string InsertSource;                             // Cached insert GLSL text
+	// Compiled mega VP variants with this insert spliced in
+	// [linked][fogOrPpl][hwClip] — always all-UBO dimensions
+	NLMISC::CSmartPtr<CVertexProgram> InsertMegaVP[2][2][2];
+	// Linked combos: insert mega VP + mega PP
+	// [fogOrPpl][cube][specular][ppClip]
+	NLMISC::CSmartPtr<CShaderProgram> InsertLinkedVPMegaPP[2][2][2][2];
 
 private:
 	GLuint programId;

@@ -33,6 +33,10 @@
 #include <nel/3d/u_driver.h>
 #include <nel/3d/u_material.h>
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
 #ifdef NL_OS_WINDOWS
 #ifndef NL_COMP_MINGW
 #define NOMINMAX
@@ -89,6 +93,7 @@ public:
 	CClipPlaneDemo();
 	~CClipPlaneDemo();
 	void run();
+	void renderOneFrame();
 
 	virtual void operator()(const CEvent &event) NL_OVERRIDE;
 
@@ -97,12 +102,18 @@ private:
 	UDriver *m_Driver;
 	UMaterial m_CubeMat;
 	UMaterial m_PlaneMat;
+	CFrustum m_Frustum;
+	double m_StartTime;
 };
 
 CClipPlaneDemo::CClipPlaneDemo()
 	: m_CloseWindow(false)
 {
+#ifdef __EMSCRIPTEN__
+	m_Driver = UDriver::createDriver(0, UDriver::OpenGlEs3);
+#else
 	m_Driver = UDriver::createDriver(0, UDriver::OpenGl3);
+#endif
 	if (!m_Driver)
 	{
 		nlerror("Failed to create driver");
@@ -126,6 +137,9 @@ CClipPlaneDemo::CClipPlaneDemo()
 	m_PlaneMat.setZWrite(false);
 	m_PlaneMat.setBlend(true);
 	m_PlaneMat.setBlendFunc(UMaterial::srcalpha, UMaterial::invsrcalpha);
+
+	m_Frustum.initPerspective(float(Pi / 3.0), 800.f / 600.f, 0.1f, 100.f);
+	m_StartTime = CTime::ticksToSecond(CTime::getPerformanceTime());
 }
 
 CClipPlaneDemo::~CClipPlaneDemo()
@@ -144,98 +158,113 @@ void CClipPlaneDemo::operator()(const CEvent &event)
 	}
 }
 
-void CClipPlaneDemo::run()
+void CClipPlaneDemo::renderOneFrame()
 {
-	CFrustum frustum;
-	frustum.initPerspective(float(Pi / 3.0), 800.f / 600.f, 0.1f, 100.f);
+	if (!m_Driver->isFrameReady())
+		return; // GPU busy, skip frame to avoid blocking browser event loop
+
+	m_Driver->EventServer.pump();
+
+	double now = CTime::ticksToSecond(CTime::getPerformanceTime()) - m_StartTime;
+
+	m_Driver->clearBuffers(CRGBA(40, 40, 40));
 
 	float camDist = 8.f;
 	float camHeight = 4.f;
 
-	double startTime = CTime::ticksToSecond(CTime::getPerformanceTime());
+	// Orbit camera around the scene
+	float camAngle = float(now * 0.3);
+	CVector eye(cosf(camAngle) * camDist, sinf(camAngle) * camDist, camHeight);
+	CVector target(0.f, 0.f, 0.f);
+	CVector up(0.f, 0.f, 1.f);
+	CVector jj = (target - eye).normed();
+	CVector ii = (jj ^ up).normed();
+	CVector kk = ii ^ jj;
+	CMatrix camWorld;
+	camWorld.setRot(ii, jj, kk, true);
+	camWorld.setPos(eye);
+	CMatrix viewMatrix = camWorld;
+	viewMatrix.invert();
 
+	m_Driver->setFrustum(m_Frustum);
+	m_Driver->setViewMatrix(viewMatrix);
+
+	// Identity model matrix (cube is in world space)
+	CMatrix modelMatrix;
+	modelMatrix.identity();
+	m_Driver->setModelMatrix(modelMatrix);
+
+	// Rotate the cube
+	CMatrix cubeTransform;
+	cubeTransform.identity();
+	cubeTransform.rotateZ(float(now * 0.5));
+	cubeTransform.rotateX(float(now * 0.3));
+
+	// Animate clip plane: wobble along both axes + oscillate height
+	float tiltX = float(sin(now * 0.4) * 0.3);
+	float tiltY = float(sin(now * 0.5) * 0.3);
+	float clipHeight = float(sin(now * 0.7) * 1.2);
+	CVector normal(tiltX, tiltY, 1.f);
+	normal.normalize();
+	CPlane clipPlane(normal.x, normal.y, normal.z, -clipHeight * normal.z);
+
+	// Enable and set the clip plane
+	m_Driver->setClipPlane(0, clipPlane);
+	m_Driver->enableClipPlane(0, true);
+
+	// Draw the cube (half-size = 1.5)
+	drawCube(m_Driver, m_CubeMat, cubeTransform, 1.5f);
+
+	// Disable clip plane
+	m_Driver->enableClipPlane(0, false);
+
+	// Draw a translucent quad to visualize the clip plane
+	{
+		// Find two tangent vectors to the plane normal
+		CVector tangentU = (normal ^ CVector(0.f, 1.f, 0.f));
+		if (tangentU.norm() < 0.001f)
+			tangentU = normal ^ CVector(1.f, 0.f, 0.f);
+		tangentU.normalize();
+		CVector tangentV = normal ^ tangentU;
+		tangentV.normalize();
+
+		// (0, 0, clipHeight) always lies on our plane since
+		// d = -clipHeight * normal.z
+		CVector center(0.f, 0.f, clipHeight);
+		float planeSize = 3.f;
+
+		CQuadColor planeQuad;
+		planeQuad.V0 = center - tangentU * planeSize - tangentV * planeSize;
+		planeQuad.V1 = center + tangentU * planeSize - tangentV * planeSize;
+		planeQuad.V2 = center + tangentU * planeSize + tangentV * planeSize;
+		planeQuad.V3 = center - tangentU * planeSize + tangentV * planeSize;
+		CRGBA planeColor(100, 200, 255, 80);
+		planeQuad.Color0 = planeQuad.Color1 = planeQuad.Color2 = planeQuad.Color3 = planeColor;
+		m_Driver->drawQuad(planeQuad, m_PlaneMat);
+	}
+
+	m_Driver->swapBuffers();
+}
+
+void CClipPlaneDemo::run()
+{
+#ifndef __EMSCRIPTEN__
 	while (m_Driver->isActive() && !m_CloseWindow)
 	{
-		m_Driver->EventServer.pump();
-
-		double now = CTime::ticksToSecond(CTime::getPerformanceTime()) - startTime;
-
-		m_Driver->clearBuffers(CRGBA(40, 40, 40));
-
-		// Orbit camera around the scene
-		float camAngle = float(now * 0.3);
-		CVector eye(cosf(camAngle) * camDist, sinf(camAngle) * camDist, camHeight);
-		CVector target(0.f, 0.f, 0.f);
-		CVector up(0.f, 0.f, 1.f);
-		CVector jj = (target - eye).normed();
-		CVector ii = (jj ^ up).normed();
-		CVector kk = ii ^ jj;
-		CMatrix camWorld;
-		camWorld.setRot(ii, jj, kk, true);
-		camWorld.setPos(eye);
-		CMatrix viewMatrix = camWorld;
-		viewMatrix.invert();
-
-		m_Driver->setFrustum(frustum);
-		m_Driver->setViewMatrix(viewMatrix);
-
-		// Identity model matrix (cube is in world space)
-		CMatrix modelMatrix;
-		modelMatrix.identity();
-		m_Driver->setModelMatrix(modelMatrix);
-
-		// Rotate the cube
-		CMatrix cubeTransform;
-		cubeTransform.identity();
-		cubeTransform.rotateZ(float(now * 0.5));
-		cubeTransform.rotateX(float(now * 0.3));
-
-		// Animate clip plane: wobble along both axes + oscillate height
-		float tiltX = float(sin(now * 0.4) * 0.3);
-		float tiltY = float(sin(now * 0.5) * 0.3);
-		float clipHeight = float(sin(now * 0.7) * 1.2);
-		CVector normal(tiltX, tiltY, 1.f);
-		normal.normalize();
-		CPlane clipPlane(normal.x, normal.y, normal.z, -clipHeight * normal.z);
-
-		// Enable and set the clip plane
-		m_Driver->setClipPlane(0, clipPlane);
-		m_Driver->enableClipPlane(0, true);
-
-		// Draw the cube (half-size = 1.5)
-		drawCube(m_Driver, m_CubeMat, cubeTransform, 1.5f);
-
-		// Disable clip plane
-		m_Driver->enableClipPlane(0, false);
-
-		// Draw a translucent quad to visualize the clip plane
-		{
-			// Find two tangent vectors to the plane normal
-			CVector tangentU = (normal ^ CVector(0.f, 1.f, 0.f));
-			if (tangentU.norm() < 0.001f)
-				tangentU = normal ^ CVector(1.f, 0.f, 0.f);
-			tangentU.normalize();
-			CVector tangentV = normal ^ tangentU;
-			tangentV.normalize();
-
-			// (0, 0, clipHeight) always lies on our plane since
-			// d = -clipHeight * normal.z
-			CVector center(0.f, 0.f, clipHeight);
-			float planeSize = 3.f;
-
-			CQuadColor planeQuad;
-			planeQuad.V0 = center - tangentU * planeSize - tangentV * planeSize;
-			planeQuad.V1 = center + tangentU * planeSize - tangentV * planeSize;
-			planeQuad.V2 = center + tangentU * planeSize + tangentV * planeSize;
-			planeQuad.V3 = center - tangentU * planeSize + tangentV * planeSize;
-			CRGBA planeColor(100, 200, 255, 80);
-			planeQuad.Color0 = planeQuad.Color1 = planeQuad.Color2 = planeQuad.Color3 = planeColor;
-			m_Driver->drawQuad(planeQuad, m_PlaneMat);
-		}
-
-		m_Driver->swapBuffers();
+		renderOneFrame();
 	}
+#endif
 }
+
+#ifdef __EMSCRIPTEN__
+static CClipPlaneDemo *s_Demo = NULL;
+
+static void emscriptenMainLoop()
+{
+	if (s_Demo)
+		s_Demo->renderOneFrame();
+}
+#endif
 
 #ifdef NL_OS_WINDOWS
 sint WINAPI WinMain(HINSTANCE /* hInstance */, HINSTANCE /* hPrevInstance */, LPSTR /* cmdline */, int /* nCmdShow */)
@@ -245,8 +274,16 @@ sint main(int /* argc */, char ** /* argv */)
 {
 	CApplicationContext applicationContext;
 
+#ifdef __EMSCRIPTEN__
+	// Emscripten: demo must persist since emscripten_set_main_loop never returns
+	static CClipPlaneDemo demo;
+	s_Demo = &demo;
+	EM_ASM({ if (window.nlLoadingComplete) window.nlLoadingComplete(); });
+	emscripten_set_main_loop(emscriptenMainLoop, 0, 1);
+#else
 	CClipPlaneDemo demo;
 	demo.run();
+#endif
 
 	return EXIT_SUCCESS;
 }

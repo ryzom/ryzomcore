@@ -51,14 +51,30 @@ runs:
         --include-subdir
         --prefix=${{ inputs.install-dir }}
 
+    - name: Configure ccache
+      shell: bash
+      run: |
+        ccache --set-config=max_size=1G
+        ccache --set-config=compression=true
+        ccache -z
+
     - name: Configure CMake
       if: runner.os == 'Linux'
       shell: bash
-      run: cmake --preset ci-linux-studio
+      run: >
+        cmake --preset ci-linux-studio
+        -DCMAKE_C_COMPILER_LAUNCHER=ccache
+        -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+        -DWITH_PCH=OFF
 
     - name: Build
       shell: bash
       run: cmake --build --preset studio
+
+    - name: ccache stats
+      if: always()
+      shell: bash
+      run: ccache -s -v || ccache -s
 
     - name: Package
       shell: bash

@@ -28,6 +28,7 @@ jobs:
       build-output-dir: ${{ steps.strings.outputs.build-output-dir }}
       build-version: ${{ steps.strings.outputs.build-version }}
       docker-image-tag: ${{ steps.strings.outputs.docker-image-tag }}
+      week: ${{ steps.strings.outputs.week }}
     steps:
       - name: Set reusable strings
         id: strings
@@ -44,6 +45,7 @@ jobs:
           echo IMAGE_ID=$IMAGE_ID
           echo "build-version=${VERSION}+sha.${COMMIT_HASH:0:8}" >> "$GITHUB_OUTPUT"
           echo "docker-image-tag=${IMAGE_ID}:${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "week=$(date +%YW%V)" >> "$GITHUB_OUTPUT"
 
   build:
     needs: [ strings ]
@@ -104,15 +106,35 @@ jobs:
           wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/quic_sal_stub.h
           sudo mv msquic.h msquic_posix.h quic_sal_stub.h /usr/include/
 
+      - name: Set up ccache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ccache
+          key: ccache-${{ matrix.os }}-${{ needs.strings.outputs.week }}-${{ github.sha }}
+          restore-keys: ccache-${{ matrix.os }}-${{ needs.strings.outputs.week }}-
+
+      - name: Configure ccache
+        run: |
+          ccache --set-config=max_size=1G
+          ccache --set-config=compression=true
+          ccache -z
+
       - name: Configure CMake
         run: >
           cmake --preset linux-default
           -DWITH_MSQUIC=ON
           -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
           -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
+          -DCMAKE_C_COMPILER_LAUNCHER=ccache
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          -DWITH_PCH=OFF
 
       - name: Build
         run: cmake --build --preset ${{ matrix.build_preset }}
+
+      - name: ccache stats
+        if: always()
+        run: ccache -s -v || ccache -s
 
       - name: Unit Tests
         run: ctest --preset default

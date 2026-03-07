@@ -60,6 +60,10 @@
 #include <windows.h>
 #endif
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
 using namespace std;
 using namespace NLMISC;
 using namespace NL3D;
@@ -355,6 +359,7 @@ public:
 	CPPLDemo();
 	~CPPLDemo();
 	void run();
+	void renderOneFrame();
 
 	virtual void operator()(const CEvent &event) NL_OVERRIDE;
 
@@ -383,6 +388,14 @@ private:
 	CMaterial m_SphereMat;
 	CMaterial m_CylMat;
 	CMaterial m_FloorMat;
+
+	// Per-frame state (moved from run() for Emscripten renderOneFrame support)
+	float m_CamAngle;
+	float m_CamDist;
+	float m_CamHeight;
+	float m_LightTime;
+	double m_LastTime;
+	float m_SmoothFps;
 };
 
 CPPLDemo::CPPLDemo()
@@ -395,6 +408,12 @@ CPPLDemo::CPPLDemo()
 	, m_KeyDown(false)
 	, m_Brightness(1.f)
 	, m_TextContext(NULL)
+	, m_CamAngle(0.f)
+	, m_CamDist(15.f)
+	, m_CamHeight(8.f)
+	, m_LightTime(0.f)
+	, m_LastTime(0.0)
+	, m_SmoothFps(60.f)
 {
 	for (uint i = 0; i < 8; ++i)
 	{
@@ -402,7 +421,11 @@ CPPLDemo::CPPLDemo()
 		m_LightEnabled[i] = true;
 	}
 
+#ifdef __EMSCRIPTEN__
+	m_Driver = UDriver::createDriver(0, UDriver::OpenGlEs3);
+#else
 	m_Driver = UDriver::createDriver(0, UDriver::OpenGl3);
+#endif
 	if (!m_Driver)
 	{
 		nlerror("Failed to create driver");
@@ -519,34 +542,41 @@ void CPPLDemo::operator()(const CEvent &event)
 
 void CPPLDemo::run()
 {
+	m_LastTime = CTime::ticksToSecond(CTime::getPerformanceTime());
+
+#ifdef __EMSCRIPTEN__
+	// Emscripten uses a callback-based main loop
+	// renderOneFrame() is called each frame via emscripten_set_main_loop
+#else
+	while (m_Driver->isActive() && !m_CloseWindow)
+	{
+		renderOneFrame();
+	}
+#endif
+}
+
+void CPPLDemo::renderOneFrame()
+{
+	if (!m_Driver->isFrameReady())
+		return; // GPU busy, skip frame to avoid blocking browser event loop
+
 	IDriver *drv = static_cast<CDriverUser *>(m_Driver)->getDriver();
 
 	CFrustum frustum;
-
-	float camAngle = 0.f;
-	float camDist = 15.f;
-	float camHeight = 8.f;
-	float lightTime = 0.f;
-
-	double lastTime = CTime::ticksToSecond(CTime::getPerformanceTime());
-	float smoothFps = 60.f;
-
-	while (m_Driver->isActive() && !m_CloseWindow)
-	{
 		m_Driver->EventServer.pump();
 
 		uint32 screenW, screenH;
 		m_Driver->getWindowSize(screenW, screenH);
-		if (screenW == 0 || screenH == 0) { nlSleep(10); continue; }
+		if (screenW == 0 || screenH == 0) { nlSleep(10); return; }
 		frustum.initPerspective(float(Pi / 3.0), float(screenW) / float(screenH), 0.1f, 200.f);
 
 		double now = CTime::ticksToSecond(CTime::getPerformanceTime());
-		float dt = float(now - lastTime);
-		lastTime = now;
-		if (dt > 0.f) smoothFps += (1.f / dt - smoothFps) * min(1.f, dt * 5.f);
+		float dt = float(now - m_LastTime);
+		m_LastTime = now;
+		if (dt > 0.f) m_SmoothFps += (1.f / dt - m_SmoothFps) * min(1.f, dt * 5.f);
 
-		if (m_AnimCamera) camAngle += dt * 0.3f;
-		lightTime += dt;
+		if (m_AnimCamera) m_CamAngle += dt * 0.3f;
+		m_LightTime += dt;
 
 		// Brightness control
 		if (m_KeyUp) m_Brightness += dt * 1.f;
@@ -558,7 +588,7 @@ void CPPLDemo::run()
 
 		// --- Camera setup ---
 
-		CVector eye(cosf(camAngle) * camDist, sinf(camAngle) * camDist, camHeight);
+		CVector eye(cosf(m_CamAngle) * m_CamDist, sinf(m_CamAngle) * m_CamDist, m_CamHeight);
 		CVector target(0.f, 0.f, 1.5f);
 		CVector up(0.f, 0.f, 1.f);
 		CMatrix viewMatrix = buildViewMatrix(eye, target, up);
@@ -596,7 +626,7 @@ void CPPLDemo::run()
 		CLight lights[8];
 		for (uint i = 0; i < 8; ++i)
 		{
-			float angle = lightTime * LightConfigs[i].OrbitSpeed + float(i) * 2.f * (float)Pi / 8.f;
+			float angle = m_LightTime * LightConfigs[i].OrbitSpeed + float(i) * 2.f * (float)Pi / 8.f;
 			float r = LightConfigs[i].OrbitRadius;
 			float h = LightConfigs[i].OrbitHeight;
 			CVector pos(cosf(angle) * r, sinf(angle) * r, h);
@@ -692,7 +722,7 @@ void CPPLDemo::run()
 			m_Driver->setModelMatrix(modelIdentity);
 			for (uint i = 0; i < 8; ++i)
 			{
-				float angle = lightTime * LightConfigs[i].OrbitSpeed + float(i) * 2.f * (float)Pi / 8.f;
+				float angle = m_LightTime * LightConfigs[i].OrbitSpeed + float(i) * 2.f * (float)Pi / 8.f;
 				float r = LightConfigs[i].OrbitRadius;
 				float h = LightConfigs[i].OrbitHeight;
 				CVector pos(cosf(angle) * r, sinf(angle) * r, h);
@@ -773,12 +803,16 @@ void CPPLDemo::run()
 			}
 			m_TextContext->printfAt(x, y, "PPL: %u  Vertex: %u  Off: %u", pplCount, vertCount, offCount);
 			y -= lineH;
-			m_TextContext->printfAt(x, y, "FPS: %.1f  (%.2f ms)", smoothFps, dt * 1000.f);
+			m_TextContext->printfAt(x, y, "FPS: %.1f  (%.2f ms)", m_SmoothFps, dt * 1000.f);
 		}
 
 		m_Driver->swapBuffers();
-	}
 }
+
+#ifdef __EMSCRIPTEN__
+static CPPLDemo *s_Demo = NULL;
+static void emscriptenMainLoop() { s_Demo->renderOneFrame(); }
+#endif
 
 #ifdef NL_OS_WINDOWS
 sint WINAPI WinMain(HINSTANCE /* hInstance */, HINSTANCE /* hPrevInstance */, LPSTR /* cmdline */, int /* nCmdShow */)
@@ -788,8 +822,14 @@ sint main(int /* argc */, char ** /* argv */)
 {
 	CApplicationContext applicationContext;
 
-	CPPLDemo demo;
+	static CPPLDemo demo;
 	demo.run();
+
+#ifdef __EMSCRIPTEN__
+	s_Demo = &demo;
+	EM_ASM({ if (window.nlLoadingComplete) window.nlLoadingComplete(); });
+	emscripten_set_main_loop(emscriptenMainLoop, 0, 1);
+#endif
 
 	return EXIT_SUCCESS;
 }

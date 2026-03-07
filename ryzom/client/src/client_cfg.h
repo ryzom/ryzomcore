@@ -586,6 +586,9 @@ struct CClientConfig
 	/// Racial Animation
 	bool			EnableRacialAnimation;
 
+	/// GPU Skinning
+	bool			GPUSkinning;
+
 	/////////////
 	// OPTIONS //
 	/// Right click select too.

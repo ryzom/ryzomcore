@@ -35,7 +35,7 @@ runs:
       run: |
         sudo apt update
         sudo apt install --yes \
-          build-essential \
+          build-essential ccache \
           libpng-dev \
           libjpeg-dev \
           libgif-dev libfreetype-dev \
@@ -58,14 +58,30 @@ runs:
         --include-subdir
         --prefix=${{ inputs.install-dir }}
 
+    - name: Configure ccache
+      shell: bash
+      run: |
+        ccache --set-config=max_size=1G
+        ccache --set-config=compression=true
+        ccache -z
+
     - name: Configure CMake
       if: runner.os == 'Linux'
       shell: bash
-      run: cmake --preset ci-linux-ryzom-${{ inputs.build-type }}
+      run: >
+        cmake --preset ci-linux-ryzom-${{ inputs.build-type }}
+        -DCMAKE_C_COMPILER_LAUNCHER=ccache
+        -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+        -DWITH_PCH=OFF
 
     - name: Build
       shell: bash
       run: cmake --build --preset ryzom
+
+    - name: ccache stats
+      if: always()
+      shell: bash
+      run: ccache -s -v || ccache -s
 
     - name: Package
       shell: bash

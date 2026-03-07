@@ -777,6 +777,14 @@ public:
 	/// Swap the back and front buffers.
 	virtual bool			swapBuffers() = 0;
 
+	/** Non-blocking check whether the GPU is ready for the next frame.
+	 *  Returns true if we can render, false if the GPU is still processing
+	 *  previous frames. On Emscripten/WebGL, callers should skip the frame
+	 *  to avoid blocking the browser's event loop.
+	 *  Default implementation returns true (always ready).
+	 */
+	virtual bool			isFrameReady() { return true; }
+
 	/** set the number of VBL wait when a swapBuffers() is issued. 0 means no synchronisation to the VBL
 	 *	Default is 1. Values >1 may be clamped to 1 by the driver.
 	 */
@@ -1445,6 +1453,10 @@ public:
 
 	// see if the Multiply-Add Tex Env operator is supported (see CMaterial::Mad)
 	virtual	bool			supportMADOperator() const = 0;
+
+	/// Return true if the driver supports large UBO arrays (e.g. skeleton bones, light tables).
+	/// Returns false on ANGLE/D3D11 where the GLSL-to-HLSL translator fails on large arrays.
+	virtual bool			supportLargeUBOArrays() const { return true; }
 
 	// Adapter class
 	class CAdapter

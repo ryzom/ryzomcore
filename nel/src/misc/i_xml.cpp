@@ -19,6 +19,8 @@
 
 #include "stdmisc.h"
 
+#ifndef NL_NO_LIBXML2
+
 #include "nel/misc/i_xml.h"
 
 #ifndef NL_DONT_USE_EXTERNAL_CODE
@@ -1199,3 +1201,5 @@ std::string CIXml::getErrorString()
 } // NLMISC
 
 #endif // NL_DONT_USE_EXTERNAL_CODE
+
+#endif // NL_NO_LIBXML2

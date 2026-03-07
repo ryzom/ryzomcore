@@ -34,6 +34,7 @@
 #include "nel/3d/visual_collision_mesh.h"
 #include "nel/3d/meshvp_wind_tree.h"
 #include "nel/3d/vertex_stream_manager.h"
+#include "nel/3d/gpu_skin_vp.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -134,6 +135,7 @@ CMeshGeom::CMeshGeom()
 	_BoneIdComputed = false;
 	_BoneIdExtended= false;
 	_PreciseClipping= false;
+	_GPUSkinBuilt= false;
 }
 
 
@@ -1647,6 +1649,8 @@ void	CMeshGeom::computeBonesId (CSkeletonModel *skeleton)
 		_BoneIdExtended= true;
 	}
 
+	// Build GPU skinning VB now that bone indices are remapped
+	buildGPUSkinVB();
 }
 
 
@@ -2825,6 +2829,245 @@ void	CMesh::buildSystemGeometry()
 	totalMem+= _SystemGeometry.Vertices.size()*sizeof(CVector);
 	totalMem+= _SystemGeometry.Triangles.size()*sizeof(uint32);
 	nlinfo("CMesh: TotalMem: %d", totalMem);*/
+}
+
+
+// ***************************************************************************
+void	CMeshGeom::buildGPUSkinVB()
+{
+	if (_GPUSkinBuilt)
+		return;
+
+	// Only for skinned meshes
+	if (!_Skinned)
+		return;
+
+	// No GPU skinning with mesh vertex program (wind trees etc.)
+	if (_MeshVertexProgram)
+		return;
+
+	// No GPU skinning with blend shapes (need CPU morpher)
+	if (_MeshMorpher && !_MeshMorpher->BlendShapes.empty())
+		return;
+
+	// Only support the simplified VB format (same constraint as CPU vertex stream path)
+	if (!_OriginalSkinNormals.size() || _OriginalTGSpace.size())
+		return;
+
+	uint numVertices = (uint)_OriginalSkinVertices.size();
+	if (numVertices == 0 || _MatrixBlocks.empty())
+		return;
+
+	// Build vertex-to-block ownership map by scanning all matrix blocks' IBs
+	std::vector<sint> vertexBlock(numVertices, -1);
+	for (uint b = 0; b < _MatrixBlocks.size(); b++)
+	{
+		CMatrixBlock &mb = _MatrixBlocks[b];
+		for (uint rp = 0; rp < mb.RdrPass.size(); rp++)
+		{
+			CIndexBuffer &srcIB = mb.RdrPass[rp].PBlock;
+			CIndexBufferRead iba;
+			srcIB.lock(iba);
+			uint numIdx = srcIB.getNumIndexes();
+			if (iba.getFormat() == CIndexBuffer::Indices32)
+			{
+				const uint32 *pIdx = (const uint32 *)iba.getPtr();
+				for (uint i = 0; i < numIdx; i++)
+				{
+					if (pIdx[i] < numVertices && vertexBlock[pIdx[i]] < 0)
+						vertexBlock[pIdx[i]] = (sint)b;
+				}
+			}
+			else
+			{
+				const uint16 *pIdx = (const uint16 *)iba.getPtr();
+				for (uint i = 0; i < numIdx; i++)
+				{
+					if (pIdx[i] < numVertices && vertexBlock[pIdx[i]] < 0)
+						vertexBlock[pIdx[i]] = (sint)b;
+				}
+			}
+		}
+	}
+
+	// Read palette/weight data from VBuffer
+	CVertexBufferRead vba;
+	_VBuffer.lock(vba);
+	bool hasUV = (_VBuffer.getVertexFormat() & CVertexBuffer::TexCoord0Flag) != 0;
+
+	// Validate all bone indices fit within GPU skinning limits
+	for (uint v = 0; v < numVertices; v++)
+	{
+		if (vertexBlock[v] < 0) continue;
+		CMatrixBlock &mb = _MatrixBlocks[vertexBlock[v]];
+		const CPaletteSkin *pal = (const CPaletteSkin *)vba.getPaletteSkinPointer(v);
+		const float *wgt = (const float *)vba.getWeightPointer(v);
+		for (uint i = 0; i < NL3D_MESH_SKINNING_MAX_MATRIX; i++)
+		{
+			if (wgt[i] > 0 || i == 0)
+			{
+				uint32 skelBoneIdx = mb.MatrixId[pal->MatrixId[i]];
+				if (skelBoneIdx >= NL3D_GPU_SKIN_MAX_BONES)
+					return; // Fall back to CPU skinning
+			}
+		}
+	}
+
+	// Setup GPU VB format: Position + Normal + TexCoord0 + Weight + PaletteSkin
+	_GPUSkinVB.clearValueEx();
+	_GPUSkinVB.addValueEx(CVertexBuffer::Position, CVertexBuffer::Float3);
+	_GPUSkinVB.addValueEx(CVertexBuffer::Normal, CVertexBuffer::Float3);
+	_GPUSkinVB.addValueEx(CVertexBuffer::TexCoord0, CVertexBuffer::Float2);
+	_GPUSkinVB.addValueEx(CVertexBuffer::Weight, CVertexBuffer::Float4);
+	_GPUSkinVB.addValueEx(CVertexBuffer::PaletteSkin, CVertexBuffer::UChar4);
+	_GPUSkinVB.initEx();
+	_GPUSkinVB.setBufferUsage(CVertexBuffer::Immutable, false);
+	_GPUSkinVB.setNumVertices(numVertices);
+
+	{
+		CVertexBufferReadWrite vbaGpu;
+		_GPUSkinVB.lock(vbaGpu);
+
+		for (uint v = 0; v < numVertices; v++)
+		{
+			// Position (bind-pose)
+			vbaGpu.setValueFloat3Ex(CVertexBuffer::Position, v, _OriginalSkinVertices[v]);
+
+			// Normal (bind-pose)
+			vbaGpu.setValueFloat3Ex(CVertexBuffer::Normal, v, _OriginalSkinNormals[v]);
+
+			// UV
+			float u = 0, vc = 0;
+			if (hasUV)
+			{
+				const CUV *uv = vba.getTexCoordPointer(v, 0);
+				u = uv->U;
+				vc = uv->V;
+			}
+			vbaGpu.setValueFloat2Ex(CVertexBuffer::TexCoord0, v, u, vc);
+
+			// Weight (unchanged from VBuffer)
+			const float *wgt = (const float *)vba.getWeightPointer(v);
+			vbaGpu.setValueFloat4Ex(CVertexBuffer::Weight, v, wgt[0], wgt[1], wgt[2], wgt[3]);
+
+			// PaletteSkin: remap per-block-local indices to skeleton bone indices
+			if (vertexBlock[v] >= 0)
+			{
+				CMatrixBlock &mb = _MatrixBlocks[vertexBlock[v]];
+				const CPaletteSkin *pal = (const CPaletteSkin *)vba.getPaletteSkinPointer(v);
+				vbaGpu.setValueUChar4Ex(CVertexBuffer::PaletteSkin, v,
+					CRGBA((uint8)mb.MatrixId[pal->MatrixId[0]],
+					       (uint8)mb.MatrixId[pal->MatrixId[1]],
+					       (uint8)mb.MatrixId[pal->MatrixId[2]],
+					       (uint8)mb.MatrixId[pal->MatrixId[3]]));
+			}
+			else
+			{
+				vbaGpu.setValueUChar4Ex(CVertexBuffer::PaletteSkin, v, CRGBA(0, 0, 0, 0));
+			}
+		}
+	}
+
+	// Build combined IB by merging all matrix blocks' render passes, grouped by MaterialId.
+	// First, collect all materials used and count total indices.
+	std::map<uint32, uint32> materialIndexCount;
+	for (uint b = 0; b < _MatrixBlocks.size(); b++)
+	{
+		for (uint rp = 0; rp < _MatrixBlocks[b].RdrPass.size(); rp++)
+		{
+			CRdrPass &pass = _MatrixBlocks[b].RdrPass[rp];
+			materialIndexCount[pass.MaterialId] += pass.PBlock.getNumIndexes();
+		}
+	}
+
+	uint32 totalIndices = 0;
+	for (std::map<uint32, uint32>::iterator it = materialIndexCount.begin(); it != materialIndexCount.end(); ++it)
+		totalIndices += it->second;
+
+	_GPUSkinIB.setFormat(NL_MESH_INDEX_FORMAT);
+	_GPUSkinIB.setBufferUsage(CIndexBuffer::Immutable, false);
+	_GPUSkinIB.setNumIndexes(totalIndices);
+
+	_GPUSkinPasses.clear();
+
+	{
+		CIndexBufferReadWrite iba;
+		_GPUSkinIB.lock(iba);
+		uint32 offset = 0;
+
+		for (std::map<uint32, uint32>::iterator it = materialIndexCount.begin(); it != materialIndexCount.end(); ++it)
+		{
+			uint32 matId = it->first;
+			GPURdrPass gpuPass;
+			gpuPass.MaterialId = matId;
+			gpuPass.IBOffset = offset;
+			gpuPass.IBCount = 0;
+
+			// Copy all triangles for this material from all matrix blocks
+			for (uint b = 0; b < _MatrixBlocks.size(); b++)
+			{
+				for (uint rp = 0; rp < _MatrixBlocks[b].RdrPass.size(); rp++)
+				{
+					CRdrPass &pass = _MatrixBlocks[b].RdrPass[rp];
+					if (pass.MaterialId != matId)
+						continue;
+
+					CIndexBufferRead srcIba;
+					pass.PBlock.lock(srcIba);
+					uint32 numIdx = pass.PBlock.getNumIndexes();
+					uint32 numTris = numIdx / 3;
+
+					for (uint32 t = 0; t < numTris; t++)
+					{
+						uint32 i0, i1, i2;
+						if (srcIba.getFormat() == CIndexBuffer::Indices16)
+						{
+							const uint16 *p = (const uint16 *)srcIba.getPtr(t * 3);
+							i0 = p[0]; i1 = p[1]; i2 = p[2];
+						}
+						else
+						{
+							const uint32 *p = (const uint32 *)srcIba.getPtr(t * 3);
+							i0 = p[0]; i1 = p[1]; i2 = p[2];
+						}
+						iba.setTri(offset + gpuPass.IBCount + t * 3, i0, i1, i2);
+					}
+					gpuPass.IBCount += numIdx;
+				}
+			}
+
+			offset += gpuPass.IBCount;
+			_GPUSkinPasses.push_back(gpuPass);
+		}
+	}
+
+	_GPUSkinBuilt = true;
+}
+
+
+// ***************************************************************************
+void	CMeshGeom::renderGPUSkin(CMeshInstance *mi, CSkeletonModel *skeleton)
+{
+	nlassert(_GPUSkinBuilt);
+
+	CScene *ownerScene = mi->getOwnerScene();
+	CRenderTrav *renderTrav = &ownerScene->getRenderTrav();
+	IDriver *drv = renderTrav->getDriver();
+	nlassert(drv);
+
+	// Activate the static GPU skin VB and combined IB
+	drv->activeVertexBuffer(_GPUSkinVB);
+	drv->activeIndexBuffer(_GPUSkinIB);
+
+	// Render each material pass
+	for (uint rp = 0; rp < _GPUSkinPasses.size(); rp++)
+	{
+		const GPURdrPass &pass = _GPUSkinPasses[rp];
+		if (pass.IBCount == 0) continue;
+
+		CMaterial &material = mi->Materials[pass.MaterialId];
+		drv->renderTriangles(material, pass.IBOffset, pass.IBCount / 3);
+	}
 }
 
 

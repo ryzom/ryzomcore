@@ -19,6 +19,13 @@ IF(WITH_3D)
     HUNTER_ADD_PACKAGE(freetype)
     FIND_PACKAGE(freetype CONFIG REQUIRED)
     SET(FREETYPE_LIBRARIES freetype::freetype)
+  ELSEIF(EMSCRIPTEN)
+    # Emscripten provides FreeType as a port via -sUSE_FREETYPE=1
+    SET(FREETYPE_FOUND TRUE)
+    ADD_LIBRARY(Freetype::Freetype INTERFACE IMPORTED)
+    SET_TARGET_PROPERTIES(Freetype::Freetype PROPERTIES
+      INTERFACE_COMPILE_OPTIONS "-sUSE_FREETYPE=1"
+    )
   ELSE()
     FIND_PACKAGE(Freetype)
   ENDIF() #hunter

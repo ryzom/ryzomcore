@@ -146,7 +146,7 @@ public:
 	enum TStencilFunc { never = 0, less, lessequal, equal, notequal, greaterequal, greater, always};
 
 	// Existing drivers
-	enum TDriver { Direct3d = 0, OpenGl, OpenGlEs, OpenGl3 };
+	enum TDriver { Direct3d = 0, OpenGl, OpenGlEs, OpenGl3, OpenGlEs3 };
 
 public:
 	/// The EventServer of this driver. Init after setDisplay()!!
@@ -249,6 +249,12 @@ public:
 	virtual	void			clearBuffers(CRGBA col= CRGBA(255,255,255,255)) =0;
 	/// This swap the back and front buffer (ALL the buffer :) ).
 	virtual	void			swapBuffers() =0;
+	/** Non-blocking check whether the GPU is ready for the next frame.
+	 *  Returns true if we can render, false if the GPU is still processing
+	 *  previous frames. On platforms like Emscripten/WebGL, callers should
+	 *  skip the frame when this returns false to avoid blocking the browser.
+	 */
+	virtual bool			isFrameReady() =0;
 	// Finish all commands
 	virtual void            finish() = 0;
 	// Flush the command buffer then immediately returns
@@ -820,6 +826,12 @@ public:
 
 	// check if bloom effect is supported
 	virtual bool				supportBloomEffect() const = 0;
+
+	// check if GPU skinning is supported (requires glsl3vi profile and large UBO arrays)
+	virtual bool				supportGPUSkinning() const = 0;
+
+	/// Return true if driver supports large UBO arrays (false on ANGLE/D3D11).
+	virtual bool				supportLargeUBOArrays() const = 0;
 
 	/// \name Bench
 	// @{
