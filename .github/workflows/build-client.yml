@@ -34,6 +34,7 @@ env:
   VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}/.vcpkg,readwrite"
   CCACHE_DIR: "${{ github.workspace }}/.ccache"
   HUNTER_ROOT: "${{ github.workspace }}/.hunter"
+  MACOSX_DEPLOYMENT_TARGET: 10.13
 
 jobs:
   build:
@@ -48,6 +49,9 @@ jobs:
             cmake_preset: ci-windows-ryzom-client-hunter
           - os: windows-2025
             cmake_preset: ci-windows-ryzom-client-hunter
+          - os: windows-2025
+            cmake_preset: ci-windows-ryzom-client-vcpkg
+            vcpkg: true
           - os: ubuntu-22.04
             ubuntu_version: 22.04
             cmake_preset: ci-linux-ryzom-client-hunter
@@ -152,9 +156,7 @@ jobs:
         choco install nsis
 
     - name: Configure CMake
-      env:
-        MACOSX_DEPLOYMENT_TARGET: 10.13
-      run: >
+      run: |
         cmake --preset ${{ matrix.cmake_preset }}
 
     - uses: actions/cache/save@v4
@@ -163,6 +165,7 @@ jobs:
         key: ${{ matrix.os }}-hunter-${{ steps.strings.outputs.week }}-${{ github.sha }}
 
     - uses: actions/cache/save@v4
+      if: ! cancelled()
       with:
         path: ${{ github.workspace }}/.vcpkg
         key: vcpkg-${{ matrix.os }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
@@ -182,11 +185,11 @@ jobs:
     - uses: actions/upload-artifact@v4
       if: ${{ failure() }}
       with:
-        name: ${{ matrix.os }}-logs
+        name: ${{ matrix.os }}-build-logs
         path: build/**/*.log
 
     - uses: actions/upload-artifact@v4
       with:
-        name: ${{ matrix.os }}-client-package
+        name: ${{ matrix.os }}-client-package${{ matrix.vcpkg && '-vcpkg' }}
         path: build/ryzom-client/ryzom-client-*
         if-no-files-found: error
