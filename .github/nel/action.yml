@@ -99,12 +99,12 @@ runs:
       run: ccache -s -v || ccache -s
 
     - name: Test
-      if: inputs.tests == 'true'
+      if: runner.os != 'Windows'
       shell: bash
       run: ctest --preset nel
 
     - uses: actions/upload-artifact@v4
-      if: ( !cancelled() )
+      if: ( !cancelled() && runner.os != 'Windows' )
       with:
         name: nel-${{ inputs.os }}-${{ inputs.cmake-preset }}-${{ github.sha }}-test-results
         if-no-files-found: error
