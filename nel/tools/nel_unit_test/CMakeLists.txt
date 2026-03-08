@@ -21,6 +21,13 @@ target_compile_definitions(nel_unit_test
 
 INSTALL(TARGETS nel_unit_test RUNTIME DESTINATION ${NL_BIN_PREFIX})
 
+add_test_executable(nel_ligo_test
+        ut_ligo_primitive.test.cpp
+)
+target_link_libraries(nel_ligo_test
+        PRIVATE
+        NeL::ligo
+)
 
 add_test_executable(nel_misc_config_file_test
         ut_misc_config_file.test.cpp
