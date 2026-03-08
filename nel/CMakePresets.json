@@ -71,7 +71,8 @@
       "name": "ci-linux-nel-vcpkg",
       "cacheVariables": {
         "BUILD_SHARED_LIBS": false,
-        "WITH_STATIC": true
+        "WITH_STATIC": true,
+        "WITH_OPENAL_STATIC": false
       }
     },
     {

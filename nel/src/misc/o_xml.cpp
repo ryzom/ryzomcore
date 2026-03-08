@@ -81,7 +81,7 @@ int xmlOutputCloseCallbackForNeL ( void * /* context */ )
 	// COXml *object = (COXml*) context;
 
 	// Does nothing
-	return 1;
+	return XML_ERR_OK;
 }
 
 // ***************************************************************************
