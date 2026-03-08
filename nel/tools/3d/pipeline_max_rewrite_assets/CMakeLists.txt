@@ -1,6 +1,5 @@
 
 FIND_PACKAGE(LIBGSF)
-FIND_PACKAGE(Boost REQUIRED COMPONENTS algorithm)
 
 IF (NOT (LIBGSF_INCLUDE_DIR AND LIBGSF_LIBRARIES))
 	MESSAGE(FATAL_ERROR "LIBGSF not found!")
@@ -29,7 +28,6 @@ TARGET_LINK_LIBRARIES(pipeline_max_rewrite_assets
 	${GOBJECT2_LIBRARIES}
 	pipeline_max
 	nelmisc
-	Boost::algorithm
 )
 
 NL_DEFAULT_PROPS(pipeline_max_dump "NeL, Tools, 3D: Pipeline Max Rewrite Assets")
