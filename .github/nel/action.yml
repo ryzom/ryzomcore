@@ -20,22 +20,14 @@ runs:
       with:
         cmakeVersion: "^3.31.11"
 
-    - uses: lukka/run-vcpkg@v11
-
-    - uses: actions/cache/restore@v4
-      id: cache-vcpkg
-      with:
-        path: ${{ github.workspace }}/.vcpkg
-        key: vcpkg-${{ inputs.os }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
-
-    - name: Dependencies ${{ runner.os }}
+    - name: Dependencies Linux
       if: runner.os == 'Linux'
       shell: bash
       run: |
         sudo apt update
         sudo apt install --yes \
           build-essential ccache \
-          bison autoconf autoconf-archive automake libtool \
+          bison autoconf automake \
           libpng-dev \
           libjpeg-dev \
           libgif-dev libfreetype-dev \
@@ -60,16 +52,8 @@ runs:
 
     - name: Configure CMake
       if: runner.os == 'Linux'
-      env:
-        VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}/.vcpkg,readwrite"
       shell: bash
       run: cmake --preset ${{ inputs.cmake-preset }}
-
-    - uses: actions/cache/save@v4
-      if: ( ! cancelled() )
-      with:
-        path: ${{ github.workspace }}/.vcpkg
-        key: ${{ steps.cache-vcpkg.outputs.cache-primary-key }}
 
     - name: Build
       shell: bash
