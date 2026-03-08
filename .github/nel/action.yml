@@ -34,8 +34,8 @@ runs:
       run: |
         sudo apt update
         sudo apt install --yes \
-          build-essential ccache \
-          bison autoconf automake \
+          build-essential bison ccache\
+          autoconf autoconf-archive automake libtoolize \
           libpng-dev \
           libjpeg-dev \
           libgif-dev libfreetype-dev \
