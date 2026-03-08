@@ -227,7 +227,7 @@ IF(WITH_RYZOM_CLIENT)
               NeL::pacs
               LibXml2::LibXml2
               ${LUA_LIBRARIES}
-              ${LUABIND_LIBRARIES}
+              Luabind::Luabind
               CURL::libcurl
               ZLIB::ZLIB
   )

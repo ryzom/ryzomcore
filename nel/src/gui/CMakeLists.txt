@@ -18,7 +18,7 @@ TARGET_LINK_LIBRARIES(nelgui
         NeL::web
         NeL::3d
         ${LUA_LIBRARIES}
-        ${LUABIND_LIBRARIES}
+        Luabind::Luabind
         PRIVATE
         CURL::libcurl
         LibXml2::LibXml2
