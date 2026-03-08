@@ -62,17 +62,18 @@
       }
     },
     {
+      "name": "ci-linux-nel-vcpkg",
       "inherits": [
         "vcpkg",
         "ccache",
         "nel",
         "linux"
       ],
-      "name": "ci-linux-nel-vcpkg",
       "cacheVariables": {
-        "BUILD_SHARED_LIBS": false,
-        "WITH_STATIC": true,
-        "WITH_OPENAL_STATIC": false
+        "BUILD_SHARED_LIBS": true,
+        "WITH_STATIC": false,
+        "WITH_OPENAL_STATIC": true,
+        "WITH_STATIC_DRIVERS": false
       }
     },
     {
