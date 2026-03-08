@@ -41,7 +41,7 @@ runs:
           libgif-dev libfreetype-dev \
           freeglut3-dev \
           liblua5.2-dev libluabind-dev libcpptest-dev \
-          libogg-dev libvorbis-dev libopenal-dev \
+          libogg-dev libvorbis-dev libopenal-dev libboost-dev \
           libavcodec-dev libavformat-dev libavdevice-dev libswscale-dev libpostproc-dev \
           libmysqlclient-dev \
           libxml2-dev \
