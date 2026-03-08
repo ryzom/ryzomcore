@@ -130,7 +130,7 @@ jobs:
           -DWITH_PCH=OFF
 
       - name: Build
-        run: cmake --build --preset ${{ matrix.build_preset }}
+        run: cmake --build --preset ${{ matrix.build_preset }} --target install
 
       - name: ccache stats
         if: always()
