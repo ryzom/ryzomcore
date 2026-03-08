@@ -62,26 +62,25 @@
       }
     },
     {
+      "name": "ci-linux-nel-vcpkg",
+      "inherits": [
+        "vcpkg",
+        "ccache",
+        "nel",
+        "linux"
+      ],
+      "cacheVariables": {
+        "BUILD_SHARED_LIBS": true,
+        "WITH_STATIC": false,
+        "WITH_OPENAL_STATIC": true
+      }
+    },
+    {
       "inherits": [
         "windows",
         "nel"
       ],
       "name": "windows-nel"
-    },
-    {
-      "name": "ci-windows-nel-vcpkg",
-      "inherits": [
-        "vcpkg",
-        "nel",
-        "windows"
-      ],
-      "cacheVariables": {
-        "WITH_NEL_SAMPLES": false,
-        "WITH_NEL_TOOLS": false,
-        "WITH_TESTING": false,
-        "WITH_NEL_TESTS": false,
-        "VCPKG_MANIFEST_NO_DEFAULT_FEATURES": true
-      }
     }
   ],
   "buildPresets": [

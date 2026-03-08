@@ -13,10 +13,6 @@ inputs:
   build-version:
     description: build version
     required: true
-  tests:
-    description: run tests
-    required: false
-    default: 'true'
 runs:
   using: composite
   steps:
@@ -27,6 +23,7 @@ runs:
     - uses: lukka/run-vcpkg@v11
 
     - uses: actions/cache/restore@v4
+      id: vcpkg-cache
       with:
         path: ${{ github.workspace }}/.vcpkg
         key: vcpkg-${{ inputs.os }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
@@ -54,12 +51,6 @@ runs:
           libgsf-1-dev \
           qtbase5-dev qttools5-dev qttools5-dev-tools
 
-    - name: Dependencies ${{ runner.os }}
-      if: runner.os == 'Windows'
-      shell: powershell
-      run: |
-        choco install nsis
-
     - name: Configure ccache
       shell: bash
       run: |
@@ -74,18 +65,11 @@ runs:
       shell: bash
       run: cmake --preset ${{ inputs.cmake-preset }}
 
-    - name: Configure CMake
-      if: runner.os == 'Windows'
-      env:
-        VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}/.vcpkg,readwrite"
-      shell: powershell
-      run: cmake --preset ${{ inputs.cmake-preset }}
-
     - uses: actions/cache/save@v4
       if: ( ! cancelled() )
       with:
         path: ${{ github.workspace }}/.vcpkg
-        key: vcpkg-${{ inputs.os }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
+        key: ${{ steps.vcpkg-cache.outputs.cache-primary-key }}
 
     - name: Build
       shell: bash
@@ -99,12 +83,11 @@ runs:
       run: ccache -s -v || ccache -s
 
     - name: Test
-      if: runner.os != 'Windows'
       shell: bash
       run: ctest --preset nel
 
     - uses: actions/upload-artifact@v4
-      if: ( !cancelled() && runner.os != 'Windows' )
+      if: ( !cancelled() )
       with:
         name: nel-${{ inputs.os }}-${{ inputs.cmake-preset }}-${{ github.sha }}-test-results
         if-no-files-found: error
