@@ -64,6 +64,8 @@ jobs:
           - os: ubuntu-24.04
             cmake-preset: ci-linux-nel-dynamic
             build-type: dynamic
+          - os: ubuntu-24.04
+            cmake-preset: ci-linux-nel-vcpkg
     steps:
       - uses: actions/checkout@v4
 

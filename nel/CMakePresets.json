@@ -63,6 +63,19 @@
     },
     {
       "inherits": [
+        "vcpkg",
+        "ccache",
+        "nel",
+        "linux"
+      ],
+      "name": "ci-linux-nel-vcpkg",
+      "cacheVariables": {
+        "BUILD_SHARED_LIBS": false,
+        "WITH_STATIC": true
+      }
+    },
+    {
+      "inherits": [
         "windows",
         "nel"
       ],
