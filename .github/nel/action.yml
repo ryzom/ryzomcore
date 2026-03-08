@@ -23,6 +23,7 @@ runs:
     - uses: lukka/run-vcpkg@v11
 
     - uses: actions/cache/restore@v4
+      id: cache-vcpkg
       with:
         path: ${{ github.workspace }}/.vcpkg
         key: vcpkg-${{ inputs.os }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
@@ -34,7 +35,7 @@ runs:
         sudo apt update
         sudo apt install --yes \
           build-essential ccache \
-          bison autoconf automake \
+          bison autoconf autoconf-archive automake libtool \
           libpng-dev \
           libjpeg-dev \
           libgif-dev libfreetype-dev \
@@ -68,7 +69,7 @@ runs:
       if: ( ! cancelled() )
       with:
         path: ${{ github.workspace }}/.vcpkg
-        key: vcpkg-${{ inputs.os }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
+        key: ${{ steps.cache-vcpkg.outputs.cache-primary-key }}
 
     - name: Build
       shell: bash
