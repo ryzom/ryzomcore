@@ -205,9 +205,16 @@ IF(LUABIND_FOUND)
             Luabind::Luabind
             PROPERTIES
             INTERFACE_INCLUDE_DIRECTORIES "${LUABIND_INCLUDE_DIR}"
-            IMPORTED_LOCATION
-            $<IF:$<AND:$<BOOL:${LUABIND_LIBRARY_DEBUG}>,$<CONFIG:Debug>>,${LUABIND_LIBRARY_DEBUG},${LUABIND_LIBRARY_RELEASE}>
+            IMPORTED_LOCATION "${LUABIND_LIBRARY_RELEASE}"
+            IMPORTED_LOCATION_RELEASE "${LUABIND_LIBRARY_RELEASE}"
     )
+    if(${LUABIND_LIBRARY_DEBUG})
+      set_target_properties(
+              Luabind::Luabind
+              PROPERTIES
+              IMPORTED_LOCATION_DEBUG "${LUABIND_LIBRARY_DEBUG}"
+      )
+    endif ()
   endif ()
 
   IF(NOT Luabind_FIND_QUIETLY)
