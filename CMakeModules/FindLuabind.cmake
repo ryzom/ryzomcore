@@ -199,6 +199,24 @@ IF(LUABIND_FOUND)
 
   FIND_CORRECT_LUA_VERSION()
 
+  if(NOT TARGET Luabind::Luabind)
+    add_library(Luabind::Luabind UNKNOWN IMPORTED)
+    set_target_properties(
+            Luabind::Luabind
+            PROPERTIES
+            INTERFACE_INCLUDE_DIRECTORIES "${LUABIND_INCLUDE_DIR}"
+            IMPORTED_LOCATION "${LUABIND_LIBRARY_RELEASE}"
+            IMPORTED_LOCATION_RELEASE "${LUABIND_LIBRARY_RELEASE}"
+    )
+    if(${LUABIND_LIBRARY_DEBUG})
+      set_target_properties(
+              Luabind::Luabind
+              PROPERTIES
+              IMPORTED_LOCATION_DEBUG "${LUABIND_LIBRARY_DEBUG}"
+      )
+    endif ()
+  endif ()
+
   IF(NOT Luabind_FIND_QUIETLY)
     MESSAGE(STATUS "Found Luabind: ${LUABIND_LIBRARIES}")
   ENDIF()
