@@ -30,7 +30,6 @@
 #include "ut_misc_variable.h"
 #include "ut_misc_types.h"
 #include "ut_misc_string_common.h"
-#include "ut_misc_base64.h"
 // Add a line here when adding a new test CLASS
 
 struct CUTMisc : public Test::Suite
@@ -50,7 +49,6 @@ struct CUTMisc : public Test::Suite
 		add(std::auto_ptr<Test::Suite>(new CUTMiscVariable));
 		add(std::auto_ptr<Test::Suite>(new CUTMiscTypes));
 		add(std::auto_ptr<Test::Suite>(new CUTMiscStringCommon));
-		add(std::auto_ptr<Test::Suite>(new CUTMiscBase64));
 		// Add a line here when adding a new test CLASS
 	}
 };

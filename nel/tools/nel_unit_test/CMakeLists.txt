@@ -29,14 +29,15 @@ target_link_libraries(nel_ligo_test
         NeL::ligo
 )
 
-add_test_executable(nel_misc_config_file_test
+add_test_executable(nel_misc_test
+        ut_misc_base64.test.cpp
         ut_misc_config_file.test.cpp
 )
-target_link_libraries(nel_misc_config_file_test
+target_link_libraries(nel_misc_test
         PRIVATE
         NeL::misc
 )
-target_compile_definitions(nel_misc_config_file_test
+target_compile_definitions(nel_misc_test
         PUBLIC
         NEL_UNIT_BASE="${CMAKE_CURRENT_SOURCE_DIR}/"
 )
