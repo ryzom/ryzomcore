@@ -29,7 +29,6 @@ using namespace std;
 
 #include "ut_misc.h"
 #include "ut_net.h"
-#include "ut_ligo.h"
 // Add a line here when adding a new test MODULE
 
 #ifdef _MSC_VER
@@ -136,7 +135,6 @@ int main(int argc, char *argv[])
 
 		ts.add(std::unique_ptr<Test::Suite>(new CUTMisc));
 		ts.add(std::unique_ptr<Test::Suite>(new CUTNet));
-		ts.add(std::unique_ptr<Test::Suite>(new CUTLigo));
 		// Add a line here when adding a new test MODULE
 
 		CUniquePtr<Test::Output> output(cmdline(argc, argv));
