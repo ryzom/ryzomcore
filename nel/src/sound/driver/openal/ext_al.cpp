@@ -24,12 +24,12 @@ void alExtInit()
 {
 	nldebug("AL: Initializing extensions");
 
-	if ((AlEnumerationExt = (alcIsExtensionPresent(NULL, "ALC_ENUMERATION_EXT") == AL_TRUE)) == true)
+	if ((AlEnumerationExt = (alcIsExtensionPresent(nullptr, "ALC_ENUMERATION_EXT") == AL_TRUE)) == true)
 	{
 		// ...
 	}
 
-	if ((AlEnumerateAllExt = (alcIsExtensionPresent(NULL, "ALC_ENUMERATE_ALL_EXT") == AL_TRUE)) == true)
+	if ((AlEnumerateAllExt = (alcIsExtensionPresent(nullptr, "ALC_ENUMERATE_ALL_EXT") == AL_TRUE)) == true)
 	{
 		// ...
 	}
@@ -66,56 +66,53 @@ void alExtInitDevice(ALCdevice *device)
 		}
 	}
 
-#if !defined(AL_LIBTYPE_STATIC)
-// Windows and Mac OS always link to shared OpenAL library
-#if defined(NL_OS_WINDOWS) || defined(NL_OS_MAC) || !defined(NL_STATIC)
 	// EFX
 	if ((AlExtEfx = (alcIsExtensionPresent(device, "ALC_EXT_EFX") == ALC_TRUE)) == true)
 	{
+#if !defined(AL_ALEXT_PROTOTYPES)
 		// effect objects
-		alGenEffects = (LPALGENEFXOBJECTS)alGetProcAddress("alGenEffects");
-		alDeleteEffects = (LPALDELETEEFXOBJECTS)alGetProcAddress("alDeleteEffects");
-		alIsEffect = (LPALISEFXOBJECT)alGetProcAddress("alIsEffect");
-		alEffecti = (LPALEFXOBJECTI)alGetProcAddress("alEffecti");
-		alEffectiv = (LPALEFXOBJECTIV)alGetProcAddress("alEffectiv");
-		alEffectf = (LPALEFXOBJECTF)alGetProcAddress("alEffectf");
-		alEffectfv = (LPALEFXOBJECTFV)alGetProcAddress("alEffectfv");
-		alGetEffecti = (LPALGETEFXOBJECTI)alGetProcAddress("alGetEffecti");
-		alGetEffectiv = (LPALGETEFXOBJECTIV)alGetProcAddress("alGetEffectiv");
-		alGetEffectf = (LPALGETEFXOBJECTF)alGetProcAddress("alGetEffectf");
-		alGetEffectfv = (LPALGETEFXOBJECTFV)alGetProcAddress("alGetEffectfv");
+		alGenEffects = (LPALGENEFFECTS)alGetProcAddress("alGenEffects");
+		alDeleteEffects = (LPALDELETEEFFECTS)alGetProcAddress("alDeleteEffects");
+		alIsEffect = (LPALISEFFECT)alGetProcAddress("alIsEffect");
+		alEffecti = (LPALEFFECTI)alGetProcAddress("alEffecti");
+		alEffectiv = (LPALEFFECTIV)alGetProcAddress("alEffectiv");
+		alEffectf = (LPALEFFECTF)alGetProcAddress("alEffectf");
+		alEffectfv = (LPALEFFECTFV)alGetProcAddress("alEffectfv");
+		alGetEffecti = (LPALGETEFFECTI)alGetProcAddress("alGetEffecti");
+		alGetEffectiv = (LPALGETEFFECTIV)alGetProcAddress("alGetEffectiv");
+		alGetEffectf = (LPALGETEFFECTF)alGetProcAddress("alGetEffectf");
+		alGetEffectfv = (LPALGETEFFECTFV)alGetProcAddress("alGetEffectfv");
 		// effect objects
-		alGenFilters = (LPALGENEFXOBJECTS)alGetProcAddress("alGenFilters");
-		alDeleteFilters = (LPALDELETEEFXOBJECTS)alGetProcAddress("alDeleteFilters");
-		alIsFilter = (LPALISEFXOBJECT)alGetProcAddress("alIsFilter");
-		alFilteri = (LPALEFXOBJECTI)alGetProcAddress("alFilteri");
-		alFilteriv = (LPALEFXOBJECTIV)alGetProcAddress("alFilteriv");
-		alFilterf = (LPALEFXOBJECTF)alGetProcAddress("alFilterf");
-		alFilterfv = (LPALEFXOBJECTFV)alGetProcAddress("alFilterfv");
-		alGetFilteri = (LPALGETEFXOBJECTI)alGetProcAddress("alGetFilteri");
-		alGetFilteriv = (LPALGETEFXOBJECTIV)alGetProcAddress("alGetFilteriv");
-		alGetFilterf = (LPALGETEFXOBJECTF)alGetProcAddress("alGetFilterf");
-		alGetFilterfv = (LPALGETEFXOBJECTFV)alGetProcAddress("alGetFilterfv");
+		alGenFilters = (LPALGENFILTERS)alGetProcAddress("alGenFilters");
+		alDeleteFilters = (LPALDELETEFILTERS)alGetProcAddress("alDeleteFilters");
+		alIsFilter = (LPALISFILTER)alGetProcAddress("alIsFilter");
+		alFilteri = (LPALFILTERI)alGetProcAddress("alFilteri");
+		alFilteriv = (LPALFILTERIV)alGetProcAddress("alFilteriv");
+		alFilterf = (LPALFILTERF)alGetProcAddress("alFilterf");
+		alFilterfv = (LPALFILTERFV)alGetProcAddress("alFilterfv");
+		alGetFilteri = (LPALGETFILTERI)alGetProcAddress("alGetFilteri");
+		alGetFilteriv = (LPALGETFILTERIV)alGetProcAddress("alGetFilteriv");
+		alGetFilterf = (LPALGETFILTERF)alGetProcAddress("alGetFilterf");
+		alGetFilterfv = (LPALGETFILTERFV)alGetProcAddress("alGetFilterfv");
 		// submix objects
-		alGenAuxiliaryEffectSlots = (LPALGENEFXOBJECTS)alGetProcAddress("alGenAuxiliaryEffectSlots");
-		alDeleteAuxiliaryEffectSlots = (LPALDELETEEFXOBJECTS)alGetProcAddress("alDeleteAuxiliaryEffectSlots");
-		alIsAuxiliaryEffectSlot = (LPALISEFXOBJECT)alGetProcAddress("alIsAuxiliaryEffectSlot");
-		alAuxiliaryEffectSloti = (LPALEFXOBJECTI)alGetProcAddress("alAuxiliaryEffectSloti");
-		alAuxiliaryEffectSlotiv = (LPALEFXOBJECTIV)alGetProcAddress("alAuxiliaryEffectSlotiv");
-		alAuxiliaryEffectSlotf = (LPALEFXOBJECTF)alGetProcAddress("alAuxiliaryEffectSlotf");
-		alAuxiliaryEffectSlotfv = (LPALEFXOBJECTFV)alGetProcAddress("alAuxiliaryEffectSlotfv");
-		alGetAuxiliaryEffectSloti = (LPALGETEFXOBJECTI)alGetProcAddress("alGetAuxiliaryEffectSloti");
-		alGetAuxiliaryEffectSlotiv = (LPALGETEFXOBJECTIV)alGetProcAddress("alGetAuxiliaryEffectSlotiv");
-		alGetAuxiliaryEffectSlotf = (LPALGETEFXOBJECTF)alGetProcAddress("alGetAuxiliaryEffectSlotf");
-		alGetAuxiliaryEffectSlotfv = (LPALGETEFXOBJECTFV)alGetProcAddress("alGetFilterfv");
+		alGenAuxiliaryEffectSlots = (LPALGENAUXILIARYEFFECTSLOTS)alGetProcAddress("alGenAuxiliaryEffectSlots");
+		alDeleteAuxiliaryEffectSlots = (LPALDELETEAUXILIARYEFFECTSLOTS)alGetProcAddress("alDeleteAuxiliaryEffectSlots");
+		alIsAuxiliaryEffectSlot = (LPALISAUXILIARYEFFECTSLOT)alGetProcAddress("alIsAuxiliaryEffectSlot");
+		alAuxiliaryEffectSloti = (LPALAUXILIARYEFFECTSLOTI)alGetProcAddress("alAuxiliaryEffectSloti");
+		alAuxiliaryEffectSlotiv = (LPALAUXILIARYEFFECTSLOTIV)alGetProcAddress("alAuxiliaryEffectSlotiv");
+		alAuxiliaryEffectSlotf = (LPALAUXILIARYEFFECTSLOTF)alGetProcAddress("alAuxiliaryEffectSlotf");
+		alAuxiliaryEffectSlotfv = (LPALAUXILIARYEFFECTSLOTFV)alGetProcAddress("alAuxiliaryEffectSlotfv");
+		alGetAuxiliaryEffectSloti = (LPALGETAUXILIARYEFFECTSLOTI)alGetProcAddress("alGetAuxiliaryEffectSloti");
+		alGetAuxiliaryEffectSlotiv = (LPALGETAUXILIARYEFFECTSLOTIV)alGetProcAddress("alGetAuxiliaryEffectSlotiv");
+		alGetAuxiliaryEffectSlotf = (LPALGETAUXILIARYEFFECTSLOTF)alGetProcAddress("alGetAuxiliaryEffectSlotf");
+		alGetAuxiliaryEffectSlotfv = (LPALGETAUXILIARYEFFECTSLOTFV)alGetProcAddress("alGetFilterfv");
+#endif
 		if (!alGenEffects || !alGenFilters || !alGenAuxiliaryEffectSlots)
 		{
 			nlwarning("AL: ALC_EXT_EFX alcGetProcAddress failed");
 			AlExtEfx = false;
 		}
 	}
-#endif
-#endif
 }
 
 #if EAX_AVAILABLE
@@ -133,50 +130,48 @@ bool AlEnumerateAllExt = false;
 
 // EAX-RAM
 bool AlExtXRam = false;
-EAXSetBufferMode eaxSetBufferMode = NULL;
-EAXGetBufferMode eaxGetBufferMode = NULL;
+EAXSetBufferMode eaxSetBufferMode = nullptr;
+EAXGetBufferMode eaxGetBufferMode = nullptr;
 
 // ALC_EXT_EFX
 bool AlExtEfx = false;
 // effect objects
-#if !defined(AL_LIBTYPE_STATIC)
-#if defined(NL_OS_WINDOWS) || defined(NL_OS_MAC) || !defined(NL_STATIC)
-LPALGENEFXOBJECTS alGenEffects = NULL;
-LPALDELETEEFXOBJECTS alDeleteEffects = NULL;
-LPALISEFXOBJECT alIsEffect = NULL;
-LPALEFXOBJECTI alEffecti = NULL;
-LPALEFXOBJECTIV alEffectiv = NULL;
-LPALEFXOBJECTF alEffectf = NULL;
-LPALEFXOBJECTFV alEffectfv = NULL;
-LPALGETEFXOBJECTI alGetEffecti = NULL;
-LPALGETEFXOBJECTIV alGetEffectiv = NULL;
-LPALGETEFXOBJECTF alGetEffectf = NULL;
-LPALGETEFXOBJECTFV alGetEffectfv = NULL;
+#if !defined(AL_ALEXT_PROTOTYPES)
+LPALGENEFFECTS alGenEffects = nullptr;
+LPALDELETEEFFECTS alDeleteEffects = nullptr;
+LPALISEFFECT alIsEffect = nullptr;
+LPALEFFECTI alEffecti = nullptr;
+LPALEFFECTIV alEffectiv = nullptr;
+LPALEFFECTF alEffectf = nullptr;
+LPALEFFECTFV alEffectfv = nullptr;
+LPALGETEFFECTI alGetEffecti = nullptr;
+LPALGETEFFECTIV alGetEffectiv = nullptr;
+LPALGETEFFECTF alGetEffectf = nullptr;
+LPALGETEFFECTFV alGetEffectfv = nullptr;
 // filter objects
-LPALGENEFXOBJECTS alGenFilters = NULL;
-LPALDELETEEFXOBJECTS alDeleteFilters = NULL;
-LPALISEFXOBJECT alIsFilter = NULL;
-LPALEFXOBJECTI alFilteri = NULL;
-LPALEFXOBJECTIV alFilteriv = NULL;
-LPALEFXOBJECTF alFilterf = NULL;
-LPALEFXOBJECTFV alFilterfv = NULL;
-LPALGETEFXOBJECTI alGetFilteri = NULL;
-LPALGETEFXOBJECTIV alGetFilteriv = NULL;
-LPALGETEFXOBJECTF alGetFilterf = NULL;
-LPALGETEFXOBJECTFV alGetFilterfv = NULL;
+LPALGENFILTERS alGenFilters = nullptr;
+LPALDELETEFILTERS alDeleteFilters = nullptr;
+LPALISFILTER alIsFilter = nullptr;
+LPALFILTERI alFilteri = nullptr;
+LPALFILTERIV alFilteriv = nullptr;
+LPALFILTERF alFilterf = nullptr;
+LPALFILTERFV alFilterfv = nullptr;
+LPALGETFILTERI alGetFilteri = nullptr;
+LPALGETFILTERIV alGetFilteriv = nullptr;
+LPALGETFILTERF alGetFilterf = nullptr;
+LPALGETFILTERFV alGetFilterfv = nullptr;
 // submix objects
-LPALGENEFXOBJECTS alGenAuxiliaryEffectSlots = NULL;
-LPALDELETEEFXOBJECTS alDeleteAuxiliaryEffectSlots = NULL;
-LPALISEFXOBJECT alIsAuxiliaryEffectSlot = NULL;
-LPALEFXOBJECTI alAuxiliaryEffectSloti = NULL;
-LPALEFXOBJECTIV alAuxiliaryEffectSlotiv = NULL;
-LPALEFXOBJECTF alAuxiliaryEffectSlotf = NULL;
-LPALEFXOBJECTFV alAuxiliaryEffectSlotfv = NULL;
-LPALGETEFXOBJECTI alGetAuxiliaryEffectSloti = NULL;
-LPALGETEFXOBJECTIV alGetAuxiliaryEffectSlotiv = NULL;
-LPALGETEFXOBJECTF alGetAuxiliaryEffectSlotf = NULL;
-LPALGETEFXOBJECTFV alGetAuxiliaryEffectSlotfv = NULL;
-#endif
+LPALGENAUXILIARYEFFECTSLOTS alGenAuxiliaryEffectSlots = nullptr;
+LPALDELETEAUXILIARYEFFECTSLOTS alDeleteAuxiliaryEffectSlots = nullptr;
+LPALISAUXILIARYEFFECTSLOT alIsAuxiliaryEffectSlot = nullptr;
+LPALAUXILIARYEFFECTSLOTI alAuxiliaryEffectSloti = nullptr;
+LPALAUXILIARYEFFECTSLOTIV alAuxiliaryEffectSlotiv = nullptr;
+LPALAUXILIARYEFFECTSLOTF alAuxiliaryEffectSlotf = nullptr;
+LPALAUXILIARYEFFECTSLOTFV alAuxiliaryEffectSlotfv = nullptr;
+LPALGETAUXILIARYEFFECTSLOTI alGetAuxiliaryEffectSloti = nullptr;
+LPALGETAUXILIARYEFFECTSLOTIV alGetAuxiliaryEffectSlotiv = nullptr;
+LPALGETAUXILIARYEFFECTSLOTF alGetAuxiliaryEffectSlotf = nullptr;
+LPALGETAUXILIARYEFFECTSLOTFV alGetAuxiliaryEffectSlotfv = nullptr;
 #endif
 }
 

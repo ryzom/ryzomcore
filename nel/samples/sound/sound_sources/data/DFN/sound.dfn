@@ -12,6 +12,7 @@
   <ELEMENT Name="Priority" Type="Type" Filename="priority.typ" Default="Normal"/>
   <ELEMENT Name="Indoor" Type="Type" Filename="boolean.typ" Default="true"/>
   <ELEMENT Name="Outdoor" Type="Type" Filename="boolean.typ" Default="true"/>
-  <LOG>Tue Oct 08 12:33:33 2002 (boucher) Dfn Structure = 
+  <ELEMENT Name="GroupController" Type="Type" Filename="string.typ" Default="sound"/>
+  <LOG>Tue Oct 08 12:33:33 2002 (boucher) Dfn Structure =
 Tue Oct 08 14:35:19 2002 (boucher) Dfn Structure = </LOG>
 </DFN>
