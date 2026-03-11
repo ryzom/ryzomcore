@@ -14,12 +14,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef UT_MISC_COMMAND
-#define UT_MISC_COMMAND
+#include <gtest/gtest.h>
 
 #include <nel/misc/command.h>
 
-vector<string>	callList;
+#include <string>
+#include <vector>
+
+using std::string;
+using std::vector;
+
+vector<string> callList;
 
 class TTest : public NLMISC::ICommandsHandler
 {
@@ -47,13 +52,13 @@ public:
 
 	NLMISC_CLASS_COMMAND_DECL(theCommand1)
 	{
-		callList.push_back(_Name+".theCommand1");
+		callList.push_back(_Name + ".theCommand1");
 		return true;
 	}
 
 	NLMISC_CLASS_COMMAND_DECL(theCommand2)
 	{
-		callList.push_back(_Name+".theCommand2");
+		callList.push_back(_Name + ".theCommand2");
 		return true;
 	}
 
@@ -69,13 +74,13 @@ public:
 
 	NLMISC_CLASS_COMMAND_DECL(derivedCommand)
 	{
-		callList.push_back(_Name+".derivedCommand");
+		callList.push_back(_Name + ".derivedCommand");
 		return true;
 	}
 
 	NLMISC_CLASS_COMMAND_DECL(commandToOverride)
 	{
-		callList.push_back(_Name+".commandToOverride");
+		callList.push_back(_Name + ".commandToOverride");
 		return true;
 	}
 
@@ -91,13 +96,13 @@ public:
 
 	NLMISC_CLASS_COMMAND_DECL(derivedCommand2)
 	{
-		callList.push_back(_Name+".derivedCommand2");
+		callList.push_back(_Name + ".derivedCommand2");
 		return true;
 	}
 
 	NLMISC_CLASS_COMMAND_DECL(commandToOverride)
 	{
-		callList.push_back(_Name+".command Overidden");
+		callList.push_back(_Name + ".command Overidden");
 		return true;
 	}
 
@@ -118,136 +123,131 @@ public:
 
 	NLMISC_CLASS_COMMAND_DECL(derivedCommand4)
 	{
-		callList.push_back(_Name+".derivedCommand4");
+		callList.push_back(_Name + ".derivedCommand4");
 		return true;
 	}
 
 	NLMISC_CLASS_COMMAND_DECL(theCommand1)
 	{
-		callList.push_back(_Name+".recallBase");
+		callList.push_back(_Name + ".recallBase");
 		NLMISC_CLASS_COMMAND_CALL_BASE(TTestDerived3, theCommand1);
 		return true;
 	}
 };
 
-class CUTMiscCommand : public Test::Suite
+class CUTMiscCommand : public testing::Test
 {
-	TTest	*t1;
-	TTest	*t2;
-public:
-	CUTMiscCommand()
+protected:
+	TTest *t1;
+	TTest *t2;
+
+	void SetUp() override
 	{
-		TEST_ADD(CUTMiscCommand::createOneInstance);
-		TEST_ADD(CUTMiscCommand::createAnotherInstance);
-		TEST_ADD(CUTMiscCommand::deleteOneInstance);
-		TEST_ADD(CUTMiscCommand::derivedClass);
-		TEST_ADD(CUTMiscCommand::derivedClassAndBaseCall);
+		t1 = nullptr;
+		t2 = nullptr;
 	}
 
-	void derivedClassAndBaseCall()
+	void TearDown() override
 	{
-		TTestDerived4	t4;
+		delete t1;
+		delete t2;
+		callList.clear();
+	}
+};
+	TEST_F(CUTMiscCommand, derivedClassAndBaseCall)
+	{
+		TTestDerived4 t4;
 		t4.setName("T4");
 
-		callList.clear();
-
 		NLMISC::ICommand::execute("T4.derivedCommand4", *NLMISC::InfoLog);
-		TEST_ASSERT(callList.size() == 1);
-		TEST_ASSERT(callList[0] == "T4.derivedCommand4");
+		ASSERT_EQ(callList.size(), 1);
+		ASSERT_EQ(callList[0], "T4.derivedCommand4");
 
 		NLMISC::ICommand::execute("T4.theCommand1", *NLMISC::InfoLog);
-		TEST_ASSERT(callList.size() == 3);
-		TEST_ASSERT(callList[1] == "T4.recallBase");
-		TEST_ASSERT(callList[2] == "T4.theCommand1");
+		ASSERT_EQ(callList.size(), 3);
+		ASSERT_EQ(callList[1], "T4.recallBase");
+		ASSERT_EQ(callList[2], "T4.theCommand1");
 	}
 
-	void derivedClass()
+	TEST_F(CUTMiscCommand, derivedClass)
 	{
 		TTestDerived t1;
 		t1.setName("T1");
 		TTestDerived2 t2;
 		t2.setName("T2");
 
-		callList.clear();
-
 		NLMISC::ICommand::execute("T1.theCommand1", *NLMISC::InfoLog);
-		TEST_ASSERT(callList.size() == 1);
-		TEST_ASSERT(callList[0] == "T1.theCommand1");
+		ASSERT_EQ(callList.size(), 1);
+		ASSERT_EQ(callList[0], "T1.theCommand1");
 
 		NLMISC::ICommand::execute("T1.derivedCommand", *NLMISC::InfoLog);
-		TEST_ASSERT(callList.size() == 2);
-		TEST_ASSERT(callList[1] == "T1.derivedCommand");
+		ASSERT_EQ(callList.size(), 2);
+		ASSERT_EQ(callList[1], "T1.derivedCommand");
 
 		NLMISC::ICommand::execute("T1.commandToOverride", *NLMISC::InfoLog);
-		TEST_ASSERT(callList.size() == 3);
-		TEST_ASSERT(callList[2] == "T1.commandToOverride");
-		
+		ASSERT_EQ(callList.size(), 3);
+		ASSERT_EQ(callList[2], "T1.commandToOverride");
+
 
 		NLMISC::ICommand::execute("T2.theCommand1", *NLMISC::InfoLog);
-		TEST_ASSERT(callList.size() == 4);
-		TEST_ASSERT(callList[3] == "T2.theCommand1");
+		ASSERT_EQ(callList.size(), 4);
+		ASSERT_EQ(callList[3], "T2.theCommand1");
 
 		NLMISC::ICommand::execute("T2.derivedCommand", *NLMISC::InfoLog);
-		TEST_ASSERT(callList.size() == 5);
-		TEST_ASSERT(callList[4] == "T2.derivedCommand");
+		ASSERT_EQ(callList.size(), 5);
+		ASSERT_EQ(callList[4], "T2.derivedCommand");
 
 		NLMISC::ICommand::execute("T2.commandToOverride", *NLMISC::InfoLog);
-		TEST_ASSERT(callList.size() == 6);
-		TEST_ASSERT(callList[5] == "T2.command Overidden");
+		ASSERT_EQ(callList.size(), 6);
+		ASSERT_EQ(callList[5], "T2.command Overidden");
 	}
 
-	
-	void createOneInstance()
+
+	TEST_F(CUTMiscCommand, createOneInstance)
 	{
 		t1 = new TTest;
 		t1->setName("inst1");
 
-		TEST_ASSERT(callList.empty());
+		ASSERT_TRUE(callList.empty());
 
 		NLMISC::ICommand::execute("inst1.theCommand1", *NLMISC::InfoLog);
-		TEST_ASSERT(callList.size() == 1);
-		TEST_ASSERT(callList[0] == "inst1.theCommand1");
+		ASSERT_EQ(callList.size(), 1);
+		ASSERT_EQ(callList[0], "inst1.theCommand1");
 
 		NLMISC::ICommand::execute("inst1.theCommand2", *NLMISC::InfoLog);
-		TEST_ASSERT(callList.size() == 2);
-		TEST_ASSERT(callList[0] == "inst1.theCommand1");
-		TEST_ASSERT(callList[1] == "inst1.theCommand2");
-	}
+		ASSERT_EQ(callList.size(), 2);
+		ASSERT_EQ(callList[0], "inst1.theCommand1");
+		ASSERT_EQ(callList[1], "inst1.theCommand2");
 
-	void createAnotherInstance()
-	{
+
+		// createAnotherInstance
 		t2 = new TTest;
 		t2->setName("inst2");
 
-		TEST_ASSERT(callList.size() == 2);
+		ASSERT_EQ(callList.size(), 2);
 
 		NLMISC::ICommand::execute("inst2.theCommand1", *NLMISC::InfoLog);
-		TEST_ASSERT(callList.size() == 3);
-		TEST_ASSERT(callList[0] == "inst1.theCommand1");
-		TEST_ASSERT(callList[1] == "inst1.theCommand2");
-		TEST_ASSERT(callList[2] == "inst2.theCommand1");
+		ASSERT_EQ(callList.size(), 3);
+		ASSERT_EQ(callList[0], "inst1.theCommand1");
+		ASSERT_EQ(callList[1], "inst1.theCommand2");
+		ASSERT_EQ(callList[2], "inst2.theCommand1");
 
 		NLMISC::ICommand::execute("inst2.theCommand2", *NLMISC::InfoLog);
-		TEST_ASSERT(callList.size() == 4);
-		TEST_ASSERT(callList[0] == "inst1.theCommand1");
-		TEST_ASSERT(callList[1] == "inst1.theCommand2");
-		TEST_ASSERT(callList[2] == "inst2.theCommand1");
-		TEST_ASSERT(callList[3] == "inst2.theCommand2");
-	}
+		ASSERT_EQ(callList.size(), 4);
+		ASSERT_EQ(callList[0], "inst1.theCommand1");
+		ASSERT_EQ(callList[1], "inst1.theCommand2");
+		ASSERT_EQ(callList[2], "inst2.theCommand1");
+		ASSERT_EQ(callList[3], "inst2.theCommand2");
 
-	void deleteOneInstance()
-	{
+		// deleteOneInstance
 		delete t1;
+		t1 = nullptr;
 
 		NLMISC::ICommand::execute("inst1.theCommand2", *NLMISC::InfoLog);
-		TEST_ASSERT(callList.size() == 4);
-		TEST_ASSERT(callList[0] == "inst1.theCommand1");
-		TEST_ASSERT(callList[1] == "inst1.theCommand2");
-		TEST_ASSERT(callList[2] == "inst2.theCommand1");
-		TEST_ASSERT(callList[3] == "inst2.theCommand2");
-
+		ASSERT_EQ(callList.size(), 4);
+		ASSERT_EQ(callList[0], "inst1.theCommand1");
+		ASSERT_EQ(callList[1], "inst1.theCommand2");
+		ASSERT_EQ(callList[2], "inst2.theCommand1");
+		ASSERT_EQ(callList[3], "inst2.theCommand2");
 	}
 
-};
-
-#endif

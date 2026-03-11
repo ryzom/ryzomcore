@@ -17,7 +17,6 @@
 #ifndef UT_MISC
 #define UT_MISC
 
-#include "ut_misc_command.h"
 #include "ut_misc_common.h"
 #include "ut_misc_debug.h"
 #include "ut_misc_dynlibload.h"
@@ -35,7 +34,6 @@ struct CUTMisc : public Test::Suite
 {
 	CUTMisc()
 	{
-		add(std::auto_ptr<Test::Suite>(new CUTMiscCommand));
 		add(std::auto_ptr<Test::Suite>(new CUTMiscCommon));
 		add(std::auto_ptr<Test::Suite>(new CUTMiscDebug));
 		add(std::auto_ptr<Test::Suite>(new CUTMiscDynLibLoad));
