@@ -29,7 +29,7 @@ protected:
 	{
 		context = NLMISC::CApplicationContext();
 
-		NLMISC::createDebug(NULL);
+		NLMISC::createDebug(nullptr);
 	}
 
 	void TearDown() override
