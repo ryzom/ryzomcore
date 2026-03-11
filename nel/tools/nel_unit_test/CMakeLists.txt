@@ -31,9 +31,10 @@ target_link_libraries(nel_ligo_test
 
 add_test_executable(nel_misc_test
         ut_misc_base64.test.cpp
-        ut_misc_config_file.test.cpp
         ut_misc_co_task.test.cpp
         ut_misc_command.test.cpp
+        ut_misc_common.test.cpp
+        ut_misc_config_file.test.cpp
 )
 target_link_libraries(nel_misc_test
         PRIVATE
