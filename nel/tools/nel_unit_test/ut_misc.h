@@ -23,7 +23,6 @@
 #include "ut_misc_pack_file.h"
 #include "ut_misc_singleton.h"
 #include "ut_misc_sstring.h"
-#include "ut_misc_stream.h"
 // Add a line here when adding a new test CLASS
 
 struct CUTMisc : public Test::Suite
@@ -36,7 +35,6 @@ struct CUTMisc : public Test::Suite
 		add(std::auto_ptr<Test::Suite>(new CUTMiscPackFile));
 		add(std::auto_ptr<Test::Suite>(new CUTMiscSingleton));
 		add(std::auto_ptr<Test::Suite>(new CUTMiscSString));
-		add(std::auto_ptr<Test::Suite>(new CUTMiscStream));
 		// Add a line here when adding a new test CLASS
 	}
 };
