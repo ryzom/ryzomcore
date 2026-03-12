@@ -63,22 +63,22 @@ TEST_F(CUTMiscStreamTest, copyOnWrite)
 	s2 = s1;
 	s3 = s2;
 
-	EXPECT_TRUE(s1.buffer() == s2.buffer());
-	EXPECT_TRUE(s1.buffer() == s3.buffer());
+	EXPECT_EQ(s1.buffer(), s2.buffer());
+	EXPECT_EQ(s1.buffer(), s3.buffer());
 
 	// change s1
 	s1.serial(i);
-	EXPECT_TRUE(s1.buffer() != s2.buffer());
-	EXPECT_TRUE(s2.buffer() == s3.buffer());
+	EXPECT_NE(s1.buffer(), s2.buffer());
+	EXPECT_EQ(s2.buffer(), s3.buffer());
 
 	s2.invert();
 	s3 = s2;
 
-	EXPECT_TRUE(s2.buffer() == s3.buffer());
+	EXPECT_EQ(s2.buffer(), s3.buffer());
 
 	s2.serial(i);
 
-	EXPECT_TRUE(s2.buffer() == s3.buffer());
+	EXPECT_EQ(s2.buffer(), s3.buffer());
 }
 
 enum TEnum
@@ -168,13 +168,13 @@ TEST_F(CUTMiscStreamTest, memStreamSwap)
 		ms2.swap(ms1);
 
 		// check that ms1 is empty now
-		EXPECT_TRUE(ms1.length() == 0);
+		EXPECT_EQ(ms1.length(), 0);
 	}
 
-	EXPECT_TRUE(!ms2.isReading());
+	EXPECT_FALSE(ms2.isReading());
 	ms2.invert();
 	ms2.serial(s);
-	EXPECT_TRUE(s == "foo1");
+	EXPECT_EQ(s, "foo1");
 	ms2.serial(s);
-	EXPECT_TRUE(s == "foo2");
+	EXPECT_EQ(s, "foo2");
 }
