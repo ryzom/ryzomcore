@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "nel/net/sock.h"
-
 #include <gtest/gtest.h>
 
 #include <set>
@@ -27,6 +25,7 @@
 #include <nel/net/ipv6_address.h>
 #include <nel/net/inet_address.h>
 #include <nel/net/inet_host.h>
+#include <nel/net/sock.h>
 
 class CUTNetAddressTest : public testing::Test
 {
