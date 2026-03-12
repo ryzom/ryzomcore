@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "nel/net/sock.h"
+
 #include <gtest/gtest.h>
 
 #include <set>
@@ -259,7 +261,5 @@ TEST_F(CUTNetAddressTest, DISABLED_hostLookup)
 	EXPECT_TRUE((std::find(oneDns.addresses().begin(), oneDns.addresses().end(), NLNET::CInetAddress("1.0.0.1:53")) != oneDns.addresses().end())
 	    || (std::find(oneDns.addresses().begin(), oneDns.addresses().end(), NLNET::CInetAddress("[2606:4700:4700::1001]:53")) != oneDns.addresses().end()));
 
-	NLNET::CInetHost invalidInvalid("invalid.invalid:80");
-	EXPECT_TRUE(!invalidInvalid.isValid());
-	EXPECT_TRUE(!invalidInvalid.isAddressValid());
+	EXPECT_THROW(NLNET::CInetHost("invalid.invalid:80"), NLNET::ESocket);
 }
