@@ -40,12 +40,12 @@ protected:
 
 TEST_F(CUTNetAddressTest, validAddress)
 {
-	EXPECT_TRUE(!NLNET::CIPv6Address().isValid());
-	EXPECT_TRUE(!NLNET::CIPv6Address("").isValid());
-	EXPECT_TRUE(!NLNET::CIPv6Address("null").isValid());
-	EXPECT_TRUE(!NLNET::CIPv6Address("nil").isValid());
-	EXPECT_TRUE(!NLNET::CIPv6Address("true").isValid());
-	EXPECT_TRUE(!NLNET::CIPv6Address("false").isValid());
+	EXPECT_FALSE(NLNET::CIPv6Address().isValid());
+	EXPECT_FALSE(NLNET::CIPv6Address("").isValid());
+	EXPECT_FALSE(NLNET::CIPv6Address("null").isValid());
+	EXPECT_FALSE(NLNET::CIPv6Address("nil").isValid());
+	EXPECT_FALSE(NLNET::CIPv6Address("true").isValid());
+	EXPECT_FALSE(NLNET::CIPv6Address("false").isValid());
 	EXPECT_TRUE(NLNET::CIPv6Address("0").isValid());
 	EXPECT_TRUE(NLNET::CIPv6Address("0.0.0.0").isValid());
 	EXPECT_TRUE(NLNET::CIPv6Address("127.0.0.1").isValid());
@@ -73,52 +73,52 @@ TEST_F(CUTNetAddressTest, validAddress)
 	EXPECT_TRUE(NLNET::CIPv6Address("5397:a2c8:26e9:bf7a:a2b8:0d15:4e83:973a").isValid());
 	EXPECT_TRUE(NLNET::CIPv6Address("c3e8:6e2a:7b80:c18d:b1da:be23:eaed:2edb").isValid());
 	EXPECT_TRUE(NLNET::CIPv6Address("3416:a1ed:5052:8882:6c85:3e8d:ef33:a7b1").isValid());
-	EXPECT_TRUE(!NLNET::CIPv6Address(":").isValid());
-	EXPECT_TRUE(!NLNET::CIPv6Address(".1").isValid());
-	EXPECT_TRUE(!NLNET::CIPv6Address("1.").isValid());
-	EXPECT_TRUE(!NLNET::CIPv6Address("127.0.0.1:ffff::").isValid());
+	EXPECT_FALSE(NLNET::CIPv6Address(":").isValid());
+	EXPECT_FALSE(NLNET::CIPv6Address(".1").isValid());
+	EXPECT_FALSE(NLNET::CIPv6Address("1.").isValid());
+	EXPECT_FALSE(NLNET::CIPv6Address("127.0.0.1:ffff::").isValid());
 }
 
 TEST_F(CUTNetAddressTest, addressType)
 {
-	EXPECT_TRUE(NLNET::CIPv6Address().getType() == NLNET::CIPv6Address::Invalid);
-	EXPECT_TRUE(NLNET::CIPv6Address("0").getType() == NLNET::CIPv6Address::Any);
-	EXPECT_TRUE(NLNET::CIPv6Address("0.0.0.0").getType() == NLNET::CIPv6Address::Any);
-	EXPECT_TRUE(NLNET::CIPv6Address("::").getType() == NLNET::CIPv6Address::Any);
-	EXPECT_TRUE(NLNET::CIPv6Address("127.0.0.1").getType() == NLNET::CIPv6Address::Loopback);
-	EXPECT_TRUE(NLNET::CIPv6Address("127.0.1.1").getType() == NLNET::CIPv6Address::Loopback);
-	EXPECT_TRUE(NLNET::CIPv6Address::loopbackIPv4().getType() == NLNET::CIPv6Address::Loopback);
-	EXPECT_TRUE(NLNET::CIPv6Address::loopbackIPv6().getType() == NLNET::CIPv6Address::Loopback);
-	EXPECT_TRUE(NLNET::CIPv6Address::loopback().getType() == NLNET::CIPv6Address::Loopback);
-	EXPECT_TRUE(NLNET::CIPv6Address::anyIPv4().getType() == NLNET::CIPv6Address::Any);
-	EXPECT_TRUE(NLNET::CIPv6Address::anyIPv6().getType() == NLNET::CIPv6Address::Any);
-	EXPECT_TRUE(NLNET::CIPv6Address::any().getType() == NLNET::CIPv6Address::Any);
-	EXPECT_TRUE(NLNET::CIPv6Address("::1").getType() == NLNET::CIPv6Address::Loopback);
-	EXPECT_TRUE(NLNET::CIPv6Address("8.8.8.8").getType() == NLNET::CIPv6Address::Internet);
-	EXPECT_TRUE(NLNET::CIPv6Address("192.168.9.9").getType() == NLNET::CIPv6Address::SiteLocal);
-	EXPECT_TRUE(NLNET::CIPv6Address("192.168.100.254").getType() == NLNET::CIPv6Address::SiteLocal);
-	EXPECT_TRUE(NLNET::CIPv6Address("10.0.0.1").getType() == NLNET::CIPv6Address::SiteLocal);
-	EXPECT_TRUE(NLNET::CIPv6Address("172.16.0.1").getType() == NLNET::CIPv6Address::SiteLocal);
-	EXPECT_TRUE(NLNET::CIPv6Address("2001:0db8:85a3:0000:0000:8a2e:0370:7334").getType() == NLNET::CIPv6Address::Internet);
-	EXPECT_TRUE(NLNET::CIPv6Address("2001:0db8:0000:0000:0000:ff00:0042:8329").getType() == NLNET::CIPv6Address::Internet);
-	EXPECT_TRUE(NLNET::CIPv6Address("2001:db8:1234:5678::1").getType() == NLNET::CIPv6Address::Internet);
-	EXPECT_TRUE(NLNET::CIPv6Address("2607:f8b0:4006:81a::200e").getType() == NLNET::CIPv6Address::Internet);
-	EXPECT_TRUE(NLNET::CIPv6Address("2a02:c7d:41f6:e400:1234:5678:90ab:cdef").getType() == NLNET::CIPv6Address::Internet);
-	EXPECT_TRUE(NLNET::CIPv6Address("fe80::1").getType() == NLNET::CIPv6Address::LinkLocal);
-	EXPECT_TRUE(NLNET::CIPv6Address("fe80::1234:5678:9abc:def0").getType() == NLNET::CIPv6Address::LinkLocal);
-	EXPECT_TRUE(NLNET::CIPv6Address("fe80::dc72:7c1f:a73c:b7a1").getType() == NLNET::CIPv6Address::LinkLocal);
-	EXPECT_TRUE(NLNET::CIPv6Address("fc00:1234:5678::1").getType() == NLNET::CIPv6Address::UniqueLocal);
-	EXPECT_TRUE(NLNET::CIPv6Address("fd00:1234:5678::1").getType() == NLNET::CIPv6Address::UniqueLocal);
-	EXPECT_TRUE(NLNET::CIPv6Address("fdc2:4c24:1e4a:f832::1").getType() == NLNET::CIPv6Address::UniqueLocal);
-	EXPECT_TRUE(NLNET::CIPv6Address("fc00:1:2:3:4:5:6:7").getType() == NLNET::CIPv6Address::UniqueLocal);
+	EXPECT_EQ(NLNET::CIPv6Address().getType(), NLNET::CIPv6Address::Invalid);
+	EXPECT_EQ(NLNET::CIPv6Address("0").getType(), NLNET::CIPv6Address::Any);
+	EXPECT_EQ(NLNET::CIPv6Address("0.0.0.0").getType(), NLNET::CIPv6Address::Any);
+	EXPECT_EQ(NLNET::CIPv6Address("::").getType(), NLNET::CIPv6Address::Any);
+	EXPECT_EQ(NLNET::CIPv6Address("127.0.0.1").getType(), NLNET::CIPv6Address::Loopback);
+	EXPECT_EQ(NLNET::CIPv6Address("127.0.1.1").getType(), NLNET::CIPv6Address::Loopback);
+	EXPECT_EQ(NLNET::CIPv6Address::loopbackIPv4().getType(), NLNET::CIPv6Address::Loopback);
+	EXPECT_EQ(NLNET::CIPv6Address::loopbackIPv6().getType(), NLNET::CIPv6Address::Loopback);
+	EXPECT_EQ(NLNET::CIPv6Address::loopback().getType(), NLNET::CIPv6Address::Loopback);
+	EXPECT_EQ(NLNET::CIPv6Address::anyIPv4().getType(), NLNET::CIPv6Address::Any);
+	EXPECT_EQ(NLNET::CIPv6Address::anyIPv6().getType(), NLNET::CIPv6Address::Any);
+	EXPECT_EQ(NLNET::CIPv6Address::any().getType(), NLNET::CIPv6Address::Any);
+	EXPECT_EQ(NLNET::CIPv6Address("::1").getType(), NLNET::CIPv6Address::Loopback);
+	EXPECT_EQ(NLNET::CIPv6Address("8.8.8.8").getType(), NLNET::CIPv6Address::Internet);
+	EXPECT_EQ(NLNET::CIPv6Address("192.168.9.9").getType(), NLNET::CIPv6Address::SiteLocal);
+	EXPECT_EQ(NLNET::CIPv6Address("192.168.100.254").getType(), NLNET::CIPv6Address::SiteLocal);
+	EXPECT_EQ(NLNET::CIPv6Address("10.0.0.1").getType(), NLNET::CIPv6Address::SiteLocal);
+	EXPECT_EQ(NLNET::CIPv6Address("172.16.0.1").getType(), NLNET::CIPv6Address::SiteLocal);
+	EXPECT_EQ(NLNET::CIPv6Address("2001:0db8:85a3:0000:0000:8a2e:0370:7334").getType(), NLNET::CIPv6Address::Internet);
+	EXPECT_EQ(NLNET::CIPv6Address("2001:0db8:0000:0000:0000:ff00:0042:8329").getType(), NLNET::CIPv6Address::Internet);
+	EXPECT_EQ(NLNET::CIPv6Address("2001:db8:1234:5678::1").getType(), NLNET::CIPv6Address::Internet);
+	EXPECT_EQ(NLNET::CIPv6Address("2607:f8b0:4006:81a::200e").getType(), NLNET::CIPv6Address::Internet);
+	EXPECT_EQ(NLNET::CIPv6Address("2a02:c7d:41f6:e400:1234:5678:90ab:cdef").getType(), NLNET::CIPv6Address::Internet);
+	EXPECT_EQ(NLNET::CIPv6Address("fe80::1").getType(), NLNET::CIPv6Address::LinkLocal);
+	EXPECT_EQ(NLNET::CIPv6Address("fe80::1234:5678:9abc:def0").getType(), NLNET::CIPv6Address::LinkLocal);
+	EXPECT_EQ(NLNET::CIPv6Address("fe80::dc72:7c1f:a73c:b7a1").getType(), NLNET::CIPv6Address::LinkLocal);
+	EXPECT_EQ(NLNET::CIPv6Address("fc00:1234:5678::1").getType(), NLNET::CIPv6Address::UniqueLocal);
+	EXPECT_EQ(NLNET::CIPv6Address("fd00:1234:5678::1").getType(), NLNET::CIPv6Address::UniqueLocal);
+	EXPECT_EQ(NLNET::CIPv6Address("fdc2:4c24:1e4a:f832::1").getType(), NLNET::CIPv6Address::UniqueLocal);
+	EXPECT_EQ(NLNET::CIPv6Address("fc00:1:2:3:4:5:6:7").getType(), NLNET::CIPv6Address::UniqueLocal);
 }
 
 TEST_F(CUTNetAddressTest, standardAddress)
 {
-	EXPECT_TRUE(NLNET::CIPv6Address::loopbackIPv4() == NLNET::CIPv6Address("127.0.0.1"));
-	EXPECT_TRUE(NLNET::CIPv6Address::loopbackIPv6() == NLNET::CIPv6Address("::1"));
-	EXPECT_TRUE(NLNET::CIPv6Address::anyIPv4() == NLNET::CIPv6Address("0.0.0.0"));
-	EXPECT_TRUE(NLNET::CIPv6Address::anyIPv6() == NLNET::CIPv6Address("::"));
+	EXPECT_EQ(NLNET::CIPv6Address::loopbackIPv4(), NLNET::CIPv6Address("127.0.0.1"));
+	EXPECT_EQ(NLNET::CIPv6Address::loopbackIPv6(), NLNET::CIPv6Address("::1"));
+	EXPECT_EQ(NLNET::CIPv6Address::anyIPv4(), NLNET::CIPv6Address("0.0.0.0"));
+	EXPECT_EQ(NLNET::CIPv6Address::anyIPv6(), NLNET::CIPv6Address("::"));
 }
 
 TEST_F(CUTNetAddressTest, compareAddress)
@@ -173,7 +173,7 @@ TEST_F(CUTNetAddressTest, addressSet)
 		uint64 uniqueRandomA[2] = { NLMISC::wangHash64(i), NLMISC::wangHash64(i + count) };
 		uniqueRandomA[1] &= 0xFFFF7FFFFFF7FFFFULL; // Ensure no IPv4
 		NLNET::CIPv6Address a = NLNET::CIPv6Address((uint8 *)uniqueRandomA, 16);
-		EXPECT_TRUE(!a.isIPv4());
+		EXPECT_FALSE(a.isIPv4());
 		addresses.insert(a);
 	}
 	EXPECT_TRUE(addresses.size() == count);
@@ -182,7 +182,7 @@ TEST_F(CUTNetAddressTest, addressSet)
 		uint64 uniqueRandomA[2] = { NLMISC::wangHash64(i), NLMISC::wangHash64(i + count) };
 		uniqueRandomA[1] &= 0xFFFF7FFFFFF7FFFFULL; // Ensure no IPv4
 		NLNET::CIPv6Address a = NLNET::CIPv6Address((uint8 *)uniqueRandomA, 16);
-		EXPECT_TRUE(!a.isIPv4());
+		EXPECT_FALSE(a.isIPv4());
 		addresses.insert(a);
 	}
 	EXPECT_TRUE(addresses.size() == count);
@@ -201,41 +201,41 @@ TEST_F(CUTNetAddressTest, addressSet)
 		EXPECT_TRUE(a.isIPv4());
 		addresses.insert(a);
 	}
-	EXPECT_TRUE(addresses.size() == count * 2);
+	EXPECT_EQ(addresses.size(), count * 2);
 }
 
 TEST_F(CUTNetAddressTest, stringCompare)
 {
-	EXPECT_TRUE(NLNET::CIPv6Address("::ffff:127.0.0.1").toString() == "127.0.0.1");
-	EXPECT_TRUE(NLNET::CIPv6Address("0000::0001").toString() == "::1");
-	EXPECT_TRUE(NLNET::CIPv6Address("www.microsoft.com").toString() == "null");
-	EXPECT_TRUE(NLNET::CIPv6Address("0").toString() == "0.0.0.0");
-	EXPECT_TRUE(NLNET::CIPv6Address("1").toString() == "0.0.0.1");
-	EXPECT_TRUE(NLNET::CIPv6Address("127").toString() == "0.0.0.127");
-	EXPECT_TRUE(NLNET::CIPv6Address("32639").toString() == "0.0.127.127");
+	EXPECT_EQ(NLNET::CIPv6Address("::ffff:127.0.0.1").toString(), "127.0.0.1");
+	EXPECT_EQ(NLNET::CIPv6Address("0000::0001").toString(), "::1");
+	EXPECT_EQ(NLNET::CIPv6Address("www.microsoft.com").toString(), "null");
+	EXPECT_EQ(NLNET::CIPv6Address("0").toString(), "0.0.0.0");
+	EXPECT_EQ(NLNET::CIPv6Address("1").toString(), "0.0.0.1");
+	EXPECT_EQ(NLNET::CIPv6Address("127").toString(), "0.0.0.127");
+	EXPECT_EQ(NLNET::CIPv6Address("32639").toString(), "0.0.127.127");
 }
 
 TEST_F(CUTNetAddressTest, netParse)
 {
-	EXPECT_TRUE(NLNET::CInetAddress("8.8.8.8").asString() != NLNET::CInetAddress("::").asString()); // Wrong constructor
-	EXPECT_TRUE(NLNET::CInetAddress("8.8.8.8").asString() == "8.8.8.8:0");
-	EXPECT_TRUE(NLNET::CInetAddress("8.8.8.8") == NLNET::CInetAddress("8.8.8.8:0"));
-	EXPECT_TRUE(NLNET::CInetAddress("::").asString() == "[::]:0");
+	EXPECT_NE(NLNET::CInetAddress("8.8.8.8").asString(), NLNET::CInetAddress("::").asString()); // Wrong constructor
+	EXPECT_EQ(NLNET::CInetAddress("8.8.8.8").asString(), "8.8.8.8:0");
+	EXPECT_EQ(NLNET::CInetAddress("8.8.8.8"), NLNET::CInetAddress("8.8.8.8:0"));
+	EXPECT_EQ(NLNET::CInetAddress("::").asString(), "[::]:0");
 }
 
 TEST_F(CUTNetAddressTest, hostParse)
 {
-	EXPECT_TRUE(NLNET::CInetHost("2606:4700:4700::1111").address().getAddress() == NLNET::CIPv6Address("2606:4700:4700::1111"));
-	EXPECT_TRUE(NLNET::CInetHost("2606:4700:4700::1111:1111").address().getAddress() == NLNET::CIPv6Address("2606:4700:4700::1111:1111"));
-	EXPECT_TRUE(NLNET::CInetHost("[2606:4700:4700::1111]").address().getAddress() == NLNET::CIPv6Address("2606:4700:4700::1111"));
-	EXPECT_TRUE(NLNET::CInetHost("[2606:4700:4700::1111]:53").address().getAddress() == NLNET::CIPv6Address("2606:4700:4700::1111"));
-	EXPECT_TRUE(NLNET::CInetHost("8.8.8.8").address().getAddress() == NLNET::CIPv6Address("8.8.8.8"));
-	EXPECT_TRUE(NLNET::CInetHost("8.8.8.8:53").address().getAddress() == NLNET::CIPv6Address("8.8.8.8"));
-	EXPECT_TRUE(NLNET::CInetHost("[8.8.8.8]").address().getAddress() == NLNET::CIPv6Address("8.8.8.8"));
-	EXPECT_TRUE(NLNET::CInetHost("[8.8.8.8]:53").address().getAddress() == NLNET::CIPv6Address("8.8.8.8"));
-	EXPECT_TRUE(NLNET::CInetHost("::ffff:8.8.8.8").address().getAddress() == NLNET::CIPv6Address("8.8.8.8"));
-	EXPECT_TRUE(NLNET::CInetHost("[::ffff:8.8.8.8]").address().getAddress() == NLNET::CIPv6Address("8.8.8.8"));
-	EXPECT_TRUE(NLNET::CInetHost("[::ffff:8.8.8.8]:53").address().getAddress() == NLNET::CIPv6Address("8.8.8.8"));
+	EXPECT_EQ(NLNET::CInetHost("2606:4700:4700::1111").address().getAddress(), NLNET::CIPv6Address("2606:4700:4700::1111"));
+	EXPECT_EQ(NLNET::CInetHost("2606:4700:4700::1111:1111").address().getAddress(), NLNET::CIPv6Address("2606:4700:4700::1111:1111"));
+	EXPECT_EQ(NLNET::CInetHost("[2606:4700:4700::1111]").address().getAddress(), NLNET::CIPv6Address("2606:4700:4700::1111"));
+	EXPECT_EQ(NLNET::CInetHost("[2606:4700:4700::1111]:53").address().getAddress(), NLNET::CIPv6Address("2606:4700:4700::1111"));
+	EXPECT_EQ(NLNET::CInetHost("8.8.8.8").address().getAddress(), NLNET::CIPv6Address("8.8.8.8"));
+	EXPECT_EQ(NLNET::CInetHost("8.8.8.8:53").address().getAddress(), NLNET::CIPv6Address("8.8.8.8"));
+	EXPECT_EQ(NLNET::CInetHost("[8.8.8.8]").address().getAddress(), NLNET::CIPv6Address("8.8.8.8"));
+	EXPECT_EQ(NLNET::CInetHost("[8.8.8.8]:53").address().getAddress(), NLNET::CIPv6Address("8.8.8.8"));
+	EXPECT_EQ(NLNET::CInetHost("::ffff:8.8.8.8").address().getAddress(), NLNET::CIPv6Address("8.8.8.8"));
+	EXPECT_EQ(NLNET::CInetHost("[::ffff:8.8.8.8]").address().getAddress(), NLNET::CIPv6Address("8.8.8.8"));
+	EXPECT_EQ(NLNET::CInetHost("[::ffff:8.8.8.8]:53").address().getAddress(), NLNET::CIPv6Address("8.8.8.8"));
 	EXPECT_ANY_THROW(NLNET::CInetHost("::ffff:8.8.8.8:53"));
 }
 
