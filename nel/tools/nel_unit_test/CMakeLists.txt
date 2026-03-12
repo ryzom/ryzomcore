@@ -48,6 +48,7 @@ target_compile_definitions(nel_misc_test
 
 add_test_executable(nel_net_test
         ut_net_address.test.cpp
+        ut_net_message.test.cpp
         ut_net_module.test.cpp
 )
 target_link_libraries(nel_net_test
@@ -65,7 +66,7 @@ target_link_libraries(nel_web_http_client_it
         NeL::web
 )
 
-if(WITH_DRIVER_OPENAL)
+if (WITH_DRIVER_OPENAL)
     add_test_executable(nel_sound_openal_it
             ut_sound_openal.it.cpp
     )
@@ -77,4 +78,4 @@ if(WITH_DRIVER_OPENAL)
     add_dependencies(nel_sound_openal_it
             NeL::sound::OpenAL
     )
-endif()
+endif ()

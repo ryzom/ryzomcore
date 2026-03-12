@@ -23,7 +23,6 @@
 #include <nel/net/message.h>
 
 #include "ut_net_layer3.h"
-#include "ut_net_message.h"
 // Add a line here when adding a new test CLASS
 
 struct CUTNet : public Test::Suite
@@ -31,7 +30,6 @@ struct CUTNet : public Test::Suite
 	CUTNet()
 	{
 		add(std::unique_ptr<Test::Suite>(new CUTNetLayer3));
-		add(std::unique_ptr<Test::Suite>(new CUTNetMessage));
 		// Add a line here when adding a new test CLASS
 	}
 };
