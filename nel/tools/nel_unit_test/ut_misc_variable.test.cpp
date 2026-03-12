@@ -14,31 +14,41 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef UT_MISC_VARIABLE
-#define UT_MISC_VARIABLE
+#include <gtest/gtest.h>
+
+#include <string>
 
 #include <nel/misc/variable.h>
 
-class CUTMiscVariable : public Test::Suite
+using std::string;
+
+class CUTMiscVariableTest : public testing::Test
 {
-public:
-	CUTMiscVariable ()
+protected:
+	NLMISC::CApplicationContext context;
+
+	void SetUp() override
 	{
-		TEST_ADD(CUTMiscVariable ::declareVar)
+		context = NLMISC::CApplicationContext();
+
+		NLMISC::createDebug(nullptr);
 	}
 
-	void declareVar()
+	void TearDown() override
 	{
-		{
-			NLMISC::CVariable<std::string> myLocalVar("test", "myLocalVar", "no help", "");
-
-			TEST_ASSERT(myLocalVar.get() == string(""));
-			TEST_ASSERT(NLMISC::CCommandRegistry::getInstance().execute("myLocalVar foo", (*NLMISC::InfoLog)));
-			TEST_ASSERT(myLocalVar.get() == string("foo"));
-		}
-
-		TEST_ASSERT(!NLMISC::CCommandRegistry::getInstance().execute("myLocalVar foo", (*NLMISC::InfoLog)));
 	}
 };
 
-#endif
+TEST_F(CUTMiscVariableTest, declareVar)
+{
+	auto &command_registry = NLMISC::CCommandRegistry::getInstance();
+	{
+		NLMISC::CVariable<string> myLocalVar("test", "myLocalVar", "no help", "");
+
+		EXPECT_EQ(myLocalVar.get(), string(""));
+		ASSERT_TRUE(command_registry.execute("myLocalVar foo", (*NLMISC::InfoLog)));
+		EXPECT_EQ(myLocalVar.get(), string("foo"));
+	}
+
+	EXPECT_FALSE(command_registry.execute("myLocalVar foo", (*NLMISC::InfoLog)));
+}
