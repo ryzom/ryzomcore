@@ -47,6 +47,7 @@ target_compile_definitions(nel_misc_test
 
 
 add_test_executable(nel_net_test
+        ut_net_address.test.cpp
         ut_net_module.test.cpp
 )
 target_link_libraries(nel_net_test
