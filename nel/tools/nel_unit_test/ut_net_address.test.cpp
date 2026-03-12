@@ -241,7 +241,7 @@ TEST_F(CUTNetAddressTest, hostParse)
 	EXPECT_ANY_THROW(NLNET::CInetHost("::ffff:8.8.8.8:53"));
 }
 
-TEST_F(CUTNetAddressTest, DISABLED_hostLookup)
+TEST_F(CUTNetAddressTest, hostLookup)
 {
 	NLNET::CInetHost googleDns("dns.google");
 	EXPECT_TRUE(!googleDns.isValid());
