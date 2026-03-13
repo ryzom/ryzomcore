@@ -1,26 +1,3 @@
-ADD_EXECUTABLE(nel_unit_test
-        nel_unit_test.cpp
-)
-ADD_TEST(NAME nel_unit_test COMMAND nel_unit_test)
-
-TARGET_LINK_LIBRARIES(nel_unit_test
-        PRIVATE
-        CppTest::CppTest
-        NeL::misc
-        NeL::net
-        NeL::ligo
-)
-
-NL_DEFAULT_PROPS(nel_unit_test "Unit Tests")
-NL_ADD_RUNTIME_FLAGS(nel_unit_test)
-
-target_compile_definitions(nel_unit_test
-        PUBLIC
-        NEL_UNIT_BASE="${PROJECT_SOURCE_DIR}/tools/nel_unit_test/"
-)
-
-INSTALL(TARGETS nel_unit_test RUNTIME DESTINATION ${NL_BIN_PREFIX})
-
 add_test_executable(nel_ligo_test
         ut_ligo_primitive.test.cpp
 )
@@ -34,6 +11,9 @@ add_test_executable(nel_misc_test
         ut_misc_co_task.test.cpp
         ut_misc_command.test.cpp
         ut_misc_common.test.cpp
+        ut_misc_debug.test.cpp
+        ut_misc_dynlibload.test.cpp
+        ut_misc_file.test.cpp
         ut_misc_config_file.test.cpp
         ut_misc_pack_file.test.cpp
         ut_misc_singleton.test.cpp

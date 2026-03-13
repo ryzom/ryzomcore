@@ -1,5 +1,5 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010-2020  Winch Gate Property Limited
+// Copyright (C) 2010  Winch Gate Property Limited
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -14,23 +14,23 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef UT_MISC
-#define UT_MISC
+#include <gtest/gtest.h>
 
-#include "ut_misc_debug.h"
-#include "ut_misc_dynlibload.h"
-#include "ut_misc_file.h"
-// Add a line here when adding a new test CLASS
+#include <string>
 
-struct CUTMisc : public Test::Suite
+#include <nel/misc/dynloadlib.h>
+
+using std::string;
+
+class CUTMiscDynLibLoadTest : public testing::Test
 {
-	CUTMisc()
-	{
-		add(std::auto_ptr<Test::Suite>(new CUTMiscDebug));
-		add(std::auto_ptr<Test::Suite>(new CUTMiscDynLibLoad));
-		add(std::auto_ptr<Test::Suite>(new CUTMiscFile));
-		// Add a line here when adding a new test CLASS
-	}
 };
 
-#endif
+TEST_F(CUTMiscDynLibLoadTest, libraryNameDecoration)
+{
+	string libName = "libmylib_with_dll_so_some_very_bad_rd_df_tag_inside_df";
+	string fileName = "some/path/to/add/difficulties/" + NLMISC::CLibrary::makeLibName(libName);
+	string cleanedName = NLMISC::CLibrary::cleanLibName(fileName);
+
+	ASSERT_TRUE(cleanedName == libName);
+}
