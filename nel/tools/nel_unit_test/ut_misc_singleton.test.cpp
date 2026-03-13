@@ -41,14 +41,14 @@ class CUnsafeSingleton
 public:
 	static CUnsafeSingleton &getInstance()
 	{
-		if (_Instance == NULL)
+		if (_Instance == nullptr)
 			_Instance = new CUnsafeSingleton;
 		return *_Instance;
 	}
 };
 
 NL_INSTANCE_COUNTER_IMPL(CUnsafeSingleton);
-CUnsafeSingleton *CUnsafeSingleton::_Instance = NULL;
+CUnsafeSingleton *CUnsafeSingleton::_Instance = nullptr;
 
 // Test suite for Singleton behavior
 class CUTMiscSingletonTest : public testing::Test
@@ -56,6 +56,7 @@ class CUTMiscSingletonTest : public testing::Test
 protected:
 	void SetUp() override
 	{
+		ASSERT_TRUE(NLMISC::INelContext::getInstance().isContextInitialised());
 	}
 
 	void TearDown() override
@@ -67,30 +68,31 @@ protected:
 
 TEST_F(CUTMiscSingletonTest, createSingleton)
 {
-	EXPECT_EQ(NLMISC::CInstanceCounterManager::getInstance().getInstanceCounter("CSafeSingleton"), 0);
+	EXPECT_EQ(NL_GET_LOCAL_INSTANCE_COUNTER(CSafeSingleton), 0);
 	// createSingleton
 	{
 		CSafeSingleton &ss = CSafeSingleton::getInstance();
 
+		EXPECT_EQ(NL_GET_LOCAL_INSTANCE_COUNTER(CSafeSingleton), 1);
 		EXPECT_EQ(NL_GET_INSTANCE_COUNTER(CSafeSingleton), 1);
 
-		EXPECT_EQ(NL_GET_INSTANCE_COUNTER(CUnsafeSingleton), 0);
+		EXPECT_EQ(NL_GET_LOCAL_INSTANCE_COUNTER(CUnsafeSingleton), 0);
 		CUnsafeSingleton &us = CUnsafeSingleton::getInstance();
 
-		EXPECT_EQ(NL_GET_INSTANCE_COUNTER(CUnsafeSingleton), 1);
+		EXPECT_EQ(NL_GET_LOCAL_INSTANCE_COUNTER(CUnsafeSingleton), 1);
 	}
 
 	// accessSingleton
 	{
-		EXPECT_EQ(NL_GET_INSTANCE_COUNTER(CSafeSingleton), 1);
+		EXPECT_EQ(NL_GET_LOCAL_INSTANCE_COUNTER(CSafeSingleton), 1);
 		CSafeSingleton &ss = CSafeSingleton::getInstance();
 
-		EXPECT_EQ(NL_GET_INSTANCE_COUNTER(CSafeSingleton), 1);
+		EXPECT_EQ(NL_GET_LOCAL_INSTANCE_COUNTER(CSafeSingleton), 1);
 
-		EXPECT_EQ(NL_GET_INSTANCE_COUNTER(CUnsafeSingleton), 1);
+		EXPECT_EQ(NL_GET_LOCAL_INSTANCE_COUNTER(CUnsafeSingleton), 1);
 		CUnsafeSingleton &us = CUnsafeSingleton::getInstance();
 
-		EXPECT_EQ(NL_GET_INSTANCE_COUNTER(CUnsafeSingleton), 1);
+		EXPECT_EQ(NL_GET_LOCAL_INSTANCE_COUNTER(CUnsafeSingleton), 1);
 	}
 }
 

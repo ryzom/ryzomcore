@@ -25,12 +25,9 @@ using std::string;
 class CUTMiscVariableTest : public testing::Test
 {
 protected:
-	NLMISC::CApplicationContext context;
-
 	void SetUp() override
 	{
-		context = NLMISC::CApplicationContext();
-
+		ASSERT_TRUE(NLMISC::INelContext::getInstance().isContextInitialised());
 		NLMISC::createDebug(nullptr);
 	}
 

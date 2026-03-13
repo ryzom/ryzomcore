@@ -87,6 +87,7 @@ vector<string> result2;
 class CTask1 : public NLMISC::CCoTask
 {
 	vector<string> &Output;
+
 public:
 	CTask1(vector<string> &output = result)
 	    : Output(output)
@@ -147,13 +148,9 @@ class CTaskThread : public NLMISC::IRunnable
 class CUTMiscCoTask : public testing::Test
 {
 protected:
-	NLMISC::CApplicationContext context;
-
 	void SetUp() override
 	{
-		context = NLMISC::CApplicationContext();
-
-		NLMISC::createDebug(nullptr);
+		ASSERT_TRUE(NLMISC::INelContext::getInstance().isContextInitialised());
 	}
 
 	void TearDown() override
@@ -241,4 +238,3 @@ TEST_F(CUTMiscCoTask, runThreads)
 		ASSERT_EQ(referenceResult[i], result[i]);
 	}
 }
-
