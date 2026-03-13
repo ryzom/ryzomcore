@@ -30,14 +30,6 @@ NLMISC::CBitMemStream globalBms(false, 2048); // global to avoid reallocation
 // ! not complete at all at time of writing !
 class CUTMiscStreamTest : public testing::Test
 {
-protected:
-	void SetUp() override
-	{
-	}
-
-	void TearDown() override
-	{
-	}
 };
 
 TEST_F(CUTMiscStreamTest, preallocatedBitStream)

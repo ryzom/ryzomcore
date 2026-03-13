@@ -20,14 +20,6 @@
 
 class CUTMiscTypesTest : public testing::Test
 {
-protected:
-	void SetUp() override
-	{
-	}
-
-	void TearDown() override
-	{
-	}
 };
 
 TEST_F(CUTMiscTypesTest, basicTypes)
