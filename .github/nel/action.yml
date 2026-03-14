@@ -97,10 +97,6 @@ runs:
       shell: bash
       run: cmake --build --preset nel --target install
 
-    - if: ( failure() )
-      shell: bash
-      run: find .
-
     - name: ccache stats
       if: always()
       shell: bash
