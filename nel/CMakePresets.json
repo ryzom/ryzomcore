@@ -10,7 +10,6 @@
       "binaryDir": "${sourceDir}/build/nel",
       "installDir": "${sourceDir}/build/install/nel",
       "cacheVariables": {
-        "WITH_STATIC": true,
         "WITH_NEL": true,
         "WITH_NEL_TESTS": true,
         "WITH_NEL_SAMPLES": true,
@@ -86,10 +85,14 @@
       "cacheVariables": {
         "WITH_NEL_SAMPLES": false,
         "WITH_NEL_TOOLS": false,
-        "BUILD_SHARED_LIBS": false,
-        "WITH_STATIC": true,
-        "WITH_OPENAL_STATIC": true,
-        "VCPKG_MANIFEST_NO_DEFAULT_FEATURES": true
+        "WITH_QT5": false,
+        "WITH_LIBGSF": false,
+        "WITH_INSTALL_LIBRARIES": false,
+        "WITH_DRIVER_DIRECT3D": true,
+        "WITH_DRIVER_XAUDIO2": true,
+        "WITH_STATIC_LIBXML2": false,
+        "VCPKG_MANIFEST_NO_DEFAULT_FEATURES": true,
+        "DXSDK_DIR": "C:/DXSDK"
       }
     },
     {
