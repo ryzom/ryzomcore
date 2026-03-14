@@ -17,10 +17,6 @@ inputs:
     description: cache directory for chocolatey
     required: false
     default: "${{ github.workspace }}/.choco"
-  target:
-    description: cmake target to build
-    required: false
-    default: all
 runs:
   using: composite
   steps:
@@ -82,7 +78,7 @@ runs:
       env:
         VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}/.vcpkg,readwrite"
       shell: bash
-      run: cmake --preset ${{ inputs.cmake-preset }} --target ${{ inputs.target }}
+      run: cmake --preset ${{ inputs.cmake-preset }}
 
     - name: Configure CMake
       if: runner.os == 'Windows'
