@@ -13,6 +13,10 @@ inputs:
   build-version:
     description: build version
     required: true
+  chocolatey-cache-dir:
+    description: cache directory for chocolatey
+    required: false
+    default: "${{ github.workspace }}/.choco"
 runs:
   using: composite
   steps:
@@ -51,6 +55,17 @@ runs:
           libgsf-1-dev \
           qtbase5-dev qttools5-dev qttools5-dev-tools
 
+    - uses: actions/cache@v4
+      if: runner.os == 'Windows'
+      with:
+        path: ${{ inputs.chocolatey-cache-dir }}
+        key: choco
+
+    - name: Dependencies ${{ runner.os }}
+      if: runner.os == 'Windows'
+      shell: powershell
+      run: choco install nsis --cache-location=${{ inputs.chocolatey-cache-dir }}
+
     - name: Configure ccache
       shell: bash
       run: |
@@ -63,6 +78,13 @@ runs:
       env:
         VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}/.vcpkg,readwrite"
       shell: bash
+      run: cmake --preset ${{ inputs.cmake-preset }}
+
+    - name: Configure CMake
+      if: runner.os == 'Windows'
+      env:
+        VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}/.vcpkg,readwrite"
+      shell: powershell
       run: cmake --preset ${{ inputs.cmake-preset }}
 
     - uses: actions/cache/save@v4
