@@ -93,6 +93,10 @@ runs:
         path: ${{ github.workspace }}/.vcpkg
         key: ${{ steps.vcpkg-cache.outputs.cache-primary-key }}
 
+    - if: ( ! cancelled() )
+      shell: bash
+      run: find ${{ github.workspace }}
+
     - name: Build
       shell: bash
       run: cmake --build --preset nel --target install
