@@ -84,11 +84,12 @@
         "windows"
       ],
       "cacheVariables": {
+        "WITH_NEL_SAMPLES": false,
+        "WITH_NEL_TOOLS": false,
         "BUILD_SHARED_LIBS": true,
         "WITH_STATIC": false,
         "WITH_OPENAL_STATIC": true,
-        "VCPKG_MANIFEST_NO_DEFAULT_FEATURES": true,
-        "VCPKG_MANIFEST_FEATURES": "pipeline-max"
+        "VCPKG_MANIFEST_NO_DEFAULT_FEATURES": true
       }
     },
     {
