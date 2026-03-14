@@ -99,7 +99,7 @@ runs:
 
     - if: ( failure() )
       shell: bash
-      run: find ${{ github.workspace }}
+      run: find .
 
     - name: ccache stats
       if: always()
