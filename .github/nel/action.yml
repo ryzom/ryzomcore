@@ -20,7 +20,7 @@ inputs:
   target:
     description: cmake target to build
     required: false
-    default: all
+    default: install
 runs:
   using: composite
   steps:
@@ -82,7 +82,7 @@ runs:
       env:
         VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}/.vcpkg,readwrite"
       shell: bash
-      run: cmake --preset ${{ inputs.cmake-preset }} --target ${{ inputs.target }}
+      run: cmake --preset ${{ inputs.cmake-preset }}
 
     - name: Configure CMake
       if: runner.os == 'Windows'
@@ -99,7 +99,7 @@ runs:
 
     - name: Build
       shell: bash
-      run: cmake --build --preset nel --target install
+      run: cmake --build --preset nel --target ${{ inputs.target }}
 
     - name: ccache stats
       if: always()
