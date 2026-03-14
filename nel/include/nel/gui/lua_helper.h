@@ -24,6 +24,10 @@
 #include "nel/misc/types_nl.h"
 #include "nel/misc/smart_ptr.h"
 
+#ifdef _WIN32
+#include <WinDef.h>
+#endif
+
 extern "C" {
 #include "lua_loadlib.h"
 }
