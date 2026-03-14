@@ -68,6 +68,8 @@ jobs:
             cmake-preset: ci-linux-nel-vcpkg
           - os: windows-2025
             cmake-preset: ci-windows-nel-vcpkg
+            target: "help"
+
     steps:
       - uses: actions/checkout@v4
 
