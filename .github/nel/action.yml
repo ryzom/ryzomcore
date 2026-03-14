@@ -73,9 +73,7 @@ runs:
 
     - name: Build
       shell: bash
-      run: |
-        cmake --build --preset nel
-        cmake --build --preset nel --target install
+      run: cmake --build --preset nel --target install
 
     - name: ccache stats
       if: always()

@@ -33,6 +33,7 @@ on:
 env:
   VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}/.vcpkg,readwrite"
   CCACHE_DIR: "${{ github.workspace }}/.ccache"
+  CHOCOLATEY_CACHE: "${{ github.workspace }}/.choco"
   HUNTER_ROOT: "${{ github.workspace }}/.hunter"
   MACOSX_DEPLOYMENT_TARGET: 10.13
 
@@ -150,10 +151,16 @@ jobs:
           del DXSDK_Jun10.exe
         )
 
+    - uses: actions/cache@v4
+      if: runner.os == 'Windows'
+      with:
+        path: ${{ env.CHOCOLATEY_CACHE }}
+        key: choco
+
     - name: Dependencies Windows
       if: runner.os == 'Windows'
       run: |
-        choco install nsis
+        choco install nsis --cache-location=${{ env.CHOCOLATEY_CACHE }}
 
     - name: Configure CMake
       run: |

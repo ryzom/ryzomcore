@@ -389,7 +389,7 @@ end:
 			else
 			{
 				if (!quiet)
-					log.displayNL("Command '%s' : can't found object named '%s'",
+					log.displayNL("Command '%s' : can't find object named '%s'",
 						cp.CommandName.c_str(),
 						objectName.c_str());
 			}

@@ -1,26 +1,3 @@
-ADD_EXECUTABLE(nel_unit_test
-        nel_unit_test.cpp
-)
-ADD_TEST(NAME nel_unit_test COMMAND nel_unit_test)
-
-TARGET_LINK_LIBRARIES(nel_unit_test
-        PRIVATE
-        CppTest::CppTest
-        NeL::misc
-        NeL::net
-        NeL::ligo
-)
-
-NL_DEFAULT_PROPS(nel_unit_test "Unit Tests")
-NL_ADD_RUNTIME_FLAGS(nel_unit_test)
-
-target_compile_definitions(nel_unit_test
-        PUBLIC
-        NEL_UNIT_BASE="${PROJECT_SOURCE_DIR}/tools/nel_unit_test/"
-)
-
-INSTALL(TARGETS nel_unit_test RUNTIME DESTINATION ${NL_BIN_PREFIX})
-
 add_test_executable(nel_ligo_test
         ut_ligo_primitive.test.cpp
 )
@@ -29,23 +6,40 @@ target_link_libraries(nel_ligo_test
         NeL::ligo
 )
 
-add_test_executable(nel_misc_config_file_test
+add_test_executable(nel_misc_test
+        ut_misc_base64.test.cpp
+        ut_misc_co_task.test.cpp
+        ut_misc_command.test.cpp
+        ut_misc_common.test.cpp
+        ut_misc_debug.test.cpp
+        ut_misc_dynlibload.test.cpp
+        ut_misc_file.test.cpp
         ut_misc_config_file.test.cpp
+        ut_misc_pack_file.test.cpp
+        ut_misc_singleton.test.cpp
+        ut_misc_sstring.test.cpp
+        ut_misc_stream.test.cpp
+        ut_misc_string_common.test.cpp
+        ut_misc_types.test.cpp
+        ut_misc_variable.test.cpp
 )
-target_link_libraries(nel_misc_config_file_test
+target_link_libraries(nel_misc_test
         PRIVATE
         NeL::misc
 )
-target_compile_definitions(nel_misc_config_file_test
+target_compile_definitions(nel_misc_test
         PUBLIC
         NEL_UNIT_BASE="${CMAKE_CURRENT_SOURCE_DIR}/"
 )
 
 
-add_test_executable(nel_net_module_test
+add_test_executable(nel_net_test
+        ut_net_address.test.cpp
+        ut_net_layer3.test.cpp
+        ut_net_message.test.cpp
         ut_net_module.test.cpp
 )
-target_link_libraries(nel_net_module_test
+target_link_libraries(nel_net_test
         PRIVATE
         NeL::misc
         NeL::net
@@ -60,7 +54,7 @@ target_link_libraries(nel_web_http_client_it
         NeL::web
 )
 
-if(WITH_DRIVER_OPENAL)
+if (WITH_DRIVER_OPENAL)
     add_test_executable(nel_sound_openal_it
             ut_sound_openal.it.cpp
     )
@@ -72,4 +66,4 @@ if(WITH_DRIVER_OPENAL)
     add_dependencies(nel_sound_openal_it
             NeL::sound::OpenAL
     )
-endif()
+endif ()

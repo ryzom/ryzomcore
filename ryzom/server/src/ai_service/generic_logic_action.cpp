@@ -1512,70 +1512,57 @@ public:
 };
 //-------------------------------------------------------------------------------------------
 // Same as CAILogicActionConditionIf but the condition is evaluated dynamicaly not at loading of primitive(eg primitive 1 modify primitive 2)
-class CAILogicActionDynamicIf : public IAILogicAction, public CAIVariableParser
+class CAILogicActionDynamicIf : public IAILogicAction
 {
 public:
-	CAILogicActionDynamicIf (const std::vector<std::string> &args, const std::vector<IAILogicAction::TSmartPtr> 
+	CAILogicActionDynamicIf (const std::vector<std::string> &args, const std::vector<IAILogicAction::TSmartPtr>
 								&subActions, const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
 	{
 		if (args.empty())
 		{
-			nlwarning("condition_if (%s) need arguments !", eventNode->fullName().c_str());
+			nlwarning("dynamic_if (%s) need arguments !", eventNode->fullName().c_str());
 			return;
 		}
 		if (subActions.empty())
 		{
-			nlwarning("condition_if (%s) need sub action !", eventNode->fullName().c_str());
+			nlwarning("dynamic_if (%s) need sub action !", eventNode->fullName().c_str());
 			return;
 		}
 		_SubActions = subActions;
-		_Args = args;
-		//_EventFullName = eventNode->fullName();
-		if (!_Args.empty())
+
+		// Wrap the expression in an if block that calls setConditionSuccess
+		std::vector<std::string> wrappedArgs = args;
+		if (!wrappedArgs.empty())
 		{
-			std::string oldValue = _Args[_Args.size()-1];
-			_Args[_Args.size()-1] = std::string("if (") + oldValue + std::string("){()setConditionSuccess(1);} else { ()setConditionSuccess(0); }");
+			std::string oldValue = wrappedArgs[wrappedArgs.size()-1];
+			wrappedArgs[wrappedArgs.size()-1] = std::string("if (") + oldValue + std::string("){()setConditionSuccess(1);} else { ()setConditionSuccess(0); }");
 		}
 
+		// Compile once at construction time (bytecode is stateless and deterministic)
+		_Code = AICOMP::CCompiler::getInstance().compileCode(wrappedArgs, eventNode->fullName() + std::string(":dynamic if"));
 	}
 
 	bool	executeAction(CStateInstance	*entity,const IAIEvent *event)
 	{
-				// parse the argument string.
-
-		if (_Args.empty()) { return false; }
+		if (_Code.isNull()) { return false; }
 		if (_SubActions.empty()){ return false;}
-		
-		
-		NLMISC::CSmartPtr<const  AIVM::CByteCode> codePtr =  AICOMP::CCompiler::getInstance().compileCode(_Args, _EventFullName + std::string(":dynamic if"));
-		
+
 		CAILogicDynamicIfHelper::setConditionSuccess(false);
-		if (!codePtr.isNull())
-		{
-			entity->getPersistentStateInstance()->interpretCode(entity, codePtr);
-		}
-		
+		entity->getPersistentStateInstance()->interpretCode(entity, _Code);
+
 		if ( CAILogicDynamicIfHelper::getConditionSuccess() )
 		{
 			_SubActions[0]->executeAction(entity, event);
 		}
 		else if (_SubActions.size() == 2)
 		{
-
 			_SubActions[1]->executeAction(entity, event);
 		}
 		return true;
 	}
 protected:
-	CAIVariableParser::TVariable	_Var1;
-	CAIVariableParser::TOperator	_Op;
-	CAIVariableParser::TVariable	_Var2;
-
 	std::vector<IAILogicAction::TSmartPtr> _SubActions;
-	std::vector<std::string> _Args;
-
-	std::string _EventFullName;
-	static bool _Condition;
+	NLMISC::CSmartPtr<const AIVM::CByteCode> _Code;
 };
 
 //-------------------------------------------------------------------------------------------
