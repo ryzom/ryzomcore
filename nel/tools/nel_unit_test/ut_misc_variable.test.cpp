@@ -1,9 +1,6 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
-// This source file has been modified by the following contributors:
-// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
-//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -17,27 +14,38 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef UT_NET
-#define UT_NET
+#include <gtest/gtest.h>
 
-#include <nel/net/message.h>
+#include <string>
 
-#include "ut_net_layer3.h"
-#include "ut_net_message.h"
-#include "ut_net_module.h"
-#include "ut_net_address.h"
-// Add a line here when adding a new test CLASS
+#include <nel/misc/variable.h>
 
-struct CUTNet : public Test::Suite
+using std::string;
+
+class CUTMiscVariableTest : public testing::Test
 {
-	CUTNet()
+protected:
+	void SetUp() override
 	{
-		add(std::unique_ptr<Test::Suite>(new CUTNetLayer3));
-		add(std::unique_ptr<Test::Suite>(new CUTNetMessage));
-		add(std::unique_ptr<Test::Suite>(new CUTNetModule));
-		add(std::unique_ptr<Test::Suite>(new CUTNetAddress));
-		// Add a line here when adding a new test CLASS
+		ASSERT_TRUE(NLMISC::INelContext::getInstance().isContextInitialised());
+		NLMISC::createDebug(nullptr);
+	}
+
+	void TearDown() override
+	{
 	}
 };
 
-#endif
+TEST_F(CUTMiscVariableTest, declareVar)
+{
+	auto &command_registry = NLMISC::CCommandRegistry::getInstance();
+	{
+		NLMISC::CVariable<string> myLocalVar("test", "myLocalVar", "no help", "");
+
+		EXPECT_EQ(myLocalVar.get(), string(""));
+		ASSERT_TRUE(command_registry.execute("myLocalVar foo", (*NLMISC::InfoLog)));
+		EXPECT_EQ(myLocalVar.get(), string("foo"));
+	}
+
+	EXPECT_FALSE(command_registry.execute("myLocalVar foo", (*NLMISC::InfoLog)));
+}

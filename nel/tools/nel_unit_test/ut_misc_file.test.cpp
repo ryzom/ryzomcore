@@ -14,36 +14,31 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef UT_MISC_FILE
-#define UT_MISC_FILE
+#include <gtest/gtest.h>
+
+#include <string>
 
 #include <nel/misc/file.h>
 #include <nel/misc/path.h>
 #include <nel/misc/common.h>
 
+using std::string;
+
 // Test suite for NLMISC::CFile behavior
-struct CUTMiscFile : public Test::Suite
+class CUTMiscFileTest : public testing::Test
 {
-	CUTMiscFile()
-	{
-		TEST_ADD(CUTMiscFile::copyOneBigFile);
-		TEST_ADD(CUTMiscFile::copyDifferentFileSize);
-		TEST_ADD(CUTMiscFile::moveOneBigFile);
-		TEST_ADD(CUTMiscFile::moveDifferentFileSize);
-		// Add a line here when adding a new test METHOD
-	}
+protected:
+	string _SrcFile;
+	string _DstFile;
 
-private:
-	string	_SrcFile;
-	string	_DstFile;
-
-	void setup()
+	void SetUp() override
 	{
+		ASSERT_TRUE(NLMISC::INelContext::getInstance().isContextInitialised());
 		_SrcFile = "__copy_file_src.foo";
 		_DstFile = "__copy_file_dst.foo";
 	}
 
-	void tear_down()
+	void TearDown() override
 	{
 	}
 
@@ -53,7 +48,7 @@ private:
 		FILE *fp = NLMISC::nlfopen(_SrcFile, "wb");
 		nlverify(fp != NULL);
 
-		for (uint i=0; i<fileSize; ++i)
+		for (uint i = 0; i < fileSize; ++i)
 		{
 			uint8 c = uint8(i & 0xff);
 			nlverify(fwrite(&c, 1, 1, fp) == 1);
@@ -65,44 +60,21 @@ private:
 
 		// verify the resulting file
 		fp = NLMISC::nlfopen(_DstFile, "rb");
-		TEST_ASSERT(fp != NULL);
+		ASSERT_TRUE(fp != NULL);
 		if (fp)
 		{
-			for (uint i=0; i<fileSize; ++i)
+			for (uint i = 0; i < fileSize; ++i)
 			{
 				uint8 c;
-				size_t nbRead = fread(&c, 1,1, fp);
-				TEST_ASSERT(nbRead == 1);
+				size_t nbRead = fread(&c, 1, 1, fp);
+				ASSERT_TRUE(nbRead == 1);
 				if (nbRead != 1)
 					break;
-				TEST_ASSERT_MSG(c == uint8(i & 0xff), "File content changed during copy");
+				ASSERT_TRUE(c == uint8(i & 0xff)) << "File content changed during copy";
 				if (c != uint8(i & 0xff))
 					break;
 			}
 			fclose(fp);
-		}
-	}
-
-
-	void copyOneBigFile()
-	{
-		// check for a big file
-		copyFileSize(1024*1024);
-	}
-
-	void copyDifferentFileSize()
-	{
-		// check for a series of size
-		for (uint i=0; i<10; ++i)
-		{
-			copyFileSize(i);
-		}
-
-		srand(1234);
-		for (uint i=0; i<1024; ++i)
-		{
-			i += rand()%10;
-			copyFileSize(i);
 		}
 	}
 
@@ -120,7 +92,7 @@ private:
 		fp = NLMISC::nlfopen(_SrcFile, "wb");
 		nlverify(fp != NULL);
 
-		for (uint i=0; i<fileSize; ++i)
+		for (uint i = 0; i < fileSize; ++i)
 		{
 			uint8 c = uint8(i & 0xff);
 			nlverify(fwrite(&c, 1, 1, fp) == 1);
@@ -132,51 +104,70 @@ private:
 
 		// verify the resulting file
 		fp = NLMISC::nlfopen(_SrcFile, "rb");
-		TEST_ASSERT_MSG(fp == NULL, "The source file is not removed");
+		ASSERT_EQ(fp, nullptr) << "The source file is not removed";
 		if (fp)
 			fclose(fp);
 
 		fp = NLMISC::nlfopen(_DstFile, "rb");
-		TEST_ASSERT(fp != NULL);
+		ASSERT_NE(fp, nullptr);
 		if (fp)
 		{
-			for (uint i=0; i<fileSize; ++i)
+			for (uint i = 0; i < fileSize; ++i)
 			{
 				uint8 c;
-				size_t nbRead = fread(&c, 1,1, fp);
-				TEST_ASSERT(nbRead == 1);
+				size_t nbRead = fread(&c, 1, 1, fp);
+				ASSERT_TRUE(nbRead == 1);
 				if (nbRead != 1)
 					break;
-				TEST_ASSERT_MSG(c == uint8(i & 0xff), "File content changed during move");
+				ASSERT_TRUE(c == uint8(i & 0xff)) << "File content changed during move";
 				if (c != uint8(i & 0xff))
 					break;
 			}
 			fclose(fp);
 		}
 	}
-
-	void moveOneBigFile()
-	{
-		// check for a big file
-		moveFileSize(1024*1024);
-	}
-
-	void moveDifferentFileSize()
-	{
-		// check for a series of size
-		for (uint i=0; i<10; ++i)
-		{
-			moveFileSize(i);
-		}
-
-		srand(1234);
-		for (uint i=0; i<1024; ++i)
-		{
-			i += rand()%10;
-			moveFileSize(i);
-		}
-	}
-
 };
 
-#endif
+TEST_F(CUTMiscFileTest, copyOneBigFile)
+{
+	// check for a big file
+	copyFileSize(1024 * 1024);
+}
+
+TEST_F(CUTMiscFileTest, copyDifferentFileSize)
+{
+	// check for a series of size
+	for (uint i = 0; i < 10; ++i)
+	{
+		copyFileSize(i);
+	}
+
+	srand(1234);
+	for (uint i = 0; i < 1024; ++i)
+	{
+		i += rand() % 10;
+		copyFileSize(i);
+	}
+}
+
+TEST_F(CUTMiscFileTest, moveOneBigFile)
+{
+	// check for a big file
+	moveFileSize(1024 * 1024);
+}
+
+TEST_F(CUTMiscFileTest, moveDifferentFileSize)
+{
+	// check for a series of size
+	for (uint i = 0; i < 10; ++i)
+	{
+		moveFileSize(i);
+	}
+
+	srand(1234);
+	for (uint i = 0; i < 1024; ++i)
+	{
+		i += rand() % 10;
+		moveFileSize(i);
+	}
+}

@@ -14,31 +14,23 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef UT_MISC_VARIABLE
-#define UT_MISC_VARIABLE
+#include <gtest/gtest.h>
 
-#include <nel/misc/variable.h>
+#include <string>
 
-class CUTMiscVariable : public Test::Suite
+#include <nel/misc/dynloadlib.h>
+
+using std::string;
+
+class CUTMiscDynLibLoadTest : public testing::Test
 {
-public:
-	CUTMiscVariable ()
-	{
-		TEST_ADD(CUTMiscVariable ::declareVar)
-	}
-
-	void declareVar()
-	{
-		{
-			NLMISC::CVariable<std::string> myLocalVar("test", "myLocalVar", "no help", "");
-
-			TEST_ASSERT(myLocalVar.get() == string(""));
-			TEST_ASSERT(NLMISC::CCommandRegistry::getInstance().execute("myLocalVar foo", (*NLMISC::InfoLog)));
-			TEST_ASSERT(myLocalVar.get() == string("foo"));
-		}
-
-		TEST_ASSERT(!NLMISC::CCommandRegistry::getInstance().execute("myLocalVar foo", (*NLMISC::InfoLog)));
-	}
 };
 
-#endif
+TEST_F(CUTMiscDynLibLoadTest, libraryNameDecoration)
+{
+	string libName = "libmylib_with_dll_so_some_very_bad_rd_df_tag_inside_df";
+	string fileName = "some/path/to/add/difficulties/" + NLMISC::CLibrary::makeLibName(libName);
+	string cleanedName = NLMISC::CLibrary::cleanLibName(fileName);
+
+	ASSERT_TRUE(cleanedName == libName);
+}

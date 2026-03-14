@@ -18,6 +18,8 @@
 #ifndef NL_BASE64_H
 #define NL_BASE64_H
 
+#include <nel/misc/types_nl.h>
+
 namespace NLMISC
 {
 
