@@ -90,6 +90,7 @@ jobs:
         with:
           os: ${{ matrix.os }}
           cmake-preset: ${{ matrix.cmake-preset }}
+          target: ${{ matrix.target }}
           build-dir: ${{ needs.strings.outputs.build-dir }}
           build-version: ${{ needs.strings.outputs.build-version }}
 
