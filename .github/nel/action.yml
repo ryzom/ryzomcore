@@ -110,7 +110,13 @@ runs:
         key: ${{ steps.vcpkg-cache.outputs.cache-primary-key }}
 
     - name: Build
+      if: runner.os != 'Windows'
       shell: bash
+      run: cmake --build --preset nel --target install
+
+    - name: Build
+      if: runner.os == 'Windows'
+      shell: powershell
       run: cmake --build --preset nel --target install
 
     - name: ccache stats
