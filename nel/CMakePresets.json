@@ -78,7 +78,6 @@
       "name": "ci-windows-nel-vcpkg",
       "inherits": [
         "vcpkg",
-        "ccache",
         "nel",
         "windows"
       ],
