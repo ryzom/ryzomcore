@@ -87,10 +87,19 @@ runs:
         ccache -z
 
     - name: Configure CMake
+      if: runner.os != 'Windows'
       env:
         VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}/.vcpkg,readwrite"
         HUNTER_ROOT: ${{ github.workspace }}/.hunter
       shell: bash
+      run: cmake --preset ${{ inputs.cmake-preset }}
+
+    - name: Configure CMake
+      if: runner.os == 'Windows'
+      env:
+        VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}/.vcpkg,readwrite"
+        HUNTER_ROOT: ${{ github.workspace }}/.hunter
+      shell: powershell
       run: cmake --preset ${{ inputs.cmake-preset }}
 
     - uses: actions/cache/save@v4
