@@ -116,7 +116,9 @@ runs:
     - name: Build
       if: runner.os == 'Windows'
       shell: powershell
-      run: cmake --build --preset nel --target install
+      run: |
+        cmake --build --preset nel
+        cmake --install build/nel
 
     - name: ccache stats
       if: always()
