@@ -66,6 +66,8 @@ jobs:
             build-type: dynamic
           - os: windows-2025
             cmake-preset: ci-windows-nel-vcpkg
+          - os: windows-2025
+            cmake-preset: ci-windows-nel-hunter
     steps:
       - uses: actions/checkout@v4
 

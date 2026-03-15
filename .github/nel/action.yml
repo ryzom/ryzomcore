@@ -89,6 +89,7 @@ runs:
     - name: Configure CMake
       env:
         VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}/.vcpkg,readwrite"
+        HUNTER_ROOT: ${{ github.workspace }}/.hunter
       shell: bash
       run: cmake --preset ${{ inputs.cmake-preset }}
 

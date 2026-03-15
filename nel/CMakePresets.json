@@ -74,6 +74,28 @@
       }
     },
     {
+      "name": "ci-windows-nel-hunter",
+      "inherits": [
+        "hunter",
+        "ccache",
+        "nel",
+        "windows"
+      ],
+      "cacheVariables": {
+        "FINAL_VERSION": false,
+        "WITH_INSTALL_LIBRARIES": false,
+        "WITH_DRIVER_DIRECT3D": true,
+        "WITH_DRIVER_XAUDIO2": true,
+        "WITH_STATIC_LIBXML2": false,
+        "WITH_NEL_SAMPLES": false,
+        "WITH_NEL_TOOLS": false,
+        "WITH_QT5": false,
+        "WITH_LIBGSF": false,
+        "VCPKG_MANIFEST_NO_DEFAULT_FEATURES": true,
+        "DXSDK_DIR": "C:/DXSDK"
+      }
+    },
+    {
       "name": "ci-windows-nel-vcpkg",
       "inherits": [
         "vcpkg",
