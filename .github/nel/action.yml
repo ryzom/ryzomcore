@@ -133,11 +133,7 @@ runs:
       with:
         name: nel-${{ inputs.os }}-${{ inputs.cmake-preset }}-${{ github.sha }}-test-results
         if-no-files-found: error
-        path: ${{ inputs.build-dir }}/reports/*.xml
-
-    - shell: bash
-      if: (failure())
-      run: find .
+        path: "${{ github.workspace }}/**/reports/*.xml"
 
     - name: Package
       shell: bash
