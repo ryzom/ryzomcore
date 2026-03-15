@@ -129,6 +129,10 @@ runs:
       shell: bash
       run: ctest --preset nel
 
+    - if: failure()
+      shell: bash
+      run: find build
+
     - uses: actions/upload-artifact@v4
       if: ( !cancelled() )
       with:
