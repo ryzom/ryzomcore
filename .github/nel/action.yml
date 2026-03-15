@@ -87,17 +87,9 @@ runs:
         ccache -z
 
     - name: Configure CMake
-      if: runner.os == 'Linux'
       env:
         VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}/.vcpkg,readwrite"
       shell: bash
-      run: cmake --preset ${{ inputs.cmake-preset }}
-
-    - name: Configure CMake
-      if: runner.os == 'Windows'
-      env:
-        VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}/.vcpkg,readwrite"
-      shell: powershell
       run: cmake --preset ${{ inputs.cmake-preset }}
 
     - uses: actions/cache/save@v4
@@ -107,13 +99,7 @@ runs:
         key: ${{ steps.vcpkg-cache.outputs.cache-primary-key }}
 
     - name: Build
-      if: runner.os != 'Windows'
       shell: bash
-      run: cmake --build --preset nel --target install
-
-    - name: Build
-      if: runner.os == 'Windows'
-      shell: powershell
       run: cmake --build --preset nel --target install
 
     - name: ccache stats
@@ -130,7 +116,7 @@ runs:
       with:
         name: nel-${{ inputs.os }}-${{ inputs.cmake-preset }}-${{ github.sha }}-test-results
         if-no-files-found: error
-        path: "build/reports/*.xml"
+        path: build/reports/*.xml
 
     - name: Package
       shell: bash
