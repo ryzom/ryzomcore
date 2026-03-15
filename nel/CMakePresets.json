@@ -64,7 +64,6 @@
       "name": "ci-linux-nel-vcpkg",
       "inherits": [
         "vcpkg",
-        "ccache",
         "nel",
         "linux"
       ],

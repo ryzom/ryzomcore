@@ -88,7 +88,6 @@ jobs:
         with:
           os: ${{ matrix.os }}
           cmake-preset: ${{ matrix.cmake-preset }}
-          build-dir: ${{ needs.strings.outputs.build-dir }}
           build-version: ${{ needs.strings.outputs.build-version }}
 
       - uses: actions/upload-artifact@v4

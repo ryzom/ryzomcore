@@ -7,9 +7,6 @@ inputs:
   cmake-preset:
     description: cmake preset to use for configure step
     required: true
-  build-dir:
-    description: build directory
-    required: true
   build-version:
     description: build version
     required: true
@@ -133,7 +130,7 @@ runs:
       with:
         name: nel-${{ inputs.os }}-${{ inputs.cmake-preset }}-${{ github.sha }}-test-results
         if-no-files-found: error
-        path: "${{ github.workspace }}/**/reports/*.xml"
+        path: "build/reports/*.xml"
 
     - name: Package
       shell: bash
