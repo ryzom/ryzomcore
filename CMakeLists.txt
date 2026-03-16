@@ -250,7 +250,8 @@ ENDIF()
 
 IF(WITH_STATIC)
   # libxml2 could need winsock2 library
-  IF(WINSOCK2_LIB AND TARGET LibXml2::LibXml2 AND NOT HUNTER_ENABLED)
+  # libxml2 with LIBXML_HTTP_ENABLED has some additional dependencies that hunter does not add to the target
+  IF(WINSOCK2_LIB AND TARGET LibXml2::LibXml2)
       set_property(TARGET LibXml2::LibXml2
             APPEND
             PROPERTY INTERFACE_LINK_LIBRARIES
