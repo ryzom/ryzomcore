@@ -174,6 +174,14 @@ IF(HUNTER_ENABLED)
   # add compatibility with cmake find module
   if(libxml2_FOUND AND NOT TARGET LibXml2::LibXml2)
       add_library(LibXml2::LibXml2 ALIAS libxml2::libxml2)
+      IF(WITH_STATIC AND WINSOCK2_LIB)
+        # libxml2 with LIBXML_HTTP_ENABLED has some additional dependencies that hunter does not add
+            set_property(TARGET libxml2::libxml2
+                    APPEND
+                    PROPERTY INTERFACE_LINK_LIBRARIES
+                    ${WINSOCK2_LIB}
+            )
+      ENDIF()
   endif()
 
   # cross compiling doesn't quite work on the hunter openssl package therefor compile it separately and use it
@@ -246,18 +254,6 @@ IF(Iconv_FOUND)
             Iconv::Iconv
       )
   endif ()
-ENDIF()
-
-IF(WITH_STATIC)
-  # libxml2 could need winsock2 library
-  # libxml2 with LIBXML_HTTP_ENABLED has some additional dependencies that hunter does not add to the target
-  IF(WINSOCK2_LIB AND TARGET LibXml2::LibXml2)
-      set_property(TARGET LibXml2::LibXml2
-            APPEND
-            PROPERTY INTERFACE_LINK_LIBRARIES
-            ${WINSOCK2_LIB}
-      )
-  ENDIF()
 ENDIF()
 
 IF(FINAL_VERSION)
