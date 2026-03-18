@@ -77,7 +77,6 @@
       "name": "ci-windows-nel-hunter",
       "inherits": [
         "hunter",
-        "ccache",
         "nel",
         "windows"
       ],
@@ -145,8 +144,8 @@
   ],
   "testPresets": [
     {
-      "inherits": "default",
       "name": "nel",
+      "inherits": "default",
       "configurePreset": "nel"
     }
   ],
