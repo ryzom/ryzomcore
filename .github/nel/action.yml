@@ -137,7 +137,7 @@ runs:
         path: build/reports/*.xml
 
     - uses: actions/upload-artifact@v4
-      if: ( !failure() )
+      if: ( failure() )
       with:
         name: build-logs-${{ inputs.os }}-${{ inputs.cmake-preset }}-${{ github.sha }}
         path: build/**/*.log
