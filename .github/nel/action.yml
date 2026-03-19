@@ -136,6 +136,12 @@ runs:
         if-no-files-found: error
         path: build/reports/*.xml
 
+    - uses: actions/upload-artifact@v4
+      if: ( !failure() )
+      with:
+        name: build-logs-${{ inputs.os }}-${{ inputs.cmake-preset }}-${{ github.sha }}
+        path: build/**/*.log
+
     - name: Package
       shell: bash
       run: cpack --preset nel -R "${{ inputs.build-version }}"
