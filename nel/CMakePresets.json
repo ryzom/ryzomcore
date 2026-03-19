@@ -94,7 +94,6 @@
         "WITH_NEL_TOOLS": false,
         "WITH_QT5": false,
         "WITH_LIBGSF": false,
-        "VCPKG_MANIFEST_NO_DEFAULT_FEATURES": true,
         "DXSDK_DIR": "C:/DXSDK"
       }
     },
