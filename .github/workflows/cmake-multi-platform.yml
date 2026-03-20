@@ -139,7 +139,7 @@ jobs:
       - name: Unit Tests
         run: ctest --preset default
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: (success() || failure()) && matrix.os == 'ubuntu-24.04'
         with:
           name: test-results
@@ -149,7 +149,7 @@ jobs:
       - name: Package
         run: cpack --preset default
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.os }}-package
           path: ${{ needs.strings.outputs.build-output-dir }}/ryzomcore-*
@@ -175,7 +175,7 @@ jobs:
           docker build . --file docker/Dockerfile --tag "${{ needs.strings.outputs.docker-image-tag }}"
           docker save --output=${{ needs.strings.outputs.build-output-dir }}/docker-$IMAGE_NAME-${{ needs.strings.outputs.build-version }} "${{ needs.strings.outputs.docker-image-tag }}"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: docker
           path: ${{ needs.strings.outputs.build-output-dir }}/docker-*

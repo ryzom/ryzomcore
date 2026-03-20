@@ -87,7 +87,7 @@ jobs:
           build-dir: ${{ needs.strings.outputs.build-dir }}
           build-version: ${{ needs.strings.outputs.build-version }}
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: matrix.build-type
         with:
           name: nel-${{ matrix.os }}-${{ matrix.build-type }}-${{ needs.strings.outputs.build-version }}
@@ -134,7 +134,7 @@ jobs:
           build-dir: ${{ needs.strings.outputs.build-dir }}
           build-version: ${{ needs.strings.outputs.build-version }}
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: nelns-${{ matrix.os }}-${{ needs.strings.outputs.build-version }}
           path: ${{ needs.strings.outputs.build-dir }}/nelns/nelns-*
@@ -182,7 +182,7 @@ jobs:
           build-dir: ${{ needs.strings.outputs.build-dir }}
           build-version: ${{ needs.strings.outputs.build-version }}
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: ryzom-${{ matrix.os }}-${{ matrix.build-type }}-${{ needs.strings.outputs.build-version }}
           path: ${{ needs.strings.outputs.build-dir }}/ryzom/ryzom-*
@@ -227,7 +227,7 @@ jobs:
           build-dir: ${{ needs.strings.outputs.build-dir }}
           build-version: ${{ needs.strings.outputs.build-version }}
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: snowballs-${{ matrix.os }}-${{ needs.strings.outputs.build-version }}
           path: ${{ needs.strings.outputs.build-dir }}/snowballs/snowballs-*
@@ -269,7 +269,7 @@ jobs:
           build-version: ${{ needs.strings.outputs.build-version }}
           os: ${{ matrix.os }}
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: studio-${{ matrix.os }}-${{ needs.strings.outputs.build-version }}
           path: ${{ needs.strings.outputs.build-dir }}/studio/studio-*
@@ -295,7 +295,7 @@ jobs:
           image-group: ${{ needs.strings.outputs.image-group }}
           image-version: ${{ needs.strings.outputs.image-version }}
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: web-${{ needs.strings.outputs.build-version }}
           path: ${{ needs.strings.outputs.build-dir }}/web/web-*
