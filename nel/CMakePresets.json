@@ -82,10 +82,9 @@
         "windows"
       ],
       "cacheVariables": {
-        "BUILD_SHARED_LIBS": true,
-        "WITH_STATIC": false,
+        "BUILD_SHARED_LIBS": false,
+        "WITH_STATIC": true,
         "FINAL_VERSION": false,
-        "WITH_INSTALL_LIBRARIES": false,
         "WITH_DRIVER_DIRECT3D": false,
         "WITH_DRIVER_XAUDIO2": false,
         "WITH_STATIC_LIBXML2": false,
@@ -105,8 +104,9 @@
         "windows"
       ],
       "cacheVariables": {
+        "BUILD_SHARED_LIBS": false,
+        "WITH_STATIC": true,
         "FINAL_VERSION": false,
-        "WITH_INSTALL_LIBRARIES": false,
         "WITH_DRIVER_DIRECT3D": true,
         "WITH_DRIVER_XAUDIO2": true,
         "WITH_STATIC_LIBXML2": false,
