@@ -85,7 +85,6 @@
         "BUILD_SHARED_LIBS": false,
         "WITH_STATIC": true,
         "FINAL_VERSION": false,
-        "WITH_INSTALL_LIBRARIES": false,
         "WITH_DRIVER_DIRECT3D": false,
         "WITH_DRIVER_XAUDIO2": false,
         "WITH_STATIC_LIBXML2": false,
