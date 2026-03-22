@@ -140,6 +140,10 @@ runs:
       shell: bash
       run: cpack --preset nel -R "${{ inputs.build-version }}"
 
+    - if: ( failure() )
+      shell: bash
+      run: find build
+
     - uses: actions/upload-artifact@v4
       if: ( failure() )
       with:
