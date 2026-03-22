@@ -34,13 +34,13 @@ runs:
     - uses: actions/cache/restore@v4
       id: vcpkg-cache
       with:
-        path: ${{ input.vcpkg-cache-dir}}
+        path: ${{ inputs.vcpkg-cache-dir}}
         key: vcpkg-${{ inputs.os }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
 
     - uses: actions/cache/restore@v4
       id: hunter-cache
       with:
-        path: ${{ input.hunter-cache-dir}}
+        path: ${{ inputs.hunter-cache-dir}}
         key: hunter-${{ input.os }}-${{ hashFiles('nel/**/CMakeLists.txt', 'cmake/**', 'CMakeModules/**', 'CMakeLists.txt', 'CMakePresets.json') }}
 
     - name: Dependencies ${{ runner.os }}
@@ -103,16 +103,16 @@ runs:
     - name: Configure CMake
       if: runner.os != 'Windows'
       env:
-        VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}/.vcpkg,readwrite"
-        HUNTER_ROOT: ${{ github.workspace }}/.hunter
+        VCPKG_BINARY_SOURCES: "clear;files,${{ inputs.vcpkg-cache-dir }},readwrite"
+        HUNTER_ROOT: ${{ inputs.hunter-cache-dir }}
       shell: bash
       run: cmake --preset ${{ inputs.cmake-preset }}
 
     - name: Configure CMake
       if: runner.os == 'Windows'
       env:
-        VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}/.vcpkg,readwrite"
-        HUNTER_ROOT: ${{ github.workspace }}/.hunter
+        VCPKG_BINARY_SOURCES: "clear;files,${{ inputs.vcpkg-cache-dir }},readwrite"
+        HUNTER_ROOT: ${{ inputs.hunter-cache-dir }}
       shell: powershell
       run: cmake --preset ${{ inputs.cmake-preset }}
 
