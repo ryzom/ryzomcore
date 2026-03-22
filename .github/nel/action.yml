@@ -41,7 +41,7 @@ runs:
       id: hunter-cache
       with:
         path: ${{ inputs.hunter-cache-dir}}
-        key: hunter-${{ input.os }}-${{ hashFiles('nel/**/CMakeLists.txt', 'cmake/**', 'CMakeModules/**', 'CMakeLists.txt', 'CMakePresets.json') }}
+        key: hunter-${{ inputs.os }}-${{ hashFiles('nel/**/CMakeLists.txt', 'cmake/**', 'CMakeModules/**', 'CMakeLists.txt', 'CMakePresets.json') }}
 
     - name: Dependencies ${{ runner.os }}
       if: runner.os == 'Linux'
