@@ -123,7 +123,7 @@ jobs:
     - name: Package
       run: cpack --preset ci-ryzom-client
 
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       with:
         name: ryzom-client-win32-${{ steps.strings.outputs.version }}
         path: build/ryzom-client/ryzom-client-*

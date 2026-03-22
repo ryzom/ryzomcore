@@ -189,13 +189,13 @@ jobs:
     - name: Package
       run: cpack --preset ci-ryzom-client
 
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       if: ${{ failure() }}
       with:
         name: ${{ matrix.os }}-build-logs
         path: build/**/*.log
 
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       with:
         name: ${{ matrix.os }}-client-package${{ matrix.vcpkg && '-vcpkg' }}
         path: build/ryzom-client/ryzom-client-*
