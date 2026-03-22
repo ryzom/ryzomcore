@@ -14,6 +14,14 @@ inputs:
     description: cache directory for chocolatey
     required: false
     default: "${{ github.workspace }}/.choco"
+  hunter-cache-dir:
+    description: cache directory for hunter
+    required: false
+    default: "${{ github.workspace }}/.hunter"
+  vcpkg-cache-dir:
+    description: cache directory for vcpkg
+    required: false
+    default: "${{ github.workspace }}/.vcpkg"
 runs:
   using: composite
   steps:
@@ -26,8 +34,14 @@ runs:
     - uses: actions/cache/restore@v4
       id: vcpkg-cache
       with:
-        path: ${{ github.workspace }}/.vcpkg
+        path: ${{ input.vcpkg-cache-dir}}
         key: vcpkg-${{ inputs.os }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
+
+    - uses: actions/cache/restore@v4
+      id: hunter-cache
+      with:
+        path: ${{ input.hunter-cache-dir}}
+        key: hunter-${{ input.os }}-${{ hashFiles('nel/**/CMakeLists.txt', 'cmake/**', 'CMakeModules/**', 'CMakeLists.txt', 'CMakePresets.json') }}
 
     - name: Dependencies ${{ runner.os }}
       if: runner.os == 'Linux'
@@ -77,7 +91,7 @@ runs:
     - name: Dependencies ${{ runner.os }}
       if: runner.os == 'Windows'
       shell: powershell
-      run: choco install nsis --cache-location=${{ inputs.chocolatey-cache-dir }}
+      run: choco install ccache nsis --cache-location=${{ inputs.chocolatey-cache-dir }}
 
     - name: Configure ccache
       shell: bash
@@ -105,8 +119,14 @@ runs:
     - uses: actions/cache/save@v4
       if: ( ! cancelled() )
       with:
-        path: ${{ github.workspace }}/.vcpkg
+        path: ${{ inputs.vcpkg-cache-dir }}
         key: ${{ steps.vcpkg-cache.outputs.cache-primary-key }}
+
+    - uses: actions/cache/save@v4
+      if: ( ! cancelled() )
+      with:
+        path: ${{ inputs.hunter-cache-dir }}
+        key: ${{ steps.hunter-cache.outputs.cache-primary-key }}
 
     - name: Build
       if: runner.os != 'Windows'
