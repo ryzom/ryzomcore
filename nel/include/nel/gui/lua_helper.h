@@ -22,7 +22,7 @@
 #define RZ_LUA_HELPER_H
 
 #ifdef _WIN32
-		#include <windef.h>
+		#include <windows.h>
 #endif
 
 #include "nel/misc/types_nl.h"
