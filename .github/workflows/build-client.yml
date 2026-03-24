@@ -172,7 +172,7 @@ jobs:
         key: ${{ matrix.os }}-hunter-${{ steps.strings.outputs.week }}-${{ github.sha }}
 
     - uses: actions/cache/save@v4
-      if: (matrix.vcpkg == true && ! cancelled())
+      if: (matrix.vcpkg == true)
       with:
         path: ${{ github.workspace }}/.vcpkg
         key: vcpkg-${{ matrix.os }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
