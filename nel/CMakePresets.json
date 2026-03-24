@@ -91,9 +91,7 @@
         "WITH_OPENAL_STATIC": true,
         "WITH_NEL_SAMPLES": false,
         "WITH_NEL_TOOLS": false,
-        "WITH_QT5": false,
-        "WITH_LIBGSF": false,
-        "DXSDK_DIR": "C:/DXSDK"
+        "WITH_QT5": false
       }
     },
     {

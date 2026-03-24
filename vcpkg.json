@@ -11,6 +11,10 @@
         "error-strings"
       ]
     },
+    {
+      "name": "directxsdk",
+      "platform": "windows"
+    },
     "giflib",
     "libogg",
     "libvorbis",
