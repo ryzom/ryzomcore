@@ -30,6 +30,8 @@ on:
       - vcpkg.json
       - vcpkg-configuration.json
 
+  workflow_dispatch:
+
 env:
   VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}/.vcpkg,readwrite"
   CCACHE_DIR: "${{ github.workspace }}/.ccache"
