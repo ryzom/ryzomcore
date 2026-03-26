@@ -21,6 +21,9 @@
 #ifndef RZ_LUA_HELPER_H
 #define RZ_LUA_HELPER_H
 
+#ifdef _WIN32
+		#include <windows.h>
+#endif
 
 #include "nel/misc/types_nl.h"
 #include "nel/misc/smart_ptr.h"
@@ -380,7 +383,7 @@ namespace NLGUI
 		static const char *			_NELSmallScriptTableName;
 
 #ifdef _WIN32
-		HMODULE m_LuaSocket;
+		HINSTANCE m_LuaSocket;
 #endif
 
 	private:

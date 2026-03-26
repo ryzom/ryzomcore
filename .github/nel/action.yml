@@ -7,12 +7,21 @@ inputs:
   cmake-preset:
     description: cmake preset to use for configure step
     required: true
-  build-dir:
-    description: build directory
-    required: true
   build-version:
     description: build version
     required: true
+  chocolatey-cache-dir:
+    description: cache directory for chocolatey
+    required: false
+    default: "${{ github.workspace }}/.choco"
+  hunter-cache-dir:
+    description: cache directory for hunter
+    required: false
+    default: "${{ github.workspace }}/.hunter"
+  vcpkg-cache-dir:
+    description: cache directory for vcpkg
+    required: false
+    default: "${{ github.workspace }}/.vcpkg"
 runs:
   using: composite
   steps:
@@ -20,14 +29,28 @@ runs:
       with:
         cmakeVersion: "^3.31.11"
 
-    - name: Dependencies Linux
+    - uses: lukka/run-vcpkg@v11
+
+    - uses: actions/cache/restore@v4
+      id: vcpkg-cache
+      with:
+        path: ${{ inputs.vcpkg-cache-dir}}
+        key: vcpkg-${{ inputs.os }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
+
+    - uses: actions/cache/restore@v4
+      id: hunter-cache
+      with:
+        path: ${{ inputs.hunter-cache-dir}}
+        key: hunter-${{ inputs.os }}-nel
+
+    - name: Dependencies ${{ runner.os }}
       if: runner.os == 'Linux'
       shell: bash
       run: |
         sudo apt update
         sudo apt install --yes \
-          build-essential ccache \
-          bison autoconf automake \
+          build-essential bison ccache\
+          autoconf autoconf-archive automake libtool \
           libpng-dev \
           libjpeg-dev \
           libgif-dev libfreetype-dev \
@@ -43,6 +66,40 @@ runs:
           libgsf-1-dev \
           qtbase5-dev qttools5-dev qttools5-dev-tools
 
+    - uses: actions/cache@v4
+      if: runner.os == 'Windows'
+      with:
+        path: C:\DXSDK
+        key: dxsdk-jun2010
+
+    - name: DirectX SDK
+      if: runner.os == 'Windows'
+      shell: cmd
+      run: |
+        IF NOT EXIST C:\DXSDK (
+          aria2c https://download.microsoft.com/download/A/E/7/AE743F1F-632B-4809-87A9-AA1BB3458E31/DXSDK_Jun10.exe
+          7z x DXSDK_Jun10.exe -oC:\ -r -y
+          del DXSDK_Jun10.exe
+        )
+
+    - uses: actions/cache/restore@v4
+      if: runner.os == 'Windows'
+      id: chocolatey-cache
+      with:
+        path: ${{ inputs.chocolatey-cache-dir }}
+        key: chocolatey-${{ inputs.os }}-${{ hashFiles('chocolatey.config') }}
+
+    - name: Dependencies ${{ runner.os }}
+      if: runner.os == 'Windows'
+      shell: powershell
+      run: choco install chocolatey.config --cache-location=${{ inputs.chocolatey-cache-dir }}
+
+    - uses: actions/cache/save@v4
+      if: runner.os == 'Windows'
+      with:
+        path: ${{ inputs.chocolatey-cache-dir }}
+        key: ${{ steps.chocolatey-cache.outputs.cache-primary-key }}
+
     - name: Configure ccache
       shell: bash
       run: |
@@ -51,13 +108,44 @@ runs:
         ccache -z
 
     - name: Configure CMake
-      if: runner.os == 'Linux'
+      if: runner.os != 'Windows'
+      env:
+        VCPKG_BINARY_SOURCES: "clear;files,${{ inputs.vcpkg-cache-dir }},readwrite"
+        HUNTER_ROOT: ${{ inputs.hunter-cache-dir }}
       shell: bash
       run: cmake --preset ${{ inputs.cmake-preset }}
 
+    - name: Configure CMake
+      if: runner.os == 'Windows'
+      env:
+        VCPKG_BINARY_SOURCES: "clear;files,${{ inputs.vcpkg-cache-dir }},readwrite"
+        HUNTER_ROOT: ${{ inputs.hunter-cache-dir }}
+      shell: powershell
+      run: cmake --preset ${{ inputs.cmake-preset }}
+
+    - uses: actions/cache/save@v4
+      if: ( ! cancelled() )
+      with:
+        path: ${{ inputs.vcpkg-cache-dir }}
+        key: ${{ steps.vcpkg-cache.outputs.cache-primary-key }}
+
+    - uses: actions/cache/save@v4
+      if: ( ! cancelled() )
+      with:
+        path: ${{ inputs.hunter-cache-dir }}
+        key: ${{ steps.hunter-cache.outputs.cache-primary-key }}
+
     - name: Build
+      if: runner.os != 'Windows'
       shell: bash
       run: cmake --build --preset nel --target install
+
+    - name: Build
+      if: runner.os == 'Windows'
+      shell: powershell
+      run: |
+        cmake --build --preset nel
+        cmake --install build/nel
 
     - name: ccache stats
       if: always()
@@ -73,9 +161,19 @@ runs:
       with:
         name: nel-${{ inputs.os }}-${{ inputs.cmake-preset }}-${{ github.sha }}-test-results
         if-no-files-found: error
-        path: ${{ inputs.build-dir }}/reports/*.xml
+        path: build/reports/*.xml
 
     - name: Package
       shell: bash
       run: cpack --preset nel -R "${{ inputs.build-version }}"
+
+    - if: ( failure() )
+      shell: bash
+      run: find build
+
+    - uses: actions/upload-artifact@v4
+      if: ( failure() )
+      with:
+        name: build-logs-${{ inputs.os }}-${{ inputs.cmake-preset }}-${{ github.sha }}
+        path: build/**/*.log
 

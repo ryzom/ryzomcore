@@ -56,7 +56,7 @@ jobs:
     - script: |
         cat build/CMakeCache.txt
     - script: |
-        cmake --build --preset release
+        cmake --build --preset release --target install
       displayName: 'Make'
     - script: ccache -s -v || ccache -s
       displayName: 'ccache stats'
@@ -126,7 +126,7 @@ jobs:
     - script: |
         cat build/CMakeCache.txt
     - script: |
-        cmake --build --preset release
+        cmake --build --preset release --target install
       displayName: 'Make'
     - script: ccache -s -v || ccache -s
       displayName: 'ccache stats'

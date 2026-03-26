@@ -10,7 +10,6 @@
       "binaryDir": "${sourceDir}/build/nel",
       "installDir": "${sourceDir}/build/install/nel",
       "cacheVariables": {
-        "WITH_STATIC": true,
         "WITH_NEL": true,
         "WITH_NEL_TESTS": true,
         "WITH_NEL_SAMPLES": true,
@@ -62,6 +61,63 @@
       }
     },
     {
+      "name": "ci-linux-nel-vcpkg",
+      "inherits": [
+        "vcpkg",
+        "nel",
+        "linux"
+      ],
+      "cacheVariables": {
+        "BUILD_SHARED_LIBS": true,
+        "WITH_STATIC": false,
+        "WITH_OPENAL_STATIC": true
+      }
+    },
+    {
+      "name": "ci-windows-nel-hunter",
+      "inherits": [
+        "hunter",
+        "ccache",
+        "nel",
+        "windows"
+      ],
+      "cacheVariables": {
+        "BUILD_SHARED_LIBS": false,
+        "WITH_STATIC": true,
+        "FINAL_VERSION": false,
+        "WITH_DRIVER_DIRECT3D": false,
+        "WITH_DRIVER_XAUDIO2": false,
+        "WITH_STATIC_LIBXML2": false,
+        "WITH_OPENAL_STATIC": true,
+        "WITH_NEL_SAMPLES": false,
+        "WITH_NEL_TOOLS": false,
+        "WITH_QT5": false,
+        "DXSDK_DIR": "C:/DXSDK"
+      }
+    },
+    {
+      "name": "ci-windows-nel-vcpkg",
+      "inherits": [
+        "vcpkg",
+        "nel",
+        "windows"
+      ],
+      "cacheVariables": {
+        "BUILD_SHARED_LIBS": false,
+        "WITH_STATIC": true,
+        "FINAL_VERSION": false,
+        "WITH_DRIVER_DIRECT3D": true,
+        "WITH_DRIVER_XAUDIO2": true,
+        "WITH_STATIC_LIBXML2": false,
+        "WITH_NEL_SAMPLES": false,
+        "WITH_NEL_TOOLS": false,
+        "WITH_QT5": false,
+        "WITH_LIBGSF": false,
+        "VCPKG_MANIFEST_NO_DEFAULT_FEATURES": true,
+        "DXSDK_DIR": "C:/DXSDK"
+      }
+    },
+    {
       "inherits": [
         "windows",
         "nel"
@@ -71,9 +127,9 @@
   ],
   "buildPresets": [
     {
-      "inherits": "release",
       "name": "nel",
-      "configurePreset": "nel"
+      "configurePreset": "nel",
+      "configuration": "Release"
     },
     {
       "inherits": "nel",
@@ -90,8 +146,8 @@
   ],
   "testPresets": [
     {
-      "inherits": "default",
       "name": "nel",
+      "inherits": "default",
       "configurePreset": "nel"
     }
   ],
@@ -118,6 +174,6 @@
           "name": "ci-linux-nel/install"
         }
       ]
-   }
+    }
   ]
 }

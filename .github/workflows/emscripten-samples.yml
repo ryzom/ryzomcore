@@ -280,7 +280,7 @@ jobs:
           cp ${{ github.workspace }}/nel/samples/3d/index.html pages/index.html
 
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: pages
 

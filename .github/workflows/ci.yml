@@ -64,6 +64,10 @@ jobs:
           - os: ubuntu-24.04
             cmake-preset: ci-linux-nel-dynamic
             build-type: dynamic
+          - os: windows-2025
+            cmake-preset: ci-windows-nel-vcpkg
+          - os: windows-2025
+            cmake-preset: ci-windows-nel-hunter
     steps:
       - uses: actions/checkout@v4
 
@@ -84,10 +88,9 @@ jobs:
         with:
           os: ${{ matrix.os }}
           cmake-preset: ${{ matrix.cmake-preset }}
-          build-dir: ${{ needs.strings.outputs.build-dir }}
           build-version: ${{ needs.strings.outputs.build-version }}
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: matrix.build-type
         with:
           name: nel-${{ matrix.os }}-${{ matrix.build-type }}-${{ needs.strings.outputs.build-version }}
@@ -112,7 +115,7 @@ jobs:
           key: ccache-nelns-${{ matrix.os }}-${{ needs.strings.outputs.week }}-${{ github.sha }}
           restore-keys: ccache-nelns-${{ matrix.os }}-${{ needs.strings.outputs.week }}-
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           pattern: nel-${{ matrix.os }}-static-*
           merge-multiple: true
@@ -134,7 +137,7 @@ jobs:
           build-dir: ${{ needs.strings.outputs.build-dir }}
           build-version: ${{ needs.strings.outputs.build-version }}
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: nelns-${{ matrix.os }}-${{ needs.strings.outputs.build-version }}
           path: ${{ needs.strings.outputs.build-dir }}/nelns/nelns-*
@@ -149,7 +152,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-24.04 ]
-        build-type: ["static", "dynamic"]
+        build-type: [ "static", "dynamic" ]
     steps:
       - uses: actions/checkout@v4
 
@@ -159,7 +162,7 @@ jobs:
           key: ccache-ryzom-${{ matrix.os }}-${{ matrix.build-type }}-${{ needs.strings.outputs.week }}-${{ github.sha }}
           restore-keys: ccache-ryzom-${{ matrix.os }}-${{ matrix.build-type }}-${{ needs.strings.outputs.week }}-
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           pattern: nel-${{ matrix.os }}-${{ matrix.build-type }}-*
           merge-multiple: true
@@ -182,7 +185,7 @@ jobs:
           build-dir: ${{ needs.strings.outputs.build-dir }}
           build-version: ${{ needs.strings.outputs.build-version }}
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: ryzom-${{ matrix.os }}-${{ matrix.build-type }}-${{ needs.strings.outputs.build-version }}
           path: ${{ needs.strings.outputs.build-dir }}/ryzom/ryzom-*
@@ -205,7 +208,7 @@ jobs:
           key: ccache-snowballs-${{ matrix.os }}-${{ needs.strings.outputs.week }}-${{ github.sha }}
           restore-keys: ccache-snowballs-${{ matrix.os }}-${{ needs.strings.outputs.week }}-
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           pattern: nel-${{ matrix.os }}-static-*
           merge-multiple: true
@@ -227,7 +230,7 @@ jobs:
           build-dir: ${{ needs.strings.outputs.build-dir }}
           build-version: ${{ needs.strings.outputs.build-version }}
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: snowballs-${{ matrix.os }}-${{ needs.strings.outputs.build-version }}
           path: ${{ needs.strings.outputs.build-dir }}/snowballs/snowballs-*
@@ -249,7 +252,7 @@ jobs:
           key: ccache-studio-${{ matrix.os }}-${{ needs.strings.outputs.week }}-${{ github.sha }}
           restore-keys: ccache-studio-${{ matrix.os }}-${{ needs.strings.outputs.week }}-
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           pattern: nel-${{ matrix.os }}-static-*
           merge-multiple: true
@@ -269,7 +272,7 @@ jobs:
           build-version: ${{ needs.strings.outputs.build-version }}
           os: ${{ matrix.os }}
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: studio-${{ matrix.os }}-${{ needs.strings.outputs.build-version }}
           path: ${{ needs.strings.outputs.build-dir }}/studio/studio-*
@@ -295,7 +298,7 @@ jobs:
           image-group: ${{ needs.strings.outputs.image-group }}
           image-version: ${{ needs.strings.outputs.image-version }}
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: web-${{ needs.strings.outputs.build-version }}
           path: ${{ needs.strings.outputs.build-dir }}/web/web-*
@@ -309,13 +312,13 @@ jobs:
       contents: read
     if: ${{ github.ref == format('refs/heads/{0}', github.event.repository.default_branch ) }}
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           pattern: "*-ubuntu-24.04-*"
           merge-multiple: true
           path: ${{ needs.strings.outputs.build-dir }}
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           pattern: "web-*"
           merge-multiple: true
