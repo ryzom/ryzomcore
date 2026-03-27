@@ -17,7 +17,7 @@ class CSoundOpenALIT : public testing::Test
 {
 protected:
 	NLMISC::CApplicationContext context;
-	UAudioMixer	*AudioMixer = nullptr;
+	UAudioMixer *AudioMixer = nullptr;
 
 	void SetUp() override
 	{
@@ -36,7 +36,7 @@ TEST_F(CSoundOpenALIT, shouldBeToLoadOpenALDriver)
 {
 	const auto drivers = UAudioMixer::getDrivers();
 
-	ASSERT_THAT(drivers, Contains(
-		Field("Name", &UAudioMixer::TDriverInfo::Name, StrEq("OpenAL"))
-	));
+	ASSERT_THAT(drivers, Contains(Field("Name", &UAudioMixer::TDriverInfo::Name, StrEq("OpenAL"))));
+
+	AudioMixer->init(32, true, false, nullptr, true, UAudioMixer::DriverOpenAl);
 }
