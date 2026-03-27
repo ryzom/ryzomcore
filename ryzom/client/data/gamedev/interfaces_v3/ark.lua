@@ -1075,7 +1075,7 @@ function S2E1:newQuake(timer)
 end
 
 -- VERSION --
-FILE_ARK_VERSION = 183
+FILE_ARK_VERSION = 185
 
 function arkRpMessageShowCapPopup(timer)
 	local ui = getUI("ui:interface:cap_popup")
