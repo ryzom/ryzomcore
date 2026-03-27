@@ -39,35 +39,7 @@ end
 
 function help:skipTutorial()
 	WebQueue:push("https://app.ryzom.com/app_arcc/outgame_rpbg.php?action=skip")
-	setDbProp("UI:SAVE:SKIP_WELCOME", 1)
-	setDbProp("UI:SAVE:TUTORIAL_ACTIVE_SETS", 1)
-	getUI("ui:interface:gestionsets").active = true
-	setDbProp("UI:SAVE:TUTORIAL_ACTIVE_INFO_PLAYER_JOURNAL", 1)
-	getUI("ui:interface:info_player_journal").active = true
-	setDbProp("UI:SAVE:TUTORIAL_ACTIVE_PLAYER", 1)
-	getUI("ui:interface:player").active = true
-	setDbProp("UI:SAVE:TUTORIAL_ACTIVE_COMPASS", 1)
-	getUI("ui:interface:compass").active = true
-	setDbProp("UI:SAVE:TUTORIAL_ACTIVE_TARGET", 1)
-	getUI("ui:interface:target").active = true
-	setDbProp("UI:SAVE:TUTORIAL_ACTIVE_MAIN_CHAT", 1)
-	setDbProp("UI:SAVE:TUTORIAL_ACTIVE_INVENTORY", 1)
-	setDbProp("UI:SAVE:TUTORIAL_ACTIVE_ENCYCLOPEDIA", 1)
-	setDbProp("UI:SAVE:ISENABLED:AROUND_ME", 1)
-	setDbProp("UI:SAVE:ISENABLED:REGION_CHAT", 1)
-	setDbProp("UI:SAVE:ISENABLED:DYNAMIC_CHAT0", 1)
-	setDbProp("UI:SAVE:MK_MODE", 4)
-	game:activeMilkoKey(1, true)
-	game:activeMilkoKey(2, true)
-	game:activeMilkoKey(3, true)
-	game:activeMilkoKey(4, true)
-
-	if getDbProp("UI:SAVE:SKIP_TUTORIAL") == 1 then
-		return
-	end
 	setDbProp("UI:SAVE:SKIP_TUTORIAL", 1)
-	runAH(nil, "milko_menu_do_reset_interface", "")
-	removeOnDbChange(getUI("ui:interface:milko_pad"), "@UI:VARIABLES:CURRENT_SERVER_TICK")
 end
 
 function help:displayWelcome()
@@ -121,5 +93,3 @@ function help:checkTutorialMilkoPad()
 	end
 end
 
--- VERSION --
-FILE_HELP_VERSION = 182
