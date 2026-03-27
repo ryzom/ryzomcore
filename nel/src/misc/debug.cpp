@@ -25,9 +25,8 @@
 #ifdef NL_OS_WINDOWS
 #	include <direct.h>
 #	include <tchar.h>
-//#	include <imagehlp.h>
-//#	pragma comment(lib, "imagehlp.lib")
-#	include "breakpad/client/windows/handler/exception_handler.h"
+#	include <imagehlp.h>
+#	pragma comment(lib, "imagehlp.lib")
 #	ifndef getcwd
 #		define getcwd(_a, _b) (_getcwd(_a,_b))
 #	endif
@@ -395,20 +394,53 @@ typedef enum _NEL_MINIDUMP_TYPE
 
 static void DumpMiniDump(PEXCEPTION_POINTERS excpInfo)
 {
-    string dumpPath = getLogDirectory();
-	
-	std::wstring wpath = dumpPath.empty() ? L"." : std::wstring(dumpPath.begin(), dumpPath.end());
-    google_breakpad::ExceptionHandler handler(
-        wpath,
-        NULL,
-        NULL,
-        NULL,
-        google_breakpad::ExceptionHandler::HANDLER_NONE
-    );
-    bool result = handler.WriteMinidump();
-	wchar_t msg[256];
-	swprintf(msg, 256, L"WriteMinidump into '%S' result: %d, LastError: %d", dumpPath, result, GetLastError());
-	MessageBoxW(NULL, msg, L"Debug", MB_OK);
+	HANDLE file = CreateFileA (NL_CRASH_DUMP_FILE, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (file)
+	{
+		HMODULE hm = LoadLibraryA ("dbghelp.dll");
+		if (hm)
+		{
+			BOOL (WINAPI* MiniDumpWriteDump)(
+			  HANDLE hProcess,
+			  DWORD ProcessId,
+			  HANDLE hFile,
+			  NEL_MINIDUMP_TYPE DumpType,
+			  PNEL_MINIDUMP_EXCEPTION_INFORMATION ExceptionParam,
+			  PNEL_MINIDUMP_EXCEPTION_INFORMATION UserStreamParam,
+			  PNEL_MINIDUMP_EXCEPTION_INFORMATION CallbackParam
+			) = NULL;
+			*(FARPROC*)&MiniDumpWriteDump = GetProcAddress(hm, "MiniDumpWriteDump");
+			if (MiniDumpWriteDump)
+			{
+				// OutputDebugString(_T("writing minidump\r\n"));
+				NEL_MINIDUMP_EXCEPTION_INFORMATION eInfo;
+				eInfo.ThreadId = GetCurrentThreadId();
+				eInfo.ExceptionPointers = excpInfo;
+				eInfo.ClientPointers = FALSE;
+
+				// note:  MiniDumpWithIndirectlyReferencedMemory does not work on Win98
+				MiniDumpWriteDump(
+					GetCurrentProcess(),
+					GetCurrentProcessId(),
+					file,
+					MiniDumpNormal,
+					excpInfo ? &eInfo : NULL,
+					NULL,
+					NULL);
+			}
+			else
+			{
+				nlwarning ("Can't get proc MiniDumpWriteDump in dbghelp.dll");
+			}
+		}
+		else
+		{
+			nlwarning ("Can't load dbghelp.dll");
+		}
+		CloseHandle (file);
+	}
+	else
+		nlwarning ("Can't create mini dump file");
 }
 
 class EDebug : public ETrapDebug
