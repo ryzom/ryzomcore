@@ -93,3 +93,6 @@ function help:checkTutorialMilkoPad()
 	end
 end
 
+
+-- VERSION --
+FILE_HELP_VERSION = 182

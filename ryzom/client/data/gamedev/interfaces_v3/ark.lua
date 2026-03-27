@@ -1122,3 +1122,6 @@ function game:autoHideCapPopup()
 		end
 	end
 end
+
+-- VERSION --
+FILE_ARK_VERSION = 184

@@ -81,3 +81,6 @@ end
 
 setOnDraw(getUI("ui:interface:compass"), "game:updateCompass()")
 
+
+-- VERSION --
+FILE_COMPASS_VERSION = 184
