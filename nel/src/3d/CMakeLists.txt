@@ -720,9 +720,9 @@ NL_TARGET_LIB(nel3d ${HEADERS} ${SRC})
 add_project_library_alias(nel3d 3d)
 
 TARGET_LINK_LIBRARIES(nel3d
-        PUBLIC
+        #PUBLIC
         NeL::misc
-        PRIVATE
+        #PRIVATE
         ${LIBOVR_LIBRARIES}
         ${LIBVR_LIBRARY}
 )
@@ -738,7 +738,7 @@ TARGET_INCLUDE_DIRECTORIES(nel3d
 
 IF(FREETYPE_FOUND)
     TARGET_LINK_LIBRARIES(nel3d
-            PRIVATE
+            #PRIVATE
             Freetype::Freetype
     )
     TARGET_COMPILE_DEFINITIONS(nel3d PRIVATE HAVE_FREETYPE)
