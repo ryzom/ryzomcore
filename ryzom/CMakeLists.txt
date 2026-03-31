@@ -24,3 +24,7 @@ IF(WITH_RYZOM_SERVER OR WITH_RYZOM_TOOLS)
     ADD_SUBDIRECTORY(server)
   ENDIF()
 ENDIF()
+
+if (WITH_TESTING)
+  add_subdirectory(tools/server/test_modules)
+endif ()
