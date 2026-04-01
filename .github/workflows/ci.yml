@@ -32,7 +32,7 @@ jobs:
         id: strings
         shell: bash
         run: |
-          echo "build-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+          echo "build-dir=build" >> "$GITHUB_OUTPUT"
           echo "install-dir=${{ github.workspace }}/build/install" >> "$GITHUB_OUTPUT"
           COMMIT_HASH=${{ github.sha }}
           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
