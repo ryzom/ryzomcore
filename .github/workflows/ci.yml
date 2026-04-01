@@ -66,6 +66,7 @@ jobs:
             build-type: dynamic
           - os: windows-2025
             cmake-preset: ci-windows-nel-vcpkg
+            build-type: static
           - os: windows-2025
             cmake-preset: ci-windows-nel-hunter
     steps:
