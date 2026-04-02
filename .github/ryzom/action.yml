@@ -76,7 +76,7 @@ runs:
 
     - name: Build
       shell: bash
-      run: cmake --build --preset ryzom
+      run: cmake --build --preset ryzom --target install
 
     - name: ccache stats
       if: always()
