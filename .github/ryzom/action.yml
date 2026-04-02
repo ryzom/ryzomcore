@@ -85,6 +85,8 @@ runs:
 
     - name: Test
       shell: bash
+      env:
+        LD_LIBRARY_PATH: ${{ inputs.install-dir }}/lib
       run: ctest --preset ryzom
 
     - uses: actions/upload-artifact@v4
