@@ -83,6 +83,17 @@ runs:
       shell: bash
       run: ccache -s -v || ccache -s
 
+    - name: Test
+      shell: bash
+      run: ctest --preset ryzom
+
+    - uses: actions/upload-artifact@v4
+      if: ( !cancelled() )
+      with:
+        name: ryzom-${{ inputs.os }}-${{ inputs.cmake-preset }}-${{ github.sha }}-test-results
+        if-no-files-found: error
+        path: build/reports/*.xml
+
     - name: Package
       shell: bash
       run: cpack --preset ryzom -R "${{ inputs.build-version }}"
