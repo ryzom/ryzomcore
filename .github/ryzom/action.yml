@@ -85,8 +85,9 @@ runs:
 
     - name: Test
       shell: bash
-      run: >
-        LD_LIBRARY_PATH=$(realpath ${{ inputs.install-dir }}/lib):${LD_LIBRARY_PATH} 
+      run: |
+        export LD_LIBRARY_PATH=$(realpath ${{ inputs.install-dir }}/lib):${LD_LIBRARY_PATH}
+        ldd build/ryzom/bin/Release/ryzom_server_test_module_interface
         ctest --preset ryzom
 
     - uses: actions/upload-artifact@v4
