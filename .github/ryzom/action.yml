@@ -85,8 +85,6 @@ runs:
 
     - name: Test
       shell: bash
-      env:
-        LD_LIBRARY_PATH: ${{ inputs.install-dir }}/lib
       run: >
         LD_LIBRARY_PATH=$(realpath ${{ inputs.install-dir }}/lib):${LD_LIBRARY_PATH} 
         ctest --preset ryzom
