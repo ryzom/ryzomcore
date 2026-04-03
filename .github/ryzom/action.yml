@@ -86,7 +86,7 @@ runs:
     - name: Test
       shell: bash
       run: |
-        export LD_LIBRARY_PATH=$(realpath ${{ inputs.install-dir }}/lib):${LD_LIBRARY_PATH}
+        export LD_LIBRARY_PATH=$(realpath ${{ inputs.install-dir }}/nel-*/lib):${LD_LIBRARY_PATH}
         ldd build/ryzom/bin/Release/ryzom_server_test_module_interface
         ctest --preset ryzom
 
