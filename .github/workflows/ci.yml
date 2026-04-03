@@ -152,8 +152,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-24.04 ]
-        build-type: [ "static", "dynamic" ]
+        include:
+          - os: ubuntu-24.04
+            cmake-preset: ci-linux-ryzom-static
+            build-type: static
+          - os: ubuntu-24.04
+            cmake-preset: ci-linux-ryzom-dynamic
+            build-type: dynamic
     steps:
       - uses: actions/checkout@v6
 
@@ -179,7 +184,7 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         with:
           os: ${{ matrix.os }}
-          build-type: ${{ matrix.build-type }}
+          cmake-preset: ${{ matrix.cmake-preset }}
           install-dir: ${{ needs.strings.outputs.install-dir }}
           image-group: ${{ needs.strings.outputs.image-group }}
           image-version: ${{ needs.strings.outputs.image-version }}
