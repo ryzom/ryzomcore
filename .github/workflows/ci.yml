@@ -106,7 +106,14 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ ubuntu-22.04, ubuntu-24.04 ]
+        include:
+          - os: ubuntu-22.04
+            cmake-preset: ci-linux-nelns
+          - os: ubuntu-24.04
+            cmake-preset: ci-linux-nelns
+            docker: true
+          - os: ubuntu-24.04
+            cmake-preset: ci-linux-nelns-vcpkg
     steps:
       - uses: actions/checkout@v6
 
@@ -132,7 +139,9 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         with:
           os: ${{ matrix.os }}
+          cmake-preset: ${{ matrix.cmake-preset }}
           install-dir: ${{ needs.strings.outputs.install-dir }}
+          docker: ${{ matrix.docker }}
           image-group: ${{ needs.strings.outputs.image-group }}
           image-version: ${{ needs.strings.outputs.image-version }}
           build-dir: ${{ needs.strings.outputs.build-dir }}
