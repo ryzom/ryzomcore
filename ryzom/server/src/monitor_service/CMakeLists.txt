@@ -2,12 +2,12 @@ FILE(GLOB SRC *.cpp *.h)
 
 ADD_EXECUTABLE(ryzom_monitor_service WIN32 ${SRC})
 
-TARGET_INCLUDE_DIRECTORIES(ryzom_monitor_service PRIVATE ${RZ_SERVER_SRC_DIR} ${MYSQL_INCLUDE_DIR})
+TARGET_INCLUDE_DIRECTORIES(ryzom_monitor_service PRIVATE ${RZ_SERVER_SRC_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_monitor_service
         PRIVATE
         ryzom_gameshare
-        ${MYSQL_LIBRARIES}
+        MySQL::MySQL
         NeL::misc
         NeL::net
         NeL::georges
