@@ -59,6 +59,12 @@
         "qt"
       ]
     },
+    "mysql": {
+      "description": "Builds with MySQL",
+      "dependencies": [
+        "libmariadb"
+      ]
+    },
     "testing": {
       "description": "Builds tests",
       "dependencies": [
