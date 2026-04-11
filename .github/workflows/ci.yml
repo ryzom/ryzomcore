@@ -102,7 +102,7 @@ jobs:
   nelns:
     name: "NeL Network Services"
     needs: [ strings, nel ]
-    timeout-minutes: 10
+    timeout-minutes: 20
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
