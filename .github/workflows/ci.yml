@@ -148,7 +148,7 @@ jobs:
 
       - uses: actions/upload-artifact@v7
         with:
-          name: nelns-${{ matrix.os }}-${{ needs.strings.outputs.build-version }}
+          name: nelns-${{ matrix.os }}-${{ matrix.cmake-preset }}-${{ needs.strings.outputs.build-version }}
           path: ${{ needs.strings.outputs.build-dir }}/nelns/nelns-*
           if-no-files-found: error
 
