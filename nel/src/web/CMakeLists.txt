@@ -6,8 +6,6 @@ SOURCE_GROUP("" FILES ${SRC} ${HEADERS})
 NL_TARGET_LIB(nelweb ${HEADERS} ${SRC})
 add_project_library_alias(nelweb web)
 
-TARGET_INCLUDE_DIRECTORIES(nelweb PRIVATE ../../3rdparty)
-
 TARGET_LINK_LIBRARIES(nelweb
         PUBLIC
         NeL::misc

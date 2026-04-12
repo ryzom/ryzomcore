@@ -135,11 +135,11 @@ ENDIF()
 
 TARGET_LINK_LIBRARIES(nelsound
         PUBLIC
-        nelmisc
-        nelligo
-        nelgeorges
-        nel3d
-        nelsnd_lowlevel
+        NeL::misc
+		NeL::ligo
+        NeL::georges
+        NeL::3d
+        NeL::snd_lowlevel
         PRIVATE
         LibXml2::LibXml2
 )
