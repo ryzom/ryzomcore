@@ -1,5 +1,6 @@
 NL_TARGET_LIB(nel_sevenzip ${LIB_SRC})
-add_project_library_alias(nel_sevenzip sevenzip)
+add_library(NeL::sevenzip ALIAS nel_sevenzip)
+set_target_properties(nel_sevenzip PROPERTIES EXPORT_NAME sevenzip)
 
 # TARGET_LINK_LIBRARIES(nel_sevenzip ${PLATFORM_LINKFLAGS})
 NL_DEFAULT_PROPS(nel_sevenzip "NeL, 3rd Party: Seven Zip")

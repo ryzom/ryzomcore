@@ -717,7 +717,8 @@ SOURCE_GROUP(Stereo FILES
 		../../include/nel/3d/stereo_passthrough.h)
 
 NL_TARGET_LIB(nel3d ${HEADERS} ${SRC})
-add_project_library_alias(nel3d 3d)
+add_library(NeL::3d ALIAS nel3d)
+set_target_properties(nel3d PROPERTIES EXPORT_NAME 3d)
 
 TARGET_LINK_LIBRARIES(nel3d
         #PUBLIC

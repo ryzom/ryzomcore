@@ -4,7 +4,8 @@ FILE(GLOB HEADERS ../../include/nel/web/*.h)
 SOURCE_GROUP("" FILES ${SRC} ${HEADERS})
 
 NL_TARGET_LIB(nelweb ${HEADERS} ${SRC})
-add_project_library_alias(nelweb web)
+add_library(NeL::web ALIAS nelweb)
+set_target_properties(nelweb PROPERTIES EXPORT_NAME web)
 
 TARGET_LINK_LIBRARIES(nelweb
         PUBLIC

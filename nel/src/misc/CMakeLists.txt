@@ -174,7 +174,8 @@ SOURCE_GROUP("crypt" FILES ${NLMISC_CRYPT})
 SOURCE_GROUP("string" FILES ${NLMISC_STRING})
 
 NL_TARGET_LIB(nelmisc ${HEADERS} ${SRC})
-add_project_library_alias(nelmisc misc)
+add_library(NeL::misc ALIAS nelmisc)
+set_target_properties(nelmisc PROPERTIES EXPORT_NAME misc)
 
 target_sources(nelmisc
 		PUBLIC
