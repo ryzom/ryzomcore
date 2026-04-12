@@ -10,7 +10,7 @@ TARGET_LINK_LIBRARIES(ryzom_mission_compiler_fe
         PRIVATE
         NeL::misc
         NeL::ligo
-        ryzom_mission_compiler_lib
+        Ryzom::mission_compiler_lib
 )
 
 NL_DEFAULT_PROPS(ryzom_mission_compiler_fe "Ryzom, Tools, Misc: Mission Compiler Frontend")

@@ -6,12 +6,13 @@ LIST(REMOVE_ITEM SRC
 			${CMAKE_CURRENT_SOURCE_DIR}/pd_string_manager.h)
 
 NL_TARGET_LIB(ryzom_pd ${SRC})
+add_library(Ryzom::pd ALIAS ryzom_pd)
 
 TARGET_LINK_LIBRARIES(ryzom_pd
 		PUBLIC
 		NeL::misc
 		NeL::net
-		ryzom_gameshare
+		Ryzom::gameshare
 )
 NL_DEFAULT_PROPS(ryzom_pd "Ryzom, Library: PD Lib")
 NL_ADD_RUNTIME_FLAGS(ryzom_pd)

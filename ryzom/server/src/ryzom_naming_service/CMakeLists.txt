@@ -6,7 +6,7 @@ TARGET_INCLUDE_DIRECTORIES(ryzom_naming_service PRIVATE ${RZ_SERVER_SRC_DIR} ${M
 
 TARGET_LINK_LIBRARIES(ryzom_naming_service
         PRIVATE
-        ryzom_adminmodules
+        Ryzom::adminmodules
         NeL::misc
         NeL::net
 )

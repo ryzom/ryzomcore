@@ -8,7 +8,7 @@ TARGET_INCLUDE_DIRECTORIES(ai_build_wmap PRIVATE ${RZ_SERVER_SRC_DIR})
 
 TARGET_LINK_LIBRARIES(ai_build_wmap
         PRIVATE
-        ryzom_gameshare
+        Ryzom::gameshare
         Ryzom::aishare
         NeL::misc
 )

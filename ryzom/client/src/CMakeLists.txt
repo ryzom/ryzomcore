@@ -222,8 +222,8 @@ IF(WITH_RYZOM_CLIENT)
               NeL::sound
               NeL::sevenzip
               NeL::web
-              ryzom_clientsheets
-              ryzom_gameshare
+              Ryzom::clientsheets
+              Ryzom::gameshare
               NeL::pacs
               LibXml2::LibXml2
               ${LUA_LIBRARIES}

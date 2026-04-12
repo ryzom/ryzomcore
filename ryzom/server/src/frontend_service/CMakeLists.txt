@@ -14,8 +14,8 @@ ADD_EXECUTABLE(ryzom_frontend_service WIN32 ${SRC})
 
 TARGET_LINK_LIBRARIES(ryzom_frontend_service
         PRIVATE
-        ryzom_adminmodules
-        ryzom_gameshare
+        Ryzom::adminmodules
+        Ryzom::gameshare
         MySQL::MySQL
         NeL::misc
         NeL::net

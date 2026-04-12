@@ -9,6 +9,7 @@ SOURCE_GROUP("" FILES ${SRC})
 SOURCE_GROUP("R2" FILES ${R2})
 
 NL_TARGET_LIB(ryzom_servershare ${SRC} ${R2})
+add_library(Ryzom::servershare ALIAS ryzom_servershare)
 
 TARGET_LINK_LIBRARIES(ryzom_servershare
         PUBLIC
@@ -16,7 +17,7 @@ TARGET_LINK_LIBRARIES(ryzom_servershare
         NeL::pacs
         NeL::georges
         NeL::net
-        ryzom_gameshare
+        Ryzom::gameshare
         MySQL::MySQL
         ${ZLIB_LIBRARIES}
 )

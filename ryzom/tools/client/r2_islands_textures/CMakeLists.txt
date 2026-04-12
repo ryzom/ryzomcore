@@ -8,8 +8,8 @@ TARGET_INCLUDE_DIRECTORIES(r2_islands_textures PRIVATE ${RZ_SERVER_SRC_DIR})
 
 TARGET_LINK_LIBRARIES(r2_islands_textures
         PRIVATE
-        ryzom_gameshare
-        ryzom_aishare
+        Ryzom::gameshare
+        Ryzom::aishare
         NeL::misc
         NeL::3d
 )

@@ -35,6 +35,7 @@ LIST(REMOVE_ITEM SRC ${CMAKE_CURRENT_SOURCE_DIR}/enum_template.cpp)
 LIST(REMOVE_ITEM HEADER ${CMAKE_CURRENT_SOURCE_DIR}/enum_template.h)
 
 NL_TARGET_LIB(ryzom_gameshare ${HEADER} ${PRIV_TIME_H} ${SRC} ${SRC_TIME} ${R2})
+add_library(Ryzom::gameshare ALIAS ryzom_gameshare)
 
 TARGET_INCLUDE_DIRECTORIES(ryzom_gameshare PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 

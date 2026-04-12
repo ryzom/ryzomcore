@@ -5,7 +5,7 @@ ADD_EXECUTABLE(patch_gen ${MAIN_SRC} ${RECS})
 TARGET_LINK_LIBRARIES(patch_gen
         PRIVATE
         NeL::sevenzip
-        ryzom_gameshare
+        Ryzom::gameshare
         NeL::misc
         NeL::net
         NeL::ligo
@@ -18,7 +18,7 @@ ADD_EXECUTABLE(patch_gen_service WIN32 ${SERVICE_SRC} ${RECS})
 TARGET_LINK_LIBRARIES(patch_gen_service
         PRIVATE
         NeL::sevenzip
-        ryzom_gameshare
+        Ryzom::gameshare
         NeL::misc
         NeL::net
         NeL::ligo

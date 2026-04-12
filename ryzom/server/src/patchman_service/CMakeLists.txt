@@ -24,9 +24,9 @@ TARGET_INCLUDE_DIRECTORIES(ryzom_patchman_service PRIVATE ${RZ_SERVER_SRC_DIR} $
 
 TARGET_LINK_LIBRARIES(ryzom_patchman_service
         PRIVATE
-        ryzom_adminmodules
-        ryzom_gameshare
-        ryzom_servershare
+        Ryzom::adminmodules
+        Ryzom::gameshare
+        Ryzom::servershare
         NeL::misc
         NeL::net
         NeL::pacs

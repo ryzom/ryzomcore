@@ -6,7 +6,7 @@ TARGET_INCLUDE_DIRECTORIES(ryzom_monitor_service PRIVATE ${RZ_SERVER_SRC_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_monitor_service
         PRIVATE
-        ryzom_gameshare
+        Ryzom::gameshare
         MySQL::MySQL
         NeL::misc
         NeL::net

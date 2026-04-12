@@ -6,6 +6,7 @@ FILE(GLOB LIBSRC mission_compiler.cpp
   variables.cpp)
 
 NL_TARGET_LIB(ryzom_mission_compiler_lib ${LIBSRC})
+add_library(Ryzom::mission_compiler_lib ALIAS ryzom_mission_compiler_lib)
 
 TARGET_INCLUDE_DIRECTORIES(ryzom_mission_compiler_lib PRIVATE ${NEL_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -26,7 +27,7 @@ FILE(GLOB EXESRC main.cpp)
   
 ADD_EXECUTABLE(ryzom_mission_compiler ${EXESRC})
 
-TARGET_LINK_LIBRARIES(ryzom_mission_compiler ryzom_mission_compiler_lib)
+TARGET_LINK_LIBRARIES(ryzom_mission_compiler PRIVATE Ryzom::mission_compiler_lib)
 NL_DEFAULT_PROPS(ryzom_mission_compiler "Ryzom, Tools, Misc: Mission Compiler")
 NL_ADD_RUNTIME_FLAGS(ryzom_mission_compiler)
 

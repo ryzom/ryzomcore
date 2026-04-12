@@ -8,9 +8,9 @@ TARGET_INCLUDE_DIRECTORIES(build_world_packed_col PRIVATE ${RZ_SERVER_SRC_DIR})
 
 TARGET_LINK_LIBRARIES(build_world_packed_col
         PRIVATE
-        ryzom_gameshare
-        ryzom_servershare
-        ryzom_aishare
+        Ryzom::gameshare
+        Ryzom::servershare
+        Ryzom::aishare
         NeL::misc
         NeL::3d
 )

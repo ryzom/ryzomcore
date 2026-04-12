@@ -130,10 +130,10 @@ TARGET_INCLUDE_DIRECTORIES(ryzom_general_utilities_service PRIVATE ${RZ_SERVER_S
 
 TARGET_LINK_LIBRARIES(ryzom_general_utilities_service
 						PRIVATE
-						ryzom_adminmodules
-						ryzom_gameshare
-						ryzom_servershare
-						ryzom_aishare
+						Ryzom::adminmodules
+						Ryzom::gameshare
+						Ryzom::servershare
+						Ryzom::aishare
 						NeL::misc
 						NeL::net
 						NeL::georges
