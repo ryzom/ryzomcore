@@ -12,7 +12,7 @@ TARGET_LINK_LIBRARIES(nl_sample_udpclient PRIVATE NeL::misc NeL::net)
 TARGET_LINK_LIBRARIES(nl_sample_udpserver PRIVATE NeL::misc NeL::net)
 
 IF(WITH_3D)
-  ADD_DEFINITIONS(-DUSE_3D)
+  TARGET_COMPILE_DEFINITIONS(nl_sample_udpclient PRIVATE USE_3D)
   TARGET_LINK_LIBRARIES(nl_sample_udpclient PRIVATE NeL::3d)
 ENDIF()
 
