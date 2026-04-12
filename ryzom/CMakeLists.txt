@@ -12,6 +12,8 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/common)
 
 SET(RZ_SERVER_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/server/src)
 
+include(../cmake/add_project_library_alias.cmake)
+
 ADD_SUBDIRECTORY(common)
 ADD_SUBDIRECTORY(tools)
 ADD_SUBDIRECTORY(client)
@@ -24,3 +26,7 @@ IF(WITH_RYZOM_SERVER OR WITH_RYZOM_TOOLS)
     ADD_SUBDIRECTORY(server)
   ENDIF()
 ENDIF()
+
+if (WITH_TESTING)
+  add_subdirectory(tools/server/test_modules)
+endif ()

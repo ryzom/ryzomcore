@@ -4,6 +4,9 @@ inputs:
   os:
     description: os
     required: true
+  cmake-preset:
+    description: cmake preset to use for configure step
+    required: true
   install-dir:
     description: install directory
     required: true
@@ -13,12 +16,20 @@ inputs:
   build-version:
     description: build version
     required: true
+  docker:
+    description: build docker image
+    required: false
+    default: 'false'
   image-group:
     description: image group
     required: true
   image-version:
     description: image version
     required: true
+  vcpkg-cache-dir:
+    description: cache directory for vcpkg
+    required: false
+    default: "${{ github.workspace }}/.vcpkg"
 runs:
   using: composite
   steps:
@@ -26,13 +37,22 @@ runs:
       with:
         cmakeVersion: "^3.31.11"
 
+    - uses: lukka/run-vcpkg@v11
+
+    - uses: actions/cache/restore@v4
+      id: vcpkg-cache
+      with:
+        path: ${{ inputs.vcpkg-cache-dir}}
+        key: vcpkg-${{ inputs.os }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
+
     - name: Dependencies Linux
       if: runner.os == 'Linux'
       shell: bash
       run: |
         sudo apt update
         sudo apt install --yes \
-          build-essential ccache \
+          build-essential bison ccache\
+          autoconf autoconf-archive automake libtool \
           libpng-dev \
           libjpeg-dev \
           libgif-dev libfreetype-dev \
@@ -64,16 +84,20 @@ runs:
 
     - name: Configure CMake
       if: runner.os == 'Linux'
+      env:
+        VCPKG_BINARY_SOURCES: "clear;files,${{ inputs.vcpkg-cache-dir }},readwrite"
       shell: bash
-      run: >
-        cmake --preset ci-linux-nelns
-        -DCMAKE_C_COMPILER_LAUNCHER=ccache
-        -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
-        -DWITH_PCH=OFF
+      run: cmake --preset ${{ inputs.cmake-preset }}
+
+    - uses: actions/cache/save@v4
+      if: ( ! cancelled() )
+      with:
+        path: ${{ inputs.vcpkg-cache-dir }}
+        key: ${{ steps.vcpkg-cache.outputs.cache-primary-key }}
 
     - name: Build
       shell: bash
-      run: cmake --build --preset nelns
+      run: cmake --build --preset nelns --target install
 
     - name: ccache stats
       if: always()
@@ -82,14 +106,16 @@ runs:
 
     - name: Test
       shell: bash
-      run: ctest --preset nelns
+      run: |
+        export LD_LIBRARY_PATH=$(realpath ${{ inputs.install-dir }}/nel-*/lib):${LD_LIBRARY_PATH}
+        ctest --preset nelns
 
     - uses: actions/upload-artifact@v4
       if: ( !cancelled() )
       with:
-        name: nelns-${{ inputs.os }}-test-results
+        name: nelns-${{ inputs.os }}-${{ inputs.cmake-preset }}-${{ github.sha }}-test-results
         if-no-files-found: error
-        path: ${{ inputs.build-dir }}/reports/*.xml
+        path: build/reports/*.xml
 
     - name: Package
       shell: bash
@@ -97,7 +123,7 @@ runs:
 
     - name: Build Docker image
       shell: bash
-      if: inputs.os == 'ubuntu-24.04'
+      if: inputs.docker == 'true'
       run: |
         IMAGE_TAG="${{ inputs.image-group }}/ryzomcore-nelns:${{ inputs.image-version }}"
         docker build . --file nelns/docker/Dockerfile --tag "${IMAGE_TAG}"

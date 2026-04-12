@@ -164,7 +164,13 @@ runs:
         path: build/reports/*.xml
 
     - name: Package
+      if: runner.os != 'Windows'
       shell: bash
+      run: cpack --preset nel -R "${{ inputs.build-version }}"
+
+    - name: Package
+      if: runner.os == 'Windows'
+      shell: powershell
       run: cpack --preset nel -R "${{ inputs.build-version }}"
 
     - if: ( failure() )

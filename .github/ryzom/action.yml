@@ -4,8 +4,8 @@ inputs:
   os:
     description: os
     required: true
-  build-type:
-    description: link statically or dynamically value  should be static | dynamic
+  cmake-preset:
+    description: cmake preset to use for configure step
     required: true
   install-dir:
     description: install directory
@@ -68,20 +68,29 @@ runs:
     - name: Configure CMake
       if: runner.os == 'Linux'
       shell: bash
-      run: >
-        cmake --preset ci-linux-ryzom-${{ inputs.build-type }}
-        -DCMAKE_C_COMPILER_LAUNCHER=ccache
-        -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
-        -DWITH_PCH=OFF
+      run: cmake --preset ${{ inputs.cmake-preset }}
 
     - name: Build
       shell: bash
-      run: cmake --build --preset ryzom
+      run: cmake --build --preset ryzom --target install
 
     - name: ccache stats
       if: always()
       shell: bash
       run: ccache -s -v || ccache -s
+
+    - name: Test
+      shell: bash
+      run: |
+        export LD_LIBRARY_PATH=$(realpath ${{ inputs.install-dir }}/nel-*/lib):${LD_LIBRARY_PATH}
+        ctest --preset ryzom
+
+    - uses: actions/upload-artifact@v4
+      if: ( !cancelled() )
+      with:
+        name: ryzom-${{ inputs.os }}-${{ inputs.cmake-preset }}-${{ github.sha }}-test-results
+        if-no-files-found: error
+        path: build/reports/*.xml
 
     - name: Package
       shell: bash

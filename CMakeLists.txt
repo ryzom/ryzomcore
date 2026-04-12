@@ -325,7 +325,7 @@ IF(WITH_NEL_TESTS OR WITH_TESTING)
   include(FetchContent)
   FetchContent_Declare(
           googletest
-          URL https://github.com/google/googletest/archive/54915d462bb64e9b2bd1a3f0e70c00e6f5d817fb.zip
+          URL https://github.com/google/googletest/archive/52eb8108c5bdec04579160ae17225d66034bd723.zip
           EXCLUDE_FROM_ALL
   )
   SET(INSTALL_GTEST OFF)

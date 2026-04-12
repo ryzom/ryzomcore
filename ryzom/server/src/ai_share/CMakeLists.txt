@@ -2,6 +2,8 @@ FILE(GLOB SRC *.cpp *.h)
 
 NL_TARGET_LIB(ryzom_aishare ${SRC})
 
+add_project_library_alias(ryzom_aishare aishare)
+
 TARGET_LINK_LIBRARIES(ryzom_aishare
         PUBLIC
         ryzom_gameshare
