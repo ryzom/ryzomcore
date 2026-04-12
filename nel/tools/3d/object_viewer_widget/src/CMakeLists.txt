@@ -11,8 +11,8 @@ TARGET_INCLUDE_DIRECTORIES(object_viewer_widget_qt
 		${NEL_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(object_viewer_widget_qt
-		nelmisc
-		nel3d
+		NeL::misc
+		NeL::3d
 		${QT_LIBRARIES})
 
 NL_DEFAULT_PROPS(object_viewer_widget_qt "NeL, Tools, 3D: Object Viewer Qt Widget")

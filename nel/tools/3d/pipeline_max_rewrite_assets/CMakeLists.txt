@@ -28,7 +28,7 @@ TARGET_LINK_LIBRARIES(pipeline_max_rewrite_assets
 	${GLIB2_LIBRARIES}
 	${GOBJECT2_LIBRARIES}
 	pipeline_max
-	nelmisc
+	NeL::misc
 	Boost::boost
 )
 

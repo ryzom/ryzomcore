@@ -7,8 +7,8 @@ ADD_LIBRARY(nel_vertex_tree_paint SHARED ${SRC})
 TARGET_INCLUDE_DIRECTORIES(nel_vertex_tree_paint PRIVATE ${MAXSDK_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(nel_vertex_tree_paint 
-							nelmisc
-							nel3d
+							NeL::misc
+							NeL::3d
 							nel_mesh_lib 
 							nel_patch_lib
 							nel_3dsmax_shared 

@@ -7,8 +7,8 @@ set_target_properties(nellogic PROPERTIES EXPORT_NAME logic)
 
 TARGET_LINK_LIBRARIES(nellogic
         PUBLIC
-        nelmisc
-        nelnet
+        NeL::misc
+        NeL::net
         PRIVATE
         LibXml2::LibXml2
 )

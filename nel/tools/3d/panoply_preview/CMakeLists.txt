@@ -27,10 +27,12 @@ ELSE()
 ENDIF()
 
 TARGET_LINK_LIBRARIES(nl_panoply_preview
-	nelmisc
-	nel3d
-	shared_widgets
-	${PANOPLY_PREVIEW_QT_LIBRARIES})
+		PRIVATE
+		NeL::misc
+		NeL::3d
+		shared_widgets
+		${PANOPLY_PREVIEW_QT_LIBRARIES}
+)
 
 NL_DEFAULT_PROPS(nl_panoply_preview "NeL, Tools, 3D: panoply_preview")
 NL_ADD_RUNTIME_FLAGS(nl_panoply_preview)

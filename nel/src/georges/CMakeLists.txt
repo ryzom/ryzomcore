@@ -9,7 +9,7 @@ set_target_properties(nelgeorges PROPERTIES EXPORT_NAME georges)
 
 TARGET_LINK_LIBRARIES(nelgeorges
         PUBLIC
-        nelmisc
+        NeL::misc
         PRIVATE
         LibXml2::LibXml2
 )

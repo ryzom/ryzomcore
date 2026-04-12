@@ -5,7 +5,7 @@ NL_TARGET_LIB(nelpacs ${HEADERS} ${SRC})
 add_library(NeL::pacs ALIAS nelpacs)
 set_target_properties(nelpacs PROPERTIES EXPORT_NAME pacs)
 
-TARGET_LINK_LIBRARIES(nelpacs nelmisc)
+TARGET_LINK_LIBRARIES(nelpacs NeL::net)
 NL_DEFAULT_PROPS(nelpacs "NeL, Library: NeL PACS")
 NL_ADD_RUNTIME_FLAGS(nelpacs)
 

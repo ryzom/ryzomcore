@@ -19,7 +19,7 @@ SOURCE_GROUP(sfx FILES
 NL_TARGET_DRIVER(nel_drv_dsound_win ${SRC})
 
 TARGET_INCLUDE_DIRECTORIES(nel_drv_dsound_win BEFORE PRIVATE ${DXSDK_INCLUDE_DIR})
-TARGET_LINK_LIBRARIES(nel_drv_dsound_win nelmisc nelsnd_lowlevel ${DXSDK_DSOUND_LIBRARY})
+TARGET_LINK_LIBRARIES(nel_drv_dsound_win NeL::misc NeL::snd_lowlevel ${DXSDK_DSOUND_LIBRARY})
 
 NL_DEFAULT_PROPS(nel_drv_dsound_win "NeL, Driver, Sound: DirectSound")
 NL_ADD_RUNTIME_FLAGS(nel_drv_dsound_win)

@@ -4,7 +4,7 @@ SOURCE_GROUP("" FILES ${SRC})
 
 ADD_EXECUTABLE(build_coarse_mesh ${SRC})
 
-TARGET_LINK_LIBRARIES(build_coarse_mesh nel3d nelmisc)
+TARGET_LINK_LIBRARIES(build_coarse_mesh PRIVATE NeL::3d NeL::misc)
 NL_DEFAULT_PROPS(build_coarse_mesh "NeL, Tools, 3D: build_coarse_mesh")
 NL_ADD_RUNTIME_FLAGS(build_coarse_mesh)
 

@@ -4,7 +4,7 @@ SOURCE_GROUP("" FILES ${SRC})
 
 ADD_EXECUTABLE(words_dic WIN32 ${SRC} words_dic.rc)
 
-TARGET_LINK_LIBRARIES(words_dic nelmisc)
+TARGET_LINK_LIBRARIES(words_dic PRIVATE NeL::misc)
 NL_DEFAULT_PROPS(words_dic "NeL, Tools, Misc: words_dic")
 NL_ADD_RUNTIME_FLAGS(words_dic)
 

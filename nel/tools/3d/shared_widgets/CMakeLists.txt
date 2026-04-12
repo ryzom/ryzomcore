@@ -16,7 +16,7 @@ ELSE()
   SET(SHARED_WIDGETS_QT_LIBRARIES Qt${QT_VERSION_MAJOR}::Widgets)
 ENDIF()
 
-TARGET_LINK_LIBRARIES(shared_widgets nelmisc nel3d ${SHARED_WIDGETS_QT_LIBRARIES})
+TARGET_LINK_LIBRARIES(shared_widgets NeL::misc NeL::3d ${SHARED_WIDGETS_QT_LIBRARIES})
 NL_DEFAULT_PROPS(shared_widgets "NeL, Tools, 3D: Shared Widgets")
 NL_ADD_RUNTIME_FLAGS(shared_widgets)
 

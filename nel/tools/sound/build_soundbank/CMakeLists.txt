@@ -4,7 +4,7 @@ SOURCE_GROUP("" FILES ${SRC})
 
 ADD_EXECUTABLE(build_soundbank ${SRC})
 
-TARGET_LINK_LIBRARIES(build_soundbank nelmisc nelsound)
+TARGET_LINK_LIBRARIES(build_soundbank PRIVATE NeL::misc NeL::sound)
 NL_DEFAULT_PROPS(build_soundbank "NeL, Tools, Sound: build_soundbank")
 NL_ADD_RUNTIME_FLAGS(build_soundbank)
 

@@ -5,10 +5,10 @@ SOURCE_GROUP("" FILES ${SRC})
 ADD_LIBRARY(object_viewer_dll SHARED ${SRC})
 
 TARGET_LINK_LIBRARIES(object_viewer_dll
-							nelmisc
-							nel3d
-							nelsound
-							nelsnd_lowlevel
+							NeL::misc
+							NeL::3d
+							NeL::sound
+							NeL::snd_lowlevel
 							Version.lib)
 
 NL_DEFAULT_PROPS(object_viewer_dll "NeL, Tools, 3D: Object Viewer DLL")

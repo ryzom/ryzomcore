@@ -4,7 +4,7 @@ SOURCE_GROUP("" FILES ${SRC})
 
 ADD_EXECUTABLE(unbuild_interface ${SRC})
 
-TARGET_LINK_LIBRARIES(unbuild_interface nelmisc)
+TARGET_LINK_LIBRARIES(unbuild_interface PRIVATE NeL::misc)
 NL_DEFAULT_PROPS(unbuild_interface "NeL, Tools, 3D: Unbuild Interface")
 NL_ADD_RUNTIME_FLAGS(unbuild_interface)
 

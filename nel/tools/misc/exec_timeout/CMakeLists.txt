@@ -4,7 +4,7 @@ SOURCE_GROUP("" FILES ${SRC})
 
 ADD_EXECUTABLE(exec_timeout ${SRC})
 
-TARGET_LINK_LIBRARIES(exec_timeout nelmisc)
+TARGET_LINK_LIBRARIES(exec_timeout PRIVATE NeL::misc)
 NL_DEFAULT_PROPS(exec_timeout "NeL, Tools, Misc: exec_timeout")
 NL_ADD_RUNTIME_FLAGS(exec_timeout)
 
