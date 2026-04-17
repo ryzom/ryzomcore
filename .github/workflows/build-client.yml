@@ -93,14 +93,14 @@ jobs:
         key: vcpkg-${{ matrix.os }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
 
     - name: Dependencies Linux
-      if: runner.os == 'Linux' && matrix.vcpkg != true
+      if: runner.os == 'Linux'
       run: |
         wget --quiet https://packages.microsoft.com/config/ubuntu/${{ matrix.ubuntu_version }}/packages-microsoft-prod.deb
         sudo dpkg -i packages-microsoft-prod.deb
         sudo apt update
         sudo apt remove --yes man-db
         sudo apt update
-        sudo apt install -y --no-install-recommends \
+        sudo apt install --yes --no-install-recommends \
           ccache \
           libasound2-dev \
           libgl1-mesa-dev \
@@ -119,8 +119,8 @@ jobs:
       if: runner.os == 'Linux' && matrix.vcpkg == true
       run: |
         sudo apt update
-        sudo apt install -y --no-install-recommends \
-          autoconf autoconf-archive automake libtool nasm libltdl-dev
+        sudo apt install --yes --no-install-recommends \
+          autoconf autoconf-archive automake libtool nasm libltdl-dev libgl1-mesa-dev
 
     - name: Dependencies macOS
       if: runner.os == 'macOS'
