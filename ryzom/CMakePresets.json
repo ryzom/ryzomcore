@@ -85,19 +85,27 @@
       }
     },
     {
-      "name": "windows-ryzom",
-      "inherits": [
-        "windows",
-        "ryzom"
-      ]
-    },
-    {
       "name": "ci-linux-ryzom-client-hunter",
       "inherits": [
         "hunter",
         "ccache",
         "ryzom-client",
         "linux"
+      ]
+    },
+    {
+      "name": "ci-linux-ryzom-client-vcpkg",
+      "inherits": [
+        "vcpkg",
+        "ryzom-client",
+        "linux"
+      ]
+    },
+    {
+      "name": "windows-ryzom",
+      "inherits": [
+        "windows",
+        "ryzom"
       ]
     },
     {

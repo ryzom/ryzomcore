@@ -63,6 +63,10 @@ jobs:
             ubuntu_version: 24.04
             cmake_preset: ci-linux-ryzom-client-hunter
             ccache: true
+          - os: ubuntu-24.04
+            ubuntu_version: 24.04
+            cmake_preset: ci-linux-ryzom-client-vcpkg
+            vcpkg: true
           - os: macos-15
             cmake_preset: ci-macos-ryzom-client-vcpkg
             vcpkg: true
