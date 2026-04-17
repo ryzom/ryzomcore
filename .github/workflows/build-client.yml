@@ -93,7 +93,7 @@ jobs:
         key: vcpkg-${{ matrix.os }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
 
     - name: Dependencies Linux
-      if: runner.os == 'Linux'
+      if: runner.os == 'Linux' && matrix.vcpkg != true
       run: |
         wget --quiet https://packages.microsoft.com/config/ubuntu/${{ matrix.ubuntu_version }}/packages-microsoft-prod.deb
         sudo dpkg -i packages-microsoft-prod.deb
