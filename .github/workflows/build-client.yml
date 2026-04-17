@@ -64,7 +64,6 @@ jobs:
             cmake_preset: ci-linux-ryzom-client-hunter
             ccache: true
           - os: ubuntu-24.04
-            ubuntu_version: 24.04
             cmake_preset: ci-linux-ryzom-client-vcpkg
             vcpkg: true
           - os: macos-15
@@ -94,7 +93,7 @@ jobs:
         key: vcpkg-${{ matrix.os }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
 
     - name: Dependencies Linux
-      if: runner.os == 'Linux'
+      if: runner.os == 'Linux' && matrix.vcpkg != true
       run: |
         wget --quiet https://packages.microsoft.com/config/ubuntu/${{ matrix.ubuntu_version }}/packages-microsoft-prod.deb
         sudo dpkg -i packages-microsoft-prod.deb
@@ -115,6 +114,13 @@ jobs:
         wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic_posix.h
         wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/quic_sal_stub.h
         sudo mv msquic.h msquic_posix.h quic_sal_stub.h /usr/include/
+
+    - name: Dependencies Linux
+      if: runner.os == 'Linux' && matrix.vcpkg == true
+      run: |
+        sudo apt update
+        sudo apt install -y --no-install-recommends \
+          autoconf autoconf-archive automake libtool nasm libltdl-dev
 
     - name: Dependencies macOS
       if: runner.os == 'macOS'
