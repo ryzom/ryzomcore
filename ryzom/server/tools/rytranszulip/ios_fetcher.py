@@ -143,6 +143,9 @@ class IosFetcher(RyzomService):
 					else:
 						channel = "⚜️  "+channel_id[8:]
 					channel_id = "dyn:"+channel_id
+				elif channel_id[:7] == "League_":
+					print(channel+" 🛑 "+sline[0]+" "+sline[1]+" ", " ".join(sline[2:5])+" ", sline[6])
+					return
 				else:
 					channel = "❇️  "+channel_id
 					channel_id = "dyn:"+channel_id
