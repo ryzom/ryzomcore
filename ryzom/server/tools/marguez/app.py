@@ -107,6 +107,10 @@ class Errors(Screen):
 	
 	def on_mount(self):
 		self.query_one(RichLog).write(last_run_errors)
+		err_file = "."+sys.argv[0].split("/")[-1].split(".")[0]+".err"
+		if os.path.isfile(err_file):
+			with open(err_file):
+				self.query_one(RichLog).write(f.read())
 
 
 class Marguez(App):
@@ -198,18 +202,18 @@ class Marguez(App):
 			self.messages_panel.search(event.value[1:])
 			event.input.placeholder = event.value
 			return
-			
+		service = "Ryzom_"+self.selected_service.split("_", 1)[-1]
 		try:
-			cid = self.client.incr(f"DagRun-{self.selected_service}-Id", 1)
+			cid = self.client.incr(f"DagRun-{service}-Id", 1)
 		except:
 			cid = None
 		
 		if not cid:
 			cid = 1
-			self.client.set(f"DagRun-{self.selected_service}-Id", 1)
+			self.client.set(f"DagRun-{service}-Id", 1)
 
-		print("Send Command", cid, event.value, "to", self.selected_service)
-		self.client.set(f"DagRun-{self.selected_service}-{cid}", event.value)
+		print("Send Command", cid, event.value, "to", service)
+		self.client.set(f"DagRun-{service}-{cid}", event.value)
 
 	def setLogSections(self, is_new_selected_service=False):
 		if self.selected_service and self.selected_service in self.services:
