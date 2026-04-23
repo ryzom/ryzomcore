@@ -606,12 +606,13 @@ void CGuild::dumpGuildInfos( NLMISC::CLog & log )
 
 		CEntityId eId = member->getIngameEId();
 		string name = CEntityIdTranslator::getInstance()->getByEntity( eId ).toUtf8();
-		log.displayNL("\tMember '%s' %s, index: %hu, grade: %s, enter time: %" NL_I64 "u",
+		log.displayNL("\tMember '%s' %s, index: %hu, grade: %s, enter time: %u, enter era: %u",
 			name.c_str(),
 			eId.toString().c_str(),
 			member->getMemberIndex(),
 			EGSPD::CGuildGrade::toString( member->getGrade() ).c_str(),
-			member->getRealEnterTime()
+			member->getEnterTime(),
+			member->getEnterEra(),
 			);
 	}
 
@@ -1413,7 +1414,7 @@ void CGuild::putMoney( CCharacter * user, uint64 money, uint16 session )
 }
 
 //----------------------------------------------------------------------------
-CGuildMember* CGuild::newMember( const EGSPD::TCharacterId & id, NLMISC::TGameCycle enterTime, uint32 enterEra )
+CGuildMember* CGuild::newMember( const EGSPD::TCharacterId & id, NLMISC::TGameCycle enterTime, sint32 enterEra )
 {
 	incMemberSession();
 	CGuildMember * member = EGS_PD_CAST<CGuildMember *>( EGSPD::CGuildMemberPD::create( id ) );
@@ -1423,7 +1424,7 @@ CGuildMember* CGuild::newMember( const EGSPD::TCharacterId & id, NLMISC::TGameCy
 	CGuildManager::getInstance()->storeCharToGuildAssoc(id, getId());
 
 	member->setEnterTime( enterTime == 0 ? CTickEventHandler::getGameCycle() : enterTime );
-	member->setEnterEra( enterEra == 0 ? CurrentEra : enterEra );
+	member->setEnterEra( enterEra == -1 ? CurrentEra : (uint32)enterEra );
 	member->setGrade( EGSPD::CGuildGrade::Member );
 	if ( !_FreeMemberIndexes.empty() )
 	{
