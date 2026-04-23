@@ -314,7 +314,7 @@ void CLoginStateMachine::run()
 						SM_EVENT(ev_create_account, st_create_account);
 						SM_EVENT(ev_bad_login, st_login);
 						SM_EVENT(ev_quit, st_end);
-					SM_END_EVENT_TABLE	
+					SM_END_EVENT_TABLE
 				}
 				else
 				{
@@ -467,12 +467,12 @@ void CLoginStateMachine::run()
 			/// check the data to check if patch needed
 			CLoginProgressPostThread::getInstance().step(CLoginStep(LoginStep_PostLogin, "login_step_post_login"));
 
-			if (!ClientCfg.PatchWanted || Args.haveLongArg("nopatch"))
-			{
-				// client don't want to be patched !
-				_CurrentState = st_display_eula;
-				break;
-			}
+		if (!ClientCfg.PatchWanted || (Args.haveArg("n") && Args.getArg("n").front() != "0") || (Args.haveLongArg("nopatch") && Args.getLongArg("nopatch").front() != "0"))
+		{
+			// client don't want to be patched !
+			_CurrentState = st_display_eula;
+			break;
+		}
 
 			initPatchCheck();
 			SM_BEGIN_EVENT_TABLE
