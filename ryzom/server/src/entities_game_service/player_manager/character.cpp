@@ -21628,7 +21628,7 @@ void CCharacter::outpostSideChosen(bool neutral, OUTPOSTENUMS::TPVPSide side)
 				CGuildMember* member = guild->getMemberFromEId(_Id);
 				if (member != NULL)
 				{
-					nlinfo("Check Need days = 21, %"NL_I64"u, %"NL_I64"u", NLMISC::CTime::getSeconds64bSince1970(), member->getRealEnterTimestamp());
+					nlinfo("Check Need days = 21, %" NL_I64 "u, %" NL_I64 "u", NLMISC::CTime::getSeconds64bSince1970(), member->getRealEnterTimestamp());
 					if (((NLMISC::CTime::getSeconds64bSince1970() - member->getRealEnterTimestamp()) / 86400) < OutpostDaysForGvX.get())
 					{
 						side = OUTPOSTENUMS::UnknownPVPSide;

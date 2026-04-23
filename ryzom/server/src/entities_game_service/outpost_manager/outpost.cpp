@@ -843,7 +843,7 @@ COutpost::TChallengeOutpostErrors COutpost::challengeOutpost( CGuild *attackerGu
 				CGuildMember* guild_member = EGS_PD_CAST<CGuildMember*> ( (*it).second );
 				EGS_PD_AST(guild_member);
 
-				nlinfo("Check Need days = %u, %"NL_I64"u, %"NL_I64"u", outpostForm->Level/NumberDayFactorGuildNeedForChallengeOutpost, NLMISC::CTime::getSeconds64bSince1970(), guild_member->getRealEnterTimestamp());
+				nlinfo("Check Need days = %u, %" NL_I64 "u, %" NL_I64 "u", outpostForm->Level/NumberDayFactorGuildNeedForChallengeOutpost, NLMISC::CTime::getSeconds64bSince1970(), guild_member->getRealEnterTimestamp());
 				if( outpostForm->Level/NumberDayFactorGuildNeedForChallengeOutpost < ((NLMISC::CTime::getSeconds64bSince1970() - guild_member->getRealEnterTimestamp()) / days) )
 				{
 					guildAttackerValid = true;

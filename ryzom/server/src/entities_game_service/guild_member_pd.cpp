@@ -64,7 +64,7 @@ uint32							CGuildMemberPD::getEnterEra() const
 }
 void							CGuildMemberPD::setEnterEra(uint32 __v, bool forceWrite)
 {
-	if ((_EnterTime != __v) || forceWrite)
+	if ((_EnterEra != __v) || forceWrite)
 	{
 		PDSLib.set(3, __BaseRow, (RY_PDS::TColumnIndex)(3), __v, _Id);
 	}

@@ -214,7 +214,7 @@ public:
 	///\name Member management
 	//@{
 	/// add a new member to the guild
-	CGuildMember* newMember( const EGSPD::TCharacterId & id, NLMISC::TGameCycle enterTime = 0, uint32 enterEra = 0);
+	CGuildMember* newMember( const EGSPD::TCharacterId & id, NLMISC::TGameCycle enterTime = 0, sint32 enterEra = -1);
 	/// Remove a member of the guild, taking appropriate action if the player is on or off line
 	void removeMember(const EGSPD::TCharacterId &id);
 	/// delete a member from the guild
