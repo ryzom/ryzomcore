@@ -612,7 +612,7 @@ void CGuild::dumpGuildInfos( NLMISC::CLog & log )
 			member->getMemberIndex(),
 			EGSPD::CGuildGrade::toString( member->getGrade() ).c_str(),
 			member->getEnterTime(),
-			member->getEnterEra(),
+			member->getEnterEra()
 			);
 	}
 
