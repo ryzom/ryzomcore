@@ -48,9 +48,9 @@ class IosFetcher(RyzomService):
 		self.db = None
 		try:
 			self.db = mysql.connector.connect(
-				host = self.config["DB_webig"]["host"],
-				user = self.config["DB_webig"]["user"],
-				passwd = self.config["DB_webig"]["pass"],
+				host = self.config["db_webig"]["host"],
+				user = self.config["db_webig"]["user"],
+				passwd = self.config["db_webig"]["pass"],
 				database = "webig",
 			)
 			print("MySQL Database connection successful")
@@ -148,7 +148,7 @@ class IosFetcher(RyzomService):
 					channel_id = "dyn:"+channel_id
 			elif channel == "tell":
 				channel = "player"
-				#channel_id = channel_id[1:]
+				channel_id = channel_id[1:]
 			elif channel == "arround":
 				message = message[5:]
 				channel_id = channel
@@ -162,6 +162,7 @@ class IosFetcher(RyzomService):
 			if len(ssender) > 1:
 				sender = ssender[1]
 
+			sline[6] = "".join([ s[0] for s in  sline[6].split() ])
 			print("ios logs", "✅ "+sline[0]+" "+sline[1]+" ", " ".join(sline[2:5])+" ", sline[6])
 			message = RyzomMessage("ios", sender, channel, channel_id, source_lang, langs, message)
 			last_id = self.addRyzomMessage(message)

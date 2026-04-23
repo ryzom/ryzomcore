@@ -60,9 +60,9 @@ class ShardCommands(RyzomService):
 		self.db = None
 		try:
 			self.db = mysql.connector.connect(
-				host = self.config["DB_webig"]["host"],
-				user = self.config["DB_webig"]["user"],
-				passwd = self.config["DB_webig"]["pass"],
+				host = self.config["db_webig"]["host"],
+				user = self.config["db_webig"]["user"],
+				passwd = self.config["db_webig"]["pass"],
 				database = "webig",
 			)
 			print("MySQL Database connection successful")

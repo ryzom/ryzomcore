@@ -299,8 +299,7 @@ inline CInventoryPtr CCharacter::getLootContainer()
 
 inline bool CCharacter::isInitChest(uint8 chest)
 {
-	if (chest < 20)
-		return _initializedChests[chest];
+	return chest < 20 && _initializedChests[chest];
 }
 
 inline void CCharacter::isInitChest(uint8 chest, bool value)

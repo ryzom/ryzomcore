@@ -71,71 +71,9 @@ function help:skipTutorial()
 end
 
 function help:displayWelcome()
-	-- Hide not ready windows
-	if not game:areInSilan() then
-		return
-	end
-
-	if getDbProp("UI:SAVE:SKIP_TUTORIAL") == 1 then
-		return
-	end
-
-	game:keepExpandCapWeb(true)
-
-	if getDbProp("UI:SAVE:TUTORIAL_ACTIVE_MAIN_CHAT") == 0 then
-		setDbProp("UI:SAVE:ISENABLED:AROUND_ME", 0)
-		setDbProp("UI:SAVE:ISENABLED:REGION_CHAT", 0)
-		setDbProp("UI:SAVE:ISENABLED:DYNAMIC_CHAT0", 0)
-	end
-
-	if getDbProp("UI:SAVE:TUTORIAL_ACTIVE_SETS") == 0 then
-		getUI("ui:interface:gestionsets").active = false
-	end
-
-	if getDbProp("UI:SAVE:TUTORIAL_ACTIVE_INFO_PLAYER_JOURNAL") == 0 then
-		getUI("ui:interface:info_player_journal").active = false
-	end
-
-	if getDbProp("UI:SAVE:TUTORIAL_ACTIVE_PLAYER") == 0 then
-		getUI("ui:interface:player").active = false
-	end
-
-	if getDbProp("UI:SAVE:TUTORIAL_ACTIVE_TARGET") == 0 then
-		getUI("ui:interface:target").active = false
-	end
-
-
-	getUI("ui:interface:milko_pad:content:mode_button").active = false
-	setDbProp("UI:SAVE:MK_MODE", 5)
-	game:activeMilkoKey(1, false)
-	game:activeMilkoKey(2, false)
-	game:activeMilkoKey(3, false)
-	game:activeMilkoKey(4, getDbProp("UI:SAVE:TUTORIAL_ACTIVE_INVENTORY") == 1) -- bag
-	game:activeMilkoKey(5, true) -- ency
-	game:activeMilkoKey(6, true) -- mission
-	game:activeMilkoKey(7, true) -- help
-	game:activeMilkoKey(8, true) -- system
-	game:activeMilkoKey(9, true) -- quit
-	game:resizeMilkoPad()
-	getUI("ui:interface:milko_pad").y = 5
 end
 
 function help:initWelcome()
-	if getDbProp("UI:SAVE:SKIP_TUTORIAL") == 1 then return end
-
-	local root = getUI("ui:interface")
-	local wins = {"compass", "player", "target", "welcome_info", "encyclopedia", "milko_pad:content:mode_button"}
-
-	for _, win in ipairs(wins) do
-		local ui = getUI("ui:interface:"..win, false)
-		if ui and ui.active and getDbProp("UI:SAVE:TUTORIAL_ACTIVE_"..win:upper()) == 0 then
-			ui.active = false
-			if win == "milko_pad:content:mode_button" then
-				game:resizeMilkoPad()
-			end
-		end
-	end
-	addOnDbChange(getUI("ui:interface:milko_pad"), "@UI:VARIABLES:CURRENT_SERVER_TICK", "help:checkCapActive()")
 end
 
 function help:checkCapActive()
@@ -184,4 +122,4 @@ function help:checkTutorialMilkoPad()
 end
 
 -- VERSION --
-RYZOM_HELP_VERSION = 335
+FILE_HELP_VERSION = 182

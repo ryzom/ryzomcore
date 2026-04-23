@@ -307,3 +307,6 @@ function GIF_SetFPS(groupId, fps)
     local p = _GIFPLAYERS[groupId]
     if p then p:setFPS(tonumber(fps) or 12) end
 end
+
+-- VERSION --
+FILE_RYGIF_VERSION = 137

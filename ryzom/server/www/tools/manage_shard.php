@@ -21,6 +21,7 @@ switch($command) {
 	break;
 
 	case 'lock':
+		echo sendToChat('The server will restart gently in 10 minutes...', $RocketChatGeneral, $ShardName, ':upside_down:');
 		@queryShard('su', 'rsm.setWSState '. $ShardId .' RESTRICTED ""');
 	break;
 
@@ -59,10 +60,10 @@ switch($command) {
 			}
 			if ($have_player && $RocketChatGeneral) {
 				$trads = [
-					'en' => 'Test:killing all services...',
+					'en' => 'killing all services...',
 					'fr' => '<[FR]>:flag_united_kingdom: tuant tous les services...',
 				];
-				sendToChat($trads['en'], $RocketChatGeneral, 'Admin', ':broken_heart:');
+				sendToChat($trads['en'], $RocketChatGeneral, $ShardName, ':broken_heart:');
 			}
 		}
 

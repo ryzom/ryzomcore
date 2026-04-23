@@ -47,6 +47,11 @@ class RyzomMessage():
 	def output(self):
 		return repr(self.get())
 
+	def output_zipped(self):
+		out = list(self.get())
+		out[6] = "".join([ s[0] for s in  out[6].split() ])
+		out[8] = "".join([ s[0] for s in  out[8].split() ])
+		return repr(out)
 
 class RyzomService(Service):
 	def __init__(self):
@@ -82,7 +87,8 @@ class RyzomService(Service):
 	def addRyzomMessage(self, message):
 		self.last_chat_id = self.client.incr("Ryzom-Chat-LastID", 1)
 		self.client.set("Ryzom-Chat-"+str(self.last_chat_id), message.get(), 24*60*60)
-		print("Set", "Ryzom-Chat-"+str(self.last_chat_id), "=", message.get())
+
+		print("Set", "Ryzom-Chat-"+str(self.last_chat_id), "=", message.output_zipped())
 		return self.last_chat_id
 
 	def getRyzomMessage(self, i):

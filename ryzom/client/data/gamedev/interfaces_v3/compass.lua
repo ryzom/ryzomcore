@@ -49,11 +49,24 @@ end
 
 
 function game:displayDynE()
-	local win = getUI("ui:interface:app2453")
+	local win = getUI("ui:interface:ark_dyne_window")
 	if win ~= nil and win.active == true then
 		win.active = false
 	else
-		AppZone:launchApp(2453)
+		if not win then
+			win = createRootGroupInstance("webig_browser", "ark_dyne_window", {x = 0, y = 0, w = 370, h = 600})
+			local ui = getUI("ui:interface")
+			win.x = math.floor((ui.w - 400) / 2)
+			win.y = math.floor((ui.h + 600) / 2)
+			win:find("html"):renderHtml("<i>uiLoading</i>")
+		end
+		win.active = true
+		win.opened = true
+		win:find("browse_redo").active = false
+		win:find("browse_redo").active = false
+		win:find("browse_undo").active = false
+		win:find("browse_home").active = false
+		getUI("ui:interface:web_lua_action"):find("html"):browse("https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=12517&command=reset_all")
 	end
 end
 
@@ -69,4 +82,4 @@ end
 setOnDraw(getUI("ui:interface:compass"), "game:updateCompass()")
 
 -- VERSION --
-RYZOM_COMPASS_VERSION = 335
+FILE_COMPASS_VERSION = 183
