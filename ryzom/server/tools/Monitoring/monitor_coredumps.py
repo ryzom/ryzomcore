@@ -28,6 +28,7 @@ def sendNotif(message):
 def export_gdb(pid):
 	date = datetime.today().strftime("%Y_%m_%d_%H_%M_%S")
 	sbin = ""
+	service_name = ""
 	if os.path.isfile("/tmp/"+pid+".core"):
 		p = Popen(["file", "/tmp/"+pid+".core"],  stdout=PIPE, stdin=PIPE, stderr=PIPE, text=True)
 		stdout_data = p.communicate(input="\n")[0]
@@ -41,7 +42,7 @@ def export_gdb(pid):
 			if "Command Line:" in line:
 				sline = line.split("../sbin/")
 				if len(sline) > 1:
-					line = sline[1]
+					service_name = sline[1]
 					sbin = line.split(" ")[0]
 				else:
 					return
@@ -56,7 +57,9 @@ def export_gdb(pid):
 	p = Popen(["schroot", "-c", "atys", "--", "gdb", "/home/nevrax/shard/sbin/"+sbin, "/tmp/"+pid+".core"], stdout=PIPE, stdin=PIPE, stderr=PIPE, text=True)
 	stdout_data = p.communicate(input="bt\n")[0]
 	if sbin == "ryzom_ai_service":
-		logname = sbin+"_"+line.split(" -N")[1].split(" ")[0]
+		print(service_name)
+		logname = sbin+"_"+service_name
+		#.split(" -N")[1].split(" ")[0]
 	else:
 		logname = sbin
 	with open("/home/nevrax/shard/crashs/"+date+"_"+logname+".log", "w") as f:
@@ -90,4 +93,3 @@ def monitor(path):
 if __name__ == "__main__":
 	path = sys.argv[1]
 	monitor(path)
-
