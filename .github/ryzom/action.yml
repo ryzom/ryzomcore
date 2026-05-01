@@ -40,7 +40,7 @@ runs:
           libjpeg-dev \
           libgif-dev libfreetype-dev \
           freeglut3-dev \
-          liblua5.2-dev libluabind-dev libcpptest-dev \
+          liblua5.2-dev libluabind-dev \
           libogg-dev libvorbis-dev libopenal-dev \
           libavcodec-dev libavformat-dev libavdevice-dev libswscale-dev libpostproc-dev \
           libmysqlclient-dev \

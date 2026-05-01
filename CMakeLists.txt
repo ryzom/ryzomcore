@@ -316,8 +316,6 @@ IF(WITH_MSQUIC)
 ENDIF()
 
 IF(WITH_NEL_TESTS OR WITH_TESTING)
-  FIND_PACKAGE(CppTest)
-
   ENABLE_TESTING()
   # GoogleTest requires at least C++17 not the whole project depends on google test though
   # set(CMAKE_CXX_STANDARD 17)

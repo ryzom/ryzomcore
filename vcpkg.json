@@ -43,8 +43,7 @@
     }
   ],
   "default-features": [
-    "pipeline-max",
-    "testing"
+    "pipeline-max"
   ],
   "features": {
     "pipeline-max": {
@@ -63,12 +62,6 @@
       "description": "Builds with MySQL",
       "dependencies": [
         "libmariadb"
-      ]
-    },
-    "testing": {
-      "description": "Builds tests",
-      "dependencies": [
-        "cpptest"
       ]
     }
   }
