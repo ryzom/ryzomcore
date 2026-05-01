@@ -113,6 +113,7 @@ void CGuildMemberModule::quitGuild()
 	clearOnlineGuildProperties();
 	uint32 enterTime = _GuildMemberCore->getEnterTime();
 	uint32 enterEra = _GuildMemberCore->getEnterEra();
+	uint64 realEnterTime = _GuildMemberCore->getRealEnterTime();
 	guild->deleteMember( _GuildMemberCore );
 	if ( guild->getMembersBegin() == guild->getMembersEnd() )
 	{
@@ -124,10 +125,10 @@ void CGuildMemberModule::quitGuild()
 		CCharacter *c = PlayerManager.getChar(proxy.getId());
 		if (c) {
 			// if player are in guild since 3 days, save it
-			if (((CTickEventHandler::getGameCycle() - enterTime) / (86400/CTickEventHandler::getGameTimeStep())) > 3)
+			if (((CTickEventHandler::getGameCycle(CurrentEra) - realEnterTime) / 8640) > 3)
 			{
-				nlinfo("char in guild since 3 days, set enter time to %u", enterTime);
-				c->setGuildEnterTime(enterTime);
+				nlinfo("char in guild since 3 days, set enter time to %u %u", enterTime, enterEra);
+				c->setGuildEnterTime(enterTime, enterEra);
 				c->setLastGuildId(guild->getId());
 			}
 		}

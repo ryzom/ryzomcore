@@ -84,10 +84,9 @@ TReportResult report(const std::string &title, const std::string &subject, const
 	std::string reportPath;
 	if (!body.empty())
 	{
-		std::string reportFile = getLogDirectory() + NLMISC::toString("nel_report_%u.log", (uint)time(NULL));
-		reportPath = CFile::findNewFile(reportFile);
+		std::string reportFile = getLogDirectory() + "crash.log";
 
-		FILE *f = nlfopen(reportPath, "wb"); // write as binary so \n are preserved
+		FILE *f = nlfopen(reportFile, "wb"); // write as binary so \n are preserved
 
 		if (!f)
 		{

@@ -2371,7 +2371,7 @@ public:
 
 	/// get/set the last guild enter time
 	NLMISC::TGameCycle getGuildEnterTime() const;
-	void setGuildEnterTime(NLMISC::TGameCycle time);
+	void setGuildEnterTime(NLMISC::TGameCycle time, uint32 era);
 
 	/// get/set the last guild enter time
 	NLMISC::TGameCycle getGuildEnterEra() const;

@@ -921,7 +921,7 @@ NLMISC_COMMAND(getItemList, "get list of items of character by filter", "<uid> [
 							string item_stats = toString("%3d|%s|", j, sheet.c_str());
 							if (!extra.empty())
 								itemPtr->getStats(extra, item_stats);
-							log.displayNL(item_stats.c_str());
+							log.displayNL("%s", item_stats.c_str());
 						}
 					}
 				}
@@ -1022,7 +1022,7 @@ NLMISC_COMMAND(getNamedItemList, "get list of named items of character by filter
 							string item_stats = toString("%3d|%s|", j, phraseId.c_str());
 							if (!extra.empty())
 								itemPtr->getStats(extra, item_stats);
-							log.displayNL(item_stats.c_str());
+							log.displayNL("%s", item_stats.c_str());
 						}
 					}
 				}
@@ -3085,15 +3085,15 @@ NLMISC_COMMAND(getTags, "get player tags", "<uid>")
 
 	GET_ACTIVE_CHARACTER
 
-	log.displayNL(c->getTagPvPA().c_str());
-	log.displayNL(c->getTagPvPB().c_str());
-	log.displayNL(c->getDefaultTagA().c_str());
-	log.displayNL(c->getDefaultTagB().c_str());
-	log.displayNL(c->getTagA().c_str());
-	log.displayNL(c->getTagB().c_str());
-	log.displayNL(c->getTagRightHand().c_str());
-	log.displayNL(c->getTagLeftHand().c_str());
-	log.displayNL(c->getTagHat().c_str());
+	log.displayNL("%s", c->getTagPvPA().c_str());
+	log.displayNL("%s", c->getTagPvPB().c_str());
+	log.displayNL("%s", c->getDefaultTagA().c_str());
+	log.displayNL("%s", c->getDefaultTagB().c_str());
+	log.displayNL("%s", c->getTagA().c_str());
+	log.displayNL("%s", c->getTagB().c_str());
+	log.displayNL("%s", c->getTagRightHand().c_str());
+	log.displayNL("%s", c->getTagLeftHand().c_str());
+	log.displayNL("%s", c->getTagHat().c_str());
 	log.displayNL("%d", c->getVisualPropertyA().directAccessForStructMembers().PropertySubData.WeaponRightHand);
 	log.displayNL("%d", c->getVisualPropertyA().directAccessForStructMembers().PropertySubData.WeaponLeftHand);
 	log.displayNL("%d", c->getVisualPropertyA().directAccessForStructMembers().PropertySubData.HatModel);
@@ -4652,7 +4652,7 @@ NLMISC_COMMAND(haveBricks, "Return list of player selected learned bricks", "<ui
 	{
 		CSheetId brickId(bricks[i]);
 		if (c->haveBrick(brickId))
-			log.displayNL(bricks[i].c_str());
+			log.displayNL("%s", bricks[i].c_str());
 	}
 
 	return true;
