@@ -27,7 +27,12 @@ SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
 
 ADD_LIBRARY(studio_plugin_disp_sheet_id MODULE ${SRC} ${OVQT_DISP_SHEET_ID_PLUGIN_MOC_SRC} ${OVQT_EXT_SYS_SRC} ${OVQT_DISP_SHEET_ID_PLUGIN_UI_HDRS})
 
-TARGET_LINK_LIBRARIES(studio_plugin_disp_sheet_id studio_plugin_core NeL::misc ${QT_LIBRARIES})
+TARGET_LINK_LIBRARIES(studio_plugin_disp_sheet_id
+        studio_plugin_core
+        NeL::misc
+        Qt::Core
+        Qt::Widgets
+)
 
 IF(WITH_STLPORT)
   TARGET_LINK_LIBRARIES(studio_plugin_disp_sheet_id ${CMAKE_THREAD_LIBS_INIT})
