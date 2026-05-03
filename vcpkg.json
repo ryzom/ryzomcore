@@ -55,7 +55,7 @@
     "qt": {
       "description": "Builds with QT",
       "dependencies": [
-        "qt"
+        "qt5"
       ]
     },
     "mysql": {

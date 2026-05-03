@@ -56,7 +56,13 @@ SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
 
 ADD_LIBRARY(studio_plugin_core SHARED ${SRC} ${OVQT_CORE_PLUGIN_MOC_SRC} ${OVQT_EXT_SYS_SRC} ${OVQT_CORE_PLUGIN_RC_SRCS} ${OVQT_CORE_PLUGIN_UI_HDRS})
 
-TARGET_LINK_LIBRARIES(studio_plugin_core NeL::misc NeL::3d ${QT_LIBRARIES})
+TARGET_LINK_LIBRARIES(studio_plugin_core
+		NeL::misc
+		NeL::3d
+		Qt::Core
+		Qt::Gui
+		Qt::Widgets
+)
 
 NL_DEFAULT_PROPS(studio_plugin_core "Tools: Studio Plugin: Core")
 NL_ADD_RUNTIME_FLAGS(studio_plugin_core)
