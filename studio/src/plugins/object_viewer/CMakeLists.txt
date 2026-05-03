@@ -181,8 +181,9 @@ TARGET_LINK_LIBRARIES(studio_plugin_object_viewer
 		NeL::sound
 		NeL::ligo
 		NeL::georges
-		${QT_LIBRARIES}
-		${QT_QTOPENGL_LIBRARY}
+		Qt::Core
+		Qt::Gui
+		Qt::Widgets
 )
 
 NL_DEFAULT_PROPS(studio_plugin_object_viewer "Tools: Studio Plugin: Object Viewer")
