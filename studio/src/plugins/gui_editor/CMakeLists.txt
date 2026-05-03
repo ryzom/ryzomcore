@@ -87,8 +87,9 @@ TARGET_LINK_LIBRARIES(studio_plugin_gui_editor
 		NeL::misc
 		NeL::3d
 		NeL::gui
-        ${QT_LIBRARIES}
-        ${QT_QTOPENGL_LIBRARY}
+		Qt::Core
+		Qt::Gui
+		Qt::Widgets
         ${QtPropertyBrowser_LIBRARY}
         LibXml2::LibXml2
 )
