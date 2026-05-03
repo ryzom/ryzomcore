@@ -25,7 +25,12 @@ SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
 
 ADD_LIBRARY(studio_plugin_log MODULE ${SRC} ${OVQT_PLUG_LOG_MOC_SRC} ${OVQT_EXT_SYS_SRC} ${OVQT_PLUG_LOG_UI_HDRS})
 
-TARGET_LINK_LIBRARIES(studio_plugin_log studio_plugin_core NeL::misc ${QT_LIBRARIES})
+TARGET_LINK_LIBRARIES(studio_plugin_log
+        studio_plugin_core
+        NeL::misc
+        Qt::Core
+        Qt::Widgets
+)
 
 NL_DEFAULT_PROPS(studio_plugin_log "Tools: Studio Plugin: Log")
 NL_ADD_RUNTIME_FLAGS(studio_plugin_log)
