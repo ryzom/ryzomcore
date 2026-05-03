@@ -56,6 +56,8 @@ SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
 
 ADD_LIBRARY(studio_plugin_core SHARED ${SRC} ${OVQT_CORE_PLUGIN_MOC_SRC} ${OVQT_EXT_SYS_SRC} ${OVQT_CORE_PLUGIN_RC_SRCS} ${OVQT_CORE_PLUGIN_UI_HDRS})
 
+ADD_LIBRARY(Studio::plugin::core ALIAS studio_plugin_core)
+
 TARGET_LINK_LIBRARIES(studio_plugin_core
 		NeL::misc
 		NeL::3d

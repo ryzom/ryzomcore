@@ -36,7 +36,7 @@ SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
 ADD_LIBRARY(studio_plugin_bnp_manager MODULE ${SRC} ${OVQT_PLUG_BNP_MANAGER_MOC_SRC} ${OVQT_EXT_SYS_SRC} ${OVQT_PLUGIN_BNP_MANAGER_RC_SRCS} ${OVQT_PLUG_BNP_MANAGER_UI_HDRS})
 
 TARGET_LINK_LIBRARIES(studio_plugin_bnp_manager
-		studio_plugin_core
+		Studio::plugin::core
 		NeL::misc
 		NeL::georges
 		Qt::Core
