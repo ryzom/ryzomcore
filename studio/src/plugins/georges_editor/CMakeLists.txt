@@ -59,7 +59,8 @@ TARGET_LINK_LIBRARIES(studio_plugin_georges_editor
         NeL::georges
         qtpropertybrowser
         ${QtPropertyBrowser_LIBRARY}
-        ${QT_LIBRARIES}
+		Qt::Core
+		Qt::Widgets
         LibXml2::LibXml2
 )
 
