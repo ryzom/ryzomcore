@@ -33,7 +33,13 @@ SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
 
 ADD_LIBRARY(studio_plugin_tile_editor MODULE ${SRC} ${OVQT_TILE_EDITOR_PLUGIN_MOC_SRC} ${OVQT_PLUG_TILE_EDITOR_RC_SRCS} ${OVQT_EXT_SYS_SRC} ${OVQT_TILE_EDITOR_PLUGIN_UI_HDRS})
 
-TARGET_LINK_LIBRARIES(studio_plugin_tile_editor studio_plugin_core NeL::misc ${QT_LIBRARIES})
+TARGET_LINK_LIBRARIES(studio_plugin_tile_editor
+        studio_plugin_core
+        NeL::misc
+        Qt::Core
+        Qt::Gui
+        Qt::Widgets
+)
 
 IF(WITH_STLPORT)
   TARGET_LINK_LIBRARIES(studio_plugin_tile_editor ${CMAKE_THREAD_LIBS_INIT})
