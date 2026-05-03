@@ -33,7 +33,15 @@ SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
 
 ADD_LIBRARY(studio_plugin_zone_painter MODULE ${SRC} ${OVQT_PLUG_ZONE_PAINTER_MOC_SRC} ${OVQT_PLUG_ZONE_PAINTER_RC_SRCS} ${OVQT_EXT_SYS_SRC} ${OVQT_PLUG_ZONE_PAINTER_UI_HDRS})
 
-TARGET_LINK_LIBRARIES(studio_plugin_zone_painter studio_plugin_core NeL::misc NeL::3d ${QT_LIBRARIES} ${QT_QTOPENGL_LIBRARY})
+TARGET_LINK_LIBRARIES(studio_plugin_zone_painter
+        studio_plugin_core
+        NeL::misc
+        NeL::3d
+        Qt::Core
+        Qt::Gui
+        Qt::OpenGL
+        Qt::Widgets
+)
 
 NL_DEFAULT_PROPS(studio_plugin_zone_painter "Tools: Studio Plugin: Zone Painter")
 NL_ADD_RUNTIME_FLAGS(studio_plugin_zone_painter)

@@ -60,8 +60,10 @@ TARGET_LINK_LIBRARIES(studio_plugin_world_editor
 		NeL::3d
 		${QtPropertyBrowser_LIBRARY}
 		QtPropertyBrowser::Text
-		${QT_LIBRARIES}
-		${QT_QTOPENGL_LIBRARY}
+		Qt::Core
+		Qt::Gui
+		Qt::OpenGL
+		Qt::Widgets
 		LibXml2::LibXml2
 )
 
