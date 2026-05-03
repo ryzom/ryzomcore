@@ -17,26 +17,34 @@ SET(OVQT_PLUG_BNP_MANAGER_HDR  bnp_manager_plugin.h
                                   )
 SET(OVQT_PLUG_BNP_MANAGER_UIS	bnp_dirtree_form.ui
 								bnp_filelist_dialog.ui
+								bnp_manager_window.ui
 								)
 
 SET(OVQT_PLUGIN_BNP_MANAGER_RCS bnp_manager.qrc)
 
 SET(QT_USE_QTGUI TRUE)
 
-QT5_ADD_RESOURCES(OVQT_PLUGIN_BNP_MANAGER_RC_SRCS ${OVQT_PLUGIN_BNP_MANAGER_RCS})
 QT5_WRAP_CPP(OVQT_PLUG_BNP_MANAGER_MOC_SRC ${OVQT_PLUG_BNP_MANAGER_HDR})
-QT5_WRAP_UI(OVQT_PLUG_BNP_MANAGER_UI_HDRS ${OVQT_PLUG_BNP_MANAGER_UIS})
 
 SOURCE_GROUP(QtResources FILES ${OVQT_PLUG_BNP_MANAGER_UIS} ${OVQT_PLUGIN_BNP_MANAGER_RCS})
-SOURCE_GROUP(QtGeneratedUiHdr FILES ${OVQT_PLUG_BNP_MANAGER_UI_HDRS})
 SOURCE_GROUP(QtGeneratedMocSrc FILES ${OVQT_PLUG_BNP_MANAGER_MOC_SRC})
 SOURCE_GROUP("BNP Manager Plugin" FILES ${SRC})
 SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
 
-ADD_LIBRARY(studio_plugin_bnp_manager MODULE ${SRC} ${OVQT_PLUG_BNP_MANAGER_MOC_SRC} ${OVQT_EXT_SYS_SRC} ${OVQT_PLUGIN_BNP_MANAGER_RC_SRCS} ${OVQT_PLUG_BNP_MANAGER_UI_HDRS})
+ADD_LIBRARY(studio_plugin_bnp_manager MODULE ${SRC} ${OVQT_PLUG_BNP_MANAGER_MOC_SRC} ${OVQT_EXT_SYS_SRC})
+
+target_sources(studio_plugin_bnp_manager
+		PRIVATE
+		bnp_manager.qrc
+		bnp_dirtree_form.ui
+		bnp_filelist_dialog.ui
+		bnp_manager_window.ui
+)
 
 TARGET_LINK_LIBRARIES(studio_plugin_bnp_manager
+		PUBLIC
 		Studio::plugin::core
+		PRIVATE
 		NeL::misc
 		NeL::georges
 		Qt::Core
