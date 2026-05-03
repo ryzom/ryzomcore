@@ -61,6 +61,7 @@ TARGET_LINK_LIBRARIES(studio_plugin_core
 		NeL::3d
 		Qt::Core
 		Qt::Gui
+		Qt::OpenGL
 		Qt::Widgets
 )
 
