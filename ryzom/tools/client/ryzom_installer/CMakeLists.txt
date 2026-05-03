@@ -8,11 +8,6 @@ FILE(GLOB CLIENT_INSTALL_RCS res/*.qrc)
 CONFIGURE_FILE(translations/translations.qrc ${CMAKE_CURRENT_BINARY_DIR}/translations.qrc COPYONLY)
 LIST(APPEND CLIENT_INSTALL_RCS ${CMAKE_CURRENT_BINARY_DIR}/translations.qrc)
 
-IF(WIN32)
-  FIND_PACKAGE(Qt5WinExtras)
-  SET(QT_LIBRARIES Qt5::WinExtras ${QT_LIBRARIES})
-ENDIF()
-
 #  uncomment this line if you want to update original translations
 #  QT5_CREATE_TRANSLATION(CLIENT_INSTALL_Q ${CLIENT_INSTALL_UIS} ${SRC} ${CLIENT_INSTALL_TRANS} OPTIONS -I ${CMAKE_CURRENT_SOURCE_DIR})
 QT5_ADD_TRANSLATION(CLIENT_INSTALL_QM ${CLIENT_INSTALL_TRANS} ${CLIENT_INSTALL_BASE_TRANS})
@@ -66,13 +61,18 @@ TARGET_LINK_LIBRARIES(ryzom_installer_qt
         PRIVATE
         NeL::misc
         NeL::sevenzip
-        ${QT_LIBRARIES}
+        Qt::Core
+        Qt::Gui
+        Qt::Network
+        Qt::Widgets
 )
 
 IF(WIN32)
+  FIND_PACKAGE(Qt5WinExtras)
   TARGET_LINK_LIBRARIES(ryzom_installer_qt
           PRIVATE
           NeL::misc
+          Qt::WinExtras
           ${WINSDK_LIBRARY_DIR}/Version.lib
   )
 ENDIF()
