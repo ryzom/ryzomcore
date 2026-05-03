@@ -82,7 +82,7 @@ ADD_LIBRARY(studio_plugin_gui_editor MODULE ${SRC}
 
 TARGET_LINK_LIBRARIES(studio_plugin_gui_editor
         PUBLIC
-        studio_plugin_core
+        Studio::plugin::core
         PRIVATE
 		NeL::misc
 		NeL::3d

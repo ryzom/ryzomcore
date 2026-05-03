@@ -46,8 +46,10 @@ ADD_LIBRARY(studio_plugin_landscape_editor SHARED ${SRC}
 						${OVQT_PLUGIN_LANDSCAPE_EDITOR_UI_HDRS}
 						${OVQT_PLUGIN_LANDSCAPE_EDITOR_RC_SRCS})
 
+add_library(Studio::plugin::LandscapeEditor ALIAS studio_plugin_landscape_editor)
+
 TARGET_LINK_LIBRARIES(studio_plugin_landscape_editor
-		studio_plugin_core
+		Studio::plugin::core
 		NeL::misc
 		NeL::3d
 		NeL::georges

@@ -38,7 +38,7 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/common/src)
 ADD_LIBRARY(studio_plugin_mission_compiler MODULE ${SRC} ${OVQT_PLUG_MISSION_COMPILER_MOC_SRC} ${OVQT_PLUG_MISSION_COMPILER_RC_SRCS} ${OVQT_EXT_SYS_SRC} ${OVQT_PLUG_MISSION_COMPILER_UI_HDRS})
 
 TARGET_LINK_LIBRARIES(studio_plugin_mission_compiler
-        studio_plugin_core
+        Studio::plugin::core
         NeL::misc
         NeL::ligo
         ryzom_mission_compiler_lib

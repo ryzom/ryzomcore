@@ -21,7 +21,7 @@ SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
 ADD_LIBRARY(studio_plugin_sheet_builder MODULE ${SRC} ${OVQT_PLUG_SHEET_BUILDER_MOC_SRC} ${OVQT_EXT_SYS_SRC})
 
 TARGET_LINK_LIBRARIES(studio_plugin_sheet_builder
-        studio_plugin_core
+        Studio::plugin::core
         NeL::misc
         Qt::Core
         Qt::Widgets

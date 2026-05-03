@@ -30,7 +30,7 @@ SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
 ADD_LIBRARY(studio_plugin_example MODULE ${SRC} ${OVQT_PLUG_EXAMPLE_MOC_SRC} ${OVQT_EXT_SYS_SRC} ${OVQT_PLUG_EXAMPLE_UI_HDRS})
 
 TARGET_LINK_LIBRARIES(studio_plugin_example
-        studio_plugin_core
+        Studio::plugin::core
         NeL::misc
         NeL::3d
         Qt::Core

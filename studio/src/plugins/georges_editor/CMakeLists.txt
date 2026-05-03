@@ -53,7 +53,7 @@ ADD_LIBRARY(studio_plugin_georges_editor MODULE ${SRC} ${OVQT_PLUG_GEORGES_EDITO
 
 TARGET_LINK_LIBRARIES(studio_plugin_georges_editor
         PUBLIC
-        studio_plugin_core
+        Studio::plugin::core
         PRIVATE
         NeL::misc
         NeL::georges
