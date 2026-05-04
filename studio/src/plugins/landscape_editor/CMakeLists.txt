@@ -8,17 +8,6 @@ SET(OVQT_EXT_SYS_SRC	${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin.
 			${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_manager.h
 			${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_spec.h)
 
-SET(OVQT_PLUGIN_LANDSCAPE_EDITOR_HDR	landscape_editor_plugin.h
-					landscape_editor_window.h
-					landscape_scene_base.h
-					landscape_scene.h
-					list_zones_model.h
-					list_zones_widget.h
-					landscape_view.h
-					project_settings_dialog.h
-					snapshot_dialog.h
-)
-
 SET(OVQT_PLUGIN_LANDSCAPE_EDITOR_UIS	landscape_editor_window.ui
 					list_zones_widget.ui
 					project_settings_dialog.ui
@@ -28,21 +17,31 @@ SET(OVQT_PLUGIN_LANDSCAPE_EDITOR_UIS	landscape_editor_window.ui
 SET(QT_USE_QTGUI TRUE)
 SET(QT_USE_QTOPENGL TRUE)
 
-QT5_WRAP_CPP(OVQT_PLUGIN_LANDSCAPE_EDITOR_MOC_SRC ${OVQT_PLUGIN_LANDSCAPE_EDITOR_HDR})
-
 SOURCE_GROUP(QtResources FILES ${OVQT_PLUGIN_LANDSCAPE_EDITOR_UIS})
-SOURCE_GROUP(QtGeneratedMocQrcSrc FILES ${OVQT_PLUGIN_LANDSCAPE_EDITOR_MOC_SRC} OVQT_PLUGIN_LANDSCAPE_EDITOR_RC_SRCS)
 SOURCE_GROUP("Landscape Editor Plugin" FILES ${SRC})
 SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
 
-ADD_LIBRARY(studio_plugin_landscape_editor SHARED ${SRC}
-						${OVQT_PLUGIN_LANDSCAPE_EDITOR_MOC_SRC} 
-						${OVQT_EXT_SYS_SRC})
+ADD_LIBRARY(studio_plugin_landscape_editor SHARED ${OVQT_EXT_SYS_SRC})
 
 add_library(Studio::plugin::LandscapeEditor ALIAS studio_plugin_landscape_editor)
 
 target_sources(studio_plugin_landscape_editor
         PRIVATE
+        builder_zone.cpp
+        builder_zone_base.cpp
+        builder_zone_region.cpp
+        landscape_actions.cpp
+        landscape_editor_plugin.cpp
+        landscape_editor_window.cpp
+        landscape_scene.cpp
+        landscape_scene_base.cpp
+        landscape_view.cpp
+        list_zones_model.cpp
+        list_zones_widget.cpp
+        pixmap_database.cpp
+        project_settings_dialog.cpp
+        snapshot_dialog.cpp
+        zone_region_editor.cpp
         landscape_editor.qrc
         landscape_editor_window.ui
         list_zones_widget.ui
