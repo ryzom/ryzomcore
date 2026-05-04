@@ -9,7 +9,13 @@ SET(WORDS_DIC_RCS words_dic_Qt.qrc)
 
 ADD_EXECUTABLE(words_dic_qt WIN32 ${WORDS_DIC_SRC} ${WORDS_DIC_HDR} ${WORDS_DIC_RCS} ${WORDS_DIC_UIS})
 TARGET_INCLUDE_DIRECTORIES(words_dic_qt PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
-TARGET_LINK_LIBRARIES(words_dic_qt PRIVATE ${QT_LIBRARIES} NeL::misc)
+TARGET_LINK_LIBRARIES(words_dic_qt
+        PRIVATE
+        NeL::misc
+        Qt::Core
+        Qt::Gui
+        Qt::Widgets
+)
 target_compile_definitions(words_dic_qt PRIVATE NL_WORDS_DIC_CFG="${NL_ETC_PREFIX}/")
 
 NL_DEFAULT_PROPS(words_dic_qt "NeL, Tools, Misc: Qt Words Dic")

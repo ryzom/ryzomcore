@@ -10,13 +10,13 @@ SOURCE_GROUP("" FILES ${SRCS} ${HDRS} ${RSRC} ${RESOURCES})
 
 NL_TARGET_LIB(shared_widgets ${SRCS} ${HDRS} ${RSRC} ${RESOURCES})
 
-IF(QT_STATIC)
-  SET(SHARED_WIDGETS_QT_LIBRARIES ${QT_LIBRARIES})
-ELSE()
-  SET(SHARED_WIDGETS_QT_LIBRARIES Qt${QT_VERSION_MAJOR}::Widgets)
-ENDIF()
-
-TARGET_LINK_LIBRARIES(shared_widgets NeL::misc NeL::3d ${SHARED_WIDGETS_QT_LIBRARIES})
+TARGET_LINK_LIBRARIES(shared_widgets
+        PUBLIC
+        NeL::misc
+        Qt::Core
+        Qt::Gui
+        Qt::Widgets
+)
 NL_DEFAULT_PROPS(shared_widgets "NeL, Tools, 3D: Shared Widgets")
 NL_ADD_RUNTIME_FLAGS(shared_widgets)
 

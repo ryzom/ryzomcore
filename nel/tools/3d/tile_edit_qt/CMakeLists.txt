@@ -11,7 +11,14 @@ ADD_EXECUTABLE(tile_edit_qt WIN32 ${TILE_EDIT_SRC} ${TILE_EDIT_HDR} ${TILE_EDIT_
 
 TARGET_INCLUDE_DIRECTORIES(tile_edit_qt PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 
-TARGET_LINK_LIBRARIES(tile_edit_qt PRIVATE ${QT_LIBRARIES} NeL::misc NeL::3d)
+TARGET_LINK_LIBRARIES(tile_edit_qt
+        PRIVATE
+        NeL::misc
+        NeL::3d
+        Qt::Core
+        Qt::Gui
+        Qt::Widgets
+)
 NL_DEFAULT_PROPS(tile_edit_qt "NeL, Tools, 3D: Qt Tile Editor")
 NL_ADD_RUNTIME_FLAGS(tile_edit_qt)
 
