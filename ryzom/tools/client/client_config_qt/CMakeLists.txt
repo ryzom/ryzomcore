@@ -62,7 +62,10 @@ TARGET_LINK_LIBRARIES(ryzom_configuration_qt
         PRIVATE
         NeL::misc
         NeL::3d
-        ${QT_LIBRARIES}
+        Qt::Core
+        Qt::Gui
+        Qt::OpenGL
+        Qt::Widgets
         OpenGL::GL
 )
 
