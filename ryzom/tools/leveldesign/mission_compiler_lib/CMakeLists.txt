@@ -20,7 +20,7 @@ target_sources(ryzom_mission_compiler_lib
 )
 
 
-TARGET_INCLUDE_DIRECTORIES(ryzom_mission_compiler_lib PRIVATE ${NEL_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+TARGET_INCLUDE_DIRECTORIES(ryzom_mission_compiler_lib PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_mission_compiler_lib
         PUBLIC

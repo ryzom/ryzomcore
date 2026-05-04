@@ -52,8 +52,8 @@ TARGET_INCLUDE_DIRECTORIES(georges_editor_qt
 		PRIVATE
 		${CMAKE_CURRENT_BINARY_DIR}
 		${CMAKE_CURRENT_SOURCE_DIR}
-		${NEL_INCLUDE_DIR}
-		../../../../../nel/tools/3d/object_viewer_widget/src)
+		../../../../../nel/tools/3d/object_viewer_widget/src
+)
 
 
 TARGET_LINK_LIBRARIES(georges_editor_qt

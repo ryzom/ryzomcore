@@ -8,7 +8,7 @@ TARGET_INCLUDE_DIRECTORIES(object_viewer_widget_qt
 		PUBLIC
 		${CMAKE_CURRENT_BINARY_DIR}
 		${CMAKE_CURRENT_SOURCE_DIR}
-		${NEL_INCLUDE_DIR})
+)
 
 TARGET_LINK_LIBRARIES(object_viewer_widget_qt
 		NeL::misc
