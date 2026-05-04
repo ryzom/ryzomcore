@@ -8,24 +8,13 @@ SET(OVQT_EXT_SYS_SRC	${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin.
 						${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_manager.h
 						${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_spec.h)
 
-SET(OVQT_PLUG_MISSION_COMPILER_HDR 	mission_compiler_plugin.h
-							mission_compiler_main_window.h
-							mission_compiler_settings_page.h
-							server_entry_dialog.h)
-
 SET(OVQT_PLUG_MISSION_COMPILER_UIS	mission_compiler_main_window.ui server_entry_dialog.ui mission_compiler_settings_page.ui)
 
 SET(OVQT_PLUG_MISSION_COMPILER_RCS mission_compiler.qrc)
 
 SET(QT_USE_QTGUI TRUE)
 
-QT5_WRAP_CPP(OVQT_PLUG_MISSION_COMPILER_MOC_SRC ${OVQT_PLUG_MISSION_COMPILER_HDR})
-QT5_ADD_RESOURCES( OVQT_PLUG_MISSION_COMPILER_RC_SRCS ${OVQT_PLUG_MISSION_COMPILER_RCS})
-QT5_WRAP_UI(OVQT_PLUG_MISSION_COMPILER_UI_HDRS ${OVQT_PLUG_MISSION_COMPILER_UIS})
-
 SOURCE_GROUP(QtResources FILES ${OVQT_PLUG_MISSION_COMPILER_UIS} ${OVQT_PLUG_MISSION_COMPILER_RCS})
-SOURCE_GROUP(QtGeneratedUiHdr FILES ${OVQT_PLUG_MISSION_COMPILER_UI_HDRS})
-SOURCE_GROUP(QtGeneratedMocSrc FILES ${OVQT_PLUG_MISSION_COMPILER_MOC_SRC} ${OVQT_PLUG_MISSION_COMPILER_RC_SRCS})
 SOURCE_GROUP("Mission Compiler Plugin" FILES ${SRC})
 SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
 
@@ -35,9 +24,23 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/ryzom/tools/leveldesign/mission_compiler
 # Game Share Library
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/common/src)
 
-ADD_LIBRARY(studio_plugin_mission_compiler MODULE ${SRC} ${OVQT_PLUG_MISSION_COMPILER_MOC_SRC} ${OVQT_PLUG_MISSION_COMPILER_RC_SRCS} ${OVQT_EXT_SYS_SRC} ${OVQT_PLUG_MISSION_COMPILER_UI_HDRS})
+ADD_LIBRARY(studio_plugin_mission_compiler MODULE ${OVQT_EXT_SYS_SRC})
+
+target_sources(studio_plugin_mission_compiler
+        PRIVATE
+        mission_compiler_main_window.cpp
+        mission_compiler_plugin.cpp
+        mission_compiler_settings_page.cpp
+        server_entry_dialog.cpp
+        validation_file.cpp
+        mission_compiler.qrc
+        mission_compiler_main_window.ui
+        mission_compiler_settings_page.ui
+        server_entry_dialog.ui
+)
 
 TARGET_LINK_LIBRARIES(studio_plugin_mission_compiler
+        PRIVATE
         Studio::plugin::core
         NeL::misc
         NeL::ligo
