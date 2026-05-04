@@ -56,9 +56,10 @@ TARGET_LINK_LIBRARIES(georges_editor_qt
 		NeL::misc
 		NeL::3d
 		NeL::georges
-		${QT_LIBRARIES}
-		${QT_QTOPENGL_LIBRARY}
-		${QT_QTMAIN_LIBRARY})
+		Qt::Core
+		Qt::OpenGL
+		Qt::Widgets
+)
 
 TARGET_COMPILE_DEFINITIONS(georges_editor_qt PRIVATE QT_NO_KEYWORDS ${QT_DEFINITIONS})
 NL_DEFAULT_PROPS(georges_editor_qt "Ryzom, Tools, World: Georges Editor Qt")
