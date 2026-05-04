@@ -8,6 +8,18 @@ FILE(GLOB LIBSRC mission_compiler.cpp
 NL_TARGET_LIB(ryzom_mission_compiler_lib ${LIBSRC})
 add_library(Ryzom::mission_compiler_lib ALIAS ryzom_mission_compiler_lib)
 
+target_sources(ryzom_mission_compiler_lib
+        PUBLIC
+        FILE_SET HEADERS
+        FILES
+        mission_compiler.h
+        PRIVATE
+        step_content.cpp
+        steps.cpp
+        variables.cpp
+)
+
+
 TARGET_INCLUDE_DIRECTORIES(ryzom_mission_compiler_lib PRIVATE ${NEL_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_mission_compiler_lib

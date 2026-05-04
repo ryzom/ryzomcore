@@ -8,18 +8,10 @@ SET(OVQT_EXT_SYS_SRC	${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin.
 						${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_manager.h
 						${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_spec.h)
 
-SET(OVQT_PLUG_MISSION_COMPILER_UIS	mission_compiler_main_window.ui server_entry_dialog.ui mission_compiler_settings_page.ui)
-
-SET(OVQT_PLUG_MISSION_COMPILER_RCS mission_compiler.qrc)
-
 SET(QT_USE_QTGUI TRUE)
 
-SOURCE_GROUP(QtResources FILES ${OVQT_PLUG_MISSION_COMPILER_UIS} ${OVQT_PLUG_MISSION_COMPILER_RCS})
 SOURCE_GROUP("Mission Compiler Plugin" FILES ${SRC})
 SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
-
-# Mission Compiler Library
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/ryzom/tools/leveldesign/mission_compiler_lib)
 
 # Game Share Library
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/common/src)
@@ -44,7 +36,7 @@ TARGET_LINK_LIBRARIES(studio_plugin_mission_compiler
         Studio::plugin::core
         NeL::misc
         NeL::ligo
-        ryzom_mission_compiler_lib
+        Ryzom::mission_compiler_lib
         Qt::Core
         Qt::Gui
         Qt::Widgets
