@@ -24,17 +24,21 @@ SET(OVQT_PLUGIN_BNP_MANAGER_RCS bnp_manager.qrc)
 
 SET(QT_USE_QTGUI TRUE)
 
-QT5_WRAP_CPP(OVQT_PLUG_BNP_MANAGER_MOC_SRC ${OVQT_PLUG_BNP_MANAGER_HDR})
-
 SOURCE_GROUP(QtResources FILES ${OVQT_PLUG_BNP_MANAGER_UIS} ${OVQT_PLUGIN_BNP_MANAGER_RCS})
-SOURCE_GROUP(QtGeneratedMocSrc FILES ${OVQT_PLUG_BNP_MANAGER_MOC_SRC})
 SOURCE_GROUP("BNP Manager Plugin" FILES ${SRC})
 SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
 
-ADD_LIBRARY(studio_plugin_bnp_manager MODULE ${SRC} ${OVQT_PLUG_BNP_MANAGER_MOC_SRC} ${OVQT_EXT_SYS_SRC})
+ADD_LIBRARY(studio_plugin_bnp_manager MODULE ${OVQT_EXT_SYS_SRC})
 
 target_sources(studio_plugin_bnp_manager
 		PRIVATE
+        bnp_dirtree_dialog.cpp
+        bnp_file.cpp
+        bnp_filelist_dialog.cpp
+        bnp_filesystem_model.cpp
+        bnp_manager_plugin.cpp
+        bnp_manager_window.cpp
+        bnp_proxy_model.cpp
 		bnp_manager.qrc
 		bnp_dirtree_form.ui
 		bnp_filelist_dialog.ui
