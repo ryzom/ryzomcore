@@ -7,27 +7,23 @@ SET(OVQT_EXT_SYS_SRC	${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin.
 			${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_manager.h
 			${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_spec.h)
 
-SET(OVQT_DISP_SHEET_ID_PLUGIN_HDR
-			sheet_id_view.h
-			disp_sheet_id_plugin.h)
-
-SET(OVQT_DISP_SHEET_ID_PLUGIN_UIS
-				sheet_id_view.ui)
-
 SET(QT_USE_QTGUI TRUE)
 SET(QT_USE_QTOPENGL TRUE)
 
-QT5_WRAP_CPP(OVQT_DISP_SHEET_ID_PLUGIN_MOC_SRC ${OVQT_DISP_SHEET_ID_PLUGIN_HDR})
-QT5_WRAP_UI(OVQT_DISP_SHEET_ID_PLUGIN_UI_HDRS ${OVQT_DISP_SHEET_ID_PLUGIN_UIS})
-
-SOURCE_GROUP(QtGeneratedUiHdr FILES ${OVQT_DISP_SHEET_ID_PLUGIN_UI_HDRS})
-SOURCE_GROUP(QtGeneratedMocSrc FILES ${OVQT_DISP_SHEET_ID_PLUGIN_MOC_SRC})
 SOURCE_GROUP("Display sheet id Plugin" FILES ${SRC})
 SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
 
-ADD_LIBRARY(studio_plugin_disp_sheet_id MODULE ${SRC} ${OVQT_DISP_SHEET_ID_PLUGIN_MOC_SRC} ${OVQT_EXT_SYS_SRC} ${OVQT_DISP_SHEET_ID_PLUGIN_UI_HDRS})
+ADD_LIBRARY(studio_plugin_disp_sheet_id MODULE ${OVQT_EXT_SYS_SRC})
+
+target_sources(studio_plugin_disp_sheet_id
+        PRIVATE
+        disp_sheet_id_plugin.cpp
+        sheet_id_view.cpp
+        sheet_id_view.ui
+)
 
 TARGET_LINK_LIBRARIES(studio_plugin_disp_sheet_id
+        PRIVATE
         Studio::plugin::core
         NeL::misc
         Qt::Core
