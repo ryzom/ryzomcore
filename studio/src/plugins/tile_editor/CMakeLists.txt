@@ -7,33 +7,32 @@ SET(OVQT_EXT_SYS_SRC	${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin.
 			${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_manager.h
 			${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_spec.h)
 
-SET(OVQT_TILE_EDITOR_PLUGIN_HDR
-			tile_model.h
-			tile_editor_main_window.h
-			tile_editor_plugin.h
-			land_edit_dialog.h)
-
-SET(OVQT_TILE_EDITOR_PLUGIN_UIS
-				tile_editor_main_window.ui
-				land_edit_dialog.ui)
-
-SET(OVQT_PLUG_TILE_EDITOR_RCS tile_editor.qrc)
-
 SET(QT_USE_QTGUI TRUE)
 SET(QT_USE_QTOPENGL TRUE)
 
-QT5_WRAP_CPP(OVQT_TILE_EDITOR_PLUGIN_MOC_SRC ${OVQT_TILE_EDITOR_PLUGIN_HDR})
-QT5_ADD_RESOURCES( OVQT_PLUG_TILE_EDITOR_RC_SRCS ${OVQT_PLUG_TILE_EDITOR_RCS})
-QT5_WRAP_UI(OVQT_TILE_EDITOR_PLUGIN_UI_HDRS ${OVQT_TILE_EDITOR_PLUGIN_UIS})
-
-SOURCE_GROUP(QtGeneratedUiHdr FILES ${OVQT_TILE_EDITOR_PLUGIN_UI_HDRS})
-SOURCE_GROUP(QtGeneratedMocSrc FILES ${OVQT_TILE_EDITOR_PLUGIN_MOC_SRC} ${OVQT_PLUG_TILE_EDITOR_RC_SRCS})
 SOURCE_GROUP("Tile Editor Plugin" FILES ${SRC})
 SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
 
-ADD_LIBRARY(studio_plugin_tile_editor MODULE ${SRC} ${OVQT_TILE_EDITOR_PLUGIN_MOC_SRC} ${OVQT_PLUG_TILE_EDITOR_RC_SRCS} ${OVQT_EXT_SYS_SRC} ${OVQT_TILE_EDITOR_PLUGIN_UI_HDRS})
+ADD_LIBRARY(studio_plugin_tile_editor MODULE ${OVQT_EXT_SYS_SRC})
+
+target_sources(studio_plugin_tile_editor
+        PRIVATE
+        land_edit_dialog.cpp
+        tile_bank.cpp
+        tile_editor_main_window.cpp
+        tile_editor_plugin.cpp
+        tile_item.cpp
+        tile_item_delegate.cpp
+        tile_model.cpp
+        tilebank_loader.cpp
+        tilebank_saver.cpp
+        tile_editor.qrc
+        land_edit_dialog.ui
+        tile_editor_main_window.ui
+)
 
 TARGET_LINK_LIBRARIES(studio_plugin_tile_editor
+        PRIVATE
         Studio::plugin::core
         NeL::misc
         Qt::Core
