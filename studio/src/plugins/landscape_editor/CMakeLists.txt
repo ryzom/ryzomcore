@@ -50,11 +50,13 @@ target_sources(studio_plugin_landscape_editor
 )
 
 TARGET_LINK_LIBRARIES(studio_plugin_landscape_editor
+        PUBLIC
+        NeL::ligo
+        PRIVATE
 		Studio::plugin::core
 		NeL::misc
 		NeL::3d
 		NeL::georges
-		NeL::ligo
 		Qt::Core
 		Qt::OpenGL
 		Qt::Widgets
