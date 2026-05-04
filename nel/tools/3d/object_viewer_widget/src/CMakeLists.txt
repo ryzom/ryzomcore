@@ -11,9 +11,12 @@ TARGET_INCLUDE_DIRECTORIES(object_viewer_widget_qt
 )
 
 TARGET_LINK_LIBRARIES(object_viewer_widget_qt
+        PUBLIC
 		NeL::misc
 		NeL::3d
-		${QT_LIBRARIES})
+        Qt::Core
+        Qt::Widgets
+)
 
 NL_DEFAULT_PROPS(object_viewer_widget_qt "NeL, Tools, 3D: Object Viewer Qt Widget")
 NL_ADD_RUNTIME_FLAGS(object_viewer_widget_qt)
