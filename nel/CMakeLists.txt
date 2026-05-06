@@ -95,6 +95,7 @@ set(package_components 3d georges gui ligo misc net pacs sevenzip sound snd_lowl
 set(package_required_dependencies CURL Freetype)
 set(package_georges_dependencies LibXml2)
 set(package_gui_dependencies Lua Luabind)
+set(package_misc_dependencies LibXml2 ZLIB)
 set(package_sound_dependencies Vorbis)
 
 

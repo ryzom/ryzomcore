@@ -3,6 +3,7 @@
 set(_@PROJECT_NAME@_supported_components @package_components@)
 set(_@PROJECT_NAME@_georges_dependencies @package_georges_dependencies@)
 set(_@PROJECT_NAME@_gui_dependencies @package_gui_dependencies@)
+set(_@PROJECT_NAME@_misc_dependencies @package_misc_dependencies@)
 set(_@PROJECT_NAME@_sound_dependencies @package_sound_dependencies@)
 
 foreach(_comp ${@PROJECT_NAME@_FIND_COMPONENTS})
@@ -22,7 +23,7 @@ endforeach()
 
 
 # Dependencies for components
-foreach(_comp ${_@PROJECT_NAME@_supported_components})
+foreach(_comp ${@PROJECT_NAME@_FIND_COMPONENTS})
   foreach(_dependency IN ITEMS ${_@PROJECT_NAME@_${_comp}_dependencies})
     find_dependency(${_dependency} REQUIRED)
   endforeach()
