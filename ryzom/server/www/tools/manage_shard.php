@@ -25,6 +25,10 @@ switch($command) {
 		@queryShard('su', 'rsm.setWSState '. $ShardId .' RESTRICTED ""');
 	break;
 
+	case 'stopped':
+		echo sendToChat('The server is sleeping well...', $RocketChatGeneral, $ShardName, ':sob:');
+	break;
+
 	case 'stopEgs':
 		@queryShard('egs', 'stopService', 'stopService', true, true);
 	break;
