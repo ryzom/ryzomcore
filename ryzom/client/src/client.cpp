@@ -182,6 +182,7 @@ int main(int argc, char **argv)
 	Args.setDescription("Ryzom client");
 	Args.addArg("n", "nopatch", "value", "Use this to not use patch system");
 	Args.addArg("p", "profile", "id", "Use this profile to determine what directory to use by default");
+	Args.addArg("l", "logsdir", "path", "Directory to use for log files");
 	Args.addAdditionalArg("login", "Login to use", true, false);
 	Args.addAdditionalArg("password", "Password to use", true, false);
 	Args.addAdditionalArg("shard_id", "Shard ID to use", true, false);
@@ -238,8 +239,8 @@ int main(int argc, char **argv)
 	if (sLoginShardId.empty() || !fromString(sLoginShardId, LoginShardId))
 		LoginShardId = std::numeric_limits<uint32>::max();
 
-	// if client_default.cfg is not in current directory, use application default directory
-	if (Args.haveArg("p") || !CFile::isExists("client_default.cfg"))
+// if client_default.cfg is not in current directory, use application default directory
+	if (Args.haveArg("p") || Args.haveLongArg("profile") || !CFile::isExists("client_default.cfg"))
 	{
 		std::string currentPath = CPath::getApplicationDirectory("Ryzom");
 
@@ -247,14 +248,26 @@ int main(int argc, char **argv)
 		if (!CFile::isExists(currentPath)) CFile::createDirectory(currentPath);
 
 		// append profile ID to directory
-		if (Args.haveArg("p"))
+		if (Args.haveArg("p") || Args.haveLongArg("profile"))
 		{
-			currentPath = NLMISC::CPath::standardizePath(currentPath) + Args.getArg("p").front();
+			std::string profileId = Args.haveArg("p")
+				? Args.getArg("p").front()
+				: Args.getLongArg("profile").front();
+			currentPath = NLMISC::CPath::standardizePath(currentPath) + profileId;
 
 			if (!CFile::isExists(currentPath)) CFile::createDirectory(currentPath);
 		}
 
 		if (!CPath::setCurrentPath(currentPath)) return 1;
+	}
+	// override log directory if specified
+	if (Args.haveArg("l") || Args.haveLongArg("logsdir"))
+	{
+		std::string logsPath = Args.haveArg("l")
+			? Args.getArg("l").front()
+			: Args.getLongArg("logsdir").front();
+		if (!CFile::isExists(logsPath)) CFile::createDirectoryTree(logsPath);
+		changeLogDirectory(logsPath);
 	}
 
 #ifdef TEST_CRASH_COUNTER

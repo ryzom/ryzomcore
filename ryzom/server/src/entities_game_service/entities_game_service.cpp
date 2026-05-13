@@ -2186,7 +2186,7 @@ NLMISC_COMMAND(plrStat,"get or set a player stat","<pid><stat><value>")
 		CEntityId playerId(RYZOMID::player,pid);
 		string stat( args[1] );
 		string value = PlayerManager.getValue( playerId, stat );
-		log.displayNL(value.c_str());
+		log.displayNL("%s", value.c_str());
 		return true;
 	}
 

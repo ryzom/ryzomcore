@@ -3150,7 +3150,7 @@ static void displayTime(const CRyzomTime &rt, NLMISC::CLog &log)
 {
 	std::string result;
 	result = NLMISC::toString("hh:mm = %d:%d; ", (int) floorf(rt.getRyzomTime()) , (int) floorf(60.f * fmodf(rt.getRyzomTime(), 1.f)));
-	log.displayNL(result.c_str());
+	log.displayNL("%s", result.c_str());
 	uint32 month = rt.getRyzomMonth();
 	MONTH::EMonth monthInCycle = rt.getRyzomMonthInCurrentCycle();
 	std::string monthName = MONTH::toString((MONTH::EMonth) monthInCycle);
@@ -3162,7 +3162,7 @@ static void displayTime(const CRyzomTime &rt, NLMISC::CLog &log)
 							   (int) rt.getRyzomYear(),
 							   monthName.c_str(),
 							   dayName.c_str());
-	log.displayNL(result.c_str());
+	log.displayNL("%s", result.c_str());
 	log.displayNL("day of year = %d/%d", (int) (rt.getRyzomDayOfYear() + 1), (int) RYZOM_YEAR_IN_DAY);
 	log.displayNL("season = %d/4 (%s)", (int) rt.getRyzomSeason() + 1, EGSPD::CSeason::toString(rt.getRyzomSeason()).c_str());
 }
