@@ -6763,17 +6763,17 @@ void CCharacter::onAnimalSpawned(CPetSpawnConfirmationMsg::TSpawnError SpawnStat
 				c->setIsAPet(true);
 				c->setName("pet_of_"+getName().toString());
 
-				uint32 program = creature->getBotChatProgram();
+				uint32 program = c->getBotChatProgram();
 				if (!(program & (1<<BOTCHATTYPE::WebPageFlag)))
 				{
 					program |= 1 << BOTCHATTYPE::WebPageFlag;
-					creature->setBotChatProgram(program);
+					c->setBotChatProgram(program);
 				}
 
-				const string &wp = creature->getWebPage();
-				(string &)wp = "MENU_MOUNT_IT";
-				const string &wpn = creature->getWebPageName();
-				(string &)wpn = toString("app_arcc action=mScript_Run&script_name=MountARenta&player=%s&sheet=%s", getName().toString(), c->getType().c_str());
+				const string &wpn = c->getWebPageName();
+				(string &)wpn = "MENU_MOUNT_IT";
+				const string &wp = c->getWebPage();
+				(string &)wp = toString("app_arcc action=mScript_Run&script_name=MountARenta&player=%s&sheet=%s", getName().toString().c_str(), c->getType().toString().c_str());
 			}
 			CMirrorPropValue<TYPE_FUEL> freeSpeedMode(TheDataset, PetMirrorRow, DSPropertyFUEL);
 			freeSpeedMode = true;
