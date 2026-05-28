@@ -1201,15 +1201,30 @@ ENTITY_VARIABLE(Position, "Position of a player (in meter) <eid> <posx>,<posy>[,
 		fy = e->getState().Y() / 1000.f;
 		fz = e->getState().Z() / 1000.f;
 		if (cell < 0)
-			value = toString ("%.2f,%.2f,%.2f@%d", fx, fy, fz, -cell);
+			value = toString ("%.2f,%.2f,%.2f@%d", fx, fy, fz, cell);
 		else
 			value = toString ("%.2f,%.2f,%.2f", fx, fy, fz);
 	}
 	else
 	{
+		x = e->getState().X();
+		y = e->getState().Y();
+		z = e->getState().Z();
+
+		if ( value.find('@') != string::npos )
+		{
+
+			explode(value, string("@"), res);
+			if (res.size() >= 2)
+			{
+				fromString(res[1], cell);
+			}
+			value = res[0];
+		}
+
 		if ( value.find(',') != string::npos )
 		{
-			explode (value, string(","), res);
+			explode(value, string(","), res);
 			if (res.size() >= 2)
 			{
 				fromString(res[0], fx);
@@ -1221,17 +1236,6 @@ ENTITY_VARIABLE(Position, "Position of a player (in meter) <eid> <posx>,<posy>[,
 			{
 				fromString(res[2], fz);
 				z =  sint32(fz*1000);
-			}
-		}
-		else if ( value.find('@') != string::npos )
-		{
-			x = e->getState().X();
-			y = e->getState().Y();
-			z = e->getState().Z();
-			explode (value, string("@"), res);
-			if (res.size() == 1)
-			{
-				fromString(res[0], cell);
 			}
 		}
 		else
