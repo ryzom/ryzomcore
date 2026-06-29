@@ -1414,7 +1414,7 @@ uint32 COutpost::getChallengeCost() const
 TAIAlias COutpost::getRandomSpawnZone() const
 {
 	// choose a random spawn zone
-	sint32 randomCount = RandomGenerator.rand((uint16)_SpawnZones.size() - 1);
+	sint32 randomCount = rand() % ((uint16)_SpawnZones.size() - 1);
 	nlassert(randomCount >= 0 && randomCount < (sint32)_SpawnZones.size());
 	return _SpawnZones[randomCount].alias();
 }
