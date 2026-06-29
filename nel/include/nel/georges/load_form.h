@@ -668,7 +668,7 @@ void loadForm2(const std::vector<std::string> &sheetFilters, const std::string &
 		}
 	}
 
-	nlinfo ("%d sheets checked, %d need to be recomputed", filenames.size(), NeededToRecompute.size());
+	nlinfo ("%s: %d sheets checked, %d need to be recomputed", packedFilename.c_str(), filenames.size(), NeededToRecompute.size());
 
 	NLMISC::TTime last = NLMISC::CTime::getLocalTime ();
 	NLMISC::TTime start = NLMISC::CTime::getLocalTime ();
@@ -1036,7 +1036,7 @@ void loadForm (const std::vector<std::string> &sheetFilters, const std::string &
 		}
 	}
 
-	nlinfo ("%d sheets checked, %d need to be recomputed", sheetNames.size(), NeededToRecompute.size());
+	nlinfo ("%s: %d sheets checked, %d need to be recomputed", packedFilename.c_str(), sheetNames.size(), NeededToRecompute.size());
 
 	NLMISC::TTime lastTime = NLMISC::CTime::getLocalTime ();
 	NLMISC::TTime start = NLMISC::CTime::getLocalTime ();

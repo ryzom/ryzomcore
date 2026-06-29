@@ -122,6 +122,7 @@
 #include "nel/gui/lua_ihm.h"
 #include "interface_v3/lua_ihm_ryzom.h"
 #include "far_tp.h"
+#include "zone_util.h"
 #include "session_browser_impl.h"
 #include "bg_downloader_access.h"
 #include "login_progress_post_thread.h"
@@ -1418,7 +1419,7 @@ bool mainLoop()
 		MainCam.setTransformMode(UTransformable::RotQuat);
 
 		CVector cameraMoves = UserEntity->getCameraMoves();
-		
+
 		currViewPos.z += cameraMoves.z;
 		MainCam.setPos(currViewPos);
 		MainCam.setRotQuat(View.currentViewQuat());
@@ -1432,7 +1433,7 @@ bool mainLoop()
 		}
 
 		UserEntity->setCameraMoves(CVector(0, 0, 0));
-		
+
 		if (StereoHMD)
 		{
 			CMatrix camMatrix;
@@ -1535,6 +1536,10 @@ bool mainLoop()
 					Landscape->refreshZonesAround(View.refinePos(), ClientCfg.Vision + ExtraZoneLoadingVision, zoneAdded, zoneRemoved, ci ? &(ci->ZoneIDs) : NULL);
 					LandscapeIGManager.loadZoneIG(zoneAdded);
 					LandscapeIGManager.unloadZoneIG(zoneRemoved);
+					if (!zoneAdded.empty())
+						ContinentMngr.loadZoneLua(zoneAdded);
+					if (!zoneRemoved.empty())
+						EntitiesMngr.removeInstancesInIgZone(getZoneIdFromName(zoneRemoved));
 				}
 			}
 		}

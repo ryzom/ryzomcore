@@ -573,9 +573,10 @@ public:
 	NLMISC::CCDBNodeLeaf *_DB_UI_DUMMY_FACTION_TYPE;
 
 	void updateDesktops( uint32 newScreenW, uint32 newScreenH );
-	void setInterfaceScale( float scale, bool autoScale = false )
+	void setInterfaceScale( float scale, bool autoScale = false, bool base768 = false )
 	{
 		_InterfaceScaleChanged = true;
+		_InterfaceScale768 = base768;
 		_InterfaceScale = scale;
 		_InterfaceScaleAuto = autoScale;
 	}
@@ -626,6 +627,7 @@ private:
 	float			_InterfaceScale;
 	bool			_InterfaceScaleAuto;
 	bool			_InterfaceScaleChanged;
+	bool			_InterfaceScale768;
 
 	// Modes
 	std::vector<CInterfaceConfig::CDesktopImage> _Modes;

@@ -49,6 +49,7 @@
 #include "weather_manager_client.h"
 #include "interface_v3/interface_manager.h"
 #include "interface_v3/group_map.h"
+#include "zone_util.h"
 //
 #include "input.h"
 
@@ -247,6 +248,34 @@ void CContinentManager::load ()
 	}
 }// load //
 
+void CContinentManager::loadZoneLua(const string &zone)
+{
+	string luaScriptName = CPath::lookup(zone+".lua", false, false);
+
+	if (!zone.empty())
+	{
+		CIFile in;
+		if (in.open(luaScriptName))
+		{
+
+			string luaScript;
+			if (in.readAll(luaScript))
+			{
+				CLuaManager::getInstance().executeLuaScript(luaScript, true);
+				nlinfo("loading %s", luaScriptName.c_str());
+			}
+		}
+	}
+}
+
+void CContinentManager::loadZonesLua(const vector<string> &zones)
+{
+	for (uint i = 0; i < zones.size(); i++)
+	{
+		loadZoneLua(zones[i]);
+	}
+}
+
 //-----------------------------------------------
 // select :
 // Select continent from a name.
@@ -368,19 +397,31 @@ void CContinentManager::select(const string &name, const CVectorD &pos, NLMISC::
 	{
 		H_AUTO(InitRZWorldMapHandling)
 		CWorldSheet *pWS = dynamic_cast<CWorldSheet*>(SheetMngr.get(CSheetId("ryzom.world")));
+		string foundMap = "";
+		string firstMap = "";
 		for (uint32 i = 0; i < pWS->Maps.size(); ++i)
-		if (pWS->Maps[i].ContinentName == name)
 		{
-			CInterfaceManager *pIM = CInterfaceManager::getInstance();
-			CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
-			if (pMap != NULL)
-				pMap->setMap(pWS->Maps[i].Name);
-			pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:respawn_map:content:map_content:actual_map"));
-			if (pMap != NULL)
-				pMap->setMap(pWS->Maps[i].Name);
-			break;
+			if (pWS->Maps[i].ContinentName == name)
+			{
+				if (foundMap.empty())
+				{
+					firstMap =  pWS->Maps[i].Name;
+					foundMap = firstMap;
+				}
+				if (pos.x >= pWS->Maps[i].MinX
+					&& pos.x <= pWS->Maps[i].MaxX
+					&& pos.y >= pWS->Maps[i].MinY
+					&& pos.y <= pWS->Maps[i].MaxY)
+					foundMap = pWS->Maps[i].Name;
+			}
 		}
 
+		CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
+		if (pMap != NULL)
+			pMap->setMap(foundMap);
+		pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:respawn_map:content:map_content:actual_map"));
+		if (pMap != NULL)
+			pMap->setMap(firstMap);
 	}
 
 }// select //

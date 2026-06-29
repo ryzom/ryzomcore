@@ -1085,7 +1085,7 @@ public:
 	void removeAnimal(CGameItemPtr item, CPetCommandMsg::TCommand command);
 
 	// remove pet from player corresponding to index and despawn it
-	void removeRentAMount();
+	void removeRentAMount(TDataSetRow rentamount);
 	void removeAnimalIndex(uint32 beastIndex, CPetCommandMsg::TCommand command, bool keepInventory=false);
 
 	// update coordinate for spawned pets
@@ -2371,7 +2371,10 @@ public:
 
 	/// get/set the last guild enter time
 	NLMISC::TGameCycle getGuildEnterTime() const;
-	void setGuildEnterTime(NLMISC::TGameCycle time);
+	void setGuildEnterTime(NLMISC::TGameCycle time, uint32 era);
+
+	/// get/set the last guild enter time
+	NLMISC::TGameCycle getGuildEnterEra() const;
 
 	/// updates the guild flag field in the mirror, according to character clan and preferences
 	void updateGuildFlag() const;
@@ -2715,6 +2718,7 @@ public:
 
 	uint32 getOrganization() const;
 	uint32 getOrganizationStatus() const;
+	uint32 getLastRespawnTick() const;
 	uint32 getLastTpTick() const;
 	uint32 getLastOverSpeedTick() const;
 	uint32 getLastUnMountTick() const;
@@ -3854,6 +3858,7 @@ private:
 
 	/// last guild enter time  (if player are in guild since 21 days)
 	NLMISC::TGameCycle _GuildEnterTime;
+	uint32 _GuildEnterEra;
 
 	/// guild id of the player
 	bool _UseFactionSymbol;
@@ -4244,6 +4249,9 @@ private:
 	bool _PowoCanAccesRoomInv;
 	bool _PowoCanAccessGuildInv;
 
+	bool _IsTeleportFromRespawn;
+
+	uint32 _LastRespawnTick;
 	uint32 _LastTpTick;
 	uint32 _LastOverSpeedTick;
 	uint32 _LastMountTick;

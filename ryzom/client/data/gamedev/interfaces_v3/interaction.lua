@@ -75,7 +75,7 @@ end
 ------------------------------------------------------------------------------------------------------------
 --Send Guild invite from guildwindow
 function game:invToGuild()
-	player = getUI('ui:interface:add_guild'):find('edit_text').hardtext:split(">")[2]
+	player = getUI('ui:interface:add_guild'):find('eb').input_string
 	if(player ~= '')then
 		runAH(nil, 'talk', 'mode=0|text=/guildinvite ' .. player)
 	end
@@ -787,6 +787,7 @@ end
 
 function game:openGuildSpecialBag()
 	runAH(nil, "browse_home", "name=ui:interface:guild:content:tab_special_bag:inv:html")
+	getUI("ui:interface:guild:content:tab_special_bag:inv:html"):renderHtml("<table width='100%'><td height='100px'><tr></td></tr><tr><td align='center' style='font-size: 18px; font-color: lightgreen'>"..tostring(i18n.get("uiPleaseWait")).."</td></tr></table>")
 end
 
 
@@ -990,4 +991,4 @@ function game:TalkWithNpc(bullying)
 end
 
 -- VERSION --
-RYZOM_INTERACTION_VERSION = 366
+FILE_INTERACTION_VERSION = 122

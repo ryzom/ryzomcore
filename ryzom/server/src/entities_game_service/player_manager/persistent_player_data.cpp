@@ -82,6 +82,7 @@ using namespace NLMISC;
 using namespace EGSPD;
 
 CVariable<uint32>			MaxNoRentDisconnectedTime("egs","MaxNoRentDisconnectedTime", "Number of minutes of log off time after no rent item are deleted", 8*60, 0, true );
+CVariable<uint32>			Era("egs","Era", "Current Era", 1, 0, true );
 
 
 #define PERSISTENT_TOKEN_FAMILY RyzomTokenFamily
@@ -442,6 +443,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	_SavedFames[i],\
 	PVP_CLAN::TPVPClan k=PVP_CLAN::fromString(key); if ((k>=PVP_CLAN::BeginClans) && (k<=PVP_CLAN::EndClans)) _SavedFames[k]=val)\
 \
+	PROP(uint32,_LastRespawnTick)\
 	PROP(uint32,_LastTpTick)\
 	PROP(uint32,_LastOverSpeedTick)\
 	PROP(uint32,_LastMountTick)\
@@ -451,15 +453,15 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	PROP(uint32,_PvpPoint)\
 	PROP(uint32,_GuildPoints)\
 	PROP(uint8,_TodayGuildPoints)\
-	PROP_GAME_CYCLE_COMP(_NextTodayGuildPointsReset)\
+	PROP_GAME_CYCLE_OR_0(_NextTodayGuildPointsReset)\
 	PROP2(_LangChannel,string,_LangChannel,_LangChannel=val)\
 	PROP(uint32,_Organization)\
 	PROP(uint32,_OrganizationStatus)\
 	PROP(uint32,_OrganizationPoints)\
 	PROP(uint32,_RpPoints)\
 	PROP(uint32,_BattlePoints)\
-	PROP_GAME_CYCLE_COMP(_FirstRpPointsWin)\
-	PROP_GAME_CYCLE_COMP(_LastRpPointsWin)\
+	PROP_GAME_CYCLE_OR_0(_FirstRpPointsWin)\
+	PROP_GAME_CYCLE_OR_0(_LastRpPointsWin)\
 	PROP(uint32,_TimedUrl)\
 	PROP2(DeclaredCult,string,PVP_CLAN::toString(_DeclaredCult),_DeclaredCult=PVP_CLAN::fromString(val))\
 	PROP2(DeclaredCiv,string,PVP_CLAN::toString(_DeclaredCiv),_DeclaredCiv=PVP_CLAN::fromString(val))\
@@ -467,9 +469,9 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	PROP(bool,_doPact)\
 \
 	PROP(bool,_PVPFlag)\
-	PROP_GAME_CYCLE_COMP(_PVPFlagLastTimeChange)\
-	PROP_GAME_CYCLE_COMP(_PVPRecentActionTime)\
-	PROP_GAME_CYCLE_COMP(_PVPFlagTimeSettedOn)\
+	PROP_GAME_CYCLE_OR_0(_PVPFlagLastTimeChange)\
+	PROP_GAME_CYCLE_OR_0(_PVPRecentActionTime)\
+	PROP_GAME_CYCLE_OR_0(_PVPFlagTimeSettedOn)\
 	PROP(uint16,_RegionKilledInPvp)\
 \
 	/* we don't want save pvp outpost status */\
@@ -480,10 +482,10 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	LPROP(string, _SDBPvPPath, if (!_SDBPvPPath.empty()))\
 	PROP(uint32,_GuildId)\
 	PROP(uint32,_LastGuildId)\
-	PROP_GAME_CYCLE_COMP(_GuildEnterTime)\
+	PROP_GAME_CYCLE(_GuildEnterEra, _GuildEnterTime)\
 	PROP(uint8, _CreationPointsRepartition)\
-	PROP_GAME_CYCLE_COMP(_ForbidAuraUseStartDate)\
-	PROP_GAME_CYCLE_COMP(_ForbidAuraUseEndDate)\
+	PROP_GAME_CYCLE_OR_0(_ForbidAuraUseStartDate)\
+	PROP_GAME_CYCLE_OR_0(_ForbidAuraUseEndDate)\
 	PROP2(_Title, string, CHARACTER_TITLE::toString(getTitle()), setTitle(CHARACTER_TITLE::toCharacterTitle(val)))\
 	PROP2(_NewTitle, string, _NewTitle, _NewTitle=val)\
 	PROP2(_TagPvPA, string, _TagPvPA, _TagPvPA=val)\
@@ -753,7 +755,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	PROP(sint32,Landscape_X)\
 	PROP(sint32,Landscape_Y)\
 	PROP(sint32,Landscape_Z)\
-	PROP_GAME_CYCLE_COMP(DeathTick)\
+	PROP_GAME_CYCLE_OR_CURRENT(DeathTick)\
 	PROP2(PetStatus,uint16,PetStatus,PetStatus=(CPetAnimal::TStatus)val)\
 	PROP2(Slot,sint16,ticketSlot,if (val != -1) Slot = uint32(val))\
 	LPROP(bool,IsFollowing,if(IsFollowing))\
@@ -828,8 +830,8 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 #define PERSISTENT_CLASS CPowerActivationDate
 
 #define PERSISTENT_DATA\
-	PROP_GAME_CYCLE(DeactivationDate)\
-	PROP_GAME_CYCLE(ActivationDate)\
+	PROP_GAME_CYCLE_OR_0(DeactivationDate)\
+	PROP_GAME_CYCLE_OR_0(ActivationDate)\
 	PROP(uint16, ConsumableFamilyId)\
 	PROP2(PowerType,string,POWERS::toString(PowerType),PowerType=POWERS::toPowerType(val))\
 
@@ -861,7 +863,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 #define PERSISTENT_CLASS CConsumableOverdoseTimer
 
 #define PERSISTENT_DATA\
-	PROP_GAME_CYCLE(ActivationDate)\
+	PROP_GAME_CYCLE_OR_0(ActivationDate)\
 	PROP2(Family,string,  CConsumable::getFamilyName(Family), Family=CConsumable::getFamilyIndex(val))\
 
 //#pragma message( PERSISTENT_GENERATION_MESSAGE )
@@ -974,7 +976,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 #define PERSISTENT_DATA\
 	FLAG0(CLEAR,clear())\
 	PROP(bool, Successfull)\
-	PROP_GAME_CYCLE_COMP(LastSuccessDate)\
+	PROP_GAME_CYCLE_OR_0(LastSuccessDate)\
 
 //#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
@@ -1262,7 +1264,7 @@ static void displayWarning(const std::string& s)
 #define PERSISTENT_DATA\
 	FLAG0(CLEAR,clear())\
 	PROP(CSheetId,SheetId)\
-	PROP_GAME_CYCLE_COMP(ActivationDate)\
+	PROP_GAME_CYCLE_OR_0(ActivationDate)\
 	PROP(bool,Disabled)\
 
 //#pragma message( PERSISTENT_GENERATION_MESSAGE )
@@ -1686,7 +1688,7 @@ private:
 	H_AUTO(CCharacterGameEventApply);\
 
 #define PERSISTENT_DATA\
-	PROP_GAME_CYCLE_COMP(_Date)\
+	PROP_GAME_CYCLE_OR_0(_Date)\
 	LPROP2(_EventFaction, string, if (!_EventFaction.empty()), _EventFaction, setEventFaction(val))\
 
 //#pragma message( PERSISTENT_GENERATION_MESSAGE )

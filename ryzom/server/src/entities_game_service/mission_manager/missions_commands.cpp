@@ -921,7 +921,7 @@ NLMISC_COMMAND(getItemList, "get list of items of character by filter", "<uid> [
 							string item_stats = toString("%3d|%s|", j, sheet.c_str());
 							if (!extra.empty())
 								itemPtr->getStats(extra, item_stats);
-							log.displayNL(item_stats.c_str());
+							log.displayNL("%s", item_stats.c_str());
 						}
 					}
 				}
@@ -1022,7 +1022,7 @@ NLMISC_COMMAND(getNamedItemList, "get list of named items of character by filter
 							string item_stats = toString("%3d|%s|", j, phraseId.c_str());
 							if (!extra.empty())
 								itemPtr->getStats(extra, item_stats);
-							log.displayNL(item_stats.c_str());
+							log.displayNL("%s", item_stats.c_str());
 						}
 					}
 				}
@@ -1861,6 +1861,8 @@ NLMISC_COMMAND(getPvpPoints, "get pvp points of player (if quantity, give/take/s
 	}
 
 	log.displayNL("%u", points);
+
+	return true;
 }
 
 
@@ -2909,69 +2911,96 @@ NLMISC_COMMAND(grpScript, "executes a script on an event npc group", "<uid> <gro
 }
 
 //----------------------------------------------------------------------------
-NLMISC_COMMAND(setUrl, "changes the url of a bot", "<uid> <groupname> [<url>] [<name>]")
+NLMISC_COMMAND(setUrl, "changes the url of a bot", "<uid|@_ai_instance> <groupname> [<url>] [<name>]")
 {
 	if (args.size () < 2) return false;
 
-	GET_ACTIVE_CHARACTER
+	uint32 instanceNumber;
+	CEntityId botId;
 
-	uint32 instanceNumber = c->getInstanceNumber();
-
-	string groupname = args[1];
-	if (! getAIInstanceFromGroupName(groupname, instanceNumber))
+	if (args[0][0] == '@')
 	{
-		log.displayNL("ERR: INVALID_AI_INSTANCE");
-		return false;
+		instanceNumber = CUsedContinent::instance().getInstanceForContinent(args[0].substr(1));
+	}
+	else
+	{
+		GET_ACTIVE_CHARACTER
+		instanceNumber = c->getInstanceNumber();
 	}
 
-
-	// try to find the bot name
-	vector<TAIAlias> aliases;
-
-	log.displayNL("NAME: %s", groupname.c_str());
-	CAIAliasTranslator::getInstance()->getNPCAliasesFromName(groupname, aliases);
-	if (aliases.empty())
+	if (args[1][0] == '@')
 	{
-		log.displayNL("ERR: INVALID_BOT");
-		return false;
+		CEntityId entityId(args[1].substr(1));
+		botId = entityId;
+	}
+	else
+	{
+
+		string groupname = args[1];
+		if (! getAIInstanceFromGroupName(groupname, instanceNumber))
+		{
+			log.displayNL("ERR: INVALID_AI_INSTANCE");
+			return true;
+		}
+
+
+		// try to find the bot name
+		vector<TAIAlias> aliases;
+
+		log.displayNL("NAME: %s", groupname.c_str());
+		CAIAliasTranslator::getInstance()->getNPCAliasesFromName(groupname, aliases);
+		if (aliases.empty())
+		{
+			log.displayNL("ERR: INVALID_BOT");
+			return true;
+		}
+
+		TAIAlias alias = aliases[0];
+
+		botId = CAIAliasTranslator::getInstance()->getEntityId (alias);
 	}
 
-	TAIAlias alias = aliases[0];
-
-	const CEntityId & botId = CAIAliasTranslator::getInstance()->getEntityId (alias);
 	if (botId != CEntityId::Unknown)
 	{
 
 		CCreature* creature = CreatureManager.getCreature(botId);
 
-		uint32 program = creature->getBotChatProgram();
-		if (!(program & (1<<BOTCHATTYPE::WebPageFlag)))
+		if (creature)
 		{
-			program |= 1 << BOTCHATTYPE::WebPageFlag;
-			creature->setBotChatProgram(program);
-		}
+			uint32 program = creature->getBotChatProgram();
+			if (!(program & (1<<BOTCHATTYPE::WebPageFlag)))
+			{
+				program |= 1 << BOTCHATTYPE::WebPageFlag;
+				creature->setBotChatProgram(program);
+			}
 
-		const string &wp = creature->getWebPage();
-		if (args.size() < 3)
-		{
-			(string &)wp = "";
-			program &= ~(1 << BOTCHATTYPE::WebPageFlag);
-			creature->setBotChatProgram(program);
+			const string &wp = creature->getWebPage();
+			if (args.size() < 3)
+			{
+				(string &)wp = "";
+				program &= ~(1 << BOTCHATTYPE::WebPageFlag);
+				creature->setBotChatProgram(program);
+			}
+			else
+			{
+				(string &)wp = args[2];
+				if (args.size() > 3)
+				{
+					const string &wpn = creature->getWebPageName();
+					(string &)wpn = args[3];
+				}
+			}
 		}
 		else
 		{
-			(string &)wp = args[2];
-			if (args.size() > 3)
-			{
-				const string &wpn = creature->getWebPageName();
-				(string &)wpn = args[3];
-			}
+			log.displayNL("ERR: INVALID_BOT");
+			return true;
 		}
 	}
 	else
 	{
 		log.displayNL("ERR: BOT_NOT_SPAWNED");
-		return false;
+		return true;
 	}
 
 	return true;
@@ -3056,15 +3085,15 @@ NLMISC_COMMAND(getTags, "get player tags", "<uid>")
 
 	GET_ACTIVE_CHARACTER
 
-	log.displayNL(c->getTagPvPA().c_str());
-	log.displayNL(c->getTagPvPB().c_str());
-	log.displayNL(c->getDefaultTagA().c_str());
-	log.displayNL(c->getDefaultTagB().c_str());
-	log.displayNL(c->getTagA().c_str());
-	log.displayNL(c->getTagB().c_str());
-	log.displayNL(c->getTagRightHand().c_str());
-	log.displayNL(c->getTagLeftHand().c_str());
-	log.displayNL(c->getTagHat().c_str());
+	log.displayNL("%s", c->getTagPvPA().c_str());
+	log.displayNL("%s", c->getTagPvPB().c_str());
+	log.displayNL("%s", c->getDefaultTagA().c_str());
+	log.displayNL("%s", c->getDefaultTagB().c_str());
+	log.displayNL("%s", c->getTagA().c_str());
+	log.displayNL("%s", c->getTagB().c_str());
+	log.displayNL("%s", c->getTagRightHand().c_str());
+	log.displayNL("%s", c->getTagLeftHand().c_str());
+	log.displayNL("%s", c->getTagHat().c_str());
 	log.displayNL("%d", c->getVisualPropertyA().directAccessForStructMembers().PropertySubData.WeaponRightHand);
 	log.displayNL("%d", c->getVisualPropertyA().directAccessForStructMembers().PropertySubData.WeaponLeftHand);
 	log.displayNL("%d", c->getVisualPropertyA().directAccessForStructMembers().PropertySubData.HatModel);
@@ -3390,6 +3419,19 @@ NLMISC_COMMAND(getLastTpTick,"get tick of last teleport","<uid>")
 }
 
 //-----------------------------------------------
+NLMISC_COMMAND(getLastRespawnTick,"get tick of last respawn","<uid>")
+{
+	if (args.size() != 1)
+		return false;
+
+	GET_ACTIVE_CHARACTER;
+
+	log.displayNL("%d", c->getLastRespawnTick());
+
+	return true;
+}
+
+//-----------------------------------------------
 NLMISC_COMMAND(getLastOverSpeedTick,"get tick of last over speed","<uid>")
 {
 	if (args.size() != 1)
@@ -3455,9 +3497,9 @@ NLMISC_COMMAND(getLastExchangeMount,"get tick of last exchange mount","<uid>")
 }
 
 //-----------------------------------------------
-NLMISC_COMMAND(mount,"mount the target","<uid>")
+NLMISC_COMMAND(mount,"mount the target","<uid> [<eid>]")
 {
-	if (args.size() != 1)
+	if (args.size() < 1)
 		return false;
 
 	GET_ACTIVE_CHARACTER;
@@ -3465,6 +3507,15 @@ NLMISC_COMMAND(mount,"mount the target","<uid>")
 	if ( c->getRiderEntity().isNull() )
 	{
 		CEntityId target = c->getTarget();
+
+		if (args.size() > 1)
+		{
+			CEntityId entityId(args[1]);
+			if (entityId != target)
+				log.displayNL("ERR: Bad target");
+		}
+
+
 		if( target.getType() == RYZOMID::creature || target.getType() == RYZOMID::npc )
 		{
 			CEntityBase * mount = CEntityBaseManager::getEntityBasePtr( target );
@@ -3504,7 +3555,7 @@ NLMISC_COMMAND(mount,"mount the target","<uid>")
 
 // spawnMount 2 sagass_mount_00.creature "Mount$#Property of Ulukyn"
 //-----------------------------------------------
-NLMISC_COMMAND(spawnMount,"spawn a mount close to player","<uid> <mount sheet name> [<pet custom name>]")
+NLMISC_COMMAND(spawnMount,"spawn a RentAMount","<uid> <mount sheet name> [<pet custom name>] [x,-y,z] [cell]")
 {
 	if (args.size() < 2)
 		return false;
@@ -3512,42 +3563,73 @@ NLMISC_COMMAND(spawnMount,"spawn a mount close to player","<uid> <mount sheet na
 	GET_ACTIVE_CHARACTER;
 
 	const float distFromPlayer = 2000.f;
-	CPetSpawnMsg msg;
-
-	SGameCoordinate destination;
-	destination.X = c->getState().X;
-	destination.Y = c->getState().Y;
-	destination.Z = c->getState().Z;
 	TDataSetRow dsr = c->getEntityRowId();
-	CMirrorPropValueRO<TYPE_CELL> mirrorCell(TheDataset, dsr, DSPropertyCELL);
-	destination.Cell = mirrorCell;
-
-	msg.SpawnMode = CPetSpawnMsg::NEAR_POINT;
-	msg.Coordinate_X = destination.X - sint32(cos(c->getHeading()) * distFromPlayer);
-	msg.Coordinate_Y = destination.Y - sint32(sin(c->getHeading()) * distFromPlayer);
-	msg.Coordinate_H = destination.Z;
-	msg.Heading = c->getHeading();
-	msg.CharacterMirrorRow = dsr;
-	msg.PetSheetId = CSheetId(args[1]);
-	msg.PetIdx = 8;
-	msg.Cell = destination.Cell;
 	ucstring customName;
 	if (args.size() >= 3)
 		customName.fromUtf8(args[2]);
+
+	CPetSpawnMsg msg;
+	msg.CharacterMirrorRow = dsr;
+	msg.SpawnMode = CPetSpawnMsg::NEAR_POINT;
+	msg.PetSheetId = CSheetId(args[1]);
+	msg.PetIdx = MAX_INVENTORY_ANIMAL;
 	msg.CustomName = customName;
 
+	// Position from command
+	if (args.size() >= 4)
+	{
+		std::vector< std::string > pos;
+		NLMISC::splitString(args[3], ",", pos);
 
-	CContinent * continent = CZoneManager::getInstance().getContinent(destination.X, destination.Y);
-	if (!continent) {
+		if (pos.size() < 2)
+		{
+			log.displayNL("ERR: invalid position");
+			return true;
+		}
+
+		fromString(pos[0], msg.Coordinate_X);
+		fromString(pos[1], msg.Coordinate_Y);
+
+		if (pos.size() >= 3)
+			fromString(pos[2], msg.Coordinate_H);
+
+	}
+	else
+	{
+		SGameCoordinate destination;
+		destination.X = c->getState().X;
+		destination.Y = c->getState().Y;
+		destination.Z = c->getState().Z;
+		msg.Coordinate_X = destination.X - sint32(cos(c->getHeading()) * distFromPlayer);
+		msg.Coordinate_Y = destination.Y - sint32(sin(c->getHeading()) * distFromPlayer);
+		msg.Coordinate_H = destination.Z;
+		msg.Heading = c->getHeading();
+	}
+
+
+	if (args.size() >= 5)
+	{
+		fromString(args[4], msg.Cell);
+	}
+	else
+	{
+		CMirrorPropValueRO<TYPE_CELL> mirrorCell(TheDataset, dsr, DSPropertyCELL);
+		msg.Cell = mirrorCell;
+	}
+
+
+	CContinent * continent = CZoneManager::getInstance().getContinent(msg.Coordinate_X, msg.Coordinate_Y);
+	if (!continent)
+	{
 		log.displayNL("ERR: invalid continent");
-		return false;
+		return true;
 	}
 
 	uint32 aiInstance = CUsedContinent::instance().getInstanceForContinent((CONTINENT::TContinent)continent->getId());
 	if (aiInstance == ~0)
 	{
 		log.displayNL("ERR: invalid continent");
-		return false;
+		return true;
 	}
 	msg.AIInstanceId = (uint16)aiInstance;
 	CWorldInstances::instance().msgToAIInstance(msg.AIInstanceId, msg);
@@ -3555,7 +3637,6 @@ NLMISC_COMMAND(spawnMount,"spawn a mount close to player","<uid> <mount sheet na
 
 	return true;
 }
-
 
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(getPlayerVar, "get the value of a variable of player","<uid> <var>")
@@ -3657,6 +3738,19 @@ NLMISC_COMMAND(setTrigger, "set a custom trigger", "<trigger> [<web_app>] [<args
 		CBuildingManager::getInstance()->setCustomTrigger(triggerId, "");
 	log.displayNL("OK");
 	return true;
+}
+
+/*
+setRegionTrigger uiR2_Jungle18 app_arcc action=mScript_Run&script=7624&command=reset_all
+*/
+NLMISC_COMMAND(setRegionTrigger,"set region trigger","<region_name> <app> <params>")
+{
+	if (args.size() == 3)
+	{
+		CZoneManager::getInstance().addRegionTrigger(args[0], args[1]+" "+args[2]);
+		return true;
+	}
+	return false;
 }
 
 //----------------------------------------------------------------------------
@@ -3917,7 +4011,7 @@ NLMISC_COMMAND(spawnPlayerPet, "spawn player pet", "<uid> <slot>")
 }
 
 //----------------------------------------------------------------------------
-NLMISC_COMMAND(removePlayerPet, "remove player pet", "<uid> <slot> [<keepInventory=0|1>]")
+NLMISC_COMMAND(removePlayerPet, "remove player pet", "<uid> <slot> [<keepInventory=0|1>|<entittyid>]")
 {
 	if (args.size() < 2)
 		return false;
@@ -3927,9 +4021,20 @@ NLMISC_COMMAND(removePlayerPet, "remove player pet", "<uid> <slot> [<keepInvento
 	uint32 index;
 	fromString(args[1], index);
 
-	if (index == 8)
+	if (index >= MAX_INVENTORY_ANIMAL)
 	{
-		c->removeRentAMount();
+
+		if (args.size() > 2)
+		{
+			CEntityId entityId(args[2]);
+			if (entityId != CEntityId::Unknown)
+			{
+				TDataSetRow row = TheDataset.getDataSetRow(entityId);
+				c->removeRentAMount(row);
+				return true;
+			}
+		}
+		c->removeRentAMount(TDataSetRow());
 		return true;
 	}
 
@@ -4547,7 +4652,7 @@ NLMISC_COMMAND(haveBricks, "Return list of player selected learned bricks", "<ui
 	{
 		CSheetId brickId(bricks[i]);
 		if (c->haveBrick(brickId))
-			log.displayNL(bricks[i].c_str());
+			log.displayNL("%s", bricks[i].c_str());
 	}
 
 	return true;

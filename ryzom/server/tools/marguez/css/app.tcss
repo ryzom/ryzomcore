@@ -1,0 +1,58 @@
+
+Screen {
+	background: black;
+}
+
+Rule {
+	margin: 0;
+}
+
+Toast {
+	background: #222;
+	color: white;
+}
+
+ToastRack {
+	align: center middle;
+	dock: top;
+}
+
+RichLog {
+	background: black;
+	max-width: 100%;
+	margin: 0 0;
+}
+
+RichLog:focus {
+	background: black;
+}
+
+Button:focus {
+	text-style: bold;
+}
+
+#log {
+	background: green;
+	color: black;
+	width: 100%;
+	margin: 0 0;
+	padding: 0 0;
+}
+
+.selected {
+	color: white;
+	text-style: bold;
+}
+
+
+.height1 {
+	height: 1;
+}
+
+.no-scroll {
+	scrollbar-size: 0 0;
+	height: 1;
+	margin: 0 0;
+}
+
+

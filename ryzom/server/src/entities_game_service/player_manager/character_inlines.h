@@ -21,6 +21,7 @@
 #ifndef CHARACTER_INLINES_H
 #define CHARACTER_INLINES_H
 
+extern NLMISC::CVariable<uint32> CurrentEra;
 
 //------------------------------------------------------------------------------
 
@@ -298,8 +299,7 @@ inline CInventoryPtr CCharacter::getLootContainer()
 
 inline bool CCharacter::isInitChest(uint8 chest)
 {
-	if (chest < 20)
-		return _initializedChests[chest];
+	return chest < 20 && _initializedChests[chest];
 }
 
 inline void CCharacter::isInitChest(uint8 chest, bool value)
@@ -851,9 +851,15 @@ inline NLMISC::TGameCycle CCharacter::getGuildEnterTime() const
 	return _GuildEnterTime;
 }
 
-inline void CCharacter::setGuildEnterTime(NLMISC::TGameCycle time)
+inline NLMISC::TGameCycle CCharacter::getGuildEnterEra() const
+{
+	return _GuildEnterEra;
+}
+
+inline void CCharacter::setGuildEnterTime(NLMISC::TGameCycle time, uint32 era)
 {
 	_GuildEnterTime = time;
+	_GuildEnterEra = era;
 }
 
 
@@ -1256,6 +1262,11 @@ inline uint32 CCharacter::getOrganization() const
 inline uint32 CCharacter::getOrganizationStatus() const
 {
 	return _OrganizationStatus;
+}
+
+inline uint32 CCharacter::getLastRespawnTick() const
+{
+	return _LastRespawnTick;
 }
 
 inline uint32 CCharacter::getLastTpTick() const

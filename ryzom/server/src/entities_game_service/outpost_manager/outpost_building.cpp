@@ -195,7 +195,10 @@ void COutpostBuilding::update(uint32 nCurrentTime)
 								CGameItemPtr item;
 								item = GameItemManager.createItem(_StaticData->Driller.MPs[i], (j+1)*(250/DRILLER_NB_LEVEL), true, false);
 								if (item != NULL)
+								{
+									nlinfo("OP %s MP Generated %s Q%i", _Parent->getName().c_str(), _StaticData->Driller.MPs[i].toString().c_str(), (j+1)*(250/DRILLER_NB_LEVEL));
 									pGuild->putItem(item);
+								}
 							}
 						}
 					}
@@ -266,7 +269,7 @@ std::string COutpostBuilding::toString() const
 			for (uint j = 0; j < DRILLER_NB_LEVEL; ++j)
 			{
 				if (_StaticData->Driller.QualityFactor[j])
-					desc += _StaticData->Driller.MPs[i].toString()+NLMISC::toString(" Q%d", 50*(j+1))+"\n";
+					desc += _StaticData->Driller.MPs[i].toString()+NLMISC::toString(" Q%d", (j+1)*(250/DRILLER_NB_LEVEL))+"\n";
 			}
 		}
 	}

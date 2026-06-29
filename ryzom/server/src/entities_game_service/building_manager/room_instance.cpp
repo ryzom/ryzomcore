@@ -82,7 +82,7 @@ void CRoomInstanceGuild::removeUser( CCharacter* user, bool send_url, bool keep_
 	BOMB_IF( !user, "<BUILDING> null character!", return );
 
 	// close guild inventory window
-	PlayerManager.sendImpulseToClient(user->getId(), "GUILD:CLOSE_INVENTORY");
+	// PlayerManager.sendImpulseToClient(user->getId(), "GUILD:CLOSE_INVENTORY");
 
 	CBuildingPhysicalGuild * guildBuilding = dynamic_cast<CBuildingPhysicalGuild *>( _Building );
 	BOMB_IF( !guildBuilding, "<BUILDING> building type does not match with room type", return );
@@ -140,7 +140,7 @@ void CRoomInstancePlayer::removeUser( CCharacter* user, bool send_url, bool keep
 	BOMB_IF( !user, "<BUILDING> null character!", return );
 
 	// close room inventory window
-	PlayerManager.sendImpulseToClient(user->getId(), "ITEM:CLOSE_ROOM_INVENTORY");
+	//PlayerManager.sendImpulseToClient(user->getId(), "ITEM:CLOSE_ROOM_INVENTORY");
 
 	CBuildingPhysicalPlayer * playerBuilding = dynamic_cast<CBuildingPhysicalPlayer *>( _Building );
 	BOMB_IF( !playerBuilding, "<BUILDING> building type does not match with room type", return );

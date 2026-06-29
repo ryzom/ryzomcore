@@ -461,6 +461,7 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 	ls.registerFunc("breakPoint",    breakPoint);
 	ls.registerFunc("setTextFormatTaged",    setTextFormatTaged);
 	ls.registerFunc("initEmotesMenu", initEmotesMenu);
+	ls.registerFunc("getEmotesList", getEmotesList);
 	ls.registerFunc("hideAllWindows", hideAllWindows);
 	ls.registerFunc("hideAllNonSavableWindows", hideAllNonSavableWindows);
 	ls.registerFunc("getDesktopIndex", getDesktopIndex);
@@ -542,6 +543,7 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 	ls.registerFunc("updateUserLandMarks",  updateUserLandMarks);
 	ls.registerFunc("delArkPoints",  delArkPoints);
 	ls.registerFunc("addRespawnPoint",  addRespawnPoint);
+	ls.registerFunc("centerMap",  centerMap);
 	ls.registerFunc("setArkPowoOptions",  setArkPowoOptions);
 	ls.registerFunc("getActualMapZoom",  getActualMapZoom);
 	ls.registerFunc("setActualMapZoom",  setActualMapZoom);
@@ -549,6 +551,7 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 	ls.registerFunc("readUserChannels", readUserChannels);
 	ls.registerFunc("getMaxDynChan", getMaxDynChan);
 	ls.registerFunc("scrollElement", scrollElement);
+	ls.registerFunc("loadTextures", loadTextures);
 
 	lua_State *L = ls.getStatePointer();
 
@@ -1168,8 +1171,78 @@ int CLuaIHMRyzom::initEmotesMenu(CLuaState &ls)
 
 	return 1;
 }
-
 // ***************************************************************************
+int CLuaIHMRyzom::getEmotesList(CLuaState &ls)
+{
+	ls.newTable();
+	CLuaObject result(ls);
+
+	CTextEmotListSheet *pTELS = dynamic_cast<CTextEmotListSheet *>(SheetMngr.get(CSheetId("list.text_emotes")));
+	if (pTELS == NULL)
+		return 0;
+
+	std::list<CEmoteStruct> entries;
+
+	if (entries.empty())
+	{
+		for (uint i = 0; i < pTELS->TextEmotList.size(); i++)
+		{
+			CEmoteStruct entry;
+			entry.EmoteId = pTELS->TextEmotList[i].EmoteId;
+			entry.Path = pTELS->TextEmotList[i].Path;
+			entry.Anim = pTELS->TextEmotList[i].Anim;
+			entry.UsableFromClientUI = pTELS->TextEmotList[i].UsableFromClientUI;
+			entries.push_back(entry);
+		}
+		entries.sort();
+	}
+
+	// The list of behaviour missnames emotList
+	CEmotListSheet *pEmotList = dynamic_cast<CEmotListSheet *>(SheetMngr.get(CSheetId("list.emot")));
+	nlassert(pEmotList != NULL);
+	nlassert(pEmotList->Emots.size() <= 255);
+	// Get the focus beta tester flag
+	bool betaTester = false;
+
+	CInterfaceManager *pIM = CInterfaceManager::getInstance();
+	CSkillManager *pSM = CSkillManager::getInstance();
+
+	betaTester = pSM->isTitleUnblocked(CHARACTER_TITLE::FBT);
+
+	for (std::list<CEmoteStruct>::const_iterator it = entries.begin(); it != entries.end(); it++)
+	{
+		std::string sEmoteId = (*it).EmoteId;
+		std::string sState = (*it).Anim;
+		std::string sName = (*it).Path;
+
+		// Check that the emote can be added to UI
+		// ---------------------------------------
+		if ((*it).UsableFromClientUI == false)
+			continue;
+
+		// Check the emote reserved for FBT (hardcoded)
+		// --------------------------------------------
+		if (sState == "FBT" && !betaTester)
+			continue;
+
+
+		// Add EmotId to list
+		// ----------------------------
+		ls.newTable();
+		CLuaObject oEmoteInfos(ls);
+		oEmoteInfos.setValue("translated", toLower(CI18N::get("uiEM_" + sEmoteId)));
+		oEmoteInfos.setValue("path", sName);
+		result.setValue(sEmoteId, oEmoteInfos);
+	}
+
+	result.push();
+
+	return 1;
+}
+
+
+
+	// ***************************************************************************
 int CLuaIHMRyzom::hideAllWindows(CLuaState &/* ls */)
 {
 	//H_AUTO(Lua_CLuaIHM_hideAllWindows)
@@ -1561,7 +1634,7 @@ int CLuaIHMRyzom::getPlayerMode(CLuaState &ls)
 int CLuaIHMRyzom::getPlayerPrivs(CLuaState &ls)
 {
 	std::string privsString = "";
-	
+
 	if (hasPrivilegeDEV()) privsString=":DEV";
 	if (hasPrivilegeSGM()) privsString+=":SGM";
 	if (hasPrivilegeGM()) privsString+=":GM";
@@ -1572,7 +1645,7 @@ int CLuaIHMRyzom::getPlayerPrivs(CLuaState &ls)
 	if (hasPrivilegeEG()) privsString+=":EG";
 	if (hasPrivilegeOBSERVER()) privsString+=":OBSERVER";
 	if (hasPrivilegeOBSERVER()) privsString+=":TESTER";
-	
+
 	if(privsString == ""){
 		return 0;
 	}
@@ -4598,12 +4671,12 @@ int CLuaIHMRyzom::removeLandMarks(CLuaState &ls)
 }
 
 // ***************************************************************************
-// addLandMark(10000, -4000, "Hello Atys!", "ico_over_homin.tga","","","","")
+// addLandMark(3000, -2500, "Hello Atys!", "ico_over_homin.tga","","","","", "", "", "FFFF", "")
 int CLuaIHMRyzom::addLandMark(CLuaState &ls)
 {
 	const char* funcName = "addLandMark";
 	CLuaIHM::checkArgMin(ls, funcName, 4);
-	CLuaIHM::checkArgMax(ls, funcName, 11);
+	CLuaIHM::checkArgMax(ls, funcName, 12);
 	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER); // x
 	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TNUMBER); // y
 	CLuaIHM::checkArgType(ls, funcName, 3, LUA_TSTRING); // title
@@ -4615,6 +4688,7 @@ int CLuaIHMRyzom::addLandMark(CLuaState &ls)
 	CLuaIHM::checkArgType(ls, funcName, 9, LUA_TSTRING); // over click action
 	CLuaIHM::checkArgType(ls, funcName, 10, LUA_TSTRING); // over click params
 	// 11 : Color
+	// 12 : Map name
 
 	CArkPoint point;
 	point.x = (sint32)(ls.toNumber(1)*1000.f);
@@ -4629,20 +4703,63 @@ int CLuaIHMRyzom::addLandMark(CLuaState &ls)
 	point.OverClickParam = ls.toString(10);
 
 	point.Color = CRGBA(255,255,255,255);
-
+	bool center = false;
+	string mapid = "ui:interface:map:content:map_content:actual_map";
 	if (ls.getTop() >= 11)
 		CLuaIHM::pop(ls, point.Color);
 
-	CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
+	if (ls.getTop() >= 12)
+	{
+		CLuaIHM::checkArgType(ls, funcName, 12, LUA_TSTRING);
+		mapid = ls.toString(12);
+	}
+
+	CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId(mapid));
 	if (pMap != NULL)
 		pMap->addArkPoint(point);
+
+	return 0;
+}
+
+// ***************************************************************************
+int CLuaIHMRyzom::centerMap(CLuaState &ls)
+{
+	const char* funcName = "centerMap";
+	CLuaIHM::checkArgMin(ls, funcName, 2);
+	CLuaIHM::checkArgMax(ls, funcName, 3);
+	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER); // x
+	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TNUMBER); // y
+
+	CVector2f point;
+	point.x = (sint32)(ls.toNumber(1));
+	point.y = (sint32)(ls.toNumber(2));
+
+	string mapid = "ui:interface:map:content:map_content:actual_map";
+	if (ls.getTop() >= 3)
+	{
+		CLuaIHM::checkArgType(ls, funcName, 3, LUA_TSTRING);
+		mapid = ls.toString(3);
+	}
+
+	CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId(mapid));
+	if (pMap != NULL)
+		pMap->centerOnWorldPos(point);
 	return 0;
 }
 
 // ***************************************************************************
 int CLuaIHMRyzom::delArkPoints(CLuaState &ls)
 {
-	CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
+	const char* funcName = "delArkPoints";
+	string mapid = "ui:interface:map:content:map_content:actual_map";
+
+	if (ls.getTop() >= 1)
+	{
+		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
+		mapid = ls.toString(1);
+	}
+
+	CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId(mapid));
 	if (pMap != NULL)
 		pMap->delArkPoints();
 	return 0;
@@ -4690,7 +4807,16 @@ int CLuaIHMRyzom::setArkPowoOptions(CLuaState &ls)
 // ***************************************************************************
 int CLuaIHMRyzom::getActualMapZoom(CLuaState &ls)
 {
-	CGroupMap *gm = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
+	const char* funcName = "getActualMapZoom";
+	string mapid = "ui:interface:map:content:map_content:actual_map";
+
+	if (ls.getTop() >= 1)
+	{
+		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
+		mapid = ls.toString(1);
+	}
+
+	CGroupMap *gm = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId(mapid));
 	if (gm != NULL)
 		ls.push(gm->getScale());
 	else
@@ -4705,8 +4831,16 @@ int CLuaIHMRyzom::setActualMapZoom(CLuaState &ls)
 	const char* funcName = "setActualMapZoom";
 	CLuaIHM::checkArgMin(ls, funcName, 1);
 	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
+	string mapid = "ui:interface:map:content:map_content:actual_map";
+
+	if (ls.getTop() >= 2)
+	{
+		CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
+		mapid = ls.toString(2);
+	}
+
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CGroupMap *gm = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
+	CGroupMap *gm = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId(mapid));
 	if (gm != NULL)
 	{
 		CVector2f center;
@@ -5015,5 +5149,68 @@ int CLuaIHMRyzom::scrollElement(CLuaState &ls)
 		}
 	}
 	ls.pushNil();
+	return 1;
+}
+
+// ---------------------------------------------------------------------------
+// loadTextures(basePath [, uploadDXTC])  OR  loadTextures(textPath, uvPath [, uploadDXTC])
+//
+// Lua usage examples:
+//
+//   -- 1) Base path only, without extension; loads "<base>.tga" + "<base>.txt"
+//   loadTextures("my_sheet", true)
+//
+//   -- 2) Explicit file names
+//   loadTextures("my_sheet.tga", "my_sheet.txt", false)
+//
+// Returns: true on success
+int CLuaIHMRyzom::loadTextures(CLuaState &ls)
+{
+	CLuaStackChecker lsc(&ls, 1);
+	const char *funcName = "loadTextures";
+
+	int top = ls.getTop();
+	// Expect between 1 and 3 arguments
+	CLuaIHM::check(ls, top >= 1 && top <= 3, toString("%s requires at leat 1 or maximum 3 arguments", funcName));
+
+	bool uploadDXTC = false;
+	std::string textFileName;
+	std::string uvFileName;
+
+	// If the last argument is a boolean, treat it as the uploadDXTC flag
+	if (top >= 2 && ls.isBoolean(top))
+	{
+		uploadDXTC = ls.toBoolean(top);
+		top -= 1; // remaining arguments are the string paths
+	}
+
+	if (top == 1)
+	{
+		// Single string: basePath → base.tga + base.txt
+		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
+		std::string base = ls.toString(1);
+		textFileName = base + ".tga";
+		uvFileName = base + ".txt";
+	}
+	else if (top == 2)
+	{
+		// Two strings: textPath, uvPath
+		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
+		CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
+		textFileName = ls.toString(1);
+		uvFileName = ls.toString(2);
+	}
+	else
+	{
+		// Anything else is invalid
+		CLuaIHM::check(ls, false, "Invalid arguments");
+	}
+
+	// Delegate to the C++ interface manager
+	CInterfaceManager *pIM = CInterfaceManager::getInstance();
+	pIM->loadTextures(textFileName, uvFileName, uploadDXTC);
+
+	// Push true to Lua stack to indicate success
+	ls.push(true);
 	return 1;
 }

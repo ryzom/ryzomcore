@@ -58,7 +58,7 @@
 #include "game_share/http_client.h"
 #include "server_share/log_command_gen.h"
 #include "server_share/r2_vision.h"
-#include "server_share/mongo_wrapper.h"
+#include "server_share/memc_wrapper.h"
 
 #include "egs_sheets/egs_sheets.h"
 #include "egs_sheets/egs_static_rolemaster_phrase.h"
@@ -4195,7 +4195,7 @@ NLMISC_COMMAND (infos, "give info on character (GodMode, Invisible...)", "")
 		str << "NOT_AGGROABLE ";
 	}
 
-	log.displayNL(str.c_str());
+	log.displayNL("%s", str.c_str());
 	return true;
 }
 
@@ -4665,6 +4665,7 @@ NLMISC_COMMAND(setGuildInventoryChest, "Select the chest to display in GH A or B
 	CGuild * guild = CGuildManager::getInstance()->getGuildFromId(c->getGuildId());
 	if (guild)
 	{
+		guild->initChests();
 		uint8 chest;
 		NLMISC::fromString(args[2], chest);
 
@@ -7722,8 +7723,8 @@ NLMISC_COMMAND(chanList, "display the list of all channels", "<>")
 	DynChatEGS.getChans(chans);
 	for(uint k = 0; k < chans.size(); ++k)
 	{
-		ucstring name = DynChatEGS.getChanNameFromID(chans[k]->getID());
-		nlinfo("Channel name : %s, num sessions = %d, historic size = %d", name.toString().c_str(), (int) chans[k]->getSessionCount(), (int) chans[k]->HistoricSize);
+		string name = DynChatEGS.getChanNameFromID(chans[k]->getID());
+		nlinfo("Channel name : %s, num sessions = %d, historic size = %d", name.c_str(), (int) chans[k]->getSessionCount(), (int) chans[k]->HistoricSize);
 	}
 	return true;
 }
@@ -9097,6 +9098,8 @@ NLMISC_COMMAND(openTargetApp, "open target app", "<user_id>")
 	{
 		c->sendUrl(creature->getWebPage());
 	}
+
+	return true;
 }
 
 //----------------------------------------------------------------------------
@@ -9115,6 +9118,8 @@ NLMISC_COMMAND(openTargetUrl, "Open target url", "<user_id> [bullying]")
 		c->sendUrl("app_arcc action=mScript_Run&script_name=TalkNpc&bullying=1&command=reset_all");
 	else
 		c->sendUrl("app_arcc action=mScript_Run&script_name=TalkNpc&command=reset_all");
+
+	return true;
 }
 
 
@@ -9316,7 +9321,7 @@ NLMISC_COMMAND(characterInventoryDump, "Dump character inventory info", "<eid> <
 
 			++j;
 			if ( ! (j % 3)) {
-				log.displayNL(msg.c_str());
+				log.displayNL("%s", msg.c_str());
 				msg = "";
 				j = 0;
 			}
@@ -9326,7 +9331,7 @@ NLMISC_COMMAND(characterInventoryDump, "Dump character inventory info", "<eid> <
 	log.displayNL("Showing slot %d - %d for inventory '%s':", start_slot, end_slot, selected_inv.c_str());
 	if (msg.length() > 0)
 	{
-		log.displayNL(msg.c_str());
+		log.displayNL("%s", msg.c_str());
 	}
 	else {
 		log.displayNL("Nothing to display.");

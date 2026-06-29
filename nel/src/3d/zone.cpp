@@ -442,6 +442,8 @@ void			CZone::serial(NLMISC::IStream &f)
 	 *	It can be loaded/called through CAsyncFileManager for instance
 	 * ***********************************************/
 	/*
+	Version 5:
+		- Ryzom Core release check
 	Version 4:
 		- PointLights
 	Version 3:
@@ -453,7 +455,7 @@ void			CZone::serial(NLMISC::IStream &f)
 	Version 0:
 		- base verison.
 	*/
-	uint	ver= f.serialVersion(4);
+	uint	ver= f.serialVersion(5);
 
 	// No more compatibility before version 3
 	if (ver<3)

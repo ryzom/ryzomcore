@@ -1135,7 +1135,7 @@ void CGroupMap::checkCoords()
 
 	// **** retrieve pos of respawn and update it, or hide it if there's no target
 	uint offset = 0;
-	
+
 	if (!_ArkPoints.empty())
 	{
 		offset = _ArkPoints.size();
@@ -2322,7 +2322,6 @@ void CGroupMap::setMap(SMap *map)
 	setScale(0);
 }
 
-//============================================================================================================
 void CGroupMap::setMap(const string &mapName)
 {
 	if ((_CurMap != NULL) && (_CurMap->Name == mapName)) return;
@@ -3743,6 +3742,12 @@ std::string CGroupMap::getContinentName() const
 std::string CGroupMap::getMapTexture() const
 {
 	return toLowerAscii(_MapTexture);
+}
+
+//=========================================================================================================
+std::string CGroupMap::getMap() const
+{
+	return _CurMap->Name;
 }
 
 //=========================================================================================================

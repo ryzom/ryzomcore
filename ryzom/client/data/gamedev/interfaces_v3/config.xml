@@ -3169,6 +3169,9 @@ This MUST follow the Enum MISSION_DESC::TIconId
   <variable entry="UI:SAVE:CHAT:ENTER_DONT_QUIT_CB"
             type="bool"
             value="false" />
+  <variable entry="UI:SAVE:CHAT:CHAT_AUTOCOMPLETE"
+            type="bool"
+            value="true" />
   <variable entry="UI:SAVE:CHAT:SAVE_CHANNEL"
             type="bool"
             value="false" />

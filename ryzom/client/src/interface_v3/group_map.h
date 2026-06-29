@@ -147,6 +147,7 @@ public:
 		REFLECT_STRING("texture", getMapTexture, dummySet);
 		REFLECT_LUA_METHOD("isIsland", luaIsIsland);
 		REFLECT_LUA_METHOD("reload", luaReload);
+		REFLECT_STRING("map", getMap, setMap);
 	REFLECT_EXPORT_END
 
 	int luaReload(CLuaState &ls);
@@ -169,6 +170,7 @@ public:
 	virtual bool getCtrlsUnder (sint32 x, sint32 y, sint32 clipX, sint32 clipY, sint32 clipW, sint32 clipH, std::vector<CCtrlBase*> &vICL);
 
 	// Name of the map as filled in the ryzom.world file
+	std::string getMap() const;
 	void setMap(const std::string &mapName);
 	void setMap(SMap *map);
 

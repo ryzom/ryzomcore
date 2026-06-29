@@ -767,7 +767,10 @@ void CCharacter::destroyItem(INVENTORIES::TInventory invId, uint32 slot, uint32 
 	}
 	else if (quantity == item->getStackSize())
 	{
-		nlinfo("Player %s has destroy %d items %s(%s) Q%d at slot %d", getName().toString().c_str(), quantity, sheetId.toString().c_str(), item->getItemId().toString().c_str(), quality, slot);
+		if (item->getLockedByOwner())
+			nlinfo("Player %s has destroy locked all %d items %s(%s) Q%d at slot %d", getName().toString().c_str(), quantity, sheetId.toString().c_str(), item->getItemId().toString().c_str(), quality, slot);
+		else
+			nlinfo("Player %s has destroy %d all items %s(%s) Q%d at slot %d", getName().toString().c_str(), quantity, sheetId.toString().c_str(), item->getItemId().toString().c_str(), quality, slot);
 		// just delete the item
 		inv->deleteItem(slot);
 		remainingQuantity = 0;
@@ -775,6 +778,10 @@ void CCharacter::destroyItem(INVENTORIES::TInventory invId, uint32 slot, uint32 
 	else
 	{
 		// change the stack size
+		if (item->getLockedByOwner())
+			nlinfo("Player %s has destroy locked %d/%d items %s(%s) Q%d at slot %d", getName().toString().c_str(), quantity, item->getStackSize(), sheetId.toString().c_str(), item->getItemId().toString().c_str(), quality, slot);
+		else
+			nlinfo("Player %s has destroy %d/%d items %s(%s) Q%d at slot %d", getName().toString().c_str(), quantity, item->getStackSize(), sheetId.toString().c_str(), item->getItemId().toString().c_str(), quality, slot);
 		remainingQuantity = item->getStackSize() - quantity;
 		item->setStackSize(remainingQuantity);
 	}

@@ -1,0 +1,142 @@
+RibsKitchen {
+	border: solid orange;
+	margin-bottom: 3;
+}
+
+RibsRecipes {
+	height: 100%;
+	margin: 0 0;
+	padding: 0 0;
+	max-width: 40;
+	content-align: left top;
+	border-left: solid #08c;
+}
+
+RibsRecipes Button {
+	background: #000;
+	color: orange;
+	margin: 0;
+	padding: 0;
+	width: 22;
+	border: hidden white;
+	text-align: left;
+	content-align-horizontal: left;
+}
+
+
+RibsSpices {
+	margin: 0 0;
+	padding: 0 0;
+	max-width: 40;
+	content-align: left top;
+	border-left: solid #08c;
+}
+
+RibsSpices Button:hover {
+	background: #222;
+}
+
+RibsSpices > Label, RibsRecipes > Label {
+	width: 100%;
+	text-style: bold;
+	color: #C6E1F1;
+	background: #252525;
+}
+
+RibsSpices > Select {
+	width: 100%;
+	text-style: bold;
+	color: orange;
+	margin-bottom: 1;
+}
+
+RibsWorkplan {
+	display: none;
+}
+
+#ribs_cooking_output {
+	background: black;
+	margin: 0 0;
+}
+
+#ribs_preparation_output {
+	display: none;
+	background: black;
+	margin: 0 0;
+}
+
+#preparation VerticalScroll {
+	height: 100%;
+}
+
+#preparation Grid {
+	height: auto;
+	width: 100%;
+	grid-size: 3;
+	grid-columns: auto auto auto;
+	grid-gutter: 0 0;
+} 
+
+.ribs_title {
+	color: #08c;
+	text-style: bold;
+	text-align: center;
+	margin-bottom: 1;
+}
+
+.ribs_option {
+	height: 1;
+	background: #000;
+	color: gray;
+	border: hidden gray;
+	text-align: center;
+}
+
+.ribs_option.selected {
+	color: #08c;
+	text-style: bold;
+}
+
+
+.ribs {
+	background: #000;
+	width: 100%;
+	border: hidden black;
+}
+
+.ribs:focus .toggle--label {
+	background: #000;
+}
+
+.ribs:hover .toggle--label {
+	background: #000;
+}
+
+
+.ribs .toggle--label {
+	color: gray;
+}
+
+.ribs.-on .toggle--label {
+	color: orange;
+	text-style: bold;
+}
+
+.ribs .toggle--button {
+	background: #000;
+	color: gray;
+}
+
+.ribs.-on > .toggle--button {
+	background: #000;
+	color: orange;
+	text-style: bold;
+}
+
+#ribs_status {
+	color: orange;
+	background: #111;
+	padding: 1;
+}
+
+

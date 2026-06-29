@@ -12,7 +12,7 @@ AppZone = {
 -- use client.cfg value when available
 local uri = getClientCfg("AppZoneUrl")
 if uri == nil or uri == '' then
-  uri = 'http://app.ryzom.com/'
+	uri = "https://app.ryzom.com/"
 end
 
 AppZone.homeuri = uri .. AppZone.homeuri
@@ -192,4 +192,4 @@ function AppZone:handle(cmd)
 end
 
 -- VERSION --
-RYZOM_APPZONE_VERSION = 324
+FILE_APPZONE_VERSION = 98

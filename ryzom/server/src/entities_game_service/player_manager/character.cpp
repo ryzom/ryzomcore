@@ -137,7 +137,7 @@
 #include "pvp_manager/pvp_manager_2.h"
 #include "server_share/log_character_gen.h"
 #include "server_share/log_item_gen.h"
-#include "server_share/mongo_wrapper.h"
+#include "server_share/memc_wrapper.h"
 #include "shop_type/character_shopping_list.h"
 #include "shop_type/items_for_sale.h"
 #include "shop_type/offline_character_command.h"
@@ -239,7 +239,7 @@ CVariable<uint32> OutpostDaysForGvX(
 	"egs", "OutpostDaysForGvX", "Minimum days in Guild for GvE,PvE and GvG", 21, 0, true);
 
 CVariable<float> RegenerateReposModifierFactor(
-	"egs", "RegenerateReposModifierFactor", "Factor who will increase the RegenerateModifier with the time", 0, 0, true);
+	"egs", "RegenerateReposModifierFactor", "Factor who will increase the RegenerateModifier with the time", 0.03, 0, true);
 
 
 
@@ -382,6 +382,7 @@ CCharacter::CCharacter()
 	//	_CarriedWeight = 0;
 	_GuildId = 0;
 	_LastGuildId = 0;
+	_GuildEnterEra = 0;
 	_GuildEnterTime = 0;
 	_UseFactionSymbol = false;
 	_SavedVersion = 0;
@@ -652,7 +653,9 @@ CCharacter::CCharacter()
 	_SelectedOutpost = 0;
 	_ChannelAdded = false;
 	_DuelOpponent = NULL;
+	_IsTeleportFromRespawn = false;
 	_LastTpTick = 0;
+	_LastRespawnTick = 0;
 	_LastOverSpeedTick = 0;
 	_LastMountTick = 0;
 	_LastUnMountTick = 0;
@@ -713,6 +716,7 @@ void CCharacter::clear()
 	_GuildId = 0;
 	_LastGuildId = 0;
 	_GuildEnterTime = 0;
+	_GuildEnterEra = 0;
 	_CreationPointsRepartition = 0;
 	_ForbidAuraUseStartDate = 0;
 	_ForbidAuraUseEndDate = 0;
@@ -2090,6 +2094,9 @@ void CCharacter::respawn(sint32 x, sint32 y, sint32 z, float heading, bool apply
 	CMessage msgout("ENTITY_TELEPORTATION");
 	msgout.serial(_Id);
 
+	// save Last Respawn Tick if player respawns
+	_LastRespawnTick = CTickEventHandler::getGameCycle();
+
 	if (IsRingShard)
 	{
 		nlinfo("Asking GPMS to TP character %s to (0,0) for respawn", _Id.toString().c_str());
@@ -2116,6 +2123,8 @@ void CCharacter::respawn(sint32 x, sint32 y, sint32 z, float heading, bool apply
 //---------------------------------------------------
 void CCharacter::applyRespawnEffects(bool applyDP)
 {
+	_IsTeleportFromRespawn = true;
+
 	CSheetId usedSheet;
 	CSBrickParamJewelAttrs sbrickParam = getJewelAttrs("rez", SLOT_EQUIPMENT::NECKLACE, usedSheet);
 	SM_STATIC_PARAMS_1(params, STRING_MANAGER::sbrick);
@@ -2331,6 +2340,8 @@ void CCharacter::mount(TDataSetRow PetRowId, bool fromArk, bool skipDistance)
 							// remember the mount state
 							if (petIndex != -1)
 								_PlayerPets[petIndex].IsMounted = true;
+							else
+								_RentAMount = PetRowId;
 							//							_PropertyDatabase.setProp( "USER:MOUNT_WALK_SPEED",
 							//(sint64)(sint)(e->getPhysScores().CurrentWalkSpeed() * 1000.0f) );
 							CBankAccessor_PLR::getUSER().setMOUNT_WALK_SPEED(_PropertyDatabase,
@@ -2397,6 +2408,10 @@ void CCharacter::mount(TDataSetRow PetRowId, bool fromArk, bool skipDistance)
 							}
 
 							return;
+						}
+						else
+						{
+							PHRASE_UTILITIES::sendDynamicSystemMessage(_EntityRowId, "ANIMAL_TOO_FAR");
 						}
 					}
 
@@ -2796,15 +2811,26 @@ void CCharacter::applyRegenAndClipCurrentValue()
 	sint16 speedVariationModifier = std::max((sint)_PhysScores.SpeedVariationModifier, (sint) - 100);
 	CSheetId aqua_speed("aqua_speed.sbrick");
 	bool usingAquaSpeed = false;
-	if (isInWater() && getMode() != MBEHAV::MOUNT_NORMAL && (haveBrick(aqua_speed) || _CurrentSpeedSwimBonus > 0))
+	if (isInWater())
 	{
-		setBonusMalusName("aqua_speed", addEffectInDB(aqua_speed, true));
-		if (_CurrentSpeedSwimBonus > 0)
-			speedVariationModifier = std::min(speedVariationModifier + (sint16)_CurrentSpeedSwimBonus, 100);
-		else
+		if (TheDataset.isAccessible(_EntityMounted()))
 		{
-			usingAquaSpeed = true;
-			speedVariationModifier = std::min(speedVariationModifier + 33, 100);
+			CCreature* creature = CreatureManager.getCreature(_EntityMounted);
+			if (creature->_Race == EGSPD::CPeople::WaterFauna)
+			{
+				speedVariationModifier = 100;
+			}
+		}
+		else if (getMode() != MBEHAV::MOUNT_NORMAL && haveBrick(aqua_speed) || _CurrentSpeedSwimBonus > 0)
+		{
+			setBonusMalusName("aqua_speed", addEffectInDB(aqua_speed, true));
+			if (_CurrentSpeedSwimBonus > 0)
+				speedVariationModifier = std::min(speedVariationModifier + (sint16)_CurrentSpeedSwimBonus, 100);
+			else
+			{
+				usingAquaSpeed = true;
+				speedVariationModifier = std::min(speedVariationModifier + 33, 100);
+			}
 		}
 	}
 	else
@@ -4031,7 +4057,7 @@ void CCharacter::setTargetBotchatProgramm(CEntityBase* target, const CEntityId &
 	// set bot chat programms and npcs special options
 	CCreature* c = NULL;
 
-	if (targetId.getType() == RYZOMID::npc)
+	if (targetId.getType() >= RYZOMID::bot_ai_begin && targetId.getType() <= RYZOMID::bot_ai_end)
 	{
 		c = dynamic_cast<CCreature*>(target);
 
@@ -5965,8 +5991,14 @@ void CCharacter::teleportCharacter(sint32 x, sint32 y, sint32 z, bool teleportWi
 		}
 	}
 
-	if (_IntangibleEndDate != ~0 && !fromVortex) // Don't save Last Tp Tick if player respawns or teleport from Vortex
+	if (_IsTeleportFromRespawn && !fromVortex)
+	{
+		_LastRespawnTick = CTickEventHandler::getGameCycle();
+	}
+	else if (!_IsTeleportFromRespawn && !fromVortex)
+	{
 		_LastTpTick = CTickEventHandler::getGameCycle();
+	}
 
 	_TpCoordinate.X = x;
 	_TpCoordinate.Y = y;
@@ -6020,6 +6052,8 @@ void CCharacter::teleportCharacter(sint32 x, sint32 y, sint32 z, bool teleportWi
 	//	respawnMsg.send("AIS");
 	// backup the who sees me property and set it to 0
 	CMirrorPropValue<TYPE_WHO_SEES_ME> whoSeesMe(TheDataset, _EntityRowId, DSPropertyWHO_SEES_ME);
+
+	_IsTeleportFromRespawn = false;
 
 	/*
 	FOR AIS the change of property value AIInstance is handled before the sendAggro message send by setWhoSeesMe
@@ -6196,6 +6230,7 @@ string CCharacter::getPetsInfos()
 	{
 		string sheet = _PlayerPets[i].PetSheetId.toString();
 		string ticketSheet = _PlayerPets[i].TicketPetSheetId.toString();
+		string spawnedPet = TheDataset.getEntityId(_PlayerPets[i].SpawnedPets).toString();
 
 		uint32 timeBeforeDespawn = 0;
 		if (CTickEventHandler::getGameCycle() <= _PlayerPets[i].DeathTick + 3 * 24 * 36000)
@@ -6237,8 +6272,10 @@ string CCharacter::getPetsInfos()
 		uint32 weight = _Inventory[packInv]->getInventoryWeight();
 		uint32 max_weight = _Inventory[packInv]->getMaxWeight();
 
-		pets += sheet+"|"+ticketSheet+"|"+type+"|"+state+"|"+toString("%d", _PlayerPets[i].Size)+"|"+toString("%d", _PlayerPets[i].StableId)+"|"+toString("%d,%d,%d", _PlayerPets[i].Landscape_X, _PlayerPets[i].Landscape_Y, _PlayerPets[i].Landscape_Z)+"|"+toString("%u", timeBeforeDespawn)+"|"+toString("%f/%f", _PlayerPets[i].Satiety, _PlayerPets[i].MaxSatiety)+"|"+toString("%u|%u/%u|%u/%u", slots, bulk, max_bulk, weight, max_weight)+"|"+inBag+"|"+spawnFlag+"|"+name+"\n";
+		pets += sheet+"|"+ticketSheet+"|"+type+"|"+state+"|"+toString("%d", _PlayerPets[i].Size)+"|"+toString("%d", _PlayerPets[i].StableId)+"|"+toString("%d,%d,%d", _PlayerPets[i].Landscape_X, _PlayerPets[i].Landscape_Y, _PlayerPets[i].Landscape_Z)+"|"+toString("%u", timeBeforeDespawn)+"|"+toString("%f/%f", _PlayerPets[i].Satiety, _PlayerPets[i].MaxSatiety)+"|"+toString("%u|%u/%u|%u/%u", slots, bulk, max_bulk, weight, max_weight)+"|"+inBag+"|"+spawnFlag+"|"+name+"|"+spawnedPet+"\n";
 	}
+
+	pets += TheDataset.getEntityId(_RentAMount).toString();
 
 	return pets;
 }
@@ -6716,19 +6753,19 @@ void CCharacter::onAnimalSpawned(CPetSpawnConfirmationMsg::TSpawnError SpawnStat
 {
 	CPetAnimal &animal = _PlayerPets[PetIdx];
 
-	if (SpawnStatus == CPetSpawnConfirmationMsg::NO_ERROR_SPAWN)
+	if (SpawnStatus == CPetSpawnConfirmationMsg::NO_ERROR_SPAWN
+		|| (SpawnStatus == CPetSpawnConfirmationMsg::PET_ALREADY_SPAWNED && PetIdx == MAX_INVENTORY_ANIMAL))
 	{
-		if (PetIdx == 8)
+		if (PetIdx == MAX_INVENTORY_ANIMAL) // Special case of RentAMount
 		{
 			CCreature* c = CreatureManager.getCreature(TheDataset.getEntityId(PetMirrorRow));
-			if (c)
+			if (c) {
 				c->setIsAPet(true);
-			c->setName("pet_of_"+getName().toString());
-
+				c->setName("pet_of_"+getName().toString());
+			}
 			CMirrorPropValue<TYPE_FUEL> freeSpeedMode(TheDataset, PetMirrorRow, DSPropertyFUEL);
 			freeSpeedMode = true;
 			_RentAMount = PetMirrorRow;
-
 		}
 		else if (PetIdx < MAX_INVENTORY_ANIMAL)
 		{
@@ -7278,12 +7315,15 @@ void CCharacter::removeAnimal(CGameItemPtr item, CPetCommandMsg::TCommand mode)
 	}
 }
 
-void CCharacter::removeRentAMount()
+void CCharacter::removeRentAMount(TDataSetRow rentamount)
 {
 	CPetCommandMsg msg;
 	msg.Command = CPetCommandMsg::DESPAWN;
 	msg.CharacterMirrorRow = _EntityRowId;
-	msg.PetMirrorRow = _RentAMount;
+	if (rentamount == INVALID_DATASET_INDEX)
+		msg.PetMirrorRow = _RentAMount;
+	else
+		msg.PetMirrorRow = rentamount;
 	msg.Coordinate_X = _EntityState.X;
 	msg.Coordinate_Y = _EntityState.Y;
 	msg.Coordinate_H = _EntityState.Z;
@@ -12049,6 +12089,11 @@ void CCharacter::setLangChannel(const string &lang)
 //-----------------------------------------------------------------------------
 void CCharacter::setNewTitle(const string &title)
 {
+
+#ifdef HAVE_MEMCACHED
+	if (title != _NewTitle)
+		CMemC::setWithIndex("Shard-Command", toString("setNewTitle:%s:%s", getName().toString().c_str(), title.c_str()));
+#endif
 	_NewTitle = title;
 }
 
@@ -21581,10 +21626,15 @@ void CCharacter::outpostSideChosen(bool neutral, OUTPOSTENUMS::TPVPSide side)
 			if (outpost->getName().substr(0, 14) != "outpost_nexus_")
 			{
 				CGuildMember* member = guild->getMemberFromEId(_Id);
-				if (member != NULL && ((CTickEventHandler::getGameCycle() - member->getEnterTime()) / (86400/CTickEventHandler::getGameTimeStep())) < OutpostDaysForGvX.get())
+				if (member != NULL)
 				{
-					side = OUTPOSTENUMS::UnknownPVPSide;
-					nlinfo("Player %s entertime are < 21d at OP %s", getName().toString().c_str(), outpost->getName().c_str());
+					nlinfo("Check Need days = 21, %" NL_I64 "u, %" NL_I64 "u", NLMISC::CTime::getSeconds64bSince1970(), member->getRealEnterTimestamp());
+					if (((NLMISC::CTime::getSeconds64bSince1970() - member->getRealEnterTimestamp()) / 86400) < OutpostDaysForGvX.get())
+					{
+						side = OUTPOSTENUMS::UnknownPVPSide;
+						nlinfo("Player %s entertime are < 21d at OP %s", getName().toString().c_str(), outpost->getName().c_str());
+						sendDynamicSystemMessage(_EntityRowId, "OUTPOST_CANT_PARTICIPATE_21DAYS");
+					}
 				}
 			}
 
@@ -22695,9 +22745,13 @@ bool CCharacter::setGuildId(uint32 guildId)
 			IShardUnifierEvent::getInstance()->onUpdateCharGuild(_Id, guildId);
 
 		_GuildId = guildId;
-#ifdef HAVE_MONGO
-		CMongo::update("ryzom_users", toString("{'cid': %" NL_I64 "u}", _Id.getShortId()),
-					   toString("{ $set: {'guildId': %d} }", guildId));
+
+#ifdef HAVE_MEMCACHED
+		ucstring name = CEntityIdTranslator::getInstance()->getByEntity(getId());
+		CEntityIdTranslator::removeShardFromName(name);
+		CGuild* guild = CGuildManager::getInstance()->getGuildFromId(guildId);
+		if (guild)
+			CMemC::setWithIndex("Shard-Command", toString("setUserGuild:%s:%s", name.toUtf8().c_str(), guild->getName().toUtf8().c_str()));
 #endif
 		return true;
 	}

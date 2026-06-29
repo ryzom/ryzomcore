@@ -246,7 +246,7 @@ void	setOutGameFullScreen()
 	}
 
 	// Enable auto scaling in login window
-	CInterfaceManager::getInstance()->setInterfaceScale(1.0f, true);
+	CInterfaceManager::getInstance()->setInterfaceScale(1.0f, true, true);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -349,7 +349,6 @@ bool connection (const string &cookie, const string &fsaddr)
 	{
 		// it means that we have a nel_launcher values, so we are online
 		ClientCfg.Local = 0;
-		nlinfo ("Using the nel launcher parameters '%s' '%s'", cookie.c_str (), fsaddr.c_str ());
 	}
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
@@ -529,7 +528,6 @@ bool reconnection()
 	{
 		// it means that we have a nel_launcher values, so we are online
 		ClientCfg.Local = 0;
-		nlinfo ("Using the nel launcher parameters '%s' '%s'", cookie.c_str (), fsaddr.c_str ());
 	}
 
 	// If the Client is in in Local Mode -> init the Time and return.

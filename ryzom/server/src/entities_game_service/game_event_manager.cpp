@@ -87,7 +87,7 @@ void CGameEventManager::resetGameEvent(const string &sEventName, const string &s
 	_EventFaction2ChannelName = sEventFaction2ChannelName;
 
 	_FactionChanelInZoneOnly = factionChanelInZoneOnly;
-	
+
 	// Get the starting date
 	if( !sEventName.empty() )
 		_Date = CTickEventHandler::getGameCycle();
@@ -123,7 +123,7 @@ void CGameEventManager::resetGameEvent(const string &sEventName, const string &s
 		DynChatEGS.removeChan( _ChannelGMEventFaction2Id );
 		_ChannelGMEventFaction2Id = TChanID::Unknown;
 	}
-		
+
 	createEventChannel();
 
 	// For all character online reset their game event part
@@ -131,7 +131,7 @@ void CGameEventManager::resetGameEvent(const string &sEventName, const string &s
 	CPlayerManager::TMapPlayers::const_iterator it = playerMap.begin();
 	while (it != playerMap.end())
 	{
-		CPlayer *p = it->second.Player;		
+		CPlayer *p = it->second.Player;
 		CCharacter *c = p->getActiveCharacter();
 		if (c != NULL)
 		{
@@ -307,7 +307,7 @@ void CGameEventManager::saveGameEventFile()
 	{
 		string sFilename = GameEventFile.get();
 		sFilename = CPath::standardizePath(IService::getInstance()->WriteFilesDirectory) + sFilename;
-		
+
 		static CPersistentDataRecordRyzomStore	pdr;
 		pdr.clear();
 		store(pdr);
@@ -328,7 +328,7 @@ void CGameEventManager::saveGameEventFile()
 	H_AUTO(CGameEventManagerApply);\
 
 #define PERSISTENT_DATA\
-	PROP_GAME_CYCLE_COMP(_Date)\
+	PROP_GAME_CYCLE_OR_0(_Date)\
 	PROP(string, _Name)\
 	PROP(string, _EventFaction1Name)\
 	PROP(string, _EventFaction2Name)\

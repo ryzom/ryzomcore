@@ -1,0 +1,15 @@
+name: Shard.Command
+description: Manage commands from shard
+group: RTZ
+timeoutSec: 0
+env:
+  - MARGUEZ_PRIO: 99
+  - WORKING_DIR: /home/nevrax/repos/ryzom-core/ryzom/server/tools/rytranszulip
+  - LOG_FILE: /${WORKING_DIR}/.shard_command.out
+  - DB_Messages: "['Shard-Command-Last', 'Shard-Command-{}', '']"
+  - PYTHONPATH: /home/nevrax/shard/tools/
+steps:
+  - name: run
+    command: bash /home/nevrax/repos/ryzom-core/ryzom/server/tools/marguez/monitor_script.sh shard_commands.py
+
+

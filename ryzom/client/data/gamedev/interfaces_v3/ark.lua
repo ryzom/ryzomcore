@@ -98,8 +98,182 @@ function getArkScript(id, selected)
 	return url
 end
 
+function ArkUpdateItemVariant(db, id, vp, val, skin)
+	local item
+	if db then
+		runAH(nil, "set", "dblink=UI:TEMP:ARK_RYWARD_CHAR3D_"..db..":"..vp.."|value="..val)
+		item = getUI("ui:interface:encyclopedia:content:htmlC"):find("div_item_"..db)
+	else
+		item = getUI("ui:interface:encyclopedia:content:htmlC"):find(vp)
+		local scene = getUI("ui:interface:encyclopedia:content:htmlC"):find(vp):find("scene")
+		local shape = scene:getElement("shape#0")
+		if skin and skin ~= "" then
+			shape.name = skin
+		end
+		shape.textures = val
+		for token in string.gmatch(vp, "[^_]*") do
+			db = tonumber(token)
+		end
+	end
+
+	item:find("resell").active = false
+	item:find("apply").active = false
+	item:find("v").hardtext = id
+	item:find("infos").hardtext = i18n.get("uiPhraseTotal"):toUtf8().." = 0"
+
+	if db ~= nil then
+		if ArkItemVariantQuantities[db] ~= nil and ArkItemVariantQuantities[db][id] ~= nil then
+			ArkSelectedItemVariant[db] = id
+			if ArkItemVariantQuantities[db][id] > 0 then
+				if item:find("apply") ~= nil then
+					item:find("apply").active = true
+				end
+				if item:find("infos") ~= nil then
+					item:find("infos").hardtext = i18n.get("uiPhraseTotal"):toUtf8().." = "..tostring(ArkItemVariantQuantities[db][id])
+				end
+			end
+			if ArkItemVariantQuantities[db][id] >= ArkItemVariantMinToSell[db] and ArkItemExchange[db] == true then
+				if item:find("resell") ~= nil then
+					item:find("resell").active = true
+				end
+			end
+		end
+	end
+end
 
 --------------------------------------------------------------------------------
+--- ARK RP ITEMS ---
+--------------------------------------------------------------------------------
+
+if ArkItems == nil then
+	ArkItems = {}
+end
+
+function ArkItemOpenUrl(db, url)
+	if ArkSelectedItemVariant[db] ~= nil then
+		webig:openUrl(url.."%26variant%3D"..tostring(ArkSelectedItemVariant[db]).."&variant="..tostring(ArkSelectedItemVariant[db]).."&rand="..tostring(math.random(10000000)).."#$SelectedPathC")
+	else
+		webig:openUrl(url)
+	end
+end
+
+function ArkItemApply(db, url)
+	if ArkSelectedItemVariant[db] ~= nil then
+		url = url.."&variant="..tostring(ArkSelectedItemVariant[db])
+	end
+	webig:openUrl(url)
+end
+
+function ArkFixItemPosition(id, textures, preview_params, skeleton, anim)
+	local scene = getUI("ui:interface:encyclopedia:content:htmlC"):find("div_item_"..id):find("scene")
+	local shape = scene:getElement("shape#0")
+	local shape2 = scene:getElement("shape#1")
+	local camera = scene:getElement("camera#0")
+	local params = preview_params:split(" ")
+	shape_offset_posx[id] = camera.posx
+	shape_offset_posy[id] = camera.posy
+	shape_offset_posz[id] = camera.posz
+	shape_offset_posr[id] = shape.rotx
+	if shape then
+		shape.posy = 0.5
+		camera.tgty = 0.5
+
+		-- Camera posz must be set before camera dist
+		if params[4] ~= nil and params[4] ~= "" then
+			camera.posz = camera.posz - tonumber(params[4])
+			camera.tgtz = camera.tgtz - tonumber(params[4])
+			shape_offset_posz[id] = tonumber(params[4])
+		end
+		 -- Camera posy must be set before camera dist
+		if params[5] ~= nil and params[5] ~= "" then
+			camera.posy = camera.posy - tonumber(params[5])
+			camera.tgty = camera.tgty - tonumber(params[5])
+			shape_offset_posy[id] = tonumber(params[5])
+		end
+		 -- Camera posy must be set before camera dist
+		if params[6] ~= nil and params[6] ~= "" then
+			camera.posx = camera.posx - tonumber(params[6])
+			camera.tgtx = camera.tgtx - tonumber(params[6])
+			shape_offset_posx[id] = tonumber(params[6])
+		end
+
+		if params[7] ~= nil and params[7] ~= "" then
+			camera.roll = camera.roll - tonumber(params[7])
+			shape_offset_posr[id] = tonumber(params[7])
+		end
+
+		if params[1] ~= nil and params[1] ~= "" then
+			camera.roty = tonumber(params[1])
+		end
+		if params[2] ~= nil then
+			camera.rotz = tonumber(params[2])
+		end
+		if params[3] ~= nil then
+			camera.dist = tonumber(params[3])
+		end
+
+
+		scene.distlimitmin = camera.dist - (camera.dist / 1.5)
+		scene.distlimitmax = camera.dist +  100*(camera.dist / 1.5)
+		shape.textures = textures
+		if shape2 then
+			shape2.posy = shape.posy
+			shape2.posz = shape.posz
+		end
+	end
+	if skeleton and shape.skeleton then
+		shape.skeleton = skeleton
+		shape.anim = string.gsub(anim, ".anim", "")
+	end
+end
+
+function ArkUpdateItemZ(id, x, y, z, r)
+	if r == nil then
+		r = 0
+	end
+	local scene = getUI("ui:interface:encyclopedia:content:htmlC"):find("div_item_"..id):find("scene")
+	local camera = scene:getElement("camera#0")
+	local shape = scene:getElement("shape#0")
+	local dist = camera.dist
+
+	camera.posx = camera.posx - x
+	camera.tgtx = camera.tgtx - x
+	camera.posy = camera.posy - y
+	camera.tgty = camera.tgty - y
+	camera.posz = camera.posz - z
+	camera.tgtz = camera.tgtz - z
+	camera.roll = camera.roll - 100*r
+
+	camera.dist = dist
+	shape_offset_posx[id] = shape_offset_posx[id] + x
+	shape_offset_posy[id] = shape_offset_posy[id] + y
+	shape_offset_posz[id] = shape_offset_posz[id] + z
+	shape_offset_posr[id] = shape_offset_posr[id] + 100*r
+end
+
+function ArkUpdateItemView(id, script)
+	local scene = getUI("ui:interface:encyclopedia:content:htmlC"):find("div_item_"..id):find("scene")
+	local camera = scene:getElement("camera#0")
+	local url = "https://app.ryzom.com/app_arcc/index.php?action=mRyzhome_SetPreviewParams&script="..tostring(script).."&params="..string.format("%.5f", camera.roty).."%20"..string.format("%.5f", camera.rotz).."%20"..string.format("%.5f", camera.dist).."%20"..string.format("%.5f", shape_offset_posz[id]).."%20"..string.format("%.5f", shape_offset_posy[id]).."%20"..string.format("%.5f", shape_offset_posx[id]).."%20"..string.format("%.5f", shape_offset_posr[id])
+	webig:openUrl(url)
+end
+
+function ArkRenderContent(ui, text)
+	getUI(ui):renderHtml([[
+	<style>* {
+		background-color: #0009;
+		color: orange;
+	}
+	 body, tr,td,table,button {
+		background-color: #0000;
+	}
+	</style>
+	<table width="100%"><tr>
+		<td height="100px" align="center" valign="middle">]]..text..[[</td>
+	</tr><table>]])
+end
+
+---------------------------------------------------------------------------
 --- ARK DYNE ---
 --------------------------------------------------------------------------------
 
@@ -148,17 +322,12 @@ function DynE:OpenHelp(img)
 end
 
 function DynE:UpdateMapWindow()
-	if (nltime.getLocalTime() - DynE.lastWinUpdate) > 60000 then
-		local win_html = getUI("ui:interface:app2453:browser:content:html")
-		local map_html = getUI("ui:interface:map:content:map_content:lm_events:html")
-		map_html:browse("home")
-		if win_html ~= nil then
-			win_html:renderHtml(map_html.html)
-		end
-
+	if (nltime.getLocalTime() - DynE.lastWinUpdate) > 10000 then
 		DynE.lastWinUpdate = nltime.getLocalTime()
+		getUI("ui:interface:web_lua_action"):find("html"):browse("https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=12517&command=reset_all")
 	end
 end
+
 
 --------------------------------------------------------------------------------
 --- ARK MISSION CATALOG ---
@@ -179,6 +348,17 @@ function openRyward(folder, event)
 	getUI(ArkMissionCatalog.window_id..":content:htmlB"):browse("https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=10741&command=reset_all&pathB="..folder.."&pathC="..event)
 	getUI(ArkMissionCatalog.window_id).active = true
 end
+
+function openRykea(folder, event)
+	folder = "f"..tostring(folder)
+	event = tostring(event)
+	if not (rykea_selected_path_B == folder and rykea_selected_path_C == event and getUI("ui:interface:encyclopedia").active == true) then
+		ArkMissionCatalog:OpenCat("rykea","https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=11938&command=reset_all")
+	end
+	getUI(ArkMissionCatalog.window_id..":content:htmlB"):browse("https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=11938&command=reset_all&pathB="..folder.."&pathC="..event)
+	getUI(ArkMissionCatalog.window_id).active = true
+end
+
 
 function ArkMissionCatalog:OpenWindow(urlA, urlB, dont_active)
 	local winframe = getUI(ArkMissionCatalog.window_id)
@@ -339,15 +519,17 @@ function translateText(id, script, event, dst_lang)
 	setTopWindow(framewin)
 	if dst_lang then
 		dst_lang = "&dst_lang="..dst_lang
+	else
+		dst_lang = ""
 	end
 	framewin:find("html"):browse("https://app.ryzom.com/app_arcc/index.php?action=mTrads_Edit&event="..tostring(event).."&trad_name="..tostring(id).."&reload="..script..dst_lang)
 end
 
 
 function setupArkUrls()
-	debug("Setup Lm Events")
+	debug("Setup Lm Events v2")
 	local ui = getUI("ui:interface:map:content:map_content:lm_events:html")
-	ui.home = "https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=8297&command=reset_all&no_html_header=1&continent="..tostring(game.currentMapContinent)
+	ui.home = "https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=12517&command=reset_all&no_html_header=1&continent=&posx=$posx$&posy=$posy$"
 	ui:browse("home")
 
 	debug("Setup Lm Icons")
@@ -355,6 +537,7 @@ function setupArkUrls()
 	ui.home = "https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=11158&command=reset_all&no_html_header=1"
 	ui:browse("home")
 	game.updateRpItemsUrl = "https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=11488&command=reset_all"
+	addOnDbChange(ui, "@UI:VARIABLES:CURRENT_SERVER_TICK", "DynE:UpdateMapWindow()")
 end
 
 
@@ -384,9 +567,11 @@ function ArkSelectRyform(curwin, id, mod)
 end
 
 function ArkSendForm(name)
-	ArkGetStageEdit(__CURRENT_WINDOW__):find(name.."__command:eb").input_string = "reset"
-	ArkGetStageEdit(__CURRENT_WINDOW__):find("send:b"):runLeftClickAction()
+	local ui = getUICaller().id
+	ArkGetStageEdit(ui):find(name.."__command:eb").input_string = "reset"
+	ArkGetStageEdit(ui):find("send:b"):runLeftClickAction()
 end
+
 
 function ArkGetStageEdit(curwin)
 	local sid = string.split(curwin, ":")
@@ -435,9 +620,15 @@ function ArkV5GetSelectEntity(prefix, input)
 	end
 end
 
-function fixUrl(url)
-	s, n = string.gsub(url, "{amp}", "&")
-	return s
+function getVpx(vpx)
+	while string.len(vpx) < 16 do
+		vpx = "0"..vpx
+	end
+
+	local vpx1 = string.format("%06d", tonumber(vpx:sub(1, string.len(vpx)-2), 16)*256)
+	local vpx2 = string.format("%06d", tonumber(vpx:sub(string.len(vpx)-1, string.len(vpx)), 16)+tonumber(vpx1:sub(string.len(vpx1)-5, string.len(vpx1))))
+	local nvpx = vpx1:sub(1, string.len(vpx1)-6)..vpx2:sub(string.len(vpx2)-5, string.len(vpx2))
+	return nvpx
 end
 
 function openUrlInBg(url)
@@ -447,7 +638,18 @@ end
 function arkWindowCloseMe(url)
 	local framewin = getUICaller()
 	framewin.parent.active = false
-	framewin:browse(fixUrl(url))
+	if url then
+		framewin:browse(fixUrl(url))
+	end
+end
+
+function windowCloseMe(ui)
+	local framewin = getUI("ui:interface:"..ui)
+	framewin.active = false
+end
+
+function game:displayWhatsUp()
+	getUI("ui:interface:npc_web_browser:content:html"):browse("https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=11154&command=reset_all")
 end
 
 -- S2E1 STUFF --
@@ -872,5 +1074,54 @@ function S2E1:newQuake(timer)
 
 end
 
+
+function arkRpMessageShowCapPopup(timer)
+	local ui = getUI("ui:interface:cap_popup")
+	ui:updateCoords()
+	setOnDraw(ui, "")
+	setTopWindow(ui)
+	ui.alpha = 255
+	ui.pop_max_h = getUI("ui:interface:cap_popup:html:text_list").h_real + 8
+	if ui.pop_max_h < 80 then
+		ui.pop_max_h = 155
+	end
+	ui.h = ui.pop_max_h
+	ui.y = getUI("ui:interface").h - 90
+	ui.x = math.floor(getUI("ui:interface").w / 2) - 400
+
+	if timer then
+		game.autoHideCapStartTime = nltime.getLocalTime()
+		game.autoHideCapTimer = timer
+		setOnDraw(getUI("ui:interface:cap_popup"), "game:autoHideCapPopup()")
+	else
+		setOnDraw(getUI("ui:interface:cap_popup"), "game:tempfixCapPopup()")
+	end
+end
+
+function game:autoHideCapPopup()
+	local ui = getUI("ui:interface:cap_popup")
+
+	ui.pop_max_h = getUI("ui:interface:cap_popup:html:text_list").h_real + 8
+	if ui.pop_max_h < 80 then
+		ui.pop_max_h = 155
+	end
+	ui.h = ui.pop_max_h
+
+	if game.autoHideCapTimer == 0 then
+		alpha = nltime.getLocalTime() - game.autoHideCapStartTime
+		if alpha >= 254*5 then
+			setOnDraw(getUI("ui:interface:cap_popup"), "")
+			ui.active=false
+		else
+			ui.alpha=255-math.floor(alpha/5)
+		end
+	else
+		if game.autoHideCapStartTime + game.autoHideCapTimer < nltime.getLocalTime() then
+			game.autoHideCapStartTime = nltime.getLocalTime()
+			game.autoHideCapTimer = 0
+		end
+	end
+end
+
 -- VERSION --
-RYZOM_ARK_VERSION = 366
+FILE_ARK_VERSION = 184
