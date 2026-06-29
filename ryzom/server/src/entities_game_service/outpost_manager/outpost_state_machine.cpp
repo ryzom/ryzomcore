@@ -205,6 +205,15 @@ void COutpost::eventTriggered(OUTPOSTENUMS::TOutpostEvent event, void* eventPara
 			_CurrentSquadsA.resize(_CurrentSquadsAQueue.size());
 			_CurrentSquadsB.resize(_CurrentSquadsBQueue.size());
 			actionSpawnSquadsA(squadCount, OUTPOSTENUMS::OutpostOwner);
+
+			OUTPOST_INF("AttackSquadsA (size=%u):", _CurrentSquadsAQueue.size());
+			for (uint i = 0; i < _CurrentSquadsAQueue.size(); ++i)
+				OUTPOST_INF("    %u: [%s]", i, _CurrentSquadsAQueue[i].toString().c_str());
+			OUTPOST_INF("AttackSquadsB (size=%u):", _CurrentSquadsAQueue.size());
+			for (uint i = 0; i < _CurrentSquadsAQueue.size(); ++i)
+				OUTPOST_INF("    %u: [%s]", i, _CurrentSquadsAQueue[i].toString().c_str());
+
+
 		} break;
 		case Timer0End: // Check the round result
 		{
