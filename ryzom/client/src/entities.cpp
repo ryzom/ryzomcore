@@ -29,6 +29,7 @@
 #include "entities.h"
 #include "entity_cl.h"
 #include "fx_cl.h"
+#include "weather.h"
 #include "forage_source_cl.h"
 #include "item_cl.h"
 #include "pacs_client.h"
@@ -893,12 +894,6 @@ bool CEntityManager::setupInstance(uint32 idx, const vector<string> &keys, const
 
 			for(uint j=0;j<instance.getNumMaterials();j++)
 			{
-				if (highlight)
-				{
-					instance.getMaterial(j).setAmbient(CRGBA(0,0,0,255));
-					instance.getMaterial(j).setEmissive(CRGBA(255,0,0,255));
-					instance.getMaterial(j).setShininess(1000.0f);
-				}
 
 				if (!texture.empty())
 				{
