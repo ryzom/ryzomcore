@@ -74,7 +74,7 @@ jobs:
         with:
           cmakeVersion: 3.31.11
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Dependencies
         run: |
@@ -163,7 +163,7 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: actions/download-artifact@v8
         with:
