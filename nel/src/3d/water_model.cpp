@@ -520,9 +520,11 @@ void	CWaterModel::traverseRender()
 			const uint  doubleWaterHeightMapSize = (WaterHeightMapSize << 1);
 
 
-			sint64 idate = getOwnerScene()->getHrcTrav().CurrentDate;
-
-
+			// Animate once per frame: keyed on the scene frame id, NOT the
+			// HRC traversal date — replicated render passes (stereo eyes,
+			// reflections) re-run the HRC pass within one frame, and a
+			// per-traversal key advances the waves once per eye
+			sint64 idate = (sint64)getOwnerScene()->getFrameId();
 
 			if (idate != whm.Date)
 			{
