@@ -46,6 +46,11 @@
 //   S - Toggle skybox roll
 //   G - Toggle fog (default on, matches the in-game look; the skybox is
 //       drawn fog-free like the game sky)
+//   P - Toggle realtime planar reflection (default on): the water plane
+//       reflects the actual scene (cube and skybox) via a render target
+//       instead of the static envmap. Uses the scene water reflection
+//       manager (CWaterReflectionManager) with the force-all flag; the
+//       content callback draws the skybox and cube into the reflection.
 //   V - Toggle VSync (default on)
 //   Up/Down - Move camera closer/farther
 //
@@ -70,6 +75,17 @@
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
+
+// Read an integer flag from the URL query string, e.g. ?planar=0&mirror=1.
+// Key input does not reach NeL on the web (no input callbacks in the
+// Emscripten driver backend yet), so this is the way to drive the toggles.
+static int queryFlag(const char *name, int defaultValue)
+{
+	return EM_ASM_INT({
+		var m = new RegExp('[?&]' + UTF8ToString($0) + '=([^&]*)').exec(window.location.search);
+		return m ? (parseInt(m[1]) | 0) : $1;
+	}, name, defaultValue);
+}
 #endif
 
 #ifdef NL_OS_WINDOWS
@@ -102,7 +118,7 @@ static void drawSkybox(UDriver *driver, UMaterial &mat, const CVector &center, f
 	const float s = 400.f;
 	const int grid = 16;
 	float cs = 2.f * s / float(grid);
-	CRGBA color(50, 50, 55);
+	CRGBA color(100, 125, 160); // bright sky cells so the water reflection reads clearly
 
 	// Roll the skybox forward around the X axis
 	CMatrix rot;
@@ -231,7 +247,7 @@ static std::string findFontPath()
 }
 
 // Water rendering baseline demo application
-class CWaterDemo : public IEventListener
+class CWaterDemo : public IEventListener, public UWaterReflectionContentCallback
 {
 public:
 	CWaterDemo();
@@ -241,6 +257,32 @@ public:
 
 	virtual void operator()(const CEvent &event) NL_OVERRIDE;
 
+	// UWaterReflectionContentCallback: draw the skybox and cube into the reflection
+	virtual void renderReflectionContent(UDriver &driver, const NLMISC::CMatrix &reflectedCamWorld, const CFrustum &frustum) NL_OVERRIDE;
+
+	// Option ids shared with the injected HTML control panel (Emscripten)
+	enum TOption
+	{
+		OptPlanar = 0,
+		OptMirror = 1,
+		OptOverlay = 2,
+		OptHalfRes = 3,
+		OptPow2 = 4,
+		OptFixedSize = 5,
+		OptFog = 6,
+		OptOrbit = 7,
+		OptBob = 8,
+		OptSkyRoll = 9,
+		OptCamDist = 10,
+		OptCamHeight = 11
+	};
+	void setOption(int opt, int value);
+
+private:
+	void drawWorldContent(UDriver &driver, const NLMISC::CVector &eye);
+
+public:
+
 private:
 	bool m_CloseWindow;
 	bool m_Wireframe;
@@ -248,18 +290,25 @@ private:
 	bool m_AnimCube;
 	bool m_AnimSkybox;
 	bool m_Fog;
+	bool m_Planar;
+	bool m_Mirror;  // debug: draw the raw reflection as an opaque mirror floor
+	int m_ShowRT;   // debug: reflection RT overlay: 0=off, 1=fullscreen, 2=corner thumbnail
 	bool m_VSync;
 	bool m_KeyForward;
 	bool m_KeyBackward;
+	int m_QueryCamDist;
+	int m_QueryCamHeight;
 	UDriver *m_Driver;
 	UScene *m_Scene;
 	UTextContext *m_TextContext;
 	UMaterial m_SkyMat;
 	UMaterial m_CubeMat;
+	UMaterial m_MirrorMat;
 	UInstance m_Water;
 	CVector m_WaterCenter;
 	float m_WaterRadius;
 	float m_CubeHalfSize;
+	CMatrix m_CubeTransform;
 	float m_CamAngle;
 	float m_CubeAngle;
 	float m_BobPhase;
@@ -278,9 +327,14 @@ CWaterDemo::CWaterDemo()
 	, m_AnimCube(true)
 	, m_AnimSkybox(true)
 	, m_Fog(true)
+	, m_Planar(true)
+	, m_Mirror(false)
+	, m_ShowRT(2)
 	, m_VSync(true)
 	, m_KeyForward(false)
 	, m_KeyBackward(false)
+	, m_QueryCamDist(0)
+	, m_QueryCamHeight(0)
 	, m_Scene(NULL)
 	, m_TextContext(NULL)
 	, m_WaterCenter(0.f, 0.f, 0.f)
@@ -357,8 +411,37 @@ CWaterDemo::CWaterDemo()
 	m_CubeMat.setZWrite(true);
 	m_CubeMat.setZFunc(UMaterial::lessequal);
 
+	// Textured material for the mirror-floor debug mode and the RT overlay
+	m_MirrorMat = m_Driver->createMaterial();
+	m_MirrorMat.initUnlit();
+	m_MirrorMat.setZWrite(true);
+	m_MirrorMat.setZFunc(UMaterial::lessequal);
+	m_MirrorMat.setDoubleSided(true);
+
 	// Scene with the water shape; the actual in-game lacustre lake water
 	m_Scene = m_Driver->createScene(true);
+
+	// Realtime planar reflections: one plane budget, force-enabled on all
+	// water (the shape predates the artist flag), demo draws the skybox and
+	// cube into the reflection via the content callback
+#ifdef __EMSCRIPTEN__
+	// URL query flags, e.g. ?planar=0&mirror=1&overlay=1&halfres=0&pow2=0&fixed=0&fog=0&orbit=0&bob=0
+	m_Planar = queryFlag("planar", m_Planar ? 1 : 0) != 0;
+	m_Mirror = queryFlag("mirror", m_Mirror ? 1 : 0) != 0;
+	m_ShowRT = queryFlag("overlay", m_ShowRT);
+	m_Fog = queryFlag("fog", m_Fog ? 1 : 0) != 0;
+	m_AnimCamera = queryFlag("orbit", m_AnimCamera ? 1 : 0) != 0;
+	m_AnimCube = queryFlag("bob", m_AnimCube ? 1 : 0) != 0;
+	m_Scene->setWaterReflectionHalfRes(queryFlag("halfres", m_Scene->getWaterReflectionHalfRes() ? 1 : 0) != 0);
+	m_Scene->setWaterReflectionPow2(queryFlag("pow2", m_Scene->getWaterReflectionPow2() ? 1 : 0) != 0);
+	m_Scene->setWaterReflectionFixedSize(queryFlag("fixed", m_Scene->getWaterReflectionFixedSize() ? 1 : 0) != 0);
+	m_QueryCamDist = queryFlag("dist", 0);
+	m_QueryCamHeight = queryFlag("height", 0);
+#endif
+	m_Scene->setMaxRealtimeWaterReflections(m_Planar ? 1 : 0);
+	m_Scene->setForceRealtimeWaterReflections(true);
+	m_Scene->setWaterReflectionContentCallback(this);
+
 	m_Water = m_Scene->createInstance("waterbassina01.shape");
 	if (!m_Water.empty())
 	{
@@ -382,6 +465,8 @@ CWaterDemo::CWaterDemo()
 		clamp(m_CamDist, 8.f, 80.f);
 		m_CamHeight = m_WaterRadius * 0.3f;
 		clamp(m_CamHeight, 3.f, 25.f);
+		if (m_QueryCamDist > 0) m_CamDist = (float)m_QueryCamDist;
+		if (m_QueryCamHeight > 0) m_CamHeight = (float)m_QueryCamHeight;
 	}
 	else
 	{
@@ -389,10 +474,68 @@ CWaterDemo::CWaterDemo()
 	}
 
 	m_StartTime = CTime::ticksToSecond(CTime::getPerformanceTime());
+
+#ifdef __EMSCRIPTEN__
+	// Inject an HTML control panel into the host page. Key input does not
+	// reach NeL in browsers, so the page UI drives the demo through the
+	// exported nlwater_option() function.
+	EM_ASM({
+		// NB: the array literal is wrapped in parens: the C preprocessor
+		// splits EM_ASM arguments on commas that are not inside parentheses
+		var opts = ([
+			['Planar reflection', 0, $0],
+			['Mirror floor debug', 1, $1],
+			['Half-res RT', 3, $3],
+			['Pow2 RT', 4, $4],
+			['Fixed-size RT', 5, $5],
+			['Fog', 6, $6],
+			['Camera orbit', 7, $7],
+			['Cube bobbing', 8, $8],
+			['Skybox roll', 9, $9]
+		]);
+		var panel = document.createElement('div');
+		panel.style.cssText = 'position:fixed;left:10px;bottom:10px;background:rgba(10,15,30,0.85);color:#dde;font:12px sans-serif;padding:10px 12px;border-radius:8px;z-index:20;user-select:none';
+		var html = '<b>Water Demo</b>';
+		opts.forEach(function(o) {
+			html += '<label style="display:block;margin-top:4px;cursor:pointer"><input type="checkbox" data-opt="' + o[1] + '"' + (o[2] ? ' checked' : '') + '> ' + o[0] + '</label>';
+		});
+		html += '<label style="display:block;margin-top:4px">RT overlay <select data-opt="2">'
+			+ '<option value="0"' + ($2 == 0 ? ' selected' : '') + '>off</option>'
+			+ '<option value="1"' + ($2 == 1 ? ' selected' : '') + '>fullscreen</option>'
+			+ '<option value="2"' + ($2 == 2 ? ' selected' : '') + '>thumbnail</option>'
+			+ '</select></label>';
+		html += '<label style="display:block;margin-top:6px">Cam dist <input type="range" data-opt="10" min="8" max="100" value="' + $10 + '" style="width:90px;vertical-align:middle"></label>';
+		html += '<label style="display:block;margin-top:2px">Cam height <input type="range" data-opt="11" min="3" max="60" value="' + $11 + '" style="width:90px;vertical-align:middle"></label>';
+		panel.innerHTML = html;
+		function send(t) {
+			var opt = parseInt(t.getAttribute('data-opt'));
+			var val = (t.type === 'checkbox') ? (t.checked ? 1 : 0) : parseInt(t.value);
+			Module._nlwater_option(opt, val);
+		}
+		panel.addEventListener('change', function(e) { send(e.target); });
+		panel.addEventListener('input', function(e) { if (e.target.type === 'range') send(e.target); });
+		document.body.appendChild(panel);
+	},
+		m_Planar ? 1 : 0,
+		m_Mirror ? 1 : 0,
+		m_ShowRT,
+		m_Scene->getWaterReflectionHalfRes() ? 1 : 0,
+		m_Scene->getWaterReflectionPow2() ? 1 : 0,
+		m_Scene->getWaterReflectionFixedSize() ? 1 : 0,
+		m_Fog ? 1 : 0,
+		m_AnimCamera ? 1 : 0,
+		m_AnimCube ? 1 : 0,
+		m_AnimSkybox ? 1 : 0,
+		(int)m_CamDist,
+		(int)m_CamHeight);
+#endif
 }
 
 CWaterDemo::~CWaterDemo()
 {
+	if (m_Scene)
+		m_Scene->setWaterReflectionContentCallback(NULL);
+	m_Driver->deleteMaterial(m_MirrorMat);
 	if (!m_Water.empty())
 		m_Scene->deleteInstance(m_Water);
 	if (m_Scene)
@@ -419,8 +562,14 @@ void CWaterDemo::operator()(const CEvent &event)
 			if (keyDown.Key == KeyF) m_Wireframe = !m_Wireframe;
 			if (keyDown.Key == KeyC) m_AnimCamera = !m_AnimCamera;
 			if (keyDown.Key == KeyR) m_AnimCube = !m_AnimCube;
-			if (keyDown.Key == KeyS) m_AnimSkybox = !m_AnimSkybox;
-			if (keyDown.Key == KeyG) m_Fog = !m_Fog;
+			if (keyDown.Key == KeyS) setOption(OptSkyRoll, !m_AnimSkybox);
+			if (keyDown.Key == KeyG) setOption(OptFog, !m_Fog);
+			if (keyDown.Key == KeyP) setOption(OptPlanar, !m_Planar);
+			if (keyDown.Key == KeyM) setOption(OptMirror, !m_Mirror);
+			if (keyDown.Key == KeyT) setOption(OptOverlay, (m_ShowRT + 1) % 3);
+			if (keyDown.Key == KeyH) setOption(OptHalfRes, !m_Scene->getWaterReflectionHalfRes());
+			if (keyDown.Key == KeyY) setOption(OptPow2, !m_Scene->getWaterReflectionPow2());
+			if (keyDown.Key == KeyW) setOption(OptFixedSize, !m_Scene->getWaterReflectionFixedSize());
 			if (keyDown.Key == KeyV) { m_VSync = !m_VSync; m_Driver->setSwapVBLInterval(m_VSync ? 1 : 0); }
 		}
 		if (keyDown.Key == KeyUP) m_KeyForward = true;
@@ -432,6 +581,43 @@ void CWaterDemo::operator()(const CEvent &event)
 		if (keyUp.Key == KeyUP) m_KeyForward = false;
 		if (keyUp.Key == KeyDOWN) m_KeyBackward = false;
 	}
+}
+
+void CWaterDemo::setOption(int opt, int value)
+{
+	switch (opt)
+	{
+	case OptPlanar: m_Planar = value != 0; m_Scene->setMaxRealtimeWaterReflections(m_Planar ? 1 : 0); break;
+	case OptMirror: m_Mirror = value != 0; break;
+	case OptOverlay: m_ShowRT = value; break;
+	case OptHalfRes: m_Scene->setWaterReflectionHalfRes(value != 0); break;
+	case OptPow2: m_Scene->setWaterReflectionPow2(value != 0); break;
+	case OptFixedSize: m_Scene->setWaterReflectionFixedSize(value != 0); break;
+	case OptFog: m_Fog = value != 0; break;
+	case OptOrbit: m_AnimCamera = value != 0; break;
+	case OptBob: m_AnimCube = value != 0; break;
+	case OptSkyRoll: m_AnimSkybox = value != 0; break;
+	case OptCamDist: m_CamDist = (float)value; break;
+	case OptCamHeight: m_CamHeight = (float)value; break;
+	}
+}
+
+// Draw the demo's world content (used by both the main pass and the
+// reflection pass, so the reflection always matches the scene):
+// fog-free skybox like the game sky, then the fogged cube
+void CWaterDemo::drawWorldContent(UDriver &driver, const CVector &eye)
+{
+	driver.enableFog(false);
+	drawSkybox(&driver, m_SkyMat, eye, m_SkyAngle);
+	if (m_Fog)
+		driver.enableFog(true);
+	drawCube(&driver, m_CubeMat, m_CubeTransform, m_CubeHalfSize);
+}
+
+void CWaterDemo::renderReflectionContent(UDriver &driver, const NLMISC::CMatrix &reflectedCamWorld, const CFrustum &/* frustum */)
+{
+	// Frustum and view matrices are set up for the reflected camera
+	drawWorldContent(driver, reflectedCamWorld.getPos());
 }
 
 void CWaterDemo::run()
@@ -497,23 +683,19 @@ void CWaterDemo::renderOneFrame()
 	camera.setPerspective(fov, aspect, nearZ, farZ);
 	camera.setMatrix(camWorld);
 
-	// --- Direct driver draws: skybox and bobbing cube ---
+	// Cube bobbing through the water surface, standing on a corner so its
+	// silhouette (and its reflection) is unmistakable
+	m_CubeTransform.identity();
+	float bob = sinf(m_BobPhase) * m_CubeHalfSize * 1.5f + m_CubeHalfSize * 0.9f;
+	m_CubeTransform.setPos(CVector(m_WaterCenter.x, m_WaterCenter.y, waterZ + bob));
+	m_CubeTransform.rotateZ(m_CubeAngle + float(Pi / 4.0));
+	m_CubeTransform.rotateX(0.9553f); // atan(sqrt(2)): body diagonal vertical, corner down
 
-	m_Driver->clearBuffers(CRGBA(40, 40, 40));
-
-	m_Driver->setFrustum(frustum);
-	m_Driver->setViewMatrix(viewMatrix);
-	CMatrix identity;
-	identity.identity();
-	m_Driver->setModelMatrix(identity);
-
-	// Skybox is drawn fog-free, like the game sky
-	drawSkybox(m_Driver, m_SkyMat, eye, m_SkyAngle);
-
-	// Fog matching the in-game look; scaled to the water footprint
+	// Fog matching the in-game look; scaled to the water footprint.
+	// Enabled before the reflection pass so reflections are fogged too.
 	if (m_Fog)
 	{
-		m_Driver->setupFog(m_WaterRadius * 0.4f, m_WaterRadius * 2.5f, CRGBA(40, 40, 40));
+		m_Driver->setupFog(m_WaterRadius * 0.4f, m_WaterRadius * 2.5f, CRGBA(75, 95, 125));
 		m_Driver->enableFog(true);
 	}
 	else
@@ -521,20 +703,111 @@ void CWaterDemo::renderOneFrame()
 		m_Driver->enableFog(false);
 	}
 
-	// Cube bobbing through the water surface: fully emerges and submerges
-	CMatrix cubeTransform;
-	cubeTransform.identity();
-	float bob = sinf(m_BobPhase) * m_CubeHalfSize * 2.2f;
-	cubeTransform.setPos(CVector(m_WaterCenter.x, m_WaterCenter.y, waterZ + bob));
-	cubeTransform.rotateZ(m_CubeAngle);
-	drawCube(m_Driver, m_CubeMat, cubeTransform, m_CubeHalfSize);
+	m_Scene->animate(now - m_StartTime);
+
+	// --- Reflection pass: render the water reflections to their RTs ---
+	// (the content callback below draws the skybox and cube)
+
+	m_Scene->renderWaterReflections();
+
+	// --- Main pass ---
+
+	m_Driver->clearBuffers(CRGBA(75, 95, 125));
+
+	m_Driver->setFrustum(frustum);
+	m_Driver->setViewMatrix(viewMatrix);
+	CMatrix identity;
+	identity.identity();
+	m_Driver->setModelMatrix(identity);
+
+	drawWorldContent(*m_Driver, eye);
 
 	// --- Scene render: the water surface (blends over the cube and skybox) ---
 
-	m_Scene->animate(now - m_StartTime);
 	m_Scene->render();
 
 	m_Driver->enableFog(false);
+
+	// --- Debug: mirror floor and reflection RT overlay ---
+
+	UWaterReflectionInfo reflInfo;
+	bool haveRefl = m_Scene->getActiveWaterReflectionInfo(0, reflInfo);
+
+	if (m_Mirror && haveRefl)
+	{
+		// Draw the raw reflection as an opaque mirror floor over the water:
+		// a world-space grid across the water footprint, each vertex
+		// projected through the engine's reflected camera and sub-frustum.
+		// This replicates the planar_reflection sample's floor using the
+		// engine-provided data, bypassing the water shader entirely.
+		m_Driver->setFrustum(frustum);
+		m_Driver->setViewMatrix(viewMatrix);
+		m_Driver->setModelMatrix(identity);
+
+		const int gridN = 24;
+		const float x0 = m_WaterCenter.x - m_WaterRadius;
+		const float y0 = m_WaterCenter.y - m_WaterRadius;
+		const float step = 2.f * m_WaterRadius / (float)gridN;
+		const float z = reflInfo.PlaneZ + 0.05f; // slight offset over the water surface
+		const float ooW = 1.f / (reflInfo.FrustumRight - reflInfo.FrustumLeft);
+		const float ooH = 1.f / (reflInfo.FrustumTop - reflInfo.FrustumBottom);
+
+		static std::vector<CQuadColorUV> quads;
+		quads.clear();
+		for (int j = 0; j < gridN; ++j)
+		for (int i = 0; i < gridN; ++i)
+		{
+			CQuadColorUV q;
+			CVector *vs[4] = { &q.V0, &q.V1, &q.V2, &q.V3 };
+			CUV *uvs[4] = { &q.Uv0, &q.Uv1, &q.Uv2, &q.Uv3 };
+			float cx[4] = { (float)i, (float)(i + 1), (float)(i + 1), (float)i };
+			float cy[4] = { (float)j, (float)j, (float)(j + 1), (float)(j + 1) };
+			for (int c = 0; c < 4; ++c)
+			{
+				CVector world(x0 + cx[c] * step, y0 + cy[c] * step, z);
+				*vs[c] = world;
+				CVector p = reflInfo.ReflViewMatrix * world;
+				float invDepth = 1.f / max(p.y, reflInfo.FrustumNear);
+				uvs[c]->U = (reflInfo.FrustumNear * p.x * invDepth - reflInfo.FrustumLeft) * ooW * reflInfo.UScale;
+				uvs[c]->V = (reflInfo.FrustumNear * p.z * invDepth - reflInfo.FrustumBottom) * ooH * reflInfo.VScale;
+			}
+			q.Color0 = q.Color1 = q.Color2 = q.Color3 = CRGBA::White;
+			quads.push_back(q);
+		}
+		m_MirrorMat.setTexture(0, reflInfo.Texture);
+		m_Driver->drawQuads(quads, m_MirrorMat);
+	}
+
+	if (m_ShowRT && haveRefl)
+	{
+		// Reflection RT overlay, matching the planar_reflection sample:
+		// fullscreen or corner thumbnail, full allocation shown
+		m_Driver->setMatrixMode2D11();
+
+		float ox0, oy0, ox1, oy1;
+		if (m_ShowRT == 1) { ox0 = 0.f; oy0 = 0.f; ox1 = 1.f; oy1 = 1.f; }
+		else { ox0 = 0.65f; oy0 = 0.65f; ox1 = 1.f; oy1 = 1.f; }
+
+		CQuadColorUV rtQuad;
+		rtQuad.V0.set(ox0, oy0, 0.5f); rtQuad.Uv0 = CUV(0.f, 1.f);
+		rtQuad.V1.set(ox1, oy0, 0.5f); rtQuad.Uv1 = CUV(1.f, 1.f);
+		rtQuad.V2.set(ox1, oy1, 0.5f); rtQuad.Uv2 = CUV(1.f, 0.f);
+		rtQuad.V3.set(ox0, oy1, 0.5f); rtQuad.Uv3 = CUV(0.f, 0.f);
+		rtQuad.Color0 = rtQuad.Color1 = rtQuad.Color2 = rtQuad.Color3 = CRGBA::White;
+		m_MirrorMat.setTexture(0, reflInfo.Texture);
+		m_Driver->drawQuad(rtQuad, m_MirrorMat);
+
+		if (m_ShowRT == 2)
+		{
+			CRGBA borderColor(255, 255, 255);
+			m_Driver->drawLine(ox0, oy0, ox1, oy0, borderColor);
+			m_Driver->drawLine(ox1, oy0, ox1, oy1, borderColor);
+			m_Driver->drawLine(ox1, oy1, ox0, oy1, borderColor);
+			m_Driver->drawLine(ox0, oy1, ox0, oy0, borderColor);
+		}
+	}
+
+	m_MirrorMat.setTexture(0, NULL);
 
 	// --- HUD ---
 
@@ -560,6 +833,18 @@ void CWaterDemo::renderOneFrame()
 		y -= lineH;
 		m_TextContext->printfAt(x, y, "[G] Fog: %s", m_Fog ? "ON" : "OFF");
 		y -= lineH;
+		m_TextContext->printfAt(x, y, "[P] Planar reflection: %s (%u active)", m_Planar ? "ON" : "OFF",
+			m_Scene->getNumActiveWaterReflections());
+		y -= lineH;
+		m_TextContext->printfAt(x, y, "[M] Mirror floor debug: %s  [T] RT overlay: %s",
+			m_Mirror ? "ON" : "OFF",
+			m_ShowRT == 0 ? "off" : (m_ShowRT == 1 ? "fullscreen" : "thumbnail"));
+		y -= lineH;
+		m_TextContext->printfAt(x, y, "[H] Half-res: %s  [Y] Pow2: %s  [W] Fixed RT: %s",
+			m_Scene->getWaterReflectionHalfRes() ? "ON" : "OFF",
+			m_Scene->getWaterReflectionPow2() ? "ON" : "OFF",
+			m_Scene->getWaterReflectionFixedSize() ? "ON" : "OFF");
+		y -= lineH;
 		m_TextContext->printfAt(x, y, "[V] VSync: %s", m_VSync ? "ON" : "OFF");
 		y -= lineH;
 		m_TextContext->printfAt(x, y, "[Up/Down] Camera dist: %.1f", m_CamDist);
@@ -572,11 +857,15 @@ void CWaterDemo::renderOneFrame()
 		}
 		else
 		{
-			m_TextContext->printfAt(x, y, "waterbassina01.shape (lacustre basin): radius %.1fm, envmap reflection (static skymap)",
-				m_WaterRadius);
+			m_TextContext->printfAt(x, y, "waterbassina01.shape (lacustre basin): radius %.1fm, %s",
+				m_WaterRadius,
+				m_Scene->getNumActiveWaterReflections() ? "REALTIME planar reflection" : "envmap reflection (static skymap)");
 		}
 		y -= lineH;
-		m_TextContext->printfAt(x, y, "Note: cube and skybox are NOT in the reflection - that is the point");
+		if (m_Scene->getNumActiveWaterReflections())
+			m_TextContext->printfAt(x, y, "Cube and skybox ARE in the reflection now - toggle [P] to compare");
+		else
+			m_TextContext->printfAt(x, y, "Note: cube and skybox are NOT in the reflection - that is the point");
 		y -= lineH;
 		m_TextContext->printfAt(x, y, "FPS: %.1f  (%.2f ms)", m_SmoothFps, dt * 1000.f);
 	}
@@ -591,6 +880,13 @@ static void emscriptenMainLoop()
 {
 	if (s_Demo)
 		s_Demo->renderOneFrame();
+}
+
+// Called by the injected HTML control panel
+extern "C" EMSCRIPTEN_KEEPALIVE void nlwater_option(int opt, int value)
+{
+	if (s_Demo)
+		s_Demo->setOption(opt, value);
 }
 #endif
 
