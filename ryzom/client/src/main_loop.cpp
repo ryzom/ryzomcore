@@ -1718,10 +1718,21 @@ bool mainLoop()
 
 			if (StereoDisplay->wantSceneReflections())
 			{
-				// Render realtime planar water reflections to RTT
+				// Render realtime planar water reflections to RTT: replicate
+				// the scene render once per admitted water plane, with the
+				// reflected camera set by the reflection pass
 				if (!ClientCfg.Light && Render)
 				{
-					Scene->renderWaterReflections();
+					uint numWaterReflectionPasses = Scene->beginWaterReflectionPasses();
+					for (uint reflPass = 0; reflPass < numWaterReflectionPasses; ++reflPass)
+					{
+						UWaterReflectionInfo reflInfo;
+						Scene->beginWaterReflectionPass(reflPass, reflInfo);
+						// TODO: render the sky scene into the reflection
+						doRenderScene(true, true); // keepTraversals: replicated pass, like a stereo eye
+						Scene->endWaterReflectionPass(reflPass);
+					}
+					Scene->endWaterReflectionPasses();
 				}
 			}
 

@@ -32,6 +32,7 @@
 #include <nel/misc/vector_2f.h>
 
 #include <nel/3d/frustum.h>
+#include <nel/3d/viewport.h>
 
 #include <map>
 #include <vector>
@@ -49,13 +50,18 @@ class ITexture;
  * - During the main scene render, visible water models report their
  *   reflection plane (world z), projected screen area, and screen-space
  *   AABB via reportVisibleSurface().
- * - Before the next main render (the stereo loop's scene reflections
- *   pass), renderReflections() ranks the reported planes by screen area
- *   (with hysteresis in favor of already-active planes), admits up to the
- *   configured budget, and renders the scene from a mirrored camera into
- *   a render target per plane, with a clip plane slightly below the
- *   water surface. Water itself and flares are excluded from these
- *   renders.
+ * - Before the next main render (the render loop's scene reflections
+ *   pass), beginPasses() ranks the reported planes by screen area (with
+ *   hysteresis in favor of already-active planes) and admits up to the
+ *   configured budget, returning the number of reflection passes. The
+ *   caller renders each pass through its own render logic — the render
+ *   loop replays its scene rendering with the reflected camera the way
+ *   the stereo pass system replicates passes — between beginPass() and
+ *   endPass(), and finishes with endPasses(). beginPass() binds and
+ *   clears the render target, restricts rendering to the active
+ *   sub-region, sets the scene camera to the reflected camera and
+ *   enables a clip plane slightly below the water surface. Water itself
+ *   and flares are excluded via the scene render filters.
  * - During the main render, water models query getActiveReflection() by
  *   plane height; when available (and allowed by the shape flag or the
  *   force-all override), the water render uses the reflection texture
@@ -71,19 +77,6 @@ class ITexture;
 class CWaterReflectionManager
 {
 public:
-	/// Callback to render non-scene content (sky, etc.) into reflections.
-	class IContentCallback
-	{
-	public:
-		virtual ~IContentCallback() {}
-		/** Called after the render target is cleared and the driver
-		 * frustum/view matrices are set up for the reflected camera,
-		 * before the scene render. The clip plane is enabled. Content must
-		 * be rendered into activeViewport (the active sub-region of the
-		 * render target that the reflection UVs sample). */
-		virtual void renderReflectionContent(const NLMISC::CMatrix &reflectedCamWorld, const CFrustum &frustum, const class CViewport &activeViewport) = 0;
-	};
-
 	/// Published reflection state for one water plane, valid for one main render.
 	struct CActiveReflection
 	{
@@ -118,8 +111,6 @@ public:
 	  * When false, targets are allocated at the active size (dynamic mode). */
 	void			setFixedSize(bool fixedSize) { _FixedSize = fixedSize; }
 	bool			getFixedSize() const { return _FixedSize; }
-	/// Callback for extra content (sky) rendered into each reflection.
-	void			setContentCallback(IContentCallback *cb) { _ContentCallback = cb; }
 	// @}
 
 	/** Report a visible water surface. Called by CWaterModel during the
@@ -129,10 +120,28 @@ public:
 						const NLMISC::CVector2f &screenMin, const NLMISC::CVector2f &screenMax,
 						bool shapeAllows);
 
-	/** Render the admitted water plane reflections. Call once per frame
-	 * before the main scene render (in the scene reflections pass), with
-	 * the scene camera already set up for the frame. */
-	void			renderReflections();
+	/// \name Reflection render passes
+	// @{
+	/** Select the water planes to reflect this frame (consumes the stats
+	  * from the last main render) and save the scene and driver state.
+	  * Returns the number of reflection passes to render. For each pass,
+	  * call beginPass(), render the scene content through the caller's
+	  * own render logic, then endPass(); finish with endPasses() (safe to
+	  * call when zero passes were returned). Call once per frame before
+	  * the main scene render, with the scene camera set up for the frame. */
+	uint			beginPasses();
+	/** Set up reflection pass 'pass': binds and clears the render target,
+	  * restricts rendering to the active sub-region, sets the scene camera
+	  * to the reflected camera and enables the water clip plane. The pass
+	  * state (reflected view matrix, sub-frustum, UV scale — the active
+	  * viewport is (0, 0, UVScale.U, UVScale.V) of the render target) is
+	  * returned in 'out' for the caller's own drawing. */
+	void			beginPass(uint pass, CActiveReflection &out);
+	/// Publish the reflection rendered by pass 'pass' for the coming main render.
+	void			endPass(uint pass);
+	/// Restore scene and driver state after all passes.
+	void			endPasses();
+	// @}
 
 	/// \name Queries during the main render
 	// @{
@@ -178,7 +187,17 @@ private:
 		CSlot() : AllocW(0), AllocH(0) {}
 	};
 
-	void			renderPlane(CCamera *mainCam, const CPlaneStats &stats, CSlot &slot, CActiveReflection &out);
+	// Prepared state for one reflection pass
+	struct CPassData
+	{
+		sint32				Key;
+		CActiveReflection	Refl;		// camera, sub-frustum, uv scale (texture set at beginPass)
+		NLMISC::CMatrix		ReflCamWorld;
+		uint				AllocW, AllocH;
+		uint				ActiveW, ActiveH;
+	};
+
+	void			preparePass(CCamera *mainCam, const CPlaneStats &stats, CPassData &pass);
 	CCamera			*getReflCamera();
 
 	CScene								*_Scene;
@@ -187,7 +206,6 @@ private:
 	bool								_HalfRes;
 	bool								_Pow2;
 	bool								_FixedSize;
-	IContentCallback					*_ContentCallback;
 	bool								_InReflectionRender;
 	bool								_CollectionArmed;
 	bool								_HadReflections;
@@ -196,7 +214,14 @@ private:
 	std::map<sint32, CActiveReflection>	_Active;	// published reflections for the current main render
 	std::vector<sint32>					_PrevAdmitted; // hysteresis: planes admitted last frame
 	std::vector<CSlot>					_Slots;
+	std::vector<CPassData>				_Passes;	// prepared passes between beginPasses and endPasses
 	CCamera								*_ReflCamera;
+
+	// state saved across the reflection passes
+	CCamera								*_SaveCam;
+	CViewport							_SaveSceneViewport;
+	NLMISC::CSmartPtr<ITexture>			_SaveRenderTarget;
+	CViewport							_SaveDrvViewport;
 
 }; /* class CWaterReflectionManager */
 

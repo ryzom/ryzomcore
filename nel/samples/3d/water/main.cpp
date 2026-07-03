@@ -49,8 +49,11 @@
 //   P - Toggle realtime planar reflection (default on): the water plane
 //       reflects the actual scene (cube and skybox) via a render target
 //       instead of the static envmap. Uses the scene water reflection
-//       manager (CWaterReflectionManager) with the force-all flag; the
-//       content callback draws the skybox and cube into the reflection.
+//       manager (CWaterReflectionManager) with the force-all flag. The
+//       reflection is rendered as replicated passes through this demo's
+//       own render logic (beginWaterReflectionPasses / beginWaterReflectionPass /
+//       endWaterReflectionPass / endWaterReflectionPasses), the same way
+//       the client's render loop replicates passes for stereo.
 //   V - Toggle VSync (default on)
 //   Up/Down - Move camera closer/farther
 //
@@ -247,7 +250,7 @@ static std::string findFontPath()
 }
 
 // Water rendering baseline demo application
-class CWaterDemo : public IEventListener, public UWaterReflectionContentCallback
+class CWaterDemo : public IEventListener
 {
 public:
 	CWaterDemo();
@@ -256,9 +259,6 @@ public:
 	void renderOneFrame();
 
 	virtual void operator()(const CEvent &event) NL_OVERRIDE;
-
-	// UWaterReflectionContentCallback: draw the skybox and cube into the reflection
-	virtual void renderReflectionContent(UDriver &driver, const NLMISC::CMatrix &reflectedCamWorld, const CFrustum &frustum) NL_OVERRIDE;
 
 	// Option ids shared with the injected HTML control panel (Emscripten)
 	enum TOption
@@ -440,7 +440,6 @@ CWaterDemo::CWaterDemo()
 #endif
 	m_Scene->setMaxRealtimeWaterReflections(m_Planar ? 1 : 0);
 	m_Scene->setForceRealtimeWaterReflections(true);
-	m_Scene->setWaterReflectionContentCallback(this);
 
 	m_Water = m_Scene->createInstance("waterbassina01.shape");
 	if (!m_Water.empty())
@@ -533,8 +532,6 @@ CWaterDemo::CWaterDemo()
 
 CWaterDemo::~CWaterDemo()
 {
-	if (m_Scene)
-		m_Scene->setWaterReflectionContentCallback(NULL);
 	m_Driver->deleteMaterial(m_MirrorMat);
 	if (!m_Water.empty())
 		m_Scene->deleteInstance(m_Water);
@@ -614,11 +611,6 @@ void CWaterDemo::drawWorldContent(UDriver &driver, const CVector &eye)
 	drawCube(&driver, m_CubeMat, m_CubeTransform, m_CubeHalfSize);
 }
 
-void CWaterDemo::renderReflectionContent(UDriver &driver, const NLMISC::CMatrix &reflectedCamWorld, const CFrustum &/* frustum */)
-{
-	// Frustum and view matrices are set up for the reflected camera
-	drawWorldContent(driver, reflectedCamWorld.getPos());
-}
 
 void CWaterDemo::run()
 {
@@ -705,19 +697,57 @@ void CWaterDemo::renderOneFrame()
 
 	m_Scene->animate(now - m_StartTime);
 
-	// --- Reflection pass: render the water reflections to their RTs ---
-	// (the content callback below draws the skybox and cube)
+	CMatrix identity;
+	identity.identity();
 
-	m_Scene->renderWaterReflections();
+	// --- Reflection passes: replicate our render logic once per admitted
+	// water plane, with the reflected camera the pass sets up ---
+
+	uint numReflPasses = m_Scene->beginWaterReflectionPasses();
+	for (uint reflPass = 0; reflPass < numReflPasses; ++reflPass)
+	{
+		UWaterReflectionInfo passInfo;
+		m_Scene->beginWaterReflectionPass(reflPass, passInfo);
+
+		// Set our driver context to the reflected camera and the render
+		// target's active sub-region for the direct draws
+		CMatrix reflCamWorld = passInfo.ReflViewMatrix;
+		reflCamWorld.invert();
+		CFrustum reflFrustum(passInfo.FrustumLeft, passInfo.FrustumRight,
+			passInfo.FrustumBottom, passInfo.FrustumTop,
+			passInfo.FrustumNear, passInfo.FrustumFar, true);
+		CViewport activeVP;
+		activeVP.init(0.f, 0.f, passInfo.UScale, passInfo.VScale);
+		m_Driver->setViewport(activeVP);
+		m_Driver->setScissor(CScissor(0.f, 0.f, passInfo.UScale, passInfo.VScale));
+		m_Driver->setFrustum(reflFrustum);
+		m_Driver->setViewMatrix(passInfo.ReflViewMatrix);
+		m_Driver->setModelMatrix(identity);
+
+		// Same content as the main pass (water itself is filtered out of
+		// the scene render); keepTrav like any replicated pass
+		drawWorldContent(*m_Driver, reflCamWorld.getPos());
+		m_Scene->beginPartRender();
+		m_Scene->renderPart(UScene::RenderAll, true, true, true);
+		m_Scene->endPartRender(true, true, true);
+
+		m_Scene->endWaterReflectionPass(reflPass);
+	}
+	m_Scene->endWaterReflectionPasses();
 
 	// --- Main pass ---
+
+	CViewport fullVP;
+	fullVP.initFullScreen();
+	m_Driver->setViewport(fullVP);
+	CScissor fullScissor;
+	fullScissor.initFullScreen();
+	m_Driver->setScissor(fullScissor);
 
 	m_Driver->clearBuffers(CRGBA(75, 95, 125));
 
 	m_Driver->setFrustum(frustum);
 	m_Driver->setViewMatrix(viewMatrix);
-	CMatrix identity;
-	identity.identity();
 	m_Driver->setModelMatrix(identity);
 
 	drawWorldContent(*m_Driver, eye);

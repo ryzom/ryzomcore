@@ -29,7 +29,6 @@
 
 #include "nel/3d/camera.h"
 #include "nel/3d/driver.h"
-#include "nel/3d/dru.h"
 #include "nel/3d/scene.h"
 #include "nel/3d/scissor.h"
 #include "nel/3d/texture_offscreen.h"
@@ -79,11 +78,11 @@ CWaterReflectionManager::CWaterReflectionManager()
 	, _HalfRes(true)
 	, _Pow2(true)
 	, _FixedSize(true)
-	, _ContentCallback(NULL)
 	, _InReflectionRender(false)
 	, _CollectionArmed(false)
 	, _HadReflections(false)
 	, _ReflCamera(NULL)
+	, _SaveCam(NULL)
 {
 }
 
@@ -96,10 +95,14 @@ CWaterReflectionManager::~CWaterReflectionManager()
 // ***************************************************************************
 void CWaterReflectionManager::release()
 {
+	nlassert(!_InReflectionRender);
 	_Active.clear();
 	_Collected.clear();
 	_PrevAdmitted.clear();
 	_Slots.clear();
+	_Passes.clear();
+	_SaveRenderTarget = NULL;
+	_SaveCam = NULL;
 	_CollectionArmed = false;
 	_HadReflections = false;
 	if (_ReflCamera)
@@ -170,9 +173,10 @@ const CWaterReflectionManager::CActiveReflection *CWaterReflectionManager::getAc
 }
 
 // ***************************************************************************
-void CWaterReflectionManager::renderReflections()
+uint CWaterReflectionManager::beginPasses()
 {
 	nlassert(_Scene);
+	nlassert(!_InReflectionRender); // missing endPasses()?
 
 	// Water models only report visibility stats once this has been called;
 	// applications that never render reflections must not accumulate stats
@@ -182,28 +186,28 @@ void CWaterReflectionManager::renderReflections()
 	std::map<sint32, CPlaneStats> collected;
 	collected.swap(_Collected);
 
-	// Multi-pass render loops (stereo) may call this more than once per
-	// frame; the second call finds no stats and must keep the reflections
-	// rendered by the first call instead of discarding them
+	// Multi-pass render loops (stereo) may reach the reflections pass more
+	// than once per frame; later calls find no stats and must keep the
+	// reflections rendered by the first call instead of discarding them
 	if (collected.empty() && !_Active.empty() && _MaxReflections != 0)
-		return;
+		return 0;
 
 	_Active.clear();
+	_Passes.clear();
 
 	if (_MaxReflections == 0 || collected.empty())
 	{
 		_PrevAdmitted.clear();
-		return;
+		return 0;
 	}
 
 	CCamera *mainCam = _Scene->getCam();
 	if (!mainCam)
 	{
 		_PrevAdmitted.clear();
-		return;
+		return 0;
 	}
-	const CMatrix &camWorld = mainCam->getWorldMatrix();
-	float camZ = camWorld.getPos().z;
+	float camZ = mainCam->getWorldMatrix().getPos().z;
 
 	// Build candidate list: allowed planes with the camera above them.
 	// Hysteresis: planes admitted last frame get a sticky area bonus so a
@@ -225,62 +229,44 @@ void CWaterReflectionManager::renderReflections()
 	if (_MaxReflections >= 0)
 		numAdmitted = std::min(numAdmitted, (uint)_MaxReflections);
 
-	_PrevAdmitted.clear();
+	_PrevAdmitted.clear(); // repopulated by endPass
 	if (!numAdmitted)
-		return;
+		return 0;
 
 	if (_Slots.size() < numAdmitted)
 		_Slots.resize(numAdmitted);
 
+	// Prepare the per-pass reflected cameras, sub-frusta and target sizes
+	_Passes.resize(numAdmitted);
+	for (uint i = 0; i < numAdmitted; ++i)
+	{
+		_Passes[i].Key = candidates[i].second;
+		preparePass(mainCam, collected[_Passes[i].Key], _Passes[i]);
+	}
+
 	// Save scene and driver state. The render target must be restored to
 	// the previously bound one, not to NULL: the caller may already be
 	// rendering into an effects render target (bloom/FXAA pipeline).
-	CCamera *saveCam = _Scene->getCam();
-	CViewport saveViewport = _Scene->getViewport();
-
 	IDriver *drv = _Scene->getDriver();
-	NLMISC::CSmartPtr<ITexture> saveRenderTarget = drv->getRenderTarget();
-	CViewport saveDrvViewport;
-	drv->getViewport(saveDrvViewport);
+	_SaveCam = mainCam;
+	_SaveSceneViewport = _Scene->getViewport();
+	_SaveRenderTarget = drv->getRenderTarget();
+	drv->getViewport(_SaveDrvViewport);
 
 	_InReflectionRender = true;
+	_HadReflections = true;
 
 	// Water must not reflect itself; flares use per-frame occlusion queries
 	_Scene->enableElementRender(UScene::FilterWater, false);
 	_Scene->enableElementRender(UScene::FilterFlare, false);
 
-	_HadReflections = true;
-
-	for (uint i = 0; i < numAdmitted; ++i)
-	{
-		sint32 key = candidates[i].second;
-		CActiveReflection refl;
-		renderPlane(saveCam, collected[key], _Slots[i], refl);
-		_Active[key] = refl;
-		_PrevAdmitted.push_back(key);
-	}
-
-	_Scene->enableElementRender(UScene::FilterWater, true);
-	_Scene->enableElementRender(UScene::FilterFlare, true);
-
-	_InReflectionRender = false;
-
-	// Restore scene and driver state
-	drv->setRenderTarget(saveRenderTarget);
-	drv->setupViewport(saveDrvViewport);
-	CScissor fullScissor;
-	fullScissor.initFullScreen();
-	drv->setupScissor(fullScissor);
-	drv->enableClipPlane(0, false);
-	_Scene->setCam(saveCam);
-	_Scene->setViewport(saveViewport);
+	return numAdmitted;
 }
 
 // ***************************************************************************
-void CWaterReflectionManager::renderPlane(CCamera *mainCam, const CPlaneStats &stats, CSlot &slot, CActiveReflection &out)
+void CWaterReflectionManager::preparePass(CCamera *mainCam, const CPlaneStats &stats, CPassData &pass)
 {
 	IDriver *drv = _Scene->getDriver();
-	nlassert(mainCam);
 
 	const float planeZ = stats.PlaneZ;
 
@@ -299,10 +285,9 @@ void CWaterReflectionManager::renderPlane(CCamera *mainCam, const CPlaneStats &s
 	CVector Jm(J.x, J.y, -J.z);
 	CVector Km(K.x, K.y, -K.z);
 	CVector Pm(P.x, P.y, 2.f * planeZ - P.z);
-	CMatrix reflCamWorld;
-	reflCamWorld.identity();
-	reflCamWorld.setRot(Im, Jm, Km);
-	reflCamWorld.setPos(Pm);
+	pass.ReflCamWorld.identity();
+	pass.ReflCamWorld.setRot(Im, Jm, Km);
+	pass.ReflCamWorld.setPos(Pm);
 
 	// --- Screen AABB of the water in the reflected view ---
 	// For points on the mirror plane, the reflected-camera projection is
@@ -365,28 +350,51 @@ void CWaterReflectionManager::renderPlane(CCamera *mainCam, const CPlaneStats &s
 		fb + minY * fh, fb + maxY * fh,
 		fnear, ffar, true);
 
+	pass.AllocW = allocW;
+	pass.AllocH = allocH;
+	pass.ActiveW = activeW;
+	pass.ActiveH = activeH;
+	pass.Refl.Texture = NULL; // set at beginPass, once the slot is ensured
+	pass.Refl.ReflViewMatrix = pass.ReflCamWorld;
+	pass.Refl.ReflViewMatrix.invert();
+	pass.Refl.ReflFrustum = subFrustum;
+	pass.Refl.UVScale.U = (float)activeW / (float)allocW;
+	pass.Refl.UVScale.V = (float)activeH / (float)allocH;
+	pass.Refl.PlaneZ = planeZ;
+}
+
+// ***************************************************************************
+void CWaterReflectionManager::beginPass(uint pass, CActiveReflection &out)
+{
+	nlassert(_InReflectionRender);
+	nlassert(pass < _Passes.size());
+	CPassData &pd = _Passes[pass];
+	IDriver *drv = _Scene->getDriver();
+
 	// --- Render target ---
-	if (!slot.Texture || slot.AllocW != allocW || slot.AllocH != allocH)
+	CSlot &slot = _Slots[pass];
+	if (!slot.Texture || slot.AllocW != pd.AllocW || slot.AllocH != pd.AllocH)
 	{
 		CTextureOffscreen *tex = new CTextureOffscreen();
 		tex->setNeedsDepthStencil(true);
 		tex->setRenderTarget(true);
 		tex->setReleasable(false);
-		tex->resize(allocW, allocH);
+		tex->resize(pd.AllocW, pd.AllocH);
 		tex->setFilterMode(ITexture::Linear, ITexture::LinearMipMapOff);
 		tex->setWrapS(ITexture::Clamp);
 		tex->setWrapT(ITexture::Clamp);
 		drv->setupTexture(*tex);
 		slot.Texture = tex;
-		slot.AllocW = allocW;
-		slot.AllocH = allocH;
+		slot.AllocW = pd.AllocW;
+		slot.AllocH = pd.AllocH;
 	}
+	pd.Refl.Texture = slot.Texture;
 
-	// --- Render the reflection ---
-	drv->setRenderTarget(slot.Texture, 0, 0, allocW, allocH);
+	// --- Bind the render target ---
+	drv->setRenderTarget(slot.Texture, 0, 0, pd.AllocW, pd.AllocH);
 
-	float vpW = (float)activeW / (float)allocW;
-	float vpH = (float)activeH / (float)allocH;
+	float vpW = pd.Refl.UVScale.U;
+	float vpH = pd.Refl.UVScale.V;
 
 	// Clear the full allocation to the fog color so out-of-frustum samples
 	// and the wobble margin around the active region blend in
@@ -408,52 +416,65 @@ void CWaterReflectionManager::renderPlane(CCamera *mainCam, const CPlaneStats &s
 	activeScissor.init(0.f, 0.f, vpW, vpH);
 	drv->setupScissor(activeScissor);
 
-	// Reflected camera view state
-	CMatrix reflView = reflCamWorld;
-	reflView.invert();
-
 	// Clip plane, biased slightly below the surface. The driver transforms
 	// it to eye space using the current view matrix, so set up the same
-	// view state the scene render will use (including the PZB camera pos).
-	drv->setFrustum(subFrustum.Left, subFrustum.Right, subFrustum.Bottom, subFrustum.Top, subFrustum.Near, subFrustum.Far, true);
-	drv->setupViewMatrixEx(reflView, Pm);
-	drv->setClipPlane(0, CPlane(0.f, 0.f, 1.f, -(planeZ - WATER_REFLECTION_CLIP_BIAS)));
+	// view state the caller's scene render will use (including the PZB
+	// camera pos).
+	const CFrustum &f = pd.Refl.ReflFrustum;
+	drv->setFrustum(f.Left, f.Right, f.Bottom, f.Top, f.Near, f.Far, true);
+	drv->setupViewMatrixEx(pd.Refl.ReflViewMatrix, pd.ReflCamWorld.getPos());
+	drv->setClipPlane(0, CPlane(0.f, 0.f, 1.f, -(pd.Refl.PlaneZ - WATER_REFLECTION_CLIP_BIAS)));
 	drv->enableClipPlane(0, true);
 
-	// Extra content (sky, ...) first, as background
-	if (_ContentCallback)
-	{
-		CMatrix identity;
-		identity.identity();
-		drv->setupModelMatrix(identity);
-		_ContentCallback->renderReflectionContent(reflCamWorld, subFrustum, activeVP);
-	}
-
-	// Scene render from the reflected camera. keepTrav so that the frame's
-	// ellapsed time is preserved for the main render: elements excluded
-	// from this pass (flares, water waves, trails) advance their animation
-	// from the ellapsed time during their own render, and this pass must
-	// not consume it on their behalf.
+	// --- Scene camera for the caller's scene render ---
 	CCamera *reflCam = getReflCamera();
-	reflCam->setMatrix(reflCamWorld);
-	reflCam->setFrustum(subFrustum);
+	reflCam->setMatrix(pd.ReflCamWorld);
+	reflCam->setFrustum(f);
 	_Scene->setCam(reflCam);
 	CViewport sceneVP;
 	sceneVP.init(0.f, 0.f, vpW, vpH);
 	_Scene->setViewport(sceneVP);
-	_Scene->beginPartRender();
-	_Scene->renderPart(UScene::RenderAll, true, true, true);
-	_Scene->endPartRender(true);
 
+	out = pd.Refl;
+}
+
+// ***************************************************************************
+void CWaterReflectionManager::endPass(uint pass)
+{
+	nlassert(_InReflectionRender);
+	nlassert(pass < _Passes.size());
+	IDriver *drv = _Scene->getDriver();
 	drv->enableClipPlane(0, false);
 
-	// --- Publish ---
-	out.Texture = slot.Texture;
-	out.ReflViewMatrix = reflView;
-	out.ReflFrustum = subFrustum;
-	out.UVScale.U = vpW;
-	out.UVScale.V = vpH;
-	out.PlaneZ = planeZ;
+	// Publish for the coming main render
+	_Active[_Passes[pass].Key] = _Passes[pass].Refl;
+	_PrevAdmitted.push_back(_Passes[pass].Key);
+}
+
+// ***************************************************************************
+void CWaterReflectionManager::endPasses()
+{
+	if (!_InReflectionRender)
+		return; // no passes were begun
+	nlassert(_Scene);
+	IDriver *drv = _Scene->getDriver();
+
+	_Scene->enableElementRender(UScene::FilterWater, true);
+	_Scene->enableElementRender(UScene::FilterFlare, true);
+	_InReflectionRender = false;
+
+	// Restore scene and driver state
+	drv->setRenderTarget(_SaveRenderTarget);
+	drv->setupViewport(_SaveDrvViewport);
+	CScissor fullScissor;
+	fullScissor.initFullScreen();
+	drv->setupScissor(fullScissor);
+	drv->enableClipPlane(0, false);
+	_Scene->setCam(_SaveCam);
+	_Scene->setViewport(_SaveSceneViewport);
+	_SaveRenderTarget = NULL;
+	_SaveCam = NULL;
+	_Passes.clear();
 }
 
 } /* namespace NL3D */

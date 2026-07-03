@@ -951,9 +951,9 @@ CSceneUser::CSceneUser(CDriverUser *drv, bool bSmallScene) : _Scene(bSmallScene)
 
 CSceneUser::~CSceneUser()
 {
-	for (uint i = 0; i < _WaterReflectionDebugTextures.size(); ++i)
-		delete _WaterReflectionDebugTextures[i];
-	_WaterReflectionDebugTextures.clear();
+	for (uint i = 0; i < _WaterReflectionTextures.size(); ++i)
+		delete _WaterReflectionTextures[i];
+	_WaterReflectionTextures.clear();
 	_VisualCollisionManagers.clear();
 	_Landscapes.clear();
 	_CloudScapes.clear();
@@ -1173,11 +1173,37 @@ void CSceneUser::updateWaterEnvMaps(TGlobalAnimationTime time)
 }
 
 // ***************************************************************************
-void CSceneUser::renderWaterReflections()
+void CSceneUser::fillWaterReflectionInfo(uint wrapperIndex, const CWaterReflectionManager::CActiveReflection &refl, UWaterReflectionInfo &info)
 {
-	NL3D_HAUTO_RENDER_SCENE
+	// Maintain a U-level wrapper for the render target texture
+	if (_WaterReflectionTextures.size() <= wrapperIndex)
+		_WaterReflectionTextures.resize(wrapperIndex + 1, NULL);
+	CTextureUser *&wrapper = _WaterReflectionTextures[wrapperIndex];
+	if (!wrapper || wrapper->getITexture() != refl.Texture)
+	{
+		delete wrapper;
+		wrapper = new CTextureUser(refl.Texture);
+	}
 
-	_Scene.getWaterReflectionManager().renderReflections();
+	info.Texture = wrapper;
+	info.ReflViewMatrix = refl.ReflViewMatrix;
+	info.FrustumLeft = refl.ReflFrustum.Left;
+	info.FrustumRight = refl.ReflFrustum.Right;
+	info.FrustumBottom = refl.ReflFrustum.Bottom;
+	info.FrustumTop = refl.ReflFrustum.Top;
+	info.FrustumNear = refl.ReflFrustum.Near;
+	info.FrustumFar = refl.ReflFrustum.Far;
+	info.UScale = refl.UVScale.U;
+	info.VScale = refl.UVScale.V;
+	info.PlaneZ = refl.PlaneZ;
+}
+
+// ***************************************************************************
+void CSceneUser::beginWaterReflectionPass(uint pass, UWaterReflectionInfo &info)
+{
+	CWaterReflectionManager::CActiveReflection refl;
+	_Scene.getWaterReflectionManager().beginPass(pass, refl);
+	fillWaterReflectionInfo(pass, refl, info);
 }
 
 // ***************************************************************************
@@ -1186,77 +1212,8 @@ bool CSceneUser::getActiveWaterReflectionInfo(uint index, UWaterReflectionInfo &
 	const CWaterReflectionManager::CActiveReflection *refl = _Scene.getWaterReflectionManager().getActiveReflectionByIndex(index);
 	if (!refl || !refl->Texture)
 		return false;
-
-	// Maintain a U-level wrapper for the render target texture
-	if (_WaterReflectionDebugTextures.size() <= index)
-		_WaterReflectionDebugTextures.resize(index + 1, NULL);
-	CTextureUser *&wrapper = _WaterReflectionDebugTextures[index];
-	if (!wrapper || wrapper->getITexture() != refl->Texture)
-	{
-		delete wrapper;
-		wrapper = new CTextureUser(refl->Texture);
-	}
-
-	info.Texture = wrapper;
-	info.ReflViewMatrix = refl->ReflViewMatrix;
-	info.FrustumLeft = refl->ReflFrustum.Left;
-	info.FrustumRight = refl->ReflFrustum.Right;
-	info.FrustumBottom = refl->ReflFrustum.Bottom;
-	info.FrustumTop = refl->ReflFrustum.Top;
-	info.FrustumNear = refl->ReflFrustum.Near;
-	info.FrustumFar = refl->ReflFrustum.Far;
-	info.UScale = refl->UVScale.U;
-	info.VScale = refl->UVScale.V;
-	info.PlaneZ = refl->PlaneZ;
+	fillWaterReflectionInfo(index, *refl, info);
 	return true;
-}
-
-// ***************************************************************************
-void CSceneUser::setWaterReflectionContentCallback(UWaterReflectionContentCallback *cb)
-{
-	_WaterReflectionContentAdapter.SceneUser = this;
-	_WaterReflectionContentAdapter.UserCallback = cb;
-	_Scene.getWaterReflectionManager().setContentCallback(cb ? &_WaterReflectionContentAdapter : NULL);
-}
-
-// ***************************************************************************
-void CSceneUser::CWaterReflectionContentAdapter::renderReflectionContent(const NLMISC::CMatrix &reflectedCamWorld, const CFrustum &frustum, const CViewport &activeViewport)
-{
-	if (!UserCallback || !SceneUser)
-		return;
-	// Set the user-level matrix context to the reflected camera so that the
-	// callback can draw immediately (CDriverUser re-applies its own cached
-	// matrix context on state changes, so the IDriver-level state set by the
-	// reflection manager is not enough here). The viewport and scissor must
-	// cover exactly the active sub-region of the render target: that is the
-	// region the reflection UVs sample. Rendering into any other region
-	// (e.g. the full allocation) shifts and scales the reflection.
-	UDriver &drv = *SceneUser->_DriverUser;
-	NLMISC::CMatrix viewMatrix = reflectedCamWorld;
-	viewMatrix.invert();
-	NLMISC::CMatrix identity;
-	identity.identity();
-	// Save the user-level matrix context (viewport, scissor, frustum, view
-	// and model matrices): none of the reflected camera state may leak into
-	// the main render, since the context is re-applied on state changes
-	CViewport saveViewport = drv.getViewport();
-	CScissor saveScissor = drv.getScissor();
-	CFrustum saveFrustum = drv.getFrustum();
-	NLMISC::CMatrix saveViewMatrix = drv.getViewMatrix();
-	NLMISC::CMatrix saveModelMatrix = drv.getModelMatrix();
-	drv.setViewport(activeViewport);
-	CScissor activeScissor;
-	activeScissor.init(activeViewport.getX(), activeViewport.getY(), activeViewport.getWidth(), activeViewport.getHeight());
-	drv.setScissor(activeScissor);
-	drv.setFrustum(frustum);
-	drv.setViewMatrix(viewMatrix);
-	drv.setModelMatrix(identity);
-	UserCallback->renderReflectionContent(drv, reflectedCamWorld, frustum);
-	drv.setViewport(saveViewport);
-	drv.setScissor(saveScissor);
-	drv.setFrustum(saveFrustum);
-	drv.setViewMatrix(saveViewMatrix);
-	drv.setModelMatrix(saveModelMatrix);
 }
 
 

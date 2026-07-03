@@ -87,28 +87,18 @@ class UDriver;
 class CFrustum;
 class UTexture;
 
-// callback to render extra (non-scene) content into realtime water reflections, e.g. the sky
-class UWaterReflectionContentCallback
-{
-public:
-	virtual ~UWaterReflectionContentCallback() {}
-	/** Called for each water reflection render, after the render target is
-	  * cleared and before the scene render. The driver frustum and view
-	  * matrices are set up for the reflected camera; the clip plane at the
-	  * water surface is enabled. */
-	virtual void renderReflectionContent(UDriver &driver, const NLMISC::CMatrix &reflectedCamWorld, const CFrustum &frustum) = 0;
-};
-
-// debug/display info for an active realtime water reflection
+// info for a realtime water reflection pass or an active reflection
 struct UWaterReflectionInfo
 {
-	/// Reflection render target texture (owned by the scene; valid until the next reflection render)
+	/// Reflection render target texture (owned by the scene; valid until the next reflection passes)
 	UTexture		*Texture;
 	/// World -> reflected camera space matrix
 	NLMISC::CMatrix	ReflViewMatrix;
 	/// Off-center sub-frustum used for the reflection render (Left, Right, Bottom, Top, Near, Far)
 	float			FrustumLeft, FrustumRight, FrustumBottom, FrustumTop, FrustumNear, FrustumFar;
-	/// Maps the sub-frustum's [0,1] projection onto the render target's active sub-region
+	/** Maps the sub-frustum's [0,1] projection onto the render target's
+	  * active sub-region. The active viewport of the render target is
+	  * (0, 0, UScale, VScale). */
 	float			UScale, VScale;
 	/// Water plane height
 	float			PlaneZ;
@@ -693,10 +683,26 @@ public:
 	/// Enable realtime reflection on all water surfaces regardless of the per-shape artist flag
 	virtual void		  setForceRealtimeWaterReflections(bool force) = 0;
 	virtual bool		  getForceRealtimeWaterReflections() const = 0;
-	/** Render the water reflections for this frame. Call once per frame
-	  * before the scene render (in the scene reflections pass of the render
-	  * loop), with the scene camera already set up for the frame. */
-	virtual void		  renderWaterReflections() = 0;
+	/** Select the water planes to reflect this frame and save the scene and
+	  * driver state; returns the number of reflection passes to render.
+	  * Call once per frame before the scene render (in the scene
+	  * reflections pass of the render loop), with the scene camera set up
+	  * for the frame. For each pass, call beginWaterReflectionPass(), render
+	  * the scene content through your own render logic (the reflected
+	  * camera is set as the scene camera; use keepTrav-style flags as for
+	  * any replicated pass), then endWaterReflectionPass(); finish with
+	  * endWaterReflectionPasses() (safe to call when zero passes were
+	  * returned). */
+	virtual uint		  beginWaterReflectionPasses() = 0;
+	/** Set up a reflection pass: binds and clears the render target,
+	  * restricts rendering to the active sub-region, sets the scene camera
+	  * to the reflected camera and enables the water clip plane. Pass state
+	  * for the caller's own drawing is returned in 'info'. */
+	virtual void		  beginWaterReflectionPass(uint pass, UWaterReflectionInfo &info) = 0;
+	/// Publish the reflection rendered by the pass for the coming main render
+	virtual void		  endWaterReflectionPass(uint pass) = 0;
+	/// Restore scene and driver state after the reflection passes
+	virtual void		  endWaterReflectionPasses() = 0;
 	/// Number of water planes with an active realtime reflection this frame
 	virtual uint		  getNumActiveWaterReflections() const = 0;
 	/// Debug/display info for an active reflection (index 0..getNumActiveWaterReflections()-1)
@@ -710,10 +716,6 @@ public:
 	/// Fixed window-derived render target allocation with active sub-region (default true); false = dynamic allocation
 	virtual void		  setWaterReflectionFixedSize(bool fixedSize) = 0;
 	virtual bool		  getWaterReflectionFixedSize() const = 0;
-	/** Set a callback that renders extra (non-scene) content into each water
-	  * reflection, e.g. the sky. Called with the driver frustum and view
-	  * matrices set up for the reflected camera. */
-	virtual void		  setWaterReflectionContentCallback(UWaterReflectionContentCallback *cb) = 0;
 	// @}
 };
 
