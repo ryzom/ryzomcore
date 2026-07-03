@@ -614,6 +614,18 @@ void CDriverGLStates3::bindTexture(GLenum target, GLuint id)
 	}
 }
 
+void CDriverGLStates3::unbindTexture(uint stage)
+{
+	H_AUTO_OGL(CDriverGLStates3_unbindTexture)
+	nlassert(stage < MaxTextureUnits);
+	if (m_CurTexture[stage] != 0)
+	{
+		activeTexture(stage);
+		glBindTexture(m_CurTextureTarget[stage], 0);
+		m_CurTexture[stage] = 0;
+	}
+}
+
 // ===========================================================================
 // Framebuffer
 // ===========================================================================

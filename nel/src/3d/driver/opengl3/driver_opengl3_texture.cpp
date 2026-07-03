@@ -1528,10 +1528,12 @@ bool CDriverGL3::activateTexture(uint stage, ITexture *tex)
 		}
 		else
 		{
-			// Force no texturing for this stage.
+			// Force no texturing for this stage. Actually unbind at the GL
+			// level, not just in the cache: a texture left bound here while
+			// it is attached to the active framebuffer is a rendering
+			// feedback loop, and WebGL/ANGLE silently drops such draws.
 			_CurrentTextureInfoGL[stage] = NULL;
-			// setup texture mode, after activeTexture()
-			// FIXME GL3 TEXTUREMODE _DriverGLStates.setTextureMode(CDriverGLStates3::TextureDisabled);
+			_DriverGLStates.unbindTexture(stage);
 
 			/*if (_Extensions.ATITextureEnvCombine3)
 			{
@@ -1745,6 +1747,22 @@ bool CDriverGL3::setRenderTarget (ITexture *tex, uint32 x, uint32 y, uint32 widt
 			if (!height) height = tex->getHeight();
 
 			_RenderTargetFBO = tex;
+
+			// Unbind all texture units: the target texture may still be
+			// bound as a sampler from an earlier draw, and WebGL/ANGLE
+			// treats that as a rendering feedback loop, silently dropping
+			// every draw call into the FBO (desktop GL does not enforce
+			// this, making the failure GLES-specific). Unbind through the
+			// GL states cache, not activateTexture(stage, NULL): texture
+			// setup/upload paths can leave a texture GL-bound while
+			// _CurrentTexture[] already says NULL, which would defeat the
+			// unbind exactly on the frame a render target is (re)created.
+			for (uint stage = 0; stage < (uint)IDRV_PROGRAM_MAXSAMPLERS; ++stage)
+			{
+				_DriverGLStates.unbindTexture(stage);
+				_CurrentTexture[stage] = NULL;
+				_CurrentTextureInfoGL[stage] = NULL;
+			}
 
 			CViewport newVP;
 			newVP.init(0, 0, (float)width / (float)tex->getWidth(),
