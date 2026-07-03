@@ -694,6 +694,13 @@ public:
 	  * endWaterReflectionPasses() (safe to call when zero passes were
 	  * returned). */
 	virtual uint		  beginWaterReflectionPasses() = 0;
+	/** Select the current water reflection view (eye), default 0. Stereo
+	  * render loops set this before each eye's reflection pass and before
+	  * each eye's scene render, so every eye reflects from its own camera.
+	  * Reflections are rendered and published per view; plane selection is
+	  * shared. */
+	virtual void		  setWaterReflectionView(uint view) = 0;
+	virtual uint		  getWaterReflectionView() const = 0;
 	/** Set up a reflection pass: binds and clears the render target,
 	  * restricts rendering to the active sub-region, sets the scene camera
 	  * to the reflected camera and enables the water clip plane. Pass state

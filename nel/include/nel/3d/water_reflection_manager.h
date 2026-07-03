@@ -111,6 +111,15 @@ public:
 	  * When false, targets are allocated at the active size (dynamic mode). */
 	void			setFixedSize(bool fixedSize) { _FixedSize = fixedSize; }
 	bool			getFixedSize() const { return _FixedSize; }
+	/** Select the current view (eye), default 0. Reflections are rendered
+	  * and published per view: stereo render loops set the view before each
+	  * eye's reflection passes and before each eye's scene render, so that
+	  * every eye reflects from its own camera. Plane selection and render
+	  * target sub-region sizing are shared across views (stats are merged
+	  * from all views' scene renders); only the mirrored camera and the
+	  * render target contents are per-view. */
+	void			setCurrentView(uint view) { _CurrentView = view; }
+	uint			getCurrentView() const { return _CurrentView; }
 	// @}
 
 	/** Report a visible water surface. Called by CWaterModel during the
@@ -122,35 +131,40 @@ public:
 
 	/// \name Reflection render passes
 	// @{
-	/** Select the water planes to reflect this frame (consumes the stats
-	  * from the last main render) and save the scene and driver state.
-	  * Returns the number of reflection passes to render. For each pass,
-	  * call beginPass(), render the scene content through the caller's
-	  * own render logic, then endPass(); finish with endPasses() (safe to
-	  * call when zero passes were returned). Call once per frame before
-	  * the main scene render, with the scene camera set up for the frame. */
+	/** Select the water planes to reflect this frame (consumes the merged
+	  * stats from the last main render). Returns the number of reflection
+	  * passes to render. Selection is camera-independent, so this may be
+	  * called before the render loop starts and the count handed to the
+	  * loop driver (IStereoDisplay::setSceneReflectionPasses); each pass
+	  * may then be rendered once per view. For each pass, set the current
+	  * view, call beginPass(), render the scene content through the
+	  * caller's own render logic, then endPass(); finish the frame with
+	  * endPasses() (safe to call when zero passes were returned). */
 	uint			beginPasses();
-	/** Set up reflection pass 'pass': binds and clears the render target,
+	/** Set up reflection pass 'pass' for the current view: saves the scene
+	  * camera and driver state, binds and clears the render target,
 	  * restricts rendering to the active sub-region, sets the scene camera
-	  * to the reflected camera and enables the water clip plane. The pass
-	  * state (reflected view matrix, sub-frustum, UV scale — the active
-	  * viewport is (0, 0, UVScale.U, UVScale.V) of the render target) is
-	  * returned in 'out' for the caller's own drawing. */
+	  * to the current scene camera mirrored across the water plane and
+	  * enables the water clip plane. The pass state (reflected view matrix,
+	  * sub-frustum, UV scale — the active viewport is
+	  * (0, 0, UVScale.U, UVScale.V) of the render target) is returned in
+	  * 'out' for the caller's own drawing. */
 	void			beginPass(uint pass, CActiveReflection &out);
-	/// Publish the reflection rendered by pass 'pass' for the coming main render.
+	/** Publish the reflection rendered by pass 'pass' for the current view
+	  * and restore the scene camera and driver state. */
 	void			endPass(uint pass);
-	/// Restore scene and driver state after all passes.
+	/// End the frame's reflection passes.
 	void			endPasses();
 	// @}
 
-	/// \name Queries during the main render
+	/// \name Queries during the main render (all for the current view)
 	// @{
 	/// Returns the active reflection for the given plane height, or NULL.
 	const CActiveReflection	*getActiveReflection(float planeZ) const;
 	/// Returns the active reflection by index (0..getNumActiveReflections()-1), or NULL. For debug display.
 	const CActiveReflection	*getActiveReflectionByIndex(uint index) const;
-	bool			hasActiveReflections() const { return !_Active.empty(); }
-	uint			getNumActiveReflections() const { return (uint)_Active.size(); }
+	bool			hasActiveReflections() const { const CView *v = currentView(); return v && !v->Active.empty(); }
+	uint			getNumActiveReflections() const { const CView *v = currentView(); return v ? (uint)v->Active.size() : 0; }
 	/// True while the manager is rendering a reflection pass (guards recursion and stat collection).
 	bool			isRenderingReflection() const { return _InReflectionRender; }
 	/** True when water models should compute and report visibility stats:
@@ -187,18 +201,24 @@ private:
 		CSlot() : AllocW(0), AllocH(0) {}
 	};
 
-	// Prepared state for one reflection pass
+	// Per-view (per-eye) reflection state
+	struct CView
+	{
+		std::map<sint32, CActiveReflection>	Active;	// published reflections for the current main render
+		std::vector<CSlot>					Slots;
+	};
+
+	// Selected state for one reflection pass (one plane, rendered per view)
 	struct CPassData
 	{
 		sint32				Key;
-		CActiveReflection	Refl;		// camera, sub-frustum, uv scale (texture set at beginPass)
-		NLMISC::CMatrix		ReflCamWorld;
-		uint				AllocW, AllocH;
-		uint				ActiveW, ActiveH;
+		CPlaneStats			Stats;
+		CActiveReflection	Refl;	// filled by beginPass, published by endPass
 	};
 
-	void			preparePass(CCamera *mainCam, const CPlaneStats &stats, CPassData &pass);
 	CCamera			*getReflCamera();
+	const CView		*currentView() const { return _CurrentView < _Views.size() ? &_Views[_CurrentView] : NULL; }
+	CView			&ensureCurrentView();
 
 	CScene								*_Scene;
 	sint								_MaxReflections;
@@ -209,15 +229,15 @@ private:
 	bool								_InReflectionRender;
 	bool								_CollectionArmed;
 	bool								_HadReflections;
+	uint								_CurrentView;
 
-	std::map<sint32, CPlaneStats>		_Collected;	// stats from the current main render
-	std::map<sint32, CActiveReflection>	_Active;	// published reflections for the current main render
+	std::map<sint32, CPlaneStats>		_Collected;	// stats from the current main render, merged across views
+	std::vector<CView>					_Views;		// per-view published reflections and render targets
 	std::vector<sint32>					_PrevAdmitted; // hysteresis: planes admitted last frame
-	std::vector<CSlot>					_Slots;
-	std::vector<CPassData>				_Passes;	// prepared passes between beginPasses and endPasses
+	std::vector<CPassData>				_Passes;	// selected passes between beginPasses and endPasses
 	CCamera								*_ReflCamera;
 
-	// state saved across the reflection passes
+	// state saved across one reflection pass (beginPass..endPass)
 	CCamera								*_SaveCam;
 	CViewport							_SaveSceneViewport;
 	NLMISC::CSmartPtr<ITexture>			_SaveRenderTarget;

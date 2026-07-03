@@ -87,7 +87,7 @@ protected:
 	// U-level texture wrappers for water reflection info
 	std::vector<CTextureUser *>		_WaterReflectionTextures;
 	// Fill a UWaterReflectionInfo from an internal reflection state
-	void fillWaterReflectionInfo(uint wrapperIndex, const CWaterReflectionManager::CActiveReflection &refl, UWaterReflectionInfo &info);
+	void fillWaterReflectionInfo(const CWaterReflectionManager::CActiveReflection &refl, UWaterReflectionInfo &info);
 
 public:
 
@@ -322,6 +322,8 @@ public:
 	virtual void		  setForceRealtimeWaterReflections(bool force) { _Scene.getWaterReflectionManager().setForceReflections(force); }
 	virtual bool		  getForceRealtimeWaterReflections() const { return _Scene.getWaterReflectionManager().getForceReflections(); }
 	virtual uint		  beginWaterReflectionPasses() { return _Scene.getWaterReflectionManager().beginPasses(); }
+	virtual void		  setWaterReflectionView(uint view) { _Scene.getWaterReflectionManager().setCurrentView(view); }
+	virtual uint		  getWaterReflectionView() const { return _Scene.getWaterReflectionManager().getCurrentView(); }
 	virtual void		  beginWaterReflectionPass(uint pass, UWaterReflectionInfo &info);
 	virtual void		  endWaterReflectionPass(uint pass) { _Scene.getWaterReflectionManager().endPass(pass); }
 	virtual void		  endWaterReflectionPasses() { _Scene.getWaterReflectionManager().endPasses(); }

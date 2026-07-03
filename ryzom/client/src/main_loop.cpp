@@ -1665,6 +1665,15 @@ bool mainLoop()
 			}
 		}
 		bool fullDetail = false;
+
+		// Announce the water reflection passes wanted this frame to the
+		// render loop; the display replicates the reflections stage per
+		// pass and per eye
+		if (!ClientCfg.Light && Render)
+			StereoDisplay->setSceneReflectionPasses(Scene->beginWaterReflectionPasses());
+		else
+			StereoDisplay->setSceneReflectionPasses(0);
+
 		while (StereoDisplay->nextPass())
 		{
 			++i;
@@ -1718,21 +1727,23 @@ bool mainLoop()
 
 			if (StereoDisplay->wantSceneReflections())
 			{
-				// Render realtime planar water reflections to RTT: replicate
-				// the scene render once per admitted water plane, with the
-				// reflected camera set by the reflection pass
+				// Render one realtime water reflection pass (one water
+				// plane, one eye) as a replicated scene render, mirroring
+				// this pass's committed eye camera. The eye stages of one
+				// reflection pass are adjacent, so the second eye
+				// re-renders the first eye's traversal (isSceneFirst());
+				// keepTraversals stays true since reflections are never the
+				// frame's last render (the frame's ellapsed time belongs to
+				// the scene renders).
 				if (!ClientCfg.Light && Render)
 				{
-					uint numWaterReflectionPasses = Scene->beginWaterReflectionPasses();
-					for (uint reflPass = 0; reflPass < numWaterReflectionPasses; ++reflPass)
-					{
-						UWaterReflectionInfo reflInfo;
-						Scene->beginWaterReflectionPass(reflPass, reflInfo);
-						// TODO: render the sky scene into the reflection
-						doRenderScene(true, true); // keepTraversals: replicated pass, like a stereo eye
-						Scene->endWaterReflectionPass(reflPass);
-					}
-					Scene->endWaterReflectionPasses();
+					Scene->setWaterReflectionView(StereoDisplay->isSceneFirst() ? 0 : 1);
+					uint reflPass = StereoDisplay->getSceneReflectionPass();
+					UWaterReflectionInfo reflInfo;
+					Scene->beginWaterReflectionPass(reflPass, reflInfo);
+					// TODO: render the sky scene into the reflection
+					doRenderScene(StereoDisplay->isSceneFirst(), true);
+					Scene->endWaterReflectionPass(reflPass);
 				}
 			}
 
@@ -1755,7 +1766,8 @@ bool mainLoop()
 						}
 					}
 
-					// Render scene
+					// Render scene, with this eye's water reflections
+					Scene->setWaterReflectionView(StereoDisplay->isSceneFirst() ? 0 : 1);
 					bool wantTraversals = StereoDisplay->isSceneFirst();
 					bool keepTraversals = !StereoDisplay->isSceneLast();
 					doRenderScene(wantTraversals, keepTraversals);
@@ -2228,6 +2240,9 @@ bool mainLoop()
 
 			StereoDisplay->endRenderTarget();
 		} /* stereo pass */
+
+		if (!ClientCfg.Light && Render)
+			Scene->endWaterReflectionPasses();
 
 		if (defaultRenderTarget)
 		{

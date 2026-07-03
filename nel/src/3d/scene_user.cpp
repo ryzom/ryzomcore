@@ -1173,16 +1173,30 @@ void CSceneUser::updateWaterEnvMaps(TGlobalAnimationTime time)
 }
 
 // ***************************************************************************
-void CSceneUser::fillWaterReflectionInfo(uint wrapperIndex, const CWaterReflectionManager::CActiveReflection &refl, UWaterReflectionInfo &info)
+void CSceneUser::fillWaterReflectionInfo(const CWaterReflectionManager::CActiveReflection &refl, UWaterReflectionInfo &info)
 {
-	// Maintain a U-level wrapper for the render target texture
-	if (_WaterReflectionTextures.size() <= wrapperIndex)
-		_WaterReflectionTextures.resize(wrapperIndex + 1, NULL);
-	CTextureUser *&wrapper = _WaterReflectionTextures[wrapperIndex];
-	if (!wrapper || wrapper->getITexture() != refl.Texture)
+	// Maintain a U-level wrapper per render target texture (the same pass
+	// index maps to a different texture per view, so match by texture)
+	CTextureUser *wrapper = NULL;
+	for (uint i = 0; i < _WaterReflectionTextures.size(); ++i)
 	{
-		delete wrapper;
+		if (_WaterReflectionTextures[i]->getITexture() == refl.Texture)
+		{
+			wrapper = _WaterReflectionTextures[i];
+			break;
+		}
+	}
+	if (!wrapper)
+	{
+		// Bound the graveyard of wrappers for reallocated render targets
+		if (_WaterReflectionTextures.size() >= 32)
+		{
+			for (uint i = 0; i < _WaterReflectionTextures.size(); ++i)
+				delete _WaterReflectionTextures[i];
+			_WaterReflectionTextures.clear();
+		}
 		wrapper = new CTextureUser(refl.Texture);
+		_WaterReflectionTextures.push_back(wrapper);
 	}
 
 	info.Texture = wrapper;
@@ -1203,7 +1217,7 @@ void CSceneUser::beginWaterReflectionPass(uint pass, UWaterReflectionInfo &info)
 {
 	CWaterReflectionManager::CActiveReflection refl;
 	_Scene.getWaterReflectionManager().beginPass(pass, refl);
-	fillWaterReflectionInfo(pass, refl, info);
+	fillWaterReflectionInfo(refl, info);
 }
 
 // ***************************************************************************
@@ -1212,7 +1226,7 @@ bool CSceneUser::getActiveWaterReflectionInfo(uint index, UWaterReflectionInfo &
 	const CWaterReflectionManager::CActiveReflection *refl = _Scene.getWaterReflectionManager().getActiveReflectionByIndex(index);
 	if (!refl || !refl->Texture)
 		return false;
-	fillWaterReflectionInfo(index, *refl, info);
+	fillWaterReflectionInfo(*refl, info);
 	return true;
 }
 
