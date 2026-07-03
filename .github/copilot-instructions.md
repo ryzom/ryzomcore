@@ -43,8 +43,34 @@ emcmake cmake /path/to/ryzomcore \
 
 ```bash
 cd /tmp/embuild
-emmake make -j$(nproc) nl_sample_clip_plane nl_sample_nelvp nl_sample_planar_reflection nl_sample_ppl nl_sample_font
+emmake make -j$(nproc) nl_sample_clip_plane nl_sample_nelvp nl_sample_planar_reflection nl_sample_ppl nl_sample_water nl_sample_font
 ```
+
+### Sample assets (nl_sample_water)
+
+No graphics asset copies live in this code repo. The water sample loads the
+in-game lacustre water shape and textures from a checkout of the public
+https://github.com/ryzom/ryzomcore_graphics repository (44 GB full; use a
+blobless sparse checkout of `landscape/water` only):
+
+```bash
+git clone --filter=blob:none --sparse --depth=1 \
+  https://github.com/ryzom/ryzomcore_graphics.git ../ryzomcore_graphics
+cd ../ryzomcore_graphics && git sparse-checkout set landscape/water
+```
+
+- The Emscripten build packs only the files listed in
+  `nel/samples/3d/water/CMakeLists.txt` into the `.data` preload bundle,
+  taken from the `NL_GRAPHICS_DIR` CMake cache variable (defaults to
+  `../ryzomcore_graphics` next to the source tree).
+- Native builds need no assets at build time; the demo finds the checkout at
+  runtime by walking up from the working directory (override with the
+  `NL_GRAPHICS_DIR` environment variable).
+- Water shapes reference `.tga` texture names; the graphics repo stores
+  `.png` sources — handled at runtime via `CPath::remapExtension`.
+- PNG loading on Emscripten uses the zlib/libpng ports (`-sUSE_ZLIB=1
+  -sUSE_LIBPNG=1`), wired up as `ZLIB::ZLIB`/`PNG::PNG` INTERFACE IMPORTED
+  targets in the root CMakeLists.txt (same pattern as the FreeType port).
 
 ### Serve and test in browser
 

@@ -48,6 +48,13 @@ jobs:
           version: ${{ env.EM_VERSION }}
           no-cache: true
 
+      - name: Checkout graphics assets (sparse)
+        run: |
+          git clone --filter=blob:none --sparse --depth=1 \
+            https://github.com/ryzom/ryzomcore_graphics.git ${{ github.workspace }}/../ryzomcore_graphics
+          cd ${{ github.workspace }}/../ryzomcore_graphics
+          git sparse-checkout set landscape/water
+
       - name: Verify Emscripten
         run: emcc --version
 
@@ -96,6 +103,7 @@ jobs:
             nl_sample_nelvp \
             nl_sample_planar_reflection \
             nl_sample_ppl \
+            nl_sample_water \
             nl_sample_font
 
       - name: ccache stats
@@ -106,7 +114,7 @@ jobs:
         run: |
           mkdir -p pages
           # Copy built sample files
-          for sample in clip_plane nelvp planar_reflection ppl font; do
+          for sample in clip_plane nelvp planar_reflection ppl water font; do
             cp build/bin/nl_sample_${sample}.js pages/
             cp build/bin/nl_sample_${sample}.wasm pages/
             # Copy any embedded data files
@@ -115,7 +123,7 @@ jobs:
             fi
           done
           # Generate per-sample HTML host pages
-          for sample in clip_plane nelvp planar_reflection ppl font; do
+          for sample in clip_plane nelvp planar_reflection ppl water font; do
             title=$(echo "$sample" | sed 's/_/ /g; s/\b\(.\)/\u\1/g')
             cat > pages/nl_sample_${sample}.html << 'SAMPLEEOF'
           <!DOCTYPE html>
