@@ -33,6 +33,11 @@
 #define new DEBUG_NEW
 #endif
 
+// Enable the GLSL water VP sources (UBO pipeline-stage variant for the
+// linked program path, plus SSO fallback). Drivers that don't support these
+// profiles simply select the nelvp source instead.
+#define NL_WATER_VP_GLSL 1
+
 namespace NL3D {
 
 
