@@ -75,6 +75,8 @@
 #include <nel/3d/u_text_context.h>
 #include <nel/3d/frustum.h>
 #include <nel/3d/viewport.h>
+#include <nel/3d/stereo_debugger.h>
+#include <nel/3d/stereo_passthrough.h>
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -274,12 +276,15 @@ public:
 		OptBob = 8,
 		OptSkyRoll = 9,
 		OptCamDist = 10,
-		OptCamHeight = 11
+		OptCamHeight = 11,
+		OptStereo = 12
 	};
 	void setOption(int opt, int value);
 
 private:
 	void drawWorldContent(UDriver &driver, const NLMISC::CVector &eye);
+	void renderScenePart(bool traverse, bool keep);
+	NL3D::IStereoDisplay *stereoDisplay() { return m_Stereo && m_StereoDebugger ? (NL3D::IStereoDisplay *)m_StereoDebugger : (NL3D::IStereoDisplay *)m_StereoPassthrough; }
 
 public:
 
@@ -304,6 +309,12 @@ private:
 	UMaterial m_SkyMat;
 	UMaterial m_CubeMat;
 	UMaterial m_MirrorMat;
+
+	// Render loop manager: passthrough normally, stereo debugger when
+	// toggled (per-eye replicated passes with a side-by-side composite)
+	NL3D::CStereoPassthrough *m_StereoPassthrough;
+	NL3D::CStereoDebugger *m_StereoDebugger;
+	bool m_Stereo;
 	UInstance m_Water;
 	CVector m_WaterCenter;
 	float m_WaterRadius;
@@ -335,6 +346,9 @@ CWaterDemo::CWaterDemo()
 	, m_KeyBackward(false)
 	, m_QueryCamDist(0)
 	, m_QueryCamHeight(0)
+	, m_StereoPassthrough(NULL)
+	, m_StereoDebugger(NULL)
+	, m_Stereo(false)
 	, m_Scene(NULL)
 	, m_TextContext(NULL)
 	, m_WaterCenter(0.f, 0.f, 0.f)
@@ -413,6 +427,9 @@ CWaterDemo::CWaterDemo()
 
 	// Textured material for the mirror-floor debug mode and the RT overlay
 	m_MirrorMat = m_Driver->createMaterial();
+
+	m_StereoPassthrough = new CStereoPassthrough();
+	m_StereoPassthrough->setDriver(m_Driver);
 	m_MirrorMat.initUnlit();
 	m_MirrorMat.setZWrite(true);
 	m_MirrorMat.setZFunc(UMaterial::lessequal);
@@ -437,6 +454,8 @@ CWaterDemo::CWaterDemo()
 	m_Scene->setWaterReflectionFixedSize(queryFlag("fixed", m_Scene->getWaterReflectionFixedSize() ? 1 : 0) != 0);
 	m_QueryCamDist = queryFlag("dist", 0);
 	m_QueryCamHeight = queryFlag("height", 0);
+	if (queryFlag("stereo", 0) != 0)
+		setOption(OptStereo, 1);
 #endif
 	m_Scene->setMaxRealtimeWaterReflections(m_Planar ? 1 : 0);
 	m_Scene->setForceRealtimeWaterReflections(true);
@@ -490,7 +509,8 @@ CWaterDemo::CWaterDemo()
 			['Fog', 6, $6],
 			['Camera orbit', 7, $7],
 			['Cube bobbing', 8, $8],
-			['Skybox roll', 9, $9]
+			['Skybox roll', 9, $9],
+			['Stereo debugger', 12, $12]
 		]);
 		var panel = document.createElement('div');
 		panel.style.cssText = 'position:fixed;left:10px;bottom:10px;background:rgba(10,15,30,0.85);color:#dde;font:12px sans-serif;padding:10px 12px;border-radius:8px;z-index:20;user-select:none';
@@ -526,12 +546,17 @@ CWaterDemo::CWaterDemo()
 		m_AnimCube ? 1 : 0,
 		m_AnimSkybox ? 1 : 0,
 		(int)m_CamDist,
-		(int)m_CamHeight);
+		(int)m_CamHeight,
+		m_Stereo ? 1 : 0);
 #endif
 }
 
 CWaterDemo::~CWaterDemo()
 {
+	delete m_StereoDebugger;
+	m_StereoDebugger = NULL;
+	delete m_StereoPassthrough;
+	m_StereoPassthrough = NULL;
 	m_Driver->deleteMaterial(m_MirrorMat);
 	if (!m_Water.empty())
 		m_Scene->deleteInstance(m_Water);
@@ -567,6 +592,7 @@ void CWaterDemo::operator()(const CEvent &event)
 			if (keyDown.Key == KeyH) setOption(OptHalfRes, !m_Scene->getWaterReflectionHalfRes());
 			if (keyDown.Key == KeyY) setOption(OptPow2, !m_Scene->getWaterReflectionPow2());
 			if (keyDown.Key == KeyW) setOption(OptFixedSize, !m_Scene->getWaterReflectionFixedSize());
+			if (keyDown.Key == KeyX) setOption(OptStereo, !m_Stereo);
 			if (keyDown.Key == KeyV) { m_VSync = !m_VSync; m_Driver->setSwapVBLInterval(m_VSync ? 1 : 0); }
 		}
 		if (keyDown.Key == KeyUP) m_KeyForward = true;
@@ -596,6 +622,16 @@ void CWaterDemo::setOption(int opt, int value)
 	case OptSkyRoll: m_AnimSkybox = value != 0; break;
 	case OptCamDist: m_CamDist = (float)value; break;
 	case OptCamHeight: m_CamHeight = (float)value; break;
+	case OptStereo:
+		m_Stereo = value != 0;
+		if (m_Stereo && !m_StereoDebugger)
+		{
+			// Created once and kept: its render targets live in the
+			// driver's render target pool
+			m_StereoDebugger = new CStereoDebugger();
+			m_StereoDebugger->setDriver(m_Driver);
+		}
+		break;
 	}
 }
 
@@ -622,6 +658,18 @@ void CWaterDemo::run()
 		renderOneFrame();
 	}
 #endif
+}
+
+// Replicated scene render for one pass of the render loop: traverse on the
+// first pass of a group, re-render the kept traversal on the others.
+// The HRC pass always runs, matching the client's render loop: water
+// rendering diverges between replicated renders without it (verified with
+// the stereo debugger's comparison composite).
+void CWaterDemo::renderScenePart(bool traverse, bool keep)
+{
+	m_Scene->beginPartRender();
+	m_Scene->renderPart(UScene::RenderAll, true, traverse, keep);
+	m_Scene->endPartRender(true, true, keep);
 }
 
 void CWaterDemo::renderOneFrame()
@@ -700,205 +748,242 @@ void CWaterDemo::renderOneFrame()
 	CMatrix identity;
 	identity.identity();
 
-	// --- Reflection passes: replicate our render logic once per admitted
-	// water plane, with the reflected camera the pass sets up ---
+	// --- Render loop: driven by the render loop manager (stereo display),
+	// which replicates passes — per water reflection pass, and per eye when
+	// the stereo debugger is enabled. Same structure as the client's
+	// main loop. ---
 
-	uint numReflPasses = m_Scene->beginWaterReflectionPasses();
-	for (uint reflPass = 0; reflPass < numReflPasses; ++reflPass)
+	IStereoDisplay *display = stereoDisplay();
+	display->setSceneReflectionPasses(m_Scene->beginWaterReflectionPasses());
+
+	while (display->nextPass())
 	{
-		UWaterReflectionInfo passInfo;
-		m_Scene->beginWaterReflectionPass(reflPass, passInfo);
+		const CViewport &vp = display->getCurrentViewport();
+		m_Driver->setViewport(vp);
+		m_Scene->setViewport(vp);
 
-		// Set our driver context to the reflected camera and the render
-		// target's active sub-region for the direct draws
-		CMatrix reflCamWorld = passInfo.ReflViewMatrix;
-		reflCamWorld.invert();
-		CFrustum reflFrustum(passInfo.FrustumLeft, passInfo.FrustumRight,
-			passInfo.FrustumBottom, passInfo.FrustumTop,
-			passInfo.FrustumNear, passInfo.FrustumFar, true);
-		CViewport activeVP;
-		activeVP.init(0.f, 0.f, passInfo.UScale, passInfo.VScale);
-		m_Driver->setViewport(activeVP);
-		m_Driver->setScissor(CScissor(0.f, 0.f, passInfo.UScale, passInfo.VScale));
-		m_Driver->setFrustum(reflFrustum);
-		m_Driver->setViewMatrix(passInfo.ReflViewMatrix);
-		m_Driver->setModelMatrix(identity);
+		display->beginRenderTarget();
 
-		// Same content as the main pass (water itself is filtered out of
-		// the scene render); keepTrav like any replicated pass
-		drawWorldContent(*m_Driver, reflCamWorld.getPos());
-		m_Scene->beginPartRender();
-		m_Scene->renderPart(UScene::RenderAll, true, true, true);
-		m_Scene->endPartRender(true, true, true);
+		if (display->wantClear())
+		{
+			m_Driver->clearBuffers(CRGBA(75, 95, 125));
+		}
 
-		m_Scene->endWaterReflectionPass(reflPass);
+		if (display->wantSceneReflections())
+		{
+			// One water reflection pass (one plane, one eye). The eye
+			// stages of a pass are adjacent: the second eye re-renders the
+			// first eye's traversal. Reflections are never the frame's
+			// last render, so traversals (and the frame's ellapsed time)
+			// are always kept.
+			m_Scene->setWaterReflectionView(display->isSceneFirst() ? 0 : 1);
+			uint reflPass = display->getSceneReflectionPass();
+			UWaterReflectionInfo passInfo;
+			m_Scene->beginWaterReflectionPass(reflPass, passInfo);
+
+			// Set our driver context to the reflected camera and the render
+			// target's active sub-region for the direct draws
+			CMatrix reflCamWorld = passInfo.ReflViewMatrix;
+			reflCamWorld.invert();
+			CFrustum reflFrustum(passInfo.FrustumLeft, passInfo.FrustumRight,
+				passInfo.FrustumBottom, passInfo.FrustumTop,
+				passInfo.FrustumNear, passInfo.FrustumFar, true);
+			CViewport activeVP;
+			activeVP.init(0.f, 0.f, passInfo.UScale, passInfo.VScale);
+			m_Driver->setViewport(activeVP);
+			CScissor activeScissor;
+			activeScissor.init(0.f, 0.f, passInfo.UScale, passInfo.VScale);
+			m_Driver->setScissor(activeScissor);
+			m_Driver->setFrustum(reflFrustum);
+			m_Driver->setViewMatrix(passInfo.ReflViewMatrix);
+			m_Driver->setModelMatrix(identity);
+
+			// Same content as the main pass (water itself is filtered out
+			// of the scene render)
+			drawWorldContent(*m_Driver, reflCamWorld.getPos());
+			renderScenePart(display->isSceneFirst(), true);
+
+			m_Scene->endWaterReflectionPass(reflPass);
+
+			// Restore our driver context for the next pass
+			m_Driver->setViewport(vp);
+			CScissor fullScissor;
+			fullScissor.initFullScreen();
+			m_Driver->setScissor(fullScissor);
+		}
+
+		if (display->wantScene())
+		{
+			m_Scene->setWaterReflectionView(display->isSceneFirst() ? 0 : 1);
+
+			m_Driver->setFrustum(frustum);
+			m_Driver->setViewMatrix(viewMatrix);
+			m_Driver->setModelMatrix(identity);
+
+			drawWorldContent(*m_Driver, eye);
+
+			// The water surface (blends over the cube and skybox), sampling
+			// this eye's reflections
+			renderScenePart(display->isSceneFirst(), !display->isSceneLast());
+
+			// --- Debug: mirror floor (world-space, per eye) ---
+			UWaterReflectionInfo reflInfo;
+			if (m_Mirror && m_Scene->getActiveWaterReflectionInfo(0, reflInfo))
+			{
+				// Draw the raw reflection as an opaque mirror floor over the
+				// water: a world-space grid across the water footprint, each
+				// vertex projected through the engine's reflected camera and
+				// sub-frustum. This replicates the planar_reflection
+				// sample's floor using the engine-provided data, bypassing
+				// the water shader entirely.
+				m_Driver->enableFog(false);
+				m_Driver->setFrustum(frustum);
+				m_Driver->setViewMatrix(viewMatrix);
+				m_Driver->setModelMatrix(identity);
+
+				const int gridN = 24;
+				const float x0 = m_WaterCenter.x - m_WaterRadius;
+				const float y0 = m_WaterCenter.y - m_WaterRadius;
+				const float step = 2.f * m_WaterRadius / (float)gridN;
+				const float z = reflInfo.PlaneZ + 0.05f; // slight offset over the water surface
+				const float ooW = 1.f / (reflInfo.FrustumRight - reflInfo.FrustumLeft);
+				const float ooH = 1.f / (reflInfo.FrustumTop - reflInfo.FrustumBottom);
+
+				static std::vector<CQuadColorUV> quads;
+				quads.clear();
+				for (int j = 0; j < gridN; ++j)
+				for (int i = 0; i < gridN; ++i)
+				{
+					CQuadColorUV q;
+					CVector *vs[4] = { &q.V0, &q.V1, &q.V2, &q.V3 };
+					CUV *uvs[4] = { &q.Uv0, &q.Uv1, &q.Uv2, &q.Uv3 };
+					float cx[4] = { (float)i, (float)(i + 1), (float)(i + 1), (float)i };
+					float cy[4] = { (float)j, (float)j, (float)(j + 1), (float)(j + 1) };
+					for (int c = 0; c < 4; ++c)
+					{
+						CVector world(x0 + cx[c] * step, y0 + cy[c] * step, z);
+						*vs[c] = world;
+						CVector pv = reflInfo.ReflViewMatrix * world;
+						float invDepth = 1.f / max(pv.y, reflInfo.FrustumNear);
+						uvs[c]->U = (reflInfo.FrustumNear * pv.x * invDepth - reflInfo.FrustumLeft) * ooW * reflInfo.UScale;
+						uvs[c]->V = (reflInfo.FrustumNear * pv.z * invDepth - reflInfo.FrustumBottom) * ooH * reflInfo.VScale;
+					}
+					q.Color0 = q.Color1 = q.Color2 = q.Color3 = CRGBA::White;
+					quads.push_back(q);
+				}
+				m_MirrorMat.setTexture(0, reflInfo.Texture);
+				m_Driver->drawQuads(quads, m_MirrorMat);
+				m_MirrorMat.setTexture(0, NULL);
+				if (m_Fog)
+					m_Driver->enableFog(true);
+			}
+		}
+
+		if (display->wantInterface2D())
+		{
+			m_Driver->enableFog(false);
+
+			// --- Debug: reflection RT overlay ---
+			UWaterReflectionInfo reflInfo;
+			if (m_ShowRT && m_Scene->getActiveWaterReflectionInfo(0, reflInfo))
+			{
+				// Reflection RT overlay, matching the planar_reflection
+				// sample: fullscreen or corner thumbnail, full allocation
+				// shown (the current view's — the last eye in stereo)
+				m_Driver->setMatrixMode2D11();
+
+				float ox0, oy0, ox1, oy1;
+				if (m_ShowRT == 1) { ox0 = 0.f; oy0 = 0.f; ox1 = 1.f; oy1 = 1.f; }
+				else { ox0 = 0.65f; oy0 = 0.65f; ox1 = 1.f; oy1 = 1.f; }
+
+				CQuadColorUV rtQuad;
+				rtQuad.V0.set(ox0, oy0, 0.5f); rtQuad.Uv0 = CUV(0.f, 1.f);
+				rtQuad.V1.set(ox1, oy0, 0.5f); rtQuad.Uv1 = CUV(1.f, 1.f);
+				rtQuad.V2.set(ox1, oy1, 0.5f); rtQuad.Uv2 = CUV(1.f, 0.f);
+				rtQuad.V3.set(ox0, oy1, 0.5f); rtQuad.Uv3 = CUV(0.f, 0.f);
+				rtQuad.Color0 = rtQuad.Color1 = rtQuad.Color2 = rtQuad.Color3 = CRGBA::White;
+				m_MirrorMat.setTexture(0, reflInfo.Texture);
+				m_Driver->drawQuad(rtQuad, m_MirrorMat);
+				m_MirrorMat.setTexture(0, NULL);
+
+				if (m_ShowRT == 2)
+				{
+					CRGBA borderColor(255, 255, 255);
+					m_Driver->drawLine(ox0, oy0, ox1, oy0, borderColor);
+					m_Driver->drawLine(ox1, oy0, ox1, oy1, borderColor);
+					m_Driver->drawLine(ox1, oy1, ox0, oy1, borderColor);
+					m_Driver->drawLine(ox0, oy1, ox0, oy0, borderColor);
+				}
+			}
+
+			// --- HUD ---
+			if (m_TextContext)
+			{
+				m_Driver->setMatrixMode2D11();
+
+				m_TextContext->setHotSpot(UTextContext::TopLeft);
+				m_TextContext->setColor(CRGBA::White);
+				m_TextContext->setFontSize(12);
+
+				float lineH = 0.025f;
+				float x = 0.01f;
+				float y = 1.f - 0.01f;
+
+				m_TextContext->printfAt(x, y, "[F] Wireframe: %s", m_Wireframe ? "ON" : "OFF");
+				y -= lineH;
+				m_TextContext->printfAt(x, y, "[C] Camera orbit: %s", m_AnimCamera ? "ON" : "OFF");
+				y -= lineH;
+				m_TextContext->printfAt(x, y, "[R] Cube bobbing: %s", m_AnimCube ? "ON" : "OFF");
+				y -= lineH;
+				m_TextContext->printfAt(x, y, "[S] Skybox roll: %s", m_AnimSkybox ? "ON" : "OFF");
+				y -= lineH;
+				m_TextContext->printfAt(x, y, "[G] Fog: %s", m_Fog ? "ON" : "OFF");
+				y -= lineH;
+				m_TextContext->printfAt(x, y, "[P] Planar reflection: %s (%u active)", m_Planar ? "ON" : "OFF",
+					m_Scene->getNumActiveWaterReflections());
+				y -= lineH;
+				m_TextContext->printfAt(x, y, "[M] Mirror floor debug: %s  [T] RT overlay: %s",
+					m_Mirror ? "ON" : "OFF",
+					m_ShowRT == 0 ? "off" : (m_ShowRT == 1 ? "fullscreen" : "thumbnail"));
+				y -= lineH;
+				m_TextContext->printfAt(x, y, "[H] Half-res: %s  [Y] Pow2: %s  [W] Fixed RT: %s",
+					m_Scene->getWaterReflectionHalfRes() ? "ON" : "OFF",
+					m_Scene->getWaterReflectionPow2() ? "ON" : "OFF",
+					m_Scene->getWaterReflectionFixedSize() ? "ON" : "OFF");
+				y -= lineH;
+				m_TextContext->printfAt(x, y, "[X] Stereo debugger: %s  [V] VSync: %s",
+					m_Stereo ? "ON" : "OFF", m_VSync ? "ON" : "OFF");
+				y -= lineH;
+				m_TextContext->printfAt(x, y, "[Up/Down] Camera dist: %.1f", m_CamDist);
+				y -= lineH * 1.5f;
+				if (m_Water.empty())
+				{
+					m_TextContext->setColor(CRGBA(255, 80, 80));
+					m_TextContext->printfAt(x, y, "waterbassina01.shape NOT LOADED - check ryzomcore_graphics assets");
+					m_TextContext->setColor(CRGBA::White);
+				}
+				else
+				{
+					m_TextContext->printfAt(x, y, "waterbassina01.shape (lacustre basin): radius %.1fm, %s",
+						m_WaterRadius,
+						m_Scene->getNumActiveWaterReflections() ? "REALTIME planar reflection" : "envmap reflection (static skymap)");
+				}
+				y -= lineH;
+				if (m_Scene->getNumActiveWaterReflections())
+					m_TextContext->printfAt(x, y, "Cube and skybox ARE in the reflection now - toggle [P] to compare");
+				else
+					m_TextContext->printfAt(x, y, "Note: cube and skybox are NOT in the reflection - that is the point");
+				y -= lineH;
+				m_TextContext->printfAt(x, y, "FPS: %.1f  (%.2f ms)", m_SmoothFps, dt * 1000.f);
+				y -= lineH;
+				m_TextContext->printfAt(x, y, "Build: %s %s", __DATE__, __TIME__);
+			}
+		}
+
+		display->endRenderTarget();
 	}
 	m_Scene->endWaterReflectionPasses();
-
-	// --- Main pass ---
-
-	CViewport fullVP;
-	fullVP.initFullScreen();
-	m_Driver->setViewport(fullVP);
-	CScissor fullScissor;
-	fullScissor.initFullScreen();
-	m_Driver->setScissor(fullScissor);
-
-	m_Driver->clearBuffers(CRGBA(75, 95, 125));
-
-	m_Driver->setFrustum(frustum);
-	m_Driver->setViewMatrix(viewMatrix);
-	m_Driver->setModelMatrix(identity);
-
-	drawWorldContent(*m_Driver, eye);
-
-	// --- Scene render: the water surface (blends over the cube and skybox) ---
-
-	m_Scene->render();
-
 	m_Driver->enableFog(false);
-
-	// --- Debug: mirror floor and reflection RT overlay ---
-
-	UWaterReflectionInfo reflInfo;
-	bool haveRefl = m_Scene->getActiveWaterReflectionInfo(0, reflInfo);
-
-	if (m_Mirror && haveRefl)
-	{
-		// Draw the raw reflection as an opaque mirror floor over the water:
-		// a world-space grid across the water footprint, each vertex
-		// projected through the engine's reflected camera and sub-frustum.
-		// This replicates the planar_reflection sample's floor using the
-		// engine-provided data, bypassing the water shader entirely.
-		m_Driver->setFrustum(frustum);
-		m_Driver->setViewMatrix(viewMatrix);
-		m_Driver->setModelMatrix(identity);
-
-		const int gridN = 24;
-		const float x0 = m_WaterCenter.x - m_WaterRadius;
-		const float y0 = m_WaterCenter.y - m_WaterRadius;
-		const float step = 2.f * m_WaterRadius / (float)gridN;
-		const float z = reflInfo.PlaneZ + 0.05f; // slight offset over the water surface
-		const float ooW = 1.f / (reflInfo.FrustumRight - reflInfo.FrustumLeft);
-		const float ooH = 1.f / (reflInfo.FrustumTop - reflInfo.FrustumBottom);
-
-		static std::vector<CQuadColorUV> quads;
-		quads.clear();
-		for (int j = 0; j < gridN; ++j)
-		for (int i = 0; i < gridN; ++i)
-		{
-			CQuadColorUV q;
-			CVector *vs[4] = { &q.V0, &q.V1, &q.V2, &q.V3 };
-			CUV *uvs[4] = { &q.Uv0, &q.Uv1, &q.Uv2, &q.Uv3 };
-			float cx[4] = { (float)i, (float)(i + 1), (float)(i + 1), (float)i };
-			float cy[4] = { (float)j, (float)j, (float)(j + 1), (float)(j + 1) };
-			for (int c = 0; c < 4; ++c)
-			{
-				CVector world(x0 + cx[c] * step, y0 + cy[c] * step, z);
-				*vs[c] = world;
-				CVector p = reflInfo.ReflViewMatrix * world;
-				float invDepth = 1.f / max(p.y, reflInfo.FrustumNear);
-				uvs[c]->U = (reflInfo.FrustumNear * p.x * invDepth - reflInfo.FrustumLeft) * ooW * reflInfo.UScale;
-				uvs[c]->V = (reflInfo.FrustumNear * p.z * invDepth - reflInfo.FrustumBottom) * ooH * reflInfo.VScale;
-			}
-			q.Color0 = q.Color1 = q.Color2 = q.Color3 = CRGBA::White;
-			quads.push_back(q);
-		}
-		m_MirrorMat.setTexture(0, reflInfo.Texture);
-		m_Driver->drawQuads(quads, m_MirrorMat);
-	}
-
-	if (m_ShowRT && haveRefl)
-	{
-		// Reflection RT overlay, matching the planar_reflection sample:
-		// fullscreen or corner thumbnail, full allocation shown
-		m_Driver->setMatrixMode2D11();
-
-		float ox0, oy0, ox1, oy1;
-		if (m_ShowRT == 1) { ox0 = 0.f; oy0 = 0.f; ox1 = 1.f; oy1 = 1.f; }
-		else { ox0 = 0.65f; oy0 = 0.65f; ox1 = 1.f; oy1 = 1.f; }
-
-		CQuadColorUV rtQuad;
-		rtQuad.V0.set(ox0, oy0, 0.5f); rtQuad.Uv0 = CUV(0.f, 1.f);
-		rtQuad.V1.set(ox1, oy0, 0.5f); rtQuad.Uv1 = CUV(1.f, 1.f);
-		rtQuad.V2.set(ox1, oy1, 0.5f); rtQuad.Uv2 = CUV(1.f, 0.f);
-		rtQuad.V3.set(ox0, oy1, 0.5f); rtQuad.Uv3 = CUV(0.f, 0.f);
-		rtQuad.Color0 = rtQuad.Color1 = rtQuad.Color2 = rtQuad.Color3 = CRGBA::White;
-		m_MirrorMat.setTexture(0, reflInfo.Texture);
-		m_Driver->drawQuad(rtQuad, m_MirrorMat);
-
-		if (m_ShowRT == 2)
-		{
-			CRGBA borderColor(255, 255, 255);
-			m_Driver->drawLine(ox0, oy0, ox1, oy0, borderColor);
-			m_Driver->drawLine(ox1, oy0, ox1, oy1, borderColor);
-			m_Driver->drawLine(ox1, oy1, ox0, oy1, borderColor);
-			m_Driver->drawLine(ox0, oy1, ox0, oy0, borderColor);
-		}
-	}
-
-	m_MirrorMat.setTexture(0, NULL);
-
-	// --- HUD ---
-
-	if (m_TextContext)
-	{
-		m_Driver->setMatrixMode2D11();
-
-		m_TextContext->setHotSpot(UTextContext::TopLeft);
-		m_TextContext->setColor(CRGBA::White);
-		m_TextContext->setFontSize(12);
-
-		float lineH = 0.025f;
-		float x = 0.01f;
-		float y = 1.f - 0.01f;
-
-		m_TextContext->printfAt(x, y, "[F] Wireframe: %s", m_Wireframe ? "ON" : "OFF");
-		y -= lineH;
-		m_TextContext->printfAt(x, y, "[C] Camera orbit: %s", m_AnimCamera ? "ON" : "OFF");
-		y -= lineH;
-		m_TextContext->printfAt(x, y, "[R] Cube bobbing: %s", m_AnimCube ? "ON" : "OFF");
-		y -= lineH;
-		m_TextContext->printfAt(x, y, "[S] Skybox roll: %s", m_AnimSkybox ? "ON" : "OFF");
-		y -= lineH;
-		m_TextContext->printfAt(x, y, "[G] Fog: %s", m_Fog ? "ON" : "OFF");
-		y -= lineH;
-		m_TextContext->printfAt(x, y, "[P] Planar reflection: %s (%u active)", m_Planar ? "ON" : "OFF",
-			m_Scene->getNumActiveWaterReflections());
-		y -= lineH;
-		m_TextContext->printfAt(x, y, "[M] Mirror floor debug: %s  [T] RT overlay: %s",
-			m_Mirror ? "ON" : "OFF",
-			m_ShowRT == 0 ? "off" : (m_ShowRT == 1 ? "fullscreen" : "thumbnail"));
-		y -= lineH;
-		m_TextContext->printfAt(x, y, "[H] Half-res: %s  [Y] Pow2: %s  [W] Fixed RT: %s",
-			m_Scene->getWaterReflectionHalfRes() ? "ON" : "OFF",
-			m_Scene->getWaterReflectionPow2() ? "ON" : "OFF",
-			m_Scene->getWaterReflectionFixedSize() ? "ON" : "OFF");
-		y -= lineH;
-		m_TextContext->printfAt(x, y, "[V] VSync: %s", m_VSync ? "ON" : "OFF");
-		y -= lineH;
-		m_TextContext->printfAt(x, y, "[Up/Down] Camera dist: %.1f", m_CamDist);
-		y -= lineH * 1.5f;
-		if (m_Water.empty())
-		{
-			m_TextContext->setColor(CRGBA(255, 80, 80));
-			m_TextContext->printfAt(x, y, "waterbassina01.shape NOT LOADED - check ryzomcore_graphics assets");
-			m_TextContext->setColor(CRGBA::White);
-		}
-		else
-		{
-			m_TextContext->printfAt(x, y, "waterbassina01.shape (lacustre basin): radius %.1fm, %s",
-				m_WaterRadius,
-				m_Scene->getNumActiveWaterReflections() ? "REALTIME planar reflection" : "envmap reflection (static skymap)");
-		}
-		y -= lineH;
-		if (m_Scene->getNumActiveWaterReflections())
-			m_TextContext->printfAt(x, y, "Cube and skybox ARE in the reflection now - toggle [P] to compare");
-		else
-			m_TextContext->printfAt(x, y, "Note: cube and skybox are NOT in the reflection - that is the point");
-		y -= lineH;
-		m_TextContext->printfAt(x, y, "FPS: %.1f  (%.2f ms)", m_SmoothFps, dt * 1000.f);
-	}
 
 	m_Driver->swapBuffers();
 }
