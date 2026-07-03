@@ -43,7 +43,15 @@ IF(HUNTER_ENABLED)
   FIND_PACKAGE(OpenAL CONFIG REQUIRED)
 ENDIF()# hunter
 
-TARGET_COMPILE_DEFINITIONS(${NLDRV_AL_LIB} PRIVATE AL_ALEXT_PROTOTYPES)
+IF(HUNTER_ENABLED)
+  # Hunter builds OpenAL Soft from source, so the runtime library always
+  # matches the import library and the EFX entry points can be linked as
+  # static imports. With prebuilt externals the deployed OpenAL32.dll may
+  # be an older build without static EFX exports (-> "entry point not
+  # found" at load), so there the EFX entry points are loaded at runtime
+  # through alGetProcAddress (see ext_al.cpp).
+  TARGET_COMPILE_DEFINITIONS(${NLDRV_AL_LIB} PRIVATE AL_ALEXT_PROTOTYPES)
+ENDIF()
 
 TARGET_LINK_LIBRARIES(${NLDRV_AL_LIB}
         PUBLIC
