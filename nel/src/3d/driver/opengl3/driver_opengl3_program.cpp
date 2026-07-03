@@ -411,7 +411,12 @@ bool CDriverGL3::compileProgram(IProgram *program, GLenum shaderType,
 	// (linking happens in linkPrograms()), so uniform queries would fail.
 	// Defer uniform resolution to linkPrograms() for these programs, but
 	// still associate the source so features()/source() are available.
-	if (src->Profile != linkedProfile || m_SupportSSO)
+	// Exception: nelvp-converted programs resolve indices through
+	// NelvpParamIndices (constant register indices, no GL queries), so their
+	// buildInfo must run now — callers read idx()/getUniformIndex() before
+	// the program pair is ever linked, and skipping this leaves all cached
+	// indices zero (every setUniform* would write constant register c[0]).
+	if (src->Profile != linkedProfile || m_SupportSSO || isNelvp)
 		program->buildInfo(src);
 	else
 		program->setBuildSrc(src);
@@ -598,6 +603,20 @@ bool CDriverGL3::activeVertexProgram(CVertexProgram *program, bool driver)
 	{
 		// Still update user program tracking even on early return
 		if (!driver) m_UserVertexProgram = program;
+		// Re-arm the nelvp constant UBO for setUniform* calls. Mega linked
+		// draws clear m_NelvpActiveUB without going through
+		// activeVertexProgram (no PPO stage rebind in linked mode), so
+		// m_DriverVertexProgram can match while the UBO is disarmed and
+		// setUniform* writes would silently drop (nglProgramUniform* are
+		// no-ops without SSO).
+		if (program && program->m_DrvInfo)
+		{
+			CProgramDrvInfosGL3 *drvInfo = static_cast<CProgramDrvInfosGL3 *>((IProgramDrvInfos *)program->m_DrvInfo);
+			if (drvInfo->isNelvpConverted && drvInfo->NelvpConstantUB)
+				m_NelvpActiveUB = drvInfo->NelvpConstantUB;
+			else
+				m_NelvpActiveUB = NULL;
+		}
 		return true;
 	}
 
@@ -2901,6 +2920,12 @@ uint CProgramDrvInfosGL3::getUniformIndex(const char *name) const
 					return (uint)idx;
 			}
 		}
+
+		// Converted nelvp programs expose only constant registers and UBOs —
+		// never named GL uniforms. Do not fall through to GL queries: on the
+		// GLES3 pipeline the stage program may not be linked yet, and
+		// glGetUniformLocation on an unlinked program is invalid.
+		return ~0;
 	}
 
 	int idx = nglGetUniformLocation(programId, name);
