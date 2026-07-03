@@ -1037,7 +1037,7 @@ static inline uint32 countNumWantedIndexFar1(CPatch	*patch)
 
 
 // ***************************************************************************
-void			CLandscape::render(const CVector &refineCenter, const CVector &frontVector, const CPlane	pyramid[NL3D_TESSBLOCK_NUM_CLIP_PLANE], bool doTileAddPass)
+void			CLandscape::render(const CVector &refineCenter, const CVector &frontVector, const CPlane	pyramid[NL3D_TESSBLOCK_NUM_CLIP_PLANE], bool	doTileAddPass, bool doVegetables)
 {
 	IDriver *driver= _Driver;
 	nlassert(driver);
@@ -1754,7 +1754,7 @@ void			CLandscape::render(const CVector &refineCenter, const CVector &frontVecto
 
 	// First, update Dynamic Lighting for Vegetable, ie just copy.
 	// ==================
-	if(isVegetableActive())
+	if(doVegetables && isVegetableActive())
 	{
 		/* Actually we modulate the DLM with an arbitrary constant for this reason:
 			Color of vegetable (ie their material) are NOT modulated with DLM.
@@ -1805,7 +1805,7 @@ void			CLandscape::render(const CVector &refineCenter, const CVector &frontVecto
 
 	// render all vegetables, only if driver support VertexProgram.
 	// ==================
-	if(isVegetableActive())
+	if(doVegetables && isVegetableActive())
 	{
 		// Use same plane as TessBlock for faster clipping.
 		vector<CPlane>		vegetablePyramid;

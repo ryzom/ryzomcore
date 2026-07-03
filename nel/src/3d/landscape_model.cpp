@@ -246,7 +246,11 @@ void	CLandscapeModel::clipAndRenderLandscape()
 
 	// then render.
 	H_BEFORE( NL3D_Landscape_Render );
-	Landscape.render(refineCenter, renderTrav.CamLook, CurrentPyramid, isAdditive ());
+	// Vegetation is excluded from water reflection renders: its vertex
+	// program does not implement the reflection clip plane (underwater
+	// vegetation would show), and the contribution is not worth the cost
+	bool doVegetables = !getOwnerScene()->getWaterReflectionManager().isRenderingReflection();
+	Landscape.render(refineCenter, renderTrav.CamLook, CurrentPyramid, isAdditive (), doVegetables);
 	H_AFTER( NL3D_Landscape_Render );
 
 	// Should be unlocked by render

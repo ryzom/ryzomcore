@@ -153,6 +153,10 @@ void	CVegetableBlendLayerModel::render(IDriver *driver)
 // ***************************************************************************
 void	CVegetableBlendLayerModel::traverseRender()
 {
+	// Vegetation is excluded from water reflection renders (see
+	// CLandscapeModel::traverseRender)
+	if (getOwnerScene()->getWaterReflectionManager().isRenderingReflection())
+		return;
 	CRenderTrav		&rTrav= getOwnerScene()->getRenderTrav();
 	render(rTrav.getDriver());
 }

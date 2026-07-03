@@ -81,6 +81,17 @@ public:
 	CClipTrav();
 	~CClipTrav();
 
+	/** Override the position used to find the camera's clusters. Water
+	  * reflection passes use this: the mirrored camera sits below the
+	  * surface, outside any cluster, but by mirror symmetry the reflection
+	  * sees the clusters visible from the real (unmirrored) eye. The
+	  * clip pyramid itself stays that of the current (mirrored) camera. */
+	void setClusterVisibilityPosOverride(bool enable, const NLMISC::CVector &pos = NLMISC::CVector::Null)
+	{
+		_UseClusterVisibilityPosOverride = enable;
+		_ClusterVisibilityPosOverride = pos;
+	}
+
 	/// traverse
 	void				traverse ();
 
@@ -123,6 +134,8 @@ public:
 	const std::vector<CCluster*> &getVisibleClusters();
 
 	bool						_TrackClusterVisibility;
+	bool						_UseClusterVisibilityPosOverride;
+	NLMISC::CVector				_ClusterVisibilityPosOverride;
 	std::vector<CCluster*>		_VisibleClusters;
 	//@}
 

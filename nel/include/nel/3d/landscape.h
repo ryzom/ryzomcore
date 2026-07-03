@@ -233,7 +233,7 @@ public:
 	 *	\param refineCenter should be the position of the camera
 	 *	\param frontVector should be the J vector of the camera
 	 */
-	void			render(const CVector &refineCenter, const CVector &frontVector, const CPlane pyramid[NL3D_TESSBLOCK_NUM_CLIP_PLANE], bool doTileAddPass=false);
+	void			render(const CVector &refineCenter, const CVector &frontVector, const CPlane pyramid[NL3D_TESSBLOCK_NUM_CLIP_PLANE], bool doTileAddPass=false, bool doVegetables=true);
 
 	/// Refine/Geomorph ALL the tesselation of the landscape, from the view point refineCenter. Even if !RefineMode.
 	void			refineAll(const CVector &refineCenter);

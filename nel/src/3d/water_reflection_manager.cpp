@@ -444,9 +444,15 @@ void CWaterReflectionManager::beginPass(uint pass, CActiveReflection &out)
 	drv->enableClipPlane(0, true);
 
 	// --- Scene camera for the caller's scene render ---
+	// The mirrored camera sits below the surface, outside any cluster. By
+	// mirror symmetry the reflection sees the clusters visible from the
+	// real eye: inherit its cluster system and resolve the camera clusters
+	// from its unmirrored position.
 	CCamera *reflCam = getReflCamera();
 	reflCam->setMatrix(reflCamWorld);
 	reflCam->setFrustum(subFrustum);
+	reflCam->setClusterSystem(mainCam->getClusterSystem());
+	_Scene->getClipTrav().setClusterVisibilityPosOverride(true, P);
 	_Scene->setCam(reflCam);
 	CViewport sceneVP;
 	sceneVP.init(0.f, 0.f, vpW, vpH);
@@ -477,6 +483,7 @@ void CWaterReflectionManager::endPass(uint pass)
 	ensureCurrentView().Active[_Passes[pass].Key] = _Passes[pass].Refl;
 
 	// Restore scene and driver state
+	_Scene->getClipTrav().setClusterVisibilityPosOverride(false);
 	drv->enableClipPlane(0, false);
 	drv->setRenderTarget(_SaveRenderTarget);
 	drv->setupViewport(_SaveDrvViewport);
