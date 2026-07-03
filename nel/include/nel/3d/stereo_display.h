@@ -135,6 +135,17 @@ public:
 	/// Is this the last 3D scene of the frame
 	virtual bool isSceneLast() = 0;
 
+	/** Set the number of scene reflection passes wanted this frame (e.g.
+	  * one per admitted water plane). Call before the first nextPass() of
+	  * the frame. The display replicates its scene reflections stage once
+	  * per pass — and per eye for stereo displays, with the two eye stages
+	  * of the same pass adjacent so the second eye can re-render the first
+	  * eye's render traversal (isSceneFirst()). Zero skips the reflections
+	  * stage entirely. */
+	virtual void setSceneReflectionPasses(uint count) { m_SceneReflectionPasses = count; }
+	/// The current reflection pass index during a wantSceneReflections() stage
+	virtual uint getSceneReflectionPass() const { return 0; }
+
 	/// Get the flare context for the current pass (0-3). Different eyes must use different contexts.
 	virtual uint getFlareContext() = 0;
 
@@ -149,7 +160,10 @@ public:
 	static IStereoDisplay *createDevice(const CStereoDeviceInfo &deviceInfo);
 	static void releaseUnusedLibraries();
 	static void releaseAllLibraries();
-	
+
+protected:
+	uint m_SceneReflectionPasses;
+
 }; /* class IStereoDisplay */
 
 } /* namespace NL3D */

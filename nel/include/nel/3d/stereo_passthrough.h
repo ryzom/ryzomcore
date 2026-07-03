@@ -62,6 +62,8 @@ public:
 
 	virtual bool isSceneFirst();
 	virtual bool isSceneLast();
+
+	virtual uint getSceneReflectionPass() const;
 	virtual uint getFlareContext();
 
 	virtual bool beginRenderTarget();
@@ -72,6 +74,7 @@ private:
 	CViewport m_Viewport;
 	CFrustum m_Frustum[NL_STEREO_MAX_USER_CAMERAS];
 	int m_Stage; // 0: before first pass, 1: reflection pass, 2: normal pass
+	uint m_ReflPass; // current reflection pass index during stage 1
 
 }; /* class CStereoPassthrough */
 

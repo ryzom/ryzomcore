@@ -22,7 +22,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#if !FINAL_VERSION
 #include "std3d.h"
 #include "nel/3d/stereo_debugger.h"
 
@@ -231,7 +230,7 @@ NLMISC_CATEGORISED_COMMAND(nel, stereoDisplayMode, "Set stereo debugger display 
 	return true;
 }
 
-CStereoDebugger::CStereoDebugger() : m_Driver(NULL), m_Stage(0), m_SubStage(0), m_LeftTexU(NULL), m_RightTexU(NULL), m_PixelProgram(NULL)
+CStereoDebugger::CStereoDebugger() : m_Driver(NULL), m_Stage(0), m_SubStage(0), m_ReflPass(0), m_LeftTexU(NULL), m_RightTexU(NULL), m_PixelProgram(NULL)
 {
 
 }
@@ -468,30 +467,58 @@ void CStereoDebugger::getOriginalFrustum(uint cid, NL3D::UCamera *camera) const
 }
 
 /// Is there a next pass
-/// Filled mode stages: 1=L reflect, 2=R reflect, 3=L scene, 4=R scene, 5=composite
-/// Non-filled mode stages: 1=reflect, 3=scene (skips 2 so want* conditions are shared)
+/// Filled mode stages: 1=L reflect, 2=R reflect (both repeated per requested
+/// reflection pass, eye pair adjacent so the right eye can re-render the left
+/// eye's traversal), 3=L scene, 4=R scene, 5=composite
+/// Non-filled mode stages: 1=reflect (repeated per requested reflection
+/// pass), 3=scene (skips 2 so want* conditions are shared)
 bool CStereoDebugger::nextPass()
 {
 	if (m_Driver->getPolygonMode() == UDriver::Filled)
 	{
-		++m_Stage;
-		m_SubStage = 0;
-		if (m_Stage > 5)
+		switch (m_Stage)
 		{
+		case 0:
+			m_ReflPass = 0;
+			m_Stage = m_SceneReflectionPasses > 0 ? 1 : 3;
+			m_SubStage = 0;
+			return true;
+		case 1:
+			m_Stage = 2; // L reflect -> R reflect, same reflection pass
+			m_SubStage = 0;
+			return true;
+		case 2:
+			++m_ReflPass;
+			m_Stage = m_ReflPass < m_SceneReflectionPasses ? 1 : 3;
+			m_SubStage = 0;
+			return true;
+		case 3:
+		case 4:
+			++m_Stage;
+			m_SubStage = 0;
+			return true;
+		default:
 			m_Stage = 0;
+			m_SubStage = 0;
 			return false;
 		}
-		return true;
 	}
 	else
 	{
 		switch (m_Stage)
 		{
 		case 0:
-			m_Stage = 1;
+			m_ReflPass = 0;
+			m_Stage = m_SceneReflectionPasses > 0 ? 1 : 3;
 			m_SubStage = 0;
 			return true;
 		case 1:
+			++m_ReflPass;
+			if (m_ReflPass < m_SceneReflectionPasses)
+			{
+				m_SubStage = 0;
+				return true; // next reflection pass
+			}
 			m_Stage = 3;
 			m_SubStage = 0;
 			return true;
@@ -502,6 +529,11 @@ bool CStereoDebugger::nextPass()
 		}
 	}
 	return false;
+}
+
+uint CStereoDebugger::getSceneReflectionPass() const
+{
+	return m_ReflPass;
 }
 
 /// Gets the current viewport
@@ -671,6 +703,5 @@ void CStereoDebugger::listDevices(std::vector<CStereoDeviceInfo> &devicesOut)
 
 } /* namespace NL3D */
 
-#endif /* #if !FINAL_VERSION */
 
 /* end of file */

@@ -26,7 +26,7 @@
 
 namespace NL3D {
 
-CStereoPassthrough::CStereoPassthrough() : m_Driver(NULL), m_Stage(0)
+CStereoPassthrough::CStereoPassthrough() : m_Driver(NULL), m_Stage(0), m_ReflPass(0)
 {
 
 }
@@ -74,14 +74,29 @@ void CStereoPassthrough::getOriginalFrustum(uint cid, NL3D::UCamera *camera) con
 
 bool CStereoPassthrough::nextPass()
 {
-	// Stage 0 -> 1 (reflection pass), 1 -> 2 (normal pass), 2 -> 0 (done)
-	++m_Stage;
-	if (m_Stage > 2)
+	// Stage 0 -> 1 (reflection pass, repeated per requested reflection
+	// pass), 1 -> 2 (normal pass), 2 -> 0 (done)
+	switch (m_Stage)
 	{
+	case 0:
+		m_ReflPass = 0;
+		m_Stage = m_SceneReflectionPasses > 0 ? 1 : 2;
+		return true;
+	case 1:
+		++m_ReflPass;
+		if (m_ReflPass < m_SceneReflectionPasses)
+			return true; // next reflection pass
+		m_Stage = 2;
+		return true;
+	default:
 		m_Stage = 0;
 		return false;
 	}
-	return true;
+}
+
+uint CStereoPassthrough::getSceneReflectionPass() const
+{
+	return m_ReflPass;
 }
 
 const NL3D::CViewport &CStereoPassthrough::getCurrentViewport() const
