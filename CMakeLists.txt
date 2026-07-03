@@ -194,15 +194,24 @@ IF(HUNTER_ENABLED)
   SET(ZLIB_INCLUDE_DIR ZLIB_ROOT/include)
 ELSE()
 IF(EMSCRIPTEN)
-  # For Emscripten builds, zlib/libpng/libxml2 are not required for the sample demos.
-  # Create stub ZLIB::ZLIB imported target so nelmisc's TARGET_LINK_LIBRARIES doesn't
-  # error out. No actual zlib is linked; the stub is intentionally empty.
+  # For Emscripten builds, zlib and libpng come from Emscripten ports
+  # (-sUSE_ZLIB=1 / -sUSE_LIBPNG=1), same pattern as the FreeType port in
+  # nel/CMakeLists.txt. The options must be present at both compile time
+  # (port headers) and link time (port libraries); INTERFACE options on the
+  # imported targets propagate to consumers of nelmisc. libxml2 stays
+  # unavailable; XML-dependent code is compiled out.
   ADD_LIBRARY(ZLIB::ZLIB INTERFACE IMPORTED)
+  SET_TARGET_PROPERTIES(ZLIB::ZLIB PROPERTIES
+    INTERFACE_COMPILE_OPTIONS "-sUSE_ZLIB=1"
+    INTERFACE_LINK_OPTIONS "-sUSE_ZLIB=1")
   SET(ZLIB_FOUND TRUE)
   SET(ZLIB_INCLUDE_DIRS "")
   SET(ZLIB_LIBRARIES "")
-  # Do NOT create PNG::PNG - no libpng available, bitmap_png.cpp will be compiled out
-  SET(PNG_FOUND FALSE)
+  ADD_LIBRARY(PNG::PNG INTERFACE IMPORTED)
+  SET_TARGET_PROPERTIES(PNG::PNG PROPERTIES
+    INTERFACE_COMPILE_OPTIONS "-sUSE_ZLIB=1;-sUSE_LIBPNG=1"
+    INTERFACE_LINK_OPTIONS "-sUSE_ZLIB=1;-sUSE_LIBPNG=1")
+  SET(PNG_FOUND TRUE)
   SET(LIBXML2_FOUND FALSE)
   SET(LIBXML2_INCLUDE_DIR "")
   SET(LIBXML2_LIBRARIES "")
