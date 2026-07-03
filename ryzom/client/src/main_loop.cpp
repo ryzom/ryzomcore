@@ -1718,8 +1718,11 @@ bool mainLoop()
 
 			if (StereoDisplay->wantSceneReflections())
 			{
-				// Render water planar reflections to RTT
-				// TODO: water reflection system renders here
+				// Render realtime planar water reflections to RTT
+				if (!ClientCfg.Light && Render)
+				{
+					Scene->renderWaterReflections();
+				}
 			}
 
 			if (StereoDisplay->wantScene())
