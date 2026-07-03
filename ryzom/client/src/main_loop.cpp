@@ -1725,38 +1725,28 @@ bool mainLoop()
 				clearBuffers();
 			}
 
-			if (StereoDisplay->wantSceneReflections())
+			if (StereoDisplay->wantSceneReflections() || StereoDisplay->wantScene())
 			{
-				// Render one realtime water reflection pass (one water
-				// plane, one eye) as a replicated render of the main scene,
-				// mirroring this pass's committed eye camera. The eye stages
-				// of one reflection pass are adjacent, so the second eye
-				// re-renders the first eye's traversal (isSceneFirst());
-				// keepTraversals stays true since reflections are never the
-				// frame's last render (the frame's ellapsed time belongs to
-				// the scene renders). Only the main scene is replicated:
-				// canopy and sky render from their own cameras, which are
-				// not mirrored by the reflection pass.
-				// TODO: mirror the sky scene camera and render the sky into
-				// the reflection instead of the fog-color clear
 				if (!ClientCfg.Light && Render)
 				{
-					Scene->setWaterReflectionView(StereoDisplay->getSceneView());
-					uint reflPass = StereoDisplay->getSceneReflectionPass();
+					// A water reflection pass is the same scene render as
+					// the scene pass, replicated with the mirrored camera,
+					// the reflection render target and the water clip plane
+					// (all set up by beginWaterReflectionPass; water, flares
+					// and vegetation exclude themselves at engine level).
+					// TODO: mirror the sky and canopy cameras for the
+					// reflection render (they follow the unmirrored eye)
+					bool reflectionPass = StereoDisplay->wantSceneReflections();
+					uint reflPass = 0;
 					UWaterReflectionInfo reflInfo;
-					Scene->beginWaterReflectionPass(reflPass, reflInfo);
-					beginRenderMainScenePart();
-					renderMainScenePart(UScene::RenderAll, StereoDisplay->isSceneFirst(), true);
-					endRenderMainScenePart(true);
-					Scene->endWaterReflectionPass(reflPass);
-				}
-			}
 
-			if (StereoDisplay->wantScene())
-			{
-				if (!ClientCfg.Light && Render)
-				{
-					if (StereoDisplay->isSceneFirst())
+					Scene->setWaterReflectionView(StereoDisplay->getSceneView());
+					if (reflectionPass)
+					{
+						reflPass = StereoDisplay->getSceneReflectionPass();
+						Scene->beginWaterReflectionPass(reflPass, reflInfo);
+					}
+					else if (StereoDisplay->isSceneFirst())
 					{
 						// nb : force full detail if a screenshot is asked
 						// todo : move outside render code
@@ -1771,13 +1761,18 @@ bool mainLoop()
 						}
 					}
 
-					// Render scene, with this eye's water reflections
-					Scene->setWaterReflectionView(StereoDisplay->getSceneView());
+					// Render scene, with this eye's water reflections.
+					// Reflection passes are never the frame's last render:
+					// traversals (and the frame's ellapsed time) are kept.
 					bool wantTraversals = StereoDisplay->isSceneFirst();
-					bool keepTraversals = !StereoDisplay->isSceneLast();
+					bool keepTraversals = reflectionPass || !StereoDisplay->isSceneLast();
 					doRenderScene(wantTraversals, keepTraversals);
 
-					if (StereoDisplay->isSceneLast())
+					if (reflectionPass)
+					{
+						Scene->endWaterReflectionPass(reflPass);
+					}
+					else if (StereoDisplay->isSceneLast())
 					{
 						if (fullDetail)
 						{

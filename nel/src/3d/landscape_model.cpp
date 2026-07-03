@@ -239,17 +239,29 @@ void	CLandscapeModel::clipAndRenderLandscape()
 		}
 	}
 
-	// First, refine.
-	H_BEFORE( NL3D_Landscape_Refine );
-	Landscape.refine(refineCenter);
-	H_AFTER( NL3D_Landscape_Refine );
+	const bool inReflection = getOwnerScene()->getWaterReflectionManager().isRenderingReflection();
+
+	// First, refine. NOT in water reflection renders: refine() mutates the
+	// tessellation incrementally toward the given center, so refining
+	// toward the mirrored camera would (a) thrash the tessellation between
+	// the real and mirrored centers every frame and (b) leave each of the
+	// frame's replicated reflection passes rendering a different
+	// intermediate state (visible as per-eye reflection mismatch in the
+	// stereo debugger). The main render's tessellation shares the mirrored
+	// camera's XY position and serves the reflection by symmetry.
+	if (!inReflection)
+	{
+		H_BEFORE( NL3D_Landscape_Refine );
+		Landscape.refine(refineCenter);
+		H_AFTER( NL3D_Landscape_Refine );
+	}
 
 	// then render.
 	H_BEFORE( NL3D_Landscape_Render );
 	// Vegetation is excluded from water reflection renders: its vertex
 	// program does not implement the reflection clip plane (underwater
 	// vegetation would show), and the contribution is not worth the cost
-	bool doVegetables = !getOwnerScene()->getWaterReflectionManager().isRenderingReflection();
+	bool doVegetables = !inReflection;
 	Landscape.render(refineCenter, renderTrav.CamLook, CurrentPyramid, isAdditive (), doVegetables);
 	H_AFTER( NL3D_Landscape_Render );
 

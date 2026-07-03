@@ -408,7 +408,11 @@ void CWaterReflectionManager::beginPass(uint pass, CActiveReflection &out)
 	float vpH = (float)activeH / (float)allocH;
 
 	// Clear the full allocation to the fog color so out-of-frustum samples
-	// and the wobble margin around the active region blend in
+	// and the wobble margin around the active region blend in. The pass
+	// owns its write state: glClearBuffer honors the color write mask, so
+	// a mask left disabled by earlier rendering (occlusion tests, special
+	// multipass) must not turn this clear (and the whole pass) into a no-op.
+	drv->setColorMask(true, true, true, true);
 	CViewport fullVP;
 	fullVP.initFullScreen();
 	drv->setupViewport(fullVP);
@@ -416,6 +420,7 @@ void CWaterReflectionManager::beginPass(uint pass, CActiveReflection &out)
 	fullScissor.initFullScreen();
 	drv->setupScissor(fullScissor);
 	CRGBA clearColor = drv->fogEnabled() ? drv->getFogColor() : CRGBA(0, 0, 0, 255);
+	clearColor.A = 255;
 	drv->clear2D(clearColor);
 	drv->clearZBuffer();
 

@@ -321,6 +321,9 @@ void CClipTrav::traverse()
 		vCluster[i]->setCameraIn(true);
 	}
 
+	if (_UseClusterVisibilityPosOverride) // TEMP DEBUG
+		nlinfo("REFLDBG clip date=%d camClusters=%u camPos=(%.1f %.1f %.1f) searchPos=(%.1f %.1f %.1f)", (int)CurrentDate, (uint)vCluster.size(), CamPos.x, CamPos.y, CamPos.z, clusterPos.x, clusterPos.y, clusterPos.z); // TEMP DEBUG
+
 
 	H_AFTER( NL3D_TravClip_FindCameraCluster);
 
