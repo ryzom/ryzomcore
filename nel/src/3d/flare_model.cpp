@@ -129,6 +129,11 @@ void	CFlareModel::traverseRender()
 {
 	CRenderTrav			&renderTrav = getOwnerScene()->getRenderTrav();
 	if (renderTrav.isCurrentPassOpaque()) return;
+	// No flares in water reflection renders: they are screen-space effects
+	// driven by per-context occlusion queries, and a reflection pass would
+	// corrupt the owning eye's query state. Enforced at engine level: the
+	// render loop re-applies its own scene filters inside reflection passes.
+	if (getOwnerScene()->getWaterReflectionManager().isRenderingReflection()) return;
 	IDriver				*drv  = renderTrav.getDriver();
 	nlassert(drv);
 	// For now, don't render flare if occlusion query is not supported (direct read of z-buffer is far too slow)

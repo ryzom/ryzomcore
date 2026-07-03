@@ -633,6 +633,10 @@ void initMainLoop()
 		if(MainCam.empty())
 			nlerror("initMainLoop: Cannot Create the main camera.");
 
+		// realtime water reflection budget: one plane per frame (each
+		// admitted plane costs a scene render per eye)
+		Scene->setMaxRealtimeWaterReflections(1);
+
 		// setup load balancing
 		Scene->setPolygonBalancingMode(UScene::PolygonBalancingClamp);
 		Scene->setGroupLoadMaxPolygon("Skin", ClientCfg.SkinNbMaxPoly);

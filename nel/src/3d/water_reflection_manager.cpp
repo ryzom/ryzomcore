@@ -199,17 +199,6 @@ uint CWaterReflectionManager::beginPasses()
 	std::map<sint32, CPlaneStats> collected;
 	collected.swap(_Collected);
 
-	// A frame without stats (warmup, or the render loop probing again)
-	// keeps the previously published reflections instead of discarding them
-	if (collected.empty() && _MaxReflections != 0)
-	{
-		bool anyActive = false;
-		for (uint i = 0; i < _Views.size(); ++i)
-			anyActive = anyActive || !_Views[i].Active.empty();
-		if (anyActive)
-			return 0;
-	}
-
 	for (uint i = 0; i < _Views.size(); ++i)
 		_Views[i].Active.clear();
 	_Passes.clear();
@@ -261,8 +250,6 @@ uint CWaterReflectionManager::beginPasses()
 		_PrevAdmitted.push_back(candidates[i].second);
 	}
 
-	_HadReflections = true;
-
 	return numAdmitted;
 }
 
@@ -272,6 +259,15 @@ void CWaterReflectionManager::beginPass(uint pass, CActiveReflection &out)
 	nlassert(_Scene);
 	nlassert(!_InReflectionRender); // missing endPass()?
 	nlassert(pass < _Passes.size());
+	if (_InReflectionRender || pass >= _Passes.size())
+	{
+		// Misuse (unbalanced bracketing or a stale pass index from the
+		// render loop): publish nothing rather than capturing the
+		// manager's own state as the scene state to restore
+		out = CActiveReflection();
+		out.PlaneZ = 0.f;
+		return;
+	}
 	CPassData &pd = _Passes[pass];
 	const CPlaneStats &stats = pd.Stats;
 	IDriver *drv = _Scene->getDriver();
@@ -315,10 +311,16 @@ void CWaterReflectionManager::beginPass(uint pass, CActiveReflection &out)
 
 	// --- Screen AABB of the water in the reflected view ---
 	// For points on the mirror plane, the reflected-camera projection is
-	// the main-camera projection mirrored in x. The AABB is merged across
-	// views, so all views share the sub-region sizing.
-	float minX = 1.f - stats.Max.x;
-	float maxX = 1.f - stats.Min.x;
+	// the main-camera projection mirrored across the optical axis:
+	// u' = -u - 2*Left/(Right-Left), which reduces to 1-u for x-symmetric
+	// frusta but stays correct for off-center (per-eye HMD) frusta. The
+	// AABB is merged across views, so all views share the sub-region
+	// sizing.
+	float fl, fr, fb, ft, fnear, ffar;
+	mainCam->getFrustum(fl, fr, fb, ft, fnear, ffar);
+	const float mirrorOfs = -2.f * fl / (fr - fl);
+	float minX = -stats.Max.x + mirrorOfs;
+	float maxX = -stats.Min.x + mirrorOfs;
 	float minY = stats.Min.y;
 	float maxY = stats.Max.y;
 	clamp(minX, 0.f, 1.f); clamp(maxX, 0.f, 1.f);
@@ -331,13 +333,18 @@ void CWaterReflectionManager::beginPass(uint pass, CActiveReflection &out)
 	drv->getWindowSize(winW, winH);
 	if (winW == 0 || winH == 0) { winW = 128; winH = 128; }
 
+	// The reported AABB is relative to the camera viewport, which may be a
+	// sub-region of the window (per-eye side-by-side viewports)
+	const float vpPixW = (float)winW * _SaveSceneViewport.getWidth();
+	const float vpPixH = (float)winH * _SaveSceneViewport.getHeight();
+
 	// Active region: snapped AABB dimensions, padded symmetrically
-	uint rawW = (uint)std::max(1.f, ceilf((maxX - minX) * (float)winW));
-	uint rawH = (uint)std::max(1.f, ceilf((maxY - minY) * (float)winH));
+	uint rawW = (uint)std::max(1.f, ceilf((maxX - minX) * vpPixW));
+	uint rawH = (uint)std::max(1.f, ceilf((maxY - minY) * vpPixH));
 	uint snappedW = snapUp(rawW, WATER_REFLECTION_SNAP);
 	uint snappedH = snapUp(rawH, WATER_REFLECTION_SNAP);
-	float padX = (float)(snappedW - rawW) / (2.f * (float)winW);
-	float padY = (float)(snappedH - rawH) / (2.f * (float)winH);
+	float padX = (float)(snappedW - rawW) / (2.f * std::max(1.f, vpPixW));
+	float padY = (float)(snappedH - rawH) / (2.f * std::max(1.f, vpPixH));
 	minX -= padX; maxX += padX;
 	minY -= padY; maxY += padY;
 	uint activeW = snappedW;
@@ -365,8 +372,6 @@ void CWaterReflectionManager::beginPass(uint pass, CActiveReflection &out)
 	}
 
 	// --- Off-center sub-frustum over the reflected AABB ---
-	float fl, fr, fb, ft, fnear, ffar;
-	mainCam->getFrustum(fl, fr, fb, ft, fnear, ffar);
 	CFrustum subFrustum;
 	float fw = fr - fl;
 	float fh = ft - fb;
@@ -447,11 +452,11 @@ void CWaterReflectionManager::beginPass(uint pass, CActiveReflection &out)
 	sceneVP.init(0.f, 0.f, vpW, vpH);
 	_Scene->setViewport(sceneVP);
 
+	// While set, water and flares exclude themselves from the render (at
+	// engine level, since render loops re-apply their own scene filters
+	// inside the pass) and water models don't report visibility stats
 	_InReflectionRender = true;
-
-	// Water must not reflect itself; flares use per-frame occlusion queries
-	_Scene->enableElementRender(UScene::FilterWater, false);
-	_Scene->enableElementRender(UScene::FilterFlare, false);
+	_HadReflections = true;
 
 	out = pd.Refl;
 }
@@ -462,10 +467,10 @@ void CWaterReflectionManager::endPass(uint pass)
 	nlassert(_Scene);
 	nlassert(_InReflectionRender);
 	nlassert(pass < _Passes.size());
+	if (!_InReflectionRender || pass >= _Passes.size())
+		return;
 	IDriver *drv = _Scene->getDriver();
 
-	_Scene->enableElementRender(UScene::FilterWater, true);
-	_Scene->enableElementRender(UScene::FilterFlare, true);
 	_InReflectionRender = false;
 
 	// Publish for the coming main render of the current view

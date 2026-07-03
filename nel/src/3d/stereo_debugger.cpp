@@ -222,6 +222,7 @@ public:
 // 0 = comparison (default), 1 = left only, 2 = right only
 static int s_StereoDisplayMode = 0;
 
+#if !FINAL_VERSION
 NLMISC_CATEGORISED_COMMAND(nel, stereoDisplayMode, "Set stereo debugger display mode (0=compare, 1=left, 2=right)", "<mode>")
 {
 	if (args.size() != 1) return false;
@@ -229,6 +230,7 @@ NLMISC_CATEGORISED_COMMAND(nel, stereoDisplayMode, "Set stereo debugger display 
 	if (s_StereoDisplayMode < 0 || s_StereoDisplayMode > 2) s_StereoDisplayMode = 0;
 	return true;
 }
+#endif
 
 CStereoDebugger::CStereoDebugger() : m_Driver(NULL), m_Stage(0), m_SubStage(0), m_ReflPass(0), m_LeftTexU(NULL), m_RightTexU(NULL), m_PixelProgram(NULL)
 {
@@ -534,6 +536,12 @@ bool CStereoDebugger::nextPass()
 uint CStereoDebugger::getSceneReflectionPass() const
 {
 	return m_ReflPass;
+}
+
+uint CStereoDebugger::getSceneView() const
+{
+	// Odd stages are the left eye (1=L reflect, 3=L scene)
+	return (m_Stage % 2) ? 0 : 1;
 }
 
 /// Gets the current viewport

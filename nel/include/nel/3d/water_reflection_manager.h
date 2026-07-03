@@ -60,8 +60,9 @@ class ITexture;
  *   endPass(), and finishes with endPasses(). beginPass() binds and
  *   clears the render target, restricts rendering to the active
  *   sub-region, sets the scene camera to the reflected camera and
- *   enables a clip plane slightly below the water surface. Water itself
- *   and flares are excluded via the scene render filters.
+ *   enables a clip plane slightly below the water surface. Water and
+ *   flares exclude themselves at engine level while
+ *   isRenderingReflection() is set.
  * - During the main render, water models query getActiveReflection() by
  *   plane height; when available (and allowed by the shape flag or the
  *   force-all override), the water render uses the reflection texture
@@ -95,7 +96,7 @@ public:
 	/// \name Configuration
 	// @{
 	/// Maximum number of water planes with realtime reflection per frame. -1 = unlimited, 0 = disabled.
-	void			setMaxReflections(sint maxReflections) { _MaxReflections = maxReflections; }
+	void			setMaxReflections(sint maxReflections) { _MaxReflections = maxReflections; if (maxReflections == 0) _HadReflections = false; }
 	sint			getMaxReflections() const { return _MaxReflections; }
 	/// Enable realtime reflection on all water surfaces regardless of the per-shape artist flag.
 	void			setForceReflections(bool force) { _ForceReflections = force; }

@@ -1728,21 +1728,26 @@ bool mainLoop()
 			if (StereoDisplay->wantSceneReflections())
 			{
 				// Render one realtime water reflection pass (one water
-				// plane, one eye) as a replicated scene render, mirroring
-				// this pass's committed eye camera. The eye stages of one
-				// reflection pass are adjacent, so the second eye
+				// plane, one eye) as a replicated render of the main scene,
+				// mirroring this pass's committed eye camera. The eye stages
+				// of one reflection pass are adjacent, so the second eye
 				// re-renders the first eye's traversal (isSceneFirst());
 				// keepTraversals stays true since reflections are never the
 				// frame's last render (the frame's ellapsed time belongs to
-				// the scene renders).
+				// the scene renders). Only the main scene is replicated:
+				// canopy and sky render from their own cameras, which are
+				// not mirrored by the reflection pass.
+				// TODO: mirror the sky scene camera and render the sky into
+				// the reflection instead of the fog-color clear
 				if (!ClientCfg.Light && Render)
 				{
-					Scene->setWaterReflectionView(StereoDisplay->isSceneFirst() ? 0 : 1);
+					Scene->setWaterReflectionView(StereoDisplay->getSceneView());
 					uint reflPass = StereoDisplay->getSceneReflectionPass();
 					UWaterReflectionInfo reflInfo;
 					Scene->beginWaterReflectionPass(reflPass, reflInfo);
-					// TODO: render the sky scene into the reflection
-					doRenderScene(StereoDisplay->isSceneFirst(), true);
+					beginRenderMainScenePart();
+					renderMainScenePart(UScene::RenderAll, StereoDisplay->isSceneFirst(), true);
+					endRenderMainScenePart(true);
 					Scene->endWaterReflectionPass(reflPass);
 				}
 			}
@@ -1767,7 +1772,7 @@ bool mainLoop()
 					}
 
 					// Render scene, with this eye's water reflections
-					Scene->setWaterReflectionView(StereoDisplay->isSceneFirst() ? 0 : 1);
+					Scene->setWaterReflectionView(StereoDisplay->getSceneView());
 					bool wantTraversals = StereoDisplay->isSceneFirst();
 					bool keepTraversals = !StereoDisplay->isSceneLast();
 					doRenderScene(wantTraversals, keepTraversals);

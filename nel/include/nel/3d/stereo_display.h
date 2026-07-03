@@ -145,6 +145,10 @@ public:
 	virtual void setSceneReflectionPasses(uint count) { m_SceneReflectionPasses = count; }
 	/// The current reflection pass index during a wantSceneReflections() stage
 	virtual uint getSceneReflectionPass() const { return 0; }
+	/** The view (eye) index of the current scene or scene reflections
+	  * stage: 0 for the first/only eye, 1 for the second. Used to select
+	  * per-view resources such as water reflections. */
+	virtual uint getSceneView() const { return 0; }
 
 	/// Get the flare context for the current pass (0-3). Different eyes must use different contexts.
 	virtual uint getFlareContext() = 0;

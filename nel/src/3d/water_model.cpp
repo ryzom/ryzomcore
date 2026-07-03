@@ -526,11 +526,13 @@ void	CWaterModel::traverseRender()
 			// per-traversal key advances the waves once per eye
 			sint64 idate = (sint64)getOwnerScene()->getFrameId();
 
+			// The height map user window follows the observer on every
+			// render (apps may render without animating)
+			whm.setUserPos((sint) (obsPos.x * invWaterRatio) - (WaterHeightMapSize >> 1),
+				   (sint) (obsPos.y * invWaterRatio) - (WaterHeightMapSize >> 1)
+				  );
 			if (idate != whm.Date)
 			{
-				whm.setUserPos((sint) (obsPos.x * invWaterRatio) - (WaterHeightMapSize >> 1),
-					   (sint) (obsPos.y * invWaterRatio) - (WaterHeightMapSize >> 1)
-					  );
 				nlassert(getOwnerScene()); // this object should have been created from a CWaterShape!
 				whm.animate((float) (getOwnerScene()->getEllapsedTime()));
 				whm.Date = idate;
@@ -1278,8 +1280,12 @@ uint CWaterModel::getNumWantedVertices()
 	if (reflMgr.wantsSurfaceReports())
 	{
 		CWaterShape *reflShape = NLMISC::safe_cast<CWaterShape *>((IShape *) Shape);
+		// Surfaces that can never use the reflection do not report:
+		// their stats would rank the plane and inflate the shared render
+		// target sub-region for pixels that never sample it
+		const bool mayReflect = reflShape->isRealtimeReflectionEnabled() || reflMgr.getForceReflections();
 		const float planeZ = getWorldMatrix().getPos().z;
-		if (renderTrav.CamPos.z > planeZ)
+		if (mayReflect && renderTrav.CamPos.z > planeZ)
 		{
 			// Project the frustum-clipped poly to screen space [0,1]:
 			// compute the on-screen AABB and area for plane prioritization.
@@ -1843,6 +1849,11 @@ void	CWaterModel::traverseRender()
 bool CWaterModel::clip()
 {
 	H_AUTO( NL3D_Water_Render );
+	// Water must never render into its own reflection. Enforced here at
+	// engine level: render loops (e.g. the client) re-apply their own
+	// scene filter configuration inside the reflection pass, so the
+	// UScene::FilterWater flag cannot carry this invariant.
+	if (getOwnerScene()->getWaterReflectionManager().isRenderingReflection()) return false;
 	CRenderTrav			&renderTrav= getOwnerScene()->getRenderTrav();
 	if (renderTrav.CamPos.z == getWorldMatrix().getPos().z) return false;
 	if(Shape)

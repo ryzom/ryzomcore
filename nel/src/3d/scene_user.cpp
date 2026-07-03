@@ -1188,12 +1188,23 @@ void CSceneUser::fillWaterReflectionInfo(const CWaterReflectionManager::CActiveR
 	}
 	if (!wrapper)
 	{
-		// Bound the graveyard of wrappers for reallocated render targets
-		if (_WaterReflectionTextures.size() >= 32)
+		// Sweep wrappers whose render target was released (the wrapper's
+		// smart pointer is the last reference): keeps reallocated targets
+		// from being pinned in memory, without ever deleting a wrapper the
+		// caller may still hold (those textures stay referenced by the
+		// manager's slots until they are replaced)
+		if (_WaterReflectionTextures.size() >= 8)
 		{
+			std::vector<CTextureUser *> kept;
+			kept.reserve(_WaterReflectionTextures.size());
 			for (uint i = 0; i < _WaterReflectionTextures.size(); ++i)
-				delete _WaterReflectionTextures[i];
-			_WaterReflectionTextures.clear();
+			{
+				if (_WaterReflectionTextures[i]->getITexture()->getRefCount() <= 1)
+					delete _WaterReflectionTextures[i];
+				else
+					kept.push_back(_WaterReflectionTextures[i]);
+			}
+			_WaterReflectionTextures.swap(kept);
 		}
 		wrapper = new CTextureUser(refl.Texture);
 		_WaterReflectionTextures.push_back(wrapper);

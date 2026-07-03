@@ -776,7 +776,7 @@ void CWaterDemo::renderOneFrame()
 			// first eye's traversal. Reflections are never the frame's
 			// last render, so traversals (and the frame's ellapsed time)
 			// are always kept.
-			m_Scene->setWaterReflectionView(display->isSceneFirst() ? 0 : 1);
+			m_Scene->setWaterReflectionView(display->getSceneView());
 			uint reflPass = display->getSceneReflectionPass();
 			UWaterReflectionInfo passInfo;
 			m_Scene->beginWaterReflectionPass(reflPass, passInfo);
@@ -814,7 +814,7 @@ void CWaterDemo::renderOneFrame()
 
 		if (display->wantScene())
 		{
-			m_Scene->setWaterReflectionView(display->isSceneFirst() ? 0 : 1);
+			m_Scene->setWaterReflectionView(display->getSceneView());
 
 			m_Driver->setFrustum(frustum);
 			m_Driver->setViewMatrix(viewMatrix);

@@ -114,6 +114,9 @@ public:
 
 	/// The current reflection pass index during a wantSceneReflections() stage
 	virtual uint getSceneReflectionPass() const;
+
+	/// The view (eye) index of the current scene or reflections stage
+	virtual uint getSceneView() const;
 	/// Is this the last 3D scene of the frame
 	virtual bool isSceneLast();
 	/// Get the flare context for the current pass
