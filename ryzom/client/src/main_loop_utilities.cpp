@@ -197,6 +197,12 @@ void updateFromClientCfg()
 
 	// GRAPHICS - SPECIAL EFFECTS
 	//---------------------------------------------------
+	// Water reflections
+	if (ClientCfg.MaxWaterReflections != LastClientCfg.MaxWaterReflections)
+		Scene->setMaxRealtimeWaterReflections(ClientCfg.MaxWaterReflections);
+	if (ClientCfg.ForceWaterReflections != LastClientCfg.ForceWaterReflections)
+		Scene->setForceRealtimeWaterReflections(ClientCfg.ForceWaterReflections);
+
 	if (ClientCfg.FxNbMaxPoly != LastClientCfg.FxNbMaxPoly)
 	{
 		if (Scene->getGroupLoadMaxPolygon("Fx") != ClientCfg.FxNbMaxPoly)

@@ -2093,6 +2093,7 @@ class CAHInitResLod : public IActionHandler
 		CfgPresetList.push_back(pair<string,bool>("Bloom",					false));
 		CfgPresetList.push_back(pair<string,bool>("SquareBloom",			false));
 		CfgPresetList.push_back(pair<string,bool>("DensityBloom",			true));
+		CfgPresetList.push_back(pair<string,bool>("MaxWaterReflections",	false));
 
 		// Check if all the preset-able cfg-variable are in a preset mode
 		sint nPreset = -1;

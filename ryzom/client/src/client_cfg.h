@@ -298,6 +298,10 @@ struct CClientConfig
 	bool			Bloom;
 	bool			SquareBloom;
 	float			DensityBloom;
+	/// Max number of water pools with realtime planar reflection per frame (0 = off)
+	sint			MaxWaterReflections;
+	/// Dev: force realtime planar reflection on all water surfaces
+	bool			ForceWaterReflections;
 
 	/// Movie Shooter
 	uint			MovieShooterMemory;

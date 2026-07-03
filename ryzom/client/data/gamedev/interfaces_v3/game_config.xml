@@ -391,6 +391,7 @@
 				<instance template="tgcw_checkbox" id="square_bloom" text="uiFxSquareBloom" posparent="bloom" posref="BL TL" x="20" y="-2" />
 				<instance template="tgcw_scrollbarfloat" id="density_bloom" text="uiFxDensityBloom" posparent="square_bloom" posref="BL TL" x="0" y="-2" />
 			</group>
+			<instance template="tgcw_scrollbarint" id="water_refl" text="uiFxMaxWaterReflections" posparent="bloom_gr" posref="BL TL" x="20" y="-12" />
 		</group>
 		<ctrl style="skin_scroll" id="sb_fx" align="T" target="fx" posparent="crop" posref="TL TR" x="-8" y="0" />
 
@@ -784,6 +785,7 @@
 			<param ui="fx:bloom_gr:bloom:c" type="cfg" widget="boolbut" realtime="true" link="Bloom" preset="UI:TEMP:PRESET_FX" />
 			<param ui="fx:bloom_gr:square_bloom:c" type="cfg" widget="boolbut" realtime="true" link="SquareBloom" preset="UI:TEMP:PRESET_FX" />
 			<param ui="fx:bloom_gr:density_bloom:c" type="cfg" widget="sbfloat_round" realtime="true" ui_view="fx:bloom_gr:density_bloom:c_res" link="DensityBloom" preset="UI:TEMP:PRESET_FX" />
+			<param ui="fx:water_refl:c" type="cfg" widget="sbint" realtime="true" ui_view="fx:water_refl:c_res" link="MaxWaterReflections" preset="UI:TEMP:PRESET_FX" />
 
 
 			<!--
