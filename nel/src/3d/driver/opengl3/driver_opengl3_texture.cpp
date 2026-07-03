@@ -1528,12 +1528,17 @@ bool CDriverGL3::activateTexture(uint stage, ITexture *tex)
 		}
 		else
 		{
-			// Force no texturing for this stage. Actually unbind at the GL
-			// level, not just in the cache: a texture left bound here while
-			// it is attached to the active framebuffer is a rendering
-			// feedback loop, and WebGL/ANGLE silently drops such draws.
+			// Force no texturing for this stage. Deliberately cache-only:
+			// the GL binding is left in place (deferred state; avoids bind
+			// churn when materials alternate stage counts, and direct-bound
+			// textures such as shadow maps must survive material stage
+			// disables). The WebGL rendering-feedback-loop invariant (an
+			// FBO-attached texture must not stay bound to a sampler unit)
+			// is established in setRenderTarget, which unbinds all units
+			// through the GL states cache when a render target is bound.
 			_CurrentTextureInfoGL[stage] = NULL;
-			_DriverGLStates.unbindTexture(stage);
+			// setup texture mode, after activeTexture()
+			// FIXME GL3 TEXTUREMODE _DriverGLStates.setTextureMode(CDriverGLStates3::TextureDisabled);
 
 			/*if (_Extensions.ATITextureEnvCombine3)
 			{
