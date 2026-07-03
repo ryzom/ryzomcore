@@ -205,15 +205,31 @@ IF(LUABIND_FOUND)
             Luabind::Luabind
             PROPERTIES
             INTERFACE_INCLUDE_DIRECTORIES "${LUABIND_INCLUDE_DIR}"
-            IMPORTED_LOCATION "${LUABIND_LIBRARY_RELEASE}"
-            IMPORTED_LOCATION_RELEASE "${LUABIND_LIBRARY_RELEASE}"
     )
-    if(${LUABIND_LIBRARY_DEBUG})
+    if(LUABIND_LIBRARY_RELEASE)
+      set_target_properties(
+              Luabind::Luabind
+              PROPERTIES
+              IMPORTED_LOCATION "${LUABIND_LIBRARY_RELEASE}"
+              IMPORTED_LOCATION_RELEASE "${LUABIND_LIBRARY_RELEASE}"
+      )
+    endif ()
+    # NB: if(LUABIND_LIBRARY_DEBUG) without dereference: if(${VAR}) tests the
+    # VALUE (a path) as a constant, which is always false, silently linking
+    # the release runtime into debug builds
+    if(LUABIND_LIBRARY_DEBUG)
       set_target_properties(
               Luabind::Luabind
               PROPERTIES
               IMPORTED_LOCATION_DEBUG "${LUABIND_LIBRARY_DEBUG}"
       )
+      if(NOT LUABIND_LIBRARY_RELEASE)
+        set_target_properties(
+                Luabind::Luabind
+                PROPERTIES
+                IMPORTED_LOCATION "${LUABIND_LIBRARY_DEBUG}"
+        )
+      endif ()
     endif ()
   endif ()
 
