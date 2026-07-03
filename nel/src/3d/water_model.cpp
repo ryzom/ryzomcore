@@ -59,22 +59,23 @@ NLMISC::CRefPtr<IDriver> CWaterModel::_CurrDrv;
 volatile bool forceWaterSimpleRender = false;
 
 //=======================================================================
-void CWaterModel::setupVertexBuffer(CVertexBuffer &vb, uint numWantedVertices, IDriver *drv)
+void CWaterModel::setupVertexBuffer(CVertexBuffer &vb, uint numWantedVertices, IDriver *drv, bool planarUVs)
 {
 	if (!numWantedVertices) return;
-	if (vb.getNumVertices() == 0 || drv != _CurrDrv) // not setupped yet, or driver changed ?
+	// Wanted format: the water-shader path needs positions only, unless
+	// realtime planar reflections are active this frame (per-vertex
+	// reflection UVs in TexCoord0). The non-water-shader path always has UVs.
+	uint16 wantedFormat;
+	if (drv->supportWaterShader() && !planarUVs)
+		wantedFormat = CVertexBuffer::PositionFlag;
+	else
+		wantedFormat = CVertexBuffer::PositionFlag | CVertexBuffer::TexCoord0Flag;
+	if (vb.getNumVertices() == 0 || drv != _CurrDrv || vb.getVertexFormat() != wantedFormat) // not setupped yet, driver or format changed ?
 	{
 		vb.setNumVertices(0);
 		vb.setName("Water");
 		vb.setBufferUsage(CVertexBuffer::FullRewrite, false);
-		if (drv->supportWaterShader())
-		{
-			vb.setVertexFormat(CVertexBuffer::PositionFlag);
-		}
-		else
-		{
-			vb.setVertexFormat(CVertexBuffer::PositionFlag | CVertexBuffer::TexCoord0Flag);
-		}
+		vb.setVertexFormat(wantedFormat);
 		_CurrDrv = drv;
 	}
 	uint numVerts = std::max(numWantedVertices, WATER_MODEL_DEFAULT_NUM_VERTICES);
@@ -97,6 +98,7 @@ CWaterModel::CWaterModel()
 	_Prev = NULL;
 	_Next = NULL;
 	_MatrixUpdateDate = 0;
+	_PlanarReflection = NULL;
 }
 
 //=======================================================================
@@ -913,13 +915,22 @@ void CWaterModel::setupMaterialNVertexShader(IDriver *drv, CWaterShape *shape, c
 	//	setup Water material   //
 	//=========================//
 	shape->initVertexProgram();
-	CVertexProgramWaterVPNoWave *program = shape->_ColorMap ? CWaterShape::_VertexProgramNoWaveDiffuse : CWaterShape::_VertexProgramNoWave;
+	// Realtime planar reflection: reflection UVs come from the vertex buffer
+	// (see fillVBHard) and the reflection texture replaces the envmap
+	const bool planar = _PlanarReflection != NULL;
+	CVertexProgramWaterVPNoWave *program = shape->_ColorMap
+		? (planar ? CWaterShape::_VertexProgramNoWavePlanarDiffuse : CWaterShape::_VertexProgramNoWaveDiffuse)
+		: (planar ? CWaterShape::_VertexProgramNoWavePlanar : CWaterShape::_VertexProgramNoWave);
 	drv->activeVertexProgram(program);
 	CWaterModel::_WaterMat.setTexture(0, shape->_BumpMap[0]);
 	CWaterModel::_WaterMat.setTexture(1, shape->_BumpMap[1]);
 	CWaterModel::_WaterMat.setTexture(3, shape->_ColorMap);
 	CScene *scene = getOwnerScene();
-	if (!above && shape->_EnvMap[1])
+	if (planar)
+	{
+		CWaterModel::_WaterMat.setTexture(2, _PlanarReflection->Texture);
+	}
+	else if (!above && shape->_EnvMap[1])
 	{
 		if (shape->_UsesSceneWaterEnvMap[1] || scene->getForceWaterEnvMap())
 		{
@@ -1247,8 +1258,64 @@ uint CWaterModel::getNumWantedVertices()
 	H_AUTO( NL3D_Water_Render );
 	nlassert(!_ClippedPoly.Vertices.empty());
 	//
-	CRenderTrav					&renderTrav		= getOwnerScene()->getRenderTrav();
+	CScene						*scene = getOwnerScene();
+	CRenderTrav					&renderTrav		= scene->getRenderTrav();
+
+	_PlanarReflection = NULL;
+
 	if (!renderTrav.Perspective || forceWaterSimpleRender) return 0;
+
+	// Realtime planar reflection: report visibility stats and pick up this
+	// frame's reflection for our plane. This runs inside the render
+	// traversal, where the traversal's camera state is up to date (during
+	// the clip traversal, renderTrav.CamPos is still stale from the
+	// previous render — which is the reflection render itself when one ran).
+	// After the perspective/simple-render early-out: the simple water path
+	// ignores planar reflections, so it must not feed the manager either.
+	CWaterReflectionManager &reflMgr = scene->getWaterReflectionManager();
+	if (reflMgr.wantsSurfaceReports())
+	{
+		CWaterShape *reflShape = NLMISC::safe_cast<CWaterShape *>((IShape *) Shape);
+		const float planeZ = getWorldMatrix().getPos().z;
+		if (renderTrav.CamPos.z > planeZ)
+		{
+			// Project the frustum-clipped poly to screen space [0,1]:
+			// compute the on-screen AABB and area for plane prioritization.
+			// Vertices are frustum-clipped already, so no behind-camera guard needed.
+			const NLMISC::CMatrix &worldMat = getWorldMatrix();
+			const NLMISC::CMatrix &projViewMat = renderTrav.ViewMatrix;
+			const float ooW = 1.f / (renderTrav.Right - renderTrav.Left);
+			const float ooH = 1.f / (renderTrav.Top - renderTrav.Bottom);
+			const uint numVerts = (uint)_ClippedPoly.Vertices.size();
+			static std::vector<NLMISC::CVector2f> scr; // scratch, avoids per-frame alloc
+			scr.resize(numVerts);
+			NLMISC::CVector2f scrMin(1.f, 1.f), scrMax(0.f, 0.f);
+			for (uint k = 0; k < numVerts; ++k)
+			{
+				NLMISC::CVector p = projViewMat * (worldMat * _ClippedPoly.Vertices[k]);
+				float invDepth = 1.f / std::max(p.y, renderTrav.Near);
+				scr[k].set(
+					(renderTrav.Near * p.x * invDepth - renderTrav.Left) * ooW,
+					(renderTrav.Near * p.z * invDepth - renderTrav.Bottom) * ooH);
+				scrMin.x = std::min(scrMin.x, scr[k].x); scrMin.y = std::min(scrMin.y, scr[k].y);
+				scrMax.x = std::max(scrMax.x, scr[k].x); scrMax.y = std::max(scrMax.y, scr[k].y);
+			}
+			float area2 = 0.f; // twice the polygon area (shoelace)
+			for (uint k = 0; k < numVerts; ++k)
+			{
+				const NLMISC::CVector2f &a = scr[k];
+				const NLMISC::CVector2f &b = scr[(k + 1) % numVerts];
+				area2 += a.x * b.y - b.x * a.y;
+			}
+			reflMgr.reportVisibleSurface(planeZ, 0.5f * fabsf(area2), scrMin, scrMax,
+				reflShape->isRealtimeReflectionEnabled());
+
+			// Use this frame's reflection if our plane got one
+			if (reflShape->isRealtimeReflectionEnabled() || reflMgr.getForceReflections())
+				_PlanarReflection = reflMgr.getActiveReflection(planeZ);
+		}
+	}
+
 	// viewer pos in world space
 	const NLMISC::CVector &obsPos = renderTrav.CamPos;
 	// view matrix (inverted cam matrix)
@@ -1569,10 +1636,68 @@ void computeWaterVertexHard(float px, float py, CVector &pos, const CVector &cam
 }
 
 // ***********************************************************************************************************
+// Helper to write water vertices to the shared VB. When realtime planar
+// reflections are active this frame, the VB carries a TexCoord0 channel:
+// planar surfaces get the reflection UV (vertex projected through the
+// reflected camera's sub-frustum, scaled to the active RT sub-region);
+// other surfaces write zeros to keep the stride consistent.
+class CWaterVertexWriter
+{
+public:
+	CWaterVertexWriter(uint8 *dest, uint vtxSize,
+		const CWaterReflectionManager::CActiveReflection *planarRefl,
+		const CVector &modelPos)
+		: _Dest(dest), _VtxSize(vtxSize), _PlanarRefl(planarRefl)
+	{
+		if (planarRefl)
+		{
+			// Fold the model position into the world -> reflected camera transform
+			_ToRefl = planarRefl->ReflViewMatrix;
+			_ToRefl.translate(modelPos);
+			const CFrustum &f = planarRefl->ReflFrustum;
+			_UScale = f.Near / (f.Right - f.Left) * planarRefl->UVScale.U;
+			_UBias = -f.Left / (f.Right - f.Left) * planarRefl->UVScale.U;
+			_VScale = f.Near / (f.Top - f.Bottom) * planarRefl->UVScale.V;
+			_VBias = -f.Bottom / (f.Top - f.Bottom) * planarRefl->UVScale.V;
+			_MinDepth = f.Near;
+		}
+	}
+	inline void write(const CVector &pos)
+	{
+		*(CVector *) _Dest = pos;
+		if (_VtxSize > WATER_VERTEX_HARD_SIZE)
+		{
+			float *uv = (float *) (_Dest + WATER_VERTEX_HARD_SIZE);
+			if (_PlanarRefl)
+			{
+				CVector q = _ToRefl * pos;
+				float invDepth = 1.f / std::max(q.y, _MinDepth);
+				uv[0] = q.x * invDepth * _UScale + _UBias;
+				uv[1] = q.z * invDepth * _VScale + _VBias;
+			}
+			else
+			{
+				uv[0] = 0.f;
+				uv[1] = 0.f;
+			}
+		}
+		_Dest += _VtxSize;
+	}
+	inline uint8 *dest() const { return _Dest; }
+private:
+	uint8	*_Dest;
+	uint	_VtxSize;
+	const CWaterReflectionManager::CActiveReflection *_PlanarRefl;
+	CMatrix	_ToRefl;
+	float	_UScale, _UBias, _VScale, _VBias, _MinDepth;
+};
+
+// ***********************************************************************************************************
 uint CWaterModel::fillVBHard(void *datas, uint startTri)
 {
 	_StartTri = (uint32) startTri;
-	CRenderTrav			  &renderTrav		= getOwnerScene()->getRenderTrav();
+	CScene				  *scene = getOwnerScene();
+	CRenderTrav			  &renderTrav		= scene->getRenderTrav();
 	const NLMISC::CMatrix &camMat = renderTrav.CamMatrix;
 	const sint numStepX = CWaterShape::getScreenXGridSize();
 	const sint numStepY = CWaterShape::getScreenYGridSize();
@@ -1580,8 +1705,11 @@ uint CWaterModel::fillVBHard(void *datas, uint startTri)
 	CVector camJ = camMat.getJ();
 	CVector camK = camMat.getK() * (1.f / numStepY) * (renderTrav.Top - renderTrav.Bottom) / renderTrav.Near;
 	float obsZ = camMat.getPos().z;
-	float denom = getWorldMatrix().getPos().z - obsZ;
-	uint8 *dest = (uint8 *) datas + startTri * WATER_VERTEX_HARD_SIZE * 3;
+	const float zHeight = getWorldMatrix().getPos().z;
+	float denom = zHeight - obsZ;
+	const uint vtxSize = scene->getWaterVB().getVertexSize();
+	CWaterVertexWriter writer((uint8 *) datas + startTri * vtxSize * 3, vtxSize, _PlanarReflection,
+		CVector(camMat.getPos().x, camMat.getPos().y, zHeight));
 	if (!_ClippedTriNumVerts.empty())
 	{
 		const CVector2f *currVert =  &_ClippedTris.front();
@@ -1597,12 +1725,9 @@ uint CWaterModel::fillVBHard(void *datas, uint startTri)
 			}
 			for(uint l = 0; l < numVerts - 2; ++l)
 			{
-				*(CVector *) dest = unprojectedTri[0];
-				dest += WATER_VERTEX_HARD_SIZE;
-				*(CVector *) dest = unprojectedTri[l + 1];
-				dest += WATER_VERTEX_HARD_SIZE;
-				*(CVector *) dest = unprojectedTri[l + 2];
-				dest += WATER_VERTEX_HARD_SIZE;
+				writer.write(unprojectedTri[0]);
+				writer.write(unprojectedTri[l + 1]);
+				writer.write(unprojectedTri[l + 2]);
 			}
 		}
 	}
@@ -1621,23 +1746,17 @@ uint CWaterModel::fillVBHard(void *datas, uint startTri)
 				computeWaterVertexHard((float) (x + 1), (float) (y + 1), proj[2], camI, camJ, camK, denom);
 				computeWaterVertexHard((float) x, (float) (y + 1), proj[3], camI, camJ, camK, denom);
 				//
-				*(CVector *) dest = proj[0];
-				dest += WATER_VERTEX_HARD_SIZE;
-				*(CVector *) dest = proj[2];
-				dest += WATER_VERTEX_HARD_SIZE;
-				*(CVector *) dest = proj[1];
-				dest += WATER_VERTEX_HARD_SIZE;
-				*(CVector *) dest = proj[0];
-				dest += WATER_VERTEX_HARD_SIZE;
-				*(CVector *) dest = proj[3];
-				dest += WATER_VERTEX_HARD_SIZE;
-				*(CVector *) dest = proj[2];
-				dest += WATER_VERTEX_HARD_SIZE;
+				writer.write(proj[0]);
+				writer.write(proj[2]);
+				writer.write(proj[1]);
+				writer.write(proj[0]);
+				writer.write(proj[3]);
+				writer.write(proj[2]);
 			}
 		}
 	}
-	nlassert((dest - (uint8 * ) datas) % (3 * WATER_VERTEX_HARD_SIZE) == 0);
-	uint endTri = (uint)(dest - (uint8 * ) datas) / (3 * WATER_VERTEX_HARD_SIZE);
+	nlassert((writer.dest() - (uint8 * ) datas) % (3 * vtxSize) == 0);
+	uint endTri = (uint)(writer.dest() - (uint8 * ) datas) / (3 * vtxSize);
 	_NumTris = endTri - _StartTri;
 	return endTri;
 }

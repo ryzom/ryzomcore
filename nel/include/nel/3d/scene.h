@@ -36,6 +36,7 @@
 #include "nel/3d/light_trav.h"
 #include "nel/3d/render_trav.h"
 #include "nel/3d/flare_model.h"
+#include "nel/3d/water_reflection_manager.h"
 
 #include "nel/3d/viewport.h"
 #include "nel/3d/u_scene.h"
@@ -508,6 +509,9 @@ public:
 
 	//@}
 
+	/// Realtime planar water reflections
+	CWaterReflectionManager			&getWaterReflectionManager() {return _WaterReflectionManager;}
+	const CWaterReflectionManager	&getWaterReflectionManager() const {return _WaterReflectionManager;}
 
 	/// Get a ref. to the particle system manager. You shouldn't call this (has methods for private processing)
 	CParticleSystemManager &getParticleSystemManager();
@@ -701,6 +705,9 @@ private:
 	CLoadBalancingTrav	LoadBalancingTrav;
 	CRenderTrav			RenderTrav;
 	//@}
+
+	// Realtime planar water reflections
+	CWaterReflectionManager	_WaterReflectionManager;
 
 	// The root models (will be deleted by CScene).
 	CTransform			*Root;

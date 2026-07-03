@@ -1,0 +1,207 @@
+/**
+ * \file water_reflection_manager.h
+ * \brief CWaterReflectionManager
+ * \date 2026-07-03
+ * \author Jan Boon (Kaetemi)
+ * CWaterReflectionManager
+ */
+
+// NeL - MMORPG Framework <https://wiki.ryzom.dev/>
+// Copyright (C) 2026  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#ifndef NL3D_WATER_REFLECTION_MANAGER_H
+#define NL3D_WATER_REFLECTION_MANAGER_H
+
+#include <nel/misc/types_nl.h>
+#include <nel/misc/matrix.h>
+#include <nel/misc/smart_ptr.h>
+#include <nel/misc/uv.h>
+#include <nel/misc/vector_2f.h>
+
+#include <nel/3d/frustum.h>
+
+#include <map>
+#include <vector>
+
+namespace NL3D {
+
+class CScene;
+class CCamera;
+class ITexture;
+
+/**
+ * Realtime planar reflections for water surfaces (HL2-era).
+ *
+ * Owned by CScene. Each frame:
+ * - During the main scene render, visible water models report their
+ *   reflection plane (world z), projected screen area, and screen-space
+ *   AABB via reportVisibleSurface().
+ * - Before the next main render (the stereo loop's scene reflections
+ *   pass), renderReflections() ranks the reported planes by screen area
+ *   (with hysteresis in favor of already-active planes), admits up to the
+ *   configured budget, and renders the scene from a mirrored camera into
+ *   a render target per plane, with a clip plane slightly below the
+ *   water surface. Water itself and flares are excluded from these
+ *   renders.
+ * - During the main render, water models query getActiveReflection() by
+ *   plane height; when available (and allowed by the shape flag or the
+ *   force-all override), the water render uses the reflection texture
+ *   with projected UVs instead of the static envmap.
+ *
+ * Render targets use the "fixed mode" strategy validated by the
+ * planar_reflection sample: allocation is derived from the window size
+ * (stable across frames, no reallocation stutter; pow2 rounded down to
+ * bound memory on large screens), while a per-frame active sub-region
+ * sized to the water's screen AABB bounds fill rate. UVs are scaled by
+ * (active / allocation) to address the sub-region.
+ */
+class CWaterReflectionManager
+{
+public:
+	/// Callback to render non-scene content (sky, etc.) into reflections.
+	class IContentCallback
+	{
+	public:
+		virtual ~IContentCallback() {}
+		/** Called after the render target is cleared and the driver
+		 * frustum/view matrices are set up for the reflected camera,
+		 * before the scene render. The clip plane is enabled. Content must
+		 * be rendered into activeViewport (the active sub-region of the
+		 * render target that the reflection UVs sample). */
+		virtual void renderReflectionContent(const NLMISC::CMatrix &reflectedCamWorld, const CFrustum &frustum, const class CViewport &activeViewport) = 0;
+	};
+
+	/// Published reflection state for one water plane, valid for one main render.
+	struct CActiveReflection
+	{
+		NLMISC::CSmartPtr<ITexture>	Texture;
+		NLMISC::CMatrix				ReflViewMatrix;	// world -> reflected camera space
+		CFrustum					ReflFrustum;	// off-center sub-frustum used for the reflection render
+		NLMISC::CUV					UVScale;		// maps sub-frustum [0,1] projection to the active RT sub-region
+		float						PlaneZ;
+	};
+
+	CWaterReflectionManager();
+	~CWaterReflectionManager();
+
+	void			setScene(CScene *scene) { _Scene = scene; }
+
+	/// \name Configuration
+	// @{
+	/// Maximum number of water planes with realtime reflection per frame. -1 = unlimited, 0 = disabled.
+	void			setMaxReflections(sint maxReflections) { _MaxReflections = maxReflections; }
+	sint			getMaxReflections() const { return _MaxReflections; }
+	/// Enable realtime reflection on all water surfaces regardless of the per-shape artist flag.
+	void			setForceReflections(bool force) { _ForceReflections = force; }
+	bool			getForceReflections() const { return _ForceReflections; }
+	/// Render reflections at half resolution (default true)
+	void			setHalfRes(bool halfRes) { _HalfRes = halfRes; }
+	bool			getHalfRes() const { return _HalfRes; }
+	/// Round render target sizes down to powers of two, bounds memory (default true)
+	void			setPow2(bool pow2) { _Pow2 = pow2; }
+	bool			getPow2() const { return _Pow2; }
+	/** Fixed render target allocation from the window size with an active
+	  * sub-region (default true, avoids per-frame reallocation stutter).
+	  * When false, targets are allocated at the active size (dynamic mode). */
+	void			setFixedSize(bool fixedSize) { _FixedSize = fixedSize; }
+	bool			getFixedSize() const { return _FixedSize; }
+	/// Callback for extra content (sky) rendered into each reflection.
+	void			setContentCallback(IContentCallback *cb) { _ContentCallback = cb; }
+	// @}
+
+	/** Report a visible water surface. Called by CWaterModel during the
+	 * main scene render. Screen coordinates are in [0,1] of the main
+	 * camera viewport. */
+	void			reportVisibleSurface(float planeZ, float screenArea,
+						const NLMISC::CVector2f &screenMin, const NLMISC::CVector2f &screenMax,
+						bool shapeAllows);
+
+	/** Render the admitted water plane reflections. Call once per frame
+	 * before the main scene render (in the scene reflections pass), with
+	 * the scene camera already set up for the frame. */
+	void			renderReflections();
+
+	/// \name Queries during the main render
+	// @{
+	/// Returns the active reflection for the given plane height, or NULL.
+	const CActiveReflection	*getActiveReflection(float planeZ) const;
+	/// Returns the active reflection by index (0..getNumActiveReflections()-1), or NULL. For debug display.
+	const CActiveReflection	*getActiveReflectionByIndex(uint index) const;
+	bool			hasActiveReflections() const { return !_Active.empty(); }
+	uint			getNumActiveReflections() const { return (uint)_Active.size(); }
+	/// True while the manager is rendering a reflection pass (guards recursion and stat collection).
+	bool			isRenderingReflection() const { return _InReflectionRender; }
+	/** True when water models should compute and report visibility stats:
+	  * the app has opted in by calling renderReflections() at least once,
+	  * reflections aren't disabled, and no reflection pass is rendering. */
+	bool			wantsSurfaceReports() const { return _CollectionArmed && _MaxReflections != 0 && !_InReflectionRender; }
+	/** True once any reflection has been rendered. Used to keep the shared
+	  * water vertex buffer format stable (with the reflection UV channel)
+	  * instead of reallocating it whenever reflections toggle on and off. */
+	bool			needsPlanarUVs() const { return _HadReflections; }
+	// @}
+
+	/// Release render targets and the internal camera (driver reset / scene teardown).
+	void			release();
+
+private:
+	// Quantize a plane height to a bucket key (1/16 m resolution)
+	static sint32	planeKey(float z) { return (sint32)floorf(z * 16.f + 0.5f); }
+
+	// Per-plane visibility stats collected during the main render
+	struct CPlaneStats
+	{
+		float				PlaneZ;
+		float				Area;		// summed projected screen area
+		NLMISC::CVector2f	Min, Max;	// united screen AABB, [0,1]
+		bool				Allowed;	// at least one surface with the artist flag
+	};
+
+	// One reflection render target slot
+	struct CSlot
+	{
+		NLMISC::CSmartPtr<ITexture>	Texture;
+		uint						AllocW, AllocH;
+		CSlot() : AllocW(0), AllocH(0) {}
+	};
+
+	void			renderPlane(CCamera *mainCam, const CPlaneStats &stats, CSlot &slot, CActiveReflection &out);
+	CCamera			*getReflCamera();
+
+	CScene								*_Scene;
+	sint								_MaxReflections;
+	bool								_ForceReflections;
+	bool								_HalfRes;
+	bool								_Pow2;
+	bool								_FixedSize;
+	IContentCallback					*_ContentCallback;
+	bool								_InReflectionRender;
+	bool								_CollectionArmed;
+	bool								_HadReflections;
+
+	std::map<sint32, CPlaneStats>		_Collected;	// stats from the current main render
+	std::map<sint32, CActiveReflection>	_Active;	// published reflections for the current main render
+	std::vector<sint32>					_PrevAdmitted; // hysteresis: planes admitted last frame
+	std::vector<CSlot>					_Slots;
+	CCamera								*_ReflCamera;
+
+}; /* class CWaterReflectionManager */
+
+} /* namespace NL3D */
+
+#endif /* #ifndef NL3D_WATER_REFLECTION_MANAGER_H */
+
+/* end of file */

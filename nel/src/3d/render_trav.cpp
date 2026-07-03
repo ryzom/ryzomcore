@@ -398,7 +398,8 @@ void		CRenderTrav::traverse(UScene::TRenderPart renderPart, bool newRender, bool
 			}
 			if (numWantedVertices != 0)
 			{
-				CWaterModel::setupVertexBuffer(Scene->getWaterVB(), numWantedVertices, getDriver());
+				CWaterModel::setupVertexBuffer(Scene->getWaterVB(), numWantedVertices, getDriver(),
+					Scene->getWaterReflectionManager().needsPlanarUVs());
 				//
 				{
 					CVertexBufferReadWrite vbrw;

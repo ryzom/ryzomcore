@@ -69,13 +69,14 @@ public:
 		uint DiffuseMapVector0;
 		uint DiffuseMapVector1;
 	};
-	CVertexProgramWaterVPNoWave(bool diffuse);
+	CVertexProgramWaterVPNoWave(bool diffuse, bool planar = false);
 	virtual ~CVertexProgramWaterVPNoWave() { }
 	virtual void buildInfo();
 	inline const CIdx &idx() const { return m_Idx; }
 private:
 	CIdx m_Idx;
 	bool m_Diffuse;
+	bool m_Planar;
 };
 
 /**
@@ -230,6 +231,11 @@ public:
 	// Use envmap computed from scene instead of user envmap
 	void				setUseSceneWaterEnvMap(uint index, bool enable) { nlassert(index < 2); _UsesSceneWaterEnvMap[index] = enable; }
 	bool				getUseSceneWaterEnvMap(uint index) const { nlassert(index < 2); return _UsesSceneWaterEnvMap[index]; }
+	/** Artist flag: this surface may use a realtime planar reflection instead
+	  * of the envmap, subject to the scene's water reflection budget.
+	  * See CWaterReflectionManager. */
+	void				enableRealtimeReflection(bool enable) { _RealtimeReflection = enable; }
+	bool				isRealtimeReflectionEnabled() const { return _RealtimeReflection; }
 	//@}
 	// TMP : get mean color of over envmap
 	CRGBA				computeEnvMapMeanColor();
@@ -263,6 +269,7 @@ private:
 	float								_WaveHeightFactor;
 	bool								_ComputeLightmap;
 	bool								_SplashEnabled;
+	bool								_RealtimeReflection;
 	bool								_HeightMapTouch[2];
 	float								_HeightMapNormalizationFactor[2];
 
@@ -287,6 +294,8 @@ private:
 	//
 	static NLMISC::CSmartPtr<CVertexProgramWaterVPNoWave>    _VertexProgramNoWave; // STATIC GPU RESOURCE: Blocks multiple driver instances
 	static NLMISC::CSmartPtr<CVertexProgramWaterVPNoWave>    _VertexProgramNoWaveDiffuse; // STATIC GPU RESOURCE: Blocks multiple driver instances
+	static NLMISC::CSmartPtr<CVertexProgramWaterVPNoWave>    _VertexProgramNoWavePlanar; // STATIC GPU RESOURCE: Blocks multiple driver instances
+	static NLMISC::CSmartPtr<CVertexProgramWaterVPNoWave>    _VertexProgramNoWavePlanarDiffuse; // STATIC GPU RESOURCE: Blocks multiple driver instances
 
 	// Water VP UBO (bump map params, observer, etc.)
 	struct CWaterVPUBOOffsets

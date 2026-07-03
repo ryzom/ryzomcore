@@ -84,6 +84,19 @@ protected:
 	TWaitingIGList		  _WaitingIGs;
 	UWaterEnvMap		  *_WaterEnvMap;
 
+	// Adapts the U-level water reflection content callback to the internal manager callback
+	class CWaterReflectionContentAdapter : public CWaterReflectionManager::IContentCallback
+	{
+	public:
+		CWaterReflectionContentAdapter() : SceneUser(NULL), UserCallback(NULL) {}
+		virtual void renderReflectionContent(const NLMISC::CMatrix &reflectedCamWorld, const CFrustum &frustum, const CViewport &activeViewport);
+		CSceneUser						*SceneUser;
+		UWaterReflectionContentCallback	*UserCallback;
+	};
+	CWaterReflectionContentAdapter	_WaterReflectionContentAdapter;
+	// U-level texture wrappers for water reflection debug info
+	std::vector<CTextureUser *>		_WaterReflectionDebugTextures;
+
 public:
 
 	/// \name Object
@@ -308,6 +321,24 @@ public:
 	virtual void		  updateWaterEnvMaps(TGlobalAnimationTime time);
 	virtual void		  setForceWaterEnvMap(bool force) { _Scene.setForceWaterEnvMap(force); }
 	virtual bool		  getForceWaterEnvMap() const { return _Scene.getForceWaterEnvMap(); }
+	// @}
+
+	/// \name Realtime planar water reflections
+	// @{
+	virtual void		  setMaxRealtimeWaterReflections(sint maxCount) { _Scene.getWaterReflectionManager().setMaxReflections(maxCount); }
+	virtual sint		  getMaxRealtimeWaterReflections() const { return _Scene.getWaterReflectionManager().getMaxReflections(); }
+	virtual void		  setForceRealtimeWaterReflections(bool force) { _Scene.getWaterReflectionManager().setForceReflections(force); }
+	virtual bool		  getForceRealtimeWaterReflections() const { return _Scene.getWaterReflectionManager().getForceReflections(); }
+	virtual void		  renderWaterReflections();
+	virtual uint		  getNumActiveWaterReflections() const { return _Scene.getWaterReflectionManager().getNumActiveReflections(); }
+	virtual bool		  getActiveWaterReflectionInfo(uint index, UWaterReflectionInfo &info);
+	virtual void		  setWaterReflectionHalfRes(bool halfRes) { _Scene.getWaterReflectionManager().setHalfRes(halfRes); }
+	virtual bool		  getWaterReflectionHalfRes() const { return _Scene.getWaterReflectionManager().getHalfRes(); }
+	virtual void		  setWaterReflectionPow2(bool pow2) { _Scene.getWaterReflectionManager().setPow2(pow2); }
+	virtual bool		  getWaterReflectionPow2() const { return _Scene.getWaterReflectionManager().getPow2(); }
+	virtual void		  setWaterReflectionFixedSize(bool fixedSize) { _Scene.getWaterReflectionManager().setFixedSize(fixedSize); }
+	virtual bool		  getWaterReflectionFixedSize() const { return _Scene.getWaterReflectionManager().getFixedSize(); }
+	virtual void		  setWaterReflectionContentCallback(UWaterReflectionContentCallback *cb);
 	// @}
 
 public:

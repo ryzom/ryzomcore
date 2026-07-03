@@ -22,6 +22,7 @@
 
 #include "nel/misc/types_nl.h"
 #include "nel/misc/quat.h"
+#include "nel/misc/matrix.h"
 #include "animation_time.h"
 #include <map>
 
@@ -80,6 +81,37 @@ public:
 	virtual ~ILandscapePolyDrawingCallback() {}
 	virtual void beginPolyDrawing() = 0;
 	virtual void endPolyDrawing() = 0;
+};
+
+class UDriver;
+class CFrustum;
+class UTexture;
+
+// callback to render extra (non-scene) content into realtime water reflections, e.g. the sky
+class UWaterReflectionContentCallback
+{
+public:
+	virtual ~UWaterReflectionContentCallback() {}
+	/** Called for each water reflection render, after the render target is
+	  * cleared and before the scene render. The driver frustum and view
+	  * matrices are set up for the reflected camera; the clip plane at the
+	  * water surface is enabled. */
+	virtual void renderReflectionContent(UDriver &driver, const NLMISC::CMatrix &reflectedCamWorld, const CFrustum &frustum) = 0;
+};
+
+// debug/display info for an active realtime water reflection
+struct UWaterReflectionInfo
+{
+	/// Reflection render target texture (owned by the scene; valid until the next reflection render)
+	UTexture		*Texture;
+	/// World -> reflected camera space matrix
+	NLMISC::CMatrix	ReflViewMatrix;
+	/// Off-center sub-frustum used for the reflection render (Left, Right, Bottom, Top, Near, Far)
+	float			FrustumLeft, FrustumRight, FrustumBottom, FrustumTop, FrustumNear, FrustumFar;
+	/// Maps the sub-frustum's [0,1] projection onto the render target's active sub-region
+	float			UScale, VScale;
+	/// Water plane height
+	float			PlaneZ;
 };
 
 
@@ -649,6 +681,39 @@ public:
 	/// Force all water surfaces in the scene to use the scene water envmap
 	virtual void		  setForceWaterEnvMap(bool force) = 0;
 	virtual bool		  getForceWaterEnvMap() const = 0;
+	// @}
+
+	/// \name Realtime planar water reflections
+	// @{
+	/** Maximum number of water planes rendered with realtime planar reflection
+	  * per frame, largest on-screen planes prioritized.
+	  * -1 = unlimited, 0 = realtime reflections disabled (default -1). */
+	virtual void		  setMaxRealtimeWaterReflections(sint maxCount) = 0;
+	virtual sint		  getMaxRealtimeWaterReflections() const = 0;
+	/// Enable realtime reflection on all water surfaces regardless of the per-shape artist flag
+	virtual void		  setForceRealtimeWaterReflections(bool force) = 0;
+	virtual bool		  getForceRealtimeWaterReflections() const = 0;
+	/** Render the water reflections for this frame. Call once per frame
+	  * before the scene render (in the scene reflections pass of the render
+	  * loop), with the scene camera already set up for the frame. */
+	virtual void		  renderWaterReflections() = 0;
+	/// Number of water planes with an active realtime reflection this frame
+	virtual uint		  getNumActiveWaterReflections() const = 0;
+	/// Debug/display info for an active reflection (index 0..getNumActiveWaterReflections()-1)
+	virtual bool		  getActiveWaterReflectionInfo(uint index, UWaterReflectionInfo &info) = 0;
+	/// Render reflections at half resolution (default true)
+	virtual void		  setWaterReflectionHalfRes(bool halfRes) = 0;
+	virtual bool		  getWaterReflectionHalfRes() const = 0;
+	/// Round reflection render target sizes down to powers of two (default true)
+	virtual void		  setWaterReflectionPow2(bool pow2) = 0;
+	virtual bool		  getWaterReflectionPow2() const = 0;
+	/// Fixed window-derived render target allocation with active sub-region (default true); false = dynamic allocation
+	virtual void		  setWaterReflectionFixedSize(bool fixedSize) = 0;
+	virtual bool		  getWaterReflectionFixedSize() const = 0;
+	/** Set a callback that renders extra (non-scene) content into each water
+	  * reflection, e.g. the sky. Called with the driver frustum and view
+	  * matrices set up for the reflected camera. */
+	virtual void		  setWaterReflectionContentCallback(UWaterReflectionContentCallback *cb) = 0;
 	// @}
 };
 
