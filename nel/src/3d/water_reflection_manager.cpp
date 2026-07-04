@@ -424,6 +424,14 @@ void CWaterReflectionManager::beginPass(uint pass, CActiveReflection &out)
 	drv->clear2D(clearColor);
 	drv->clearZBuffer();
 
+	// The pass renders RGB only: the water shader uses the reflection
+	// texture's ALPHA as its reflection blend factor (the envmap it
+	// replaces encodes angle transparency there), while scene content
+	// writes meaningless destination alpha (opaque meshes write 0 and
+	// punch holes, landscape near/far blending writes fractions). The
+	// cleared alpha is the water's uniform reflectivity.
+	drv->setColorMask(true, true, true, false);
+
 	// Restrict rendering to the active sub-region
 	CViewport activeVP;
 	activeVP.init(0.f, 0.f, vpW, vpH);
@@ -488,6 +496,7 @@ void CWaterReflectionManager::endPass(uint pass)
 	ensureCurrentView().Active[_Passes[pass].Key] = _Passes[pass].Refl;
 
 	// Restore scene and driver state
+	drv->setColorMask(true, true, true, true);
 	_Scene->getClipTrav().setClusterVisibilityPosOverride(false);
 	drv->enableClipPlane(0, false);
 	drv->setRenderTarget(_SaveRenderTarget);
