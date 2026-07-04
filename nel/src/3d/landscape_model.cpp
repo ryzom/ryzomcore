@@ -198,7 +198,28 @@ void	CLandscapeModel::clipAndRenderLandscape()
 
 	// Use the Clustered pyramid for Patch, but Frustum pyramid for TessBlocks.
 	// We are sure that pyramid has normalized plane normals.
-	Landscape.clip(refineCenter, ClusteredPyramid);
+	// Water reflection renders: the landscape vertex program does not
+	// implement the water clip plane (nelvp-converted programs emit no
+	// clip distances), so underwater terrain renders into the reflection
+	// as a huge dark shape (the mirrored camera sits below the surface,
+	// close to the lake bed). Cull it at patch level: append the water
+	// plane to the clip pyramid so fully submerged patches are dropped.
+	// Patches straddling the waterline keep their submerged part
+	// (TessBlock clipping has a fixed plane count).
+	float reflPlaneZ;
+	if (getOwnerScene()->getWaterReflectionManager().getRenderingReflectionPlaneZ(reflPlaneZ))
+	{
+		static std::vector<CPlane> reflPyramid;
+		reflPyramid = ClusteredPyramid;
+		CPlane waterPlane;
+		waterPlane.make(CVector(0.f, 0.f, -1.f), CVector(0.f, 0.f, reflPlaneZ));
+		reflPyramid.push_back(waterPlane);
+		Landscape.clip(refineCenter, reflPyramid);
+	}
+	else
+	{
+		Landscape.clip(refineCenter, ClusteredPyramid);
+	}
 
 
 	// Render

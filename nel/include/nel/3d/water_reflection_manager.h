@@ -168,6 +168,8 @@ public:
 	uint			getNumActiveReflections() const { const CView *v = currentView(); return v ? (uint)v->Active.size() : 0; }
 	/// True while the manager is rendering a reflection pass (guards recursion and stat collection).
 	bool			isRenderingReflection() const { return _InReflectionRender; }
+	/// When a reflection pass is rendering, returns true and sets planeZ to its water plane height.
+	bool			getRenderingReflectionPlaneZ(float &planeZ) const { if (!_InReflectionRender) return false; planeZ = _CurrentPassPlaneZ; return true; }
 	/** True while ANY scene's reflection pass is rendering. Content that
 	  * lives in auxiliary scenes rendered into a reflection (e.g. the sun
 	  * flare in the sky scene) must check this rather than its own scene's
@@ -235,6 +237,7 @@ private:
 	bool								_InReflectionRender;
 	bool								_CollectionArmed;
 	bool								_HadReflections;
+	float								_CurrentPassPlaneZ; // water plane height of the pass being rendered
 	uint								_CurrentView;
 
 	std::map<sint32, CPlaneStats>		_Collected;	// stats from the current main render, merged across views

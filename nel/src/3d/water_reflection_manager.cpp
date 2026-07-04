@@ -84,6 +84,7 @@ CWaterReflectionManager::CWaterReflectionManager()
 	, _InReflectionRender(false)
 	, _CollectionArmed(false)
 	, _HadReflections(false)
+	, _CurrentPassPlaneZ(0.f)
 	, _CurrentView(0)
 	, _ReflCamera(NULL)
 	, _SaveCam(NULL)
@@ -481,6 +482,7 @@ void CWaterReflectionManager::beginPass(uint pass, CActiveReflection &out)
 	// engine level, since render loops re-apply their own scene filters
 	// inside the pass) and water models don't report visibility stats
 	_InReflectionRender = true;
+	_CurrentPassPlaneZ = planeZ;
 	++_AnyReflectionRenderCount;
 	_HadReflections = true;
 
