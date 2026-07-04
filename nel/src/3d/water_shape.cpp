@@ -494,7 +494,7 @@ static CVertexProgram *BuildWaterVP(bool diffuseMap, bool bumpMap, bool use2Bump
 /*
  * Constructor
  */
-CWaterShape::CWaterShape() :  _WaterPoolID(0), _TransitionRatio(0.6f), _WaveHeightFactor(3), _ComputeLightmap(false), _SplashEnabled(true), _RealtimeReflection(false), _ReflFresnelBias(0.15f), _ReflFresnelScale(1.1f), _ReflFresnelPower(2.f)
+CWaterShape::CWaterShape() :  _WaterPoolID(0), _TransitionRatio(0.6f), _WaveHeightFactor(3), _ComputeLightmap(false), _SplashEnabled(true), _RealtimeReflection(false), _ReflFresnelBias(0.15f), _ReflFresnelScale(0.85f), _ReflFresnelPower(2.f)
 {
 	/* ***********************************************
 	 *	WARNING: This Class/Method must be thread-safe (ctor/dtor/serial): no static access for instance
