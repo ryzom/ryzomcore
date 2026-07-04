@@ -28,7 +28,6 @@
 #include "nel/3d/render_trav.h"
 #include "nel/3d/occlusion_query.h"
 #include "nel/3d/mesh.h"
-#include "nel/3d/shape_bank.h"
 #include "nel/3d/viewport.h"
 #include "nel/3d/debug_vb.h"
 
@@ -259,28 +258,6 @@ void	CFlareModel::traverseRender()
 				// and that is used for the sole purpose of the occlusion query)
 				_Scene->insertInOcclusionQueryList(this);
 			}
-		}
-		// TEMP DIAGNOSTIC (sun flare fade freeze while reflections active):
-		// trace the occlusion state machine of every flare, one line per
-		// flare per context every 64 frames. Remove when resolved.
-		if ((currFrame & 63) == 0)
-		{
-			IOcclusionQuery *checkedOQ = _OcclusionQuery[flareContext][OcclusionTestFrameDelay - 1];
-			IOcclusionQuery *checkedDQ = _DrawQuery[flareContext][OcclusionTestFrameDelay - 1];
-			static const char *typeNames[] = { "n/a", "occl", "vis" };
-			CViewport vp;
-			drv->getViewport(vp);
-			const std::string *shapeName = _Scene->getShapeBank() ? _Scene->getShapeBank()->getShapeNameFromShapePtr(Shape) : NULL;
-			nlinfo("FLAREDBG %s(%p) ctx=%u frm=%u inf=%d cont=%d int=[%u,%u] oq=%s dq=%s mesh=%d issue=%d retr=%d ratio=%.2f intens=%.2f nfrm=%u scr=(%d,%d) vp=(%.2f,%.2f,%.2f,%.2f)",
-				shapeName ? shapeName->c_str() : "?", this,
-				flareContext, (uint)currFrame, (int)fs->getFlareAtInfiniteDist(),
-				(int)(_LastRenderIntervalEnd[flareContext] + 1 == currFrame),
-				(uint)_LastRenderIntervalBegin[flareContext], (uint)_LastRenderIntervalEnd[flareContext],
-				checkedOQ ? typeNames[checkedOQ->getOcclusionType()] : "null",
-				checkedDQ ? typeNames[checkedDQ->getOcclusionType()] : "null",
-				occlusionTestMesh ? 1 : 0, (int)issueNewQuery, (int)visibilityRetrieved,
-				visibilityRatio, _Intensity[flareContext], (uint)_NumFrameForOcclusionQuery[flareContext],
-				(int)xPos, (int)yPos, vp.getX(), vp.getY(), vp.getWidth(), vp.getHeight());
 		}
 	}
 	else
