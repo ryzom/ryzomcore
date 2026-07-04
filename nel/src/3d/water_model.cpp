@@ -1673,10 +1673,13 @@ void computeWaterVertexHard(float px, float py, CVector &pos, const CVector &cam
 // blends the reflection by alpha = lerp(base, 1, reflection luminance) — the
 // luminance term reproduces the original assets' luminance-derived envmap
 // alpha (Fyros day map: alpha = lerp(0.37, 1, lum)). The base follows an
-// HL2-era stylized fresnel: F = clamp(bias + scale * (1 - cosTheta)^2, 0, 1).
+// HL2-era stylized fresnel: F = clamp(bias + scale * (1 - cosTheta)^power).
 // scale = 0 gives the flat, view-independent original look (bias 0.37).
-volatile float WaterplanarReflFresnelBias = 0.15f;
-volatile float WaterplanarReflFresnelScale = 1.1f;
+// Keep scale <= 1 - bias so full mirror is reached only at true grazing;
+// higher power pushes the transition farther out.
+volatile float WaterplanarReflFresnelBias = 0.12f;
+volatile float WaterplanarReflFresnelScale = 0.88f;
+volatile float WaterplanarReflFresnelPower = 3.f;
 
 // ***********************************************************************************************************
 // Helper to write water vertices to the shared VB. When realtime planar
@@ -1710,6 +1713,7 @@ public:
 			_CamHeight2 = _CamHeight * _CamHeight;
 			_FresnelBias = WaterplanarReflFresnelBias;
 			_FresnelScale = WaterplanarReflFresnelScale;
+			_FresnelPower = WaterplanarReflFresnelPower;
 		}
 	}
 	inline void write(const CVector &pos)
@@ -1731,7 +1735,7 @@ public:
 					// view cosine to the (flat) surface comes cheap
 					float cosT = _CamHeight / sqrtf(pos.x * pos.x + pos.y * pos.y + _CamHeight2);
 					float t = 1.f - cosT;
-					float f = _FresnelBias + _FresnelScale * t * t;
+					float f = _FresnelBias + _FresnelScale * powf(t, _FresnelPower);
 					uv[2] = std::min(1.f, std::max(0.f, f));
 				}
 			}
@@ -1751,7 +1755,7 @@ private:
 	CMatrix	_ToRefl;
 	float	_UScale, _UBias, _VScale, _VBias, _MinDepth;
 	float	_CamHeight, _CamHeight2;
-	float	_FresnelBias, _FresnelScale;
+	float	_FresnelBias, _FresnelScale, _FresnelPower;
 };
 
 // ***********************************************************************************************************
