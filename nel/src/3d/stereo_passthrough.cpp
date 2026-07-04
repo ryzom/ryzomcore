@@ -161,7 +161,10 @@ bool CStereoPassthrough::isSceneLast()
 
 uint CStereoPassthrough::getFlareContext()
 {
-	return 0;
+	// Water reflection passes have their own occlusion context: their
+	// queries test the mirrored view's depth, and sharing the eye's
+	// context would cross-feed fade state between the views
+	return m_Stage == 1 ? 1 : 0;
 }
 
 bool CStereoPassthrough::beginRenderTarget()

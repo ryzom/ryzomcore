@@ -626,7 +626,12 @@ bool CStereoDebugger::isSceneLast()
 
 uint CStereoDebugger::getFlareContext()
 {
-	// Odd stages (1,3,5) = left eye → context 0, even stages (2,4) = right eye → context 2
+	// Odd stages = left eye, even stages = right eye. Scene stages use
+	// contexts 0/2; the water reflection stages (1, 2) use their own
+	// contexts 1/3: their occlusion queries test the mirrored view's
+	// depth and must not cross-feed the eyes' fade state.
+	if (m_Stage <= 2)
+		return (m_Stage % 2) ? 1 : 3;
 	return (m_Stage % 2) ? 0 : 2;
 }
 

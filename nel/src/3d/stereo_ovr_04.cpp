@@ -810,6 +810,10 @@ bool CStereoOVR::isSceneLast()
 
 uint CStereoOVR::getFlareContext()
 {
+	// Eyes use contexts 0/2; the water reflection stages (21, 22) use
+	// their own contexts 1/3 (mirrored-view occlusion, own fade state)
+	if (m_Stage >= 21)
+		return (m_Stage % 2) ? 1 : 3;
 	return (m_Stage % 2) ? 0 : 2;
 }
 

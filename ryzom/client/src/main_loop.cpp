@@ -1715,8 +1715,15 @@ bool mainLoop()
 			// Commit camera changes
 			commitCamera();
 
-			// Set flare context for this pass (separate context per eye for stereo)
+			// Set flare context for this pass (separate context per eye for
+			// stereo, and per water reflection pass — reflected flares keep
+			// their own occlusion state). The sun flare lives in the sky
+			// scene: it needs the context too.
 			Scene->setFlareContext(StereoDisplay->getFlareContext());
+			if (s_SkyMode == NewSky && ContinentMngr.cur())
+				ContinentMngr.cur()->CurrentSky.getScene()->setFlareContext(StereoDisplay->getFlareContext());
+			if (SceneRoot)
+				SceneRoot->setFlareContext(StereoDisplay->getFlareContext());
 
 			//////////////////////////
 			// RENDER THE FRAME  3D //
