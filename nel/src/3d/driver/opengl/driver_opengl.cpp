@@ -1988,13 +1988,14 @@ static const char *WaterCodeForARBFragmentProgram =
 "MUL result.color, R0, R1;\n"
 "END\n";
 
-// Realtime planar reflection variants: texture 2 is the reflection RT; the
+// Calculated reflectivity variants: texture 2 is a reflection (realtime
+// planar RT or artist envmap, alpha channel ignored); the
 // blend alpha is the per-vertex reflectivity base (fragment.texcoord[2].z,
 // the shape's stylized fresnel) boosted by the reflection's gamma-space
 // luma, reproducing the original assets' luminance-derived envmap alpha.
 
-// Planar, no diffuse, no fog
-static const char *WaterCodePlanarNoDiffuseForARBFragmentProgram =
+// Calculated reflectivity, no diffuse, no fog
+static const char *WaterCodeCalcNoDiffuseForARBFragmentProgram =
 "!!ARBfp1.0\n"
 "OPTION ARB_precision_hint_nicest;\n"
 "PARAM c[3] = { program.env[0..1], { 0.2126, 0.7152, 0.0722, 1 } };\n"
@@ -2013,8 +2014,8 @@ static const char *WaterCodePlanarNoDiffuseForARBFragmentProgram =
 "MOV result.color, R0;\n"
 "END\n";
 
-// Planar, no diffuse, with fog
-static const char *WaterCodePlanarNoDiffuseWithFogForARBFragmentProgram =
+// Calculated reflectivity, no diffuse, with fog
+static const char *WaterCodeCalcNoDiffuseWithFogForARBFragmentProgram =
 "!!ARBfp1.0\n"
 "OPTION ARB_precision_hint_nicest;\n"
 "PARAM c[5] = { program.env[0..2], state.fog.color, { 0.2126, 0.7152, 0.0722, 1 } };\n"
@@ -2035,8 +2036,8 @@ static const char *WaterCodePlanarNoDiffuseWithFogForARBFragmentProgram =
 "MAD result.color, R1.x, R0, c[3];\n"
 "END\n";
 
-// Planar, with diffuse, no fog
-static const char *WaterCodePlanarForARBFragmentProgram =
+// Calculated reflectivity, with diffuse, no fog
+static const char *WaterCodeCalcForARBFragmentProgram =
 "!!ARBfp1.0\n"
 "OPTION ARB_precision_hint_nicest;\n"
 "PARAM c[3] = { program.env[0..1], { 0.2126, 0.7152, 0.0722, 1 } };\n"
@@ -2057,8 +2058,8 @@ static const char *WaterCodePlanarForARBFragmentProgram =
 "MUL result.color, R0, R1;\n"
 "END\n";
 
-// Planar, with diffuse, with fog
-static const char *WaterCodePlanarWithFogForARBFragmentProgram =
+// Calculated reflectivity, with diffuse, with fog
+static const char *WaterCodeCalcWithFogForARBFragmentProgram =
 "!!ARBfp1.0\n"
 "OPTION ARB_precision_hint_nicest;\n"
 "PARAM c[5] = { program.env[0..2], state.fog.color, { 0.2126, 0.7152, 0.0722, 1 } };\n"
@@ -2206,17 +2207,17 @@ void CDriverGL::initFragmentShaders()
 		if (ok)
 		{
 			nlinfo("WATER: ARB_fragment_program OK, Use it");
-			// Realtime planar reflection variants (optional: planar draws
-			// fall back to the flat reflection alpha if unavailable)
-			ARBWaterShader[4] = loadARBFragmentProgramStringNative(WaterCodePlanarNoDiffuseForARBFragmentProgram, _ForceNativeFragmentPrograms);
-			ARBWaterShader[5] = loadARBFragmentProgramStringNative(WaterCodePlanarNoDiffuseWithFogForARBFragmentProgram, _ForceNativeFragmentPrograms);
-			ARBWaterShader[6] = loadARBFragmentProgramStringNative(WaterCodePlanarForARBFragmentProgram, _ForceNativeFragmentPrograms);
-			ARBWaterShader[7] = loadARBFragmentProgramStringNative(WaterCodePlanarWithFogForARBFragmentProgram, _ForceNativeFragmentPrograms);
+			// Calculated reflectivity variants (optional: such draws fall
+			// back to the flat reflection alpha if unavailable)
+			ARBWaterShader[4] = loadARBFragmentProgramStringNative(WaterCodeCalcNoDiffuseForARBFragmentProgram, _ForceNativeFragmentPrograms);
+			ARBWaterShader[5] = loadARBFragmentProgramStringNative(WaterCodeCalcNoDiffuseWithFogForARBFragmentProgram, _ForceNativeFragmentPrograms);
+			ARBWaterShader[6] = loadARBFragmentProgramStringNative(WaterCodeCalcForARBFragmentProgram, _ForceNativeFragmentPrograms);
+			ARBWaterShader[7] = loadARBFragmentProgramStringNative(WaterCodeCalcWithFogForARBFragmentProgram, _ForceNativeFragmentPrograms);
 			for (uint k = 4; k < 8; ++k)
 			{
 				if (!ARBWaterShader[k])
 				{
-					nlwarning("WATER: planar reflection fragment %d not loaded, planar water keeps the flat reflection alpha", k);
+					nlwarning("WATER: calculated reflectivity fragment %d not loaded, keeping the flat reflection alpha", k);
 					for (uint l = 4; l < 8; ++l)
 					{
 						if (ARBWaterShader[l])

@@ -953,7 +953,7 @@ void CWaterModel::setupMaterialNVertexShader(IDriver *drv, CWaterShape *shape, c
 	// Planar draws derive the blend alpha from the per-vertex reflectivity
 	// base and the reflection luminance (drivers select a water FP variant
 	// on this flag); envmap draws keep the legacy texture-alpha semantics
-	CWaterModel::_WaterMat.setWaterPlanarReflection(planar);
+	CWaterModel::_WaterMat.setWaterCalcReflectivity(planar);
 	CScene *scene = getOwnerScene();
 	if (planar)
 	{

@@ -2680,11 +2680,11 @@ private:
 	CD3DShaderFX					_ShaderCloud;
 	CD3DShaderFX					_ShaderWaterNoDiffuse;
 	CD3DShaderFX					_ShaderWaterDiffuse;
-	// Realtime planar reflection variants (ps_2_0 derives the blend alpha
+	// Calculated reflectivity variants (ps_2_0 derives the blend alpha
 	// from the per-vertex reflectivity base + reflection luma; the ps_1_x
 	// techniques keep the flat reflection alpha)
-	CD3DShaderFX					_ShaderWaterPlanarNoDiffuse;
-	CD3DShaderFX					_ShaderWaterPlanarDiffuse;
+	CD3DShaderFX					_ShaderWaterCalcNoDiffuse;
+	CD3DShaderFX					_ShaderWaterCalcDiffuse;
 
 
 	// Backup frame buffer

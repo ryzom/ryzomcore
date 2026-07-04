@@ -3237,15 +3237,15 @@ technique technique_water_no_diffuse_1_1							\n\
 																	\n\
 ";
 
-// Realtime planar reflection variants of the water effects: the ps_2_0
+// Calculated reflectivity variants of the water effects: the ps_2_0
 // technique derives the blend alpha from the per-vertex reflectivity base
 // (TEXCOORD2.z, the shape's stylized fresnel) boosted by the reflection's
 // gamma-space luma — reproducing the original assets' luminance-derived
 // envmap alpha. The ps_1_x techniques are verbatim copies (flat reflection
 // alpha fallback). ps_2_0 shaders compiled from shaders/water_fp.cg with
-// -DUSE_PLANAR.
+// -DUSE_CALC_REFLECTIVITY.
 
-static const char *Water_planar_diffuseFx =
+static const char *Water_calc_diffuseFx =
 "																	\n\
 texture texture0; // bumpmap0										\n\
 texture texture1; // bumpmap1										\n\
@@ -3256,9 +3256,9 @@ float4 factor0; // bumpmap0 scale									\n\
 float4 factor1; // bumpmap1 scale									\n\
 float  scalarFloat0; // bump scale for 1_1 version					\n\
 																	\n\
-pixelshader water_planar_diffuse_2_0 = asm							\n\
+pixelshader water_calc_diffuse_2_0 = asm							\n\
 {																	\n\
-	// planar reflection: alpha = lerp(t2.z, 1, luma(reflection))	\n\
+	// calculated reflectivity: alpha = lerp(t2.z, 1, luma(reflection))	\n\
 	ps_2_0;															\n\
 	dcl_2d s0;														\n\
 	dcl_2d s1;														\n\
@@ -3284,7 +3284,7 @@ pixelshader water_planar_diffuse_2_0 = asm							\n\
 	mov oC0, r0;													\n\
 };																	\n\
 																	\n\
-technique technique_water_planar_diffuse_2_0								\n\
+technique technique_water_calc_diffuse_2_0								\n\
 {																	\n\
 	pass p0															\n\
 	{																\n\
@@ -3294,11 +3294,11 @@ technique technique_water_planar_diffuse_2_0								\n\
 		Texture[3] = <texture3>;									\n\
 		PixelShaderConstant[0] = <factor0>;							\n\
 		PixelShaderConstant[1] = <factor1>;							\n\
-		PixelShader = (water_planar_diffuse_2_0);							\n\
+		PixelShader = (water_calc_diffuse_2_0);							\n\
 	}																\n\
 };																	\n\
 																	\n\
-pixelshader water_planar_diffuse_1_4 = asm									\n\
+pixelshader water_calc_diffuse_1_4 = asm									\n\
 {																	\n\
 	ps_1_4;															\n\
 	texld   r0, t0;													\n\
@@ -3312,7 +3312,7 @@ pixelshader water_planar_diffuse_1_4 = asm									\n\
 	mul r0, r2, r3;													\n\
 };																	\n\
 																	\n\
-technique technique_water_planar_diffuse_1_4								\n\
+technique technique_water_calc_diffuse_1_4								\n\
 {																	\n\
 	pass p0															\n\
 	{																\n\
@@ -3322,11 +3322,11 @@ technique technique_water_planar_diffuse_1_4								\n\
 		Texture[3] = <texture3>;									\n\
 		PixelShaderConstant[0] = <factor0>;							\n\
 		PixelShaderConstant[1] = <factor1>;							\n\
-		PixelShader = (water_planar_diffuse_1_4);							\n\
+		PixelShader = (water_calc_diffuse_1_4);							\n\
 	}																\n\
 };																	\n\
 																	\n\
-pixelshader water_planar_diffuse_1_1 = asm									\n\
+pixelshader water_calc_diffuse_1_1 = asm									\n\
 {																	\n\
 	// note in OpenGL on nVidia cards, it is permitted to chain 2 texbem so the effect is less nice there (no bumpmap animation)\n\
 	ps_1_1;															\n\
@@ -3336,7 +3336,7 @@ pixelshader water_planar_diffuse_1_1 = asm									\n\
 	mul r0, t3, t2;													\n\
 };																	\n\
 																	\n\
-technique technique_water_planar_diffuse_1_1								\n\
+technique technique_water_calc_diffuse_1_1								\n\
 {																	\n\
 	pass p0															\n\
 	{																\n\
@@ -3345,7 +3345,7 @@ technique technique_water_planar_diffuse_1_1								\n\
 		Texture[3] = <texture3>;									\n\
 		PixelShaderConstant[0] = <factor0>;							\n\
 		PixelShaderConstant[1] = <factor1>;							\n\
-		PixelShader = (water_planar_diffuse_1_1);							\n\
+		PixelShader = (water_calc_diffuse_1_1);							\n\
 		BumpEnvMat00[2] = <scalarFloat0>;							\n\
 		BumpEnvMat01[0] = 0;										\n\
 		BumpEnvMat10[0] = 0;										\n\
@@ -3355,7 +3355,7 @@ technique technique_water_planar_diffuse_1_1								\n\
 																	\n\
 ";
 
-static const char *Water_planar_no_diffuseFx =
+static const char *Water_calc_no_diffuseFx =
 "																	\n\
 texture texture0; // bumpmap0										\n\
 texture texture1; // bumpmap1										\n\
@@ -3365,9 +3365,9 @@ float4 factor0; // bumpmap0 scale									\n\
 float4 factor1; // bumpmap1 scale									\n\
 float  scalarFloat0; // bump scale for 1_1 version					\n\
 																	\n\
-pixelshader water_planar_no_diffuse_2_0 = asm						\n\
+pixelshader water_calc_no_diffuse_2_0 = asm						\n\
 {																	\n\
-	// planar reflection: alpha = lerp(t2.z, 1, luma(reflection))	\n\
+	// calculated reflectivity: alpha = lerp(t2.z, 1, luma(reflection))	\n\
 	ps_2_0;															\n\
 	dcl_2d s0;														\n\
 	dcl_2d s1;														\n\
@@ -3389,7 +3389,7 @@ pixelshader water_planar_no_diffuse_2_0 = asm						\n\
 	mov oC0, r2;													\n\
 };																	\n\
 																	\n\
-technique technique_water_planar_no_diffuse_2_0							\n\
+technique technique_water_calc_no_diffuse_2_0							\n\
 {																	\n\
 	pass p0															\n\
 	{																\n\
@@ -3398,11 +3398,11 @@ technique technique_water_planar_no_diffuse_2_0							\n\
 		Texture[2] = <texture2>;									\n\
 		PixelShaderConstant[0] = <factor0>;							\n\
 		PixelShaderConstant[1] = <factor1>;							\n\
-		PixelShader = (water_planar_no_diffuse_2_0);						\n\
+		PixelShader = (water_calc_no_diffuse_2_0);						\n\
 	}																\n\
 };																	\n\
 																	\n\
-pixelshader water_planar_no_diffuse_1_4 = asm								\n\
+pixelshader water_calc_no_diffuse_1_4 = asm								\n\
 {																	\n\
 	ps_1_4;															\n\
 	texld   r0, t0;													\n\
@@ -3415,7 +3415,7 @@ pixelshader water_planar_no_diffuse_1_4 = asm								\n\
 	mov r0, r2;														\n\
 };																	\n\
 																	\n\
-technique technique_water_planar_no_diffuse_1_4							\n\
+technique technique_water_calc_no_diffuse_1_4							\n\
 {																	\n\
 	pass p0															\n\
 	{																\n\
@@ -3424,11 +3424,11 @@ technique technique_water_planar_no_diffuse_1_4							\n\
 		Texture[2] = <texture2>;									\n\
 		PixelShaderConstant[0] = <factor0>;							\n\
 		PixelShaderConstant[1] = <factor1>;							\n\
-		PixelShader = (water_planar_no_diffuse_1_4);						\n\
+		PixelShader = (water_calc_no_diffuse_1_4);						\n\
 	}																\n\
 };																	\n\
 																	\n\
-pixelshader water_planar_no_diffuse_1_1 = asm								\n\
+pixelshader water_calc_no_diffuse_1_1 = asm								\n\
 {																	\n\
 	// note in OpenGL on nVidia cards, it is permitted to chain 2 texbem so the effect is less nice there (no bumpmap animation)\n\
 	ps_1_1;															\n\
@@ -3437,7 +3437,7 @@ pixelshader water_planar_no_diffuse_1_1 = asm								\n\
 	mov r0, t2;														\n\
 };																	\n\
 																	\n\
-technique technique_water_planar_no_diffuse_1_1							\n\
+technique technique_water_calc_no_diffuse_1_1							\n\
 {																	\n\
 	pass p0															\n\
 	{																\n\
@@ -3445,7 +3445,7 @@ technique technique_water_planar_no_diffuse_1_1							\n\
 		Texture[2] = <texture2>;									\n\
 		PixelShaderConstant[0] = <factor0>;							\n\
 		PixelShaderConstant[1] = <factor1>;							\n\
-		PixelShader = (water_planar_no_diffuse_1_1);						\n\
+		PixelShader = (water_calc_no_diffuse_1_1);						\n\
 		BumpEnvMat00[2] = <scalarFloat0>;							\n\
 		BumpEnvMat01[0] = 0;										\n\
 		BumpEnvMat10[0] = 0;										\n\
@@ -3483,8 +3483,8 @@ void CDriverD3D::initInternalShaders()
 	setFx(_ShaderCloud, "cloudFx", CloudFx);
 	setFx(_ShaderWaterNoDiffuse,"water_no_diffuseFx", Water_no_diffuseFx);
 	setFx(_ShaderWaterDiffuse, "water_diffuseFx", Water_diffuseFx);
-	setFx(_ShaderWaterPlanarNoDiffuse,"water_planar_no_diffuseFx", Water_planar_no_diffuseFx);
-	setFx(_ShaderWaterPlanarDiffuse, "water_planar_diffuseFx", Water_planar_diffuseFx);
+	setFx(_ShaderWaterCalcNoDiffuse,"water_calc_no_diffuseFx", Water_calc_no_diffuseFx);
+	setFx(_ShaderWaterCalcDiffuse, "water_calc_diffuseFx", Water_calc_diffuseFx);
 }
 
 
@@ -3516,8 +3516,8 @@ void CDriverD3D::releaseInternalShaders()
 	_ShaderCloud._DrvInfo.kill();
 	_ShaderWaterNoDiffuse._DrvInfo.kill();
 	_ShaderWaterDiffuse._DrvInfo.kill();
-	_ShaderWaterPlanarNoDiffuse._DrvInfo.kill();
-	_ShaderWaterPlanarDiffuse._DrvInfo.kill();
+	_ShaderWaterCalcNoDiffuse._DrvInfo.kill();
+	_ShaderWaterCalcDiffuse._DrvInfo.kill();
 }
 
 // ***************************************************************************

@@ -85,8 +85,8 @@ static const char *WaterFPGLSL_Body = "layout(location = 8) smooth in vec4 texCo
                                       "  b1 = b1 * bump1ScaleBias.x + bump1ScaleBias.y;\n"
                                       "  vec2 uv2 = texCoord2.xy + b1;\n"
                                       "  vec4 col = texture(sampler2, uv2);\n"
-                                      "#ifdef USE_PLANAR\n"
-                                      "  // Realtime planar reflection: blend alpha from the per-vertex\n"
+                                      "#ifdef USE_CALC_REFLECTIVITY\n"
+                                      "  // Calculated reflectivity: blend alpha from the per-vertex\n"
                                       "  // reflectivity base (texCoord2.z) boosted by the reflection's\n"
                                       "  // gamma-space luma, reproducing the original assets' rule\n"
                                       "  col.a = mix(texCoord2.z, 1.0, dot(col.rgb, vec3(0.2126, 0.7152, 0.0722)));\n"
@@ -129,8 +129,8 @@ static const char *WaterFPGLSL_UBO_Body = "smooth in vec4 texCoord0;\n"
                                           "  b1 = b1 * bump1ScaleBias.x + bump1ScaleBias.y;\n"
                                           "  vec2 uv2 = texCoord2.xy + b1;\n"
                                           "  vec4 col = texture(sampler2, uv2);\n"
-                                          "#ifdef USE_PLANAR\n"
-                                          "  // Realtime planar reflection: blend alpha from the per-vertex\n"
+                                          "#ifdef USE_CALC_REFLECTIVITY\n"
+                                          "  // Calculated reflectivity: blend alpha from the per-vertex\n"
                                           "  // reflectivity base (texCoord2.z) boosted by the reflection's\n"
                                           "  // gamma-space luma, reproducing the original assets' rule\n"
                                           "  col.a = mix(texCoord2.z, 1.0, dot(col.rgb, vec3(0.2126, 0.7152, 0.0722)));\n"
@@ -1223,9 +1223,10 @@ void CDriverGL3::setupWaterPass(uint /* pass */)
 		activateTexture(k, NULL);
 	}
 
-	// Select water FP variant: bit 0 = fog, bit 1 = diffuse, bit 2 = planar
+	// Select water FP variant: bit 0 = fog, bit 1 = diffuse,
+	// bit 2 = calculated reflectivity
 	uint fpIdx = (_FogEnabled ? 1 : 0) | (mat.getTexture(3) != NULL ? 2 : 0)
-	    | (mat.isWaterPlanarReflection() ? 4 : 0);
+	    | (mat.isWaterCalcReflectivity() ? 4 : 0);
 
 	// Lazy creation of water FP programs
 	if (!_WaterFP[fpIdx])
@@ -1244,7 +1245,7 @@ void CDriverGL3::setupWaterPass(uint /* pass */)
 
 		std::string defines;
 		if (fpIdx & 2) defines += "#define USE_DIFFUSE\n";
-		if (fpIdx & 4) defines += "#define USE_PLANAR\n";
+		if (fpIdx & 4) defines += "#define USE_CALC_REFLECTIVITY\n";
 
 		_WaterFP[fpIdx] = new CPixelProgram();
 
@@ -1257,7 +1258,7 @@ void CDriverGL3::setupWaterPass(uint /* pass */)
 			s->UniformBufferFormats[UBBindingPixelProgram] = _WaterUBFormat;
 			s->DisplayName = NLMISC::toString("glsl300esf/WaterFP/%s%s",
 			    (fpIdx & 2) ? "diffuse" : "noDiffuse",
-			    (fpIdx & 4) ? "/planar" : "");
+			    (fpIdx & 4) ? "/calcRefl" : "");
 			s->setSource(std::string(WaterFPGLSL_ES_Header) + defines + WaterFPGLSL_UBO_Body);
 			_WaterFP[fpIdx]->addSource(s);
 		}
@@ -1274,7 +1275,7 @@ void CDriverGL3::setupWaterPass(uint /* pass */)
 			s->DisplayName = NLMISC::toString("glsl330f/WaterFP/%s/%s%s",
 			    (fpIdx & 1) ? "fog" : "noFog",
 			    (fpIdx & 2) ? "diffuse" : "noDiffuse",
-			    (fpIdx & 4) ? "/planar" : "");
+			    (fpIdx & 4) ? "/calcRefl" : "");
 			s->setSource(src);
 			_WaterFP[fpIdx]->addSource(s);
 		}
