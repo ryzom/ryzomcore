@@ -286,8 +286,10 @@ void	CLandscapeModel::traverseRender()
 	// No-Op. But delay the clip and render to the end of Opaque Rendering. For VBLock optim
 	renderTRav.addRenderLandscape(this);
 
-	// If the landscape receive shadow, then add it.
-	if(canReceiveShadowMap())
+	// If the landscape receive shadow, then add it. Not during water
+	// reflection renders (shadow projection is skipped there; see
+	// CClipTrav shadow caster registration).
+	if(canReceiveShadowMap() && !getOwnerScene()->getWaterReflectionManager().isRenderingReflection())
 		renderTRav.getShadowMapManager().addShadowReceiver(this);
 }
 

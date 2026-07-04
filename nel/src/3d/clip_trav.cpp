@@ -649,7 +649,12 @@ void	CClipTrav::clipShadowCasters()
 			}
 
 			// If the ShadowMap is visible, add it to the List Of ShadowMap to Render.
-			if(visible)
+			// Not during water reflection renders: reflections neither
+			// generate nor project shadow maps, so casters registered there
+			// are never consumed and would duplicate into the eye renders'
+			// list (each duplicate re-modulates the shadow: near-black
+			// shadows).
+			if(visible && !Scene->getWaterReflectionManager().isRenderingReflection())
 				Scene->getRenderTrav().getShadowMapManager().addShadowCaster(sc);
 
 			// update Fading.
