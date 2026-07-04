@@ -494,7 +494,7 @@ static CVertexProgram *BuildWaterVP(bool diffuseMap, bool bumpMap, bool use2Bump
 /*
  * Constructor
  */
-CWaterShape::CWaterShape() :  _WaterPoolID(0), _TransitionRatio(0.6f), _WaveHeightFactor(3), _ComputeLightmap(false), _SplashEnabled(true), _RealtimeReflection(false)
+CWaterShape::CWaterShape() :  _WaterPoolID(0), _TransitionRatio(0.6f), _WaveHeightFactor(3), _ComputeLightmap(false), _SplashEnabled(true), _RealtimeReflection(false), _ReflFresnelBias(0.15f), _ReflFresnelScale(1.1f), _ReflFresnelPower(2.f)
 {
 	/* ***********************************************
 	 *	WARNING: This Class/Method must be thread-safe (ctor/dtor/serial): no static access for instance
@@ -730,10 +730,11 @@ void CWaterShape::serial(NLMISC::IStream &f)
 	 *	It can be loaded/called through CAsyncFileManager for instance
 	 * ***********************************************/
 
+	// version 6 : added realtime reflection reflectivity fresnel params
 	// version 5 : added '_RealtimeReflection' flag
 	// version 4 : added scene water env map
 	// version 3 : added '_Splashenabled' flag
-	sint ver = f.serialVersion(5);
+	sint ver = f.serialVersion(6);
 	// serial 'shape'
 	f.serial(_Poly);
 	// serial heightMap identifier
@@ -788,6 +789,9 @@ void CWaterShape::serial(NLMISC::IStream &f)
 
 	if (ver >= 5)
 		f.serial(_RealtimeReflection);
+
+	if (ver >= 6)
+		f.serial(_ReflFresnelBias, _ReflFresnelScale, _ReflFresnelPower);
 
 	// tmp
 	/*

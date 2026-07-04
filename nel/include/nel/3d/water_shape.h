@@ -236,6 +236,16 @@ public:
 	  * See CWaterReflectionManager. */
 	void				enableRealtimeReflection(bool enable) { _RealtimeReflection = enable; }
 	bool				isRealtimeReflectionEnabled() const { return _RealtimeReflection; }
+	/** Realtime planar reflection reflectivity base, an HL2-era stylized
+	  * fresnel evaluated per vertex:
+	  *   F = clamp(bias + scale * (1 - cosTheta)^power, 0, 1)
+	  * The water shader blends the reflection by lerp(F, 1, luminance) —
+	  * the luminance boost reproduces the original envmap alpha authoring.
+	  * scale = 0 gives a flat, view-independent reflectivity of 'bias'. */
+	void				setReflectivityFresnel(float bias, float scale, float power) { _ReflFresnelBias = bias; _ReflFresnelScale = scale; _ReflFresnelPower = power; }
+	float				getReflectivityFresnelBias() const { return _ReflFresnelBias; }
+	float				getReflectivityFresnelScale() const { return _ReflFresnelScale; }
+	float				getReflectivityFresnelPower() const { return _ReflFresnelPower; }
 	//@}
 	// TMP : get mean color of over envmap
 	CRGBA				computeEnvMapMeanColor();
@@ -270,6 +280,9 @@ private:
 	bool								_ComputeLightmap;
 	bool								_SplashEnabled;
 	bool								_RealtimeReflection;
+	float								_ReflFresnelBias;
+	float								_ReflFresnelScale;
+	float								_ReflFresnelPower;
 	bool								_HeightMapTouch[2];
 	float								_HeightMapNormalizationFactor[2];
 

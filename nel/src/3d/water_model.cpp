@@ -1669,22 +1669,13 @@ void computeWaterVertexHard(float px, float py, CVector &pos, const CVector &cam
 }
 
 // ***********************************************************************************************************
-// Per-vertex reflectivity base for realtime planar reflections: the water FP
-// blends the reflection by alpha = lerp(base, 1, reflection luminance) — the
+// Helper to write water vertices to the shared VB. The water FP blends the
+// planar reflection by alpha = lerp(base, 1, reflection luminance) — the
 // luminance term reproduces the original assets' luminance-derived envmap
-// alpha (Fyros day map: alpha = lerp(0.37, 1, lum)). The base follows an
-// HL2-era stylized fresnel: F = clamp(bias + scale * (1 - cosTheta)^power).
-// scale = 0 gives the flat, view-independent original look (bias 0.37).
-// Keep scale <= 1 - bias so full mirror is reached only at true grazing;
-// higher power pushes the transition farther out.
-volatile float WaterplanarReflFresnelBias = 0.12f;
-volatile float WaterplanarReflFresnelScale = 0.88f;
-volatile float WaterplanarReflFresnelPower = 3.f;
-
-// ***********************************************************************************************************
-// Helper to write water vertices to the shared VB. When realtime planar
-// reflections are active this frame, the VB carries a Float3 TexCoord0
-// channel: planar surfaces get the reflection UV (vertex projected through
+// alpha (Fyros day map: alpha = lerp(0.37, 1, lum)); the per-vertex base is
+// the shape's stylized fresnel (see CWaterShape::setReflectivityFresnel).
+// When realtime planar reflections are active this frame, the VB carries a
+// Float3 TexCoord0 channel: planar surfaces get the reflection UV (vertex projected through
 // the reflected camera's sub-frustum, scaled to the active RT sub-region)
 // plus the per-vertex reflectivity base in z; other surfaces write zeros to
 // keep the stride consistent.
@@ -1693,7 +1684,7 @@ class CWaterVertexWriter
 public:
 	CWaterVertexWriter(uint8 *dest, uint vtxSize,
 		const CWaterReflectionManager::CActiveReflection *planarRefl,
-		const CVector &modelPos, float camHeight)
+		const CVector &modelPos, float camHeight, const CWaterShape *shape)
 		: _Dest(dest), _VtxSize(vtxSize), _PlanarRefl(planarRefl)
 	{
 		if (planarRefl)
@@ -1711,9 +1702,10 @@ public:
 			// plane; the epsilon just keeps the math finite regardless
 			_CamHeight = std::max(1e-3f, camHeight);
 			_CamHeight2 = _CamHeight * _CamHeight;
-			_FresnelBias = WaterplanarReflFresnelBias;
-			_FresnelScale = WaterplanarReflFresnelScale;
-			_FresnelPower = WaterplanarReflFresnelPower;
+			// Reflectivity base curve is an artist parameter on the shape
+			_FresnelBias = shape->getReflectivityFresnelBias();
+			_FresnelScale = shape->getReflectivityFresnelScale();
+			_FresnelPower = shape->getReflectivityFresnelPower();
 		}
 	}
 	inline void write(const CVector &pos)
@@ -1775,7 +1767,8 @@ uint CWaterModel::fillVBHard(void *datas, uint startTri)
 	float denom = zHeight - obsZ;
 	const uint vtxSize = scene->getWaterVB().getVertexSize();
 	CWaterVertexWriter writer((uint8 *) datas + startTri * vtxSize * 3, vtxSize, _PlanarReflection,
-		CVector(camMat.getPos().x, camMat.getPos().y, zHeight), obsZ - zHeight);
+		CVector(camMat.getPos().x, camMat.getPos().y, zHeight), obsZ - zHeight,
+		NLMISC::safe_cast<CWaterShape *>((IShape *) Shape));
 	if (!_ClippedTriNumVerts.empty())
 	{
 		const CVector2f *currVert =  &_ClippedTris.front();
