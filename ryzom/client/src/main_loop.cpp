@@ -1739,6 +1739,8 @@ bool mainLoop()
 					bool reflectionPass = StereoDisplay->wantSceneReflections();
 					uint reflPass = 0;
 					UWaterReflectionInfo reflInfo;
+					CFrustum saveCanopyFrustum;
+					bool canopyFrustumChanged = false;
 
 					Scene->setWaterReflectionView(StereoDisplay->getSceneView());
 					if (reflectionPass)
@@ -1777,6 +1779,12 @@ bool mainLoop()
 								SceneRoot->setViewport(reflViewport);
 								// scale the sub-frustum window to the canopy camera's near plane
 								CFrustum rootFrust = camRoot.getFrustum();
+								// the canopy frustum is NOT re-set per pass on
+								// non-HMD displays (getCurrentFrustum is a
+								// no-op there), so it must be restored
+								// explicitly after this reflection pass
+								saveCanopyFrustum = rootFrust;
+								canopyFrustumChanged = true;
 								float subScale = rootFrust.Near / reflInfo.FrustumNear;
 								rootFrust.Left = reflInfo.FrustumLeft * subScale;
 								rootFrust.Right = reflInfo.FrustumRight * subScale;
@@ -1819,6 +1827,12 @@ bool mainLoop()
 					if (reflectionPass)
 					{
 						Scene->endWaterReflectionPass(reflPass);
+						if (canopyFrustumChanged)
+						{
+							UCamera camRoot = SceneRoot->getCam();
+							if (!camRoot.empty())
+								camRoot.setFrustum(saveCanopyFrustum);
+						}
 					}
 					else if (StereoDisplay->isSceneLast())
 					{
