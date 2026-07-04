@@ -1396,8 +1396,8 @@ private:
 	sint			beginWaterMultiPass();
 	void			setupWaterPass(uint pass);
 	void			endWaterMultiPass();
-	// Water fragment programs: [fog | diffuse<<1]
-	NLMISC::CSmartPtr<CPixelProgram>	_WaterFP[4];
+	// Water fragment programs: [fog | diffuse<<1 | planar<<2]
+	NLMISC::CSmartPtr<CPixelProgram>	_WaterFP[8];
 	// Water PP UBO format (bump scale/bias parameters)
 	NLMISC::CSmartPtr<CUniformBufferFormat> _WaterUBFormat;
 	struct CWaterUBOOffsets {

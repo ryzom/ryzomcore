@@ -97,6 +97,14 @@ const uint32 IDRV_MAT_USER_TEX_MAT_ALL  =   0x0FF00000;
 
 const uint32 IDRV_MAT_USER_TEX_FIRST_BIT = 20;
 
+/* Water shader draw with a realtime planar reflection at stage 2: the vertex
+   buffer carries a per-vertex reflectivity base (TexCoord0.z) and the water
+   fragment shader derives the blend alpha from it and the reflection
+   luminance, instead of the envmap legacy texture-alpha semantics.
+   Runtime-only flag (set on the water render material, never present in
+   streamed content). */
+const uint32 IDRV_MAT_WATER_PLANAR	=	0x10000000;
+
 // For TexCoordGen
 const uint32 IDRV_MAT_TEX_GEN_SHIFT  =   2;
 const uint32 IDRV_MAT_TEX_GEN_MASK  =   0x03;
@@ -732,6 +740,10 @@ public:
 	uint32					getFlags() const {return _Flags;}
 	uint32					getTouched(void)  const { return(_Touched); }
 	void					clearTouched(uint32 flag) { _Touched&=~flag; }
+
+	/// Realtime planar water reflection semantics for this draw (see IDRV_MAT_WATER_PLANAR)
+	void					setWaterPlanarReflection(bool on) { if (on) _Flags|=IDRV_MAT_WATER_PLANAR; else _Flags&=~IDRV_MAT_WATER_PLANAR; }
+	bool					isWaterPlanarReflection() const { return (_Flags&IDRV_MAT_WATER_PLANAR)!=0; }
 
 
 

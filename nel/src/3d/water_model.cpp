@@ -64,18 +64,39 @@ void CWaterModel::setupVertexBuffer(CVertexBuffer &vb, uint numWantedVertices, I
 	if (!numWantedVertices) return;
 	// Wanted format: the water-shader path needs positions only, unless
 	// realtime planar reflections are active this frame (per-vertex
-	// reflection UVs in TexCoord0). The non-water-shader path always has UVs.
+	// reflection UV + reflectivity base in TexCoord0, Float3). The
+	// non-water-shader path always has plain Float2 UVs.
 	uint16 wantedFormat;
+	CVertexBuffer::TType wantedUVType = CVertexBuffer::Float2;
 	if (drv->supportWaterShader() && !planarUVs)
+	{
 		wantedFormat = CVertexBuffer::PositionFlag;
+	}
 	else
+	{
 		wantedFormat = CVertexBuffer::PositionFlag | CVertexBuffer::TexCoord0Flag;
-	if (vb.getNumVertices() == 0 || drv != _CurrDrv || vb.getVertexFormat() != wantedFormat) // not setupped yet, driver or format changed ?
+		if (planarUVs)
+			wantedUVType = CVertexBuffer::Float3;
+	}
+	bool uvTypeChanged = (wantedFormat & CVertexBuffer::TexCoord0Flag) != 0
+		&& vb.getVertexFormat() == wantedFormat
+		&& vb.getValueType(CVertexBuffer::TexCoord0) != wantedUVType;
+	if (vb.getNumVertices() == 0 || drv != _CurrDrv || vb.getVertexFormat() != wantedFormat || uvTypeChanged) // not setupped yet, driver or format changed ?
 	{
 		vb.setNumVertices(0);
 		vb.setName("Water");
 		vb.setBufferUsage(CVertexBuffer::FullRewrite, false);
-		vb.setVertexFormat(wantedFormat);
+		if (wantedFormat & CVertexBuffer::TexCoord0Flag)
+		{
+			vb.clearValueEx();
+			vb.addValueEx(CVertexBuffer::Position, CVertexBuffer::Float3);
+			vb.addValueEx(CVertexBuffer::TexCoord0, wantedUVType);
+			vb.initEx();
+		}
+		else
+		{
+			vb.setVertexFormat(wantedFormat);
+		}
 		_CurrDrv = drv;
 	}
 	uint numVerts = std::max(numWantedVertices, WATER_MODEL_DEFAULT_NUM_VERTICES);
@@ -929,6 +950,10 @@ void CWaterModel::setupMaterialNVertexShader(IDriver *drv, CWaterShape *shape, c
 	CWaterModel::_WaterMat.setTexture(0, shape->_BumpMap[0]);
 	CWaterModel::_WaterMat.setTexture(1, shape->_BumpMap[1]);
 	CWaterModel::_WaterMat.setTexture(3, shape->_ColorMap);
+	// Planar draws derive the blend alpha from the per-vertex reflectivity
+	// base and the reflection luminance (drivers select a water FP variant
+	// on this flag); envmap draws keep the legacy texture-alpha semantics
+	CWaterModel::_WaterMat.setWaterPlanarReflection(planar);
 	CScene *scene = getOwnerScene();
 	if (planar)
 	{
@@ -1644,17 +1669,28 @@ void computeWaterVertexHard(float px, float py, CVector &pos, const CVector &cam
 }
 
 // ***********************************************************************************************************
+// Per-vertex reflectivity base for realtime planar reflections: the water FP
+// blends the reflection by alpha = lerp(base, 1, reflection luminance) — the
+// luminance term reproduces the original assets' luminance-derived envmap
+// alpha (Fyros day map: alpha = lerp(0.37, 1, lum)). The base follows an
+// HL2-era stylized fresnel: F = clamp(bias + scale * (1 - cosTheta)^2, 0, 1).
+// scale = 0 gives the flat, view-independent original look (bias 0.37).
+volatile float WaterplanarReflFresnelBias = 0.15f;
+volatile float WaterplanarReflFresnelScale = 1.1f;
+
+// ***********************************************************************************************************
 // Helper to write water vertices to the shared VB. When realtime planar
-// reflections are active this frame, the VB carries a TexCoord0 channel:
-// planar surfaces get the reflection UV (vertex projected through the
-// reflected camera's sub-frustum, scaled to the active RT sub-region);
-// other surfaces write zeros to keep the stride consistent.
+// reflections are active this frame, the VB carries a Float3 TexCoord0
+// channel: planar surfaces get the reflection UV (vertex projected through
+// the reflected camera's sub-frustum, scaled to the active RT sub-region)
+// plus the per-vertex reflectivity base in z; other surfaces write zeros to
+// keep the stride consistent.
 class CWaterVertexWriter
 {
 public:
 	CWaterVertexWriter(uint8 *dest, uint vtxSize,
 		const CWaterReflectionManager::CActiveReflection *planarRefl,
-		const CVector &modelPos)
+		const CVector &modelPos, float camHeight)
 		: _Dest(dest), _VtxSize(vtxSize), _PlanarRefl(planarRefl)
 	{
 		if (planarRefl)
@@ -1668,6 +1704,12 @@ public:
 			_VScale = f.Near / (f.Top - f.Bottom) * planarRefl->UVScale.V;
 			_VBias = -f.Bottom / (f.Top - f.Bottom) * planarRefl->UVScale.V;
 			_MinDepth = f.Near;
+			// reflections are only admitted with the camera above the
+			// plane; the epsilon just keeps the math finite regardless
+			_CamHeight = std::max(1e-3f, camHeight);
+			_CamHeight2 = _CamHeight * _CamHeight;
+			_FresnelBias = WaterplanarReflFresnelBias;
+			_FresnelScale = WaterplanarReflFresnelScale;
 		}
 	}
 	inline void write(const CVector &pos)
@@ -1676,17 +1718,27 @@ public:
 		if (_VtxSize > WATER_VERTEX_HARD_SIZE)
 		{
 			float *uv = (float *) (_Dest + WATER_VERTEX_HARD_SIZE);
+			uint numUV = (_VtxSize - WATER_VERTEX_HARD_SIZE) / sizeof(float);
 			if (_PlanarRefl)
 			{
 				CVector q = _ToRefl * pos;
 				float invDepth = 1.f / std::max(q.y, _MinDepth);
 				uv[0] = q.x * invDepth * _UScale + _UBias;
 				uv[1] = q.z * invDepth * _VScale + _VBias;
+				if (numUV >= 3)
+				{
+					// pos is camera-xy-relative at water height, so the
+					// view cosine to the (flat) surface comes cheap
+					float cosT = _CamHeight / sqrtf(pos.x * pos.x + pos.y * pos.y + _CamHeight2);
+					float t = 1.f - cosT;
+					float f = _FresnelBias + _FresnelScale * t * t;
+					uv[2] = std::min(1.f, std::max(0.f, f));
+				}
 			}
 			else
 			{
-				uv[0] = 0.f;
-				uv[1] = 0.f;
+				for (uint k = 0; k < numUV; ++k)
+					uv[k] = 0.f;
 			}
 		}
 		_Dest += _VtxSize;
@@ -1698,6 +1750,8 @@ private:
 	const CWaterReflectionManager::CActiveReflection *_PlanarRefl;
 	CMatrix	_ToRefl;
 	float	_UScale, _UBias, _VScale, _VBias, _MinDepth;
+	float	_CamHeight, _CamHeight2;
+	float	_FresnelBias, _FresnelScale;
 };
 
 // ***********************************************************************************************************
@@ -1717,7 +1771,7 @@ uint CWaterModel::fillVBHard(void *datas, uint startTri)
 	float denom = zHeight - obsZ;
 	const uint vtxSize = scene->getWaterVB().getVertexSize();
 	CWaterVertexWriter writer((uint8 *) datas + startTri * vtxSize * 3, vtxSize, _PlanarReflection,
-		CVector(camMat.getPos().x, camMat.getPos().y, zHeight));
+		CVector(camMat.getPos().x, camMat.getPos().y, zHeight), obsZ - zHeight);
 	if (!_ClippedTriNumVerts.empty())
 	{
 		const CVector2f *currVert =  &_ClippedTris.front();
