@@ -492,6 +492,14 @@ static void renderSkyPart(UScene::TRenderPart renderPart)
 	nlassert(s_SkyMode != NoSky);
 	Driver->setDepthRange(SKY_DEPTH_RANGE_START, 1.f);
 	Driver->enableFog(false);
+	// In water reflection passes the water clip plane is set up in the
+	// reflection camera's eye space; the sky renders camera-centered with
+	// its own view, where that frozen half-space slices arbitrarily
+	// through the sky dome and sun billboards (a visible seam around the
+	// sun in the reflection). The sky needs no water clipping.
+	bool noClipPlane = Scene->isRenderingWaterReflection();
+	if (noClipPlane)
+		static_cast<CDriverUser *>(Driver)->getDriver()->enableClipPlane(0, false);
 	if (s_SkyMode == NewSky)
 	{
 		CSky &sky = ContinentMngr.cur()->CurrentSky;
@@ -509,6 +517,8 @@ static void renderSkyPart(UScene::TRenderPart renderPart)
 				CloudScape->render ();
 		}
 	#endif
+	if (noClipPlane)
+		static_cast<CDriverUser *>(Driver)->getDriver()->enableClipPlane(0, true);
 }
 
 // ***************************************************************************************************************************

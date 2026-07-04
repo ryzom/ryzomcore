@@ -327,6 +327,7 @@ public:
 	virtual void		  beginWaterReflectionPass(uint pass, UWaterReflectionInfo &info);
 	virtual void		  endWaterReflectionPass(uint pass) { _Scene.getWaterReflectionManager().endPass(pass); }
 	virtual void		  endWaterReflectionPasses() { _Scene.getWaterReflectionManager().endPasses(); }
+	virtual bool		  isRenderingWaterReflection() const { return _Scene.getWaterReflectionManager().isRenderingReflection(); }
 	virtual uint		  getNumActiveWaterReflections() const { return _Scene.getWaterReflectionManager().getNumActiveReflections(); }
 	virtual bool		  getActiveWaterReflectionInfo(uint index, UWaterReflectionInfo &info);
 	virtual void		  setWaterReflectionHalfRes(bool halfRes) { _Scene.getWaterReflectionManager().setHalfRes(halfRes); }

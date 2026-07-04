@@ -710,6 +710,8 @@ public:
 	virtual void		  endWaterReflectionPass(uint pass) = 0;
 	/// Restore scene and driver state after the reflection passes
 	virtual void		  endWaterReflectionPasses() = 0;
+	/// True while rendering inside a water reflection pass
+	virtual bool		  isRenderingWaterReflection() const = 0;
 	/// Number of water planes with an active realtime reflection this frame
 	virtual uint		  getNumActiveWaterReflections() const = 0;
 	/// Debug/display info for an active reflection (index 0..getNumActiveWaterReflections()-1)
