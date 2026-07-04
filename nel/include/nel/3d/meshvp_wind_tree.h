@@ -127,6 +127,8 @@ private:
 
 	/// Single UBO-based VP (all light/specular/normalize folded). GL3-only, falls back to 16 variants if not compiled.
 	static	NLMISC::CSmartPtr<CVertexProgramWindTreeUBO> _VertexProgramUBO; // STATIC GPU RESOURCE: Blocks multiple driver instances
+	/// Clip-writing twin of _VertexProgramUBO, activated while the driver clips vertex program geometry through vertex-stage clip distances (IDriver::needVertexProgramClipVariant)
+	static	NLMISC::CSmartPtr<CVertexProgramWindTreeUBO> _VertexProgramUBOClip; // STATIC GPU RESOURCE: Blocks multiple driver instances
 
 	NLMISC::CRefPtr<CVertexProgramWindTree> _ActiveVertexProgram;
 	NLMISC::CRefPtr<CVertexProgramWindTreeUBO> _ActiveVertexProgramUBO;

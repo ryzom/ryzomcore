@@ -1373,6 +1373,16 @@ public:
 	  * reflection would show unclipped underwater geometry.
 	  */
 	virtual bool			supportVertexProgramClipPlanes() const { return true; }
+	/** True while user clip planes are enabled AND this driver clips vertex
+	  * program geometry through clip distances written by the vertex program
+	  * itself. Engine code that supplies hand-written vertex programs should
+	  * activate their clip-writing variant while this returns true — a
+	  * compiled split selected at pass granularity, like any other vertex
+	  * program variant axis. Drivers that clip vertex program geometry by
+	  * other means (fixed function, clip-space planes, pixel stage discard,
+	  * or internal program variants) always return false.
+	  */
+	virtual bool			needVertexProgramClipVariant() const { return false; }
 	/// Does the cubemap face convention use +Z as forward? (D3D: true, GL: false)
 	/// GL cubemaps map forward (-Z) to NEGATIVE_Z face, D3D maps forward (+Z) to POSITIVE_Z face.
 	virtual bool			cubemapZPositiveForward() const = 0;

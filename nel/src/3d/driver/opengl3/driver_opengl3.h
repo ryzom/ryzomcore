@@ -611,6 +611,7 @@ public:
 
 	virtual void			enableClipPlane(uint index, bool enable);
 	virtual void			setClipPlane(uint index, const NLMISC::CPlane &plane);
+	virtual bool			needVertexProgramClipVariant() const;
 
 	virtual void			setupViewMatrix(const CMatrix& mtx);
 

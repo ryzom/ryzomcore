@@ -38,17 +38,6 @@ public:
 	/// Destructor
 	virtual ~CVertexProgram();
 
-	/** Optional user-authored clip variant of this program (same outputs
-	  * plus clip distance writes). Drivers that clip vertex-program
-	  * geometry in the vertex stage substitute it while user clip planes
-	  * are enabled, as a compiled split (same mechanism as the
-	  * converted-nelvp clip variants). */
-	void			setUserClipVariant(CVertexProgram *vp) { m_UserClipVariant = vp; }
-	CVertexProgram	*getUserClipVariant() const { return m_UserClipVariant; }
-
-private:
-	NLMISC::CSmartPtr<CVertexProgram>	m_UserClipVariant;
-
 };
 
 } // NL3D

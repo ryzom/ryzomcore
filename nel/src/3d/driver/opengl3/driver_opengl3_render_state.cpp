@@ -303,6 +303,16 @@ void CDriverGL3::enableClipPlane(uint index, bool enable)
 	_CameraUBODirty = true;
 }
 
+bool CDriverGL3::needVertexProgramClipVariant() const
+{
+	// The GLES path clips through the pixel stage discard instead of
+	// vertex-stage clip distances, so user programs never need a variant
+	if (m_PPClipPlanes) return false;
+	for (uint i = 0; i < MaxClipPlanes; ++i)
+		if (_ClipPlaneEnabled[i]) return true;
+	return false;
+}
+
 void CDriverGL3::setClipPlane(uint index, const NLMISC::CPlane &plane)
 {
 	H_AUTO_OGL(CDriverGL3_setClipPlane)

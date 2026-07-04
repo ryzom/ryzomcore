@@ -51,6 +51,7 @@ static const uint	VPLightConstantStart = 24;
 // ***************************************************************************
 NLMISC::CSmartPtr<CVertexProgramWindTree> CMeshVPWindTree::_VertexProgram[CMeshVPWindTree::NumVp];
 NLMISC::CSmartPtr<CVertexProgramWindTreeUBO> CMeshVPWindTree::_VertexProgramUBO;
+NLMISC::CSmartPtr<CVertexProgramWindTreeUBO> CMeshVPWindTree::_VertexProgramUBOClip;
 NLMISC::CSmartPtr<CUniformBuffer> CMeshVPWindTree::_WindTreeUB;
 CMeshVPWindTree::CWindTreeUBOOffsets CMeshVPWindTree::_UBOOffsets;
 NLMISC::CSmartPtr<CUniformBufferFormat> CMeshVPWindTree::_WindTreeUBFormat;
@@ -759,9 +760,10 @@ void CMeshVPWindTree::initVertexPrograms()
 #ifdef NL_WINDTREE_VP_UBO
 		// Single UBO-based VP (all light/specular/normalize folded, GL3-only)
 		_VertexProgramUBO = new CVertexProgramWindTreeUBO(false);
-		// Clip twin: substituted by drivers that clip in the vertex stage
-		// while user clip planes are enabled (water reflection passes)
-		_VertexProgramUBO->setUserClipVariant(new CVertexProgramWindTreeUBO(true));
+		// Clip-writing twin, activated instead of the base program while
+		// the driver clips vertex program geometry in the vertex stage and
+		// user clip planes are enabled (water reflection passes)
+		_VertexProgramUBOClip = new CVertexProgramWindTreeUBO(true);
 
 		// Shared UBO for wind + material data (set-and-discard per draw call)
 		if (_WindTreeUBFormat)
@@ -929,10 +931,17 @@ bool	CMeshVPWindTree::begin(IDriver *driver, CScene *scene, CMeshBaseInstance *m
 	//===============
 
 	// Try UBO program first (single program for all variants)
-	if (_VertexProgramUBO && driver->supportBuiltinUBO()
-		&& driver->activeVertexProgram(_VertexProgramUBO))
+	// Clip axis is an engine-side variant selection like the light
+	// count/specular variants; needVertexProgramClipVariant() is true only
+	// while user clip planes are enabled on a driver that clips through
+	// vertex-stage clip distances (desktop GL3 during reflection passes)
+	CVertexProgramWindTreeUBO *progUBO =
+		(_VertexProgramUBOClip && driver->needVertexProgramClipVariant())
+		? _VertexProgramUBOClip : _VertexProgramUBO;
+	if (progUBO && driver->supportBuiltinUBO()
+		&& driver->activeVertexProgram(progUBO))
 	{
-		_ActiveVertexProgramUBO = _VertexProgramUBO;
+		_ActiveVertexProgramUBO = progUBO;
 		_ActiveVertexProgram = NULL;
 		driver->bindUniformBuffer(UBBindingVertexProgram, _WindTreeUB);
 	}
@@ -1086,10 +1095,17 @@ bool	CMeshVPWindTree::isMBRVpOk(IDriver *driver) const
 void	CMeshVPWindTree::beginMBRMesh(IDriver *driver, CScene *scene)
 {
 	// Try UBO program first (single program for all variants, skip variant switching entirely)
-	if (_VertexProgramUBO && driver->supportBuiltinUBO()
-		&& driver->activeVertexProgram(_VertexProgramUBO))
+	// Clip axis is an engine-side variant selection like the light
+	// count/specular variants; needVertexProgramClipVariant() is true only
+	// while user clip planes are enabled on a driver that clips through
+	// vertex-stage clip distances (desktop GL3 during reflection passes)
+	CVertexProgramWindTreeUBO *progUBO =
+		(_VertexProgramUBOClip && driver->needVertexProgramClipVariant())
+		? _VertexProgramUBOClip : _VertexProgramUBO;
+	if (progUBO && driver->supportBuiltinUBO()
+		&& driver->activeVertexProgram(progUBO))
 	{
-		_ActiveVertexProgramUBO = _VertexProgramUBO;
+		_ActiveVertexProgramUBO = progUBO;
 		_ActiveVertexProgram = NULL;
 		_LastMBRIdVP = ~0u; // Sentinel: UBO path active, no variant switching
 		driver->bindUniformBuffer(UBBindingVertexProgram, _WindTreeUB);

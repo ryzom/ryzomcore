@@ -618,30 +618,6 @@ bool CDriverGL3::compileVertexProgram(CVertexProgram *program)
 		}
 	}
 
-	// Compiled clip split for user programs that author their own clip
-	// variant (writes gl_ClipDistance): compile it and hang it on the
-	// drvinfo so the pass-level substitution picks it up, same slot as the
-	// converted-nelvp clip variants. Native clip mode only — the PP
-	// discard path clips user programs through the ecPos varying.
-	if (!m_PPClipPlanes && program->getUserClipVariant() && program->m_DrvInfo)
-	{
-		CProgramDrvInfosGL3 *drvInfo = static_cast<CProgramDrvInfosGL3 *>(
-			(IProgramDrvInfos *)program->m_DrvInfo);
-		if (!drvInfo->NelvpClipVP)
-		{
-			CVertexProgram *clipVP = program->getUserClipVariant();
-			if (clipVP->m_DrvInfo || compileVertexProgram(clipVP))
-			{
-				drvInfo->NelvpClipVP = clipVP;
-			}
-			else
-			{
-				nlwarning("GL3: user clip variant compilation failed for '%s'",
-					program->source() ? program->source()->DisplayName.c_str() : "<unknown>");
-			}
-		}
-	}
-
 	return true;
 }
 
