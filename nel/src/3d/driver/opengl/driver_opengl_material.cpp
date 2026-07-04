@@ -2289,7 +2289,13 @@ void CDriverGL::setupWaterPassARB(const CMaterial &mat)
 	{
 		activateTexture(k, NULL);
 	}
-	nglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, ARBWaterShader[(_FogEnabled ? 1 : 0) | (mat.getTexture(3) != NULL ? 2 : 0)]);
+	uint waterShaderIdx = (_FogEnabled ? 1 : 0) | (mat.getTexture(3) != NULL ? 2 : 0);
+	// Realtime planar reflection: blend alpha from the per-vertex
+	// reflectivity base + reflection luma (variant optional; flat
+	// reflection alpha otherwise)
+	if (mat.isWaterPlanarReflection() && ARBWaterShader[4])
+		waterShaderIdx |= 4;
+	nglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, ARBWaterShader[waterShaderIdx]);
 	glEnable(GL_FRAGMENT_PROGRAM_ARB);
 
 	// setup the constant
@@ -2461,13 +2467,20 @@ void CDriverGL::setupWaterPass(uint /* pass */)
 	CMaterial &mat = *_CurrentMaterial;
 	nlassert(_CurrentMaterial->getShader() == CMaterial::Water);
 
-	if (_Extensions.NVTextureShader)
+	// Planar reflection draws take the ARB path when its planar variants
+	// are available: the NV20 texture shader path cannot derive the blend
+	// alpha from the reflection luma. Envmap draws keep the legacy
+	// NV-first order.
+	const bool planarARB = mat.isWaterPlanarReflection() && ARBWaterShader[4] != 0;
+	_CurWaterPassIsARB = false;
+	if (_Extensions.NVTextureShader && !planarARB)
 	{
 		setupWaterPassNV20(mat);
 	}
 	else if (ARBWaterShader[0])
 	{
 		setupWaterPassARB(mat);
+		_CurWaterPassIsARB = true;
 	}
 	else if (ATIWaterShaderHandleNoDiffuseMap)
 	{
@@ -2483,6 +2496,14 @@ void CDriverGL::endWaterMultiPass()
 #ifndef USE_OPENGLES
 	nlassert(_CurrentMaterial->getShader() == CMaterial::Water);
 	// NB : as fragment shaders / programs bypass the texture envs, no special env enum is added (c.f CTexEnvSpecial)
+	// mirror the setupWaterPass routing (planar draws take the ARB path
+	// even when NV_texture_shader is present)
+	if (_CurWaterPassIsARB)
+	{
+		glDisable(GL_FRAGMENT_PROGRAM_ARB);
+		_CurWaterPassIsARB = false;
+		return;
+	}
 	if (_Extensions.NVTextureShader) return;
 	if (ARBWaterShader[0])
 	{

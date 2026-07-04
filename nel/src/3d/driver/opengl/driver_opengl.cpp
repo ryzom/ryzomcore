@@ -331,7 +331,8 @@ CDriverGL::CDriverGL()
 	_ATIDriverVersion = 0;
 	_ATIFogRangeFixed = true;
 
-	std::fill(ARBWaterShader, ARBWaterShader + 4, 0);
+	std::fill(ARBWaterShader, ARBWaterShader + 8, 0);
+	_CurWaterPassIsARB = false;
 
 ///	buildCausticCubeMapTex();
 
@@ -1987,6 +1988,99 @@ static const char *WaterCodeForARBFragmentProgram =
 "MUL result.color, R0, R1;\n"
 "END\n";
 
+// Realtime planar reflection variants: texture 2 is the reflection RT; the
+// blend alpha is the per-vertex reflectivity base (fragment.texcoord[2].z,
+// the shape's stylized fresnel) boosted by the reflection's gamma-space
+// luma, reproducing the original assets' luminance-derived envmap alpha.
+
+// Planar, no diffuse, no fog
+static const char *WaterCodePlanarNoDiffuseForARBFragmentProgram =
+"!!ARBfp1.0\n"
+"OPTION ARB_precision_hint_nicest;\n"
+"PARAM c[3] = { program.env[0..1], { 0.2126, 0.7152, 0.0722, 1 } };\n"
+"TEMP R0;\n"
+"TEMP R1;\n"
+"TEX R0.xy, fragment.texcoord[0], texture[0], 2D;\n"
+"MAD R0.xy, R0, c[0].x, c[0].y;\n"
+"ADD R0.xy, R0, fragment.texcoord[1];\n"
+"TEX R0.xy, R0, texture[1], 2D;\n"
+"MAD R0.xy, R0, c[1].x, c[1].y;\n"
+"ADD R0.xy, R0, fragment.texcoord[2];\n"
+"TEX R0.xyz, R0, texture[2], 2D;\n"
+"ADD R1.x, -fragment.texcoord[2].z, c[2].w;\n"
+"DP3 R0.w, R0, c[2];\n"
+"MAD R0.w, R0, R1.x, fragment.texcoord[2].z;\n"
+"MOV result.color, R0;\n"
+"END\n";
+
+// Planar, no diffuse, with fog
+static const char *WaterCodePlanarNoDiffuseWithFogForARBFragmentProgram =
+"!!ARBfp1.0\n"
+"OPTION ARB_precision_hint_nicest;\n"
+"PARAM c[5] = { program.env[0..2], state.fog.color, { 0.2126, 0.7152, 0.0722, 1 } };\n"
+"TEMP R0;\n"
+"TEMP R1;\n"
+"TEX R0.xy, fragment.texcoord[0], texture[0], 2D;\n"
+"MAD R0.xy, R0, c[0].x, c[0].y;\n"
+"ADD R0.xy, R0, fragment.texcoord[1];\n"
+"TEX R0.xy, R0, texture[1], 2D;\n"
+"MAD R0.xy, R0, c[1].x, c[1].y;\n"
+"ADD R0.xy, R0, fragment.texcoord[2];\n"
+"TEX R0.xyz, R0, texture[2], 2D;\n"
+"ADD R1.x, -fragment.texcoord[2].z, c[4].w;\n"
+"DP3 R0.w, R0, c[4];\n"
+"MAD R0.w, R0, R1.x, fragment.texcoord[2].z;\n"
+"ADD R0, R0, -c[3];\n"
+"MAD_SAT R1.x, fragment.fogcoord, c[2], c[2].y;\n"
+"MAD result.color, R1.x, R0, c[3];\n"
+"END\n";
+
+// Planar, with diffuse, no fog
+static const char *WaterCodePlanarForARBFragmentProgram =
+"!!ARBfp1.0\n"
+"OPTION ARB_precision_hint_nicest;\n"
+"PARAM c[3] = { program.env[0..1], { 0.2126, 0.7152, 0.0722, 1 } };\n"
+"TEMP R0;\n"
+"TEMP R1;\n"
+"TEMP R2;\n"
+"TEX R0.xy, fragment.texcoord[0], texture[0], 2D;\n"
+"MAD R0.xy, R0, c[0].x, c[0].y;\n"
+"ADD R0.xy, R0, fragment.texcoord[1];\n"
+"TEX R0.xy, R0, texture[1], 2D;\n"
+"MAD R0.xy, R0, c[1].x, c[1].y;\n"
+"ADD R0.xy, R0, fragment.texcoord[2];\n"
+"TEX R0.xyz, R0, texture[2], 2D;\n"
+"TEX R1, fragment.texcoord[3], texture[3], 2D;\n"
+"ADD R2.x, -fragment.texcoord[2].z, c[2].w;\n"
+"DP3 R0.w, R0, c[2];\n"
+"MAD R0.w, R0, R2.x, fragment.texcoord[2].z;\n"
+"MUL result.color, R0, R1;\n"
+"END\n";
+
+// Planar, with diffuse, with fog
+static const char *WaterCodePlanarWithFogForARBFragmentProgram =
+"!!ARBfp1.0\n"
+"OPTION ARB_precision_hint_nicest;\n"
+"PARAM c[5] = { program.env[0..2], state.fog.color, { 0.2126, 0.7152, 0.0722, 1 } };\n"
+"TEMP R0;\n"
+"TEMP R1;\n"
+"TEMP R2;\n"
+"TEX R0.xy, fragment.texcoord[0], texture[0], 2D;\n"
+"MAD R0.xy, R0, c[0].x, c[0].y;\n"
+"ADD R0.xy, R0, fragment.texcoord[1];\n"
+"TEX R0.xy, R0, texture[1], 2D;\n"
+"MAD R0.xy, R0, c[1].x, c[1].y;\n"
+"ADD R0.xy, R0, fragment.texcoord[2];\n"
+"TEX R0.xyz, R0, texture[2], 2D;\n"
+"DP3 R0.w, R0, c[4];\n"
+"ADD R2.x, -fragment.texcoord[2].z, c[4].w;\n"
+"TEX R1, fragment.texcoord[3], texture[3], 2D;\n"
+"MAD R0.w, R0, R2.x, fragment.texcoord[2].z;\n"
+"MAD R1, R0, R1, -c[3];\n"
+"MAD_SAT R0.x, fragment.fogcoord, c[2], c[2].y;\n"
+"MAD result.color, R0.x, R1, c[3];\n"
+"END\n";
+
 // With diffuse, with fog (11 instructions, 2 R-regs)
 static const char *WaterCodeWithFogForARBFragmentProgram =
 "!!ARBfp1.0\n"
@@ -2112,6 +2206,29 @@ void CDriverGL::initFragmentShaders()
 		if (ok)
 		{
 			nlinfo("WATER: ARB_fragment_program OK, Use it");
+			// Realtime planar reflection variants (optional: planar draws
+			// fall back to the flat reflection alpha if unavailable)
+			ARBWaterShader[4] = loadARBFragmentProgramStringNative(WaterCodePlanarNoDiffuseForARBFragmentProgram, _ForceNativeFragmentPrograms);
+			ARBWaterShader[5] = loadARBFragmentProgramStringNative(WaterCodePlanarNoDiffuseWithFogForARBFragmentProgram, _ForceNativeFragmentPrograms);
+			ARBWaterShader[6] = loadARBFragmentProgramStringNative(WaterCodePlanarForARBFragmentProgram, _ForceNativeFragmentPrograms);
+			ARBWaterShader[7] = loadARBFragmentProgramStringNative(WaterCodePlanarWithFogForARBFragmentProgram, _ForceNativeFragmentPrograms);
+			for (uint k = 4; k < 8; ++k)
+			{
+				if (!ARBWaterShader[k])
+				{
+					nlwarning("WATER: planar reflection fragment %d not loaded, planar water keeps the flat reflection alpha", k);
+					for (uint l = 4; l < 8; ++l)
+					{
+						if (ARBWaterShader[l])
+						{
+							GLuint progId = ARBWaterShader[l];
+							nglDeleteProgramsARB(1, &progId);
+							ARBWaterShader[l] = 0;
+						}
+					}
+					break;
+				}
+			}
 			return;
 		}
 	}
@@ -2203,7 +2320,7 @@ void CDriverGL::deleteARBFragmentPrograms()
 	H_AUTO_OGL(CDriverGL_deleteARBFragmentPrograms);
 
 #ifndef USE_OPENGLES
-	for(uint k = 0; k < 4; ++k)
+	for(uint k = 0; k < 8; ++k)
 	{
 		if (ARBWaterShader[k])
 		{

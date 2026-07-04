@@ -4,10 +4,18 @@
 //   cgc -entry water_fp water_fp.cg -profile arbfp1 -O3 -fastmath -fastprecision -DUSE_FOG
 //   cgc -entry water_fp water_fp.cg -profile arbfp1 -O3 -fastmath -fastprecision -DUSE_DIFFUSE
 //   cgc -entry water_fp water_fp.cg -profile arbfp1 -O3 -fastmath -fastprecision -DUSE_FOG -DUSE_DIFFUSE
+//   ... and the four above with -DUSE_PLANAR (realtime planar reflection variants)
 //   cgc -entry water_fp water_fp.cg -profile ps_2_0 -O3 -fastmath -fastprecision
 //   cgc -entry water_fp water_fp.cg -profile ps_2_0 -O3 -fastmath -fastprecision -DUSE_DIFFUSE
+//   ... and the two above with -DUSE_PLANAR
 // Note: ps_2_0 fog is handled by D3D fixed-function pipeline, USE_FOG is arbfp1 only.
 // Note: In arbfp1 output, replace "program.local" with "program.env" to match driver setup.
+//
+// USE_PLANAR: texture 2 is a realtime planar reflection instead of the
+// envmap. The blend alpha is derived from the per-vertex reflectivity base
+// (TEXCOORD2.z, the shape's stylized fresnel) boosted by the reflection's
+// gamma-space luma — reproducing the original assets' luminance-derived
+// envmap alpha (see CWaterShape::setReflectivityFresnel).
 //
 // Driver sets constants:
 //   c[0] = bump0ScaleBias {2*factor, -factor, 0, 0}
@@ -19,7 +27,11 @@ void water_fp(
 	// Per fragment parameters
 	float2 bump0TexCoord : TEXCOORD0,
 	float2 bump1TexCoord : TEXCOORD1,
+#ifdef USE_PLANAR
+	float3 envMapTexCoord : TEXCOORD2,
+#else
 	float2 envMapTexCoord : TEXCOORD2,
+#endif
 #ifdef USE_DIFFUSE
 	float2 diffuseTexCoord : TEXCOORD3,
 #endif
@@ -57,10 +69,16 @@ void water_fp(
 	// Bias result (include scaling)
 	bmValue = bmValue * bump1ScaleBias.xxxx + bump1ScaleBias.yyzz;
 	// Offset envmap UVs
-	bmValue.xy += envMapTexCoord;
+	bmValue.xy += envMapTexCoord.xy;
 
 	// Read envmap
 	float4 envMap = tex2D(nlTex2, bmValue.xy);
+
+#ifdef USE_PLANAR
+	// Blend alpha: per-vertex reflectivity base boosted by reflection luma
+	float lum = dot(envMap.rgb, float3(0.2126, 0.7152, 0.0722));
+	envMap.a = lerp(envMapTexCoord.z, 1.0, lum);
+#endif
 
 #ifdef USE_DIFFUSE
 	// Read diffuse and modulate with envmap

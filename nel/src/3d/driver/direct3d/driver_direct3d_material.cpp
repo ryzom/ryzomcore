@@ -1176,7 +1176,12 @@ bool CDriverD3D::setupMaterial(CMaterial &mat)
 		case CMaterial::Water:
 			{
 				H_AUTO_D3D(CDriverD3D_setupMaterial_setupWaterShader)
-				activeShader(mat.getTexture(3) ? &_ShaderWaterDiffuse : &_ShaderWaterNoDiffuse);
+				// Planar reflection draws derive the blend alpha from the
+				// per-vertex reflectivity base + reflection luma (ps_2_0)
+				if (mat.isWaterPlanarReflection())
+					activeShader(mat.getTexture(3) ? &_ShaderWaterPlanarDiffuse : &_ShaderWaterPlanarNoDiffuse);
+				else
+					activeShader(mat.getTexture(3) ? &_ShaderWaterDiffuse : &_ShaderWaterNoDiffuse);
 				// Get the shader
 				nlassert (_CurrentShader);
 //				CShaderDrvInfosD3D *shaderInfo = static_cast<CShaderDrvInfosD3D*>((IShaderDrvInfos*)_CurrentShader->_DrvInfo);

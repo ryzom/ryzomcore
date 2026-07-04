@@ -1624,7 +1624,14 @@ private:
 			GLuint ATIWaterShaderHandle; // water support on R200
 			GLuint ATICloudShaderHandle; // cloud support for R200 and more
 
-			GLuint ARBWaterShader[4]; // water support on R300, NV30 & the like
+			// water support on R300, NV30 & the like
+			// [fog | diffuse<<1 | planar<<2]; [4..7] = realtime planar
+			// reflection variants (blend alpha from per-vertex reflectivity
+			// base + reflection luma), 0 when unavailable
+			GLuint ARBWaterShader[8];
+			// water pass routing for endWaterMultiPass (planar draws take
+			// the ARB path even when NV_texture_shader is present)
+			bool   _CurWaterPassIsARB;
 
 
 			void   initFragmentShaders();
