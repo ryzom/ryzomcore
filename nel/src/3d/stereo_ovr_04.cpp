@@ -166,7 +166,7 @@ static float lerp(float f0, float f1, float factor)
 	return (f1 * factor) + (f0 * (1.0f - factor));
 }
 
-CStereoOVR::CStereoOVR(const CStereoOVRDeviceFactory *factory) : m_DevicePtr(NULL), m_Stage(0), m_SubStage(0), m_OrientationCached(false), m_Driver(NULL), m_SceneTexture(NULL), m_GUITexture(NULL), m_EyePosition(0.0f, 0.09f, 0.15f), m_Scale(1.0f), m_AttachedDisplay(false)
+CStereoOVR::CStereoOVR(const CStereoOVRDeviceFactory *factory) : m_DevicePtr(NULL), m_Stage(0), m_SubStage(0), m_ReflPass(0), m_OrientationCached(false), m_Driver(NULL), m_SceneTexture(NULL), m_GUITexture(NULL), m_EyePosition(0.0f, 0.09f, 0.15f), m_Scale(1.0f), m_AttachedDisplay(false)
 {
 	nlctassert(NL_OVR_EYE_COUNT == ovrEye_Count);
 
@@ -568,12 +568,30 @@ bool CStereoOVR::nextPass()
 			// draw interface 2d (onto render target)
 			return true;
 		case 2:
-			++m_Stage;
 			m_SubStage = 0;
+			if (m_SceneReflectionPasses > 0)
+			{
+				m_ReflPass = 0;
+				m_Stage = 21;
+				// stage 21: water reflection pass, left eye
+				// (odd/even stage ids keep the eye parity convention)
+				return true;
+			}
+			m_Stage = 3;
 			// stage 3:
 			// (initBloom)
 			// clear buffer
 			// draw scene left
+			return true;
+		case 21:
+			m_Stage = 22;
+			m_SubStage = 0;
+			// stage 22: water reflection pass, right eye
+			return true;
+		case 22:
+			++m_ReflPass;
+			m_Stage = (m_ReflPass < m_SceneReflectionPasses) ? 21 : 3;
+			m_SubStage = 0;
 			return true;
 		case 3:
 			++m_Stage;
@@ -620,8 +638,21 @@ bool CStereoOVR::nextPass()
 		switch (m_Stage)
 		{
 		case 0:
-			++m_Stage;
 			m_SubStage = 0;
+			if (m_SceneReflectionPasses > 0)
+			{
+				m_ReflPass = 0;
+				m_Stage = 21; // water reflection passes, single eye
+				return true;
+			}
+			++m_Stage;
+			return true;
+		case 21:
+			++m_ReflPass;
+			m_SubStage = 0;
+			if (m_ReflPass < m_SceneReflectionPasses)
+				return true; // next reflection pass
+			m_Stage = 1;
 			return true;
 		case 1:
 			m_Stage = 0;
@@ -689,7 +720,7 @@ bool CStereoOVR::wantClear()
 
 bool CStereoOVR::wantSceneReflections()
 {
-	return false;
+	return m_Stage == 21 || m_Stage == 22;
 }
 
 bool CStereoOVR::wantScene()
@@ -742,17 +773,33 @@ bool CStereoOVR::isSceneFirst()
 	switch (m_Stage)
 	{
 	case 3:
+	case 21:
 		return true;
 	case 4:
+	case 22:
 		return false;
 	}
 	return m_Driver->getPolygonMode() != UDriver::Filled;
+}
+
+uint CStereoOVR::getSceneReflectionPass() const
+{
+	return m_ReflPass;
+}
+
+uint CStereoOVR::getSceneView() const
+{
+	// Odd stages are the left eye
+	return (m_Stage % 2) ? 0 : 1;
 }
 
 bool CStereoOVR::isSceneLast()
 {
 	switch (m_Stage)
 	{
+	case 21:
+	case 22:
+		return false; // reflection passes are never the frame's last render
 	case 3:
 		return false;
 	case 4:

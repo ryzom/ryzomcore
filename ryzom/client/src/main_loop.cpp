@@ -1745,6 +1745,50 @@ bool mainLoop()
 					{
 						reflPass = StereoDisplay->getSceneReflectionPass();
 						Scene->beginWaterReflectionPass(reflPass, reflInfo);
+
+						// Mirror the sky and canopy cameras like the main
+						// scene camera (commitCamera set them from the eye
+						// camera), and give them the reflection sub-frustum
+						// and active viewport so they align with the render
+						// target's active region. The next pass's camera
+						// setup and commitCamera restore all of it.
+						CMatrix reflCamMatrix = reflInfo.ReflViewMatrix;
+						reflCamMatrix.invert();
+						CViewport reflViewport;
+						reflViewport.init(0.f, 0.f, reflInfo.UScale, reflInfo.VScale);
+						if (s_SkyMode == NewSky)
+						{
+							CSky &sky = ContinentMngr.cur()->CurrentSky;
+							UCamera camSky = sky.getScene()->getCam();
+							sky.getScene()->setViewport(reflViewport);
+							CFrustum skyFrust(reflInfo.FrustumLeft, reflInfo.FrustumRight,
+								reflInfo.FrustumBottom, reflInfo.FrustumTop,
+								reflInfo.FrustumNear, SkyCameraZFar, true);
+							camSky.setFrustum(skyFrust);
+							CMatrix skyCameraMatrix = reflCamMatrix;
+							skyCameraMatrix.setPos(CVector::Null);
+							camSky.setMatrix(skyCameraMatrix);
+						}
+						if (SceneRoot)
+						{
+							UCamera camRoot = SceneRoot->getCam();
+							if (!camRoot.empty())
+							{
+								SceneRoot->setViewport(reflViewport);
+								// scale the sub-frustum window to the canopy camera's near plane
+								CFrustum rootFrust = camRoot.getFrustum();
+								float subScale = rootFrust.Near / reflInfo.FrustumNear;
+								rootFrust.Left = reflInfo.FrustumLeft * subScale;
+								rootFrust.Right = reflInfo.FrustumRight * subScale;
+								rootFrust.Bottom = reflInfo.FrustumBottom * subScale;
+								rootFrust.Top = reflInfo.FrustumTop * subScale;
+								camRoot.setFrustum(rootFrust);
+								camRoot.setPos(reflCamMatrix.getPos());
+								CQuat reflRotQuat;
+								reflCamMatrix.getRot(reflRotQuat);
+								camRoot.setRotQuat(reflRotQuat);
+							}
+						}
 					}
 					else if (StereoDisplay->isSceneFirst())
 					{

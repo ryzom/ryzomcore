@@ -99,6 +99,10 @@ public:
 
 	/// Is this the first 3D scene of the frame
 	virtual bool isSceneFirst();
+	/// The current reflection pass index during a wantSceneReflections() stage
+	virtual uint getSceneReflectionPass() const;
+	/// The view (eye) index of the current scene or reflections stage
+	virtual uint getSceneView() const;
 	/// Is this the last 3D scene of the frame
 	virtual bool isSceneLast();
 	/// Get the flare context for the current pass
@@ -138,6 +142,7 @@ public:
 private:
 	CStereoLibVRDevicePtr *m_DevicePtr;
 	int m_Stage;
+	uint m_ReflPass; // current reflection pass index during the reflection stages
 	int m_SubStage;
 	CViewport m_LeftViewport;
 	CViewport m_RightViewport;

@@ -420,7 +420,10 @@ void CWaterReflectionManager::beginPass(uint pass, CActiveReflection &out)
 	fullScissor.initFullScreen();
 	drv->setupScissor(fullScissor);
 	CRGBA clearColor = drv->fogEnabled() ? drv->getFogColor() : CRGBA(0, 0, 0, 255);
-	clearColor.A = 255;
+	// The cleared alpha is the water's uniform reflectivity (the water
+	// shader blends the reflection by the texture alpha). 192 is a preview
+	// value; proper reflectivity/opacity handling is future work.
+	clearColor.A = 192;
 	drv->clear2D(clearColor);
 	drv->clearZBuffer();
 

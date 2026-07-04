@@ -90,7 +90,7 @@ public:
     float InterpupillaryDistance;
 };
 
-CStereoLibVR::CStereoLibVR(const CStereoLibVRDeviceHandle *handle) : m_Stage(0), m_SubStage(0), m_OrientationCached(false), m_Driver(NULL), m_BarrelTexU(NULL), m_PixelProgram(NULL), m_EyePosition(0.0f, 0.09f, 0.15f), m_Scale(1.0f)
+CStereoLibVR::CStereoLibVR(const CStereoLibVRDeviceHandle *handle) : m_Stage(0), m_SubStage(0), m_ReflPass(0), m_OrientationCached(false), m_Driver(NULL), m_BarrelTexU(NULL), m_PixelProgram(NULL), m_EyePosition(0.0f, 0.09f, 0.15f), m_Scale(1.0f)
 {
 	struct stereo_config st_conf;
 
@@ -276,12 +276,30 @@ bool CStereoLibVR::nextPass()
 		switch (m_Stage)
 		{
 		case 0:
-			++m_Stage;
 			m_SubStage = 0;
+			if (m_SceneReflectionPasses > 0)
+			{
+				m_ReflPass = 0;
+				m_Stage = 21;
+				// stage 21: water reflection pass, left eye
+				// (odd/even stage ids keep the eye parity convention)
+				return true;
+			}
+			++m_Stage;
 			// stage 1:
 			// (initBloom)
 			// clear buffer
 			// draw scene left
+			return true;
+		case 21:
+			m_Stage = 22;
+			m_SubStage = 0;
+			// stage 22: water reflection pass, right eye
+			return true;
+		case 22:
+			++m_ReflPass;
+			m_Stage = (m_ReflPass < m_SceneReflectionPasses) ? 21 : 1;
+			m_SubStage = 0;
 			return true;
 		case 1:
 			++m_Stage;
@@ -328,8 +346,21 @@ bool CStereoLibVR::nextPass()
 		switch (m_Stage)
 		{
 		case 0:
-			++m_Stage;
 			m_SubStage = 0;
+			if (m_SceneReflectionPasses > 0)
+			{
+				m_ReflPass = 0;
+				m_Stage = 21; // water reflection passes, single eye
+				return true;
+			}
+			++m_Stage;
+			return true;
+		case 21:
+			++m_ReflPass;
+			m_SubStage = 0;
+			if (m_ReflPass < m_SceneReflectionPasses)
+				return true; // next reflection pass
+			m_Stage = 1;
 			return true;
 		case 1:
 			m_Stage = 0;
@@ -393,7 +424,7 @@ bool CStereoLibVR::wantClear()
 
 bool CStereoLibVR::wantSceneReflections()
 {
-	return false;
+	return m_Stage == 21 || m_Stage == 22;
 }
 
 bool CStereoLibVR::wantScene()
@@ -445,12 +476,24 @@ bool CStereoLibVR::wantInterface2D()
 
 bool CStereoLibVR::isSceneFirst()
 {
-	return m_Stage == 1;
+	return m_Stage == 1 || m_Stage == 21;
 }
 
 bool CStereoLibVR::isSceneLast()
 {
+	// NB: reflection stages (21, 22) are never the frame's last render
 	return m_Stage == 2;
+}
+
+uint CStereoLibVR::getSceneReflectionPass() const
+{
+	return m_ReflPass;
+}
+
+uint CStereoLibVR::getSceneView() const
+{
+	// Odd stages are the left eye
+	return (m_Stage % 2) ? 0 : 1;
 }
 
 uint CStereoLibVR::getFlareContext()
