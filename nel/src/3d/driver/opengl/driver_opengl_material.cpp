@@ -2467,19 +2467,24 @@ void CDriverGL::setupWaterPass(uint /* pass */)
 	CMaterial &mat = *_CurrentMaterial;
 	nlassert(_CurrentMaterial->getShader() == CMaterial::Water);
 
-	// Calculated reflectivity draws take the ARB path when its variants
-	// are available: the NV20 texture shader path cannot derive the blend
-	// alpha from the reflection luma. Legacy draws keep the NV-first order.
-	const bool planarARB = mat.isWaterCalcReflectivity() && ARBWaterShader[4] != 0;
+	// The ARB path is preferred whenever its programs loaded — this matches
+	// initFragmentShaders' stated priority ("ARB_fragment_program OK, Use
+	// it") and supportWaterShader(). It is also required for correctness:
+	// mixing the NV20 texture-shader path with ARB fragment programs
+	// across water draws within one frame desyncs the ancient texture
+	// shader state on modern NVIDIA drivers (observed: stage 2 envmap
+	// fetch lost, bump map showing as an opaque scrolling texture). The
+	// NV20 and R200 paths remain for hardware without
+	// ARB_fragment_program.
 	_CurWaterPassIsARB = false;
-	if (_Extensions.NVTextureShader && !planarARB)
-	{
-		setupWaterPassNV20(mat);
-	}
-	else if (ARBWaterShader[0])
+	if (ARBWaterShader[0])
 	{
 		setupWaterPassARB(mat);
 		_CurWaterPassIsARB = true;
+	}
+	else if (_Extensions.NVTextureShader)
+	{
+		setupWaterPassNV20(mat);
 	}
 	else if (ATIWaterShaderHandleNoDiffuseMap)
 	{
