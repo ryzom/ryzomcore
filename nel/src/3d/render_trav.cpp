@@ -360,15 +360,21 @@ void		CRenderTrav::traverse(UScene::TRenderPart renderPart, bool newRender, bool
 		// Render the Landscape
 		renderLandscapes();
 
-		// Project ShadowMaps.
-		if(Scene->getLandscapePolyDrawingCallback() != NULL)
+		// Project ShadowMaps. Not in water reflection renders: dynamic
+		// entity shadows project onto the ground directly beneath their
+		// casters, which the mirrored view essentially never sees (it is
+		// hidden behind the caster's own reflection) — skip the cost.
+		if (!Scene->getWaterReflectionManager().isRenderingReflection())
 		{
-			Scene->getLandscapePolyDrawingCallback()->beginPolyDrawing();
-		}
-		_ShadowMapManager.renderProject(Scene);
-		if(Scene->getLandscapePolyDrawingCallback())
-		{
-			Scene->getLandscapePolyDrawingCallback()->endPolyDrawing();
+			if(Scene->getLandscapePolyDrawingCallback() != NULL)
+			{
+				Scene->getLandscapePolyDrawingCallback()->beginPolyDrawing();
+			}
+			_ShadowMapManager.renderProject(Scene);
+			if(Scene->getLandscapePolyDrawingCallback())
+			{
+				Scene->getLandscapePolyDrawingCallback()->endPolyDrawing();
+			}
 		}
 
 		// Profile this frame?
