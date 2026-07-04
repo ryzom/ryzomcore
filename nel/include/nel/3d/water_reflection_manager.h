@@ -168,6 +168,11 @@ public:
 	uint			getNumActiveReflections() const { const CView *v = currentView(); return v ? (uint)v->Active.size() : 0; }
 	/// True while the manager is rendering a reflection pass (guards recursion and stat collection).
 	bool			isRenderingReflection() const { return _InReflectionRender; }
+	/** True while ANY scene's reflection pass is rendering. Content that
+	  * lives in auxiliary scenes rendered into a reflection (e.g. the sun
+	  * flare in the sky scene) must check this rather than its own scene's
+	  * manager. */
+	static bool		isAnyRenderingReflection() { return _AnyReflectionRenderCount != 0; }
 	/** True when water models should compute and report visibility stats:
 	  * the app has opted in by calling renderReflections() at least once,
 	  * reflections aren't disabled, and no reflection pass is rendering. */
@@ -237,6 +242,8 @@ private:
 	std::vector<sint32>					_PrevAdmitted; // hysteresis: planes admitted last frame
 	std::vector<CPassData>				_Passes;	// selected passes between beginPasses and endPasses
 	CCamera								*_ReflCamera;
+
+	static uint							_AnyReflectionRenderCount; // reflection passes rendering, across all scenes
 
 	// state saved across one reflection pass (beginPass..endPass)
 	CCamera								*_SaveCam;

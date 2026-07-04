@@ -130,10 +130,12 @@ void	CFlareModel::traverseRender()
 	CRenderTrav			&renderTrav = getOwnerScene()->getRenderTrav();
 	if (renderTrav.isCurrentPassOpaque()) return;
 	// No flares in water reflection renders: they are screen-space effects
-	// driven by per-context occlusion queries, and a reflection pass would
-	// corrupt the owning eye's query state. Enforced at engine level: the
-	// render loop re-applies its own scene filters inside reflection passes.
-	if (getOwnerScene()->getWaterReflectionManager().isRenderingReflection()) return;
+	// driven by per-context occlusion queries whose color mask restore
+	// would re-enable the reflection pass's masked alpha writes (the water
+	// reads the render target alpha as its reflectivity), and the query
+	// state belongs to the eyes. Checked GLOBALLY: the sun flare lives in
+	// the SKY scene, rendered into reflections of the main scene.
+	if (CWaterReflectionManager::isAnyRenderingReflection()) return;
 	IDriver				*drv  = renderTrav.getDriver();
 	nlassert(drv);
 	// For now, don't render flare if occlusion query is not supported (direct read of z-buffer is far too slow)

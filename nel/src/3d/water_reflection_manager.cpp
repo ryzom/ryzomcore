@@ -45,9 +45,12 @@ using namespace NLMISC;
 
 namespace NL3D {
 
-// Keep geometry slightly below the surface in the reflection so that
-// perturbed UVs near the waterline don't sample clip-void (halo artifacts)
-static const float WATER_REFLECTION_CLIP_BIAS = 0.25f;
+uint CWaterReflectionManager::_AnyReflectionRenderCount = 0;
+
+// World-space bias of the clip plane below the water surface. Zero: clip
+// exactly at the surface (perturbed UVs near the waterline may sample the
+// clip void on deep-submerged geometry; tune if halos show).
+static const float WATER_REFLECTION_CLIP_BIAS = 0.0f;
 // Screen-space margin around the water AABB for UV wobble, fraction of screen
 static const float WATER_REFLECTION_MARGIN = 0.02f;
 // RT dimension snap in pixels, avoids active-region churn
@@ -478,6 +481,7 @@ void CWaterReflectionManager::beginPass(uint pass, CActiveReflection &out)
 	// engine level, since render loops re-apply their own scene filters
 	// inside the pass) and water models don't report visibility stats
 	_InReflectionRender = true;
+	++_AnyReflectionRenderCount;
 	_HadReflections = true;
 
 	out = pd.Refl;
@@ -494,6 +498,8 @@ void CWaterReflectionManager::endPass(uint pass)
 	IDriver *drv = _Scene->getDriver();
 
 	_InReflectionRender = false;
+	nlassert(_AnyReflectionRenderCount > 0);
+	--_AnyReflectionRenderCount;
 
 	// Publish for the coming main render of the current view
 	ensureCurrentView().Active[_Passes[pass].Key] = _Passes[pass].Refl;
