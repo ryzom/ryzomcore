@@ -129,13 +129,6 @@ void	CFlareModel::traverseRender()
 {
 	CRenderTrav			&renderTrav = getOwnerScene()->getRenderTrav();
 	if (renderTrav.isCurrentPassOpaque()) return;
-	// No flares in water reflection renders: they are screen-space effects
-	// driven by per-context occlusion queries whose color mask restore
-	// would re-enable the reflection pass's masked alpha writes (the water
-	// reads the render target alpha as its reflectivity), and the query
-	// state belongs to the eyes. Checked GLOBALLY: the sun flare lives in
-	// the SKY scene, rendered into reflections of the main scene.
-	if (CWaterReflectionManager::isAnyRenderingReflection()) return;
 	IDriver				*drv  = renderTrav.getDriver();
 	nlassert(drv);
 	// For now, don't render flare if occlusion query is not supported (direct read of z-buffer is far too slow)
@@ -592,7 +585,12 @@ void CFlareModel::updateOcclusionQueryBegin(IDriver *drv)
 // ********************************************************************************************************************
 void CFlareModel::updateOcclusionQueryEnd(IDriver *drv)
 {
-	drv->setColorMask(true, true, true, true);
+	// Restore color writes. Alpha writes stay masked inside water
+	// reflection passes: the pass cleared the render target alpha as the
+	// water's reflectivity, and a blind all-true restore here let the
+	// flare quads (e.g. the sky scene's sun flare) stamp garbage alpha
+	// into the reflection (visible as an opaque square around the sun).
+	drv->setColorMask(true, true, true, !CWaterReflectionManager::isAnyRenderingReflection());
 }
 
 // ********************************************************************************************************************
@@ -693,7 +691,7 @@ void CFlareModel::occlusionTest(CMesh &mesh, IDriver &drv)
 	dq->begin();
 	renderOcclusionMeshPrimitives(mesh, drv);
 	dq->end();
-	drv.setColorMask(true, true, true, true); // restore pixel writes
+	drv.setColorMask(true, true, true, !CWaterReflectionManager::isAnyRenderingReflection()); // restore pixel writes (alpha stays masked in reflection passes)
 }
 
 // ********************************************************************************************************************
