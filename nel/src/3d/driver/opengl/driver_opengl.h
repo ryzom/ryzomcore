@@ -1491,6 +1491,17 @@ private:
 		bool compileNVVertexProgram (CVertexProgram *program);
 		bool compileARBVertexProgram (CVertexProgram *program);
 		bool compileEXTVertexShader (CVertexProgram *program);
+
+		/** nelvp dispatch: prefer the ARB path over the NV path?
+		  * The NV-first order elsewhere is deliberate: some older hardware
+		  * advertised GL_ARB_vertex_program but was unreliable with it. Only
+		  * prefer ARB when GL_NV_vertex_program2_option is also present
+		  * (GeForce6+ era drivers), which is what enables the user clip
+		  * plane program variant that the NV VP1.0 path ignores by spec.
+		  * Must be used consistently by compile, activation, and program id
+		  * generation (CVertexProgamDrvInfosGL ctor).
+		  */
+		bool preferARBVertexProgram() const { return _Extensions.ARBVertexProgram && _Extensions.NVVertexProgram2Option; }
 	//@}
 
 
@@ -1523,6 +1534,10 @@ private:
 	bool							_VertexProgramEnabled;
 	// Track state of activePixelProgram()
 	bool							_PixelProgramEnabled;
+
+	// Mask of user clip planes currently enabled (mirror of enableClipPlane).
+	// Used to select the clip variant of vertex programs on the ARB path.
+	uint							_UserClipPlaneEnableMask;
 
 	// Say if last setupGlArrays() was a VertexProgram setup.
 	bool							_LastSetupGLArrayVertexProgram;
@@ -1587,7 +1602,7 @@ private:
 			static const uint _EVSNumConstant;
 			//
 			bool   setupEXTVertexShader(const CVPParser::TProgram &program, GLuint id, uint variants[EVSNumVariants], uint16 &usedInputRegisters);
-			bool   setupARBVertexProgram (const CVPParser::TProgram &parsedProgram, GLuint id, bool &specularWritten);
+			bool   setupARBVertexProgram (const CVPParser::TProgram &parsedProgram, GLuint id, bool &specularWritten, bool clip);
 			//
 	// @}
 
@@ -1684,6 +1699,15 @@ class CVertexProgamDrvInfosGL : public IProgramDrvInfos
 public:
 	// The GL Id.
 	GLuint					ID;
+
+	/** ARB path: optional user-clip-plane variant of the program
+	  * (OPTION NV_vertex_program2, writes result.clip[0..5] from the
+	  * clip-space plane equations at program.env[96..101]). 0 if absent.
+	  * Bound instead of ID while user clip planes are enabled; the written
+	  * clip distances only take effect for planes that are glEnable'd, so
+	  * fixed function and program draws can coexist per-draw.
+	  */
+	GLuint					ClipID;
 
 	// ARB_vertex_program specific -> must know if specular part is written
 	bool					SpecularWritten;

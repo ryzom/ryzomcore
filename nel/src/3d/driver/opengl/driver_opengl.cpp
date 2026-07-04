@@ -295,6 +295,8 @@ CDriverGL::CDriverGL()
 
 	_NVTextureShaderEnabled = false;
 
+	_UserClipPlaneEnableMask = 0;
+
 	_AnisotropicFilter = 0.f;
 
 	// Compute the Flag which say if one texture has been changed in CMaterial.
@@ -3025,6 +3027,15 @@ void CDriverGL::enableClipPlane(uint index, bool enable)
 {
 	H_AUTO_OGL(CDriverGL_enableClipPlane)
 
+	nlassert(index < CDriverGLStates::MaxClipPlanes);
+
+	// Mirror the enable mask: activeARBVertexProgram binds the clip variant
+	// of vertex programs while any user clip plane is enabled.
+	if (enable)
+		_UserClipPlaneEnableMask |= (1 << index);
+	else
+		_UserClipPlaneEnableMask &= ~(1u << index);
+
 	_DriverGLStates.enableClipPlane(index, enable);
 }
 
@@ -3055,6 +3066,29 @@ void CDriverGL::setClipPlane(uint index, const NLMISC::CPlane &plane)
 	glLoadMatrixf((const GLfloat *)_ViewMtx.get());
 	glClipPlane(GL_CLIP_PLANE0 + index, equation);
 	glPopMatrix();
+
+	// When vertex programs run through the ARB path with
+	// NV_vertex_program2_option (see preferARBVertexProgram), their clip
+	// variant computes the clip distances itself, from the CLIP-SPACE plane
+	// equation stored at program.env[96+index] (the equation applies to the
+	// program's output position): p_clip = transpose(inverse(Proj*View)) * p_world.
+	// Same snapshot-at-set-time semantics as glClipPlane above; the
+	// projection and view matrices are set before the plane for each pass.
+	if (preferARBVertexProgram())
+	{
+		refreshProjMatrixFromGL();
+		CMatrix invViewProj = _GLProjMat * _ViewMtx;
+		invViewProj.invert();
+		const float *m = invViewProj.get();	// column major
+		float pc[4];
+		for (uint r = 0; r < 4; ++r)
+		{
+			// row r of the transpose = column r of the inverse
+			pc[r] = (float)(m[4*r+0] * equation[0] + m[4*r+1] * equation[1]
+			              + m[4*r+2] * equation[2] + m[4*r+3] * equation[3]);
+		}
+		nglProgramEnvParameter4fvARB(GL_VERTEX_PROGRAM_ARB, 96 + index, pc);
+	}
 #endif
 }
 
