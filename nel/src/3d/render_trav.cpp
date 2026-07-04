@@ -397,15 +397,20 @@ void		CRenderTrav::traverse(UScene::TRenderPart renderPart, bool newRender, bool
 			// setup water models
 			CWaterModel *curr = _FirstWaterModel;
 			uint numWantedVertices = 0;
+			// per-vertex channel: planar reflection UVs + reflectivity base;
+			// armed by active reflections or any visible surface using
+			// calculated reflectivity over its envmap
+			bool baseChannelUVs = Scene->getWaterReflectionManager().needsPlanarUVs();
 			while (curr)
 			{
 				numWantedVertices += curr->getNumWantedVertices();
+				baseChannelUVs = baseChannelUVs || curr->wantsCalcReflectivityUVs();
 				curr = curr->_Next;
 			}
 			if (numWantedVertices != 0)
 			{
 				CWaterModel::setupVertexBuffer(Scene->getWaterVB(), numWantedVertices, getDriver(),
-					Scene->getWaterReflectionManager().needsPlanarUVs());
+					baseChannelUVs);
 				//
 				{
 					CVertexBufferReadWrite vbrw;

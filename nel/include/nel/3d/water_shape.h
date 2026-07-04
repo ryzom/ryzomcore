@@ -69,7 +69,7 @@ public:
 		uint DiffuseMapVector0;
 		uint DiffuseMapVector1;
 	};
-	CVertexProgramWaterVPNoWave(bool diffuse, bool planar = false);
+	CVertexProgramWaterVPNoWave(bool diffuse, bool planar = false, bool envCalc = false);
 	virtual ~CVertexProgramWaterVPNoWave() { }
 	virtual void buildInfo();
 	inline const CIdx &idx() const { return m_Idx; }
@@ -77,6 +77,7 @@ private:
 	CIdx m_Idx;
 	bool m_Diffuse;
 	bool m_Planar;
+	bool m_EnvCalc;
 };
 
 /**
@@ -246,6 +247,13 @@ public:
 	float				getReflectivityFresnelBias() const { return _ReflFresnelBias; }
 	float				getReflectivityFresnelScale() const { return _ReflFresnelScale; }
 	float				getReflectivityFresnelPower() const { return _ReflFresnelPower; }
+	/** Use calculated reflectivity (the per-vertex fresnel base boosted by
+	  * the reflection luminance) over the artist envmap too, ignoring its
+	  * alpha channel. Reflection-capable surfaces do this automatically
+	  * while falling back from a realtime planar reflection, for visual
+	  * continuity; this flag extends it to always-envmap surfaces. */
+	void				enableEnvMapCalcReflectivity(bool enable) { _EnvMapCalcReflectivity = enable; }
+	bool				isEnvMapCalcReflectivityEnabled() const { return _EnvMapCalcReflectivity; }
 	//@}
 	// TMP : get mean color of over envmap
 	CRGBA				computeEnvMapMeanColor();
@@ -283,6 +291,7 @@ private:
 	float								_ReflFresnelBias;
 	float								_ReflFresnelScale;
 	float								_ReflFresnelPower;
+	bool								_EnvMapCalcReflectivity;
 	bool								_HeightMapTouch[2];
 	float								_HeightMapNormalizationFactor[2];
 
@@ -309,6 +318,8 @@ private:
 	static NLMISC::CSmartPtr<CVertexProgramWaterVPNoWave>    _VertexProgramNoWaveDiffuse; // STATIC GPU RESOURCE: Blocks multiple driver instances
 	static NLMISC::CSmartPtr<CVertexProgramWaterVPNoWave>    _VertexProgramNoWavePlanar; // STATIC GPU RESOURCE: Blocks multiple driver instances
 	static NLMISC::CSmartPtr<CVertexProgramWaterVPNoWave>    _VertexProgramNoWavePlanarDiffuse; // STATIC GPU RESOURCE: Blocks multiple driver instances
+	static NLMISC::CSmartPtr<CVertexProgramWaterVPNoWave>    _VertexProgramNoWaveEnvCalc; // STATIC GPU RESOURCE: Blocks multiple driver instances
+	static NLMISC::CSmartPtr<CVertexProgramWaterVPNoWave>    _VertexProgramNoWaveEnvCalcDiffuse; // STATIC GPU RESOURCE: Blocks multiple driver instances
 
 	// Water VP UBO (bump map params, observer, etc.)
 	struct CWaterVPUBOOffsets

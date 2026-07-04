@@ -59,23 +59,26 @@ NLMISC::CRefPtr<IDriver> CWaterModel::_CurrDrv;
 volatile bool forceWaterSimpleRender = false;
 
 //=======================================================================
-void CWaterModel::setupVertexBuffer(CVertexBuffer &vb, uint numWantedVertices, IDriver *drv, bool planarUVs)
+void CWaterModel::setupVertexBuffer(CVertexBuffer &vb, uint numWantedVertices, IDriver *drv, bool baseChannelUVs)
 {
 	if (!numWantedVertices) return;
 	// Wanted format: the water-shader path needs positions only, unless
-	// realtime planar reflections are active this frame (per-vertex
-	// reflection UV + reflectivity base in TexCoord0, Float3). The
-	// non-water-shader path always has plain Float2 UVs.
+	// some surface needs the per-vertex channel this frame (planar
+	// reflection UV + reflectivity base in TexCoord0, Float3 — see
+	// wantsCalcReflectivityUVs). The non-water-shader path always has
+	// plain Float2 UVs.
 	uint16 wantedFormat;
 	CVertexBuffer::TType wantedUVType = CVertexBuffer::Float2;
-	if (drv->supportWaterShader() && !planarUVs)
+	if (drv->supportWaterShader() && !baseChannelUVs)
 	{
 		wantedFormat = CVertexBuffer::PositionFlag;
 	}
 	else
 	{
 		wantedFormat = CVertexBuffer::PositionFlag | CVertexBuffer::TexCoord0Flag;
-		if (planarUVs)
+		// only the water-shader path carries the base in TexCoord0.z; the
+		// non-shader path uses plain Float2 texture coordinates
+		if (baseChannelUVs && drv->supportWaterShader())
 			wantedUVType = CVertexBuffer::Float3;
 	}
 	bool uvTypeChanged = (wantedFormat & CVertexBuffer::TexCoord0Flag) != 0
@@ -106,6 +109,21 @@ void CWaterModel::setupVertexBuffer(CVertexBuffer &vb, uint numWantedVertices, I
 		numVerts = vb_INCREASE_SIZE * ((numVerts + (vb_INCREASE_SIZE - 1)) / vb_INCREASE_SIZE); // snap size
 		vb.setNumVertices((uint32) numVerts);
 	}
+}
+
+//=======================================================================
+bool CWaterModel::wantsCalcReflectivityUVs() const
+{
+	nlassert(Shape);
+	CWaterShape *shape = NLMISC::safe_cast<CWaterShape *>((IShape *) Shape);
+	// explicit artist opt-in for always-envmap surfaces
+	if (shape->isEnvMapCalcReflectivityEnabled()) return true;
+	// reflection-capable surfaces keep the calculated reflectivity when
+	// falling back to the envmap (budget, admission, reflections disabled),
+	// so budget swaps between planar and envmap stay visually continuous
+	if (shape->isRealtimeReflectionEnabled()) return true;
+	CScene *scene = getOwnerScene();
+	return scene && scene->getWaterReflectionManager().getForceReflections();
 }
 
 //=======================================================================
@@ -940,21 +958,30 @@ void CWaterModel::setupMaterialNVertexShader(IDriver *drv, CWaterShape *shape, c
 	//	setup Water material   //
 	//=========================//
 	shape->initVertexProgram();
+	CScene *scene = getOwnerScene();
 	// Realtime planar reflection: reflection UVs come from the vertex buffer
 	// (see fillVBHard) and the reflection texture replaces the envmap
 	const bool planar = _PlanarReflection != NULL;
+	// Calculated reflectivity over the artist envmap (fallback continuity /
+	// explicit shape option), when the per-vertex base channel is present
+	const bool envCalc = !planar
+		&& wantsCalcReflectivityUVs()
+		&& (scene->getWaterVB().getVertexFormat() & CVertexBuffer::TexCoord0Flag) != 0
+		&& scene->getWaterVB().getValueType(CVertexBuffer::TexCoord0) == CVertexBuffer::Float3;
 	CVertexProgramWaterVPNoWave *program = shape->_ColorMap
-		? (planar ? CWaterShape::_VertexProgramNoWavePlanarDiffuse : CWaterShape::_VertexProgramNoWaveDiffuse)
-		: (planar ? CWaterShape::_VertexProgramNoWavePlanar : CWaterShape::_VertexProgramNoWave);
+		? (planar ? CWaterShape::_VertexProgramNoWavePlanarDiffuse
+			: (envCalc ? CWaterShape::_VertexProgramNoWaveEnvCalcDiffuse : CWaterShape::_VertexProgramNoWaveDiffuse))
+		: (planar ? CWaterShape::_VertexProgramNoWavePlanar
+			: (envCalc ? CWaterShape::_VertexProgramNoWaveEnvCalc : CWaterShape::_VertexProgramNoWave));
 	drv->activeVertexProgram(program);
 	CWaterModel::_WaterMat.setTexture(0, shape->_BumpMap[0]);
 	CWaterModel::_WaterMat.setTexture(1, shape->_BumpMap[1]);
 	CWaterModel::_WaterMat.setTexture(3, shape->_ColorMap);
-	// Planar draws derive the blend alpha from the per-vertex reflectivity
-	// base and the reflection luminance (drivers select a water FP variant
-	// on this flag); envmap draws keep the legacy texture-alpha semantics
-	CWaterModel::_WaterMat.setWaterCalcReflectivity(planar);
-	CScene *scene = getOwnerScene();
+	// Calculated reflectivity draws derive the blend alpha from the
+	// per-vertex reflectivity base and the reflection luminance (drivers
+	// select a water FP variant on this flag); legacy envmap draws keep the
+	// texture-alpha semantics
+	CWaterModel::_WaterMat.setWaterCalcReflectivity(planar || envCalc);
 	if (planar)
 	{
 		CWaterModel::_WaterMat.setTexture(2, _PlanarReflection->Texture);
@@ -1687,6 +1714,19 @@ public:
 		const CVector &modelPos, float camHeight, const CWaterShape *shape)
 		: _Dest(dest), _VtxSize(vtxSize), _PlanarRefl(planarRefl)
 	{
+		// The per-vertex reflectivity base serves both planar draws and
+		// calculated reflectivity over the envmap (fallback surfaces).
+		// The camera can legitimately be under the plane on the envmap
+		// path; the epsilon keeps the math finite (base saturates then)
+		_CamHeight = std::max(1e-3f, camHeight);
+		_CamHeight2 = _CamHeight * _CamHeight;
+		// Reflectivity base curve is an artist parameter on the shape
+		_FresnelBias = shape->getReflectivityFresnelBias();
+		_FresnelScale = shape->getReflectivityFresnelScale();
+		_FresnelPower = shape->getReflectivityFresnelPower();
+		// small integral powers (incl. the default, 2) skip the powf
+		_FresnelIntPower = (_FresnelPower == 2.f || _FresnelPower == 3.f || _FresnelPower == 4.f)
+			? (uint) _FresnelPower : 0;
 		if (planarRefl)
 		{
 			// Fold the model position into the world -> reflected camera transform
@@ -1698,17 +1738,6 @@ public:
 			_VScale = f.Near / (f.Top - f.Bottom) * planarRefl->UVScale.V;
 			_VBias = -f.Bottom / (f.Top - f.Bottom) * planarRefl->UVScale.V;
 			_MinDepth = f.Near;
-			// reflections are only admitted with the camera above the
-			// plane; the epsilon just keeps the math finite regardless
-			_CamHeight = std::max(1e-3f, camHeight);
-			_CamHeight2 = _CamHeight * _CamHeight;
-			// Reflectivity base curve is an artist parameter on the shape
-			_FresnelBias = shape->getReflectivityFresnelBias();
-			_FresnelScale = shape->getReflectivityFresnelScale();
-			_FresnelPower = shape->getReflectivityFresnelPower();
-			// small integral powers (incl. the default, 2) skip the powf
-			_FresnelIntPower = (_FresnelPower == 2.f || _FresnelPower == 3.f || _FresnelPower == 4.f)
-				? (uint) _FresnelPower : 0;
 		}
 	}
 	inline void write(const CVector &pos)
@@ -1724,28 +1753,29 @@ public:
 				float invDepth = 1.f / std::max(q.y, _MinDepth);
 				uv[0] = q.x * invDepth * _UScale + _UBias;
 				uv[1] = q.z * invDepth * _VScale + _VBias;
-				if (numUV >= 3)
-				{
-					// pos is camera-xy-relative at water height, so the
-					// view cosine to the (flat) surface comes cheap
-					float cosT = _CamHeight / sqrtf(pos.x * pos.x + pos.y * pos.y + _CamHeight2);
-					float t = 1.f - cosT;
-					float tp;
-					switch (_FresnelIntPower)
-					{
-					case 2: tp = t * t; break;
-					case 3: tp = t * t * t; break;
-					case 4: tp = (t * t) * (t * t); break;
-					default: tp = powf(t, _FresnelPower); break;
-					}
-					float f = _FresnelBias + _FresnelScale * tp;
-					uv[2] = std::min(1.f, std::max(0.f, f));
-				}
 			}
 			else
 			{
-				for (uint k = 0; k < numUV; ++k)
-					uv[k] = 0.f;
+				// envmap path: UV comes from the vertex program
+				uv[0] = 0.f;
+				uv[1] = 0.f;
+			}
+			if (numUV >= 3)
+			{
+				// pos is camera-xy-relative at water height, so the
+				// view cosine to the (flat) surface comes cheap
+				float cosT = _CamHeight / sqrtf(pos.x * pos.x + pos.y * pos.y + _CamHeight2);
+				float t = 1.f - cosT;
+				float tp;
+				switch (_FresnelIntPower)
+				{
+				case 2: tp = t * t; break;
+				case 3: tp = t * t * t; break;
+				case 4: tp = (t * t) * (t * t); break;
+				default: tp = powf(t, _FresnelPower); break;
+				}
+				float f = _FresnelBias + _FresnelScale * tp;
+				uv[2] = std::min(1.f, std::max(0.f, f));
 			}
 		}
 		_Dest += _VtxSize;

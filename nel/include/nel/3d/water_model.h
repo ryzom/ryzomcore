@@ -103,7 +103,11 @@ public:
 
 	// setup vertex buffer before render; planarUVs adds a TexCoord0 channel
 	// for realtime planar reflection UVs on the water-shader path
-	static void setupVertexBuffer(CVertexBuffer &vb, uint numWantedVertices, IDriver *drv, bool planarUVs);
+	static void setupVertexBuffer(CVertexBuffer &vb, uint numWantedVertices, IDriver *drv, bool baseChannelUVs);
+	/** True when this surface wants the per-vertex reflectivity base channel
+	  * in the water VB: reflection-capable shapes (fallback continuity) and
+	  * shapes flagged for calculated reflectivity over the artist envmap. */
+	bool wantsCalcReflectivityUVs() const;
 
 	// For Debug purpose
 	void	debugDumpMem(void* &clippedPolyBegin, void* &clippedPolyEnd);
