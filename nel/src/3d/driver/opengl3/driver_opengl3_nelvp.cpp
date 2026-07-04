@@ -398,7 +398,7 @@ bool CDriverGL3::convertNelvpToGLSL(CVertexProgram *program, bool linked)
 		ss << "precision highp float;\n\n";
 
 	if (!linked)
-		ss << "out gl_PerVertex { vec4 gl_Position; float gl_PointSize; };\n\n";
+		ss << "out gl_PerVertex { vec4 gl_Position; float gl_PointSize; float gl_ClipDistance[6]; };\n\n";
 
 	// Input attributes — always use layout(location) for vertex inputs,
 	// even in linked mode. GLSL ES 3.00 supports layout(location) on
@@ -731,6 +731,25 @@ bool CDriverGL3::convertNelvpToGLSL(CVertexProgram *program, bool linked)
 	// Must be NeL space (not GL eye space) because builtin PP fog uses ecPos.y as forward depth.
 	ss << "\n// Synthesize NeL-space position for fog\n";
 	ss << "ecPos = inverseProjectionBasis * gl_Position;\n";
+
+	// Native clip distances (desktop GL only; GLES clips via PP-based
+	// discard using the ecPos varying): eye-space planes from the camera
+	// UBO dotted with the synthesized NeL eye-space position. A converted
+	// program is compiled once (no per-clip-mask variants like the builtin
+	// VP), so fold per plane on the UBO mask the way the mega VP's hwClip
+	// variant does — uniform-controlled branching, no ALU when disabled.
+	// GL ignores distances whose GL_CLIP_DISTANCEi enable is off.
+	if (!linked)
+	{
+		ss << "\n// Clip distances from camera UBO planes (uniform-folded)\n";
+		for (int i = 0; i < 6; ++i) // CDriverGL3::MaxClipPlanes
+		{
+			ss << "if ((nlClipPlaneMask & " << (1 << i) << ") != 0)\n";
+			ss << "  gl_ClipDistance[" << i << "] = dot(clipPlane" << i << ", ecPos);\n";
+			ss << "else\n";
+			ss << "  gl_ClipDistance[" << i << "] = 1.0;\n";
+		}
+	}
 
 	ss << "}\n";
 
