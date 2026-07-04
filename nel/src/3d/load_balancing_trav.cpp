@@ -17,6 +17,7 @@
 #include "std3d.h"
 
 #include "nel/3d/load_balancing_trav.h"
+#include "nel/3d/scene.h"
 #include "nel/3d/hrc_trav.h"
 #include "nel/3d/clip_trav.h"
 #include "nel/misc/common.h"
@@ -142,6 +143,8 @@ CLoadBalancingTrav::CLoadBalancingTrav()
 	// prepare some space
 	_VisibleList.resize(1024);
 	_CurrentNumVisibleModels= 0;
+
+	_LastAdaptFrameId= 0;
 }
 
 
@@ -159,35 +162,49 @@ void				CLoadBalancingTrav::traverse()
 
 	CTravCameraScene::update();
 
-	// Reset each group.
-	//================
-	ItGroupMap	it= _GroupMap.begin();
-	for(;it!=_GroupMap.end();it++)
+	// Adapt the balancing once per real frame, and never from a water
+	// reflection pass: the ratio smoothing is stateful, so per-pass
+	// adaptation would feed the reflection sub-frustum's face counts into
+	// the budget and give the frame's replicated renders different
+	// budgets — visible as per-eye MRM detail and animation-LOD
+	// divergence in the stereo debugger. Replicated passes reuse the
+	// frame's ratios (the 2nd pass below still assigns per-model face
+	// budgets for the pass's own visible list).
+	const uint64 frameId = Scene->getFrameId();
+	const bool adapt = !Scene->getWaterReflectionManager().isRenderingReflection()
+		&& frameId != _LastAdaptFrameId;
+	if (adapt)
 	{
-		// reset _NbFacePass0.
-		it->second._NbFacePass0= 0;
-	}
+		_LastAdaptFrameId = frameId;
+
+		// Reset each group.
+		//================
+		ItGroupMap	it= _GroupMap.begin();
+		for(;it!=_GroupMap.end();it++)
+		{
+			// reset _NbFacePass0.
+			it->second._NbFacePass0= 0;
+		}
 
 
-	// Traverse the graph 2 times.
-
-	// 1st pass, count NBFaces drawed.
-	//================
-	_LoadPass= 0;
-	// count _NbFacePass0.
-	traverseVisibilityList();
+		// 1st pass, count NBFaces drawed.
+		//================
+		_LoadPass= 0;
+		// count _NbFacePass0.
+		traverseVisibilityList();
 
 
-	// Reset _SumNbFacePass0
-	_SumNbFacePass0= 0;
-	// For each group
-	it= _GroupMap.begin();
-	for(;it!=_GroupMap.end();it++)
-	{
-		// compute ratio and smooth
-		it->second.computeRatioAndSmooth(PolygonBalancingMode);
-		// update _SumNbFacePass0
-		_SumNbFacePass0+= it->second.getNbFaceAsked();
+		// Reset _SumNbFacePass0
+		_SumNbFacePass0= 0;
+		// For each group
+		it= _GroupMap.begin();
+		for(;it!=_GroupMap.end();it++)
+		{
+			// compute ratio and smooth
+			it->second.computeRatioAndSmooth(PolygonBalancingMode);
+			// update _SumNbFacePass0
+			_SumNbFacePass0+= it->second.getNbFaceAsked();
+		}
 	}
 
 
