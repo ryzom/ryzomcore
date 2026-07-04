@@ -1632,6 +1632,11 @@ public:
 	// Update all modified render states, assume current material is still alive
 	void updateRenderVariablesInternal();
 
+	// Upload user clip plane equations in the convention required by the
+	// pipeline about to draw (world space for fixed function, clip space
+	// when a vertex shader is bound). Called from updateRenderVariablesInternal().
+	void updateClipPlanes();
+
 	// Reset the driver, release the lost resources
 	bool reset (const GfxMode& mode);
 
@@ -2089,6 +2094,9 @@ public:
 		{
 			theMatrix.Matrix = matrix;
 			touchRenderVariable (&theMatrix);
+			// Clip plane equations uploaded in clip space (shader mode) depend on view/projection
+			if (type == D3DTS_VIEW || type == D3DTS_PROJECTION)
+				++_ViewProjId;
 		}
 	}
 
@@ -2711,6 +2719,20 @@ private:
 	DWORD			_CurStencilOpZPass;
 	DWORD			_CurStencilWriteMask;
 	DWORD			_CurClipPlaneEnable;
+
+	// User clip planes, stored in (PZB-adjusted) NeL world space. D3D9
+	// interprets SetClipPlane equations in WORLD space with the fixed
+	// function pipeline but in CLIP space when a vertex shader is bound,
+	// so updateClipPlanes() (re)uploads the equations in the convention of
+	// the pipeline about to draw — refreshed when the equations, the
+	// pipeline type, or (in shader mode) the view/projection change.
+	enum { MaxClipPlane = 6 };
+	float			_ClipPlaneWorld[MaxClipPlane][4];
+	uint			_ClipPlaneSetMask;		// planes with a valid equation
+	bool			_ClipPlaneDirty;		// equations changed since last upload
+	bool			_ClipPlaneShaderMode;	// convention currently uploaded
+	uint			_ClipPlaneViewProjId;	// _ViewProjId at last shader-mode upload
+	uint			_ViewProjId;			// bumped when view/projection matrices change
 
 public:
 

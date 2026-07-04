@@ -289,6 +289,13 @@ CDriverD3D::CDriverD3D()
 	_CurStencilWriteMask = std::numeric_limits<DWORD>::max();
 	_CurClipPlaneEnable = 0;
 
+	for (uint i = 0; i < MaxClipPlane; ++i)
+		_ClipPlaneWorld[i][0] = _ClipPlaneWorld[i][1] = _ClipPlaneWorld[i][2] = _ClipPlaneWorld[i][3] = 0.f;
+	_ClipPlaneSetMask = 0;
+	_ClipPlaneDirty = false;
+	_ClipPlaneShaderMode = false;
+	_ClipPlaneViewProjId = 0;
+	_ViewProjId = 0;
 
 	for(uint k = 0; k < MaxTexture; ++k)
 	{
@@ -372,6 +379,9 @@ CDriverD3D::~CDriverD3D()
 void CDriverD3D::resetRenderVariables()
 {
 	H_AUTO_D3D(CDriver3D_resetRenderVariables);
+
+	// Device reset drops SetClipPlane state — force re-upload
+	_ClipPlaneDirty = true;
 
 	uint i;
 	for (i=0; i<MaxRenderState; i++)
@@ -1084,6 +1094,66 @@ void CDriverD3D::updateRenderVariablesInternal()
 		}
 	}
 
+	// Upload user clip plane equations in the convention of the pipeline
+	// about to draw (fixed function vs vertex shader)
+	updateClipPlanes();
+}
+
+// ***************************************************************************
+
+void CDriverD3D::updateClipPlanes()
+{
+	H_AUTO_D3D(CDriverD3D_updateClipPlanes);
+
+	// D3D9 interprets SetClipPlane equations in WORLD space with the fixed
+	// function pipeline, but in CLIP space (applied to the vertex shader's
+	// output position) when a vertex shader is bound. Reupload the
+	// equations when they change, when the pipeline type changes, or (in
+	// shader mode) when the view/projection changes.
+	const bool shaderMode = _VertexProgramCache.VertexProgram != NULL;
+	if (!_ClipPlaneDirty && shaderMode == _ClipPlaneShaderMode
+		&& (!shaderMode || _ClipPlaneViewProjId == _ViewProjId))
+		return;
+
+	if (_ClipPlaneSetMask)
+	{
+		if (shaderMode)
+		{
+			// Transform the world-space equations to clip space. With the
+			// row vector convention v_clip = v_world * (View * Projection),
+			// the plane satisfying dot(p_clip, v_clip) == dot(p_world, v_world)
+			// is p_clip = inverse(View * Projection) * p_world (each
+			// component is a row of the inverse dotted with the world
+			// equation).
+			D3DXMATRIX viewProj, invViewProj;
+			D3DXMatrixMultiply (&viewProj,
+				&(_MatrixCache[remapMatrixIndex (D3DTS_VIEW)].Matrix),
+				&(_MatrixCache[remapMatrixIndex (D3DTS_PROJECTION)].Matrix));
+			D3DXMatrixInverse (&invViewProj, NULL, &viewProj);
+			for (uint i = 0; i < MaxClipPlane; ++i)
+			{
+				if (!(_ClipPlaneSetMask & (1 << i))) continue;
+				const float *pw = _ClipPlaneWorld[i];
+				float pc[4];
+				for (uint r = 0; r < 4; ++r)
+					pc[r] = invViewProj.m[r][0] * pw[0] + invViewProj.m[r][1] * pw[1]
+					      + invViewProj.m[r][2] * pw[2] + invViewProj.m[r][3] * pw[3];
+				_DeviceInterface->SetClipPlane (i, pc);
+			}
+		}
+		else
+		{
+			for (uint i = 0; i < MaxClipPlane; ++i)
+			{
+				if (!(_ClipPlaneSetMask & (1 << i))) continue;
+				_DeviceInterface->SetClipPlane (i, _ClipPlaneWorld[i]);
+			}
+		}
+	}
+
+	_ClipPlaneDirty = false;
+	_ClipPlaneShaderMode = shaderMode;
+	_ClipPlaneViewProjId = _ViewProjId;
 }
 
 
@@ -3720,20 +3790,24 @@ void CDriverD3D::enableClipPlane(uint index, bool enable)
 void CDriverD3D::setClipPlane(uint index, const NLMISC::CPlane &plane)
 {
 	H_AUTO_D3D(CDriverD3D_setClipPlane);
-	nlassert(index < 6);
+	nlassert(index < MaxClipPlane);
 
 	// Plane is in NeL world space. The D3D World matrix operates in NeL
 	// space (basis conversion is in the View matrix), so no basis
 	// conversion is needed on the plane coefficients.
 	// Adjust d for _PZBCameraPos precision optimization.
-	float equation[4];
-	equation[0] = plane.a;
-	equation[1] = plane.b;
-	equation[2] = plane.c;
-	equation[3] = plane.d + plane.a * _PZBCameraPos.x
-	                      + plane.b * _PZBCameraPos.y
-	                      + plane.c * _PZBCameraPos.z;
-	_DeviceInterface->SetClipPlane(index, equation);
+	// The equation is uploaded by updateClipPlanes() in the convention of
+	// the pipeline about to draw: D3D9 interprets SetClipPlane in world
+	// space for fixed function draws but in CLIP space when a vertex
+	// shader is bound.
+	_ClipPlaneWorld[index][0] = plane.a;
+	_ClipPlaneWorld[index][1] = plane.b;
+	_ClipPlaneWorld[index][2] = plane.c;
+	_ClipPlaneWorld[index][3] = plane.d + plane.a * _PZBCameraPos.x
+	                          + plane.b * _PZBCameraPos.y
+	                          + plane.c * _PZBCameraPos.z;
+	_ClipPlaneSetMask |= (1 << index);
+	_ClipPlaneDirty = true;
 }
 
 // volatile bool preciseStateProfile = false;
