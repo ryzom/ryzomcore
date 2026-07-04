@@ -1706,6 +1706,9 @@ public:
 			_FresnelBias = shape->getReflectivityFresnelBias();
 			_FresnelScale = shape->getReflectivityFresnelScale();
 			_FresnelPower = shape->getReflectivityFresnelPower();
+			// small integral powers (incl. the default, 2) skip the powf
+			_FresnelIntPower = (_FresnelPower == 2.f || _FresnelPower == 3.f || _FresnelPower == 4.f)
+				? (uint) _FresnelPower : 0;
 		}
 	}
 	inline void write(const CVector &pos)
@@ -1727,7 +1730,15 @@ public:
 					// view cosine to the (flat) surface comes cheap
 					float cosT = _CamHeight / sqrtf(pos.x * pos.x + pos.y * pos.y + _CamHeight2);
 					float t = 1.f - cosT;
-					float f = _FresnelBias + _FresnelScale * powf(t, _FresnelPower);
+					float tp;
+					switch (_FresnelIntPower)
+					{
+					case 2: tp = t * t; break;
+					case 3: tp = t * t * t; break;
+					case 4: tp = (t * t) * (t * t); break;
+					default: tp = powf(t, _FresnelPower); break;
+					}
+					float f = _FresnelBias + _FresnelScale * tp;
 					uv[2] = std::min(1.f, std::max(0.f, f));
 				}
 			}
@@ -1748,6 +1759,7 @@ private:
 	float	_UScale, _UBias, _VScale, _VBias, _MinDepth;
 	float	_CamHeight, _CamHeight2;
 	float	_FresnelBias, _FresnelScale, _FresnelPower;
+	uint	_FresnelIntPower;
 };
 
 // ***********************************************************************************************************
