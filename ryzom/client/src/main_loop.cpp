@@ -1764,7 +1764,11 @@ bool mainLoop()
 					// Render scene, with this eye's water reflections.
 					// Reflection passes are never the frame's last render:
 					// traversals (and the frame's ellapsed time) are kept.
-					bool wantTraversals = StereoDisplay->isSceneFirst();
+					// They also never generate shadow maps: generation runs
+					// mid-render with its own render targets and camera
+					// state (a hazard nested inside the reflection target),
+					// and the maps belong to the eye scene passes.
+					bool wantTraversals = !reflectionPass && StereoDisplay->isSceneFirst();
 					bool keepTraversals = reflectionPass || !StereoDisplay->isSceneLast();
 					doRenderScene(wantTraversals, keepTraversals);
 
