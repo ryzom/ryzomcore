@@ -1355,6 +1355,12 @@ void initMainLoop()
 			LastGameCycle = NetMngr.getCurrentServerTick();
 			while(LastGameCycle == NetMngr.getCurrentServerTick())
 			{
+				// Do not spin forever when the connection died while
+				// loading (e.g. a transport-level shutdown): the server
+				// tick will never advance. The main loop's disconnection
+				// handling takes over from here.
+				if (NetMngr.getConnectionState() == CNetworkConnection::Disconnect)
+					break;
 				// Event server get events
 				CInputHandlerManager::getInstance()->pumpEventsNoIM();
 				// Update Network.
