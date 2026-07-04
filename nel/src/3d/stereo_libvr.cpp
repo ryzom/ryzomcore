@@ -498,10 +498,10 @@ uint CStereoLibVR::getSceneView() const
 
 uint CStereoLibVR::getFlareContext()
 {
-	// Eyes use contexts 0/2; the water reflection stages (21, 22) use
-	// their own contexts 1/3 (mirrored-view occlusion, own fade state)
+	// Eyes use contexts 0/2; the water reflection stages (21, 22) use the
+	// dedicated reflection contexts 4/5 (mirrored-view occlusion, own fade)
 	if (m_Stage >= 21)
-		return (m_Stage % 2) ? 1 : 3;
+		return (m_Stage % 2) ? 4 : 5;
 	return (m_Stage % 2) ? 0 : 2;
 }
 

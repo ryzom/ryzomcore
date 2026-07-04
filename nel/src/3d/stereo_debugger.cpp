@@ -627,11 +627,12 @@ bool CStereoDebugger::isSceneLast()
 uint CStereoDebugger::getFlareContext()
 {
 	// Odd stages = left eye, even stages = right eye. Scene stages use
-	// contexts 0/2; the water reflection stages (1, 2) use their own
-	// contexts 1/3: their occlusion queries test the mirrored view's
-	// depth and must not cross-feed the eyes' fade state.
+	// contexts 0/2; the water reflection stages (1, 2) use the dedicated
+	// reflection contexts 4/5 (see the CScene flare context allocation):
+	// their occlusion queries test the mirrored view's depth and must not
+	// cross-feed any other context's fade state.
 	if (m_Stage <= 2)
-		return (m_Stage % 2) ? 1 : 3;
+		return (m_Stage % 2) ? 4 : 5;
 	return (m_Stage % 2) ? 0 : 2;
 }
 

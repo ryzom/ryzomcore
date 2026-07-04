@@ -150,7 +150,7 @@ public:
 	  * per-view resources such as water reflections. */
 	virtual uint getSceneView() const { return 0; }
 
-	/// Get the flare context for the current pass (0-3). Different eyes must use different contexts.
+	/// Get the flare context for the current pass (see the CScene flare context allocation). Different eyes and reflection passes must use different contexts.
 	virtual uint getFlareContext() = 0;
 
 	/// Returns true if a new render target was set, always fase if not using render targets

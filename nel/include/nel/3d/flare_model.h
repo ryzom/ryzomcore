@@ -36,7 +36,7 @@ class CMesh;
 class CFlareModel : public CTransformShape
 {
 public:
-	enum { MaxNumContext = 4 };
+	enum { MaxNumContext = 8 }; // see CScene flare context allocation
 	enum { OcclusionTestFrameDelay = 2 }; // number of frame to wait before occlusion result is collected
 	/// Constructor
 	CFlareModel();

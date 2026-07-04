@@ -586,10 +586,13 @@ public:
 	  * Several contexts allow to deal with a flare rendered from several points of view.
 	  * There's a limited number of contexts (MaxNumFlareContexts).
 	  * Context allocation:
-	  *   0 - Main scene (default)
+	  *   0 - Main scene (default) / stereo left eye
 	  *   1 - Interface 3D scenes (character/item previews)
 	  *   2 - Stereo right eye (via IStereoDisplay::getFlareContext)
 	  *   3 - Reserved
+	  *   4 - Water reflection pass, left eye (via IStereoDisplay::getFlareContext)
+	  *   5 - Water reflection pass, right eye
+	  *   6, 7 - Free
 	  */
 	// @{
 		// The max number of contexts for flares
