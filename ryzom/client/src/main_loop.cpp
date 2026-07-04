@@ -421,9 +421,14 @@ void	beginRenderCanopyPart()
 {
 	SceneRoot->beginPartRender();
 }
-void	endRenderCanopyPart()
+void	endRenderCanopyPart(bool keepTraversals)
 {
-	SceneRoot->endPartRender(false);
+	// keepTraversals matters beyond traversals: without it endPartRender
+	// consumes the scene's ellapsed time, and replicated passes (water
+	// reflections, stereo first eye) run BEFORE the frame's scene pass —
+	// time-integrated state (e.g. flare fades) would then integrate with
+	// dt = 0 for the rest of the frame.
+	SceneRoot->endPartRender(false, true, keepTraversals);
 }
 
 void	beginRenderMainScenePart()
@@ -443,12 +448,14 @@ void	beginRenderSkyPart()
 		sky.getScene()->beginPartRender();
 	}
 }
-void	endRenderSkyPart()
+void	endRenderSkyPart(bool keepTraversals)
 {
 	if (s_SkyMode == NewSky)
 	{
 		CSky &sky = ContinentMngr.cur()->CurrentSky;
-		sky.getScene()->endPartRender(false);
+		// see endRenderCanopyPart — the sun flare fade lives in the sky
+		// scene and integrates its scene's ellapsed time
+		sky.getScene()->endPartRender(false, true, keepTraversals);
 	}
 }
 
@@ -780,9 +787,9 @@ void drawRenderScene(bool wantTraversals, bool keepTraversals)
 void endRenderScene(bool keepTraversals)
 {
 	// End Part Rendering
-	endRenderSkyPart();
+	endRenderSkyPart(keepTraversals);
 	endRenderMainScenePart(keepTraversals);
-	endRenderCanopyPart();
+	endRenderCanopyPart(keepTraversals);
 
 	// reset depth range
 	Driver->setDepthRange(0.f, CANOPY_DEPTH_RANGE_START);
