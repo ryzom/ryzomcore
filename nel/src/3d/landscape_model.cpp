@@ -185,6 +185,15 @@ void	CLandscapeModel::clipAndRenderLandscape()
 	else
 		refineCenter= _RefineCenterUser;
 
+	// Water reflection renders: refine, clip and geomorph from the REAL
+	// eye position (the clip traversal's cluster visibility override),
+	// not the mirrored below-ground camera. The tessellation and its
+	// geomorphs are computed and calibrated for the eye; evaluating the
+	// geomorph from the mirrored center renders nearby patches at wildly
+	// wrong morph factors — huge stretched terrain shapes in the
+	// reflection while the camera moves.
+	clipTrav.getClusterVisibilityPosOverride(refineCenter);
+
 	Landscape.lockBuffers ();
 
 	// Use the Clustered pyramid for Patch, but Frustum pyramid for TessBlocks.

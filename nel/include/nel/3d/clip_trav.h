@@ -91,6 +91,13 @@ public:
 		_UseClusterVisibilityPosOverride = enable;
 		_ClusterVisibilityPosOverride = pos;
 	}
+	/// When the override is active, replaces 'pos' with the override position and returns true
+	bool getClusterVisibilityPosOverride(NLMISC::CVector &pos) const
+	{
+		if (_UseClusterVisibilityPosOverride)
+			pos = _ClusterVisibilityPosOverride;
+		return _UseClusterVisibilityPosOverride;
+	}
 
 	/// traverse
 	void				traverse ();
