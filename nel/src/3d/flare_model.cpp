@@ -259,6 +259,31 @@ void	CFlareModel::traverseRender()
 				_Scene->insertInOcclusionQueryList(this);
 			}
 		}
+		// TEMP DIAGNOSTIC (sun flare fade freeze while reflections active):
+		// trace the occlusion state machine of infinite-distance flares
+		// (sun/moon), one line per 60 frames per context. Remove when resolved.
+		if (fs->getFlareAtInfiniteDist())
+		{
+			static uint64 s_LastLogFrame[MaxNumContext];
+			if (currFrame - s_LastLogFrame[flareContext] >= 60)
+			{
+				s_LastLogFrame[flareContext] = currFrame;
+				IOcclusionQuery *checkedOQ = _OcclusionQuery[flareContext][OcclusionTestFrameDelay - 1];
+				IOcclusionQuery *checkedDQ = _DrawQuery[flareContext][OcclusionTestFrameDelay - 1];
+				static const char *typeNames[] = { "n/a", "occl", "vis" };
+				CViewport vp;
+				drv->getViewport(vp);
+				nlinfo("FLAREDBG ctx=%u frm=%u cont=%d int=[%u,%u] oq=%s dq=%s mesh=%d issue=%d retr=%d ratio=%.2f intens=%.2f nfrm=%u scr=(%d,%d) vp=(%.2f,%.2f,%.2f,%.2f)",
+					flareContext, (uint)currFrame,
+					(int)(_LastRenderIntervalEnd[flareContext] + 1 == currFrame),
+					(uint)_LastRenderIntervalBegin[flareContext], (uint)_LastRenderIntervalEnd[flareContext],
+					checkedOQ ? typeNames[checkedOQ->getOcclusionType()] : "null",
+					checkedDQ ? typeNames[checkedDQ->getOcclusionType()] : "null",
+					occlusionTestMesh ? 1 : 0, (int)issueNewQuery, (int)visibilityRetrieved,
+					visibilityRatio, _Intensity[flareContext], (uint)_NumFrameForOcclusionQuery[flareContext],
+					(int)xPos, (int)yPos, vp.getX(), vp.getY(), vp.getWidth(), vp.getHeight());
+			}
+		}
 	}
 	else
 	{
