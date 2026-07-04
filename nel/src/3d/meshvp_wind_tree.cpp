@@ -1013,11 +1013,14 @@ bool	CMeshVPWindTree::isMBRVpOk(IDriver *driver) const
 	// Try to compile UBO program
 	if (_VertexProgramUBO)
 	{
+		// only log on the first real compile attempt; afterwards
+		// compileVertexProgram returns the cached failure
+		bool firstAttempt = !_VertexProgramUBO->m_CompileFailed;
 		if (driver->compileVertexProgram(_VertexProgramUBO))
 		{
 			res = true;
 		}
-		else
+		else if (firstAttempt)
 		{
 			nldebug("GL3 WindTree: UBO vertex program not available, using variant path");
 		}
