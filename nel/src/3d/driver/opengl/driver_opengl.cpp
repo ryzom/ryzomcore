@@ -3093,6 +3093,30 @@ void CDriverGL::setClipPlane(uint index, const NLMISC::CPlane &plane)
 }
 
 // ***************************************************************************
+bool CDriverGL::supportVertexProgramClipPlanes() const
+{
+	H_AUTO_OGL(CDriverGL_supportVertexProgramClipPlanes)
+
+#ifdef USE_OPENGLES
+	// no user clip plane support at all in this driver
+	return false;
+#else
+	// The NV_vertex_program (VP1.0) path ignores user clip planes by spec,
+	// and without NV_vertex_program2_option there is no clip variant either
+	// (see preferARBVertexProgram). EXT_vertex_shader clip behaviour is
+	// unspecified; that R200-era hardware gets the envmap fallback too.
+	// The ARB path clips (natively on Mesa/AMD, via the clip variant with
+	// NV_vertex_program2_option), and without any vertex program support
+	// the fixed function pipeline clips everything through glClipPlane.
+	if (_Extensions.NVVertexProgram)
+		return preferARBVertexProgram();
+	if (_Extensions.EXTVertexShader && !_Extensions.ARBVertexProgram)
+		return false;
+	return true;
+#endif
+}
+
+// ***************************************************************************
 void CDriverGL::getNumPerStageConstant(uint &lightedMaterial, uint &unlightedMaterial) const
 {
 	lightedMaterial = inlGetNumTextStages();

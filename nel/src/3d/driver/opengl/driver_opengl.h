@@ -716,6 +716,7 @@ public:
 
 	virtual void			enableClipPlane(uint index, bool enable);
 	virtual void			setClipPlane(uint index, const NLMISC::CPlane &plane);
+	virtual bool			supportVertexProgramClipPlanes() const;
 
 	GfxMode						_CurrentMode;
 	sint32						_WindowX;

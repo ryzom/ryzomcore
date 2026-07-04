@@ -1365,6 +1365,14 @@ public:
 	virtual bool			supportTextureShaders() const = 0;
 	// Is the shader water supported ? If not, the driver caller should implement its own version
 	virtual bool			supportWaterShader() const = 0;
+	/** Do user clip planes clip geometry drawn with vertex programs?
+	  * False on hardware where assembly vertex programs bypass user clip
+	  * planes (classic GL NV_vertex_program path without
+	  * NV_vertex_program2_option, or EXT_vertex_shader). Realtime planar
+	  * water reflections are disabled there (envmap fallback), as the
+	  * reflection would show unclipped underwater geometry.
+	  */
+	virtual bool			supportVertexProgramClipPlanes() const { return true; }
 	/// Does the cubemap face convention use +Z as forward? (D3D: true, GL: false)
 	/// GL cubemaps map forward (-Z) to NEGATIVE_Z face, D3D maps forward (+Z) to POSITIVE_Z face.
 	virtual bool			cubemapZPositiveForward() const = 0;

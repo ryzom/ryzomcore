@@ -195,6 +195,15 @@ uint CWaterReflectionManager::beginPasses()
 	nlassert(_Scene);
 	nlassert(!_InReflectionRender); // missing endPass()?
 
+	// Hardware gate: on drivers where vertex programs bypass user clip
+	// planes the reflection would show unclipped underwater geometry, so
+	// realtime reflections stay disabled entirely (effectively max 0;
+	// water keeps the envmap path). Checked before arming collection so
+	// such hardware never accumulates stats either.
+	IDriver *gateDrv = _Scene->getDriver();
+	if (gateDrv && !gateDrv->supportVertexProgramClipPlanes())
+		return 0;
+
 	// Water models only report visibility stats once this has been called;
 	// applications that never render reflections must not accumulate stats
 	_CollectionArmed = true;
