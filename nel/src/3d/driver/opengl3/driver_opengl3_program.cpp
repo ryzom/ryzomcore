@@ -546,7 +546,7 @@ bool CDriverGL3::compileVertexProgram(CVertexProgram *program)
 	if (hasNelvp && !hasGLSL)
 	{
 		bool linked = m_LinkedMegaShaders;
-		if (!convertNelvpToGLSL(program, linked))
+		if (!convertNelvpToGLSL(program, linked, false))
 		{
 			nlwarning("GL3: Failed to convert nelvp to GLSL");
 			program->m_CompileFailed = true;
@@ -576,6 +576,45 @@ bool CDriverGL3::compileVertexProgram(CVertexProgram *program)
 			void *p = drvInfo->NelvpConstantUB->lock();
 			memset(p, 0, regCount * 16);
 			drvInfo->NelvpConstantUB->unlock();
+
+			// Compile the clip variant (native clip mode only): the same
+			// conversion with the gl_ClipDistance epilogue. Clip planes
+			// toggle at pass granularity (water reflections), so this is a
+			// compiled split selected per pass — the base program carries no
+			// clip cost. The variant shares the outer program's constant UBO
+			// through the shared GL binding point.
+			if (!m_PPClipPlanes)
+			{
+				IProgram::CSource *nelvpSrc = NULL;
+				for (int i = 0; i < program->getSourceNb(); i++)
+				{
+					IProgram::CSource *s = program->getSource(i);
+					if (s->Profile == IProgram::nelvp)
+					{ nelvpSrc = s; break; }
+				}
+				if (nelvpSrc)
+				{
+					CVertexProgram *clipVP = new CVertexProgram();
+					IProgram::CSource *src = new IProgram::CSource();
+					src->Profile = IProgram::nelvp;
+					src->DisplayName = nelvpSrc->DisplayName + " (clip)";
+					src->setSource(std::string(nelvpSrc->SourcePtr, nelvpSrc->SourceLen));
+					src->ParamIndices = nelvpSrc->ParamIndices;
+					src->Features = nelvpSrc->Features;
+					clipVP->addSource(src);
+					if (convertNelvpToGLSL(clipVP, m_LinkedMegaShaders, true)
+						&& compileProgram(clipVP, GL_VERTEX_SHADER,
+							IProgram::glsl300esv, IProgram::glsl330v, "VP"))
+					{
+						drvInfo->NelvpClipVP = clipVP;
+					}
+					else
+					{
+						nlwarning("GL3: nelvp clip variant compilation failed for '%s'", src->DisplayName.c_str());
+						delete clipVP;
+					}
+				}
+			}
 		}
 	}
 
@@ -590,13 +629,15 @@ bool CDriverGL3::activeVertexProgram(CVertexProgram *program)
 bool CDriverGL3::activeVertexProgram(CVertexProgram *program, bool driver)
 {
 	// When the driver activates an inner VP (driver=true), the user VP must be
-	// either NULL (normal mega VP path) or an insert program whose inner variant
-	// is being materialized.
+	// either NULL (normal mega VP path), an insert program whose inner variant
+	// is being materialized, or a nelvp-converted program whose clip variant
+	// stage is being substituted for the pass.
 	if (driver)
 	{
 		nlassert(m_UserVertexProgram == NULL
 			|| (m_UserVertexProgram->m_DrvInfo
-				&& static_cast<CProgramDrvInfosGL3 *>((IProgramDrvInfos *)m_UserVertexProgram->m_DrvInfo)->isInsertProgram));
+				&& (static_cast<CProgramDrvInfosGL3 *>((IProgramDrvInfos *)m_UserVertexProgram->m_DrvInfo)->isInsertProgram
+					|| static_cast<CProgramDrvInfosGL3 *>((IProgramDrvInfos *)m_UserVertexProgram->m_DrvInfo)->isNelvpConverted)));
 	}
 
 	if (m_DriverVertexProgram == program)
@@ -1423,6 +1464,16 @@ bool CDriverGL3::setupBuiltinVertexProgram(CVertexProgram *effectiveVP, CPixelPr
 				(IProgramDrvInfos *)effectiveVP->m_DrvInfo);
 			if (di && di->isNelvpConverted && di->NelvpConstantUB)
 			{
+				// Compiled clip split: substitute the clip variant stage when
+				// clip planes are enabled this pass (pass-level toggle, like
+				// the mega VP hwClip axis). The variant's own drvinfo has no
+				// constant UBO, so re-arm m_NelvpActiveUB from the outer
+				// program's below.
+				int hwClip = (m_VPBuiltinCurrent.ClipPlaneMask != 0) ? 1 : 0;
+				CVertexProgram *vpStage = (hwClip && di->NelvpClipVP && di->NelvpClipVP->m_DrvInfo)
+					? (CVertexProgram *)di->NelvpClipVP : effectiveVP;
+				if (!activeVertexProgram(vpStage, true))
+					return false;
 				bindUniformBuffer(UBBindingVertexProgram, di->NelvpConstantUB);
 				m_NelvpActiveUB = di->NelvpConstantUB;
 				// Nelvp-converted programs have no GL uniforms (all go through UBO),
@@ -2571,13 +2622,33 @@ bool CDriverGL3::setupUserLinkedPrograms(CVertexProgram *vpProg, CPixelProgram *
 	int cube = (matDrv->PPBuiltin.TexSamplerMode != 0) ? 1 : 0;
 	int specular = m_VPSpecularOutput ? 1 : 0;
 
+	// hwClip (native gl_ClipDistance, desktop) and ppClip (PP discard,
+	// GLES) are mutually exclusive by m_PPClipPlanes; fold them into one
+	// axis for the per-program linked caches so the cached pairing follows
+	// the pass-level clip toggle on both paths (the VP stage varies by
+	// hwClip, the mega PP partner by ppClip).
+	int clip = hwClip | ppClip;
+
+	// Compiled clip split for nelvp-converted VPs: substitute the clip
+	// variant stage when clip planes are enabled this pass
+	CVertexProgram *vpStage = vpProg;
+	if (vpProg && hwClip && vpProg->m_DrvInfo)
+	{
+		CProgramDrvInfosGL3 *vpDi = static_cast<CProgramDrvInfosGL3 *>((IProgramDrvInfos *)vpProg->m_DrvInfo);
+		if (vpDi->NelvpClipVP && vpDi->NelvpClipVP->m_DrvInfo)
+			vpStage = vpDi->NelvpClipVP;
+	}
+
 	CShaderProgram *sp = NULL;
 
 	if (vpIsInsert && !ppProg)
 	{
-		// Case: Insert VP + Mega PP — use pre-compiled linked inner VP, link with mega PP
+		// Case: Insert VP + Mega PP — use pre-compiled linked inner VP, link with mega PP.
+		// Cache is indexed by the combined clip axis: the inner VP varies by
+		// hwClip, the mega PP by ppClip (indexing by ppClip alone let a
+		// stale hwClip pairing stick across passes on desktop).
 		CProgramDrvInfosGL3 *vpDrv = static_cast<CProgramDrvInfosGL3 *>((IProgramDrvInfos *)vpProg->m_DrvInfo);
-		sp = vpDrv->InsertLinkedVPMegaPP[fogOrPpl][cube][specular][ppClip];
+		sp = vpDrv->InsertLinkedVPMegaPP[fogOrPpl][cube][specular][clip];
 		if (!sp)
 		{
 			CVertexProgram *innerVP = vpDrv->InsertMegaVP[1][fogOrPpl][hwClip];
@@ -2588,23 +2659,24 @@ bool CDriverGL3::setupUserLinkedPrograms(CVertexProgram *vpProg, CPixelProgram *
 			sp = linkPrograms(innerVP, innerVP->source()->Features,
 				megaPP, megaPP->source()->Features);
 			if (!sp) return false;
-			vpDrv->InsertLinkedVPMegaPP[fogOrPpl][cube][specular][ppClip] = sp;
+			vpDrv->InsertLinkedVPMegaPP[fogOrPpl][cube][specular][clip] = sp;
 		}
 	}
 	else if (vpProg && !ppProg)
 	{
-		// Case A: User/Material VP + Mega PP
+		// Case A: User/Material VP + Mega PP (VP stage varies by hwClip for
+		// nelvp-converted programs, mega PP by ppClip — combined clip axis)
 		CProgramDrvInfosGL3 *vpDrv = static_cast<CProgramDrvInfosGL3 *>((IProgramDrvInfos *)vpProg->m_DrvInfo);
-		sp = vpDrv->LinkedVPMegaPP[fogOrPpl][cube][specular][ppClip];
+		sp = vpDrv->LinkedVPMegaPP[fogOrPpl][cube][specular][clip];
 		if (!sp)
 		{
 			int ppTableUBO = fogOrPpl ? 1 : 0;
 			CPixelProgram *megaPP = m_MegaPP[1][fogOrPpl][cube][specular][ppClip][ppTableUBO][1][1][1];
 			if (!megaPP || !megaPP->m_DrvInfo) return false;
-			sp = linkPrograms(vpProg, vpProg->source()->Features,
+			sp = linkPrograms(vpStage, vpProg->source()->Features,
 				megaPP, megaPP->source()->Features);
 			if (!sp) return false;
-			vpDrv->LinkedVPMegaPP[fogOrPpl][cube][specular][ppClip] = sp;
+			vpDrv->LinkedVPMegaPP[fogOrPpl][cube][specular][clip] = sp;
 		}
 	}
 	else if (!vpProg && ppProg)
@@ -2624,20 +2696,21 @@ bool CDriverGL3::setupUserLinkedPrograms(CVertexProgram *vpProg, CPixelProgram *
 	}
 	else
 	{
-		// Case C: User/Material VP + User/Material PP
+		// Case C: User/Material VP + User/Material PP (clip axis: the VP
+		// stage varies by hwClip for nelvp-converted programs)
 		CProgramDrvInfosGL3 *vpDrv = static_cast<CProgramDrvInfosGL3 *>((IProgramDrvInfos *)vpProg->m_DrvInfo);
 		CProgramDrvInfosGL3 *ppDrv = static_cast<CProgramDrvInfosGL3 *>((IProgramDrvInfos *)ppProg->m_DrvInfo);
-		std::map<CProgramDrvInfosGL3*, NLMISC::CSmartPtr<CShaderProgram> >::iterator it = vpDrv->LinkedUserVPPP.find(ppDrv);
-		if (it != vpDrv->LinkedUserVPPP.end())
+		std::map<CProgramDrvInfosGL3*, NLMISC::CSmartPtr<CShaderProgram> >::iterator it = vpDrv->LinkedUserVPPP[clip].find(ppDrv);
+		if (it != vpDrv->LinkedUserVPPP[clip].end())
 		{
 			sp = it->second;
 		}
 		else
 		{
-			sp = linkPrograms(vpProg, vpProg->source()->Features,
+			sp = linkPrograms(vpStage, vpProg->source()->Features,
 				ppProg, ppProg->source()->Features);
 			if (!sp) return false;
-			vpDrv->LinkedUserVPPP[ppDrv] = sp;
+			vpDrv->LinkedUserVPPP[clip][ppDrv] = sp;
 		}
 	}
 

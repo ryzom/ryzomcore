@@ -1491,7 +1491,7 @@ private:
 
 	bool			compileVertexProgram(CVertexProgram *program);
 	bool			compileInsertVertexProgram(CVertexProgram *program);
-	bool			convertNelvpToGLSL(CVertexProgram *program, bool linked);
+	bool			convertNelvpToGLSL(CVertexProgram *program, bool linked, bool clip);
 	CUniformBuffer	*getNelvpUB(TProgram program) const;
 	void			flushNelvpUserVP();
 
@@ -1770,7 +1770,8 @@ public:
 	void setMaterialBlockIndex(GLuint idx) { materialBlockIndex = idx; }
 
 	// Linked program cache for user VP + mega PP combinations
-	// Indexed by [fogOrPpl][cube][specular][ppClip]
+	// Indexed by [fogOrPpl][cube][specular][clip] (clip = hwClip|ppClip,
+	// mutually exclusive by m_PPClipPlanes — the pass-level clip toggle)
 	NLMISC::CSmartPtr<CShaderProgram> LinkedVPMegaPP[2][2][2][2];
 
 	// Linked program cache for mega VP + user PP combinations
@@ -1778,13 +1779,19 @@ public:
 	NLMISC::CSmartPtr<CShaderProgram> LinkedMegaVPPP[2][2];
 
 	// Linked program cache for user VP + user PP combinations
-	// Keyed by the other program's drvinfo pointer
-	std::map<CProgramDrvInfosGL3*, NLMISC::CSmartPtr<CShaderProgram> > LinkedUserVPPP;
+	// Keyed by the other program's drvinfo pointer, indexed by clip
+	std::map<CProgramDrvInfosGL3*, NLMISC::CSmartPtr<CShaderProgram> > LinkedUserVPPP[2];
 
 	// nelvp-converted program state
 	bool isNelvpConverted;                                // True if this VP was converted from nelvp
 	NLMISC::CSmartPtr<CUniformBuffer> NelvpConstantUB;   // UBO for nelvp constant registers (96 + 4 modelView)
 	std::map<std::string, uint> NelvpParamIndices;        // ParamIndices from nelvp source (name → register index)
+	// Clip variant (native clip mode only): the same conversion with the
+	// gl_ClipDistance epilogue, substituted per pass when clip planes are
+	// enabled — a compiled split like the mega VP hwClip axis, so the base
+	// program carries no clip cost in ordinary passes. Shares the outer
+	// program's NelvpConstantUB (this variant's own drvinfo has none).
+	NLMISC::CSmartPtr<CVertexProgram> NelvpClipVP;
 
 	// VP insert program state (glsl3vi profile)
 	bool isInsertProgram;                                 // True if this VP is a VP insert

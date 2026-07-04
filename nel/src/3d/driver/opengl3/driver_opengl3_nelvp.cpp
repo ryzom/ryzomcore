@@ -296,8 +296,11 @@ static void writeBroadcastAssign(std::stringstream &ss, const CVPOperand &dest,
 	ss << ";\n";
 }
 
-// Convert a nelvp program to GLSL and append as a new source entry
-bool CDriverGL3::convertNelvpToGLSL(CVertexProgram *program, bool linked)
+// Convert a nelvp program to GLSL and append as a new source entry.
+// 'clip' emits the gl_ClipDistance epilogue (native clip variant, selected
+// per pass when clip planes are enabled; never used when the PP handles
+// clip planes via discard).
+bool CDriverGL3::convertNelvpToGLSL(CVertexProgram *program, bool linked, bool clip)
 {
 	// Find the nelvp source
 	IProgram::CSource *nelvpSrc = NULL;
@@ -390,7 +393,7 @@ bool CDriverGL3::convertNelvpToGLSL(CVertexProgram *program, bool linked)
 		ss << "#version 300 es\n";
 		// Native clip distances in ES-profile source (same as the mega VP's
 		// linked hwClip variant). Desktop GL 3.3 also uses linked mode.
-		if (!m_PPClipPlanes)
+		if (clip)
 			ss << "#extension GL_EXT_clip_cull_distance : enable\n";
 	}
 	else
@@ -404,7 +407,12 @@ bool CDriverGL3::convertNelvpToGLSL(CVertexProgram *program, bool linked)
 		ss << "precision highp float;\n\n";
 
 	if (!linked)
-		ss << "out gl_PerVertex { vec4 gl_Position; float gl_PointSize; float gl_ClipDistance[6]; };\n\n";
+	{
+		if (clip)
+			ss << "out gl_PerVertex { vec4 gl_Position; float gl_PointSize; float gl_ClipDistance[6]; };\n\n";
+		else
+			ss << "out gl_PerVertex { vec4 gl_Position; float gl_PointSize; };\n\n";
+	}
 
 	// Input attributes — always use layout(location) for vertex inputs,
 	// even in linked mode. GLSL ES 3.00 supports layout(location) on
@@ -738,17 +746,13 @@ bool CDriverGL3::convertNelvpToGLSL(CVertexProgram *program, bool linked)
 	ss << "\n// Synthesize NeL-space position for fog\n";
 	ss << "ecPos = inverseProjectionBasis * gl_Position;\n";
 
-	// Native clip distances (skipped when the PP handles clip planes via
-	// discard, i.e. GLES/WebGL): eye-space planes from the camera UBO
-	// dotted with the synthesized NeL eye-space position. A converted
-	// program is compiled once (no per-clip-mask variants like the builtin
-	// VP), so fold per plane on the UBO mask the way the mega VP's hwClip
-	// variant does — uniform-controlled branching, no ALU when disabled.
-	// GL ignores distances whose GL_CLIP_DISTANCEi enable is off. NB: on
-	// desktop GL 3.3 the converter runs in LINKED mode too
-	// (m_LinkedMegaShaders is set for both), so this must not key on
-	// 'linked' — key on the clip implementation instead.
-	if (!m_PPClipPlanes)
+	// Native clip distances (clip variant only — the pass-level compiled
+	// split, mirroring the mega VP hwClip axis): eye-space planes from the
+	// camera UBO dotted with the synthesized NeL eye-space position. Fold
+	// per plane on the UBO mask like the mega VP's hwClip variant, so any
+	// enabled-plane combination is correct within the one variant. GL
+	// ignores distances whose GL_CLIP_DISTANCEi enable is off.
+	if (clip)
 	{
 		ss << "\n// Clip distances from camera UBO planes (uniform-folded)\n";
 		for (int i = 0; i < 6; ++i) // CDriverGL3::MaxClipPlanes
