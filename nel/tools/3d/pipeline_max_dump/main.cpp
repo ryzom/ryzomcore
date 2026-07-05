@@ -74,6 +74,8 @@ using namespace PIPELINE::MAX::EPOLY;
 static const char *filename = "/mnt/tsurugi/ryzom-assets/database/landscape/ligo/desert/pipeline_max/zonematerial-converted-165_eg.max";
 static const char *streamname = "Scene";
 
+// Overridden by argv[1] if provided.
+
 #define PBMS_GEOM_BUFFERS_POLY_A_VERTEX_CHUNK_ID 0x0100
 #define PBMS_GEOM_BUFFERS_POLY_A_EDGE_CHUNK_ID 0x010a
 #define PBMS_GEOM_BUFFERS_POLY_A_FACE_CHUNK_ID 0x011a
@@ -139,6 +141,9 @@ int main(int argc, char **argv)
 	char const *me = (argv[0] ? argv[0] : "pipeline_max_dump");
 	g_set_prgname(me);
 	gsf_init();
+
+	if (argc > 1)
+		filename = argv[1];
 
 	// Register all plugin classes
 	CSceneClassRegistry sceneClassRegistry;

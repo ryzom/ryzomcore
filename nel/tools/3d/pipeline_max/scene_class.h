@@ -166,7 +166,7 @@ template <typename T>
 const T &CSceneClass::getChunkValue(uint16 id)
 {
 	CStorageValue<T> *chunk = static_cast<CStorageValue<T> *>(getChunk(id));
-	if (!chunk) { nlerror("Try to get required chunk value 0x%x but it does not exist, bad file format"); }
+	if (!chunk) { nlerror("Try to get required chunk value 0x%x but it does not exist, bad file format", (uint32)id); }
 	m_ArchivedChunks.push_back(chunk);
 	return chunk->Value;
 }

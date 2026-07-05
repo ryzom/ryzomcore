@@ -75,7 +75,7 @@ void CTrackViewNode::parse(uint16 version, uint filter)
 		m_Empty0140 = static_cast<CStorageRaw *>(getChunk(PMB_TVNODE_EMPTY0140_CHUNK_ID));
 		if (m_Empty0140) nlassert(m_Empty0140->Value.empty());
 		m_Empty0150 = static_cast<CStorageRaw *>(getChunk(PMB_TVNODE_EMPTY0150_CHUNK_ID));
-		if (m_Empty0150) nlassert(m_Empty0140->Value.empty());
+		if (m_Empty0150) nlassert(m_Empty0150->Value.empty());
 
 		// Read child nodes
 		for (std::vector<TChild>::size_type i = 0; i < m_Children.size(); ++i)

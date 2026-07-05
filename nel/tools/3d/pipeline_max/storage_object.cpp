@@ -321,6 +321,7 @@ std::string CStorageRaw::className() const
 
 void CStorageRaw::serial(NLMISC::IStream &stream)
 {
+	if (Value.empty()) return;
 	stream.serialBuffer(&Value[0], Value.size());
 }
 

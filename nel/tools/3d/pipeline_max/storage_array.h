@@ -157,7 +157,9 @@ void CStorageArraySizePre<T>::setSize(sint32 size)
 template <typename T>
 bool CStorageArraySizePre<T>::getSize(sint32 &size) const
 {
-	size = CStorageArray<T>::getSize(size) + sizeof(uint32);
+	sint32 innerSize = 0;
+	if (!CStorageArray<T>::getSize(innerSize)) return false;
+	size = innerSize + (sint32)sizeof(uint32);
 	return true;
 }
 

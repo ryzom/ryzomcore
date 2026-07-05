@@ -532,7 +532,8 @@ void CConfigScriptMetaString::serial(NLMISC::IStream &stream)
 		uint32 size = Value.size() + 1;
 		stream.serial(size);
 	}
-	stream.serialBuffer(static_cast<uint8 *>(static_cast<void *>(&Value[0])), Value.size());
+	if (!Value.empty())
+		stream.serialBuffer(static_cast<uint8 *>(static_cast<void *>(&Value[0])), Value.size());
 	uint8 endByte = 0;
 	stream.serial(endByte);
 	nlassert(endByte == 0);
