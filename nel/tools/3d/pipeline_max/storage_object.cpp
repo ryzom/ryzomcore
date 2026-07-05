@@ -50,7 +50,7 @@ namespace MAX {
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
-IStorageObject::IStorageObject()
+IStorageObject::IStorageObject() : m_Was64BitChunk(false), m_Was64BitChunkKnown(false)
 {
 
 }
@@ -137,7 +137,7 @@ void CStorageContainer::serial(NLMISC::IStream &stream)
 		// Use dummy size value so the system can at least read the header
 		CStorageChunks chunks(stream, stream.isReading() ? 0xFF : 0);
 		if (!stream.isReading()) chunks.set64Bit(m_Was64Bit);
-		bool ok = chunks.enterChunk(0x4352, true);
+		bool ok = chunks.enterChunk(0x4352, true, m_Was64Bit);
 		nlassert(ok);
 		serial(chunks);
 		chunks.leaveChunk();
@@ -267,6 +267,13 @@ void CStorageContainer::serial(CStorageChunks &chunks)
 			uint16 id = chunks.getChunkId();
 			bool cont = chunks.isChunkContainer();
 			IStorageObject *storageObject = createChunkById(id, cont);
+			bool childWas64Bit = chunks.isCurrentChunk64Bit();
+			storageObject->setWas64BitChunk(childWas64Bit);
+			// Track this container's own aggregate width preference (did ANY direct child use a
+			// 64-bit header) so build() can default brand-new sub-chunks (freshly created by typed
+			// classes, e.g. CNodeImpl's version/parent/name — see wasRead64BitChunkKnown()) to the
+			// width the rest of this container actually uses, rather than always 32-bit.
+			if (childWas64Bit) m_Was64Bit = true;
 			storageObject->setSize(chunks.getChunkSize());
 			if (storageObject->isContainer()) static_cast<CStorageContainer *>(storageObject)->serial(chunks);
 			else storageObject->serial(chunks.stream());
@@ -285,7 +292,8 @@ void CStorageContainer::serial(CStorageChunks &chunks)
 #endif
 		for (TStorageObjectContainer::iterator it = m_Chunks.begin(), end = m_Chunks.end(); it != end; ++it)
 		{
-			chunks.enterChunk(it->first, it->second->writeAsContainer());
+			bool as64Bit = it->second->wasRead64BitChunkKnown() ? it->second->wasRead64BitChunk() : m_Was64Bit;
+			chunks.enterChunk(it->first, it->second->writeAsContainer(), as64Bit);
 			IStorageObject *storageObject = it->second;
 			if (storageObject->isContainer()) static_cast<CStorageContainer *>(storageObject)->serial(chunks);
 			else storageObject->serial(chunks.stream());

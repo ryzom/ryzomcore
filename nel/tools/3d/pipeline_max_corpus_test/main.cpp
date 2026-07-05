@@ -24,6 +24,13 @@
 
 #include <cstdio>
 #include <fstream>
+#ifdef NL_OS_WINDOWS
+#include <process.h>
+#define PMCT_GETPID _getpid
+#else
+#include <unistd.h>
+#define PMCT_GETPID getpid
+#endif
 
 #include <gsf/gsf-infile-msole.h>
 #include <gsf/gsf-infile.h>
@@ -132,7 +139,10 @@ struct StreamResult
 
 // Do a T1 roundtrip via CStorageContainer (raw pass-through). Reads gsf stream into src bytes,
 // serials into a container, serials container out to a memory buffer, compares bytes.
-static std::string g_tempPath = "/tmp/pipeline_max_corpus_test.tmp";
+// PID-suffixed so concurrent invocations (e.g. a parallelized corpus sweep, or two unrelated test
+// runs overlapping) don't race on the same file and corrupt each other's round-trip — this bit a
+// stray background invocation during development (see pipeline_max_design.md).
+static std::string g_tempPath = "/tmp/pipeline_max_corpus_test." + std::to_string((long)PMCT_GETPID()) + ".tmp";
 
 static bool t1Roundtrip(GsfInput *in, std::vector<uint8> &src, std::vector<uint8> &rt, std::string &info)
 {

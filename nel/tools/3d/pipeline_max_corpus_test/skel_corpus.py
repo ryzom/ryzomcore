@@ -15,6 +15,13 @@ Defaults are the layout on Kaetemi's machine; override via CLI when running else
 
 import argparse, os, re, struct, subprocess, sys, collections
 
+# Autotools/CTest skip convention: exit 77 means "test could not run here", distinct from a real
+# failure (exit 1). Used when the private asset checkouts (ryzomcore_graphics, core4_data,
+# ryzomcore_leveldesign) or the built binaries aren't present — e.g. any CI/dev machine that
+# doesn't have Kaetemi's local asset checkouts. The CMake `add_test()` registration for this
+# script sets the SKIP_RETURN_CODE test property to 77 to match.
+SKIP_CODE = 77
+
 def parse_workspace(path):
     dirs = []
     if not os.path.isfile(path):
@@ -119,9 +126,11 @@ def run_tests(bin_dir, files, do_t1, do_t2, do_t3, ref_biped, ref_nonbiped, outp
     corpus_test = os.path.join(bin_dir, "pipeline_max_corpus_test")
     export_skel = os.path.join(bin_dir, "pipeline_max_export_skel")
     if do_t1 and not os.path.isfile(corpus_test):
-        sys.exit(f"missing: {corpus_test}")
+        print(f"SKIP: missing binary {corpus_test} (build it first)")
+        sys.exit(SKIP_CODE)
     if do_t3 and not os.path.isfile(export_skel):
-        sys.exit(f"missing: {export_skel}")
+        print(f"SKIP: missing binary {export_skel} (build it first)")
+        sys.exit(SKIP_CODE)
     if do_t3 and output_dir:
         os.makedirs(output_dir, exist_ok=True)
 
@@ -255,10 +264,17 @@ def main():
     if not (args.t1 or args.t2 or args.t3):
         args.t1 = True
 
+    if not os.path.isdir(args.graphics) or not os.path.isdir(args.workspace):
+        print(f"SKIP: asset checkouts not present ({args.graphics}, {args.workspace}) — "
+              f"this corpus test only runs where Kaetemi's private ryzomcore_graphics / "
+              f"ryzomcore_leveldesign checkouts are available")
+        sys.exit(SKIP_CODE)
+
     files = enumerate_corpus(args.graphics, args.workspace)
     print(f"corpus: {len(files)} .max files across {len(set(d for d,_,_ in files))} dirs")
     if not files:
-        sys.exit("empty corpus — check --graphics / --workspace paths")
+        print("SKIP: enumerated 0 .max files — check --graphics / --workspace paths")
+        sys.exit(SKIP_CODE)
 
     ref_biped = args.ref_biped if os.path.isdir(args.ref_biped) else None
     ref_nonbiped = args.ref_nonbiped if os.path.isdir(args.ref_nonbiped) else None

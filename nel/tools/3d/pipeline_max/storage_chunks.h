@@ -73,13 +73,21 @@ public:
 
 	// Returns true if there's another chunk, false if no more chunks in this container or if the current chunk is not a container
 	bool enterChunk();
-	// Reads and skips chunks until the one with given id is found, or writes a chunk with this id
-	bool enterChunk(uint16 id, bool container);
+	// Reads and skips chunks until the one with given id is found, or writes a chunk with this id.
+	// In write mode, as64Bit picks the header width for THIS chunk specifically (6 vs 14 bytes) —
+	// callers should pass the per-chunk width recorded at read time (IStorageObject::
+	// wasRead64BitChunk()), not the stream-wide is64Bit() sticky flag, so a stream with a genuine
+	// mix of 32-bit and 64-bit chunk headers round-trips each chunk at its original width instead
+	// of widening everything to whatever the outermost chunk happened to use.
+	bool enterChunk(uint16 id, bool container, bool as64Bit = false);
 	// Returns the number of skipped bytes in read more, returns chunk size including header in write mode
 	sint32 leaveChunk();
 
 	inline bool is64Bit() const { return m_Is64Bit; }
 	inline void set64Bit(bool enabled = true) { m_Is64Bit = enabled; }
+	// True if the chunk just entered (via enterChunk()) had a 64-bit header. Only meaningful in
+	// read mode, right after a successful enterChunk().
+	inline bool isCurrentChunk64Bit() const { return currentChunk()->HeaderSize == 14; }
 
 	inline uint16 getChunkId() const { return currentChunk()->Id; }
 	inline sint32 getChunkSize() const { return currentChunk()->getSize(); }

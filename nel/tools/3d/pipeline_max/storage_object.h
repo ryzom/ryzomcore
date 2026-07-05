@@ -88,6 +88,24 @@ public: // should be protected but that doesn't compile, nice c++!
 	// e.g. CSceneClass overrides this to reproduce a chunk that was read with the container bit
 	// unset even though the object type is always a CStorageContainer (see CSceneClass::m_ReadAsLeaf).
 	virtual bool writeAsContainer() const { return isContainer(); }
+
+	// Whether THIS specific chunk was read with a 64-bit header (6- vs 14-byte chunk header; see
+	// CStorageChunks). Set by CStorageContainer::serial(CStorageChunks&) right after the chunk is
+	// entered, consulted on write so a stream with a genuine mix of 32-bit and 64-bit chunks
+	// round-trips each chunk at its original width instead of the writer upgrading everything to
+	// whatever width the outermost chunk happened to use (see pipeline_max_design.md defect list).
+	// Tri-state (known/unknown, not just true/false): typed classes commonly rebuild their own
+	// sub-chunks as brand new objects during build() (putChunk/putChunkValue), which never went
+	// through a read, so they have no original width of their own — wasWas64BitChunkKnown() is
+	// false for those, and the container's own build() falls back to its aggregate m_Was64Bit
+	// default for them instead of silently treating "never read" as "was 32-bit".
+	inline void setWas64BitChunk(bool was64Bit) { m_Was64BitChunk = was64Bit; m_Was64BitChunkKnown = true; }
+	inline bool wasRead64BitChunk() const { return m_Was64BitChunk; }
+	inline bool wasRead64BitChunkKnown() const { return m_Was64BitChunkKnown; }
+
+private:
+	bool m_Was64BitChunk;
+	bool m_Was64BitChunkKnown;
 };
 
 // CStorageContainer : serializes a container chunk

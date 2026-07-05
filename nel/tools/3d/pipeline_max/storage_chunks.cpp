@@ -125,7 +125,7 @@ bool CStorageChunks::enterChunk()
 	}
 }
 
-bool CStorageChunks::enterChunk(uint16 id, bool container)
+bool CStorageChunks::enterChunk(uint16 id, bool container, bool as64Bit)
 {
 	if (!m_Stream.isReading())
 	{
@@ -138,11 +138,11 @@ bool CStorageChunks::enterChunk(uint16 id, bool container)
 		CChunk *chunk = currentChunk();
 		chunk->Id = container ? 1 : 0; // reused: bit indicates container-flag for leaveChunk
 		chunk->OffsetBegin = m_Stream.getPos(); // store current pos
-		chunk->HeaderSize = m_Is64Bit ? 14 : 6; // per-chunk width, patched in leaveChunk
+		chunk->HeaderSize = as64Bit ? 14 : 6; // per-chunk width, patched in leaveChunk
 
 		// write header
 		m_Stream.serial(id); // write the id
-		if (m_Is64Bit)
+		if (as64Bit)
 		{
 			uint32 zero = 0;
 			uint64 sizeDummy64 = 0xFFFFFFFFFFFFFFFFULL;
