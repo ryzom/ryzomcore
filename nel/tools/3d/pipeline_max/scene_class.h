@@ -131,6 +131,16 @@ public:
 	inline CSceneClassContainer *container() const { return m_Scene->container(); }
 	//@}
 
+	//! \name Container-bit preservation
+	//@{
+	/// Set by CSceneClassContainer::createChunkById when this object's own chunk was read with
+	/// the container bit unset (a scene-class slot that is a literal 0-byte leaf in the source
+	/// file — every CSceneClass is a CStorageContainer so isContainer() is always true, but the
+	/// file's own bit for this particular slot must be reproduced or T2 byte-identity breaks).
+	inline void setReadAsLeaf(bool readAsLeaf) { m_ReadAsLeaf = readAsLeaf; }
+	virtual bool writeAsContainer() const { return !m_ReadAsLeaf; }
+	//@}
+
 protected:
 	//! \name Methods used by inheriting classes to read and write to the storage safely
 	//@{
@@ -159,6 +169,8 @@ private:
 	TStorageObjectIterator m_PutChunkInsert;
 
 	CScene *m_Scene;
+
+	bool m_ReadAsLeaf;
 
 }; /* class CSceneClass */
 

@@ -195,36 +195,42 @@ uint32 CSceneClassContainer::getOrCreateStorageIndex(CSceneClass *storageObject)
 IStorageObject *CSceneClassContainer::createChunkById(uint16 id, bool container)
 {
 	// nldebug("Scene class id %x (%i)", (uint32)id, (uint32)id);
+	CSceneClass *sceneClass = NULL;
 	switch (id)
 	{
 		// Known unknown special identifiers...
 	case 0x2032:
-		return m_SceneClassRegistry->createUnknown(m_Scene, 0x0, NLMISC::CClassId(0x29263a68, 0x405f22f5), ucstring("OSM Derived"), ucstring("Internal"), ucstring("Internal"));
+		sceneClass = m_SceneClassRegistry->createUnknown(m_Scene, 0x0, NLMISC::CClassId(0x29263a68, 0x405f22f5), ucstring("OSM Derived"), ucstring("Internal"), ucstring("Internal"));
+		break;
 	case 0x2033:
-		return m_SceneClassRegistry->createUnknown(m_Scene, 0x0, NLMISC::CClassId(0x4ec13906, 0x5578130e), ucstring("WSM Derived"), ucstring("Internal"), ucstring("Internal"));
+		sceneClass = m_SceneClassRegistry->createUnknown(m_Scene, 0x0, NLMISC::CClassId(0x4ec13906, 0x5578130e), ucstring("WSM Derived"), ucstring("Internal"), ucstring("Internal"));
+		break;
 		// return new CSceneClass(m_Scene); // TODO: Make dummy dllentry and classentry for these...
 		// return static_cast<IStorageObject *>(new CSceneClassUnknown<CSceneClass>(dllEntry, classEntry));
-	}
-	const CClassEntry *classEntry = m_ClassDirectory3->get(id);
-	CSceneClass *sceneClass = m_SceneClassRegistry->create(m_Scene, classEntry->superClassId(), classEntry->classId());
-	if (sceneClass)
-	{
-		return static_cast<IStorageObject *>(sceneClass);
-	}
-	else
-	{
-		const CDllEntry *dllEntry = m_DllDirectory->get(classEntry->dllIndex());
-		sceneClass = m_SceneClassRegistry->createUnknown(m_Scene, classEntry->superClassId(), classEntry->classId(), classEntry->displayName(), dllEntry->dllFilename(), dllEntry->dllDescription());
-		if (sceneClass)
+	default:
 		{
-			return static_cast<IStorageObject *>(sceneClass);
+			const CClassEntry *classEntry = m_ClassDirectory3->get(id);
+			sceneClass = m_SceneClassRegistry->create(m_Scene, classEntry->superClassId(), classEntry->classId());
+			if (!sceneClass)
+			{
+				const CDllEntry *dllEntry = m_DllDirectory->get(classEntry->dllIndex());
+				sceneClass = m_SceneClassRegistry->createUnknown(m_Scene, classEntry->superClassId(), classEntry->classId(), classEntry->displayName(), dllEntry->dllFilename(), dllEntry->dllDescription());
+				if (!sceneClass)
+				{
+					// Create an invalid unknown scene class
+					sceneClass = new CSceneClassUnknown<CSceneClass>(m_Scene, classEntry->classId(), classEntry->superClassId(), classEntry->displayName(), "SceneClassUnknown", dllEntry->dllFilename(), dllEntry->dllDescription());
+				}
+			}
 		}
-		else
-		{
-			// Create an invalid unknown scene class
-			return static_cast<IStorageObject *>(new CSceneClassUnknown<CSceneClass>(m_Scene,classEntry->classId(), classEntry->superClassId(), classEntry->displayName(), "SceneClassUnknown", dllEntry->dllFilename(), dllEntry->dllDescription()));
-		}
+		break;
 	}
+	// A scene-class chunk is always typed as a container object (every CSceneClass is a
+	// CStorageContainer), but the source file may have stored this specific slot with the
+	// container bit unset (observed as a literal 0-byte leaf — some object types are sometimes
+	// emitted empty by the Max exporter). Remember that so build() re-emits the same bit; see
+	// CSceneClass::writeAsContainer.
+	if (!container) sceneClass->setReadAsLeaf(true);
+	return static_cast<IStorageObject *>(sceneClass);
 }
 
 ////////////////////////////////////////////////////////////////////////

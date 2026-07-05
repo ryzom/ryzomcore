@@ -118,6 +118,10 @@ protected:
 
 private:
 	TMap m_Entries;
+	/// Entries in original file order (or creation order for authored entries). build() writes
+	/// entries in this order, not m_Entries' key-sorted order, so files whose exporter didn't
+	/// insert entries in (ClassId,SuperClassId,SubId) order still round-trip byte-identically.
+	std::vector<CAppDataEntry *> m_EntryOrder;
 
 }; /* class CAppData */
 
@@ -254,6 +258,7 @@ T *CAppData::getOrCreate(NLMISC::CClassId classId, TSClassId superClassId, uint3
 		appDataEntry = new CAppDataEntry();
 		appDataEntry->init();
 		m_Entries[key] = appDataEntry;
+		m_EntryOrder.push_back(appDataEntry);
 		appDataEntry->key()->ClassId = classId;
 		appDataEntry->key()->SuperClassId = superClassId;
 		appDataEntry->key()->SubId = subId;

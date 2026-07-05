@@ -285,7 +285,7 @@ void CStorageContainer::serial(CStorageChunks &chunks)
 #endif
 		for (TStorageObjectContainer::iterator it = m_Chunks.begin(), end = m_Chunks.end(); it != end; ++it)
 		{
-			chunks.enterChunk(it->first, it->second->isContainer());
+			chunks.enterChunk(it->first, it->second->writeAsContainer());
 			IStorageObject *storageObject = it->second;
 			if (storageObject->isContainer()) static_cast<CStorageContainer *>(storageObject)->serial(chunks);
 			else storageObject->serial(chunks.stream());

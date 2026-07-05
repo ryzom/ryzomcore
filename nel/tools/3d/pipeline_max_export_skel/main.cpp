@@ -43,6 +43,7 @@
 #include "../pipeline_max/builtin/i_node.h"
 #include "../pipeline_max/builtin/node_impl.h"
 #include "../pipeline_max/builtin/reference_maker.h"
+#include "../pipeline_max/builtin/biped_driven.h"
 
 using namespace PIPELINE::MAX;
 using namespace PIPELINE::MAX::BUILTIN;
@@ -187,12 +188,9 @@ static bool readRawBytes(CSceneClass *sc, uint16 chunkId, void *dst, size_t nByt
 // Returns true if the node's TM controller (getReference(0)) is a biped BipDriven_Control
 // (ClassId {0x9154, 0}). Uses classDesc() from the scene class registry which was populated by
 // CSceneClassContainer::createChunkById at load time, so this is O(1).
-static const NLMISC::CClassId CLASSID_BIP_DRIVEN(0x00009154, 0x00000000);
 static bool isBipedBoneNode(INode *node)
 {
-	CSceneClass *tmCtrl = dynamic_cast<CSceneClass *>(node->getReference(0));
-	if (!tmCtrl) return false;
-	return tmCtrl->classDesc()->classId() == CLASSID_BIP_DRIVEN;
+	return dynamic_cast<CBipedDriven *>(node->getReference(0)) != NULL;
 }
 
 // Read 0x096c off the node itself and return the CVector part (Max biped bone dimensions).
@@ -211,23 +209,18 @@ static NLMISC::CVector readNodeBoneDimensions(INode *node)
 }
 
 // BipDriven Control (0x9154) stores its (biped_bone_id, link_index) pair as chunk 0x0200
-// (8 bytes = 2 uint32s). The bone_id maps to Autodesk's biped.getIdLink table (12=pelvis,
-// 9=spine, 11=head, etc.). We use it to distinguish "straight chain" bones (child.id ==
-// parent.id and child.link == parent.link + 1, e.g. Spine → Spine1) from "chain base" bones
-// (child.id != parent.id, e.g. Pelvis → Spine crosses biped groups) — the two need different
-// local-position rules.
-#define CHUNK_BIP_DRIVEN_IDLINK 0x0200
+// (8 bytes = 2 uint32s), now typed as CBipedDriven (see builtin/biped_driven.h). The bone_id maps
+// to Autodesk's biped.getIdLink table (12=pelvis, 9=spine, 11=head, etc.). We use it to
+// distinguish "straight chain" bones (child.id == parent.id and child.link == parent.link + 1,
+// e.g. Spine → Spine1) from "chain base" bones (child.id != parent.id, e.g. Pelvis → Spine
+// crosses biped groups) — the two need different local-position rules.
 static bool readBipDrivenIdLink(INode *node, uint32 &boneId, uint32 &linkIdx)
 {
-	CSceneClass *tmCtrl = dynamic_cast<CSceneClass *>(node->getReference(0));
+	CBipedDriven *tmCtrl = dynamic_cast<CBipedDriven *>(node->getReference(0));
 	if (!tmCtrl) return false;
-	if (tmCtrl->classDesc()->classId() != CLASSID_BIP_DRIVEN) return false;
-	IStorageObject *chunk = findChunkAnywhere(tmCtrl, CHUNK_BIP_DRIVEN_IDLINK);
-	if (!chunk) return false;
-	CStorageRaw *raw = dynamic_cast<CStorageRaw *>(chunk);
-	if (!raw || raw->Value.size() < 8) return false;
-	memcpy(&boneId, raw->Value.data(), 4);
-	memcpy(&linkIdx, raw->Value.data() + 4, 4);
+	if (!tmCtrl->hasBipedIdLink()) return false;
+	boneId = tmCtrl->bipedBoneId();
+	linkIdx = tmCtrl->bipedLinkIndex();
 	return true;
 }
 

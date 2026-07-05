@@ -84,6 +84,10 @@ public: // should be protected but that doesn't compile, nice c++!
 	virtual bool getSize(sint32 &size) const;
 	// Only true when inherting from CStorageContainer
 	virtual bool isContainer() const;
+	// Which chunk-header container bit to write for this object. Defaults to isContainer(), but
+	// e.g. CSceneClass overrides this to reproduce a chunk that was read with the container bit
+	// unset even though the object type is always a CStorageContainer (see CSceneClass::m_ReadAsLeaf).
+	virtual bool writeAsContainer() const { return isContainer(); }
 };
 
 // CStorageContainer : serializes a container chunk
