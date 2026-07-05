@@ -172,6 +172,65 @@ static bool readRawBytes(CSceneClass *sc, uint16 chunkId, void *dst, size_t nByt
 #define CHUNK_TCB_QUAT_VALUE   0x2504 // CQuat
 #define CHUNK_BEZIER_SCALE_VALUE 0x2505 // CVector + CQuat (28 bytes) — take first CVector
 
+// Node-level chunks (on every CNodeImpl, orphaned):
+//   0x096a  12 bytes  CVector — pivot-like offset; observed all-zero on biped bones and small
+//                                garbage-looking values on non-biped roots. Not used.
+//   0x096b  16 bytes  CQuat — offset rotation; identity on biped bones, real rotation on some
+//                              non-biped roots. Not used yet.
+//   0x096c  28 bytes  CVector + CQuat — on non-biped nodes the CVector is scale (~1,1,1) and the
+//                              quat is identity; on biped bones the CVector is the bone's own
+//                              physical dimensions in Max biped's convention (X=length along the
+//                              bone, Y=width, Z=depth), which for straight-chain descendants
+//                              equals the LOCAL POSITION OFFSET of the child from this bone.
+#define CHUNK_NODE_096C 0x096c
+
+// Returns true if the node's TM controller (getReference(0)) is a biped BipDriven_Control
+// (ClassId {0x9154, 0}). Uses classDesc() from the scene class registry which was populated by
+// CSceneClassContainer::createChunkById at load time, so this is O(1).
+static const NLMISC::CClassId CLASSID_BIP_DRIVEN(0x00009154, 0x00000000);
+static bool isBipedBoneNode(INode *node)
+{
+	CSceneClass *tmCtrl = dynamic_cast<CSceneClass *>(node->getReference(0));
+	if (!tmCtrl) return false;
+	return tmCtrl->classDesc()->classId() == CLASSID_BIP_DRIVEN;
+}
+
+// Read 0x096c off the node itself and return the CVector part (Max biped bone dimensions).
+// Returns (0,0,0) if the chunk isn't present.
+static NLMISC::CVector readNodeBoneDimensions(INode *node)
+{
+	NLMISC::CVector v = NLMISC::CVector::Null;
+	CSceneClass *n = dynamic_cast<CSceneClass *>(node);
+	if (!n) return v;
+	IStorageObject *chunk = findChunkAnywhere(n, CHUNK_NODE_096C);
+	if (!chunk) return v;
+	CStorageRaw *raw = dynamic_cast<CStorageRaw *>(chunk);
+	if (!raw || raw->Value.size() < 12) return v;
+	memcpy(&v, raw->Value.data(), 12);
+	return v;
+}
+
+// BipDriven Control (0x9154) stores its (biped_bone_id, link_index) pair as chunk 0x0200
+// (8 bytes = 2 uint32s). The bone_id maps to Autodesk's biped.getIdLink table (12=pelvis,
+// 9=spine, 11=head, etc.). We use it to distinguish "straight chain" bones (child.id ==
+// parent.id and child.link == parent.link + 1, e.g. Spine → Spine1) from "chain base" bones
+// (child.id != parent.id, e.g. Pelvis → Spine crosses biped groups) — the two need different
+// local-position rules.
+#define CHUNK_BIP_DRIVEN_IDLINK 0x0200
+static bool readBipDrivenIdLink(INode *node, uint32 &boneId, uint32 &linkIdx)
+{
+	CSceneClass *tmCtrl = dynamic_cast<CSceneClass *>(node->getReference(0));
+	if (!tmCtrl) return false;
+	if (tmCtrl->classDesc()->classId() != CLASSID_BIP_DRIVEN) return false;
+	IStorageObject *chunk = findChunkAnywhere(tmCtrl, CHUNK_BIP_DRIVEN_IDLINK);
+	if (!chunk) return false;
+	CStorageRaw *raw = dynamic_cast<CStorageRaw *>(chunk);
+	if (!raw || raw->Value.size() < 8) return false;
+	memcpy(&boneId, raw->Value.data(), 4);
+	memcpy(&linkIdx, raw->Value.data() + 4, 4);
+	return true;
+}
+
 static void getLocalTransform(CReferenceMaker *tmCtrl,
                               NLMISC::CVector &pos, NLMISC::CQuat &rot, NLMISC::CVector &scale)
 {
@@ -193,6 +252,54 @@ static void getLocalTransform(CReferenceMaker *tmCtrl,
 	if (posSc) readRawBytes(posSc, CHUNK_BEZIER_POS_VALUE, &pos, 12);
 	if (rotSc) readRawBytes(rotSc, CHUNK_TCB_QUAT_VALUE, &rot, 16);
 	if (scaleSc) readRawBytes(scaleSc, CHUNK_BEZIER_SCALE_VALUE, &scale, 12);
+}
+
+// Autodesk biped internal bone-id constants — 0-based, one less than the MaxScript-facing IDs in
+// biped.getIdLink docs. Confirmed by dumping 0x0200 across fy_hom_skel: Bip01 Spine → id=8,
+// Bip01 Neck → id=16, Bip01 Head → id=10, Bip01 Pelvis → id=11, L Clavicle group id=0, etc.
+enum EBipedBoneId
+{
+	BID_LARM = 0, BID_RARM = 1, BID_LFINGERS = 2, BID_RFINGERS = 3,
+	BID_LLEG = 4, BID_RLEG = 5, BID_LTOES = 6, BID_RTOES = 7,
+	BID_SPINE = 8, BID_TAIL = 9, BID_HEAD = 10, BID_PELVIS = 11,
+	BID_VERTICAL = 12, BID_HORIZONTAL = 13, BID_TURN = 14, BID_FOOTPRINTS = 15,
+	BID_NECK = 16, BID_PONY1 = 17, BID_PONY2 = 18,
+	BID_PROP1 = 19, BID_PROP2 = 20, BID_PROP3 = 21,
+};
+
+// Approximate local transform for a biped bone. Rules, in order:
+//   1. Parent isn't a BipDriven biped bone (parent is COM/V-H-T, or non-biped): local pos = 0.
+//      Matches ref for Bip01 Pelvis, most root-attached biped bones.
+//   2. Spine base (id=9, link=0): position inherits from COM per SDK docs, so the offset relative
+//      to the INode parent (Pelvis) is roughly the Spine's OWN length. Use self.096c.x.
+//   3. Straight-chain default: local pos = (parent.096c.x, 0, 0). Correct for Spine1→Head, finger
+//      sub-segments, everything the "position inherits from INode parent" rule applies to.
+//   Rotation is left as identity — getting real biped rotations requires the biped's forward
+//   kinematics using the rotation-inheritance rules (upper arms/legs/spine-base/feet inherit from
+//   COM; clavicles from last spine link). Chain-crossing bones (clavicles, upper limbs, upper
+//   legs, feet) still fall through the straight-chain rule and are approximate.
+static void getBipedLocalTransformApprox(INode *node, NLMISC::CVector &pos, NLMISC::CQuat &rot, NLMISC::CVector &scale)
+{
+	pos = NLMISC::CVector::Null;
+	rot = NLMISC::CQuat::Identity;
+	scale = NLMISC::CVector(1, 1, 1);
+
+	INode *parent = node->parent();
+	if (!parent) return;
+	if (!isBipedBoneNode(parent)) return; // parent isn't a BipDriven biped bone — rule 1
+
+	uint32 selfId = 0, selfLink = 0;
+	if (readBipDrivenIdLink(node, selfId, selfLink) && selfId == BID_SPINE && selfLink == 0)
+	{
+		// Rule 2: Spine base — position from COM, approximated by own X length.
+		NLMISC::CVector selfDims = readNodeBoneDimensions(node);
+		pos = NLMISC::CVector(selfDims.x, 0.0f, 0.0f);
+		return;
+	}
+
+	// Rule 3: straight chain — child at end of parent along parent's X axis.
+	NLMISC::CVector parentDims = readNodeBoneDimensions(parent);
+	pos = NLMISC::CVector(parentDims.x, 0.0f, 0.0f);
 }
 
 static NLMISC::CMatrix makeLocalTM(const NLMISC::CVector &pos, const NLMISC::CQuat &rot, const NLMISC::CVector &scale)
@@ -243,7 +350,17 @@ static void walkNode(INode *node, sint32 fatherId, const NLMISC::CMatrix &parent
 	NLMISC::CVector realPos, realScale;
 	NLMISC::CQuat realRot;
 	CReferenceMaker *tmCtrl = node->getReference(0);
-	getLocalTransform(tmCtrl, realPos, realRot, realScale);
+	if (isBipedBoneNode(node))
+	{
+		// Straight-chain biped approximation until we decode the full biped rig — see
+		// getBipedLocalTransformApprox for what this does and doesn't cover.
+		getBipedLocalTransformApprox(node, realPos, realRot, realScale);
+		b.UnheritScale = true; // biped bones always unherit their parent's scale (see plugin_max/nel_mesh_lib)
+	}
+	else
+	{
+		getLocalTransform(tmCtrl, realPos, realRot, realScale);
+	}
 	realRot.normalize();
 
 	NLMISC::CMatrix localTM = makeLocalTM(realPos, realRot, realScale);
@@ -300,7 +417,17 @@ static void walkNodeD(INode *node, sint32 fatherId, const Mat4D &parentWorld,
 	NLMISC::CVector realPos, realScale;
 	NLMISC::CQuat realRot;
 	CReferenceMaker *tmCtrl = node->getReference(0);
-	getLocalTransform(tmCtrl, realPos, realRot, realScale);
+	if (isBipedBoneNode(node))
+	{
+		// Straight-chain biped approximation until we decode the full biped rig — see
+		// getBipedLocalTransformApprox for what this does and doesn't cover.
+		getBipedLocalTransformApprox(node, realPos, realRot, realScale);
+		b.UnheritScale = true; // biped bones always unherit their parent's scale (see plugin_max/nel_mesh_lib)
+	}
+	else
+	{
+		getLocalTransform(tmCtrl, realPos, realRot, realScale);
+	}
 	realRot.normalize();
 
 	Mat4D localTM = Mat4D::fromTRS(realPos, realRot, realScale);
