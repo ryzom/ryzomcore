@@ -163,20 +163,22 @@ def run_tests(bin_dir, files, do_t1, do_t2, do_t3, ref_biped, ref_nonbiped, outp
         if do_t3:
             base = os.path.splitext(name)[0]
             out_skel = os.path.join(output_dir, base + ".skel") if output_dir else "/tmp/skel_test.skel"
-            # Pass --allow-biped-degraded on biped files so the exporter runs (degraded output —
-            # correct names/hierarchy, identity local transforms) instead of refusing outright.
-            # T3 reports the delta so degraded output can't quietly pass as a match.
-            extra = ["--allow-biped-degraded"] if kind == "biped" else []
-            r = subprocess.run([export_skel] + extra + [full, out_skel],
+            r = subprocess.run([export_skel, full, out_skel],
                                capture_output=True, text=True, timeout=120)
             if r.returncode != 0:
                 b["t3_fail"].append((name, f"exporter rc={r.returncode}", r.stderr.strip()))
                 continue
-            ref_dir_here = ref_biped if kind == "biped" else ref_nonbiped
-            if not ref_dir_here:
-                continue
-            ref = os.path.join(ref_dir_here, base + ".skel")
-            if not os.path.isfile(ref):
+            # A reference may live in either output set regardless of biped-ness: the biped kami
+            # and degenerate-homin rigs are fauna, the humanoids are characters. Check both.
+            ref = None
+            for ref_dir_here in (ref_biped, ref_nonbiped):
+                if not ref_dir_here:
+                    continue
+                cand = os.path.join(ref_dir_here, base + ".skel")
+                if os.path.isfile(cand):
+                    ref = cand
+                    break
+            if not ref:
                 b["t3_missing_ref"].append(name)
                 continue
             with open(out_skel, "rb") as f: ours = f.read()
