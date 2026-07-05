@@ -61,6 +61,10 @@
 //       a separate reflection pass. Stresses the multi-plane budget and is
 //       the testbed for reflection render target packing.
 //   K/L - Fewer/more procedural pools
+//   O - Cycle the reflection texture budget (unlimited, 1..4): passes pack
+//       their active regions as tiles into shared render target textures;
+//       when the budget is full, tiles shrink instead of dropping planes.
+//       Watch the RT overlay [T] to see the pools tile into one texture.
 //   B - Toggle the sky flare: a runtime-built CFlareShape with a procedural
 //       blob texture. Bright reference point in reflections, and exercises
 //       the flare occlusion query/fade machinery (per-context, including the
@@ -324,7 +328,8 @@ public:
 		OptStereo = 12,
 		OptPools = 13,
 		OptPoolCount = 14,
-		OptFlare = 15
+		OptFlare = 15,
+		OptMaxTextures = 16
 	};
 	void setOption(int opt, int value);
 
@@ -525,6 +530,7 @@ CWaterDemo::CWaterDemo()
 	m_PoolCount = (uint)queryFlag("poolcount", (int)m_PoolCount);
 	clamp(m_PoolCount, 1u, POOL_MAX_COUNT);
 	m_FlareOn = queryFlag("flare", m_FlareOn ? 1 : 0) != 0;
+	setOption(OptMaxTextures, queryFlag("maxrt", 0));
 	if (queryFlag("stereo", 0) != 0)
 		setOption(OptStereo, 1);
 #endif
@@ -588,7 +594,8 @@ CWaterDemo::CWaterDemo()
 			+ '<option value="1"' + ($2 == 1 ? ' selected' : '') + '>fullscreen</option>'
 			+ '<option value="2"' + ($2 == 2 ? ' selected' : '') + '>thumbnail</option>'
 			+ '</select></label>';
-		html += '<label style="display:block;margin-top:2px">Pool count <input type="range" data-opt="14" min="1" max="12" value="' + $14 + '" style="width:90px;vertical-align:middle"></label>';
+		html += '<label style="display:block;margin-top:2px">Pool count <input type="range" data-opt="14" min="1" max="12" value="' + ($14 & 255) + '" style="width:90px;vertical-align:middle"></label>';
+		html += '<label style="display:block;margin-top:2px">Max RT tex (0=any) <input type="range" data-opt="16" min="0" max="4" value="' + ($14 >> 8) + '" style="width:90px;vertical-align:middle"></label>';
 		html += '<label style="display:block;margin-top:6px">Cam dist <input type="range" data-opt="10" min="8" max="100" value="' + $10 + '" style="width:90px;vertical-align:middle"></label>';
 		html += '<label style="display:block;margin-top:2px">Cam height <input type="range" data-opt="11" min="3" max="60" value="' + $11 + '" style="width:90px;vertical-align:middle"></label>';
 		panel.innerHTML = html;
@@ -615,7 +622,9 @@ CWaterDemo::CWaterDemo()
 		(int)m_CamHeight,
 		m_Stereo ? 1 : 0,
 		m_PoolsMode ? 1 : 0,
-		(int)m_PoolCount,
+		// EM_ASM allows 16 args ($0..$15): pool count and the reflection
+		// texture budget share one packed argument
+		(int)m_PoolCount | ((m_Scene->getWaterReflectionMaxTextures() < 0 ? 0 : (int)m_Scene->getWaterReflectionMaxTextures()) << 8),
 		m_FlareOn ? 1 : 0);
 #endif
 }
@@ -670,6 +679,11 @@ void CWaterDemo::operator()(const CEvent &event)
 			if (keyDown.Key == KeyK) setOption(OptPoolCount, (int)m_PoolCount - 1);
 			if (keyDown.Key == KeyL) setOption(OptPoolCount, (int)m_PoolCount + 1);
 			if (keyDown.Key == KeyB) setOption(OptFlare, !m_FlareOn);
+			if (keyDown.Key == KeyO)
+			{
+				sint cur = m_Scene->getWaterReflectionMaxTextures();
+				setOption(OptMaxTextures, cur < 0 ? 1 : (cur >= 4 ? 0 : (int)cur + 1));
+			}
 		}
 		if (keyDown.Key == KeyUP) m_KeyForward = true;
 		if (keyDown.Key == KeyDOWN) m_KeyBackward = true;
@@ -726,6 +740,11 @@ void CWaterDemo::setOption(int opt, int value)
 	case OptFlare:
 		m_FlareOn = value != 0;
 		updateFlare();
+		break;
+	case OptMaxTextures:
+		// 0 = as many textures as needed; 1..4 = tile the passes into at
+		// most that many shared textures per view
+		m_Scene->setWaterReflectionMaxTextures(value <= 0 ? -1 : value);
 		break;
 	}
 }
@@ -1087,10 +1106,10 @@ void CWaterDemo::renderOneFrame()
 				passInfo.FrustumBottom, passInfo.FrustumTop,
 				passInfo.FrustumNear, passInfo.FrustumFar, true);
 			CViewport activeVP;
-			activeVP.init(0.f, 0.f, passInfo.UScale, passInfo.VScale);
+			activeVP.init(passInfo.UBias, passInfo.VBias, passInfo.UScale, passInfo.VScale);
 			m_Driver->setViewport(activeVP);
 			CScissor activeScissor;
-			activeScissor.init(0.f, 0.f, passInfo.UScale, passInfo.VScale);
+			activeScissor.init(passInfo.UBias, passInfo.VBias, passInfo.UScale, passInfo.VScale);
 			m_Driver->setScissor(activeScissor);
 			m_Driver->setFrustum(reflFrustum);
 			m_Driver->setViewMatrix(passInfo.ReflViewMatrix);
@@ -1163,8 +1182,8 @@ void CWaterDemo::renderOneFrame()
 						*vs[c] = world;
 						CVector pv = reflInfo.ReflViewMatrix * world;
 						float invDepth = 1.f / max(pv.y, reflInfo.FrustumNear);
-						uvs[c]->U = (reflInfo.FrustumNear * pv.x * invDepth - reflInfo.FrustumLeft) * ooW * reflInfo.UScale;
-						uvs[c]->V = (reflInfo.FrustumNear * pv.z * invDepth - reflInfo.FrustumBottom) * ooH * reflInfo.VScale;
+						uvs[c]->U = (reflInfo.FrustumNear * pv.x * invDepth - reflInfo.FrustumLeft) * ooW * reflInfo.UScale + reflInfo.UBias;
+						uvs[c]->V = (reflInfo.FrustumNear * pv.z * invDepth - reflInfo.FrustumBottom) * ooH * reflInfo.VScale + reflInfo.VBias;
 					}
 					q.Color0 = q.Color1 = q.Color2 = q.Color3 = CRGBA::White;
 					quads.push_back(q);
@@ -1254,6 +1273,11 @@ void CWaterDemo::renderOneFrame()
 				y -= lineH;
 				m_TextContext->printfAt(x, y, "[N] Procedural pools: %s  [K/L] Pool count: %u  [B] Sky flare: %s",
 					m_PoolsMode ? "ON" : "OFF", m_PoolCount, m_FlareOn ? "ON" : "OFF");
+				y -= lineH;
+				if (m_Scene->getWaterReflectionMaxTextures() < 0)
+					m_TextContext->printfAt(x, y, "[O] Max reflection textures: unlimited");
+				else
+					m_TextContext->printfAt(x, y, "[O] Max reflection textures: %d", (int)m_Scene->getWaterReflectionMaxTextures());
 				y -= lineH;
 				m_TextContext->printfAt(x, y, "[Up/Down] Camera dist: %.1f", m_CamDist);
 				y -= lineH * 1.5f;

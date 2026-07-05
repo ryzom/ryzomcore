@@ -1734,9 +1734,9 @@ public:
 			_ToRefl.translate(modelPos);
 			const CFrustum &f = planarRefl->ReflFrustum;
 			_UScale = f.Near / (f.Right - f.Left) * planarRefl->UVScale.U;
-			_UBias = -f.Left / (f.Right - f.Left) * planarRefl->UVScale.U;
+			_UBias = -f.Left / (f.Right - f.Left) * planarRefl->UVScale.U + planarRefl->UVBias.U;
 			_VScale = f.Near / (f.Top - f.Bottom) * planarRefl->UVScale.V;
-			_VBias = -f.Bottom / (f.Top - f.Bottom) * planarRefl->UVScale.V;
+			_VBias = -f.Bottom / (f.Top - f.Bottom) * planarRefl->UVScale.V + planarRefl->UVBias.V;
 			_MinDepth = f.Near;
 		}
 	}

@@ -336,6 +336,8 @@ public:
 	virtual bool		  getWaterReflectionPow2() const { return _Scene.getWaterReflectionManager().getPow2(); }
 	virtual void		  setWaterReflectionFixedSize(bool fixedSize) { _Scene.getWaterReflectionManager().setFixedSize(fixedSize); }
 	virtual bool		  getWaterReflectionFixedSize() const { return _Scene.getWaterReflectionManager().getFixedSize(); }
+	virtual void		  setWaterReflectionMaxTextures(sint maxTextures) { _Scene.getWaterReflectionManager().setMaxTextures(maxTextures); }
+	virtual sint		  getWaterReflectionMaxTextures() const { return _Scene.getWaterReflectionManager().getMaxTextures(); }
 	// @}
 
 public:

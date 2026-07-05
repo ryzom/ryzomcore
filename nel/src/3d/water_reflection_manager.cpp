@@ -59,6 +59,9 @@ static const uint WATER_REFLECTION_SNAP = 32;
 static const float WATER_REFLECTION_MIN_CAM_HEIGHT = 0.05f;
 // Hysteresis: a challenger plane must beat an incumbent by this factor
 static const float WATER_REFLECTION_HYSTERESIS = 1.25f;
+// Padding between packed tiles in pixels: bump-perturbed UVs wobbling past a
+// tile's active region must read cleared margin, not a neighbor pool's tile
+static const uint WATER_REFLECTION_TILE_PAD = 32;
 
 // Round down to a power of two (bounds RT memory on large screens; deliberate)
 static uint pow2Down(uint v)
@@ -77,6 +80,7 @@ static uint snapUp(uint v, uint snap)
 CWaterReflectionManager::CWaterReflectionManager()
 	: _Scene(NULL)
 	, _MaxReflections(-1)
+	, _MaxTextures(-1)
 	, _ForceReflections(false)
 	, _HalfRes(true)
 	, _Pow2(true)
@@ -213,7 +217,19 @@ uint CWaterReflectionManager::beginPasses()
 	collected.swap(_Collected);
 
 	for (uint i = 0; i < _Views.size(); ++i)
+	{
 		_Views[i].Active.clear();
+		// Reset the tile packing state for the new frame, and drop textures
+		// beyond a lowered budget
+		if (_MaxTextures >= 0 && _Views[i].Slots.size() > (uint)_MaxTextures && _FixedSize)
+			_Views[i].Slots.resize(_MaxTextures);
+		for (uint s = 0; s < _Views[i].Slots.size(); ++s)
+		{
+			CSlot &slot = _Views[i].Slots[s];
+			slot.CursorX = slot.CursorY = slot.RowH = 0;
+			slot.Touched = false;
+		}
+	}
 	_Passes.clear();
 
 	if (_MaxReflections == 0 || collected.empty())
@@ -264,6 +280,66 @@ uint CWaterReflectionManager::beginPasses()
 	}
 
 	return numAdmitted;
+}
+
+// ***************************************************************************
+CWaterReflectionManager::CSlot &CWaterReflectionManager::claimTile(uint allocW, uint allocH, uint &w, uint &h, uint &tileX, uint &tileY, bool &firstTouch)
+{
+	CView &view = ensureCurrentView();
+	for (;;)
+	{
+		for (uint s = 0; s < view.Slots.size(); ++s)
+		{
+			CSlot &slot = view.Slots[s];
+			// an untouched slot is (re)allocated at the current size on claim
+			uint effW = slot.Touched ? slot.AllocW : allocW;
+			uint effH = slot.Touched ? slot.AllocH : allocH;
+			// place in the current shelf row, or open a new row below it
+			uint x = slot.CursorX, y = slot.CursorY;
+			if (x + w > effW)
+			{
+				x = 0;
+				y = slot.CursorY + slot.RowH;
+			}
+			if (x + w <= effW && y + h <= effH)
+			{
+				if (y != slot.CursorY)
+				{
+					slot.CursorY = y;
+					slot.RowH = 0;
+				}
+				tileX = x;
+				tileY = y;
+				slot.CursorX = x + w + WATER_REFLECTION_TILE_PAD;
+				slot.RowH = std::max(slot.RowH, h + WATER_REFLECTION_TILE_PAD);
+				firstTouch = !slot.Touched;
+				slot.Touched = true;
+				return slot;
+			}
+		}
+		// no texture has room: open a new one if the budget allows
+		if (_MaxTextures < 0 || view.Slots.size() < (uint)_MaxTextures)
+		{
+			view.Slots.push_back(CSlot());
+			continue; // the new (untouched) slot is claimed by the loop above
+		}
+		// budget full: shrink the tile until it fits somewhere (the UV
+		// scale/bias absorb the size — the pool reflects at lower res)
+		if (w <= WATER_REFLECTION_SNAP && h <= WATER_REFLECTION_SNAP)
+		{
+			// degenerate (should not happen with a sane budget): overlap
+			// into the first texture rather than failing the pass
+			if (view.Slots.empty())
+				view.Slots.push_back(CSlot());
+			CSlot &slot = view.Slots[0];
+			tileX = tileY = 0;
+			firstTouch = !slot.Touched;
+			slot.Touched = true;
+			return slot;
+		}
+		w = std::max(WATER_REFLECTION_SNAP, w / 2);
+		h = std::max(WATER_REFLECTION_SNAP, h / 2);
+	}
 }
 
 // ***************************************************************************
@@ -393,12 +469,29 @@ void CWaterReflectionManager::beginPass(uint pass, CActiveReflection &out)
 		fb + minY * fh, fb + maxY * fh,
 		fnear, ffar, true);
 
-	// --- Render target for this pass, in the current view's slot ---
+	// --- Render target and tile for this pass, in the current view ---
+	// Fixed mode packs the passes' active regions as tiles into shared
+	// per-view textures (several water planes per allocation, see
+	// claimTile); dynamic mode keeps one texture per pass at the active
+	// size. Tiles of different views never share a texture: the slot lists
+	// are per view.
 	CView &view = ensureCurrentView();
-	if (view.Slots.size() <= pass)
-		view.Slots.resize(pass + 1);
-	CSlot &slot = view.Slots[pass];
-	if (!slot.Texture || slot.AllocW != allocW || slot.AllocH != allocH)
+	CSlot *slot;
+	uint tileX = 0, tileY = 0;
+	bool firstTouch;
+	if (_FixedSize)
+	{
+		slot = &claimTile(allocW, allocH, activeW, activeH, tileX, tileY, firstTouch);
+	}
+	else
+	{
+		if (view.Slots.size() <= pass)
+			view.Slots.resize(pass + 1);
+		slot = &view.Slots[pass];
+		firstTouch = !slot->Touched;
+		slot->Touched = true;
+	}
+	if (firstTouch && (!slot->Texture || slot->AllocW != allocW || slot->AllocH != allocH))
 	{
 		CTextureOffscreen *tex = new CTextureOffscreen();
 		tex->setNeedsDepthStencil(true);
@@ -409,36 +502,47 @@ void CWaterReflectionManager::beginPass(uint pass, CActiveReflection &out)
 		tex->setWrapS(ITexture::Clamp);
 		tex->setWrapT(ITexture::Clamp);
 		drv->setupTexture(*tex);
-		slot.Texture = tex;
-		slot.AllocW = allocW;
-		slot.AllocH = allocH;
+		slot->Texture = tex;
+		slot->AllocW = allocW;
+		slot->AllocH = allocH;
 	}
 
 	// --- Bind the render target ---
-	drv->setRenderTarget(slot.Texture, 0, 0, allocW, allocH);
+	drv->setRenderTarget(slot->Texture, 0, 0, slot->AllocW, slot->AllocH);
 
-	float vpW = (float)activeW / (float)allocW;
-	float vpH = (float)activeH / (float)allocH;
+	const float ooAllocW = 1.f / (float)slot->AllocW;
+	const float ooAllocH = 1.f / (float)slot->AllocH;
+	const float vpX = (float)tileX * ooAllocW;
+	const float vpY = (float)tileY * ooAllocH;
+	const float vpW = (float)activeW * ooAllocW;
+	const float vpH = (float)activeH * ooAllocH;
 
-	// Clear the full allocation to the fog color so out-of-frustum samples
-	// and the wobble margin around the active region blend in. The pass
-	// owns its write state: glClearBuffer honors the color write mask, so
-	// a mask left disabled by earlier rendering (occlusion tests, special
-	// multipass) must not turn this clear (and the whole pass) into a no-op.
+	// Clear the whole texture on its first pass of the frame, to the fog
+	// color so out-of-frustum samples and the wobble margins around (and
+	// between) the tiles blend in. Later tiles render into regions this
+	// same clear already covered — color, alpha and depth — so per-tile
+	// scissored clears are not needed (and could not be relied on anyway:
+	// not every driver's clear honors the scissor). The pass owns its write
+	// state: glClearBuffer honors the color write mask, so a mask left
+	// disabled by earlier rendering (occlusion tests, special multipass)
+	// must not turn this clear (and the whole pass) into a no-op.
 	drv->setColorMask(true, true, true, true);
-	CViewport fullVP;
-	fullVP.initFullScreen();
-	drv->setupViewport(fullVP);
-	CScissor fullScissor;
-	fullScissor.initFullScreen();
-	drv->setupScissor(fullScissor);
-	CRGBA clearColor = drv->fogEnabled() ? drv->getFogColor() : CRGBA(0, 0, 0, 255);
-	// The cleared alpha is the water's uniform reflectivity (the water
-	// shader blends the reflection by the texture alpha). 192 is a preview
-	// value; proper reflectivity/opacity handling is future work.
-	clearColor.A = 192;
-	drv->clear2D(clearColor);
-	drv->clearZBuffer();
+	if (firstTouch)
+	{
+		CViewport fullVP;
+		fullVP.initFullScreen();
+		drv->setupViewport(fullVP);
+		CScissor fullScissor;
+		fullScissor.initFullScreen();
+		drv->setupScissor(fullScissor);
+		CRGBA clearColor = drv->fogEnabled() ? drv->getFogColor() : CRGBA(0, 0, 0, 255);
+		// The cleared alpha is the water's uniform reflectivity (the water
+		// shader blends the reflection by the texture alpha). 192 is a preview
+		// value; proper reflectivity/opacity handling is future work.
+		clearColor.A = 192;
+		drv->clear2D(clearColor);
+		drv->clearZBuffer();
+	}
 
 	// The pass renders RGB only: the water shader uses the reflection
 	// texture's ALPHA as its reflection blend factor (the envmap it
@@ -448,24 +552,26 @@ void CWaterReflectionManager::beginPass(uint pass, CActiveReflection &out)
 	// cleared alpha is the water's uniform reflectivity.
 	drv->setColorMask(true, true, true, false);
 
-	// Restrict rendering to the active sub-region
+	// Restrict rendering to this pass's tile
 	CViewport activeVP;
-	activeVP.init(0.f, 0.f, vpW, vpH);
+	activeVP.init(vpX, vpY, vpW, vpH);
 	drv->setupViewport(activeVP);
 	CScissor activeScissor;
-	activeScissor.init(0.f, 0.f, vpW, vpH);
+	activeScissor.init(vpX, vpY, vpW, vpH);
 	drv->setupScissor(activeScissor);
 
 	// Clip plane, biased slightly below the surface. The driver transforms
 	// it to eye space using the current view matrix, so set up the same
 	// view state the caller's scene render will use (including the PZB
 	// camera pos).
-	pd.Refl.Texture = slot.Texture;
+	pd.Refl.Texture = slot->Texture;
 	pd.Refl.ReflViewMatrix = reflCamWorld;
 	pd.Refl.ReflViewMatrix.invert();
 	pd.Refl.ReflFrustum = subFrustum;
 	pd.Refl.UVScale.U = vpW;
 	pd.Refl.UVScale.V = vpH;
+	pd.Refl.UVBias.U = vpX;
+	pd.Refl.UVBias.V = vpY;
 	pd.Refl.PlaneZ = planeZ;
 	drv->setFrustum(subFrustum.Left, subFrustum.Right, subFrustum.Bottom, subFrustum.Top, subFrustum.Near, subFrustum.Far, true);
 	drv->setupViewMatrixEx(pd.Refl.ReflViewMatrix, Pm);
@@ -484,7 +590,7 @@ void CWaterReflectionManager::beginPass(uint pass, CActiveReflection &out)
 	_Scene->getClipTrav().setClusterVisibilityPosOverride(true, P);
 	_Scene->setCam(reflCam);
 	CViewport sceneVP;
-	sceneVP.init(0.f, 0.f, vpW, vpH);
+	sceneVP.init(vpX, vpY, vpW, vpH);
 	_Scene->setViewport(sceneVP);
 
 	// While set, water and flares exclude themselves from the render (at

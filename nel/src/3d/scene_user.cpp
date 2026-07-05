@@ -1220,6 +1220,8 @@ void CSceneUser::fillWaterReflectionInfo(const CWaterReflectionManager::CActiveR
 	info.FrustumFar = refl.ReflFrustum.Far;
 	info.UScale = refl.UVScale.U;
 	info.VScale = refl.UVScale.V;
+	info.UBias = refl.UVBias.U;
+	info.VBias = refl.UVBias.V;
 	info.PlaneZ = refl.PlaneZ;
 }
 

@@ -1781,7 +1781,7 @@ bool mainLoop()
 						CMatrix reflCamMatrix = reflInfo.ReflViewMatrix;
 						reflCamMatrix.invert();
 						CViewport reflViewport;
-						reflViewport.init(0.f, 0.f, reflInfo.UScale, reflInfo.VScale);
+						reflViewport.init(reflInfo.UBias, reflInfo.VBias, reflInfo.UScale, reflInfo.VScale);
 						if (s_SkyMode == NewSky)
 						{
 							CSky &sky = ContinentMngr.cur()->CurrentSky;

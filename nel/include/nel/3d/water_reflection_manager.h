@@ -85,6 +85,7 @@ public:
 		NLMISC::CMatrix				ReflViewMatrix;	// world -> reflected camera space
 		CFrustum					ReflFrustum;	// off-center sub-frustum used for the reflection render
 		NLMISC::CUV					UVScale;		// maps sub-frustum [0,1] projection to the active RT sub-region
+		NLMISC::CUV					UVBias;			// origin of the sub-region (tile) within the render target
 		float						PlaneZ;
 	};
 
@@ -112,6 +113,15 @@ public:
 	  * When false, targets are allocated at the active size (dynamic mode). */
 	void			setFixedSize(bool fixedSize) { _FixedSize = fixedSize; }
 	bool			getFixedSize() const { return _FixedSize; }
+	/** Maximum number of reflection render target textures per view (eye).
+	  * In fixed-size mode the passes' active sub-regions are packed as tiles
+	  * into shared textures (a view's tiles never mix with another view's),
+	  * so several water planes can reflect without one allocation each; when
+	  * the budget is full, tiles shrink to fit rather than dropping planes.
+	  * -1 = as many textures as needed (default). Ignored in dynamic mode
+	  * (one texture per pass). */
+	void			setMaxTextures(sint maxTextures) { _MaxTextures = maxTextures; }
+	sint			getMaxTextures() const { return _MaxTextures; }
 	/** Select the current view (eye), default 0. Reflections are rendered
 	  * and published per view: stereo render loops set the view before each
 	  * eye's reflection passes and before each eye's scene render, so that
@@ -143,13 +153,13 @@ public:
 	  * endPasses() (safe to call when zero passes were returned). */
 	uint			beginPasses();
 	/** Set up reflection pass 'pass' for the current view: saves the scene
-	  * camera and driver state, binds and clears the render target,
-	  * restricts rendering to the active sub-region, sets the scene camera
-	  * to the current scene camera mirrored across the water plane and
-	  * enables the water clip plane. The pass state (reflected view matrix,
-	  * sub-frustum, UV scale — the active viewport is
-	  * (0, 0, UVScale.U, UVScale.V) of the render target) is returned in
-	  * 'out' for the caller's own drawing. */
+	  * camera and driver state, binds the render target (cleared on its
+	  * first pass of the frame), restricts rendering to the pass's tile,
+	  * sets the scene camera to the current scene camera mirrored across
+	  * the water plane and enables the water clip plane. The pass state
+	  * (reflected view matrix, sub-frustum, UV scale and bias — the active
+	  * viewport is (UVBias.U, UVBias.V, UVScale.U, UVScale.V) of the render
+	  * target) is returned in 'out' for the caller's own drawing. */
 	void			beginPass(uint pass, CActiveReflection &out);
 	/** Publish the reflection rendered by pass 'pass' for the current view
 	  * and restore the scene camera and driver state. */
@@ -201,12 +211,15 @@ private:
 		bool				Allowed;	// at least one surface with the artist flag
 	};
 
-	// One reflection render target slot
+	// One reflection render target texture, with per-frame shelf-packing
+	// state: passes claim tiles row by row until the texture is full
 	struct CSlot
 	{
 		NLMISC::CSmartPtr<ITexture>	Texture;
 		uint						AllocW, AllocH;
-		CSlot() : AllocW(0), AllocH(0) {}
+		uint						CursorX, CursorY, RowH;	// shelf cursor, reset each frame
+		bool						Touched;				// (re)allocated + cleared this frame
+		CSlot() : AllocW(0), AllocH(0), CursorX(0), CursorY(0), RowH(0), Touched(false) {}
 	};
 
 	// Per-view (per-eye) reflection state
@@ -228,8 +241,15 @@ private:
 	const CView		*currentView() const { return _CurrentView < _Views.size() ? &_Views[_CurrentView] : NULL; }
 	CView			&ensureCurrentView();
 
+	// Claim a tile of (w × h) in the current view's textures (fixed mode);
+	// shrinks w/h when no texture has room and no new one may be opened.
+	// Returns the slot and the tile origin in pixels; firstTouch is set on
+	// the slot's first claim of the frame (caller must allocate and clear).
+	CSlot			&claimTile(uint allocW, uint allocH, uint &w, uint &h, uint &tileX, uint &tileY, bool &firstTouch);
+
 	CScene								*_Scene;
 	sint								_MaxReflections;
+	sint								_MaxTextures;
 	bool								_ForceReflections;
 	bool								_HalfRes;
 	bool								_Pow2;

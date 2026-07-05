@@ -97,9 +97,11 @@ struct UWaterReflectionInfo
 	/// Off-center sub-frustum used for the reflection render (Left, Right, Bottom, Top, Near, Far)
 	float			FrustumLeft, FrustumRight, FrustumBottom, FrustumTop, FrustumNear, FrustumFar;
 	/** Maps the sub-frustum's [0,1] projection onto the render target's
-	  * active sub-region. The active viewport of the render target is
-	  * (0, 0, UScale, VScale). */
+	  * active sub-region (tile): uv = bias + projection * scale. Several
+	  * passes may tile into one shared render target. The active viewport
+	  * of the render target is (UBias, VBias, UScale, VScale). */
 	float			UScale, VScale;
+	float			UBias, VBias;
 	/// Water plane height
 	float			PlaneZ;
 };
@@ -725,6 +727,15 @@ public:
 	/// Fixed window-derived render target allocation with active sub-region (default true); false = dynamic allocation
 	virtual void		  setWaterReflectionFixedSize(bool fixedSize) = 0;
 	virtual bool		  getWaterReflectionFixedSize() const = 0;
+	/** Maximum reflection render target textures per view (eye). In fixed
+	  * allocation mode, reflection passes pack their active sub-regions as
+	  * tiles into shared textures, so the reflection budget can be raised
+	  * without one render target allocation per water plane; when the
+	  * texture budget is full, tiles shrink to fit instead of dropping
+	  * planes. -1 = as many textures as needed (default). Ignored in
+	  * dynamic allocation mode. */
+	virtual void		  setWaterReflectionMaxTextures(sint maxTextures) = 0;
+	virtual sint		  getWaterReflectionMaxTextures() const = 0;
 	// @}
 };
 
