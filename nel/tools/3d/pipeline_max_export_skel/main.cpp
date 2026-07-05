@@ -402,6 +402,10 @@ struct SBipedRig
 	bool HasCom;
 	NLMISC::CVector ComPos;
 	NLMISC::CQuat ComRot;
+	// Current V/H/T displacement of the COM node relative to the figure COM, in the COM's local
+	// frame (0x006c[0..2] as (d0,-d2,d1)). Bip01World = figureCom + ComRot*Disp; the Pelvis stays
+	// at the figure COM, so its local position is -Disp.
+	NLMISC::CVector ComDisp;
 	// legs + toes (left half; right side is mirrored on use)
 	bool HasThighZ;
 	float ThighZ;
@@ -419,8 +423,9 @@ struct SBipedRig
 	NLMISC::CQuat PelvisWorldRot;
 	bool HavePelvisWorldRot;
 	SBipedRig() : Sys(NULL), HasCom(false), ComPos(NLMISC::CVector::Null), ComRot(NLMISC::CQuat::Identity),
-		HasThighZ(false), ThighZ(0.0f), MaxLegLink(2), HasClavicleZ(false), ClavicleZ(0.0f),
-		ClavicleAngle(0.0f), PelvisWorldRot(NLMISC::CQuat::Identity), HavePelvisWorldRot(false) { }
+		ComDisp(NLMISC::CVector::Null), HasThighZ(false), ThighZ(0.0f), MaxLegLink(2),
+		HasClavicleZ(false), ClavicleZ(0.0f), ClavicleAngle(0.0f),
+		PelvisWorldRot(NLMISC::CQuat::Identity), HavePelvisWorldRot(false) { }
 };
 
 // Rigs per Biped system object; cleared per file.
@@ -624,9 +629,14 @@ static void parseComRecord(SBipedRig &rig)
 	const float *c = bipedChunkFloats(0x006c, 12, &n);
 	if (c)
 	{
-		rig.ComPos = NLMISC::CVector(c[4], -c[6], c[5]);
 		rig.ComRot = NLMISC::CQuat(-c[8], c[10], -c[9], c[11]);
 		rig.ComRot.normalize();
+		// [0..2] = current V/H/T displacement in the COM frame; the Bip01 node's world position
+		// is the figure COM plus this displacement rotated into the world. Exact on every
+		// era-matched corpus file (z-component discriminated by tr_mo_kitifly/kitikil).
+		rig.ComDisp = NLMISC::CVector(c[0], -c[2], c[1]);
+		NLMISC::CMatrix rm; rm.identity(); rm.setRot(rig.ComRot);
+		rig.ComPos = NLMISC::CVector(c[4], -c[6], c[5]) + rm.mulVector(rig.ComDisp);
 		rig.HasCom = true;
 		return;
 	}
@@ -731,6 +741,10 @@ static void getBipedLocal(INode *node, const NLMISC::CQuat &parentWorldRot,
 	else if (haveId && id == BID_PELVIS) // Pelvis: constant COM->pelvis frame reorientation
 	{
 		worldRot = parentWorldRot * NLMISC::CQuat(0.5f, 0.5f, 0.5f, -0.5f);
+		// The pelvis sits at the figure COM; the Bip01 node is displaced from it by the current
+		// V/H/T value, so the pelvis' local position undoes that displacement.
+		posOverride = -rig.ComDisp;
+		havePosOverride = true;
 	}
 	else if (haveId && (id == BID_LARM || id == BID_RARM) && link == 0 && rig.HasClavicleZ)
 	{
