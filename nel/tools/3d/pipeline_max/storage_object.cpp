@@ -86,7 +86,7 @@ bool IStorageObject::isContainer() const
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
-CStorageContainer::CStorageContainer() : m_ChunksOwnsPointers(true)
+CStorageContainer::CStorageContainer() : m_ChunksOwnsPointers(true), m_Was64Bit(false)
 {
 
 }
@@ -124,7 +124,9 @@ void CStorageContainer::serial(NLMISC::IStream &stream)
 			nldebug("Implicitly assume the entire stream is the container");
 #endif
 			CStorageChunks chunks(stream, stream.isReading() ? storageStream->size() : 0);
+			if (!stream.isReading()) chunks.set64Bit(m_Was64Bit);
 			serial(chunks);
+			if (stream.isReading()) m_Was64Bit = chunks.is64Bit();
 			return;
 		}
 	}
@@ -134,17 +136,21 @@ void CStorageContainer::serial(NLMISC::IStream &stream)
 	{
 		// Use dummy size value so the system can at least read the header
 		CStorageChunks chunks(stream, stream.isReading() ? 0xFF : 0);
+		if (!stream.isReading()) chunks.set64Bit(m_Was64Bit);
 		bool ok = chunks.enterChunk(0x4352, true);
 		nlassert(ok);
 		serial(chunks);
 		chunks.leaveChunk();
+		if (stream.isReading()) m_Was64Bit = chunks.is64Bit();
 	}
 }
 
 void CStorageContainer::serial(NLMISC::IStream &stream, uint size)
 {
 	CStorageChunks chunks(stream, size);
+	if (!stream.isReading()) chunks.set64Bit(m_Was64Bit);
 	serial(chunks);
+	if (stream.isReading()) m_Was64Bit = chunks.is64Bit();
 	return;
 }
 

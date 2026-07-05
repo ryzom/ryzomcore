@@ -100,6 +100,11 @@ protected:
 	// protected data
 	TStorageObjectContainer m_Chunks;
 	bool m_ChunksOwnsPointers;
+	// True if the source stream used 64-bit chunk headers (any chunk with size32==0 marker).
+	// Set on read; consumed on write to preserve per-stream byte identity. Nested containers
+	// share the top-level's CStorageChunks so this flag is only load-bearing on the top-level
+	// container passed to serial(stream, size).
+	bool m_Was64Bit;
 
 public:
 	CStorageContainer();
