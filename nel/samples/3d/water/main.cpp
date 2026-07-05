@@ -1286,6 +1286,29 @@ void CWaterDemo::renderOneFrame()
 				m_Driver->drawQuad(rtQuad, m_MirrorMat);
 				m_MirrorMat.setTexture(0, NULL);
 
+				// Outline each active reflection's tile within the displayed
+				// texture (tiles of other textures are skipped), to make the
+				// tile packing inspectable; the quad shows the texture with V
+				// flipped, mirror that for the outlines
+				uint numRefl = m_Scene->getNumActiveWaterReflections();
+				for (uint r = 0; r < numRefl; ++r)
+				{
+					UWaterReflectionInfo tileInfo;
+					if (!m_Scene->getActiveWaterReflectionInfo(r, tileInfo))
+						continue;
+					if (tileInfo.Texture != reflInfo.Texture)
+						continue;
+					float tx0 = ox0 + tileInfo.UBias * (ox1 - ox0);
+					float tx1 = ox0 + (tileInfo.UBias + tileInfo.UScale) * (ox1 - ox0);
+					float ty0 = oy0 + (1.f - tileInfo.VBias - tileInfo.VScale) * (oy1 - oy0);
+					float ty1 = oy0 + (1.f - tileInfo.VBias) * (oy1 - oy0);
+					CRGBA tileColor = POOL_CUBE_COLORS[r % 6];
+					m_Driver->drawLine(tx0, ty0, tx1, ty0, tileColor);
+					m_Driver->drawLine(tx1, ty0, tx1, ty1, tileColor);
+					m_Driver->drawLine(tx1, ty1, tx0, ty1, tileColor);
+					m_Driver->drawLine(tx0, ty1, tx0, ty0, tileColor);
+				}
+
 				if (m_ShowRT == 2)
 				{
 					CRGBA borderColor(255, 255, 255);

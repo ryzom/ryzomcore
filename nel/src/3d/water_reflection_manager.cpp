@@ -59,9 +59,16 @@ static const uint WATER_REFLECTION_SNAP = 32;
 static const float WATER_REFLECTION_MIN_CAM_HEIGHT = 0.05f;
 // Hysteresis: a challenger plane must beat an incumbent by this factor
 static const float WATER_REFLECTION_HYSTERESIS = 1.25f;
-// Padding between packed tiles in pixels: bump-perturbed UVs wobbling past a
-// tile's active region must read cleared margin, not a neighbor pool's tile
-static const uint WATER_REFLECTION_TILE_PAD = 32;
+// Padding between packed tiles: bump-perturbed UVs wobbling past a tile must
+// read cleared margin, not a neighbor pool's tile. Small guard band only —
+// each tile's active region already carries the wobble margin proper inside
+// it (WATER_REFLECTION_MARGIN is applied to the AABB before sizing) — and
+// proportional to the allocation so it doesn't dwarf small (half-res,
+// pow2-rounded) textures.
+static uint tilePad(uint allocW, uint allocH)
+{
+	return std::max(4u, std::max(allocW, allocH) / 64);
+}
 
 // Round down to a power of two (bounds RT memory on large screens; deliberate)
 static uint pow2Down(uint v)
@@ -310,8 +317,9 @@ CWaterReflectionManager::CSlot &CWaterReflectionManager::claimTile(uint allocW, 
 				}
 				tileX = x;
 				tileY = y;
-				slot.CursorX = x + w + WATER_REFLECTION_TILE_PAD;
-				slot.RowH = std::max(slot.RowH, h + WATER_REFLECTION_TILE_PAD);
+				uint pad = tilePad(effW, effH);
+				slot.CursorX = x + w + pad;
+				slot.RowH = std::max(slot.RowH, h + pad);
 				firstTouch = !slot.Touched;
 				slot.Touched = true;
 				return slot;
