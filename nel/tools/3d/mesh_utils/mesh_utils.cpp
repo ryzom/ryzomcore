@@ -48,6 +48,7 @@
 #include "assimp_skel.h"
 
 CMeshUtilsSettings::CMeshUtilsSettings()
+	: IgnoreNelExtras(false)
 {
 	/*ShapeDirectory = "shape";
 	IGDirectory = "ig";

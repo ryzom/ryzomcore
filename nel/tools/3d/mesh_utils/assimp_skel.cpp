@@ -159,12 +159,19 @@ static void walkSkelNode(CMeshUtilsContext &context, const aiNode *node,
 	// preserve the source's float32 bits exactly and avoid the TRS->matrix->Decompose
 	// roundtrip that costs 5-16% byte parity on the .skel output. Falls back to Decompose
 	// for glTFs authored elsewhere (Blender export, etc.) that don't carry our extras.
+	//
+	// Settings.IgnoreNelExtras forces the Decompose path even when the extras are present —
+	// used for validation, to confirm the fallback works and to measure its accuracy floor.
 	NLMISC::CVector realPos, realScale;
 	NLMISC::CQuat realRot;
 	float tx, ty, tz, rx, ry, rz, rw, sx, sy, sz;
-	bool haveTrans = getNelFloatMeta(node, "nel_tx", tx) & getNelFloatMeta(node, "nel_ty", ty) & getNelFloatMeta(node, "nel_tz", tz);
-	bool haveRot   = getNelFloatMeta(node, "nel_rx", rx) & getNelFloatMeta(node, "nel_ry", ry) & getNelFloatMeta(node, "nel_rz", rz) & getNelFloatMeta(node, "nel_rw", rw);
-	bool haveScl   = getNelFloatMeta(node, "nel_sx", sx) & getNelFloatMeta(node, "nel_sy", sy) & getNelFloatMeta(node, "nel_sz", sz);
+	bool haveTrans = false, haveRot = false, haveScl = false;
+	if (!context.Settings.IgnoreNelExtras)
+	{
+		haveTrans = getNelFloatMeta(node, "nel_tx", tx) & getNelFloatMeta(node, "nel_ty", ty) & getNelFloatMeta(node, "nel_tz", tz);
+		haveRot   = getNelFloatMeta(node, "nel_rx", rx) & getNelFloatMeta(node, "nel_ry", ry) & getNelFloatMeta(node, "nel_rz", rz) & getNelFloatMeta(node, "nel_rw", rw);
+		haveScl   = getNelFloatMeta(node, "nel_sx", sx) & getNelFloatMeta(node, "nel_sy", sy) & getNelFloatMeta(node, "nel_sz", sz);
+	}
 	if (haveTrans && haveRot && haveScl)
 	{
 		realPos = NLMISC::CVector(tx, ty, tz);
@@ -182,11 +189,14 @@ static void walkSkelNode(CMeshUtilsContext &context, const aiNode *node,
 	}
 	realRot.normalize();
 
-	// Read NeL-specific per-bone flags from extras when present.
-	bool metaUnherit;
-	if (getNelBoolMeta(node, "nel_unheritScale", metaUnherit)) b.UnheritScale = metaUnherit;
-	float metaLod;
-	if (getNelFloatMeta(node, "nel_lodDisableDistance", metaLod)) b.LodDisableDistance = metaLod;
+	// Read NeL-specific per-bone flags from extras when present (also gated by IgnoreNelExtras).
+	if (!context.Settings.IgnoreNelExtras)
+	{
+		bool metaUnherit;
+		if (getNelBoolMeta(node, "nel_unheritScale", metaUnherit)) b.UnheritScale = metaUnherit;
+		float metaLod;
+		if (getNelFloatMeta(node, "nel_lodDisableDistance", metaLod)) b.LodDisableDistance = metaLod;
+	}
 
 	// Build local matrix and accumulate world (float, matching pipeline_max_export_skel default).
 	NLMISC::CMatrix localTM;
