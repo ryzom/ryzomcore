@@ -79,8 +79,14 @@ public:
 protected:
 	// inherited
 	virtual IStorageObject *createChunkById(uint16 id, bool container);
-	/// Storage method
+	/// Storage method: false = 0x2034 (flat array), true = 0x2035 (sparse pairs).
+	/// Only load-bearing when a reference chunk existed in the source or one is authored.
 	bool m_ReferenceMap;
+	/// Set when the source stream had a 0x2034 or 0x2035 chunk. build() only re-emits the
+	/// reference chunk when this is set OR when references have been authored — otherwise
+	/// classes that never had a reference chunk in the .max would get one on write, breaking
+	/// byte-identity.
+	bool m_HasReferencesChunk;
 
 private:
 	CStorageValue<uint8> *m_204B_Equals_2E;
@@ -90,9 +96,13 @@ private:
 	/// Unknown value
 	uint32 m_References2035Value0;
 
-	CStorageRaw *m_Unknown2045;
-	CStorageRaw *m_Unknown2047;
-	CStorageRaw *m_Unknown21B0;
+	// Unknown chunks preserved verbatim. Types are IStorageObject* rather than CStorageRaw*
+	// because the source can flag any of these as a container — createChunkById defers to the
+	// default (CStorageContainer for container chunks, CStorageRaw for leaves) rather than
+	// forcing a specific type.
+	IStorageObject *m_Unknown2045;
+	IStorageObject *m_Unknown2047;
+	IStorageObject *m_Unknown21B0;
 
 }; /* class CReferenceMaker */
 
