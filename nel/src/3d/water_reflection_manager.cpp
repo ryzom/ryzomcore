@@ -50,7 +50,7 @@ uint CWaterReflectionManager::_AnyReflectionRenderCount = 0;
 // World-space bias of the clip plane below the water surface: keeps a thin
 // band of underwater geometry in the reflection so that perturbed UVs near
 // the waterline don't sample the clip void (halo artifacts).
-static const float WATER_REFLECTION_CLIP_BIAS = 0.25f;
+static const float WATER_REFLECTION_CLIP_BIAS = 0.5f;
 // World-space clip bias below the surface for the FAR landscape passes: at
 // the horizon the thin static band still leaves a void bleed where perturbed
 // lookups cross the waterline; deeper terrain fills it (see selectClipBias)
