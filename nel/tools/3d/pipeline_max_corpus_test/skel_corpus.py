@@ -13,7 +13,7 @@ git-lfs stubs, and runs three test tiers:
 Defaults are the layout on Kaetemi's machine; override via CLI when running elsewhere.
 """
 
-import argparse, os, re, subprocess, sys, collections
+import argparse, os, re, struct, subprocess, sys, collections
 
 def parse_workspace(path):
     dirs = []
@@ -49,6 +49,61 @@ def is_biped(path):
     marker = "Biped Object".encode("utf-16le")
     with open(path, "rb") as f:
         return marker in f.read()
+
+def read_skel_dpos(path):
+    """Parse a .skel and return [(bone_name, dpos_tuple), ...]. Skips InvBindPos matrix by state-bit."""
+    with open(path, "rb") as f: data = f.read()
+    pos = [0]
+    def rd(n): v = data[pos[0]:pos[0]+n]; pos[0] += n; return v
+    def u8(): return rd(1)[0]
+    def u32(): return struct.unpack("<I", rd(4))[0]
+    def i32(): return struct.unpack("<i", rd(4))[0]
+    def u64(): return struct.unpack("<Q", rd(8))[0]
+    def f32(): return struct.unpack("<f", rd(4))[0]
+    def str_(): n = u32(); return rd(n).decode("utf-8", "replace")
+    def cvec(): return (f32(), f32(), f32())
+    def cquat(): return (f32(), f32(), f32(), f32())
+    def rdmat():
+        u8(); state = u32(); f32()  # ver, state, scale33
+        if state & (2|4|8):
+            for _ in range(9): f32()
+        if state & 1:
+            for _ in range(3): f32()
+        if state & 16:
+            for _ in range(4): f32()
+    rd(4); u64(); str_(); u8(); bc = i32()
+    out = []
+    for i in range(bc):
+        boneVer = u8(); name = str_(); rdmat()
+        i32(); u8(); f32()  # father, unherit, lod
+        u8(); dpos = cvec()
+        u8(); cvec()  # euler
+        u8(); cquat()  # quat
+        u8(); cvec()  # scale
+        u8(); cvec()  # pivot
+        if boneVer >= 2:
+            cvec()  # skinScale
+        out.append((name, dpos))
+    return out
+
+def bone_accuracy(ours, ref_path):
+    """Compare our .skel bone dposes to reference. Returns (total, exact, close, sum_err)."""
+    try:
+        a = read_skel_dpos(ours)
+        b = read_skel_dpos(ref_path)
+    except Exception:
+        return (0, 0, 0, 0.0)
+    if len(a) != len(b): return (0, 0, 0, 0.0)
+    total = exact = close = 0
+    sum_err = 0.0
+    for (na, pa), (nb, pb) in zip(a, b):
+        if na != nb: continue
+        total += 1
+        err = ((pa[0]-pb[0])**2 + (pa[1]-pb[1])**2 + (pa[2]-pb[2])**2) ** 0.5
+        sum_err += err
+        if err < 1e-5: exact += 1
+        elif err < 0.02: close += 1
+    return (total, exact, close, sum_err)
 
 def run_tests(bin_dir, files, do_t1, do_t2, do_t3, ref_biped, ref_nonbiped, output_dir):
     corpus_test = os.path.join(bin_dir, "pipeline_max_corpus_test")
@@ -107,6 +162,12 @@ def run_tests(bin_dir, files, do_t1, do_t2, do_t3, ref_biped, ref_nonbiped, outp
                 continue
             with open(out_skel, "rb") as f: ours = f.read()
             with open(ref, "rb") as f: theirs = f.read()
+            # Aggregate per-bone dpos accuracy (works even when total-size differs from ref).
+            bt, be, bc_, err = bone_accuracy(out_skel, ref)
+            b.setdefault("t3_bones_total", 0); b["t3_bones_total"] += bt
+            b.setdefault("t3_bones_exact", 0); b["t3_bones_exact"] += be
+            b.setdefault("t3_bones_close", 0); b["t3_bones_close"] += bc_
+            b.setdefault("t3_bones_err", 0.0); b["t3_bones_err"] += err
             if ours == theirs:
                 b["t3_pass"] += 1
             else:
@@ -142,7 +203,11 @@ def report(buckets, do_t1, do_t2, do_t3, verbose):
             sm = b.get("t3_size_match", 0)
             pcts = b.get("t3_pct_sum", 0.0); pn = b.get("t3_pct_n", 0)
             avg = (pcts / pn) if pn else 0.0
-            line += f", T3 {b['t3_pass']}/{total-missing} exact (size-match {sm}, avg byte-match {avg:.1f}%, missing-ref={missing})"
+            bt = b.get("t3_bones_total", 0); be = b.get("t3_bones_exact", 0); bc_ = b.get("t3_bones_close", 0)
+            err_avg = (b.get("t3_bones_err", 0.0) / bt) if bt else 0.0
+            line += (f", T3 {b['t3_pass']}/{total-missing} exact"
+                     f" (size-match {sm}, avg byte-match {avg:.1f}%, missing-ref={missing};"
+                     f" bones {be}+{bc_}/{bt} exact+close, avg dpos err {err_avg:.4f})")
         print(line)
         if verbose:
             for name, summary, err in b.get("t1_fail", [])[:20]:
