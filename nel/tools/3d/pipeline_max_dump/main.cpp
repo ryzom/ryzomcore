@@ -31,6 +31,13 @@
 #include <cstdio>
 #include <iostream>
 #include <fstream>
+#ifdef NL_OS_WINDOWS
+#include <process.h>
+#define PMD_GETPID _getpid
+#else
+#include <unistd.h>
+#define PMD_GETPID getpid
+#endif
 
 #include <vector>
 #include <utility>
@@ -198,15 +205,19 @@ int main(int argc, char **argv)
 		PIPELINE::MAX::CStorageStream instream(input);
 		PIPELINE::MAX::CStorageContainer ctr;
 		ctr.serial(instream);
+		// PID-suffixed temp path so concurrent invocations don't clobber each other
+		// (same pattern as pipeline_max_corpus_test), removed after the reserial check.
+		std::string tempPath = "/tmp/pipeline_max_dump." + NLMISC::toString((sint32)PMD_GETPID()) + ".tmp";
 		{
-			NLMISC::COFile of("temp.bin");
+			NLMISC::COFile of(tempPath);
 			ctr.serial(of); // out
 			// nldebug("Written %i bytes", of.getPos());
 		}
 		{
-			NLMISC::CIFile inf("temp.bin");
+			NLMISC::CIFile inf(tempPath);
 			dllDirectory.serial(inf); // in
 		}
+		std::remove(tempPath.c_str());
 		//dllDirectory.serial(instream);
 	}
 	g_object_unref(input);
