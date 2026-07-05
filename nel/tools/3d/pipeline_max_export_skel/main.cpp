@@ -12,6 +12,7 @@
 #include <nel/misc/quat.h>
 #include <nel/misc/matrix.h>
 
+#include <algorithm>
 #include <cmath>
 #include <cstring>
 
@@ -543,21 +544,45 @@ static void writeGltf(const std::string &path, const std::vector<Bone> &bones)
 	fclose(fp);
 }
 
+// Detect a biped file by scanning the ClassDirectory3 for an entry named "Biped Object". The
+// DllDirectory-based check would false-positive because biped.dlc is loaded even when no biped
+// exists in the scene (Max loads all installed plugins); only the ClassDirectory3 entry appears
+// when a biped class is actually instantiated.
+static bool looksLikeBipedFile(CClassDirectory3 &cd)
+{
+	for (auto it = cd.chunks().begin(); it != cd.chunks().end(); ++it)
+	{
+		const CClassEntry *entry = dynamic_cast<const CClassEntry *>(it->second);
+		if (!entry) continue;
+		std::string name = entry->displayName().toUtf8();
+		if (name == "Biped Object") return true;
+	}
+	return false;
+}
+
 int main(int argc, char **argv)
 {
-	// Args: [--double] [--gltf <path>] <input.max> <output.skel>
-	//   --double  world-matrix accumulation in double instead of float
-	//   --gltf    also write a glTF 2.0 skeleton-only file next to the .skel; used for the
-	//             mesh_export roundtrip validator (Blender-importable, assimp-readable)
+	// Args: [--double] [--gltf <path>] [--allow-biped-degraded] <input.max> <output.skel>
+	//   --double                 world-matrix accumulation in double instead of float
+	//   --gltf <path>            also write a glTF 2.0 skeleton-only file next to the .skel; used for
+	//                            the mesh_export roundtrip validator (Blender-importable,
+	//                            assimp-readable)
+	//   --allow-biped-degraded   proceed on biped files with identity local transforms + a warning
+	//                            (bind pose is stored inside proprietary Biped controller chunks and
+	//                            we don't yet decode them, so the output has correct names + hierarchy
+	//                            but wrong per-bone InvBindPos); default is to refuse with an error so
+	//                            silent-broken outputs don't slip into the corpus.
 	int argi = 1;
 	const char *gltfOut = NULL;
+	bool allowBipedDegraded = false;
 	while (argi < argc && argv[argi][0] == '-' && argv[argi][1] == '-')
 	{
 		if (std::string(argv[argi]) == "--double") { g_useDouble = true; ++argi; }
 		else if (std::string(argv[argi]) == "--gltf" && argi + 1 < argc) { gltfOut = argv[argi + 1]; argi += 2; }
+		else if (std::string(argv[argi]) == "--allow-biped-degraded") { allowBipedDegraded = true; ++argi; }
 		else break;
 	}
-	if (argc - argi < 2) { std::cerr << "usage: export_skel [--double] [--gltf <path>] <input.max> <output.skel>\n"; return 1; }
+	if (argc - argi < 2) { std::cerr << "usage: export_skel [--double] [--gltf <path>] [--allow-biped-degraded] <input.max> <output.skel>\n"; return 1; }
 	const char *maxFile = argv[argi];
 	const char *skelOut = argv[argi + 1];
 
@@ -580,6 +605,22 @@ int main(int argc, char **argv)
 	CClassDirectory3 cd(&dll);
 	{ GsfInput *s = gsf_infile_child_by_name(in, "ClassDirectory3"); CStorageStream st(s); cd.serial(st); g_object_unref(s); }
 	cd.parse(VersionUnknown);
+
+	bool isBiped = looksLikeBipedFile(cd);
+	if (isBiped)
+	{
+		if (!allowBipedDegraded)
+		{
+			std::cerr << maxFile << ": biped skeleton — bind-pose extraction not yet implemented.\n"
+			          << "  The biped bind pose lives in proprietary Biped controller storage that we\n"
+			          << "  don't decode. Pass --allow-biped-degraded to write a .skel with correct\n"
+			          << "  hierarchy but identity local transforms (unusable for skinning). Or wait\n"
+			          << "  for the Biped controller reverse-engineering pass (see pipeline_max_design\n"
+			          << "  §12 for the milestone plan).\n";
+			return 3;
+		}
+		std::cerr << maxFile << ": WARNING biped detected, exporting with identity local transforms\n";
+	}
 	CScene scene(&reg, &dll, &cd);
 	{ GsfInput *s = gsf_infile_child_by_name(in, "Scene"); CStorageStream st(s); scene.serial(st); g_object_unref(s); }
 	scene.parse(VersionUnknown);

@@ -50,7 +50,7 @@ def is_biped(path):
     with open(path, "rb") as f:
         return marker in f.read()
 
-def run_tests(bin_dir, files, do_t1, do_t2, do_t3, ref_dir, output_dir):
+def run_tests(bin_dir, files, do_t1, do_t2, do_t3, ref_biped, ref_nonbiped, output_dir):
     corpus_test = os.path.join(bin_dir, "pipeline_max_corpus_test")
     export_skel = os.path.join(bin_dir, "pipeline_max_export_skel")
     if do_t1 and not os.path.isfile(corpus_test):
@@ -89,13 +89,19 @@ def run_tests(bin_dir, files, do_t1, do_t2, do_t3, ref_dir, output_dir):
         if do_t3:
             base = os.path.splitext(name)[0]
             out_skel = os.path.join(output_dir, base + ".skel") if output_dir else "/tmp/skel_test.skel"
-            r = subprocess.run([export_skel, full, out_skel], capture_output=True, text=True, timeout=120)
+            # Pass --allow-biped-degraded on biped files so the exporter runs (degraded output —
+            # correct names/hierarchy, identity local transforms) instead of refusing outright.
+            # T3 reports the delta so degraded output can't quietly pass as a match.
+            extra = ["--allow-biped-degraded"] if kind == "biped" else []
+            r = subprocess.run([export_skel] + extra + [full, out_skel],
+                               capture_output=True, text=True, timeout=120)
             if r.returncode != 0:
                 b["t3_fail"].append((name, f"exporter rc={r.returncode}", r.stderr.strip()))
                 continue
-            if not ref_dir:
+            ref_dir_here = ref_biped if kind == "biped" else ref_nonbiped
+            if not ref_dir_here:
                 continue
-            ref = os.path.join(ref_dir, base + ".skel")
+            ref = os.path.join(ref_dir_here, base + ".skel")
             if not os.path.isfile(ref):
                 b["t3_missing_ref"].append(name)
                 continue
@@ -104,11 +110,21 @@ def run_tests(bin_dir, files, do_t1, do_t2, do_t3, ref_dir, output_dir):
             if ours == theirs:
                 b["t3_pass"] += 1
             else:
-                # size-match + byte-percent
+                # Size-match check + byte-percent. Non-biped runs are expected to size-match with
+                # ~61-96% byte-match (T3-epsilon float noise); biped runs are currently degraded so
+                # match% is meaningful mostly as a floor + progress metric.
                 pct = 0
-                if len(ours) == len(theirs) and len(ours):
+                size_match = len(ours) == len(theirs)
+                if size_match and len(ours):
                     matches = sum(1 for a, b_ in zip(ours, theirs) if a == b_)
                     pct = matches * 100.0 / len(ours)
+                b.setdefault("t3_size_match", 0)
+                if size_match: b["t3_size_match"] += 1
+                b.setdefault("t3_pct_sum", 0.0)
+                b.setdefault("t3_pct_n", 0)
+                if size_match:
+                    b["t3_pct_sum"] += pct
+                    b["t3_pct_n"] += 1
                 b["t3_fail"].append((name, f"size={len(ours)} vs {len(theirs)} byte-match={pct:.1f}%", ""))
 
     return buckets
@@ -123,7 +139,10 @@ def report(buckets, do_t1, do_t2, do_t3, verbose):
         if do_t2: line += f", T2 {b['t2_pass']}/{total}"
         if do_t3:
             missing = len(b['t3_missing_ref'])
-            line += f", T3 {b['t3_pass']}/{total-missing} (missing-ref={missing})"
+            sm = b.get("t3_size_match", 0)
+            pcts = b.get("t3_pct_sum", 0.0); pn = b.get("t3_pct_n", 0)
+            avg = (pcts / pn) if pn else 0.0
+            line += f", T3 {b['t3_pass']}/{total-missing} exact (size-match {sm}, avg byte-match {avg:.1f}%, missing-ref={missing})"
         print(line)
         if verbose:
             for name, summary, err in b.get("t1_fail", [])[:20]:
@@ -141,7 +160,8 @@ def main():
     ap.add_argument("--graphics", default=os.path.join(home, "ryzomcore_graphics"))
     ap.add_argument("--workspace", default=os.path.join(home, "ryzomcore_leveldesign/workspace"))
     ap.add_argument("--bin",       default=os.path.join(home, "ryzomcore/build/nel-pipeline/bin"))
-    ap.add_argument("--ref",       default=os.path.join(home, "core4_data/characters_skeletons"))
+    ap.add_argument("--ref-biped", default=os.path.join(home, "core4_data/characters_skeletons"))
+    ap.add_argument("--ref-nonbiped", default=os.path.join(home, "core4_data/fauna_skeletons"))
     ap.add_argument("--output",    default=None, help="directory to write .skel outputs (T3)")
     ap.add_argument("--t1", action="store_true")
     ap.add_argument("--t2", action="store_true")
@@ -159,11 +179,13 @@ def main():
     if not files:
         sys.exit("empty corpus — check --graphics / --workspace paths")
 
-    ref = args.ref if os.path.isdir(args.ref) else None
-    if args.t3 and not ref:
-        print(f"note: T3 reference dir {args.ref} not present; T3 will only check exporter runs")
+    ref_biped = args.ref_biped if os.path.isdir(args.ref_biped) else None
+    ref_nonbiped = args.ref_nonbiped if os.path.isdir(args.ref_nonbiped) else None
+    if args.t3:
+        if not ref_biped: print(f"note: T3 biped-ref dir {args.ref_biped} not present")
+        if not ref_nonbiped: print(f"note: T3 nonbiped-ref dir {args.ref_nonbiped} not present")
 
-    buckets = run_tests(args.bin, files, args.t1, args.t2, args.t3, ref, args.output)
+    buckets = run_tests(args.bin, files, args.t1, args.t2, args.t3, ref_biped, ref_nonbiped, args.output)
     report(buckets, args.t1, args.t2, args.t3, args.verbose)
 
     # Non-zero exit if any T1/T2 failure surfaced (T3 mismatches are epsilon-tolerated).
