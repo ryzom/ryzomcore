@@ -260,6 +260,16 @@ enum EBipedBoneId
 	BID_VERTICAL = 12, BID_HORIZONTAL = 13, BID_TURN = 14, BID_FOOTPRINTS = 15,
 	BID_NECK = 16, BID_PONY1 = 17, BID_PONY2 = 18,
 	BID_PROP1 = 19, BID_PROP2 = 20, BID_PROP3 = 21,
+	// Extension ids beyond the 22 MaxScript-documented groups (0-21), found empirically 2026-07 by
+	// scanning chunk 0x0200 across the full biped skel corpus (9 templates: fy/tr/zo/ma male,
+	// fy/tr/zo/ca female, ca male). Stable across all of them:
+	BID_RFINGERNUB = 22, // end-effector dummy under each "R Finger*2" tip (link = which finger, 0-4)
+	BID_LFINGERNUB = 23, // end-effector dummy under each "L Finger*2" tip (link = which finger, 0-4)
+	BID_LTOENUB = 24,    // end-effector dummy under "Bip01 L Toe0"
+	BID_RTOENUB = 25,    // end-effector dummy under "Bip01 R Toe0"
+	// Seen but not yet decoded/needed (real bones or accessory dummies, not covered by any current
+	// reference mismatch): 26 = Tail (ca_hom/ca_hof), 27 = second head-attach dummy, 28 = Ponytail1
+	// (again, on a second attach point), 29 = neck accessory dummy (ca_hom "Dummy23").
 };
 
 static NLMISC::CMatrix makeLocalTM(const NLMISC::CVector &pos, const NLMISC::CQuat &rot, const NLMISC::CVector &scale)
@@ -298,6 +308,12 @@ static CSceneClass *g_bipedObj = NULL;
 // Pelvis world rotation, captured when the Pelvis node is walked (all decoded joints are deeper).
 static NLMISC::CQuat g_pelvisWorldRot = NLMISC::CQuat::Identity;
 static bool g_havePelvisWorldRot = false;
+// Highest link index observed among BID_LLEG/BID_RLEG BipDriven bones in this file, i.e. the
+// last leg segment before the Foot. The SDK-documented leg chain is Thigh(0), Calf(1),
+// [HorseLink(2) only on 4-link mount/horse rigs], Foot(last). Scanned once per file (see
+// computeMaxLegLink) so the Foot joint decode generalizes to both 3-link and 4-link legs instead
+// of hardcoding link==2, which would silently misfire as "Foot" on a HorseLink segment.
+static int g_maxLegLink = 2;
 
 static const NLMISC::CClassId CLASSID_BIPED_SYS(0x00009155, 0x00000000);
 
@@ -427,7 +443,7 @@ static void getBipedLocal(INode *node, const NLMISC::CQuat &parentWorldRot,
 	bool decoded = false;
 
 	if (haveId && (id == BID_LLEG || id == BID_RLEG) && link == 0) decoded = jointWorldRot(JD_THIGH, wq);    // Thigh
-	else if (haveId && (id == BID_LLEG || id == BID_RLEG) && link == 2) decoded = jointWorldRot(JD_FOOT, wq); // Foot
+	else if (haveId && (id == BID_LLEG || id == BID_RLEG) && (int)link == g_maxLegLink) decoded = jointWorldRot(JD_FOOT, wq); // Foot (last leg link — generalizes 3- and 4-link legs)
 	else if (haveId && (id == BID_LARM || id == BID_RARM) && link == 1) decoded = jointWorldRot(JD_UPPERARM, wq); // UpperArm
 	else if (haveId && id == BID_HEAD && link == 0) decoded = jointWorldRot(JD_HEAD, wq); // Head
 
@@ -462,6 +478,16 @@ static void getBipedLocal(INode *node, const NLMISC::CQuat &parentWorldRot,
 			// finger-base world rotation = parent(Hand) * local
 			worldRot = parentWorldRot * rot;
 		}
+	}
+	else if (haveId && (id == BID_RFINGERNUB || id == BID_LTOENUB))
+	{
+		// Finger/toe end-effector marker (no children, so the "aim at child" rule that gives
+		// straight-chain bones identity local rotation doesn't apply here). Confirmed constant
+		// 180-deg-about-Z local rotation across all 9 biped templates checked (fy/tr/zo/ma male,
+		// fy/tr/zo/ca female, ca male) for ids 22 (R finger nub) and 24 (L toe nub); the mirror
+		// ids 23 (L finger nub) / 25 (R toe nub) are already exact via the identity default below,
+		// so only these two need the override.
+		worldRot = parentWorldRot * NLMISC::CQuat(0.0f, 0.0f, -1.0f, 0.0f);
 	}
 
 	// --- Positions for the non-finger roles (straight-chain + known offsets). ---
@@ -523,6 +549,26 @@ static std::vector<INode *> orderedChildrenOf(INode *parent, CSceneClassContaine
 		if (n && n->parent() == parent) out.push_back(n);
 	}
 	return out;
+}
+
+// Scan every BipDriven bone in the scene once, before walking, to find the highest link index used
+// on the leg groups (BID_LLEG/BID_RLEG). Sets g_maxLegLink to that value, or leaves it at the
+// default of 2 (the 3-link Thigh/Calf/Foot case) if no leg bones are found at all. This makes the
+// Foot-joint decode ("last leg link" below) generalize to 4-link HorseLink rigs without special
+// casing them, and is a no-op on every 3-link rig in the corpus today.
+static void computeMaxLegLink(CSceneClassContainer *ssc)
+{
+	int maxLink = -1;
+	for (auto it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
+	{
+		INode *node = dynamic_cast<INode *>(it->second);
+		if (!node) continue;
+		uint32 id = 0, link = 0;
+		if (!readBipDrivenIdLink(node, id, link)) continue;
+		if (id == BID_LLEG || id == BID_RLEG)
+			maxLink = std::max(maxLink, (int)link);
+	}
+	if (maxLink >= 0) g_maxLegLink = maxLink;
 }
 
 // walkNode has two overloads for the two accumulation modes. They're structurally identical
@@ -979,6 +1025,8 @@ int main(int argc, char **argv)
 		// corpus: the biped root frame). The .skel writes Bip01's DefaultRotQuat as identity (root
 		// reset), but its InvBindPos and all descendants derive from this real world orientation.
 		rootMat.setRot(NLMISC::CQuat(0.0f, 0.0f, -0.70710678f, 0.70710678f));
+		g_maxLegLink = 2;
+		computeMaxLegLink(scene.container());
 	}
 
 	std::vector<Bone> bones;

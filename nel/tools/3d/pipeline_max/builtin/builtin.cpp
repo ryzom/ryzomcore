@@ -193,6 +193,12 @@ const CShadowTypeSuperClassDesc ShadowTypeSuperClassDesc(&ReferenceTargetClassDe
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x00001160> CCustAttribSuperClassDesc;
 const CCustAttribSuperClassDesc CustAttribSuperClassDesc(&ReferenceTargetClassDesc, "CustAttribSuperClassUnknown");
 
+// 0x1190 - camera effect (e.g. "Depth of Field (mental ray)"), directly under ref target;
+// observed in the *_fp.max (first-person hand) corpus files, which crashed the exporter with an
+// unregistered-superclass nlerror before this entry was added.
+typedef CSuperClassDescUnknown<CReferenceTarget, 0x00001190> CCameraEffectSuperClassDesc;
+const CCameraEffectSuperClassDesc CameraEffectSuperClassDesc(&ReferenceTargetClassDesc, "CameraEffectSuperClassUnknown");
+
 // 0x9012 - point4list, controlpoint4, also rgba, under controll???
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x00009012> CControlPoint4SuperClassDesc;
 const CControlPoint4SuperClassDesc ControlPoint4SuperClassDesc(&ReferenceTargetClassDesc, "ControlPoint4SuperClassUnknown");
@@ -320,6 +326,7 @@ void CBuiltin::registerClasses(CSceneClassRegistry *registry)
 	registry->add(&RenderEffectSuperClassDesc);
 	registry->add(&ShadowTypeSuperClassDesc);
 	registry->add(&CustAttribSuperClassDesc);
+	registry->add(&CameraEffectSuperClassDesc);
 	registry->add(&ControlPoint4SuperClassDesc);
 	registry->add(&UserDataTypeSuperClassDesc);
 	registry->add(&UserTypeSuperClassDesc);
