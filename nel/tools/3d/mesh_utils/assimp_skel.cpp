@@ -97,8 +97,47 @@ static void collectChildren(const aiNode *node, std::vector<const aiNode *> &out
 		out.push_back(node->mChildren[i]);
 }
 
+// Look up a float-valued NeL extras key on an aiNode. Assimp's glTF loader stores JSON
+// numbers as AI_DOUBLE (with-decimal) or AI_UINT64/INT32 (integer-looking); we accept
+// any numeric type and downcast to float. Returns true iff the key was found.
+// See wiki: nel_gltf_extras.md for the catalogue of nel_* keys.
+static bool getNelFloatMeta(const aiNode *node, const char *key, float &out)
+{
+	if (!node->mMetaData) return false;
+	for (unsigned i = 0; i < node->mMetaData->mNumProperties; ++i)
+	{
+		if (strcmp(node->mMetaData->mKeys[i].C_Str(), key) != 0) continue;
+		const aiMetadataEntry &v = node->mMetaData->mValues[i];
+		switch (v.mType)
+		{
+		case AI_DOUBLE: out = (float)*(const double *)v.mData; return true;
+		case AI_FLOAT:  out =        *(const float *)v.mData;  return true;
+		case AI_INT32:  out = (float)*(const int32_t *)v.mData; return true;
+		case AI_UINT32: out = (float)*(const uint32_t *)v.mData; return true;
+		case AI_UINT64: out = (float)*(const uint64_t *)v.mData; return true;
+		case AI_INT64:  out = (float)*(const int64_t *)v.mData; return true;
+		default: return false;
+		}
+	}
+	return false;
+}
+
+static bool getNelBoolMeta(const aiNode *node, const char *key, bool &out)
+{
+	if (!node->mMetaData) return false;
+	for (unsigned i = 0; i < node->mMetaData->mNumProperties; ++i)
+	{
+		if (strcmp(node->mMetaData->mKeys[i].C_Str(), key) != 0) continue;
+		const aiMetadataEntry &v = node->mMetaData->mValues[i];
+		if (v.mType == AI_BOOL) { out = *(const bool *)v.mData; return true; }
+		return false;
+	}
+	return false;
+}
+
 // Recursively build CBoneBase entries. Mirrors pipeline_max_export_skel::walkNode:
-// * Local T/R/S come from decomposing aiNode.mTransformation.
+// * Local T/R/S preferred from nel_* extras (bit-exact preservation from source); falls back
+//   to decomposing aiNode.mTransformation if none present (e.g., artist-authored glTF).
 // * Root bone (fatherId==-1) gets DefaultPos and DefaultRotQuat zeroed (NeL buildSkeleton
 //   convention); DefaultScale is preserved.
 // * InvBindPos = inverse of parentWorld * localTM, rebuilt via identity+setRot(I,J,K)+setPos(P)
@@ -116,14 +155,38 @@ static void walkSkelNode(CMeshUtilsContext &context, const aiNode *node,
 	b.UnheritScale = false; // Default for non-biped PRS controllers; matches pipeline_max_export_skel default.
 	b.LodDisableDistance = 0.0f;
 
-	// Decompose the aiNode local transform into T, R, S
-	aiVector3D aiScl, aiPos;
-	aiQuaternion aiRot;
-	node->mTransformation.Decompose(aiScl, aiRot, aiPos);
-	NLMISC::CVector realPos(aiPos.x, aiPos.y, aiPos.z);
-	NLMISC::CQuat  realRot(aiRot.x, aiRot.y, aiRot.z, aiRot.w);
-	NLMISC::CVector realScale(aiScl.x, aiScl.y, aiScl.z);
+	// Prefer nel_tx/ty/tz + nel_rx/ry/rz/rw + nel_sx/sy/sz extras when present — they
+	// preserve the source's float32 bits exactly and avoid the TRS->matrix->Decompose
+	// roundtrip that costs 5-16% byte parity on the .skel output. Falls back to Decompose
+	// for glTFs authored elsewhere (Blender export, etc.) that don't carry our extras.
+	NLMISC::CVector realPos, realScale;
+	NLMISC::CQuat realRot;
+	float tx, ty, tz, rx, ry, rz, rw, sx, sy, sz;
+	bool haveTrans = getNelFloatMeta(node, "nel_tx", tx) & getNelFloatMeta(node, "nel_ty", ty) & getNelFloatMeta(node, "nel_tz", tz);
+	bool haveRot   = getNelFloatMeta(node, "nel_rx", rx) & getNelFloatMeta(node, "nel_ry", ry) & getNelFloatMeta(node, "nel_rz", rz) & getNelFloatMeta(node, "nel_rw", rw);
+	bool haveScl   = getNelFloatMeta(node, "nel_sx", sx) & getNelFloatMeta(node, "nel_sy", sy) & getNelFloatMeta(node, "nel_sz", sz);
+	if (haveTrans && haveRot && haveScl)
+	{
+		realPos = NLMISC::CVector(tx, ty, tz);
+		realRot = NLMISC::CQuat(rx, ry, rz, rw);
+		realScale = NLMISC::CVector(sx, sy, sz);
+	}
+	else
+	{
+		aiVector3D aiScl, aiPos;
+		aiQuaternion aiRot;
+		node->mTransformation.Decompose(aiScl, aiRot, aiPos);
+		realPos = NLMISC::CVector(aiPos.x, aiPos.y, aiPos.z);
+		realRot = NLMISC::CQuat(aiRot.x, aiRot.y, aiRot.z, aiRot.w);
+		realScale = NLMISC::CVector(aiScl.x, aiScl.y, aiScl.z);
+	}
 	realRot.normalize();
+
+	// Read NeL-specific per-bone flags from extras when present.
+	bool metaUnherit;
+	if (getNelBoolMeta(node, "nel_unheritScale", metaUnherit)) b.UnheritScale = metaUnherit;
+	float metaLod;
+	if (getNelFloatMeta(node, "nel_lodDisableDistance", metaLod)) b.LodDisableDistance = metaLod;
 
 	// Build local matrix and accumulate world (float, matching pipeline_max_export_skel default).
 	NLMISC::CMatrix localTM;

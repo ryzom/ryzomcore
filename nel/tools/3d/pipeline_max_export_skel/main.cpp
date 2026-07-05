@@ -13,6 +13,7 @@
 #include <nel/misc/matrix.h>
 
 #include <cmath>
+#include <cstring>
 
 #include <gsf/gsf-infile-msole.h>
 #include <gsf/gsf-input-stdio.h>
@@ -24,6 +25,7 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <map>
 
 #include "../pipeline_max/storage_stream.h"
 #include "../pipeline_max/storage_object.h"
@@ -379,14 +381,19 @@ static void writeSkel(const std::string &path, const std::vector<Bone> &bones)
 		of.serial(skinScale);
 	}
 
-	// _BoneMap: std::map<string, uint32>
-	uint32 mapCount = (uint32)bones.size();
+	// _BoneMap: std::map<string, uint32>, iterated in std::map's sorted key order (not bone
+	// insertion order — that was a bug that manifested as a mismatch in the _BoneMap byte
+	// range against mesh_export's output, which uses CSkeletonShape::build's actual std::map).
+	sint32 mapCount = (sint32)bones.size();
 	of.serial(mapCount);
-	for (uint32 i = 0; i < bones.size(); ++i)
+	std::map<std::string, uint32> boneMap;
+	for (uint32 i = 0; i < bones.size(); ++i) boneMap[bones[i].Name] = i;
+	for (auto it = boneMap.begin(); it != boneMap.end(); ++it)
 	{
-		std::string n = bones[i].Name;
+		std::string n = it->first;
 		of.serial(n);
-		of.serial(i);
+		uint32 idx = it->second;
+		of.serial(idx);
 	}
 
 	// _Lods: vector<CLod> with just one lod
@@ -404,6 +411,29 @@ static void writeSkel(const std::string &path, const std::vector<Bone> &bones)
 		uint8 active = 0xFF;
 		of.serial(active);
 	}
+}
+
+// Format a float for JSON such that assimp's parser sees it as a floating-point number and
+// not an integer. Assimp's glTF loader picks the smallest integer type first when the JSON
+// token has no '.' or 'e', so we force decimal notation on integer-valued floats.
+// %.9g round-trips float32 exactly (24-bit mantissa needs 9 decimal digits).
+static std::string formatFloat(float v)
+{
+	char buf[32];
+	if (std::isnan(v) || std::isinf(v))
+	{
+		// glTF spec forbids these in TRS values; use 0 to keep the file valid rather than
+		// emitting an invalid token. Should not occur for real skeleton data.
+		return "0.0";
+	}
+	snprintf(buf, sizeof(buf), "%.9g", (double)v);
+	// Append ".0" if the printed form has no decimal marker so the reader picks a float type.
+	if (!strchr(buf, '.') && !strchr(buf, 'e') && !strchr(buf, 'E'))
+	{
+		size_t n = strlen(buf);
+		if (n + 2 < sizeof(buf)) { buf[n] = '.'; buf[n+1] = '0'; buf[n+2] = 0; }
+	}
+	return buf;
 }
 
 // Escape a name for embedding in JSON. Skeleton node names are typically simple identifiers
@@ -472,10 +502,13 @@ static void writeGltf(const std::string &path, const std::vector<Bone> &bones)
 		// The root reset is applied by the .skel writer, and mesh_export re-applies it on its
 		// side; feeding reset values through glTF would zero out the source's InvBindPos noise
 		// pattern and give a false byte-diff between the two paths.
-		fprintf(fp, ", \"translation\": [%.9g, %.9g, %.9g]", b.OrigPos.x, b.OrigPos.y, b.OrigPos.z);
-		fprintf(fp, ", \"rotation\": [%.9g, %.9g, %.9g, %.9g]",
-			b.OrigRot.x, b.OrigRot.y, b.OrigRot.z, b.OrigRot.w);
-		fprintf(fp, ", \"scale\": [%.9g, %.9g, %.9g]", b.DefaultScale.x, b.DefaultScale.y, b.DefaultScale.z);
+		fprintf(fp, ", \"translation\": [%s, %s, %s]",
+			formatFloat(b.OrigPos.x).c_str(), formatFloat(b.OrigPos.y).c_str(), formatFloat(b.OrigPos.z).c_str());
+		fprintf(fp, ", \"rotation\": [%s, %s, %s, %s]",
+			formatFloat(b.OrigRot.x).c_str(), formatFloat(b.OrigRot.y).c_str(),
+			formatFloat(b.OrigRot.z).c_str(), formatFloat(b.OrigRot.w).c_str());
+		fprintf(fp, ", \"scale\": [%s, %s, %s]",
+			formatFloat(b.DefaultScale.x).c_str(), formatFloat(b.DefaultScale.y).c_str(), formatFloat(b.DefaultScale.z).c_str());
 		if (!children[i].empty())
 		{
 			fprintf(fp, ", \"children\": [");
@@ -483,10 +516,24 @@ static void writeGltf(const std::string &path, const std::vector<Bone> &bones)
 				fprintf(fp, "%s%zu", k ? ", " : "", children[i][k]);
 			fprintf(fp, "]");
 		}
-		// Encode NeL-specific per-bone data in the "extras" object so downstream .skel emission
-		// can round-trip UnheritScale and LodDisableDistance without losing them.
-		fprintf(fp, ", \"extras\": {\"nel_unheritScale\": %s, \"nel_lodDisableDistance\": %.9g}",
-			b.UnheritScale ? "true" : "false", b.LodDisableDistance);
+		// Extras: NeL-specific per-node data that either isn't representable in stock glTF (the
+		// two convertMatrix flags) or has to be preserved bit-exact for our .skel roundtrip
+		// (the T/R/S floats). See wiki: nel_gltf_extras.md for the full catalogue.
+		//
+		// Rationale for nel_tx/ty/... instead of nel_translation: assimp maps JSON arrays into
+		// aiMetadata differently across versions, and mapping scalar JSON numbers to typed
+		// metadata entries is the most portable path. Cost is a few extra keys per node.
+		fprintf(fp, ", \"extras\": {");
+		fprintf(fp, "\"nel_tx\": %s, \"nel_ty\": %s, \"nel_tz\": %s",
+			formatFloat(b.OrigPos.x).c_str(), formatFloat(b.OrigPos.y).c_str(), formatFloat(b.OrigPos.z).c_str());
+		fprintf(fp, ", \"nel_rx\": %s, \"nel_ry\": %s, \"nel_rz\": %s, \"nel_rw\": %s",
+			formatFloat(b.OrigRot.x).c_str(), formatFloat(b.OrigRot.y).c_str(),
+			formatFloat(b.OrigRot.z).c_str(), formatFloat(b.OrigRot.w).c_str());
+		fprintf(fp, ", \"nel_sx\": %s, \"nel_sy\": %s, \"nel_sz\": %s",
+			formatFloat(b.DefaultScale.x).c_str(), formatFloat(b.DefaultScale.y).c_str(), formatFloat(b.DefaultScale.z).c_str());
+		fprintf(fp, ", \"nel_unheritScale\": %s", b.UnheritScale ? "true" : "false");
+		fprintf(fp, ", \"nel_lodDisableDistance\": %s", formatFloat(b.LodDisableDistance).c_str());
+		fprintf(fp, "}");
 		fprintf(fp, "}%s\n", (i + 1 < bones.size()) ? "," : "");
 	}
 
