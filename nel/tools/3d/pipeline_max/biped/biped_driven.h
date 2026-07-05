@@ -34,11 +34,11 @@
 // NeL includes
 
 // Project includes
-#include "reference_target.h"
+#include "../builtin/reference_target.h"
 
 namespace PIPELINE {
 namespace MAX {
-namespace BUILTIN {
+namespace BIPED {
 
 /**
  * \brief CBipedDriven
@@ -47,11 +47,11 @@ namespace BUILTIN {
  * "BipSlave Control" (pre-2022) / "BipDriven Control" (2022+), ClassId {0x9154, 0}, superclass
  * 0x9008 (ControlTransform). Every non-COM biped bone has one of these as its TM controller
  * (getReference(0)). Chunk 0x0200 (8 bytes = 2 uint32) identifies which biped bone this drives:
- * Autodesk's biped.getIdLink(node) pair (bone_id, link_index), 0-based internally (see
- * pipeline_max_design.md for the confirmed id table). This is currently the only sub-chunk typed
- * here; everything else on a BipDriven Control (e.g. chunk 0x0201) stays orphaned pass-through.
+ * the plugin's internal (bone_id, link_index) pair, 0-based internally (see pipeline_max_design.md
+ * for the confirmed id table). This is currently the only sub-chunk typed here; everything else
+ * on a BipDriven Control (e.g. chunk 0x0201) stays orphaned pass-through.
  */
-class CBipedDriven : public CReferenceTarget
+class CBipedDriven : public BUILTIN::CReferenceTarget
 {
 public:
 	CBipedDriven(CScene *scene);
@@ -77,7 +77,7 @@ public:
 	/// True if this instance carries the (bone_id, link_index) chunk (always true in the observed
 	/// corpus; guarded defensively in case a future file lacks it).
 	inline bool hasBipedIdLink() const { return m_HasIdLink; }
-	/// Autodesk biped internal bone-id enum value (0-based; see EBipedBoneId in pipeline_max_export_skel).
+	/// Internal bone-id enum value (0-based; see EBipedBoneId in pipeline_max_export_skel).
 	inline uint32 bipedBoneId() const { return m_BipedBoneId; }
 	/// Segment index within the bone's chain (e.g. which finger/spine/toe link).
 	inline uint32 bipedLinkIndex() const { return m_BipedLinkIndex; }
@@ -96,7 +96,7 @@ private:
 typedef CSceneClassDesc<CBipedDriven> CBipedDrivenClassDesc;
 extern const CBipedDrivenClassDesc BipedDrivenClassDesc;
 
-} /* namespace BUILTIN */
+} /* namespace BIPED */
 } /* namespace MAX */
 } /* namespace PIPELINE */
 

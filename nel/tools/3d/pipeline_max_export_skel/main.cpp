@@ -38,15 +38,17 @@
 #include "../pipeline_max/builtin/builtin.h"
 #include "../pipeline_max/update1/update1.h"
 #include "../pipeline_max/epoly/epoly.h"
+#include "../pipeline_max/biped/biped.h"
 
 #include "../pipeline_max/builtin/scene_impl.h"
 #include "../pipeline_max/builtin/i_node.h"
 #include "../pipeline_max/builtin/node_impl.h"
 #include "../pipeline_max/builtin/reference_maker.h"
-#include "../pipeline_max/builtin/biped_driven.h"
+#include "../pipeline_max/biped/biped_driven.h"
 
 using namespace PIPELINE::MAX;
 using namespace PIPELINE::MAX::BUILTIN;
+using namespace PIPELINE::MAX::BIPED;
 
 struct Bone
 {
@@ -209,8 +211,8 @@ static NLMISC::CVector readNodeBoneDimensions(INode *node)
 }
 
 // BipDriven Control (0x9154) stores its (biped_bone_id, link_index) pair as chunk 0x0200
-// (8 bytes = 2 uint32s), now typed as CBipedDriven (see builtin/biped_driven.h). The bone_id maps
-// to Autodesk's biped.getIdLink table (12=pelvis, 9=spine, 11=head, etc.). We use it to
+// (8 bytes = 2 uint32s), now typed as CBipedDriven (see biped/biped_driven.h). The bone_id maps
+// to the biped plugin's getIdLink table (12=pelvis, 9=spine, 11=head, etc.). We use it to
 // distinguish "straight chain" bones (child.id == parent.id and child.link == parent.link + 1,
 // e.g. Spine → Spine1) from "chain base" bones (child.id != parent.id, e.g. Pelvis → Spine
 // crosses biped groups) — the two need different local-position rules.
@@ -247,7 +249,7 @@ static void getLocalTransform(CReferenceMaker *tmCtrl,
 	if (scaleSc) readRawBytes(scaleSc, CHUNK_BEZIER_SCALE_VALUE, &scale, 12);
 }
 
-// Autodesk biped internal bone-id constants — 0-based, one less than the MaxScript-facing IDs in
+// Biped plugin internal bone-id constants — 0-based, one less than the MaxScript-facing IDs in
 // biped.getIdLink docs. Confirmed by dumping 0x0200 across fy_hom_skel: Bip01 Spine → id=8,
 // Bip01 Neck → id=16, Bip01 Head → id=10, Bip01 Pelvis → id=11, L Clavicle group id=0, etc.
 enum EBipedBoneId
@@ -878,7 +880,7 @@ static const NLMISC::CClassId CLASSID_BIPED_OBJECT (0x00009125, 0x00000000);
 // DllDirectory-based check would false-positive because biped.dlc is loaded even when no biped
 // exists in the scene (Max loads all installed plugins); only the ClassDirectory3 entry appears
 // when a biped class is actually instantiated. Using ClassId not display name so this survives
-// the Autodesk rename of BipSlave_Control → BipDriven_Control across the corpus's Max versions.
+// the plugin's rename of BipSlave_Control → BipDriven_Control across the corpus's Max versions.
 static bool looksLikeBipedFile(CClassDirectory3 &cd)
 {
 	for (auto it = cd.chunks().begin(); it != cd.chunks().end(); ++it)
@@ -926,6 +928,7 @@ int main(int argc, char **argv)
 	CBuiltin::registerClasses(&reg);
 	UPDATE1::CUpdate1::registerClasses(&reg);
 	EPOLY::CEPoly::registerClasses(&reg);
+	BIPED::CBiped::registerClasses(&reg);
 
 	GsfInput *src = gsf_input_stdio_new(maxFile, NULL);
 	if (!src) { std::cerr << "cannot open " << maxFile << "\n"; return 1; }

@@ -34,12 +34,15 @@
 
 // Project includes
 #include "../storage_array.h"
+#include "biped.h"
 
 using namespace std;
 
 namespace PIPELINE {
 namespace MAX {
-namespace BUILTIN {
+namespace BIPED {
+
+using BUILTIN::CReferenceTarget;
 
 #define PMB_BIPED_DRIVEN_IDLINK_CHUNK_ID 0x0200
 
@@ -57,7 +60,7 @@ const ucstring CBipedDriven::DisplayName = ucstring("BipDriven Control");
 const char *CBipedDriven::InternalName = "BipedDriven";
 const NLMISC::CClassId CBipedDriven::ClassId = NLMISC::CClassId(0x00009154, 0x00000000);
 const TSClassId CBipedDriven::SuperClassId = 0x00009008; // ControlTransform
-const CBipedDrivenClassDesc BipedDrivenClassDesc(&DllPluginDescBuiltin);
+const CBipedDrivenClassDesc BipedDrivenClassDesc(&DllPluginDescBiped);
 
 void CBipedDriven::parse(uint16 version, uint filter)
 {
@@ -140,7 +143,7 @@ IStorageObject *CBipedDriven::createChunkById(uint16 id, bool container)
 	return CReferenceTarget::createChunkById(id, container);
 }
 
-} /* namespace BUILTIN */
+} /* namespace BIPED */
 } /* namespace MAX */
 } /* namespace PIPELINE */
 

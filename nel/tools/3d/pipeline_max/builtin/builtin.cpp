@@ -56,8 +56,6 @@
 #include "patch_object.h"
 #include "editable_patch.h"
 
-#include "biped_driven.h"
-
 // using namespace std;
 // using namespace NLMISC;
 
@@ -289,9 +287,6 @@ void CBuiltin::registerClasses(CSceneClassRegistry *registry)
 			}
 		}
 	}
-
-	// biped (inh ReferenceTarget, exact match under the ControlTransform unknown-superclass fallback)
-	registry->add(&BipedDrivenClassDesc);
 
 	// unimplemented
 	registry->add(&ControlFloatSuperClassDesc);

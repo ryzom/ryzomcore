@@ -60,6 +60,7 @@
 #include "../pipeline_max/builtin/builtin.h"
 #include "../pipeline_max/update1/update1.h"
 #include "../pipeline_max/epoly/epoly.h"
+#include "../pipeline_max/biped/biped.h"
 
 #include "../pipeline_max/builtin/storage/app_data.h"
 #include "../pipeline_max/builtin/storage/geom_buffers.h"
@@ -1541,6 +1542,7 @@ int main(int argc, char **argv)
 	CBuiltin::registerClasses(&SceneClassRegistry);
 	CUpdate1::registerClasses(&SceneClassRegistry);
 	CEPoly::registerClasses(&SceneClassRegistry);
+	BIPED::CBiped::registerClasses(&SceneClassRegistry);
 
 	//handleFile("/srv/work/database/interfaces/anims_max/cp_fy_hof_species.max");
 	runInitialize();
