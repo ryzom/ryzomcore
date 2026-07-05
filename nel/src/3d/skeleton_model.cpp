@@ -1077,11 +1077,25 @@ void		CSkeletonModel::traverseRender()
 {
 	H_AUTO( NL3D_Skeleton_Render );
 
+	// Inside water reflection passes, entities clip at the exact water
+	// surface instead of the below-surface biased plane: the bias keeps
+	// the waterline seamless on static geometry, but would show the
+	// entity's submerged parts in its reflection. (CLod impostors are
+	// batched and drawn later under the biased plane — far-LOD characters
+	// in a reflection, negligible.)
+	CWaterReflectionManager &wrm = getOwnerScene()->getWaterReflectionManager();
+	const bool entityClip = wrm.isRenderingReflection();
+	if (entityClip)
+		wrm.selectClipBias(getOwnerScene()->getRenderTrav().getDriver(), CWaterReflectionManager::ClipBiasEntity);
+
 	// render as CLod, or render Skins.
 	if(isDisplayedAsLodCharacter())
 		renderCLod();
 	else
 		renderSkins();
+
+	if (entityClip)
+		wrm.selectClipBias(getOwnerScene()->getRenderTrav().getDriver(), CWaterReflectionManager::ClipBiasStatic);
 }
 
 

@@ -568,6 +568,7 @@ void			CLandscape::clear()
 
 	// reset driver.
 	_Driver= NULL;
+	_WaterReflectionClip= NULL;
 }
 
 // ***************************************************************************
@@ -1581,6 +1582,13 @@ void			CLandscape::render(const CVector &refineCenter, const CVector &frontVecto
 	// 2. Far0Render pass.
 	//====================
 
+	// Water reflection renders: the far passes clip deeper below the water
+	// surface than the static bias — at the horizon the thin static band
+	// still leaves a void bleed where perturbed lookups cross the
+	// waterline, and distant underwater terrain fills it correctly
+	if (_WaterReflectionClip)
+		_WaterReflectionClip->selectClipBias(driver, CWaterReflectionManager::ClipBiasFar);
+
 	// Yoyo: profile
 	NL3D_PROFILE_LAND_SET(ProfNFar0SetupMaterial, driver->profileSetupedMaterials() );
 	H_BEFORE( NL3D_Landscape_Render_DLM );
@@ -1725,6 +1733,10 @@ void			CLandscape::render(const CVector &refineCenter, const CVector &frontVecto
 	NL3D_PROFILE_LAND_SET(ProfNFar1SetupMaterial, driver->profileSetupedMaterials()-ProfNFar1SetupMaterial );
 	H_AFTER( NL3D_Landscape_Render_Far1 );
 
+
+	// Restore the static-geometry water clip bias after the far passes
+	if (_WaterReflectionClip)
+		_WaterReflectionClip->selectClipBias(driver, CWaterReflectionManager::ClipBiasStatic);
 
 	// 4. "Release" texture materials.
 	//================================

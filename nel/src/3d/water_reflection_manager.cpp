@@ -51,6 +51,10 @@ uint CWaterReflectionManager::_AnyReflectionRenderCount = 0;
 // band of underwater geometry in the reflection so that perturbed UVs near
 // the waterline don't sample the clip void (halo artifacts).
 static const float WATER_REFLECTION_CLIP_BIAS = 0.25f;
+// World-space clip bias below the surface for the FAR landscape passes: at
+// the horizon the thin static band still leaves a void bleed where perturbed
+// lookups cross the waterline; deeper terrain fills it (see selectClipBias)
+static const float WATER_REFLECTION_FAR_CLIP_BIAS = 2.5f;
 // Screen-space margin around the water AABB for UV wobble, fraction of screen
 static const float WATER_REFLECTION_MARGIN = 0.02f;
 // RT dimension snap in pixels, avoids active-region churn
@@ -582,6 +586,13 @@ void CWaterReflectionManager::beginPass(uint pass, CActiveReflection &out)
 	drv->setupViewMatrixEx(pd.Refl.ReflViewMatrix, Pm);
 	drv->setClipPlane(0, CPlane(0.f, 0.f, 1.f, -(planeZ - WATER_REFLECTION_CLIP_BIAS)));
 	drv->enableClipPlane(0, true);
+	// Clip bias variants, selected per draw via selectClipBias: entities
+	// clip exactly at the surface (plane 1), the far landscape clips well
+	// below it (plane 2). Both disabled until selected.
+	drv->setClipPlane(1, CPlane(0.f, 0.f, 1.f, -planeZ));
+	drv->enableClipPlane(1, false);
+	drv->setClipPlane(2, CPlane(0.f, 0.f, 1.f, -(planeZ - WATER_REFLECTION_FAR_CLIP_BIAS)));
+	drv->enableClipPlane(2, false);
 
 	// --- Scene camera for the caller's scene render ---
 	// The mirrored camera sits below the surface, outside any cluster. By
@@ -630,6 +641,8 @@ void CWaterReflectionManager::endPass(uint pass)
 	drv->setColorMask(true, true, true, true);
 	_Scene->getClipTrav().setClusterVisibilityPosOverride(false);
 	drv->enableClipPlane(0, false);
+	drv->enableClipPlane(1, false);
+	drv->enableClipPlane(2, false);
 	drv->setRenderTarget(_SaveRenderTarget);
 	drv->setupViewport(_SaveDrvViewport);
 	CScissor fullScissor;
@@ -639,6 +652,23 @@ void CWaterReflectionManager::endPass(uint pass)
 	_Scene->setViewport(_SaveSceneViewport);
 	_SaveRenderTarget = NULL;
 	_SaveCam = NULL;
+}
+
+// ***************************************************************************
+void CWaterReflectionManager::selectClipBias(IDriver *drv, TClipBias bias)
+{
+	if (!_InReflectionRender || !drv)
+		return;
+	// exactly one of the three planes set up by beginPass is enabled
+	drv->enableClipPlane(0, bias == ClipBiasStatic);
+	drv->enableClipPlane(1, bias == ClipBiasEntity);
+	drv->enableClipPlane(2, bias == ClipBiasFar);
+}
+
+// ***************************************************************************
+float CWaterReflectionManager::getFarClipBias()
+{
+	return WATER_REFLECTION_FAR_CLIP_BIAS;
 }
 
 // ***************************************************************************

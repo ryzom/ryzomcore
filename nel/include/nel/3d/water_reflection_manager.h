@@ -42,6 +42,7 @@ namespace NL3D {
 class CScene;
 class CCamera;
 class ITexture;
+class IDriver;
 
 /**
  * Realtime planar reflections for water surfaces (HL2-era).
@@ -178,6 +179,26 @@ public:
 	uint			getNumActiveReflections() const { const CView *v = currentView(); return v ? (uint)v->Active.size() : 0; }
 	/// True while the manager is rendering a reflection pass (guards recursion and stat collection).
 	bool			isRenderingReflection() const { return _InReflectionRender; }
+	/** Water clip plane variants during a reflection pass. Static geometry
+	  * clips slightly below the surface (bump-perturbed lookups at the
+	  * waterline must not sample the clip void); entities clip exactly at
+	  * the surface (the bias would show their submerged parts in the
+	  * reflection); the far landscape clips well below it (at the horizon
+	  * the thin static band still leaves a void bleed — deeper terrain
+	  * fills it, and distant underwater terrain is visually correct there). */
+	enum TClipBias
+	{
+		ClipBiasStatic = 0,	// plane 0, WATER_REFLECTION_CLIP_BIAS below the surface
+		ClipBiasEntity = 1,	// plane 1, exactly at the surface
+		ClipBiasFar = 2		// plane 2, WATER_REFLECTION_FAR_CLIP_BIAS below the surface
+	};
+	/** During a reflection pass, select which clip bias variant subsequent
+	  * draws use (skeleton models bracket their draws with the entity
+	  * variant, the landscape far passes with the far variant). No-op
+	  * outside reflection passes. */
+	void			selectClipBias(IDriver *drv, TClipBias bias);
+	/// World-space clip bias below the surface used by the far landscape variant
+	static float	getFarClipBias();
 	/// When a reflection pass is rendering, returns true and sets planeZ to its water plane height.
 	bool			getRenderingReflectionPlaneZ(float &planeZ) const { if (!_InReflectionRender) return false; planeZ = _CurrentPassPlaneZ; return true; }
 	/** True while ANY scene's reflection pass is rendering. Content that

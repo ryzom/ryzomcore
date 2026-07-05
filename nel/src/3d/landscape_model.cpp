@@ -212,7 +212,10 @@ void	CLandscapeModel::clipAndRenderLandscape()
 		static std::vector<CPlane> reflPyramid;
 		reflPyramid = ClusteredPyramid;
 		CPlane waterPlane;
-		waterPlane.make(CVector(0.f, 0.f, -1.f), CVector(0.f, 0.f, reflPlaneZ));
+		// cull below the FAR clip bias, not the surface: the far passes
+		// keep a deep underwater band (see CLandscape::render), so patches
+		// within it must survive the patch-level cull
+		waterPlane.make(CVector(0.f, 0.f, -1.f), CVector(0.f, 0.f, reflPlaneZ - CWaterReflectionManager::getFarClipBias()));
 		reflPyramid.push_back(waterPlane);
 		Landscape.clip(refineCenter, reflPyramid);
 	}
@@ -288,6 +291,9 @@ void	CLandscapeModel::clipAndRenderLandscape()
 
 	// then render.
 	H_BEFORE( NL3D_Landscape_Render );
+	// In reflection renders the far passes select the deeper water clip
+	// bias (fills the void bleed at water horizons with distant terrain)
+	Landscape.setWaterReflectionClip(inReflection ? &getOwnerScene()->getWaterReflectionManager() : NULL);
 	// Vegetation is excluded from water reflection renders: its vertex
 	// program does not implement the reflection clip plane (underwater
 	// vegetation would show), and the contribution is not worth the cost
