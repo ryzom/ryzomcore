@@ -260,41 +260,6 @@ enum EBipedBoneId
 	BID_PROP1 = 19, BID_PROP2 = 20, BID_PROP3 = 21,
 };
 
-// Approximate local transform for a biped bone. Rules, in order:
-//   1. Parent isn't a BipDriven biped bone (parent is COM/V-H-T, or non-biped): local pos = 0.
-//      Matches ref for Bip01 Pelvis, most root-attached biped bones.
-//   2. Spine base (id=9, link=0): position inherits from COM per SDK docs, so the offset relative
-//      to the INode parent (Pelvis) is roughly the Spine's OWN length. Use self.096c.x.
-//   3. Straight-chain default: local pos = (parent.096c.x, 0, 0). Correct for Spine1→Head, finger
-//      sub-segments, everything the "position inherits from INode parent" rule applies to.
-//   Rotation is left as identity — getting real biped rotations requires the biped's forward
-//   kinematics using the rotation-inheritance rules (upper arms/legs/spine-base/feet inherit from
-//   COM; clavicles from last spine link). Chain-crossing bones (clavicles, upper limbs, upper
-//   legs, feet) still fall through the straight-chain rule and are approximate.
-static void getBipedLocalTransformApprox(INode *node, NLMISC::CVector &pos, NLMISC::CQuat &rot, NLMISC::CVector &scale)
-{
-	pos = NLMISC::CVector::Null;
-	rot = NLMISC::CQuat::Identity;
-	scale = NLMISC::CVector(1, 1, 1);
-
-	INode *parent = node->parent();
-	if (!parent) return;
-	if (!isBipedBoneNode(parent)) return; // parent isn't a BipDriven biped bone — rule 1
-
-	uint32 selfId = 0, selfLink = 0;
-	if (readBipDrivenIdLink(node, selfId, selfLink) && selfId == BID_SPINE && selfLink == 0)
-	{
-		// Rule 2: Spine base — position from COM, approximated by own X length.
-		NLMISC::CVector selfDims = readNodeBoneDimensions(node);
-		pos = NLMISC::CVector(selfDims.x, 0.0f, 0.0f);
-		return;
-	}
-
-	// Rule 3: straight chain — child at end of parent along parent's X axis.
-	NLMISC::CVector parentDims = readNodeBoneDimensions(parent);
-	pos = NLMISC::CVector(parentDims.x, 0.0f, 0.0f);
-}
-
 static NLMISC::CMatrix makeLocalTM(const NLMISC::CVector &pos, const NLMISC::CQuat &rot, const NLMISC::CVector &scale)
 {
 	NLMISC::CMatrix m;
@@ -303,6 +268,235 @@ static NLMISC::CMatrix makeLocalTM(const NLMISC::CVector &pos, const NLMISC::CQu
 	m.setRot(rot);
 	m.scale(scale);
 	return m;
+}
+
+////////////////////////////////////////////////////////////////////////
+// Biped figure-mode bind-pose reconstruction.
+//
+// The Max biped computes figure-mode transforms procedurally from state stored in the root Biped
+// (0x9155) system object. Reverse-engineering (2026-07, see pipeline_max_design.md) established:
+//   * The biped internal frame is Y-up; NeL/Max world is Z-up. Position conversion (x,y,z)->(x,-z,y);
+//     rotation basis change C=[[1,0,0],[0,0,-1],[0,1,0]].
+//   * Each bone's world local-X axis points exactly at its child (aim==exact). Straight-continuation
+//     bones therefore have identity local rotation; only direction-changing joints carry real rotation.
+//   * Direction-changing joint rotations are stored as quaternions at fixed offsets in per-limb record
+//     chunks, in either world or pelvis-relative frame, under a fixed component permutation+sign.
+//     Validated stable across templates (fy/ma/tr, male/female): Thigh (0x0069[2], pelvis-rel),
+//     UpperArm (0x006a[2], pelvis-rel), Foot (0x0069[28], world), Head (0x0064[0], pelvis-rel).
+//   * Right side is the left mirror: q_R = (x, y, -z, -w).
+//   * Finger/toe base bones store a full 4x4 local matrix (arm record 0x0010 / leg record).
+//   * Base frame: Bip01 world = COM from 0x0104 (Y-up 4x4); Pelvis local rot = (0.5,0.5,0.5,-0.5).
+//
+// This reconstruction supplies correct local (pos,rot) for the decoded roles and falls back to the
+// straight-chain approximation for the not-yet-decoded ones (Clavicle/Hand 2-DOF, ponytail, props),
+// so partial coverage never regresses a bone below the previous approximation.
+
+// The root Biped system object, located once per file. NULL for non-biped files.
+static CSceneClass *g_bipedObj = NULL;
+// Pelvis world rotation, captured when the Pelvis node is walked (all decoded joints are deeper).
+static NLMISC::CQuat g_pelvisWorldRot = NLMISC::CQuat::Identity;
+static bool g_havePelvisWorldRot = false;
+
+static const NLMISC::CClassId CLASSID_BIPED_SYS(0x00009155, 0x00000000);
+
+// Fetch a raw float array from a chunk on the biped object (orphaned or m_Chunks). Returns NULL if
+// absent or too short.
+static const float *bipedChunkFloats(uint16 chunkId, size_t minFloats)
+{
+	if (!g_bipedObj) return NULL;
+	IStorageObject *chunk = findChunkAnywhere(g_bipedObj, chunkId);
+	if (!chunk) return NULL;
+	CStorageRaw *raw = dynamic_cast<CStorageRaw *>(chunk);
+	if (!raw || raw->Value.size() < minFloats * 4) return NULL;
+	return reinterpret_cast<const float *>(raw->Value.data());
+}
+
+// Decode a joint quaternion stored at (chunkId, floatOffset) under a component permutation+sign.
+// Returns false if the chunk/offset is missing.
+static bool decodeJointQuat(uint16 chunkId, int off, const int perm[4], const int sign[4], NLMISC::CQuat &out)
+{
+	const float *f = bipedChunkFloats(chunkId, (size_t)off + 4);
+	if (!f) return false;
+	float q[4] = { f[off + 0], f[off + 1], f[off + 2], f[off + 3] };
+	NLMISC::CQuat r;
+	r.x = sign[0] * q[perm[0]];
+	r.y = sign[1] * q[perm[1]];
+	r.z = sign[2] * q[perm[2]];
+	r.w = sign[3] * q[perm[3]];
+	float n = sqrtf(r.x*r.x + r.y*r.y + r.z*r.z + r.w*r.w);
+	if (n < 1e-6f) return false;
+	r.x /= n; r.y /= n; r.z /= n; r.w /= n;
+	out = r;
+	return true;
+}
+
+// Mirror a left-side world/local rotation to the right side: (x,y,z,w) -> (x,y,-z,-w).
+static NLMISC::CQuat mirrorQuatLR(const NLMISC::CQuat &q)
+{
+	return NLMISC::CQuat(q.x, q.y, -q.z, -q.w);
+}
+
+// Stable joint-rotation decodings (validated across fy/ma/tr male+female templates).
+struct SJointDec { uint16 chunk; int off; int perm[4]; int sign[4]; bool pelvisRel; };
+static const SJointDec JD_THIGH    = { 0x0069, 2,  {2,3,0,1}, {1,1,-1,1},  true  };
+static const SJointDec JD_FOOT     = { 0x0069, 28, {2,0,3,1}, {1,-1,-1,1}, false };
+static const SJointDec JD_UPPERARM = { 0x006a, 2,  {1,2,3,0}, {1,-1,1,-1}, true  };
+static const SJointDec JD_HEAD     = { 0x0064, 0,  {0,1,2,3}, {1,1,1,1},   true  };
+
+// Compute the world rotation for a decoded joint. Returns false if not decodable.
+static bool jointWorldRot(const SJointDec &jd, NLMISC::CQuat &worldRot)
+{
+	NLMISC::CQuat q;
+	if (!decodeJointQuat(jd.chunk, jd.off, jd.perm, jd.sign, q)) return false;
+	if (jd.pelvisRel)
+	{
+		if (!g_havePelvisWorldRot) return false;
+		worldRot = g_pelvisWorldRot * q; // world = pelvis * (pelvis-relative)
+	}
+	else
+	{
+		worldRot = q;
+	}
+	worldRot.normalize();
+	return true;
+}
+
+// Parse the arm record (0x0010) and return the local transform (relative to the Hand) of finger
+// base index fi (0..4) on the LEFT arm. Record layout: [0..15] arm params, [16]=nFingers, then per
+// finger: [nLinks(int)][4x4 matrix (16 floats, row-major, Y-up)][nLinks length floats].
+// Returns false if the record is absent or fi is out of range.
+static bool parseLeftFingerBase(int fi, NLMISC::CVector &pos, NLMISC::CQuat &rot)
+{
+	const float *f = bipedChunkFloats(0x0010, 17);
+	if (!f) return false;
+	int nFingers = (int)*reinterpret_cast<const uint32 *>(&f[16]);
+	if (fi < 0 || fi >= nFingers) return false;
+	int idx = 17;
+	const int HALF = 117; // guard against overrun into the R-arm half
+	for (int i = 0; i <= fi; ++i)
+	{
+		if (idx + 1 > HALF) return false;
+		int nLinks = (int)*reinterpret_cast<const uint32 *>(&f[idx]); idx += 1;
+		if (nLinks < 0 || nLinks > 16 || idx + 16 + nLinks > HALF) return false;
+		if (i == fi)
+		{
+			const float *m = &f[idx];
+			// position: Y-up (x,y,z)->(x,-z,y)
+			pos = NLMISC::CVector(m[12], -m[14], m[13]);
+			// rotation R_nel = C * M^T ; columns: I=(m0,-m2,m1) J=(m4,-m6,m5) K=(m8,-m10,m9)
+			NLMISC::CVector I(m[0], -m[2], m[1]);
+			NLMISC::CVector J(m[4], -m[6], m[5]);
+			NLMISC::CVector K(m[8], -m[10], m[9]);
+			NLMISC::CMatrix rm; rm.identity(); rm.setRot(I, J, K);
+			rot = rm.getRot();
+			rot.normalize();
+			return true;
+		}
+		idx += 16 + nLinks;
+	}
+	return false;
+}
+
+// Biped role of a node, derived from its BipDriven (bone_id, link_index).
+enum EBipedRole { ROLE_NONE, ROLE_STRAIGHT, ROLE_PELVIS, ROLE_SPINEBASE, ROLE_THIGH, ROLE_FOOT,
+                  ROLE_UPPERARM, ROLE_HEAD, ROLE_FINGERBASE, ROLE_CLAVICLE, ROLE_HAND };
+
+// Compute the local (pos,rot) for a biped bone, given its already-computed parent world rotation.
+// Also captures the Pelvis world rotation for later pelvis-relative joints. scale is always identity
+// for biped bones. Sets *worldRotOut to this bone's world rotation (for children to consume).
+static void getBipedLocal(INode *node, const NLMISC::CQuat &parentWorldRot,
+                          NLMISC::CVector &pos, NLMISC::CQuat &rot, NLMISC::CVector &scale,
+                          NLMISC::CQuat &worldRotOut)
+{
+	pos = NLMISC::CVector::Null;
+	rot = NLMISC::CQuat::Identity;
+	scale = NLMISC::CVector(1, 1, 1);
+
+	INode *parent = node->parent();
+	uint32 id = 0, link = 0;
+	bool haveId = readBipDrivenIdLink(node, id, link);
+
+	// --- Determine world rotation and (for finger bases) an explicit local transform. ---
+	NLMISC::CQuat worldRot = parentWorldRot; // default: straight-chain inherits parent direction
+	bool haveLocalDirect = false;            // finger bases set pos+rot directly
+
+	bool isLeft = (id == BID_LARM || id == BID_LLEG || id == BID_LFINGERS || id == BID_LTOES);
+	NLMISC::CQuat wq;
+	bool decoded = false;
+
+	if (haveId && (id == BID_LLEG || id == BID_RLEG) && link == 0) decoded = jointWorldRot(JD_THIGH, wq);    // Thigh
+	else if (haveId && (id == BID_LLEG || id == BID_RLEG) && link == 2) decoded = jointWorldRot(JD_FOOT, wq); // Foot
+	else if (haveId && (id == BID_LARM || id == BID_RARM) && link == 1) decoded = jointWorldRot(JD_UPPERARM, wq); // UpperArm
+	else if (haveId && id == BID_HEAD && link == 0) decoded = jointWorldRot(JD_HEAD, wq); // Head
+
+	if (decoded)
+	{
+		// jointWorldRot returns the LEFT-side world rotation. For the right side, mirror in the
+		// pelvis-relative frame (the only frame where the mirror is the clean (x,y,-z,-w) rule),
+		// then convert back to world.
+		if (!isLeft && g_havePelvisWorldRot)
+		{
+			NLMISC::CQuat pinv = g_pelvisWorldRot; pinv.invert();
+			NLMISC::CQuat rel = pinv * wq;
+			rel = mirrorQuatLR(rel);
+			wq = g_pelvisWorldRot * rel;
+			wq.normalize();
+		}
+		worldRot = wq;
+	}
+	else if (haveId && id == BID_PELVIS) // Pelvis: constant COM->pelvis frame reorientation
+	{
+		worldRot = parentWorldRot * NLMISC::CQuat(0.5f, 0.5f, 0.5f, -0.5f);
+	}
+	else if (haveId && (id == BID_LFINGERS || id == BID_RFINGERS) && (link % 3) == 0) // finger base
+	{
+		int fi = (int)(link / 3);
+		NLMISC::CVector lp; NLMISC::CQuat lr;
+		if (parseLeftFingerBase(fi, lp, lr))
+		{
+			if (isLeft) { pos = lp; rot = lr; }
+			else { pos = NLMISC::CVector(lp.x, lp.y, -lp.z); rot = mirrorQuatLR(lr); }
+			haveLocalDirect = true;
+			// finger-base world rotation = parent(Hand) * local
+			worldRot = parentWorldRot * rot;
+		}
+	}
+
+	// --- Positions for the non-finger roles (straight-chain + known offsets). ---
+	if (!haveLocalDirect)
+	{
+		// local rotation = parentWorldRot^-1 * worldRot
+		NLMISC::CQuat pinv = parentWorldRot; pinv.invert();
+		rot = pinv * worldRot;
+		rot.normalize();
+
+		if (haveId && id == BID_SPINE && link == 0)
+		{
+			// Spine base: position from COM ~ own length along X (independent of parent kind).
+			NLMISC::CVector selfDims = readNodeBoneDimensions(node);
+			pos = NLMISC::CVector(selfDims.x, 0.0f, 0.0f);
+		}
+		else if (!parent || !isBipedBoneNode(parent))
+		{
+			// Root-attached biped bone (Pelvis etc.): local pos = 0.
+			pos = NLMISC::CVector::Null;
+		}
+		else
+		{
+			// Straight-chain: child sits at parent's length along parent local X.
+			NLMISC::CVector parentDims = readNodeBoneDimensions(parent);
+			pos = NLMISC::CVector(parentDims.x, 0.0f, 0.0f);
+		}
+	}
+
+	worldRotOut = worldRot;
+
+	// Capture Pelvis world rotation for pelvis-relative joints (Pelvis precedes them in the walk).
+	if (haveId && id == BID_PELVIS)
+	{
+		g_pelvisWorldRot = worldRot;
+		g_havePelvisWorldRot = true;
+	}
 }
 
 // Build ordered children list per parent by scanning the CSceneClassContainer in scene order.
@@ -345,9 +539,10 @@ static void walkNode(INode *node, sint32 fatherId, const NLMISC::CMatrix &parent
 	CReferenceMaker *tmCtrl = node->getReference(0);
 	if (isBipedBoneNode(node))
 	{
-		// Straight-chain biped approximation until we decode the full biped rig — see
-		// getBipedLocalTransformApprox for what this does and doesn't cover.
-		getBipedLocalTransformApprox(node, realPos, realRot, realScale);
+		// Figure-mode biped reconstruction (see getBipedLocal). Supplies correct local transforms
+		// for the decoded roles; not-yet-decoded joints inherit their parent's direction.
+		NLMISC::CQuat worldRotOut;
+		getBipedLocal(node, parentWorld.getRot(), realPos, realRot, realScale, worldRotOut);
 		b.UnheritScale = true; // biped bones always unherit their parent's scale (see plugin_max/nel_mesh_lib)
 	}
 	else
@@ -412,9 +607,12 @@ static void walkNodeD(INode *node, sint32 fatherId, const Mat4D &parentWorld,
 	CReferenceMaker *tmCtrl = node->getReference(0);
 	if (isBipedBoneNode(node))
 	{
-		// Straight-chain biped approximation until we decode the full biped rig — see
-		// getBipedLocalTransformApprox for what this does and doesn't cover.
-		getBipedLocalTransformApprox(node, realPos, realRot, realScale);
+		// Figure-mode biped reconstruction (see getBipedLocal). Extract the parent world rotation
+		// from the double-precision parent matrix.
+		NLMISC::CMatrix pm; pm.identity();
+		pm.setRot(parentWorld.getI(), parentWorld.getJ(), parentWorld.getK());
+		NLMISC::CQuat worldRotOut;
+		getBipedLocal(node, pm.getRot(), realPos, realRot, realScale, worldRotOut);
 		b.UnheritScale = true; // biped bones always unherit their parent's scale (see plugin_max/nel_mesh_lib)
 	}
 	else
@@ -742,20 +940,7 @@ int main(int argc, char **argv)
 	cd.parse(VersionUnknown);
 
 	bool isBiped = looksLikeBipedFile(cd);
-	if (isBiped)
-	{
-		if (!allowBipedDegraded)
-		{
-			std::cerr << maxFile << ": biped skeleton — bind-pose extraction not yet implemented.\n"
-			          << "  The biped rig computes local transforms procedurally in figure mode from\n"
-			          << "  the state stored in the root Biped (0x9155) controller chunks; we don't\n"
-			          << "  yet decode them. Pass --allow-biped-degraded to write a .skel with\n"
-			          << "  correct hierarchy but identity local transforms (unusable for skinning).\n"
-			          << "  See pipeline_max_design §12 for the milestone plan.\n";
-			return 3;
-		}
-		std::cerr << maxFile << ": WARNING biped detected, exporting with identity local transforms\n";
-	}
+	(void)allowBipedDegraded; // legacy flag, now a no-op — biped bind pose is reconstructed
 	CScene scene(&reg, &dll, &cd);
 	{ GsfInput *s = gsf_infile_child_by_name(in, "Scene"); CStorageStream st(s); scene.serial(st); g_object_unref(s); }
 	scene.parse(VersionUnknown);
@@ -764,17 +949,36 @@ int main(int argc, char **argv)
 	INode *bip01 = root->find(ucstring("Bip01"));
 	if (!bip01) { std::cerr << "Bip01 not found in " << maxFile << "\n"; return 2; }
 
+	// Locate the root Biped system object and derive the COM (Bip01 world) from chunk 0x0104:
+	// a Y-up 4x4 whose translation, converted (x,y,z)->(x,-z,y), is Bip01's world position. The
+	// figure-mode reconstruction reads the biped's per-limb record chunks off this object.
+	g_bipedObj = NULL;
+	g_havePelvisWorldRot = false;
+	NLMISC::CMatrix rootMat; rootMat.identity();
+	if (isBiped)
+	{
+		for (auto it = scene.container()->chunks().begin(); it != scene.container()->chunks().end(); ++it)
+		{
+			CSceneClass *sc = dynamic_cast<CSceneClass *>(it->second);
+			if (sc && sc->classDesc()->classId() == CLASSID_BIPED_SYS) { g_bipedObj = sc; break; }
+		}
+		const float *com = bipedChunkFloats(0x0104, 15);
+		if (com) rootMat.setPos(NLMISC::CVector(com[12], -com[14], com[13]));
+		// Bip01's figure-mode world rotation is the canonical -90 deg about Z (constant across the
+		// corpus: the biped root frame). The .skel writes Bip01's DefaultRotQuat as identity (root
+		// reset), but its InvBindPos and all descendants derive from this real world orientation.
+		rootMat.setRot(NLMISC::CQuat(0.0f, 0.0f, -0.70710678f, 0.70710678f));
+	}
+
 	std::vector<Bone> bones;
 	std::set<std::string> nameSet;
-	if (g_useDouble)
+	if (g_useDouble && !isBiped)
 	{
-		Mat4D rootMat = Mat4D::identity();
-		walkNodeD(bip01, -1, rootMat, scene.container(), bones, nameSet);
+		Mat4D rootMatD = Mat4D::identity();
+		walkNodeD(bip01, -1, rootMatD, scene.container(), bones, nameSet);
 	}
 	else
 	{
-		NLMISC::CMatrix rootMat;
-		rootMat.identity();
 		walkNode(bip01, -1, rootMat, scene.container(), bones, nameSet);
 	}
 

@@ -51,7 +51,7 @@ def is_biped(path):
         return marker in f.read()
 
 def read_skel_dpos(path):
-    """Parse a .skel and return [(bone_name, dpos_tuple), ...]. Skips InvBindPos matrix by state-bit."""
+    """Parse a .skel and return [(bone_name, dpos_tuple, drot_tuple), ...]. Skips InvBindPos by state-bit."""
     with open(path, "rb") as f: data = f.read()
     pos = [0]
     def rd(n): v = data[pos[0]:pos[0]+n]; pos[0] += n; return v
@@ -78,32 +78,42 @@ def read_skel_dpos(path):
         i32(); u8(); f32()  # father, unherit, lod
         u8(); dpos = cvec()
         u8(); cvec()  # euler
-        u8(); cquat()  # quat
+        u8(); drot = cquat()
         u8(); cvec()  # scale
         u8(); cvec()  # pivot
         if boneVer >= 2:
             cvec()  # skinScale
-        out.append((name, dpos))
+        out.append((name, dpos, drot))
     return out
 
+def quat_dist(a, b):
+    """Quaternion distance accounting for double-cover (q == -q)."""
+    d1 = sum((a[i]-b[i])**2 for i in range(4)) ** 0.5
+    d2 = sum((a[i]+b[i])**2 for i in range(4)) ** 0.5
+    return min(d1, d2)
+
 def bone_accuracy(ours, ref_path):
-    """Compare our .skel bone dposes to reference. Returns (total, exact, close, sum_err)."""
+    """Compare our .skel bones to reference. Returns dict with dpos + drot accuracy tallies."""
+    zero = dict(total=0, dp_exact=0, dp_close=0, dp_err=0.0, dr_exact=0, dr_close=0, dr_err=0.0)
     try:
         a = read_skel_dpos(ours)
         b = read_skel_dpos(ref_path)
     except Exception:
-        return (0, 0, 0, 0.0)
-    if len(a) != len(b): return (0, 0, 0, 0.0)
-    total = exact = close = 0
-    sum_err = 0.0
-    for (na, pa), (nb, pb) in zip(a, b):
+        return zero
+    if len(a) != len(b): return zero
+    r = dict(zero)
+    for (na, pa, qa), (nb, pb, qb) in zip(a, b):
         if na != nb: continue
-        total += 1
+        r["total"] += 1
         err = ((pa[0]-pb[0])**2 + (pa[1]-pb[1])**2 + (pa[2]-pb[2])**2) ** 0.5
-        sum_err += err
-        if err < 1e-5: exact += 1
-        elif err < 0.02: close += 1
-    return (total, exact, close, sum_err)
+        r["dp_err"] += err
+        if err < 1e-5: r["dp_exact"] += 1
+        elif err < 0.02: r["dp_close"] += 1
+        qerr = quat_dist(qa, qb)
+        r["dr_err"] += qerr
+        if qerr < 1e-3: r["dr_exact"] += 1
+        elif qerr < 0.02: r["dr_close"] += 1
+    return r
 
 def run_tests(bin_dir, files, do_t1, do_t2, do_t3, ref_biped, ref_nonbiped, output_dir):
     corpus_test = os.path.join(bin_dir, "pipeline_max_corpus_test")
@@ -162,12 +172,15 @@ def run_tests(bin_dir, files, do_t1, do_t2, do_t3, ref_biped, ref_nonbiped, outp
                 continue
             with open(out_skel, "rb") as f: ours = f.read()
             with open(ref, "rb") as f: theirs = f.read()
-            # Aggregate per-bone dpos accuracy (works even when total-size differs from ref).
-            bt, be, bc_, err = bone_accuracy(out_skel, ref)
-            b.setdefault("t3_bones_total", 0); b["t3_bones_total"] += bt
-            b.setdefault("t3_bones_exact", 0); b["t3_bones_exact"] += be
-            b.setdefault("t3_bones_close", 0); b["t3_bones_close"] += bc_
-            b.setdefault("t3_bones_err", 0.0); b["t3_bones_err"] += err
+            # Aggregate per-bone dpos + drot accuracy (works even when total-size differs from ref).
+            acc = bone_accuracy(out_skel, ref)
+            b.setdefault("t3_bones_total", 0); b["t3_bones_total"] += acc["total"]
+            b.setdefault("t3_bones_exact", 0); b["t3_bones_exact"] += acc["dp_exact"]
+            b.setdefault("t3_bones_close", 0); b["t3_bones_close"] += acc["dp_close"]
+            b.setdefault("t3_bones_err", 0.0); b["t3_bones_err"] += acc["dp_err"]
+            b.setdefault("t3_drot_exact", 0); b["t3_drot_exact"] += acc["dr_exact"]
+            b.setdefault("t3_drot_close", 0); b["t3_drot_close"] += acc["dr_close"]
+            b.setdefault("t3_drot_err", 0.0); b["t3_drot_err"] += acc["dr_err"]
             if ours == theirs:
                 b["t3_pass"] += 1
             else:
@@ -205,9 +218,12 @@ def report(buckets, do_t1, do_t2, do_t3, verbose):
             avg = (pcts / pn) if pn else 0.0
             bt = b.get("t3_bones_total", 0); be = b.get("t3_bones_exact", 0); bc_ = b.get("t3_bones_close", 0)
             err_avg = (b.get("t3_bones_err", 0.0) / bt) if bt else 0.0
+            dre = b.get("t3_drot_exact", 0); drc = b.get("t3_drot_close", 0)
+            drerr_avg = (b.get("t3_drot_err", 0.0) / bt) if bt else 0.0
             line += (f", T3 {b['t3_pass']}/{total-missing} exact"
                      f" (size-match {sm}, avg byte-match {avg:.1f}%, missing-ref={missing};"
-                     f" bones {be}+{bc_}/{bt} exact+close, avg dpos err {err_avg:.4f})")
+                     f" dpos {be}+{bc_}/{bt} exact+close, err {err_avg:.4f};"
+                     f" drot {dre}+{drc}/{bt} exact+close, err {drerr_avg:.4f})")
         print(line)
         if verbose:
             for name, summary, err in b.get("t1_fail", [])[:20]:
