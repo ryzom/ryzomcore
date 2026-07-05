@@ -960,11 +960,17 @@ void CWaterModel::setupMaterialNVertexShader(IDriver *drv, CWaterShape *shape, c
 	shape->initVertexProgram();
 	CScene *scene = getOwnerScene();
 	// Realtime planar reflection: reflection UVs come from the vertex buffer
-	// (see fillVBHard) and the reflection texture replaces the envmap
-	const bool planar = _PlanarReflection != NULL;
+	// (see fillVBHard) and the reflection texture replaces the envmap.
+	// Underwater views (camera below the plane) always keep the legacy
+	// envmap route: the calculated fresnel base is meaningless from below
+	// (negative camera height saturates it to fully opaque), and the
+	// reflection manager never renders reflections for planes the camera
+	// is under anyway — the 'above' gate on planar only covers the same
+	// frame's camera diving below a plane selected while above it.
+	const bool planar = _PlanarReflection != NULL && above;
 	// Calculated reflectivity over the artist envmap (fallback continuity /
 	// explicit shape option), when the per-vertex base channel is present
-	const bool envCalc = !planar
+	const bool envCalc = !planar && above
 		&& wantsCalcReflectivityUVs()
 		&& (scene->getWaterVB().getVertexFormat() & CVertexBuffer::TexCoord0Flag) != 0
 		&& scene->getWaterVB().getValueType(CVertexBuffer::TexCoord0) == CVertexBuffer::Float3;
