@@ -300,6 +300,8 @@ struct CClientConfig
 	float			DensityBloom;
 	/// Max number of water pools with realtime planar reflection per frame (0 = off)
 	sint			MaxWaterReflections;
+	/// Max reflection render target textures per eye (L and R each get up to this many); reflected planes tile into shared textures (-1 = as many as needed)
+	sint			MaxWaterReflectionTextures;
 	/// Dev: force realtime planar reflection on all water surfaces
 	bool			ForceWaterReflections;
 

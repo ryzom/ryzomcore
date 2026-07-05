@@ -634,8 +634,10 @@ void initMainLoop()
 			nlerror("initMainLoop: Cannot Create the main camera.");
 
 		// realtime water reflection budget (each admitted plane costs a
-		// scene render per eye); force flag is a dev configuration
+		// scene render per eye, but planes tile into the shared reflection
+		// textures); force flag is a dev configuration
 		Scene->setMaxRealtimeWaterReflections(ClientCfg.MaxWaterReflections);
+		Scene->setWaterReflectionMaxTextures(ClientCfg.MaxWaterReflectionTextures);
 		Scene->setForceRealtimeWaterReflections(ClientCfg.ForceWaterReflections);
 
 		// setup load balancing
