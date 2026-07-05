@@ -478,6 +478,14 @@ static void getBipedLocal(INode *node, const NLMISC::CQuat &parentWorldRot,
 			NLMISC::CVector selfDims = readNodeBoneDimensions(node);
 			pos = NLMISC::CVector(selfDims.x, 0.0f, 0.0f);
 		}
+		else if (haveId && (id == BID_LARM || id == BID_RARM) && link == 0)
+		{
+			// Clavicle: attaches to the last spine link at a pure Z (side) offset, stored in the
+			// arm record header at 0x0010[10]. (Its own X-length is 0; not a straight-chain bone.)
+			const float *arm = bipedChunkFloats(0x0010, 11);
+			float zoff = arm ? arm[10] : 0.0f;
+			pos = NLMISC::CVector(0.0f, 0.0f, isLeft ? zoff : -zoff);
+		}
 		else if (!parent || !isBipedBoneNode(parent))
 		{
 			// Root-attached biped bone (Pelvis etc.): local pos = 0.
