@@ -49,9 +49,16 @@ struct Bone
 	std::string Name;
 	sint32 FatherId; // -1 for root
 	bool UnheritScale;
+	// DefaultPos/RotQuat are what goes into the .skel file's default tracks — reset to Null/
+	// Identity for the root bone (NeL buildSkeleton convention). DefaultScale is not reset.
 	NLMISC::CVector DefaultPos;
 	NLMISC::CQuat DefaultRotQuat;
 	NLMISC::CVector DefaultScale;
+	// OrigPos/RotQuat are the REAL local transform from the PRS controller — used for
+	// InvBindPos world-matrix accumulation and for glTF output (so the mesh_export roundtrip
+	// can reconstruct the identical worldTM without needing the reset to be applied twice).
+	NLMISC::CVector OrigPos;
+	NLMISC::CQuat OrigRot;
 	NLMISC::CMatrix InvBindPos; // inverse of world TM
 	float LodDisableDistance;
 };
@@ -223,7 +230,11 @@ static void walkNode(INode *node, sint32 fatherId, const NLMISC::CMatrix &parent
 	if (!nameSet.insert(name).second) name += "_Second";
 	b.Name = name;
 	b.FatherId = fatherId;
-	b.UnheritScale = true;
+	// Default for standard PRS controllers is FALSE (bone inherits parent's scale).
+	// buildSkeleton flips this to true only when the controller's inheritance flags have
+	// any of INHERIT_SCL_X|Y|Z set, or when the parent is a biped node. For the non-biped
+	// files we handle, the default holds — no controller-flag reader implemented yet.
+	b.UnheritScale = false;
 	b.LodDisableDistance = 0.0f;
 
 	NLMISC::CVector realPos, realScale;
@@ -234,6 +245,10 @@ static void walkNode(INode *node, sint32 fatherId, const NLMISC::CMatrix &parent
 
 	NLMISC::CMatrix localTM = makeLocalTM(realPos, realRot, realScale);
 	NLMISC::CMatrix worldTM = parentWorld * localTM;
+
+	// REAL local transform preserved for glTF emission (see the writeGltf comment).
+	b.OrigPos = realPos;
+	b.OrigRot = realRot;
 
 	if (fatherId < 0)
 	{
@@ -272,7 +287,11 @@ static void walkNodeD(INode *node, sint32 fatherId, const Mat4D &parentWorld,
 	if (!nameSet.insert(name).second) name += "_Second";
 	b.Name = name;
 	b.FatherId = fatherId;
-	b.UnheritScale = true;
+	// Default for standard PRS controllers is FALSE (bone inherits parent's scale).
+	// buildSkeleton flips this to true only when the controller's inheritance flags have
+	// any of INHERIT_SCL_X|Y|Z set, or when the parent is a biped node. For the non-biped
+	// files we handle, the default holds — no controller-flag reader implemented yet.
+	b.UnheritScale = false;
 	b.LodDisableDistance = 0.0f;
 
 	NLMISC::CVector realPos, realScale;
@@ -283,6 +302,9 @@ static void walkNodeD(INode *node, sint32 fatherId, const Mat4D &parentWorld,
 
 	Mat4D localTM = Mat4D::fromTRS(realPos, realRot, realScale);
 	Mat4D worldTM = parentWorld * localTM;
+
+	b.OrigPos = realPos;
+	b.OrigRot = realRot;
 
 	if (fatherId < 0)
 	{
@@ -384,12 +406,111 @@ static void writeSkel(const std::string &path, const std::vector<Bone> &bones)
 	}
 }
 
+// Escape a name for embedding in JSON. Skeleton node names are typically simple identifiers
+// (no quotes, backslashes, newlines), but escape defensively.
+static std::string jsonEscape(const std::string &s)
+{
+	std::string out;
+	out.reserve(s.size() + 2);
+	for (char c : s)
+	{
+		switch (c)
+		{
+		case '"':  out += "\\\""; break;
+		case '\\': out += "\\\\"; break;
+		case '\n': out += "\\n";  break;
+		case '\r': out += "\\r";  break;
+		case '\t': out += "\\t";  break;
+		default:
+			if ((unsigned char)c < 0x20)
+			{
+				char buf[8]; snprintf(buf, sizeof(buf), "\\u%04x", (int)(unsigned char)c);
+				out += buf;
+			}
+			else out += c;
+		}
+	}
+	return out;
+}
+
+// Emit the skeleton as glTF 2.0. Skeleton-only — no meshes, no skins, no materials. Each bone
+// becomes a node with its local translation/rotation/scale. Children lists are built from the
+// bones' FatherId. mesh_export can walk this and reconstruct the same bone data using the
+// same NeL CMatrix operations, producing a byte-identical .skel modulo glTF float rasterization.
+//
+// float precision: JSON stores numbers as doubles; we write with %.9g which round-trips a
+// float32 exactly (float32 has ~7 decimal digits, 9 is enough).
+//
+// The root bone's DefaultPos/DefaultRotQuat are already zeroed by walkNode's "if fatherId<0"
+// branch (NeL buildSkeleton convention). If the downstream reader needs the REAL root
+// transform, it would have to be encoded separately — we don't need it for skel round-trip
+// since our .skel writer applies the same reset.
+static void writeGltf(const std::string &path, const std::vector<Bone> &bones)
+{
+	// Build per-parent children lists
+	std::vector<std::vector<size_t> > children(bones.size());
+	for (size_t i = 0; i < bones.size(); ++i)
+		if (bones[i].FatherId >= 0)
+			children[(size_t)bones[i].FatherId].push_back(i);
+
+	FILE *fp = fopen(path.c_str(), "w");
+	if (!fp) { std::cerr << "cannot open " << path << " for writing\n"; return; }
+
+	fprintf(fp,
+		"{\n"
+		"  \"asset\": {\"version\": \"2.0\", \"generator\": \"pipeline_max_export_skel\"},\n"
+		"  \"scene\": 0,\n"
+		"  \"scenes\": [{\"nodes\": [0]}],\n"
+		"  \"nodes\": [\n");
+
+	for (size_t i = 0; i < bones.size(); ++i)
+	{
+		const Bone &b = bones[i];
+		fprintf(fp, "    {");
+		fprintf(fp, "\"name\": \"%s\"", jsonEscape(b.Name).c_str());
+		// Use the REAL local transform (OrigPos/OrigRot), NOT the reset DefaultPos/DefaultRotQuat.
+		// The root reset is applied by the .skel writer, and mesh_export re-applies it on its
+		// side; feeding reset values through glTF would zero out the source's InvBindPos noise
+		// pattern and give a false byte-diff between the two paths.
+		fprintf(fp, ", \"translation\": [%.9g, %.9g, %.9g]", b.OrigPos.x, b.OrigPos.y, b.OrigPos.z);
+		fprintf(fp, ", \"rotation\": [%.9g, %.9g, %.9g, %.9g]",
+			b.OrigRot.x, b.OrigRot.y, b.OrigRot.z, b.OrigRot.w);
+		fprintf(fp, ", \"scale\": [%.9g, %.9g, %.9g]", b.DefaultScale.x, b.DefaultScale.y, b.DefaultScale.z);
+		if (!children[i].empty())
+		{
+			fprintf(fp, ", \"children\": [");
+			for (size_t k = 0; k < children[i].size(); ++k)
+				fprintf(fp, "%s%zu", k ? ", " : "", children[i][k]);
+			fprintf(fp, "]");
+		}
+		// Encode NeL-specific per-bone data in the "extras" object so downstream .skel emission
+		// can round-trip UnheritScale and LodDisableDistance without losing them.
+		fprintf(fp, ", \"extras\": {\"nel_unheritScale\": %s, \"nel_lodDisableDistance\": %.9g}",
+			b.UnheritScale ? "true" : "false", b.LodDisableDistance);
+		fprintf(fp, "}%s\n", (i + 1 < bones.size()) ? "," : "");
+	}
+
+	fprintf(fp,
+		"  ]\n"
+		"}\n");
+	fclose(fp);
+}
+
 int main(int argc, char **argv)
 {
-	// Parse args. --double before the positional args switches to double-precision accumulation.
+	// Args: [--double] [--gltf <path>] <input.max> <output.skel>
+	//   --double  world-matrix accumulation in double instead of float
+	//   --gltf    also write a glTF 2.0 skeleton-only file next to the .skel; used for the
+	//             mesh_export roundtrip validator (Blender-importable, assimp-readable)
 	int argi = 1;
-	if (argi < argc && std::string(argv[argi]) == "--double") { g_useDouble = true; ++argi; }
-	if (argc - argi < 2) { std::cerr << "usage: export_skel [--double] <input.max> <output.skel>\n"; return 1; }
+	const char *gltfOut = NULL;
+	while (argi < argc && argv[argi][0] == '-' && argv[argi][1] == '-')
+	{
+		if (std::string(argv[argi]) == "--double") { g_useDouble = true; ++argi; }
+		else if (std::string(argv[argi]) == "--gltf" && argi + 1 < argc) { gltfOut = argv[argi + 1]; argi += 2; }
+		else break;
+	}
+	if (argc - argi < 2) { std::cerr << "usage: export_skel [--double] [--gltf <path>] <input.max> <output.skel>\n"; return 1; }
 	const char *maxFile = argv[argi];
 	const char *skelOut = argv[argi + 1];
 
@@ -446,6 +567,12 @@ int main(int argc, char **argv)
 
 	writeSkel(skelOut, bones);
 	std::cout << "Wrote " << skelOut << "\n";
+
+	if (gltfOut)
+	{
+		writeGltf(gltfOut, bones);
+		std::cout << "Wrote " << gltfOut << "\n";
+	}
 
 	g_object_unref(in);
 	g_object_unref(src);

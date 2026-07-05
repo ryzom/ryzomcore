@@ -45,6 +45,7 @@
 
 #include "assimp_material.h"
 #include "assimp_shape.h"
+#include "assimp_skel.h"
 
 CMeshUtilsSettings::CMeshUtilsSettings()
 {
@@ -350,6 +351,9 @@ int exportScene(const CMeshUtilsSettings &settings)
 
 	// Export shapes
 	exportShapes(context);
+
+	// Export skeletons
+	exportSkels(context);
 
 	return EXIT_SUCCESS;
 }
