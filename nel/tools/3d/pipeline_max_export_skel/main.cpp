@@ -280,7 +280,15 @@ static void getLocalTransform(CReferenceMaker *tmCtrl,
 	CSceneClass *scaleSc = dynamic_cast<CSceneClass *>(scaleCtrl);
 
 	if (posSc) readRawBytes(posSc, CHUNK_BEZIER_POS_VALUE, &pos, 12);
-	if (rotSc) readRawBytes(rotSc, CHUNK_TCB_QUAT_VALUE, &rot, 16);
+	if (rotSc && readRawBytes(rotSc, CHUNK_TCB_QUAT_VALUE, &rot, 16))
+	{
+		// Max stores rotation-controller values in the inverse convention relative to the node
+		// TM rotation (the reference exporter never hit this because it read GetNodeTM matrices,
+		// not controller values). Without this, every non-180deg/non-identity PRS rotation in the
+		// corpus came out as the conjugate of the reference (xyz equal, w flipped) — 180deg and
+		// identity rotations are self-conjugate, which is why they matched either way.
+		rot.invert();
+	}
 	if (scaleSc) readRawBytes(scaleSc, CHUNK_BEZIER_SCALE_VALUE, &scale, 12);
 }
 
@@ -402,6 +410,7 @@ struct SBipedRig
 	// arms + fingers (left half)
 	bool HasClavicleZ;
 	float ClavicleZ;
+	float ClavicleAngle; // arm record [7]; base rotation = 180deg about (cos phi, 0, sin phi), phi = pi/4 + angle/2
 	std::vector<SBipedFinger> Fingers;
 	// chains
 	SBipedChain Spine, Tail, Pony1, Pony2;
@@ -411,7 +420,7 @@ struct SBipedRig
 	bool HavePelvisWorldRot;
 	SBipedRig() : Sys(NULL), HasCom(false), ComPos(NLMISC::CVector::Null), ComRot(NLMISC::CQuat::Identity),
 		HasThighZ(false), ThighZ(0.0f), MaxLegLink(2), HasClavicleZ(false), ClavicleZ(0.0f),
-		PelvisWorldRot(NLMISC::CQuat::Identity), HavePelvisWorldRot(false) { }
+		ClavicleAngle(0.0f), PelvisWorldRot(NLMISC::CQuat::Identity), HavePelvisWorldRot(false) { }
 };
 
 // Rigs per Biped system object; cleared per file.
@@ -581,6 +590,7 @@ static void parseArmRecord(SBipedRig &rig)
 	const float *f = bipedChunkFloats(0x0010, 17, &n);
 	if (!f) return;
 	rig.ClavicleZ = f[10];
+	rig.ClavicleAngle = f[7];
 	rig.HasClavicleZ = true;
 	uint32 nFingers = floatBitsAsUint(f[16]);
 	if (nFingers > 16) return;
@@ -721,6 +731,19 @@ static void getBipedLocal(INode *node, const NLMISC::CQuat &parentWorldRot,
 	else if (haveId && id == BID_PELVIS) // Pelvis: constant COM->pelvis frame reorientation
 	{
 		worldRot = parentWorldRot * NLMISC::CQuat(0.5f, 0.5f, 0.5f, -0.5f);
+	}
+	else if (haveId && (id == BID_LARM || id == BID_RARM) && link == 0 && rig.HasClavicleZ)
+	{
+		// Clavicle: position is a pure Z (side) offset off the last spine link (arm record [10]);
+		// base rotation is 180deg about (cos phi, 0, sin phi) with phi = pi/4 + armRecord[7]/2 —
+		// exact on planar rigs (humanoids, kami_keep); rigs with a second clavicle DOF carry an
+		// extra not-yet-decoded twist on top of this (see pipeline_max_design.md).
+		float phi = (float)(M_PI / 4.0) + rig.ClavicleAngle * 0.5f;
+		float c = cosf(phi), s = sinf(phi);
+		rot = isLeft ? NLMISC::CQuat(-c, 0.0f, -s, 0.0f) : NLMISC::CQuat(c, 0.0f, -s, 0.0f);
+		pos = NLMISC::CVector(0.0f, 0.0f, isLeft ? rig.ClavicleZ : -rig.ClavicleZ);
+		haveLocalDirect = true;
+		worldRot = parentWorldRot * rot;
 	}
 	else if (haveId && (id == BID_LFINGERS || id == BID_RFINGERS) && !rig.Fingers.empty()) // fingers
 	{
@@ -1044,6 +1067,15 @@ static void walkNode(INode *node, sint32 fatherId, const NLMISC::CMatrix &parent
 	else
 	{
 		getLocalTransform(tmCtrl, realPos, realRot, realScale);
+		// PRS children of a biped COM node don't inherit the COM's rotation: their stored
+		// rotation value is world-frame (position stays parent-relative). Verified bit-exact on
+		// every corpus 'name' tag marker, including tilted-COM rigs (tr_mo_c03).
+		INode *parent = node->parent();
+		if (parent && isBipedComNode(parent))
+		{
+			NLMISC::CQuat pinv = parentWorld.getRot(); pinv.invert();
+			realRot = pinv * realRot;
+		}
 	}
 	realRot.normalize();
 
