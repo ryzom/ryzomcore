@@ -1900,6 +1900,15 @@ void CDriverGL3::deleteOcclusionQuery(IOcclusionQuery *oq)
 
 }
 
+// GLES 3 has no sample-counting query target; the boolean any-samples target
+// is sufficient for the flare system (without a draw query the visibility
+// test degrades to visible/occluded anyway)
+#ifdef USE_OPENGLES3
+#define NL_GL3_OCCLUSION_QUERY_TARGET GL_ANY_SAMPLES_PASSED
+#else
+#define NL_GL3_OCCLUSION_QUERY_TARGET GL_SAMPLES_PASSED
+#endif
+
 // ***************************************************************************
 void COcclusionQueryGL3::begin()
 {
@@ -1908,7 +1917,7 @@ void COcclusionQueryGL3::begin()
 	nlassert(Driver);
 	nlassert(Driver->_CurrentOcclusionQuery == NULL); // only one query at a time
 	nlassert(ID);
-	nglBeginQuery(GL_SAMPLES_PASSED, ID);
+	nglBeginQuery(NL_GL3_OCCLUSION_QUERY_TARGET, ID);
 	Driver->_CurrentOcclusionQuery = this;
 	OcclusionType = NotAvailable;
 	VisibleCount = 0;
@@ -1923,7 +1932,7 @@ void COcclusionQueryGL3::end()
 	nlassert(Driver);
 	nlassert(Driver->_CurrentOcclusionQuery == this); // only one query at a time
 	nlassert(ID);
-	nglEndQuery(GL_SAMPLES_PASSED);
+	nglEndQuery(NL_GL3_OCCLUSION_QUERY_TARGET);
 	Driver->_CurrentOcclusionQuery = NULL;
 
 }
