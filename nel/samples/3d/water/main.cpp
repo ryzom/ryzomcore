@@ -136,6 +136,18 @@ static const float POOL_RADIUS = 3.5f;
 static const float POOL_MIN_Z = 0.4f;
 static const float POOL_MAX_Z = 3.4f;
 static const uint POOL_MAX_COUNT = 12;
+static const float POOL_CUBE_HALF_SIZE = 0.8f;
+
+// Primary color palette per pool index: each pool's bobbing cube renders in
+// shades of one hue, so a pool's reflection is attributable at a glance
+static const CRGBA POOL_CUBE_COLORS[6] = {
+	CRGBA(220,  40,  40), // red
+	CRGBA( 40, 200,  40), // green
+	CRGBA( 60, 100, 235), // blue
+	CRGBA(235, 210,  40), // yellow
+	CRGBA(210,  60, 210), // magenta
+	CRGBA( 40, 205, 215), // cyan
+};
 
 // Deterministic integer hash (SplitMix-style avalanche) and derived [0,1[
 // float; used instead of any random source so pool layouts are reproducible
@@ -225,6 +237,40 @@ static void drawFace(UDriver *driver, UMaterial &mat,
 	quad.V3 = v3;
 	quad.Color0 = quad.Color1 = quad.Color2 = quad.Color3 = color;
 	driver->drawQuad(quad, mat);
+}
+
+// Shade a base color: f <= 1 darkens toward black, f > 1 lightens toward white
+static CRGBA shadeColor(CRGBA c, float f)
+{
+	if (f <= 1.f)
+		return CRGBA((uint8)(c.R * f), (uint8)(c.G * f), (uint8)(c.B * f));
+	float t = f - 1.f;
+	return CRGBA((uint8)(c.R + (255.f - c.R) * t),
+		(uint8)(c.G + (255.f - c.G) * t),
+		(uint8)(c.B + (255.f - c.B) * t));
+}
+
+// Draw a cube in shades of one base color: every face distinct (dark bottom,
+// light top), the whole cube reads as one hue
+static void drawCubePalette(UDriver *driver, UMaterial &mat, const CMatrix &transform, float s, CRGBA base)
+{
+	CVector v[8] = {
+		transform * CVector(-s, -s, -s),
+		transform * CVector( s, -s, -s),
+		transform * CVector( s,  s, -s),
+		transform * CVector(-s,  s, -s),
+		transform * CVector(-s, -s,  s),
+		transform * CVector( s, -s,  s),
+		transform * CVector( s,  s,  s),
+		transform * CVector(-s,  s,  s),
+	};
+
+	drawFace(driver, mat, v[3], v[2], v[1], v[0], shadeColor(base, 0.30f)); // bottom (Z-) darkest
+	drawFace(driver, mat, v[4], v[5], v[6], v[7], shadeColor(base, 1.60f)); // top    (Z+) lightest
+	drawFace(driver, mat, v[0], v[1], v[5], v[4], shadeColor(base, 0.55f)); // back   (Y-)
+	drawFace(driver, mat, v[2], v[3], v[7], v[6], shadeColor(base, 1.00f)); // front  (Y+) base
+	drawFace(driver, mat, v[3], v[0], v[4], v[7], shadeColor(base, 0.75f)); // left   (X-)
+	drawFace(driver, mat, v[1], v[2], v[6], v[5], shadeColor(base, 1.30f)); // right  (X+)
 }
 
 // Draw a cube centered at origin with given half-size, transformed by matrix
@@ -380,6 +426,7 @@ private:
 	uint m_PoolCount;
 	bool m_FlareOn;
 	std::vector<UInstance> m_Pools;
+	std::vector<CVector> m_PoolPositions;
 	UInstance m_Flare;
 	CVector m_LakeCenter;
 	float m_LakeRadius;
@@ -873,8 +920,10 @@ void CWaterDemo::createProceduralPools()
 		float ang = float(i) * 2.39996f;
 		float rad = m_PoolCount > 1 ? POOL_FIELD_RADIUS * 0.78f * sqrtf((float(i) + 0.5f) / float(m_PoolCount)) : 0.f;
 		float z = m_PoolCount > 1 ? POOL_MIN_Z + (POOL_MAX_Z - POOL_MIN_Z) * float(i) / float(m_PoolCount - 1) : 0.5f * (POOL_MIN_Z + POOL_MAX_Z);
-		pool.setPos(CVector(cosf(ang) * rad, sinf(ang) * rad, z));
+		CVector pos(cosf(ang) * rad, sinf(ang) * rad, z);
+		pool.setPos(pos);
 		m_Pools.push_back(pool);
+		m_PoolPositions.push_back(pos);
 	}
 }
 
@@ -886,6 +935,7 @@ void CWaterDemo::destroyProceduralPools()
 			m_Scene->deleteInstance(m_Pools[i]);
 	}
 	m_Pools.clear();
+	m_PoolPositions.clear();
 }
 
 // Runtime-built sky flare: CFlareShape with a procedural radial blob
@@ -956,6 +1006,19 @@ void CWaterDemo::drawWorldContent(UDriver &driver, const CVector &eye)
 	if (m_Fog)
 		driver.enableFog(true);
 	drawCube(&driver, m_CubeMat, m_CubeTransform, m_CubeHalfSize);
+
+	// Pools mode: one bobbing cube above each pool, each in shades of its
+	// own primary color, so each pool's reflected content is attributable
+	for (uint i = 0; i < m_PoolPositions.size(); ++i)
+	{
+		float bob = sinf(m_BobPhase * 1.3f + float(i) * 1.7f) * POOL_CUBE_HALF_SIZE * 1.2f + POOL_CUBE_HALF_SIZE * 1.1f;
+		CMatrix t;
+		t.identity();
+		t.setPos(m_PoolPositions[i] + CVector(0.f, 0.f, bob));
+		t.rotateZ(m_CubeAngle + float(i) * 0.8f + float(Pi / 4.0));
+		t.rotateX(0.9553f); // corner down, like the reference cube
+		drawCubePalette(&driver, m_CubeMat, t, POOL_CUBE_HALF_SIZE, POOL_CUBE_COLORS[i % 6]);
+	}
 }
 
 
