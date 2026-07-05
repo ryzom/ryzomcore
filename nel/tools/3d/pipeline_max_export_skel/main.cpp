@@ -544,18 +544,33 @@ static void writeGltf(const std::string &path, const std::vector<Bone> &bones)
 	fclose(fp);
 }
 
-// Detect a biped file by scanning the ClassDirectory3 for an entry named "Biped Object". The
+// Biped ClassIds are confirmed from the character-studio MAXScript reference:
+//   bipedSystem                    {9155,0}  — the biped system (root, superclass 0x60/Object)
+//   Vertical_Horizontal_Turn       {9156,0}  — COM/body controller (superclass 0x9008/ControlTransform)
+//   BipDriven_Control              {9154,0}  — per-body-part controller (was BipSlave_Control pre-2022)
+//   Biped_SubAnim                  {0x6b147369, 0x078c6b2a}  — sub-anim (superclass 0x9003/ControlFloat)
+//   biped_object                   {9125,0}  — per-body-part geometry (superclass 0x10/GeomObject)
+static const NLMISC::CClassId CLASSID_BIPED_SYSTEM (0x00009155, 0x00000000);
+static const NLMISC::CClassId CLASSID_BIPED_VHT    (0x00009156, 0x00000000);
+static const NLMISC::CClassId CLASSID_BIPED_DRIVEN (0x00009154, 0x00000000);
+static const NLMISC::CClassId CLASSID_BIPED_SUBANIM(0x6b147369, 0x078c6b2a);
+static const NLMISC::CClassId CLASSID_BIPED_OBJECT (0x00009125, 0x00000000);
+
+// Detect a biped file by scanning the ClassDirectory3 for any of the four Biped ClassIds. The
 // DllDirectory-based check would false-positive because biped.dlc is loaded even when no biped
 // exists in the scene (Max loads all installed plugins); only the ClassDirectory3 entry appears
-// when a biped class is actually instantiated.
+// when a biped class is actually instantiated. Using ClassId not display name so this survives
+// the Autodesk rename of BipSlave_Control → BipDriven_Control across the corpus's Max versions.
 static bool looksLikeBipedFile(CClassDirectory3 &cd)
 {
 	for (auto it = cd.chunks().begin(); it != cd.chunks().end(); ++it)
 	{
 		const CClassEntry *entry = dynamic_cast<const CClassEntry *>(it->second);
 		if (!entry) continue;
-		std::string name = entry->displayName().toUtf8();
-		if (name == "Biped Object") return true;
+		NLMISC::CClassId cid = entry->classId();
+		if (cid == CLASSID_BIPED_SYSTEM || cid == CLASSID_BIPED_VHT ||
+		    cid == CLASSID_BIPED_DRIVEN || cid == CLASSID_BIPED_OBJECT)
+			return true;
 	}
 	return false;
 }
@@ -612,11 +627,11 @@ int main(int argc, char **argv)
 		if (!allowBipedDegraded)
 		{
 			std::cerr << maxFile << ": biped skeleton — bind-pose extraction not yet implemented.\n"
-			          << "  The biped bind pose lives in proprietary Biped controller storage that we\n"
-			          << "  don't decode. Pass --allow-biped-degraded to write a .skel with correct\n"
-			          << "  hierarchy but identity local transforms (unusable for skinning). Or wait\n"
-			          << "  for the Biped controller reverse-engineering pass (see pipeline_max_design\n"
-			          << "  §12 for the milestone plan).\n";
+			          << "  The biped rig computes local transforms procedurally in figure mode from\n"
+			          << "  the state stored in the root Biped (0x9155) controller chunks; we don't\n"
+			          << "  yet decode them. Pass --allow-biped-degraded to write a .skel with\n"
+			          << "  correct hierarchy but identity local transforms (unusable for skinning).\n"
+			          << "  See pipeline_max_design §12 for the milestone plan.\n";
 			return 3;
 		}
 		std::cerr << maxFile << ": WARNING biped detected, exporting with identity local transforms\n";
