@@ -55,6 +55,16 @@
 //       endWaterReflectionPass / endWaterReflectionPasses), the same way
 //       the client's render loop replicates passes for stereo.
 //   V - Toggle VSync (default on)
+//   N - Toggle the procedural pool field: a deterministic set of small
+//       runtime-built water shapes (CWaterShape created in code, no assets),
+//       each pool on its own plane at a different height, so every pool is
+//       a separate reflection pass. Stresses the multi-plane budget and is
+//       the testbed for reflection render target packing.
+//   K/L - Fewer/more procedural pools
+//   B - Toggle the sky flare: a runtime-built CFlareShape with a procedural
+//       blob texture. Bright reference point in reflections, and exercises
+//       the flare occlusion query/fade machinery (per-context, including the
+//       reflection contexts) in a controlled scene.
 //   Up/Down - Move camera closer/farther
 //
 
@@ -65,6 +75,7 @@
 #include <nel/misc/debug.h>
 #include <nel/misc/event_listener.h>
 #include <nel/misc/path.h>
+#include <nel/misc/polygon.h>
 #include <nel/misc/time_nl.h>
 
 #include <nel/3d/u_camera.h>
@@ -77,6 +88,16 @@
 #include <nel/3d/viewport.h>
 #include <nel/3d/stereo_debugger.h>
 #include <nel/3d/stereo_passthrough.h>
+
+// Internal engine headers for the runtime-built shapes (procedural pools and
+// flare): shapes are created in code and registered in the scene's shape
+// bank under synthetic names, then instanced through the normal UScene path
+#include <nel/3d/scene_user.h>
+#include <nel/3d/shape_bank.h>
+#include <nel/3d/water_shape.h>
+#include <nel/3d/flare_shape.h>
+#include <nel/3d/texture_mem.h>
+#include <nel/3d/texture_file.h>
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -103,6 +124,29 @@ static int queryFlag(const char *name, int defaultValue)
 using namespace std;
 using namespace NLMISC;
 using namespace NL3D;
+
+// Procedural pool field parameters (meters). Deterministic: the same count
+// always produces the same pools.
+static const float POOL_FIELD_RADIUS = 16.f;
+static const float POOL_RADIUS = 3.5f;
+static const float POOL_MIN_Z = 0.4f;
+static const float POOL_MAX_Z = 3.4f;
+static const uint POOL_MAX_COUNT = 12;
+
+// Deterministic integer hash (SplitMix-style avalanche) and derived [0,1[
+// float; used instead of any random source so pool layouts are reproducible
+static uint32 hash32(uint32 x)
+{
+	x ^= x >> 16; x *= 0x7feb352dU;
+	x ^= x >> 15; x *= 0x846ca68bU;
+	x ^= x >> 16;
+	return x;
+}
+
+static float hash01(uint32 x)
+{
+	return float(hash32(x) & 0xffffff) / float(1 << 24);
+}
 
 // Build a view matrix from eye position, target, and up vector
 static CMatrix buildCamWorldMatrix(const CVector &eye, const CVector &target, const CVector &up)
@@ -277,13 +321,23 @@ public:
 		OptSkyRoll = 9,
 		OptCamDist = 10,
 		OptCamHeight = 11,
-		OptStereo = 12
+		OptStereo = 12,
+		OptPools = 13,
+		OptPoolCount = 14,
+		OptFlare = 15
 	};
 	void setOption(int opt, int value);
 
 private:
 	void drawWorldContent(UDriver &driver, const NLMISC::CVector &eye);
 	void renderScenePart(bool traverse, bool keep);
+	void applyFootprint(const NLMISC::CVector &center, float radius);
+	void applyMode();
+	void updateReflectionBudget();
+	void createProceduralPools();
+	void destroyProceduralPools();
+	void createFlare();
+	void updateFlare();
 	NL3D::IStereoDisplay *stereoDisplay() { return m_Stereo && m_StereoDebugger ? (NL3D::IStereoDisplay *)m_StereoDebugger : (NL3D::IStereoDisplay *)m_StereoPassthrough; }
 
 public:
@@ -316,6 +370,14 @@ private:
 	NL3D::CStereoDebugger *m_StereoDebugger;
 	bool m_Stereo;
 	UInstance m_Water;
+	// Procedural pool field (runtime-built water shapes) and sky flare
+	bool m_PoolsMode;
+	uint m_PoolCount;
+	bool m_FlareOn;
+	std::vector<UInstance> m_Pools;
+	UInstance m_Flare;
+	CVector m_LakeCenter;
+	float m_LakeRadius;
 	CVector m_WaterCenter;
 	float m_WaterRadius;
 	float m_CubeHalfSize;
@@ -351,6 +413,11 @@ CWaterDemo::CWaterDemo()
 	, m_Stereo(false)
 	, m_Scene(NULL)
 	, m_TextContext(NULL)
+	, m_PoolsMode(false)
+	, m_PoolCount(5)
+	, m_FlareOn(true)
+	, m_LakeCenter(0.f, 0.f, 0.f)
+	, m_LakeRadius(10.f)
 	, m_WaterCenter(0.f, 0.f, 0.f)
 	, m_WaterRadius(10.f)
 	, m_CubeHalfSize(1.f)
@@ -454,10 +521,13 @@ CWaterDemo::CWaterDemo()
 	m_Scene->setWaterReflectionFixedSize(queryFlag("fixed", m_Scene->getWaterReflectionFixedSize() ? 1 : 0) != 0);
 	m_QueryCamDist = queryFlag("dist", 0);
 	m_QueryCamHeight = queryFlag("height", 0);
+	m_PoolsMode = queryFlag("pools", m_PoolsMode ? 1 : 0) != 0;
+	m_PoolCount = (uint)queryFlag("poolcount", (int)m_PoolCount);
+	clamp(m_PoolCount, 1u, POOL_MAX_COUNT);
+	m_FlareOn = queryFlag("flare", m_FlareOn ? 1 : 0) != 0;
 	if (queryFlag("stereo", 0) != 0)
 		setOption(OptStereo, 1);
 #endif
-	m_Scene->setMaxRealtimeWaterReflections(m_Planar ? 1 : 0);
 	m_Scene->setForceRealtimeWaterReflections(true);
 
 	m_Water = m_Scene->createInstance("waterbassina01.shape");
@@ -470,26 +540,19 @@ CWaterDemo::CWaterDemo()
 
 		CAABBox bbox;
 		m_Water.getShapeAABBox(bbox);
-		m_WaterCenter = bbox.getCenter();
+		m_LakeCenter = bbox.getCenter();
 		CVector halfSize = bbox.getHalfSize();
-		m_WaterRadius = max(1.f, max(halfSize.x, halfSize.y));
+		m_LakeRadius = max(1.f, max(halfSize.x, halfSize.y));
 		nlinfo("Water shape loaded: center (%.1f %.1f %.1f), radius %.1f",
-			m_WaterCenter.x, m_WaterCenter.y, m_WaterCenter.z, m_WaterRadius);
-
-		// Scale demo proportions to the water footprint
-		m_CubeHalfSize = m_WaterRadius * 0.08f;
-		clamp(m_CubeHalfSize, 0.5f, 3.f);
-		m_CamDist = m_WaterRadius * 1.1f;
-		clamp(m_CamDist, 8.f, 80.f);
-		m_CamHeight = m_WaterRadius * 0.3f;
-		clamp(m_CamHeight, 3.f, 25.f);
-		if (m_QueryCamDist > 0) m_CamDist = (float)m_QueryCamDist;
-		if (m_QueryCamHeight > 0) m_CamHeight = (float)m_QueryCamHeight;
+			m_LakeCenter.x, m_LakeCenter.y, m_LakeCenter.z, m_LakeRadius);
 	}
 	else
 	{
 		nlwarning("Failed to load waterbassina01.shape; check assets");
 	}
+
+	createFlare();
+	applyMode(); // builds the pool field when requested; footprint + budget
 
 	m_StartTime = CTime::ticksToSecond(CTime::getPerformanceTime());
 
@@ -510,7 +573,9 @@ CWaterDemo::CWaterDemo()
 			['Camera orbit', 7, $7],
 			['Cube bobbing', 8, $8],
 			['Skybox roll', 9, $9],
-			['Stereo debugger', 12, $12]
+			['Stereo debugger', 12, $12],
+			['Procedural pools', 13, $13],
+			['Sky flare', 15, $15]
 		]);
 		var panel = document.createElement('div');
 		panel.style.cssText = 'position:fixed;left:10px;bottom:10px;background:rgba(10,15,30,0.85);color:#dde;font:12px sans-serif;padding:10px 12px;border-radius:8px;z-index:20;user-select:none';
@@ -523,6 +588,7 @@ CWaterDemo::CWaterDemo()
 			+ '<option value="1"' + ($2 == 1 ? ' selected' : '') + '>fullscreen</option>'
 			+ '<option value="2"' + ($2 == 2 ? ' selected' : '') + '>thumbnail</option>'
 			+ '</select></label>';
+		html += '<label style="display:block;margin-top:2px">Pool count <input type="range" data-opt="14" min="1" max="12" value="' + $14 + '" style="width:90px;vertical-align:middle"></label>';
 		html += '<label style="display:block;margin-top:6px">Cam dist <input type="range" data-opt="10" min="8" max="100" value="' + $10 + '" style="width:90px;vertical-align:middle"></label>';
 		html += '<label style="display:block;margin-top:2px">Cam height <input type="range" data-opt="11" min="3" max="60" value="' + $11 + '" style="width:90px;vertical-align:middle"></label>';
 		panel.innerHTML = html;
@@ -547,7 +613,10 @@ CWaterDemo::CWaterDemo()
 		m_AnimSkybox ? 1 : 0,
 		(int)m_CamDist,
 		(int)m_CamHeight,
-		m_Stereo ? 1 : 0);
+		m_Stereo ? 1 : 0,
+		m_PoolsMode ? 1 : 0,
+		(int)m_PoolCount,
+		m_FlareOn ? 1 : 0);
 #endif
 }
 
@@ -558,6 +627,9 @@ CWaterDemo::~CWaterDemo()
 	delete m_StereoPassthrough;
 	m_StereoPassthrough = NULL;
 	m_Driver->deleteMaterial(m_MirrorMat);
+	destroyProceduralPools();
+	if (!m_Flare.empty())
+		m_Scene->deleteInstance(m_Flare);
 	if (!m_Water.empty())
 		m_Scene->deleteInstance(m_Water);
 	if (m_Scene)
@@ -594,6 +666,10 @@ void CWaterDemo::operator()(const CEvent &event)
 			if (keyDown.Key == KeyW) setOption(OptFixedSize, !m_Scene->getWaterReflectionFixedSize());
 			if (keyDown.Key == KeyX) setOption(OptStereo, !m_Stereo);
 			if (keyDown.Key == KeyV) { m_VSync = !m_VSync; m_Driver->setSwapVBLInterval(m_VSync ? 1 : 0); }
+			if (keyDown.Key == KeyN) setOption(OptPools, !m_PoolsMode);
+			if (keyDown.Key == KeyK) setOption(OptPoolCount, (int)m_PoolCount - 1);
+			if (keyDown.Key == KeyL) setOption(OptPoolCount, (int)m_PoolCount + 1);
+			if (keyDown.Key == KeyB) setOption(OptFlare, !m_FlareOn);
 		}
 		if (keyDown.Key == KeyUP) m_KeyForward = true;
 		if (keyDown.Key == KeyDOWN) m_KeyBackward = true;
@@ -610,7 +686,7 @@ void CWaterDemo::setOption(int opt, int value)
 {
 	switch (opt)
 	{
-	case OptPlanar: m_Planar = value != 0; m_Scene->setMaxRealtimeWaterReflections(m_Planar ? 1 : 0); break;
+	case OptPlanar: m_Planar = value != 0; updateReflectionBudget(); break;
 	case OptMirror: m_Mirror = value != 0; break;
 	case OptOverlay: m_ShowRT = value; break;
 	case OptHalfRes: m_Scene->setWaterReflectionHalfRes(value != 0); break;
@@ -632,7 +708,223 @@ void CWaterDemo::setOption(int opt, int value)
 			m_StereoDebugger->setDriver(m_Driver);
 		}
 		break;
+	case OptPools:
+		m_PoolsMode = value != 0;
+		applyMode();
+		break;
+	case OptPoolCount:
+	{
+		uint count = (uint)max(1, min((int)POOL_MAX_COUNT, value));
+		if (count != m_PoolCount)
+		{
+			m_PoolCount = count;
+			if (m_PoolsMode)
+				applyMode();
+		}
+		break;
 	}
+	case OptFlare:
+		m_FlareOn = value != 0;
+		updateFlare();
+		break;
+	}
+}
+
+// Scale demo proportions (cube, camera limits) to the viewed water footprint
+void CWaterDemo::applyFootprint(const CVector &center, float radius)
+{
+	m_WaterCenter = center;
+	m_WaterRadius = radius;
+	m_CubeHalfSize = radius * 0.08f;
+	clamp(m_CubeHalfSize, 0.5f, 3.f);
+	m_CamDist = radius * 1.1f;
+	clamp(m_CamDist, 8.f, 80.f);
+	m_CamHeight = radius * 0.3f;
+	clamp(m_CamHeight, 3.f, 25.f);
+	if (m_QueryCamDist > 0) m_CamDist = (float)m_QueryCamDist;
+	if (m_QueryCamHeight > 0) m_CamHeight = (float)m_QueryCamHeight;
+}
+
+// Switch between the lake shape and the procedural pool field
+void CWaterDemo::applyMode()
+{
+	if (m_PoolsMode)
+	{
+		if (!m_Water.empty())
+			m_Water.hide();
+		createProceduralPools();
+		applyFootprint(CVector(0.f, 0.f, 0.5f * (POOL_MIN_Z + POOL_MAX_Z)), POOL_FIELD_RADIUS);
+	}
+	else
+	{
+		destroyProceduralPools();
+		if (!m_Water.empty())
+			m_Water.show();
+		applyFootprint(m_LakeCenter, m_LakeRadius);
+	}
+	updateFlare();
+	updateReflectionBudget();
+}
+
+// The budget covers every visible plane: 1 for the lake, one per pool in
+// pools mode (each pool sits on its own plane)
+void CWaterDemo::updateReflectionBudget()
+{
+	m_Scene->setMaxRealtimeWaterReflections(m_Planar ? (m_PoolsMode ? (sint)m_PoolCount : 1) : 0);
+}
+
+// Build the deterministic pool field: runtime-created CWaterShape objects
+// registered in the scene's shape bank under synthetic names
+void CWaterDemo::createProceduralPools()
+{
+	destroyProceduralPools();
+
+	CScene &scene = static_cast<CSceneUser *>(m_Scene)->getScene();
+	CShapeBank *bank = scene.getShapeBank();
+
+	// Texture setup cloned from the lake shape when it is loaded; the same
+	// named file textures otherwise (same files, already on the search path)
+	CWaterShape *ref = dynamic_cast<CWaterShape *>(bank->getShape("waterbassina01.shape"));
+
+	for (uint i = 0; i < m_PoolCount; ++i)
+	{
+		std::string name = toString("procpool%02u.shape", i);
+		if (!bank->getShape(name))
+		{
+			CWaterShape *ws = new CWaterShape;
+
+			// Weird-but-convex deterministic outline: vertices at jittered
+			// angles on the unit circle (a polygon inscribed in a circle
+			// with increasing angles is convex by construction), squashed
+			// and rotated by a per-pool affine transform. Vertex count,
+			// elongation and orientation all vary with the pool index.
+			uint numVerts = 5 + hash32(i * 97 + 11) % 4;
+			float sx = POOL_RADIUS * (0.55f + 0.45f * hash01(i * 97 + 23));
+			float sy = POOL_RADIUS * (0.30f + 0.35f * hash01(i * 97 + 37));
+			float rot = 2.f * float(Pi) * hash01(i * 97 + 51);
+			float cr = cosf(rot), sr = sinf(rot);
+			CPolygon2D poly;
+			poly.Vertices.resize(numVerts);
+			for (uint k = 0; k < numVerts; ++k)
+			{
+				// jitter strictly below half the angular step keeps the
+				// angles increasing (and therefore the outline convex)
+				float jitter = 0.8f * (hash01(i * 331 + k * 17 + 5) - 0.5f);
+				float a = 2.f * float(Pi) * (float(k) + jitter) / float(numVerts);
+				float px = sx * cosf(a);
+				float py = sy * sinf(a);
+				poly.Vertices[k].set(cr * px - sr * py, sr * px + cr * py);
+			}
+			ws->setShape(poly);
+
+			if (ref)
+			{
+				for (uint e = 0; e < 2; ++e)
+				{
+					ws->setEnvMap(e, ref->getEnvMap(e));
+					ws->setHeightMap(e, ref->getHeightMap(e));
+					ws->setHeightMapScale(e, ref->getHeightMapScale(e));
+					ws->setHeightMapSpeed(e, ref->getHeightMapSpeed(e));
+				}
+				ws->setWaveHeightFactor(ref->getWaveHeightFactor());
+				ws->setTransitionRatio(ref->getTransitionRatio());
+				ws->setWaterPoolID(ref->getWaterPoolID());
+			}
+			else
+			{
+				ws->setEnvMap(0, new CTextureFile("waterenvmap.tga"));
+				ws->setEnvMap(1, new CTextureFile("waterunderenvmap.tga"));
+				ws->setHeightMap(0, new CTextureFile("waterdisplace.tga"));
+				ws->setHeightMap(1, new CTextureFile("waterbump.tga"));
+				ws->setHeightMapScale(0, CVector2f(0.005f, 0.005f));
+				ws->setHeightMapScale(1, CVector2f(0.01f, 0.01f));
+				ws->setHeightMapSpeed(0, CVector2f(0.005f, 0.005f));
+				ws->setHeightMapSpeed(1, CVector2f(0.01f, 0.01f));
+			}
+			ws->enableRealtimeReflection(true);
+			bank->add(name, ws);
+		}
+
+		UInstance pool = m_Scene->createInstance(name);
+		if (pool.empty())
+			continue;
+		// Golden-angle spiral placement so any count spreads evenly in view;
+		// stepped heights put every pool on its own plane, so every pool is
+		// its own reflection pass
+		float ang = float(i) * 2.39996f;
+		float rad = m_PoolCount > 1 ? POOL_FIELD_RADIUS * 0.78f * sqrtf((float(i) + 0.5f) / float(m_PoolCount)) : 0.f;
+		float z = m_PoolCount > 1 ? POOL_MIN_Z + (POOL_MAX_Z - POOL_MIN_Z) * float(i) / float(m_PoolCount - 1) : 0.5f * (POOL_MIN_Z + POOL_MAX_Z);
+		pool.setPos(CVector(cosf(ang) * rad, sinf(ang) * rad, z));
+		m_Pools.push_back(pool);
+	}
+}
+
+void CWaterDemo::destroyProceduralPools()
+{
+	for (uint i = 0; i < m_Pools.size(); ++i)
+	{
+		if (!m_Pools[i].empty())
+			m_Scene->deleteInstance(m_Pools[i]);
+	}
+	m_Pools.clear();
+}
+
+// Runtime-built sky flare: CFlareShape with a procedural radial blob
+// texture, additive. Bright reference point in the reflections, and
+// exercises the flare occlusion/fade machinery per context.
+void CWaterDemo::createFlare()
+{
+	CScene &scene = static_cast<CSceneUser *>(m_Scene)->getScene();
+	CShapeBank *bank = scene.getShapeBank();
+	if (!bank->getShape("procflare.shape"))
+	{
+		// Radial blob: smooth falloff plus a hot core
+		const uint ts = 64;
+		uint8 *data = new uint8[ts * ts * 4];
+		for (uint y = 0; y < ts; ++y)
+		for (uint x = 0; x < ts; ++x)
+		{
+			float dx = (float(x) + 0.5f) / float(ts) - 0.5f;
+			float dy = (float(y) + 0.5f) / float(ts) - 0.5f;
+			float d = 2.f * sqrtf(dx * dx + dy * dy);
+			float v = std::max(0.f, 1.f - d);
+			float lum = std::min(1.f, 0.6f * v * v + powf(v, 8.f));
+			uint8 c = (uint8)(255.f * lum + 0.5f);
+			uint8 *px = data + 4 * (y * ts + x);
+			px[0] = c; px[1] = c; px[2] = c; px[3] = c;
+		}
+		CTextureMem *tex = new CTextureMem(data, ts * ts * 4, true, false, ts, ts, CBitmap::RGBA);
+
+		CFlareShape *fs = new CFlareShape;
+		fs->setTexture(0, tex);
+		fs->setSize(0, 5.f); // world units at the flare position
+		fs->setColor(CRGBA(255, 235, 190));
+		fs->setPersistence(1.f); // 1s fade, easy to eyeball
+		fs->setMaxViewDist(2000.f);
+		bank->add("procflare.shape", fs);
+	}
+	m_Flare = m_Scene->createInstance("procflare.shape");
+	if (m_Flare.empty())
+		nlwarning("Failed to create the flare instance");
+	updateFlare();
+}
+
+// Place the flare high over the water footprint and apply its visibility
+void CWaterDemo::updateFlare()
+{
+	if (m_Flare.empty())
+		return;
+	// Opposite the camera's start side (the orbit begins on +X looking -X)
+	// and low enough to sit inside the default frustum, so the flare is in
+	// view immediately even with the orbit off (the flare model clips as a
+	// point: off-frustum means gone entirely, not partially)
+	m_Flare.setPos(CVector(m_WaterCenter.x - m_WaterRadius * 1.1f,
+		m_WaterCenter.y + m_WaterRadius * 0.6f,
+		m_WaterCenter.z + m_WaterRadius * 0.55f));
+	if (m_FlareOn)
+		m_Flare.show();
+	else
+		m_Flare.hide();
 }
 
 // Draw the demo's world content (used by both the main pass and the
@@ -761,6 +1053,12 @@ void CWaterDemo::renderOneFrame()
 		const CViewport &vp = display->getCurrentViewport();
 		m_Driver->setViewport(vp);
 		m_Scene->setViewport(vp);
+
+		// Per-pass flare occlusion context, like the client's render loop:
+		// reflection passes must not share the main view's context — their
+		// occlusion queries test the mirrored view's depth (a flare that is
+		// off the mirrored frustum would pin the shared fade to zero)
+		m_Scene->setFlareContext(display->getFlareContext());
 
 		display->beginRenderTarget();
 
@@ -954,9 +1252,17 @@ void CWaterDemo::renderOneFrame()
 				m_TextContext->printfAt(x, y, "[X] Stereo debugger: %s  [V] VSync: %s",
 					m_Stereo ? "ON" : "OFF", m_VSync ? "ON" : "OFF");
 				y -= lineH;
+				m_TextContext->printfAt(x, y, "[N] Procedural pools: %s  [K/L] Pool count: %u  [B] Sky flare: %s",
+					m_PoolsMode ? "ON" : "OFF", m_PoolCount, m_FlareOn ? "ON" : "OFF");
+				y -= lineH;
 				m_TextContext->printfAt(x, y, "[Up/Down] Camera dist: %.1f", m_CamDist);
 				y -= lineH * 1.5f;
-				if (m_Water.empty())
+				if (m_PoolsMode)
+				{
+					m_TextContext->printfAt(x, y, "%u runtime-built pools, each on its own plane: %u active reflections",
+						(uint)m_Pools.size(), m_Scene->getNumActiveWaterReflections());
+				}
+				else if (m_Water.empty())
 				{
 					m_TextContext->setColor(CRGBA(255, 80, 80));
 					m_TextContext->printfAt(x, y, "waterbassina01.shape NOT LOADED - check ryzomcore_graphics assets");
