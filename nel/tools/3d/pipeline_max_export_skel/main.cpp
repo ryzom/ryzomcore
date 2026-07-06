@@ -158,7 +158,9 @@ static bool writeMaxscriptFragment(FILE *fp, const std::string &baseName)
 	// driver header measure the current value in-scene and apply the ratio).
 	{
 		// per-side leg link node indices (0=thigh .. maxLegLink=foot; 4-link mounts included)
+		// + first toe base per side (foot length forcing: ankle -> toe attach)
 		sint32 leg[2][8];
+		sint32 toe0[2] = { -1, -1 };
 		for (int s2 = 0; s2 < 2; ++s2)
 			for (int l = 0; l < 8; ++l)
 				leg[s2][l] = -1;
@@ -168,20 +170,35 @@ static bool writeMaxscriptFragment(FILE *fp, const std::string &baseName)
 			if (!mb.IsBiped || mb.Link >= 8) continue;
 			if (mb.Id == BID_LLEG) leg[0][mb.Link] = (sint32)i;
 			else if (mb.Id == BID_RLEG) leg[1][mb.Link] = (sint32)i;
+			else if (mb.Id == BID_LTOES && mb.Link == 0) toe0[0] = (sint32)i;
+			else if (mb.Id == BID_RTOES && mb.Link == 0) toe0[1] = (sint32)i;
 		}
+		// Two passes: the pelvis rescale shifts the leg chain, so lengths re-measure and
+		// re-apply (SL/SW measure the current in-scene value each call).
+		fprintf(fp, "  for spass = 1 to 2 do (\n");
 		// pelvis width = distance from COM to a thigh (decoded thigh side offset)
 		if (comIdx >= 0 && leg[0][0] >= 0)
-			fprintf(fp, "  SW com \"%s\" \"%s\" (%.9g)\n", rootName.c_str(), g_msBones[leg[0][0]].Name.c_str(),
+			fprintf(fp, "    SW com \"%s\" \"%s\" (%.9g)\n", rootName.c_str(), g_msBones[leg[0][0]].Name.c_str(),
 			        (g_msBones[leg[0][0]].WorldPos - g_msBones[comIdx].WorldPos).norm());
 		// per-link lengths from the decoded child distances, both sides, all leg links
 		for (int s2 = 0; s2 < 2; ++s2)
+		{
+			int lastLeg = -1;
 			for (int l = 0; l + 1 < 8; ++l)
 			{
 				if (leg[s2][l] < 0 || leg[s2][l + 1] < 0) continue;
-				fprintf(fp, "  SL com \"%s\" \"%s\" (%.9g)\n",
+				lastLeg = l + 1;
+				fprintf(fp, "    SL com \"%s\" \"%s\" (%.9g)\n",
 				        g_msBones[leg[s2][l]].Name.c_str(), g_msBones[leg[s2][l + 1]].Name.c_str(),
 				        (g_msBones[leg[s2][l + 1]].WorldPos - g_msBones[leg[s2][l]].WorldPos).norm());
 			}
+			// foot length: ankle (last leg link) -> first toe base
+			if (lastLeg >= 0 && leg[s2][lastLeg] >= 0 && toe0[s2] >= 0)
+				fprintf(fp, "    SL com \"%s\" \"%s\" (%.9g)\n",
+				        g_msBones[leg[s2][lastLeg]].Name.c_str(), g_msBones[toe0[s2]].Name.c_str(),
+				        (g_msBones[toe0[s2]].WorldPos - g_msBones[leg[s2][lastLeg]].WorldPos).norm());
+		}
+		fprintf(fp, "  )\n");
 	}
 	// Two passes: rubber-banding a child position rescales its parent, which shifts already-set
 	// grandchildren; the second pass converges the chain.

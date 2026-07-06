@@ -104,19 +104,41 @@ fn SL com nm childNm targetLen = (
   )
 )
 
--- Force the pelvis width via uniform pelvis scale so the thigh's distance from the COM
--- matches the decoded side offset (also not rubber-banded by position forcing).
+-- Force the pelvis width so the thigh's distance from the COM matches the decoded side
+-- offset (not rubber-banded by position forcing). The uniform-scale v3 approach did NOT
+-- move the thigh spacing — so probe which pelvis scale AXIS actually drives it (apply a
+-- small bump per axis, measure, revert), then apply the ratio on the responsive axis and
+-- iterate to converge on nonlinearity. Logs the axis it found.
 fn SW com rootNm thighNm targetOff = (
   local nd = findBoneExact com (rootNm + " Pelvis")
   local th = findBoneExact com thighNm
   if nd == undefined or th == undefined then mlog ("MISS\tSW")
   else (
-    local cur = distance com.transform.pos th.transform.pos
-    if cur > 0.00001 do (
-      local sc = biped.getTransform nd #scale
-      local ratio = targetOff / cur
-      sc.x = sc.x * ratio; sc.y = sc.y * ratio; sc.z = sc.z * ratio
-      biped.setTransform nd #scale sc false
+    local axisIdx = 0
+    local base = distance com.transform.pos th.transform.pos
+    if base > 0.00001 do (
+      for a = 1 to 3 while axisIdx == 0 do (
+        local sc = biped.getTransform nd #scale
+        local sc2 = [sc.x, sc.y, sc.z]
+        sc2[a] = sc2[a] * 1.25
+        biped.setTransform nd #scale sc2 false
+        local w = distance com.transform.pos th.transform.pos
+        biped.setTransform nd #scale sc false
+        if (abs (w - base)) > (base * 0.01) do axisIdx = a
+      )
+      if axisIdx == 0 then mlog "MISS\tSW no pelvis scale axis moves the thigh spacing"
+      else (
+        mlog ("  APPLIED SW axis " + (axisIdx as string))
+        for it = 1 to 3 do (
+          local cur = distance com.transform.pos th.transform.pos
+          if cur > 0.00001 do (
+            local sc = biped.getTransform nd #scale
+            local sc3 = [sc.x, sc.y, sc.z]
+            sc3[axisIdx] = sc3[axisIdx] * (targetOff / cur)
+            biped.setTransform nd #scale sc3 false
+          )
+        )
+      )
     )
   )
 )
