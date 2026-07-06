@@ -411,7 +411,10 @@ struct SBipedRig
 	// as before (the left half's own matrices use yet another basis and are not parsed).
 	bool HasThighZ;
 	float ThighZ[2]; // [0] = right, [1] = left
-	std::vector<SBipedToe> Toes;
+	// Toe/finger base transforms per side ([0] = right half, [1] = left half). Both halves use
+	// the SAME matrix encoding, which decodes to the left-handed convention: the left side uses
+	// its half's decode directly, the right side LR-mirrors its own half's decode.
+	std::vector<SBipedToe> Toes[2];
 	int MaxLegLink;
 	// arms + fingers
 	bool HasClavicleZ;
@@ -422,7 +425,7 @@ struct SBipedRig
 	NLMISC::CVector ClavicleOff[2]; // [0] = right, [1] = left
 	float ClavicleA[2]; // arm record [6] per side: extra rotation about the spine2-frame -X, radians
 	float ClavicleB[2]; // arm record [7] per side: base rotation = 180deg about (cos phi, 0, sin phi), phi = pi/4 + b/2
-	std::vector<SBipedFinger> Fingers;
+	std::vector<SBipedFinger> Fingers[2]; // [0] = right half, [1] = left half
 	// chains
 	SBipedChain Spine, Tail, Pony1, Pony2;
 	std::vector<NLMISC::CVector> NeckAngles;
@@ -720,33 +723,40 @@ static void parseChainRecord(uint16 structId, uint16 angleId, SBipedChain &out)
 	}
 }
 
-// Parse the leg record (0x000f): per-side thigh offsets + per-toe base matrices/lengths (from
-// the first/right half; the left half's matrices use another basis and are mirrored instead).
+// Parse the leg record (0x000f): per-side thigh offsets + per-toe base matrices/lengths from
+// each side's half (both halves share the encoding; see the Toes comment in SBipedRig).
 static void parseLegRecord(SBipedRig &rig)
 {
 	size_t n = 0;
 	const float *f = bipedChunkFloats(0x000f, 12, &n);
 	if (!f) return;
+	size_t half = n / 2;
 	rig.ThighZ[0] = f[1];
-	rig.ThighZ[1] = (n / 2 + 1 < n) ? f[n / 2 + 1] : f[1];
+	rig.ThighZ[1] = (half + 1 < n) ? f[half + 1] : f[1];
 	rig.HasThighZ = true;
-	size_t i = 10;
-	uint32 nToes = floatBitsAsUint(f[i]); ++i;
-	if (nToes > 16) return;
-	for (uint32 t = 0; t < nToes; ++t)
+	for (int side = 0; side < 2; ++side)
 	{
-		if (i >= n) return;
-		uint32 nl = floatBitsAsUint(f[i]); ++i;
-		if (nl < 1 || nl > 16 || i + 16 + nl > n) return;
-		SBipedToe toe;
-		toe.NLinks = (int)nl;
-		const float *m = f + i; i += 16;
-		// toe base: rows-as-IJK quat with the (x,y,-z,-w) z-flip; pos (x,y,-z)
-		toe.Rot = mirrorQuatLR(matRowsIJKQuat(m));
-		toe.Pos = NLMISC::CVector(m[12], m[13], -m[14]);
-		toe.Lens.assign(f + i, f + i + nl);
-		i += nl;
-		rig.Toes.push_back(toe);
+		size_t base = side ? half : 0;
+		size_t end = side ? n : half;
+		size_t i = base + 10;
+		if (i >= end) break;
+		uint32 nToes = floatBitsAsUint(f[i]); ++i;
+		if (nToes > 16) continue;
+		for (uint32 t = 0; t < nToes; ++t)
+		{
+			if (i >= end) break;
+			uint32 nl = floatBitsAsUint(f[i]); ++i;
+			if (nl < 1 || nl > 16 || i + 16 + nl > end) break;
+			SBipedToe toe;
+			toe.NLinks = (int)nl;
+			const float *m = f + i; i += 16;
+			// toe base: rows-as-IJK quat with the (x,y,-z,-w) z-flip; pos (x,y,-z)
+			toe.Rot = mirrorQuatLR(matRowsIJKQuat(m));
+			toe.Pos = NLMISC::CVector(m[12], m[13], -m[14]);
+			toe.Lens.assign(f + i, f + i + nl);
+			i += nl;
+			rig.Toes[side].push_back(toe);
+		}
 	}
 }
 
@@ -779,27 +789,33 @@ static void parseArmRecord(SBipedRig &rig)
 		rig.ClavicleOff[1] = NLMISC::CVector(-rig.ClavicleOff[0].x, -rig.ClavicleOff[0].y, -rig.ClavicleOff[0].z);
 	}
 	rig.HasClavicleZ = true;
-	uint32 nFingers = floatBitsAsUint(f[16]);
-	if (nFingers > 16) return;
-	size_t i = 17;
-	for (uint32 fi = 0; fi < nFingers; ++fi)
+	for (int side = 0; side < 2; ++side)
 	{
-		if (i >= n) return;
-		uint32 nl = floatBitsAsUint(f[i]); ++i;
-		if (nl < 1 || nl > 16 || i + 16 + nl > n) return;
-		SBipedFinger fing;
-		fing.NLinks = (int)nl;
-		const float *m = f + i; i += 16;
-		fing.Pos = NLMISC::CVector(m[12], -m[14], m[13]);
-		NLMISC::CVector I(m[0], -m[2], m[1]);
-		NLMISC::CVector J(m[4], -m[6], m[5]);
-		NLMISC::CVector K(m[8], -m[10], m[9]);
-		NLMISC::CMatrix rm; rm.identity(); rm.setRot(I, J, K);
-		fing.Rot = rm.getRot();
-		fing.Rot.normalize();
-		fing.Lens.assign(f + i, f + i + nl);
-		i += nl;
-		rig.Fingers.push_back(fing);
+		size_t base = side ? half : 0;
+		size_t end = side ? n : half;
+		if (base + 16 >= end) break;
+		uint32 nFingers = floatBitsAsUint(f[base + 16]);
+		if (nFingers > 16) continue;
+		size_t i = base + 17;
+		for (uint32 fi = 0; fi < nFingers; ++fi)
+		{
+			if (i >= end) break;
+			uint32 nl = floatBitsAsUint(f[i]); ++i;
+			if (nl < 1 || nl > 16 || i + 16 + nl > end) break;
+			SBipedFinger fing;
+			fing.NLinks = (int)nl;
+			const float *m = f + i; i += 16;
+			fing.Pos = NLMISC::CVector(m[12], -m[14], m[13]);
+			NLMISC::CVector I(m[0], -m[2], m[1]);
+			NLMISC::CVector J(m[4], -m[6], m[5]);
+			NLMISC::CVector K(m[8], -m[10], m[9]);
+			NLMISC::CMatrix rm; rm.identity(); rm.setRot(I, J, K);
+			fing.Rot = rm.getRot();
+			fing.Rot.normalize();
+			fing.Lens.assign(f + i, f + i + nl);
+			i += nl;
+			rig.Fingers[side].push_back(fing);
+		}
 	}
 }
 
@@ -995,12 +1011,17 @@ static void getBipedLocal(INode *node, const NLMISC::CQuat &parentWorldRot,
 		posOverride = rig.ClavicleOff[isLeft ? 1 : 0];
 		havePosOverride = true;
 	}
-	else if (haveId && (id == BID_LFINGERS || id == BID_RFINGERS) && !rig.Fingers.empty()) // fingers
+	else if (haveId && (id == BID_LFINGERS || id == BID_RFINGERS) && !rig.Fingers[0].empty()) // fingers
 	{
+		// NOTE: both sides decode the FIRST (right) half's matrices — corpus-era left halves do
+		// NOT share the encoding (verified: per-side decode regressed 250 drot bones), so the left
+		// convention is taken from the right half and the right side mirrors it, as before. The
+		// pose-block deltas remain per-side.
+		const std::vector<SBipedFinger> &fingers = rig.Fingers[0];
 		int fi = 0, sub = 0;
-		if (locateChainSub(rig.Fingers, link, fi, sub))
+		if (locateChainSub(fingers, link, fi, sub))
 		{
-			const SBipedFinger &fing = rig.Fingers[fi];
+			const SBipedFinger &fing = fingers[fi];
 			if (sub == 0)
 			{
 				// finger base: creation-time local transform from the arm-record matrix, composed
@@ -1035,13 +1056,14 @@ static void getBipedLocal(INode *node, const NLMISC::CQuat &parentWorldRot,
 			}
 		}
 	}
-	else if (haveId && (id == BID_LTOES || id == BID_RTOES) && !rig.Toes.empty()) // toes
+	else if (haveId && (id == BID_LTOES || id == BID_RTOES) && !rig.Toes[0].empty()) // toes
 	{
 		bool tLeft = (id == BID_LTOES);
+		const std::vector<SBipedToe> &toes = rig.Toes[0]; // first half for both sides (see fingers)
 		int ti = 0, sub = 0;
-		if (locateChainSub(rig.Toes, link, ti, sub))
+		if (locateChainSub(toes, link, ti, sub))
 		{
-			const SBipedToe &toe = rig.Toes[ti];
+			const SBipedToe &toe = toes[ti];
 			if (sub == 0)
 			{
 				// toe base: creation-time local transform from the leg-record matrix, composed
