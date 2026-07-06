@@ -1,0 +1,241 @@
+/**
+ * \file control_keyframer.h
+ * \brief CControlKeyFramer
+ * \date 2026-07-06
+ * \author Jan Boon (Kaetemi)
+ * Typed classes for the builtin keyframe animation controllers (Linear / Bezier / TCB
+ * position, rotation, scale and float variants).
+ */
+
+/*
+ * Copyright (C) 2026  by authors
+ *
+ * This file is part of RYZOM CORE PIPELINE.
+ * RYZOM CORE PIPELINE is free software: you can redistribute it
+ * and/or modify it under the terms of the GNU Affero General Public
+ * License as published by the Free Software Foundation, either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * RYZOM CORE PIPELINE is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public
+ * License along with RYZOM CORE PIPELINE.  If not, see
+ * <http://www.gnu.org/licenses/>.
+ */
+
+#ifndef PIPELINE_CONTROL_KEYFRAMER_H
+#define PIPELINE_CONTROL_KEYFRAMER_H
+#include <nel/misc/types_nl.h>
+
+// STL includes
+#include <vector>
+
+// NeL includes
+
+// Project includes
+#include "reference_target.h"
+
+namespace PIPELINE {
+namespace MAX {
+namespace BUILTIN {
+
+/**
+ * Key record layouts as stored in the .max key-table chunks (little-endian dwords, no
+ * padding — verified corpus-wide that every table's byte size is an exact multiple of the
+ * record size; see pipeline_max_design.md §"Animation controllers").
+ *
+ * Common fields: Time is in Max ticks (4800/s, 160/frame); Flags is the Max key-flags dword
+ * (Bezier: tangent types at bits 7..9 in / 10..12 out, BEZKEY_STEP = 2).
+ *
+ * "Extra" fields are interpolation caches rebuilt by Max at load time (cached quats/tangent
+ * data); they are preserved verbatim for roundtrip but their semantics are not decoded.
+ */
+
+/// Linear Position (0x2002, 0) — chunk 0x2513
+struct CStorageLinPoint3Key
+{
+	sint32 Time;
+	uint32 Flags;
+	float Val[3];
+};
+
+/// Linear Rotation (0x2003, 0) — chunk 0x2514. Quat is the ABSOLUTE key rotation (x,y,z,w);
+/// the reference exporter's ILinRotKey conversion negates w for NeL.
+struct CStorageLinRotKey
+{
+	sint32 Time;
+	uint32 Flags;
+	float Quat[4];
+};
+
+/// Linear Scale (0x2004, 0) — chunk 0x2515. Max ScaleValue: per-axis scale S plus the scale
+/// axis system quat Q.
+struct CStorageLinScaleKey
+{
+	sint32 Time;
+	uint32 Flags;
+	float S[3];
+	float Q[4];
+};
+
+/// Bezier Float (0x2007, 0) — chunk 0x2525
+struct CStorageBezFloatKey
+{
+	sint32 Time;
+	uint32 Flags;
+	float Val;
+	float InTan;
+	float OutTan;
+	float Extra[2];
+};
+
+/// Bezier Position / Point3 (0x2008, 0) — chunk 0x2526. InTan/OutTan are in value units per
+/// tick (the reference exporter multiplies by 4800 for NeL's per-second convention).
+struct CStorageBezPoint3Key
+{
+	sint32 Time;
+	uint32 Flags;
+	float Val[3];
+	float InTan[3];
+	float OutTan[3];
+	float Extra[9];
+};
+
+/// Bezier Scale (0x2010, 0) — chunk 0x2528. Tangent offsets provisional: every corpus
+/// instance carries zero tangents, so [9..11]/[12..14] are placed by analogy with the
+/// Bezier Position layout and cannot be discriminated from cache dwords yet.
+struct CStorageBezScaleKey
+{
+	sint32 Time;
+	uint32 Flags;
+	float S[3];
+	float Q[4];
+	float InTan[3];
+	float OutTan[3];
+	float Extra[22];
+};
+
+/// TCB Position / Point3 (0x442312, 0) — chunk 0x2521
+struct CStorageTCBPoint3Key
+{
+	sint32 Time;
+	uint32 Flags;
+	float Val[3];
+	float Tens, Cont, Bias, EaseIn, EaseOut;
+	float Extra[6];
+};
+
+/// TCB Rotation (0x442313, 0) — chunk 0x2522. AbsQuat is the cumulative absolute rotation at
+/// this key; Axis+Angle is the RELATIVE angle-axis from the previous key (axis in world space)
+/// — this is what Max's GetKey returns in ITCBRotKey.val and what the reference exporter
+/// converts to NeL's CKeyTCBQuat (with the angle negated).
+struct CStorageTCBRotKey
+{
+	sint32 Time;
+	uint32 Flags;
+	float AbsQuat[4];
+	float Tens, Cont, Bias, EaseIn, EaseOut;
+	float Axis[3];
+	float Angle;
+	float Extra[8];
+};
+
+/**
+ * \brief CControlKeyFramerBase
+ * \date 2026-07-06
+ * \author Jan Boon (Kaetemi)
+ * Shared machinery for the typed keyframe controllers. Claims the controller's known chunks
+ * head-first in file order (default value, 0x2500, 0x3002, 0x3003 range, 0x2532/33/34,
+ * key table, 0x3005), stopping at the first unrecognized id so unknown chunks stay orphaned
+ * pass-through. All claimed chunks are re-emitted verbatim in original order by build();
+ * the key table and range are additionally exposed through typed read accessors. The raw
+ * bytes remain authoritative (no authoring direction yet), so roundtrip is byte-exact by
+ * construction.
+ */
+class CControlKeyFramerBase : public CReferenceTarget
+{
+public:
+	CControlKeyFramerBase(CScene *scene, uint16 defaultChunkId, uint16 keyChunkId, uint keySize);
+	virtual ~CControlKeyFramerBase();
+
+	// inherited
+	virtual void parse(uint16 version, uint filter = 0);
+	virtual void clean();
+	virtual void build(uint16 version, uint filter = 0);
+	virtual void disown();
+	virtual void init();
+	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "", uint filter = 0) const;
+
+	// read access
+	/// Number of keys in the key table (0 when absent or when the table size is not an exact
+	/// multiple of the record size — the latter never happens in the corpus, but a variant
+	/// layout degrades to "no typed keys" rather than misreading).
+	uint keyCount() const;
+	/// Raw pointer to the first key record, NULL when keyCount() == 0.
+	const void *keyData() const;
+	/// Default value bytes (chunk 0x2503/0x2504/0x2505/0x2501 depending on the controller
+	/// type), NULL when absent. Size returned in sizeOut.
+	const uint8 *defaultValue(uint &sizeOut) const;
+	/// Controller time range from chunk 0x3003 (Max Interval, 2 x sint32 ticks).
+	bool range(sint32 &start, sint32 &end) const;
+
+protected:
+	// inherited
+	virtual IStorageObject *createChunkById(uint16 id, bool container);
+
+private:
+	bool isKnownChunkId(uint16 id) const;
+
+	uint16 m_DefaultChunkId;
+	uint16 m_KeyChunkId;
+	uint m_KeySize;
+
+	/// Chunks claimed off the orphan list head, in original file order; re-emitted verbatim.
+	TStorageObjectContainer m_Claimed;
+
+	// Views into m_Claimed (not owned separately)
+	CStorageRaw *m_KeyTable;
+	CStorageRaw *m_Default;
+	CStorageRaw *m_Range;
+
+}; /* class CControlKeyFramerBase */
+
+/// Declare one concrete typed controller class. They differ only in identity and key layout.
+#define PMB_DECLARE_CONTROL_KEYFRAMER(className, keyType)                                         \
+	class className : public CControlKeyFramerBase                                                \
+	{                                                                                             \
+	public:                                                                                       \
+		className(CScene *scene);                                                                 \
+		virtual ~className();                                                                     \
+		static const ucstring DisplayName;                                                        \
+		static const char *InternalName;                                                          \
+		static const NLMISC::CClassId ClassId;                                                    \
+		static const TSClassId SuperClassId;                                                      \
+		virtual bool inherits(const NLMISC::CClassId classId) const;                              \
+		virtual const ISceneClassDesc *classDesc() const;                                         \
+		inline const keyType *keys() const { return (const keyType *)keyData(); }                 \
+	};                                                                                            \
+	typedef CSceneClassDesc<className> className##ClassDesc;                                      \
+	extern const className##ClassDesc className##Desc;
+
+PMB_DECLARE_CONTROL_KEYFRAMER(CControlPosLinear, CStorageLinPoint3Key)
+PMB_DECLARE_CONTROL_KEYFRAMER(CControlRotLinear, CStorageLinRotKey)
+PMB_DECLARE_CONTROL_KEYFRAMER(CControlScaleLinear, CStorageLinScaleKey)
+PMB_DECLARE_CONTROL_KEYFRAMER(CControlFloatBezier, CStorageBezFloatKey)
+PMB_DECLARE_CONTROL_KEYFRAMER(CControlPosBezier, CStorageBezPoint3Key)
+PMB_DECLARE_CONTROL_KEYFRAMER(CControlScaleBezier, CStorageBezScaleKey)
+PMB_DECLARE_CONTROL_KEYFRAMER(CControlPosTCB, CStorageTCBPoint3Key)
+PMB_DECLARE_CONTROL_KEYFRAMER(CControlRotTCB, CStorageTCBRotKey)
+
+#undef PMB_DECLARE_CONTROL_KEYFRAMER
+
+} /* namespace BUILTIN */
+} /* namespace MAX */
+} /* namespace PIPELINE */
+
+#endif /* #ifndef PIPELINE_CONTROL_KEYFRAMER_H */
+
+/* end of file */

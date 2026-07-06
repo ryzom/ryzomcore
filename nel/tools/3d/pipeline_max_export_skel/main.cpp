@@ -48,6 +48,7 @@
 #include "../pipeline_max/builtin/node_impl.h"
 #include "../pipeline_max/builtin/reference_maker.h"
 #include "../pipeline_max/builtin/storage/app_data.h"
+#include "../pipeline_max/builtin/control_keyframer.h"
 #include "../pipeline_max/biped/biped_driven.h"
 
 using namespace PIPELINE::MAX;
@@ -174,6 +175,26 @@ static bool readRawBytes(CSceneClass *sc, uint16 chunkId, void *dst, size_t nByt
 	return true;
 }
 
+// Read a controller's default-value chunk (0x2503/0x2504/0x2505). The keyframe controllers are
+// typed now (CControlKeyFramerBase claims the default-value chunk out of the orphan list), so
+// prefer the typed accessor and keep the raw orphan scan as the fallback for any controller
+// class that is still an unknown pass-through.
+static bool readCtrlDefault(CSceneClass *sc, uint16 chunkId, void *dst, size_t nBytes)
+{
+	PIPELINE::MAX::BUILTIN::CControlKeyFramerBase *ctrl = dynamic_cast<PIPELINE::MAX::BUILTIN::CControlKeyFramerBase *>(sc);
+	if (ctrl)
+	{
+		uint size = 0;
+		const uint8 *data = ctrl->defaultValue(size);
+		if (data && size >= nBytes)
+		{
+			memcpy(dst, data, nBytes);
+			return true;
+		}
+	}
+	return readRawBytes(sc, chunkId, dst, nBytes);
+}
+
 // PRS controller chunk ids (super 0x900b/c/d Bezier variants)
 #define CHUNK_BEZIER_POS_VALUE 0x2503 // CVector
 #define CHUNK_TCB_QUAT_VALUE   0x2504 // CQuat
@@ -279,8 +300,8 @@ static void getLocalTransform(CReferenceMaker *tmCtrl,
 	CSceneClass *rotSc = dynamic_cast<CSceneClass *>(rotCtrl);
 	CSceneClass *scaleSc = dynamic_cast<CSceneClass *>(scaleCtrl);
 
-	if (posSc) readRawBytes(posSc, CHUNK_BEZIER_POS_VALUE, &pos, 12);
-	if (rotSc && readRawBytes(rotSc, CHUNK_TCB_QUAT_VALUE, &rot, 16))
+	if (posSc) readCtrlDefault(posSc, CHUNK_BEZIER_POS_VALUE, &pos, 12);
+	if (rotSc && readCtrlDefault(rotSc, CHUNK_TCB_QUAT_VALUE, &rot, 16))
 	{
 		// Max stores rotation-controller values in the inverse convention relative to the node
 		// TM rotation (the reference exporter never hit this because it read GetNodeTM matrices,
@@ -289,7 +310,7 @@ static void getLocalTransform(CReferenceMaker *tmCtrl,
 		// identity rotations are self-conjugate, which is why they matched either way.
 		rot.invert();
 	}
-	if (scaleSc) readRawBytes(scaleSc, CHUNK_BEZIER_SCALE_VALUE, &scale, 12);
+	if (scaleSc) readCtrlDefault(scaleSc, CHUNK_BEZIER_SCALE_VALUE, &scale, 12);
 }
 
 // Biped plugin internal bone-id constants — 0-based, one less than the MaxScript-facing IDs in

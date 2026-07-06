@@ -1,0 +1,265 @@
+/**
+ * \file control_keyframer.cpp
+ * \brief CControlKeyFramer
+ * \date 2026-07-06
+ * \author Jan Boon (Kaetemi)
+ * Typed classes for the builtin keyframe animation controllers.
+ */
+
+/*
+ * Copyright (C) 2026  by authors
+ *
+ * This file is part of RYZOM CORE PIPELINE.
+ * RYZOM CORE PIPELINE is free software: you can redistribute it
+ * and/or modify it under the terms of the GNU Affero General Public
+ * License as published by the Free Software Foundation, either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * RYZOM CORE PIPELINE is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public
+ * License along with RYZOM CORE PIPELINE.  If not, see
+ * <http://www.gnu.org/licenses/>.
+ */
+
+#include <nel/misc/types_nl.h>
+#include "control_keyframer.h"
+
+// STL includes
+#include <cstring>
+
+// NeL includes
+
+// Project includes
+
+using namespace std;
+
+namespace PIPELINE {
+namespace MAX {
+namespace BUILTIN {
+
+// The typed accessors reinterpret the raw chunk bytes; the record layouts must be packed.
+static_assert(sizeof(CStorageLinPoint3Key) == 20, "packed key record");
+static_assert(sizeof(CStorageLinRotKey) == 24, "packed key record");
+static_assert(sizeof(CStorageLinScaleKey) == 36, "packed key record");
+static_assert(sizeof(CStorageBezFloatKey) == 28, "packed key record");
+static_assert(sizeof(CStorageBezPoint3Key) == 80, "packed key record");
+static_assert(sizeof(CStorageBezScaleKey) == 148, "packed key record");
+static_assert(sizeof(CStorageTCBPoint3Key) == 64, "packed key record");
+static_assert(sizeof(CStorageTCBRotKey) == 92, "packed key record");
+
+// Common controller chunk ids (shared across all keyframe controller classes; the default
+// value and key table ids are per-class and passed in by the concrete constructors).
+#define PMB_CTRL_UNKNOWN2500_CHUNK_ID 0x2500
+#define PMB_CTRL_UNKNOWN3002_CHUNK_ID 0x3002
+#define PMB_CTRL_RANGE_CHUNK_ID 0x3003
+#define PMB_CTRL_UNKNOWN3005_CHUNK_ID 0x3005
+#define PMB_CTRL_UNKNOWN2532_CHUNK_ID 0x2532
+#define PMB_CTRL_UNKNOWN2533_CHUNK_ID 0x2533
+#define PMB_CTRL_UNKNOWN2534_CHUNK_ID 0x2534
+
+CControlKeyFramerBase::CControlKeyFramerBase(CScene *scene, uint16 defaultChunkId, uint16 keyChunkId, uint keySize)
+	: CReferenceTarget(scene)
+	, m_DefaultChunkId(defaultChunkId)
+	, m_KeyChunkId(keyChunkId)
+	, m_KeySize(keySize)
+	, m_KeyTable(NULL)
+	, m_Default(NULL)
+	, m_Range(NULL)
+{
+
+}
+
+CControlKeyFramerBase::~CControlKeyFramerBase()
+{
+	if (!m_ChunksOwnsPointers)
+	{
+		for (TStorageObjectContainer::iterator it = m_Claimed.begin(), end = m_Claimed.end(); it != end; ++it)
+			delete it->second;
+		m_Claimed.clear();
+	}
+}
+
+bool CControlKeyFramerBase::isKnownChunkId(uint16 id) const
+{
+	switch (id)
+	{
+	case PMB_CTRL_UNKNOWN2500_CHUNK_ID:
+	case PMB_CTRL_UNKNOWN3002_CHUNK_ID:
+	case PMB_CTRL_RANGE_CHUNK_ID:
+	case PMB_CTRL_UNKNOWN3005_CHUNK_ID:
+	case PMB_CTRL_UNKNOWN2532_CHUNK_ID:
+	case PMB_CTRL_UNKNOWN2533_CHUNK_ID:
+	case PMB_CTRL_UNKNOWN2534_CHUNK_ID:
+		return true;
+	}
+	if (id == m_DefaultChunkId) return true;
+	if (id == m_KeyChunkId) return true;
+	return false;
+}
+
+void CControlKeyFramerBase::parse(uint16 version, uint filter)
+{
+	CReferenceTarget::parse(version);
+	if (!m_ChunksOwnsPointers)
+	{
+		// Claim known chunks off the head of the orphan list, in file order, stopping at the
+		// first unrecognized id. getChunk on the head never triggers the out-of-order warning,
+		// and anything after an unknown id simply stays orphaned (verbatim pass-through).
+		for (;;)
+		{
+			uint16 id = peekChunk();
+			if (id == 0x0000) break;
+			if (!isKnownChunkId(id)) break;
+			IStorageObject *so = getChunk(id);
+			if (!so) break;
+			m_Claimed.push_back(TStorageObjectWithId(id, so));
+			if (id == m_KeyChunkId) m_KeyTable = dynamic_cast<CStorageRaw *>(so);
+			else if (id == m_DefaultChunkId) m_Default = dynamic_cast<CStorageRaw *>(so);
+			else if (id == PMB_CTRL_RANGE_CHUNK_ID) m_Range = dynamic_cast<CStorageRaw *>(so);
+		}
+	}
+}
+
+void CControlKeyFramerBase::clean()
+{
+	CReferenceTarget::clean();
+}
+
+void CControlKeyFramerBase::build(uint16 version, uint filter)
+{
+	CReferenceTarget::build(version);
+	for (TStorageObjectContainer::iterator it = m_Claimed.begin(), end = m_Claimed.end(); it != end; ++it)
+		putChunk(it->first, it->second);
+}
+
+void CControlKeyFramerBase::disown()
+{
+	m_Claimed.clear();
+	m_KeyTable = NULL;
+	m_Default = NULL;
+	m_Range = NULL;
+	CReferenceTarget::disown();
+}
+
+void CControlKeyFramerBase::init()
+{
+	CReferenceTarget::init();
+}
+
+void CControlKeyFramerBase::toStringLocal(std::ostream &ostream, const std::string &pad, uint filter) const
+{
+	CReferenceTarget::toStringLocal(ostream, pad);
+	uint nb = keyCount();
+	if (nb)
+	{
+		ostream << "\n" << pad << "Keys: " << nb;
+	}
+	else if (m_KeyTable)
+	{
+		ostream << "\n" << pad << "Keys: UNALIGNED " << m_KeyTable->Value.size() << " bytes / " << m_KeySize;
+	}
+	sint32 rs, re;
+	if (range(rs, re))
+	{
+		ostream << "\n" << pad << "Range: " << rs << " to " << re << " ticks";
+	}
+}
+
+uint CControlKeyFramerBase::keyCount() const
+{
+	if (!m_KeyTable) return 0;
+	if (m_KeySize == 0) return 0;
+	if (m_KeyTable->Value.size() % m_KeySize) return 0;
+	return (uint)(m_KeyTable->Value.size() / m_KeySize);
+}
+
+const void *CControlKeyFramerBase::keyData() const
+{
+	if (!keyCount()) return NULL;
+	return m_KeyTable->Value.data();
+}
+
+const uint8 *CControlKeyFramerBase::defaultValue(uint &sizeOut) const
+{
+	if (!m_Default) { sizeOut = 0; return NULL; }
+	sizeOut = (uint)m_Default->Value.size();
+	return m_Default->Value.data();
+}
+
+bool CControlKeyFramerBase::range(sint32 &start, sint32 &end) const
+{
+	if (!m_Range) return false;
+	if (m_Range->Value.size() != 8) return false;
+	memcpy(&start, m_Range->Value.data(), 4);
+	memcpy(&end, m_Range->Value.data() + 4, 4);
+	return true;
+}
+
+IStorageObject *CControlKeyFramerBase::createChunkById(uint16 id, bool container)
+{
+	// All leaf chunks on these controllers default to CStorageRaw already; containers
+	// (0x2532/33/34) stay generic containers. Nothing to specialize.
+	return CReferenceTarget::createChunkById(id, container);
+}
+
+////////////////////////////////////////////////////////////////////////
+// Concrete classes
+////////////////////////////////////////////////////////////////////////
+
+// Default-value chunk ids per controller value type
+#define PMB_CTRL_DEFAULT_FLOAT_CHUNK_ID 0x2501
+#define PMB_CTRL_DEFAULT_POS_CHUNK_ID 0x2503
+#define PMB_CTRL_DEFAULT_ROT_CHUNK_ID 0x2504
+#define PMB_CTRL_DEFAULT_SCALE_CHUNK_ID 0x2505
+
+// Key-table chunk ids
+#define PMB_CTRL_KEYS_LIN_POS_CHUNK_ID 0x2513
+#define PMB_CTRL_KEYS_LIN_ROT_CHUNK_ID 0x2514
+#define PMB_CTRL_KEYS_LIN_SCALE_CHUNK_ID 0x2515
+#define PMB_CTRL_KEYS_BEZ_FLOAT_CHUNK_ID 0x2525
+#define PMB_CTRL_KEYS_BEZ_POS_CHUNK_ID 0x2526
+#define PMB_CTRL_KEYS_BEZ_SCALE_CHUNK_ID 0x2528
+#define PMB_CTRL_KEYS_TCB_POS_CHUNK_ID 0x2521
+#define PMB_CTRL_KEYS_TCB_ROT_CHUNK_ID 0x2522
+
+// Superclass ids
+#define PMB_SCLASS_CONTROL_FLOAT 0x00009003
+#define PMB_SCLASS_CONTROL_POS 0x0000900b
+#define PMB_SCLASS_CONTROL_ROT 0x0000900c
+#define PMB_SCLASS_CONTROL_SCALE 0x0000900d
+
+#define PMB_DEFINE_CONTROL_KEYFRAMER(className, displayName, internalName, classIdA, sclassId, defaultChunk, keyChunk, keyType) \
+	className::className(CScene *scene) : CControlKeyFramerBase(scene, defaultChunk, keyChunk, sizeof(keyType)) { } \
+	className::~className() { } \
+	const ucstring className::DisplayName = ucstring(displayName); \
+	const char *className::InternalName = internalName; \
+	const NLMISC::CClassId className::ClassId = NLMISC::CClassId(classIdA, 0x00000000); \
+	const TSClassId className::SuperClassId = sclassId; \
+	const className##ClassDesc className##Desc(&DllPluginDescBuiltin); \
+	bool className::inherits(const NLMISC::CClassId classId) const \
+	{ \
+		if (classId == classDesc()->classId()) return true; \
+		return CControlKeyFramerBase::inherits(classId); \
+	} \
+	const ISceneClassDesc *className::classDesc() const { return &className##Desc; }
+
+PMB_DEFINE_CONTROL_KEYFRAMER(CControlPosLinear, "Linear Position", "ControlPosLinear", 0x00002002, PMB_SCLASS_CONTROL_POS, PMB_CTRL_DEFAULT_POS_CHUNK_ID, PMB_CTRL_KEYS_LIN_POS_CHUNK_ID, CStorageLinPoint3Key)
+PMB_DEFINE_CONTROL_KEYFRAMER(CControlRotLinear, "Linear Rotation", "ControlRotLinear", 0x00002003, PMB_SCLASS_CONTROL_ROT, PMB_CTRL_DEFAULT_ROT_CHUNK_ID, PMB_CTRL_KEYS_LIN_ROT_CHUNK_ID, CStorageLinRotKey)
+PMB_DEFINE_CONTROL_KEYFRAMER(CControlScaleLinear, "Linear Scale", "ControlScaleLinear", 0x00002004, PMB_SCLASS_CONTROL_SCALE, PMB_CTRL_DEFAULT_SCALE_CHUNK_ID, PMB_CTRL_KEYS_LIN_SCALE_CHUNK_ID, CStorageLinScaleKey)
+PMB_DEFINE_CONTROL_KEYFRAMER(CControlFloatBezier, "Bezier Float", "ControlFloatBezier", 0x00002007, PMB_SCLASS_CONTROL_FLOAT, PMB_CTRL_DEFAULT_FLOAT_CHUNK_ID, PMB_CTRL_KEYS_BEZ_FLOAT_CHUNK_ID, CStorageBezFloatKey)
+PMB_DEFINE_CONTROL_KEYFRAMER(CControlPosBezier, "Bezier Position", "ControlPosBezier", 0x00002008, PMB_SCLASS_CONTROL_POS, PMB_CTRL_DEFAULT_POS_CHUNK_ID, PMB_CTRL_KEYS_BEZ_POS_CHUNK_ID, CStorageBezPoint3Key)
+PMB_DEFINE_CONTROL_KEYFRAMER(CControlScaleBezier, "Bezier Scale", "ControlScaleBezier", 0x00002010, PMB_SCLASS_CONTROL_SCALE, PMB_CTRL_DEFAULT_SCALE_CHUNK_ID, PMB_CTRL_KEYS_BEZ_SCALE_CHUNK_ID, CStorageBezScaleKey)
+PMB_DEFINE_CONTROL_KEYFRAMER(CControlPosTCB, "TCB Position", "ControlPosTCB", 0x00442312, PMB_SCLASS_CONTROL_POS, PMB_CTRL_DEFAULT_POS_CHUNK_ID, PMB_CTRL_KEYS_TCB_POS_CHUNK_ID, CStorageTCBPoint3Key)
+PMB_DEFINE_CONTROL_KEYFRAMER(CControlRotTCB, "TCB Rotation", "ControlRotTCB", 0x00442313, PMB_SCLASS_CONTROL_ROT, PMB_CTRL_DEFAULT_ROT_CHUNK_ID, PMB_CTRL_KEYS_TCB_ROT_CHUNK_ID, CStorageTCBRotKey)
+
+#undef PMB_DEFINE_CONTROL_KEYFRAMER
+
+} /* namespace BUILTIN */
+} /* namespace MAX */
+} /* namespace PIPELINE */
+
+/* end of file */

@@ -56,6 +56,8 @@
 #include "patch_object.h"
 #include "editable_patch.h"
 
+#include "control_keyframer.h"
+
 // using namespace std;
 // using namespace NLMISC;
 
@@ -274,6 +276,17 @@ void CBuiltin::registerClasses(CSceneClassRegistry *registry)
 
 	// tvnode (inh ReferenceTarget)
 	registry->add(&TrackViewNodeClassDesc);
+
+	// keyframe animation controllers (inh ReferenceTarget; typed key tables, see
+	// control_keyframer.h — registered under their respective control superclasses)
+	registry->add(&CControlPosLinearDesc);
+	registry->add(&CControlRotLinearDesc);
+	registry->add(&CControlScaleLinearDesc);
+	registry->add(&CControlFloatBezierDesc);
+	registry->add(&CControlPosBezierDesc);
+	registry->add(&CControlScaleBezierDesc);
+	registry->add(&CControlPosTCBDesc);
+	registry->add(&CControlRotTCBDesc);
 
 	// object (inh ReferenceMaker)
 	registry->add(&BaseObjectClassDesc);
