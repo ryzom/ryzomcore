@@ -434,6 +434,14 @@ struct SBipedRig
 	bool HavePelvisWorldRot;
 	NLMISC::CQuat LastSpineWorldRot; // last spine link's world rotation (clavicle reference frame)
 	bool HaveLastSpineWorldRot;
+	// Figure-data version marker, chunk 0x0115 on the 0x9155 system object: int 3 on every
+	// legacy rig in the corpus (authored in Max 3, upgraded to Max 9), int 0 on figures created
+	// fresh in Max 9+ (the whole differential dataset, and tr_mo_kitin_queen — the corpus's one
+	// fresh-format rig, which is also every "single outlier file per role" in the error tables).
+	// Legacy rigs keep their FIRST (right) half's toe/finger base matrices authoritative with a
+	// stale left half; fresh rigs update the SECOND (left) half and can leave the right stale
+	// (observed on the queen's x24-scaled fingers). Gate half selection on this.
+	int FigureVersion;
 	float ToeBaseWorldZ;             // L toe0 attach world height = ground level (footsteps Z)
 	bool HaveToeBaseWorldZ;
 	// Footsteps bone bookkeeping for the post-walk ground-level patch (the Footsteps bone is
@@ -445,6 +453,7 @@ struct SBipedRig
 		HasClavicleZ(false),
 		PelvisWorldRot(NLMISC::CQuat::Identity), HavePelvisWorldRot(false),
 		LastSpineWorldRot(NLMISC::CQuat::Identity), HaveLastSpineWorldRot(false),
+		FigureVersion(3),
 		ToeBaseWorldZ(0.0f), HaveToeBaseWorldZ(false),
 		FootstepsBoneIdx(-1)
 	{
@@ -1011,13 +1020,17 @@ static void getBipedLocal(INode *node, const NLMISC::CQuat &parentWorldRot,
 		posOverride = rig.ClavicleOff[isLeft ? 1 : 0];
 		havePosOverride = true;
 	}
-	else if (haveId && (id == BID_LFINGERS || id == BID_RFINGERS) && !rig.Fingers[0].empty()) // fingers
+	else if (haveId && (id == BID_LFINGERS || id == BID_RFINGERS) && !(rig.Fingers[0].empty() && rig.Fingers[1].empty())) // fingers
 	{
-		// NOTE: both sides decode the FIRST (right) half's matrices — corpus-era left halves do
-		// NOT share the encoding (verified: per-side decode regressed 250 drot bones), so the left
-		// convention is taken from the right half and the right side mirrors it, as before. The
-		// pose-block deltas remain per-side.
-		const std::vector<SBipedFinger> &fingers = rig.Fingers[0];
+		// NOTE: both sides decode the FIRST (right) half's matrices — per-side decode regresses
+		// (the other half can go stale; verified both directions). On the corpus's one fresh-format
+		// rig (tr_mo_kitin_queen, FigureVersion 0) the staleness is even per-record: its x24-scaled
+		// FINGER bases are current only in the LEFT half while its TOE bases are current only in
+		// the right — no consistent selection rule is derivable from one file, so the legacy
+		// right-half read stays until more fresh-format corpus material exists. The pose-block
+		// deltas remain per-side.
+		int srcHalf = rig.Fingers[0].empty() ? 1 : 0;
+		const std::vector<SBipedFinger> &fingers = rig.Fingers[srcHalf];
 		int fi = 0, sub = 0;
 		if (locateChainSub(fingers, link, fi, sub))
 		{
@@ -1056,10 +1069,11 @@ static void getBipedLocal(INode *node, const NLMISC::CQuat &parentWorldRot,
 			}
 		}
 	}
-	else if (haveId && (id == BID_LTOES || id == BID_RTOES) && !rig.Toes[0].empty()) // toes
+	else if (haveId && (id == BID_LTOES || id == BID_RTOES) && !(rig.Toes[0].empty() && rig.Toes[1].empty())) // toes
 	{
 		bool tLeft = (id == BID_LTOES);
-		const std::vector<SBipedToe> &toes = rig.Toes[0]; // first half for both sides (see fingers)
+		int tSrcHalf = rig.Toes[0].empty() ? 1 : 0;
+		const std::vector<SBipedToe> &toes = rig.Toes[tSrcHalf]; // right half for both sides (see fingers)
 		int ti = 0, sub = 0;
 		if (locateChainSub(toes, link, ti, sub))
 		{
@@ -1318,6 +1332,10 @@ static SBipedRig &rigFor(CSceneClass *sys, CSceneClassContainer *ssc)
 	SBipedRig &rig = g_bipedRigs[sys];
 	rig.Sys = sys;
 	g_rig = &rig; // bipedChunkFloats reads through g_rig during parsing
+	{
+		const float *v = bipedChunkFloats(0x0115, 1);
+		if (v) rig.FigureVersion = (int)floatBitsAsUint(v[0]);
+	}
 	parseComRecord(rig);
 	parseLegRecord(rig);
 	parseArmRecord(rig);
