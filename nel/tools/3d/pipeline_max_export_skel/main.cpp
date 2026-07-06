@@ -416,6 +416,10 @@ struct SBipedRig
 	// arms + fingers
 	bool HasClavicleZ;
 	float ClavicleZ[2]; // [0] = right, [1] = left
+	// Full clavicle local position (parent frame): arm record ([9], [8], [10]) with per-side
+	// signs — [8]/[9] are the x/y components (zero on humanoids, real offsets on monster rigs
+	// like tr_mo_c05/fy_mo_frahar), [10] the side offset. Left half stores (-x, -y, z).
+	NLMISC::CVector ClavicleOff[2]; // [0] = right, [1] = left
 	float ClavicleA[2]; // arm record [6] per side: extra rotation about the spine2-frame -X, radians
 	float ClavicleB[2]; // arm record [7] per side: base rotation = 180deg about (cos phi, 0, sin phi), phi = pi/4 + b/2
 	std::vector<SBipedFinger> Fingers;
@@ -759,17 +763,20 @@ static void parseArmRecord(SBipedRig &rig)
 	rig.ClavicleZ[0] = f[10];
 	rig.ClavicleA[0] = f[6];
 	rig.ClavicleB[0] = f[7];
+	rig.ClavicleOff[0] = NLMISC::CVector(f[9], f[8], -f[10]);
 	if (half + 10 < n)
 	{
 		rig.ClavicleZ[1] = f[half + 10];
 		rig.ClavicleA[1] = f[half + 6];
 		rig.ClavicleB[1] = f[half + 7];
+		rig.ClavicleOff[1] = NLMISC::CVector(-f[half + 9], -f[half + 8], f[half + 10]);
 	}
 	else
 	{
 		rig.ClavicleZ[1] = rig.ClavicleZ[0];
 		rig.ClavicleA[1] = rig.ClavicleA[0];
 		rig.ClavicleB[1] = rig.ClavicleB[0];
+		rig.ClavicleOff[1] = NLMISC::CVector(-rig.ClavicleOff[0].x, -rig.ClavicleOff[0].y, -rig.ClavicleOff[0].z);
 	}
 	rig.HasClavicleZ = true;
 	uint32 nFingers = floatBitsAsUint(f[16]);
@@ -985,7 +992,7 @@ static void getBipedLocal(INode *node, const NLMISC::CQuat &parentWorldRot,
 		const NLMISC::CQuat &spineRef = rig.HaveLastSpineWorldRot ? rig.LastSpineWorldRot : parentWorldRot;
 		worldRot = spineRef * rel;
 		worldRot.normalize();
-		posOverride = NLMISC::CVector(0.0f, 0.0f, isLeft ? rig.ClavicleZ[1] : -rig.ClavicleZ[0]);
+		posOverride = rig.ClavicleOff[isLeft ? 1 : 0];
 		havePosOverride = true;
 	}
 	else if (haveId && (id == BID_LFINGERS || id == BID_RFINGERS) && !rig.Fingers.empty()) // fingers
@@ -1189,9 +1196,9 @@ static void getBipedLocal(INode *node, const NLMISC::CQuat &parentWorldRot,
 		}
 		else if (haveId && (id == BID_LARM || id == BID_RARM) && link == 0)
 		{
-			// Clavicle without a parsed arm record: attaches to the last spine link at a pure Z
-			// (side) offset. (Its own X-length is 0; not a straight-chain bone.)
-			pos = NLMISC::CVector(0.0f, 0.0f, isLeft ? rig.ClavicleZ[1] : -rig.ClavicleZ[0]);
+			// Clavicle without a parsed arm record: fall back to the per-side offset vector
+			// (zero when the record is missing entirely).
+			pos = rig.ClavicleOff[isLeft ? 1 : 0];
 		}
 		else if (!parent || !isBipedBoneNode(parent))
 		{
@@ -1399,7 +1406,9 @@ static void walkNode(INode *node, sint32 fatherId, const NLMISC::CMatrix &parent
 	sint32 myId = (sint32)bones.size();
 	bones.push_back(b);
 
-	// Footsteps / ground-level bookkeeping (see patchFootstepsGround).
+	// Footsteps / ground-level bookkeeping (see patchFootstepsGround). The corpus-era Footsteps
+	// node carries a plain PRS controller (not a BipDriven with BID_FOOTPRINTS like later plugin
+	// versions), so it is identified as a COM child by name.
 	if (bipedSys && isBipedBoneNode(node))
 	{
 		SBipedRig &rig = g_bipedRigs[bipedSys];
@@ -1415,6 +1424,20 @@ static void walkNode(INode *node, sint32 fatherId, const NLMISC::CMatrix &parent
 			{
 				rig.ToeBaseWorldZ = worldTM.getPos().z;
 				rig.HaveToeBaseWorldZ = true;
+			}
+		}
+	}
+	else
+	{
+		INode *fparent = node->parent();
+		if (fparent && isBipedComNode(fparent) && name.find("Footsteps") != std::string::npos)
+		{
+			CSceneClass *psys = bipedSystemOfCtrl(fparent->getReference(0));
+			if (psys)
+			{
+				SBipedRig &rig = g_bipedRigs[psys];
+				rig.FootstepsBoneIdx = myId;
+				rig.FootstepsParentWorld = parentWorld;
 			}
 		}
 	}
