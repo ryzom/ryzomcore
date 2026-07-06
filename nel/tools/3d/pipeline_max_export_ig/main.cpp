@@ -100,6 +100,7 @@ using namespace MAXMATH;
 #define NEL3D_APPDATA_LIGHT_DONT_CAST_SHADOW_EXTERIOR 1423062637
 #define NEL3D_APPDATA_EXPORT_REALTIME_LIGHT 1423062588
 #define NEL3D_APPDATA_EXPORT_AS_SUN_LIGHT 1423062591
+#define NEL3D_APPDATA_REALTIME_AMBIENT_ADD_SUN 1423062672
 
 // AppData script-entry key (the MaxScript utility panel writes these)
 static const NLMISC::CClassId APPDATA_SCRIPT_CLASS_ID(0x04d64858, 0x16d1751d);
@@ -233,41 +234,36 @@ struct SLoadedMax
 
 static std::map<std::string, SLoadedMax> g_xrefScenes;
 
-// Case-insensitive path resolution under a root (the database checkout may differ in case from
-// the authored Windows paths).
+// Resolution of authored (Windows, case-insensitive) paths under the database root: the
+// checkout is lowercase on disk except possibly some filenames, so lowercase the directory
+// components (locale-independent NLMISC::toLowerAscii) and try the filename lowercased first,
+// verbatim second.
 static bool resolvePathCI(const std::string &root, const std::string &relative, std::string &out)
 {
-	std::string cur = root;
 	std::vector<std::string> parts;
 	NLMISC::splitString(relative, "/", parts);
-	for (uint i = 0; i < parts.size(); ++i)
+	while (!parts.empty() && parts[0].empty()) parts.erase(parts.begin());
+	if (parts.empty()) return false;
+	std::string dir = root;
+	for (uint i = 0; i + 1 < parts.size(); ++i)
 	{
 		if (parts[i].empty()) continue;
-		std::string direct = cur + "/" + parts[i];
-		if (NLMISC::CFile::fileExists(direct) || NLMISC::CFile::isDirectory(direct))
-		{
-			cur = direct;
-			continue;
-		}
-		// scan for a case-insensitive match
-		std::vector<std::string> contents;
-		NLMISC::CPath::getPathContent(cur, false, true, true, contents);
-		std::string want = NLMISC::toLower(parts[i]);
-		bool found = false;
-		for (uint j = 0; j < contents.size(); ++j)
-		{
-			std::string name = NLMISC::CFile::getFilename(NLMISC::CPath::standardizePath(contents[j], false));
-			if (NLMISC::toLower(name) == want)
-			{
-				cur = cur + "/" + name;
-				found = true;
-				break;
-			}
-		}
-		if (!found) return false;
+		dir += "/" + NLMISC::toLowerAscii(parts[i]);
 	}
-	out = cur;
-	return true;
+	const std::string &file = parts[parts.size() - 1];
+	std::string lower = dir + "/" + NLMISC::toLowerAscii(file);
+	if (NLMISC::CFile::fileExists(lower) || NLMISC::CFile::isDirectory(lower))
+	{
+		out = lower;
+		return true;
+	}
+	std::string verbatim = dir + "/" + file;
+	if (NLMISC::CFile::fileExists(verbatim) || NLMISC::CFile::isDirectory(verbatim))
+	{
+		out = verbatim;
+		return true;
+	}
+	return false;
 }
 
 static SLoadedMax *loadMaxFileCached(const std::string &path)
@@ -357,7 +353,7 @@ static CSceneClass *resolveXRefObject(CSceneClass *xrefObj, int depth)
 		std::string::size_type slash = rel.find('/');
 		if (slash != std::string::npos)
 		{
-			std::string first = NLMISC::toLower(rel.substr(0, slash));
+			std::string first = NLMISC::toLowerAscii(rel.substr(0, slash));
 			if (first == "graphics" || first == "database")
 				rel = rel.substr(slash + 1);
 		}
@@ -375,12 +371,12 @@ static CSceneClass *resolveXRefObject(CSceneClass *xrefObj, int depth)
 
 	// Find the named node in the referenced scene.
 	CSceneClassContainer *ssc = lm->Scene->container();
-	std::string wantLower = NLMISC::toLower(objName);
+	std::string wantLower = NLMISC::toLowerAscii(objName);
 	for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
 	{
 		CNodeImpl *node = dynamic_cast<CNodeImpl *>(it->second);
 		if (!node) continue;
-		if (NLMISC::toLower(ucstring(node->userName()).toUtf8()) != wantLower) continue;
+		if (NLMISC::toLowerAscii(ucstring(node->userName()).toUtf8()) != wantLower) continue;
 		return baseObjectOfObj(dynamic_cast<CSceneClass *>(node->getReference(1)), depth + 1);
 	}
 	fprintf(stderr, "WARNING: xref: node '%s' not found in %s\n", objName.c_str(), resolved.c_str());
@@ -773,13 +769,278 @@ static Matrix3M getNodeTM(INode *node, SNodeTMCache &cache)
 }
 
 // ---------------------------------------------------------------------------------------------
+// Max light objects (superclass 0x30). Storage decode (correlated against the reference igs'
+// point lights, light-by-light; see pipeline_max_design.md §10g):
+//   class (0x1011,0) = Omni, (0x1012,0) = target spot, (0x1013,0)/(0x1015,0) = directional,
+//   (0x1014,0) = free spot.
+//   ParamBlock (reference 0): omni 15-param layout: 0 = color (Point3 0..1), 1 = multiplier,
+//     6/7 = attenuation start/end. Spot 18-param layout: 0 = color, 4 = hotspot (degrees),
+//     5 = falloff (degrees), 9/10 = attenuation start/end.
+//   Object flag words (2-byte chunks): 0x2561 = affect diffuse, 0x2562 = USE ATTENUATION
+//     (discriminated by ref lights with atten (10,10) = off while carrying real pblock radii).
+//     affect-specular storage not yet located (every reference light has specular == diffuse);
+//     defaults to the affect-diffuse value pending the raw-intermediate reference round.
+//   Chunk 0x2600 (empty, presence flag) = "ambient only".
+//   AppData: 41654685 = animated light name (NEL3D_APPDATA_LM_ANIMATED_LIGHT; the values "Sun",
+//     "GlobalLight" and "(Use NelLight Modifier)" mean none), 41654687 = light group
+//     (NEL3D_APPDATA_LM_LIGHT_GROUP).
+
+#define NEL3D_APPDATA_LM_ANIMATED_LIGHT 41654685
+#define NEL3D_APPDATA_LM_LIGHT_GROUP 41654687
+
+struct SPBlockParam
+{
+	bool IsPoint3;
+	float V[3];
+};
+
+static void readPBlockParams(CSceneClass *pblock, std::map<sint32, SPBlockParam> &out)
+{
+	const CStorageContainer::TStorageObjectContainer &po = pblock->orphanedChunks();
+	for (CStorageContainer::TStorageObjectConstIt it = po.begin(); it != po.end(); ++it)
+	{
+		if (it->first != 0x0002) continue;
+		CStorageContainer *pc = dynamic_cast<CStorageContainer *>(it->second);
+		if (!pc) continue;
+		sint32 idx = -1;
+		for (CStorageContainer::TStorageObjectConstIt cit = pc->chunks().begin(); cit != pc->chunks().end(); ++cit)
+		{
+			CStorageRaw *cr = dynamic_cast<CStorageRaw *>(cit->second);
+			if (!cr) continue;
+			if (cit->first == 0x0003 && cr->Value.size() == 4)
+				memcpy(&idx, cr->Value.data(), 4);
+			else if (cit->first == 0x0102 && cr->Value.size() == 12 && idx >= 0)
+			{
+				SPBlockParam p;
+				p.IsPoint3 = true;
+				memcpy(p.V, cr->Value.data(), 12);
+				out[idx] = p;
+			}
+			else if (cit->first != 0x0004 && cr->Value.size() == 4 && idx >= 0)
+			{
+				SPBlockParam p;
+				p.IsPoint3 = false;
+				p.V[1] = p.V[2] = 0.0f;
+				memcpy(p.V, cr->Value.data(), 4);
+				out[idx] = p;
+			}
+		}
+	}
+}
+
+// Objects' 2-byte flag words + presence flags.
+static bool lightWord(CSceneClass *obj, uint16 chunkId, uint16 &out)
+{
+	const CStorageContainer::TStorageObjectContainer &orphans = obj->orphanedChunks();
+	for (CStorageContainer::TStorageObjectConstIt it = orphans.begin(); it != orphans.end(); ++it)
+	{
+		if (it->first != chunkId) continue;
+		CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
+		if (!raw || raw->Value.size() < 2) return false;
+		memcpy(&out, raw->Value.data(), 2);
+		return true;
+	}
+	return false;
+}
+
+static bool lightHasChunk(CSceneClass *obj, uint16 chunkId)
+{
+	const CStorageContainer::TStorageObjectContainer &orphans = obj->orphanedChunks();
+	for (CStorageContainer::TStorageObjectConstIt it = orphans.begin(); it != orphans.end(); ++it)
+		if (it->first == chunkId) return true;
+	return false;
+}
+
+enum TMaxLightKind
+{
+	maxLightNone,
+	maxLightOmni,
+	maxLightTargetSpot,
+	maxLightFreeSpot,
+	maxLightDir
+};
+
+static TMaxLightKind maxLightKind(CSceneClass *obj)
+{
+	if (!obj || obj->classDesc()->superClassId() != SCLASS_LIGHT) return maxLightNone;
+	switch (obj->classDesc()->classId().a())
+	{
+	case 0x1011: return maxLightOmni;
+	case 0x1012: return maxLightTargetSpot;
+	case 0x1014: return maxLightFreeSpot;
+	case 0x1013:
+	case 0x1015: return maxLightDir;
+	}
+	fprintf(stderr, "WARNING: unknown light class %s, skipped\n", obj->classDesc()->classId().toString().c_str());
+	return maxLightNone;
+}
+
+// Replicates the PointLight part of buildInstanceGroup + SLightBuild::convertFromMaxLight for
+// one node. Returns false when the node is not a light or is a directional (skipped); sunLight
+// is set when a directional light carries the EXPORT_AS_SUN_LIGHT appdata.
+static bool convertMaxLight(NL3D::CPointLightNamed &plNamed, INode &node, SNodeTMCache &tmCache, bool &sunLight)
+{
+	CNodeImpl *n = dynamic_cast<CNodeImpl *>(&node);
+	if (!n) return false;
+	CSceneClass *obj = baseObjectOf(node);
+	TMaxLightKind kind = maxLightKind(obj);
+	if (kind == maxLightNone) return false;
+
+	// Directional: only the sun check.
+	if (kind == maxLightDir)
+	{
+		if (getScriptAppDataInt(n, NEL3D_APPDATA_EXPORT_AS_SUN_LIGHT, 0) == 1)
+			sunLight = true;
+		return false;
+	}
+
+	// And if this light is checked to realtime export (default checked)
+	if (getScriptAppDataInt(n, NEL3D_APPDATA_EXPORT_REALTIME_LIGHT, 1) != 1)
+		return false;
+
+	std::map<sint32, SPBlockParam> params;
+	CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(obj);
+	for (uint r = 0; rm && r < rm->nbReferences(); ++r)
+	{
+		CSceneClass *ref = dynamic_cast<CSceneClass *>(rm->getReference(r));
+		if (ref && ref->classDesc()->superClassId() == 0x8)
+		{
+			readPBlockParams(ref, params);
+			break; // reference 0 is the light's own param block
+		}
+	}
+	if (params.find(0) == params.end() || !params[0].IsPoint3)
+	{
+		fprintf(stderr, "WARNING: light '%s' without color param, skipped\n", ucstring(n->userName()).toUtf8().c_str());
+		return false;
+	}
+
+	// Color
+	NLMISC::CRGBAF nelFColor;
+	nelFColor.R = params[0].V[0];
+	nelFColor.G = params[0].V[1];
+	nelFColor.B = params[0].V[2];
+	nelFColor.A = 1.f;
+	NLMISC::CRGBA nelColor = nelFColor;
+
+	uint16 w = 0;
+	bool ambientOnly = lightHasChunk(obj, 0x2600);
+	// Affect-diffuse/specular storage is not located (0x2561 was a false lead: the outgame
+	// lights carry 0 there yet export colored diffuse in the raw intermediates). Every corpus
+	// light exports with both enabled — unconditional until a counterexample appears.
+	bool affectDiffuse = true;
+	bool affectSpecular = true;
+	bool useAtten = lightWord(obj, 0x2562, w) && w != 0;
+
+	NLMISC::CRGBA ambient(0, 0, 0), diffuse(0, 0, 0), specular(0, 0, 0);
+	if (ambientOnly)
+	{
+		ambient = nelColor;
+	}
+	else
+	{
+		if (affectDiffuse) diffuse = nelColor;
+		if (affectSpecular) specular = nelColor;
+	}
+
+	// Position from the node TM
+	Matrix3M nodeTM = getNodeTM(&node, tmCache);
+	NLMISC::CVector position(nodeTM.m[3][0], nodeTM.m[3][1], nodeTM.m[3][2]);
+
+	// Direction: target node when present, else -K of the node TM
+	NLMISC::CVector direction(0, 0, -1);
+	if (kind == maxLightTargetSpot)
+	{
+		CReferenceMaker *tm = dynamic_cast<CReferenceMaker *>(node.getReference(0));
+		CSceneClass *tmsc = dynamic_cast<CSceneClass *>(tm);
+		INode *target = NULL;
+		if (tmsc && tmsc->classDesc()->classId() == CLASSID_LOOKAT_CTRL)
+			target = dynamic_cast<INode *>(tm->getReference(0));
+		if (target)
+		{
+			Matrix3M targetTM = getNodeTM(target, tmCache);
+			direction = NLMISC::CVector(targetTM.m[3][0], targetTM.m[3][1], targetTM.m[3][2]) - position;
+			direction.normalize();
+		}
+		else
+		{
+			fprintf(stderr, "WARNING: target spot '%s' without target node\n", ucstring(n->userName()).toUtf8().c_str());
+		}
+	}
+	else if (kind == maxLightFreeSpot)
+	{
+		// -Z row of the node TM (the NeL K column), normalized
+		direction = -NLMISC::CVector(nodeTM.m[2][0], nodeTM.m[2][1], nodeTM.m[2][2]);
+		direction.normalize();
+	}
+
+	// Attenuation radii
+	float rRadiusMin = 10.0f, rRadiusMax = 10.0f;
+	sint attenStartIdx = (kind == maxLightOmni) ? 6 : 9;
+	if (useAtten)
+	{
+		if (params.find(attenStartIdx) != params.end() && params.find(attenStartIdx + 1) != params.end())
+		{
+			rRadiusMin = params[attenStartIdx].V[0];
+			rRadiusMax = params[attenStartIdx + 1].V[0];
+		}
+		else
+		{
+			fprintf(stderr, "WARNING: light '%s' with attenuation but no radii params\n", ucstring(n->userName()).toUtf8().c_str());
+		}
+	}
+
+	// Fill the CPointLightNamed like the reference PointLight block.
+	plNamed.setPosition(position);
+	plNamed.setupAttenuation(rRadiusMin, rRadiusMax);
+	ambient.A = 255;
+	plNamed.setDefaultAmbient(ambient);
+	plNamed.setAmbient(ambient);
+	plNamed.setDefaultDiffuse(diffuse);
+	plNamed.setDiffuse(diffuse);
+	plNamed.setDefaultSpecular(specular);
+	plNamed.setSpecular(specular);
+
+	// GroupName
+	std::string anim = getScriptAppDataStr(n, NEL3D_APPDATA_LM_ANIMATED_LIGHT, "");
+	if (anim == "Sun" || anim == "GlobalLight" || anim == "(Use NelLight Modifier)")
+		anim.clear();
+	plNamed.AnimatedLight = anim;
+	plNamed.LightGroup = (uint32)getScriptAppDataInt(n, NEL3D_APPDATA_LM_LIGHT_GROUP, 0);
+
+	if (ambientOnly)
+	{
+		plNamed.setType(NL3D::CPointLight::AmbientLight);
+		plNamed.setAddAmbientWithSun(getScriptAppDataInt(n, NEL3D_APPDATA_REALTIME_AMBIENT_ADD_SUN, 0) == 1);
+	}
+	else if (kind == maxLightOmni)
+	{
+		plNamed.setType(NL3D::CPointLight::PointLight);
+	}
+	else
+	{
+		plNamed.setType(NL3D::CPointLight::SpotLight);
+		plNamed.setupSpotDirection(direction);
+		// rHotspot/rFallof: degrees -> the reference exporter's half-angle radians
+		float hotspot = 50.0f, fallsize = 45.0f;
+		sint hotIdx = 4, fallIdx = 5;
+		if (params.find(hotIdx) != params.end()) hotspot = params[hotIdx].V[0];
+		if (params.find(fallIdx) != params.end()) fallsize = params[fallIdx].V[0];
+		float rHotspot = (float)(NLMISC::Pi * hotspot / (2.0 * 180.0));
+		float rFallof = (float)(NLMISC::Pi * fallsize / (2.0 * 180.0));
+		plNamed.setupSpotAngle(rHotspot, rFallof);
+	}
+
+	return true;
+}
+
+// ---------------------------------------------------------------------------------------------
 // The buildInstanceGroup replication.
 
 struct SIgBuildStats
 {
-	uint UnimplementedLights;
 	uint UnimplementedAccel;
-	SIgBuildStats() : UnimplementedLights(0), UnimplementedAccel(0) { }
+	SIgBuildStats() : UnimplementedAccel(0) { }
 };
 
 static NL3D::CInstanceGroup *buildInstanceGroup(const std::vector<INode *> &vectNode, SNodeTMCache &tmCache, SIgBuildStats &stats)
@@ -922,14 +1183,17 @@ static NL3D::CInstanceGroup *buildInstanceGroup(const std::vector<INode *> &vect
 			++stats.UnimplementedAccel;
 	}
 
-	// PointLights: not implemented yet (light-object decode pending).
+	// PointLight part
 	std::vector<NL3D::CPointLightNamed> pointLights;
 	bool sunLightEnabled = false;
+	pointLights.resize(vectNode.size());
+	sint nNumPointLight = 0;
 	for (i = 0; i < vectNode.size(); ++i)
 	{
-		if (nodeCategory(*vectNode[i]) == SCLASS_LIGHT)
-			++stats.UnimplementedLights;
+		if (convertMaxLight(pointLights[nNumPointLight], *vectNode[i], tmCache, sunLightEnabled))
+			++nNumPointLight;
 	}
+	pointLights.resize(nNumPointLight);
 
 	NL3D::CInstanceGroup *pIG = new NL3D::CInstanceGroup;
 	pIG->build(NLMISC::CVector(0, 0, 0), aIGArray, vClusters, vPortals, pointLights);
@@ -941,9 +1205,23 @@ static NL3D::CInstanceGroup *buildInstanceGroup(const std::vector<INode *> &vect
 // Debug dump of the per-node classification.
 
 static const char *g_dumpObjName = NULL;
+static const char *g_dumpLightName = NULL;
+static void dumpLightNode(CNodeImpl *node);
 
 static void dumpNodes(CSceneClassContainer *ssc, SNodeTMCache &tmCache)
 {
+	if (g_dumpLightName)
+	{
+		for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
+		{
+			CNodeImpl *node = dynamic_cast<CNodeImpl *>(it->second);
+			if (!node) continue;
+			if (std::string(g_dumpLightName) != "*" && ucstring(node->userName()).toUtf8() != g_dumpLightName) continue;
+			if (std::string(g_dumpLightName) == "*" && nodeCategory(*node) != SCLASS_LIGHT) continue;
+			dumpLightNode(node);
+		}
+		return;
+	}
 	if (g_dumpObjName)
 	{
 		for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
@@ -1014,7 +1292,7 @@ static bool quatEq(const NLMISC::CQuat &a, const NLMISC::CQuat &b, float eps)
 	return std::min(d1, d2) <= eps;
 }
 
-static int compareIgs(const char *pathA, const char *pathB, bool maskLighting, bool maskZ)
+static int compareIgs(const char *pathA, const char *pathB, bool maskLighting, bool maskZ, bool maskUninit)
 {
 	NL3D::CInstanceGroup igA, igB;
 	try
@@ -1034,6 +1312,10 @@ static int compareIgs(const char *pathA, const char *pathB, bool maskLighting, b
 
 	int fails = 0;
 	const float EPS = 1e-5f;
+	// Positions compare with a magnitude-aware epsilon: the reference exporter's x87 matrix
+	// arithmetic leaves +-1-2 ULP noise on large world coordinates (the sky-dome moon anchors at
+	// |pos| ~ 200 differ by exactly 1 ULP); ~2.5 ULP allowance, floor 1e-5.
+	#define POS_EPS(v) (std::max(EPS, fabsf(v) * 3e-7f))
 
 	if (igA.getNumInstance() != igB.getNumInstance())
 	{
@@ -1046,10 +1328,10 @@ static int compareIgs(const char *pathA, const char *pathB, bool maskLighting, b
 		const NL3D::CInstanceGroup::CInstance &a = igA.getInstance(i);
 		const NL3D::CInstanceGroup::CInstance &b = igB.getInstance(i);
 		std::string diffs;
-		if (NLMISC::toLower(a.Name) != NLMISC::toLower(b.Name)) diffs += NLMISC::toString(" Name('%s' vs '%s')", a.Name.c_str(), b.Name.c_str());
+		if (NLMISC::toLowerAscii(a.Name) != NLMISC::toLowerAscii(b.Name)) diffs += NLMISC::toString(" Name('%s' vs '%s')", a.Name.c_str(), b.Name.c_str());
 		if (a.InstanceName != b.InstanceName) diffs += NLMISC::toString(" InstanceName('%s' vs '%s')", a.InstanceName.c_str(), b.InstanceName.c_str());
 		if (a.nParent != b.nParent) diffs += NLMISC::toString(" nParent(%d vs %d)", a.nParent, b.nParent);
-		if (fabsf(a.Pos.x - b.Pos.x) > EPS || fabsf(a.Pos.y - b.Pos.y) > EPS || (!maskZ && fabsf(a.Pos.z - b.Pos.z) > EPS))
+		if (fabsf(a.Pos.x - b.Pos.x) > POS_EPS(b.Pos.x) || fabsf(a.Pos.y - b.Pos.y) > POS_EPS(b.Pos.y) || (!maskZ && fabsf(a.Pos.z - b.Pos.z) > POS_EPS(b.Pos.z)))
 			diffs += NLMISC::toString(" Pos((%g,%g,%g) vs (%g,%g,%g))", a.Pos.x, a.Pos.y, a.Pos.z, b.Pos.x, b.Pos.y, b.Pos.z);
 		if (!quatEq(a.Rot, b.Rot, EPS))
 			diffs += NLMISC::toString(" Rot((%g,%g,%g,%g) vs (%g,%g,%g,%g))", a.Rot.x, a.Rot.y, a.Rot.z, a.Rot.w, b.Rot.x, b.Rot.y, b.Rot.z, b.Rot.w);
@@ -1065,8 +1347,13 @@ static int compareIgs(const char *pathA, const char *pathB, bool maskLighting, b
 		{
 			if (a.AvoidStaticLightPreCompute != b.AvoidStaticLightPreCompute) diffs += " AvoidStaticLightPreCompute";
 			if (a.StaticLightEnabled != b.StaticLightEnabled) diffs += " StaticLightEnabled";
-			if (a.SunContribution != b.SunContribution) diffs += " SunContribution";
-			if (a.Light[0] != b.Light[0] || a.Light[1] != b.Light[1]) diffs += " Light";
+			// SunContribution and Light[] are uninitialized memory in the reference exporter's
+			// raw output (CInstance ctor doesn't set them; see pipeline_max_design.md whitelist).
+			if (!maskUninit)
+			{
+				if (a.SunContribution != b.SunContribution) diffs += " SunContribution";
+				if (a.Light[0] != b.Light[0] || a.Light[1] != b.Light[1]) diffs += " Light";
+			}
 			if (a.LocalAmbientId != b.LocalAmbientId) diffs += " LocalAmbientId";
 		}
 		if (!diffs.empty())
@@ -1076,29 +1363,97 @@ static int compareIgs(const char *pathA, const char *pathB, bool maskLighting, b
 		}
 	}
 
-	if (igA.getNumPointLights() != igB.getNumPointLights())
+	// Point lights. maskLighting compares B's lights as a SUBSET of A's: the ig_lighter drops
+	// lights that influence no instance and reorders survivors, so the processed references
+	// carry a filtered list; every reference light must still exist in A with matching fields.
+	if (maskLighting)
 	{
-		printf("DIFF numPointLights %u vs %u\n", igA.getNumPointLights(), igB.getNumPointLights());
-		++fails;
-	}
-	uint nl = std::min(igA.getNumPointLights(), igB.getNumPointLights());
-	for (uint i = 0; i < nl; ++i)
-	{
-		NL3D::CPointLightNamed &a = igA.getPointLightNamed(i);
-		NL3D::CPointLightNamed &b = igB.getPointLightNamed(i);
-		std::string diffs;
-		if (a.AnimatedLight != b.AnimatedLight) diffs += " AnimatedLight";
-		if (a.LightGroup != b.LightGroup) diffs += " LightGroup";
-		if ((a.getPosition() - b.getPosition()).norm() > EPS * (1.0f + a.getPosition().norm())) diffs += " Position";
-		if (a.getType() != b.getType()) diffs += NLMISC::toString(" Type(%d vs %d)", (int)a.getType(), (int)b.getType());
-		if (a.getDefaultAmbient() != b.getDefaultAmbient()) diffs += " Ambient";
-		if (a.getDefaultDiffuse() != b.getDefaultDiffuse()) diffs += " Diffuse";
-		if (a.getDefaultSpecular() != b.getDefaultSpecular()) diffs += " Specular";
-		if (fabsf(a.getAttenuationBegin() - b.getAttenuationBegin()) > EPS || fabsf(a.getAttenuationEnd() - b.getAttenuationEnd()) > EPS) diffs += " Attenuation";
-		if (!diffs.empty())
+		for (uint i = 0; i < igB.getNumPointLights(); ++i)
 		{
-			printf("DIFF pointlight %u:%s\n", i, diffs.c_str());
+			NL3D::CPointLightNamed &b = igB.getPointLightNamed(i);
+			bool found = false;
+			std::string nearest;
+			for (uint j = 0; j < igA.getNumPointLights() && !found; ++j)
+			{
+				NL3D::CPointLightNamed &a = igA.getPointLightNamed(j);
+				NLMISC::CVector dp = a.getPosition() - b.getPosition();
+				if (maskZ) dp.z = 0.0f; // heightmap elevation moved the reference light
+				if (dp.norm() > 1e-3f) continue;
+				std::string diffs;
+				if (a.AnimatedLight != b.AnimatedLight) diffs += " AnimatedLight";
+				if (a.LightGroup != b.LightGroup) diffs += " LightGroup";
+				if (a.getType() != b.getType()) diffs += NLMISC::toString(" Type(%d vs %d)", (int)a.getType(), (int)b.getType());
+				if (a.getDefaultAmbient() != b.getDefaultAmbient()) diffs += " Ambient";
+				if (a.getDefaultDiffuse() != b.getDefaultDiffuse()) diffs += " Diffuse";
+				if (a.getDefaultSpecular() != b.getDefaultSpecular()) diffs += " Specular";
+				if (fabsf(a.getAttenuationBegin() - b.getAttenuationBegin()) > EPS || fabsf(a.getAttenuationEnd() - b.getAttenuationEnd()) > EPS) diffs += " Attenuation";
+				if (a.getType() == NL3D::CPointLight::SpotLight && b.getType() == NL3D::CPointLight::SpotLight)
+				{
+					if ((a.getSpotDirection() - b.getSpotDirection()).norm() > EPS) diffs += " SpotDirection";
+					if (fabsf(a.getSpotAngleBegin() - b.getSpotAngleBegin()) > EPS || fabsf(a.getSpotAngleEnd() - b.getSpotAngleEnd()) > EPS) diffs += " SpotAngle";
+				}
+				if (a.getType() == NL3D::CPointLight::AmbientLight && b.getType() == NL3D::CPointLight::AmbientLight
+				    && a.getAddAmbientWithSun() != b.getAddAmbientWithSun()) diffs += " AddAmbientWithSun";
+				if (diffs.empty()) found = true;
+				else nearest = diffs;
+			}
+			if (!found)
+			{
+				printf("DIFF ref pointlight %u pos=(%g,%g,%g) LightMissing%s\n", i,
+				       b.getPosition().x, b.getPosition().y, b.getPosition().z,
+				       nearest.empty() ? "" : (" nearest:" + nearest).c_str());
+				++fails;
+			}
+		}
+	}
+	else
+	{
+		// Direct-tier: exact set of lights, but ORDER-TOLERANT within (AnimatedLight, LightGroup)
+		// ties — CPointLightNamedArray::build sorts with std::sort, whose tie permutation is
+		// STL-implementation-defined; the reference exporter's MSVC permutation is not
+		// reproducible (documented as an accepted class in pipeline_max_design.md). Every light
+		// must 1:1 match by full field equality.
+		if (igA.getNumPointLights() != igB.getNumPointLights())
+		{
+			printf("DIFF numPointLights %u vs %u\n", igA.getNumPointLights(), igB.getNumPointLights());
 			++fails;
+		}
+		std::vector<bool> used(igA.getNumPointLights(), false);
+		for (uint i = 0; i < igB.getNumPointLights(); ++i)
+		{
+			NL3D::CPointLightNamed &b = igB.getPointLightNamed(i);
+			bool found = false;
+			std::string nearest;
+			for (uint j = 0; j < igA.getNumPointLights() && !found; ++j)
+			{
+				if (used[j]) continue;
+				NL3D::CPointLightNamed &a = igA.getPointLightNamed(j);
+				if ((a.getPosition() - b.getPosition()).norm() > EPS * (1.0f + b.getPosition().norm())) continue;
+				std::string diffs;
+				if (a.AnimatedLight != b.AnimatedLight) diffs += " AnimatedLight";
+				if (a.LightGroup != b.LightGroup) diffs += " LightGroup";
+				if (a.getType() != b.getType()) diffs += NLMISC::toString(" Type(%d vs %d)", (int)a.getType(), (int)b.getType());
+				if (a.getDefaultAmbient() != b.getDefaultAmbient()) diffs += " Ambient";
+				if (a.getDefaultDiffuse() != b.getDefaultDiffuse()) diffs += " Diffuse";
+				if (a.getDefaultSpecular() != b.getDefaultSpecular()) diffs += " Specular";
+				if (fabsf(a.getAttenuationBegin() - b.getAttenuationBegin()) > EPS || fabsf(a.getAttenuationEnd() - b.getAttenuationEnd()) > EPS) diffs += " Attenuation";
+				if (a.getType() == NL3D::CPointLight::SpotLight && b.getType() == NL3D::CPointLight::SpotLight)
+				{
+					if ((a.getSpotDirection() - b.getSpotDirection()).norm() > EPS) diffs += " SpotDirection";
+					if (fabsf(a.getSpotAngleBegin() - b.getSpotAngleBegin()) > EPS || fabsf(a.getSpotAngleEnd() - b.getSpotAngleEnd()) > EPS) diffs += " SpotAngle";
+				}
+				if (a.getType() == NL3D::CPointLight::AmbientLight && b.getType() == NL3D::CPointLight::AmbientLight
+				    && a.getAddAmbientWithSun() != b.getAddAmbientWithSun()) diffs += " AddAmbientWithSun";
+				if (diffs.empty()) { found = true; used[j] = true; }
+				else nearest = diffs;
+			}
+			if (!found)
+			{
+				printf("DIFF pointlight %u pos=(%g,%g,%g) LightMissing%s\n", i,
+				       b.getPosition().x, b.getPosition().y, b.getPosition().z,
+				       nearest.empty() ? "" : (" nearest:" + nearest).c_str());
+				++fails;
+			}
 		}
 	}
 
@@ -1120,6 +1475,69 @@ static int compareIgs(const char *pathA, const char *pathB, bool maskLighting, b
 
 	if (!fails) printf("MATCH\n");
 	return fails ? 2 : 0;
+}
+
+// Compact dump of a light node's object words + param block values (decode workbench).
+static void dumpLightNode(CNodeImpl *node)
+{
+	CSceneClass *obj = baseObjectOf(*node);
+	if (!obj) { printf("no object\n"); return; }
+	printf("light '%s' class=%s (%s)\n", ucstring(node->userName()).toUtf8().c_str(),
+	       obj->classDesc()->classId().toString().c_str(), obj->className().c_str());
+	const CStorageContainer::TStorageObjectContainer &orphans = obj->orphanedChunks();
+	for (CStorageContainer::TStorageObjectConstIt it = orphans.begin(); it != orphans.end(); ++it)
+	{
+		CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
+		if (!raw || raw->Value.size() > 4 || raw->Value.empty()) continue;
+		uint32 v = 0;
+		memcpy(&v, raw->Value.data(), raw->Value.size());
+		printf("  word 0x%04x = %u\n", it->first, v);
+	}
+	CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(obj);
+	for (uint r = 0; rm && r < rm->nbReferences(); ++r)
+	{
+		CSceneClass *ref = dynamic_cast<CSceneClass *>(rm->getReference(r));
+		if (!ref || ref->classDesc()->superClassId() != 0x8) continue;
+		printf("  pblock ref %u:\n", r);
+		// Param entries: 0x0002 containers with 0x0003 index + 0x0100 (4B) / 0x0102 (12B) value.
+		const CStorageContainer::TStorageObjectContainer &po = ref->orphanedChunks();
+		for (CStorageContainer::TStorageObjectConstIt it = po.begin(); it != po.end(); ++it)
+		{
+			if (it->first != 0x0002) continue;
+			CStorageContainer *pc = dynamic_cast<CStorageContainer *>(it->second);
+			if (!pc) continue;
+			sint32 idx = -1;
+			for (CStorageContainer::TStorageObjectConstIt cit = pc->chunks().begin(); cit != pc->chunks().end(); ++cit)
+			{
+				CStorageRaw *cr = dynamic_cast<CStorageRaw *>(cit->second);
+				if (!cr) continue;
+				if (cit->first == 0x0003 && cr->Value.size() == 4)
+					memcpy(&idx, cr->Value.data(), 4);
+				else if (cit->first == 0x0100 && cr->Value.size() == 4)
+				{
+					float f;
+					memcpy(&f, cr->Value.data(), 4);
+					printf("    param %d = %.9g\n", idx, f);
+				}
+				else if (cit->first == 0x0102 && cr->Value.size() == 12)
+				{
+					float f[3];
+					memcpy(f, cr->Value.data(), 12);
+					printf("    param %d = (%.9g, %.9g, %.9g)\n", idx, f[0], f[1], f[2]);
+				}
+				else if (cit->first != 0x0004 && cr->Value.size() == 4)
+				{
+					uint32 u;
+					float f;
+					memcpy(&u, cr->Value.data(), 4);
+					memcpy(&f, cr->Value.data(), 4);
+					printf("    param %d = int %u / float %.9g (chunk 0x%04x)\n", idx, u, f, cit->first);
+				}
+				else if (cit->first != 0x0004)
+					printf("    param %d: chunk 0x%04x size %u\n", idx, cit->first, (uint)cr->Value.size());
+			}
+		}
+	}
 }
 
 // Print an ig's instance fields (reference inspection).
@@ -1148,6 +1566,21 @@ static int infoIg(const char *path)
 		       (int)a.AvoidStaticLightPreCompute, (int)a.StaticLightEnabled, a.SunContribution, a.Light[0], a.Light[1], a.LocalAmbientId,
 		       (uint)a.Clusters.size());
 	}
+	for (uint i = 0; i < ig.getNumPointLights(); ++i)
+	{
+		NL3D::CPointLightNamed &l = ig.getPointLightNamed(i);
+		printf("L%3u type=%d pos=(%.9g,%.9g,%.9g) amb=(%d,%d,%d,%d) dif=(%d,%d,%d,%d) spec=(%d,%d,%d,%d) atten=(%.9g,%.9g) group=%u anim='%s'",
+		       i, (int)l.getType(), l.getPosition().x, l.getPosition().y, l.getPosition().z,
+		       l.getDefaultAmbient().R, l.getDefaultAmbient().G, l.getDefaultAmbient().B, l.getDefaultAmbient().A,
+		       l.getDefaultDiffuse().R, l.getDefaultDiffuse().G, l.getDefaultDiffuse().B, l.getDefaultDiffuse().A,
+		       l.getDefaultSpecular().R, l.getDefaultSpecular().G, l.getDefaultSpecular().B, l.getDefaultSpecular().A,
+		       l.getAttenuationBegin(), l.getAttenuationEnd(), l.LightGroup, l.AnimatedLight.c_str());
+		if (l.getType() == NL3D::CPointLight::SpotLight)
+			printf(" spotDir=(%.9g,%.9g,%.9g) spotAI=%.9g spotAO=%.9g",
+			       l.getSpotDirection().x, l.getSpotDirection().y, l.getSpotDirection().z,
+			       l.getSpotAngleBegin(), l.getSpotAngleEnd());
+		printf(" ambAddSun=%d\n", (int)l.getAddAmbientWithSun());
+	}
 	printf("pointLights=%u clusters=%u portals=%u realTimeSun=%d globalPos=(%g,%g,%g)\n",
 	       ig.getNumPointLights(), (uint)ig._ClusterInfos.size(), (uint)ig._Portals.size(),
 	       (int)ig.getRealTimeSunContribution(), ig.getGlobalPos().x, ig.getGlobalPos().y, ig.getGlobalPos().z);
@@ -1168,6 +1601,7 @@ int main(int argc, char **argv)
 		std::string arg = argv[argi];
 		if (arg == "--dump") { dump = true; ++argi; }
 		else if (arg == "--dump-obj" && argi + 1 < argc) { dump = true; g_dumpObjName = argv[argi + 1]; argi += 2; }
+		else if (arg == "--dump-light" && argi + 1 < argc) { dump = true; g_dumpLightName = argv[argi + 1]; argi += 2; }
 		else if (arg == "--db" && argi + 1 < argc) { g_dbRoot = argv[argi + 1]; argi += 2; }
 		else if (arg == "--info" && argi + 1 < argc)
 		{
@@ -1177,14 +1611,15 @@ int main(int argc, char **argv)
 		else if (arg == "--verbose") { g_verbose = true; ++argi; }
 		else if (arg == "--compare" && argi + 2 < argc)
 		{
-			bool maskLighting = false, maskZ = false;
+			bool maskLighting = false, maskZ = false, maskUninit = false;
 			for (int k = argi + 3; k < argc; ++k)
 			{
 				if (std::string(argv[k]) == "--mask-lighting") maskLighting = true;
 				if (std::string(argv[k]) == "--mask-z") maskZ = true;
+				if (std::string(argv[k]) == "--mask-uninit") maskUninit = true;
 			}
 			NL3D::registerSerial3d();
-			return compareIgs(argv[argi + 1], argv[argi + 2], maskLighting, maskZ);
+			return compareIgs(argv[argi + 1], argv[argi + 2], maskLighting, maskZ, maskUninit);
 		}
 		else break;
 	}
@@ -1295,8 +1730,6 @@ int main(int argc, char **argv)
 
 		SIgBuildStats stats;
 		NL3D::CInstanceGroup *ig = buildInstanceGroup(vectNode, tmCache, stats);
-		if (stats.UnimplementedLights)
-			fprintf(stderr, "WARNING: ig '%s' has %u light node(s); point lights are not implemented yet\n", igName.c_str(), stats.UnimplementedLights);
 		if (stats.UnimplementedAccel)
 			fprintf(stderr, "WARNING: ig '%s' has %u accelerator node(s); clusters/portals are not implemented yet\n", igName.c_str(), stats.UnimplementedAccel);
 

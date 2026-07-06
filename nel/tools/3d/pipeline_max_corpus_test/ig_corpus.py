@@ -8,14 +8,16 @@ build_gamedata processes/ig/1_export.py drives), and runs test tiers:
   T1  structural roundtrip:  the pipeline_max_corpus_test binary, no --parse.
   T2  parse/build roundtrip: the pipeline_max_corpus_test binary with --parse.
   T3  .ig export:            pipeline_max_export_ig per file, then per exported ig:
-        - direct tier: byte-compare against the raw intermediate export in --igref
-          (~/ig_export/<flat_source_dir>/<igname>.ig, from gen_ig_export.py's Max run)
-          when present;
+        - direct tier: byte-compare against the raw intermediate export under --igref
+          (~/pipeline_export/<group>/<project>/ig_static_other/<igname>.ig — the 1_export
+          stage outputs of the original pipeline, run on the Max side). Byte-identity is
+          the target; a field compare with --mask-uninit (SunContribution/Light[] are
+          uninitialized memory in the reference exporter) classifies near-misses.
         - processed tier: structural compare (pipeline_max_export_ig --compare
           --mask-lighting) against the FINAL client data references under --ref
           (~/core4_data/*_ig + outgame + sky) — these are elevated + lighted, so lighting
-          fields are masked and Pos.z differences are reported separately (heightmap
-          elevation class).
+          fields are masked (lights compared as subset) and Pos.z differences are masked
+          (heightmap elevation class).
 
 Defaults are the layout on Kaetemi's machine; override via CLI when running elsewhere.
 """
@@ -27,7 +29,7 @@ SKIP_CODE = 77
 DEF_GRAPHICS = os.path.expanduser("~/ryzomcore_graphics")
 DEF_WORKSPACE = os.path.expanduser("~/ryzomcore_leveldesign/workspace")
 DEF_REF = os.path.expanduser("~/core4_data")
-DEF_IGREF = os.path.expanduser("~/ig_export")
+DEF_IGREF = os.path.expanduser("~/pipeline_export")
 DEF_BIN = os.path.expanduser("~/ryzomcore/build/nel-pipeline/bin")
 
 OLE_MAGIC = b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1"
@@ -40,6 +42,19 @@ def load_dirs(path):
     except Exception:
         return None
     return ns
+
+
+def resolve_ci(root, rel):
+    """Resolve a workspace-authored (Windows, case-insensitive) subdir under the checkout: the
+    on-disk tree is lowercase (except possibly some filenames), so lowercase the directory path
+    and fall back to the verbatim spelling (e.g. stuff/Generique/Decors/Constructions ->
+    stuff/generique/decors/constructions)."""
+    rel = rel.replace("\\", "/")
+    for cand in (rel.lower(), rel):
+        p = os.path.join(root, cand)
+        if os.path.isdir(p):
+            return p
+    return None
 
 
 def enumerate_corpus(graphics_dir, workspace_dir):
@@ -60,8 +75,8 @@ def enumerate_corpus(graphics_dir, workspace_dir):
             for kind, dirs in (("other", ns.get("IgOtherSourceDirectories") or []),
                                ("land", ns.get("IgLandSourceDirectories") or [])):
                 for dd in dirs:
-                    full = os.path.join(graphics_dir, dd)
-                    if not os.path.isdir(full):
+                    full = resolve_ci(graphics_dir, dd)
+                    if not full:
                         continue
                     for f in sorted(os.listdir(full)):
                         if not f.lower().endswith(".max"):
@@ -136,7 +151,9 @@ def main():
     exported = 0
     export_fail = []
     nothing = 0
-    direct_match = direct_diff = 0
+    direct_match = direct_diff = direct_near = 0
+    direct_noref = []
+    direct_field_counter = collections.Counter()
     struct_match = struct_diff = 0
     noref = []
     diff_details = []
@@ -179,20 +196,43 @@ def main():
                 continue
             exported += 1
             # per exported ig (only those THIS file produced): reference comparison
+            leaf = proj.split("/")[-1]
             for igfile in sorted(set(os.listdir(outdir)) - before):
                 if not igfile.endswith(".ig"):
                     continue
                 ours = os.path.join(outdir, igfile)
-                # direct tier: raw intermediate reference
-                direct = os.path.join(args.igref, flat, igfile)
-                directLower = os.path.join(args.igref, flat, igfile.lower())
-                dpath = direct if os.path.isfile(direct) else (directLower if os.path.isfile(directLower) else None)
-                if dpath:
+                # direct tier: raw intermediate reference from the original pipeline's
+                # ig_static_other export directory of the owning project (group folder name may
+                # differ, e.g. "continents - Copy"); falls back to a global search by ig name.
+                import glob as _glob
+                cands = _glob.glob(os.path.join(args.igref, "*", leaf, "ig_static_other", igfile))
+                if not cands:
+                    cands = _glob.glob(os.path.join(args.igref, "*", "*", "ig_static_other", igfile))
+                if cands:
+                    dpath = cands[0]
                     if open(ours, "rb").read() == open(dpath, "rb").read():
                         direct_match += 1
                     else:
-                        direct_diff += 1
-                        diff_details.append(("direct", path, igfile))
+                        r3 = subprocess.run([export_bin, "--compare", ours, dpath, "--mask-uninit"],
+                                            capture_output=True, text=True)
+                        if r3.returncode == 0:
+                            direct_near += 1
+                            diff_details.append(("direct-uninit-only", path, igfile))
+                        else:
+                            direct_diff += 1
+                            fields = set()
+                            for line in r3.stdout.splitlines():
+                                for m in re.finditer(r" ([A-Za-z]+)\(", line):
+                                    fields.add(m.group(1))
+                                if line.startswith("DIFF num"):
+                                    fields.add(line.split()[1])
+                                for m in re.finditer(r" (LightMissing|Ambient|Diffuse|Specular|Attenuation|AnimatedLight|LightGroup|SpotDirection|SpotAngle|StaticLightEnabled|AvoidStaticLightPreCompute|LocalAmbientId|DontCastShadowForInterior|DontCastShadowForExterior|DontAddToScene|Visible)\b", line):
+                                    fields.add(m.group(1))
+                            for f in fields:
+                                direct_field_counter[f] += 1
+                            diff_details.append(("direct", path, igfile, sorted(fields)))
+                else:
+                    direct_noref.append((proj, igfile))
                 # processed tier: structural vs final client refs
                 rlist = refs.get(igfile.lower())
                 if not rlist:
@@ -220,7 +260,10 @@ def main():
         print("T1: %d pass, %d fail; T2: %d pass, %d fail; %d stubs" % (t1_pass, t1_fail, t2_pass, t2_fail, stubs))
     if args.t3:
         print("T3: %d files exported, %d export failures, %d files with nothing to export" % (exported, len(export_fail), nothing))
-        print("    direct-ref (raw intermediates): %d byte-identical, %d differ" % (direct_match, direct_diff))
+        print("    direct-ref (raw intermediates): %d byte-identical, %d uninit-bytes-only, %d differ, %d without ref"
+              % (direct_match, direct_near, direct_diff, len(direct_noref)))
+        if direct_field_counter:
+            print("    direct diff fields: %s" % ", ".join("%s=%d" % kv for kv in direct_field_counter.most_common()))
         print("    processed-ref (final client data, lighting+z masked): %d match, %d differ" % (struct_match, struct_diff))
         if noref:
             print("    no reference found: %s" % ", ".join("%s:%s" % (p, f) for p, f in noref[:10]))
