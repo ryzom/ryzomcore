@@ -1267,6 +1267,25 @@ static void getBipedLocal(INode *node, const NLMISC::CQuat &parentWorldRot,
 	}
 }
 
+// --- MAXScript regeneration support (--maxscript) ---------------------------------------------
+// Captures, during the walk, everything needed to emit a Max 9 MAXScript that recreates the biped
+// from OUR decoded reconstruction: structure counts via biped.createNew, then per-bone figure-mode
+// world transforms via biped.setTransform. Running the emitted script in Max 9 regenerates a
+// "clean" fresh-format rig whose figure state should match the original — cross-validating the
+// decode in the encode direction (Max re-derives its own records from our values).
+struct SMsBone
+{
+	std::string Name;
+	bool IsBiped;      // has a BipDriven TM controller
+	bool IsCom;        // the Bip01/Bip02 COM node itself
+	uint32 Id, Link;   // biped id/link when IsBiped
+	sint32 FatherIdx;  // index into the capture vector
+	NLMISC::CVector WorldPos;
+	NLMISC::CQuat WorldRot; // NeL convention; MAXScript wants the conjugate
+	CSceneClass *Rig;  // owning biped system (NULL for non-biped bones)
+};
+static std::vector<SMsBone> g_msBones;
+
 // Build ordered children list per parent by scanning the CSceneClassContainer in scene order.
 // INode::children() is a std::set keyed by pointer, so its iteration order is unstable across
 // runs — Max preserves original scene order (which is how bones get numbered in the .skel).
@@ -1453,6 +1472,22 @@ static void walkNode(INode *node, sint32 fatherId, const NLMISC::CMatrix &parent
 	sint32 myId = (sint32)bones.size();
 	bones.push_back(b);
 
+	// MAXScript regeneration capture (see SMsBone).
+	{
+		SMsBone mb;
+		mb.Name = name;
+		mb.IsBiped = bipedSys && isBipedBoneNode(node);
+		mb.IsCom = bipedSys && isBipedComNode(node);
+		mb.Id = 0; mb.Link = 0;
+		if (mb.IsBiped) readBipDrivenIdLink(node, mb.Id, mb.Link);
+		mb.FatherIdx = fatherId;
+		mb.WorldPos = worldTM.getPos();
+		mb.WorldRot = worldTM.getRot();
+		mb.WorldRot.normalize();
+		mb.Rig = bipedSys;
+		g_msBones.push_back(mb);
+	}
+
 	// Footsteps / ground-level bookkeeping (see patchFootstepsGround). The corpus-era Footsteps
 	// node carries a plain PRS controller (not a BipDriven with BID_FOOTPRINTS like later plugin
 	// versions), so it is identified as a COM child by name.
@@ -1596,6 +1631,118 @@ static void walkNodeD(INode *node, sint32 fatherId, const Mat4D &parentWorld,
 
 	std::vector<INode *> kids = orderedChildrenOf(node, ssc);
 	for (INode *child : kids) walkNodeD(child, myId, worldTM, ssc, bones, nameSet);
+}
+
+// Emit the MAXScript fragment (one parenthesized block per file) that regenerates this file's
+// biped in Max 9. Uses helper functions (S2 / regenFinalize) provided once by the driver's header
+// (gen_biped_regen.py). Returns false (with a SKIP comment written) when regeneration isn't
+// supported for this file (no biped, or multiple biped systems).
+static bool writeMaxscriptFragment(FILE *fp, const std::string &baseName)
+{
+	// exactly one biped system supported
+	if (g_bipedRigs.size() != 1)
+	{
+		fprintf(fp, "-- SKIP %s: %zu biped systems (only single-biped regeneration supported)\n\n",
+		        baseName.c_str(), g_bipedRigs.size());
+		return false;
+	}
+	SBipedRig &rig = g_bipedRigs.begin()->second;
+	g_rig = &rig;
+
+	// --- structure counts from the captured id/link table (left side; right mirrors) ---
+	int spineLinks = 0, neckLinks = 0, tailLinks = 0, pony1Links = 0, pony2Links = 0;
+	int maxLegLinkSeen = -1;
+	bool arms = false, prop1 = false, prop2 = false, prop3 = false;
+	sint32 comIdx = -1, clavIdx = -1, thighIdx = -1;
+	std::string rootName = "Bip01";
+	for (size_t i = 0; i < g_msBones.size(); ++i)
+	{
+		const SMsBone &mb = g_msBones[i];
+		if (mb.IsCom) { comIdx = (sint32)i; rootName = mb.Name; }
+		if (!mb.IsBiped) continue;
+		switch (mb.Id)
+		{
+		case BID_SPINE: ++spineLinks; break;
+		case BID_NECK: ++neckLinks; break;
+		case BID_TAIL: ++tailLinks; break;
+		case BID_PONY1: ++pony1Links; break;
+		case BID_PONY2: ++pony2Links; break;
+		case BID_LARM: arms = true; if (mb.Link == 0) clavIdx = (sint32)i; break;
+		case BID_LLEG: maxLegLinkSeen = std::max(maxLegLinkSeen, (int)mb.Link); if (mb.Link == 0) thighIdx = (sint32)i; break;
+		case BID_PROP1: prop1 = true; break;
+		case BID_PROP2: prop2 = true; break;
+		case BID_PROP3: prop3 = true; break;
+		default: break;
+		}
+	}
+	int legLinks = (maxLegLinkSeen >= 0) ? (maxLegLinkSeen + 1) : 3;
+	int fingers = (int)rig.Fingers[0].size();
+	int fingerLinks = 0;
+	for (size_t i = 0; i < rig.Fingers[0].size(); ++i) fingerLinks = std::max(fingerLinks, rig.Fingers[0][i].NLinks);
+	int toes = (int)rig.Toes[0].size();
+	int toeLinks = 0;
+	for (size_t i = 0; i < rig.Toes[0].size(); ++i) toeLinks = std::max(toeLinks, rig.Toes[0][i].NLinks);
+	if (!fingerLinks) fingerLinks = 1;
+	if (!toeLinks) toeLinks = 1;
+
+	// height: 0x000c stores height * 0.11325325 (dataset: 1.83 -> 0.207253, 1.2 -> 0.135904,
+	// 2.4 -> 0.271807). ankleAttach: 0x000f ([8], [9]) split the foot length as a/(a+b).
+	float height = 1.8f;
+	const float *hc = bipedChunkFloats(0x000c, 1);
+	if (hc) height = hc[0] / 0.11325325f;
+	float ankleAttach = 0.0f;
+	const float *lf = bipedChunkFloats(0x000f, 10);
+	if (lf && (lf[8] + lf[9]) > 1e-9f) ankleAttach = lf[8] / (lf[8] + lf[9]);
+
+	// triangle flags from node parenting: thigh under Pelvis => trianglePelvis; clavicle NOT
+	// under a neck link => triangleNeck.
+	bool trianglePelvis = true, triangleNeck = false;
+	if (thighIdx >= 0 && g_msBones[thighIdx].FatherIdx >= 0)
+	{
+		const SMsBone &fa = g_msBones[g_msBones[thighIdx].FatherIdx];
+		trianglePelvis = (fa.IsBiped && fa.Id == BID_PELVIS);
+	}
+	if (clavIdx >= 0 && g_msBones[clavIdx].FatherIdx >= 0)
+	{
+		const SMsBone &fa = g_msBones[g_msBones[clavIdx].FatherIdx];
+		triangleNeck = !(fa.IsBiped && fa.Id == BID_NECK);
+	}
+
+	NLMISC::CVector wpos = (comIdx >= 0) ? g_msBones[comIdx].WorldPos : NLMISC::CVector::Null;
+
+	fprintf(fp, "-- FILE %s\n(\n", baseName.c_str());
+	fprintf(fp, "  resetMaxFile #noPrompt\n");
+	// MAXScript parses "f 1.8 -90.0" as a subtraction — every positional numeric literal that can
+	// be negative gets its own parentheses.
+	fprintf(fp, "  local com = biped.createNew %.9g (-90.0) [%.9g,%.9g,%.9g] \\\n", height, wpos.x, wpos.y, wpos.z);
+	fprintf(fp, "      arms:%s neckLinks:%d spineLinks:%d legLinks:%d \\\n",
+	        arms ? "true" : "false", std::max(neckLinks, 1), std::max(spineLinks, 1), legLinks);
+	fprintf(fp, "      tailLinks:%d ponytail1Links:%d ponytail2Links:%d \\\n", tailLinks, pony1Links, pony2Links);
+	fprintf(fp, "      fingers:%d fingerLinks:%d toes:%d toeLinks:%d \\\n", fingers, fingerLinks, toes, toeLinks);
+	fprintf(fp, "      ankleAttach:%.9g trianglePelvis:%s triangleNeck:%s \\\n",
+	        ankleAttach, trianglePelvis ? "true" : "false", triangleNeck ? "true" : "false");
+	fprintf(fp, "      prop1Exists:%s prop2Exists:%s prop3Exists:%s forearmTwistLinks:0\n",
+	        prop1 ? "true" : "false", prop2 ? "true" : "false", prop3 ? "true" : "false");
+	fprintf(fp, "  com.transform.controller.rootName = \"%s\"\n", rootName.c_str());
+	fprintf(fp, "  com.transform.controller.figureMode = true\n");
+	// Two passes: rubber-banding a child position rescales its parent, which shifts already-set
+	// grandchildren; the second pass converges the chain.
+	fprintf(fp, "  for pass = 1 to 2 do (\n");
+	for (size_t i = 0; i < g_msBones.size(); ++i)
+	{
+		const SMsBone &mb = g_msBones[i];
+		if (!mb.IsCom && !mb.IsBiped) continue;              // PRS markers aren't biped-creatable
+		if (mb.IsBiped && mb.Id >= BID_RFINGERNUB) continue; // end-effector dummies follow parents
+		if (mb.IsBiped && (mb.Id == BID_VERTICAL || mb.Id == BID_HORIZONTAL || mb.Id == BID_TURN || mb.Id == BID_FOOTPRINTS)) continue;
+		// MAXScript quats are the conjugate of the NeL convention.
+		fprintf(fp, "    S2 com \"%s\" [%.9g,%.9g,%.9g] (quat (%.9g) (%.9g) (%.9g) (%.9g))\n",
+		        mb.Name.c_str(), mb.WorldPos.x, mb.WorldPos.y, mb.WorldPos.z,
+		        -mb.WorldRot.x, -mb.WorldRot.y, -mb.WorldRot.z, mb.WorldRot.w);
+	}
+	fprintf(fp, "  )\n");
+	fprintf(fp, "  regenFinalize com \"%s\"\n", baseName.c_str());
+	fprintf(fp, ")\n\n");
+	return true;
 }
 
 // Serialize a CSkeletonShape file (SHAP magic + CShapeStream + CSkeletonShape v1 + CBoneBase v2 + CLod v0).
@@ -1887,11 +2034,13 @@ int main(int argc, char **argv)
 	//                            silent-broken outputs don't slip into the corpus.
 	int argi = 1;
 	const char *gltfOut = NULL;
+	const char *maxscriptOut = NULL;
 	bool allowBipedDegraded = false;
 	while (argi < argc && argv[argi][0] == '-' && argv[argi][1] == '-')
 	{
 		if (std::string(argv[argi]) == "--double") { g_useDouble = true; ++argi; }
 		else if (std::string(argv[argi]) == "--gltf" && argi + 1 < argc) { gltfOut = argv[argi + 1]; argi += 2; }
+		else if (std::string(argv[argi]) == "--maxscript" && argi + 1 < argc) { maxscriptOut = argv[argi + 1]; argi += 2; }
 		else if (std::string(argv[argi]) == "--allow-biped-degraded") { allowBipedDegraded = true; ++argi; }
 		else break;
 	}
@@ -1935,6 +2084,7 @@ int main(int argc, char **argv)
 	// which handles files with multiple bipeds (e.g. tr_mo_kitin_queen's Bip01 + Bip02) correctly.
 	g_bipedRigs.clear();
 	g_rig = NULL;
+	g_msBones.clear();
 
 	std::vector<Bone> bones;
 	std::set<std::string> nameSet;
@@ -1967,6 +2117,20 @@ int main(int argc, char **argv)
 	{
 		writeGltf(gltfOut, bones);
 		std::cout << "Wrote " << gltfOut << "\n";
+	}
+
+	if (maxscriptOut)
+	{
+		FILE *fp = fopen(maxscriptOut, "w");
+		if (!fp) { std::cerr << "cannot open " << maxscriptOut << " for writing\n"; return 1; }
+		std::string base = maxFile;
+		std::string::size_type slash = base.find_last_of("/\\");
+		if (slash != std::string::npos) base = base.substr(slash + 1);
+		std::string::size_type dot = base.rfind('.');
+		if (dot != std::string::npos) base = base.substr(0, dot);
+		bool ok = writeMaxscriptFragment(fp, base);
+		fclose(fp);
+		std::cout << (ok ? "Wrote " : "Skipped (see comment) ") << maxscriptOut << "\n";
 	}
 
 	g_object_unref(in);
