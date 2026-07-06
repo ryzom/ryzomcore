@@ -103,7 +103,13 @@ IF (Python3_Interpreter_FOUND)
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 	SET_TESTS_PROPERTIES(pipeline_max_ig_corpus PROPERTIES SKIP_RETURN_CODE 77)
 
+	ADD_TEST(NAME pipeline_max_zone_corpus
+		COMMAND ${Python3_EXECUTABLE} zone_corpus.py --all --gate-t3
+			--bin $<TARGET_FILE_DIR:pipeline_max_export_zone>
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+	SET_TESTS_PROPERTIES(pipeline_max_zone_corpus PROPERTIES SKIP_RETURN_CODE 77)
+
 	IF (TARGET unit_test)
-		ADD_DEPENDENCIES(unit_test pipeline_max_corpus_test pipeline_max_export_skel pipeline_max_export_anim pipeline_max_export_swt pipeline_max_export_ig)
+		ADD_DEPENDENCIES(unit_test pipeline_max_corpus_test pipeline_max_export_skel pipeline_max_export_anim pipeline_max_export_swt pipeline_max_export_ig pipeline_max_export_zone)
 	ENDIF (TARGET unit_test)
 ENDIF (Python3_Interpreter_FOUND)

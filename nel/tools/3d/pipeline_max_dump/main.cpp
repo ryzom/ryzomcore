@@ -59,6 +59,7 @@
 #include "../pipeline_max/update1/update1.h"
 #include "../pipeline_max/epoly/epoly.h"
 #include "../pipeline_max/biped/biped.h"
+#include "../pipeline_max/nelpatch/nelpatch.h"
 
 #include "../pipeline_max/builtin/storage/app_data.h"
 #include "../pipeline_max/builtin/storage/geom_buffers.h"
@@ -159,6 +160,7 @@ int main(int argc, char **argv)
 	CUpdate1::registerClasses(&sceneClassRegistry);
 	CEPoly::registerClasses(&sceneClassRegistry);
 	BIPED::CBiped::registerClasses(&sceneClassRegistry);
+	NELPATCH::CNelPatch::registerClasses(&sceneClassRegistry);
 
 	GsfInfile *infile;
 	GError *error = NULL;

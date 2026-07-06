@@ -8,8 +8,8 @@ ENDIF (NOT (LIBGSF_INCLUDE_DIR AND LIBGSF_LIBRARIES))
 FIND_PACKAGE(GOBJECT2 REQUIRED)
 FIND_PACKAGE(GLIB2 REQUIRED)
 
-FILE(GLOB SRCS *.cpp builtin/*.cpp builtin/storage/*.cpp update1/*.cpp epoly/*.cpp biped/*.cpp)
-FILE(GLOB HDRS *.h builtin/*.h builtin/storage/*.h update1/*.h epoly/*.h biped/*.h)
+FILE(GLOB SRCS *.cpp builtin/*.cpp builtin/storage/*.cpp update1/*.cpp epoly/*.cpp biped/*.cpp nelpatch/*.cpp)
+FILE(GLOB HDRS *.h builtin/*.h builtin/storage/*.h update1/*.h epoly/*.h biped/*.h nelpatch/*.h)
 
 NL_TARGET_LIB(pipeline_max
 	${SRCS}

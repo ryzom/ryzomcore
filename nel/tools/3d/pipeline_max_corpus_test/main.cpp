@@ -58,6 +58,7 @@
 #include "../pipeline_max/update1/update1.h"
 #include "../pipeline_max/epoly/epoly.h"
 #include "../pipeline_max/biped/biped.h"
+#include "../pipeline_max/nelpatch/nelpatch.h"
 
 using namespace PIPELINE::MAX;
 
@@ -235,6 +236,7 @@ int main(int argc, char **argv)
 	UPDATE1::CUpdate1::registerClasses(&reg);
 	EPOLY::CEPoly::registerClasses(&reg);
 	BIPED::CBiped::registerClasses(&reg);
+	NELPATCH::CNelPatch::registerClasses(&reg);
 
 	// Chunk-formatted streams that participate in the CStorageContainer round-trip. The two
 	// \05Summary* streams and the OLE class-id are raw byte blobs (copied verbatim by any full
