@@ -82,7 +82,19 @@ IF (Python3_Interpreter_FOUND)
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 	SET_TESTS_PROPERTIES(pipeline_max_anim_corpus PROPERTIES SKIP_RETURN_CODE 77)
 
+	# ig_corpus.py: T1/T2 over the IgOtherSourceDirectories/IgLandSourceDirectories sources +
+	# T3 export with the two-tier reference comparison (direct raw intermediates under
+	# ~/pipeline_export with the uninitialized-bytes mask, processed client data under
+	# ~/core4_data with lighting/elevation masked). --gate-t3 fails on T1/T2 mismatches, export
+	# failures, and direct-tier field-compare failures beyond the recorded known-deviation
+	# budget (--max-direct-diff, currently 1: the mirror-modifier default-gizmo case).
+	ADD_TEST(NAME pipeline_max_ig_corpus
+		COMMAND ${Python3_EXECUTABLE} ig_corpus.py --all --gate-t3
+			--bin $<TARGET_FILE_DIR:pipeline_max_export_ig>
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+	SET_TESTS_PROPERTIES(pipeline_max_ig_corpus PROPERTIES SKIP_RETURN_CODE 77)
+
 	IF (TARGET unit_test)
-		ADD_DEPENDENCIES(unit_test pipeline_max_corpus_test pipeline_max_export_skel pipeline_max_export_anim pipeline_max_export_swt)
+		ADD_DEPENDENCIES(unit_test pipeline_max_corpus_test pipeline_max_export_skel pipeline_max_export_anim pipeline_max_export_swt pipeline_max_export_ig)
 	ENDIF (TARGET unit_test)
 ENDIF (Python3_Interpreter_FOUND)

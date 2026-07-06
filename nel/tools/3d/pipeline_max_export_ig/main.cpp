@@ -44,8 +44,11 @@
 #include <nel/misc/quat.h>
 #include <nel/misc/vector.h>
 
+#include <nel/3d/texture.h>
+#include <nel/3d/particle_system_shape.h>
 #include <nel/3d/register_3d.h>
 #include <nel/3d/scene_group.h>
+#include <nel/3d/shape.h>
 
 #include <gsf/gsf-infile-msole.h>
 #include <gsf/gsf-input-stdio.h>
@@ -79,6 +82,7 @@
 #include "../pipeline_max/builtin/node_impl.h"
 #include "../pipeline_max/builtin/reference_maker.h"
 #include "../pipeline_max/builtin/storage/app_data.h"
+#include "../pipeline_max/builtin/geom_object.h"
 #include "../pipeline_max/builtin/control_keyframer.h"
 
 #include "max_math.h"
@@ -101,6 +105,10 @@ using namespace MAXMATH;
 #define NEL3D_APPDATA_EXPORT_REALTIME_LIGHT 1423062588
 #define NEL3D_APPDATA_EXPORT_AS_SUN_LIGHT 1423062591
 #define NEL3D_APPDATA_REALTIME_AMBIENT_ADD_SUN 1423062672
+#define NEL3D_APPDATA_OCC_MODEL 84682540
+#define NEL3D_APPDATA_OPEN_OCC_MODEL 84682541
+#define NEL3D_APPDATA_SOUND_GROUP 84682542
+#define NEL3D_APPDATA_ENV_FX 84682543
 
 // AppData script-entry key (the MaxScript utility panel writes these)
 static const NLMISC::CClassId APPDATA_SCRIPT_CLASS_ID(0x04d64858, 0x16d1751d);
@@ -132,6 +140,9 @@ static const TSClassId SCLASS_WSMODIFIER = 0x00000820;
 #define CHUNK_CTRL_SCALE_VALUE 0x2505
 
 static bool g_verbose = false;
+// Search directories for .ps shapes (the clusterize link test needs the FX AABBox, like the
+// reference exporter's CPath::lookup of ps_file_name); set via --ps-path, repeatable.
+static std::vector<std::string> g_psSearchPaths;
 // Database root for XRef resolution (the ryzomcore_graphics checkout); deduced from the input
 // path or passed via --db.
 static std::string g_dbRoot;
@@ -791,6 +802,8 @@ static Matrix3M getNodeTM(INode *node, SNodeTMCache &cache)
 struct SPBlockParam
 {
 	bool IsPoint3;
+	bool IsInt;
+	sint32 I;
 	float V[3];
 };
 
@@ -820,8 +833,10 @@ static void readPBlockParams(CSceneClass *pblock, std::map<sint32, SPBlockParam>
 			{
 				SPBlockParam p;
 				p.IsPoint3 = false;
+				p.IsInt = (cit->first == 0x0101);
 				p.V[1] = p.V[2] = 0.0f;
 				memcpy(p.V, cr->Value.data(), 4);
+				memcpy(&p.I, cr->Value.data(), 4);
 				out[idx] = p;
 			}
 		}
@@ -1035,6 +1050,747 @@ static bool convertMaxLight(NL3D::CPointLightNamed &plNamed, INode &node, SNodeT
 }
 
 // ---------------------------------------------------------------------------------------------
+// Mesh geometry for the accelerator (cluster/portal) and clusterize-linking paths, replicating
+// createMeshBuild + convertToWorldCoordinate: world verts = m1 * (objectToLocal * v) where
+// objectToLocal = convertMatrix(objectTM * Inverse(nodeTM)) (object offset, chunks 0x096a/b/c
+// on the node) and m1 is the node's LOCAL TRS re-composed through NeL CMatrix translate/rotate/
+// scale from the decompMatrix parts (the reference recomposes from the DECOMPOSED local matrix).
+
+struct SMeshTri
+{
+	uint32 A, B, C;
+};
+
+struct SMeshData
+{
+	std::vector<NLMISC::CVector> Vertices; // world space
+	std::vector<SMeshTri> Tris;
+};
+
+// Vertex/face extraction in Max OBJECT space per source object type.
+static bool extractObjectMesh(CSceneClass *obj, std::vector<NLMISC::CVector> &verts, std::vector<SMeshTri> &tris, const std::string &nodeName)
+{
+	NLMISC::CClassId cid = obj->classDesc()->classId();
+
+	// Editable mesh: GeomBuffers 0x08fe, tri A vertex chunk 0x0914 (uint32 count + CVector[]),
+	// tri A index chunk 0x0912 (uint32 count + (a,b,c,alwaysOne,smoothing)[]).
+	if (cid == NLMISC::CClassId(0xe44f10b3, 0x00000000))
+	{
+		CGeomObject *geom = dynamic_cast<CGeomObject *>(obj);
+		STORAGE::CGeomBuffers *gb = geom ? geom->geomBuffers() : NULL;
+		if (!gb)
+		{
+			fprintf(stderr, "WARNING: accelerator mesh '%s' without geom buffers\n", nodeName.c_str());
+			return false;
+		}
+		CStorageRaw *vraw = dynamic_cast<CStorageRaw *>(gb->findStorageObject(0x0914));
+		CStorageRaw *iraw = dynamic_cast<CStorageRaw *>(gb->findStorageObject(0x0912));
+		if (!vraw || vraw->Value.size() < 4 || !iraw || iraw->Value.size() < 4)
+		{
+			fprintf(stderr, "WARNING: accelerator mesh '%s' with missing vertex/index chunks\n", nodeName.c_str());
+			return false;
+		}
+		uint32 nv, nf;
+		memcpy(&nv, vraw->Value.data(), 4);
+		memcpy(&nf, iraw->Value.data(), 4);
+		if (vraw->Value.size() < 4 + (size_t)nv * 12 || iraw->Value.size() < 4 + (size_t)nf * 20)
+		{
+			fprintf(stderr, "WARNING: accelerator mesh '%s' with truncated buffers\n", nodeName.c_str());
+			return false;
+		}
+		verts.resize(nv);
+		for (uint32 i = 0; i < nv; ++i)
+			memcpy(&verts[i], vraw->Value.data() + 4 + i * 12, 12);
+		tris.resize(nf);
+		for (uint32 i = 0; i < nf; ++i)
+		{
+			uint32 f[3];
+			memcpy(f, iraw->Value.data() + 4 + i * 20, 12);
+			tris[i].A = f[0];
+			tris[i].B = f[1];
+			tris[i].C = f[2];
+		}
+		return true;
+	}
+
+	// Parametric primitives: pblock reference 0.
+	std::map<sint32, SPBlockParam> params;
+	{
+		CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(obj);
+		for (uint r = 0; rm && r < rm->nbReferences(); ++r)
+		{
+			CSceneClass *ref = dynamic_cast<CSceneClass *>(rm->getReference(r));
+			if (ref && ref->classDesc()->superClassId() == 0x8)
+			{
+				readPBlockParams(ref, params);
+				break;
+			}
+		}
+	}
+	#define PBF(i) (params.find(i) != params.end() ? params[i].V[0] : 0.0f)
+	#define PBI(i) (params.find(i) != params.end() ? (params[i].IsInt ? (sint)params[i].I : (sint)params[i].V[0]) : 0)
+
+	// Box (0x10, 0): params 0/1/2 = length/width/height, 3/4/5 = w/l/h segments (all 1 in the
+	// corpus accelerators). Topology derived from the reference cluster volumes (plane order,
+	// windings and zero signs, all bit-exact): shared 8-vert grid (bottom then top), faces
+	// bottom, top, then the side ring from (+w/2,+l/2) walking -x first (+y, -x, -y, +x);
+	// bottom quad tris (P11,P10,P01)+(P01,P10,P00), top (P00,P10,P11)+(P11,P01,P00), side
+	// (b1,b2,t1)+(b2,t2,t1). Multi-segment boxes warn (none in the corpus).
+	if (cid == NLMISC::CClassId(0x00000010, 0x00000000))
+	{
+		float l = PBF(0), w = PBF(1), h = PBF(2);
+		sint wsegs = std::max(1, PBI(3)), lsegs = std::max(1, PBI(4)), hsegs = std::max(1, PBI(5));
+		if (wsegs != 1 || lsegs != 1 || hsegs != 1)
+			fprintf(stderr, "WARNING: box '%s' with %dx%dx%d segments; only 1x1x1 topology is corpus-validated\n",
+			        nodeName.c_str(), wsegs, lsegs, hsegs, 0);
+		float x0 = -w / 2.0f, x1 = x0 + w;
+		float y0 = -l / 2.0f, y1 = y0 + l;
+		verts.clear();
+		// bottom grid: P00=0 (x0,y0), P10=1 (x1,y0), P01=2 (x0,y1), P11=3 (x1,y1); top +4
+		verts.push_back(NLMISC::CVector(x0, y0, 0.0f));
+		verts.push_back(NLMISC::CVector(x1, y0, 0.0f));
+		verts.push_back(NLMISC::CVector(x0, y1, 0.0f));
+		verts.push_back(NLMISC::CVector(x1, y1, 0.0f));
+		verts.push_back(NLMISC::CVector(x0, y0, h));
+		verts.push_back(NLMISC::CVector(x1, y1 - l, h)); // = (x1, y0, h), kept as computed floats
+		verts.push_back(NLMISC::CVector(x0, y1, h));
+		verts.push_back(NLMISC::CVector(x1, y1, h));
+		verts[5] = NLMISC::CVector(x1, y0, h);
+		tris.clear();
+		#define BOX_TRI(a, b, c) { SMeshTri t = { (uint32)(a), (uint32)(b), (uint32)(c) }; tris.push_back(t); }
+		// bottom
+		BOX_TRI(3, 1, 2) BOX_TRI(2, 1, 0)
+		// top
+		BOX_TRI(4, 5, 7) BOX_TRI(7, 6, 4)
+		// sides: perimeter ring; start/direction selectable for corpus validation (PMB_BOX_RING)
+		{
+			static const int rings[8][4] = {
+				{ 3, 2, 0, 1 }, { 2, 0, 1, 3 }, { 0, 1, 3, 2 }, { 1, 3, 2, 0 },
+				{ 3, 1, 0, 2 }, { 1, 0, 2, 3 }, { 0, 2, 3, 1 }, { 2, 3, 1, 0 },
+			};
+			int variant = 2; // start P00, +x first: corpus-validated (PMB_BOX_RING overrides for testing)
+			const char *env = getenv("PMB_BOX_RING");
+			if (env) variant = atoi(env) & 7;
+			const int *ringB = rings[variant];
+			for (int k = 0; k < 4; ++k)
+			{
+				int k2 = (k + 1) % 4;
+				BOX_TRI(ringB[k], ringB[k2], ringB[k] + 4)
+				BOX_TRI(ringB[k2], ringB[k2] + 4, ringB[k] + 4)
+			}
+		}
+		#undef BOX_TRI
+		return true;
+	}
+
+	// Plane (0x081f1dfc, 0x77566f65): params 0/1 = length/width, 2/3 = segments. Grid at z=0.
+	if (cid == NLMISC::CClassId(0x081f1dfc, 0x77566f65))
+	{
+		float l = PBF(0), w = PBF(1);
+		sint lsegs = std::max(1, PBI(2)), wsegs = std::max(1, PBI(3));
+		float dx = w / wsegs, dy = l / lsegs;
+		float startx = -w / 2.0f, starty = -l / 2.0f;
+		verts.clear();
+		for (sint iy = 0; iy <= lsegs; ++iy)
+			for (sint ix = 0; ix <= wsegs; ++ix)
+				verts.push_back(NLMISC::CVector(startx + dx * ix, starty + dy * iy, 0.0f));
+		tris.clear();
+		for (sint iy = 0; iy < lsegs; ++iy)
+			for (sint ix = 0; ix < wsegs; ++ix)
+			{
+				uint32 a = iy * (wsegs + 1) + ix;
+				uint32 b = a + 1;
+				uint32 c = b + (wsegs + 1);
+				uint32 d = a + (wsegs + 1);
+				SMeshTri t1 = { c, d, a };
+				tris.push_back(t1);
+				SMeshTri t2 = { a, b, c };
+				tris.push_back(t2);
+			}
+		return true;
+	}
+
+	// Dummies have no mesh; the reference createMeshBuild yields an empty build for them, which
+	// still runs the (vacuous) cluster test. Return an empty mesh rather than a warning.
+	if (cid.a() == 0x876234)
+	{
+		verts.clear();
+		tris.clear();
+		return true;
+	}
+
+	// Cylinder (0x12, 0): params 0/1 = radius/height, 2/3 = height/cap segments, 4 = sides.
+	// Face order per the reference volumes: bottom cap, sides, top cap. Exact BuildMesh
+	// vertex phase pending the primitive dataset; positions are correct for containment.
+	if (cid == NLMISC::CClassId(0x00000012, 0x00000000))
+	{
+		float r = PBF(0), h = PBF(1);
+		sint sides = std::max(3, PBI(4));
+		verts.clear();
+		for (int layer = 0; layer < 2; ++layer)
+		{
+			float z = layer ? h : 0.0f;
+			for (sint j = 0; j < sides; ++j)
+			{
+				float a = (float)(2.0 * NLMISC::Pi * j / sides);
+				verts.push_back(NLMISC::CVector(r * cosf(a), r * sinf(a), z));
+			}
+		}
+		uint32 cb = (uint32)verts.size();
+		verts.push_back(NLMISC::CVector(0.0f, 0.0f, 0.0f));
+		uint32 ct = (uint32)verts.size();
+		verts.push_back(NLMISC::CVector(0.0f, 0.0f, h));
+		tris.clear();
+		#define CYL_TRI(a, b, c) { SMeshTri t = { (uint32)(a), (uint32)(b), (uint32)(c) }; tris.push_back(t); }
+		for (sint j = 0; j < sides; ++j) // bottom cap, -z winding
+			CYL_TRI(cb, (j + 1) % sides, j)
+		for (sint j = 0; j < sides; ++j) // sides, outward
+		{
+			sint j2 = (j + 1) % sides;
+			CYL_TRI(j, j2, sides + j)
+			CYL_TRI(j2, sides + j2, sides + j)
+		}
+		for (sint j = 0; j < sides; ++j) // top cap, +z winding
+			CYL_TRI(ct, sides + j, sides + (j + 1) % sides)
+		#undef CYL_TRI
+		return true;
+	}
+
+	// Sphere (0x11, 0): params 0/1 = radius/segments. Used as the nel_flare scripted plugin's
+	// delegate; only the vertex POSITIONS matter for the clusterize containment test (faces are
+	// never stitched or made into volumes for these), so the canonical pole+rings layout is
+	// sufficient without pinning the exact BuildMesh ordering.
+	if (cid == NLMISC::CClassId(0x00000011, 0x00000000))
+	{
+		float r = PBF(0);
+		sint segs = std::max(4, PBI(1));
+		sint rows = segs / 2;
+		verts.clear();
+		verts.push_back(NLMISC::CVector(0.0f, 0.0f, r));
+		for (sint i = 1; i < rows; ++i)
+		{
+			float phi = (float)(NLMISC::Pi * i / rows);
+			float z = r * cosf(phi);
+			float rr = r * sinf(phi);
+			for (sint j = 0; j < segs; ++j)
+			{
+				float a = (float)(2.0 * NLMISC::Pi * j / segs);
+				verts.push_back(NLMISC::CVector(rr * cosf(a), rr * sinf(a), z));
+			}
+		}
+		verts.push_back(NLMISC::CVector(0.0f, 0.0f, -r));
+		tris.clear();
+		return true;
+	}
+
+	// Scripted plugin objects (nel_flare extends Sphere, nel_ps extends Box, ...) carry their
+	// geometry DELEGATE as a reference — route extraction to it.
+	{
+		CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(obj);
+		for (uint i = 0; rm && i < rm->nbReferences(); ++i)
+		{
+			CSceneClass *r = dynamic_cast<CSceneClass *>(rm->getReference(i));
+			if (r && r->classDesc()->superClassId() == 0x10 && r != obj)
+			{
+				#undef PBF
+				#undef PBI
+				return extractObjectMesh(r, verts, tris, nodeName);
+			}
+		}
+	}
+
+	#undef PBF
+	#undef PBI
+	fprintf(stderr, "WARNING: mesh extraction for object class %s ('%s') not implemented\n",
+	        cid.toString().c_str(), nodeName.c_str());
+	return false;
+}
+
+// Read the node's object-offset TRS (chunks 0x096a pos, 0x096b rot, 0x096c ScaleValue).
+static bool readObjectOffset(CNodeImpl *node, Point3M &pos, QuatM &rot, ScaleValueM &scale)
+{
+	pos.x = pos.y = pos.z = 0.0f;
+	rot.x = rot.y = rot.z = 0.0f;
+	rot.w = 1.0f;
+	scale.s.x = scale.s.y = scale.s.z = 1.0f;
+	scale.q.x = scale.q.y = scale.q.z = 0.0f;
+	scale.q.w = 1.0f;
+	const CStorageContainer::TStorageObjectContainer &orphans = node->orphanedChunks();
+	bool any = false;
+	for (CStorageContainer::TStorageObjectConstIt it = orphans.begin(); it != orphans.end(); ++it)
+	{
+		CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
+		if (!raw) continue;
+		if (it->first == 0x096a && raw->Value.size() >= 12) { memcpy(&pos, raw->Value.data(), 12); any = true; }
+		else if (it->first == 0x096b && raw->Value.size() >= 16) { memcpy(&rot, raw->Value.data(), 16); any = true; }
+		else if (it->first == 0x096c && raw->Value.size() >= 28) { memcpy(&scale, raw->Value.data(), 28); any = true; }
+	}
+	return any;
+}
+
+// FX instances: the clusterize test uses the .ps shape's AABBox corners transformed to world
+// (the reference reads ps_file_name via ParamBlock2, loads the shape through CPath, and takes
+// CParticleSystemShape::getAABBox; fallback is the helper mesh). Returns false when the shape
+// cannot be resolved so the caller falls back to the placeholder mesh.
+static bool psShapeBBoxVerts(INode &node, CSceneClass *obj, SNodeTMCache &tmCache, std::vector<NLMISC::CVector> &out)
+{
+	std::string psFilePath;
+	if (!getPB2StringParam(obj, 0, psFilePath) || psFilePath.empty())
+		psFilePath = getNelObjectName(node);
+	if (psFilePath.empty()) return false;
+	std::string base = NLMISC::toLowerAscii(NLMISC::CFile::getFilename(psFilePath));
+	std::string found;
+	for (uint i = 0; i < g_psSearchPaths.size() && found.empty(); ++i)
+	{
+		std::string cand = g_psSearchPaths[i] + "/" + base;
+		if (NLMISC::CFile::fileExists(cand)) found = cand;
+	}
+	if (found.empty()) return false;
+
+	NL3D::CParticleSystemShape *pss = NULL;
+	try
+	{
+		NLMISC::CIFile f;
+		if (!f.open(found)) return false;
+		NL3D::CShapeStream ss;
+		f.serial(ss);
+		pss = dynamic_cast<NL3D::CParticleSystemShape *>(ss.getShapePointer());
+		if (!pss)
+		{
+			fprintf(stderr, "ERROR: Node %s shape is not a FX\n", ucstring(node.userName()).toUtf8().c_str());
+			delete ss.getShapePointer();
+			return false;
+		}
+	}
+	catch (const NLMISC::Exception &e)
+	{
+		fprintf(stderr, "WARNING: %s\n", e.what());
+		delete pss;
+		return false;
+	}
+
+	NLMISC::CAABBox bbox;
+	pss->getAABBox(bbox);
+	// transform in world (convertMatrix of GetNodeTM)
+	Matrix3M tm = getNodeTM(&node, tmCache);
+	NLMISC::CMatrix nelXForm;
+	nelXForm.identity();
+	{
+		float m[16];
+		m[0] = tm.m[0][0]; m[4] = tm.m[1][0]; m[8] = tm.m[2][0]; m[12] = tm.m[3][0];
+		m[1] = tm.m[0][1]; m[5] = tm.m[1][1]; m[9] = tm.m[2][1]; m[13] = tm.m[3][1];
+		m[2] = tm.m[0][2]; m[6] = tm.m[1][2]; m[10] = tm.m[2][2]; m[14] = tm.m[3][2];
+		m[3] = 0.0f; m[7] = 0.0f; m[11] = 0.0f; m[15] = 1.0f;
+		nelXForm.set(m);
+	}
+	bbox = NLMISC::CAABBox::transformAABBox(nelXForm, bbox);
+	out.clear();
+	out.reserve(8);
+	for (uint k = 0; k < 8; ++k)
+	{
+		out.push_back(NLMISC::CVector(((k & 1) ? 1 : -1) * bbox.getHalfSize().x + bbox.getCenter().x,
+		                              ((k & 2) ? 1 : -1) * bbox.getHalfSize().y + bbox.getCenter().y,
+		                              ((k & 4) ? 1 : -1) * bbox.getHalfSize().z + bbox.getCenter().z));
+	}
+	delete pss;
+	return true;
+}
+
+// Edit Mesh modifier (class 0x50) evaluation: the per-node modifier data lives on the OSM
+// Derived wrapper's orphaned 0x2500 containers (one per modifier slot). Decoded from the corpus
+// (fy_appart portal + auberge Cluster2): 0x2512/0x4000 mesh-delta record with children
+// 0x0100 int = input vertex count, 0x0110 int = input face count, 0x0140 = moved verts
+// (uint32 count + (uint32 index, Point3 delta)[count], object space), 0x0170/0x0270 =
+// container[0x2700 BitArray: uint32 count + dword-padded LSB-first bits] deleted verts/faces,
+// 0x0300 int = subobject level, 0x0400 = vertex selection (ignored).
+struct SEditMeshEdits
+{
+	std::vector<std::pair<uint32, NLMISC::CVector> > Moves;
+	std::vector<NLMISC::CVector> Created; // 0x0210: created vertices (Point3[], object space)
+	std::vector<bool> DelVerts;
+	std::vector<bool> DelFaces;
+};
+
+static bool readEditMeshBitArray(CStorageContainer *cont, std::vector<bool> &out)
+{
+	if (!cont) return false;
+	for (CStorageContainer::TStorageObjectConstIt it = cont->chunks().begin(); it != cont->chunks().end(); ++it)
+	{
+		if (it->first != 0x2700) continue;
+		CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
+		if (!raw || raw->Value.size() < 4) return false;
+		uint32 n;
+		memcpy(&n, raw->Value.data(), 4);
+		if (raw->Value.size() < 4 + ((size_t)n + 7) / 8) return false;
+		out.resize(n);
+		for (uint32 i = 0; i < n; ++i)
+			out[i] = (raw->Value[4 + i / 8] >> (i % 8)) & 1;
+		return true;
+	}
+	return false;
+}
+
+static bool readEditMeshModApp(CStorageContainer *c2500, SEditMeshEdits &out)
+{
+	// 0x2512 -> 0x4000 -> the mesh-delta record
+	for (CStorageContainer::TStorageObjectConstIt it = c2500->chunks().begin(); it != c2500->chunks().end(); ++it)
+	{
+		if (it->first != 0x2512) continue;
+		CStorageContainer *c2512 = dynamic_cast<CStorageContainer *>(it->second);
+		if (!c2512) continue;
+		for (CStorageContainer::TStorageObjectConstIt jt = c2512->chunks().begin(); jt != c2512->chunks().end(); ++jt)
+		{
+			if (jt->first != 0x4000) continue;
+			CStorageContainer *c4000 = dynamic_cast<CStorageContainer *>(jt->second);
+			if (!c4000) continue;
+			for (CStorageContainer::TStorageObjectConstIt kt = c4000->chunks().begin(); kt != c4000->chunks().end(); ++kt)
+			{
+				if (kt->first == 0x0140)
+				{
+					CStorageRaw *raw = dynamic_cast<CStorageRaw *>(kt->second);
+					if (raw && raw->Value.size() >= 4)
+					{
+						uint32 n;
+						memcpy(&n, raw->Value.data(), 4);
+						if (raw->Value.size() >= 4 + (size_t)n * 16)
+						{
+							for (uint32 i = 0; i < n; ++i)
+							{
+								uint32 idx;
+								float v[3];
+								memcpy(&idx, raw->Value.data() + 4 + i * 16, 4);
+								memcpy(v, raw->Value.data() + 4 + i * 16 + 4, 12);
+								out.Moves.push_back(std::make_pair(idx, NLMISC::CVector(v[0], v[1], v[2])));
+							}
+						}
+					}
+				}
+				else if (kt->first == 0x0210)
+				{
+					CStorageRaw *raw = dynamic_cast<CStorageRaw *>(kt->second);
+					if (raw && raw->Value.size() >= 4)
+					{
+						uint32 n;
+						memcpy(&n, raw->Value.data(), 4);
+						if (raw->Value.size() >= 4 + (size_t)n * 12)
+						{
+							out.Created.resize(n);
+							memcpy(out.Created.data(), raw->Value.data() + 4, (size_t)n * 12);
+						}
+					}
+				}
+				else if (kt->first == 0x0170)
+					readEditMeshBitArray(dynamic_cast<CStorageContainer *>(kt->second), out.DelVerts);
+				else if (kt->first == 0x0270)
+					readEditMeshBitArray(dynamic_cast<CStorageContainer *>(kt->second), out.DelFaces);
+			}
+			return true;
+		}
+	}
+	return false;
+}
+
+// Mirror modifier (mods.dlm (0xef92aa7c, 0x511bbe75)): ParamBlock params 0 = axis (0..5 =
+// X,Y,Z,XY,YZ,ZX), 1 = offset; modifier chunk 0x1000 = copy flag; gizmo = the modifier's own
+// PRS controller (reference 0) over the mod-context TM (0x2510 of the paired mod-app slot).
+struct SModOp
+{
+	int Type; // 0 = Edit Mesh, 1 = Mirror
+	SEditMeshEdits Edits;
+	Matrix3M GizmoTM;
+	Matrix3M CtxTM;
+	sint MirrorAxis;
+	float MirrorOffset;
+	bool MirrorCopy;
+};
+
+static void applyMirror(const SModOp &op, std::vector<NLMISC::CVector> &verts, std::vector<SMeshTri> &tris)
+{
+	Matrix3M objToGizmo = op.CtxTM * inverseM3(op.GizmoTM);
+	Matrix3M gizmoToObj = inverseM3(objToGizmo);
+	static const float FLIPS[6][3] = {
+		{ -1, 1, 1 }, { 1, -1, 1 }, { 1, 1, -1 }, { -1, -1, 1 }, { 1, -1, -1 }, { -1, 1, -1 }
+	};
+	const float *f = FLIPS[op.MirrorAxis >= 0 && op.MirrorAxis < 6 ? op.MirrorAxis : 0];
+	uint32 nv = (uint32)verts.size(), nf = (uint32)tris.size();
+	std::vector<NLMISC::CVector> mirrored(nv);
+	#define M3_XFORM(M, ix, iy, iz, ox, oy, oz) \
+		ox = (ix) * (M).m[0][0] + (iy) * (M).m[1][0] + (iz) * (M).m[2][0] + (M).m[3][0]; \
+		oy = (ix) * (M).m[0][1] + (iy) * (M).m[1][1] + (iz) * (M).m[2][1] + (M).m[3][1]; \
+		oz = (ix) * (M).m[0][2] + (iy) * (M).m[1][2] + (iz) * (M).m[2][2] + (M).m[3][2];
+	for (uint32 i = 0; i < nv; ++i)
+	{
+		float gx, gy, gz, ox, oy, oz;
+		M3_XFORM(objToGizmo, verts[i].x, verts[i].y, verts[i].z, gx, gy, gz)
+		gx = gx * f[0] + (f[0] < 0 ? 2.0f * op.MirrorOffset : 0.0f);
+		gy = gy * f[1] + (f[1] < 0 ? 2.0f * op.MirrorOffset : 0.0f);
+		gz = gz * f[2] + (f[2] < 0 ? 2.0f * op.MirrorOffset : 0.0f);
+		M3_XFORM(gizmoToObj, gx, gy, gz, ox, oy, oz)
+		mirrored[i] = NLMISC::CVector(ox, oy, oz);
+	}
+	#undef M3_XFORM
+	if (op.MirrorCopy)
+	{
+		verts.insert(verts.end(), mirrored.begin(), mirrored.end());
+		for (uint32 i = 0; i < nf; ++i)
+		{
+			SMeshTri t = { tris[i].A + nv, tris[i].C + nv, tris[i].B + nv };
+			tris.push_back(t);
+		}
+	}
+	else
+	{
+		verts.swap(mirrored);
+		for (uint32 i = 0; i < nf; ++i)
+			std::swap(tris[i].B, tris[i].C);
+	}
+}
+
+// Apply Edit Mesh edits to an object-space mesh: moves, then face deletes, then vertex deletes
+// with face reindexing.
+static void applyEditMeshEdits(const SEditMeshEdits &e, std::vector<NLMISC::CVector> &verts, std::vector<SMeshTri> &tris)
+{
+	for (uint i = 0; i < e.Moves.size(); ++i)
+		if (e.Moves[i].first < verts.size())
+			verts[e.Moves[i].first] += e.Moves[i].second;
+	if (!e.DelFaces.empty())
+	{
+		std::vector<SMeshTri> kept;
+		for (uint i = 0; i < tris.size(); ++i)
+			if (i >= e.DelFaces.size() || !e.DelFaces[i])
+				kept.push_back(tris[i]);
+		tris.swap(kept);
+	}
+	if (!e.DelVerts.empty())
+	{
+		std::vector<uint32> remap(verts.size());
+		std::vector<NLMISC::CVector> kept;
+		for (uint i = 0; i < verts.size(); ++i)
+		{
+			remap[i] = (uint32)kept.size();
+			if (i >= e.DelVerts.size() || !e.DelVerts[i])
+				kept.push_back(verts[i]);
+		}
+		verts.swap(kept);
+		for (uint i = 0; i < tris.size(); ++i)
+		{
+			tris[i].A = remap[tris[i].A];
+			tris[i].B = remap[tris[i].B];
+			tris[i].C = remap[tris[i].C];
+		}
+	}
+	// Created vertices append after deletion; their faces are not decoded (0x0410-family) —
+	// sufficient for the clusterize containment test, which uses vertices only.
+	verts.insert(verts.end(), e.Created.begin(), e.Created.end());
+}
+
+// World-space mesh of a node, replicating createMeshBuild + convertToWorldCoordinate.
+static bool nodeWorldMesh(INode &node, SNodeTMCache &tmCache, SMeshData &out)
+{
+	CNodeImpl *n = dynamic_cast<CNodeImpl *>(&node);
+	if (!n) return false;
+	// Walk the object chain manually so Edit Mesh modifier stacks are EVALUATED (EvalWorldState
+	// semantics), collecting each derived wrapper's 0x2500 mod-app edits along the way.
+	std::vector<SModOp> opStack; // collected outermost-first
+	CSceneClass *obj = dynamic_cast<CSceneClass *>(node.getReference(1));
+	{
+		int guard = 16;
+		while (obj && guard-- > 0)
+		{
+			NLMISC::CClassId cid = obj->classDesc()->classId();
+			if (cid.a() == 0x92aab38c)
+			{
+				CSceneClass *resolved = resolveXRefObject(obj, 0);
+				if (!resolved) break;
+				obj = resolved;
+				continue;
+			}
+			if (cid != CLASSID_OSM_DERIVED && cid != CLASSID_WSM_DERIVED) break;
+			CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(obj);
+			CSceneClass *base = NULL;
+			std::vector<CSceneClass *> mods;
+			for (uint i = 0; rm && i < rm->nbReferences(); ++i)
+			{
+				CSceneClass *r = dynamic_cast<CSceneClass *>(rm->getReference(i));
+				if (!r) continue;
+				TSClassId scid = r->classDesc()->superClassId();
+				if (scid == SCLASS_OSMODIFIER || scid == SCLASS_WSMODIFIER)
+				{
+					mods.push_back(r);
+					continue;
+				}
+				base = r;
+			}
+			// mod-app local data: the wrapper's orphaned 0x2500 containers, one per modifier
+			// slot in reference order
+			std::vector<CStorageContainer *> modApps;
+			{
+				const CStorageContainer::TStorageObjectContainer &orphans = obj->orphanedChunks();
+				for (CStorageContainer::TStorageObjectConstIt it = orphans.begin(); it != orphans.end(); ++it)
+					if (it->first == 0x2500)
+						modApps.push_back(dynamic_cast<CStorageContainer *>(it->second));
+			}
+			for (uint m = 0; m < mods.size(); ++m)
+			{
+				NLMISC::CClassId mcid = mods[m]->classDesc()->classId();
+				CStorageContainer *app = m < modApps.size() ? modApps[m] : NULL;
+				if (mcid == NLMISC::CClassId(0x00000050, 0x00000000)) // Edit Mesh
+				{
+					SModOp op;
+					op.Type = 0;
+					if (app && readEditMeshModApp(app, op.Edits))
+						opStack.push_back(op);
+				}
+				else if (mcid == NLMISC::CClassId(0xef92aa7c, 0x511bbe75)) // Mirror
+				{
+					SModOp op;
+					op.Type = 1;
+					op.GizmoTM = Matrix3M::identity();
+					op.CtxTM = Matrix3M::identity();
+					op.MirrorAxis = 0;
+					op.MirrorOffset = 0.0f;
+					op.MirrorCopy = false;
+					CReferenceMaker *mrm = dynamic_cast<CReferenceMaker *>(mods[m]);
+					for (uint r = 0; mrm && r < mrm->nbReferences(); ++r)
+					{
+						CSceneClass *ref = dynamic_cast<CSceneClass *>(mrm->getReference(r));
+						if (!ref) continue;
+						if (ref->classDesc()->superClassId() == 0x8)
+						{
+							std::map<sint32, SPBlockParam> params;
+							readPBlockParams(ref, params);
+							if (params.find(0) != params.end()) op.MirrorAxis = params[0].IsInt ? (sint)params[0].I : (sint)params[0].V[0];
+							if (params.find(1) != params.end()) op.MirrorOffset = params[1].V[0];
+						}
+						else if (ref->classDesc()->classId() == NLMISC::CClassId(0x00002005, 0x00000000))
+						{
+							CSceneClass *pc = dynamic_cast<CSceneClass *>(dynamic_cast<CReferenceMaker *>(ref)->getReference(0));
+							Point3M gp = posValueAt0(pc);
+							QuatM gr = rotValueAt0(dynamic_cast<CSceneClass *>(dynamic_cast<CReferenceMaker *>(ref)->getReference(1)));
+							ScaleValueM gs = scaleValueAt0(dynamic_cast<CSceneClass *>(dynamic_cast<CReferenceMaker *>(ref)->getReference(2)));
+							op.GizmoTM = composePRS(gp, gr, gs);
+						}
+					}
+					// copy flag: modifier chunk 0x1000
+					{
+						const CStorageContainer::TStorageObjectContainer &mo = mods[m]->orphanedChunks();
+						for (CStorageContainer::TStorageObjectConstIt it = mo.begin(); it != mo.end(); ++it)
+						{
+							if (it->first != 0x1000) continue;
+							CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
+							uint32 v = 0;
+							if (raw && raw->Value.size() >= 4) memcpy(&v, raw->Value.data(), 4);
+							op.MirrorCopy = v != 0;
+						}
+					}
+					if (app)
+					{
+						for (CStorageContainer::TStorageObjectConstIt it = app->chunks().begin(); it != app->chunks().end(); ++it)
+						{
+							if (it->first != 0x2510) continue;
+							CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
+							if (raw && raw->Value.size() >= 48)
+								memcpy(op.CtxTM.m, raw->Value.data(), 48);
+						}
+					}
+					opStack.push_back(op);
+				}
+				else if (mcid != NLMISC::CClassId(0x000f72b1, 0x00000000)) // UVW Map: geometry-neutral
+				{
+					fprintf(stderr, "WARNING: node '%s' has unhandled modifier %s; geometry evaluated without it\n",
+					        ucstring(n->userName()).toUtf8().c_str(), mcid.toString().c_str());
+				}
+			}
+			if (!base) break;
+			obj = base;
+		}
+	}
+	if (!obj) return false;
+	std::vector<NLMISC::CVector> objVerts;
+	if (!extractObjectMesh(obj, objVerts, out.Tris, ucstring(n->userName()).toUtf8()))
+		return false;
+	// Apply modifier ops base-upward (stack order = reverse of collection order, which walked
+	// outermost wrapper first; within a wrapper, reference order = stack order bottom-up already,
+	// so replay the collected list back-to-front).
+	const char *dbgOps = getenv("PMB_DEBUG_MESH");
+	bool dbgThis = dbgOps && ucstring(n->userName()).toUtf8() == dbgOps;
+	for (uint i = (uint)opStack.size(); i > 0; --i)
+	{
+		if (opStack[i - 1].Type == 0)
+			applyEditMeshEdits(opStack[i - 1].Edits, objVerts, out.Tris);
+		else
+			applyMirror(opStack[i - 1], objVerts, out.Tris);
+		if (dbgThis)
+		{
+			float zmin = 1e30f, zmax = -1e30f;
+			for (uint v = 0; v < objVerts.size(); ++v) { zmin = std::min(zmin, objVerts[v].z); zmax = std::max(zmax, objVerts[v].z); }
+			fprintf(stderr, "DEBUG op[%u] type=%d -> %u verts %u tris, objz [%g, %g] (moves=%u delv=%u delf=%u)\n",
+			        i - 1, opStack[i - 1].Type, (uint)objVerts.size(), (uint)out.Tris.size(), zmin, zmax,
+			        (uint)opStack[i - 1].Edits.Moves.size(), (uint)opStack[i - 1].Edits.DelVerts.size(), (uint)opStack[i - 1].Edits.DelFaces.size());
+		}
+	}
+
+	// objectToLocal = objectTM * Inverse(nodeTM) in Max float ops; objectTM = offsetTM * nodeTM.
+	Matrix3M nodeTM = getNodeTM(&node, tmCache);
+	Point3M opos;
+	QuatM orot;
+	ScaleValueM oscale;
+	readObjectOffset(n, opos, orot, oscale);
+	Matrix3M offsetTM = composePRS(opos, orot, oscale);
+	Matrix3M objectTM = offsetTM * nodeTM;
+	Matrix3M objectToLocal = objectTM * inverseM3(nodeTM);
+
+	// convertMatrix: Max row-vector Matrix3 -> NeL column CMatrix
+	NLMISC::CMatrix toExportSpace;
+	toExportSpace.identity();
+	{
+		float m[16];
+		m[0] = objectToLocal.m[0][0]; m[4] = objectToLocal.m[1][0]; m[8] = objectToLocal.m[2][0]; m[12] = objectToLocal.m[3][0];
+		m[1] = objectToLocal.m[0][1]; m[5] = objectToLocal.m[1][1]; m[9] = objectToLocal.m[2][1]; m[13] = objectToLocal.m[3][1];
+		m[2] = objectToLocal.m[0][2]; m[6] = objectToLocal.m[1][2]; m[10] = objectToLocal.m[2][2]; m[14] = objectToLocal.m[3][2];
+		m[3] = 0.0f; m[7] = 0.0f; m[11] = 0.0f; m[15] = 1.0f;
+		toExportSpace.set(m);
+	}
+
+	// m1 = translate(DefaultPos) * rotate(DefaultRotQuat) * scale(DefaultScale) from the
+	// decompMatrix parts of the node's local matrix.
+	Matrix3M parentTM = getNodeTM(node.parent(), tmCache);
+	Matrix3M localTM = nodeTM * inverseM3(parentTM);
+	AffinePartsM parts;
+	decompAffine(localTM, parts);
+	NLMISC::CVector pos(parts.t.x, parts.t.y, parts.t.z);
+	NLMISC::CQuat rot(parts.q.x, parts.q.y, parts.q.z, -parts.q.w);
+	Matrix3M srtm = quatToMatrix3(parts.u);
+	Matrix3M stm = Matrix3M::identity();
+	stm.m[0][0] = parts.k.x;
+	stm.m[1][1] = parts.k.y;
+	stm.m[2][2] = parts.k.z;
+	Matrix3M smat = inverseM3(srtm) * stm * srtm;
+	NLMISC::CVector scale(parts.f * smat.m[0][0], parts.f * smat.m[1][1], parts.f * smat.m[2][2]);
+
+	NLMISC::CMatrix m1;
+	m1.identity();
+	m1.translate(pos /* + DefaultPivot(0) */);
+	m1.rotate(rot);
+	m1.scale(scale);
+
+	out.Vertices.resize(objVerts.size());
+	for (uint i = 0; i < objVerts.size(); ++i)
+		out.Vertices[i] = m1 * (toExportSpace * objVerts[i]);
+	{
+		const char *dbg = getenv("PMB_DEBUG_MESH");
+		if (dbg && ucstring(n->userName()).toUtf8() == dbg)
+		{
+			fprintf(stderr, "DEBUG mesh '%s': %u verts %u tris\n", dbg, (uint)out.Vertices.size(), (uint)out.Tris.size());
+			for (uint i = 0; i < out.Vertices.size(); ++i)
+				fprintf(stderr, "  v%u (%.9g, %.9g, %.9g)\n", i, out.Vertices[i].x, out.Vertices[i].y, out.Vertices[i].z);
+		}
+	}
+	return true;
+}
+
+
+// ---------------------------------------------------------------------------------------------
 // The buildInstanceGroup replication.
 
 struct SIgBuildStats
@@ -1173,14 +1929,215 @@ static NL3D::CInstanceGroup *buildInstanceGroup(const std::vector<INode *> &vect
 		}
 	}
 
-	// Accelerators (clusters/portals) and the clusterize linking: not implemented yet.
+	// Accelerator Portal/Cluster part
 	std::vector<NL3D::CCluster> vClusters;
+	for (i = 0; i < vectNode.size(); ++i)
+	{
+		INode *pNode = vectNode[i];
+		CNodeImpl *pNodeImpl = dynamic_cast<CNodeImpl *>(pNode);
+		int nAccelType = getScriptAppDataInt(pNodeImpl, NEL3D_APPDATA_ACCEL, NEL3D_APPDATA_ACCEL_DEFAULT);
+		bool bFatherVisible = (nAccelType & 4) != 0;          // NEL3D_APPDATA_ACCEL_FATHER_VISIBLE
+		bool bVisibleFromFather = (nAccelType & 8) != 0;      // NEL3D_APPDATA_ACCEL_VISIBLE_FROM_FATHER
+		bool bAudibleLikeVisible = (nAccelType & 64) == 0;    // NEL3D_APPDATA_ACCEL_AUDIBLE_NOT_LIKE_VISIBLE
+		bool bFatherAudible = bAudibleLikeVisible ? bFatherVisible : (nAccelType & 128) != 0;
+		bool bAudibleFromFather = bAudibleLikeVisible ? bVisibleFromFather : (nAccelType & 256) != 0;
+
+		if ((nAccelType & 3) == 2) // cluster
+		if (!isZone(*pNode))
+		if (isMesh(*pNode))
+		{
+			NL3D::CCluster clusterTemp;
+			std::string temp;
+
+			temp = getScriptAppDataStr(pNodeImpl, NEL3D_APPDATA_SOUND_GROUP, "no sound");
+			clusterTemp.setSoundGroup(temp != "no sound" ? temp : "");
+			temp = getScriptAppDataStr(pNodeImpl, NEL3D_APPDATA_ENV_FX, "no fx");
+			clusterTemp.setEnvironmentFx(temp != "no fx" ? temp : "");
+
+			SMeshData mesh;
+			if (nodeWorldMesh(*pNode, tmCache, mesh))
+			{
+				for (uint f = 0; f < mesh.Tris.size(); ++f)
+				{
+					if (!clusterTemp.makeVolume(mesh.Vertices[mesh.Tris[f].A],
+					                            mesh.Vertices[mesh.Tris[f].B],
+					                            mesh.Vertices[mesh.Tris[f].C]))
+					{
+						fprintf(stderr, "ERROR: The cluster %s is not convex.\n", ucstring(pNode->userName()).toUtf8().c_str());
+					}
+				}
+			}
+
+			clusterTemp.FatherVisible = bFatherVisible;
+			clusterTemp.VisibleFromFather = bVisibleFromFather;
+			clusterTemp.FatherAudible = bFatherAudible;
+			clusterTemp.AudibleFromFather = bAudibleFromFather;
+			clusterTemp.Name = ucstring(pNode->userName()).toUtf8();
+
+			vClusters.push_back(clusterTemp);
+		}
+	}
+
+	// Creation of all the portals
 	std::vector<NL3D::CPortal> vPortals;
 	for (i = 0; i < vectNode.size(); ++i)
 	{
-		int nAccelType = getScriptAppDataInt(dynamic_cast<CNodeImpl *>(vectNode[i]), NEL3D_APPDATA_ACCEL, NEL3D_APPDATA_ACCEL_DEFAULT);
-		if ((nAccelType & 3) == 2 || (nAccelType & 3) == 1)
-			++stats.UnimplementedAccel;
+		INode *pNode = vectNode[i];
+		CNodeImpl *pNodeImpl = dynamic_cast<CNodeImpl *>(pNode);
+		int nAccelType = getScriptAppDataInt(pNodeImpl, NEL3D_APPDATA_ACCEL, 32);
+
+		if ((nAccelType & 3) == 1) // portal
+		if (!isZone(*pNode))
+		if (isMesh(*pNode))
+		{
+			NL3D::CPortal portalTemp;
+			std::string temp;
+
+			temp = getScriptAppDataStr(pNodeImpl, NEL3D_APPDATA_OCC_MODEL, "no occlusion");
+			portalTemp.setOcclusionModel(temp != "no occlusion" ? temp : "");
+			temp = getScriptAppDataStr(pNodeImpl, NEL3D_APPDATA_OPEN_OCC_MODEL, "no occlusion");
+			portalTemp.setOpenOcclusionModel(temp != "no occlusion" ? temp : "");
+
+			SMeshData mesh;
+			if (nodeWorldMesh(*pNode, tmCache, mesh) && !mesh.Tris.empty())
+			{
+				// Stitch the faces into one ordered polygon (the reference's edge-walk loop).
+				std::vector<sint32> poly;
+				std::vector<bool> facechecked(mesh.Tris.size(), false);
+				poly.push_back(mesh.Tris[0].A);
+				poly.push_back(mesh.Tris[0].B);
+				poly.push_back(mesh.Tris[0].C);
+				facechecked[0] = true;
+				for (uint32 f = 0; f < mesh.Tris.size(); ++f)
+				if (!facechecked[f])
+				{
+					uint32 corner[3] = { mesh.Tris[f].A, mesh.Tris[f].B, mesh.Tris[f].C };
+					bool found = false;
+					uint32 k = 0, m = 0;
+					for (k = 0; k < 3; ++k)
+					{
+						for (m = 0; m < poly.size(); ++m)
+						{
+							if (((sint32)corner[k] == poly[m] && (sint32)corner[(k + 1) % 3] == poly[(m + 1) % poly.size()]) ||
+							    ((sint32)corner[(k + 1) % 3] == poly[m] && (sint32)corner[k] == poly[(m + 1) % poly.size()]))
+							{
+								found = true;
+								break;
+							}
+						}
+						if (found)
+							break;
+					}
+					if (found)
+					{
+						poly.resize(poly.size() + 1);
+						for (uint32 a = (uint32)poly.size() - 2; a > m; --a)
+							poly[a + 1] = poly[a];
+						poly[m + 1] = corner[(k + 2) % 3];
+						facechecked[f] = true;
+						f = 0;
+						// the reference loop restarts via j=0 then ++j; replicate by continuing
+						// from face 1 next iteration (the for's ++ runs after this)
+						f = (uint32)-1;
+					}
+				}
+				std::vector<NLMISC::CVector> polyv(poly.size());
+				for (uint32 v = 0; v < poly.size(); ++v)
+					polyv[v] = mesh.Vertices[poly[v]];
+
+				if (!portalTemp.setPoly(polyv))
+				{
+					fprintf(stderr, "ERROR: The portal %s is not convex.\n", ucstring(pNode->userName()).toUtf8().c_str());
+				}
+
+				if (nAccelType & 16) // dynamic portal
+				{
+					std::string instanceName = getScriptAppDataStr(pNodeImpl, NEL3D_APPDATA_INSTANCE_NAME, "");
+					if (!instanceName.empty())
+						portalTemp.setName(instanceName);
+					else
+						portalTemp.setName(ucstring(pNode->userName()).toUtf8());
+				}
+
+				// Check if portal has 2 cluster
+				sint nNbCluster = 0;
+				for (uint32 c = 0; c < vClusters.size(); ++c)
+				{
+					bool bPortalInCluster = true;
+					for (uint32 v = 0; v < polyv.size(); ++v)
+						if (!vClusters[c].isIn(polyv[v]))
+						{
+							bPortalInCluster = false;
+							break;
+						}
+					if (bPortalInCluster)
+						++nNbCluster;
+				}
+				if (nNbCluster != 2)
+				{
+					fprintf(stderr, "ERROR: The portal %s has not 2 clusters but %d\n",
+					        ucstring(pNode->userName()).toUtf8().c_str(), nNbCluster);
+				}
+			}
+
+			vPortals.push_back(portalTemp);
+		}
+	}
+
+	// Link instances to clusters
+	nNumIG = 0;
+	for (i = 0; i < vectNode.size(); ++i)
+	{
+		INode *pNode = vectNode[i];
+		CNodeImpl *pNodeImpl = dynamic_cast<CNodeImpl *>(pNode);
+		int nAccelType = getScriptAppDataInt(pNodeImpl, NEL3D_APPDATA_ACCEL, 32);
+
+		if ((nAccelType & 3) == 0)
+		if (!isZone(*pNode))
+		if (isMesh(*pNode) || isDummy(*pNode))
+		{
+			if (nAccelType & 32) // clusterize flag
+			{
+				// The vertices tested against the clusters: FX instances use the .ps shape's
+				// world-transformed AABBox corners; everything else uses the node's mesh in
+				// world space (PS placeholder mesh as fallback when the shape is unresolvable,
+				// like the reference).
+				SMeshData mesh;
+				CSceneClass *baseObj = baseObjectOf(*pNode);
+				bool haveVerts = false;
+				if (objIsParticleSystem(baseObj))
+				{
+					haveVerts = psShapeBBoxVerts(*pNode, baseObj, tmCache, mesh.Vertices);
+					if (!haveVerts)
+						fprintf(stderr, "ERROR: Can't get bbox of a particle system from its shape, using helper bbox instead\n");
+				}
+				if (!haveVerts)
+					haveVerts = nodeWorldMesh(*pNode, tmCache, mesh);
+				if (haveVerts)
+				{
+					for (uint32 c = 0; c < vClusters.size(); ++c)
+					{
+						bool bMeshInCluster = false;
+						for (uint32 v = 0; v < mesh.Vertices.size(); ++v)
+						{
+							if (vClusters[c].isIn(mesh.Vertices[v]))
+							{
+								bMeshInCluster = true;
+								break;
+							}
+						}
+						if (bMeshInCluster)
+							aIGArray[nNumIG].Clusters.push_back(c);
+					}
+				}
+				if (!vClusters.empty() && aIGArray[nNumIG].Clusters.empty())
+				{
+					fprintf(stderr, "ERROR: Object %s is not attached to any cluster but his flag clusterize is set\n",
+					        ucstring(pNode->userName()).toUtf8().c_str());
+				}
+			}
+			++nNumIG;
+		}
 	}
 
 	// PointLight part
@@ -1565,6 +2522,13 @@ static int infoIg(const char *path)
 		       (int)a.DontAddToScene, (int)a.Visible, (int)a.DontCastShadow, (int)a.DontCastShadowForInterior, (int)a.DontCastShadowForExterior,
 		       (int)a.AvoidStaticLightPreCompute, (int)a.StaticLightEnabled, a.SunContribution, a.Light[0], a.Light[1], a.LocalAmbientId,
 		       (uint)a.Clusters.size());
+		if (!a.Clusters.empty())
+		{
+			printf("    clusterIdx:");
+			for (uint c = 0; c < a.Clusters.size(); ++c)
+				printf(" %d", a.Clusters[c]);
+			printf("\n");
+		}
 	}
 	for (uint i = 0; i < ig.getNumPointLights(); ++i)
 	{
@@ -1580,6 +2544,40 @@ static int infoIg(const char *path)
 			       l.getSpotDirection().x, l.getSpotDirection().y, l.getSpotDirection().z,
 			       l.getSpotAngleBegin(), l.getSpotAngleEnd());
 		printf(" ambAddSun=%d\n", (int)l.getAddAmbientWithSun());
+	}
+	// Clusters: private plane list — decode through a serial roundtrip (version, Name,
+	// _LocalVolume, _LocalBBox, flags, soundGroup, envFx).
+	for (uint i = 0; i < ig._ClusterInfos.size(); ++i)
+	{
+		NL3D::CCluster &c = ig._ClusterInfos[i];
+		NLMISC::CMemStream mem;
+		c.serial(mem);
+		mem.invert();
+		uint8 ver = 0;
+		mem.serial(ver);
+		std::string name;
+		if (ver >= 1) mem.serial(name);
+		std::vector<NLMISC::CPlane> planes;
+		mem.serialCont(planes);
+		NLMISC::CAABBox bbox;
+		mem.serial(bbox);
+		printf("C%3u '%s' planes=%u fatherVis=%d visFromFather=%d sound='%s' fx='%s' bbox=(%g,%g,%g|%g,%g,%g)\n",
+		       i, name.c_str(), (uint)planes.size(), (int)c.FatherVisible, (int)c.VisibleFromFather,
+		       c.getSoundGroup().c_str(), c.getEnvironmentFx().c_str(),
+		       bbox.getCenter().x, bbox.getCenter().y, bbox.getCenter().z,
+		       bbox.getHalfSize().x, bbox.getHalfSize().y, bbox.getHalfSize().z);
+		for (uint j = 0; j < planes.size(); ++j)
+			printf("    plane %u: (%.9g, %.9g, %.9g, %.9g)\n", j, planes[j].a, planes[j].b, planes[j].c, planes[j].d);
+	}
+	for (uint i = 0; i < ig._Portals.size(); ++i)
+	{
+		NL3D::CPortal &pt = ig._Portals[i];
+		std::vector<NLMISC::CVector> poly;
+		pt.getPoly(poly);
+		printf("P%3u '%s' verts=%u occ='%s' openOcc='%s'\n", i, pt.getName().c_str(), (uint)poly.size(),
+		       pt.getOcclusionModel().c_str(), pt.getOpenOcclusionModel().c_str());
+		for (uint j = 0; j < poly.size(); ++j)
+			printf("    v %u: (%.9g, %.9g, %.9g)\n", j, poly[j].x, poly[j].y, poly[j].z);
 	}
 	printf("pointLights=%u clusters=%u portals=%u realTimeSun=%d globalPos=(%g,%g,%g)\n",
 	       ig.getNumPointLights(), (uint)ig._ClusterInfos.size(), (uint)ig._Portals.size(),
@@ -1603,6 +2601,7 @@ int main(int argc, char **argv)
 		else if (arg == "--dump-obj" && argi + 1 < argc) { dump = true; g_dumpObjName = argv[argi + 1]; argi += 2; }
 		else if (arg == "--dump-light" && argi + 1 < argc) { dump = true; g_dumpLightName = argv[argi + 1]; argi += 2; }
 		else if (arg == "--db" && argi + 1 < argc) { g_dbRoot = argv[argi + 1]; argi += 2; }
+		else if (arg == "--ps-path" && argi + 1 < argc) { g_psSearchPaths.push_back(argv[argi + 1]); argi += 2; }
 		else if (arg == "--info" && argi + 1 < argc)
 		{
 			NL3D::registerSerial3d();
@@ -1730,8 +2729,6 @@ int main(int argc, char **argv)
 
 		SIgBuildStats stats;
 		NL3D::CInstanceGroup *ig = buildInstanceGroup(vectNode, tmCache, stats);
-		if (stats.UnimplementedAccel)
-			fprintf(stderr, "WARNING: ig '%s' has %u accelerator node(s); clusters/portals are not implemented yet\n", igName.c_str(), stats.UnimplementedAccel);
 
 		std::string outPath = NLMISC::CPath::standardizePath(outDir, true) + igName + ".ig";
 		try
