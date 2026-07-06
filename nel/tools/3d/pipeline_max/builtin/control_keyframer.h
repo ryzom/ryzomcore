@@ -143,6 +143,19 @@ struct CStorageTCBRotKey
 	float Extra[8];
 };
 
+/// TCB Scale (0x442315, 0) — chunk 0x2523. Max ScaleValue (per-axis S + axis-system quat Q)
+/// followed by the TCB params, same field order as the other TCB records; decoded against
+/// weapon-box scale tracks in the character anim corpus (fy_hof_a_stun_end Ma_Epee2M et al).
+struct CStorageTCBScaleKey
+{
+	sint32 Time;
+	uint32 Flags;
+	float S[3];
+	float Q[4];
+	float Tens, Cont, Bias, EaseIn, EaseOut;
+	float Extra[14];
+};
+
 /**
  * \brief CControlKeyFramerBase
  * \date 2026-07-06
@@ -229,6 +242,7 @@ PMB_DECLARE_CONTROL_KEYFRAMER(CControlPosBezier, CStorageBezPoint3Key)
 PMB_DECLARE_CONTROL_KEYFRAMER(CControlScaleBezier, CStorageBezScaleKey)
 PMB_DECLARE_CONTROL_KEYFRAMER(CControlPosTCB, CStorageTCBPoint3Key)
 PMB_DECLARE_CONTROL_KEYFRAMER(CControlRotTCB, CStorageTCBRotKey)
+PMB_DECLARE_CONTROL_KEYFRAMER(CControlScaleTCB, CStorageTCBScaleKey)
 
 #undef PMB_DECLARE_CONTROL_KEYFRAMER
 

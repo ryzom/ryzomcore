@@ -287,6 +287,7 @@ void CBuiltin::registerClasses(CSceneClassRegistry *registry)
 	registry->add(&CControlScaleBezierDesc);
 	registry->add(&CControlPosTCBDesc);
 	registry->add(&CControlRotTCBDesc);
+	registry->add(&CControlScaleTCBDesc);
 
 	// object (inh ReferenceMaker)
 	registry->add(&BaseObjectClassDesc);

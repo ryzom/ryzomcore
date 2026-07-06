@@ -166,13 +166,15 @@ _TRACKS = {
     'CTrackDefaultFloat':          lambda r: _default_track(r, _R.f32),
 }
 
-def parse_anim(path):
+def parse_anim(path, header=None):
+    """Parse tracks; when `header` is a dict, also fill it with the post-track fields
+    (min_end_time, sss_shapes — CAnimation::serial v1/v2)."""
     data = open(path, 'rb').read()
     r = _R(data)
     if data[0:8] != b'NEL_ANIM':
         raise ValueError('not a .anim: ' + path)
     r.o = 8
-    r.ver()
+    ver = r.ver()
     r.s()
     n = r.u32()
     idbyname = {}
@@ -184,6 +186,12 @@ def parse_anim(path):
         r.u64()
         cls = r.s()
         tracks[idbyname.get(i, '#%d' % i)] = (cls, _TRACKS[cls](r))
+    if header is not None:
+        if ver >= 1:
+            header['min_end_time'] = r.f32()
+        if ver >= 2:
+            cnt = r.u32()
+            header['sss_shapes'] = sorted(r.s() for _ in range(cnt))
     return tracks
 
 # ---------------------------------------------------------------------------------------------
@@ -229,6 +237,19 @@ def _eval_sampled(keys, framemap, frame, isquat, fs):
 def _key_delta(cls, x, y):
     xt = x if isinstance(x, tuple) else (x,)
     yt = y if isinstance(y, tuple) else (y,)
+    if cls == 'CTrackKeyFramerTCBQuat' and len(xt) >= 10:
+        # (time, axis3, angle, tens, cont, bias, easeto, easefrom): (axis, angle) and
+        # (-axis, -angle) encode the same rotation (double cover of the angle-axis form) —
+        # compare both representations and keep the closer one. When both angles are ~0 the
+        # axis is degenerate (identity rotation, any axis) — the corpus carries stale-cache
+        # near-identity keys whose rederived axis bits are reference-era noise; compare the
+        # angle and TCB params only there.
+        def _d(a, b):
+            return max(abs(u - v) for u, v in zip(a, b))
+        if abs(xt[4]) < 1e-5 and abs(yt[4]) < 1e-5:
+            return max(_d(xt[:1] + xt[5:], yt[:1] + yt[5:]), abs(xt[4] - yt[4]))
+        yflip = (yt[0], -yt[1], -yt[2], -yt[3], -yt[4]) + yt[5:]
+        return min(_d(xt, yt), _d(xt, yflip))
     if 'Quat' in cls and len(xt) >= 4:
         q = xt[-4:]
         d1 = max(abs(u - v) for u, v in zip(q, yt[-4:]))
@@ -308,18 +329,23 @@ def compare_optimized(a_path, b_path):
     return 'EPS', 'worst=%g' % worst
 
 def compare_direct_float(a_path, b_path):
-    """Float-level compare for direct references: track sets and key counts must match;
-    returns (verdict, worst, msg) with verdict IDENT | STRUCT | FAIL."""
+    """Float-level compare for direct references: track sets, key counts, SSS shape set and
+    min-end-time must match; returns (verdict, worst, msg) with verdict IDENT | STRUCT | FAIL."""
     da = open(a_path, 'rb').read(); db = open(b_path, 'rb').read()
     if da == db:
         return 'IDENT', 0.0, ''
     try:
-        A = parse_anim(a_path); B = parse_anim(b_path)
+        ha, hb = {}, {}
+        A = parse_anim(a_path, ha); B = parse_anim(b_path, hb)
     except Exception as e:
         return 'FAIL', 9.9, 'parse error: %r' % e
     if set(A.keys()) != set(B.keys()):
         return 'FAIL', 9.9, 'track sets differ: only-ours=%s only-ref=%s' % (
             sorted(set(A)-set(B))[:3], sorted(set(B)-set(A))[:3])
+    if ha.get('sss_shapes') != hb.get('sss_shapes'):
+        return 'FAIL', 9.9, 'sss shapes differ: %s vs %s' % (ha.get('sss_shapes'), hb.get('sss_shapes'))
+    if ha.get('min_end_time') != hb.get('min_end_time'):
+        return 'FAIL', 9.9, 'min end time differs: %r vs %r' % (ha.get('min_end_time'), hb.get('min_end_time'))
     worst = 0.0
     for name in B:
         ca, ta = A[name]; cb, tb = B[name]

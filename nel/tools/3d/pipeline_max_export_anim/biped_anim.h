@@ -17,6 +17,7 @@
  *   0x013e/f head        (hdr 3, rec 12: quat4, 0,0,0, 3*, neck a1,a2,a3)
  *   0x0142/3 tail        (hdr 4, rec 10: 9*, 9 angles)
  *   0x0147/8 pony1       (hdr 4, rec 7: 6*, 6 angles)
+ *   0x0149/a pony2       (like pony1)
  *
  * Limb record (110 floats): [0] hinge angle (elbow/knee), [1] ballistic tension, [2..5] upper
  * quat (COM-relative), [9]/[10] clavicle (a, b-delta) on arms, [11] pivot int, [12] IK blend,
@@ -133,8 +134,12 @@ struct SBipAnimKeys
 {
 	SBipKeyTrack Horizontal, Turn, Vertical, Pelvis;
 	SBipKeyTrack ArmR, ArmL, LegR, LegL;
-	SBipKeyTrack Spine, Head, Tail, Pony1;
-	// Union of key ranges across all tracks (ticks); false when no track has keys.
+	SBipKeyTrack Spine, Head, Tail, Pony1, Pony2;
+	// Union of key ranges (ticks) over the keytracks of the EXISTING BipDriven bones — the COM
+	// (BIPBODY) controller contributes nothing, matching the reference's buildBipedInformation
+	// (its h/v/t keys are invisible to IKeyControl; verified against fy_hof_co_fus_tir, whose
+	// turn/vertical tracks run past every limb track yet the reference range stops at the
+	// limbs). false when no track has keys.
 	bool HasRange;
 	sint32 RangeMin, RangeMax;
 	SBipAnimKeys() : HasRange(false), RangeMin(0), RangeMax(0) { }
@@ -207,7 +212,7 @@ private:
 	TCBQuatChannel m_ChLegEnd[2];     // foot
 	TCBScalarChannel m_ChIkBlend[2][2];   // [arm/leg][side]
 	TCBVec3Channel m_ChIkTarget[2][2];    // world end-effector pos (Y-up stored)
-	std::vector<TCBScalarChannel> m_ChSpineAng, m_ChTailAng, m_ChPony1Ang, m_ChNeckAng;
+	std::vector<TCBScalarChannel> m_ChSpineAng, m_ChTailAng, m_ChPony1Ang, m_ChPony2Ang, m_ChNeckAng;
 	TCBQuatChannel m_ChHead;
 	std::vector<TCBQuatChannel> m_ChFingerBase[2], m_ChToeBase[2];
 	std::vector<TCBScalarChannel> m_ChFingerBend[2], m_ChToeBend[2];

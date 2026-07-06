@@ -50,6 +50,7 @@ static_assert(sizeof(CStorageBezPoint3Key) == 80, "packed key record");
 static_assert(sizeof(CStorageBezScaleKey) == 148, "packed key record");
 static_assert(sizeof(CStorageTCBPoint3Key) == 64, "packed key record");
 static_assert(sizeof(CStorageTCBRotKey) == 92, "packed key record");
+static_assert(sizeof(CStorageTCBScaleKey) == 112, "packed key record");
 
 // Common controller chunk ids (shared across all keyframe controller classes; the default
 // value and key table ids are per-class and passed in by the concrete constructors).
@@ -225,6 +226,7 @@ IStorageObject *CControlKeyFramerBase::createChunkById(uint16 id, bool container
 #define PMB_CTRL_KEYS_BEZ_SCALE_CHUNK_ID 0x2528
 #define PMB_CTRL_KEYS_TCB_POS_CHUNK_ID 0x2521
 #define PMB_CTRL_KEYS_TCB_ROT_CHUNK_ID 0x2522
+#define PMB_CTRL_KEYS_TCB_SCALE_CHUNK_ID 0x2523
 
 // Superclass ids
 #define PMB_SCLASS_CONTROL_FLOAT 0x00009003
@@ -255,6 +257,7 @@ PMB_DEFINE_CONTROL_KEYFRAMER(CControlPosBezier, "Bezier Position", "ControlPosBe
 PMB_DEFINE_CONTROL_KEYFRAMER(CControlScaleBezier, "Bezier Scale", "ControlScaleBezier", 0x00002010, PMB_SCLASS_CONTROL_SCALE, PMB_CTRL_DEFAULT_SCALE_CHUNK_ID, PMB_CTRL_KEYS_BEZ_SCALE_CHUNK_ID, CStorageBezScaleKey)
 PMB_DEFINE_CONTROL_KEYFRAMER(CControlPosTCB, "TCB Position", "ControlPosTCB", 0x00442312, PMB_SCLASS_CONTROL_POS, PMB_CTRL_DEFAULT_POS_CHUNK_ID, PMB_CTRL_KEYS_TCB_POS_CHUNK_ID, CStorageTCBPoint3Key)
 PMB_DEFINE_CONTROL_KEYFRAMER(CControlRotTCB, "TCB Rotation", "ControlRotTCB", 0x00442313, PMB_SCLASS_CONTROL_ROT, PMB_CTRL_DEFAULT_ROT_CHUNK_ID, PMB_CTRL_KEYS_TCB_ROT_CHUNK_ID, CStorageTCBRotKey)
+PMB_DEFINE_CONTROL_KEYFRAMER(CControlScaleTCB, "TCB Scale", "ControlScaleTCB", 0x00442315, PMB_SCLASS_CONTROL_SCALE, PMB_CTRL_DEFAULT_SCALE_CHUNK_ID, PMB_CTRL_KEYS_TCB_SCALE_CHUNK_ID, CStorageTCBScaleKey)
 
 #undef PMB_DEFINE_CONTROL_KEYFRAMER
 

@@ -321,27 +321,9 @@ void parseBipAnimKeys(CSceneClass *sys, SBipAnimKeys &out)
 	parseTrack(sys, 0x013e, 0x013f, 3, 0, out.Head);
 	parseTrack(sys, 0x0142, 0x0143, 4, 0, out.Tail);
 	parseTrack(sys, 0x0147, 0x0148, 4, 0, out.Pony1);
-	// Range union: scan EVERY keytrack time chunk in the key section generically (0x012c..0x0160,
-	// odd = time companion) so tracks we don't decode yet (props, footprints, pony2, ...) still
-	// contribute to the sampled range — the reference's BipedRangeMin/Max comes from the biped
-	// nodes' controllers, which cover all of these.
-	for (uint16 cid = 0x012d; cid <= 0x0161; cid += 2)
-	{
-		size_t tn = 0;
-		const float *t = sysChunkFloats(sys, cid, tn);
-		if (!t || tn < 8) continue;
-		sint32 count = (sint32)fBits(t[0]);
-		if (count <= 0 || count > 100000) continue;
-		if ((tn - 7) % count) continue;
-		size_t trec = (tn - 7) / count;
-		if (trec < 10) continue;
-		sint32 mn, mx;
-		memcpy(&mn, &t[7], 4);
-		memcpy(&mx, &t[7 + (size_t)(count - 1) * trec], 4);
-		if (mx < mn) continue;
-		if (!out.HasRange) { out.RangeMin = mn; out.RangeMax = mx; out.HasRange = true; }
-		else { out.RangeMin = std::min(out.RangeMin, mn); out.RangeMax = std::max(out.RangeMax, mx); }
-	}
+	parseTrack(sys, 0x0149, 0x014a, 4, 0, out.Pony2);
+	// The range union (HasRange/RangeMin/RangeMax) is computed by CBipedAnimEval's constructor
+	// over the keytracks of the bones that actually exist in the scene; see SBipAnimKeys.
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -478,18 +460,21 @@ CBipedAnimEval::CBipedAnimEval(CSceneClass *rigSys, SBipedRig &rig,
 		m_Nodes.push_back(ni);
 	}
 
-	// Range: the reference exporter unions the key spans of the EXISTING biped nodes' controllers
-	// (buildBipedInformation walks INodes), so keytracks without a corresponding node (e.g. leg
-	// tracks on a first-person arms-only rig) must not contribute. Recompute over m_Nodes.
+	// Range: the reference exporter unions the key spans of the EXISTING biped nodes'
+	// controllers via IKeyControl (buildBipedInformation walks INodes), so keytracks without a
+	// corresponding node (e.g. leg tracks on a first-person arms-only rig) must not contribute
+	// — and neither does the COM (BIPBODY) controller: its horizontal/vertical/turn keys are
+	// invisible to that enumeration (verified against fy_hof_co_fus_tir / fy_hom_co_pa_tir_
+	// 1stperson, whose COM tracks extend past every limb track while the reference range stops
+	// at the limbs). Recompute over m_Nodes.
 	{
 		bool has = false;
 		sint32 mn = 0, mx = 0;
 		bool idSeen[32] = { false };
-		bool comSeen = false;
 		for (size_t i = 0; i < m_Nodes.size(); ++i)
 		{
-			if (m_Nodes[i].IsCom) comSeen = true;
-			else if (m_Nodes[i].HasIdLink && m_Nodes[i].Id < 32) idSeen[m_Nodes[i].Id] = true;
+			if (!m_Nodes[i].IsCom && m_Nodes[i].HasIdLink && m_Nodes[i].Id < 32)
+				idSeen[m_Nodes[i].Id] = true;
 		}
 		const SBipKeyTrack *byId[32] = { NULL };
 		byId[0] = &m_Keys.ArmL; byId[1] = &m_Keys.ArmR;
@@ -498,18 +483,10 @@ CBipedAnimEval::CBipedAnimEval(CSceneClass *rigSys, SBipedRig &rig,
 		byId[6] = &m_Keys.LegL; byId[7] = &m_Keys.LegR;   // toes ride the leg tracks
 		byId[8] = &m_Keys.Spine; byId[9] = &m_Keys.Tail;
 		byId[10] = &m_Keys.Head; byId[11] = &m_Keys.Pelvis;
-		byId[16] = &m_Keys.Head; byId[17] = &m_Keys.Pony1;
+		byId[16] = &m_Keys.Head; byId[17] = &m_Keys.Pony1; byId[18] = &m_Keys.Pony2;
 		byId[22] = &m_Keys.ArmR; byId[23] = &m_Keys.ArmL;
 		byId[24] = &m_Keys.LegL; byId[25] = &m_Keys.LegR;
 		byId[26] = &m_Keys.Tail; byId[27] = &m_Keys.Head; byId[28] = &m_Keys.Pony1; byId[29] = &m_Keys.Head;
-		const SBipKeyTrack *comTracks[3] = { &m_Keys.Horizontal, &m_Keys.Vertical, &m_Keys.Turn };
-		for (int c = 0; c < 3 && comSeen; ++c)
-		{
-			if (comTracks[c]->empty()) continue;
-			sint32 a = comTracks[c]->Times.front(), b = comTracks[c]->Times.back();
-			if (!has) { mn = a; mx = b; has = true; }
-			else { mn = std::min(mn, a); mx = std::max(mx, b); }
-		}
 		for (int id = 0; id < 32; ++id)
 		{
 			if (!idSeen[id] || !byId[id] || byId[id]->empty()) continue;
@@ -582,8 +559,9 @@ void CBipedAnimEval::buildChannels()
 	}
 	// spine/tail/pony: per-angle scalar channels (rec = count marker + angles)
 	struct { const SBipKeyTrack *tr; std::vector<TCBScalarChannel> *ch; } chains[] = {
-		{ &m_Keys.Spine, &m_ChSpineAng }, { &m_Keys.Tail, &m_ChTailAng }, { &m_Keys.Pony1, &m_ChPony1Ang } };
-	for (size_t c = 0; c < 3; ++c)
+		{ &m_Keys.Spine, &m_ChSpineAng }, { &m_Keys.Tail, &m_ChTailAng },
+		{ &m_Keys.Pony1, &m_ChPony1Ang }, { &m_Keys.Pony2, &m_ChPony2Ang } };
+	for (size_t c = 0; c < 4; ++c)
 	{
 		const SBipKeyTrack &tr = *chains[c].tr;
 		if (tr.empty()) continue;
@@ -762,6 +740,18 @@ void CBipedAnimEval::evalAt(double t, std::map<INode *, SBipNodeState> &out)
 						m_Rig && ni.Link < m_Rig->Pony1.Angles.size() ? m_Rig->Pony1.Angles[ni.Link].z : 0.0);
 					QuatD C = qMul(ni.FigLocalRot, qConj(figAng));
 					QuatD R = chainAngleQuatD(m_ChPony1Ang[ni.Link*3].eval(t), m_ChPony1Ang[ni.Link*3+1].eval(t), m_ChPony1Ang[ni.Link*3+2].eval(t));
+					worldRot = qNorm(qMul(parentRot, qMul(C, R)));
+				}
+				break;
+			case BID_PONY2:
+				if (!m_ChPony2Ang.empty() && m_ChPony2Ang.size() >= (ni.Link + 1) * 3)
+				{
+					QuatD figAng = chainAngleQuatD(
+						m_Rig && ni.Link < m_Rig->Pony2.Angles.size() ? m_Rig->Pony2.Angles[ni.Link].x : 0.0,
+						m_Rig && ni.Link < m_Rig->Pony2.Angles.size() ? m_Rig->Pony2.Angles[ni.Link].y : 0.0,
+						m_Rig && ni.Link < m_Rig->Pony2.Angles.size() ? m_Rig->Pony2.Angles[ni.Link].z : 0.0);
+					QuatD C = qMul(ni.FigLocalRot, qConj(figAng));
+					QuatD R = chainAngleQuatD(m_ChPony2Ang[ni.Link*3].eval(t), m_ChPony2Ang[ni.Link*3+1].eval(t), m_ChPony2Ang[ni.Link*3+2].eval(t));
 					worldRot = qNorm(qMul(parentRot, qMul(C, R)));
 				}
 				break;
