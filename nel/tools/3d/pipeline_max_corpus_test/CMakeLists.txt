@@ -50,7 +50,19 @@ IF (Python3_Interpreter_FOUND)
 			--bin $<TARGET_FILE_DIR:pipeline_max_export_skel>
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 	SET_TESTS_PROPERTIES(pipeline_max_skel_corpus PROPERTIES SKIP_RETURN_CODE 77)
+
+	# anim_corpus.py drives the same tiers over the anim-source corpus. T1/T2 run on the
+	# non-biped subset here to keep the ctest runtime bounded (the full 4.5k-file anim corpus
+	# T1/T2 sweep is a manual/occasional run); T3 exports every non-biped anim and gates:
+	# direct pre-optimizer references must be byte-identical, optimizer-processed references
+	# must reconstruct within the optimizer's own key-drop tolerance.
+	ADD_TEST(NAME pipeline_max_anim_corpus
+		COMMAND ${Python3_EXECUTABLE} anim_corpus.py --all --gate-t3 --nonbiped-only
+			--bin $<TARGET_FILE_DIR:pipeline_max_export_anim>
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+	SET_TESTS_PROPERTIES(pipeline_max_anim_corpus PROPERTIES SKIP_RETURN_CODE 77)
+
 	IF (TARGET unit_test)
-		ADD_DEPENDENCIES(unit_test pipeline_max_corpus_test pipeline_max_export_skel)
+		ADD_DEPENDENCIES(unit_test pipeline_max_corpus_test pipeline_max_export_skel pipeline_max_export_anim)
 	ENDIF (TARGET unit_test)
 ENDIF (Python3_Interpreter_FOUND)
