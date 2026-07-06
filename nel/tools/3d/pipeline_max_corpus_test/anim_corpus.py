@@ -27,6 +27,7 @@ Defaults are the layout on Kaetemi's machine; override via CLI when running else
 """
 
 import argparse, os, re, struct, subprocess, sys, collections, bisect, math, shutil
+from concurrent.futures import ThreadPoolExecutor
 
 SKIP_CODE = 77
 
@@ -361,6 +362,68 @@ def compare_direct_float(a_path, b_path):
 
 # ---------------------------------------------------------------------------------------------
 
+# Per-file worker: runs the T1/T2 and T3 subprocesses and the direct-ref compare, touching NO
+# shared state — everything is returned as a result record and folded into the buckets/fails
+# aggregates by the main thread IN SUBMISSION ORDER, so the parallel run's counters, fail lists
+# and report lines are byte-identical to the serial run's. Subprocess isolation makes this safe:
+# pipeline_max_corpus_test's temp path is PID-suffixed and each T3 export writes its own
+# <base>.anim.
+def process_one(args, corpus_test, export_anim, out_dir, item):
+    group, d, name, full = item
+    res = {"name": name, "group": group}
+    if is_git_lfs_stub(full):
+        res["stub"] = True
+        return res
+    kind = "biped" if is_biped(full) else "nonbiped"
+    res["kind"] = kind
+
+    if args.t1 or args.t2:
+        cmd = [corpus_test, full]
+        if args.t2: cmd.insert(1, "--parse")
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+        summary = r.stdout.strip()
+        res["t1_ok"] = "T1=FAIL" not in summary and r.returncode == 0
+        res["t2_ok"] = ("T2=FAIL" not in summary and r.returncode == 0) if args.t2 else True
+        res["t12_summary"] = summary or f"rc={r.returncode}"
+        res["t12_err"] = r.stderr.strip()[:200]
+
+    if args.t3:
+        base = os.path.splitext(name)[0]
+        out_anim = os.path.join(out_dir, "export", base + ".anim")
+        r = subprocess.run([export_anim, full, out_anim], capture_output=True, text=True, timeout=300)
+        if r.returncode == 3:
+            res["t3"] = ("nothing",)
+            return res
+        if r.returncode != 0:
+            res["t3"] = ("err", f"exporter rc={r.returncode}", r.stderr.strip()[:200])
+            return res
+        direct_ref = None
+        for rd in args.ref_direct:
+            cand = os.path.join(rd, base + ".anim")
+            if os.path.isfile(cand):
+                direct_ref = cand
+                break
+        if direct_ref:
+            if kind == "biped":
+                verdict, worst, msg = compare_direct_float(out_anim, direct_ref)
+                res["t3"] = ("direct_biped", verdict, worst, msg)
+            else:
+                ours = open(out_anim, 'rb').read()
+                theirs = open(direct_ref, 'rb').read()
+                res["t3"] = ("direct_bytes", ours == theirs, len(ours), len(theirs))
+            return res
+        opt_ref = None
+        for rd in args.ref_optimized:
+            cand = os.path.join(rd, base + ".anim")
+            if os.path.isfile(cand):
+                opt_ref = cand
+                break
+        if opt_ref:
+            res["t3"] = ("opt", kind, name, base, out_anim, opt_ref)
+        else:
+            res["t3"] = ("missing_ref",)
+    return res
+
 def run_tests(args, files):
     corpus_test = os.path.join(args.bin, "pipeline_max_corpus_test")
     export_anim = os.path.join(args.bin, "pipeline_max_export_anim")
@@ -382,79 +445,55 @@ def run_tests(args, files):
     buckets = collections.defaultdict(lambda: collections.defaultdict(int))
     fails = collections.defaultdict(list)
 
-    for group, d, name, full in files:
-        if is_git_lfs_stub(full):
-            buckets["stubs"]["total"] += 1
-            continue
-        kind = "biped" if is_biped(full) else "nonbiped"
-        b = buckets[kind]
-        b["total"] += 1
+    with ThreadPoolExecutor(max_workers=max(1, args.jobs)) as ex:
+        results = ex.map(lambda item: process_one(args, corpus_test, export_anim, out_dir, item), files)
+        for res in results:
+            name = res["name"]
+            if res.get("stub"):
+                buckets["stubs"]["total"] += 1
+                continue
+            kind = res["kind"]
+            b = buckets[kind]
+            b["total"] += 1
 
-        if args.t1 or args.t2:
-            cmd = [corpus_test, full]
-            if args.t2: cmd.insert(1, "--parse")
-            r = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
-            summary = r.stdout.strip()
-            t1_ok = "T1=FAIL" not in summary and r.returncode == 0
-            t2_ok = ("T2=FAIL" not in summary and r.returncode == 0) if args.t2 else True
-            if t1_ok: b["t1_pass"] += 1
-            else: fails["t1"].append((name, summary or f"rc={r.returncode}", r.stderr.strip()[:200]))
-            if args.t2:
-                if t2_ok: b["t2_pass"] += 1
-                else: fails["t2"].append((name, summary or f"rc={r.returncode}", r.stderr.strip()[:200]))
+            if args.t1 or args.t2:
+                if res["t1_ok"]: b["t1_pass"] += 1
+                else: fails["t1"].append((name, res["t12_summary"], res["t12_err"]))
+                if args.t2:
+                    if res["t2_ok"]: b["t2_pass"] += 1
+                    else: fails["t2"].append((name, res["t12_summary"], res["t12_err"]))
 
-        if args.t3:
-            base = os.path.splitext(name)[0]
-            out_anim = os.path.join(out_dir, "export", base + ".anim")
-            r = subprocess.run([export_anim, full, out_anim], capture_output=True, text=True, timeout=300)
-            if r.returncode == 3:
+            t3 = res.get("t3")
+            if not t3:
+                continue
+            if t3[0] == "nothing":
                 b["t3_nothing"] += 1
                 fails["t3"].append((name, "nothing to export", ""))
-                continue
-            if r.returncode != 0:
+            elif t3[0] == "err":
                 b["t3_err"] += 1
-                fails["t3"].append((name, f"exporter rc={r.returncode}", r.stderr.strip()[:200]))
-                continue
-            # Direct (pre-optimizer) reference?
-            direct_ref = None
-            for rd in args.ref_direct:
-                cand = os.path.join(rd, base + ".anim")
-                if os.path.isfile(cand):
-                    direct_ref = cand
-                    break
-            if direct_ref:
-                if kind == "biped":
-                    verdict, worst, msg = compare_direct_float(out_anim, direct_ref)
-                    if verdict == 'IDENT':
-                        b["t3_direct_ident"] += 1
-                    elif verdict == 'STRUCT':
-                        b["t3_struct"] += 1
-                        b.setdefault("_worsts", []).append(worst)
-                        if worst > args.biped_tol:
-                            b["t3_struct_over"] += 1
-                            fails["t3info"].append((name, "worst %.4g" % worst, ""))
-                    else:
-                        b["t3_direct_fail"] += 1
-                        fails["t3"].append((name, msg, ""))
+                fails["t3"].append((name, t3[1], t3[2]))
+            elif t3[0] == "direct_biped":
+                verdict, worst, msg = t3[1], t3[2], t3[3]
+                if verdict == 'IDENT':
+                    b["t3_direct_ident"] += 1
+                elif verdict == 'STRUCT':
+                    b["t3_struct"] += 1
+                    b.setdefault("_worsts", []).append(worst)
+                    if worst > args.biped_tol:
+                        b["t3_struct_over"] += 1
+                        fails["t3info"].append((name, "worst %.4g" % worst, ""))
                 else:
-                    ours = open(out_anim, 'rb').read()
-                    theirs = open(direct_ref, 'rb').read()
-                    if ours == theirs:
-                        b["t3_direct_ident"] += 1
-                    else:
-                        b["t3_direct_fail"] += 1
-                        fails["t3"].append((name, f"direct ref differs (size {len(ours)} vs {len(theirs)})", ""))
-                continue
-            # Optimized reference (per project group cfg)
-            opt_ref = None
-            for rd in args.ref_optimized:
-                cand = os.path.join(rd, base + ".anim")
-                if os.path.isfile(cand):
-                    opt_ref = cand
-                    break
-            if opt_ref:
-                opt_groups.setdefault(group, []).append((kind, name, base, out_anim, opt_ref))
-            else:
+                    b["t3_direct_fail"] += 1
+                    fails["t3"].append((name, msg, ""))
+            elif t3[0] == "direct_bytes":
+                if t3[1]:
+                    b["t3_direct_ident"] += 1
+                else:
+                    b["t3_direct_fail"] += 1
+                    fails["t3"].append((name, f"direct ref differs (size {t3[2]} vs {t3[3]})", ""))
+            elif t3[0] == "opt":
+                opt_groups.setdefault(res["group"], []).append(t3[1:])
+            elif t3[0] == "missing_ref":
                 b["t3_missing_ref"] += 1
 
     # anim_builder pass per project group
@@ -521,6 +560,13 @@ def main():
                          "in-between approximation; see wiki open work)")
     ap.add_argument("--nonbiped-only", action="store_true",
                     help="restrict T1/T2 to the non-biped subset (T3 is always non-biped)")
+    ap.add_argument("-j", "--jobs", type=int, default=max(1, (os.cpu_count() or 4) - 2),
+                    help="parallel worker threads for the per-file subprocesses (default: "
+                         "cores - 2). Results are aggregated in submission order, so counters, "
+                         "fail lists and report lines are identical to a serial run. CAVEAT: "
+                         "don't rebuild the binaries while a sweep runs — a subprocess launched "
+                         "mid-relink fails spuriously (this holds for the serial run too, it "
+                         "just has a longer exposure window).")
     ap.add_argument("-v", "--verbose", action="store_true")
     args = ap.parse_args()
     if args.all:
