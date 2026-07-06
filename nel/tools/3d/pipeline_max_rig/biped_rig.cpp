@@ -282,8 +282,11 @@ SBipedRig::SBipedRig() : Sys(NULL), HasCom(false), ComPos(NLMISC::CVector::Null)
 		HasClavicleZ(false),
 		PelvisWorldRot(NLMISC::CQuat::Identity), HavePelvisWorldRot(false),
 		LastSpineWorldRot(NLMISC::CQuat::Identity), HaveLastSpineWorldRot(false),
+		PelvisRecTrans(NLMISC::CVector::Null), HavePelvisWorldTM(false),
+		HaveLastSpineWorldTM(false),
 		FigureVersion(3),
 		ToeBaseWorldZ(0.0f), HaveToeBaseWorldZ(false),
+		AnkleWorldZ(0.0f), HaveAnkleWorldZ(false),
 		FootstepsBoneIdx(-1)
 	{
 		ThighZ[0] = ThighZ[1] = 0.0f;
@@ -366,6 +369,26 @@ NLMISC::CQuat chainAngleQuat(const NLMISC::CVector &a)
 	NLMISC::CQuat r = qx * qz * qy;
 	r.normalize();
 	return r;
+}
+
+// Fresh-format (FigureVersion 0) chain layout: element positions include the first-order shift
+// [Rz(-eps) - I] . A(own angles) . (own length, 0, 0) — the runtime lays the matrix-based chains
+// (spine/tail/pony) out with an eps-twisted tip per element while the orientations use the
+// corrected angles. Confirmed exactly on the regen corpus (tr_mo_c03 base: dx +183um dy -49um
+// both predicted; kakty/chonari/ryzerb/capryni link steps match to ~2um across bend angles
+// 0..90 deg). Legacy rigs (FigureVersion 3) don't have this — call sites gate on FigureVersion.
+NLMISC::CVector chainEpsShift(const NLMISC::CVector &angles, float len)
+{
+	NLMISC::CQuat a = chainAngleQuat(angles);
+	NLMISC::CMatrix am;
+	am.identity();
+	am.setRot(a);
+	NLMISC::CVector v = am.mulVector(NLMISC::CVector(len, 0.0f, 0.0f));
+	NLMISC::CQuat qe(NLMISC::CAngleAxis(NLMISC::CVector(0.0f, 0.0f, 1.0f), -BIPED_EPS_TWIST));
+	NLMISC::CMatrix em;
+	em.identity();
+	em.setRot(qe);
+	return em.mulVector(v) - v;
 }
 
 // The leg pose-record half's head grows by 2 floats per leg link beyond 3 (observed: 3-link
@@ -685,6 +708,21 @@ void parseComRecord(SBipedRig &rig)
 	}
 }
 
+// Parse the pelvis record (0x000d): [0]=int 3, [1]=pelvis width param, [2..17]=4x4 attach matrix.
+// The matrix translation is zero on the legacy corpus; fresh-format rigs store the offset between
+// the last spine link's end (its stored length) and the actual neck attach point here (regen-corpus
+// GT: fy_hom neck sits at Lens.back() - 0.0789 with 0x000d trans = (-0.0789, 0.00025, ~0)).
+void parsePelvisRecord(SBipedRig &rig)
+{
+	size_t n = 0;
+	const float *f = bipedChunkFloats(0x000d, 17, &n);
+	if (!f) return;
+	// Variable-length head ([0]=int record type/count, then 1..2 width params — one on humanoid
+	// rigs, two on the kami-guide family), 4x4 matrix always at the END (like parseChainRecord).
+	const float *m = f + (n - 16);
+	rig.PelvisRecTrans = NLMISC::CVector(m[13], m[12], -m[14]);
+}
+
 // Parse neck angles. The authoritative source is the neck record 0x0065 ([0]=int count of angle
 // floats = 3 per link, [1..count] = (a1,a2,a3) triples, then a 4x4 base-attach matrix) — the Max 9
 // differential dataset shows neck edits land there, and 48/169 corpus files carry stale copies in
@@ -740,10 +778,11 @@ bool locateChainSub(const std::vector<SBipedFinger> &fingers, uint32 link, int &
 // Also captures the Pelvis world rotation for later pelvis-relative joints. scale is always identity
 // for biped bones. Sets *worldRotOut to this bone's world rotation (for children to consume).
 // g_rig must point at the bone's rig (set by walkNode from the BipDriven's system reference).
-void getBipedLocal(INode *node, const NLMISC::CQuat &parentWorldRot,
+void getBipedLocal(INode *node, const NLMISC::CMatrix &parentWorld,
                           NLMISC::CVector &pos, NLMISC::CQuat &rot, NLMISC::CVector &scale,
                           NLMISC::CQuat &worldRotOut)
 {
+	NLMISC::CQuat parentWorldRot = parentWorld.getRot();
 	pos = NLMISC::CVector::Null;
 	rot = NLMISC::CQuat::Identity;
 	scale = NLMISC::CVector(1, 1, 1);
@@ -812,8 +851,25 @@ void getBipedLocal(INode *node, const NLMISC::CQuat &parentWorldRot,
 		worldRot = wq;
 		if (haveId && (id == BID_LLEG || id == BID_RLEG) && link == 0 && rig.HasThighZ)
 		{
-			// Thigh position: pure side offset in the pelvis frame, per-side leg record value.
-			posOverride = NLMISC::CVector(0.0f, 0.0f, (id == BID_LLEG) ? rig.ThighZ[1] : -rig.ThighZ[0]);
+			// Thigh position: pure side offset in the PELVIS frame, per-side leg record value.
+			// The walk parent depends on the era (legacy corpus: pelvis; Max 9 triangle-pelvis
+			// rigs: lowest spine link), so when the parent isn't the pelvis, anchor through the
+			// pelvis world matrix and convert into the parent frame. The parent-is-pelvis path
+			// stays the direct local value to keep the legacy corpus bit-stable.
+			NLMISC::CVector t(0.0f, 0.0f, (id == BID_LLEG) ? rig.ThighZ[1] : -rig.ThighZ[0]);
+			uint32 pid = 0, plink = 0;
+			bool parentIsPelvis = parent && readBipDrivenIdLink(parent, pid, plink) && pid == BID_PELVIS;
+			if (!parentIsPelvis && rig.HavePelvisWorldTM)
+			{
+				NLMISC::CVector wp = rig.PelvisWorldTM * t;
+				NLMISC::CMatrix pinvM = parentWorld;
+				pinvM.invert();
+				posOverride = pinvM * wp;
+			}
+			else
+			{
+				posOverride = t;
+			}
 			havePosOverride = true;
 		}
 	}
@@ -847,6 +903,21 @@ void getBipedLocal(INode *node, const NLMISC::CQuat &parentWorldRot,
 		worldRot = spineRef * rel;
 		worldRot.normalize();
 		posOverride = rig.ClavicleOff[isLeft ? 1 : 0];
+		// Fresh-format rigs anchor the clavicle at the END OF THE LAST SPINE LINK, offset by
+		// (f[9], f[8], +-f[10]) in the LAST SPINE LINK's frame — not the walk parent's (neck)
+		// frame. On straight rigs the two coincide; the kitin family's 22.5-degree neck bend
+		// discriminates (regen GT reproduced to 3e-4 under the spine-frame rule).
+		if (rig.FigureVersion == 0 && rig.HaveLastSpineWorldTM && !rig.Spine.Lens.empty())
+		{
+			NLMISC::CVector spineEnd = rig.LastSpineWorldTM * NLMISC::CVector(rig.Spine.Lens.back(), 0.0f, 0.0f);
+			NLMISC::CMatrix rl;
+			rl.identity();
+			rl.setRot(rig.LastSpineWorldTM.getRot());
+			NLMISC::CVector wp = spineEnd + rl.mulVector(posOverride);
+			NLMISC::CMatrix pinvM = parentWorld;
+			pinvM.invert();
+			posOverride = pinvM * wp;
+		}
 		havePosOverride = true;
 	}
 	else if (haveId && (id == BID_LFINGERS || id == BID_RFINGERS) && !(rig.Fingers[0].empty() && rig.Fingers[1].empty())) // fingers
@@ -910,14 +981,22 @@ void getBipedLocal(INode *node, const NLMISC::CQuat &parentWorldRot,
 			if (sub == 0)
 			{
 				// toe base: creation-time local transform from the leg-record matrix, composed
-				// with the pose block's per-side base delta (local post-multiply; the right half's
-				// delta is mirror-encoded, so the mirror wraps the composed local).
+				// with the pose block's per-side base delta (local post-multiply; the mirrored
+				// side's delta is mirror-encoded, so the mirror wraps the composed local).
+				// Which side the ROTATION matrix stores directly flipped between eras: legacy
+				// corpus files hold the LEFT toe rotation direct (right = LR mirror), fresh-format
+				// (Max 9) files hold the RIGHT one direct (left = LR mirror) — regen corpus GT,
+				// discriminated by tr_mo_kakty (R toe) and tr_mo_kami_guide_4 (both sides). The
+				// POSITION keeps the left-direct/right-z-negate rule in BOTH eras (ryzerb-family
+				// GT: record z -0.4599, L toe -0.4599, R toe +0.4599).
 				NLMISC::CQuat delta;
 				bool haveDelta = chainPoseBaseDelta(0x0069, tLeft, ti, delta);
 				rot = toe.Rot;
 				if (haveDelta) rot = rot * delta;
-				if (tLeft) { pos = toe.Pos; }
-				else { pos = NLMISC::CVector(toe.Pos.x, toe.Pos.y, -toe.Pos.z); rot = mirrorQuatLR(rot); }
+				bool rotDirectSide = (rig.FigureVersion == 0) ? !tLeft : tLeft;
+				if (!rotDirectSide) rot = mirrorQuatLR(rot);
+				if (tLeft) pos = toe.Pos;
+				else pos = NLMISC::CVector(toe.Pos.x, toe.Pos.y, -toe.Pos.z);
 				rot.normalize();
 				haveLocalDirect = true;
 				worldRot = parentWorldRot * rot;
@@ -941,11 +1020,20 @@ void getBipedLocal(INode *node, const NLMISC::CQuat &parentWorldRot,
 	else if (haveId && id == BID_SPINE && link == 0 && rig.Spine.HasMat)
 	{
 		// Spine base: attach matrix from the spine record (COM-relative), composed with the
-		// per-link angles when present.
+		// per-link angles when present. Fresh-format (FigureVersion 0) base-link a1 angles carry
+		// a baked +BIPED_EPS_TWIST the runtime subtracts (regen corpus: stored a1 differs from
+		// the legacy twin's by exactly eps on every matrix-based chain base; GT poses exclude it).
 		rot = rig.Spine.MatRot;
-		if (!rig.Spine.Angles.empty()) rot = rot * chainAngleQuat(rig.Spine.Angles[0]);
+		if (!rig.Spine.Angles.empty())
+		{
+			NLMISC::CVector a0 = rig.Spine.Angles[0];
+			if (rig.FigureVersion == 0) a0.x -= BIPED_EPS_TWIST;
+			rot = rot * chainAngleQuat(a0);
+			if (rig.FigureVersion == 0 && !rig.Spine.Lens.empty())
+				pos += chainEpsShift(a0, rig.Spine.Lens[0]);
+		}
 		rot.normalize();
-		pos = rig.Spine.MatPos;
+		pos += rig.Spine.MatPos;
 		haveLocalDirect = true;
 		worldRot = parentWorldRot * rot;
 	}
@@ -955,7 +1043,11 @@ void getBipedLocal(INode *node, const NLMISC::CQuat &parentWorldRot,
 		worldRot = parentWorldRot * rot;
 		// Spine link position: the previous link's stored length (like tail/pony links).
 		if (link - 1 < rig.Spine.Lens.size())
+		{
 			pos = NLMISC::CVector(rig.Spine.Lens[link - 1], 0.0f, 0.0f);
+			if (rig.FigureVersion == 0 && link < rig.Spine.Lens.size())
+				pos += chainEpsShift(rig.Spine.Angles[link], rig.Spine.Lens[link]);
+		}
 		else
 		{
 			NLMISC::CVector parentDims = readNodeBoneDimensions(parent);
@@ -970,8 +1062,10 @@ void getBipedLocal(INode *node, const NLMISC::CQuat &parentWorldRot,
 		if (link == 0 && !rig.Spine.Lens.empty())
 		{
 			// Neck base sits at the end of the last spine link (its stored length — the last
-			// spine link's own 0x096c dims don't track it; confirmed on kami_keep_2).
-			pos = NLMISC::CVector(rig.Spine.Lens.back(), 0.0f, 0.0f);
+			// spine link's own 0x096c dims don't track it; confirmed on kami_keep_2), displaced
+			// by the pelvis record's attach translation (zero on the legacy corpus; fresh-format
+			// rigs keep the neck off the stored spine length by this offset — regen-corpus GT).
+			pos = NLMISC::CVector(rig.Spine.Lens.back(), 0.0f, 0.0f) + rig.PelvisRecTrans;
 		}
 		else
 		{
@@ -986,11 +1080,40 @@ void getBipedLocal(INode *node, const NLMISC::CQuat &parentWorldRot,
 		if (chain.HasMat)
 		{
 			rot = chain.MatRot;
-			if (!chain.Angles.empty()) rot = rot * chainAngleQuat(chain.Angles[0]);
+			if (!chain.Angles.empty())
+			{
+				// Fresh-format base-link a1 carries the baked +eps (see the spine base).
+				NLMISC::CVector a0 = chain.Angles[0];
+				if (rig.FigureVersion == 0) a0.x -= BIPED_EPS_TWIST;
+				rot = rot * chainAngleQuat(a0);
+			}
 			rot.normalize();
 			pos = chain.MatPos;
 			haveLocalDirect = true;
 			worldRot = parentWorldRot * rot;
+			// The tail record is PELVIS-relative (like the thigh offset). The legacy corpus parents
+			// the tail node to the pelvis, so parent-frame composition was correct by construction;
+			// Max 9 triangle-pelvis rigs parent it to the lowest spine link — anchor through the
+			// pelvis world matrix there. Pony records stay head-relative (parented to the head in
+			// both eras).
+			if (id == BID_TAIL)
+			{
+				uint32 pid = 0, plink = 0;
+				bool parentIsPelvis = parent && readBipDrivenIdLink(parent, pid, plink) && pid == BID_PELVIS;
+				if (!parentIsPelvis && rig.HavePelvisWorldTM)
+				{
+					worldRot = rig.PelvisWorldTM.getRot() * rot;
+					worldRot.normalize();
+					NLMISC::CQuat pinv = parentWorldRot;
+					pinv.invert();
+					rot = pinv * worldRot;
+					rot.normalize();
+					NLMISC::CVector wp = rig.PelvisWorldTM * pos;
+					NLMISC::CMatrix pinvM = parentWorld;
+					pinvM.invert();
+					pos = pinvM * wp;
+				}
+			}
 		}
 	}
 	else if (haveId && (id == BID_TAIL || id == BID_PONY1 || id == BID_PONY2) && link > 0)
@@ -1177,6 +1300,7 @@ SBipedRig &rigFor(CSceneClass *sys, CSceneClassContainer *ssc)
 	parseComRecord(rig);
 	parseLegRecord(rig);
 	parseArmRecord(rig);
+	parsePelvisRecord(rig);
 	parseChainRecord(0x000b, 0x0067, rig.Spine);
 	parseChainRecord(0x000e, 0x0068, rig.Tail);
 	parseChainRecord(0x0013, 0x006d, rig.Pony1);
@@ -1232,7 +1356,7 @@ void walkNode(INode *node, sint32 fatherId, const NLMISC::CMatrix &parentWorld,
 			// transforms for the decoded roles; not-yet-decoded joints inherit their parent's
 			// direction.
 			NLMISC::CQuat worldRotOut;
-			getBipedLocal(node, parentWorld.getRot(), realPos, realRot, realScale, worldRotOut);
+			getBipedLocal(node, parentWorld, realPos, realRot, realScale, worldRotOut);
 			b.UnheritScale = true; // biped bones always unherit their parent's scale (see plugin_max/nel_mesh_lib)
 		}
 		else
@@ -1319,6 +1443,19 @@ void walkNode(INode *node, sint32 fatherId, const NLMISC::CMatrix &parentWorld,
 		uint32 fid = 0, flink = 0;
 		if (readBipDrivenIdLink(node, fid, flink))
 		{
+			if (fid == BID_PELVIS)
+			{
+				// Pelvis world matrix for the thigh world-space anchor (pelvis precedes the
+				// thighs in walk order on every corpus and regen rig).
+				rig.PelvisWorldTM = worldTM;
+				rig.HavePelvisWorldTM = true;
+			}
+			if (fid == BID_SPINE)
+			{
+				// Last assignment wins: by clavicle time this holds the last spine link.
+				rig.LastSpineWorldTM = worldTM;
+				rig.HaveLastSpineWorldTM = true;
+			}
 			if (fid == BID_FOOTPRINTS)
 			{
 				rig.FootstepsBoneIdx = myId;
@@ -1328,6 +1465,11 @@ void walkNode(INode *node, sint32 fatherId, const NLMISC::CMatrix &parentWorld,
 			{
 				rig.ToeBaseWorldZ = worldTM.getPos().z;
 				rig.HaveToeBaseWorldZ = true;
+			}
+			else if (fid == BID_LLEG && (int)flink == rig.MaxLegLink && !rig.HaveAnkleWorldZ)
+			{
+				rig.AnkleWorldZ = worldTM.getPos().z;
+				rig.HaveAnkleWorldZ = true;
 			}
 		}
 	}
@@ -1360,12 +1502,34 @@ void patchFootstepsGround(std::vector<Bone> &bones)
 	for (std::map<CSceneClass *, SBipedRig>::iterator it = g_bipedRigs.begin(); it != g_bipedRigs.end(); ++it)
 	{
 		SBipedRig &rig = it->second;
-		if (rig.FootstepsBoneIdx < 0 || !rig.HaveToeBaseWorldZ) continue;
+		if (rig.FootstepsBoneIdx < 0) continue;
+		// Ground height rule by era: legacy = the (left) toe attach height; fresh-format = the
+		// (left) ankle height minus the leg record's foot-height slot ([7]) — regen corpus GT
+		// (fy_hom -0.011485 exact; ca_spaceship 7.8084 - 0.4040; the toe rule was ~0.5m off on
+		// the deep-ankle monster families).
+		float groundZ = 0.0f;
+		bool haveGround = false;
+		if (rig.FigureVersion == 0 && rig.HaveAnkleWorldZ)
+		{
+			g_rig = &rig;
+			const float *lf = bipedSideHalf(0x000f, false, 8);
+			if (lf)
+			{
+				groundZ = rig.AnkleWorldZ - lf[7];
+				haveGround = true;
+			}
+		}
+		if (!haveGround && rig.HaveToeBaseWorldZ)
+		{
+			groundZ = rig.ToeBaseWorldZ;
+			haveGround = true;
+		}
+		if (!haveGround) continue;
 		Bone &b = bones[(size_t)rig.FootstepsBoneIdx];
 		NLMISC::CMatrix localTM = makeLocalTM(b.OrigPos, b.OrigRot, b.DefaultScale);
 		NLMISC::CMatrix worldTM = rig.FootstepsParentWorld * localTM;
 		NLMISC::CVector wp = worldTM.getPos();
-		wp.z = rig.ToeBaseWorldZ;
+		wp.z = groundZ;
 		NLMISC::CMatrix pinv = rig.FootstepsParentWorld;
 		pinv.invert();
 		NLMISC::CVector newLocal = pinv * wp;
@@ -1379,6 +1543,12 @@ void patchFootstepsGround(std::vector<Bone> &bones)
 		invBind.setPos(newWorld.getPos());
 		invBind.invert();
 		b.InvBindPos = invBind;
+		// Keep the world-transform views coherent with the patch: WorldTM feeds the anim
+		// exporter's attach-offset derivation and g_msBones feeds the maxscript/manifest dumps
+		// (both are index-parallel with bones).
+		b.WorldTM = newWorld;
+		if ((size_t)rig.FootstepsBoneIdx < g_msBones.size() && g_msBones[(size_t)rig.FootstepsBoneIdx].Name == b.Name)
+			g_msBones[(size_t)rig.FootstepsBoneIdx].WorldPos = newWorld.getPos();
 	}
 }
 
@@ -1412,8 +1582,9 @@ void walkNodeD(INode *node, sint32 fatherId, const Mat4D &parentWorld,
 		g_rig = &rigFor(bipedSys, ssc);
 		NLMISC::CMatrix pm; pm.identity();
 		pm.setRot(parentWorld.getI(), parentWorld.getJ(), parentWorld.getK());
+		pm.setPos(parentWorld.getPos());
 		NLMISC::CQuat worldRotOut;
-		getBipedLocal(node, pm.getRot(), realPos, realRot, realScale, worldRotOut);
+		getBipedLocal(node, pm, realPos, realRot, realScale, worldRotOut);
 		b.UnheritScale = true; // biped bones always unherit their parent's scale (see plugin_max/nel_mesh_lib)
 	}
 	else

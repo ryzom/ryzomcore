@@ -209,9 +209,26 @@ struct SBipedRig
 	bool HavePelvisWorldRot;
 	NLMISC::CQuat LastSpineWorldRot;
 	bool HaveLastSpineWorldRot;
+	// Pelvis record (0x000d) attach translation in MatPos convention. Zero on the legacy corpus;
+	// fresh-format (FigureVersion 0) rigs store the last-spine-link-end -> neck attach offset here
+	// (Max 9 keeps the neck off the stored spine-link length by this amount; regen-corpus GT).
+	NLMISC::CVector PelvisRecTrans;
+	// Pelvis bone world matrix, captured by walkNode when the pelvis is walked (before any thigh).
+	// Thighs anchor to the pelvis frame in world space: their node parent differs by era (legacy
+	// corpus: pelvis; Max 9 triangle-pelvis rigs: lowest spine link), the attach rule doesn't.
+	NLMISC::CMatrix PelvisWorldTM;
+	bool HavePelvisWorldTM;
+	// Last spine link's world matrix (last assignment during the walk wins) — fresh-format
+	// clavicles anchor at the spine end in this frame.
+	NLMISC::CMatrix LastSpineWorldTM;
+	bool HaveLastSpineWorldTM;
 	int FigureVersion;
 	float ToeBaseWorldZ;
 	bool HaveToeBaseWorldZ;
+	// Left ankle (last leg link) world height — fresh-format footsteps sit at ankle minus the
+	// leg record's foot-height slot ([7]) instead of at the toe attach height.
+	float AnkleWorldZ;
+	bool HaveAnkleWorldZ;
 	sint32 FootstepsBoneIdx;
 	NLMISC::CMatrix FootstepsParentWorld;
 	SBipedRig();
@@ -269,7 +286,7 @@ bool chainPoseLinkAngle(uint16 chunkId, bool leftSide, int chainIdx, int sub, fl
 
 // Rig state
 SBipedRig &rigFor(PIPELINE::MAX::CSceneClass *sys, PIPELINE::MAX::CSceneClassContainer *ssc);
-void getBipedLocal(PIPELINE::MAX::BUILTIN::INode *node, const NLMISC::CQuat &parentWorldRot,
+void getBipedLocal(PIPELINE::MAX::BUILTIN::INode *node, const NLMISC::CMatrix &parentWorld,
                    NLMISC::CVector &pos, NLMISC::CQuat &rot, NLMISC::CVector &scale,
                    NLMISC::CQuat &worldRotOut);
 

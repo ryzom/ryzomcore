@@ -171,6 +171,64 @@ static bool writeMaxscriptFragment(FILE *fp, const std::string &baseName)
 	return true;
 }
 
+// Dump the walked bones' figure-mode WORLD transforms in the biped_regen manifest.txt line format
+// (biped.getTransform ground truth from Max 9): one BONE line per walked node, positions in world
+// Z-up meters, rotations as MAXScript quats (the conjugate of the NeL convention). id/link are the
+// MaxScript-facing 1-based pair for biped bones, 0/0 otherwise (the harness matches by name).
+// This is the decode side of the encode-direction cross-validation: run against a regenerated
+// fresh-format .max and diff against the manifest entry Max wrote for the same rig.
+static void writeManifestDump(FILE *fp, const std::string &baseName)
+{
+	fprintf(fp, "STATE\t%s\n", baseName.c_str());
+	for (size_t i = 0; i < g_msBones.size(); ++i)
+	{
+		const SMsBone &mb = g_msBones[i];
+		uint32 id1 = mb.IsBiped ? (mb.Id + 1) : 0;
+		uint32 link1 = mb.IsBiped ? (mb.Link + 1) : 0;
+		fprintf(fp, "  BONE\t%s\tid\t%u\tlink\t%u\tpos\t%.9g,%.9g,%.9g\trot\t%.9g,%.9g,%.9g,%.9g\tbiped\t%d\tcom\t%d\tfather\t%s\n",
+		        mb.Name.c_str(), id1, link1,
+		        mb.WorldPos.x, mb.WorldPos.y, mb.WorldPos.z,
+		        -mb.WorldRot.x, -mb.WorldRot.y, -mb.WorldRot.z, mb.WorldRot.w,
+		        mb.IsBiped ? 1 : 0, mb.IsCom ? 1 : 0,
+		        (mb.FatherIdx >= 0 && (size_t)mb.FatherIdx < g_msBones.size()) ? g_msBones[(size_t)mb.FatherIdx].Name.c_str() : "-");
+	}
+}
+
+// Debug dump of every raw chunk on each Biped (0x9155) system object encountered during the walk:
+// chunk id, byte size, and the payload as floats (with the uint32 bit pattern alongside where the
+// float looks like a bit-stored int). Triage aid for record decode work (fresh-format analysis).
+static void writeRigDump(FILE *fp)
+{
+	int rigIdx = 0;
+	for (std::map<CSceneClass *, SBipedRig>::iterator it = g_bipedRigs.begin(); it != g_bipedRigs.end(); ++it, ++rigIdx)
+	{
+		fprintf(fp, "RIG %d figver %d\n", rigIdx, it->second.FigureVersion);
+		CSceneClass *sys = it->first;
+		// after parse, everything unclaimed sits in orphanedChunks; m_Chunks may hold the rest
+		std::vector<std::pair<uint16, IStorageObject *> > all;
+		for (auto c = sys->orphanedChunks().begin(); c != sys->orphanedChunks().end(); ++c) all.push_back(*c);
+		for (auto c = sys->chunks().begin(); c != sys->chunks().end(); ++c) all.push_back(*c);
+		for (size_t k = 0; k < all.size(); ++k)
+		{
+			CStorageRaw *raw = dynamic_cast<CStorageRaw *>(all[k].second);
+			if (!raw) { fprintf(fp, "CHUNK 0x%04x (non-raw)\n", all[k].first); continue; }
+			size_t nb = raw->Value.size();
+			fprintf(fp, "CHUNK 0x%04x bytes %zu\n", all[k].first, nb);
+			const uint8 *d = raw->Value.data();
+			for (size_t i = 0; i + 4 <= nb; i += 4)
+			{
+				float f; uint32 u;
+				memcpy(&f, d + i, 4);
+				memcpy(&u, d + i, 4);
+				if (u != 0 && u < 0x10000) // small bit-stored int (counts, flags)
+					fprintf(fp, "  [%zu] %.9g (int %u)\n", i / 4, (double)f, u);
+				else
+					fprintf(fp, "  [%zu] %.9g\n", i / 4, (double)f);
+			}
+		}
+	}
+}
+
 // Serialize a CSkeletonShape file (SHAP magic + CShapeStream + CSkeletonShape v1 + CBoneBase v2 + CLod v0).
 static void writeSkel(const std::string &path, const std::vector<Bone> &bonesIn)
 {
@@ -430,12 +488,16 @@ int main(int argc, char **argv)
 	int argi = 1;
 	const char *gltfOut = NULL;
 	const char *maxscriptOut = NULL;
+	const char *manifestOut = NULL;
+	const char *rigDumpOut = NULL;
 	bool allowBipedDegraded = false;
 	while (argi < argc && argv[argi][0] == '-' && argv[argi][1] == '-')
 	{
 		if (std::string(argv[argi]) == "--double") { g_useDouble = true; ++argi; }
 		else if (std::string(argv[argi]) == "--gltf" && argi + 1 < argc) { gltfOut = argv[argi + 1]; argi += 2; }
 		else if (std::string(argv[argi]) == "--maxscript" && argi + 1 < argc) { maxscriptOut = argv[argi + 1]; argi += 2; }
+		else if (std::string(argv[argi]) == "--manifest" && argi + 1 < argc) { manifestOut = argv[argi + 1]; argi += 2; }
+		else if (std::string(argv[argi]) == "--dump-rig" && argi + 1 < argc) { rigDumpOut = argv[argi + 1]; argi += 2; }
 		else if (std::string(argv[argi]) == "--allow-biped-degraded") { allowBipedDegraded = true; ++argi; }
 		else break;
 	}
@@ -514,18 +576,38 @@ int main(int argc, char **argv)
 		std::cout << "Wrote " << gltfOut << "\n";
 	}
 
-	if (maxscriptOut)
+	if (maxscriptOut || manifestOut)
 	{
-		FILE *fp = fopen(maxscriptOut, "w");
-		if (!fp) { std::cerr << "cannot open " << maxscriptOut << " for writing\n"; return 1; }
 		std::string base = maxFile;
 		std::string::size_type slash = base.find_last_of("/\\");
 		if (slash != std::string::npos) base = base.substr(slash + 1);
 		std::string::size_type dot = base.rfind('.');
 		if (dot != std::string::npos) base = base.substr(0, dot);
-		bool ok = writeMaxscriptFragment(fp, base);
+		if (maxscriptOut)
+		{
+			FILE *fp = fopen(maxscriptOut, "w");
+			if (!fp) { std::cerr << "cannot open " << maxscriptOut << " for writing\n"; return 1; }
+			bool ok = writeMaxscriptFragment(fp, base);
+			fclose(fp);
+			std::cout << (ok ? "Wrote " : "Skipped (see comment) ") << maxscriptOut << "\n";
+		}
+		if (manifestOut)
+		{
+			FILE *fp = fopen(manifestOut, "w");
+			if (!fp) { std::cerr << "cannot open " << manifestOut << " for writing\n"; return 1; }
+			writeManifestDump(fp, base);
+			fclose(fp);
+			std::cout << "Wrote " << manifestOut << "\n";
+		}
+	}
+
+	if (rigDumpOut)
+	{
+		FILE *fp = fopen(rigDumpOut, "w");
+		if (!fp) { std::cerr << "cannot open " << rigDumpOut << " for writing\n"; return 1; }
+		writeRigDump(fp);
 		fclose(fp);
-		std::cout << (ok ? "Wrote " : "Skipped (see comment) ") << maxscriptOut << "\n";
+		std::cout << "Wrote " << rigDumpOut << "\n";
 	}
 
 	g_object_unref(in);
