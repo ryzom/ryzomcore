@@ -48,7 +48,7 @@ def main():
     ap.add_argument("--graphics", default=os.path.join(home, "ryzomcore_graphics"))
     ap.add_argument("--workspace", default=os.path.join(home, "ryzomcore_leveldesign/workspace"))
     ap.add_argument("--bin", default=os.path.join(home, "ryzomcore/build/nel-pipeline/bin"))
-    ap.add_argument("--ref", default=os.path.join(home, "characters/swt"))
+    ap.add_argument("--ref", default=os.path.join(home, "pipeline_export/common/characters/swt"))
     args = ap.parse_args()
 
     if not os.path.isdir(args.graphics) or not os.path.isdir(args.workspace):

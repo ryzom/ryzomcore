@@ -189,6 +189,11 @@ double TCBScalarChannel::eval(double t) const
 		if (t >= Keys[i].Time && t <= Keys[i+1].Time)
 		{
 			double d = (t - Keys[i].Time) / (double)(Keys[i+1].Time - Keys[i].Time);
+			if (CosineEase)
+			{
+				d = 0.5 * (1.0 - cos(d * M_PI));
+				return Keys[i].Value * (1.0 - d) + Keys[i+1].Value * d;
+			}
 			d = easeWarp(d, Keys[i].EaseFrom, Keys[i+1].EaseTo);
 			double d2 = d*d, d3 = d2*d;
 			double a = 3.0*d2 - 2.0*d3;
@@ -592,6 +597,9 @@ void CBipedAnimEval::buildChannels()
 				m_ChToeBase[s][f].CosineEase = true;
 				angleChannelFrom(*legs[s], 54 + legShift + 10*(int)f, m_ChToeBend[s][f*2]);
 				angleChannelFrom(*legs[s], 55 + legShift + 10*(int)f, m_ChToeBend[s][f*2+1]);
+				// toe BENDS cosine-ease like the toe bases (b_fk_toebend); finger bends stay TCB
+				m_ChToeBend[s][f*2].CosineEase = true;
+				m_ChToeBend[s][f*2+1].CosineEase = true;
 			}
 		}
 	}
@@ -899,8 +907,8 @@ void CBipedAnimEval::evalAt(double t, std::map<INode *, SBipNodeState> &out)
 						if (!isLeftLeg) s = qMirrorLR(s);
 						worldRot = qNorm(qMul(comRot, qMul(qMul(Q_THIGH_A, qConj(s)), Q_THIGH_B)));
 					}
-					else if (m_HaveFigPelvis)
-						worldRot = qNorm(qMul(pelvisRot, qMul(qConj(m_FigPelvisRot), ni.FigWorldRot))); // pelvis-hold
+					else
+						worldRot = qNorm(qMul(comRot, qMul(figComInv, ni.FigWorldRot))); // world-hold: COM-anchored even under pelvis keys (b_fk_pelvis)
 					// thigh attach: fixed offset in the PELVIS frame — the walk parent differs by
 					// era (fresh Max 9 rigs hang thighs off the lowest spine link) but the attach
 					// doesn't (differential anim dataset: a_fk_spine's legs stay put).

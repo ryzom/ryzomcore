@@ -94,6 +94,8 @@ struct TCBScalarChannel
 {
 	std::vector<TCBScalarKey> Keys;
 	std::vector<double> TanFrom, TanTo;
+	// Toe BEND channels cosine-ease like the toe base quats (b_fk_toebend) — see TCBQuatChannel.
+	bool CosineEase = false;
 	void compile();
 	double eval(double timeTicks) const;
 	bool empty() const { return Keys.empty(); }

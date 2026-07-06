@@ -9,7 +9,7 @@ non-biped by scanning for the "Biped Object" UTF-16 marker, filters git-lfs stub
   T2  parse/build roundtrip: the pipeline_max_corpus_test binary with --parse.
   T3  .anim export:          pipeline_max_export_anim on every file (biped rigs go through the
         oversampling path since 2026-07-06), validated two ways —
-        direct:    byte-compare against a pre-optimizer reference (.anim in ~/characters/
+        direct:    byte-compare against a pre-optimizer reference (.anim in ~/pipeline_export/common/characters/
                    anim_export or ~/core4_data/sky) when one exists. Must be IDENTICAL.
         optimized: when only a post-anim_builder reference exists (~/core4_data/
                    fauna_animations), run the in-tree anim_builder over our exports with the
@@ -540,7 +540,7 @@ def main():
     ap.add_argument("--workspace", default=os.path.join(home, "ryzomcore_leveldesign/workspace"))
     ap.add_argument("--bin",       default=os.path.join(home, "ryzomcore/build/nel-pipeline/bin"))
     ap.add_argument("--ref-direct", nargs="*", default=[
-        os.path.join(home, "characters/anim_export"),
+        os.path.join(home, "pipeline_export/common/characters/anim_export"),
         os.path.join(home, "core4_data/sky")],
         help="directories with DIRECT (pre-optimizer) reference .anim files; byte-identity required")
     ap.add_argument("--ref-optimized", nargs="*", default=[

@@ -134,9 +134,13 @@ def main():
         file_ok = True
         for name, (parent, ctrl, mpos, mrot) in gt[base].items():
             if name not in ours:
-                # GT covers ALL scene nodes; we only walk the Bip01 subtree — count only
-                # nodes we're expected to have (biped ctrl or a parent we exported).
-                if ctrl.startswith("BipSlave") or ctrl.startswith("BipDriven") or ctrl.startswith("Vertical_Horizontal"):
+                # GT covers ALL scene nodes; we only walk the Bip01 subtree. Count only biped
+                # nodes we're expected to export — the _big/_small/_selle variant files carry a
+                # full duplicate rig suffixed _ref_scale (the artists' re-proportioning
+                # template, never exported; 5205 nodes corpus-wide), which doesn't count.
+                if (ctrl.startswith("BipSlave") or ctrl.startswith("BipDriven")
+                        or ctrl.startswith("Vertical_Horizontal")) \
+                        and "_ref_scale" not in name and name.startswith("Bip0"):
                     agg["missing"] += 1
                     file_ok = False
                 continue
