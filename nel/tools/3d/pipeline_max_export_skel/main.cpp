@@ -510,6 +510,26 @@ static const SJointDec JD_FOOT     = { 0x0069, 28, {2,0,3,1}, {1,-1,-1,1}, false
 static const SJointDec JD_UPPERARM = { 0x006a, 2,  {1,2,3,0}, {1,-1,1,-1}, true  };
 static const SJointDec JD_HEAD     = { 0x0064, 0,  {0,1,2,3}, {1,1,1,1},   true  };
 
+// Hinge joints (SDK: GetHingeVal / GetHorseAnkleVal — knee, elbow and the 4-link-leg horse ankle
+// are 1-DOF). The figure value sits at the head of the side's pose-record half: the knee/elbow
+// interior angle at [0] (local z-rotation = [0] - pi), the horse ankle at [1] (local z-rotation
+// = [1] as-is). Bit-exact across the era-matched corpus except two small known deviations
+// (kitin-family calf 5.0deg, and the asymmetric-edited bird rigs' L forearm 0.5deg).
+// Returns false when the record is missing.
+static bool hingeLocalRot(uint16 chunkId, bool leftSide, int slot, bool interior, NLMISC::CQuat &out)
+{
+	size_t n = 0;
+	const float *f = bipedChunkFloats(chunkId, 2, &n);
+	if (!f) return false;
+	size_t half = n / 2;
+	size_t off = (leftSide ? 0 : half) + (size_t)slot;
+	if (off >= n) return false;
+	float a = f[off] - (interior ? (float)M_PI : 0.0f);
+	out = NLMISC::CQuat(NLMISC::CAngleAxis(NLMISC::CVector(0.0f, 0.0f, 1.0f), a));
+	out.normalize();
+	return true;
+}
+
 // Compute the world rotation for a decoded joint. Returns false if not decodable.
 static bool jointWorldRot(const SJointDec &jd, NLMISC::CQuat &worldRot)
 {
@@ -716,6 +736,42 @@ static void getBipedLocal(INode *node, const NLMISC::CQuat &parentWorldRot,
 	else if (haveId && (id == BID_LLEG || id == BID_RLEG) && (int)link == rig.MaxLegLink) decoded = jointWorldRot(JD_FOOT, wq); // Foot (last leg link — generalizes 3- and 4-link legs)
 	else if (haveId && (id == BID_LARM || id == BID_RARM) && link == 1) decoded = jointWorldRot(JD_UPPERARM, wq); // UpperArm
 	else if (haveId && id == BID_HEAD && link == 0) decoded = jointWorldRot(JD_HEAD, wq); // Head
+	else if (haveId && (id == BID_LLEG || id == BID_RLEG) && link == 1) // Calf: knee hinge
+	{
+		NLMISC::CQuat hq;
+		if (hingeLocalRot(0x0069, id == BID_LLEG, 0, true, hq))
+		{
+			rot = hq;
+			worldRot = parentWorldRot * rot;
+			NLMISC::CVector parentDims = readNodeBoneDimensions(parent);
+			pos = NLMISC::CVector(parentDims.x, 0.0f, 0.0f);
+			haveLocalDirect = true;
+		}
+	}
+	else if (haveId && (id == BID_LLEG || id == BID_RLEG) && (int)link == 2 && rig.MaxLegLink == 3) // HorseLink ankle hinge
+	{
+		NLMISC::CQuat hq;
+		if (hingeLocalRot(0x0069, id == BID_LLEG, 1, false, hq))
+		{
+			rot = hq;
+			worldRot = parentWorldRot * rot;
+			NLMISC::CVector parentDims = readNodeBoneDimensions(parent);
+			pos = NLMISC::CVector(parentDims.x, 0.0f, 0.0f);
+			haveLocalDirect = true;
+		}
+	}
+	else if (haveId && (id == BID_LARM || id == BID_RARM) && link == 2) // Forearm: elbow hinge
+	{
+		NLMISC::CQuat hq;
+		if (hingeLocalRot(0x006a, id == BID_LARM, 0, true, hq))
+		{
+			rot = hq;
+			worldRot = parentWorldRot * rot;
+			NLMISC::CVector parentDims = readNodeBoneDimensions(parent);
+			pos = NLMISC::CVector(parentDims.x, 0.0f, 0.0f);
+			haveLocalDirect = true;
+		}
+	}
 
 	if (decoded)
 	{
