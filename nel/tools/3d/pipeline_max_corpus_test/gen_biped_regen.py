@@ -86,6 +86,41 @@ fn S2 com nm p r = (
   )
 )
 
+-- Force a bone's LENGTH via figure-mode scale (the leg chain does NOT rubber-band on
+-- setTransform #pos, unlike arms/spine — v1/v2 regen legs came out grossly mis-sized).
+-- Measures the current bone->child distance in-scene and applies the ratio on the scale X
+-- (length) component.
+fn SL com nm childNm targetLen = (
+  local nd = findBoneExact com nm
+  local ch = findBoneExact com childNm
+  if nd == undefined or ch == undefined then mlog ("MISS\tSL " + nm)
+  else (
+    local cur = distance nd.transform.pos ch.transform.pos
+    if cur > 0.00001 do (
+      local sc = biped.getTransform nd #scale
+      sc.x = sc.x * (targetLen / cur)
+      biped.setTransform nd #scale sc false
+    )
+  )
+)
+
+-- Force the pelvis width via uniform pelvis scale so the thigh's distance from the COM
+-- matches the decoded side offset (also not rubber-banded by position forcing).
+fn SW com rootNm thighNm targetOff = (
+  local nd = findBoneExact com (rootNm + " Pelvis")
+  local th = findBoneExact com thighNm
+  if nd == undefined or th == undefined then mlog ("MISS\tSW")
+  else (
+    local cur = distance com.transform.pos th.transform.pos
+    if cur > 0.00001 do (
+      local sc = biped.getTransform nd #scale
+      local ratio = targetOff / cur
+      sc.x = sc.x * ratio; sc.y = sc.y * ratio; sc.z = sc.z * ratio
+      biped.setTransform nd #scale sc false
+    )
+  )
+)
+
 fn regenFinalize com name = (
   com.transform.controller.figureMode = true
   mlog ""

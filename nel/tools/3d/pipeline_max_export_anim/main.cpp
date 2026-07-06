@@ -1292,16 +1292,74 @@ static void addBipedAnimation(NL3D::CAnimation &animation, INode &node, const st
 
 // ---------------------------------------------------------------------------------------------
 
+// Evaluate the biped at quarter-frame steps over [0, maxFrame] and dump world transforms in the
+// differential anim dataset's manifest SAMPLE format (MAXScript-convention quats): the compare
+// side of the Max 9 ground truth (~/biped_anim_dataset). World state straight from evalAt — no
+// local conversion, exactly what biped.getTransform reported.
+static int dumpBipedSamples(INode &root, CSceneClassContainer *ssc, const char *outPath, double maxFrame)
+{
+	using namespace PMAX_RIG;
+	g_bipedRigs.clear();
+	g_rig = NULL;
+	g_msBones.clear();
+	std::vector<Bone> bones;
+	std::set<std::string> nameSet;
+	NLMISC::CMatrix rootMat; rootMat.identity();
+	walkNode(&root, -1, rootMat, ssc, bones, nameSet);
+	patchFootstepsGround(bones);
+	std::map<INode *, size_t> boneOf;
+	for (size_t i = 0; i < bones.size(); ++i)
+		if (bones[i].Node) boneOf[bones[i].Node] = i;
+	std::vector<BIPANIM::CBipedAnimEval *> evals;
+	for (std::map<CSceneClass *, SBipedRig>::iterator it = g_bipedRigs.begin(); it != g_bipedRigs.end(); ++it)
+	{
+		g_rig = &it->second;
+		evals.push_back(new BIPANIM::CBipedAnimEval(it->first, it->second, bones, boneOf));
+	}
+	FILE *fp = fopen(outPath, "w");
+	if (!fp) { std::cerr << "ERROR: cannot open " << outPath << "\n"; return 1; }
+	std::map<INode *, BIPANIM::SBipNodeState> state;
+	for (double f = 0.0; f <= maxFrame + 1e-9; f += 0.25)
+	{
+		state.clear();
+		for (size_t e = 0; e < evals.size(); ++e)
+			evals[e]->evalAt(f * 160.0, state);
+		for (size_t i = 0; i < bones.size(); ++i)
+		{
+			if (!bones[i].Node) continue;
+			std::map<INode *, BIPANIM::SBipNodeState>::iterator it = state.find(bones[i].Node);
+			if (it == state.end()) continue;
+			const BIPANIM::SBipNodeState &st = it->second;
+			fprintf(fp, "  SAMPLE\t%.9g\t%s\tpos\t%.9g,%.9g,%.9g\trot\t%.9g,%.9g,%.9g,%.9g\n",
+			        f, bones[i].Name.c_str(),
+			        st.WorldPos.x, st.WorldPos.y, st.WorldPos.z,
+			        -st.WorldRot.x, -st.WorldRot.y, -st.WorldRot.z, st.WorldRot.w);
+		}
+	}
+	fclose(fp);
+	for (size_t i = 0; i < evals.size(); ++i) delete evals[i];
+	return 0;
+}
+
 int main(int argc, char **argv)
 {
-	if (argc < 3)
+	const char *dumpSamples = NULL;
+	double dumpMaxFrame = 60.0;
+	int argi = 1;
+	while (argi < argc && argv[argi][0] == '-' && argv[argi][1] == '-')
 	{
-		std::cerr << "usage: pipeline_max_export_anim <input.max> <output.anim>\n";
+		if (std::string(argv[argi]) == "--dump-samples" && argi + 1 < argc) { dumpSamples = argv[argi + 1]; argi += 2; }
+		else if (std::string(argv[argi]) == "--dump-max-frame" && argi + 1 < argc) { dumpMaxFrame = atof(argv[argi + 1]); argi += 2; }
+		else break;
+	}
+	if (argc - argi < 2)
+	{
+		std::cerr << "usage: pipeline_max_export_anim [--dump-samples <out.txt> [--dump-max-frame <f>]] <input.max> <output.anim>\n";
 		std::cerr << "exit codes: 0 ok, 1 error, 3 nothing to export\n";
 		return 1;
 	}
-	const char *maxFile = argv[1];
-	const char *animOut = argv[2];
+	const char *maxFile = argv[argi];
+	const char *animOut = argv[argi + 1];
 
 	gsf_init();
 	NL3D::registerSerial3d();
@@ -1347,6 +1405,11 @@ int main(int argc, char **argv)
 			CNodeImpl *n = dynamic_cast<CNodeImpl *>(it->second);
 			if (n && NLMISC::toLower(ucstring(n->userName()).toUtf8()) == "bip01") bip01 = n;
 		}
+	}
+	if (dumpSamples)
+	{
+		if (!bip01) { std::cerr << "ERROR: --dump-samples needs a Bip01\n"; return 1; }
+		return dumpBipedSamples(*bip01, ssc, dumpSamples, dumpMaxFrame);
 	}
 	if (bip01 && selected.insert(bip01).second) selection.push_back(bip01);
 	for (auto it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)

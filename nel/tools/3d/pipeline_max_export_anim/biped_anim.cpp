@@ -164,6 +164,20 @@ void TCBScalarChannel::compile()
 	TanTo[n-1] = (Keys[n-1].Value - Keys[n-2].Value) * (1.0 - Keys[n-1].Tens);
 }
 
+// Max segment ease curve: piecewise-quadratic time warp; a = start key's easeFrom, b = end
+// key's easeTo, both 0..1. Classic Max SDK formula (identical in the 2004-era exporter's Max).
+static double easeWarp(double u, double a, double b)
+{
+	double s = a + b;
+	if (u <= 0.0 || u >= 1.0 || s <= 0.0) return u;
+	if (s > 1.0) { a /= s; b /= s; }
+	double k = 1.0 / (2.0 - a - b);
+	if (u < a) return (k / a) * u * u;
+	if (u < 1.0 - b) return k * (2.0 * u - a);
+	u = 1.0 - u;
+	return 1.0 - (k / b) * u * u;
+}
+
 double TCBScalarChannel::eval(double t) const
 {
 	size_t n = Keys.size();
@@ -175,6 +189,7 @@ double TCBScalarChannel::eval(double t) const
 		if (t >= Keys[i].Time && t <= Keys[i+1].Time)
 		{
 			double d = (t - Keys[i].Time) / (double)(Keys[i+1].Time - Keys[i].Time);
+			d = easeWarp(d, Keys[i].EaseFrom, Keys[i+1].EaseTo);
 			double d2 = d*d, d3 = d2*d;
 			double a = 3.0*d2 - 2.0*d3;
 			return Keys[i].Value*(1.0-a) + Keys[i+1].Value*a
@@ -227,6 +242,9 @@ QuatD TCBQuatChannel::eval(double t) const
 		if (t >= Keys[i].Time && t <= Keys[i+1].Time)
 		{
 			double d = (t - Keys[i].Time) / (double)(Keys[i+1].Time - Keys[i].Time);
+			if (CosineEase)
+				return qSlerp(Keys[i].Quat, Keys[i+1].Quat, 0.5 * (1.0 - cos(d * M_PI)));
+			d = easeWarp(d, Keys[i].EaseFrom, Keys[i+1].EaseTo);
 			QuatD s0 = qSlerp(Keys[i].Quat, Keys[i+1].Quat, d);
 			QuatD s1 = qSlerp(A[i], B[i+1], d);
 			return qSlerp(s0, s1, 2.0*d*(1.0-d));
@@ -292,16 +310,23 @@ static void parseTrack(CSceneClass *sys, uint16 dataId, uint16 timeId, int dataH
 	out.Tens.resize(count);
 	out.Cont.resize(count);
 	out.Bias.resize(count);
+	out.EaseTo.resize(count);
+	out.EaseFrom.resize(count);
 	for (sint32 k = 0; k < count; ++k)
 	{
 		const float *tr = t + 7 + (size_t)k * trec;
 		sint32 timeTicks;
 		memcpy(&timeTicks, &tr[0], 4);
 		out.Times[k] = timeTicks;
-		// TCB in UI units (0..50, default 25) -> internal -1..1
+		// TCB in UI units (0..50, default 25) -> internal -1..1. Stored record order is
+		// (easeTo, easeFrom, tension, BIAS, CONTINUITY) at [5..9] — bias BEFORE continuity,
+		// pinned by the differential anim dataset's a_tcb_cont0/a_tcb_bias0 pair (the earlier
+		// t,c,b assumption was undetectable while every corpus key sat at the 25 defaults).
 		out.Tens[k] = (tr[7] - 25.0f) / 25.0f;
-		out.Cont[k] = (tr[8] - 25.0f) / 25.0f;
-		out.Bias[k] = (tr[9] - 25.0f) / 25.0f;
+		out.Bias[k] = (tr[8] - 25.0f) / 25.0f;
+		out.Cont[k] = (tr[9] - 25.0f) / 25.0f;
+		out.EaseTo[k] = tr[5] / 50.0f;
+		out.EaseFrom[k] = tr[6] / 50.0f;
 		const float *dr = d + dataHdr + (size_t)k * rec;
 		out.Recs[k].assign(dr, dr + rec);
 	}
@@ -363,6 +388,7 @@ void CBipedAnimEval::quatChannelFrom(const SBipKeyTrack &tr, int off, TCBQuatCha
 		key.Time = tr.Times[k];
 		key.Quat = qNorm(QuatD(tr.Recs[k][off], tr.Recs[k][off+1], tr.Recs[k][off+2], tr.Recs[k][off+3]));
 		key.Tens = tr.Tens[k]; key.Cont = tr.Cont[k]; key.Bias = tr.Bias[k];
+		key.EaseTo = tr.EaseTo[k]; key.EaseFrom = tr.EaseFrom[k];
 		out.Keys.push_back(key);
 	}
 	out.compile();
@@ -378,6 +404,7 @@ void CBipedAnimEval::scalarChannelFrom(const SBipKeyTrack &tr, int off, TCBScala
 		key.Time = tr.Times[k];
 		key.Value = tr.Recs[k][off];
 		key.Tens = tr.Tens[k]; key.Cont = tr.Cont[k]; key.Bias = tr.Bias[k];
+		key.EaseTo = tr.EaseTo[k]; key.EaseFrom = tr.EaseFrom[k];
 		out.Keys.push_back(key);
 	}
 	out.compile();
@@ -404,6 +431,7 @@ static void angleChannelFrom(const SBipKeyTrack &tr, int off, TCBScalarChannel &
 		prev = v;
 		key.Value = v;
 		key.Tens = tr.Tens[k]; key.Cont = tr.Cont[k]; key.Bias = tr.Bias[k];
+		key.EaseTo = tr.EaseTo[k]; key.EaseFrom = tr.EaseFrom[k];
 		out.Keys.push_back(key);
 	}
 	out.compile();
@@ -419,6 +447,8 @@ static void vec3ChannelFrom(const SBipKeyTrack &tr, int ox, int oy, int oz, TCBV
 		kx.Tens = ky.Tens = kz.Tens = tr.Tens[k];
 		kx.Cont = ky.Cont = kz.Cont = tr.Cont[k];
 		kx.Bias = ky.Bias = kz.Bias = tr.Bias[k];
+		kx.EaseTo = ky.EaseTo = kz.EaseTo = tr.EaseTo[k];
+		kx.EaseFrom = ky.EaseFrom = kz.EaseFrom = tr.EaseFrom[k];
 		kx.Value = tr.Recs[k][ox]; ky.Value = tr.Recs[k][oy]; kz.Value = tr.Recs[k][oz];
 		out.X.Keys.push_back(kx); out.Y.Keys.push_back(ky); out.Z.Keys.push_back(kz);
 	}
@@ -428,7 +458,7 @@ static void vec3ChannelFrom(const SBipKeyTrack &tr, int ox, int oy, int oz, TCBV
 CBipedAnimEval::CBipedAnimEval(CSceneClass *rigSys, SBipedRig &rig,
                                const std::vector<Bone> &bones,
                                const std::map<INode *, size_t> &boneOfNode)
-	: m_Sys(rigSys), m_Rig(&rig)
+	: m_Sys(rigSys), m_Rig(&rig), m_HaveFigPelvis(false)
 {
 	parseBipAnimKeys(rigSys, m_Keys);
 
@@ -455,6 +485,12 @@ CBipedAnimEval::CBipedAnimEval(CSceneClass *rigSys, SBipedRig &rig,
 		{
 			m_FigComRot = ni.FigWorldRot;
 			m_FigComPos = ni.FigWorldPos;
+		}
+		if (ni.HasIdLink && ni.Id == BID_PELVIS)
+		{
+			m_FigPelvisRot = ni.FigWorldRot;
+			m_FigPelvisPos = ni.FigWorldPos;
+			m_HaveFigPelvis = true;
 		}
 		m_NodeIdx[node] = m_Nodes.size();
 		m_Nodes.push_back(ni);
@@ -534,6 +570,7 @@ void CBipedAnimEval::buildChannels()
 			for (size_t f = 0; f < nf; ++f)
 			{
 				quatChannelFrom(*arms[s], 46 + 10*(int)f, m_ChFingerBase[s][f]);
+				// finger bases stay TCB — only TOE bases cosine-ease (a_fk_finger vs a_fk_toe)
 				angleChannelFrom(*arms[s], 54 + 10*(int)f, m_ChFingerBend[s][f*2]);
 				angleChannelFrom(*arms[s], 55 + 10*(int)f, m_ChFingerBend[s][f*2+1]);
 			}
@@ -552,6 +589,7 @@ void CBipedAnimEval::buildChannels()
 			for (size_t f = 0; f < nt; ++f)
 			{
 				quatChannelFrom(*legs[s], 46 + legShift + 10*(int)f, m_ChToeBase[s][f]);
+				m_ChToeBase[s][f].CosineEase = true;
 				angleChannelFrom(*legs[s], 54 + legShift + 10*(int)f, m_ChToeBend[s][f*2]);
 				angleChannelFrom(*legs[s], 55 + legShift + 10*(int)f, m_ChToeBend[s][f*2+1]);
 			}
@@ -667,6 +705,8 @@ void CBipedAnimEval::evalAt(double t, std::map<INode *, SBipNodeState> &out)
 					QuatD s = m_ChPelvis.eval(t);
 					worldRot = qNorm(qMul(comRot, qMul(qMul(Q_PELVIS_A, qConj(s)), Q_PELVIS_B)));
 				}
+				else
+					worldRot = qNorm(qMul(comRot, qMul(figComInv, ni.FigWorldRot)));
 				// pelvis attach: fixed offset from the COM node in the pelvis frame (figure)
 				{
 					NLMISC::CVectorD off = qRotate(qConj(ni.FigWorldRot), ni.FigWorldPos - m_FigComPos);
@@ -685,6 +725,8 @@ void CBipedAnimEval::evalAt(double t, std::map<INode *, SBipNodeState> &out)
 						QuatD R = chainAngleQuatD(m_ChSpineAng[0].eval(t), m_ChSpineAng[1].eval(t), m_ChSpineAng[2].eval(t));
 						worldRot = qNorm(qMul(comRot, qMul(C, R)));
 					}
+					else
+						worldRot = qNorm(qMul(comRot, qMul(figComInv, ni.FigWorldRot)));
 					// spine base attach: rigid in the COM frame (figure offset)
 					NLMISC::CVectorD off = qRotate(figComInv, ni.FigWorldPos - m_FigComPos);
 					worldPos = comPos + qRotate(comRot, off);
@@ -706,6 +748,13 @@ void CBipedAnimEval::evalAt(double t, std::map<INode *, SBipNodeState> &out)
 				haveLastSpine = true;
 				break;
 			case BID_TAIL:
+				if (m_ChTailAng.empty() && ni.Link == 0)
+				{
+					// unkeyed tail: base holds its figure orientation in the COM frame (world-hold
+					// rule from the differential anim dataset: unkeyed world/COM-frame roles do NOT
+					// follow the node hierarchy — a_fk_spine's tail/legs/head/arms all stay put).
+					worldRot = qNorm(qMul(comRot, qMul(figComInv, ni.FigWorldRot)));
+				}
 				if (!m_ChTailAng.empty() && m_ChTailAng.size() >= (ni.Link + 1) * 3)
 				{
 					QuatD figAng = chainAngleQuatD(
@@ -773,6 +822,8 @@ void CBipedAnimEval::evalAt(double t, std::map<INode *, SBipNodeState> &out)
 					QuatD s = m_ChHead.eval(t);
 					worldRot = qNorm(qMul(comRot, qMul(qMul(Q_C, qConj(s)), Q_HEAD_B)));
 				}
+				else
+					worldRot = qNorm(qMul(comRot, qMul(figComInv, ni.FigWorldRot))); // world-hold (see BID_TAIL)
 				break;
 			case BID_LARM: case BID_RARM:
 			{
@@ -812,6 +863,8 @@ void CBipedAnimEval::evalAt(double t, std::map<INode *, SBipNodeState> &out)
 						if (isLeftArm) s = qMirrorLR(s);
 						worldRot = qNorm(qMul(comRot, qMul(qMul(Q_UPPERARM_A, qConj(s)), Q_UPPERARM_B)));
 					}
+					else
+						worldRot = qNorm(qMul(comRot, qMul(figComInv, ni.FigWorldRot))); // world-hold (see BID_TAIL)
 				}
 				else if (ni.Link == 2) // forearm (elbow hinge)
 				{
@@ -846,6 +899,16 @@ void CBipedAnimEval::evalAt(double t, std::map<INode *, SBipNodeState> &out)
 						if (!isLeftLeg) s = qMirrorLR(s);
 						worldRot = qNorm(qMul(comRot, qMul(qMul(Q_THIGH_A, qConj(s)), Q_THIGH_B)));
 					}
+					else if (m_HaveFigPelvis)
+						worldRot = qNorm(qMul(pelvisRot, qMul(qConj(m_FigPelvisRot), ni.FigWorldRot))); // pelvis-hold
+					// thigh attach: fixed offset in the PELVIS frame — the walk parent differs by
+					// era (fresh Max 9 rigs hang thighs off the lowest spine link) but the attach
+					// doesn't (differential anim dataset: a_fk_spine's legs stay put).
+					if (m_HaveFigPelvis)
+					{
+						NLMISC::CVectorD off = qRotate(qConj(m_FigPelvisRot), ni.FigWorldPos - m_FigPelvisPos);
+						worldPos = pelvisPos + qRotate(pelvisRot, off);
+					}
 				}
 				else if (ni.Link == 1) // calf (knee hinge)
 				{
@@ -870,6 +933,8 @@ void CBipedAnimEval::evalAt(double t, std::map<INode *, SBipNodeState> &out)
 						QuatD s = m_ChLegEnd[sLeg].eval(t);
 						worldRot = qNorm(qMul(comRot, qMul(Q_C, qConj(s))));
 					}
+					else
+						worldRot = qNorm(qMul(comRot, qMul(figComInv, ni.FigWorldRot))); // world-hold (see BID_TAIL)
 				}
 				break;
 			}
@@ -925,9 +990,20 @@ void CBipedAnimEval::evalAt(double t, std::map<INode *, SBipNodeState> &out)
 						if ((size_t)ti < m_ChToeBase[side].size() && !m_ChToeBase[side][ti].empty())
 						{
 							QuatD s = m_ChToeBase[side][ti].eval(t);
-							// SBipedToe.Rot = mirrorQuatLR(rawRowsIJK): undo the flip to get M_raw.
-							QuatD Mraw = qMirrorLR(QuatD(toes[ti].Rot));
-							QuatD local = qMul(Mraw, qConj(s));
+							QuatD local;
+							if (m_Rig && m_Rig->FigureVersion == 0)
+							{
+								// Fresh-format rule = the figure decode's (toe.Rot keeps the z-flip;
+								// right direct, left = LR mirror of the composed local) — pinned by
+								// the differential anim dataset's a_fk_toe.
+								local = qMul(QuatD(toes[ti].Rot), qConj(s));
+							}
+							else
+							{
+								// Legacy: raw rows-as-IJK matrix (undo the z-flip).
+								QuatD Mraw = qMirrorLR(QuatD(toes[ti].Rot));
+								local = qMul(Mraw, qConj(s));
+							}
 							if (side == 1) local = qMirrorLR(local);
 							worldRot = qNorm(qMul(parentRot, local));
 						}

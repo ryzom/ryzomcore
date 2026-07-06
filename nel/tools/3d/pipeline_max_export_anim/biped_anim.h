@@ -89,7 +89,7 @@ NLMISC::CVectorD qRotate(const QuatD &q, const NLMISC::CVectorD &v);
 QuatD qAxisAngle(const NLMISC::CVectorD &axis, double angle);
 
 // One keyframe channel with Max-style TCB interpolation (see header comment).
-struct TCBScalarKey { sint32 Time; double Value; float Tens, Cont, Bias; };
+struct TCBScalarKey { sint32 Time; double Value; float Tens, Cont, Bias, EaseTo, EaseFrom; };
 struct TCBScalarChannel
 {
 	std::vector<TCBScalarKey> Keys;
@@ -101,11 +101,16 @@ struct TCBScalarChannel
 	sint32 lastTime() const { return Keys.back().Time; }
 };
 
-struct TCBQuatKey { sint32 Time; QuatD Quat; float Tens, Cont, Bias; };
+struct TCBQuatKey { sint32 Time; QuatD Quat; float Tens, Cont, Bias, EaseTo, EaseFrom; };
 struct TCBQuatChannel
 {
 	std::vector<TCBQuatKey> Keys;
 	std::vector<QuatD> A, B; // squad control points
+	// Finger/toe BASE delta channels interpolate with per-segment cosine ease + slerp, ignoring
+	// the TCB params entirely (zero slope through every key) — pinned by the differential anim
+	// dataset's a_fk_toe (angle = 25 deg * sin^2(pi*u/2) exact at every quarter frame).
+	bool CosineEase;
+	TCBQuatChannel() : CosineEase(false) { }
 	void compile();
 	QuatD eval(double timeTicks) const;
 	bool empty() const { return Keys.empty(); }
@@ -126,6 +131,7 @@ struct SBipKeyTrack
 	std::vector<sint32> Times;
 	std::vector<std::vector<float> > Recs;   // rec_size floats per key
 	std::vector<float> Tens, Cont, Bias;     // internal units (-1..1)
+	std::vector<float> EaseTo, EaseFrom;     // 0..1 (UI 0..50 / 50)
 	bool empty() const { return Times.empty(); }
 };
 
@@ -196,6 +202,11 @@ private:
 	// figure-frame constants
 	QuatD m_FigComRot;
 	NLMISC::CVectorD m_FigComPos;
+	// figure pelvis state — thigh positions anchor to the pelvis frame (the node hierarchy
+	// differs by era: fresh Max 9 rigs parent thighs to the lowest spine link).
+	QuatD m_FigPelvisRot;
+	NLMISC::CVectorD m_FigPelvisPos;
+	bool m_HaveFigPelvis;
 
 	// compiled channels (lazy)
 	TCBVec3Channel m_ChHorizontal;    // Y-up stored (x, y_up, z_up)

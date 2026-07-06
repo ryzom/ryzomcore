@@ -151,6 +151,38 @@ static bool writeMaxscriptFragment(FILE *fp, const std::string &baseName)
 	        prop1 ? "true" : "false", prop2 ? "true" : "false", prop3 ? "true" : "false");
 	fprintf(fp, "  com.transform.controller.rootName = \"%s\"\n", rootName.c_str());
 	fprintf(fp, "  com.transform.controller.figureMode = true\n");
+	// Leg-chain sizes and pelvis width are NOT rubber-banded by biped.setTransform #pos (unlike
+	// the arm/spine chains), so v1/v2 regen rigs came out with grossly mis-sized thighs/calves
+	// and too-narrow pelves. Force them via figure-mode scale first: pelvis width from the thigh
+	// side offset, per-bone lengths from the decoded child distances (SW/SL helpers in the
+	// driver header measure the current value in-scene and apply the ratio).
+	{
+		// per-side leg link node indices (0=thigh .. maxLegLink=foot; 4-link mounts included)
+		sint32 leg[2][8];
+		for (int s2 = 0; s2 < 2; ++s2)
+			for (int l = 0; l < 8; ++l)
+				leg[s2][l] = -1;
+		for (size_t i = 0; i < g_msBones.size(); ++i)
+		{
+			const SMsBone &mb = g_msBones[i];
+			if (!mb.IsBiped || mb.Link >= 8) continue;
+			if (mb.Id == BID_LLEG) leg[0][mb.Link] = (sint32)i;
+			else if (mb.Id == BID_RLEG) leg[1][mb.Link] = (sint32)i;
+		}
+		// pelvis width = distance from COM to a thigh (decoded thigh side offset)
+		if (comIdx >= 0 && leg[0][0] >= 0)
+			fprintf(fp, "  SW com \"%s\" \"%s\" (%.9g)\n", rootName.c_str(), g_msBones[leg[0][0]].Name.c_str(),
+			        (g_msBones[leg[0][0]].WorldPos - g_msBones[comIdx].WorldPos).norm());
+		// per-link lengths from the decoded child distances, both sides, all leg links
+		for (int s2 = 0; s2 < 2; ++s2)
+			for (int l = 0; l + 1 < 8; ++l)
+			{
+				if (leg[s2][l] < 0 || leg[s2][l + 1] < 0) continue;
+				fprintf(fp, "  SL com \"%s\" \"%s\" (%.9g)\n",
+				        g_msBones[leg[s2][l]].Name.c_str(), g_msBones[leg[s2][l + 1]].Name.c_str(),
+				        (g_msBones[leg[s2][l + 1]].WorldPos - g_msBones[leg[s2][l]].WorldPos).norm());
+			}
+	}
 	// Two passes: rubber-banding a child position rescales its parent, which shifts already-set
 	// grandchildren; the second pass converges the chain.
 	fprintf(fp, "  for pass = 1 to 2 do (\n");
