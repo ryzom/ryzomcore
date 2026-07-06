@@ -56,6 +56,15 @@ IF (Python3_Interpreter_FOUND)
 	# T1/T2 sweep is a manual/occasional run); T3 exports every non-biped anim and gates:
 	# direct pre-optimizer references must be byte-identical, optimizer-processed references
 	# must reconstruct within the optimizer's own key-drop tolerance.
+	# swt_corpus.py: T1/T2 over the SwtSourceDirectories sources + T3 export byte-compare
+	# against the direct reference .swt (era-tolerant for nodes flagged after the reference
+	# export; see the ERA_EXTRA_NODES list in the driver).
+	ADD_TEST(NAME pipeline_max_swt_corpus
+		COMMAND ${Python3_EXECUTABLE} swt_corpus.py
+			--bin $<TARGET_FILE_DIR:pipeline_max_export_swt>
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+	SET_TESTS_PROPERTIES(pipeline_max_swt_corpus PROPERTIES SKIP_RETURN_CODE 77)
+
 	ADD_TEST(NAME pipeline_max_anim_corpus
 		COMMAND ${Python3_EXECUTABLE} anim_corpus.py --all --gate-t3
 			--bin $<TARGET_FILE_DIR:pipeline_max_export_anim>
@@ -63,6 +72,6 @@ IF (Python3_Interpreter_FOUND)
 	SET_TESTS_PROPERTIES(pipeline_max_anim_corpus PROPERTIES SKIP_RETURN_CODE 77)
 
 	IF (TARGET unit_test)
-		ADD_DEPENDENCIES(unit_test pipeline_max_corpus_test pipeline_max_export_skel pipeline_max_export_anim)
+		ADD_DEPENDENCIES(unit_test pipeline_max_corpus_test pipeline_max_export_skel pipeline_max_export_anim pipeline_max_export_swt)
 	ENDIF (TARGET unit_test)
 ENDIF (Python3_Interpreter_FOUND)
