@@ -39,12 +39,14 @@ INSTALL(TARGETS pipeline_max_corpus_test RUNTIME DESTINATION bin COMPONENT tools
 # workspace configs. It needs the private ryzomcore_graphics/ryzomcore_leveldesign asset
 # checkouts and reference core4_data .skel files that aren't part of this repo, so it self-skips
 # (exit 77) rather than failing when those aren't present — e.g. any machine other than
-# Kaetemi's. T1/T2 byte-identity mismatches fail the test; T3 .skel-export accuracy is
-# informational only (an active reverse-engineering target, not yet expected to be byte-exact).
+# Kaetemi's. T1/T2 byte-identity mismatches fail the test; T3 .skel-export accuracy is gated
+# against the recorded accuracy floor (--gate-t3: biped size-match 100%, drot exact >= 97%,
+# dpos exact+close >= 72%, non-biped bit-exact) so decode regressions fail while byte-exactness
+# remains an aspiration, not a requirement.
 FIND_PACKAGE(Python3 COMPONENTS Interpreter)
 IF (Python3_Interpreter_FOUND)
 	ADD_TEST(NAME pipeline_max_skel_corpus
-		COMMAND ${Python3_EXECUTABLE} skel_corpus.py --all
+		COMMAND ${Python3_EXECUTABLE} skel_corpus.py --all --gate-t3
 			--bin $<TARGET_FILE_DIR:pipeline_max_export_skel>
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 	SET_TESTS_PROPERTIES(pipeline_max_skel_corpus PROPERTIES SKIP_RETURN_CODE 77)

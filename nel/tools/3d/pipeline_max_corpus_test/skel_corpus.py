@@ -125,7 +125,7 @@ def bone_accuracy(ours, ref_path):
 def run_tests(bin_dir, files, do_t1, do_t2, do_t3, ref_biped, ref_nonbiped, output_dir):
     corpus_test = os.path.join(bin_dir, "pipeline_max_corpus_test")
     export_skel = os.path.join(bin_dir, "pipeline_max_export_skel")
-    if do_t1 and not os.path.isfile(corpus_test):
+    if (do_t1 or do_t2) and not os.path.isfile(corpus_test):
         print(f"SKIP: missing binary {corpus_test} (build it first)")
         sys.exit(SKIP_CODE)
     if do_t3 and not os.path.isfile(export_skel):
@@ -145,7 +145,7 @@ def run_tests(bin_dir, files, do_t1, do_t2, do_t3, ref_biped, ref_nonbiped, outp
         b = buckets[kind]
         b["total"] += 1
 
-        if do_t1:
+        if do_t1 or do_t2:
             args = [corpus_test, full]
             if do_t2: args.insert(1, "--parse")
             r = subprocess.run(args, capture_output=True, text=True, timeout=120)
@@ -259,6 +259,10 @@ def main():
     ap.add_argument("--t2", action="store_true")
     ap.add_argument("--t3", action="store_true")
     ap.add_argument("--all", action="store_true", help="shortcut for --t1 --t2 --t3")
+    ap.add_argument("--gate-t3", action="store_true",
+                    help="fail (exit 1) when T3 export accuracy regresses below the recorded floor: "
+                         "biped size-match 100%%, drot exact >= 97%%, dpos exact+close >= 72%%; "
+                         "non-biped dpos and drot 100%% exact")
     ap.add_argument("-v", "--verbose", action="store_true")
     args = ap.parse_args()
     if args.all:
@@ -287,11 +291,35 @@ def main():
     buckets = run_tests(args.bin, files, args.t1, args.t2, args.t3, ref_biped, ref_nonbiped, args.output)
     report(buckets, args.t1, args.t2, args.t3, args.verbose)
 
-    # Non-zero exit if any T1/T2 failure surfaced (T3 mismatches are epsilon-tolerated).
+    # Non-zero exit if any T1/T2 failure surfaced (T3 mismatches are epsilon-tolerated unless
+    # --gate-t3 asks for the accuracy regression gate).
     fail = 0
     for k in ("biped", "nonbiped"):
         b = buckets.get(k, {})
         fail += len(b.get("t1_fail", [])) + len(b.get("t2_fail", []))
+    if args.gate_t3 and args.t3:
+        def frac(b, num_key, den_key):
+            den = b.get(den_key, 0)
+            return (b.get(num_key, 0) / den) if den else 1.0
+        bb = buckets.get("biped", {})
+        nb = buckets.get("nonbiped", {})
+        gates = []
+        n_cmp = bb.get("total", 0) - len(bb.get("t3_missing_ref", []))
+        if n_cmp:
+            sm = bb.get("t3_size_match", 0) + bb.get("t3_pass", 0)
+            gates.append(("biped size-match", sm >= n_cmp))
+            gates.append(("biped drot exact >= 97%", frac(bb, "t3_drot_exact", "t3_bones_total") >= 0.97))
+            dp_ec = bb.get("t3_bones_exact", 0) + bb.get("t3_bones_close", 0)
+            bt = bb.get("t3_bones_total", 0)
+            gates.append(("biped dpos exact+close >= 72%", (dp_ec / bt if bt else 1.0) >= 0.72))
+        nt = nb.get("t3_bones_total", 0)
+        if nt:
+            gates.append(("nonbiped dpos 100% exact", nb.get("t3_bones_exact", 0) >= nt))
+            gates.append(("nonbiped drot 100% exact", nb.get("t3_drot_exact", 0) >= nt))
+        for name, ok in gates:
+            if not ok:
+                print(f"T3 GATE FAIL: {name}")
+                fail += 1
     sys.exit(1 if fail else 0)
 
 if __name__ == "__main__":
