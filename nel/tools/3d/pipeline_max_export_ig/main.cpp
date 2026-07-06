@@ -1067,6 +1067,198 @@ struct SMeshData
 	std::vector<SMeshTri> Tris;
 };
 
+// Parametric primitive mesh generation, GROUND-TRUTH EXACT per ~/prim_mesh_dataset
+// (gen_prim_mesh_dataset.ms, Max 9 run 2026-07-06): vertex order, face order, windings,
+// including multi-segment grids and the negative-height winding flip. Validated by
+// prim_check.py against the dataset manifest (ctest pipeline_max_prim_mesh).
+static bool buildParametricMesh(const NLMISC::CClassId &cid, std::map<sint32, SPBlockParam> &params, std::vector<NLMISC::CVector> &verts, std::vector<SMeshTri> &tris)
+{
+	#define PBF(i) (params.find(i) != params.end() ? params[i].V[0] : 0.0f)
+	#define PBI(i) (params.find(i) != params.end() ? (params[i].IsInt ? (sint)params[i].I : (sint)params[i].V[0]) : 0)
+	// Parametric primitive topology below is GROUND-TRUTH EXACT per ~/prim_mesh_dataset
+	// (gen_prim_mesh_dataset.ms, Max 9 run 2026-07-06): vertex order, face order, windings,
+	// including multi-segment grids and the negative-height winding flip. Validated by
+	// prim_check.py against the dataset manifest.
+
+	// Box (0x10, 0): params 0/1/2 = length/width/height, 3/4/5 = w/l/h segments.
+	if (cid == NLMISC::CClassId(0x00000010, 0x00000000))
+	{
+		float l = PBF(0), w = PBF(1), h = PBF(2);
+		sint ws = std::max(1, PBI(3)), ls = std::max(1, PBI(4)), hs = std::max(1, PBI(5));
+		float dx = w / ws, dy = l / ls, dz = h / hs;
+		float x0 = -w / 2.0f, y0 = -l / 2.0f;
+		sint row = ws + 1;
+		sint gridN = (ws + 1) * (ls + 1);
+		verts.clear();
+		// bottom grid, top grid (ix fastest, x/y ascending by formula — negative dims flip
+		// coordinates naturally), then hs-1 middle perimeter rings bottom-up
+		for (sint iy = 0; iy <= ls; ++iy)
+			for (sint ix = 0; ix <= ws; ++ix)
+				verts.push_back(NLMISC::CVector(x0 + dx * ix, y0 + dy * iy, 0.0f));
+		for (sint iy = 0; iy <= ls; ++iy)
+			for (sint ix = 0; ix <= ws; ++ix)
+				verts.push_back(NLMISC::CVector(x0 + dx * ix, y0 + dy * iy, h));
+		// perimeter walk from P00: +x, +y, -x, -y
+		std::vector<sint> perIx, perIy;
+		for (sint ix = 0; ix < ws; ++ix) { perIx.push_back(ix); perIy.push_back(0); }
+		for (sint iy = 0; iy < ls; ++iy) { perIx.push_back(ws); perIy.push_back(iy); }
+		for (sint ix = ws; ix > 0; --ix) { perIx.push_back(ix); perIy.push_back(ls); }
+		for (sint iy = ls; iy > 0; --iy) { perIx.push_back(0); perIy.push_back(iy); }
+		sint perN = (sint)perIx.size();
+		for (sint r = 1; r < hs; ++r)
+			for (sint k = 0; k < perN; ++k)
+				verts.push_back(NLMISC::CVector(x0 + dx * perIx[k], y0 + dy * perIy[k], dz * r));
+		// level ring index: v = 0 -> bottom grid perim, v = hs -> top grid perim, else mid ring
+		#define BOX_RING(v, k) ((v) == 0 ? perIy[(k) % perN] * row + perIx[(k) % perN] \
+			: ((v) == hs ? gridN + perIy[(k) % perN] * row + perIx[(k) % perN] \
+			: 2 * gridN + ((v) - 1) * perN + ((k) % perN)))
+		tris.clear();
+		bool flip = h < 0.0f; // per box_negheight GT; negative l/w flip via coordinates only
+		#define BOX_TRI(a, b, c) { SMeshTri t = { (uint32)(flip ? (b) : (a)), (uint32)(flip ? (a) : (b)), (uint32)(c) }; tris.push_back(t); }
+		// bottom cells: (a, a+row, a+row+1), (a+row+1, a+1, a)
+		for (sint iy = 0; iy < ls; ++iy)
+			for (sint ix = 0; ix < ws; ++ix)
+			{
+				sint a = iy * row + ix;
+				BOX_TRI(a, a + row, a + row + 1)
+				BOX_TRI(a + row + 1, a + 1, a)
+			}
+		// top cells: (a, a+1, a+1+row), (a+1+row, a+row, a)
+		for (sint iy = 0; iy < ls; ++iy)
+			for (sint ix = 0; ix < ws; ++ix)
+			{
+				sint a = gridN + iy * row + ix;
+				BOX_TRI(a, a + 1, a + 1 + row)
+				BOX_TRI(a + 1 + row, a + row, a)
+			}
+		// sides: 4 sides in perimeter order (-y, +x, +y, -x), levels bottom-up, segments along;
+		// (lo[k], lo[k+1], up[k+1]), (up[k+1], up[k], lo[k])
+		sint sideStart[4] = { 0, ws, ws + ls, 2 * ws + ls };
+		sint sideLen[4] = { ws, ls, ws, ls };
+		for (sint sd = 0; sd < 4; ++sd)
+			for (sint v = 0; v < hs; ++v)
+				for (sint k = 0; k < sideLen[sd]; ++k)
+				{
+					sint pk = sideStart[sd] + k;
+					sint lo1 = BOX_RING(v, pk), lo2 = BOX_RING(v, pk + 1);
+					sint up1 = BOX_RING(v + 1, pk), up2 = BOX_RING(v + 1, pk + 1);
+					BOX_TRI(lo1, lo2, up2)
+					BOX_TRI(up2, up1, lo1)
+				}
+		#undef BOX_TRI
+		#undef BOX_RING
+		return true;
+	}
+
+	// Cylinder (0x12, 0): params 0/1 = radius/height, 2/3 = height/cap segments, 4 = sides.
+	// Verts: bottom center, rings bottom-up (angle k*2pi/sides CCW from +x), top center.
+	if (cid == NLMISC::CClassId(0x00000012, 0x00000000))
+	{
+		float r = PBF(0), h = PBF(1);
+		sint hs = std::max(1, PBI(2)), sides = std::max(3, PBI(4));
+		float dz = h / hs;
+		verts.clear();
+		verts.push_back(NLMISC::CVector(0.0f, 0.0f, 0.0f));
+		for (sint v = 0; v <= hs; ++v)
+			for (sint k = 0; k < sides; ++k)
+			{
+				double a = 2.0 * NLMISC::Pi * k / sides;
+				verts.push_back(NLMISC::CVector(r * (float)cos(a), r * (float)sin(a), dz * v));
+			}
+		uint32 tc = (uint32)verts.size();
+		verts.push_back(NLMISC::CVector(0.0f, 0.0f, h));
+		#define CYL_RING(v, k) (1 + (v) * sides + ((k) % sides))
+		tris.clear();
+		#define CYL_TRI(a, b, c) { SMeshTri t = { (uint32)(a), (uint32)(b), (uint32)(c) }; tris.push_back(t); }
+		for (sint k = 0; k < sides; ++k) // bottom cap: (c, r[k+1], r[k])
+			CYL_TRI(0, CYL_RING(0, k + 1), CYL_RING(0, k))
+		for (sint v = 0; v < hs; ++v) // sides: (lo[k], up[k+1], up[k]), (lo[k], lo[k+1], up[k+1])
+			for (sint k = 0; k < sides; ++k)
+			{
+				CYL_TRI(CYL_RING(v, k), CYL_RING(v + 1, k + 1), CYL_RING(v + 1, k))
+				CYL_TRI(CYL_RING(v, k), CYL_RING(v, k + 1), CYL_RING(v + 1, k + 1))
+			}
+		for (sint k = 0; k < sides; ++k) // top cap: (tc, t[k], t[k+1])
+			CYL_TRI(tc, CYL_RING(hs, k), CYL_RING(hs, k + 1))
+		#undef CYL_TRI
+		#undef CYL_RING
+		return true;
+	}
+
+	// Sphere (0x11, 0): params 0/1 = radius/segments. Verts: top pole, rings top-down with
+	// meridians starting at +Y going CCW, bottom pole. The nel_flare delegate.
+	if (cid == NLMISC::CClassId(0x00000011, 0x00000000))
+	{
+		float r = PBF(0);
+		sint segs = std::max(4, PBI(1));
+		sint rows = segs / 2;
+		verts.clear();
+		verts.push_back(NLMISC::CVector(0.0f, 0.0f, r));
+		for (sint i = 1; i < rows; ++i)
+		{
+			double phi = NLMISC::Pi * i / rows;
+			float z = r * (float)cos(phi);
+			float rr = r * (float)sin(phi);
+			for (sint k = 0; k < segs; ++k)
+			{
+				double a = NLMISC::Pi / 2.0 + 2.0 * NLMISC::Pi * k / segs;
+				verts.push_back(NLMISC::CVector(rr * (float)cos(a), rr * (float)sin(a), z));
+			}
+		}
+		uint32 bp = (uint32)verts.size();
+		verts.push_back(NLMISC::CVector(0.0f, 0.0f, -r));
+		#define SPH_RING(i, k) (1 + ((i) - 1) * segs + ((k) % segs))
+		tris.clear();
+		#define SPH_TRI(a, b, c) { SMeshTri t = { (uint32)(a), (uint32)(b), (uint32)(c) }; tris.push_back(t); }
+		for (sint k = 0; k < segs; ++k) // top fan
+			SPH_TRI(0, SPH_RING(1, k), SPH_RING(1, k + 1))
+		for (sint i = 1; i < rows - 1; ++i) // quad rows: (u[k], lo[k], lo[k+1]), (u[k], lo[k+1], u[k+1])
+			for (sint k = 0; k < segs; ++k)
+			{
+				SPH_TRI(SPH_RING(i, k), SPH_RING(i + 1, k), SPH_RING(i + 1, k + 1))
+				SPH_TRI(SPH_RING(i, k), SPH_RING(i + 1, k + 1), SPH_RING(i, k + 1))
+			}
+		for (sint k = 0; k < segs; ++k) // bottom fan
+			SPH_TRI(bp, SPH_RING(rows - 1, k + 1), SPH_RING(rows - 1, k))
+		#undef SPH_TRI
+		#undef SPH_RING
+		return true;
+	}
+
+	// Plane (0x081f1dfc, 0x77566f65): params 0/1 = length/width, 2/3 = length/width segments.
+	// Grid at z=0 (ix fastest); per cell (d, a, c), (b, c, a).
+	if (cid == NLMISC::CClassId(0x081f1dfc, 0x77566f65))
+	{
+		float l = PBF(0), w = PBF(1);
+		sint ls = std::max(1, PBI(2)), ws = std::max(1, PBI(3));
+		float dx = w / ws, dy = l / ls;
+		float x0 = -w / 2.0f, y0 = -l / 2.0f;
+		sint row = ws + 1;
+		verts.clear();
+		for (sint iy = 0; iy <= ls; ++iy)
+			for (sint ix = 0; ix <= ws; ++ix)
+				verts.push_back(NLMISC::CVector(x0 + dx * ix, y0 + dy * iy, 0.0f));
+		tris.clear();
+		for (sint iy = 0; iy < ls; ++iy)
+			for (sint ix = 0; ix < ws; ++ix)
+			{
+				uint32 a = iy * row + ix;
+				uint32 b = a + 1;
+				uint32 c = a + row + 1;
+				uint32 d = a + row;
+				SMeshTri t1 = { d, a, c };
+				tris.push_back(t1);
+				SMeshTri t2 = { b, c, a };
+				tris.push_back(t2);
+			}
+		return true;
+	}
+
+	#undef PBF
+	#undef PBI
+	return false;
+}
+
 // Vertex/face extraction in Max OBJECT space per source object type.
 static bool extractObjectMesh(CSceneClass *obj, std::vector<NLMISC::CVector> &verts, std::vector<SMeshTri> &tris, const std::string &nodeName)
 {
@@ -1113,6 +1305,15 @@ static bool extractObjectMesh(CSceneClass *obj, std::vector<NLMISC::CVector> &ve
 		return true;
 	}
 
+	// Dummies have no mesh; the reference createMeshBuild yields an empty build for them, which
+	// still runs the (vacuous) cluster test. Return an empty mesh rather than a warning.
+	if (cid.a() == 0x876234)
+	{
+		verts.clear();
+		tris.clear();
+		return true;
+	}
+
 	// Parametric primitives: pblock reference 0.
 	std::map<sint32, SPBlockParam> params;
 	{
@@ -1127,161 +1328,8 @@ static bool extractObjectMesh(CSceneClass *obj, std::vector<NLMISC::CVector> &ve
 			}
 		}
 	}
-	#define PBF(i) (params.find(i) != params.end() ? params[i].V[0] : 0.0f)
-	#define PBI(i) (params.find(i) != params.end() ? (params[i].IsInt ? (sint)params[i].I : (sint)params[i].V[0]) : 0)
-
-	// Box (0x10, 0): params 0/1/2 = length/width/height, 3/4/5 = w/l/h segments (all 1 in the
-	// corpus accelerators). Topology derived from the reference cluster volumes (plane order,
-	// windings and zero signs, all bit-exact): shared 8-vert grid (bottom then top), faces
-	// bottom, top, then the side ring from (+w/2,+l/2) walking -x first (+y, -x, -y, +x);
-	// bottom quad tris (P11,P10,P01)+(P01,P10,P00), top (P00,P10,P11)+(P11,P01,P00), side
-	// (b1,b2,t1)+(b2,t2,t1). Multi-segment boxes warn (none in the corpus).
-	if (cid == NLMISC::CClassId(0x00000010, 0x00000000))
-	{
-		float l = PBF(0), w = PBF(1), h = PBF(2);
-		sint wsegs = std::max(1, PBI(3)), lsegs = std::max(1, PBI(4)), hsegs = std::max(1, PBI(5));
-		if (wsegs != 1 || lsegs != 1 || hsegs != 1)
-			fprintf(stderr, "WARNING: box '%s' with %dx%dx%d segments; only 1x1x1 topology is corpus-validated\n",
-			        nodeName.c_str(), wsegs, lsegs, hsegs, 0);
-		float x0 = -w / 2.0f, x1 = x0 + w;
-		float y0 = -l / 2.0f, y1 = y0 + l;
-		verts.clear();
-		// bottom grid: P00=0 (x0,y0), P10=1 (x1,y0), P01=2 (x0,y1), P11=3 (x1,y1); top +4
-		verts.push_back(NLMISC::CVector(x0, y0, 0.0f));
-		verts.push_back(NLMISC::CVector(x1, y0, 0.0f));
-		verts.push_back(NLMISC::CVector(x0, y1, 0.0f));
-		verts.push_back(NLMISC::CVector(x1, y1, 0.0f));
-		verts.push_back(NLMISC::CVector(x0, y0, h));
-		verts.push_back(NLMISC::CVector(x1, y1 - l, h)); // = (x1, y0, h), kept as computed floats
-		verts.push_back(NLMISC::CVector(x0, y1, h));
-		verts.push_back(NLMISC::CVector(x1, y1, h));
-		verts[5] = NLMISC::CVector(x1, y0, h);
-		tris.clear();
-		#define BOX_TRI(a, b, c) { SMeshTri t = { (uint32)(a), (uint32)(b), (uint32)(c) }; tris.push_back(t); }
-		// bottom
-		BOX_TRI(3, 1, 2) BOX_TRI(2, 1, 0)
-		// top
-		BOX_TRI(4, 5, 7) BOX_TRI(7, 6, 4)
-		// sides: perimeter ring; start/direction selectable for corpus validation (PMB_BOX_RING)
-		{
-			static const int rings[8][4] = {
-				{ 3, 2, 0, 1 }, { 2, 0, 1, 3 }, { 0, 1, 3, 2 }, { 1, 3, 2, 0 },
-				{ 3, 1, 0, 2 }, { 1, 0, 2, 3 }, { 0, 2, 3, 1 }, { 2, 3, 1, 0 },
-			};
-			int variant = 2; // start P00, +x first: corpus-validated (PMB_BOX_RING overrides for testing)
-			const char *env = getenv("PMB_BOX_RING");
-			if (env) variant = atoi(env) & 7;
-			const int *ringB = rings[variant];
-			for (int k = 0; k < 4; ++k)
-			{
-				int k2 = (k + 1) % 4;
-				BOX_TRI(ringB[k], ringB[k2], ringB[k] + 4)
-				BOX_TRI(ringB[k2], ringB[k2] + 4, ringB[k] + 4)
-			}
-		}
-		#undef BOX_TRI
+	if (buildParametricMesh(cid, params, verts, tris))
 		return true;
-	}
-
-	// Plane (0x081f1dfc, 0x77566f65): params 0/1 = length/width, 2/3 = segments. Grid at z=0.
-	if (cid == NLMISC::CClassId(0x081f1dfc, 0x77566f65))
-	{
-		float l = PBF(0), w = PBF(1);
-		sint lsegs = std::max(1, PBI(2)), wsegs = std::max(1, PBI(3));
-		float dx = w / wsegs, dy = l / lsegs;
-		float startx = -w / 2.0f, starty = -l / 2.0f;
-		verts.clear();
-		for (sint iy = 0; iy <= lsegs; ++iy)
-			for (sint ix = 0; ix <= wsegs; ++ix)
-				verts.push_back(NLMISC::CVector(startx + dx * ix, starty + dy * iy, 0.0f));
-		tris.clear();
-		for (sint iy = 0; iy < lsegs; ++iy)
-			for (sint ix = 0; ix < wsegs; ++ix)
-			{
-				uint32 a = iy * (wsegs + 1) + ix;
-				uint32 b = a + 1;
-				uint32 c = b + (wsegs + 1);
-				uint32 d = a + (wsegs + 1);
-				SMeshTri t1 = { c, d, a };
-				tris.push_back(t1);
-				SMeshTri t2 = { a, b, c };
-				tris.push_back(t2);
-			}
-		return true;
-	}
-
-	// Dummies have no mesh; the reference createMeshBuild yields an empty build for them, which
-	// still runs the (vacuous) cluster test. Return an empty mesh rather than a warning.
-	if (cid.a() == 0x876234)
-	{
-		verts.clear();
-		tris.clear();
-		return true;
-	}
-
-	// Cylinder (0x12, 0): params 0/1 = radius/height, 2/3 = height/cap segments, 4 = sides.
-	// Face order per the reference volumes: bottom cap, sides, top cap. Exact BuildMesh
-	// vertex phase pending the primitive dataset; positions are correct for containment.
-	if (cid == NLMISC::CClassId(0x00000012, 0x00000000))
-	{
-		float r = PBF(0), h = PBF(1);
-		sint sides = std::max(3, PBI(4));
-		verts.clear();
-		for (int layer = 0; layer < 2; ++layer)
-		{
-			float z = layer ? h : 0.0f;
-			for (sint j = 0; j < sides; ++j)
-			{
-				float a = (float)(2.0 * NLMISC::Pi * j / sides);
-				verts.push_back(NLMISC::CVector(r * cosf(a), r * sinf(a), z));
-			}
-		}
-		uint32 cb = (uint32)verts.size();
-		verts.push_back(NLMISC::CVector(0.0f, 0.0f, 0.0f));
-		uint32 ct = (uint32)verts.size();
-		verts.push_back(NLMISC::CVector(0.0f, 0.0f, h));
-		tris.clear();
-		#define CYL_TRI(a, b, c) { SMeshTri t = { (uint32)(a), (uint32)(b), (uint32)(c) }; tris.push_back(t); }
-		for (sint j = 0; j < sides; ++j) // bottom cap, -z winding
-			CYL_TRI(cb, (j + 1) % sides, j)
-		for (sint j = 0; j < sides; ++j) // sides, outward
-		{
-			sint j2 = (j + 1) % sides;
-			CYL_TRI(j, j2, sides + j)
-			CYL_TRI(j2, sides + j2, sides + j)
-		}
-		for (sint j = 0; j < sides; ++j) // top cap, +z winding
-			CYL_TRI(ct, sides + j, sides + (j + 1) % sides)
-		#undef CYL_TRI
-		return true;
-	}
-
-	// Sphere (0x11, 0): params 0/1 = radius/segments. Used as the nel_flare scripted plugin's
-	// delegate; only the vertex POSITIONS matter for the clusterize containment test (faces are
-	// never stitched or made into volumes for these), so the canonical pole+rings layout is
-	// sufficient without pinning the exact BuildMesh ordering.
-	if (cid == NLMISC::CClassId(0x00000011, 0x00000000))
-	{
-		float r = PBF(0);
-		sint segs = std::max(4, PBI(1));
-		sint rows = segs / 2;
-		verts.clear();
-		verts.push_back(NLMISC::CVector(0.0f, 0.0f, r));
-		for (sint i = 1; i < rows; ++i)
-		{
-			float phi = (float)(NLMISC::Pi * i / rows);
-			float z = r * cosf(phi);
-			float rr = r * sinf(phi);
-			for (sint j = 0; j < segs; ++j)
-			{
-				float a = (float)(2.0 * NLMISC::Pi * j / segs);
-				verts.push_back(NLMISC::CVector(rr * cosf(a), rr * sinf(a), z));
-			}
-		}
-		verts.push_back(NLMISC::CVector(0.0f, 0.0f, -r));
-		tris.clear();
-		return true;
-	}
 
 	// Scripted plugin objects (nel_flare extends Sphere, nel_ps extends Box, ...) carry their
 	// geometry DELEGATE as a reference — route extraction to it.
@@ -1522,9 +1570,10 @@ static void applyMirror(const SModOp &op, std::vector<NLMISC::CVector> &verts, s
 	{
 		float gx, gy, gz, ox, oy, oz;
 		M3_XFORM(objToGizmo, verts[i].x, verts[i].y, verts[i].z, gx, gy, gz)
-		gx = gx * f[0] + (f[0] < 0 ? 2.0f * op.MirrorOffset : 0.0f);
-		gy = gy * f[1] + (f[1] < 0 ? 2.0f * op.MirrorOffset : 0.0f);
-		gz = gz * f[2] + (f[2] < 0 ? 2.0f * op.MirrorOffset : 0.0f);
+		// per the dataset offset case: mirrored coord = offset - coord along flipped axes
+		gx = gx * f[0] + (f[0] < 0 ? op.MirrorOffset : 0.0f);
+		gy = gy * f[1] + (f[1] < 0 ? op.MirrorOffset : 0.0f);
+		gz = gz * f[2] + (f[2] < 0 ? op.MirrorOffset : 0.0f);
 		M3_XFORM(gizmoToObj, gx, gy, gz, ox, oy, oz)
 		mirrored[i] = NLMISC::CVector(ox, oy, oz);
 	}
@@ -1660,7 +1709,8 @@ static bool nodeWorldMesh(INode &node, SNodeTMCache &tmCache, SMeshData &out)
 							std::map<sint32, SPBlockParam> params;
 							readPBlockParams(ref, params);
 							if (params.find(0) != params.end()) op.MirrorAxis = params[0].IsInt ? (sint)params[0].I : (sint)params[0].V[0];
-							if (params.find(1) != params.end()) op.MirrorOffset = params[1].V[0];
+							if (params.find(1) != params.end()) op.MirrorCopy = (params[1].IsInt ? params[1].I : (sint)params[1].V[0]) != 0;
+							if (params.find(2) != params.end() && !params[2].IsInt) op.MirrorOffset = params[2].V[0];
 						}
 						else if (ref->classDesc()->classId() == NLMISC::CClassId(0x00002005, 0x00000000))
 						{
@@ -1669,18 +1719,6 @@ static bool nodeWorldMesh(INode &node, SNodeTMCache &tmCache, SMeshData &out)
 							QuatM gr = rotValueAt0(dynamic_cast<CSceneClass *>(dynamic_cast<CReferenceMaker *>(ref)->getReference(1)));
 							ScaleValueM gs = scaleValueAt0(dynamic_cast<CSceneClass *>(dynamic_cast<CReferenceMaker *>(ref)->getReference(2)));
 							op.GizmoTM = composePRS(gp, gr, gs);
-						}
-					}
-					// copy flag: modifier chunk 0x1000
-					{
-						const CStorageContainer::TStorageObjectContainer &mo = mods[m]->orphanedChunks();
-						for (CStorageContainer::TStorageObjectConstIt it = mo.begin(); it != mo.end(); ++it)
-						{
-							if (it->first != 0x1000) continue;
-							CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
-							uint32 v = 0;
-							if (raw && raw->Value.size() >= 4) memcpy(&v, raw->Value.data(), 4);
-							op.MirrorCopy = v != 0;
 						}
 					}
 					if (app)
@@ -2602,6 +2640,39 @@ int main(int argc, char **argv)
 		else if (arg == "--dump-light" && argi + 1 < argc) { dump = true; g_dumpLightName = argv[argi + 1]; argi += 2; }
 		else if (arg == "--db" && argi + 1 < argc) { g_dbRoot = argv[argi + 1]; argi += 2; }
 		else if (arg == "--ps-path" && argi + 1 < argc) { g_psSearchPaths.push_back(argv[argi + 1]); argi += 2; }
+		else if (arg == "--dump-prim" && argi + 2 < argc)
+		{
+			// --dump-prim <box|plane|cylinder|sphere> <p0> [p1 ...] — prints manifest-format
+			// V/F lines (1-based) for prim_check.py validation against ~/prim_mesh_dataset.
+			std::string kind = argv[argi + 1];
+			std::map<sint32, SPBlockParam> params;
+			for (int k = argi + 2; k < argc; ++k)
+			{
+				SPBlockParam prm;
+				prm.IsPoint3 = false;
+				std::string v = argv[k];
+				prm.IsInt = v.find('.') == std::string::npos;
+				prm.V[0] = (float)atof(v.c_str());
+				prm.V[1] = prm.V[2] = 0.0f;
+				prm.I = atoi(v.c_str());
+				params[k - argi - 2] = prm;
+			}
+			NLMISC::CClassId cid;
+			if (kind == "box") cid = NLMISC::CClassId(0x00000010, 0x00000000);
+			else if (kind == "cylinder") cid = NLMISC::CClassId(0x00000012, 0x00000000);
+			else if (kind == "sphere") cid = NLMISC::CClassId(0x00000011, 0x00000000);
+			else if (kind == "plane") cid = NLMISC::CClassId(0x081f1dfc, 0x77566f65);
+			else { fprintf(stderr, "unknown primitive kind\n"); return 1; }
+			std::vector<NLMISC::CVector> verts;
+			std::vector<SMeshTri> tris;
+			if (!buildParametricMesh(cid, params, verts, tris)) return 1;
+			printf("MESH\t%s\tverts\t%u\tfaces\t%u\n", kind.c_str(), (uint)verts.size(), (uint)tris.size());
+			for (uint i = 0; i < verts.size(); ++i)
+				printf("  V\t%u\t%.9g\t%.9g\t%.9g\n", i + 1, verts[i].x, verts[i].y, verts[i].z);
+			for (uint i = 0; i < tris.size(); ++i)
+				printf("  F\t%u\t%u\t%u\t%u\n", i + 1, tris[i].A + 1, tris[i].B + 1, tris[i].C + 1);
+			return 0;
+		}
 		else if (arg == "--info" && argi + 1 < argc)
 		{
 			NL3D::registerSerial3d();

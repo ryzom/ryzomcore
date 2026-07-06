@@ -88,6 +88,15 @@ IF (Python3_Interpreter_FOUND)
 	# ~/core4_data with lighting/elevation masked). --gate-t3 fails on T1/T2 mismatches, export
 	# failures, and direct-tier field-compare failures beyond the recorded known-deviation
 	# budget (--max-direct-diff, currently 1: the mirror-modifier default-gizmo case).
+	# prim_check.py: parametric primitive topology (--dump-prim) vs the Max 9 ground-truth
+	# dump in ~/prim_mesh_dataset (gen_prim_mesh_dataset.ms) — exact face indices, vertex
+	# positions to manifest precision. Self-skips without the dataset.
+	ADD_TEST(NAME pipeline_max_prim_mesh
+		COMMAND ${Python3_EXECUTABLE} prim_check.py
+			--bin $<TARGET_FILE_DIR:pipeline_max_export_ig>
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+	SET_TESTS_PROPERTIES(pipeline_max_prim_mesh PROPERTIES SKIP_RETURN_CODE 77)
+
 	ADD_TEST(NAME pipeline_max_ig_corpus
 		COMMAND ${Python3_EXECUTABLE} ig_corpus.py --all --gate-t3
 			--bin $<TARGET_FILE_DIR:pipeline_max_export_ig>
