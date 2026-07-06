@@ -57,8 +57,10 @@ def is_biped(path):
     with open(path, "rb") as f:
         return marker in f.read()
 
-def read_skel_dpos(path):
-    """Parse a .skel and return [(bone_name, dpos_tuple, drot_tuple), ...]. Skips InvBindPos by state-bit."""
+def read_skel_bones(path):
+    """Parse a .skel fully into per-bone dicts. Every float is returned both as a Python float
+    and as its raw uint32 bit pattern (key + '_b'), so callers can do bit-exact and ULP-level
+    comparisons, not just epsilon comparisons."""
     with open(path, "rb") as f: data = f.read()
     pos = [0]
     def rd(n): v = data[pos[0]:pos[0]+n]; pos[0] += n; return v
@@ -66,32 +68,56 @@ def read_skel_dpos(path):
     def u32(): return struct.unpack("<I", rd(4))[0]
     def i32(): return struct.unpack("<i", rd(4))[0]
     def u64(): return struct.unpack("<Q", rd(8))[0]
-    def f32(): return struct.unpack("<f", rd(4))[0]
+    def f32b():
+        raw = rd(4)
+        return struct.unpack("<f", raw)[0], struct.unpack("<I", raw)[0]
     def str_(): n = u32(); return rd(n).decode("utf-8", "replace")
-    def cvec(): return (f32(), f32(), f32())
-    def cquat(): return (f32(), f32(), f32(), f32())
-    def rdmat():
-        u8(); state = u32(); f32()  # ver, state, scale33
-        if state & (2|4|8):
-            for _ in range(9): f32()
-        if state & 1:
-            for _ in range(3): f32()
-        if state & 16:
-            for _ in range(4): f32()
+    def vecb(n):
+        fs, bs = [], []
+        for _ in range(n):
+            f, b = f32b(); fs.append(f); bs.append(b)
+        return tuple(fs), tuple(bs)
     rd(4); u64(); str_(); u8(); bc = i32()
     out = []
     for i in range(bc):
-        boneVer = u8(); name = str_(); rdmat()
-        i32(); u8(); f32()  # father, unherit, lod
-        u8(); dpos = cvec()
-        u8(); cvec()  # euler
-        u8(); drot = cquat()
-        u8(); cvec()  # scale
-        u8(); cvec()  # pivot
+        bone = {}
+        boneVer = u8(); bone["name"] = str_()
+        # InvBindPos: CMatrix = ver u8, StateBit u32, Scale33 f32, then rot 3x3 / trans / proj
+        # by state bits (MAT_ROT|MAT_SCALEUNI|MAT_SCALEANY -> 9, MAT_TRANS -> 3, MAT_PROJ -> 4).
+        u8(); state = u32()
+        bone["ibp_state"] = state
+        bone["ibp_scale33"], bone["ibp_scale33_b"] = f32b()
+        rot = ((), ()); trans = ((), ()); proj = ((), ())
+        if state & (2|4|8): rot = vecb(9)
+        if state & 1: trans = vecb(3)
+        if state & 16: proj = vecb(4)
+        bone["ibp_rot"], bone["ibp_rot_b"] = rot
+        bone["ibp_trans"], bone["ibp_trans_b"] = trans
+        bone["ibp_proj"], bone["ibp_proj_b"] = proj
+        bone["father"] = i32()
+        bone["unherit"] = u8()
+        bone["lod"], bone["lod_b"] = f32b()
+        u8(); bone["dpos"], bone["dpos_b"] = vecb(3)
+        u8(); bone["euler"], bone["euler_b"] = vecb(3)
+        u8(); bone["drot"], bone["drot_b"] = vecb(4)
+        u8(); bone["dscale"], bone["dscale_b"] = vecb(3)
+        u8(); bone["pivot"], bone["pivot_b"] = vecb(3)
         if boneVer >= 2:
-            cvec()  # skinScale
-        out.append((name, dpos, drot))
+            bone["skinscale"], bone["skinscale_b"] = vecb(3)
+        else:
+            bone["skinscale"], bone["skinscale_b"] = (1.0, 1.0, 1.0), None
+        out.append(bone)
     return out
+
+def read_skel_dpos(path):
+    """Back-compat wrapper: [(bone_name, dpos_tuple, drot_tuple), ...]."""
+    return [(b["name"], b["dpos"], b["drot"]) for b in read_skel_bones(path)]
+
+def ulp_dist(a_bits, b_bits):
+    """ULP distance between two float32 bit patterns (monotonic IEEE754 key; +0 == -0)."""
+    def key(b):
+        return b if b < 0x80000000 else 0x80000000 - b
+    return abs(key(a_bits) - key(b_bits))
 
 def quat_dist(a, b):
     """Quaternion distance accounting for double-cover (q == -q)."""
@@ -99,27 +125,67 @@ def quat_dist(a, b):
     d2 = sum((a[i]+b[i])**2 for i in range(4)) ** 0.5
     return min(d1, d2)
 
+ULP_BUCKETS = (0, 1, 2, 4, 16, 256)  # histogram edges; ">256" is the overflow bucket
+
 def bone_accuracy(ours, ref_path):
-    """Compare our .skel bones to reference. Returns dict with dpos + drot accuracy tallies."""
-    zero = dict(total=0, dp_exact=0, dp_close=0, dp_err=0.0, dr_exact=0, dr_close=0, dr_err=0.0)
+    """Compare our .skel bones to the reference at float level, across EVERY stored field.
+    Epsilon buckets (dpos/drot exact/close) keep their historical meaning; the *_bit counters
+    are strict bit-identity per bone; ibp_* quantifies InvBindPos per element in ULPs."""
+    zero = dict(total=0, dp_exact=0, dp_close=0, dp_err=0.0, dr_exact=0, dr_close=0, dr_err=0.0,
+                dp_bit=0, dr_bit=0, scale_bit=0, lod_bit=0, father_ok=0, unherit_ok=0,
+                aux_bit=0,  # euler + pivot + skinScale + ibp scale33 all bit-exact
+                ibp_state_ok=0, ibp_bit=0, ibp_elems=0,
+                ibp_ulp_hist=[0]*(len(ULP_BUCKETS)+1), ibp_ulp_max=0)
     try:
-        a = read_skel_dpos(ours)
-        b = read_skel_dpos(ref_path)
+        a = read_skel_bones(ours)
+        b = read_skel_bones(ref_path)
     except Exception:
-        return zero
-    if len(a) != len(b): return zero
-    r = dict(zero)
-    for (na, pa, qa), (nb, pb, qb) in zip(a, b):
-        if na != nb: continue
+        return dict(zero, ibp_ulp_hist=list(zero["ibp_ulp_hist"]))
+    if len(a) != len(b): return dict(zero, ibp_ulp_hist=list(zero["ibp_ulp_hist"]))
+    r = dict(zero, ibp_ulp_hist=list(zero["ibp_ulp_hist"]))
+    for ba, bb in zip(a, b):
+        if ba["name"] != bb["name"]: continue
         r["total"] += 1
+        pa, pb = ba["dpos"], bb["dpos"]
         err = ((pa[0]-pb[0])**2 + (pa[1]-pb[1])**2 + (pa[2]-pb[2])**2) ** 0.5
         r["dp_err"] += err
         if err < 1e-5: r["dp_exact"] += 1
         elif err < 0.02: r["dp_close"] += 1
-        qerr = quat_dist(qa, qb)
+        qerr = quat_dist(ba["drot"], bb["drot"])
         r["dr_err"] += qerr
         if qerr < 1e-3: r["dr_exact"] += 1
         elif qerr < 0.02: r["dr_close"] += 1
+        # strict bit-identity per field (drot also accepts the negated quat: same rotation,
+        # and the reference exporter emits either sign)
+        if ba["dpos_b"] == bb["dpos_b"]: r["dp_bit"] += 1
+        negb = tuple(x ^ 0x80000000 for x in bb["drot_b"])
+        if ba["drot_b"] == bb["drot_b"] or ba["drot_b"] == negb: r["dr_bit"] += 1
+        if ba["dscale_b"] == bb["dscale_b"]: r["scale_bit"] += 1
+        if ba["lod_b"] == bb["lod_b"]: r["lod_bit"] += 1
+        if ba["father"] == bb["father"]: r["father_ok"] += 1
+        if ba["unherit"] == bb["unherit"]: r["unherit_ok"] += 1
+        if (ba["euler_b"] == bb["euler_b"] and ba["pivot_b"] == bb["pivot_b"]
+                and ba["skinscale_b"] == bb["skinscale_b"]
+                and ba["ibp_scale33_b"] == bb["ibp_scale33_b"]):
+            r["aux_bit"] += 1
+        # InvBindPos: state bits must agree for element comparison to be meaningful
+        if ba["ibp_state"] == bb["ibp_state"]:
+            r["ibp_state_ok"] += 1
+            ea = ba["ibp_rot_b"] + ba["ibp_trans_b"] + ba["ibp_proj_b"]
+            eb = bb["ibp_rot_b"] + bb["ibp_trans_b"] + bb["ibp_proj_b"]
+            bone_bit = True
+            for x, y in zip(ea, eb):
+                r["ibp_elems"] += 1
+                u = ulp_dist(x, y)
+                if u: bone_bit = False
+                if u > r["ibp_ulp_max"]: r["ibp_ulp_max"] = u
+                for k, edge in enumerate(ULP_BUCKETS):
+                    if u <= edge:
+                        r["ibp_ulp_hist"][k] += 1
+                        break
+                else:
+                    r["ibp_ulp_hist"][len(ULP_BUCKETS)] += 1
+            if bone_bit: r["ibp_bit"] += 1
     return r
 
 def run_tests(bin_dir, files, do_t1, do_t2, do_t3, ref_biped, ref_nonbiped, output_dir):
@@ -192,6 +258,13 @@ def run_tests(bin_dir, files, do_t1, do_t2, do_t3, ref_biped, ref_nonbiped, outp
             b.setdefault("t3_drot_exact", 0); b["t3_drot_exact"] += acc["dr_exact"]
             b.setdefault("t3_drot_close", 0); b["t3_drot_close"] += acc["dr_close"]
             b.setdefault("t3_drot_err", 0.0); b["t3_drot_err"] += acc["dr_err"]
+            for k in ("dp_bit", "dr_bit", "scale_bit", "lod_bit", "father_ok", "unherit_ok",
+                      "aux_bit", "ibp_state_ok", "ibp_bit", "ibp_elems"):
+                b.setdefault("t3_" + k, 0); b["t3_" + k] += acc[k]
+            b.setdefault("t3_ibp_ulp_hist", [0]*(len(ULP_BUCKETS)+1))
+            for k, v in enumerate(acc["ibp_ulp_hist"]): b["t3_ibp_ulp_hist"][k] += v
+            b.setdefault("t3_ibp_ulp_max", 0)
+            b["t3_ibp_ulp_max"] = max(b["t3_ibp_ulp_max"], acc["ibp_ulp_max"])
             if ours == theirs:
                 b["t3_pass"] += 1
             else:
@@ -236,6 +309,21 @@ def report(buckets, do_t1, do_t2, do_t3, verbose):
                      f" dpos {be}+{bc_}/{bt} exact+close, err {err_avg:.4f};"
                      f" drot {dre}+{drc}/{bt} exact+close, err {drerr_avg:.4f})")
         print(line)
+        if do_t3 and b.get("t3_bones_total"):
+            bt = b["t3_bones_total"]
+            elems = b.get("t3_ibp_elems", 0)
+            hist = b.get("t3_ibp_ulp_hist", [0]*(len(ULP_BUCKETS)+1))
+            histstr = " ".join(
+                (f"<={edge}:{hist[k]*100.0/elems:.1f}%" if elems else f"<={edge}:0")
+                for k, edge in enumerate(ULP_BUCKETS)) +                 (f" >{ULP_BUCKETS[-1]}:{hist[len(ULP_BUCKETS)]*100.0/elems:.1f}%" if elems else "")
+            print(f"  float-level: bit-exact dpos {b.get('t3_dp_bit',0)}/{bt}"
+                  f" drot {b.get('t3_dr_bit',0)}/{bt}"
+                  f" scale {b.get('t3_scale_bit',0)}/{bt} lod {b.get('t3_lod_bit',0)}/{bt}"
+                  f" aux {b.get('t3_aux_bit',0)}/{bt};"
+                  f" father {b.get('t3_father_ok',0)}/{bt} unherit {b.get('t3_unherit_ok',0)}/{bt}")
+            print(f"  invbindpos: state-bits {b.get('t3_ibp_state_ok',0)}/{bt},"
+                  f" bit-exact bones {b.get('t3_ibp_bit',0)}/{bt},"
+                  f" element ULP [{histstr}] max={b.get('t3_ibp_ulp_max',0)}")
         if verbose:
             for name, summary, err in b.get("t1_fail", [])[:20]:
                 print(f"  T1 FAIL {name}: {summary}")
@@ -316,6 +404,16 @@ def main():
         if nt:
             gates.append(("nonbiped dpos 100% exact", nb.get("t3_bones_exact", 0) >= nt))
             gates.append(("nonbiped drot 100% exact", nb.get("t3_drot_exact", 0) >= nt))
+        # Field-level structural floors (currently 100% on both buckets): father links,
+        # UnheritScale, LodDisableDistance, the always-constant aux fields (euler/pivot/
+        # skinScale/scale33), and the InvBindPos CMatrix state bits.
+        for label, bucket in (("biped", bb), ("nonbiped", nb)):
+            t = bucket.get("t3_bones_total", 0)
+            if not t: continue
+            for key, nm in (("t3_father_ok", "father"), ("t3_unherit_ok", "unheritScale"),
+                            ("t3_lod_bit", "lodDistance"), ("t3_aux_bit", "aux fields"),
+                            ("t3_ibp_state_ok", "invbindpos state bits")):
+                gates.append((f"{label} {nm} 100%", bucket.get(key, 0) >= t))
         for name, ok in gates:
             if not ok:
                 print(f"T3 GATE FAIL: {name}")

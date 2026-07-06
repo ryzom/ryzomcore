@@ -1414,6 +1414,13 @@ static void walkNode(INode *node, sint32 fatherId, const NLMISC::CMatrix &parent
 			NLMISC::CQuat pinv = parentWorld.getRot(); pinv.invert();
 			realRot = pinv * realRot;
 		}
+		// The reference exporter's getNELUnHeritFatherScale also sets UnheritScale when the
+		// PARENT is a biped node — so plain PRS bones hanging off biped bones (Footsteps, the
+		// 'name'/'cheveux'/weapon-box markers) unherit too, not just the biped bones themselves.
+		// Surfaced by the float-level field validation: 862 corpus bones had this flag wrong,
+		// invisible in the aggregate byte-match percentage.
+		if (parent && (isBipedComNode(parent) || isBipedBoneNode(parent)))
+			b.UnheritScale = true;
 	}
 	realRot.normalize();
 
