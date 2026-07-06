@@ -57,7 +57,7 @@ IF (Python3_Interpreter_FOUND)
 	# direct pre-optimizer references must be byte-identical, optimizer-processed references
 	# must reconstruct within the optimizer's own key-drop tolerance.
 	ADD_TEST(NAME pipeline_max_anim_corpus
-		COMMAND ${Python3_EXECUTABLE} anim_corpus.py --all --gate-t3 --nonbiped-only
+		COMMAND ${Python3_EXECUTABLE} anim_corpus.py --all --gate-t3
 			--bin $<TARGET_FILE_DIR:pipeline_max_export_anim>
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 	SET_TESTS_PROPERTIES(pipeline_max_anim_corpus PROPERTIES SKIP_RETURN_CODE 77)

@@ -15,8 +15,14 @@
 // buildNelKey) and serialized through the real NL3D CAnimation::serial, so the output format
 // is exact by construction.
 //
-// Biped rigs (a real Vertical/Horizontal/Turn COM controller in the scene) are refused with
-// exit code 2 — the biped animation phase needs the oversampling path, not implemented yet.
+// Biped rigs (a real Vertical/Horizontal/Turn COM controller in the scene) go through the
+// biped path: the figure rig is reconstructed via pipeline_max_rig, the animation keytracks on
+// the Biped (0x9155) system object are decoded and TCB-evaluated (see biped_anim.h), and every
+// biped node is oversampled once per frame across the union key range into LinearQuat/
+// LinearVector tracks — replicating CExportNel::addBipedNodeTracks + overSampleBipedAnimation
+// (NL3D_BIPED_OVERSAMPLING=30 at 30 fps == one sample per frame). Position tracks are emitted
+// for the COM and the biped.getNode(#larm/#rarm/#spine/#tail) first links (clavicles, spine
+// base, tail base), like the reference's mustExportBipedBonePos set.
 
 #include <nel/misc/types_nl.h>
 #include <nel/misc/common.h>
@@ -61,6 +67,10 @@
 #include "../pipeline_max/builtin/reference_maker.h"
 #include "../pipeline_max/builtin/storage/app_data.h"
 #include "../pipeline_max/builtin/control_keyframer.h"
+
+#include "../pipeline_max_rig/biped_rig.h"
+#include "../pipeline_max/biped/biped_driven.h"
+#include "biped_anim.h"
 
 using namespace PIPELINE::MAX;
 using namespace PIPELINE::MAX::BUILTIN;
@@ -393,13 +403,18 @@ static NL3D::ITrack *buildATrack(CReferenceMaker *ctrl, TNelValueType type)
 				// final rotation is the stored absolute quat's conjugate bit-exactly, which this
 				// axis/angle reproduces through NeL's eval to within 1 ULP.
 				double ax = keys[i].AbsQuat[0], ay = keys[i].AbsQuat[1], az = keys[i].AbsQuat[2];
+				double aw = keys[i].AbsQuat[3];
+				// Max normalizes the quat to a positive w before deriving (observed on
+				// box_arme_gauche in ca_hof_mort: axis = -xyz, angle = 2*acos(-w) for w < 0;
+				// the asin path below stays for w >= 0 where it was validated byte-identical).
+				if (aw < 0.0) { ax = -ax; ay = -ay; az = -az; aw = -aw; }
 				double n = sqrt(ax * ax + ay * ay + az * az);
 				if (n > 0.0)
 				{
 					k.Value.Axis.set((float)(ax / n), (float)(ay / n), (float)(az / n));
-					double l = std::min(n, 1.0);
-					double angle = 2.0 * asin(l);
-					if (keys[i].AbsQuat[3] < 0.0f) angle = 2.0 * NLMISC::Pi - angle;
+					double angle;
+					if (keys[i].AbsQuat[3] < 0.0f) angle = 2.0 * acos(std::min(1.0, aw));
+					else angle = 2.0 * asin(std::min(n, 1.0));
 					k.Value.Angle = -(float)angle;
 				}
 				else
@@ -507,8 +522,17 @@ static void addBoneTracks(NL3D::CAnimation &animation, INode &node, const std::s
 		addBoneTracks(animation, *child, parentName, ssc);
 }
 
+static void addBipedAnimation(NL3D::CAnimation &animation, INode &node, const std::string &baseName, CSceneClassContainer *ssc);
+
 static void addAnimation(NL3D::CAnimation &animation, INode &node, const std::string &baseName, CSceneClassContainer *ssc)
 {
+	// Biped COM root: the oversampling path (CExportNel::addBipedNodeTracks).
+	CSceneClass *tmsc = dynamic_cast<CSceneClass *>(node.getReference(0));
+	if (tmsc && tmsc->classDesc()->classId() == CLASSID_BIPED_VHT_CTRL)
+	{
+		addBipedAnimation(animation, node, baseName, ssc);
+		return;
+	}
 	// Non-biped path of CExportNel::addAnimation: the node's own tracks under the bare base
 	// name, then every child subtree via addBoneTracks. (NoteTrack/SSS/material/morph tracks:
 	// not present in the non-biped corpus, see addNodeTracks.)
@@ -519,13 +543,284 @@ static void addAnimation(NL3D::CAnimation &animation, INode &node, const std::st
 }
 
 // ---------------------------------------------------------------------------------------------
+// Biped export path.
+
+struct SBipedSampled
+{
+	std::vector<sint32> Times; // sample times (ticks)
+	std::map<INode *, std::vector<NLMISC::CQuat> > Rot;   // local rotation per sample
+	std::map<INode *, std::vector<NLMISC::CVector> > Pos; // local position per sample
+	std::map<INode *, std::pair<sint32, sint32> > RotRange; // per-node keytrack span (rot)
+	std::map<INode *, std::pair<sint32, sint32> > PosRange;
+	std::set<INode *> PosExport; // nodes that get a pos track
+};
+
+// Track span of the keytrack a bone id maps to; falls back to the global range.
+static bool trackSpan(const BIPANIM::SBipAnimKeys &keys, uint32 id, bool isCom, bool comPos,
+                      sint32 &mn, sint32 &mx)
+{
+	const BIPANIM::SBipKeyTrack *tr = NULL;
+	if (isCom)
+	{
+		if (comPos)
+		{
+			// COM position: union of horizontal/vertical/turn (the TM controller's range)
+			bool have = false;
+			const BIPANIM::SBipKeyTrack *all[3] = { &keys.Horizontal, &keys.Vertical, &keys.Turn };
+			for (int i = 0; i < 3; ++i)
+			{
+				if (all[i]->empty()) continue;
+				if (!have) { mn = all[i]->Times.front(); mx = all[i]->Times.back(); have = true; }
+				else { mn = std::min(mn, all[i]->Times.front()); mx = std::max(mx, all[i]->Times.back()); }
+			}
+			return have;
+		}
+		tr = &keys.Turn;
+	}
+	else switch (id)
+	{
+	case PMAX_RIG::BID_LARM: case PMAX_RIG::BID_LFINGERS: case PMAX_RIG::BID_LFINGERNUB: tr = &keys.ArmL; break;
+	case PMAX_RIG::BID_RARM: case PMAX_RIG::BID_RFINGERS: case PMAX_RIG::BID_RFINGERNUB: tr = &keys.ArmR; break;
+	case PMAX_RIG::BID_LLEG: case PMAX_RIG::BID_LTOES: case PMAX_RIG::BID_LTOENUB: tr = &keys.LegL; break;
+	case PMAX_RIG::BID_RLEG: case PMAX_RIG::BID_RTOES: case PMAX_RIG::BID_RTOENUB: tr = &keys.LegR; break;
+	case PMAX_RIG::BID_SPINE: tr = &keys.Spine; break;
+	case PMAX_RIG::BID_TAIL: case PMAX_RIG::BID_TAILNUB: tr = &keys.Tail; break;
+	case PMAX_RIG::BID_HEAD: case PMAX_RIG::BID_NECK: case PMAX_RIG::BID_HEADNUB: case PMAX_RIG::BID_NECKNUB: tr = &keys.Head; break;
+	case PMAX_RIG::BID_PELVIS: tr = &keys.Pelvis; break;
+	case PMAX_RIG::BID_PONY1: case PMAX_RIG::BID_PONY1NUB: tr = &keys.Pony1; break;
+	default: tr = NULL; break;
+	}
+	if (!tr || tr->empty()) return false;
+	mn = tr->Times.front();
+	mx = tr->Times.back();
+	return true;
+}
+
+// Sample the whole biped subtree once per frame. Returns false when no biped keys exist.
+static bool sampleBipedSubtree(INode &root, CSceneClassContainer *ssc, SBipedSampled &out)
+{
+	using namespace PMAX_RIG;
+
+	// figure-time walk (fills g_bipedRigs and per-bone figure world transforms)
+	g_bipedRigs.clear();
+	g_rig = NULL;
+	g_msBones.clear();
+	std::vector<Bone> bones;
+	std::set<std::string> nameSet;
+	NLMISC::CMatrix rootMat; rootMat.identity();
+	walkNode(&root, -1, rootMat, ssc, bones, nameSet);
+	patchFootstepsGround(bones);
+
+	std::map<INode *, size_t> boneOf;
+	for (size_t i = 0; i < bones.size(); ++i)
+		if (bones[i].Node) boneOf[bones[i].Node] = i;
+
+	// one evaluator per rig
+	std::vector<BIPANIM::CBipedAnimEval *> evals;
+	bool hasRange = false;
+	sint32 rangeMin = 0, rangeMax = 0;
+	for (std::map<CSceneClass *, SBipedRig>::iterator it = g_bipedRigs.begin(); it != g_bipedRigs.end(); ++it)
+	{
+		g_rig = &it->second;
+		BIPANIM::CBipedAnimEval *ev = new BIPANIM::CBipedAnimEval(it->first, it->second, bones, boneOf);
+		evals.push_back(ev);
+		if (ev->keys().HasRange)
+		{
+			if (!hasRange) { rangeMin = ev->keys().RangeMin; rangeMax = ev->keys().RangeMax; hasRange = true; }
+			else { rangeMin = std::min(rangeMin, ev->keys().RangeMin); rangeMax = std::max(rangeMax, ev->keys().RangeMax); }
+		}
+	}
+	if (!hasRange)
+	{
+		for (size_t i = 0; i < evals.size(); ++i) delete evals[i];
+		return false;
+	}
+
+	// sample times: one per frame (160 ticks) across [min, max], last sample clamped to max —
+	// replicating overSampleBipedAnimation's loop shape.
+	const sint32 step = 160;
+	for (sint32 tt = rangeMin; tt <= rangeMax; tt += step)
+	{
+		sint32 tc = std::min(tt, rangeMax);
+		out.Times.push_back(tc);
+		if (tc == rangeMax) break;
+	}
+	if (out.Times.empty() || out.Times.back() != rangeMax) out.Times.push_back(rangeMax);
+
+	// per-sample evaluation
+	std::map<INode *, BIPANIM::SBipNodeState> state;
+	for (size_t s = 0; s < out.Times.size(); ++s)
+	{
+		state.clear();
+		for (size_t e = 0; e < evals.size(); ++e)
+			evals[e]->evalAt((double)out.Times[s], state);
+		// convert to local transforms
+		for (std::map<INode *, BIPANIM::SBipNodeState>::iterator it = state.begin(); it != state.end(); ++it)
+		{
+			INode *node = it->first;
+			INode *parent = node->parent();
+			BIPANIM::QuatD w = it->second.WorldRot;
+			NLMISC::CVectorD wp = it->second.WorldPos;
+			BIPANIM::QuatD localR = w;
+			NLMISC::CVectorD localP = wp;
+			std::map<INode *, BIPANIM::SBipNodeState>::iterator ps = parent ? state.find(parent) : state.end();
+			if (ps != state.end())
+			{
+				localR = BIPANIM::qMul(BIPANIM::qConj(ps->second.WorldRot), w);
+				localP = BIPANIM::qRotate(BIPANIM::qConj(ps->second.WorldRot), wp - ps->second.WorldPos);
+			}
+			localR = BIPANIM::qNorm(localR);
+			// The decode formulas already produce NeL-convention rotations (the same values the
+			// reference exporter's decompMatrix + w-negation yields) — no further negation.
+			NLMISC::CQuat q((float)localR.x, (float)localR.y, (float)localR.z, (float)localR.w);
+			out.Rot[node].push_back(q);
+			out.Pos[node].push_back(NLMISC::CVector((float)localP.x, (float)localP.y, (float)localP.z));
+		}
+	}
+
+	// pos-track set + per-node ranges
+	for (std::map<INode *, std::vector<NLMISC::CQuat> >::iterator it = out.Rot.begin(); it != out.Rot.end(); ++it)
+	{
+		INode *node = it->first;
+		bool isCom = PMAX_RIG::isBipedComNode(node);
+		uint32 id = 0, link = 0;
+		bool hasId = PMAX_RIG::readBipDrivenIdLink(node, id, link);
+		if (isCom)
+			out.PosExport.insert(node);
+		else if (hasId && link == 0 && (id == PMAX_RIG::BID_LARM || id == PMAX_RIG::BID_RARM || id == PMAX_RIG::BID_SPINE || id == PMAX_RIG::BID_TAIL))
+			out.PosExport.insert(node);
+		// default range: the whole sampled span (refined below from the node's keytrack)
+		out.RotRange[node] = std::make_pair(out.Times.front(), out.Times.back());
+		out.PosRange[node] = std::make_pair(out.Times.front(), out.Times.back());
+	}
+
+	// refine per-node ranges using each node's keytrack span
+	{
+		size_t e = 0;
+		for (std::map<CSceneClass *, SBipedRig>::iterator rit = g_bipedRigs.begin(); rit != g_bipedRigs.end(); ++rit, ++e)
+		{
+			if (e >= evals.size()) break;
+			const BIPANIM::SBipAnimKeys &keys = evals[e]->keys();
+			for (std::map<INode *, std::vector<NLMISC::CQuat> >::iterator it = out.Rot.begin(); it != out.Rot.end(); ++it)
+			{
+				INode *node = it->first;
+				if (PMAX_RIG::bipedSystemOfCtrl(node->getReference(0)) != rit->first) continue;
+				bool isCom = PMAX_RIG::isBipedComNode(node);
+				uint32 id = 0, link = 0;
+				PMAX_RIG::readBipDrivenIdLink(node, id, link);
+				sint32 mn, mx;
+				if (trackSpan(keys, id, isCom, false, mn, mx)) out.RotRange[node] = std::make_pair(mn, mx);
+				if (trackSpan(keys, id, isCom, true, mn, mx)) out.PosRange[node] = std::make_pair(mn, mx);
+			}
+		}
+	}
+
+	for (size_t i = 0; i < evals.size(); ++i) delete evals[i];
+	return true;
+}
+
+// Build a LinearQuat track from sampled local rotations (normalize + makeClosest, reference
+// createBipedKeyFramer).
+static NL3D::ITrack *buildSampledQuatTrack(const std::vector<sint32> &times, const std::vector<NLMISC::CQuat> &vals,
+                                           sint32 rangeStart, sint32 rangeEnd)
+{
+	if (vals.empty()) return NULL;
+	NL3D::CTrackKeyFramerLinearQuat *track = new NL3D::CTrackKeyFramerLinearQuat();
+	NLMISC::CQuat prev;
+	for (size_t i = 0; i < times.size() && i < vals.size(); ++i)
+	{
+		NLMISC::CQuat q = vals[i];
+		q.normalize();
+		if (i > 0) q.makeClosest(prev);
+		prev = q;
+		NL3D::CKeyQuat k;
+		k.Value = q;
+		track->addKey(k, convertTime(times[i]));
+	}
+	track->unlockRange(convertTime(rangeStart), convertTime(rangeEnd));
+	track->setLoopMode(false);
+	return track;
+}
+
+static NL3D::ITrack *buildSampledPosTrack(const std::vector<sint32> &times, const std::vector<NLMISC::CVector> &vals,
+                                          sint32 rangeStart, sint32 rangeEnd)
+{
+	if (vals.empty()) return NULL;
+	NL3D::CTrackKeyFramerLinearVector *track = new NL3D::CTrackKeyFramerLinearVector();
+	for (size_t i = 0; i < times.size() && i < vals.size(); ++i)
+	{
+		NL3D::CKeyVector k;
+		k.Value = vals[i];
+		track->addKey(k, convertTime(times[i]));
+	}
+	track->unlockRange(convertTime(rangeStart), convertTime(rangeEnd));
+	track->setLoopMode(false);
+	return track;
+}
+
+// Replicates CExportNel::addBipedNodeTracks: biped nodes emit their sampled tracks under
+// parentName + name + "." (bare for the root), non-biped children go through addBoneTracks.
+static void addBipedNodeTracks(NL3D::CAnimation &animation, INode &node, const std::string &parentName,
+                               bool root, CSceneClassContainer *ssc, const SBipedSampled &sampled)
+{
+	CSceneClass *tmsc = dynamic_cast<CSceneClass *>(node.getReference(0));
+	bool isBiped = tmsc && (tmsc->classDesc()->classId() == CLASSID_BIPED_VHT_CTRL ||
+	                        tmsc->classDesc()->classId() == PIPELINE::MAX::BIPED::CBipedDriven::ClassId);
+	if (isBiped)
+	{
+		std::string name = root ? parentName : (parentName + ucstring(node.userName()).toUtf8() + ".");
+		// scale: biped nodes have none. rotation:
+		std::map<INode *, std::vector<NLMISC::CQuat> >::const_iterator rit = sampled.Rot.find(&node);
+		if (rit != sampled.Rot.end())
+		{
+			std::pair<sint32, sint32> rr = sampled.RotRange.find(&node)->second;
+			NL3D::ITrack *track = buildSampledQuatTrack(sampled.Times, rit->second, rr.first, rr.second);
+			addTrackChecked(animation, name + NL3D::ITransformable::getRotQuatValueName(), track);
+		}
+		// position (COM + clavicles/spine/tail bases only):
+		if (sampled.PosExport.count(&node))
+		{
+			std::map<INode *, std::vector<NLMISC::CVector> >::const_iterator pit = sampled.Pos.find(&node);
+			if (pit != sampled.Pos.end())
+			{
+				std::pair<sint32, sint32> pr = sampled.PosRange.find(&node)->second;
+				NL3D::ITrack *track = buildSampledPosTrack(sampled.Times, pit->second, pr.first, pr.second);
+				addTrackChecked(animation, name + NL3D::ITransformable::getPosValueName(), track);
+			}
+		}
+		std::vector<INode *> kids = orderedChildrenOf(&node, ssc);
+		for (INode *child : kids)
+			addBipedNodeTracks(animation, *child, parentName, false, ssc, sampled);
+	}
+	else
+	{
+		addBoneTracks(animation, node, parentName, ssc);
+	}
+}
+
+static void addBipedAnimation(NL3D::CAnimation &animation, INode &node, const std::string &baseName, CSceneClassContainer *ssc)
+{
+	SBipedSampled sampled;
+	if (!sampleBipedSubtree(node, ssc, sampled))
+	{
+		// no biped keys at all: fall back to the non-biped path (nothing to oversample)
+		addNodeTracks(animation, node, baseName);
+		std::vector<INode *> kids = orderedChildrenOf(&node, ssc);
+		for (INode *child : kids)
+			addBoneTracks(animation, *child, baseName, ssc);
+		return;
+	}
+	addBipedNodeTracks(animation, node, baseName, true, ssc, sampled);
+}
+
+// ---------------------------------------------------------------------------------------------
 
 int main(int argc, char **argv)
 {
 	if (argc < 3)
 	{
 		std::cerr << "usage: pipeline_max_export_anim <input.max> <output.anim>\n";
-		std::cerr << "exit codes: 0 ok, 1 error, 2 biped rig (unsupported), 3 nothing to export\n";
+		std::cerr << "exit codes: 0 ok, 1 error, 3 nothing to export\n";
 		return 1;
 	}
 	const char *maxFile = argv[1];
@@ -589,18 +884,6 @@ int main(int argc, char **argv)
 	{
 		std::cerr << "WARNING: no node animated to export in " << maxFile << "\n";
 		return 3;
-	}
-
-	// --- Refuse real biped rigs (V/H/T transform on a selected node or anywhere): the biped
-	// export path oversamples through the biped controller, which is not implemented yet.
-	for (auto it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
-	{
-		CSceneClass *sc = dynamic_cast<CSceneClass *>(it->second);
-		if (sc && sc->classDesc()->classId() == CLASSID_BIPED_VHT_CTRL)
-		{
-			std::cerr << "SKIP: biped rig (Vertical/Horizontal/Turn controller present), biped anim export not implemented: " << maxFile << "\n";
-			return 2;
-		}
 	}
 
 	// --- Export each selected node (CNelExport::exportAnim, scene=false).

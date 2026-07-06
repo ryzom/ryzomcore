@@ -7,7 +7,8 @@ non-biped by scanning for the "Biped Object" UTF-16 marker, filters git-lfs stub
 
   T1  structural roundtrip:  the pipeline_max_corpus_test binary, no --parse.
   T2  parse/build roundtrip: the pipeline_max_corpus_test binary with --parse.
-  T3  .anim export:          pipeline_max_export_anim on non-biped files, validated two ways —
+  T3  .anim export:          pipeline_max_export_anim on every file (biped rigs go through the
+        oversampling path since 2026-07-06), validated two ways —
         direct:    byte-compare against a pre-optimizer reference (.anim in ~/characters/
                    anim_export or ~/core4_data/sky) when one exists. Must be IDENTICAL.
         optimized: when only a post-anim_builder reference exists (~/core4_data/
@@ -17,7 +18,10 @@ non-biped by scanning for the "Biped Object" UTF-16 marker, filters git-lfs stub
                    optimizer's own key-drop tolerance (the reference builder ran on the
                    2004-era x87 codegen, so borderline threshold decisions flip; see
                    pipeline_max_design.md §10b).
-        Biped anim files are out of scope (exporter exit code 2) and counted as skipped.
+        Biped direct comparisons additionally report a float-level structural verdict
+        (track sets + key counts must match; per-key worst delta bucketed against the
+        optimizer tolerance) because the in-between frames of IK intervals are approximated
+        (see pipeline_max_design.md §10c open work) — byte-identity is not yet expected.
 
 Defaults are the layout on Kaetemi's machine; override via CLI when running elsewhere.
 """
@@ -303,6 +307,32 @@ def compare_optimized(a_path, b_path):
         return 'FAIL', '; '.join(msgs[:5])
     return 'EPS', 'worst=%g' % worst
 
+def compare_direct_float(a_path, b_path):
+    """Float-level compare for direct references: track sets and key counts must match;
+    returns (verdict, worst, msg) with verdict IDENT | STRUCT | FAIL."""
+    da = open(a_path, 'rb').read(); db = open(b_path, 'rb').read()
+    if da == db:
+        return 'IDENT', 0.0, ''
+    try:
+        A = parse_anim(a_path); B = parse_anim(b_path)
+    except Exception as e:
+        return 'FAIL', 9.9, 'parse error: %r' % e
+    if set(A.keys()) != set(B.keys()):
+        return 'FAIL', 9.9, 'track sets differ: only-ours=%s only-ref=%s' % (
+            sorted(set(A)-set(B))[:3], sorted(set(B)-set(A))[:3])
+    worst = 0.0
+    for name in B:
+        ca, ta = A[name]; cb, tb = B[name]
+        if ca != cb:
+            return 'FAIL', 9.9, '%s: class %s vs %s' % (name, ca, cb)
+        ka, kb = ta['keys'], tb['keys']
+        if len(ka) != len(kb):
+            return 'FAIL', 9.9, '%s: keycount %d vs %d' % (name, len(ka), len(kb))
+        for x, y in zip(ka, kb):
+            d = _key_delta(ca, x, y)
+            if d > worst: worst = d
+    return 'STRUCT', worst, ''
+
 # ---------------------------------------------------------------------------------------------
 
 def run_tests(args, files):
@@ -347,13 +377,10 @@ def run_tests(args, files):
                 if t2_ok: b["t2_pass"] += 1
                 else: fails["t2"].append((name, summary or f"rc={r.returncode}", r.stderr.strip()[:200]))
 
-        if args.t3 and kind == "nonbiped":
+        if args.t3:
             base = os.path.splitext(name)[0]
             out_anim = os.path.join(out_dir, "export", base + ".anim")
             r = subprocess.run([export_anim, full, out_anim], capture_output=True, text=True, timeout=300)
-            if r.returncode == 2:
-                b["t3_biped_skip"] += 1  # scene marker said non-biped but exporter found a VHT rig
-                continue
             if r.returncode == 3:
                 b["t3_nothing"] += 1
                 fails["t3"].append((name, "nothing to export", ""))
@@ -370,13 +397,27 @@ def run_tests(args, files):
                     direct_ref = cand
                     break
             if direct_ref:
-                ours = open(out_anim, 'rb').read()
-                theirs = open(direct_ref, 'rb').read()
-                if ours == theirs:
-                    b["t3_direct_ident"] += 1
+                if kind == "biped":
+                    verdict, worst, msg = compare_direct_float(out_anim, direct_ref)
+                    if verdict == 'IDENT':
+                        b["t3_direct_ident"] += 1
+                    elif verdict == 'STRUCT':
+                        b["t3_struct"] += 1
+                        b.setdefault("_worsts", []).append(worst)
+                        if worst > args.biped_tol:
+                            b["t3_struct_over"] += 1
+                            fails["t3info"].append((name, "worst %.4g" % worst, ""))
+                    else:
+                        b["t3_direct_fail"] += 1
+                        fails["t3"].append((name, msg, ""))
                 else:
-                    b["t3_direct_fail"] += 1
-                    fails["t3"].append((name, f"direct ref differs (size {len(ours)} vs {len(theirs)})", ""))
+                    ours = open(out_anim, 'rb').read()
+                    theirs = open(direct_ref, 'rb').read()
+                    if ours == theirs:
+                        b["t3_direct_ident"] += 1
+                    else:
+                        b["t3_direct_fail"] += 1
+                        fails["t3"].append((name, f"direct ref differs (size {len(ours)} vs {len(theirs)})", ""))
                 continue
             # Optimized reference (per project group cfg)
             opt_ref = None
@@ -386,12 +427,9 @@ def run_tests(args, files):
                     opt_ref = cand
                     break
             if opt_ref:
-                opt_groups.setdefault(group, []).append((name, base, out_anim, opt_ref))
+                opt_groups.setdefault(group, []).append((kind, name, base, out_anim, opt_ref))
             else:
                 b["t3_missing_ref"] += 1
-
-        elif args.t3 and kind == "biped":
-            b["t3_biped_skip"] += 1
 
     # anim_builder pass per project group
     if args.t3:
@@ -400,30 +438,31 @@ def run_tests(args, files):
             src = os.path.join(out_dir, "opt_src_" + group)
             dst = os.path.join(out_dir, "opt_dst_" + group)
             os.makedirs(src, exist_ok=True); os.makedirs(dst, exist_ok=True)
-            for name, base, out_anim, opt_ref in items:
+            for kind, name, base, out_anim, opt_ref in items:
                 shutil.copyfile(out_anim, os.path.join(src, base + ".anim"))
             if not os.path.isfile(anim_builder) or not os.path.isfile(cfg):
                 print(f"note: anim_builder or cfg missing for group {group}; optimized T3 skipped")
-                buckets["nonbiped"]["t3_missing_ref"] += len(items)
+                for kind, name, base, out_anim, opt_ref in items:
+                    buckets[kind]["t3_missing_ref"] += 1
                 continue
             subprocess.run([anim_builder, src, dst, cfg], capture_output=True, text=True, timeout=1800)
-            for name, base, out_anim, opt_ref in items:
+            for kind, name, base, out_anim, opt_ref in items:
                 built = os.path.join(dst, base + ".anim")
                 if not os.path.isfile(built):
-                    buckets["nonbiped"]["t3_opt_fail"] += 1
-                    fails["t3"].append((name, "anim_builder produced no output", ""))
+                    buckets[kind]["t3_opt_fail"] += 1
+                    (fails["t3"] if kind == "nonbiped" else fails["t3info"]).append((name, "anim_builder produced no output", ""))
                     continue
                 try:
                     verdict, msg = compare_optimized(built, opt_ref)
                 except Exception as e:
                     verdict, msg = 'FAIL', 'compare error: %r' % e
                 if verdict == 'IDENT':
-                    buckets["nonbiped"]["t3_opt_ident"] += 1
+                    buckets[kind]["t3_opt_ident"] += 1
                 elif verdict == 'EPS':
-                    buckets["nonbiped"]["t3_opt_eps"] += 1
+                    buckets[kind]["t3_opt_eps"] += 1
                 else:
-                    buckets["nonbiped"]["t3_opt_fail"] += 1
-                    fails["t3"].append((name, msg, ""))
+                    buckets[kind]["t3_opt_fail"] += 1
+                    (fails["t3"] if kind == "nonbiped" else fails["t3info"]).append((name, msg, ""))
 
     if not args.output and args.t3:
         shutil.rmtree(out_dir, ignore_errors=True)
@@ -451,6 +490,9 @@ def main():
     ap.add_argument("--gate-t3", action="store_true",
                     help="fail when any direct-reference export is not byte-identical or any "
                          "optimized-reference comparison exceeds the optimizer tolerance")
+    ap.add_argument("--biped-tol", type=float, default=0.25,
+                    help="informational threshold for biped direct-ref worst key delta (IK "
+                         "in-between approximation; see wiki open work)")
     ap.add_argument("--nonbiped-only", action="store_true",
                     help="restrict T1/T2 to the non-biped subset (T3 is always non-biped)")
     ap.add_argument("-v", "--verbose", action="store_true")
@@ -485,12 +527,20 @@ def main():
         line = f"{kind}: total={total}"
         if args.t1: line += f", T1 {b['t1_pass']}/{total}"
         if args.t2: line += f", T2 {b['t2_pass']}/{total}"
-        if args.t3 and kind == "nonbiped":
+        if args.t3:
             line += (f", T3 direct {b['t3_direct_ident']}/{b['t3_direct_ident'] + b['t3_direct_fail']} byte-identical,"
                      f" optimized {b['t3_opt_ident']}+{b['t3_opt_eps']}(eps)/{b['t3_opt_ident'] + b['t3_opt_eps'] + b['t3_opt_fail']},"
                      f" missing-ref={b['t3_missing_ref']}, nothing={b['t3_nothing']}, err={b['t3_err']}")
         if args.t3 and kind == "biped":
-            line += f", T3 skipped (biped anim export not implemented)"
+            ws = b.get("_worsts", [])
+            wsline = ""
+            if ws:
+                ws2 = sorted(ws)
+                wsline = f" worst-delta median {ws2[len(ws2)//2]:.4g} max {ws2[-1]:.4g},"
+            line += (f", T3 direct {b['t3_direct_ident']} identical + {b['t3_struct']} structural"
+                     f" ({b['t3_struct_over']} over tol),{wsline}"
+                     f" optimized {b['t3_opt_ident']}+{b['t3_opt_eps']}(eps)/{b['t3_opt_ident'] + b['t3_opt_eps'] + b['t3_opt_fail']},"
+                     f" missing-ref={b['t3_missing_ref']}, nothing={b['t3_nothing']}, err={b['t3_err']}, structfail={b['t3_direct_fail']}")
         print(line)
     if args.verbose or fails["t1"] or fails["t2"]:
         for tier in ("t1", "t2"):
@@ -499,9 +549,20 @@ def main():
     if args.verbose or fails["t3"]:
         for name, summary, err in fails["t3"][:40]:
             print(f"  T3 FAIL {name}: {summary}")
+    if fails["t3info"]:
+        print(f"  ({len(fails['t3info'])} biped files over the informational tolerance; worst offenders:)")
+        def _worstkey(x):
+            try: return -float(x[1].split()[1])
+            except (IndexError, ValueError): return 0.0
+        for name, summary, err in sorted(fails["t3info"], key=_worstkey)[:15]:
+            print(f"  T3 INFO {name}: {summary}")
 
     fail = len(fails["t1"]) + len(fails["t2"])
     if args.gate_t3 and args.t3:
+        bb = buckets.get("biped", {})
+        if bb.get("t3_direct_fail", 0) or bb.get("t3_err", 0):
+            print(f"T3 GATE FAIL: biped structural fails={bb.get('t3_direct_fail', 0)} errors={bb.get('t3_err', 0)}")
+            fail += 1
         nb = buckets.get("nonbiped", {})
         if nb.get("t3_direct_fail", 0):
             print(f"T3 GATE FAIL: {nb['t3_direct_fail']} direct-reference exports not byte-identical")
