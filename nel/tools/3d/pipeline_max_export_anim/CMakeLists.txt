@@ -26,6 +26,7 @@ TARGET_LINK_LIBRARIES(pipeline_max_export_anim
 	${GLIB2_LIBRARIES}
 	${GOBJECT2_LIBRARIES}
 	pipeline_max
+	pipeline_max_rig
 	NeL::misc
 	NeL::3d
 )
