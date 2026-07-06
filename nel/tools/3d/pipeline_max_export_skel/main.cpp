@@ -406,15 +406,18 @@ struct SBipedRig
 	// frame (0x006c[0..2] as (d0,-d2,d1)). Bip01World = figureCom + ComRot*Disp; the Pelvis stays
 	// at the figure COM, so its local position is -Disp.
 	NLMISC::CVector ComDisp;
-	// legs + toes (left half; right side is mirrored on use)
+	// legs + toes. Structure-record scalars are per side (R half first — see bipedSideHalf);
+	// the toe/finger base matrices are still parsed from the first (right) half and mirrored,
+	// as before (the left half's own matrices use yet another basis and are not parsed).
 	bool HasThighZ;
-	float ThighZ;
+	float ThighZ[2]; // [0] = right, [1] = left
 	std::vector<SBipedToe> Toes;
 	int MaxLegLink;
-	// arms + fingers (left half)
+	// arms + fingers
 	bool HasClavicleZ;
-	float ClavicleZ;
-	float ClavicleAngle; // arm record [7]; base rotation = 180deg about (cos phi, 0, sin phi), phi = pi/4 + angle/2
+	float ClavicleZ[2]; // [0] = right, [1] = left
+	float ClavicleA[2]; // arm record [6] per side: extra rotation about the spine2-frame -X, radians
+	float ClavicleB[2]; // arm record [7] per side: base rotation = 180deg about (cos phi, 0, sin phi), phi = pi/4 + b/2
 	std::vector<SBipedFinger> Fingers;
 	// chains
 	SBipedChain Spine, Tail, Pony1, Pony2;
@@ -422,10 +425,27 @@ struct SBipedRig
 	// runtime state, captured during the walk
 	NLMISC::CQuat PelvisWorldRot;
 	bool HavePelvisWorldRot;
+	NLMISC::CQuat LastSpineWorldRot; // last spine link's world rotation (clavicle reference frame)
+	bool HaveLastSpineWorldRot;
+	float ToeBaseWorldZ;             // L toe0 attach world height = ground level (footsteps Z)
+	bool HaveToeBaseWorldZ;
+	// Footsteps bone bookkeeping for the post-walk ground-level patch (the Footsteps bone is
+	// walked before the toes, so its Z can only be fixed up afterwards).
+	sint32 FootstepsBoneIdx;
+	NLMISC::CMatrix FootstepsParentWorld;
 	SBipedRig() : Sys(NULL), HasCom(false), ComPos(NLMISC::CVector::Null), ComRot(NLMISC::CQuat::Identity),
-		ComDisp(NLMISC::CVector::Null), HasThighZ(false), ThighZ(0.0f), MaxLegLink(2),
-		HasClavicleZ(false), ClavicleZ(0.0f), ClavicleAngle(0.0f),
-		PelvisWorldRot(NLMISC::CQuat::Identity), HavePelvisWorldRot(false) { }
+		ComDisp(NLMISC::CVector::Null), HasThighZ(false), MaxLegLink(2),
+		HasClavicleZ(false),
+		PelvisWorldRot(NLMISC::CQuat::Identity), HavePelvisWorldRot(false),
+		LastSpineWorldRot(NLMISC::CQuat::Identity), HaveLastSpineWorldRot(false),
+		ToeBaseWorldZ(0.0f), HaveToeBaseWorldZ(false),
+		FootstepsBoneIdx(-1)
+	{
+		ThighZ[0] = ThighZ[1] = 0.0f;
+		ClavicleZ[0] = ClavicleZ[1] = 0.0f;
+		ClavicleA[0] = ClavicleA[1] = 0.0f;
+		ClavicleB[0] = ClavicleB[1] = 0.0f;
+	}
 };
 
 // Rigs per Biped system object; cleared per file.
@@ -446,6 +466,31 @@ static const float *bipedChunkFloats(uint16 chunkId, size_t minFloats, size_t *c
 	if (countOut) *countOut = raw->Value.size() / 4;
 	return reinterpret_cast<const float *>(raw->Value.data());
 }
+
+// Paired pose records (legs 0x0069, arms 0x006a) and the paired sections of the structure records
+// (0x000f, 0x0010) store the RIGHT side in the first half and the LEFT side in the second half.
+// Established 2026-07-06 via the Max 9 differential dataset (single-bone rotations: R Hand lands at
+// [28..31], L Hand at [half+28..]; R Clavicle at 0x0010[6..7], L at [half+6..7]). The earlier
+// assumption of left-first was undetectable on symmetric rigs (L == mirror(R)) and is exactly what
+// broke on the asymmetric-edited ones (bird-rig L forearm, kami_guide_4 L toe).
+// Returns a pointer to the given side's half (NULL when missing) and the half length.
+static const float *bipedSideHalf(uint16 chunkId, bool leftSide, size_t minFloats, size_t *halfOut = NULL)
+{
+	size_t n = 0;
+	const float *f = bipedChunkFloats(chunkId, 2 * minFloats, &n);
+	if (!f) return NULL;
+	size_t half = n / 2;
+	if (half < minFloats) return NULL;
+	if (halfOut) *halfOut = half;
+	return leftSide ? (f + half) : f;
+}
+
+// The biped runtime bakes a tiny constant twist into several of its procedural default frames —
+// measured 0.0008 rad (0.0456 deg) on the Max 9 differential dataset, invariant across rig
+// structure, pose and scale, and confirmed present in the corpus era (19 corpus hands become
+// bit-exact with it, 0 without). Appears in the hand default (Rx(-/+(pi/2 - eps)) off the forearm)
+// and as an Rz(-eps) factor inside the clavicle orientation.
+static const float BIPED_EPS_TWIST = 0.0008f;
 
 static inline uint32 floatBitsAsUint(float f)
 {
@@ -478,22 +523,26 @@ static NLMISC::CQuat chainAngleQuat(const NLMISC::CVector &a)
 	return r;
 }
 
-// Decode a joint quaternion stored at (chunkId, floatOffset) under a component permutation+sign.
-// Returns false if the chunk/offset is missing.
-static bool decodeJointQuat(uint16 chunkId, int off, const int perm[4], const int sign[4], NLMISC::CQuat &out)
+// The leg pose-record half's head grows by 2 floats per leg link beyond 3 (observed: 3-link
+// rigs put the thigh quat at [2], foot quat at [28]; 4-link rigs at [4]/[30] — confirmed on the
+// Max 9 dataset's s_leg4 AND the corpus mounts/birds). The knee ([0]) and horse ankle ([1])
+// hinge slots do NOT shift. Everything at or after the thigh quat does.
+static int legHeadShift()
 {
-	const float *f = bipedChunkFloats(chunkId, (size_t)off + 4);
+	if (!g_rig) return 0;
+	int s = 2 * (g_rig->MaxLegLink - 2);
+	return s > 0 ? s : 0;
+}
+
+// Read a stored quat (x,y,z,w) from a side's half at the given in-half offset.
+static bool readSideQuat(uint16 chunkId, bool leftSide, int off, NLMISC::CQuat &out)
+{
+	const float *f = bipedSideHalf(chunkId, leftSide, (size_t)off + 4);
 	if (!f) return false;
-	float q[4] = { f[off + 0], f[off + 1], f[off + 2], f[off + 3] };
-	NLMISC::CQuat r;
-	r.x = sign[0] * q[perm[0]];
-	r.y = sign[1] * q[perm[1]];
-	r.z = sign[2] * q[perm[2]];
-	r.w = sign[3] * q[perm[3]];
-	float n = sqrtf(r.x*r.x + r.y*r.y + r.z*r.z + r.w*r.w);
+	out.set(f[off + 0], f[off + 1], f[off + 2], f[off + 3]);
+	float n = sqrtf(out.x*out.x + out.y*out.y + out.z*out.z + out.w*out.w);
 	if (n < 1e-6f) return false;
-	r.x /= n; r.y /= n; r.z /= n; r.w /= n;
-	out = r;
+	out.x /= n; out.y /= n; out.z /= n; out.w /= n;
 	return true;
 }
 
@@ -503,48 +552,137 @@ static NLMISC::CQuat mirrorQuatLR(const NLMISC::CQuat &q)
 	return NLMISC::CQuat(q.x, q.y, -q.z, -q.w);
 }
 
-// Stable joint-rotation decodings (validated across fy/ma/tr male+female templates).
-struct SJointDec { uint16 chunk; int off; int perm[4]; int sign[4]; bool pelvisRel; };
-static const SJointDec JD_THIGH    = { 0x0069, 2,  {2,3,0,1}, {1,1,-1,1},  true  };
-static const SJointDec JD_FOOT     = { 0x0069, 28, {2,0,3,1}, {1,-1,-1,1}, false };
-static const SJointDec JD_UPPERARM = { 0x006a, 2,  {1,2,3,0}, {1,-1,1,-1}, true  };
-static const SJointDec JD_HEAD     = { 0x0064, 0,  {0,1,2,3}, {1,1,1,1},   true  };
+// The biped-internal Y-up basis change as a rotation: C = [[1,0,0],[0,0,-1],[0,1,0]] = Rx(+90deg).
+static const NLMISC::CQuat QUAT_C(0.70710678f, 0.0f, 0.0f, 0.70710678f);
+// 180-degree axis rotations used by the per-side upperarm frames.
+static const NLMISC::CQuat QUAT_I(1.0f, 0.0f, 0.0f, 0.0f); // Rx(pi)
+static const NLMISC::CQuat QUAT_J(0.0f, 1.0f, 0.0f, 0.0f); // Ry(pi)
+
+// Thigh: stored per side at [2..5] of the 0x0069 half, pelvis-relative, gathered as
+// q = (s2, s3, -s0, s1) — which yields the LEFT-convention rotation; the right half is
+// mirror-encoded, so the right side applies the LR mirror to its own half's decode. (The
+// differential dataset's canonical poses are mirror-degenerate for exactly these quat shapes,
+// which is why per-side "no mirror" also passed there; the corpus discriminates.)
+static bool thighWorldRot(bool leftSide, NLMISC::CQuat &worldRot)
+{
+	if (!g_rig || !g_rig->HavePelvisWorldRot) return false;
+	int base = 2 + legHeadShift();
+	const float *f = bipedSideHalf(0x0069, leftSide, (size_t)base + 4);
+	if (!f) return false;
+	NLMISC::CQuat q(f[base + 2], f[base + 3], -f[base + 0], f[base + 1]);
+	q.normalize();
+	if (!leftSide) q = mirrorQuatLR(q);
+	worldRot = g_rig->PelvisWorldRot * q;
+	worldRot.normalize();
+	return true;
+}
+
+// Foot: stored per side at [28..31] of the 0x0069 half as the ABSOLUTE foot orientation in the
+// COM-relative Y-up frame: R_foot = R_com * C * qmat(s)^T — both sides direct, NO mirror (each
+// half stores its own side's absolute orientation; verified exact on the corpus for both sides
+// including the free-footed bird rigs). Replaces the old "world quat, planted feet only"
+// reading, whose fixed perm/sign silently baked in the canonical -90deg COM yaw and broke on
+// tilted-COM rigs and non-planted feet.
+static bool footWorldRot(bool leftSide, NLMISC::CQuat &worldRot)
+{
+	if (!g_rig || !g_rig->HasCom) return false;
+	NLMISC::CQuat s;
+	if (!readSideQuat(0x0069, leftSide, 28 + legHeadShift(), s)) return false;
+	s.invert(); // qmat(s)^T = qmat(conj(s))
+	worldRot = g_rig->ComRot * QUAT_C * s;
+	worldRot.normalize();
+	return true;
+}
+
+// UpperArm: stored per side at [2..5] of the 0x006a half, pelvis-relative with per-side fixed
+// 180-degree frame factors:  L: R = R_pelvis * Rx(pi) * qmat(s)^T * Ry(pi)
+//                            R: R = R_pelvis * Ry(pi) * qmat(s)^T * Rx(pi)
+// (differential dataset, exact at 7e-7 across baseline + sweeps + single-side rotations; the
+// previous perm/sign gather was off by ~4 degrees even on the dataset baseline).
+static bool upperArmWorldRot(bool leftSide, NLMISC::CQuat &worldRot)
+{
+	if (!g_rig || !g_rig->HavePelvisWorldRot) return false;
+	NLMISC::CQuat s;
+	if (!readSideQuat(0x006a, leftSide, 2, s)) return false;
+	s.invert();
+	worldRot = leftSide ? (g_rig->PelvisWorldRot * QUAT_I * s * QUAT_J)
+	                    : (g_rig->PelvisWorldRot * QUAT_J * s * QUAT_I);
+	worldRot.normalize();
+	return true;
+}
+
+// Hand: the hand's procedural default is the forearm frame twisted by -/+(pi/2 - eps) about its
+// own X; the stored quat at [28..31] of the 0x006a half is a local post-multiplied delta in the
+// Y-up conversion frame:  R_hand = R_forearm * Rx(-/+(pi/2-eps)) * C * qmat(s)^T * C^T.
+// (Differential dataset: composition exact at 4e-7 on the sweeps; eps confirmed corpus-era.)
+static bool handWorldRot(bool leftSide, const NLMISC::CQuat &forearmWorldRot, NLMISC::CQuat &worldRot)
+{
+	NLMISC::CQuat s;
+	if (!readSideQuat(0x006a, leftSide, 28, s)) return false;
+	s.invert();
+	float twist = (float)(M_PI / 2.0) - BIPED_EPS_TWIST;
+	if (leftSide) twist = -twist;
+	NLMISC::CQuat tw(NLMISC::CAngleAxis(NLMISC::CVector(1.0f, 0.0f, 0.0f), twist));
+	NLMISC::CQuat cInv = QUAT_C; cInv.invert();
+	NLMISC::CQuat delta = QUAT_C * s * cInv;
+	if (!leftSide) delta = mirrorQuatLR(delta); // right half is mirror-encoded (see thighWorldRot)
+	worldRot = forearmWorldRot * tw * delta;
+	worldRot.normalize();
+	return true;
+}
+
+// Head: stored at 0x0064[0..3], pelvis-relative, identity component order (corpus-validated).
+static bool headWorldRot(NLMISC::CQuat &worldRot)
+{
+	if (!g_rig || !g_rig->HavePelvisWorldRot) return false;
+	const float *f = bipedChunkFloats(0x0064, 4);
+	if (!f) return false;
+	NLMISC::CQuat q(f[0], f[1], f[2], f[3]);
+	float n = sqrtf(q.x*q.x + q.y*q.y + q.z*q.z + q.w*q.w);
+	if (n < 1e-6f) return false;
+	q.x /= n; q.y /= n; q.z /= n; q.w /= n;
+	worldRot = g_rig->PelvisWorldRot * q;
+	worldRot.normalize();
+	return true;
+}
 
 // Hinge joints (SDK: GetHingeVal / GetHorseAnkleVal — knee, elbow and the 4-link-leg horse ankle
 // are 1-DOF). The figure value sits at the head of the side's pose-record half: the knee/elbow
 // interior angle at [0] (local z-rotation = [0] - pi), the horse ankle at [1] (local z-rotation
-// = [1] as-is). Bit-exact across the era-matched corpus except two small known deviations
-// (kitin-family calf 5.0deg, and the asymmetric-edited bird rigs' L forearm 0.5deg).
+// = [1] as-is). Bit-exact across the era-matched corpus except one small known deviation
+// (kitin-family calf 5.0deg; the bird-rig L forearm 0.5deg resolved with the R-first half fix).
 // Returns false when the record is missing.
 static bool hingeLocalRot(uint16 chunkId, bool leftSide, int slot, bool interior, NLMISC::CQuat &out)
 {
-	size_t n = 0;
-	const float *f = bipedChunkFloats(chunkId, 2, &n);
+	const float *f = bipedSideHalf(chunkId, leftSide, (size_t)slot + 1);
 	if (!f) return false;
-	size_t half = n / 2;
-	size_t off = (leftSide ? 0 : half) + (size_t)slot;
-	if (off >= n) return false;
-	float a = f[off] - (interior ? (float)M_PI : 0.0f);
+	float a = f[slot] - (interior ? (float)M_PI : 0.0f);
 	out = NLMISC::CQuat(NLMISC::CAngleAxis(NLMISC::CVector(0.0f, 0.0f, 1.0f), a));
 	out.normalize();
 	return true;
 }
 
-// Compute the world rotation for a decoded joint. Returns false if not decodable.
-static bool jointWorldRot(const SJointDec &jd, NLMISC::CQuat &worldRot)
+// Per-finger/toe pose block inside the 0x0069 / 0x006a half: blocks of 10 floats starting at
+// in-half offset 46 — [46+10k .. 49+10k] = chain k's base-link delta quat (local post-multiplied:
+// local = baseLocal * qmat(s)^T), [54+10k], [55+10k], ... = the non-base links' absolute bend
+// angles in radians (local rotation = Rz(angle); the record matrices hold only the creation-time
+// state, the pose block is authoritative). Differential dataset, exact at 1e-6 either side.
+static bool chainPoseBaseDelta(uint16 chunkId, bool leftSide, int chainIdx, NLMISC::CQuat &delta)
 {
-	NLMISC::CQuat q;
-	if (!decodeJointQuat(jd.chunk, jd.off, jd.perm, jd.sign, q)) return false;
-	if (jd.pelvisRel)
-	{
-		if (!g_rig || !g_rig->HavePelvisWorldRot) return false;
-		worldRot = g_rig->PelvisWorldRot * q; // world = pelvis * (pelvis-relative)
-	}
-	else
-	{
-		worldRot = q;
-	}
-	worldRot.normalize();
+	int shift = (chunkId == 0x0069) ? legHeadShift() : 0;
+	if (!readSideQuat(chunkId, leftSide, 46 + shift + 10 * chainIdx, delta)) return false;
+	delta.invert();
+	return true;
+}
+
+static bool chainPoseLinkAngle(uint16 chunkId, bool leftSide, int chainIdx, int sub, float &angle)
+{
+	if (sub < 1) return false;
+	int shift = (chunkId == 0x0069) ? legHeadShift() : 0;
+	int off = 54 + shift + 10 * chainIdx + (sub - 1);
+	const float *f = bipedSideHalf(chunkId, leftSide, (size_t)off + 1);
+	if (!f) return false;
+	angle = f[off];
 	return true;
 }
 
@@ -578,13 +716,15 @@ static void parseChainRecord(uint16 structId, uint16 angleId, SBipedChain &out)
 	}
 }
 
-// Parse the leg record (0x000f) left half: thigh side offset + per-toe base matrices/lengths.
+// Parse the leg record (0x000f): per-side thigh offsets + per-toe base matrices/lengths (from
+// the first/right half; the left half's matrices use another basis and are mirrored instead).
 static void parseLegRecord(SBipedRig &rig)
 {
 	size_t n = 0;
 	const float *f = bipedChunkFloats(0x000f, 12, &n);
 	if (!f) return;
-	rig.ThighZ = f[1];
+	rig.ThighZ[0] = f[1];
+	rig.ThighZ[1] = (n / 2 + 1 < n) ? f[n / 2 + 1] : f[1];
 	rig.HasThighZ = true;
 	size_t i = 10;
 	uint32 nToes = floatBitsAsUint(f[i]); ++i;
@@ -606,7 +746,8 @@ static void parseLegRecord(SBipedRig &rig)
 	}
 }
 
-// Parse the arm record (0x0010) left half: clavicle Z offset + per-finger base matrices/lengths.
+// Parse the arm record (0x0010): per-side clavicle params + per-finger base matrices/lengths
+// (from the first/right half; see parseLegRecord).
 // Finger matrices use the Y-up conversion (position (x,-z,y); rotation C*M^T), unlike the
 // toe/chain records — validated per record type, not assumed uniform.
 static void parseArmRecord(SBipedRig &rig)
@@ -614,8 +755,22 @@ static void parseArmRecord(SBipedRig &rig)
 	size_t n = 0;
 	const float *f = bipedChunkFloats(0x0010, 17, &n);
 	if (!f) return;
-	rig.ClavicleZ = f[10];
-	rig.ClavicleAngle = f[7];
+	size_t half = n / 2;
+	rig.ClavicleZ[0] = f[10];
+	rig.ClavicleA[0] = f[6];
+	rig.ClavicleB[0] = f[7];
+	if (half + 10 < n)
+	{
+		rig.ClavicleZ[1] = f[half + 10];
+		rig.ClavicleA[1] = f[half + 6];
+		rig.ClavicleB[1] = f[half + 7];
+	}
+	else
+	{
+		rig.ClavicleZ[1] = rig.ClavicleZ[0];
+		rig.ClavicleA[1] = rig.ClavicleA[0];
+		rig.ClavicleB[1] = rig.ClavicleB[0];
+	}
 	rig.HasClavicleZ = true;
 	uint32 nFingers = floatBitsAsUint(f[16]);
 	if (nFingers > 16) return;
@@ -669,10 +824,25 @@ static void parseComRecord(SBipedRig &rig)
 	}
 }
 
-// Parse neck angles from the head record (0x0064: [0..3] head quat, [7]=int count, [8..] triples).
-static void parseHeadRecord(SBipedRig &rig)
+// Parse neck angles. The authoritative source is the neck record 0x0065 ([0]=int count of angle
+// floats = 3 per link, [1..count] = (a1,a2,a3) triples, then a 4x4 base-attach matrix) — the Max 9
+// differential dataset shows neck edits land there, and 48/169 corpus files carry stale copies in
+// the head record's [8..] region (tr_mo_arma/bul, the ge_ kami pair). Fall back to the head-record
+// copy (0x0064: [7]=int count, [8..] triples) only when 0x0065 is absent.
+static void parseNeckAngles(SBipedRig &rig)
 {
 	size_t n = 0;
+	const float *k = bipedChunkFloats(0x0065, 2, &n);
+	if (k)
+	{
+		uint32 cnt = floatBitsAsUint(k[0]);
+		if (cnt <= 3 * 64 && 1 + cnt <= n)
+		{
+			for (uint32 i = 0; i + 2 < cnt; i += 3)
+				rig.NeckAngles.push_back(NLMISC::CVector(k[1 + i], k[2 + i], k[3 + i]));
+			return;
+		}
+	}
 	const float *h = bipedChunkFloats(0x0064, 8, &n);
 	if (!h) return;
 	uint32 cnt = floatBitsAsUint(h[7]);
@@ -732,10 +902,13 @@ static void getBipedLocal(INode *node, const NLMISC::CQuat &parentWorldRot,
 	NLMISC::CQuat wq;
 	bool decoded = false;
 
-	if (haveId && (id == BID_LLEG || id == BID_RLEG) && link == 0) decoded = jointWorldRot(JD_THIGH, wq);    // Thigh
-	else if (haveId && (id == BID_LLEG || id == BID_RLEG) && (int)link == rig.MaxLegLink) decoded = jointWorldRot(JD_FOOT, wq); // Foot (last leg link — generalizes 3- and 4-link legs)
-	else if (haveId && (id == BID_LARM || id == BID_RARM) && link == 1) decoded = jointWorldRot(JD_UPPERARM, wq); // UpperArm
-	else if (haveId && id == BID_HEAD && link == 0) decoded = jointWorldRot(JD_HEAD, wq); // Head
+	// Every paired decode reads the bone's own side's half (R half first — see bipedSideHalf);
+	// no mirror step anywhere. This is what fixes the asymmetric-edited rigs.
+	if (haveId && (id == BID_LLEG || id == BID_RLEG) && link == 0) decoded = thighWorldRot(id == BID_LLEG, wq); // Thigh
+	else if (haveId && (id == BID_LLEG || id == BID_RLEG) && (int)link == rig.MaxLegLink) decoded = footWorldRot(id == BID_LLEG, wq); // Foot (last leg link)
+	else if (haveId && (id == BID_LARM || id == BID_RARM) && link == 1) decoded = upperArmWorldRot(id == BID_LARM, wq); // UpperArm
+	else if (haveId && (id == BID_LARM || id == BID_RARM) && link == 3) decoded = handWorldRot(id == BID_LARM, parentWorldRot, wq); // Hand (forearm = walk parent)
+	else if (haveId && id == BID_HEAD && link == 0) decoded = headWorldRot(wq); // Head
 	else if (haveId && (id == BID_LLEG || id == BID_RLEG) && link == 1) // Calf: knee hinge
 	{
 		NLMISC::CQuat hq;
@@ -775,22 +948,11 @@ static void getBipedLocal(INode *node, const NLMISC::CQuat &parentWorldRot,
 
 	if (decoded)
 	{
-		// jointWorldRot returns the LEFT-side world rotation. For the right side, mirror in the
-		// pelvis-relative frame (the only frame where the mirror is the clean (x,y,-z,-w) rule),
-		// then convert back to world.
-		if (!isLeft && rig.HavePelvisWorldRot)
-		{
-			NLMISC::CQuat pinv = rig.PelvisWorldRot; pinv.invert();
-			NLMISC::CQuat rel = pinv * wq;
-			rel = mirrorQuatLR(rel);
-			wq = rig.PelvisWorldRot * rel;
-			wq.normalize();
-		}
 		worldRot = wq;
 		if (haveId && (id == BID_LLEG || id == BID_RLEG) && link == 0 && rig.HasThighZ)
 		{
-			// Thigh position: pure side offset in the pelvis frame, leg record 0x000f[1].
-			posOverride = NLMISC::CVector(0.0f, 0.0f, (id == BID_LLEG) ? rig.ThighZ : -rig.ThighZ);
+			// Thigh position: pure side offset in the pelvis frame, per-side leg record value.
+			posOverride = NLMISC::CVector(0.0f, 0.0f, (id == BID_LLEG) ? rig.ThighZ[1] : -rig.ThighZ[0]);
 			havePosOverride = true;
 		}
 	}
@@ -804,16 +966,27 @@ static void getBipedLocal(INode *node, const NLMISC::CQuat &parentWorldRot,
 	}
 	else if (haveId && (id == BID_LARM || id == BID_RARM) && link == 0 && rig.HasClavicleZ)
 	{
-		// Clavicle: position is a pure Z (side) offset off the last spine link (arm record [10]);
-		// base rotation is 180deg about (cos phi, 0, sin phi) with phi = pi/4 + armRecord[7]/2 —
-		// exact on planar rigs (humanoids, kami_keep); rigs with a second clavicle DOF carry an
-		// extra not-yet-decoded twist on top of this (see pipeline_max_design.md).
-		float phi = (float)(M_PI / 4.0) + rig.ClavicleAngle * 0.5f;
-		float c = cosf(phi), s = sinf(phi);
-		rot = isLeft ? NLMISC::CQuat(-c, 0.0f, -s, 0.0f) : NLMISC::CQuat(c, 0.0f, -s, 0.0f);
-		pos = NLMISC::CVector(0.0f, 0.0f, isLeft ? rig.ClavicleZ : -rig.ClavicleZ);
-		haveLocalDirect = true;
-		worldRot = parentWorldRot * rot;
+		// Clavicle: position is a pure Z (side) offset off the last spine link (per-side arm
+		// record [10]); rotation is the full 2-DOF orientation relative to the LAST SPINE LINK
+		// (not the neck, the walk parent — SDK: clavicle inherits from the last spine link):
+		//   rel_L = Rx(-a) * Rz(-eps) * B(b),  B(b) = 180deg about (cos phi, 0, sin phi),
+		//   phi = pi/4 + b/2;  rel_R = LR-mirror of rel computed from the right side's (a,b).
+		// (Differential dataset: exact at 2e-6 on both sides across both DOF sweeps; the old
+		// b-only formula ignored [6] and the eps twist.)
+		int si = isLeft ? 1 : 0;
+		float a = rig.ClavicleA[si], bb = rig.ClavicleB[si];
+		float phi = (float)(M_PI / 4.0) + bb * 0.5f;
+		NLMISC::CQuat qb(cosf(phi), 0.0f, sinf(phi), 0.0f);
+		NLMISC::CQuat qa(NLMISC::CAngleAxis(NLMISC::CVector(1.0f, 0.0f, 0.0f), -a));
+		NLMISC::CQuat qe(NLMISC::CAngleAxis(NLMISC::CVector(0.0f, 0.0f, 1.0f), -BIPED_EPS_TWIST));
+		NLMISC::CQuat rel = qa * qe * qb;
+		if (!isLeft) rel = mirrorQuatLR(rel);
+		rel.normalize();
+		const NLMISC::CQuat &spineRef = rig.HaveLastSpineWorldRot ? rig.LastSpineWorldRot : parentWorldRot;
+		worldRot = spineRef * rel;
+		worldRot.normalize();
+		posOverride = NLMISC::CVector(0.0f, 0.0f, isLeft ? rig.ClavicleZ[1] : -rig.ClavicleZ[0]);
+		havePosOverride = true;
 	}
 	else if (haveId && (id == BID_LFINGERS || id == BID_RFINGERS) && !rig.Fingers.empty()) // fingers
 	{
@@ -823,16 +996,36 @@ static void getBipedLocal(INode *node, const NLMISC::CQuat &parentWorldRot,
 			const SBipedFinger &fing = rig.Fingers[fi];
 			if (sub == 0)
 			{
-				// finger base: full local transform from the arm-record matrix
-				if (isLeft) { pos = fing.Pos; rot = fing.Rot; }
-				else { pos = NLMISC::CVector(fing.Pos.x, fing.Pos.y, -fing.Pos.z); rot = mirrorQuatLR(fing.Rot); }
+				// finger base: creation-time local transform from the arm-record matrix, composed
+				// with the pose block's per-side base delta (local post-multiply; the right half's
+				// delta is mirror-encoded, so the mirror wraps the composed local).
+				NLMISC::CQuat delta;
+				bool haveDelta = chainPoseBaseDelta(0x006a, isLeft, fi, delta);
+				rot = fing.Rot;
+				if (haveDelta) rot = rot * delta;
+				if (isLeft) { pos = fing.Pos; }
+				else { pos = NLMISC::CVector(fing.Pos.x, fing.Pos.y, -fing.Pos.z); rot = mirrorQuatLR(rot); }
+				rot.normalize();
 				haveLocalDirect = true;
 				worldRot = parentWorldRot * rot;
 			}
-			// finger links fall through to the straight-chain default: the parent bone's 0x096c
-			// dimensions reflect per-bone figure scaling (rubber-banding), which the record
-			// lengths do NOT (they store unscaled template values — observed on
-			// tr_mo_kitin_queen, whose bones are figure-scaled ~24x).
+			else
+			{
+				// finger link: absolute bend angle from the pose block, local rotation Rz(angle).
+				float angle;
+				if (chainPoseLinkAngle(0x006a, isLeft, fi, sub, angle))
+				{
+					rot = NLMISC::CQuat(NLMISC::CAngleAxis(NLMISC::CVector(0.0f, 0.0f, 1.0f), angle));
+					rot.normalize();
+					worldRot = parentWorldRot * rot;
+					// position stays the straight-chain rule: the parent bone's 0x096c dimensions
+					// reflect per-bone figure scaling (rubber-banding), which the record lengths
+					// do NOT (observed on tr_mo_kitin_queen, figure-scaled ~24x).
+					NLMISC::CVector parentDims = readNodeBoneDimensions(parent);
+					pos = NLMISC::CVector(parentDims.x, 0.0f, 0.0f);
+					haveLocalDirect = true;
+				}
+			}
 		}
 	}
 	else if (haveId && (id == BID_LTOES || id == BID_RTOES) && !rig.Toes.empty()) // toes
@@ -844,13 +1037,33 @@ static void getBipedLocal(INode *node, const NLMISC::CQuat &parentWorldRot,
 			const SBipedToe &toe = rig.Toes[ti];
 			if (sub == 0)
 			{
-				// toe base: full local transform from the leg-record matrix
-				if (tLeft) { pos = toe.Pos; rot = toe.Rot; }
-				else { pos = NLMISC::CVector(toe.Pos.x, toe.Pos.y, -toe.Pos.z); rot = mirrorQuatLR(toe.Rot); }
+				// toe base: creation-time local transform from the leg-record matrix, composed
+				// with the pose block's per-side base delta (local post-multiply; the right half's
+				// delta is mirror-encoded, so the mirror wraps the composed local).
+				NLMISC::CQuat delta;
+				bool haveDelta = chainPoseBaseDelta(0x0069, tLeft, ti, delta);
+				rot = toe.Rot;
+				if (haveDelta) rot = rot * delta;
+				if (tLeft) { pos = toe.Pos; }
+				else { pos = NLMISC::CVector(toe.Pos.x, toe.Pos.y, -toe.Pos.z); rot = mirrorQuatLR(rot); }
+				rot.normalize();
 				haveLocalDirect = true;
 				worldRot = parentWorldRot * rot;
 			}
-			// toe links fall through to the straight-chain default (see the finger-link comment).
+			else
+			{
+				// toe link: absolute bend angle from the pose block (same layout as fingers).
+				float angle;
+				if (chainPoseLinkAngle(0x0069, tLeft, ti, sub, angle))
+				{
+					rot = NLMISC::CQuat(NLMISC::CAngleAxis(NLMISC::CVector(0.0f, 0.0f, 1.0f), angle));
+					rot.normalize();
+					worldRot = parentWorldRot * rot;
+					NLMISC::CVector parentDims = readNodeBoneDimensions(parent);
+					pos = NLMISC::CVector(parentDims.x, 0.0f, 0.0f);
+					haveLocalDirect = true;
+				}
+			}
 		}
 	}
 	else if (haveId && id == BID_SPINE && link == 0 && rig.Spine.HasMat)
@@ -976,9 +1189,9 @@ static void getBipedLocal(INode *node, const NLMISC::CQuat &parentWorldRot,
 		}
 		else if (haveId && (id == BID_LARM || id == BID_RARM) && link == 0)
 		{
-			// Clavicle: attaches to the last spine link at a pure Z (side) offset, stored in the
-			// arm record header at 0x0010[10]. (Its own X-length is 0; not a straight-chain bone.)
-			pos = NLMISC::CVector(0.0f, 0.0f, isLeft ? rig.ClavicleZ : -rig.ClavicleZ);
+			// Clavicle without a parsed arm record: attaches to the last spine link at a pure Z
+			// (side) offset. (Its own X-length is 0; not a straight-chain bone.)
+			pos = NLMISC::CVector(0.0f, 0.0f, isLeft ? rig.ClavicleZ[1] : -rig.ClavicleZ[0]);
 		}
 		else if (!parent || !isBipedBoneNode(parent))
 		{
@@ -1000,6 +1213,14 @@ static void getBipedLocal(INode *node, const NLMISC::CQuat &parentWorldRot,
 	{
 		rig.PelvisWorldRot = worldRot;
 		rig.HavePelvisWorldRot = true;
+	}
+	// Capture the last spine link's world rotation for the clavicle reference frame. Spine links
+	// are walked in order, so the last assignment wins — by the time a clavicle (a descendant of
+	// the last spine link through the neck) is processed, this holds the correct frame.
+	if (haveId && id == BID_SPINE)
+	{
+		rig.LastSpineWorldRot = worldRot;
+		rig.HaveLastSpineWorldRot = true;
 	}
 }
 
@@ -1075,7 +1296,7 @@ static SBipedRig &rigFor(CSceneClass *sys, CSceneClassContainer *ssc)
 	parseChainRecord(0x000e, 0x0068, rig.Tail);
 	parseChainRecord(0x0013, 0x006d, rig.Pony1);
 	parseChainRecord(0x0014, 0x006e, rig.Pony2);
-	parseHeadRecord(rig);
+	parseNeckAngles(rig);
 	computeMaxLegLink(rig, ssc);
 	return rig;
 }
@@ -1178,8 +1399,60 @@ static void walkNode(INode *node, sint32 fatherId, const NLMISC::CMatrix &parent
 	sint32 myId = (sint32)bones.size();
 	bones.push_back(b);
 
+	// Footsteps / ground-level bookkeeping (see patchFootstepsGround).
+	if (bipedSys && isBipedBoneNode(node))
+	{
+		SBipedRig &rig = g_bipedRigs[bipedSys];
+		uint32 fid = 0, flink = 0;
+		if (readBipDrivenIdLink(node, fid, flink))
+		{
+			if (fid == BID_FOOTPRINTS)
+			{
+				rig.FootstepsBoneIdx = myId;
+				rig.FootstepsParentWorld = parentWorld;
+			}
+			else if (fid == BID_LTOES && flink == 0 && !rig.HaveToeBaseWorldZ)
+			{
+				rig.ToeBaseWorldZ = worldTM.getPos().z;
+				rig.HaveToeBaseWorldZ = true;
+			}
+		}
+	}
+
 	std::vector<INode *> kids = orderedChildrenOf(node, ssc);
 	for (INode *child : kids) walkNode(child, myId, worldTM, ssc, bones, nameSet);
+}
+
+// The Footsteps marker sits at ground level: its world height equals the (left) toe attach height
+// (exact on the Max 9 differential dataset across ankle/height/foot-scale variants; the value is
+// derived, not stored — which is why exhaustive scans never found e.g. ca_spaceship's 7.73).
+// The Footsteps bone precedes the toes in walk order, so patch it after the walk: keep its world
+// X/Y, set world Z to the toe attach height, recompute local pos + InvBindPos.
+static void patchFootstepsGround(std::vector<Bone> &bones)
+{
+	for (std::map<CSceneClass *, SBipedRig>::iterator it = g_bipedRigs.begin(); it != g_bipedRigs.end(); ++it)
+	{
+		SBipedRig &rig = it->second;
+		if (rig.FootstepsBoneIdx < 0 || !rig.HaveToeBaseWorldZ) continue;
+		Bone &b = bones[(size_t)rig.FootstepsBoneIdx];
+		NLMISC::CMatrix localTM = makeLocalTM(b.OrigPos, b.OrigRot, b.DefaultScale);
+		NLMISC::CMatrix worldTM = rig.FootstepsParentWorld * localTM;
+		NLMISC::CVector wp = worldTM.getPos();
+		wp.z = rig.ToeBaseWorldZ;
+		NLMISC::CMatrix pinv = rig.FootstepsParentWorld;
+		pinv.invert();
+		NLMISC::CVector newLocal = pinv * wp;
+		b.OrigPos = newLocal;
+		b.DefaultPos = newLocal;
+		NLMISC::CMatrix newLocalTM = makeLocalTM(newLocal, b.OrigRot, b.DefaultScale);
+		NLMISC::CMatrix newWorld = rig.FootstepsParentWorld * newLocalTM;
+		NLMISC::CMatrix invBind;
+		invBind.identity();
+		invBind.setRot(newWorld.getI(), newWorld.getJ(), newWorld.getK());
+		invBind.setPos(newWorld.getPos());
+		invBind.invert();
+		b.InvBindPos = invBind;
+	}
 }
 
 // Double-precision variant: parent-world is Mat4D, local build + multiply + invert happen in
@@ -1604,6 +1877,7 @@ int main(int argc, char **argv)
 	{
 		NLMISC::CMatrix rootMat; rootMat.identity();
 		walkNode(bip01, -1, rootMat, scene.container(), bones, nameSet);
+		patchFootstepsGround(bones);
 	}
 
 	std::cout << "Extracted " << bones.size() << " bones from " << maxFile << "\n";
