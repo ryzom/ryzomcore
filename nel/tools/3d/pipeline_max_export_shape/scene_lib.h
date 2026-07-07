@@ -5,6 +5,9 @@
  * derived-object chain walking and XRef resolution. Adapted from the ig exporter's in-file
  * helpers (pipeline_max_export_ig/main.cpp) with a full typed ParamBlock2 record decode on top
  * (values by (block, param) or by script parameter name through per-script tables).
+ * \author Jan Boon (Kaetemi)
+ * \author Claude Fable 5
+ * \author Claude Opus 4.8
  */
 
 /*

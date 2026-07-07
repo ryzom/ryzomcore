@@ -3,6 +3,7 @@
  * \brief CMultiMtl
  * \date 2012-08-22 08:55GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.8
  * CMultiMtl
  */
 
@@ -44,6 +45,7 @@ namespace BUILTIN {
  * \brief CMultiMtl
  * \date 2012-08-22 08:55GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.8
  *
  * The Multi/Sub-Object material, ClassId {0x200, 0}, superclass 0xc00. It holds N sub-materials:
  * reference 0 is the material's own ParamBlock2, references 1..N are the sub-materials, and the

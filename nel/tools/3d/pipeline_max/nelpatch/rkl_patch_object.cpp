@@ -3,6 +3,7 @@
  * \brief CRklPatchObject
  * \date 2026-07-06
  * \author Jan Boon (Kaetemi)
+ * \author Claude Fable 5
  * CRklPatchObject
  */
 

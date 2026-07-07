@@ -3,6 +3,7 @@
  * \brief CGeomBuffers
  * \date 2012-08-25 07:55GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.8
  * CGeomBuffers
  */
 
@@ -103,6 +104,7 @@ struct CGeomPolyFaceInfo
  * \brief CGeomBuffers
  * \date 2012-08-25 07:55GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.8
  * CGeomBuffers
  */
 class CGeomBuffers : public CStorageContainer

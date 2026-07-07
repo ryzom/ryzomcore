@@ -3,6 +3,8 @@
  * \brief CStorageObject
  * \date 2012-08-18 09:02GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.7
+ * \author Claude Sonnet 5
  * CStorageObject
  */
 

@@ -3,6 +3,7 @@
  * \brief CTrackViewNode
  * \date 2012-08-24 09:44GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.7
  * CTrackViewNode
  */
 

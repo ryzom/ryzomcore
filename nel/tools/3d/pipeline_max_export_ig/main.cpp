@@ -1,3 +1,9 @@
+/**
+ * \file main.cpp
+ * \author Jan Boon (Kaetemi)
+ * \author Claude Fable 5
+ * \author Claude Opus 4.8
+ */
 // Ig export: .max -> .ig, replicating the NelExportInstanceGroup path of the 3ds Max plugin
 // (build_gamedata processes/ig) without 3ds Max.
 //

@@ -3,6 +3,7 @@
  * \brief CMtlBase
  * \date 2012-08-22 08:53GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.8
  * CMtlBase
  */
 

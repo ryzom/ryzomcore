@@ -4,6 +4,8 @@
  * (pipeline_max_export_skel, pipeline_max_export_anim). Extracted verbatim from
  * pipeline_max_export_skel/main.cpp (2026-07-06); see pipeline_max_design.md for the decode
  * provenance. Behavior gated by the skel corpus test (byte-identical outputs).
+ * \author Jan Boon (Kaetemi)
+ * \author Claude Fable 5
  */
 
 /*

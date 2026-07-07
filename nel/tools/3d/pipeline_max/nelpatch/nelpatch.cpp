@@ -3,6 +3,8 @@
  * \brief CNelPatch
  * \date 2026-07-06
  * \author Jan Boon (Kaetemi)
+ * \author Claude Sonnet 5
+ * \author Claude Fable 5
  * CNelPatch
  */
 

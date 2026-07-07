@@ -1,3 +1,9 @@
+/**
+ * \file main.cpp
+ * \author Jan Boon (Kaetemi)
+ * \author Claude Fable 5
+ * \author Claude Opus 4.8
+ */
 // Shape export: .max -> .shape, replicating the NelExportShapeEx path of the 3ds Max plugin
 // (build_gamedata processes/shape) without 3ds Max.
 //

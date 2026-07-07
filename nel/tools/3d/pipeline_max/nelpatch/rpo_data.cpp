@@ -3,6 +3,7 @@
  * \brief RPO / NeL patch mesh data decoding
  * \date 2026-07-06
  * \author Jan Boon (Kaetemi)
+ * \author Claude Fable 5
  * See rpo_data.h.
  */
 

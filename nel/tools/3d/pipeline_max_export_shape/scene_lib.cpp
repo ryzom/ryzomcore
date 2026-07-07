@@ -1,6 +1,9 @@
 /**
  * \file scene_lib.cpp
  * \brief See scene_lib.h.
+ * \author Jan Boon (Kaetemi)
+ * \author Claude Fable 5
+ * \author Claude Opus 4.8
  */
 
 /*

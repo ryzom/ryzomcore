@@ -3,6 +3,7 @@
  * \brief CAppData
  * \date 2012-08-21 11:47GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Sonnet 5
  * CAppData
  */
 

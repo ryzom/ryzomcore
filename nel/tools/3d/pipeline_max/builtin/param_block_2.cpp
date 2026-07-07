@@ -3,6 +3,7 @@
  * \brief CParamBlock2
  * \date 2012-08-22 08:57GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.8
  * CParamBlock2
  */
 

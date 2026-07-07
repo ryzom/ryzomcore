@@ -1,3 +1,8 @@
+/**
+ * \file main.cpp
+ * \author Jan Boon (Kaetemi)
+ * \author Claude Fable 5
+ */
 // Zone export: .max -> .zone / .ligozone, replicating the ExportRykolZone and NeLLigoExportZone
 // paths of the 3ds Max plugins (build_gamedata processes/zone and processes/ligo) without
 // 3ds Max.

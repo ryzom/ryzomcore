@@ -3,6 +3,7 @@
  * \brief CScene
  * \date 2012-08-18 19:25GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Sonnet 5
  * CScene
  */
 

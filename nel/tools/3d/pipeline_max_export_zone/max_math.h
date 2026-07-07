@@ -5,6 +5,8 @@
  * Gems IV polar/affine matrix decomposition (Shoemake) that CExportNel::decompMatrix wraps.
  * All arithmetic in float, mimicking the SDK operation order — see pipeline_max_design.md for
  * the bit-exactness contract (T3-epsilon class where x87 intermediates differ).
+ * \author Jan Boon (Kaetemi)
+ * \author Claude Fable 5
  */
 
 /*

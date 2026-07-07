@@ -21,6 +21,9 @@
  * StdUVGen ("Placement"): no sub-references; state in legacy chunks — 0x9002 = flags dword
  * (bit 0 = U wrap, bit 1 = V wrap), 0x900b = map channel; offset/scale/angle chunks are only
  * written when non-default (not yet decoded — identity assumed, warned when present).
+ * \author Jan Boon (Kaetemi)
+ * \author Claude Fable 5
+ * \author Claude Opus 4.8
  */
 
 /*

@@ -3,6 +3,7 @@
  * \brief CBipedDriven
  * \date 2026-07-05
  * \author Jan Boon (Kaetemi)
+ * \author Claude Sonnet 5
  * CBipedDriven
  */
 
@@ -44,6 +45,7 @@ namespace BIPED {
  * \brief CBipedDriven
  * \date 2026-07-05
  * \author Jan Boon (Kaetemi)
+ * \author Claude Sonnet 5
  * "BipSlave Control" (pre-2022) / "BipDriven Control" (2022+), ClassId {0x9154, 0}, superclass
  * 0x9008 (ControlTransform). Every non-COM biped bone has one of these as its TM controller
  * (getReference(0)). Chunk 0x0200 (8 bytes = 2 uint32) identifies which biped bone this drives:

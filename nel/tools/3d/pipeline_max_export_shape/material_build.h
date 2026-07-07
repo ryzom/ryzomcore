@@ -5,6 +5,8 @@
  * export_material.cpp). NeL Material (scripted plugin, classid (0x64c75fec, 0x222b9eb9))
  * parameters are read from its ParamBlock2 blocks through the script-version parameter
  * tables (v14 = the whole shape corpus); standard materials through the delegate's blocks.
+ * \author Jan Boon (Kaetemi)
+ * \author Claude Fable 5
  */
 
 /*

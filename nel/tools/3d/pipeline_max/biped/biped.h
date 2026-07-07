@@ -3,6 +3,7 @@
  * \brief CBiped
  * \date 2026-07-05
  * \author Jan Boon (Kaetemi)
+ * \author Claude Sonnet 5
  * CBiped
  */
 
@@ -47,6 +48,7 @@ namespace BIPED {
  * \brief CBiped
  * \date 2026-07-05
  * \author Jan Boon (Kaetemi)
+ * \author Claude Sonnet 5
  * Registers the typed classes for character studio's Biped controller (biped.dlc), a third-party
  * plugin DLL like UPDATE1/EPOLY — not part of 3ds Max's own builtin classes. Confirmed via corpus
  * inspection: every observed Biped-related ClassId (0x9155 Biped system, 0x9156 Vertical/
@@ -69,6 +71,7 @@ public:
  * \brief CDllPluginDescBiped
  * \date 2026-07-05
  * \author Jan Boon (Kaetemi)
+ * \author Claude Sonnet 5
  * CDllPluginDescBiped
  */
 class CDllPluginDescBiped : public IDllPluginDescInternal

@@ -3,6 +3,7 @@
  * \brief CConfig
  * \date 2012-08-18 19:25GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.7
  * CConfig
  */
 

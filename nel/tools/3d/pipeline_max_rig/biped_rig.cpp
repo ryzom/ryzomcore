@@ -1,6 +1,10 @@
 /**
  * \file biped_rig.cpp
  * \brief See biped_rig.h — extracted verbatim from pipeline_max_export_skel/main.cpp.
+ * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.7
+ * \author Claude Sonnet 5
+ * \author Claude Fable 5
  */
 
 /*

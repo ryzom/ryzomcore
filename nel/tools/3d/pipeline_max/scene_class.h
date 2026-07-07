@@ -3,6 +3,8 @@
  * \brief CSceneClass
  * \date 2012-08-20 09:07GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.7
+ * \author Claude Sonnet 5
  * CSceneClass
  */
 
@@ -56,6 +58,8 @@ class ISceneClassDesc;
  * \brief CSceneClass
  * \date 2012-08-19 19:25GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.7
+ * \author Claude Sonnet 5
  * It is recommended to use CRefPtr<T> to refer to any pointers to
  * classes inherited from this class.
  * NOTE: CRefPtr<T> does not delete the class when references go to
@@ -196,6 +200,8 @@ void CSceneClass::putChunkValue(uint16 id, const T &value)
  * \brief ISceneClassDesc
  * \date 2012-08-19 19:25GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.7
+ * \author Claude Sonnet 5
  * ISceneClassDesc
  */
 class ISceneClassDesc
@@ -215,6 +221,8 @@ public:
  * \brief CSceneClassDesc
  * \date 2012-08-19 19:25GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.7
+ * \author Claude Sonnet 5
  * CSceneClassDesc
  * Use in a cpp when registering the CClassId.
  */

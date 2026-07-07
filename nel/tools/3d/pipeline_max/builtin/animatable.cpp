@@ -3,6 +3,7 @@
  * \brief CAnimatable
  * \date 2012-08-22 08:52GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Fable 5
  * CAnimatable
  */
 

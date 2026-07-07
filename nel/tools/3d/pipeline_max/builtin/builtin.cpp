@@ -3,6 +3,9 @@
  * \brief CBuiltin
  * \date 2012-08-22 09:42GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Sonnet 5
+ * \author Claude Fable 5
+ * \author Claude Opus 4.8
  * CBuiltin
  */
 

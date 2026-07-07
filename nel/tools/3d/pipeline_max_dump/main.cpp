@@ -1,3 +1,10 @@
+/**
+ * \file main.cpp
+ * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.7
+ * \author Claude Sonnet 5
+ * \author Claude Fable 5
+ */
 /*
  * Copyright (C) 2012  by Jan Boon (Kaetemi)
  *

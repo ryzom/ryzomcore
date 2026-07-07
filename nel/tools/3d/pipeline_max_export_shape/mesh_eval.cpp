@@ -13,6 +13,9 @@
  *     0x2394 u32 count + count x Point3 map vertices;
  *     0x2396 u32 count + count x (u32 t0, t1, t2) map faces (parallel to mesh faces);
  *   0x0952/0x0953/0x0956/0x094c vertex-data channels (soft selection floats etc.) — not needed.
+ * \author Jan Boon (Kaetemi)
+ * \author Claude Fable 5
+ * \author Claude Opus 4.8
  */
 
 /*

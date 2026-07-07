@@ -3,6 +3,7 @@
  * \brief CBiped
  * \date 2026-07-05
  * \author Jan Boon (Kaetemi)
+ * \author Claude Sonnet 5
  * CBiped
  */
 

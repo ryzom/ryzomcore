@@ -3,6 +3,7 @@
  * \brief CRklPatchObject
  * \date 2026-07-06
  * \author Jan Boon (Kaetemi)
+ * \author Claude Fable 5
  * CRklPatchObject
  */
 
@@ -45,6 +46,7 @@ namespace NELPATCH {
  * \brief CRklPatchObject
  * \date 2026-07-06
  * \author Jan Boon (Kaetemi)
+ * \author Claude Fable 5
  * The Rykol Patch Object ("RklPatch", nelconvertpatch_r.dlm), ClassId (0x368c679f, 0x711c22ee),
  * superclass 0x10 (GeomObject) — the NeL landscape patch grid inside .max files. The original
  * RPO::Save writes chunk 0x08FD (uint32 rpoVersion + the RPatchMesh blob), then the Max

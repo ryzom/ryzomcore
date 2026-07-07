@@ -1,3 +1,10 @@
+/**
+ * \file main.cpp
+ * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.7
+ * \author Claude Sonnet 5
+ * \author Claude Fable 5
+ */
 // Skel export: .max -> .skel, replicating the NelExportSkeleton path of the 3ds Max plugin
 // (build_gamedata processes/skel) without 3ds Max.
 // Reads Bip01, walks children in scene order, and emits the .skel binary in the same format

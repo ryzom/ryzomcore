@@ -1,3 +1,8 @@
+/**
+ * \file main.cpp
+ * \author Jan Boon (Kaetemi)
+ * \author Claude Fable 5
+ */
 // Anim export: .max -> .anim, replicating the NelExportAnimation path of the 3ds Max plugin
 // (build_gamedata processes/anim) without 3ds Max, for non-biped rigs.
 //

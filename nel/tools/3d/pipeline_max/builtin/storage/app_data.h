@@ -3,6 +3,7 @@
  * \brief CAppData
  * \date 2012-08-21 11:47GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Sonnet 5
  * CAppData
  */
 
@@ -54,6 +55,7 @@ class CAppDataEntry;
  * \brief CAppData
  * \date 2012-08-21 11:47GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Sonnet 5
  * This implements the AppData chunk in the storage
  */
 class CAppData : public CStorageContainer
@@ -129,6 +131,7 @@ private:
  * \brief CAppDataEntryKey
  * \date 2012-08-18 18:01GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Sonnet 5
  * CAppDataEntryKey
  */
 class CAppDataEntryKey : public IStorageObject
@@ -154,6 +157,7 @@ public:
  * \brief CAppDataEntry
  * \date 2012-08-21 11:47GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Sonnet 5
  * This implements an entry in the AppData chunk in the storage
  */
 class CAppDataEntry : public CStorageContainer

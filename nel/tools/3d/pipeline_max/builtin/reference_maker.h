@@ -3,6 +3,8 @@
  * \brief CReferenceMaker
  * \date 2012-08-22 08:52GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.7
+ * \author Claude Opus 4.8
  * CReferenceMaker
  */
 
@@ -45,6 +47,8 @@ namespace BUILTIN {
  * \brief CReferenceMaker
  * \date 2012-08-22 08:52GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.7
+ * \author Claude Opus 4.8
  * This class implements references
  */
 class CReferenceMaker : public CAnimatable

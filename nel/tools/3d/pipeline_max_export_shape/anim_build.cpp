@@ -1,6 +1,8 @@
 /**
  * \file anim_build.cpp
  * \brief See anim_build.h.
+ * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.8
  */
 
 /*

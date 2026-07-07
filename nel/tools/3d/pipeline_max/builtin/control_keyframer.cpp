@@ -3,6 +3,8 @@
  * \brief CControlKeyFramer
  * \date 2026-07-06
  * \author Jan Boon (Kaetemi)
+ * \author Claude Fable 5
+ * \author Claude Opus 4.8
  * Typed classes for the builtin keyframe animation controllers.
  */
 

@@ -3,6 +3,7 @@
  * \brief CNelPatch
  * \date 2026-07-06
  * \author Jan Boon (Kaetemi)
+ * \author Claude Fable 5
  * CNelPatch
  */
 
@@ -47,6 +48,7 @@ namespace NELPATCH {
  * \brief CNelPatch
  * \date 2026-07-06
  * \author Jan Boon (Kaetemi)
+ * \author Claude Fable 5
  * Registers the typed classes for the NeL patch mesh converter plugin (nelconvertpatch_r.dlm,
  * "Rykol Patchmesh Converter") — the in-tree plugin_max/nel_patch_lib plugin that stores the
  * NeL landscape patch grids (RklPatch objects) inside .max files.
@@ -66,6 +68,7 @@ public:
  * \brief CDllPluginDescNelPatch
  * \date 2026-07-06
  * \author Jan Boon (Kaetemi)
+ * \author Claude Fable 5
  * CDllPluginDescNelPatch
  */
 class CDllPluginDescNelPatch : public IDllPluginDescInternal

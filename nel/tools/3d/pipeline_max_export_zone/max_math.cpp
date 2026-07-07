@@ -3,6 +3,8 @@
  * \brief See max_math.h. The decomposition is a faithful float port of the Graphics Gems IV
  * "Polar Matrix Decomposition" reference code (Ken Shoemake), which is what the SDK's
  * decomp_affine wraps; the gems code carries no license restrictions ("free to reuse").
+ * \author Jan Boon (Kaetemi)
+ * \author Claude Fable 5
  */
 
 /*

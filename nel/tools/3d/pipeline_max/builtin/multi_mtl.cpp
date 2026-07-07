@@ -3,6 +3,7 @@
  * \brief CMultiMtl
  * \date 2012-08-22 08:55GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.8
  * CMultiMtl
  */
 

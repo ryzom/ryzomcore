@@ -3,6 +3,7 @@
  * \brief CStorageArray
  * \date 2012-08-21 11:33GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.7
  * CStorageArray
  */
 
@@ -50,6 +51,7 @@ namespace MAX {
  * \brief CStorageArray
  * \date 2012-08-21 11:33GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.7
  * WARNING: sizeof(TType) should match the serialized size,
  * otherwise you must specialize the getSize and setSize functions!
  */

@@ -6,6 +6,8 @@
  * counterpart of EvalWorldState + ConvertToType(TRIOBJ) that CExportNel::buildMeshInterface
  * reads. Chunk-level decode established on the Max 9 shape corpus (see max_geometry_formats.md
  * Part F and pipeline_max_design.md §10i).
+ * \author Jan Boon (Kaetemi)
+ * \author Claude Fable 5
  */
 
 /*

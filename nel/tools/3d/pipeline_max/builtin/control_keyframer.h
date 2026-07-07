@@ -3,6 +3,8 @@
  * \brief CControlKeyFramer
  * \date 2026-07-06
  * \author Jan Boon (Kaetemi)
+ * \author Claude Fable 5
+ * \author Claude Opus 4.8
  * Typed classes for the builtin keyframe animation controllers (Linear / Bezier / TCB
  * position, rotation, scale and float variants).
  */
@@ -168,6 +170,8 @@ struct CStorageTCBScaleKey
  * \brief CControlKeyFramerBase
  * \date 2026-07-06
  * \author Jan Boon (Kaetemi)
+ * \author Claude Fable 5
+ * \author Claude Opus 4.8
  * Shared machinery for the typed keyframe controllers. Claims the controller's known chunks
  * head-first in file order (default value, 0x2500, 0x3002, 0x3003 range, 0x2532/33/34,
  * key table, 0x3005), stopping at the first unrecognized id so unknown chunks stay orphaned

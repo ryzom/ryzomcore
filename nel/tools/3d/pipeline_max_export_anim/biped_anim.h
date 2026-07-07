@@ -35,6 +35,8 @@
  * frames (COM/pelvis/parent). Legs/arms with IK blend keys additionally solve a 2-bone IK toward
  * the interpolated world end-effector position (approximation for in-between frames; exact at
  * keys — see the wiki's open-work note).
+ * \author Jan Boon (Kaetemi)
+ * \author Claude Fable 5
  */
 
 /*

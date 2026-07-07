@@ -3,6 +3,7 @@
  * \brief RPO / NeL patch mesh data decoding
  * \date 2026-07-06
  * \author Jan Boon (Kaetemi)
+ * \author Claude Fable 5
  * Plain-data views of the Rykol Patch Object payloads: the RPatchMesh blob (chunk 0x08FD on
  * the RklPatch scene object, or chunk 0x4001 in NeL Edit Patch per-node local data) and the
  * Max PatchMesh chunk stream (flat on the RklPatch object, or nested under chunk 0x1140 in

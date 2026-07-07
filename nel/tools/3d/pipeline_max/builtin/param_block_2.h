@@ -3,6 +3,7 @@
  * \brief CParamBlock2
  * \date 2012-08-22 08:57GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.8
  * CParamBlock2
  */
 
@@ -46,6 +47,7 @@ namespace BUILTIN {
  * \brief CParamBlock2
  * \date 2012-08-22 08:57GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.8
  *
  * The Max ParamBlock2 (superclass 0x82). A ParamBlock2 scene object stores a single parameter
  * block: a header chunk 0x0009 = { u32 scriptVersion, u16 blockId, u16 (owner class marker),

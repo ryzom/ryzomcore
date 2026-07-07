@@ -3,6 +3,7 @@
  * \brief CMtlBase
  * \date 2012-08-22 08:53GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.8
  * CMtlBase
  */
 
@@ -45,6 +46,7 @@ namespace BUILTIN {
  * \brief CMtlBase
  * \date 2012-08-22 08:53GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.8
  *
  * The shared base of every material and texmap scene class (MtlBase). Its only universally
  * present payload is the material-base container: chunk 0x4000 wraps the base state, whose

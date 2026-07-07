@@ -1,3 +1,8 @@
+/**
+ * \file main.cpp
+ * \author Jan Boon (Kaetemi)
+ * \author Claude Fable 5
+ */
 // Swt export: .max -> .swt, replicating the NelExportSkeletonWeight path of the 3ds Max
 // plugin (build_gamedata processes/swt) without 3ds Max.
 //

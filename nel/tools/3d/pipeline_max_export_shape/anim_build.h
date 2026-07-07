@@ -9,6 +9,8 @@
  * enabled texture stage, its texmap's StdUVGen U/V Offset (etc.) driven by a Linear Float
  * controller, exported as a CTrackKeyFramerLinearFloat named <mtlName>.UTrans<stage> /
  * .VTrans<stage>. See pipeline_max_design.md §10k.
+ * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.8
  */
 
 /*

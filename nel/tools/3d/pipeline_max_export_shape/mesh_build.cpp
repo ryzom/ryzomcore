@@ -1,6 +1,8 @@
 /**
  * \file mesh_build.cpp
  * \brief See mesh_build.h.
+ * \author Jan Boon (Kaetemi)
+ * \author Claude Fable 5
  */
 
 /*

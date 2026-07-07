@@ -1,3 +1,8 @@
+/**
+ * \file main.cpp
+ * \author Jan Boon (Kaetemi)
+ * \author Claude Sonnet 5
+ */
 /*
  * Copyright (C) 2012  by Jan Boon (Kaetemi)
  *

@@ -4,6 +4,8 @@
  * counterpart of CExportNel::buildBaseMeshInterface + buildMeshInterface (plugin_max/
  * nel_mesh_lib/export_mesh.cpp), including the Max buildRenderNormals smoothing-group normal
  * computation and the per-corner UV/color extraction with material channel remapping.
+ * \author Jan Boon (Kaetemi)
+ * \author Claude Fable 5
  */
 
 /*

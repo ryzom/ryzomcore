@@ -3,6 +3,8 @@
  * \brief CSceneClass
  * \date 2012-08-20 09:07GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.7
+ * \author Claude Sonnet 5
  * CSceneClass
  */
 
