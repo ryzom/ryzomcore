@@ -81,6 +81,14 @@ struct CStorageLinScaleKey
 	float Q[4];
 };
 
+/// Linear Float (0x2001, 0) — chunk 0x2511
+struct CStorageLinFloatKey
+{
+	sint32 Time;
+	uint32 Flags;
+	float Val;
+};
+
 /// Bezier Float (0x2007, 0) — chunk 0x2525
 struct CStorageBezFloatKey
 {
@@ -252,6 +260,7 @@ private:
 PMB_DECLARE_CONTROL_KEYFRAMER(CControlPosLinear, CStorageLinPoint3Key)
 PMB_DECLARE_CONTROL_KEYFRAMER(CControlRotLinear, CStorageLinRotKey)
 PMB_DECLARE_CONTROL_KEYFRAMER(CControlScaleLinear, CStorageLinScaleKey)
+PMB_DECLARE_CONTROL_KEYFRAMER(CControlFloatLinear, CStorageLinFloatKey)
 PMB_DECLARE_CONTROL_KEYFRAMER(CControlFloatBezier, CStorageBezFloatKey)
 PMB_DECLARE_CONTROL_KEYFRAMER(CControlPosBezier, CStorageBezPoint3Key)
 PMB_DECLARE_CONTROL_KEYFRAMER(CControlScaleBezier, CStorageBezScaleKey)

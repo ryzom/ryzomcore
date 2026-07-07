@@ -237,9 +237,16 @@ bool CControlKeyFramerBase::floatValueAt0(float &out) const
 {
 	if (keyCount())
 	{
+		bool l; float f;
+		if (const CControlFloatLinear *c = dynamic_cast<const CControlFloatLinear *>(this))
+		{
+			uint i = kfKeyIndexAt0(c->keys(), keyCount(), l, f);
+			out = c->keys()[i].Val;
+			if (l) out += f * (c->keys()[i + 1].Val - c->keys()[i].Val);
+			return true;
+		}
 		if (const CControlFloatBezier *c = dynamic_cast<const CControlFloatBezier *>(this))
 		{
-			bool l; float f;
 			uint i = kfKeyIndexAt0(c->keys(), keyCount(), l, f);
 			out = c->keys()[i].Val;
 			return true;
@@ -357,6 +364,7 @@ bool CControlKeyFramerBase::scaleValueAt0(float out[7]) const
 #define PMB_CTRL_DEFAULT_SCALE_CHUNK_ID 0x2505
 
 // Key-table chunk ids
+#define PMB_CTRL_KEYS_LIN_FLOAT_CHUNK_ID 0x2511
 #define PMB_CTRL_KEYS_LIN_POS_CHUNK_ID 0x2513
 #define PMB_CTRL_KEYS_LIN_ROT_CHUNK_ID 0x2514
 #define PMB_CTRL_KEYS_LIN_SCALE_CHUNK_ID 0x2515
@@ -391,6 +399,7 @@ bool CControlKeyFramerBase::scaleValueAt0(float out[7]) const
 PMB_DEFINE_CONTROL_KEYFRAMER(CControlPosLinear, "Linear Position", "ControlPosLinear", 0x00002002, PMB_SCLASS_CONTROL_POS, PMB_CTRL_DEFAULT_POS_CHUNK_ID, PMB_CTRL_KEYS_LIN_POS_CHUNK_ID, CStorageLinPoint3Key)
 PMB_DEFINE_CONTROL_KEYFRAMER(CControlRotLinear, "Linear Rotation", "ControlRotLinear", 0x00002003, PMB_SCLASS_CONTROL_ROT, PMB_CTRL_DEFAULT_ROT_CHUNK_ID, PMB_CTRL_KEYS_LIN_ROT_CHUNK_ID, CStorageLinRotKey)
 PMB_DEFINE_CONTROL_KEYFRAMER(CControlScaleLinear, "Linear Scale", "ControlScaleLinear", 0x00002004, PMB_SCLASS_CONTROL_SCALE, PMB_CTRL_DEFAULT_SCALE_CHUNK_ID, PMB_CTRL_KEYS_LIN_SCALE_CHUNK_ID, CStorageLinScaleKey)
+PMB_DEFINE_CONTROL_KEYFRAMER(CControlFloatLinear, "Linear Float", "ControlFloatLinear", 0x00002001, PMB_SCLASS_CONTROL_FLOAT, PMB_CTRL_DEFAULT_FLOAT_CHUNK_ID, PMB_CTRL_KEYS_LIN_FLOAT_CHUNK_ID, CStorageLinFloatKey)
 PMB_DEFINE_CONTROL_KEYFRAMER(CControlFloatBezier, "Bezier Float", "ControlFloatBezier", 0x00002007, PMB_SCLASS_CONTROL_FLOAT, PMB_CTRL_DEFAULT_FLOAT_CHUNK_ID, PMB_CTRL_KEYS_BEZ_FLOAT_CHUNK_ID, CStorageBezFloatKey)
 PMB_DEFINE_CONTROL_KEYFRAMER(CControlPosBezier, "Bezier Position", "ControlPosBezier", 0x00002008, PMB_SCLASS_CONTROL_POS, PMB_CTRL_DEFAULT_POS_CHUNK_ID, PMB_CTRL_KEYS_BEZ_POS_CHUNK_ID, CStorageBezPoint3Key)
 PMB_DEFINE_CONTROL_KEYFRAMER(CControlScaleBezier, "Bezier Scale", "ControlScaleBezier", 0x00002010, PMB_SCLASS_CONTROL_SCALE, PMB_CTRL_DEFAULT_SCALE_CHUNK_ID, PMB_CTRL_KEYS_BEZ_SCALE_CHUNK_ID, CStorageBezScaleKey)

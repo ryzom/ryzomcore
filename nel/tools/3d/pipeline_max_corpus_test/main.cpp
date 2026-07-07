@@ -549,7 +549,10 @@ static void dumpRefTree(CSceneClass *obj, int depth, int maxDepth)
 		{
 			std::cout << " chunks:";
 			for (CStorageContainer::TStorageObjectConstIt ct = cont->chunks().begin(); ct != cont->chunks().end(); ++ct)
+			{
 				std::cout << " 0x" << std::hex << ct->first << std::dec;
+				if (CStorageRaw *rw = dynamic_cast<CStorageRaw *>(ct->second)) std::cout << "(" << rw->Value.size() << ")";
+			}
 		}
 		std::cout << "\n";
 		if (depth + 1 < maxDepth) dumpRefTree(ref, depth + 1, maxDepth);

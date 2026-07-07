@@ -295,6 +295,7 @@ void CBuiltin::registerClasses(CSceneClassRegistry *registry)
 	registry->add(&CControlPosLinearDesc);
 	registry->add(&CControlRotLinearDesc);
 	registry->add(&CControlScaleLinearDesc);
+	registry->add(&CControlFloatLinearDesc);
 	registry->add(&CControlFloatBezierDesc);
 	registry->add(&CControlPosBezierDesc);
 	registry->add(&CControlScaleBezierDesc);
