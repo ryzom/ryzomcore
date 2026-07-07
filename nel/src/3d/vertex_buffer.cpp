@@ -35,6 +35,10 @@ namespace NL3D
 
 // --------------------------------------------------
 
+bool CVertexBuffer::SerialOldPreferredMemory = false;
+
+// --------------------------------------------------
+
 const uint CVertexBuffer::SizeType[NumType]=
 {
 	1*sizeof(double),
@@ -796,7 +800,7 @@ void		CVertexBuffer::serialHeader(NLMISC::IStream &f)
 	Version 0:
 		- base verison of the header serialisation.
 	*/
-	sint	ver= f.serialVersion(4);
+	sint	ver= f.serialVersion(SerialOldPreferredMemory ? 3 : 4);
 
 	// Serial VBuffers format/size.
 	//=============================
@@ -913,8 +917,23 @@ void		CVertexBuffer::serialHeader(NLMISC::IStream &f)
 		}
 		else
 		{
-			// Should not write old format
-			nlstop;
+			// Write the old format (SerialOldPreferredMemory compatibility mode; the version
+			// byte above is 3 in that mode): TBufferUsage mapped back to TPreferredMemory.
+			nlassert(SerialOldPreferredMemory);
+			sint32 oldPref;
+			switch (_BufferUsage)
+			{
+			case CpuReadWrite: oldPref = 0; break;         // RAMPreferred
+			case FullRewrite:
+			case PartialWrite:
+			case UnsynchronizedWrite: oldPref = 1; break;  // AGPPreferred
+			case Immutable: oldPref = 2; break;            // StaticPreferred
+			case SmallStream: oldPref = 3; break;          // RAMVolatile
+			case FullStream: oldPref = 4; break;           // AGPVolatile
+			default: oldPref = 0; break;
+			}
+			f.serial(oldPref);
+			f.serial(_Name);
 		}
 	}
 	else

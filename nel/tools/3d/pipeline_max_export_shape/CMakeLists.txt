@@ -1,0 +1,37 @@
+FIND_PACKAGE(LIBGSF)
+
+IF (NOT (LIBGSF_INCLUDE_DIR AND LIBGSF_LIBRARIES))
+	MESSAGE(FATAL_ERROR "LIBGSF not found!")
+ENDIF (NOT (LIBGSF_INCLUDE_DIR AND LIBGSF_LIBRARIES))
+
+FIND_PACKAGE(GOBJECT2 REQUIRED)
+FIND_PACKAGE(GLIB2 REQUIRED)
+
+FILE(GLOB SRCS *.cpp)
+FILE(GLOB HDRS *.h)
+
+ADD_EXECUTABLE(pipeline_max_export_shape
+	${SRCS}
+	${HDRS}
+	)
+
+TARGET_INCLUDE_DIRECTORIES(pipeline_max_export_shape
+		PRIVATE
+		${GLIB2_INCLUDE_DIRS}
+		${LIBGSF_INCLUDE_DIR}
+)
+
+TARGET_LINK_LIBRARIES(pipeline_max_export_shape
+	${LIBGSF_LIBRARIES}
+	${GLIB2_LIBRARIES}
+	${GOBJECT2_LIBRARIES}
+	pipeline_max
+	pipeline_max_rig
+	NeL::misc
+	NeL::3d
+)
+
+NL_DEFAULT_PROPS(pipeline_max_export_shape "NeL, Tools, 3D: Pipeline Max Export Shape")
+NL_ADD_RUNTIME_FLAGS(pipeline_max_export_shape)
+
+INSTALL(TARGETS pipeline_max_export_shape RUNTIME DESTINATION bin COMPONENT toolsmisc)
