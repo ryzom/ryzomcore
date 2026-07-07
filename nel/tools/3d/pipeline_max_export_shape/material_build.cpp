@@ -657,8 +657,12 @@ static void buildANelMaterial(CMaterial &material, SMaterialInfo &materialInfo, 
 	// Double sided
 	material.setDoubleSided(nelInt(np, NLB_NLBP, NLP_BTWOSIDED, 0) != 0);
 
-	// Textures
-	int bExportTexMatAnim = nelInt(np, NLB_MAIN, NLP_BEXPORTTEXTUREMATRIX, 0);
+	// Textures. bExportTextureMatrix may be an inline constant OR controller-backed (the artist
+	// keyed the flag with an On/Off controller on some materials — combes_plateaux waterfalls);
+	// the reference reads the live value at t=0, so resolve the controller here too — otherwise
+	// enableUserTexMat is skipped and the material carries no user texture matrix for the anim to
+	// drive (the "waterfall not moving" class).
+	int bExportTexMatAnim = resolveNelBoolAt0(np.Blocks, NLB_MAIN, NLP_BEXPORTTEXTUREMATRIX, false) ? 1 : 0;
 	materialInfo.TextureMatrixEnabled = bExportTexMatAnim != 0;
 	materialInfo.RemapChannel.clear();
 

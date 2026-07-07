@@ -214,6 +214,14 @@ const SPB2Param *findPB2Param(const std::vector<SPB2Block> &blocks, uint blockIn
 // The scene object referenced by a ref-backed PB2 param (texmap etc.), NULL when absent.
 CSceneClass *pb2RefValue(const SPB2Block &block, const SPB2Param &param);
 
+/// The On/Off bool controller (0x984b8d27) state at tick 0: state before the first key (chunk
+/// 0x0140) toggled by every key (0x0100 time) at or before 0.
+bool onOffControllerAt0(CReferenceMaker *ctrl);
+
+/// A NeL-material bool param's value at t=0: the inline constant, else a controller-backed value
+/// (an On/Off controller keyed onto the flag — e.g. bExportTextureMatrix), else the default.
+bool resolveNelBoolAt0(const std::vector<SPB2Block> &blocks, uint block, uint16 id, bool def);
+
 // ---------------------------------------------------------------------------------------------
 // Controller values at t=0 (PRS sub-controllers; typed keyframer key tables bracketed at t=0,
 // else the default-value chunks 0x2503/0x2504/0x2505)

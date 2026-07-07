@@ -423,6 +423,43 @@ CSceneClass *pb2RefValue(const SPB2Block &block, const SPB2Param &param)
 	return dynamic_cast<CSceneClass *>(rm->getReference(param.RefSlot));
 }
 
+bool onOffControllerAt0(CReferenceMaker *ctrl)
+{
+	if (!ctrl) return false;
+	uint32 initState = 0;
+	std::vector<sint32> times;
+	const CStorageContainer::TStorageObjectContainer &orphans = ctrl->orphanedChunks();
+	for (CStorageContainer::TStorageObjectConstIt it = orphans.begin(); it != orphans.end(); ++it)
+	{
+		CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
+		if (!raw || raw->Value.size() != 4) continue;
+		uint32 v;
+		memcpy(&v, raw->Value.data(), 4);
+		if (it->first == 0x0100) times.push_back((sint32)v);
+		else if (it->first == 0x0140) initState = v;
+	}
+	bool state = initState != 0;
+	for (uint i = 0; i < times.size(); ++i)
+		if (times[i] <= 0) state = !state;
+	return state;
+}
+
+bool resolveNelBoolAt0(const std::vector<SPB2Block> &blocks, uint block, uint16 id, bool def)
+{
+	const SPB2Param *p = findPB2Param(blocks, block, id);
+	if (!p) return def;
+	if (p->HasConstant) return p->I != 0;
+	// Controller-backed: an On/Off controller keyed onto the flag (bExportTextureMatrix is animated
+	// this way on some materials); evaluate its state at tick 0.
+	if (p->RefBacked)
+	{
+		CSceneClass *rv = pb2RefValue(blocks[block], *p);
+		if (rv && rv->classDesc()->classId().a() == 0x984b8d27)
+			return onOffControllerAt0(dynamic_cast<CReferenceMaker *>(rv));
+	}
+	return def;
+}
+
 // ---------------------------------------------------------------------------------------------
 // Controller values at t=0
 

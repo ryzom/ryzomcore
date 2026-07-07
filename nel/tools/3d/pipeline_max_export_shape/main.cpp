@@ -49,6 +49,7 @@
 #include <nel/3d/mesh_multi_lod.h>
 #include <nel/3d/register_3d.h>
 #include <nel/3d/shape.h>
+#include <nel/3d/animation.h>
 #include <nel/3d/texture_file.h>
 
 #include <gsf/gsf-utils.h>
@@ -65,6 +66,7 @@
 #include "mesh_eval.h"
 #include "material_build.h"
 #include "mesh_build.h"
+#include "anim_build.h"
 
 #include "../pipeline_max/builtin/scene_impl.h"
 #include "../pipeline_max/builtin/i_node.h"
@@ -113,8 +115,9 @@ struct SExportStats
 {
 	uint Exported;
 	uint Skipped;
+	uint AnimExported;
 	std::map<std::string, uint> SkipReasons;
-	SExportStats() : Exported(0), Skipped(0) { }
+	SExportStats() : Exported(0), Skipped(0), AnimExported(0) { }
 	void skip(const std::string &reason)
 	{
 		++Skipped;
@@ -323,7 +326,7 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache, bool 
 // Per-file export
 
 static int exportFile(const std::string &maxPath, const std::string &outDir, const std::string &outDirCoarse,
-                      bool exportLighting, SExportStats &stats)
+                      const std::string &animDir, bool exportLighting, SExportStats &stats)
 {
 	SLoadedMax lm;
 	if (!loadMaxFile(maxPath, lm))
@@ -468,6 +471,30 @@ static int exportFile(const std::string &maxPath, const std::string &outDir, con
 			fprintf(stderr, "ERROR: shape serialization failed for %s: %s\n", outPath.c_str(), e.what());
 		}
 		delete shape;
+
+		// Per-node material animation (.anim), the shape process's NelExportAnimation step
+		// (shape_export.ms "Export default animations"): a node with AUTOMATIC_ANIMATION gets a
+		// <node>.anim. The animated-material class (waterfalls) resolves to texture-matrix tracks
+		// (§10k); other track classes (node transform / note / morph) of NelExportAnimation are not
+		// yet replicated here, so a node whose only animation is those produces no file for now.
+		if (!animDir.empty() && SHAPEANIM::isAnimToBeExported(node))
+		{
+			NL3D::CAnimation animation;
+			if (SHAPEANIM::buildMaterialAnim(node, animation))
+			{
+				std::string animPath = animDir + "/" + name + ".anim"; // raw node name, like the reference
+				try
+				{
+					NLMISC::COFile f;
+					if (f.open(animPath)) { animation.serial(f); f.close(); ++stats.AnimExported; }
+					else fprintf(stderr, "ERROR: cannot open %s for writing\n", animPath.c_str());
+				}
+				catch (const NLMISC::Exception &e)
+				{
+					fprintf(stderr, "ERROR: anim serialization failed for %s: %s\n", animPath.c_str(), e.what());
+				}
+			}
+		}
 	}
 
 	return 0;
@@ -842,7 +869,7 @@ int main(int argc, char **argv)
 	NL3D::CVertexBuffer::SerialOldPreferredMemory = true;
 	NL3D::CIndexBuffer::SerialOldPreferredMemory = true;
 
-	std::string input, outDir, outDirCoarse, dbRoot;
+	std::string input, outDir, outDirCoarse, animDir, dbRoot;
 	bool exportLighting = true;
 	std::vector<std::string> compareArgs;
 
@@ -855,6 +882,8 @@ int main(int argc, char **argv)
 			dbRoot = argv[++i];
 		else if (arg == "--coarse-out" && i + 1 < argc)
 			outDirCoarse = argv[++i];
+		else if (arg == "--anim-out" && i + 1 < argc)
+			animDir = argv[++i];
 		else if (arg == "--no-lighting")
 			exportLighting = false;
 		else if (arg == "--compare")
@@ -899,8 +928,8 @@ int main(int argc, char **argv)
 	setDatabaseRoot(dbRoot);
 
 	SExportStats stats;
-	int ret = exportFile(input, outDir, outDirCoarse, exportLighting, stats);
-	printf("EXPORTED %u shapes, %u skipped\n", stats.Exported, stats.Skipped);
+	int ret = exportFile(input, outDir, outDirCoarse, animDir, exportLighting, stats);
+	printf("EXPORTED %u shapes, %u skipped, %u anims\n", stats.Exported, stats.Skipped, stats.AnimExported);
 	for (std::map<std::string, uint>::iterator it = stats.SkipReasons.begin(); it != stats.SkipReasons.end(); ++it)
 		printf("SKIPCLASS %s %u\n", it->first.c_str(), it->second);
 	return ret;

@@ -160,6 +160,14 @@ def main():
 
     from concurrent.futures import ThreadPoolExecutor
 
+    # Reference material-animation (.anim) index: the shape process writes a per-node <node>.anim
+    # (texture-matrix tracks); the final client references live under ~/core4_data/*_shapes.
+    import glob as _glob
+    g_animRefIdx = {}
+    if args.t3:
+        for r in _glob.glob(os.path.expanduser("~/core4_data") + "/**/*.anim", recursive=True):
+            g_animRefIdx.setdefault(os.path.basename(r), r)
+
     def run_file(item):
         proj, path = item
         res = {"proj": proj, "path": path}
@@ -176,11 +184,14 @@ def main():
             flat = proj.replace("/", "_")
             outdir = os.path.join(args.out, flat)
             coarsedir = os.path.join(args.out, flat + "_coarse")
+            animdir = os.path.join(args.out, flat + "_anim")
             os.makedirs(outdir, exist_ok=True)
             os.makedirs(coarsedir, exist_ok=True)
+            os.makedirs(animdir, exist_ok=True)
             before = set(os.listdir(outdir)) | set("c/" + f for f in os.listdir(coarsedir))
-            r = subprocess.run([export_bin, "--db", args.graphics, "--coarse-out", coarsedir, path, outdir],
-                               capture_output=True, text=True)
+            animbefore = set(os.listdir(animdir))
+            r = subprocess.run([export_bin, "--db", args.graphics, "--coarse-out", coarsedir,
+                                "--anim-out", animdir, path, outdir], capture_output=True, text=True)
             res["t3rc"] = r.returncode
             res["t3out"] = r.stdout
             res["t3err"] = r.stderr
@@ -192,6 +203,20 @@ def main():
                 if f.endswith(".shape") and ("c/" + f) not in before:
                     new.append((f, os.path.join(coarsedir, f), True))
             res["t3new"] = new
+            # Material animation (.anim) — the shape process's per-node NelExportAnimation step;
+            # compare byte-exact against the final client references indexed from ~/core4_data.
+            animres = []
+            for f in os.listdir(animdir):
+                if not f.endswith(".anim") or f in animbefore:
+                    continue
+                ref = g_animRefIdx.get(f)
+                if not ref:
+                    animres.append(("noref", f))
+                elif open(os.path.join(animdir, f), "rb").read() == open(ref, "rb").read():
+                    animres.append(("ident", f))
+                else:
+                    animres.append(("diff", f))
+            res["animres"] = animres
         return res
 
     results = []
@@ -200,11 +225,21 @@ def main():
             results.append(res)
 
     # aggregate
+    anim_ident = anim_diff = anim_noref = 0
+    anim_diffs = []
     proj_produced = collections.defaultdict(dict)  # proj -> name -> (path, coarse)
     for res in results:
         if res.get("stub"):
             stubs += 1
             continue
+        for tag, bn in res.get("animres", []):
+            if tag == "ident":
+                anim_ident += 1
+            elif tag == "noref":
+                anim_noref += 1
+            else:
+                anim_diff += 1
+                anim_diffs.append(bn)
         if args.t1:
             if res.get("t1"):
                 t1_pass += 1
@@ -304,9 +339,14 @@ def main():
         for s in diff_samples:
             print("    DIFF %s" % s)
         print("    export failures: %d" % len(export_fail))
+        print("    material anim (.anim): %d byte-identical, %d differ, %d without reference"
+              % (anim_ident, anim_diff, anim_noref))
+        for bn in anim_diffs[:20]:
+            print("    ANIM DIFF %s" % bn)
 
     fails = t1_fail + t2_fail + len(export_fail)
     if args.gate_t3:
+        fails += anim_diff  # material animations must be byte-exact against the references
         if identical + floateq < args.min_identical:
             fails += 1
         # structural diffs above the milestone budget are regressions
