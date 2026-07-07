@@ -49,6 +49,7 @@
 #include <nel/3d/mesh_multi_lod.h>
 #include <nel/3d/register_3d.h>
 #include <nel/3d/shape.h>
+#include <nel/3d/texture_file.h>
 
 #include <gsf/gsf-utils.h>
 
@@ -250,6 +251,17 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache, bool 
 	SMaxMeshBaseBuild maxBaseBuild;
 	NL3D::CMeshBase::CMeshBaseBuild buildBaseMesh;
 	buildBaseMeshInterface(buildBaseMesh, maxBaseBuild, node, tmCache, localTM, exportLighting);
+
+	// Lightmapped materials: the reference computed lightmaps at export time (exportLighting);
+	// the headless design exports unmapped (design doc §9) — tag for the harness bucket.
+	for (uint i = 0; i < buildBaseMesh.Materials.size(); ++i)
+	{
+		if (buildBaseMesh.Materials[i].getShader() == NL3D::CMaterial::LightMap)
+		{
+			printf("LIGHTMAP %s\n", NLMISC::toLowerAscii(name).c_str());
+			break;
+		}
+	}
 
 	NL3D::CMesh::CMeshBuild buildMesh;
 	buildMeshInterface(mesh, buildMesh, buildBaseMesh, maxBaseBuild, node, tmCache);
@@ -502,11 +514,16 @@ static void raiseVerdict(int v)
 }
 
 // Float-noise tolerance: near-zero absolute noise or a few ulp on larger values.
-static bool floatNoise(float a, float b)
+static bool floatNoiseTol(float a, float b, float absTol)
 {
 	if (a == b) return true;
-	if (fabsf(a - b) <= 2e-6f) return true;
+	if (fabsf(a - b) <= absTol) return true;
 	return floatUlp(a, b) <= 32;
+}
+
+static bool floatNoise(float a, float b)
+{
+	return floatNoiseTol(a, b, 2e-6f);
 }
 
 static void compareVB(const NL3D::CVertexBuffer &va, const NL3D::CVertexBuffer &vb)
@@ -555,7 +572,10 @@ static void compareVB(const NL3D::CVertexBuffer &va, const NL3D::CVertexBuffer &
 						uint32 u = floatUlp(fa, fb);
 						maxUlp = std::max(maxUlp, u);
 						maxAbs = std::max(maxAbs, (float)fabs(fa - fb));
-						raiseVerdict(floatNoise(fa, fb) ? 1 : 2);
+						// Normals (value 1) tolerate 1e-4 (~0.006 deg on a unit vector): the
+						// angle-weighted accumulation amplifies x87-vs-SSE tails through
+						// near-cancellation sums; positions/UVs stay at the tight tier.
+						raiseVerdict(floatNoiseTol(fa, fb, value == 1 ? 1e-4f : 2e-6f) ? 1 : 2);
 					}
 				}
 				else
@@ -642,7 +662,11 @@ static void compareMeshBase(NL3D::CMeshBase *ma, NL3D::CMeshBase *mb)
 		printf("  DefaultRotQuat: (%.9g %.9g %.9g %.9g) vs (%.9g %.9g %.9g %.9g) ulp(%u %u %u %u)\n",
 		       qa.x, qa.y, qa.z, qa.w, qb.x, qb.y, qb.z, qb.w,
 		       floatUlp(qa.x, qb.x), floatUlp(qa.y, qb.y), floatUlp(qa.z, qb.z), floatUlp(qa.w, qb.w));
-		raiseVerdict((floatNoise(qa.x, qb.x) && floatNoise(qa.y, qb.y) && floatNoise(qa.z, qb.z) && floatNoise(qa.w, qb.w)) ? 1 : 2);
+		// double-cover aware: q and -q are the same rotation; the x87 reference build lands on
+		// the other representative at 180-degree sign boundaries (w ~ 0)
+		bool direct = floatNoise(qa.x, qb.x) && floatNoise(qa.y, qb.y) && floatNoise(qa.z, qb.z) && floatNoise(qa.w, qb.w);
+		bool negated = floatNoise(qa.x, -qb.x) && floatNoise(qa.y, -qb.y) && floatNoise(qa.z, -qb.z) && floatNoise(qa.w, -qb.w);
+		raiseVerdict((direct || negated) ? 1 : 2);
 	}
 	NLMISC::CVector sa = ma->getDefaultScale()->getDefaultValue();
 	NLMISC::CVector sb = mb->getDefaultScale()->getDefaultValue();
@@ -672,6 +696,30 @@ static void compareMeshBase(NL3D::CMeshBase *ma, NL3D::CMeshBase *mb)
 			printf("  material %u differs (serialized %u vs %u bytes, first diff 0x%x)\n",
 			       i, sa.length(), sb.length(), off);
 			raiseVerdict(2);
+			if (getenv("PMB_COMPARE_DUMP"))
+			{
+				for (uint side = 0; side < 2; ++side)
+				{
+					const NL3D::CMaterial &m = side ? mb->getMaterial(i) : ma->getMaterial(i);
+					printf("    %c: shader %d flags(dbl %d blend %d atest %d zwrite %d light %d) srcb %d dstb %d\n",
+					       side ? 'B' : 'A', (int)m.getShader(), m.getDoubleSided(), m.getBlend(),
+					       m.getAlphaTest(), m.getZWrite(), m.isLighted(),
+					       (int)m.getSrcBlend(), (int)m.getDstBlend());
+					NLMISC::CRGBA d = m.isLighted() ? m.getDiffuse() : m.getColor();
+					NLMISC::CRGBA e = m.getEmissive(), am = m.getAmbient(), sp = m.getSpecular();
+					printf("       col(%d %d %d %d) emis(%d %d %d) amb(%d %d %d) spec(%d %d %d) shin %g op %d\n",
+					       d.R, d.G, d.B, d.A, e.R, e.G, e.B, am.R, am.G, am.B, sp.R, sp.G, sp.B,
+					       m.getShininess(), m.getOpacity());
+					for (uint t = 0; t < NL3D::IDRV_MAT_MAXTEXTURES; ++t)
+					{
+						NL3D::ITexture *tex = m.getTexture((uint8)t);
+						if (!tex) continue;
+						NL3D::CTextureFile *tf = dynamic_cast<NL3D::CTextureFile *>(tex);
+						printf("       tex%u %s '%s' wrap(%d %d)\n", t, tex->getClassName().c_str(),
+						       tf ? tf->getFileName().c_str() : "?", (int)tex->getWrapS(), (int)tex->getWrapT());
+					}
+				}
+			}
 		}
 	}
 }

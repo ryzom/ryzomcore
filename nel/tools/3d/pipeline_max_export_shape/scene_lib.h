@@ -185,6 +185,11 @@ struct SPB2Param
 	float F[4];          // float/int/bool/color components (F[0] for scalars)
 	sint32 I;
 	std::string S;       // string/filename
+	// Tab (array) params (type flag 0x800): per-element inline values. For reference-kind
+	// element types (TEXMAP etc.) TabI holds the PB2 reference slot per element (-1 = none).
+	bool IsTab;
+	std::vector<sint32> TabI;
+	std::vector<float> TabF;
 };
 
 struct SPB2Block

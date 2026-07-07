@@ -150,6 +150,7 @@ def main():
     stubs = 0
     mapext_nodes = set()
     mapext_report = []
+    lightmap_nodes = set()
     export_fail = []
     produced = {}
     skip_classes = collections.Counter()
@@ -228,6 +229,8 @@ def main():
                 elif line.startswith("MAPEXT "):
                     mapext_nodes.add((res["proj"], line.split(None, 1)[1] + ".shape"))
                     mapext_report.append("%s\t%s\t%s" % (res["proj"], res["path"], line.split(None, 1)[1]))
+                elif line.startswith("LIGHTMAP "):
+                    lightmap_nodes.add((res["proj"], line.split(None, 1)[1] + ".shape"))
             for line in (res.get("t3err") or "").splitlines():
                 m = re.search(r"unhandled modifier \(0x([0-9a-f]+), 0x([0-9a-f]+)\)", line)
                 if m:
@@ -243,7 +246,7 @@ def main():
     if args.t1 or args.t2:
         print("T1: %d pass, %d fail; T2: %d pass, %d fail; %d stubs" % (t1_pass, t1_fail, t2_pass, t2_fail, stubs))
 
-    identical = floateq = diff = us_only = mapext = 0
+    identical = floateq = diff = us_only = mapext = lightmap = 0
     ref_missing = 0
     diff_samples = []
     if args.t3:
@@ -264,6 +267,11 @@ def main():
                     # custom UVW plugin (Map Extender): reference UVs are garbage by design-doc
                     # pre-triage; bucketed out of the diff gate, listed in the asset report
                     mapext += 1
+                elif (proj, name) in lightmap_nodes:
+                    # lightmapped shape: the reference carries export-time lightmaps, the
+                    # headless export is unmapped by design — bucketed until the standalone
+                    # lightmapper exists
+                    lightmap += 1
                 else:
                     r = subprocess.run([export_bin, "--compare", path, ref], capture_output=True, text=True)
                     if r.returncode == 0:
@@ -280,8 +288,8 @@ def main():
             have = set(refs) | set(coarse_refs)
             missing = have - set(mine)
             ref_missing += len(missing)
-        print("T3: %d exported: %d byte-identical, %d float-noise-eq, %d differ, %d mapext-bucketed, %d without reference; %d reference shapes not produced"
-              % (identical + floateq + diff + mapext + us_only, identical, floateq, diff, mapext, us_only, ref_missing))
+        print("T3: %d exported: %d byte-identical, %d float-noise-eq, %d differ, %d mapext-bucketed, %d lightmap-bucketed, %d without reference; %d reference shapes not produced"
+              % (identical + floateq + diff + mapext + lightmap + us_only, identical, floateq, diff, mapext, lightmap, us_only, ref_missing))
         if mapext_report:
             report_path = os.path.join(args.out, "mapext_assets.txt")
             with open(report_path, "w") as fh:

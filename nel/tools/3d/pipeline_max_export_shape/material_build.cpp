@@ -787,18 +787,361 @@ static void buildANelMaterial(CMaterial &material, SMaterialInfo &materialInfo, 
 // branch matters in the corpus (one instance). No texture (the diffuse texmap of a StdMat2
 // rides its Texmaps container — decoded when the corpus needs it), colors from the delegate
 // blocks by name.
-static void buildAStdMaterial(CMaterial &material, SMaterialInfo &materialInfo, CSceneClass *mtl)
+static CRGBA convertColorF(const float c[3])
+{
+	float fR = c[0] * 255.f + 0.5f;
+	float fG = c[1] * 255.f + 0.5f;
+	float fB = c[2] * 255.f + 0.5f;
+	clamp(fR, 0.f, 255.f);
+	clamp(fG, 0.f, 255.f);
+	clamp(fB, 0.f, 255.f);
+	return CRGBA((uint8)fR, (uint8)fG, (uint8)fB);
+}
+
+static void dumpMaterialStructure(CSceneClass *mtl)
+{
+	CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(mtl);
+	fprintf(stderr, "MTLDUMP '%s' class %s, %u refs\n", materialName(mtl).c_str(),
+	        mtl->classDesc()->classId().toString().c_str(), rm ? rm->nbReferences() : 0);
+	for (uint i = 0; rm && i < rm->nbReferences(); ++i)
+	{
+		CSceneClass *r = dynamic_cast<CSceneClass *>(rm->getReference(i));
+		if (!r) { fprintf(stderr, "  ref %u: null\n", i); continue; }
+		fprintf(stderr, "  ref %u: class %s sclass 0x%x '%s'\n", i,
+		        r->classDesc()->classId().toString().c_str(),
+		        (uint)r->classDesc()->superClassId(),
+		        ucstring(r->classDesc()->displayName()).toUtf8().c_str());
+		if (r->classDesc()->superClassId() == SCLASS_PBLOCK2)
+		{
+			std::vector<SPB2Block> blocks;
+			// hack: wrap the single pblock via its owner walk — read it directly
+			SPB2Block blk;
+			if (readPB2Block(r, blk))
+			{
+				fprintf(stderr, "    pb2 blockId %u, %u params\n", blk.BlockId, (uint)blk.Params.size());
+				for (uint k = 0; k < blk.Params.size(); ++k)
+				{
+					const SPB2Param &pp = blk.Params[k];
+					fprintf(stderr, "      id %u type 0x%x %s F(%g %g %g %g) I=%d S='%s'",
+					        pp.Id, pp.Type, pp.HasConstant ? "const" : "ctrl/ref",
+					        pp.F[0], pp.F[1], pp.F[2], pp.F[3], pp.I, pp.S.c_str());
+					if (pp.IsTab)
+					{
+						fprintf(stderr, " tab[");
+						for (uint e = 0; e < pp.TabI.size(); ++e)
+							fprintf(stderr, "%s%d", e ? " " : "", pp.TabI[e]);
+						fprintf(stderr, "]");
+					}
+					fprintf(stderr, "\n");
+				}
+			}
+		}
+		// raw chunks of this ref
+		{
+			const CStorageContainer::TStorageObjectContainer &orphans = r->orphanedChunks();
+			for (CStorageContainer::TStorageObjectConstIt it = orphans.begin(); it != orphans.end(); ++it)
+			{
+				CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
+				fprintf(stderr, "    chunk 0x%04x sz %d:", it->first, raw ? (int)raw->Value.size() : -1);
+				if (raw)
+					for (uint b = 0; b < raw->Value.size() && b < 32; ++b)
+						fprintf(stderr, " %02x", raw->Value[b]);
+				fprintf(stderr, "\n");
+			}
+		}
+		if (r->classDesc()->superClassId() != SCLASS_PBLOCK2)
+		{
+			// second level (shader/texmaps): show its refs + pblocks
+			CReferenceMaker *rm2 = dynamic_cast<CReferenceMaker *>(r);
+			for (uint j = 0; rm2 && j < rm2->nbReferences(); ++j)
+			{
+				CSceneClass *r2 = dynamic_cast<CSceneClass *>(rm2->getReference(j));
+				if (!r2) { fprintf(stderr, "    ref %u.%u: null\n", i, j); continue; }
+				fprintf(stderr, "    ref %u.%u: class %s sclass 0x%x '%s'\n", i, j,
+				        r2->classDesc()->classId().toString().c_str(),
+				        (uint)r2->classDesc()->superClassId(),
+				        ucstring(r2->classDesc()->displayName()).toUtf8().c_str());
+				if (r2->classDesc()->superClassId() == SCLASS_PBLOCK2)
+				{
+					SPB2Block blk;
+					if (readPB2Block(r2, blk))
+					{
+						fprintf(stderr, "      pb2 blockId %u, %u params\n", blk.BlockId, (uint)blk.Params.size());
+						for (uint k = 0; k < blk.Params.size(); ++k)
+						{
+							const SPB2Param &pp = blk.Params[k];
+							fprintf(stderr, "        id %u type 0x%x %s F(%g %g %g %g) I=%d S='%s'\n",
+							        pp.Id, pp.Type, pp.HasConstant ? "const" : "ctrl/ref",
+							        pp.F[0], pp.F[1], pp.F[2], pp.F[3], pp.I, pp.S.c_str());
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+// Standard material (StdMat/StdMat2, (0x2,0)) — the reference's "not a nel material" branch.
+// Storage: refs = { 0 = null, 1 = Texmaps (sclass 0x1080), 2 = shader (sclass 0x10b0, Blinn
+// (0x38,0) in the corpus), then the material's own PB2s by blockId: 0 = std2_shader
+// (shader_type, wire, twoSided, face_map, faceted), 1 = std2_extended (opacityType, opacity,
+// ...), 2 = std2_sampling, 3 = std_maps (0 = mapEnables BOOL_TAB[24], 1 = maps TEXMAP_TAB[24]
+// with per-element PB2 ref slots, 2 = amounts, 3 = texlock), 4 = std2_dynamics, then the
+// sampler }. The shader's own PB2 (Blinn block 0): 0 = ambient, 1 = diffuse, 2 = specular,
+// 3-5 locks, 6 = useSelfIllumColor, 7 = selfIllumAmount, 8 = selfIllumColor,
+// 9 = specularLevel, 10 = glossiness, 11 = soften. The reference resolves these by param NAME
+// through live ParamDefs; the (blockId, paramId) pairs are serialization-stable, which is what
+// we key on headless (values cross-checked against the corpus references).
+#define STD2_BLOCK_SHADER 0
+#define STD2_BLOCK_EXTENDED 1
+#define STD2_BLOCK_MAPS 3
+#define STD2_SHADER_TWOSIDED 2
+#define STD2_EXT_OPACITYTYPE 0
+#define STD2_EXT_OPACITY 1
+#define STD2_MAPS_ENABLES 0
+#define STD2_MAPS_MAPS 1
+#define SHDR_AMBIENT 0
+#define SHDR_DIFFUSE 1
+#define SHDR_SPECULAR 2
+#define SHDR_USE_SELF_ILLUM_COLOR 6
+#define SHDR_SELF_ILLUM_AMNT 7
+#define SHDR_SELF_ILLUM_COLOR 8
+#define SHDR_SPEC_LVL 9
+#define SHDR_GLOSSINESS 10
+// Max map slot indices
+#define MAPSLOT_DI 1
+#define MAPSLOT_SP 2
+#define MAPSLOT_OP 6
+
+static const SPB2Block *blockById(const std::vector<SPB2Block> &blocks, uint16 blockId)
+{
+	for (uint i = 0; i < blocks.size(); ++i)
+		if (blocks[i].BlockId == blockId) return &blocks[i];
+	return NULL;
+}
+
+static void buildAStdMaterial(CMaterial &material, SMaterialInfo &materialInfo, CSceneClass *mtl, bool exportLighting)
 {
 	std::string mtlName = materialName(mtl);
-	fprintf(stderr, "WARNING: material '%s': non-NeL material class %s; std material path incomplete\n",
-	        mtlName.c_str(), mtl->classDesc()->classId().toString().c_str());
+	if (getenv("PMB_DUMP_MTL"))
+		dumpMaterialStructure(mtl);
+
+	bool isStdMat = mtl->classDesc()->classId() == CLASSID_STDMAT
+		|| mtl->classDesc()->classId() == NLMISC::CClassId(0x00000001, 0x00000000);
+	if (!isStdMat)
+		fprintf(stderr, "WARNING: material '%s': unhandled material class %s (std fallback)\n",
+		        mtlName.c_str(), mtl->classDesc()->classId().toString().c_str());
+
+	// Own PB2 blocks + shader's PB2 block
+	std::vector<SPB2Block> blocks;
+	readObjectPB2Blocks(mtl, blocks);
+	std::vector<SPB2Block> shaderBlocks;
+	{
+		CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(mtl);
+		for (uint i = 0; rm && i < rm->nbReferences(); ++i)
+		{
+			CSceneClass *r = dynamic_cast<CSceneClass *>(rm->getReference(i));
+			if (r && r->classDesc()->superClassId() == 0x10b0)
+			{
+				readObjectPB2Blocks(r, shaderBlocks);
+				break;
+			}
+		}
+	}
+	const SPB2Block *mapsBlk = blockById(blocks, STD2_BLOCK_MAPS);
+	const SPB2Block *extBlk = blockById(blocks, STD2_BLOCK_EXTENDED);
+	const SPB2Block *shBlk = blockById(blocks, STD2_BLOCK_SHADER);
+	const SPB2Block *shaderBlk = shaderBlocks.empty() ? NULL : &shaderBlocks[0];
+
 	material.initLighted();
-	material.setShader(CMaterial::Normal);
+
+	// Enabled texmaps in the diffuse/opacity/specular slots
+	CSceneClass *pDifTexmap = NULL, *pOpaTexmap = NULL, *pSpeTexmap = NULL;
+	if (mapsBlk)
+	{
+		const SPB2Param *en = NULL, *maps = NULL;
+		{
+			std::map<uint16, SPB2Param>::const_iterator it = mapsBlk->Params.find(STD2_MAPS_ENABLES);
+			if (it != mapsBlk->Params.end()) en = &it->second;
+			it = mapsBlk->Params.find(STD2_MAPS_MAPS);
+			if (it != mapsBlk->Params.end()) maps = &it->second;
+		}
+		if (en && maps)
+		{
+			// TEXMAP_TAB inline element values are scene-container storage indices (-1 = none)
+			for (uint slot = 0; slot < en->TabI.size() && slot < maps->TabI.size(); ++slot)
+			{
+				if (!en->TabI[slot]) continue;
+				sint32 idx = maps->TabI[slot];
+				if (idx < 0) continue;
+				CSceneClass *tex = dynamic_cast<CSceneClass *>(mtl->container()->getByStorageIndex((sint32)idx));
+				if (!tex) continue;
+				if (getenv("PMB_DUMP_MTL"))
+					fprintf(stderr, "  map slot %u -> storage #%d class %s\n", slot, idx,
+					        tex->classDesc()->classId().toString().c_str());
+				if (slot == MAPSLOT_DI) pDifTexmap = tex;
+				else if (slot == MAPSLOT_OP) pOpaTexmap = tex;
+				else if (slot == MAPSLOT_SP) pSpeTexmap = tex;
+			}
+		}
+	}
+
+	// NeL-scripted flags don't exist on standard materials: reference defaults apply
+	// (bLightMap 0, bAlphaTest stays 1, force-z flags 0, bUnlighted/alpha/color vertex 0).
+	const int bAlphaTest = 1;
+
+	if (pSpeTexmap)
+		material.setShader(CMaterial::Specular);
+	else
+		material.setShader(CMaterial::Normal);
+
+	material.setStainedGlassWindow(false);
 	material.setAlphaTest(false);
 	material.setBlend(false);
-	material.setBlendFunc(CMaterial::srcalpha, CMaterial::invsrcalpha);
+
+	if (pDifTexmap)
+	{
+		NLMISC::CClassId tcid = pDifTexmap->classDesc()->classId();
+		if (tcid == CLASSID_BMTEX || tcid == CLASSID_NEL_BMTEX)
+		{
+			SMaterialDesc texChannel;
+			ITexture *pTexture = buildATexture(pDifTexmap, texChannel, false, mtlName);
+			materialInfo.RemapChannel.resize(1);
+			if (texChannel.IndexInMaxMaterial < 0)
+			{
+				materialInfo.RemapChannel[0].IndexInMaxMaterial = UVGEN_MISSING;
+				materialInfo.RemapChannel[0].UVMatrix = Matrix3M::identity();
+			}
+			else
+				materialInfo.RemapChannel[0] = texChannel;
+			material.setTexture(0, pTexture);
+
+			if (pOpaTexmap)
+			{
+				if (bAlphaTest)
+				{
+					material.setAlphaTest(true);
+					material.setZWrite(true);
+				}
+				else
+				{
+					material.setBlend(true);
+					material.setZWrite(false);
+				}
+			}
+
+			if (texChannel.IndexInMaxMaterial >= 0)
+				materialInfo.UVRouting[0] = 0;
+		}
+		else
+		{
+			fprintf(stderr, "WARNING: material '%s': diffuse texmap class %s not supported\n",
+			        mtlName.c_str(), tcid.toString().c_str());
+		}
+	}
+
+	if (pSpeTexmap)
+		fprintf(stderr, "WARNING: material '%s': specular texture cube not implemented\n", mtlName.c_str());
+
+	// Blend mode from opacityType
+	{
+		int opacityType = 0;
+		if (extBlk)
+		{
+			std::map<uint16, SPB2Param>::const_iterator it = extBlk->Params.find(STD2_EXT_OPACITYTYPE);
+			if (it != extBlk->Params.end() && it->second.HasConstant) opacityType = it->second.I;
+		}
+		if (opacityType == 0)
+			material.setBlendFunc(CMaterial::srcalpha, CMaterial::invsrcalpha);
+		else
+			material.setBlendFunc(CMaterial::srcalpha, CMaterial::one);
+	}
+
 	material.setZFunc(CMaterial::lessequal);
 	material.setZBias(0.f);
+
+	if (isStdMat && shaderBlk)
+	{
+		// Colors, self illumination and opacity from the shader's pblock
+		float dif[3] = { 0.5f, 0.5f, 0.5f };
+		const SPB2Param *pp;
+		std::map<uint16, SPB2Param>::const_iterator it;
+		if ((it = shaderBlk->Params.find(SHDR_DIFFUSE)) != shaderBlk->Params.end() && it->second.HasConstant)
+			memcpy(dif, it->second.F, 12);
+		CRGBA nelDiffuse = convertColorF(dif);
+		float fOp = 0.0f;
+		if (extBlk && (it = extBlk->Params.find(STD2_EXT_OPACITY)) != extBlk->Params.end() && it->second.HasConstant)
+			fOp = it->second.F[0];
+		float fA = fOp * 255.f + 0.5f;
+		clamp(fA, 0.f, 255.f);
+		nelDiffuse.A = (uint8)fA;
+		material.setColor(nelDiffuse);
+
+		if (fOp < 0.99f)
+		{
+			if (bAlphaTest)
+			{
+				material.setAlphaTest(true);
+				material.setZWrite(true);
+			}
+			else
+			{
+				material.setBlend(true);
+				material.setZWrite(false);
+			}
+		}
+
+		CRGBA nelEmissive;
+		int bSelfIllumColorOn = 0;
+		if ((it = shaderBlk->Params.find(SHDR_USE_SELF_ILLUM_COLOR)) != shaderBlk->Params.end() && it->second.HasConstant)
+			bSelfIllumColorOn = it->second.I;
+		if (bSelfIllumColorOn)
+		{
+			float c[3] = { 0, 0, 0 };
+			if ((it = shaderBlk->Params.find(SHDR_SELF_ILLUM_COLOR)) != shaderBlk->Params.end() && it->second.HasConstant)
+				memcpy(c, it->second.F, 12);
+			nelEmissive = convertColorF(c);
+		}
+		else
+		{
+			float amount = 0.0f;
+			if ((it = shaderBlk->Params.find(SHDR_SELF_ILLUM_AMNT)) != shaderBlk->Params.end() && it->second.HasConstant)
+				amount = it->second.F[0];
+			float c[3] = { dif[0] * amount, dif[1] * amount, dif[2] * amount };
+			nelEmissive = convertColorF(c);
+		}
+
+		float amb[3] = { 0, 0, 0 };
+		if ((it = shaderBlk->Params.find(SHDR_AMBIENT)) != shaderBlk->Params.end() && it->second.HasConstant)
+			memcpy(amb, it->second.F, 12);
+		CRGBA nelAmbient = convertColorF(amb);
+
+		float spe[3] = { 0, 0, 0 };
+		if ((it = shaderBlk->Params.find(SHDR_SPECULAR)) != shaderBlk->Params.end() && it->second.HasConstant)
+			memcpy(spe, it->second.F, 12);
+		CRGBA nelSpecular = convertColorF(spe);
+
+		float shininess = 0.0f;
+		if ((it = shaderBlk->Params.find(SHDR_SPEC_LVL)) != shaderBlk->Params.end() && it->second.HasConstant)
+			shininess = it->second.F[0];
+		CRGBAF fColor = nelSpecular;
+		fColor *= shininess;
+		nelSpecular = fColor;
+
+		shininess = 0.0f;
+		if ((it = shaderBlk->Params.find(SHDR_GLOSSINESS)) != shaderBlk->Params.end() && it->second.HasConstant)
+			shininess = it->second.F[0];
+		shininess = (float)pow(2.0, shininess * 10.0) * 4.f;
+
+		material.setLighting(true, nelEmissive, nelAmbient, nelDiffuse, nelSpecular, shininess);
+
+		int bDoubleSided = 0;
+		if (shBlk && (it = shBlk->Params.find(STD2_SHADER_TWOSIDED)) != shBlk->Params.end() && it->second.HasConstant)
+			bDoubleSided = it->second.I;
+		material.setDoubleSided(bDoubleSided != 0);
+	}
+
+	(void)exportLighting;
 	materialInfo.MaterialName = mtlName;
 }
 
@@ -807,7 +1150,7 @@ static void buildAMaterial(CMaterial &material, SMaterialInfo &materialInfo, CSc
 	if (isNelMaterial(mtl))
 		buildANelMaterial(material, materialInfo, mtl, exportLighting);
 	else
-		buildAStdMaterial(material, materialInfo, mtl);
+		buildAStdMaterial(material, materialInfo, mtl, exportLighting);
 }
 
 // ---------------------------------------------------------------------------------------------

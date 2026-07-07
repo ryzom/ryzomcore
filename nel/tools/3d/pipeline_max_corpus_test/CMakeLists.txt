@@ -110,7 +110,7 @@ IF (Python3_Interpreter_FOUND)
 	SET_TESTS_PROPERTIES(pipeline_max_zone_corpus PROPERTIES SKIP_RETURN_CODE 77)
 
 	ADD_TEST(NAME pipeline_max_shape_corpus
-		COMMAND ${Python3_EXECUTABLE} shape_corpus.py --all --gate-t3 --min-identical 650 --max-diff 1400
+		COMMAND ${Python3_EXECUTABLE} shape_corpus.py --all --gate-t3 --min-identical 700 --max-diff 400
 			--bin $<TARGET_FILE_DIR:pipeline_max_export_shape>
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 	SET_TESTS_PROPERTIES(pipeline_max_shape_corpus PROPERTIES SKIP_RETURN_CODE 77)

@@ -396,10 +396,55 @@ bool readPB2Block(CSceneClass *pb2, SPB2Block &out)
 			p.RefSlot = -1;
 			p.F[0] = p.F[1] = p.F[2] = p.F[3] = 0.0f;
 			p.I = 0;
+			p.IsTab = (p.Type & 0x0800) != 0;
 			const uint8 *payload = raw->Value.data() + 15;
 			size_t payloadSize = raw->Value.size() - 15;
-			bool refKind = pb2TypeIsRefKind(p.Type);
+			bool refKind = pb2TypeIsRefKind(p.Type & 0x07ff);
 			bool isConstant = (flagByte & 0x40) != 0;
+			if (p.IsTab)
+			{
+				// Tab record: [14] flag (0x00 observed), then u32 count, then per element
+				// u8 flag (0x40 = inline) + payload by base type. Reference-kind element
+				// payloads are PB2 reference slot indices.
+				const uint8 *q = raw->Value.data() + 14 + 1;
+				const uint8 *end = raw->Value.data() + raw->Value.size();
+				if (q + 4 <= end)
+				{
+					uint32 count;
+					memcpy(&count, q, 4);
+					q += 4;
+					uint16 base = p.Type & 0x07ff;
+					uint elemSize = (base == PB2_RGBA || base == PB2_POINT3 || base == PB2_HSV) ? 12 : 4;
+					for (uint32 e = 0; e < count && q + 1 + elemSize <= end; ++e)
+					{
+						uint8 ef = *q++;
+						if (!(ef & 0x40))
+							fprintf(stderr, "WARNING: PB2 tab param %u element %u not inline (flag 0x%02x)\n", p.Id, e, ef);
+						if (elemSize == 4)
+						{
+							sint32 iv;
+							float fv;
+							memcpy(&iv, q, 4);
+							memcpy(&fv, q, 4);
+							p.TabI.push_back(iv);
+							p.TabF.push_back(fv);
+						}
+						else
+						{
+							float fv[3];
+							memcpy(fv, q, 12);
+							p.TabF.push_back(fv[0]);
+							p.TabF.push_back(fv[1]);
+							p.TabF.push_back(fv[2]);
+							p.TabI.push_back(0);
+						}
+						q += elemSize;
+					}
+					p.HasConstant = true;
+				}
+				out.Params[p.Id] = p;
+				continue;
+			}
 			if (refKind || !isConstant)
 			{
 				// reftarget-kind params and controller-backed value params own the PB2's
