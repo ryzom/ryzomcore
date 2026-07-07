@@ -56,6 +56,8 @@
 #include "patch_object.h"
 #include "editable_patch.h"
 
+#include "param_block_2.h"
+
 #include "control_keyframer.h"
 
 // using namespace std;
@@ -83,9 +85,11 @@ const CParamBlockSuperClassDesc ParamBlockSuperClassDesc(&ReferenceTargetClassDe
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000c20> CUVGenSuperClassDesc;
 const CUVGenSuperClassDesc UVGenSuperClassDesc(&ReferenceTargetClassDesc, "UVGenSuperClassUnknown");
 
-// 0x82 param block 2, under reftarget directly
-typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000082> CParamBlock2SuperClassDesc;
-const CParamBlock2SuperClassDesc ParamBlock2SuperClassDesc(&ReferenceTargetClassDesc, "ParamBlock2SuperClassUnknown");
+// 0x82 param block 2, under reftarget directly — typed: every ParamBlock2 object parses through
+// CParamBlock2 (header + parameter record decode; raw chunks stay authoritative so roundtrip is
+// byte-exact). Unknown ParamBlock2 class ids fall through to CSceneClassUnknown<CParamBlock2>.
+typedef CSuperClassDescUnknown<CParamBlock2, 0x00000082> CParamBlock2SuperClassDesc;
+const CParamBlock2SuperClassDesc ParamBlock2SuperClassDesc(&ParamBlock2ClassDesc, "ParamBlock2SuperClassUnknown");
 
 // 0xc40 output, textureoutput???, under mtlbase
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000c40> CTextureOutputSuperClassDesc;

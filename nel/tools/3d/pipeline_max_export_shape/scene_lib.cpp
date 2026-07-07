@@ -55,6 +55,7 @@
 #include "../pipeline_max/builtin/reference_maker.h"
 #include "../pipeline_max/builtin/storage/app_data.h"
 #include "../pipeline_max/builtin/control_keyframer.h"
+#include "../pipeline_max/builtin/param_block_2.h"
 
 using namespace PIPELINE::MAX;
 using namespace PIPELINE::MAX::BUILTIN;
@@ -352,19 +353,6 @@ void readPBlockParams(CSceneClass *pblock, std::map<sint32, SPBlockParam> &out)
 // ---------------------------------------------------------------------------------------------
 // ParamBlock2
 
-static bool pb2TypeIsRefKind(uint16 type)
-{
-	switch (type & 0x07ff)
-	{
-	case PB2_MTL:
-	case PB2_TEXMAP:
-	case PB2_NODE:
-	case PB2_REFTARG:
-		return true;
-	}
-	return false;
-}
-
 bool readPB2Block(CSceneClass *pb2, SPB2Block &out)
 {
 	if (!pb2) return false;
@@ -373,132 +361,32 @@ bool readPB2Block(CSceneClass *pb2, SPB2Block &out)
 	out.BlockId = 0;
 	out.ParamCount = 0;
 	out.Params.clear();
-	sint refSlot = 0;
-	const CStorageContainer::TStorageObjectContainer &orphans = pb2->orphanedChunks();
-	for (CStorageContainer::TStorageObjectConstIt it = orphans.begin(); it != orphans.end(); ++it)
+
+	// ParamBlock2 objects are typed in pipeline_max proper (BUILTIN::CParamBlock2, registered
+	// for superclass 0x82): the header + parameter record decode, the reference-slot counting
+	// and the tab-element handling all live there now. Copy its typed model into the exporter's
+	// SPB2Block (the read-side struct material_build consumes).
+	CParamBlock2 *tp = dynamic_cast<CParamBlock2 *>(pb2);
+	if (!tp) return false;
+	out.ScriptVersion = tp->scriptVersion();
+	out.BlockId = tp->blockId();
+	out.ParamCount = tp->declaredParamCount();
+	const std::vector<CParamBlock2::SParam> &tps = tp->params();
+	for (std::vector<CParamBlock2::SParam>::const_iterator it = tps.begin(); it != tps.end(); ++it)
 	{
-		CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
-		if (!raw) continue;
-		if (it->first == 0x0009 && raw->Value.size() >= 16)
-		{
-			memcpy(&out.ScriptVersion, raw->Value.data(), 4);
-			memcpy(&out.BlockId, raw->Value.data() + 4, 2);
-			memcpy(&out.ParamCount, raw->Value.data() + 10, 2);
-		}
-		else if (it->first == 0x000e && raw->Value.size() >= 15)
-		{
-			SPB2Param p;
-			memcpy(&p.Id, raw->Value.data(), 2);
-			memcpy(&p.Type, raw->Value.data() + 2, 2);
-			uint8 flagByte = raw->Value[14];
-			p.HasConstant = false;
-			p.RefBacked = false;
-			p.RefSlot = -1;
-			p.F[0] = p.F[1] = p.F[2] = p.F[3] = 0.0f;
-			p.I = 0;
-			p.IsTab = (p.Type & 0x0800) != 0;
-			const uint8 *payload = raw->Value.data() + 15;
-			size_t payloadSize = raw->Value.size() - 15;
-			bool refKind = pb2TypeIsRefKind(p.Type & 0x07ff);
-			bool isConstant = (flagByte & 0x40) != 0;
-			if (p.IsTab)
-			{
-				// Tab record: [14] flag (0x00 observed), then u32 count, then per element
-				// u8 flag (0x40 = inline) + payload by base type. Reference-kind element
-				// payloads are PB2 reference slot indices.
-				const uint8 *q = raw->Value.data() + 14 + 1;
-				const uint8 *end = raw->Value.data() + raw->Value.size();
-				if (q + 4 <= end)
-				{
-					uint32 count;
-					memcpy(&count, q, 4);
-					q += 4;
-					uint16 base = p.Type & 0x07ff;
-					uint elemSize = (base == PB2_RGBA || base == PB2_POINT3 || base == PB2_HSV) ? 12 : 4;
-					for (uint32 e = 0; e < count && q + 1 + elemSize <= end; ++e)
-					{
-						uint8 ef = *q++;
-						if (!(ef & 0x40))
-							fprintf(stderr, "WARNING: PB2 tab param %u element %u not inline (flag 0x%02x)\n", p.Id, e, ef);
-						if (elemSize == 4)
-						{
-							sint32 iv;
-							float fv;
-							memcpy(&iv, q, 4);
-							memcpy(&fv, q, 4);
-							p.TabI.push_back(iv);
-							p.TabF.push_back(fv);
-						}
-						else
-						{
-							float fv[3];
-							memcpy(fv, q, 12);
-							p.TabF.push_back(fv[0]);
-							p.TabF.push_back(fv[1]);
-							p.TabF.push_back(fv[2]);
-							p.TabI.push_back(0);
-						}
-						q += elemSize;
-					}
-					p.HasConstant = true;
-				}
-				out.Params[p.Id] = p;
-				continue;
-			}
-			if (refKind || !isConstant)
-			{
-				// reftarget-kind params and controller-backed value params own the PB2's
-				// reference slots in record order
-				p.RefBacked = true;
-				p.RefSlot = refSlot++;
-			}
-			if (isConstant && !refKind && payloadSize > 0)
-			{
-				p.HasConstant = true;
-				switch (p.Type & 0x07ff)
-				{
-				case PB2_FLOAT:
-				case PB2_ANGLE:
-				case PB2_PCNT_FRAC:
-				case PB2_WORLD:
-				case PB2_COLOR_CHANNEL:
-					if (payloadSize >= 4) memcpy(&p.F[0], payload, 4);
-					break;
-				case PB2_INT:
-				case PB2_BOOL:
-				case PB2_TIMEVALUE:
-				case PB2_RADIOBTN_INDEX:
-					if (payloadSize >= 4)
-					{
-						memcpy(&p.I, payload, 4);
-						p.F[0] = (float)p.I;
-					}
-					break;
-				case PB2_RGBA:
-				case PB2_POINT3:
-				case PB2_HSV:
-					if (payloadSize >= 12) memcpy(p.F, payload, 12);
-					break;
-				case PB2_STRING:
-				case PB2_FILENAME:
-					if (payloadSize >= 4)
-					{
-						uint32 len;
-						memcpy(&len, payload, 4);
-						if (len > payloadSize - 4) len = (uint32)(payloadSize - 4);
-						std::string s((const char *)payload + 4, len);
-						while (!s.empty() && s[s.size() - 1] == '\0') s.resize(s.size() - 1);
-						p.S = s;
-					}
-					break;
-				default:
-					// unknown/tab types: keep the record id/type, no decoded value
-					p.HasConstant = false;
-					break;
-				}
-			}
-			out.Params[p.Id] = p;
-		}
+		SPB2Param p;
+		p.Id = it->Id;
+		p.Type = it->Type;
+		p.HasConstant = it->HasConstant;
+		p.RefBacked = it->RefBacked;
+		p.RefSlot = it->RefSlot;
+		p.F[0] = it->F[0]; p.F[1] = it->F[1]; p.F[2] = it->F[2]; p.F[3] = it->F[3];
+		p.I = it->I;
+		p.S = it->S;
+		p.IsTab = it->IsTab;
+		p.TabI = it->TabI;
+		p.TabF = it->TabF;
+		out.Params[p.Id] = p;
 	}
 	return out.ParamCount != 0 || !out.Params.empty();
 }

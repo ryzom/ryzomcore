@@ -60,6 +60,8 @@
 #include "../pipeline_max/biped/biped.h"
 #include "../pipeline_max/nelpatch/nelpatch.h"
 
+#include "../pipeline_max/builtin/param_block_2.h"
+
 using namespace PIPELINE::MAX;
 
 // Serialize a container to a temp file and read the file bytes back. CMemStream's length()==Pos
@@ -203,16 +205,68 @@ static bool t2Scene(GsfInput *in, const std::vector<uint8> &src, CSceneClassRegi
 	return false;
 }
 
+// Parse the Scene stream fully and run the CParamBlock2 write-direction self-check on every
+// ParamBlock2 object: decode the typed model, then re-encode each fixed-size scalar/color
+// parameter from its decoded value and verify it matches the stored payload bytes (proving the
+// in-place modify API reproduces the original layout). Counts PB2 objects and params tested;
+// any mismatch is a failure.
+static int pb2SelfTest(GsfInfile *in, CSceneClassRegistry *reg, bool verbose)
+{
+	CDllDirectory dll;
+	CClassDirectory3 cd(&dll);
+	CScene scene(reg, &dll, &cd);
+	{
+		GsfInput *s = gsf_infile_child_by_name(in, "DllDirectory");
+		if (!s) { std::cerr << "no DllDirectory\n"; return 2; }
+		CStorageStream ss(s); try { dll.serial(ss); dll.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "dll: " << e.what() << "\n"; g_object_unref(s); return 2; }
+		g_object_unref(s);
+	}
+	{
+		GsfInput *s = gsf_infile_child_by_name(in, "ClassDirectory3");
+		if (!s) { std::cerr << "no ClassDirectory3\n"; return 2; }
+		CStorageStream ss(s); try { cd.serial(ss); cd.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "cd: " << e.what() << "\n"; g_object_unref(s); return 2; }
+		g_object_unref(s);
+	}
+	{
+		GsfInput *s = gsf_infile_child_by_name(in, "Scene");
+		if (!s) { std::cerr << "no Scene\n"; return 2; }
+		CStorageStream ss(s); try { scene.serial(ss); scene.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "scene: " << e.what() << "\n"; g_object_unref(s); return 2; }
+		g_object_unref(s);
+	}
+	uint nPb2 = 0, nParams = 0, nFail = 0;
+	CSceneClassContainer *ssc = scene.container();
+	for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
+	{
+		BUILTIN::CParamBlock2 *pb2 = dynamic_cast<BUILTIN::CParamBlock2 *>(it->second);
+		if (!pb2) continue;
+		++nPb2;
+		nParams += (uint)pb2->params().size();
+		std::string err;
+		if (!pb2->selfTestReencode(err))
+		{
+			++nFail;
+			std::cerr << "  PB2 selftest FAIL (block " << pb2->blockId() << "): " << err << "\n";
+		}
+	}
+	std::cout << (nFail ? "FAIL" : "OK") << " pb2-selftest: " << nPb2 << " blocks, " << nParams
+	          << " params, " << nFail << " fail\n";
+	if (verbose && !nFail)
+		std::cerr << "  (all " << nPb2 << " ParamBlock2 objects re-encode byte-exact)\n";
+	return nFail ? 1 : 0;
+}
+
 int main(int argc, char **argv)
 {
 	bool doT2 = false;
 	bool verbose = false;
+	bool doPb2SelfTest = false;
 	int argi = 1;
 	while (argi < argc && argv[argi][0] == '-' && argv[argi][1] == '-')
 	{
 		std::string a = argv[argi];
 		if (a == "--parse") doT2 = true;
 		else if (a == "--verbose" || a == "-v") verbose = true;
+		else if (a == "--pb2-selftest") doPb2SelfTest = true;
 		else break;
 		++argi;
 	}
@@ -237,6 +291,15 @@ int main(int argc, char **argv)
 	EPOLY::CEPoly::registerClasses(&reg);
 	BIPED::CBiped::registerClasses(&reg);
 	NELPATCH::CNelPatch::registerClasses(&reg);
+
+	if (doPb2SelfTest)
+	{
+		int rc = pb2SelfTest(in, &reg, verbose);
+		g_object_unref(in);
+		g_object_unref(src);
+		gsf_shutdown();
+		return rc;
+	}
 
 	// Chunk-formatted streams that participate in the CStorageContainer round-trip. The two
 	// \05Summary* streams and the OLE class-id are raw byte blobs (copied verbatim by any full
