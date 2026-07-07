@@ -210,7 +210,7 @@ static bool readCtrlDefaultBytes(CSceneClass *sc, uint16 chunkId, void *dst, siz
 	CStorageRaw *raw = dynamic_cast<CStorageRaw *>(so);
 	if (raw && raw->Value.size() >= nBytes)
 	{
-		memcpy(dst, raw->Value.data(), nBytes);
+		memcpy(dst, nlVectorData(raw->Value), nBytes);
 		return true;
 	}
 	return false;
@@ -385,9 +385,9 @@ static Matrix3M getObjectTM(CNodeImpl *node, SNodeTMCache &cache)
 	{
 		CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
 		if (!raw) continue;
-		if (it->first == 0x096a && raw->Value.size() >= 12) { memcpy(&pos, raw->Value.data(), 12); any = true; }
-		else if (it->first == 0x096b && raw->Value.size() >= 16) { memcpy(&rot, raw->Value.data(), 16); any = true; }
-		else if (it->first == 0x096c && raw->Value.size() >= 28) { memcpy(&scale.s, raw->Value.data(), 12); memcpy(&scale.q, (const uint8 *)raw->Value.data() + 12, 16); any = true; }
+		if (it->first == 0x096a && raw->Value.size() >= 12) { memcpy(&pos, nlVectorData(raw->Value), 12); any = true; }
+		else if (it->first == 0x096b && raw->Value.size() >= 16) { memcpy(&rot, nlVectorData(raw->Value), 16); any = true; }
+		else if (it->first == 0x096c && raw->Value.size() >= 28) { memcpy(&scale.s, nlVectorData(raw->Value), 12); memcpy(&scale.q, (const uint8 *)nlVectorData(raw->Value) + 12, 16); any = true; }
 	}
 	Matrix3M nodeTM = getNodeTM(node, cache);
 	if (!any) return nodeTM;
@@ -470,7 +470,7 @@ static bool applyEditPatch(CStorageContainer *localData, SEvalPatch &current, st
 
 	SEvalPatch out;
 	if (!decodePatchMesh(pmChunk->chunks(), out.Pm, err)) { err = "0x1140: " + err; return false; }
-	if (!decodeRPatchMesh(rpChunk->Value.data(), rpChunk->Value.size(), out.Rp, err)) { err = "0x4001: " + err; return false; }
+	if (!decodeRPatchMesh(nlVectorData(rpChunk->Value), rpChunk->Value.size(), out.Rp, err)) { err = "0x4001: " + err; return false; }
 
 	// Vertex mapper (0x1130 -> child 0x1000), optional: without it the stored final patch is
 	// authoritative as-is.
@@ -481,7 +481,7 @@ static bool applyEditPatch(CStorageContainer *localData, SEvalPatch &current, st
 		if (mapperRaw)
 		{
 			SPmVertMapper mapper;
-			if (!decodeVertMapper(mapperRaw->Value.data(), mapperRaw->Value.size(), mapper, err)) { err = "0x1130: " + err; return false; }
+			if (!decodeVertMapper(nlVectorData(mapperRaw->Value), mapperRaw->Value.size(), mapper, err)) { err = "0x1130: " + err; return false; }
 			// EPVertMapper::UpdateAndApplyDeltas (over the INPUT patch 'current'). The refresh
 			// pass sets originalStored=TRUE for every mapped record within the input's range
 			// BEFORE the apply pass, so a stored originalStored=FALSE is only load-bearing for
@@ -537,7 +537,7 @@ static bool applyEditPatch(CStorageContainer *localData, SEvalPatch &current, st
 			CStorageRaw *mr = rawChildOf(mapperC2, 0x1000);
 			SPmVertMapper mv;
 			std::string e2;
-			if (mr && decodeVertMapper(mr->Value.data(), mr->Value.size(), mv, e2))
+			if (mr && decodeVertMapper(nlVectorData(mr->Value), mr->Value.size(), mv, e2))
 				for (size_t k = 0; k < mv.VecMap.size(); ++k)
 					if (mv.VecMap[k].Vert == traceVec)
 						fprintf(stderr, "TRACE   vecmap[%u] os=%d orig %a %a %a delta %a %a %a\n", (uint)k,
@@ -1197,7 +1197,7 @@ static bool writeZoneV4(NL3D::CZone &zone, const std::string &path)
 	}
 	NLMISC::COFile f;
 	if (!f.open(path)) return false;
-	f.serialBuffer(buf.data(), (uint)buf.size());
+	f.serialBuffer(nlVectorData(buf), (uint)buf.size());
 	return true;
 }
 

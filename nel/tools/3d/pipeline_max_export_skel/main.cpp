@@ -16,6 +16,11 @@
 // object (see the reconstruction section below and pipeline_max_design.md).
 
 #include <nel/misc/types_nl.h>
+
+// MSVC 9.0 (VS2008) has no C99 snprintf; _snprintf is equivalent for our fixed-size formatting.
+#if defined(_MSC_VER) && _MSC_VER < 1900
+#define snprintf _snprintf
+#endif
 #include <nel/misc/common.h>
 #include <nel/misc/file.h>
 #include <nel/misc/vector.h>
@@ -24,6 +29,16 @@
 
 #include <algorithm>
 #include <cmath>
+#include <float.h>
+
+// MSVC 9.0 (VS2008) has no std::isnan/std::isinf; use the CRT equivalents there.
+#if defined(_MSC_VER) && _MSC_VER < 1800
+static inline bool pmbIsNan(double x) { return _isnan(x) != 0; }
+static inline bool pmbIsInf(double x) { return !_finite(x) && !_isnan(x); }
+#else
+static inline bool pmbIsNan(double x) { return std::isnan(x); }
+static inline bool pmbIsInf(double x) { return std::isinf(x); }
+#endif
 #include <cstring>
 
 #include "../pipeline_max/storage_ole.h"
@@ -260,15 +275,15 @@ static void writeRigDump(FILE *fp)
 		CSceneClass *sys = it->first;
 		// after parse, everything unclaimed sits in orphanedChunks; m_Chunks may hold the rest
 		std::vector<std::pair<uint16, IStorageObject *> > all;
-		for (auto c = sys->orphanedChunks().begin(); c != sys->orphanedChunks().end(); ++c) all.push_back(*c);
-		for (auto c = sys->chunks().begin(); c != sys->chunks().end(); ++c) all.push_back(*c);
+		for (PIPELINE::MAX::CStorageContainer::TStorageObjectConstIt c = sys->orphanedChunks().begin(); c != sys->orphanedChunks().end(); ++c) all.push_back(*c);
+		for (PIPELINE::MAX::CStorageContainer::TStorageObjectConstIt c = sys->chunks().begin(); c != sys->chunks().end(); ++c) all.push_back(*c);
 		for (size_t k = 0; k < all.size(); ++k)
 		{
 			CStorageRaw *raw = dynamic_cast<CStorageRaw *>(all[k].second);
 			if (!raw) { fprintf(fp, "CHUNK 0x%04x (non-raw)\n", all[k].first); continue; }
 			size_t nb = raw->Value.size();
 			fprintf(fp, "CHUNK 0x%04x bytes %zu\n", all[k].first, nb);
-			const uint8 *d = raw->Value.data();
+			const uint8 *d = nlVectorData(raw->Value);
 			for (size_t i = 0; i + 4 <= nb; i += 4)
 			{
 				float f; uint32 u;
@@ -323,8 +338,9 @@ static void writeSkel(const std::string &path, const std::vector<Bone> &bonesIn)
 	// _Bones: sint32 count + each CBoneBase
 	sint32 boneCount = (sint32)bones.size();
 	of.serial(boneCount);
-	for (const Bone &b : bones)
+	for (std::vector<Bone>::const_iterator bi = bones.begin(); bi != bones.end(); ++bi)
 	{
+		const Bone &b = *bi;
 		uint8 boneVer = 2;
 		of.serial(boneVer);
 		std::string name = b.Name;
@@ -356,7 +372,7 @@ static void writeSkel(const std::string &path, const std::vector<Bone> &bonesIn)
 	of.serial(mapCount);
 	std::map<std::string, uint32> boneMap;
 	for (uint32 i = 0; i < bones.size(); ++i) boneMap[bones[i].Name] = i;
-	for (auto it = boneMap.begin(); it != boneMap.end(); ++it)
+	for (std::map<std::string, uint32>::iterator it = boneMap.begin(); it != boneMap.end(); ++it)
 	{
 		std::string n = it->first;
 		of.serial(n);
@@ -404,7 +420,7 @@ static void writeSkel(const std::string &path, const std::vector<Bone> &bonesIn)
 static std::string formatFloat(float v)
 {
 	char buf[32];
-	if (std::isnan(v) || std::isinf(v))
+	if (pmbIsNan(v) || pmbIsInf(v))
 	{
 		// glTF spec forbids these in TRS values; use 0 to keep the file valid rather than
 		// emitting an invalid token. Should not occur for real skeleton data.
@@ -426,8 +442,9 @@ static std::string jsonEscape(const std::string &s)
 {
 	std::string out;
 	out.reserve(s.size() + 2);
-	for (char c : s)
+	for (std::string::const_iterator chi = s.begin(); chi != s.end(); ++chi)
 	{
+		char c = *chi;
 		switch (c)
 		{
 		case '"':  out += "\\\""; break;

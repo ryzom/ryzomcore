@@ -128,7 +128,7 @@ int main(int argc, char **argv)
 			CStorageRaw *flags = dynamic_cast<CStorageRaw *>(node->findStorageObject(0x0963));
 			bool foundFlags = false;
 			uint32 fl = 0;
-			if (flags && flags->Value.size() >= 4) { memcpy(&fl, flags->Value.data(), 4); foundFlags = true; }
+			if (flags && flags->Value.size() >= 4) { memcpy(&fl, nlVectorData(flags->Value), 4); foundFlags = true; }
 			if (!foundFlags)
 			{
 				const CStorageContainer::TStorageObjectContainer &orphans = node->orphanedChunks();
@@ -136,7 +136,7 @@ int main(int argc, char **argv)
 				{
 					if (oit->first != 0x0963) continue;
 					CStorageRaw *raw = dynamic_cast<CStorageRaw *>(oit->second);
-					if (raw && raw->Value.size() >= 4) { memcpy(&fl, raw->Value.data(), 4); }
+					if (raw && raw->Value.size() >= 4) { memcpy(&fl, nlVectorData(raw->Value), 4); }
 					break;
 				}
 			}

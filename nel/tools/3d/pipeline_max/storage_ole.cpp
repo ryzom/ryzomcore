@@ -385,6 +385,15 @@ static int cfbNameCompare(const std::string &a, const std::string &b)
 	return 0;
 }
 
+// Sort comparator for the directory tree (functor, not a lambda, so the file compiles under
+// VS2008 / MSVC 9.0 as well as the modern toolchain).
+struct CCfbDirNameLess
+{
+	const std::vector<SCfbDirEntry> *Dir;
+	CCfbDirNameLess(const std::vector<SCfbDirEntry> *dir) : Dir(dir) { }
+	bool operator()(uint32 a, uint32 b) const { return cfbNameCompare((*Dir)[a].Name, (*Dir)[b].Name) < 0; }
+};
+
 struct CCfbWriter
 {
 	const std::vector<std::pair<std::string, std::vector<uint8> > > *Streams;
@@ -529,9 +538,7 @@ bool CCfbWriter::assemble(std::vector<uint8> &fileOut)
 	{
 		std::vector<uint32> ids(N);
 		for (size_t i = 0; i < N; ++i) ids[i] = (uint32)(i + 1);
-		std::sort(ids.begin(), ids.end(), [this](uint32 a, uint32 b) {
-			return cfbNameCompare(Dir[a].Name, Dir[b].Name) < 0;
-		});
+		std::sort(ids.begin(), ids.end(), CCfbDirNameLess(&Dir));
 		Dir[0].Child = buildTree(ids, 0, (sint)N - 1);
 	}
 

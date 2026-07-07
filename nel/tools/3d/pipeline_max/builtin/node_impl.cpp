@@ -60,7 +60,7 @@ CNodeImpl::~CNodeImpl()
 const ucstring CNodeImpl::DisplayName = ucstring("Node");
 const char *CNodeImpl::InternalName = "NodeImpl";
 const NLMISC::CClassId CNodeImpl::ClassId = NLMISC::CClassId(0x00000001, 0x00000000);
-const TSClassId CNodeImpl::SuperClassId = INode::SuperClassId;
+const TSClassId CNodeImpl::SuperClassId = 0x00000001; // Node; literal to avoid cross-TU static-init-order dependency
 const CNodeImplClassDesc NodeImplClassDesc(&DllPluginDescBuiltin);
 
 void CNodeImpl::parse(uint16 version, uint filter)

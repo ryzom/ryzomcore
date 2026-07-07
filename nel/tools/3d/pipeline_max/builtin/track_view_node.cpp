@@ -64,7 +64,7 @@ CTrackViewNode::~CTrackViewNode()
 const ucstring CTrackViewNode::DisplayName = ucstring("TVNode");
 const char *CTrackViewNode::InternalName = "TrackViewNode";
 const NLMISC::CClassId CTrackViewNode::ClassId = NLMISC::CClassId(0x8d73b8aa, 0x90f2ee71);
-const TSClassId CTrackViewNode::SuperClassId = CReferenceTarget::SuperClassId;
+const TSClassId CTrackViewNode::SuperClassId = 0x00000200; // ReferenceTarget; literal to avoid cross-TU static-init-order dependency
 const CTrackViewNodeClassDesc TrackViewNodeClassDesc(&DllPluginDescBuiltin);
 
 void CTrackViewNode::parse(uint16 version, uint filter)

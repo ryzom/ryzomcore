@@ -175,14 +175,14 @@ const CStorageRaw *rawSub(const CStorageContainer *c, uint16 id)
 bool readRawInts(const CStorageRaw *raw, sint32 *dst, size_t n, const char *what, std::string &err)
 {
 	if (!raw || raw->Value.size() != n * 4) { err = std::string("bad ") + what; return false; }
-	memcpy(dst, raw->Value.data(), n * 4);
+	memcpy(dst, nlVectorData(raw->Value), n * 4);
 	return true;
 }
 
 bool readRawFloats(const CStorageRaw *raw, float *dst, size_t n, const char *what, std::string &err)
 {
 	if (!raw || raw->Value.size() != n * 4) { err = std::string("bad ") + what; return false; }
-	memcpy(dst, raw->Value.data(), n * 4);
+	memcpy(dst, nlVectorData(raw->Value), n * 4);
 	return true;
 }
 
@@ -190,10 +190,10 @@ bool readCountedInts(const CStorageRaw *raw, std::vector<sint32> &dst, const cha
 {
 	if (!raw || raw->Value.size() < 4) { err = std::string("bad ") + what; return false; }
 	sint32 count;
-	memcpy(&count, raw->Value.data(), 4);
+	memcpy(&count, nlVectorData(raw->Value), 4);
 	if (count < 0 || raw->Value.size() != 4 + (size_t)count * 4) { err = std::string("bad count in ") + what; return false; }
 	dst.resize(count);
-	if (count) memcpy(&dst[0], raw->Value.data() + 4, count * 4);
+	if (count) memcpy(&dst[0], nlVectorData(raw->Value) + 4, count * 4);
 	return true;
 }
 

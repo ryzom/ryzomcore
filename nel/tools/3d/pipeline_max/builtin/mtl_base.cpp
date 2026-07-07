@@ -137,7 +137,7 @@ std::string CMtlBase::name() const
 	if (!m_NameChunk || m_NameChunk->Value.empty()) return std::string();
 	ucstring us;
 	us.resize(m_NameChunk->Value.size() / 2);
-	memcpy(&us[0], m_NameChunk->Value.data(), us.size() * 2);
+	memcpy(&us[0], nlVectorData(m_NameChunk->Value), us.size() * 2);
 	return us.toUtf8();
 }
 

@@ -122,7 +122,7 @@ static std::string getNodeScriptAppDataString(INode *node, uint32 subId)
 	if (!n) return std::string();
 	PIPELINE::MAX::BUILTIN::STORAGE::CAppData *ad = n->appData();
 	if (!ad) return std::string();
-	for (auto it = ad->entries().begin(); it != ad->entries().end(); ++it)
+	for (PIPELINE::MAX::BUILTIN::STORAGE::CAppData::TMap::const_iterator it = ad->entries().begin(); it != ad->entries().end(); ++it)
 	{
 		if (it->first.SubId != subId) continue;
 		PIPELINE::MAX::BUILTIN::STORAGE::CAppDataEntry *entry = it->second;
@@ -553,7 +553,7 @@ static bool getNoteKeys(INode &node, std::vector<SNoteKey> &out)
 			if (raw->Value.size() == 4)
 			{
 				uint32 cnt;
-				memcpy(&cnt, raw->Value.data(), 4);
+				memcpy(&cnt, nlVectorData(raw->Value), 4);
 				if (cnt > 1)
 					fprintf(stderr, "WARNING: node carries %u note tracks; key-to-track assignment is not marked in storage, exporting all keys as track 0\n", cnt);
 			}
@@ -561,7 +561,7 @@ static bool getNoteKeys(INode &node, std::vector<SNoteKey> &out)
 		case 0x0100: // key time (ticks)
 			if (raw->Value.size() == 4)
 			{
-				memcpy(&time, raw->Value.data(), 4);
+				memcpy(&time, nlVectorData(raw->Value), 4);
 				haveTime = true;
 			}
 			break;
@@ -570,7 +570,7 @@ static bool getNoteKeys(INode &node, std::vector<SNoteKey> &out)
 			if (!haveTime) break;
 			ucstring us;
 			us.resize(raw->Value.size() / 2);
-			if (!us.empty()) memcpy(&us[0], raw->Value.data(), us.size() * 2);
+			if (!us.empty()) memcpy(&us[0], nlVectorData(raw->Value), us.size() * 2);
 			SNoteKey k;
 			k.Time = time;
 			k.Text = us.toUtf8();
@@ -933,7 +933,7 @@ static NL3D::ITrack *buildOnOffTrack(CReferenceMaker *ctrl)
 		CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
 		if (!raw || raw->Value.size() != 4) continue;
 		uint32 v;
-		memcpy(&v, raw->Value.data(), 4);
+		memcpy(&v, nlVectorData(raw->Value), 4);
 		if (it->first == 0x0100) times.push_back((sint32)v);
 		else if (it->first == 0x0140) initState = v;
 	}
@@ -984,8 +984,8 @@ static void addParticleSystemTracks(NL3D::CAnimation &animation, INode &node, co
 			CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
 			if (!raw || raw->Value.size() < 15) continue;
 			uint16 paramId, paramType;
-			memcpy(&paramId, raw->Value.data(), 2);
-			memcpy(&paramType, raw->Value.data() + 2, 2);
+			memcpy(&paramId, nlVectorData(raw->Value), 2);
+			memcpy(&paramType, nlVectorData(raw->Value) + 2, 2);
 			uint8 flag = raw->Value[14];
 			if (!(flag & 0x40))
 				ctrlSlotOfParam[paramId] = slot++;
@@ -1023,7 +1023,7 @@ static void addParticleSystemTracks(NL3D::CAnimation &animation, INode &node, co
 static std::vector<INode *> orderedChildrenOf(INode *parent, CSceneClassContainer *ssc)
 {
 	std::vector<INode *> out;
-	for (auto it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
+	for (PIPELINE::MAX::CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
 	{
 		CNodeImpl *n = dynamic_cast<CNodeImpl *>(it->second);
 		if (n && n->parent() == parent) out.push_back(n);
@@ -1038,8 +1038,8 @@ static void addBoneTracks(NL3D::CAnimation &animation, INode &node, const std::s
 	std::string name = parentName + ucstring(node.userName()).toUtf8() + ".";
 	addNodeTracks(animation, node, name, &ssBuilder);
 	std::vector<INode *> kids = orderedChildrenOf(&node, ssc);
-	for (INode *child : kids)
-		addBoneTracks(animation, *child, parentName, ssc, ssBuilder);
+	for (std::vector<INode *>::iterator ci = kids.begin(); ci != kids.end(); ++ci)
+		{ INode *child = *ci; addBoneTracks(animation, *child, parentName, ssc, ssBuilder); }
 }
 
 static void addBipedAnimation(NL3D::CAnimation &animation, INode &node, const std::string &baseName, bool root, CSceneClassContainer *ssc, CSSSBuild &ssBuilder);
@@ -1067,8 +1067,8 @@ static void addAnimation(NL3D::CAnimation &animation, INode &node, const std::st
 		addParticleSystemTracks(animation, node, baseName);
 		addMorphTracks(animation, node, baseName);
 		std::vector<INode *> kids = orderedChildrenOf(&node, ssc);
-		for (INode *child : kids)
-			addBoneTracks(animation, *child, baseName, ssc, ssBuilder);
+		for (std::vector<INode *>::iterator ci = kids.begin(); ci != kids.end(); ++ci)
+			{ INode *child = *ci; addBoneTracks(animation, *child, baseName, ssc, ssBuilder); }
 	}
 
 	// NoteTrack export (a string track used to create events)
@@ -1269,8 +1269,8 @@ static void addBipedNodeTracks(NL3D::CAnimation &animation, INode &node, const s
 		if (getNodeScriptAppDataString(&node, NEL3D_APPDATA_EXPORT_SSS_TRACK) == "1")
 			addSSSTrack(ssBuilder, node);
 		std::vector<INode *> kids = orderedChildrenOf(&node, ssc);
-		for (INode *child : kids)
-			addBipedNodeTracks(animation, *child, parentName, false, ssc, sampled, ssBuilder);
+		for (std::vector<INode *>::iterator ci = kids.begin(); ci != kids.end(); ++ci)
+			{ INode *child = *ci; addBipedNodeTracks(animation, *child, parentName, false, ssc, sampled, ssBuilder); }
 	}
 	else
 	{
@@ -1286,8 +1286,8 @@ static void addBipedAnimation(NL3D::CAnimation &animation, INode &node, const st
 		// no biped keys at all: fall back to the non-biped path (nothing to oversample)
 		addNodeTracks(animation, node, baseName, &ssBuilder);
 		std::vector<INode *> kids = orderedChildrenOf(&node, ssc);
-		for (INode *child : kids)
-			addBoneTracks(animation, *child, baseName, ssc, ssBuilder);
+		for (std::vector<INode *>::iterator ci = kids.begin(); ci != kids.end(); ++ci)
+			{ INode *child = *ci; addBoneTracks(animation, *child, baseName, ssc, ssBuilder); }
 		return;
 	}
 	addBipedNodeTracks(animation, node, baseName, root, ssc, sampled, ssBuilder);
@@ -1398,7 +1398,7 @@ int main(int argc, char **argv)
 	// whole container if the root-level find missed.
 	if (!bip01)
 	{
-		for (auto it = ssc->chunks().begin(); it != ssc->chunks().end() && !bip01; ++it)
+		for (PIPELINE::MAX::CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end() && !bip01; ++it)
 		{
 			CNodeImpl *n = dynamic_cast<CNodeImpl *>(it->second);
 			if (n && NLMISC::toLower(ucstring(n->userName()).toUtf8()) == "bip01") bip01 = n;
@@ -1410,7 +1410,7 @@ int main(int argc, char **argv)
 		return dumpBipedSamples(*bip01, ssc, dumpSamples, dumpMaxFrame);
 	}
 	if (bip01 && selected.insert(bip01).second) selection.push_back(bip01);
-	for (auto it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
+	for (PIPELINE::MAX::CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
 	{
 		CNodeImpl *n = dynamic_cast<CNodeImpl *>(it->second);
 		if (!n) continue;
@@ -1426,8 +1426,9 @@ int main(int argc, char **argv)
 
 	// --- Export each selected node (CNelExport::exportAnim, scene=false).
 	NL3D::CAnimation animFile;
-	for (INode *node : selection)
+	for (std::vector<INode *>::iterator si = selection.begin(); si != selection.end(); ++si)
 	{
+		INode *node = *si;
 		std::string nodeName;
 		std::string prefixe = getNodeScriptAppDataString(node, NEL3D_APPDATA_EXPORT_ANIMATION_PREFIXE_NAME);
 		if (!prefixe.empty() && atoi(prefixe.c_str()) != 0)

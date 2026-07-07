@@ -32,6 +32,12 @@
 
 #include <algorithm>
 #include <cmath>
+
+// M_PI is not standard C++ (MSVC 9.0 / VS2008 does not define it in <cmath> without _USE_MATH_DEFINES);
+// define it portably to the same double value glibc uses so both toolchains agree bit-for-bit.
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 #include <cstdio>
 #include <cstring>
 
@@ -60,10 +66,10 @@ bool g_useDouble = false;
 // we check both.
 IStorageObject *findChunkAnywhere(CSceneClass *sc, uint16 id)
 {
-	for (auto it = sc->orphanedChunks().begin(); it != sc->orphanedChunks().end(); ++it)
+	for (PIPELINE::MAX::CStorageContainer::TStorageObjectConstIt it = sc->orphanedChunks().begin(); it != sc->orphanedChunks().end(); ++it)
 		if (it->first == id) return it->second;
 	// Also check m_Chunks (may still have entries pre-clean/build)
-	for (auto it = sc->chunks().begin(); it != sc->chunks().end(); ++it)
+	for (PIPELINE::MAX::CStorageContainer::TStorageObjectConstIt it = sc->chunks().begin(); it != sc->chunks().end(); ++it)
 		if (it->first == id) return it->second;
 	return NULL;
 }
@@ -75,7 +81,7 @@ bool readRawBytes(CSceneClass *sc, uint16 chunkId, void *dst, size_t nBytes)
 	CStorageRaw *raw = dynamic_cast<CStorageRaw *>(chunk);
 	if (!raw) return false;
 	if (raw->Value.size() < nBytes) return false;
-	memcpy(dst, raw->Value.data(), nBytes);
+	memcpy(dst, nlVectorData(raw->Value), nBytes);
 	return true;
 }
 
@@ -137,7 +143,7 @@ float getNodeScriptAppDataFloat(INode *node, uint32 subId, float def)
 	if (!n) return def;
 	PIPELINE::MAX::BUILTIN::STORAGE::CAppData *ad = n->appData();
 	if (!ad) return def;
-	for (auto it = ad->entries().begin(); it != ad->entries().end(); ++it)
+	for (PIPELINE::MAX::BUILTIN::STORAGE::CAppData::TMap::const_iterator it = ad->entries().begin(); it != ad->entries().end(); ++it)
 	{
 		if (it->first.SubId != subId) continue;
 		PIPELINE::MAX::BUILTIN::STORAGE::CAppDataEntry *entry = it->second;
@@ -166,7 +172,7 @@ NLMISC::CVector readNodeBoneDimensions(INode *node)
 	if (!chunk) return v;
 	CStorageRaw *raw = dynamic_cast<CStorageRaw *>(chunk);
 	if (!raw || raw->Value.size() < 12) return v;
-	memcpy(&v, raw->Value.data(), 12);
+	memcpy(&v, nlVectorData(raw->Value), 12);
 	return v;
 }
 
@@ -316,7 +322,7 @@ const float *bipedChunkFloats(uint16 chunkId, size_t minFloats, size_t *countOut
 	CStorageRaw *raw = dynamic_cast<CStorageRaw *>(chunk);
 	if (!raw || raw->Value.size() < minFloats * 4) return NULL;
 	if (countOut) *countOut = raw->Value.size() / 4;
-	return reinterpret_cast<const float *>(raw->Value.data());
+	return reinterpret_cast<const float *>(nlVectorData(raw->Value));
 }
 
 // Paired pose records (legs 0x0069, arms 0x006a) and the paired sections of the structure records
@@ -1238,7 +1244,7 @@ std::vector<SMsBone> g_msBones;
 std::vector<INode *> orderedChildrenOf(INode *parent, CSceneClassContainer *ssc)
 {
 	std::vector<INode *> out;
-	for (auto it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
+	for (PIPELINE::MAX::CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
 	{
 		// CRootNode inherits INode but doesn't override parent() — INode::parent() nlerrors,
 		// so we must only call parent() on CNodeImpl (which does override it).
@@ -1275,7 +1281,7 @@ bool isBipedComNode(INode *node)
 void computeMaxLegLink(SBipedRig &rig, CSceneClassContainer *ssc)
 {
 	int maxLink = -1;
-	for (auto it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
+	for (PIPELINE::MAX::CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
 	{
 		INode *node = dynamic_cast<INode *>(it->second);
 		if (!node) continue;
@@ -1493,7 +1499,7 @@ void walkNode(INode *node, sint32 fatherId, const NLMISC::CMatrix &parentWorld,
 	}
 
 	std::vector<INode *> kids = orderedChildrenOf(node, ssc);
-	for (INode *child : kids) walkNode(child, myId, worldTM, ssc, bones, nameSet);
+	for (std::vector<INode *>::iterator ci = kids.begin(); ci != kids.end(); ++ci) walkNode(*ci, myId, worldTM, ssc, bones, nameSet);
 }
 
 // The Footsteps marker sits at ground level: its world height equals the (left) toe attach height
@@ -1635,7 +1641,7 @@ void walkNodeD(INode *node, sint32 fatherId, const Mat4D &parentWorld,
 	bones.push_back(b);
 
 	std::vector<INode *> kids = orderedChildrenOf(node, ssc);
-	for (INode *child : kids) walkNodeD(child, myId, worldTM, ssc, bones, nameSet);
+	for (std::vector<INode *>::iterator ci = kids.begin(); ci != kids.end(); ++ci) walkNodeD(*ci, myId, worldTM, ssc, bones, nameSet);
 }
 
 // Biped ClassIds are confirmed from the character-studio MAXScript reference:
@@ -1657,7 +1663,7 @@ const NLMISC::CClassId CLASSID_BIPED_OBJECT (0x00009125, 0x00000000);
 // the plugin's rename of BipSlave_Control → BipDriven_Control across the corpus's Max versions.
 bool looksLikeBipedFile(CClassDirectory3 &cd)
 {
-	for (auto it = cd.chunks().begin(); it != cd.chunks().end(); ++it)
+	for (PIPELINE::MAX::CStorageContainer::TStorageObjectConstIt it = cd.chunks().begin(); it != cd.chunks().end(); ++it)
 	{
 		const CClassEntry *entry = dynamic_cast<const CClassEntry *>(it->second);
 		if (!entry) continue;

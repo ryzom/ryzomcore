@@ -60,7 +60,7 @@ CRklPatchObject::~CRklPatchObject()
 const ucstring CRklPatchObject::DisplayName = ucstring("RklPatch");
 const char *CRklPatchObject::InternalName = "RklPatchObject";
 const NLMISC::CClassId CRklPatchObject::ClassId = NLMISC::CClassId(0x368c679f, 0x711c22ee);
-const TSClassId CRklPatchObject::SuperClassId = BUILTIN::CPatchObject::SuperClassId;
+const TSClassId CRklPatchObject::SuperClassId = 0x00000010; // GeomObject (== CPatchObject::SuperClassId); literal, not a cross-TU read, to avoid the static-init-order fiasco (MSVC/VS2008 initialized this before CPatchObject's and got 0)
 const CRklPatchObjectClassDesc RklPatchObjectClassDesc(&DllPluginDescNelPatch);
 
 bool CRklPatchObject::isKnownChunkId(uint16 id) const
@@ -165,7 +165,7 @@ bool CRklPatchObject::decodeRPatch(SRPatchMesh &out, std::string &err) const
 {
 	const CStorageRaw *raw = rpoChunk();
 	if (!raw) { err = "no 0x08fd chunk"; return false; }
-	return decodeRpoChunk(raw->Value.data(), raw->Value.size(), out, err);
+	return decodeRpoChunk(nlVectorData(raw->Value), raw->Value.size(), out, err);
 }
 
 bool CRklPatchObject::decodePatch(SPatchMesh &out, std::string &err) const

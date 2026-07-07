@@ -233,7 +233,7 @@ uint32 readNodeDword(CNodeImpl *node, uint16 chunkId, bool &found)
 	CStorageRaw *raw = findRawChunk(node, chunkId);
 	if (raw && raw->Value.size() >= 4)
 	{
-		memcpy(&fl, raw->Value.data(), 4);
+		memcpy(&fl, nlVectorData(raw->Value), 4);
 		found = true;
 	}
 	return fl;
@@ -249,11 +249,11 @@ bool readObjectOffset(CNodeImpl *node, Point3M &pos, QuatM &rot, ScaleValueM &sc
 	scale.q.w = 1.0f;
 	bool any = false;
 	CStorageRaw *raw = findRawChunk(node, 0x096a);
-	if (raw && raw->Value.size() >= 12) { memcpy(&pos, raw->Value.data(), 12); any = true; }
+	if (raw && raw->Value.size() >= 12) { memcpy(&pos, nlVectorData(raw->Value), 12); any = true; }
 	raw = findRawChunk(node, 0x096b);
-	if (raw && raw->Value.size() >= 16) { memcpy(&rot, raw->Value.data(), 16); any = true; }
+	if (raw && raw->Value.size() >= 16) { memcpy(&rot, nlVectorData(raw->Value), 16); any = true; }
 	raw = findRawChunk(node, 0x096c);
-	if (raw && raw->Value.size() >= 28) { memcpy(&scale, raw->Value.data(), 28); any = true; }
+	if (raw && raw->Value.size() >= 28) { memcpy(&scale, nlVectorData(raw->Value), 28); any = true; }
 	return any;
 }
 
@@ -275,12 +275,12 @@ void readPBlockParams(CSceneClass *pblock, std::map<sint32, SPBlockParam> &out)
 			CStorageRaw *cr = dynamic_cast<CStorageRaw *>(cit->second);
 			if (!cr) continue;
 			if (cit->first == 0x0003 && cr->Value.size() == 4)
-				memcpy(&idx, cr->Value.data(), 4);
+				memcpy(&idx, nlVectorData(cr->Value), 4);
 			else if (cit->first == 0x0102 && cr->Value.size() == 12 && idx >= 0)
 			{
 				SPBlockParam p;
 				p.IsPoint3 = true;
-				memcpy(p.V, cr->Value.data(), 12);
+				memcpy(p.V, nlVectorData(cr->Value), 12);
 				out[idx] = p;
 			}
 			else if (cit->first != 0x0004 && cr->Value.size() == 4 && idx >= 0)
@@ -289,8 +289,8 @@ void readPBlockParams(CSceneClass *pblock, std::map<sint32, SPBlockParam> &out)
 				p.IsPoint3 = false;
 				p.IsInt = (cit->first == 0x0101);
 				p.V[1] = p.V[2] = 0.0f;
-				memcpy(p.V, cr->Value.data(), 4);
-				memcpy(&p.I, cr->Value.data(), 4);
+				memcpy(p.V, nlVectorData(cr->Value), 4);
+				memcpy(&p.I, nlVectorData(cr->Value), 4);
 				out[idx] = p;
 			}
 		}
@@ -381,7 +381,7 @@ bool onOffControllerAt0(CReferenceMaker *ctrl)
 		CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
 		if (!raw || raw->Value.size() != 4) continue;
 		uint32 v;
-		memcpy(&v, raw->Value.data(), 4);
+		memcpy(&v, nlVectorData(raw->Value), 4);
 		if (it->first == 0x0100) times.push_back((sint32)v);
 		else if (it->first == 0x0140) initState = v;
 	}
@@ -427,7 +427,7 @@ static bool readCtrlDefaultBytes(CSceneClass *sc, uint16 chunkId, void *dst, siz
 	CStorageRaw *raw = findRawChunk(sc, chunkId);
 	if (raw && raw->Value.size() >= nBytes)
 	{
-		memcpy(dst, raw->Value.data(), nBytes);
+		memcpy(dst, nlVectorData(raw->Value), nBytes);
 		return true;
 	}
 	return false;
@@ -569,7 +569,7 @@ static bool xrefChildString(CStorageContainer *cont, uint16 id, std::string &out
 		if (!raw) return false;
 		ucstring us;
 		us.resize(raw->Value.size() / 2);
-		if (!us.empty()) memcpy(&us[0], raw->Value.data(), us.size() * 2);
+		if (!us.empty()) memcpy(&us[0], nlVectorData(raw->Value), us.size() * 2);
 		out = us.toUtf8();
 		return true;
 	}

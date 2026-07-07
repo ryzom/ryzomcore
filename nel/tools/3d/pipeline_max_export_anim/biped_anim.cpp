@@ -28,6 +28,12 @@
 
 #include <algorithm>
 #include <cmath>
+
+// M_PI is not standard C++ (MSVC 9.0 / VS2008 does not define it in <cmath> without _USE_MATH_DEFINES);
+// define it portably to the same double value glibc uses so both toolchains agree bit-for-bit.
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 #include <cstring>
 
 #include "../pipeline_max/builtin/node_impl.h"
@@ -271,7 +277,7 @@ static const float *sysChunkFloats(CSceneClass *sys, uint16 chunkId, size_t &cou
 	CStorageRaw *raw = dynamic_cast<CStorageRaw *>(chunk);
 	if (!raw || raw->Value.size() < 4) return NULL;
 	countOut = raw->Value.size() / 4;
-	return reinterpret_cast<const float *>(raw->Value.data());
+	return reinterpret_cast<const float *>(nlVectorData(raw->Value));
 }
 
 static uint32 fBits(float f) { uint32 u; memcpy(&u, &f, 4); return u; }

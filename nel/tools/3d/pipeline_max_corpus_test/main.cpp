@@ -24,6 +24,11 @@
 //   1 = failure (details on stderr, machine-readable one-line summary on stdout).
 
 #include <nel/misc/types_nl.h>
+
+// MSVC 9.0 (VS2008) has no C99 snprintf; _snprintf is equivalent for our fixed-size formatting.
+#if defined(_MSC_VER) && _MSC_VER < 1900
+#define snprintf _snprintf
+#endif
 #include <nel/misc/common.h>
 #include <nel/misc/file.h>
 #include <nel/misc/mem_stream.h>
@@ -87,7 +92,7 @@ static std::vector<uint8> writeContainerToTemp(CStorageContainer &ctr, const std
 		std::streampos end = ifs.tellg();
 		ifs.seekg(0);
 		out.resize((size_t)end);
-		if ((size_t)end) ifs.read((char *)out.data(), (std::streamsize)end);
+		if ((size_t)end) ifs.read((char *)nlVectorData(out), (std::streamsize)end);
 	}
 	return out;
 }
@@ -130,7 +135,7 @@ struct StreamResult
 
 // PID-suffixed so concurrent invocations (e.g. a parallelized corpus sweep, or two unrelated test
 // runs overlapping) don't race on the same file and corrupt each other's round-trip.
-static std::string g_tempPath = "/tmp/pipeline_max_corpus_test." + std::to_string((long)PMCT_GETPID()) + ".tmp";
+static std::string g_tempPath = "/tmp/pipeline_max_corpus_test." + NLMISC::toString((sint32)PMCT_GETPID()) + ".tmp";
 
 // Do a T1 roundtrip via CStorageContainer (raw pass-through). Serials the source bytes into a
 // container, serials the container back out, compares bytes.
@@ -485,7 +490,7 @@ static void dumpRefTree(CSceneClass *obj, int depth, int maxDepth)
 		if (BUILTIN::CControlKeyFramerBase *kf = dynamic_cast<BUILTIN::CControlKeyFramerBase *>(ref))
 		{
 			sint32 s = 0, e = 0; kf->range(s, e);
-			extra = " <KEYFRAMER keys=" + std::to_string(kf->keyCount()) + " range=[" + std::to_string(s) + ".." + std::to_string(e) + "]>";
+			extra = " <KEYFRAMER keys=" + NLMISC::toString(kf->keyCount()) + " range=[" + NLMISC::toString(s) + ".." + NLMISC::toString(e) + "]>";
 		}
 		std::cout << pad << "ref[" << r << "] " << ref->classDesc()->classId().toString()
 		          << " sc=" << std::hex << ref->classDesc()->superClassId() << std::dec << extra;
@@ -512,7 +517,7 @@ static void dumpRefTree(CSceneClass *obj, int depth, int maxDepth)
 					{
 						char buf[16]; snprintf(buf, sizeof(buf), " 0x%x", st->first); subs += buf;
 						CStorageRaw *rw = dynamic_cast<CStorageRaw *>(st->second);
-						if (st->first == 0x0003 && rw && rw->Value.size() == 4) memcpy(&idx, rw->Value.data(), 4);
+						if (st->first == 0x0003 && rw && rw->Value.size() == 4) memcpy(&idx, nlVectorData(rw->Value), 4);
 						if (rw) { char b2[16]; snprintf(b2, sizeof(b2), "(%zu)", rw->Value.size()); subs += b2; }
 					}
 					std::cout << pad << "  param idx=" << idx << " chunks:" << subs << "\n";
@@ -577,7 +582,7 @@ int main(int argc, char **argv)
 
 	if (doModifySave)
 	{
-		std::string tempMax = "/tmp/pipeline_max_modify_save." + std::to_string((long)PMCT_GETPID()) + ".max";
+		std::string tempMax = "/tmp/pipeline_max_modify_save." + NLMISC::toString((sint32)PMCT_GETPID()) + ".max";
 		int rc = modifySaveTest(in, &reg, tempMax, verbose);
 		remove(tempMax.c_str());
 		remove(g_tempPath.c_str());
@@ -671,7 +676,7 @@ int main(int argc, char **argv)
 		scene.clean(); scene.build(VersionUnknown); scene.disown();
 		std::vector<uint8> bytes = writeContainerToTemp(scene, g_tempPath);
 		FILE *f = fopen(dumpScene, "wb");
-		if (f) { if (!bytes.empty()) fwrite(bytes.data(), 1, bytes.size(), f); fclose(f); }
+		if (f) { if (!bytes.empty()) fwrite(nlVectorData(bytes), 1, bytes.size(), f); fclose(f); }
 		std::cout << "wrote " << bytes.size() << " bytes to " << dumpScene << "\n";
 		remove(g_tempPath.c_str());
 		return 0;
@@ -680,14 +685,13 @@ int main(int argc, char **argv)
 	// Chunk-formatted streams that participate in the CStorageContainer round-trip. The two
 	// \05Summary* streams and the OLE class-id are raw byte blobs (copied verbatim by any full
 	// rewrite tool), so byte identity is trivially met and they aren't retested here.
-	std::vector<std::string> streamNames = {
-		"DllDirectory",
-		"ClassDirectory3",
-		"ClassData",
-		"Config",
-		"Scene",
-		"VideoPostQueue",
-	};
+	std::vector<std::string> streamNames;
+	streamNames.push_back("DllDirectory");
+	streamNames.push_back("ClassDirectory3");
+	streamNames.push_back("ClassData");
+	streamNames.push_back("Config");
+	streamNames.push_back("Scene");
+	streamNames.push_back("VideoPostQueue");
 
 	// State that carries across streams for T2 (need dll to interpret classdir; both to interpret scene).
 	CDllDirectory dllForT2;
@@ -698,9 +702,10 @@ int main(int argc, char **argv)
 	std::vector<StreamResult> results;
 	bool anyFail = false;
 
-	for (const std::string &name : streamNames)
+	for (std::vector<std::string>::const_iterator ni = streamNames.begin(); ni != streamNames.end(); ++ni)
 	{
-		StreamResult r{ name, false, false, "", false, false, "" };
+		const std::string &name = *ni;
+		StreamResult r = { name, false, false, "", false, false, "" };
 		std::vector<uint8> srcBytes;
 		if (!in.readStream(name, srcBytes)) { results.push_back(r); continue; }
 		r.Exists = true;
@@ -742,8 +747,9 @@ int main(int argc, char **argv)
 
 	// Concise one-line stdout summary + per-stream verbose if requested or on failure.
 	std::cout << (anyFail ? "FAIL" : "OK") << " " << maxFile;
-	for (const StreamResult &r : results)
+	for (std::vector<StreamResult>::const_iterator ri = results.begin(); ri != results.end(); ++ri)
 	{
+		const StreamResult &r = *ri;
 		if (!r.Exists) continue;
 		std::cout << " " << r.Name << ":T1=" << (r.T1Ok ? "ok" : "FAIL");
 		if (r.T2Applicable) std::cout << ",T2=" << (r.T2Ok ? "ok" : "FAIL");
@@ -751,8 +757,9 @@ int main(int argc, char **argv)
 	std::cout << "\n";
 	if (anyFail || verbose)
 	{
-		for (const StreamResult &r : results)
+		for (std::vector<StreamResult>::const_iterator ri = results.begin(); ri != results.end(); ++ri)
 		{
+			const StreamResult &r = *ri;
 			if (!r.Exists) continue;
 			if (!r.T1Ok) std::cerr << "  T1 " << r.Name << " FAIL: " << r.T1Info << "\n";
 			if (r.T2Applicable && !r.T2Ok) std::cerr << "  T2 " << r.Name << " FAIL: " << r.T2Info << "\n";

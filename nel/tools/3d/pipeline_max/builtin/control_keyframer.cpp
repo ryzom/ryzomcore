@@ -34,6 +34,7 @@
 #include <cstring>
 
 // NeL includes
+#include <nel/misc/debug.h> // nlctassert
 
 // Project includes
 
@@ -44,15 +45,15 @@ namespace MAX {
 namespace BUILTIN {
 
 // The typed accessors reinterpret the raw chunk bytes; the record layouts must be packed.
-static_assert(sizeof(CStorageLinPoint3Key) == 20, "packed key record");
-static_assert(sizeof(CStorageLinRotKey) == 24, "packed key record");
-static_assert(sizeof(CStorageLinScaleKey) == 36, "packed key record");
-static_assert(sizeof(CStorageBezFloatKey) == 28, "packed key record");
-static_assert(sizeof(CStorageBezPoint3Key) == 80, "packed key record");
-static_assert(sizeof(CStorageBezScaleKey) == 148, "packed key record");
-static_assert(sizeof(CStorageTCBPoint3Key) == 64, "packed key record");
-static_assert(sizeof(CStorageTCBRotKey) == 92, "packed key record");
-static_assert(sizeof(CStorageTCBScaleKey) == 112, "packed key record");
+nlctassert(sizeof(CStorageLinPoint3Key) == 20);
+nlctassert(sizeof(CStorageLinRotKey) == 24);
+nlctassert(sizeof(CStorageLinScaleKey) == 36);
+nlctassert(sizeof(CStorageBezFloatKey) == 28);
+nlctassert(sizeof(CStorageBezPoint3Key) == 80);
+nlctassert(sizeof(CStorageBezScaleKey) == 148);
+nlctassert(sizeof(CStorageTCBPoint3Key) == 64);
+nlctassert(sizeof(CStorageTCBRotKey) == 92);
+nlctassert(sizeof(CStorageTCBScaleKey) == 112);
 
 // Common controller chunk ids (shared across all keyframe controller classes; the default
 // value and key table ids are per-class and passed in by the concrete constructors).
@@ -183,22 +184,22 @@ uint CControlKeyFramerBase::keyCount() const
 const void *CControlKeyFramerBase::keyData() const
 {
 	if (!keyCount()) return NULL;
-	return m_KeyTable->Value.data();
+	return nlVectorData(m_KeyTable->Value);
 }
 
 const uint8 *CControlKeyFramerBase::defaultValue(uint &sizeOut) const
 {
 	if (!m_Default) { sizeOut = 0; return NULL; }
 	sizeOut = (uint)m_Default->Value.size();
-	return m_Default->Value.data();
+	return nlVectorData(m_Default->Value);
 }
 
 bool CControlKeyFramerBase::range(sint32 &start, sint32 &end) const
 {
 	if (!m_Range) return false;
 	if (m_Range->Value.size() != 8) return false;
-	memcpy(&start, m_Range->Value.data(), 4);
-	memcpy(&end, m_Range->Value.data() + 4, 4);
+	memcpy(&start, nlVectorData(m_Range->Value), 4);
+	memcpy(&end, nlVectorData(m_Range->Value) + 4, 4);
 	return true;
 }
 

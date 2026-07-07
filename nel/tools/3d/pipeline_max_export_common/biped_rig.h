@@ -80,7 +80,7 @@ struct Mat4D
 	double m[16]; // row-major: m[row*4 + col]
 	static Mat4D identity()
 	{
-		Mat4D r{};
+		Mat4D r = { { 0 } };
 		r.m[0] = r.m[5] = r.m[10] = r.m[15] = 1.0;
 		return r;
 	}
@@ -106,7 +106,7 @@ struct Mat4D
 	}
 	Mat4D operator*(const Mat4D &o) const
 	{
-		Mat4D r{};
+		Mat4D r = { { 0 } };
 		for (int i = 0; i < 4; ++i)
 			for (int j = 0; j < 4; ++j)
 				r.m[i*4+j] = m[i*4+0]*o.m[0*4+j] + m[i*4+1]*o.m[1*4+j] + m[i*4+2]*o.m[2*4+j] + m[i*4+3]*o.m[3*4+j];
@@ -134,7 +134,7 @@ struct Mat4D
 		inv[15] =  m[0]*m[5]*m[10]  - m[0]*m[6]*m[9]   - m[4]*m[1]*m[10] + m[4]*m[2]*m[9]  + m[8]*m[1]*m[6]   - m[8]*m[2]*m[5];
 		double det = m[0]*inv[0] + m[1]*inv[4] + m[2]*inv[8] + m[3]*inv[12];
 		double invDet = 1.0 / det;
-		Mat4D r{};
+		Mat4D r = { { 0 } };
 		for (int i = 0; i < 16; ++i) r.m[i] = inv[i] * invDet;
 		return r;
 	}

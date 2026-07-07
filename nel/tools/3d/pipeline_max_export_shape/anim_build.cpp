@@ -125,7 +125,7 @@ static CControlKeyFramerBase *uvController(CSceneClass *texmap, int coord)
 			if (st->first == 0x0003)
 			{
 				CStorageRaw *rw = dynamic_cast<CStorageRaw *>(st->second);
-				if (rw && rw->Value.size() == 4) memcpy(&idx, rw->Value.data(), 4);
+				if (rw && rw->Value.size() == 4) memcpy(&idx, nlVectorData(rw->Value), 4);
 			}
 			else if (st->first == 0x0200)
 				animated = true;

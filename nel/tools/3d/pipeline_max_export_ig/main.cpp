@@ -289,7 +289,7 @@ static bool xrefChildString(CStorageContainer *cont, uint16 id, std::string &out
 		if (!raw) return false;
 		ucstring us;
 		us.resize(raw->Value.size() / 2);
-		if (!us.empty()) memcpy(&us[0], raw->Value.data(), us.size() * 2);
+		if (!us.empty()) memcpy(&us[0], nlVectorData(raw->Value), us.size() * 2);
 		out = us.toUtf8();
 		return true;
 	}
@@ -417,7 +417,7 @@ static bool getPB2StringParam(CSceneClass *obj, uint16 paramId, std::string &out
 		CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
 		if (!raw || raw->Value.size() < 15) continue;
 		uint16 id;
-		memcpy(&id, raw->Value.data(), 2);
+		memcpy(&id, nlVectorData(raw->Value), 2);
 		if (id != paramId) continue;
 		uint8 flag = raw->Value[14];
 		if (!(flag & 0x40)) return false; // controller-backed, not a constant
@@ -425,9 +425,9 @@ static bool getPB2StringParam(CSceneClass *obj, uint16 paramId, std::string &out
 		// (null included in the length in the observed corpus records).
 		if (raw->Value.size() < 15 + 4) return false;
 		uint32 len;
-		memcpy(&len, raw->Value.data() + 15, 4);
+		memcpy(&len, nlVectorData(raw->Value) + 15, 4);
 		if (len > raw->Value.size() - 19) len = (uint32)(raw->Value.size() - 19);
-		std::string s((const char *)raw->Value.data() + 19, len);
+		std::string s((const char *)nlVectorData(raw->Value) + 19, len);
 		while (!s.empty() && s[s.size() - 1] == '\0') s.resize(s.size() - 1);
 		out = s;
 		return true;
@@ -484,7 +484,7 @@ static uint32 readNodeDword(CNodeImpl *node, uint16 chunkId, bool &found)
 	CStorageRaw *flags = dynamic_cast<CStorageRaw *>(node->findStorageObject(chunkId));
 	if (flags && flags->Value.size() >= 4)
 	{
-		memcpy(&fl, flags->Value.data(), 4);
+		memcpy(&fl, nlVectorData(flags->Value), 4);
 		found = true;
 		return fl;
 	}
@@ -495,7 +495,7 @@ static uint32 readNodeDword(CNodeImpl *node, uint16 chunkId, bool &found)
 		CStorageRaw *raw = dynamic_cast<CStorageRaw *>(oit->second);
 		if (raw && raw->Value.size() >= 4)
 		{
-			memcpy(&fl, raw->Value.data(), 4);
+			memcpy(&fl, nlVectorData(raw->Value), 4);
 			found = true;
 		}
 		break;
@@ -535,7 +535,7 @@ static bool readCtrlDefaultBytes(CSceneClass *sc, uint16 chunkId, void *dst, siz
 	CStorageRaw *raw = dynamic_cast<CStorageRaw *>(so);
 	if (raw && raw->Value.size() >= nBytes)
 	{
-		memcpy(dst, raw->Value.data(), nBytes);
+		memcpy(dst, nlVectorData(raw->Value), nBytes);
 		return true;
 	}
 	return false;
@@ -939,12 +939,12 @@ static void readPBlockParams(CSceneClass *pblock, std::map<sint32, SPBlockParam>
 			CStorageRaw *cr = dynamic_cast<CStorageRaw *>(cit->second);
 			if (!cr) continue;
 			if (cit->first == 0x0003 && cr->Value.size() == 4)
-				memcpy(&idx, cr->Value.data(), 4);
+				memcpy(&idx, nlVectorData(cr->Value), 4);
 			else if (cit->first == 0x0102 && cr->Value.size() == 12 && idx >= 0)
 			{
 				SPBlockParam p;
 				p.IsPoint3 = true;
-				memcpy(p.V, cr->Value.data(), 12);
+				memcpy(p.V, nlVectorData(cr->Value), 12);
 				out[idx] = p;
 			}
 			else if (cit->first != 0x0004 && cr->Value.size() == 4 && idx >= 0)
@@ -953,8 +953,8 @@ static void readPBlockParams(CSceneClass *pblock, std::map<sint32, SPBlockParam>
 				p.IsPoint3 = false;
 				p.IsInt = (cit->first == 0x0101);
 				p.V[1] = p.V[2] = 0.0f;
-				memcpy(p.V, cr->Value.data(), 4);
-				memcpy(&p.I, cr->Value.data(), 4);
+				memcpy(p.V, nlVectorData(cr->Value), 4);
+				memcpy(&p.I, nlVectorData(cr->Value), 4);
 				out[idx] = p;
 			}
 		}
@@ -970,7 +970,7 @@ static bool lightWord(CSceneClass *obj, uint16 chunkId, uint16 &out)
 		if (it->first != chunkId) continue;
 		CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
 		if (!raw || raw->Value.size() < 2) return false;
-		memcpy(&out, raw->Value.data(), 2);
+		memcpy(&out, nlVectorData(raw->Value), 2);
 		return true;
 	}
 	return false;
@@ -1477,9 +1477,9 @@ static bool readObjectOffset(CNodeImpl *node, Point3M &pos, QuatM &rot, ScaleVal
 	{
 		CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
 		if (!raw) continue;
-		if (it->first == 0x096a && raw->Value.size() >= 12) { memcpy(&pos, raw->Value.data(), 12); any = true; }
-		else if (it->first == 0x096b && raw->Value.size() >= 16) { memcpy(&rot, raw->Value.data(), 16); any = true; }
-		else if (it->first == 0x096c && raw->Value.size() >= 28) { memcpy(&scale, raw->Value.data(), 28); any = true; }
+		if (it->first == 0x096a && raw->Value.size() >= 12) { memcpy(&pos, nlVectorData(raw->Value), 12); any = true; }
+		else if (it->first == 0x096b && raw->Value.size() >= 16) { memcpy(&rot, nlVectorData(raw->Value), 16); any = true; }
+		else if (it->first == 0x096c && raw->Value.size() >= 28) { memcpy(&scale, nlVectorData(raw->Value), 28); any = true; }
 	}
 	return any;
 }
@@ -1576,7 +1576,7 @@ static bool readEditMeshBitArray(CStorageContainer *cont, std::vector<bool> &out
 		CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
 		if (!raw || raw->Value.size() < 4) return false;
 		uint32 n;
-		memcpy(&n, raw->Value.data(), 4);
+		memcpy(&n, nlVectorData(raw->Value), 4);
 		if (raw->Value.size() < 4 + ((size_t)n + 7) / 8) return false;
 		out.resize(n);
 		for (uint32 i = 0; i < n; ++i)
@@ -1607,15 +1607,15 @@ static bool readEditMeshModApp(CStorageContainer *c2500, SEditMeshEdits &out)
 					if (raw && raw->Value.size() >= 4)
 					{
 						uint32 n;
-						memcpy(&n, raw->Value.data(), 4);
+						memcpy(&n, nlVectorData(raw->Value), 4);
 						if (raw->Value.size() >= 4 + (size_t)n * 16)
 						{
 							for (uint32 i = 0; i < n; ++i)
 							{
 								uint32 idx;
 								float v[3];
-								memcpy(&idx, raw->Value.data() + 4 + i * 16, 4);
-								memcpy(v, raw->Value.data() + 4 + i * 16 + 4, 12);
+								memcpy(&idx, nlVectorData(raw->Value) + 4 + i * 16, 4);
+								memcpy(v, nlVectorData(raw->Value) + 4 + i * 16 + 4, 12);
 								out.Moves.push_back(std::make_pair(idx, NLMISC::CVector(v[0], v[1], v[2])));
 							}
 						}
@@ -1627,11 +1627,11 @@ static bool readEditMeshModApp(CStorageContainer *c2500, SEditMeshEdits &out)
 					if (raw && raw->Value.size() >= 4)
 					{
 						uint32 n;
-						memcpy(&n, raw->Value.data(), 4);
+						memcpy(&n, nlVectorData(raw->Value), 4);
 						if (raw->Value.size() >= 4 + (size_t)n * 12)
 						{
 							out.Created.resize(n);
-							memcpy(out.Created.data(), raw->Value.data() + 4, (size_t)n * 12);
+							memcpy(nlVectorData(out.Created), nlVectorData(raw->Value) + 4, (size_t)n * 12);
 						}
 					}
 				}
@@ -1836,7 +1836,7 @@ static bool nodeWorldMesh(INode &node, SNodeTMCache &tmCache, SMeshData &out)
 							if (it->first != 0x2510) continue;
 							CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
 							if (raw && raw->Value.size() >= 48)
-								memcpy(op.CtxTM.m, raw->Value.data(), 48);
+								memcpy(op.CtxTM.m, nlVectorData(raw->Value), 48);
 						}
 					}
 					opStack.push_back(op);
@@ -2728,7 +2728,7 @@ static void dumpLightNode(CNodeImpl *node)
 		CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
 		if (!raw || raw->Value.size() > 4 || raw->Value.empty()) continue;
 		uint32 v = 0;
-		memcpy(&v, raw->Value.data(), raw->Value.size());
+		memcpy(&v, nlVectorData(raw->Value), raw->Value.size());
 		printf("  word 0x%04x = %u\n", it->first, v);
 	}
 	CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(obj);
@@ -2750,25 +2750,25 @@ static void dumpLightNode(CNodeImpl *node)
 				CStorageRaw *cr = dynamic_cast<CStorageRaw *>(cit->second);
 				if (!cr) continue;
 				if (cit->first == 0x0003 && cr->Value.size() == 4)
-					memcpy(&idx, cr->Value.data(), 4);
+					memcpy(&idx, nlVectorData(cr->Value), 4);
 				else if (cit->first == 0x0100 && cr->Value.size() == 4)
 				{
 					float f;
-					memcpy(&f, cr->Value.data(), 4);
+					memcpy(&f, nlVectorData(cr->Value), 4);
 					printf("    param %d = %.9g\n", idx, f);
 				}
 				else if (cit->first == 0x0102 && cr->Value.size() == 12)
 				{
 					float f[3];
-					memcpy(f, cr->Value.data(), 12);
+					memcpy(f, nlVectorData(cr->Value), 12);
 					printf("    param %d = (%.9g, %.9g, %.9g)\n", idx, f[0], f[1], f[2]);
 				}
 				else if (cit->first != 0x0004 && cr->Value.size() == 4)
 				{
 					uint32 u;
 					float f;
-					memcpy(&u, cr->Value.data(), 4);
-					memcpy(&f, cr->Value.data(), 4);
+					memcpy(&u, nlVectorData(cr->Value), 4);
+					memcpy(&f, nlVectorData(cr->Value), 4);
 					printf("    param %d = int %u / float %.9g (chunk 0x%04x)\n", idx, u, f, cit->first);
 				}
 				else if (cit->first != 0x0004)

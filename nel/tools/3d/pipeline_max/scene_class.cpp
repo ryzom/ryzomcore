@@ -241,7 +241,11 @@ void CSceneClass::toStringLocal(std::ostream &ostream, const std::string &pad, u
 
 IStorageObject *CSceneClass::getChunk(uint16 id)
 {
-	if (m_OrphanedChunks.begin()->first == id)
+	// Guard the empty-list case: dereferencing begin() of an empty std::list is UB (glibc happens
+	// to read a harmless sentinel and fall through to the loop below; MSVC's checked iterators —
+	// _SECURE_SCL, on by default in VS2008 — raise 0xC0000417 and abort). A class parsing a chunk
+	// after it has already drained all its orphans hits this.
+	if (!m_OrphanedChunks.empty() && m_OrphanedChunks.begin()->first == id)
 	{
 		IStorageObject *result = m_OrphanedChunks.begin()->second;
 		m_OrphanedChunks.pop_front();

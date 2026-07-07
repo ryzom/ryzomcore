@@ -62,7 +62,7 @@ CEditablePoly::~CEditablePoly()
 const ucstring CEditablePoly::DisplayName = ucstring("EditablePoly");
 const char *CEditablePoly::InternalName = "EditablePoly";
 const NLMISC::CClassId CEditablePoly::ClassId = NLMISC::CClassId(0x1bf8338d, 0x192f6098);
-const TSClassId CEditablePoly::SuperClassId = CPolyObject::SuperClassId;
+const TSClassId CEditablePoly::SuperClassId = 0x00000010; // GeomObject (== CPolyObject::SuperClassId); literal to avoid cross-TU static-init-order dependency
 const CEditablePolyClassDesc EditablePolyClassDesc(&DllPluginDescEPoly);
 
 void CEditablePoly::parse(uint16 version, uint filter)

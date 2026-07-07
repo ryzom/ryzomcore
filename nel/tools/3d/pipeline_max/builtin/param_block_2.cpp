@@ -143,22 +143,22 @@ void CParamBlock2::decodeModel()
 		if (!raw) continue;
 		if (it->first == PMB_PB2_HEADER_CHUNK_ID && raw->Value.size() >= 16)
 		{
-			memcpy(&m_ScriptVersion, raw->Value.data(), 4);
-			memcpy(&m_BlockId, raw->Value.data() + 4, 2);
-			memcpy(&m_ParamCount, raw->Value.data() + 10, 2);
+			memcpy(&m_ScriptVersion, nlVectorData(raw->Value), 4);
+			memcpy(&m_BlockId, nlVectorData(raw->Value) + 4, 2);
+			memcpy(&m_ParamCount, nlVectorData(raw->Value) + 10, 2);
 			m_HasHeader = true;
 		}
 		else if (it->first == PMB_PB2_PARAM_CHUNK_ID && raw->Value.size() >= 15)
 		{
 			SParam p;
-			memcpy(&p.Id, raw->Value.data(), 2);
-			memcpy(&p.Type, raw->Value.data() + 2, 2);
+			memcpy(&p.Id, nlVectorData(raw->Value), 2);
+			memcpy(&p.Type, nlVectorData(raw->Value) + 2, 2);
 			p.Chunk = raw;
 			p.IsTab = (p.Type & TYPE_TAB_FLAG) != 0;
 			uint8 flagByte = raw->Value[14];
 			bool refKind = SParam::typeIsRefKind(p.baseType());
 			bool isConstant = (flagByte & 0x40) != 0;
-			const uint8 *payload = raw->Value.data() + 15;
+			const uint8 *payload = nlVectorData(raw->Value) + 15;
 			size_t payloadSize = raw->Value.size() - 15;
 
 			if (p.IsTab)
@@ -167,8 +167,8 @@ void CParamBlock2::decodeModel()
 				// flag (0x40 = inline) + value by base type. Reference-kind element values are
 				// scene storage indices (resolved through the scene container by the consumer),
 				// not PB2 reference slots — a tab record does NOT own a PB2 reference slot.
-				const uint8 *q = raw->Value.data() + 14 + 1;
-				const uint8 *end = raw->Value.data() + raw->Value.size();
+				const uint8 *q = nlVectorData(raw->Value) + 14 + 1;
+				const uint8 *end = nlVectorData(raw->Value) + raw->Value.size();
 				if (q + 4 <= end)
 				{
 					uint32 count;
@@ -374,7 +374,7 @@ bool CParamBlock2::setFloat(uint16 id, float v)
 		return false;
 	}
 	if (p->PayloadOff + 4 > p->Chunk->Value.size()) return false;
-	memcpy(p->Chunk->Value.data() + p->PayloadOff, &v, 4);
+	memcpy(nlVectorData(p->Chunk->Value) + p->PayloadOff, &v, 4);
 	p->F[0] = v;
 	return true;
 }
@@ -393,7 +393,7 @@ bool CParamBlock2::setInt(uint16 id, sint32 v)
 		return false;
 	}
 	if (p->PayloadOff + 4 > p->Chunk->Value.size()) return false;
-	memcpy(p->Chunk->Value.data() + p->PayloadOff, &v, 4);
+	memcpy(nlVectorData(p->Chunk->Value) + p->PayloadOff, &v, 4);
 	p->I = v;
 	p->F[0] = (float)v;
 	return true;
@@ -406,7 +406,7 @@ bool CParamBlock2::setBool(uint16 id, bool v)
 	if (p->baseType() != TYPE_BOOL) return false;
 	if (p->PayloadOff + 4 > p->Chunk->Value.size()) return false;
 	sint32 iv = v ? 1 : 0;
-	memcpy(p->Chunk->Value.data() + p->PayloadOff, &iv, 4);
+	memcpy(nlVectorData(p->Chunk->Value) + p->PayloadOff, &iv, 4);
 	p->I = iv;
 	p->F[0] = (float)iv;
 	return true;
@@ -426,7 +426,7 @@ bool CParamBlock2::setColor(uint16 id, const float c[3])
 		return false;
 	}
 	if (p->PayloadOff + 12 > p->Chunk->Value.size()) return false;
-	memcpy(p->Chunk->Value.data() + p->PayloadOff, c, 12);
+	memcpy(nlVectorData(p->Chunk->Value) + p->PayloadOff, c, 12);
 	p->F[0] = c[0]; p->F[1] = c[1]; p->F[2] = c[2];
 	return true;
 }
@@ -460,7 +460,7 @@ bool CParamBlock2::selfTestReencode(std::string &err) const
 			continue; // string/other: not re-encoded here
 		}
 		if (p.PayloadOff + sz > p.Chunk->Value.size()
-			|| memcmp(buf, p.Chunk->Value.data() + p.PayloadOff, sz) != 0)
+			|| memcmp(buf, nlVectorData(p.Chunk->Value) + p.PayloadOff, sz) != 0)
 		{
 			std::stringstream ss;
 			ss << "param 0x" << std::hex << p.Id << " type 0x" << p.Type << " re-encode mismatch";

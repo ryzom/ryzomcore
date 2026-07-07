@@ -62,9 +62,9 @@ namespace MESHEVAL {
 static bool readCountPrefixed(CStorageRaw *raw, uint stride, const void **data, uint32 &count)
 {
 	if (!raw || raw->Value.size() < 4) return false;
-	memcpy(&count, raw->Value.data(), 4);
+	memcpy(&count, nlVectorData(raw->Value), 4);
 	if (raw->Value.size() < 4 + (size_t)count * stride) return false;
-	*data = raw->Value.data() + 4;
+	*data = nlVectorData(raw->Value) + 4;
 	return true;
 }
 
@@ -112,7 +112,7 @@ static bool extractEditableMesh(CSceneClass *obj, SEvalMesh &out, const std::str
 			if (it->first == 0x0959 && raw->Value.size() >= 4)
 			{
 				uint32 chan;
-				memcpy(&chan, raw->Value.data(), 4);
+				memcpy(&chan, nlVectorData(raw->Value), 4);
 				currentChannel = (int)chan;
 			}
 			else if (it->first == 0x2394 && currentChannel >= 0)
@@ -180,7 +180,7 @@ static bool readEditMeshBitArray(CStorageContainer *cont, std::vector<bool> &out
 		CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
 		if (!raw || raw->Value.size() < 4) return false;
 		uint32 n;
-		memcpy(&n, raw->Value.data(), 4);
+		memcpy(&n, nlVectorData(raw->Value), 4);
 		if (raw->Value.size() < 4 + ((size_t)n + 7) / 8) return false;
 		out.resize(n);
 		for (uint32 i = 0; i < n; ++i)
@@ -210,15 +210,15 @@ static bool readEditMeshModApp(CStorageContainer *c2500, SEditMeshEdits &out)
 					if (raw && raw->Value.size() >= 4)
 					{
 						uint32 n;
-						memcpy(&n, raw->Value.data(), 4);
+						memcpy(&n, nlVectorData(raw->Value), 4);
 						if (raw->Value.size() >= 4 + (size_t)n * 16)
 						{
 							for (uint32 i = 0; i < n; ++i)
 							{
 								uint32 idx;
 								Point3M v;
-								memcpy(&idx, raw->Value.data() + 4 + i * 16, 4);
-								memcpy(&v, raw->Value.data() + 4 + i * 16 + 4, 12);
+								memcpy(&idx, nlVectorData(raw->Value) + 4 + i * 16, 4);
+								memcpy(&v, nlVectorData(raw->Value) + 4 + i * 16 + 4, 12);
 								out.Moves.push_back(std::make_pair(idx, v));
 							}
 						}
@@ -230,11 +230,11 @@ static bool readEditMeshModApp(CStorageContainer *c2500, SEditMeshEdits &out)
 					if (raw && raw->Value.size() >= 4)
 					{
 						uint32 n;
-						memcpy(&n, raw->Value.data(), 4);
+						memcpy(&n, nlVectorData(raw->Value), 4);
 						if (raw->Value.size() >= 4 + (size_t)n * 12)
 						{
 							out.Created.resize(n);
-							if (n) memcpy(&out.Created[0], raw->Value.data() + 4, (size_t)n * 12);
+							if (n) memcpy(&out.Created[0], nlVectorData(raw->Value) + 4, (size_t)n * 12);
 						}
 					}
 				}
@@ -333,7 +333,7 @@ static void applyXForm(CSceneClass *mod, CStorageContainer *app, SEvalMesh &mesh
 			if (it->first != 0x2510) continue;
 			CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
 			if (raw && raw->Value.size() >= 48)
-				memcpy(ctx.m, raw->Value.data(), 48);
+				memcpy(ctx.m, nlVectorData(raw->Value), 48);
 		}
 	}
 	Matrix3M full = ctx * gizmo * inverseM3(ctx);

@@ -165,7 +165,7 @@ std::string materialName(CSceneClass *mtl)
 	if (!raw) return std::string();
 	ucstring us;
 	us.resize(raw->Value.size() / 2);
-	if (!us.empty()) memcpy(&us[0], raw->Value.data(), us.size() * 2);
+	if (!us.empty()) memcpy(&us[0], nlVectorData(raw->Value), us.size() * 2);
 	return us.toUtf8();
 }
 
@@ -174,8 +174,8 @@ static bool scriptedPluginVersion(CSceneClass *sc, uint32 &version, uint32 &bloc
 {
 	CStorageRaw *raw = findRawChunk(sc, 0x0010);
 	if (!raw || raw->Value.size() < 8) return false;
-	memcpy(&version, raw->Value.data(), 4);
-	memcpy(&blockCount, raw->Value.data() + 4, 4);
+	memcpy(&version, nlVectorData(raw->Value), 4);
+	memcpy(&blockCount, nlVectorData(raw->Value) + 4, 4);
 	return true;
 }
 
@@ -200,7 +200,7 @@ static void getSubMaterials(CSceneClass *mtl, std::vector<CSceneClass *> &subs)
 	if (raw && raw->Value.size() >= 4)
 	{
 		uint32 n;
-		memcpy(&n, raw->Value.data(), 4);
+		memcpy(&n, nlVectorData(raw->Value), 4);
 		count = n;
 	}
 	for (uint i = 1; i < rm->nbReferences() && subs.size() < count; ++i)
@@ -301,13 +301,13 @@ static void readUVGen(CSceneClass *uvgen, SUVGen &out, const std::string &texNam
 	if (raw && raw->Value.size() >= 4)
 	{
 		uint32 chan;
-		memcpy(&chan, raw->Value.data(), 4);
+		memcpy(&chan, nlVectorData(raw->Value), 4);
 		out.MapChannel = (int)chan;
 	}
 	raw = findRawChunk(uvgen, 0x9002);
 	if (raw && raw->Value.size() >= 4)
 	{
-		memcpy(&out.Flags, raw->Value.data(), 4);
+		memcpy(&out.Flags, nlVectorData(raw->Value), 4);
 		out.WrapU = (out.Flags & 0x1) != 0;
 		out.WrapV = (out.Flags & 0x2) != 0;
 	}
@@ -352,7 +352,7 @@ static bool bmtexFileName(CSceneClass *bmtex, std::string &out)
 				if (!raw) return false;
 				ucstring us;
 				us.resize(raw->Value.size() / 2);
-				if (!us.empty()) memcpy(&us[0], raw->Value.data(), us.size() * 2);
+				if (!us.empty()) memcpy(&us[0], nlVectorData(raw->Value), us.size() * 2);
 				out = us.toUtf8();
 				while (!out.empty() && out[out.size() - 1] == '\0') out.resize(out.size() - 1);
 				return !out.empty();

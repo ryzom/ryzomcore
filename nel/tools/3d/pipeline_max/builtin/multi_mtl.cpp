@@ -74,7 +74,7 @@ void CMultiMtl::parse(uint16 version, uint filter)
 			if (raw && raw->Value.size() >= 4)
 			{
 				uint32 n;
-				memcpy(&n, raw->Value.data(), 4);
+				memcpy(&n, nlVectorData(raw->Value), 4);
 				m_NumSubMaterials = n;
 			}
 			break;
