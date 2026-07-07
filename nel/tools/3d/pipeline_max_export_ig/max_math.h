@@ -71,6 +71,9 @@ struct ScaleValueM
 // M = S * R * T for row vectors (scale applied first).
 Matrix3M composePRS(const Point3M &pos, const QuatM &rot, const ScaleValueM &scale);
 
+// Max Point3 * Matrix3 (row-vector convention).
+Point3M transformPoint(const Point3M &v, const Matrix3M &m);
+
 // ---------------------------------------------------------------------------------------------
 // Graphics Gems IV affine matrix decomposition (Ken Shoemake, "Polar Matrix Decomposition").
 // Operates on the Max row-vector Matrix3M with the same input adaptation the SDK version uses.

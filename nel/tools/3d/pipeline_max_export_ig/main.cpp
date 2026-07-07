@@ -82,6 +82,8 @@
 #include "../pipeline_max/update1/update1.h"
 #include "../pipeline_max/epoly/epoly.h"
 #include "../pipeline_max/biped/biped.h"
+#include "../pipeline_max/nelpatch/nelpatch.h"
+#include "../pipeline_max/nelpatch/rkl_patch_object.h"
 
 #include "../pipeline_max/builtin/scene_impl.h"
 #include "../pipeline_max/builtin/i_node.h"
@@ -783,6 +785,168 @@ static Matrix3M getNodeTM(INode *node, SNodeTMCache &cache)
 	Matrix3M world = local * getNodeTM(node->parent(), cache);
 	cache.TM[node] = world;
 	return world;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Ligo brick ig export (build_gamedata processes/ligo, nel_ligo_export.ms): the same
+// zonematerial-<mat>-<cell>.max / zonespecial-<name>.max / zonetransition-<a>-<b>-<t>.max
+// filename protocol pipeline_max_export_zone classifies. Ligo bricks carry the same
+// NEL3D_APPDATA_IGNAME-tagged ig content as the standalone ig process, with two differences
+// (see exportInstanceGroupFromZone / getIg in the maxscript): the ig name is matched and
+// filenamed LOWERCASED (the standalone tool keeps the appdata's original casing), and
+// zonetransition files export one ig PER GRID SLOT (0..8) rather than one per distinct name —
+// only nodes whose ig name matches that exact slot's zoneBaseName are selected, and each
+// selected node is repositioned into the slot via buildTransitionMatrixObj before the normal
+// instance-group build. zonematerial/zonespecial export every distinct name in the file, same
+// as the standalone tool otherwise (igName == "" in the maxscript).
+//
+// The transition tables below are the same literal game constants pipeline_max_export_zone
+// already carries (duplicated here rather than shared — they are static data, not design
+// knowledge that could drift; see max_math.cpp's per-tool duplication for the established
+// precedent). buildTransitionMatrixObj is a DIFFERENT function from zone's buildTransitionMatrix
+// despite the similar shape: zone's version repositions the RklPatch's own vertices (zero pos,
+// mirror/rotate about the origin, translate to the grid slot plus the original offset); this
+// one repositions a live node's WORLD transform by recentering the pivot at the CELL CENTER
+// before the mirror/rotate (so a mirrored/rotated template object flips about the cell it sits
+// in, not about the world origin) and composing the result as (original world TM) * (placement
+// matrix) — matching the maxscript composing `mt * copyMt` rather than overwriting `mt` in
+// place.
+
+static const bool TransitionScale[9] = { false, false, false, false, true, false, false, false, false };
+static const int TransitionRot[9]    = { 2, 1, 3, 0, 1, 3, 0, 0, 0 };
+static const float TransitionPos[9][3] = {
+	{ 0, 0, 0 }, { -1, 0, 0 }, { -1, -1, 0 }, { -1, -2, 0 }, { 0, -2, 0 },
+	{ 0, -3, 0 }, { -1, -3, 0 }, { -2, -3, 0 }, { -3, -3, 0 }
+};
+// TransitionIds[y][x], -1 = undefined; y rows of variable length (x < len)
+static const int TransitionIdsRow0[] = { 1, 2 };
+static const int TransitionIdsRow1[] = { -1, 3 };
+static const int TransitionIdsRow2[] = { 5, 4 };
+static const int TransitionIdsRow3[] = { 6, 7, 8, 9 };
+static const int *TransitionIds[4] = { TransitionIdsRow0, TransitionIdsRow1, TransitionIdsRow2, TransitionIdsRow3 };
+static const int TransitionIdsLen[4] = { 2, 2, 2, 4 };
+
+static Matrix3M buildTransitionMatrixObj(const Matrix3M &mt, int transitionZone, float cellSize)
+{
+	// copyMt = transMatrix(TransitionPos[z]*cellSize)
+	Matrix3M copyMt = Matrix3M::identity();
+	copyMt.m[3][0] = TransitionPos[transitionZone][0] * cellSize;
+	copyMt.m[3][1] = TransitionPos[transitionZone][1] * cellSize;
+	copyMt.m[3][2] = TransitionPos[transitionZone][2] * cellSize;
+
+	// copyMt = translate(copyMt, [-cellSize/2, -cellSize/2, 0])
+	copyMt.m[3][0] += -cellSize / 2.0f;
+	copyMt.m[3][1] += -cellSize / 2.0f;
+
+	if (TransitionScale[transitionZone])
+	{
+		// scale copyMt [-1,1,1]: post-multiply by diag(-1,1,1) -> negate column 0 of every row,
+		// including the just-set translation (the recentering above puts the cell center at the
+		// origin at exactly this point in the composition, so the mirror pivots about the cell).
+		for (int i = 0; i < 4; ++i)
+			copyMt.m[i][0] = -copyMt.m[i][0];
+	}
+
+	if (TransitionRot[transitionZone] != 0)
+	{
+		// rotateZ copyMt (90*rot): post-multiply by RotateZMatrix(degrees)
+		double rad = (double)(90 * TransitionRot[transitionZone]) * 3.14159265358979323846 / 180.0;
+		float c = (float)cos(rad);
+		float s = (float)sin(rad);
+		Matrix3M rz = Matrix3M::identity();
+		rz.m[0][0] = c; rz.m[0][1] = s;
+		rz.m[1][0] = -s; rz.m[1][1] = c;
+		copyMt = copyMt * rz;
+	}
+
+	// copyMt = translate(copyMt, [cellSize/2, cellSize/2, 0])
+	copyMt.m[3][0] += cellSize / 2.0f;
+	copyMt.m[3][1] += cellSize / 2.0f;
+
+	// return (mt * copyMt)
+	return mt * copyMt;
+}
+
+static bool nodeIsFrozen(CNodeImpl *node)
+{
+	const CStorageContainer::TStorageObjectContainer &orphans = node->orphanedChunks();
+	for (CStorageContainer::TStorageObjectConstIt it = orphans.begin(); it != orphans.end(); ++it)
+		if (it->first == 0x0976) return true;
+	return false;
+}
+
+// Forward-declared: defined further down (object-offset chunks 0x096a/b/c), needed here for the
+// RklPatch node-center bbox transform.
+static bool readObjectOffset(CNodeImpl *node, Point3M &pos, QuatM &rot, ScaleValueM &scale);
+
+// The bbox center of an RklPatch node's own (pre-modifier) patch vertices, for 160m-cell grid
+// classification only (the maxscript's node.center via getTransitionZoneCoordinates). Using the
+// RklPatch's raw stored vertices rather than evaluating the NeL Edit/Paint modifier stack is
+// sufficient here: modifier deltas are geometry-local, far smaller than a cell, and this check
+// only needs to land in the right 160m bucket, not be vertex-exact (unlike the .zone/.ligozone
+// export itself, which does replicate that full modifier evaluation).
+static bool rklPatchCenter(NELPATCH::CRklPatchObject *rpo, CNodeImpl *node, SNodeTMCache &tmCache, float center[3])
+{
+	NELPATCH::SPatchMesh pm;
+	std::string err;
+	if (!rpo->decodePatch(pm, err) || pm.Verts.empty()) return false;
+	Point3M offPos = { 0.0f, 0.0f, 0.0f };
+	QuatM offRot = { 0.0f, 0.0f, 0.0f, 1.0f };
+	ScaleValueM offScale;
+	offScale.s.x = offScale.s.y = offScale.s.z = 1.0f;
+	offScale.q.x = offScale.q.y = offScale.q.z = 0.0f;
+	offScale.q.w = 1.0f;
+	bool hasOffset = readObjectOffset(node, offPos, offRot, offScale);
+	Matrix3M objectTM = hasOffset ? (composePRS(offPos, offRot, offScale) * getNodeTM(node, tmCache)) : getNodeTM(node, tmCache);
+	float bbMin[3] = { 0, 0, 0 }, bbMax[3] = { 0, 0, 0 };
+	bool first = true;
+	for (size_t i = 0; i < pm.Verts.size(); ++i)
+	{
+		Point3M v = { pm.Verts[i].Pos[0], pm.Verts[i].Pos[1], pm.Verts[i].Pos[2] };
+		Point3M w = transformPoint(v, objectTM);
+		float p[3] = { w.x, w.y, w.z };
+		for (int a = 0; a < 3; ++a)
+		{
+			if (first || p[a] < bbMin[a]) bbMin[a] = p[a];
+			if (first || p[a] > bbMax[a]) bbMax[a] = p[a];
+		}
+		first = false;
+	}
+	center[0] = (bbMin[0] + bbMax[0]) * 0.5f;
+	center[1] = (bbMin[1] + bbMax[1]) * 0.5f;
+	center[2] = (bbMin[2] + bbMax[2]) * 0.5f;
+	return true;
+}
+
+// True if every non-frozen RklPatch node in the scene classifies into a valid transition grid
+// cell (the maxscript's getTransitionZoneCoordinates gate: exportInstanceGroupFromZone only runs
+// per zone when this holds for the whole file, same as the .ligozone export it runs alongside).
+static bool classifyTransitionGrid(CSceneClassContainer *ssc, SNodeTMCache &tmCache, float cellSize, std::string &err)
+{
+	for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
+	{
+		CNodeImpl *node = dynamic_cast<CNodeImpl *>(it->second);
+		if (!node) continue;
+		if (nodeIsFrozen(node)) continue;
+		CSceneClass *obj = baseObjectOf(*node);
+		NELPATCH::CRklPatchObject *rpo = dynamic_cast<NELPATCH::CRklPatchObject *>(obj);
+		if (!rpo) continue;
+		float center[3];
+		if (!rklPatchCenter(rpo, node, tmCache, center))
+		{
+			err = "node '" + ucstring(node->userName()).toUtf8() + "': empty patch";
+			return false;
+		}
+		int x = (int)(center[0] / cellSize);
+		int y = (int)(center[1] / cellSize);
+		if (y < 0 || y >= 4 || x < 0 || x >= TransitionIdsLen[y] || TransitionIds[y][x] < 0)
+		{
+			err = "node '" + ucstring(node->userName()).toUtf8() + "' is not at a transition scheme position (cell "
+			      + NLMISC::toString(x) + "," + NLMISC::toString(y) + ")";
+			return false;
+		}
+	}
+	return true;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -2192,6 +2356,141 @@ static NL3D::CInstanceGroup *buildInstanceGroup(const std::vector<INode *> &vect
 	return pIG;
 }
 
+// Select nodes (geometry, then lights, then helpers — the maxscript's three selectmore passes)
+// whose ig name appdata matches igNameMatch, build the instance group, or return NULL when
+// nothing matched (the maxscript's "ig_array.count != 0" gate is implicit: an empty selection
+// yields no output file rather than an error). When transitionZone >= 0, each matched node's
+// world TM is overridden in tmCache via buildTransitionMatrixObj before the build — this mirrors
+// the maxscript literally overwriting node.transform for the SAME nodes it just selected.
+static NL3D::CInstanceGroup *exportIgForName(CSceneClassContainer *ssc, SNodeTMCache &tmCache,
+                                              const std::string &igNameMatch, bool lowercaseCompare,
+                                              int transitionZone, float cellSize, SIgBuildStats &stats)
+{
+	std::string want = lowercaseCompare ? NLMISC::toLowerAscii(igNameMatch) : igNameMatch;
+	std::vector<INode *> vectNode;
+	static const TSClassId cats[3] = { SCLASS_GEOMOBJECT, SCLASS_LIGHT, SCLASS_HELPER };
+	for (int c = 0; c < 3; ++c)
+	{
+		for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
+		{
+			CNodeImpl *node = dynamic_cast<CNodeImpl *>(it->second);
+			if (!node) continue;
+			if (nodeCategory(*node) != cats[c]) continue;
+			std::string ig = getScriptAppDataStr(node, NEL3D_APPDATA_IGNAME, "");
+			if (lowercaseCompare) ig = NLMISC::toLowerAscii(ig);
+			if (ig != want) continue;
+			if (transitionZone >= 0)
+			{
+				Matrix3M orig = getNodeTM(node, tmCache);
+				tmCache.TM[node] = buildTransitionMatrixObj(orig, transitionZone, cellSize);
+			}
+			vectNode.push_back(node);
+		}
+	}
+	if (vectNode.empty()) return NULL;
+	return buildInstanceGroup(vectNode, tmCache, stats);
+}
+
+// ---------------------------------------------------------------------------------------------
+// Ligo brick file classification and export (see the ligo brick export block above for the
+// per-mode contract). Returns 0 on success (including "nothing to export"), 1 on error — a
+// tagThisFile=false in the maxscript. Writes one <name>.ig per exported instance group directly
+// into outDir (no "igs" subdirectory: outDir already denotes the igs output for the caller, same
+// convention as the standalone per-file mode).
+static int exportLigoIg(CSceneClassContainer *ssc, SNodeTMCache &tmCache, const std::string &inputBase,
+                         const std::string &outDir, float cellSize)
+{
+	std::vector<std::string> tokens;
+	{
+		size_t start = 0;
+		for (size_t i = 0; i <= inputBase.size(); ++i)
+		{
+			if (i == inputBase.size() || inputBase[i] == '-')
+			{
+				tokens.push_back(inputBase.substr(start, i - start));
+				start = i + 1;
+			}
+		}
+	}
+
+	SIgBuildStats stats;
+	int ret = 0;
+
+	if ((tokens.size() == 3 && tokens[0] == "zonematerial") || (tokens.size() == 2 && tokens[0] == "zonespecial"))
+	{
+		// igName == "" in the maxscript: every distinct (lowercased) ig name in the file.
+		std::vector<std::string> igNames;
+		for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
+		{
+			CNodeImpl *node = dynamic_cast<CNodeImpl *>(it->second);
+			if (!node) continue;
+			std::string ig = getScriptAppDataStr(node, NEL3D_APPDATA_IGNAME, "");
+			if (ig.empty()) continue;
+			ig = NLMISC::toLowerAscii(ig);
+			if (std::find(igNames.begin(), igNames.end(), ig) == igNames.end())
+				igNames.push_back(ig);
+		}
+		for (uint i = 0; i < igNames.size(); ++i)
+		{
+			// igNames[i] is already lowercased, but a matching node's OWN igname appdata may
+			// carry any casing (the corpus mixes "converted-164_eg" and "converted-164_EG"
+			// tags on nodes that belong to the same ig) — lowercaseCompare must stay true so
+			// exportIgForName lowercases each candidate node's igname before comparing.
+			NL3D::CInstanceGroup *ig = exportIgForName(ssc, tmCache, igNames[i], /*lowercaseCompare*/ true, -1, cellSize, stats);
+			if (!ig) continue;
+			std::string outPath = NLMISC::CPath::standardizePath(outDir, true) + igNames[i] + ".ig";
+			try
+			{
+				NLMISC::COFile file;
+				if (!file.open(outPath)) { std::cerr << "ERROR: cannot open output " << outPath << "\n"; delete ig; return 1; }
+				ig->serial(file);
+				file.close();
+				if (g_verbose) printf("OK %s (%u instances)\n", outPath.c_str(), ig->getNumInstance());
+			}
+			catch (const NLMISC::Exception &e)
+			{
+				std::cerr << "ERROR: serial failed for " << outPath << ": " << e.what() << "\n";
+				ret = 1;
+			}
+			delete ig;
+		}
+		return ret;
+	}
+	else if (tokens.size() == 4 && tokens[0] == "zonetransition")
+	{
+		std::string err;
+		if (!classifyTransitionGrid(ssc, tmCache, cellSize, err))
+		{
+			std::cerr << "ERROR: " << inputBase << ": " << err << "\n";
+			return 1;
+		}
+		for (int zone = 0; zone < 9; ++zone)
+		{
+			std::string zoneBaseName = tokens[1] + "-" + tokens[2] + "-" + tokens[3] + "-" + NLMISC::toString(zone);
+			NL3D::CInstanceGroup *ig = exportIgForName(ssc, tmCache, zoneBaseName, /*lowercaseCompare*/ true, zone, cellSize, stats);
+			if (!ig) continue;
+			std::string outPath = NLMISC::CPath::standardizePath(outDir, true) + NLMISC::toLowerAscii(zoneBaseName) + ".ig";
+			try
+			{
+				NLMISC::COFile file;
+				if (!file.open(outPath)) { std::cerr << "ERROR: cannot open output " << outPath << "\n"; delete ig; return 1; }
+				ig->serial(file);
+				file.close();
+				if (g_verbose) printf("OK %s (%u instances)\n", outPath.c_str(), ig->getNumInstance());
+			}
+			catch (const NLMISC::Exception &e)
+			{
+				std::cerr << "ERROR: serial failed for " << outPath << ": " << e.what() << "\n";
+				ret = 1;
+			}
+			delete ig;
+		}
+		return ret;
+	}
+	// Not a ligo brick filename (e.g. a debug/scratch file in the ligo source dir): nothing to do.
+	return 0;
+}
+
 // ---------------------------------------------------------------------------------------------
 // Debug dump of the per-node classification.
 
@@ -2627,6 +2926,8 @@ int main(int argc, char **argv)
 		new NLMISC::CApplicationContext();
 
 	bool dump = false;
+	std::string ligoOutDir;
+	float cellSize = 160.0f;
 	int argi = 1;
 	while (argi < argc && argv[argi][0] == '-' && argv[argi][1] == '-')
 	{
@@ -2636,6 +2937,8 @@ int main(int argc, char **argv)
 		else if (arg == "--dump-light" && argi + 1 < argc) { dump = true; g_dumpLightName = argv[argi + 1]; argi += 2; }
 		else if (arg == "--db" && argi + 1 < argc) { g_dbRoot = argv[argi + 1]; argi += 2; }
 		else if (arg == "--ps-path" && argi + 1 < argc) { g_psSearchPaths.push_back(argv[argi + 1]); argi += 2; }
+		else if (arg == "--ligo" && argi + 1 < argc) { ligoOutDir = argv[argi + 1]; argi += 2; }
+		else if (arg == "--cellsize" && argi + 1 < argc) { NLMISC::fromString(argv[argi + 1], cellSize); argi += 2; }
 		else if (arg == "--dump-prim" && argi + 2 < argc)
 		{
 			// --dump-prim <box|plane|cylinder|sphere> <p0> [p1 ...] — prints manifest-format
@@ -2689,16 +2992,22 @@ int main(int argc, char **argv)
 		}
 		else break;
 	}
-	if (argc - argi < 2 && !(dump && argc - argi >= 1))
+	bool ligoMode = !ligoOutDir.empty();
+	if (argc - argi < 1 || (argc - argi < 2 && !dump && !ligoMode))
 	{
 		std::cerr << "usage: pipeline_max_export_ig <input.max> <output_dir>\n";
 		std::cerr << "       pipeline_max_export_ig --dump <input.max>\n";
+		std::cerr << "       pipeline_max_export_ig --ligo <outdir> [--cellsize 160] <input.max>\n";
 		std::cerr << "       pipeline_max_export_ig --compare <a.ig> <b.ig> [--mask-lighting] [--mask-z]\n";
+		std::cerr << "--ligo: NeLLigoBuild-ig-from-zone protocol by input filename (zonematerial/\n";
+		std::cerr << "        zonespecial: every distinct ig name, lowercased; zonetransition: one\n";
+		std::cerr << "        ig per grid slot 0..8, repositioned) — see the ligo maxscript's\n";
+		std::cerr << "        exportInstanceGroupFromZone.\n";
 		std::cerr << "exit codes: 0 ok, 1 error, 3 nothing to export\n";
 		return 1;
 	}
 	const char *maxFile = argv[argi];
-	const char *outDir = (argc - argi >= 2) ? argv[argi + 1] : NULL;
+	const char *outDir = ligoMode ? ligoOutDir.c_str() : ((argc - argi >= 2) ? argv[argi + 1] : NULL);
 
 	gsf_init();
 	NL3D::registerSerial3d();
@@ -2708,6 +3017,7 @@ int main(int argc, char **argv)
 	UPDATE1::CUpdate1::registerClasses(&reg);
 	EPOLY::CEPoly::registerClasses(&reg);
 	BIPED::CBiped::registerClasses(&reg);
+	NELPATCH::CNelPatch::registerClasses(&reg);
 	g_registry = &reg;
 
 	// Deduce the database root for XRef resolution when not passed: the ancestor directory of
@@ -2753,6 +3063,13 @@ int main(int argc, char **argv)
 	{
 		dumpNodes(ssc, tmCache);
 		return 0;
+	}
+
+	if (ligoMode)
+	{
+		std::string inputBase = NLMISC::CFile::getFilenameWithoutExtension(maxFile);
+		NLMISC::CFile::createDirectoryTree(outDir);
+		return exportLigoIg(ssc, tmCache, inputBase, outDir, cellSize);
 	}
 
 	// --- Scan all objects for distinct ig names, in scene order (ig_export.ms).

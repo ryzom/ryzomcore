@@ -139,6 +139,16 @@ Matrix3M composePRS(const Point3M &pos, const QuatM &rot, const ScaleValueM &sca
 	return m;
 }
 
+Point3M transformPoint(const Point3M &v, const Matrix3M &m)
+{
+	// Max Point3 * Matrix3: per component x*m[0][j] + y*m[1][j] + z*m[2][j] + m[3][j].
+	Point3M r;
+	r.x = v.x * m.m[0][0] + v.y * m.m[1][0] + v.z * m.m[2][0] + m.m[3][0];
+	r.y = v.x * m.m[0][1] + v.y * m.m[1][1] + v.z * m.m[2][1] + m.m[3][1];
+	r.z = v.x * m.m[0][2] + v.y * m.m[1][2] + v.z * m.m[2][2] + m.m[3][2];
+	return r;
+}
+
 // ---------------------------------------------------------------------------------------------
 // Graphics Gems IV decomp_affine port. HMatrix is the gems 4x4 float, column-vector convention
 // (translation in column W). The SDK adapter copies the Matrix3 rows straight into the HMatrix

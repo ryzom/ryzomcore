@@ -103,6 +103,17 @@ IF (Python3_Interpreter_FOUND)
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 	SET_TESTS_PROPERTIES(pipeline_max_ig_corpus PROPERTIES SKIP_RETURN_CODE 77)
 
+	# ligo_ig_corpus.py: the ligo-brick side of ig export (build_gamedata processes/ligo's
+	# exportInstanceGroupFromZone), as opposed to ig_corpus.py's standalone processes/ig path —
+	# zonematerial/zonespecial/zonetransition .max under landscape/ligo/<eco>/max, compared
+	# against ~/pipeline_export/ecosystems/<eco>/ligo_es/igs. --gate-t3 budgets the known
+	# selection-order and cluster-membership diff classes (DIFF_BUDGET; see the script docstring).
+	ADD_TEST(NAME pipeline_max_ligo_ig_corpus
+		COMMAND ${Python3_EXECUTABLE} ligo_ig_corpus.py --all --gate-t3
+			--bin $<TARGET_FILE_DIR:pipeline_max_export_ig>
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+	SET_TESTS_PROPERTIES(pipeline_max_ligo_ig_corpus PROPERTIES SKIP_RETURN_CODE 77)
+
 	ADD_TEST(NAME pipeline_max_zone_corpus
 		COMMAND ${Python3_EXECUTABLE} zone_corpus.py --all --gate-t3
 			--bin $<TARGET_FILE_DIR:pipeline_max_export_zone>
