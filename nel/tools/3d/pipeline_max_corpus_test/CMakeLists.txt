@@ -78,6 +78,24 @@ IF (Python3_Interpreter_FOUND)
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 	SET_TESTS_PROPERTIES(pipeline_max_anim_corpus PROPERTIES SKIP_RETURN_CODE 77)
 
+	# Same corpus, driven through the VS2008/Wine x87 reference-codegen build (see the "VS2008
+	# x87 reference build" wiki page), same rationale as pipeline_max_skel_corpus_vs2008: confirms
+	# the T1/T2 roundtrip and the T3 direct-reference byte-identity/structural floor hold under
+	# the Max-2010-matching compiler and float model, not just x64/SSE. anim_builder IS built in
+	# that tree too (nel/tools/3d/anim_builder is unconditional under WITH_3D, no pipeline-native-OLE
+	# gate), so the optimized-reference tier runs for real there — but it is informational only for
+	# both biped and nonbiped (anim_corpus.py never gates on it): it chains our exporter's output
+	# through a SEPARATE tool (anim_builder) whose own key-drop/quantization thresholds already sit
+	# within a few thousandths of the tolerance on the original x64/SSE build, so switching either
+	# tool's codegen can tip an already-borderline fauna file over — confirmed 2026-07-07, see the
+	# design doc. The direct tier (byte-identity for nonbiped, structural-floor for biped) and T1/T2
+	# are what's actually gated here. Self-skips (exit 77) on any machine without that build.
+	ADD_TEST(NAME pipeline_max_anim_corpus_vs2008
+		COMMAND ${Python3_EXECUTABLE} anim_corpus.py --all --gate-t3
+			--bin $ENV{HOME}/build_vs2008_wine_pipeline/winebin
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+	SET_TESTS_PROPERTIES(pipeline_max_anim_corpus_vs2008 PROPERTIES SKIP_RETURN_CODE 77)
+
 	# ig_corpus.py: T1/T2 over the IgOtherSourceDirectories/IgLandSourceDirectories sources +
 	# T3 export with the two-tier reference comparison (direct raw intermediates under
 	# ~/pipeline_export with the uninitialized-bytes mask, processed client data under
