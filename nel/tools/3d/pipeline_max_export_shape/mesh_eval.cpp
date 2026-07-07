@@ -75,27 +75,27 @@ static bool extractEditableMesh(CSceneClass *obj, SEvalMesh &out, const std::str
 		return false;
 	}
 
-	// Vertices and faces
+	// Vertices and faces — read the typed geom buffers (PMBS_GEOM_BUFFERS_PARSE); CVector and
+	// CGeomTriIndexInfo share the byte layout of Point3M / SEvalFace, so a bulk copy reproduces
+	// the exact bytes the raw path used (SEvalFace: V[3]=a,b,c, SmGroup=offset 12, Flags=offset 16).
 	{
-		const void *vdata;
-		uint32 nv;
-		if (!readCountPrefixed(dynamic_cast<CStorageRaw *>(gb->findStorageObject(0x0914)), 12, &vdata, nv))
+		const std::vector<NLMISC::CVector> *vv = gb->triVertices();
+		if (!vv)
 		{
 			fprintf(stderr, "WARNING: mesh '%s' with missing vertex chunk\n", name.c_str());
 			return false;
 		}
-		out.Verts.resize(nv);
-		if (nv) memcpy(&out.Verts[0], vdata, (size_t)nv * 12);
+		out.Verts.resize(vv->size());
+		if (!vv->empty()) memcpy(&out.Verts[0], &(*vv)[0], vv->size() * 12);
 
-		const void *fdata;
-		uint32 nf;
-		if (!readCountPrefixed(dynamic_cast<CStorageRaw *>(gb->findStorageObject(0x0912)), 20, &fdata, nf))
+		const std::vector<STORAGE::CGeomTriIndexInfo> *ff = gb->triFaces();
+		if (!ff)
 		{
 			fprintf(stderr, "WARNING: mesh '%s' with missing face chunk\n", name.c_str());
 			return false;
 		}
-		out.Faces.resize(nf);
-		if (nf) memcpy(&out.Faces[0], fdata, (size_t)nf * 20);
+		out.Faces.resize(ff->size());
+		if (!ff->empty()) memcpy(&out.Faces[0], &(*ff)[0], ff->size() * 20);
 	}
 
 	// Map channels: iterate the container chunks in file order; 0x0959 announces the channel

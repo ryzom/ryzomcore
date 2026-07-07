@@ -49,7 +49,7 @@ namespace STORAGE {
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
-#define PMBS_GEOM_BUFFERS_PARSE 0
+#define PMBS_GEOM_BUFFERS_PARSE 1
 
 // Elevate warnings to errors in this file for stricter reading
 #undef nlwarning
@@ -282,6 +282,20 @@ void CGeomBuffers::disown()
 #else
 	CStorageContainer::disown();
 #endif
+}
+
+const std::vector<NLMISC::CVector> *CGeomBuffers::triVertices() const
+{
+	const CStorageArraySizePre<NLMISC::CVector> *a =
+		dynamic_cast<const CStorageArraySizePre<NLMISC::CVector> *>(findStorageObject(0x0914));
+	return a ? &a->Value : NULL;
+}
+
+const std::vector<CGeomTriIndexInfo> *CGeomBuffers::triFaces() const
+{
+	const CStorageArraySizePre<CGeomTriIndexInfo> *a =
+		dynamic_cast<const CStorageArraySizePre<CGeomTriIndexInfo> *>(findStorageObject(0x0912));
+	return a ? &a->Value : NULL;
 }
 
 IStorageObject *CGeomBuffers::createChunkById(uint16 id, bool container)

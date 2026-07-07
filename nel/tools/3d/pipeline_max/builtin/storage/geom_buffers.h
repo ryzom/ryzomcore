@@ -119,6 +119,18 @@ public:
 	virtual void build(uint16 version, uint filter = 0);
 	virtual void disown();
 
+	//! \name Typed geometry access (valid when the typed leaf serializers are enabled — the
+	//! PMBS_GEOM_BUFFERS_PARSE default). NULL when the chunk is absent or rode through raw.
+	//@{
+	/// The tri-mesh vertex array (chunk 0x0914, count-prefixed CVector[]).
+	const std::vector<NLMISC::CVector> *triVertices() const;
+	/// The tri-mesh face array (chunk 0x0912, count-prefixed CGeomTriIndexInfo[] — a,b,c indices
+	/// plus the two per-face dwords; note the field names alwaysOne/smoothingGroups are the 2012
+	/// labels — the corpus-validated meaning is smGroup at offset 12 and faceFlags (matID in the
+	/// high word) at offset 16, see pipeline_max_design.md §10i).
+	const std::vector<CGeomTriIndexInfo> *triFaces() const;
+	//@}
+
 protected:
 	virtual IStorageObject *createChunkById(uint16 id, bool container);
 

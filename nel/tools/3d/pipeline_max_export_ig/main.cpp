@@ -1275,32 +1275,22 @@ static bool extractObjectMesh(CSceneClass *obj, std::vector<NLMISC::CVector> &ve
 			fprintf(stderr, "WARNING: accelerator mesh '%s' without geom buffers\n", nodeName.c_str());
 			return false;
 		}
-		CStorageRaw *vraw = dynamic_cast<CStorageRaw *>(gb->findStorageObject(0x0914));
-		CStorageRaw *iraw = dynamic_cast<CStorageRaw *>(gb->findStorageObject(0x0912));
-		if (!vraw || vraw->Value.size() < 4 || !iraw || iraw->Value.size() < 4)
+		// Typed geom buffers (PMBS_GEOM_BUFFERS_PARSE): vertices as CVector[], faces as
+		// CGeomTriIndexInfo[] (a,b,c indices + two per-face dwords).
+		const std::vector<NLMISC::CVector> *vv = gb->triVertices();
+		const std::vector<STORAGE::CGeomTriIndexInfo> *ff = gb->triFaces();
+		if (!vv || !ff)
 		{
 			fprintf(stderr, "WARNING: accelerator mesh '%s' with missing vertex/index chunks\n", nodeName.c_str());
 			return false;
 		}
-		uint32 nv, nf;
-		memcpy(&nv, vraw->Value.data(), 4);
-		memcpy(&nf, iraw->Value.data(), 4);
-		if (vraw->Value.size() < 4 + (size_t)nv * 12 || iraw->Value.size() < 4 + (size_t)nf * 20)
+		verts = *vv;
+		tris.resize(ff->size());
+		for (uint32 i = 0; i < ff->size(); ++i)
 		{
-			fprintf(stderr, "WARNING: accelerator mesh '%s' with truncated buffers\n", nodeName.c_str());
-			return false;
-		}
-		verts.resize(nv);
-		for (uint32 i = 0; i < nv; ++i)
-			memcpy(&verts[i], vraw->Value.data() + 4 + i * 12, 12);
-		tris.resize(nf);
-		for (uint32 i = 0; i < nf; ++i)
-		{
-			uint32 f[3];
-			memcpy(f, iraw->Value.data() + 4 + i * 20, 12);
-			tris[i].A = f[0];
-			tris[i].B = f[1];
-			tris[i].C = f[2];
+			tris[i].A = (*ff)[i].a;
+			tris[i].B = (*ff)[i].b;
+			tris[i].C = (*ff)[i].c;
 		}
 		return true;
 	}
