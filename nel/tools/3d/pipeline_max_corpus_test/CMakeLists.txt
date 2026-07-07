@@ -33,6 +33,20 @@ IF (Python3_Interpreter_FOUND)
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 	SET_TESTS_PROPERTIES(pipeline_max_skel_corpus PROPERTIES SKIP_RETURN_CODE 77)
 
+	# Same corpus, driven through the VS2008/Wine x87 reference-codegen build (see the "VS2008
+	# x87 reference build" wiki page) via the winebin/ wrapper scripts, which translate Unix
+	# paths to Windows form so the native x64 harness can drive the .exe under Wine. This is a
+	# second, independent build tree (not part of this CMake project — ~/build_vs2008_wine_pipeline
+	# is a personal path, hence hardcoded rather than a CMake target reference) that matches the
+	# Max 2010 reference exporter's own compiler/float model. Confirms T1/T2 byte-identity and the
+	# T3 accuracy floor hold independently of SSE-vs-x87 codegen, not just on the x64/SSE build —
+	# self-skips (exit 77) on any machine without that build, same as every other line here.
+	ADD_TEST(NAME pipeline_max_skel_corpus_vs2008
+		COMMAND ${Python3_EXECUTABLE} skel_corpus.py --all --gate-t3
+			--bin $ENV{HOME}/build_vs2008_wine_pipeline/winebin
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+	SET_TESTS_PROPERTIES(pipeline_max_skel_corpus_vs2008 PROPERTIES SKIP_RETURN_CODE 77)
+
 	# regen_corpus.py validates the fresh-format (Max 9, figure-version 0x0115 == 0) biped decode
 	# against the regenerated corpus in ~/biped_regen: T1/T2 roundtrip over the regenerated .max
 	# files plus a bone-by-bone compare of our reconstructed figure-mode world transforms against
