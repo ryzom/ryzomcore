@@ -555,6 +555,28 @@ static void dumpRefTree(CSceneClass *obj, int depth, int maxDepth)
 			}
 		}
 		std::cout << "\n";
+		// Old ParamBlock (superclass 0x8): dump each 0x0002 param entry's index (0x0003) and
+		// sub-chunk ids so animated params (which carry a controller-ref chunk 0x0004 instead of
+		// a value) and their param index can be read off — the StdUVGen U/V Offset slot mapping.
+		if (ref->classDesc()->superClassId() == 0x8)
+		{
+			if (CStorageContainer *pb = dynamic_cast<CStorageContainer *>(ref))
+				for (CStorageContainer::TStorageObjectConstIt et = pb->chunks().begin(); et != pb->chunks().end(); ++et)
+				{
+					if (et->first != 0x0002) continue;
+					CStorageContainer *e = dynamic_cast<CStorageContainer *>(et->second);
+					if (!e) continue;
+					sint32 idx = -1; std::string subs;
+					for (CStorageContainer::TStorageObjectConstIt st = e->chunks().begin(); st != e->chunks().end(); ++st)
+					{
+						char buf[16]; snprintf(buf, sizeof(buf), " 0x%x", st->first); subs += buf;
+						CStorageRaw *rw = dynamic_cast<CStorageRaw *>(st->second);
+						if (st->first == 0x0003 && rw && rw->Value.size() == 4) memcpy(&idx, rw->Value.data(), 4);
+						if (rw) { char b2[16]; snprintf(b2, sizeof(b2), "(%zu)", rw->Value.size()); subs += b2; }
+					}
+					std::cout << pad << "  param idx=" << idx << " chunks:" << subs << "\n";
+				}
+		}
 		if (depth + 1 < maxDepth) dumpRefTree(ref, depth + 1, maxDepth);
 	}
 }
