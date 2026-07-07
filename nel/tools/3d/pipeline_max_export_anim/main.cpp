@@ -21,7 +21,7 @@
 // is exact by construction.
 //
 // Biped rigs (a real Vertical/Horizontal/Turn COM controller in the scene) go through the
-// biped path: the figure rig is reconstructed via pipeline_max_rig, the animation keytracks on
+// biped path: the figure rig is reconstructed via pipeline_max_export_common, the animation keytracks on
 // the Biped (0x9155) system object are decoded and TCB-evaluated (see biped_anim.h), and every
 // biped node is oversampled once per frame across the union key range into LinearQuat/
 // LinearVector tracks — replicating CExportNel::addBipedNodeTracks + overSampleBipedAnimation
@@ -44,9 +44,7 @@
 #include <nel/3d/transformable.h>
 #include <nel/3d/register_3d.h>
 
-#include <gsf/gsf-infile-msole.h>
-#include <gsf/gsf-input-stdio.h>
-#include <gsf/gsf-utils.h>
+#include "../pipeline_max/storage_ole.h"
 
 #include <algorithm>
 #include <cmath>
@@ -77,7 +75,7 @@
 #include "../pipeline_max/builtin/storage/app_data.h"
 #include "../pipeline_max/builtin/control_keyframer.h"
 
-#include "../pipeline_max_rig/biped_rig.h"
+#include "../pipeline_max_export_common/biped_rig.h"
 #include "../pipeline_max/biped/biped_driven.h"
 #include "biped_anim.h"
 
@@ -1366,7 +1364,6 @@ int main(int argc, char **argv)
 	const char *maxFile = argv[argi];
 	const char *animOut = argv[argi + 1];
 
-	gsf_init();
 	NL3D::registerSerial3d();
 
 	CSceneClassRegistry reg;
@@ -1375,23 +1372,19 @@ int main(int argc, char **argv)
 	EPOLY::CEPoly::registerClasses(&reg);
 	BIPED::CBiped::registerClasses(&reg);
 
-	GsfInput *src = gsf_input_stdio_new(maxFile, NULL);
-	if (!src) { std::cerr << "ERROR: cannot open " << maxFile << "\n"; return 1; }
-	GsfInfile *in = gsf_infile_msole_new(src, NULL);
-	g_object_unref(src);
-	if (!in) { std::cerr << "ERROR: not an OLE compound file: " << maxFile << "\n"; return 1; }
+	CStorageOleIn in;
+	if (!in.open(maxFile)) { std::cerr << "ERROR: not an OLE compound file: " << maxFile << "\n"; return 1; }
 
 	CDllDirectory dll;
-	{ GsfInput *s = gsf_infile_child_by_name(in, "DllDirectory"); if (!s) { std::cerr << "ERROR: no DllDirectory stream\n"; return 1; } CStorageStream st(s); dll.serial(st); g_object_unref(s); }
+	{ std::vector<uint8> b; if (!in.readStream("DllDirectory", b)) { std::cerr << "ERROR: no DllDirectory stream\n"; return 1; } CStorageStream st(b); dll.serial(st); }
 	dll.parse(VersionUnknown);
 	CClassDirectory3 cd(&dll);
-	{ GsfInput *s = gsf_infile_child_by_name(in, "ClassDirectory3"); if (!s) { std::cerr << "ERROR: no ClassDirectory3 stream\n"; return 1; } CStorageStream st(s); cd.serial(st); g_object_unref(s); }
+	{ std::vector<uint8> b; if (!in.readStream("ClassDirectory3", b)) { std::cerr << "ERROR: no ClassDirectory3 stream\n"; return 1; } CStorageStream st(b); cd.serial(st); }
 	cd.parse(VersionUnknown);
 
 	CScene scene(&reg, &dll, &cd);
-	{ GsfInput *s = gsf_infile_child_by_name(in, "Scene"); if (!s) { std::cerr << "ERROR: no Scene stream\n"; return 1; } CStorageStream st(s); scene.serial(st); g_object_unref(s); }
+	{ std::vector<uint8> b; if (!in.readStream("Scene", b)) { std::cerr << "ERROR: no Scene stream\n"; return 1; } CStorageStream st(b); scene.serial(st); }
 	scene.parse(VersionUnknown);
-	g_object_unref(in);
 
 	CSceneClassContainer *ssc = scene.container();
 

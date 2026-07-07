@@ -26,9 +26,7 @@
 #include <cmath>
 #include <cstring>
 
-#include <gsf/gsf-infile-msole.h>
-#include <gsf/gsf-input-stdio.h>
-#include <gsf/gsf-utils.h>
+#include "../pipeline_max/storage_ole.h"
 
 #include <cstdio>
 #include <cstring>
@@ -62,7 +60,7 @@ using namespace PIPELINE::MAX;
 using namespace PIPELINE::MAX::BUILTIN;
 using namespace PIPELINE::MAX::BIPED;
 
-#include "../pipeline_max_rig/biped_rig.h"
+#include "../pipeline_max_export_common/biped_rig.h"
 
 using namespace PMAX_RIG;
 
@@ -561,31 +559,26 @@ int main(int argc, char **argv)
 	const char *maxFile = argv[argi];
 	const char *skelOut = argv[argi + 1];
 
-	g_set_prgname(argv[0]);
-	gsf_init();
-
 	CSceneClassRegistry reg;
 	CBuiltin::registerClasses(&reg);
 	UPDATE1::CUpdate1::registerClasses(&reg);
 	EPOLY::CEPoly::registerClasses(&reg);
 	BIPED::CBiped::registerClasses(&reg);
 
-	GsfInput *src = gsf_input_stdio_new(maxFile, NULL);
-	if (!src) { std::cerr << "cannot open " << maxFile << "\n"; return 1; }
-	GsfInfile *in = gsf_infile_msole_new(src, NULL);
-	if (!in) { std::cerr << "not an OLE file\n"; return 1; }
+	CStorageOleIn in;
+	if (!in.open(maxFile)) { std::cerr << "cannot open " << maxFile << "\n"; return 1; }
 
 	CDllDirectory dll;
-	{ GsfInput *s = gsf_infile_child_by_name(in, "DllDirectory"); CStorageStream st(s); dll.serial(st); g_object_unref(s); }
+	{ std::vector<uint8> b; in.readStream("DllDirectory", b); CStorageStream st(b); dll.serial(st); }
 	dll.parse(VersionUnknown);
 	CClassDirectory3 cd(&dll);
-	{ GsfInput *s = gsf_infile_child_by_name(in, "ClassDirectory3"); CStorageStream st(s); cd.serial(st); g_object_unref(s); }
+	{ std::vector<uint8> b; in.readStream("ClassDirectory3", b); CStorageStream st(b); cd.serial(st); }
 	cd.parse(VersionUnknown);
 
 	bool isBiped = looksLikeBipedFile(cd);
 	(void)allowBipedDegraded; // legacy flag, now a no-op — biped bind pose is reconstructed
 	CScene scene(&reg, &dll, &cd);
-	{ GsfInput *s = gsf_infile_child_by_name(in, "Scene"); CStorageStream st(s); scene.serial(st); g_object_unref(s); }
+	{ std::vector<uint8> b; in.readStream("Scene", b); CStorageStream st(b); scene.serial(st); }
 	scene.parse(VersionUnknown);
 
 	INode *root = scene.container()->scene()->rootNode();
@@ -666,8 +659,5 @@ int main(int argc, char **argv)
 		std::cout << "Wrote " << rigDumpOut << "\n";
 	}
 
-	g_object_unref(in);
-	g_object_unref(src);
-	gsf_shutdown();
 	return 0;
 }

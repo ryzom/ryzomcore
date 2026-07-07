@@ -56,9 +56,7 @@
 #include <nel/3d/scene_group.h>
 #include <nel/3d/shape.h>
 
-#include <gsf/gsf-infile-msole.h>
-#include <gsf/gsf-input-stdio.h>
-#include <gsf/gsf-utils.h>
+#include "../pipeline_max/storage_ole.h"
 
 #include <algorithm>
 #include <cmath>
@@ -93,7 +91,8 @@
 #include "../pipeline_max/builtin/geom_object.h"
 #include "../pipeline_max/builtin/control_keyframer.h"
 
-#include "max_math.h"
+#include "../pipeline_max_export_common/max_math.h"
+#include "../pipeline_max_export_common/db_path.h"
 
 using namespace PIPELINE::MAX;
 using namespace PIPELINE::MAX::BUILTIN;
@@ -151,9 +150,10 @@ static bool g_verbose = false;
 // Search directories for .ps shapes (the clusterize link test needs the FX AABBox, like the
 // reference exporter's CPath::lookup of ps_file_name); set via --ps-path, repeatable.
 static std::vector<std::string> g_psSearchPaths;
-// Database root for XRef resolution (the ryzomcore_graphics checkout); deduced from the input
-// path or passed via --db.
-static std::string g_dbRoot;
+// Database root for XRef resolution (the ryzomcore_graphics checkout) lives in DBPATH now
+// (shared with pipeline_max_export_shape) — deduced from the input path or passed via --db;
+// --path-alias registers additional DBPATH::addAlias() roots for corpus content that doesn't
+// follow the "R:\graphics\..." / "R:\database\..." convention.
 static CSceneClassRegistry *g_registry = NULL;
 
 // ---------------------------------------------------------------------------------------------
@@ -253,56 +253,20 @@ struct SLoadedMax
 
 static std::map<std::string, SLoadedMax> g_xrefScenes;
 
-// Resolution of authored (Windows, case-insensitive) paths under the database root: the
-// checkout is lowercase on disk except possibly some filenames, so lowercase the directory
-// components (locale-independent NLMISC::toLowerAscii) and try the filename lowercased first,
-// verbatim second.
-static bool resolvePathCI(const std::string &root, const std::string &relative, std::string &out)
-{
-	std::vector<std::string> parts;
-	NLMISC::splitString(relative, "/", parts);
-	while (!parts.empty() && parts[0].empty()) parts.erase(parts.begin());
-	if (parts.empty()) return false;
-	std::string dir = root;
-	for (uint i = 0; i + 1 < parts.size(); ++i)
-	{
-		if (parts[i].empty()) continue;
-		dir += "/" + NLMISC::toLowerAscii(parts[i]);
-	}
-	const std::string &file = parts[parts.size() - 1];
-	std::string lower = dir + "/" + NLMISC::toLowerAscii(file);
-	if (NLMISC::CFile::fileExists(lower) || NLMISC::CFile::isDirectory(lower))
-	{
-		out = lower;
-		return true;
-	}
-	std::string verbatim = dir + "/" + file;
-	if (NLMISC::CFile::fileExists(verbatim) || NLMISC::CFile::isDirectory(verbatim))
-	{
-		out = verbatim;
-		return true;
-	}
-	return false;
-}
-
 static SLoadedMax *loadMaxFileCached(const std::string &path)
 {
 	std::map<std::string, SLoadedMax>::iterator it = g_xrefScenes.find(path);
 	if (it != g_xrefScenes.end()) return it->second.Scene ? &it->second : NULL;
 	SLoadedMax &lm = g_xrefScenes[path]; // inserted empty: failure is cached too
-	GsfInput *src = gsf_input_stdio_new(path.c_str(), NULL);
-	if (!src) { fprintf(stderr, "WARNING: xref: cannot open %s\n", path.c_str()); return NULL; }
-	GsfInfile *in = gsf_infile_msole_new(src, NULL);
-	g_object_unref(src);
-	if (!in) { fprintf(stderr, "WARNING: xref: not an OLE compound file: %s\n", path.c_str()); return NULL; }
+	CStorageOleIn in;
+	if (!in.open(path)) { fprintf(stderr, "WARNING: xref: not an OLE compound file: %s\n", path.c_str()); return NULL; }
 	CDllDirectory *dll = new CDllDirectory();
 	CClassDirectory3 *cd = new CClassDirectory3(dll);
 	CScene *scene = new CScene(g_registry, dll, cd);
 	bool ok = true;
-	{ GsfInput *s = gsf_infile_child_by_name(in, "DllDirectory"); if (s) { CStorageStream st(s); dll->serial(st); g_object_unref(s); dll->parse(VersionUnknown); } else ok = false; }
-	if (ok) { GsfInput *s = gsf_infile_child_by_name(in, "ClassDirectory3"); if (s) { CStorageStream st(s); cd->serial(st); g_object_unref(s); cd->parse(VersionUnknown); } else ok = false; }
-	if (ok) { GsfInput *s = gsf_infile_child_by_name(in, "Scene"); if (s) { CStorageStream st(s); scene->serial(st); g_object_unref(s); scene->parse(VersionUnknown); } else ok = false; }
-	g_object_unref(in);
+	{ std::vector<uint8> b; if (in.readStream("DllDirectory", b)) { CStorageStream st(b); dll->serial(st); dll->parse(VersionUnknown); } else ok = false; }
+	if (ok) { std::vector<uint8> b; if (in.readStream("ClassDirectory3", b)) { CStorageStream st(b); cd->serial(st); cd->parse(VersionUnknown); } else ok = false; }
+	if (ok) { std::vector<uint8> b; if (in.readStream("Scene", b)) { CStorageStream st(b); scene->serial(st); scene->parse(VersionUnknown); } else ok = false; }
 	if (!ok)
 	{
 		fprintf(stderr, "WARNING: xref: missing streams in %s\n", path.c_str());
@@ -360,28 +324,12 @@ static CSceneClass *resolveXRefObject(CSceneClass *xrefObj, int depth)
 		return NULL;
 	}
 
-	// Authored path -> database-relative: strip the drive and the top-level "graphics"/"database"
-	// component, then resolve case-insensitively under the database root.
-	std::string rel = file;
-	for (uint i = 0; i < rel.size(); ++i)
-		if (rel[i] == '\\') rel[i] = '/';
-	std::string::size_type colon = rel.find(':');
-	if (colon != std::string::npos) rel = rel.substr(colon + 1);
-	while (!rel.empty() && rel[0] == '/') rel = rel.substr(1);
-	{
-		std::string::size_type slash = rel.find('/');
-		if (slash != std::string::npos)
-		{
-			std::string first = NLMISC::toLowerAscii(rel.substr(0, slash));
-			if (first == "graphics" || first == "database")
-				rel = rel.substr(slash + 1);
-		}
-	}
+	// Authored path (R:\graphics\... or an explicit --path-alias prefix) -> on-disk path.
 	std::string resolved;
-	if (g_dbRoot.empty() || !resolvePathCI(g_dbRoot, rel, resolved))
+	if (!DBPATH::resolve(file, resolved))
 	{
-		fprintf(stderr, "WARNING: xref: cannot resolve '%s' (relative '%s') under db root '%s'\n",
-		        file.c_str(), rel.c_str(), g_dbRoot.c_str());
+		fprintf(stderr, "WARNING: xref: cannot resolve '%s' under db root '%s'\n",
+		        file.c_str(), DBPATH::defaultRoot().c_str());
 		return NULL;
 	}
 
@@ -2935,7 +2883,19 @@ int main(int argc, char **argv)
 		if (arg == "--dump") { dump = true; ++argi; }
 		else if (arg == "--dump-obj" && argi + 1 < argc) { dump = true; g_dumpObjName = argv[argi + 1]; argi += 2; }
 		else if (arg == "--dump-light" && argi + 1 < argc) { dump = true; g_dumpLightName = argv[argi + 1]; argi += 2; }
-		else if (arg == "--db" && argi + 1 < argc) { g_dbRoot = argv[argi + 1]; argi += 2; }
+		else if (arg == "--db" && argi + 1 < argc) { DBPATH::setDefaultRoot(argv[argi + 1]); argi += 2; }
+		else if (arg == "--path-alias" && argi + 1 < argc)
+		{
+			// --path-alias <windows-prefix>=<root>, e.g. --path-alias "P:\old_graphics=/mnt/old"
+			// for corpus content authored under a different drive/root than "R:\graphics\...".
+			std::string kv = argv[argi + 1];
+			std::string::size_type eq = kv.find('=');
+			if (eq == std::string::npos)
+				fprintf(stderr, "WARNING: --path-alias expects <prefix>=<root>, got '%s'\n", kv.c_str());
+			else
+				DBPATH::addAlias(kv.substr(0, eq), kv.substr(eq + 1));
+			argi += 2;
+		}
 		else if (arg == "--ps-path" && argi + 1 < argc) { g_psSearchPaths.push_back(argv[argi + 1]); argi += 2; }
 		else if (arg == "--ligo" && argi + 1 < argc) { ligoOutDir = argv[argi + 1]; argi += 2; }
 		else if (arg == "--cellsize" && argi + 1 < argc) { NLMISC::fromString(argv[argi + 1], cellSize); argi += 2; }
@@ -3009,7 +2969,6 @@ int main(int argc, char **argv)
 	const char *maxFile = argv[argi];
 	const char *outDir = ligoMode ? ligoOutDir.c_str() : ((argc - argi >= 2) ? argv[argi + 1] : NULL);
 
-	gsf_init();
 	NL3D::registerSerial3d();
 
 	CSceneClassRegistry reg;
@@ -3022,14 +2981,14 @@ int main(int argc, char **argv)
 
 	// Deduce the database root for XRef resolution when not passed: the ancestor directory of
 	// the input that holds the database tree (contains "stuff").
-	if (g_dbRoot.empty())
+	if (DBPATH::defaultRoot().empty())
 	{
 		std::string p = NLMISC::CPath::standardizePath(NLMISC::CPath::getFullPath(NLMISC::CFile::getPath(maxFile), false), false);
 		while (!p.empty() && p != "/")
 		{
 			if (NLMISC::CFile::isDirectory(p + "/stuff") || NLMISC::CFile::isDirectory(p + "/Stuff"))
 			{
-				g_dbRoot = p;
+				DBPATH::setDefaultRoot(p);
 				break;
 			}
 			p = NLMISC::CFile::getPath(p);
@@ -3037,23 +2996,19 @@ int main(int argc, char **argv)
 		}
 	}
 
-	GsfInput *src = gsf_input_stdio_new(maxFile, NULL);
-	if (!src) { std::cerr << "ERROR: cannot open " << maxFile << "\n"; return 1; }
-	GsfInfile *in = gsf_infile_msole_new(src, NULL);
-	g_object_unref(src);
-	if (!in) { std::cerr << "ERROR: not an OLE compound file: " << maxFile << "\n"; return 1; }
+	CStorageOleIn in;
+	if (!in.open(maxFile)) { std::cerr << "ERROR: not an OLE compound file: " << maxFile << "\n"; return 1; }
 
 	CDllDirectory dll;
-	{ GsfInput *s = gsf_infile_child_by_name(in, "DllDirectory"); if (!s) { std::cerr << "ERROR: no DllDirectory stream\n"; return 1; } CStorageStream st(s); dll.serial(st); g_object_unref(s); }
+	{ std::vector<uint8> b; if (!in.readStream("DllDirectory", b)) { std::cerr << "ERROR: no DllDirectory stream\n"; return 1; } CStorageStream st(b); dll.serial(st); }
 	dll.parse(VersionUnknown);
 	CClassDirectory3 cd(&dll);
-	{ GsfInput *s = gsf_infile_child_by_name(in, "ClassDirectory3"); if (!s) { std::cerr << "ERROR: no ClassDirectory3 stream\n"; return 1; } CStorageStream st(s); cd.serial(st); g_object_unref(s); }
+	{ std::vector<uint8> b; if (!in.readStream("ClassDirectory3", b)) { std::cerr << "ERROR: no ClassDirectory3 stream\n"; return 1; } CStorageStream st(b); cd.serial(st); }
 	cd.parse(VersionUnknown);
 
 	CScene scene(&reg, &dll, &cd);
-	{ GsfInput *s = gsf_infile_child_by_name(in, "Scene"); if (!s) { std::cerr << "ERROR: no Scene stream\n"; return 1; } CStorageStream st(s); scene.serial(st); g_object_unref(s); }
+	{ std::vector<uint8> b; if (!in.readStream("Scene", b)) { std::cerr << "ERROR: no Scene stream\n"; return 1; } CStorageStream st(b); scene.serial(st); }
 	scene.parse(VersionUnknown);
-	g_object_unref(in);
 
 	CSceneClassContainer *ssc = scene.container();
 	SNodeTMCache tmCache;

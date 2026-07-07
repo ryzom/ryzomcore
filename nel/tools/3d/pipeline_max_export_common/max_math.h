@@ -1,10 +1,12 @@
 /**
  * \file max_math.h
- * \brief Headless replication of the 3ds Max float matrix/quat math the reference ig exporter
- * runs through: Matrix3 (row-vector, 4x3), the PRS transform composition, and the Graphics
- * Gems IV polar/affine matrix decomposition (Shoemake) that CExportNel::decompMatrix wraps.
- * All arithmetic in float, mimicking the SDK operation order — see pipeline_max_design.md for
- * the bit-exactness contract (T3-epsilon class where x87 intermediates differ).
+ * \brief Headless replication of the 3ds Max float matrix/quat math the reference ig/zone/shape
+ * exporters run through: Matrix3 (row-vector, 4x3), the PRS transform composition, and the
+ * Graphics Gems IV polar/affine matrix decomposition (Shoemake) that CExportNel::decompMatrix
+ * wraps. All arithmetic in float, mimicking the SDK operation order — see pipeline_max_design.md
+ * for the bit-exactness contract (T3-epsilon class where x87 intermediates differ). Shared by
+ * pipeline_max_export_ig/_zone/_shape (previously one copy per tool; consolidated here to stop
+ * the copies drifting — see pipeline_max_design.md's note on the consolidation).
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
  */
@@ -28,8 +30,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PIPELINE_MAX_EXPORT_IG_MAX_MATH_H
-#define PIPELINE_MAX_EXPORT_IG_MAX_MATH_H
+#ifndef PIPELINE_MAX_EXPORT_COMMON_MAX_MATH_H
+#define PIPELINE_MAX_EXPORT_COMMON_MAX_MATH_H
 
 #include <nel/misc/types_nl.h>
 
@@ -91,6 +93,6 @@ void decompAffine(const Matrix3M &a, AffinePartsM &parts);
 
 } /* namespace MAXMATH */
 
-#endif /* PIPELINE_MAX_EXPORT_IG_MAX_MATH_H */
+#endif /* PIPELINE_MAX_EXPORT_COMMON_MAX_MATH_H */
 
 /* end of file */

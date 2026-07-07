@@ -25,16 +25,6 @@
 #include <nel/misc/types_nl.h>
 #include <nel/misc/common.h>
 
-#include <gsf/gsf-outfile-msole.h>
-#include <gsf/gsf-outfile.h>
-#include <gsf/gsf-output-stdio.h>
-#include <gsf/gsf-infile-msole.h>
-#include <gsf/gsf-infile.h>
-#include <gsf/gsf-input-stdio.h>
-#include <gsf/gsf-utils.h>
-#include <gsf/gsf-doc-meta-data.h>
-#include <gsf/gsf-msole-utils.h>
-#include <glib/gi18n.h>
 #include <string.h>
 #include <cstdio>
 #include <iostream>
@@ -52,6 +42,7 @@
 #include "nel/misc/file.h"
 #include "nel/misc/mem_stream.h"
 
+#include "../pipeline_max/storage_ole.h"
 #include "../pipeline_max/storage_stream.h"
 #include "../pipeline_max/storage_object.h"
 #include "../pipeline_max/dll_directory.h"
@@ -609,68 +600,40 @@ void runHandler()
 	doDirectoryHandler(SrcDirectoryRecursiveHandle);
 }
 
-void serializeStorageContainer(PIPELINE::MAX::CStorageContainer *storageContainer, GsfInfile *infile, const char *streamName)
+void serializeStorageContainer(PIPELINE::MAX::CStorageContainer *storageContainer, PIPELINE::MAX::CStorageOleIn &infile, const char *streamName)
 {
-	GsfInput *input = gsf_infile_child_by_name(infile, streamName);
-	if (!input)
+	std::vector<uint8> bytes;
+	if (!infile.readStream(streamName, bytes))
 	{
-		nlerror("GSF Could not read stream %s", streamName);
+		nlerror("Could not read stream %s", streamName);
 		return;
 	}
-	{
-		PIPELINE::MAX::CStorageStream instream(input);
-		storageContainer->serial(instream);
-	}
-	g_object_unref(input);
+	PIPELINE::MAX::CStorageStream instream(bytes);
+	storageContainer->serial(instream);
 }
 
-void serializeStorageContainer(PIPELINE::MAX::CStorageContainer *storageContainer, GsfOutfile *outfile, const char *streamName)
+void serializeStorageContainer(PIPELINE::MAX::CStorageContainer *storageContainer, PIPELINE::MAX::CStorageOleOut &outfile, const char *streamName)
 {
 	//nldebug("write");
-	GsfOutput *output = GSF_OUTPUT(gsf_outfile_new_child(outfile, streamName, false));
-	if (!output)
-	{
-		nlerror("GSF Could not write stream %s", streamName);
-		return;
-	}
-	{
-		PIPELINE::MAX::CStorageStream outstream(output);
-		storageContainer->serial(outstream);
-	}
-	gsf_output_close(output);
-	g_object_unref(G_OBJECT(output));
+	PIPELINE::MAX::CStorageStream outstream;
+	storageContainer->serial(outstream);
+	std::vector<uint8> bytes;
+	outstream.swapBuffer(bytes);
+	outfile.addStreamSwap(streamName, bytes);
 }
 
-void serializeRaw(std::vector<uint8> &rawOutput, GsfInfile *infile, const char *streamName)
+void serializeRaw(std::vector<uint8> &rawOutput, PIPELINE::MAX::CStorageOleIn &infile, const char *streamName)
 {
-	GsfInput *input = gsf_infile_child_by_name(infile, streamName);
-	if (!input)
+	if (!infile.readStream(streamName, rawOutput))
 	{
-		nlerror("GSF Could not read stream %s", streamName);
+		nlerror("Could not read stream %s", streamName);
 		return;
 	}
-	{
-		PIPELINE::MAX::CStorageStream instream(input);
-		rawOutput.resize(instream.size());
-		instream.serialBuffer(&rawOutput[0], rawOutput.size());
-	}
-	g_object_unref(input);
 }
 
-void serializeRaw(std::vector<uint8> &rawOutput, GsfOutfile *outfile, const char *streamName)
+void serializeRaw(std::vector<uint8> &rawOutput, PIPELINE::MAX::CStorageOleOut &outfile, const char *streamName)
 {
-	GsfOutput *output = GSF_OUTPUT(gsf_outfile_new_child(outfile, streamName, false));
-	if (!output)
-	{
-		nlerror("GSF Could not write stream %s", streamName);
-		return;
-	}
-	{
-		PIPELINE::MAX::CStorageStream outstream(output);
-		outstream.serialBuffer(&rawOutput[0], rawOutput.size());
-	}
-	gsf_output_close(output);
-	g_object_unref(G_OBJECT(output));
+	outfile.addStream(streamName, rawOutput);
 }
 
 std::string cleanString(const std::string &str)
@@ -1090,21 +1053,12 @@ bool fixChunks(CStorageContainer *container)
 
 void handleFile(const std::string &path)
 {
-	GError *err = NULL;
-
-	GsfDocMetaData *metadata = gsf_doc_meta_data_new();
-	nlassert(metadata);
-
-	GsfInput *src = gsf_input_stdio_new(path.c_str(), &err);
-	if (err) { nlerror("GSF Failed to open %s", path.c_str()); return; }
-
-	GsfInfile *infile = gsf_infile_msole_new(src, NULL);
-	if (!infile) { nlerror("GSF Failed to recognize %s", path.c_str()); return; }
-	g_object_unref(src);
+	PIPELINE::MAX::CStorageOleIn infile;
+	if (!infile.open(path)) { nlerror("Failed to recognize %s as an OLE compound file", path.c_str()); return; }
 
 	uint8 classId[16];
-	if (!gsf_infile_msole_get_class_id((GsfInfileMSOle *)infile, classId))
-		nlerror("GSF Did not find classId");
+	if (!infile.getClassId(classId))
+		nlerror("Did not find classId");
 
 	PIPELINE::MAX::CStorageContainer videoPostQueue;
 	serializeStorageContainer(&videoPostQueue, infile, "VideoPostQueue");
@@ -1164,8 +1118,6 @@ void handleFile(const std::string &path)
 		scene.build(VersionUnknown);
 		scene.disown();
 	}
-
-	g_object_unref(infile);
 
 	bool pathsChanged = !WritePathChangesOnly;
 	if (ReplacePaths)
@@ -1500,13 +1452,7 @@ void handleFile(const std::string &path)
 	if (WriteModified && (ReplaceMapExt || pathsChanged))
 	{
 		const char *outpath = (WriteDummy ? "testdummy.max" : path.c_str());
-		GsfOutput  *output;
-		GsfOutfile *outfile;
-
-		output = gsf_output_stdio_new(outpath, &err);
-		if (err) { nlerror("GSF Failed to create %s", outpath); return; }
-		outfile = gsf_outfile_msole_new(output);
-		g_object_unref(G_OBJECT(output));
+		PIPELINE::MAX::CStorageOleOut outfile;
 
 		serializeStorageContainer(&videoPostQueue, outfile, "VideoPostQueue");
 		serializeStorageContainer(&scene, outfile, "Scene");
@@ -1517,11 +1463,10 @@ void handleFile(const std::string &path)
 		serializeRaw(summaryInformation, outfile, "\05SummaryInformation");
 		serializeRaw(documentSummaryInformation, outfile, "\05DocumentSummaryInformation");
 
-		if (!gsf_outfile_msole_set_class_id((GsfOutfileMSOle *)outfile, classId))
-			nlerror("GSF Cannot write class id");
+		outfile.setClassId(classId);
 
-		gsf_output_close(GSF_OUTPUT(outfile));
-		g_object_unref(G_OBJECT(outfile));
+		if (!outfile.write(outpath))
+			nlerror("Cannot write %s", outpath);
 
 		if (WriteDummy)
 		{
@@ -1530,18 +1475,12 @@ void handleFile(const std::string &path)
 			std::cin >> x;
 		}
 	}
-
-	g_object_unref(metadata);
 }
 
 // int __stdcall WinMain(void *, void *, void *, int)
 int main(int argc, char **argv)
 {
-	// Initialise gsf
 	printf("Pipeline Max Rewrite Assets\n");
-	char const *me = (argv[0] ? argv[0] : "pipeline_max_rewrite_assets");
-	g_set_prgname(me);
-	gsf_init();
 
 	// Register all plugin classes
 	CBuiltin::registerClasses(&SceneClassRegistry);
@@ -1569,8 +1508,6 @@ int main(int argc, char **argv)
 
 	for (std::set<std::string>::iterator it = MissingFiles.begin(), end = MissingFiles.end(); it != end; ++it)
 		nlinfo("Missing: '%s'", (*it).c_str());
-
-	gsf_shutdown();
 
 	return 0;
 }

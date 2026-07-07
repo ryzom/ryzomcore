@@ -58,8 +58,6 @@
 #include <nel/3d/animation.h>
 #include <nel/3d/texture_file.h>
 
-#include <gsf/gsf-utils.h>
-
 #include <algorithm>
 #include <cstdio>
 #include <cstring>
@@ -69,6 +67,7 @@
 #include <vector>
 
 #include "scene_lib.h"
+#include "../pipeline_max_export_common/db_path.h"
 #include "mesh_eval.h"
 #include "material_build.h"
 #include "mesh_build.h"
@@ -867,7 +866,6 @@ static int compareShapes(const std::string &a, const std::string &b)
 int main(int argc, char **argv)
 {
 	NLMISC::CApplicationContext appContext;
-	gsf_init();
 	NL3D::registerSerial3d();
 
 	// Write export-era stream versions (see the SerialOldPreferredMemory notes): the reference
@@ -886,6 +884,17 @@ int main(int argc, char **argv)
 			g_verbose = true;
 		else if (arg == "--db" && i + 1 < argc)
 			dbRoot = argv[++i];
+		else if (arg == "--path-alias" && i + 1 < argc)
+		{
+			// --path-alias <windows-prefix>=<root>, e.g. --path-alias "P:\old_graphics=/mnt/old"
+			// for corpus content authored under a different drive/root than "R:\graphics\...".
+			std::string kv = argv[++i];
+			std::string::size_type eq = kv.find('=');
+			if (eq == std::string::npos)
+				fprintf(stderr, "WARNING: --path-alias expects <prefix>=<root>, got '%s'\n", kv.c_str());
+			else
+				DBPATH::addAlias(kv.substr(0, eq), kv.substr(eq + 1));
+		}
 		else if (arg == "--coarse-out" && i + 1 < argc)
 			outDirCoarse = argv[++i];
 		else if (arg == "--anim-out" && i + 1 < argc)

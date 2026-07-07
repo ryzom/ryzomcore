@@ -70,7 +70,7 @@
 #include <string>
 #include <vector>
 
-#include "../pipeline_max_rig/biped_rig.h"
+#include "../pipeline_max_export_common/biped_rig.h"
 
 namespace BIPANIM {
 

@@ -38,9 +38,7 @@
 #include <nel/3d/skeleton_weight.h>
 #include <nel/3d/transformable.h>
 
-#include <gsf/gsf-infile-msole.h>
-#include <gsf/gsf-input-stdio.h>
-#include <gsf/gsf-utils.h>
+#include "../pipeline_max/storage_ole.h"
 
 #include <cstdlib>
 #include <cstring>
@@ -95,30 +93,24 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	gsf_init();
-
 	CSceneClassRegistry reg;
 	CBuiltin::registerClasses(&reg);
 	UPDATE1::CUpdate1::registerClasses(&reg);
 	EPOLY::CEPoly::registerClasses(&reg);
 	BIPED::CBiped::registerClasses(&reg);
 
-	GsfInput *src = gsf_input_stdio_new(argv[1], NULL);
-	if (!src) { std::cerr << "ERROR: cannot open " << argv[1] << "\n"; return 1; }
-	GsfInfile *in = gsf_infile_msole_new(src, NULL);
-	g_object_unref(src);
-	if (!in) { std::cerr << "ERROR: not an OLE compound file: " << argv[1] << "\n"; return 1; }
+	CStorageOleIn in;
+	if (!in.open(argv[1])) { std::cerr << "ERROR: not an OLE compound file: " << argv[1] << "\n"; return 1; }
 
 	CDllDirectory dll;
-	{ GsfInput *s = gsf_infile_child_by_name(in, "DllDirectory"); if (!s) { std::cerr << "ERROR: no DllDirectory stream\n"; return 1; } CStorageStream st(s); dll.serial(st); g_object_unref(s); }
+	{ std::vector<uint8> b; if (!in.readStream("DllDirectory", b)) { std::cerr << "ERROR: no DllDirectory stream\n"; return 1; } CStorageStream st(b); dll.serial(st); }
 	dll.parse(VersionUnknown);
 	CClassDirectory3 cd(&dll);
-	{ GsfInput *s = gsf_infile_child_by_name(in, "ClassDirectory3"); if (!s) { std::cerr << "ERROR: no ClassDirectory3 stream\n"; return 1; } CStorageStream st(s); cd.serial(st); g_object_unref(s); }
+	{ std::vector<uint8> b; if (!in.readStream("ClassDirectory3", b)) { std::cerr << "ERROR: no ClassDirectory3 stream\n"; return 1; } CStorageStream st(b); cd.serial(st); }
 	cd.parse(VersionUnknown);
 	CScene scene(&reg, &dll, &cd);
-	{ GsfInput *s = gsf_infile_child_by_name(in, "Scene"); if (!s) { std::cerr << "ERROR: no Scene stream\n"; return 1; } CStorageStream st(s); scene.serial(st); g_object_unref(s); }
+	{ std::vector<uint8> b; if (!in.readStream("Scene", b)) { std::cerr << "ERROR: no Scene stream\n"; return 1; } CStorageStream st(b); scene.serial(st); }
 	scene.parse(VersionUnknown);
-	g_object_unref(in);
 
 	// Walk nodes in scene-container order (the `max select all` enumeration) and collect the
 	// flagged ones, three channels each: rotquat, pos, scale (reference emission order).

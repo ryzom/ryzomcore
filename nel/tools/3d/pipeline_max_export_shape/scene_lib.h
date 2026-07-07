@@ -44,7 +44,7 @@
 #include "../pipeline_max/scene_class.h"
 #include "../pipeline_max/storage_object.h"
 
-#include "max_math.h"
+#include "../pipeline_max_export_common/max_math.h"
 
 namespace PIPELINE {
 namespace MAX {

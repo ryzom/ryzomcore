@@ -1,37 +1,22 @@
-FIND_PACKAGE(LIBGSF)
-
-IF (NOT (LIBGSF_INCLUDE_DIR AND LIBGSF_LIBRARIES))
-	MESSAGE(FATAL_ERROR "LIBGSF not found!")
-ENDIF (NOT (LIBGSF_INCLUDE_DIR AND LIBGSF_LIBRARIES))
-
-FIND_PACKAGE(GOBJECT2 REQUIRED)
-FIND_PACKAGE(GLIB2 REQUIRED)
-
 FILE(GLOB SRCS *.cpp)
 FILE(GLOB HDRS *.h)
 
-NL_TARGET_LIB(pipeline_max_rig
+NL_TARGET_LIB(pipeline_max_export_common
 	${SRCS}
 	${HDRS}
 	)
 
-TARGET_INCLUDE_DIRECTORIES(pipeline_max_rig
-		PRIVATE
-		${GLIB2_INCLUDE_DIRS}
-		${LIBGSF_INCLUDE_DIR}
-)
-
-TARGET_LINK_LIBRARIES(pipeline_max_rig
+TARGET_LINK_LIBRARIES(pipeline_max_export_common
 	pipeline_max
 	NeL::misc
 )
 
-SET_TARGET_PROPERTIES(pipeline_max_rig PROPERTIES LINK_INTERFACE_LIBRARIES "")
+SET_TARGET_PROPERTIES(pipeline_max_export_common PROPERTIES LINK_INTERFACE_LIBRARIES "")
 
-NL_DEFAULT_PROPS(pipeline_max_rig "NeL, Tools, 3D: Pipeline Max Rig (Library)")
-NL_ADD_LIB_SUFFIX(pipeline_max_rig)
-NL_ADD_RUNTIME_FLAGS(pipeline_max_rig)
+NL_DEFAULT_PROPS(pipeline_max_export_common "NeL, Tools, 3D: Pipeline Max Export Common (Library)")
+NL_ADD_LIB_SUFFIX(pipeline_max_export_common)
+NL_ADD_RUNTIME_FLAGS(pipeline_max_export_common)
 
 IF(WITH_INSTALL_LIBRARIES OR NOT WITH_STATIC)
-  INSTALL(TARGETS pipeline_max_rig LIBRARY DESTINATION lib ARCHIVE DESTINATION lib COMPONENT libraries)
+  INSTALL(TARGETS pipeline_max_export_common LIBRARY DESTINATION lib ARCHIVE DESTINATION lib COMPONENT libraries)
 ENDIF()

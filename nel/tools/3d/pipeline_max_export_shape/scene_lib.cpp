@@ -36,9 +36,7 @@
 #include <nel/misc/file.h>
 #include <nel/misc/path.h>
 
-#include <gsf/gsf-infile-msole.h>
-#include <gsf/gsf-input-stdio.h>
-#include <gsf/gsf-utils.h>
+#include "../pipeline_max/storage_ole.h"
 
 #include "../pipeline_max/storage_stream.h"
 #include "../pipeline_max/storage_value.h"
@@ -59,6 +57,8 @@
 #include "../pipeline_max/builtin/storage/app_data.h"
 #include "../pipeline_max/builtin/control_keyframer.h"
 #include "../pipeline_max/builtin/param_block_2.h"
+
+#include "../pipeline_max_export_common/db_path.h"
 
 using namespace PIPELINE::MAX;
 using namespace PIPELINE::MAX::BUILTIN;
@@ -92,16 +92,14 @@ static const uint32 APPDATA_SCRIPT_SUPER_CLASS_ID = 4128;
 
 // ---------------------------------------------------------------------------------------------
 
-static std::string g_dbRoot;
-
 void setDatabaseRoot(const std::string &root)
 {
-	g_dbRoot = root;
+	DBPATH::setDefaultRoot(root);
 }
 
 const std::string &databaseRoot()
 {
-	return g_dbRoot;
+	return DBPATH::defaultRoot();
 }
 
 CSceneClassRegistry *sceneRegistry()
@@ -121,15 +119,8 @@ CSceneClassRegistry *sceneRegistry()
 
 bool loadMaxFile(const std::string &path, SLoadedMax &lm)
 {
-	GsfInput *src = gsf_input_stdio_new(path.c_str(), NULL);
-	if (!src)
-	{
-		fprintf(stderr, "WARNING: cannot open %s\n", path.c_str());
-		return false;
-	}
-	GsfInfile *in = gsf_infile_msole_new(src, NULL);
-	g_object_unref(src);
-	if (!in)
+	CStorageOleIn in;
+	if (!in.open(path))
 	{
 		fprintf(stderr, "WARNING: not an OLE compound file: %s\n", path.c_str());
 		return false;
@@ -138,10 +129,9 @@ bool loadMaxFile(const std::string &path, SLoadedMax &lm)
 	CClassDirectory3 *cd = new CClassDirectory3(dll);
 	CScene *scene = new CScene(sceneRegistry(), dll, cd);
 	bool ok = true;
-	{ GsfInput *s = gsf_infile_child_by_name(in, "DllDirectory"); if (s) { CStorageStream st(s); dll->serial(st); g_object_unref(s); dll->parse(VersionUnknown); } else ok = false; }
-	if (ok) { GsfInput *s = gsf_infile_child_by_name(in, "ClassDirectory3"); if (s) { CStorageStream st(s); cd->serial(st); g_object_unref(s); cd->parse(VersionUnknown); } else ok = false; }
-	if (ok) { GsfInput *s = gsf_infile_child_by_name(in, "Scene"); if (s) { CStorageStream st(s); scene->serial(st); g_object_unref(s); scene->parse(VersionUnknown); } else ok = false; }
-	g_object_unref(in);
+	{ std::vector<uint8> b; if (in.readStream("DllDirectory", b)) { CStorageStream st(b); dll->serial(st); dll->parse(VersionUnknown); } else ok = false; }
+	if (ok) { std::vector<uint8> b; if (in.readStream("ClassDirectory3", b)) { CStorageStream st(b); cd->serial(st); cd->parse(VersionUnknown); } else ok = false; }
+	if (ok) { std::vector<uint8> b; if (in.readStream("Scene", b)) { CStorageStream st(b); scene->serial(st); scene->parse(VersionUnknown); } else ok = false; }
 	if (!ok)
 	{
 		fprintf(stderr, "WARNING: missing streams in %s\n", path.c_str());
@@ -167,55 +157,9 @@ SLoadedMax *loadMaxFileCached(const std::string &path)
 	return &lm;
 }
 
-// Case-insensitive path resolution under the database checkout: directories lowercased,
-// filename lowercase first then verbatim (matches the on-disk convention).
-static bool resolvePathCI(const std::string &root, const std::string &relative, std::string &out)
-{
-	std::vector<std::string> parts;
-	NLMISC::splitString(relative, "/", parts);
-	while (!parts.empty() && parts[0].empty()) parts.erase(parts.begin());
-	if (parts.empty()) return false;
-	std::string dir = root;
-	for (uint i = 0; i + 1 < parts.size(); ++i)
-	{
-		if (parts[i].empty()) continue;
-		dir += "/" + NLMISC::toLowerAscii(parts[i]);
-	}
-	const std::string &file = parts[parts.size() - 1];
-	std::string lower = dir + "/" + NLMISC::toLowerAscii(file);
-	if (NLMISC::CFile::fileExists(lower) || NLMISC::CFile::isDirectory(lower))
-	{
-		out = lower;
-		return true;
-	}
-	std::string verbatim = dir + "/" + file;
-	if (NLMISC::CFile::fileExists(verbatim) || NLMISC::CFile::isDirectory(verbatim))
-	{
-		out = verbatim;
-		return true;
-	}
-	return false;
-}
-
 bool resolveDbPath(const std::string &authoredPath, std::string &out)
 {
-	std::string rel = authoredPath;
-	for (uint i = 0; i < rel.size(); ++i)
-		if (rel[i] == '\\') rel[i] = '/';
-	std::string::size_type colon = rel.find(':');
-	if (colon != std::string::npos) rel = rel.substr(colon + 1);
-	while (!rel.empty() && rel[0] == '/') rel = rel.substr(1);
-	{
-		std::string::size_type slash = rel.find('/');
-		if (slash != std::string::npos)
-		{
-			std::string first = NLMISC::toLowerAscii(rel.substr(0, slash));
-			if (first == "graphics" || first == "database")
-				rel = rel.substr(slash + 1);
-		}
-	}
-	if (g_dbRoot.empty()) return false;
-	return resolvePathCI(g_dbRoot, rel, out);
+	return DBPATH::resolve(authoredPath, out);
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -661,7 +605,7 @@ static CSceneClass *resolveXRefObject(CSceneClass *xrefObj, int depth)
 	std::string resolved;
 	if (!resolveDbPath(file, resolved))
 	{
-		fprintf(stderr, "WARNING: xref: cannot resolve '%s' under db root '%s'\n", file.c_str(), g_dbRoot.c_str());
+		fprintf(stderr, "WARNING: xref: cannot resolve '%s' under db root '%s'\n", file.c_str(), DBPATH::defaultRoot().c_str());
 		return NULL;
 	}
 	SLoadedMax *lm = loadMaxFileCached(resolved);

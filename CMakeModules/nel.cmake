@@ -313,6 +313,7 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
 
   OPTION(WITH_ASSIMP              "Use assimp exporter"                           OFF)
   OPTION(WITH_LIBGSF              "Use libgsf for max file library"               OFF)
+  OPTION(WITH_PIPELINE_NATIVE_OLE "Use the native OLE/CFB backend for the max file library (no libgsf)" ON )
 
   OPTION(WITH_FFMPEG              "Use ffmpeg for audio decoder"                  OFF)
   OPTION(WITH_MSQUIC              "Use msquic for QUIC networking support"        OFF)

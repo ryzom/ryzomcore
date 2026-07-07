@@ -5,6 +5,7 @@
  * \author Claude Sonnet 5
  * \author Claude Fable 5
  * \author Claude Opus 4.8
+ * \author Claude Opus 4.8 (1M context)
  */
 // Corpus-level roundtrip tester for pipeline_max.
 //
@@ -14,16 +15,13 @@
 //                              back → byte-compare per stream. Only run for streams we type
 //                              (DllDirectory, ClassDirectory3, Scene). Others fall through to T1.
 //
+// The OLE2/CFB container is accessed through PIPELINE::MAX::CStorageOleIn/CStorageOleOut, which is
+// backed either by the native reader/writer (default) or by libgsf (compile-time switch); this
+// tool is backend-agnostic.
+//
 // Exit code:
 //   0 = all requested tests passed.
 //   1 = failure (details on stderr, machine-readable one-line summary on stdout).
-//
-// The Python driver (test/skel_corpus_test.py) iterates the manifest and aggregates.
-//
-// Streams tested:
-//   DllDirectory, ClassDirectory3, ClassData, Config, Scene, VideoPostQueue,
-//   \05SummaryInformation, \05DocumentSummaryInformation
-// All by-name; missing streams are skipped (some files have no VideoPostQueue).
 
 #include <nel/misc/types_nl.h>
 #include <nel/misc/common.h>
@@ -40,15 +38,6 @@
 #define PMCT_GETPID getpid
 #endif
 
-#include <gsf/gsf-infile-msole.h>
-#include <gsf/gsf-infile.h>
-#include <gsf/gsf-input-stdio.h>
-#include <gsf/gsf-input.h>
-#include <gsf/gsf-outfile-msole.h>
-#include <gsf/gsf-outfile.h>
-#include <gsf/gsf-output-stdio.h>
-#include <gsf/gsf-utils.h>
-
 #include <cstdio>
 #include <cstring>
 #include <iostream>
@@ -56,6 +45,7 @@
 #include <string>
 #include <vector>
 
+#include "../pipeline_max/storage_ole.h"
 #include "../pipeline_max/storage_stream.h"
 #include "../pipeline_max/storage_object.h"
 #include "../pipeline_max/dll_directory.h"
@@ -102,23 +92,6 @@ static std::vector<uint8> writeContainerToTemp(CStorageContainer &ctr, const std
 	return out;
 }
 
-// Read an entire gsf stream into a byte vector.
-static std::vector<uint8> readAll(GsfInput *in)
-{
-	std::vector<uint8> out;
-	gsf_off_t sz = gsf_input_size(in);
-	out.resize((size_t)sz);
-	if (sz > 0)
-	{
-		gsf_input_seek(in, 0, G_SEEK_SET);
-		if (!gsf_input_read(in, (size_t)sz, out.data()))
-		{
-			out.clear();
-		}
-	}
-	return out;
-}
-
 // Print a short diff summary of two byte vectors for triage. Only the first diff run.
 static std::string diffSummary(const std::vector<uint8> &a, const std::vector<uint8> &b)
 {
@@ -155,18 +128,15 @@ struct StreamResult
 	std::string T2Info;
 };
 
-// Do a T1 roundtrip via CStorageContainer (raw pass-through). Reads gsf stream into src bytes,
-// serials into a container, serials container out to a memory buffer, compares bytes.
 // PID-suffixed so concurrent invocations (e.g. a parallelized corpus sweep, or two unrelated test
-// runs overlapping) don't race on the same file and corrupt each other's round-trip — this bit a
-// stray background invocation during development (see pipeline_max_design.md).
+// runs overlapping) don't race on the same file and corrupt each other's round-trip.
 static std::string g_tempPath = "/tmp/pipeline_max_corpus_test." + std::to_string((long)PMCT_GETPID()) + ".tmp";
 
-static bool t1Roundtrip(GsfInput *in, std::vector<uint8> &src, std::vector<uint8> &rt, std::string &info)
+// Do a T1 roundtrip via CStorageContainer (raw pass-through). Serials the source bytes into a
+// container, serials the container back out, compares bytes.
+static bool t1Roundtrip(const std::vector<uint8> &src, std::vector<uint8> &rt, std::string &info)
 {
-	src = readAll(in);
-	gsf_input_seek(in, 0, G_SEEK_SET); // readAll left the cursor at end; CStorageContainer needs pos 0.
-	CStorageStream ss(in);
+	CStorageStream ss(src);
 	CStorageContainer ctr;
 	try { ctr.serial(ss); }
 	catch (std::exception &e) { info = std::string("read-throw: ") + e.what(); return false; }
@@ -179,11 +149,10 @@ static bool t1Roundtrip(GsfInput *in, std::vector<uint8> &src, std::vector<uint8
 }
 
 // Do a T2 roundtrip specialized per stream type. Returns false if roundtrip diverges.
-// applicable=false means we don't have a typed class for this stream — caller falls back to T1 only.
-static bool t2DllDirectory(GsfInput *in, const std::vector<uint8> &src, std::string &info)
+static bool t2DllDirectory(const std::vector<uint8> &src, std::string &info)
 {
 	CDllDirectory dll;
-	{ CStorageStream ss(in); try { dll.serial(ss); } catch (std::exception &e) { info = std::string("read-throw: ") + e.what(); return false; } }
+	{ CStorageStream ss(src); try { dll.serial(ss); } catch (std::exception &e) { info = std::string("read-throw: ") + e.what(); return false; } }
 	try { dll.parse(VersionUnknown); dll.clean(); dll.build(VersionUnknown); dll.disown(); }
 	catch (std::exception &e) { info = std::string("lifecycle-throw: ") + e.what(); return false; }
 	std::vector<uint8> rt;
@@ -193,10 +162,10 @@ static bool t2DllDirectory(GsfInput *in, const std::vector<uint8> &src, std::str
 	return false;
 }
 
-static bool t2ClassDirectory3(GsfInput *in, const std::vector<uint8> &src, CDllDirectory *dll, std::string &info)
+static bool t2ClassDirectory3(const std::vector<uint8> &src, CDllDirectory *dll, std::string &info)
 {
 	CClassDirectory3 cd(dll);
-	{ CStorageStream ss(in); try { cd.serial(ss); } catch (std::exception &e) { info = std::string("read-throw: ") + e.what(); return false; } }
+	{ CStorageStream ss(src); try { cd.serial(ss); } catch (std::exception &e) { info = std::string("read-throw: ") + e.what(); return false; } }
 	try { cd.parse(VersionUnknown); cd.clean(); cd.build(VersionUnknown); cd.disown(); }
 	catch (std::exception &e) { info = std::string("lifecycle-throw: ") + e.what(); return false; }
 	std::vector<uint8> rt;
@@ -206,11 +175,11 @@ static bool t2ClassDirectory3(GsfInput *in, const std::vector<uint8> &src, CDllD
 	return false;
 }
 
-static bool t2Scene(GsfInput *in, const std::vector<uint8> &src, CSceneClassRegistry *reg,
+static bool t2Scene(const std::vector<uint8> &src, CSceneClassRegistry *reg,
                     CDllDirectory *dll, CClassDirectory3 *cd, std::string &info)
 {
 	CScene scene(reg, dll, cd);
-	{ CStorageStream ss(in); try { scene.serial(ss); } catch (std::exception &e) { info = std::string("read-throw: ") + e.what(); return false; } }
+	{ CStorageStream ss(src); try { scene.serial(ss); } catch (std::exception &e) { info = std::string("read-throw: ") + e.what(); return false; } }
 	try { scene.parse(VersionUnknown); scene.clean(); scene.build(VersionUnknown); scene.disown(); }
 	catch (std::exception &e) { info = std::string("lifecycle-throw: ") + e.what(); return false; }
 	std::vector<uint8> rt;
@@ -220,23 +189,14 @@ static bool t2Scene(GsfInput *in, const std::vector<uint8> &src, CSceneClassRegi
 	return false;
 }
 
-// Read a whole gsf child stream into a byte vector. Returns false when the stream is absent.
-static bool readRawStream(GsfInfile *in, const char *name, std::vector<uint8> &out)
+// Parse a typed container out of a named stream's bytes. Returns false on absence or a read throw.
+static bool loadContainer(const CStorageOleIn &in, const char *name, CStorageContainer &c)
 {
-	GsfInput *s = gsf_infile_child_by_name(in, name);
-	if (!s) return false;
-	out = readAll(s);
-	g_object_unref(s);
+	std::vector<uint8> b;
+	if (!in.readStream(name, b)) return false;
+	CStorageStream ss(b);
+	c.serial(ss);
 	return true;
-}
-
-static void writeRawStream(GsfOutfile *outfile, const char *name, const std::vector<uint8> &bytes)
-{
-	GsfOutput *output = GSF_OUTPUT(gsf_outfile_new_child(outfile, name, FALSE));
-	if (!output) { std::cerr << "cannot create stream " << name << "\n"; return; }
-	if (!bytes.empty()) gsf_output_write(output, bytes.size(), bytes.data());
-	gsf_output_close(output);
-	g_object_unref(G_OBJECT(output));
 }
 
 // End-to-end parse&modify&save proof: load a .max, change one ParamBlock2 parameter through the
@@ -246,7 +206,7 @@ static void writeRawStream(GsfOutfile *outfile, const char *name, const std::vec
 // to the original, and (c) the Scene stream differs from the original ONLY in the modified
 // parameter's payload bytes (a surgical, byte-localized edit — nothing else moved). This is the
 // "programmatically adjust existing .max files" capability the material editor is built on.
-static int modifySaveTest(GsfInfile *in, CSceneClassRegistry *reg, const std::string &tempMax, bool verbose)
+static int modifySaveTest(CStorageOleIn &in, CSceneClassRegistry *reg, const std::string &tempMax, bool verbose)
 {
 	// All chunk streams read verbatim for byte-exact write-back of the unmodified ones + the
 	// original-vs-rewritten comparison.
@@ -259,32 +219,29 @@ static int modifySaveTest(GsfInfile *in, CSceneClassRegistry *reg, const std::st
 	for (const char **n = kStreams; *n; ++n)
 	{
 		std::vector<uint8> b;
-		if (readRawStream(in, *n, b)) { present.push_back(*n); rawOrig.push_back(b); }
+		if (in.readStream(*n, b)) { present.push_back(*n); rawOrig.push_back(b); }
 	}
 	uint8 classId[16];
-	bool haveClassId = gsf_infile_msole_get_class_id((GsfInfileMSOle *)in, classId) != FALSE;
+	bool haveClassId = in.getClassId(classId);
 
 	// Typed load for the modification (dll/cd needed to resolve the scene class graph).
 	CDllDirectory dll;
 	CClassDirectory3 cd(&dll);
 	CScene scene(reg, &dll, &cd);
 	{
-		GsfInput *s = gsf_infile_child_by_name(in, "DllDirectory");
-		if (!s) { std::cout << "SKIP modify-save: no DllDirectory\n"; return 0; }
-		CStorageStream ss(s); try { dll.serial(ss); dll.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "dll: " << e.what() << "\n"; g_object_unref(s); return 1; }
-		g_object_unref(s);
+		std::vector<uint8> b;
+		if (!in.readStream("DllDirectory", b)) { std::cout << "SKIP modify-save: no DllDirectory\n"; return 0; }
+		CStorageStream ss(b); try { dll.serial(ss); dll.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "dll: " << e.what() << "\n"; return 1; }
 	}
 	{
-		GsfInput *s = gsf_infile_child_by_name(in, "ClassDirectory3");
-		if (!s) { std::cout << "SKIP modify-save: no ClassDirectory3\n"; return 0; }
-		CStorageStream ss(s); try { cd.serial(ss); cd.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "cd: " << e.what() << "\n"; g_object_unref(s); return 1; }
-		g_object_unref(s);
+		std::vector<uint8> b;
+		if (!in.readStream("ClassDirectory3", b)) { std::cout << "SKIP modify-save: no ClassDirectory3\n"; return 0; }
+		CStorageStream ss(b); try { cd.serial(ss); cd.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "cd: " << e.what() << "\n"; return 1; }
 	}
 	{
-		GsfInput *s = gsf_infile_child_by_name(in, "Scene");
-		if (!s) { std::cout << "SKIP modify-save: no Scene\n"; return 0; }
-		CStorageStream ss(s); try { scene.serial(ss); scene.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "scene: " << e.what() << "\n"; g_object_unref(s); return 1; }
-		g_object_unref(s);
+		std::vector<uint8> b;
+		if (!in.readStream("Scene", b)) { std::cout << "SKIP modify-save: no Scene\n"; return 0; }
+		CStorageStream ss(b); try { scene.serial(ss); scene.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "scene: " << e.what() << "\n"; return 1; }
 	}
 
 	// Find a fixed-size scalar/color parameter to modify, and remember how to find it again.
@@ -376,27 +333,20 @@ static int modifySaveTest(GsfInfile *in, CSceneClassRegistry *reg, const std::st
 
 	// Write the whole .max back: modified Scene from the graph, every other stream verbatim.
 	{
-		GError *err = NULL;
-		GsfOutput *output = gsf_output_stdio_new(tempMax.c_str(), &err);
-		if (!output) { std::cerr << "cannot create " << tempMax << "\n"; return 1; }
-		GsfOutfile *outfile = gsf_outfile_msole_new(output);
-		g_object_unref(G_OBJECT(output));
+		CStorageOleOut out;
 		for (size_t i = 0; i < present.size(); ++i)
 		{
-			if (present[i] == "Scene") writeRawStream(outfile, "Scene", newScene);
-			else writeRawStream(outfile, present[i].c_str(), rawOrig[i]);
+			if (present[i] == "Scene") out.addStream("Scene", newScene);
+			else out.addStream(present[i], rawOrig[i]);
 		}
-		if (haveClassId) gsf_outfile_msole_set_class_id((GsfOutfileMSOle *)outfile, classId);
-		gsf_output_close(GSF_OUTPUT(outfile));
-		g_object_unref(G_OBJECT(outfile));
+		if (haveClassId) out.setClassId(classId);
+		if (!out.write(tempMax)) { std::cerr << "cannot create " << tempMax << "\n"; return 1; }
 	}
 
 	// Reload and verify the modification + the surgical byte-locality of the edit.
 	int fails = 0;
-	GsfInput *src2 = gsf_input_stdio_new(tempMax.c_str(), NULL);
-	GsfInfile *in2 = src2 ? gsf_infile_msole_new(src2, NULL) : NULL;
-	if (src2) g_object_unref(src2);
-	if (!in2) { std::cerr << "cannot reopen rewritten .max\n"; return 1; }
+	CStorageOleIn in2;
+	if (!in2.open(tempMax)) { std::cerr << "cannot reopen rewritten .max\n"; return 1; }
 
 	// (a) modified parameter reads back the new value
 	{
@@ -404,9 +354,9 @@ static int modifySaveTest(GsfInfile *in, CSceneClassRegistry *reg, const std::st
 		CClassDirectory3 cd2(&dll2);
 		CScene scene2(reg, &dll2, &cd2);
 		bool ok = true;
-		{ GsfInput *s = gsf_infile_child_by_name(in2, "DllDirectory"); if (s) { CStorageStream ss(s); try { dll2.serial(ss); dll2.parse(VersionUnknown); } catch (...) { ok = false; } g_object_unref(s); } else ok = false; }
-		if (ok) { GsfInput *s = gsf_infile_child_by_name(in2, "ClassDirectory3"); if (s) { CStorageStream ss(s); try { cd2.serial(ss); cd2.parse(VersionUnknown); } catch (...) { ok = false; } g_object_unref(s); } else ok = false; }
-		if (ok) { GsfInput *s = gsf_infile_child_by_name(in2, "Scene"); if (s) { CStorageStream ss(s); try { scene2.serial(ss); scene2.parse(VersionUnknown); } catch (...) { ok = false; } g_object_unref(s); } else ok = false; }
+		{ std::vector<uint8> b; if (in2.readStream("DllDirectory", b)) { CStorageStream ss(b); try { dll2.serial(ss); dll2.parse(VersionUnknown); } catch (...) { ok = false; } } else ok = false; }
+		if (ok) { std::vector<uint8> b; if (in2.readStream("ClassDirectory3", b)) { CStorageStream ss(b); try { cd2.serial(ss); cd2.parse(VersionUnknown); } catch (...) { ok = false; } } else ok = false; }
+		if (ok) { std::vector<uint8> b; if (in2.readStream("Scene", b)) { CStorageStream ss(b); try { scene2.serial(ss); scene2.parse(VersionUnknown); } catch (...) { ok = false; } } else ok = false; }
 		if (!ok) { std::cerr << "reload parse failed\n"; ++fails; }
 		else
 		{
@@ -427,7 +377,7 @@ static int modifySaveTest(GsfInfile *in, CSceneClassRegistry *reg, const std::st
 	for (size_t i = 0; i < present.size(); ++i)
 	{
 		std::vector<uint8> b2;
-		readRawStream(in2, present[i].c_str(), b2);
+		in2.readStream(present[i], b2);
 		if (present[i] != "Scene")
 		{
 			if (b2 != rawOrig[i]) { std::cerr << "stream " << present[i] << " changed unexpectedly\n"; ++fails; }
@@ -447,7 +397,6 @@ static int modifySaveTest(GsfInfile *in, CSceneClassRegistry *reg, const std::st
 			}
 		}
 	}
-	g_object_unref(in2);
 
 	std::cout << (fails ? "FAIL" : "OK") << " modify-save: param 0x" << std::hex << targetParam << std::dec
 	          << " kind " << targetKind << " @storage " << targetIndex << ", " << fails << " fail\n";
@@ -455,37 +404,28 @@ static int modifySaveTest(GsfInfile *in, CSceneClassRegistry *reg, const std::st
 }
 
 // Parse the Scene stream fully and run the CParamBlock2 write-direction self-check on every
-// ParamBlock2 object: decode the typed model, then re-encode each fixed-size scalar/color
-// parameter from its decoded value and verify it matches the stored payload bytes (proving the
-// in-place modify API reproduces the original layout). Counts PB2 objects and params tested;
-// any mismatch is a failure.
-static int pb2SelfTest(GsfInfile *in, CSceneClassRegistry *reg, bool verbose)
+// ParamBlock2 object.
+static int pb2SelfTest(CStorageOleIn &in, CSceneClassRegistry *reg, bool verbose)
 {
 	CDllDirectory dll;
 	CClassDirectory3 cd(&dll);
 	CScene scene(reg, &dll, &cd);
 	{
-		GsfInput *s = gsf_infile_child_by_name(in, "DllDirectory");
-		if (!s) { std::cerr << "no DllDirectory\n"; return 2; }
-		CStorageStream ss(s); try { dll.serial(ss); dll.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "dll: " << e.what() << "\n"; g_object_unref(s); return 2; }
-		g_object_unref(s);
+		std::vector<uint8> b;
+		if (!in.readStream("DllDirectory", b)) { std::cerr << "no DllDirectory\n"; return 2; }
+		CStorageStream ss(b); try { dll.serial(ss); dll.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "dll: " << e.what() << "\n"; return 2; }
 	}
 	{
-		GsfInput *s = gsf_infile_child_by_name(in, "ClassDirectory3");
-		if (!s) { std::cerr << "no ClassDirectory3\n"; return 2; }
-		CStorageStream ss(s); try { cd.serial(ss); cd.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "cd: " << e.what() << "\n"; g_object_unref(s); return 2; }
-		g_object_unref(s);
+		std::vector<uint8> b;
+		if (!in.readStream("ClassDirectory3", b)) { std::cerr << "no ClassDirectory3\n"; return 2; }
+		CStorageStream ss(b); try { cd.serial(ss); cd.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "cd: " << e.what() << "\n"; return 2; }
 	}
 	{
-		GsfInput *s = gsf_infile_child_by_name(in, "Scene");
-		if (!s) { std::cerr << "no Scene\n"; return 2; }
-		CStorageStream ss(s); try { scene.serial(ss); scene.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "scene: " << e.what() << "\n"; g_object_unref(s); return 2; }
-		g_object_unref(s);
+		std::vector<uint8> b;
+		if (!in.readStream("Scene", b)) { std::cerr << "no Scene\n"; return 2; }
+		CStorageStream ss(b); try { scene.serial(ss); scene.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "scene: " << e.what() << "\n"; return 2; }
 	}
 	uint nPb2 = 0, nParams = 0, nFail = 0;
-	// t=0 controller-resolution probe: count animated (controller-backed) float parameters and how
-	// many getFloatAt0 resolves via a keyframer at tick 0 (the corpus has no keyed material params,
-	// but other PB2 owners do — this proves the resolving path is reachable and returns a value).
 	uint nAnimFloat = 0, nAnimFloatResolved = 0;
 	uint animTypeHist[32] = { 0 };
 	CSceneClassContainer *ssc = scene.container();
@@ -506,8 +446,6 @@ static int pb2SelfTest(GsfInfile *in, CSceneClassRegistry *reg, bool verbose)
 		{
 			if (ps[i].IsTab || ps[i].HasConstant || !ps[i].RefBacked) continue;
 			uint16 bt = ps[i].baseType();
-			// A ref-backed non-constant param either owns a controller (animated) or a ref-kind
-			// slot (mtl/texmap/node/reftarg). Count only the animation-eligible scalar/vector kinds.
 			if (BUILTIN::CParamBlock2::SParam::typeIsRefKind(ps[i].Type)) continue;
 			animTypeHist[bt & 0x1f]++;
 			if (bt == BUILTIN::CParamBlock2::TYPE_FLOAT)
@@ -533,9 +471,7 @@ static int pb2SelfTest(GsfInfile *in, CSceneClassRegistry *reg, bool verbose)
 	return nFail ? 1 : 0;
 }
 
-// Recursive reference-tree dump (used by --uvgen-dump): prints each reference slot's class id and,
-// for keyframe controllers, their key count + tick range — to locate animated sub-controllers such
-// as a StdUVGen's "U Offset".
+// Recursive reference-tree dump (used by --uvgen-dump).
 static void dumpRefTree(CSceneClass *obj, int depth, int maxDepth)
 {
 	BUILTIN::CReferenceMaker *rm = dynamic_cast<BUILTIN::CReferenceMaker *>(obj);
@@ -563,9 +499,6 @@ static void dumpRefTree(CSceneClass *obj, int depth, int maxDepth)
 			}
 		}
 		std::cout << "\n";
-		// Old ParamBlock (superclass 0x8): dump each 0x0002 param entry's index (0x0003) and
-		// sub-chunk ids so animated params (which carry a controller-ref chunk 0x0004 instead of
-		// a value) and their param index can be read off — the StdUVGen U/V Offset slot mapping.
 		if (ref->classDesc()->superClassId() == 0x8)
 		{
 			if (CStorageContainer *pb = dynamic_cast<CStorageContainer *>(ref))
@@ -625,13 +558,8 @@ int main(int argc, char **argv)
 		return 2;
 	}
 
-	g_set_prgname(argv[0]);
-	gsf_init();
-
-	GsfInput *src = gsf_input_stdio_new(maxFile, NULL);
-	if (!src) { std::cerr << "cannot open " << maxFile << "\n"; return 2; }
-	GsfInfile *in = gsf_infile_msole_new(src, NULL);
-	if (!in) { std::cerr << "not an OLE file: " << maxFile << "\n"; g_object_unref(src); return 2; }
+	CStorageOleIn in;
+	if (!in.open(maxFile)) { std::cerr << "not an OLE file: " << maxFile << "\n"; return 2; }
 
 	CSceneClassRegistry reg;
 	BUILTIN::CBuiltin::registerClasses(&reg);
@@ -643,10 +571,7 @@ int main(int argc, char **argv)
 	if (doPb2SelfTest)
 	{
 		int rc = pb2SelfTest(in, &reg, verbose);
-		g_object_unref(in);
-		g_object_unref(src);
 		remove(g_tempPath.c_str());
-		gsf_shutdown();
 		return rc;
 	}
 
@@ -656,9 +581,6 @@ int main(int argc, char **argv)
 		int rc = modifySaveTest(in, &reg, tempMax, verbose);
 		remove(tempMax.c_str());
 		remove(g_tempPath.c_str());
-		g_object_unref(in);
-		g_object_unref(src);
-		gsf_shutdown();
 		return rc;
 	}
 
@@ -666,9 +588,9 @@ int main(int argc, char **argv)
 	{
 		// Enumerate the typed material/texmap tree: name (CMtlBase), sub-materials (CMultiMtl).
 		CDllDirectory dll; CClassDirectory3 cd(&dll); CScene scene(&reg, &dll, &cd);
-		{ GsfInput *s = gsf_infile_child_by_name(in, "DllDirectory"); CStorageStream ss(s); dll.serial(ss); dll.parse(VersionUnknown); g_object_unref(s); }
-		{ GsfInput *s = gsf_infile_child_by_name(in, "ClassDirectory3"); CStorageStream ss(s); cd.serial(ss); cd.parse(VersionUnknown); g_object_unref(s); }
-		{ GsfInput *s = gsf_infile_child_by_name(in, "Scene"); CStorageStream ss(s); scene.serial(ss); scene.parse(VersionUnknown); g_object_unref(s); }
+		loadContainer(in, "DllDirectory", dll); dll.parse(VersionUnknown);
+		loadContainer(in, "ClassDirectory3", cd); cd.parse(VersionUnknown);
+		loadContainer(in, "Scene", scene); scene.parse(VersionUnknown);
 		uint nMtl = 0, nTex = 0, nMulti = 0, nNamed = 0;
 		CSceneClassContainer *ssc = scene.container();
 		for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
@@ -699,20 +621,15 @@ int main(int argc, char **argv)
 		std::cout << "OK mtl-dump: " << nMtl << " materials (" << nMulti << " multi), " << nTex
 		          << " texmaps, " << nNamed << " named\n";
 		remove(g_tempPath.c_str());
-		g_object_unref(in); g_object_unref(src); gsf_shutdown();
 		return 0;
 	}
 
 	if (doUvgenDump)
 	{
-		// Reverse-engineering probe: for every BitmapTex (0x240) dump its reference tree (StdUVGen
-		// "Placement" is ref 0), surfacing any keyframe controllers — the animated "U Offset"/
-		// "V Offset" behind texture-matrix (waterfall UV scroll) animation. Also lists each UVGen
-		// (superclass 0xc20) object's chunk ids so the offset/scale/angle storage can be located.
 		CDllDirectory dll; CClassDirectory3 cd(&dll); CScene scene(&reg, &dll, &cd);
-		{ GsfInput *s = gsf_infile_child_by_name(in, "DllDirectory"); CStorageStream ss(s); dll.serial(ss); dll.parse(VersionUnknown); g_object_unref(s); }
-		{ GsfInput *s = gsf_infile_child_by_name(in, "ClassDirectory3"); CStorageStream ss(s); cd.serial(ss); cd.parse(VersionUnknown); g_object_unref(s); }
-		{ GsfInput *s = gsf_infile_child_by_name(in, "Scene"); CStorageStream ss(s); scene.serial(ss); scene.parse(VersionUnknown); g_object_unref(s); }
+		loadContainer(in, "DllDirectory", dll); dll.parse(VersionUnknown);
+		loadContainer(in, "ClassDirectory3", cd); cd.parse(VersionUnknown);
+		loadContainer(in, "Scene", scene); scene.parse(VersionUnknown);
 		CSceneClassContainer *ssc = scene.container();
 		uint nTex = 0, nUvgen = 0;
 		for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
@@ -742,24 +659,21 @@ int main(int argc, char **argv)
 		}
 		std::cout << "OK uvgen-dump: " << nTex << " bitmaptex, " << nUvgen << " uvgen\n";
 		remove(g_tempPath.c_str());
-		g_object_unref(in); g_object_unref(src); gsf_shutdown();
 		return 0;
 	}
 
 	if (dumpScene)
 	{
-		// Parse -> clean -> build -> disown the Scene and write it out, for structural diffing.
 		CDllDirectory dll; CClassDirectory3 cd(&dll); CScene scene(&reg, &dll, &cd);
-		{ GsfInput *s = gsf_infile_child_by_name(in, "DllDirectory"); CStorageStream ss(s); dll.serial(ss); dll.parse(VersionUnknown); g_object_unref(s); }
-		{ GsfInput *s = gsf_infile_child_by_name(in, "ClassDirectory3"); CStorageStream ss(s); cd.serial(ss); cd.parse(VersionUnknown); g_object_unref(s); }
-		{ GsfInput *s = gsf_infile_child_by_name(in, "Scene"); CStorageStream ss(s); scene.serial(ss); scene.parse(VersionUnknown); g_object_unref(s); }
+		loadContainer(in, "DllDirectory", dll); dll.parse(VersionUnknown);
+		loadContainer(in, "ClassDirectory3", cd); cd.parse(VersionUnknown);
+		loadContainer(in, "Scene", scene); scene.parse(VersionUnknown);
 		scene.clean(); scene.build(VersionUnknown); scene.disown();
 		std::vector<uint8> bytes = writeContainerToTemp(scene, g_tempPath);
 		FILE *f = fopen(dumpScene, "wb");
 		if (f) { if (!bytes.empty()) fwrite(bytes.data(), 1, bytes.size(), f); fclose(f); }
 		std::cout << "wrote " << bytes.size() << " bytes to " << dumpScene << "\n";
 		remove(g_tempPath.c_str());
-		g_object_unref(in); g_object_unref(src); gsf_shutdown();
 		return 0;
 	}
 
@@ -787,48 +701,40 @@ int main(int argc, char **argv)
 	for (const std::string &name : streamNames)
 	{
 		StreamResult r{ name, false, false, "", false, false, "" };
-		GsfInput *s = gsf_infile_child_by_name(in, name.c_str());
-		if (!s) { results.push_back(r); continue; }
+		std::vector<uint8> srcBytes;
+		if (!in.readStream(name, srcBytes)) { results.push_back(r); continue; }
 		r.Exists = true;
 
-		std::vector<uint8> srcBytes, rtBytes;
-		r.T1Ok = t1Roundtrip(s, srcBytes, rtBytes, r.T1Info);
+		std::vector<uint8> rtBytes;
+		r.T1Ok = t1Roundtrip(srcBytes, rtBytes, r.T1Info);
 
 		if (doT2)
 		{
-			g_object_unref(s);
-			s = gsf_infile_child_by_name(in, name.c_str());
 			if (name == "DllDirectory")
 			{
 				r.T2Applicable = true;
-				r.T2Ok = t2DllDirectory(s, srcBytes, r.T2Info);
+				r.T2Ok = t2DllDirectory(srcBytes, r.T2Info);
 				// Also prime dllForT2 for later streams.
 				if (r.T2Ok)
 				{
-					g_object_unref(s);
-					s = gsf_infile_child_by_name(in, name.c_str());
-					CStorageStream ss(s); try { dllForT2.serial(ss); dllForT2.parse(VersionUnknown); dllReady = true; } catch (...) {}
+					CStorageStream ss(srcBytes); try { dllForT2.serial(ss); dllForT2.parse(VersionUnknown); dllReady = true; } catch (...) {}
 				}
 			}
 			else if (name == "ClassDirectory3" && dllReady)
 			{
 				r.T2Applicable = true;
-				r.T2Ok = t2ClassDirectory3(s, srcBytes, &dllForT2, r.T2Info);
+				r.T2Ok = t2ClassDirectory3(srcBytes, &dllForT2, r.T2Info);
 				if (r.T2Ok)
 				{
-					g_object_unref(s);
-					s = gsf_infile_child_by_name(in, name.c_str());
-					CStorageStream ss(s); try { cdForT2.serial(ss); cdForT2.parse(VersionUnknown); cdReady = true; } catch (...) {}
+					CStorageStream ss(srcBytes); try { cdForT2.serial(ss); cdForT2.parse(VersionUnknown); cdReady = true; } catch (...) {}
 				}
 			}
 			else if (name == "Scene" && dllReady && cdReady)
 			{
 				r.T2Applicable = true;
-				r.T2Ok = t2Scene(s, srcBytes, &reg, &dllForT2, &cdForT2, r.T2Info);
+				r.T2Ok = t2Scene(srcBytes, &reg, &dllForT2, &cdForT2, r.T2Info);
 			}
 		}
-
-		g_object_unref(s);
 
 		if (!r.T1Ok || (r.T2Applicable && !r.T2Ok)) anyFail = true;
 		results.push_back(r);
@@ -853,9 +759,6 @@ int main(int argc, char **argv)
 		}
 	}
 
-	g_object_unref(in);
-	g_object_unref(src);
 	remove(g_tempPath.c_str());
-	gsf_shutdown();
 	return anyFail ? 1 : 0;
 }
