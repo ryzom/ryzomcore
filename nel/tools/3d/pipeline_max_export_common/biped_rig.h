@@ -300,6 +300,12 @@ void walkNodeD(PIPELINE::MAX::BUILTIN::INode *node, sint32 fatherId, const Mat4D
                PIPELINE::MAX::CSceneClassContainer *ssc,
                std::vector<Bone> &bones, std::set<std::string> &nameSet);
 void patchFootstepsGround(std::vector<Bone> &bones);
+// Non-biped skeleton walk: walkNode's arithmetic with DefaultPos taken from the reference's Max
+// quotient matrix (max_scene decompMatrix) — a float-precision refinement over the raw controller
+// position, no regression on any other field (see biped_rig.cpp).
+void walkNodeMax(PIPELINE::MAX::BUILTIN::INode *node, sint32 fatherId,
+                 PIPELINE::MAX::CSceneClassContainer *ssc,
+                 std::vector<Bone> &bones, std::set<std::string> &nameSet);
 
 // Biped file detection (ClassDirectory3 scan)
 bool looksLikeBipedFile(PIPELINE::MAX::CClassDirectory3 &cd);

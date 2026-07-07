@@ -45,6 +45,8 @@
 #include "../pipeline_max/builtin/control_keyframer.h"
 #include "../pipeline_max/biped/biped_driven.h"
 
+#include "max_scene.h" // non-biped walkNodeMax: DefaultPos from the Max quotient matrix
+
 namespace PMAX_RIG {
 
 using namespace PIPELINE::MAX;
@@ -1642,6 +1644,70 @@ void walkNodeD(INode *node, sint32 fatherId, const Mat4D &parentWorld,
 
 	std::vector<INode *> kids = orderedChildrenOf(node, ssc);
 	for (std::vector<INode *>::iterator ci = kids.begin(); ci != kids.end(); ++ci) walkNodeD(*ci, myId, worldTM, ssc, bones, nameSet);
+}
+
+// Non-biped skeleton walk (the all-PRS fauna files). Identical to walkNode's non-biped arithmetic —
+// direct PRS-controller values for DefaultRot/Scale, NeL CMatrix world accumulation for InvBindPos —
+// with ONE reference-faithful refinement: DefaultPos is taken from the Max quotient matrix's
+// translation, decompMatrix(nodeTM·Inverse(parentTM)) via max_scene (which is what
+// CExportNel::buildSkeleton / getNELBoneLocalTM actually computes for a non-biped bone), not the raw
+// controller position. That single change measurably improves bit-exactness against the reference
+// (fauna corpus, of 222 bones: DefaultPos bit-exact 47→84 on the x64/SSE build, 47→53 on the VS2008
+// x87 reference build) with NO regression on any other field on either codegen. DefaultRot/Scale and
+// InvBindPos stay on the direct/NeL path deliberately: routing them through our decomp_affine port
+// (which is not bit-identical to Max's SDK object code) only adds ULP noise on skeletons' many
+// near-identity local rotations — see pipeline_max_design.md's skel float-precision note.
+static void walkNodeMaxRec(INode *node, sint32 fatherId, MAXSCENE::SNodeTMCache &cache,
+                           const NLMISC::CMatrix &nelParentWorld,
+                           CSceneClassContainer *ssc, std::vector<Bone> &bones, std::set<std::string> &nameSet)
+{
+	Bone b;
+	std::string name = ucstring(node->userName()).toUtf8();
+	if (!nameSet.insert(name).second) name += "_Second";
+	b.Name = name;
+	b.FatherId = fatherId;
+	b.UnheritScale = false; // non-biped standard PRS bones inherit their father's scale
+	b.LodDisableDistance = std::max(0.0f, getNodeScriptAppDataFloat(node, NEL3D_APPDATA_BONE_LOD_DISTANCE, 0.0f));
+
+	// Direct PRS-controller values + NeL CMatrix world (the shipped walkNode arithmetic).
+	NLMISC::CVector realPos, realScale; NLMISC::CQuat realRot;
+	getLocalTransform(node->getReference(0), realPos, realRot, realScale);
+	realRot.normalize();
+	NLMISC::CMatrix localNel = makeLocalTM(realPos, realRot, realScale);
+	NLMISC::CMatrix worldNel = nelParentWorld * localNel;
+
+	// DefaultPos from the reference's Max quotient matrix (getLocalMatrix = nodeTM·Inverse(parentTM)).
+	MAXMATH::Matrix3M localMax = MAXSCENE::getLocalMatrix(*node, cache);
+	NLMISC::CVector qScale, qPos; NLMISC::CQuat qRot;
+	MAXSCENE::decompMatrix(qScale, qRot, qPos, localMax);
+
+	b.OrigPos = qPos;   // glTF carries the real local; DefaultPos is what the .skel stores
+	b.OrigRot = realRot;
+	if (fatherId < 0) { b.DefaultPos = NLMISC::CVector::Null; b.DefaultRotQuat = NLMISC::CQuat::Identity; }
+	else { b.DefaultPos = qPos; b.DefaultRotQuat = realRot; }
+	b.DefaultScale = realScale;
+
+	NLMISC::CMatrix ibp; ibp.identity();
+	ibp.setRot(worldNel.getI(), worldNel.getJ(), worldNel.getK()); ibp.setPos(worldNel.getPos());
+	ibp.invert();
+	b.InvBindPos = ibp;
+	b.Node = node;
+	b.WorldTM = worldNel;
+
+	sint32 myId = (sint32)bones.size();
+	bones.push_back(b);
+
+	std::vector<INode *> kids = orderedChildrenOf(node, ssc);
+	for (std::vector<INode *>::iterator ci = kids.begin(); ci != kids.end(); ++ci)
+		walkNodeMaxRec(*ci, myId, cache, worldNel, ssc, bones, nameSet);
+}
+
+void walkNodeMax(INode *node, sint32 fatherId, CSceneClassContainer *ssc,
+                 std::vector<Bone> &bones, std::set<std::string> &nameSet)
+{
+	MAXSCENE::SNodeTMCache cache;
+	NLMISC::CMatrix root; root.identity();
+	walkNodeMaxRec(node, fatherId, cache, root, ssc, bones, nameSet);
 }
 
 // Biped ClassIds are confirmed from the character-studio MAXScript reference:

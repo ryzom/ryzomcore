@@ -616,6 +616,13 @@ int main(int argc, char **argv)
 		Mat4D rootMatD = Mat4D::identity();
 		walkNodeD(bip01, -1, rootMatD, scene.container(), bones, nameSet);
 	}
+	else if (!isBiped)
+	{
+		// Non-biped (all-PRS) skeletons: walkNode's arithmetic with DefaultPos taken from the
+		// reference's Max quotient matrix (max_scene decompMatrix) instead of the raw controller
+		// position — a float-precision refinement, no regression on any other field.
+		walkNodeMax(bip01, -1, scene.container(), bones, nameSet);
+	}
 	else
 	{
 		NLMISC::CMatrix rootMat; rootMat.identity();
