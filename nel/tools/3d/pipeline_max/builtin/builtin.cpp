@@ -58,6 +58,9 @@
 
 #include "param_block_2.h"
 
+#include "mtl_base.h"
+#include "multi_mtl.h"
+
 #include "control_keyframer.h"
 
 // using namespace std;
@@ -95,9 +98,9 @@ const CParamBlock2SuperClassDesc ParamBlock2SuperClassDesc(&ParamBlock2ClassDesc
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000c40> CTextureOutputSuperClassDesc;
 const CTextureOutputSuperClassDesc TextureOutputSuperClassDesc(&ReferenceTargetClassDesc, "TextureOutputSuperClassUnknown");
 
-// 0xc10 texmap, under mtlbase
-typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000c10> CTexmapSuperClassDesc;
-const CTexmapSuperClassDesc TexmapSuperClassDesc(&ReferenceTargetClassDesc, "TexmapSuperClassUnknown");
+// 0xc10 texmap, under mtlbase — typed through CMtlBase (shares the material-base name decode).
+typedef CSuperClassDescUnknown<CMtlBase, 0x00000c10> CTexmapSuperClassDesc;
+const CTexmapSuperClassDesc TexmapSuperClassDesc(&MtlBaseClassDesc, "TexmapSuperClassUnknown");
 
 // 0x1080 texmap_container, 'Texmaps' under reftarget directly
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x00001080> CTexmapContainerSuperClassDesc;
@@ -111,9 +114,10 @@ const CShaderSuperClassDesc ShaderSuperClassDesc(&ReferenceTargetClassDesc, "Sha
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x00001110> CSamplerSuperClassDesc;
 const CSamplerSuperClassDesc SamplerSuperClassDesc(&ReferenceTargetClassDesc, "SamplerSuperClassUnknown");
 
-// 0xc00, mtl 'materials', under mtlbase
-typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000c00> CMtlSuperClassDesc;
-const CMtlSuperClassDesc MtlSuperClassDesc(&ReferenceTargetClassDesc, "MtlSuperClassUnknown");
+// 0xc00, mtl 'materials', under mtlbase — typed through CMtlBase (material-base name decode);
+// the Multi/Sub-Object material is exact-registered separately (CMultiMtl, sub-material list).
+typedef CSuperClassDescUnknown<CMtlBase, 0x00000c00> CMtlSuperClassDesc;
+const CMtlSuperClassDesc MtlSuperClassDesc(&MtlBaseClassDesc, "MtlSuperClassUnknown");
 
 // 0xd00, soundobj, under reftarget directly
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000d00> CSoundObjSuperClassDesc;
@@ -280,6 +284,11 @@ void CBuiltin::registerClasses(CSceneClassRegistry *registry)
 
 	// tvnode (inh ReferenceTarget)
 	registry->add(&TrackViewNodeClassDesc);
+
+	// materials (inh MtlBase, superclass 0xc00 typed through CMtlBase below): the Multi/Sub-Object
+	// material is the one that needs its own type (sub-material list); the rest ride the CMtlBase
+	// superclass fallback with just the material-base name decode.
+	registry->add(&MultiMtlClassDesc);
 
 	// keyframe animation controllers (inh ReferenceTarget; typed key tables, see
 	// control_keyframer.h — registered under their respective control superclasses)

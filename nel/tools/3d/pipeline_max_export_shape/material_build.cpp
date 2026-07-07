@@ -56,6 +56,8 @@
 
 #include "../pipeline_max/builtin/node_impl.h"
 #include "../pipeline_max/builtin/reference_maker.h"
+#include "../pipeline_max/builtin/mtl_base.h"
+#include "../pipeline_max/builtin/multi_mtl.h"
 
 using namespace PIPELINE::MAX;
 using namespace PIPELINE::MAX::BUILTIN;
@@ -145,10 +147,14 @@ namespace MATBUILD {
 
 std::string materialName(CSceneClass *mtl)
 {
+	// Materials/texmaps are typed in pipeline_max proper (BUILTIN::CMtlBase, registered for
+	// superclasses 0xc00/0xc10): the 0x4000 base + 0x4001 name decode lives there now.
+	if (CMtlBase *mb = dynamic_cast<CMtlBase *>(mtl))
+		return mb->name();
+	// Fallback for any non-CMtlBase carrier (defensive; should not occur for materials).
 	CStorageRaw *raw = findRawChunk(mtl, 0x4001);
 	if (!raw)
 	{
-		// materials with a 0x4000 base container carry the name inside it
 		CStorageContainer *base = dynamic_cast<CStorageContainer *>(findChunk(mtl, 0x4000));
 		if (base)
 			raw = dynamic_cast<CStorageRaw *>(base->findStorageObject(0x4001));

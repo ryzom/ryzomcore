@@ -64,6 +64,8 @@
 #include "../pipeline_max/nelpatch/nelpatch.h"
 
 #include "../pipeline_max/builtin/param_block_2.h"
+#include "../pipeline_max/builtin/mtl_base.h"
+#include "../pipeline_max/builtin/multi_mtl.h"
 
 using namespace PIPELINE::MAX;
 
@@ -498,6 +500,7 @@ int main(int argc, char **argv)
 	bool verbose = false;
 	bool doPb2SelfTest = false;
 	bool doModifySave = false;
+	bool doMtlDump = false;
 	const char *dumpScene = NULL;
 	const char *maxFile = NULL;
 	// Accept flags in ANY position (the corpus drivers historically appended --parse after the
@@ -509,6 +512,7 @@ int main(int argc, char **argv)
 		else if (a == "--verbose" || a == "-v") verbose = true;
 		else if (a == "--pb2-selftest") doPb2SelfTest = true;
 		else if (a == "--modify-save-test") doModifySave = true;
+		else if (a == "--mtl-dump") doMtlDump = true;
 		else if (a == "--dump-scene" && i + 1 < argc) dumpScene = argv[++i];
 		else if (a.size() >= 2 && a[0] == '-' && a[1] == '-')
 		{
@@ -559,6 +563,47 @@ int main(int argc, char **argv)
 		g_object_unref(src);
 		gsf_shutdown();
 		return rc;
+	}
+
+	if (doMtlDump)
+	{
+		// Enumerate the typed material/texmap tree: name (CMtlBase), sub-materials (CMultiMtl).
+		CDllDirectory dll; CClassDirectory3 cd(&dll); CScene scene(&reg, &dll, &cd);
+		{ GsfInput *s = gsf_infile_child_by_name(in, "DllDirectory"); CStorageStream ss(s); dll.serial(ss); dll.parse(VersionUnknown); g_object_unref(s); }
+		{ GsfInput *s = gsf_infile_child_by_name(in, "ClassDirectory3"); CStorageStream ss(s); cd.serial(ss); cd.parse(VersionUnknown); g_object_unref(s); }
+		{ GsfInput *s = gsf_infile_child_by_name(in, "Scene"); CStorageStream ss(s); scene.serial(ss); scene.parse(VersionUnknown); g_object_unref(s); }
+		uint nMtl = 0, nTex = 0, nMulti = 0, nNamed = 0;
+		CSceneClassContainer *ssc = scene.container();
+		for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
+		{
+			BUILTIN::CMtlBase *mb = dynamic_cast<BUILTIN::CMtlBase *>(it->second);
+			if (!mb) continue;
+			TSClassId sc = mb->classDesc()->superClassId();
+			if (sc == 0x00000c10) ++nTex; else ++nMtl;
+			if (mb->hasName()) ++nNamed;
+			BUILTIN::CMultiMtl *mm = dynamic_cast<BUILTIN::CMultiMtl *>(mb);
+			if (mm) ++nMulti;
+			if (verbose)
+			{
+				std::cout << "  " << (sc == 0x00000c10 ? "TEX " : "MTL ") << mb->classDesc()->classId().toString()
+				          << " '" << mb->name() << "'";
+				if (mm)
+				{
+					std::cout << " MULTI[" << mm->numSubMaterials() << "]:";
+					for (uint s = 0; s < mm->numSubMaterials(); ++s)
+					{
+						BUILTIN::CMtlBase *sub = mm->subMaterial(s);
+						std::cout << " '" << (sub ? sub->name() : std::string("<null>")) << "'";
+					}
+				}
+				std::cout << "\n";
+			}
+		}
+		std::cout << "OK mtl-dump: " << nMtl << " materials (" << nMulti << " multi), " << nTex
+		          << " texmaps, " << nNamed << " named\n";
+		remove(g_tempPath.c_str());
+		g_object_unref(in); g_object_unref(src); gsf_shutdown();
+		return 0;
 	}
 
 	if (dumpScene)
