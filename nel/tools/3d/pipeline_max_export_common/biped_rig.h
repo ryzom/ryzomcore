@@ -195,6 +195,16 @@ struct SBipedRig
 	NLMISC::CVector ComPos;
 	NLMISC::CQuat ComRot;
 	NLMISC::CVector ComDisp;
+	// The 0x0104 base-frame world matrix's own translation, read independently of the 0x006c COM
+	// record above (see parseComRecord). Normally identical to ComPos's height: 0x006c's [4..6]
+	// is this rig's structural/template COM height, which coincides with the biped's current world
+	// position for the overwhelming majority of corpus files. The one confirmed exception is a rig
+	// whose whole biped was repositioned for a specific animation take (e.g. a "settled after death"
+	// resting pose authored by moving the figure, not by keying it) — there 0x0104 tracks the actual
+	// current position and 0x006c's height does not. Used as the vertical fallback when a rig's COM
+	// vertical channel has zero keys system-wide (biped_anim.cpp) — see pipeline_max_design.md §10n.
+	NLMISC::CVector BaseFramePos;
+	bool HaveBaseFramePos;
 	bool HasThighZ;
 	float ThighZ[2];
 	std::vector<SBipedToe> Toes[2];

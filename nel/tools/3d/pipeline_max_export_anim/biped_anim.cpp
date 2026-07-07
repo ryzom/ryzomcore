@@ -548,6 +548,10 @@ CBipedAnimEval::CBipedAnimEval(CSceneClass *rigSys, SBipedRig &rig,
 		m_Keys.RangeMax = mx;
 	}
 
+	if (m_Keys.Vertical.empty() && getenv("PMB_ANIM_DUMP_VERTFALLBACK"))
+		fprintf(stderr, "PMB_ANIM_DUMP_VERTFALLBACK: rig has zero COM-vertical keys; figHeight=%.9g baseFramePos=%.9g (have=%d)\n",
+		        m_FigComPos.z, m_Rig ? m_Rig->BaseFramePos.z : 0.0, m_Rig ? (int)m_Rig->HaveBaseFramePos : -1);
+
 	buildChannels();
 }
 

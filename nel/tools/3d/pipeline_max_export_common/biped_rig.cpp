@@ -290,7 +290,8 @@ const NLMISC::CClassId CLASSID_BIPED_VHT_CTRL(0x00009156, 0x00000000);
 
 
 SBipedRig::SBipedRig() : Sys(NULL), HasCom(false), ComPos(NLMISC::CVector::Null), ComRot(NLMISC::CQuat::Identity),
-		ComDisp(NLMISC::CVector::Null), HasThighZ(false), MaxLegLink(2),
+		ComDisp(NLMISC::CVector::Null), BaseFramePos(NLMISC::CVector::Null), HaveBaseFramePos(false),
+		HasThighZ(false), MaxLegLink(2),
 		HasClavicleZ(false),
 		PelvisWorldRot(NLMISC::CQuat::Identity), HavePelvisWorldRot(false),
 		LastSpineWorldRot(NLMISC::CQuat::Identity), HaveLastSpineWorldRot(false),
@@ -693,7 +694,10 @@ void parseArmRecord(SBipedRig &rig)
 }
 
 // Parse the COM record (0x006c: [4..6] position Y-up, [8..11] world rotation quat Y-up), with
-// 0x0104 (Y-up 4x4, canonical -90degZ rotation assumed) as the fallback.
+// 0x0104 (Y-up 4x4, canonical -90degZ rotation assumed) as the fallback when 0x006c is absent.
+// 0x0104 is additionally read into BaseFramePos independently of whether 0x006c succeeded — see
+// the field comment in biped_rig.h and pipeline_max_design.md §10n: the two normally agree, and
+// the one confirmed disagreement is the source of truth for a whole-rig-repositioned anim take.
 void parseComRecord(SBipedRig &rig)
 {
 	size_t n = 0;
@@ -709,14 +713,19 @@ void parseComRecord(SBipedRig &rig)
 		NLMISC::CMatrix rm; rm.identity(); rm.setRot(rig.ComRot);
 		rig.ComPos = NLMISC::CVector(c[4], -c[6], c[5]) + rm.mulVector(rig.ComDisp);
 		rig.HasCom = true;
-		return;
 	}
-	const float *com = bipedChunkFloats(0x0104, 15, &n);
+	size_t nb = 0;
+	const float *com = bipedChunkFloats(0x0104, 15, &nb);
 	if (com)
 	{
-		rig.ComPos = NLMISC::CVector(com[12], -com[14], com[13]);
-		rig.ComRot = NLMISC::CQuat(0.0f, 0.0f, -0.70710678f, 0.70710678f);
-		rig.HasCom = true;
+		rig.BaseFramePos = NLMISC::CVector(com[12], -com[14], com[13]);
+		rig.HaveBaseFramePos = true;
+		if (!rig.HasCom)
+		{
+			rig.ComPos = rig.BaseFramePos;
+			rig.ComRot = NLMISC::CQuat(0.0f, 0.0f, -0.70710678f, 0.70710678f);
+			rig.HasCom = true;
+		}
 	}
 }
 
