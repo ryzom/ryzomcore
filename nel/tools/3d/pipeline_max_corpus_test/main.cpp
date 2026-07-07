@@ -66,6 +66,8 @@
 #include "../pipeline_max/builtin/param_block_2.h"
 #include "../pipeline_max/builtin/mtl_base.h"
 #include "../pipeline_max/builtin/multi_mtl.h"
+#include "../pipeline_max/builtin/reference_maker.h"
+#include "../pipeline_max/builtin/control_keyframer.h"
 
 using namespace PIPELINE::MAX;
 
@@ -523,6 +525,37 @@ static int pb2SelfTest(GsfInfile *in, CSceneClassRegistry *reg, bool verbose)
 	return nFail ? 1 : 0;
 }
 
+// Recursive reference-tree dump (used by --uvgen-dump): prints each reference slot's class id and,
+// for keyframe controllers, their key count + tick range — to locate animated sub-controllers such
+// as a StdUVGen's "U Offset".
+static void dumpRefTree(CSceneClass *obj, int depth, int maxDepth)
+{
+	BUILTIN::CReferenceMaker *rm = dynamic_cast<BUILTIN::CReferenceMaker *>(obj);
+	if (!rm) return;
+	std::string pad((size_t)(depth + 1) * 2, ' ');
+	for (uint r = 0; r < rm->nbReferences(); ++r)
+	{
+		CSceneClass *ref = dynamic_cast<CSceneClass *>(rm->getReference(r));
+		if (!ref) { std::cout << pad << "ref[" << r << "] = null\n"; continue; }
+		std::string extra;
+		if (BUILTIN::CControlKeyFramerBase *kf = dynamic_cast<BUILTIN::CControlKeyFramerBase *>(ref))
+		{
+			sint32 s = 0, e = 0; kf->range(s, e);
+			extra = " <KEYFRAMER keys=" + std::to_string(kf->keyCount()) + " range=[" + std::to_string(s) + ".." + std::to_string(e) + "]>";
+		}
+		std::cout << pad << "ref[" << r << "] " << ref->classDesc()->classId().toString()
+		          << " sc=" << std::hex << ref->classDesc()->superClassId() << std::dec << extra;
+		if (CStorageContainer *cont = dynamic_cast<CStorageContainer *>(ref))
+		{
+			std::cout << " chunks:";
+			for (CStorageContainer::TStorageObjectConstIt ct = cont->chunks().begin(); ct != cont->chunks().end(); ++ct)
+				std::cout << " 0x" << std::hex << ct->first << std::dec;
+		}
+		std::cout << "\n";
+		if (depth + 1 < maxDepth) dumpRefTree(ref, depth + 1, maxDepth);
+	}
+}
+
 int main(int argc, char **argv)
 {
 	bool doT2 = false;
@@ -530,6 +563,7 @@ int main(int argc, char **argv)
 	bool doPb2SelfTest = false;
 	bool doModifySave = false;
 	bool doMtlDump = false;
+	bool doUvgenDump = false;
 	const char *dumpScene = NULL;
 	const char *maxFile = NULL;
 	// Accept flags in ANY position (the corpus drivers historically appended --parse after the
@@ -542,6 +576,7 @@ int main(int argc, char **argv)
 		else if (a == "--pb2-selftest") doPb2SelfTest = true;
 		else if (a == "--modify-save-test") doModifySave = true;
 		else if (a == "--mtl-dump") doMtlDump = true;
+		else if (a == "--uvgen-dump") doUvgenDump = true;
 		else if (a == "--dump-scene" && i + 1 < argc) dumpScene = argv[++i];
 		else if (a.size() >= 2 && a[0] == '-' && a[1] == '-')
 		{
@@ -630,6 +665,49 @@ int main(int argc, char **argv)
 		}
 		std::cout << "OK mtl-dump: " << nMtl << " materials (" << nMulti << " multi), " << nTex
 		          << " texmaps, " << nNamed << " named\n";
+		remove(g_tempPath.c_str());
+		g_object_unref(in); g_object_unref(src); gsf_shutdown();
+		return 0;
+	}
+
+	if (doUvgenDump)
+	{
+		// Reverse-engineering probe: for every BitmapTex (0x240) dump its reference tree (StdUVGen
+		// "Placement" is ref 0), surfacing any keyframe controllers — the animated "U Offset"/
+		// "V Offset" behind texture-matrix (waterfall UV scroll) animation. Also lists each UVGen
+		// (superclass 0xc20) object's chunk ids so the offset/scale/angle storage can be located.
+		CDllDirectory dll; CClassDirectory3 cd(&dll); CScene scene(&reg, &dll, &cd);
+		{ GsfInput *s = gsf_infile_child_by_name(in, "DllDirectory"); CStorageStream ss(s); dll.serial(ss); dll.parse(VersionUnknown); g_object_unref(s); }
+		{ GsfInput *s = gsf_infile_child_by_name(in, "ClassDirectory3"); CStorageStream ss(s); cd.serial(ss); cd.parse(VersionUnknown); g_object_unref(s); }
+		{ GsfInput *s = gsf_infile_child_by_name(in, "Scene"); CStorageStream ss(s); scene.serial(ss); scene.parse(VersionUnknown); g_object_unref(s); }
+		CSceneClassContainer *ssc = scene.container();
+		uint nTex = 0, nUvgen = 0;
+		for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
+		{
+			CSceneClass *obj = dynamic_cast<CSceneClass *>(it->second);
+			if (!obj) continue;
+			TSClassId sc = obj->classDesc()->superClassId();
+			NLMISC::CClassId cid = obj->classDesc()->classId();
+			if (cid == NLMISC::CClassId(0x00000240, 0x00000000))
+			{
+				++nTex;
+				std::string nm;
+				if (BUILTIN::CMtlBase *mb = dynamic_cast<BUILTIN::CMtlBase *>(obj)) nm = mb->name();
+				std::cout << "BitmapTex '" << nm << "'\n";
+				dumpRefTree(obj, 0, 4);
+			}
+			else if (sc == 0x00000c20 || cid == NLMISC::CClassId(0x00000100, 0x00000000))
+			{
+				++nUvgen;
+				std::cout << "UVGen " << cid.toString() << " sc=" << std::hex << sc << std::dec << " chunks:";
+				if (CStorageContainer *cont = dynamic_cast<CStorageContainer *>(obj))
+					for (CStorageContainer::TStorageObjectConstIt ct = cont->chunks().begin(); ct != cont->chunks().end(); ++ct)
+						std::cout << " 0x" << std::hex << ct->first << std::dec;
+				std::cout << "\n";
+				dumpRefTree(obj, 0, 2);
+			}
+		}
+		std::cout << "OK uvgen-dump: " << nTex << " bitmaptex, " << nUvgen << " uvgen\n";
 		remove(g_tempPath.c_str());
 		g_object_unref(in); g_object_unref(src); gsf_shutdown();
 		return 0;
