@@ -45,6 +45,7 @@
 #include "../pipeline_max/storage_object.h"
 
 #include "../pipeline_max_export_common/max_math.h"
+#include "../pipeline_max_export_common/max_scene.h"
 
 namespace PIPELINE {
 namespace MAX {
@@ -67,8 +68,8 @@ using PIPELINE::MAX::BUILTIN::INode;
 using PIPELINE::MAX::BUILTIN::CReferenceMaker;
 
 // Well-known scene class identities
-extern const NLMISC::CClassId CLASSID_PRS_CTRL;
-extern const NLMISC::CClassId CLASSID_LOOKAT_CTRL;
+using MAXSCENE::CLASSID_PRS_CTRL;
+using MAXSCENE::CLASSID_LOOKAT_CTRL;
 extern const NLMISC::CClassId CLASSID_OSM_DERIVED;
 extern const NLMISC::CClassId CLASSID_WSM_DERIVED;
 extern const NLMISC::CClassId CLASSID_RPO;
@@ -229,32 +230,27 @@ bool resolveNelBoolAt0(const std::vector<SPB2Block> &blocks, uint block, uint16 
 // Controller values at t=0 (PRS sub-controllers; typed keyframer key tables bracketed at t=0,
 // else the default-value chunks 0x2503/0x2504/0x2505)
 
-MAXMATH::Point3M posValueAt0(CSceneClass *ctrl);
-MAXMATH::QuatM rotValueAt0(CSceneClass *ctrl);
-MAXMATH::ScaleValueM scaleValueAt0(CSceneClass *ctrl);
+using MAXSCENE::posValueAt0;
+using MAXSCENE::rotValueAt0;
+using MAXSCENE::scaleValueAt0;
 
 // Bezier float controller value at t=0 (morph channel weights); returns def when absent.
-float floatValueAt0(CSceneClass *ctrl, float def);
+using MAXSCENE::floatValueAt0;
 
 // ---------------------------------------------------------------------------------------------
 // Node access
 
-struct SNodeTMCache
-{
-	std::map<INode *, MAXMATH::Matrix3M> TM;
-	INode *SceneRoot;
-	SNodeTMCache() : SceneRoot(NULL) { }
-};
+typedef MAXSCENE::SNodeTMCache SNodeTMCache;
 
 // GetNodeTM(0) replication with memoization.
-MAXMATH::Matrix3M getNodeTM(INode *node, SNodeTMCache &cache);
+using MAXSCENE::getNodeTM;
 
 // Node state flags chunk 0x0963 bit 0x40 = hidden; rendering-control chunk 0x099c bits
 // 0x0200 = cast-shadows, 0x0400 = receive-shadows.
 uint32 readNodeDword(CNodeImpl *node, uint16 chunkId, bool &found);
 
 // The node's object-offset TRS (chunks 0x096a pos, 0x096b rot, 0x096c ScaleValue).
-bool readObjectOffset(CNodeImpl *node, MAXMATH::Point3M &pos, MAXMATH::QuatM &rot, MAXMATH::ScaleValueM &scale);
+using MAXSCENE::readObjectOffset;
 
 // ---------------------------------------------------------------------------------------------
 // Object chain

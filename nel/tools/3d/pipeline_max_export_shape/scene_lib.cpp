@@ -66,8 +66,6 @@ using namespace MAXMATH;
 
 namespace SCENELIB {
 
-const NLMISC::CClassId CLASSID_PRS_CTRL(0x00002005, 0x00000000);
-const NLMISC::CClassId CLASSID_LOOKAT_CTRL(0x00002006, 0x00000000);
 const NLMISC::CClassId CLASSID_OSM_DERIVED(0x29263a68, 0x405f22f5);
 const NLMISC::CClassId CLASSID_WSM_DERIVED(0x4ec13906, 0x5578130e);
 const NLMISC::CClassId CLASSID_RPO(0x368c679f, 0x711c22ee);
@@ -83,12 +81,6 @@ const NLMISC::CClassId CLASSID_NEL_BMTEX(0x5a8003f9, 0x043e0955);
 // AppData script-entry key (the MaxScript utility panel writes these)
 static const NLMISC::CClassId APPDATA_SCRIPT_CLASS_ID(0x04d64858, 0x16d1751d);
 static const uint32 APPDATA_SCRIPT_SUPER_CLASS_ID = 4128;
-
-// PRS sub-controller default-value chunk ids
-#define CHUNK_CTRL_POS_VALUE 0x2503
-#define CHUNK_CTRL_ROT_VALUE 0x2504
-#define CHUNK_CTRL_SCALE_VALUE 0x2505
-#define CHUNK_CTRL_FLOAT_VALUE 0x2501
 
 // ---------------------------------------------------------------------------------------------
 
@@ -239,24 +231,6 @@ uint32 readNodeDword(CNodeImpl *node, uint16 chunkId, bool &found)
 	return fl;
 }
 
-bool readObjectOffset(CNodeImpl *node, Point3M &pos, QuatM &rot, ScaleValueM &scale)
-{
-	pos.x = pos.y = pos.z = 0.0f;
-	rot.x = rot.y = rot.z = 0.0f;
-	rot.w = 1.0f;
-	scale.s.x = scale.s.y = scale.s.z = 1.0f;
-	scale.q.x = scale.q.y = scale.q.z = 0.0f;
-	scale.q.w = 1.0f;
-	bool any = false;
-	CStorageRaw *raw = findRawChunk(node, 0x096a);
-	if (raw && raw->Value.size() >= 12) { memcpy(&pos, nlVectorData(raw->Value), 12); any = true; }
-	raw = findRawChunk(node, 0x096b);
-	if (raw && raw->Value.size() >= 16) { memcpy(&rot, nlVectorData(raw->Value), 16); any = true; }
-	raw = findRawChunk(node, 0x096c);
-	if (raw && raw->Value.size() >= 28) { memcpy(&scale, nlVectorData(raw->Value), 28); any = true; }
-	return any;
-}
-
 // ---------------------------------------------------------------------------------------------
 // Old ParamBlock
 
@@ -405,150 +379,6 @@ bool resolveNelBoolAt0(const std::vector<SPB2Block> &blocks, uint block, uint16 
 			return onOffControllerAt0(dynamic_cast<CReferenceMaker *>(rv));
 	}
 	return def;
-}
-
-// ---------------------------------------------------------------------------------------------
-// Controller values at t=0
-
-static bool readCtrlDefaultBytes(CSceneClass *sc, uint16 chunkId, void *dst, size_t nBytes)
-{
-	CControlKeyFramerBase *kf = dynamic_cast<CControlKeyFramerBase *>(sc);
-	if (kf)
-	{
-		uint size = 0;
-		const uint8 *data = kf->defaultValue(size);
-		if (data && size >= nBytes)
-		{
-			memcpy(dst, data, nBytes);
-			return true;
-		}
-	}
-	if (!sc) return false;
-	CStorageRaw *raw = findRawChunk(sc, chunkId);
-	if (raw && raw->Value.size() >= nBytes)
-	{
-		memcpy(dst, nlVectorData(raw->Value), nBytes);
-		return true;
-	}
-	return false;
-}
-
-// The controller value-at-t=0 evaluation lives in the library now (CControlKeyFramerBase::
-// {float,pos,rot,scale}ValueAt0 — key-bracket at tick 0 else default-value chunk); these wrap it
-// into the exporter's MAXMATH value types, keeping the raw-chunk fallback for controllers that
-// are not typed keyframers (an unknown-class PRS sub-controller carrying a bare 0x2503/04/05
-// chunk).
-
-Point3M posValueAt0(CSceneClass *ctrl)
-{
-	Point3M p = { 0.0f, 0.0f, 0.0f };
-	if (CControlKeyFramerBase *kf = dynamic_cast<CControlKeyFramerBase *>(ctrl))
-	{
-		float v[3];
-		if (kf->posValueAt0(v)) { p.x = v[0]; p.y = v[1]; p.z = v[2]; }
-		return p;
-	}
-	readCtrlDefaultBytes(ctrl, CHUNK_CTRL_POS_VALUE, &p, 12);
-	return p;
-}
-
-QuatM rotValueAt0(CSceneClass *ctrl)
-{
-	QuatM q = { 0.0f, 0.0f, 0.0f, 1.0f };
-	if (CControlKeyFramerBase *kf = dynamic_cast<CControlKeyFramerBase *>(ctrl))
-	{
-		float v[4];
-		if (kf->rotValueAt0(v)) { q.x = v[0]; q.y = v[1]; q.z = v[2]; q.w = v[3]; }
-		return q;
-	}
-	readCtrlDefaultBytes(ctrl, CHUNK_CTRL_ROT_VALUE, &q, 16);
-	return q;
-}
-
-ScaleValueM scaleValueAt0(CSceneClass *ctrl)
-{
-	ScaleValueM s;
-	s.s.x = s.s.y = s.s.z = 1.0f;
-	s.q.x = s.q.y = s.q.z = 0.0f;
-	s.q.w = 1.0f;
-	if (CControlKeyFramerBase *kf = dynamic_cast<CControlKeyFramerBase *>(ctrl))
-	{
-		float v[7];
-		if (kf->scaleValueAt0(v))
-		{
-			s.s.x = v[0]; s.s.y = v[1]; s.s.z = v[2];
-			s.q.x = v[3]; s.q.y = v[4]; s.q.z = v[5]; s.q.w = v[6];
-		}
-		return s;
-	}
-	// Default chunk 0x2505: CVector scale + CQuat axis system (28 bytes) on a non-keyframer.
-	uint8 buf[28];
-	if (readCtrlDefaultBytes(ctrl, CHUNK_CTRL_SCALE_VALUE, buf, 28))
-	{
-		memcpy(&s.s, buf, 12);
-		memcpy(&s.q, buf + 12, 16);
-	}
-	else if (readCtrlDefaultBytes(ctrl, CHUNK_CTRL_SCALE_VALUE, buf, 12))
-	{
-		memcpy(&s.s, buf, 12);
-	}
-	return s;
-}
-
-float floatValueAt0(CSceneClass *ctrl, float def)
-{
-	float v = def;
-	if (CControlKeyFramerBase *kf = dynamic_cast<CControlKeyFramerBase *>(ctrl))
-	{
-		float fv;
-		if (kf->floatValueAt0(fv)) v = fv;
-		return v;
-	}
-	readCtrlDefaultBytes(ctrl, CHUNK_CTRL_FLOAT_VALUE, &v, 4);
-	return v;
-}
-
-// ---------------------------------------------------------------------------------------------
-// Node TM
-
-Matrix3M getNodeTM(INode *node, SNodeTMCache &cache)
-{
-	if (!node || node == cache.SceneRoot) return Matrix3M::identity();
-	if (!dynamic_cast<CNodeImpl *>(node)) return Matrix3M::identity(); // scene root / unknown node class
-	std::map<INode *, Matrix3M>::iterator it = cache.TM.find(node);
-	if (it != cache.TM.end()) return it->second;
-
-	Point3M pos = { 0.0f, 0.0f, 0.0f };
-	QuatM rot = { 0.0f, 0.0f, 0.0f, 1.0f };
-	ScaleValueM scale;
-	scale.s.x = scale.s.y = scale.s.z = 1.0f;
-	scale.q.x = scale.q.y = scale.q.z = 0.0f;
-	scale.q.w = 1.0f;
-
-	CReferenceMaker *tm = dynamic_cast<CReferenceMaker *>(node->getReference(0));
-	CSceneClass *tmsc = dynamic_cast<CSceneClass *>(tm);
-	if (tmsc && tmsc->classDesc()->classId() == CLASSID_PRS_CTRL && tm->nbReferences() >= 3)
-	{
-		pos = posValueAt0(dynamic_cast<CSceneClass *>(tm->getReference(0)));
-		rot = rotValueAt0(dynamic_cast<CSceneClass *>(tm->getReference(1)));
-		scale = scaleValueAt0(dynamic_cast<CSceneClass *>(tm->getReference(2)));
-	}
-	else if (tmsc && tmsc->classDesc()->classId() == CLASSID_LOOKAT_CTRL && tm->nbReferences() >= 2)
-	{
-		// LookAt (target lights/cameras): position from ref 1; rotation is target-computed and
-		// not needed for the current consumers.
-		pos = posValueAt0(dynamic_cast<CSceneClass *>(tm->getReference(1)));
-	}
-	else if (tmsc)
-	{
-		fprintf(stderr, "WARNING: node '%s' TM controller %s is not PRS; identity local TM used\n",
-		        ucstring(node->userName()).toUtf8().c_str(), tmsc->classDesc()->classId().toString().c_str());
-	}
-
-	Matrix3M local = composePRS(pos, rot, scale);
-	Matrix3M world = local * getNodeTM(node->parent(), cache);
-	cache.TM[node] = world;
-	return world;
 }
 
 // ---------------------------------------------------------------------------------------------

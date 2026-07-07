@@ -46,6 +46,12 @@ using namespace SCENELIB;
 using namespace MESHEVAL;
 using namespace MATBUILD;
 
+// The Max transform helpers now live in pipeline_max_export_common/max_scene.h; the getLocalMatrix
+// public API is re-exported through mesh_build.h (SCENELIB provides getNodeTM / SNodeTMCache /
+// readObjectOffset), decompMatrix / convertMatrix resolve here.
+using MAXSCENE::decompMatrix;
+using MAXSCENE::convertMatrix;
+
 namespace MESHBUILD {
 
 // NeL export AppData sub-ids used here
@@ -232,43 +238,6 @@ static void getLocalNormal(const SEvalMesh &mesh, const SRenderNormals &rn, uint
 		}
 	}
 	memcpy(out, &rn.FaceNormals[face * 3], 12);
-}
-
-// ---------------------------------------------------------------------------------------------
-
-Matrix3M getLocalMatrix(INode &node, SNodeTMCache &tmCache)
-{
-	Matrix3M nodeTM = getNodeTM(&node, tmCache);
-	Matrix3M parentTM = getNodeTM(node.parent(), tmCache);
-	return nodeTM * inverseM3(parentTM);
-}
-
-// Max row-vector Matrix3 -> NeL column CMatrix
-static void convertMatrix(NLMISC::CMatrix &nelMatrix, const Matrix3M &maxMatrix)
-{
-	float m[16];
-	m[0] = maxMatrix.m[0][0]; m[4] = maxMatrix.m[1][0]; m[8] = maxMatrix.m[2][0]; m[12] = maxMatrix.m[3][0];
-	m[1] = maxMatrix.m[0][1]; m[5] = maxMatrix.m[1][1]; m[9] = maxMatrix.m[2][1]; m[13] = maxMatrix.m[3][1];
-	m[2] = maxMatrix.m[0][2]; m[6] = maxMatrix.m[1][2]; m[10] = maxMatrix.m[2][2]; m[14] = maxMatrix.m[3][2];
-	m[3] = 0.0f; m[7] = 0.0f; m[11] = 0.0f; m[15] = 1.0f;
-	nelMatrix.identity();
-	nelMatrix.set(m);
-}
-
-// CExportNel::decompMatrix (decomp_affine + the decompMatrix conventions)
-static void decompMatrix(NLMISC::CVector &nelScale, NLMISC::CQuat &nelRot, NLMISC::CVector &nelPos, const Matrix3M &maxMatrix)
-{
-	AffinePartsM parts;
-	decompAffine(maxMatrix, parts);
-	nelPos.set(parts.t.x, parts.t.y, parts.t.z);
-	nelRot.set(parts.q.x, parts.q.y, parts.q.z, -parts.q.w);
-	Matrix3M srtm = quatToMatrix3(parts.u);
-	Matrix3M stm = Matrix3M::identity();
-	stm.m[0][0] = parts.k.x;
-	stm.m[1][1] = parts.k.y;
-	stm.m[2][2] = parts.k.z;
-	Matrix3M smat = inverseM3(srtm) * stm * srtm;
-	nelScale.set(parts.f * smat.m[0][0], parts.f * smat.m[1][1], parts.f * smat.m[2][2]);
 }
 
 void buildBaseMeshInterface(CMeshBase::CMeshBaseBuild &buildMesh, SMaxMeshBaseBuild &maxBaseBuild,

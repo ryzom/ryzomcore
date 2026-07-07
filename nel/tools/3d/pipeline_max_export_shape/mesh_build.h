@@ -58,7 +58,7 @@ void buildMeshInterface(const MESHEVAL::SEvalMesh &mesh, NL3D::CMesh::CMeshBuild
 void buildMRMParameters(CSceneClass *node, NL3D::CMRMParameters &params);
 
 // getLocalMatrix: nodeTM * Inverse(parentTM) in Max float math.
-MAXMATH::Matrix3M getLocalMatrix(INode &node, SNodeTMCache &tmCache);
+using MAXSCENE::getLocalMatrix;
 
 } /* namespace MESHBUILD */
 

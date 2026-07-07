@@ -92,11 +92,22 @@
 #include "../pipeline_max/builtin/control_keyframer.h"
 
 #include "../pipeline_max_export_common/max_math.h"
+#include "../pipeline_max_export_common/max_scene.h"
 #include "../pipeline_max_export_common/db_path.h"
 
 using namespace PIPELINE::MAX;
 using namespace PIPELINE::MAX::BUILTIN;
 using namespace MAXMATH;
+
+// Shared Max scene-graph transform helpers (formerly file-local copies here); see max_scene.h.
+using MAXSCENE::CLASSID_PRS_CTRL;
+using MAXSCENE::CLASSID_LOOKAT_CTRL;
+using MAXSCENE::posValueAt0;
+using MAXSCENE::rotValueAt0;
+using MAXSCENE::scaleValueAt0;
+using MAXSCENE::readObjectOffset;
+using MAXSCENE::getNodeTM;
+using MAXSCENE::SNodeTMCache;
 
 // NeL export AppData sub-ids (plugin_max/nel_mesh_lib/export_appdata.h)
 #define NEL3D_APPDATA_IGNAME 1423062564
@@ -121,9 +132,7 @@ using namespace MAXMATH;
 static const NLMISC::CClassId APPDATA_SCRIPT_CLASS_ID(0x04d64858, 0x16d1751d);
 static const uint32 APPDATA_SCRIPT_SUPER_CLASS_ID = 4128;
 
-// Scene class ids
-static const NLMISC::CClassId CLASSID_PRS_CTRL(0x00002005, 0x00000000);
-static const NLMISC::CClassId CLASSID_LOOKAT_CTRL(0x00002006, 0x00000000);
+// Scene class ids (CLASSID_PRS_CTRL / CLASSID_LOOKAT_CTRL come from MAXSCENE, imported above)
 static const NLMISC::CClassId CLASSID_OSM_DERIVED(0x29263a68, 0x405f22f5);
 static const NLMISC::CClassId CLASSID_WSM_DERIVED(0x4ec13906, 0x5578130e);
 static const NLMISC::CClassId CLASSID_RPO(0x368c679f, 0x711c22ee);
@@ -140,11 +149,6 @@ static const TSClassId SCLASS_CAMERA = 0x00000020;
 static const TSClassId SCLASS_HELPER = 0x00000050;
 static const TSClassId SCLASS_OSMODIFIER = 0x00000810;
 static const TSClassId SCLASS_WSMODIFIER = 0x00000820;
-
-// PRS sub-controller default-value chunk ids
-#define CHUNK_CTRL_POS_VALUE 0x2503
-#define CHUNK_CTRL_ROT_VALUE 0x2504
-#define CHUNK_CTRL_SCALE_VALUE 0x2505
 
 static bool g_verbose = false;
 // Search directories for .ps shapes (the clusterize link test needs the FX AABBox, like the
@@ -504,238 +508,6 @@ static uint32 readNodeDword(CNodeImpl *node, uint16 chunkId, bool &found)
 }
 
 // ---------------------------------------------------------------------------------------------
-// PRS controller values at t=0 (GetNodeTM(0) inputs). For keyed typed keyframers the value at
-// tick 0 is the bracketing key's value (clamped before/after the key range); a t=0 that falls
-// strictly between two keys warns and linearly interpolates (not hit in the ig corpus).
-
-static bool readCtrlDefaultBytes(CSceneClass *sc, uint16 chunkId, void *dst, size_t nBytes)
-{
-	CControlKeyFramerBase *kf = dynamic_cast<CControlKeyFramerBase *>(sc);
-	if (kf)
-	{
-		uint size = 0;
-		const uint8 *data = kf->defaultValue(size);
-		if (data && size >= nBytes)
-		{
-			memcpy(dst, data, nBytes);
-			return true;
-		}
-	}
-	if (!sc) return false;
-	// Fallback: scan the class's chunks (pre-parse) and orphans (post-parse).
-	IStorageObject *so = sc->findStorageObject(chunkId);
-	if (!so)
-	{
-		const CStorageContainer::TStorageObjectContainer &orphans = sc->orphanedChunks();
-		for (CStorageContainer::TStorageObjectConstIt it = orphans.begin(); it != orphans.end(); ++it)
-		{
-			if (it->first == chunkId) { so = it->second; break; }
-		}
-	}
-	CStorageRaw *raw = dynamic_cast<CStorageRaw *>(so);
-	if (raw && raw->Value.size() >= nBytes)
-	{
-		memcpy(dst, nlVectorData(raw->Value), nBytes);
-		return true;
-	}
-	return false;
-}
-
-// Index of the key bracketing t=0: returns the value-index to use and, via lerpNext/lerpFactor,
-// whether interpolation toward the next key is needed.
-template <typename TKey>
-static uint keyIndexAt0(const TKey *keys, uint numKeys, bool &lerpNext, float &lerpFactor)
-{
-	lerpNext = false;
-	lerpFactor = 0.0f;
-	if (keys[0].Time >= 0) return 0;
-	if (keys[numKeys - 1].Time <= 0) return numKeys - 1;
-	for (uint i = 0; i + 1 < numKeys; ++i)
-	{
-		if (keys[i].Time <= 0 && keys[i + 1].Time >= 0)
-		{
-			if (keys[i + 1].Time == 0) return i + 1;
-			if (keys[i].Time == 0) return i;
-			lerpNext = true;
-			lerpFactor = (0.0f - (float)keys[i].Time) / ((float)keys[i + 1].Time - (float)keys[i].Time);
-			fprintf(stderr, "WARNING: t=0 falls between keys (%d..%d ticks); linear interpolation used\n",
-			        keys[i].Time, keys[i + 1].Time);
-			return i;
-		}
-	}
-	return 0;
-}
-
-static Point3M posValueAt0(CSceneClass *ctrl)
-{
-	Point3M p = { 0.0f, 0.0f, 0.0f };
-	CControlKeyFramerBase *kf = dynamic_cast<CControlKeyFramerBase *>(ctrl);
-	if (kf && kf->keyCount())
-	{
-		bool lerp; float f;
-		if (CControlPosLinear *c = dynamic_cast<CControlPosLinear *>(kf))
-		{
-			uint i = keyIndexAt0(c->keys(), kf->keyCount(), lerp, f);
-			const CStorageLinPoint3Key *k = c->keys();
-			p.x = k[i].Val[0]; p.y = k[i].Val[1]; p.z = k[i].Val[2];
-			if (lerp)
-			{
-				p.x += f * (k[i + 1].Val[0] - k[i].Val[0]);
-				p.y += f * (k[i + 1].Val[1] - k[i].Val[1]);
-				p.z += f * (k[i + 1].Val[2] - k[i].Val[2]);
-			}
-			return p;
-		}
-		if (CControlPosBezier *c = dynamic_cast<CControlPosBezier *>(kf))
-		{
-			uint i = keyIndexAt0(c->keys(), kf->keyCount(), lerp, f);
-			const CStorageBezPoint3Key *k = c->keys();
-			p.x = k[i].Val[0]; p.y = k[i].Val[1]; p.z = k[i].Val[2];
-			if (lerp) fprintf(stderr, "WARNING: bezier pos mid-interval at t=0, key value used\n");
-			return p;
-		}
-		if (CControlPosTCB *c = dynamic_cast<CControlPosTCB *>(kf))
-		{
-			uint i = keyIndexAt0(c->keys(), kf->keyCount(), lerp, f);
-			const CStorageTCBPoint3Key *k = c->keys();
-			p.x = k[i].Val[0]; p.y = k[i].Val[1]; p.z = k[i].Val[2];
-			if (lerp) fprintf(stderr, "WARNING: tcb pos mid-interval at t=0, key value used\n");
-			return p;
-		}
-	}
-	readCtrlDefaultBytes(ctrl, CHUNK_CTRL_POS_VALUE, &p, 12);
-	return p;
-}
-
-static QuatM rotValueAt0(CSceneClass *ctrl)
-{
-	QuatM q = { 0.0f, 0.0f, 0.0f, 1.0f };
-	CControlKeyFramerBase *kf = dynamic_cast<CControlKeyFramerBase *>(ctrl);
-	if (kf && kf->keyCount())
-	{
-		bool lerp; float f;
-		if (CControlRotLinear *c = dynamic_cast<CControlRotLinear *>(kf))
-		{
-			uint i = keyIndexAt0(c->keys(), kf->keyCount(), lerp, f);
-			const CStorageLinRotKey *k = c->keys();
-			q.x = k[i].Quat[0]; q.y = k[i].Quat[1]; q.z = k[i].Quat[2]; q.w = k[i].Quat[3];
-			if (lerp) fprintf(stderr, "WARNING: linear rot mid-interval at t=0, key value used\n");
-			return q;
-		}
-		if (CControlRotTCB *c = dynamic_cast<CControlRotTCB *>(kf))
-		{
-			uint i = keyIndexAt0(c->keys(), kf->keyCount(), lerp, f);
-			const CStorageTCBRotKey *k = c->keys();
-			q.x = k[i].AbsQuat[0]; q.y = k[i].AbsQuat[1]; q.z = k[i].AbsQuat[2]; q.w = k[i].AbsQuat[3];
-			if (lerp) fprintf(stderr, "WARNING: tcb rot mid-interval at t=0, key value used\n");
-			return q;
-		}
-	}
-	readCtrlDefaultBytes(ctrl, CHUNK_CTRL_ROT_VALUE, &q, 16);
-	return q;
-}
-
-static ScaleValueM scaleValueAt0(CSceneClass *ctrl)
-{
-	ScaleValueM s;
-	s.s.x = s.s.y = s.s.z = 1.0f;
-	s.q.x = s.q.y = s.q.z = 0.0f;
-	s.q.w = 1.0f;
-	CControlKeyFramerBase *kf = dynamic_cast<CControlKeyFramerBase *>(ctrl);
-	if (kf && kf->keyCount())
-	{
-		bool lerp; float f;
-		if (CControlScaleLinear *c = dynamic_cast<CControlScaleLinear *>(kf))
-		{
-			uint i = keyIndexAt0(c->keys(), kf->keyCount(), lerp, f);
-			const CStorageLinScaleKey *k = c->keys();
-			memcpy(&s.s, k[i].S, 12);
-			memcpy(&s.q, k[i].Q, 16);
-			if (lerp) fprintf(stderr, "WARNING: linear scale mid-interval at t=0, key value used\n");
-			return s;
-		}
-		if (CControlScaleBezier *c = dynamic_cast<CControlScaleBezier *>(kf))
-		{
-			uint i = keyIndexAt0(c->keys(), kf->keyCount(), lerp, f);
-			const CStorageBezScaleKey *k = c->keys();
-			memcpy(&s.s, k[i].S, 12);
-			memcpy(&s.q, k[i].Q, 16);
-			if (lerp) fprintf(stderr, "WARNING: bezier scale mid-interval at t=0, key value used\n");
-			return s;
-		}
-		if (CControlScaleTCB *c = dynamic_cast<CControlScaleTCB *>(kf))
-		{
-			uint i = keyIndexAt0(c->keys(), kf->keyCount(), lerp, f);
-			const CStorageTCBScaleKey *k = c->keys();
-			memcpy(&s.s, k[i].S, 12);
-			memcpy(&s.q, k[i].Q, 16);
-			if (lerp) fprintf(stderr, "WARNING: tcb scale mid-interval at t=0, key value used\n");
-			return s;
-		}
-	}
-	// Default chunk 0x2505: CVector scale + CQuat axis system (28 bytes).
-	uint8 buf[28];
-	if (readCtrlDefaultBytes(ctrl, CHUNK_CTRL_SCALE_VALUE, buf, 28))
-	{
-		memcpy(&s.s, buf, 12);
-		memcpy(&s.q, buf + 12, 16);
-	}
-	else if (readCtrlDefaultBytes(ctrl, CHUNK_CTRL_SCALE_VALUE, buf, 12))
-	{
-		memcpy(&s.s, buf, 12);
-	}
-	return s;
-}
-
-// ---------------------------------------------------------------------------------------------
-// Node TM computation (GetNodeTM(0)) with memoization.
-
-struct SNodeTMCache
-{
-	std::map<INode *, Matrix3M> TM;
-	INode *SceneRoot;
-};
-
-static Matrix3M getNodeTM(INode *node, SNodeTMCache &cache)
-{
-	if (!node || node == cache.SceneRoot) return Matrix3M::identity();
-	std::map<INode *, Matrix3M>::iterator it = cache.TM.find(node);
-	if (it != cache.TM.end()) return it->second;
-
-	Point3M pos = { 0.0f, 0.0f, 0.0f };
-	QuatM rot = { 0.0f, 0.0f, 0.0f, 1.0f };
-	ScaleValueM scale;
-	scale.s.x = scale.s.y = scale.s.z = 1.0f;
-	scale.q.x = scale.q.y = scale.q.z = 0.0f;
-	scale.q.w = 1.0f;
-
-	CReferenceMaker *tm = dynamic_cast<CReferenceMaker *>(node->getReference(0));
-	CSceneClass *tmsc = dynamic_cast<CSceneClass *>(tm);
-	if (tmsc && tmsc->classDesc()->classId() == CLASSID_PRS_CTRL && tm->nbReferences() >= 3)
-	{
-		pos = posValueAt0(dynamic_cast<CSceneClass *>(tm->getReference(0)));
-		rot = rotValueAt0(dynamic_cast<CSceneClass *>(tm->getReference(1)));
-		scale = scaleValueAt0(dynamic_cast<CSceneClass *>(tm->getReference(2)));
-	}
-	else if (tmsc && tmsc->classDesc()->classId() == CLASSID_LOOKAT_CTRL && tm->nbReferences() >= 2)
-	{
-		// LookAt (target lights/cameras): position from ref 1; rotation is target-computed and
-		// not needed for the current consumers (light positions).
-		pos = posValueAt0(dynamic_cast<CSceneClass *>(tm->getReference(1)));
-	}
-	else if (tmsc)
-	{
-		fprintf(stderr, "WARNING: node '%s' TM controller %s is not PRS; identity local TM used\n",
-		        ucstring(node->userName()).toUtf8().c_str(), tmsc->classDesc()->classId().toString().c_str());
-	}
-
-	Matrix3M local = composePRS(pos, rot, scale);
-	Matrix3M world = local * getNodeTM(node->parent(), cache);
-	cache.TM[node] = world;
-	return world;
-}
-
-// ---------------------------------------------------------------------------------------------
 // Ligo brick ig export (build_gamedata processes/ligo, nel_ligo_export.ms): the same
 // zonematerial-<mat>-<cell>.max / zonespecial-<name>.max / zonetransition-<a>-<b>-<t>.max
 // filename protocol pipeline_max_export_zone classifies. Ligo bricks carry the same
@@ -822,10 +594,6 @@ static bool nodeIsFrozen(CNodeImpl *node)
 		if (it->first == 0x0976) return true;
 	return false;
 }
-
-// Forward-declared: defined further down (object-offset chunks 0x096a/b/c), needed here for the
-// RklPatch node-center bbox transform.
-static bool readObjectOffset(CNodeImpl *node, Point3M &pos, QuatM &rot, ScaleValueM &scale);
 
 // The bbox center of an RklPatch node's own (pre-modifier) patch vertices, for 160m-cell grid
 // classification only (the maxscript's node.center via getTransitionZoneCoordinates). Using the
@@ -1460,28 +1228,6 @@ static bool extractObjectMesh(CSceneClass *obj, std::vector<NLMISC::CVector> &ve
 	fprintf(stderr, "WARNING: mesh extraction for object class %s ('%s') not implemented\n",
 	        cid.toString().c_str(), nodeName.c_str());
 	return false;
-}
-
-// Read the node's object-offset TRS (chunks 0x096a pos, 0x096b rot, 0x096c ScaleValue).
-static bool readObjectOffset(CNodeImpl *node, Point3M &pos, QuatM &rot, ScaleValueM &scale)
-{
-	pos.x = pos.y = pos.z = 0.0f;
-	rot.x = rot.y = rot.z = 0.0f;
-	rot.w = 1.0f;
-	scale.s.x = scale.s.y = scale.s.z = 1.0f;
-	scale.q.x = scale.q.y = scale.q.z = 0.0f;
-	scale.q.w = 1.0f;
-	const CStorageContainer::TStorageObjectContainer &orphans = node->orphanedChunks();
-	bool any = false;
-	for (CStorageContainer::TStorageObjectConstIt it = orphans.begin(); it != orphans.end(); ++it)
-	{
-		CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
-		if (!raw) continue;
-		if (it->first == 0x096a && raw->Value.size() >= 12) { memcpy(&pos, nlVectorData(raw->Value), 12); any = true; }
-		else if (it->first == 0x096b && raw->Value.size() >= 16) { memcpy(&rot, nlVectorData(raw->Value), 16); any = true; }
-		else if (it->first == 0x096c && raw->Value.size() >= 28) { memcpy(&scale, nlVectorData(raw->Value), 28); any = true; }
-	}
-	return any;
 }
 
 // FX instances: the clusterize test uses the .ps shape's AABBox corners transformed to world
