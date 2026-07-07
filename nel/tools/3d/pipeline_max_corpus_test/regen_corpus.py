@@ -20,6 +20,7 @@ binaries aren't present.
 """
 
 import argparse, collections, os, subprocess, sys
+from concurrent.futures import ThreadPoolExecutor
 
 SKIP_CODE = 77
 
@@ -114,6 +115,7 @@ def main():
                          "eps-twist class, see pipeline_max_design.md)")
     ap.add_argument("--only", default=None, help="restrict to files whose name contains this substring")
     ap.add_argument("-v", "--verbose", action="store_true")
+    ap.add_argument("-j", "--jobs", type=int, default=max(1, (os.cpu_count() or 4) - 2))
     args = ap.parse_args()
     if args.all:
         args.t12 = args.gt = True
@@ -145,29 +147,52 @@ def main():
     worst = []
 
     tmpdir = os.environ.get("TMPDIR", "/tmp")
-    dump_path = os.path.join(tmpdir, f"regen_corpus.{os.getpid()}.gt")
-    skel_path = os.path.join(tmpdir, f"regen_corpus.{os.getpid()}.skel")
 
-    for base in bases:
+    # Parallel pre-pass: T12 parse + ground-truth export/parse per rig, concurrently, each writing
+    # its own temp dump/skel (no collision). Aggregation stays serial, in manifest order, over the
+    # cached parsed dumps — byte-identical to a serial run.
+    def _prep(indexed):
+        idx, base = indexed
         full = os.path.join(args.regen, base + ".max")
-        if not os.path.isfile(full):
+        pr = {"base": base, "exists": os.path.isfile(full)}
+        if not pr["exists"]:
+            return pr
+        if args.t12:
+            r = subprocess.run([corpus_test, "--parse", full], capture_output=True, text=True, timeout=120)
+            pr["t12_ok"] = (r.returncode == 0 and "FAIL" not in r.stdout)
+            pr["t12_out"] = r.stdout.strip(); pr["t12_err"] = r.stderr.strip()
+        if args.gt:
+            dp = os.path.join(tmpdir, f"regen_corpus.{os.getpid()}.{idx}.gt")
+            sp = os.path.join(tmpdir, f"regen_corpus.{os.getpid()}.{idx}.skel")
+            r = subprocess.run([export_skel, "--manifest", dp, full, sp], capture_output=True, text=True, timeout=120)
+            pr["gt_rc"] = r.returncode; pr["gt_err"] = r.stderr.strip()
+            if r.returncode == 0:
+                pr["ours"] = parse_dump(dp)
+            for p in (dp, sp):
+                try: os.unlink(p)
+                except OSError: pass
+        return pr
+
+    with ThreadPoolExecutor(max_workers=max(1, args.jobs)) as ex:
+        prepped = list(ex.map(_prep, enumerate(bases)))
+
+    for pr in prepped:
+        base = pr["base"]
+        if not pr["exists"]:
             print(f"  missing regen file {base}.max (manifest entry without output?)")
             continue
 
         if args.t12:
-            r = subprocess.run([corpus_test, "--parse", full], capture_output=True, text=True, timeout=120)
-            if r.returncode == 0 and "FAIL" not in r.stdout:
+            if pr["t12_ok"]:
                 t12_pass += 1
             else:
-                t12_fail.append((base, r.stdout.strip(), r.stderr.strip()))
+                t12_fail.append((base, pr["t12_out"], pr["t12_err"]))
 
         if args.gt:
-            r = subprocess.run([export_skel, "--manifest", dump_path, full, skel_path],
-                               capture_output=True, text=True, timeout=120)
-            if r.returncode != 0:
-                t12_fail.append((base, f"exporter rc={r.returncode}", r.stderr.strip()))
+            if pr["gt_rc"] != 0:
+                t12_fail.append((base, f"exporter rc={pr['gt_rc']}", pr["gt_err"]))
                 continue
-            ours = parse_dump(dump_path)
+            ours = pr["ours"]
             gt["files"] += 1
             file_ok = True
             seen = set()
@@ -202,10 +227,6 @@ def main():
                 rs[4] += rerr
             if file_ok:
                 gt["files_ok"] += 1
-
-    for p in (dump_path, skel_path):
-        try: os.unlink(p)
-        except OSError: pass
 
     if args.t12:
         total = len(bases)

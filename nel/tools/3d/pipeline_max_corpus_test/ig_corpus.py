@@ -23,6 +23,7 @@ Defaults are the layout on Kaetemi's machine; override via CLI when running else
 """
 
 import argparse, os, re, subprocess, sys, collections
+from concurrent.futures import ThreadPoolExecutor
 
 SKIP_CODE = 77
 
@@ -124,6 +125,7 @@ def main():
     ap.add_argument("--max-direct-diff", type=int, default=1,
                     help="allowed direct-ref field-compare failures under --gate-t3 (known-deviation budget)")
     ap.add_argument("--only", default=None, help="substring filter on the .max path")
+    ap.add_argument("-j", "--jobs", type=int, default=max(1, (os.cpu_count() or 4) - 2))
     args = ap.parse_args()
     if args.all:
         args.t1 = args.t2 = args.t3 = True
@@ -167,99 +169,138 @@ def main():
 
     os.makedirs(args.out, exist_ok=True)
 
-    for proj, kind, subdir, path in corpus:
-        name = os.path.basename(path)
+    import glob as _glob
+
+    # Per-file worker (parallel): runs T1/T2/T3 and the per-ig reference compares, returns a
+    # result record. Each file exports into its OWN output dir so parallel runs never race on the
+    # shared listing. Aggregation stays serial (below), in submission order, so output is
+    # identical to a serial run.
+    def process_file(indexed):
+        idx, (proj, kind, subdir, path) = indexed
+        res = {"proj": proj, "subdir": subdir, "path": path, "stub": False, "t1": None, "t2": None, "t3": None, "igs": []}
         if not is_ole(path):
-            stubs += 1
-            continue
+            res["stub"] = True
+            return res
         if args.t1:
-            r = subprocess.run([corpus_bin, path], capture_output=True)
-            if r.returncode == 0:
-                t1_pass += 1
-            else:
-                t1_fail += 1
-                print("T1 FAIL %s" % path)
+            res["t1"] = subprocess.run([corpus_bin, path], capture_output=True).returncode == 0
         if args.t2:
-            r = subprocess.run([corpus_bin, "--parse", path], capture_output=True)
-            if r.returncode == 0:
-                t2_pass += 1
-            else:
-                t2_fail += 1
-                print("T2 FAIL %s" % path)
+            res["t2"] = subprocess.run([corpus_bin, "--parse", path], capture_output=True).returncode == 0
         if args.t3:
-            flat = subdir.replace("/", "_").replace(" ", "_")
-            outdir = os.path.join(args.out, flat)
+            outdir = os.path.join(args.out, "f%d" % idx)
             os.makedirs(outdir, exist_ok=True)
-            before = set(os.listdir(outdir))
             cmd = [export_bin, "--db", args.graphics]
             for pp in ps_paths:
                 cmd += ["--ps-path", pp]
             r = subprocess.run(cmd + [path, outdir], capture_output=True, text=True)
             if r.returncode == 3:
-                nothing += 1
-                continue
+                res["t3"] = "nothing"
+                return res
             if r.returncode != 0:
-                export_fail.append(path)
-                print("T3 EXPORT FAIL %s" % path)
-                sys.stdout.write(r.stderr[-500:] if r.stderr else "")
-                continue
-            exported += 1
-            # per exported ig (only those THIS file produced): reference comparison
+                res["t3"] = ("exportfail", r.stderr[-500:] if r.stderr else "")
+                return res
+            res["t3"] = "exported"
             leaf = proj.split("/")[-1]
-            for igfile in sorted(set(os.listdir(outdir)) - before):
-                if not igfile.endswith(".ig"):
-                    continue
+            for igfile in sorted(f for f in os.listdir(outdir) if f.endswith(".ig")):
                 ours = os.path.join(outdir, igfile)
-                # direct tier: raw intermediate reference from the original pipeline's
-                # ig_static_other export directory of the owning project (group folder name may
-                # differ, e.g. "continents - Copy"); falls back to a global search by ig name.
-                import glob as _glob
+                ig = {"name": igfile, "direct": None, "struct": None}
                 cands = _glob.glob(os.path.join(args.igref, "*", leaf, "ig_static_other", igfile))
                 if not cands:
                     cands = _glob.glob(os.path.join(args.igref, "*", "*", "ig_static_other", igfile))
                 if cands:
                     dpath = cands[0]
                     if open(ours, "rb").read() == open(dpath, "rb").read():
-                        direct_match += 1
+                        ig["direct"] = ("match", "")
                     else:
                         r3 = subprocess.run([export_bin, "--compare", ours, dpath, "--mask-uninit"],
                                             capture_output=True, text=True)
-                        if r3.returncode == 0:
-                            direct_near += 1
-                            diff_details.append(("direct-uninit-only", path, igfile))
-                        else:
-                            direct_diff += 1
-                            fields = set()
-                            for line in r3.stdout.splitlines():
-                                for m in re.finditer(r" ([A-Za-z]+)\(", line):
-                                    fields.add(m.group(1))
-                                if line.startswith("DIFF num"):
-                                    fields.add(line.split()[1])
-                                for m in re.finditer(r" (LightMissing|Ambient|Diffuse|Specular|Attenuation|AnimatedLight|LightGroup|SpotDirection|SpotAngle|StaticLightEnabled|AvoidStaticLightPreCompute|LocalAmbientId|DontCastShadowForInterior|DontCastShadowForExterior|DontAddToScene|Visible)\b", line):
-                                    fields.add(m.group(1))
-                            for f in fields:
-                                direct_field_counter[f] += 1
-                            diff_details.append(("direct", path, igfile, sorted(fields)))
+                        ig["direct"] = ("near" if r3.returncode == 0 else "diff", r3.stdout)
                 else:
-                    direct_noref.append((proj, igfile))
-                # processed tier: structural vs final client refs
+                    ig["direct"] = ("noref", "")
                 rlist = refs.get(igfile.lower())
                 if not rlist:
-                    noref.append((proj, igfile))
-                    continue
-                r2 = subprocess.run([export_bin, "--compare", ours, rlist[0], "--mask-lighting", "--mask-z"],
-                                    capture_output=True, text=True)
-                if r2.returncode == 0:
-                    struct_match += 1
+                    ig["struct"] = ("noref", "")
                 else:
-                    struct_diff += 1
+                    r2 = subprocess.run([export_bin, "--compare", ours, rlist[0], "--mask-lighting", "--mask-z"],
+                                        capture_output=True, text=True)
+                    ig["struct"] = ("match" if r2.returncode == 0 else "diff", r2.stdout)
+                res["igs"].append(ig)
+        return res
+
+    with ThreadPoolExecutor(max_workers=max(1, args.jobs)) as ex:
+        results = list(ex.map(process_file, enumerate(corpus)))
+
+    # Serial aggregation in submission order (deterministic output). The original serial driver
+    # shared one output dir per subdir, so a same-named ig produced by more than one .max in the
+    # same subdir was compared only for the first producer (subsequent ones were already on disk
+    # and dropped by the new-files diff). Replicate that first-producer-per-(subdir, ig) dedup so
+    # the parallel run's counts match the serial run exactly.
+    seen_ig = set()
+    for res in results:
+        proj, path = res["proj"], res["path"]
+        if res["stub"]:
+            stubs += 1
+            continue
+        if res["t1"] is not None:
+            if res["t1"]:
+                t1_pass += 1
+            else:
+                t1_fail += 1
+                print("T1 FAIL %s" % path)
+        if res["t2"] is not None:
+            if res["t2"]:
+                t2_pass += 1
+            else:
+                t2_fail += 1
+                print("T2 FAIL %s" % path)
+        t3 = res["t3"]
+        if t3 == "nothing":
+            nothing += 1
+        elif isinstance(t3, tuple) and t3[0] == "exportfail":
+            export_fail.append(path)
+            print("T3 EXPORT FAIL %s" % path)
+            sys.stdout.write(t3[1])
+        elif t3 == "exported":
+            exported += 1
+            for ig in res["igs"]:
+                igfile = ig["name"]
+                key = (res["subdir"], igfile)
+                if key in seen_ig:
+                    continue
+                seen_ig.add(key)
+                dk, dout = ig["direct"]
+                if dk == "match":
+                    direct_match += 1
+                elif dk == "near":
+                    direct_near += 1
+                    diff_details.append(("direct-uninit-only", path, igfile))
+                elif dk == "diff":
+                    direct_diff += 1
                     fields = set()
-                    for line in r2.stdout.splitlines():
+                    for line in dout.splitlines():
                         for m in re.finditer(r" ([A-Za-z]+)\(", line):
                             fields.add(m.group(1))
                         if line.startswith("DIFF num"):
                             fields.add(line.split()[1])
-                        m2 = re.search(r" (Clusters)\(", line)
+                        for m in re.finditer(r" (LightMissing|Ambient|Diffuse|Specular|Attenuation|AnimatedLight|LightGroup|SpotDirection|SpotAngle|StaticLightEnabled|AvoidStaticLightPreCompute|LocalAmbientId|DontCastShadowForInterior|DontCastShadowForExterior|DontAddToScene|Visible)\b", line):
+                            fields.add(m.group(1))
+                    for f in fields:
+                        direct_field_counter[f] += 1
+                    diff_details.append(("direct", path, igfile, sorted(fields)))
+                else:  # noref
+                    direct_noref.append((proj, igfile))
+                sk, sout = ig["struct"]
+                if sk == "noref":
+                    noref.append((proj, igfile))
+                elif sk == "match":
+                    struct_match += 1
+                else:
+                    struct_diff += 1
+                    fields = set()
+                    for line in sout.splitlines():
+                        for m in re.finditer(r" ([A-Za-z]+)\(", line):
+                            fields.add(m.group(1))
+                        if line.startswith("DIFF num"):
+                            fields.add(line.split()[1])
                     for f in fields:
                         field_counter[f] += 1
                     diff_details.append(("struct", path, igfile, sorted(fields)))

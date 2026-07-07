@@ -14,6 +14,7 @@ Defaults are the layout on Kaetemi's machine; override via CLI when running else
 """
 
 import argparse, os, re, struct, subprocess, sys, collections
+from concurrent.futures import ThreadPoolExecutor
 
 # Autotools/CTest skip convention: exit 77 means "test could not run here", distinct from a real
 # failure (exit 1). Used when the private asset checkouts (ryzomcore_graphics, core4_data,
@@ -188,7 +189,7 @@ def bone_accuracy(ours, ref_path):
             if bone_bit: r["ibp_bit"] += 1
     return r
 
-def run_tests(bin_dir, files, do_t1, do_t2, do_t3, ref_biped, ref_nonbiped, output_dir):
+def run_tests(bin_dir, files, do_t1, do_t2, do_t3, ref_biped, ref_nonbiped, output_dir, jobs=1):
     corpus_test = os.path.join(bin_dir, "pipeline_max_corpus_test")
     export_skel = os.path.join(bin_dir, "pipeline_max_export_skel")
     if (do_t1 or do_t2) and not os.path.isfile(corpus_test):
@@ -203,36 +204,56 @@ def run_tests(bin_dir, files, do_t1, do_t2, do_t3, ref_biped, ref_nonbiped, outp
     buckets = collections.defaultdict(lambda: {"total": 0, "t1_pass": 0, "t1_fail": [],
                                                 "t2_pass": 0, "t2_fail": [],
                                                 "t3_pass": 0, "t3_fail": [], "t3_missing_ref": []})
-    for d, name, full in files:
+    # Parallel pre-pass: run each file's subprocesses (T1/T2 corpus_test, T3 export) concurrently
+    # and cache the raw results; the aggregation loop below stays serial and byte-identical, just
+    # reading from the cache instead of shelling out. Each file exports to its own path so parallel
+    # runs never collide.
+    def _prep(indexed):
+        idx, (d, name, full) = indexed
         if is_git_lfs_stub(full):
+            return {"stub": True}
+        pr = {"stub": False, "kind": "biped" if is_biped(full) else "nonbiped"}
+        if do_t1 or do_t2:
+            a = [corpus_test, full]
+            if do_t2: a.insert(1, "--parse")
+            r = subprocess.run(a, capture_output=True, text=True, timeout=120)
+            pr["t12_out"] = r.stdout.strip(); pr["t12_err"] = r.stderr.strip()
+        if do_t3:
+            base = os.path.splitext(name)[0]
+            out_skel = os.path.join(output_dir, base + ".skel") if output_dir else ("/tmp/skel_test_%d.skel" % idx)
+            r = subprocess.run([export_skel, full, out_skel], capture_output=True, text=True, timeout=120)
+            pr["t3_rc"] = r.returncode; pr["t3_err"] = r.stderr.strip(); pr["out_skel"] = out_skel
+        return pr
+
+    with ThreadPoolExecutor(max_workers=max(1, jobs)) as ex:
+        prepped = list(ex.map(_prep, enumerate(files)))
+
+    for idx, (d, name, full) in enumerate(files):
+        pr = prepped[idx]
+        if pr["stub"]:
             buckets["stubs"]["total"] += 1
             continue
-        kind = "biped" if is_biped(full) else "nonbiped"
+        kind = pr["kind"]
         b = buckets[kind]
         b["total"] += 1
 
         if do_t1 or do_t2:
-            args = [corpus_test, full]
-            if do_t2: args.insert(1, "--parse")
-            r = subprocess.run(args, capture_output=True, text=True, timeout=120)
-            summary = r.stdout.strip()
+            summary = pr["t12_out"]
             # Parse "OK|FAIL <path> Stream:T1=ok[,T2=ok] ..."
             ok = summary.startswith("OK ")
             t1_ok = "T1=FAIL" not in summary
             t2_ok = "T2=FAIL" not in summary if do_t2 else True
             if t1_ok: b["t1_pass"] += 1
-            else: b["t1_fail"].append((name, summary, r.stderr.strip()))
+            else: b["t1_fail"].append((name, summary, pr["t12_err"]))
             if do_t2:
                 if t2_ok: b["t2_pass"] += 1
-                else: b["t2_fail"].append((name, summary, r.stderr.strip()))
+                else: b["t2_fail"].append((name, summary, pr["t12_err"]))
 
         if do_t3:
             base = os.path.splitext(name)[0]
-            out_skel = os.path.join(output_dir, base + ".skel") if output_dir else "/tmp/skel_test.skel"
-            r = subprocess.run([export_skel, full, out_skel],
-                               capture_output=True, text=True, timeout=120)
-            if r.returncode != 0:
-                b["t3_fail"].append((name, f"exporter rc={r.returncode}", r.stderr.strip()))
+            out_skel = pr["out_skel"]
+            if pr["t3_rc"] != 0:
+                b["t3_fail"].append((name, f"exporter rc={pr['t3_rc']}", pr["t3_err"]))
                 continue
             # A reference may live in either output set regardless of biped-ness: the biped kami
             # and degenerate-homin rigs are fauna, the humanoids are characters. Check both.
@@ -352,6 +373,7 @@ def main():
                          "biped size-match 100%%, drot exact >= 97%%, dpos exact+close >= 72%%; "
                          "non-biped dpos and drot 100%% exact")
     ap.add_argument("-v", "--verbose", action="store_true")
+    ap.add_argument("-j", "--jobs", type=int, default=max(1, (os.cpu_count() or 4) - 2))
     args = ap.parse_args()
     if args.all:
         args.t1 = args.t2 = args.t3 = True
@@ -376,7 +398,7 @@ def main():
         if not ref_biped: print(f"note: T3 biped-ref dir {args.ref_biped} not present")
         if not ref_nonbiped: print(f"note: T3 nonbiped-ref dir {args.ref_nonbiped} not present")
 
-    buckets = run_tests(args.bin, files, args.t1, args.t2, args.t3, ref_biped, ref_nonbiped, args.output)
+    buckets = run_tests(args.bin, files, args.t1, args.t2, args.t3, ref_biped, ref_nonbiped, args.output, args.jobs)
     report(buckets, args.t1, args.t2, args.t3, args.verbose)
 
     # Non-zero exit if any T1/T2 failure surfaced (T3 mismatches are epsilon-tolerated unless
