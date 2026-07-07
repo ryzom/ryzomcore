@@ -165,6 +165,17 @@ public:
 	bool getColor(uint16 id, float out[3]) const;
 	bool getString(uint16 id, std::string &out) const;
 
+	/// Value at t=0 — like getFloat/getColor, but a ParamBlock2 parameter may be an inline
+	/// constant OR controller-backed (animated). These return the inline constant when present,
+	/// and otherwise resolve the parameter's reference slot to its keyframe controller and
+	/// evaluate it at tick 0 (the value the exporter/editor actually wants — a param animated by
+	/// a controller that happens to be correct at frame 0). Only float parameters (Bezier Float
+	/// controller) and point3/color parameters carried by a pos-kind controller resolve; a color
+	/// backed by an untyped Point3 controller falls through to false. See
+	/// CControlKeyFramerBase::floatValueAt0 / posValueAt0.
+	bool getFloatAt0(uint16 id, float &out) const;
+	bool getColorAt0(uint16 id, float out[3]) const;
+
 	/// The scene object referenced by a ref-backed parameter (texmap/material/node), NULL when
 	/// absent. Resolves through the PB2 object's own reference slots.
 	CReferenceMaker *refValue(const SParam &param) const;

@@ -207,6 +207,145 @@ IStorageObject *CControlKeyFramerBase::createChunkById(uint16 id, bool container
 	return CReferenceTarget::createChunkById(id, container);
 }
 
+// ---------------------------------------------------------------------------------------------
+// Value at t=0
+
+// Index of the key bracketing tick 0; sets lerpNext + lerpFactor when 0 falls strictly between
+// two keys (used only by the Linear controllers, which interpolate).
+template <typename TKey>
+static uint kfKeyIndexAt0(const TKey *keys, uint numKeys, bool &lerpNext, float &lerpFactor)
+{
+	lerpNext = false;
+	lerpFactor = 0.0f;
+	if (keys[0].Time >= 0) return 0;
+	if (keys[numKeys - 1].Time <= 0) return numKeys - 1;
+	for (uint i = 0; i + 1 < numKeys; ++i)
+	{
+		if (keys[i].Time <= 0 && keys[i + 1].Time >= 0)
+		{
+			if (keys[i + 1].Time == 0) return i + 1;
+			if (keys[i].Time == 0) return i;
+			lerpNext = true;
+			lerpFactor = (0.0f - (float)keys[i].Time) / ((float)keys[i + 1].Time - (float)keys[i].Time);
+			return i;
+		}
+	}
+	return 0;
+}
+
+bool CControlKeyFramerBase::floatValueAt0(float &out) const
+{
+	if (keyCount())
+	{
+		if (const CControlFloatBezier *c = dynamic_cast<const CControlFloatBezier *>(this))
+		{
+			bool l; float f;
+			uint i = kfKeyIndexAt0(c->keys(), keyCount(), l, f);
+			out = c->keys()[i].Val;
+			return true;
+		}
+	}
+	uint sz = 0;
+	const uint8 *d = defaultValue(sz);
+	if (d && sz >= 4) { memcpy(&out, d, 4); return true; }
+	return false;
+}
+
+bool CControlKeyFramerBase::posValueAt0(float out[3]) const
+{
+	if (keyCount())
+	{
+		bool l; float f;
+		if (const CControlPosLinear *c = dynamic_cast<const CControlPosLinear *>(this))
+		{
+			uint i = kfKeyIndexAt0(c->keys(), keyCount(), l, f);
+			const CStorageLinPoint3Key *k = c->keys();
+			out[0] = k[i].Val[0]; out[1] = k[i].Val[1]; out[2] = k[i].Val[2];
+			if (l)
+			{
+				out[0] += f * (k[i + 1].Val[0] - k[i].Val[0]);
+				out[1] += f * (k[i + 1].Val[1] - k[i].Val[1]);
+				out[2] += f * (k[i + 1].Val[2] - k[i].Val[2]);
+			}
+			return true;
+		}
+		if (const CControlPosBezier *c = dynamic_cast<const CControlPosBezier *>(this))
+		{
+			uint i = kfKeyIndexAt0(c->keys(), keyCount(), l, f);
+			out[0] = c->keys()[i].Val[0]; out[1] = c->keys()[i].Val[1]; out[2] = c->keys()[i].Val[2];
+			return true;
+		}
+		if (const CControlPosTCB *c = dynamic_cast<const CControlPosTCB *>(this))
+		{
+			uint i = kfKeyIndexAt0(c->keys(), keyCount(), l, f);
+			out[0] = c->keys()[i].Val[0]; out[1] = c->keys()[i].Val[1]; out[2] = c->keys()[i].Val[2];
+			return true;
+		}
+	}
+	uint sz = 0;
+	const uint8 *d = defaultValue(sz);
+	if (d && sz >= 12) { memcpy(out, d, 12); return true; }
+	return false;
+}
+
+bool CControlKeyFramerBase::rotValueAt0(float out[4]) const
+{
+	if (keyCount())
+	{
+		bool l; float f;
+		if (const CControlRotLinear *c = dynamic_cast<const CControlRotLinear *>(this))
+		{
+			uint i = kfKeyIndexAt0(c->keys(), keyCount(), l, f);
+			memcpy(out, c->keys()[i].Quat, 16);
+			return true;
+		}
+		if (const CControlRotTCB *c = dynamic_cast<const CControlRotTCB *>(this))
+		{
+			uint i = kfKeyIndexAt0(c->keys(), keyCount(), l, f);
+			memcpy(out, c->keys()[i].AbsQuat, 16);
+			return true;
+		}
+	}
+	uint sz = 0;
+	const uint8 *d = defaultValue(sz);
+	if (d && sz >= 16) { memcpy(out, d, 16); return true; }
+	return false;
+}
+
+bool CControlKeyFramerBase::scaleValueAt0(float out[7]) const
+{
+	// identity default
+	out[0] = out[1] = out[2] = 1.0f;
+	out[3] = out[4] = out[5] = 0.0f; out[6] = 1.0f;
+	if (keyCount())
+	{
+		bool l; float f;
+		if (const CControlScaleLinear *c = dynamic_cast<const CControlScaleLinear *>(this))
+		{
+			uint i = kfKeyIndexAt0(c->keys(), keyCount(), l, f);
+			memcpy(out, c->keys()[i].S, 12); memcpy(out + 3, c->keys()[i].Q, 16);
+			return true;
+		}
+		if (const CControlScaleBezier *c = dynamic_cast<const CControlScaleBezier *>(this))
+		{
+			uint i = kfKeyIndexAt0(c->keys(), keyCount(), l, f);
+			memcpy(out, c->keys()[i].S, 12); memcpy(out + 3, c->keys()[i].Q, 16);
+			return true;
+		}
+		if (const CControlScaleTCB *c = dynamic_cast<const CControlScaleTCB *>(this))
+		{
+			uint i = kfKeyIndexAt0(c->keys(), keyCount(), l, f);
+			memcpy(out, c->keys()[i].S, 12); memcpy(out + 3, c->keys()[i].Q, 16);
+			return true;
+		}
+	}
+	uint sz = 0;
+	const uint8 *d = defaultValue(sz);
+	if (d && sz >= 28) { memcpy(out, d, 12); memcpy(out + 3, d + 12, 16); return true; }
+	if (d && sz >= 12) { memcpy(out, d, 12); return true; }
+	return false;
+}
+
 ////////////////////////////////////////////////////////////////////////
 // Concrete classes
 ////////////////////////////////////////////////////////////////////////

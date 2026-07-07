@@ -195,6 +195,21 @@ public:
 	/// Controller time range from chunk 0x3003 (Max Interval, 2 x sint32 ticks).
 	bool range(sint32 &start, sint32 &end) const;
 
+	//! \name Value at t=0 (tick 0)
+	//! The value this controller drives at time 0 — the key table bracketed at tick 0 (linear
+	//! interpolation between the surrounding keys for the Linear controllers), else the
+	//! default-value chunk. Raw component form (no external math types). Returns false when no
+	//! value can be produced. This is the same "eval at t=0" the export samples: a property
+	//! driven by a controller that happens to be correct at frame 0 resolves here, rather than
+	//! being read as a static field. `out` widths: float[1] / pos float[3] / rot quat float[4] /
+	//! scale float[7] (per-axis scale s[0..2] + axis-system quat q[3..6]).
+	//@{
+	bool floatValueAt0(float &out) const;
+	bool posValueAt0(float out[3]) const;
+	bool rotValueAt0(float out[4]) const;
+	bool scaleValueAt0(float out[7]) const;
+	//@}
+
 protected:
 	// inherited
 	virtual IStorageObject *createChunkById(uint16 id, bool container);

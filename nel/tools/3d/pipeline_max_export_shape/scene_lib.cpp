@@ -449,66 +449,20 @@ static bool readCtrlDefaultBytes(CSceneClass *sc, uint16 chunkId, void *dst, siz
 	return false;
 }
 
-// Index of the key bracketing t=0
-template <typename TKey>
-static uint keyIndexAt0(const TKey *keys, uint numKeys, bool &lerpNext, float &lerpFactor)
-{
-	lerpNext = false;
-	lerpFactor = 0.0f;
-	if (keys[0].Time >= 0) return 0;
-	if (keys[numKeys - 1].Time <= 0) return numKeys - 1;
-	for (uint i = 0; i + 1 < numKeys; ++i)
-	{
-		if (keys[i].Time <= 0 && keys[i + 1].Time >= 0)
-		{
-			if (keys[i + 1].Time == 0) return i + 1;
-			if (keys[i].Time == 0) return i;
-			lerpNext = true;
-			lerpFactor = (0.0f - (float)keys[i].Time) / ((float)keys[i + 1].Time - (float)keys[i].Time);
-			fprintf(stderr, "WARNING: t=0 falls between keys (%d..%d ticks); linear interpolation used\n",
-			        keys[i].Time, keys[i + 1].Time);
-			return i;
-		}
-	}
-	return 0;
-}
+// The controller value-at-t=0 evaluation lives in the library now (CControlKeyFramerBase::
+// {float,pos,rot,scale}ValueAt0 — key-bracket at tick 0 else default-value chunk); these wrap it
+// into the exporter's MAXMATH value types, keeping the raw-chunk fallback for controllers that
+// are not typed keyframers (an unknown-class PRS sub-controller carrying a bare 0x2503/04/05
+// chunk).
 
 Point3M posValueAt0(CSceneClass *ctrl)
 {
 	Point3M p = { 0.0f, 0.0f, 0.0f };
-	CControlKeyFramerBase *kf = dynamic_cast<CControlKeyFramerBase *>(ctrl);
-	if (kf && kf->keyCount())
+	if (CControlKeyFramerBase *kf = dynamic_cast<CControlKeyFramerBase *>(ctrl))
 	{
-		bool lerp; float f;
-		if (CControlPosLinear *c = dynamic_cast<CControlPosLinear *>(kf))
-		{
-			uint i = keyIndexAt0(c->keys(), kf->keyCount(), lerp, f);
-			const CStorageLinPoint3Key *k = c->keys();
-			p.x = k[i].Val[0]; p.y = k[i].Val[1]; p.z = k[i].Val[2];
-			if (lerp)
-			{
-				p.x += f * (k[i + 1].Val[0] - k[i].Val[0]);
-				p.y += f * (k[i + 1].Val[1] - k[i].Val[1]);
-				p.z += f * (k[i + 1].Val[2] - k[i].Val[2]);
-			}
-			return p;
-		}
-		if (CControlPosBezier *c = dynamic_cast<CControlPosBezier *>(kf))
-		{
-			uint i = keyIndexAt0(c->keys(), kf->keyCount(), lerp, f);
-			const CStorageBezPoint3Key *k = c->keys();
-			p.x = k[i].Val[0]; p.y = k[i].Val[1]; p.z = k[i].Val[2];
-			if (lerp) fprintf(stderr, "WARNING: bezier pos mid-interval at t=0, key value used\n");
-			return p;
-		}
-		if (CControlPosTCB *c = dynamic_cast<CControlPosTCB *>(kf))
-		{
-			uint i = keyIndexAt0(c->keys(), kf->keyCount(), lerp, f);
-			const CStorageTCBPoint3Key *k = c->keys();
-			p.x = k[i].Val[0]; p.y = k[i].Val[1]; p.z = k[i].Val[2];
-			if (lerp) fprintf(stderr, "WARNING: tcb pos mid-interval at t=0, key value used\n");
-			return p;
-		}
+		float v[3];
+		if (kf->posValueAt0(v)) { p.x = v[0]; p.y = v[1]; p.z = v[2]; }
+		return p;
 	}
 	readCtrlDefaultBytes(ctrl, CHUNK_CTRL_POS_VALUE, &p, 12);
 	return p;
@@ -517,26 +471,11 @@ Point3M posValueAt0(CSceneClass *ctrl)
 QuatM rotValueAt0(CSceneClass *ctrl)
 {
 	QuatM q = { 0.0f, 0.0f, 0.0f, 1.0f };
-	CControlKeyFramerBase *kf = dynamic_cast<CControlKeyFramerBase *>(ctrl);
-	if (kf && kf->keyCount())
+	if (CControlKeyFramerBase *kf = dynamic_cast<CControlKeyFramerBase *>(ctrl))
 	{
-		bool lerp; float f;
-		if (CControlRotLinear *c = dynamic_cast<CControlRotLinear *>(kf))
-		{
-			uint i = keyIndexAt0(c->keys(), kf->keyCount(), lerp, f);
-			const CStorageLinRotKey *k = c->keys();
-			q.x = k[i].Quat[0]; q.y = k[i].Quat[1]; q.z = k[i].Quat[2]; q.w = k[i].Quat[3];
-			if (lerp) fprintf(stderr, "WARNING: linear rot mid-interval at t=0, key value used\n");
-			return q;
-		}
-		if (CControlRotTCB *c = dynamic_cast<CControlRotTCB *>(kf))
-		{
-			uint i = keyIndexAt0(c->keys(), kf->keyCount(), lerp, f);
-			const CStorageTCBRotKey *k = c->keys();
-			q.x = k[i].AbsQuat[0]; q.y = k[i].AbsQuat[1]; q.z = k[i].AbsQuat[2]; q.w = k[i].AbsQuat[3];
-			if (lerp) fprintf(stderr, "WARNING: tcb rot mid-interval at t=0, key value used\n");
-			return q;
-		}
+		float v[4];
+		if (kf->rotValueAt0(v)) { q.x = v[0]; q.y = v[1]; q.z = v[2]; q.w = v[3]; }
+		return q;
 	}
 	readCtrlDefaultBytes(ctrl, CHUNK_CTRL_ROT_VALUE, &q, 16);
 	return q;
@@ -548,39 +487,17 @@ ScaleValueM scaleValueAt0(CSceneClass *ctrl)
 	s.s.x = s.s.y = s.s.z = 1.0f;
 	s.q.x = s.q.y = s.q.z = 0.0f;
 	s.q.w = 1.0f;
-	CControlKeyFramerBase *kf = dynamic_cast<CControlKeyFramerBase *>(ctrl);
-	if (kf && kf->keyCount())
+	if (CControlKeyFramerBase *kf = dynamic_cast<CControlKeyFramerBase *>(ctrl))
 	{
-		bool lerp; float f;
-		if (CControlScaleLinear *c = dynamic_cast<CControlScaleLinear *>(kf))
+		float v[7];
+		if (kf->scaleValueAt0(v))
 		{
-			uint i = keyIndexAt0(c->keys(), kf->keyCount(), lerp, f);
-			const CStorageLinScaleKey *k = c->keys();
-			memcpy(&s.s, k[i].S, 12);
-			memcpy(&s.q, k[i].Q, 16);
-			if (lerp) fprintf(stderr, "WARNING: linear scale mid-interval at t=0, key value used\n");
-			return s;
+			s.s.x = v[0]; s.s.y = v[1]; s.s.z = v[2];
+			s.q.x = v[3]; s.q.y = v[4]; s.q.z = v[5]; s.q.w = v[6];
 		}
-		if (CControlScaleBezier *c = dynamic_cast<CControlScaleBezier *>(kf))
-		{
-			uint i = keyIndexAt0(c->keys(), kf->keyCount(), lerp, f);
-			const CStorageBezScaleKey *k = c->keys();
-			memcpy(&s.s, k[i].S, 12);
-			memcpy(&s.q, k[i].Q, 16);
-			if (lerp) fprintf(stderr, "WARNING: bezier scale mid-interval at t=0, key value used\n");
-			return s;
-		}
-		if (CControlScaleTCB *c = dynamic_cast<CControlScaleTCB *>(kf))
-		{
-			uint i = keyIndexAt0(c->keys(), kf->keyCount(), lerp, f);
-			const CStorageTCBScaleKey *k = c->keys();
-			memcpy(&s.s, k[i].S, 12);
-			memcpy(&s.q, k[i].Q, 16);
-			if (lerp) fprintf(stderr, "WARNING: tcb scale mid-interval at t=0, key value used\n");
-			return s;
-		}
+		return s;
 	}
-	// Default chunk 0x2505: CVector scale + CQuat axis system (28 bytes).
+	// Default chunk 0x2505: CVector scale + CQuat axis system (28 bytes) on a non-keyframer.
 	uint8 buf[28];
 	if (readCtrlDefaultBytes(ctrl, CHUNK_CTRL_SCALE_VALUE, buf, 28))
 	{
@@ -597,18 +514,11 @@ ScaleValueM scaleValueAt0(CSceneClass *ctrl)
 float floatValueAt0(CSceneClass *ctrl, float def)
 {
 	float v = def;
-	CControlKeyFramerBase *kf = dynamic_cast<CControlKeyFramerBase *>(ctrl);
-	if (kf && kf->keyCount())
+	if (CControlKeyFramerBase *kf = dynamic_cast<CControlKeyFramerBase *>(ctrl))
 	{
-		bool lerp; float f;
-		if (CControlFloatBezier *c = dynamic_cast<CControlFloatBezier *>(kf))
-		{
-			uint i = keyIndexAt0(c->keys(), kf->keyCount(), lerp, f);
-			const CStorageBezFloatKey *k = c->keys();
-			v = k[i].Val;
-			if (lerp) fprintf(stderr, "WARNING: bezier float mid-interval at t=0, key value used\n");
-			return v;
-		}
+		float fv;
+		if (kf->floatValueAt0(fv)) v = fv;
+		return v;
 	}
 	readCtrlDefaultBytes(ctrl, CHUNK_CTRL_FLOAT_VALUE, &v, 4);
 	return v;

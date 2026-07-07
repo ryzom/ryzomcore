@@ -35,6 +35,7 @@
 // NeL includes
 
 // Project includes
+#include "control_keyframer.h"
 
 using namespace std;
 // using namespace NLMISC;
@@ -319,6 +320,29 @@ CReferenceMaker *CParamBlock2::refValue(const SParam &param) const
 {
 	if (!param.RefBacked || param.RefSlot < 0) return NULL;
 	return getReference((uint)param.RefSlot);
+}
+
+bool CParamBlock2::getFloatAt0(uint16 id, float &out) const
+{
+	const SParam *p = findParam(id);
+	if (!p || p->IsTab) return false;
+	if (p->HasConstant) { out = p->F[0]; return true; }
+	// Controller-backed (animated) — resolve the reference slot to its keyframer at tick 0.
+	if (p->RefBacked)
+		if (CControlKeyFramerBase *kf = dynamic_cast<CControlKeyFramerBase *>(refValue(*p)))
+			return kf->floatValueAt0(out);
+	return false;
+}
+
+bool CParamBlock2::getColorAt0(uint16 id, float out[3]) const
+{
+	const SParam *p = findParam(id);
+	if (!p || p->IsTab) return false;
+	if (p->HasConstant) { out[0] = p->F[0]; out[1] = p->F[1]; out[2] = p->F[2]; return true; }
+	if (p->RefBacked)
+		if (CControlKeyFramerBase *kf = dynamic_cast<CControlKeyFramerBase *>(refValue(*p)))
+			return kf->posValueAt0(out); // point3-kind controller (RGBA/Point3 driven by a pos controller)
+	return false;
 }
 
 CReferenceMaker *CParamBlock2::refValue(uint16 id) const
