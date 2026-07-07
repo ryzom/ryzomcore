@@ -473,6 +473,11 @@ static int pb2SelfTest(GsfInfile *in, CSceneClassRegistry *reg, bool verbose)
 		g_object_unref(s);
 	}
 	uint nPb2 = 0, nParams = 0, nFail = 0;
+	// t=0 controller-resolution probe: count animated (controller-backed) float parameters and how
+	// many getFloatAt0 resolves via a keyframer at tick 0 (the corpus has no keyed material params,
+	// but other PB2 owners do — this proves the resolving path is reachable and returns a value).
+	uint nAnimFloat = 0, nAnimFloatResolved = 0;
+	uint animTypeHist[32] = { 0 };
 	CSceneClassContainer *ssc = scene.container();
 	for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
 	{
@@ -486,9 +491,33 @@ static int pb2SelfTest(GsfInfile *in, CSceneClassRegistry *reg, bool verbose)
 			++nFail;
 			std::cerr << "  PB2 selftest FAIL (block " << pb2->blockId() << "): " << err << "\n";
 		}
+		const std::vector<BUILTIN::CParamBlock2::SParam> &ps = pb2->params();
+		for (uint i = 0; i < ps.size(); ++i)
+		{
+			if (ps[i].IsTab || ps[i].HasConstant || !ps[i].RefBacked) continue;
+			uint16 bt = ps[i].baseType();
+			// A ref-backed non-constant param either owns a controller (animated) or a ref-kind
+			// slot (mtl/texmap/node/reftarg). Count only the animation-eligible scalar/vector kinds.
+			if (BUILTIN::CParamBlock2::SParam::typeIsRefKind(ps[i].Type)) continue;
+			animTypeHist[bt & 0x1f]++;
+			if (bt == BUILTIN::CParamBlock2::TYPE_FLOAT)
+			{
+				++nAnimFloat;
+				float v;
+				if (pb2->getFloatAt0(ps[i].Id, v)) ++nAnimFloatResolved;
+			}
+		}
 	}
 	std::cout << (nFail ? "FAIL" : "OK") << " pb2-selftest: " << nPb2 << " blocks, " << nParams
-	          << " params, " << nFail << " fail\n";
+	          << " params, " << nFail << " fail; anim-float " << nAnimFloatResolved << "/" << nAnimFloat
+	          << " resolved at t=0";
+	if (verbose)
+	{
+		std::cout << "; anim-by-type[";
+		for (uint t = 0; t < 32; ++t) if (animTypeHist[t]) std::cout << " " << t << ":" << animTypeHist[t];
+		std::cout << " ]";
+	}
+	std::cout << "\n";
 	if (verbose && !nFail)
 		std::cerr << "  (all " << nPb2 << " ParamBlock2 objects re-encode byte-exact)\n";
 	return nFail ? 1 : 0;
