@@ -180,7 +180,7 @@ def main():
                 t1_fail += 1
                 print("T1 FAIL %s" % path)
         if args.t2:
-            r = subprocess.run([corpus_bin, path, "--parse"], capture_output=True)
+            r = subprocess.run([corpus_bin, "--parse", path], capture_output=True)
             if r.returncode == 0:
                 t2_pass += 1
             else:

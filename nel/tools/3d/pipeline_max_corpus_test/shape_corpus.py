@@ -170,7 +170,7 @@ def main():
             r = subprocess.run([corpus_bin, path], capture_output=True)
             res["t1"] = r.returncode == 0
         if args.t2:
-            r = subprocess.run([corpus_bin, path, "--parse"], capture_output=True)
+            r = subprocess.run([corpus_bin, "--parse", path], capture_output=True)
             res["t2"] = r.returncode == 0
         if args.t3:
             flat = proj.replace("/", "_")

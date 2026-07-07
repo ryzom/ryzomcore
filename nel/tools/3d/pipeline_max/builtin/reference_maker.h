@@ -95,6 +95,13 @@ private:
 	std::vector<NLMISC::CRefPtr<CReferenceMaker> > m_References;
 	/// Unknown value
 	uint32 m_References2035Value0;
+	/// Length of the source 0x2034 flat reference array (0 when none / not the 0x2034 form).
+	/// build() re-emits at least this many entries so trailing empty (-1) slots survive a
+	/// rebuild — subclasses that store references in their own vector (CTrackViewNode's
+	/// m_Children, CSceneImpl's fixed slots) grow that vector only up to the last non-empty
+	/// slot, so nbReferences() alone would silently drop the trailing -1 entries (a roundtrip
+	/// defect: observed on a TVNode with two empty trailing slots in the sfx corpus).
+	uint32 m_References2034Count;
 
 	// Unknown chunks preserved verbatim. Types are IStorageObject* rather than CStorageRaw*
 	// because the source can flag any of these as a container — createChunkById defers to the

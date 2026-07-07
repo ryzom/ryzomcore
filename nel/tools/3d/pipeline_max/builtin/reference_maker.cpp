@@ -67,7 +67,7 @@ namespace BUILTIN {
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
-CReferenceMaker::CReferenceMaker(CScene *scene) : CAnimatable(scene), m_ReferenceMap(false), m_HasReferencesChunk(false), m_204B_Equals_2E(NULL), m_References2035Value0(0), m_Unknown2045(NULL), m_Unknown2047(NULL), m_Unknown21B0(NULL)
+CReferenceMaker::CReferenceMaker(CScene *scene) : CAnimatable(scene), m_ReferenceMap(false), m_HasReferencesChunk(false), m_204B_Equals_2E(NULL), m_References2035Value0(0), m_References2034Count(0), m_Unknown2045(NULL), m_Unknown2047(NULL), m_Unknown21B0(NULL)
 {
 
 }
@@ -114,7 +114,11 @@ void CReferenceMaker::parse(uint16 version, uint filter)
 			m_HasReferencesChunk = true;
 			m_ArchivedChunks.push_back(references2034);
 			// Preserve the source array's length (including trailing -1 empty slots) by resizing
-			// m_References upfront, so build re-emits the same count of entries.
+			// m_References upfront, so build re-emits the same count of entries. m_References2034Count
+			// additionally carries that length for subclasses that route references into their own
+			// vector (which grows only up to the last non-empty slot) so build re-emits the trailing
+			// empties too.
+			m_References2034Count = (uint32)references2034->Value.size();
 			m_References.resize(references2034->Value.size());
 			for (std::vector<sint32>::size_type i = 0; i < references2034->Value.size(); ++i)
 			{
@@ -172,6 +176,9 @@ void CReferenceMaker::build(uint16 version, uint filter)
 		{
 			CStorageArray<sint32> *references2034 = new CStorageArray<sint32>();
 			uint nb = nbReferences();
+			// Re-emit at least the source array length so trailing empty (-1) slots survive when a
+			// subclass's nbReferences() reflects only its populated slots (see m_References2034Count).
+			if (m_References2034Count > nb) nb = m_References2034Count;
 			references2034->Value.resize(nb);
 			for (uint i = 0; i < nb; ++i)
 			{
@@ -212,6 +219,7 @@ void CReferenceMaker::disown()
 	m_ReferenceMap = false;
 	m_HasReferencesChunk = false;
 	m_References2035Value0 = 0;
+	m_References2034Count = 0;
 	m_204B_Equals_2E = NULL;
 	m_Unknown2045 = NULL;
 	m_Unknown2047 = NULL;
