@@ -498,6 +498,55 @@ CBipedAnimEval::CBipedAnimEval(CSceneClass *rigSys, SBipedRig &rig,
 		{
 			m_FigComRot = ni.FigWorldRot;
 			m_FigComPos = ni.FigWorldPos;
+			if (getenv("PMB_ANIM_DUMP_VHT"))
+			{
+				CReferenceMaker *vht = node->getReference(0);
+				CSceneClass *vhtSc = dynamic_cast<CSceneClass *>(vht);
+				fprintf(stderr, "PMB_ANIM_DUMP_VHT: COM node '%s' TM controller class %s\n",
+				        ucstring(node->userName()).toUtf8().c_str(),
+				        vhtSc ? vhtSc->classDesc()->classId().toString().c_str() : "?");
+				if (vhtSc)
+				{
+					const CStorageContainer::TStorageObjectContainer &orph = vhtSc->orphanedChunks();
+					for (CStorageContainer::TStorageObjectConstIt it = orph.begin(); it != orph.end(); ++it)
+					{
+						CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
+						fprintf(stderr, "  chunk 0x%04x bytes=%zu%s", it->first, raw ? raw->Value.size() : (size_t)0, raw ? " floats=[" : " (container)\n");
+						if (raw)
+						{
+							size_t nf = raw->Value.size() / 4;
+							const float *f = reinterpret_cast<const float *>(nlVectorData(raw->Value));
+							for (size_t k = 0; k < nf && k < 16; ++k) fprintf(stderr, "%.9g,", f[k]);
+							fprintf(stderr, "]\n");
+						}
+					}
+					// Also walk this controller's OWN references (0/1/2 = vertical/horizontal/turn
+					// sub-controllers, if it follows the plain PRS-style reference wiring).
+					CReferenceMaker *vhtRm = dynamic_cast<CReferenceMaker *>(vht);
+					for (uint r = 0; vhtRm && r < vhtRm->nbReferences() && r < 6; ++r)
+					{
+						CReferenceMaker *sub = vhtRm->getReference(r);
+						CSceneClass *subSc = dynamic_cast<CSceneClass *>(sub);
+						fprintf(stderr, "  ref[%u] class %s\n", r, subSc ? subSc->classDesc()->classId().toString().c_str() : (sub ? "?" : "NULL"));
+						if (subSc)
+						{
+							const CStorageContainer::TStorageObjectContainer &sorph = subSc->orphanedChunks();
+							for (CStorageContainer::TStorageObjectConstIt it = sorph.begin(); it != sorph.end(); ++it)
+							{
+								CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
+								fprintf(stderr, "    chunk 0x%04x bytes=%zu%s", it->first, raw ? raw->Value.size() : (size_t)0, raw ? " floats=[" : " (container)\n");
+								if (raw)
+								{
+									size_t nf = raw->Value.size() / 4;
+									const float *f = reinterpret_cast<const float *>(nlVectorData(raw->Value));
+									for (size_t k = 0; k < nf && k < 16; ++k) fprintf(stderr, "%.9g,", f[k]);
+									fprintf(stderr, "]\n");
+								}
+							}
+						}
+					}
+				}
+			}
 		}
 		if (ni.HasIdLink && ni.Id == BID_PELVIS)
 		{
