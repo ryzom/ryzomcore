@@ -24,6 +24,21 @@ DECODED = set(int(x, 16) for x in """
 0x0142 0x0143 0x0147 0x0148 0x0149 0x014a
 """.split())
 
+# Chunk ids whose ROLE is now identified by the field probe (§10p) but which the exporter still
+# rides through raw (understood, not consumed) — tracked separately so the coverage number stays
+# honest about what the decode actually reads vs. what we merely understand.
+#   0x0258..0x0261 = the live-state byte-mirror of the 0x0064..0x006d pose records (base + 0x01F4)
+#   0x00ca = height-derived dynamics record ([1]=height, [4]=gravAccel)
+#   0x0102 = sub-anim index/enable table; 0x0110 = per-track anim-handle id table
+#   0x015e = track-separation flags; 0x014b = inPlaceMode; 0x0109 = twist; 0x0204 = link-count scalar
+#   0x01f4..0x01fc = per-limb absolute-length tables (0x01f5 neck / f7 spine / f8 tail / f9 leg-toe / fa arm-finger)
+#   0x000a, 0x001a = tail-arm / finger-toe structure presence records
+IDENTIFIED = set(int(x, 16) for x in """
+0x0258 0x0259 0x025a 0x025b 0x025c 0x025d 0x025e 0x025f 0x0261
+0x00ca 0x0102 0x0110 0x015e 0x014b 0x0109 0x0204 0x000a 0x001a
+0x01f4 0x01f5 0x01f7 0x01f8 0x01f9 0x01fa 0x01fc
+""".split())
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 def main():
@@ -64,13 +79,18 @@ def main():
 
     ids = sorted(occ)
     dec_ids = [c for c in ids if c in DECODED]
-    unk_ids = [c for c in ids if c not in DECODED]
-    tot_bytes = sum(byts.values()); dec_bytes = sum(byts[c] for c in dec_ids)
+    idn_ids = [c for c in ids if c in IDENTIFIED and c not in DECODED]
+    unk_ids = [c for c in ids if c not in DECODED and c not in IDENTIFIED]
+    tot_bytes = sum(byts.values())
+    dec_bytes = sum(byts[c] for c in dec_ids)
+    idn_bytes = sum(byts[c] for c in idn_ids)
     print(f"\ndistinct 0x9155 chunk ids seen: {len(ids)}")
-    print(f"  decoded: {len(dec_ids)}  ({100.0*len(dec_ids)/max(1,len(ids)):.1f}% by id count)")
+    print(f"  decoded (read by the exporter): {len(dec_ids)}  ({100.0*len(dec_ids)/max(1,len(ids)):.1f}% by id count)")
+    print(f"  identified (role known, §10p — passed through raw): {len(idn_ids)}")
     print(f"  unknown: {len(unk_ids)}")
-    print(f"byte weight: decoded {dec_bytes}/{tot_bytes} = {100.0*dec_bytes/max(1,tot_bytes):.1f}%")
-    print(f"\ntop unknown chunks by byte weight (id: files, total bytes):")
+    print(f"byte weight: decoded {100.0*dec_bytes/max(1,tot_bytes):.1f}%  +identified {100.0*idn_bytes/max(1,tot_bytes):.1f}%"
+          f"  = {100.0*(dec_bytes+idn_bytes)/max(1,tot_bytes):.1f}% understood ({dec_bytes+idn_bytes}/{tot_bytes})")
+    print(f"\ntop UNKNOWN chunks by byte weight (id: files, total bytes):")
     for c in sorted(unk_ids, key=lambda c: byts[c], reverse=True)[:25]:
         print(f"  0x{c:04x}: {occ[c]:5d} files, {byts[c]:10d} bytes")
 
