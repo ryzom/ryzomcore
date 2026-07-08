@@ -752,6 +752,46 @@ struct SAttach
 	Vec Shoulder[2]; // upperarm node pos
 };
 
+// Patch the time-slider range in the raw Config stream: container 0x20b0 is the time
+// configuration ([0x0010]=frame rate, [0x0060]=range END ticks, [0x0070]=current slider time
+// ticks; range start stays in its own zero chunk). Pinned by a user-supplied single-variable
+// probe (range end 12345 / slider 5432 -> exactly those two ints moved, as frames x 160), and
+// corpus-confirmed: fy_hom_emot_bye carries 12000 = its exact key span, so the reference
+// assets DO set the range. In-place 4-byte patches — chunk sizes unchanged.
+static bool patchConfigTimeRange(std::vector<uint8> &config, sint32 endTicks, sint32 sliderTicks)
+{
+	// Max chunk header: [u16 id][u32 size], size includes the 6-byte header, bit 31 = container.
+	size_t pos = 0;
+	bool patchedEnd = false, patchedCur = false;
+	while (pos + 6 <= config.size())
+	{
+		uint16 id; uint32 sz;
+		memcpy(&id, &config[pos], 2);
+		memcpy(&sz, &config[pos + 2], 4);
+		bool container = (sz & 0x80000000u) != 0;
+		sz &= 0x7fffffffu;
+		if (sz < 6 || pos + sz > config.size()) return false;
+		if (id == 0x20b0 && container)
+		{
+			size_t sub = pos + 6, subEnd = pos + sz;
+			while (sub + 6 <= subEnd)
+			{
+				uint16 sid; uint32 ssz;
+				memcpy(&sid, &config[sub], 2);
+				memcpy(&ssz, &config[sub + 2], 4);
+				ssz &= 0x7fffffffu;
+				if (ssz < 6 || sub + ssz > subEnd) return false;
+				if (sid == 0x0060 && ssz == 10) { memcpy(&config[sub + 6], &endTicks, 4); patchedEnd = true; }
+				if (sid == 0x0070 && ssz == 10) { memcpy(&config[sub + 6], &sliderTicks, 4); patchedCur = true; }
+				sub += ssz;
+			}
+			break;
+		}
+		pos += sz;
+	}
+	return patchedEnd && patchedCur;
+}
+
 int runAuthorJump(const char *skelMax, const char *idleMax, const char *outMax)
 {
 	CSceneClassRegistry reg;
@@ -1460,6 +1500,18 @@ int runAuthorJump(const char *skelMax, const char *idleMax, const char *outMax)
 			if ((size_t)end) ifs.read((char *)nlVectorData(sceneBytes), (std::streamsize)end);
 		}
 		remove(tempPath.c_str());
+		// time-slider range: 0..LAST_FRAME, slider parked at 0 (the reference assets set the
+		// range to their key span — fy_hom_emot_bye carries exactly 12000). Patch BEFORE the
+		// streams are handed to the OLE writer.
+		for (size_t i = 0; i < wr.StreamNames.size(); ++i)
+		{
+			if (wr.StreamNames[i] != "Config") continue;
+			if (patchConfigTimeRange(wr.StreamBytes[i], (sint32)(LAST_FRAME * TICKS), 0))
+				fprintf(stderr, "TIMERANGE: Config 0x20b0 range end set to %d ticks (%g frames)\n",
+				        (int)(LAST_FRAME * TICKS), LAST_FRAME);
+			else
+				fprintf(stderr, "TIMERANGE: WARNING could not patch the Config time range\n");
+		}
 		CStorageOleOut oleOut;
 		for (size_t i = 0; i < wr.StreamNames.size(); ++i)
 		{
