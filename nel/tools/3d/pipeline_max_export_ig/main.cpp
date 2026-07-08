@@ -1299,16 +1299,28 @@ static bool psShapeBBoxVerts(INode &node, CSceneClass *obj, SNodeTMCache &tmCach
 }
 
 // Edit Mesh modifier (class 0x50) evaluation: the per-node modifier data lives on the OSM
-// Derived wrapper's orphaned 0x2500 containers (one per modifier slot). Decoded from the corpus
-// (fy_appart portal + auberge Cluster2): 0x2512/0x4000 mesh-delta record with children
-// 0x0100 int = input vertex count, 0x0110 int = input face count, 0x0140 = moved verts
-// (uint32 count + (uint32 index, Point3 delta)[count], object space), 0x0170/0x0270 =
-// container[0x2700 BitArray: uint32 count + dword-padded LSB-first bits] deleted verts/faces,
-// 0x0300 int = subobject level, 0x0400 = vertex selection (ignored).
+// Derived wrapper's orphaned 0x2500 containers (one per modifier slot). Decoded from the corpus:
+// 0x2512/0x4000 mesh-delta record with children (Max SDK `MeshDelta` chunk IDs):
+//   0x0100 int   = input vertex count
+//   0x0110 int   = input face count
+//   0x0130       = created vertices (uint32 count + (uint32 srcTag=-1, Point3 pos)[count]);
+//                  16-byte stride, srcTag holds the "cloned-from-vert" index Max uses to source
+//                  authoring data, ignored on evaluation — the geometric position is what
+//                  matters. Corpus example: fy_mairie's `_puit_carre2/3` (base EditableMesh
+//                  with 8 verts + Edit Mesh deleting all 8 and creating 12 new ones)
+//   0x0140       = moved verts (uint32 count + (uint32 index, Point3 delta)[count], object space)
+//   0x0170       = container[0x2700 BitArray: uint32 count + dword-padded LSB-first bits] = del verts
+//   0x0208       = created faces (uint32 count + (uint32 srcTag, uint32 v[3], uint32 smGrp,
+//                  uint32 flagsMatId)[count]); 24-byte stride, used together with 0x0130.
+//                  Not applied here — the clusterize containment test uses vertices only.
+//   0x0210       = created faces variant (uint32 count + (uint32 v[3], uint32 smGrp,
+//                  uint32 flagsMatId)[count]); 20-byte stride, no srcTag; also not applied.
+//   0x0270       = container[0x2700 BitArray] = deleted faces
+//   0x0300 int   = subobject level, 0x0400/0x0410 = selections (ignored)
 struct SEditMeshEdits
 {
 	std::vector<std::pair<uint32, NLMISC::CVector> > Moves;
-	std::vector<NLMISC::CVector> Created; // 0x0210: created vertices (Point3[], object space)
+	std::vector<NLMISC::CVector> Created; // created vertices (Point3[], object space)
 	std::vector<bool> DelVerts;
 	std::vector<bool> DelFaces;
 };
@@ -1367,20 +1379,34 @@ static bool readEditMeshModApp(CStorageContainer *c2500, SEditMeshEdits &out)
 						}
 					}
 				}
-				else if (kt->first == 0x0210)
+				else if (kt->first == 0x0130)
 				{
+					// Created vertices (16-byte stride: uint32 srcTag + Point3 pos). The srcTag
+					// (typically 0xFFFFFFFF or a source-vert index used for authoring history)
+					// is ignored on evaluation. Corpus example: fy_mairie's `_puit_carre2/3`
+					// (base EditableMesh with 8 verts + Edit Mesh deleting all 8 and creating
+					// 12 new ones — without decoding 0x0130 the clusterize link test saw an
+					// empty mesh and attached the object to 0 clusters vs the reference's 1).
 					CStorageRaw *raw = dynamic_cast<CStorageRaw *>(kt->second);
 					if (raw && raw->Value.size() >= 4)
 					{
 						uint32 n;
 						memcpy(&n, nlVectorData(raw->Value), 4);
-						if (raw->Value.size() >= 4 + (size_t)n * 12)
+						if (raw->Value.size() >= 4 + (size_t)n * 16)
 						{
-							out.Created.resize(n);
-							memcpy(nlVectorData(out.Created), nlVectorData(raw->Value) + 4, (size_t)n * 12);
+							out.Created.reserve(out.Created.size() + n);
+							for (uint32 i = 0; i < n; ++i)
+							{
+								float v[3];
+								memcpy(v, nlVectorData(raw->Value) + 4 + (size_t)i * 16 + 4, 12);
+								out.Created.push_back(NLMISC::CVector(v[0], v[1], v[2]));
+							}
 						}
 					}
 				}
+				// 0x0208 / 0x0210 = created faces (not applied here — clusterize link test uses
+				// vertices only). Left as pass-through; see the SEditMeshEdits header comment
+				// for the format.
 				else if (kt->first == 0x0170)
 					readEditMeshBitArray(dynamic_cast<CStorageContainer *>(kt->second), out.DelVerts);
 				else if (kt->first == 0x0270)
@@ -2050,21 +2076,95 @@ static NL3D::CInstanceGroup *buildInstanceGroup(const std::vector<INode *> &vect
 	return pIG;
 }
 
+// Depth-first pre-order index by tree walk from the scene root; children of a given parent are
+// visited in their storage (creation) order — matches MaxScript's `$geometry`/`$lights`/
+// `$helpers` iteration, which walks the scene tree from root DFS. Storage-container order
+// coincides with tree order on most corpus files but diverges on a subset (desert `nb01..nb05`,
+// jungle `foret-18..21_village_a/b/c/d`, some `ilot_butte`) where children of two sibling
+// parents are interleaved in file order; the tree walk pins the per-category iteration to what
+// the reference `$geometry` enumerator sees.
+static void buildTreeOrder(CSceneClassContainer *ssc, INode *root, std::map<INode *, int> &orderMap)
+{
+	// Build parent -> ordered children[] (in storage order); collect every CNodeImpl.
+	std::map<INode *, std::vector<INode *> > kids;
+	std::vector<INode *> allNodes;
+	for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
+	{
+		CNodeImpl *n = dynamic_cast<CNodeImpl *>(it->second);
+		if (!n) continue;
+		allNodes.push_back(n);
+		kids[n->parent()].push_back(n);
+	}
+	// DFS pre-order. Seed with root's children (and any NULL-parent orphans, defensive) in
+	// storage order — push in reverse so the top of the stack is the first child.
+	std::vector<INode *> stack;
+	INode *seeds[2] = { root, NULL };
+	for (int s = 0; s < 2; ++s)
+	{
+		std::map<INode *, std::vector<INode *> >::iterator it = kids.find(seeds[s]);
+		if (it == kids.end()) continue;
+		for (std::vector<INode *>::const_reverse_iterator ki = it->second.rbegin(); ki != it->second.rend(); ++ki)
+			stack.push_back(*ki);
+	}
+	int idx = 0;
+	while (!stack.empty())
+	{
+		INode *n = stack.back();
+		stack.pop_back();
+		if (orderMap.count(n)) continue; // parent-loop or duplicate defense
+		orderMap[n] = idx++;
+		std::map<INode *, std::vector<INode *> >::iterator it = kids.find(n);
+		if (it == kids.end()) continue;
+		for (std::vector<INode *>::const_reverse_iterator ki = it->second.rbegin(); ki != it->second.rend(); ++ki)
+			stack.push_back(*ki);
+	}
+	// Any node the tree walk didn't reach (isolated parents, broken hierarchies): append in
+	// storage order after the reachable set. Doesn't affect corpus files (every corpus node is
+	// tree-reachable) but keeps the map total.
+	for (uint i = 0; i < allNodes.size(); ++i)
+		if (!orderMap.count(allNodes[i]))
+			orderMap[allNodes[i]] = idx++;
+}
+
+static int treeOrderOf(const std::map<INode *, int> &orderMap, INode *n)
+{
+	std::map<INode *, int>::const_iterator it = orderMap.find(n);
+	return it == orderMap.end() ? (int)0x7fffffff : it->second;
+}
+
 // Select nodes (geometry, then lights, then helpers — the maxscript's three selectmore passes)
 // whose ig name appdata matches igNameMatch, build the instance group, or return NULL when
 // nothing matched (the maxscript's "ig_array.count != 0" gate is implicit: an empty selection
 // yields no output file rather than an error). When transitionZone >= 0, each matched node's
 // world TM is overridden in tmCache via buildTransitionMatrixObj before the build — this mirrors
 // the maxscript literally overwriting node.transform for the SAME nodes it just selected.
+//
+// The ligo maxscript's `exportInstanceGroupFromZone` (§10g-bis) has an extra XRef-first loop
+// (`for node in objects where classOf node == XRefObject`) BEFORE the three geometry/lights/
+// helpers passes; it doesn't change the effective ordering because MaxScript's
+// `$selection as array` returns nodes in SCENE ORDER (base-object-resolved superclass, then
+// scene-tree DFS), not in `selectmore` insertion order — the XRef pass just guarantees
+// XRef nodes end up in the selection at all in the presence of any Max version where
+// `$geometry` filters by direct-object superclass instead of the resolved base. Base-object
+// unwrapping is what `nodeCategory` already does, so the single tree-ordered per-category walk
+// below reproduces the reference selection whether or not the XRef loop ran. The
+// includeXRefFirst parameter is kept as a caller-visible flag for the ligo/standalone split
+// documented in the exporter interface, but no longer changes ordering.
 static NL3D::CInstanceGroup *exportIgForName(CSceneClassContainer *ssc, SNodeTMCache &tmCache,
                                               const std::string &igNameMatch, bool lowercaseCompare,
-                                              int transitionZone, float cellSize, SIgBuildStats &stats)
+                                              int transitionZone, float cellSize, SIgBuildStats &stats,
+                                              bool /*includeXRefFirst — see above; ordering-inert */)
 {
 	std::string want = lowercaseCompare ? NLMISC::toLowerAscii(igNameMatch) : igNameMatch;
+	std::map<INode *, int> treeOrder;
+	buildTreeOrder(ssc, tmCache.SceneRoot, treeOrder);
+
 	std::vector<INode *> vectNode;
+
 	static const TSClassId cats[3] = { SCLASS_GEOMOBJECT, SCLASS_LIGHT, SCLASS_HELPER };
 	for (int c = 0; c < 3; ++c)
 	{
+		std::vector<INode *> catNodes;
 		for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
 		{
 			CNodeImpl *node = dynamic_cast<CNodeImpl *>(it->second);
@@ -2073,15 +2173,28 @@ static NL3D::CInstanceGroup *exportIgForName(CSceneClassContainer *ssc, SNodeTMC
 			std::string ig = getScriptAppDataStr(node, NEL3D_APPDATA_IGNAME, "");
 			if (lowercaseCompare) ig = NLMISC::toLowerAscii(ig);
 			if (ig != want) continue;
-			if (transitionZone >= 0)
-			{
-				Matrix3M orig = getNodeTM(node, tmCache);
-				tmCache.TM[node] = buildTransitionMatrixObj(orig, transitionZone, cellSize);
-			}
-			vectNode.push_back(node);
+			catNodes.push_back(node);
+		}
+		// Sort matched nodes in tree-walk order (matches Max's per-category collection order).
+		for (uint a = 0; a < catNodes.size(); ++a)
+			for (uint b = a + 1; b < catNodes.size(); ++b)
+				if (treeOrderOf(treeOrder, catNodes[a]) > treeOrderOf(treeOrder, catNodes[b]))
+					std::swap(catNodes[a], catNodes[b]);
+		for (uint i = 0; i < catNodes.size(); ++i)
+			vectNode.push_back(catNodes[i]);
+	}
+
+	if (vectNode.empty()) return NULL;
+
+	if (transitionZone >= 0)
+	{
+		for (uint i = 0; i < vectNode.size(); ++i)
+		{
+			Matrix3M orig = getNodeTM(vectNode[i], tmCache);
+			tmCache.TM[vectNode[i]] = buildTransitionMatrixObj(orig, transitionZone, cellSize);
 		}
 	}
-	if (vectNode.empty()) return NULL;
+
 	return buildInstanceGroup(vectNode, tmCache, stats);
 }
 
@@ -2130,7 +2243,7 @@ static int exportLigoIg(CSceneClassContainer *ssc, SNodeTMCache &tmCache, const 
 			// carry any casing (the corpus mixes "converted-164_eg" and "converted-164_EG"
 			// tags on nodes that belong to the same ig) — lowercaseCompare must stay true so
 			// exportIgForName lowercases each candidate node's igname before comparing.
-			NL3D::CInstanceGroup *ig = exportIgForName(ssc, tmCache, igNames[i], /*lowercaseCompare*/ true, -1, cellSize, stats);
+			NL3D::CInstanceGroup *ig = exportIgForName(ssc, tmCache, igNames[i], /*lowercaseCompare*/ true, -1, cellSize, stats, /*includeXRefFirst*/ true);
 			if (!ig) continue;
 			std::string outPath = NLMISC::CPath::standardizePath(outDir, true) + igNames[i] + ".ig";
 			try
@@ -2161,7 +2274,7 @@ static int exportLigoIg(CSceneClassContainer *ssc, SNodeTMCache &tmCache, const 
 		for (int zone = 0; zone < 9; ++zone)
 		{
 			std::string zoneBaseName = tokens[1] + "-" + tokens[2] + "-" + tokens[3] + "-" + NLMISC::toString(zone);
-			NL3D::CInstanceGroup *ig = exportIgForName(ssc, tmCache, zoneBaseName, /*lowercaseCompare*/ true, zone, cellSize, stats);
+			NL3D::CInstanceGroup *ig = exportIgForName(ssc, tmCache, zoneBaseName, /*lowercaseCompare*/ true, zone, cellSize, stats, /*includeXRefFirst*/ true);
 			if (!ig) continue;
 			std::string outPath = NLMISC::CPath::standardizePath(outDir, true) + NLMISC::toLowerAscii(zoneBaseName) + ".ig";
 			try
@@ -2244,6 +2357,8 @@ static void dumpNodes(CSceneClassContainer *ssc, SNodeTMCache &tmCache)
 		printf("node '%s' not found\n", g_dumpObjName);
 		return;
 	}
+	std::map<INode *, int> treeOrder;
+	buildTreeOrder(ssc, tmCache.SceneRoot, treeOrder);
 	for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
 	{
 		CNodeImpl *node = dynamic_cast<CNodeImpl *>(it->second);
@@ -2253,8 +2368,12 @@ static void dumpNodes(CSceneClassContainer *ssc, SNodeTMCache &tmCache)
 		uint32 flags = readNodeDword(node, NODE_FLAGS_CHUNK_ID, flagsFound);
 		std::string ig = getScriptAppDataStr(node, NEL3D_APPDATA_IGNAME, "");
 		Matrix3M tm = getNodeTM(node, tmCache);
-		printf("node '%s' ig='%s' cat=0x%x obj=%s (%s) accel=%d flags=0x%08x%s shape='%s' pos=(%g,%g,%g)\n",
+		INode *parent = node->parent();
+		std::string parentName = parent && dynamic_cast<CNodeImpl *>(parent) ? ucstring(dynamic_cast<CNodeImpl *>(parent)->userName()).toUtf8() : std::string("<root>");
+		printf("node '%s' tree=%d parent='%s' ig='%s' cat=0x%x obj=%s (%s) accel=%d flags=0x%08x%s shape='%s' pos=(%g,%g,%g)\n",
 		       ucstring(node->userName()).toUtf8().c_str(),
+		       treeOrderOf(treeOrder, node),
+		       parentName.c_str(),
 		       ig.c_str(),
 		       obj ? (uint32)obj->classDesc()->superClassId() : 0,
 		       obj ? obj->classDesc()->classId().toString().c_str() : "none",
@@ -2797,23 +2916,14 @@ int main(int argc, char **argv)
 		const std::string &igName = igNames[igIdx];
 
 		// Selection: geometry, then lights, then helpers (selectmore passes; selection arrays
-		// keep selection order).
-		std::vector<INode *> vectNode;
-		static const TSClassId cats[3] = { SCLASS_GEOMOBJECT, SCLASS_LIGHT, SCLASS_HELPER };
-		for (int c = 0; c < 3; ++c)
-		{
-			for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
-			{
-				CNodeImpl *node = dynamic_cast<CNodeImpl *>(it->second);
-				if (!node) continue;
-				if (nodeCategory(*node) != cats[c]) continue;
-				if (getScriptAppDataStr(node, NEL3D_APPDATA_IGNAME, "") != igName) continue;
-				vectNode.push_back(node);
-			}
-		}
-
+		// keep selection order). Reuses the shared tree-walk-ordered selector (the standalone
+		// process/ig maxscript doesn't do the XRef-first pass — that lives in the ligo
+		// exportInstanceGroupFromZone maxscript only).
 		SIgBuildStats stats;
-		NL3D::CInstanceGroup *ig = buildInstanceGroup(vectNode, tmCache, stats);
+		NL3D::CInstanceGroup *ig = exportIgForName(ssc, tmCache, igName, /*lowercaseCompare*/ false,
+		                                            /*transitionZone*/ -1, /*cellSize*/ 160.0f, stats,
+		                                            /*includeXRefFirst*/ false);
+		if (!ig) continue;
 
 		std::string outPath = NLMISC::CPath::standardizePath(outDir, true) + igName + ".ig";
 		try
