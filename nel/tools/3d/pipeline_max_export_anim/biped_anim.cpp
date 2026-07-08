@@ -521,7 +521,7 @@ CBipedAnimEval::CBipedAnimEval(CSceneClass *rigSys, SBipedRig &rig,
 						{
 							size_t nf = raw->Value.size() / 4;
 							const float *f = reinterpret_cast<const float *>(nlVectorData(raw->Value));
-							for (size_t k = 0; k < nf && k < 16; ++k) fprintf(stderr, "%.9g,", f[k]);
+							for (size_t k = 0; k < nf && k < 24; ++k) fprintf(stderr, "%.9g,", f[k]);
 							fprintf(stderr, "]\n");
 						}
 					}
@@ -544,7 +544,7 @@ CBipedAnimEval::CBipedAnimEval(CSceneClass *rigSys, SBipedRig &rig,
 								{
 									size_t nf = raw->Value.size() / 4;
 									const float *f = reinterpret_cast<const float *>(nlVectorData(raw->Value));
-									for (size_t k = 0; k < nf && k < 16; ++k) fprintf(stderr, "%.9g,", f[k]);
+									for (size_t k = 0; k < nf && k < 24; ++k) fprintf(stderr, "%.9g,", f[k]);
 									fprintf(stderr, "]\n");
 								}
 							}

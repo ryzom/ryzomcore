@@ -215,6 +215,22 @@ struct SBipedRig
 	// this field is populated but deliberately NOT substituted for ComPos; see biped_anim.cpp.
 	NLMISC::CVector BaseFramePos;
 	bool HaveBaseFramePos;
+	// A height-correction scalar at 0x0260[1] (0x006c's own [1] — same 12-float record layout — is
+	// always 0, since figure mode needs no correction). Solves ship_tank_karavan_mort_idle's
+	// previously-unexplained 5cm residual exactly: BaseFramePos.z + HeightCorrection reproduces the
+	// shipped reference to 4e-8 (float32 noise). Confirmed NOT a live Character Studio computation —
+	// an exhaustive interactive test (moving the biped, deleting the rig's only real key, adding and
+	// removing a real vertical key) showed the Animation-Mode value is completely invariant except
+	// when the vertical channel is genuinely (re)keyed, and 0x0260[1] closes the gap by simple
+	// addition, no rotation or other transform needed (pipeline_max_design.md §10n "Thirteenth").
+	// Verified 0 on every corpus file checked where BaseFramePos alone was already exact (decoupe)
+	// and on files where the OTHER branch (figure height) is the correct source entirely (recruteur)
+	// — consistent both times. Not yet corpus-swept for files where the correction is itself nonzero
+	// besides this one; kept as documented, typed, unconsumed plumbing (like BaseFramePos) rather
+	// than substituted into ComPos, since the "which branch" ambiguity between figure height and
+	// base(+correction) is unchanged by this finding.
+	float HeightCorrection;
+	bool HaveHeightCorrection;
 	// Character Studio's <biped_ctrl>.dynamicsType (0 = "Biped Dynamics", the default — Character
 	// Studio can live-compute airborne trajectories/balance even off-key; 1 = "Spline Dynamics" —
 	// plain interpolation, no live physics), stored at chunk 0x0012 (confirmed via an isolated,

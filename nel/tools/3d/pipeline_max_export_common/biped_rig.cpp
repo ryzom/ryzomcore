@@ -291,6 +291,7 @@ const NLMISC::CClassId CLASSID_BIPED_VHT_CTRL(0x00009156, 0x00000000);
 
 SBipedRig::SBipedRig() : Sys(NULL), HasCom(false), ComPos(NLMISC::CVector::Null), ComRot(NLMISC::CQuat::Identity),
 		ComDisp(NLMISC::CVector::Null), BaseFramePos(NLMISC::CVector::Null), HaveBaseFramePos(false),
+		HeightCorrection(0.0f), HaveHeightCorrection(false),
 		DynamicsType(0), HaveDynamicsType(false),
 		HasThighZ(false), MaxLegLink(2),
 		HasClavicleZ(false),
@@ -730,6 +731,17 @@ void parseComRecord(SBipedRig &rig)
 			rig.ComRot = NLMISC::CQuat(0.0f, 0.0f, -0.70710678f, 0.70710678f);
 			rig.HasCom = true;
 		}
+	}
+	// Height-correction scalar at 0x0260[1] — same 12-float record layout as 0x006c (whose own [1]
+	// is always 0). See the field comment in biped_rig.h / pipeline_max_design.md §10n "Thirteenth":
+	// closes ship_tank_karavan_mort_idle's 5cm residual exactly (BaseFramePos.z + this = reference,
+	// to 4e-8), confirmed not a live computation via interactive testing.
+	size_t nh = 0;
+	const float *hc = bipedChunkFloats(0x0260, 2, &nh);
+	if (hc)
+	{
+		rig.HeightCorrection = hc[1];
+		rig.HaveHeightCorrection = true;
 	}
 	// <biped_ctrl>.dynamicsType, confirmed at this offset via an isolated single-chunk A/B toggle
 	// on a real skeleton (§10n "Ninth"/"Tenth") — read for corpus-wide auditing; not consumed by
