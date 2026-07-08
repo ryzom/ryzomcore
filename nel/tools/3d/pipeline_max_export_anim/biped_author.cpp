@@ -1411,6 +1411,25 @@ int runAuthorJump(const char *skelMax, const char *idleMax, const char *outMax)
 		if (!loadMax(skelMax, &reg, wr, true)) return 1;
 		CBipedSystem *wrSys = findBipedSystem(wr.Scene->container());
 		if (!wrSys) { std::cerr << "ERROR: no typed Biped system in the write scene\n"; return 1; }
+		// Chunk 0x0109 = the Figure Mode flag: 1 on the skeleton source, 0 on every corpus
+		// animation file, and the SINGLE-VARIABLE isolation diff (fy_hom_skel vs the animode
+		// probe's b00_baseline, whose only change is the figureMode=false commit) moves exactly
+		// this chunk 1 -> 0 plus the §10n current-position/shadow-bank caches. Clear it so the
+		// authored file opens in Animation Mode. (This corrects §10p's earlier 0x0109 = twist
+		// attribution — that probe case toggled modes as a side effect.) The commit's cache
+		// side-effect chunks are left as-is: they only drive UNKEYED channels (§10n/§10o) and
+		// every channel here is keyed.
+		{
+			IStorageObject *fm = PMAX_RIG::findChunkAnywhere(wrSys, 0x0109);
+			CStorageRaw *fmRaw = dynamic_cast<CStorageRaw *>(fm);
+			if (fmRaw && fmRaw->Value.size() == 4)
+			{
+				fmRaw->Value[0] = 0; fmRaw->Value[1] = 0; fmRaw->Value[2] = 0; fmRaw->Value[3] = 0;
+				fprintf(stderr, "FIGMODE: cleared 0x0109 (Figure Mode) in the output\n");
+			}
+			else
+				fprintf(stderr, "FIGMODE: WARNING 0x0109 not found/unexpected size — output may open in Figure Mode\n");
+		}
 		storeTrack(wrSys, CBipedAnimTrack::TrackHorizontal, bHorizontal, false);
 		storeTrack(wrSys, CBipedAnimTrack::TrackTurn, bTurn, false);
 		storeTrack(wrSys, CBipedAnimTrack::TrackVertical, bVertical, true);

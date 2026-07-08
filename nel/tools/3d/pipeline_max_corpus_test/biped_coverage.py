@@ -30,7 +30,8 @@ DECODED = set(int(x, 16) for x in """
 #   0x0258..0x0261 = the live-state byte-mirror of the 0x0064..0x006d pose records (base + 0x01F4)
 #   0x00ca = height-derived dynamics record ([1]=height, [4]=gravAccel)
 #   0x0102 = sub-anim index/enable table; 0x0110 = per-track anim-handle id table
-#   0x015e = track-separation flags; 0x014b = inPlaceMode; 0x0109 = twist; 0x0204 = link-count scalar
+#   0x015e = track-separation flags; 0x014b = inPlaceMode; 0x0109 = FIGURE MODE flag (b00 isolation
+#   diff, 2026-07-08 — supersedes the earlier twist attribution); 0x0204 = link-count scalar
 #   0x01f4..0x01fc = per-limb absolute-length tables (0x01f5 neck / f7 spine / f8 tail / f9 leg-toe / fa arm-finger)
 #   0x000a, 0x001a = tail-arm / finger-toe structure presence records
 IDENTIFIED = set(int(x, 16) for x in """
