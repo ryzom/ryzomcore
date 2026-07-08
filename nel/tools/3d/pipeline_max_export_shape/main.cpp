@@ -53,6 +53,7 @@
 #include <nel/3d/mesh_mrm.h>
 #include <nel/3d/mesh_mrm_skinned.h>
 #include <nel/3d/mesh_multi_lod.h>
+#include <nel/3d/mesh_geom.h>
 #include <nel/3d/register_3d.h>
 #include <nel/3d/shape.h>
 #include <nel/3d/animation.h>
@@ -159,9 +160,68 @@ static bool startsWithBip(const std::string &s)
 }
 
 // ---------------------------------------------------------------------------------------------
-// buildShape: the mesh path (CMesh / CMeshMRM)
+// buildShape: the mesh path (CMesh / CMeshMRM / CMeshMultiLod)
 
-static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache, bool exportLighting, SExportStats &stats)
+// Evaluate a node's mesh + build the CMesh::CMeshBuild against a caller-supplied CMeshBaseBuild
+// (base materials + transform stay owned by the caller). Returns NULL on eval failure; sets
+// noteMapExt/noteLightmap for the harness tags. The base node's CMeshBaseBuild is what feeds
+// UVRouting + material count; a multi-lod slave rides on that same base.
+static bool evalAndBuildMesh(INode &node, SNodeTMCache &tmCache,
+                             const NL3D::CMeshBase::CMeshBaseBuild &buildBaseMesh,
+                             const SMaxMeshBaseBuild &maxBaseBuild,
+                             NL3D::CMesh::CMeshBuild &buildMesh, SExportStats &stats)
+{
+	std::string name = nodeName(node);
+	SEvalMesh mesh;
+	std::vector<std::string> warnings;
+	if (!evalNodeMesh(node, mesh, &warnings))
+	{
+		stats.skip("mesh-eval");
+		return false;
+	}
+	buildMeshInterface(mesh, buildMesh, buildBaseMesh, maxBaseBuild, node, tmCache);
+	return true;
+}
+
+// Construct an IMeshGeom (CMeshGeom or CMeshMRMGeom) from a built CMeshBuild — used per LOD slot
+// in the multi-lod path. Caller owns the returned pointer until CMeshMultiLod::build takes it.
+static NL3D::IMeshGeom *buildMeshGeomFor(INode &node, NL3D::CMesh::CMeshBuild &buildMesh,
+                                          uint numMaxMaterial)
+{
+	CNodeImpl *n = dynamic_cast<CNodeImpl *>(&node);
+	if (getScriptAppDataInt(n, NEL3D_APPDATA_LOD_MRM, 0))
+	{
+		NL3D::CMRMParameters parameters;
+		buildMRMParameters(n, parameters);
+		std::vector<NL3D::CMesh::CMeshBuild *> bsList; // morph targets: not implemented
+		NL3D::CMeshMRMGeom *g = new NL3D::CMeshMRMGeom;
+		g->build(buildMesh, bsList, numMaxMaterial, parameters);
+		return g;
+	}
+	NL3D::CMeshGeom *g = new NL3D::CMeshGeom;
+	g->build(buildMesh, numMaxMaterial);
+	return g;
+}
+
+// LOD slot flags from a slave's appdata.
+static uint8 lodSlotFlags(CNodeImpl *n)
+{
+	uint8 flags = 0;
+	if (getScriptAppDataStr(n, NEL3D_APPDATA_LOD_BLEND_IN, "") == "1")
+		flags |= NL3D::CMeshMultiLod::CMeshMultiLodBuild::CBuildSlot::BlendIn;
+	if (getScriptAppDataStr(n, NEL3D_APPDATA_LOD_BLEND_OUT, "") == "1")
+		flags |= NL3D::CMeshMultiLod::CMeshMultiLodBuild::CBuildSlot::BlendOut;
+	if (getScriptAppDataStr(n, NEL3D_APPDATA_LOD_COARSE_MESH, "") == "1")
+		flags |= NL3D::CMeshMultiLod::CMeshMultiLodBuild::CBuildSlot::CoarseMesh;
+	return flags;
+}
+
+// Node lookup (case-insensitive) — passed into buildShapeForNode for the multi-lod slave path.
+typedef std::map<std::string, INode *> TNodesByName;
+
+static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
+                                       const TNodesByName &nodesByName,
+                                       bool exportLighting, SExportStats &stats)
 {
 	CNodeImpl *n = dynamic_cast<CNodeImpl *>(&node);
 	std::string name = nodeName(node);
@@ -212,14 +272,12 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache, bool 
 		}
 	}
 
-	// Multi-lod object?
+	// Multi-lod object detection (LOD_NAME_COUNT > 0 = the node has LOD slaves — LOD 0 is the
+	// node itself + up to 9 slaves resolved by NAME from the LOD_NAME + i appdata; each slave
+	// contributes ONE MeshGeom slot to a CMeshMultiLod. Materials, transform and shadow flags
+	// live at the base level and come from the parent node; slave matIDs get clamped through
+	// buildMeshInterface's `% numMaterials` so a slave with fewer materials is safe).
 	uint lodCount = (uint)getScriptAppDataInt(n, NEL3D_APPDATA_LOD_NAME_COUNT, 0);
-	if (lodCount)
-	{
-		stats.skip("multilod");
-		fprintf(stderr, "SKIP shape '%s': multi-lod object not implemented\n", name.c_str());
-		return NULL;
-	}
 
 	// Interface meshes (normal welding)
 	if (!getScriptAppDataStr(n, NEL3D_APPDATA_INTERFACE_FILE, "").empty())
@@ -245,16 +303,8 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache, bool 
 		}
 	}
 
-	// Evaluate the mesh
-	SEvalMesh mesh;
-	std::vector<std::string> warnings;
-	if (!evalNodeMesh(node, mesh, &warnings))
-	{
-		stats.skip("mesh-eval");
-		return NULL;
-	}
-
-	// Base mesh (materials, flags, default transform)
+	// Base mesh (materials, flags, default transform) — parent-authoritative for the whole
+	// multi-lod, and the sole build for the single-mesh path.
 	Matrix3M localTM = getLocalMatrix(node, tmCache);
 	SMaxMeshBaseBuild maxBaseBuild;
 	NL3D::CMeshBase::CMeshBaseBuild buildBaseMesh;
@@ -271,41 +321,116 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache, bool 
 		}
 	}
 
-	NL3D::CMesh::CMeshBuild buildMesh;
-	buildMeshInterface(mesh, buildMesh, buildBaseMesh, maxBaseBuild, node, tmCache);
-
 	NL3D::CMeshBase *meshBase = NULL;
 	std::vector<sint> materialRemap;
 
-	if (getScriptAppDataInt(n, NEL3D_APPDATA_LOD_MRM, 0))
+	if (lodCount > 0)
 	{
-		NL3D::CMRMParameters parameters;
-		buildMRMParameters(n, parameters);
+		// Build the CMeshMultiLod: LOD 0 = this node's own mesh, LOD 1..count from the slave
+		// nodes named in the LOD_NAME + i appdata (case-insensitive lookup — same discipline as
+		// the LOD-slave gate in exportFile that keeps slaves from producing their own .shape).
+		NL3D::CMeshMultiLod::CMeshMultiLodBuild mlBuild;
+		mlBuild.BaseMesh = buildBaseMesh;
+		mlBuild.StaticLod = getScriptAppDataStr(n, NEL3D_APPDATA_LOD_DYNAMIC_MESH, "") != "1";
 
-		std::vector<NL3D::CMesh::CMeshBuild *> bsList; // morph targets: not implemented
+		uint numMaterials = (uint)buildBaseMesh.Materials.size();
+		bool anyOk = false;
 
-		if (NL3D::CMeshMRMSkinned::isCompatible(buildMesh) && bsList.empty())
+		// LOD 0 = the parent node itself
 		{
-			NL3D::CMeshMRMSkinned *meshMRMSkinned = new NL3D::CMeshMRMSkinned;
-			meshMRMSkinned->build(buildBaseMesh, buildMesh, parameters);
-			meshMRMSkinned->optimizeMaterialUsage(materialRemap);
-			meshBase = meshMRMSkinned;
+			NL3D::CMesh::CMeshBuild buildMesh;
+			if (evalAndBuildMesh(node, tmCache, buildBaseMesh, maxBaseBuild, buildMesh, stats))
+			{
+				NL3D::CMeshMultiLod::CMeshMultiLodBuild::CBuildSlot slot;
+				slot.MeshGeom = buildMeshGeomFor(node, buildMesh, numMaterials);
+				slot.DistMax = getScriptAppDataFloat(n, NEL3D_APPDATA_LOD_DIST_MAX, 1000.f);
+				slot.BlendLength = getScriptAppDataFloat(n, NEL3D_APPDATA_LOD_BLEND_LENGTH, 0.f);
+				slot.Flags = lodSlotFlags(n);
+				mlBuild.LodMeshes.push_back(slot);
+				anyOk = true;
+			}
 		}
-		else
+
+		// LOD 1..count = slave nodes
+		for (uint i = 0; i < lodCount && i < 10; ++i)
 		{
-			NL3D::CMeshMRM *meshMRM = new NL3D::CMeshMRM;
-			meshMRM->build(buildBaseMesh, buildMesh, bsList, parameters);
-			meshMRM->optimizeMaterialUsage(materialRemap);
-			meshBase = meshMRM;
+			std::string slaveName = getScriptAppDataStr(n, NEL3D_APPDATA_LOD_NAME + i, "");
+			if (slaveName.empty()) continue;
+			TNodesByName::const_iterator it = nodesByName.find(NLMISC::toLowerAscii(slaveName));
+			if (it == nodesByName.end())
+			{
+				fprintf(stderr, "WARNING: multilod '%s': slave LOD '%s' not found\n",
+				        name.c_str(), slaveName.c_str());
+				continue;
+			}
+			INode *slave = it->second;
+			CNodeImpl *sn = dynamic_cast<CNodeImpl *>(slave);
+			NL3D::CMesh::CMeshBuild buildMesh;
+			if (!evalAndBuildMesh(*slave, tmCache, buildBaseMesh, maxBaseBuild, buildMesh, stats))
+				continue;
+			NL3D::CMeshMultiLod::CMeshMultiLodBuild::CBuildSlot slot;
+			slot.MeshGeom = buildMeshGeomFor(*slave, buildMesh, numMaterials);
+			slot.DistMax = getScriptAppDataFloat(sn, NEL3D_APPDATA_LOD_DIST_MAX, 1000.f);
+			slot.BlendLength = getScriptAppDataFloat(sn, NEL3D_APPDATA_LOD_BLEND_LENGTH, 0.f);
+			slot.Flags = lodSlotFlags(sn);
+			mlBuild.LodMeshes.push_back(slot);
+			anyOk = true;
 		}
+
+		if (!anyOk)
+		{
+			// No LOD came through — bail rather than serialize an empty multi-lod.
+			stats.skip("mesh-eval");
+			return NULL;
+		}
+
+		NL3D::CMeshMultiLod *ml = new NL3D::CMeshMultiLod;
+		ml->build(mlBuild);
+		// No optimizeMaterialUsage on CMeshMultiLod — the base material list is fixed and shared
+		// across every LOD's MeshGeom, so we can't drop unreferenced ones without walking every
+		// per-LOD index buffer for its actual material use. Fill an identity remap for the
+		// animated-material path below.
+		materialRemap.resize(maxBaseBuild.NumMaterials);
+		for (uint i = 0; i < maxBaseBuild.NumMaterials; ++i)
+			materialRemap[i] = (sint)i;
+		meshBase = ml;
 	}
 	else
 	{
-		NL3D::CMesh *m = new NL3D::CMesh;
-		m->build(buildBaseMesh, buildMesh);
-		// buildMeshMorph: morph targets not implemented (Morpher modifier reports unhandled)
-		m->optimizeMaterialUsage(materialRemap);
-		meshBase = m;
+		NL3D::CMesh::CMeshBuild buildMesh;
+		if (!evalAndBuildMesh(node, tmCache, buildBaseMesh, maxBaseBuild, buildMesh, stats))
+			return NULL;
+
+		if (getScriptAppDataInt(n, NEL3D_APPDATA_LOD_MRM, 0))
+		{
+			NL3D::CMRMParameters parameters;
+			buildMRMParameters(n, parameters);
+
+			std::vector<NL3D::CMesh::CMeshBuild *> bsList; // morph targets: not implemented
+
+			if (NL3D::CMeshMRMSkinned::isCompatible(buildMesh) && bsList.empty())
+			{
+				NL3D::CMeshMRMSkinned *meshMRMSkinned = new NL3D::CMeshMRMSkinned;
+				meshMRMSkinned->build(buildBaseMesh, buildMesh, parameters);
+				meshMRMSkinned->optimizeMaterialUsage(materialRemap);
+				meshBase = meshMRMSkinned;
+			}
+			else
+			{
+				NL3D::CMeshMRM *meshMRM = new NL3D::CMeshMRM;
+				meshMRM->build(buildBaseMesh, buildMesh, bsList, parameters);
+				meshMRM->optimizeMaterialUsage(materialRemap);
+				meshBase = meshMRM;
+			}
+		}
+		else
+		{
+			NL3D::CMesh *m = new NL3D::CMesh;
+			m->build(buildBaseMesh, buildMesh);
+			// buildMeshMorph: morph targets not implemented (Morpher modifier reports unhandled)
+			m->optimizeMaterialUsage(materialRemap);
+			meshBase = m;
+		}
 	}
 
 	// Animated materials
@@ -427,7 +552,7 @@ static int exportFile(const std::string &maxPath, const std::string &outDir, con
 
 		std::string outPath = (haveCoarse ? outDirCoarse : outDir) + "/" + NLMISC::toLowerAscii(name) + ".shape";
 
-		NL3D::IShape *shape = buildShapeForNode(node, tmCache, exportLighting, stats);
+		NL3D::IShape *shape = buildShapeForNode(node, tmCache, nodesByName, exportLighting, stats);
 		if (!shape)
 			continue;
 
