@@ -60,14 +60,16 @@ OLE_MAGIC = b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1"
 
 # Known-open diff budget (see the module docstring). Regression guard: any count beyond this
 # fails --gate-t3. Retire by fixing diffs and re-tightening — don't raise. Tightened 2026-07-08
-# (§10w): 89 -> 28 after the Edit Mesh 0x0130 created-verts decode + tree-ordered per-category
-# walk + ligo XRef-first pass. Remaining 28 = ~5 PS-instance clusterize AABBox corners landing
-# within CLUSTERPRECISION=5mm of a cluster plane (x64/SSE vs x87, real content risk LOW — extra
-# links harden culling, don't drop content) + ~23 village-bundle files (fy_module_village_nb_*,
-# zo_imm_village_nb_*, tr_village_nb_*, jungle foret village_*, ilot_butte cases) where every
-# node parents to the scene root so buildTreeOrder degenerates to storage order — cause not
-# pinned without a Max-side $geometry probe on one of them.
-DIFF_BUDGET = 28
+# (§10w): 89 -> 8 in one session. 89 -> 28 after the Edit Mesh 0x0130 created-verts decode +
+# tree-ordered per-category walk + ligo XRef-first pass; then 28 -> 8 after the ligo XRef pre-
+# pass gained the single-step source-resolution + source-superclass filter (Kaetemi's Max 9
+# gen_ig_selorder_probe.ms run pinned the maxscript's actual criterion: source XRef → skip
+# (nested), source superclass ∉ {Geom, Helper, Light} → skip). Remaining 8 = ~5-6 PS-instance
+# clusterize AABBox corners landing within CLUSTERPRECISION=5mm of a cluster plane (x64/SSE vs
+# x87, LOW real-content risk — extra cluster links harden visibility culling rather than drop
+# content) + 2-3 unclassified singleton file cases (taverne.ig Scale, jungle-2.ig Pos,
+# fy_cn_fortress_a_brandon.ig Scale+Clusters) not yet triaged.
+DIFF_BUDGET = 8
 
 
 def enumerate_corpus(graphics_dir):

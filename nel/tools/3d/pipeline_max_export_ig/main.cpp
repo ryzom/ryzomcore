@@ -2164,8 +2164,20 @@ static NL3D::CInstanceGroup *exportIgForName(CSceneClassContainer *ssc, SNodeTMC
 	std::vector<INode *> vectNode;
 	std::set<INode *> picked;
 
-	// Ligo-only XRef-first pass. The maxscript filter is `classOf node == XRefObject`, so test
-	// the direct object reference (BEFORE base-object unwrapping) for the XRefObject classId.
+	// Ligo-only XRef-first pass. The maxscript filter is (per Kaetemi's Max 9
+	// gen_ig_selorder_probe.ms run on `zonematerial-desert-nb01.max`/`fy_module_village_nb_01`):
+	//   for node in objects where classOf node == XRefObject do (
+	//     sourceObject = node.GetSourceObject false   -- SINGLE-STEP resolve, no recursion
+	//     if (classOf sourceObject == XRefObject) then FAIL   -- nested XRef → skipped
+	//     else if (superclassOf sourceObject in {Geom, Helper, Light}) then selectmore
+	//     -- anything else (e.g. sClass=shape 0x40) → dropped, no selectmore branch fires
+	//   )
+	// Not the ordering-inert catch-all it looked like — probing this specific file exposed both
+	// exclusion cases: 5 "ascenseur" XRefs whose source is a chained XRefObject (not resolved
+	// further by the maxscript, ours single-step resolve returns them as such), plus
+	// `fy_module_col_nb01` whose source is a `SplineShape`/sClass=shape 0x40 (none of the three
+	// `selectmore` branches fire). Both were being incorrectly added to our pre-pass before this
+	// fix — see §10w for the full ligo diff-count drop and the 23 village-bundle-file class.
 	if (includeXRefFirst)
 	{
 		std::vector<INode *> xrefNodes;
@@ -2178,6 +2190,69 @@ static NL3D::CInstanceGroup *exportIgForName(CSceneClassContainer *ssc, SNodeTMC
 			std::string ig = getScriptAppDataStr(node, NEL3D_APPDATA_IGNAME, "");
 			if (lowercaseCompare) ig = NLMISC::toLowerAscii(ig);
 			if (ig != want) continue;
+
+			// Single-step XRef source resolution. The maxscript's `GetSourceObject false` never
+			// unwraps a nested XRef — it returns the direct target object as stored on the XRef,
+			// which may itself be an XRefObject if the source .max chains a reference.
+			// resolveXRefObject() by itself would recurse through baseObjectOfObj at the end,
+			// so we call it and then peel back one step: what we want is the OBJECT REFERENCE of
+			// the resolved source node, not its fully-unwrapped base — inline the same loader
+			// path resolveXRefObject uses and stop at `node->getReference(1)`.
+			CSceneClass *source = NULL;
+			{
+				CStorageContainer *rec170 = NULL;
+				const CStorageContainer::TStorageObjectContainer &orphans = directObj->orphanedChunks();
+				for (CStorageContainer::TStorageObjectConstIt oi = orphans.begin(); oi != orphans.end(); ++oi)
+					if (oi->first == 0x0170) { rec170 = dynamic_cast<CStorageContainer *>(oi->second); break; }
+				std::string srcFile, srcObj, srcOnDisk;
+				SLoadedMax *lm = NULL;
+				if (rec170 &&
+				    xrefChildString(rec170, 0x0100, srcFile) &&
+				    xrefChildString(rec170, 0x0110, srcObj) &&
+				    DBPATH::resolve(srcFile, srcOnDisk))
+					lm = loadMaxFileCached(srcOnDisk);
+				if (lm)
+				{
+					CSceneClassContainer *sub = lm->Scene->container();
+					std::string wantLower = NLMISC::toLowerAscii(srcObj);
+					for (CStorageContainer::TStorageObjectConstIt si = sub->chunks().begin(); si != sub->chunks().end(); ++si)
+					{
+						CNodeImpl *n2 = dynamic_cast<CNodeImpl *>(si->second);
+						if (!n2) continue;
+						if (NLMISC::toLowerAscii(ucstring(n2->userName()).toUtf8()) != wantLower) continue;
+						source = dynamic_cast<CSceneClass *>(n2->getReference(1));
+						break;
+					}
+				}
+			}
+			if (!source) continue; // unresolvable → maxscript's `sourceObject == undefined` fall-through
+			// Nested-XRef check: maxscript raises "FAIL XREF STILL XREF" and skips.
+			if (source->classDesc()->classId().a() == 0x92aab38c) continue;
+			// Category filter: only Geom/Helper/Light superclasses have a matching `selectmore`
+			// branch in the maxscript. Everything else (Shape 0x40, Camera 0x20, ...) falls
+			// through unadded. UNWRAP OSM/WSM derived-object wrappers first — the maxscript's
+			// `superclassOf sourceObject` sees the base-of-derived, not the wrapper.
+			CSceneClass *unwrapped = source;
+			for (int guard = 0; unwrapped && guard < 8; ++guard)
+			{
+				NLMISC::CClassId cid = unwrapped->classDesc()->classId();
+				if (cid != CLASSID_OSM_DERIVED && cid != CLASSID_WSM_DERIVED) break;
+				CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(unwrapped);
+				CSceneClass *base = NULL;
+				for (uint i = 0; rm && i < rm->nbReferences(); ++i)
+				{
+					CSceneClass *r = dynamic_cast<CSceneClass *>(rm->getReference(i));
+					if (!r) continue;
+					TSClassId scid_i = r->classDesc()->superClassId();
+					if (scid_i == SCLASS_OSMODIFIER || scid_i == SCLASS_WSMODIFIER) continue;
+					base = r;
+				}
+				if (!base) break;
+				unwrapped = base;
+			}
+			TSClassId scid = unwrapped ? unwrapped->classDesc()->superClassId() : (TSClassId)0;
+			if (scid != SCLASS_GEOMOBJECT && scid != SCLASS_HELPER && scid != SCLASS_LIGHT) continue;
+
 			xrefNodes.push_back(node);
 		}
 		// Sort by tree order; the maxscript's `for node in objects` uses the scene walk.
