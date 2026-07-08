@@ -50,6 +50,8 @@
 #include "../pipeline_max/builtin/reference_maker.h"
 
 #include "../pipeline_max_export_common/edit_mesh_mod.h"
+#include "../pipeline_max_export_common/old_param_block.h"
+#include "../pipeline_max_export_common/parametric_mesh.h"
 
 using namespace PIPELINE::MAX;
 using namespace PIPELINE::MAX::BUILTIN;
@@ -343,6 +345,55 @@ static void applyXForm(CSceneClass *mod, CStorageContainer *app, SEvalMesh &mesh
 
 // ---------------------------------------------------------------------------------------------
 
+// Extract a parametric primitive's mesh into SEvalMesh: use the shared PRIMMESH library for
+// GT-exact topology, assign all faces smoothing group 1 (Max's default single smoothing group
+// for primitives) + material id 0, and leave map channels empty (mapping-coord UV generation
+// per primitive type is unimplemented — Box gets 6-face box mapping, Cylinder cylindrical,
+// Sphere spherical, Plane planar; formulas depend on the primitive's "generate mapping coords"
+// checkbox and its specific dimensions, and the reference builds them via Max's own SDK. Skipped
+// here — texture UVs for these prims default to (0,0,0) via buildMeshInterface's empty-channel
+// path, which is only "wrong" for textured prims and correct for untextured/collision ones).
+static bool extractParametricPrimitive(CSceneClass *base, SEvalMesh &out, const std::string &name)
+{
+	// Locate the primitive's ref-0 old-style ParamBlock (superclass 0x8).
+	CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(base);
+	CSceneClass *pblock = NULL;
+	for (uint r = 0; rm && r < rm->nbReferences(); ++r)
+	{
+		CSceneClass *ref = dynamic_cast<CSceneClass *>(rm->getReference(r));
+		if (ref && ref->classDesc()->superClassId() == SCLASS_PBLOCK)
+		{
+			pblock = ref;
+			break;
+		}
+	}
+	if (!pblock)
+	{
+		fprintf(stderr, "WARNING: parametric prim '%s' without ref-0 pblock\n", name.c_str());
+		return false;
+	}
+	std::map<sint32, OLDPBLOCK::SParam> params;
+	OLDPBLOCK::readOldParamBlock(pblock, params);
+
+	std::vector<NLMISC::CVector> pverts;
+	std::vector<PRIMMESH::SPrimTri> ptris;
+	if (!PRIMMESH::buildParametricMesh(base->classDesc()->classId(), params, pverts, ptris))
+		return false;
+
+	out.Verts.resize(pverts.size());
+	if (!pverts.empty()) memcpy(&out.Verts[0], &pverts[0], pverts.size() * 12);
+	out.Faces.resize(ptris.size());
+	for (uint i = 0; i < ptris.size(); ++i)
+	{
+		out.Faces[i].V[0] = ptris[i].V[0];
+		out.Faces[i].V[1] = ptris[i].V[1];
+		out.Faces[i].V[2] = ptris[i].V[2];
+		out.Faces[i].SmGroup = 1; // Max's default single smoothing group for primitives
+		out.Faces[i].Flags = 0;    // matID 0, all edges visible, not hidden
+	}
+	return true;
+}
+
 bool evalNodeMesh(INode &node, SEvalMesh &out, std::vector<std::string> *warnings)
 {
 	std::string name = nodeName(node);
@@ -355,6 +406,12 @@ bool evalNodeMesh(INode &node, SEvalMesh &out, std::vector<std::string> *warning
 	if (cid == CLASSID_EDITABLE_MESH)
 	{
 		if (!extractEditableMesh(base, out, name))
+			return false;
+	}
+	else if (cid == PRIMMESH::CLASSID_BOX || cid == PRIMMESH::CLASSID_CYLINDER
+	         || cid == PRIMMESH::CLASSID_SPHERE || cid == PRIMMESH::CLASSID_PLANE)
+	{
+		if (!extractParametricPrimitive(base, out, name))
 			return false;
 	}
 	else
