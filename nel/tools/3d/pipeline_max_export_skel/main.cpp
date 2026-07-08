@@ -271,7 +271,7 @@ static void writeRigDump(FILE *fp)
 	int rigIdx = 0;
 	for (std::map<CSceneClass *, SBipedRig>::iterator it = g_bipedRigs.begin(); it != g_bipedRigs.end(); ++it, ++rigIdx)
 	{
-		fprintf(fp, "RIG %d figver %d\n", rigIdx, it->second.FigureVersion);
+		fprintf(fp, "RIG %d figver %d\n", rigIdx, it->second.BodyType);
 		CSceneClass *sys = it->first;
 		// after parse, everything unclaimed sits in orphanedChunks; m_Chunks may hold the rest
 		std::vector<std::pair<uint16, IStorageObject *> > all;

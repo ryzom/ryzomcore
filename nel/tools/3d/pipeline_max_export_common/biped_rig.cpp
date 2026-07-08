@@ -300,7 +300,7 @@ SBipedRig::SBipedRig() : Sys(NULL), HasCom(false), ComPos(NLMISC::CVector::Null)
 		LastSpineWorldRot(NLMISC::CQuat::Identity), HaveLastSpineWorldRot(false),
 		PelvisRecTrans(NLMISC::CVector::Null), HavePelvisWorldTM(false),
 		HaveLastSpineWorldTM(false),
-		FigureVersion(3),
+		BodyType(3),
 		ToeBaseWorldZ(0.0f), HaveToeBaseWorldZ(false),
 		AnkleWorldZ(0.0f), HaveAnkleWorldZ(false),
 		FootstepsBoneIdx(-1)
@@ -387,12 +387,12 @@ NLMISC::CQuat chainAngleQuat(const NLMISC::CVector &a)
 	return r;
 }
 
-// Fresh-format (FigureVersion 0) chain layout: element positions include the first-order shift
+// Fresh-format (BodyType 0) chain layout: element positions include the first-order shift
 // [Rz(-eps) - I] . A(own angles) . (own length, 0, 0) — the runtime lays the matrix-based chains
 // (spine/tail/pony) out with an eps-twisted tip per element while the orientations use the
 // corrected angles. Confirmed exactly on the regen corpus (tr_mo_c03 base: dx +183um dy -49um
 // both predicted; kakty/chonari/ryzerb/capryni link steps match to ~2um across bend angles
-// 0..90 deg). Legacy rigs (FigureVersion 3) don't have this — call sites gate on FigureVersion.
+// 0..90 deg). Legacy rigs (BodyType 3) don't have this — call sites gate on BodyType.
 NLMISC::CVector chainEpsShift(const NLMISC::CVector &angles, float len)
 {
 	NLMISC::CQuat a = chainAngleQuat(angles);
@@ -970,7 +970,7 @@ void getBipedLocal(INode *node, const NLMISC::CMatrix &parentWorld,
 		// (f[9], f[8], +-f[10]) in the LAST SPINE LINK's frame — not the walk parent's (neck)
 		// frame. On straight rigs the two coincide; the kitin family's 22.5-degree neck bend
 		// discriminates (regen GT reproduced to 3e-4 under the spine-frame rule).
-		if (rig.FigureVersion == 0 && rig.HaveLastSpineWorldTM && !rig.Spine.Lens.empty())
+		if (rig.BodyType == 0 && rig.HaveLastSpineWorldTM && !rig.Spine.Lens.empty())
 		{
 			NLMISC::CVector spineEnd = rig.LastSpineWorldTM * NLMISC::CVector(rig.Spine.Lens.back(), 0.0f, 0.0f);
 			NLMISC::CMatrix rl;
@@ -987,7 +987,7 @@ void getBipedLocal(INode *node, const NLMISC::CMatrix &parentWorld,
 	{
 		// NOTE: both sides decode the FIRST (right) half's matrices — per-side decode regresses
 		// (the other half can go stale; verified both directions). On the corpus's one fresh-format
-		// rig (tr_mo_kitin_queen, FigureVersion 0) the staleness is even per-record: its x24-scaled
+		// rig (tr_mo_kitin_queen, BodyType 0) the staleness is even per-record: its x24-scaled
 		// FINGER bases are current only in the LEFT half while its TOE bases are current only in
 		// the right — no consistent selection rule is derivable from one file, so the legacy
 		// right-half read stays until more fresh-format corpus material exists. The pose-block
@@ -1056,7 +1056,7 @@ void getBipedLocal(INode *node, const NLMISC::CMatrix &parentWorld,
 				bool haveDelta = chainPoseBaseDelta(0x0069, tLeft, ti, delta);
 				rot = toe.Rot;
 				if (haveDelta) rot = rot * delta;
-				bool rotDirectSide = (rig.FigureVersion == 0) ? !tLeft : tLeft;
+				bool rotDirectSide = (rig.BodyType == 0) ? !tLeft : tLeft;
 				if (!rotDirectSide) rot = mirrorQuatLR(rot);
 				if (tLeft) pos = toe.Pos;
 				else pos = NLMISC::CVector(toe.Pos.x, toe.Pos.y, -toe.Pos.z);
@@ -1083,16 +1083,16 @@ void getBipedLocal(INode *node, const NLMISC::CMatrix &parentWorld,
 	else if (haveId && id == BID_SPINE && link == 0 && rig.Spine.HasMat)
 	{
 		// Spine base: attach matrix from the spine record (COM-relative), composed with the
-		// per-link angles when present. Fresh-format (FigureVersion 0) base-link a1 angles carry
+		// per-link angles when present. Fresh-format (BodyType 0) base-link a1 angles carry
 		// a baked +BIPED_EPS_TWIST the runtime subtracts (regen corpus: stored a1 differs from
 		// the legacy twin's by exactly eps on every matrix-based chain base; GT poses exclude it).
 		rot = rig.Spine.MatRot;
 		if (!rig.Spine.Angles.empty())
 		{
 			NLMISC::CVector a0 = rig.Spine.Angles[0];
-			if (rig.FigureVersion == 0) a0.x -= BIPED_EPS_TWIST;
+			if (rig.BodyType == 0) a0.x -= BIPED_EPS_TWIST;
 			rot = rot * chainAngleQuat(a0);
-			if (rig.FigureVersion == 0 && !rig.Spine.Lens.empty())
+			if (rig.BodyType == 0 && !rig.Spine.Lens.empty())
 				pos += chainEpsShift(a0, rig.Spine.Lens[0]);
 		}
 		rot.normalize();
@@ -1108,7 +1108,7 @@ void getBipedLocal(INode *node, const NLMISC::CMatrix &parentWorld,
 		if (link - 1 < rig.Spine.Lens.size())
 		{
 			pos = NLMISC::CVector(rig.Spine.Lens[link - 1], 0.0f, 0.0f);
-			if (rig.FigureVersion == 0 && link < rig.Spine.Lens.size())
+			if (rig.BodyType == 0 && link < rig.Spine.Lens.size())
 				pos += chainEpsShift(rig.Spine.Angles[link], rig.Spine.Lens[link]);
 		}
 		else
@@ -1147,7 +1147,7 @@ void getBipedLocal(INode *node, const NLMISC::CMatrix &parentWorld,
 			{
 				// Fresh-format base-link a1 carries the baked +eps (see the spine base).
 				NLMISC::CVector a0 = chain.Angles[0];
-				if (rig.FigureVersion == 0) a0.x -= BIPED_EPS_TWIST;
+				if (rig.BodyType == 0) a0.x -= BIPED_EPS_TWIST;
 				rot = rot * chainAngleQuat(a0);
 			}
 			rot.normalize();
@@ -1358,7 +1358,7 @@ SBipedRig &rigFor(CSceneClass *sys, CSceneClassContainer *ssc)
 	g_rig = &rig; // bipedChunkFloats reads through g_rig during parsing
 	{
 		const float *v = bipedChunkFloats(0x0115, 1);
-		if (v) rig.FigureVersion = (int)floatBitsAsUint(v[0]);
+		if (v) rig.BodyType = (int)floatBitsAsUint(v[0]);
 	}
 	parseComRecord(rig);
 	parseLegRecord(rig);
@@ -1572,7 +1572,7 @@ void patchFootstepsGround(std::vector<Bone> &bones)
 		// the deep-ankle monster families).
 		float groundZ = 0.0f;
 		bool haveGround = false;
-		if (rig.FigureVersion == 0 && rig.HaveAnkleWorldZ)
+		if (rig.BodyType == 0 && rig.HaveAnkleWorldZ)
 		{
 			g_rig = &rig;
 			const float *lf = bipedSideHalf(0x000f, false, 8);

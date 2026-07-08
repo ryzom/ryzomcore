@@ -1096,7 +1096,7 @@ void CBipedAnimEval::evalAt(double t, std::map<INode *, SBipNodeState> &out)
 						{
 							QuatD s = m_ChToeBase[side][ti].eval(t);
 							QuatD local;
-							if (m_Rig && m_Rig->FigureVersion == 0)
+							if (m_Rig && m_Rig->BodyType == 0)
 							{
 								// Fresh-format rule = the figure decode's (toe.Rot keeps the z-flip;
 								// right direct, left = LR mirror of the composed local) — pinned by

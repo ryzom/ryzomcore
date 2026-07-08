@@ -274,7 +274,7 @@ struct SBipedRig
 	NLMISC::CQuat LastSpineWorldRot;
 	bool HaveLastSpineWorldRot;
 	// Pelvis record (0x000d) attach translation in MatPos convention. Zero on the legacy corpus;
-	// fresh-format (FigureVersion 0) rigs store the last-spine-link-end -> neck attach offset here
+	// fresh-format (BodyType 0) rigs store the last-spine-link-end -> neck attach offset here
 	// (Max 9 keeps the neck off the stored spine-link length by this amount; regen-corpus GT).
 	NLMISC::CVector PelvisRecTrans;
 	// Pelvis bone world matrix, captured by walkNode when the pelvis is walked (before any thigh).
@@ -286,7 +286,12 @@ struct SBipedRig
 	// clavicles anchor at the spine end in this frame.
 	NLMISC::CMatrix LastSpineWorldTM;
 	bool HaveLastSpineWorldTM;
-	int FigureVersion;
+	// Chunk 0x0115 = the biped bodyType enum (0=Skeleton, 1=Male, 2=Female, 3=Classic — proven by
+	// a single-variable probe edit; previously misread as a "figure version" marker). Still used
+	// as the legacy-vs-fresh decode gate, which works because the whole legacy corpus was authored
+	// as Classic (3) while biped.createNew leaves the documented Skeleton default (0) — the gate's
+	// real semantic is authoring era via body-type default, not a format version.
+	int BodyType;
 	float ToeBaseWorldZ;
 	bool HaveToeBaseWorldZ;
 	// Left ankle (last leg link) world height — fresh-format footsteps sit at ankle minus the
