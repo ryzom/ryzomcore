@@ -140,7 +140,25 @@ IF (Python3_Interpreter_FOUND)
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 	SET_TESTS_PROPERTIES(pipeline_max_shape_corpus PROPERTIES SKIP_RETURN_CODE 77)
 
+	# pacs_prim_corpus.py: T1/T2 over PacsPrimSourceDirectories (stuff/<race>/decors/vegetations)
+	# + T3 export byte-compare against ~/pipeline_export/ecosystems/<eco>/pacs_prim. Landing state:
+	# 509 corpus files, 493 with PACS primitives, all byte-identical.
+	ADD_TEST(NAME pipeline_max_pacs_prim_corpus
+		COMMAND ${Python3_EXECUTABLE} pacs_prim_corpus.py --all --gate-t3
+			--bin $<TARGET_FILE_DIR:pipeline_max_export_pacs_prim>
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+	SET_TESTS_PROPERTIES(pipeline_max_pacs_prim_corpus PROPERTIES SKIP_RETURN_CODE 77)
+
+	# cmb_corpus.py: T1/T2/T3 over the 16 direct RBankCmbSourceDirectories construction files
+	# (gated, DIRECT_DIFF_BUDGET) plus an informational (non-gated) sweep of the ligo brick
+	# corpus via --ligo. See the script docstring for the known open diff classes.
+	ADD_TEST(NAME pipeline_max_cmb_corpus
+		COMMAND ${Python3_EXECUTABLE} cmb_corpus.py --t1 --t2 --t3 --gate-t3
+			--bin $<TARGET_FILE_DIR:pipeline_max_export_cmb>
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+	SET_TESTS_PROPERTIES(pipeline_max_cmb_corpus PROPERTIES SKIP_RETURN_CODE 77)
+
 	IF (TARGET unit_test)
-		ADD_DEPENDENCIES(unit_test pipeline_max_corpus_test pipeline_max_export_skel pipeline_max_export_anim pipeline_max_export_swt pipeline_max_export_ig pipeline_max_export_zone pipeline_max_export_shape)
+		ADD_DEPENDENCIES(unit_test pipeline_max_corpus_test pipeline_max_export_skel pipeline_max_export_anim pipeline_max_export_swt pipeline_max_export_ig pipeline_max_export_zone pipeline_max_export_shape pipeline_max_export_pacs_prim pipeline_max_export_cmb)
 	ENDIF (TARGET unit_test)
 ENDIF (Python3_Interpreter_FOUND)
