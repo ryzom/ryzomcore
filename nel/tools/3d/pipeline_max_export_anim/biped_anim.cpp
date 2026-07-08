@@ -656,8 +656,11 @@ void CBipedAnimEval::buildChannels()
 			angleChannelFrom(*legs[s], 1, m_ChLegAnkle[s]);
 			quatChannelFrom(*legs[s], 2 + legShift, m_ChLegUpper[s]);
 			quatChannelFrom(*legs[s], 28 + legShift, m_ChLegEnd[s]);
-			scalarChannelFrom(*legs[s], 12, m_ChIkBlend[1][s]);
-			vec3ChannelFrom(*legs[s], 18, 19, 20, m_ChIkTarget[1][s]);
+			// IK blend [12] and world end-effector [18..20] sit above index 2, so they take the
+			// same +2-per-extra-leg-link head shift as the thigh/foot/toe fields (wiki §10c) —
+			// previously read unshifted, which fed 4-link (mount/bird) rigs garbage IK inputs.
+			scalarChannelFrom(*legs[s], 12 + legShift, m_ChIkBlend[1][s]);
+			vec3ChannelFrom(*legs[s], 18 + legShift, 19 + legShift, 20 + legShift, m_ChIkTarget[1][s]);
 			size_t nt = m_Rig ? std::max(m_Rig->Toes[0].size(), m_Rig->Toes[1].size()) : 0;
 			m_ChToeBase[s].resize(nt);
 			m_ChToeBend[s].resize(nt * 2);
@@ -1141,8 +1144,13 @@ void CBipedAnimEval::evalAt(double t, std::map<INode *, SBipNodeState> &out)
 	// --- IK pass: legs and arms with IK blend keys. Solves thigh/calf (upperarm/forearm) toward
 	// the interpolated world end-effector position; end rotation stays the channel value.
 	// Approximation for in-between frames (exact at keys); see the wiki open-work note.
-	static const bool s_enableIk = (getenv("PMB_BIPED_IK") != NULL); // experimental — see wiki open-work note
-	for (int limb = 0; limb < 2 && s_enableIk; ++limb) // 0=arm, 1=leg
+	// PMB_BIPED_IK=1: the original experimental solve, both limbs (corpus A/B: big leg wins,
+	//   catastrophic arm regressions — training_empathie class ~1.2 rad flips).
+	// PMB_BIPED_IK=2: E3 variant — 3-link LEGS ONLY plus a target-sanity guard; the arm solve
+	//   and 4-link chains (whose 2-bone model spans the horse link) stay pure channel-FK.
+	static const char *s_ikEnv = getenv("PMB_BIPED_IK"); // experimental — see wiki open-work note
+	static const int s_ikMode = s_ikEnv ? atoi(s_ikEnv) : 0;
+	for (int limb = (s_ikMode >= 2 ? 1 : 0); limb < 2 && s_ikMode; ++limb) // 0=arm, 1=leg
 	{
 		for (int side = 0; side < 2; ++side) // 0=R, 1=L
 		{
@@ -1184,6 +1192,7 @@ void CBipedAnimEval::evalAt(double t, std::map<INode *, SBipNodeState> &out)
 				else if ((limb && (int)l == maxLegLink) || (!limb && l == 3)) nEnd = m_Nodes[i].Node;
 			}
 			if (!nUp || !nMid || !nEnd) continue;
+			if (s_ikMode >= 2 && maxLegLink != 2) continue; // E3: 3-link legs only
 			SBipNodeState &stUp = out[nUp];
 			SBipNodeState &stMid = out[nMid];
 			SBipNodeState &stEnd = out[nEnd];
@@ -1199,6 +1208,10 @@ void CBipedAnimEval::evalAt(double t, std::map<INode *, SBipNodeState> &out)
 				NLMISC::CVectorD raw = m_ChIkTarget[limb][side].eval(t);
 				Tik = NLMISC::CVectorD(raw.x, -raw.z, raw.y); // Y-up -> Z-up
 			}
+			// E3 sanity guard: the stored world target and the channel-FK ankle should roughly
+			// agree (channels carry the solved pose at keys); a gap of a large fraction of the
+			// leg length means a wrong-space/garbage target — fall back to pure FK.
+			if (s_ikMode >= 2 && (Tik - ankFk).norm() > 0.5 * (L1 + L2)) continue;
 			NLMISC::CVectorD T = ankFk + (Tik - ankFk) * alpha;
 			double d = (T - H).norm();
 			double dmin = fabs(L1 - L2) + 1e-9, dmax = L1 + L2 - 1e-9;
