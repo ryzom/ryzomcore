@@ -78,6 +78,7 @@
 #include "../pipeline_max_export_common/biped_rig.h"
 #include "../pipeline_max/biped/biped_driven.h"
 #include "biped_anim.h"
+#include "biped_author.h"
 
 using namespace PIPELINE::MAX;
 using namespace PIPELINE::MAX::BUILTIN;
@@ -1521,6 +1522,8 @@ int main(int argc, char **argv)
 		return runDiffRig(argv[2], argv[3], argv[4]);
 	if (argc >= 3 && std::string(argv[1]) == "--dump-rig")
 		return runDumpRig(argv[2], argc >= 4 ? argv[3] : NULL);
+	if (argc >= 5 && std::string(argv[1]) == "--author-jump")
+		return BIPAUTHOR::runAuthorJump(argv[2], argv[3], argv[4]);
 
 	const char *dumpSamples = NULL;
 	double dumpMaxFrame = 60.0;
