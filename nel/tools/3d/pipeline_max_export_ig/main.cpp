@@ -94,6 +94,7 @@
 #include "../pipeline_max_export_common/max_math.h"
 #include "../pipeline_max_export_common/max_scene.h"
 #include "../pipeline_max_export_common/db_path.h"
+#include "../pipeline_max_export_common/edit_mesh_mod.h"
 
 using namespace PIPELINE::MAX;
 using namespace PIPELINE::MAX::BUILTIN;
@@ -1302,125 +1303,14 @@ static bool psShapeBBoxVerts(INode &node, CSceneClass *obj, SNodeTMCache &tmCach
 	return true;
 }
 
-// Edit Mesh modifier (class 0x50) evaluation: the per-node modifier data lives on the OSM
-// Derived wrapper's orphaned 0x2500 containers (one per modifier slot). Decoded from the corpus:
-// 0x2512/0x4000 mesh-delta record with children (Max SDK `MeshDelta` chunk IDs):
-//   0x0100 int   = input vertex count
-//   0x0110 int   = input face count
-//   0x0130       = created vertices (uint32 count + (uint32 srcTag=-1, Point3 pos)[count]);
-//                  16-byte stride, srcTag holds the "cloned-from-vert" index Max uses to source
-//                  authoring data, ignored on evaluation — the geometric position is what
-//                  matters. Corpus example: fy_mairie's `_puit_carre2/3` (base EditableMesh
-//                  with 8 verts + Edit Mesh deleting all 8 and creating 12 new ones)
-//   0x0140       = moved verts (uint32 count + (uint32 index, Point3 delta)[count], object space)
-//   0x0170       = container[0x2700 BitArray: uint32 count + dword-padded LSB-first bits] = del verts
-//   0x0208       = created faces (uint32 count + (uint32 srcTag, uint32 v[3], uint32 smGrp,
-//                  uint32 flagsMatId)[count]); 24-byte stride, used together with 0x0130.
-//                  Not applied here — the clusterize containment test uses vertices only.
-//   0x0210       = created faces variant (uint32 count + (uint32 v[3], uint32 smGrp,
-//                  uint32 flagsMatId)[count]); 20-byte stride, no srcTag; also not applied.
-//   0x0270       = container[0x2700 BitArray] = deleted faces
-//   0x0300 int   = subobject level, 0x0400/0x0410 = selections (ignored)
-struct SEditMeshEdits
-{
-	std::vector<std::pair<uint32, NLMISC::CVector> > Moves;
-	std::vector<NLMISC::CVector> Created; // created vertices (Point3[], object space)
-	std::vector<bool> DelVerts;
-	std::vector<bool> DelFaces;
-};
-
-static bool readEditMeshBitArray(CStorageContainer *cont, std::vector<bool> &out)
-{
-	if (!cont) return false;
-	for (CStorageContainer::TStorageObjectConstIt it = cont->chunks().begin(); it != cont->chunks().end(); ++it)
-	{
-		if (it->first != 0x2700) continue;
-		CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
-		if (!raw || raw->Value.size() < 4) return false;
-		uint32 n;
-		memcpy(&n, nlVectorData(raw->Value), 4);
-		if (raw->Value.size() < 4 + ((size_t)n + 7) / 8) return false;
-		out.resize(n);
-		for (uint32 i = 0; i < n; ++i)
-			out[i] = (raw->Value[4 + i / 8] >> (i % 8)) & 1;
-		return true;
-	}
-	return false;
-}
-
-static bool readEditMeshModApp(CStorageContainer *c2500, SEditMeshEdits &out)
-{
-	// 0x2512 -> 0x4000 -> the mesh-delta record
-	for (CStorageContainer::TStorageObjectConstIt it = c2500->chunks().begin(); it != c2500->chunks().end(); ++it)
-	{
-		if (it->first != 0x2512) continue;
-		CStorageContainer *c2512 = dynamic_cast<CStorageContainer *>(it->second);
-		if (!c2512) continue;
-		for (CStorageContainer::TStorageObjectConstIt jt = c2512->chunks().begin(); jt != c2512->chunks().end(); ++jt)
-		{
-			if (jt->first != 0x4000) continue;
-			CStorageContainer *c4000 = dynamic_cast<CStorageContainer *>(jt->second);
-			if (!c4000) continue;
-			for (CStorageContainer::TStorageObjectConstIt kt = c4000->chunks().begin(); kt != c4000->chunks().end(); ++kt)
-			{
-				if (kt->first == 0x0140)
-				{
-					CStorageRaw *raw = dynamic_cast<CStorageRaw *>(kt->second);
-					if (raw && raw->Value.size() >= 4)
-					{
-						uint32 n;
-						memcpy(&n, nlVectorData(raw->Value), 4);
-						if (raw->Value.size() >= 4 + (size_t)n * 16)
-						{
-							for (uint32 i = 0; i < n; ++i)
-							{
-								uint32 idx;
-								float v[3];
-								memcpy(&idx, nlVectorData(raw->Value) + 4 + i * 16, 4);
-								memcpy(v, nlVectorData(raw->Value) + 4 + i * 16 + 4, 12);
-								out.Moves.push_back(std::make_pair(idx, NLMISC::CVector(v[0], v[1], v[2])));
-							}
-						}
-					}
-				}
-				else if (kt->first == 0x0130)
-				{
-					// Created vertices (16-byte stride: uint32 srcTag + Point3 pos). The srcTag
-					// (typically 0xFFFFFFFF or a source-vert index used for authoring history)
-					// is ignored on evaluation. Corpus example: fy_mairie's `_puit_carre2/3`
-					// (base EditableMesh with 8 verts + Edit Mesh deleting all 8 and creating
-					// 12 new ones — without decoding 0x0130 the clusterize link test saw an
-					// empty mesh and attached the object to 0 clusters vs the reference's 1).
-					CStorageRaw *raw = dynamic_cast<CStorageRaw *>(kt->second);
-					if (raw && raw->Value.size() >= 4)
-					{
-						uint32 n;
-						memcpy(&n, nlVectorData(raw->Value), 4);
-						if (raw->Value.size() >= 4 + (size_t)n * 16)
-						{
-							out.Created.reserve(out.Created.size() + n);
-							for (uint32 i = 0; i < n; ++i)
-							{
-								float v[3];
-								memcpy(v, nlVectorData(raw->Value) + 4 + (size_t)i * 16 + 4, 12);
-								out.Created.push_back(NLMISC::CVector(v[0], v[1], v[2]));
-							}
-						}
-					}
-				}
-				// 0x0208 / 0x0210 = created faces (not applied here — clusterize link test uses
-				// vertices only). Left as pass-through; see the SEditMeshEdits header comment
-				// for the format.
-				else if (kt->first == 0x0170)
-					readEditMeshBitArray(dynamic_cast<CStorageContainer *>(kt->second), out.DelVerts);
-				else if (kt->first == 0x0270)
-					readEditMeshBitArray(dynamic_cast<CStorageContainer *>(kt->second), out.DelFaces);
-			}
-			return true;
-		}
-	}
-	return false;
-}
+// Edit Mesh modifier (class 0x50) evaluation is shared with pipeline_max_export_cmb via
+// pipeline_max_export_common/edit_mesh_mod.h — see that header for the MDELTA_CHUNK layout, the
+// created-verts/created-faces/face-attrib decoding, and the SEdits struct. This tool applies the
+// verts-and-moves-only slice (facesMode=0) because its cluster-containment link test operates on
+// vertices only; created faces (0x0208) and the face-attrib rewrites (0x0220) are decoded but
+// unused. See design-doc §10w for the corpus-validated chunk-ID mapping and edit_mesh_mod.h for
+// the SEdits header comment on why the shared apply order is byte-preserving for this consumer.
+typedef EDITMESH::SEdits SEditMeshEdits;
 
 // Mirror modifier (mods.dlm (0xef92aa7c, 0x511bbe75)): ParamBlock params 0 = axis (0..5 =
 // X,Y,Z,XY,YZ,ZX), 1 = offset; modifier chunk 0x1000 = copy flag; gizmo = the modifier's own
@@ -1479,42 +1369,41 @@ static void applyMirror(const SModOp &op, std::vector<NLMISC::CVector> &verts, s
 	}
 }
 
-// Apply Edit Mesh edits to an object-space mesh: moves, then face deletes, then vertex deletes
-// with face reindexing.
+// Bridge to the shared apply: SMeshTri exposes A/B/C, the shared code expects V[3]. A tiny
+// wrapper adapts the field names for the templated apply call.
+struct SMeshTriAdapter
+{
+	uint32 V[3];
+	SMeshTri toTri() const { SMeshTri t = { V[0], V[1], V[2] }; return t; }
+};
+
+struct SMeshTriFromCreated
+{
+	SMeshTriAdapter operator()(uint32 /*vBase*/, const EDITMESH::SFace &cf) const
+	{
+		// Not called: facesMode=0 in the applyEdits call below.
+		SMeshTriAdapter a; a.V[0] = cf.V[0]; a.V[1] = cf.V[1]; a.V[2] = cf.V[2]; return a;
+	}
+};
+
+// Apply Edit Mesh edits (verts + moves only) via the shared EDITMESH::applyEdits: moves, face
+// deletes, vert deletes with face reindexing, created verts appended. facesMode=0 skips created
+// faces (ig's cluster-containment link test operates on vertices only; appending faces would
+// change its cluster volumes — see edit_mesh_mod.h). Byte-preserving vs the pre-refactor
+// inline decode.
 static void applyEditMeshEdits(const SEditMeshEdits &e, std::vector<NLMISC::CVector> &verts, std::vector<SMeshTri> &tris)
 {
-	for (uint i = 0; i < e.Moves.size(); ++i)
-		if (e.Moves[i].first < verts.size())
-			verts[e.Moves[i].first] += e.Moves[i].second;
-	if (!e.DelFaces.empty())
+	std::vector<SMeshTriAdapter> adapted(tris.size());
+	for (size_t i = 0; i < tris.size(); ++i)
 	{
-		std::vector<SMeshTri> kept;
-		for (uint i = 0; i < tris.size(); ++i)
-			if (i >= e.DelFaces.size() || !e.DelFaces[i])
-				kept.push_back(tris[i]);
-		tris.swap(kept);
+		adapted[i].V[0] = tris[i].A; adapted[i].V[1] = tris[i].B; adapted[i].V[2] = tris[i].C;
 	}
-	if (!e.DelVerts.empty())
+	EDITMESH::applyEdits(e, verts, adapted, SMeshTriFromCreated(), 0);
+	tris.resize(adapted.size());
+	for (size_t i = 0; i < adapted.size(); ++i)
 	{
-		std::vector<uint32> remap(verts.size());
-		std::vector<NLMISC::CVector> kept;
-		for (uint i = 0; i < verts.size(); ++i)
-		{
-			remap[i] = (uint32)kept.size();
-			if (i >= e.DelVerts.size() || !e.DelVerts[i])
-				kept.push_back(verts[i]);
-		}
-		verts.swap(kept);
-		for (uint i = 0; i < tris.size(); ++i)
-		{
-			tris[i].A = remap[tris[i].A];
-			tris[i].B = remap[tris[i].B];
-			tris[i].C = remap[tris[i].C];
-		}
+		tris[i].A = adapted[i].V[0]; tris[i].B = adapted[i].V[1]; tris[i].C = adapted[i].V[2];
 	}
-	// Created vertices append after deletion; their faces are not decoded (0x0410-family) —
-	// sufficient for the clusterize containment test, which uses vertices only.
-	verts.insert(verts.end(), e.Created.begin(), e.Created.end());
 }
 
 // World-space mesh of a node, replicating createMeshBuild + convertToWorldCoordinate.
@@ -1571,7 +1460,7 @@ static bool nodeWorldMesh(INode &node, SNodeTMCache &tmCache, SMeshData &out)
 				{
 					SModOp op;
 					op.Type = 0;
-					if (app && readEditMeshModApp(app, op.Edits))
+					if (app && EDITMESH::readModApp(app, op.Edits))
 						opStack.push_back(op);
 				}
 				else if (mcid == NLMISC::CClassId(0xef92aa7c, 0x511bbe75)) // Mirror

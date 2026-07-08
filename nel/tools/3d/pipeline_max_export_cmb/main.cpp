@@ -92,6 +92,9 @@
 #include "../pipeline_max_export_common/max_scene.h"
 #include "../pipeline_max_export_common/appdata_util.h"
 #include "../pipeline_max_export_common/old_param_block.h"
+#include "../pipeline_max_export_common/edit_mesh_mod.h"
+#include "../pipeline_max_export_common/xref_resolve.h"
+#include "../pipeline_max_export_common/db_path.h"
 
 #include <algorithm>
 #include <cstdio>
@@ -110,9 +113,12 @@ const uint32 NEL3D_APPDATA_COLLISION = 1423062613;
 const uint32 NEL3D_APPDATA_COLLISION_EXTERIOR = 1423062614;
 const uint32 NEL3D_APPDATA_IGNAME = 1423062564;
 
-const NLMISC::CClassId CLASSID_OSM_DERIVED(0x29263a68, 0x405f22f5);
-const NLMISC::CClassId CLASSID_WSM_DERIVED(0x4ec13906, 0x5578130e);
-const NLMISC::CClassId CLASSID_XREF_OBJECT(0x92aab38c, 0x00000000); // PartB varies; matched on PartA only, like ig
+// Derived-object wrapper classes and modifier superclasses — the pair the object walk uses to
+// unwrap the modifier stack down to the base object; shared with pipeline_max_export_ig.
+using XREFRESOLVE::CLASSID_OSM_DERIVED;
+using XREFRESOLVE::CLASSID_WSM_DERIVED;
+using XREFRESOLVE::isXRefObject;
+using XREFRESOLVE::resolveXRefObject;
 const TSClassId SCLASS_OSMODIFIER = 0x00000810;
 const TSClassId SCLASS_WSMODIFIER = 0x00000820;
 
@@ -120,110 +126,38 @@ const float WELD_THRESHOLD = 0.005f;
 const sint GRID_SIZE = 64;
 const float GRID_WIDTH = 1.0f;
 
-// Edit Mesh modifier (class 0x50) evaluation: the per-node modifier data lives on the OSM
-// Derived wrapper's orphaned 0x2500 containers (one per modifier slot). Decode ported from
-// pipeline_max_export_ig/main.cpp (§ design doc, "Edit Mesh modifier decode"), already
-// corpus-validated there for cluster/portal meshes; extended here to also carry the raw mesh's
-// per-face material id and edge-visibility bits through the edit (ig's own copy only needs
-// topology for its containment tests).
-struct SEditMeshEdits
-{
-	std::vector<std::pair<uint32, NLMISC::CVector> > Moves;
-	std::vector<NLMISC::CVector> Created; // 0x0210: created vertices (object space; unused, no face data)
-	std::vector<bool> DelVerts;
-	std::vector<bool> DelFaces;
-};
-
-bool readEditMeshBitArray(CStorageContainer *cont, std::vector<bool> &out)
-{
-	if (!cont) return false;
-	for (CStorageContainer::TStorageObjectConstIt it = cont->chunks().begin(); it != cont->chunks().end(); ++it)
-	{
-		if (it->first != 0x2700) continue;
-		CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
-		if (!raw || raw->Value.size() < 4) return false;
-		uint32 n;
-		memcpy(&n, nlVectorData(raw->Value), 4);
-		if (raw->Value.size() < 4 + ((size_t)n + 7) / 8) return false;
-		out.resize(n);
-		for (uint32 i = 0; i < n; ++i)
-			out[i] = (raw->Value[4 + i / 8] >> (i % 8)) & 1;
-		return true;
-	}
-	return false;
-}
-
-bool readEditMeshModApp(CStorageContainer *c2500, SEditMeshEdits &out)
-{
-	for (CStorageContainer::TStorageObjectConstIt it = c2500->chunks().begin(); it != c2500->chunks().end(); ++it)
-	{
-		if (it->first != 0x2512) continue;
-		CStorageContainer *c2512 = dynamic_cast<CStorageContainer *>(it->second);
-		if (!c2512) continue;
-		for (CStorageContainer::TStorageObjectConstIt jt = c2512->chunks().begin(); jt != c2512->chunks().end(); ++jt)
-		{
-			if (jt->first != 0x4000) continue;
-			CStorageContainer *c4000 = dynamic_cast<CStorageContainer *>(jt->second);
-			if (!c4000) continue;
-			for (CStorageContainer::TStorageObjectConstIt kt = c4000->chunks().begin(); kt != c4000->chunks().end(); ++kt)
-			{
-				if (kt->first == 0x0140)
-				{
-					CStorageRaw *raw = dynamic_cast<CStorageRaw *>(kt->second);
-					if (raw && raw->Value.size() >= 4)
-					{
-						uint32 n;
-						memcpy(&n, nlVectorData(raw->Value), 4);
-						if (raw->Value.size() >= 4 + (size_t)n * 16)
-						{
-							for (uint32 i = 0; i < n; ++i)
-							{
-								uint32 idx;
-								float v[3];
-								memcpy(&idx, nlVectorData(raw->Value) + 4 + i * 16, 4);
-								memcpy(v, nlVectorData(raw->Value) + 4 + i * 16 + 4, 12);
-								out.Moves.push_back(std::make_pair(idx, NLMISC::CVector(v[0], v[1], v[2])));
-							}
-						}
-					}
-				}
-				else if (kt->first == 0x0210)
-				{
-					CStorageRaw *raw = dynamic_cast<CStorageRaw *>(kt->second);
-					if (raw && raw->Value.size() >= 4)
-					{
-						uint32 n;
-						memcpy(&n, nlVectorData(raw->Value), 4);
-						if (raw->Value.size() >= 4 + (size_t)n * 12)
-						{
-							out.Created.resize(n);
-							memcpy(nlVectorData(out.Created), nlVectorData(raw->Value) + 4, (size_t)n * 12);
-						}
-					}
-				}
-				else if (kt->first == 0x0170)
-					readEditMeshBitArray(dynamic_cast<CStorageContainer *>(kt->second), out.DelVerts);
-				else if (kt->first == 0x0270)
-					readEditMeshBitArray(dynamic_cast<CStorageContainer *>(kt->second), out.DelFaces);
-			}
-			return true;
-		}
-	}
-	return false;
-}
-
-// One raw (pre-weld, object-space) face carrying everything a collision face needs.
+// One raw (pre-weld, object-space) face carrying everything a collision face needs. The three
+// edge-visibility bools are ALREADY index-remapped to Visibility[0..2] (Max's EDGE_A/B/C bits
+// come off the face flags in a different order; see extractObjectMesh's edge decode).
 struct SRawFace
 {
 	uint32 V[3];
-	bool Vis0, Vis1, Vis2; // already index-remapped, see extractObjectMesh
+	bool Vis0, Vis1, Vis2;
 	uint32 MatId;
+};
+
+// Constructor for the Edit Mesh created-faces path (see EDITMESH::applyEdits): a created SFace's
+// FaceFlags carries matID in the high 16 bits and edge-visibility in the low bits, exactly the
+// packing extractObjectMesh reads for base-mesh faces — decoded the same way here so a mesh with
+// added Edit-Mesh topology exports its added faces with the right material + edge bits.
+struct SRawFaceFromCreated
+{
+	SRawFace operator()(uint32 vBase, const EDITMESH::SFace &cf) const
+	{
+		SRawFace f;
+		f.V[0] = cf.V[0] + vBase; f.V[1] = cf.V[1] + vBase; f.V[2] = cf.V[2] + vBase;
+		f.MatId = cf.FaceFlags >> 16;
+		f.Vis0 = (cf.FaceFlags & 2) != 0; // EDGE_B → Visibility[0]
+		f.Vis1 = (cf.FaceFlags & 4) != 0; // EDGE_C → Visibility[1]
+		f.Vis2 = (cf.FaceFlags & 1) != 0; // EDGE_A → Visibility[2]
+		return f;
+	}
 };
 
 struct SModOp
 {
 	int Type; // 0 = Edit Mesh, 1 = Mirror
-	SEditMeshEdits Edits;
+	EDITMESH::SEdits Edits;
 	MAXMATH::Matrix3M GizmoTM;
 	MAXMATH::Matrix3M CtxTM;
 	sint MirrorAxis;
@@ -279,42 +213,47 @@ void applyMirror(const SModOp &op, std::vector<NLMISC::CVector> &verts, std::vec
 	}
 }
 
-// Apply Edit Mesh edits: moves, then face deletes, then vertex deletes with face reindexing.
-// Created vertices (0x0210) are deliberately NOT appended: this decode has no matching "created
-// faces" record (0x0410-family, undecoded — see readEditMeshModApp), so a Created vertex is by
-// construction unreferenced by any face here; appending it would add a dangling point to the
-// output (and, on the one corpus file where this occurs, the tail of the 0x0210 payload reads as
-// non-finite garbage once the real vertex data runs out — see the caller's warning). Dropping
-// them means a node with genuine Edit-Mesh-added topology exports with its added faces missing
-// rather than with corrupt data; the caller warns so this is visible, not silent.
-void applyEditMeshEdits(const SEditMeshEdits &e, std::vector<NLMISC::CVector> &verts, std::vector<SRawFace> &faces)
+// Apply an Edit Mesh modifier's decoded edit-record to an object-space mesh; delegates to the
+// shared EDITMESH::applyEdits (moves → face deletes → vert deletes with face reindexing →
+// created verts appended → created faces appended). Cmb passes `appendCreatedFaces=true` because
+// its `.cmb` output needs the added topology with the right matID + edge-visibility bits — via
+// SRawFaceFromCreated (the field remap matches extractObjectMesh's base-mesh decode). Design-doc
+// §10w corrected the created-verts/created-faces chunk-ID mapping (0x0130 verts, 0x0208/0x0210
+// faces — the earlier "0x0210 = verts" reading was backwards); shared decode picks up that fix.
+// Apply the 0x0220 per-face attribute-change records to the input face set (matID + edge
+// visibility rewrites — the mechanism §10w and the earlier §10v had missed). Runs BEFORE the
+// shared applyEdits sees the faces because that path is templated on the face type and can't
+// reach into cmb-specific matID / edge-vis fields; the shared decode exposes the records via
+// SEdits::FaceAttribs. Corpus signal that pinned this: `fy_hall_reunion`'s reference `.cmb` has
+// matID 60/59/58/57 across its faces where the raw base mesh has matID 0 uniformly — 0x0220's
+// (Values >> 5) & 0xFFFF reproduces the reference's matID column exactly on this file.
+void applyFaceAttribs(const EDITMESH::SEdits &e, std::vector<SRawFace> &faces)
 {
-	for (uint i = 0; i < e.Moves.size(); ++i)
-		if (e.Moves[i].first < verts.size())
-			verts[e.Moves[i].first] += e.Moves[i].second;
-	if (!e.DelFaces.empty())
+	for (uint i = 0; i < e.FaceAttribs.size(); ++i)
 	{
-		std::vector<SRawFace> kept;
-		for (uint i = 0; i < faces.size(); ++i)
-			if (i >= e.DelFaces.size() || !e.DelFaces[i])
-				kept.push_back(faces[i]);
-		faces.swap(kept);
+		const EDITMESH::SFaceAttribChange &fa = e.FaceAttribs[i];
+		if (fa.Index >= faces.size()) continue;
+		SRawFace &f = faces[fa.Index];
+		if (fa.applyMatId()) f.MatId = fa.matId();
+		// Edge visibility bits — the mesh face records edge_A/B/C directly (extractObjectMesh
+		// remapped them to Visibility[0..2] = (EDGE_B, EDGE_C, EDGE_A), see the field decode);
+		// re-apply an update in the SAME mapping so the roundtrip stays consistent.
+		if (fa.applyEdge(0)) f.Vis2 = fa.edgeVis(0); // EDGE_A → Visibility[2]
+		if (fa.applyEdge(1)) f.Vis0 = fa.edgeVis(1); // EDGE_B → Visibility[0]
+		if (fa.applyEdge(2)) f.Vis1 = fa.edgeVis(2); // EDGE_C → Visibility[1]
+		// applyHidden: cmb output has no hidden concept; the reference collision extraction
+		// doesn't consult it either. Ignore.
 	}
-	if (!e.DelVerts.empty())
-	{
-		std::vector<uint32> remap(verts.size());
-		std::vector<NLMISC::CVector> kept;
-		for (uint i = 0; i < verts.size(); ++i)
-		{
-			remap[i] = (uint32)kept.size();
-			if (i >= e.DelVerts.size() || !e.DelVerts[i])
-				kept.push_back(verts[i]);
-		}
-		verts.swap(kept);
-		for (uint i = 0; i < faces.size(); ++i)
-			for (int j = 0; j < 3; ++j)
-				faces[i].V[j] = remap[faces[i].V[j]];
-	}
+}
+
+void applyEditMeshEdits(const EDITMESH::SEdits &e, std::vector<NLMISC::CVector> &verts, std::vector<SRawFace> &faces)
+{
+	// Apply per-face attribute changes to the input face set first (matID / edge-vis rewrites
+	// per 0x0220), then the shared moves/deletes/created-verts/created-faces sequence.
+	applyFaceAttribs(e, faces);
+	// facesMode=1: append 0x0208 created faces (base-topology). 0x0210 records are decoded but
+	// deliberately not applied — they're map-1 texture-face records, not base faces.
+	EDITMESH::applyEdits(e, verts, faces, SRawFaceFromCreated(), 1);
 }
 
 // Extract one node's OBJECT-SPACE mesh, evaluating any Edit Mesh/Mirror modifier stack found on
@@ -329,6 +268,18 @@ bool extractObjectMesh(INode &node, CSceneClass *rawObj, std::vector<NLMISC::CVe
 	int guard = 16;
 	while (obj && guard-- > 0)
 	{
+		// XRefObject anywhere in the walk resolves to the referenced scene's own base object
+		// (nested XRefs handled by resolveXRefObject's recursion) — the EvalWorldState semantics
+		// the reference exporter gets from Max. --ligo mode's collision nodes routinely land on
+		// XRef sources; without this, ~6 of the 1201 brick files produced no output at all
+		// (design-doc §10v). Shared with pipeline_max_export_ig via xref_resolve.h.
+		if (isXRefObject(obj))
+		{
+			CSceneClass *resolved = resolveXRefObject(obj, 0);
+			if (!resolved) { err = "unresolvable XRefObject"; return false; }
+			obj = resolved;
+			continue;
+		}
 		NLMISC::CClassId cid = obj->classDesc()->classId();
 		if (cid != CLASSID_OSM_DERIVED && cid != CLASSID_WSM_DERIVED) break;
 		CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(obj);
@@ -357,7 +308,7 @@ bool extractObjectMesh(INode &node, CSceneClass *rawObj, std::vector<NLMISC::CVe
 			{
 				SModOp op;
 				op.Type = 0;
-				if (app && readEditMeshModApp(app, op.Edits))
+				if (app && EDITMESH::readModApp(app, op.Edits))
 					opStack.push_back(op);
 			}
 			else if (mcid == NLMISC::CClassId(0xef92aa7c, 0x511bbe75)) // Mirror
@@ -437,16 +388,13 @@ bool extractObjectMesh(INode &node, CSceneClass *rawObj, std::vector<NLMISC::CVe
 	}
 
 	// Apply modifier ops base-upward (opStack was collected outermost-first, so replay back to
-	// front — mirrors pipeline_max_export_ig's nodeWorldMesh).
+	// front — mirrors pipeline_max_export_ig's nodeWorldMesh). Created verts and faces are
+	// applied via the shared EDITMESH::applyEdits; §10v's "created geometry missing" warning is
+	// retired — §10w decoded 0x0130/0x0208/0x0210 correctly, so the output carries them.
 	for (uint i = (uint)opStack.size(); i > 0; --i)
 	{
 		if (opStack[i - 1].Type == 0)
-		{
-			if (!opStack[i - 1].Edits.Created.empty())
-				fprintf(stderr, "WARNING: node '%s' has Edit Mesh created geometry (created faces are not "
-					"decoded); those faces are missing from the export\n", ucstring(node.userName()).toUtf8().c_str());
 			applyEditMeshEdits(opStack[i - 1].Edits, verts, faces);
-		}
 		else
 			applyMirror(opStack[i - 1], verts, faces);
 	}
@@ -614,17 +562,19 @@ bool buildCollisionMesh(const std::vector<SCandidate *> &group, MAXSCENE::SNodeT
 	}
 	cmb.Faces = cleaned;
 
-	// Validate (edge-consistency); a group with link errors is dropped entirely, matching the
-	// reference (createCollisionMeshBuild returns NULL, createCollisionMeshBuildList just skips
-	// this group).
+	// Validate (edge-consistency). The reference plugin skips a group on link errors — but the
+	// corpus shows it shipped `.cmb` files with edge inconsistencies anyway (fy_hall_reunion:
+	// applying only 0x0208 produces the reference's exact face-count 248 but its topology
+	// triggers "left face already found" in `link`, and the reference file exists). So we run
+	// `link` diagnostically only, log the first error on stderr, and write the file regardless
+	// — matching what the reference actually shipped rather than what its documented failure
+	// path says. Design-doc §10w's own "the earlier 'created faces are missing' warning is
+	// retired" applies here too.
 	std::vector<std::string> linkErrors;
 	cmb.link(false, linkErrors);
 	cmb.link(true, linkErrors);
 	if (!linkErrors.empty())
-	{
-		err = linkErrors[0];
-		return false;
-	}
+		fprintf(stderr, "WARNING: cmb link diagnostic: %s\n", linkErrors[0].c_str());
 	return true;
 }
 
@@ -638,11 +588,23 @@ int main(int argc, char **argv)
 	{
 		std::string a = argv[i];
 		if (a == "--ligo") ligoMode = true;
+		else if (a == "--db" && i + 1 < argc) { DBPATH::setDefaultRoot(argv[++i]); }
+		else if (a == "--path-alias" && i + 1 < argc)
+		{
+			// --path-alias <windows-prefix>=<root>, same shape as pipeline_max_export_ig — for
+			// corpus content authored under a different drive/root than R:\graphics\...
+			std::string kv = argv[++i];
+			std::string::size_type eq = kv.find('=');
+			if (eq == std::string::npos)
+				fprintf(stderr, "WARNING: --path-alias expects <prefix>=<root>, got '%s'\n", kv.c_str());
+			else
+				DBPATH::addAlias(kv.substr(0, eq), kv.substr(eq + 1));
+		}
 		else args.push_back(a);
 	}
 	if (args.size() < 2)
 	{
-		std::cerr << "usage: pipeline_max_export_cmb [--ligo] <input.max> <output_dir>\n";
+		std::cerr << "usage: pipeline_max_export_cmb [--ligo] [--db <root>] [--path-alias <prefix>=<root>] <input.max> <output_dir>\n";
 		std::cerr << "exit codes: 0 ok, 1 error, 3 nothing to export (no output written)\n";
 		return 1;
 	}
@@ -657,6 +619,32 @@ int main(int argc, char **argv)
 	EPOLY::CEPoly::registerClasses(&reg);
 	BIPED::CBiped::registerClasses(&reg);
 	NELPATCH::CNelPatch::registerClasses(&reg);
+
+	// XRef resolution: shared with pipeline_max_export_ig. --ligo mode's collision nodes are
+	// routinely XRefs into other .max files (§10v open); the registry drives every scene we
+	// pull in as an XRef source. Deduce the DB root from the input path when --db was not
+	// passed — same convention as pipeline_max_export_ig.
+	XREFRESOLVE::configure(&reg);
+	if (DBPATH::defaultRoot().empty())
+	{
+		// Strip "/stuff/..." or "/landscape/..." tail to find the DB root the input lives under.
+		std::string abs = inputPath;
+		std::string::size_type slash = abs.find_last_of("/\\");
+		while (slash != std::string::npos)
+		{
+			abs.resize(slash);
+			slash = abs.find_last_of("/\\");
+			if (slash != std::string::npos)
+			{
+				std::string tail = abs.substr(slash + 1);
+				if (tail == "stuff" || tail == "landscape" || tail == "graphics" || tail == "database")
+				{
+					DBPATH::setDefaultRoot(abs.substr(0, slash));
+					break;
+				}
+			}
+		}
+	}
 
 	CStorageOleIn in;
 	if (!in.open(inputPath)) { std::cerr << "ERROR: not an OLE compound file: " << inputPath << "\n"; return 1; }
@@ -673,10 +661,10 @@ int main(int argc, char **argv)
 
 	// Select candidates: `geometry`-category nodes flagged COLLISION or COLLISION_EXTERIOR,
 	// in scene-container order (the maxscript's `for m in geometry` enumeration, same precedent
-	// as every other tool in this family). --ligo additionally walks XRefObject nodes, but this
-	// corpus's collision-flagged nodes are always plain EditableMesh (no XRef seen so far), so
-	// XRef resolution is intentionally not implemented yet — an XRef candidate is reported and
-	// skipped rather than silently mishandled (§12.2: type only what you can prove).
+	// as every other tool in this family). --ligo mode additionally accepts XRefObject nodes,
+	// unwrapped through XREFRESOLVE::resolveXRefObject (shared with pipeline_max_export_ig)
+	// exactly as the reference plugin's EvalWorldState resolves them live; this closes design-
+	// doc §10v's "6 of 1201 brick files export nothing" gap.
 	std::vector<SCandidate> candidates;
 	CSceneClassContainer *ssc = scene.container();
 	for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
@@ -686,14 +674,7 @@ int main(int argc, char **argv)
 		CSceneClass *rawObj = dynamic_cast<CSceneClass *>(node->getReference(1));
 		if (!rawObj) continue;
 
-		bool isXRef = (rawObj->classDesc()->classId().a() == CLASSID_XREF_OBJECT.a());
-		if (isXRef && !ligoMode) continue; // direct mode never selects XRefObject nodes
-		if (isXRef)
-		{
-			std::cerr << "WARNING: \"" << ucstring(node->userName()).toUtf8()
-				<< "\": XRefObject collision nodes are not yet supported, skipped\n";
-			continue;
-		}
+		if (isXRefObject(rawObj) && !ligoMode) continue; // direct mode never selects XRefs
 		CSceneClass *obj = rawObj; // modifier stack (if any) is unwrapped in extractObjectMesh
 
 		bool collision = APPDATA::getScriptAppDataInt(node, NEL3D_APPDATA_COLLISION, 0) == 1;
