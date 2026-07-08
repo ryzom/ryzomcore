@@ -468,10 +468,17 @@ bool buildCollisionMesh(const std::vector<SCandidate *> &group, MAXSCENE::SNodeT
 	for (size_t n = 0; n < group.size(); ++n)
 	{
 		SNodeMesh mesh;
-		if (!extractNodeMesh(*group[n]->Node, group[n]->Obj, tmCache, mesh, err))
+		std::string nerr;
+		if (!extractNodeMesh(*group[n]->Node, group[n]->Obj, tmCache, mesh, nerr))
 		{
-			err = "\"" + ucstring(group[n]->Node->userName()).toUtf8() + "\": " + err;
-			return false;
+			// Non-fatal — one bad node drops that node, the group keeps building. Typical cases:
+			// XRef source resolves to a parametric primitive (Box/Cylinder/Sphere) or an
+			// EditablePoly that we don't yet extract to a tri mesh for cmb (ig's own
+			// buildParametricMesh + poly triangulation still lives in ig, not shared). Log the
+			// warning and continue so the other collision nodes in the ig group still ship.
+			fprintf(stderr, "WARNING: cmb: skipping \"%s\": %s\n",
+				ucstring(group[n]->Node->userName()).toUtf8().c_str(), nerr.c_str());
+			continue;
 		}
 
 		uint32 vertBase = (uint32)cmb.Vertices.size();
