@@ -475,6 +475,10 @@ CBipedAnimEval::CBipedAnimEval(CSceneClass *rigSys, SBipedRig &rig,
 {
 	parseBipAnimKeys(rigSys, m_Keys);
 
+	if (getenv("PMB_ANIM_DUMP_DYNTYPE"))
+		fprintf(stderr, "PMB_ANIM_DUMP_DYNTYPE: have=%d dynamicsType=%d\n",
+		        (int)rig.HaveDynamicsType, rig.DynamicsType);
+
 	// Collect this rig's nodes in walk (bone) order: the COM node and every BipDriven bone whose
 	// controller references this system.
 	for (size_t i = 0; i < bones.size(); ++i)

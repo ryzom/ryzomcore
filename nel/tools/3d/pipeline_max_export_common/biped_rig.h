@@ -196,15 +196,34 @@ struct SBipedRig
 	NLMISC::CQuat ComRot;
 	NLMISC::CVector ComDisp;
 	// The 0x0104 base-frame world matrix's own translation, read independently of the 0x006c COM
-	// record above (see parseComRecord). Normally identical to ComPos's height: 0x006c's [4..6]
-	// is this rig's structural/template COM height, which coincides with the biped's current world
-	// position for the overwhelming majority of corpus files. The one confirmed exception is a rig
-	// whose whole biped was repositioned for a specific animation take (e.g. a "settled after death"
-	// resting pose authored by moving the figure, not by keying it) — there 0x0104 tracks the actual
-	// current position and 0x006c's height does not. Used as the vertical fallback when a rig's COM
-	// vertical channel has zero keys system-wide (biped_anim.cpp) — see pipeline_max_design.md §10n.
+	// record above (see parseComRecord). Normally identical to ComPos: 0x006c's [4..6] is this
+	// rig's figure-mode COM position, which coincides with the biped's current world position for
+	// the overwhelming majority of corpus files — because EXITING Figure Mode unconditionally
+	// recommits the figure value as current, healing any prior divergence even with no deliberate
+	// edit (confirmed live in Max 9, pipeline_max_design.md §10n "Tenth"). An ordinary Move outside
+	// Figure Mode is the only thing that diverges the two; per-file, whichever of {0x006c, 0x0104}
+	// is correct depends entirely on whether the file was, at some later point for any reason,
+	// re-entered into and exited from Figure Mode after that move — information the format does not
+	// record. `--diff-rig` (pipeline_max_export_anim) confirmed 0x0104 is one of a FOUR-chunk
+	// "current position" family that always changes together on an ordinary move: 0x0065[17] (inside
+	// the neck-angle record, past what parseNeckAngles actually reads — see its own comment),
+	// 0x0104[12..14] (this field), 0x0259[17] and 0x0260[5] (the 0x0258-0x0261 shadow bank, Part J).
+	// Only 0x0104 is read here; the other three are documented but intentionally unclaimed (proven
+	// redundant with this one in every case checked, not worth a second read path for the same
+	// value). Used as the vertical fallback candidate — evidence tally in §10n found figure height
+	// (0x006c) the correct GENERAL default (10+ independent exact matches vs. ~1 for 0x0104), so
+	// this field is populated but deliberately NOT substituted for ComPos; see biped_anim.cpp.
 	NLMISC::CVector BaseFramePos;
 	bool HaveBaseFramePos;
+	// Character Studio's <biped_ctrl>.dynamicsType (0 = "Biped Dynamics", the default — Character
+	// Studio can live-compute airborne trajectories/balance even off-key; 1 = "Spline Dynamics" —
+	// plain interpolation, no live physics), stored at chunk 0x0012 (confirmed via an isolated,
+	// single-chunk A/B toggle on a real skeleton file — pipeline_max_design.md §10n "Ninth"/"Tenth").
+	// Uniformly 0 on every real corpus file checked so far and confirmed NOT to affect the exported
+	// COM position even when forced to 1 (§10n) — kept for completeness/future corpus-wide auditing,
+	// not consumed by any decision in this library.
+	int DynamicsType;
+	bool HaveDynamicsType;
 	bool HasThighZ;
 	float ThighZ[2];
 	std::vector<SBipedToe> Toes[2];

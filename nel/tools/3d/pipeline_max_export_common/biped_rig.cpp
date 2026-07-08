@@ -291,6 +291,7 @@ const NLMISC::CClassId CLASSID_BIPED_VHT_CTRL(0x00009156, 0x00000000);
 
 SBipedRig::SBipedRig() : Sys(NULL), HasCom(false), ComPos(NLMISC::CVector::Null), ComRot(NLMISC::CQuat::Identity),
 		ComDisp(NLMISC::CVector::Null), BaseFramePos(NLMISC::CVector::Null), HaveBaseFramePos(false),
+		DynamicsType(0), HaveDynamicsType(false),
 		HasThighZ(false), MaxLegLink(2),
 		HasClavicleZ(false),
 		PelvisWorldRot(NLMISC::CQuat::Identity), HavePelvisWorldRot(false),
@@ -697,7 +698,10 @@ void parseArmRecord(SBipedRig &rig)
 // 0x0104 (Y-up 4x4, canonical -90degZ rotation assumed) as the fallback when 0x006c is absent.
 // 0x0104 is additionally read into BaseFramePos independently of whether 0x006c succeeded — see
 // the field comment in biped_rig.h and pipeline_max_design.md §10n: the two normally agree, and
-// the one confirmed disagreement is the source of truth for a whole-rig-repositioned anim take.
+// figure height (0x006c) is the well-supported general default where they don't (evidence tally,
+// §10n "Seventh") — a per-file divergence is healed by any later Figure Mode entry/exit for any
+// reason (§10n "Tenth", confirmed live in Max), which is why no byte-level rule distinguishes the
+// files where it stayed diverged.
 void parseComRecord(SBipedRig &rig)
 {
 	size_t n = 0;
@@ -726,6 +730,16 @@ void parseComRecord(SBipedRig &rig)
 			rig.ComRot = NLMISC::CQuat(0.0f, 0.0f, -0.70710678f, 0.70710678f);
 			rig.HasCom = true;
 		}
+	}
+	// <biped_ctrl>.dynamicsType, confirmed at this offset via an isolated single-chunk A/B toggle
+	// on a real skeleton (§10n "Ninth"/"Tenth") — read for corpus-wide auditing; not consumed by
+	// any decision here (already confirmed not to affect the exported COM position, §10n).
+	size_t nd = 0;
+	const float *dt = bipedChunkFloats(0x0012, 1, &nd);
+	if (dt)
+	{
+		rig.DynamicsType = (int)dt[0]; // stored as an actual float (0.0/1.0), not raw int bits
+		rig.HaveDynamicsType = true;
 	}
 }
 
