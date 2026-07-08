@@ -498,6 +498,7 @@ CBipedAnimEval::CBipedAnimEval(CSceneClass *rigSys, SBipedRig &rig,
 		{
 			m_FigComRot = ni.FigWorldRot;
 			m_FigComPos = ni.FigWorldPos;
+			m_ComNodeName = ucstring(node->userName()).toUtf8();
 			if (getenv("PMB_ANIM_DUMP_VHT"))
 			{
 				CReferenceMaker *vht = node->getReference(0);
@@ -598,8 +599,12 @@ CBipedAnimEval::CBipedAnimEval(CSceneClass *rigSys, SBipedRig &rig,
 	}
 
 	if (m_Keys.Vertical.empty() && getenv("PMB_ANIM_DUMP_VERTFALLBACK"))
-		fprintf(stderr, "PMB_ANIM_DUMP_VERTFALLBACK: rig has zero COM-vertical keys; figHeight=%.9g baseFramePos=%.9g (have=%d)\n",
-		        m_FigComPos.z, m_Rig ? m_Rig->BaseFramePos.z : 0.0, m_Rig ? (int)m_Rig->HaveBaseFramePos : -1);
+		fprintf(stderr, "PMB_ANIM_DUMP_VERTFALLBACK: rig '%s' has zero COM-vertical keys; figHeight=%.9g baseFramePos=%.9g (have=%d)\n",
+		        m_ComNodeName.c_str(), m_FigComPos.z, m_Rig ? m_Rig->BaseFramePos.z : 0.0, m_Rig ? (int)m_Rig->HaveBaseFramePos : -1);
+	if (m_Keys.Horizontal.empty() && getenv("PMB_ANIM_DUMP_HORZFALLBACK"))
+		fprintf(stderr, "PMB_ANIM_DUMP_HORZFALLBACK: rig '%s' has zero COM-horizontal keys; figPos=(%.9g,%.9g) baseFramePos=(%.9g,%.9g) (have=%d)\n",
+		        m_ComNodeName.c_str(), m_FigComPos.x, m_FigComPos.y,
+		        m_Rig ? m_Rig->BaseFramePos.x : 0.0, m_Rig ? m_Rig->BaseFramePos.y : 0.0, m_Rig ? (int)m_Rig->HaveBaseFramePos : -1);
 
 	buildChannels();
 }

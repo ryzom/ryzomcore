@@ -1344,8 +1344,132 @@ static int dumpBipedSamples(INode &root, CSceneClassContainer *ssc, const char *
 	return 0;
 }
 
+// ============================================================================
+// --diff-rig: unbiased, full per-chunk byte/float diff of every Biped (0x9155)
+// system object between two .max files, for differential-dataset work (compare
+// a baseline against each single- or multi-toggle variant with no assumption
+// about which chunk matters — everything that changed is reported, not just
+// the fields we already have a theory about).
+// ============================================================================
+struct SLoadedRigScene
+{
+	CDllDirectory *Dll;
+	CClassDirectory3 *Cd;
+	CScene *Scene;
+};
+
+static bool loadRigScene(const char *path, CSceneClassRegistry *reg, SLoadedRigScene &out)
+{
+	CStorageOleIn in;
+	if (!in.open(path)) { std::cerr << "ERROR: not an OLE compound file: " << path << "\n"; return false; }
+	out.Dll = new CDllDirectory();
+	{ std::vector<uint8> b; if (!in.readStream("DllDirectory", b)) { std::cerr << "ERROR: no DllDirectory in " << path << "\n"; return false; } CStorageStream st(b); out.Dll->serial(st); }
+	out.Dll->parse(VersionUnknown);
+	out.Cd = new CClassDirectory3(out.Dll);
+	{ std::vector<uint8> b; if (!in.readStream("ClassDirectory3", b)) { std::cerr << "ERROR: no ClassDirectory3 in " << path << "\n"; return false; } CStorageStream st(b); out.Cd->serial(st); }
+	out.Cd->parse(VersionUnknown);
+	out.Scene = new CScene(reg, out.Dll, out.Cd);
+	{ std::vector<uint8> b; if (!in.readStream("Scene", b)) { std::cerr << "ERROR: no Scene in " << path << "\n"; return false; } CStorageStream st(b); out.Scene->serial(st); }
+	out.Scene->parse(VersionUnknown);
+	return true;
+}
+
+struct SBipedSysDump
+{
+	int Index;
+	// Duplicate chunk ids within one object are rare on the 0x9155 system object and are
+	// collapsed here (last-wins) — fine for a differential-dataset diagnostic where we're
+	// comparing near-identical files, not for anything roundtrip-authoritative.
+	std::map<uint16, std::vector<uint8> > Chunks;
+};
+
+static void collectBipedSysDumps(CSceneClassContainer *ssc, std::vector<SBipedSysDump> &out)
+{
+	static const NLMISC::CClassId CLASSID_SYS(0x00009155, 0x00000000);
+	int idx = 0;
+	for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it, ++idx)
+	{
+		CSceneClass *sc = dynamic_cast<CSceneClass *>(it->second);
+		if (!sc || sc->classDesc()->classId() != CLASSID_SYS) continue;
+		SBipedSysDump d;
+		d.Index = idx;
+		const CStorageContainer::TStorageObjectContainer &orph = sc->orphanedChunks();
+		for (CStorageContainer::TStorageObjectConstIt jt = orph.begin(); jt != orph.end(); ++jt)
+		{
+			CStorageRaw *raw = dynamic_cast<CStorageRaw *>(jt->second);
+			if (raw) d.Chunks[jt->first] = raw->Value;
+		}
+		out.push_back(d);
+	}
+}
+
+static void diffBipedSysDumps(const std::vector<SBipedSysDump> &a, const std::vector<SBipedSysDump> &b, FILE *fp)
+{
+	size_t n = a.size() > b.size() ? a.size() : b.size();
+	for (size_t i = 0; i < n; ++i)
+	{
+		if (i >= a.size()) { fprintf(fp, "SYSOBJ %zu only in B\n", i); continue; }
+		if (i >= b.size()) { fprintf(fp, "SYSOBJ %zu only in A\n", i); continue; }
+		const SBipedSysDump &da = a[i], &db = b[i];
+		std::set<uint16> ids;
+		for (std::map<uint16, std::vector<uint8> >::const_iterator it = da.Chunks.begin(); it != da.Chunks.end(); ++it) ids.insert(it->first);
+		for (std::map<uint16, std::vector<uint8> >::const_iterator it = db.Chunks.begin(); it != db.Chunks.end(); ++it) ids.insert(it->first);
+		for (std::set<uint16>::iterator idit = ids.begin(); idit != ids.end(); ++idit)
+		{
+			uint16 id = *idit;
+			std::map<uint16, std::vector<uint8> >::const_iterator ia = da.Chunks.find(id);
+			std::map<uint16, std::vector<uint8> >::const_iterator ib = db.Chunks.find(id);
+			if (ia == da.Chunks.end()) { fprintf(fp, "SYSOBJ %zu chunk 0x%04x only in B (%zu bytes)\n", i, id, ib->second.size()); continue; }
+			if (ib == db.Chunks.end()) { fprintf(fp, "SYSOBJ %zu chunk 0x%04x only in A (%zu bytes)\n", i, id, ia->second.size()); continue; }
+			if (ia->second == ib->second) continue;
+			fprintf(fp, "SYSOBJ %zu chunk 0x%04x DIFFERS (A %zu bytes, B %zu bytes)\n", i, id, ia->second.size(), ib->second.size());
+			if (ia->second.size() == ib->second.size() && ia->second.size() >= 4 && (ia->second.size() % 4) == 0)
+			{
+				// Compare raw bit patterns, not float value equality — a +0.0/-0.0 flip or a
+				// differing NaN payload is byte-real and worth reporting even though it would
+				// compare "equal" (or uninformatively as "nan") under floating-point ==.
+				size_t nf = ia->second.size() / 4;
+				const float *fa = reinterpret_cast<const float *>(nlVectorData(ia->second));
+				const float *fb = reinterpret_cast<const float *>(nlVectorData(ib->second));
+				const uint32 *ua = reinterpret_cast<const uint32 *>(nlVectorData(ia->second));
+				const uint32 *ub = reinterpret_cast<const uint32 *>(nlVectorData(ib->second));
+				for (size_t k = 0; k < nf; ++k)
+					if (ua[k] != ub[k])
+						fprintf(fp, "    [%zu] %.9g -> %.9g (delta %.9g) [bits 0x%08x -> 0x%08x]\n", k, fa[k], fb[k], fb[k] - fa[k], ua[k], ub[k]);
+			}
+		}
+	}
+}
+
+static int runDiffRig(const char *pathA, const char *pathB, const char *outPath)
+{
+	CSceneClassRegistry reg;
+	CBuiltin::registerClasses(&reg);
+	UPDATE1::CUpdate1::registerClasses(&reg);
+	EPOLY::CEPoly::registerClasses(&reg);
+	BIPED::CBiped::registerClasses(&reg);
+
+	SLoadedRigScene a, b;
+	if (!loadRigScene(pathA, &reg, a)) return 1;
+	if (!loadRigScene(pathB, &reg, b)) return 1;
+
+	std::vector<SBipedSysDump> da, db;
+	collectBipedSysDumps(a.Scene->container(), da);
+	collectBipedSysDumps(b.Scene->container(), db);
+
+	FILE *fp = fopen(outPath, "w");
+	if (!fp) { std::cerr << "ERROR: cannot open " << outPath << " for writing\n"; return 1; }
+	fprintf(fp, "DIFF-RIG A=%s (%zu sysobjs) B=%s (%zu sysobjs)\n", pathA, da.size(), pathB, db.size());
+	diffBipedSysDumps(da, db, fp);
+	fclose(fp);
+	return 0;
+}
+
 int main(int argc, char **argv)
 {
+	if (argc >= 5 && std::string(argv[1]) == "--diff-rig")
+		return runDiffRig(argv[2], argv[3], argv[4]);
+
 	const char *dumpSamples = NULL;
 	double dumpMaxFrame = 60.0;
 	int argi = 1;
@@ -1358,6 +1482,7 @@ int main(int argc, char **argv)
 	if (argc - argi < 2)
 	{
 		std::cerr << "usage: pipeline_max_export_anim [--dump-samples <out.txt> [--dump-max-frame <f>]] <input.max> <output.anim>\n";
+		std::cerr << "       pipeline_max_export_anim --diff-rig <A.max> <B.max> <out.txt>\n";
 		std::cerr << "exit codes: 0 ok, 1 error, 3 nothing to export\n";
 		return 1;
 	}

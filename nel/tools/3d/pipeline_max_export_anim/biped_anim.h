@@ -207,6 +207,7 @@ private:
 	// figure-frame constants
 	QuatD m_FigComRot;
 	NLMISC::CVectorD m_FigComPos;
+	std::string m_ComNodeName; // for multi-biped-file diagnostics (PMB_ANIM_DUMP_VERTFALLBACK/HORZFALLBACK)
 	// figure pelvis state — thigh positions anchor to the pelvis frame (the node hierarchy
 	// differs by era: fresh Max 9 rigs parent thighs to the lowest spine link).
 	QuatD m_FigPelvisRot;

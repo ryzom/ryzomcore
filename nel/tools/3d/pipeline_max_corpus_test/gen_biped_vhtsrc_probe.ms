@@ -150,16 +150,20 @@ fn tryReexport com label = (
   ok
 )
 
-fn findComNode = (
-  local best = undefined
+-- Returns ALL biped COM nodes in the scene, not just one — multi-biped files
+-- (e.g. tr_mo_kitin_queen: Bip01 + a nested Bip02) would otherwise silently
+-- confound whichever rig happens to be found first with the "the" rig, making
+-- any single-value comparison meaningless for that file.
+fn findComNodes = (
+  local found = #()
   for o in objects do (
-    try ( if classof o.transform.controller == Vertical_Horizontal_Turn then best = o ) catch ()
+    try ( if classof o.transform.controller == Vertical_Horizontal_Turn then append found o ) catch ()
   )
-  if best == undefined do (
+  if found.count == 0 do (
     -- fallback: name-match, in case the VHT classof check didn't resolve in this build
-    for o in objects do ( if best == undefined and (matchPattern o.name pattern:"Bip*" ignoreCase:true) and o.parent == undefined do best = o )
+    for o in objects do ( if (matchPattern o.name pattern:"Bip*" ignoreCase:true) and o.parent == undefined do append found o )
   )
-  best
+  found
 )
 
 -- If dynamicsType==0 really does keep a live balance/trajectory solve running,
@@ -215,12 +219,16 @@ for rf in REAL_FILES do (
   if not (doesFileExist path) then ( mlog ("  ERROR file not found: " + path) )
   else (
     loadMaxFile path quiet:true
-    local com = findComNode()
-    if com == undefined then ( mlog "  ERROR no biped COM node found" )
+    local coms = findComNodes()
+    if coms.count == 0 then ( mlog "  ERROR no biped COM node found" )
     else (
-      dumpBipedState label com
-      dumpComHeightSweep label com
-      tryReexport com label
+      if coms.count > 1 do mlog ("  NOTE: " + (coms.count as string) + " biped COM nodes found in this file — each dumped separately below, do not conflate them")
+      for com in coms do (
+        local rigLabel = label + "#" + com.name
+        dumpBipedState rigLabel com
+        dumpComHeightSweep rigLabel com
+        tryReexport com rigLabel
+      )
     )
   )
 )
