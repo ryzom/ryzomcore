@@ -299,6 +299,20 @@ const std::vector<CGeomTriIndexInfo> *CGeomBuffers::triFaces() const
 	return a ? &a->Value : NULL;
 }
 
+const std::vector<CGeomPolyVertexInfo> *CGeomBuffers::polyVertices() const
+{
+	const CStorageArraySizePre<CGeomPolyVertexInfo> *a =
+		dynamic_cast<const CStorageArraySizePre<CGeomPolyVertexInfo> *>(findStorageObject(PBMS_GEOM_BUFFERS_POLY_A_VERTEX_CHUNK_ID));
+	return a ? &a->Value : NULL;
+}
+
+const std::vector<CGeomPolyFaceInfo> *CGeomBuffers::polyFaces() const
+{
+	const CStorageArrayDynSize<CGeomPolyFaceInfo> *a =
+		dynamic_cast<const CStorageArrayDynSize<CGeomPolyFaceInfo> *>(findStorageObject(PBMS_GEOM_BUFFERS_POLY_A_FACE_CHUNK_ID));
+	return a ? &a->Value : NULL;
+}
+
 IStorageObject *CGeomBuffers::createChunkById(uint16 id, bool container)
 {
 #if PMBS_GEOM_BUFFERS_PARSE

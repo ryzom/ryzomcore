@@ -131,6 +131,14 @@ public:
 	/// labels — the corpus-validated meaning is smGroup at offset 12 and faceFlags (matID in the
 	/// high word) at offset 16, see pipeline_max_design.md §10i).
 	const std::vector<CGeomTriIndexInfo> *triFaces() const;
+	/// The poly-mesh vertex array (chunk 0x0100, count-prefixed CGeomPolyVertexInfo[]) — carries
+	/// the vertex position plus a per-vertex uint32 the format uses as an internal id (max_geometry_formats
+	/// Part C 0x0100). Used by the EditablePoly path in the shape exporter (design doc §10i M2).
+	const std::vector<CGeomPolyVertexInfo> *polyVertices() const;
+	/// The poly-mesh face array (chunk 0x011a, CGeomPolyFaceInfo[]) — variable-size records with
+	/// vertex list, optional matID / smoothing group / triangulation cuts. Use
+	/// CGeomObject::triangulatePolyFace to convert each face to triangles.
+	const std::vector<CGeomPolyFaceInfo> *polyFaces() const;
 	//@}
 
 protected:

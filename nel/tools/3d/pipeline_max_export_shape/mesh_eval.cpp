@@ -161,6 +161,73 @@ static bool extractEditableMesh(CSceneClass *obj, SEvalMesh &out, const std::str
 	return true;
 }
 
+// EditablePoly: the poly-buffer path. `<PolyObject base data>` (max_geometry_formats Part C) sits
+// in the SAME GeomBuffers container the tri path reads, but under distinct ids: 0x0100 = poly
+// vertices (CGeomPolyVertexInfo — position + a per-vertex uint32), 0x011a = poly faces
+// (CGeomPolyFaceInfo — variable-size records with vertex-list, optional matID / smoothing group /
+// triangulation cuts). CGeomObject::triangulatePolyFace already does the corpus-validated
+// triangulation (dump tool exportObj drives it — same call used here). One SEvalFace is emitted
+// per resulting triangle, materialId + smGroup filled from the parent poly face; per-face flags
+// keep matID in the high 16 bits (MAX_FACE_MATID_SHIFT). Map channels are NOT read here yet —
+// EditablePoly's MNMesh format stores per-poly map channels differently from the tri path's
+// 0x2394/0x2396 pair (Part C notes the MNMesh sub-container is out of scope). Textured
+// EditablePoly nodes will therefore diff on UVs until the poly map decode lands; untextured
+// ones (collision hulls, primitive stand-ins) match. This is the same practical trade-off
+// mesh_eval already makes for parametric primitives (see extractParametricPrimitive above).
+static bool extractEditablePoly(CSceneClass *obj, SEvalMesh &out, const std::string &name)
+{
+	CGeomObject *geom = dynamic_cast<CGeomObject *>(obj);
+	STORAGE::CGeomBuffers *gb = geom ? geom->geomBuffers() : NULL;
+	if (!gb)
+	{
+		fprintf(stderr, "WARNING: poly '%s' without geom buffers\n", name.c_str());
+		return false;
+	}
+	const std::vector<STORAGE::CGeomPolyVertexInfo> *pv = gb->polyVertices();
+	const std::vector<STORAGE::CGeomPolyFaceInfo> *pf = gb->polyFaces();
+	if (!pv || !pf)
+	{
+		fprintf(stderr, "WARNING: poly '%s' with missing poly buffers\n", name.c_str());
+		return false;
+	}
+	out.Verts.resize(pv->size());
+	for (uint i = 0; i < pv->size(); ++i)
+	{
+		const NLMISC::CVector &v = (*pv)[i].v;
+		out.Verts[i].x = v.x;
+		out.Verts[i].y = v.y;
+		out.Verts[i].z = v.z;
+	}
+	std::vector<STORAGE::CGeomTriIndex> tris;
+	for (uint i = 0; i < pf->size(); ++i)
+	{
+		const STORAGE::CGeomPolyFaceInfo &face = (*pf)[i];
+		if (face.Vertices.size() < 3) continue;
+		tris.clear();
+		CGeomObject::triangulatePolyFace(tris, face);
+		// EditablePoly Material is 0-based when the format stores it, else the packed-bitfield
+		// path left it 0 (interpreted the same way as EditableMesh matID). Smoothing group is
+		// the poly's bitmask; face-flags carry all-edges-visible (edges 0..2 set) since the poly
+		// triangulation subdivides the polygon interior and Max's convention for these interior
+		// edges is invisible — but since the export path reads the low 3 bits only to determine
+		// edge visibility for shading, we leave them all visible here (matches the interior of a
+		// triangulated poly as rendered).
+		uint32 flags = ((uint32)(face.Material) & 0xFFFFu) << MAX_FACE_MATID_SHIFT;
+		flags |= 0x7; // all edges visible
+		for (uint t = 0; t < tris.size(); ++t)
+		{
+			SEvalFace ef;
+			ef.V[0] = tris[t].a;
+			ef.V[1] = tris[t].b;
+			ef.V[2] = tris[t].c;
+			ef.SmGroup = face.SmoothingGroups;
+			ef.Flags = flags;
+			out.Faces.push_back(ef);
+		}
+	}
+	return true;
+}
+
 // ---------------------------------------------------------------------------------------------
 // Modifier application
 
@@ -406,6 +473,11 @@ bool evalNodeMesh(INode &node, SEvalMesh &out, std::vector<std::string> *warning
 	if (cid == CLASSID_EDITABLE_MESH)
 	{
 		if (!extractEditableMesh(base, out, name))
+			return false;
+	}
+	else if (cid == CLASSID_EDITABLE_POLY)
+	{
+		if (!extractEditablePoly(base, out, name))
 			return false;
 	}
 	else if (cid == PRIMMESH::CLASSID_BOX || cid == PRIMMESH::CLASSID_CYLINDER
