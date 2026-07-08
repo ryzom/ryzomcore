@@ -58,10 +58,16 @@ DEF_BIN = os.path.expanduser("~/ryzomcore/build/nel-pipeline/bin")
 ECOSYSTEMS = ["desert", "jungle", "lacustre", "primes_racines"]
 OLE_MAGIC = b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1"
 
-# Known-open diff budget (see the module docstring): the selection-order divergence class and
-# the cluster-membership edge cases, as measured at landing (2026-07-07). Any regression beyond
-# this count fails --gate-t3; getting BELOW it is welcome (tighten the constant when it drops).
-DIFF_BUDGET = 89
+# Known-open diff budget (see the module docstring). Regression guard: any count beyond this
+# fails --gate-t3. Retire by fixing diffs and re-tightening — don't raise. Tightened 2026-07-08
+# (§10w): 89 -> 28 after the Edit Mesh 0x0130 created-verts decode + tree-ordered per-category
+# walk + ligo XRef-first pass. Remaining 28 = ~5 PS-instance clusterize AABBox corners landing
+# within CLUSTERPRECISION=5mm of a cluster plane (x64/SSE vs x87, real content risk LOW — extra
+# links harden culling, don't drop content) + ~23 village-bundle files (fy_module_village_nb_*,
+# zo_imm_village_nb_*, tr_village_nb_*, jungle foret village_*, ilot_butte cases) where every
+# node parents to the scene root so buildTreeOrder degenerates to storage order — cause not
+# pinned without a Max-side $geometry probe on one of them.
+DIFF_BUDGET = 28
 
 
 def enumerate_corpus(graphics_dir):
