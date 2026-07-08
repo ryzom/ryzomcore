@@ -281,7 +281,7 @@ def main():
     if args.t1 or args.t2:
         print("T1: %d pass, %d fail; T2: %d pass, %d fail; %d stubs" % (t1_pass, t1_fail, t2_pass, t2_fail, stubs))
 
-    identical = floateq = diff = us_only = mapext = lightmap = 0
+    identical = floateq = diff = us_only = mapext = lightmap_ok = lightmap_diff = 0
     ref_missing = 0
     diff_samples = []
     if args.t3:
@@ -304,9 +304,21 @@ def main():
                     mapext += 1
                 elif (proj, name) in lightmap_nodes:
                     # lightmapped shape: the reference carries export-time lightmaps, the
-                    # headless export is unmapped by design — bucketed until the standalone
-                    # lightmapper exists
-                    lightmap += 1
+                    # headless export is unmapped by design (pending the standalone lightmapper).
+                    # Run --compare-lightmap-mask to promote from bucketed → structurally-verified
+                    # when the base fields the lightmapper doesn't touch all match.
+                    r = subprocess.run([export_bin, "--compare-lightmap-mask", path, ref], capture_output=True, text=True)
+                    if r.returncode == 0:
+                        lightmap_ok += 1
+                    else:
+                        lightmap_diff += 1
+                        if len(diff_samples) < 25:
+                            summary = ""
+                            for line in r.stdout.splitlines():
+                                ls = line.strip()
+                                if ls.startswith(("VB", "material", "DefaultPos", "DefaultRotQuat", "DefaultScale", "rdrpass", "class:", "matrix")) and ("differ" in ls or "vs" in ls):
+                                    summary += "|" + ls[:60]
+                            diff_samples.append("LM %s:%s%s" % (proj, name, summary[:220]))
                 else:
                     r = subprocess.run([export_bin, "--compare", path, ref], capture_output=True, text=True)
                     if r.returncode == 0:
@@ -323,8 +335,10 @@ def main():
             have = set(refs) | set(coarse_refs)
             missing = have - set(mine)
             ref_missing += len(missing)
-        print("T3: %d exported: %d byte-identical, %d float-noise-eq, %d differ, %d mapext-bucketed, %d lightmap-bucketed, %d without reference; %d reference shapes not produced"
-              % (identical + floateq + diff + mapext + lightmap + us_only, identical, floateq, diff, mapext, lightmap, us_only, ref_missing))
+        print("T3: %d exported: %d byte-identical, %d float-noise-eq, %d differ, %d mapext-bucketed, "
+              "%d lightmap-verified + %d lightmap-diff, %d without reference; %d reference shapes not produced"
+              % (identical + floateq + diff + mapext + lightmap_ok + lightmap_diff + us_only,
+                 identical, floateq, diff, mapext, lightmap_ok, lightmap_diff, us_only, ref_missing))
         if mapext_report:
             report_path = os.path.join(args.out, "mapext_assets.txt")
             with open(report_path, "w") as fh:
@@ -347,10 +361,11 @@ def main():
     fails = t1_fail + t2_fail + len(export_fail)
     if args.gate_t3:
         fails += anim_diff  # material animations must be byte-exact against the references
-        if identical + floateq < args.min_identical:
+        if identical + floateq + lightmap_ok < args.min_identical:
             fails += 1
-        # structural diffs above the milestone budget are regressions
-        fails += max(0, diff - args.max_diff)
+        # structural diffs above the milestone budget are regressions (both the plain and the
+        # lightmap-mask class count against the budget)
+        fails += max(0, diff + lightmap_diff - args.max_diff)
     return 1 if fails else 0
 
 
