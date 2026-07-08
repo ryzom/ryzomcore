@@ -109,21 +109,25 @@ dumpList "selection_sequence_for_IG_NAME" (selection as array)
 --    without needing an external file load). This is what the ligo maxscript XRef
 --    pre-pass filters on. Also dump the XRef's stored source-file path so we can
 --    correlate which target files are/aren't loaded/embedded.
-mlog ""
-mlog "== xref_resolvability =="
-mlog "  (idx name ig sourceOK sourceClass sourceSClass fileName objName)"
-local xidx = 0
-for node in objects where classOf node == XRefObject do (
-    local ig = getIgOf node
-    if ig != IG_NAME do continue
-    local src = try ( node.GetSourceObject false ) catch undefined
-    local ok = src != undefined
-    local sc = if ok then ( try (classOf src as string) catch "?" ) else "-"
-    local ssc = if ok then ( try (superclassOf src as string) catch "?" ) else "-"
-    local fnm = try ( node.fileName ) catch "?"
-    local onm = try ( node.objectName ) catch "?"
-    mlog ("  " + (xidx as string) + "\t" + node.name + "\tig=" + ig + "\tok=" + (ok as string) + "\tclass=" + sc + "\tsClass=" + ssc + "\tfile=" + fnm + "\tobj=" + onm)
-    xidx = xidx + 1
+fn dumpXRefResolvability = (
+    mlog ""
+    mlog "== xref_resolvability =="
+    mlog "  (idx name ig sourceOK sourceClass sourceSClass fileName objName)"
+    local xidx = 0
+    for node in objects where classOf node == XRefObject do (
+        local ig = getIgOf node
+        if ig == IG_NAME do (
+            local src = try ( node.GetSourceObject false ) catch undefined
+            local ok = src != undefined
+            local sc = if ok then ( try (classOf src as string) catch "?" ) else "-"
+            local ssc = if ok then ( try (superclassOf src as string) catch "?" ) else "-"
+            local fnm = try ( node.fileName ) catch "?"
+            local onm = try ( node.objectName ) catch "?"
+            mlog ("  " + (xidx as string) + "\t" + node.name + "\tig=" + ig + "\tok=" + (ok as string) + "\tclass=" + sc + "\tsClass=" + ssc + "\tfile=" + fnm + "\tobj=" + onm)
+            xidx = xidx + 1
+        )
+    )
 )
+dumpXRefResolvability()
 
 mlog "BYE"
