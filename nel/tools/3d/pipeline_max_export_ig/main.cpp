@@ -2139,27 +2139,54 @@ static int treeOrderOf(const std::map<INode *, int> &orderMap, INode *n)
 // world TM is overridden in tmCache via buildTransitionMatrixObj before the build — this mirrors
 // the maxscript literally overwriting node.transform for the SAME nodes it just selected.
 //
-// The ligo maxscript's `exportInstanceGroupFromZone` (§10g-bis) has an extra XRef-first loop
-// (`for node in objects where classOf node == XRefObject`) BEFORE the three geometry/lights/
-// helpers passes; it doesn't change the effective ordering because MaxScript's
-// `$selection as array` returns nodes in SCENE ORDER (base-object-resolved superclass, then
-// scene-tree DFS), not in `selectmore` insertion order — the XRef pass just guarantees
-// XRef nodes end up in the selection at all in the presence of any Max version where
-// `$geometry` filters by direct-object superclass instead of the resolved base. Base-object
-// unwrapping is what `nodeCategory` already does, so the single tree-ordered per-category walk
-// below reproduces the reference selection whether or not the XRef loop ran. The
-// includeXRefFirst parameter is kept as a caller-visible flag for the ligo/standalone split
-// documented in the exporter interface, but no longer changes ordering.
+// includeXRefFirst=true replicates the ligo maxscript's `exportInstanceGroupFromZone` extra
+// XRef pre-pass (`for node in objects where classOf node == XRefObject`) that adds XRef-object
+// nodes in scene-tree order BEFORE the three geometry/lights/helpers passes; the ligo maxscript
+// treats `$selection as array` as returning in `selectmore` insertion order (empirically
+// confirmed by corpus regression: enabling the XRef pass drops the ligo diff count from ~88
+// to ~29 in one commit, disabling it swings the same delta back — Max's `$selection` iterator
+// isn't documented as insertion-vs-scene ordered so we replicate the observed behavior). The
+// standalone `processes/ig` maxscript doesn't have this XRef pass, so the standalone caller
+// passes false and the selection is purely the three per-category tree-ordered walks.
 static NL3D::CInstanceGroup *exportIgForName(CSceneClassContainer *ssc, SNodeTMCache &tmCache,
                                               const std::string &igNameMatch, bool lowercaseCompare,
                                               int transitionZone, float cellSize, SIgBuildStats &stats,
-                                              bool /*includeXRefFirst — see above; ordering-inert */)
+                                              bool includeXRefFirst)
 {
 	std::string want = lowercaseCompare ? NLMISC::toLowerAscii(igNameMatch) : igNameMatch;
 	std::map<INode *, int> treeOrder;
 	buildTreeOrder(ssc, tmCache.SceneRoot, treeOrder);
 
 	std::vector<INode *> vectNode;
+	std::set<INode *> picked;
+
+	// Ligo-only XRef-first pass. The maxscript filter is `classOf node == XRefObject`, so test
+	// the direct object reference (BEFORE base-object unwrapping) for the XRefObject classId.
+	if (includeXRefFirst)
+	{
+		std::vector<INode *> xrefNodes;
+		for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
+		{
+			CNodeImpl *node = dynamic_cast<CNodeImpl *>(it->second);
+			if (!node) continue;
+			CSceneClass *directObj = dynamic_cast<CSceneClass *>(node->getReference(1));
+			if (!directObj || directObj->classDesc()->classId().a() != 0x92aab38c) continue;
+			std::string ig = getScriptAppDataStr(node, NEL3D_APPDATA_IGNAME, "");
+			if (lowercaseCompare) ig = NLMISC::toLowerAscii(ig);
+			if (ig != want) continue;
+			xrefNodes.push_back(node);
+		}
+		// Sort by tree order; the maxscript's `for node in objects` uses the scene walk.
+		for (uint a = 0; a < xrefNodes.size(); ++a)
+			for (uint b = a + 1; b < xrefNodes.size(); ++b)
+				if (treeOrderOf(treeOrder, xrefNodes[a]) > treeOrderOf(treeOrder, xrefNodes[b]))
+					std::swap(xrefNodes[a], xrefNodes[b]);
+		for (uint i = 0; i < xrefNodes.size(); ++i)
+		{
+			vectNode.push_back(xrefNodes[i]);
+			picked.insert(xrefNodes[i]);
+		}
+	}
 
 	static const TSClassId cats[3] = { SCLASS_GEOMOBJECT, SCLASS_LIGHT, SCLASS_HELPER };
 	for (int c = 0; c < 3; ++c)
@@ -2169,6 +2196,7 @@ static NL3D::CInstanceGroup *exportIgForName(CSceneClassContainer *ssc, SNodeTMC
 		{
 			CNodeImpl *node = dynamic_cast<CNodeImpl *>(it->second);
 			if (!node) continue;
+			if (picked.count(node)) continue; // already added by the XRef-first pass
 			if (nodeCategory(*node) != cats[c]) continue;
 			std::string ig = getScriptAppDataStr(node, NEL3D_APPDATA_IGNAME, "");
 			if (lowercaseCompare) ig = NLMISC::toLowerAscii(ig);
@@ -2181,7 +2209,10 @@ static NL3D::CInstanceGroup *exportIgForName(CSceneClassContainer *ssc, SNodeTMC
 				if (treeOrderOf(treeOrder, catNodes[a]) > treeOrderOf(treeOrder, catNodes[b]))
 					std::swap(catNodes[a], catNodes[b]);
 		for (uint i = 0; i < catNodes.size(); ++i)
+		{
 			vectNode.push_back(catNodes[i]);
+			picked.insert(catNodes[i]);
+		}
 	}
 
 	if (vectNode.empty()) return NULL;
