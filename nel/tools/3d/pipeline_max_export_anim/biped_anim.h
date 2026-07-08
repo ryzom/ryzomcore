@@ -32,9 +32,29 @@
  * Interpolation: per-channel TCB in STORED space (Max/NeL TCB formulas — see NeL track_tcb.h —
  * with the biped boundary rule tanFrom(first) = (1-t)(v1-v0), tanTo(last) = (1-t)(vlast-vprev)),
  * quats via squad on the raw stored key quats, then per-frame conversion with the time-varying
- * frames (COM/pelvis/parent). Legs/arms with IK blend keys additionally solve a 2-bone IK toward
- * the interpolated world end-effector position (approximation for in-between frames; exact at
- * keys — see the wiki's open-work note).
+ * frames (COM/pelvis/parent).
+ *
+ * IK in-betweens (legs): planted intervals (ikBlend 1 at BOTH interval keys) evaluate through the
+ * PIVOT-CONSTRAINED model decoded 2026-07-08 against the fy_hof_a_course direct reference (see
+ * pipeline_max_design.md §10r): the record tail carries per-key foot-pivot state — [98] = the
+ * 0-based ikPivotIndex, [101..103] = the active pivot's world position at this key's pose (Y-up),
+ * [105..107] = the PREVIOUS key's pivot re-expressed at this key's pose (equal to [101..103] when
+ * the pivot didn't change); [12] = IK blend, [11] = the Body/Object space flag (2 = object/world
+ * on the corpus plants), [25] = join-to-previous-IK-key. Per contiguous run of same-pivot planted
+ * intervals (a "session"), the pivot's world position follows a TCB vec3 spline through its
+ * per-key positions (the biped boundary rule at session ends; a 2-knot session degenerates to
+ * lerp), and the ankle is slaved to the foot rotation channel through the rigid pivot arm:
+ * ankle(t) = W(t) - R_foot(t)·pLocal. A hard 2-bone thigh/calf solve places the ankle there
+ * (exact no-op at keys by construction — the knots are computed from the channel state at key
+ * times). The per-interval coverage gate (the D-window), the session release-break, the terminal
+ * pB-handoff knot, and the in-plant foot rotation rule are documented at their implementation
+ * sites and in §10r; the rule set was corpus-arbitrated over six full sweeps. Blend transitions
+ * (0->1, 1->0) evaluate pure channel-FK (corpus-verified). Data-gated: keys without recorded
+ * pivot positions (scripted / body-space keys, the Max 9 datasets) keep the previous behavior.
+ * The residual open item is the true in-plant foot rotation (solver-derived in the reference;
+ * the key-yaw composition here is the measured best interpolation). PMB_BIPED_IK=0 forces pure
+ * FK for A/B; 1/2 are the older superseded experiments; PMB_BIPED_IK_ROT / PMB_BIPED_IK_ARMS
+ * select rotation-rule and arm-pin variants.
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
  */
@@ -183,6 +203,52 @@ public:
 
 	const SBipAnimKeys &keys() const { return m_Keys; }
 
+	// One contiguous run of planted leg intervals sharing an active pivot (see header comment).
+	// Intervals whose in-between behavior the model can't claim revert to channel-FK by simply
+	// not being covered: the RELEASE interval (a small vertically-dominant pivot ascent on the
+	// run's final same-pivot interval — zo_hof_marche's stride release evaluates near-FK in the
+	// reference) and the pB-unrecorded HANDOFF interval (idx changes but the old pivot's motion
+	// into the change key isn't recorded — fy_hom_strafe_gauche's landing; the reference is
+	// near-FK there too, and any target error explodes through the knee near full extension).
+	struct SPivotInterval
+	{
+		sint32 T0, T1;               // covered tick span (one keyframe interval)
+		NLMISC::CVectorD M0, M1;     // endpoint feather (ankle-FK minus model; ~0 normally)
+	};
+	struct SPivotSession
+	{
+		TCBVec3Channel W;            // the active pivot's world-position channel (NeL space)
+		NLMISC::CVectorD PLocal;     // pivot offset in the foot frame
+		std::vector<SPivotInterval> Intervals;
+	};
+	// Per-side foot rotation channels for planted intervals. The stored foot quats are COM-relative
+	// snapshots; the FK rule (interpolate stored, compose with the time-varying COM(t)) is exact on
+	// FK intervals but drags a planted foot along with the moving body (fy_hof_co_l2m_coup_fort's
+	// 32-frame plant: the FK-composed foot swings 0.30 rad while the reference stays put;
+	// fy_hom_emot_a_cheer 0.45 -> 0.013 under a world-space channel). A pure WORLD-space
+	// interpolation over-corrects the opposite way on net turns: the planted foot genuinely swivels
+	// with a half-turn (fy_hom_a_demitour_go: world-squad 0.75 off). The shipped default therefore
+	// interpolates BOTH parts from the keys: the COM's yaw (world-Z twist) as its own key channel,
+	// composed with the yaw-frame foot residual channel — R(t) = yawKeys(t)·yawFrame(t). At keys
+	// exact; between keys the foot follows the KEY-interpolated body turn but none of the live COM
+	// wobble (the live-yaw variant injected the gait/gesture pelvis twist into planted feet). The
+	// true in-plant foot rotation is solver-derived (the reference's mid-plant foot passes OUTSIDE
+	// the geodesic of its own keys — Character Studio's loose-ankle response to the leg state),
+	// left as the documented open item; see pipeline_max_design.md §10r.
+	// PMB_BIPED_IK_ROT: yaw (default: key-yaw composition) | full | run | off.
+	struct SFootWorldRot
+	{
+		TCBQuatChannel Yaw;                   // yaw-frame residual, knots at every key (default)
+		// The COM yaw itself as an UNWRAPPED ANGLE channel (default composition): interpolating
+		// the yaw as quats hits the double cover on large per-key turn steps (a >90° step's
+		// shorter arc goes the wrong way around — fy_hof_co_mn_demitourgauche's half-turn put the
+		// planted foot 0.69 off); the unwrapped scalar follows the turn's actual direction.
+		TCBScalarChannel YawAngle;
+		TCBQuatChannel Full;                  // knots at every key (world quats)
+		std::vector<TCBQuatChannel> Runs;     // knots per planted run (world quats)
+		std::vector<sint32> RunT0, RunT1;     // run spans
+	};
+
 private:
 	struct SNodeInfo
 	{
@@ -217,7 +283,17 @@ private:
 	// compiled channels (lazy)
 	TCBVec3Channel m_ChHorizontal;    // Y-up stored (x, y_up, z_up)
 	TCBScalarChannel m_ChVertical;    // z (Y-up [2])
-	TCBQuatChannel m_ChTurn;
+	// The COM turn: the stored record carries BOTH the quat [4..7] and the SIGNED TURN ANGLE [1]
+	// (s_k == AxisAngle(Y-up, -angle_k) exactly on pure turns). Interpolating the quat alone is
+	// wrong for large per-segment turns: the angle is the authoritative winding (a >150° segment
+	// interpolates through the angle's own TCB — fy_hof_demitour_go's 162° swing put the exported
+	// COM 0.73 off mid-segment under the quat squad — and the stored angle wraps at ±180°, so the
+	// channel unwraps it). Decomposition: s(t) = AxisAngle(Y, -angleCh(t)) · residCh(t), with the
+	// residual (the non-pure-turn part, identity on flat rigs) still a quat channel.
+	TCBScalarChannel m_ChTurnAngle;
+	TCBQuatChannel m_ChTurnResid;
+	bool m_HaveTurn;             // decomposition active (else m_ChTurn quat squad)
+	TCBQuatChannel m_ChTurn;     // plain quat squad (the ordinary-step default)
 	TCBQuatChannel m_ChPelvis;
 	TCBQuatChannel m_ChUpper[2];      // [0]=R, [1]=L  (limb rec [2..5])
 	TCBScalarChannel m_ChHinge[2];    // elbow
@@ -234,7 +310,21 @@ private:
 	std::vector<TCBQuatChannel> m_ChFingerBase[2], m_ChToeBase[2];
 	std::vector<TCBScalarChannel> m_ChFingerBend[2], m_ChToeBend[2];
 
+	// pivot-constrained end-effector IK (see header comment); built lazily on first evalAt.
+	// [limb][side]: limb 0 = arm (wrist-pin case only, pLocal ~ 0 — the stored arm end-effector
+	// space varies per file and is undecoded, but a zero pivot arm is space-independent),
+	// limb 1 = leg (the full pivot model). Side 0 = R, 1 = L.
+	std::vector<SPivotSession> m_PivotSessions[2][2];
+	SFootWorldRot m_FootWorldRot[2]; // legs only
+	bool m_PivotSessionsBuilt;
+
 	void buildChannels();
+	// The pure channel-FK evaluation (everything except the IK pass).
+	void evalFkAt(double timeTicks, std::map<PIPELINE::MAX::BUILTIN::INode *, SBipNodeState> &out);
+	// The IK pass over the FK result (mode-dependent; see PMB_BIPED_IK).
+	void applyIk(double timeTicks, std::map<PIPELINE::MAX::BUILTIN::INode *, SBipNodeState> &out);
+	void buildPivotSessions();
+	void applyPivotIk(double timeTicks, std::map<PIPELINE::MAX::BUILTIN::INode *, SBipNodeState> &out);
 	static void quatChannelFrom(const SBipKeyTrack &tr, int off, TCBQuatChannel &out);
 	static void scalarChannelFrom(const SBipKeyTrack &tr, int off, TCBScalarChannel &out);
 };

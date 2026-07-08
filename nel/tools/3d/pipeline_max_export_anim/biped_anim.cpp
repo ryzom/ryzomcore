@@ -471,7 +471,7 @@ static void vec3ChannelFrom(const SBipKeyTrack &tr, int ox, int oy, int oz, TCBV
 CBipedAnimEval::CBipedAnimEval(CSceneClass *rigSys, SBipedRig &rig,
                                const std::vector<Bone> &bones,
                                const std::map<INode *, size_t> &boneOfNode)
-	: m_Sys(rigSys), m_Rig(&rig), m_HaveFigPelvis(false)
+	: m_Sys(rigSys), m_Rig(&rig), m_HaveFigPelvis(false), m_HaveTurn(false), m_PivotSessionsBuilt(false)
 {
 	parseBipAnimKeys(rigSys, m_Keys);
 
@@ -620,7 +620,52 @@ void CBipedAnimEval::buildChannels()
 	if (!m_Keys.Vertical.empty())
 		scalarChannelFrom(m_Keys.Vertical, 2, m_ChVertical);
 	if (!m_Keys.Turn.empty())
-		quatChannelFrom(m_Keys.Turn, 4, m_ChTurn);
+	{
+		// angle + residual decomposition (see m_ChTurnAngle in the header) — gated to tracks with
+		// a pathological turn step (a segment beyond ~115°, where the quat squad's shape visibly
+		// diverges from Max's own scalar-angle interpolation — the demitour/pompous class). Tracks
+		// with ordinary steps keep the plain quat squad: on non-pure turns (death anims pitching
+		// the body) the angle and residual channels interpolate independently and their
+		// composition diverges from the true path (fy_hof_*_mort regressed 0.16 -> 0.85 under an
+		// ungated decomposition).
+		angleChannelFrom(m_Keys.Turn, 1, m_ChTurnAngle);
+		double maxStep = 0.0;
+		for (size_t k = 1; k < m_ChTurnAngle.Keys.size(); ++k)
+			maxStep = std::max(maxStep, fabs(m_ChTurnAngle.Keys[k].Value - m_ChTurnAngle.Keys[k-1].Value));
+		// ... and only when the track is a near-PURE turn (small residuals at every key): a body
+		// that also pitches/rolls (the death anims — a1md_mort spins WHILE falling) exceeds both
+		// thresholds and must keep the squad (the independent angle/residual interpolation
+		// composes wrongly there).
+		double maxResid = 0.0;
+		for (size_t k = 0; k < m_Keys.Turn.Times.size() && m_Keys.Turn.Recs[k].size() >= 8; ++k)
+		{
+			double a = m_ChTurnAngle.Keys[k].Value;
+			QuatD yq(0.0, sin(-a * 0.5), 0.0, cos(-a * 0.5));
+			QuatD r = qNorm(qMul(qConj(yq), QuatD(m_Keys.Turn.Recs[k][4], m_Keys.Turn.Recs[k][5], m_Keys.Turn.Recs[k][6], m_Keys.Turn.Recs[k][7])));
+			maxResid = std::max(maxResid, 2.0 * acos(std::min(1.0, fabs(r.w))));
+		}
+		if (maxStep > 2.0 && maxResid < 0.6)
+		{
+			m_ChTurnResid.Keys.clear();
+			for (size_t k = 0; k < m_Keys.Turn.Times.size(); ++k)
+			{
+				const std::vector<float> &rec = m_Keys.Turn.Recs[k];
+				if (rec.size() < 8) { m_ChTurnResid.Keys.clear(); break; }
+				double a = m_ChTurnAngle.Keys[k].Value; // unwrapped
+				QuatD yq(0.0, sin(-a * 0.5), 0.0, cos(-a * 0.5)); // AxisAngle(Y-up, -a)
+				TCBQuatKey key;
+				key.Time = m_Keys.Turn.Times[k];
+				key.Quat = qNorm(qMul(qConj(yq), QuatD(rec[4], rec[5], rec[6], rec[7])));
+				key.Tens = m_Keys.Turn.Tens[k]; key.Cont = m_Keys.Turn.Cont[k]; key.Bias = m_Keys.Turn.Bias[k];
+				key.EaseTo = m_Keys.Turn.EaseTo[k]; key.EaseFrom = m_Keys.Turn.EaseFrom[k];
+				m_ChTurnResid.Keys.push_back(key);
+			}
+			m_ChTurnResid.compile();
+			m_HaveTurn = !m_ChTurnAngle.empty() && !m_ChTurnResid.empty();
+		}
+		if (!m_HaveTurn)
+			quatChannelFrom(m_Keys.Turn, 4, m_ChTurn);
+	}
 	if (!m_Keys.Pelvis.empty())
 		quatChannelFrom(m_Keys.Pelvis, 0, m_ChPelvis);
 	const SBipKeyTrack *arms[2] = { &m_Keys.ArmR, &m_Keys.ArmL };
@@ -706,9 +751,22 @@ void CBipedAnimEval::buildChannels()
 
 void CBipedAnimEval::evalAt(double t, std::map<INode *, SBipNodeState> &out)
 {
+	evalFkAt(t, out);
+	applyIk(t, out);
+}
+
+void CBipedAnimEval::evalFkAt(double t, std::map<INode *, SBipNodeState> &out)
+{
 	// --- COM ---
 	QuatD comRot = m_FigComRot;
-	if (!m_ChTurn.empty())
+	if (m_HaveTurn)
+	{
+		double a = m_ChTurnAngle.eval(t);
+		QuatD yq(0.0, sin(-a * 0.5), 0.0, cos(-a * 0.5)); // AxisAngle(Y-up, -a)
+		QuatD s = qNorm(qMul(yq, m_ChTurnResid.eval(t)));
+		comRot = qNorm(qMul(qMul(Q_C, qConj(s)), qConj(Q_C)));
+	}
+	else if (!m_ChTurn.empty())
 	{
 		QuatD s = m_ChTurn.eval(t);
 		comRot = qNorm(qMul(qMul(Q_C, qConj(s)), qConj(Q_C)));
@@ -1140,16 +1198,24 @@ void CBipedAnimEval::evalAt(double t, std::map<INode *, SBipNodeState> &out)
 		st.WorldPos = worldPos;
 		out[ni.Node] = st;
 	}
+}
 
-	// --- IK pass: legs and arms with IK blend keys. Solves thigh/calf (upperarm/forearm) toward
-	// the interpolated world end-effector position; end rotation stays the channel value.
-	// Approximation for in-between frames (exact at keys); see the wiki open-work note.
-	// PMB_BIPED_IK=1: the original experimental solve, both limbs (corpus A/B: big leg wins,
-	//   catastrophic arm regressions — training_empathie class ~1.2 rad flips).
-	// PMB_BIPED_IK=2: E3 variant — 3-link LEGS ONLY plus a target-sanity guard; the arm solve
-	//   and 4-link chains (whose 2-bone model spans the horse link) stay pure channel-FK.
-	static const char *s_ikEnv = getenv("PMB_BIPED_IK"); // experimental — see wiki open-work note
-	static const int s_ikMode = s_ikEnv ? atoi(s_ikEnv) : 0;
+void CBipedAnimEval::applyIk(double t, std::map<INode *, SBipNodeState> &out)
+{
+	// PMB_BIPED_IK unset (default): the pivot-constrained leg model (§10r) — data-gated, exact
+	//   no-op at keys and on files without recorded pivot state.
+	// PMB_BIPED_IK=0: pure channel-FK everywhere (the pre-§10r default, kept for A/B).
+	// PMB_BIPED_IK=1: the original experimental 2-bone solve, both limbs (corpus A/B: big leg
+	//   wins, catastrophic arm regressions — training_empathie class ~1.2 rad flips). Superseded.
+	// PMB_BIPED_IK=2: E3 variant — 3-link LEGS ONLY toward the TCB-of-ankle path with a target
+	//   sanity guard. Superseded by the pivot model (kept as the A/B artifact).
+	static const char *s_ikEnv = getenv("PMB_BIPED_IK");
+	static const int s_ikMode = s_ikEnv ? atoi(s_ikEnv) : 3;
+	if (s_ikMode == 3)
+	{
+		applyPivotIk(t, out);
+		return;
+	}
 	for (int limb = (s_ikMode >= 2 ? 1 : 0); limb < 2 && s_ikMode; ++limb) // 0=arm, 1=leg
 	{
 		for (int side = 0; side < 2; ++side) // 0=R, 1=L
@@ -1281,6 +1347,477 @@ void CBipedAnimEval::evalAt(double t, std::map<INode *, SBipNodeState> &out)
 					out[ni2.Node].WorldPos = ps->second.WorldPos + qRotate(ps->second.WorldRot, ni2.FigLocalPos);
 				}
 			}
+		}
+	}
+}
+
+// ---------------------------------------------------------------------------------------------
+// Pivot-constrained leg IK (§10r). See biped_anim.h's header comment for the decoded storage
+// semantics and the model. Everything here is data-gated off the leg keytrack record tail; files
+// without recorded pivot state (scripted keys, the Max 9 datasets) build no sessions and evaluate
+// exactly as before.
+
+namespace {
+
+// Minimal rotation mapping unit vector a onto unit vector b.
+QuatD quatBetween(const NLMISC::CVectorD &a, const NLMISC::CVectorD &b)
+{
+	NLMISC::CVectorD c(a.y*b.z - a.z*b.y, a.z*b.x - a.x*b.z, a.x*b.y - a.y*b.x);
+	double d = std::min(1.0, std::max(-1.0, a * b));
+	if (d > -0.99999)
+	{
+		double s2 = sqrt((1.0 + d) * 2.0);
+		return qNorm(QuatD(c.x / s2, c.y / s2, c.z / s2, s2 / 2.0));
+	}
+	return QuatD(1.0, 0.0, 0.0, 0.0);
+}
+
+// Stored Y-up triple at rec[off..off+2] -> NeL space.
+NLMISC::CVectorD recYup(const std::vector<float> &rec, int off)
+{
+	return NLMISC::CVectorD(rec[off], -(double)rec[off + 2], rec[off + 1]);
+}
+
+// Double-cover-aware max-component quat distance.
+double qdistApprox(const QuatD &a, const QuatD &b)
+{
+	double d1 = std::max(std::max(fabs(a.x - b.x), fabs(a.y - b.y)), std::max(fabs(a.z - b.z), fabs(a.w - b.w)));
+	double d2 = std::max(std::max(fabs(a.x + b.x), fabs(a.y + b.y)), std::max(fabs(a.z + b.z), fabs(a.w + b.w)));
+	return std::min(d1, d2);
+}
+
+// The yaw (world-Z twist) of a body rotation: the swing-twist decomposition's twist about Z,
+// q_twist = normalize(0,0,q.z,q.w). Smooth along any quat path (unlike an axis-heading
+// extraction, which swings wildly as the body pitches toward horizontal — the mort/death-anim
+// class); degenerates gracefully to identity when the body is fully sideways.
+QuatD yawOf(const QuatD &q)
+{
+	double n = sqrt(q.z*q.z + q.w*q.w);
+	if (n < 1e-6) return QuatD(0, 0, 0, 1);
+	return QuatD(0.0, 0.0, q.z / n, q.w / n);
+}
+
+} /* anonymous namespace */
+
+void CBipedAnimEval::buildPivotSessions()
+{
+	m_PivotSessionsBuilt = true;
+	if (!m_Rig) return;
+	const SBipKeyTrack *legs[2] = { &m_Keys.LegR, &m_Keys.LegL };
+	const SBipKeyTrack *arms[2] = { &m_Keys.ArmR, &m_Keys.ArmL };
+	// The arm (wrist-pin) variant measured NET-NEGATIVE on the gesture corpus (training_empathie
+	// 0.113 -> 0.158: the reference's held wrists are not position-splined either) — legs only
+	// unless PMB_BIPED_IK_ARMS=1 (kept for future arm-pin investigation; the machinery below is
+	// limb-generic).
+	static const bool s_armPins = getenv("PMB_BIPED_IK_ARMS") != NULL;
+	for (int limb = (s_armPins ? 0 : 1); limb < 2; ++limb) // 0 = arm (wrist-pin case), 1 = leg
+	for (int side = 0; side < 2; ++side)
+	{
+		if (limb == 1 && m_Rig->MaxLegLink != 2) continue; // 3-link legs only (2-bone solve)
+		const SBipKeyTrack &tr = limb ? *legs[side] : *arms[side];
+		size_t n = tr.Times.size();
+		if (n < 2) continue;
+		uint32 limbId = limb ? (side ? BID_LLEG : BID_RLEG) : (side ? BID_LARM : BID_RARM);
+		uint32 upLink = limb ? 0 : 1, midLink = limb ? 1 : 2, endLink = limb ? 2 : 3;
+		// chain nodes
+		INode *nUp = NULL, *nMid = NULL, *nEnd = NULL;
+		for (size_t i = 0; i < m_Nodes.size(); ++i)
+		{
+			if (!m_Nodes[i].HasIdLink || m_Nodes[i].Id != limbId) continue;
+			if (m_Nodes[i].Link == upLink) nUp = m_Nodes[i].Node;
+			else if (m_Nodes[i].Link == midLink) nMid = m_Nodes[i].Node;
+			else if (m_Nodes[i].Link == endLink) nEnd = m_Nodes[i].Node;
+		}
+		if (!nUp || !nMid || !nEnd) continue;
+		size_t iUp = m_NodeIdx[nUp], iMid = m_NodeIdx[nMid], iEnd = m_NodeIdx[nEnd];
+		double L1 = (m_Nodes[iMid].FigWorldPos - m_Nodes[iUp].FigWorldPos).norm();
+		double L2 = (m_Nodes[iEnd].FigWorldPos - m_Nodes[iMid].FigWorldPos).norm();
+		if (L1 <= 0.0 || L2 <= 0.0) continue;
+
+		// per-key decoded fields (no head shift: MaxLegLink == 2)
+		std::vector<char> planted(n, 0);
+		std::vector<int> pivIdx(n, 0);
+		for (size_t k = 0; k < n; ++k)
+		{
+			if (tr.Recs[k].size() < 108) { n = 0; break; }
+			double blend = tr.Recs[k][12];
+			planted[k] = (blend > 0.5 && blend <= 1.5) ? 1 : 0;
+			pivIdx[k] = (int)fBits(tr.Recs[k][98]);
+		}
+		if (n < 2) continue;
+
+		// FK state at key times (channels return the stored pose exactly at keys)
+		INode *comNode = NULL;
+		for (size_t i = 0; i < m_Nodes.size() && !comNode; ++i)
+			if (m_Nodes[i].IsCom) comNode = m_Nodes[i].Node;
+		std::vector<QuatD> keyRot(n);
+		std::vector<QuatD> keyComRot(n);
+		std::vector<NLMISC::CVectorD> keyPos(n);
+		{
+			std::map<INode *, SBipNodeState> tmp;
+			for (size_t k = 0; k < n; ++k)
+			{
+				tmp.clear();
+				evalFkAt((double)tr.Times[k], tmp);
+				keyRot[k] = tmp[nEnd].WorldRot;
+				keyPos[k] = tmp[nEnd].WorldPos;
+				if (comNode) keyComRot[k] = tmp[comNode].WorldRot;
+			}
+		}
+
+		// foot rotation channels for planted intervals (see SFootWorldRot): the COM-yaw-frame
+		// default plus the world-space full/run A/B variants — LEGS only (the hand's rotation is
+		// parent-composed, not a world-frame channel)
+		if (limb == 1)
+		{
+			TCBQuatChannel &full = m_FootWorldRot[side].Full;
+			TCBQuatChannel &yaw = m_FootWorldRot[side].Yaw;
+			TCBScalarChannel &yawAngle = m_FootWorldRot[side].YawAngle;
+			full.Keys.clear();
+			yaw.Keys.clear();
+			yawAngle.Keys.clear();
+			double prevA = 0.0;
+			for (size_t m = 0; m < n; ++m)
+			{
+				TCBQuatKey qk;
+				qk.Time = tr.Times[m];
+				qk.Quat = keyRot[m];
+				qk.Tens = tr.Tens[m]; qk.Cont = tr.Cont[m]; qk.Bias = tr.Bias[m];
+				qk.EaseTo = tr.EaseTo[m]; qk.EaseFrom = tr.EaseFrom[m];
+				full.Keys.push_back(qk);
+				QuatD yq = yawOf(keyComRot[m]);
+				qk.Quat = qMul(qConj(yq), keyRot[m]);
+				yaw.Keys.push_back(qk);
+				// unwrapped yaw angle (see SFootWorldRot::YawAngle)
+				double a = 2.0 * atan2(yq.z, yq.w);
+				if (m > 0)
+				{
+					while (a - prevA > M_PI) a -= 2.0 * M_PI;
+					while (a - prevA < -M_PI) a += 2.0 * M_PI;
+				}
+				prevA = a;
+				TCBScalarKey sk;
+				sk.Time = qk.Time;
+				sk.Value = a;
+				sk.Tens = qk.Tens; sk.Cont = qk.Cont; sk.Bias = qk.Bias;
+				sk.EaseTo = qk.EaseTo; sk.EaseFrom = qk.EaseFrom;
+				yawAngle.Keys.push_back(sk);
+			}
+			full.compile();
+			yaw.compile();
+			yawAngle.compile();
+		}
+
+		// sessions over runs of consecutive planted intervals, split by interval-start pivot idx
+		size_t k = 0;
+		while (k + 1 < n)
+		{
+			if (!(planted[k] && planted[k + 1])) { ++k; continue; }
+			// run of planted intervals: interval-start keys k..re (interval [i, i+1])
+			size_t re = k;
+			while (re + 1 < n && planted[re] && planted[re + 1]) ++re; // re = last key of run
+			// run-local world foot-rotation channel (see SFootWorldRot) — legs only
+			if (limb == 1)
+			{
+				TCBQuatChannel run;
+				for (size_t m = k; m <= re; ++m)
+				{
+					TCBQuatKey qk;
+					qk.Time = tr.Times[m];
+					qk.Quat = keyRot[m];
+					qk.Tens = tr.Tens[m]; qk.Cont = tr.Cont[m]; qk.Bias = tr.Bias[m];
+					qk.EaseTo = tr.EaseTo[m]; qk.EaseFrom = tr.EaseFrom[m];
+					run.Keys.push_back(qk);
+				}
+				run.compile();
+				m_FootWorldRot[side].Runs.push_back(run);
+				m_FootWorldRot[side].RunT0.push_back(tr.Times[k]);
+				m_FootWorldRot[side].RunT1.push_back(tr.Times[re]);
+			}
+			// split [k .. re-1] interval-start keys by pivot idx
+			size_t s = k;
+			while (s < re)
+			{
+				int P = pivIdx[s];
+				size_t e = s + 1;
+				while (e <= re && pivIdx[e] == P) ++e; // e = first key past s with different idx (or re+1)
+				size_t lastSessKey = e - 1;            // last key with idx==P (<= re)
+				// intervals covered: through the idx-change key when the pivot hands off inside
+				// the run, else to the run's last interval
+				size_t coverEnd = (e <= re) ? lastSessKey : re - 1; // last interval-start key
+				// pLocal from the stored pivot at the session's first key
+				NLMISC::CVectorD pA = recYup(tr.Recs[s], 101);
+				NLMISC::CVectorD ankS = recYup(tr.Recs[s], 18);
+				bool valid = pA.norm() > 1e-9;
+				NLMISC::CVectorD pLocal(0, 0, 0);
+				if (valid)
+				{
+					pLocal = qRotate(qConj(keyRot[s]), pA - ankS);
+					if (pLocal.norm() > 0.75 * (L1 + L2)) valid = false;
+					// arms: the wrist-pin case only (pA == ank ⇒ pLocal ~ 0, space-independent);
+					// the stored arm end-effector SPACE varies per file and a nonzero palm-pivot
+					// arm can't be trusted (see the header comment)
+					if (limb == 0 && pLocal.norm() > 0.01) valid = false;
+					if (limb == 0) pLocal = NLMISC::CVectorD(0, 0, 0);
+				}
+				// Release break: a later session key whose stored pivot is no longer arm-consistent
+				// with pLocal is the storage's own statement that the foot left this pivot before
+				// that key — the session truncates before it and the interval into it stays FK.
+				// Defensive: the corpus's stride releases keep the arm intact while the pivot
+				// slides (those land in the D-window below instead), so this fires only on
+				// genuinely inconsistent records. A ZERO pA is "no record" (scripted keys,
+				// b_ikb_out) — kept as a computed knot, not a release.
+				bool released = false;
+				if (valid)
+				{
+					double arm = pLocal.norm();
+					for (size_t m = s + 1; m <= lastSessKey; ++m)
+					{
+						NLMISC::CVectorD pAm = recYup(tr.Recs[m], 101);
+						if (pAm.norm() <= 1e-9) continue;
+						double armM = (pAm - recYup(tr.Recs[m], 18)).norm();
+						if (fabs(armM - arm) > std::max(0.05 * arm, 1e-3))
+						{
+							lastSessKey = m - 1;
+							released = true;
+							break;
+						}
+					}
+					if (released)
+						coverEnd = (lastSessKey > s) ? lastSessKey - 1 : s; // no interval into the released key
+					if (lastSessKey == s && released) valid = false; // single-key session: nothing to cover
+				}
+				if (valid)
+				{
+					SPivotSession sess;
+					sess.PLocal = pLocal;
+					// knots at session keys with idx==P (s..lastSessKey), computed from channel state
+					for (size_t m = s; m <= lastSessKey; ++m)
+					{
+						NLMISC::CVectorD Wm = keyPos[m] + qRotate(keyRot[m], pLocal);
+						TCBScalarKey kx, ky, kz;
+						kx.Time = ky.Time = kz.Time = tr.Times[m];
+						kx.Tens = ky.Tens = kz.Tens = tr.Tens[m];
+						kx.Cont = ky.Cont = kz.Cont = tr.Cont[m];
+						kx.Bias = ky.Bias = kz.Bias = tr.Bias[m];
+						kx.EaseTo = ky.EaseTo = kz.EaseTo = tr.EaseTo[m];
+						kx.EaseFrom = ky.EaseFrom = kz.EaseFrom = tr.EaseFrom[m];
+						kx.Value = Wm.x; ky.Value = Wm.y; kz.Value = Wm.z;
+						sess.W.X.Keys.push_back(kx); sess.W.Y.Keys.push_back(ky); sess.W.Z.Keys.push_back(kz);
+					}
+					// terminal knot at the pivot-change key e, only when the stored pB(e) records
+					// THIS pivot's position there (arm-length-consistent — the storage's own
+					// signal that the pivot kept moving into that key, wiki §10r). A handoff
+					// WITHOUT that record evaluates FK (the interval is simply not covered): the
+					// reference is near-FK on such landings (fy_hom_strafe_gauche), and the
+					// course-L heel counter-case keeps its boundary tangent this way too.
+					bool handoffCovered = false;
+					if (!released && e <= re && tr.Recs[e].size() >= 108)
+					{
+						NLMISC::CVectorD pB = recYup(tr.Recs[e], 105);
+						NLMISC::CVectorD ankE = recYup(tr.Recs[e], 18);
+						double armHere = (pB - ankE).norm();
+						double arm = pLocal.norm();
+						if (pB.norm() > 1e-9 && fabs(armHere - arm) < std::max(0.05 * arm, 1e-3))
+						{
+							NLMISC::CVectorD We = keyPos[e] + qRotate(keyRot[e], pLocal);
+							TCBScalarKey kx, ky, kz;
+							kx.Time = ky.Time = kz.Time = tr.Times[e];
+							kx.Tens = ky.Tens = kz.Tens = tr.Tens[e];
+							kx.Cont = ky.Cont = kz.Cont = tr.Cont[e];
+							kx.Bias = ky.Bias = kz.Bias = tr.Bias[e];
+							kx.EaseTo = ky.EaseTo = kz.EaseTo = tr.EaseTo[e];
+							kx.EaseFrom = ky.EaseFrom = kz.EaseFrom = tr.EaseFrom[e];
+							kx.Value = We.x; ky.Value = We.y; kz.Value = We.z;
+							sess.W.X.Keys.push_back(kx); sess.W.Y.Keys.push_back(ky); sess.W.Z.Keys.push_back(kz);
+							handoffCovered = true;
+						}
+					}
+					sess.W.compile();
+					// Covered intervals + endpoint feathers (ankle-FK minus model at the interval
+					// keys; zero by construction except past a clamped session end). Per-interval
+					// coverage gate: the pivot's EFFECTIVE end-to-end motion D (channel + feather)
+					// must be either ~zero (a genuine plant — the core case) or large (a
+					// deliberate movement the reference interpolates: the course heel strike's
+					// 27 cm descent, kneel's get-up); the ambiguous small band (0.5–5 cm contact
+					// adjustments: zo_hof_marche's stride release, fy_hom_strafe_gauche's landing)
+					// evaluates near-FK in the reference and any modeled target error there
+					// explodes through the knee near full extension — those stay FK. A
+					// pB-VALIDATED handoff interval is exempt (the storage explicitly recorded the
+					// roll-through; verified float-exact on the course R roll, whose D is 4.7 cm).
+					for (size_t i = s; i <= coverEnd; ++i)
+					{
+						SPivotInterval iv;
+						iv.T0 = tr.Times[i];
+						iv.T1 = tr.Times[i + 1];
+						NLMISC::CVectorD w0 = sess.W.eval((double)iv.T0);
+						NLMISC::CVectorD w1 = sess.W.eval((double)iv.T1);
+						iv.M0 = keyPos[i] - (w0 - qRotate(keyRot[i], pLocal));
+						iv.M1 = keyPos[i + 1] - (w1 - qRotate(keyRot[i + 1], pLocal));
+						bool validatedHandoff = handoffCovered && i == lastSessKey;
+						double D = ((w1 + iv.M1) - (w0 + iv.M0)).norm();
+						if (!validatedHandoff && D > 0.005 && D < 0.05)
+							continue; // ambiguous contact adjustment: FK
+						sess.Intervals.push_back(iv);
+					}
+					if (!sess.Intervals.empty())
+						m_PivotSessions[limb][side].push_back(sess);
+				}
+				s = e;
+			}
+			k = re;
+		}
+	}
+}
+
+void CBipedAnimEval::applyPivotIk(double t, std::map<INode *, SBipNodeState> &out)
+{
+	if (!m_PivotSessionsBuilt) buildPivotSessions();
+	for (int limb = 0; limb < 2; ++limb)
+	for (int side = 0; side < 2; ++side)
+	{
+		std::vector<SPivotSession> &sessions = m_PivotSessions[limb][side];
+		if (sessions.empty()) continue;
+		const SPivotSession *sess = NULL;
+		const SPivotInterval *iv = NULL;
+		for (size_t si = 0; si < sessions.size() && !iv; ++si)
+			for (size_t ii = 0; ii < sessions[si].Intervals.size(); ++ii)
+			{
+				const SPivotInterval &c = sessions[si].Intervals[ii];
+				if (t >= c.T0 && t <= c.T1)
+				{
+					sess = &sessions[si];
+					iv = &c;
+					break;
+				}
+			}
+		if (!iv) continue;
+		uint32 limbId = limb ? (side ? BID_LLEG : BID_RLEG) : (side ? BID_LARM : BID_RARM);
+		uint32 upLink = limb ? 0 : 1, midLink = limb ? 1 : 2, endLink = limb ? 2 : 3;
+		INode *nUp = NULL, *nMid = NULL, *nEnd = NULL;
+		for (size_t i = 0; i < m_Nodes.size(); ++i)
+		{
+			if (!m_Nodes[i].HasIdLink || m_Nodes[i].Id != limbId) continue;
+			if (m_Nodes[i].Link == upLink) nUp = m_Nodes[i].Node;
+			else if (m_Nodes[i].Link == midLink) nMid = m_Nodes[i].Node;
+			else if (m_Nodes[i].Link == endLink) nEnd = m_Nodes[i].Node;
+		}
+		if (!nUp || !nMid || !nEnd) continue;
+		SBipNodeState &stUp = out[nUp];
+		SBipNodeState &stMid = out[nMid];
+		SBipNodeState &stEnd = out[nEnd];
+		size_t iUp = m_NodeIdx[nUp], iMid = m_NodeIdx[nMid], iEnd = m_NodeIdx[nEnd];
+
+		// foot rotation inside the plant (see SFootWorldRot): replace the FK-composed value (which
+		// rides the moving COM) with the yaw-frame channel (default) or an A/B variant. At keys all
+		// variants agree with the stored pose. PMB_BIPED_IK_ROT: yaw (default) | full | run | off.
+		static const char *s_rotEnv = getenv("PMB_BIPED_IK_ROT");
+		static const int s_rotMode0 = !s_rotEnv ? 3 : (!strcmp(s_rotEnv, "full") ? 1 : (!strcmp(s_rotEnv, "run") ? 2 : (!strcmp(s_rotEnv, "off") ? 0 : 3)));
+		const int s_rotMode = limb ? s_rotMode0 : 0; // legs only (the hand's rotation is parent-composed)
+		QuatD footRotOld = stEnd.WorldRot;
+		if (s_rotMode == 3 && !m_FootWorldRot[side].Yaw.empty())
+		{
+			// key-interpolated yaw (unwrapped angle) composed with the yaw-frame residual
+			double a = m_FootWorldRot[side].YawAngle.eval(t);
+			QuatD yq(0.0, 0.0, sin(a * 0.5), cos(a * 0.5));
+			stEnd.WorldRot = qNorm(qMul(yq, m_FootWorldRot[side].Yaw.eval(t)));
+		}
+		else if (s_rotMode == 1 && !m_FootWorldRot[side].Full.empty())
+			stEnd.WorldRot = qNorm(m_FootWorldRot[side].Full.eval(t));
+		else if (s_rotMode == 2)
+		{
+			SFootWorldRot &fw = m_FootWorldRot[side];
+			for (size_t r = 0; r < fw.Runs.size(); ++r)
+				if (t >= fw.RunT0[r] && t <= fw.RunT1[r]) { stEnd.WorldRot = qNorm(fw.Runs[r].eval(t)); break; }
+		}
+
+		// target: the pivot channel + the rigid arm through the foot's rotation, feathered so the
+		// interval endpoints stay exactly on the stored pose
+		NLMISC::CVectorD W = sess->W.eval(t);
+		NLMISC::CVectorD T = W - qRotate(stEnd.WorldRot, sess->PLocal);
+		double u = (iv->T1 > iv->T0) ? (t - (double)iv->T0) / ((double)iv->T1 - (double)iv->T0) : 0.0;
+		T += iv->M0 * (1.0 - u) + iv->M1 * u;
+
+		NLMISC::CVectorD ankFk = stEnd.WorldPos;
+		static const bool s_ikDebug = getenv("PMB_BIPED_IK_DEBUG") != NULL;
+		if (s_ikDebug)
+			fprintf(stderr, "IKDBG side=%d t=%g iv=[%d,%d] W=(%g,%g,%g) pLoc=(%g,%g,%g) T=(%g,%g,%g) ankFk=(%g,%g,%g) M0=(%g,%g,%g) M1=(%g,%g,%g)\n",
+			        side, t, iv->T0, iv->T1, W.x, W.y, W.z, sess->PLocal.x, sess->PLocal.y, sess->PLocal.z,
+			        T.x, T.y, T.z, ankFk.x, ankFk.y, ankFk.z, iv->M0.x, iv->M0.y, iv->M0.z, iv->M1.x, iv->M1.y, iv->M1.z);
+		bool footRotChanged = qdistApprox(footRotOld, stEnd.WorldRot) > 1e-9;
+		bool solveNeeded = (T - ankFk).norm() >= 1e-7;
+		if (!solveNeeded && !footRotChanged) continue; // keys/no-op frames: bit-stable skip
+
+		// remember the pre-solve rotations for the descendant recomposition
+		std::map<INode *, QuatD> oldRot;
+		oldRot[nUp] = stUp.WorldRot;
+		oldRot[nMid] = stMid.WorldRot;
+		oldRot[nEnd] = footRotOld;
+
+		if (solveNeeded)
+		{
+			double L1 = (m_Nodes[iMid].FigWorldPos - m_Nodes[iUp].FigWorldPos).norm();
+			double L2 = (m_Nodes[iEnd].FigWorldPos - m_Nodes[iMid].FigWorldPos).norm();
+			NLMISC::CVectorD H = stUp.WorldPos;
+			double d = (T - H).norm();
+			double dmin = fabs(L1 - L2) + 1e-9, dmax = L1 + L2 - 1e-9;
+			if (d < dmin) d = dmin;
+			if (d > dmax) d = dmax;
+			NLMISC::CVectorD uFk = ankFk - H;
+			double nFk = uFk.norm();
+			if (nFk < 1e-9) continue;
+			uFk = uFk / nFk;
+			NLMISC::CVectorD uT = T - H;
+			double nu = uT.norm();
+			if (nu < 1e-9) continue;
+			uT = uT / nu;
+			QuatD thigh1 = qMul(quatBetween(uFk, uT), stUp.WorldRot);
+			double aIk = acos(std::min(1.0, std::max(-1.0, (L1*L1 + L2*L2 - d*d) / (2.0*L1*L2))));
+			double phiT = acos(std::min(1.0, std::max(-1.0, (L1*L1 + d*d - L2*L2) / (2.0*L1*d))));
+			NLMISC::CVectorD thX = qRotate(thigh1, NLMISC::CVectorD(1, 0, 0));
+			NLMISC::CVectorD hz = qRotate(thigh1, NLMISC::CVectorD(0, 0, 1));
+			// Signed angle from the thigh X axis to the target direction about the hinge axis; the
+			// final thigh X must sit at +phiT from uT about hz (knee bending on the hinge side).
+			// The E1/E3-era form ((phiT - phiNow)·sgn with sgn from a cross-product test) is
+			// numerically unstable exactly when the leg points straight at the target (phiNow -> 0,
+			// cross -> 0): a noise-flipped sign rotated the hip the wrong way by 2·phiT (caught on
+			// zo_hof_marche's straight-leg release frame — a 0.24 rad ankle miss).
+			NLMISC::CVectorD cxv(thX.y*uT.z - thX.z*uT.y, thX.z*uT.x - thX.x*uT.z, thX.x*uT.y - thX.y*uT.x);
+			double theta = atan2(cxv * hz, thX * uT);
+			QuatD thigh2 = qMul(qAxisAngle(hz, theta + phiT), thigh1);
+			QuatD calf2 = qMul(thigh2, qAxisAngle(NLMISC::CVectorD(0, 0, 1), aIk - M_PI));
+			stUp.WorldRot = qNorm(thigh2);
+			stMid.WorldRot = qNorm(calf2);
+			stMid.WorldPos = stUp.WorldPos + qRotate(stUp.WorldRot, m_Nodes[iMid].FigLocalPos);
+			stEnd.WorldPos = stMid.WorldPos + qRotate(stMid.WorldRot, m_Nodes[iEnd].FigLocalPos);
+			if (getenv("PMB_BIPED_IK_DEBUG"))
+				fprintf(stderr, "IKDBG2 t=%g d=%g dmin=%g dmax=%g aIk=%g phiT=%g theta=%g end=(%g,%g,%g) missT=%g\n",
+				        t, d, dmin, dmax, aIk, phiT, theta, stEnd.WorldPos.x, stEnd.WorldPos.y, stEnd.WorldPos.z,
+				        (stEnd.WorldPos - T).norm());
+		}
+		// descendants: recompose transitively — positions from the (possibly moved) parents, and
+		// rotations preserving each node's local rotation when its parent's rotation changed (the
+		// toes/nubs compose off the foot's world rotation)
+		std::set<INode *> touched;
+		touched.insert(nMid);
+		touched.insert(nEnd);
+		for (size_t i = 0; i < m_Nodes.size(); ++i)
+		{
+			SNodeInfo &ni = m_Nodes[i];
+			if (ni.Node == nUp || ni.Node == nMid || ni.Node == nEnd) continue;
+			if (!ni.Parent || touched.find(ni.Parent) == touched.end()) continue;
+			std::map<INode *, SBipNodeState>::iterator ps = out.find(ni.Parent);
+			std::map<INode *, SBipNodeState>::iterator cs = out.find(ni.Node);
+			if (ps == out.end() || cs == out.end()) continue;
+			std::map<INode *, QuatD>::iterator po = oldRot.find(ni.Parent);
+			if (po != oldRot.end())
+			{
+				QuatD local = qMul(qConj(po->second), cs->second.WorldRot);
+				oldRot[ni.Node] = cs->second.WorldRot;
+				cs->second.WorldRot = qNorm(qMul(ps->second.WorldRot, local));
+			}
+			cs->second.WorldPos = ps->second.WorldPos + qRotate(ps->second.WorldRot, ni.FigLocalPos);
+			touched.insert(ni.Node);
 		}
 	}
 }
