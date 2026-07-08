@@ -1538,6 +1538,7 @@ int main(int argc, char **argv)
 	{
 		std::cerr << "usage: pipeline_max_export_anim [--dump-samples <out.txt> [--dump-max-frame <f>]] <input.max> <output.anim>\n";
 		std::cerr << "       pipeline_max_export_anim --diff-rig <A.max> <B.max> <out.txt>\n";
+		std::cerr << "       pipeline_max_export_anim --author-jump <skel.max> <idle_source.max> <out.max>\n";
 		std::cerr << "exit codes: 0 ok, 1 error, 3 nothing to export\n";
 		return 1;
 	}
