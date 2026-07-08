@@ -73,6 +73,7 @@
 #include "material_build.h"
 #include "mesh_build.h"
 #include "anim_build.h"
+#include "water_build.h"
 
 #include "../pipeline_max/builtin/scene_impl.h"
 #include "../pipeline_max/builtin/i_node.h"
@@ -252,9 +253,16 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 	}
 	if (hasWaterMaterial(node))
 	{
-		stats.skip("water");
-		fprintf(stderr, "SKIP shape '%s': water shape not implemented\n", name.c_str());
-		return NULL;
+		NL3D::IShape *ws = WATERBUILD::buildWaterShape(node, tmCache);
+		if (!ws)
+		{
+			// The water builder logs its own reason; count as a skip so the harness bucket is
+			// specific (the reference exporter returns NULL in the same cases without further
+			// output — missing required maps, empty geometry).
+			stats.skip("water");
+			return NULL;
+		}
+		return ws;
 	}
 
 	// Skinning (Physique/Skin modifier)
