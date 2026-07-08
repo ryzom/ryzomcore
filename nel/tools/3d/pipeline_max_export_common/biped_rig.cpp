@@ -292,6 +292,7 @@ const NLMISC::CClassId CLASSID_BIPED_VHT_CTRL(0x00009156, 0x00000000);
 SBipedRig::SBipedRig() : Sys(NULL), HasCom(false), ComPos(NLMISC::CVector::Null), ComRot(NLMISC::CQuat::Identity),
 		ComDisp(NLMISC::CVector::Null), BaseFramePos(NLMISC::CVector::Null), HaveBaseFramePos(false),
 		HeightCorrection(0.0f), HaveHeightCorrection(false),
+		MoveAllTrans(NLMISC::CVector::Null), HaveMoveAll(false), ComDispNonZero(false),
 		DynamicsType(0), HaveDynamicsType(false),
 		HasThighZ(false), MaxLegLink(2),
 		HasClavicleZ(false),
@@ -715,6 +716,11 @@ void parseComRecord(SBipedRig &rig)
 		// is the figure COM plus this displacement rotated into the world. Exact on every
 		// era-matched corpus file (z-component discriminated by tr_mo_kitifly/kitikil).
 		rig.ComDisp = NLMISC::CVector(c[0], -c[2], c[1]);
+		// A nonzero figure-mode ComDisp signals the COM holds a committed non-figure pose (the
+		// current-position frame is then what Max evaluates for the unkeyed COM); exactly zero when
+		// the COM sits at figure. Discriminates base-wins (mort_idle, decoupe) from figure-wins
+		// (recruteur, meca) — see the field comment and pipeline_max_design.md §10n.
+		rig.ComDispNonZero = (c[0] != 0.0f) || (c[1] != 0.0f) || (c[2] != 0.0f);
 		NLMISC::CMatrix rm; rm.identity(); rm.setRot(rig.ComRot);
 		rig.ComPos = NLMISC::CVector(c[4], -c[6], c[5]) + rm.mulVector(rig.ComDisp);
 		rig.HasCom = true;
@@ -742,6 +748,16 @@ void parseComRecord(SBipedRig &rig)
 	{
 		rig.HeightCorrection = hc[1];
 		rig.HaveHeightCorrection = true;
+	}
+	// Move All Mode reference-frame transform (0x0117, Y-up affine 4x4; translation row [12,13,14]
+	// = (x, z_up, -y) -> NeL (m12, -m14, m13)). Identity on every shipped file (no-op there); read
+	// so any future Move-All file exports the offset. See the field comment / §10n.
+	size_t nm = 0;
+	const float *ma = bipedChunkFloats(0x0117, 16, &nm);
+	if (ma)
+	{
+		rig.MoveAllTrans = NLMISC::CVector(ma[12], -ma[14], ma[13]);
+		rig.HaveMoveAll = true;
 	}
 	// <biped_ctrl>.dynamicsType, confirmed at this offset via an isolated single-chunk A/B toggle
 	// on a real skeleton (§10n "Ninth"/"Tenth") — read for corpus-wide auditing; not consumed by

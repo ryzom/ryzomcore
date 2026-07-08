@@ -1441,6 +1441,50 @@ static void diffBipedSysDumps(const std::vector<SBipedSysDump> &a, const std::ve
 	}
 }
 
+// --dump-rig: dump every Biped (0x9155) system object's chunks (floats + first ints) from a
+// single file, for inspecting a specific chunk's contents (e.g. 0x0117, the Move All Mode
+// reference-frame matrix) without needing a second file to diff against.
+static int runDumpRig(const char *path, const char *outPath)
+{
+	CSceneClassRegistry reg;
+	CBuiltin::registerClasses(&reg);
+	UPDATE1::CUpdate1::registerClasses(&reg);
+	EPOLY::CEPoly::registerClasses(&reg);
+	BIPED::CBiped::registerClasses(&reg);
+
+	SLoadedRigScene a;
+	if (!loadRigScene(path, &reg, a)) return 1;
+	std::vector<SBipedSysDump> da;
+	collectBipedSysDumps(a.Scene->container(), da);
+
+	FILE *fp = outPath ? fopen(outPath, "w") : stdout;
+	if (!fp) { std::cerr << "ERROR: cannot open " << outPath << " for writing\n"; return 1; }
+	fprintf(fp, "DUMP-RIG %s (%zu sysobjs)\n", path, da.size());
+	for (size_t i = 0; i < da.size(); ++i)
+	{
+		fprintf(fp, "SYSOBJ %zu (%zu chunks)\n", i, da[i].Chunks.size());
+		for (std::map<uint16, std::vector<uint8> >::const_iterator it = da[i].Chunks.begin(); it != da[i].Chunks.end(); ++it)
+		{
+			const std::vector<uint8> &v = it->second;
+			fprintf(fp, "  chunk 0x%04x bytes=%zu", it->first, v.size());
+			if (v.size() >= 4 && (v.size() % 4) == 0)
+			{
+				size_t nf = v.size() / 4;
+				const float *f = reinterpret_cast<const float *>(nlVectorData(v));
+				const sint32 *iv = reinterpret_cast<const sint32 *>(nlVectorData(v));
+				fprintf(fp, " floats=[");
+				for (size_t k = 0; k < nf && k < 32; ++k) fprintf(fp, "%.9g,", f[k]);
+				fprintf(fp, "] ints=[");
+				for (size_t k = 0; k < nf && k < 8; ++k) fprintf(fp, "%d,", iv[k]);
+				fprintf(fp, "]");
+			}
+			fprintf(fp, "\n");
+		}
+	}
+	if (outPath) fclose(fp);
+	return 0;
+}
+
 static int runDiffRig(const char *pathA, const char *pathB, const char *outPath)
 {
 	CSceneClassRegistry reg;
@@ -1469,6 +1513,8 @@ int main(int argc, char **argv)
 {
 	if (argc >= 5 && std::string(argv[1]) == "--diff-rig")
 		return runDiffRig(argv[2], argv[3], argv[4]);
+	if (argc >= 3 && std::string(argv[1]) == "--dump-rig")
+		return runDumpRig(argv[2], argc >= 4 ? argv[3] : NULL);
 
 	const char *dumpSamples = NULL;
 	double dumpMaxFrame = 60.0;

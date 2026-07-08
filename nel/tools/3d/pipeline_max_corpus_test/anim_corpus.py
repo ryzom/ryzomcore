@@ -424,6 +424,10 @@ def process_one(args, corpus_test, export_anim, out_dir, item):
             res["t3"] = ("missing_ref",)
     return res
 
+# Optional per-file worst-delta CSV (name<TAB>worst) for A/B regression diffing of the biped
+# direct-reference tier — set PMB_ANIM_DELTALOG=<path>. No effect on default behavior.
+_deltalog = open(os.environ["PMB_ANIM_DELTALOG"], "w") if os.environ.get("PMB_ANIM_DELTALOG") else None
+
 def run_tests(args, files):
     corpus_test = os.path.join(args.bin, "pipeline_max_corpus_test")
     export_anim = os.path.join(args.bin, "pipeline_max_export_anim")
@@ -474,6 +478,8 @@ def run_tests(args, files):
                 fails["t3"].append((name, t3[1], t3[2]))
             elif t3[0] == "direct_biped":
                 verdict, worst, msg = t3[1], t3[2], t3[3]
+                if _deltalog is not None:
+                    _deltalog.write("%s\t%.9g\n" % (name, 0.0 if verdict == 'IDENT' else worst))
                 if verdict == 'IDENT':
                     b["t3_direct_ident"] += 1
                 elif verdict == 'STRUCT':

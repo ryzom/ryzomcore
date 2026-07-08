@@ -231,6 +231,23 @@ struct SBipedRig
 	// base(+correction) is unchanged by this finding.
 	float HeightCorrection;
 	bool HaveHeightCorrection;
+	// Move All Mode reference-frame transform (chunk 0x0117, a Y-up row-major affine 4x4 / 16
+	// floats). Decoded + validated 2026-07-08 via three interactive Move All probes on
+	// ship_tank_karavan_mort_idle (+10z -> [13]=10; x5/y10/z20 -> [12]=5,[13]=20,[14]=-10;
+	// rotZ45 -> the 3x3 rotation block + induced translation): translation row [12,13,14] =
+	// (x, z_up, -y), so the NeL-space Move All translation is (m12, -m14, m13). Identity on every
+	// shipped corpus file (Move All was never used in the reference assets), so applying it is a
+	// no-op there; it is additive on top of the current-position COM frame and must be applied for
+	// any file that DOES carry a non-identity Move All. Only the translation is captured here (the
+	// rotation part is identity corpus-wide; full-affine application is a documented TODO with no
+	// corpus case to validate against). See pipeline_max_design.md §10n.
+	NLMISC::CVector MoveAllTrans;
+	bool HaveMoveAll;
+	// True when the figure-mode COM record (0x006c[0..2]) carries a nonzero displacement — the
+	// in-file signal that the biped's COM holds a committed non-figure pose, so the unkeyed COM
+	// evaluates from the current-position frame (BaseFramePos + HeightCorrection + MoveAllTrans)
+	// rather than figure height. Exactly zero on files whose COM sits at figure (recruteur/meca).
+	bool ComDispNonZero;
 	// Character Studio's <biped_ctrl>.dynamicsType (0 = "Biped Dynamics", the default — Character
 	// Studio can live-compute airborne trajectories/balance even off-key; 1 = "Spline Dynamics" —
 	// plain interpolation, no live physics), stored at chunk 0x0012 (confirmed via an isolated,

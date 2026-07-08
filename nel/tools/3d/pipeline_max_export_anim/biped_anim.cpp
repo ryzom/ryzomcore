@@ -710,7 +710,26 @@ void CBipedAnimEval::evalAt(double t, std::map<INode *, SBipNodeState> &out)
 		QuatD s = m_ChTurn.eval(t);
 		comRot = qNorm(qMul(qMul(Q_C, qConj(s)), qConj(Q_C)));
 	}
+	// Base COM. Start at figure; keyed channels override per-axis below. For the UNKEYED VERTICAL,
+	// what Max evaluates in animation mode is the biped's current-position frame (0x0104[13] /
+	// 0x0260[5] + the 0x0260[1] height-correction), NOT the figure height — confirmed live in Max 9:
+	// changing figure-mode Z leaves the non-figure COM at its baseline, "delete curves" keeps it,
+	// and "Clear All Animation" is precisely what resets those current-position chunks to figure
+	// (diffed: 0x0104[13]/0x0260[5] 1.275->6, 0x0260[1] 0.052->0). The figure-mode ComDisp
+	// (0x006c[0..2]) discriminates: nonzero ⟺ the COM holds a committed non-figure pose so the
+	// current-position vertical is authoritative (mort_idle -> 1.327, decoupe -> 0.914); exactly
+	// zero ⟺ the COM sits at figure and the snapshot is stale vs the shipped reference (recruteur/
+	// meca -> figure, reference-era, max-authoritative). Applied to the VERTICAL AXIS ONLY: the
+	// horizontal forward component of the current-position frame is a small (~5mm) baked template
+	// offset the reference exporter does NOT read (decoupe REF y=0 vs current -0.0053; the §10n
+	// fy_hof case), so it stays unproven and is left at figure/keys. A/B via PMB_ANIM_FIGURE_COM.
+	// See pipeline_max_design.md §10n.
 	NLMISC::CVectorD comPos = m_FigComPos;
+	if (m_Rig && m_Rig->HaveBaseFramePos && m_Rig->ComDispNonZero && !getenv("PMB_ANIM_FIGURE_COM"))
+	{
+		comPos.z = m_Rig->BaseFramePos.z;
+		if (m_Rig->HaveHeightCorrection) comPos.z += m_Rig->HeightCorrection;
+	}
 	if (!m_ChHorizontal.empty())
 	{
 		NLMISC::CVectorD h = m_ChHorizontal.eval(t); // stored Y-up (x, y_up, z_up)
@@ -719,6 +738,11 @@ void CBipedAnimEval::evalAt(double t, std::map<INode *, SBipNodeState> &out)
 	}
 	if (!m_ChVertical.empty())
 		comPos.z = m_ChVertical.eval(t);
+	// Move All Mode (0x0117) is a world-space offset on the whole biped — apply to the final COM,
+	// after the keyed channels. Identity on every shipped corpus file (no-op there); the interactive
+	// probes (+10z, x5/y10/z20) confirm it offsets the exported COM by exactly this translation.
+	if (m_Rig && m_Rig->HaveMoveAll)
+		comPos += NLMISC::CVectorD(m_Rig->MoveAllTrans.x, m_Rig->MoveAllTrans.y, m_Rig->MoveAllTrans.z);
 
 	// per-eval state
 	QuatD pelvisRot = comRot;      // updated when the pelvis is seen
