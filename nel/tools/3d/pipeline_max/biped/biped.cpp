@@ -37,6 +37,7 @@
 #include "../scene_class_registry.h"
 
 #include "biped_driven.h"
+#include "biped_system.h"
 
 using namespace std;
 
@@ -57,6 +58,7 @@ CBiped::~CBiped()
 void CBiped::registerClasses(CSceneClassRegistry *registry)
 {
 	registry->add(&BipedDrivenClassDesc);
+	registry->add(&BipedSystemClassDesc);
 }
 
 const ucchar *CDllPluginDescBiped::displayName() const

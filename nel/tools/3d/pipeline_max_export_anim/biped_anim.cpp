@@ -470,10 +470,12 @@ static void vec3ChannelFrom(const SBipKeyTrack &tr, int ox, int oy, int oz, TCBV
 
 CBipedAnimEval::CBipedAnimEval(CSceneClass *rigSys, SBipedRig &rig,
                                const std::vector<Bone> &bones,
-                               const std::map<INode *, size_t> &boneOfNode)
+                               const std::map<INode *, size_t> &boneOfNode,
+                               const SBipAnimKeys *overrideKeys)
 	: m_Sys(rigSys), m_Rig(&rig), m_HaveFigPelvis(false), m_HaveTurn(false), m_PivotSessionsBuilt(false)
 {
-	parseBipAnimKeys(rigSys, m_Keys);
+	if (overrideKeys) m_Keys = *overrideKeys;
+	else parseBipAnimKeys(rigSys, m_Keys);
 
 	if (getenv("PMB_ANIM_DUMP_DYNTYPE"))
 		fprintf(stderr, "PMB_ANIM_DUMP_DYNTYPE: have=%d dynamicsType=%d\n",

@@ -193,9 +193,13 @@ class CBipedAnimEval
 {
 public:
 	// bones: figure-time walk output (Bone::Node / Bone::WorldTM set). rigSys: the 0x9155 object.
+	// overrideKeys: evaluate these keys instead of parsing the system object's keytracks — the
+	// animation-authoring passes (biped_author.cpp) iterate candidate key sets against the same
+	// evaluator math without touching the scene. NULL = parse from rigSys (the export path).
 	CBipedAnimEval(PIPELINE::MAX::CSceneClass *rigSys, PMAX_RIG::SBipedRig &rig,
 	               const std::vector<PMAX_RIG::Bone> &bones,
-	               const std::map<PIPELINE::MAX::BUILTIN::INode *, size_t> &boneOfNode);
+	               const std::map<PIPELINE::MAX::BUILTIN::INode *, size_t> &boneOfNode,
+	               const SBipAnimKeys *overrideKeys = NULL);
 
 	// Evaluate every biped node of this rig at the given time (ticks). Results keyed by INode*.
 	// Nodes without animation keys stay at their figure pose.

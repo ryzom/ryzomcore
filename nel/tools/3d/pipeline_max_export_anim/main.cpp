@@ -1393,8 +1393,11 @@ static void collectBipedSysDumps(CSceneClassContainer *ssc, std::vector<SBipedSy
 		if (!sc || sc->classDesc()->classId() != CLASSID_SYS) continue;
 		SBipedSysDump d;
 		d.Index = idx;
-		const CStorageContainer::TStorageObjectContainer &orph = sc->orphanedChunks();
-		for (CStorageContainer::TStorageObjectConstIt jt = orph.begin(); jt != orph.end(); ++jt)
+		// Read via chunks(), not orphanedChunks(): the pre-clean container still holds every
+		// original chunk, INCLUDING the keytrack pairs the typed CBipedSystem parse lifts out of
+		// the orphan list (biped_coverage.py / gen_biped_fields_diff.py depend on complete dumps).
+		const CStorageContainer::TStorageObjectContainer &all = sc->chunks();
+		for (CStorageContainer::TStorageObjectConstIt jt = all.begin(); jt != all.end(); ++jt)
 		{
 			CStorageRaw *raw = dynamic_cast<CStorageRaw *>(jt->second);
 			if (raw) d.Chunks[jt->first] = raw->Value;
@@ -1469,13 +1472,16 @@ static int runDumpRig(const char *path, const char *outPath)
 			fprintf(fp, "  chunk 0x%04x bytes=%zu", it->first, v.size());
 			if (v.size() >= 4 && (v.size() % 4) == 0)
 			{
+				// PMB_DUMP_RIG_FULL: no float/int cap (keytrack record inspection)
+				static const bool s_full = getenv("PMB_DUMP_RIG_FULL") != NULL;
 				size_t nf = v.size() / 4;
+				size_t fCap = s_full ? nf : 32, iCap = s_full ? nf : 8;
 				const float *f = reinterpret_cast<const float *>(nlVectorData(v));
 				const sint32 *iv = reinterpret_cast<const sint32 *>(nlVectorData(v));
 				fprintf(fp, " floats=[");
-				for (size_t k = 0; k < nf && k < 32; ++k) fprintf(fp, "%.9g,", f[k]);
+				for (size_t k = 0; k < nf && k < fCap; ++k) fprintf(fp, "%.9g,", f[k]);
 				fprintf(fp, "] ints=[");
-				for (size_t k = 0; k < nf && k < 8; ++k) fprintf(fp, "%d,", iv[k]);
+				for (size_t k = 0; k < nf && k < iCap; ++k) fprintf(fp, "%d,", iv[k]);
 				fprintf(fp, "]");
 			}
 			fprintf(fp, "\n");
