@@ -122,8 +122,8 @@ def main():
     ap.add_argument("--t3", action="store_true")
     ap.add_argument("--all", action="store_true")
     ap.add_argument("--gate-t3", action="store_true", help="fail on structural T3 regressions")
-    ap.add_argument("--max-direct-diff", type=int, default=1,
-                    help="allowed direct-ref field-compare failures under --gate-t3 (known-deviation budget)")
+    ap.add_argument("--max-direct-diff", type=int, default=0,
+                    help="allowed direct-ref field-compare failures under --gate-t3 (regression guard, 0 = strict — retired 2026-07-08 when the last open TR_hall_reu_vitrine_decors diff closed via §10w's Edit Mesh 0x0130 fix)")
     ap.add_argument("--only", default=None, help="substring filter on the .max path")
     ap.add_argument("-j", "--jobs", type=int, default=max(1, (os.cpu_count() or 4) - 2))
     args = ap.parse_args()
@@ -324,8 +324,6 @@ def main():
 
     fails = t1_fail + t2_fail + len(export_fail)
     if args.gate_t3:
-        # Known deviation allowance: TR_hall_reu_vitrine_decors' cluster links (mirror-modifier
-        # default-gizmo plane semantics pending the Max primitive dataset).
         if direct_diff > args.max_direct_diff:
             fails += direct_diff - args.max_direct_diff
     return 1 if fails else 0
