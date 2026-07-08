@@ -1273,7 +1273,11 @@ static bool psShapeBBoxVerts(INode &node, CSceneClass *obj, SNodeTMCache &tmCach
 
 	NLMISC::CAABBox bbox;
 	pss->getAABBox(bbox);
-	// transform in world (convertMatrix of GetNodeTM)
+	// Reference behavior: re-compute an axis-aligned enclosing box in world space via
+	// `CAABBox::transformAABBox` before taking the 8 corners. This axis-aligned-in-world
+	// inflation is what the plugin does; corpus regression confirmed swapping to a direct
+	// 8-corner transform breaks Matis hall_conseil / hall_vitrine (their FX instances land in
+	// FEWER clusters than the reference under the tight box).
 	Matrix3M tm = getNodeTM(&node, tmCache);
 	NLMISC::CMatrix nelXForm;
 	nelXForm.identity();
