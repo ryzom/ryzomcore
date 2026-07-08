@@ -49,6 +49,8 @@
 #include "../pipeline_max/builtin/node_impl.h"
 #include "../pipeline_max/builtin/reference_maker.h"
 
+#include "../pipeline_max_export_common/edit_mesh_mod.h"
+
 using namespace PIPELINE::MAX;
 using namespace PIPELINE::MAX::BUILTIN;
 using namespace MAXMATH;
@@ -160,148 +162,139 @@ static bool extractEditableMesh(CSceneClass *obj, SEvalMesh &out, const std::str
 // ---------------------------------------------------------------------------------------------
 // Modifier application
 
-// Edit Mesh modifier per-node data (mod-app 0x2500 -> 0x2512 -> 0x4000): 0x0100/0x0110 input
-// vert/face counts, 0x0140 moved verts, 0x0170/0x0270 deleted vert/face BitArrays, 0x0210
-// created verts. (Created faces 0x0410-family not yet decoded — warn when the counts imply some.)
-struct SEditMeshEdits
+// Edit Mesh modifier per-node data (mod-app 0x2500 -> 0x2512 -> 0x4000). Decode + apply live in
+// the shared pipeline_max_export_common/edit_mesh_mod library — pipeline_max_design.md §10x
+// pinned the chunk map (0x0130 = created verts 16B srcTag+Point3, 0x0208 = created base faces
+// 24B srcTag+v3+sm+ff, 0x0220 = face-attribute rewrites incl. matID and per-edge visibility) and
+// the shared library carries the corrected decode; the earlier local reader here misread 0x0210
+// (map-1 texture-vertex faces, 20B) as vertices at 12B, so any node whose Edit Mesh appended
+// verts was silently garbled and any node whose matID was rewritten by 0x0220 shipped the raw
+// base's matIDs. Shape adds two things over ig/cmb here: (a) per-face matID + edge-vis rewrites
+// need to land in SEvalFace.Flags before deletes/appends (b) map channels must be reordered in
+// parallel with the base face-delete pass (ig/cmb don't carry maps).
+
+// Face factory for the shared apply: create an SEvalFace from EDITMESH::SFace. `vOffset` is
+// ignored — created-face V[3] already reference the union input+created vert space per the
+// shared apply order (see edit_mesh_mod.h). matID lives in the high 16 bits of SEvalFace::Flags
+// (MAX_FACE_MATID_SHIFT); edge-vis in the low bits — same packing as MDELTA_CHUNK's 0x0220
+// Values word (bits 0..2 = per-edge visibility, bit 3 = hidden, bits 5..20 = matID). Convert
+// the packed FaceFlags word verbatim; the corpus base mesh reads the same field layout.
+struct SEvalFaceFactory
 {
-	std::vector<std::pair<uint32, Point3M> > Moves;
-	std::vector<Point3M> Created;
-	std::vector<bool> DelVerts;
-	std::vector<bool> DelFaces;
+	SEvalFace operator()(uint32 vOffset, const EDITMESH::SFace &sf) const
+	{
+		(void)vOffset;
+		SEvalFace f;
+		f.V[0] = sf.V[0];
+		f.V[1] = sf.V[1];
+		f.V[2] = sf.V[2];
+		f.SmGroup = sf.SmGroup;
+		f.Flags = sf.FaceFlags;
+		return f;
+	}
 };
 
-static bool readEditMeshBitArray(CStorageContainer *cont, std::vector<bool> &out)
+// Apply per-face attribute changes (0x0220): rewrite matID + edge-vis + hidden bits inside
+// SEvalFace::Flags, gated per record by ApplyMask. Same convention as cmb's applyFaceAttribs;
+// unified into shape's Flags word (matID at bits 16..31, edge-vis at bits 0..2, hidden at bit 4).
+// FaceAttribs run BEFORE deletes/appends (they index the input face set).
+static void applyFaceAttribs(const std::vector<EDITMESH::SFaceAttribChange> &attribs,
+                             std::vector<SEvalFace> &faces)
 {
-	if (!cont) return false;
-	for (CStorageContainer::TStorageObjectConstIt it = cont->chunks().begin(); it != cont->chunks().end(); ++it)
+	for (uint i = 0; i < attribs.size(); ++i)
 	{
-		if (it->first != 0x2700) continue;
-		CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
-		if (!raw || raw->Value.size() < 4) return false;
-		uint32 n;
-		memcpy(&n, nlVectorData(raw->Value), 4);
-		if (raw->Value.size() < 4 + ((size_t)n + 7) / 8) return false;
-		out.resize(n);
-		for (uint32 i = 0; i < n; ++i)
-			out[i] = (raw->Value[4 + i / 8] >> (i % 8)) & 1;
-		return true;
-	}
-	return false;
-}
-
-static bool readEditMeshModApp(CStorageContainer *c2500, SEditMeshEdits &out)
-{
-	for (CStorageContainer::TStorageObjectConstIt it = c2500->chunks().begin(); it != c2500->chunks().end(); ++it)
-	{
-		if (it->first != 0x2512) continue;
-		CStorageContainer *c2512 = dynamic_cast<CStorageContainer *>(it->second);
-		if (!c2512) continue;
-		for (CStorageContainer::TStorageObjectConstIt jt = c2512->chunks().begin(); jt != c2512->chunks().end(); ++jt)
+		const EDITMESH::SFaceAttribChange &a = attribs[i];
+		if (a.Index >= faces.size()) continue;
+		SEvalFace &f = faces[a.Index];
+		if (a.applyMatId())
 		{
-			if (jt->first != 0x4000) continue;
-			CStorageContainer *c4000 = dynamic_cast<CStorageContainer *>(jt->second);
-			if (!c4000) continue;
-			for (CStorageContainer::TStorageObjectConstIt kt = c4000->chunks().begin(); kt != c4000->chunks().end(); ++kt)
-			{
-				if (kt->first == 0x0140)
-				{
-					CStorageRaw *raw = dynamic_cast<CStorageRaw *>(kt->second);
-					if (raw && raw->Value.size() >= 4)
-					{
-						uint32 n;
-						memcpy(&n, nlVectorData(raw->Value), 4);
-						if (raw->Value.size() >= 4 + (size_t)n * 16)
-						{
-							for (uint32 i = 0; i < n; ++i)
-							{
-								uint32 idx;
-								Point3M v;
-								memcpy(&idx, nlVectorData(raw->Value) + 4 + i * 16, 4);
-								memcpy(&v, nlVectorData(raw->Value) + 4 + i * 16 + 4, 12);
-								out.Moves.push_back(std::make_pair(idx, v));
-							}
-						}
-					}
-				}
-				else if (kt->first == 0x0210)
-				{
-					CStorageRaw *raw = dynamic_cast<CStorageRaw *>(kt->second);
-					if (raw && raw->Value.size() >= 4)
-					{
-						uint32 n;
-						memcpy(&n, nlVectorData(raw->Value), 4);
-						if (raw->Value.size() >= 4 + (size_t)n * 12)
-						{
-							out.Created.resize(n);
-							if (n) memcpy(&out.Created[0], nlVectorData(raw->Value) + 4, (size_t)n * 12);
-						}
-					}
-				}
-				else if (kt->first == 0x0170)
-					readEditMeshBitArray(dynamic_cast<CStorageContainer *>(kt->second), out.DelVerts);
-				else if (kt->first == 0x0270)
-					readEditMeshBitArray(dynamic_cast<CStorageContainer *>(kt->second), out.DelFaces);
-			}
-			return true;
+			f.Flags &= 0x0000FFFFu;
+			f.Flags |= (a.matId() & 0xFFFFu) << MAX_FACE_MATID_SHIFT;
+		}
+		for (int e = 0; e < 3; ++e)
+		{
+			if (!a.applyEdge(e)) continue;
+			uint32 bit = 1u << e;
+			if (a.edgeVis(e))
+				f.Flags |= bit;
+			else
+				f.Flags &= ~bit;
+		}
+		if (a.applyHidden())
+		{
+			uint32 bit = 1u << 4;
+			if (a.hidden()) f.Flags |= bit;
+			else f.Flags &= ~bit;
 		}
 	}
-	return false;
 }
 
-// Apply Edit Mesh edits: moves, then face deletes (mesh + map faces in parallel), then vertex
-// deletes with reindexing (map verts are indexed independently and stay).
-static void applyEditMeshEdits(const SEditMeshEdits &e, SEvalMesh &mesh, const std::string &name)
+// Apply the decoded Edit Mesh edits to shape's SEvalMesh, keeping the map channels coherent.
+// The shared EDITMESH::applyEdits handles the base vertex/face lists (moves → face-deletes →
+// append created verts → append created faces (0x0208) → vert-deletes with reindex) but doesn't
+// know about map channels; we run the map-face delete pass here in parallel with the base face
+// deletes, and each channel keeps its own vert list untouched.
+static void applyEditMeshEdits(const EDITMESH::SEdits &e, SEvalMesh &mesh, const std::string &name)
 {
-	for (uint i = 0; i < e.Moves.size(); ++i)
-	{
-		if (e.Moves[i].first < mesh.Verts.size())
-		{
-			mesh.Verts[e.Moves[i].first].x += e.Moves[i].second.x;
-			mesh.Verts[e.Moves[i].first].y += e.Moves[i].second.y;
-			mesh.Verts[e.Moves[i].first].z += e.Moves[i].second.z;
-		}
-	}
+	// (a) Face attribute rewrites on the INPUT face set — before deletes/appends.
+	applyFaceAttribs(e.FaceAttribs, mesh.Faces);
+
+	// (b) Reorder each map channel's face list in parallel with the base face-delete pass. The
+	// shared applyEdits deletes base faces itself; do the same predicate here on the map faces
+	// so they stay index-parallel with the base. Map verts (the channel's own vert list) are
+	// index-independent and stay.
+	std::map<int, std::vector<SMapFace> > keptMapFaces;
 	if (!e.DelFaces.empty())
 	{
-		std::vector<SEvalFace> kept;
-		std::map<int, std::vector<SMapFace> > keptMaps;
-		for (uint i = 0; i < mesh.Faces.size(); ++i)
-		{
-			if (i < e.DelFaces.size() && e.DelFaces[i]) continue;
-			kept.push_back(mesh.Faces[i]);
-			for (std::map<int, SMapChannel>::iterator mt = mesh.Maps.begin(); mt != mesh.Maps.end(); ++mt)
-				if (i < mt->second.Faces.size())
-					keptMaps[mt->first].push_back(mt->second.Faces[i]);
-		}
-		mesh.Faces.swap(kept);
 		for (std::map<int, SMapChannel>::iterator mt = mesh.Maps.begin(); mt != mesh.Maps.end(); ++mt)
-			mt->second.Faces.swap(keptMaps[mt->first]);
-	}
-	if (!e.DelVerts.empty())
-	{
-		std::vector<uint32> remap(mesh.Verts.size());
-		std::vector<Point3M> kept;
-		for (uint i = 0; i < mesh.Verts.size(); ++i)
 		{
-			remap[i] = (uint32)kept.size();
-			if (i >= e.DelVerts.size() || !e.DelVerts[i])
-				kept.push_back(mesh.Verts[i]);
-		}
-		mesh.Verts.swap(kept);
-		for (uint i = 0; i < mesh.Faces.size(); ++i)
-		{
-			mesh.Faces[i].V[0] = remap[mesh.Faces[i].V[0]];
-			mesh.Faces[i].V[1] = remap[mesh.Faces[i].V[1]];
-			mesh.Faces[i].V[2] = remap[mesh.Faces[i].V[2]];
+			std::vector<SMapFace> &kept = keptMapFaces[mt->first];
+			kept.reserve(mesh.Faces.size());
+			for (uint i = 0; i < mesh.Faces.size(); ++i)
+			{
+				if (i < e.DelFaces.size() && e.DelFaces[i]) continue;
+				if (i < mt->second.Faces.size())
+					kept.push_back(mt->second.Faces[i]);
+			}
 		}
 	}
-	if (!e.Created.empty())
+
+	// (c) Delegate to the shared apply: moves + face-deletes + created-verts + created-faces
+	// (0x0208) + vert-delete-and-remap. SEvalMesh::Verts is std::vector<Point3M>; Point3M has
+	// the same 12-byte layout as NLMISC::CVector, so a reinterpret-cast is safe here (same
+	// pattern the mesh extractor uses for the typed geom buffers → SEvalFace bulk copies).
+	std::vector<NLMISC::CVector> &vertsCV
+		= *reinterpret_cast<std::vector<NLMISC::CVector> *>(&mesh.Verts);
+	EDITMESH::applyEdits<SEvalFace, SEvalFaceFactory>(e, vertsCV, mesh.Faces,
+	                                                  SEvalFaceFactory(), /* facesMode = */ 1);
+
+	// (d) Commit the kept map-face lists and, for any created base faces just appended, extend
+	// each map channel's face list with a placeholder (index 0 corner). The 0x0210 chunk carries
+	// the map-1 texture-vertex faces for created base faces, but its vert indices reference the
+	// map-1 texture-vertex space (not the base vert space) — applying it against the base mesh
+	// caused edge-inconsistent topology in cmb (§10x); shape would additionally need per-channel
+	// tex-vert creation to consume it. For now new faces get UV (0,0,0) — matches the corpus
+	// observation that files with Edit-Mesh-created geometry typically carry unmapped materials
+	// on the new region (portals/clusters).
+	if (!e.DelFaces.empty())
 	{
-		fprintf(stderr, "WARNING: mesh '%s' Edit Mesh creates %u vertices (created faces not decoded)\n",
-		        name.c_str(), (uint)e.Created.size());
-		for (uint i = 0; i < e.Created.size(); ++i)
-			mesh.Verts.push_back(e.Created[i]);
+		for (std::map<int, SMapChannel>::iterator mt = mesh.Maps.begin(); mt != mesh.Maps.end(); ++mt)
+			mt->second.Faces.swap(keptMapFaces[mt->first]);
+	}
+	{
+		SMapFace zero;
+		zero.T[0] = zero.T[1] = zero.T[2] = 0;
+		for (std::map<int, SMapChannel>::iterator mt = mesh.Maps.begin(); mt != mesh.Maps.end(); ++mt)
+			mt->second.Faces.resize(mesh.Faces.size(), zero);
+	}
+	if (!e.CreatedFacesA.empty())
+	{
+		// Warn only when created faces reference a channel that would care — silent when the
+		// mesh has no map channels at all.
+		if (!mesh.Maps.empty())
+			fprintf(stderr, "WARNING: mesh '%s' Edit Mesh appends %u faces; map channels get "
+			                "placeholder UVs (0x0210 tex-vert faces not applied)\n",
+			        name.c_str(), (uint)e.CreatedFacesA.size());
 	}
 }
 
@@ -381,8 +374,8 @@ bool evalNodeMesh(INode &node, SEvalMesh &out, std::vector<std::string> *warning
 		NLMISC::CClassId mcid = mod->classDesc()->classId();
 		if (mcid == NLMISC::CClassId(0x00000050, 0x00000000)) // Edit Mesh
 		{
-			SEditMeshEdits edits;
-			if (app && readEditMeshModApp(app, edits))
+			EDITMESH::SEdits edits;
+			if (app && EDITMESH::readModApp(app, edits))
 				applyEditMeshEdits(edits, out, name);
 		}
 		else if (mcid == NLMISC::CClassId(0x25215824, 0x00000000)) // XForm
