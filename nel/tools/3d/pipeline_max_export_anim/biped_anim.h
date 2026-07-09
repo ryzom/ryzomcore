@@ -24,7 +24,9 @@
  * [14..16]+1 end-effector pos body(COM Y-up), [18..20]+1 end-effector pos WORLD (Y-up),
  * [22..24] unit pole vector (Y-up; mid-bone direction ⊥ upper→end — decoded 2026-07-09),
  * [28..31] foot/hand quat, [46+10k..49+10k] finger/toe base delta quat,
- * [54+10k],[55+10k] bend angles. ([50+10k..53+10k] etc are caches — ignore.)
+ * [54+10k],[55+10k] bend angles, [109] ikAnkleTension (0..1; last float — pinned 2026-07-09
+ * via Max 9 residual-probe --diff-rig on c_ankle_t0/t05/t1; +legShift on 4-link legs).
+ * ([50+10k..53+10k] etc are caches — ignore.)
  *
  * Time chunk: hdr 7 dwords (count, ?, ?, ?, ?, trackType, ?), then count x 10 dwords:
  * (time_ticks, index, p0..p4, tens, cont, bias) — TCB in Max UI units (25 = default);
@@ -61,8 +63,9 @@
  * — coup_fort weapon plants) uses dual-fold reach-first with FK hand rotation when FK wrist
  * miss > 6.5 cm (moderate-miss holds stay on the stored upper/hinge path — residual last-plant
  * coup_fort_03); Full world squad is A/B-only via PMB_BIPED_IK_ROT=full. Pole vector [22..24]
- * twists the solved chain onto the stored elbow/knee plane (env-gated). PMB_BIPED_IK_ARMS=0
- * forces legs-only for A/B.
+ * twists the solved chain onto the stored elbow/knee plane (env-gated). ikAnkleTension
+ * ([109]) is decoded into m_ChAnkleTension but not yet applied (corpus ≈0; Max GT for
+ * Object-space plant × tension still pending). PMB_BIPED_IK_ARMS=0 forces legs-only for A/B.
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
  * \author Grok 4.5
@@ -329,6 +332,9 @@ private:
 	// plane normal — ~0.95·pole on plant keys. Used to twist the 2-bone solve about the reach
 	// axis so the mid bone tracks Character Studio's swivel, not just the FK-inherited plane.
 	TCBVec3Channel m_ChPole[2][2];        // [arm/leg][side], NeL space unit vectors
+	// ikAnkleTension limb record [109] (+legShift). Decoded; not applied to the solve yet —
+	// residual-probe body-space plants showed zero eval effect; Object-space re-run pending.
+	TCBScalarChannel m_ChAnkleTension[2]; // [0]=R leg, [1]=L leg
 	std::vector<TCBScalarChannel> m_ChSpineAng, m_ChTailAng, m_ChPony1Ang, m_ChPony2Ang, m_ChNeckAng;
 	TCBQuatChannel m_ChHead;
 	std::vector<TCBQuatChannel> m_ChFingerBase[2], m_ChToeBase[2];

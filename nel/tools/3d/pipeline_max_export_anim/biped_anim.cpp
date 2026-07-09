@@ -742,6 +742,13 @@ void CBipedAnimEval::buildChannels()
 			// previously read unshifted, which fed 4-link (mount/bird) rigs garbage IK inputs.
 			scalarChannelFrom(*legs[s], 12 + legShift, m_ChIkBlend[1][s]);
 			vec3ChannelFrom(*legs[s], 18 + legShift, 19 + legShift, 20 + legShift, m_ChIkTarget[1][s]);
+			// ikAnkleTension = limb record [109] (+legShift on 4-link). Pinned 2026-07-09:
+			// Max 9 residual-probe c_ankle_t0/t05/t1 --diff-rig: only payload diffs are
+			// 0x013a floats [113]/[223] (= key0/key1 field 109 with 4-float header) and
+			// live twin 0x025d [219]; values 0 / 0.5 / 1.0. Channel built, not applied —
+			// no in-plant foot-rot model consumes it yet (body-space probe samples were
+			// tension-identical; Object-space re-probe pending).
+			scalarChannelFrom(*legs[s], 109 + legShift, m_ChAnkleTension[s]);
 			// Leg pole channel: decoded (planted-only, sign-chained) but NOT applied yet —
 			// first arm-only corpus A/B of the twist; legs already near-good under FK plane
 			// preservation and a premature apply regressed L foot/thigh on coup_fort_03.
