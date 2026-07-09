@@ -134,6 +134,23 @@ IF (Python3_Interpreter_FOUND)
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 	SET_TESTS_PROPERTIES(pipeline_max_zone_corpus PROPERTIES SKIP_RETURN_CODE 77)
 
+	# Same zone corpus, driven through the VS2008/Wine x87 reference-codegen build (see the "VS2008
+	# x87 reference build" wiki page), same rationale as pipeline_max_skel_corpus_vs2008 /
+	# pipeline_max_anim_corpus_vs2008: the .zone format quantizes patch control points into sint16
+	# via (v - PatchBias) / PatchScale, and the reference plugin was a 32-bit x87 build that keeps
+	# that quotient at extended precision (one rounding before the truncation), where the x64/SSE
+	# build rounds the subtraction and the division separately. This is the codegen-limited residual
+	# class documented in pipeline_max_design.md section 10h (the +-1 packed-word flips at
+	# quantization boundaries). The VS2008 build confirms how much of the x87-tier closes under the
+	# Max-2010-matching compiler/float model and pins T1/T2 byte-identity independent of SSE-vs-x87
+	# codegen (the chunk parser/writer never recomputes a float). Self-skips (exit 77) on any machine
+	# without that build tree, same convention as every other *_vs2008 line here.
+	ADD_TEST(NAME pipeline_max_zone_corpus_vs2008
+		COMMAND ${Python3_EXECUTABLE} zone_corpus.py --all --gate-t3
+			--bin $ENV{HOME}/build_vs2008_wine_pipeline/winebin
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+	SET_TESTS_PROPERTIES(pipeline_max_zone_corpus_vs2008 PROPERTIES SKIP_RETURN_CODE 77)
+
 	ADD_TEST(NAME pipeline_max_shape_corpus
 		COMMAND ${Python3_EXECUTABLE} shape_corpus.py --all --gate-t3 --min-identical 700 --max-diff 400
 			--bin $<TARGET_FILE_DIR:pipeline_max_export_shape>
