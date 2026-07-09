@@ -62,6 +62,7 @@
 #include <nel/3d/texture_multi_file.h>
 #include <nel/3d/texture_blend.h>
 #include <nel/3d/water_shape.h>
+#include <nel/3d/seg_remanence_shape.h>
 
 #include <algorithm>
 #include <cstdio>
@@ -79,6 +80,7 @@
 #include "anim_build.h"
 #include "water_build.h"
 #include "flare_build.h"
+#include "remanence_build.h"
 #include "../pipeline_max_export_common/physique_skin.h"
 
 #include "../pipeline_max/builtin/scene_impl.h"
@@ -319,9 +321,13 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 	}
 	if (getScriptAppDataInt(n, NEL3D_APPDATA_USE_REMANENCE, 0))
 	{
-		stats.skip("remanence");
-		fprintf(stderr, "SKIP shape '%s': remanence not implemented\n", name.c_str());
-		return NULL;
+		NL3D::IShape *rs = REMANENCEBUILD::buildRemanenceShape(node, tmCache, exportLighting);
+		if (!rs)
+		{
+			stats.skip("remanence");
+			return NULL;
+		}
+		return rs;
 	}
 	if (cid.a() == CLASSID_PARTA_NEL_FLARE)
 	{
@@ -1411,10 +1417,66 @@ static void compareShapesFields(const std::string &a, const std::string &b)
 		delete sb;
 		return;
 	}
+	NL3D::CSegRemanenceShape *ra = dynamic_cast<NL3D::CSegRemanenceShape *>(sa);
+	NL3D::CSegRemanenceShape *rb = dynamic_cast<NL3D::CSegRemanenceShape *>(sb);
+	if (ra && rb)
+	{
+		// Default transform
+		{
+			NLMISC::CVector pa = ra->getDefaultPos()->getDefaultValue();
+			NLMISC::CVector pb = rb->getDefaultPos()->getDefaultValue();
+			if (!floatNoise(pa.x, pb.x) || !floatNoise(pa.y, pb.y) || !floatNoise(pa.z, pb.z))
+			{ printf("  DefaultPos differs\n"); raiseVerdict(1); }
+			NLMISC::CQuat qa = ra->getDefaultRotQuat()->getDefaultValue();
+			NLMISC::CQuat qb = rb->getDefaultRotQuat()->getDefaultValue();
+			// double-cover aware
+			bool qSame = (floatNoise(qa.x, qb.x) && floatNoise(qa.y, qb.y)
+			              && floatNoise(qa.z, qb.z) && floatNoise(qa.w, qb.w))
+			          || (floatNoise(qa.x, -qb.x) && floatNoise(qa.y, -qb.y)
+			              && floatNoise(qa.z, -qb.z) && floatNoise(qa.w, -qb.w));
+			if (!qSame) { printf("  DefaultRotQuat differs\n"); raiseVerdict(1); }
+			NLMISC::CVector sa2 = ra->getDefaultScale()->getDefaultValue();
+			NLMISC::CVector sb2 = rb->getDefaultScale()->getDefaultValue();
+			if (!floatNoise(sa2.x, sb2.x) || !floatNoise(sa2.y, sb2.y) || !floatNoise(sa2.z, sb2.z))
+			{ printf("  DefaultScale differs\n"); raiseVerdict(1); }
+		}
+		if (ra->getNumSlices() != rb->getNumSlices())
+		{ printf("  NumSlices %u vs %u\n", ra->getNumSlices(), rb->getNumSlices()); raiseVerdict(2); }
+		if (!floatNoise(ra->getSliceTime(), rb->getSliceTime()))
+		{ printf("  SliceTime differs\n"); raiseVerdict(1); }
+		if (!floatNoise(ra->getRollupRatio(), rb->getRollupRatio()))
+		{ printf("  RollupRatio differs\n"); raiseVerdict(1); }
+		if (ra->getTextureShifting() != rb->getTextureShifting())
+		{ printf("  TextureShifting differs\n"); raiseVerdict(2); }
+		if (ra->getNumCorners() != rb->getNumCorners())
+		{
+			printf("  NumCorners %u vs %u\n", ra->getNumCorners(), rb->getNumCorners());
+			raiseVerdict(2);
+		}
+		else
+		{
+			for (uint i = 0; i < ra->getNumCorners(); ++i)
+			{
+				NLMISC::CVector ca = ra->getCorner(i), cb = rb->getCorner(i);
+				if (!floatNoise(ca.x, cb.x) || !floatNoise(ca.y, cb.y) || !floatNoise(ca.z, cb.z))
+				{
+					printf("  Corner[%u] (%.9g,%.9g,%.9g) vs (%.9g,%.9g,%.9g)\n",
+					       i, ca.x, ca.y, ca.z, cb.x, cb.y, cb.z);
+					raiseVerdict(1);
+				}
+			}
+		}
+		// Material — structural (shader/blend); float noise on colors is FLOATEQ
+		if (ra->getMaterial().getShader() != rb->getMaterial().getShader())
+		{ printf("  Material shader differs\n"); raiseVerdict(2); }
+		delete sa;
+		delete sb;
+		return;
+	}
 	NL3D::CMesh *ma = dynamic_cast<NL3D::CMesh *>(sa);
 	NL3D::CMesh *mb = dynamic_cast<NL3D::CMesh *>(sb);
 	if (!ma || !mb)
-		raiseVerdict(2); // only CMesh/CWaterShape get the full field walk so far
+		raiseVerdict(2); // only CMesh/CWaterShape/CSegRemanence get the full field walk so far
 	if (ma && mb)
 	{
 		compareVB(ma->getVertexBuffer(), mb->getVertexBuffer());
