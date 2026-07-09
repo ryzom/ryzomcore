@@ -9,8 +9,11 @@ non-biped by scanning for the "Biped Object" UTF-16 marker, filters git-lfs stub
   T2  parse/build roundtrip: the pipeline_max_corpus_test binary with --parse.
   T3  .anim export:          pipeline_max_export_anim on every file (biped rigs go through the
         oversampling path since 2026-07-06), validated two ways —
-        direct:    byte-compare against a pre-optimizer reference (.anim in ~/pipeline_export/common/characters/
-                   anim_export or ~/core4_data/sky) when one exists. Must be IDENTICAL.
+        direct:    byte-compare against a pre-optimizer reference (.anim in ~/pipeline_export/
+                   common/{characters,fauna,sky}/anim_export or ~/core4_data/sky) when one
+                   exists. Must be IDENTICAL. (The fauna and sky anim_export tiers were wired
+                   2026-07-09 — before that, fauna was only compared through the informational
+                   post-anim_builder tier.)
         optimized: when only a post-anim_builder reference exists (~/core4_data/
                    fauna_animations), run the in-tree anim_builder over our exports with the
                    project's anim_builder.cfg and compare the OPTIMIZED outputs — byte-equal,
@@ -329,6 +332,48 @@ def compare_optimized(a_path, b_path):
         return 'FAIL', '; '.join(msgs[:5])
     return 'EPS', 'worst=%g' % worst
 
+# Non-biped direct-tier float-noise tolerance: the fauna direct references carry Bezier/Linear
+# scale VALUES that differ from our export by 1-2 ULP (~2.4e-7 at scale ~1.0) — the
+# maxScaleValueToNel (srtm·stm·srtm⁻¹) diagonal is a hand-rolled port of the reference's Max
+# SDK Matrix3 arithmetic, and neither x64/SSE nor the VS2008/x87 reference build reproduces
+# Max's own compiled operation order bit-for-bit (same wall as decomp_affine, design doc
+# §10i/§10l — verified 2026-07-09: the x87 build moves the ULPs around without closing them).
+# Same FLOATEQ tier as the shape/skel/zone exporters; kept 100x tighter than shape's 2e-6.
+NB_DIRECT_EPS = 5e-7
+
+def compare_direct_nonbiped(a_path, b_path):
+    """(verdict, msg) with verdict IDENT | FLOATEQ | FAIL — byte-identity, else float-level
+    walk where every difference must be within NB_DIRECT_EPS (track sets, classes, key counts
+    and string/step fields must match exactly)."""
+    da = open(a_path, 'rb').read(); db = open(b_path, 'rb').read()
+    if da == db:
+        return 'IDENT', ''
+    try:
+        ha, hb = {}, {}
+        A = parse_anim(a_path, ha); B = parse_anim(b_path, hb)
+    except Exception as e:
+        return 'FAIL', 'parse error: %r' % e
+    if set(A.keys()) != set(B.keys()):
+        return 'FAIL', 'track sets differ: only-ours=%s only-ref=%s' % (
+            sorted(set(A)-set(B))[:3], sorted(set(B)-set(A))[:3])
+    if ha != hb:
+        return 'FAIL', 'header differs: %s vs %s' % (ha, hb)
+    worst = 0.0
+    for name in B:
+        ca, ta = A[name]; cb, tb = B[name]
+        if ca != cb:
+            return 'FAIL', '%s: class %s vs %s' % (name, ca, cb)
+        ka, kb = ta['keys'], tb['keys']
+        if len(ka) != len(kb):
+            return 'FAIL', '%s: keycount %d vs %d' % (name, len(ka), len(kb))
+        for x, y in zip(ka, kb):
+            d = _key_delta(ca, x, y)
+            if d > worst: worst = d
+            if worst > NB_DIRECT_EPS:
+                return 'FAIL', '%s: worst %g > %g' % (name, worst, NB_DIRECT_EPS)
+    return 'FLOATEQ', 'worst=%g' % worst
+
+
 def compare_direct_float(a_path, b_path):
     """Float-level compare for direct references: track sets, key counts, SSS shape set and
     min-end-time must match; returns (verdict, worst, msg) with verdict IDENT | STRUCT | FAIL."""
@@ -408,9 +453,8 @@ def process_one(args, corpus_test, export_anim, out_dir, item):
                 verdict, worst, msg = compare_direct_float(out_anim, direct_ref)
                 res["t3"] = ("direct_biped", verdict, worst, msg)
             else:
-                ours = open(out_anim, 'rb').read()
-                theirs = open(direct_ref, 'rb').read()
-                res["t3"] = ("direct_bytes", ours == theirs, len(ours), len(theirs))
+                verdict, msg = compare_direct_nonbiped(out_anim, direct_ref)
+                res["t3"] = ("direct_nonbiped", verdict, msg)
             return res
         opt_ref = None
         for rd in args.ref_optimized:
@@ -491,12 +535,14 @@ def run_tests(args, files):
                 else:
                     b["t3_direct_fail"] += 1
                     fails["t3"].append((name, msg, ""))
-            elif t3[0] == "direct_bytes":
-                if t3[1]:
+            elif t3[0] == "direct_nonbiped":
+                if t3[1] == 'IDENT':
                     b["t3_direct_ident"] += 1
+                elif t3[1] == 'FLOATEQ':
+                    b["t3_direct_floateq"] += 1
                 else:
                     b["t3_direct_fail"] += 1
-                    fails["t3"].append((name, f"direct ref differs (size {t3[2]} vs {t3[3]})", ""))
+                    fails["t3"].append((name, t3[2], ""))
             elif t3[0] == "opt":
                 opt_groups.setdefault(res["group"], []).append(t3[1:])
             elif t3[0] == "missing_ref":
@@ -563,6 +609,8 @@ def main():
     ap.add_argument("--bin",       default=os.path.join(home, "ryzomcore/build/nel-pipeline/bin"))
     ap.add_argument("--ref-direct", nargs="*", default=[
         os.path.join(home, "pipeline_export/common/characters/anim_export"),
+        os.path.join(home, "pipeline_export/common/fauna/anim_export"),
+        os.path.join(home, "pipeline_export/common/sky/anim_export"),
         os.path.join(home, "core4_data/sky")],
         help="directories with DIRECT (pre-optimizer) reference .anim files; byte-identity required")
     ap.add_argument("--ref-optimized", nargs="*", default=[
@@ -623,7 +671,8 @@ def main():
         if args.t2: line += f", T2 {b['t2_pass']}/{total}"
         if args.t3:
             optTotal = b['t3_opt_ident'] + b['t3_opt_eps'] + b['t3_opt_fail'] + b['t3_opt_crash']
-            line += (f", T3 direct {b['t3_direct_ident']}/{b['t3_direct_ident'] + b['t3_direct_fail']} byte-identical,"
+            directTotal = b['t3_direct_ident'] + b['t3_direct_floateq'] + b['t3_direct_fail']
+            line += (f", T3 direct {b['t3_direct_ident']}+{b['t3_direct_floateq']}(floateq)/{directTotal},"
                      f" optimized {b['t3_opt_ident']}+{b['t3_opt_eps']}(eps)/{optTotal}"
                      f"{'+' + str(b['t3_opt_fail']) + '(over-tol)' if b['t3_opt_fail'] else ''}"
                      f"{'+' + str(b['t3_opt_crash']) + '(crash)' if b['t3_opt_crash'] else ''},"

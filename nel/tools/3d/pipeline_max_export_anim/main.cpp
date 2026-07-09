@@ -348,11 +348,10 @@ static NL3D::ITrack *buildATrack(CReferenceMaker *ctrl, TNelValueType type)
 		{
 			for (uint i = 0; i < numKeys; ++i)
 			{
-				fprintf(stderr, "bezscale t=%d f=%08x s=(%.9g,%.9g,%.9g) q=(%.9g,%.9g,%.9g,%.9g) it=(%.9g,%.9g,%.9g) ot=(%.9g,%.9g,%.9g) ex=[", keys[i].Time, keys[i].Flags,
+				fprintf(stderr, "bezscale t=%d f=%08x s=(%.9g,%.9g,%.9g) q=(%.9g,%.9g,%.9g,%.9g) it=(%.9g,%.9g,%.9g) ot=(%.9g,%.9g,%.9g) il=(%.9g,%.9g,%.9g) ol=(%.9g,%.9g,%.9g)\n", keys[i].Time, keys[i].Flags,
 				        keys[i].S[0], keys[i].S[1], keys[i].S[2], keys[i].Q[0], keys[i].Q[1], keys[i].Q[2], keys[i].Q[3],
-				        keys[i].InTan[0], keys[i].InTan[1], keys[i].InTan[2], keys[i].OutTan[0], keys[i].OutTan[1], keys[i].OutTan[2]);
-				for (int j = 0; j < 22; ++j) fprintf(stderr, "%.9g,", keys[i].Extra[j]);
-				fprintf(stderr, "]\n");
+				        keys[i].InTan[0], keys[i].InTan[1], keys[i].InTan[2], keys[i].OutTan[0], keys[i].OutTan[1], keys[i].OutTan[2],
+				        keys[i].InLen[0], keys[i].InLen[1], keys[i].InLen[2], keys[i].OutLen[0], keys[i].OutLen[1], keys[i].OutLen[2]);
 			}
 		}
 		for (uint i = 0; i < numKeys; ++i)
@@ -1032,54 +1031,40 @@ static std::vector<INode *> orderedChildrenOf(INode *parent, CSceneClassContaine
 	return out;
 }
 
-static void addBoneTracks(NL3D::CAnimation &animation, INode &node, const std::string &parentName, CSceneClassContainer *ssc, CSSSBuild &ssBuilder)
+struct SBipedSampled;
+static void addBipedNodeTracks(NL3D::CAnimation &animation, INode &node, const std::string &parentName,
+                               bool root, CSceneClassContainer *ssc, const SBipedSampled &sampled,
+                               CSSSBuild &ssBuilder);
+
+static void addBoneTracks(NL3D::CAnimation &animation, INode &node, const std::string &parentName, CSceneClassContainer *ssc, CSSSBuild &ssBuilder, const SBipedSampled *sampled)
 {
+	// A nested biped COM under a non-biped node re-enters the biped path with the selection's
+	// shared sample context — CExportNel::addBoneTracks does exactly this on BIPBODY children
+	// (the mektoub_selle rider rig: Bip01male under selle-assise/selle inside the mount's
+	// subtree; the rider's uniquely-named bones — Finger3/4, Ponytail2, its dummies — only
+	// export through this branch). The reference then ALSO recurses children unconditionally,
+	// but every node the biped branch reaches is already covered by addBipedNodeTracks'
+	// own recursion and the duplicates are discarded by first-wins — insertion order (and so
+	// the output bytes) is identical without the redundant second visit.
+	CSceneClass *tmsc = dynamic_cast<CSceneClass *>(node.getReference(0));
+	if (sampled && tmsc && tmsc->classDesc()->classId() == CLASSID_BIPED_VHT_CTRL)
+	{
+		addBipedNodeTracks(animation, node, parentName, false, ssc, *sampled, ssBuilder);
+		return;
+	}
 	// Track names are FLAT: parentName + nodeName + "." for this node's own tracks, but the
 	// recursion passes the ORIGINAL parentName down (matching CExportNel::addBoneTracks).
 	std::string name = parentName + ucstring(node.userName()).toUtf8() + ".";
 	addNodeTracks(animation, node, name, &ssBuilder);
 	std::vector<INode *> kids = orderedChildrenOf(&node, ssc);
 	for (std::vector<INode *>::iterator ci = kids.begin(); ci != kids.end(); ++ci)
-		{ INode *child = *ci; addBoneTracks(animation, *child, parentName, ssc, ssBuilder); }
+		{ INode *child = *ci; addBoneTracks(animation, *child, parentName, ssc, ssBuilder, sampled); }
 }
 
-static void addBipedAnimation(NL3D::CAnimation &animation, INode &node, const std::string &baseName, bool root, CSceneClassContainer *ssc, CSSSBuild &ssBuilder);
 
 // root = the selected node's parent is the scene root (CNelExport::exportAnim: GetParentNode()
 // == GetRootNode()) — biped tracks lose the bare names and get "<nodeName>."-prefixed when the
 // selected biped hangs under another node (e.g. the aquatic-mount rigs' Bip01 under stick_1).
-static void addAnimation(NL3D::CAnimation &animation, INode &node, const std::string &baseName, bool root, CSceneClassContainer *ssc)
-{
-	// One SkeletonSpawnScript builder per exported selection node, like the reference.
-	CSSSBuild ssBuilder;
-
-	// Biped COM root: the oversampling path (CExportNel::addBipedNodeTracks).
-	CSceneClass *tmsc = dynamic_cast<CSceneClass *>(node.getReference(0));
-	if (tmsc && tmsc->classDesc()->classId() == CLASSID_BIPED_VHT_CTRL)
-	{
-		addBipedAnimation(animation, node, baseName, root, ssc, ssBuilder);
-	}
-	else
-	{
-		// Non-biped path of CExportNel::addAnimation: the node's own tracks under the bare base
-		// name, then particle-system and morph tracks, then every child subtree via
-		// addBoneTracks. (Object FOV, material and light tracks: no corpus signal.)
-		addNodeTracks(animation, node, baseName, &ssBuilder);
-		addParticleSystemTracks(animation, node, baseName);
-		addMorphTracks(animation, node, baseName);
-		std::vector<INode *> kids = orderedChildrenOf(&node, ssc);
-		for (std::vector<INode *>::iterator ci = kids.begin(); ci != kids.end(); ++ci)
-			{ INode *child = *ci; addBoneTracks(animation, *child, baseName, ssc, ssBuilder); }
-	}
-
-	// NoteTrack export (a string track used to create events)
-	if (getNodeScriptAppDataString(&node, NEL3D_APPDATA_EXPORT_NOTE_TRACK) == "1")
-		addNoteTrack(animation, node);
-
-	// Compile the SkeletonSpawnScript builder
-	ssBuilder.compile(animation, baseName);
-}
-
 // ---------------------------------------------------------------------------------------------
 // Biped export path.
 
@@ -1275,23 +1260,58 @@ static void addBipedNodeTracks(NL3D::CAnimation &animation, INode &node, const s
 	}
 	else
 	{
-		addBoneTracks(animation, node, parentName, ssc, ssBuilder);
+		addBoneTracks(animation, node, parentName, ssc, ssBuilder, &sampled);
 	}
 }
 
-static void addBipedAnimation(NL3D::CAnimation &animation, INode &node, const std::string &baseName, bool root, CSceneClassContainer *ssc, CSSSBuild &ssBuilder)
+static void addAnimation(NL3D::CAnimation &animation, INode &node, const std::string &baseName, bool root, CSceneClassContainer *ssc)
 {
+	// One SkeletonSpawnScript builder per exported selection node, like the reference.
+	CSSSBuild ssBuilder;
+
+	// The reference builds ONE CAnimationBuildCtx over the whole selected subtree up front
+	// (buildBipedInformation + overSampleBipedAnimation) regardless of the selected node's own
+	// controller class, so a nested biped COM anywhere in the subtree (the mektoub_selle rider
+	// under the saddle nodes) samples and exports through the same shared context and range.
 	SBipedSampled sampled;
-	if (!sampleBipedSubtree(node, ssc, sampled))
+	bool hasBiped = sampleBipedSubtree(node, ssc, sampled);
+
+	// Biped COM root: the oversampling path (CExportNel::addBipedNodeTracks).
+	CSceneClass *tmsc = dynamic_cast<CSceneClass *>(node.getReference(0));
+	if (tmsc && tmsc->classDesc()->classId() == CLASSID_BIPED_VHT_CTRL)
 	{
-		// no biped keys at all: fall back to the non-biped path (nothing to oversample)
+		if (hasBiped)
+		{
+			addBipedNodeTracks(animation, node, baseName, root, ssc, sampled, ssBuilder);
+		}
+		else
+		{
+			// no biped keys at all: fall back to the non-biped path (nothing to oversample)
+			addNodeTracks(animation, node, baseName, &ssBuilder);
+			std::vector<INode *> kids = orderedChildrenOf(&node, ssc);
+			for (std::vector<INode *>::iterator ci = kids.begin(); ci != kids.end(); ++ci)
+				{ INode *child = *ci; addBoneTracks(animation, *child, baseName, ssc, ssBuilder, NULL); }
+		}
+	}
+	else
+	{
+		// Non-biped path of CExportNel::addAnimation: the node's own tracks under the bare base
+		// name, then particle-system and morph tracks, then every child subtree via
+		// addBoneTracks. (Object FOV, material and light tracks: no corpus signal.)
 		addNodeTracks(animation, node, baseName, &ssBuilder);
+		addParticleSystemTracks(animation, node, baseName);
+		addMorphTracks(animation, node, baseName);
 		std::vector<INode *> kids = orderedChildrenOf(&node, ssc);
 		for (std::vector<INode *>::iterator ci = kids.begin(); ci != kids.end(); ++ci)
-			{ INode *child = *ci; addBoneTracks(animation, *child, baseName, ssc, ssBuilder); }
-		return;
+			{ INode *child = *ci; addBoneTracks(animation, *child, baseName, ssc, ssBuilder, hasBiped ? &sampled : NULL); }
 	}
-	addBipedNodeTracks(animation, node, baseName, root, ssc, sampled, ssBuilder);
+
+	// NoteTrack export (a string track used to create events)
+	if (getNodeScriptAppDataString(&node, NEL3D_APPDATA_EXPORT_NOTE_TRACK) == "1")
+		addNoteTrack(animation, node);
+
+	// Compile the SkeletonSpawnScript builder
+	ssBuilder.compile(animation, baseName);
 }
 
 // ---------------------------------------------------------------------------------------------

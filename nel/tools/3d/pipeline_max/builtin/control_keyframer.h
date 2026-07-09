@@ -114,9 +114,15 @@ struct CStorageBezPoint3Key
 	float Extra[9];
 };
 
-/// Bezier Scale (0x2010, 0) — chunk 0x2528. Tangent offsets provisional: every corpus
-/// instance carries zero tangents, so [9..11]/[12..14] are placed by analogy with the
-/// Bezier Position layout and cannot be discriminated from cache dwords yet.
+/// Bezier Scale (0x2010, 0) — chunk 0x2528. Layout resolved 2026-07-09 against the fauna
+/// direct-reference anims (plante_carnivore family — the first corpus keys with nonzero
+/// tangents; the character corpus carries zero tangents throughout, which is why the old
+/// provisional layout put OutTan at [10..12] and read reference-matching zeros anyway):
+/// after S[3]+Q[4], four 7-float blocks at stride 7 — {InTan, OutTan, InLen, OutLen}, each
+/// block = vec3 data + 3 zero floats + a constant 1.0 tail. OutTan therefore sits at floats
+/// [14..16], not [10..12]; InLen carries -1 sentinels (default 1/3) on first keys. Verified
+/// byte-exact against ~/pipeline_export/common/fauna/anim_export (pr_mo_phytopsy_attack
+/// Box31/Box32 scale tracks).
 struct CStorageBezScaleKey
 {
 	sint32 Time;
@@ -124,8 +130,13 @@ struct CStorageBezScaleKey
 	float S[3];
 	float Q[4];
 	float InTan[3];
+	float InTanPad[4]; // 3 zeros + 1.0 block tail
 	float OutTan[3];
-	float Extra[22];
+	float OutTanPad[4]; // 3 zeros + 1.0 block tail
+	float InLen[3]; // -1 sentinels = default 1/3
+	float InLenPad[4]; // 3 zeros + 1.0 block tail
+	float OutLen[3];
+	float OutLenPad[4]; // 3 zeros + 1.0 block tail
 };
 
 /// TCB Position / Point3 (0x442312, 0) — chunk 0x2521
