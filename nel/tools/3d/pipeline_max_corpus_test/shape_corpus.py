@@ -103,6 +103,20 @@ def project_refs(ref_dir, proj):
     return refs, coarse
 
 
+def project_anim_refs(ref_dir, proj):
+    """anim name (verbatim) -> path from the project's raw shape_anim reference dir — the
+    authoritative per-project tier for the shape process's per-node NelExportAnimation output
+    (the core4_data global index stays as fallback for names outside it)."""
+    grp, leaf = proj.split("/")
+    refs = {}
+    d = os.path.join(ref_dir, grp, leaf, "shape_anim")
+    if os.path.isdir(d):
+        for f in os.listdir(d):
+            if f.endswith(".anim"):
+                refs[f] = os.path.join(d, f)
+    return refs
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--graphics", default=DEF_GRAPHICS)
@@ -203,20 +217,14 @@ def main():
                 if f.endswith(".shape") and ("c/" + f) not in before:
                     new.append((f, os.path.join(coarsedir, f), True))
             res["t3new"] = new
-            # Material animation (.anim) — the shape process's per-node NelExportAnimation step;
-            # compare byte-exact against the final client references indexed from ~/core4_data.
-            animres = []
+            # Material/node animation (.anim) — the shape process's per-node NelExportAnimation
+            # step; record what was produced, comparison happens per-project in the aggregate
+            # phase (per-project shape_anim refs + core4_data fallback).
+            newanims = []
             for f in os.listdir(animdir):
-                if not f.endswith(".anim") or f in animbefore:
-                    continue
-                ref = g_animRefIdx.get(f)
-                if not ref:
-                    animres.append(("noref", f))
-                elif open(os.path.join(animdir, f), "rb").read() == open(ref, "rb").read():
-                    animres.append(("ident", f))
-                else:
-                    animres.append(("diff", f))
-            res["animres"] = animres
+                if f.endswith(".anim") and f not in animbefore:
+                    newanims.append((f, os.path.join(animdir, f)))
+            res["animnew"] = newanims
         return res
 
     results = []
@@ -225,21 +233,17 @@ def main():
             results.append(res)
 
     # aggregate
-    anim_ident = anim_diff = anim_noref = 0
+    anim_ident = anim_diff = anim_noref = anim_ref_missing = 0
     anim_diffs = []
+    anim_missing = []
     proj_produced = collections.defaultdict(dict)  # proj -> name -> (path, coarse)
+    proj_anims = collections.defaultdict(dict)     # proj -> anim name -> path
     for res in results:
         if res.get("stub"):
             stubs += 1
             continue
-        for tag, bn in res.get("animres", []):
-            if tag == "ident":
-                anim_ident += 1
-            elif tag == "noref":
-                anim_noref += 1
-            else:
-                anim_diff += 1
-                anim_diffs.append(bn)
+        for f, p in res.get("animnew", []):
+            proj_anims[res["proj"]][f] = p
         if args.t1:
             if res.get("t1"):
                 t1_pass += 1
@@ -291,6 +295,25 @@ def main():
     if args.t3:
         projs = sorted(set(p for p, _ in corpus))
         for proj in projs:
+            # Per-node .anim tier: compare produced anims against the project's raw shape_anim
+            # references (core4_data global index as fallback), and account for every reference
+            # anim we did NOT produce — a reference without a producer is a coverage gap, not
+            # a silent pass.
+            arefs = project_anim_refs(args.ref, proj)
+            amine = proj_anims.get(proj, {})
+            for f, p in sorted(amine.items()):
+                ref = arefs.get(f) or g_animRefIdx.get(f)
+                if not ref:
+                    anim_noref += 1
+                elif open(p, "rb").read() == open(ref, "rb").read():
+                    anim_ident += 1
+                else:
+                    anim_diff += 1
+                    anim_diffs.append("%s:%s" % (proj, f))
+            for f in sorted(arefs):
+                if f not in amine:
+                    anim_ref_missing += 1
+                    anim_missing.append("%s:%s" % (proj, f))
             refs, coarse_refs = project_refs(args.ref, proj)
             mine = proj_produced.get(proj, {})
             for name, (path, coarse) in sorted(mine.items()):
@@ -357,10 +380,13 @@ def main():
         for s in diff_samples:
             print("    DIFF %s" % s)
         print("    export failures: %d" % len(export_fail))
-        print("    material anim (.anim): %d byte-identical, %d differ, %d without reference"
-              % (anim_ident, anim_diff, anim_noref))
+        print("    material anim (.anim): %d byte-identical, %d differ, %d without reference, "
+              "%d reference anims not produced"
+              % (anim_ident, anim_diff, anim_noref, anim_ref_missing))
         for bn in anim_diffs[:20]:
             print("    ANIM DIFF %s" % bn)
+        for bn in anim_missing[:20]:
+            print("    ANIM NOT PRODUCED %s" % bn)
 
     fails = t1_fail + t2_fail + len(export_fail)
     if args.gate_t3:
