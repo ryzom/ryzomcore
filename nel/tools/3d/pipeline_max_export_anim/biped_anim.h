@@ -320,6 +320,9 @@ private:
 	// limb 1 = leg (the full pivot model). Side 0 = R, 1 = L.
 	std::vector<SPivotSession> m_PivotSessions[2][2];
 	SFootWorldRot m_FootWorldRot[2]; // legs only
+	SFootWorldRot m_HandWorldRot[2]; // arms (PMB_BIPED_IK_ARMS): same yaw-frame decomposition as
+	                                 // the legs, applied to the planted hand so it does not ride
+	                                 // the moving COM (the §10r item-7 leg fix generalized).
 	bool m_PivotSessionsBuilt;
 
 	void buildChannels();
