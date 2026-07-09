@@ -1935,6 +1935,19 @@ void CBipedAnimEval::applyPivotIk(double t, std::map<INode *, SBipNodeState> &ou
 		// close — solving only injects the in-plant floor as noise. Static 2-knot plants are
 		// dropped entirely at session build (see buildPivotSessions).
 		if (limb == 0 && correction < 0.02) solveNeeded = false;
+		// LargePath moderate-miss FK hold (coup_fort residual plant). Dual-fold re-bends by
+		// law-of-cosines whenever the wrist is off T. On the last LargePath of
+		// fy_hof_co_l2m_coup_fort_03 ([4640,5600], storedD≈0.91) that over-bends R Forearm
+		// against the reference (file-worst 0.5116 @ frame 33 vs FK's ~0.23) while FK miss
+		// ≤ 6.4 cm — the stored upper/hinge path tracks CS better than a full re-solve. The
+		// first strike LargePath still dual-folds (miss up to ~0.53 m). Gate: dual-fold only
+		// when FK wrist is farther than 6.5 cm from T (just above residual-plant peak miss;
+		// 8 cm noise-regressed coup2/sit_end mid-band). Full-corpus A/B vs LP_HOLD=0:
+		// 3↑/3↓, coup_fort_03 0.51→0.23, max reg +0.037. PMB_BIPED_IK_LP_HOLD=0 restores
+		// §10s-cinq always-dual-fold for A/B.
+		static const char *s_lpHoldEnv = getenv("PMB_BIPED_IK_LP_HOLD");
+		static const bool s_lpModHold = !s_lpHoldEnv || s_lpHoldEnv[0] != '0';
+		if (limb == 0 && armLargeD && s_lpModHold && correction < 0.065) solveNeeded = false;
 		if (!solveNeeded && !footRotChanged) continue; // keys/no-op frames: bit-stable skip
 
 		// remember the pre-solve rotations for the descendant recomposition
@@ -2018,7 +2031,8 @@ void CBipedAnimEval::applyPivotIk(double t, std::map<INode *, SBipNodeState> &ou
 				// Always accept the better dual-fold on LargePath intervals (session build
 				// already requires ≥3 W knots + stored pA travel > 10 cm). midFlip vs FK is
 				// a wrong reject metric mid-swing (coup_fort t=2560: midFlip 0.94 on both
-				// folds while the wrist is 30+ cm from FK).
+				// folds while the wrist is 30+ cm from FK). Moderate-miss frames never reach
+				// here (solveNeeded cleared above).
 				if (getenv("PMB_BIPED_IK_DEBUG"))
 					fprintf(stderr, "IKDBG_ARM t=%g midFlip=%g largeD=1 knots=%d reject=0\n",
 					        t, bestFlip, (int)sess->W.X.Keys.size());

@@ -58,9 +58,11 @@
  * select rotation-rule and arm-pin variants. Arm-pin is default ON (§10s-quat/cinq): palm-pivot
  * + space + stored-pA path gate + correction + static-plant-drop + COM-yaw-session-drop;
  * small-D uses single-fold + midFlip/locFlip; large-path (stored pA travel > 10 cm + ≥4 knots
- * — coup_fort weapon plants) uses dual-fold reach-first with FK hand rotation (Full world
- * squad is A/B-only via PMB_BIPED_IK_ROT=full). Pole vector [22..24] twists the solved chain
- * onto the stored elbow/knee plane. PMB_BIPED_IK_ARMS=0 forces legs-only for A/B.
+ * — coup_fort weapon plants) uses dual-fold reach-first with FK hand rotation when FK wrist
+ * miss > 6.5 cm (moderate-miss holds stay on the stored upper/hinge path — residual last-plant
+ * coup_fort_03); Full world squad is A/B-only via PMB_BIPED_IK_ROT=full. Pole vector [22..24]
+ * twists the solved chain onto the stored elbow/knee plane (env-gated). PMB_BIPED_IK_ARMS=0
+ * forces legs-only for A/B.
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
  * \author Grok 4.5
