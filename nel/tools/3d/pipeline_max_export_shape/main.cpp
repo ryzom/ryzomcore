@@ -72,6 +72,14 @@
 #include <string>
 #include <vector>
 
+#ifdef NL_OS_WINDOWS
+#include <process.h>
+#define PMB_GETPID _getpid
+#else
+#include <unistd.h>
+#define PMB_GETPID getpid
+#endif
+
 #include "scene_lib.h"
 #include "../pipeline_max_export_common/db_path.h"
 #include "mesh_eval.h"
@@ -752,19 +760,50 @@ static int exportFile(const std::string &maxPath, const std::string &outDir, con
 
 		try
 		{
-			// Serialize to memory, then patch the serialMeshBase version byte 10 -> 9: current
-			// NL3D writes CMeshBase version 10 ("Ryzom Core release check", 2024) which adds no
-			// fields over the export-era version 9 — same pure-version-byte class as the zone
-			// v4/v5 byte (see pipeline_max_design.md §10h). Stream layout for the CMeshBase
-			// shapes: "SHAP" + u64 0x1 + u32 nameLen + name + classVersion byte + meshBase
-			// version byte.
-			NLMISC::CMemStream mem;
+			// Serialize via a PID+node temp file, then patch the serialMeshBase version byte 10 -> 9:
+			// current NL3D writes CMeshBase version 10 ("Ryzom Core release check", 2024) which adds
+			// no fields over the export-era version 9 — same pure-version-byte class as the zone
+			// v4/v5 byte (see pipeline_max_design.md §10h). Stream layout for the CMeshBase shapes:
+			// "SHAP" + u64 0x1 + u32 nameLen + name + classVersion byte + meshBase version byte.
+			//
+			// COFile-not-CMemStream: CMeshMRMGeom::save uses a seek-back-then-forward pattern to
+			// patch its per-lod offsets after writing each lod (mesh_mrm.cpp:1942-1972). CMemStream
+			// rejects the forward seek because its `length()` (checked in `seek(begin)`) returns the
+			// current write position, not the max ever written — so the writer silently overwrites
+			// its own lod-offset placeholders and the resulting file cannot be loaded (see
+			// pipeline_max_design.md §9 T2 note for the same limitation on the corpus tester). Route
+			// the initial serialize through a real file to sidestep the CMemStream constraint,
+			// exactly the way pipeline_max_corpus_test T2 does.
+			char tmpPath[256];
+			sprintf(tmpPath, "/tmp/pipeline_max_export_shape.%d.tmp", (int)PMB_GETPID());
 			{
+				NLMISC::COFile ofile;
+				if (!ofile.open(tmpPath))
+				{
+					fprintf(stderr, "ERROR: cannot open %s for writing\n", tmpPath);
+					delete shape;
+					continue;
+				}
 				NL3D::CShapeStream shapeStream(shape);
-				shapeStream.serial(mem);
+				shapeStream.serial(ofile);
+				ofile.close();
 			}
-			uint8 *buf = const_cast<uint8 *>(mem.buffer());
-			uint32 len = mem.length();
+			std::vector<uint8> memBuf;
+			{
+				NLMISC::CIFile ifile;
+				if (!ifile.open(tmpPath))
+				{
+					fprintf(stderr, "ERROR: cannot open %s for reading\n", tmpPath);
+					delete shape;
+					continue;
+				}
+				memBuf.resize(ifile.getFileSize());
+				if (!memBuf.empty())
+					ifile.serialBuffer(&memBuf[0], (uint)memBuf.size());
+				ifile.close();
+			}
+			uint8 *buf = memBuf.empty() ? NULL : &memBuf[0];
+			uint32 len = (uint32)memBuf.size();
 			{
 				std::string className = shape->getClassName();
 				// CMeshBase-derived shapes: CMesh/CMeshMRM/CMeshMRMSkinned write their OWN
