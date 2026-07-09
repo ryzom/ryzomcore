@@ -1146,6 +1146,27 @@ static bool sampleBipedSubtree(INode &root, CSceneClassContainer *ssc, SBipedSam
 		{
 			INode *node = it->first;
 			INode *parent = node->parent();
+			// A LINKED biped COM (nested under another node — the kitin family's Bip02 under
+			// Bip01 Spine, the mektoub rider's Bip01male under the saddle) rides its parent
+			// RIGIDLY in Character Studio: the reference's exported local TM is CONSTANT per
+			// file, and its value equals the FIGURE-mode attach (position corpus-exact to
+			// ~2e-4 on every kitin anim except the stun trilogy, whose figure was re-posed
+			// after the reference export — reference-era class; rotation matches to ~6e-3,
+			// the residual is a small saved-pose twist not yet pinned). The COM's own h/v/t
+			// channels do NOT place a linked rig in world. Rig-internal locals are invariant
+			// under this re-anchoring (both sides of every child's local shift together), so
+			// only the COM's exported track changes.
+			if (PMAX_RIG::isBipedComNode(node) && parent)
+			{
+				std::map<INode *, size_t>::const_iterator bi = boneOf.find(node), pi = boneOf.find(parent);
+				if (bi != boneOf.end() && pi != boneOf.end())
+				{
+					NLMISC::CMatrix loc = bones[pi->second].WorldTM.inverted() * bones[bi->second].WorldTM;
+					out.Rot[node].push_back(loc.getRot());
+					out.Pos[node].push_back(loc.getPos());
+					continue;
+				}
+			}
 			BIPANIM::QuatD w = it->second.WorldRot;
 			NLMISC::CVectorD wp = it->second.WorldPos;
 			BIPANIM::QuatD localR = w;
