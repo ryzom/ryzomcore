@@ -127,21 +127,32 @@ bool buildParametricMesh(const NLMISC::CClassId &cid,
 				uvVerts->push_back(boxUvFor(verts[_c], FT, l, w, h)); \
 			} \
 		} while (0)
-		curMat = 1; curSg = 0x02;
+		// Negative height inverts the cap roles: the z=0 grid is now functionally the TOP face
+		// (facing +Z after the winding flip) and the z=h grid is the BOTTOM. Swap the face-type
+		// used for UV generation AND the matId/sg pair on each so a wall-mounted upside-down box
+		// (h < 0, box01.max) uv-maps the same as its right-side-up sibling. Validated against
+		// box01.shape (h < 0): the z=0 face's UVs now match the BX_TOP formula ref carries.
+		TBoxUvFace ftLow = flip ? BX_TOP : BX_BOTTOM;
+		TBoxUvFace ftHigh = flip ? BX_BOTTOM : BX_TOP;
+		uint32 matLow = flip ? 0 : 1;
+		uint32 sgLow = flip ? 0x04 : 0x02;
+		uint32 matHigh = flip ? 1 : 0;
+		uint32 sgHigh = flip ? 0x02 : 0x04;
+		curMat = matLow; curSg = sgLow;
 		for (sint iy = 0; iy < ls; ++iy)
 			for (sint ix = 0; ix < ws; ++ix)
 			{
 				sint a = iy * row + ix;
-				BOX_TRI(a, a + row, a + row + 1, BX_BOTTOM);
-				BOX_TRI(a + row + 1, a + 1, a, BX_BOTTOM);
+				BOX_TRI(a, a + row, a + row + 1, ftLow);
+				BOX_TRI(a + row + 1, a + 1, a, ftLow);
 			}
-		curMat = 0; curSg = 0x04;
+		curMat = matHigh; curSg = sgHigh;
 		for (sint iy = 0; iy < ls; ++iy)
 			for (sint ix = 0; ix < ws; ++ix)
 			{
 				sint a = gridN + iy * row + ix;
-				BOX_TRI(a, a + 1, a + 1 + row, BX_TOP);
-				BOX_TRI(a + 1 + row, a + row, a, BX_TOP);
+				BOX_TRI(a, a + 1, a + 1 + row, ftHigh);
+				BOX_TRI(a + 1 + row, a + row, a, ftHigh);
 			}
 		sint sideStart[4] = { 0, ws, ws + ls, 2 * ws + ls };
 		sint sideLen[4] = { ws, ls, ws, ls };
