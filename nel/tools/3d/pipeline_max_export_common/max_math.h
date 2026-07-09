@@ -9,6 +9,7 @@
  * the copies drifting — see pipeline_max_design.md's note on the consolidation).
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
+ * \author Grok 4.5
  */
 
 /*

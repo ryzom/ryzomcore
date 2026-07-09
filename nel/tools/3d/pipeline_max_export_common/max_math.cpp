@@ -11,6 +11,7 @@
  * rotation (q) diverge from Max on rot*scale composites.
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
+ * \author Grok 4.5
  */
 
 /*

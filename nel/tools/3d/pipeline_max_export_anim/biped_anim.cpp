@@ -3,6 +3,7 @@
  * \brief Biped animation-key decode + evaluation. See biped_anim.h.
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
+ * \author Grok 4.5
  */
 
 /*

@@ -60,6 +60,7 @@
  * forces legs-only for A/B.
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
+ * \author Grok 4.5
  */
 
 /*
