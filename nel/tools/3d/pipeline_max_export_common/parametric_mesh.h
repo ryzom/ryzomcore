@@ -9,6 +9,7 @@
  * dataset round for the derivation.
  * \author Jan Boon (Kaetemi)
  * \author Claude Opus 4.7 (1M context)
+ * \author Grok 4.5
  */
 
 /*
@@ -82,10 +83,21 @@ extern const NLMISC::CClassId CLASSID_PLANE;    ///< {0x081f1dfc, 0x77566f65}
 ///  - Sphere: top pole, rings top-down with meridians starting at +Y CCW, bottom pole. Fans +
 ///    quad rows (u[k], lo[k], lo[k+1])+(u[k], lo[k+1], u[k+1]).
 ///  - Plane: grid at z=0 (ix fastest); per cell (d, a, c)+(b, c, a).
+///
+/// When `uvVerts` is non-NULL, the "generate mapping coords" UVs are also emitted (Box + Plane
+/// only for now — Cylinder/Sphere need per-primitive seam handling, design §10z-cinq). `uvVerts`
+/// receives exactly `3 x tris.size()` entries, one UV per triangle corner in tri order (corner c
+/// of tri t is `(*uvVerts)[t*3 + c]`); the caller builds a map channel whose face t maps its 3
+/// corners to `t*3 + {0,1,2}`. No dedup here: the consuming mesh build dedups the final vertex
+/// buffer on (pos, normal, UV), so the per-corner VALUE is what matters. Box UVs derive
+/// geometrically per face (each face projects onto its two in-plane axes; validated against
+/// ~/shape_export_dataset primuv_box(_multiseg), generalises to multi-segment by vertex coord);
+/// Plane UVs are `(0.5+x/w, 0.5+y/l)`.
 bool buildParametricMesh(const NLMISC::CClassId &cid,
                          const std::map<sint32, OLDPBLOCK::SParam> &params,
                          std::vector<NLMISC::CVector> &verts,
-                         std::vector<SPrimTri> &tris);
+                         std::vector<SPrimTri> &tris,
+                         std::vector<NLMISC::CVector> *uvVerts = NULL);
 
 } /* namespace PRIMMESH */
 

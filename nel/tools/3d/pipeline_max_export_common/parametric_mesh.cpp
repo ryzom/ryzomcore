@@ -3,6 +3,7 @@
  * \brief See parametric_mesh.h.
  * \author Jan Boon (Kaetemi)
  * \author Claude Opus 4.7 (1M context)
+ * \author Grok 4.5
  */
 
 /*
@@ -38,10 +39,29 @@ const NLMISC::CClassId CLASSID_CYLINDER(0x00000012, 0x00000000);
 const NLMISC::CClassId CLASSID_SPHERE(0x00000011, 0x00000000);
 const NLMISC::CClassId CLASSID_PLANE(0x081f1dfc, 0x77566f65);
 
+// Box "generate mapping coords" UV for one vertex, by face type. Each face projects onto its two
+// in-plane axes; validated against ~/shape_export_dataset primuv_box (and generalises to
+// primuv_box_multiseg because the projection is by vertex coordinate, not face index). w=width,
+// l=length, h=height (the Box pblock params; signed — the formula tracks how positions are built).
+enum TBoxUvFace { BX_BOTTOM, BX_TOP, BX_SIDE_Y, BX_SIDE_X };
+static inline NLMISC::CVector boxUvFor(const NLMISC::CVector &p, TBoxUvFace ft, float l, float w, float h)
+{
+	float u = 0.0f, v = 0.0f;
+	switch (ft)
+	{
+		case BX_BOTTOM:  u = 0.5f - p.x / w; v = 0.5f + p.y / l; break; // -Z face (U mirrored vs top)
+		case BX_TOP:     u = 0.5f + p.x / w; v = 0.5f + p.y / l; break;
+		case BX_SIDE_Y:  u = 0.5f + p.x / w; v = p.z / h; break;       // ±Y faces share this mapping
+		case BX_SIDE_X:  u = 0.5f + p.y / l; v = p.z / h; break;       // ±X faces share this mapping
+	}
+	return NLMISC::CVector(u, v, 0.0f);
+}
+
 bool buildParametricMesh(const NLMISC::CClassId &cid,
                          const std::map<sint32, OLDPBLOCK::SParam> &params,
                          std::vector<NLMISC::CVector> &verts,
-                         std::vector<SPrimTri> &tris)
+                         std::vector<SPrimTri> &tris,
+                         std::vector<NLMISC::CVector> *uvVerts)
 {
 	using OLDPBLOCK::paramFloat;
 	using OLDPBLOCK::paramInt;
@@ -77,6 +97,7 @@ bool buildParametricMesh(const NLMISC::CClassId &cid,
 			: ((v) == hs ? gridN + perIy[(k) % perN] * row + perIx[(k) % perN] \
 			: 2 * gridN + ((v) - 1) * perN + ((k) % perN)))
 		tris.clear();
+		if (uvVerts) uvVerts->clear();
 		bool flip = h < 0.0f;
 		// Per-side (matId, smoothing-group) tables — corpus-validated against
 		// ~/shape_export_dataset/manifest.txt (plain_box, primuv_box, primuv_box_multiseg): Max's
@@ -93,22 +114,34 @@ bool buildParametricMesh(const NLMISC::CClassId &cid,
 		static const uint32 sideSg[4]  = { 0x08, 0x10, 0x20, 0x40 };
 		uint32 curMat = 0;
 		uint32 curSg = 0;
-		#define BOX_TRI(a, b, c) { SPrimTri t = { { (uint32)(flip ? (b) : (a)), (uint32)(flip ? (a) : (b)), (uint32)(c) }, curMat, curSg }; tris.push_back(t); }
+		// FT = the box-mapping face type for the UV; emitted per corner in the SAME order the geom
+		// tri is pushed (flip-aware) so map-face t's corner c is (*uvVerts)[t*3 + c].
+		#define BOX_TRI(a, b, c, FT) do { \
+			sint _a = (a), _b = (b), _c = (c); \
+			sint _o0 = flip ? _b : _a, _o1 = flip ? _a : _b; \
+			SPrimTri _t = { { (uint32)_o0, (uint32)_o1, (uint32)_c }, curMat, curSg }; \
+			tris.push_back(_t); \
+			if (uvVerts) { \
+				uvVerts->push_back(boxUvFor(verts[_o0], FT, l, w, h)); \
+				uvVerts->push_back(boxUvFor(verts[_o1], FT, l, w, h)); \
+				uvVerts->push_back(boxUvFor(verts[_c], FT, l, w, h)); \
+			} \
+		} while (0)
 		curMat = 1; curSg = 0x02;
 		for (sint iy = 0; iy < ls; ++iy)
 			for (sint ix = 0; ix < ws; ++ix)
 			{
 				sint a = iy * row + ix;
-				BOX_TRI(a, a + row, a + row + 1)
-				BOX_TRI(a + row + 1, a + 1, a)
+				BOX_TRI(a, a + row, a + row + 1, BX_BOTTOM);
+				BOX_TRI(a + row + 1, a + 1, a, BX_BOTTOM);
 			}
 		curMat = 0; curSg = 0x04;
 		for (sint iy = 0; iy < ls; ++iy)
 			for (sint ix = 0; ix < ws; ++ix)
 			{
 				sint a = gridN + iy * row + ix;
-				BOX_TRI(a, a + 1, a + 1 + row)
-				BOX_TRI(a + 1 + row, a + row, a)
+				BOX_TRI(a, a + 1, a + 1 + row, BX_TOP);
+				BOX_TRI(a + 1 + row, a + row, a, BX_TOP);
 			}
 		sint sideStart[4] = { 0, ws, ws + ls, 2 * ws + ls };
 		sint sideLen[4] = { ws, ls, ws, ls };
@@ -116,14 +149,16 @@ bool buildParametricMesh(const NLMISC::CClassId &cid,
 		{
 			curMat = sideMat[sd];
 			curSg = sideSg[sd];
+			// sd 0/2 = -Y/+Y faces (span x,z); sd 1/3 = +X/-X faces (span y,z).
+			TBoxUvFace ft = (sd == 0 || sd == 2) ? BX_SIDE_Y : BX_SIDE_X;
 			for (sint v = 0; v < hs; ++v)
 				for (sint k = 0; k < sideLen[sd]; ++k)
 				{
 					sint pk = sideStart[sd] + k;
 					sint lo1 = BOX_RING(v, pk), lo2 = BOX_RING(v, pk + 1);
 					sint up1 = BOX_RING(v + 1, pk), up2 = BOX_RING(v + 1, pk + 1);
-					BOX_TRI(lo1, lo2, up2)
-					BOX_TRI(up2, up1, lo1)
+					BOX_TRI(lo1, lo2, up2, ft);
+					BOX_TRI(up2, up1, lo1, ft);
 				}
 		}
 		#undef BOX_TRI
@@ -230,7 +265,10 @@ bool buildParametricMesh(const NLMISC::CClassId &cid,
 			for (sint ix = 0; ix <= ws; ++ix)
 				verts.push_back(NLMISC::CVector(x0 + dx * ix, y0 + dy * iy, 0.0f));
 		tris.clear();
-		// Plane: matId 0, sg 0x01 uniformly (~/shape_export_dataset primuv_plane).
+		if (uvVerts) uvVerts->clear();
+		// Plane: matId 0, sg 0x01 uniformly (~/shape_export_dataset primuv_plane). UV per corner =
+		// (0.5+x/w, 0.5+y/l) — planar mapping over the plane's own XY extent.
+		#define PLANE_UV(IDX) (uvVerts ? uvVerts->push_back(NLMISC::CVector(0.5f + verts[IDX].x / w, 0.5f + verts[IDX].y / l, 0.0f)) : ((void)0))
 		for (sint iy = 0; iy < ls; ++iy)
 			for (sint ix = 0; ix < ws; ++ix)
 			{
@@ -240,9 +278,12 @@ bool buildParametricMesh(const NLMISC::CClassId &cid,
 				uint32 d = a + row;
 				SPrimTri t1 = { { d, a, c }, 0, 0x01 };
 				tris.push_back(t1);
+				PLANE_UV(d); PLANE_UV(a); PLANE_UV(c);
 				SPrimTri t2 = { { b, c, a }, 0, 0x01 };
 				tris.push_back(t2);
+				PLANE_UV(b); PLANE_UV(c); PLANE_UV(a);
 			}
+		#undef PLANE_UV
 		return true;
 	}
 

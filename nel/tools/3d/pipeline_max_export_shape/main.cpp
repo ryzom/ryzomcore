@@ -3,6 +3,7 @@
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
  * \author Claude Opus 4.8
+ * \author Grok 4.5
  */
 // Shape export: .max -> .shape, replicating the NelExportShapeEx path of the 3ds Max plugin
 // (build_gamedata processes/shape) without 3ds Max.
@@ -78,6 +79,7 @@
 #include "anim_build.h"
 #include "water_build.h"
 #include "flare_build.h"
+#include "../pipeline_max_export_common/physique_skin.h"
 
 #include "../pipeline_max/builtin/scene_impl.h"
 #include "../pipeline_max/builtin/i_node.h"
@@ -237,6 +239,27 @@ static bool evalAndBuildMesh(INode &node, SNodeTMCache &tmCache,
 	return true;
 }
 
+// Apply Physique skinning onto a just-built CMeshBuild (fills SkinWeights + BonesNames + the
+// PaletteSkin vertex flag). Returns false only on hard failure (caller may still ship the
+// unskinned mesh or skip — currently we skip to keep the harness honest).
+static bool tryApplyPhysique(INode &node, NL3D::CMesh::CMeshBuild &buildMesh,
+                             const std::vector<CSceneClass *> &mods,
+                             const std::vector<CStorageContainer *> &modApps,
+                             CSceneClassContainer *ssc, SExportStats &stats)
+{
+	std::string err;
+	if (!PHYSIQUESKIN::applyPhysiqueSkinning(buildMesh, node, mods, modApps, ssc, &err))
+	{
+		stats.skip("skinned-physique");
+		fprintf(stderr, "SKIP shape '%s': Physique skinning failed: %s\n",
+		        nodeName(node).c_str(), err.c_str());
+		return false;
+	}
+	// Reference sets PaletteSkinFlag after a successful buildSkinning (export_mesh.cpp).
+	buildMesh.VertexFlags |= NL3D::CVertexBuffer::PaletteSkinFlag;
+	return true;
+}
+
 // Construct an IMeshGeom (CMeshGeom or CMeshMRMGeom) from a built CMeshBuild — used per LOD slot
 // in the multi-lod path. Caller owns the returned pointer until CMeshMultiLod::build takes it.
 static NL3D::IMeshGeom *buildMeshGeomFor(INode &node, NL3D::CMesh::CMeshBuild &buildMesh,
@@ -275,7 +298,8 @@ typedef std::map<std::string, INode *> TNodesByName;
 
 static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
                                        const TNodesByName &nodesByName,
-                                       bool exportLighting, SExportStats &stats)
+                                       bool exportLighting, SExportStats &stats,
+                                       CSceneClassContainer *ssc)
 {
 	CNodeImpl *n = dynamic_cast<CNodeImpl *>(&node);
 	std::string name = nodeName(node);
@@ -323,25 +347,20 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 		return ws;
 	}
 
-	// Skinning (Physique/Skin modifier). Detection is on (ClassId, SuperClassId) — Max shares
-	// ClassId (0x100, 0) across four modifier-superclass classes (Physique 0x810 is the one we
-	// want; Placement 0xc20, Output 0xc40, Shadow Map 0x10d0 are irrelevant); Skin is a unique
-	// pair (0x95c6a3, 0x15666). Bucket by which modifier is in the way so the harness can triage
-	// them separately (Physique needs the CS SDK IPhysiqueExport payload; Skin needs the ISkin
-	// context — the two decode paths are unrelated, cf. reference export_skinning.cpp).
+	// Skinning detection (Physique/Skin). Physique has a production decode path (§10z-six /
+	// PHYSIQUESKIN); Skin (Max 4+) still skips — zero corpus hits under Max 3-era assets.
+	// Detection is on (ClassId, SuperClassId) — Max shares ClassId (0x100, 0) across four
+	// classes (Physique is SuperClassId 0x810).
+	bool hasPhysique = false;
 	for (uint i = 0; i < mods.size(); ++i)
 	{
 		NLMISC::CClassId mcid = mods[i]->classDesc()->classId();
 		TSClassId mscid = mods[i]->classDesc()->superClassId();
-		bool isPhysique = (mcid == SCENELIB::CLASSID_PHYSIQUE && mscid == SCENELIB::SCLASS_OSMODIFIER);
-		bool isSkin = (mcid == SCENELIB::CLASSID_SKIN);
+		bool isPhysique = (mcid == SCENELIB::CLASSID_PHYSIQUE && mscid == SCENELIB::SCLASS_OSMODIFIER)
+		                  || PHYSIQUESKIN::isPhysiqueModifier(mods[i]);
+		bool isSkin = (mcid == SCENELIB::CLASSID_SKIN) || PHYSIQUESKIN::isSkinModifier(mods[i]);
 		if (isPhysique || isSkin)
 		{
-			// Env-gated diagnostic: dump the mod-app (0x2500) sub-chunk tree for a future decode
-			// session. The per-vertex weight blob layout is undocumented in max_geometry_formats.md
-			// so we don't attempt to interpret it here — just characterize the structure so
-			// somebody with a differential dataset can pin the fields (same channel §10 used for
-			// the biped decode).
 			if (getenv("PMB_SKIN_DUMP"))
 			{
 				CStorageContainer *app = (i < modApps.size()) ? modApps[i] : NULL;
@@ -349,17 +368,9 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 				        name.c_str(), isPhysique ? "Physique" : "Skin",
 				        mcid.a(), mcid.b(), (uint32)mscid);
 				if (app)
-				{
 					dumpPhysiquePayload(app);
-				}
 				else
-				{
 					fprintf(stderr, "  (no mod-app slot)\n");
-				}
-				// Also dump the MODIFIER SCENE OBJECT's references + raw chunks: the per-modifier
-				// bone table (index -> INode) the per-vertex boneRef indexes into lives here, not
-				// on the mod-app. bones ~ per-vertex boneRef (one's-complement index) decoded as
-				// ~boneRef; locating the table is the open Physique decode blocker (Part M §M.3).
 				CReferenceMaker *mrm = dynamic_cast<CReferenceMaker *>(mods[i]);
 				if (mrm)
 				{
@@ -374,25 +385,18 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 						        (uint32)ref->classDesc()->superClassId(),
 						        rn ? "NODE '" : "", rn ? nodeName(*rn).c_str() : "");
 					}
-					const CStorageContainer::TStorageObjectContainer &orph = mods[i]->orphanedChunks();
-					fprintf(stderr, "  MODCHUNKS count=%u\n", (uint)orph.size());
-					for (CStorageContainer::TStorageObjectConstIt it = orph.begin(); it != orph.end(); ++it)
-					{
-						CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
-						CStorageContainer *sub = dynamic_cast<CStorageContainer *>(it->second);
-						fprintf(stderr, "    chunk 0x%04x %s size=%u\n", it->first,
-						        raw ? "leaf" : (sub ? "container" : "?"),
-						        raw ? (uint)raw->Value.size() : (sub ? (uint)sub->chunks().size() : 0u));
-					}
 				}
 			}
-			const char *kind = isPhysique ? "skinned-physique" : "skinned-skin";
-			stats.skip(kind);
-			fprintf(stderr, "SKIP shape '%s': %s modifier not implemented (per-node vertex weights "
-			                "in the modifier's 0x2500 mod-app payload — undocumented, see design "
-			                "doc §10z-bis handoff; use PMB_SKIN_DUMP=1 to dump the payload structure)\n",
-			        name.c_str(), isPhysique ? "Physique" : "Skin");
-			return NULL;
+			if (isSkin)
+			{
+				stats.skip("skinned-skin");
+				fprintf(stderr, "SKIP shape '%s': Skin modifier not implemented (Max 4+ ISkin path;"
+				                " corpus era is Physique-only — see design §10z-quat)\n",
+				        name.c_str());
+				return NULL;
+			}
+			hasPhysique = true;
+			// Physique: continue into the mesh path; skinning is applied after mesh eval.
 		}
 	}
 
@@ -401,14 +405,19 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 	// contributes ONE MeshGeom slot to a CMeshMultiLod. Materials, transform and shadow flags
 	// live at the base level and come from the parent node; slave matIDs get clamped through
 	// buildMeshInterface's `% numMaterials` so a slave with fewer materials is safe).
+	// Note: multi-lod + Physique is rare in the corpus; we still apply skinning per slot when
+	// the parent/slave carries Physique (hasPhysique covers the parent; slaves re-detect).
 	uint lodCount = (uint)getScriptAppDataInt(n, NEL3D_APPDATA_LOD_NAME_COUNT, 0);
 
-	// Interface meshes (normal welding)
+	// Interface meshes (border normal welding against another .max via INTERFACE_FILE appdata).
+	// The reference applies this as a post-build normal correction (export_mesh_interface.cpp),
+	// not a hard export gate — the mesh still ships without the weld, just with different border
+	// normals. Warn and continue so skinned armor / other interface-bearing shapes aren't
+	// blocked; full weld decode remains open (§10z-bis handoff, ~10 files).
 	if (!getScriptAppDataStr(n, NEL3D_APPDATA_INTERFACE_FILE, "").empty())
 	{
-		stats.skip("interface-mesh");
-		fprintf(stderr, "SKIP shape '%s': interface mesh not implemented\n", name.c_str());
-		return NULL;
+		fprintf(stderr, "WARNING: shape '%s' has INTERFACE_FILE appdata; exporting without "
+		                "border normal welding (interface-mesh open item)\n", name.c_str());
 	}
 
 	// Nodes carrying the custom UVW-mapping plugin modifier ("Map Extender", mapext198m3.dlm,
@@ -465,6 +474,8 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 			NL3D::CMesh::CMeshBuild buildMesh;
 			if (evalAndBuildMesh(node, tmCache, buildBaseMesh, maxBaseBuild, buildMesh, stats))
 			{
+				if (hasPhysique && !tryApplyPhysique(node, buildMesh, mods, modApps, ssc, stats))
+					return NULL;
 				NL3D::CMeshMultiLod::CMeshMultiLodBuild::CBuildSlot slot;
 				slot.MeshGeom = buildMeshGeomFor(node, buildMesh, numMaterials);
 				slot.DistMax = getScriptAppDataFloat(n, NEL3D_APPDATA_LOD_DIST_MAX, 1000.f);
@@ -492,6 +503,17 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 			NL3D::CMesh::CMeshBuild buildMesh;
 			if (!evalAndBuildMesh(*slave, tmCache, buildBaseMesh, maxBaseBuild, buildMesh, stats))
 				continue;
+			// Slave may carry its own Physique (rare); re-detect.
+			{
+				std::vector<CSceneClass *> sMods;
+				std::vector<CStorageContainer *> sApps;
+				baseObjectOf(*slave, &sMods, &sApps);
+				bool slavePhys = false;
+				for (uint mi = 0; mi < sMods.size(); ++mi)
+					if (PHYSIQUESKIN::isPhysiqueModifier(sMods[mi])) { slavePhys = true; break; }
+				if (slavePhys && !tryApplyPhysique(*slave, buildMesh, sMods, sApps, ssc, stats))
+					continue;
+			}
 			NL3D::CMeshMultiLod::CMeshMultiLodBuild::CBuildSlot slot;
 			slot.MeshGeom = buildMeshGeomFor(*slave, buildMesh, numMaterials);
 			slot.DistMax = getScriptAppDataFloat(sn, NEL3D_APPDATA_LOD_DIST_MAX, 1000.f);
@@ -524,8 +546,18 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 		NL3D::CMesh::CMeshBuild buildMesh;
 		if (!evalAndBuildMesh(node, tmCache, buildBaseMesh, maxBaseBuild, buildMesh, stats))
 			return NULL;
+		if (hasPhysique && !tryApplyPhysique(node, buildMesh, mods, modApps, ssc, stats))
+			return NULL;
 
-		if (getScriptAppDataInt(n, NEL3D_APPDATA_LOD_MRM, 0))
+		// Skinned meshes without LOD_MRM still take the MRM path when skinning is present —
+		// the reference's buildShape routes isSkin nodes through buildMeshGeom which builds
+		// CMeshMRM/CMeshMRMSkinned; plain CMesh can carry SkinWeights too but character corpus
+		// is LOD_MRM almost exclusively. Force the MRM branch when skinned so isCompatible
+		// can pick CMeshMRMSkinned.
+		const bool wantMrm = getScriptAppDataInt(n, NEL3D_APPDATA_LOD_MRM, 0)
+		                     || !buildMesh.SkinWeights.empty();
+
+		if (wantMrm)
 		{
 			NL3D::CMRMParameters parameters;
 			buildMRMParameters(n, parameters);
@@ -682,7 +714,7 @@ static int exportFile(const std::string &maxPath, const std::string &outDir, con
 
 		std::string outPath = (haveCoarse ? outDirCoarse : outDir) + "/" + NLMISC::toLowerAscii(name) + ".shape";
 
-		NL3D::IShape *shape = buildShapeForNode(node, tmCache, nodesByName, exportLighting, stats);
+		NL3D::IShape *shape = buildShapeForNode(node, tmCache, nodesByName, exportLighting, stats, ssc);
 		if (!shape)
 			continue;
 

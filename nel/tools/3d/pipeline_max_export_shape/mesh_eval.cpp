@@ -16,6 +16,7 @@
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
  * \author Claude Opus 4.8
+ * \author Grok 4.5
  */
 
 /*
@@ -493,13 +494,10 @@ static void applyXForm(CSceneClass *mod, CStorageContainer *app, SEvalMesh &mesh
 // ---------------------------------------------------------------------------------------------
 
 // Extract a parametric primitive's mesh into SEvalMesh: use the shared PRIMMESH library for
-// GT-exact topology, assign all faces smoothing group 1 (Max's default single smoothing group
-// for primitives) + material id 0, and leave map channels empty (mapping-coord UV generation
-// per primitive type is unimplemented — Box gets 6-face box mapping, Cylinder cylindrical,
-// Sphere spherical, Plane planar; formulas depend on the primitive's "generate mapping coords"
-// checkbox and its specific dimensions, and the reference builds them via Max's own SDK. Skipped
-// here — texture UVs for these prims default to (0,0,0) via buildMeshInterface's empty-channel
-// path, which is only "wrong" for textured prims and correct for untextured/collision ones).
+// GT-exact topology + per-face matId/smGroup (§10z-cinq). Map channel 1 is filled for Box and
+// Plane "generate mapping coords" UVs (Cylinder/Sphere seam handling still open — §10z-cinq
+// follow-up); when UVs aren't produced, buildMeshInterface's empty-channel path supplies
+// (0,0,0), correct for untextured/collision prims.
 static bool extractParametricPrimitive(CSceneClass *base, SEvalMesh &out, const std::string &name)
 {
 	// Locate the primitive's ref-0 old-style ParamBlock (superclass 0x8).
@@ -524,7 +522,10 @@ static bool extractParametricPrimitive(CSceneClass *base, SEvalMesh &out, const 
 
 	std::vector<NLMISC::CVector> pverts;
 	std::vector<PRIMMESH::SPrimTri> ptris;
-	if (!PRIMMESH::buildParametricMesh(base->classDesc()->classId(), params, pverts, ptris))
+	// UV generation for Box + Plane (Cylinder/Sphere seam handling still open — §10z-cinq).
+	// Per-corner UVs (3 × nFaces); the mesh-build path dedups the final VB on (pos,n,uv).
+	std::vector<NLMISC::CVector> puvs;
+	if (!PRIMMESH::buildParametricMesh(base->classDesc()->classId(), params, pverts, ptris, &puvs))
 		return false;
 
 	out.Verts.resize(pverts.size());
@@ -543,6 +544,22 @@ static bool extractParametricPrimitive(CSceneClass *base, SEvalMesh &out, const 
 		out.Faces[i].SmGroup = ptris[i].SmGroup;
 		out.Faces[i].Flags = (ptris[i].MatId & 0xFFFFu) << MAX_FACE_MATID_SHIFT;
 		out.Faces[i].Flags |= 0x7; // all edges visible
+	}
+	// Map channel 1: per-corner UVs when the generator produced them (Box/Plane today). Face t's
+	// three corners map to indices t*3+{0,1,2} into the UV vert list — no UV-vert sharing here
+	// (matches how Max stores some multi-seg cases; the export VB dedup absorbs the redundancy).
+	if (!puvs.empty() && puvs.size() == ptris.size() * 3)
+	{
+		SMapChannel &mc = out.Maps[1];
+		mc.Verts.resize(puvs.size());
+		if (!puvs.empty()) memcpy(&mc.Verts[0], &puvs[0], puvs.size() * 12);
+		mc.Faces.resize(ptris.size());
+		for (uint i = 0; i < ptris.size(); ++i)
+		{
+			mc.Faces[i].T[0] = i * 3 + 0;
+			mc.Faces[i].T[1] = i * 3 + 1;
+			mc.Faces[i].T[2] = i * 3 + 2;
+		}
 	}
 	return true;
 }
@@ -620,6 +637,13 @@ bool evalNodeMesh(INode &node, SEvalMesh &out, std::vector<std::string> *warning
 			std::vector<uint32> colors;
 			if (readVertexPaintColors(app, colors))
 				applyVertexPaint(colors, out, name);
+		}
+		else if ((mcid == NLMISC::CClassId(0x00000100, 0x00000000)
+		          && mod->classDesc()->superClassId() == 0x810) // Physique (geometry-neutral)
+		         || mcid == NLMISC::CClassId(0x0095c6a3, 0x00015666)) // Skin (geometry-neutral)
+		{
+			// Skinning weights are applied after mesh eval (PHYSIQUESKIN); the modifier itself
+			// does not rewrite geometry at export time (the reference disables it first).
 		}
 		else
 		{
