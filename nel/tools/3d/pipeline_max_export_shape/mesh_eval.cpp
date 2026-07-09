@@ -530,13 +530,19 @@ static bool extractParametricPrimitive(CSceneClass *base, SEvalMesh &out, const 
 	out.Verts.resize(pverts.size());
 	if (!pverts.empty()) memcpy(&out.Verts[0], &pverts[0], pverts.size() * 12);
 	out.Faces.resize(ptris.size());
+	// PRIMMESH::buildParametricMesh assigns Max's own per-face matId + smoothing group per prim
+	// class (Box: 6 distinct per-side matIds + smoothing bits; Cylinder: bottom cap/sides/top cap;
+	// Sphere/Plane: uniform). Corpus-validated GT: ~/shape_export_dataset/manifest.txt. Before
+	// this, all faces got matId 0 + sg 1, which collapsed a Box + MultiMtl (box01.shape corpus
+	// class, DIFF "materials: 1 vs 6") into a single rdrpass and produced the wrong smoothing.
 	for (uint i = 0; i < ptris.size(); ++i)
 	{
 		out.Faces[i].V[0] = ptris[i].V[0];
 		out.Faces[i].V[1] = ptris[i].V[1];
 		out.Faces[i].V[2] = ptris[i].V[2];
-		out.Faces[i].SmGroup = 1; // Max's default single smoothing group for primitives
-		out.Faces[i].Flags = 0;    // matID 0, all edges visible, not hidden
+		out.Faces[i].SmGroup = ptris[i].SmGroup;
+		out.Faces[i].Flags = (ptris[i].MatId & 0xFFFFu) << MAX_FACE_MATID_SHIFT;
+		out.Faces[i].Flags |= 0x7; // all edges visible
 	}
 	return true;
 }

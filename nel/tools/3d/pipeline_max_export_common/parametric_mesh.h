@@ -44,10 +44,20 @@
 
 namespace PRIMMESH {
 
-/// A parametric-primitive triangle: three vertex indices in the caller-provided vertex list.
+/// A parametric-primitive triangle: three vertex indices in the caller-provided vertex list plus
+/// the 0-based material id and smoothing-group bitmask Max's own primitive builder assigns to it
+/// (corpus-validated against ~/shape_export_dataset/manifest.txt: plain_box / primuv_box(_multiseg)
+/// / primuv_cyl / primuv_sphere / primuv_plane). The 0-based `MatId` is the low half-word of Max's
+/// Face::flags matID field (MAXScript `getFaceMatID` returns `MatId + 1`); `SmGroup` is the raw
+/// smoothing-group bitmask.
+///
+/// Old callers that read only `V[]` (cmb's collision face builder, which fills its own MatId=0 and
+/// full edge visibility per its own conventions) keep working — the new fields are additive.
 struct SPrimTri
 {
 	uint32 V[3];
+	uint32 MatId;   ///< 0-based; MAXScript convention = MatId + 1
+	uint32 SmGroup; ///< smoothing-group bitmask, one bit per group
 };
 
 /// Well-known parametric-primitive class ids.
