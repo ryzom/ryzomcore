@@ -1409,10 +1409,10 @@ void CBipedAnimEval::buildPivotSessions()
 	const SBipKeyTrack *legs[2] = { &m_Keys.LegR, &m_Keys.LegL };
 	const SBipKeyTrack *arms[2] = { &m_Keys.ArmR, &m_Keys.ArmL };
 	// Arms: palm-pivot Object-space plants only (|pLocal| > 2 cm, space==2 — gates below).
-	// Default ON since §10s-quat (full-corpus A/B 15↑/3↓ max reg +0.02, mean −0.0005 over
-	// 3167 direct-ref bipeds). PMB_BIPED_IK_ARMS=0 forces the pre-§10s-quat legs-only default
-	// for A/B. Static 2-knot held plants and large-D locomotion swings stay FK (those classes
-	// are net-negative under the 2-bone model). The machinery below is limb-generic.
+	// Default ON since §10s-quat; large-path dual-fold since §10s-cinq (full-corpus A/B
+	// 23↑/3↓ max reg +0.05, mean −0.0012 over 3167 direct-ref bipeds). PMB_BIPED_IK_ARMS=0
+	// forces the legs-only baseline for A/B. Static 2-knot holds, 3-knot large swings, and
+	// W-only large D (course) stay FK. The machinery below is limb-generic.
 	static const char *s_armEnv = getenv("PMB_BIPED_IK_ARMS");
 	static const bool s_armPins = !s_armEnv || s_armEnv[0] != '0';
 	for (int limb = (s_armPins ? 0 : 1); limb < 2; ++limb) // 0 = arm, 1 = leg
@@ -1680,14 +1680,25 @@ void CBipedAnimEval::buildPivotSessions()
 						double D = ((w1 + iv.M1) - (w0 + iv.M0)).norm();
 						if (!validatedHandoff && D > 0.005 && D < 0.05)
 							continue; // ambiguous contact adjustment: FK
-						// Arms: large pivot motion (D > 5 cm) is usually a locomotion swing
-						// (course/strafe) where the FK arc is already correct and IK regresses
-						// (tr_hof_co_l2m_course +0.16, zo_hof_co_a2m_course +0.10). Keep the
-						// solve for small-D dynamic plants (emote_indifferent, swim_hisser).
-						// Large deliberate weapon plants (coup_fort) still need a better model
-						// than hard 2-bone + large D; left FK until then.
-						if (limb == 0 && !validatedHandoff && D > 0.05)
+						// Stored pivot travel (authoritative plant path vs W-channel D).
+						NLMISC::CVectorD pA0s = recYup(tr.Recs[i], 101);
+						NLMISC::CVectorD pA1s = recYup(tr.Recs[i + 1], 101);
+						double storedD = 0.0;
+						if (pA0s.norm() > 1e-9 && pA1s.norm() > 1e-9)
+							storedD = (pA1s - pA0s).norm();
+						else
+							storedD = (recYup(tr.Recs[i + 1], 18) - recYup(tr.Recs[i], 18)).norm();
+						// Arms large-path weapon plants need multi-key sessions (≥4 W knots).
+						// 2-knot (first_pilon) and 3-knot plants with one big swing
+						// (coup2_milieu L arm) are under-constrained / wrong-fold under dual-
+						// fold; the strike class (coup_fort_03) carries 5+ knots. Borderline
+						// slides and W-only large D (course) stay FK.
+						const size_t nKnots = (lastSessKey - s + 1)
+							+ (handoffCovered ? 1 : 0);
+						const bool largePath = (limb == 0 && storedD > 0.10 && nKnots >= 4);
+						if (limb == 0 && !validatedHandoff && D > 0.05 && !largePath)
 							continue;
+						iv.LargePath = largePath;
 						sess.Intervals.push_back(iv);
 					}
 					if (!sess.Intervals.empty())
@@ -1796,6 +1807,10 @@ void CBipedAnimEval::applyPivotIk(double t, std::map<INode *, SBipNodeState> &ou
 		// leg-side angle+residual turn decomposition) but still allow the position solve.
 		// Interval COM-yaw span from the already-built YawAngle channel (knots at every key).
 		bool armSkipHandRot = false;
+		// Arms large-path intervals: stored pA travels > 5 cm (set at session build). The
+		// yaw-frame residual is for planted holds; a deliberate multi-key hand path needs the
+		// full world hand squad so T = W − R·pLocal tracks the swinging palm orientation.
+		const bool armLargeD = (limb == 0 && iv->LargePath);
 		if (limb == 0 && !fwr.YawAngle.empty())
 		{
 			double a0 = fwr.YawAngle.eval((double)iv->T0);
@@ -1805,21 +1820,28 @@ void CBipedAnimEval::applyPivotIk(double t, std::map<INode *, SBipNodeState> &ou
 			while (dy < -M_PI) dy += 2.0 * M_PI;
 			if (fabs(dy) > 0.7) armSkipHandRot = true;
 		}
-		if (!armSkipHandRot && s_rotMode == 3 && !fwr.Yaw.empty())
+		// Large-path arm: keep FK hand rotation by default (Full world squad was tried and
+		// regressed coup2_milieu L UpperArm +0.20 while only marginally helping some frames;
+		// position solve + dual-fold is the accuracy lever). Explicit PMB_BIPED_IK_ROT=full
+		// still forces Full. yaw/run/hold/off honour the env as usual when not large-path.
+		if (armLargeD && s_rotMode == 3)
+			armSkipHandRot = true;
+		const int rotMode = s_rotMode;
+		if (!armSkipHandRot && rotMode == 3 && !fwr.Yaw.empty())
 		{
 			// key-interpolated yaw (unwrapped angle) composed with the yaw-frame residual
 			double a = fwr.YawAngle.eval(t);
 			QuatD yq(0.0, 0.0, sin(a * 0.5), cos(a * 0.5));
 			stEnd.WorldRot = qNorm(qMul(yq, fwr.Yaw.eval(t)));
 		}
-		else if (!armSkipHandRot && s_rotMode == 1 && !fwr.Full.empty())
+		else if (!armSkipHandRot && rotMode == 1 && !fwr.Full.empty())
 			stEnd.WorldRot = qNorm(fwr.Full.eval(t));
-		else if (!armSkipHandRot && s_rotMode == 2)
+		else if (!armSkipHandRot && rotMode == 2)
 		{
 			for (size_t r = 0; r < fwr.Runs.size(); ++r)
 				if (t >= fwr.RunT0[r] && t <= fwr.RunT1[r]) { stEnd.WorldRot = qNorm(fwr.Runs[r].eval(t)); break; }
 		}
-		else if (!armSkipHandRot && s_rotMode == 4 && !fwr.Full.empty())
+		else if (!armSkipHandRot && rotMode == 4 && !fwr.Full.empty())
 		{
 			// Piecewise world-hold: R(t) = Full(T0) for t in [T0, T1); Full(T1) at T1.
 			// At keys Full is the FK world end-bone, so this snaps to keys and holds between.
@@ -1885,28 +1907,76 @@ void CBipedAnimEval::applyPivotIk(double t, std::map<INode *, SBipNodeState> &ou
 			// zo_hof_marche's straight-leg release frame — a 0.24 rad ankle miss).
 			NLMISC::CVectorD cxv(thX.y*uT.z - thX.z*uT.y, thX.z*uT.x - thX.x*uT.z, thX.x*uT.y - thX.y*uT.x);
 			double theta = atan2(cxv * hz, thX * uT);
-			QuatD thigh2 = qNorm(qMul(qAxisAngle(hz, theta + phiT), thigh1));
-			QuatD calf2 = qNorm(qMul(thigh2, qAxisAngle(NLMISC::CVectorD(0, 0, 1), aIk - M_PI)));
-			// Arms: reject a solve that flips the forearm far from the FK mid rotation
-			// (engarde bent-back L-arm hinge fold). midFlip > 0.18; locFlip > 0.40 as a
-			// secondary extreme-fold backstop. Legs unaffected. Static 2-knot plants never
-			// reach here (dropped at session build).
+			// Legs: single signed-angle fold (corpus-proven §10r).
+			// Arms small-D: same single fold + midFlip/locFlip gates (§10s-ter/quat).
+			// Arms large-D (§10s-cinq): dual-fold — both ±phiT reach T; pick lower midFlip.
+			// locFlip is NOT a gate on large-D: mid-swing FK elbow angle is already wrong, so
+			// |local_IK − local_FK| is large even when the world fold is correct (coup_fort
+			// t=2400: midFlip 0.11 / locFlip 0.96 — locFlip would reject a good solve).
+			QuatD thigh2, calf2;
 			bool armReject = false;
-			if (limb == 0)
+			if (limb == 0 && armLargeD)
 			{
-				const double midFlip = qdistApprox(calf2, stMid.WorldRot);
-				const QuatD locFk = qNorm(qMul(qConj(stUp.WorldRot), stMid.WorldRot));
-				const QuatD locIk = qNorm(qMul(qConj(thigh2), calf2));
-				const double locFlip = qdistApprox(locIk, locFk);
-				if (midFlip > 0.18 || locFlip > 0.40)
-					armReject = true;
+				QuatD bestTh, bestCa;
+				double bestFlip = 1e9;
+				bool have = false;
+				for (int s = 0; s < 2; ++s)
+				{
+					const double ph = (s == 0) ? phiT : -phiT;
+					QuatD th = qNorm(qMul(qAxisAngle(hz, theta + ph), thigh1));
+					QuatD ca = qNorm(qMul(th, qAxisAngle(NLMISC::CVectorD(0, 0, 1), aIk - M_PI)));
+					NLMISC::CVectorD midP = H + qRotate(th, m_Nodes[iMid].FigLocalPos);
+					NLMISC::CVectorD endP = midP + qRotate(ca, m_Nodes[iEnd].FigLocalPos);
+					if ((endP - T).norm() > 1e-3)
+						continue;
+					const double midFlip = qdistApprox(ca, stMid.WorldRot);
+					if (!have || midFlip < bestFlip)
+					{
+						bestFlip = midFlip;
+						bestTh = th;
+						bestCa = ca;
+						have = true;
+					}
+				}
+				if (!have)
+				{
+					thigh2 = qNorm(qMul(qAxisAngle(hz, theta + phiT), thigh1));
+					calf2 = qNorm(qMul(thigh2, qAxisAngle(NLMISC::CVectorD(0, 0, 1), aIk - M_PI)));
+					bestFlip = qdistApprox(calf2, stMid.WorldRot);
+				}
+				else
+				{
+					thigh2 = bestTh;
+					calf2 = bestCa;
+				}
+				// Always accept the better dual-fold on LargePath intervals (session build
+				// already requires ≥3 W knots + stored pA travel > 10 cm). midFlip vs FK is
+				// a wrong reject metric mid-swing (coup_fort t=2560: midFlip 0.94 on both
+				// folds while the wrist is 30+ cm from FK).
 				if (getenv("PMB_BIPED_IK_DEBUG"))
-					fprintf(stderr, "IKDBG_ARM t=%g midFlip=%g locFlip=%g reject=%d\n",
-					        t, midFlip, locFlip, (int)armReject);
+					fprintf(stderr, "IKDBG_ARM t=%g midFlip=%g largeD=1 knots=%d reject=0\n",
+					        t, bestFlip, (int)sess->W.X.Keys.size());
+			}
+			else
+			{
+				thigh2 = qNorm(qMul(qAxisAngle(hz, theta + phiT), thigh1));
+				calf2 = qNorm(qMul(thigh2, qAxisAngle(NLMISC::CVectorD(0, 0, 1), aIk - M_PI)));
+				if (limb == 0)
+				{
+					const double midFlip = qdistApprox(calf2, stMid.WorldRot);
+					const QuatD locFk = qNorm(qMul(qConj(stUp.WorldRot), stMid.WorldRot));
+					const QuatD locIk = qNorm(qMul(qConj(thigh2), calf2));
+					const double locFlip = qdistApprox(locIk, locFk);
+					if (midFlip > 0.18 || locFlip > 0.40)
+						armReject = true;
+					if (getenv("PMB_BIPED_IK_DEBUG"))
+						fprintf(stderr, "IKDBG_ARM t=%g midFlip=%g locFlip=%g largeD=0 reject=%d\n",
+						        t, midFlip, locFlip, (int)armReject);
+				}
 			}
 			if (armReject)
 			{
-				stEnd.WorldRot = footRotOld; // undo yaw-frame hand override
+				stEnd.WorldRot = footRotOld; // undo yaw-frame / full hand override
 			}
 			else
 			{

@@ -54,9 +54,10 @@
  * The residual open item is the true in-plant foot rotation (solver-derived in the reference;
  * the key-yaw composition here is the measured best interpolation). PMB_BIPED_IK=0 forces pure
  * FK for A/B; 1/2 are the older superseded experiments; PMB_BIPED_IK_ROT / PMB_BIPED_IK_ARMS
- * select rotation-rule and arm-pin variants. Arm-pin (§10s-bis/ter) is env-gated: palm-pivot
- * + space + D-window + correction + static-plant-drop + COM-yaw-session-drop gates;
- * midFlip/locFlip reject drops a bad 2-bone fold. Default ON (§10s-quat); PMB_BIPED_IK_ARMS=0
+ * select rotation-rule and arm-pin variants. Arm-pin is default ON (§10s-quat/cinq): palm-pivot
+ * + space + stored-pA path gate + correction + static-plant-drop + COM-yaw-session-drop;
+ * small-D uses single-fold + midFlip/locFlip; large-path (stored pA travel > 5 cm — coup_fort
+ * weapon plants) uses dual-fold reach-first with Full world hand squad. PMB_BIPED_IK_ARMS=0
  * forces legs-only for A/B.
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
@@ -222,6 +223,12 @@ public:
 	{
 		sint32 T0, T1;               // covered tick span (one keyframe interval)
 		NLMISC::CVectorD M0, M1;     // endpoint feather (ankle-FK minus model; ~0 normally)
+		// Arms only (§10s-cinq): true when the STORED pivot (pA) travels > 10 cm across the
+		// interval — a deliberate multi-key weapon path (coup_fort 0.3–2 m). Distinct from
+		// W-channel D (can exceed 5 cm on hand-rot holds / locomotion even when pA is fixed)
+		// and from borderline 5–10 cm slides (l2m_to_walk). Legs leave this false.
+		bool LargePath;
+		SPivotInterval() : T0(0), T1(0), LargePath(false) { }
 	};
 	struct SPivotSession
 	{
