@@ -1407,13 +1407,13 @@ void CBipedAnimEval::buildPivotSessions()
 	if (!m_Rig) return;
 	const SBipKeyTrack *legs[2] = { &m_Keys.LegR, &m_Keys.LegL };
 	const SBipKeyTrack *arms[2] = { &m_Keys.ArmR, &m_Keys.ArmL };
-	// Arms are gated to the PALM-PIVOT STRIKE class only (|pLocal| > 2 cm, Object/world space —
-	// the gate is inside the session loop below). The prior wrist-pin variant measured
-	// NET-NEGATIVE on the gesture corpus (training_empathie 0.113 -> 0.158: the reference's held
-	// wrists are not position-splined either); the palm-pivot gate excludes that class. Legs are
-	// always on; arms require PMB_BIPED_IK_ARMS=1 until the corpus A/B confirms net-positive
-	// (design doc §10s item 1). The machinery below is limb-generic.
-	static const bool s_armPins = getenv("PMB_BIPED_IK_ARMS") != NULL;
+	// Arms: palm-pivot Object-space plants only (|pLocal| > 2 cm, space==2 — gates below).
+	// Default ON since §10s-quat (full-corpus A/B 15↑/3↓ max reg +0.02, mean −0.0005 over
+	// 3167 direct-ref bipeds). PMB_BIPED_IK_ARMS=0 forces the pre-§10s-quat legs-only default
+	// for A/B. Static 2-knot held plants and large-D locomotion swings stay FK (those classes
+	// are net-negative under the 2-bone model). The machinery below is limb-generic.
+	static const char *s_armEnv = getenv("PMB_BIPED_IK_ARMS");
+	static const bool s_armPins = !s_armEnv || s_armEnv[0] != '0';
 	for (int limb = (s_armPins ? 0 : 1); limb < 2; ++limb) // 0 = arm, 1 = leg
 	for (int side = 0; side < 2; ++side)
 	{
@@ -1573,26 +1573,12 @@ void CBipedAnimEval::buildPivotSessions()
 					{
 						if (pLocal.norm() < 0.02) valid = false;
 						else if (tr.Recs[s].size() > 11 && (int)fBits(tr.Recs[s][11]) != 2) valid = false;
-						// arms additionally exclude sessions where the COM rotates significantly
-						// (turns/spins): the arm hand-rotation has the §10r item-7 yaw-frame but NOT
-						// the item-9 large-turn angle+residual decomposition the legs carry, so a
-						// planted hand during body rotation swings wrong (the toupie/demitour/tourne
-						// regressions). Gate to roughly straight-line body motion until item-9 is
-						// generalized to arms. COM yaw = 2·atan2(yawQuat.z, yawQuat.w) (unwrapped).
-						if (valid && comNode)
-						{
-							QuatD yqs = yawOf(keyComRot[s]);
-							double baseYaw = 2.0 * atan2(yqs.z, yqs.w);
-							for (size_t m = s + 1; m <= lastSessKey && valid; ++m)
-							{
-								QuatD yqm = yawOf(keyComRot[m]);
-								double ym = 2.0 * atan2(yqm.z, yqm.w);
-								double dy = ym - baseYaw;
-								while (dy > M_PI) dy -= 2.0 * M_PI;
-								while (dy < -M_PI) dy += 2.0 * M_PI;
-								if (fabs(dy) > 0.7) valid = false;
-							}
-						}
+						// NOTE: the earlier COM-yaw > 0.7 whole-session reject (toupie/demitour
+						// protection) also killed dynamic strike plants that need the position
+						// solve while the body turns (coup_fort R-arm sessions — arms_identical
+						// with that gate). The hand yaw-frame is now gated per-frame in
+						// applyPivotIk when |COM yaw span of the covering interval| is large;
+						// the position solve is kept. See §10s-quat.
 					}
 				}
 				// Release break: a later session key whose stored pivot is no longer arm-consistent
@@ -1693,16 +1679,55 @@ void CBipedAnimEval::buildPivotSessions()
 						double D = ((w1 + iv.M1) - (w0 + iv.M0)).norm();
 						if (!validatedHandoff && D > 0.005 && D < 0.05)
 							continue; // ambiguous contact adjustment: FK
-						// arms: a large pivot motion (D > 5 cm) is an arm SWING (locomotion, a run),
-						// not a deliberate pin — unlike the legs' heel-strike, an arm's stored wrist
-						// path during a swing is already the FK arc, so solving IK to it regresses
-						// (the course/marche class). Restrict arms to genuine plants (small D).
+						// Arms: large pivot motion (D > 5 cm) is usually a locomotion swing
+						// (course/strafe) where the FK arc is already correct and IK regresses
+						// (tr_hof_co_l2m_course +0.16, zo_hof_co_a2m_course +0.10). Keep the
+						// solve for small-D dynamic plants (emote_indifferent, swim_hisser).
+						// Large deliberate weapon plants (coup_fort) still need a better model
+						// than hard 2-bone + large D; left FK until then.
 						if (limb == 0 && !validatedHandoff && D > 0.05)
 							continue;
 						sess.Intervals.push_back(iv);
 					}
 					if (!sess.Intervals.empty())
-						m_PivotSessions[limb][side].push_back(sess);
+					{
+						// Arms: a 2-knot session with ~zero pivot travel is a HELD plant
+						// (l2m/engarde/mount/fus idle grips). Position solve is hinge-
+						// ambiguous there; hand yaw-frame alone also regressed the fus_idle
+						// class (+0.28) while only partially helping engarde. Drop the whole
+						// session — FK is the measured best for static arm plants. Dynamic
+						// multi-key plants (emote_indifferent, swim_hisser, coup) keep it.
+						bool drop = false;
+						if (limb == 0 && sess.W.X.Keys.size() == 2)
+						{
+							NLMISC::CVectorD w0 = sess.W.eval((double)sess.W.X.Keys.front().Time);
+							NLMISC::CVectorD w1 = sess.W.eval((double)sess.W.X.Keys.back().Time);
+							if ((w1 - w0).norm() < 0.01)
+								drop = true;
+						}
+						// Arms: whole-session COM yaw span (first→last key) > 0.7 rad —
+						// turning/spinning body (toupie/demitour/tourne). The hand yaw-frame
+						// lacks the leg-side angle+residual decomposition. Applied at session
+						// build (not only per-interval) so multi-interval plants that turn
+						// overall still drop.
+						if (!drop && limb == 0 && comNode && !keyComRot.empty()
+						    && sess.W.X.Keys.size() >= 2)
+						{
+							// key times of session knots map into keyComRot by matching Times
+							// — approximate via first/last interval ends against tr.Times
+							QuatD y0 = yawOf(keyComRot[s]);
+							QuatD y1 = yawOf(keyComRot[lastSessKey]);
+							double a0 = 2.0 * atan2(y0.z, y0.w);
+							double a1 = 2.0 * atan2(y1.z, y1.w);
+							double dy = a1 - a0;
+							while (dy > M_PI) dy -= 2.0 * M_PI;
+							while (dy < -M_PI) dy += 2.0 * M_PI;
+							if (fabs(dy) > 0.7)
+								drop = true;
+						}
+						if (!drop)
+							m_PivotSessions[limb][side].push_back(sess);
+					}
 				}
 				s = e;
 			}
@@ -1752,26 +1777,53 @@ void CBipedAnimEval::applyPivotIk(double t, std::map<INode *, SBipNodeState> &ou
 		// end-bone rotation inside the plant (see SFootWorldRot): replace the FK-composed value
 		// (which rides the moving COM) with the yaw-frame channel (default) or an A/B variant. At
 		// keys all variants agree with the stored pose. Legs always; arms when PMB_BIPED_IK_ARMS.
-		// PMB_BIPED_IK_ROT: yaw (default) | full | run | off.
+		// PMB_BIPED_IK_ROT: yaw (default) | full | run | hold | off.
+		// hold = piecewise world-hold with key snaps (PODA eq-10 candidate, §10s item 8): within
+		// each covered interval keep the end-bone world rotation from T0 until the next key.
 		static const char *s_rotEnv = getenv("PMB_BIPED_IK_ROT");
-		static const int s_rotMode0 = !s_rotEnv ? 3 : (!strcmp(s_rotEnv, "full") ? 1 : (!strcmp(s_rotEnv, "run") ? 2 : (!strcmp(s_rotEnv, "off") ? 0 : 3)));
-		static const bool s_armPins = getenv("PMB_BIPED_IK_ARMS") != NULL;
+		static const int s_rotMode0 = !s_rotEnv ? 3
+			: (!strcmp(s_rotEnv, "full") ? 1
+			: (!strcmp(s_rotEnv, "run") ? 2
+			: (!strcmp(s_rotEnv, "off") ? 0
+			: (!strcmp(s_rotEnv, "hold") ? 4 : 3))));
+		static const char *s_armEnv2 = getenv("PMB_BIPED_IK_ARMS");
+		static const bool s_armPins = !s_armEnv2 || s_armEnv2[0] != '0';
 		const int s_rotMode = (limb || s_armPins) ? s_rotMode0 : 0;
 		SFootWorldRot &fwr = limb ? m_FootWorldRot[side] : m_HandWorldRot[side];
 		QuatD footRotOld = stEnd.WorldRot;
-		if (s_rotMode == 3 && !fwr.Yaw.empty())
+		// Arms during a large body-turn: skip the yaw-frame hand override (it lacks the
+		// leg-side angle+residual turn decomposition) but still allow the position solve.
+		// Interval COM-yaw span from the already-built YawAngle channel (knots at every key).
+		bool armSkipHandRot = false;
+		if (limb == 0 && !fwr.YawAngle.empty())
+		{
+			double a0 = fwr.YawAngle.eval((double)iv->T0);
+			double a1 = fwr.YawAngle.eval((double)iv->T1);
+			double dy = a1 - a0;
+			while (dy > M_PI) dy -= 2.0 * M_PI;
+			while (dy < -M_PI) dy += 2.0 * M_PI;
+			if (fabs(dy) > 0.7) armSkipHandRot = true;
+		}
+		if (!armSkipHandRot && s_rotMode == 3 && !fwr.Yaw.empty())
 		{
 			// key-interpolated yaw (unwrapped angle) composed with the yaw-frame residual
 			double a = fwr.YawAngle.eval(t);
 			QuatD yq(0.0, 0.0, sin(a * 0.5), cos(a * 0.5));
 			stEnd.WorldRot = qNorm(qMul(yq, fwr.Yaw.eval(t)));
 		}
-		else if (s_rotMode == 1 && !fwr.Full.empty())
+		else if (!armSkipHandRot && s_rotMode == 1 && !fwr.Full.empty())
 			stEnd.WorldRot = qNorm(fwr.Full.eval(t));
-		else if (s_rotMode == 2)
+		else if (!armSkipHandRot && s_rotMode == 2)
 		{
 			for (size_t r = 0; r < fwr.Runs.size(); ++r)
 				if (t >= fwr.RunT0[r] && t <= fwr.RunT1[r]) { stEnd.WorldRot = qNorm(fwr.Runs[r].eval(t)); break; }
+		}
+		else if (!armSkipHandRot && s_rotMode == 4 && !fwr.Full.empty())
+		{
+			// Piecewise world-hold: R(t) = Full(T0) for t in [T0, T1); Full(T1) at T1.
+			// At keys Full is the FK world end-bone, so this snaps to keys and holds between.
+			double th = (t < (double)iv->T1 - 1e-9) ? (double)iv->T0 : (double)iv->T1;
+			stEnd.WorldRot = qNorm(fwr.Full.eval(th));
 		}
 
 		// target: the pivot channel + the rigid arm through the foot's rotation, feathered so the
@@ -1790,12 +1842,9 @@ void CBipedAnimEval::applyPivotIk(double t, std::map<INode *, SBipNodeState> &ou
 		bool footRotChanged = qdistApprox(footRotOld, stEnd.WorldRot) > 1e-9;
 		double correction = (T - ankFk).norm();
 		bool solveNeeded = correction >= 1e-7;
-		// arms: a small position correction (< 2 cm) is a held pose (engarde/idle_attente) whose FK
-		// wrist is already correct — solving it only injects the in-plant floor as noise (the §10r
-		// open-item-a hand-rotation residue amplified through near-extension). Only solve arms when
-		// the plant pulls the wrist a real distance from FK (the dynamic-strike/mount-attack class,
-		// where the wrist target is far from the FK arc). ROT-variant A/B confirmed the static-pose
-		// regressions are the position solve, not the rotation override.
+		// arms: a small position correction (< 2 cm) is a held pose whose FK wrist is already
+		// close — solving only injects the in-plant floor as noise. Static 2-knot plants are
+		// dropped entirely at session build (see buildPivotSessions).
 		if (limb == 0 && correction < 0.02) solveNeeded = false;
 		if (!solveNeeded && !footRotChanged) continue; // keys/no-op frames: bit-stable skip
 
@@ -1837,17 +1886,24 @@ void CBipedAnimEval::applyPivotIk(double t, std::map<INode *, SBipNodeState> &ou
 			double theta = atan2(cxv * hz, thX * uT);
 			QuatD thigh2 = qNorm(qMul(qAxisAngle(hz, theta + phiT), thigh1));
 			QuatD calf2 = qNorm(qMul(thigh2, qAxisAngle(NLMISC::CVectorD(0, 0, 1), aIk - M_PI)));
-			// Arms: reject a solve that flips the forearm far from the FK mid rotation.
-			// Bent-back L-arm held poses (engarde/idle_attente, §10s-bis residual) still
-			// reach the palm-pivot target but land on the wrong hinge fold — world mid-bone
-			// quat distance to FK is 0.25–0.48 on those frames while mount-attack wins top
-			// out at ≈0.15. Drop BOTH the position solve and the hand-rotation override
-			// for that frame. Threshold 0.18 is corpus-gated (anim_ik_subset.py + full A/B:
-			// 69 improve / 25 regress / mean −0.0025 over 3173 direct-ref bipeds). Note:
-			// residual regressions (l2m idle_attente) keep midFlip < 0.18 while the LOCAL
-			// forearm track still jumps — those need a better arm hinge model, not a tighter
-			// threshold (tighter kills the mount-attack wins). Legs unaffected.
-			if (limb == 0 && qdistApprox(calf2, stMid.WorldRot) > 0.18)
+			// Arms: reject a solve that flips the forearm far from the FK mid rotation
+			// (engarde bent-back L-arm hinge fold). midFlip > 0.18; locFlip > 0.40 as a
+			// secondary extreme-fold backstop. Legs unaffected. Static 2-knot plants never
+			// reach here (dropped at session build).
+			bool armReject = false;
+			if (limb == 0)
+			{
+				const double midFlip = qdistApprox(calf2, stMid.WorldRot);
+				const QuatD locFk = qNorm(qMul(qConj(stUp.WorldRot), stMid.WorldRot));
+				const QuatD locIk = qNorm(qMul(qConj(thigh2), calf2));
+				const double locFlip = qdistApprox(locIk, locFk);
+				if (midFlip > 0.18 || locFlip > 0.40)
+					armReject = true;
+				if (getenv("PMB_BIPED_IK_DEBUG"))
+					fprintf(stderr, "IKDBG_ARM t=%g midFlip=%g locFlip=%g reject=%d\n",
+					        t, midFlip, locFlip, (int)armReject);
+			}
+			if (armReject)
 			{
 				stEnd.WorldRot = footRotOld; // undo yaw-frame hand override
 			}

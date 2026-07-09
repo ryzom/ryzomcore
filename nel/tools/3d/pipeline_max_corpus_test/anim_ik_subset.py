@@ -12,9 +12,10 @@ for whether a heuristic change is corpus-net-positive BEFORE committing to a ful
 
 Usage:
   anim_ik_subset.py [--env NAME=VAL] [--env2 NAME=VAL] ... [-n NRANDOM] [--seed S] [--bin DIR]
-  --env NAME=VAL   environment override for the "A" run (repeatable); default PMB_BIPED_IK_ARMS=1.
-                   Pass '--env BASE' (or no --env) to run A against B with no override (a no-op
-                   self-check: every file should land in 'same').
+  --env NAME=VAL   environment override for the "A" run (repeatable). Default is none (self-check
+                   against the shipping default — arm-pin ON since §10s-quat). To A/B arms off:
+                   --env PMB_BIPED_IK_ARMS=0 (A = legs-only, B = default arms-on). Pass
+                   '--env BASE' for an explicit no-override self-check.
   -n NRANDOM       random-sample size on top of the fixed worst-offender/flip-flopper set (default 220).
   --seed S         random seed (default 42).
   --bin DIR        binary dir (default ~/ryzomcore/build/nel-pipeline/bin).
@@ -76,7 +77,7 @@ def build_subset(files, n_random, seed, ref_dir):
 def main():
     home = os.path.expanduser("~")
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--env", action="append", default=[], help="NAME=VAL override for the A run (default PMB_BIPED_IK_ARMS=1; 'BASE' = none)")
+    ap.add_argument("--env", action="append", default=[], help="NAME=VAL override for the A run (default none = self-check; 'BASE' = none)")
     ap.add_argument("-n", type=int, default=220, help="random-sample size (default 220)")
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--bin", default=os.path.join(home, "ryzomcore/build/nel-pipeline/bin"))
@@ -104,8 +105,8 @@ def main():
                 return 1
             k, v = e.split("=", 1)
             env_overrides[k] = v
-    else:
-        env_overrides["PMB_BIPED_IK_ARMS"] = "1"
+    # No default override: shipping default is arm-pin ON (§10s-quat). Use
+    # --env PMB_BIPED_IK_ARMS=0 to A/B legs-only as the "A" run against default B.
 
     files = enumerate_corpus(args.graphics, args.workspace)
     subset = build_subset(files, args.n, args.seed, args.ref)

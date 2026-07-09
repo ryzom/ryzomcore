@@ -34,6 +34,10 @@ DECODED = set(int(x, 16) for x in """
 #   diff, 2026-07-08 — supersedes the earlier twist attribution); 0x0204 = link-count scalar
 #   0x01f4..0x01fc = per-limb absolute-length tables (0x01f5 neck / f7 spine / f8 tail / f9 leg-toe / fa arm-finger)
 #   0x000a, 0x001a = tail-arm / finger-toe structure presence records
+# Pivot IK fields live INSIDE the limb keytrack data chunks already in DECODED (0x0134..0x013b):
+#   rec[11]=Body/Object space, [12]=IK blend, [25]=Join-to-Prev, [98]=ikPivotIndex,
+#   [101..103]=pA, [105..107]=pB — consumed by biped_anim.cpp buildPivotSessions (§10r/§10s-quat).
+#   Not separate chunk ids; listed here so coverage reports don't re-open that hunt.
 IDENTIFIED = set(int(x, 16) for x in """
 0x0258 0x0259 0x025a 0x025b 0x025c 0x025d 0x025e 0x025f 0x0261
 0x00ca 0x0102 0x0110 0x015e 0x014b 0x0109 0x0204 0x000a 0x001a
