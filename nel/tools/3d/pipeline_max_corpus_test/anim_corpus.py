@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Corpus driver for the anim .max → .anim pipeline (non-biped scope).
+"""Corpus driver for the anim .max → .anim pipeline (whole corpus, biped + non-biped).
 
 Enumerates every anim-source .max from the ryzomcore_leveldesign workspace configs
 (AnimSourceDirectories of common/fauna, common/characters, common/sky), classifies biped vs
