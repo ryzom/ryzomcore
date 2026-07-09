@@ -61,6 +61,7 @@
 #include "../pipeline_max/builtin/reference_maker.h"
 #include "../pipeline_max/builtin/mtl_base.h"
 #include "../pipeline_max/builtin/multi_mtl.h"
+#include "../pipeline_max_export_common/old_param_block.h"
 
 using namespace PIPELINE::MAX;
 using namespace PIPELINE::MAX::BUILTIN;
@@ -285,14 +286,105 @@ static CRGBA nelColor(const SNelMtlParams &np, uint block, uint16 id, CRGBA def)
 // ---------------------------------------------------------------------------------------------
 // Texture construction (buildATexture)
 
-// StdUVGen state
+// StdUVGen state + UV transform matrix construction
+//
+// The offset/tiling/angle state lives on the UVGen's reference 0 = an old-style ParamBlock
+// (superclass 0x8), keyed by declared index (§10z-cinq stduvgen dataset — verified against
+// ~/shape_export_dataset/stduvgen_{baseline,offset,tile2x3,angle45}):
+//   0 U Offset, 1 V Offset, 2 U Tiling, 3 V Tiling, 4 U Angle, 5 V Angle, 6 W Angle.
+// For animated params the pblock's 0x0002 value chunk is replaced by an empty 0x0200 marker
+// (§10k / anim_build.cpp) and the controller sits on the pblock's reference slot. We take the
+// baked-in static value from the pblock's own value chunk when present, else the default (0 for
+// offset/angle, 1 for tiling) — the animation track drives the runtime matrix regardless. This
+// matches the reference plugin's texmap->GetUVTransform(channelMatrix) at t=0 for the static
+// non-animated case (~48-byte-per-animated-material shape T3 gap per §10z round 3).
 struct SUVGen
 {
 	int MapChannel;
 	uint32 Flags;
 	bool WrapU, WrapV;
-	SUVGen() : MapChannel(1), Flags(0x00000003), WrapU(true), WrapV(true) { }
+	float UOffset, VOffset, WOffset;
+	float UTiling, VTiling, WTiling;
+	float UAngle, VAngle, WAngle;
+	SUVGen() : MapChannel(1), Flags(0x00000003), WrapU(true), WrapV(true),
+	           UOffset(0.f), VOffset(0.f), WOffset(0.f),
+	           UTiling(1.f), VTiling(1.f), WTiling(1.f),
+	           UAngle(0.f), VAngle(0.f), WAngle(0.f) { }
 };
+
+// Row-vector Matrix3M helpers for the Max UV transform chain. Max's Matrix3::Scale/RotateX/etc.
+// post-multiply (this = this * op); operating on row vectors, that means transforms accumulate in
+// application order (v' = v * S * R * T scales first, then rotates, then translates).
+static Matrix3M m3Scale(float sx, float sy, float sz)
+{
+	Matrix3M r = Matrix3M::identity();
+	r.m[0][0] = sx; r.m[1][1] = sy; r.m[2][2] = sz;
+	return r;
+}
+static Matrix3M m3RotateX(float a)
+{
+	Matrix3M r = Matrix3M::identity();
+	float c = cosf(a), s = sinf(a);
+	r.m[1][1] = c; r.m[1][2] = s;
+	r.m[2][1] = -s; r.m[2][2] = c;
+	return r;
+}
+static Matrix3M m3RotateY(float a)
+{
+	Matrix3M r = Matrix3M::identity();
+	float c = cosf(a), s = sinf(a);
+	r.m[0][0] = c; r.m[0][2] = -s;
+	r.m[2][0] = s; r.m[2][2] = c;
+	return r;
+}
+static Matrix3M m3RotateZ(float a)
+{
+	Matrix3M r = Matrix3M::identity();
+	float c = cosf(a), s = sinf(a);
+	r.m[0][0] = c; r.m[0][1] = s;
+	r.m[1][0] = -s; r.m[1][1] = c;
+	return r;
+}
+static Matrix3M m3Translate(float tx, float ty, float tz)
+{
+	Matrix3M r = Matrix3M::identity();
+	r.m[3][0] = tx; r.m[3][1] = ty; r.m[3][2] = tz;
+	return r;
+}
+
+// Max SDK StdUVGen::GetUVTransform semantics: tm = identity; tm.Scale(tiling); tm.RotateX(uAngle);
+// tm.RotateY(vAngle); tm.RotateZ(wAngle); tm.Translate(offset).
+static Matrix3M uvgenToMatrix3(const SUVGen &g)
+{
+	Matrix3M tm = Matrix3M::identity();
+	tm = tm * m3Scale(g.UTiling, g.VTiling, g.WTiling);
+	tm = tm * m3RotateX(g.UAngle);
+	tm = tm * m3RotateY(g.VAngle);
+	tm = tm * m3RotateZ(g.WAngle);
+	tm = tm * m3Translate(g.UOffset, g.VOffset, g.WOffset);
+	return tm;
+}
+
+// CExportNel::uvMatrix2NelUVMatrix (export_misc.cpp:869): copy the Max rows as NeL basis vectors +
+// translation, then apply the similarity transform dest = C * dest * C where
+// C.rot = (I, -J, K) and C.pos = J = (0,1,0) — this handles the V-axis flip between Max's UV
+// convention and NeL's. Reproduces the reference operation-for-operation.
+static NLMISC::CMatrix uvMatrix2NelUVMatrix(const Matrix3M &m)
+{
+	NLMISC::CVector I(m.m[0][0], m.m[0][1], m.m[0][2]);
+	NLMISC::CVector J(m.m[1][0], m.m[1][1], m.m[1][2]);
+	NLMISC::CVector K(m.m[2][0], m.m[2][1], m.m[2][2]);
+	NLMISC::CVector P(m.m[3][0], m.m[3][1], m.m[3][2]);
+	NLMISC::CMatrix dest;
+	dest.identity();
+	dest.setRot(I, J, K);
+	dest.setPos(P);
+	NLMISC::CMatrix convert;
+	convert.setRot(NLMISC::CVector::I, -NLMISC::CVector::J, NLMISC::CVector::K);
+	convert.setPos(NLMISC::CVector::J);
+	dest = convert * dest * convert;
+	return dest;
+}
 
 static void readUVGen(CSceneClass *uvgen, SUVGen &out, const std::string &texName)
 {
@@ -311,18 +403,32 @@ static void readUVGen(CSceneClass *uvgen, SUVGen &out, const std::string &texNam
 		out.WrapU = (out.Flags & 0x1) != 0;
 		out.WrapV = (out.Flags & 0x2) != 0;
 	}
-	// Offset/scale/angle state appears as extra chunks only when non-default; warn until the
-	// UV transform decode lands so affected textures get bucketed by the harness.
-	static const uint16 knownIds[] = { 0x9002, 0x9003, 0x9005, 0x9006, 0x9009, 0x900b, 0x2150, 0x2034, 0x2035, 0x2045, 0x2047, 0x204B, 0x21B0, 0 };
-	const CStorageContainer::TStorageObjectContainer &orphans = uvgen->orphanedChunks();
-	for (CStorageContainer::TStorageObjectConstIt it = orphans.begin(); it != orphans.end(); ++it)
+
+	// UV transform: the offset/tiling/angle values live on reference 0 = an old ParamBlock. Read
+	// its static values; animated params (0x0200 marker) contribute nothing to the baked-in
+	// matrix — the animation track drives the runtime matrix each frame (§10k). Defaults from
+	// the SUVGen ctor (0 for offset/angle, 1 for tiling).
+	CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(uvgen);
+	if (rm && rm->nbReferences() > 0)
 	{
-		bool known = false;
-		for (const uint16 *p = knownIds; *p; ++p)
-			if (it->first == *p) { known = true; break; }
-		if (!known)
-			fprintf(stderr, "WARNING: texture '%s' UVGen carries undecoded chunk 0x%04x (UV transform not identity?)\n",
-			        texName.c_str(), it->first);
+		CSceneClass *pblock = dynamic_cast<CSceneClass *>(rm->getReference(0));
+		if (pblock && pblock->classDesc()->superClassId() == SCLASS_PBLOCK)
+		{
+			std::map<sint32, OLDPBLOCK::SParam> params;
+			OLDPBLOCK::readOldParamBlock(pblock, params);
+			// Only override the default if the pblock actually carried a stored value for that
+			// index (paramFloat returns 0 for missing, which would zero out tiling defaults).
+			std::map<sint32, OLDPBLOCK::SParam>::const_iterator it;
+			if ((it = params.find(0)) != params.end()) out.UOffset = it->second.V[0];
+			if ((it = params.find(1)) != params.end()) out.VOffset = it->second.V[0];
+			if ((it = params.find(2)) != params.end()) out.UTiling = it->second.V[0];
+			if ((it = params.find(3)) != params.end()) out.VTiling = it->second.V[0];
+			if ((it = params.find(4)) != params.end()) out.UAngle = it->second.V[0];
+			if ((it = params.find(5)) != params.end()) out.VAngle = it->second.V[0];
+			if ((it = params.find(6)) != params.end()) out.WAngle = it->second.V[0];
+			// TODO: W Offset (index 8?) — deferred until a corpus asset exercises it.
+			(void)texName;
+		}
 	}
 }
 
@@ -497,7 +603,7 @@ static ITexture *buildATexture(CSceneClass *texmap, SMaterialDesc &remap, bool f
 		readUVGen(uvgenObj, uvgen, mtlName);
 	}
 	remap.IndexInMaxMaterial = uvgen.MapChannel;
-	remap.UVMatrix = Matrix3M::identity(); // non-identity UVGen transforms warn in readUVGen
+	remap.UVMatrix = uvgenToMatrix3(uvgen);
 
 	if (pTexture)
 	{
@@ -708,8 +814,12 @@ static void buildANelMaterial(CMaterial &material, SMaterialInfo &materialInfo, 
 		if (bExportTexMatAnim != 0)
 		{
 			material.enableUserTexMat(i);
-			// uvMatrix2NelUVMatrix of the (identity until decoded) UV matrix
-			material.setUserTexMat(i, NLMISC::CMatrix::Identity);
+			// Bake in the StdUVGen static transform (§10z-cinq / this session): offset/tiling/
+			// angle from the pblock. For animated params the runtime anim track drives the
+			// matrix each frame; the baked value here reflects the pblock's own static value
+			// (0 for animated offset in the corpus waterfalls). The uvMatrix2NelUVMatrix
+			// convention flips the V axis to match NeL's UV origin (see helper above).
+			material.setUserTexMat(i, uvMatrix2NelUVMatrix(materialDesc.UVMatrix));
 		}
 	}
 
