@@ -356,6 +356,35 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 				{
 					fprintf(stderr, "  (no mod-app slot)\n");
 				}
+				// Also dump the MODIFIER SCENE OBJECT's references + raw chunks: the per-modifier
+				// bone table (index -> INode) the per-vertex boneRef indexes into lives here, not
+				// on the mod-app. bones ~ per-vertex boneRef (one's-complement index) decoded as
+				// ~boneRef; locating the table is the open Physique decode blocker (Part M §M.3).
+				CReferenceMaker *mrm = dynamic_cast<CReferenceMaker *>(mods[i]);
+				if (mrm)
+				{
+					fprintf(stderr, "  MODREFS count=%u\n", (uint)mrm->nbReferences());
+					for (uint r = 0; r < mrm->nbReferences(); ++r)
+					{
+						CSceneClass *ref = dynamic_cast<CSceneClass *>(mrm->getReference(r));
+						if (!ref) { fprintf(stderr, "    ref[%u] = NULL\n", r); continue; }
+						INode *rn = dynamic_cast<INode *>(ref);
+						fprintf(stderr, "    ref[%u] cid=(0x%x,0x%x) sup=0x%x %s%s\n", r,
+						        ref->classDesc()->classId().a(), ref->classDesc()->classId().b(),
+						        (uint32)ref->classDesc()->superClassId(),
+						        rn ? "NODE '" : "", rn ? nodeName(*rn).c_str() : "");
+					}
+					const CStorageContainer::TStorageObjectContainer &orph = mods[i]->orphanedChunks();
+					fprintf(stderr, "  MODCHUNKS count=%u\n", (uint)orph.size());
+					for (CStorageContainer::TStorageObjectConstIt it = orph.begin(); it != orph.end(); ++it)
+					{
+						CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
+						CStorageContainer *sub = dynamic_cast<CStorageContainer *>(it->second);
+						fprintf(stderr, "    chunk 0x%04x %s size=%u\n", it->first,
+						        raw ? "leaf" : (sub ? "container" : "?"),
+						        raw ? (uint)raw->Value.size() : (sub ? (uint)sub->chunks().size() : 0u));
+					}
+				}
 			}
 			const char *kind = isPhysique ? "skinned-physique" : "skinned-skin";
 			stats.skip(kind);
@@ -774,6 +803,64 @@ static NL3D::IShape *loadShape(const std::string &path)
 		fprintf(stderr, "load %s: %s\n", path.c_str(), e.what());
 		return NULL;
 	}
+}
+
+// Dump a loaded skinned shape's bone names + per-vertex SkinWeights (CMeshMRM and CMeshMRMSkinned
+// both expose getSkinWeights()/getBonesName()). Used to validate the Physique decode (boneRef =
+// ~index into the modifier's reference array; raw weight normalized top-4) field-by-field against
+// the reference .shape before committing to the full build path.
+static const std::vector<NL3D::CMesh::CSkinWeight> *dumpSkinWeightsOf(NL3D::IShape *shape,
+                                                                       std::vector<std::string> &bonesNames)
+{
+	NL3D::CMeshMRM *mrm = dynamic_cast<NL3D::CMeshMRM *>(shape);
+	NL3D::CMeshMRMSkinned *mrms = dynamic_cast<NL3D::CMeshMRMSkinned *>(shape);
+	if (mrm)
+	{
+		const NL3D::CMeshMRMGeom &g = mrm->getMeshGeom();
+		bonesNames = g.getBonesName();
+		// _SkinWeights lives on the geom; store a copy so the caller holds stable storage.
+		static std::vector<NL3D::CMesh::CSkinWeight> sw;
+		sw = g.getSkinWeights();
+		return &sw;
+	}
+	if (mrms)
+	{
+		// CMeshMRMSkinned reconstructs the full SkinWeights array on demand.
+		static std::vector<NL3D::CMesh::CSkinWeight> sw;
+		const NL3D::CMeshMRMSkinnedGeom &g = mrms->getMeshGeom();
+		g.getSkinWeights(sw);
+		bonesNames = g.getBonesName();
+		return &sw;
+	}
+	return NULL;
+}
+
+static int dumpSkin(const std::string &path)
+{
+	NL3D::IShape *shape = loadShape(path);
+	if (!shape) { fprintf(stderr, "cannot load %s\n", path.c_str()); return 2; }
+	printf("class %s\n", shape->getClassName().c_str());
+	std::vector<std::string> bones;
+	const std::vector<NL3D::CMesh::CSkinWeight> *sw = dumpSkinWeightsOf(shape, bones);
+	if (!sw) { printf("(not a skinned MRM shape)\n"); delete shape; return 0; }
+	printf("bones %u\n", (uint)bones.size());
+	for (uint i = 0; i < bones.size(); ++i)
+		printf("  bone[%u] '%s'\n", i, bones[i].c_str());
+	printf("verts %u\n", (uint)sw->size());
+	uint nShow = std::min((uint)sw->size(), (uint)16u);
+	for (uint v = 0; v < nShow; ++v)
+	{
+		const NL3D::CMesh::CSkinWeight &s = (*sw)[v];
+		printf("  v%u:", v);
+		for (uint i = 0; i < 4; ++i) printf(" [%u]=%.6g", s.MatrixId[i], s.Weights[i]);
+		printf("  |");
+		for (uint i = 0; i < 4; ++i)
+			if (s.Weights[i] != 0.f && s.MatrixId[i] < bones.size())
+				printf(" %s=%.6g", bones[s.MatrixId[i]].c_str(), s.Weights[i]);
+		printf("\n");
+	}
+	delete shape;
+	return 0;
 }
 
 static uint32 floatUlp(float a, float b)
@@ -1430,6 +1517,12 @@ int main(int argc, char **argv)
 
 	if (compareArgs.size() == 2)
 		return compareShapes(compareArgs[0], compareArgs[1]);
+
+	for (int i = 1; i < argc; ++i)
+	{
+		if (std::string(argv[i]) == "--dump-skin" && i + 1 < argc)
+			return dumpSkin(argv[i + 1]);
+	}
 
 	if (input.empty() || outDir.empty())
 	{
