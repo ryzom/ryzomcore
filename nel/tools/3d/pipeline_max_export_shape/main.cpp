@@ -549,13 +549,13 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 		if (hasPhysique && !tryApplyPhysique(node, buildMesh, mods, modApps, ssc, stats))
 			return NULL;
 
-		// Skinned meshes without LOD_MRM still take the MRM path when skinning is present —
-		// the reference's buildShape routes isSkin nodes through buildMeshGeom which builds
-		// CMeshMRM/CMeshMRMSkinned; plain CMesh can carry SkinWeights too but character corpus
-		// is LOD_MRM almost exclusively. Force the MRM branch when skinned so isCompatible
-		// can pick CMeshMRMSkinned.
-		const bool wantMrm = getScriptAppDataInt(n, NEL3D_APPDATA_LOD_MRM, 0)
-		                     || !buildMesh.SkinWeights.empty();
+		// LOD_MRM alone selects the MRM branch, matching the reference plugin
+		// (export_mesh.cpp:360): a skinned node with LOD_MRM=0 exports as a plain CMesh carrying
+		// SkinWeights (that's how ca_spaceship2/ship_tank_karavan ship in the reference). Earlier
+		// this branch OR'd `!SkinWeights.empty()` in to force MRM for any skinned mesh, which
+		// mislabelled those two files as CMeshMRMSkinned and blew NL3D_MESH_SKIN_MANAGER_MAXVERTICES
+		// on their post-MRM VB (both are big ship meshes without LOD_MRM authored).
+		const bool wantMrm = getScriptAppDataInt(n, NEL3D_APPDATA_LOD_MRM, 0) != 0;
 
 		if (wantMrm)
 		{
