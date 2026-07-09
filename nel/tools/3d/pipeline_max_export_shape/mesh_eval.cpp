@@ -231,6 +231,86 @@ static bool extractEditablePoly(CSceneClass *obj, SEvalMesh &out, const std::str
 // ---------------------------------------------------------------------------------------------
 // Modifier application
 
+// Nel VertexTreePaint modifier (nel_vertex_tree_paint plugin, ClassId (0x40c7005e, 0x2a95082c),
+// SuperClassId 0x810 OSModifier). Per-node payload (SDK LocalModData) lands under 0x2500 -> 0x2512
+// as documented in vertex_tree_paint.cpp:569 (SaveLocalData). Sub-chunks:
+//   0x0100 leaf (int32 version, currentVersion == 1)
+//   0x0120 leaf (int32 numColors + numColors × COLORREF)
+// COLORREF is Win32 DWORD 0x00BBGGRR (little-endian; low byte = R, then G, then B). Applied by
+// writing map channel 0 (vertex color) of the current SEvalMesh: numColors matches the mesh's
+// vertex count post-XForm/EditMesh; each COLORREF becomes a Point3M(r, g, b) in 0..1.
+// Sourced from plugin_max/nel_vertex_tree_paint/vertex_tree_paint.cpp (VERSION_CHUNKID 0x100,
+// COLORLIST_CHUNKID 0x120); mod-app framing corpus-verified against ge_mission_maduk.max.
+static bool readVertexPaintColors(CStorageContainer *app, std::vector<uint32> &out)
+{
+	if (!app) return false;
+	// Descend into 0x2512 (payload container), find 0x0120 leaf.
+	const CStorageContainer::TStorageObjectContainer &c = app->chunks();
+	for (CStorageContainer::TStorageObjectConstIt it = c.begin(); it != c.end(); ++it)
+	{
+		if (it->first != 0x2512) continue;
+		CStorageContainer *pl = dynamic_cast<CStorageContainer *>(it->second);
+		if (!pl) return false;
+		const CStorageContainer::TStorageObjectContainer &pc = pl->chunks();
+		for (CStorageContainer::TStorageObjectConstIt jt = pc.begin(); jt != pc.end(); ++jt)
+		{
+			if (jt->first != 0x0120) continue;
+			CStorageRaw *raw = dynamic_cast<CStorageRaw *>(jt->second);
+			if (!raw || raw->Value.size() < 4) return false;
+			uint32 numColors = 0;
+			memcpy(&numColors, nlVectorData(raw->Value), 4);
+			if (raw->Value.size() < 4 + (size_t)numColors * 4) return false;
+			out.resize(numColors);
+			memcpy(&out[0], nlVectorData(raw->Value) + 4, (size_t)numColors * 4);
+			return true;
+		}
+		return false;
+	}
+	return false;
+}
+
+static void applyVertexPaint(const std::vector<uint32> &colors, SEvalMesh &mesh, const std::string &name)
+{
+	if (colors.empty()) return;
+	// Nel VertexTreePaint's numColors is per SDK-mesh vertex; on a stack that just ran the base
+	// EditableMesh + possible modifiers, current mesh.Verts.size() should equal numColors. If they
+	// disagree we bail (mismatch means we don't understand this file's stack) rather than paint
+	// wrong colors.
+	if (colors.size() != mesh.Verts.size())
+	{
+		fprintf(stderr, "WARNING: VertexTreePaint on '%s': color count %u != vertex count %u; "
+		                "skipping color application\n",
+		        name.c_str(), (uint)colors.size(), (uint)mesh.Verts.size());
+		return;
+	}
+	// Map channel 0 = vertex color. If a channel already exists (e.g. base EditableMesh had
+	// authored colors), OVERWRITE — Nel VertexTreePaint is a REPLACING modifier, not additive
+	// (per the reference plugin's Paint.cpp; the artist re-paints on top of any base colors).
+	SMapChannel &ch = mesh.Maps[0];
+	ch.Verts.resize(colors.size());
+	for (uint i = 0; i < colors.size(); ++i)
+	{
+		// COLORREF = 0x00BBGGRR little-endian → (r, g, b) as (byte0, byte1, byte2). NeL Point3M
+		// vertex color = (R, G, B) as floats 0..1.
+		uint32 c = colors[i];
+		float r = (c & 0xff) / 255.0f;
+		float g = ((c >> 8) & 0xff) / 255.0f;
+		float b = ((c >> 16) & 0xff) / 255.0f;
+		Point3M p; p.x = r; p.y = g; p.z = b;
+		ch.Verts[i] = p;
+	}
+	// Faces list mirrors the base tri faces: one per SEvalFace, T = V verbatim (per-vertex color,
+	// no per-corner independence — this is how SDK vertex-color storage works and how the reference
+	// buildMeshInterface pipes it into VBuild for map channel 0).
+	ch.Faces.resize(mesh.Faces.size());
+	for (uint i = 0; i < mesh.Faces.size(); ++i)
+	{
+		ch.Faces[i].T[0] = mesh.Faces[i].V[0];
+		ch.Faces[i].T[1] = mesh.Faces[i].V[1];
+		ch.Faces[i].T[2] = mesh.Faces[i].V[2];
+	}
+}
+
 // Edit Mesh modifier per-node data (mod-app 0x2500 -> 0x2512 -> 0x4000). Decode + apply live in
 // the shared pipeline_max_export_common/edit_mesh_mod library — pipeline_max_design.md §10x
 // pinned the chunk map (0x0130 = created verts 16B srcTag+Point3, 0x0208 = created base faces
@@ -528,6 +608,12 @@ bool evalNodeMesh(INode &node, SEvalMesh &out, std::vector<std::string> *warning
 		else if (mcid == NLMISC::CClassId(0x25215824, 0x00000000)) // XForm
 		{
 			applyXForm(mod, app, out, name);
+		}
+		else if (mcid == NLMISC::CClassId(0x40c7005e, 0x2a95082c)) // Nel VertexTreePaint
+		{
+			std::vector<uint32> colors;
+			if (readVertexPaintColors(app, colors))
+				applyVertexPaint(colors, out, name);
 		}
 		else
 		{
