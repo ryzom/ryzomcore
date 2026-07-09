@@ -1,16 +1,17 @@
 /**
  * \file anim_build.h
- * \brief Per-node material texture-matrix animation export for the shape process.
+ * \brief Per-node animation export for the shape process (NelExportAnimation).
  *
  * The shape process (shape_export.ms) exports a <node>.anim per node with
- * NEL3D_APPDATA_AUTOMATIC_ANIMATION set, via NelExportAnimation. For the animated-material class
- * (waterfalls: a scrolling texture), that animation is the material texture-matrix tracks
- * (CExportNel::addMtlTracks -> addTexTracks): a material with bExportTextureMatrix has, per
- * enabled texture stage, its texmap's StdUVGen U/V Offset (etc.) driven by a Linear Float
- * controller, exported as a CTrackKeyFramerLinearFloat named <mtlName>.UTrans<stage> /
- * .VTrans<stage>. See pipeline_max_design.md §10k.
+ * NEL3D_APPDATA_AUTOMATIC_ANIMATION set, via NelExportAnimation #(node). That covers:
+ *   - node transform tracks (pos/rotquat/scale) — e.g. conerotor
+ *   - material texture-matrix tracks (bExportTextureMatrix) — waterfalls (§10k)
+ *   - LightmapController.<animName> color tracks on lights with LM_ANIMATED — brazero/lanterne
+ *   - morph factor tracks when a Morpher is present
+ *
  * \author Jan Boon (Kaetemi)
  * \author Claude Opus 4.8
+ * \author Grok 4.5
  */
 
 /*
@@ -42,12 +43,15 @@ namespace NL3D { class CAnimation; }
 
 namespace SHAPEANIM {
 
-/// True when the node requests animation export (NEL3D_APPDATA_AUTOMATIC_ANIMATION != "0").
+/// True when the node requests animation export (NEL3D_APPDATA_AUTOMATIC_ANIMATION != "0"),
+/// and is not excluded by DONOTEXPORT / COLLISION flags (shape_export.ms isAnimToBeExported).
 bool isAnimToBeExported(SCENELIB::INode &node);
 
-/// Add the node's material texture-matrix animation tracks (gated by the node's
-/// NEL3D_APPDATA_EXPORT_ANIMATED_MATERIALS). Returns the number of tracks added.
-uint buildMaterialAnim(SCENELIB::INode &node, NL3D::CAnimation &animation);
+/// Build the full NelExportAnimation track set for a single selected node (shape process:
+/// one node, scene=false). Returns the number of tracks added. Caller serializes when > 0
+/// (or always — empty animations exist as 29-byte NEL_ANIM headers for Sun.anim etc.;
+/// the reference still writes those; we match by writing whenever isAnimToBeExported).
+uint buildNodeAnim(SCENELIB::INode &node, NL3D::CAnimation &animation);
 
 } /* namespace SHAPEANIM */
 

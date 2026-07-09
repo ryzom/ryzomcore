@@ -267,10 +267,18 @@ PMB_DECLARE_CONTROL_KEYFRAMER(CControlScaleLinear, CStorageLinScaleKey)
 PMB_DECLARE_CONTROL_KEYFRAMER(CControlFloatLinear, CStorageLinFloatKey)
 PMB_DECLARE_CONTROL_KEYFRAMER(CControlFloatBezier, CStorageBezFloatKey)
 PMB_DECLARE_CONTROL_KEYFRAMER(CControlPosBezier, CStorageBezPoint3Key)
+// Bezier Point3 (0x200A, CTRL_POINT3 0x9005) and Bezier Color (0x2011, CTRL_COLOR 0x9009)
+// share the Position Bezier key table layout (chunk 0x2526) — the color / light-group
+// anim path (§10k-bis). Same storage as CControlPosBezier; distinct class ids so the
+// ClassDirectory3 lookup instantiates the typed keyframer instead of a raw unknown.
+PMB_DECLARE_CONTROL_KEYFRAMER(CControlPoint3Bezier, CStorageBezPoint3Key)
+PMB_DECLARE_CONTROL_KEYFRAMER(CControlColorBezier, CStorageBezPoint3Key)
 PMB_DECLARE_CONTROL_KEYFRAMER(CControlScaleBezier, CStorageBezScaleKey)
 PMB_DECLARE_CONTROL_KEYFRAMER(CControlPosTCB, CStorageTCBPoint3Key)
 PMB_DECLARE_CONTROL_KEYFRAMER(CControlRotTCB, CStorageTCBRotKey)
 PMB_DECLARE_CONTROL_KEYFRAMER(CControlScaleTCB, CStorageTCBScaleKey)
+// TCB Point3 (0x442314) — same keys as TCB Position, color/point3 role.
+PMB_DECLARE_CONTROL_KEYFRAMER(CControlPoint3TCB, CStorageTCBPoint3Key)
 
 #undef PMB_DECLARE_CONTROL_KEYFRAMER
 

@@ -851,28 +851,38 @@ static int exportFile(const std::string &maxPath, const std::string &outDir, con
 			fprintf(stderr, "ERROR: shape serialization failed for %s: %s\n", outPath.c_str(), e.what());
 		}
 		delete shape;
+	}
 
-		// Per-node material animation (.anim), the shape process's NelExportAnimation step
-		// (shape_export.ms "Export default animations"): a node with AUTOMATIC_ANIMATION gets a
-		// <node>.anim. The animated-material class (waterfalls) resolves to texture-matrix tracks
-		// (§10k); other track classes (node transform / note / morph) of NelExportAnimation are not
-		// yet replicated here, so a node whose only animation is those produces no file for now.
-		if (!animDir.empty() && SHAPEANIM::isAnimToBeExported(node))
+	// Shape process "Export default animations" (shape_export.ms):
+	//   for node in objects do if isAnimToBeExported node then NelExportAnimation #(node)
+	// This is a SEPARATE pass over ALL scene objects — not just geometry. Lights with
+	// AUTOMATIC_ANIMATION + LM_ANIMATED produce LightmapController tracks (brazero/lanterne);
+	// mesh nodes produce transform / material-texmat / morph tracks. Gating only on the
+	// geometry branch previously dropped every light-only and transform-only .anim.
+	if (!animDir.empty())
+	{
+		for (uint i = 0; i < allNodes.size(); ++i)
 		{
+			INode &node = *allNodes[i];
+			if (!SHAPEANIM::isAnimToBeExported(node))
+				continue;
+			std::string name = nodeName(node);
 			NL3D::CAnimation animation;
-			if (SHAPEANIM::buildMaterialAnim(node, animation))
+			uint nTracks = SHAPEANIM::buildNodeAnim(node, animation);
+			// Always write when the node is flagged — empty NEL_ANIM files exist in the
+			// reference corpus (Sun.anim, 29 bytes) for nodes with AUTOMATIC_ANIMATION but
+			// no exportable keyed controllers.
+			(void)nTracks;
+			std::string animPath = animDir + "/" + name + ".anim"; // raw node name, like the reference
+			try
 			{
-				std::string animPath = animDir + "/" + name + ".anim"; // raw node name, like the reference
-				try
-				{
-					NLMISC::COFile f;
-					if (f.open(animPath)) { animation.serial(f); f.close(); ++stats.AnimExported; }
-					else fprintf(stderr, "ERROR: cannot open %s for writing\n", animPath.c_str());
-				}
-				catch (const NLMISC::Exception &e)
-				{
-					fprintf(stderr, "ERROR: anim serialization failed for %s: %s\n", animPath.c_str(), e.what());
-				}
+				NLMISC::COFile f;
+				if (f.open(animPath)) { animation.serial(f); f.close(); ++stats.AnimExported; }
+				else fprintf(stderr, "ERROR: cannot open %s for writing\n", animPath.c_str());
+			}
+			catch (const NLMISC::Exception &e)
+			{
+				fprintf(stderr, "ERROR: anim serialization failed for %s: %s\n", animPath.c_str(), e.what());
 			}
 		}
 	}

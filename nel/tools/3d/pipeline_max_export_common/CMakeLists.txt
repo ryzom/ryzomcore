@@ -9,6 +9,7 @@ NL_TARGET_LIB(pipeline_max_export_common
 TARGET_LINK_LIBRARIES(pipeline_max_export_common
 	pipeline_max
 	NeL::misc
+	NeL::3d
 )
 
 SET_TARGET_PROPERTIES(pipeline_max_export_common PROPERTIES LINK_INTERFACE_LIBRARIES "")

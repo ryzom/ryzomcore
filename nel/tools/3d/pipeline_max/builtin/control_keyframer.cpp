@@ -64,6 +64,9 @@ nlctassert(sizeof(CStorageTCBScaleKey) == 112);
 #define PMB_CTRL_UNKNOWN2532_CHUNK_ID 0x2532
 #define PMB_CTRL_UNKNOWN2533_CHUNK_ID 0x2533
 #define PMB_CTRL_UNKNOWN2534_CHUNK_ID 0x2534
+// Leading empty marker on Bezier Point3 / Color controllers (before the default value).
+// Must be known so the claim loop reaches the 0x2526 key table.
+#define PMB_CTRL_POINT3_MARKER_CHUNK_ID 0x8499
 
 CControlKeyFramerBase::CControlKeyFramerBase(CScene *scene, uint16 defaultChunkId, uint16 keyChunkId, uint keySize)
 	: CReferenceTarget(scene)
@@ -98,6 +101,7 @@ bool CControlKeyFramerBase::isKnownChunkId(uint16 id) const
 	case PMB_CTRL_UNKNOWN2532_CHUNK_ID:
 	case PMB_CTRL_UNKNOWN2533_CHUNK_ID:
 	case PMB_CTRL_UNKNOWN2534_CHUNK_ID:
+	case PMB_CTRL_POINT3_MARKER_CHUNK_ID: // 0x8499 — Point3/Color leading marker
 		return true;
 	}
 	if (id == m_DefaultChunkId) return true;
@@ -362,6 +366,10 @@ bool CControlKeyFramerBase::scaleValueAt0(float out[7]) const
 
 // Default-value chunk ids per controller value type
 #define PMB_CTRL_DEFAULT_FLOAT_CHUNK_ID 0x2501
+// Point3 / Color controllers store their 12-byte default under 0x2501 (same id as the
+// float default, but 12 bytes = RGB triple) — observed on every light-color Bezier Point3
+// in stuff/animated_light/fyros_city_animated_lights.max.
+#define PMB_CTRL_DEFAULT_POINT3_CHUNK_ID 0x2501
 #define PMB_CTRL_DEFAULT_POS_CHUNK_ID 0x2503
 #define PMB_CTRL_DEFAULT_ROT_CHUNK_ID 0x2504
 #define PMB_CTRL_DEFAULT_SCALE_CHUNK_ID 0x2505
@@ -380,6 +388,8 @@ bool CControlKeyFramerBase::scaleValueAt0(float out[7]) const
 
 // Superclass ids
 #define PMB_SCLASS_CONTROL_FLOAT 0x00009003
+#define PMB_SCLASS_CONTROL_POINT3 0x00009005
+#define PMB_SCLASS_CONTROL_COLOR 0x00009009
 #define PMB_SCLASS_CONTROL_POS 0x0000900b
 #define PMB_SCLASS_CONTROL_ROT 0x0000900c
 #define PMB_SCLASS_CONTROL_SCALE 0x0000900d
@@ -405,10 +415,13 @@ PMB_DEFINE_CONTROL_KEYFRAMER(CControlScaleLinear, "Linear Scale", "ControlScaleL
 PMB_DEFINE_CONTROL_KEYFRAMER(CControlFloatLinear, "Linear Float", "ControlFloatLinear", 0x00002001, PMB_SCLASS_CONTROL_FLOAT, PMB_CTRL_DEFAULT_FLOAT_CHUNK_ID, PMB_CTRL_KEYS_LIN_FLOAT_CHUNK_ID, CStorageLinFloatKey)
 PMB_DEFINE_CONTROL_KEYFRAMER(CControlFloatBezier, "Bezier Float", "ControlFloatBezier", 0x00002007, PMB_SCLASS_CONTROL_FLOAT, PMB_CTRL_DEFAULT_FLOAT_CHUNK_ID, PMB_CTRL_KEYS_BEZ_FLOAT_CHUNK_ID, CStorageBezFloatKey)
 PMB_DEFINE_CONTROL_KEYFRAMER(CControlPosBezier, "Bezier Position", "ControlPosBezier", 0x00002008, PMB_SCLASS_CONTROL_POS, PMB_CTRL_DEFAULT_POS_CHUNK_ID, PMB_CTRL_KEYS_BEZ_POS_CHUNK_ID, CStorageBezPoint3Key)
+PMB_DEFINE_CONTROL_KEYFRAMER(CControlPoint3Bezier, "Bezier Point3", "ControlPoint3Bezier", 0x0000200a, PMB_SCLASS_CONTROL_POINT3, PMB_CTRL_DEFAULT_POINT3_CHUNK_ID, PMB_CTRL_KEYS_BEZ_POS_CHUNK_ID, CStorageBezPoint3Key)
+PMB_DEFINE_CONTROL_KEYFRAMER(CControlColorBezier, "Bezier Color", "ControlColorBezier", 0x00002011, PMB_SCLASS_CONTROL_COLOR, PMB_CTRL_DEFAULT_POINT3_CHUNK_ID, PMB_CTRL_KEYS_BEZ_POS_CHUNK_ID, CStorageBezPoint3Key)
 PMB_DEFINE_CONTROL_KEYFRAMER(CControlScaleBezier, "Bezier Scale", "ControlScaleBezier", 0x00002010, PMB_SCLASS_CONTROL_SCALE, PMB_CTRL_DEFAULT_SCALE_CHUNK_ID, PMB_CTRL_KEYS_BEZ_SCALE_CHUNK_ID, CStorageBezScaleKey)
 PMB_DEFINE_CONTROL_KEYFRAMER(CControlPosTCB, "TCB Position", "ControlPosTCB", 0x00442312, PMB_SCLASS_CONTROL_POS, PMB_CTRL_DEFAULT_POS_CHUNK_ID, PMB_CTRL_KEYS_TCB_POS_CHUNK_ID, CStorageTCBPoint3Key)
 PMB_DEFINE_CONTROL_KEYFRAMER(CControlRotTCB, "TCB Rotation", "ControlRotTCB", 0x00442313, PMB_SCLASS_CONTROL_ROT, PMB_CTRL_DEFAULT_ROT_CHUNK_ID, PMB_CTRL_KEYS_TCB_ROT_CHUNK_ID, CStorageTCBRotKey)
 PMB_DEFINE_CONTROL_KEYFRAMER(CControlScaleTCB, "TCB Scale", "ControlScaleTCB", 0x00442315, PMB_SCLASS_CONTROL_SCALE, PMB_CTRL_DEFAULT_SCALE_CHUNK_ID, PMB_CTRL_KEYS_TCB_SCALE_CHUNK_ID, CStorageTCBScaleKey)
+PMB_DEFINE_CONTROL_KEYFRAMER(CControlPoint3TCB, "TCB Point3", "ControlPoint3TCB", 0x00442314, PMB_SCLASS_CONTROL_POINT3, PMB_CTRL_DEFAULT_POINT3_CHUNK_ID, PMB_CTRL_KEYS_TCB_POS_CHUNK_ID, CStorageTCBPoint3Key)
 
 #undef PMB_DEFINE_CONTROL_KEYFRAMER
 

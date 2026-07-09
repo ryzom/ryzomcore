@@ -3,6 +3,7 @@
  * \brief See anim_build.h.
  * \author Jan Boon (Kaetemi)
  * \author Claude Opus 4.8
+ * \author Grok 4.5
  */
 
 /*
@@ -29,16 +30,23 @@
 
 #include <cstdio>
 #include <cstring>
+#include <set>
+#include <string>
+#include <vector>
 
 #include <nel/3d/animation.h>
-#include <nel/3d/track_keyframer.h>
 #include <nel/3d/animated_material.h>
+#include <nel/3d/transformable.h>
+#include <nel/misc/algo.h>
+#include <nel/misc/ucstring.h>
 
 #include "material_build.h"
-#include "../pipeline_max/builtin/i_node.h"
+#include "scene_lib.h"
+#include "../pipeline_max_export_common/track_build.h"
 #include "../pipeline_max/builtin/control_keyframer.h"
 #include "../pipeline_max/builtin/mtl_base.h"
 #include "../pipeline_max/builtin/multi_mtl.h"
+#include "../pipeline_max/builtin/node_impl.h"
 #include "../pipeline_max/builtin/reference_maker.h"
 #include "../pipeline_max/storage_object.h"
 
@@ -46,14 +54,21 @@ using namespace PIPELINE::MAX;
 using namespace PIPELINE::MAX::BUILTIN;
 using namespace SCENELIB;
 using namespace MATBUILD;
+using namespace TRACKBUILD;
 
 namespace SHAPEANIM {
 
+// NeL AppData sub-ids
 #define NEL3D_APPDATA_AUTOMATIC_ANIMATION 1423062617
 #define NEL3D_APPDATA_EXPORT_ANIMATED_MATERIALS 1423062587
+#define NEL3D_APPDATA_DONOTEXPORT 1423062565
+#define NEL3D_APPDATA_COLLISION 1423062613
+#define NEL3D_APPDATA_COLLISION_EXTERIOR 1423062614
+// Lightmap animated light (calc_lm.h): NEL3D_APPDATA_LM = 41654684
+#define NEL3D_APPDATA_LM_ANIMATED_LIGHT 41654685
+#define NEL3D_APPDATA_LM_ANIMATED 41654686
 
-// NeL material v14 param table (subset shared with material_build.cpp): block index among the
-// material's ParamBlock2 references, and param id.
+// NeL material v14 param ids (subset)
 #define NLB_MAIN 1
 #define NLB_TEXTURES 2
 #define NLP_BEXPORTTEXTUREMATRIX 0x24
@@ -61,35 +76,91 @@ namespace SHAPEANIM {
 #define NLP_TTEXTURE_1 0x10
 #define MAX_TEX_STAGE 8
 
-// Max ticks per second (GetTicksPerFrame*GetFrameRate = 4800), and the Interval sentinels.
-static const sint32 TIME_NEG_INF = (sint32)0x80000000;
-static const sint32 TIME_POS_INF = (sint32)0x7fffffff;
-static inline float convertTime(sint32 ticks) { return (float)ticks / 4800.0f; }
+// Class ids
+static const NLMISC::CClassId CLASSID_PRS_CTRL(0x00002005, 0x00000000);
+static const NLMISC::CClassId CLASSID_LOOKAT_CTRL(0x00002006, 0x00000000);
+static const NLMISC::CClassId CLASSID_OSM_DERIVED(0x29263a68, 0x405f22f5);
+static const NLMISC::CClassId CLASSID_MORPHER(0x17bb6854, 0xa5cba2a3);
+// Light superclasses / Omni class for light detection
+static const TSClassId SCLASS_LIGHT = 0x00000030;
 
-// The StdUVGen coordinate params, in ParamBlock index order, and the NeL texture-matrix track
-// each one drives (the subset the reference addTexTracks reads). U/V Offset are the corpus-proven
-// pair (§10k); tiling/angle are by the standard StdUVGen order, unexercised so far.
+// ---------------------------------------------------------------------------------------------
+// AppData helpers
+
+static std::string getAppDataStr(INode &node, uint32 subId, const std::string &def = std::string())
+{
+	CNodeImpl *n = dynamic_cast<CNodeImpl *>(&node);
+	if (!n) return def;
+	std::string s = getScriptAppDataStr(n, subId, def);
+	return s;
+}
+
+static int getAppDataInt(INode &node, uint32 subId, int def)
+{
+	CNodeImpl *n = dynamic_cast<CNodeImpl *>(&node);
+	if (!n) return def;
+	return getScriptAppDataInt(n, subId, def);
+}
+
+bool isAnimToBeExported(INode &node)
+{
+	// shape_export.ms isAnimToBeExported: AUTOMATIC_ANIMATION must be set and non-"0",
+	// and the node must not be DONOTEXPORT / COLLISION / COLLISION_EXTERIOR.
+	if (getAppDataInt(node, NEL3D_APPDATA_AUTOMATIC_ANIMATION, 0) == 0)
+		return false;
+	if (getAppDataStr(node, NEL3D_APPDATA_DONOTEXPORT, "") == "1")
+		return false;
+	if (getAppDataStr(node, NEL3D_APPDATA_COLLISION, "") == "1")
+		return false;
+	if (getAppDataStr(node, NEL3D_APPDATA_COLLISION_EXTERIOR, "") == "1")
+		return false;
+	return true;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Node transform tracks (addNodeTracks for a single selected root — bare track names)
+
+static uint addNodeTracks(NL3D::CAnimation &animation, INode &node)
+{
+	uint n = 0;
+	CReferenceMaker *transform = node.getReference(0);
+	CSceneClass *tmsc = transform ? dynamic_cast<CSceneClass *>(transform) : NULL;
+	bool isPrs = tmsc && tmsc->classDesc()->classId() == CLASSID_PRS_CTRL;
+	bool isLookAt = tmsc && tmsc->classDesc()->classId() == CLASSID_LOOKAT_CTRL;
+	if (!isPrs && !isLookAt) return 0;
+
+	// Export order matches the reference: scale, rotation, position.
+	NL3D::ITrack *track = buildATrack(transform->getReference(isPrs ? 2 : 3), typeScale);
+	if (track) { addTrackChecked(animation, NL3D::ITransformable::getScaleValueName(), track); ++n; }
+
+	if (isPrs)
+	{
+		track = buildATrack(transform->getReference(1), typeRotation);
+		if (track) { addTrackChecked(animation, NL3D::ITransformable::getRotQuatValueName(), track); ++n; }
+	}
+
+	track = buildATrack(transform->getReference(isPrs ? 0 : 1), typePos);
+	if (track) { addTrackChecked(animation, NL3D::ITransformable::getPosValueName(), track); ++n; }
+
+	return n;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Material texture-matrix tracks (§10k)
+
 struct SUVCoord
 {
-	int Index;                        // StdUVGen ParamBlock param index
-	const char *(*NameFn)(uint stage); // CAnimatedMaterial track-name suffix
+	int Index;
+	const char *(*NameFn)(uint stage);
 };
 static const SUVCoord s_uvCoords[] = {
-	{ 0, &NL3D::CAnimatedMaterial::getTexMatUTransName }, // U Offset -> UTrans
-	{ 1, &NL3D::CAnimatedMaterial::getTexMatVTransName }, // V Offset -> VTrans
-	{ 2, &NL3D::CAnimatedMaterial::getTexMatUScaleName }, // U Tiling -> UScale
-	{ 3, &NL3D::CAnimatedMaterial::getTexMatVScaleName }, // V Tiling -> VScale
-	{ 6, &NL3D::CAnimatedMaterial::getTexMatWRotName },   // W Angle  -> WRot
+	{ 0, &NL3D::CAnimatedMaterial::getTexMatUTransName },
+	{ 1, &NL3D::CAnimatedMaterial::getTexMatVTransName },
+	{ 2, &NL3D::CAnimatedMaterial::getTexMatUScaleName },
+	{ 3, &NL3D::CAnimatedMaterial::getTexMatVScaleName },
+	{ 6, &NL3D::CAnimatedMaterial::getTexMatWRotName },
 };
 
-// Resolve the Linear Float controller animating StdUVGen coordinate param `coord` on this texmap.
-// texmap ref 0 = StdUVGen ("Placement"); StdUVGen ref 0 = the old-style ParamBlock (0x8). A coord
-// param's 0x0002 entry replaces its value chunk with an empty 0x0200 marker when animated, and its
-// controller is the ParamBlock's reference, in animated-entry order (compact — one ref per
-// animated param). See --uvgen-dump / §10k.
-// Find the first UVGen (superclass 0xc20) in the texmap's reference subtree — the texmap is a
-// plain BitmapTex (ref 0 = StdUVGen directly) or a NeL Multi Bitmap (ref 0 = delegate BitmapTex
-// whose ref 0 is the StdUVGen), matching getControlerByName's recursive subanim walk.
 static CSceneClass *findUVGen(CSceneClass *obj, int depth)
 {
 	if (!obj) return NULL;
@@ -139,36 +210,6 @@ static CControlKeyFramerBase *uvController(CSceneClass *texmap, int coord)
 	return NULL;
 }
 
-// Build a CTrackKeyFramerLinearFloat from a Linear Float controller (buildATrack typeFloat path:
-// value passthrough, time = ticks/4800, range from the controller's Interval).
-static NL3D::ITrack *buildFloatTrack(CControlKeyFramerBase *kf)
-{
-	CControlFloatLinear *c = dynamic_cast<CControlFloatLinear *>(kf);
-	if (!c || kf->keyCount() == 0) return NULL;
-	NL3D::CTrackKeyFramerLinearFloat *track = new NL3D::CTrackKeyFramerLinearFloat();
-	const CStorageLinFloatKey *keys = c->keys();
-	float firstK = 0.0f, lastK = 0.0f;
-	for (uint i = 0; i < kf->keyCount(); ++i)
-	{
-		float t = convertTime(keys[i].Time);
-		if (i == 0) firstK = t;
-		lastK = t;
-		NL3D::CKeyFloat k;
-		k.Value = keys[i].Val;
-		track->addKey(k, t);
-	}
-	sint32 rs = 0, re = 0;
-	bool hasRange = kf->range(rs, re);
-	bool valid = hasRange;
-	if (valid && rs == TIME_NEG_INF && re == TIME_POS_INF) valid = false; // FOREVER
-	if (valid && rs == TIME_NEG_INF && re == TIME_NEG_INF) valid = false; // NEVER
-	if (valid) track->unlockRange(convertTime(rs), convertTime(re));
-	else track->unlockRange(firstK, lastK);
-	track->setLoopMode(false);
-	return track;
-}
-
-// addTexTracks: per texmap per stage, add the UTrans/VTrans/... tracks whose coord is animated.
 static uint addTexTracks(NL3D::CAnimation &animation, CSceneClass *texmap, uint stage, const std::string &mtlName)
 {
 	uint n = 0;
@@ -176,22 +217,16 @@ static uint addTexTracks(NL3D::CAnimation &animation, CSceneClass *texmap, uint 
 	{
 		CControlKeyFramerBase *c = uvController(texmap, s_uvCoords[k].Index);
 		if (!c) continue;
-		NL3D::ITrack *track = buildFloatTrack(c);
+		NL3D::ITrack *track = buildATrack(c, typeFloat);
 		if (!track) continue;
 		std::string name = mtlName + s_uvCoords[k].NameFn(stage);
-		if (animation.getTrackByName(name.c_str())) { delete track; continue; } // first-wins, like the reference
+		if (animation.getTrackByName(name.c_str())) { delete track; continue; }
 		animation.addTrack(name.c_str(), track);
 		++n;
 	}
 	return n;
 }
 
-// The first NeL material reachable from `mtl` (itself if it is one, else the first sub-material,
-// recursively). The reference's getValueByNameUsingParamBlock2 / getControlerByName recurse a
-// material's subanims and return the first match, so a Multi/Sub-Object resolves the texmat params
-// (bExportTextureMatrix, tTexture_N) from its first sub-material — which is how a Multi gets a
-// texture-matrix track under ITS OWN name (e.g. waterfall01's Multi 'Material #83' emits
-// 'Material #83.VTrans0' driven by sub-material #26's controller).
 static CSceneClass *firstNelMaterial(CSceneClass *mtl)
 {
 	if (!mtl) return NULL;
@@ -202,20 +237,13 @@ static CSceneClass *firstNelMaterial(CSceneClass *mtl)
 	return NULL;
 }
 
-// addMtlTracks: the texture-matrix half (color tracks unimplemented — no corpus signal, §12.2).
-// Emits this material's own tracks (params resolved through its first reachable NeL material, per
-// the reference recursion), then recurses Multi sub-materials with the SAME parent prefix (the
-// reference passes the base name, not the multi's, to sub-materials).
 static uint addMtlTracks(NL3D::CAnimation &animation, CSceneClass *mtl, const std::string &parentName)
 {
 	if (!mtl) return 0;
 	uint n = 0;
 	std::string mtlName = parentName + materialName(mtl) + ".";
 
-	// The reference recurses sub-materials BEFORE emitting its own texmat tracks (addMtlTracks:
-	// the GetSubMtl loop precedes the bExportTextureMatrix block), so the insertion order — which
-	// CAnimation preserves as the track-data index behind the name-sorted map — is subs first,
-	// then this material's own.
+	// Reference: recurse sub-materials BEFORE own texmat tracks.
 	if (CMultiMtl *mm = dynamic_cast<CMultiMtl *>(mtl))
 		for (uint s = 0; s < mm->numSubMaterials(); ++s)
 			n += addMtlTracks(animation, mm->subMaterial(s), parentName);
@@ -225,9 +253,6 @@ static uint addMtlTracks(NL3D::CAnimation &animation, CSceneClass *mtl, const st
 	{
 		std::vector<SPB2Block> blocks;
 		readObjectPB2Blocks(nel, blocks);
-		// bExportTextureMatrix and bEnableSlot_N can be inline constants OR controller-backed (the
-		// export flag is animated with an On/Off controller on some materials — the reference reads
-		// the live value at t=0). Default false (the NeL material script default).
 		if (resolveNelBoolAt0(blocks, NLB_MAIN, NLP_BEXPORTTEXTUREMATRIX, false))
 		{
 			for (uint i = 0; i < MAX_TEX_STAGE; ++i)
@@ -240,21 +265,135 @@ static uint addMtlTracks(NL3D::CAnimation &animation, CSceneClass *mtl, const st
 			}
 		}
 	}
-
 	return n;
 }
 
-bool isAnimToBeExported(INode &node)
+// ---------------------------------------------------------------------------------------------
+// Light tracks — LightmapController.<animatedLightName> from Color Point3 controller
+// (CExportNel::addLightTracks). Only when NEL3D_APPDATA_LM_ANIMATED != 0 and the node object
+// is a light (superclass 0x30).
+
+static bool nodeIsLight(INode &node)
 {
-	return getScriptAppDataInt(&node, NEL3D_APPDATA_AUTOMATIC_ANIMATION, 0) != 0;
+	CReferenceMaker *obj = dynamic_cast<CReferenceMaker *>(node.getReference(1));
+	return obj && obj->classDesc()->superClassId() == SCLASS_LIGHT;
 }
 
-uint buildMaterialAnim(INode &node, NL3D::CAnimation &animation)
+// Locate a Color / Point3 keyframer under the light object (getControlerByName(node,"Color")).
+// Walks the node + object reference tree depth-first; prefers Bezier Color / Point3 / Position
+// controllers that carry keys (the corpus light anims are all Bezier Color / Point3).
+// Color controllers live on the light OBJECT (ParamBlock ref), not on the PRS transform.
+// Prefer Point3/Color keyframers; never return a position-superclass controller (those are
+// the node TM channels — lanterne-int1 wrongly matched ControlPosBezier when we walked the
+// whole node first).
+static CReferenceMaker *findColorController(CReferenceMaker *obj, int depth, std::set<CReferenceMaker *> &seen)
 {
-	if (getScriptAppDataInt(&node, NEL3D_APPDATA_EXPORT_ANIMATED_MATERIALS, 0) == 0)
+	if (!obj || depth < 0) return NULL;
+	if (!seen.insert(obj).second) return NULL;
+
+	if (CControlKeyFramerBase *kf = dynamic_cast<CControlKeyFramerBase *>(obj))
+	{
+		if (kf->keyCount() > 0)
+		{
+			if (dynamic_cast<CControlColorBezier *>(obj)
+			    || dynamic_cast<CControlPoint3Bezier *>(obj)
+			    || dynamic_cast<CControlPoint3TCB *>(obj))
+				return obj;
+		}
+	}
+
+	for (uint i = 0; i < obj->nbReferences(); ++i)
+	{
+		CReferenceMaker *r = obj->getReference(i);
+		if (CReferenceMaker *found = findColorController(r, depth - 1, seen))
+			return found;
+	}
+	return NULL;
+}
+
+static std::string getAnimatedLightName(INode &node)
+{
+	std::string ret = getAppDataStr(node, NEL3D_APPDATA_LM_ANIMATED_LIGHT, "");
+	if (ret == "Sun" || ret == "GlobalLight" || ret == "(Use NelLight Modifier)")
+		ret.clear();
+	return ret;
+}
+
+static uint addLightTracks(NL3D::CAnimation &animation, INode &node)
+{
+	if (!nodeIsLight(node)) return 0;
+	if (getAppDataInt(node, NEL3D_APPDATA_LM_ANIMATED, 0) == 0) return 0;
+
+	std::string name = "LightmapController." + getAnimatedLightName(node);
+
+	// Search Color controller under the light object only (not the whole node — the PRS
+	// sub-controllers are also Point3-layout keyframers and would false-match).
+	CReferenceMaker *lightObj = dynamic_cast<CReferenceMaker *>(node.getReference(1));
+	std::set<CReferenceMaker *> seen;
+	CReferenceMaker *ctrl = findColorController(lightObj, 8, seen);
+	if (!ctrl) return 0;
+
+	NL3D::ITrack *track = buildATrack(ctrl, typeColor);
+	if (!track) return 0;
+	if (animation.getTrackByName(name.c_str()))
+	{
+		delete track;
 		return 0;
-	// Base name is bare for the exported shape node (its parent is the scene root).
-	return addMtlTracks(animation, materialOf(node), std::string());
+	}
+	animation.addTrack(name.c_str(), track);
+	return 1;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Morph tracks
+
+static uint addMorphTracks(NL3D::CAnimation &animation, INode &node)
+{
+	CReferenceMaker *obj = dynamic_cast<CReferenceMaker *>(node.getReference(1));
+	if (!obj || obj->classDesc()->classId() != CLASSID_OSM_DERIVED) return 0;
+	CReferenceMaker *morpher = NULL;
+	for (uint i = 0; i < obj->nbReferences() && !morpher; ++i)
+	{
+		CReferenceMaker *mod = obj->getReference(i);
+		if (mod && mod->classDesc()->classId() == CLASSID_MORPHER)
+			morpher = mod;
+	}
+	if (!morpher) return 0;
+
+	uint n = 0;
+	for (uint i = 0; i < 100; ++i)
+	{
+		CNodeImpl *target = dynamic_cast<CNodeImpl *>(morpher->getReference(101 + i));
+		if (!target) continue;
+		CReferenceMaker *pblock = morpher->getReference(i + 1);
+		if (!pblock) continue;
+		NL3D::ITrack *track = buildATrack(pblock->getReference(0), typeFloat);
+		if (!track) continue;
+		std::string name = ucstring(target->userName()).toUtf8() + "MorphFactor";
+		if (animation.getTrackByName(name.c_str())) { delete track; continue; }
+		animation.addTrack(name.c_str(), track);
+		++n;
+	}
+	return n;
+}
+
+// ---------------------------------------------------------------------------------------------
+
+uint buildNodeAnim(INode &node, NL3D::CAnimation &animation)
+{
+	// Replicates CExportNel::addAnimation for a single non-biped selected node
+	// (shape process: NelExportAnimation #(node) out false).
+	// Order: node tracks, object (FOV skipped — no corpus keys), materials, lights, PS
+	// (skipped — no shape-process corpus), morph. Bare track names (selected root).
+	uint n = 0;
+	n += addNodeTracks(animation, node);
+
+	if (getAppDataInt(node, NEL3D_APPDATA_EXPORT_ANIMATED_MATERIALS, 0) != 0)
+		n += addMtlTracks(animation, materialOf(node), std::string());
+
+	n += addLightTracks(animation, node);
+	n += addMorphTracks(animation, node);
+	return n;
 }
 
 } /* namespace SHAPEANIM */

@@ -83,6 +83,11 @@ const CNullSuperClassDesc NullSuperClassDesc(&ReferenceTargetClassDesc, "NullSup
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x00009003> CControlFloatSuperClassDesc;
 const CControlFloatSuperClassDesc ControlFloatSuperClassDesc(&ReferenceTargetClassDesc, "ControlFloatSuperClassUnknown");
 
+// 0x9009 CTRL_COLOR — float RGB color controllers (Bezier Color 0x2011)
+// (0x9005 CTRL_POINT3 is declared further below with the other control superclasses)
+typedef CSuperClassDescUnknown<CReferenceTarget, 0x00009009> CControlColorSuperClassDesc;
+const CControlColorSuperClassDesc ControlColorSuperClassDesc(&ReferenceTargetClassDesc, "ControlColorSuperClassUnknown");
+
 // 0x8 param block, under reftarget directly
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000008> CParamBlockSuperClassDesc;
 const CParamBlockSuperClassDesc ParamBlockSuperClassDesc(&ReferenceTargetClassDesc, "ParamBlockSuperClassUnknown");
@@ -301,10 +306,13 @@ void CBuiltin::registerClasses(CSceneClassRegistry *registry)
 	registry->add(&CControlFloatLinearDesc);
 	registry->add(&CControlFloatBezierDesc);
 	registry->add(&CControlPosBezierDesc);
+	registry->add(&CControlPoint3BezierDesc);
+	registry->add(&CControlColorBezierDesc);
 	registry->add(&CControlScaleBezierDesc);
 	registry->add(&CControlPosTCBDesc);
 	registry->add(&CControlRotTCBDesc);
 	registry->add(&CControlScaleTCBDesc);
+	registry->add(&CControlPoint3TCBDesc);
 
 	// object (inh ReferenceMaker)
 	registry->add(&BaseObjectClassDesc);
@@ -327,6 +335,7 @@ void CBuiltin::registerClasses(CSceneClassRegistry *registry)
 
 	// unimplemented
 	registry->add(&ControlFloatSuperClassDesc);
+	registry->add(&ControlColorSuperClassDesc);
 	registry->add(&ParamBlockSuperClassDesc);
 	registry->add(&UVGenSuperClassDesc);
 	registry->add(&ParamBlock2SuperClassDesc);
