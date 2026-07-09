@@ -1835,16 +1835,33 @@ void CBipedAnimEval::applyPivotIk(double t, std::map<INode *, SBipNodeState> &ou
 			// zo_hof_marche's straight-leg release frame — a 0.24 rad ankle miss).
 			NLMISC::CVectorD cxv(thX.y*uT.z - thX.z*uT.y, thX.z*uT.x - thX.x*uT.z, thX.x*uT.y - thX.y*uT.x);
 			double theta = atan2(cxv * hz, thX * uT);
-			QuatD thigh2 = qMul(qAxisAngle(hz, theta + phiT), thigh1);
-			QuatD calf2 = qMul(thigh2, qAxisAngle(NLMISC::CVectorD(0, 0, 1), aIk - M_PI));
-			stUp.WorldRot = qNorm(thigh2);
-			stMid.WorldRot = qNorm(calf2);
-			stMid.WorldPos = stUp.WorldPos + qRotate(stUp.WorldRot, m_Nodes[iMid].FigLocalPos);
-			stEnd.WorldPos = stMid.WorldPos + qRotate(stMid.WorldRot, m_Nodes[iEnd].FigLocalPos);
-			if (getenv("PMB_BIPED_IK_DEBUG"))
-				fprintf(stderr, "IKDBG2 t=%g d=%g dmin=%g dmax=%g aIk=%g phiT=%g theta=%g end=(%g,%g,%g) missT=%g\n",
-				        t, d, dmin, dmax, aIk, phiT, theta, stEnd.WorldPos.x, stEnd.WorldPos.y, stEnd.WorldPos.z,
-				        (stEnd.WorldPos - T).norm());
+			QuatD thigh2 = qNorm(qMul(qAxisAngle(hz, theta + phiT), thigh1));
+			QuatD calf2 = qNorm(qMul(thigh2, qAxisAngle(NLMISC::CVectorD(0, 0, 1), aIk - M_PI)));
+			// Arms: reject a solve that flips the forearm far from the FK mid rotation.
+			// Bent-back L-arm held poses (engarde/idle_attente, §10s-bis residual) still
+			// reach the palm-pivot target but land on the wrong hinge fold — world mid-bone
+			// quat distance to FK is 0.25–0.48 on those frames while mount-attack wins top
+			// out at ≈0.15. Drop BOTH the position solve and the hand-rotation override
+			// for that frame. Threshold 0.18 is corpus-gated (anim_ik_subset.py + full A/B:
+			// 69 improve / 25 regress / mean −0.0025 over 3173 direct-ref bipeds). Note:
+			// residual regressions (l2m idle_attente) keep midFlip < 0.18 while the LOCAL
+			// forearm track still jumps — those need a better arm hinge model, not a tighter
+			// threshold (tighter kills the mount-attack wins). Legs unaffected.
+			if (limb == 0 && qdistApprox(calf2, stMid.WorldRot) > 0.18)
+			{
+				stEnd.WorldRot = footRotOld; // undo yaw-frame hand override
+			}
+			else
+			{
+				stUp.WorldRot = thigh2;
+				stMid.WorldRot = calf2;
+				stMid.WorldPos = stUp.WorldPos + qRotate(stUp.WorldRot, m_Nodes[iMid].FigLocalPos);
+				stEnd.WorldPos = stMid.WorldPos + qRotate(stMid.WorldRot, m_Nodes[iEnd].FigLocalPos);
+				if (getenv("PMB_BIPED_IK_DEBUG"))
+					fprintf(stderr, "IKDBG2 t=%g d=%g dmin=%g dmax=%g aIk=%g phiT=%g theta=%g end=(%g,%g,%g) missT=%g\n",
+					        t, d, dmin, dmax, aIk, phiT, theta, stEnd.WorldPos.x, stEnd.WorldPos.y, stEnd.WorldPos.z,
+					        (stEnd.WorldPos - T).norm());
+			}
 		}
 		// descendants: recompose transitively — positions from the (possibly moved) parents, and
 		// rotations preserving each node's local rotation when its parent's rotation changed (the

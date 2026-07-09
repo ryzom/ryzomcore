@@ -54,7 +54,10 @@
  * The residual open item is the true in-plant foot rotation (solver-derived in the reference;
  * the key-yaw composition here is the measured best interpolation). PMB_BIPED_IK=0 forces pure
  * FK for A/B; 1/2 are the older superseded experiments; PMB_BIPED_IK_ROT / PMB_BIPED_IK_ARMS
- * select rotation-rule and arm-pin variants.
+ * select rotation-rule and arm-pin variants. Arm-pin (§10s-bis/ter) is env-gated: palm-pivot
+ * + space + COM-yaw + D-window + correction gates, plus a midFlip > 0.18 reject that drops
+ * both the position solve and the hand yaw-frame on bent-back held poses (engarde); residual
+ * l2m idle_attente class needs a local-forearm hinge model.
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
  */
