@@ -22,7 +22,8 @@
  * Limb record (110 floats): [0] hinge angle (elbow/knee), [1] ballistic tension, [2..5] upper
  * quat (COM-relative), [9]/[10] clavicle (a, b-delta) on arms, [11] pivot int, [12] IK blend,
  * [14..16]+1 end-effector pos body(COM Y-up), [18..20]+1 end-effector pos WORLD (Y-up),
- * [22..24]+0 unit vector, [28..31] foot/hand quat, [46+10k..49+10k] finger/toe base delta quat,
+ * [22..24] unit pole vector (Y-up; mid-bone direction ⊥ upper→end — decoded 2026-07-09),
+ * [28..31] foot/hand quat, [46+10k..49+10k] finger/toe base delta quat,
  * [54+10k],[55+10k] bend angles. ([50+10k..53+10k] etc are caches — ignore.)
  *
  * Time chunk: hdr 7 dwords (count, ?, ?, ?, ?, trackType, ?), then count x 10 dwords:
@@ -56,9 +57,10 @@
  * FK for A/B; 1/2 are the older superseded experiments; PMB_BIPED_IK_ROT / PMB_BIPED_IK_ARMS
  * select rotation-rule and arm-pin variants. Arm-pin is default ON (§10s-quat/cinq): palm-pivot
  * + space + stored-pA path gate + correction + static-plant-drop + COM-yaw-session-drop;
- * small-D uses single-fold + midFlip/locFlip; large-path (stored pA travel > 5 cm — coup_fort
- * weapon plants) uses dual-fold reach-first with Full world hand squad. PMB_BIPED_IK_ARMS=0
- * forces legs-only for A/B.
+ * small-D uses single-fold + midFlip/locFlip; large-path (stored pA travel > 10 cm + ≥4 knots
+ * — coup_fort weapon plants) uses dual-fold reach-first with FK hand rotation (Full world
+ * squad is A/B-only via PMB_BIPED_IK_ROT=full). Pole vector [22..24] twists the solved chain
+ * onto the stored elbow/knee plane. PMB_BIPED_IK_ARMS=0 forces legs-only for A/B.
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
  * \author Grok 4.5
@@ -320,6 +322,11 @@ private:
 	TCBQuatChannel m_ChLegEnd[2];     // foot
 	TCBScalarChannel m_ChIkBlend[2][2];   // [arm/leg][side]
 	TCBVec3Channel m_ChIkTarget[2][2];    // world end-effector pos (Y-up stored)
+	// Limb pole / elbow-knee plane direction from record [22..24] (unit, Y-up stored → NeL in
+	// the channel). Corpus-validated as the mid-bone pole vector (⊥ shoulder/hip→end), not the
+	// plane normal — ~0.95·pole on plant keys. Used to twist the 2-bone solve about the reach
+	// axis so the mid bone tracks Character Studio's swivel, not just the FK-inherited plane.
+	TCBVec3Channel m_ChPole[2][2];        // [arm/leg][side], NeL space unit vectors
 	std::vector<TCBScalarChannel> m_ChSpineAng, m_ChTailAng, m_ChPony1Ang, m_ChPony2Ang, m_ChNeckAng;
 	TCBQuatChannel m_ChHead;
 	std::vector<TCBQuatChannel> m_ChFingerBase[2], m_ChToeBase[2];

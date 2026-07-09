@@ -686,6 +686,39 @@ void CBipedAnimEval::buildChannels()
 			angleChannelFrom(*arms[s], 10, m_ChClavB[s]);
 			scalarChannelFrom(*arms[s], 12, m_ChIkBlend[0][s]);
 			vec3ChannelFrom(*arms[s], 18, 19, 20, m_ChIkTarget[0][s]);
+			// Pole vector [22..24] Y-up → NeL (x,-z,y). Knots only at planted keys (blend≈1)
+			// so free-key poles don't pollute TCB tangents into plant intervals.
+			{
+				TCBVec3Channel &pole = m_ChPole[0][s];
+				pole.X.Keys.clear(); pole.Y.Keys.clear(); pole.Z.Keys.clear();
+				for (size_t k = 0; k < arms[s]->Times.size(); ++k)
+				{
+					if (arms[s]->Recs[k].size() < 25) continue;
+					double blend = arms[s]->Recs[k][12];
+					if (!(blend > 0.5 && blend <= 1.5)) continue;
+					const std::vector<float> &rec = arms[s]->Recs[k];
+					NLMISC::CVectorD p((double)rec[22], -(double)rec[24], (double)rec[23]);
+					double n = p.norm();
+					if (n > 1e-6) p = p / n;
+					// Sign-chain against previous knot so TCB doesn't flip through the double cover.
+					if (!pole.X.empty())
+					{
+						NLMISC::CVectorD prev(pole.X.Keys.back().Value, pole.Y.Keys.back().Value, pole.Z.Keys.back().Value);
+						if (p * prev < 0.0) p = NLMISC::CVectorD(-p.x, -p.y, -p.z);
+					}
+					TCBScalarKey kx, ky, kz;
+					kx.Time = ky.Time = kz.Time = arms[s]->Times[k];
+					kx.Tens = ky.Tens = kz.Tens = arms[s]->Tens[k];
+					kx.Cont = ky.Cont = kz.Cont = arms[s]->Cont[k];
+					kx.Bias = ky.Bias = kz.Bias = arms[s]->Bias[k];
+					kx.EaseTo = ky.EaseTo = kz.EaseTo = arms[s]->EaseTo[k];
+					kx.EaseFrom = ky.EaseFrom = kz.EaseFrom = arms[s]->EaseFrom[k];
+					kx.Value = p.x; ky.Value = p.y; kz.Value = p.z;
+					pole.X.Keys.push_back(kx); pole.Y.Keys.push_back(ky); pole.Z.Keys.push_back(kz);
+				}
+				if (pole.X.Keys.size() >= 2) pole.compile();
+				else { pole.X.Keys.clear(); pole.Y.Keys.clear(); pole.Z.Keys.clear(); }
+			}
 			// fingers: base quat [46+10k], bends [54+10k], [55+10k]
 			size_t nf = m_Rig ? std::max(m_Rig->Fingers[0].size(), m_Rig->Fingers[1].size()) : 0;
 			m_ChFingerBase[s].resize(nf);
@@ -709,6 +742,40 @@ void CBipedAnimEval::buildChannels()
 			// previously read unshifted, which fed 4-link (mount/bird) rigs garbage IK inputs.
 			scalarChannelFrom(*legs[s], 12 + legShift, m_ChIkBlend[1][s]);
 			vec3ChannelFrom(*legs[s], 18 + legShift, 19 + legShift, 20 + legShift, m_ChIkTarget[1][s]);
+			// Leg pole channel: decoded (planted-only, sign-chained) but NOT applied yet —
+			// first arm-only corpus A/B of the twist; legs already near-good under FK plane
+			// preservation and a premature apply regressed L foot/thigh on coup_fort_03.
+			{
+				TCBVec3Channel &pole = m_ChPole[1][s];
+				const int po = 22 + legShift;
+				pole.X.Keys.clear(); pole.Y.Keys.clear(); pole.Z.Keys.clear();
+				for (size_t k = 0; k < legs[s]->Times.size(); ++k)
+				{
+					if (legs[s]->Recs[k].size() < (size_t)po + 3) continue;
+					double blend = legs[s]->Recs[k][12 + legShift];
+					if (!(blend > 0.5 && blend <= 1.5)) continue;
+					const std::vector<float> &rec = legs[s]->Recs[k];
+					NLMISC::CVectorD p((double)rec[po], -(double)rec[po + 2], (double)rec[po + 1]);
+					double n = p.norm();
+					if (n > 1e-6) p = p / n;
+					if (!pole.X.empty())
+					{
+						NLMISC::CVectorD prev(pole.X.Keys.back().Value, pole.Y.Keys.back().Value, pole.Z.Keys.back().Value);
+						if (p * prev < 0.0) p = NLMISC::CVectorD(-p.x, -p.y, -p.z);
+					}
+					TCBScalarKey kx, ky, kz;
+					kx.Time = ky.Time = kz.Time = legs[s]->Times[k];
+					kx.Tens = ky.Tens = kz.Tens = legs[s]->Tens[k];
+					kx.Cont = ky.Cont = kz.Cont = legs[s]->Cont[k];
+					kx.Bias = ky.Bias = kz.Bias = legs[s]->Bias[k];
+					kx.EaseTo = ky.EaseTo = kz.EaseTo = legs[s]->EaseTo[k];
+					kx.EaseFrom = ky.EaseFrom = kz.EaseFrom = legs[s]->EaseFrom[k];
+					kx.Value = p.x; ky.Value = p.y; kz.Value = p.z;
+					pole.X.Keys.push_back(kx); pole.Y.Keys.push_back(ky); pole.Z.Keys.push_back(kz);
+				}
+				if (pole.X.Keys.size() >= 2) pole.compile();
+				else { pole.X.Keys.clear(); pole.Y.Keys.clear(); pole.Z.Keys.clear(); }
+			}
 			size_t nt = m_Rig ? std::max(m_Rig->Toes[0].size(), m_Rig->Toes[1].size()) : 0;
 			m_ChToeBase[s].resize(nt);
 			m_ChToeBend[s].resize(nt * 2);
@@ -1819,10 +1886,10 @@ void CBipedAnimEval::applyPivotIk(double t, std::map<INode *, SBipNodeState> &ou
 			while (dy < -M_PI) dy += 2.0 * M_PI;
 			if (fabs(dy) > 0.7) armSkipHandRot = true;
 		}
-		// Large-path arm: keep FK hand rotation by default (Full world squad was tried and
-		// regressed coup2_milieu L UpperArm +0.20 while only marginally helping some frames;
-		// position solve + dual-fold is the accuracy lever). Explicit PMB_BIPED_IK_ROT=full
-		// still forces Full. yaw/run/hold/off honour the env as usual when not large-path.
+		// Large-path arm: keep FK hand rotation by default (Full world squad was tried for both
+		// export and T-only; export regressed coup2_milieu, T-only was neutral-to-worse on
+		// coup_fort_03 residual 0.51→0.525). Explicit PMB_BIPED_IK_ROT=full still forces Full.
+		// yaw/run/hold/off honour the env as usual when not large-path.
 		if (armLargeD && s_rotMode == 3)
 			armSkipHandRot = true;
 		const int rotMode = s_rotMode;
@@ -1848,7 +1915,7 @@ void CBipedAnimEval::applyPivotIk(double t, std::map<INode *, SBipNodeState> &ou
 			stEnd.WorldRot = qNorm(fwr.Full.eval(th));
 		}
 
-		// target: the pivot channel + the rigid arm through the foot's rotation, feathered so the
+		// target: the pivot channel + the rigid arm through the end-bone rotation, feathered so the
 		// interval endpoints stay exactly on the stored pose
 		NLMISC::CVectorD W = sess->W.eval(t);
 		NLMISC::CVectorD T = W - qRotate(stEnd.WorldRot, sess->PLocal);
@@ -1983,6 +2050,51 @@ void CBipedAnimEval::applyPivotIk(double t, std::map<INode *, SBipNodeState> &ou
 				stMid.WorldRot = calf2;
 				stMid.WorldPos = stUp.WorldPos + qRotate(stUp.WorldRot, m_Nodes[iMid].FigLocalPos);
 				stEnd.WorldPos = stMid.WorldPos + qRotate(stMid.WorldRot, m_Nodes[iEnd].FigLocalPos);
+				// Pole twist (env-gated): record [22..24] is the mid-bone pole (⊥ reach axis).
+				// Corpus-validated at plant keys (~0.95·pole). Default OFF — LargePath-only and
+				// always-on variants both regressed coup residual / small-D plants relative to
+				// the §10s-cinq dual-fold (coup_fort_03 0.51→0.64). Channel is always built
+				// (planted-only, sign-chained) so PMB_BIPED_IK_POLE=1 can A/B without recompile.
+				static const char *s_poleEnv = getenv("PMB_BIPED_IK_POLE");
+				static const bool s_poleTwist = s_poleEnv && s_poleEnv[0] == '1';
+				if (s_poleTwist && limb == 0 && armLargeD && !m_ChPole[limb][side].empty())
+				{
+					NLMISC::CVectorD axis = T - H;
+					double axisN = axis.norm();
+					if (axisN > 1e-6)
+					{
+						axis = axis / axisN;
+						NLMISC::CVectorD midRel = stMid.WorldPos - H;
+						NLMISC::CVectorD curPole = midRel - axis * (midRel * axis);
+						double curN = curPole.norm();
+						NLMISC::CVectorD des = m_ChPole[limb][side].eval(t);
+						double desN0 = des.norm();
+						if (desN0 > 1e-6) des = des / desN0;
+						NLMISC::CVectorD desPole = des - axis * (des * axis);
+						double desN = desPole.norm();
+						if (curN > 1e-6 && desN > 1e-6)
+						{
+							curPole = curPole / curN;
+							desPole = desPole / desN;
+							if (curPole * desPole > 0.0)
+							{
+								NLMISC::CVectorD cr(
+									curPole.y * desPole.z - curPole.z * desPole.y,
+									curPole.z * desPole.x - curPole.x * desPole.z,
+									curPole.x * desPole.y - curPole.y * desPole.x);
+								double ang = atan2(cr * axis, curPole * desPole);
+								if (fabs(ang) > 1e-9)
+								{
+									QuatD tw = qAxisAngle(axis, ang);
+									stUp.WorldRot = qNorm(qMul(tw, stUp.WorldRot));
+									stMid.WorldRot = qNorm(qMul(tw, stMid.WorldRot));
+									stMid.WorldPos = H + qRotate(stUp.WorldRot, m_Nodes[iMid].FigLocalPos);
+									stEnd.WorldPos = stMid.WorldPos + qRotate(stMid.WorldRot, m_Nodes[iEnd].FigLocalPos);
+								}
+							}
+						}
+					}
+				}
 				if (getenv("PMB_BIPED_IK_DEBUG"))
 					fprintf(stderr, "IKDBG2 t=%g d=%g dmin=%g dmax=%g aIk=%g phiT=%g theta=%g end=(%g,%g,%g) missT=%g\n",
 					        t, d, dmin, dmax, aIk, phiT, theta, stEnd.WorldPos.x, stEnd.WorldPos.y, stEnd.WorldPos.z,
