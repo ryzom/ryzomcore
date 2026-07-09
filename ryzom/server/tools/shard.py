@@ -52,7 +52,7 @@ services = (
 client = None
 domain = socket.gethostname()
 shard = domain.split(".")[0].title()
-
+print(f"Starting Shard Join in {domain}")
 def stopService(name):
 	global client
 	if not client:

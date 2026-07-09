@@ -103,9 +103,7 @@ inline uint64 CGuildMember::getRealEnterTime()const
 //----------------------------------------------------------------------------
 inline uint64 CGuildMember::getRealEnterTimestamp()const
 {
-	uint64 realEnterTime = static_cast<uint64>(getEnterEra());
-	realEnterTime = realEnterTime << 32;
-	realEnterTime |= (static_cast<uint64>(getEnterTime()) & 0xFFFFFFFF);
+	uint64 realEnterTime = getRealEnterTime();
 
 	NLMISC::TGameCycle tick_dt = CTickEventHandler::getGameCycle(CurrentEra) - realEnterTime;
 	uint32 s_dt = tick_dt / 10;

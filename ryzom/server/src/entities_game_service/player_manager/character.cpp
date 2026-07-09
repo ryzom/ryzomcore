@@ -6762,6 +6762,18 @@ void CCharacter::onAnimalSpawned(CPetSpawnConfirmationMsg::TSpawnError SpawnStat
 			if (c) {
 				c->setIsAPet(true);
 				c->setName("pet_of_"+getName().toString());
+
+				uint32 program = c->getBotChatProgram();
+				if (!(program & (1<<BOTCHATTYPE::WebPageFlag)))
+				{
+					program |= 1 << BOTCHATTYPE::WebPageFlag;
+					c->setBotChatProgram(program);
+				}
+
+				const string &wpn = c->getWebPageName();
+				(string &)wpn = "MENU_MOUNT_IT";
+				const string &wp = c->getWebPage();
+				(string &)wp = toString("app_arcc action=mScript_Run&script_name=MountARenta&player=%s&sheet=%s", getName().toString().c_str(), c->getType().toString().c_str());
 			}
 			CMirrorPropValue<TYPE_FUEL> freeSpeedMode(TheDataset, PetMirrorRow, DSPropertyFUEL);
 			freeSpeedMode = true;
@@ -15745,7 +15757,13 @@ string CCharacter::getTargetInfos()
 			CMirrorPropValueRO<TYPE_CELL> srcCell(TheDataset, dsr, DSPropertyCELL);
 			sint32 cell = srcCell;
 
-			msg += toString("%.2f|%.2f|%.2f|%.2f|%.4f|%d|", dist, x, y, z, h, cell)+cTarget->getType().toString()+"|"+EGSPD::CPeople::toString(cTarget->getRace())+"|"+toString("%d", cTarget->getGender())+"|"+title;
+			string riderName;
+			CCharacter *rider = PlayerManager.getChar( cTarget->getRiderEntity() );
+			if ( rider )
+				riderName = rider->getName().toString();
+
+
+			msg += toString("%.2f|%.2f|%.2f|%.2f|%.4f|%d|", dist, x, y, z, h, cell)+cTarget->getType().toString()+"|"+EGSPD::CPeople::toString(cTarget->getRace())+"|"+toString("%d", cTarget->getGender())+"|"+title+"|"+riderName;
 		}
 	}
 
@@ -21628,7 +21646,7 @@ void CCharacter::outpostSideChosen(bool neutral, OUTPOSTENUMS::TPVPSide side)
 				CGuildMember* member = guild->getMemberFromEId(_Id);
 				if (member != NULL)
 				{
-					nlinfo("Check Need days = 21, %"NL_I64"u, %"NL_I64"u", NLMISC::CTime::getSeconds64bSince1970(), member->getRealEnterTimestamp());
+					nlinfo("Check Need days = 21, %" NL_I64 "u, %" NL_I64 "u", NLMISC::CTime::getSeconds64bSince1970(), member->getRealEnterTimestamp());
 					if (((NLMISC::CTime::getSeconds64bSince1970() - member->getRealEnterTimestamp()) / 86400) < OutpostDaysForGvX.get())
 					{
 						side = OUTPOSTENUMS::UnknownPVPSide;

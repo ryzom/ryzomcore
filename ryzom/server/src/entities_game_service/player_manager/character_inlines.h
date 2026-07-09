@@ -856,10 +856,10 @@ inline NLMISC::TGameCycle CCharacter::getGuildEnterEra() const
 	return _GuildEnterEra;
 }
 
-inline void CCharacter::setGuildEnterTime(NLMISC::TGameCycle time)
+inline void CCharacter::setGuildEnterTime(NLMISC::TGameCycle time, uint32 era)
 {
 	_GuildEnterTime = time;
-	_GuildEnterEra = CurrentEra;
+	_GuildEnterEra = era;
 }
 
 
