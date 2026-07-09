@@ -488,9 +488,27 @@ bool evalNodeMesh(INode &node, SEvalMesh &out, std::vector<std::string> *warning
 	}
 	else
 	{
-		fprintf(stderr, "WARNING: mesh extraction for object class %s ('%s') not implemented\n",
-		        cid.toString().c_str(), name.c_str());
-		if (warnings) warnings->push_back("object:" + cid.toString());
+		// Shape-superclass base objects (SplineShape 0x0a, Line 0x1040, Rectangle 0x1065) are
+		// splines, not meshes — the reference plugin's buildShape produces no `.shape` for them
+		// unless routed to `buildRemanence` (USE_REMANENCE appdata gated in the caller); a plain
+		// SplineShape without that appdata gets a fall-through NULL. Report them as a distinct
+		// warn class so the harness bucket doesn't hide them under "mesh-eval" (which is meant for
+		// genuine GeomObject-class decode gaps).
+		TSClassId scid = base->classDesc()->superClassId();
+		if (scid == SCLASS_SHAPE)
+		{
+			fprintf(stderr, "WARNING: shape-class base object %s ('%s') — spline extraction not "
+			                "implemented (SplineShape/Line/Rectangle would need CSegRemanence or a "
+			                "dedicated spline decode; §10z-bis open item)\n",
+			        cid.toString().c_str(), name.c_str());
+			if (warnings) warnings->push_back("shape-class:" + cid.toString());
+		}
+		else
+		{
+			fprintf(stderr, "WARNING: mesh extraction for object class %s ('%s') not implemented\n",
+			        cid.toString().c_str(), name.c_str());
+			if (warnings) warnings->push_back("object:" + cid.toString());
+		}
 		return false;
 	}
 

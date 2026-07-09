@@ -165,6 +165,55 @@ static bool startsWithBip(const std::string &s)
 }
 
 // ---------------------------------------------------------------------------------------------
+// PMB_SKIN_DUMP diagnostic — recursive dump of a Physique/Skin mod-app payload.
+// Emits (chunk id, container flag, raw byte size, depth) so a future decode session has the
+// structure map. Sizes come from CStorageRaw::Value size for leaves; containers recurse.
+static void dumpModAppTree(const CStorageContainer *c, uint depth, uint maxDepth)
+{
+	if (!c || depth > maxDepth) return;
+	const CStorageContainer::TStorageObjectContainer &children = c->chunks();
+	std::string indent(depth * 2, ' ');
+	for (CStorageContainer::TStorageObjectConstIt it = children.begin(); it != children.end(); ++it)
+	{
+		CStorageContainer *sub = dynamic_cast<CStorageContainer *>(it->second);
+		CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
+		if (sub && !raw)
+		{
+			// Container
+			uint childCount = (uint)sub->chunks().size();
+			fprintf(stderr, "%s0x%04x container children=%u\n", indent.c_str(), it->first, childCount);
+			if (depth + 1 <= maxDepth)
+				dumpModAppTree(sub, depth + 1, maxDepth);
+		}
+		else if (raw)
+		{
+			size_t sz = raw->Value.size();
+			fprintf(stderr, "%s0x%04x leaf size=%u", indent.c_str(), it->first, (uint)sz);
+			if (sz >= 4 && sz <= 128)
+			{
+				fprintf(stderr, "  bytes[");
+				for (size_t k = 0; k < sz && k < 128; ++k)
+				{
+					if (k && k % 4 == 0) fprintf(stderr, " ");
+					fprintf(stderr, "%02x", raw->Value[k]);
+				}
+				fprintf(stderr, "]");
+			}
+			fprintf(stderr, "\n");
+		}
+		else
+		{
+			fprintf(stderr, "%s0x%04x (typed non-raw)\n", indent.c_str(), it->first);
+		}
+	}
+}
+
+static void dumpPhysiquePayload(const CStorageContainer *app)
+{
+	dumpModAppTree(app, 1, 5);
+}
+
+// ---------------------------------------------------------------------------------------------
 // buildShape: the mesh path (CMesh / CMeshMRM / CMeshMultiLod)
 
 // Evaluate a node's mesh + build the CMesh::CMeshBuild against a caller-supplied CMeshBaseBuild
@@ -232,7 +281,8 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 	std::string name = nodeName(node);
 
 	std::vector<CSceneClass *> mods;
-	CSceneClass *base = baseObjectOf(node, &mods, NULL);
+	std::vector<CStorageContainer *> modApps;
+	CSceneClass *base = baseObjectOf(node, &mods, &modApps);
 	if (!base) return NULL;
 	NLMISC::CClassId cid = base->classDesc()->classId();
 
@@ -273,17 +323,46 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 		return ws;
 	}
 
-	// Skinning (Physique/Skin modifier)
+	// Skinning (Physique/Skin modifier). Detection is on (ClassId, SuperClassId) — Max shares
+	// ClassId (0x100, 0) across four modifier-superclass classes (Physique 0x810 is the one we
+	// want; Placement 0xc20, Output 0xc40, Shadow Map 0x10d0 are irrelevant); Skin is a unique
+	// pair (0x95c6a3, 0x15666). Bucket by which modifier is in the way so the harness can triage
+	// them separately (Physique needs the CS SDK IPhysiqueExport payload; Skin needs the ISkin
+	// context — the two decode paths are unrelated, cf. reference export_skinning.cpp).
 	for (uint i = 0; i < mods.size(); ++i)
 	{
 		NLMISC::CClassId mcid = mods[i]->classDesc()->classId();
-		// Physique (0x00000100, 0x00000000)-class old id or Skin; identified by name via the
-		// class directory: Physique modifier classid in the corpus files.
-		std::string disp = ucstring(mods[i]->classDesc()->displayName()).toUtf8();
-		if (disp == "Physique" || disp == "Skin")
+		TSClassId mscid = mods[i]->classDesc()->superClassId();
+		bool isPhysique = (mcid == SCENELIB::CLASSID_PHYSIQUE && mscid == SCENELIB::SCLASS_OSMODIFIER);
+		bool isSkin = (mcid == SCENELIB::CLASSID_SKIN);
+		if (isPhysique || isSkin)
 		{
-			stats.skip("skinned");
-			fprintf(stderr, "SKIP shape '%s': skinned mesh not implemented\n", name.c_str());
+			// Env-gated diagnostic: dump the mod-app (0x2500) sub-chunk tree for a future decode
+			// session. The per-vertex weight blob layout is undocumented in max_geometry_formats.md
+			// so we don't attempt to interpret it here — just characterize the structure so
+			// somebody with a differential dataset can pin the fields (same channel §10 used for
+			// the biped decode).
+			if (getenv("PMB_SKIN_DUMP"))
+			{
+				CStorageContainer *app = (i < modApps.size()) ? modApps[i] : NULL;
+				fprintf(stderr, "PMB_SKIN_DUMP node='%s' modifier=%s cid=(0x%x,0x%x) sup=0x%x\n",
+				        name.c_str(), isPhysique ? "Physique" : "Skin",
+				        mcid.a(), mcid.b(), (uint32)mscid);
+				if (app)
+				{
+					dumpPhysiquePayload(app);
+				}
+				else
+				{
+					fprintf(stderr, "  (no mod-app slot)\n");
+				}
+			}
+			const char *kind = isPhysique ? "skinned-physique" : "skinned-skin";
+			stats.skip(kind);
+			fprintf(stderr, "SKIP shape '%s': %s modifier not implemented (per-node vertex weights "
+			                "in the modifier's 0x2500 mod-app payload — undocumented, see design "
+			                "doc §10z-bis handoff; use PMB_SKIN_DUMP=1 to dump the payload structure)\n",
+			        name.c_str(), isPhysique ? "Physique" : "Skin");
 			return NULL;
 		}
 	}

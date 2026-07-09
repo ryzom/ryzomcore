@@ -274,6 +274,10 @@ def main():
                     m = re.search(r"class \(0x([0-9a-f]+), 0x([0-9a-f]+)\)", line)
                     if m:
                         warn_classes["obj:" + m.group(1)] += 1
+                elif "shape-class base object" in line:
+                    m = re.search(r"object \(0x([0-9a-f]+), 0x([0-9a-f]+)\)", line)
+                    if m:
+                        warn_classes["shape:" + m.group(1)] += 1
             for (name, path, coarse) in res.get("t3new") or []:
                 proj_produced[res["proj"]][name.lower()] = (path, coarse)
 

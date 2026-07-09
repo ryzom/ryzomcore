@@ -77,6 +77,11 @@ const NLMISC::CClassId CLASSID_MULTI_MTL(0x00000200, 0x00000000);
 const NLMISC::CClassId CLASSID_STDMAT(0x00000002, 0x00000000);
 const NLMISC::CClassId CLASSID_BMTEX(0x00000240, 0x00000000);
 const NLMISC::CClassId CLASSID_NEL_BMTEX(0x5a8003f9, 0x043e0955);
+// Physique = SDK PHYSIQUE_CLASS_ID = Class_ID(0x00100, 0x00000); Skin = iskin.h SKIN_CLASSID =
+// Class_ID(9815843, 87654) = Class_ID(0x0095c6a3, 0x00015666). Corpus-verified against Physique
+// class entries in armor/character .max files (idx=41 name="Physique" superclass 0x810).
+const NLMISC::CClassId CLASSID_PHYSIQUE(0x00000100, 0x00000000);
+const NLMISC::CClassId CLASSID_SKIN(0x0095c6a3, 0x00015666);
 
 // AppData script-entry key (the MaxScript utility panel writes these)
 static const NLMISC::CClassId APPDATA_SCRIPT_CLASS_ID(0x04d64858, 0x16d1751d);

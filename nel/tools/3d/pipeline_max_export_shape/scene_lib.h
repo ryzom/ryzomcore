@@ -81,6 +81,12 @@ extern const NLMISC::CClassId CLASSID_MULTI_MTL;
 extern const NLMISC::CClassId CLASSID_STDMAT;
 extern const NLMISC::CClassId CLASSID_BMTEX;
 extern const NLMISC::CClassId CLASSID_NEL_BMTEX;
+// Skinning modifiers — CS/phyexp.h and iskin.h in the Max SDK; the concrete (ClassId, SuperClassId)
+// tuple is what distinguishes them (Max shares ClassId 0x100/0 across four unrelated classes —
+// Placement 0xc20, Output 0xc40, Physique 0x810, Shadow Map 0x10d0 — the modifier superclass is
+// the discriminator).
+extern const NLMISC::CClassId CLASSID_PHYSIQUE;
+extern const NLMISC::CClassId CLASSID_SKIN;
 
 // Superclass ids
 const TSClassId SCLASS_GEOMOBJECT = 0x00000010;
