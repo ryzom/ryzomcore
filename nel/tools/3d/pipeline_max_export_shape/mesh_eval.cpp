@@ -53,6 +53,7 @@
 #include "../pipeline_max_export_common/edit_mesh_mod.h"
 #include "../pipeline_max_export_common/old_param_block.h"
 #include "../pipeline_max_export_common/parametric_mesh.h"
+#include "../pipeline_max_export_common/uvw_map_mod.h"
 
 using namespace PIPELINE::MAX;
 using namespace PIPELINE::MAX::BUILTIN;
@@ -644,6 +645,22 @@ bool evalNodeMesh(INode &node, SEvalMesh &out, std::vector<std::string> *warning
 		{
 			// Skinning weights are applied after mesh eval (PHYSIQUESKIN); the modifier itself
 			// does not rewrite geometry at export time (the reference disables it first).
+		}
+		else if (UVWMAP::isUvwMapModifier(mod))
+		{
+			// UVW Map library (pipeline_max_export_common/uvw_map_mod) is scaffolded — pblock
+			// indices, gizmo PRS, mod-context TM, and MapPoint projections for planar/cyl/
+			// spherical/box/ball/face are implemented. Production apply is GATED until the
+			// gizmo TM × Length/Width/Height composition is corpus-validated against a Max 9
+			// differential dataset (gen_shape_export_dataset.ms UVW cases currently fail on
+			// the Max 9 SP2 gizmo API; without GT, applying a wrong projection overwrites
+			// baked Editable-Mesh UVs and regressed 2 FLOATEQ files in a full T3 probe).
+			// Keep the "unhandled modifier (0x…)" warn shape so shape_corpus.py still buckets
+			// the 272 uses under mod:000f72b1.
+			fprintf(stderr, "WARNING: mesh '%s' has unhandled modifier %s; evaluated without it "
+			                "(UVW Map scaffold ready, apply gated pending GT)\n",
+			        name.c_str(), mcid.toString().c_str());
+			if (warnings) warnings->push_back("modifier:" + mcid.toString());
 		}
 		else
 		{
