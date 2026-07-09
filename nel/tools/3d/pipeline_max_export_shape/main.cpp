@@ -58,6 +58,9 @@
 #include <nel/3d/shape.h>
 #include <nel/3d/animation.h>
 #include <nel/3d/texture_file.h>
+#include <nel/3d/texture_multi_file.h>
+#include <nel/3d/texture_blend.h>
+#include <nel/3d/water_shape.h>
 
 #include <algorithm>
 #include <cstdio>
@@ -74,6 +77,7 @@
 #include "mesh_build.h"
 #include "anim_build.h"
 #include "water_build.h"
+#include "flare_build.h"
 
 #include "../pipeline_max/builtin/scene_impl.h"
 #include "../pipeline_max/builtin/i_node.h"
@@ -247,9 +251,13 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 	}
 	if (cid.a() == CLASSID_PARTA_NEL_FLARE)
 	{
-		stats.skip("flare");
-		fprintf(stderr, "SKIP shape '%s': flare not implemented\n", name.c_str());
-		return NULL;
+		NL3D::IShape *fs = FLAREBUILD::buildFlareShape(node, tmCache);
+		if (!fs)
+		{
+			stats.skip("flare");
+			return NULL;
+		}
+		return fs;
 	}
 	if (hasWaterMaterial(node))
 	{
@@ -457,6 +465,12 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 	if (getScriptAppDataInt(n, NEL3D_APPDATA_AUTOMATIC_ANIMATION, 0) != 0)
 		meshBase->setAutoAnim(true);
 
+	// Dist max — only for the mesh/multilod path, matching the reference exporter's
+	// buildShape which gates its setDistMax call on the mesh path (`!multiLodObject && buildLods`
+	// block at export_mesh.cpp:466) and returns early before that block for flare/water/
+	// remanence/wavemaker/particle-system builds. See the corresponding comment in exportFile.
+	meshBase->setDistMax(getScriptAppDataFloat(n, NEL3D_APPDATA_LOD_DIST_MAX, 1000.f));
+
 	return meshBase;
 }
 
@@ -564,9 +578,13 @@ static int exportFile(const std::string &maxPath, const std::string &outDir, con
 		if (!shape)
 			continue;
 
-		// Set the dist max for this shape (non-multilod path)
-		float distmax = getScriptAppDataFloat(n, NEL3D_APPDATA_LOD_DIST_MAX, 1000.f);
-		shape->setDistMax(distmax);
+		// setDistMax was previously called uniformly here; the reference exporter's
+		// CExportNel::buildShape gates it on the mesh path only (`!multiLodObject && buildLods`
+		// block at export_mesh.cpp:466) and RETURNS EARLY before that block for flare/water/
+		// remanence/wavemaker/particle-system builds, so those keep their shape ctor default
+		// (CFlareShape default = 1000). Discovered when flare export was off by exactly
+		// LOD_DIST_MAX on zo_flare (300 vs ref 1000) even though every other field matched
+		// byte-for-byte. Now applied inside the mesh/multi-lod branch of buildShapeForNode.
 
 		try
 		{
@@ -968,6 +986,184 @@ static void compareMeshBase(NL3D::CMeshBase *ma, NL3D::CMeshBase *mb)
 	}
 }
 
+// Compare two textures by class name + file path. Handles CTextureFile, CTextureMultiFile,
+// CTextureBlend (recursive on its two blend inputs). NULL vs NULL = match; NULL vs !NULL = raise.
+// Takes non-const refs because ITexture::getClassName is non-const (IClassable convention).
+static void compareTexture(const char *label, NL3D::ITexture *ta, NL3D::ITexture *tb)
+{
+	if (!ta && !tb) return;
+	if (!ta || !tb)
+	{
+		printf("  %s: %s vs %s\n", label, ta ? ta->getClassName().c_str() : "NULL",
+		       tb ? tb->getClassName().c_str() : "NULL");
+		raiseVerdict(2);
+		return;
+	}
+	if (ta->getClassName() != tb->getClassName())
+	{
+		printf("  %s: class %s vs %s\n", label, ta->getClassName().c_str(), tb->getClassName().c_str());
+		raiseVerdict(2);
+		return;
+	}
+	NL3D::CTextureFile *fa = dynamic_cast<NL3D::CTextureFile *>(ta);
+	NL3D::CTextureFile *fb = dynamic_cast<NL3D::CTextureFile *>(tb);
+	if (fa && fb)
+	{
+		if (NLMISC::toLowerAscii(fa->getFileName()) != NLMISC::toLowerAscii(fb->getFileName()))
+		{
+			printf("  %s: file '%s' vs '%s'\n", label, fa->getFileName().c_str(), fb->getFileName().c_str());
+			raiseVerdict(2);
+		}
+		return;
+	}
+	NL3D::CTextureMultiFile *mfa = dynamic_cast<NL3D::CTextureMultiFile *>(ta);
+	NL3D::CTextureMultiFile *mfb = dynamic_cast<NL3D::CTextureMultiFile *>(tb);
+	if (mfa && mfb)
+	{
+		if (mfa->getNumFileName() != mfb->getNumFileName())
+		{
+			printf("  %s: multi-file slot count %u vs %u\n", label,
+			       mfa->getNumFileName(), mfb->getNumFileName());
+			raiseVerdict(2);
+			return;
+		}
+		for (uint i = 0; i < mfa->getNumFileName(); ++i)
+			if (NLMISC::toLowerAscii(mfa->getFileName(i)) != NLMISC::toLowerAscii(mfb->getFileName(i)))
+			{
+				printf("  %s: multi-file slot %u '%s' vs '%s'\n", label, i,
+				       mfa->getFileName(i).c_str(), mfb->getFileName(i).c_str());
+				raiseVerdict(2);
+			}
+		return;
+	}
+	NL3D::CTextureBlend *ba = dynamic_cast<NL3D::CTextureBlend *>(ta);
+	NL3D::CTextureBlend *bb = dynamic_cast<NL3D::CTextureBlend *>(tb);
+	if (ba && bb)
+	{
+		compareTexture(label, ba->getBlendtexture(0), bb->getBlendtexture(0));
+		compareTexture(label, ba->getBlendtexture(1), bb->getBlendtexture(1));
+		return;
+	}
+	// Fall through: unknown texture class — flag structurally
+	printf("  %s: unhandled texture class %s\n", label, ta->getClassName().c_str());
+	raiseVerdict(2);
+}
+
+// CWaterShape field walk. CWaterShape does NOT derive from CMeshBase (it's plain IShape) but it
+// carries the same default transform triple through separate CTrackDefault* members. Reason for
+// the walk: byte-compare of otherwise-correct water shapes fails on the DefaultRotQuat MSB-of-
+// x/y/z triple that decompMatrix computes as (-x,-y,-z,-w) on our tree vs (+x,+y,+z,-w) on the
+// reference build (double-cover boundary; §10z). Everything else — bump/displace params, textures
+// (incl. day/night CTextureBlend), pool ID, splash flag — was already byte-exact in §10z round 2.
+static void compareWaterShape(NL3D::CWaterShape *wa, NL3D::CWaterShape *wb)
+{
+	// Default transform (same triple as CMeshBase; double-cover aware quat, float-noise triple)
+	{
+		NLMISC::CVector va = wa->getDefaultPos()->getDefaultValue();
+		NLMISC::CVector vb = wb->getDefaultPos()->getDefaultValue();
+		if (va != vb)
+		{
+			printf("  DefaultPos: (%.9g %.9g %.9g) vs (%.9g %.9g %.9g)\n", va.x, va.y, va.z, vb.x, vb.y, vb.z);
+			raiseVerdict((floatNoise(va.x, vb.x) && floatNoise(va.y, vb.y) && floatNoise(va.z, vb.z)) ? 1 : 2);
+		}
+	}
+	{
+		NLMISC::CQuat qa = wa->getDefaultRotQuat()->getDefaultValue();
+		NLMISC::CQuat qb = wb->getDefaultRotQuat()->getDefaultValue();
+		if (qa.x != qb.x || qa.y != qb.y || qa.z != qb.z || qa.w != qb.w)
+		{
+			printf("  DefaultRotQuat: (%.9g %.9g %.9g %.9g) vs (%.9g %.9g %.9g %.9g)\n",
+			       qa.x, qa.y, qa.z, qa.w, qb.x, qb.y, qb.z, qb.w);
+			bool direct = floatNoise(qa.x, qb.x) && floatNoise(qa.y, qb.y) && floatNoise(qa.z, qb.z) && floatNoise(qa.w, qb.w);
+			bool negated = floatNoise(qa.x, -qb.x) && floatNoise(qa.y, -qb.y) && floatNoise(qa.z, -qb.z) && floatNoise(qa.w, -qb.w);
+			raiseVerdict((direct || negated) ? 1 : 2);
+		}
+	}
+	{
+		NLMISC::CVector sa = wa->getDefaultScale()->getDefaultValue();
+		NLMISC::CVector sb = wb->getDefaultScale()->getDefaultValue();
+		if (sa != sb)
+		{
+			printf("  DefaultScale: (%.9g %.9g %.9g) vs (%.9g %.9g %.9g)\n", sa.x, sa.y, sa.z, sb.x, sb.y, sb.z);
+			raiseVerdict((floatNoise(sa.x, sb.x) && floatNoise(sa.y, sb.y) && floatNoise(sa.z, sb.z)) ? 1 : 2);
+		}
+	}
+	// WaterPoolID, WaveHeightFactor, splash flag, use-scene-env-map
+	if (wa->getWaterPoolID() != wb->getWaterPoolID())
+	{
+		printf("  WaterPoolID: %u vs %u\n", wa->getWaterPoolID(), wb->getWaterPoolID());
+		raiseVerdict(2);
+	}
+	if (wa->getWaveHeightFactor() != wb->getWaveHeightFactor())
+	{
+		printf("  WaveHeightFactor: %g vs %g\n", wa->getWaveHeightFactor(), wb->getWaveHeightFactor());
+		raiseVerdict(floatNoise(wa->getWaveHeightFactor(), wb->getWaveHeightFactor()) ? 1 : 2);
+	}
+	if (wa->isSplashEnabled() != wb->isSplashEnabled())
+	{
+		printf("  Splash: %d vs %d\n", (int)wa->isSplashEnabled(), (int)wb->isSplashEnabled());
+		raiseVerdict(2);
+	}
+	for (uint i = 0; i < 2; ++i)
+	{
+		if (wa->getUseSceneWaterEnvMap(i) != wb->getUseSceneWaterEnvMap(i))
+		{
+			printf("  UsesSceneWaterEnvMap[%u]: %d vs %d\n", i, (int)wa->getUseSceneWaterEnvMap(i),
+			       (int)wb->getUseSceneWaterEnvMap(i));
+			raiseVerdict(2);
+		}
+		NLMISC::CVector2f hsa = wa->getHeightMapScale(i);
+		NLMISC::CVector2f hsb = wb->getHeightMapScale(i);
+		if (hsa.x != hsb.x || hsa.y != hsb.y)
+		{
+			printf("  HeightMapScale[%u]: (%g %g) vs (%g %g)\n", i, hsa.x, hsa.y, hsb.x, hsb.y);
+			raiseVerdict((floatNoise(hsa.x, hsb.x) && floatNoise(hsa.y, hsb.y)) ? 1 : 2);
+		}
+		NLMISC::CVector2f hspa = wa->getHeightMapSpeed(i);
+		NLMISC::CVector2f hspb = wb->getHeightMapSpeed(i);
+		if (hspa.x != hspb.x || hspa.y != hspb.y)
+		{
+			printf("  HeightMapSpeed[%u]: (%g %g) vs (%g %g)\n", i, hspa.x, hspa.y, hspb.x, hspb.y);
+			raiseVerdict((floatNoise(hspa.x, hspb.x) && floatNoise(hspa.y, hspb.y)) ? 1 : 2);
+		}
+	}
+	// Polygon: same vertex count, position float-noise tolerated (world-vertex xform noise, same
+	// POS_EPS family as §10g).
+	const NLMISC::CPolygon2D &pa = wa->getShape();
+	const NLMISC::CPolygon2D &pb = wb->getShape();
+	if (pa.Vertices.size() != pb.Vertices.size())
+	{
+		printf("  Poly vertices: %u vs %u\n", (uint)pa.Vertices.size(), (uint)pb.Vertices.size());
+		raiseVerdict(2);
+	}
+	else
+	{
+		uint firstDiff = 0xFFFFFFFF;
+		uint nDiff = 0;
+		float maxAbs = 0.0f;
+		for (uint i = 0; i < pa.Vertices.size(); ++i)
+		{
+			const NLMISC::CVector2f &va = pa.Vertices[i];
+			const NLMISC::CVector2f &vb = pb.Vertices[i];
+			if (va.x != vb.x || va.y != vb.y)
+			{
+				++nDiff;
+				if (firstDiff == 0xFFFFFFFF) firstDiff = i;
+				maxAbs = std::max(maxAbs, (float)std::max(fabs(va.x - vb.x), fabs(va.y - vb.y)));
+				raiseVerdict((floatNoise(va.x, vb.x) && floatNoise(va.y, vb.y)) ? 1 : 2);
+			}
+		}
+		if (nDiff)
+			printf("  Poly: %u verts differ (first %u), maxAbs %g\n", nDiff, firstDiff, maxAbs);
+	}
+	// Textures
+	compareTexture("EnvMap[0]", wa->getEnvMap(0), wb->getEnvMap(0));
+	compareTexture("EnvMap[1]", wa->getEnvMap(1), wb->getEnvMap(1));
+	compareTexture("HeightMap[0]", wa->getHeightMap(0), wb->getHeightMap(0));
+	compareTexture("HeightMap[1]", wa->getHeightMap(1), wb->getHeightMap(1));
+	compareTexture("ColorMap", wa->getColorMap(), wb->getColorMap());
+}
+
 static void compareShapesFields(const std::string &a, const std::string &b)
 {
 	NL3D::IShape *sa = loadShape(a);
@@ -990,10 +1186,19 @@ static void compareShapesFields(const std::string &a, const std::string &b)
 	NL3D::CMeshBase *mbb = dynamic_cast<NL3D::CMeshBase *>(sb);
 	if (mba && mbb)
 		compareMeshBase(mba, mbb);
+	NL3D::CWaterShape *wa = dynamic_cast<NL3D::CWaterShape *>(sa);
+	NL3D::CWaterShape *wb = dynamic_cast<NL3D::CWaterShape *>(sb);
+	if (wa && wb)
+	{
+		compareWaterShape(wa, wb);
+		delete sa;
+		delete sb;
+		return;
+	}
 	NL3D::CMesh *ma = dynamic_cast<NL3D::CMesh *>(sa);
 	NL3D::CMesh *mb = dynamic_cast<NL3D::CMesh *>(sb);
 	if (!ma || !mb)
-		raiseVerdict(2); // only CMesh gets the full field walk so far; anything else unclassified
+		raiseVerdict(2); // only CMesh/CWaterShape get the full field walk so far
 	if (ma && mb)
 	{
 		compareVB(ma->getVertexBuffer(), mb->getVertexBuffer());
