@@ -78,7 +78,9 @@ Point3M transformPoint(const Point3M &v, const Matrix3M &m);
 
 // ---------------------------------------------------------------------------------------------
 // Graphics Gems IV affine matrix decomposition (Ken Shoemake, "Polar Matrix Decomposition").
-// Operates on the Max row-vector Matrix3M with the same input adaptation the SDK version uses.
+// Max 2010 core.dll decomp_affine gold: convert Matrix3 → column-vector HMatrix (transpose 3x3
+// + translation in column W), run gems, conjugate q/u into Max MakeMatrix convention.
+// Validated offline against Max 2010 SP2 geom/core under a VS2008/Wine LoadLibrary host.
 
 struct AffinePartsM
 {

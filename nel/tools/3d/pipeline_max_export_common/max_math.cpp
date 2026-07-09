@@ -3,6 +3,12 @@
  * \brief See max_math.h. The decomposition is a faithful float port of the Graphics Gems IV
  * "Polar Matrix Decomposition" reference code (Ken Shoemake), which is what the SDK's
  * decomp_affine wraps; the gems code carries no license restrictions ("free to reuse").
+ *
+ * Max 2010 gold alignment (2026-07-09, offline geom.dll/core.dll probe under VS2008 Wine):
+ * Matrix3 is converted to the gems column-vector HMatrix by transposing the 3x3 and placing
+ * translation in column W; the resulting rotation/stretch quats are conjugated into Max's
+ * row-vector / MakeMatrix convention. Without that adapter, stretch factors (k) and essential
+ * rotation (q) diverge from Max on rot*scale composites.
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
  */
@@ -88,13 +94,18 @@ Matrix3M inverseM3(const Matrix3M &a)
 
 Matrix3M quatToMatrix3(const QuatM &q)
 {
-	// Max Quat::MakeMatrix. Max quats follow the LEFT-handed/inverse convention relative to the
-	// standard quat-rotation mapping (the corpus-established "rotation controllers store the
-	// inverse convention"): the row matrix built from a stored controller quat is the transpose
-	// of the standard R(q) — validated against the reference igs (the untransposed variant
-	// produced conjugated instance rotations corpus-wide).
+	// Max Quat::MakeMatrix(mat, flag=false). Max quats follow the inverse convention relative
+	// to the standard column-vector R(q): the row matrix is the transpose of the usual form.
+	// Validated against Max 2010 geom.dll MakeMatrix gold (2026-07-09) for unit quats.
+	// Non-unit inputs are normalized first (Max does the same).
 	Matrix3M r = Matrix3M::identity();
 	float x = q.x, y = q.y, z = q.z, w = q.w;
+	float n2 = x * x + y * y + z * z + w * w;
+	if (n2 > 0.0f && fabsf(n2 - 1.0f) > 1e-8f)
+	{
+		float inv = 1.0f / sqrtf(n2);
+		x *= inv; y *= inv; z *= inv; w *= inv;
+	}
 	float xx = x * x, yy = y * y, zz = z * z;
 	float xy = x * y, xz = x * z, yz = y * z;
 	float wx = w * x, wy = w * y, wz = w * z;
@@ -672,16 +683,22 @@ static QuatG snuggle(QuatG q, float k[3])
 
 void decompAffine(const Matrix3M &a, AffinePartsM &parts)
 {
-	// SDK adaptation: Matrix3 rows into the HMatrix rows (the gems code then works on the
-	// column-convention view of the same values), translation from row 3.
+	// Gems IV decomp_affine expects a column-vector HMatrix (translation in column W =
+	// indices [0..2][3]). Max Matrix3 is row-vector (translation in row 3). The Max SDK
+	// wrapper converts by TRANSPOSING the 3x3 into the HMatrix upper-left and placing
+	// the translation in column W — matching gems' parts->t = (A[X][W], A[Y][W], A[Z][W]).
+	// The previous "copy rows as rows" adaptation matched simple axis-aligned cases by
+	// accident but mis-ordered stretch axes (k) / stretch rotation (u) on rot*scale
+	// composites (Max 2010 gold probe, 2026-07-09).
 	HMatrix A, Q, S, U;
 	for (int i = 0; i < 3; ++i)
 	{
 		for (int j = 0; j < 3; ++j)
-			A[i][j] = a.m[i][j];
-		A[i][3] = 0.0f;
+			A[i][j] = a.m[j][i]; // transpose 3x3 into column-vector layout
+		A[i][3] = a.m[3][i];    // translation → column W
 	}
-	A[3][0] = a.m[3][0]; A[3][1] = a.m[3][1]; A[3][2] = a.m[3][2]; A[3][3] = 1.0f;
+	A[3][0] = A[3][1] = A[3][2] = 0.0f;
+	A[3][3] = 1.0f;
 
 	parts.t.x = a.m[3][0];
 	parts.t.y = a.m[3][1];
@@ -706,6 +723,12 @@ void decompAffine(const Matrix3M &a, AffinePartsM &parts)
 	u = qtFromMatrix(U);
 	p = snuggle(u, k);
 	u = qtMul(u, p);
+
+	// Column-vector gems quats are conjugates of the Max row-vector controller
+	// convention (same dual as Quat::MakeMatrix's inverse/transpose mapping). Without
+	// this, pure rotations come out as the inverse of Max 2010 decomp_affine gold.
+	q = qtConj(q);
+	u = qtConj(u);
 
 	parts.q.x = q.x; parts.q.y = q.y; parts.q.z = q.z; parts.q.w = q.w;
 	parts.u.x = u.x; parts.u.y = u.y; parts.u.z = u.z; parts.u.w = u.w;
