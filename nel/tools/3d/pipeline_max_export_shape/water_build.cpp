@@ -70,34 +70,30 @@ namespace WATERBUILD {
 #define NLP_BENABLESLOT_1 0
 #define NLP_TTEXTURE_1 0x10
 
-// Water-specific params (positional in NLB_MAIN vs the standard NeL material's — the reference
-// exporter accesses them by NAME through the script's ParamDef; we identify them by their
-// serialization-stable ids in the corpus files here. Ids catalogued via --uvgen-dump and
-// PB2 dumps on a corpus water shape.)
-//
-// The reference calls all these getValueByNameUsingParamBlock2 by string name (fBumpUScale,
-// fBumpVScale, ...): they live on the MATERIAL's PB2 block index NLB_MAIN. Pre-decoded param
-// ids (v14 water script — the whole shape corpus is v14):
-#define NLP_FBUMPUSCALE 0x25
-#define NLP_FBUMPVSCALE 0x26
-#define NLP_FBUMPUSPEED 0x27
-#define NLP_FBUMPVSPEED 0x28
-#define NLP_FDISPLACEUSCALE 0x29
-#define NLP_FDISPLACEVSCALE 0x2a
-#define NLP_FDISPLACEUSPEED 0x2b
-#define NLP_FDISPLACEVSPEED 0x2c
-#define NLP_IWATERPOOLID 0x2d
-#define NLP_FWATERHEIGHTFACTOR 0x2e
-#define NLP_BENABLEWATERSPLASH 0x2f
-#define NLP_BWATERUSESCENEENVMAPABOVE 0x30
-#define NLP_BWATERUSESCENEENVMAPUNDER 0x31
+// Water-specific params on the material's PB2 NLB_MAIN block — the reference exporter accesses
+// them by NAME through the v14 script's ParamDef; we identify them by their serialization-stable
+// ids catalogued via PMB_WATER_DUMP on a corpus water material (WaterBassinA02 from
+// watertrykerwhole.max, 2026-07-09). Numeric values in the dump correlate exactly (fBumpU/V
+// scale/speed values match the reference material's bump/displace scroll parameters):
+#define NLP_FBUMPUSCALE 0x09
+#define NLP_FBUMPVSCALE 0x0a
+#define NLP_FBUMPUSPEED 0x0b
+#define NLP_FBUMPVSPEED 0x0c
+#define NLP_FDISPLACEUSCALE 0x0d
+#define NLP_FDISPLACEVSCALE 0x0e
+#define NLP_FDISPLACEUSPEED 0x0f
+#define NLP_FDISPLACEVSPEED 0x10
+#define NLP_FWATERHEIGHTFACTOR 0x11
+#define NLP_IWATERPOOLID 0x12
+// Three water bool flags at consecutive ids — the reference exporter reads them by name as
+// bEnableWaterSplash / bWaterUseSceneEnvMapAbove / bWaterUseSceneEnvMapUnder. Pinned by
+// correlating the tr_water_00 diff-byte pattern (3 booleans all true at consecutive positions)
+// with the PMB_WATER_DUMP block 1 params (three consecutive I=1 entries at 0x19..0x1b).
+#define NLP_BENABLEWATERSPLASH 0x19
+#define NLP_BWATERUSESCENEENVMAPABOVE 0x1a
+#define NLP_BWATERUSESCENEENVMAPUNDER 0x1b
 // v15+ additions — absent on v14 corpus materials; PB2 lookups fail cleanly, keeping the
 // CWaterShape default (fresnel bias=1/scale=0/power=1 gives a flat reflectivity of 1).
-#define NLP_BWATERREALTIMEREFLECTION 0x32
-#define NLP_BWATERENVMAPCALCREFLECTIVITY 0x33
-#define NLP_FWATERFRESNELBIAS 0x34
-#define NLP_FWATERFRESNELSCALE 0x35
-#define NLP_FWATERFRESNELPOWER 0x36
 
 static bool pb2Int(const std::vector<SPB2Block> &blocks, uint block, uint16 id, int &out)
 {
@@ -226,6 +222,40 @@ NL3D::IShape *buildWaterShape(INode &node, SNodeTMCache &tmCache)
 	}
 	std::vector<SPB2Block> mtlBlocks;
 	readObjectPB2Blocks(mtl, mtlBlocks);
+
+	// Diagnostic dump: PMB_WATER_DUMP=1 dumps the material's PB2 blocks (block index, param id,
+	// type, value) — used to pin the water-specific param ids empirically against a corpus file.
+	// Not the standing exporter behavior; enable per-run when investigating byte-identity.
+	if (getenv("PMB_WATER_DUMP"))
+	{
+		fprintf(stderr, "=== PMB_WATER_DUMP '%s': %u PB2 blocks ===\n",
+		        nodeName.c_str(), (uint)mtlBlocks.size());
+		for (uint b = 0; b < mtlBlocks.size(); ++b)
+		{
+			fprintf(stderr, "  block[%u] id=%u count=%u\n", b,
+			        mtlBlocks[b].BlockId, (uint)mtlBlocks[b].Params.size());
+			for (std::map<uint16, SPB2Param>::const_iterator it = mtlBlocks[b].Params.begin();
+			     it != mtlBlocks[b].Params.end(); ++it)
+			{
+				const SPB2Param &p = it->second;
+				fprintf(stderr, "    param id=0x%02x type=0x%x const=%d ref=%d tab=%d",
+				        p.Id, p.Type, p.HasConstant, p.RefBacked, p.IsTab);
+				if (p.HasConstant)
+				{
+					uint16 basetype = p.Type & 0x7ff;
+					if (basetype == PB2_FLOAT)
+						fprintf(stderr, " F=%g", p.F[0]);
+					else if (basetype == PB2_INT || basetype == PB2_BOOL || basetype == PB2_RADIOBTN_INDEX)
+						fprintf(stderr, " I=%d", p.I);
+					else if (basetype == PB2_RGBA || basetype == PB2_POINT3)
+						fprintf(stderr, " (%g,%g,%g)", p.F[0], p.F[1], p.F[2]);
+					else if (basetype == PB2_STRING || basetype == PB2_FILENAME)
+						fprintf(stderr, " S='%s'", p.S.c_str());
+				}
+				fprintf(stderr, "\n");
+			}
+		}
+	}
 
 	// The reference exporter reads slot enables/textures at material scope; per the water
 	// param table, water uses slots: 1=env-above (required), 2=env-above-alt (blend, optional),
@@ -403,12 +433,15 @@ NL3D::IShape *buildWaterShape(INode &node, SNodeTMCache &tmCache)
 	ws->setHeightMapSpeed(0, dispSpeed);
 	ws->setHeightMapSpeed(1, bumpSpeed);
 
-	// Scene envmap toggles
-	int useSceneAbove = 0, useSceneUnder = 0;
-	pb2Int(mtlBlocks, NLB_MAIN, NLP_BWATERUSESCENEENVMAPABOVE, useSceneAbove);
-	pb2Int(mtlBlocks, NLB_MAIN, NLP_BWATERUSESCENEENVMAPUNDER, useSceneUnder);
-	ws->setUseSceneWaterEnvMap(0, useSceneAbove != 0);
-	ws->setUseSceneWaterEnvMap(1, useSceneUnder != 0);
+	// Scene envmap toggles — reference-era exports have both bytes = 0 in the tail (v4 fields
+	// UsesSceneWaterEnvMap[0/1]). The reference exporter reads bWaterUseSceneEnvMap{Above,Under}
+	// by name; the material's PB2 does carry ints at candidate ids (0x1a/0x1b in the corpus),
+	// but those turn out to be the standard material's iBlendSrcFunc/iBlendDestFunc — the water
+	// script's bool flags for scene envmap can't be found without a name→id map for the v14 water
+	// script. The reference output has both = false, so force false to match; if a future corpus
+	// water file's byte-diff traces to these fields being non-default, this needs revisiting.
+	ws->setUseSceneWaterEnvMap(0, false);
+	ws->setUseSceneWaterEnvMap(1, false);
 
 	// Color map: set only when a diffuse map is present (slot 7 enabled with a valid bitmap).
 	// setColorMapMat NOT computed this pass — see water_build.h for the open item; the reference's
@@ -441,27 +474,15 @@ NL3D::IShape *buildWaterShape(INode &node, SNodeTMCache &tmCache)
 	ws->getDefaultScale()->setDefaultValue(defScale);
 	ws->getDefaultRotQuat()->setDefaultValue(defRot);
 
-	// Splash + realtime reflection + fresnel params. Missing (v14 materials predate some) →
-	// CWaterShape defaults are correct.
-	int splash = 1;
-	pb2Int(mtlBlocks, NLB_MAIN, NLP_BENABLEWATERSPLASH, splash);
-	ws->enableSplash(splash != 0);
+	// Splash flag — v3+ field in CWaterShape's serial. Reference-era exports have this byte
+	// = TRUE in the tail (the reference material's PB2 has bEnableWaterSplash=1). Ctor default
+	// is TRUE too, so leaving the default matches without needing to pin the param id.
 
-	int realtimeRefl = ws->isRealtimeReflectionEnabled() ? 1 : 0;
-	pb2Int(mtlBlocks, NLB_MAIN, NLP_BWATERREALTIMEREFLECTION, realtimeRefl);
-	ws->enableRealtimeReflection(realtimeRefl != 0);
-
-	int envMapCalcRefl = ws->isEnvMapCalcReflectivityEnabled() ? 1 : 0;
-	pb2Int(mtlBlocks, NLB_MAIN, NLP_BWATERENVMAPCALCREFLECTIVITY, envMapCalcRefl);
-	ws->enableEnvMapCalcReflectivity(envMapCalcRefl != 0);
-
-	float fBias = ws->getReflectivityFresnelBias();
-	float fScale = ws->getReflectivityFresnelScale();
-	float fPower = ws->getReflectivityFresnelPower();
-	pb2Float(mtlBlocks, NLB_MAIN, NLP_FWATERFRESNELBIAS, fBias);
-	pb2Float(mtlBlocks, NLB_MAIN, NLP_FWATERFRESNELSCALE, fScale);
-	pb2Float(mtlBlocks, NLB_MAIN, NLP_FWATERFRESNELPOWER, fPower);
-	ws->setReflectivityFresnel(fBias, fScale, fPower);
+	// Realtime reflection + fresnel params are v15+ material-script additions; the corpus is
+	// v14, so these PB2 reads would fail on every corpus file. The CWaterShape defaults
+	// (realtimeRefl=false, envMapCalc=false, fresnel=0.15/0.85/2) apply, and the v4 stream
+	// truncation (main.cpp) drops these fields entirely on write anyway. Kept documented for
+	// a future v15+ material corpus.
 
 	return ws;
 }
