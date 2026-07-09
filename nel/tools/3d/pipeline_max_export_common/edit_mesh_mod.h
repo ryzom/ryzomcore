@@ -4,13 +4,15 @@
  * `MeshDelta` record stored in the OSM Derived wrapper's orphaned 0x2500 modifier-app containers.
  * Consolidated from pipeline_max_export_ig's corpus-validated decode (see design-doc §10w: the
  * correct chunk map is 0x0130 = created verts (16-byte srcTag+Point3), 0x0208 = created faces
- * variant A (24-byte, with srcTag), 0x0210 = created faces variant B (20-byte); the ig session's
- * fix to §10g's earlier "0x0210 = created verts" misread closed ~65 ligo diffs by itself), plus
- * an equally-decoded created-faces reader (0x0208 / 0x0210) that ig does not consume (its cluster-
- * containment link test uses vertices only, and appending faces would change its cluster
- * volumes) but cmb does (its `.cmb` output must carry those faces with their material id and
- * edge-visibility). One decode + one apply, both consumers on it, so the two copies don't drift
- * again.
+ * (24-byte, with srcTag); the ig session's fix to §10g's earlier "0x0210 = created verts" misread
+ * closed ~65 ligo diffs by itself). 0x0210 is now decoded as the FACE-VERTEX-REMAP table (modern
+ * equivalent of legacy TOPO_FACEMAP_CHUNK 0x2780) — 20-byte stride records `(uint32 faceIdx,
+ * uint32 applyMask, uint32 v[3])` where `applyMask` bits 0..2 select which of face `faceIdx`'s
+ * corners get replaced with the corresponding `v[i]`. Corpus-verified across 445 files / 113
+ * chunks / 2881 entries: every observed mask is in 0..7 and every faceIdx fits in a real face
+ * range. This closes the "one face-index remap" §10x listed as an open item, and generalises to
+ * the face diffs on the other Edit-Mesh direct-tier files. One decode + one apply, both consumers
+ * on it, so the two copies don't drift again.
  * \author Jan Boon (Kaetemi)
  * \author Claude Opus 4.7 (1M context)
  */
@@ -89,16 +91,32 @@ struct SFaceAttribChange
 	inline bool hidden() const      { return (Values & 0x08) != 0; }
 };
 
+/// One face-vertex-remap record (0x0210 modern-format, ex-legacy TOPO_FACEMAP_CHUNK 0x2780):
+/// on face `Index`, per-corner `i` in {0,1,2}, if `ApplyMask & (1u<<i)` is set, replace the
+/// corner's vertex index with `V[i]`. Corners not covered by ApplyMask carry undefined bytes in
+/// the file (uninitialised writer memory — corpus-witnessed) and must be ignored. In legacy the
+/// same semantic lived in a per-corner `V[3]` with sentinel `0xFFFFFFFF` (§ L.5.3); modern splits
+/// the apply bits into a parallel word, exactly the same shape the modern 0x0220 face-attrib
+/// change record has (parallel apply + values words).
+struct SFaceVertRemap
+{
+	uint32 Index;
+	uint32 ApplyMask;
+	uint32 V[3];
+
+	inline bool applyCorner(int c) const { return (ApplyMask & (1u << c)) != 0; }
+};
+
 /// The decoded modifier-app record for one Edit Mesh modifier slot.
 ///
-/// `CreatedFacesA` (0x0208, 24-byte with srcTag) and `CreatedFacesB` (0x0210, 20-byte no srcTag)
-/// are BOTH created-face records, but for different meshes: `CreatedFacesA` = the base-topology
-/// created faces (LEGACY TOPO_NFACES_CHUNK), `CreatedFacesB` = the map-1 texture-vertex created
-/// faces (LEGACY TOPO_NTVFACES_CHUNK). Because they reference DIFFERENT vertex spaces (base vs
-/// texture), applying CreatedFacesB to the base mesh causes edge-inconsistent topology
-/// (`fy_hall_reunion`'s CCollisionMeshBuild::link rejects it outright — the corpus signal that
-/// pinned this classification). Cmb consumers should apply CreatedFacesA only; CreatedFacesB is
-/// kept for a future texture-map-aware consumer.
+/// `CreatedFacesA` (0x0208, 24-byte with srcTag) is the base-topology created-faces record
+/// (legacy TOPO_NFACES_CHUNK) — the record cmb appends after the input faces have been remapped
+/// and the deletes applied. `FaceRemap` (0x0210, 20-byte) is the FACE-VERTEX-REMAP table (legacy
+/// TOPO_FACEMAP_CHUNK 0x2780; see `SFaceVertRemap` — per-face per-corner index rewrites) —
+/// applied to the INPUT face set BEFORE deletes so the remapped face indices are what the deleter
+/// sees, and BEFORE the created-vert append so a remap that points to a not-yet-appended created
+/// vert stays valid (the append is later in the same pass and lands the created verts at exactly
+/// the referenced indices).
 ///
 /// `FaceAttribs` (0x0220) is the per-face attribute-change table — matID + edge-vis + hidden
 /// updates to the INPUT face set (before deletes/appends). Not applied by the shared applyEdits
@@ -112,7 +130,7 @@ struct SEdits
 	std::vector<std::pair<uint32, NLMISC::CVector> > Moves;      ///< 0x0140 vertex-delta records
 	std::vector<NLMISC::CVector> CreatedVerts;                    ///< 0x0130 created verts (object space)
 	std::vector<SFace> CreatedFacesA;                             ///< 0x0208 base-topo created faces
-	std::vector<SFace> CreatedFacesB;                             ///< 0x0210 map-1 tex created faces
+	std::vector<SFaceVertRemap> FaceRemap;                        ///< 0x0210 face-vertex remap
 	std::vector<SFaceAttribChange> FaceAttribs;                   ///< 0x0220 per-face attrib changes
 	std::vector<bool> DelVerts;                                   ///< 0x0170 → 0x2700 bit array
 	std::vector<bool> DelFaces;                                   ///< 0x0270 → 0x2700 bit array
@@ -127,22 +145,25 @@ struct SEdits
 bool readModApp(PIPELINE::MAX::CStorageContainer *c2500, SEdits &out);
 
 /// Apply a decoded edit-record to an object-space mesh, mirroring the Max SDK's `MeshDelta::Apply`
-/// semantics: moves, then face-deletes on the input face set, then **created verts appended to
-/// the input vert set** (0x0130), then — per \a facesMode — **the 0x0208 created faces appended
-/// with V[3] as stored** (they reference the union input⊕created vert space, no offset needed),
-/// then **vert-deletes remap ALL face indices** (both surviving-original and appended-created).
-/// Order matters: earlier iterations offset created V[3] onto the post-delete vert count,
-/// double-counting the original vert range and producing edge-inconsistent meshes that
-/// `CCollisionMeshBuild::link` rejected outright.
+/// semantics: moves, then the 0x0210 FACE-VERTEX REMAP over the input face set (per-corner index
+/// rewrites, indices may reference verts that don't exist yet — the append below will land the
+/// created verts at exactly those indices), then face-deletes on the input face set, then
+/// **created verts appended to the input vert set** (0x0130), then — per \a facesMode — **the
+/// 0x0208 created faces appended with V[3] as stored** (they reference the union input⊕created
+/// vert space, no offset needed), then **vert-deletes remap ALL face indices** (both surviving-
+/// original and appended-created). Order matters: earlier iterations offset created V[3] onto the
+/// post-delete vert count, double-counting the original vert range and producing edge-
+/// inconsistent meshes that `CCollisionMeshBuild::link` rejected outright.
 ///
 /// Templated on the caller's face type (must expose a mutable `V[3]` index array); \a FaceFactory
 /// is a functor `Face(uint32 vOffset, const SFace &)` returning the caller's face type. Only
-/// invoked for the applied face records. \a facesMode selects which face record to apply:
+/// invoked for the appended CreatedFacesA records. \a facesMode selects which face records the
+/// caller wants applied downstream (both branches ALWAYS apply the FaceRemap on the input set —
+/// remap is topology-preserving so ig's cluster-containment link test benefits too):
 ///   0 = no created faces (ig's cluster-containment test, verts-only)
-///   1 = only `CreatedFacesA` (0x0208) — cmb's default, corpus-validated against
+///   1 = append `CreatedFacesA` (0x0208) — cmb's default, corpus-validated against
 ///       `~/pipeline_export/.../FY_hall_reunion.cmb` (input 82 - 2 deleted + 19 from 0x0208 =
-///       99 for this node; total across nodes matches ref exact). 0x0210 is deliberately NOT
-///       applied here; see the SEdits header comment for the reasoning.
+///       99 for this node; total across nodes matches ref exact).
 template <typename Face, typename FaceFactory>
 void applyEdits(const SEdits &e, std::vector<NLMISC::CVector> &verts, std::vector<Face> &faces,
                 FaceFactory faceFactory, int facesMode)
@@ -151,6 +172,20 @@ void applyEdits(const SEdits &e, std::vector<NLMISC::CVector> &verts, std::vecto
 	for (uint i = 0; i < e.Moves.size(); ++i)
 		if (e.Moves[i].first < verts.size())
 			verts[e.Moves[i].first] += e.Moves[i].second;
+	// Face-vertex remap — per-corner index rewrites on input faces. Applied BEFORE deletes so
+	// the deleter sees post-remap indices (irrelevant to which face gets deleted, but keeps the
+	// invariant "each stage sees the mesh state the next stage expects"), and BEFORE created-vert
+	// append so a remap pointing to a not-yet-appended created vert index stays valid — the append
+	// below lands the created verts at exactly those indices. Corners not covered by ApplyMask
+	// carry undefined bytes in the file and must not be touched.
+	for (uint i = 0; i < e.FaceRemap.size(); ++i)
+	{
+		const SFaceVertRemap &r = e.FaceRemap[i];
+		if (r.Index >= faces.size()) continue;
+		for (int c = 0; c < 3; ++c)
+			if (r.applyCorner(c))
+				faces[r.Index].V[c] = r.V[c];
+	}
 	// Face deletes — bitmap indexes the input face list.
 	if (!e.DelFaces.empty())
 	{

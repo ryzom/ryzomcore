@@ -129,26 +129,29 @@ bool readModApp(CStorageContainer *c2500, SEdits &out)
 				}
 				else if (kt->first == 0x0210)
 				{
-					// Created faces variant B (no srcTag): `uint32 count + (uint32 v[3], uint32
-					// smGrp, uint32 flagsMatId)[count]`, 20-byte stride. Decoded and exposed,
-					// but the shared applyEdits does NOT append these to the mesh — the corpus
-					// (fy_hall_reunion) shows the reference plugin does not either, and
-					// applying them produces the edge-inconsistent meshes CCollisionMeshBuild::
-					// link rejects. Left as data for future probes.
+					// Face-vertex remap (modern equivalent of legacy TOPO_FACEMAP_CHUNK 0x2780):
+					// `uint32 count + (uint32 faceIdx, uint32 applyMask, uint32 v[3])[count]`,
+					// 20-byte stride. ApplyMask bits 0..2 select which of face `faceIdx`'s
+					// corners get replaced with the corresponding v[i]. Corpus-validated across
+					// 445 files / 113 chunks / 2881 entries: every observed mask is 0..7 (0 =
+					// no-op remap on a face that's about to be deleted; 3 = most common; 7 =
+					// full replacement, e.g. fy_hall_reunion face 18 → (76, 81, 74) matching the
+					// reference `.cmb` exactly). Corners not covered by mask carry undefined
+					// bytes in the writer and must be ignored — see SFaceVertRemap::applyCorner.
 					CStorageRaw *raw = dynamic_cast<CStorageRaw *>(kt->second);
 					if (!raw || raw->Value.size() < 4) continue;
 					uint32 n;
 					memcpy(&n, nlVectorData(raw->Value), 4);
 					if (raw->Value.size() < 4 + (size_t)n * 20) continue;
-					out.CreatedFacesB.reserve(out.CreatedFacesB.size() + n);
+					out.FaceRemap.reserve(out.FaceRemap.size() + n);
 					for (uint32 i = 0; i < n; ++i)
 					{
 						const uint8 *p = nlVectorData(raw->Value) + 4 + (size_t)i * 20;
-						SFace f;
-						memcpy(f.V, p + 0, 12);
-						memcpy(&f.SmGroup, p + 12, 4);
-						memcpy(&f.FaceFlags, p + 16, 4);
-						out.CreatedFacesB.push_back(f);
+						SFaceVertRemap r;
+						memcpy(&r.Index, p + 0, 4);
+						memcpy(&r.ApplyMask, p + 4, 4);
+						memcpy(r.V, p + 8, 12);
+						out.FaceRemap.push_back(r);
 					}
 				}
 				else if (kt->first == 0x0220)

@@ -94,7 +94,9 @@
 #include "../pipeline_max_export_common/old_param_block.h"
 #include "../pipeline_max_export_common/edit_mesh_mod.h"
 #include "../pipeline_max_export_common/xref_resolve.h"
+#include "../pipeline_max_export_common/parametric_mesh.h"
 #include "../pipeline_max_export_common/db_path.h"
+
 
 #include <algorithm>
 #include <cstdio>
@@ -367,36 +369,142 @@ bool extractObjectMesh(INode &node, CSceneClass *rawObj, std::vector<NLMISC::CVe
 	if (!obj) { err = "no base object found"; return false; }
 
 	CGeomObject *geom = dynamic_cast<CGeomObject *>(obj);
-	if (!geom) { err = "base object is not a GeomObject"; return false; }
-	STORAGE::CGeomBuffers *gb = geom->geomBuffers();
-	if (!gb) { err = "no GeomBuffers chunk"; return false; }
-	const std::vector<NLMISC::CVector> *rawVerts = gb->triVertices();
-	const std::vector<STORAGE::CGeomTriIndexInfo> *rawFaces = gb->triFaces();
-	if (!rawVerts || !rawFaces) { err = "no tri buffers (EditablePoly or unsupported object?)"; return false; }
-
-	verts = *rawVerts;
-	faces.resize(rawFaces->size());
-	for (size_t i = 0; i < rawFaces->size(); ++i)
+	if (!geom)
 	{
-		const STORAGE::CGeomTriIndexInfo &f = (*rawFaces)[i];
-		faces[i].V[0] = f.a; faces[i].V[1] = f.b; faces[i].V[2] = f.c;
-		uint32 faceFlags = f.smoothingGroups;
-		faces[i].MatId = faceFlags >> 16;
-		faces[i].Vis0 = (faceFlags & 2) != 0; // EDGE_B
-		faces[i].Vis1 = (faceFlags & 4) != 0; // EDGE_C
-		faces[i].Vis2 = (faceFlags & 1) != 0; // EDGE_A
+		err = "base object is not a GeomObject (class " + obj->classDesc()->classId().toString()
+		    + ", superclass " + NLMISC::toString(obj->classDesc()->superClassId()) + ")";
+		return false;
+	}
+	NLMISC::CClassId baseCid = obj->classDesc()->classId();
+	STORAGE::CGeomBuffers *gb = geom->geomBuffers();
+
+	if (gb && gb->triVertices() && gb->triFaces())
+	{
+		// EditableMesh path: tri buffers (0x0914 vertices / 0x0912 faces). Vis bits + matID pack
+		// into the face's flags/smoothingGroups word (matID at high 16 bits).
+		verts = *gb->triVertices();
+		const std::vector<STORAGE::CGeomTriIndexInfo> &rf = *gb->triFaces();
+		faces.resize(rf.size());
+		for (size_t i = 0; i < rf.size(); ++i)
+		{
+			const STORAGE::CGeomTriIndexInfo &f = rf[i];
+			faces[i].V[0] = f.a; faces[i].V[1] = f.b; faces[i].V[2] = f.c;
+			uint32 faceFlags = f.smoothingGroups;
+			faces[i].MatId = faceFlags >> 16;
+			faces[i].Vis0 = (faceFlags & 2) != 0; // EDGE_B
+			faces[i].Vis1 = (faceFlags & 4) != 0; // EDGE_C
+			faces[i].Vis2 = (faceFlags & 1) != 0; // EDGE_A
+		}
+	}
+	else if (gb && gb->polyVertices() && gb->polyFaces())
+	{
+		// EditablePoly path: poly buffers (0x0100 verts / 0x011a faces) triangulated via
+		// CGeomObject::triangulatePolyFace, same code path shape's mesh_eval uses. Poly
+		// triangulation subdivides the polygon interior with all-edges-visible (the export path
+		// reads the low 3 bits only for shading, so all-visible is fine).
+		const std::vector<STORAGE::CGeomPolyVertexInfo> &pv = *gb->polyVertices();
+		const std::vector<STORAGE::CGeomPolyFaceInfo> &pf = *gb->polyFaces();
+		verts.resize(pv.size());
+		for (size_t i = 0; i < pv.size(); ++i)
+			verts[i] = pv[i].v;
+		std::vector<STORAGE::CGeomTriIndex> tris;
+		for (size_t i = 0; i < pf.size(); ++i)
+		{
+			const STORAGE::CGeomPolyFaceInfo &face = pf[i];
+			if (face.Vertices.size() < 3) continue;
+			tris.clear();
+			CGeomObject::triangulatePolyFace(tris, face);
+			for (size_t t = 0; t < tris.size(); ++t)
+			{
+				SRawFace ff;
+				ff.V[0] = tris[t].a; ff.V[1] = tris[t].b; ff.V[2] = tris[t].c;
+				ff.MatId = (uint32)face.Material;
+				ff.Vis0 = ff.Vis1 = ff.Vis2 = true;
+				faces.push_back(ff);
+			}
+		}
+	}
+	else if (baseCid == PRIMMESH::CLASSID_BOX || baseCid == PRIMMESH::CLASSID_CYLINDER
+	         || baseCid == PRIMMESH::CLASSID_SPHERE || baseCid == PRIMMESH::CLASSID_PLANE)
+	{
+		// Parametric primitive path: locate the ref-0 old-style ParamBlock (superclass 0x8),
+		// drive PRIMMESH::buildParametricMesh for ground-truth-exact topology (see design doc
+		// §10g's primitive dataset round). All-edges-visible + matID 0 — matches the default
+		// smGroup=1 primitive convention shape's extractParametricPrimitive uses. Base collision
+		// nodes are frequently plain Boxes with an Edit Mesh modifier stack on top (§10g), so
+		// the modifier evaluation pass below still gets to run.
+		CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(obj);
+		CSceneClass *pblock = NULL;
+		for (uint r = 0; rm && r < rm->nbReferences(); ++r)
+		{
+			CSceneClass *ref = dynamic_cast<CSceneClass *>(rm->getReference(r));
+			if (ref && ref->classDesc()->superClassId() == 0x8)
+			{
+				pblock = ref;
+				break;
+			}
+		}
+		if (!pblock) { err = "parametric primitive without ref-0 pblock"; return false; }
+		std::map<sint32, OLDPBLOCK::SParam> params;
+		OLDPBLOCK::readOldParamBlock(pblock, params);
+
+		std::vector<NLMISC::CVector> pverts;
+		std::vector<PRIMMESH::SPrimTri> ptris;
+		if (!PRIMMESH::buildParametricMesh(baseCid, params, pverts, ptris))
+		{
+			err = "parametric primitive build failed";
+			return false;
+		}
+		verts.swap(pverts);
+		faces.resize(ptris.size());
+		for (size_t i = 0; i < ptris.size(); ++i)
+		{
+			faces[i].V[0] = ptris[i].V[0];
+			faces[i].V[1] = ptris[i].V[1];
+			faces[i].V[2] = ptris[i].V[2];
+			faces[i].MatId = 0;
+			faces[i].Vis0 = faces[i].Vis1 = faces[i].Vis2 = true;
+		}
+	}
+	else
+	{
+		err = "unsupported base object class " + baseCid.toString();
+		return false;
 	}
 
 	// Apply modifier ops base-upward (opStack was collected outermost-first, so replay back to
 	// front — mirrors pipeline_max_export_ig's nodeWorldMesh). Created verts and faces are
 	// applied via the shared EDITMESH::applyEdits; §10v's "created geometry missing" warning is
-	// retired — §10w decoded 0x0130/0x0208/0x0210 correctly, so the output carries them.
+	// retired — §10w decoded 0x0130/0x0208 and §10z-ter corrected 0x0210 (face-vertex remap, not
+	// created map-1 faces) so the output carries all three.
+	const char *dbgOps = getenv("PMB_DEBUG_MESH");
+	// Empty string ("") = debug every collision node; otherwise match by exact node user name.
+	bool dbgThis = dbgOps && (dbgOps[0] == 0 || ucstring(node.userName()).toUtf8() == dbgOps);
+	if (dbgThis)
+		fprintf(stderr, "DEBUG node %s base=%s stack of %u ops (outermost first)\n",
+			ucstring(node.userName()).toUtf8().c_str(), obj->classDesc()->classId().toString().c_str(),
+			(uint)opStack.size());
 	for (uint i = (uint)opStack.size(); i > 0; --i)
 	{
+		if (dbgThis)
+		{
+			const SModOp &op = opStack[i - 1];
+			if (op.Type == 0)
+				fprintf(stderr, "  op[%u] EditMesh: moves=%u remap=%u attribs=%u createdV=%u createdF=%u delV=%u delF=%u\n",
+					i - 1, (uint)op.Edits.Moves.size(), (uint)op.Edits.FaceRemap.size(),
+					(uint)op.Edits.FaceAttribs.size(), (uint)op.Edits.CreatedVerts.size(),
+					(uint)op.Edits.CreatedFacesA.size(), (uint)op.Edits.DelVerts.size(),
+					(uint)op.Edits.DelFaces.size());
+			else
+				fprintf(stderr, "  op[%u] Mirror axis=%d offset=%g copy=%d\n",
+					i - 1, op.MirrorAxis, op.MirrorOffset, op.MirrorCopy ? 1 : 0);
+		}
 		if (opStack[i - 1].Type == 0)
 			applyEditMeshEdits(opStack[i - 1].Edits, verts, faces);
 		else
 			applyMirror(opStack[i - 1], verts, faces);
+		if (dbgThis)
+			fprintf(stderr, "    -> %u verts, %u faces\n", (uint)verts.size(), (uint)faces.size());
 	}
 	return true;
 }

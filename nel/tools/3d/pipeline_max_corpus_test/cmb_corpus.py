@@ -2,25 +2,26 @@
 """Corpus driver for the .max -> .cmb collision-mesh pipeline (build_gamedata processes/rbank's
 direct cmb_export.ms path, and the ligo process's own exportCollisionsFromZone call).
 
-Two independent tiers, both driven by the single pipeline_max_export_cmb tool:
+Two GATED tiers, both driven by the single pipeline_max_export_cmb tool — the ligo tier is a
+real Max export step (`nel_ligo_export.ms` calls `NelExportCollision` per brick exactly like it
+calls `NelExportInstanceGroup` for `.ig`), landing brick-level `.cmb` files in
+`LigoEcosystemCmbExportDirectory` that `land_exporter` then uses as `RefCMBDir` to build the
+placed-instance `.cmb` set `rbank`'s "Build rbank indoor" step consumes for `.rbank`/`.gr`/`.lr`.
+So the ligo tier is exactly as load-bearing as the standalone one, and the gate treats it that
+way — same soft-gating convention as `ligo_ig_corpus.py` (a `LIGO_DIFF_BUDGET` that fails only
+on regression past the observed count; tighten as diffs close).
 
   direct  RBankCmbSourceDirectories (== ShapeSourceDirectories) under continents/indoors/
           directories.py: the 16 construction .max files, one .cmb per distinct ig name inside,
           compared against ~/pipeline_export/continents/indoors/rbank_cmb_export/<name>.cmb.
-          Gated (--gate-t3): T1/T2 must be clean; T3 byte-mismatches beyond DIRECT_DIFF_BUDGET
-          fail. Landing state (2026-07-08): 16 files, 13/16 igs byte-identical-or-float-tolerance
-          (see cmp_close below), 2 igs missing Edit-Mesh-created faces (undecoded 0x0410-family
-          "created faces" record — see pipeline_max_export_cmb/main.cpp), 1 ig with an
-          unexplained ~4.4-unit vertex offset on a single plain-EditableMesh node with no
-          modifier stack (root cause not found this session; see pipeline_max_design.md).
+          --gate-t3: T1/T2 must be clean; T3 diffs beyond DIRECT_DIFF_BUDGET fail.
 
   ligo    the same zonematerial-*/zonespecial-*/zonetransition-* brick corpus as
           ligo_ig_corpus.py/zone_corpus.py (landscape/ligo/<eco>/max), run through
           pipeline_max_export_cmb --ligo, compared against
-          ~/pipeline_export/ecosystems/<eco>/ligo_es/cmb/<igname>.cmb. Informational only
-          (--gate-t3 does not fail on ligo diffs) since XRefObject collision nodes are not yet
-          resolved (the tool warns and skips them, matching only the subset of bricks whose
-          collision nodes are plain geometry).
+          ~/pipeline_export/ecosystems/<eco>/ligo_es/cmb/<igname>.cmb. --gate-t3: T3 diffs
+          beyond LIGO_DIFF_BUDGET fail; regressions past that budget block the gate the same
+          way ligo_ig_corpus.py does. Tighten the budget as diffs close.
 """
 
 import argparse, math, os, struct, subprocess, sys
@@ -50,10 +51,26 @@ DIRECT_SOURCES = [
     ("zorai", "salle_npc", "zo_bt_piece_npc.max"),
 ]
 
-# Known-open T3 direct-tier diffs (see module docstring): 2 igs missing Edit-Mesh-created faces,
-# 1 ig with an unexplained vertex-position offset. Any regression beyond this count fails
-# --gate-t3; dropping below it is welcome (tighten the constant when it does).
+# Known-open T3 diffs — regressions past these budgets fail --gate-t3; dropping below is welcome
+# (tighten the budget when it does — track budget-vs-actual in the same doc section that landed
+# each fix).
+#
+# Direct tier (16 files, 16 igs):
+#   Zo_bt_Hall_Conseil — 80/80 verts, 0 face diffs, ~0.05 unit vertex offset (Y-preserved X/Z
+#                        diverge; root cause unresolved, precision ruled out via VS2008/x87).
+#   FY_hall_reunion    — 16 created-vert positions offset (candidate: 0x2510 mod-context TM
+#                        applied to created verts, unproven).
+#   Zo_bt_hall_Reunion_vitrine — 25 vert offsets + 221 face diffs (larger-scale variant of the
+#                                same class as FY_hall_reunion; face-remap decode landed for it
+#                                too but a modifier-context defect remains).
 DIRECT_DIFF_BUDGET = 3
+
+# Ligo tier (1201 bricks, ~221 igs measured against reference): documented open classes are
+# XRef sources resolving to classes cmb doesn't yet build a mesh for (unregistered scripted
+# plugins, Shape/SplineShape superclass 0x40), and the shared cluster-containment / selection-
+# order classes ligo_ig_corpus.py documents on the same brick set. Tighten as diffs close;
+# regressions past this fail --gate-t3 the same way ligo_ig_corpus.py's DIFF_BUDGET does.
+LIGO_DIFF_BUDGET = 105
 
 # float32 position tolerance for the direct tier's "close" classification (x87-vs-SSE /
 # operation-order noise — same POS_EPS-style tier already established for ig/zone/shape).
@@ -134,7 +151,7 @@ def main():
     ap.add_argument("--t1", action="store_true")
     ap.add_argument("--t2", action="store_true")
     ap.add_argument("--t3", action="store_true")
-    ap.add_argument("--ligo", action="store_true", help="also run the ligo-brick tier (slow, informational)")
+    ap.add_argument("--ligo", action="store_true", help="also run the ligo-brick tier (slow, gated same as direct)")
     ap.add_argument("--all", action="store_true")
     ap.add_argument("--gate-t3", action="store_true")
     ap.add_argument("-j", "--jobs", type=int, default=max(1, (os.cpu_count() or 4) - 2))
@@ -237,7 +254,7 @@ def main():
     ligo_match = ligo_close = ligo_diff = ligo_noref = ligo_exportfail = 0
     if args.ligo:
         ligo_corpus = enumerate_ligo(args.graphics)
-        print("\nligo corpus: %d brick .max files (informational tier)" % len(ligo_corpus))
+        print("\nligo corpus: %d brick .max files (gated same as direct)" % len(ligo_corpus))
 
         def process_ligo(indexed):
             idx, (eco, path) = indexed
@@ -285,6 +302,11 @@ def main():
     if args.gate_t3 and have_ref:
         fails += max(0, direct_diff - DIRECT_DIFF_BUDGET)
         print("\ndirect diff budget: %d used / %d allowed" % (direct_diff, DIRECT_DIFF_BUDGET))
+        if args.ligo:
+            ligo_over_budget = max(0, (ligo_diff + ligo_exportfail) - LIGO_DIFF_BUDGET)
+            fails += ligo_over_budget
+            print("ligo diff budget: %d used / %d allowed (%d diff + %d export-fail)"
+                  % (ligo_diff + ligo_exportfail, LIGO_DIFF_BUDGET, ligo_diff, ligo_exportfail))
     return 1 if fails else 0
 
 
