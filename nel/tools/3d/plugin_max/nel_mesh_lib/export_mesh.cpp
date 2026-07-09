@@ -380,6 +380,26 @@ NL3D::IShape *CExportNel::buildShape (INode& node, TimeValue time, const TInodeP
 								// Build the mesh with the build interface
 								meshMRMSkinned->build (buildBaseMesh, buildMesh, parameters);
 
+								// CMeshMRMSkinned::isCompatible gates the INPUT vertex count,
+								// but MRM construction can grow the post-MRM VB past
+								// NL3D_MESH_SKIN_MANAGER_MAXVERTICES=5000 (the skin-manager's
+								// fixed shared VB size). compileRunTime logs the failure and
+								// clears _RuntimeCompiled; refuse to ship the broken shape and
+								// surface a MessageBox so the artist knows to author LOD_MRM=0
+								// or split the geometry.
+								if (!meshMRMSkinned->isRuntimeCompiled())
+								{
+									std::string msg = "Node '" + CExportNel::getName(node) +
+										"' cannot be exported as CMeshMRMSkinned: the post-MRM "
+										"vertex count exceeds the shared skin-manager buffer "
+										"size (NL3D_MESH_SKIN_MANAGER_MAXVERTICES=5000). Author "
+										"the node with LOD_MRM=0 to export as plain CMesh with "
+										"SkinWeights, or split the geometry so each part fits.";
+									outputErrorMessage(msg);
+									delete meshMRMSkinned;
+									return NULL;
+								}
+
 								// optimize number of material
 								meshMRMSkinned->optimizeMaterialUsage(materialRemap);
 

@@ -568,6 +568,24 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 			{
 				NL3D::CMeshMRMSkinned *meshMRMSkinned = new NL3D::CMeshMRMSkinned;
 				meshMRMSkinned->build(buildBaseMesh, buildMesh, parameters);
+				// CMeshMRMSkinned::isCompatible gates the INPUT vertex count, but MRM
+				// construction can grow the vertex count at smoothing-group/material/bone
+				// boundaries past NL3D_MESH_SKIN_MANAGER_MAXVERTICES=5000 (the skin-manager's
+				// fixed shared VB size). CMeshMRMSkinnedGeom::compileRunTime logs the failure
+				// and clears _RuntimeCompiled when that happens; skip the node with an artist-
+				// facing message so the authoring gets fixed (LOD_MRM=0 or split the mesh).
+				if (!meshMRMSkinned->isRuntimeCompiled())
+				{
+					fprintf(stderr, "SKIP shape '%s': CMeshMRMSkinned post-MRM vertex count "
+					                "exceeds NL3D_MESH_SKIN_MANAGER_MAXVERTICES. Author "
+					                "LOD_MRM=0 to export as plain CMesh with SkinWeights, or "
+					                "split the geometry so each part's post-MRM VB fits in "
+					                "the skin-manager buffer.\n",
+					        name.c_str());
+					delete meshMRMSkinned;
+					stats.skip("skinned-maxverts");
+					return NULL;
+				}
 				meshMRMSkinned->optimizeMaterialUsage(materialRemap);
 				meshBase = meshMRMSkinned;
 			}
