@@ -1719,14 +1719,13 @@ void CBipedAnimEval::buildPivotSessions()
 						}
 						// Arms: whole-session COM yaw span (first→last key) > 0.7 rad —
 						// turning/spinning body (toupie/demitour/tourne). The hand yaw-frame
-						// lacks the leg-side angle+residual decomposition. Applied at session
-						// build (not only per-interval) so multi-interval plants that turn
-						// overall still drop.
+						// lacks the leg-side angle+residual decomposition. Also covers
+						// multi-key large-path plants that turn hard mid-swing (a1m_coup1);
+						// exempting LargePath was tried and regressed emote_beta_testeur
+						// (+0.12) while a1m_coup1's file-worst stayed the foot track.
 						if (!drop && limb == 0 && comNode && !keyComRot.empty()
 						    && sess.W.X.Keys.size() >= 2)
 						{
-							// key times of session knots map into keyComRot by matching Times
-							// — approximate via first/last interval ends against tr.Times
 							QuatD y0 = yawOf(keyComRot[s]);
 							QuatD y1 = yawOf(keyComRot[lastSessKey]);
 							double a0 = 2.0 * atan2(y0.z, y0.w);
