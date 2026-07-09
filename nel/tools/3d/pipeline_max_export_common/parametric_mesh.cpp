@@ -196,6 +196,7 @@ bool buildParametricMesh(const NLMISC::CClassId &cid,
 		verts.push_back(NLMISC::CVector(0.0f, 0.0f, h));
 		#define CYL_RING(v, k) (1 + (v) * sides + ((k) % sides))
 		tris.clear();
+		if (uvVerts) uvVerts->clear();
 		// Cylinder matId/sg tables (~/shape_export_dataset primuv_cyl):
 		//   bottom cap: matId 1, sg 0x01 (mid=2)
 		//   sides:      matId 2, sg 0x08 (mid=3, all sides share one smoothing group so a cylinder
@@ -203,21 +204,82 @@ bool buildParametricMesh(const NLMISC::CClassId &cid,
 		//   top cap:    matId 0, sg 0x01 (mid=1)
 		uint32 curMat = 0;
 		uint32 curSg = 0;
-		#define CYL_TRI(a, b, c) { SPrimTri t = { { (uint32)(a), (uint32)(b), (uint32)(c) }, curMat, curSg }; tris.push_back(t); }
+		// Max "Generate Mapping Coords" for Cylinder unwraps the whole cylinder onto a strip:
+		//   u = fract(0.75 + k/N) — offset places the seam at k = N/4 (Y+ direction), the
+		//     conventional Max cylinder UV origin. Corpus-validated against primuv_cyl (sides=8):
+		//     u_ring[0..7] = 0.75, 0.875, 0.0, 0.125, 0.25, 0.375, 0.5, 0.625.
+		//   v = z / h  (bottom cap collapses to v=0, side varies with z, top cap collapses to v=1)
+		//   Bottom cap center: (0.5, 0). Top cap center: (0.5, 1).
+		//
+		// Seam handling — some cap-fan tris cross the k = N/4 boundary (u_A of one corner is on
+		// one side of the seam, u_B on the other). In the manifest this shows up as an extra UV
+		// vert with u < 0 (e.g. U27 = -0.125): the "later" corner keeps continuity by shifting
+		// its u by -1. Rule: for each tri, keep adjacent corners' u values within 0.5 of the
+		// previous corner by adding ±1 as needed.
+		#define CYL_U_BASE(k) (0.75f + (float)((k) % sides) / (float)sides)
+		#define CYL_V_SIDE(v) ((float)(v) / (float)hs)
+		float cylTriUV[3] = { 0.f, 0.f, 0.f };
+		#define CYL_TRI(a, b, c) do { \
+			SPrimTri _t = { { (uint32)(a), (uint32)(b), (uint32)(c) }, curMat, curSg }; \
+			tris.push_back(_t); \
+			if (uvVerts) { \
+				uvVerts->push_back(NLMISC::CVector(cylTriUV[0], 0.f, 0.f)); \
+				uvVerts->push_back(NLMISC::CVector(cylTriUV[1], 0.f, 0.f)); \
+				uvVerts->push_back(NLMISC::CVector(cylTriUV[2], 0.f, 0.f)); \
+			} \
+		} while (0)
+		// Fill (u, v) into the two-buffer output. If uvVerts is null, the tri push doesn't read.
+		#define CYL_TRI_UV(a, b, c, ua, va, ub, vb, uc, vc) do { \
+			SPrimTri _t = { { (uint32)(a), (uint32)(b), (uint32)(c) }, curMat, curSg }; \
+			tris.push_back(_t); \
+			if (uvVerts) { \
+				float _uA = (ua), _uB = (ub), _uC = (uc); \
+				/* seam fix: keep consecutive |Δu| <= 0.5 within the tri */ \
+				while (_uB - _uA > 0.5f) _uB -= 1.0f; \
+				while (_uA - _uB > 0.5f) _uB += 1.0f; \
+				while (_uC - _uB > 0.5f) _uC -= 1.0f; \
+				while (_uB - _uC > 0.5f) _uC += 1.0f; \
+				uvVerts->push_back(NLMISC::CVector(_uA, (va), 0.f)); \
+				uvVerts->push_back(NLMISC::CVector(_uB, (vb), 0.f)); \
+				uvVerts->push_back(NLMISC::CVector(_uC, (vc), 0.f)); \
+			} \
+		} while (0)
+		(void)cylTriUV; // silence unused
 		curMat = 1; curSg = 0x01;
 		for (sint k = 0; k < sides; ++k)
-			CYL_TRI(0, CYL_RING(0, k + 1), CYL_RING(0, k))
+		{
+			// Bottom cap fan tri (center, ring[k+1], ring[k]) — v=0 for cap corners.
+			CYL_TRI_UV(0, CYL_RING(0, k + 1), CYL_RING(0, k),
+			           0.5f, 0.0f,
+			           CYL_U_BASE(k + 1), 0.0f,
+			           CYL_U_BASE(k), 0.0f);
+		}
 		curMat = 2; curSg = 0x08;
 		for (sint v = 0; v < hs; ++v)
 			for (sint k = 0; k < sides; ++k)
 			{
-				CYL_TRI(CYL_RING(v, k), CYL_RING(v + 1, k + 1), CYL_RING(v + 1, k))
-				CYL_TRI(CYL_RING(v, k), CYL_RING(v, k + 1), CYL_RING(v + 1, k + 1))
+				CYL_TRI_UV(CYL_RING(v, k), CYL_RING(v + 1, k + 1), CYL_RING(v + 1, k),
+				           CYL_U_BASE(k), CYL_V_SIDE(v),
+				           CYL_U_BASE(k + 1), CYL_V_SIDE(v + 1),
+				           CYL_U_BASE(k), CYL_V_SIDE(v + 1));
+				CYL_TRI_UV(CYL_RING(v, k), CYL_RING(v, k + 1), CYL_RING(v + 1, k + 1),
+				           CYL_U_BASE(k), CYL_V_SIDE(v),
+				           CYL_U_BASE(k + 1), CYL_V_SIDE(v),
+				           CYL_U_BASE(k + 1), CYL_V_SIDE(v + 1));
 			}
 		curMat = 0; curSg = 0x01;
 		for (sint k = 0; k < sides; ++k)
-			CYL_TRI(tc, CYL_RING(hs, k), CYL_RING(hs, k + 1))
+		{
+			// Top cap fan tri (topCenter, ring[k], ring[k+1]) — v=1 for cap corners.
+			CYL_TRI_UV(tc, CYL_RING(hs, k), CYL_RING(hs, k + 1),
+			           0.5f, 1.0f,
+			           CYL_U_BASE(k), 1.0f,
+			           CYL_U_BASE(k + 1), 1.0f);
+		}
 		#undef CYL_TRI
+		#undef CYL_TRI_UV
+		#undef CYL_U_BASE
+		#undef CYL_V_SIDE
 		#undef CYL_RING
 		return true;
 	}
@@ -245,19 +307,61 @@ bool buildParametricMesh(const NLMISC::CClassId &cid,
 		verts.push_back(NLMISC::CVector(0.0f, 0.0f, -r));
 		#define SPH_RING(i, k) (1 + ((i) - 1) * segs + ((k) % segs))
 		tris.clear();
+		if (uvVerts) uvVerts->clear();
 		// Sphere: matId 1, sg 0x01 uniformly across the surface (~/shape_export_dataset primuv_sphere).
-		#define SPH_TRI(a, b, c) { SPrimTri t = { { (uint32)(a), (uint32)(b), (uint32)(c) }, 1, 0x01 }; tris.push_back(t); }
+		// Max "Generate Mapping Coords" for Sphere: rectangular strip UV, corpus-validated against
+		// primuv_sphere (segs=16, rows=8):
+		//   u_wrap(k) = k / segs                 (seam at k=0/segs = +Y direction, NO offset unlike
+		//                                         Cylinder — corpus-validated)
+		//   Ring i (i=1..rows-1) v = 1 - i/rows  (NOT z/r — Max maps by index, not latitude angle)
+		//   Top pole v=1, bottom pole v=0.
+		//   Pole-fan tri k: pole corner gets u = k/segs (the LOWER-k side of the tri).
+		//   Seam-crossing rule: within a tri, keep consecutive |Δu| <= 0.5 by shifting by ±1
+		//   (the wrap corner gets u=1.0 instead of 0.0 in the last-side fan tri).
+		#define SPH_U_BASE(k) ((float)((k) % segs) / (float)segs)
+		#define SPH_V_ROW(i)  (1.0f - (float)(i) / (float)rows)
+		#define SPH_TRI_UV(a, b, c, ua, va, ub, vb, uc, vc) do { \
+			SPrimTri _t = { { (uint32)(a), (uint32)(b), (uint32)(c) }, 1, 0x01 }; \
+			tris.push_back(_t); \
+			if (uvVerts) { \
+				float _uA = (ua), _uB = (ub), _uC = (uc); \
+				while (_uB - _uA > 0.5f) _uB -= 1.0f; \
+				while (_uA - _uB > 0.5f) _uB += 1.0f; \
+				while (_uC - _uB > 0.5f) _uC -= 1.0f; \
+				while (_uB - _uC > 0.5f) _uC += 1.0f; \
+				uvVerts->push_back(NLMISC::CVector(_uA, (va), 0.f)); \
+				uvVerts->push_back(NLMISC::CVector(_uB, (vb), 0.f)); \
+				uvVerts->push_back(NLMISC::CVector(_uC, (vc), 0.f)); \
+			} \
+		} while (0)
+		// Top pole fan
 		for (sint k = 0; k < segs; ++k)
-			SPH_TRI(0, SPH_RING(1, k), SPH_RING(1, k + 1))
+			SPH_TRI_UV(0, SPH_RING(1, k), SPH_RING(1, k + 1),
+			           SPH_U_BASE(k), 1.0f,
+			           SPH_U_BASE(k), SPH_V_ROW(1),
+			           SPH_U_BASE(k + 1), SPH_V_ROW(1));
+		// Middle quad rows
 		for (sint i = 1; i < rows - 1; ++i)
 			for (sint k = 0; k < segs; ++k)
 			{
-				SPH_TRI(SPH_RING(i, k), SPH_RING(i + 1, k), SPH_RING(i + 1, k + 1))
-				SPH_TRI(SPH_RING(i, k), SPH_RING(i + 1, k + 1), SPH_RING(i, k + 1))
+				SPH_TRI_UV(SPH_RING(i, k), SPH_RING(i + 1, k), SPH_RING(i + 1, k + 1),
+				           SPH_U_BASE(k), SPH_V_ROW(i),
+				           SPH_U_BASE(k), SPH_V_ROW(i + 1),
+				           SPH_U_BASE(k + 1), SPH_V_ROW(i + 1));
+				SPH_TRI_UV(SPH_RING(i, k), SPH_RING(i + 1, k + 1), SPH_RING(i, k + 1),
+				           SPH_U_BASE(k), SPH_V_ROW(i),
+				           SPH_U_BASE(k + 1), SPH_V_ROW(i + 1),
+				           SPH_U_BASE(k + 1), SPH_V_ROW(i));
 			}
+		// Bottom pole fan
 		for (sint k = 0; k < segs; ++k)
-			SPH_TRI(bp, SPH_RING(rows - 1, k + 1), SPH_RING(rows - 1, k))
-		#undef SPH_TRI
+			SPH_TRI_UV(bp, SPH_RING(rows - 1, k + 1), SPH_RING(rows - 1, k),
+			           SPH_U_BASE(k), 0.0f,
+			           SPH_U_BASE(k + 1), SPH_V_ROW(rows - 1),
+			           SPH_U_BASE(k), SPH_V_ROW(rows - 1));
+		#undef SPH_TRI_UV
+		#undef SPH_U_BASE
+		#undef SPH_V_ROW
 		#undef SPH_RING
 		return true;
 	}
