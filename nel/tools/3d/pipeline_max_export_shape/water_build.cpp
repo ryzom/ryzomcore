@@ -38,6 +38,7 @@
 #include <nel/3d/water_shape.h>
 #include <nel/3d/texture_file.h>
 #include <nel/3d/texture_multi_file.h>
+#include <nel/3d/texture_blend.h>
 
 #include "mesh_eval.h"
 #include "material_build.h"
@@ -317,12 +318,57 @@ NL3D::IShape *buildWaterShape(INode &node, SNodeTMCache &tmCache)
 	// Build the shape
 	CWaterShape *ws = new CWaterShape;
 
-	// Env map: primary (slot 1). A CTextureBlend of the two envmap slots exists in the reference
-	// when slot 2 is enabled + present; we ship the primary only (documented in the header).
-	NLMISC::CSmartPtr<ITexture> envMap = waterTextureFromTexmap(texmap[0], nodeName, "env");
+	// Env maps — reference exporter's rule (see export_mesh.cpp:1879-1911):
+	//   if (maxEnvMap):        envMap = maxEnvMap2 ? CTextureBlend(m1,m2) : buildATexture(m1)
+	//   if (maxEnvMapUnder):   envMapUnder = maxEnvMapUnder2 ? CTextureBlend(...) : plain
+	// The blend gate is TEXMAP presence (not the enable-slot flag) — the corpus's above-water
+	// envmap on tr_water_00 is `CTextureBlend(waterenvmap.png, water_night_envmap.png)`, i.e.
+	// the day/night blend that CWaterPoolManager::setBlend drives at runtime.
+	NLMISC::CSmartPtr<ITexture> envMap = NULL;
+	{
+		ITexture *t0 = waterTextureFromTexmap(texmap[0], nodeName, "env");
+		if (t0)
+		{
+			if (texmap[1])
+			{
+				ITexture *t1 = waterTextureFromTexmap(texmap[1], nodeName, "env-alt");
+				if (t1)
+				{
+					CTextureBlend *b = new CTextureBlend;
+					b->setBlendTexture(0, t0);
+					b->setBlendTexture(1, t1);
+					envMap = b;
+				}
+				else
+					envMap = t0;
+			}
+			else
+				envMap = t0;
+		}
+	}
 	NLMISC::CSmartPtr<ITexture> envMapUnder = NULL;
-	if (enable[2] && texmap[2])
-		envMapUnder = waterTextureFromTexmap(texmap[2], nodeName, "env-under");
+	if (texmap[2])
+	{
+		ITexture *t0 = waterTextureFromTexmap(texmap[2], nodeName, "env-under");
+		if (t0)
+		{
+			if (texmap[3])
+			{
+				ITexture *t1 = waterTextureFromTexmap(texmap[3], nodeName, "env-under-alt");
+				if (t1)
+				{
+					CTextureBlend *b = new CTextureBlend;
+					b->setBlendTexture(0, t0);
+					b->setBlendTexture(1, t1);
+					envMapUnder = b;
+				}
+				else
+					envMapUnder = t0;
+			}
+			else
+				envMapUnder = t0;
+		}
+	}
 	NLMISC::CSmartPtr<ITexture> bumpMap = waterTextureFromTexmap(texmap[4], nodeName, "bump");
 	NLMISC::CSmartPtr<ITexture> displaceMap = waterTextureFromTexmap(texmap[5], nodeName, "displace");
 	NLMISC::CSmartPtr<ITexture> colorMap = NULL;

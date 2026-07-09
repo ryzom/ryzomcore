@@ -585,10 +585,31 @@ static int exportFile(const std::string &maxPath, const std::string &outDir, con
 			uint32 len = mem.length();
 			{
 				std::string className = shape->getClassName();
-				uint32 versionOff = 4 + 8 + 4 + (uint32)className.size() + 1;
+				// CMeshBase-derived shapes: CMesh/CMeshMRM/CMeshMRMSkinned write their OWN
+				// version byte first, THEN CMeshBase's version byte — the "+1" skips over the
+				// outer class version to reach CMeshBase's (see the two-level serial in
+				// CMesh::serial calling CMeshBase::serial). For a plain-IShape-derived shape
+				// like CWaterShape there's no inner class, so the version byte sits right at
+				// the end of the class name (no +1 offset).
+				uint32 meshBaseVerOff = 4 + 8 + 4 + (uint32)className.size() + 1;
 				if ((className == "CMesh" || className == "CMeshMRM" || className == "CMeshMRMSkinned")
-					&& versionOff < len && buf[versionOff] == 10)
-					buf[versionOff] = 9;
+					&& meshBaseVerOff < len && buf[meshBaseVerOff] == 10)
+					buf[meshBaseVerOff] = 9;
+				// CWaterShape: reference-era exports are stream version 4 (2004 plugin build).
+				// Our v7 adds RealtimeReflection (1 byte) + fresnel bias/scale/power (12 bytes)
+				// + EnvMapCalcReflectivity (1 byte) at the END of the serial, in that order. To
+				// emit a v4 stream from a v7 in-memory shape: patch the version byte + truncate
+				// the trailing 14 bytes. Safe because those 4 fields sit right at the end and
+				// aren't referenced by any later field (the CMeshBase v10→v9 pattern is a pure
+				// version bump with no data change — this one has data to peel off too, but the
+				// same structural principle applies).
+				uint32 waterVerOff = 4 + 8 + 4 + (uint32)className.size();
+				if (className == "CWaterShape" && waterVerOff < len && buf[waterVerOff] == 7
+					&& len > 14)
+				{
+					buf[waterVerOff] = 4;
+					len -= 14;
+				}
 			}
 			NLMISC::COFile file;
 			if (file.open(outPath))
