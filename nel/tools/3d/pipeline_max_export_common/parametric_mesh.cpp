@@ -284,11 +284,111 @@ bool buildParametricMesh(const NLMISC::CClassId &cid,
 		return true;
 	}
 
-	// Sphere (0x11, 0): params 0/1 = radius/segments.
+	// Sphere (0x11, 0): params 0/1 = radius/segments, 2 = smooth, 3 = hemisphere (0..1),
+	// 4 = squash (chop keeps segment density, squash redistributes), 5 = recenter (base-to-pivot).
 	if (cid == CLASSID_SPHERE)
 	{
 		float r = paramFloat(params, 0);
 		sint segs = std::max(4, paramInt(params, 1));
+		float hemiParam = paramFloat(params, 3);
+		sint squash = paramInt(params, 4);
+		sint recenter = paramInt(params, 5);
+		// Hemisphere path — SDK SphereObject::BuildMesh (samples/objects/sphere.cpp), non-pie form,
+		// float accumulation kept as in the source (alt/secang step, last ring altitude forced to
+		// hemi). Discovered via the 4 primes_racines sky domes (base sphere must build rows=9
+		// rings, hemi=0.5, so the Map Extender cache face count lines up — §10z-quatorze skies).
+		if (hemiParam >= 0.00001f)
+		{
+			if (hemiParam >= 1.0f) hemiParam = 0.9999f;
+			float hemi = (1.0f - hemiParam) * (float)NLMISC::Pi;
+			float basedelta = 2.0f * (float)NLMISC::Pi / (float)segs;
+			float delta2 = basedelta;
+			float delta = squash ? 2.0f * hemi / (float)(segs - 2) : basedelta;
+			sint rows = squash ? (segs / 2 - 1) : (sint)(hemi / delta) + 1;
+			// Legacy A_PLUGIN1 start angle (+Y) — same convention the full-sphere path below uses,
+			// corpus-validated (§10g primitive dataset).
+			float startAng = (float)NLMISC::Pi / 2.0f;
+			verts.clear();
+			verts.push_back(NLMISC::CVector(0.0f, 0.0f, r));
+			float alt = delta;
+			for (sint ix = 1; ix <= rows; ++ix)
+			{
+				if (ix == rows) alt = hemi;
+				float za = (float)cos(alt) * r;
+				float secrad = (float)sin(alt) * r;
+				float secang = startAng;
+				for (sint jx = 0; jx < segs; ++jx)
+				{
+					verts.push_back(NLMISC::CVector((float)cos(secang) * secrad, (float)sin(secang) * secrad, za));
+					secang += delta2;
+				}
+				alt += delta;
+			}
+			uint32 bp = (uint32)verts.size();
+			verts.push_back(NLMISC::CVector(0.0f, 0.0f, (float)cos(hemi) * r));
+			if (recenter)
+			{
+				// "Base To Pivot" — put the flat part of the hemisphere at z=0.
+				float shift = (float)cos(hemi) * r;
+				for (uint i = 0; i < verts.size(); ++i)
+					verts[i].z -= shift;
+			}
+			#define SPHH_RING(i, k) (1 + ((i) - 1) * segs + ((k) % segs))
+			// Texture v advances by basedelta per ROW INDEX (the SDK's genUVs loop does NOT clamp
+			// the last row's alt to hemi — texture squashes uniformly); u = k/segs like the full
+			// sphere. Per-tri seam shift shared with the full-sphere macro below.
+			#define SPHH_V(i) (1.0f - (float)(i) * basedelta / (float)NLMISC::Pi)
+			tris.clear();
+			if (uvVerts) uvVerts->clear();
+			uint32 curMat = 1, curSg = 0x01;
+			#define SPHH_TRI_UV(a, b, c, ua, va, ub, vb, uc, vc) do { \
+				SPrimTri _t = { { (uint32)(a), (uint32)(b), (uint32)(c) }, curMat, curSg }; \
+				tris.push_back(_t); \
+				if (uvVerts) { \
+					float _uA = (ua), _uB = (ub), _uC = (uc); \
+					while (_uB - _uA > 0.5f) _uB -= 1.0f; \
+					while (_uA - _uB > 0.5f) _uB += 1.0f; \
+					while (_uC - _uB > 0.5f) _uC -= 1.0f; \
+					while (_uB - _uC > 0.5f) _uC += 1.0f; \
+					uvVerts->push_back(NLMISC::CVector(_uA, (va), 0.f)); \
+					uvVerts->push_back(NLMISC::CVector(_uB, (vb), 0.f)); \
+					uvVerts->push_back(NLMISC::CVector(_uC, (vc), 0.f)); \
+				} \
+			} while (0)
+			#define SPHH_U(k) ((float)((k) % segs) / (float)segs)
+			// Top pole fan — smG 1, matID 1 (surface).
+			for (sint k = 0; k < segs; ++k)
+				SPHH_TRI_UV(0, SPHH_RING(1, k), SPHH_RING(1, k + 1),
+				            SPHH_U(k), 1.0f,
+				            SPHH_U(k), SPHH_V(1),
+				            SPHH_U(k + 1), SPHH_V(1));
+			// Middle quad rows — smG 1, matID 1.
+			for (sint i = 1; i < rows; ++i)
+				for (sint k = 0; k < segs; ++k)
+				{
+					SPHH_TRI_UV(SPHH_RING(i, k), SPHH_RING(i + 1, k), SPHH_RING(i + 1, k + 1),
+					            SPHH_U(k), SPHH_V(i),
+					            SPHH_U(k), SPHH_V(i + 1),
+					            SPHH_U(k + 1), SPHH_V(i + 1));
+					SPHH_TRI_UV(SPHH_RING(i, k), SPHH_RING(i + 1, k + 1), SPHH_RING(i, k + 1),
+					            SPHH_U(k), SPHH_V(i),
+					            SPHH_U(k + 1), SPHH_V(i + 1),
+					            SPHH_U(k + 1), SPHH_V(i));
+				}
+			// Bottom conic cap — the hemisphere cut disc: smG 2, matID 0 (the SDK's !noHemi cap
+			// attributes, distinct from the full sphere's smG 1 / matID 1 cap).
+			curMat = 0; curSg = 0x02;
+			for (sint k = 0; k < segs; ++k)
+				SPHH_TRI_UV(bp, SPHH_RING(rows, k + 1), SPHH_RING(rows, k),
+				            SPHH_U(k), SPHH_V(rows + 1),
+				            SPHH_U(k + 1), SPHH_V(rows),
+				            SPHH_U(k), SPHH_V(rows));
+			#undef SPHH_U
+			#undef SPHH_TRI_UV
+			#undef SPHH_V
+			#undef SPHH_RING
+			return true;
+		}
 		sint rows = segs / 2;
 		verts.clear();
 		verts.push_back(NLMISC::CVector(0.0f, 0.0f, r));
@@ -305,6 +405,12 @@ bool buildParametricMesh(const NLMISC::CClassId &cid,
 		}
 		uint32 bp = (uint32)verts.size();
 		verts.push_back(NLMISC::CVector(0.0f, 0.0f, -r));
+		if (recenter)
+		{
+			// SDK applies the base-to-pivot shift for the full sphere too: hemi = π, shift = −r.
+			for (uint i = 0; i < verts.size(); ++i)
+				verts[i].z += r;
+		}
 		#define SPH_RING(i, k) (1 + ((i) - 1) * segs + ((k) % segs))
 		tris.clear();
 		if (uvVerts) uvVerts->clear();
