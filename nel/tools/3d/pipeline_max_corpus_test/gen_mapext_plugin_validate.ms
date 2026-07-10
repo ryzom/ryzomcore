@@ -24,17 +24,17 @@ global OUT_DIR = "C:\\mapext_probe\\"          -- EDIT ME: output dir
 makeDir OUT_DIR all:true
 global gMan = createFile (OUT_DIR + "manifest.txt")
 
--- Map Extender Class_ID (0x2ec82081, 0x045a6271) as MAXScript getclassid values
-global MAPEXT_A = 0x2ec82081
-global MAPEXT_B = 0x045a6271
-
+-- The drop-in plugin's ClassDesc names the class "Map Extender" -> MAXScript class value
+-- Map_Extender. classof-string compare per the repo maxscript convention (there is NO
+-- getclassid built-in in MAXScript -- the first revision of this script called one and every
+-- node failed with "Call needs function or class, got: undefined"). A missing-plugin stand-in
+-- reports Missing_OSM here, so this also cleanly distinguishes PLUGINSTATE.
 fn isMapExt m = (
-    local cid = getclassid m
-    (cid[1] == MAPEXT_A) and (cid[2] == MAPEXT_B)
+    (((classof m) as string) == "Map_Extender")
 )
 
 fn dumpChannel tm tag = (
-    for ch in 1 to 2 do (
+    for ch = 1 to 2 do (
         if (meshop.getMapSupport tm ch) then (
             local nv = meshop.getNumMapVerts tm ch
             format "% CHAN % VERTS % FACES %\n" tag ch nv tm.numfaces to:gMan
@@ -63,7 +63,9 @@ fn probeNode nodeName = (
         if (isMapExt n.modifiers[i]) then mi = i
     )
     if mi == 0 then (
-        format "PLUGINSTATE missing-or-standin\n" to:gMan
+        local cls = ""
+        for i = 1 to n.modifiers.count do cls += (((classof n.modifiers[i]) as string) + " ")
+        format "PLUGINSTATE missing-or-standin stack: %\n" cls to:gMan
         return false
     )
     format "PLUGINSTATE ok index % of % class %\n" mi n.modifiers.count ((classof n.modifiers[mi]) as string) to:gMan
