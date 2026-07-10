@@ -173,15 +173,25 @@ static void buildRenderNormals(const SEvalMesh &mesh, SRenderNormals &out)
 				const char *env = getenv("PMB_SMOOTH_MODE");
 				smMode = env ? atoi(env) : 0;
 			}
+			// The weighted contribution materializes as a FLOAT Point3 before the add (Max's
+			// Point3 operator* returns a float struct; operator+= then adds float to float) —
+			// exact-opposite doubled faces (a two-sided fin, same triangle both windings) must
+			// cancel to EXACTLY zero: fl(w·n) + (-fl(w·n)) == 0, where an unrounded long-double
+			// delta leaves a rounding residual that normalizes into a garbage unit normal
+			// (clapclap/sagass_selle clod class — the reference lands the (1,0,0) zero-normalize
+			// fallback below).
+			float dwx = (float)((long double)fn[0] * w);
+			float dwy = (float)((long double)fn[1] * w);
+			float dwz = (float)((long double)fn[2] * w);
 			for (uint r = 0; r < rns.size(); ++r)
 			{
 				bool match = smMode == 2 ? (rns[r].SmGroup == face.SmGroup)
 				                         : ((rns[r].SmGroup & face.SmGroup) != 0);
 				if (match)
 				{
-					rns[r].N[0] = (float)(rns[r].N[0] + (long double)fn[0] * w);
-					rns[r].N[1] = (float)(rns[r].N[1] + (long double)fn[1] * w);
-					rns[r].N[2] = (float)(rns[r].N[2] + (long double)fn[2] * w);
+					rns[r].N[0] = (float)((long double)rns[r].N[0] + dwx);
+					rns[r].N[1] = (float)((long double)rns[r].N[1] + dwy);
+					rns[r].N[2] = (float)((long double)rns[r].N[2] + dwz);
 					if (smMode != 1)
 						rns[r].SmGroup |= face.SmGroup;
 					merged = true;
@@ -191,15 +201,18 @@ static void buildRenderNormals(const SEvalMesh &mesh, SRenderNormals &out)
 			if (!merged)
 			{
 				SRNormal rn;
-				rn.N[0] = (float)((long double)fn[0] * w);
-				rn.N[1] = (float)((long double)fn[1] * w);
-				rn.N[2] = (float)((long double)fn[2] * w);
+				rn.N[0] = dwx;
+				rn.N[1] = dwy;
+				rn.N[2] = dwz;
 				rn.SmGroup = face.SmGroup;
 				rns.push_back(rn);
 			}
 		}
 	}
 	// Normalize accumulated normals (Max normalizes RNormals at the end of buildRenderNormals).
+	// Zero-length (exact cancellation of a two-sided fin's doubled faces) falls back to
+	// (1,0,0) — Max Point3::Normalize's documented zero-length result, corpus-pinned by the
+	// clapclap/sagass_selle clod references carrying exactly (1,0,0) on those corners.
 	for (uint v = 0; v < nv; ++v)
 	{
 		for (uint r = 0; r < out.VertexNormals[v].size(); ++r)
@@ -211,6 +224,12 @@ static void buildRenderNormals(const SEvalMesh &mesh, SRenderNormals &out)
 				n[0] = (float)(n[0] / len);
 				n[1] = (float)(n[1] / len);
 				n[2] = (float)(n[2] / len);
+			}
+			else
+			{
+				n[0] = 1.f;
+				n[1] = 0.f;
+				n[2] = 0.f;
 			}
 		}
 	}
