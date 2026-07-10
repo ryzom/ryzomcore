@@ -54,10 +54,20 @@
 #define PLUGIN_MAX_MAP_EXTENDER_H
 
 #include <Max.h>
+#include <maxversion.h>
 
 #include <vector>
 
 #define MAP_EXTENDER_CLASS_ID Class_ID(0x2ec82081, 0x045a6271)
+
+// SDK signature drift across the Max versions the quick_start redist targets (9 .. 2023+),
+// same conditions as nel_3dsmax_shared/string_common.h — inlined here so this plugin stays
+// free of NeL dependencies.
+#if (MAX_VERSION_MAJOR < 15)
+#define MAPEXT_NOTIFY_REF_PARAMS Interval /* changeInt */, RefTargetHandle /* hTarget */, PartID & /* partID */, RefMessage /* message */
+#else
+#define MAPEXT_NOTIFY_REF_PARAMS const Interval & /* changeInt */, RefTargetHandle /* hTarget */, PartID & /* partID */, RefMessage /* message */, BOOL /* propagate */
+#endif
 
 extern HINSTANCE hInstance;
 
@@ -106,14 +116,23 @@ public:
 	void DeleteThis() { delete this; }
 	Class_ID ClassID() { return MAP_EXTENDER_CLASS_ID; }
 	SClass_ID SuperClassID() { return OSM_CLASS_ID; }
+#if (MAX_VERSION_MAJOR < 24)
 	void GetClassName(TSTR &s) { s = _T("Map Extender"); }
+#else
+	void GetClassName(TSTR &s, bool /* localized */) const { s = _T("Map Extender"); }
+#endif
+#if (MAX_VERSION_MAJOR < 15)
 	TCHAR *GetObjectName() { return _T("Map Extender"); }
+#elif (MAX_VERSION_MAJOR < 24)
+	const MCHAR *GetObjectName() { return _T("Map Extender"); }
+#else
+	const MCHAR *GetObjectName(bool /* localized */) const { return _T("Map Extender"); }
+#endif
 	int NumSubs() { return 0; }
 	int NumRefs() { return 0; }
 	RefTargetHandle GetReference(int /* i */) { return NULL; }
 	void SetReference(int /* i */, RefTargetHandle /* rtarg */) {}
-	RefResult NotifyRefChanged(Interval /* changeInt */, RefTargetHandle /* hTarget */,
-	                           PartID & /* partID */, RefMessage /* message */)
+	RefResult NotifyRefChanged(MAPEXT_NOTIFY_REF_PARAMS)
 	{
 		return REF_SUCCEED;
 	}

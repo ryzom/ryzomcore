@@ -35,8 +35,11 @@ class MapExtenderClassDesc : public ClassDesc
 {
 public:
 	int IsPublic() { return TRUE; }
-	void *Create(BOOL /* loading */) { return new MapExtenderMod(); }
+	void *Create(BOOL /* loading */ = FALSE) { return new MapExtenderMod(); }
 	const TCHAR *ClassName() { return _T("Map Extender"); }
+#if (MAX_VERSION_MAJOR >= 24)
+	virtual const TCHAR *NonLocalizedClassName() { return _T("Map Extender"); }
+#endif
 	SClass_ID SuperClassID() { return OSM_CLASS_ID; }
 	Class_ID ClassID() { return MAP_EXTENDER_CLASS_ID; }
 	const TCHAR *Category() { return _T("NeL Tools"); }
