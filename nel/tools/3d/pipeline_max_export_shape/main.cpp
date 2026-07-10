@@ -1624,10 +1624,139 @@ static void compareShapesFields(const std::string &a, const std::string &b)
 		delete sb;
 		return;
 	}
+	// CMeshMRM / CMeshMRMSkinned: compare bones, skin weights, the (dequantized) VB, and the
+	// per-lod rdrpass structure. MRM construction is deterministic on bit-equal inputs (whole
+	// skinned files compare byte-identical since the world-space fix), so same-topology output
+	// within the quantization/float-noise tier is FLOATEQ; topology differences (different
+	// simplification order from float-noise inputs) stay DIFF.
+	{
+		NL3D::CMeshMRM *mrma = dynamic_cast<NL3D::CMeshMRM *>(sa);
+		NL3D::CMeshMRM *mrmb = dynamic_cast<NL3D::CMeshMRM *>(sb);
+		NL3D::CMeshMRMSkinned *msa = dynamic_cast<NL3D::CMeshMRMSkinned *>(sa);
+		NL3D::CMeshMRMSkinned *msb = dynamic_cast<NL3D::CMeshMRMSkinned *>(sb);
+		if ((mrma && mrmb) || (msa && msb))
+		{
+			compareMeshBase(dynamic_cast<NL3D::CMeshBase *>(sa), dynamic_cast<NL3D::CMeshBase *>(sb));
+			// Bones + weights
+			std::vector<std::string> bonesA, bonesB;
+			const std::vector<NL3D::CMesh::CSkinWeight> *swa = dumpSkinWeightsOf(sa, bonesA);
+			std::vector<NL3D::CMesh::CSkinWeight> swbStore;
+			const std::vector<NL3D::CMesh::CSkinWeight> *swb = NULL;
+			if (mrmb) { bonesB = mrmb->getMeshGeom().getBonesName(); swbStore = mrmb->getMeshGeom().getSkinWeights(); swb = &swbStore; }
+			else { msb->getMeshGeom().getSkinWeights(swbStore); bonesB = msb->getMeshGeom().getBonesName(); swb = &swbStore; }
+			if (bonesA != bonesB)
+			{
+				printf("  bones: %u vs %u (or order/name mismatch)\n", (uint)bonesA.size(), (uint)bonesB.size());
+				raiseVerdict(2);
+			}
+			if (swa && swb)
+			{
+				if (swa->size() != swb->size())
+				{
+					printf("  skin weights: %u vs %u verts\n", (uint)swa->size(), (uint)swb->size());
+					raiseVerdict(2);
+				}
+				else
+				{
+					uint nDiff = 0;
+					for (uint v = 0; v < swa->size(); ++v)
+					{
+						const NL3D::CMesh::CSkinWeight &A = (*swa)[v], &B = (*swb)[v];
+						for (uint k = 0; k < NL3D_MESH_SKINNING_MAX_MATRIX; ++k)
+						{
+							if (A.MatrixId[k] != B.MatrixId[k]
+								&& (A.Weights[k] != 0.f || B.Weights[k] != 0.f))
+							{ ++nDiff; break; }
+							// CMeshMRMSkinned stores weights quantized uint8/255; tolerate one
+							// quantum plus float noise for the CMeshMRM float path.
+							if (fabsf(A.Weights[k] - B.Weights[k]) > (msa ? 1.5f / 255.f : 2e-4f))
+							{ ++nDiff; break; }
+						}
+					}
+					if (nDiff)
+					{
+						printf("  skin weights: %u verts differ\n", nDiff);
+						raiseVerdict(2);
+					}
+				}
+			}
+			// VB (dequantized for the skinned class; positions there snap to int16 quanta, so
+			// matching inputs give bit-equal dequantized floats).
+			{
+				NL3D::CVertexBuffer va, vbb;
+				if (mrma) va = mrma->getMeshGeom().getVertexBuffer();
+				else msa->getMeshGeom().getVertexBuffer(va);
+				if (mrmb) vbb = mrmb->getMeshGeom().getVertexBuffer();
+				else msb->getMeshGeom().getVertexBuffer(vbb);
+				compareVB(va, vbb);
+			}
+			// Lods / rdrpass structure
+			uint nLodA = mrma ? mrma->getMeshGeom().getNbLod() : msa->getMeshGeom().getNbLod();
+			uint nLodB = mrmb ? mrmb->getMeshGeom().getNbLod() : msb->getMeshGeom().getNbLod();
+			if (nLodA != nLodB)
+			{
+				printf("  lods: %u vs %u\n", nLodA, nLodB);
+				raiseVerdict(2);
+			}
+			else
+			{
+				for (uint l = 0; l < nLodA; ++l)
+				{
+					uint rpA = mrma ? mrma->getMeshGeom().getNbRdrPass(l) : msa->getMeshGeom().getNbRdrPass(l);
+					uint rpB = mrmb ? mrmb->getMeshGeom().getNbRdrPass(l) : msb->getMeshGeom().getNbRdrPass(l);
+					if (rpA != rpB)
+					{
+						printf("  lod %u rdrpass %u vs %u\n", l, rpA, rpB);
+						raiseVerdict(2);
+						continue;
+					}
+					for (uint rp = 0; rp < rpA; ++rp)
+					{
+						uint mA = mrma ? mrma->getMeshGeom().getRdrPassMaterial(l, rp) : msa->getMeshGeom().getRdrPassMaterial(l, rp);
+						uint mB = mrmb ? mrmb->getMeshGeom().getRdrPassMaterial(l, rp) : msb->getMeshGeom().getRdrPassMaterial(l, rp);
+						if (mA != mB)
+						{
+							printf("  lod %u rdrpass %u material %u vs %u\n", l, rp, mA, mB);
+							raiseVerdict(2);
+						}
+						NL3D::CIndexBuffer iaStore, ibStore;
+						if (mrma) iaStore = mrma->getMeshGeom().getRdrPassPrimitiveBlock(l, rp);
+						else msa->getMeshGeom().getRdrPassPrimitiveBlock(l, rp, iaStore);
+						if (mrmb) ibStore = mrmb->getMeshGeom().getRdrPassPrimitiveBlock(l, rp);
+						else msb->getMeshGeom().getRdrPassPrimitiveBlock(l, rp, ibStore);
+						const NL3D::CIndexBuffer &ia = iaStore;
+						const NL3D::CIndexBuffer &ib2 = ibStore;
+						if (ia.getNumIndexes() != ib2.getNumIndexes())
+						{
+							printf("  lod %u rdrpass %u indexes %u vs %u\n", l, rp,
+							       ia.getNumIndexes(), ib2.getNumIndexes());
+							raiseVerdict(2);
+						}
+						else
+						{
+							NL3D::CIndexBufferRead ira, irb;
+							const_cast<NL3D::CIndexBuffer &>(ia).lock(ira);
+							const_cast<NL3D::CIndexBuffer &>(ib2).lock(irb);
+							uint bytesPer = ia.getFormat() == NL3D::CIndexBuffer::Indices16 ? 2 : 4;
+							if (ia.getFormat() != ib2.getFormat()
+								|| memcmp(ira.getPtr(), irb.getPtr(), ia.getNumIndexes() * bytesPer) != 0)
+							{
+								printf("  lod %u rdrpass %u index content differs\n", l, rp);
+								raiseVerdict(2);
+							}
+						}
+					}
+				}
+			}
+			delete sa;
+			delete sb;
+			return;
+		}
+	}
 	NL3D::CMesh *ma = dynamic_cast<NL3D::CMesh *>(sa);
 	NL3D::CMesh *mb = dynamic_cast<NL3D::CMesh *>(sb);
 	if (!ma || !mb)
-		raiseVerdict(2); // only CMesh/CWaterShape/CSegRemanence get the full field walk so far
+		raiseVerdict(2); // CMeshMultiLod and anything else unclassified stays DIFF for now
 	if (ma && mb)
 	{
 		compareVB(ma->getVertexBuffer(), mb->getVertexBuffer());

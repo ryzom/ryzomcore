@@ -152,12 +152,13 @@ IF (Python3_Interpreter_FOUND)
 	SET_TESTS_PROPERTIES(pipeline_max_zone_corpus_vs2008 PROPERTIES SKIP_RETURN_CODE 77)
 
 	# Budgets re-baselined 2026-07-10 (shape-coverage session): the skinned-physique landing
-	# moved ~650 files into the DIFF bucket without bumping the old 700/400 budget, so the gate
-	# had been failing silently since. Measured at re-baseline: 94 ident + 1073 floateq + 916
-	# lightmap-verified = 2083 good; 1038 differ + 349 lightmap-diff = 1387 structural diffs.
-	# Tighten as diff classes close.
+	# had moved ~650 files into the DIFF bucket without bumping the old 700/400 budget, so the
+	# gate had been failing silently since. Measured at end of session (after the spline-cap /
+	# UVW-planar / skinned-world-space / Physique-link / MRM-field-walk landings): 122 ident +
+	# 1209 floateq + 918 lightmap-verified = 2249 good; 875 differ + 347 lightmap-diff = 1222
+	# structural diffs. Tighten as diff classes close.
 	ADD_TEST(NAME pipeline_max_shape_corpus
-		COMMAND ${Python3_EXECUTABLE} shape_corpus.py --all --gate-t3 --min-identical 2000 --max-diff 1400
+		COMMAND ${Python3_EXECUTABLE} shape_corpus.py --all --gate-t3 --min-identical 2200 --max-diff 1250
 			--bin $<TARGET_FILE_DIR:pipeline_max_export_shape>
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 	SET_TESTS_PROPERTIES(pipeline_max_shape_corpus PROPERTIES SKIP_RETURN_CODE 77)
@@ -167,7 +168,7 @@ IF (Python3_Interpreter_FOUND)
 	# tier (2e-6/32-ULP, normals 1e-4) must hold under the Max-2010-matching compiler/float
 	# model too. Self-skips (exit 77) without that build tree.
 	ADD_TEST(NAME pipeline_max_shape_corpus_vs2008
-		COMMAND ${Python3_EXECUTABLE} shape_corpus.py --all --gate-t3 --min-identical 2000 --max-diff 1400
+		COMMAND ${Python3_EXECUTABLE} shape_corpus.py --all --gate-t3 --min-identical 2200 --max-diff 1250
 			--bin $ENV{HOME}/build_vs2008_wine_pipeline/winebin
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 	SET_TESTS_PROPERTIES(pipeline_max_shape_corpus_vs2008 PROPERTIES SKIP_RETURN_CODE 77)
