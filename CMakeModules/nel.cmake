@@ -67,6 +67,43 @@ MACRO(NL_DEFAULT_PROPS name label)
     ENDIF()
   ENDIF()
 
+  # VS2008-era toolchains that cannot run CMake's mt.exe manifest embedding (the VS2008/Wine
+  # trees — mt.exe page-faults under Wine outright) would otherwise ship DLLs/EXEs WITHOUT
+  # their VC90 SxS manifest; on real Windows the CRT then never resolves through WinSxS and
+  # LoadLibrary fails with error 126 (hit by the 3ds Max plugin set, PMD §10z-seize). Embed the
+  # dependent-assembly manifest through the resource compiler instead (RT_MANIFEST = type 24;
+  # id 1 for EXEs, id 2 = ISOLATIONAWARE for DLLs) — rc.exe works fine under Wine. Directories
+  # that compile with MFC (_AFXDLL via ADD_DEFINITIONS, e.g. object_viewer) get the CRT+MFC
+  # manifest. The manifests reference the RTM version (9.0.21022.8); publisher policy upgrades
+  # to whatever VC90 SP1 redist the target machine carries — the VS2008 default convention.
+  # Gate: NL_EMBED_SXS_MANIFEST_RC is set by the toolchain that needs it (the Wine one sets it
+  # in vs2008-toolchain.cmake); real-Windows builds keep CMake's own mt-based embedding and
+  # must NOT also get a resource-compiled manifest (mt would collide with the existing
+  # RT_MANIFEST resource).
+  IF(NL_EMBED_SXS_MANIFEST_RC AND MSVC AND MSVC_VERSION LESS 1600
+     AND (${type} STREQUAL SHARED_LIBRARY OR ${type} STREQUAL MODULE_LIBRARY OR ${type} STREQUAL EXECUTABLE))
+    IF(${type} STREQUAL EXECUTABLE)
+      SET(_NL_MANIFEST_ID 1)
+    ELSE()
+      SET(_NL_MANIFEST_ID 2)
+    ENDIF()
+    # MFC detection: the _AFXDLL directory definition when it is already set at this point, or
+    # the explicit NL_SXS_MANIFEST_MFC target property for directories that ADD_DEFINITIONS
+    # after NL_DEFAULT_PROPS (object_viewer does).
+    GET_DIRECTORY_PROPERTY(_NL_DIR_DEFS COMPILE_DEFINITIONS)
+    GET_TARGET_PROPERTY(_NL_TGT_MFC ${name} NL_SXS_MANIFEST_MFC)
+    IF("${_NL_DIR_DEFS}" MATCHES "_AFXDLL" OR _NL_TGT_MFC)
+      SET(_NL_MANIFEST_SRC ${CMAKE_SOURCE_DIR}/CMakeModules/manifests/vc90_crt_mfc.manifest)
+    ELSE()
+      SET(_NL_MANIFEST_SRC ${CMAKE_SOURCE_DIR}/CMakeModules/manifests/vc90_crt.manifest)
+    ENDIF()
+    # The manifest is copied next to the generated .rc and referenced by bare filename —
+    # rc.exe resolves it relative to the .rc file's own directory, path-convention-free.
+    CONFIGURE_FILE(${_NL_MANIFEST_SRC} ${CMAKE_CURRENT_BINARY_DIR}/${name}_sxs.manifest COPYONLY)
+    FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${name}_sxs.rc "${_NL_MANIFEST_ID} 24 \"${name}_sxs.manifest\"\n")
+    TARGET_SOURCES(${name} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/${name}_sxs.rc)
+  ENDIF()
+
   IF(${type} STREQUAL EXECUTABLE AND WIN32 AND NOT MINGW)
     # check if using a GUI
     GET_TARGET_PROPERTY(_VALUE ${name} WIN32_EXECUTABLE)
