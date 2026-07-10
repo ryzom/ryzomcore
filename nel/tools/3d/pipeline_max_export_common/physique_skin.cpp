@@ -231,8 +231,15 @@ bool decodePhysiqueWeights(CSceneClass *mod,
 				++unresolvedVals[boneRef];
 				continue;
 			}
-			// Skip non-positive weights (Physique stores rigidity factors that can be 0).
-			if (weight <= 0.f) continue;
+			// A SINGLE-link record is a rigid vertex: it deforms 100% by its one bone and the
+			// stored float is Physique's rigidity/blend factor, not a skinning weight — the
+			// c03/monster family stores 0.0 there (620+ verts per mesh silently fell to the
+			// root fallback, the tr_mo_c03_boss "12 vs 55 bones" class); the armor family
+			// stores 1.0 (unaffected). Part M §M.2 documents the field's non-weight
+			// semantics; forcing 1.0 on one-link records is the ConvertToRigid read.
+			// Multi-link records keep the stored blend values, dropping non-positive entries.
+			if (numBones == 1) weight = 1.f;
+			else if (weight <= 0.f) continue;
 			SBoneWeight bw;
 			bw.Bone = bone;
 			bw.Weight = weight;
@@ -415,6 +422,8 @@ bool applyPhysiqueSkinning(NL3D::CMesh::CMeshBuild &buildMesh,
 	{
 		// Collect weight → boneId, keeping only bones that resolve in the skeleton map.
 		// multimap sorts ascending by weight so we can drop the lowest when over the max.
+		// (Rigid one-link records already arrive with weight forced to 1.0 by the decode —
+		// see decodePhysiqueWeights' single-link rule.)
 		std::multimap<float, sint32> weightMap;
 		for (uint b = 0; b < vertWeights[v].size(); ++b)
 		{
