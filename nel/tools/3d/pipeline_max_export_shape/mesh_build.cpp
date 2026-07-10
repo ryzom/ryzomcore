@@ -294,7 +294,7 @@ void buildBaseMeshInterface(CMeshBase::CMeshBaseBuild &buildMesh, SMaxMeshBaseBu
 void buildMeshInterface(const SEvalMesh &mesh, CMesh::CMeshBuild &buildMesh,
                         const CMeshBase::CMeshBaseBuild &buildBaseMesh,
                         const SMaxMeshBaseBuild &maxBaseBuild,
-                        INode &node, SNodeTMCache &tmCache)
+                        INode &node, SNodeTMCache &tmCache, bool skinned)
 {
 	CNodeImpl *n = dynamic_cast<CNodeImpl *>(&node);
 
@@ -304,8 +304,12 @@ void buildMeshInterface(const SEvalMesh &mesh, CMesh::CMeshBuild &buildMesh,
 
 	buildMesh.VertexFlags = CVertexBuffer::PositionFlag | CVertexBuffer::NormalFlag;
 
-	// Export matrix: objectToLocal = objectTM * Inverse(nodeTM) in Max float math;
-	// objectTM = offsetTM * nodeTM.
+	// Export matrix (reference export_mesh.cpp:671): a SKINNED mesh exports its vertices in
+	// WORLD space (ToExportSpace = objectTM — skinning overrides the node transform at
+	// runtime, so the bind-pose world positions are what the skin weights deform); a
+	// non-skinned mesh exports in the node-offset local space, objectToLocal =
+	// objectTM * Inverse(nodeTM). DefaultPos/Rot/Scale stay the node's local transform in
+	// both cases (buildBaseMeshInterface is unconditional in the reference too).
 	NLMISC::CMatrix toExportSpace;
 	NLMISC::CMatrix fromExportSpace;
 	{
@@ -316,8 +320,15 @@ void buildMeshInterface(const SEvalMesh &mesh, CMesh::CMeshBuild &buildMesh,
 		readObjectOffset(n, opos, orot, oscale);
 		Matrix3M offsetTM = composePRS(opos, orot, oscale);
 		Matrix3M objectTM = offsetTM * nodeTM;
-		Matrix3M objectToLocal = objectTM * inverseM3(nodeTM);
-		convertMatrix(toExportSpace, objectToLocal);
+		if (skinned)
+		{
+			convertMatrix(toExportSpace, objectTM);
+		}
+		else
+		{
+			Matrix3M objectToLocal = objectTM * inverseM3(nodeTM);
+			convertMatrix(toExportSpace, objectToLocal);
+		}
 		fromExportSpace = toExportSpace;
 		fromExportSpace.invert();
 	}

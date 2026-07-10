@@ -47,12 +47,14 @@ void buildBaseMeshInterface(NL3D::CMeshBase::CMeshBaseBuild &buildMesh, MATBUILD
                             INode &node, SNodeTMCache &tmCache, const MAXMATH::Matrix3M &nodeBasis,
                             bool exportLighting);
 
-// buildMeshInterface replication over the evaluated mesh (non-skinned path; vertices in the
-// node-offset local space via objectToLocal).
+// buildMeshInterface replication over the evaluated mesh. Vertices land in the node-offset
+// local space (objectToLocal) for plain meshes, or in WORLD space (objectTM) when `skinned` —
+// the reference exports skinned meshes in world space (export_mesh.cpp:671); the runtime
+// deforms them by the skin weights, not the node transform.
 void buildMeshInterface(const MESHEVAL::SEvalMesh &mesh, NL3D::CMesh::CMeshBuild &buildMesh,
                         const NL3D::CMeshBase::CMeshBaseBuild &buildBaseMesh,
                         const MATBUILD::SMaxMeshBaseBuild &maxBaseBuild,
-                        INode &node, SNodeTMCache &tmCache);
+                        INode &node, SNodeTMCache &tmCache, bool skinned = false);
 
 // buildMRMParameters replication (appdata-driven).
 void buildMRMParameters(CSceneClass *node, NL3D::CMRMParameters &params);

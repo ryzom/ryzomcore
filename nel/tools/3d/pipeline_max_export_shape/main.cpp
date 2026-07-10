@@ -235,7 +235,8 @@ static void dumpPhysiquePayload(const CStorageContainer *app)
 static bool evalAndBuildMesh(INode &node, SNodeTMCache &tmCache,
                              const NL3D::CMeshBase::CMeshBaseBuild &buildBaseMesh,
                              const SMaxMeshBaseBuild &maxBaseBuild,
-                             NL3D::CMesh::CMeshBuild &buildMesh, SExportStats &stats)
+                             NL3D::CMesh::CMeshBuild &buildMesh, SExportStats &stats,
+                             bool skinned = false)
 {
 	std::string name = nodeName(node);
 	SEvalMesh mesh;
@@ -245,7 +246,7 @@ static bool evalAndBuildMesh(INode &node, SNodeTMCache &tmCache,
 		stats.skip("mesh-eval");
 		return false;
 	}
-	buildMeshInterface(mesh, buildMesh, buildBaseMesh, maxBaseBuild, node, tmCache);
+	buildMeshInterface(mesh, buildMesh, buildBaseMesh, maxBaseBuild, node, tmCache, skinned);
 	return true;
 }
 
@@ -486,7 +487,8 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 		// LOD 0 = the parent node itself
 		{
 			NL3D::CMesh::CMeshBuild buildMesh;
-			if (evalAndBuildMesh(node, tmCache, buildBaseMesh, maxBaseBuild, buildMesh, stats))
+			if (evalAndBuildMesh(node, tmCache, buildBaseMesh, maxBaseBuild, buildMesh, stats,
+			                     hasPhysique))
 			{
 				if (hasPhysique && !tryApplyPhysique(node, buildMesh, mods, modApps, ssc, stats))
 					return NULL;
@@ -514,20 +516,20 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 			}
 			INode *slave = it->second;
 			CNodeImpl *sn = dynamic_cast<CNodeImpl *>(slave);
+			// Slave may carry its own Physique (rare); detect BEFORE the mesh build so the
+			// vertex export space (world for skinned) is decided up front like the parent's.
+			std::vector<CSceneClass *> sMods;
+			std::vector<CStorageContainer *> sApps;
+			baseObjectOf(*slave, &sMods, &sApps);
+			bool slavePhys = false;
+			for (uint mi = 0; mi < sMods.size(); ++mi)
+				if (PHYSIQUESKIN::isPhysiqueModifier(sMods[mi])) { slavePhys = true; break; }
 			NL3D::CMesh::CMeshBuild buildMesh;
-			if (!evalAndBuildMesh(*slave, tmCache, buildBaseMesh, maxBaseBuild, buildMesh, stats))
+			if (!evalAndBuildMesh(*slave, tmCache, buildBaseMesh, maxBaseBuild, buildMesh, stats,
+			                      slavePhys))
 				continue;
-			// Slave may carry its own Physique (rare); re-detect.
-			{
-				std::vector<CSceneClass *> sMods;
-				std::vector<CStorageContainer *> sApps;
-				baseObjectOf(*slave, &sMods, &sApps);
-				bool slavePhys = false;
-				for (uint mi = 0; mi < sMods.size(); ++mi)
-					if (PHYSIQUESKIN::isPhysiqueModifier(sMods[mi])) { slavePhys = true; break; }
-				if (slavePhys && !tryApplyPhysique(*slave, buildMesh, sMods, sApps, ssc, stats))
-					continue;
-			}
+			if (slavePhys && !tryApplyPhysique(*slave, buildMesh, sMods, sApps, ssc, stats))
+				continue;
 			NL3D::CMeshMultiLod::CMeshMultiLodBuild::CBuildSlot slot;
 			slot.MeshGeom = buildMeshGeomFor(*slave, buildMesh, numMaterials);
 			slot.DistMax = getScriptAppDataFloat(sn, NEL3D_APPDATA_LOD_DIST_MAX, 1000.f);
@@ -558,7 +560,8 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 	else
 	{
 		NL3D::CMesh::CMeshBuild buildMesh;
-		if (!evalAndBuildMesh(node, tmCache, buildBaseMesh, maxBaseBuild, buildMesh, stats))
+		if (!evalAndBuildMesh(node, tmCache, buildBaseMesh, maxBaseBuild, buildMesh, stats,
+		                      hasPhysique))
 			return NULL;
 		if (hasPhysique && !tryApplyPhysique(node, buildMesh, mods, modApps, ssc, stats))
 			return NULL;

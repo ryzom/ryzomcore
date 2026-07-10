@@ -94,27 +94,39 @@ static CStorageRaw *findChildRaw(CStorageContainer *parent, uint16 id)
 }
 
 // Resolve boneRef → INode via the modifier's reference table.
-// Primary/rigid links store ~index (one's-complement); deformable cross-links store the
-// POSITIVE index + 1 (1-based). Pinned on fy_hof_armor01_pantabottes: the cross-link records
-// pair (−83 → idx 82 'R Thigh') with (+84 → idx 83 'R Calf') on knee vertices and
-// (−1 Pelvis, −83 R Thigh, +77 → idx 76 'L Thigh') on hip vertices — anatomically exact —
-// and the 1-based read removes the spurious 'R Foot' from the used-bone set, matching the
-// reference shape's 8-bone list (a raw 0-based read had produced 9 bones incl. R Foot).
-// NULL slots in the ref table are counted in the index (Part M §M.3 — Bip01 Head at index 6
-// because index 5 is NULL).
+// The stored value encodes a LINK index k: negative form is one's-complement (~stored = k,
+// the rigid/primary encoding), positive form is k + 1 (the deformable cross-link encoding).
+// Link k is the SEGMENT ENDING at the bone in reference slot k+1, and the vertex deforms by
+// the segment's START bone — which is the INode PARENT of ref[k+1], NOT ref[k] itself.
+// The two coincide for mid-chain slots (parent(ref[k+1]) == ref[k]), which is why a plain
+// ref[k] read looked anatomically right everywhere except chain boundaries; at boundaries
+// the parent rule is what matches the reference exporter (empirically solved 2026-07-10 by
+// weight-multiset matching over every position-matched vertex of the five fy_hof_armor01
+// nodes against their reference CMeshMRMSkinned shapes — see the design doc):
+//   ref[k+1] = 'R Hand'        → 'R Forearm'  (the Hand slot's link starts at the forearm)
+//   ref[k+1] = 'R Finger0'     → 'R Hand'     (k+1 right after a NULL chain-attach slot)
+//   ref[k+1] = 'R Toe0' (nub)  → 'R Toe0'     (name-shadowed nub; parent = the real toe)
+//   ref[k+1] = 'Bip01 Spine'   → 'Bip01 Pelvis'
+// The NULL slots between chains are never addressed as k+1 by valid links; a NULL ref[k+1]
+// (or out-of-range k+1) is unresolved and falls through to the caller's root fallback (the
+// ConvertToRigid root-promotion class).
 static INode *resolveBoneRef(CReferenceMaker *modRm, sint32 boneRef)
 {
 	if (!modRm) return NULL;
 	uint n = modRm->nbReferences();
-	sint32 idx = -1;
+	sint32 k = -1;
 	if (boneRef < 0)
-		idx = ~boneRef; // one's complement (rigid link)
+		k = ~boneRef; // one's complement (rigid link)
 	else if (boneRef > 0)
-		idx = boneRef - 1; // 1-based (deformable cross-link)
+		k = boneRef - 1; // 1-based (deformable cross-link)
 	else
 		return NULL;
-	if (idx < 0 || (uint)idx >= n) return NULL;
-	return dynamic_cast<INode *>(modRm->getReference((uint)idx));
+	if (k < 0 || (uint)(k + 1) >= n) return NULL;
+	INode *end = dynamic_cast<INode *>(modRm->getReference((uint)(k + 1)));
+	if (!end) return NULL;
+	CNodeImpl *endImpl = dynamic_cast<CNodeImpl *>(end);
+	if (!endImpl) return NULL;
+	return endImpl->parent();
 }
 
 bool decodePhysiqueWeights(CSceneClass *mod,
@@ -180,6 +192,7 @@ bool decodePhysiqueWeights(CSceneClass *mod,
 	outVertWeights.resize(vertRecs.size());
 	uint unresolvedBones = 0;
 	uint totalBones = 0;
+	std::map<sint32, uint> unresolvedVals;
 	for (uint v = 0; v < vertRecs.size(); ++v)
 	{
 		CStorageRaw *rec = findChildRaw(vertRecs[v], 0x0989);
@@ -215,6 +228,7 @@ bool decodePhysiqueWeights(CSceneClass *mod,
 			if (!bone)
 			{
 				++unresolvedBones;
+				++unresolvedVals[boneRef];
 				continue;
 			}
 			// Skip non-positive weights (Physique stores rigidity factors that can be 0).
@@ -227,8 +241,12 @@ bool decodePhysiqueWeights(CSceneClass *mod,
 	}
 	if (getenv("PMB_SKIN_STATS"))
 	{
-		fprintf(stderr, "PMB_SKIN_STATS verts=%u bone-entries=%u unresolved=%u\n",
+		fprintf(stderr, "PMB_SKIN_STATS verts=%u bone-entries=%u unresolved=%u",
 		        (uint)vertRecs.size(), totalBones, unresolvedBones);
+		for (std::map<sint32, uint>::iterator it = unresolvedVals.begin();
+		     it != unresolvedVals.end(); ++it)
+			fprintf(stderr, " [%d]x%u", (int)it->first, it->second);
+		fprintf(stderr, "\n");
 	}
 	return true;
 }
@@ -456,6 +474,21 @@ bool applyPhysiqueSkinning(NL3D::CMesh::CMeshBuild &buildMesh,
 		fprintf(stderr, "PMB_SKIN_STATS node skinned: verts=%u bones=%u noWeight=%u rootFallback=%u root='%s'\n",
 		        (uint)vertWeights.size(), (uint)bonesNames.size(), vertsNoWeight, vertsRootFallback,
 		        bonesNames.empty() ? "?" : bonesNames[0].c_str());
+	}
+	if (getenv("PMB_SKIN_DUMP_WEIGHTS"))
+	{
+		// Per INPUT vertex (pre-MRM): position + final normalized weights by bone name — the
+		// position-matched oracle against the reference shape's finest-LOD VB.
+		for (uint v = 0; v < vertWeights.size() && v < buildMesh.Vertices.size(); ++v)
+		{
+			const NLMISC::CVector &p = buildMesh.Vertices[v];
+			const NL3D::CMesh::CSkinWeight &sw = buildMesh.SkinWeights[v];
+			fprintf(stderr, "SKINW v%u pos(%.9g %.9g %.9g)", v, p.x, p.y, p.z);
+			for (uint i = 0; i < NL3D_MESH_SKINNING_MAX_MATRIX; ++i)
+				if (sw.Weights[i] > 0.f && sw.MatrixId[i] < bonesNames.size())
+					fprintf(stderr, " '%s'=%.6g", bonesNames[sw.MatrixId[i]].c_str(), sw.Weights[i]);
+			fprintf(stderr, "\n");
+		}
 	}
 	(void)node; // reserved for future Skin-modifier path / diagnostics
 	return true;
