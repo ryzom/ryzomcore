@@ -42,6 +42,7 @@
 #include <nel/misc/types_nl.h>
 #include <nel/misc/vector.h>
 
+#include <map>
 #include <utility>
 #include <vector>
 
@@ -107,6 +108,17 @@ struct SFaceVertRemap
 	inline bool applyCorner(int c) const { return (ApplyMask & (1u << c)) != 0; }
 };
 
+/// One 0x0130 created-vertex record. `SrcTag == 0xFFFFFFFF` → a fresh vertex, `Pos` is the
+/// absolute object-space position. `SrcTag != -1` → a CLONE of input vertex `SrcTag`, `Pos` is
+/// the OFFSET from the source vertex's (post-move) position — the modern merge of legacy
+/// TOPO_CVERTS_CHUNK clone-sources + the clone's own move (§ L.5/§ L.6; chamfer/extrude record
+/// their geometry this way). Decoded off the primes_racines sky domes (design doc §10z-quinze).
+struct SCreatedVert
+{
+	uint32 SrcTag;
+	NLMISC::CVector Pos;
+};
+
 /// The decoded modifier-app record for one Edit Mesh modifier slot.
 ///
 /// `CreatedFacesA` (0x0208, 24-byte with srcTag) is the base-topology created-faces record
@@ -128,7 +140,7 @@ struct SFaceVertRemap
 struct SEdits
 {
 	std::vector<std::pair<uint32, NLMISC::CVector> > Moves;      ///< 0x0140 vertex-delta records
-	std::vector<NLMISC::CVector> CreatedVerts;                    ///< 0x0130 created verts (object space)
+	std::vector<SCreatedVert> CreatedVerts;                       ///< 0x0130 created verts (absolute or clone+offset)
 	std::vector<SFace> CreatedFacesA;                             ///< 0x0208 base-topo created faces
 	std::vector<SFaceVertRemap> FaceRemap;                        ///< 0x0210 face-vertex remap
 	std::vector<SFaceAttribChange> FaceAttribs;                   ///< 0x0220 per-face attrib changes
@@ -168,6 +180,14 @@ template <typename Face, typename FaceFactory>
 void applyEdits(const SEdits &e, std::vector<NLMISC::CVector> &verts, std::vector<Face> &faces,
                 FaceFactory faceFactory, int facesMode)
 {
+	// Clone-source snapshot — a clone record's offset is relative to the source vertex's
+	// PRE-move position (the legacy effect order emits clones at step 3 and moves at step 13,
+	// §L.6; corpus-proven: zo_bt_hall_reunion_vitrine's 25 clones-of-moved-sources land exactly
+	// one move-delta off when resolved post-move). Snapshot just the needed sources.
+	std::map<uint32, NLMISC::CVector> cloneSrc;
+	for (uint i = 0; i < e.CreatedVerts.size(); ++i)
+		if (e.CreatedVerts[i].SrcTag != 0xFFFFFFFF && e.CreatedVerts[i].SrcTag < verts.size())
+			cloneSrc[e.CreatedVerts[i].SrcTag] = verts[e.CreatedVerts[i].SrcTag];
 	// Moves — position deltas on original verts, indices in input space.
 	for (uint i = 0; i < e.Moves.size(); ++i)
 		if (e.Moves[i].first < verts.size())
@@ -197,8 +217,18 @@ void applyEdits(const SEdits &e, std::vector<NLMISC::CVector> &verts, std::vecto
 		faces.swap(kept);
 	}
 	// Created verts appended to input verts — creates the union space that created-face V[3]
-	// references.
-	verts.insert(verts.end(), e.CreatedVerts.begin(), e.CreatedVerts.end());
+	// references. A clone record (SrcTag != -1) resolves against the source vertex's PRE-move
+	// position (the snapshot above); a fresh record (SrcTag == -1) is an absolute position.
+	verts.reserve(verts.size() + e.CreatedVerts.size());
+	for (uint i = 0; i < e.CreatedVerts.size(); ++i)
+	{
+		const SCreatedVert &cv = e.CreatedVerts[i];
+		std::map<uint32, NLMISC::CVector>::const_iterator src = cloneSrc.find(cv.SrcTag);
+		if (src != cloneSrc.end())
+			verts.push_back(src->second + cv.Pos);
+		else
+			verts.push_back(cv.Pos);
+	}
 	// Created faces appended — V[3] is stored in the union space, so vOffset arg = 0.
 	if (facesMode >= 1)
 	{

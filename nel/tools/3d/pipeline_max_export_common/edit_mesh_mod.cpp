@@ -89,8 +89,13 @@ bool readModApp(CStorageContainer *c2500, SEdits &out)
 				else if (kt->first == 0x0130)
 				{
 					// Created verts: `uint32 count + (uint32 srcTag, Point3 pos)[count]`, 16-byte
-					// stride. srcTag = Max's cloned-from-vert authoring history; ignored — the
-					// geometric position is what evaluation needs. Design-doc §10w.
+					// stride. srcTag == 0xFFFFFFFF → fresh vertex, pos is the absolute object-space
+					// position; srcTag != -1 → CLONE of input vertex srcTag, pos is the OFFSET from
+					// the source vertex (the modern merge of legacy TOPO_CVERTS_CHUNK clone-sources
+					// + TOPO_NVERTS_CHUNK absolute creates + the clone's move, §L.5/§L.6 — how
+					// chamfer/extrude records its geometry). Decoded off the primes_racines sky
+					// domes (§10z-quinze): reading clone offsets as absolute positions was the
+					// "created-vertex positions offset" class of §10x/§10z-ter.
 					CStorageRaw *raw = dynamic_cast<CStorageRaw *>(kt->second);
 					if (!raw || raw->Value.size() < 4) continue;
 					uint32 n;
@@ -99,9 +104,12 @@ bool readModApp(CStorageContainer *c2500, SEdits &out)
 					out.CreatedVerts.reserve(out.CreatedVerts.size() + n);
 					for (uint32 i = 0; i < n; ++i)
 					{
+						SCreatedVert cv;
+						memcpy(&cv.SrcTag, nlVectorData(raw->Value) + 4 + (size_t)i * 16, 4);
 						float v[3];
 						memcpy(v, nlVectorData(raw->Value) + 4 + (size_t)i * 16 + 4, 12);
-						out.CreatedVerts.push_back(NLMISC::CVector(v[0], v[1], v[2]));
+						cv.Pos = NLMISC::CVector(v[0], v[1], v[2]);
+						out.CreatedVerts.push_back(cv);
 					}
 				}
 				else if (kt->first == 0x0208)
