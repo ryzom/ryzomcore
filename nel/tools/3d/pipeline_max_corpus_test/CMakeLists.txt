@@ -158,7 +158,7 @@ IF (Python3_Interpreter_FOUND)
 	# 1209 floateq + 918 lightmap-verified = 2249 good; 875 differ + 347 lightmap-diff = 1222
 	# structural diffs. Tighten as diff classes close.
 	ADD_TEST(NAME pipeline_max_shape_corpus
-		COMMAND ${Python3_EXECUTABLE} shape_corpus.py --all --gate-t3 --min-identical 2450 --max-diff 800
+		COMMAND ${Python3_EXECUTABLE} shape_corpus.py --all --gate-t3 --min-identical 2550 --max-diff 750
 			--bin $<TARGET_FILE_DIR:pipeline_max_export_shape>
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 	SET_TESTS_PROPERTIES(pipeline_max_shape_corpus PROPERTIES SKIP_RETURN_CODE 77)
@@ -168,7 +168,7 @@ IF (Python3_Interpreter_FOUND)
 	# tier (2e-6/32-ULP, normals 1e-4) must hold under the Max-2010-matching compiler/float
 	# model too. Self-skips (exit 77) without that build tree.
 	ADD_TEST(NAME pipeline_max_shape_corpus_vs2008
-		COMMAND ${Python3_EXECUTABLE} shape_corpus.py --all --gate-t3 --min-identical 2450 --max-diff 800
+		COMMAND ${Python3_EXECUTABLE} shape_corpus.py --all --gate-t3 --min-identical 2550 --max-diff 750
 			--bin $ENV{HOME}/build_vs2008_wine_pipeline/winebin
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 	SET_TESTS_PROPERTIES(pipeline_max_shape_corpus_vs2008 PROPERTIES SKIP_RETURN_CODE 77)
@@ -205,15 +205,30 @@ IF (Python3_Interpreter_FOUND)
 
 	# clod_corpus.py: T1/T2 over ClodSourceDirectories (lod_fauna + lod_characters) + T3
 	# field-compare against ~/pipeline_export/common/{fauna,characters}/clod_export.
-	# Last surface format (§10z-clod, 2026-07-10): 105/105 refs produced, 0 export failures;
-	# 84 field-exact (FLOATEQ), 21 residual (ConvertToRigid→Bip01 bone-set, MRM VB-dedup,
-	# 1 UV, few normals). Deep OSM peel fix in scene_lib closed the cococlaw pair.
+	# Last surface format (§10z-clod, 2026-07-10): 105/105 refs produced, 0 export failures.
+	# Coverage-audit round (same day): the Physique link-tree root / NULL-end / COM-skip decode
+	# + the float-Point3 normal-delta accumulation closed the bone-set and doubled-face-normal
+	# classes — 99 field-exact (FLOATEQ, 2 of them mapext-UV-masked), 6 residual (the RVertex
+	# merge-order dedup family: kitinega x2 / warlord / vampignon x2, + 1 chaotic-sign
+	# cancellation vert on sagass_selle — all codegen-stable under VS2008/x87).
 	ADD_TEST(NAME pipeline_max_clod_corpus
-		COMMAND ${Python3_EXECUTABLE} clod_corpus.py --all --gate-t3 --min-floateq 84 --max-diff 21
+		COMMAND ${Python3_EXECUTABLE} clod_corpus.py --all --gate-t3 --min-floateq 99 --max-diff 6
 			--max-not-produced 0
 			--bin $<TARGET_FILE_DIR:pipeline_max_export_clod>
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 	SET_TESTS_PROPERTIES(pipeline_max_clod_corpus PROPERTIES SKIP_RETURN_CODE 77)
+
+	# Same corpus through the VS2008/Wine x87 reference-codegen build, same rationale as
+	# pipeline_max_skel_corpus_vs2008: confirms T1/T2 byte-identity and the T3 floor hold under
+	# the Max-2010-matching compiler/float model (measured identical buckets to x64 on
+	# 2026-07-10: 99 field-exact + 6 residual, same file list — the residual classes are model
+	# gaps, not codegen). Self-skips (exit 77) without that build tree.
+	ADD_TEST(NAME pipeline_max_clod_corpus_vs2008
+		COMMAND ${Python3_EXECUTABLE} clod_corpus.py --all --gate-t3 --min-floateq 99 --max-diff 6
+			--max-not-produced 0
+			--bin $ENV{HOME}/build_vs2008_wine_pipeline/winebin
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+	SET_TESTS_PROPERTIES(pipeline_max_clod_corpus_vs2008 PROPERTIES SKIP_RETURN_CODE 77)
 
 	IF (TARGET unit_test)
 		ADD_DEPENDENCIES(unit_test pipeline_max_corpus_test pipeline_max_export_skel pipeline_max_export_anim pipeline_max_export_swt pipeline_max_export_ig pipeline_max_export_zone pipeline_max_export_shape pipeline_max_export_pacs_prim pipeline_max_export_cmb pipeline_max_export_veget pipeline_max_export_clod)
