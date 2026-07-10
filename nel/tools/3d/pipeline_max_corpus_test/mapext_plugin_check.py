@@ -86,11 +86,15 @@ def mapext_caches(path):
 
 
 def parse_manifest(path):
-    """Yield (file, node, pluginstate, atpos) where atpos = (ch, nv, uvw floats, nf, corners)."""
+    """Yield (file, node, pluginstate, atpos) where atpos = {channel: (nv, uvw floats, nf,
+    corners)}. dumpChannel emits EVERY supported map channel (1 and 2) — an earlier revision
+    kept only the last CHAN record, so any node whose mesh also carries a second channel
+    compared the wrong (pass-through) channel against the cache and spuriously failed."""
     cur_file = None
     cur_node = None
     state = None
-    at = None
+    at = None      # dict channel -> [nv, uvw, nf, corners]
+    cur = None     # channel being filled
     results = []
 
     def push():
@@ -103,21 +107,26 @@ def parse_manifest(path):
             continue
         if t[0] == 'FILE':
             push()
-            cur_file, cur_node, state, at = t[1], None, None, None
+            cur_file, cur_node, state, at, cur = t[1], None, None, None, None
         elif t[0] == 'NODE':
             push()
-            cur_node, state, at = t[1], None, None
+            cur_node, state, at, cur = t[1], None, None, None
             if len(t) > 2 and t[2] == 'MISSING':
                 state = 'node-missing'
         elif t[0] == 'PLUGINSTATE':
             state = ' '.join(t[1:])
         elif t[0] == 'ATPOS' and t[1] == 'CHAN':
-            at = (int(t[2]), int(t[4]), [], int(t[6]), [])
-        elif t[0] == 'ATPOS' and t[1] == 'MV' and at is not None:
-            at[2].extend([float(t[3]), float(t[4]), float(t[5])])
-        elif t[0] == 'ATPOS' and t[1] == 'MF' and at is not None:
+            if at is None:
+                at = {}
+            cur = int(t[2])
+            at[cur] = (int(t[4]), [], int(t[6]), [])
+        elif t[0] == 'ATPOS' and t[1] == 'MV' and at is not None and cur is not None:
+            at[cur][1].extend([float(t[3]), float(t[4]), float(t[5])])
+        elif t[0] == 'ATPOS' and t[1] == 'MF' and at is not None and cur is not None:
             # MAXScript map-face indices are 1-based; the cache is 0-based.
-            at[4].extend([int(t[3]) - 1, int(t[4]) - 1, int(t[5]) - 1])
+            at[cur][3].extend([int(t[3]) - 1, int(t[4]) - 1, int(t[5]) - 1])
+        elif t[0] == 'FULL':
+            cur = None
     push()
     return results
 
@@ -138,21 +147,21 @@ def main():
             print('SKIP %s (%s)' % (tag, state))
             skip += 1
             continue
-        if at is None:
+        if not at:
             print('FAIL %s: plugin resolved but produced no map channel' % tag)
             fail += 1
             continue
         path = os.path.join(args.graphics, relfile.replace('\\', '/'))
         if path not in cache_cache:
             cache_cache[path] = mapext_caches(path)
-        ch, nv, uvw, nf, fcs = at
         matched = False
-        why = 'no cache with nFaces=%d nVerts=%d' % (nf, nv)
+        why = 'no cache matches any dumped channel (%s)' % ', '.join(
+            'ch%d %dv/%df' % (c, v[0], v[2]) for c, v in sorted(at.items()))
         for cch, cnv, cuvw, cnf, cfcs in cache_cache[path]:
-            if cnf != nf or cnv != nv:
+            if cch not in at:
                 continue
-            if cch != ch:
-                why = 'size-matched cache has channel %d vs manifest %d' % (cch, ch)
+            nv, uvw, nf, fcs = at[cch]
+            if cnf != nf or cnv != nv:
                 continue
             if cfcs != fcs:
                 why = 'size-matched cache corner indices differ'
