@@ -1149,21 +1149,40 @@ static bool sampleBipedSubtree(INode &root, CSceneClassContainer *ssc, SBipedSam
 			// A LINKED biped COM (nested under another node — the kitin family's Bip02 under
 			// Bip01 Spine, the mektoub rider's Bip01male under the saddle) rides its parent
 			// RIGIDLY in Character Studio: the reference's exported local TM is CONSTANT per
-			// file, and its value equals the FIGURE-mode attach (position corpus-exact to
-			// ~2e-4 on every kitin anim except the stun trilogy, whose figure was re-posed
-			// after the reference export — reference-era class; rotation matches to ~6e-3,
-			// the residual is a small saved-pose twist not yet pinned). The COM's own h/v/t
-			// channels do NOT place a linked rig in world. Rig-internal locals are invariant
-			// under this re-anchoring (both sides of every child's local shift together), so
-			// only the COM's exported track changes.
+			// file, and the COM's own h/v/t channels do NOT place a linked rig in world.
+			// Rig-internal locals are invariant under this re-anchoring (both sides of every
+			// child's local shift together), so only the COM's exported track changes.
+			// The constant is derived from a stored pair (gen_biped_linkcom_probe round,
+			// design doc §10m-ter; float-exact on kitin run/stun/queen + the mektoub rider):
+			//   L = 0x0112 (inverse of the parent's world TM at link/edit time)
+			//     * [0x0104 rotation | 0x0104.t + 0x0260[0..2] correction]
+			// with the exported quat = the conjugate of L's rotation. Fallback: the figure
+			// attach from the walked WorldTMs (position-close on figure-consistent files)
+			// when the chunk pair is missing.
 			if (PMAX_RIG::isBipedComNode(node) && parent)
 			{
 				std::map<INode *, size_t>::const_iterator bi = boneOf.find(node), pi = boneOf.find(parent);
 				if (bi != boneOf.end() && pi != boneOf.end())
 				{
-					NLMISC::CMatrix loc = bones[pi->second].WorldTM.inverted() * bones[bi->second].WorldTM;
-					out.Rot[node].push_back(loc.getRot());
-					out.Pos[node].push_back(loc.getPos());
+					const PMAX_RIG::SBipedRig *rig = NULL;
+					CSceneClass *sys = PMAX_RIG::bipedSystemOfCtrl(dynamic_cast<CReferenceMaker *>(node->getReference(0)));
+					if (sys)
+					{
+						std::map<CSceneClass *, PMAX_RIG::SBipedRig>::iterator rit = PMAX_RIG::g_bipedRigs.find(sys);
+						if (rit != PMAX_RIG::g_bipedRigs.end()) rig = &rit->second;
+					}
+					if (rig && rig->HaveLinkParentInv && rig->HaveBaseFrameTM)
+					{
+						NLMISC::CMatrix loc = rig->LinkParentInvTM * rig->BaseFrameTM;
+						out.Rot[node].push_back(loc.getRot());
+						out.Pos[node].push_back(loc.getPos());
+					}
+					else
+					{
+						NLMISC::CMatrix loc = bones[pi->second].WorldTM.inverted() * bones[bi->second].WorldTM;
+						out.Rot[node].push_back(loc.getRot());
+						out.Pos[node].push_back(loc.getPos());
+					}
 					continue;
 				}
 			}

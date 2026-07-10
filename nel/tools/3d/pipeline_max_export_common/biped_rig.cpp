@@ -294,6 +294,7 @@ SBipedRig::SBipedRig() : Sys(NULL), HasCom(false), ComPos(NLMISC::CVector::Null)
 		HeightCorrection(0.0f), HaveHeightCorrection(false),
 		MoveAllTrans(NLMISC::CVector::Null), HaveMoveAll(false), ComDispNonZero(false),
 		DynamicsType(0), HaveDynamicsType(false),
+		HaveLinkParentInv(false), HaveBaseFrameTM(false),
 		HasThighZ(false), MaxLegLink(2),
 		HasClavicleZ(false),
 		PelvisWorldRot(NLMISC::CQuat::Identity), HavePelvisWorldRot(false),
@@ -731,6 +732,19 @@ void parseComRecord(SBipedRig &rig)
 	{
 		rig.BaseFramePos = NLMISC::CVector(com[12], -com[14], com[13]);
 		rig.HaveBaseFramePos = true;
+		// Full current-position frame as a matrix. NOTE this is the full basis-change similarity
+		// B·Mᵀ·Bᵀ (both sides), NOT the one-sided C·Mᵀ world-rotation rule of §10 item 1 — a TM
+		// composed against other TMs must have both its input and output spaces converted; the
+		// resulting NeL columns are (I, -K, J) of the §10 per-vector forms. The translation gains
+		// the 0x0260[0..2] correction below. Pairs with 0x0112 for the linked-COM attach
+		// (biped_rig.h field comment).
+		rig.BaseFrameTM.identity();
+		rig.BaseFrameTM.setRot(
+			NLMISC::CVector(com[0], -com[2], com[1]),
+			NLMISC::CVector(-com[8], com[10], -com[9]),
+			NLMISC::CVector(com[4], -com[6], com[5]));
+		rig.BaseFrameTM.setPos(rig.BaseFramePos);
+		rig.HaveBaseFrameTM = true;
 		if (!rig.HasCom)
 		{
 			rig.ComPos = rig.BaseFramePos;
@@ -738,16 +752,36 @@ void parseComRecord(SBipedRig &rig)
 			rig.HasCom = true;
 		}
 	}
-	// Height-correction scalar at 0x0260[1] — same 12-float record layout as 0x006c (whose own [1]
-	// is always 0). See the field comment in biped_rig.h / pipeline_max_design.md §10n "Thirteenth":
-	// closes ship_tank_karavan_mort_idle's 5cm residual exactly (BaseFramePos.z + this = reference,
-	// to 4e-8), confirmed not a live computation via interactive testing.
+	// Height-correction at 0x0260[0..2] — same 12-float record layout as 0x006c (whose own [0..2]
+	// is the ComDisp there; 0x0260's [0..2] is an additive CORRECTION on the current-position
+	// translation). Originally decoded as the scalar [1] alone (the vertical component — closes
+	// ship_tank_karavan_mort_idle's 5cm residual exactly, §10n "Thirteenth"); the linkcom probe
+	// round (§10m-ter) generalized it to the full vector: 0x0104.t + this = the exact
+	// current-position translation (float-exact on the kitin run/stun/queen linked COMs).
 	size_t nh = 0;
-	const float *hc = bipedChunkFloats(0x0260, 2, &nh);
+	const float *hc = bipedChunkFloats(0x0260, 3, &nh);
 	if (hc)
 	{
 		rig.HeightCorrection = hc[1];
 		rig.HaveHeightCorrection = true;
+		if (rig.HaveBaseFrameTM)
+			rig.BaseFrameTM.setPos(rig.BaseFramePos + NLMISC::CVector(hc[0], -hc[2], hc[1]));
+	}
+	// Linked-COM parent snapshot (0x0112, 12 floats: 3x3 rows + translation in PLAIN world
+	// coordinates — not Y-up like the biped records): the INVERSE of the parent's world TM
+	// captured when the link relationship was last established/edited. Identity on unlinked/root
+	// rigs; the linked-COM local is LinkParentInvTM * BaseFrameTM (see biped_rig.h).
+	size_t nl = 0;
+	const float *lp = bipedChunkFloats(0x0112, 12, &nl);
+	if (lp)
+	{
+		rig.LinkParentInvTM.identity();
+		rig.LinkParentInvTM.setRot(
+			NLMISC::CVector(lp[0], lp[1], lp[2]),
+			NLMISC::CVector(lp[3], lp[4], lp[5]),
+			NLMISC::CVector(lp[6], lp[7], lp[8]));
+		rig.LinkParentInvTM.setPos(NLMISC::CVector(lp[9], lp[10], lp[11]));
+		rig.HaveLinkParentInv = true;
 	}
 	// Move All Mode reference-frame transform (0x0117, Y-up affine 4x4; translation row [12,13,14]
 	// = (x, z_up, -y) -> NeL (m12, -m14, m13)). Identity on every shipped file (no-op there); read

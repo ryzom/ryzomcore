@@ -257,6 +257,23 @@ struct SBipedRig
 	// not consumed by any decision in this library.
 	int DynamicsType;
 	bool HaveDynamicsType;
+	// Linked-COM attach pair (2026-07-10, gen_biped_linkcom_probe round — design doc §10m-ter).
+	// A biped COM LINKED under another node rides its parent rigidly; the constant exported local
+	// TM is NOT stored literally but derived from a stored pair:
+	//   L = LinkParentInvTM * BaseFrameTM     (NeL column convention)
+	// LinkParentInvTM = chunk 0x0112 (12 floats: 3x3 rows + translation, PLAIN world coordinates
+	// row-vector — unlike the Y-up biped records) = the INVERSE of the parent's world TM captured
+	// when the link relationship was last established/edited (probe: linking, ordinary moves and
+	// figure-mode edits of a linked COM all refresh the pair; identity on unlinked/root rigs).
+	// BaseFrameTM = the full current-position frame: 0x0104's rotation (Y-up) with translation
+	// 0x0104.t + the 0x0260[0..2] correction vector — the FULL-VECTOR generalization of
+	// HeightCorrection below (whose 0x0260[1] is this vector's Y-up vertical component).
+	// Float-exact on every probe file incl. the previously-unexplained kitin stun trilogy and the
+	// mektoub rider (exported quat = conjugate of L.getRot()).
+	NLMISC::CMatrix LinkParentInvTM;
+	bool HaveLinkParentInv;
+	NLMISC::CMatrix BaseFrameTM;
+	bool HaveBaseFrameTM;
 	bool HasThighZ;
 	float ThighZ[2];
 	std::vector<SBipedToe> Toes[2];
