@@ -137,6 +137,13 @@ CLightmapReceiverGeom::CLightmapReceiverGeom()
 	DistMax = 1000.f;
 	BlendLength = 0.f;
 	SlotFlags = 0;
+	GeomMrm = false;
+	MrmNLods = 11;
+	MrmDivisor = 20;
+	MrmSkinReduction = 1; // CMRMParameters::SkinReductionMax
+	MrmDistanceFinest = 5.f;
+	MrmDistanceMiddle = 30.f;
+	MrmDistanceCoarsest = 200.f;
 	LumelSizeMul = 1.f;
 	LmcEnabled = false;
 	for (uint i = 0; i < 3; ++i)
@@ -158,6 +165,13 @@ void CLightmapReceiverGeom::serial(NLMISC::IStream &f)
 	f.serial(DistMax);
 	f.serial(BlendLength);
 	f.serial(SlotFlags);
+	f.serial(GeomMrm);
+	f.serial(MrmNLods);
+	f.serial(MrmDivisor);
+	f.serial(MrmSkinReduction);
+	f.serial(MrmDistanceFinest);
+	f.serial(MrmDistanceMiddle);
+	f.serial(MrmDistanceCoarsest);
 
 	f.serial(LumelSizeMul);
 	f.serial(LmcEnabled);

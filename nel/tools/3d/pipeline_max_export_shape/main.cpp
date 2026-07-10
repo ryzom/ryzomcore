@@ -91,6 +91,7 @@
 #include "remanence_build.h"
 #include "../pipeline_max_export_common/physique_skin.h"
 #include "interface_build.h"
+#include "lm_scene_build.h"
 
 #include "../pipeline_max/builtin/scene_impl.h"
 #include "../pipeline_max/builtin/i_node.h"
@@ -415,7 +416,8 @@ typedef std::map<std::string, INode *> TNodesByName;
 static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
                                        const TNodesByName &nodesByName,
                                        bool exportLighting, SExportStats &stats,
-                                       CSceneClassContainer *ssc)
+                                       CSceneClassContainer *ssc,
+                                       LMSCENE::SCollector *lmc)
 {
 	CNodeImpl *n = dynamic_cast<CNodeImpl *>(&node);
 	std::string name = nodeName(node);
@@ -558,13 +560,55 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 
 	// Lightmapped materials: the reference computed lightmaps at export time (exportLighting);
 	// the headless design exports unmapped (design doc §9) — tag for the harness bucket.
+	bool hasLightMapMaterial = false;
 	for (uint i = 0; i < buildBaseMesh.Materials.size(); ++i)
 	{
 		if (buildBaseMesh.Materials[i].getShader() == NL3D::CMaterial::LightMap)
 		{
+			hasLightMapMaterial = true;
 			printf("LIGHTMAP %s\n", NLMISC::toLowerAscii(name).c_str());
 			break;
 		}
+	}
+
+	// Lightmap scene-graph collection (--lm-scene, design doc §11-lm): record this node as a
+	// receiver — pre-build base + per-geom mesh builds (copied BEFORE the shape build mutates
+	// them) + the shape-build recipe. The standalone lightmapper re-runs calc_lm on these and
+	// finishes the build; the exporter's own output stays unmapped as before.
+	bool lmCollect = lmc && hasLightMapMaterial;
+	if (lmCollect && hasPhysique)
+	{
+		// Skinned receivers would break the object-space convention (skinned VBs export in
+		// world space, §10z-treize) and the reference never lightmaps skinned content.
+		fprintf(stderr, "WARNING: '%s' is skinned AND lightmapped — not collected as a"
+		                " lightmap receiver\n", name.c_str());
+		lmCollect = false;
+	}
+	NL3D::CLightmapReceiver lmRecv;
+	if (lmCollect)
+	{
+		lmRecv.NodeName = name;
+		lmRecv.BaseBuild = buildBaseMesh;
+		lmRecv.MultiLod = lodCount > 0;
+		lmRecv.StaticLod = getScriptAppDataStr(n, NEL3D_APPDATA_LOD_DYNAMIC_MESH, "") != "1";
+		lmRecv.WantMrm = getScriptAppDataInt(n, NEL3D_APPDATA_LOD_MRM, 0) != 0;
+		if (lmRecv.WantMrm)
+		{
+			NL3D::CMRMParameters parameters;
+			buildMRMParameters(n, parameters);
+			lmRecv.MrmNLods = parameters.NLods;
+			lmRecv.MrmDivisor = parameters.Divisor;
+			lmRecv.MrmSkinReduction = (uint32)parameters.SkinReduction;
+			lmRecv.MrmDistanceFinest = parameters.DistanceFinest;
+			lmRecv.MrmDistanceMiddle = parameters.DistanceMiddle;
+			lmRecv.MrmDistanceCoarsest = parameters.DistanceCoarsest;
+		}
+		for (uint i = 0; i < maxBaseBuild.MaterialInfo.size(); ++i)
+			lmRecv.MaterialNames.push_back(maxBaseBuild.MaterialInfo[i].MaterialName);
+		lmRecv.AnimatedMaterials = getScriptAppDataInt(n, NEL3D_APPDATA_EXPORT_ANIMATED_MATERIALS, 0) != 0;
+		lmRecv.AutoAnim = getScriptAppDataInt(n, NEL3D_APPDATA_AUTOMATIC_ANIMATION, 0) != 0;
+		lmRecv.DistMax = getScriptAppDataFloat(n, NEL3D_APPDATA_LOD_DIST_MAX, 1000.f);
+		lmRecv.CoarseOutput = lmc->CurrentCoarse;
 	}
 
 	NL3D::CMeshBase *meshBase = NULL;
@@ -592,10 +636,34 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 					return NULL;
 				tryApplyInterface(node, buildMesh, tmCache, hasPhysique);
 				NL3D::CMeshMultiLod::CMeshMultiLodBuild::CBuildSlot slot;
-				slot.MeshGeom = buildMeshGeomFor(node, buildMesh, numMaterials);
 				slot.DistMax = getScriptAppDataFloat(n, NEL3D_APPDATA_LOD_DIST_MAX, 1000.f);
 				slot.BlendLength = getScriptAppDataFloat(n, NEL3D_APPDATA_LOD_BLEND_LENGTH, 0.f);
 				slot.Flags = lodSlotFlags(n);
+				if (lmCollect)
+				{
+					NL3D::CLightmapReceiverGeom lmGeom;
+					lmGeom.NodeName = name;
+					lmGeom.MeshBuild = buildMesh; // pre-build copy
+					lmGeom.DistMax = slot.DistMax;
+					lmGeom.BlendLength = slot.BlendLength;
+					lmGeom.SlotFlags = slot.Flags;
+					lmGeom.FirstMaterial = maxBaseBuild.FirstMaterial;
+					lmGeom.GeomMrm = getScriptAppDataInt(n, NEL3D_APPDATA_LOD_MRM, 0) != 0;
+					if (lmGeom.GeomMrm)
+					{
+						NL3D::CMRMParameters gp;
+						buildMRMParameters(n, gp);
+						lmGeom.MrmNLods = gp.NLods; lmGeom.MrmDivisor = gp.Divisor;
+						lmGeom.MrmSkinReduction = (uint32)gp.SkinReduction;
+						lmGeom.MrmDistanceFinest = gp.DistanceFinest;
+						lmGeom.MrmDistanceMiddle = gp.DistanceMiddle;
+						lmGeom.MrmDistanceCoarsest = gp.DistanceCoarsest;
+					}
+					lmGeom.GeomMrm = lmRecv.WantMrm;
+			LMSCENE::fillGeomAppData(lmGeom, n, *lmc, name);
+					lmRecv.Geoms.push_back(lmGeom);
+				}
+				slot.MeshGeom = buildMeshGeomFor(node, buildMesh, numMaterials);
 				mlBuild.LodMeshes.push_back(slot);
 				anyOk = true;
 			}
@@ -631,10 +699,33 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 				continue;
 			tryApplyInterface(*slave, buildMesh, tmCache, slavePhys);
 			NL3D::CMeshMultiLod::CMeshMultiLodBuild::CBuildSlot slot;
-			slot.MeshGeom = buildMeshGeomFor(*slave, buildMesh, numMaterials);
 			slot.DistMax = getScriptAppDataFloat(sn, NEL3D_APPDATA_LOD_DIST_MAX, 1000.f);
 			slot.BlendLength = getScriptAppDataFloat(sn, NEL3D_APPDATA_LOD_BLEND_LENGTH, 0.f);
 			slot.Flags = lodSlotFlags(sn);
+			if (lmCollect && !slavePhys)
+			{
+				NL3D::CLightmapReceiverGeom lmGeom;
+				lmGeom.NodeName = nodeName(*slave);
+				lmGeom.MeshBuild = buildMesh; // pre-build copy
+				lmGeom.DistMax = slot.DistMax;
+				lmGeom.BlendLength = slot.BlendLength;
+				lmGeom.SlotFlags = slot.Flags;
+				lmGeom.FirstMaterial = maxBaseBuild.FirstMaterial;
+				lmGeom.GeomMrm = getScriptAppDataInt(sn, NEL3D_APPDATA_LOD_MRM, 0) != 0;
+				if (lmGeom.GeomMrm)
+				{
+					NL3D::CMRMParameters gp;
+					buildMRMParameters(sn, gp);
+					lmGeom.MrmNLods = gp.NLods; lmGeom.MrmDivisor = gp.Divisor;
+					lmGeom.MrmSkinReduction = (uint32)gp.SkinReduction;
+					lmGeom.MrmDistanceFinest = gp.DistanceFinest;
+					lmGeom.MrmDistanceMiddle = gp.DistanceMiddle;
+					lmGeom.MrmDistanceCoarsest = gp.DistanceCoarsest;
+				}
+				LMSCENE::fillGeomAppData(lmGeom, sn, *lmc, lmGeom.NodeName);
+				lmRecv.Geoms.push_back(lmGeom);
+			}
+			slot.MeshGeom = buildMeshGeomFor(*slave, buildMesh, numMaterials);
 			mlBuild.LodMeshes.push_back(slot);
 			anyOk = true;
 		}
@@ -666,6 +757,16 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 		if (hasPhysique && !tryApplyPhysique(node, buildMesh, mods, modApps, ssc, stats))
 			return NULL;
 		tryApplyInterface(node, buildMesh, tmCache, hasPhysique);
+
+		if (lmCollect)
+		{
+			NL3D::CLightmapReceiverGeom lmGeom;
+			lmGeom.NodeName = name;
+			lmGeom.MeshBuild = buildMesh; // pre-build copy (CMesh::build mutates VertLink etc.)
+			lmGeom.FirstMaterial = maxBaseBuild.FirstMaterial;
+			LMSCENE::fillGeomAppData(lmGeom, n, *lmc, name);
+			lmRecv.Geoms.push_back(lmGeom);
+		}
 
 		// LOD_MRM alone selects the MRM branch, matching the reference plugin
 		// (export_mesh.cpp:360): a skinned node with LOD_MRM=0 exports as a plain CMesh carrying
@@ -753,6 +854,9 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 	// remanence/wavemaker/particle-system builds. See the corresponding comment in exportFile.
 	meshBase->setDistMax(getScriptAppDataFloat(n, NEL3D_APPDATA_LOD_DIST_MAX, 1000.f));
 
+	if (lmCollect && !lmRecv.Geoms.empty())
+		lmc->Scene.Receivers.push_back(lmRecv);
+
 	return meshBase;
 }
 
@@ -760,7 +864,8 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 // Per-file export
 
 static int exportFile(const std::string &maxPath, const std::string &outDir, const std::string &outDirCoarse,
-                      const std::string &animDir, bool exportLighting, SExportStats &stats)
+                      const std::string &animDir, const std::string &lmSceneDir,
+                      bool exportLighting, SExportStats &stats)
 {
 	SLoadedMax lm;
 	if (!loadMaxFile(maxPath, lm))
@@ -769,6 +874,9 @@ static int exportFile(const std::string &maxPath, const std::string &outDir, con
 	CSceneClassContainer *ssc = lm.Scene->container();
 	SNodeTMCache tmCache;
 	tmCache.SceneRoot = NULL;
+
+	LMSCENE::SCollector lmCollector;
+	LMSCENE::SCollector *lmc = lmSceneDir.empty() ? NULL : &lmCollector;
 
 	// Collect the LOD slave set (case-insensitive) and coarse-mesh info
 	std::set<std::string> lodNames;
@@ -788,8 +896,21 @@ static int exportFile(const std::string &maxPath, const std::string &outDir, con
 		for (uint l = 0; l < count && l < 10; ++l)
 		{
 			std::string nm = getScriptAppDataStr(n, NEL3D_APPDATA_LOD_NAME + l, "");
-			if (!nm.empty())
-				lodNames.insert(NLMISC::toLowerAscii(nm));
+			if (nm.empty())
+				continue;
+			lodNames.insert(NLMISC::toLowerAscii(nm));
+			if (lmc)
+			{
+				// LOD relations for the scene-graph exclusion sets, on RESOLVED node names
+				// (the appdata value's case may differ from the actual node name)
+				std::map<std::string, INode *>::iterator sit = nodesByName.find(NLMISC::toLowerAscii(nm));
+				if (sit != nodesByName.end())
+				{
+					std::string slaveName = nodeName(*sit->second);
+					lmc->LodSlaveNames.insert(slaveName);
+					lmc->LodParents[NLMISC::toLowerAscii(slaveName)].insert(nodeName(*allNodes[i]));
+				}
+			}
 		}
 	}
 
@@ -856,7 +977,10 @@ static int exportFile(const std::string &maxPath, const std::string &outDir, con
 
 		std::string outPath = (haveCoarse ? outDirCoarse : outDir) + "/" + NLMISC::toLowerAscii(name) + ".shape";
 
-		NL3D::IShape *shape = buildShapeForNode(node, tmCache, nodesByName, exportLighting, stats, ssc);
+		if (lmc)
+			lmc->CurrentCoarse = haveCoarse;
+
+		NL3D::IShape *shape = buildShapeForNode(node, tmCache, nodesByName, exportLighting, stats, ssc, lmc);
 		if (!shape)
 			continue;
 
@@ -961,6 +1085,79 @@ static int exportFile(const std::string &maxPath, const std::string &outDir, con
 			fprintf(stderr, "ERROR: shape serialization failed for %s: %s\n", outPath.c_str(), e.what());
 		}
 		delete shape;
+	}
+
+	// Lightmap scene-graph: when receivers were collected, add the lights and the occluder
+	// meshes and write <lmSceneDir>/<maxstem>.lmscene (design doc §11-lm). Occluder selection
+	// replicates the reference flow: the shape maxscript selects ROOT-level geometry nodes
+	// with the cast-shadow node flag, and CRTWorld::addNode then filters non-zone,
+	// non-accelerator, shadow-casting meshes (bExcludeNonSelected=true in the batch export).
+	// Receivers themselves ride the lightmapper's include path, not this list.
+	if (lmc && !lmc->Scene.Receivers.empty())
+	{
+		// Lights (all scene lights checked for lightmap export, hidden included)
+		for (uint i = 0; i < allNodes.size(); ++i)
+		{
+			NL3D::CLightmapLight light;
+			if (LMSCENE::convertLightmapLight(light, *allNodes[i], tmCache))
+				lmc->Scene.Lights.push_back(light);
+		}
+
+		// Occluders
+		SExportStats occStats; // throwaway (occluder eval failures don't count as skips)
+		for (uint i = 0; i < allNodes.size(); ++i)
+		{
+			INode &node = *allNodes[i];
+			CNodeImpl *n = dynamic_cast<CNodeImpl *>(&node);
+			if (!n) continue;
+			// Root-level only (the maxscript's `node.parent == undefined` selection)
+			if (dynamic_cast<CNodeImpl *>(n->parent())) continue;
+			std::string name = nodeName(node);
+			CSceneClass *base = baseObjectOf(node, NULL, NULL);
+			if (!base || base->classDesc()->superClassId() != SCLASS_GEOMOBJECT) continue;
+			NLMISC::CClassId cid = base->classDesc()->classId();
+			if (cid == CLASSID_RPO) continue; // zones never occlude (RPO::isZone in addNode)
+			if (cid.a() == CLASSID_PARTA_NEL_PS) continue;
+			if (cid == CLASSID_PACS_BOX || cid == CLASSID_PACS_CYL) continue;
+			// Accelerators don't occlude ((accel & 3) == 0 filter in addNode)
+			{
+				int accel = getScriptAppDataInt(n, NEL3D_APPDATA_ACCEL, 32);
+				if ((accel & 3) != 0) continue;
+			}
+			if (lmc->OccluderNames.count(name)) continue;
+
+			NL3D::CLightmapSceneMesh occ;
+			occ.NodeName = name;
+			SMaxMeshBaseBuild occMaxBase;
+			Matrix3M occLocalTM = getLocalMatrix(node, tmCache);
+			buildBaseMeshInterface(occ.BaseBuild, occMaxBase, node, tmCache, occLocalTM, exportLighting);
+			// The cast-shadow node flag gates the world (same flag the maxscript selection
+			// and addNode's bCastShadows check read)
+			if (!occ.BaseBuild.bCastShadows) continue;
+			// Occluders evaluate as plain meshes (the reference's createMeshBuild ignores
+			// skinning for the raytrace world)
+			if (!evalAndBuildMesh(node, tmCache, occ.BaseBuild, occMaxBase, occ.MeshBuild, occStats, false))
+				continue;
+			lmc->OccluderNames.insert(name);
+			lmc->Scene.Occluders.push_back(occ);
+		}
+
+		// Project name = the source scene's file stem (prefixes the lightmap texture names)
+		lmc->Scene.ProjectName = NLMISC::CFile::getFilenameWithoutExtension(maxPath);
+
+		std::string scenePath = lmSceneDir + "/"
+			+ NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(maxPath)) + ".lmscene";
+		try
+		{
+			lmc->Scene.save(scenePath);
+			printf("LMSCENE %s (%u receivers, %u occluders, %u lights)\n", scenePath.c_str(),
+			       (uint)lmc->Scene.Receivers.size(), (uint)lmc->Scene.Occluders.size(),
+			       (uint)lmc->Scene.Lights.size());
+		}
+		catch (const NLMISC::Exception &e)
+		{
+			fprintf(stderr, "ERROR: cannot write %s: %s\n", scenePath.c_str(), e.what());
+		}
 	}
 
 	// Shape process "Export default animations" (shape_export.ms):
@@ -1998,7 +2195,7 @@ int main(int argc, char **argv)
 	NL3D::CVertexBuffer::SerialOldPreferredMemory = true;
 	NL3D::CIndexBuffer::SerialOldPreferredMemory = true;
 
-	std::string input, outDir, outDirCoarse, animDir, dbRoot;
+	std::string input, outDir, outDirCoarse, animDir, dbRoot, lmSceneDir;
 	bool exportLighting = true;
 	std::vector<std::string> compareArgs;
 
@@ -2024,6 +2221,8 @@ int main(int argc, char **argv)
 			outDirCoarse = argv[++i];
 		else if (arg == "--anim-out" && i + 1 < argc)
 			animDir = argv[++i];
+		else if (arg == "--lm-scene" && i + 1 < argc)
+			lmSceneDir = argv[++i];
 		else if (arg == "--no-lighting")
 			exportLighting = false;
 		else if (arg == "--compare")
@@ -2072,7 +2271,7 @@ int main(int argc, char **argv)
 
 	if (input.empty() || outDir.empty())
 	{
-		fprintf(stderr, "usage: pipeline_max_export_shape [--db <graphics-root>] [--coarse-out <dir>] [--no-lighting] [-v] <input.max> <outdir>\n");
+		fprintf(stderr, "usage: pipeline_max_export_shape [--db <graphics-root>] [--coarse-out <dir>] [--anim-out <dir>] [--lm-scene <dir>] [--no-lighting] [-v] <input.max> <outdir>\n");
 		fprintf(stderr, "       pipeline_max_export_shape --compare <a.shape> <b.shape>\n");
 		return 2;
 	}
@@ -2092,7 +2291,7 @@ int main(int argc, char **argv)
 	setDatabaseRoot(dbRoot);
 
 	SExportStats stats;
-	int ret = exportFile(input, outDir, outDirCoarse, animDir, exportLighting, stats);
+	int ret = exportFile(input, outDir, outDirCoarse, animDir, lmSceneDir, exportLighting, stats);
 	printf("EXPORTED %u shapes, %u skipped, %u anims\n", stats.Exported, stats.Skipped, stats.AnimExported);
 	for (std::map<std::string, uint>::iterator it = stats.SkipReasons.begin(); it != stats.SkipReasons.end(); ++it)
 		printf("SKIPCLASS %s %u\n", it->first.c_str(), it->second);

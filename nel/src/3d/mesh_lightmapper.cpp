@@ -1852,8 +1852,13 @@ bool CMeshLightmapper::calculateLM( CMesh::CMeshBuild *pZeMeshBuild, CMeshBase::
 	vGlobalPos.z = (float)((int)vGlobalPos.z);
 
 	// Select meshes to test for raytrace
-	// Get all lightmap lights from the scene graph
+	// Get all lightmap lights from the scene graph. The original converted lights from Max
+	// AFTER vGlobalPos was set, baking the -vGlobalPos translation into every light position
+	// (SLightBuild::convertFromMaxLight: "Position = position - vGlobalPos"); the scene graph
+	// stores world positions, so apply the same translation here.
 	AllLights = scene.Lights;
+	for (i = 0; i < AllLights.size(); ++i)
+		AllLights[i].Position -= vGlobalPos;
 	// Get all lights L that have influence over the mesh selected
 	supprLightNoInteractOne( AllLights, pZeMeshBuild, pZeMeshBaseBuild, geom.NodeName );
 
@@ -2153,8 +2158,16 @@ bool CMeshLightmapper::calculateLM( CMesh::CMeshBuild *pZeMeshBuild, CMeshBase::
 				sSaveName += tmp;
 				sSaveName += ".tga";
 
-				// Concat name of the project with name of the file
-				sSaveName = projectName + "_" + sSaveName;
+				// Concat name of the project with name of the file.
+				// REFERENCE BUG REPRODUCED: the original wrote
+				//   sSaveName = (const char*)projectName + string("_") + sSaveName;
+				// where projectName was a UTF-16 (ucchar) buffer from _wsplitpath —
+				// reinterpreted as a C string it terminates after the FIRST character
+				// ("m" from "ma_acc_ascenseur"). Every reference lightmap texture carries
+				// that single-letter project prefix (m_ma_acc_ascenseur_0.tga), while the
+				// lightmap LOG file (through a correct ucstring conversion) carries the
+				// full stem. Byte-compatibility with the reference data requires keeping it.
+				sSaveName = projectName.substr(0, 1) + "_" + sSaveName;
 				sSaveName = toLowerAscii (sSaveName);
 
 				// Remove spaces

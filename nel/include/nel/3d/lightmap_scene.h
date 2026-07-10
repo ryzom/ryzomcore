@@ -119,6 +119,14 @@ public:
 	float						DistMax;
 	float						BlendLength;
 	uint8						SlotFlags;		// CMeshMultiLodBuild::CBuildSlot flags
+	// Per-slot MRM geometry (a multi-lod slot node's own LOD_MRM appdata + MRM parameters)
+	bool						GeomMrm;
+	uint32						MrmNLods;
+	uint32						MrmDivisor;
+	uint32						MrmSkinReduction;
+	float						MrmDistanceFinest;
+	float						MrmDistanceMiddle;
+	float						MrmDistanceCoarsest;
 
 	// Per-node lightmap appdata
 	float						LumelSizeMul;
