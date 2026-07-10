@@ -305,6 +305,77 @@ static void tryApplyInterface(INode &node, NL3D::CMesh::CMeshBuild &buildMesh,
 	                                      interfaceToWorldMat(node, tmCache, skinned), tmCache);
 }
 
+// Morpher blend-shape targets — the reference's getBSMeshBuild (export_mesh.cpp:1192): for each
+// non-NULL Morpher ref 101+i, evaluate the TARGET node through the non-skinned mesh path with
+// finalSpace = the SOURCE node's NodeTM when the source is skinned (else Identity) — landing the
+// target's verts in the same space as the source's build — then copy the source's (welded)
+// corner normals onto every corner whose vertex is an interface vertex (the reference computes
+// them off a fresh base MeshBuild in the objectToLocal·finalSpace frame, which equals the
+// skinned world frame; our export buildMesh IS that frame with the weld applied, so it serves
+// as the base directly). Targets that fail to evaluate or whose vertex count diverges from the
+// base are skipped with a warning — NL3D's CMRMBuilder::buildBlendShapes dereferences and
+// asserts equal counts (the reference could rely on live Max never failing there).
+static void buildBSList(INode &node, SNodeTMCache &tmCache,
+                        const std::vector<CSceneClass *> &mods,
+                        const NL3D::CMesh::CMeshBuild &exportMesh, bool skinned,
+                        bool exportLighting,
+                        std::vector<NL3D::CMesh::CMeshBuild *> &bsList)
+{
+	static const NLMISC::CClassId CLASSID_MORPHER(0x17bb6854, 0xa5cba2a3);
+	CReferenceMaker *morph = NULL;
+	for (uint i = 0; i < mods.size() && !morph; ++i)
+		if (mods[i]->classDesc()->classId() == CLASSID_MORPHER)
+			morph = dynamic_cast<CReferenceMaker *>(mods[i]);
+	if (!morph)
+		return;
+
+	NLMISC::CMatrix finalSpace = NLMISC::CMatrix::Identity;
+	if (skinned)
+		MAXSCENE::convertMatrix(finalSpace, getNodeTM(&node, tmCache));
+
+	for (uint i = 0; i < 100; ++i)
+	{
+		if (101 + i >= morph->nbReferences())
+			break;
+		INode *target = dynamic_cast<INode *>(morph->getReference(101 + i));
+		if (!target)
+			continue;
+		SEvalMesh tmesh;
+		if (!MESHEVAL::evalNodeMesh(*target, tmesh, NULL))
+		{
+			fprintf(stderr, "WARNING: morph target '%s' of '%s' failed mesh eval; channel dropped\n",
+			        nodeName(*target).c_str(), nodeName(node).c_str());
+			continue;
+		}
+		SMaxMeshBaseBuild tMax;
+		NL3D::CMeshBase::CMeshBaseBuild tBase;
+		buildBaseMeshInterface(tBase, tMax, *target, tmCache, getLocalMatrix(*target, tmCache),
+		                       exportLighting);
+		NL3D::CMesh::CMeshBuild *mb = new NL3D::CMesh::CMeshBuild;
+		buildMeshInterface(tmesh, *mb, tBase, tMax, *target, tmCache, false, &finalSpace);
+		if (mb->Vertices.size() != exportMesh.Vertices.size())
+		{
+			fprintf(stderr, "WARNING: morph target '%s' of '%s' has %u verts vs base %u; channel dropped\n",
+			        nodeName(*target).c_str(), nodeName(node).c_str(),
+			        (uint)mb->Vertices.size(), (uint)exportMesh.Vertices.size());
+			delete mb;
+			continue;
+		}
+		// Interface-vert corner normals come from the (welded) base.
+		if (exportMesh.InterfaceVertexFlag.size() != 0)
+		{
+			for (uint k = 0; k < mb->Faces.size() && k < exportMesh.Faces.size(); ++k)
+				for (uint l = 0; l < 3; ++l)
+				{
+					uint vert = mb->Faces[k].Corner[l].Vertex;
+					if (vert < exportMesh.InterfaceVertexFlag.size() && exportMesh.InterfaceVertexFlag.get(vert))
+						mb->Faces[k].Corner[l].Normal = exportMesh.Faces[k].Corner[l].Normal;
+				}
+		}
+		bsList.push_back(mb);
+	}
+}
+
 // Construct an IMeshGeom (CMeshGeom or CMeshMRMGeom) from a built CMeshBuild — used per LOD slot
 // in the multi-lod path. Caller owns the returned pointer until CMeshMultiLod::build takes it.
 static NL3D::IMeshGeom *buildMeshGeomFor(INode &node, NL3D::CMesh::CMeshBuild &buildMesh,
@@ -609,7 +680,11 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 			NL3D::CMRMParameters parameters;
 			buildMRMParameters(n, parameters);
 
-			std::vector<NL3D::CMesh::CMeshBuild *> bsList; // morph targets: not implemented
+			// Morpher blend-shape targets — a non-empty bsList forces the CMeshMRM branch (the
+			// reference's isCompatible gate below), which is how the visage files ship as
+			// CMeshMRM-with-SkinWeights instead of CMeshMRMSkinned.
+			std::vector<NL3D::CMesh::CMeshBuild *> bsList;
+			buildBSList(node, tmCache, mods, buildMesh, hasPhysique, exportLighting, bsList);
 
 			if (NL3D::CMeshMRMSkinned::isCompatible(buildMesh) && bsList.empty())
 			{
@@ -643,6 +718,8 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 				meshMRM->optimizeMaterialUsage(materialRemap);
 				meshBase = meshMRM;
 			}
+			for (uint i = 0; i < bsList.size(); ++i)
+				delete bsList[i];
 		}
 		else
 		{

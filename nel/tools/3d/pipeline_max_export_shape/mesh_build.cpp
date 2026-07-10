@@ -315,7 +315,8 @@ void buildBaseMeshInterface(CMeshBase::CMeshBaseBuild &buildMesh, SMaxMeshBaseBu
 void buildMeshInterface(const SEvalMesh &mesh, CMesh::CMeshBuild &buildMesh,
                         const CMeshBase::CMeshBaseBuild &buildBaseMesh,
                         const SMaxMeshBaseBuild &maxBaseBuild,
-                        INode &node, SNodeTMCache &tmCache, bool skinned)
+                        INode &node, SNodeTMCache &tmCache, bool skinned,
+                        const NLMISC::CMatrix *morphFinalSpace)
 {
 	CNodeImpl *n = dynamic_cast<CNodeImpl *>(&node);
 
@@ -349,6 +350,11 @@ void buildMeshInterface(const SEvalMesh &mesh, CMesh::CMeshBuild &buildMesh,
 		{
 			Matrix3M objectToLocal = objectTM * inverseM3(nodeTM);
 			convertMatrix(toExportSpace, objectToLocal);
+			// Morph target: right-multiply the caller's finalSpace (reference
+			// export_mesh.cpp:725, `ToExportSpace = newBasis*ToExportSpace*finalSpace` with
+			// newBasis = Identity from createMeshBuild) — see the header comment.
+			if (morphFinalSpace)
+				toExportSpace = toExportSpace * (*morphFinalSpace);
 		}
 		fromExportSpace = toExportSpace;
 		fromExportSpace.invert();

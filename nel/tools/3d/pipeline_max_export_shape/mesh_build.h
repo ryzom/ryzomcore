@@ -51,10 +51,19 @@ void buildBaseMeshInterface(NL3D::CMeshBase::CMeshBaseBuild &buildMesh, MATBUILD
 // local space (objectToLocal) for plain meshes, or in WORLD space (objectTM) when `skinned` —
 // the reference exports skinned meshes in world space (export_mesh.cpp:671); the runtime
 // deforms them by the skin weights, not the node transform.
+//
+// `morphFinalSpace` non-NULL = build a MORPH TARGET (reference getBSMeshBuild →
+// createMeshBuild(..., masterNodeMat, isMorphTarget=true)): the non-skinned export space gets
+// the caller's finalSpace right-multiplied — `toExportSpace = objectToLocal * finalSpace`, the
+// reference's literal composition (export_mesh.cpp:725). For a skinned source node, finalSpace
+// = the SOURCE node's NodeTM, which lands the target in the source's world frame
+// (objectToLocal·nodeTM == objectTM for the source itself — why the reference's non-skinned
+// formula + finalSpace equals the skinned world space on the base mesh).
 void buildMeshInterface(const MESHEVAL::SEvalMesh &mesh, NL3D::CMesh::CMeshBuild &buildMesh,
                         const NL3D::CMeshBase::CMeshBaseBuild &buildBaseMesh,
                         const MATBUILD::SMaxMeshBaseBuild &maxBaseBuild,
-                        INode &node, SNodeTMCache &tmCache, bool skinned = false);
+                        INode &node, SNodeTMCache &tmCache, bool skinned = false,
+                        const NLMISC::CMatrix *morphFinalSpace = NULL);
 
 // buildMRMParameters replication (appdata-driven).
 void buildMRMParameters(CSceneClass *node, NL3D::CMRMParameters &params);
