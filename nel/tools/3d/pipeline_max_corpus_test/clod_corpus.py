@@ -15,10 +15,14 @@ and runs:
 
 Landing (2026-07-10, §10z-clod): last MISSING format on the pipeline_max surface.
 PHYSIQUESKIN shared + weight-exact since §10z-treize; path is CMeshMRM NLods=1/Divisor=1
-→ CLodCharacterShapeBuild serial. Measured whole-corpus T3: every ref produced, 0 export
-failures; field-exact (IDENTICAL+FLOATEQ) on the large majority; residual classes are the
-known ConvertToRigid→Bip01 root-fallback bone-set deltas, a handful of MRM VB-dedup splits,
-and 1-file UV / few-vert normal residuals.
+→ CLodCharacterShapeBuild serial.
+
+Audit round (same day, §10z-clod-bis): 105/105 refs produced, 0 export failures, 99
+field-exact (2 of them mapext-UV-masked — the reference of a Map-Extender node was exported
+with the plugin missing, so its UV channel is not a valid oracle; see the MAPEXT tag handling
+below) + 6 residual. The 6 are the shape-shared Max-closed-source accumulation tails
+(kitinega x2 / warlord MRM VB-dedup twin splits, vampignon x2 multi-smooth merge, 1
+chaotic-sign cancellation vert on sagass_selle), all codegen-stable under VS2008/x87.
 """
 
 import argparse, os, struct, subprocess, sys

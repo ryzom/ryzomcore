@@ -153,12 +153,15 @@ IF (Python3_Interpreter_FOUND)
 
 	# Budgets re-baselined 2026-07-10 (shape-coverage session): the skinned-physique landing
 	# had moved ~650 files into the DIFF bucket without bumping the old 700/400 budget, so the
-	# gate had been failing silently since. Measured at end of session (after the spline-cap /
-	# UVW-planar / skinned-world-space / Physique-link / MRM-field-walk landings): 122 ident +
-	# 1209 floateq + 918 lightmap-verified = 2249 good; 875 differ + 347 lightmap-diff = 1222
-	# structural diffs. Tighten as diff classes close.
+	# gate had been failing silently since — and the 2026-07-10 §10z-quinze re-baseline (2450/800)
+	# repeated the mistake by budgeting only the plain-differ count while the gate charges
+	# diff + lightmap-diff + mapext-diff (third instance of this trap; caught by the clod-audit
+	# session's full ctest run). Measured 2026-07-10 clod-audit end state: 147 ident + 1330
+	# floateq + 983 lightmap-verified + 113 mapext-verified = 2573 good; 730 differ + 282
+	# lightmap-diff + 3 mapext-diff = 1015 charged. Tighten as diff classes close — against the
+	# GATE'S OWN ACCOUNTING, verified by running the gate, not the raw sweep counts.
 	ADD_TEST(NAME pipeline_max_shape_corpus
-		COMMAND ${Python3_EXECUTABLE} shape_corpus.py --all --gate-t3 --min-identical 2550 --max-diff 750
+		COMMAND ${Python3_EXECUTABLE} shape_corpus.py --all --gate-t3 --min-identical 2570 --max-diff 1015
 			--bin $<TARGET_FILE_DIR:pipeline_max_export_shape>
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 	SET_TESTS_PROPERTIES(pipeline_max_shape_corpus PROPERTIES SKIP_RETURN_CODE 77)
@@ -168,7 +171,7 @@ IF (Python3_Interpreter_FOUND)
 	# tier (2e-6/32-ULP, normals 1e-4) must hold under the Max-2010-matching compiler/float
 	# model too. Self-skips (exit 77) without that build tree.
 	ADD_TEST(NAME pipeline_max_shape_corpus_vs2008
-		COMMAND ${Python3_EXECUTABLE} shape_corpus.py --all --gate-t3 --min-identical 2550 --max-diff 750
+		COMMAND ${Python3_EXECUTABLE} shape_corpus.py --all --gate-t3 --min-identical 2570 --max-diff 1015
 			--bin $ENV{HOME}/build_vs2008_wine_pipeline/winebin
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 	SET_TESTS_PROPERTIES(pipeline_max_shape_corpus_vs2008 PROPERTIES SKIP_RETURN_CODE 77)
