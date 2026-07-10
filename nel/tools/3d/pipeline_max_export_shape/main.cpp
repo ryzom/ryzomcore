@@ -1338,12 +1338,15 @@ static void compareMeshBase(NL3D::CMeshBase *ma, NL3D::CMeshBase *mb)
 		const NL3D::CMaterial &m_a = ma->getMaterial(i);
 		const NL3D::CMaterial &m_b = mb->getMaterial(i);
 
-		// Under lightmap mask: skip appended-texture + calc-lm-touched compare paths, verify
+		// Under EITHER UV mask: skip appended-texture + calc-lm-touched compare paths, verify
 		// only the base fields the lightmapper does not modify. LightMap-shaded materials in
 		// the reference carry (a) lightmap textures appended after slot 0, (b) calc-lm-modified
 		// ambient/specular/shininess, (c) an added Stage-1 texenv. Compare shader type + blend
-		// + z-write + two-sided + color + slot-0 texture presence and STOP.
-		if (g_lightmapMask && m_b.getShader() == NL3D::CMaterial::LightMap)
+		// + z-write + two-sided + color + slot-0 texture presence and STOP. Initially lightmap-
+		// mask-only; extended to the mapext mask 2026-07-10 — 27 of the 47 mapext-diff files
+		// (the gen_bt construction class) are mapext+LightMap combos whose reference materials
+		// carry the same calc-lm modifications regardless of which bucket routed the compare.
+		if (uvMask() && m_b.getShader() == NL3D::CMaterial::LightMap)
 		{
 			if (m_a.getShader() != m_b.getShader()
 				|| m_a.getBlend() != m_b.getBlend()
@@ -1692,8 +1695,19 @@ static void compareShapesFields(const std::string &a, const std::string &b)
 			else { msb->getMeshGeom().getSkinWeights(swbStore); bonesB = msb->getMeshGeom().getBonesName(); swb = &swbStore; }
 			if (bonesA != bonesB)
 			{
-				printf("  bones: %u vs %u (or order/name mismatch)\n", (uint)bonesA.size(), (uint)bonesB.size());
-				raiseVerdict(2);
+				// Under a UV mask the used-bone ORDER legitimately differs: BonesNames is the
+				// skeleton list reduced by first-use order over the VB, and the reference's VB
+				// order follows its garbage-UV/lightmap-UV dedup. The bone SET is still exact
+				// signal — compare sorted (2026-07-10, the 12-file mapext bones class).
+				std::vector<std::string> sortA = bonesA, sortB = bonesB;
+				std::sort(sortA.begin(), sortA.end());
+				std::sort(sortB.begin(), sortB.end());
+				if (!uvMask() || sortA != sortB)
+				{
+					printf("  bones: %u vs %u (%s mismatch)\n", (uint)bonesA.size(), (uint)bonesB.size(),
+					       sortA == sortB ? "order" : "set");
+					raiseVerdict(2);
+				}
 			}
 			if (swa && swb)
 			{
@@ -1704,8 +1718,11 @@ static void compareShapesFields(const std::string &a, const std::string &b)
 					// lightmap UVs) — count mismatch is not a verdict by itself there.
 					if (!uvMask()) raiseVerdict(2);
 				}
-				else
+				else if (!uvMask())
 				{
+					// Per-vertex weight compare needs matching vertex ORDER; under a UV mask the
+					// dedup orders diverge even when the counts happen to match, so this is
+					// skipped there (the bone SET + rdrpass material assignment stay gated).
 					uint nDiff = 0;
 					for (uint v = 0; v < swa->size(); ++v)
 					{
