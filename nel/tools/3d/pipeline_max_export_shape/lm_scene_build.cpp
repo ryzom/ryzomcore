@@ -80,6 +80,58 @@ static bool lightHasChunk(CSceneClass *obj, uint16 chunkId)
 	return false;
 }
 
+// Node chunk 0x0a32 = the persistent Max node handle
+bool nodeHandle(CNodeImpl *n, uint32 &out)
+{
+	const CStorageContainer::TStorageObjectContainer &orphans = n->orphanedChunks();
+	for (CStorageContainer::TStorageObjectConstIt it = orphans.begin(); it != orphans.end(); ++it)
+	{
+		if (it->first != 0x0a32) continue;
+		CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
+		if (!raw || raw->Value.size() < 4) return false;
+		memcpy(&out, &raw->Value[0], 4);
+		return true;
+	}
+	return false;
+}
+
+// Light-object chunk 0x2800: the exclusion list (see lm_scene_build.h)
+static void readExclusionList(CSceneClass *obj, const std::map<uint32, std::string> &nodeByHandle,
+                              std::set<std::string> &out)
+{
+	const CStorageContainer::TStorageObjectContainer &orphans = obj->orphanedChunks();
+	for (CStorageContainer::TStorageObjectConstIt it = orphans.begin(); it != orphans.end(); ++it)
+	{
+		if (it->first != 0x2800) continue;
+		CStorageContainer *c = dynamic_cast<CStorageContainer *>(it->second);
+		if (!c) return;
+		uint32 count = 0;
+		std::vector<uint32> handles;
+		const CStorageContainer::TStorageObjectContainer &sub = c->chunks();
+		for (CStorageContainer::TStorageObjectConstIt s = sub.begin(); s != sub.end(); ++s)
+		{
+			CStorageRaw *raw = dynamic_cast<CStorageRaw *>(s->second);
+			if (!raw) continue;
+			if (s->first == 0x03e9 && raw->Value.size() >= 4)
+				memcpy(&count, &raw->Value[0], 4);
+			else if (s->first == 0x03ea && raw->Value.size() >= 4)
+			{
+				handles.resize(raw->Value.size() / 4);
+				memcpy(&handles[0], &raw->Value[0], handles.size() * 4);
+			}
+		}
+		for (uint i = 0; i < handles.size() && i < count; ++i)
+		{
+			std::map<uint32, std::string>::const_iterator hit = nodeByHandle.find(handles[i]);
+			if (hit != nodeByHandle.end())
+				out.insert(hit->second);
+			else
+				fprintf(stderr, "WARNING: light exclusion handle %u not found in scene\n", handles[i]);
+		}
+		return;
+	}
+}
+
 // "r g b a" string appdata -> CRGBA (the reference's getScriptAppData CRGBA overload)
 static NLMISC::CRGBA appDataColor(CNodeImpl *n, uint32 subId, NLMISC::CRGBA def)
 {
@@ -93,7 +145,8 @@ static NLMISC::CRGBA appDataColor(CNodeImpl *n, uint32 subId, NLMISC::CRGBA def)
 }
 
 // ---------------------------------------------------------------------------------------------
-bool convertLightmapLight(NL3D::CLightmapLight &out, INode &node, SCENELIB::SNodeTMCache &tmCache)
+bool convertLightmapLight(NL3D::CLightmapLight &out, INode &node, SCENELIB::SNodeTMCache &tmCache,
+                          const std::map<uint32, std::string> &nodeByHandle)
 {
 	CNodeImpl *n = dynamic_cast<CNodeImpl *>(&node);
 	if (!n) return false;
@@ -274,9 +327,10 @@ bool convertLightmapLight(NL3D::CLightmapLight &out, INode &node, SCENELIB::SNod
 		NLMISC::fromString(s, out.rSoftShadowConeLength);
 	}
 
-	// Exclusion list + projector: the corpus light-chunk vocabulary is closed (no
-	// variable-size chunks on any of 2992 lights scanned) — both are unused corpus-wide.
+	// Exclusion list: chunk 0x2800 (node handles, see lm_scene_build.h). Projectors stay
+	// unused corpus-wide (no projector storage on any light scanned).
 	out.setExclusion.clear();
+	readExclusionList(obj, nodeByHandle, out.setExclusion);
 
 	return true;
 }

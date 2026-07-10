@@ -1095,12 +1095,51 @@ static int exportFile(const std::string &maxPath, const std::string &outDir, con
 	// Receivers themselves ride the lightmapper's include path, not this list.
 	if (lmc && !lmc->Scene.Receivers.empty())
 	{
-		// Lights (all scene lights checked for lightmap export, hidden included)
+		// Persistent node handles (chunk 0x0a32) — light exclusion lists reference nodes
+		// by handle.
+		std::map<uint32, std::string> nodeByHandle;
 		for (uint i = 0; i < allNodes.size(); ++i)
 		{
-			NL3D::CLightmapLight light;
-			if (LMSCENE::convertLightmapLight(light, *allNodes[i], tmCache))
-				lmc->Scene.Lights.push_back(light);
+			CNodeImpl *n = dynamic_cast<CNodeImpl *>(allNodes[i]);
+			uint32 h;
+			if (n && LMSCENE::nodeHandle(n, h))
+				nodeByHandle[h] = nodeName(*allNodes[i]);
+		}
+
+		// Lights (all scene lights checked for lightmap export, hidden included). The
+		// reference enumerates them by NODE-TREE pre-order recursion (getLightNodeList),
+		// not storage order — the enumeration order decides the light order inside each
+		// lightmap layer and the layer creation order (the §10w tree-vs-storage lesson).
+		{
+			std::map<INode *, std::vector<INode *> > kids;
+			for (uint i = 0; i < allNodes.size(); ++i)
+			{
+				CNodeImpl *n = dynamic_cast<CNodeImpl *>(allNodes[i]);
+				if (n) kids[n->parent()].push_back(n);
+			}
+			std::vector<INode *> stack;
+			INode *sceneRoot = ssc->scene()->rootNode();
+			INode *seeds[2] = { sceneRoot, NULL };
+			for (int s = 0; s < 2; ++s)
+			{
+				if (s == 1 && seeds[0] == seeds[1]) continue;
+				std::map<INode *, std::vector<INode *> >::iterator it = kids.find(seeds[s]);
+				if (it == kids.end()) continue;
+				for (std::vector<INode *>::const_reverse_iterator ki = it->second.rbegin(); ki != it->second.rend(); ++ki)
+					stack.push_back(*ki);
+			}
+			while (!stack.empty())
+			{
+				INode *node = stack.back();
+				stack.pop_back();
+				NL3D::CLightmapLight light;
+				if (LMSCENE::convertLightmapLight(light, *node, tmCache, nodeByHandle))
+					lmc->Scene.Lights.push_back(light);
+				std::map<INode *, std::vector<INode *> >::iterator it = kids.find(node);
+				if (it != kids.end())
+					for (std::vector<INode *>::const_reverse_iterator ki = it->second.rbegin(); ki != it->second.rend(); ++ki)
+						stack.push_back(*ki);
+			}
 		}
 
 		// Occluders

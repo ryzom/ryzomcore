@@ -206,6 +206,42 @@ int main(int argc, char **argv)
 		printf("scene '%s': %u receivers, %u occluders, %u lights\n", scene.ProjectName.c_str(),
 		       (uint)scene.Receivers.size(), (uint)scene.Occluders.size(), (uint)scene.Lights.size());
 
+	if (getenv("SLM_DUMP_SCENE"))
+	{
+		for (uint i = 0; i < scene.Lights.size(); ++i)
+		{
+			const CLightmapLight &l = scene.Lights[i];
+			printf("LIGHT '%s' type=%d grp=%u anim='%s' pos=(%g %g %g) dir=(%g %g %g) rmin=%g rmax=%g"
+			       " hot=%g fall=%g mult=%g shadow=%d ambOnly=%d diff=(%u %u %u)\n",
+			       l.Name.c_str(), (int)l.Type, l.LightGroup, l.AnimatedLight.c_str(),
+			       l.Position.x, l.Position.y, l.Position.z, l.Direction.x, l.Direction.y, l.Direction.z,
+			       l.rRadiusMin, l.rRadiusMax, l.rHotspot, l.rFallof, l.rMult,
+			       (int)l.bCastShadow, (int)l.bAmbientOnly, l.Diffuse.R, l.Diffuse.G, l.Diffuse.B);
+		}
+		for (uint i = 0; i < scene.Receivers.size(); ++i)
+		{
+			const CLightmapReceiver &recv = scene.Receivers[i];
+			for (uint g = 0; g < recv.Geoms.size(); ++g)
+			{
+				const CLightmapReceiverGeom &geom = recv.Geoms[g];
+				NLMISC::CMatrix m = CMeshLightmapper::getObjectToWorldMatrix(&geom.MeshBuild, &recv.BaseBuild);
+				NLMISC::CAABBox box;
+				if (!geom.MeshBuild.Vertices.empty())
+				{
+					box.setCenter(m * geom.MeshBuild.Vertices[0]);
+					for (uint v = 1; v < geom.MeshBuild.Vertices.size(); ++v)
+						box.extend(m * geom.MeshBuild.Vertices[v]);
+				}
+				printf("RECV '%s' geom '%s' verts=%u bbox=(%g %g %g)-(%g %g %g)\n",
+				       recv.NodeName.c_str(), geom.NodeName.c_str(), (uint)geom.MeshBuild.Vertices.size(),
+				       box.getMin().x, box.getMin().y, box.getMin().z,
+				       box.getMax().x, box.getMax().y, box.getMax().z);
+			}
+		}
+		fflush(stdout);
+		return 0; // dump-only mode
+	}
+
 	uint exported = 0, failed = 0, deferred = 0;
 
 	for (uint r = 0; r < scene.Receivers.size(); ++r)

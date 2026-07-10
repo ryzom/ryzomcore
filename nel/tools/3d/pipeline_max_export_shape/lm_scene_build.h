@@ -73,13 +73,22 @@ struct SCollector
  *	omni attenuation 6/7, spot hotspot/falloff (degrees) 4/5 and attenuation 9/10. Object
  *	flag words: 0x2562 = use attenuation, 0x2570 = cast shadows (PROVISIONAL — varies per
  *	light exactly like the artist shadow toggle: sun=1, accent omnis=0; validated in
- *	aggregate against the reference lightmaps). Empty chunk 0x2600 = ambient only. The
- *	corpus light-chunk vocabulary is CLOSED (2992 lights scanned, no variable-size chunks):
- *	exclusion lists and projector bitmaps are unused corpus-wide, so leaving them empty is
- *	corpus-exact, not an approximation.
+ *	aggregate against the reference lightmaps). Empty chunk 0x2600 = ambient only.
+ *
+ *	EXCLUSION LIST (decoded off zo_cn_mairie's zo_mairie_omniamb/omniamb01 against the
+ *	reference lightmap logs): light-object chunk 0x2800 = { 0x03e9 = uint32 count,
+ *	0x03ea = count × uint32 NODE HANDLES, 0x03ec = uint32 flags (6 = exclude
+ *	illumination+shadow observed corpus-wide) }. Handles resolve through node chunk
+ *	0x0a32 (the persistent Max node handle) — nodeByHandle carries that map. The
+ *	reference's convertFromMaxLight inserts every ExclList entry as an exclusion NAME
+ *	regardless of the include/exclude flag bits; reproduced as-is.
  */
 bool convertLightmapLight(NL3D::CLightmapLight &out, PIPELINE::MAX::BUILTIN::INode &node,
-                          SCENELIB::SNodeTMCache &tmCache);
+                          SCENELIB::SNodeTMCache &tmCache,
+                          const std::map<uint32, std::string> &nodeByHandle);
+
+/// Node chunk 0x0a32 = the persistent Max node handle (used by light exclusion lists).
+bool nodeHandle(PIPELINE::MAX::BUILTIN::CNodeImpl *n, uint32 &out);
 
 /** Fill a receiver geom's per-node lightmap appdata (lumel-size multiplier, 8-bit LMC
  *	compression colors) and its raytrace-world exclusion set (the original exporter's
