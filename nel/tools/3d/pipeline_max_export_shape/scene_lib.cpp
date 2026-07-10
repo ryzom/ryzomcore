@@ -30,6 +30,7 @@
 
 #include <cstdio>
 #include <cstring>
+#include <set>
 
 #include <nel/misc/common.h>
 #include <nel/misc/algo.h>
@@ -461,9 +462,15 @@ static CSceneClass *resolveXRefObject(CSceneClass *xrefObj, int depth)
 CSceneClass *baseObjectOf(CSceneClass *obj, std::vector<CSceneClass *> *mods,
                           std::vector<CStorageContainer *> *modApps)
 {
-	int guard = 16;
+	// Deep OSM chains exist in the corpus (cococlaw LOD: 20+ nested OSM Derived wrappers
+	// before the Editable Mesh). Guard must clear that depth; a seen-set breaks pure cycles.
+	// SuperClassId of OSM Derived is often 0 on the unknown-class path — identify by ClassId.
+	int guard = 256;
+	std::set<CSceneClass *> seen;
 	while (obj && guard-- > 0)
 	{
+		if (!seen.insert(obj).second)
+			break; // cycle
 		NLMISC::CClassId cid = obj->classDesc()->classId();
 		if (cid.a() == 0x92aab38c)
 		{
@@ -481,12 +488,20 @@ CSceneClass *baseObjectOf(CSceneClass *obj, std::vector<CSceneClass *> *mods,
 			CSceneClass *r = dynamic_cast<CSceneClass *>(rm->getReference(i));
 			if (!r) continue;
 			TSClassId scid = r->classDesc()->superClassId();
+			// GeomObject / Shape / derived-object wrappers are bases. Modifiers are stack
+			// entries. Controllers and other non-geometry refs on the OSM array are ignored.
 			if (scid == SCLASS_OSMODIFIER || scid == SCLASS_WSMODIFIER)
 			{
 				if (mods) mods->push_back(r);
 				continue;
 			}
-			base = r;
+			if (scid == SCLASS_GEOMOBJECT || scid == SCLASS_SHAPE
+			    || r->classDesc()->classId() == CLASSID_OSM_DERIVED
+			    || r->classDesc()->classId() == CLASSID_WSM_DERIVED
+			    || r->classDesc()->classId().a() == 0x92aab38c)
+			{
+				base = r;
+			}
 		}
 		if (modApps)
 		{

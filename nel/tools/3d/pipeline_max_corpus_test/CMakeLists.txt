@@ -203,7 +203,19 @@ IF (Python3_Interpreter_FOUND)
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 	SET_TESTS_PROPERTIES(pipeline_max_cmb_corpus PROPERTIES SKIP_RETURN_CODE 77)
 
+	# clod_corpus.py: T1/T2 over ClodSourceDirectories (lod_fauna + lod_characters) + T3
+	# field-compare against ~/pipeline_export/common/{fauna,characters}/clod_export.
+	# Last surface format (§10z-clod, 2026-07-10): 105/105 refs produced, 0 export failures;
+	# 84 field-exact (FLOATEQ), 21 residual (ConvertToRigid→Bip01 bone-set, MRM VB-dedup,
+	# 1 UV, few normals). Deep OSM peel fix in scene_lib closed the cococlaw pair.
+	ADD_TEST(NAME pipeline_max_clod_corpus
+		COMMAND ${Python3_EXECUTABLE} clod_corpus.py --all --gate-t3 --min-floateq 84 --max-diff 21
+			--max-not-produced 0
+			--bin $<TARGET_FILE_DIR:pipeline_max_export_clod>
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+	SET_TESTS_PROPERTIES(pipeline_max_clod_corpus PROPERTIES SKIP_RETURN_CODE 77)
+
 	IF (TARGET unit_test)
-		ADD_DEPENDENCIES(unit_test pipeline_max_corpus_test pipeline_max_export_skel pipeline_max_export_anim pipeline_max_export_swt pipeline_max_export_ig pipeline_max_export_zone pipeline_max_export_shape pipeline_max_export_pacs_prim pipeline_max_export_cmb pipeline_max_export_veget)
+		ADD_DEPENDENCIES(unit_test pipeline_max_corpus_test pipeline_max_export_skel pipeline_max_export_anim pipeline_max_export_swt pipeline_max_export_ig pipeline_max_export_zone pipeline_max_export_shape pipeline_max_export_pacs_prim pipeline_max_export_cmb pipeline_max_export_veget pipeline_max_export_clod)
 	ENDIF (TARGET unit_test)
 ENDIF (Python3_Interpreter_FOUND)
