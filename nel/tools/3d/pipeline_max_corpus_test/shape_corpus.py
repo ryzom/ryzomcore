@@ -289,7 +289,7 @@ def main():
     if args.t1 or args.t2:
         print("T1: %d pass, %d fail; T2: %d pass, %d fail; %d stubs" % (t1_pass, t1_fail, t2_pass, t2_fail, stubs))
 
-    identical = floateq = diff = us_only = mapext = lightmap_ok = lightmap_diff = 0
+    identical = floateq = diff = us_only = mapext = mapext_ok = lightmap_ok = lightmap_diff = 0
     ref_missing = 0
     diff_samples = []
     if args.t3:
@@ -327,8 +327,22 @@ def main():
                     identical += 1
                 elif (proj, name) in mapext_nodes:
                     # custom UVW plugin (Map Extender): reference UVs are garbage by design-doc
-                    # pre-triage; bucketed out of the diff gate, listed in the asset report
-                    mapext += 1
+                    # pre-triage (our recovered cache UVs are the correct ones since
+                    # §10z-quatorze), which poisons the reference's vertex dedup — so compare
+                    # under the mapext mask (everything except UV values / vertex sets / index
+                    # content), splitting the bucket into verified vs diff like lightmap's.
+                    r = subprocess.run([export_bin, "--compare-mapext-mask", path, ref], capture_output=True, text=True)
+                    if r.returncode == 0:
+                        mapext_ok += 1
+                    else:
+                        mapext += 1
+                        if len(diff_samples) < 25:
+                            summary = ""
+                            for line in r.stdout.splitlines():
+                                ls = line.strip()
+                                if ls.startswith(("VB", "material", "DefaultPos", "DefaultRotQuat", "DefaultScale", "rdrpass", "class:", "matrix", "bones", "lod")) and ("differ" in ls or "vs" in ls):
+                                    summary += "|" + ls[:60]
+                            diff_samples.append("MAPEXT %s:%s%s" % (proj, name, summary[:220]))
                 elif (proj, name) in lightmap_nodes:
                     # lightmapped shape: the reference carries export-time lightmaps, the
                     # headless export is unmapped by design (pending the standalone lightmapper).
@@ -362,10 +376,11 @@ def main():
             have = set(refs) | set(coarse_refs)
             missing = have - set(mine)
             ref_missing += len(missing)
-        print("T3: %d exported: %d byte-identical, %d float-noise-eq, %d differ, %d mapext-bucketed, "
+        print("T3: %d exported: %d byte-identical, %d float-noise-eq, %d differ, "
+              "%d mapext-verified + %d mapext-diff, "
               "%d lightmap-verified + %d lightmap-diff, %d without reference; %d reference shapes not produced"
-              % (identical + floateq + diff + mapext + lightmap_ok + lightmap_diff + us_only,
-                 identical, floateq, diff, mapext, lightmap_ok, lightmap_diff, us_only, ref_missing))
+              % (identical + floateq + diff + mapext_ok + mapext + lightmap_ok + lightmap_diff + us_only,
+                 identical, floateq, diff, mapext_ok, mapext, lightmap_ok, lightmap_diff, us_only, ref_missing))
         if mapext_report:
             report_path = os.path.join(args.out, "mapext_assets.txt")
             with open(report_path, "w") as fh:
@@ -391,11 +406,11 @@ def main():
     fails = t1_fail + t2_fail + len(export_fail)
     if args.gate_t3:
         fails += anim_diff  # material animations must be byte-exact against the references
-        if identical + floateq + lightmap_ok < args.min_identical:
+        if identical + floateq + lightmap_ok + mapext_ok < args.min_identical:
             fails += 1
-        # structural diffs above the milestone budget are regressions (both the plain and the
-        # lightmap-mask class count against the budget)
-        fails += max(0, diff + lightmap_diff - args.max_diff)
+        # structural diffs above the milestone budget are regressions (the plain, the
+        # lightmap-mask and the mapext-mask classes all count against the budget)
+        fails += max(0, diff + lightmap_diff + mapext - args.max_diff)
     return 1 if fails else 0
 
 

@@ -90,6 +90,7 @@
 #include "flare_build.h"
 #include "remanence_build.h"
 #include "../pipeline_max_export_common/physique_skin.h"
+#include "interface_build.h"
 
 #include "../pipeline_max/builtin/scene_impl.h"
 #include "../pipeline_max/builtin/i_node.h"
@@ -271,6 +272,39 @@ static bool tryApplyPhysique(INode &node, NL3D::CMesh::CMeshBuild &buildMesh,
 	return true;
 }
 
+// Interface-weld world matrix per the reference call sites (export_mesh.cpp:1111): Identity
+// for skinned meshes (their VBs are already world space), else worldObjectTM * FromExportSpace
+// (maps the build's local/offset-space verts back to world).
+static NLMISC::CMatrix interfaceToWorldMat(INode &node, SNodeTMCache &tmCache, bool skinned)
+{
+	if (skinned)
+		return NLMISC::CMatrix::Identity;
+	CNodeImpl *n = dynamic_cast<CNodeImpl *>(&node);
+	Matrix3M nodeTM = getNodeTM(&node, tmCache);
+	Point3M opos;
+	QuatM orot;
+	ScaleValueM oscale;
+	readObjectOffset(n, opos, orot, oscale);
+	Matrix3M objectTM = composePRS(opos, orot, oscale) * nodeTM;
+	Matrix3M objectToLocal = objectTM * inverseM3(nodeTM);
+	NLMISC::CMatrix toWorld, fromExportSpace;
+	MAXSCENE::convertMatrix(toWorld, objectTM);
+	MAXSCENE::convertMatrix(fromExportSpace, objectToLocal);
+	fromExportSpace.invert();
+	return toWorld * fromExportSpace;
+}
+
+// Apply the interface weld when the node carries the appdata (post skinning, like the
+// reference; morph targets would skip — none are built yet).
+static void tryApplyInterface(INode &node, NL3D::CMesh::CMeshBuild &buildMesh,
+                              SNodeTMCache &tmCache, bool skinned)
+{
+	if (!IFACEBUILD::useInterfaceMesh(node))
+		return;
+	IFACEBUILD::applyInterfaceToMeshBuild(node, buildMesh,
+	                                      interfaceToWorldMat(node, tmCache, skinned), tmCache);
+}
+
 // Construct an IMeshGeom (CMeshGeom or CMeshMRMGeom) from a built CMeshBuild — used per LOD slot
 // in the multi-lod path. Caller owns the returned pointer until CMeshMultiLod::build takes it.
 static NL3D::IMeshGeom *buildMeshGeomFor(INode &node, NL3D::CMesh::CMeshBuild &buildMesh,
@@ -424,16 +458,9 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 	// the parent/slave carries Physique (hasPhysique covers the parent; slaves re-detect).
 	uint lodCount = (uint)getScriptAppDataInt(n, NEL3D_APPDATA_LOD_NAME_COUNT, 0);
 
-	// Interface meshes (border normal welding against another .max via INTERFACE_FILE appdata).
-	// The reference applies this as a post-build normal correction (export_mesh_interface.cpp),
-	// not a hard export gate — the mesh still ships without the weld, just with different border
-	// normals. Warn and continue so skinned armor / other interface-bearing shapes aren't
-	// blocked; full weld decode remains open (§10z-bis handoff, ~10 files).
-	if (!getScriptAppDataStr(n, NEL3D_APPDATA_INTERFACE_FILE, "").empty())
-	{
-		fprintf(stderr, "WARNING: shape '%s' has INTERFACE_FILE appdata; exporting without "
-		                "border normal welding (interface-mesh open item)\n", name.c_str());
-	}
+	// Interface meshes (border normal welding against another .max via INTERFACE_FILE appdata)
+	// are applied post-build per mesh below (IFACEBUILD::applyInterfaceToMeshBuild — the
+	// headless replication of the reference's export_mesh_interface.cpp).
 
 	// Nodes carrying the custom UVW-mapping plugin modifier ("Map Extender", mapext198m3.dlm,
 	// (0x2ec82081, 0x045a6271)): the reference .shape UVs of these assets are garbage (see
@@ -492,6 +519,7 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 			{
 				if (hasPhysique && !tryApplyPhysique(node, buildMesh, mods, modApps, ssc, stats))
 					return NULL;
+				tryApplyInterface(node, buildMesh, tmCache, hasPhysique);
 				NL3D::CMeshMultiLod::CMeshMultiLodBuild::CBuildSlot slot;
 				slot.MeshGeom = buildMeshGeomFor(node, buildMesh, numMaterials);
 				slot.DistMax = getScriptAppDataFloat(n, NEL3D_APPDATA_LOD_DIST_MAX, 1000.f);
@@ -530,6 +558,7 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 				continue;
 			if (slavePhys && !tryApplyPhysique(*slave, buildMesh, sMods, sApps, ssc, stats))
 				continue;
+			tryApplyInterface(*slave, buildMesh, tmCache, slavePhys);
 			NL3D::CMeshMultiLod::CMeshMultiLodBuild::CBuildSlot slot;
 			slot.MeshGeom = buildMeshGeomFor(*slave, buildMesh, numMaterials);
 			slot.DistMax = getScriptAppDataFloat(sn, NEL3D_APPDATA_LOD_DIST_MAX, 1000.f);
@@ -565,6 +594,7 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 			return NULL;
 		if (hasPhysique && !tryApplyPhysique(node, buildMesh, mods, modApps, ssc, stats))
 			return NULL;
+		tryApplyInterface(node, buildMesh, tmCache, hasPhysique);
 
 		// LOD_MRM alone selects the MRM branch, matching the reference plugin
 		// (export_mesh.cpp:360): a skinned node with LOD_MRM=0 exports as a plain CMesh carrying
@@ -1096,6 +1126,22 @@ static int g_verdict = 0;
 // content isn't). VB content and per-material texture list beyond slot 0 are skipped.
 static bool g_lightmapMask = false;
 
+// --compare-mapext-mask mode: the reference .shape UVs of Map Extender assets are garbage
+// (the 2004 plugin leaked uninitialized memory — design doc §9 / defective_max_files §4.4),
+// which poisons everything the vertex dedup touches: UV values, vertex count/order, index
+// content. This mode compares what garbage UVs canNOT poison — transform, the full material
+// serialization, matrix-block/rdrpass counts, per-rdrpass material assignment and index
+// COUNT (3× the per-material face count, dedup-independent) — upgrading the mapext bucket
+// from "excluded" to "verified except UV". Shares the VB/index handling with the lightmap
+// mask via g_uvMask; the LightMap material masking stays lightmap-only.
+static bool g_mapextMask = false;
+
+// Either mask that makes VB content/count and index CONTENT incomparable-by-design.
+static bool uvMask()
+{
+	return g_lightmapMask || g_mapextMask;
+}
+
 static void raiseVerdict(int v)
 {
 	if (v > g_verdict) g_verdict = v;
@@ -1120,7 +1166,7 @@ static void compareVB(const NL3D::CVertexBuffer &va, const NL3D::CVertexBuffer &
 	       va.getNumVertices(), vb.getNumVertices(),
 	       va.getVertexFormat(), vb.getVertexFormat(),
 	       va.getVertexSize(), vb.getVertexSize());
-	if (g_lightmapMask)
+	if (uvMask())
 	{
 		// The lightmapper adds a second UV set (VB format bit 3) and re-deduplicates verts
 		// against the lightmap UV; positions/normals are still the same source data, but the
@@ -1654,7 +1700,9 @@ static void compareShapesFields(const std::string &a, const std::string &b)
 				if (swa->size() != swb->size())
 				{
 					printf("  skin weights: %u vs %u verts\n", (uint)swa->size(), (uint)swb->size());
-					raiseVerdict(2);
+					// Under a UV mask the vertex sets legitimately differ (dedup on garbage or
+					// lightmap UVs) — count mismatch is not a verdict by itself there.
+					if (!uvMask()) raiseVerdict(2);
 				}
 				else
 				{
@@ -1730,9 +1778,12 @@ static void compareShapesFields(const std::string &a, const std::string &b)
 						{
 							printf("  lod %u rdrpass %u indexes %u vs %u\n", l, rp,
 							       ia.getNumIndexes(), ib2.getNumIndexes());
-							raiseVerdict(2);
+							// Per-lod MRM index counts shift with the vertex set under a UV
+							// mask (simplification order differs); total face counts are
+							// checked via the plain-CMesh path only.
+							if (!uvMask()) raiseVerdict(2);
 						}
-						else
+						else if (!uvMask())
 						{
 							NL3D::CIndexBufferRead ira, irb;
 							const_cast<NL3D::CIndexBuffer &>(ia).lock(ira);
@@ -1785,7 +1836,7 @@ static void compareShapesFields(const std::string &a, const std::string &b)
 						printf("  rdrpass %u indexes %u vs %u\n", rp, ia.getNumIndexes(), ib.getNumIndexes());
 						raiseVerdict(2);
 					}
-					else if (!g_lightmapMask)
+					else if (!uvMask())
 					{
 						// Under lightmap mask, index CONTENT will legitimately differ because the
 						// vert list was re-deduplicated on the lightmap UV — the count is what
@@ -1830,7 +1881,7 @@ static int compareShapes(const std::string &a, const std::string &b)
 	printf("DIFF size %u vs %u, first mismatch at 0x%x\n", (uint)da.size(), (uint)db.size(), (uint)diff);
 	// Under lightmap mask the sizes ALWAYS differ (calc-lm adds textures + a UV set) — don't
 	// let the size-differs alone prevent the FLOATEQ verdict.
-	g_verdict = (da.size() == db.size() || g_lightmapMask) ? 0 : 2;
+	g_verdict = (da.size() == db.size() || uvMask()) ? 0 : 2;
 	compareShapesFields(a, b);
 	if (g_verdict <= 1)
 	{
@@ -1883,6 +1934,13 @@ int main(int argc, char **argv)
 			exportLighting = false;
 		else if (arg == "--compare")
 		{
+			for (int j = i + 1; j < argc; ++j)
+				compareArgs.push_back(argv[j]);
+			break;
+		}
+		else if (arg == "--compare-mapext-mask")
+		{
+			g_mapextMask = true;
 			for (int j = i + 1; j < argc; ++j)
 				compareArgs.push_back(argv[j]);
 			break;
