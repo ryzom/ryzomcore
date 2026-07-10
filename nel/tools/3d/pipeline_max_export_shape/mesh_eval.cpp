@@ -51,6 +51,7 @@
 #include "../pipeline_max/builtin/reference_maker.h"
 
 #include "../pipeline_max_export_common/edit_mesh_mod.h"
+#include "../pipeline_max_export_common/map_extender_mod.h"
 #include "../pipeline_max_export_common/old_param_block.h"
 #include "../pipeline_max_export_common/parametric_mesh.h"
 #include "../pipeline_max_export_common/spline_mesh.h"
@@ -878,6 +879,36 @@ bool evalNodeMesh(INode &node, SEvalMesh &out, std::vector<std::string> *warning
 					        name.c_str(), mcid.toString().c_str(), mapType);
 					if (warnings) warnings->push_back("modifier:" + mcid.toString());
 				}
+			}
+		}
+		else if (MAPEXT::isMapExtenderModifier(mod))
+		{
+			// Map Extender (mapext198m3.dlm): plugin object holds no settings (empty 0x39bf);
+			// the computed UVW map is stored flat in the LocalModData cache
+			// (0x2500 → 0x2512 → 0x03e8/0x03e9/0x03ea/0x03eb, channel in 0x03f3). Apply as a
+			// replacing map channel. Reference NeL exports of these nodes have garbage UVs
+			// (§9 / §10i) — our recovery is strictly better; harness still buckets MAPEXT for
+			// UV-sensitive comparison against that garbage reference.
+			int channel = 1;
+			std::vector<NLMISC::CVector> uvs;
+			std::vector<uint32> faceUVs;
+			std::string err;
+			if (MAPEXT::applyMapExtender(mod, app, (uint)out.Faces.size(), channel, uvs, faceUVs, &err))
+			{
+				SMapChannel &mc = out.Maps[channel];
+				mc.Verts.resize(uvs.size());
+				if (!uvs.empty())
+					memcpy(&mc.Verts[0], &uvs[0], uvs.size() * 12);
+				mc.Faces.resize(out.Faces.size());
+				for (uint f = 0; f < out.Faces.size(); ++f)
+					for (uint c2 = 0; c2 < 3; ++c2)
+						mc.Faces[f].T[c2] = faceUVs[f * 3 + c2];
+			}
+			else
+			{
+				fprintf(stderr, "WARNING: mesh '%s' Map Extender cache not applied (%s)\n",
+				        name.c_str(), err.c_str());
+				if (warnings) warnings->push_back("modifier:" + mcid.toString());
 			}
 		}
 		else
