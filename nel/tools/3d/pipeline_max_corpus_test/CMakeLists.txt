@@ -158,7 +158,7 @@ IF (Python3_Interpreter_FOUND)
 	# 1209 floateq + 918 lightmap-verified = 2249 good; 875 differ + 347 lightmap-diff = 1222
 	# structural diffs. Tighten as diff classes close.
 	ADD_TEST(NAME pipeline_max_shape_corpus
-		COMMAND ${Python3_EXECUTABLE} shape_corpus.py --all --gate-t3 --min-identical 2200 --max-diff 1250
+		COMMAND ${Python3_EXECUTABLE} shape_corpus.py --all --gate-t3 --min-identical 2450 --max-diff 800
 			--bin $<TARGET_FILE_DIR:pipeline_max_export_shape>
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 	SET_TESTS_PROPERTIES(pipeline_max_shape_corpus PROPERTIES SKIP_RETURN_CODE 77)
@@ -168,7 +168,7 @@ IF (Python3_Interpreter_FOUND)
 	# tier (2e-6/32-ULP, normals 1e-4) must hold under the Max-2010-matching compiler/float
 	# model too. Self-skips (exit 77) without that build tree.
 	ADD_TEST(NAME pipeline_max_shape_corpus_vs2008
-		COMMAND ${Python3_EXECUTABLE} shape_corpus.py --all --gate-t3 --min-identical 2200 --max-diff 1250
+		COMMAND ${Python3_EXECUTABLE} shape_corpus.py --all --gate-t3 --min-identical 2450 --max-diff 800
 			--bin $ENV{HOME}/build_vs2008_wine_pipeline/winebin
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 	SET_TESTS_PROPERTIES(pipeline_max_shape_corpus_vs2008 PROPERTIES SKIP_RETURN_CODE 77)

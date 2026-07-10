@@ -809,6 +809,9 @@ bool evalNodeMesh(INode &node, SEvalMesh &out, std::vector<std::string> *warning
 
 	// Apply modifiers base-upward: mods was collected outermost wrapper first; within a wrapper,
 	// reference order = stack order bottom-up already, so replay back-to-front.
+	if (getenv("PMB_STACK_DUMP"))
+		fprintf(stderr, "PMB_STACK_DUMP '%s' base %s verts=%u faces=%u mods=%u\n", name.c_str(),
+		        cid.toString().c_str(), (uint)out.Verts.size(), (uint)out.Faces.size(), (uint)mods.size());
 	for (uint i = (uint)mods.size(); i > 0; --i)
 	{
 		CSceneClass *mod = mods[i - 1];
@@ -917,6 +920,9 @@ bool evalNodeMesh(INode &node, SEvalMesh &out, std::vector<std::string> *warning
 			        name.c_str(), mcid.toString().c_str());
 			if (warnings) warnings->push_back("modifier:" + mcid.toString());
 		}
+		if (getenv("PMB_STACK_DUMP"))
+			fprintf(stderr, "PMB_STACK_DUMP '%s' after mod %s verts=%u faces=%u\n", name.c_str(),
+			        mcid.toString().c_str(), (uint)out.Verts.size(), (uint)out.Faces.size());
 	}
 	return true;
 }

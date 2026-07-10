@@ -65,6 +65,9 @@ namespace MESHBUILD {
 #define NEL3D_APPDATA_LOD_DISTANCE_MIDDLE 1423062559
 #define NEL3D_APPDATA_LOD_DISTANCE_COARSEST 1423062560
 
+// Morpher modifier (Morpher.dlm) — refs 101+i are the blend-shape target nodes (design §10d).
+static const NLMISC::CClassId CLASSID_MORPHER(0x17bb6854, 0xa5cba2a3);
+
 #define NODE_RENDERFLAGS_CHUNK_ID 0x099c
 #define NODE_RENDERFLAG_CASTSHADOW 0x00000200
 #define NODE_RENDERFLAG_RCVSHADOW 0x00000400
@@ -286,8 +289,26 @@ void buildBaseMeshInterface(CMeshBase::CMeshBaseBuild &buildMesh, SMaxMeshBaseBu
 	buildMesh.DefaultPivot = NLMISC::CVector(0, 0, 0);
 	buildMesh.DefaultPos = pos;
 
-	// Morpher target names (modifier refs 101+i are the target nodes)
-	// TODO morph: BSNames/DefaultBSFactors when the Morpher modifier decode lands.
+	// Morpher target names (modifier refs 101+i are the target nodes; reference
+	// buildBaseMeshInterface pushes factor 0.0 + the target node's name per channel).
+	{
+		std::vector<CSceneClass *> mods;
+		baseObjectOf(node, &mods, NULL);
+		for (uint mi = 0; mi < mods.size(); ++mi)
+		{
+			if (mods[mi]->classDesc()->classId() != CLASSID_MORPHER) continue;
+			CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(mods[mi]);
+			for (uint i = 0; rm && i < 100; ++i)
+			{
+				if (101 + i >= rm->nbReferences()) break;
+				INode *target = dynamic_cast<INode *>(rm->getReference(101 + i));
+				if (!target) continue;
+				buildMesh.DefaultBSFactors.push_back(0.0f);
+				buildMesh.BSNames.push_back(nodeName(*target));
+			}
+			break;
+		}
+	}
 	(void)tmCache;
 }
 

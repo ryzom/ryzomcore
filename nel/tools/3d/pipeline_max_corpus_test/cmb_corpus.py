@@ -58,19 +58,17 @@ DIRECT_SOURCES = [
 # Direct tier (16 files, 16 igs):
 #   Zo_bt_Hall_Conseil — 80/80 verts, 0 face diffs, ~0.05 unit vertex offset (Y-preserved X/Z
 #                        diverge; root cause unresolved, precision ruled out via VS2008/x87).
-#   FY_hall_reunion    — 16 created-vert positions offset (candidate: 0x2510 mod-context TM
-#                        applied to created verts, unproven).
-#   Zo_bt_hall_Reunion_vitrine — 25 vert offsets + 221 face diffs (larger-scale variant of the
-#                                same class as FY_hall_reunion; face-remap decode landed for it
-#                                too but a modifier-context defect remains).
-DIRECT_DIFF_BUDGET = 3
+#   (FY_hall_reunion + Zo_bt_hall_Reunion_vitrine CLOSED 2026-07-10 — created-vert records with
+#    srcTag != -1 are CLONE+OFFSET, resolved against the source vertex's pre-move position; both
+#    files are byte-identical now. Design doc §10z-quinze.)
+DIRECT_DIFF_BUDGET = 1
 
 # Ligo tier (1201 bricks, ~221 igs measured against reference): documented open classes are
 # XRef sources resolving to classes cmb doesn't yet build a mesh for (unregistered scripted
 # plugins, Shape/SplineShape superclass 0x40), and the shared cluster-containment / selection-
 # order classes ligo_ig_corpus.py documents on the same brick set. Tighten as diffs close;
 # regressions past this fail --gate-t3 the same way ligo_ig_corpus.py's DIFF_BUDGET does.
-LIGO_DIFF_BUDGET = 105
+LIGO_DIFF_BUDGET = 95
 
 # float32 position tolerance for the direct tier's "close" classification (x87-vs-SSE /
 # operation-order noise — same POS_EPS-style tier already established for ig/zone/shape).
