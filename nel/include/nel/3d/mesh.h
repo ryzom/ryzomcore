@@ -130,12 +130,21 @@ public:
 		uint32 nFace, nCorner;
 		uint32 VertVB;
 
+		CVertLink ()
+		{
+			nFace = 0;
+			nCorner = 0;
+			VertVB = 0;
+		}
+
 		CVertLink (uint32 face, uint32 corner, uint32 iVB)
 		{
 			nFace = face;
 			nCorner = corner;
 			VertVB = iVB;
 		}
+
+		void serial(NLMISC::IStream &f);
 	};
 
 	/** Mesh Interface System for MRM
@@ -144,11 +153,15 @@ public:
 	{
 		CVector					Pos;
 		CVector					Normal;
+
+		void serial(NLMISC::IStream &f);
 	};
 	struct	CInterface
 	{
 		// The polygon describing the interface between 2 meshs.
 		std::vector<CInterfaceVertex>	Vertices;
+
+		void serial(NLMISC::IStream &f);
 	};
 	/// For each vertex
 	struct	CInterfaceLink
@@ -161,7 +174,10 @@ public:
 		CInterfaceLink()
 		{
 			InterfaceId= -1;
+			InterfaceVertexId= 0;
 		}
+
+		void serial(NLMISC::IStream &f);
 	};
 
 	/// A mesh information.
@@ -206,8 +222,12 @@ public:
 
 		CMeshBuild();
 
-		// Serialization
-		//void serial(NLMISC::IStream &f);
+		/** Versioned serialization of the pre-build mesh state.
+		 *	Never serialized historically; added as the 1_export -> standalone-lightmapper
+		 *	scene-graph contract (a long-lived pipeline intermediate — keep it versioned
+		 *	and backward-readable from day one).
+		 */
+		void serial(NLMISC::IStream &f);
 
 	};
 	//@}
