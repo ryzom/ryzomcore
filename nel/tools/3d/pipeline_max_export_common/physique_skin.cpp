@@ -94,25 +94,25 @@ static CStorageRaw *findChildRaw(CStorageContainer *parent, uint16 id)
 }
 
 // Resolve boneRef → INode via the modifier's reference table.
-// Primary/rigid links store ~index (one's-complement); deformable cross-links sometimes store a
-// plain non-negative index. Both are tried; NULL slots in the ref table are counted in the index
-// (Part M §M.3 — Bip01 Head at index 6 because index 5 is NULL).
+// Primary/rigid links store ~index (one's-complement); deformable cross-links store the
+// POSITIVE index + 1 (1-based). Pinned on fy_hof_armor01_pantabottes: the cross-link records
+// pair (−83 → idx 82 'R Thigh') with (+84 → idx 83 'R Calf') on knee vertices and
+// (−1 Pelvis, −83 R Thigh, +77 → idx 76 'L Thigh') on hip vertices — anatomically exact —
+// and the 1-based read removes the spurious 'R Foot' from the used-bone set, matching the
+// reference shape's 8-bone list (a raw 0-based read had produced 9 bones incl. R Foot).
+// NULL slots in the ref table are counted in the index (Part M §M.3 — Bip01 Head at index 6
+// because index 5 is NULL).
 static INode *resolveBoneRef(CReferenceMaker *modRm, sint32 boneRef)
 {
 	if (!modRm) return NULL;
 	uint n = modRm->nbReferences();
 	sint32 idx = -1;
-	// ~index form: high 24 bits all 1s for indices < 256 (the corpus span); general form is any
-	// negative value from one's-complement of a valid index.
 	if (boneRef < 0)
-	{
-		idx = ~boneRef; // one's complement
-	}
+		idx = ~boneRef; // one's complement (rigid link)
+	else if (boneRef > 0)
+		idx = boneRef - 1; // 1-based (deformable cross-link)
 	else
-	{
-		// Deformable cross-link candidate: raw non-negative index.
-		idx = boneRef;
-	}
+		return NULL;
 	if (idx < 0 || (uint)idx >= n) return NULL;
 	return dynamic_cast<INode *>(modRm->getReference((uint)idx));
 }

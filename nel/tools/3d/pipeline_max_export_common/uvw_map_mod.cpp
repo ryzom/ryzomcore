@@ -106,11 +106,15 @@ static Point3M mapPoint(int type, const Point3M &pIn, const Point3M &normIn, int
 	switch (type)
 	{
 	case MAP_PLANAR:
-		// Fit-centered gizmo of size = bbox produces p in ≈[-0.5, 0.5]; Max's texture
-		// sampling for a single tile expects [0,1]. Bias by +0.5 so the mapping volume
-		// lands on one tile (matches typical Fit planar exports in the corpus).
-		uvw.x = p.x + 0.5f;
-		uvw.y = p.y + 0.5f;
+		// Planar: u = 0.5 − p.x, v = 0.5 − p.y. Sign convention pinned by the Rectangle01 GT
+		// (mag_impact_cold.max → common/sfx rectangle01.shape): the artist-Fit planar gizmo is
+		// stored with a ~180°-about-Z rotation (quat (0,0,−1,ε)) and dims = bbox·1.001, and the
+		// reference UVs come out u = 0.5 + x_obj/W — which under the rotated Inverse(gizmo)
+		// mapping (p.x = −x/W) requires the NEGATIVE bias form. Equivalent reading: Max's planar
+		// map space has u/v axes opposite the gizmo's local x/y (every corpus planar gizmo
+		// carries the same 180° convention, so the two models coincide corpus-wide).
+		uvw.x = 0.5f - p.x;
+		uvw.y = 0.5f - p.y;
 		uvw.z = p.z;
 		break;
 
@@ -264,8 +268,10 @@ void applyUvwMapProjection(int type, float utile, float vtile, float wtile,
 
 // ---------------------------------------------------------------------------------------------
 
-bool applyUvwMap(CSceneClass *mod, CStorageContainer *modApp, SMeshView &mesh)
+bool applyUvwMap(CSceneClass *mod, CStorageContainer *modApp, SMeshView &mesh,
+                 uint typeMask, int *outType)
 {
+	if (outType) *outType = -1;
 	if (!isUvwMapModifier(mod) || !mesh.Verts || !mesh.FaceVerts || !mesh.Maps)
 		return false;
 
@@ -289,7 +295,19 @@ bool applyUvwMap(CSceneClass *mod, CStorageContainer *modApp, SMeshView &mesh)
 	std::map<sint32, OLDPBLOCK::SParam> params;
 	OLDPBLOCK::readOldParamBlock(pblock, params);
 
+	if (getenv("PMB_UVW_DUMP"))
+	{
+		fprintf(stderr, "PMB_UVW_DUMP pblock:");
+		for (std::map<sint32, OLDPBLOCK::SParam>::iterator it = params.begin(); it != params.end(); ++it)
+			fprintf(stderr, " [%d]=%s%.9g", (int)it->first, it->second.IsInt ? "i" : "f",
+			        it->second.IsInt ? (double)it->second.I : (double)it->second.V[0]);
+		fprintf(stderr, "\n");
+	}
+
 	int maptype = OLDPBLOCK::paramInt(params, UVWMAP_MAPTYPE);
+	if (outType) *outType = maptype;
+	if (maptype >= 0 && maptype < 32 && !(typeMask & (1u << maptype)))
+		return false; // projection type not yet corpus-validated — caller warns and skips
 	float utile = OLDPBLOCK::paramFloat(params, UVWMAP_UTILE);
 	float vtile = OLDPBLOCK::paramFloat(params, UVWMAP_VTILE);
 	float wtile = OLDPBLOCK::paramFloat(params, UVWMAP_WTILE);
@@ -325,6 +343,11 @@ bool applyUvwMap(CSceneClass *mod, CStorageContainer *modApp, SMeshView &mesh)
 			QuatM gr = MAXSCENE::rotValueAt0(dynamic_cast<CSceneClass *>(prs->getReference(1)));
 			ScaleValueM gs = MAXSCENE::scaleValueAt0(dynamic_cast<CSceneClass *>(prs->getReference(2)));
 			gizmo = composePRS(gp, gr, gs);
+			if (getenv("PMB_UVW_DUMP"))
+				fprintf(stderr, "PMB_UVW_DUMP gizmo p=(%.9g %.9g %.9g) r=(%.9g %.9g %.9g %.9g) "
+				                "s=(%.9g %.9g %.9g) sq=(%.9g %.9g %.9g %.9g)\n",
+				        gp.x, gp.y, gp.z, gr.x, gr.y, gr.z, gr.w,
+				        gs.s.x, gs.s.y, gs.s.z, gs.q.x, gs.q.y, gs.q.z, gs.q.w);
 		}
 	}
 
@@ -383,6 +406,16 @@ bool applyUvwMap(CSceneClass *mod, CStorageContainer *modApp, SMeshView &mesh)
 	// the dimension scale above with center translation should produce [-0.5,0.5]; TileFlip
 	// does not add 0.5. Leave bias off for now and rely on dim+center.)
 	Matrix3M tm = ctx * inverseM3(gizmo);
+
+	if (getenv("PMB_UVW_DUMP"))
+	{
+		fprintf(stderr, "PMB_UVW_DUMP ctx: [%g %g %g][%g %g %g][%g %g %g][%g %g %g]\n",
+		        ctx.m[0][0], ctx.m[0][1], ctx.m[0][2], ctx.m[1][0], ctx.m[1][1], ctx.m[1][2],
+		        ctx.m[2][0], ctx.m[2][1], ctx.m[2][2], ctx.m[3][0], ctx.m[3][1], ctx.m[3][2]);
+		fprintf(stderr, "PMB_UVW_DUMP tm: [%g %g %g][%g %g %g][%g %g %g][%g %g %g]\n",
+		        tm.m[0][0], tm.m[0][1], tm.m[0][2], tm.m[1][0], tm.m[1][1], tm.m[1][2],
+		        tm.m[2][0], tm.m[2][1], tm.m[2][2], tm.m[3][0], tm.m[3][1], tm.m[3][2]);
+	}
 
 	applyUvwMapProjection(maptype, utile, vtile, wtile, uflip, vflip, wflip, cap, tm, channel, mesh);
 	return true;

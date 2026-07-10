@@ -53,6 +53,8 @@
 #include "../pipeline_max_export_common/edit_mesh_mod.h"
 #include "../pipeline_max_export_common/old_param_block.h"
 #include "../pipeline_max_export_common/parametric_mesh.h"
+#include "../pipeline_max_export_common/spline_mesh.h"
+#include "../pipeline_max_export_common/spline_shape.h"
 #include "../pipeline_max_export_common/uvw_map_mod.h"
 
 using namespace PIPELINE::MAX;
@@ -513,13 +515,63 @@ static bool extractParametricPrimitive(CSceneClass *base, SEvalMesh &out, const 
 			break;
 		}
 	}
-	if (!pblock)
-	{
-		fprintf(stderr, "WARNING: parametric prim '%s' without ref-0 pblock\n", name.c_str());
-		return false;
-	}
 	std::map<sint32, OLDPBLOCK::SParam> params;
-	OLDPBLOCK::readOldParamBlock(pblock, params);
+	if (pblock)
+	{
+		OLDPBLOCK::readOldParamBlock(pblock, params);
+	}
+	else
+	{
+		// Max 4+ primitive classes (Plane, and any Box/Cylinder/Sphere re-created in a later Max)
+		// store a ParamBlock2 (superclass 0x82) instead of the old-style pblock. The PB2 param ids
+		// for these prims coincide with the old pblock indices the generator uses (Plane: 0=length,
+		// 1=width, 2/3=segments — SDK PBlock2 param ids; verified on fy_cn_smokehouse.max's
+		// 'fy_smoke_water' Plane against its reference CWaterShape polygon extent). Translate the
+		// inline constants into the same index-keyed param map.
+		for (uint r = 0; rm && r < rm->nbReferences(); ++r)
+		{
+			CSceneClass *ref = dynamic_cast<CSceneClass *>(rm->getReference(r));
+			if (!ref || ref->classDesc()->superClassId() != 0x82) continue;
+			SPB2Block blk;
+			if (!readPB2Block(ref, blk)) continue;
+			for (std::map<uint16, SPB2Param>::const_iterator it = blk.Params.begin();
+			     it != blk.Params.end(); ++it)
+			{
+				const SPB2Param &p = it->second;
+				if (!p.HasConstant || p.IsTab) continue;
+				OLDPBLOCK::SParam &dst = params[(sint32)p.Id];
+				dst.IsPoint3 = false;
+				if (p.Type == PB2_FLOAT || p.Type == PB2_WORLD || p.Type == PB2_ANGLE
+					|| p.Type == PB2_PCNT_FRAC)
+				{
+					dst.IsInt = false;
+					dst.V[0] = p.F[0];
+					dst.V[1] = dst.V[2] = 0.f;
+					dst.I = (sint32)p.F[0];
+				}
+				else if (p.Type == PB2_INT || p.Type == PB2_BOOL)
+				{
+					dst.IsInt = true;
+					dst.I = p.I;
+					dst.V[0] = (float)p.I;
+					dst.V[1] = dst.V[2] = 0.f;
+				}
+				else
+				{
+					params.erase((sint32)p.Id);
+					continue;
+				}
+				if (getenv("PMB_PRIM_DUMP"))
+					fprintf(stderr, "PMB_PRIM_DUMP '%s' pb2 block %u param %u type 0x%x f=%g i=%d\n",
+					        name.c_str(), blk.BlockId, p.Id, p.Type, dst.V[0], dst.I);
+			}
+		}
+		if (params.empty())
+		{
+			fprintf(stderr, "WARNING: parametric prim '%s' without ref-0 pblock\n", name.c_str());
+			return false;
+		}
+	}
 
 	std::vector<NLMISC::CVector> pverts;
 	std::vector<PRIMMESH::SPrimTri> ptris;
@@ -565,6 +617,145 @@ static bool extractParametricPrimitive(CSceneClass *base, SEvalMesh &out, const 
 	return true;
 }
 
+// Spline (Shape-superclass) → mesh, replicating Max's SplineShape→TriObject conversion that the
+// reference exporter triggers via ConvertToType: open splines yield an EMPTY mesh (0 verts,
+// 0 faces — the corpus references literally store empty CMesh shapes for them), closed splines
+// yield a capped mesh. Decode via the shared SPLINESHAPE library; cap replication is developed
+// against the 7 closed-spline corpus references (see PMB_SPLINE_DUMP).
+static bool extractSplineMesh(CSceneClass *base, SEvalMesh &out, const std::string &name)
+{
+	SPLINESHAPE::SShape shape;
+	if (!SPLINESHAPE::decodeShapeObject(base, shape))
+	{
+		// Parametric shape classes store no BezierShape chunks — generate. Rectangle (0x1065):
+		// knots from pblock length/width/fillet per the SDK sample source (SimpleSpline carries
+		// TWO old pblocks: the interpolation block {steps int, optimize bool, adaptive bool} and
+		// the shape block {length, width, fillet floats} — identified by content).
+		if (base->classDesc()->classId() == SPLINESHAPE::CLASSID_RECTANGLE)
+		{
+			CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(base);
+			float length = 0.f, width = 0.f, fillet = 0.f;
+			bool haveParams = false;
+			for (uint r = 0; rm && r < rm->nbReferences(); ++r)
+			{
+				CSceneClass *ref = dynamic_cast<CSceneClass *>(rm->getReference(r));
+				if (!ref || ref->classDesc()->superClassId() != SCLASS_PBLOCK) continue;
+				std::map<sint32, OLDPBLOCK::SParam> params;
+				OLDPBLOCK::readOldParamBlock(ref, params);
+				if (getenv("PMB_SPLINE_DUMP"))
+				{
+					fprintf(stderr, "PMB_SPLINE_DUMP '%s' rect pblock ref[%u]:", name.c_str(), r);
+					for (std::map<sint32, OLDPBLOCK::SParam>::iterator it = params.begin();
+					     it != params.end(); ++it)
+						fprintf(stderr, " [%d]=%s%g", (int)it->first,
+						        it->second.IsInt ? "i" : "f",
+						        it->second.IsInt ? (double)it->second.I : (double)it->second.V[0]);
+					fprintf(stderr, "\n");
+				}
+				// The interpolation block's params are ints/bools; the shape block's are floats.
+				if (params.size() >= 3 && !params[0].IsInt && !params[1].IsInt)
+				{
+					length = OLDPBLOCK::paramFloat(params, 0);
+					width = OLDPBLOCK::paramFloat(params, 1);
+					fillet = OLDPBLOCK::paramFloat(params, 2);
+					haveParams = true;
+				}
+				else if (params.size() >= 1 && params[0].IsInt)
+				{
+					shape.Steps = params[0].I; // IPB_STEPS
+					shape.HaveSteps = true;
+				}
+			}
+			if (haveParams)
+			{
+				SPLINESHAPE::SSpline sp;
+				SPLINESHAPE::buildRectangleKnots(length, width, fillet, sp);
+				shape.Curves.push_back(sp);
+			}
+		}
+		if (shape.Curves.empty())
+		{
+			fprintf(stderr, "WARNING: shape-class '%s' — no spline data decoded\n", name.c_str());
+			return false;
+		}
+	}
+	if (getenv("PMB_SPLINE_DUMP"))
+	{
+		// Full chunk tree of the shape object (orphaned + chunks) — locating the real closed flag
+		// and any tessellation params.
+		struct SDump
+		{
+			static void tree(const CStorageContainer::TStorageObjectContainer &ch, uint depth)
+			{
+				std::string ind(depth * 2, ' ');
+				for (CStorageContainer::TStorageObjectConstIt it = ch.begin(); it != ch.end(); ++it)
+				{
+					CStorageContainer *sub = dynamic_cast<CStorageContainer *>(it->second);
+					CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
+					if (sub && !raw)
+					{
+						fprintf(stderr, "%s0x%04x container\n", ind.c_str(), it->first);
+						tree(sub->chunks(), depth + 1);
+					}
+					else if (raw)
+					{
+						fprintf(stderr, "%s0x%04x leaf size=%u", ind.c_str(), it->first, (uint)raw->Value.size());
+						size_t n = std::min(raw->Value.size(), (size_t)32);
+						fprintf(stderr, " [");
+						for (size_t k = 0; k < n; ++k)
+						{
+							if (k && k % 4 == 0) fprintf(stderr, " ");
+							fprintf(stderr, "%02x", raw->Value[k]);
+						}
+						fprintf(stderr, "]\n");
+					}
+				}
+			}
+		};
+		fprintf(stderr, "PMB_SPLINE_DUMP node='%s' object chunk tree (orphaned):\n", name.c_str());
+		SDump::tree(base->orphanedChunks(), 1);
+		fprintf(stderr, "PMB_SPLINE_DUMP node='%s' object chunk tree (chunks):\n", name.c_str());
+		SDump::tree(base->chunks(), 1);
+		fprintf(stderr, "PMB_SPLINE_DUMP node='%s' curves=%u\n", name.c_str(), (uint)shape.Curves.size());
+		for (uint c = 0; c < shape.Curves.size(); ++c)
+		{
+			const SPLINESHAPE::SSpline &sp = shape.Curves[c];
+			fprintf(stderr, "  curve %u closed=%d knots=%u\n", c, (int)sp.Closed, (uint)sp.Knots.size());
+			for (uint k = 0; k < sp.Knots.size(); ++k)
+				fprintf(stderr, "    k%u kt=%d lt=%d du=%g p0=(%.9g %.9g %.9g) p1=(%.9g %.9g %.9g) p2=(%.9g %.9g %.9g) fl=0x%x\n",
+				        k, sp.Knots[k].KType, sp.Knots[k].LType, sp.Knots[k].Du,
+				        sp.Knots[k].Knot.x, sp.Knots[k].Knot.y, sp.Knots[k].Knot.z,
+				        sp.Knots[k].InVec.x, sp.Knots[k].InVec.y, sp.Knots[k].InVec.z,
+				        sp.Knots[k].OutVec.x, sp.Knots[k].OutVec.y, sp.Knots[k].OutVec.z,
+				        sp.Knots[k].Flags);
+		}
+	}
+	uint nClosed = 0;
+	for (uint c = 0; c < shape.Curves.size(); ++c)
+		if (shape.Curves[c].Closed && shape.Curves[c].Knots.size() >= 3)
+			++nClosed;
+	if (nClosed > 1)
+		fprintf(stderr, "WARNING: shape-class '%s' has %u closed curves; capping the first only "
+		                "(hole capping has no corpus instance)\n", name.c_str(), nClosed);
+
+	SPLINEMESH::SSplineMesh sm;
+	SPLINEMESH::buildSplineMesh(shape, shape.HaveSteps ? shape.Steps : 0,
+	                            /*optimize*/ true, /*adaptive*/ false, sm);
+	out.Verts.resize(sm.Verts.size());
+	if (!sm.Verts.empty()) memcpy(&out.Verts[0], &sm.Verts[0], sm.Verts.size() * 12);
+	out.Faces.resize(sm.Faces.size());
+	for (uint i = 0; i < sm.Faces.size(); ++i)
+	{
+		SEvalFace &f = out.Faces[i];
+		f.V[0] = sm.Faces[i].V[0];
+		f.V[1] = sm.Faces[i].V[1];
+		f.V[2] = sm.Faces[i].V[2];
+		f.SmGroup = 1;   // cap faces share one smoothing group (reference normals are smooth)
+		f.Flags = 0x7;   // matID 0, all edges visible
+	}
+	return true;
+}
+
 bool evalNodeMesh(INode &node, SEvalMesh &out, std::vector<std::string> *warnings)
 {
 	std::string name = nodeName(node);
@@ -592,28 +783,27 @@ bool evalNodeMesh(INode &node, SEvalMesh &out, std::vector<std::string> *warning
 	}
 	else
 	{
-		// Shape-superclass base objects (SplineShape 0x0a, Line 0x1040, Rectangle 0x1065) are
-		// splines, not meshes — the reference plugin's buildShape produces no `.shape` for them
-		// unless routed to `buildRemanence` (USE_REMANENCE appdata gated in the caller); a plain
-		// SplineShape without that appdata gets a fall-through NULL. Report them as a distinct
-		// warn class so the harness bucket doesn't hide them under "mesh-eval" (which is meant for
-		// genuine GeomObject-class decode gaps).
+		// Shape-superclass base objects (SplineShape 0x0a, Line 0x1040, Rectangle 0x1065): the
+		// reference plugin CONVERTS them to TriObject (os.obj->ConvertToType), which produces
+		// Max's spline mesh — a capped planar-ish mesh for closed splines, an EMPTY mesh (0 verts,
+		// 0 faces) for open ones. Corpus GT: the 9 characters/sfx spline references (rectangle01
+		// 4v/2f, shape01 18v/16f, shape04 9v/7f, …, shape02/03 + tr_wea_hache2m_trail_00 empty).
 		TSClassId scid = base->classDesc()->superClassId();
 		if (scid == SCLASS_SHAPE)
 		{
-			fprintf(stderr, "WARNING: shape-class base object %s ('%s') — spline extraction not "
-			                "implemented (SplineShape/Line/Rectangle would need CSegRemanence or a "
-			                "dedicated spline decode; §10z-bis open item)\n",
-			        cid.toString().c_str(), name.c_str());
-			if (warnings) warnings->push_back("shape-class:" + cid.toString());
+			if (!extractSplineMesh(base, out, name))
+			{
+				if (warnings) warnings->push_back("shape-class:" + cid.toString());
+				return false;
+			}
 		}
 		else
 		{
 			fprintf(stderr, "WARNING: mesh extraction for object class %s ('%s') not implemented\n",
 			        cid.toString().c_str(), name.c_str());
 			if (warnings) warnings->push_back("object:" + cid.toString());
+			return false;
 		}
-		return false;
 	}
 
 	// Apply modifiers base-upward: mods was collected outermost wrapper first; within a wrapper,
@@ -648,19 +838,47 @@ bool evalNodeMesh(INode &node, SEvalMesh &out, std::vector<std::string> *warning
 		}
 		else if (UVWMAP::isUvwMapModifier(mod))
 		{
-			// UVW Map library (pipeline_max_export_common/uvw_map_mod) is scaffolded — pblock
-			// indices, gizmo PRS, mod-context TM, and MapPoint projections for planar/cyl/
-			// spherical/box/ball/face are implemented. Production apply is GATED until the
-			// gizmo TM × Length/Width/Height composition is corpus-validated against a Max 9
-			// differential dataset (gen_shape_export_dataset.ms UVW cases currently fail on
-			// the Max 9 SP2 gizmo API; without GT, applying a wrong projection overwrites
-			// baked Editable-Mesh UVs and regressed 2 FLOATEQ files in a full T3 probe).
-			// Keep the "unhandled modifier (0x…)" warn shape so shape_corpus.py still buckets
-			// the 272 uses under mod:000f72b1.
-			fprintf(stderr, "WARNING: mesh '%s' has unhandled modifier %s; evaluated without it "
-			                "(UVW Map scaffold ready, apply gated pending GT)\n",
-			        name.c_str(), mcid.toString().c_str());
-			if (warnings) warnings->push_back("modifier:" + mcid.toString());
+			// UVW Map library (pipeline_max_export_common/uvw_map_mod): pblock indices, gizmo
+			// PRS, mod-context TM, MapPoint projections. PLANAR is corpus-validated (the
+			// Rectangle01 GT pinned the sign convention: u = 0.5 − p.x, v = 0.5 − p.y under the
+			// stored Fit gizmo) and applied by default; the other projection types stay gated
+			// until their own corpus validation — PMB_UVW_APPLY=1 enables all types for probes.
+			{
+				uint typeMask = getenv("PMB_UVW_APPLY") ? 0xFFFFFFFFu : (1u << UVWMAP::MAP_PLANAR);
+				std::vector<sint32> faceVerts(out.Faces.size() * 3);
+				for (uint f = 0; f < out.Faces.size(); ++f)
+					for (uint c2 = 0; c2 < 3; ++c2)
+						faceVerts[f * 3 + c2] = (sint32)out.Faces[f].V[c2];
+				std::map<int, UVWMAP::SMeshView::SChannel> chans;
+				UVWMAP::SMeshView mv;
+				mv.Verts = reinterpret_cast<std::vector<MAXMATH::Point3M> *>(&out.Verts);
+				mv.FaceVerts = &faceVerts;
+				mv.FaceNormals = NULL;
+				mv.Maps = &chans;
+				int mapType = -1;
+				if (UVWMAP::applyUvwMap(mod, app, mv, typeMask, &mapType))
+				{
+					for (std::map<int, UVWMAP::SMeshView::SChannel>::iterator ct = chans.begin();
+					     ct != chans.end(); ++ct)
+					{
+						SMapChannel &mc = out.Maps[ct->first];
+						mc.Verts.resize(ct->second.UVs.size());
+						if (!ct->second.UVs.empty())
+							memcpy(&mc.Verts[0], &ct->second.UVs[0], ct->second.UVs.size() * 12);
+						mc.Faces.resize(out.Faces.size());
+						for (uint f = 0; f < out.Faces.size(); ++f)
+							for (uint c2 = 0; c2 < 3; ++c2)
+								mc.Faces[f].T[c2] = (uint32)ct->second.FaceUVs[f * 3 + c2];
+					}
+				}
+				else
+				{
+					fprintf(stderr, "WARNING: mesh '%s' has unhandled modifier %s; evaluated "
+					                "without it (UVW Map type %d not corpus-validated yet)\n",
+					        name.c_str(), mcid.toString().c_str(), mapType);
+					if (warnings) warnings->push_back("modifier:" + mcid.toString());
+				}
+			}
 		}
 		else
 		{

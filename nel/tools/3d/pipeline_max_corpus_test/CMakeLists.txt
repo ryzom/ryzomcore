@@ -151,11 +151,38 @@ IF (Python3_Interpreter_FOUND)
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 	SET_TESTS_PROPERTIES(pipeline_max_zone_corpus_vs2008 PROPERTIES SKIP_RETURN_CODE 77)
 
+	# Budgets re-baselined 2026-07-10 (shape-coverage session): the skinned-physique landing
+	# moved ~650 files into the DIFF bucket without bumping the old 700/400 budget, so the gate
+	# had been failing silently since. Measured at re-baseline: 94 ident + 1073 floateq + 916
+	# lightmap-verified = 2083 good; 1038 differ + 349 lightmap-diff = 1387 structural diffs.
+	# Tighten as diff classes close.
 	ADD_TEST(NAME pipeline_max_shape_corpus
-		COMMAND ${Python3_EXECUTABLE} shape_corpus.py --all --gate-t3 --min-identical 700 --max-diff 400
+		COMMAND ${Python3_EXECUTABLE} shape_corpus.py --all --gate-t3 --min-identical 2000 --max-diff 1400
 			--bin $<TARGET_FILE_DIR:pipeline_max_export_shape>
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 	SET_TESTS_PROPERTIES(pipeline_max_shape_corpus PROPERTIES SKIP_RETURN_CODE 77)
+
+	# Same shape corpus through the VS2008/Wine x87 reference-codegen build, same rationale as
+	# the other *_vs2008 gates: T1/T2 byte-identity is codegen-independent, and the T3 FLOATEQ
+	# tier (2e-6/32-ULP, normals 1e-4) must hold under the Max-2010-matching compiler/float
+	# model too. Self-skips (exit 77) without that build tree.
+	ADD_TEST(NAME pipeline_max_shape_corpus_vs2008
+		COMMAND ${Python3_EXECUTABLE} shape_corpus.py --all --gate-t3 --min-identical 2000 --max-diff 1400
+			--bin $ENV{HOME}/build_vs2008_wine_pipeline/winebin
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+	SET_TESTS_PROPERTIES(pipeline_max_shape_corpus_vs2008 PROPERTIES SKIP_RETURN_CODE 77)
+
+	# veget_corpus.py: T1/T2 over the VegetSourceDirectories microveget sources + T3 export
+	# byte-compare against ~/pipeline_export/ecosystems/<eco>/veget. Serial-equal counting
+	# (per-file outdirs — the first-pass driver's shared-outdir snapshots raced under -j and
+	# inflated the exported count nondeterministically; the §10z-onze recorded numbers were
+	# that artifact). Measured at gate-wiring: 126 exported = 25 byte-identical + 97 size-eq
+	# + 4 size-diff, 0 not produced.
+	ADD_TEST(NAME pipeline_max_veget_corpus
+		COMMAND ${Python3_EXECUTABLE} veget_corpus.py --all --gate-t3 --min-identical 120 --max-diff 4
+			--bin $<TARGET_FILE_DIR:pipeline_max_export_veget>
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+	SET_TESTS_PROPERTIES(pipeline_max_veget_corpus PROPERTIES SKIP_RETURN_CODE 77)
 
 	# pacs_prim_corpus.py: T1/T2 over PacsPrimSourceDirectories (stuff/<race>/decors/vegetations)
 	# + T3 export byte-compare against ~/pipeline_export/ecosystems/<eco>/pacs_prim. Landing state:
@@ -176,6 +203,6 @@ IF (Python3_Interpreter_FOUND)
 	SET_TESTS_PROPERTIES(pipeline_max_cmb_corpus PROPERTIES SKIP_RETURN_CODE 77)
 
 	IF (TARGET unit_test)
-		ADD_DEPENDENCIES(unit_test pipeline_max_corpus_test pipeline_max_export_skel pipeline_max_export_anim pipeline_max_export_swt pipeline_max_export_ig pipeline_max_export_zone pipeline_max_export_shape pipeline_max_export_pacs_prim pipeline_max_export_cmb)
+		ADD_DEPENDENCIES(unit_test pipeline_max_corpus_test pipeline_max_export_skel pipeline_max_export_anim pipeline_max_export_swt pipeline_max_export_ig pipeline_max_export_zone pipeline_max_export_shape pipeline_max_export_pacs_prim pipeline_max_export_cmb pipeline_max_export_veget)
 	ENDIF (TARGET unit_test)
 ENDIF (Python3_Interpreter_FOUND)

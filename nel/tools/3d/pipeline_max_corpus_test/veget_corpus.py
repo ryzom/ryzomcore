@@ -98,9 +98,13 @@ def main():
             r = subprocess.run([corpus_bin, "--parse", path], capture_output=True)
             res["t2"] = r.returncode == 0
         if args.t3:
-            outdir = os.path.join(args.out, eco)
+            # Per-FILE outdir: the old shared per-eco outdir with before/after dir-listing
+            # snapshots raced under -j (another thread's outputs landed between the snapshots
+            # and were attributed to several files at once — parallel sweeps reported 6x the
+            # serial exported count, nondeterministically). One export call per .max means a
+            # per-file dir needs no snapshot at all.
+            outdir = os.path.join(args.out, eco, os.path.splitext(os.path.basename(path))[0])
             os.makedirs(outdir, exist_ok=True)
-            before = set(os.listdir(outdir))
             r = subprocess.run([export_bin, "--db", args.graphics, path, outdir],
                                capture_output=True, text=True)
             res["t3rc"] = r.returncode
@@ -108,7 +112,7 @@ def main():
             res["t3err"] = r.stderr
             new = []
             for f in os.listdir(outdir):
-                if f.endswith(".veget") and f not in before:
+                if f.endswith(".veget"):
                     new.append(os.path.join(outdir, f))
             res["t3new"] = new
         return res

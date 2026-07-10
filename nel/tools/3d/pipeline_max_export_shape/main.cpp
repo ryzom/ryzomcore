@@ -952,17 +952,116 @@ static int dumpSkin(const std::string &path)
 	for (uint i = 0; i < bones.size(); ++i)
 		printf("  bone[%u] '%s'\n", i, bones[i].c_str());
 	printf("verts %u\n", (uint)sw->size());
-	uint nShow = std::min((uint)sw->size(), (uint)16u);
+	// Positions: both CMeshMRM and CMeshMRMSkinned expose the final VB (the skinned class
+	// dequantizes its packed int16 positions), parallel to the SkinWeights array — used for
+	// position-matched weight comparison against a reference shape (PMB_SKIN_DUMP_ALL for the
+	// full listing; default keeps the original 16-vert preview).
+	NL3D::CVertexBuffer vbStore;
+	const NL3D::CVertexBuffer *vbp = NULL;
+	if (NL3D::CMeshMRM *mrm = dynamic_cast<NL3D::CMeshMRM *>(shape))
+		vbp = &mrm->getMeshGeom().getVertexBuffer();
+	else if (NL3D::CMeshMRMSkinned *mrms = dynamic_cast<NL3D::CMeshMRMSkinned *>(shape))
+	{
+		mrms->getMeshGeom().getVertexBuffer(vbStore);
+		vbp = &vbStore;
+	}
+	uint nShow = getenv("PMB_SKIN_DUMP_ALL") ? (uint)sw->size() : std::min((uint)sw->size(), (uint)16u);
+	NL3D::CVertexBufferRead vbr;
+	const uint8 *posPtr = NULL;
+	uint stride = 0;
+	if (vbp && vbp->getNumVertices() >= sw->size())
+	{
+		const_cast<NL3D::CVertexBuffer *>(vbp)->lock(vbr);
+		posPtr = (const uint8 *)vbr.getVertexCoordPointer();
+		stride = vbp->getVertexSize();
+	}
 	for (uint v = 0; v < nShow; ++v)
 	{
 		const NL3D::CMesh::CSkinWeight &s = (*sw)[v];
 		printf("  v%u:", v);
+		if (posPtr)
+		{
+			float p[3];
+			memcpy(p, posPtr + v * stride, 12);
+			printf(" pos(%.9g %.9g %.9g)", p[0], p[1], p[2]);
+		}
 		for (uint i = 0; i < 4; ++i) printf(" [%u]=%.6g", s.MatrixId[i], s.Weights[i]);
 		printf("  |");
 		for (uint i = 0; i < 4; ++i)
 			if (s.Weights[i] != 0.f && s.MatrixId[i] < bones.size())
 				printf(" %s=%.6g", bones[s.MatrixId[i]].c_str(), s.Weights[i]);
 		printf("\n");
+	}
+	delete shape;
+	return 0;
+}
+
+// --dump-mesh: print a CMesh's VB (all values) + per-rdrpass index triples — GT extraction for
+// decode work (spline caps, UVW Map projections) against reference shapes.
+static int dumpMesh(const std::string &path)
+{
+	NL3D::IShape *shape = loadShape(path);
+	if (!shape) { fprintf(stderr, "cannot load %s\n", path.c_str()); return 2; }
+	printf("class %s\n", shape->getClassName().c_str());
+	NL3D::CMesh *m = dynamic_cast<NL3D::CMesh *>(shape);
+	if (!m) { printf("(not a CMesh)\n"); delete shape; return 0; }
+	const NL3D::CVertexBuffer &vb = m->getVertexBuffer();
+	printf("verts %u format 0x%x size %u\n", vb.getNumVertices(), vb.getVertexFormat(), vb.getVertexSize());
+	NL3D::CVertexBufferRead vbr;
+	const_cast<NL3D::CVertexBuffer &>(vb).lock(vbr);
+	const uint8 *p = (const uint8 *)vbr.getVertexCoordPointer();
+	uint stride = vb.getVertexSize();
+	for (uint v = 0; v < vb.getNumVertices(); ++v)
+	{
+		printf("  v%u:", v);
+		for (uint value = 0; value < NL3D::CVertexBuffer::NumValue; ++value)
+		{
+			if (!(vb.getVertexFormat() & (1 << value))) continue;
+			uint off = vb.getValueOffEx((NL3D::CVertexBuffer::TValue)value);
+			NL3D::CVertexBuffer::TType type = vb.getValueType(value);
+			uint nComp = NL3D::CVertexBuffer::NumComponentsType[type];
+			bool isFloat = type == NL3D::CVertexBuffer::Float1 || type == NL3D::CVertexBuffer::Float2
+				|| type == NL3D::CVertexBuffer::Float3 || type == NL3D::CVertexBuffer::Float4;
+			printf(" val%u(", value);
+			for (uint c = 0; c < nComp; ++c)
+			{
+				if (isFloat)
+				{
+					float f;
+					memcpy(&f, p + v * stride + off + c * 4, 4);
+					printf("%s%.9g", c ? " " : "", f);
+				}
+				else
+				{
+					printf("%s%u", c ? " " : "", (uint)p[v * stride + off + c]);
+				}
+			}
+			printf(")");
+		}
+		printf("\n");
+	}
+	for (uint mbk = 0; mbk < m->getNbMatrixBlock(); ++mbk)
+	{
+		for (uint rp = 0; rp < m->getNbRdrPass(mbk); ++rp)
+		{
+			const NL3D::CIndexBuffer &ib = m->getRdrPassPrimitiveBlock(mbk, rp);
+			printf("rdrpass %u material %u tris %u:", rp, m->getRdrPassMaterial(mbk, rp), ib.getNumIndexes() / 3);
+			NL3D::CIndexBufferRead ibr;
+			const_cast<NL3D::CIndexBuffer &>(ib).lock(ibr);
+			if (ib.getFormat() == NL3D::CIndexBuffer::Indices16)
+			{
+				const uint16 *ix = (const uint16 *)ibr.getPtr();
+				for (uint i = 0; i + 2 < ib.getNumIndexes(); i += 3)
+					printf(" (%u %u %u)", ix[i], ix[i+1], ix[i+2]);
+			}
+			else
+			{
+				const uint32 *ix = (const uint32 *)ibr.getPtr();
+				for (uint i = 0; i + 2 < ib.getNumIndexes(); i += 3)
+					printf(" (%u %u %u)", ix[i], ix[i+1], ix[i+2]);
+			}
+			printf("\n");
+		}
 	}
 	delete shape;
 	return 0;
@@ -1683,6 +1782,8 @@ int main(int argc, char **argv)
 	{
 		if (std::string(argv[i]) == "--dump-skin" && i + 1 < argc)
 			return dumpSkin(argv[i + 1]);
+		if (std::string(argv[i]) == "--dump-mesh" && i + 1 < argc)
+			return dumpMesh(argv[i + 1]);
 	}
 
 	if (input.empty() || outDir.empty())

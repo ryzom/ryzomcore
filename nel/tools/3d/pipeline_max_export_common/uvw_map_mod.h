@@ -97,8 +97,11 @@ struct SMeshView
 
 /// Apply UVW Map to \a mesh. Reads pblock + gizmo from \a mod and 0x2510 from \a modApp.
 /// Returns false if the modifier cannot be decoded (caller should warn and skip).
+/// \a typeMask gates which projection types are applied (bit 1<<type): types outside the mask
+/// return false with \a outType set — the corpus-validated set grows per type (planar is pinned
+/// by the Rectangle01 GT; the rest await their own corpus/GT validation).
 bool applyUvwMap(PIPELINE::MAX::CSceneClass *mod, PIPELINE::MAX::CStorageContainer *modApp,
-                 SMeshView &mesh);
+                 SMeshView &mesh, uint typeMask = 0xFFFFFFFF, int *outType = 0);
 
 /// Pure projection (no scene wiring) — for tests and for reuse by parametric-prim UV paths.
 /// \a tm maps object-space points into map space (row-vector: p' = p * tm).

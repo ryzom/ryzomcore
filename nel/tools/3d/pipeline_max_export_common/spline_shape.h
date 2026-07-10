@@ -87,7 +87,17 @@ struct SSpline
 struct SShape
 {
 	std::vector<SSpline> Curves;
+	sint32 Steps;    ///< BezierShape interpolation steps (chunk 0x1050): 6 default, 0 = knots only
+	bool HaveSteps;
+	SShape() : Steps(6), HaveSteps(false) { }
 };
+
+/// Generate a parametric Rectangle's knots from its pblock length/width/fillet — the Rectangle
+/// class (0x1065) stores no BezierShape chunks; construction per the Max SDK sample source
+/// (rectangl.cpp BuildShape): fillet == 0 → 4 corner knots (w2,l2), (−w2,l2), (−w2,−l2),
+/// (w2,−l2) with degenerate handles; fillet > 0 → 8 bezier knots with circle-arc handles
+/// (CIRCLE_VECTOR_LENGTH = 0.5517861843). Closed.
+void buildRectangleKnots(float length, float width, float fillet, SSpline &out);
 
 /// Decode all Spline3D records under a shape scene object (walks orphaned + claimed chunk trees
 /// looking for the 0x2900/0x290a sibling pattern). Returns false if no spline data found.
