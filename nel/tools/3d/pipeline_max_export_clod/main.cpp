@@ -164,6 +164,23 @@ static bool buildLodCharacter(INode &node, SNodeTMCache &tmCache, CSceneClassCon
 		fprintf(stderr, "ERROR: clod '%s' has no skinning (Physique/Skin required)\n", name.c_str());
 		return false;
 	}
+
+	// Map Extender tag (same convention as the shape exporter): the reference .clod of a
+	// mapext-carrying node was exported with the plugin missing (pass-through → the base
+	// map channel), while we apply the recovered cache — the reference's UV channel is not
+	// a valid oracle for these assets (design doc §9 / §10z-quatorze; the recovered UVs are
+	// the correct ones). The harness masks UV comparison on tagged nodes.
+	{
+		static const NLMISC::CClassId CLASSID_MAP_EXTENDER(0x2ec82081, 0x045a6271);
+		for (uint i = 0; i < mods.size(); ++i)
+		{
+			if (mods[i]->classDesc() && mods[i]->classDesc()->classId() == CLASSID_MAP_EXTENDER)
+			{
+				printf("MAPEXT %s\n", NLMISC::toLowerAscii(name).c_str());
+				break;
+			}
+		}
+	}
 	if (hasSkin && !hasPhysique)
 	{
 		// Skin modifier: zero corpus hits under Max 3-era assets; refuse like the shape exporter.

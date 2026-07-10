@@ -107,26 +107,65 @@ static CStorageRaw *findChildRaw(CStorageContainer *parent, uint16 id)
 //   ref[k+1] = 'R Finger0'     → 'R Hand'     (k+1 right after a NULL chain-attach slot)
 //   ref[k+1] = 'R Toe0' (nub)  → 'R Toe0'     (name-shadowed nub; parent = the real toe)
 //   ref[k+1] = 'Bip01 Spine'   → 'Bip01 Pelvis'
-// The NULL slots between chains are never addressed as k+1 by valid links; a NULL ref[k+1]
-// (or out-of-range k+1) is unresolved and falls through to the caller's root fallback (the
-// ConvertToRigid root-promotion class).
+// The link-tree ROOT bone: ref[0] when non-NULL (the root-attach end — 'Bip01 Pelvis' on
+// every biped-attached corpus rig), else the INode PARENT of the first non-NULL ref (C04's
+// table starts [NULL, 'Bip01 Spine', ...] with Pelvis absent — the reference still deforms
+// its root-link verts by Pelvis = parent(Spine)). Corpus-pinned per-vertex against the clod
+// references (diranak/estrasson/C04, all → 'Bip01 Pelvis', never the COM).
+static INode *linkTreeRoot(CReferenceMaker *modRm)
+{
+	uint n = modRm->nbReferences();
+	for (uint i = 0; i < n; ++i)
+	{
+		CNodeImpl *bn = dynamic_cast<CNodeImpl *>(modRm->getReference(i));
+		if (!bn) continue;
+		if (i == 0)
+			return bn; // root-attach end is stored directly
+		return bn->parent(); // ref[0] NULL: root = parent of the first chain bone
+	}
+	return NULL;
+}
+
+// Stored value 0 is link k = -1 — the ROOT-ATTACH segment, which has no start bone above it
+// in the Physique link tree: the deforming bone is the link-tree root (clod corpus: the
+// references map these verts to 'Bip01 Pelvis', never the COM). A NULL ref[k+1] on a k >= 0
+// link is a deleted/free chain-attach end and ALSO deforms by the link-tree root (diranak/
+// estrasson's [-19] links end at the NULL slot ref[19]; the reference keeps them as real
+// Pelvis influences inside blends at the stored relative weights). Out-of-range k+1 stays
+// unresolved and falls through to the caller's root fallback.
 static INode *resolveBoneRef(CReferenceMaker *modRm, sint32 boneRef)
 {
 	if (!modRm) return NULL;
 	uint n = modRm->nbReferences();
-	sint32 k = -1;
+	sint32 k;
 	if (boneRef < 0)
 		k = ~boneRef; // one's complement (rigid link)
-	else if (boneRef > 0)
-		k = boneRef - 1; // 1-based (deformable cross-link)
 	else
-		return NULL;
-	if (k < 0 || (uint)(k + 1) >= n) return NULL;
-	INode *end = dynamic_cast<INode *>(modRm->getReference((uint)(k + 1)));
-	if (!end) return NULL;
-	CNodeImpl *endImpl = dynamic_cast<CNodeImpl *>(end);
-	if (!endImpl) return NULL;
-	return endImpl->parent();
+		k = boneRef - 1; // 1-based (deformable cross-link); 0 → the root-attach link -1
+	if (k < -1 || (uint)(k + 1) >= n) return NULL;
+	if (k == -1)
+		return linkTreeRoot(modRm); // root-attach link
+	CNodeImpl *endImpl = dynamic_cast<CNodeImpl *>(modRm->getReference((uint)(k + 1)));
+	if (!endImpl)
+		return linkTreeRoot(modRm); // NULL chain-attach end: deforms by the root
+	INode *start = endImpl->parent();
+	// A biped COM is not part of the DEFORMABLE spline tree: a cross-link (positive form)
+	// whose segment start lands on a linked sub-rig's COM ('Bip02' via parent('Bip02 Spine'))
+	// deforms by the bone the sub-rig is ATTACHED to — the COM's own parent ('Bip01 Spine2'
+	// on the kitin queen, corpus-pinned per-vertex against the reference clod). RIGID links
+	// (negative form) attach to the literal parent node — the kitihank/kitinagan references
+	// keep 'Bip02' itself as the deform bone for their rigid links, so the skip must not
+	// apply there.
+	if (boneRef > 0)
+	{
+		while (start && PMAX_RIG::isBipedComNode(start))
+		{
+			CNodeImpl *ci = dynamic_cast<CNodeImpl *>(start);
+			if (!ci) break;
+			start = ci->parent();
+		}
+	}
+	return start;
 }
 
 bool decodePhysiqueWeights(CSceneClass *mod,
@@ -225,6 +264,9 @@ bool decodePhysiqueWeights(CSceneClass *mod,
 			(void)offset; // bind-pose only; not used for SkinWeights (Part M §M.3)
 			++totalBones;
 			INode *bone = resolveBoneRef(modRm, boneRef);
+			if (getenv("PMB_SKIN_DUMP_REFS"))
+				fprintf(stderr, "SKINREF v%u ref=%d -> '%s'\n", v, (int)boneRef,
+				        bone ? ucstring(bone->userName()).toUtf8().c_str() : "(null)");
 			if (!bone)
 			{
 				++unresolvedBones;

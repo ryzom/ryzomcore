@@ -96,8 +96,13 @@ def parse_clod(path):
                 w=w, h=h, ntex=ntex, size=len(data))
 
 
-def compare_clod(out_path, ref_path, pos_eps=1e-5, nrm_eps=1e-3, uv_eps=1e-5, skin_w_eps=1e-4):
-    """Return (verdict, detail). Verdicts: IDENTICAL, FLOATEQ, DIFF."""
+def compare_clod(out_path, ref_path, pos_eps=1e-5, nrm_eps=1e-3, uv_eps=1e-5, skin_w_eps=1e-4,
+                 uv_mask=False):
+    """Return (verdict, detail). Verdicts: IDENTICAL, FLOATEQ, DIFF.
+
+    uv_mask: Map-Extender-tagged node — the reference was exported with the plugin missing
+    (pass-through base map channel) while we apply the recovered cache, so UV values are not
+    comparable (ours are the correct ones; design doc §9 / §10z-quatorze policy)."""
     a = open(out_path, "rb").read()
     b = open(ref_path, "rb").read()
     if a == b:
@@ -131,7 +136,7 @@ def compare_clod(out_path, ref_path, pos_eps=1e-5, nrm_eps=1e-3, uv_eps=1e-5, sk
             nd = max(_maxdiff(x, y) for x, y in zip(A["norms"], B["norms"]))
             if nd > nrm_eps:
                 issues.append("nrm_max=%.3g" % nd)
-        if A["uvs"] and B["uvs"] and len(A["uvs"]) == len(B["uvs"]):
+        if not uv_mask and A["uvs"] and B["uvs"] and len(A["uvs"]) == len(B["uvs"]):
             ud = max(_maxdiff(x, y) for x, y in zip(A["uvs"], B["uvs"]))
             if ud > uv_eps:
                 issues.append("uv_max=%.3g" % ud)
@@ -244,7 +249,7 @@ def main():
         for res in ex.map(run_file, corpus):
             results.append(res)
 
-    identical = floateq = hard_diff = us_only = 0
+    identical = floateq = hard_diff = us_only = mapext_masked = 0
     ref_missing = 0
     diff_samples = []
     for res in results:
@@ -269,25 +274,36 @@ def main():
                 print("T3 EXPORT FAIL %s" % res["path"])
                 sys.stdout.write((res.get("t3err") or "")[-800:])
                 print()
+            # Map-Extender-tagged nodes (exporter MAPEXT lines): reference UVs are the
+            # plugin-missing pass-through, not comparable — UV compare masked.
+            mapext_nodes = set()
+            for line in (res.get("t3out") or "").splitlines():
+                if line.startswith("MAPEXT "):
+                    mapext_nodes.add(line[7:].strip().lower())
             for outp in res.get("t3new") or []:
                 bn = os.path.basename(outp)
+                uv_mask = os.path.splitext(bn)[0].lower() in mapext_nodes
                 ref = find_ref(os.path.join(args.ref, res["ref_rel"]), bn)
                 if not ref:
                     us_only += 1
                     if len(diff_samples) < 25:
                         diff_samples.append("US_ONLY %s" % bn)
                     continue
-                verdict, detail = compare_clod(outp, ref)
+                verdict, detail = compare_clod(outp, ref, uv_mask=uv_mask)
+                if uv_mask and verdict != "DIFF":
+                    mapext_masked += 1
                 if verdict == "IDENTICAL":
                     identical += 1
                 elif verdict == "FLOATEQ":
                     floateq += 1
                     if args.verbose and len(diff_samples) < 10:
-                        diff_samples.append("FLOATEQ %s %s" % (bn, detail))
+                        diff_samples.append("FLOATEQ %s %s%s" % (bn, detail,
+                                            " [mapext-uvmask]" if uv_mask else ""))
                 else:
                     hard_diff += 1
                     if len(diff_samples) < 30:
-                        diff_samples.append("DIFF %s: %s" % (bn, detail))
+                        diff_samples.append("DIFF %s: %s%s" % (bn, detail,
+                                            " [mapext-uvmask]" if uv_mask else ""))
 
     if args.t3:
         exported_names = set()
@@ -311,8 +327,8 @@ def main():
     if args.t3:
         total = identical + floateq + hard_diff + us_only
         print("T3: %d exported: %d byte-identical, %d float-eq, %d hard-diff, "
-              "%d without reference; %d references not produced"
-              % (total, identical, floateq, hard_diff, us_only, ref_missing))
+              "%d without reference; %d references not produced; %d mapext-uvmasked"
+              % (total, identical, floateq, hard_diff, us_only, ref_missing, mapext_masked))
         print("    export failures: %d" % len(export_fail))
         for s in diff_samples:
             print("    %s" % s)
