@@ -101,12 +101,6 @@ Matrix3M quatToMatrix3(const QuatM &q)
 	// Non-unit inputs are normalized first (Max does the same).
 	Matrix3M r = Matrix3M::identity();
 	float x = q.x, y = q.y, z = q.z, w = q.w;
-	float n2 = x * x + y * y + z * z + w * w;
-	if (n2 > 0.0f && fabsf(n2 - 1.0f) > 1e-8f)
-	{
-		float inv = 1.0f / sqrtf(n2);
-		x *= inv; y *= inv; z *= inv; w *= inv;
-	}
 	float xx = x * x, yy = y * y, zz = z * z;
 	float xy = x * y, xz = x * z, yz = y * z;
 	float wx = w * x, wy = w * y, wz = w * z;
@@ -684,22 +678,30 @@ static QuatG snuggle(QuatG q, float k[3])
 
 void decompAffine(const Matrix3M &a, AffinePartsM &parts)
 {
-	// Gems IV decomp_affine expects a column-vector HMatrix (translation in column W =
-	// indices [0..2][3]). Max Matrix3 is row-vector (translation in row 3). The Max SDK
-	// wrapper converts by TRANSPOSING the 3x3 into the HMatrix upper-left and placing
-	// the translation in column W — matching gems' parts->t = (A[X][W], A[Y][W], A[Z][W]).
-	// The previous "copy rows as rows" adaptation matched simple axis-aligned cases by
-	// accident but mis-ordered stretch axes (k) / stretch rotation (u) on rot*scale
-	// composites (Max 2010 gold probe, 2026-07-09).
+	// SDK adaptation: Matrix3 rows into the HMatrix rows (the gems code then works on the
+	// column-convention view of the same values), translation from row 3.
+	//
+	// A 2026-07-09 "gold alignment" round swapped this for a transpose-into-column-vector
+	// adapter + conjugated output quats, matching an offline Max 2010 core.dll decomp_affine
+	// probe on synthetic rot*scale composites — REVERTED 2026-07-10 against corpus evidence:
+	// the shipped reference igs are the authoritative oracle for how the reference exporter
+	// CONSUMED decomp_affine (the §10g decompMatrix convention: nelRot = (q.x,q.y,q.z,-q.w),
+	// scale = f·diag(Inverse(srtm)·stm·srtm)), and the rows-as-rows adaptation is what
+	// reproduces them (ligo-ig 8-diff budget + ig processed-ref 40/40 with this form; 47
+	// diffs / 36+4 with the transposed form — real Scale/Pos/cluster-containment divergence,
+	// not ULP noise; skel moves only +7/222 bit-exact non-biped DefaultPos the other way).
+	// The offline probe validated reassembly (|M − R·S·T|), which is convention-invariant and
+	// cannot discriminate the transpose duality; the corpus can. If the transposed adapter is
+	// ever wanted, it must ship with a matching consumption-side change and re-gate
+	// ig/ligo-ig/shape/skel/zone together — never swap this function alone.
 	HMatrix A, Q, S, U;
 	for (int i = 0; i < 3; ++i)
 	{
 		for (int j = 0; j < 3; ++j)
-			A[i][j] = a.m[j][i]; // transpose 3x3 into column-vector layout
-		A[i][3] = a.m[3][i];    // translation → column W
+			A[i][j] = a.m[i][j];
+		A[i][3] = 0.0f;
 	}
-	A[3][0] = A[3][1] = A[3][2] = 0.0f;
-	A[3][3] = 1.0f;
+	A[3][0] = a.m[3][0]; A[3][1] = a.m[3][1]; A[3][2] = a.m[3][2]; A[3][3] = 1.0f;
 
 	parts.t.x = a.m[3][0];
 	parts.t.y = a.m[3][1];
@@ -725,11 +727,18 @@ void decompAffine(const Matrix3M &a, AffinePartsM &parts)
 	p = snuggle(u, k);
 	u = qtMul(u, p);
 
-	// Column-vector gems quats are conjugates of the Max row-vector controller
-	// convention (same dual as Quat::MakeMatrix's inverse/transpose mapping). Without
-	// this, pure rotations come out as the inverse of Max 2010 decomp_affine gold.
-	q = qtConj(q);
-	u = qtConj(u);
+	// Signed-zero alignment with the SDK's essential-rotation quat: Max's decomp_affine emits
+	// its rotation as conj(qtFromMatrix(Q^T-view)) relative to this adaptation — bit-identical
+	// to the q computed above for every NONZERO component ((a-b) vs -(b-a) is float-exact), but
+	// exactly-zero vector components come out as MINUS zero through the trailing conjugation.
+	// Reproducing that closes the "(0,0,0,-1) vs (-0,-0,-0,-1)" byte class the shape corpus
+	// documented on identity-rotation nodes (remanence §10z-dix, water §10z round 3, and ~45
+	// skinned CMeshMRMSkinned in common/characters alone); consumers that compare numerically
+	// (ig, skel) are unaffected since -0 == +0 in float compare. w keeps its own sign (conj
+	// does not negate it).
+	if (q.x == 0.0f) q.x = -0.0f;
+	if (q.y == 0.0f) q.y = -0.0f;
+	if (q.z == 0.0f) q.z = -0.0f;
 
 	parts.q.x = q.x; parts.q.y = q.y; parts.q.z = q.z; parts.q.w = q.w;
 	parts.u.x = u.x; parts.u.y = u.y; parts.u.z = u.z; parts.u.w = u.w;
