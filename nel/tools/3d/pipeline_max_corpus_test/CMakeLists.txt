@@ -233,7 +233,26 @@ IF (Python3_Interpreter_FOUND)
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 	SET_TESTS_PROPERTIES(pipeline_max_clod_corpus_vs2008 PROPERTIES SKIP_RETURN_CODE 77)
 
+	# Standalone lightmapper (design doc §11-lm / §11-lm-bis): export --lm-scene per shape
+	# source, run shape_lightmapper, compare lightmapped shapes + lightmap TGAs + light-list
+	# logs against the reference shape_not_optimized / shape_lightmap_not_optimized sets.
+	# Budgets = the 2026-07-10 landing sweep (108 scenes / 1012 single-mesh receivers;
+	# multi-lod receivers deferred): shapes 7 identical + 309 floateq + 93 repacked + 603
+	# diff (inherits every pre-existing unmapped-export diff class); TGAs 445 byte-identical
+	# + 97 near + 615 repacked (sorted-channel quantile tier) + 865 diff (median quantile
+	# 2.75 — a long near-tolerance tail); logs 837 match + 33 diff. harness-error 1 = the
+	# fy_cn_forge_clusterized receiver that exceeds the 3600s per-scene timeout (compute-
+	# bound O(n^2) face grouping, same cost the in-Max exporter had). Tighten as classes
+	# close. RUNTIME: the full sweep takes ~60-75 minutes (dominated by big interiors).
+	ADD_TEST(NAME pipeline_max_lightmap_corpus
+		COMMAND ${Python3_EXECUTABLE} lightmap_corpus.py --gate
+			--max-shape-diff 610 --max-tga-diff 875 --max-log-diff 35
+			--max-lm-fail 0 --max-harness-error 1
+			--bin $<TARGET_FILE_DIR:pipeline_max_export_shape>
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+	SET_TESTS_PROPERTIES(pipeline_max_lightmap_corpus PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 10800)
+
 	IF (TARGET unit_test)
-		ADD_DEPENDENCIES(unit_test pipeline_max_corpus_test pipeline_max_export_skel pipeline_max_export_anim pipeline_max_export_swt pipeline_max_export_ig pipeline_max_export_zone pipeline_max_export_shape pipeline_max_export_pacs_prim pipeline_max_export_cmb pipeline_max_export_veget pipeline_max_export_clod)
+		ADD_DEPENDENCIES(unit_test pipeline_max_corpus_test pipeline_max_export_skel pipeline_max_export_anim pipeline_max_export_swt pipeline_max_export_ig pipeline_max_export_zone pipeline_max_export_shape pipeline_max_export_pacs_prim pipeline_max_export_cmb pipeline_max_export_veget pipeline_max_export_clod shape_lightmapper)
 	ENDIF (TARGET unit_test)
 ENDIF (Python3_Interpreter_FOUND)

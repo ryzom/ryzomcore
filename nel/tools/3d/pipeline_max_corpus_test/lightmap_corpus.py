@@ -29,6 +29,8 @@ DEF_BIN = os.path.expanduser("~/ryzomcore/build/nel-pipeline/bin")
 
 OLE_MAGIC = b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1"
 
+PROJECT_OPTS = {}
+
 
 def load_dirs(path):
     ns = {}
@@ -66,6 +68,13 @@ def enumerate_corpus(graphics_dir, workspace_dir):
             ns = load_dirs(d)
             if ns is None:
                 continue
+            # per-project lighting build options (the process.py values the reference run used)
+            opts = {
+                "oversampling": int(pns.get("ShapeExportOptOversampling", 1) or 1),
+                "lumel": str(pns.get("ShapeExportOptLumelSize", "0.25") or "0.25"),
+                "shadow": str(pns.get("ShapeExportOptShadow", "true")).lower() == "true",
+            }
+            PROJECT_OPTS[root + "/" + name] = opts
             for dd in ns.get("ShapeSourceDirectories") or []:
                 full = resolve_ci(graphics_dir, dd)
                 if not full:
@@ -216,7 +225,15 @@ def run_file(args, proj, path, refdirs):
         if cand and os.path.isdir(cand):
             texargs += ["--texture-path", cand]
 
-    r = subprocess.run([lmtool, "--lightmap-log", "--lightmaps", lmdir] + texargs + [scene, out],
+    opts = PROJECT_OPTS.get(proj, {})
+    optargs = []
+    if opts.get("oversampling", 1) != 1:
+        optargs += ["--oversampling", str(opts["oversampling"])]
+    if opts.get("lumel", "0.25") != "0.25":
+        optargs += ["--lumel-size", opts["lumel"]]
+    if not opts.get("shadow", True):
+        optargs += ["--no-shadow"]
+    r = subprocess.run([lmtool, "--lightmap-log", "--lightmaps", lmdir] + texargs + optargs + [scene, out],
                        capture_output=True, text=True, timeout=3600)
     if r.returncode != 0:
         st["lightmapper-fail"] += 1
@@ -326,6 +343,7 @@ def main():
     ap.add_argument("--max-tga-diff", type=int, default=0)
     ap.add_argument("--max-log-diff", type=int, default=0)
     ap.add_argument("--max-lm-fail", type=int, default=0)
+    ap.add_argument("--max-harness-error", type=int, default=0)
     args = ap.parse_args()
 
     if not os.path.isdir(args.graphics) or not os.path.isdir(args.workspace):
@@ -370,7 +388,7 @@ def main():
                or total["tga-diff"] > args.max_tga_diff
                or total["log-diff"] > args.max_log_diff
                or total["lightmapper-fail"] > args.max_lm_fail
-               or total["harness-error"] > 0)
+               or total["harness-error"] > args.max_harness_error)
         sys.exit(1 if bad else 0)
 
 
