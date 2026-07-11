@@ -70,7 +70,7 @@ jobs:
           - os: windows-2025
             cmake-preset: ci-windows-nel-hunter
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: actions/cache@v5
         with:
@@ -114,7 +114,7 @@ jobs:
           - os: ubuntu-24.04
             cmake-preset: ci-linux-nelns-vcpkg
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: actions/cache@v5
         with:
@@ -168,7 +168,7 @@ jobs:
             cmake-preset: ci-linux-ryzom-dynamic
             build-type: dynamic
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: actions/cache@v5
         with:
@@ -214,7 +214,7 @@ jobs:
       matrix:
         os: [ ubuntu-22.04, ubuntu-24.04 ]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: actions/cache@v5
         with:
@@ -258,7 +258,7 @@ jobs:
       matrix:
         os: [ ubuntu-22.04, ubuntu-24.04 ]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: actions/cache@v5
         with:
@@ -296,7 +296,7 @@ jobs:
     needs: [ strings ]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - id: cache
         uses: actions/cache@v5
