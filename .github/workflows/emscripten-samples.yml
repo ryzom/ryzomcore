@@ -30,7 +30,7 @@ jobs:
         run: sudo apt-get install -y ccache
 
       - name: Cache ccache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.cache/ccache
           key: ccache-emscripten-${{ env.EM_VERSION }}-${{ hashFiles('.github/workflows/emscripten-samples.yml') }}-${{ github.sha }}

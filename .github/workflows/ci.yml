@@ -72,14 +72,14 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ~/.cache/ccache
           key: ccache-nel-${{ matrix.os }}-${{ matrix.build-type }}-${{ needs.strings.outputs.week }}-${{ github.sha }}
           restore-keys: ccache-nel-${{ matrix.os }}-${{ matrix.build-type }}-${{ needs.strings.outputs.week }}-
 
       - id: cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           key: nel-${{ matrix.os }}-${{ matrix.cmake-preset }}-${{ hashFiles('nel/**', '.github/nel/**', 'cmake/**', 'CMakeModules/**', 'CMakeLists.txt', 'CMakePresets.json') }}
           path: ${{ needs.strings.outputs.build-dir }}/nel/nel-*
@@ -116,7 +116,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ~/.cache/ccache
           key: ccache-nelns-${{ matrix.os }}-${{ needs.strings.outputs.week }}-${{ github.sha }}
@@ -129,7 +129,7 @@ jobs:
           path: ${{ needs.strings.outputs.build-dir }}
 
       - id: cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           key: nelns-${{ matrix.os }}-${{ matrix.cmake-preset }}-${{ hashFiles('build/nel-*.sh', 'nelns/**', '.github/nelns/**', 'cmake/**', 'CMakeModules/**', 'CMakeLists.txt', 'CMakePresets.json') }}
           path: ${{ needs.strings.outputs.build-dir }}/nelns/nelns-*
@@ -170,7 +170,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ~/.cache/ccache
           key: ccache-ryzom-${{ matrix.os }}-${{ matrix.build-type }}-${{ needs.strings.outputs.week }}-${{ github.sha }}
@@ -183,7 +183,7 @@ jobs:
           path: ${{ needs.strings.outputs.build-dir }}
 
       - id: cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           key: ryzom-${{ matrix.os }}-${{ hashFiles('build/nel-*.sh', 'ryzom/**', '.github/ryzom/**', 'cmake/**', 'CMakeModules/**', 'CMakeLists.txt', 'CMakePresets.json') }}
           path: ${{ needs.strings.outputs.build-dir }}/ryzom/ryzom-*
@@ -216,7 +216,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ~/.cache/ccache
           key: ccache-snowballs-${{ matrix.os }}-${{ needs.strings.outputs.week }}-${{ github.sha }}
@@ -229,7 +229,7 @@ jobs:
           path: ${{ needs.strings.outputs.build-dir }}
 
       - id: cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           key: snowballs-${{ matrix.os }}-${{ hashFiles('build/nel-*.sh', 'snowballs2/**', '.github/snowballs/**', 'cmake/**', 'CMakeModules/**', 'CMakeLists.txt', 'CMakePresets.json') }}
           path: ${{ needs.strings.outputs.build-dir }}/snowballs/snowballs-*
@@ -260,7 +260,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ~/.cache/ccache
           key: ccache-studio-${{ matrix.os }}-${{ needs.strings.outputs.week }}-${{ github.sha }}
@@ -273,7 +273,7 @@ jobs:
           path: ${{ needs.strings.outputs.build-dir }}
 
       - id: cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           key: studio-${{ matrix.os }}-${{ hashFiles('build/nel-*.sh', 'studio/**', '.github/studio/**', 'cmake/**', 'CMakeModules/**', 'CMakeLists.txt', 'CMakePresets.json') }}
           path: ${{ needs.strings.outputs.build-dir }}/studio/studio-*
@@ -299,7 +299,7 @@ jobs:
       - uses: actions/checkout@v7
 
       - id: cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           key: studio-${{ matrix.os }}-${{ hashFiles('web/**', '.github/web/**') }}
           path: ${{ needs.strings.outputs.build-dir }}/web/web-*
