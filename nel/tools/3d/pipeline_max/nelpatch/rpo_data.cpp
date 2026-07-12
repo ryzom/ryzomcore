@@ -197,6 +197,79 @@ bool readCountedInts(const CStorageRaw *raw, std::vector<sint32> &dst, const cha
 	return true;
 }
 
+// Optional adjacency tables: Max 3 (Scene version 0x2004) PatchMesh omits the count-prefixed
+// adjacency lists on verts/vecs and the entire edge stream. Absent → empty (or -1 for owner).
+bool readOptionalCountedInts(const CStorageRaw *raw, std::vector<sint32> &dst, const char *what, std::string &err)
+{
+	if (!raw) { dst.clear(); return true; }
+	return readCountedInts(raw, dst, what, err);
+}
+
+bool readOptionalInt(const CStorageRaw *raw, sint32 &dst, sint32 defaultVal)
+{
+	if (!raw) { dst = defaultVal; return true; }
+	if (raw->Value.size() != 4) return false;
+	memcpy(&dst, nlVectorData(raw->Value), 4);
+	return true;
+}
+
+/// Rebuild the Max 4+ edge table from patch topology. Max 3 stores only verts/vecs/patches;
+/// each quad edge is (V[i], Vec[2i], Vec[2i+1], V[(i+1)%n]). Shared undirected sides reuse one
+/// edge record; edge.Patches lists every patch that uses it (order = first writer, then later).
+bool reconstructEdgesFromPatches(SPatchMesh &out, std::string &err)
+{
+	out.Edges.clear();
+	// key = (loVert, hiVert) — undirected; value = edge index
+	// Linear scan is fine: snowballs zones are ~36 patches / ~70 edges.
+	for (size_t pi = 0; pi < out.Patches.size(); ++pi)
+	{
+		SPmPatch &p = out.Patches[pi];
+		const sint32 n = (p.NumVerts > 0 && p.NumVerts <= 4) ? p.NumVerts : 4;
+		if (p.Type == 0) p.Type = n;
+		for (sint32 e = 0; e < n; ++e)
+		{
+			const sint32 v1 = p.V[e];
+			const sint32 v2 = p.V[(e + 1) % n];
+			const sint32 vec12 = p.Vec[2 * e];
+			const sint32 vec21 = p.Vec[2 * e + 1];
+			if (v1 < 0 || v2 < 0) { err = "patch vertex index out of range during edge rebuild"; return false; }
+			// Find existing edge with same endpoints (either orientation).
+			sint32 found = -1;
+			for (size_t ei = 0; ei < out.Edges.size(); ++ei)
+			{
+				const SPmEdge &ed = out.Edges[ei];
+				if ((ed.V1 == v1 && ed.V2 == v2) || (ed.V1 == v2 && ed.V2 == v1))
+				{
+					found = (sint32)ei;
+					break;
+				}
+			}
+			if (found < 0)
+			{
+				found = (sint32)out.Edges.size();
+				SPmEdge ne;
+				ne.V1 = v1;
+				ne.Vec12 = vec12;
+				ne.Vec21 = vec21;
+				ne.V2 = v2;
+				ne.Patches.clear();
+				out.Edges.push_back(ne);
+			}
+			SPmEdge &ed = out.Edges[(size_t)found];
+			// Append this patch if not already listed.
+			bool already = false;
+			for (size_t k = 0; k < ed.Patches.size(); ++k)
+				if (ed.Patches[k] == (sint32)pi) { already = true; break; }
+			if (!already) ed.Patches.push_back((sint32)pi);
+			p.Edge[e] = found;
+		}
+		// Zero unused edge slots for tri patches.
+		for (sint32 e = n; e < 4; ++e)
+			p.Edge[e] = -1;
+	}
+	return true;
+}
+
 } /* anonymous namespace */
 
 bool decodePatchMesh(const CStorageContainer::TStorageObjectContainer &chunks, SPatchMesh &out, std::string &err)
@@ -208,7 +281,11 @@ bool decodePatchMesh(const CStorageContainer::TStorageObjectContainer &chunks, S
 	// The count chunks (0x0BD6 verts, 0x0BC2 vecs, 0x0BD1 edges, 0x0BEA patches) precede their
 	// element containers, but decode is tolerant of order: collect elements by id, then verify
 	// against the counts.
+	// Max 3 (Scene 0x2004): no 0x0BD1/0x0BD2 edges; vertex/vector adjacency sub-chunks absent;
+	// patch Type (0x0424) and Edge (0x042E) absent. Adjacency is optional; edges are rebuilt.
 	sint32 numVerts = -1, numVecs = -1, numEdges = -1, numPatches = -1;
+	bool anyEdgeChunk = false;
+	bool anyPatchEdgeIdx = false;
 	for (CStorageContainer::TStorageObjectConstIt it = chunks.begin(); it != chunks.end(); ++it)
 	{
 		const uint16 id = it->first;
@@ -233,9 +310,10 @@ bool decodePatchMesh(const CStorageContainer::TStorageObjectContainer &chunks, S
 			SPmVert &vt = out.Verts.back();
 			if (!readRawFloats(rawSub(c, 0x03e8), vt.Pos, 3, "vertex pos", err)) return false;
 			if (!readRawInts(rawSub(c, 0x03fc), &vt.Flags, 1, "vertex flags", err)) return false;
-			if (!readCountedInts(rawSub(c, 0x0406), vt.Vectors, "vertex vectors", err)) return false;
-			if (!readCountedInts(rawSub(c, 0x0410), vt.Patches, "vertex patches", err)) return false;
-			if (!readCountedInts(rawSub(c, 0x041a), vt.Edges, "vertex edges", err)) return false;
+			// Max 3 omits 0x0406/0x0410/0x041a adjacency tables entirely.
+			if (!readOptionalCountedInts(rawSub(c, 0x0406), vt.Vectors, "vertex vectors", err)) return false;
+			if (!readOptionalCountedInts(rawSub(c, 0x0410), vt.Patches, "vertex patches", err)) return false;
+			if (!readOptionalCountedInts(rawSub(c, 0x041a), vt.Edges, "vertex edges", err)) return false;
 			break;
 		}
 		case 0x0bcc: // vector
@@ -246,12 +324,14 @@ bool decodePatchMesh(const CStorageContainer::TStorageObjectContainer &chunks, S
 			SPmVec &vc = out.Vecs.back();
 			if (!readRawFloats(rawSub(c, 0x03e8), vc.Pos, 3, "vector pos", err)) return false;
 			if (!readRawInts(rawSub(c, 0x03fc), &vc.Flags, 1, "vector flags", err)) return false;
-			if (!readRawInts(rawSub(c, 0x0410), &vc.Vert, 1, "vector vert", err)) return false;
-			if (!readCountedInts(rawSub(c, 0x0406), vc.Patches, "vector patches", err)) return false;
+			// Max 3: no owner vert (0x0410) / patch list (0x0406).
+			if (!readOptionalInt(rawSub(c, 0x0410), vc.Vert, -1)) { err = "bad vector vert"; return false; }
+			if (!readOptionalCountedInts(rawSub(c, 0x0406), vc.Patches, "vector patches", err)) return false;
 			break;
 		}
 		case 0x0bd2: // edge
 		{
+			anyEdgeChunk = true;
 			const CStorageContainer *c = dynamic_cast<const CStorageContainer *>(it->second);
 			if (!c) { err = "edge chunk not a container"; return false; }
 			out.Edges.resize(out.Edges.size() + 1);
@@ -259,7 +339,7 @@ bool decodePatchMesh(const CStorageContainer::TStorageObjectContainer &chunks, S
 			sint32 quad[4];
 			if (!readRawInts(rawSub(c, 0x03e8), quad, 4, "edge record", err)) return false;
 			e.V1 = quad[0]; e.Vec12 = quad[1]; e.Vec21 = quad[2]; e.V2 = quad[3];
-			if (!readCountedInts(rawSub(c, 0x03f2), e.Patches, "edge patches", err)) return false;
+			if (!readOptionalCountedInts(rawSub(c, 0x03f2), e.Patches, "edge patches", err)) return false;
 			break;
 		}
 		case 0x0bf4: // patch
@@ -268,14 +348,25 @@ bool decodePatchMesh(const CStorageContainer::TStorageObjectContainer &chunks, S
 			if (!c) { err = "patch chunk not a container"; return false; }
 			out.Patches.resize(out.Patches.size() + 1);
 			SPmPatch &p = out.Patches.back();
-			if (!readRawInts(rawSub(c, 0x0424), &p.Type, 1, "patch type", err)) return false;
+			// Max 3: Type (0x0424) absent — NumVerts (0x03e8) carries 3/4; Type defaults to it.
+			if (!readOptionalInt(rawSub(c, 0x0424), p.Type, 0)) { err = "bad patch type"; return false; }
 			if (!readRawInts(rawSub(c, 0x03e8), &p.NumVerts, 1, "patch numverts", err)) return false;
+			if (p.Type == 0) p.Type = p.NumVerts;
 			if (!readRawInts(rawSub(c, 0x03f2), p.V, 4, "patch verts", err)) return false;
 			if (!readRawInts(rawSub(c, 0x03fc), p.Vec, 8, "patch vecs", err)) return false;
 			if (!readRawInts(rawSub(c, 0x0406), p.Interior, 4, "patch interiors", err)) return false;
 			if (!readRawInts(rawSub(c, 0x0410), &p.SmGroup, 1, "patch smgroup", err)) return false;
 			if (!readRawInts(rawSub(c, 0x041a), &p.Flags, 1, "patch flags", err)) return false;
-			if (!readRawInts(rawSub(c, 0x042e), p.Edge, 4, "patch edges", err)) return false;
+			// Max 3: Edge indices (0x042E) absent — rebuilt below when the edge stream is missing.
+			if (rawSub(c, 0x042e))
+			{
+				anyPatchEdgeIdx = true;
+				if (!readRawInts(rawSub(c, 0x042e), p.Edge, 4, "patch edges", err)) return false;
+			}
+			else
+			{
+				p.Edge[0] = p.Edge[1] = p.Edge[2] = p.Edge[3] = -1;
+			}
 			break;
 		}
 		default:
@@ -286,6 +377,13 @@ bool decodePatchMesh(const CStorageContainer::TStorageObjectContainer &chunks, S
 	if (numVecs >= 0 && (size_t)numVecs != out.Vecs.size()) { err = "vector count mismatch"; return false; }
 	if (numEdges >= 0 && (size_t)numEdges != out.Edges.size()) { err = "edge count mismatch"; return false; }
 	if (numPatches >= 0 && (size_t)numPatches != out.Patches.size()) { err = "patch count mismatch"; return false; }
+
+	// Max 3: no edge stream and no per-patch edge indices — derive both from patch topology so
+	// exportZone's bind pass (edge.Patches adjacency) and getEdge lookups work unchanged.
+	if (!anyEdgeChunk || !anyPatchEdgeIdx)
+	{
+		if (!reconstructEdgesFromPatches(out, err)) return false;
+	}
 	return true;
 }
 

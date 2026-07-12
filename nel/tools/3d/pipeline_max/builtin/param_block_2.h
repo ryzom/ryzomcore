@@ -51,12 +51,14 @@ namespace BUILTIN {
  *
  * The Max ParamBlock2 (superclass 0x82). A ParamBlock2 scene object stores a single parameter
  * block: a header chunk 0x0009 = { u32 scriptVersion, u16 blockId, u16 (owner class marker),
- * u16 0x2328, u16 paramCount, u32 ownerSceneIndex }, followed by one 0x000e chunk per
- * parameter = { u16 paramId, u16 type, 10 opaque bytes, u8 flagByte, payload }. flagByte bit
- * 0x40 = an inline constant value follows (except reference-kind types, whose value is a
- * reference slot on the PB2 object). Reference-kind params (MTL/TEXMAP/NODE/REFTARG) and
- * controller-backed params own the PB2's reference slots in record order. Tab (array) params
- * (type bit 0x800) carry a u32 count then per-element flag+value.
+ * u16 magic (0x2328 modern / 0x0c1c Max 3), u16 paramCount, u32 ownerSceneIndex }, followed by
+ * one parameter record per param. Modern Max 4+ uses chunk **0x000e** = { u16 paramId, u16 type,
+ * 10 opaque bytes, u8 flagByte, payload }; Max 3 uses chunk **0x000a** with the same fields but
+ * only 6 opaque bytes (11-byte header before payload). flagByte bit 0x40 (and Max 3's 0xc0) =
+ * an inline constant value follows. Reference-kind params (MTL/TEXMAP/NODE/REFTARG) and
+ * controller-backed params own the PB2's reference slots in record order (Max 3 may also store
+ * TEXMAP as an inline storage index under 0x40). Tab (array) params (type bit 0x800) carry a
+ * u32 count then per-element flag+value.
  *
  * This class keeps the raw chunks authoritative (roundtrip is byte-exact by construction, the
  * design-doc §5/§12.2 discipline shared with CControlKeyFramerBase / CRklPatchObject): parse

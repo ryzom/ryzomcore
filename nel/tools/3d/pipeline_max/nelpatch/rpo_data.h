@@ -115,32 +115,38 @@ bool decodeRpoChunk(const uint8 *data, size_t size, SRPatchMesh &out, std::strin
 // cross-validated against the reference .zone exports.
 
 /// PatchMesh vertex (container 0x0BE0)
+/// Max 3: only Pos+Flags are stored; adjacency tables are absent and stay empty.
 struct SPmVert
 {
 	float Pos[3];                 // 0x03E8
 	sint32 Flags;                 // 0x03FC
-	std::vector<sint32> Vectors;  // 0x0406, count-prefixed
-	std::vector<sint32> Patches;  // 0x0410, count-prefixed
-	std::vector<sint32> Edges;    // 0x041A, count-prefixed
+	std::vector<sint32> Vectors;  // 0x0406, count-prefixed (optional, Max 4+)
+	std::vector<sint32> Patches;  // 0x0410, count-prefixed (optional, Max 4+)
+	std::vector<sint32> Edges;    // 0x041A, count-prefixed (optional, Max 4+)
 };
 
 /// PatchMesh vector — tangent or interior handle (container 0x0BCC)
+/// Max 3: only Pos+Flags; Vert defaults to -1, Patches empty.
 struct SPmVec
 {
 	float Pos[3];                 // 0x03E8
 	sint32 Flags;                 // 0x03FC
-	sint32 Vert;                  // 0x0410, owner vertex
-	std::vector<sint32> Patches;  // 0x0406, count-prefixed
+	sint32 Vert;                  // 0x0410, owner vertex (optional, Max 4+; -1 if absent)
+	std::vector<sint32> Patches;  // 0x0406, count-prefixed (optional, Max 4+)
 };
 
 /// PatchMesh edge (container 0x0BD2)
+/// Max 3: the entire edge stream is absent; decodePatchMesh reconstructs edges from patch
+/// V/Vec rings so consumers (exportZone bind pass) see a modern-shaped table.
 struct SPmEdge
 {
 	sint32 V1, Vec12, Vec21, V2;  // 0x03E8 (16 bytes)
-	std::vector<sint32> Patches;  // 0x03F2, count-prefixed
+	std::vector<sint32> Patches;  // 0x03F2, count-prefixed (optional; rebuilt on Max 3)
 };
 
 /// PatchMesh patch (container 0x0BF4)
+/// Max 3: Type (0x0424) and Edge (0x042E) are absent — Type defaults to NumVerts; Edge is
+/// filled by edge reconstruction.
 struct SPmPatch
 {
 	sint32 Type;       // 0x0424 (4 = quad, 3 = tri; the zone corpus is all quads)
@@ -150,7 +156,7 @@ struct SPmPatch
 	sint32 Interior[4];// 0x0406
 	sint32 SmGroup;    // 0x0410
 	sint32 Flags;      // 0x041A
-	sint32 Edge[4];    // 0x042E
+	sint32 Edge[4];    // 0x042E (optional Max 4+; reconstructed on Max 3)
 };
 
 /// The decoded PatchMesh (geometry/topology; header and trailer chunks are not interpreted)

@@ -1271,7 +1271,35 @@ static void buildAStdMaterial(CMaterial &material, SMaterialInfo &materialInfo, 
 static void buildAMaterial(CMaterial &material, SMaterialInfo &materialInfo, CSceneClass *mtl, bool exportLighting)
 {
 	if (isNelMaterial(mtl))
+	{
+		// Max 3-era NeL Material (script version 2, snowballs / early NeL): a thin wrapper
+		// over a Standard material (ref 0) plus one NeL-flag ParamBlock2 (ref 1). Colors and
+		// textures live on the Standard delegate — same structure the live Max exporter
+		// resolves via getValueByNameUsingParamBlock2 sub-anim recursion. Script version 14+
+		// (the Ryzom corpus) carries the multi-block nlbp/main/textures/slots table instead.
+		uint32 version = 0, blockCount = 0;
+		scriptedPluginVersion(mtl, version, blockCount);
+		if (version > 0 && version < 14)
+		{
+			CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(mtl);
+			CSceneClass *delegate = NULL;
+			if (rm && rm->nbReferences() > 0)
+				delegate = dynamic_cast<CSceneClass *>(rm->getReference(0));
+			if (delegate && (delegate->classDesc()->classId() == CLASSID_STDMAT
+				|| delegate->classDesc()->classId() == NLMISC::CClassId(0x00000001, 0x00000000)
+				|| delegate->classDesc()->classId() == NLMISC::CClassId(0x00000002, 0x00000000)))
+			{
+				buildAStdMaterial(material, materialInfo, delegate, exportLighting);
+				// Prefer the NeL material's own name when present.
+				std::string n = materialName(mtl);
+				if (!n.empty()) materialInfo.MaterialName = n;
+				return;
+			}
+			fprintf(stderr, "WARNING: material '%s': NeL material script version %u without Standard delegate; trying v14 table\n",
+			        materialName(mtl).c_str(), version);
+		}
 		buildANelMaterial(material, materialInfo, mtl, exportLighting);
+	}
 	else
 		buildAStdMaterial(material, materialInfo, mtl, exportLighting);
 }
