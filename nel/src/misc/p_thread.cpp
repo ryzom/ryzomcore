@@ -45,6 +45,12 @@ struct CPMainThread : public CPThread
 {
 	CPMainThread() : CPThread(NULL, 0)
 	{
+		// Main thread is not started via CPThread::start(), so _ThreadHandle was left
+		// uninitialized. zone_lighter (and any getCPUMask on the main thread) then called
+		// pthread_getaffinity_np on garbage and SIGSEGV'd at affinity offset ~0x2d0.
+		_ThreadHandle = pthread_self();
+		_State = ThreadStateRunning;
+
 		if(pthread_key_create(&threadSpecificKey, NULL) != 0)
 			throw EThread("cannot create thread specific storage key.");
 
@@ -54,6 +60,8 @@ struct CPMainThread : public CPThread
 
 	~CPMainThread()
 	{
+		// Don't pthread_detach the main thread handle — it was never pthread_create'd.
+		_State = ThreadStateNone;
 		if (pthread_key_delete(threadSpecificKey) != 0)
 		{
 			nlwarning("cannot delete thread specific storage key.");
@@ -122,6 +130,7 @@ static void *ProxyFunc( void *arg )
 CPThread::CPThread(IRunnable *runnable, uint32 stackSize)
 	:	Runnable(runnable),
 		_State(ThreadStateNone),
+		_ThreadHandle(),
 		_StackSize(stackSize)
 {}
 
@@ -234,17 +243,22 @@ void CPThread::wait ()
 bool CPThread::setCPUMask(uint64 cpuMask)
 {
 #ifdef __USE_GNU
-
-	nlwarning("This code does not work. May cause a segmentation fault...");
-
-	sint res = pthread_setaffinity_np(_ThreadHandle, sizeof(uint64), (const cpu_set_t*)&cpuMask);
-
+	// Real cpu_set_t — same fix as getCPUMask / CPProcess::setCPUMask. Passing sizeof(uint64)
+	// into pthread_setaffinity_np is undefined (cpu_set_t is 128+ bytes on modern glibc) and
+	// can segfault multi-threaded tools (zone_lighter).
+	if (_State == ThreadStateNone)
+		return false;
+	cpu_set_t set;
+	CPU_ZERO(&set);
+	for (int i = 0; i < 64; ++i)
+		if (cpuMask & ((uint64)1 << i))
+			CPU_SET(i, &set);
+	sint res = pthread_setaffinity_np(_ThreadHandle, sizeof(set), &set);
 	if (res)
 	{
 		nlwarning("pthread_setaffinity_np() returned %d", res);
 		return false;
 	}
-
 	return true;
 
 #else // __USE_GNU
@@ -263,6 +277,8 @@ uint64 CPThread::getCPUMask()
 	// Must pass a real cpu_set_t — sizeof(uint64) is wrong on modern glibc (cpu_set_t is
 	// 128+ bytes) and was known to segfault (see historical warning). Fall back to the
 	// process mask when the pthread call fails or is unavailable.
+	if (_State == ThreadStateNone)
+		return IProcess::getCurrentProcess()->getCPUMask();
 	cpu_set_t set;
 	CPU_ZERO(&set);
 	sint res = pthread_getaffinity_np(_ThreadHandle, sizeof(set), &set);

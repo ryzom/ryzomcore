@@ -1266,7 +1266,10 @@ static NL3D::ITrack *buildSampledPosTrack(const std::vector<sint32> &times, cons
 }
 
 // Replicates CExportNel::addBipedNodeTracks: biped nodes emit their sampled tracks under
-// parentName + name + "." (bare for the root), non-biped children go through addBoneTracks.
+// parentName + name + "." ; the COM root uses parentName when the caller supplied a prefix
+// (scene/prefix export: "Bip01."), otherwise nodeName + "." so the skeleton binds
+// "Bip01.rotquat" rather than bare "rotquat" (Snowballs idle.anim and every Ryzom skel).
+// Non-biped children go through addBoneTracks.
 static void addBipedNodeTracks(NL3D::CAnimation &animation, INode &node, const std::string &parentName,
                                bool root, CSceneClassContainer *ssc, const SBipedSampled &sampled,
                                CSSSBuild &ssBuilder)
@@ -1276,7 +1279,13 @@ static void addBipedNodeTracks(NL3D::CAnimation &animation, INode &node, const s
 	                        tmsc->classDesc()->classId() == PIPELINE::MAX::BIPED::CBipedDriven::ClassId);
 	if (isBiped)
 	{
-		std::string name = root ? parentName : (parentName + ucstring(node.userName()).toUtf8() + ".");
+		std::string name;
+		if (!root)
+			name = parentName + ucstring(node.userName()).toUtf8() + ".";
+		else if (!parentName.empty())
+			name = parentName;
+		else
+			name = ucstring(node.userName()).toUtf8() + ".";
 		// scale: biped nodes have none. rotation:
 		std::map<INode *, std::vector<NLMISC::CQuat> >::const_iterator rit = sampled.Rot.find(&node);
 		if (rit != sampled.Rot.end())
