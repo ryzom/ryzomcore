@@ -848,7 +848,20 @@ bool evalNodeMesh(INode &node, SEvalMesh &out, std::vector<std::string> *warning
 			// stored Fit gizmo) and applied by default; the other projection types stay gated
 			// until their own corpus validation — PMB_UVW_APPLY=1 enables all types for probes.
 			{
-				uint typeMask = getenv("PMB_UVW_APPLY") ? 0xFFFFFFFFu : (1u << UVWMAP::MAP_PLANAR);
+				// Default planar only (Rectangle01 GT). Cyl/sphere/box formulas exist but
+				// still need corpus-side GT (enabling sphere on snowballs aim_sphere regressed
+				// vert count 559→482). PMB_UVW_APPLY=1|all enables every type; =cys enables
+				// cylindrical+spherical+ball+box in addition to planar.
+				uint typeMask = (1u << UVWMAP::MAP_PLANAR);
+				if (const char *e = getenv("PMB_UVW_APPLY"))
+				{
+					if (e[0] == '1' || e[0] == 'a' || e[0] == 'A')
+						typeMask = 0xFFFFFFFFu;
+					else if (e[0] == 'c' || e[0] == 'C')
+						typeMask = (1u << UVWMAP::MAP_PLANAR) | (1u << UVWMAP::MAP_CYLINDRICAL)
+							| (1u << UVWMAP::MAP_SPHERICAL) | (1u << UVWMAP::MAP_BALL)
+							| (1u << UVWMAP::MAP_BOX);
+				}
 				std::vector<sint32> faceVerts(out.Faces.size() * 3);
 				for (uint f = 0; f < out.Faces.size(); ++f)
 					for (uint c2 = 0; c2 < 3; ++c2)

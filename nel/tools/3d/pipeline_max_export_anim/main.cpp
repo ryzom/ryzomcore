@@ -78,6 +78,7 @@
 #include "../pipeline_max_export_common/biped_rig.h"
 #include "../pipeline_max/biped/biped_driven.h"
 #include "biped_anim.h"
+#include "bip_file.h"
 #include "biped_author.h"
 
 using namespace PIPELINE::MAX;
@@ -1082,7 +1083,10 @@ struct SBipedSampled
 };
 
 // Sample the whole biped subtree once per frame. Returns false when no biped keys exist.
-static bool sampleBipedSubtree(INode &root, CSceneClassContainer *ssc, SBipedSampled &out)
+// \a overrideKeys — when non-NULL (e.g. keys loaded from a Character Studio .bip), replaces
+// the figure file's (usually empty) keytracks on every rig.
+static bool sampleBipedSubtree(INode &root, CSceneClassContainer *ssc, SBipedSampled &out,
+                               const BIPANIM::SBipAnimKeys *overrideKeys = NULL)
 {
 	using namespace PMAX_RIG;
 
@@ -1107,7 +1111,7 @@ static bool sampleBipedSubtree(INode &root, CSceneClassContainer *ssc, SBipedSam
 	for (std::map<CSceneClass *, SBipedRig>::iterator it = g_bipedRigs.begin(); it != g_bipedRigs.end(); ++it)
 	{
 		g_rig = &it->second;
-		BIPANIM::CBipedAnimEval *ev = new BIPANIM::CBipedAnimEval(it->first, it->second, bones, boneOf);
+		BIPANIM::CBipedAnimEval *ev = new BIPANIM::CBipedAnimEval(it->first, it->second, bones, boneOf, overrideKeys);
 		evals.push_back(ev);
 		if (ev->keys().HasRange)
 		{
@@ -1304,6 +1308,9 @@ static void addBipedNodeTracks(NL3D::CAnimation &animation, INode &node, const s
 	}
 }
 
+// Optional BIP override keys for the current export (set from main via --bip).
+static const BIPANIM::SBipAnimKeys *g_bipOverrideKeys = NULL;
+
 static void addAnimation(NL3D::CAnimation &animation, INode &node, const std::string &baseName, bool root, CSceneClassContainer *ssc)
 {
 	// One SkeletonSpawnScript builder per exported selection node, like the reference.
@@ -1314,7 +1321,7 @@ static void addAnimation(NL3D::CAnimation &animation, INode &node, const std::st
 	// controller class, so a nested biped COM anywhere in the subtree (the mektoub_selle rider
 	// under the saddle nodes) samples and exports through the same shared context and range.
 	SBipedSampled sampled;
-	bool hasBiped = sampleBipedSubtree(node, ssc, sampled);
+	bool hasBiped = sampleBipedSubtree(node, ssc, sampled, g_bipOverrideKeys);
 
 	// Biped COM root: the oversampling path (CExportNel::addBipedNodeTracks).
 	CSceneClass *tmsc = dynamic_cast<CSceneClass *>(node.getReference(0));
@@ -1587,23 +1594,41 @@ int main(int argc, char **argv)
 
 	const char *dumpSamples = NULL;
 	double dumpMaxFrame = 60.0;
+	const char *bipFile = NULL;
 	int argi = 1;
 	while (argi < argc && argv[argi][0] == '-' && argv[argi][1] == '-')
 	{
 		if (std::string(argv[argi]) == "--dump-samples" && argi + 1 < argc) { dumpSamples = argv[argi + 1]; argi += 2; }
 		else if (std::string(argv[argi]) == "--dump-max-frame" && argi + 1 < argc) { dumpMaxFrame = atof(argv[argi + 1]); argi += 2; }
+		else if (std::string(argv[argi]) == "--bip" && argi + 1 < argc) { bipFile = argv[argi + 1]; argi += 2; }
 		else break;
 	}
 	if (argc - argi < 2)
 	{
-		std::cerr << "usage: pipeline_max_export_anim [--dump-samples <out.txt> [--dump-max-frame <f>]] <input.max> <output.anim>\n";
+		std::cerr << "usage: pipeline_max_export_anim [--bip <take.bip>] [--dump-samples <out.txt> [--dump-max-frame <f>]] <input.max> <output.anim>\n";
 		std::cerr << "       pipeline_max_export_anim --diff-rig <A.max> <B.max> <out.txt>\n";
 		std::cerr << "       pipeline_max_export_anim --author-jump <skel.max> <idle_source.max> <out.max>\n";
+		std::cerr << "  --bip loads Character Studio motion keys from a .bip take (Snowballs workflow:\n";
+		std::cerr << "        figure .max + bip/*.bip) and overrides the figure file's keytracks.\n";
 		std::cerr << "exit codes: 0 ok, 1 error, 3 nothing to export\n";
 		return 1;
 	}
 	const char *maxFile = argv[argi];
 	const char *animOut = argv[argi + 1];
+
+	BIPANIM::SBipAnimKeys bipKeys;
+	if (bipFile)
+	{
+		std::string err;
+		if (!BIPANIM::loadBipFile(bipFile, bipKeys, err))
+		{
+			std::cerr << "ERROR: --bip " << bipFile << ": " << err << "\n";
+			return 1;
+		}
+		g_bipOverrideKeys = &bipKeys;
+		std::cerr << "BIP " << bipFile << ": range [" << bipKeys.RangeMin << ".." << bipKeys.RangeMax
+		          << "] ticks\n";
+	}
 
 	NL3D::registerSerial3d();
 
