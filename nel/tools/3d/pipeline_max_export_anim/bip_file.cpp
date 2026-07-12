@@ -109,7 +109,38 @@ static size_t findTrackStart(const std::vector<uint8> &data)
 	return (size_t)-1;
 }
 
-// Walk sequential (u16 id, u32 count, body…) from start; body runs until the next track id.
+// Expected body size in bytes for a track (Snowballs CS Max 3 BIP measurements).
+// Time tracks: count×10 dwords + 3 trailing UI-TCB floats (25,25,25) = count*40 + 12.
+// Data tracks: count × recFloats × 4 (vertical = two banks of 13 without a second count).
+// Returns 0 when unknown — fall back to scan-to-next-id.
+static size_t expectedBodySize(uint16 id, uint32 count)
+{
+	if (count == 0 || count > 100000) return 0;
+	if (const STrackSpec *sd = specByData(id))
+	{
+		if (sd->Vertical)
+			return (size_t)count * 13 * 2 * 4; // two banks, no inter-count
+		if (sd->DataRecFloats > 0)
+		{
+			// Limb records on Snowballs measure 104 floats/key (+ optional 4-byte pad):
+			// body = count*104*4 + (count==3 ? 4 : 0) for arms/legs. Prefer next-id scan
+			// with a tight min, but for the LAST track (no next id) use floor formula.
+			if (sd->DataRecFloats == 110)
+				return (size_t)count * 104 * 4; // Max 3 era shorter limb record
+			return (size_t)count * (size_t)sd->DataRecFloats * 4;
+		}
+		// Variable spine/head/tail/pony DATA: unknown fixed size — scan only.
+		return 0;
+	}
+	if (specByTime(id))
+		return (size_t)count * 10 * 4 + 12; // +3 trailing TCB floats
+	return 0;
+}
+
+// Walk sequential (u16 id, u32 count, body…) from start.
+// Prefer expectedBodySize when it lands on the next track id or EOF-minus-footer; otherwise
+// scan for the next track id after minBody. Critical for the last track (0x014a): without a
+// size cap it swallowed the BIP footer and produced garbage tick values → idle range blow-up.
 static bool walkTracks(const std::vector<uint8> &data, size_t start,
                        std::map<uint16, std::vector<uint8> > &bodies,
                        std::map<uint16, uint32> &counts,
@@ -125,39 +156,93 @@ static bool walkTracks(const std::vector<uint8> &data, size_t start,
 		if (!isTrackId(id) || count == 0 || count > 100000)
 			break;
 		size_t bodyStart = pos + 6;
-		// Find next track id at an even offset after a plausible minimum body.
-		size_t bodyEnd = data.size();
-		size_t minBody = 0;
-		if (const STrackSpec *sd = specByData(id))
+		size_t expect = expectedBodySize(id, count);
+		size_t minBody = expect;
+		if (minBody == 0)
 		{
-			if (sd->Vertical)
-				minBody = (size_t)count * 13 * 4; // at least one bank of recs
-			else if (sd->DataRecFloats > 0)
-				minBody = (size_t)count * (size_t)sd->DataRecFloats * 4;
-		}
-		else
-		{
-			// time track: at least count * 10 dwords of key data
-			minBody = (size_t)count * 10 * 4;
+			if (const STrackSpec *sd = specByData(id))
+			{
+				if (sd->Vertical) minBody = (size_t)count * 13 * 4;
+				else if (sd->DataRecFloats > 0)
+					minBody = (size_t)count * 40; // lower bound
+				else
+					minBody = (size_t)count * 4;
+			}
+			else
+				minBody = (size_t)count * 10 * 4;
 		}
 		if (bodyStart + minBody > data.size())
 		{
 			err = "truncated BIP track body";
 			return false;
 		}
-		for (size_t p = bodyStart + minBody; p + 6 <= data.size(); ++p)
+
+		size_t bodyEnd = data.size();
+		// If expected size lands exactly on a following track header, take it.
+		if (expect > 0 && bodyStart + expect <= data.size())
 		{
-			uint16 nid;
-			memcpy(&nid, &data[p], 2);
-			if (!isTrackId(nid)) continue;
-			uint32 ncount;
-			memcpy(&ncount, &data[p + 2], 4);
-			if (ncount == 0 || ncount > 100000) continue;
-			// Prefer aligned starts (even offsets — all observed tags are even).
-			if (p % 2 != 0) continue;
-			bodyEnd = p;
-			break;
+			size_t cand = bodyStart + expect;
+			if (cand + 6 <= data.size())
+			{
+				uint16 nid;
+				uint32 ncount;
+				memcpy(&nid, &data[cand], 2);
+				memcpy(&ncount, &data[cand + 2], 4);
+				if (isTrackId(nid) && ncount > 0 && ncount <= 100000)
+					bodyEnd = cand;
+				else if (cand + 4 <= data.size() && !isTrackId(nid))
+				{
+					// Pad: limb bodies sometimes have +4 trailing bytes before next id.
+					if (cand + 4 + 6 <= data.size())
+					{
+						memcpy(&nid, &data[cand + 4], 2);
+						memcpy(&ncount, &data[cand + 4 + 2], 4);
+						if (isTrackId(nid) && ncount > 0 && ncount <= 100000)
+							bodyEnd = cand + 4;
+					}
+				}
+				else
+					bodyEnd = cand; // last track or footer — trust expected size
+			}
+			else
+				bodyEnd = cand; // exact end of file
 		}
+
+		// Scan for next track id when expected size didn't pin a boundary.
+		if (bodyEnd == data.size() && expect == 0)
+		{
+			for (size_t p = bodyStart + minBody; p + 6 <= data.size(); ++p)
+			{
+				uint16 nid;
+				memcpy(&nid, &data[p], 2);
+				if (!isTrackId(nid) || (p % 2) != 0) continue;
+				uint32 ncount;
+				memcpy(&ncount, &data[p + 2], 4);
+				if (ncount == 0 || ncount > 100000) continue;
+				bodyEnd = p;
+				break;
+			}
+		}
+		// Last-resort scan even when expect was set but didn't match (variable data tracks).
+		if (bodyEnd == data.size() && expect > 0)
+		{
+			bool foundNext = false;
+			for (size_t p = bodyStart + minBody; p + 6 <= data.size(); ++p)
+			{
+				uint16 nid;
+				memcpy(&nid, &data[p], 2);
+				if (!isTrackId(nid) || (p % 2) != 0) continue;
+				uint32 ncount;
+				memcpy(&ncount, &data[p + 2], 4);
+				if (ncount == 0 || ncount > 100000) continue;
+				bodyEnd = p;
+				foundNext = true;
+				break;
+			}
+			if (!foundNext && bodyStart + expect <= data.size())
+				bodyEnd = bodyStart + expect; // EOF: do NOT swallow footer past expect
+		}
+
 		if (bodyEnd < bodyStart)
 		{
 			err = "BIP track body underflow";
@@ -250,15 +335,13 @@ static void fillTimeTrack(SBipKeyTrack &out, uint32 count, const std::vector<uin
 	const float *f = reinterpret_cast<const float *>(&body[0]);
 	const sint32 *i = reinterpret_cast<const sint32 *>(&body[0]);
 
+	// Body layout: count×10 key dwords [+ optional 3 trailing TCB floats 25,25,25].
+	// Always take the FIRST count×10 floats — never trailing-align (that mis-parsed keys).
 	size_t per = 10;
 	size_t base = 0;
 	if (nf >= (size_t)count * per)
-	{
-		// Prefer a trailing-aligned block of count*10 floats when body is longer.
-		if (nf > (size_t)count * per && ((nf - (size_t)count * per) % 1) == 0)
-			base = nf - (size_t)count * per;
-	}
-	else if ((nf % count) == 0)
+		/* ok — ignore trailing floats past count*10 */;
+	else if (count > 0 && (nf % count) == 0)
 		per = nf / count;
 	else
 		return;

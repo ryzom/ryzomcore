@@ -142,16 +142,63 @@ def main():
                 fail += 1
                 print("  ZONE FAIL", f, out[-200:] if out else "")
         print("ZONE export: %d ok, %d fail" % (ok, fail))
-        # refs are .zonel (post lighter) — report size pairs only
+        # Geometry-level T3 via zone_dump triangle soup (unlit .zone vs lit .zonel share
+        # the same tessellation path; lighting lives outside the dump). Float-eq on verts.
+        zone_dump = tool("zone_dump")
         refz = os.path.join(args.ref, "zones")
-        nref = 0
-        if os.path.isdir(refz):
-            for f in os.listdir(refz):
-                if f.endswith(".zonel"):
-                    nref += 1
-        print("ZONE refs (.zonel): %d (T3 needs zone_lighter — sizes not comparable raw)" % nref)
+        geom_ok = geom_diff = geom_skip = 0
+        dumpdir = os.path.join(args.out, "zone_dumps")
+        os.makedirs(dumpdir, exist_ok=True)
+        if os.path.isdir(refz) and os.path.isfile(zone_dump):
+            for f in sorted(os.listdir(zdir)):
+                if not f.endswith(".zone"):
+                    continue
+                stem = f[:-5]
+                ref_zl = os.path.join(refz, stem + ".zonel")
+                if not os.path.isfile(ref_zl):
+                    geom_skip += 1
+                    continue
+                da = os.path.join(dumpdir, stem + "_ours.dump")
+                db = os.path.join(dumpdir, stem + "_ref.dump")
+                run([zone_dump, os.path.join(zdir, f), os.path.join(zdir, f), da], timeout=60)
+                run([zone_dump, ref_zl, ref_zl, db], timeout=60)
+                if not (os.path.isfile(da) and os.path.isfile(db)):
+                    geom_diff += 1
+                    continue
+                # dump: u32 nTris, then nTris * 9 floats
+                import struct
+                def read_dump(path):
+                    raw = open(path, "rb").read()
+                    if len(raw) < 4:
+                        return None
+                    n = struct.unpack_from("<I", raw, 0)[0]
+                    need = 4 + n * 9 * 4
+                    if len(raw) < need:
+                        return None
+                    verts = struct.unpack_from("<%df" % (n * 9), raw, 4)
+                    return n, verts
+                A = read_dump(da)
+                B = read_dump(db)
+                if not A or not B or A[0] != B[0]:
+                    geom_diff += 1
+                    continue
+                max_abs = 0.0
+                for a, b in zip(A[1], B[1]):
+                    d = abs(a - b)
+                    if d > max_abs:
+                        max_abs = d
+                # x87/SSE tessellation noise; 1e-3 m is generous for landscape
+                if max_abs <= 1e-3:
+                    geom_ok += 1
+                else:
+                    geom_diff += 1
+                    if geom_diff <= 5:
+                        print("  ZONE geom-diff %s maxAbs=%g tris=%d" % (stem, max_abs, A[0]))
+        print("ZONE geom (zone_dump vs .zonel): %d ok, %d diff, %d skip" % (geom_ok, geom_diff, geom_skip))
         summary["zone_ok"] = ok
         summary["zone_fail"] = fail
+        summary["zone_geom_ok"] = geom_ok
+        summary["zone_geom_diff"] = geom_diff
         if args.gate and fail:
             return 1
 
