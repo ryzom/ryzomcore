@@ -360,8 +360,10 @@ def main():
                 stem = os.path.splitext(bip)[0]
                 ref_name = bip_map.get(stem, stem) + ".anim"
                 outa = os.path.join(adir, ref_name)
-                rc, out = run([anim_bin, "--bip", os.path.join(bipdir, bip), gmax, outa],
-                              timeout=300)
+                # --com-node-prefix: the 2003 refs carry "Bip01.pos"/"Bip01.rotquat" with
+                # bare bone tracks; Ryzom per-node refs are bare "pos"/"rotquat".
+                rc, out = run([anim_bin, "--bip", os.path.join(bipdir, bip),
+                               "--com-node-prefix", gmax, outa], timeout=300)
                 if rc == 0 and os.path.isfile(outa) and os.path.getsize(outa) > 64:
                     anim_ok += 1
                     rs = os.path.join(refa, ref_name)

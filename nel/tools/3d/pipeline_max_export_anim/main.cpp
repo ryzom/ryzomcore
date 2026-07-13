@@ -1265,10 +1265,17 @@ static NL3D::ITrack *buildSampledPosTrack(const std::vector<sint32> &times, cons
 	return track;
 }
 
+// --com-node-prefix: give a COM exported with an empty base name its node-name prefix
+// ("Bip01.pos"). The Snowballs 2003 refs have this shape (COM prefixed, bones bare — the
+// era result when the selected COM was not a direct child of the scene root, so root was
+// false with an empty parent prefix). The Ryzom per-node refs are bare "pos"/"rotquat",
+// so this must never be default.
+static bool g_comNodePrefix = false;
+
 // Replicates CExportNel::addBipedNodeTracks: biped nodes emit their sampled tracks under
-// parentName + name + "." ; the COM root uses parentName when the caller supplied a prefix
-// (scene/prefix export: "Bip01."), otherwise nodeName + "." so the skeleton binds
-// "Bip01.rotquat" rather than bare "rotquat" (Snowballs idle.anim and every Ryzom skel).
+// parentName + name + "." ; the COM root uses parentName VERBATIM — bare "pos"/"rotquat"
+// when the caller passed no prefix (the Ryzom per-node exports; all 2004 refs). The
+// Snowballs 2003 shape (COM "Bip01.pos", bones bare) is opt-in via --com-node-prefix.
 // Non-biped children go through addBoneTracks.
 static void addBipedNodeTracks(NL3D::CAnimation &animation, INode &node, const std::string &parentName,
                                bool root, CSceneClassContainer *ssc, const SBipedSampled &sampled,
@@ -1279,12 +1286,8 @@ static void addBipedNodeTracks(NL3D::CAnimation &animation, INode &node, const s
 	                        tmsc->classDesc()->classId() == PIPELINE::MAX::BIPED::CBipedDriven::ClassId);
 	if (isBiped)
 	{
-		std::string name;
-		if (!root)
-			name = parentName + ucstring(node.userName()).toUtf8() + ".";
-		else if (!parentName.empty())
-			name = parentName;
-		else
+		std::string name = root ? parentName : (parentName + ucstring(node.userName()).toUtf8() + ".");
+		if (root && name.empty() && g_comNodePrefix)
 			name = ucstring(node.userName()).toUtf8() + ".";
 		// scale: biped nodes have none. rotation:
 		std::map<INode *, std::vector<NLMISC::CQuat> >::const_iterator rit = sampled.Rot.find(&node);
@@ -1610,15 +1613,18 @@ int main(int argc, char **argv)
 		if (std::string(argv[argi]) == "--dump-samples" && argi + 1 < argc) { dumpSamples = argv[argi + 1]; argi += 2; }
 		else if (std::string(argv[argi]) == "--dump-max-frame" && argi + 1 < argc) { dumpMaxFrame = atof(argv[argi + 1]); argi += 2; }
 		else if (std::string(argv[argi]) == "--bip" && argi + 1 < argc) { bipFile = argv[argi + 1]; argi += 2; }
+		else if (std::string(argv[argi]) == "--com-node-prefix") { g_comNodePrefix = true; ++argi; }
 		else break;
 	}
 	if (argc - argi < 2)
 	{
-		std::cerr << "usage: pipeline_max_export_anim [--bip <take.bip>] [--dump-samples <out.txt> [--dump-max-frame <f>]] <input.max> <output.anim>\n";
+		std::cerr << "usage: pipeline_max_export_anim [--bip <take.bip>] [--com-node-prefix] [--dump-samples <out.txt> [--dump-max-frame <f>]] <input.max> <output.anim>\n";
 		std::cerr << "       pipeline_max_export_anim --diff-rig <A.max> <B.max> <out.txt>\n";
 		std::cerr << "       pipeline_max_export_anim --author-jump <skel.max> <idle_source.max> <out.max>\n";
 		std::cerr << "  --bip loads Character Studio motion keys from a .bip take (Snowballs workflow:\n";
 		std::cerr << "        figure .max + bip/*.bip) and overrides the figure file's keytracks.\n";
+		std::cerr << "  --com-node-prefix names a bare-based COM's tracks '<nodeName>.pos/.rotquat'\n";
+		std::cerr << "        (Snowballs 2003 anim shape; Ryzom per-node refs are bare 'pos'/'rotquat').\n";
 		std::cerr << "exit codes: 0 ok, 1 error, 3 nothing to export\n";
 		return 1;
 	}
