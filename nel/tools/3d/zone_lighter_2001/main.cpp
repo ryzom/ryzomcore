@@ -151,6 +151,13 @@ int main(int argc, char* argv[])
 				CLandscape *landscape=new CLandscape;
 				landscape->init();
 
+				// Era reproduction: the 2001 bank has only empty displacement maps; the
+				// modern getTileNoiseMap substitutes a placeholder pattern for missing
+				// bitmaps, so disable noise to reproduce the era's clean no-displacement
+				// tessellation (also available on the modern tool as the same env).
+				if (getenv ("NL_ZONE_LIGHTER_NO_NOISE"))
+					landscape->setNoiseMode (false);
+
 				// A zone lighter
 				CMyZoneLighter lighter;
 				lighter.init ();

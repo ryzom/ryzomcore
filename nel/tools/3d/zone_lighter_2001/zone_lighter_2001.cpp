@@ -457,6 +457,29 @@ void CZoneLighter2001::light (CLandscape &landscape, CZone& output, uint zoneToL
 	// Progress bar
 	progress ("Compress the lightmap", 0.5);
 
+	// Debug: dump the RAW (uncompressed) lumels before CZone::build packs them —
+	// needed to run the era block codec externally for byte-exact comparisons.
+	if (const char *rawPath = getenv ("NL2001_DUMP_RAW_LUMELS"))
+	{
+		FILE *rawFile = fopen (rawPath, "wb");
+		if (rawFile)
+		{
+			uint32 rawPatchCount = (uint32)_PatchInfo.size ();
+			fwrite (&rawPatchCount, 4, 1, rawFile);
+			for (uint rp = 0; rp < _PatchInfo.size (); ++rp)
+			{
+				uint8 ro = (uint8)_PatchInfo[rp].OrderS, rt = (uint8)_PatchInfo[rp].OrderT;
+				fwrite (&ro, 1, 1, rawFile);
+				fwrite (&rt, 1, 1, rawFile);
+				uint32 rawLumelCount = (uint32)_PatchInfo[rp].Lumels.size ();
+				fwrite (&rawLumelCount, 4, 1, rawFile);
+				if (rawLumelCount)
+					fwrite (&_PatchInfo[rp].Lumels[0], 1, rawLumelCount, rawFile);
+			}
+			fclose (rawFile);
+		}
+	}
+
 	output.build (_ZoneToLight, _PatchInfo, _BorderVertices);
 }
 
