@@ -71,10 +71,38 @@ UDriver *drv=NULL;
 	
 // ***************************************************************************
 
+// RYZOMCORE reversal instrumentation: NL2001_ANALYTIC_LATTICE=1 replaces tessellation
+// leaf vertex positions with pure CBezierPatch::eval at the leaf's parametric coords.
+// This reproduces the 2001-era tessellation result at threshold 0 / zero noise: era
+// refineAll geomorphed every vertex to EndPos == computeVertex(s,t) == eval(s,t), while
+// the modern refine path leaves enforced-split vertices at StartPos (linear midpoints,
+// metres away from the surface on curved patches).
+static bool NL2001AnalyticLattice ()
+{
+	static bool init = false;
+	static bool value = false;
+	if (!init)
+	{
+		value = getenv ("NL2001_ANALYTIC_LATTICE") != NULL;
+		init = true;
+	}
+	return value;
+}
+
+static void NL2001EvalTessFace (const CTessFace *face, CVector &vBase, CVector &vLeft, CVector &vRight)
+{
+	CBezierPatch *bp = face->Patch->unpackIntoCache ();
+	vBase = bp->eval (face->PVBase.getS(), face->PVBase.getT());
+	vLeft = bp->eval (face->PVLeft.getS(), face->PVLeft.getT());
+	vRight = bp->eval (face->PVRight.getS(), face->PVRight.getT());
+}
+
+// ***************************************************************************
+
 
 CZoneLighter2001::CZoneLighter2001 () : _TriangleListAllocateur(100000)
 {
-	
+
 }
 	
 // ***************************************************************************
@@ -456,6 +484,33 @@ void CZoneLighter2001::light (CLandscape &landscape, CZone& output, uint zoneToL
 
 	// Progress bar
 	progress ("Compress the lightmap", 0.5);
+
+	// Debug: dump per-lumel position+normal actually used for lighting (same layout as
+	// the raw dump but 6 floats per lumel) — for external per-patch fitting.
+	if (const char *geomPath = getenv ("NL2001_DUMP_LUMEL_GEOM"))
+	{
+		FILE *geomFile = fopen (geomPath, "wb");
+		if (geomFile)
+		{
+			uint32 geomPatchCount = (uint32)_Lumels.size ();
+			fwrite (&geomPatchCount, 4, 1, geomFile);
+			for (uint rp = 0; rp < _Lumels.size (); ++rp)
+			{
+				uint8 ro = (uint8)_PatchInfo[rp].OrderS, rt = (uint8)_PatchInfo[rp].OrderT;
+				fwrite (&ro, 1, 1, geomFile);
+				fwrite (&rt, 1, 1, geomFile);
+				uint32 geomLumelCount = (uint32)_Lumels[rp].size ();
+				fwrite (&geomLumelCount, 4, 1, geomFile);
+				for (uint rl = 0; rl < _Lumels[rp].size (); ++rl)
+				{
+					const CLumelDescriptor &ld = _Lumels[rp][rl];
+					float v[6] = { ld.Position.x, ld.Position.y, ld.Position.z, ld.Normal.x, ld.Normal.y, ld.Normal.z };
+					fwrite (v, 4, 6, geomFile);
+				}
+			}
+			fclose (geomFile);
+		}
+	}
 
 	// Debug: dump the RAW (uncompressed) lumels before CZone::build packs them —
 	// needed to run the era block codec externally for byte-exact comparisons.
@@ -1415,8 +1470,15 @@ void CZoneLighter2001::addTriangles (CLandscape &landscape, vector<uint> &listZo
 		float startT=min (min (face->PVBase.getT(), face->PVLeft.getT()), face->PVRight.getT());
 		float endT=max (max (face->PVBase.getT(), face->PVLeft.getT()), face->PVRight.getT());
 
+		// Positions
+		CVector vBase=face->VBase->Pos;
+		CVector vLeft=face->VLeft->Pos;
+		CVector vRight=face->VRight->Pos;
+		if (NL2001AnalyticLattice ())
+			NL2001EvalTessFace (face, vBase, vLeft, vRight);
+
 		// Add a triangle
-		triangleArray.push_back (CTriangle (NLMISC::CTriangle (face->VBase->Pos, face->VLeft->Pos, face->VRight->Pos), 
+		triangleArray.push_back (CTriangle (NLMISC::CTriangle (vBase, vLeft, vRight),
 			face->Patch->getZone()->getZoneId(), face->Patch->getPatchId(), startS ,endS, startT, endT));
 	}
 
@@ -1765,16 +1827,23 @@ void CZoneLighter2001::buildZoneInformation (CLandscape &landscape, const vector
 			uint orderS=pPatch->getOrderS();
 			uint orderT=pPatch->getOrderT();
 
+			// Positions
+			CVector vBase=face->VBase->Pos;
+			CVector vLeft=face->VLeft->Pos;
+			CVector vRight=face->VRight->Pos;
+			if (NL2001AnalyticLattice ())
+				NL2001EvalTessFace (face, vBase, vLeft, vRight);
+
 			// *** Center coordinates
 			float centerS=(face->PVLeft.getS()+face->PVRight.getS())/2.f;
 			float centerT=(face->PVLeft.getT()+face->PVRight.getT())/2.f;
-			CVector centerPos=(face->VLeft->Pos+face->VRight->Pos)/2.f;
+			CVector centerPos=(vLeft+vRight)/2.f;
 
 			// *** Base Coordinates
-			CVector pos[14];
-			pos[0]=face->VBase->Pos;		// p0
-			pos[1]=face->VRight->Pos;
-			pos[2]=face->VLeft->Pos;		// p2
+			CVector pos[15];	// era declared pos[14] but writes pos[14] below (OOB absorbed by era MSVC stack layout)
+			pos[0]=vBase;		// p0
+			pos[1]=vRight;
+			pos[2]=vLeft;		// p2
 			pos[3]=(pos[1]+pos[2])/2;
 			pos[4]=(pos[0]+pos[1])/2;				// p4
 			pos[5]=(pos[0]+pos[2])/2;
@@ -1995,6 +2064,15 @@ void CZoneLighter2001::buildZoneInformation (CLandscape &landscape, const vector
 	leaves.clear ();
 	landscape.getTessellationLeaves(leaves);
 
+	// RYZOMCORE reversal instrumentation: NL2001_ANALYTIC_LATTICE=1 replaces tessellation
+	// leaf vertex positions with pure CBezierPatch::eval at the leaf's parametric coords
+	// (the 2001-era result at threshold 0 / noise 0, independent of any modern tessellation
+	// position contamination). NL2001_LATTICE_DEBUG=1 reports the position deltas.
+	bool analyticLattice = getenv ("NL2001_ANALYTIC_LATTICE") != NULL;
+	bool latticeDebug = getenv ("NL2001_LATTICE_DEBUG") != NULL;
+	double latticeMaxDelta = 0.0, latticeSumDelta = 0.0;
+	uint latticeSamples = 0;
+
 	// Scan each leaves
 	leavesCount=leaves.size();
 	for (leave=0; leave<leavesCount; leave++)
@@ -2043,10 +2121,39 @@ void CZoneLighter2001::buildZoneInformation (CLandscape &landscape, const vector
 			lumels[index].T+=fT;
 
 			// Normal
+			CVector vBase=face->VBase->Pos;
+			CVector vLeft=face->VLeft->Pos;
+			CVector vRight=face->VRight->Pos;
+			if (analyticLattice || latticeDebug)
+			{
+				CVector eBase, eLeft, eRight;
+				NL2001EvalTessFace (face, eBase, eLeft, eRight);
+				if (latticeDebug)
+				{
+					double d=(eBase-vBase).norm();
+					d=std::max(d, (double)(eLeft-vLeft).norm());
+					d=std::max(d, (double)(eRight-vRight).norm());
+					latticeMaxDelta=std::max(latticeMaxDelta, d);
+					latticeSumDelta+=d;
+					latticeSamples++;
+				}
+				if (analyticLattice)
+				{
+					vBase=eBase;
+					vLeft=eLeft;
+					vRight=eRight;
+				}
+			}
 			CPlane plane;
-			plane.make (face->VBase->Pos, face->VLeft->Pos, face->VRight->Pos);
+			plane.make (vBase, vLeft, vRight);
 			lumels[index].Normal+=plane.getNormal();
 		}
+	}
+
+	if (latticeDebug && latticeSamples)
+	{
+		printf ("NL2001_LATTICE_DEBUG: %u leaves, max |eval-Pos| = %g, mean = %g\n",
+			latticeSamples, latticeMaxDelta, latticeSumDelta/(double)latticeSamples);
 	}
 
 	// *** Now, finalise patch informations
