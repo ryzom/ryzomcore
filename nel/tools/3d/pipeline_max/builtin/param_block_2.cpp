@@ -137,7 +137,7 @@ const ISceneClassDesc *CParamBlock2::classDesc() const
 static void decodeParamRecord(CParamBlock2::SParam &p, CStorageRaw *raw, size_t hdr,
 	sint &refSlot, std::vector<CParamBlock2::SParam> &out)
 {
-	using SParam = CParamBlock2::SParam;
+	typedef CParamBlock2::SParam SParam; // C++03 (VS2008 x87 reference build)
 	if (!raw || raw->Value.size() < hdr) return;
 	memcpy(&p.Id, nlVectorData(raw->Value), 2);
 	memcpy(&p.Type, nlVectorData(raw->Value) + 2, 2);
