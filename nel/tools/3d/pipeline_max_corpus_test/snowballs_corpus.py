@@ -11,6 +11,9 @@ Gates:
   skel   — gnu-assigned.max → gnu.skel
   anim   — figure.max + bip/*.bip via --bip (gnu ear flip expected residual)
   swt    — informational (snowballs sources often lack SWT appdata flags)
+  light  — relight every reference .zonel with the modern zone_lighter using the
+           derived-from-2001 cfg (zone_lighter/cfg/snowballs_derived.cfg) and
+           tolerance-compare lumels against the reference lighting
 
 Self-skips (exit 77) when source/ref trees are absent.
 """
@@ -122,6 +125,7 @@ def main():
     ap.add_argument("--skip-shape", action="store_true")
     ap.add_argument("--skip-skel", action="store_true")
     ap.add_argument("--skip-anim", action="store_true")
+    ap.add_argument("--skip-lighting", action="store_true")
     ap.add_argument("--gate", action="store_true", help="exit non-zero on T1/T2 fail or zone export fail")
     args = ap.parse_args()
 
@@ -378,6 +382,141 @@ def main():
         print("ANIM (--bip): %d ok, %d fail (gnu ear flip residual expected)" % (anim_ok, anim_fail))
         summary["anim_ok"] = anim_ok
         summary["anim_fail"] = anim_fail
+
+    # --- lighting (.zonel: relight refs with the modern lighter, derived era cfg) ---
+    # The 2001 production lighting parameters were reverse-engineered byte-level
+    # (zone_lighter_2001/cfg/snowballs_recovered.cfg); this tier checks that the
+    # MODERN zone_lighter with the derived cfg still reproduces the reference
+    # lighting within tolerance. Residual bands are cross-codec skew (modern >>8
+    # dequant vs era /7,/5), zbuffer-vs-polygonal shadow edges, x87-vs-SSE float
+    # rounding and post-lighting asset drift — all value-level, so the gate is a
+    # tolerance band, not byte equality.
+    if not args.skip_lighting:
+        lighter = tool("zone_lighter")
+        refz = os.path.join(args.ref, "zones")
+        bank = os.path.join(args.ref, "tiles", "bank.bank")
+        shapes = os.path.join(args.ref, "shapes")
+        cfg_tpl = os.path.normpath(os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "..", "zone_lighter", "cfg",
+            "snowballs_derived.cfg"))
+        light_ok = True
+        if not (os.path.isdir(refz) and os.path.isfile(bank)
+                and os.path.isfile(lighter) and os.path.isfile(cfg_tpl)):
+            print("LIGHT skipped (needs reference zones+bank, zone_lighter, %s)"
+                  % os.path.basename(cfg_tpl))
+        else:
+            sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+            from snowballs_zonel_gate import era_unpack, parse_zone_lumdata
+
+            ldir = os.path.join(args.out, "lighting")
+            mirror = os.path.join(ldir, "zones_lc")
+            os.makedirs(mirror, exist_ok=True)
+            # lowercase mirror: the era data is mixed-case, the lighter loads
+            # dependencies and igs by lowercase literal path
+            for f in os.listdir(refz):
+                if not (f.endswith(".zonel") or f.endswith(".ig")):
+                    continue
+                dst = os.path.join(mirror, f.lower())
+                if not os.path.exists(dst):
+                    os.symlink(os.path.join(refz, f), dst)
+            cfg = os.path.join(ldir, "derived.cfg")
+            with open(cfg_tpl) as f:
+                tpl = f.read()
+            with open(cfg, "w") as f:
+                f.write(tpl.replace("@BANK@", bank).replace("@ZONES@", mirror)
+                        .replace("@SHAPES@", shapes))
+
+            zones = sorted(f[:-6].lower() for f in os.listdir(refz) if f.endswith(".zonel"))
+
+            def ring(zone):
+                m = re.match(r"^(\d+)_([a-z])([a-z])$", zone)
+                if not m:
+                    return []
+                r, c1, c2 = int(m.group(1)), m.group(2), m.group(3)
+                out = []
+                for dr in (-1, 0, 1):
+                    for dc in (-1, 0, 1):
+                        if dr == 0 and dc == 0:
+                            continue
+                        nc2 = chr(ord(c2) + dc)
+                        nz = "%d_%s%s" % (r + dr, c1, nc2)
+                        if ("a" <= nc2 <= "z" and r + dr >= 1
+                                and os.path.isfile(os.path.join(mirror, nz + ".zonel"))):
+                            out.append(nz)
+                return out
+
+            def unpack_zone(path):
+                out = []
+                for os_, ot_, comp in parse_zone_lumdata(path):
+                    vals = bytearray(os_ * 4 * ot_ * 4)
+                    ns = os_ * 4
+                    for tt in range(ot_):
+                        for ts in range(os_):
+                            ru = era_unpack(comp[(ts + tt * os_) * 8:(ts + tt * os_) * 8 + 8])
+                            for v in range(4):
+                                for u in range(4):
+                                    vals[ts * 4 + u + (tt * 4 + v) * ns] = ru[v * 4 + u]
+                    out.append(bytes(vals))
+                return out
+
+            def light_one(zone):
+                dep = os.path.join(ldir, "dep_%s.cfg" % zone)
+                with open(dep, "w") as f:
+                    f.write("dependencies = { %s };\n"
+                            % ", ".join('"%s"' % n for n in ring(zone)))
+                outz = os.path.join(ldir, zone + ".zonel")
+                rc, out = run([lighter, os.path.join(mirror, zone + ".zonel"), outz, cfg, dep],
+                              timeout=1800)
+                if rc != 0 or not os.path.isfile(outz):
+                    return zone, None
+                try:
+                    A = unpack_zone(outz)
+                    B = unpack_zone(os.path.join(refz, zone.upper() + ".zonel"))
+                except Exception:
+                    return zone, None
+                t = e = w3 = 0
+                for a, b in zip(A, B):
+                    if len(a) != len(b):
+                        continue
+                    for x, y in zip(a, b):
+                        t += 1
+                        d = x - y
+                        if d == 0:
+                            e += 1
+                        if -3 <= d <= 3:
+                            w3 += 1
+                return zone, (e, w3, t)
+
+            te = t3 = tt = 0
+            lfail = []
+            worst = []
+            # zone_lighter is multi-threaded itself; a couple in flight is plenty
+            with ThreadPoolExecutor(max_workers=max(1, min(4, args.jobs))) as ex:
+                for zone, res in ex.map(light_one, zones):
+                    if res is None:
+                        lfail.append(zone)
+                        continue
+                    e, w3, t = res
+                    te += e; t3 += w3; tt += t
+                    pz = 100.0 * w3 / t
+                    if pz < 90.0:
+                        worst.append((pz, zone, 100.0 * e / t))
+            for pz, zone, pe in sorted(worst):
+                print("  LIGHT %-6s +-3 %.2f%% exact %.2f%%" % (zone, pz, pe))
+            if tt:
+                print("LIGHT (.zonel relight vs 2001 refs): %d zones, exact %.2f%%, "
+                      "+-3 %.2f%% (gate: >=96%%), %d failed"
+                      % (len(zones) - len(lfail), 100.0 * te / tt, 100.0 * t3 / tt,
+                         len(lfail)))
+                summary["light_exact"] = round(100.0 * te / tt, 2)
+                summary["light_w3"] = round(100.0 * t3 / tt, 2)
+                light_ok = not lfail and (100.0 * t3 / tt) >= 96.0
+            else:
+                print("LIGHT: no zones compared")
+                light_ok = False
+            summary["light_fail"] = len(lfail)
+            if args.gate and not light_ok:
+                return 1
 
     print("SUMMARY", summary)
     return 0
