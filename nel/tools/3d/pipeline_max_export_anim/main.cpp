@@ -1721,6 +1721,11 @@ int main(int argc, char **argv)
 		}
 		// root flag: the selected node's parent is the scene root (see addAnimation)
 		bool root = node->parent() == rootNode;
+		if (getenv("PMB_ANIM_DUMP_SELECTION"))
+			fprintf(stderr, "PMB_ANIM_DUMP_SELECTION: node '%s' parent '%s' root=%d prefixe='%s'\n",
+			        ucstring(node->userName()).toUtf8().c_str(),
+			        node->parent() ? ucstring(node->parent()->userName()).toUtf8().c_str() : "(null)",
+			        (int)root, prefixe.c_str());
 		addAnimation(animFile, *node, nodeName, root, ssc);
 	}
 
