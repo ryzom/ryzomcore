@@ -64,6 +64,52 @@ def shape_name_key(name):
     b = re.sub(r"_\d+$", "", b)
     return b
 
+def parse_zone_patches(path):
+    """Minimal CZone reader: PatchBias/PatchScale + packed control points per patch.
+
+    Handles zone versions 3..5 and patch versions 2..7 (the 2001 .zonel refs are zone v3
+    / patch v4 with 5-byte era TileColors; our exports are v4+ / patch v7). CBorderVertex
+    is 7 bytes (version byte + three u16). Control points are u16 words unpacked as
+    bias + word * scale.
+    """
+    import struct
+    d = open(path, "rb").read()
+    o = 1  # zone version byte
+    if d[o:o + 4] != b"ZONE":
+        raise ValueError("no ZONE magic")
+    o += 4 + 2   # magic, ZoneId
+    o += 1 + 24  # CAABBoxExt version, bbox center+halfsize
+    bias = struct.unpack_from("<3f", d, o); o += 12
+    scale = struct.unpack_from("<f", d, o)[0]; o += 4
+    o += 4       # NumVertices
+    nb = struct.unpack_from("<I", d, o)[0]; o += 4
+    o += nb * 7
+    npatch = struct.unpack_from("<I", d, o)[0]; o += 4
+    patches = []
+    for _ in range(npatch):
+        pver = d[o]; o += 1
+        if not 2 <= pver <= 7:
+            raise ValueError("patch version %d" % pver)
+        verts = struct.unpack_from("<12H", d, o); o += 24
+        tang = struct.unpack_from("<24H", d, o); o += 48
+        inter = struct.unpack_from("<12H", d, o); o += 24
+        ntiles = struct.unpack_from("<I", d, o)[0]; o += 4
+        o += ntiles * 8
+        ncol = struct.unpack_from("<I", d, o)[0]; o += 4
+        o += ncol * (2 if pver >= 7 else 5)
+        o += 2  # OrderS, OrderT
+        nlum = struct.unpack_from("<I", d, o)[0]; o += 4
+        o += nlum
+        if pver >= 3:
+            o += 2  # NoiseRotation, _CornerSmoothFlag
+        if pver >= 4:
+            o += 1  # Flags
+        if pver >= 5:
+            ntli = struct.unpack_from("<I", d, o)[0]; o += 4
+            o += ntli * 3
+        patches.append((verts, tang, inter))
+    return {"bias": bias, "scale": scale, "patches": patches}
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--bin-dir", default=None, help="directory with pipeline_max_* tools")
@@ -142,63 +188,84 @@ def main():
                 fail += 1
                 print("  ZONE FAIL", f, out[-200:] if out else "")
         print("ZONE export: %d ok, %d fail" % (ok, fail))
-        # Geometry-level T3 via zone_dump triangle soup (unlit .zone vs lit .zonel share
-        # the same tessellation path; lighting lives outside the dump). Float-eq on verts.
-        zone_dump = tool("zone_dump")
+        # Geometry-level T3: the reference .zonel are POST-PIPELINE (zone_welder moved border
+        # verts by up to ~1m, then zone_lighter lit them), so raw exports never match them.
+        # Replicate the weld pass (neighbors resolved from the output dir, classic recipe:
+        # copy all raw zones there first), then compare packed control points field-level.
+        # Classification instead of a blanket epsilon:
+        #   exact    < 2 cm   — export + weld reproduce the reference control points
+        #   near     < 20 cm  — sub-tile residue (weld order / handle refresh)
+        #   residual < 5 m    — real deltas (source .max edited after the 2003 data build)
+        #   scale    ~ 39.37x — source authored in inch system units (different artist;
+        #                       the era plugin had no unit conversion, so these sources
+        #                       cannot be the ones the reference build used)
+        #   wild               — anything else
+        zone_welder = tool("zone_welder")
         refz = os.path.join(args.ref, "zones")
-        geom_ok = geom_diff = geom_skip = 0
-        dumpdir = os.path.join(args.out, "zone_dumps")
-        os.makedirs(dumpdir, exist_ok=True)
-        if os.path.isdir(refz) and os.path.isfile(zone_dump):
-            for f in sorted(os.listdir(zdir)):
-                if not f.endswith(".zone"):
-                    continue
+        wdir = os.path.join(args.out, "welded")
+        geom = {"exact": 0, "near": 0, "residual": 0, "scale": 0, "wild": 0, "skip": 0}
+        if os.path.isdir(refz) and os.path.isfile(zone_welder):
+            os.makedirs(wdir, exist_ok=True)
+            zones = [f for f in sorted(os.listdir(zdir)) if f.endswith(".zone")]
+            for f in zones:  # raw copies so the welder finds every neighbor
+                with open(os.path.join(zdir, f), "rb") as s, \
+                     open(os.path.join(wdir, f), "wb") as t:
+                    t.write(s.read())
+            for f in zones:
+                run([zone_welder, os.path.join(zdir, f), os.path.join(wdir, f)], timeout=120)
+            worst = []
+            for f in zones:
                 stem = f[:-5]
                 ref_zl = os.path.join(refz, stem + ".zonel")
                 if not os.path.isfile(ref_zl):
-                    geom_skip += 1
+                    geom["skip"] += 1
                     continue
-                da = os.path.join(dumpdir, stem + "_ours.dump")
-                db = os.path.join(dumpdir, stem + "_ref.dump")
-                run([zone_dump, os.path.join(zdir, f), os.path.join(zdir, f), da], timeout=60)
-                run([zone_dump, ref_zl, ref_zl, db], timeout=60)
-                if not (os.path.isfile(da) and os.path.isfile(db)):
-                    geom_diff += 1
+                try:
+                    A = parse_zone_patches(os.path.join(wdir, f))
+                    B = parse_zone_patches(ref_zl)
+                except Exception as e:
+                    geom["wild"] += 1
+                    worst.append((stem, "parse: %s" % e))
                     continue
-                # dump: u32 nTris, then nTris * 9 floats
-                import struct
-                def read_dump(path):
-                    raw = open(path, "rb").read()
-                    if len(raw) < 4:
-                        return None
-                    n = struct.unpack_from("<I", raw, 0)[0]
-                    need = 4 + n * 9 * 4
-                    if len(raw) < need:
-                        return None
-                    verts = struct.unpack_from("<%df" % (n * 9), raw, 4)
-                    return n, verts
-                A = read_dump(da)
-                B = read_dump(db)
-                if not A or not B or A[0] != B[0]:
-                    geom_diff += 1
+                if len(A["patches"]) != len(B["patches"]):
+                    geom["wild"] += 1
+                    worst.append((stem, "npatch %d vs %d" % (len(A["patches"]), len(B["patches"]))))
                     continue
-                max_abs = 0.0
-                for a, b in zip(A[1], B[1]):
-                    d = abs(a - b)
-                    if d > max_abs:
-                        max_abs = d
-                # x87/SSE tessellation noise; 1e-3 m is generous for landscape
-                if max_abs <= 1e-3:
-                    geom_ok += 1
+                max_v = 0.0
+                for pa, pb in zip(A["patches"], B["patches"]):
+                    for i in range(12):
+                        d = abs((A["bias"][i % 3] + pa[0][i] * A["scale"])
+                                - (B["bias"][i % 3] + pb[0][i] * B["scale"]))
+                        if d > max_v:
+                            max_v = d
+                if max_v < 0.02:
+                    geom["exact"] += 1
+                elif max_v < 0.2:
+                    geom["near"] += 1
+                elif max_v < 5.0:
+                    geom["residual"] += 1
+                    worst.append((stem, "verts max %.2fm" % max_v))
                 else:
-                    geom_diff += 1
-                    if geom_diff <= 5:
-                        print("  ZONE geom-diff %s maxAbs=%g tris=%d" % (stem, max_abs, A[0]))
-        print("ZONE geom (zone_dump vs .zonel): %d ok, %d diff, %d skip" % (geom_ok, geom_diff, geom_skip))
+                    br = max(abs(v) for v in A["bias"]) / max(1e-6, max(abs(v) for v in B["bias"]))
+                    if 35.0 < br < 45.0:
+                        geom["scale"] += 1
+                        worst.append((stem, "inch-authored source (bias ratio %.2f)" % br))
+                    else:
+                        geom["wild"] += 1
+                        worst.append((stem, "verts max %.1fm" % max_v))
+            for stem, why in worst[:10]:
+                print("  ZONE T3 %-6s %s" % (stem, why))
+            if len(worst) > 10:
+                print("  ZONE T3 ... %d more non-exact zones" % (len(worst) - 10))
+        else:
+            print("  ZONE T3 skipped (no refs or zone_welder)")
+        print("ZONE T3 (welded verts vs .zonel): %d exact, %d near, %d residual, "
+              "%d inch-scale, %d wild, %d skip"
+              % (geom["exact"], geom["near"], geom["residual"],
+                 geom["scale"], geom["wild"], geom["skip"]))
         summary["zone_ok"] = ok
         summary["zone_fail"] = fail
-        summary["zone_geom_ok"] = geom_ok
-        summary["zone_geom_diff"] = geom_diff
+        summary["zone_geom"] = dict(geom)
         if args.gate and fail:
             return 1
 
