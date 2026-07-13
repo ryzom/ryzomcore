@@ -1,25 +1,33 @@
-// NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010  Winch Gate Property Limited
-//
-// This source file has been modified by the following contributors:
-// Copyright (C) 2013-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+/** \file 3d/zone_lighter.cpp
+ * Class to light zones
+ *
+ * $Id$
+ */
 
-#include "std3d.h"
+/* Copyright, 2000 Nevrax Ltd.
+ *
+ * This file is part of NEVRAX NEL.
+ * NEVRAX NEL is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2, or (at your option)
+ * any later version.
 
-#include "nel/3d/zone_lighter.h"
+ * NEVRAX NEL is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with NEVRAX NEL; see the file COPYING. If not, write to the
+ * Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
+ * MA 02111-1307, USA.
+ */
+
+
+
+#define USE_JPEG
+
+#include "zone_lighter_2003.h"
 #include "nel/3d/landscape.h"
 #include "nel/3d/patchuv_locator.h"
 #include "nel/3d/shape.h"
@@ -30,6 +38,10 @@
 #include "nel/3d/water_shape.h"
 #include "nel/3d/texture_file.h"
 
+
+
+
+
 #include "nel/misc/common.h"
 #include "nel/misc/thread.h"
 #include "nel/misc/path.h"
@@ -39,12 +51,15 @@
 
 
 #ifdef NL_OS_WINDOWS
-#	define WIN32_LEAN_AND_MEAN
-#	ifndef NL_COMP_MINGW
-#		define NOMINMAX
-#	endif
-#	include <windows.h>
-#	include <winbase.h>
+#  define WIN32_LEAN_AND_MEAN
+#  include "windows.h"
+#  include "winbase.h"
+#  ifdef min
+#    undef min
+#  endif
+#  ifdef max
+#    undef max
+#  endif
 #endif // NL_OS_WINDOWS
 
 using namespace NLMISC;
@@ -53,10 +68,6 @@ using namespace std;
 
 // Define this to render the zbuffers into a bitmap zbuffer and save it into a jpeg
 // #define SAVE_ZBUFFER "c:/temp"
-
-#ifdef DEBUG_NEW
-#define new DEBUG_NEW
-#endif
 
 #define DEFAULT_JITTER 0.4f
 #define DEFAULT_ZBUFFER_LANDSCAPE_SIZE 32768
@@ -76,7 +87,7 @@ using namespace std;
 Documentation:
 
 
-	To light a zone, you must first adding shadow caster triangles using the addTriangle() methods.
+	To light a zone, you must first adding shadow caster triangles using the addTriangle() methods. 
 	Triangles can come from landscape zones or IG meshes. Then call the lighting process with ligth().
 
 	addTriangle ()
@@ -88,43 +99,43 @@ Documentation:
 	light ()
 		The lighting process uses a software zbuffers render to compute shadow attenuation of the zone.
 		CRenderZBuffer () (multithread)
-			- Render shadow caster triangles into the light zbuffers for shadows. Each z value is tested and
+			- Render shadow caster triangles into the light zbuffers for shadows. Each z value is tested and 
 			written in the pixel and in the 8 neighbor pixels.
-			- There is a zbuffer per landscape softshadow sample and an additionnal zbuffer for objects. So
+			- There is a zbuffer per landscape softshadow sample and an additionnal zbuffer for objects. So 
 			landscape triangles cast softshadows and object (trees and building) cast antialiased shadows.
 
 		- Render shadow caster triangles into a heightfield used for radiosity
 
 		buildZoneInformation ()
-
+			
 			- Tesselate the landscape to shadow accuracy (2 meters)
-
-			- Compute lumel positions.
+			
+			- Compute lumel positions. 
 				Lumel position is the average of lumel triangles center overlapping
 				the lumel but using the shadow accuracy triangle position because
 				we need the same triangles than shadow caster polygons.
 				Border lumel position are extended to fit the patch border.
-
+			
 			- Tesselate to lumel accuracy (0.5 meter)
-
+			
 			- Compute lumel normal
 				- Lumel normal is the average of lumel triangles normals. The normals
-				comes from the lumel accuracy to get more precise lighting. So normals
+				comes from the lumel accuracy to get more precise lighting. So normals 
 				are interpolated from the center of the lumel but they will be rendered
-				on the patch border. Unlike the position, we can extand the normal to the
+				on the patch border. Unlike the position, we can extand the normal to the 
 				border without loosing normal precision because normal interpolation is
 				aligned with the tesselation. So we need some border normal smoothing.
-
+			
 			- Border normal smoothing
 				- Normals on the border of the patches are smoothed with neighbor normals.
 
 		CLightRunnable () (multithread)
-
+			
 			- For each patches and for each lumels
-
+				
 				attenuation ()
 					- Compute shadow attenuation
-						- Get an antialised attenuation value in each lansdcape softshadow zbuffer.
+						- Get an antialised attenuation value in each lansdcape softshadow zbuffer. 
 						Average it with jitter.
 						- Get an antialised attenuation value from the object zbuffer.
 						- Return the smaller value of the both.
@@ -136,7 +147,7 @@ Documentation:
 						- Algorithm
 							- Get the lumel position in the heightfield
 							- Lookup in the 8 2d directions for max height
-							- Compute an approximation of the sky surface visible from
+							- Compute an approximation of the sky surface visible from 
 							the lumel position
 				- Store final lumel luminosity
 
@@ -156,14 +167,14 @@ inline float easineasout(float x)
 
 // ***************************************************************************
 
-inline void transformVectorToZBuffer (const CZoneLighter::CZBuffer& zbuffer, const CVector &world, CVector &projected)
+inline void transformVectorToZBuffer (const CZoneLighter2003::CZBuffer& zbuffer, const CVector &world, CVector &projected)
 {
 	projected = zbuffer.WorldToZBuffer * world;
 	float temp = projected.z;
 	projected.z = projected.y;
 	projected.y = -temp;
 	projected = zbuffer.WorldToZBufferFrustum.project (projected);
-
+	
 	// Scale to zbuffer size
 	projected.x *= zbuffer.ZBufferPixelSize;
 	projected.y *= zbuffer.ZBufferPixelSize;
@@ -172,7 +183,7 @@ inline void transformVectorToZBuffer (const CZoneLighter::CZBuffer& zbuffer, con
 
 // ***********************************************************
 
-static const sint DeltaZ[9][2]=
+const static sint DeltaZ[9][2]=
 {
 	{0, 0},
 	{-1, 0},
@@ -187,7 +198,7 @@ static const sint DeltaZ[9][2]=
 
 // ***************************************************************************
 
-inline float testZPercentageCloserFilter (float x, float y, float z, CZoneLighter::CZBuffer &zbuffer, const CZoneLighter::CLightDesc &description, bool &zBufferOverflowFlag)
+inline float testZPercentageCloserFilter (float x, float y, float z, CZoneLighter2003::CZBuffer &zbuffer, const CZoneLighter2003::CLightDesc &description, bool &zBufferOverflowFlag)
 {
 	// See "Rendering Antialiased Shadows With Depth Maps" Reeves, Salesint, Cook, ACM 1987
 
@@ -211,7 +222,7 @@ inline float testZPercentageCloserFilter (float x, float y, float z, CZoneLighte
 	{
 		const sint fx = dx + (sint)ix;
 		const sint fy = dy + (sint)iy;
-		if ((fx >= 0) && (fx < zbuffer.LocalZBufferWidth) && (fy >= 0) && (fy < zbuffer.LocalZBufferHeight))
+		if ((fx >= 0) || (fx < zbuffer.LocalZBufferWidth) || (fy >= 0) || (fy < zbuffer.LocalZBufferHeight))
 		{
 			const float zRed = zbuffer.Pixels[fx + (zbuffer.LocalZBufferHeight - 1 - fy) * zbuffer.LocalZBufferWidth];
 
@@ -231,13 +242,13 @@ inline float testZPercentageCloserFilter (float x, float y, float z, CZoneLighte
 
 // ***************************************************************************
 
-CZoneLighter::CZoneLighter () : _PatchComputed ("PatchComputed")
+CZoneLighter2003::CZoneLighter2003 () : _PatchComputed ("PatchComputed")
 {
 }
-
+	
 // ***************************************************************************
 
-void CZoneLighter::init ()
+void CZoneLighter2003::init ()
 {
 	// Precalc some values
 	for (uint i=0; i<8; i++)
@@ -282,7 +293,7 @@ static const sint deltaDirection[8][2]=
 
 // ***************************************************************************
 
-float CZoneLighter::calcSkyContribution (sint s, sint t, float height, float skyIntensity, const CVector& normal) const
+float CZoneLighter2003::calcSkyContribution (sint s, sint t, float height, float skyIntensity, const CVector& normal) const
 {
 	// Sky contribution
 	float skyContribution;
@@ -336,9 +347,9 @@ void setCPUMask (IThread *thread, uint process)
 	{
 		uint i=0;
 		uint count = 0;
-		for(;;)
+		while (1)
 		{
-			if (mask & (UINT64_CONSTANT(1)<<i))
+			if (mask & (1<<i))
 			{
 				if (count == process)
 					break;
@@ -348,9 +359,9 @@ void setCPUMask (IThread *thread, uint process)
 			if (i==64)
 				i = 0;
 		}
-
+		
 		// Set the CPU mask
-		// thread->setCPUMask (1<<i);
+		thread->setCPUMask (1<<i);
 	}
 }
 
@@ -360,15 +371,15 @@ class NL3D::CLightRunnable : public IRunnable
 {
 	// Members
 	uint			_Process;
-	CZoneLighter	*_ZoneLighter;
-	const CZoneLighter::CLightDesc	*_Description;
+	CZoneLighter2003	*_ZoneLighter;
+	const CZoneLighter2003::CLightDesc	*_Description;
 
 public:
 	IThread			*Thread;
 
 public:
 	// Ctor
-	CLightRunnable (uint process, CZoneLighter *zoneLighter, const CZoneLighter::CLightDesc *description)
+	CLightRunnable (uint process, CZoneLighter2003 *zoneLighter, const CZoneLighter2003::CLightDesc *description)
 	{
 		_ZoneLighter = zoneLighter;
 		_Process = process;
@@ -379,7 +390,7 @@ public:
 	void run()
 	{
 		// Set the CPU mask
-		// setCPUMask (Thread, _Process);
+		setCPUMask (Thread, _Process);
 
 		_ZoneLighter->processCalc (_Process, *_Description);
 		_ZoneLighter->_ProcessExited++;
@@ -393,22 +404,22 @@ class NL3D::CRenderZBuffer : public IRunnable
 {
 	// Members
 	uint			_Process;
-	CZoneLighter	*_ZoneLighter;
+	CZoneLighter2003	*_ZoneLighter;
 
 	// The lighting decription
-	const CZoneLighter::CLightDesc	*_Description;
+	const CZoneLighter2003::CLightDesc	*_Description;
 
 	// Triangles to render
 	uint			_FirstTriangle;
 	uint			_NumTriangle;
-	const vector<CZoneLighter::CTriangle>		*_Triangles;
+	const vector<CZoneLighter2003::CTriangle>		*_Triangles;
 
 public:
 	IThread			*Thread;
 
 public:
 	// Ctor
-	CRenderZBuffer (uint process, CZoneLighter *zoneLighter, const CZoneLighter::CLightDesc	*description, uint firstTriangle, uint numTriangle, const vector<CZoneLighter::CTriangle> *triangles)
+	CRenderZBuffer (uint process, CZoneLighter2003 *zoneLighter, const CZoneLighter2003::CLightDesc	*description, uint firstTriangle, uint numTriangle, const vector<CZoneLighter2003::CTriangle> *triangles)
 	{
 		_ZoneLighter = zoneLighter;
 		_Description = description;
@@ -430,8 +441,8 @@ public:
 #define CLIPPED_LEFT 4
 #define CLIPPED_ALL (CLIPPED_TOP|CLIPPED_BOTTOM|CLIPPED_LEFT|CLIPPED_RIGHT)
 
-void RenderTriangle (const CZoneLighter::CTriangle &triangle, const CZoneLighter::CLightDesc &description, CPolygon2D::TRasterVect &borders,
-					CFastMutex &mutex, CZoneLighter::CZBuffer &zbuffer, uint radius)
+void RenderTriangle (const CZoneLighter2003::CTriangle &triangle, const CZoneLighter2003::CLightDesc &description, CPolygon2D::TRasterVect &borders,
+					CFastMutex &mutex, CZoneLighter2003::CZBuffer &zbuffer, uint radius)
 {
 	// *** Transform it in the zbuffer basis
 
@@ -485,7 +496,7 @@ void RenderTriangle (const CZoneLighter::CTriangle &triangle, const CZoneLighter
 		borders.clear ();
 		zBasis.computeBorders (borders, minimumY);
 
-		// Compute the gradient for one over z
+		// Compute the gradient for one over z 
 		CVector ozzGradient;
 		gradientTriangle.computeGradient (ooz[0], ooz[1], ooz[2], ozzGradient);
 
@@ -501,10 +512,10 @@ void RenderTriangle (const CZoneLighter::CTriangle &triangle, const CZoneLighter
 			gradientTriangle.computeGradient (triangle.V[0], triangle.V[1], triangle.V[2], vGradient);
 		}
 
-		// Texture information
-		uint width=0;
-		uint height=0;
-		const CObjectVector<uint8> *pixels = 0;
+		// Texture informations
+		uint width = 0;
+		uint height = 0;
+		const NLMISC::CObjectVector<uint8> *pixels = NULL; // era: std::vector; CBitmap pixels container modernized
 		if (needUV)
 		{
 			// Get pixels
@@ -517,17 +528,17 @@ void RenderTriangle (const CZoneLighter::CTriangle &triangle, const CZoneLighter
 
 		// For each scanlines
 		sint y = std::max (minimumY, 0);
-		sint yMax = std::min ((sint)(minimumY+borders.size ()), zbuffer.LocalZBufferHeight);
+		sint yMax = std::min ((sint)(minimumY+borders.size ()), zbuffer.LocalZBufferWidth);
 		for (; y<yMax; y++)
 		{
 			// Ref on the raster
 			const CPolygon2D::TRaster &raster = borders[y-minimumY];
-
+			
 			// Gradient y for ooz, u and v
 			const float deltaY = (float)y - zBasis.Vertices[0].y;
 			const float oozGradientY = deltaY * ozzGradient.y;
-			float uGradientY=0.0f;
-			float vGradientY=0.0f;
+			float uGradientY = 0.f;
+			float vGradientY = 0.f;
 			if (needUV)
 			{
 				uGradientY = deltaY * uGradient.y;
@@ -542,8 +553,8 @@ void RenderTriangle (const CZoneLighter::CTriangle &triangle, const CZoneLighter
 				// Gradient x for ooz, u and v
 				const float deltaX = (float)x - zBasis.Vertices[0].x;
 				const float oozGradientX = deltaX * ozzGradient.x;
-				float uGradientX=0.0f;
-				float vGradientX=0.0f;
+				float uGradientX = 0.f;
+				float vGradientX = 0.f;
 				if (needUV)
 				{
 					uGradientX = deltaX * uGradient.x;
@@ -564,11 +575,11 @@ void RenderTriangle (const CZoneLighter::CTriangle &triangle, const CZoneLighter
 					v = triangle.V[0] + vGradientX + vGradientY;
 
 					// Clamp or wrap ?
-					if (triangle.Flags & CZoneLighter::CTriangle::ClampU)
+					if (triangle.Flags & CZoneLighter2003::CTriangle::ClampU)
 						clamp (u, 0.f, 1.f);
 					else
 						u -= (float)floor (u);
-					if (triangle.Flags & CZoneLighter::CTriangle::ClampV)
+					if (triangle.Flags & CZoneLighter2003::CTriangle::ClampV)
 						clamp (v, 0.f, 1.f);
 					else
 						v -= (float)floor (v);
@@ -588,7 +599,7 @@ void RenderTriangle (const CZoneLighter::CTriangle &triangle, const CZoneLighter
 				if (alphaTest)
 				{
 					// Enter the mutex
-					CAutoMutex<CFastMutex> lock(mutex);
+					mutex.enter ();
 
 					// Write Z around
 					uint d;
@@ -609,6 +620,9 @@ void RenderTriangle (const CZoneLighter::CTriangle &triangle, const CZoneLighter
 							}
 						}
 					}
+
+					// Leave the mutex
+					mutex.leave ();
 				}
 			}
 		}
@@ -619,7 +633,7 @@ void RenderTriangle (const CZoneLighter::CTriangle &triangle, const CZoneLighter
 void NL3D::CRenderZBuffer::run()
 {
 	// Set the CPU mask
-	// setCPUMask (Thread, _Process);
+	setCPUMask (Thread, _Process);
 
 	// Span array
 	CPolygon2D::TRasterVect borders;
@@ -629,13 +643,13 @@ void NL3D::CRenderZBuffer::run()
 	for (i=_FirstTriangle; i<_FirstTriangle+_NumTriangle; i++)
 	{
 		// Triangle reference
-		const CZoneLighter::CTriangle &triangle = (*_Triangles)[i];
+		const CZoneLighter2003::CTriangle &triangle = (*_Triangles)[i];
 
 		// Keep backface and doublesided polygons
-		if ((triangle.Flags & CZoneLighter::CTriangle::DoubleSided) || ((triangle.getPlane ().getNormal() * _ZoneLighter->_SunDirection) > 0))
+		if ((triangle.Flags & CZoneLighter2003::CTriangle::DoubleSided) || ((triangle.getPlane ().getNormal() * _ZoneLighter->_SunDirection) > 0))
 		{
 			// Landscape triangle ?
-			if (triangle.Flags & CZoneLighter::CTriangle::Landscape)
+			if (triangle.Flags & CZoneLighter2003::CTriangle::Landscape)
 			{
 				// For each landscape zbuffer
 				uint sample;
@@ -664,14 +678,14 @@ class NL3D::CCalcLightableShapeRunnable : public IRunnable
 {
 public:
 	CCalcLightableShapeRunnable(uint process,
-								CZoneLighter *zoneLighter,
-								const CZoneLighter::CLightDesc *description,
-								CZoneLighter::TShapeVect *shapeToLit,
+								CZoneLighter2003 *zoneLighter,
+								const CZoneLighter2003::CLightDesc *description,
+								CZoneLighter2003::TShapeVect *shapeToLit,
 								uint firstShape,
 								uint lastShape
 								)
-		:
-		  _ZoneLighter(zoneLighter),
+		: 
+		  _ZoneLighter(zoneLighter), 
 		  _Description(description),
 		  _ShapesToLit(shapeToLit),
 		  _FirstShape(firstShape),
@@ -685,9 +699,9 @@ public:
 		_ZoneLighter->_ProcessExited++;
 	}
 private:
-	CZoneLighter						*_ZoneLighter;
-	const CZoneLighter::CLightDesc		*_Description;
-	CZoneLighter::TShapeVect	*_ShapesToLit;
+	CZoneLighter2003						*_ZoneLighter;
+	const CZoneLighter2003::CLightDesc		*_Description;
+	CZoneLighter2003::TShapeVect	*_ShapesToLit;
 	uint								_FirstShape, _LastShape;
 	uint								_Process;
 
@@ -724,8 +738,8 @@ void draw2dLine (CBitmap &bitmap, float x0, float y0, float x1, float y1, const 
 
 // ***************************************************************************
 
-void InitZBuffer (CZoneLighter::CZBuffer &zbuffer, const CVector &SunPosition, const CMatrix &rayBasis, const CAABBoxExt &zoneBB, uint zBufferPixelSize, const CZoneLighter::CLightDesc& description)
-{
+void InitZBuffer (CZoneLighter2003::CZBuffer &zbuffer, const CVector &SunPosition, const CMatrix &rayBasis, const CAABBoxExt &zoneBB, uint zBufferPixelSize, const CZoneLighter2003::CLightDesc& description)
+{	
 	// Clac the zbuffer world size
 	const float zBufferWorldSize = (float)(tan (description.SunFOV/2)*description.SunDistance*2);
 
@@ -742,7 +756,7 @@ void InitZBuffer (CZoneLighter::CZBuffer &zbuffer, const CVector &SunPosition, c
 
 	// Evaluate the size of the local zbuffer
 
-	// The zone bounding box
+	// The zone bounding box 
 	CVector bMin = zoneBB.getMin ();
 	CVector bMax = zoneBB.getMax ();
 	transformVectorToZBuffer (zbuffer, CVector (bMin.x, bMax.y, bMin.z), zbuffer.BoundingBoxVectors[0]);
@@ -799,14 +813,14 @@ void InitZBuffer (CZoneLighter::CZBuffer &zbuffer, const CVector &SunPosition, c
 // ***************************************************************************
 
 #ifdef SAVE_ZBUFFER
-void SaveZBuffer (CZoneLighter::CZBuffer &zbuffer, const char *filename)
+void SaveZBuffer (CZoneLighter2003::CZBuffer &zbuffer, const char *filename)
 {
 	// Resize the bitmap
 	CBitmap bitmap;
 	bitmap.resize (zbuffer.LocalZBufferWidth, zbuffer.LocalZBufferHeight, CBitmap::Luminance);
 
 	// Get pixels
-	CObjectVector<uint8> &pixels = bitmap.getPixels ();
+	vector<uint8> &pixels = bitmap.getPixels ();
 
 	// Draw it
 	uint samples = zbuffer.LocalZBufferWidth*zbuffer.LocalZBufferHeight;
@@ -850,7 +864,7 @@ void SaveZBuffer (CZoneLighter::CZBuffer &zbuffer, const char *filename)
 			// Save it
 			bitmap.writeJPG (outputZFile, 128);
 		}
-		catch (const Exception& except)
+		catch (Exception& except)
 		{
 			// Error message
 			nlwarning ("ERROR writing %s: %s\n", filename, except.what());
@@ -866,7 +880,7 @@ void SaveZBuffer (CZoneLighter::CZBuffer &zbuffer, const char *filename)
 
 // ***************************************************************************
 
-void FilterZBuffer (CZoneLighter::CZBuffer &zbuffer, uint filterRadius)
+void FilterZBuffer (CZoneLighter2003::CZBuffer &zbuffer, uint filterRadius)
 {
 	// Resize the temp buffer
 	static std::vector<float> tempPixels;
@@ -877,6 +891,7 @@ void FilterZBuffer (CZoneLighter::CZBuffer &zbuffer, uint filterRadius)
 	for (x=0; x<zbuffer.LocalZBufferWidth; x++)
 	{
 		// The Value
+		const float &oldValue = zbuffer.Pixels[x+y*zbuffer.LocalZBufferWidth];
 		float &newValue = tempPixels[x+y*zbuffer.LocalZBufferWidth];
 
 		uint n;
@@ -890,7 +905,7 @@ void FilterZBuffer (CZoneLighter::CZBuffer &zbuffer, uint filterRadius)
 			{
 				const float &testValue = zbuffer.Pixels[fx+fy*zbuffer.LocalZBufferWidth];
 				if (testValue < newValue)
-					newValue = testValue;
+					newValue = testValue;					
 			}
 		}
 
@@ -902,7 +917,7 @@ void FilterZBuffer (CZoneLighter::CZBuffer &zbuffer, uint filterRadius)
 
 // ***************************************************************************
 
-void CZoneLighter::light (CLandscape &landscape, CZone& output, uint zoneToLight, const CLightDesc& description, std::vector<CTriangle>& obstacles, vector<uint> &listZone)
+void CZoneLighter2003::light (CLandscape &landscape, CZone& output, uint zoneToLight, const CLightDesc& description, std::vector<CTriangle>& obstacles, vector<uint> &listZone)
 {
 	/*
 	 * Lighting algorithm
@@ -912,13 +927,13 @@ void CZoneLighter::light (CLandscape &landscape, CZone& output, uint zoneToLight
 	 * - Create a heightfield used for global illumination. Cells are initialized with -FLT_MAX
 	 * - Insert each shadow casting triangles in the quad grid and fill the heightfield's cells overlapped by the bounding box of the triangle with
 	 * the max height of the triangle if its height is > than the current height in the heightfield's cell.
-	 * -
+	 * - 
 	 */
 
 	// Backup thread mask
 	IThread *currentThread = IThread::getCurrentThread ();
 	uint64 threadMask = currentThread->getCPUMask();
-	// currentThread->setCPUMask (1);
+	currentThread->setCPUMask (1);
 
 	// Calc the ray basis
 	_SunDirection=description.SunDirection;
@@ -927,7 +942,7 @@ void CZoneLighter::light (CLandscape &landscape, CZone& output, uint zoneToLight
 	// Zone to light
 	_ZoneToLight=zoneToLight;
 
-	// Landscape
+	// Landscape 
 	_Landscape=&landscape;
 
 	// Process count
@@ -949,10 +964,10 @@ void CZoneLighter::light (CLandscape &landscape, CZone& output, uint zoneToLight
 		_ProcessCount=MAX_CPU_PROCESS;
 
 	// Number of obstacle polygones
-	nlinfo ("Obstacle polygones : %u", (uint)obstacles.size ());
+	printf ("Obstacle polygones : %d\n", obstacles.size ());
 
 	// Number of CPUS used
-	nlinfo ("Number of CPU used: %u", _ProcessCount);
+	printf ("Number of CPU used: %d\n", _ProcessCount);
 
 	// Zone pointer
 	CZone *pZone=landscape.getZone (_ZoneToLight);
@@ -967,12 +982,12 @@ void CZoneLighter::light (CLandscape &landscape, CZone& output, uint zoneToLight
 		CVector center = zoneBB.getCenter ();
 
 		// *** Compute planes
-		const uint size=(uint)obstacles.size();
+		const uint size=obstacles.size();
 		uint triangleId;
 		for (triangleId=0; triangleId<size; triangleId++)
 		{
 			// Triangle ref
-			CZoneLighter::CTriangle& triangle=obstacles[triangleId];
+			CZoneLighter2003::CTriangle& triangle=obstacles[triangleId];
 
 			// Calc the plane
 			triangle._Plane.make (triangle.Triangle.V0, triangle.Triangle.V1, triangle.Triangle.V2);
@@ -996,21 +1011,21 @@ void CZoneLighter::light (CLandscape &landscape, CZone& output, uint zoneToLight
 			lightPos = description.SunCenter - (description.SunDirection * description.SunDistance) + lightPos;
 
 			InitZBuffer (zbuffer, lightPos, _RayBasis, zoneBB, description.ZBufferLandscapeSize, description);
-			nlinfo ("Zbuffer %d size : %d x %d", sampleX+sampleY*description.SoftShadowSamplesSqrt, zbuffer.LocalZBufferWidth, zbuffer.LocalZBufferHeight);
+			printf ("Zbuffer %d size : %d x %d\n", sampleX+sampleY*description.SoftShadowSamplesSqrt, zbuffer.LocalZBufferWidth, zbuffer.LocalZBufferHeight);
 		}
 
 
 		// *** Init the zbuffer for the vegetation
 		CVector lightPos = description.SunCenter - (description.SunDirection * description.SunDistance);
 		InitZBuffer (_ZBufferObject, lightPos, _RayBasis, zoneBB, description.ZBufferObjectSize, description);
-		nlinfo ("Zbuffer object size : %d x %d", _ZBufferObject.LocalZBufferWidth, _ZBufferObject.LocalZBufferHeight);
-
-
+		printf ("Zbuffer object size : %d x %d\n", _ZBufferObject.LocalZBufferWidth, _ZBufferObject.LocalZBufferHeight);
+		
+		
 		// Compute the zbuffer in multi thread
 		_ProcessExited = 0;
 
 		// Number of triangle to render per thread
-		uint numTriangle = ((uint)obstacles.size () / _ProcessCount) + 1;
+		uint numTriangle = (obstacles.size () / _ProcessCount) + 1;
 
 		// First triangle for the thread
 		uint firstTriangle = 0;
@@ -1023,13 +1038,13 @@ void CZoneLighter::light (CLandscape &landscape, CZone& output, uint zoneToLight
 			// Get list of triangles to render
 			uint lastTriangle=firstTriangle+numTriangle;
 			if (lastTriangle>obstacles.size ())
-				lastTriangle=(uint)obstacles.size ();
+				lastTriangle=obstacles.size ();
 
 			// Create a thread
 			CRenderZBuffer *runnable = new CRenderZBuffer (process, this, &description, firstTriangle, lastTriangle - firstTriangle, &obstacles);
 			IThread *pThread=IThread::create (runnable);
 			runnable->Thread = pThread;
-
+			
 			// New first patch
 			firstTriangle = lastTriangle;
 
@@ -1074,7 +1089,7 @@ void CZoneLighter::light (CLandscape &landscape, CZone& output, uint zoneToLight
 		// Change the quadGrid basis
 		CMatrix invRayBasis=_RayBasis;
 		invRayBasis.invert ();
-
+		
 		// Init the heightfield
 		_HeightfieldCellSize=description.HeightfieldCellSize;
 		_HeightFieldCellCount=(sint)(description.HeightfieldSize/_HeightfieldCellSize);
@@ -1090,7 +1105,7 @@ void CZoneLighter::light (CLandscape &landscape, CZone& output, uint zoneToLight
 				progress ("Build quadtree and heightfield", (float)triangleId/(float)size);
 
 			// Triangle ref
-			CZoneLighter::CTriangle& triangle=obstacles[triangleId];
+			CZoneLighter2003::CTriangle& triangle=obstacles[triangleId];
 
 			// Look for the min coordinate, in World Basis
 			CVector minv;
@@ -1129,7 +1144,7 @@ void CZoneLighter::light (CLandscape &landscape, CZone& output, uint zoneToLight
 		pZone->retrieve (_PatchInfo, _BorderVertices);
 
 		// Number of patch
-		uint patchCount=(uint)_PatchInfo.size();
+		uint patchCount=_PatchInfo.size();
 
 		// Bit array to know if the lumel is shadowed
 		if (description.Shadow)
@@ -1139,7 +1154,7 @@ void CZoneLighter::light (CLandscape &landscape, CZone& output, uint zoneToLight
 		vector<vector<CLumelDescriptor>	> lumels;
 		lumels.resize (patchCount);
 
-		// Build zone information
+		// Build zone informations
 		buildZoneInformation (landscape,
 							  listZone,
 							  description);
@@ -1147,35 +1162,7 @@ void CZoneLighter::light (CLandscape &landscape, CZone& output, uint zoneToLight
 	}
 
 	// Number of patch
-	uint patchCount=(uint)_PatchInfo.size();
-
-	// Debug: dump the exact per-lumel positions/normals the lighting pass will use
-	// (per patch: u32 count, then count * 6 floats pos.xyz normal.xyz). Lets external
-	// tooling fit lighting parameters (e.g. recover a lost sun_direction) in closed
-	// form against reference lumels instead of searching by whole lighter runs.
-	if (const char *dumpPath = getenv ("NL3D_ZONE_LIGHTER_DUMP_LUMELS"))
-	{
-		FILE *dumpFile = fopen (dumpPath, "wb");
-		if (dumpFile)
-		{
-			uint32 dumpPatchCount = (uint32)patchCount;
-			fwrite (&dumpPatchCount, 4, 1, dumpFile);
-			for (uint dp = 0; dp < patchCount; ++dp)
-			{
-				const std::vector<CLumelDescriptor> &dl = _Lumels[dp];
-				uint32 dumpLumelCount = (uint32)dl.size ();
-				fwrite (&dumpLumelCount, 4, 1, dumpFile);
-				for (uint dlIdx = 0; dlIdx < dl.size (); ++dlIdx)
-				{
-					fwrite (&dl[dlIdx].Position.x, 4, 3, dumpFile);
-					fwrite (&dl[dlIdx].Normal.x, 4, 3, dumpFile);
-				}
-			}
-			fclose (dumpFile);
-		}
-		else
-			nlwarning ("NL3D_ZONE_LIGHTER_DUMP_LUMELS: cannot write %s", dumpPath);
-	}
+	uint patchCount=_PatchInfo.size();
 
 	// Reset patch count
 	{
@@ -1198,48 +1185,42 @@ void CZoneLighter::light (CLandscape &landscape, CZone& output, uint zoneToLight
 	// Set the thread state
 	_LastPatchComputed.resize (_ProcessCount);
 
-	if (patchCount)
+	// Launch threads
+	uint process;
+	for (process=0; process<_ProcessCount; process++)
 	{
-		// Launch threads
-		uint process;
-		for (process = 0; process < _ProcessCount; process++)
-		{
-			// Last patch
-			uint lastPatch = firstPatch + patchCountByThread;
-			lastPatch %= patchCount;
+		// Last patch
+		uint lastPatch=firstPatch+patchCountByThread;
+		if (lastPatch>patchCount)
+			lastPatch=patchCount;
 
-			// Last patch computed
-			_LastPatchComputed[process] = firstPatch;
+		// Last patch computed
+		_LastPatchComputed[process] = firstPatch;
 
-			// Create a thread
-			CLightRunnable *runnable = new CLightRunnable(process, this, &description);
-			IThread *pThread = IThread::create(runnable);
-			runnable->Thread = pThread;
+		// Create a thread
+		CLightRunnable *runnable = new CLightRunnable (process, this, &description);
+		IThread *pThread=IThread::create (runnable);
+		runnable->Thread = pThread;
+		
+		// New first patch
+		firstPatch=lastPatch;
 
-			// New first patch
-			firstPatch = lastPatch;
-
-			// Launch
-			pThread->start();
-		}
-
-		// Wait for others processes
-		while (_ProcessExited != _ProcessCount)
-		{
-			nlSleep(1000);
-
-			// Call the progress callback
-			progress("Lighting patches", (float)_NumberOfPatchComputed / (float)_PatchInfo.size());
-		}
+		// Launch
+		pThread->start();
 	}
-	else
+
+	// Wait for others processes
+	while (_ProcessExited!=_ProcessCount)
 	{
-		nlwarning("Empty zone");
+		nlSleep (1000);
+
+		// Call the progress callback
+		progress ("Lighting patches", (float)_NumberOfPatchComputed/(float)_PatchInfo.size());
 	}
 
 	// Reset old thread mask
-	// currentThread->setCPUMask (threadMask);
-
+	currentThread->setCPUMask (threadMask);
+	
 	// overflow ?
 	if (_ZBufferOverflow)
 		nlwarning ("Error : zbuffer overflow");
@@ -1277,10 +1258,9 @@ void CZoneLighter::light (CLandscape &landscape, CZone& output, uint zoneToLight
 
 
 // *************************************************************************************
-void CZoneLighter::copyTileFlags(CZone &destZone, const CZone &srcZone)
+void CZoneLighter2003::copyTileFlags(CZone &destZone, const CZone &srcZone)
 {
 	nlassert(destZone.getZoneId() == srcZone.getZoneId());
-	nlassert(destZone.getNumPatchs() == srcZone.getNumPatchs());
 	for (sint k = 0; k < srcZone.getNumPatchs(); ++k)
 	{
 		destZone.copyTilesFlags(k, srcZone.getPatch(k));
@@ -1288,8 +1268,8 @@ void CZoneLighter::copyTileFlags(CZone &destZone, const CZone &srcZone)
 }
 
 // ***************************************************************************
-float CZoneLighter::getSkyContribution(const CVector &pos, const CVector &normal, float skyIntensity) const
-{
+float CZoneLighter2003::getSkyContribution(const CVector &pos, const CVector &normal, float skyIntensity) const
+{	
 	float s=(pos.x-_OrigineHeightField.x)/_HeightfieldCellSize;
 	float t=(pos.y-_OrigineHeightField.y)/_HeightfieldCellSize;
 	sint sInt=(sint)(floor (s+0.5f));
@@ -1301,18 +1281,21 @@ float CZoneLighter::getSkyContribution(const CVector &pos, const CVector &normal
 	skyContributionTab[1][0] = calcSkyContribution (sInt, tInt-1, pos.z, skyIntensity, normal);
 	skyContributionTab[1][1] = calcSkyContribution (sInt, tInt, pos.z, skyIntensity, normal);
 	skyContributionTab[0][1] = calcSkyContribution (sInt-1, tInt, pos.z, skyIntensity, normal);
-
+	
 	float sFact=s+0.5f-sInt;
 	float tFact=t+0.5f-tInt;
 	return (skyContributionTab[0][0]*(1.f-sFact) + skyContributionTab[1][0]*sFact)*(1.f-tFact) +
-		(skyContributionTab[0][1]*(1.f-sFact) + skyContributionTab[1][1]*sFact)*tFact;
+		(skyContributionTab[0][1]*(1.f-sFact) + skyContributionTab[1][1]*sFact)*tFact;	
 }
 
 
 // ***************************************************************************
-void CZoneLighter::processCalc (uint process, const CLightDesc& description)
+void CZoneLighter2003::processCalc (uint process, const CLightDesc& description)
 {
 	// *** Raytrace each patches
+
+	// Pointer on the zone
+	CZone *pZone=_Landscape->getZone (_ZoneToLight);
 
 	// Get a patch
 	uint patch = getAPatch (process);
@@ -1323,9 +1306,9 @@ void CZoneLighter::processCalc (uint process, const CLightDesc& description)
 		{
 			// Lumels
 			std::vector<CLumelDescriptor> &lumels=_Lumels[patch];
-
+		
 			// Lumel count
-			uint lumelCount=(uint)lumels.size();
+			uint lumelCount=lumels.size();
 			CPatchInfo &patchInfo=_PatchInfo[patch];
 			nlassert (patchInfo.Lumels.size()==lumelCount);
 
@@ -1344,9 +1327,9 @@ void CZoneLighter::processCalc (uint process, const CLightDesc& description)
 		{
 			// Lumels
 			std::vector<CLumelDescriptor> &lumels=_Lumels[patch];
-
+		
 			// Lumel count
-			uint lumelCount=(uint)lumels.size();
+			uint lumelCount=lumels.size();
 			CPatchInfo &patchInfo=_PatchInfo[patch];
 			nlassert (patchInfo.Lumels.size()==lumelCount);
 
@@ -1359,7 +1342,7 @@ void CZoneLighter::processCalc (uint process, const CLightDesc& description)
 		}
 
 		// *** Lighting
-
+		
 		// Get the patch info
 		CPatchInfo &patchInfo=_PatchInfo[patch];
 
@@ -1371,9 +1354,9 @@ void CZoneLighter::processCalc (uint process, const CLightDesc& description)
 		{
 			// Sky contribution
 			float skyContribution;
-
+			
 			if (description.SkyContribution)
-			{
+			{								
 				skyContribution = getSkyContribution(lumels[lumel].Position, lumels[lumel].Normal, description.SkyIntensity);
 			}
 			else
@@ -1404,7 +1387,7 @@ void CZoneLighter::processCalc (uint process, const CLightDesc& description)
 
 // ***************************************************************************
 
-uint8 CZoneLighter::getMaxPhi (sint s, sint t, sint deltaS, sint deltaT, float heightPos) const
+uint8 CZoneLighter2003::getMaxPhi (sint s, sint t, sint deltaS, sint deltaT, float heightPos) const
 {
 	// Start position
 	s+=deltaS;
@@ -1465,8 +1448,8 @@ uint8 CZoneLighter::getMaxPhi (sint s, sint t, sint deltaS, sint deltaT, float h
 
 // ***************************************************************************
 
-bool CZoneLighter::isLumelOnEdgeMustBeOversample (uint patch, uint edge, sint s, sint t, const vector<bool> &binded,
-												  const vector<bool> &oversampleEdges, vector<CPatchUVLocator> &locator,
+bool CZoneLighter2003::isLumelOnEdgeMustBeOversample (uint patch, uint edge, sint s, sint t, const vector<bool> &binded, 
+												  const vector<bool> &oversampleEdges, vector<CPatchUVLocator> &locator, 
 												  uint8 shadowed, vector<vector<uint8> >& shadowBuffer)
 {
 	// Must force oversampling of this edge ?
@@ -1485,7 +1468,7 @@ bool CZoneLighter::isLumelOnEdgeMustBeOversample (uint patch, uint edge, sint s,
 			CVector2f neighborUV;
 			CPatch *patchOut;
 			locator[edge].locateUV (lumelCoord, otherPatch, patchOut, neighborUV);
-
+			
 			// Is the same shadowed flag ?
 			sint ss=(sint)(neighborUV.x*4.f);
 			sint tt=(sint)(neighborUV.y*4.f);
@@ -1515,13 +1498,13 @@ float easineasoutC2(float x)
 // ***************************************************************************
 
 
-sint16 CZoneLighter::_GetNormalDeltaS[4]={ -1, 0, 1, 0 };
-sint16 CZoneLighter::_GetNormalDeltaT[4]={ 0, 1, 0, -1 };
+sint16 CZoneLighter2003::_GetNormalDeltaS[4]={ -1, 0, 1, 0 };
+sint16 CZoneLighter2003::_GetNormalDeltaT[4]={ 0, 1, 0, -1 };
 
 // ***************************************************************************
 
-void CZoneLighter::getNormal (const CPatch *pPatch, sint16 lumelS, sint16 lumelT, vector<CPatchUVLocator> &locator,
-								 const vector<CPatch::CBindInfo> &bindInfo, const vector<bool> &binded, set<uint64>& visited,
+void CZoneLighter2003::getNormal (const CPatch *pPatch, sint16 lumelS, sint16 lumelT, vector<CPatchUVLocator> &locator, 
+								 const vector<CPatch::CBindInfo> &bindInfo, const vector<bool> &binded, set<uint64>& visited, 
 								 float deltaS, float deltaT, uint rotation, const CBezierPatch &bezierPatch, uint lastEdge)
 {
 	// Build a desc srructure
@@ -1565,7 +1548,7 @@ void CZoneLighter::getNormal (const CPatch *pPatch, sint16 lumelS, sint16 lumelT
 						if (bind&&smooth)
 						{
 							// Lumel coord
-							CVector2f lumelCoord ( ((float)(lumelS+_GetNormalDeltaS[edge])+0.5f)/4,
+							CVector2f lumelCoord ( ((float)(lumelS+_GetNormalDeltaS[edge])+0.5f)/4, 
 								((float)(lumelT+_GetNormalDeltaT[edge])+0.5f)/4 );
 
 							// Get neighbor pixel
@@ -1597,8 +1580,8 @@ void CZoneLighter::getNormal (const CPatch *pPatch, sint16 lumelS, sint16 lumelT
 									break;
 								}
 							}
-
-							// Rotation
+							
+							// Rotation 
 							uint newRotation=(2-edge+rotation+newEdge)&0x3;
 
 							// Must found it
@@ -1608,15 +1591,15 @@ void CZoneLighter::getNormal (const CPatch *pPatch, sint16 lumelS, sint16 lumelT
 							CBezierPatch &NewBezierPatch=_BezierPatch[zoneId][patchId];
 
 							// Next lumel
-							getNormal (patchOut, newLumelS, newLumelT, _Locator[zoneId][patchId], _BindInfo[zoneId][patchId],
-								_Binded[zoneId][patchId], visited, deltaS+_GetNormalDeltaS[globalDirection],
+							getNormal (patchOut, newLumelS, newLumelT, _Locator[zoneId][patchId], _BindInfo[zoneId][patchId], 
+								_Binded[zoneId][patchId], visited, deltaS+_GetNormalDeltaS[globalDirection], 
 								deltaT+_GetNormalDeltaT[globalDirection], newRotation, NewBezierPatch, newEdge);
 						}
 					}
 					else
 					{
 						// Left internal
-						getNormal (pPatch, lumelS+_GetNormalDeltaS[edge], lumelT+_GetNormalDeltaT[edge], locator, bindInfo, binded, visited,
+						getNormal (pPatch, lumelS+_GetNormalDeltaS[edge], lumelT+_GetNormalDeltaT[edge], locator, bindInfo, binded, visited, 
 							deltaS+_GetNormalDeltaS[globalDirection], deltaT+_GetNormalDeltaT[globalDirection], rotation, bezierPatch, (edge+2)&0x3);
 					}
 				}
@@ -1627,7 +1610,7 @@ void CZoneLighter::getNormal (const CPatch *pPatch, sint16 lumelS, sint16 lumelT
 
 // ***************************************************************************
 
-void CZoneLighter::addTriangles (CLandscape &landscape, vector<uint> &listZone, uint order, std::vector<CTriangle>& triangleArray)
+void CZoneLighter2003::addTriangles (CLandscape &landscape, vector<uint> &listZone, uint order, std::vector<CTriangle>& triangleArray)
 {
 	// Set all to refine
 	excludeAllPatchFromRefineAll (landscape, listZone, false);
@@ -1644,7 +1627,7 @@ void CZoneLighter::addTriangles (CLandscape &landscape, vector<uint> &listZone, 
 	landscape.getTessellationLeaves(leaves);
 
 	// Number of leaves
-	uint leavesCount=(uint)leaves.size();
+	uint leavesCount=leaves.size();
 
 	// Reserve the array
 	triangleArray.reserve (triangleArray.size()+leavesCount);
@@ -1654,6 +1637,12 @@ void CZoneLighter::addTriangles (CLandscape &landscape, vector<uint> &listZone, 
 	{
 		// Leave
 		const CTessFace *face=leaves[leave];
+
+		// Start and end coordinate
+		float startS=min (min (face->PVBase.getS(), face->PVLeft.getS()), face->PVRight.getS());
+		float endS=max (max (face->PVBase.getS(), face->PVLeft.getS()), face->PVRight.getS());
+		float startT=min (min (face->PVBase.getT(), face->PVLeft.getT()), face->PVRight.getT());
+		float endT=max (max (face->PVBase.getT(), face->PVLeft.getT()), face->PVRight.getT());
 
 		// Add a triangle
 		triangleArray.push_back (CTriangle (NLMISC::CTriangle (face->VBase->EndPos, face->VLeft->EndPos, face->VRight->EndPos)));
@@ -1678,7 +1667,7 @@ void CZoneLighter::addTriangles (CLandscape &landscape, vector<uint> &listZone, 
 
 // ***************************************************************************
 
-void CZoneLighter::addTriangles (const IShape &shape, const CMatrix& modelMT, std::vector<CTriangle>& triangleArray)
+void CZoneLighter2003::addTriangles (const IShape &shape, const CMatrix& modelMT, std::vector<CTriangle>& triangleArray)
 {
 	// Cast to CMesh
 	const CMesh *mesh=dynamic_cast<const CMesh*>(&shape);
@@ -1725,7 +1714,7 @@ void CZoneLighter::addTriangles (const IShape &shape, const CMatrix& modelMT, st
 
 // ***************************************************************************
 
-void CZoneLighter::addTriangles (const CMeshBase &meshBase, const CMeshGeom &meshGeom, const CMatrix& modelMT, std::vector<CTriangle>& triangleArray)
+void CZoneLighter2003::addTriangles (const CMeshBase &meshBase, const CMeshGeom &meshGeom, const CMatrix& modelMT, std::vector<CTriangle>& triangleArray)
 {
 	// Get the vertex buffer
 	const CVertexBuffer &vb=meshGeom.getVertexBuffer();
@@ -1834,9 +1823,9 @@ void CZoneLighter::addTriangles (const CMeshBase &meshBase, const CMeshGeom &mes
 
 // ***************************************************************************
 
-bool CZoneLighter::getTexture (const CMaterial &material, CBitmap *&result, bool &clampU, bool &clampV, uint8 &alphaTestThreshold, bool &doubleSided)
+bool CZoneLighter2003::getTexture (const CMaterial &material, CBitmap *&result, bool &clampU, bool &clampV, uint8 &alphaTestThreshold, bool &doubleSided)
 {
-	// Texture information, not NULL only if texture is used for alpha test
+	// Texture informations, not NULL only if texture is used for alpha test
 	result = NULL;
 	clampU = false;
 	clampV = false;
@@ -1901,7 +1890,7 @@ bool CZoneLighter::getTexture (const CMaterial &material, CBitmap *&result, bool
 
 // ***************************************************************************
 
-void CZoneLighter::addTriangles (const CMeshBase &meshBase, const CMeshMRMGeom &meshGeom, const CMatrix& modelMT, std::vector<CTriangle>& triangleArray)
+void CZoneLighter2003::addTriangles (const CMeshBase &meshBase, const CMeshMRMGeom &meshGeom, const CMatrix& modelMT, std::vector<CTriangle>& triangleArray)
 {
 	// Get the vertex buffer
 	const CVertexBuffer &vb=meshGeom.getVertexBuffer();
@@ -2005,7 +1994,7 @@ void CZoneLighter::addTriangles (const CMeshBase &meshBase, const CMeshMRMGeom &
 
 // ***************************************************************************
 
-void CZoneLighter::excludeAllPatchFromRefineAll (CLandscape &landscape, vector<uint> &listZone, bool exclude)
+void CZoneLighter2003::excludeAllPatchFromRefineAll (CLandscape &landscape, vector<uint> &listZone, bool exclude)
 {
 	// For each zone
 	for (uint zone=0; zone<listZone.size(); zone++)
@@ -2024,7 +2013,7 @@ void CZoneLighter::excludeAllPatchFromRefineAll (CLandscape &landscape, vector<u
 
 // ***************************************************************************
 
-const sint8 CZoneLighter::TriangleIndexes[10][2][3] =
+const sint8 CZoneLighter2003::TriangleIndexes[10][2][3] =
 {
 	{{0, 11, 6}, {0, 6, 9}},
 	{{9, 6, 4}, {4, 6, 14}},
@@ -2041,7 +2030,7 @@ const sint8 CZoneLighter::TriangleIndexes[10][2][3] =
 // ***************************************************************************
 
 // lumel vertex ID, tesselation edge ID (0 for base<->right, 1 for base<->left), tesselation edge vertex 0, tesselation edge vertex 1
-const sint8 CZoneLighter::VertexThanCanBeSnappedOnABorder[8][4] =
+const sint8 CZoneLighter2003::VertexThanCanBeSnappedOnABorder[8][4] =
 {
 	{0, 0, 0, 9},
 	{1, 0, 9, 4},
@@ -2056,7 +2045,7 @@ const sint8 CZoneLighter::VertexThanCanBeSnappedOnABorder[8][4] =
 // ***************************************************************************
 
 // lumel vertex ID, tesselation corner vertex
-const sint8 CZoneLighter::VertexThanCanBeSnappedOnACorner[3][2] =
+const sint8 CZoneLighter2003::VertexThanCanBeSnappedOnACorner[3][2] =
 {
 	{0, 0},
 	{3, 1},
@@ -2065,13 +2054,13 @@ const sint8 CZoneLighter::VertexThanCanBeSnappedOnACorner[3][2] =
 
 // ***************************************************************************
 
-void CZoneLighter::buildZoneInformation (CLandscape &landscape, const vector<uint> &listZone, const CLightDesc &lightDesc)
+void CZoneLighter2003::buildZoneInformation (CLandscape &landscape, const vector<uint> &listZone, const CLightDesc &lightDesc)
 {
 	// Bool visit
 	vector<vector<uint> > visited;
 
 	// Zone count
-	uint zoneCount=(uint)listZone.size();
+	uint zoneCount=listZone.size();
 
 	// Resize arries
 	_Locator.resize (zoneCount);
@@ -2178,6 +2167,7 @@ void CZoneLighter::buildZoneInformation (CLandscape &landscape, const vector<uin
 
 				// Number of lumels
 				uint lumelCount = orderS*orderT*16;
+				uint lumelCornerCount = (orderS*4+1)*(orderT*4+1);
 
 				// Resize the lumel descriptor
 				CLumelDescriptor descriptor;
@@ -2216,13 +2206,13 @@ void CZoneLighter::buildZoneInformation (CLandscape &landscape, const vector<uin
 	// Get tesselated faces
 	std::vector<const CTessFace*> leaves;
 	landscape.getTessellationLeaves(leaves);
+	
 
-
-
-
+	
+	
 	if (_WaterShapes.size() != 0) // any water shape in this zone ?
 	{
-		/// make a quad grid of each water shape
+		/// make a quad grid of each water shape				
 		makeQuadGridFromWaterShapes(landscape.getZone(_ZoneToLight)->getZoneBB().getAABBox());
 
 		/// check for each tile if it is above / below water
@@ -2232,13 +2222,13 @@ void CZoneLighter::buildZoneInformation (CLandscape &landscape, const vector<uin
 	{
 		setTileFlagsToDefault(leaves);
 	}
-
+	
 
 	// Id of this zone in the array
 	uint zoneNumber=_ZoneId[_ZoneToLight];
 
 	// Scan each leaves
-	uint leavesCount=(uint)leaves.size();
+	uint leavesCount=leaves.size();
 	uint leave;
 	for (leave=0; leave<leavesCount; leave++)
 	{
@@ -2348,11 +2338,11 @@ void CZoneLighter::buildZoneInformation (CLandscape &landscape, const vector<uin
 
 			bool snapedCorner[3]=
 			{
-				((sBase == 0) && ((tBase == 0) || (tBase == orderT))) ||
+				((sBase == 0) && ((tBase == 0) || (tBase == orderT))) || 
 				((sBase == orderS) && ((tBase == 0) || (tBase == orderT))),
-				((sRight == 0) && ((tRight == 0) || (tRight == orderT))) ||
+				((sRight == 0) && ((tRight == 0) || (tRight == orderT))) || 
 				((sRight == orderS) && ((tRight == 0) || (tRight == orderT))),
-				((sLeft == 0) && ((tLeft == 0) || (tLeft == orderT))) ||
+				((sLeft == 0) && ((tLeft == 0) || (tLeft == orderT))) || 
 				((sLeft == orderS) && ((tLeft == 0) || (tLeft == orderT))),
 			};
 
@@ -2394,7 +2384,7 @@ void CZoneLighter::buildZoneInformation (CLandscape &landscape, const vector<uin
 				(s3+s7)/2,
 				(s2+s7)/2,
 			};
-
+			
 			float interpolatedT[10]=
 			{
 				(t0+t6)/2,
@@ -2435,7 +2425,7 @@ void CZoneLighter::buildZoneInformation (CLandscape &landscape, const vector<uin
 		}
 	}
 
-	// *** Now, finalise patch information for shadow source positions
+	// *** Now, finalise patch informations for shadow source positions
 
 	// For each patches
 	uint patchCount=landscape.getZone(_ZoneToLight)->getNumPatchs();
@@ -2471,7 +2461,7 @@ void CZoneLighter::buildZoneInformation (CLandscape &landscape, const vector<uin
 
 			// *** Number of visit
 			uint visitedCount=visited[patch][lumelIndex];
-
+			
 			// If visited, renormalise other values
 			if (visitedCount)
 			{
@@ -2483,7 +2473,7 @@ void CZoneLighter::buildZoneInformation (CLandscape &landscape, const vector<uin
 			visited[patch][lumelIndex]=false;
 		}
 	}
-
+	
 	// *** Now tesselate this zone to shadow receivers accuracy
 
 	// Setup the landscape
@@ -2499,7 +2489,7 @@ void CZoneLighter::buildZoneInformation (CLandscape &landscape, const vector<uin
 	landscape.getTessellationLeaves(leaves);
 
 	// Scan each leaves
-	leavesCount=(uint)leaves.size();
+	leavesCount=leaves.size();
 	for (leave=0; leave<leavesCount; leave++)
 	{
 		// Progress bar
@@ -2524,9 +2514,9 @@ void CZoneLighter::buildZoneInformation (CLandscape &landscape, const vector<uin
 			float fT=(face->PVBase.getT()+face->PVLeft.getT()+face->PVRight.getT())/3.f;
 			uint s=(uint)((float)orderS*4*fS);
 			uint t=(uint)((float)orderT*4*fT);
-			//nlassert (s>=0);
+			nlassert (s>=0);
 			nlassert (s<orderS*4);
-			//nlassert (t>=0);
+			nlassert (t>=0);
 			nlassert (t<orderT*4);
 
 			// Triangle index
@@ -2552,7 +2542,7 @@ void CZoneLighter::buildZoneInformation (CLandscape &landscape, const vector<uin
 		}
 	}
 
-	// *** Now, finalise patch information
+	// *** Now, finalise patch informations
 
 	// For each patches
 	patchCount=landscape.getZone(_ZoneToLight)->getNumPatchs();
@@ -2626,7 +2616,7 @@ void CZoneLighter::buildZoneInformation (CLandscape &landscape, const vector<uin
 				}
 				_GetNormalNormal=CVector::Null;
 				set<uint64> visitedLumels;
-				getNormal (pPatch, startS, startT, locator, bindInfo, binded, visitedLumels,
+				getNormal (pPatch, startS, startT, locator, bindInfo, binded, visitedLumels, 
 					startS+0.5f-origineS, startT+0.5f-origineT, 0, bezierPatch);
 				_GetNormalNormal.normalize ();
 				normals[lumel][edge]=_GetNormalNormal;
@@ -2644,7 +2634,7 @@ void CZoneLighter::buildZoneInformation (CLandscape &landscape, const vector<uin
 				normals[count-i][edge].normalize();
 			}
 		}
-
+		
 		for (uint t=0; t<lumelT; t++)
 		for (uint s=0; s<lumelS; s++)
 		{
@@ -2652,7 +2642,7 @@ void CZoneLighter::buildZoneInformation (CLandscape &landscape, const vector<uin
 			uint lumelIndex=s+t*lumelS;
 
 			// *** Calc the smoothed normal
-
+			
 			// For each edge
 			CVector normalS=bezierPatch.evalNormal (((float)s+0.5f)/(float)lumelS, ((float)t+0.5f)/(float)lumelT);
 			float sFactor=0;
@@ -2754,7 +2744,7 @@ void CZoneLighter::buildZoneInformation (CLandscape &landscape, const vector<uin
 
 			// *** Number of visit
 			uint visitedCount=visited[patch][lumelIndex];
-
+			
 			// Some lumel have not been found in tesselation
 			//nlassert (visitedCount==2);
 
@@ -2770,109 +2760,8 @@ void CZoneLighter::buildZoneInformation (CLandscape &landscape, const vector<uin
 }
 
 // ***************************************************************************
-void CZoneLighter::computeTileFlagsOnly (CLandscape &landscape, CZone& output, uint zoneToLight, const CLightDesc& description,
-						   std::vector<uint> &listZone)
-{
-	// Zone to light
-	_ZoneToLight=zoneToLight;
 
-	// Landscape
-	_Landscape=&landscape;
-
-
-	// Zone count
-	uint zoneCount=(uint)listZone.size();
-
-	// For each zone
-	for (uint zone=0; zone<zoneCount; zone++)
-	{
-		// Get num patches
-		uint patchCount=landscape.getZone(listZone[zone])->getNumPatchs();
-
-		// Insert zone id
-		_ZoneId.insert (map<uint, uint>::value_type (listZone[zone], zone));
-
-		// For each patch
-		uint patch;
-		for (patch=0; patch<patchCount; patch++)
-		{
-			// Progress bar
-			progress ("Scan all patches", (float)patch/(float)patchCount);
-
-			// This is the zone to light ?
-			if (listZone[zone]==_ZoneToLight)
-			{
-				// unExclude all the patches from refine all
-				landscape.excludePatchFromRefineAll (listZone[zone], patch, false);
-			}
-			else
-			{
-				// Exclude all the patches from refine all
-				landscape.excludePatchFromRefineAll (listZone[zone], patch, true);
-			}
-		}
-	}
-
-	// *** Now tesselate this zone to max accuracy
-
-	// Setup the landscape
-	landscape.setThreshold (0);
-	landscape.setTileMaxSubdivision (0);
-
-	// Refine all
-	progress ("Refine landscape to maximum", 0.5f);
-	landscape.refineAll (CVector (0, 0, 0));
-
-	// Get tesselated faces
-	std::vector<const CTessFace*> leaves;
-	landscape.getTessellationLeaves(leaves);
-
-
-	// compute only the water states
-	if (_WaterShapes.size() != 0) // any water shape in this zone ?
-	{
-		/// make a quad grid of each water shape
-		makeQuadGridFromWaterShapes(landscape.getZone(_ZoneToLight)->getZoneBB().getAABBox());
-
-		/// check for each tile if it is above / below water
-		computeTileFlagsForPositionTowardWater(description, leaves);
-	}
-	else
-	{
-		setTileFlagsToDefault(leaves);
-	}
-
-	/// verify that the zonew and the zonel (output) are compatible
-	bool	ok= true;
-	CZone	&zonew= *(landscape.getZone(zoneToLight));
-	if(zonew.getNumPatchs() == output.getNumPatchs())
-	{
-		// verify for each patch that the tile array are same
-		for(uint i=0;i<(uint)zonew.getNumPatchs();i++)
-		{
-			const CPatch	&p0= *const_cast<const CZone&>(zonew).getPatch(i);
-			const CPatch	&p1= *const_cast<const CZone&>(output).getPatch(i);
-			if( p0.getOrderS()!=p1.getOrderS() || p0.getOrderT()!=p1.getOrderT() )
-			{
-				ok= false;
-				break;
-			}
-		}
-	}
-	else
-		ok= false;
-
-	// can't copy tile flags
-	if(!ok)
-		throw Exception("The input zonew, and output zonel are too different: not same patchs!!");
-
-	/// copy the tiles flags from the zone to light to the output zone
-	copyTileFlags(output, zonew);
-}
-
-// ***************************************************************************
-
-CZoneLighter::CLightDesc::CLightDesc ()
+CZoneLighter2003::CLightDesc::CLightDesc ()
 {
 	SunDirection.set (1, 1, -1);
 	GridSize=512;
@@ -2893,7 +2782,7 @@ CZoneLighter::CLightDesc::CLightDesc ()
 }
 
 // ***************************************************************************
-void CZoneLighter::addLightableShape(IShape *shape, const NLMISC::CMatrix& MT)
+void CZoneLighter2003::addLightableShape(IShape *shape, const NLMISC::CMatrix& MT)
 {
 	CShapeInfo lsi;
 	lsi.MT = MT;
@@ -2903,7 +2792,7 @@ void CZoneLighter::addLightableShape(IShape *shape, const NLMISC::CMatrix& MT)
 
 
 // ***************************************************************************
-bool CZoneLighter::isLightableShape(IShape &shape)
+bool CZoneLighter2003::isLightableShape(IShape &shape)
 {
 	/// for now, the only shape that we lit are water shapes
 	if (dynamic_cast<CWaterShape *>(&shape) != NULL)
@@ -2920,12 +2809,12 @@ bool CZoneLighter::isLightableShape(IShape &shape)
 }
 
 // ***************************************************************************
-void CZoneLighter::lightShapes(uint zoneID, const CLightDesc& description)
+void CZoneLighter2003::lightShapes(uint zoneID, const CLightDesc& description)
 {
 	/// compute light for the lightable shapes in the given zone
-	if (_LightableShapes.empty()) return;
+	if (_LightableShapes.size() == 0) return;	
 
-	uint numShapePerThread = 1 + ((uint)_LightableShapes.size() / _ProcessCount);
+	uint numShapePerThread = 1 + (_LightableShapes.size() / _ProcessCount);
 	uint currShapeIndex = 0;
 	uint process = 0;
 	_ProcessExited = 0;
@@ -2934,11 +2823,11 @@ void CZoneLighter::lightShapes(uint zoneID, const CLightDesc& description)
 
 
 	progress("Processing lightable shapes", 0);
-
+	
 	for (uint k = 0; k < _LightableShapes.size(); ++k, ++process)
 	{
 		uint lastShapeIndex = currShapeIndex + numShapePerThread;
-		lastShapeIndex = std::min((uint)_LightableShapes.size(), lastShapeIndex);
+		lastShapeIndex = std::min((uint)_LightableShapes.size(), lastShapeIndex);		
 		IThread *pThread = IThread::create (new CCalcLightableShapeRunnable(process, this, &description, &_LightableShapes, currShapeIndex, lastShapeIndex));
 		pThread->start();
 		currShapeIndex = lastShapeIndex;
@@ -2956,7 +2845,7 @@ void CZoneLighter::lightShapes(uint zoneID, const CLightDesc& description)
 
 // ***************************************************************************
 
-void CZoneLighter::processLightableShapeCalc (uint process,
+void CZoneLighter2003::processLightableShapeCalc (uint process,
 											  TShapeVect *shapesToLit,
 											  uint firstShape,
 											  uint lastShape,
@@ -2964,15 +2853,15 @@ void CZoneLighter::processLightableShapeCalc (uint process,
 {
 	// for each lightable shape
 	for (uint k = firstShape; k < lastShape; ++k)
-	{
-		nlassert(isLightableShape(* (*shapesToLit)[k].Shape)); // make sure it is a lightable shape
-		lightSingleShape((*shapesToLit)[k], description, process);
+	{		
+		nlassert(isLightableShape(* (*shapesToLit)[k].Shape)); // make sure it is a lightable shape		
+		lightSingleShape((*shapesToLit)[k], description, process);	
 	}
 }
 
 
 // ***************************************************************************
-void CZoneLighter::lightSingleShape(CShapeInfo &si, const CLightDesc& description, uint cpu)
+void CZoneLighter2003::lightSingleShape(CShapeInfo &si, const CLightDesc& description, uint cpu)
 {
 	/// we compute the lighting for one single shape
 	if (dynamic_cast<CWaterShape *>(si.Shape))
@@ -2981,7 +2870,7 @@ void CZoneLighter::lightSingleShape(CShapeInfo &si, const CLightDesc& descriptio
 	}
 	++_NumLightableShapesProcessed;
 	progress("Processing lightable shapes", (float) _NumLightableShapesProcessed / _LightableShapes.size());
-	return;
+	return;	
 }
 
 
@@ -3047,17 +2936,17 @@ static std::string getExt (const std::string& path)
 
 
 // ***************************************************************************
-void CZoneLighter::lightWater(CWaterShape &ws, const CMatrix &MT, const CLightDesc& description, uint cpu)
-{
+void CZoneLighter2003::lightWater(CWaterShape &ws, const CMatrix &MT, const CLightDesc& description, uint cpu)
+{	
 	try
-	{
+	{	
 		/// get the diffuse map
 		CTextureFile *diffuseTex = NLMISC::safe_cast<CTextureFile *>(ws.getColorMap());
 		std::string texFileName = CPath::lookup(diffuseTex->getFileName());
 		diffuseTex->generate();
 		const uint width = diffuseTex->getWidth();
-		const uint height = diffuseTex->getHeight();
-
+		const uint height = diffuseTex->getHeight();	
+		
 		/// build a matrix to convert from water space to uv space
 		NLMISC::CMatrix worldSpaceToUVs;
 		NLMISC::CVector2f col0, col1, pos;
@@ -3065,7 +2954,7 @@ void CZoneLighter::lightWater(CWaterShape &ws, const CMatrix &MT, const CLightDe
 		worldSpaceToUVs.setRot(NLMISC::CVector(col0.x * width, col0.y * height, 0),
 							   NLMISC::CVector(col1.x * width, col1.y * height, 0),
 							   NLMISC::CVector::K);
-		worldSpaceToUVs.setPos(NLMISC::CVector(pos.x * width, pos.y * height, 0));
+		worldSpaceToUVs.setPos(NLMISC::CVector(pos.x * width, pos.y * height, 0));		
 
 		/// get min and max uvs
 		NLMISC::CPolygon p;
@@ -3085,11 +2974,11 @@ void CZoneLighter::lightWater(CWaterShape &ws, const CMatrix &MT, const CLightDe
 			minU = std::min(uvs.x, minU);
 			minV = std::min(uvs.y, minV);
 			maxU = std::max(uvs.x, maxU);
-			maxV = std::max(uvs.y, maxV);
+			maxV = std::max(uvs.y, maxV);	
 		}
-
-
-
+		
+		
+	
 
 		sint iMinU = (sint) minU;
 		sint iMaxU = (sint) maxU;
@@ -3104,17 +2993,17 @@ void CZoneLighter::lightWater(CWaterShape &ws, const CMatrix &MT, const CLightDe
 		// matrix to go from uv space to worldspace
 		NLMISC::CMatrix UVSpaceToWorldSpace = worldSpaceToUVs.inverted();
 
-		CObjectVector<uint8> &pixs8 = diffuseTex->getPixels();
+		NLMISC::CObjectVector<uint8> &pixs8 = diffuseTex->getPixels();
 		NLMISC::CRGBA *rgbPixs = (NLMISC::CRGBA *) &pixs8[0];
 
-
+	
 		/// raytrace each texel
 		for (sint x = iMinU; x < iMaxU; ++x)
 		{
 			for (sint y = iMinV; y < iMaxV; ++y)
 			{
 				float factor;
-				NLMISC::CVector pos = UVSpaceToWorldSpace * NLMISC::CVector( x + 0.5f, y + 0.5f, 0 )
+				NLMISC::CVector pos = UVSpaceToWorldSpace * NLMISC::CVector( x + 0.5f, y + 0.5f, 0 ) 
 					+ description.WaterShadowBias * NLMISC::CVector::K;
 				if (description.Shadow)
 				{
@@ -3148,7 +3037,7 @@ void CZoneLighter::lightWater(CWaterShape &ws, const CMatrix &MT, const CLightDe
 				}
 			}
 		}
-
+	
 		/// now, save the result
 		if (getExt(texFileName) != ".tga")
 		{
@@ -3163,13 +3052,13 @@ void CZoneLighter::lightWater(CWaterShape &ws, const CMatrix &MT, const CLightDe
 				diffuseTex->writeTGA(of, 24);
 				of.close();
 			}
-			catch (const NLMISC::Exception &)
+			catch (NLMISC::Exception &)
 			{
 				nlwarning("Zone lighter : while lighting a water shape, writing %s failed! ", texFileName.c_str());
 			}
 		}
 	}
-	catch(const NLMISC::Exception &e)
+	catch(NLMISC::Exception &e)
 	{
 		nlwarning("Water shape lighting failed !");
 		nlwarning(e.what());
@@ -3177,7 +3066,7 @@ void CZoneLighter::lightWater(CWaterShape &ws, const CMatrix &MT, const CLightDe
 }
 
 // ***********************************************************
-void CZoneLighter::addWaterShape(CWaterShape *shape, const NLMISC::CMatrix &MT)
+void CZoneLighter2003::addWaterShape(CWaterShape *shape, const NLMISC::CMatrix &MT)
 {
 	/// make sure it hasn't been inserted twice
 	CShapeInfo ci;
@@ -3187,9 +3076,9 @@ void CZoneLighter::addWaterShape(CWaterShape *shape, const NLMISC::CMatrix &MT)
 }
 
 // ***********************************************************
-void CZoneLighter::makeQuadGridFromWaterShapes(NLMISC::CAABBox zoneBBox)
+void CZoneLighter2003::makeQuadGridFromWaterShapes(NLMISC::CAABBox zoneBBox)
 {
-	if (_WaterShapes.empty()) return;
+	if (!_WaterShapes.size()) return;
 
 	NLMISC::CAABBox tmpBox;
 
@@ -3205,9 +3094,9 @@ void CZoneLighter::makeQuadGridFromWaterShapes(NLMISC::CAABBox zoneBBox)
 
 	/// init the quad grid
 	_WaterShapeQuadGrid.create(numCells, dim / numCells);
+	
 
-
-	uint count = 0, totalCount = (uint)_WaterShapes.size();
+	uint count = 0, totalCount = _WaterShapes.size();
 
 	/// now, insert all water shapes
 	for (TShapeVect::iterator it = _WaterShapes.begin(); it != _WaterShapes.end(); ++it, ++count)
@@ -3238,8 +3127,8 @@ struct CTileOfPatch
 	CPatch		*Patch;
 	CTileOfPatch();
 	CTileOfPatch(uint8 tileId, CPatch *patch) : TileId(tileId), Patch(patch)
-	{
-	}
+	{		
+	}	
 };
 
 
@@ -3252,14 +3141,14 @@ struct CTileOfPatch
 
 
 // ***************************************************************************
-CZoneLighter::CPointLightRT::CPointLightRT()
+CZoneLighter2003::CPointLightRT::CPointLightRT()
 {
 	RefCount= 0;
 }
 
 
 // ***************************************************************************
-bool	CZoneLighter::CPointLightRT::testRaytrace(const CVector &v)
+bool	CZoneLighter2003::CPointLightRT::testRaytrace(const CVector &v)
 {
 	CVector	dummy;
 
@@ -3299,7 +3188,7 @@ bool	CZoneLighter::CPointLightRT::testRaytrace(const CVector &v)
 
 
 // ***************************************************************************
-void			CZoneLighter::addStaticPointLight(const CPointLightNamed &pln)
+void			CZoneLighter2003::addStaticPointLight(const CPointLightNamed &pln)
 {
 	// build the plRT.
 	CPointLightRT	plRT;
@@ -3322,7 +3211,7 @@ void			CZoneLighter::addStaticPointLight(const CPointLightNamed &pln)
 
 
 // ***************************************************************************
-void			CZoneLighter::compilePointLightRT(uint gridSize, float gridCellSize, std::vector<CTriangle>& obstacles, bool doShadow)
+void			CZoneLighter2003::compilePointLightRT(uint gridSize, float gridCellSize, std::vector<CTriangle>& obstacles, bool doShadow)
 {
 	uint	i;
 
@@ -3354,7 +3243,7 @@ void			CZoneLighter::compilePointLightRT(uint gridSize, float gridCellSize, std:
 			// ===========
 			CQuadGrid<CTriangle*>	obstacleGrid;
 			obstacleGrid.create(gridSize, gridCellSize);
-			uint	size= (uint)obstacles.size();
+			uint	size= obstacles.size();
 			for(i=0; i<size; i++)
 			{
 				// bbox of triangle
@@ -3381,7 +3270,7 @@ void			CZoneLighter::compilePointLightRT(uint gridSize, float gridCellSize, std:
 				// AmbiantLIghts: do nothing.
 				if(plRT.PointLight.getType()!=CPointLight::AmbientLight)
 				{
-					// Select only obstacle Faces around the light. Other are not useful
+					// Select only obstacle Faces around the light. Other are not usefull
 					CAABBox	bbox;
 					bbox.setCenter(plRT.PointLight.getPosition());
 					float	hl= plRT.PointLight.getAttenuationEnd();
@@ -3449,7 +3338,7 @@ void			CZoneLighter::compilePointLightRT(uint gridSize, float gridCellSize, std:
 
 
 // ***************************************************************************
-bool	CZoneLighter::CPredPointLightToPoint::operator() (CPointLightRT *pla, CPointLightRT *plb) const
+bool	CZoneLighter2003::CPredPointLightToPoint::operator() (CPointLightRT *pla, CPointLightRT *plb) const
 {
 	float	ra= (pla->BSphere.Center - Point).norm();
 	float	rb= (plb->BSphere.Center - Point).norm();
@@ -3466,7 +3355,7 @@ bool	CZoneLighter::CPredPointLightToPoint::operator() (CPointLightRT *pla, CPoin
 }
 
 // ***************************************************************************
-void			CZoneLighter::processZonePointLightRT(vector<CPointLightNamed> &listPointLight)
+void			CZoneLighter2003::processZonePointLightRT(vector<CPointLightNamed> &listPointLight)
 {
 	uint	i;
 	vector<CPointLightRT*>		lightInfs;
@@ -3522,7 +3411,7 @@ void			CZoneLighter::processZonePointLightRT(vector<CPointLightNamed> &listPoint
 				// Use UnNoised normal from BezierPatch, because the lighting does not need to be so precise.
 				CBezierPatch	*bp= patch->unpackIntoCache();
 				normal= bp->evalNormal(s, t);
-
+				
 
 				// Compute Which light influences him.
 				//---------
@@ -3538,14 +3427,14 @@ void			CZoneLighter::processZonePointLightRT(vector<CPointLightNamed> &listPoint
 					// a light influence a TLI only if this one is FrontFaced to the light !!
 					if( ( pl->BSphere.Center - pos ) * normal > 0)
 					{
-						// Add 5cm else it fails in some case where ( pl->BSphere.Center - pos ) * normal is
+						// Add 5cm else it fails in some case where ( pl->BSphere.Center - pos ) * normal is 
 						// nearly 0 and the point should be occluded.
 						const float	deltaY= 0.05f;
 						CVector	posToRT= pos + normal * deltaY;
 						// Test if really in the radius of the light, if no occlusion, and if in SpotAngle
 						if( pl->testRaytrace(posToRT) )
 						{
-							// Ok, add the light to the lights which influence the TLI
+							// Ok, add the light to the lights which influence the TLI 
 							lightInfs.push_back(pl);
 						}
 					}
@@ -3676,21 +3565,21 @@ static inline bool operator < (const CTileOfPatch &lhs, const CTileOfPatch &rhs)
 {
 	return lhs.Patch == rhs.Patch  ?
 		   lhs.TileId < rhs.TileId :
-		   lhs.Patch  < rhs.Patch;
+		   lhs.Patch  < rhs.Patch;	
 };
 
 /// A set of tiles from patch and their bbox
 typedef std::map<CTileOfPatch, NLMISC::CAABBox> TTileOfPatchMap;
 
 // ***********************************************************
-void CZoneLighter::computeTileFlagsForPositionTowardWater(const CLightDesc &lightDesc,
-														  std::vector<const CTessFace*> &tessFaces
+void CZoneLighter2003::computeTileFlagsForPositionTowardWater(const CLightDesc &lightDesc,
+														  std::vector<const CTessFace*> &tessFaces														  
 														  )
-{
+{	
 	uint numTileAbove     = 0;
 	uint numTileBelow     = 0;
 	uint numTileIntersect = 0;
-
+	
 	/// the tiles that we have setupped so far...
 	TTileOfPatchMap tiles;
 
@@ -3698,7 +3587,7 @@ void CZoneLighter::computeTileFlagsForPositionTowardWater(const CLightDesc &ligh
 	//  First, build the bbox for all tiles  //
 	///////////////////////////////////////////
 
-	uint triCount = 0, totalTriCount = (uint)tessFaces.size();
+	uint triCount = 0, totalTriCount = tessFaces.size();	
 
 	nlinfo("Dealing with %d tessFaces", tessFaces.size());
 	for (std::vector<const CTessFace*>::iterator it = tessFaces.begin(); it != tessFaces.end(); ++it, ++triCount)
@@ -3712,19 +3601,19 @@ void CZoneLighter::computeTileFlagsForPositionTowardWater(const CLightDesc &ligh
 		CTileOfPatch top((*it)->TileId, (*it)->Patch);
 		TTileOfPatchMap::iterator tileIt = tiles.find(top);
 
-		/// test whether we've seen face(s) from this tile before
+		/// test wether we've seen face(s) from this tile before
 		if (tileIt == tiles.end()) // first time ?
 		{
 			/// build a bbox for this face
 			NLMISC::CAABBox b;
 			b.setMinMax((*it)->VBase->EndPos, (*it)->VLeft->EndPos);
 			b.extend((*it)->VRight->EndPos);
-			b.extend(b.getMax() + lightDesc.VegetableHeight * NLMISC::CVector::K); // adds vegetable height
+			b.extend(b.getMax() + lightDesc.VegetableHeight * NLMISC::CVector::K); // adds vegetable height			
 			tiles[top] = b;
 		}
 		else // extends the bbox with the given face
 		{
-			NLMISC::CAABBox &b = tileIt->second;
+			NLMISC::CAABBox &b = tileIt->second;			
 			b.extend((*it)->VBase->EndPos);
 			b.extend((*it)->VRight->EndPos);
 			b.extend((*it)->VLeft->EndPos);
@@ -3742,12 +3631,12 @@ void CZoneLighter::computeTileFlagsForPositionTowardWater(const CLightDesc &ligh
 
 	////////////////////////////////////////////////////
 	// Now, check each tile bbox against water shapes //
-	////////////////////////////////////////////////////
+	////////////////////////////////////////////////////	
 	NLMISC::CPolygon   waterPoly;
 	NLMISC::CPolygon2D tilePoly;
 	tilePoly.Vertices.resize(4);
 
-	uint tileCount = 0, totalTileCount = (uint)tiles.size();
+	uint tileCount = 0, totalTileCount = tiles.size();	
 
 	for (TTileOfPatchMap::iterator tileIt = tiles.begin(); tileIt != tiles.end(); ++tileIt, ++tileCount)
 	{
@@ -3755,10 +3644,10 @@ void CZoneLighter::computeTileFlagsForPositionTowardWater(const CLightDesc &ligh
 		const NLMISC::CVector v1 = tileIt->second.getMax();
 
 		/// build a top view from the bbox
-		tilePoly.Vertices[0].set(v0.x, v0.y);
-		tilePoly.Vertices[1].set(v1.x, v0.y);
-		tilePoly.Vertices[2].set(v1.x, v1.y);
-		tilePoly.Vertices[3].set(v0.x, v1.y);
+		tilePoly.Vertices[0].set(v0.x, v0.y); 
+		tilePoly.Vertices[1].set(v1.x, v0.y); 
+		tilePoly.Vertices[2].set(v1.x, v1.y); 
+		tilePoly.Vertices[3].set(v0.x, v1.y); 
 
 		/// Select the candidate water shape from the quad grid
 		_WaterShapeQuadGrid.clearSelection();
@@ -3770,12 +3659,13 @@ void CZoneLighter::computeTileFlagsForPositionTowardWater(const CLightDesc &ligh
 		TWaterShapeQuadGrid::CIterator qgIt;
 		for (qgIt = _WaterShapeQuadGrid.begin(); qgIt != _WaterShapeQuadGrid.end(); ++qgIt)
 		{
-			CWaterShape		*waterShape= safe_cast<CWaterShape*>((*qgIt).Shape);
+			
+			CWaterShape *waterShape = NLMISC::safe_cast<CWaterShape *>((*qgIt).Shape);
 			waterShape->getShapeInWorldSpace(waterPoly, (*qgIt).MT);
 			NLMISC::CPolygon2D poly(waterPoly);
-			if (poly.intersect(tilePoly)) // above or below a water surface ?
+			if (poly.intersect(tilePoly)) // above or below a water surface ?		
 			{
-				/// height of water
+				/// height of water 
 				float waterHeight = waterPoly.Vertices[0].z;
 
 				if (v1.z < waterHeight)
@@ -3805,7 +3695,7 @@ void CZoneLighter::computeTileFlagsForPositionTowardWater(const CLightDesc &ligh
 
 		if (qgIt == _WaterShapeQuadGrid.end()) // no intersection found ? if yes it's above water
 		{
-			te.setVegetableState(CTileElement::AboveWater);
+			te.setVegetableState(CTileElement::AboveWater);	
 			//nlassert(te.getVegetableState() == CTileElement::AboveWater);
 			++ numTileAbove;
 		}
@@ -3830,7 +3720,7 @@ void CZoneLighter::computeTileFlagsForPositionTowardWater(const CLightDesc &ligh
 
 // ***********************************************************
 
-void CZoneLighter::setTileFlagsToDefault(std::vector<const CTessFace*> &tessFaces)
+void CZoneLighter2003::setTileFlagsToDefault(std::vector<const CTessFace*> &tessFaces)
 {
 	/// We may setup a tile several time, but this doesn't matter here...
 	for (std::vector<const CTessFace*>::iterator it = tessFaces.begin(); it != tessFaces.end(); ++it)
@@ -3846,7 +3736,7 @@ void CZoneLighter::setTileFlagsToDefault(std::vector<const CTessFace*> &tessFace
 
 // ***********************************************************
 
-uint CZoneLighter::getAPatch (uint process)
+uint CZoneLighter2003::getAPatch (uint process)
 {
 	// Accessor
 	CSynchronized<std::vector<bool> >::CAccessor access (&_PatchComputed);
@@ -3855,9 +3745,7 @@ uint CZoneLighter::getAPatch (uint process)
 	uint index = _LastPatchComputed[process];
 	uint firstIndex = index;
 
-	nlassert(index < _PatchInfo.size());
-
-	if (access.value().empty())
+	if (access.value().size() == 0)
 		// no more patches
 		return 0xffffffff;
 
@@ -3889,7 +3777,7 @@ uint CZoneLighter::getAPatch (uint process)
 
 // ***********************************************************
 
-float CZoneLighter::attenuation (const CVector &pos, const CZoneLighter::CLightDesc &description)
+float CZoneLighter2003::attenuation (const CVector &pos, const CZoneLighter2003::CLightDesc &description)
 {
 	// Clipped ?
 
@@ -3911,6 +3799,9 @@ float CZoneLighter::attenuation (const CVector &pos, const CZoneLighter::CLightD
 		CVector zPos;
 		transformVectorToZBuffer (zbuffer, pos, zPos);
 
+		sint x = (sint)floor (zPos.x);
+		sint y = (sint)floor (zPos.y);
+
 		// Get the z
 		float random = (float)_Random.rand () * description.SoftShadowJitter + _Random.RandMax * (1.f - description.SoftShadowJitter);
 		averageAttenuation += random * testZPercentageCloserFilter (zPos.x-(float)zbuffer.LocalZBufferXMin, zPos.y-(float)zbuffer.LocalZBufferYMin, zPos.z, zbuffer, description, _ZBufferOverflow);
@@ -3921,12 +3812,15 @@ float CZoneLighter::attenuation (const CVector &pos, const CZoneLighter::CLightD
 	averageAttenuation /= randomSum;
 
 
-
+	
 	// *** Attenuation in the object zbuffer
 
 	// Get position in z buffer
 	CVector zPos;
 	transformVectorToZBuffer (_ZBufferObject, pos, zPos);
+
+	const sint x = (sint)floor (zPos.x);
+	const sint y = (sint)floor (zPos.y);
 
 	const float objectAttenuation = testZPercentageCloserFilter (zPos.x-(float)_ZBufferObject.LocalZBufferXMin, zPos.y-(float)_ZBufferObject.LocalZBufferYMin, zPos.z, _ZBufferObject, description, _ZBufferOverflow);
 
@@ -3937,4 +3831,106 @@ float CZoneLighter::attenuation (const CVector &pos, const CZoneLighter::CLightD
 
 // ***********************************************************
 
+ 
 
+
+// Spliced from the modern lighter (absent in rev 1.4; only used by -waterpatch).
+void CZoneLighter2003::computeTileFlagsOnly (CLandscape &landscape, CZone& output, uint zoneToLight, const CLightDesc& description,
+						   std::vector<uint> &listZone)
+{
+	// Zone to light
+	_ZoneToLight=zoneToLight;
+
+	// Landscape
+	_Landscape=&landscape;
+
+
+	// Zone count
+	uint zoneCount=(uint)listZone.size();
+
+	// For each zone
+	for (uint zone=0; zone<zoneCount; zone++)
+	{
+		// Get num patches
+		uint patchCount=landscape.getZone(listZone[zone])->getNumPatchs();
+
+		// Insert zone id
+		_ZoneId.insert (map<uint, uint>::value_type (listZone[zone], zone));
+
+		// For each patch
+		uint patch;
+		for (patch=0; patch<patchCount; patch++)
+		{
+			// Progress bar
+			progress ("Scan all patches", (float)patch/(float)patchCount);
+
+			// This is the zone to light ?
+			if (listZone[zone]==_ZoneToLight)
+			{
+				// unExclude all the patches from refine all
+				landscape.excludePatchFromRefineAll (listZone[zone], patch, false);
+			}
+			else
+			{
+				// Exclude all the patches from refine all
+				landscape.excludePatchFromRefineAll (listZone[zone], patch, true);
+			}
+		}
+	}
+
+	// *** Now tesselate this zone to max accuracy
+
+	// Setup the landscape
+	landscape.setThreshold (0);
+	landscape.setTileMaxSubdivision (0);
+
+	// Refine all
+	progress ("Refine landscape to maximum", 0.5f);
+	landscape.refineAll (CVector (0, 0, 0));
+
+	// Get tesselated faces
+	std::vector<const CTessFace*> leaves;
+	landscape.getTessellationLeaves(leaves);
+
+
+	// compute only the water states
+	if (_WaterShapes.size() != 0) // any water shape in this zone ?
+	{
+		/// make a quad grid of each water shape
+		makeQuadGridFromWaterShapes(landscape.getZone(_ZoneToLight)->getZoneBB().getAABBox());
+
+		/// check for each tile if it is above / below water
+		computeTileFlagsForPositionTowardWater(description, leaves);
+	}
+	else
+	{
+		setTileFlagsToDefault(leaves);
+	}
+
+	/// verify that the zonew and the zonel (output) are compatible
+	bool	ok= true;
+	CZone	&zonew= *(landscape.getZone(zoneToLight));
+	if(zonew.getNumPatchs() == output.getNumPatchs())
+	{
+		// verify for each patch that the tile array are same
+		for(uint i=0;i<(uint)zonew.getNumPatchs();i++)
+		{
+			const CPatch	&p0= *const_cast<const CZone&>(zonew).getPatch(i);
+			const CPatch	&p1= *const_cast<const CZone&>(output).getPatch(i);
+			if( p0.getOrderS()!=p1.getOrderS() || p0.getOrderT()!=p1.getOrderT() )
+			{
+				ok= false;
+				break;
+			}
+		}
+	}
+	else
+		ok= false;
+
+	// can't copy tile flags
+	if(!ok)
+		throw Exception("The input zonew, and output zonel are too different: not same patchs!!");
+
+	/// copy the tiles flags from the zone to light to the output zone
+	copyTileFlags(output, zonew);
+}

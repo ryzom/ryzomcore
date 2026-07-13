@@ -31,7 +31,7 @@
 
 
 #include "nel/3d/zone.h"
-#include "nel/3d/zone_lighter.h"
+#include "zone_lighter_2003.h"
 #include "nel/3d/quad_grid.h"
 #include "nel/3d/landscape.h"
 #include "nel/3d/scene_group.h"
@@ -74,7 +74,7 @@ const char *progressbar[BAR_LENGTH]=
 };
 
 // My zone lighter
-class CMyZoneLighter : public CZoneLighter
+class CMyZoneLighter : public CZoneLighter2003
 {
 	// Progress bar
 	virtual void progress (const char *message, float progress)
@@ -331,7 +331,7 @@ int main(int argc, char* argv[])
 				// *** Build the lighter descriptor
 				// **********
 
-				CZoneLighter::CLightDesc lighterDesc;
+				CZoneLighter2003::CLightDesc lighterDesc;
 
 				// Get bank name
 				CConfigFile::CVar &bank_name = parameter.getVar ("bank_name");
@@ -668,8 +668,8 @@ int main(int argc, char* argv[])
 					}
 				}
 
-				// A vector of CZoneLighter::CTriangle
-				vector<CZoneLighter::CTriangle> vectorTriangle;
+				// A vector of CZoneLighter2003::CTriangle
+				vector<CZoneLighter2003::CTriangle> vectorTriangle;
 
 				// **********
 				// *** Build triangle array
@@ -775,7 +775,7 @@ int main(int argc, char* argv[])
 									IShape *shape = iteMap->second;
 									if (ite == instanceGroup.begin()  /* are we dealing with main zone */ 
 										&& zoneIgLoaded               /* ig of the main zone loaded successfully (so its indeed the ig of the first zone) ? */								
-										&& CZoneLighter::isLightableShape(*shape)
+										&& CZoneLighter2003::isLightableShape(*shape)
 										&& !tileWaterPatchOnly
 									   )
 									{

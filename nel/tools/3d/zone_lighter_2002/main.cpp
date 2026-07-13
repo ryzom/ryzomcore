@@ -1,21 +1,27 @@
-// NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010  Winch Gate Property Limited
-//
-// This source file has been modified by the following contributors:
-// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+/** \file zone_lighter.cpp
+ * zone_lighter.cpp : Very simple zone lighter
+ *
+ * $Id$
+ */
+
+/* Copyright, 2000 Nevrax Ltd.
+ *
+ * This file is part of NEVRAX NEL.
+ * NEVRAX NEL is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2, or (at your option)
+ * any later version.
+
+ * NEVRAX NEL is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with NEVRAX NEL; see the file COPYING. If not, write to the
+ * Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
+ * MA 02111-1307, USA.
+ */
 
 #include "nel/misc/stream.h"
 #include "nel/misc/file.h"
@@ -31,7 +37,7 @@
 
 
 #include "nel/3d/zone.h"
-#include "nel/3d/zone_lighter.h"
+#include "zone_lighter_2002.h"
 #include "nel/3d/quad_grid.h"
 #include "nel/3d/landscape.h"
 #include "nel/3d/scene_group.h"
@@ -48,7 +54,7 @@ using namespace NL3D;
 
 #define BAR_LENGTH 21
 
-const char *progressbar[BAR_LENGTH]=
+char *progressbar[BAR_LENGTH]=
 {
 	"[                    ]",
 	"[.                   ]",
@@ -74,7 +80,7 @@ const char *progressbar[BAR_LENGTH]=
 };
 
 // My zone lighter
-class CMyZoneLighter : public CZoneLighter
+class CMyZoneLighter : public CZoneLighter2002
 {
 	// Progress bar
 	virtual void progress (const char *message, float progress)
@@ -85,23 +91,19 @@ class CMyZoneLighter : public CZoneLighter
 		pgId= min(pgId, (uint)(BAR_LENGTH-1));
 		sprintf (msg, "\r%s: %s", message, progressbar[pgId]);
 		uint i;
-		for (i=(uint)strlen(msg); i<79; i++)
+		for (i=strlen(msg); i<79; i++)
 			msg[i]=' ';
 		msg[i]=0;
-		printf ("%s\r", msg);
+		printf ("%s", msg);
+		printf ("\r");
 	}
 };
 
-struct CInstanceGroupRef
-{
-	CInstanceGroup	*IG;
-	bool			AddLight;
-};
 
 //=======================================================================================
 // load additionnal ig from a village (ryzom specific)
 static void loadIGFromVillage(const NLGEORGES::UFormElm *villageItem, const std::string &continentName,
-							  uint villageIndex, std::list<CInstanceGroupRef> &instanceGroups, CConfigFile::CVar &additionalIgNames)
+							  uint villageIndex, std::list<CInstanceGroup *> &instanceGroups)
 {	
 	const NLGEORGES::UFormElm *igNamesItem;
 	if (! (villageItem->getNodeByName (&igNamesItem, "IgList") && igNamesItem) )
@@ -134,20 +136,8 @@ static void loadIGFromVillage(const NLGEORGES::UFormElm *villageItem, const std:
 			nlwarning("Ig name of ig #%d in the continent form %s, in village #%d is an empty string", l, continentName.c_str(), villageIndex);
 			continue;
 		}
-		// ensure .ig
-		igName = CFile::getFilenameWithoutExtension(igName) + ".ig";
-		
-		// verify that the ig is not already added (case of tr_water.ig in additional_igs)
-		for(uint igAdd= 0;igAdd<(uint)additionalIgNames.size();igAdd++)
-		{
-			if( toLowerAscii(additionalIgNames.asString()) == toLower(igName) )
-			{
-				nlwarning("Skipping Village Ig %s, cause already exist in additional ig", igName.c_str());
-				continue;
-			}
-		}
 
-		// add this ig
+		igName = CFile::getFilenameWithoutExtension(igName) + ".ig";
 		string nameLookup = CPath::lookup (igName, false, true);
 		if (!nameLookup.empty())
 		{		
@@ -156,22 +146,19 @@ static void loadIGFromVillage(const NLGEORGES::UFormElm *villageItem, const std:
 			if (inputFile.open (nameLookup))
 			{
 				// New ig
-				CUniquePtr<CInstanceGroup> group(new CInstanceGroup);
+				std::auto_ptr<CInstanceGroup> group(new CInstanceGroup);
 				try
 				{
 					group->serial (inputFile);
 				}
-				catch(const NLMISC::Exception &)
+				catch(NLMISC::Exception &)
 				{
-					nlwarning ("Error while loading instance group %s", igName.c_str());	
+					nlwarning ("Error while loading instance group %s\n", igName.c_str());	
 					continue;
 				}								
 				inputFile.close();
 				// Add to the list
-				CInstanceGroupRef iref;
-				iref.IG = group.release();
-				iref.AddLight = false;
-				instanceGroups.push_back (iref);
+				instanceGroups.push_back (group.release());
 			}
 			else
 			{
@@ -185,9 +172,9 @@ static void loadIGFromVillage(const NLGEORGES::UFormElm *villageItem, const std:
 
 //=======================================================================================
 // load additionnal ig from a continent (ryzom specific)
-static void loadIGFromContinent(NLMISC::CConfigFile &parameter, std::list<CInstanceGroupRef> &instanceGroups,
-								const std::vector<std::string> &zoneNameArray,
-							    CConfigFile::CVar &additionalIgNames)
+static void loadIGFromContinent(NLMISC::CConfigFile &parameter, std::list<CInstanceGroup *> &instanceGroups,
+								const std::vector<std::string> &zoneNameArray
+							   )
 {
 		
 	try
@@ -205,7 +192,7 @@ static void loadIGFromContinent(NLMISC::CConfigFile &parameter, std::list<CInsta
 		// Load the form
 		NLGEORGES::UFormLoader *loader = NLGEORGES::UFormLoader::createLoader();
 		//
-		std::string pathName = CPath::lookup(continentName); // level_design_world_directory.asString() + "/" + continentName;
+		std::string pathName = level_design_world_directory.asString() + "/" + continentName;
 		if (pathName.empty())
 		{		
 			nlwarning("Can't find continent form : %s", continentName.c_str());
@@ -258,7 +245,7 @@ static void loadIGFromContinent(NLMISC::CConfigFile &parameter, std::list<CInsta
 					if (NLMISC::nlstricmp(CFile::getFilenameWithoutExtension(zoneNameArray[l]), zoneName) == 0)																  
 					{										
 						// ok, it is in the dependant zones
-						loadIGFromVillage(currVillage, continentName, k, instanceGroups, additionalIgNames);
+						loadIGFromVillage(currVillage, continentName, k, instanceGroups);
 						break;
 					}
 				}					
@@ -269,7 +256,7 @@ static void loadIGFromContinent(NLMISC::CConfigFile &parameter, std::list<CInsta
 			nlwarning("Can't load continent form : %s", continentName.c_str());
 		}				
 	}	
-	catch (const NLMISC::EUnknownVar &e)
+	catch (NLMISC::EUnknownVar &e)
 	{
 		nlinfo(e.what());
 	}
@@ -278,13 +265,9 @@ static void loadIGFromContinent(NLMISC::CConfigFile &parameter, std::list<CInsta
 //=======================================================================================
 int main(int argc, char* argv[])
 {
-	// Start time
-	TTime time=CTime::getLocalTime ();
-
 	// Filter addSearchPath
 	NLMISC::createDebug();
 	InfoLog->addNegativeFilter ("adding the path");
-	WarningLog->addNegativeFilter ("continent.cfg");
 
 	// Register 3d
 	registerSerial3d ();
@@ -293,17 +276,10 @@ int main(int argc, char* argv[])
 	if (argc<5)
 	{
 		// Help message
-		printf ("%s [zonein.zone] [zoneout.zone] [parameter_file] [dependancy_file] [-waterpatch bkupdir] \n", argv[0]);
+		printf ("%s [zonein.zone] [zoneout.zone] [parameter_file] [dependancy_file]\n", argv[0]);
 	}
 	else
 	{
-		// to patch only the tiles flags
-		bool	tileWaterPatchOnly;
-		tileWaterPatchOnly= argc==7 && string(argv[5])=="-waterpatch";
-		string	tileWaterPatchBkupDir;
-		if(tileWaterPatchOnly)
-			tileWaterPatchBkupDir = argv[6];
-
 		// Ok, read the zone
 		CIFile inputFile;
 
@@ -315,7 +291,7 @@ int main(int argc, char* argv[])
 		if (inputFile.open (argv[1]))
 		{
 			// Zone name
-			string zoneName=toLowerAscii (string ("zone_"+getName (argv[1])));
+			string zoneName=strlwr (string ("zone_"+getName (argv[1])));
 
 			// Load the zone
 			try
@@ -331,7 +307,7 @@ int main(int argc, char* argv[])
 				// *** Build the lighter descriptor
 				// **********
 
-				CZoneLighter::CLightDesc lighterDesc;
+				CZoneLighter2002::CLightDesc lighterDesc;
 
 				// Get bank name
 				CConfigFile::CVar &bank_name = parameter.getVar ("bank_name");
@@ -360,44 +336,10 @@ int main(int argc, char* argv[])
 
 				// Light direction
 				CConfigFile::CVar &sun_direction = parameter.getVar ("sun_direction");
-				lighterDesc.SunDirection.x=sun_direction.asFloat(0);
-				lighterDesc.SunDirection.y=sun_direction.asFloat(1);
-				lighterDesc.SunDirection.z=sun_direction.asFloat(2);
-				lighterDesc.SunDirection.normalize ();
-
-				// Light center position
-				CConfigFile::CVar &sun_center = parameter.getVar ("sun_center");
-				lighterDesc.SunCenter.x=sun_center.asFloat(0);
-				lighterDesc.SunCenter.y=sun_center.asFloat(1);
-				lighterDesc.SunCenter.z=sun_center.asFloat(2);
-
-				// Light distance
-				CConfigFile::CVar &sun_distance = parameter.getVar ("sun_distance");
-				lighterDesc.SunDistance=sun_distance.asFloat();
-
-				// Light FOV
-				CConfigFile::CVar &sun_fov = parameter.getVar ("sun_fov");
-				lighterDesc.SunFOV=sun_fov.asFloat();
-
-				// Light radius
-				CConfigFile::CVar &sun_radius = parameter.getVar ("sun_radius");
-				lighterDesc.SunRadius=sun_radius.asFloat();
-
-				// ZBuffer landscape size
-				CConfigFile::CVar &zbuffer_landscape_size = parameter.getVar ("zbuffer_landscape_size");
-				lighterDesc.ZBufferLandscapeSize=zbuffer_landscape_size.asInt();
-
-				// ZBuffer object size
-				CConfigFile::CVar &zbuffer_object_size = parameter.getVar ("zbuffer_object_size");
-				lighterDesc.ZBufferObjectSize=zbuffer_object_size.asInt();
-
-				// Soft shadow samples sqrt
-				CConfigFile::CVar &soft_shadow_samples_sqrt = parameter.getVar ("soft_shadow_samples_sqrt");
-				lighterDesc.SoftShadowSamplesSqrt=soft_shadow_samples_sqrt.asInt();
-
-				// Soft shadow jitter
-				CConfigFile::CVar &soft_shadow_jitter = parameter.getVar ("soft_shadow_jitter");
-				lighterDesc.SoftShadowJitter=soft_shadow_jitter.asFloat();
+				lighterDesc.LightDirection.x=sun_direction.asFloat(0);
+				lighterDesc.LightDirection.y=sun_direction.asFloat(1);
+				lighterDesc.LightDirection.z=sun_direction.asFloat(2);
+				lighterDesc.LightDirection.normalize ();
 
 				// Water rendering parameters
 				CConfigFile::CVar &water_zbias = parameter.getVar ("water_shadow_bias");
@@ -415,9 +357,56 @@ int main(int argc, char* argv[])
 				CConfigFile::CVar &sky_contribution_for_water = parameter.getVar ("sky_contribution_for_water");
 				lighterDesc.SkyContributionForWater = sky_contribution_for_water.asInt() != 0;
 
+				// Oversampling
+				CConfigFile::CVar &oversampling = parameter.getVar ("oversampling");
+				sint oversmaplingValue=oversampling.asInt();
+				switch (oversmaplingValue)
+				{
+				case 0:
+					lighterDesc.Oversampling=CZoneLighter2002::CLightDesc::NoOverSampling;
+					break;
+				case 2:
+					lighterDesc.Oversampling=CZoneLighter2002::CLightDesc::OverSamplingx2;
+					break;
+				case 8:
+					lighterDesc.Oversampling=CZoneLighter2002::CLightDesc::OverSamplingx8;
+					break;
+				case 32:
+					lighterDesc.Oversampling=CZoneLighter2002::CLightDesc::OverSamplingx32;
+					break;
+				case 128:
+					lighterDesc.Oversampling=CZoneLighter2002::CLightDesc::OverSamplingx128;
+					break;
+				default:
+					// Error message
+					nlwarning ("ERROR oversampling value not supported. Must be 0, 2, 8, 32 or 128. Forced to 0.\n");
+					lighterDesc.Oversampling=CZoneLighter2002::CLightDesc::NoOverSampling;
+					break;
+				}
+
 				// Number of CPU
 				CConfigFile::CVar &cpu_num = parameter.getVar ("cpu_num");
 				lighterDesc.NumCPU=cpu_num.asInt ();
+
+				// Shadow bias
+				CConfigFile::CVar &shadow_bias = parameter.getVar ("shadow_bias");
+				lighterDesc.ShadowBias=shadow_bias.asFloat ();
+
+				// Softshadow
+				CConfigFile::CVar &softshadow = parameter.getVar ("softshadow");
+				lighterDesc.Softshadow=softshadow.asInt ()!=0;
+
+				// Softshadow blur size
+				CConfigFile::CVar &softshadow_blur_size = parameter.getVar ("softshadow_blur_size");
+				lighterDesc.SoftshadowBlurSize=softshadow_blur_size.asFloat ();
+
+				// Softshadow fall
+				CConfigFile::CVar &softshadow_fallof = parameter.getVar ("softshadow_fallof");
+				lighterDesc.SoftshadowFallof=softshadow_fallof.asFloat ();
+
+				// Softshadow fall
+				CConfigFile::CVar &softshadow_shape_vertex_count = parameter.getVar ("softshadow_shape_vertex_count");
+				lighterDesc.SoftshadowShapeVertexCount=softshadow_shape_vertex_count.asInt ();
 
 				// Sun contribution
 				CConfigFile::CVar &sun_contribution = parameter.getVar ("sun_contribution");
@@ -460,11 +449,6 @@ int main(int argc, char* argv[])
 				CLandscape *landscape=new CLandscape;
 				landscape->init();
 
-				// Debug/archaeology: disable procedural tessellation noise so lumel
-				// normals come from the smooth surface only (era-reproduction probes).
-				if (getenv ("NL_ZONE_LIGHTER_NO_NOISE"))
-					landscape->setNoiseMode (false);
-
 				// A zone lighter
 				CMyZoneLighter lighter;
 				lighter.init ();
@@ -476,7 +460,7 @@ int main(int argc, char* argv[])
 				CZone zone;
 
 				// List of ig
-				std::list<CInstanceGroupRef> instanceGroup;
+				std::list<CInstanceGroup*> instanceGroup;
 
 				// Load
 				zone.serial (inputFile);
@@ -500,10 +484,7 @@ int main(int argc, char* argv[])
 					inputFile.close();
 
 					// Add to the list
-					CInstanceGroupRef iref;
-					iref.IG = group;
-					iref.AddLight = true;
-					instanceGroup.push_back (iref);
+					instanceGroup.push_back (group);
 					zoneIgLoaded = true;
 				}
 				else
@@ -526,7 +507,7 @@ int main(int argc, char* argv[])
 						landscape->TileBank.serial (inputFile);
 						landscape->initTileBanks();
 					}
-					catch (const Exception &e)
+					catch (Exception &e)
 					{
 						// Error
 						nlwarning ("ERROR error loading tile bank %s\n%s\n", bankName.c_str(), e.what());
@@ -574,10 +555,7 @@ int main(int argc, char* argv[])
 								inputFile.close();
 
 								// Add to the list
-								CInstanceGroupRef iref;
-								iref.IG = group;
-								iref.AddLight = false;
-								instanceGroup.push_back (iref);
+								instanceGroup.push_back (group);
 							}
 							else
 							{
@@ -589,7 +567,7 @@ int main(int argc, char* argv[])
 							}
 						}
 					}
-					catch (const NLMISC::EUnknownVar &)
+					catch (NLMISC::EUnknownVar &)
 					{
 						nlinfo("No additionnal ig's to load");
 					}
@@ -648,10 +626,7 @@ int main(int argc, char* argv[])
 								inputFile.close();
 
 								// Add to the list
-								CInstanceGroupRef iref;
-								iref.IG = group;
-								iref.AddLight = true;
-								instanceGroup.push_back (iref);
+								instanceGroup.push_back (group);
 							}
 							else
 							{
@@ -664,12 +639,12 @@ int main(int argc, char* argv[])
 					if (loadInstanceGroup)
 					{
 						// Ryzom specific : additionnal villages from a continent form
-						loadIGFromContinent(parameter, instanceGroup, zoneNameArray, additionnal_ig);
+						loadIGFromContinent(parameter, instanceGroup, zoneNameArray);
 					}
 				}
 
-				// A vector of CZoneLighter::CTriangle
-				vector<CZoneLighter::CTriangle> vectorTriangle;
+				// A vector of CZoneLighter2002::CTriangle
+				vector<CZoneLighter2002::CTriangle> vectorTriangle;
 
 				// **********
 				// *** Build triangle array
@@ -679,19 +654,17 @@ int main(int argc, char* argv[])
 
 				// Add triangles from landscape
 				landscape->enableAutomaticLighting (false);
-				// no need to add obstacles in case of water patch
-				if(!tileWaterPatchOnly)
-					lighter.addTriangles (*landscape, listZoneId, 0, vectorTriangle);
+				lighter.addTriangles (*landscape, listZoneId, 0, vectorTriangle);
 
 				// Map of shape
 				std::map<string, IShape*> shapeMap;
 
 				// For each instance group
-				std::list<CInstanceGroupRef>::iterator ite=instanceGroup.begin();
+				std::list<CInstanceGroup*>::iterator ite=instanceGroup.begin();
 				while (ite!=instanceGroup.end())
 				{
 					// Instance group
-					CInstanceGroup *group=ite->IG;
+					CInstanceGroup *group=*ite;
 
 					// Load and add shapes
 					if (lighterDesc.Shadow)
@@ -701,124 +674,97 @@ int main(int argc, char* argv[])
 						{
 							// Get the instance shape name
 							string name=group->getShapeName (instance);
-							if (!name.empty())
+
+							// Skip it??
+							if(group->getInstance(instance).DontCastShadow)
+								continue;
+
+							// Add a .shape at the end ?
+							if (name.find('.') == std::string::npos)
+								name += ".shape";
+
+							// Add path
+							string nameLookup = CPath::lookup (name, false, false);
+							if (!nameLookup.empty())
+								name = nameLookup;
+
+							// Find the shape in the bank
+							std::map<string, IShape*>::iterator iteMap=shapeMap.find (name);
+							if (iteMap==shapeMap.end())
 							{
-								// Skip it?? use the DontCastShadowForExterior flag. See doc of this flag
-								if(group->getInstance(instance).DontCastShadow || group->getInstance(instance).DontCastShadowForExterior)
-									continue;
+								// Input file
+								CIFile inputFile;
 
-								if (toLowerAscii (CFile::getExtension (name)) == "pacs_prim")
+								if (inputFile.open (name))
 								{
-									nlwarning("EXPORT BUG: Can't read %s (not a shape), should not be part of .ig!", name.c_str());
-									continue;
+									// Load it
+									CShapeStream stream;
+									stream.serial (inputFile);
+
+									// Get the pointer
+									iteMap=shapeMap.insert (std::map<string, IShape*>::value_type (name, stream.getShapePointer ())).first;
+								}
+								else
+								{
+									// Error
+									nlwarning ("WARNING can't load shape %s\n", name.c_str());
+								}
+							}
+							
+							// Loaded ?
+							if (iteMap!=shapeMap.end())
+							{
+								// Build the matrix
+								CMatrix scale;
+								scale.identity ();
+								scale.scale (group->getInstanceScale (instance));
+								CMatrix rot;
+								rot.identity ();
+								rot.setRot (group->getInstanceRot (instance));
+								CMatrix pos;
+								pos.identity ();
+								pos.setPos (group->getInstancePos (instance));
+								CMatrix mt=pos*rot*scale;
+
+								// Add triangles
+								lighter.addTriangles (*iteMap->second, mt, vectorTriangle);
+
+								/** If it is a lightable shape and we are dealing with the ig of the main zone,
+								  * add it to the lightable shape list
+								  */
+								IShape *shape = iteMap->second;
+								if (ite == instanceGroup.begin()  /* are we dealing with main zone */ 
+									&& zoneIgLoaded               /* ig of the main zone loaded successfully (so its indeed the ig of the first zone) ? */								
+									&& CZoneLighter2002::isLightableShape(*shape)
+								   )
+								{
+									lighter.addLightableShape(shape, mt);
 								}
 
-								// PS ?
-								if (toLowerAscii (CFile::getExtension (name)) == "ps")
-									continue;
-								
-								// Add a .shape at the end ?
-								if (name.find('.') == std::string::npos)
-									name += ".shape";
-
-								// Add path
-								string nameLookup = CPath::lookup (name, false, false);
-								if (!nameLookup.empty())
-									name = nameLookup;
-
-								// Find the shape in the bank
-								std::map<string, IShape*>::iterator iteMap=shapeMap.find (name);
-								if (iteMap==shapeMap.end())
+								/** If it is a water shape, add it to the lighter, so that it can check
+								  * which tiles are above / below water for this zone. The result is saved in the flags of tiles.
+								  * A tile that have their flags set to VegetableDisabled won't get setupped
+								  */
+								if (dynamic_cast<NL3D::CWaterShape *>(shape))
 								{
-									// Input file
-									CIFile inputFile;
-
-									if (inputFile.open (name))
-									{
-										// Load it
-										CShapeStream stream;
-										stream.serial (inputFile);
-
-										// Get the pointer
-										iteMap=shapeMap.insert (std::map<string, IShape*>::value_type (name, stream.getShapePointer ())).first;
-									}
-									else
-									{
-										// Error
-										nlwarning ("WARNING can't load shape %s\n", name.c_str());
-									}
-								}
-								
-								// Loaded ?
-								if (iteMap!=shapeMap.end())
-								{
-									// Build the matrix
-									CMatrix scale;
-									scale.identity ();
-									scale.scale (group->getInstanceScale (instance));
-									CMatrix rot;
-									rot.identity ();
-									rot.setRot (group->getInstanceRot (instance));
-									CMatrix pos;
-									pos.identity ();
-									pos.setPos (group->getInstancePos (instance));
-									CMatrix mt=pos*rot*scale;
-
-									// Add triangles
-									// no need to add obstacles in case of water patch
-									if(!tileWaterPatchOnly)
-										lighter.addTriangles (*iteMap->second, mt, vectorTriangle);
-
-									/** If it is a lightable shape and we are dealing with the ig of the main zone,
-									  * add it to the lightable shape list
-									  */
-									IShape *shape = iteMap->second;
-									if (ite == instanceGroup.begin()  /* are we dealing with main zone */ 
-										&& zoneIgLoaded               /* ig of the main zone loaded successfully (so its indeed the ig of the first zone) ? */								
-										&& CZoneLighter::isLightableShape(*shape)
-										&& !tileWaterPatchOnly
-									   )
-									{
-										lighter.addLightableShape(shape, mt);
-									}
-
-									/** If it is a water shape, add it to the lighter, so that it can check
-									  * which tiles are above / below water for this zone. The result is saved in the flags of tiles.
-									  * A tile that have their flags set to VegetableDisabled won't get setupped
-									  */
-									if (dynamic_cast<NL3D::CWaterShape *>(shape))
-									{
-										lighter.addWaterShape(static_cast<NL3D::CWaterShape *>(shape), mt);
-									}
+									lighter.addWaterShape(static_cast<NL3D::CWaterShape *>(shape), mt);
 								}
 							}
 						}
 					}
 
-					// For each point light of the ig. No need wor tileWaterPatchOnly
-					if (ite->AddLight && !tileWaterPatchOnly)
+					// For each point light of the ig
+					const std::vector<CPointLightNamed>	&pointLightList= group->getPointLightList();
+					for (uint plId=0; plId<pointLightList.size(); plId++)
 					{
-						const std::vector<CPointLightNamed>	&pointLightList= group->getPointLightList();
-						for (uint plId=0; plId<pointLightList.size(); plId++)
-						{
-							// Add it to the Ig.
-							lighter.addStaticPointLight(pointLightList[plId]);
-						}
+						// Add it to the Ig.
+						lighter.addStaticPointLight(pointLightList[plId]);
 					}
 
 					// Next instance group
 					ite++;
 				}
 
-				// If no waterpatch, and no WaterShape at all, no op
-				bool	tileWaterSkip= false;
-				if(continu && tileWaterPatchOnly && lighter.getNumWaterShape()==0)
-				{
-					nlinfo("NO WATER INTERSECTION FOUND: don't patch at all");
-					continu= false;
-					tileWaterSkip= true;
-				}
-				
 				// Continue ?
 				if (continu)
 				{
@@ -826,67 +772,18 @@ int main(int argc, char* argv[])
 					// *** Light!
 					// **********
 
+					// Start time
+					TTime time=CTime::getLocalTime ();
+
 					// Output zone
 					CZone output;
 
-					// normal lighting
-					if(!tileWaterPatchOnly)
-					{
-						// Light the zone
-						lighter.light (*landscape, output, zone.getZoneId(), lighterDesc, vectorTriangle, listZoneId);
-					}
-					else
-					{
-						// Load the zonel.
-						CIFile zonelFile;
+					// Light the zone
+					lighter.light (*landscape, output, zone.getZoneId(), lighterDesc, vectorTriangle, listZoneId);
 
-						// load the zonel (keep lighting)
-						if (zonelFile.open (argv[2]))
-						{
-							// load the new zone
-							try
-							{
-								// load it
-								output.serial (zonelFile);
-							}
-							catch (const Exception& except)
-							{
-								// Error message
-								nlwarning ("ERROR reading %s: %s\n", argv[2], except.what());
-								throw;
-							}
-						}
-						else
-						{
-							// Error can't open the file
-							nlwarning ("ERROR Can't open %s for reading\n", argv[1]);
-							throw Exception("ERROR Can't open the zonel for tile water patching. abort");
-						}
-						zonelFile.close();
-
-
-						// Bkup the zone
-						COFile outputFile;
-						string	bkupFile= tileWaterPatchBkupDir + "/" +	CFile::getFilename(argv[2]);
-						if (outputFile.open (bkupFile))
-						{
-							try
-							{
-								output.serial (outputFile);
-							}
-							catch (const Exception& except)
-							{
-								nlwarning ("ERROR backuping %s: %s\n", bkupFile.c_str(), except.what());
-							}
-							outputFile.close();
-						}
-						else
-							nlwarning ("ERROR Can't open %s for writing\n", bkupFile.c_str());
-						
-
-						// patch water flags
-						lighter.computeTileFlagsOnly(*landscape, output, zone.getZoneId(), lighterDesc, listZoneId);
-					}
+					// Compute time
+					printf ("\rCompute time: %d ms                                                      \r", 
+						(uint)(CTime::getLocalTime ()-time));
 
 					// Save the zone
 					COFile outputFile;
@@ -900,7 +797,7 @@ int main(int argc, char* argv[])
 							// Save it
 							output.serial (outputFile);
 						}
-						catch (const Exception& except)
+						catch (Exception& except)
 						{
 							// Error message
 							nlwarning ("ERROR writing %s: %s\n", argv[2], except.what());
@@ -909,21 +806,16 @@ int main(int argc, char* argv[])
 					else
 					{
 						// Error can't open the file
-						nlwarning ("ERROR Can't open %s for writing\n", argv[2]);
+						nlwarning ("ERROR Can't open %s for writing\n", argv[1]);
 					}
-
-					// Compute time
-					printf ("\rCompute time: %d ms                                                      \r", 
-						(uint)(CTime::getLocalTime ()-time));
 				}
 				else
 				{
-					if(!tileWaterSkip)
-						// Error
-						nlwarning ("ERROR Abort: files are missing.\n");
+					// Error
+					nlwarning ("ERROR Abort: files are missing.\n");
 				}
 			}
-			catch (const Exception& except)
+			catch (Exception& except)
 			{
 				// Error message
 				nlwarning ("ERROR %s\n", except.what());
@@ -936,14 +828,11 @@ int main(int argc, char* argv[])
 		}
 
 	}
+	
 
 	// Landscape is not deleted, nor the instanceGroups, for faster quit.
 	// Must disalbe BlockMemory checks (for pointLights).
 	NL3D_BlockMemoryAssertOnPurge= false;
-
-	// Compute time
-	printf ("\rCompute time: %d ms                                                      \n", 
-		(uint)(CTime::getLocalTime ()-time));
 
 	// exit.
 	return 0;
