@@ -9,7 +9,7 @@
 #
 # RyTransZulip - with delicious M.A.R.G.U.E.Z
 # M.A.R.G.U.E.Z (Make Awesome all Ryzom's Gossips with the Unreasonable Empowerment of Zulip... and a touch of Deepl :D)
-# Copyright (C) 2025 Nuneo (ulukyn@gmail.com)
+# Copyright (C) 2025 Nuneo (nuno@troispetits.net)
 # This program is free software (GPLv3): read https://www.gnu.org/licenses/gpl-3.0.en.html for more details
 #
 # -== Ryzom Translator ==-
