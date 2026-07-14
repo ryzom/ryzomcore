@@ -335,6 +335,7 @@ bool materialToExtras(const CMaterial &mat, CJsonValue &extras, std::string *err
 	extras.setString("nel_diffuse", rgbaToHex(m.getDiffuse()));
 	extras.setString("nel_specular", rgbaToHex(m.getSpecular()));
 	extras.setDouble("nel_shininess", m.getShininess());
+	extras.setBool("nel_double_sided", m.getDoubleSided());
 	extras.setBool("nel_lighted_vcolor", m.isLightedVertexColor());
 	extras.setBool("nel_stained_glass", m.getStainedGlassWindow());
 
@@ -458,9 +459,8 @@ bool materialFromExtras(const CJsonValue &extras, CMaterial &mat, std::string *e
 				if (err) *err = "bad " + prefix + "usermat_blob";
 				return false;
 			}
-			CMemStream ms;
+			CMemStream ms(true); // input stream
 			ms.fill(&bytes[0], (uint32)bytes.size());
-			nlassert(ms.isReading());
 			NLMISC::CMatrix um;
 			um.serial(ms);
 			mat.enableUserTexMat(i, true);
@@ -491,10 +491,16 @@ bool materialFromExtras(const CJsonValue &extras, CMaterial &mat, std::string *e
 	if (hexToRgba(extras.getString("nel_color", "ffffffff"), c)) mat.setColor(c);
 	if (hexToRgba(extras.getString("nel_emissive", "000000ff"), c)) mat.setEmissive(c);
 	if (hexToRgba(extras.getString("nel_ambient", "000000ff"), c)) mat.setAmbient(c);
-	if (hexToRgba(extras.getString("nel_diffuse", "ffffffff"), c)) mat.setDiffuse(c);
+	if (hexToRgba(extras.getString("nel_diffuse", "ffffffff"), c))
+	{
+		// setDiffuse keeps the current opacity (A rides setOpacity in the NL3D API)
+		mat.setDiffuse(c);
+		mat.setOpacity(c.A);
+	}
 	if (hexToRgba(extras.getString("nel_specular", "000000ff"), c)) mat.setSpecular(c);
 	mat.setShininess((float)extras.getDouble("nel_shininess", 0.0));
 
+	mat.setDoubleSided(extras.getBool("nel_double_sided", false));
 	mat.setLightedVertexColor(extras.getBool("nel_lighted_vcolor", false));
 	mat.setStainedGlassWindow(extras.getBool("nel_stained_glass", false));
 

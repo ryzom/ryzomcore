@@ -166,6 +166,20 @@ IF (Python3_Interpreter_FOUND)
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 	SET_TESTS_PROPERTIES(pipeline_max_shape_corpus PROPERTIES SKIP_RETURN_CODE 77)
 
+	# max2gltf differential gate (drafts/max2gltf_plan.md): direct .shape vs
+	# .max -> .gltf -> mesh_export .shape over the whole shape corpus. Every co-produced shape
+	# must be BYTE-IDENTICAL (same extraction + same NL3D build calls on the same host — the
+	# glTF hop is lossless by design; any float-eq is an encoding leak and fails). Direct-only
+	# shapes are the staged-coverage classes (skinned/multilod/...), tracked in the summary.
+	# min-identical pins the co-produced coverage floor (2026-07-14 sweep: 2230 byte-identical,
+	# direct-only 1387 = skinned 653 + multilod 418 + water 221 + remanence 82 + flare 13);
+	# raise as coverage stages land.
+	ADD_TEST(NAME pipeline_max_gltf_corpus
+		COMMAND ${Python3_EXECUTABLE} gltf_corpus.py --gate --min-identical 2230
+			--bin $<TARGET_FILE_DIR:pipeline_max_export_shape>
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+	SET_TESTS_PROPERTIES(pipeline_max_gltf_corpus PROPERTIES SKIP_RETURN_CODE 77)
+
 	# Same shape corpus through the VS2008/Wine x87 reference-codegen build, same rationale as
 	# the other *_vs2008 gates: T1/T2 byte-identity is codegen-independent, and the T3 FLOATEQ
 	# tier (2e-6/32-ULP, normals 1e-4) must hold under the Max-2010-matching compiler/float
