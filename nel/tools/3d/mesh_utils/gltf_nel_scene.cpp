@@ -63,6 +63,7 @@
 
 #include "../nel_gltf/json_value.h"
 #include "../nel_gltf/gltf_material.h"
+#include "../nel_gltf/gltf_special_shape.h"
 
 #include "mesh_utils.h"
 
@@ -934,20 +935,41 @@ int exportNelGltfScene(const CMeshUtilsSettings &settings)
 		std::string name = node->getString("name", "");
 		std::string shapeName = extras->getString("nel_shape_name", NLMISC::toLowerAscii(name));
 
-		// Special IShape classes (water/remanence/flare): the exact serialized stream rides
-		// per node in nel_shape_blob (already version-patched by the writer) — emit verbatim,
-		// same dual-representation rule as igs/anims.
+		// Special IShape classes (water/remanence/flare): normally carried as STRUCTURAL
+		// nel_water_*/nel_rem_*/nel_flare_* extras (full parity — the writer self-checked
+		// them byte-exact against the directly-built shape before dropping the blob); rebuild
+		// through the same setter sequence and serialize with the direct exporter's patches.
+		// nel_shape_blob remains the writer's fallback carrier for a failed self-check — emit
+		// it verbatim when present.
 		{
 			std::string blobHex = extras->getString("nel_shape_blob", "");
+			std::string shapeClass = extras->getString("nel_shape_class", "");
+			std::vector<uint8> blob;
 			if (!blobHex.empty())
 			{
-				std::vector<uint8> blob;
 				if (!hexToBytes(blobHex, blob) || blob.empty())
 				{
 					fprintf(stderr, "ERROR: bad nel_shape_blob for '%s'\n", name.c_str());
 					ret = EXIT_FAILURE;
 					continue;
 				}
+			}
+			else if (shapeClass == "water" || shapeClass == "remanence" || shapeClass == "flare")
+			{
+				std::string cerr;
+				NL3D::IShape *shape = specialShapeFromExtras(*extras, shapeClass, &cerr);
+				if (!shape || !specialShapeToFileBytes(shape, blob, &cerr) || blob.empty())
+				{
+					fprintf(stderr, "ERROR: structural %s rebuild failed for '%s': %s\n",
+					        shapeClass.c_str(), name.c_str(), cerr.c_str());
+					delete shape;
+					ret = EXIT_FAILURE;
+					continue;
+				}
+				delete shape;
+			}
+			if (!blob.empty())
+			{
 				std::string outPath = outDir + shapeName + ".shape";
 				try
 				{

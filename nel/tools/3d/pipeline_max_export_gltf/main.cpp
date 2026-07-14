@@ -84,6 +84,7 @@
 #include "../pipeline_max/builtin/node_impl.h"
 
 #include "gltf_build.h"
+#include "../nel_gltf/gltf_special_shape.h"
 
 using namespace PIPELINE::MAX;
 using namespace PIPELINE::MAX::BUILTIN;
@@ -672,9 +673,9 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 			std::vector<uint8> bytes;
 			std::string serr;
 			bool ok = shapeToFileBytes(specialShape, bytes, &serr);
-			delete specialShape;
 			if (!ok || bytes.empty())
 			{
+				delete specialShape;
 				extras->setString("nel_skip_class", "shape-serial");
 				stats.skip("shape-serial");
 				fprintf(stderr, "SKIP gltf '%s': %s\n", name.c_str(), serr.c_str());
@@ -683,7 +684,40 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 			extras->setBool("nel_shape", true);
 			extras->setString("nel_shape_name", NLMISC::toLowerAscii(name));
 			extras->setString("nel_shape_class", specialClass);
-			extras->setString("nel_shape_blob", bytesToHex(bytes));
+
+			// Structural extras (full parity: every builder-set field as artist-visible keys),
+			// self-checked by construction — rebuild from the extras and byte-compare against
+			// the directly-built shape. On match the structural form is the carrier; any gap
+			// falls back to the opaque blob with a warning, never silent loss.
+			bool structuralOk = false;
+			{
+				CJsonValue structural(CJsonValue::Object);
+				std::string cls, cerr;
+				if (specialShapeToExtras(specialShape, structural, &cls, &cerr) && cls == specialClass)
+				{
+					NL3D::IShape *re = specialShapeFromExtras(structural, cls, &cerr);
+					if (re)
+					{
+						std::vector<uint8> rebytes;
+						structuralOk = specialShapeToFileBytes(re, rebytes, &cerr) && rebytes == bytes;
+						if (!structuralOk && cerr.empty())
+							cerr = "rebuilt shape bytes differ";
+						delete re;
+					}
+				}
+				if (structuralOk)
+				{
+					// decompose is deterministic — emit the verified extras straight onto the node
+					std::string cls2, tmp;
+					specialShapeToExtras(specialShape, *extras, &cls2, &tmp);
+				}
+				else
+					fprintf(stderr, "WARNING gltf '%s': structural %s extras self-check failed (%s); carrying blob\n",
+					        name.c_str(), specialClass, cerr.c_str());
+			}
+			delete specialShape;
+			if (!structuralOk)
+				extras->setString("nel_shape_blob", bytesToHex(bytes));
 			++stats.Specials;
 			continue;
 		}
