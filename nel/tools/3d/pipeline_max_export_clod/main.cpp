@@ -47,6 +47,7 @@
 #include <nel/misc/common.h>
 #include <nel/misc/file.h>
 #include <nel/misc/path.h>
+#include <nel/misc/mem_stream.h>
 
 #include <nel/3d/vertex_buffer.h>
 #include <nel/3d/index_buffer.h>
@@ -344,10 +345,14 @@ static bool buildLodCharacter(INode &node, SNodeTMCache &tmCache, CSceneClassCon
 }
 
 // ---------------------------------------------------------------------------------------------
-// Per-file export
+// Per-file export — whole-file flow shared by the standalone tool and the max2gltf writer
+// (PMB_CLOD_NO_MAIN + nel_clods blob list): one code path, the blob and the tool's files
+// cannot drift. Serialization uses the export-era stream flags (saved/restored — the writer
+// process doesn't set them globally like this tool's main does).
 
-static int exportFile(const std::string &maxPath, const std::string &outDir, bool exportLighting,
-                      uint &exported, uint &skipped)
+int pmbExportClodsForGltf(const std::string &maxPath, bool exportLighting,
+                          std::vector<std::pair<std::string, std::vector<uint8> > > &out,
+                          uint &skipped)
 {
 	SLoadedMax lm;
 	if (!loadMaxFile(maxPath, lm))
@@ -366,6 +371,11 @@ static int exportFile(const std::string &maxPath, const std::string &outDir, boo
 		allNodes.push_back(node);
 	}
 
+	bool oldVB = NL3D::CVertexBuffer::SerialOldPreferredMemory;
+	bool oldIB = NL3D::CIndexBuffer::SerialOldPreferredMemory;
+	NL3D::CVertexBuffer::SerialOldPreferredMemory = true;
+	NL3D::CIndexBuffer::SerialOldPreferredMemory = true;
+
 	for (uint i = 0; i < allNodes.size(); ++i)
 	{
 		INode &node = *allNodes[i];
@@ -373,7 +383,6 @@ static int exportFile(const std::string &maxPath, const std::string &outDir, boo
 			continue;
 
 		std::string name = nodeName(node);
-		std::string outPath = outDir + "/" + name + ".clod";
 
 		try
 		{
@@ -384,18 +393,12 @@ static int exportFile(const std::string &maxPath, const std::string &outDir, boo
 				continue;
 			}
 
-			NLMISC::COFile file;
-			if (!file.open(outPath))
-			{
-				fprintf(stderr, "ERROR: cannot open %s for writing\n", outPath.c_str());
-				++skipped;
-				continue;
-			}
-			lodBuild.serial(file);
-			file.close();
-			++exported;
+			NLMISC::CMemStream ms;
+			lodBuild.serial(ms);
+			out.push_back(std::make_pair(name,
+				std::vector<uint8>(ms.buffer(), ms.buffer() + ms.length())));
 			if (g_verbose)
-				printf("OK %s (verts=%u tris=%u bones=%u)\n", outPath.c_str(),
+				printf("OK %s.clod (verts=%u tris=%u bones=%u)\n", name.c_str(),
 				       (uint)lodBuild.Vertices.size(),
 				       (uint)(lodBuild.TriangleIndices.size() / 3),
 				       (uint)lodBuild.BonesNames.size());
@@ -403,16 +406,19 @@ static int exportFile(const std::string &maxPath, const std::string &outDir, boo
 		catch (const NLMISC::Exception &e)
 		{
 			fprintf(stderr, "ERROR: clod serialization failed for %s: %s\n",
-			        outPath.c_str(), e.what());
+			        name.c_str(), e.what());
 			++skipped;
 		}
 	}
 
+	NL3D::CVertexBuffer::SerialOldPreferredMemory = oldVB;
+	NL3D::CIndexBuffer::SerialOldPreferredMemory = oldIB;
 	return 0;
 }
 
 // ---------------------------------------------------------------------------------------------
 
+#ifndef PMB_CLOD_NO_MAIN
 int main(int argc, char **argv)
 {
 	NLMISC::CApplicationContext appContext;
@@ -480,10 +486,33 @@ int main(int argc, char **argv)
 	// points at a fresh path).
 	NLMISC::CFile::createDirectoryTree(outDir);
 
-	uint exported = 0, skipped = 0;
-	int ret = exportFile(input, outDir, exportLighting, exported, skipped);
-	printf("EXPORTED %u clods, %u skipped\n", exported, skipped);
+	uint skipped = 0;
+	std::vector<std::pair<std::string, std::vector<uint8> > > files;
+	int ret = pmbExportClodsForGltf(input, exportLighting, files, skipped);
+	for (size_t i = 0; i < files.size(); ++i)
+	{
+		std::string outPath = outDir + "/" + files[i].first + ".clod";
+		NLMISC::COFile file;
+		if (!file.open(outPath))
+		{
+			fprintf(stderr, "ERROR: cannot open %s for writing\n", outPath.c_str());
+			++skipped;
+			continue;
+		}
+		try
+		{
+			file.serialBuffer(&files[i].second[0], (uint)files[i].second.size());
+			file.close();
+		}
+		catch (const NLMISC::Exception &e)
+		{
+			fprintf(stderr, "ERROR: write failed for %s: %s\n", outPath.c_str(), e.what());
+			++skipped;
+		}
+	}
+	printf("EXPORTED %u clods, %u skipped\n", (uint)files.size(), skipped);
 	return ret;
 }
+#endif /* PMB_CLOD_NO_MAIN */
 
 /* end of file */

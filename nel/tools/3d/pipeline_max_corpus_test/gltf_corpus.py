@@ -26,6 +26,7 @@ import zone_corpus   # ligo zone source enumeration (per-ecosystem zonematerial/
 import swt_corpus    # swt-source enumeration helper (SwtSourceDirectories)
 import pacs_prim_corpus  # pacs_prim source enumeration (per-ecosystem vegetations)
 import veget_corpus  # microveget source enumeration (VegetSourceDirectories)
+import clod_corpus   # character-lod source enumeration
 
 SKIP_CODE = 77
 
@@ -132,6 +133,15 @@ def main():
             seen_paths.add(p)
             veget_extra.append(("veget", p))
     corpus = corpus + veget_extra
+    clod_paths = set()
+    clod_extra = []
+    for item in clod_corpus.enumerate_corpus(args.graphics):
+        p = item[-1]
+        clod_paths.add(p)
+        if p not in seen_paths:
+            seen_paths.add(p)
+            clod_extra.append(("clod", p))
+    corpus = corpus + clod_extra
     if args.only:
         corpus = [c for c in corpus if args.only in c[1]]
     if args.project:
@@ -146,6 +156,7 @@ def main():
     swt_bin = os.path.join(args.bin, "pipeline_max_export_swt")
     pacs_bin = os.path.join(args.bin, "pipeline_max_export_pacs_prim")
     veget_bin = os.path.join(args.bin, "pipeline_max_export_veget")
+    clod_bin = os.path.join(args.bin, "pipeline_max_export_clod")
     ps_paths = [d for d in (os.path.expanduser("~/pipeline_export/common/sfx/ps"),) if os.path.isdir(d)]
 
     os.makedirs(args.out, exist_ok=True)
@@ -310,6 +321,25 @@ def main():
             res["veget_rc"] = r.returncode
             direct_vegets = vegets_in(dvg_dir)
 
+        # Clod differential: direct per-node .clod files vs the nel_clods blob re-emission.
+        def clods_in(d):
+            out = {}
+            if os.path.isdir(d):
+                for f in os.listdir(d):
+                    if f.endswith(".clod"):
+                        out[f] = os.path.join(d, f)
+            return out
+
+        via_clods = clods_in(v_dir)
+        direct_clods = {}
+        if path in clod_paths or via_clods:
+            dcl_dir = os.path.join(base, "direct_clod")
+            os.makedirs(dcl_dir, exist_ok=True)
+            r = subprocess.run([clod_bin, "--db", args.graphics, path, dcl_dir],
+                               capture_output=True, text=True, timeout=300)
+            res["clod_rc"] = r.returncode
+            direct_clods = clods_in(dcl_dir)
+
         via_zones = zones_in(vz_dir)
         zone_refused = False
         if path in zone_banks:
@@ -404,6 +434,21 @@ def main():
                 via_only.append("zone:" + name)
                 mismatch = True
         single_ident = 0
+        for name, dpath in sorted(direct_clods.items()):
+            vpath = via_clods.get(name)
+            if not vpath:
+                diff.append("clod-missing:" + name)
+                mismatch = True
+                continue
+            if open(dpath, "rb").read() == open(vpath, "rb").read():
+                single_ident += 1
+            else:
+                mismatch = True
+                diff.append("clod:" + name)
+        for name in sorted(via_clods):
+            if name not in direct_clods:
+                via_only.append("clod:" + name)
+                mismatch = True
         for name, dpath in sorted(direct_vegets.items()):
             vpath = via_vegets.get(name)
             if not vpath:
@@ -474,12 +519,13 @@ def main():
             continue
         if res.get("direct_rc") != 0 or res.get("gltf_rc") != 0 or res.get("import_rc") != 0 \
            or res.get("ig_rc", 0) != 0 or res.get("anim_rc", 0) != 0 or res.get("zone_rc", 0) != 0 \
-           or res.get("swt_rc", 0) != 0 or res.get("pacs_rc", 0) != 0 or res.get("veget_rc", 0) != 0:
-            tool_fail.append("%s (rc d=%s g=%s i=%s ig=%s a=%s z=%s s=%s p=%s v=%s)"
+           or res.get("swt_rc", 0) != 0 or res.get("pacs_rc", 0) != 0 or res.get("veget_rc", 0) != 0 \
+           or res.get("clod_rc", 0) != 0:
+            tool_fail.append("%s (rc d=%s g=%s i=%s ig=%s a=%s z=%s s=%s p=%s v=%s c=%s)"
                              % (res["path"], res.get("direct_rc"), res.get("gltf_rc"),
                                 res.get("import_rc"), res.get("ig_rc", 0), res.get("anim_rc", 0),
                                 res.get("zone_rc", 0), res.get("swt_rc", 0), res.get("pacs_rc", 0),
-                                res.get("veget_rc", 0)))
+                                res.get("veget_rc", 0), res.get("clod_rc", 0)))
         ident += res.get("ident", 0)
         ig_ident += res.get("ig_ident", 0)
         anim_ident += res.get("anim_ident", 0)

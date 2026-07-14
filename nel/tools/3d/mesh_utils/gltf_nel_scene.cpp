@@ -876,41 +876,48 @@ int exportNelGltfScene(const CMeshUtilsSettings &settings)
 		}
 	}
 
-	// Vegetables: the nel_vegets blob list -> <name>.veget, exact bytes verbatim.
+	// Per-node process blob lists (full parity): nel_vegets -> <name>.veget, nel_clods ->
+	// <name>.clod — exact bytes verbatim.
 	{
+		static const struct { const char *Key; const char *Ext; } kLists[] = {
+			{ "nel_vegets", ".veget" }, { "nel_clods", ".clod" },
+		};
 		const CJsonValue *asset = doc.Json.get("asset");
 		const CJsonValue *aex = asset ? asset->get("extras") : NULL;
-		const CJsonValue *vegets = aex ? aex->get("nel_vegets") : NULL;
-		for (size_t vi = 0; vegets && vi < vegets->size(); ++vi)
+		for (uint li = 0; aex && li < 2; ++li)
 		{
-			const CJsonValue *entry = vegets->at(vi);
-			std::string name = entry->getString("name", "");
-			std::vector<uint8> bytes;
-			if (name.empty() || name.find("..") != std::string::npos
-				|| !hexToBytes(entry->getString("data", ""), bytes) || bytes.empty())
+			const CJsonValue *list = aex->get(kLists[li].Key);
+			for (size_t vi = 0; list && vi < list->size(); ++vi)
 			{
-				fprintf(stderr, "ERROR: bad nel_vegets entry %u\n", (uint)vi);
-				ret = EXIT_FAILURE;
-				continue;
-			}
-			std::string outPath2 = outDir + name + ".veget";
-			try
-			{
-				COFile f;
-				if (!f.open(outPath2))
+				const CJsonValue *entry = list->at(vi);
+				std::string name = entry->getString("name", "");
+				std::vector<uint8> bytes;
+				if (name.empty() || name.find("..") != std::string::npos
+					|| !hexToBytes(entry->getString("data", ""), bytes) || bytes.empty())
 				{
-					fprintf(stderr, "ERROR: cannot open %s\n", outPath2.c_str());
+					fprintf(stderr, "ERROR: bad %s entry %u\n", kLists[li].Key, (uint)vi);
 					ret = EXIT_FAILURE;
 					continue;
 				}
-				f.serialBuffer(&bytes[0], (uint)bytes.size());
-				f.close();
-				++stats.Others;
-			}
-			catch (const NLMISC::Exception &e2)
-			{
-				fprintf(stderr, "ERROR: %s: %s\n", outPath2.c_str(), e2.what());
-				ret = EXIT_FAILURE;
+				std::string outPath2 = outDir + name + kLists[li].Ext;
+				try
+				{
+					COFile f;
+					if (!f.open(outPath2))
+					{
+						fprintf(stderr, "ERROR: cannot open %s\n", outPath2.c_str());
+						ret = EXIT_FAILURE;
+						continue;
+					}
+					f.serialBuffer(&bytes[0], (uint)bytes.size());
+					f.close();
+					++stats.Others;
+				}
+				catch (const NLMISC::Exception &e2)
+				{
+					fprintf(stderr, "ERROR: %s: %s\n", outPath2.c_str(), e2.what());
+					ret = EXIT_FAILURE;
+				}
 			}
 		}
 	}

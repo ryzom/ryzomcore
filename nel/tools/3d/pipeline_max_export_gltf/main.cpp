@@ -154,6 +154,12 @@ int pmbExportVegetsForGltf(const std::string &maxPath, bool exportLighting,
                            std::vector<std::pair<std::string, std::vector<uint8> > > &out,
                            uint &skipped);
 
+// From ../pipeline_max_export_clod/main.cpp (PMB_CLOD_NO_MAIN): the clod process's whole-file
+// flow, one (node name, .clod bytes) pair per character-lod node.
+int pmbExportClodsForGltf(const std::string &maxPath, bool exportLighting,
+                          std::vector<std::pair<std::string, std::vector<uint8> > > &out,
+                          uint &skipped);
+
 static std::string bytesToHex(const std::vector<uint8> &bytes)
 {
 	std::string hex;
@@ -1193,6 +1199,23 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 				CJsonValue *e = jv->push();
 				e->setString("name", vegets[i].first);
 				e->set("data")->setString(bytesToHex(vegets[i].second));
+				++stats.Others;
+			}
+		}
+	}
+
+	// Character LODs (.clod): per-node outputs from the clod process, in the nel_clods list.
+	{
+		std::vector<std::pair<std::string, std::vector<uint8> > > clods;
+		uint cskipped = 0;
+		if (pmbExportClodsForGltf(maxPath, exportLighting, clods, cskipped) == 0 && !clods.empty())
+		{
+			CJsonValue *jv = b.assetExtras()->setArray("nel_clods");
+			for (size_t i = 0; i < clods.size(); ++i)
+			{
+				CJsonValue *e = jv->push();
+				e->setString("name", clods[i].first);
+				e->set("data")->setString(bytesToHex(clods[i].second));
 				++stats.Others;
 			}
 		}
