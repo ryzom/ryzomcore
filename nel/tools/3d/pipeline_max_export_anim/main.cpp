@@ -32,6 +32,7 @@
 #include <nel/misc/types_nl.h>
 #include <nel/misc/common.h>
 #include <nel/misc/file.h>
+#include <nel/misc/mem_stream.h>
 #include <nel/misc/vector.h>
 #include <nel/misc/quat.h>
 #include <nel/misc/algo.h>
@@ -1595,6 +1596,95 @@ static int runDiffRig(const char *pathA, const char *pathB, const char *outPath)
 	return 0;
 }
 
+// ---------------------------------------------------------------------------------------------
+// Entry point for the max2gltf writer (pipeline_max_export_gltf compiles this file with
+// PMB_ANIM_NO_MAIN): run exactly the standalone flow — $Bip01-first + EXPORT_NODE_ANIMATION
+// selection in scene order, addAnimation per node — and hand back the serialized CAnimation.
+// The bytes ride the glTF as the lossless nel_anim blob (dual representation per the plan:
+// sampled interop channels are a later additive tier; the blob is the byte-exact carrier).
+// Loads the .max through this tool's own loader/registry, independent of the caller's state.
+// Returns 1 with animOut filled, 3 when nothing to export, -1 on load/serial failure.
+int pmbExportAnimForGltf(const std::string &maxPath, std::vector<uint8> &animOut)
+{
+	NL3D::registerSerial3d(); // internally guarded
+
+	CSceneClassRegistry reg;
+	CBuiltin::registerClasses(&reg);
+	UPDATE1::CUpdate1::registerClasses(&reg);
+	EPOLY::CEPoly::registerClasses(&reg);
+	BIPED::CBiped::registerClasses(&reg);
+
+	CStorageOleIn in;
+	if (!in.open(maxPath.c_str())) return -1;
+	CDllDirectory dll;
+	{ std::vector<uint8> b; if (!in.readStream("DllDirectory", b)) return -1; CStorageStream st(b); dll.serial(st); }
+	dll.parse(VersionUnknown);
+	CClassDirectory3 cd(&dll);
+	{ std::vector<uint8> b; if (!in.readStream("ClassDirectory3", b)) return -1; CStorageStream st(b); cd.serial(st); }
+	cd.parse(VersionUnknown);
+	CScene scene(&reg, &dll, &cd);
+	{ std::vector<uint8> b; if (!in.readStream("Scene", b)) return -1; CStorageStream st(b); scene.serial(st); }
+	scene.parse(VersionUnknown);
+
+	CSceneClassContainer *ssc = scene.container();
+
+	// Selection: $Bip01 first (case-insensitive), then every EXPORT_NODE_ANIMATION == "1" node
+	// in scene order — identical to main below.
+	std::vector<INode *> selection;
+	std::set<INode *> selected;
+	INode *rootNode = ssc->scene()->rootNode();
+	INode *bip01 = rootNode ? rootNode->find(ucstring("Bip01")) : NULL;
+	if (!bip01)
+	{
+		for (PIPELINE::MAX::CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end() && !bip01; ++it)
+		{
+			CNodeImpl *n = dynamic_cast<CNodeImpl *>(it->second);
+			if (n && NLMISC::toLower(ucstring(n->userName()).toUtf8()) == "bip01") bip01 = n;
+		}
+	}
+	if (bip01 && selected.insert(bip01).second) selection.push_back(bip01);
+	for (PIPELINE::MAX::CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
+	{
+		CNodeImpl *n = dynamic_cast<CNodeImpl *>(it->second);
+		if (!n) continue;
+		if (getNodeScriptAppDataString(n, NEL3D_APPDATA_EXPORT_NODE_ANIMATION) == "1")
+			if (selected.insert(n).second) selection.push_back(n);
+	}
+	if (selection.empty())
+		return 3;
+
+	NL3D::CAnimation animFile;
+	for (std::vector<INode *>::iterator si = selection.begin(); si != selection.end(); ++si)
+	{
+		INode *node = *si;
+		std::string nodeName;
+		std::string prefixe = getNodeScriptAppDataString(node, NEL3D_APPDATA_EXPORT_ANIMATION_PREFIXE_NAME);
+		if (!prefixe.empty() && atoi(prefixe.c_str()) != 0)
+		{
+			nodeName = getNodeScriptAppDataString(node, NEL3D_APPDATA_INSTANCE_NAME);
+			if (nodeName.empty())
+				nodeName = ucstring(node->userName()).toUtf8();
+			nodeName += ".";
+		}
+		bool root = node->parent() == rootNode;
+		addAnimation(animFile, *node, nodeName, root, ssc);
+	}
+
+	try
+	{
+		NLMISC::CMemStream ms;
+		animFile.serial(ms);
+		animOut.assign(ms.buffer(), ms.buffer() + ms.length());
+	}
+	catch (const NLMISC::Exception &e)
+	{
+		fprintf(stderr, "ERROR: anim serial failed for %s: %s\n", maxPath.c_str(), e.what());
+		return -1;
+	}
+	return 1;
+}
+
+#ifndef PMB_ANIM_NO_MAIN
 int main(int argc, char **argv)
 {
 	if (argc >= 5 && std::string(argv[1]) == "--diff-rig")
@@ -1749,5 +1839,6 @@ int main(int argc, char **argv)
 
 	return 0;
 }
+#endif /* PMB_ANIM_NO_MAIN */
 
 /* end of file */

@@ -188,9 +188,10 @@ struct SStats
 {
 	uint Exported;
 	uint Igs;
+	uint Anims;
 	uint Skipped;
 	std::map<std::string, uint> SkipReasons;
-	SStats() : Exported(0), Igs(0), Skipped(0) { }
+	SStats() : Exported(0), Igs(0), Anims(0), Skipped(0) { }
 	void skip(const std::string &r)
 	{
 		++Skipped;
@@ -652,6 +653,27 @@ IMeshGeom *buildGeomForSlot(const SGltfDoc &doc, const CJsonValue &slotExtras,
 	return g;
 }
 
+bool hexToBytes(const std::string &hex, std::vector<uint8> &bytes)
+{
+	if (hex.empty() || (hex.size() % 2))
+		return false;
+	bytes.resize(hex.size() / 2);
+	for (size_t k = 0; k < bytes.size(); ++k)
+	{
+		unsigned x = 0;
+		for (int h = 0; h < 2; ++h)
+		{
+			char c = hex[k * 2 + h];
+			x <<= 4;
+			if (c >= '0' && c <= '9') x |= (unsigned)(c - '0');
+			else if (c >= 'a' && c <= 'f') x |= (unsigned)(c - 'a' + 10);
+			else return false;
+		}
+		bytes[k] = (uint8)x;
+	}
+	return true;
+}
+
 // Serialize a shape with the export-era stream conventions: temp COFile (CMeshMRMGeom's save
 // seeks), then the CMeshBase version byte 10 -> 9 patch — same block as the direct exporter.
 bool writeShapeFile(IShape *shape, const std::string &outPath, std::string *err)
@@ -776,22 +798,8 @@ int exportNelGltfScene(const CMeshUtilsSettings &settings)
 				ret = EXIT_FAILURE;
 				continue;
 			}
-			std::vector<uint8> bytes(hexData.size() / 2);
-			bool ok = true;
-			for (size_t k = 0; k < bytes.size() && ok; ++k)
-			{
-				unsigned x = 0;
-				for (int h = 0; h < 2 && ok; ++h)
-				{
-					char c = hexData[k * 2 + h];
-					x <<= 4;
-					if (c >= '0' && c <= '9') x |= (unsigned)(c - '0');
-					else if (c >= 'a' && c <= 'f') x |= (unsigned)(c - 'a' + 10);
-					else ok = false;
-				}
-				bytes[k] = (uint8)x;
-			}
-			if (!ok)
+			std::vector<uint8> bytes;
+			if (!hexToBytes(hexData, bytes))
 			{
 				fprintf(stderr, "ERROR: bad nel_igs hex for '%s'\n", name.c_str());
 				ret = EXIT_FAILURE;
@@ -815,6 +823,52 @@ int exportNelGltfScene(const CMeshUtilsSettings &settings)
 			{
 				fprintf(stderr, "ERROR: %s: %s\n", igPath.c_str(), e2.what());
 				ret = EXIT_FAILURE;
+			}
+		}
+	}
+
+	// Animation: the asset-level nel_anim blob carries the exact CAnimation serial stream the
+	// anim process built (dual representation — sampled glTF channels are a later additive
+	// interop tier; the blob is authoritative).
+	{
+		const CJsonValue *asset = doc.Json.get("asset");
+		const CJsonValue *aex = asset ? asset->get("extras") : NULL;
+		const CJsonValue *anim = aex ? aex->get("nel_anim") : NULL;
+		if (anim)
+		{
+			std::string name = anim->getString("name", "");
+			std::vector<uint8> bytes;
+			if (name.empty() || !hexToBytes(anim->getString("data", ""), bytes))
+			{
+				fprintf(stderr, "ERROR: bad nel_anim entry\n");
+				ret = EXIT_FAILURE;
+			}
+			else
+			{
+				std::string animDir = settings.AnimDirectoryPath.empty() ? outDir
+					: CPath::standardizePath(settings.AnimDirectoryPath, true);
+				CFile::createDirectoryTree(animDir);
+				std::string animPath = animDir + name + ".anim";
+				try
+				{
+					COFile f;
+					if (!f.open(animPath))
+					{
+						fprintf(stderr, "ERROR: cannot open %s\n", animPath.c_str());
+						ret = EXIT_FAILURE;
+					}
+					else
+					{
+						f.serialBuffer(&bytes[0], (uint)bytes.size());
+						f.close();
+						++stats.Anims;
+					}
+				}
+				catch (const NLMISC::Exception &e2)
+				{
+					fprintf(stderr, "ERROR: %s: %s\n", animPath.c_str(), e2.what());
+					ret = EXIT_FAILURE;
+				}
 			}
 		}
 	}
@@ -1079,8 +1133,8 @@ int exportNelGltfScene(const CMeshUtilsSettings &settings)
 	CVertexBuffer::SerialOldPreferredMemory = oldVB;
 	CIndexBuffer::SerialOldPreferredMemory = oldIB;
 
-	printf("GLTF-IMPORT %s (%u shapes, %u igs, %u skipped)\n", settings.SourceFilePath.c_str(),
-	       stats.Exported, stats.Igs, stats.Skipped);
+	printf("GLTF-IMPORT %s (%u shapes, %u igs, %u anims, %u skipped)\n", settings.SourceFilePath.c_str(),
+	       stats.Exported, stats.Igs, stats.Anims, stats.Skipped);
 	for (std::map<std::string, uint>::iterator it = stats.SkipReasons.begin(); it != stats.SkipReasons.end(); ++it)
 		printf("SKIPCLASS %s %u\n", it->first.c_str(), it->second);
 	return ret;

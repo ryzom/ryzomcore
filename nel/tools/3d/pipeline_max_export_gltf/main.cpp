@@ -109,13 +109,31 @@ int pmbExportIgsForGltf(const std::string &maxPath,
                         std::vector<std::pair<std::string, std::vector<uint8> > > &igsOut);
 void pmbIgAddPsSearchPath(const std::string &path);
 
+// From ../pipeline_max_export_anim/main.cpp (compiled in with PMB_ANIM_NO_MAIN): the anim
+// process's whole-file flow, returning the serialized CAnimation (1 = produced, 3 = nothing).
+int pmbExportAnimForGltf(const std::string &maxPath, std::vector<uint8> &animOut);
+
+static std::string bytesToHex(const std::vector<uint8> &bytes)
+{
+	std::string hex;
+	hex.reserve(bytes.size() * 2);
+	char buf[4];
+	for (size_t k = 0; k < bytes.size(); ++k)
+	{
+		snprintf(buf, sizeof(buf), "%02x", bytes[k]);
+		hex += buf;
+	}
+	return hex;
+}
+
 struct SExportStats
 {
 	uint Meshes;
 	uint Skipped;
 	uint Igs;
+	uint Anims;
 	std::map<std::string, uint> SkipReasons;
-	SExportStats() : Meshes(0), Skipped(0), Igs(0) { }
+	SExportStats() : Meshes(0), Skipped(0), Igs(0), Anims(0) { }
 	void skip(const std::string &reason)
 	{
 		++Skipped;
@@ -654,17 +672,25 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 			{
 				CJsonValue *e = jigs->push();
 				e->setString("name", igs[i].first);
-				std::string hex;
-				hex.reserve(igs[i].second.size() * 2);
-				char buf[4];
-				for (size_t k = 0; k < igs[i].second.size(); ++k)
-				{
-					snprintf(buf, sizeof(buf), "%02x", igs[i].second[k]);
-					hex += buf;
-				}
-				e->set("data")->setString(hex);
+				e->set("data")->setString(bytesToHex(igs[i].second));
 			}
 			stats.Igs = (uint)igs.size();
+		}
+	}
+
+	// Animation: the anim process's whole-file flow ($Bip01-first + EXPORT_NODE_ANIMATION
+	// selection, biped COM decode, track build — pipeline_max_export_anim's code compiled in),
+	// the built CAnimation serialized verbatim into the asset-level nel_anim blob. Dual
+	// representation per the plan: sampled glTF animation channels are a later additive interop
+	// tier; the blob is the byte-exact carrier the corpus gates on.
+	{
+		std::vector<uint8> anim;
+		if (pmbExportAnimForGltf(maxPath, anim) == 1 && !anim.empty())
+		{
+			CJsonValue *ja = b.assetExtras()->setObject("nel_anim");
+			ja->setString("name", NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(maxPath)));
+			ja->set("data")->setString(bytesToHex(anim));
+			stats.Anims = 1;
 		}
 	}
 
@@ -739,7 +765,7 @@ int main(int argc, char **argv)
 
 	SExportStats stats;
 	int ret = exportFile(input, outPath, exportLighting, stats);
-	printf("GLTF %s (%u meshes, %u igs, %u skipped)\n", outPath.c_str(), stats.Meshes, stats.Igs,
+	printf("GLTF %s (%u meshes, %u igs, %u anims, %u skipped)\n", outPath.c_str(), stats.Meshes, stats.Igs, stats.Anims,
 	       stats.Skipped);
 	for (std::map<std::string, uint>::iterator it = stats.SkipReasons.begin(); it != stats.SkipReasons.end(); ++it)
 		printf("SKIPCLASS %s %u\n", it->first.c_str(), it->second);

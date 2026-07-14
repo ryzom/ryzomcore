@@ -33,6 +33,8 @@ struct CMeshUtilsSettings
 	std::string ShapeCoarseDirectoryPath;
 	// Instance-group (.ig) output (nel-extras glTF import route; empty = same as destination).
 	std::string IGDirectoryPath;
+	// Animation (.anim) output (nel-extras glTF import route; empty = same as destination).
+	std::string AnimDirectoryPath;
 	std::string ToolDependLog;
 	std::string ToolErrorLog;
 

@@ -21,6 +21,7 @@ import argparse, os, shutil, subprocess, sys, collections
 
 import shape_corpus  # same-directory corpus enumeration + helpers
 import ig_corpus     # ig-process source enumeration (the standalone 116-file ig corpus)
+import anim_corpus   # anim-source enumeration (fauna/characters/sky AnimSourceDirectories)
 
 SKIP_CODE = 77
 
@@ -38,6 +39,8 @@ def main():
     ap.add_argument("--gate", action="store_true", help="fail on any diff / via-only shape")
     ap.add_argument("--min-identical", type=int, default=0,
                     help="minimum byte-identical co-produced shape count for --gate")
+    ap.add_argument("--min-anims", type=int, default=0,
+                    help="minimum byte-identical co-produced anim count for --gate")
     ap.add_argument("-j", "--jobs", type=int, default=max(1, (os.cpu_count() or 4) - 2))
     args = ap.parse_args()
 
@@ -63,6 +66,18 @@ def main():
     corpus = corpus + [("ig/" + proj, path)
                        for (proj, kind, d, path) in ig_corpus.enumerate_corpus(args.graphics, args.workspace)
                        if path not in shape_paths]
+    # The anim-process sources (mostly disjoint from the shape corpus): the .anim rides the
+    # same differential, direct pipeline_max_export_anim vs the glTF's nel_anim blob re-emitted
+    # by mesh_export.
+    anim_paths = set()
+    seen_paths = set(p for (_, p) in corpus)
+    anim_extra = []
+    for (group, d, name, path) in anim_corpus.enumerate_corpus(args.graphics, args.workspace):
+        anim_paths.add(path)
+        if path not in seen_paths:
+            seen_paths.add(path)
+            anim_extra.append(("anim/" + group, path))
+    corpus = corpus + anim_extra
     if args.only:
         corpus = [c for c in corpus if args.only in c[1]]
     if args.project:
@@ -72,6 +87,7 @@ def main():
         return SKIP_CODE
 
     ig_bin = os.path.join(args.bin, "pipeline_max_export_ig")
+    anim_bin = os.path.join(args.bin, "pipeline_max_export_anim")
     ps_paths = [d for d in (os.path.expanduser("~/pipeline_export/common/sfx/ps"),) if os.path.isdir(d)]
 
     os.makedirs(args.out, exist_ok=True)
@@ -103,11 +119,13 @@ def main():
         d_dir = os.path.join(base, "direct")
         dc_dir = os.path.join(base, "direct_c")
         di_dir = os.path.join(base, "direct_ig")
+        da_dir = os.path.join(base, "direct_anim")
         g_dir = os.path.join(base, "gltf")
         v_dir = os.path.join(base, "via")
         vc_dir = os.path.join(base, "via_c")
         vi_dir = os.path.join(base, "via_ig")
-        for d in (d_dir, dc_dir, di_dir, g_dir, v_dir, vc_dir, vi_dir):
+        va_dir = os.path.join(base, "via_anim")
+        for d in (d_dir, dc_dir, di_dir, da_dir, g_dir, v_dir, vc_dir, vi_dir, va_dir):
             os.makedirs(d, exist_ok=True)
 
         r = subprocess.run([shape_bin, "--db", args.graphics, "--coarse-out", dc_dir, path, d_dir],
@@ -127,7 +145,7 @@ def main():
         via_skips = collections.Counter()
         if os.path.isfile(gltf_path):
             r = subprocess.run([import_bin, "-d", v_dir, "--coarse-dst", vc_dir,
-                                "--ig-dst", vi_dir, gltf_path],
+                                "--ig-dst", vi_dir, "--anim-dst", va_dir, gltf_path],
                                capture_output=True, text=True)
             res["import_rc"] = r.returncode
             via_skips = skipclasses(r.stdout)
@@ -157,6 +175,24 @@ def main():
             # exit 3 = nothing to export (not an error)
             res["ig_rc"] = 0 if r.returncode in (0, 3) else r.returncode
         direct_igs = igs_in(di_dir)
+
+        # Anim differential: direct .anim vs the glTF nel_anim blob re-emission. Run the direct
+        # exporter for the anim-corpus files and for any file whose glTF carried an anim.
+        def anims_in(d):
+            out = {}
+            if os.path.isdir(d):
+                for f in os.listdir(d):
+                    if f.endswith(".anim"):
+                        out[f] = os.path.join(d, f)
+            return out
+
+        via_anims = anims_in(va_dir)
+        if path in anim_paths or via_anims:
+            r = subprocess.run([anim_bin, path, os.path.join(da_dir, stem + ".anim")],
+                               capture_output=True, text=True, timeout=300)
+            # exit 3 = nothing to export (not an error)
+            res["anim_rc"] = 0 if r.returncode in (0, 3) else r.returncode
+        direct_anims = anims_in(da_dir)
 
         ident = 0
         floateq = []
@@ -206,9 +242,28 @@ def main():
             if name not in direct_igs:
                 via_only.append("ig:" + name)
                 mismatch = True
+        anim_ident = 0
+        for name, dpath in sorted(direct_anims.items()):
+            vpath = via_anims.get(name)
+            if not vpath:
+                # like igs, the writer embeds the anim the direct route builds — a missing one
+                # is a defect, not staged coverage
+                diff.append("anim-missing:" + name)
+                mismatch = True
+                continue
+            if open(dpath, "rb").read() == open(vpath, "rb").read():
+                anim_ident += 1
+            else:
+                mismatch = True
+                diff.append("anim:" + name)
+        for name in sorted(via_anims):
+            if name not in direct_anims:
+                via_only.append("anim:" + name)
+                mismatch = True
 
         res["ident"] = ident
         res["ig_ident"] = ig_ident
+        res["anim_ident"] = anim_ident
         res["floateq"] = floateq
         res["diff"] = diff
         res["direct_only"] = direct_only
@@ -229,6 +284,7 @@ def main():
     stubs = 0
     ident = 0
     ig_ident = 0
+    anim_ident = 0
     floateq = []
     diffs = []
     via_only = []
@@ -241,12 +297,13 @@ def main():
             stubs += 1
             continue
         if res.get("direct_rc") != 0 or res.get("gltf_rc") != 0 or res.get("import_rc") != 0 \
-           or res.get("ig_rc", 0) != 0:
-            tool_fail.append("%s (rc d=%s g=%s i=%s ig=%s)" % (res["path"], res.get("direct_rc"),
-                                                               res.get("gltf_rc"), res.get("import_rc"),
-                                                               res.get("ig_rc", 0)))
+           or res.get("ig_rc", 0) != 0 or res.get("anim_rc", 0) != 0:
+            tool_fail.append("%s (rc d=%s g=%s i=%s ig=%s a=%s)" % (res["path"], res.get("direct_rc"),
+                                                                    res.get("gltf_rc"), res.get("import_rc"),
+                                                                    res.get("ig_rc", 0), res.get("anim_rc", 0)))
         ident += res.get("ident", 0)
         ig_ident += res.get("ig_ident", 0)
+        anim_ident += res.get("anim_ident", 0)
         for n in res.get("floateq", []):
             floateq.append("%s:%s" % (res["proj"], n))
         for n in res.get("diff", []):
@@ -262,10 +319,10 @@ def main():
 
     print()
     print("GLTF DIFFERENTIAL: %d files (%d stubs); co-produced: %d byte-identical shapes + "
-          "%d byte-identical igs, %d float-eq, %d diff; %d direct-only (staged coverage), "
-          "%d via-only"
-          % (len(results), stubs, ident, ig_ident, len(floateq), len(diffs), direct_only,
-             len(via_only)))
+          "%d byte-identical igs + %d byte-identical anims, %d float-eq, %d diff; "
+          "%d direct-only (staged coverage), %d via-only"
+          % (len(results), stubs, ident, ig_ident, anim_ident, len(floateq), len(diffs),
+             direct_only, len(via_only)))
     if skip_direct:
         print("    direct skip classes: %s" % ", ".join("%s=%d" % kv for kv in skip_direct.most_common()))
     if skip_via:
@@ -285,6 +342,8 @@ def main():
         # against our own direct output is an encoding leak, not tolerance material.
         fails += len(diffs) + len(floateq) + len(via_only)
         if ident < args.min_identical:
+            fails += 1
+        if anim_ident < args.min_anims:
             fails += 1
     return 1 if fails else 0
 

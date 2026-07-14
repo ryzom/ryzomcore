@@ -14,6 +14,16 @@ SET(SHAPE_SHARED
 SET(IG_SHARED ../pipeline_max_export_ig/main.cpp)
 SET_SOURCE_FILES_PROPERTIES(${IG_SHARED} PROPERTIES COMPILE_DEFINITIONS PMB_IG_NO_MAIN)
 
+# The anim exporter's whole per-file flow (Bip01-first selection, biped COM decode, track
+# build) backs the nel_anim blob — same pattern. biped_anim/bip_file ride along for the
+# BIPANIM sampling the selection path uses (biped_author is main()-only, guarded out).
+SET(ANIM_SHARED
+	../pipeline_max_export_anim/main.cpp
+	../pipeline_max_export_anim/biped_anim.cpp
+	../pipeline_max_export_anim/bip_file.cpp
+)
+SET_SOURCE_FILES_PROPERTIES(../pipeline_max_export_anim/main.cpp PROPERTIES COMPILE_DEFINITIONS PMB_ANIM_NO_MAIN)
+
 FILE(GLOB SRCS *.cpp)
 FILE(GLOB HDRS *.h)
 
@@ -22,6 +32,7 @@ ADD_EXECUTABLE(pipeline_max_export_gltf
 	${HDRS}
 	${SHAPE_SHARED}
 	${IG_SHARED}
+	${ANIM_SHARED}
 	)
 
 TARGET_LINK_LIBRARIES(pipeline_max_export_gltf

@@ -62,6 +62,12 @@ public:
 		_Dirty= false;
 		_RangeLock= true;
 		_LoopMode= false;
+		// Compile-time caches ("valid only when track cleaned"), but serial() writes them
+		// unconditionally — a track serialized before any compile() would otherwise leak
+		// uninitialized heap bytes into the stream (seen on the exporters' spawn-script
+		// ConstString tracks; export-era reference files carry zeros here).
+		_RangeBegin= 0;
+		_RangeEnd= 0;
 	}
 
 
