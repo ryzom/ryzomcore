@@ -60,10 +60,12 @@
 #include "../pipeline_max_export_shape/remanence_build.h"
 #include "../pipeline_max_export_shape/flare_build.h"
 #include "../pipeline_max_export_common/physique_skin.h"
+#include "../pipeline_max_export_zone/pmb_zone_gltf.h"
 
 #include <nel/3d/shape.h>
 #include <nel/3d/vertex_buffer.h>
 #include <nel/3d/index_buffer.h>
+#include <nel/3d/bezier_patch.h>
 
 #ifdef NL_OS_WINDOWS
 #include <process.h>
@@ -117,6 +119,9 @@ static const NLMISC::CClassId CLASSID_PACS_CYL(0x62a56810, 0x4b3d601c);
 static const NLMISC::CClassId CLASSID_MAP_EXTENDER(0x2ec82081, 0x045a6271);
 
 static bool g_verbose = false;
+static std::string g_zoneBank;
+static float g_zoneCellSize = 160.0f;
+static float g_zoneSnap = 1.0f;
 
 // From ../pipeline_max_export_ig/main.cpp (compiled in with PMB_IG_NO_MAIN): the ig process's
 // full selection + buildInstanceGroup flow, returning each ig's serialized bytes.
@@ -210,8 +215,9 @@ struct SExportStats
 	uint Igs;
 	uint Anims;
 	uint Specials;
+	uint Zones;
 	std::map<std::string, uint> SkipReasons;
-	SExportStats() : Meshes(0), Skipped(0), Igs(0), Anims(0), Specials(0) { }
+	SExportStats() : Meshes(0), Skipped(0), Igs(0), Anims(0), Specials(0), Zones(0) { }
 	void skip(const std::string &reason)
 	{
 		++Skipped;
@@ -427,8 +433,8 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 		MAXSCENE::decompMatrix(scale, rot, pos, getLocalMatrix(node, tmCache));
 		nodeIdx[&node] = b.addNode(nodeName(node), pos, rot, scale);
 	}
+	std::vector<sint> roots; // scene roots — proxy nodes append later, setSceneRoots at the end
 	{
-		std::vector<sint> roots;
 		std::map<INode *, std::vector<sint> > children;
 		for (uint i = 0; i < allNodes.size(); ++i)
 		{
@@ -440,7 +446,6 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 		}
 		for (std::map<INode *, std::vector<sint> >::iterator it = children.begin(); it != children.end(); ++it)
 			b.setNodeChildren(nodeIdx[it->first], it->second);
-		b.setSceneRoots(roots);
 	}
 
 	// Pass 2: meshes + per-node NeL appdata on the shape-process node selection
@@ -806,6 +811,79 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 		}
 	}
 
+	// Ligo zone sources (zonematerial-*/zonetransition-*/zonespecial-*): the zone process's
+	// whole-file flow (pipeline_max_export_zone compiled in with PMB_ZONE_NO_MAIN). Outputs
+	// ride verbatim in the nel_zones blob list (authoritative — PatchMesh has no faithful glTF
+	// form); the AUTHORED patches additionally tessellate into nel_proxy viewing meshes any
+	// glTF consumer renders and the exact-tier importer ignores.
+	{
+		std::vector<std::pair<std::string, std::vector<uint8> > > zoneFiles;
+		std::vector<SPmbZoneProxy> proxies;
+		int nZones = pmbExportZonesForGltf(maxPath, g_zoneBank, g_zoneCellSize, g_zoneSnap,
+		                                   zoneFiles, &proxies);
+		if (nZones < 0)
+			fprintf(stderr, "WARNING: ligo zone flow failed for %s (nel_zones not emitted)\n",
+			        maxPath.c_str());
+		if (nZones > 0)
+		{
+			CJsonValue *jz = b.assetExtras()->setArray("nel_zones");
+			for (size_t i = 0; i < zoneFiles.size(); ++i)
+			{
+				CJsonValue *e = jz->push();
+				e->setString("name", zoneFiles[i].first);
+				e->set("data")->setString(bytesToHex(zoneFiles[i].second));
+			}
+			stats.Zones = (uint)zoneFiles.size();
+		}
+		for (size_t i = 0; i < proxies.size(); ++i)
+		{
+			const SPmbZoneProxy &pr = proxies[i];
+			std::vector<float> pos, norm, uv;
+			std::vector<uint32> idx;
+			for (size_t p = 0; p < pr.Patches.size(); ++p)
+			{
+				const NL3D::CPatchInfo &pi = pr.Patches[p];
+				const NL3D::CBezierPatch &patch = pi.Patch;
+				uint ns = (pi.OrderS ? (uint)pi.OrderS : 1) * 2;
+				uint nt = (pi.OrderT ? (uint)pi.OrderT : 1) * 2;
+				uint32 base = (uint32)(pos.size() / 3);
+				for (uint j = 0; j <= nt; ++j)
+					for (uint k = 0; k <= ns; ++k)
+					{
+						float s = (float)k / (float)ns, t = (float)j / (float)nt;
+						NLMISC::CVector v = patch.eval(s, t);
+						NLMISC::CVector nv = patch.evalNormal(s, t);
+						pos.push_back(v.x); pos.push_back(v.y); pos.push_back(v.z);
+						norm.push_back(nv.x); norm.push_back(nv.y); norm.push_back(nv.z);
+						uv.push_back(s); uv.push_back(t);
+					}
+				for (uint j = 0; j < nt; ++j)
+					for (uint k = 0; k < ns; ++k)
+					{
+						uint32 va = base + j * (ns + 1) + k;
+						uint32 vb = va + 1;
+						uint32 vc = va + (ns + 1);
+						uint32 vd = vc + 1;
+						idx.push_back(va); idx.push_back(vc); idx.push_back(vb);
+						idx.push_back(vb); idx.push_back(vc); idx.push_back(vd);
+					}
+			}
+			sint meshIdx = b.addProxyMesh(pr.NodeName, pos, norm, uv, idx);
+			if (meshIdx < 0)
+				continue;
+			sint nodeIdx2 = b.addNode(pr.NodeName + ".zoneproxy", NLMISC::CVector(0, 0, 0),
+			                          NLMISC::CQuat(0, 0, 0, 1), NLMISC::CVector(1, 1, 1));
+			b.attachMesh(nodeIdx2, meshIdx);
+			CJsonValue *px = b.nodeExtras(nodeIdx2);
+			px->setBool("nel_proxy", true);
+			if (pr.Frozen)
+				px->setBool("nel_proxy_frozen", true);
+			roots.push_back(nodeIdx2);
+		}
+	}
+
+	b.setSceneRoots(roots);
+
 	if (!b.save(outPath))
 	{
 		fprintf(stderr, "ERROR: cannot write %s\n", outPath.c_str());
@@ -842,6 +920,12 @@ int main(int argc, char **argv)
 		}
 		else if (arg == "--ps-path" && i + 1 < argc)
 			pmbIgAddPsSearchPath(argv[++i]);
+		else if (arg == "--zone-bank" && i + 1 < argc)
+			g_zoneBank = argv[++i];
+		else if (arg == "--zone-cellsize" && i + 1 < argc)
+			NLMISC::fromString(argv[++i], g_zoneCellSize);
+		else if (arg == "--zone-snap" && i + 1 < argc)
+			NLMISC::fromString(argv[++i], g_zoneSnap);
 		else if (arg == "--no-lighting")
 			exportLighting = false;
 		else if (input.empty())
@@ -877,8 +961,8 @@ int main(int argc, char **argv)
 
 	SExportStats stats;
 	int ret = exportFile(input, outPath, exportLighting, stats);
-	printf("GLTF %s (%u meshes, %u special shapes, %u igs, %u anims, %u skipped)\n", outPath.c_str(),
-	       stats.Meshes, stats.Specials, stats.Igs, stats.Anims, stats.Skipped);
+	printf("GLTF %s (%u meshes, %u special shapes, %u igs, %u anims, %u zones, %u skipped)\n", outPath.c_str(),
+	       stats.Meshes, stats.Specials, stats.Igs, stats.Anims, stats.Zones, stats.Skipped);
 	for (std::map<std::string, uint>::iterator it = stats.SkipReasons.begin(); it != stats.SkipReasons.end(); ++it)
 		printf("SKIPCLASS %s %u\n", it->first.c_str(), it->second);
 	return ret;

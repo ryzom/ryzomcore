@@ -189,9 +189,10 @@ struct SStats
 	uint Exported;
 	uint Igs;
 	uint Anims;
+	uint Zones;
 	uint Skipped;
 	std::map<std::string, uint> SkipReasons;
-	SStats() : Exported(0), Igs(0), Anims(0), Skipped(0) { }
+	SStats() : Exported(0), Igs(0), Anims(0), Zones(0), Skipped(0) { }
 	void skip(const std::string &r)
 	{
 		++Skipped;
@@ -873,6 +874,51 @@ int exportNelGltfScene(const CMeshUtilsSettings &settings)
 		}
 	}
 
+	// Ligo zones: the asset-level nel_zones blob list carries every file the zone process
+	// produced (zones/*.zone + zoneligos/*.ligozone, names carry the subdir) — emitted
+	// verbatim. The tessellated nel_proxy nodes are viewing meshes only and are naturally
+	// ignored below (they carry no nel_shape).
+	{
+		const CJsonValue *asset = doc.Json.get("asset");
+		const CJsonValue *aex = asset ? asset->get("extras") : NULL;
+		const CJsonValue *zones = aex ? aex->get("nel_zones") : NULL;
+		std::string zoneDir = settings.ZoneDirectoryPath.empty() ? outDir
+			: CPath::standardizePath(settings.ZoneDirectoryPath, true);
+		for (size_t i = 0; zones && i < zones->size(); ++i)
+		{
+			const CJsonValue *e = zones->at(i);
+			std::string name = e->getString("name", "");
+			std::vector<uint8> bytes;
+			if (name.empty() || name.find("..") != std::string::npos
+				|| !hexToBytes(e->getString("data", ""), bytes) || bytes.empty())
+			{
+				fprintf(stderr, "ERROR: bad nel_zones entry %u\n", (uint)i);
+				ret = EXIT_FAILURE;
+				continue;
+			}
+			std::string zonePath = zoneDir + name;
+			CFile::createDirectoryTree(CFile::getPath(zonePath));
+			try
+			{
+				COFile f;
+				if (!f.open(zonePath))
+				{
+					fprintf(stderr, "ERROR: cannot open %s\n", zonePath.c_str());
+					ret = EXIT_FAILURE;
+					continue;
+				}
+				f.serialBuffer(&bytes[0], (uint)bytes.size());
+				f.close();
+				++stats.Zones;
+			}
+			catch (const NLMISC::Exception &e2)
+			{
+				fprintf(stderr, "ERROR: %s: %s\n", zonePath.c_str(), e2.what());
+				ret = EXIT_FAILURE;
+			}
+		}
+	}
+
 	// Case-insensitive node lookup for multilod slave resolution (last name wins — the same
 	// std::map assignment discipline as the exporters' nodesByName)
 	std::map<std::string, size_t> nodesByLowerName;
@@ -1170,8 +1216,8 @@ int exportNelGltfScene(const CMeshUtilsSettings &settings)
 	CVertexBuffer::SerialOldPreferredMemory = oldVB;
 	CIndexBuffer::SerialOldPreferredMemory = oldIB;
 
-	printf("GLTF-IMPORT %s (%u shapes, %u igs, %u anims, %u skipped)\n", settings.SourceFilePath.c_str(),
-	       stats.Exported, stats.Igs, stats.Anims, stats.Skipped);
+	printf("GLTF-IMPORT %s (%u shapes, %u igs, %u anims, %u zones, %u skipped)\n", settings.SourceFilePath.c_str(),
+	       stats.Exported, stats.Igs, stats.Anims, stats.Zones, stats.Skipped);
 	for (std::map<std::string, uint>::iterator it = stats.SkipReasons.begin(); it != stats.SkipReasons.end(); ++it)
 		printf("SKIPCLASS %s %u\n", it->first.c_str(), it->second);
 	return ret;

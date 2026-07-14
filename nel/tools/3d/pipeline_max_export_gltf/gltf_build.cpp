@@ -725,6 +725,27 @@ sint CGltfBuilder::addMesh(const std::string &name, const CMesh::CMeshBuild &mb,
 	return (sint)m_Meshes->size() - 1;
 }
 
+sint CGltfBuilder::addProxyMesh(const std::string &name, const std::vector<float> &pos,
+                                const std::vector<float> &norm, const std::vector<float> &uv,
+                                const std::vector<uint32> &indices)
+{
+	if (pos.empty() || indices.empty())
+		return -1;
+	CJsonValue *jm = m_Meshes->push();
+	jm->setString("name", name);
+	CJsonValue *prims = jm->setArray("primitives");
+	CJsonValue *prim = prims->push();
+	CJsonValue *attrs = prim->setObject("attributes");
+	size_t nVerts = pos.size() / 3;
+	attrs->setInt("POSITION", addAccessorFloat(&pos[0], nVerts, 3, TARGET_ARRAY, true));
+	if (norm.size() == nVerts * 3)
+		attrs->setInt("NORMAL", addAccessorFloat(&norm[0], nVerts, 3, TARGET_ARRAY, false));
+	if (uv.size() == nVerts * 2)
+		attrs->setInt("TEXCOORD_0", addAccessorFloat(&uv[0], nVerts, 2, TARGET_ARRAY, false));
+	prim->setInt("indices", addAccessorU32(&indices[0], indices.size(), TARGET_ELEMENT));
+	return (sint)m_Meshes->size() - 1;
+}
+
 // ---------------------------------------------------------------------------------------------
 
 bool CGltfBuilder::save(const std::string &gltfPath)

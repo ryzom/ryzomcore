@@ -35,6 +35,8 @@ struct CMeshUtilsSettings
 	std::string IGDirectoryPath;
 	// Animation (.anim) output (nel-extras glTF import route; empty = same as destination).
 	std::string AnimDirectoryPath;
+	// Ligo zone output root (zones/ + zoneligos/ re-emitted under it; empty = destination).
+	std::string ZoneDirectoryPath;
 	std::string ToolDependLog;
 	std::string ToolErrorLog;
 

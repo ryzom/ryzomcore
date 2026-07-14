@@ -82,6 +82,12 @@ public:
 	             const std::vector<sint> &materialIdx, std::string *err,
 	             const std::vector<NL3D::CMesh::CMeshBuild *> *bsList = NULL);
 
+	// Plain viewing mesh (positions/normals/uv + triangle indices, no material, no nel_*
+	// reconstruction data) — used for the tessellated nel_proxy meshes (zones).
+	sint addProxyMesh(const std::string &name, const std::vector<float> &pos,
+	                  const std::vector<float> &norm, const std::vector<float> &uv,
+	                  const std::vector<uint32> &indices);
+
 	// Top-level asset extras (nel_source etc.)
 	NLGLTF::CJsonValue *assetExtras();
 

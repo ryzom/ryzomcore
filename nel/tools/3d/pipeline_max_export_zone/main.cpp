@@ -1992,6 +1992,150 @@ static int surveyFile(const std::string &inputBase, CScene &scene)
 
 // ---------------------------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------------------------
+// Entry point for the max2gltf writer (this file compiled with PMB_ZONE_NO_MAIN — see
+// pmb_zone_gltf.h): the standalone --ligo flow into a private temp dir, every produced file
+// handed back as (relative name, bytes) for the glTF's nel_zones blob list, plus the authored
+// patch sets (buildPatchInfo pre-transform, world space) for the tessellated nel_proxy viewing
+// meshes. The blob is authoritative; the proxy is visualization only.
+
+#include "pmb_zone_gltf.h"
+
+#ifdef NL_OS_WINDOWS
+#include <process.h>
+#define PMB_ZONE_GETPID _getpid
+#else
+#include <unistd.h>
+#define PMB_ZONE_GETPID getpid
+#endif
+
+static void pmbCollectDirFiles(const std::string &dir, const std::string &relPrefix,
+                               std::vector<std::pair<std::string, std::vector<uint8> > > &filesOut)
+{
+	std::vector<std::string> content;
+	NLMISC::CPath::getPathContent(dir, false, false, true, content);
+	std::sort(content.begin(), content.end());
+	for (size_t i = 0; i < content.size(); ++i)
+	{
+		NLMISC::CIFile f;
+		if (!f.open(content[i]))
+			continue;
+		std::vector<uint8> bytes(f.getFileSize());
+		if (!bytes.empty())
+			f.serialBuffer(&bytes[0], (uint)bytes.size());
+		f.close();
+		filesOut.push_back(std::make_pair(relPrefix + NLMISC::CFile::getFilename(content[i]), bytes));
+		NLMISC::CFile::deleteFile(content[i]);
+	}
+}
+
+int pmbExportZonesForGltf(const std::string &maxPath, const std::string &bankPath,
+                          float cellSize, float snap,
+                          std::vector<std::pair<std::string, std::vector<uint8> > > &filesOut,
+                          std::vector<SPmbZoneProxy> *proxiesOut)
+{
+	// Ligo protocol names only (same filename dispatch as exportLigoFile)
+	std::string inputBase = NLMISC::CFile::getFilenameWithoutExtension(maxPath);
+	{
+		std::vector<std::string> tokens;
+		tokenize(inputBase, tokens);
+		bool ligoName = (tokens.size() == 3 && tokens[0] == "zonematerial")
+			|| (tokens.size() == 4 && tokens[0] == "zonetransition")
+			|| (tokens.size() == 2 && tokens[0] == "zonespecial");
+		if (!ligoName)
+			return 0;
+	}
+
+	NL3D::registerSerial3d(); // internally guarded
+
+	CStorageOleIn in;
+	if (!in.open(maxPath.c_str()))
+		return -1;
+	CSceneClassRegistry reg;
+	CBuiltin::registerClasses(&reg);
+	UPDATE1::CUpdate1::registerClasses(&reg);
+	EPOLY::CEPoly::registerClasses(&reg);
+	BIPED::CBiped::registerClasses(&reg);
+	NELPATCH::CNelPatch::registerClasses(&reg);
+	CDllDirectory dll;
+	CClassDirectory3 cd(&dll);
+	CScene scene(&reg, &dll, &cd);
+	{
+		std::vector<uint8> b;
+		if (!in.readStream("DllDirectory", b)) return -1;
+		{ CStorageStream st(b); dll.serial(st); }
+		dll.parse(VersionUnknown);
+	}
+	{
+		std::vector<uint8> b;
+		if (!in.readStream("ClassDirectory3", b)) return -1;
+		{ CStorageStream st(b); cd.serial(st); }
+		cd.parse(VersionUnknown);
+	}
+	{
+		std::vector<uint8> b;
+		if (!in.readStream("Scene", b)) return -1;
+		{ CStorageStream st(b); scene.serial(st); }
+		scene.parse(VersionUnknown);
+	}
+
+	SExportContext ctx;
+	ctx.BankPath = bankPath;
+
+	// Authored patch sets for the viewing proxies — every RklPatch node as the artist sees it
+	// (frozen ones are the neighbor-reference bricks; flagged so viewers can dim them)
+	if (proxiesOut)
+	{
+		std::vector<SZoneNode> nodes;
+		collectZoneNodes(scene, nodes);
+		SNodeTMCache tmCache;
+		for (size_t i = 0; i < nodes.size(); ++i)
+		{
+			SEvalPatch ep;
+			std::string err;
+			if (!evalNodePatch(nodes[i].Node, ep, err))
+			{
+				fprintf(stderr, "WARNING: zone proxy '%s': %s\n",
+				        ucstring(nodes[i].Node->userName()).toUtf8().c_str(), err.c_str());
+				continue;
+			}
+			Matrix3M objectTM = getObjectTM(nodes[i].Node, tmCache);
+			SPmbZoneProxy proxy;
+			proxy.NodeName = ucstring(nodes[i].Node->userName()).toUtf8();
+			proxy.Frozen = nodes[i].Frozen;
+			if (!buildPatchInfo(ep, objectTM, 0, proxy.Patches, err))
+			{
+				fprintf(stderr, "WARNING: zone proxy '%s': %s\n", proxy.NodeName.c_str(), err.c_str());
+				continue;
+			}
+			proxiesOut->push_back(proxy);
+		}
+	}
+
+	// The ligo flow into a private temp dir, collected back as blobs
+	char tmpBuf[256];
+	snprintf(tmpBuf, sizeof(tmpBuf), "/tmp/pipeline_max_export_gltf_zone.%d", (int)PMB_ZONE_GETPID());
+	std::string tmpDir = tmpBuf;
+	NLLIGO::CLigoConfig config;
+	config.CellSize = cellSize;
+	config.Snap = snap;
+	SLigoOutputs out;
+	out.ZonesDir = tmpDir + "/zones";
+	out.ZoneLigosDir = tmpDir + "/zoneligos";
+	NLMISC::CFile::createDirectoryTree(out.ZonesDir);
+	NLMISC::CFile::createDirectoryTree(out.ZoneLigosDir);
+	int rc = exportLigoFile(inputBase, scene, config, ctx, out);
+	pmbCollectDirFiles(out.ZonesDir, "zones/", filesOut);
+	pmbCollectDirFiles(out.ZoneLigosDir, "zoneligos/", filesOut);
+	::remove(out.ZonesDir.c_str());
+	::remove(out.ZoneLigosDir.c_str());
+	::remove(tmpDir.c_str());
+	if (rc != 0)
+		return -1;
+	return (int)filesOut.size();
+}
+
+#ifndef PMB_ZONE_NO_MAIN
 int main(int argc, char **argv)
 {
 	// Parse args
@@ -2115,5 +2259,6 @@ int main(int argc, char **argv)
 
 	return rc;
 }
+#endif /* PMB_ZONE_NO_MAIN */
 
 /* end of file */

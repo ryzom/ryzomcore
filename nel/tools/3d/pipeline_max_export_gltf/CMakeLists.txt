@@ -27,6 +27,11 @@ SET(ANIM_SHARED
 )
 SET_SOURCE_FILES_PROPERTIES(../pipeline_max_export_anim/main.cpp PROPERTIES COMPILE_DEFINITIONS PMB_ANIM_NO_MAIN)
 
+# The ligo zone exporter's whole per-file flow backs the nel_zones blob + the tessellated
+# nel_proxy viewing meshes — same guarded-main pattern.
+SET(ZONE_SHARED ../pipeline_max_export_zone/main.cpp)
+SET_SOURCE_FILES_PROPERTIES(${ZONE_SHARED} PROPERTIES COMPILE_DEFINITIONS PMB_ZONE_NO_MAIN)
+
 FILE(GLOB SRCS *.cpp)
 FILE(GLOB HDRS *.h)
 
@@ -36,6 +41,7 @@ ADD_EXECUTABLE(pipeline_max_export_gltf
 	${SHAPE_SHARED}
 	${IG_SHARED}
 	${ANIM_SHARED}
+	${ZONE_SHARED}
 	)
 
 TARGET_LINK_LIBRARIES(pipeline_max_export_gltf
@@ -44,6 +50,7 @@ TARGET_LINK_LIBRARIES(pipeline_max_export_gltf
 	nel_gltf
 	NeL::misc
 	NeL::3d
+	NeL::ligo
 )
 
 NL_DEFAULT_PROPS(pipeline_max_export_gltf "NeL, Tools, 3D: Pipeline Max Export glTF")

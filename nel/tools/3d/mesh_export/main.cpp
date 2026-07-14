@@ -35,6 +35,7 @@ int main(int argc, char *argv[])
 	args.addArg("", "coarse-dst", "destination", "With-coarse-mesh shape destination directory (nel-extras glTF import; defaults to dst)");
 	args.addArg("", "ig-dst", "destination", "Instance-group (.ig) destination directory (nel-extras glTF import; defaults to dst)");
 	args.addArg("", "anim-dst", "destination", "Animation (.anim) destination directory (nel-extras glTF import; defaults to dst)");
+	args.addArg("", "zone-dst", "destination", "Ligo zone destination root (zones/ + zoneligos/ under it; nel-extras glTF import; defaults to dst)");
 	args.addArg("", "dependlog", "log", "Dependencies log path");
 	args.addArg("", "errorlog", "log", "Errors log path");
 	args.addArg("", "no-nel-extras", "", "Ignore nel_* per-node glTF extras; use Decompose(mTransformation) instead. Validation flag — see wiki: nel_gltf_extras.md.");
@@ -78,6 +79,9 @@ int main(int argc, char *argv[])
 
 		if (args.haveLongArg("anim-dst"))
 			settings.AnimDirectoryPath = NLMISC::CPath::standardizePath(args.getLongArg("anim-dst").front());
+
+		if (args.haveLongArg("zone-dst"))
+			settings.ZoneDirectoryPath = NLMISC::CPath::standardizePath(args.getLongArg("zone-dst").front());
 
 		if (args.haveLongArg("dependlog"))
 			settings.ToolDependLog = args.getLongArg("dependlog").front();

@@ -22,6 +22,7 @@ import argparse, os, shutil, subprocess, sys, collections
 import shape_corpus  # same-directory corpus enumeration + helpers
 import ig_corpus     # ig-process source enumeration (the standalone 116-file ig corpus)
 import anim_corpus   # anim-source enumeration (fauna/characters/sky AnimSourceDirectories)
+import zone_corpus   # ligo zone source enumeration (per-ecosystem zonematerial/transition/special)
 
 SKIP_CODE = 77
 
@@ -41,6 +42,8 @@ def main():
                     help="minimum byte-identical co-produced shape count for --gate")
     ap.add_argument("--min-anims", type=int, default=0,
                     help="minimum byte-identical co-produced anim count for --gate")
+    ap.add_argument("--min-zones", type=int, default=0,
+                    help="minimum byte-identical co-produced zone file count for --gate")
     ap.add_argument("-j", "--jobs", type=int, default=max(1, (os.cpu_count() or 4) - 2))
     args = ap.parse_args()
 
@@ -78,6 +81,17 @@ def main():
             seen_paths.add(path)
             anim_extra.append(("anim/" + group, path))
     corpus = corpus + anim_extra
+    # The ligo zone sources: .zone/.ligozone ride the differential as the nel_zones blob list,
+    # direct pipeline_max_export_zone --ligo vs the blob re-emission. Per-ecosystem smallbank.
+    zone_banks = {}
+    zone_extra = []
+    for (eco, path) in zone_corpus.enumerate_corpus(args.graphics):
+        zone_banks[path] = os.path.join(zone_corpus.DEF_REF,
+                                        "ecosystems", eco, "smallbank", eco + ".smallbank")
+        if path not in seen_paths:
+            seen_paths.add(path)
+            zone_extra.append(("zone/" + eco, path))
+    corpus = corpus + zone_extra
     if args.only:
         corpus = [c for c in corpus if args.only in c[1]]
     if args.project:
@@ -88,6 +102,7 @@ def main():
 
     ig_bin = os.path.join(args.bin, "pipeline_max_export_ig")
     anim_bin = os.path.join(args.bin, "pipeline_max_export_anim")
+    zone_bin = os.path.join(args.bin, "pipeline_max_export_zone")
     ps_paths = [d for d in (os.path.expanduser("~/pipeline_export/common/sfx/ps"),) if os.path.isdir(d)]
 
     os.makedirs(args.out, exist_ok=True)
@@ -120,12 +135,14 @@ def main():
         dc_dir = os.path.join(base, "direct_c")
         di_dir = os.path.join(base, "direct_ig")
         da_dir = os.path.join(base, "direct_anim")
+        dz_dir = os.path.join(base, "direct_zone")
         g_dir = os.path.join(base, "gltf")
         v_dir = os.path.join(base, "via")
         vc_dir = os.path.join(base, "via_c")
         vi_dir = os.path.join(base, "via_ig")
         va_dir = os.path.join(base, "via_anim")
-        for d in (d_dir, dc_dir, di_dir, da_dir, g_dir, v_dir, vc_dir, vi_dir, va_dir):
+        vz_dir = os.path.join(base, "via_zone")
+        for d in (d_dir, dc_dir, di_dir, da_dir, dz_dir, g_dir, v_dir, vc_dir, vi_dir, va_dir, vz_dir):
             os.makedirs(d, exist_ok=True)
 
         r = subprocess.run([shape_bin, "--db", args.graphics, "--coarse-out", dc_dir, path, d_dir],
@@ -136,7 +153,10 @@ def main():
         ps_args = []
         for pp in ps_paths:
             ps_args += ["--ps-path", pp]
-        r = subprocess.run([gltf_bin, "--db", args.graphics] + ps_args + [path, g_dir],
+        zone_args = []
+        if path in zone_banks:
+            zone_args = ["--zone-bank", zone_banks[path]]
+        r = subprocess.run([gltf_bin, "--db", args.graphics] + ps_args + zone_args + [path, g_dir],
                            capture_output=True, text=True)
         res["gltf_rc"] = r.returncode
         res["gltf_skips"] = skipclasses(r.stdout)
@@ -145,7 +165,8 @@ def main():
         via_skips = collections.Counter()
         if os.path.isfile(gltf_path):
             r = subprocess.run([import_bin, "-d", v_dir, "--coarse-dst", vc_dir,
-                                "--ig-dst", vi_dir, "--anim-dst", va_dir, gltf_path],
+                                "--ig-dst", vi_dir, "--anim-dst", va_dir,
+                                "--zone-dst", vz_dir, gltf_path],
                                capture_output=True, text=True)
             res["import_rc"] = r.returncode
             via_skips = skipclasses(r.stdout)
@@ -193,6 +214,30 @@ def main():
             # exit 3 = nothing to export (not an error)
             res["anim_rc"] = 0 if r.returncode in (0, 3) else r.returncode
         direct_anims = anims_in(da_dir)
+
+        # Zone differential: direct --ligo output tree vs the glTF nel_zones blob re-emission,
+        # relative paths (zones/*.zone + zoneligos/*.ligozone) compared byte-wise. A file the
+        # direct tool refuses (authoring errors, e.g. duplicate NelPatchMesh) is symmetric —
+        # the via route emits no nel_zones for it either.
+        def zones_in(d):
+            out = {}
+            for sub in ("zones", "zoneligos"):
+                sd = os.path.join(d, sub)
+                if os.path.isdir(sd):
+                    for f in os.listdir(sd):
+                        out[sub + "/" + f] = os.path.join(sd, f)
+            return out
+
+        via_zones = zones_in(vz_dir)
+        zone_refused = False
+        if path in zone_banks:
+            r = subprocess.run([zone_bin, "--ligo", dz_dir, "--bank", zone_banks[path], path],
+                               capture_output=True, text=True, timeout=300)
+            if r.returncode != 0 and not via_zones:
+                zone_refused = True  # symmetric refusal (direct errors, via emitted nothing)
+            elif r.returncode != 0:
+                res["zone_rc"] = r.returncode
+        direct_zones = {} if zone_refused else zones_in(dz_dir)
 
         ident = 0
         floateq = []
@@ -260,10 +305,27 @@ def main():
             if name not in direct_anims:
                 via_only.append("anim:" + name)
                 mismatch = True
+        zone_ident = 0
+        for name, dpath in sorted(direct_zones.items()):
+            vpath = via_zones.get(name)
+            if not vpath:
+                diff.append("zone-missing:" + name)
+                mismatch = True
+                continue
+            if open(dpath, "rb").read() == open(vpath, "rb").read():
+                zone_ident += 1
+            else:
+                mismatch = True
+                diff.append("zone:" + name)
+        for name in sorted(via_zones):
+            if name not in direct_zones:
+                via_only.append("zone:" + name)
+                mismatch = True
 
         res["ident"] = ident
         res["ig_ident"] = ig_ident
         res["anim_ident"] = anim_ident
+        res["zone_ident"] = zone_ident
         res["floateq"] = floateq
         res["diff"] = diff
         res["direct_only"] = direct_only
@@ -285,6 +347,7 @@ def main():
     ident = 0
     ig_ident = 0
     anim_ident = 0
+    zone_ident = 0
     floateq = []
     diffs = []
     via_only = []
@@ -297,13 +360,15 @@ def main():
             stubs += 1
             continue
         if res.get("direct_rc") != 0 or res.get("gltf_rc") != 0 or res.get("import_rc") != 0 \
-           or res.get("ig_rc", 0) != 0 or res.get("anim_rc", 0) != 0:
-            tool_fail.append("%s (rc d=%s g=%s i=%s ig=%s a=%s)" % (res["path"], res.get("direct_rc"),
-                                                                    res.get("gltf_rc"), res.get("import_rc"),
-                                                                    res.get("ig_rc", 0), res.get("anim_rc", 0)))
+           or res.get("ig_rc", 0) != 0 or res.get("anim_rc", 0) != 0 or res.get("zone_rc", 0) != 0:
+            tool_fail.append("%s (rc d=%s g=%s i=%s ig=%s a=%s z=%s)"
+                             % (res["path"], res.get("direct_rc"), res.get("gltf_rc"),
+                                res.get("import_rc"), res.get("ig_rc", 0), res.get("anim_rc", 0),
+                                res.get("zone_rc", 0)))
         ident += res.get("ident", 0)
         ig_ident += res.get("ig_ident", 0)
         anim_ident += res.get("anim_ident", 0)
+        zone_ident += res.get("zone_ident", 0)
         for n in res.get("floateq", []):
             floateq.append("%s:%s" % (res["proj"], n))
         for n in res.get("diff", []):
@@ -319,10 +384,10 @@ def main():
 
     print()
     print("GLTF DIFFERENTIAL: %d files (%d stubs); co-produced: %d byte-identical shapes + "
-          "%d byte-identical igs + %d byte-identical anims, %d float-eq, %d diff; "
-          "%d direct-only (staged coverage), %d via-only"
-          % (len(results), stubs, ident, ig_ident, anim_ident, len(floateq), len(diffs),
-             direct_only, len(via_only)))
+          "%d byte-identical igs + %d byte-identical anims + %d byte-identical zone files, "
+          "%d float-eq, %d diff; %d direct-only (staged coverage), %d via-only"
+          % (len(results), stubs, ident, ig_ident, anim_ident, zone_ident, len(floateq),
+             len(diffs), direct_only, len(via_only)))
     if skip_direct:
         print("    direct skip classes: %s" % ", ".join("%s=%d" % kv for kv in skip_direct.most_common()))
     if skip_via:
@@ -344,6 +409,8 @@ def main():
         if ident < args.min_identical:
             fails += 1
         if anim_ident < args.min_anims:
+            fails += 1
+        if zone_ident < args.min_zones:
             fails += 1
     return 1 if fails else 0
 
