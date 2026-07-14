@@ -47,6 +47,7 @@
 #include <nel/3d/mesh.h>
 #include <nel/3d/mesh_mrm.h>
 #include <nel/3d/mesh_mrm_skinned.h>
+#include <nel/3d/mesh_multi_lod.h>
 #include <nel/3d/mrm_parameters.h>
 #include <nel/3d/shape.h>
 #include <nel/3d/vertex_buffer.h>
@@ -477,6 +478,41 @@ bool reconstructBaseBuild(const SGltfDoc &doc, const CJsonValue &node, const CJs
 	return true;
 }
 
+// MRM parameters from a node's nel_mrm_* extras (defaults = buildMRMParameters' defaults on the
+// writer side, though the writer always emits every key alongside nel_lod_mrm).
+void mrmParamsFromExtras(const CJsonValue &extras, CMRMParameters &parameters)
+{
+	parameters.NLods = (uint)extras.getInt("nel_mrm_nlods", 11);
+	parameters.Divisor = (uint)extras.getInt("nel_mrm_divisor", 20);
+	parameters.SkinReduction = (CMRMParameters::TSkinReduction)extras.getInt("nel_mrm_skin_reduction", CMRMParameters::SkinReductionMax);
+	parameters.DistanceFinest = (float)extras.getDouble("nel_mrm_dist_finest", 5.0);
+	parameters.DistanceMiddle = (float)extras.getDouble("nel_mrm_dist_middle", 30.0);
+	parameters.DistanceCoarsest = (float)extras.getDouble("nel_mrm_dist_coarsest", 200.0);
+}
+
+// IMeshGeom for one multilod slot — the direct route's buildMeshGeomFor: the slot node's own
+// LOD_MRM appdata picks CMeshMRMGeom (empty morph-target list) or CMeshGeom, built against the
+// PARENT context's material count.
+IMeshGeom *buildGeomForSlot(const SGltfDoc &doc, const CJsonValue &slotExtras,
+                            const CJsonValue &mesh, uint numMaxMaterial, std::string *err)
+{
+	CMesh::CMeshBuild mb;
+	if (!reconstructMeshBuild(doc, mesh, slotExtras, mb, err))
+		return NULL;
+	if (slotExtras.getBool("nel_lod_mrm", false))
+	{
+		CMRMParameters parameters;
+		mrmParamsFromExtras(slotExtras, parameters);
+		std::vector<CMesh::CMeshBuild *> bsList; // morph targets: not implemented (direct ditto)
+		CMeshMRMGeom *g = new CMeshMRMGeom;
+		g->build(mb, bsList, numMaxMaterial, parameters);
+		return g;
+	}
+	CMeshGeom *g = new CMeshGeom;
+	g->build(mb, numMaxMaterial);
+	return g;
+}
+
 // Serialize a shape with the export-era stream conventions: temp COFile (CMeshMRMGeom's save
 // seeks), then the CMeshBase version byte 10 -> 9 patch — same block as the direct exporter.
 bool writeShapeFile(IShape *shape, const std::string &outPath, std::string *err)
@@ -644,6 +680,12 @@ int exportNelGltfScene(const CMeshUtilsSettings &settings)
 		}
 	}
 
+	// Case-insensitive node lookup for multilod slave resolution (last name wins — the same
+	// std::map assignment discipline as the exporters' nodesByName)
+	std::map<std::string, size_t> nodesByLowerName;
+	for (size_t ni = 0; nodes && ni < nodes->size(); ++ni)
+		nodesByLowerName[NLMISC::toLowerAscii(nodes->at(ni)->getString("name", ""))] = ni;
+
 	for (size_t ni = 0; nodes && ni < nodes->size(); ++ni)
 	{
 		const CJsonValue *node = nodes->at(ni);
@@ -653,95 +695,214 @@ int exportNelGltfScene(const CMeshUtilsSettings &settings)
 		std::string name = node->getString("name", "");
 		std::string shapeName = extras->getString("nel_shape_name", NLMISC::toLowerAscii(name));
 
-		if (extras->getInt("nel_lod_count", 0) > 0)
-		{
-			// CMeshMultiLod assembly from the slave meshes — next coverage step
-			stats.skip("multilod");
-			fprintf(stderr, "SKIP gltf-import '%s': multilod not implemented yet\n", name.c_str());
-			continue;
-		}
-		bool wantMrm = extras->getBool("nel_lod_mrm", false);
-		if (extras->getBool("nel_has_morpher", false) && wantMrm)
-		{
-			// The direct route builds morph-target bsList meshes into the MRM here
-			stats.skip("morpher-mrm");
-			fprintf(stderr, "SKIP gltf-import '%s': MRM morph targets not implemented yet\n", name.c_str());
-			continue;
-		}
+		uint lodCount = (uint)extras->getInt("nel_lod_count", 0);
 
-		const CJsonValue *jmesh = node->get("mesh");
-		const CJsonValue *mesh = (jmesh && jmesh->isNumber() && meshes) ? meshes->at((size_t)jmesh->asInt()) : NULL;
-		if (!mesh)
-		{
-			stats.skip("no-mesh");
-			continue;
-		}
-
-		CMeshBase::CMeshBaseBuild bbm;
-		std::vector<std::string> matNames;
-		if (!reconstructBaseBuild(doc, *node, *mesh, bbm, matNames, &err))
-		{
-			stats.skip("base-build");
-			fprintf(stderr, "SKIP gltf-import '%s': %s\n", name.c_str(), err.c_str());
-			continue;
-		}
-		CMesh::CMeshBuild mb;
-		if (!reconstructMeshBuild(doc, *mesh, *extras, mb, &err))
-		{
-			stats.skip("mesh-build");
-			fprintf(stderr, "SKIP gltf-import '%s': %s\n", name.c_str(), err.c_str());
-			continue;
-		}
-
-		// Replay the shape build (buildShapeForNode's mesh path)
 		CMeshBase *meshBase = NULL;
 		std::vector<sint> materialRemap;
-		try
+		std::vector<std::string> matNames;
+
+		if (lodCount > 0)
 		{
-			if (wantMrm)
+			// CMeshMultiLod assembly — mirrors buildShapeForNode's multilod branch: LOD 0 is
+			// this node's own mesh, LOD 1..count the slave nodes named by nel_lod_name_<i>
+			// (case-insensitive), every slot encoded in the PARENT's material context by the
+			// writer. Slot order feeds CMeshMultiLod::build unchanged (it sorts by DistMax
+			// itself); no optimizeMaterialUsage (fixed shared material list — identity remap).
+
+			// Resolve the slot node+mesh pairs first, so a staged slave class (e.g. skinned)
+			// skips the whole shape before any geometry is built. A slot whose mesh is absent
+			// because the writer's eval failed (nel_skip_class "mesh-eval", or an unselected
+			// node) drops out silently — the direct route drops that slot the same way.
+			std::vector<std::pair<const CJsonValue *, const CJsonValue *> > slots;
+			std::string stagedSlot;
 			{
-				CMRMParameters parameters;
-				parameters.NLods = (uint)extras->getInt("nel_mrm_nlods", 11);
-				parameters.Divisor = (uint)extras->getInt("nel_mrm_divisor", 20);
-				parameters.SkinReduction = (CMRMParameters::TSkinReduction)extras->getInt("nel_mrm_skin_reduction", CMRMParameters::SkinReductionMax);
-				parameters.DistanceFinest = (float)extras->getDouble("nel_mrm_dist_finest", 5.0);
-				parameters.DistanceMiddle = (float)extras->getDouble("nel_mrm_dist_middle", 30.0);
-				parameters.DistanceCoarsest = (float)extras->getDouble("nel_mrm_dist_coarsest", 200.0);
-				std::vector<CMesh::CMeshBuild *> bsList;
-				if (CMeshMRMSkinned::isCompatible(mb) && bsList.empty())
+				const CJsonValue *jmesh = node->get("mesh");
+				const CJsonValue *mesh = (jmesh && jmesh->isNumber() && meshes) ? meshes->at((size_t)jmesh->asInt()) : NULL;
+				if (mesh)
+					slots.push_back(std::make_pair(node, mesh));
+				else
 				{
-					CMeshMRMSkinned *meshMRMSkinned = new CMeshMRMSkinned;
-					meshMRMSkinned->build(bbm, mb, parameters);
-					if (!meshMRMSkinned->isRuntimeCompiled())
+					std::string sc = extras->getString("nel_skip_class", "");
+					if (sc != "mesh-eval" && !sc.empty())
+						stagedSlot = sc;
+				}
+			}
+			for (uint l = 0; l < lodCount && l < 10 && stagedSlot.empty(); ++l)
+			{
+				char keyBuf[32];
+				snprintf(keyBuf, sizeof(keyBuf), "nel_lod_name_%u", l);
+				std::string slaveName = extras->getString(keyBuf, "");
+				if (slaveName.empty())
+					continue;
+				std::map<std::string, size_t>::const_iterator it = nodesByLowerName.find(NLMISC::toLowerAscii(slaveName));
+				if (it == nodesByLowerName.end())
+				{
+					fprintf(stderr, "WARNING: multilod '%s': slave LOD '%s' not found\n",
+					        name.c_str(), slaveName.c_str());
+					continue;
+				}
+				const CJsonValue *slave = nodes->at(it->second);
+				const CJsonValue *jmesh = slave->get("mesh");
+				const CJsonValue *mesh = (jmesh && jmesh->isNumber() && meshes) ? meshes->at((size_t)jmesh->asInt()) : NULL;
+				if (!mesh)
+				{
+					const CJsonValue *sx = slave->get("extras");
+					std::string sc = sx ? sx->getString("nel_skip_class", "") : std::string();
+					if (sc != "mesh-eval" && !sc.empty())
+						stagedSlot = sc;
+					continue;
+				}
+				slots.push_back(std::make_pair(slave, mesh));
+			}
+			if (!stagedSlot.empty())
+			{
+				stats.skip("multilod-" + stagedSlot);
+				fprintf(stderr, "SKIP gltf-import '%s': multilod slot class '%s' not carried yet\n",
+				        name.c_str(), stagedSlot.c_str());
+				continue;
+			}
+			if (slots.empty())
+			{
+				// direct parity: no LOD came through -> no shape
+				stats.skip("mesh-eval");
+				continue;
+			}
+
+			try
+			{
+				CMeshMultiLod::CMeshMultiLodBuild mlBuild;
+				mlBuild.StaticLod = !extras->getBool("nel_lod_dynamic_mesh", false);
+				// Base build in the parent's material context — any slot mesh carries the
+				// parent's nel_materials (the writer encodes slaves against the parent ctx)
+				if (!reconstructBaseBuild(doc, *node, *slots[0].second, mlBuild.BaseMesh, matNames, &err))
+				{
+					stats.skip("base-build");
+					fprintf(stderr, "SKIP gltf-import '%s': %s\n", name.c_str(), err.c_str());
+					continue;
+				}
+				uint numMaterials = (uint)mlBuild.BaseMesh.Materials.size();
+				bool slotFail = false;
+				for (size_t s = 0; s < slots.size(); ++s)
+				{
+					const CJsonValue *sx = slots[s].first->get("extras");
+					CMeshMultiLod::CMeshMultiLodBuild::CBuildSlot slot;
+					slot.DistMax = (float)sx->getDouble("nel_lod_dist_max", 1000.0);
+					slot.BlendLength = (float)sx->getDouble("nel_lod_blend_length", 0.0);
+					slot.Flags = 0;
+					if (sx->getBool("nel_lod_blend_in", false))
+						slot.Flags |= CMeshMultiLod::CMeshMultiLodBuild::CBuildSlot::BlendIn;
+					if (sx->getBool("nel_lod_blend_out", false))
+						slot.Flags |= CMeshMultiLod::CMeshMultiLodBuild::CBuildSlot::BlendOut;
+					if (sx->getBool("nel_lod_coarse_mesh", false))
+						slot.Flags |= CMeshMultiLod::CMeshMultiLodBuild::CBuildSlot::CoarseMesh;
+					slot.MeshGeom = buildGeomForSlot(doc, *sx, *slots[s].second, numMaterials, &err);
+					if (!slot.MeshGeom)
 					{
-						delete meshMRMSkinned;
-						stats.skip("skinned-maxverts");
-						continue;
+						slotFail = true;
+						break;
 					}
-					meshMRMSkinned->optimizeMaterialUsage(materialRemap);
-					meshBase = meshMRMSkinned;
+					mlBuild.LodMeshes.push_back(slot);
+				}
+				if (slotFail)
+				{
+					for (size_t s = 0; s < mlBuild.LodMeshes.size(); ++s)
+						delete mlBuild.LodMeshes[s].MeshGeom;
+					stats.skip("mesh-build");
+					fprintf(stderr, "SKIP gltf-import '%s': %s\n", name.c_str(), err.c_str());
+					continue;
+				}
+				CMeshMultiLod *ml = new CMeshMultiLod;
+				ml->build(mlBuild);
+				materialRemap.resize(numMaterials);
+				for (uint m = 0; m < numMaterials; ++m)
+					materialRemap[m] = (sint)m;
+				meshBase = ml;
+			}
+			catch (const NLMISC::Exception &e)
+			{
+				stats.skip("build");
+				fprintf(stderr, "SKIP gltf-import '%s': build failed: %s\n", name.c_str(), e.what());
+				continue;
+			}
+		}
+		else
+		{
+			bool wantMrm = extras->getBool("nel_lod_mrm", false);
+			if (extras->getBool("nel_has_morpher", false) && wantMrm)
+			{
+				// The direct route builds morph-target bsList meshes into the MRM here (the multilod
+				// path above is exempt — its slot geoms never take morph targets, direct ditto)
+				stats.skip("morpher-mrm");
+				fprintf(stderr, "SKIP gltf-import '%s': MRM morph targets not implemented yet\n", name.c_str());
+				continue;
+			}
+
+			const CJsonValue *jmesh = node->get("mesh");
+			const CJsonValue *mesh = (jmesh && jmesh->isNumber() && meshes) ? meshes->at((size_t)jmesh->asInt()) : NULL;
+			if (!mesh)
+			{
+				stats.skip("no-mesh");
+				continue;
+			}
+
+			CMeshBase::CMeshBaseBuild bbm;
+			if (!reconstructBaseBuild(doc, *node, *mesh, bbm, matNames, &err))
+			{
+				stats.skip("base-build");
+				fprintf(stderr, "SKIP gltf-import '%s': %s\n", name.c_str(), err.c_str());
+				continue;
+			}
+			CMesh::CMeshBuild mb;
+			if (!reconstructMeshBuild(doc, *mesh, *extras, mb, &err))
+			{
+				stats.skip("mesh-build");
+				fprintf(stderr, "SKIP gltf-import '%s': %s\n", name.c_str(), err.c_str());
+				continue;
+			}
+
+			// Replay the shape build (buildShapeForNode's mesh path)
+			try
+			{
+				if (wantMrm)
+				{
+					CMRMParameters parameters;
+					mrmParamsFromExtras(*extras, parameters);
+					std::vector<CMesh::CMeshBuild *> bsList;
+					if (CMeshMRMSkinned::isCompatible(mb) && bsList.empty())
+					{
+						CMeshMRMSkinned *meshMRMSkinned = new CMeshMRMSkinned;
+						meshMRMSkinned->build(bbm, mb, parameters);
+						if (!meshMRMSkinned->isRuntimeCompiled())
+						{
+							delete meshMRMSkinned;
+							stats.skip("skinned-maxverts");
+							continue;
+						}
+						meshMRMSkinned->optimizeMaterialUsage(materialRemap);
+						meshBase = meshMRMSkinned;
+					}
+					else
+					{
+						CMeshMRM *meshMRM = new CMeshMRM;
+						meshMRM->build(bbm, mb, bsList, parameters);
+						meshMRM->optimizeMaterialUsage(materialRemap);
+						meshBase = meshMRM;
+					}
 				}
 				else
 				{
-					CMeshMRM *meshMRM = new CMeshMRM;
-					meshMRM->build(bbm, mb, bsList, parameters);
-					meshMRM->optimizeMaterialUsage(materialRemap);
-					meshBase = meshMRM;
+					CMesh *m = new CMesh;
+					m->build(bbm, mb);
+					m->optimizeMaterialUsage(materialRemap);
+					meshBase = m;
 				}
 			}
-			else
+			catch (const NLMISC::Exception &e)
 			{
-				CMesh *m = new CMesh;
-				m->build(bbm, mb);
-				m->optimizeMaterialUsage(materialRemap);
-				meshBase = m;
+				stats.skip("build");
+				fprintf(stderr, "SKIP gltf-import '%s': build failed: %s\n", name.c_str(), e.what());
+				continue;
 			}
-		}
-		catch (const NLMISC::Exception &e)
-		{
-			stats.skip("build");
-			fprintf(stderr, "SKIP gltf-import '%s': build failed: %s\n", name.c_str(), e.what());
-			continue;
 		}
 
 		if (extras->getBool("nel_animated_materials", false))

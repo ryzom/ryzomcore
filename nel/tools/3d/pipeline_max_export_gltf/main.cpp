@@ -303,36 +303,45 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 		CSceneClass *base = baseObjectOf(node, &mods, &modApps);
 		if (!isGeometryOrShape(base))
 			continue;
-		if (startsWithBip(name) || startsWithBip(nodeName(*rootOf(&node))))
-			continue;
 		NLMISC::CClassId cid = base->classDesc()->classId();
-		if (cid == CLASSID_RPO || cid.a() == CLASSID_PARTA_NEL_PS
-			|| cid == CLASSID_PACS_BOX || cid == CLASSID_PACS_CYL || cid == CLASSID_TARGET)
-			continue;
-		{
-			std::string accel = getScriptAppDataStr(n, NEL3D_APPDATA_ACCEL, "");
-			if (!accel.empty() && accel != "0" && accel != "32")
-				continue;
-		}
-		if (getScriptAppDataStr(n, NEL3D_APPDATA_DONOTEXPORT, "") == "1")
-			continue;
-		if (getScriptAppDataStr(n, NEL3D_APPDATA_COLLISION, "") == "1")
-			continue;
-		if (getScriptAppDataStr(n, NEL3D_APPDATA_COLLISION_EXTERIOR, "") == "1")
-			continue;
 
 		bool isSlave = lodNames.count(NLMISC::toLowerAscii(name)) != 0;
 
+		// Standalone selection filters (the direct route's exportFile gate). LOD slaves bypass
+		// ALL of them: the direct multilod branch resolves slaves by name and takes them straight
+		// to the mesh eval — no bip/classid/appdata checks on slave nodes.
+		if (!isSlave)
+		{
+			if (startsWithBip(name) || startsWithBip(nodeName(*rootOf(&node))))
+				continue;
+			if (cid == CLASSID_RPO || cid.a() == CLASSID_PARTA_NEL_PS
+				|| cid == CLASSID_PACS_BOX || cid == CLASSID_PACS_CYL || cid == CLASSID_TARGET)
+				continue;
+			{
+				std::string accel = getScriptAppDataStr(n, NEL3D_APPDATA_ACCEL, "");
+				if (!accel.empty() && accel != "0" && accel != "32")
+					continue;
+			}
+			if (getScriptAppDataStr(n, NEL3D_APPDATA_DONOTEXPORT, "") == "1")
+				continue;
+			if (getScriptAppDataStr(n, NEL3D_APPDATA_COLLISION, "") == "1")
+				continue;
+			if (getScriptAppDataStr(n, NEL3D_APPDATA_COLLISION_EXTERIOR, "") == "1")
+				continue;
+		}
+
 		// Special shape classes — same dispatch order as buildShapeForNode; the glTF mesh path
-		// can't carry these yet, so the node is tagged for the harness instead.
+		// can't carry these yet, so the node is tagged for the harness instead. For slaves only
+		// skinning matters (Physique deforms the slot's vertices in the direct multilod branch;
+		// the wavemaker/remanence/flare/water dispatch never runs on slave nodes).
 		const char *skipClass = NULL;
-		if (cid.a() == CLASSID_PARTA_NEL_WAVE_MAKER)
+		if (!isSlave && cid.a() == CLASSID_PARTA_NEL_WAVE_MAKER)
 			skipClass = "wavemaker";
-		else if (getScriptAppDataInt(n, NEL3D_APPDATA_USE_REMANENCE, 0))
+		else if (!isSlave && getScriptAppDataInt(n, NEL3D_APPDATA_USE_REMANENCE, 0))
 			skipClass = "remanence";
-		else if (cid.a() == CLASSID_PARTA_NEL_FLARE)
+		else if (!isSlave && cid.a() == CLASSID_PARTA_NEL_FLARE)
 			skipClass = "flare";
-		else if (hasWaterMaterial(node))
+		else if (!isSlave && hasWaterMaterial(node))
 			skipClass = "water";
 		else
 		{
@@ -383,38 +392,50 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 		SBaseCtx *ctx = baseCtxFor(ctxNode, tmCache, exportLighting, b, ctxCache);
 		if (!ctx)
 		{
+			extras->setString("nel_skip_class", "material");
 			stats.skip("material");
 			continue;
 		}
 
-		// Mesh evaluation + CMeshBuild (identical calls to the direct route's evalAndBuildMesh)
-		SEvalMesh mesh;
-		std::vector<std::string> warnings;
-		if (!evalNodeMesh(node, mesh, &warnings))
+		// Mesh evaluation + CMeshBuild (identical calls to the direct route's evalAndBuildMesh).
+		// A failed eval or encode tags the node but does NOT abandon it: the direct route drops a
+		// failed slot / standalone shape the same way, but a multilod PARENT still exports from
+		// its surviving slave slots — so the lod extras and nel_shape below must emit regardless.
+		bool haveMesh = false;
 		{
-			extras->setString("nel_skip_class", "mesh-eval");
-			stats.skip("mesh-eval");
-			continue;
-		}
-		NL3D::CMesh::CMeshBuild mb;
-		buildMeshInterface(mesh, mb, ctx->Bbm, ctx->MaxBB, node, tmCache, false);
-		if (IFACEBUILD::useInterfaceMesh(node))
-		{
-			IFACEBUILD::applyInterfaceToMeshBuild(node, mb, interfaceToWorldMat(node, tmCache), tmCache);
-			extras->setBool("nel_interface", true);
-		}
+			SEvalMesh mesh;
+			std::vector<std::string> warnings;
+			if (!evalNodeMesh(node, mesh, &warnings))
+			{
+				extras->setString("nel_skip_class", "mesh-eval");
+				stats.skip("mesh-eval");
+			}
+			else
+			{
+				NL3D::CMesh::CMeshBuild mb;
+				buildMeshInterface(mesh, mb, ctx->Bbm, ctx->MaxBB, node, tmCache, false);
+				if (IFACEBUILD::useInterfaceMesh(node))
+				{
+					IFACEBUILD::applyInterfaceToMeshBuild(node, mb, interfaceToWorldMat(node, tmCache), tmCache);
+					extras->setBool("nel_interface", true);
+				}
 
-		std::string err;
-		sint meshIdx = b.addMesh(name, mb, ctx->GltfMats, &err);
-		if (meshIdx < 0)
-		{
-			extras->setString("nel_skip_class", "encode");
-			stats.skip("encode");
-			fprintf(stderr, "SKIP gltf '%s': %s\n", name.c_str(), err.c_str());
-			continue;
+				std::string err;
+				sint meshIdx = b.addMesh(name, mb, ctx->GltfMats, &err);
+				if (meshIdx < 0)
+				{
+					extras->setString("nel_skip_class", "encode");
+					stats.skip("encode");
+					fprintf(stderr, "SKIP gltf '%s': %s\n", name.c_str(), err.c_str());
+				}
+				else
+				{
+					b.attachMesh(nodeIdx[&node], meshIdx);
+					++stats.Meshes;
+					haveMesh = true;
+				}
+			}
 		}
-		b.attachMesh(nodeIdx[&node], meshIdx);
-		++stats.Meshes;
 
 		// Per-node NeL data the shape build consumes downstream
 		extras->setBool("nel_cast_shadows", ctx->Bbm.bCastShadows);
@@ -462,11 +483,18 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 			continue;
 		}
 
+		uint lodCount = (uint)getScriptAppDataInt(n, NEL3D_APPDATA_LOD_NAME_COUNT, 0);
+
+		// No standalone shape from a meshless node (direct parity: buildShapeForNode returns
+		// NULL when the eval fails) — unless it is a multilod parent, whose shape can still
+		// assemble from the slave slots alone.
+		if (!haveMesh && lodCount == 0)
+			continue;
+
 		// Exportable shape node
 		extras->setBool("nel_shape", true);
 		extras->setString("nel_shape_name", NLMISC::toLowerAscii(name));
 
-		uint lodCount = (uint)getScriptAppDataInt(n, NEL3D_APPDATA_LOD_NAME_COUNT, 0);
 		bool haveCoarse = false;
 		if (lodCount > 0)
 		{
