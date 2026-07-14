@@ -375,12 +375,13 @@ static void cornerKey(const CMesh::CCorner &c, const std::vector<uint> &uvStages
 }
 
 sint CGltfBuilder::addMesh(const std::string &name, const CMesh::CMeshBuild &mb,
-                           const std::vector<sint> &materialIdx, std::string *err)
+                           const std::vector<sint> &materialIdx, std::string *err,
+                           const std::vector<NL3D::CMesh::CMeshBuild *> *bsList)
 {
-	// Stage-1 flag surface: position+normal+uv[0..7]+primary color. Anything else means a
-	// build class the encoding doesn't carry yet — refuse loudly.
+	// Carried flag surface: position+normal+uv[0..7]+primary color+palette skin. Anything else
+	// means a build class the encoding doesn't carry yet — refuse loudly.
 	uint32 supported = CVertexBuffer::PositionFlag | CVertexBuffer::NormalFlag
-		| CVertexBuffer::PrimaryColorFlag;
+		| CVertexBuffer::PrimaryColorFlag | CVertexBuffer::PaletteSkinFlag;
 	for (uint i = 0; i < CVertexBuffer::MaxStage; ++i)
 		supported |= CVertexBuffer::TexCoord0Flag << i;
 	if ((uint32)mb.VertexFlags & ~supported)
@@ -393,9 +394,18 @@ sint CGltfBuilder::addMesh(const std::string &name, const CMesh::CMeshBuild &mb,
 		}
 		return -1;
 	}
-	if (!mb.SkinWeights.empty() || !mb.BlendShapes.empty())
+	if (!mb.BlendShapes.empty())
 	{
-		if (err) *err = "skinning/blend shapes not carried yet";
+		// CMeshBuild::BlendShapes (the plain-CMesh morph carrier) is never filled by the max
+		// route — the MRM morph targets ride `bsList` instead.
+		if (err) *err = "CMeshBuild::BlendShapes not carried";
+		return -1;
+	}
+	bool hasSkin = ((uint32)mb.VertexFlags & CVertexBuffer::PaletteSkinFlag) != 0;
+	if (hasSkin != !mb.SkinWeights.empty()
+		|| (hasSkin && mb.SkinWeights.size() != mb.Vertices.size()))
+	{
+		if (err) *err = "inconsistent skin weight state";
 		return -1;
 	}
 
@@ -438,6 +448,31 @@ sint CGltfBuilder::addMesh(const std::string &name, const CMesh::CMeshBuild &mb,
 					if (err) *err = "non-zero UVW W component not carried";
 					return -1;
 				}
+	}
+
+	// Morph-target validation up front (refuse before emitting anything). buildBlendShapes
+	// iterates the BASE faces and indexes bsList[i]->Faces[j].Corner[k] blindly — equal counts
+	// are its implicit contract; the used-stage W==0 rule matches the base corners.
+	if (bsList)
+	{
+		for (size_t i = 0; i < bsList->size(); ++i)
+		{
+			const CMesh::CMeshBuild *bs = (*bsList)[i];
+			if (bs->Vertices.size() != mb.Vertices.size() || bs->Faces.size() != mb.Faces.size())
+			{
+				if (err) *err = "morph target vertex/face count mismatch";
+				return -1;
+			}
+			for (size_t f = 0; f < bs->Faces.size(); ++f)
+				for (uint c = 0; c < 3; ++c)
+					for (uint s = 0; s < CVertexBuffer::MaxStage; ++s)
+						if (((uint32)mb.VertexFlags & (CVertexBuffer::TexCoord0Flag << s))
+							&& bs->Faces[f].Corner[c].Uvws[s].W != 0.0f)
+						{
+							if (err) *err = "morph target non-zero UVW W component not carried";
+							return -1;
+						}
+		}
 	}
 
 	CJsonValue *jm = m_Meshes->push();
@@ -557,6 +592,95 @@ sint CGltfBuilder::addMesh(const std::string &name, const CMesh::CMeshBuild &mb,
 		CJsonValue *mats = mex->setArray("nel_materials");
 		for (size_t i = 0; i < materialIdx.size(); ++i)
 			mats->pushInt(materialIdx[i]);
+	}
+
+	// Skinning: per-ORIGINAL-vertex weights + joint ids (parallel to nel_vertices — the corner
+	// dedup key already covers them, skin data is a function of the original vertex id) and the
+	// full bone name list applyPhysiqueSkinning produced (the geom build remaps to the used
+	// subset itself).
+	if (hasSkin)
+	{
+		std::vector<float> weights(mb.SkinWeights.size() * 4);
+		std::vector<uint32> joints(mb.SkinWeights.size() * 4);
+		for (size_t i = 0; i < mb.SkinWeights.size(); ++i)
+			for (uint k = 0; k < NL3D_MESH_SKINNING_MAX_MATRIX; ++k)
+			{
+				weights[i * 4 + k] = mb.SkinWeights[i].Weights[k];
+				joints[i * 4 + k] = mb.SkinWeights[i].MatrixId[k];
+			}
+		mex->setInt("nel_skin_weights",
+			addAccessorFloat(&weights[0], mb.SkinWeights.size(), 4, 0, false));
+		mex->setInt("nel_skin_joints", addAccessorU32(&joints[0], joints.size(), 0));
+		CJsonValue *bones = mex->setArray("nel_bones_names");
+		for (size_t i = 0; i < mb.BonesNames.size(); ++i)
+			bones->pushString(mb.BonesNames[i]);
+	}
+
+	// MRM morph targets: per-target full vertex array + corner attribute streams in GLOBAL face
+	// order (index 3*face+corner) — exactly the fields CMRMBuilder::buildBlendShapes reads off
+	// the bs meshes (their own face topology is never consulted; the base's is).
+	if (bsList && !bsList->empty())
+	{
+		mex->setInt("nel_bs_geoms", (sint64)bsList->size());
+		for (size_t i = 0; i < bsList->size(); ++i)
+		{
+			const CMesh::CMeshBuild *bs = (*bsList)[i];
+			char keyBuf[40];
+			{
+				std::vector<float> verts(bs->Vertices.size() * 3);
+				for (size_t v = 0; v < bs->Vertices.size(); ++v)
+				{
+					verts[v * 3 + 0] = bs->Vertices[v].x;
+					verts[v * 3 + 1] = bs->Vertices[v].y;
+					verts[v * 3 + 2] = bs->Vertices[v].z;
+				}
+				snprintf(keyBuf, sizeof(keyBuf), "nel_bs_%u_vertices", (uint)i);
+				mex->setInt(keyBuf, verts.empty() ? -1
+					: addAccessorFloat(&verts[0], bs->Vertices.size(), 3, 0, false));
+			}
+			size_t nCorners = bs->Faces.size() * 3;
+			if (((uint32)mb.VertexFlags & CVertexBuffer::NormalFlag) && nCorners)
+			{
+				std::vector<float> norms(nCorners * 3);
+				for (size_t f = 0; f < bs->Faces.size(); ++f)
+					for (uint c = 0; c < 3; ++c)
+					{
+						const CVector &nv = bs->Faces[f].Corner[c].Normal;
+						norms[(f * 3 + c) * 3 + 0] = nv.x;
+						norms[(f * 3 + c) * 3 + 1] = nv.y;
+						norms[(f * 3 + c) * 3 + 2] = nv.z;
+					}
+				snprintf(keyBuf, sizeof(keyBuf), "nel_bs_%u_normals", (uint)i);
+				mex->setInt(keyBuf, addAccessorFloat(&norms[0], nCorners, 3, 0, false));
+			}
+			if (hasColor && nCorners)
+			{
+				std::vector<uint8> cols(nCorners * 4);
+				for (size_t f = 0; f < bs->Faces.size(); ++f)
+					for (uint c = 0; c < 3; ++c)
+					{
+						const NLMISC::CRGBA &col = bs->Faces[f].Corner[c].Color;
+						cols[(f * 3 + c) * 4 + 0] = col.R;
+						cols[(f * 3 + c) * 4 + 1] = col.G;
+						cols[(f * 3 + c) * 4 + 2] = col.B;
+						cols[(f * 3 + c) * 4 + 3] = col.A;
+					}
+				snprintf(keyBuf, sizeof(keyBuf), "nel_bs_%u_colors", (uint)i);
+				mex->setInt(keyBuf, addAccessorU8Vec4Norm(&cols[0], nCorners));
+			}
+			for (size_t s = 0; s < uvStages.size() && nCorners; ++s)
+			{
+				std::vector<float> uv(nCorners * 2);
+				for (size_t f = 0; f < bs->Faces.size(); ++f)
+					for (uint c = 0; c < 3; ++c)
+					{
+						uv[(f * 3 + c) * 2 + 0] = bs->Faces[f].Corner[c].Uvws[uvStages[s]].U;
+						uv[(f * 3 + c) * 2 + 1] = bs->Faces[f].Corner[c].Uvws[uvStages[s]].V;
+					}
+				snprintf(keyBuf, sizeof(keyBuf), "nel_bs_%u_uvw%u", (uint)i, uvStages[s]);
+				mex->setInt(keyBuf, addAccessorFloat(&uv[0], nCorners, 2, 0, false));
+			}
+		}
 	}
 
 	// Interface weld state (INTERFACE_FILE appdata nodes): the border polygons and the per-

@@ -10,9 +10,9 @@
  * per-node NeL appdata the shape build consumes downstream.
  *
  * Node selection replicates pipeline_max_export_shape's exportFile; special shape classes the
- * mesh path can't carry yet (water/flare/remanence/wavemaker/skinned) tag the node with
- * nel_skip_class instead of a mesh — the differential harness buckets them like the direct
- * route's SKIP lines.
+ * mesh path can't carry yet (water/flare/remanence/wavemaker) tag the node with nel_skip_class
+ * instead of a mesh — the differential harness buckets them like the direct route's SKIP lines.
+ * Physique skinning and MRM morph targets ARE carried (nel_skin_*, nel_bs_* — stage 2).
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
  */
@@ -166,6 +166,72 @@ static NLMISC::CMatrix interfaceToWorldMat(INode &node, SNodeTMCache &tmCache)
 	MAXSCENE::convertMatrix(fromExportSpace, objectToLocal);
 	fromExportSpace.invert();
 	return toWorld * fromExportSpace;
+}
+
+// Morpher blend-shape targets — verbatim replica of pipeline_max_export_shape's buildBSList
+// (itself the reference's getBSMeshBuild): evaluate each Morpher ref 101+i target through the
+// non-skinned mesh path with finalSpace = the SOURCE node's NodeTM when the source is skinned,
+// then copy the source's (welded) corner normals onto interface-vertex corners. Consumed only
+// by the single-mesh MRM branch, exactly like the direct route.
+static void buildBSList(INode &node, SNodeTMCache &tmCache,
+                        const std::vector<CSceneClass *> &mods,
+                        const NL3D::CMesh::CMeshBuild &exportMesh, bool skinned,
+                        bool exportLighting,
+                        std::vector<NL3D::CMesh::CMeshBuild *> &bsList)
+{
+	static const NLMISC::CClassId CLASSID_MORPHER(0x17bb6854, 0xa5cba2a3);
+	CReferenceMaker *morph = NULL;
+	for (uint i = 0; i < mods.size() && !morph; ++i)
+		if (mods[i]->classDesc()->classId() == CLASSID_MORPHER)
+			morph = dynamic_cast<CReferenceMaker *>(mods[i]);
+	if (!morph)
+		return;
+
+	NLMISC::CMatrix finalSpace = NLMISC::CMatrix::Identity;
+	if (skinned)
+		MAXSCENE::convertMatrix(finalSpace, getNodeTM(&node, tmCache));
+
+	for (uint i = 0; i < 100; ++i)
+	{
+		if (101 + i >= morph->nbReferences())
+			break;
+		INode *target = dynamic_cast<INode *>(morph->getReference(101 + i));
+		if (!target)
+			continue;
+		SEvalMesh tmesh;
+		if (!MESHEVAL::evalNodeMesh(*target, tmesh, NULL))
+		{
+			fprintf(stderr, "WARNING: morph target '%s' of '%s' failed mesh eval; channel dropped\n",
+			        nodeName(*target).c_str(), nodeName(node).c_str());
+			continue;
+		}
+		SMaxMeshBaseBuild tMax;
+		NL3D::CMeshBase::CMeshBaseBuild tBase;
+		buildBaseMeshInterface(tBase, tMax, *target, tmCache, getLocalMatrix(*target, tmCache),
+		                       exportLighting);
+		NL3D::CMesh::CMeshBuild *mb = new NL3D::CMesh::CMeshBuild;
+		buildMeshInterface(tmesh, *mb, tBase, tMax, *target, tmCache, false, &finalSpace);
+		if (mb->Vertices.size() != exportMesh.Vertices.size())
+		{
+			fprintf(stderr, "WARNING: morph target '%s' of '%s' has %u verts vs base %u; channel dropped\n",
+			        nodeName(*target).c_str(), nodeName(node).c_str(),
+			        (uint)mb->Vertices.size(), (uint)exportMesh.Vertices.size());
+			delete mb;
+			continue;
+		}
+		// Interface-vert corner normals come from the (welded) base.
+		if (exportMesh.InterfaceVertexFlag.size() != 0)
+		{
+			for (uint k = 0; k < mb->Faces.size() && k < exportMesh.Faces.size(); ++k)
+				for (uint l = 0; l < 3; ++l)
+				{
+					uint vert = mb->Faces[k].Corner[l].Vertex;
+					if (vert < exportMesh.InterfaceVertexFlag.size() && exportMesh.InterfaceVertexFlag.get(vert))
+						mb->Faces[k].Corner[l].Normal = exportMesh.Faces[k].Corner[l].Normal;
+				}
+		}
+		bsList.push_back(mb);
+	}
 }
 
 // Base-mesh context of an export node (materials + base build); LOD slaves build their meshes
@@ -331,10 +397,12 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 		}
 
 		// Special shape classes — same dispatch order as buildShapeForNode; the glTF mesh path
-		// can't carry these yet, so the node is tagged for the harness instead. For slaves only
-		// skinning matters (Physique deforms the slot's vertices in the direct multilod branch;
-		// the wavemaker/remanence/flare/water dispatch never runs on slave nodes).
+		// can't carry these yet, so the node is tagged for the harness instead. Physique is
+		// CARRIED (skinning applies onto the mesh build below, like the direct route); the
+		// Max-4+ Skin modifier skips the whole node exactly like the direct route does. The
+		// direct multilod slave loop re-detects Physique ONLY — mirror that asymmetry.
 		const char *skipClass = NULL;
+		bool hasPhysique = false;
 		if (!isSlave && cid.a() == CLASSID_PARTA_NEL_WAVE_MAKER)
 			skipClass = "wavemaker";
 		else if (!isSlave && getScriptAppDataInt(n, NEL3D_APPDATA_USE_REMANENCE, 0))
@@ -343,20 +411,30 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 			skipClass = "flare";
 		else if (!isSlave && hasWaterMaterial(node))
 			skipClass = "water";
-		else
+		else if (!isSlave)
 		{
 			for (uint m = 0; m < mods.size(); ++m)
 			{
 				NLMISC::CClassId mcid = mods[m]->classDesc()->classId();
 				TSClassId mscid = mods[m]->classDesc()->superClassId();
 				if ((mcid == SCENELIB::CLASSID_PHYSIQUE && mscid == SCLASS_OSMODIFIER)
-					|| PHYSIQUESKIN::isPhysiqueModifier(mods[m])
-					|| PHYSIQUESKIN::isSkinModifier(mods[m]) || mcid == SCENELIB::CLASSID_SKIN)
+					|| PHYSIQUESKIN::isPhysiqueModifier(mods[m]))
+					hasPhysique = true;
+				else if (PHYSIQUESKIN::isSkinModifier(mods[m]) || mcid == SCENELIB::CLASSID_SKIN)
 				{
-					skipClass = "skinned";
+					skipClass = "skinned-skin";
 					break;
 				}
 			}
+		}
+		else
+		{
+			for (uint m = 0; m < mods.size(); ++m)
+				if (PHYSIQUESKIN::isPhysiqueModifier(mods[m]))
+				{
+					hasPhysique = true;
+					break;
+				}
 		}
 		if (skipClass)
 		{
@@ -397,11 +475,17 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 			continue;
 		}
 
+		uint lodCount = isSlave ? 0 : (uint)getScriptAppDataInt(n, NEL3D_APPDATA_LOD_NAME_COUNT, 0);
+
 		// Mesh evaluation + CMeshBuild (identical calls to the direct route's evalAndBuildMesh).
 		// A failed eval or encode tags the node but does NOT abandon it: the direct route drops a
 		// failed slot / standalone shape the same way, but a multilod PARENT still exports from
 		// its surviving slave slots — so the lod extras and nel_shape below must emit regardless.
+		// Exception: a failed Physique decode on the node itself kills the whole shape on the
+		// direct route (only a failed SLAVE decode merely drops its slot) — shapeSuppressed
+		// mirrors that.
 		bool haveMesh = false;
+		bool shapeSuppressed = false;
 		{
 			SEvalMesh mesh;
 			std::vector<std::string> warnings;
@@ -413,26 +497,59 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 			else
 			{
 				NL3D::CMesh::CMeshBuild mb;
-				buildMeshInterface(mesh, mb, ctx->Bbm, ctx->MaxBB, node, tmCache, false);
-				if (IFACEBUILD::useInterfaceMesh(node))
-				{
-					IFACEBUILD::applyInterfaceToMeshBuild(node, mb, interfaceToWorldMat(node, tmCache), tmCache);
-					extras->setBool("nel_interface", true);
-				}
-
+				buildMeshInterface(mesh, mb, ctx->Bbm, ctx->MaxBB, node, tmCache, hasPhysique);
 				std::string err;
-				sint meshIdx = b.addMesh(name, mb, ctx->GltfMats, &err);
-				if (meshIdx < 0)
+				bool physOk = true;
+				if (hasPhysique)
 				{
-					extras->setString("nel_skip_class", "encode");
-					stats.skip("encode");
-					fprintf(stderr, "SKIP gltf '%s': %s\n", name.c_str(), err.c_str());
+					if (!PHYSIQUESKIN::applyPhysiqueSkinning(mb, node, mods, modApps, ssc, &err))
+					{
+						extras->setString("nel_skip_class", "skinned-physique");
+						stats.skip("skinned-physique");
+						fprintf(stderr, "SKIP gltf '%s': Physique skinning failed: %s\n",
+						        name.c_str(), err.c_str());
+						physOk = false;
+						if (!isSlave)
+							shapeSuppressed = true;
+					}
+					else
+						mb.VertexFlags |= NL3D::CVertexBuffer::PaletteSkinFlag;
 				}
-				else
+				if (physOk)
 				{
-					b.attachMesh(nodeIdx[&node], meshIdx);
-					++stats.Meshes;
-					haveMesh = true;
+					if (IFACEBUILD::useInterfaceMesh(node))
+					{
+						// Identity for skinned meshes — their VBs are already world space
+						// (direct route's interfaceToWorldMat skinned case)
+						IFACEBUILD::applyInterfaceToMeshBuild(node, mb,
+							hasPhysique ? NLMISC::CMatrix::Identity : interfaceToWorldMat(node, tmCache),
+							tmCache);
+						extras->setBool("nel_interface", true);
+					}
+
+					// MRM morph targets — the direct route consumes bsList only in the
+					// single-mesh wantMrm branch (multilod slots and plain meshes never do)
+					std::vector<NL3D::CMesh::CMeshBuild *> bsList;
+					if (!isSlave && lodCount == 0
+						&& getScriptAppDataInt(n, NEL3D_APPDATA_LOD_MRM, 0))
+						buildBSList(node, tmCache, mods, mb, hasPhysique, exportLighting, bsList);
+
+					sint meshIdx = b.addMesh(name, mb, ctx->GltfMats, &err,
+					                         bsList.empty() ? NULL : &bsList);
+					for (uint bi = 0; bi < bsList.size(); ++bi)
+						delete bsList[bi];
+					if (meshIdx < 0)
+					{
+						extras->setString("nel_skip_class", "encode");
+						stats.skip("encode");
+						fprintf(stderr, "SKIP gltf '%s': %s\n", name.c_str(), err.c_str());
+					}
+					else
+					{
+						b.attachMesh(nodeIdx[&node], meshIdx);
+						++stats.Meshes;
+						haveMesh = true;
+					}
 				}
 			}
 		}
@@ -483,12 +600,11 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 			continue;
 		}
 
-		uint lodCount = (uint)getScriptAppDataInt(n, NEL3D_APPDATA_LOD_NAME_COUNT, 0);
-
 		// No standalone shape from a meshless node (direct parity: buildShapeForNode returns
 		// NULL when the eval fails) — unless it is a multilod parent, whose shape can still
-		// assemble from the slave slots alone.
-		if (!haveMesh && lodCount == 0)
+		// assemble from the slave slots alone (not after a Physique-decode failure, which kills
+		// the whole shape on the direct route).
+		if (!haveMesh && (lodCount == 0 || shapeSuppressed))
 			continue;
 
 		// Exportable shape node

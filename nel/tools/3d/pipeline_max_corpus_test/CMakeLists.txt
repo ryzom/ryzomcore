@@ -171,11 +171,11 @@ IF (Python3_Interpreter_FOUND)
 	# must be BYTE-IDENTICAL (same extraction + same NL3D build calls on the same host — the
 	# glTF hop is lossless by design; any float-eq is an encoding leak and fails). Direct-only
 	# shapes are the staged-coverage classes (skinned/multilod/...), tracked in the summary.
-	# min-identical pins the co-produced coverage floor (2026-07-14 multilod sweep: 2649
-	# byte-identical shapes + 623 igs, direct-only 968 = skinned 653 + water 221 + remanence 82
-	# + flare 13 - 1 skinned-maxverts the direct route skips too); raise as coverage stages land.
+	# min-identical pins the co-produced coverage floor (2026-07-14 skinning sweep: 3301
+	# byte-identical shapes + 623 igs, direct-only 316 = water 221 + remanence 82 + flare 13,
+	# skinned-maxverts=1 skipped identically by both routes); raise as coverage stages land.
 	ADD_TEST(NAME pipeline_max_gltf_corpus
-		COMMAND ${Python3_EXECUTABLE} gltf_corpus.py --gate --min-identical 2640
+		COMMAND ${Python3_EXECUTABLE} gltf_corpus.py --gate --min-identical 3290
 			--bin $<TARGET_FILE_DIR:pipeline_max_export_shape>
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 	SET_TESTS_PROPERTIES(pipeline_max_gltf_corpus PROPERTIES SKIP_RETURN_CODE 77)

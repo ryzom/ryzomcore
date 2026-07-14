@@ -74,10 +74,13 @@ public:
 
 	// --- meshes ---
 	// Lossless CMeshBuild encoding; materialIdx maps the build's local material ids to glTF
-	// material indices (also emitted as the mesh's nel_materials list). Returns mesh index or
-	// -1 with *err.
+	// material indices (also emitted as the mesh's nel_materials list). SkinWeights/BonesNames
+	// ride nel_skin_* extras when present (PaletteSkinFlag). `bsList` (optional) carries the MRM
+	// morph-target builds as per-target corner streams in global face order — exactly the fields
+	// CMRMBuilder::buildBlendShapes consumes. Returns mesh index or -1 with *err.
 	sint addMesh(const std::string &name, const NL3D::CMesh::CMeshBuild &mb,
-	             const std::vector<sint> &materialIdx, std::string *err);
+	             const std::vector<sint> &materialIdx, std::string *err,
+	             const std::vector<NL3D::CMesh::CMeshBuild *> *bsList = NULL);
 
 	// Top-level asset extras (nel_source etc.)
 	NLGLTF::CJsonValue *assetExtras();

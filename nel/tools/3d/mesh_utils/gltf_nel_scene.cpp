@@ -408,8 +408,147 @@ bool reconstructMeshBuild(const SGltfDoc &doc, const CJsonValue &mesh, const CJs
 		}
 	}
 
+	// Skinning: per-original-vertex weights/joints (parallel to nel_vertices) + the full bone
+	// name list applyPhysiqueSkinning produced on the writer side
+	if ((uint32)mb.VertexFlags & CVertexBuffer::PaletteSkinFlag)
+	{
+		size_t nW = 0, nJ = 0;
+		const float *weights = doc.floats((sint)mex->getInt("nel_skin_weights", -1), "VEC4", 4, nW, err);
+		if (!weights) return false;
+		const uint32 *joints = doc.u32s((sint)mex->getInt("nel_skin_joints", -1), nJ, err);
+		if (!joints) return false;
+		if (nW != mb.Vertices.size() || nJ != nW * 4)
+		{
+			if (err) *err = "nel_skin_* count mismatch";
+			return false;
+		}
+		mb.SkinWeights.resize(nW);
+		for (size_t i = 0; i < nW; ++i)
+			for (uint k = 0; k < NL3D_MESH_SKINNING_MAX_MATRIX; ++k)
+			{
+				mb.SkinWeights[i].Weights[k] = weights[i * 4 + k];
+				mb.SkinWeights[i].MatrixId[k] = joints[i * 4 + k];
+			}
+		const CJsonValue *bones = mex->get("nel_bones_names");
+		for (size_t i = 0; bones && i < bones->size(); ++i)
+			mb.BonesNames.push_back(bones->at(i)->asString());
+	}
+
 	mb.VertLink.clear();
 	mb.MeshVertexProgram = NULL;
+	return true;
+}
+
+// MRM morph-target list from the nel_bs_* mesh extras: per-target full vertex array + corner
+// attribute streams in global face order. The bs meshes' own face topology is never read by
+// CMRMBuilder::buildBlendShapes (it iterates the BASE faces), so topology fields are copied
+// from the base build. Caller owns (and deletes) the returned builds, like the direct route.
+bool reconstructBsList(const SGltfDoc &doc, const CJsonValue &mex, const CMesh::CMeshBuild &base,
+                       std::vector<CMesh::CMeshBuild *> &bsList, std::string *err)
+{
+	sint count = (sint)mex.getInt("nel_bs_geoms", 0);
+	std::vector<uint> uvStages;
+	{
+		const CJsonValue *st = mex.get("nel_uv_stages");
+		for (size_t s = 0; st && s < st->size(); ++s)
+			uvStages.push_back((uint)st->at(s)->asInt());
+	}
+	bool hasColor = ((uint32)base.VertexFlags & CVertexBuffer::PrimaryColorFlag) != 0;
+	bool hasNormal = ((uint32)base.VertexFlags & CVertexBuffer::NormalFlag) != 0;
+	size_t nCorners = base.Faces.size() * 3;
+	for (sint i = 0; i < count; ++i)
+	{
+		char keyBuf[40];
+		CMesh::CMeshBuild *bs = new CMesh::CMeshBuild;
+		bsList.push_back(bs); // caller frees the partial list on failure too
+		bs->VertexFlags = base.VertexFlags;
+		for (uint s = 0; s < CVertexBuffer::MaxStage; ++s)
+		{
+			bs->UVRouting[s] = base.UVRouting[s];
+			bs->NumCoords[s] = base.NumCoords[s];
+		}
+		{
+			size_t nV = 0;
+			snprintf(keyBuf, sizeof(keyBuf), "nel_bs_%u_vertices", (uint)i);
+			const float *v = doc.floats((sint)mex.getInt(keyBuf, -1), "VEC3", 3, nV, err);
+			if (!v) return false;
+			if (nV != base.Vertices.size())
+			{
+				if (err) *err = "morph target vertex count mismatch";
+				return false;
+			}
+			bs->Vertices.resize(nV);
+			for (size_t k = 0; k < nV; ++k)
+				bs->Vertices[k].set(v[k * 3], v[k * 3 + 1], v[k * 3 + 2]);
+		}
+		const float *norms = NULL;
+		const uint8 *cols = NULL;
+		std::vector<const float *> uvs(uvStages.size(), (const float *)NULL);
+		if (hasNormal && nCorners)
+		{
+			size_t n = 0;
+			snprintf(keyBuf, sizeof(keyBuf), "nel_bs_%u_normals", (uint)i);
+			norms = doc.floats((sint)mex.getInt(keyBuf, -1), "VEC3", 3, n, err);
+			if (!norms) return false;
+			if (n != nCorners)
+			{
+				if (err) *err = "morph target normal count mismatch";
+				return false;
+			}
+		}
+		if (hasColor && nCorners)
+		{
+			size_t n = 0;
+			snprintf(keyBuf, sizeof(keyBuf), "nel_bs_%u_colors", (uint)i);
+			cols = doc.u8vec4((sint)mex.getInt(keyBuf, -1), n, err);
+			if (!cols) return false;
+			if (n != nCorners)
+			{
+				if (err) *err = "morph target color count mismatch";
+				return false;
+			}
+		}
+		for (size_t s = 0; s < uvStages.size() && nCorners; ++s)
+		{
+			size_t n = 0;
+			snprintf(keyBuf, sizeof(keyBuf), "nel_bs_%u_uvw%u", (uint)i, uvStages[s]);
+			uvs[s] = doc.floats((sint)mex.getInt(keyBuf, -1), "VEC2", 2, n, err);
+			if (!uvs[s]) return false;
+			if (n != nCorners)
+			{
+				if (err) *err = "morph target uv count mismatch";
+				return false;
+			}
+		}
+		bs->Faces.resize(base.Faces.size());
+		for (size_t f = 0; f < base.Faces.size(); ++f)
+		{
+			CMesh::CFace &face = bs->Faces[f];
+			face.MaterialId = base.Faces[f].MaterialId;
+			face.SmoothGroup = base.Faces[f].SmoothGroup;
+			for (uint c = 0; c < 3; ++c)
+			{
+				CMesh::CCorner &corner = face.Corner[c];
+				corner.Vertex = base.Faces[f].Corner[c].Vertex;
+				size_t at = f * 3 + c;
+				if (norms)
+					corner.Normal.set(norms[at * 3], norms[at * 3 + 1], norms[at * 3 + 2]);
+				for (size_t s = 0; s < uvStages.size(); ++s)
+				{
+					corner.Uvws[uvStages[s]].U = uvs[s][at * 2];
+					corner.Uvws[uvStages[s]].V = uvs[s][at * 2 + 1];
+					corner.Uvws[uvStages[s]].W = 0.0f;
+				}
+				if (cols)
+				{
+					corner.Color.R = cols[at * 4];
+					corner.Color.G = cols[at * 4 + 1];
+					corner.Color.B = cols[at * 4 + 2];
+					corner.Color.A = cols[at * 4 + 3];
+				}
+			}
+		}
+	}
 	return true;
 }
 
@@ -709,10 +848,11 @@ int exportNelGltfScene(const CMeshUtilsSettings &settings)
 			// writer. Slot order feeds CMeshMultiLod::build unchanged (it sorts by DistMax
 			// itself); no optimizeMaterialUsage (fixed shared material list — identity remap).
 
-			// Resolve the slot node+mesh pairs first, so a staged slave class (e.g. skinned)
-			// skips the whole shape before any geometry is built. A slot whose mesh is absent
-			// because the writer's eval failed (nel_skip_class "mesh-eval", or an unselected
-			// node) drops out silently — the direct route drops that slot the same way.
+			// Resolve the slot node+mesh pairs first, so a staged slave class skips the whole
+			// shape before any geometry is built. A slot whose mesh is absent because the
+			// writer's eval or Physique decode failed (nel_skip_class "mesh-eval"/
+			// "skinned-physique", or an unselected node) drops out silently — the direct route
+			// drops that slot the same way.
 			std::vector<std::pair<const CJsonValue *, const CJsonValue *> > slots;
 			std::string stagedSlot;
 			{
@@ -723,7 +863,7 @@ int exportNelGltfScene(const CMeshUtilsSettings &settings)
 				else
 				{
 					std::string sc = extras->getString("nel_skip_class", "");
-					if (sc != "mesh-eval" && !sc.empty())
+					if (sc != "mesh-eval" && sc != "skinned-physique" && !sc.empty())
 						stagedSlot = sc;
 				}
 			}
@@ -748,7 +888,7 @@ int exportNelGltfScene(const CMeshUtilsSettings &settings)
 				{
 					const CJsonValue *sx = slave->get("extras");
 					std::string sc = sx ? sx->getString("nel_skip_class", "") : std::string();
-					if (sc != "mesh-eval" && !sc.empty())
+					if (sc != "mesh-eval" && sc != "skinned-physique" && !sc.empty())
 						stagedSlot = sc;
 					continue;
 				}
@@ -828,14 +968,6 @@ int exportNelGltfScene(const CMeshUtilsSettings &settings)
 		else
 		{
 			bool wantMrm = extras->getBool("nel_lod_mrm", false);
-			if (extras->getBool("nel_has_morpher", false) && wantMrm)
-			{
-				// The direct route builds morph-target bsList meshes into the MRM here (the multilod
-				// path above is exempt — its slot geoms never take morph targets, direct ditto)
-				stats.skip("morpher-mrm");
-				fprintf(stderr, "SKIP gltf-import '%s': MRM morph targets not implemented yet\n", name.c_str());
-				continue;
-			}
 
 			const CJsonValue *jmesh = node->get("mesh");
 			const CJsonValue *mesh = (jmesh && jmesh->isNumber() && meshes) ? meshes->at((size_t)jmesh->asInt()) : NULL;
@@ -860,6 +992,17 @@ int exportNelGltfScene(const CMeshUtilsSettings &settings)
 				continue;
 			}
 
+			// MRM morph targets (nel_bs_* streams — the direct route's buildBSList output)
+			std::vector<CMesh::CMeshBuild *> bsList;
+			if (wantMrm && !reconstructBsList(doc, *mesh->get("extras"), mb, bsList, &err))
+			{
+				for (size_t k = 0; k < bsList.size(); ++k)
+					delete bsList[k];
+				stats.skip("mesh-build");
+				fprintf(stderr, "SKIP gltf-import '%s': %s\n", name.c_str(), err.c_str());
+				continue;
+			}
+
 			// Replay the shape build (buildShapeForNode's mesh path)
 			try
 			{
@@ -867,7 +1010,6 @@ int exportNelGltfScene(const CMeshUtilsSettings &settings)
 				{
 					CMRMParameters parameters;
 					mrmParamsFromExtras(*extras, parameters);
-					std::vector<CMesh::CMeshBuild *> bsList;
 					if (CMeshMRMSkinned::isCompatible(mb) && bsList.empty())
 					{
 						CMeshMRMSkinned *meshMRMSkinned = new CMeshMRMSkinned;
@@ -896,9 +1038,13 @@ int exportNelGltfScene(const CMeshUtilsSettings &settings)
 					m->optimizeMaterialUsage(materialRemap);
 					meshBase = m;
 				}
+				for (size_t k = 0; k < bsList.size(); ++k)
+					delete bsList[k];
 			}
 			catch (const NLMISC::Exception &e)
 			{
+				for (size_t k = 0; k < bsList.size(); ++k)
+					delete bsList[k];
 				stats.skip("build");
 				fprintf(stderr, "SKIP gltf-import '%s': build failed: %s\n", name.c_str(), e.what());
 				continue;
