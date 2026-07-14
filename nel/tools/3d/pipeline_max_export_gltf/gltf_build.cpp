@@ -83,6 +83,7 @@ CGltfBuilder::CGltfBuilder()
 	m_Accessors = m_Root.setArray("accessors");
 	m_BufferViews = m_Root.setArray("bufferViews");
 	m_Skins = NULL;
+	m_Animations = NULL;
 	m_Root.setArray("buffers"); // filled at save
 }
 
@@ -207,6 +208,42 @@ sint CGltfBuilder::addSkin(const std::vector<sint> &joints, const float *ibms)
 void CGltfBuilder::setNodeSkin(sint node, sint skin)
 {
 	m_NodeVals[(size_t)node]->setInt("skin", skin);
+}
+
+void CGltfBuilder::addAnimChannel(const std::string &animName, sint node, const char *path,
+                                  const std::vector<float> &times, const std::vector<float> &values,
+                                  int nComp)
+{
+	if (!m_Animations)
+		m_Animations = m_Root.setArray("animations");
+	CJsonValue *anim = NULL;
+	if (m_Animations->size())
+		anim = const_cast<CJsonValue *>(m_Animations->at(m_Animations->size() - 1));
+	if (!anim || anim->getString("name", "") != animName)
+	{
+		anim = m_Animations->push();
+		anim->setString("name", animName);
+		anim->setArray("samplers");
+		anim->setArray("channels");
+	}
+	// Time accessor needs min/max per spec; no bufferView target (not vertex data).
+	sint tbv = addBufferView(&times[0], times.size() * 4, 0);
+	float tmin = times[0], tmax = times[times.size() - 1];
+	sint tacc = addAccessor(tbv, COMP_FLOAT, "SCALAR", times.size(), false, &tmin, &tmax, 1);
+	sint vbv = addBufferView(&values[0], values.size() * 4, 0);
+	sint vacc = addAccessor(vbv, COMP_FLOAT, nComp == 4 ? "VEC4" : "VEC3",
+	                        values.size() / nComp, false, NULL, NULL, 0);
+	CJsonValue *samplers = anim->getMutable("samplers");
+	CJsonValue *sampler = samplers->push();
+	sampler->setInt("input", tacc);
+	sampler->setString("interpolation", "LINEAR");
+	sampler->setInt("output", vacc);
+	CJsonValue *channels = anim->getMutable("channels");
+	CJsonValue *channel = channels->push();
+	channel->setInt("sampler", (sint64)samplers->size() - 1);
+	CJsonValue *target = channel->setObject("target");
+	target->setInt("node", node);
+	target->setString("path", path);
 }
 
 // ---------------------------------------------------------------------------------------------

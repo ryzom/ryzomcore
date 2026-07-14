@@ -42,6 +42,9 @@
 #include <nel/misc/file.h>
 #include <nel/misc/path.h>
 #include <nel/3d/register_3d.h>
+#include <nel/3d/animation.h>
+#include <nel/3d/u_track.h>
+#include <nel/misc/mem_stream.h>
 
 #include <cstdio>
 #include <cstring>
@@ -933,10 +936,91 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 		std::vector<uint8> anim;
 		if (pmbExportAnimForGltf(maxPath, anim) == 1 && !anim.empty())
 		{
+			std::string animName = NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(maxPath));
 			CJsonValue *ja = b.assetExtras()->setObject("nel_anim");
-			ja->setString("name", NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(maxPath)));
+			ja->setString("name", animName);
 			ja->set("data")->setString(bytesToHex(anim));
 			stats.Anims = 1;
+
+			// Sampled glTF animation channels (viewing tier): the blob deserialized back into a
+			// CAnimation, TRS tracks LINEAR-sampled at 30 fps onto the nodes whose names match
+			// the track prefixes (rig rest pose landed with the skins tier). Lossy view — DCC
+			// edits do not flow back; the blob stays authoritative. Non-TRS tracks (materials,
+			// morph factors, note tracks) are not sampled yet.
+			try
+			{
+				NLMISC::CMemStream ms(true);
+				ms.fill(&anim[0], (uint32)anim.size());
+				NL3D::CAnimation na;
+				na.serial(ms);
+				std::map<std::string, sint> byName;
+				for (uint i = 0; i < allNodes.size(); ++i)
+					byName[nodeTRS[allNodes[i]].Name] = nodeIdx[allNodes[i]];
+				std::set<std::string> trackNames;
+				na.getTrackNames(trackNames);
+				const float fps = 30.0f;
+				for (std::set<std::string>::const_iterator tn = trackNames.begin(); tn != trackNames.end(); ++tn)
+				{
+					std::string::size_type dot = tn->rfind('.');
+					if (dot == std::string::npos)
+						continue;
+					std::string chan = tn->substr(dot + 1);
+					const char *path;
+					int nComp;
+					if (chan == "pos") { path = "translation"; nComp = 3; }
+					else if (chan == "rotquat") { path = "rotation"; nComp = 4; }
+					else if (chan == "scale") { path = "scale"; nComp = 3; }
+					else continue;
+					std::map<std::string, sint>::iterator ni = byName.find(tn->substr(0, dot));
+					if (ni == byName.end())
+						continue;
+					NL3D::UTrack *tr = na.getTrackByName(tn->c_str());
+					if (!tr)
+						continue;
+					float t0 = tr->getBeginTime(), t1 = tr->getEndTime();
+					uint n = (t1 > t0) ? (uint)((t1 - t0) * fps + 0.5f) + 1 : 1;
+					std::vector<float> times(n), values;
+					values.reserve((size_t)n * nComp);
+					NLMISC::CQuat prevQ;
+					bool ok = true, havePrev = false;
+					for (uint s = 0; s < n && ok; ++s)
+					{
+						float t = (s + 1 == n) ? t1 : t0 + (float)s / fps;
+						times[s] = t;
+						if (nComp == 4)
+						{
+							NLMISC::CQuat q;
+							ok = tr->interpolate(t, q);
+							// hemisphere-align consecutive samples so viewers' slerp stays short
+							if (havePrev && (q.x * prevQ.x + q.y * prevQ.y + q.z * prevQ.z + q.w * prevQ.w) < 0.0f)
+							{
+								q.x = -q.x; q.y = -q.y; q.z = -q.z; q.w = -q.w;
+							}
+							prevQ = q;
+							havePrev = true;
+							values.push_back(q.x);
+							values.push_back(q.y);
+							values.push_back(q.z);
+							values.push_back(q.w);
+						}
+						else
+						{
+							NLMISC::CVector v;
+							ok = tr->interpolate(t, v);
+							values.push_back(v.x);
+							values.push_back(v.y);
+							values.push_back(v.z);
+						}
+					}
+					if (!ok || times.empty())
+						continue;
+					b.addAnimChannel(animName, ni->second, path, times, values, nComp);
+				}
+			}
+			catch (const std::exception &e)
+			{
+				fprintf(stderr, "WARNING: sampled animation channels failed: %s\n", e.what());
+			}
 		}
 	}
 

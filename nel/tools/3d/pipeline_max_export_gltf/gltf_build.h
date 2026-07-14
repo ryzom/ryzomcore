@@ -94,6 +94,13 @@ public:
 	sint addSkin(const std::vector<sint> &joints, const float *ibms);
 	void setNodeSkin(sint node, sint skin);
 
+	// --- animations (viewing tier) ---
+	// One glTF animation (created lazily on first channel). `path` is translation/rotation/
+	// scale; values has nComp floats per time sample (3 or 4). LINEAR interpolation.
+	void addAnimChannel(const std::string &animName, sint node, const char *path,
+	                    const std::vector<float> &times, const std::vector<float> &values,
+	                    int nComp);
+
 	// Plain viewing mesh (positions/normals/uv + triangle indices, no material, no nel_*
 	// reconstruction data) — used for the tessellated nel_proxy meshes (zones).
 	sint addProxyMesh(const std::string &name, const std::vector<float> &pos,
@@ -127,6 +134,7 @@ private:
 	NLGLTF::CJsonValue *m_Accessors;
 	NLGLTF::CJsonValue *m_BufferViews;
 	NLGLTF::CJsonValue *m_Skins; // lazily created — most files have none
+	NLGLTF::CJsonValue *m_Animations; // lazily created (sampled viewing tier)
 	std::vector<NLGLTF::CJsonValue *> m_NodeVals;
 	std::map<std::string, sint> m_MaterialDedup;
 	std::map<std::string, sint> m_ImageDedup;

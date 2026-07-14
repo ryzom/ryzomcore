@@ -200,6 +200,15 @@ IF (Python3_Interpreter_FOUND)
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 	SET_TESTS_PROPERTIES(pipeline_max_gltf_skins PROPERTIES SKIP_RETURN_CODE 77)
 
+	# gltf_anim_channels_test.py: behavior test for the sampled glTF animation channels (TRS
+	# tracks from the nel_anim blob, 30 fps LINEAR, blob authoritative). One-clip fixture:
+	# presence / channel shape / well-formedness / unit hemisphere-aligned quaternions.
+	ADD_TEST(NAME pipeline_max_gltf_anim_channels
+		COMMAND ${Python3_EXECUTABLE} gltf_anim_channels_test.py
+			--bin $<TARGET_FILE_DIR:pipeline_max_export_shape>
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+	SET_TESTS_PROPERTIES(pipeline_max_gltf_anim_channels PROPERTIES SKIP_RETURN_CODE 77)
+
 	# Same shape corpus through the VS2008/Wine x87 reference-codegen build, same rationale as
 	# the other *_vs2008 gates: T1/T2 byte-identity is codegen-independent, and the T3 FLOATEQ
 	# tier (2e-6/32-ULP, normals 1e-4) must hold under the Max-2010-matching compiler/float
