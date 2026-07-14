@@ -876,6 +876,45 @@ int exportNelGltfScene(const CMeshUtilsSettings &settings)
 		}
 	}
 
+	// Vegetables: the nel_vegets blob list -> <name>.veget, exact bytes verbatim.
+	{
+		const CJsonValue *asset = doc.Json.get("asset");
+		const CJsonValue *aex = asset ? asset->get("extras") : NULL;
+		const CJsonValue *vegets = aex ? aex->get("nel_vegets") : NULL;
+		for (size_t vi = 0; vegets && vi < vegets->size(); ++vi)
+		{
+			const CJsonValue *entry = vegets->at(vi);
+			std::string name = entry->getString("name", "");
+			std::vector<uint8> bytes;
+			if (name.empty() || name.find("..") != std::string::npos
+				|| !hexToBytes(entry->getString("data", ""), bytes) || bytes.empty())
+			{
+				fprintf(stderr, "ERROR: bad nel_vegets entry %u\n", (uint)vi);
+				ret = EXIT_FAILURE;
+				continue;
+			}
+			std::string outPath2 = outDir + name + ".veget";
+			try
+			{
+				COFile f;
+				if (!f.open(outPath2))
+				{
+					fprintf(stderr, "ERROR: cannot open %s\n", outPath2.c_str());
+					ret = EXIT_FAILURE;
+					continue;
+				}
+				f.serialBuffer(&bytes[0], (uint)bytes.size());
+				f.close();
+				++stats.Others;
+			}
+			catch (const NLMISC::Exception &e2)
+			{
+				fprintf(stderr, "ERROR: %s: %s\n", outPath2.c_str(), e2.what());
+				ret = EXIT_FAILURE;
+			}
+		}
+	}
+
 	// Single-output process blobs (full parity): nel_swt -> <name>.swt, nel_pacs_prim ->
 	// <name>.pacs_prim — the shared whole-file flows' exact bytes, re-emitted verbatim.
 	{

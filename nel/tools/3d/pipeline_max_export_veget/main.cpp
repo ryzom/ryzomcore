@@ -49,6 +49,7 @@
 #include <nel/3d/mesh.h>
 #include <nel/3d/register_3d.h>
 #include <nel/3d/vegetable_shape.h>
+#include <nel/misc/mem_stream.h>
 
 #include <cstdio>
 #include <cstring>
@@ -226,10 +227,14 @@ static bool buildVegetableShape(INode &node, SNodeTMCache &tmCache, NL3D::CVeget
 }
 
 // ---------------------------------------------------------------------------------------------
-// Per-file export
+// Per-file export — the whole-file flow shared by the standalone tool and the max2gltf writer
+// (PMB_VEGET_NO_MAIN + nel_vegets blob list): one code path, the blob and the tool's files
+// cannot drift. Serialization uses the export-era stream flags (saved/restored — the writer
+// process doesn't set them globally like this tool's main does).
 
-static int exportFile(const std::string &maxPath, const std::string &outDir, bool exportLighting,
-                      uint &exported, uint &skipped)
+int pmbExportVegetsForGltf(const std::string &maxPath, bool exportLighting,
+                           std::vector<std::pair<std::string, std::vector<uint8> > > &out,
+                           uint &skipped)
 {
 	SLoadedMax lm;
 	if (!loadMaxFile(maxPath, lm))
@@ -247,6 +252,11 @@ static int exportFile(const std::string &maxPath, const std::string &outDir, boo
 		allNodes.push_back(node);
 	}
 
+	bool oldVB = NL3D::CVertexBuffer::SerialOldPreferredMemory;
+	bool oldIB = NL3D::CIndexBuffer::SerialOldPreferredMemory;
+	NL3D::CVertexBuffer::SerialOldPreferredMemory = true;
+	NL3D::CIndexBuffer::SerialOldPreferredMemory = true;
+
 	for (uint i = 0; i < allNodes.size(); ++i)
 	{
 		INode &node = *allNodes[i];
@@ -254,7 +264,6 @@ static int exportFile(const std::string &maxPath, const std::string &outDir, boo
 			continue;
 
 		std::string name = nodeName(node);
-		std::string outPath = outDir + "/" + name + ".veget";
 
 		try
 		{
@@ -265,31 +274,28 @@ static int exportFile(const std::string &maxPath, const std::string &outDir, boo
 				continue;
 			}
 
-			NLMISC::COFile file;
-			if (!file.open(outPath))
-			{
-				fprintf(stderr, "ERROR: cannot open %s for writing\n", outPath.c_str());
-				++skipped;
-				continue;
-			}
-			shape.serial(file);
-			file.close();
-			++exported;
+			NLMISC::CMemStream ms;
+			shape.serial(ms);
+			out.push_back(std::make_pair(name,
+				std::vector<uint8>(ms.buffer(), ms.buffer() + ms.length())));
 			if (g_verbose)
-				printf("OK %s\n", outPath.c_str());
+				printf("OK %s.veget\n", name.c_str());
 		}
 		catch (const NLMISC::Exception &e)
 		{
-			fprintf(stderr, "ERROR: veget serialization failed for %s: %s\n", outPath.c_str(), e.what());
+			fprintf(stderr, "ERROR: veget serialization failed for %s: %s\n", name.c_str(), e.what());
 			++skipped;
 		}
 	}
 
+	NL3D::CVertexBuffer::SerialOldPreferredMemory = oldVB;
+	NL3D::CIndexBuffer::SerialOldPreferredMemory = oldIB;
 	return 0;
 }
 
 // ---------------------------------------------------------------------------------------------
 
+#ifndef PMB_VEGET_NO_MAIN
 int main(int argc, char **argv)
 {
 	NLMISC::CApplicationContext appContext;
@@ -348,10 +354,33 @@ int main(int argc, char **argv)
 	}
 	setDatabaseRoot(dbRoot);
 
-	uint exported = 0, skipped = 0;
-	int ret = exportFile(input, outDir, exportLighting, exported, skipped);
-	printf("EXPORTED %u vegets, %u skipped\n", exported, skipped);
+	uint skipped = 0;
+	std::vector<std::pair<std::string, std::vector<uint8> > > files;
+	int ret = pmbExportVegetsForGltf(input, exportLighting, files, skipped);
+	for (size_t i = 0; i < files.size(); ++i)
+	{
+		std::string outPath = outDir + "/" + files[i].first + ".veget";
+		NLMISC::COFile file;
+		if (!file.open(outPath))
+		{
+			fprintf(stderr, "ERROR: cannot open %s for writing\n", outPath.c_str());
+			++skipped;
+			continue;
+		}
+		try
+		{
+			file.serialBuffer(&files[i].second[0], (uint)files[i].second.size());
+			file.close();
+		}
+		catch (const NLMISC::Exception &e)
+		{
+			fprintf(stderr, "ERROR: write failed for %s: %s\n", outPath.c_str(), e.what());
+			++skipped;
+		}
+	}
+	printf("EXPORTED %u vegets, %u skipped\n", (uint)files.size(), skipped);
 	return ret;
 }
+#endif /* PMB_VEGET_NO_MAIN */
 
 /* end of file */

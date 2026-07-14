@@ -148,6 +148,12 @@ int pmbExportAnimForGltf(const std::string &maxPath, std::vector<uint8> &animOut
 int pmbExportSwtForGltf(const std::string &maxPath, std::vector<uint8> &out);
 int pmbExportPacsPrimForGltf(const std::string &maxPath, std::vector<uint8> &out);
 
+// From ../pipeline_max_export_veget/main.cpp (PMB_VEGET_NO_MAIN): the veget process's
+// whole-file flow, one (node name, .veget bytes) pair per vegetable node.
+int pmbExportVegetsForGltf(const std::string &maxPath, bool exportLighting,
+                           std::vector<std::pair<std::string, std::vector<uint8> > > &out,
+                           uint &skipped);
+
 static std::string bytesToHex(const std::vector<uint8> &bytes)
 {
 	std::string hex;
@@ -1171,6 +1177,24 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 			js->setString("name", NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(maxPath)));
 			js->set("data")->setString(bytesToHex(bytes));
 			++stats.Others;
+		}
+	}
+
+	// Vegetables (.veget): per-node outputs from the veget process's whole-file flow, in the
+	// nel_vegets blob list (names as authored — the process writes <node>.veget).
+	{
+		std::vector<std::pair<std::string, std::vector<uint8> > > vegets;
+		uint vskipped = 0;
+		if (pmbExportVegetsForGltf(maxPath, exportLighting, vegets, vskipped) == 0 && !vegets.empty())
+		{
+			CJsonValue *jv = b.assetExtras()->setArray("nel_vegets");
+			for (size_t i = 0; i < vegets.size(); ++i)
+			{
+				CJsonValue *e = jv->push();
+				e->setString("name", vegets[i].first);
+				e->set("data")->setString(bytesToHex(vegets[i].second));
+				++stats.Others;
+			}
 		}
 	}
 

@@ -174,11 +174,11 @@ IF (Python3_Interpreter_FOUND)
 	# The sweep unions the shape+ig corpora with the 4524-file anim corpus (nel_anim blob) and
 	# the ligo zone corpus (nel_zones blob; per-ecosystem smallbank), ~7370 files total. The
 	# floors pin coverage (2026-07-14 singles sweep: 29910 byte-identical shapes + 625 igs +
-	# 5046 anims + 2640 zone files + 504 process files (swt/pacs_prim), 0 direct-only,
+	# 5046 anims + 2640 zone files + 630 process files (swt/pacs_prim/veget), 0 direct-only,
 	# 0 via-only — TOTAL co-production; the only skips, mesh-eval=253 and skinned-maxverts=1,
 	# are identical on both routes).
 	ADD_TEST(NAME pipeline_max_gltf_corpus
-		COMMAND ${Python3_EXECUTABLE} gltf_corpus.py --gate --min-identical 29880 --min-anims 5040 --min-zones 2630 --min-singles 500
+		COMMAND ${Python3_EXECUTABLE} gltf_corpus.py --gate --min-identical 29880 --min-anims 5040 --min-zones 2630 --min-singles 625
 			--bin $<TARGET_FILE_DIR:pipeline_max_export_shape>
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 	SET_TESTS_PROPERTIES(pipeline_max_gltf_corpus PROPERTIES SKIP_RETURN_CODE 77)

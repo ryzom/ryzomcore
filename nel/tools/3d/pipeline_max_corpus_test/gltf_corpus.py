@@ -25,6 +25,7 @@ import anim_corpus   # anim-source enumeration (fauna/characters/sky AnimSourceD
 import zone_corpus   # ligo zone source enumeration (per-ecosystem zonematerial/transition/special)
 import swt_corpus    # swt-source enumeration helper (SwtSourceDirectories)
 import pacs_prim_corpus  # pacs_prim source enumeration (per-ecosystem vegetations)
+import veget_corpus  # microveget source enumeration (VegetSourceDirectories)
 
 SKIP_CODE = 77
 
@@ -122,6 +123,15 @@ def main():
             seen_paths.add(p)
             pacs_extra.append(("pacs/" + eco, p))
     corpus = corpus + pacs_extra
+    veget_paths = set()
+    veget_extra = []
+    for item in veget_corpus.enumerate_corpus(args.graphics):
+        p = item[-1]
+        veget_paths.add(p)
+        if p not in seen_paths:
+            seen_paths.add(p)
+            veget_extra.append(("veget", p))
+    corpus = corpus + veget_extra
     if args.only:
         corpus = [c for c in corpus if args.only in c[1]]
     if args.project:
@@ -135,6 +145,7 @@ def main():
     zone_bin = os.path.join(args.bin, "pipeline_max_export_zone")
     swt_bin = os.path.join(args.bin, "pipeline_max_export_swt")
     pacs_bin = os.path.join(args.bin, "pipeline_max_export_pacs_prim")
+    veget_bin = os.path.join(args.bin, "pipeline_max_export_veget")
     ps_paths = [d for d in (os.path.expanduser("~/pipeline_export/common/sfx/ps"),) if os.path.isdir(d)]
 
     os.makedirs(args.out, exist_ok=True)
@@ -279,6 +290,26 @@ def main():
             singles.append(("pacs_prim", dpath if os.path.isfile(dpath) else None,
                             via_pacs if os.path.isfile(via_pacs) else None))
 
+        # Veget differential: direct per-node .veget files vs the nel_vegets blob re-emission
+        # (the via reader writes them into the main -d dir).
+        def vegets_in(d):
+            out = {}
+            if os.path.isdir(d):
+                for f in os.listdir(d):
+                    if f.endswith(".veget"):
+                        out[f] = os.path.join(d, f)
+            return out
+
+        via_vegets = vegets_in(v_dir)
+        direct_vegets = {}
+        if path in veget_paths or via_vegets:
+            dvg_dir = os.path.join(base, "direct_veget")
+            os.makedirs(dvg_dir, exist_ok=True)
+            r = subprocess.run([veget_bin, "--db", args.graphics, path, dvg_dir],
+                               capture_output=True, text=True, timeout=300)
+            res["veget_rc"] = r.returncode
+            direct_vegets = vegets_in(dvg_dir)
+
         via_zones = zones_in(vz_dir)
         zone_refused = False
         if path in zone_banks:
@@ -373,6 +404,21 @@ def main():
                 via_only.append("zone:" + name)
                 mismatch = True
         single_ident = 0
+        for name, dpath in sorted(direct_vegets.items()):
+            vpath = via_vegets.get(name)
+            if not vpath:
+                diff.append("veget-missing:" + name)
+                mismatch = True
+                continue
+            if open(dpath, "rb").read() == open(vpath, "rb").read():
+                single_ident += 1
+            else:
+                mismatch = True
+                diff.append("veget:" + name)
+        for name in sorted(via_vegets):
+            if name not in direct_vegets:
+                via_only.append("veget:" + name)
+                mismatch = True
         for (label, dpath, vpath) in singles:
             if dpath and not vpath:
                 diff.append(label + "-missing")
@@ -428,11 +474,12 @@ def main():
             continue
         if res.get("direct_rc") != 0 or res.get("gltf_rc") != 0 or res.get("import_rc") != 0 \
            or res.get("ig_rc", 0) != 0 or res.get("anim_rc", 0) != 0 or res.get("zone_rc", 0) != 0 \
-           or res.get("swt_rc", 0) != 0 or res.get("pacs_rc", 0) != 0:
-            tool_fail.append("%s (rc d=%s g=%s i=%s ig=%s a=%s z=%s s=%s p=%s)"
+           or res.get("swt_rc", 0) != 0 or res.get("pacs_rc", 0) != 0 or res.get("veget_rc", 0) != 0:
+            tool_fail.append("%s (rc d=%s g=%s i=%s ig=%s a=%s z=%s s=%s p=%s v=%s)"
                              % (res["path"], res.get("direct_rc"), res.get("gltf_rc"),
                                 res.get("import_rc"), res.get("ig_rc", 0), res.get("anim_rc", 0),
-                                res.get("zone_rc", 0), res.get("swt_rc", 0), res.get("pacs_rc", 0)))
+                                res.get("zone_rc", 0), res.get("swt_rc", 0), res.get("pacs_rc", 0),
+                                res.get("veget_rc", 0)))
         ident += res.get("ident", 0)
         ig_ident += res.get("ig_ident", 0)
         anim_ident += res.get("anim_ident", 0)
