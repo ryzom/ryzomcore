@@ -29,6 +29,8 @@ struct CMeshUtilsSettings
 	// Absolute Paths
 	std::string SourceFilePath;
 	std::string DestinationDirectoryPath;
+	// With-coarse-mesh shape output (nel-extras glTF import route; empty = same as destination).
+	std::string ShapeCoarseDirectoryPath;
 	std::string ToolDependLog;
 	std::string ToolErrorLog;
 

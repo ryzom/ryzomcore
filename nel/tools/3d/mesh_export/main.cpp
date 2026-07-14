@@ -32,6 +32,7 @@ int main(int argc, char *argv[])
 	NLMISC::CCmdArgs args;
 
 	args.addArg("d", "dst", "destination", "Destination directory path");
+	args.addArg("", "coarse-dst", "destination", "With-coarse-mesh shape destination directory (nel-extras glTF import; defaults to dst)");
 	args.addArg("", "dependlog", "log", "Dependencies log path");
 	args.addArg("", "errorlog", "log", "Errors log path");
 	args.addArg("", "no-nel-extras", "", "Ignore nel_* per-node glTF extras; use Decompose(mTransformation) instead. Validation flag — see wiki: nel_gltf_extras.md.");
@@ -66,6 +67,9 @@ int main(int argc, char *argv[])
 			settings.DestinationDirectoryPath = filePath + "_export";
 
 		settings.DestinationDirectoryPath = NLMISC::CPath::standardizePath(settings.DestinationDirectoryPath);
+
+		if (args.haveLongArg("coarse-dst"))
+			settings.ShapeCoarseDirectoryPath = NLMISC::CPath::standardizePath(args.getLongArg("coarse-dst").front());
 
 		if (args.haveLongArg("dependlog"))
 			settings.ToolDependLog = args.getLongArg("dependlog").front();

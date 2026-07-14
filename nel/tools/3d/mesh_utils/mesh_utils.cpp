@@ -46,6 +46,7 @@
 #include "assimp_material.h"
 #include "assimp_shape.h"
 #include "assimp_skel.h"
+#include "gltf_nel_scene.h"
 
 CMeshUtilsSettings::CMeshUtilsSettings()
 	: IgnoreNelExtras(false)
@@ -288,6 +289,11 @@ void exportShapes(CMeshUtilsContext &context)
 // TODO: Separate load scene and save scene functions
 int exportScene(const CMeshUtilsSettings &settings)
 {
+	// nel-extras glTF (max2gltf output): exact-tier import through the glTF JSON directly, no
+	// assimp — see gltf_nel_scene.h. --no-nel-extras forces the generic assimp route.
+	if (!settings.IgnoreNelExtras && isNelGltfFile(settings.SourceFilePath))
+		return exportNelGltfScene(settings);
+
 	CMeshUtilsContext context(settings);
 	NLMISC::CFile::createDirectoryTree(settings.DestinationDirectoryPath);
 

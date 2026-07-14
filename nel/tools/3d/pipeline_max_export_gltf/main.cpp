@@ -1,0 +1,556 @@
+/**
+ * \file main.cpp
+ * \brief max2gltf: whole-.max-file conversion to glTF 2.0 with nel_* extras (wiki
+ * drafts/max2gltf_plan.md stage 1). Branches at the pre-build model: the same scene_lib/
+ * mesh_eval/material_build/mesh_build extraction the direct .shape exporter consumes feeds the
+ * glTF encoder, so glTF fidelity measures format loss only, never decode drift. One .gltf +
+ * .bin per .max: the full node hierarchy (every node, bit-exact TRS extras), evaluated meshes
+ * on the nodes the shape process would export (plus LOD slaves, which the direct route folds
+ * into their parent's CMeshMultiLod), materials as PBR interop + exact nel_* extras, and the
+ * per-node NeL appdata the shape build consumes downstream.
+ *
+ * Node selection replicates pipeline_max_export_shape's exportFile; special shape classes the
+ * mesh path can't carry yet (water/flare/remanence/wavemaker/skinned) tag the node with
+ * nel_skip_class instead of a mesh — the differential harness buckets them like the direct
+ * route's SKIP lines.
+ * \author Jan Boon (Kaetemi)
+ * \author Claude Fable 5
+ */
+
+/*
+ * Copyright (C) 2026  by authors
+ *
+ * This file is part of RYZOM CORE PIPELINE.
+ * RYZOM CORE PIPELINE is free software: you can redistribute it
+ * and/or modify it under the terms of the GNU Affero General Public
+ * License as published by the Free Software Foundation, either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * RYZOM CORE PIPELINE is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public
+ * License along with RYZOM CORE PIPELINE.  If not, see
+ * <http://www.gnu.org/licenses/>.
+ */
+
+#include <nel/misc/types_nl.h>
+#include <nel/misc/app_context.h>
+#include <nel/misc/common.h>
+#include <nel/misc/file.h>
+#include <nel/misc/path.h>
+#include <nel/3d/register_3d.h>
+
+#include <cstdio>
+#include <cstring>
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
+
+#include "../pipeline_max_export_shape/scene_lib.h"
+#include "../pipeline_max_export_common/db_path.h"
+#include "../pipeline_max_export_shape/mesh_eval.h"
+#include "../pipeline_max_export_shape/material_build.h"
+#include "../pipeline_max_export_shape/mesh_build.h"
+#include "../pipeline_max_export_shape/interface_build.h"
+#include "../pipeline_max_export_common/physique_skin.h"
+
+#include "../pipeline_max/builtin/scene_impl.h"
+#include "../pipeline_max/builtin/i_node.h"
+#include "../pipeline_max/builtin/node_impl.h"
+
+#include "gltf_build.h"
+
+using namespace PIPELINE::MAX;
+using namespace PIPELINE::MAX::BUILTIN;
+using namespace MAXMATH;
+using namespace SCENELIB;
+using namespace MESHEVAL;
+using namespace MATBUILD;
+using namespace MESHBUILD;
+using namespace GLTFBUILD;
+using namespace NLGLTF;
+
+// NeL export AppData sub-ids (plugin_max/nel_mesh_lib/export_appdata.h)
+#define NEL3D_APPDATA_LOD_NAME_COUNT 1423062537
+#define NEL3D_APPDATA_LOD_NAME 1423062538
+#define NEL3D_APPDATA_LOD_BLEND_IN 1423062548
+#define NEL3D_APPDATA_LOD_BLEND_OUT 1423062549
+#define NEL3D_APPDATA_LOD_COARSE_MESH 1423062550
+#define NEL3D_APPDATA_LOD_DYNAMIC_MESH 1423062551
+#define NEL3D_APPDATA_LOD_DIST_MAX 1423062552
+#define NEL3D_APPDATA_LOD_BLEND_LENGTH 1423062553
+#define NEL3D_APPDATA_LOD_MRM 1423062554
+#define NEL3D_APPDATA_ACCEL 1423062561
+#define NEL3D_APPDATA_DONOTEXPORT 1423062565
+#define NEL3D_APPDATA_COLLISION 1423062613
+#define NEL3D_APPDATA_COLLISION_EXTERIOR 1423062614
+#define NEL3D_APPDATA_USE_REMANENCE 1423062631
+#define NEL3D_APPDATA_AUTOMATIC_ANIMATION 1423062617
+#define NEL3D_APPDATA_EXPORT_ANIMATED_MATERIALS 1423062587
+
+#define CLASSID_PARTA_NEL_PS 0x58ce2893
+#define CLASSID_PARTA_NEL_FLARE 0x4e913532
+#define CLASSID_PARTA_NEL_WAVE_MAKER 0x77e24828
+static const NLMISC::CClassId CLASSID_PACS_BOX(0x7f374277, 0x5d3971df);
+static const NLMISC::CClassId CLASSID_PACS_CYL(0x62a56810, 0x4b3d601c);
+static const NLMISC::CClassId CLASSID_MAP_EXTENDER(0x2ec82081, 0x045a6271);
+
+static bool g_verbose = false;
+
+struct SExportStats
+{
+	uint Meshes;
+	uint Skipped;
+	std::map<std::string, uint> SkipReasons;
+	SExportStats() : Meshes(0), Skipped(0) { }
+	void skip(const std::string &reason)
+	{
+		++Skipped;
+		++SkipReasons[reason];
+	}
+};
+
+static bool isGeometryOrShape(CSceneClass *base)
+{
+	if (!base) return false;
+	TSClassId scid = base->classDesc()->superClassId();
+	return scid == SCLASS_GEOMOBJECT || scid == SCLASS_SHAPE;
+}
+
+static INode *rootOf(INode *node)
+{
+	INode *cur = node;
+	int guard = 64;
+	while (cur && guard-- > 0)
+	{
+		if (!dynamic_cast<CNodeImpl *>(cur)) break;
+		INode *p = cur->parent();
+		if (!p || !dynamic_cast<CNodeImpl *>(p)) break;
+		cur = p;
+	}
+	return cur;
+}
+
+static bool startsWithBip(const std::string &s)
+{
+	return s.size() >= 3 && s.compare(0, 3, "Bip") == 0;
+}
+
+// Interface-weld world matrix — same derivation as pipeline_max_export_shape/main.cpp
+// (export_mesh.cpp:1111 semantics, non-skinned form).
+static NLMISC::CMatrix interfaceToWorldMat(INode &node, SNodeTMCache &tmCache)
+{
+	CNodeImpl *n = dynamic_cast<CNodeImpl *>(&node);
+	Matrix3M nodeTM = getNodeTM(&node, tmCache);
+	Point3M opos;
+	QuatM orot;
+	ScaleValueM oscale;
+	readObjectOffset(n, opos, orot, oscale);
+	Matrix3M objectTM = composePRS(opos, orot, oscale) * nodeTM;
+	Matrix3M objectToLocal = objectTM * inverseM3(nodeTM);
+	NLMISC::CMatrix toWorld, fromExportSpace;
+	MAXSCENE::convertMatrix(toWorld, objectTM);
+	MAXSCENE::convertMatrix(fromExportSpace, objectToLocal);
+	fromExportSpace.invert();
+	return toWorld * fromExportSpace;
+}
+
+// Base-mesh context of an export node (materials + base build); LOD slaves build their meshes
+// against their PARENT's context, exactly like the direct route's multi-lod path.
+struct SBaseCtx
+{
+	bool Ok;
+	bool HasLightMap;
+	NL3D::CMeshBase::CMeshBaseBuild Bbm;
+	SMaxMeshBaseBuild MaxBB;
+	std::vector<sint> GltfMats;
+	SBaseCtx() : Ok(false), HasLightMap(false) { }
+};
+
+typedef std::map<INode *, SBaseCtx> TBaseCtxCache;
+
+static SBaseCtx *baseCtxFor(INode *node, SNodeTMCache &tmCache, bool exportLighting,
+                            CGltfBuilder &b, TBaseCtxCache &cache)
+{
+	TBaseCtxCache::iterator it = cache.find(node);
+	if (it != cache.end())
+		return it->second.Ok ? &it->second : NULL;
+	SBaseCtx &ctx = cache[node];
+	Matrix3M localTM = getLocalMatrix(*node, tmCache);
+	buildBaseMeshInterface(ctx.Bbm, ctx.MaxBB, *node, tmCache, localTM, exportLighting);
+	for (uint i = 0; i < ctx.Bbm.Materials.size(); ++i)
+	{
+		if (ctx.Bbm.Materials[i].getShader() == NL3D::CMaterial::LightMap)
+			ctx.HasLightMap = true;
+		std::string err;
+		sint mi = b.addMaterial(ctx.Bbm.Materials[i], ctx.MaxBB.MaterialInfo[i].MaterialName, &err);
+		if (mi < 0)
+		{
+			fprintf(stderr, "SKIP gltf '%s': %s\n", nodeName(*node).c_str(), err.c_str());
+			return NULL;
+		}
+		ctx.GltfMats.push_back(mi);
+	}
+	if (ctx.HasLightMap)
+		printf("LIGHTMAP %s\n", NLMISC::toLowerAscii(nodeName(*node)).c_str());
+	ctx.Ok = true;
+	return &ctx;
+}
+
+static int exportFile(const std::string &maxPath, const std::string &outPath, bool exportLighting,
+                      SExportStats &stats)
+{
+	SLoadedMax lm;
+	if (!loadMaxFile(maxPath, lm))
+		return 1;
+
+	CSceneClassContainer *ssc = lm.Scene->container();
+	SNodeTMCache tmCache;
+	tmCache.SceneRoot = NULL;
+
+	// Node collection (storage order — the same enumeration the direct exporters walk)
+	std::map<std::string, INode *> nodesByName;
+	std::vector<INode *> allNodes;
+	for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
+	{
+		CNodeImpl *node = dynamic_cast<CNodeImpl *>(it->second);
+		if (!node) continue;
+		allNodes.push_back(node);
+		nodesByName[NLMISC::toLowerAscii(nodeName(*node))] = node;
+	}
+
+	// LOD slave set + slave -> parent (first claimant wins; duplicates warn)
+	std::set<std::string> lodNames;
+	std::map<std::string, INode *> slaveOwner;
+	for (uint i = 0; i < allNodes.size(); ++i)
+	{
+		CNodeImpl *n = dynamic_cast<CNodeImpl *>(allNodes[i]);
+		uint count = (uint)getScriptAppDataInt(n, NEL3D_APPDATA_LOD_NAME_COUNT, 0);
+		for (uint l = 0; l < count && l < 10; ++l)
+		{
+			std::string nm = getScriptAppDataStr(n, NEL3D_APPDATA_LOD_NAME + l, "");
+			if (nm.empty()) continue;
+			std::string key = NLMISC::toLowerAscii(nm);
+			lodNames.insert(key);
+			if (slaveOwner.count(key) && slaveOwner[key] != allNodes[i])
+				fprintf(stderr, "WARNING: LOD slave '%s' claimed by multiple parents\n", nm.c_str());
+			else
+				slaveOwner[key] = allNodes[i];
+		}
+	}
+
+	CGltfBuilder b;
+	b.assetExtras()->setString("nel_source", NLMISC::CFile::getFilename(maxPath));
+
+	// Pass 1: every scene node becomes a glTF node (bit-exact TRS extras)
+	std::map<INode *, sint> nodeIdx;
+	for (uint i = 0; i < allNodes.size(); ++i)
+	{
+		INode &node = *allNodes[i];
+		NLMISC::CVector pos, scale;
+		NLMISC::CQuat rot;
+		MAXSCENE::decompMatrix(scale, rot, pos, getLocalMatrix(node, tmCache));
+		nodeIdx[&node] = b.addNode(nodeName(node), pos, rot, scale);
+	}
+	{
+		std::vector<sint> roots;
+		std::map<INode *, std::vector<sint> > children;
+		for (uint i = 0; i < allNodes.size(); ++i)
+		{
+			INode *p = allNodes[i]->parent();
+			if (p && dynamic_cast<CNodeImpl *>(p) && nodeIdx.count(p))
+				children[p].push_back(nodeIdx[allNodes[i]]);
+			else
+				roots.push_back(nodeIdx[allNodes[i]]);
+		}
+		for (std::map<INode *, std::vector<sint> >::iterator it = children.begin(); it != children.end(); ++it)
+			b.setNodeChildren(nodeIdx[it->first], it->second);
+		b.setSceneRoots(roots);
+	}
+
+	// Pass 2: meshes + per-node NeL appdata on the shape-process node selection
+	TBaseCtxCache ctxCache;
+	for (uint i = 0; i < allNodes.size(); ++i)
+	{
+		INode &node = *allNodes[i];
+		CNodeImpl *n = dynamic_cast<CNodeImpl *>(&node);
+		std::string name = nodeName(node);
+		CJsonValue *extras = b.nodeExtras(nodeIdx[&node]);
+
+		std::vector<CSceneClass *> mods;
+		std::vector<CStorageContainer *> modApps;
+		CSceneClass *base = baseObjectOf(node, &mods, &modApps);
+		if (!isGeometryOrShape(base))
+			continue;
+		if (startsWithBip(name) || startsWithBip(nodeName(*rootOf(&node))))
+			continue;
+		NLMISC::CClassId cid = base->classDesc()->classId();
+		if (cid == CLASSID_RPO || cid.a() == CLASSID_PARTA_NEL_PS
+			|| cid == CLASSID_PACS_BOX || cid == CLASSID_PACS_CYL || cid == CLASSID_TARGET)
+			continue;
+		{
+			std::string accel = getScriptAppDataStr(n, NEL3D_APPDATA_ACCEL, "");
+			if (!accel.empty() && accel != "0" && accel != "32")
+				continue;
+		}
+		if (getScriptAppDataStr(n, NEL3D_APPDATA_DONOTEXPORT, "") == "1")
+			continue;
+		if (getScriptAppDataStr(n, NEL3D_APPDATA_COLLISION, "") == "1")
+			continue;
+		if (getScriptAppDataStr(n, NEL3D_APPDATA_COLLISION_EXTERIOR, "") == "1")
+			continue;
+
+		bool isSlave = lodNames.count(NLMISC::toLowerAscii(name)) != 0;
+
+		// Special shape classes — same dispatch order as buildShapeForNode; the glTF mesh path
+		// can't carry these yet, so the node is tagged for the harness instead.
+		const char *skipClass = NULL;
+		if (cid.a() == CLASSID_PARTA_NEL_WAVE_MAKER)
+			skipClass = "wavemaker";
+		else if (getScriptAppDataInt(n, NEL3D_APPDATA_USE_REMANENCE, 0))
+			skipClass = "remanence";
+		else if (cid.a() == CLASSID_PARTA_NEL_FLARE)
+			skipClass = "flare";
+		else if (hasWaterMaterial(node))
+			skipClass = "water";
+		else
+		{
+			for (uint m = 0; m < mods.size(); ++m)
+			{
+				NLMISC::CClassId mcid = mods[m]->classDesc()->classId();
+				TSClassId mscid = mods[m]->classDesc()->superClassId();
+				if ((mcid == SCENELIB::CLASSID_PHYSIQUE && mscid == SCLASS_OSMODIFIER)
+					|| PHYSIQUESKIN::isPhysiqueModifier(mods[m])
+					|| PHYSIQUESKIN::isSkinModifier(mods[m]) || mcid == SCENELIB::CLASSID_SKIN)
+				{
+					skipClass = "skinned";
+					break;
+				}
+			}
+		}
+		if (skipClass)
+		{
+			extras->setString("nel_skip_class", skipClass);
+			stats.skip(skipClass);
+			fprintf(stderr, "SKIP gltf '%s': %s not carried yet\n", name.c_str(), skipClass);
+			continue;
+		}
+
+		// Map Extender tag (garbage-UV bucket, design §9)
+		for (uint m = 0; m < mods.size(); ++m)
+		{
+			if (mods[m]->classDesc()->classId() == CLASSID_MAP_EXTENDER)
+			{
+				printf("MAPEXT %s\n", NLMISC::toLowerAscii(name).c_str());
+				extras->setBool("nel_mapext", true);
+				break;
+			}
+		}
+
+		// Base context: the node itself, or the owning parent for a LOD slave
+		INode *ctxNode = &node;
+		if (isSlave)
+		{
+			std::map<std::string, INode *>::iterator so = slaveOwner.find(NLMISC::toLowerAscii(name));
+			if (so == slaveOwner.end())
+			{
+				stats.skip("slave-orphan");
+				continue;
+			}
+			ctxNode = so->second;
+		}
+		SBaseCtx *ctx = baseCtxFor(ctxNode, tmCache, exportLighting, b, ctxCache);
+		if (!ctx)
+		{
+			stats.skip("material");
+			continue;
+		}
+
+		// Mesh evaluation + CMeshBuild (identical calls to the direct route's evalAndBuildMesh)
+		SEvalMesh mesh;
+		std::vector<std::string> warnings;
+		if (!evalNodeMesh(node, mesh, &warnings))
+		{
+			extras->setString("nel_skip_class", "mesh-eval");
+			stats.skip("mesh-eval");
+			continue;
+		}
+		NL3D::CMesh::CMeshBuild mb;
+		buildMeshInterface(mesh, mb, ctx->Bbm, ctx->MaxBB, node, tmCache, false);
+		if (IFACEBUILD::useInterfaceMesh(node))
+		{
+			IFACEBUILD::applyInterfaceToMeshBuild(node, mb, interfaceToWorldMat(node, tmCache), tmCache);
+			extras->setBool("nel_interface", true);
+		}
+
+		std::string err;
+		sint meshIdx = b.addMesh(name, mb, ctx->GltfMats, &err);
+		if (meshIdx < 0)
+		{
+			extras->setString("nel_skip_class", "encode");
+			stats.skip("encode");
+			fprintf(stderr, "SKIP gltf '%s': %s\n", name.c_str(), err.c_str());
+			continue;
+		}
+		b.attachMesh(nodeIdx[&node], meshIdx);
+		++stats.Meshes;
+
+		// Per-node NeL data the shape build consumes downstream
+		extras->setBool("nel_cast_shadows", ctx->Bbm.bCastShadows);
+		extras->setBool("nel_rcv_shadows", ctx->Bbm.bRcvShadows);
+		extras->setBool("nel_lighting_local_atten", ctx->Bbm.UseLightingLocalAttenuation);
+		extras->setInt("nel_collision_mesh_gen", (sint64)ctx->Bbm.CollisionMeshGeneration);
+		if (ctx->HasLightMap)
+			extras->setBool("nel_lightmap", true);
+		if (!ctx->Bbm.BSNames.empty() && ctxNode == &node)
+		{
+			extras->setBool("nel_has_morpher", true);
+			CJsonValue *bsn = extras->setArray("nel_bs_names");
+			for (uint k = 0; k < ctx->Bbm.BSNames.size(); ++k)
+				bsn->pushString(ctx->Bbm.BSNames[k]);
+			CJsonValue *bsf = extras->setArray("nel_bs_factors");
+			for (uint k = 0; k < ctx->Bbm.DefaultBSFactors.size(); ++k)
+				bsf->pushDouble(ctx->Bbm.DefaultBSFactors[k]);
+		}
+
+		// LOD slot data (used whether this node is a multilod LOD0, a plain mesh, or a slave)
+		extras->setDouble("nel_lod_dist_max", getScriptAppDataFloat(n, NEL3D_APPDATA_LOD_DIST_MAX, 1000.f));
+		extras->setDouble("nel_lod_blend_length", getScriptAppDataFloat(n, NEL3D_APPDATA_LOD_BLEND_LENGTH, 0.f));
+		if (getScriptAppDataStr(n, NEL3D_APPDATA_LOD_BLEND_IN, "") == "1")
+			extras->setBool("nel_lod_blend_in", true);
+		if (getScriptAppDataStr(n, NEL3D_APPDATA_LOD_BLEND_OUT, "") == "1")
+			extras->setBool("nel_lod_blend_out", true);
+		if (getScriptAppDataStr(n, NEL3D_APPDATA_LOD_COARSE_MESH, "") == "1")
+			extras->setBool("nel_lod_coarse_mesh", true);
+		if (getScriptAppDataInt(n, NEL3D_APPDATA_LOD_MRM, 0))
+		{
+			extras->setBool("nel_lod_mrm", true);
+			NL3D::CMRMParameters params;
+			buildMRMParameters(n, params);
+			extras->setInt("nel_mrm_nlods", params.NLods);
+			extras->setInt("nel_mrm_divisor", params.Divisor);
+			extras->setInt("nel_mrm_skin_reduction", (sint64)params.SkinReduction);
+			extras->setDouble("nel_mrm_dist_finest", params.DistanceFinest);
+			extras->setDouble("nel_mrm_dist_middle", params.DistanceMiddle);
+			extras->setDouble("nel_mrm_dist_coarsest", params.DistanceCoarsest);
+		}
+
+		if (isSlave)
+		{
+			extras->setBool("nel_lod_slave", true);
+			continue;
+		}
+
+		// Exportable shape node
+		extras->setBool("nel_shape", true);
+		extras->setString("nel_shape_name", NLMISC::toLowerAscii(name));
+
+		uint lodCount = (uint)getScriptAppDataInt(n, NEL3D_APPDATA_LOD_NAME_COUNT, 0);
+		bool haveCoarse = false;
+		if (lodCount > 0)
+		{
+			extras->setInt("nel_lod_count", lodCount);
+			for (uint l = 0; l < lodCount && l < 10; ++l)
+			{
+				std::string nm = getScriptAppDataStr(n, NEL3D_APPDATA_LOD_NAME + l, "");
+				char keyBuf[32];
+				snprintf(keyBuf, sizeof(keyBuf), "nel_lod_name_%u", l);
+				extras->setString(keyBuf, nm);
+				if (!nm.empty())
+				{
+					std::map<std::string, INode *>::iterator lodIt = nodesByName.find(NLMISC::toLowerAscii(nm));
+					if (lodIt != nodesByName.end()
+						&& getScriptAppDataStr(dynamic_cast<CNodeImpl *>(lodIt->second), NEL3D_APPDATA_LOD_COARSE_MESH, "") == "1")
+						haveCoarse = true;
+				}
+			}
+			if (getScriptAppDataStr(n, NEL3D_APPDATA_LOD_DYNAMIC_MESH, "") == "1")
+				extras->setBool("nel_lod_dynamic_mesh", true);
+		}
+		extras->setBool("nel_coarse", haveCoarse);
+		if (getScriptAppDataInt(n, NEL3D_APPDATA_EXPORT_ANIMATED_MATERIALS, 0))
+			extras->setBool("nel_animated_materials", true);
+		if (getScriptAppDataInt(n, NEL3D_APPDATA_AUTOMATIC_ANIMATION, 0))
+			extras->setBool("nel_auto_anim", true);
+	}
+
+	if (!b.save(outPath))
+	{
+		fprintf(stderr, "ERROR: cannot write %s\n", outPath.c_str());
+		return 1;
+	}
+	if (g_verbose)
+		printf("OK %s\n", outPath.c_str());
+	return 0;
+}
+
+int main(int argc, char **argv)
+{
+	NLMISC::CApplicationContext appContext;
+	NL3D::registerSerial3d();
+
+	std::string input, outDir;
+	bool exportLighting = true;
+
+	for (int i = 1; i < argc; ++i)
+	{
+		std::string arg = argv[i];
+		if (arg == "--verbose" || arg == "-v")
+			g_verbose = true;
+		else if (arg == "--db" && i + 1 < argc)
+			setDatabaseRoot(argv[++i]);
+		else if (arg == "--path-alias" && i + 1 < argc)
+		{
+			std::string kv = argv[++i];
+			std::string::size_type eq = kv.find('=');
+			if (eq == std::string::npos)
+				fprintf(stderr, "WARNING: --path-alias expects <prefix>=<root>, got '%s'\n", kv.c_str());
+			else
+				DBPATH::addAlias(kv.substr(0, eq), kv.substr(eq + 1));
+		}
+		else if (arg == "--no-lighting")
+			exportLighting = false;
+		else if (input.empty())
+			input = arg;
+		else if (outDir.empty())
+			outDir = arg;
+		else
+		{
+			fprintf(stderr, "unexpected argument: %s\n", arg.c_str());
+			return 2;
+		}
+	}
+
+	if (input.empty() || outDir.empty())
+	{
+		fprintf(stderr, "usage: pipeline_max_export_gltf [--db <graphics-root>] [--no-lighting] [-v] <input.max> <outdir>\n");
+		return 2;
+	}
+
+	// Deduce the database root from the input path when not given (same as the shape exporter)
+	if (databaseRoot().empty())
+	{
+		std::string abs = NLMISC::CPath::getFullPath(input, false);
+		std::string::size_type p = abs.find("/stuff/");
+		if (p == std::string::npos) p = abs.find("/landscape/");
+		if (p == std::string::npos) p = abs.find("/sky_v2/");
+		if (p != std::string::npos)
+			setDatabaseRoot(abs.substr(0, p));
+	}
+
+	std::string stem = NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(input));
+	std::string outPath = outDir + "/" + stem + ".gltf";
+
+	SExportStats stats;
+	int ret = exportFile(input, outPath, exportLighting, stats);
+	printf("GLTF %s (%u meshes, %u skipped)\n", outPath.c_str(), stats.Meshes, stats.Skipped);
+	for (std::map<std::string, uint>::iterator it = stats.SkipReasons.begin(); it != stats.SkipReasons.end(); ++it)
+		printf("SKIPCLASS %s %u\n", it->first.c_str(), it->second);
+	return ret;
+}
+
+/* end of file */
