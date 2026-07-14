@@ -7,6 +7,9 @@ SET(SHAPE_SHARED
 	../pipeline_max_export_shape/material_build.cpp
 	../pipeline_max_export_shape/mesh_build.cpp
 	../pipeline_max_export_shape/interface_build.cpp
+	../pipeline_max_export_shape/water_build.cpp
+	../pipeline_max_export_shape/remanence_build.cpp
+	../pipeline_max_export_shape/flare_build.cpp
 )
 
 # The ig exporter's whole per-file flow (selection, XRef resolution, buildInstanceGroup) backs

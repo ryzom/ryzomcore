@@ -56,7 +56,22 @@
 #include "../pipeline_max_export_shape/material_build.h"
 #include "../pipeline_max_export_shape/mesh_build.h"
 #include "../pipeline_max_export_shape/interface_build.h"
+#include "../pipeline_max_export_shape/water_build.h"
+#include "../pipeline_max_export_shape/remanence_build.h"
+#include "../pipeline_max_export_shape/flare_build.h"
 #include "../pipeline_max_export_common/physique_skin.h"
+
+#include <nel/3d/shape.h>
+#include <nel/3d/vertex_buffer.h>
+#include <nel/3d/index_buffer.h>
+
+#ifdef NL_OS_WINDOWS
+#include <process.h>
+#define PMB_GLTF_GETPID _getpid
+#else
+#include <unistd.h>
+#define PMB_GLTF_GETPID getpid
+#endif
 
 #include "../pipeline_max/builtin/scene_impl.h"
 #include "../pipeline_max/builtin/i_node.h"
@@ -126,14 +141,77 @@ static std::string bytesToHex(const std::vector<uint8> &bytes)
 	return hex;
 }
 
+// Serialize an IShape to the exact bytes the direct exporter's exportFile writes: export-era
+// stream versions, temp-COFile route, then the version patches (CMesh-family CMeshBase v10->v9;
+// CWaterShape v7->v4 + 14-byte truncation) — see pipeline_max_export_shape/main.cpp for the
+// full rationale on each.
+static bool shapeToFileBytes(NL3D::IShape *shape, std::vector<uint8> &out, std::string *err)
+{
+	bool oldVB = NL3D::CVertexBuffer::SerialOldPreferredMemory;
+	bool oldIB = NL3D::CIndexBuffer::SerialOldPreferredMemory;
+	NL3D::CVertexBuffer::SerialOldPreferredMemory = true;
+	NL3D::CIndexBuffer::SerialOldPreferredMemory = true;
+	char tmpPath[256];
+	snprintf(tmpPath, sizeof(tmpPath), "/tmp/pipeline_max_export_gltf.%d.tmp", (int)PMB_GLTF_GETPID());
+	bool ok = false;
+	try
+	{
+		{
+			NLMISC::COFile ofile;
+			if (!ofile.open(tmpPath))
+			{
+				if (err) *err = "cannot open temp file";
+				throw NLMISC::Exception("temp open");
+			}
+			NL3D::CShapeStream shapeStream(shape);
+			shapeStream.serial(ofile);
+			ofile.close();
+		}
+		{
+			NLMISC::CIFile ifile;
+			if (!ifile.open(tmpPath))
+			{
+				if (err) *err = "cannot reopen temp file";
+				throw NLMISC::Exception("temp reopen");
+			}
+			out.resize(ifile.getFileSize());
+			if (!out.empty())
+				ifile.serialBuffer(&out[0], (uint)out.size());
+			ifile.close();
+		}
+		NLMISC::CFile::deleteFile(tmpPath);
+		std::string className = shape->getClassName();
+		uint32 len = (uint32)out.size();
+		uint32 meshBaseVerOff = 4 + 8 + 4 + (uint32)className.size() + 1;
+		if ((className == "CMesh" || className == "CMeshMRM" || className == "CMeshMRMSkinned")
+			&& meshBaseVerOff < len && out[meshBaseVerOff] == 10)
+			out[meshBaseVerOff] = 9;
+		uint32 waterVerOff = 4 + 8 + 4 + (uint32)className.size();
+		if (className == "CWaterShape" && waterVerOff < len && out[waterVerOff] == 7 && len > 14)
+		{
+			out[waterVerOff] = 4;
+			out.resize(len - 14);
+		}
+		ok = true;
+	}
+	catch (const NLMISC::Exception &e)
+	{
+		if (err && err->empty()) *err = e.what();
+	}
+	NL3D::CVertexBuffer::SerialOldPreferredMemory = oldVB;
+	NL3D::CIndexBuffer::SerialOldPreferredMemory = oldIB;
+	return ok;
+}
+
 struct SExportStats
 {
 	uint Meshes;
 	uint Skipped;
 	uint Igs;
 	uint Anims;
+	uint Specials;
 	std::map<std::string, uint> SkipReasons;
-	SExportStats() : Meshes(0), Skipped(0), Igs(0), Anims(0) { }
+	SExportStats() : Meshes(0), Skipped(0), Igs(0), Anims(0), Specials(0) { }
 	void skip(const std::string &reason)
 	{
 		++Skipped;
@@ -414,21 +492,35 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 				continue;
 		}
 
-		// Special shape classes — same dispatch order as buildShapeForNode; the glTF mesh path
-		// can't carry these yet, so the node is tagged for the harness instead. Physique is
-		// CARRIED (skinning applies onto the mesh build below, like the direct route); the
-		// Max-4+ Skin modifier skips the whole node exactly like the direct route does. The
-		// direct multilod slave loop re-detects Physique ONLY — mirror that asymmetry.
+		// Special shape classes — same dispatch order as buildShapeForNode. Water/remanence/
+		// flare build through the SAME class builders the direct route uses; the built shape
+		// serializes (same version patches) into a per-node nel_shape_blob — dual
+		// representation, structural extras when Blender authoring needs them. A NULL builder
+		// result tags the node like the direct route's skip. Physique is CARRIED (skinning
+		// applies onto the mesh build below); the Max-4+ Skin modifier skips the whole node
+		// exactly like the direct route does. The direct multilod slave loop re-detects
+		// Physique ONLY — mirror that asymmetry.
 		const char *skipClass = NULL;
 		bool hasPhysique = false;
+		NL3D::IShape *specialShape = NULL;
+		const char *specialClass = NULL;
 		if (!isSlave && cid.a() == CLASSID_PARTA_NEL_WAVE_MAKER)
 			skipClass = "wavemaker";
 		else if (!isSlave && getScriptAppDataInt(n, NEL3D_APPDATA_USE_REMANENCE, 0))
-			skipClass = "remanence";
+		{
+			specialShape = REMANENCEBUILD::buildRemanenceShape(node, tmCache, exportLighting);
+			if (specialShape) specialClass = "remanence"; else skipClass = "remanence";
+		}
 		else if (!isSlave && cid.a() == CLASSID_PARTA_NEL_FLARE)
-			skipClass = "flare";
+		{
+			specialShape = FLAREBUILD::buildFlareShape(node, tmCache);
+			if (specialShape) specialClass = "flare"; else skipClass = "flare";
+		}
 		else if (!isSlave && hasWaterMaterial(node))
-			skipClass = "water";
+		{
+			specialShape = WATERBUILD::buildWaterShape(node, tmCache);
+			if (specialShape) specialClass = "water"; else skipClass = "water";
+		}
 		else if (!isSlave)
 		{
 			for (uint m = 0; m < mods.size(); ++m)
@@ -458,7 +550,27 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 		{
 			extras->setString("nel_skip_class", skipClass);
 			stats.skip(skipClass);
-			fprintf(stderr, "SKIP gltf '%s': %s not carried yet\n", name.c_str(), skipClass);
+			fprintf(stderr, "SKIP gltf '%s': %s not carried\n", name.c_str(), skipClass);
+			continue;
+		}
+		if (specialShape)
+		{
+			std::vector<uint8> bytes;
+			std::string serr;
+			bool ok = shapeToFileBytes(specialShape, bytes, &serr);
+			delete specialShape;
+			if (!ok || bytes.empty())
+			{
+				extras->setString("nel_skip_class", "shape-serial");
+				stats.skip("shape-serial");
+				fprintf(stderr, "SKIP gltf '%s': %s\n", name.c_str(), serr.c_str());
+				continue;
+			}
+			extras->setBool("nel_shape", true);
+			extras->setString("nel_shape_name", NLMISC::toLowerAscii(name));
+			extras->setString("nel_shape_class", specialClass);
+			extras->setString("nel_shape_blob", bytesToHex(bytes));
+			++stats.Specials;
 			continue;
 		}
 
@@ -765,8 +877,8 @@ int main(int argc, char **argv)
 
 	SExportStats stats;
 	int ret = exportFile(input, outPath, exportLighting, stats);
-	printf("GLTF %s (%u meshes, %u igs, %u anims, %u skipped)\n", outPath.c_str(), stats.Meshes, stats.Igs, stats.Anims,
-	       stats.Skipped);
+	printf("GLTF %s (%u meshes, %u special shapes, %u igs, %u anims, %u skipped)\n", outPath.c_str(),
+	       stats.Meshes, stats.Specials, stats.Igs, stats.Anims, stats.Skipped);
 	for (std::map<std::string, uint>::iterator it = stats.SkipReasons.begin(); it != stats.SkipReasons.end(); ++it)
 		printf("SKIPCLASS %s %u\n", it->first.c_str(), it->second);
 	return ret;

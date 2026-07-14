@@ -888,6 +888,43 @@ int exportNelGltfScene(const CMeshUtilsSettings &settings)
 		std::string name = node->getString("name", "");
 		std::string shapeName = extras->getString("nel_shape_name", NLMISC::toLowerAscii(name));
 
+		// Special IShape classes (water/remanence/flare): the exact serialized stream rides
+		// per node in nel_shape_blob (already version-patched by the writer) — emit verbatim,
+		// same dual-representation rule as igs/anims.
+		{
+			std::string blobHex = extras->getString("nel_shape_blob", "");
+			if (!blobHex.empty())
+			{
+				std::vector<uint8> blob;
+				if (!hexToBytes(blobHex, blob) || blob.empty())
+				{
+					fprintf(stderr, "ERROR: bad nel_shape_blob for '%s'\n", name.c_str());
+					ret = EXIT_FAILURE;
+					continue;
+				}
+				std::string outPath = outDir + shapeName + ".shape";
+				try
+				{
+					COFile f;
+					if (!f.open(outPath))
+					{
+						fprintf(stderr, "ERROR: cannot open %s\n", outPath.c_str());
+						ret = EXIT_FAILURE;
+						continue;
+					}
+					f.serialBuffer(&blob[0], (uint)blob.size());
+					f.close();
+					++stats.Exported;
+				}
+				catch (const NLMISC::Exception &e2)
+				{
+					fprintf(stderr, "ERROR: %s: %s\n", outPath.c_str(), e2.what());
+					ret = EXIT_FAILURE;
+				}
+				continue;
+			}
+		}
+
 		uint lodCount = (uint)extras->getInt("nel_lod_count", 0);
 
 		CMeshBase *meshBase = NULL;
