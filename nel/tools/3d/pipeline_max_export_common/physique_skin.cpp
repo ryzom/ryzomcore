@@ -369,7 +369,8 @@ bool applyPhysiqueSkinning(NL3D::CMesh::CMeshBuild &buildMesh,
                            const std::vector<CSceneClass *> &mods,
                            const std::vector<CStorageContainer *> &modApps,
                            CSceneClassContainer *ssc,
-                           std::string *err)
+                           std::string *err,
+                           std::vector<INode *> *boneNodesOut)
 {
 	// Locate the Physique modifier + its mod-app slot.
 	CSceneClass *physMod = NULL;
@@ -449,6 +450,14 @@ bool applyPhysiqueSkinning(NL3D::CMesh::CMeshBuild &buildMesh,
 	{
 		if (err) *err = "skeleton bone map is empty";
 		return false;
+	}
+	if (boneNodesOut)
+	{
+		// The scene nodes behind BonesNames, by bone id (glTF skin joints — resolves duplicate
+		// bone names exactly, no name matching).
+		boneNodesOut->assign(bonesNames.size(), (INode *)NULL);
+		for (std::map<INode *, sint32>::const_iterator mi = mapId.begin(); mi != mapId.end(); ++mi)
+			(*boneNodesOut)[(size_t)mi->second] = mi->first;
 	}
 
 	// Root bone id (always 0 by construction of the walk) — fallback for unresolved vertices

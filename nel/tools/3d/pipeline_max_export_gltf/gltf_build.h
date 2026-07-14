@@ -45,6 +45,7 @@ namespace GLTFBUILD {
 
 // glTF constants
 const int COMP_UBYTE = 5121;
+const int COMP_USHORT = 5123;
 const int COMP_UINT = 5125;
 const int COMP_FLOAT = 5126;
 const int TARGET_ARRAY = 34962;
@@ -77,10 +78,21 @@ public:
 	// material indices (also emitted as the mesh's nel_materials list). SkinWeights/BonesNames
 	// ride nel_skin_* extras when present (PaletteSkinFlag). `bsList` (optional) carries the MRM
 	// morph-target builds as per-target corner streams in global face order — exactly the fields
-	// CMRMBuilder::buildBlendShapes consumes. Returns mesh index or -1 with *err.
+	// CMRMBuilder::buildBlendShapes consumes. `skinInterop` (in/out, optional): when *in* is
+	// true, standard JOINTS_0/WEIGHTS_0 attributes are also emitted per primitive (viewing tier;
+	// values = the CSkinWeight MatrixId/Weights, so the caller's skin.joints must follow
+	// BonesNames order) — cleared to false (never an error) when the weights don't fit the
+	// interop form, so the caller knows not to attach a skin. Returns mesh index or -1 with *err.
 	sint addMesh(const std::string &name, const NL3D::CMesh::CMeshBuild &mb,
 	             const std::vector<sint> &materialIdx, std::string *err,
-	             const std::vector<NL3D::CMesh::CMeshBuild *> *bsList = NULL);
+	             const std::vector<NL3D::CMesh::CMeshBuild *> *bsList = NULL,
+	             bool *skinInterop = NULL);
+
+	// --- skins (viewing tier) ---
+	// glTF skin object: joints are node indices (BonesNames order), ibms is joints.size()*16
+	// column-major floats (inverse bind world matrices). Returns the skin index.
+	sint addSkin(const std::vector<sint> &joints, const float *ibms);
+	void setNodeSkin(sint node, sint skin);
 
 	// Plain viewing mesh (positions/normals/uv + triangle indices, no material, no nel_*
 	// reconstruction data) — used for the tessellated nel_proxy meshes (zones).
@@ -101,6 +113,7 @@ public:
 	sint addAccessorFloat(const float *data, size_t count, int nComp, int target, bool withMinMax);
 	sint addAccessorU32(const uint32 *data, size_t count, int target);
 	sint addAccessorU8Vec4Norm(const uint8 *data, size_t count4);
+	sint addAccessorU16Vec4(const uint16 *data, size_t count4);
 
 private:
 	NLGLTF::CJsonValue m_Root;
@@ -113,6 +126,7 @@ private:
 	NLGLTF::CJsonValue *m_Images;
 	NLGLTF::CJsonValue *m_Accessors;
 	NLGLTF::CJsonValue *m_BufferViews;
+	NLGLTF::CJsonValue *m_Skins; // lazily created — most files have none
 	std::vector<NLGLTF::CJsonValue *> m_NodeVals;
 	std::map<std::string, sint> m_MaterialDedup;
 	std::map<std::string, sint> m_ImageDedup;

@@ -82,6 +82,7 @@ CGltfBuilder::CGltfBuilder()
 	m_Images = m_Root.setArray("images");
 	m_Accessors = m_Root.setArray("accessors");
 	m_BufferViews = m_Root.setArray("bufferViews");
+	m_Skins = NULL;
 	m_Root.setArray("buffers"); // filled at save
 }
 
@@ -181,6 +182,31 @@ sint CGltfBuilder::addAccessorU8Vec4Norm(const uint8 *data, size_t count4)
 {
 	sint bv = addBufferView(data, count4 * 4, TARGET_ARRAY);
 	return addAccessor(bv, COMP_UBYTE, "VEC4", count4, true, NULL, NULL, 0);
+}
+
+sint CGltfBuilder::addAccessorU16Vec4(const uint16 *data, size_t count4)
+{
+	sint bv = addBufferView(data, count4 * 8, TARGET_ARRAY);
+	return addAccessor(bv, COMP_USHORT, "VEC4", count4, false, NULL, NULL, 0);
+}
+
+sint CGltfBuilder::addSkin(const std::vector<sint> &joints, const float *ibms)
+{
+	if (!m_Skins)
+		m_Skins = m_Root.setArray("skins");
+	CJsonValue *sk = m_Skins->push();
+	// IBM accessor: no bufferView target (not vertex data — validators flag ARRAY_BUFFER here)
+	sint bv = addBufferView(ibms, joints.size() * 16 * 4, 0);
+	sk->setInt("inverseBindMatrices", addAccessor(bv, COMP_FLOAT, "MAT4", joints.size(), false, NULL, NULL, 0));
+	CJsonValue *js = sk->setArray("joints");
+	for (size_t i = 0; i < joints.size(); ++i)
+		js->pushInt(joints[i]);
+	return (sint)m_Skins->size() - 1;
+}
+
+void CGltfBuilder::setNodeSkin(sint node, sint skin)
+{
+	m_NodeVals[(size_t)node]->setInt("skin", skin);
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -376,7 +402,8 @@ static void cornerKey(const CMesh::CCorner &c, const std::vector<uint> &uvStages
 
 sint CGltfBuilder::addMesh(const std::string &name, const CMesh::CMeshBuild &mb,
                            const std::vector<sint> &materialIdx, std::string *err,
-                           const std::vector<NL3D::CMesh::CMeshBuild *> *bsList)
+                           const std::vector<NL3D::CMesh::CMeshBuild *> *bsList,
+                           bool *skinInterop)
 {
 	// Carried flag surface: position+normal+uv[0..7]+primary color+palette skin. Anything else
 	// means a build class the encoding doesn't carry yet — refuse loudly.
@@ -408,6 +435,25 @@ sint CGltfBuilder::addMesh(const std::string &name, const CMesh::CMeshBuild &mb,
 		if (err) *err = "inconsistent skin weight state";
 		return -1;
 	}
+
+	// JOINTS_0/WEIGHTS_0 viewing tier: only when the weighted MatrixIds fit the interop form
+	// (they index BonesNames, which the caller's skin.joints mirrors; u16 component type).
+	// Zero-weight slots are ignored here and emitted as joint 0 — the exporter leaves them
+	// uninitialized (the geom build never reads them, so the exact tier carries the garbage
+	// verbatim). Falling short disables the interop attributes, never the exact-tier emission.
+	bool emitSkinAttrs = skinInterop && *skinInterop && hasSkin;
+	if (emitSkinAttrs)
+		for (size_t i = 0; i < mb.SkinWeights.size() && emitSkinAttrs; ++i)
+			for (uint k = 0; k < NL3D_MESH_SKINNING_MAX_MATRIX; ++k)
+				if (mb.SkinWeights[i].Weights[k] != 0.0f
+					&& (mb.SkinWeights[i].MatrixId[k] >= mb.BonesNames.size()
+						|| mb.SkinWeights[i].MatrixId[k] > 0xffff))
+				{
+					emitSkinAttrs = false;
+					break;
+				}
+	if (skinInterop)
+		*skinInterop = emitSkinAttrs;
 
 	std::vector<uint> uvStages;
 	for (uint i = 0; i < CVertexBuffer::MaxStage; ++i)
@@ -489,6 +535,8 @@ sint CGltfBuilder::addMesh(const std::string &name, const CMesh::CMeshBuild &mb,
 		std::vector<float> pos, norm;
 		std::vector<std::vector<float> > uvs(uvStages.size());
 		std::vector<uint8> colors;
+		std::vector<uint16> joints16;
+		std::vector<float> weights4;
 		std::vector<uint32> vertexIds;
 		std::vector<uint32> indices;
 		indices.reserve(faces.size() * 3);
@@ -527,6 +575,16 @@ sint CGltfBuilder::addMesh(const std::string &name, const CMesh::CMeshBuild &mb,
 						colors.push_back(corner.Color.B);
 						colors.push_back(corner.Color.A);
 					}
+					if (emitSkinAttrs)
+					{
+						const CMesh::CSkinWeight &sw = mb.SkinWeights[(size_t)corner.Vertex];
+						for (uint w = 0; w < NL3D_MESH_SKINNING_MAX_MATRIX; ++w)
+						{
+							bool used = sw.Weights[w] != 0.0f;
+							joints16.push_back(used ? (uint16)sw.MatrixId[w] : 0);
+							weights4.push_back(used ? sw.Weights[w] : 0.0f);
+						}
+					}
 					vertexIds.push_back((uint32)corner.Vertex);
 				}
 				indices.push_back(vid);
@@ -548,6 +606,11 @@ sint CGltfBuilder::addMesh(const std::string &name, const CMesh::CMeshBuild &mb,
 		}
 		if (hasColor)
 			attrs->setInt("COLOR_0", addAccessorU8Vec4Norm(&colors[0], nVerts));
+		if (emitSkinAttrs)
+		{
+			attrs->setInt("JOINTS_0", addAccessorU16Vec4(&joints16[0], nVerts));
+			attrs->setInt("WEIGHTS_0", addAccessorFloat(&weights4[0], nVerts, 4, TARGET_ARRAY, false));
+		}
 		prim->setInt("indices", addAccessorU32(&indices[0], indices.size(), TARGET_ELEMENT));
 		if (materialIdx[(size_t)mi->first] >= 0)
 			prim->setInt("material", materialIdx[(size_t)mi->first]);

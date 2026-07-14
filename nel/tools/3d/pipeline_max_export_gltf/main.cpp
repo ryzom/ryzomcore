@@ -60,6 +60,7 @@
 #include "../pipeline_max_export_shape/remanence_build.h"
 #include "../pipeline_max_export_shape/flare_build.h"
 #include "../pipeline_max_export_common/physique_skin.h"
+#include "../pipeline_max_export_common/biped_rig.h"
 #include "../pipeline_max_export_zone/pmb_zone_gltf.h"
 
 #include <nel/3d/shape.h>
@@ -90,6 +91,7 @@ using namespace MATBUILD;
 using namespace MESHBUILD;
 using namespace GLTFBUILD;
 using namespace NLGLTF;
+using namespace PMAX_RIG;
 
 // NeL export AppData sub-ids (plugin_max/nel_mesh_lib/export_appdata.h)
 #define NEL3D_APPDATA_LOD_NAME_COUNT 1423062537
@@ -270,6 +272,79 @@ static NLMISC::CMatrix interfaceToWorldMat(INode &node, SNodeTMCache &tmCache)
 	return toWorld * fromExportSpace;
 }
 
+// Per-node glTF TRS + composed world matrix (pass 1). Biped rig nodes decode through the skel
+// exporter's figure-mode reconstruction (biped TM controllers are not PRS — the plain
+// getLocalMatrix path leaves the whole rig at identity, useless as a glTF rest pose): COM nodes
+// from the rig's COM record, biped bones via getBipedLocal, and the PRS-child-of-COM
+// world-frame-rotation rule replayed from walkNode (biped_rig.cpp). Every other node keeps the
+// established decompMatrix(getLocalMatrix(...)) path unchanged. Viewing tier only — the exact
+// tier's mesh data never reads node TRS; the composed worlds feed the glTF skins' inverse bind
+// matrices, so viewers (which compose exactly these floats) cancel at bind pose.
+struct SNodeTRS
+{
+	NLMISC::CVector Pos, Scale;
+	NLMISC::CQuat Rot;
+	NLMISC::CMatrix World;
+	std::string Name; // duplicate scene names get the skeleton walk's "_Second" suffix — glTF
+	                  // node names stay unique (assimp refuses duplicate bone names) and match
+	                  // nel_bones_names exactly
+};
+
+static void computeNodeTRS(INode *node, const NLMISC::CMatrix &parentWorld,
+                           const std::map<INode *, std::vector<INode *> > &childrenOf,
+                           SNodeTMCache &tmCache, CSceneClassContainer *ssc,
+                           std::map<INode *, SNodeTRS> &out, std::set<std::string> &nameSet)
+{
+	SNodeTRS t;
+	t.Name = nodeName(*node);
+	if (!nameSet.insert(t.Name).second)
+		t.Name += "_Second";
+	CReferenceMaker *tmCtrl = node->getReference(0);
+	CSceneClass *bipedSys = bipedSystemOfCtrl(tmCtrl);
+	if (bipedSys && isBipedComNode(node) && rigFor(bipedSys, ssc).HasCom)
+	{
+		SBipedRig &rig = rigFor(bipedSys, ssc);
+		g_rig = &rig;
+		t.Scale = NLMISC::CVector(1, 1, 1);
+		NLMISC::CQuat pinv = parentWorld.getRot();
+		pinv.invert();
+		t.Rot = pinv * rig.ComRot;
+		NLMISC::CMatrix pinvM = parentWorld;
+		pinvM.invert();
+		t.Pos = pinvM * rig.ComPos;
+		t.Rot.normalize();
+	}
+	else if (bipedSys && isBipedBoneNode(node))
+	{
+		SBipedRig &rig = rigFor(bipedSys, ssc);
+		g_rig = &rig;
+		NLMISC::CQuat worldRotOut;
+		getBipedLocal(node, parentWorld, t.Pos, t.Rot, t.Scale, worldRotOut);
+		t.Rot.normalize();
+	}
+	else if (node->parent() && isBipedComNode(node->parent()))
+	{
+		// PRS child of a COM node: stored rotation is world-frame, position parent-relative
+		// (walkNode's rule, verified bit-exact on the corpus marker bones)
+		getLocalTransform(tmCtrl, t.Pos, t.Rot, t.Scale);
+		NLMISC::CQuat pinv = parentWorld.getRot();
+		pinv.invert();
+		t.Rot = pinv * t.Rot;
+		t.Rot.normalize();
+	}
+	else
+	{
+		MAXSCENE::decompMatrix(t.Scale, t.Rot, t.Pos, getLocalMatrix(*node, tmCache));
+	}
+	t.World = parentWorld * makeLocalTM(t.Pos, t.Rot, t.Scale);
+	out[node] = t;
+
+	std::map<INode *, std::vector<INode *> >::const_iterator ci = childrenOf.find(node);
+	if (ci != childrenOf.end())
+		for (size_t i = 0; i < ci->second.size(); ++i)
+			computeNodeTRS(ci->second[i], t.World, childrenOf, tmCache, ssc, out, nameSet);
+}
+
 // Morpher blend-shape targets — verbatim replica of pipeline_max_export_shape's buildBSList
 // (itself the reference's getBSMeshBuild): evaluate each Morpher ref 101+i target through the
 // non-skinned mesh path with finalSpace = the SOURCE node's NodeTM when the source is skinned,
@@ -423,29 +498,46 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 	CGltfBuilder b;
 	b.assetExtras()->setString("nel_source", NLMISC::CFile::getFilename(maxPath));
 
-	// Pass 1: every scene node becomes a glTF node (bit-exact TRS extras)
+	// Pass 1: every scene node becomes a glTF node (bit-exact TRS extras). TRS + world matrices
+	// come from a hierarchy walk so biped rig nodes get their figure-mode rest pose — see
+	// computeNodeTRS.
+	std::map<INode *, std::vector<INode *> > childrenNodes;
+	std::vector<INode *> rootNodes;
+	for (uint i = 0; i < allNodes.size(); ++i)
+	{
+		INode *p = allNodes[i]->parent();
+		if (p && dynamic_cast<CNodeImpl *>(p))
+			childrenNodes[p].push_back(allNodes[i]);
+		else
+			rootNodes.push_back(allNodes[i]);
+	}
+	std::map<INode *, SNodeTRS> nodeTRS;
+	{
+		NLMISC::CMatrix ident;
+		ident.identity();
+		std::set<std::string> nameSet;
+		for (uint i = 0; i < rootNodes.size(); ++i)
+			computeNodeTRS(rootNodes[i], ident, childrenNodes, tmCache, ssc, nodeTRS, nameSet);
+	}
 	std::map<INode *, sint> nodeIdx;
 	for (uint i = 0; i < allNodes.size(); ++i)
 	{
 		INode &node = *allNodes[i];
-		NLMISC::CVector pos, scale;
-		NLMISC::CQuat rot;
-		MAXSCENE::decompMatrix(scale, rot, pos, getLocalMatrix(node, tmCache));
-		nodeIdx[&node] = b.addNode(nodeName(node), pos, rot, scale);
+		const SNodeTRS &t = nodeTRS[&node];
+		nodeIdx[&node] = b.addNode(t.Name, t.Pos, t.Rot, t.Scale);
 	}
 	std::vector<sint> roots; // scene roots — proxy nodes append later, setSceneRoots at the end
 	{
-		std::map<INode *, std::vector<sint> > children;
-		for (uint i = 0; i < allNodes.size(); ++i)
+		for (uint i = 0; i < rootNodes.size(); ++i)
+			roots.push_back(nodeIdx[rootNodes[i]]);
+		for (std::map<INode *, std::vector<INode *> >::iterator it = childrenNodes.begin();
+		     it != childrenNodes.end(); ++it)
 		{
-			INode *p = allNodes[i]->parent();
-			if (p && dynamic_cast<CNodeImpl *>(p) && nodeIdx.count(p))
-				children[p].push_back(nodeIdx[allNodes[i]]);
-			else
-				roots.push_back(nodeIdx[allNodes[i]]);
+			std::vector<sint> ch(it->second.size());
+			for (size_t c = 0; c < it->second.size(); ++c)
+				ch[c] = nodeIdx[it->second[c]];
+			b.setNodeChildren(nodeIdx[it->first], ch);
 		}
-		for (std::map<INode *, std::vector<sint> >::iterator it = children.begin(); it != children.end(); ++it)
-			b.setNodeChildren(nodeIdx[it->first], it->second);
 	}
 
 	// Pass 2: meshes + per-node NeL appdata on the shape-process node selection
@@ -635,9 +727,11 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 				buildMeshInterface(mesh, mb, ctx->Bbm, ctx->MaxBB, node, tmCache, hasPhysique);
 				std::string err;
 				bool physOk = true;
+				std::vector<INode *> skinJointNodes; // BonesNames order (glTF skins tier)
 				if (hasPhysique)
 				{
-					if (!PHYSIQUESKIN::applyPhysiqueSkinning(mb, node, mods, modApps, ssc, &err))
+					if (!PHYSIQUESKIN::applyPhysiqueSkinning(mb, node, mods, modApps, ssc, &err,
+							&skinJointNodes))
 					{
 						extras->setString("nel_skip_class", "skinned-physique");
 						stats.skip("skinned-physique");
@@ -669,8 +763,32 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 						&& getScriptAppDataInt(n, NEL3D_APPDATA_LOD_MRM, 0))
 						buildBSList(node, tmCache, mods, mb, hasPhysique, exportLighting, bsList);
 
+					// glTF-skins viewing tier: the joints are the exact scene nodes behind
+					// BonesNames (from the physique decode itself — duplicate-name-safe),
+					// all-or-nothing. Failure only drops the viewing skin, never the exact-tier
+					// nel_skin_* emission.
+					bool skinInterop = false;
+					std::vector<sint> skinJoints;
+					if (((uint32)mb.VertexFlags & NL3D::CVertexBuffer::PaletteSkinFlag)
+						&& skinJointNodes.size() == mb.BonesNames.size()
+						&& !skinJointNodes.empty())
+					{
+						skinInterop = true;
+						for (uint bn = 0; bn < skinJointNodes.size(); ++bn)
+						{
+							if (!skinJointNodes[bn] || !nodeIdx.count(skinJointNodes[bn]))
+							{
+								fprintf(stderr, "WARNING gltf '%s': skin bone '%s' not in scene; no glTF skin emitted\n",
+								        name.c_str(), mb.BonesNames[bn].c_str());
+								skinInterop = false;
+								break;
+							}
+							skinJoints.push_back(nodeIdx[skinJointNodes[bn]]);
+						}
+					}
+
 					sint meshIdx = b.addMesh(name, mb, ctx->GltfMats, &err,
-					                         bsList.empty() ? NULL : &bsList);
+					                         bsList.empty() ? NULL : &bsList, &skinInterop);
 					for (uint bi = 0; bi < bsList.size(); ++bi)
 						delete bsList[bi];
 					if (meshIdx < 0)
@@ -682,6 +800,17 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 					else
 					{
 						b.attachMesh(nodeIdx[&node], meshIdx);
+						if (skinInterop)
+						{
+							std::vector<float> ibms(skinJoints.size() * 16);
+							for (size_t ji = 0; ji < skinJointNodes.size(); ++ji)
+							{
+								NLMISC::CMatrix w = nodeTRS[skinJointNodes[ji]].World;
+								w.invert();
+								w.get(&ibms[ji * 16]);
+							}
+							b.setNodeSkin(nodeIdx[&node], b.addSkin(skinJoints, &ibms[0]));
+						}
 						++stats.Meshes;
 						haveMesh = true;
 					}
