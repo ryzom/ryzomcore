@@ -142,6 +142,12 @@ void pmbIgAddPsSearchPath(const std::string &path);
 int pmbExportAnimForGltf(const std::string &maxPath, std::vector<uint8> &animOut,
                          std::vector<std::string> *bareNodesOut = NULL);
 
+// From ../pipeline_max_export_swt/main.cpp and ../pipeline_max_export_pacs_prim/main.cpp
+// (PMB_SWT_NO_MAIN / PMB_PACS_PRIM_NO_MAIN): single-output whole-file flows shared with the
+// standalone tools — 1 = produced, 3 = nothing to export, -1 = error.
+int pmbExportSwtForGltf(const std::string &maxPath, std::vector<uint8> &out);
+int pmbExportPacsPrimForGltf(const std::string &maxPath, std::vector<uint8> &out);
+
 static std::string bytesToHex(const std::vector<uint8> &bytes)
 {
 	std::string hex;
@@ -225,8 +231,9 @@ struct SExportStats
 	uint Anims;
 	uint Specials;
 	uint Zones;
+	uint Others; // single-output process blobs (swt, pacs_prim, ...)
 	std::map<std::string, uint> SkipReasons;
-	SExportStats() : Meshes(0), Skipped(0), Igs(0), Anims(0), Specials(0), Zones(0) { }
+	SExportStats() : Meshes(0), Skipped(0), Igs(0), Anims(0), Specials(0), Zones(0), Others(0) { }
 	void skip(const std::string &reason)
 	{
 		++Skipped;
@@ -1142,6 +1149,31 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 		}
 	}
 
+	// Skeleton weight (.swt) and PACS primitives (.pacs_prim): single-output whole-file
+	// processes — the shared flows (also the standalone tools' only code path) serialize into
+	// asset-level blobs; mesh_export re-emits <stem>.swt / <stem>.pacs_prim. Full-parity rule:
+	// every artifact the .max pipeline produces must be producible from the .gltf.
+	{
+		std::vector<uint8> bytes;
+		if (pmbExportSwtForGltf(maxPath, bytes) == 1 && !bytes.empty())
+		{
+			CJsonValue *js = b.assetExtras()->setObject("nel_swt");
+			js->setString("name", NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(maxPath)));
+			js->set("data")->setString(bytesToHex(bytes));
+			++stats.Others;
+		}
+	}
+	{
+		std::vector<uint8> bytes;
+		if (pmbExportPacsPrimForGltf(maxPath, bytes) == 1 && !bytes.empty())
+		{
+			CJsonValue *js = b.assetExtras()->setObject("nel_pacs_prim");
+			js->setString("name", NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(maxPath)));
+			js->set("data")->setString(bytesToHex(bytes));
+			++stats.Others;
+		}
+	}
+
 	// Ligo zone sources (zonematerial-*/zonetransition-*/zonespecial-*): the zone process's
 	// whole-file flow (pipeline_max_export_zone compiled in with PMB_ZONE_NO_MAIN). Outputs
 	// ride verbatim in the nel_zones blob list (authoritative — PatchMesh has no faithful glTF
@@ -1292,8 +1324,8 @@ int main(int argc, char **argv)
 
 	SExportStats stats;
 	int ret = exportFile(input, outPath, exportLighting, stats);
-	printf("GLTF %s (%u meshes, %u special shapes, %u igs, %u anims, %u zones, %u skipped)\n", outPath.c_str(),
-	       stats.Meshes, stats.Specials, stats.Igs, stats.Anims, stats.Zones, stats.Skipped);
+	printf("GLTF %s (%u meshes, %u special shapes, %u igs, %u anims, %u zones, %u others, %u skipped)\n", outPath.c_str(),
+	       stats.Meshes, stats.Specials, stats.Igs, stats.Anims, stats.Zones, stats.Others, stats.Skipped);
 	for (std::map<std::string, uint>::iterator it = stats.SkipReasons.begin(); it != stats.SkipReasons.end(); ++it)
 		printf("SKIPCLASS %s %u\n", it->first.c_str(), it->second);
 	return ret;

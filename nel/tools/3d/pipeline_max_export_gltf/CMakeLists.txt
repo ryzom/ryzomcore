@@ -32,6 +32,13 @@ SET_SOURCE_FILES_PROPERTIES(../pipeline_max_export_anim/main.cpp PROPERTIES COMP
 SET(ZONE_SHARED ../pipeline_max_export_zone/main.cpp)
 SET_SOURCE_FILES_PROPERTIES(${ZONE_SHARED} PROPERTIES COMPILE_DEFINITIONS PMB_ZONE_NO_MAIN)
 
+# Single-output processes (full-parity rule): swt + pacs_prim share their tools' only code
+# path — the blob and the standalone file cannot drift.
+SET(SWT_SHARED ../pipeline_max_export_swt/main.cpp)
+SET_SOURCE_FILES_PROPERTIES(${SWT_SHARED} PROPERTIES COMPILE_DEFINITIONS PMB_SWT_NO_MAIN)
+SET(PACS_PRIM_SHARED ../pipeline_max_export_pacs_prim/main.cpp)
+SET_SOURCE_FILES_PROPERTIES(${PACS_PRIM_SHARED} PROPERTIES COMPILE_DEFINITIONS PMB_PACS_PRIM_NO_MAIN)
+
 FILE(GLOB SRCS *.cpp)
 FILE(GLOB HDRS *.h)
 
@@ -42,6 +49,8 @@ ADD_EXECUTABLE(pipeline_max_export_gltf
 	${IG_SHARED}
 	${ANIM_SHARED}
 	${ZONE_SHARED}
+	${SWT_SHARED}
+	${PACS_PRIM_SHARED}
 	)
 
 TARGET_LINK_LIBRARIES(pipeline_max_export_gltf
@@ -51,6 +60,7 @@ TARGET_LINK_LIBRARIES(pipeline_max_export_gltf
 	NeL::misc
 	NeL::3d
 	NeL::ligo
+	NeL::pacs
 )
 
 NL_DEFAULT_PROPS(pipeline_max_export_gltf "NeL, Tools, 3D: Pipeline Max Export glTF")

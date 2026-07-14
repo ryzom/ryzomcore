@@ -191,9 +191,10 @@ struct SStats
 	uint Igs;
 	uint Anims;
 	uint Zones;
+	uint Others; // single-output process blobs (swt, pacs_prim, ...)
 	uint Skipped;
 	std::map<std::string, uint> SkipReasons;
-	SStats() : Exported(0), Igs(0), Anims(0), Zones(0), Skipped(0) { }
+	SStats() : Exported(0), Igs(0), Anims(0), Zones(0), Others(0), Skipped(0) { }
 	void skip(const std::string &r)
 	{
 		++Skipped;
@@ -875,6 +876,49 @@ int exportNelGltfScene(const CMeshUtilsSettings &settings)
 		}
 	}
 
+	// Single-output process blobs (full parity): nel_swt -> <name>.swt, nel_pacs_prim ->
+	// <name>.pacs_prim — the shared whole-file flows' exact bytes, re-emitted verbatim.
+	{
+		static const struct { const char *Key; const char *Ext; } kSingles[] = {
+			{ "nel_swt", ".swt" }, { "nel_pacs_prim", ".pacs_prim" },
+		};
+		const CJsonValue *asset = doc.Json.get("asset");
+		const CJsonValue *aex = asset ? asset->get("extras") : NULL;
+		for (uint si = 0; aex && si < 2; ++si)
+		{
+			const CJsonValue *entry = aex->get(kSingles[si].Key);
+			if (!entry)
+				continue;
+			std::string name = entry->getString("name", "");
+			std::vector<uint8> bytes;
+			if (name.empty() || !hexToBytes(entry->getString("data", ""), bytes) || bytes.empty())
+			{
+				fprintf(stderr, "ERROR: bad %s entry\n", kSingles[si].Key);
+				ret = EXIT_FAILURE;
+				continue;
+			}
+			std::string outPath2 = outDir + name + kSingles[si].Ext;
+			try
+			{
+				COFile f;
+				if (!f.open(outPath2))
+				{
+					fprintf(stderr, "ERROR: cannot open %s\n", outPath2.c_str());
+					ret = EXIT_FAILURE;
+					continue;
+				}
+				f.serialBuffer(&bytes[0], (uint)bytes.size());
+				f.close();
+				++stats.Others;
+			}
+			catch (const NLMISC::Exception &e2)
+			{
+				fprintf(stderr, "ERROR: %s: %s\n", outPath2.c_str(), e2.what());
+				ret = EXIT_FAILURE;
+			}
+		}
+	}
+
 	// Ligo zones: the asset-level nel_zones blob list carries every file the zone process
 	// produced (zones/*.zone + zoneligos/*.ligozone, names carry the subdir) — emitted
 	// verbatim. The tessellated nel_proxy nodes are viewing meshes only and are naturally
@@ -1238,8 +1282,8 @@ int exportNelGltfScene(const CMeshUtilsSettings &settings)
 	CVertexBuffer::SerialOldPreferredMemory = oldVB;
 	CIndexBuffer::SerialOldPreferredMemory = oldIB;
 
-	printf("GLTF-IMPORT %s (%u shapes, %u igs, %u anims, %u zones, %u skipped)\n", settings.SourceFilePath.c_str(),
-	       stats.Exported, stats.Igs, stats.Anims, stats.Zones, stats.Skipped);
+	printf("GLTF-IMPORT %s (%u shapes, %u igs, %u anims, %u zones, %u others, %u skipped)\n", settings.SourceFilePath.c_str(),
+	       stats.Exported, stats.Igs, stats.Anims, stats.Zones, stats.Others, stats.Skipped);
 	for (std::map<std::string, uint>::iterator it = stats.SkipReasons.begin(); it != stats.SkipReasons.end(); ++it)
 		printf("SKIPCLASS %s %u\n", it->first.c_str(), it->second);
 	return ret;

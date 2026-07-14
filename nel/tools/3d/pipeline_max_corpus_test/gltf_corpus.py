@@ -23,6 +23,8 @@ import shape_corpus  # same-directory corpus enumeration + helpers
 import ig_corpus     # ig-process source enumeration (the standalone 116-file ig corpus)
 import anim_corpus   # anim-source enumeration (fauna/characters/sky AnimSourceDirectories)
 import zone_corpus   # ligo zone source enumeration (per-ecosystem zonematerial/transition/special)
+import swt_corpus    # swt-source enumeration helper (SwtSourceDirectories)
+import pacs_prim_corpus  # pacs_prim source enumeration (per-ecosystem vegetations)
 
 SKIP_CODE = 77
 
@@ -44,6 +46,8 @@ def main():
                     help="minimum byte-identical co-produced anim count for --gate")
     ap.add_argument("--min-zones", type=int, default=0,
                     help="minimum byte-identical co-produced zone file count for --gate")
+    ap.add_argument("--min-singles", type=int, default=0,
+                    help="minimum byte-identical single-output process file count for --gate")
     ap.add_argument("-j", "--jobs", type=int, default=max(1, (os.cpu_count() or 4) - 2))
     args = ap.parse_args()
 
@@ -92,6 +96,32 @@ def main():
             seen_paths.add(path)
             zone_extra.append(("zone/" + eco, path))
     corpus = corpus + zone_extra
+    # Single-output processes (full parity): swt + pacs_prim sources; the .swt/.pacs_prim ride
+    # as asset-level blobs (nel_swt/nel_pacs_prim), direct tool vs blob re-emission.
+    swt_paths = set()
+    swt_extra = []
+    swt_cfg = os.path.join(args.workspace, "common", "characters", "directories.py")
+    if os.path.isfile(swt_cfg):
+        for d in swt_corpus.parse_workspace_dirs(swt_cfg, "SwtSourceDirectories"):
+            full = os.path.join(args.graphics, d)
+            if not os.path.isdir(full):
+                continue
+            for name in sorted(os.listdir(full)):
+                if name.lower().endswith(".max"):
+                    p = os.path.join(full, name)
+                    swt_paths.add(p)
+                    if p not in seen_paths:
+                        seen_paths.add(p)
+                        swt_extra.append(("swt", p))
+    corpus = corpus + swt_extra
+    pacs_paths = set()
+    pacs_extra = []
+    for (eco, p) in pacs_prim_corpus.enumerate_corpus(args.graphics):
+        pacs_paths.add(p)
+        if p not in seen_paths:
+            seen_paths.add(p)
+            pacs_extra.append(("pacs/" + eco, p))
+    corpus = corpus + pacs_extra
     if args.only:
         corpus = [c for c in corpus if args.only in c[1]]
     if args.project:
@@ -103,6 +133,8 @@ def main():
     ig_bin = os.path.join(args.bin, "pipeline_max_export_ig")
     anim_bin = os.path.join(args.bin, "pipeline_max_export_anim")
     zone_bin = os.path.join(args.bin, "pipeline_max_export_zone")
+    swt_bin = os.path.join(args.bin, "pipeline_max_export_swt")
+    pacs_bin = os.path.join(args.bin, "pipeline_max_export_pacs_prim")
     ps_paths = [d for d in (os.path.expanduser("~/pipeline_export/common/sfx/ps"),) if os.path.isdir(d)]
 
     os.makedirs(args.out, exist_ok=True)
@@ -228,6 +260,25 @@ def main():
                         out[sub + "/" + f] = os.path.join(sd, f)
             return out
 
+        # Single-output differentials: direct .swt/.pacs_prim vs the blob re-emission (the via
+        # reader writes them into the main -d dir). Like igs/anims, a via-missing one is a
+        # defect — the writer embeds whatever the shared flow produces.
+        singles = []  # (label, direct file, via file)
+        via_swt = os.path.join(v_dir, stem + ".swt")
+        if path in swt_paths or os.path.isfile(via_swt):
+            dpath = os.path.join(base, "direct_swt_" + stem + ".swt")
+            r = subprocess.run([swt_bin, path, dpath], capture_output=True, text=True, timeout=300)
+            res["swt_rc"] = 0 if r.returncode in (0, 3) else r.returncode
+            singles.append(("swt", dpath if os.path.isfile(dpath) else None,
+                            via_swt if os.path.isfile(via_swt) else None))
+        via_pacs = os.path.join(v_dir, stem + ".pacs_prim")
+        if path in pacs_paths or os.path.isfile(via_pacs):
+            dpath = os.path.join(base, "direct_pacs_" + stem + ".pacs_prim")
+            r = subprocess.run([pacs_bin, path, dpath], capture_output=True, text=True, timeout=300)
+            res["pacs_rc"] = 0 if r.returncode in (0, 3) else r.returncode
+            singles.append(("pacs_prim", dpath if os.path.isfile(dpath) else None,
+                            via_pacs if os.path.isfile(via_pacs) else None))
+
         via_zones = zones_in(vz_dir)
         zone_refused = False
         if path in zone_banks:
@@ -321,8 +372,23 @@ def main():
             if name not in direct_zones:
                 via_only.append("zone:" + name)
                 mismatch = True
+        single_ident = 0
+        for (label, dpath, vpath) in singles:
+            if dpath and not vpath:
+                diff.append(label + "-missing")
+                mismatch = True
+            elif vpath and not dpath:
+                via_only.append(label)
+                mismatch = True
+            elif dpath and vpath:
+                if open(dpath, "rb").read() == open(vpath, "rb").read():
+                    single_ident += 1
+                else:
+                    mismatch = True
+                    diff.append(label + ":differs")
 
         res["ident"] = ident
+        res["single_ident"] = single_ident
         res["ig_ident"] = ig_ident
         res["anim_ident"] = anim_ident
         res["zone_ident"] = zone_ident
@@ -348,6 +414,7 @@ def main():
     ig_ident = 0
     anim_ident = 0
     zone_ident = 0
+    single_ident = 0
     floateq = []
     diffs = []
     via_only = []
@@ -360,15 +427,17 @@ def main():
             stubs += 1
             continue
         if res.get("direct_rc") != 0 or res.get("gltf_rc") != 0 or res.get("import_rc") != 0 \
-           or res.get("ig_rc", 0) != 0 or res.get("anim_rc", 0) != 0 or res.get("zone_rc", 0) != 0:
-            tool_fail.append("%s (rc d=%s g=%s i=%s ig=%s a=%s z=%s)"
+           or res.get("ig_rc", 0) != 0 or res.get("anim_rc", 0) != 0 or res.get("zone_rc", 0) != 0 \
+           or res.get("swt_rc", 0) != 0 or res.get("pacs_rc", 0) != 0:
+            tool_fail.append("%s (rc d=%s g=%s i=%s ig=%s a=%s z=%s s=%s p=%s)"
                              % (res["path"], res.get("direct_rc"), res.get("gltf_rc"),
                                 res.get("import_rc"), res.get("ig_rc", 0), res.get("anim_rc", 0),
-                                res.get("zone_rc", 0)))
+                                res.get("zone_rc", 0), res.get("swt_rc", 0), res.get("pacs_rc", 0)))
         ident += res.get("ident", 0)
         ig_ident += res.get("ig_ident", 0)
         anim_ident += res.get("anim_ident", 0)
         zone_ident += res.get("zone_ident", 0)
+        single_ident += res.get("single_ident", 0)
         for n in res.get("floateq", []):
             floateq.append("%s:%s" % (res["proj"], n))
         for n in res.get("diff", []):
@@ -384,10 +453,11 @@ def main():
 
     print()
     print("GLTF DIFFERENTIAL: %d files (%d stubs); co-produced: %d byte-identical shapes + "
-          "%d byte-identical igs + %d byte-identical anims + %d byte-identical zone files, "
-          "%d float-eq, %d diff; %d direct-only (staged coverage), %d via-only"
-          % (len(results), stubs, ident, ig_ident, anim_ident, zone_ident, len(floateq),
-             len(diffs), direct_only, len(via_only)))
+          "%d byte-identical igs + %d byte-identical anims + %d byte-identical zone files + "
+          "%d byte-identical process files, %d float-eq, %d diff; "
+          "%d direct-only (staged coverage), %d via-only"
+          % (len(results), stubs, ident, ig_ident, anim_ident, zone_ident, single_ident,
+             len(floateq), len(diffs), direct_only, len(via_only)))
     if skip_direct:
         print("    direct skip classes: %s" % ", ".join("%s=%d" % kv for kv in skip_direct.most_common()))
     if skip_via:
@@ -411,6 +481,8 @@ def main():
         if anim_ident < args.min_anims:
             fails += 1
         if zone_ident < args.min_zones:
+            fails += 1
+        if single_ident < args.min_singles:
             fails += 1
     return 1 if fails else 0
 
