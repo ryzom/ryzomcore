@@ -182,6 +182,15 @@ IF (Python3_Interpreter_FOUND)
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 	SET_TESTS_PROPERTIES(pipeline_max_gltf_corpus PROPERTIES SKIP_RETURN_CODE 77)
 
+	# materials_sidecar_test.py: behavior test for the assimp route's --materials sidecar
+	# loader (materials-only .gltf, name-bound nel_* materials — plan decision 2026-07-14).
+	# One-fixture test: bind-all / fallback / partial / tamper-fails / stacking / exact-ignores.
+	ADD_TEST(NAME pipeline_max_materials_sidecar
+		COMMAND ${Python3_EXECUTABLE} materials_sidecar_test.py
+			--bin $<TARGET_FILE_DIR:pipeline_max_export_shape>
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+	SET_TESTS_PROPERTIES(pipeline_max_materials_sidecar PROPERTIES SKIP_RETURN_CODE 77)
+
 	# Same shape corpus through the VS2008/Wine x87 reference-codegen build, same rationale as
 	# the other *_vs2008 gates: T1/T2 byte-identity is codegen-independent, and the T3 FLOATEQ
 	# tier (2e-6/32-ULP, normals 1e-4) must hold under the Max-2010-matching compiler/float

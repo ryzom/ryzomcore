@@ -47,6 +47,7 @@
 #include "assimp_shape.h"
 #include "assimp_skel.h"
 #include "gltf_nel_scene.h"
+#include "material_sidecar.h"
 
 CMeshUtilsSettings::CMeshUtilsSettings()
 	: IgnoreNelExtras(false)
@@ -292,7 +293,12 @@ int exportScene(const CMeshUtilsSettings &settings)
 	// nel-extras glTF (max2gltf output): exact-tier import through the glTF JSON directly, no
 	// assimp — see gltf_nel_scene.h. --no-nel-extras forces the generic assimp route.
 	if (!settings.IgnoreNelExtras && isNelGltfFile(settings.SourceFilePath))
+	{
+		if (!settings.MaterialSidecarPaths.empty())
+			nlwarning("Materials sidecar ignored: '%s' carries nel_* extras (exact-tier import; materials ride in-file)",
+				settings.SourceFilePath.c_str());
 		return exportNelGltfScene(settings);
+	}
 
 	CMeshUtilsContext context(settings);
 	NLMISC::CFile::createDirectoryTree(settings.DestinationDirectoryPath);
@@ -336,6 +342,12 @@ int exportScene(const CMeshUtilsSettings &settings)
 		context.ToolLogger.writeDepend(NLPIPELINE::BUILD, "*", context.SceneMeta.metaFilePath().c_str()); // Meta input file
 
 	validateInternalNodeNames(context, context.InternalScene->mRootNode);
+
+	// Materials sidecar (name-bound exact NeL materials for artist-provided model files)
+	if (!settings.MaterialSidecarPaths.empty()
+		&& !loadMaterialSidecars(settings.MaterialSidecarPaths, context.SidecarMaterials,
+			context.ToolLogger, settings.SourceFilePath))
+		return EXIT_FAILURE;
 
 	// -- SKEL FLAG --
 	flagAssimpBones(context);
