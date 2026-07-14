@@ -92,6 +92,8 @@ using namespace NLGLTF;
 #define NEL3D_APPDATA_AUTOMATIC_ANIMATION 1423062617
 #define NEL3D_APPDATA_EXPORT_ANIMATED_MATERIALS 1423062587
 
+#define NEL3D_APPDATA_IGNAME 1423062564
+
 #define CLASSID_PARTA_NEL_PS 0x58ce2893
 #define CLASSID_PARTA_NEL_FLARE 0x4e913532
 #define CLASSID_PARTA_NEL_WAVE_MAKER 0x77e24828
@@ -101,12 +103,19 @@ static const NLMISC::CClassId CLASSID_MAP_EXTENDER(0x2ec82081, 0x045a6271);
 
 static bool g_verbose = false;
 
+// From ../pipeline_max_export_ig/main.cpp (compiled in with PMB_IG_NO_MAIN): the ig process's
+// full selection + buildInstanceGroup flow, returning each ig's serialized bytes.
+int pmbExportIgsForGltf(const std::string &maxPath,
+                        std::vector<std::pair<std::string, std::vector<uint8> > > &igsOut);
+void pmbIgAddPsSearchPath(const std::string &path);
+
 struct SExportStats
 {
 	uint Meshes;
 	uint Skipped;
+	uint Igs;
 	std::map<std::string, uint> SkipReasons;
-	SExportStats() : Meshes(0), Skipped(0) { }
+	SExportStats() : Meshes(0), Skipped(0), Igs(0) { }
 	void skip(const std::string &reason)
 	{
 		++Skipped;
@@ -280,6 +289,14 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 		CNodeImpl *n = dynamic_cast<CNodeImpl *>(&node);
 		std::string name = nodeName(node);
 		CJsonValue *extras = b.nodeExtras(nodeIdx[&node]);
+
+		// IG membership tag (artist-visible; the byte-exact ig data rides the asset-level
+		// nel_igs blob — see below)
+		{
+			std::string igName = getScriptAppDataStr(n, NEL3D_APPDATA_IGNAME, "");
+			if (!igName.empty())
+				extras->setString("nel_ig_name", igName);
+		}
 
 		std::vector<CSceneClass *> mods;
 		std::vector<CStorageContainer *> modApps;
@@ -478,6 +495,35 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 			extras->setBool("nel_auto_anim", true);
 	}
 
+	// Instance groups: the ig process's full flow over this file (selection order, XRef
+	// resolution, clusters/portals/lights — pipeline_max_export_ig's code compiled in), each
+	// built CInstanceGroup serialized verbatim into the asset-level nel_igs blob list. The
+	// structural per-node nel_ig_name tags above are the artist-visible view; the blob is the
+	// byte-exact carrier (dual representation, same rule as animation tracks).
+	{
+		std::vector<std::pair<std::string, std::vector<uint8> > > igs;
+		int nIgs = pmbExportIgsForGltf(maxPath, igs);
+		if (nIgs > 0)
+		{
+			CJsonValue *jigs = b.assetExtras()->setArray("nel_igs");
+			for (size_t i = 0; i < igs.size(); ++i)
+			{
+				CJsonValue *e = jigs->push();
+				e->setString("name", igs[i].first);
+				std::string hex;
+				hex.reserve(igs[i].second.size() * 2);
+				char buf[4];
+				for (size_t k = 0; k < igs[i].second.size(); ++k)
+				{
+					snprintf(buf, sizeof(buf), "%02x", igs[i].second[k]);
+					hex += buf;
+				}
+				e->set("data")->setString(hex);
+			}
+			stats.Igs = (uint)igs.size();
+		}
+	}
+
 	if (!b.save(outPath))
 	{
 		fprintf(stderr, "ERROR: cannot write %s\n", outPath.c_str());
@@ -512,6 +558,8 @@ int main(int argc, char **argv)
 			else
 				DBPATH::addAlias(kv.substr(0, eq), kv.substr(eq + 1));
 		}
+		else if (arg == "--ps-path" && i + 1 < argc)
+			pmbIgAddPsSearchPath(argv[++i]);
 		else if (arg == "--no-lighting")
 			exportLighting = false;
 		else if (input.empty())
@@ -547,7 +595,8 @@ int main(int argc, char **argv)
 
 	SExportStats stats;
 	int ret = exportFile(input, outPath, exportLighting, stats);
-	printf("GLTF %s (%u meshes, %u skipped)\n", outPath.c_str(), stats.Meshes, stats.Skipped);
+	printf("GLTF %s (%u meshes, %u igs, %u skipped)\n", outPath.c_str(), stats.Meshes, stats.Igs,
+	       stats.Skipped);
 	for (std::map<std::string, uint>::iterator it = stats.SkipReasons.begin(); it != stats.SkipReasons.end(); ++it)
 		printf("SKIPCLASS %s %u\n", it->first.c_str(), it->second);
 	return ret;

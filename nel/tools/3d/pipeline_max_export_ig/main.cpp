@@ -46,6 +46,7 @@
 #include <nel/misc/app_context.h>
 #include <nel/misc/common.h>
 #include <nel/misc/file.h>
+#include <nel/misc/mem_stream.h>
 #include <nel/misc/path.h>
 #include <nel/misc/quat.h>
 #include <nel/misc/vector.h>
@@ -2732,6 +2733,87 @@ static int infoIg(const char *path)
 
 // ---------------------------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------------------------
+// Entry point for the max2gltf writer (pipeline_max_export_gltf compiles this file with
+// PMB_IG_NO_MAIN): run exactly the standalone-mode flow — distinct-ig-name scan in scene order,
+// tree-walk-ordered selection, buildInstanceGroup — and hand back each built CInstanceGroup's
+// serialized bytes. The bytes ride the glTF as the lossless nel_igs blob (same dual-
+// representation rule as animation tracks: structural node tags for artists, the blob for the
+// byte-exact roundtrip). Loads the .max through this tool's own loader/registry — independent
+// of the caller's scene state. Returns the number of igs built, or -1 on load failure.
+// Companion setter for the entry below: the .ps shape search paths (the standalone tool's
+// --ps-path flag) — the FX-instance clusterize test resolves .ps shapes through these.
+void pmbIgAddPsSearchPath(const std::string &path)
+{
+	g_psSearchPaths.push_back(path);
+}
+
+int pmbExportIgsForGltf(const std::string &maxPath,
+                        std::vector<std::pair<std::string, std::vector<uint8> > > &igsOut)
+{
+	CSceneClassRegistry reg;
+	CBuiltin::registerClasses(&reg);
+	UPDATE1::CUpdate1::registerClasses(&reg);
+	EPOLY::CEPoly::registerClasses(&reg);
+	BIPED::CBiped::registerClasses(&reg);
+	NELPATCH::CNelPatch::registerClasses(&reg);
+	CSceneClassRegistry *prevReg = g_registry;
+	g_registry = &reg;
+
+	CStorageOleIn in;
+	if (!in.open(maxPath.c_str())) { g_registry = prevReg; return -1; }
+	CDllDirectory dll;
+	{ std::vector<uint8> b; if (!in.readStream("DllDirectory", b)) { g_registry = prevReg; return -1; } CStorageStream st(b); dll.serial(st); }
+	dll.parse(VersionUnknown);
+	CClassDirectory3 cd(&dll);
+	{ std::vector<uint8> b; if (!in.readStream("ClassDirectory3", b)) { g_registry = prevReg; return -1; } CStorageStream st(b); cd.serial(st); }
+	cd.parse(VersionUnknown);
+	CScene scene(&reg, &dll, &cd);
+	{ std::vector<uint8> b; if (!in.readStream("Scene", b)) { g_registry = prevReg; return -1; } CStorageStream st(b); scene.serial(st); }
+	scene.parse(VersionUnknown);
+
+	CSceneClassContainer *ssc = scene.container();
+	SNodeTMCache tmCache;
+	tmCache.SceneRoot = ssc->scene()->rootNode();
+
+	std::vector<std::string> igNames;
+	for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
+	{
+		CNodeImpl *node = dynamic_cast<CNodeImpl *>(it->second);
+		if (!node) continue;
+		std::string ig = getScriptAppDataStr(node, NEL3D_APPDATA_IGNAME, "");
+		if (ig.empty()) continue;
+		if (std::find(igNames.begin(), igNames.end(), ig) == igNames.end())
+			igNames.push_back(ig);
+	}
+
+	for (uint igIdx = 0; igIdx < igNames.size(); ++igIdx)
+	{
+		SIgBuildStats stats;
+		NL3D::CInstanceGroup *ig = exportIgForName(ssc, tmCache, igNames[igIdx],
+		                                            /*lowercaseCompare*/ false, /*transitionZone*/ -1,
+		                                            /*cellSize*/ 160.0f, stats,
+		                                            /*includeXRefFirst*/ false);
+		if (!ig) continue;
+		try
+		{
+			NLMISC::CMemStream ms;
+			ig->serial(ms);
+			std::vector<uint8> bytes(ms.buffer(), ms.buffer() + ms.length());
+			igsOut.push_back(std::make_pair(igNames[igIdx], bytes));
+		}
+		catch (const NLMISC::Exception &e)
+		{
+			fprintf(stderr, "ERROR: ig serial failed for %s: %s\n", igNames[igIdx].c_str(), e.what());
+		}
+		delete ig;
+	}
+
+	g_registry = prevReg;
+	return (int)igsOut.size();
+}
+
+#ifndef PMB_IG_NO_MAIN
 int main(int argc, char **argv)
 {
 	if (!NLMISC::INelContext::isContextInitialised())
@@ -2949,5 +3031,6 @@ int main(int argc, char **argv)
 
 	return ret;
 }
+#endif /* PMB_IG_NO_MAIN */
 
 /* end of file */

@@ -611,6 +611,10 @@ bool CGltfBuilder::save(const std::string &gltfPath)
 		binPath = binPath.substr(0, dot);
 	binPath += ".bin";
 
+	// A glTF buffer must have byteLength >= 1, and a zero-byte .bin trips CIFile::open on the
+	// reader side — pad the (mesh-less scene) case to one dword.
+	if (m_Bin.empty() && m_BufferViews->size() == 0)
+		m_Bin.resize(4, 0);
 	CJsonValue *buffers = m_Root.getMutable("buffers");
 	buffers->clear();
 	CJsonValue *buf = buffers->push();

@@ -20,6 +20,7 @@ corpus); pass --keep-diff to retain the artifacts of mismatching files for triag
 import argparse, os, shutil, subprocess, sys, collections
 
 import shape_corpus  # same-directory corpus enumeration + helpers
+import ig_corpus     # ig-process source enumeration (the standalone 116-file ig corpus)
 
 SKIP_CODE = 77
 
@@ -52,6 +53,16 @@ def main():
             return SKIP_CODE
 
     corpus = shape_corpus.enumerate_corpus(args.graphics, args.workspace)
+    # The ig-process sources (mostly disjoint from the shape corpus): igs ride the same
+    # differential, direct pipeline_max_export_ig .ig vs the glTF's nel_igs blob re-emitted by
+    # mesh_export. Files present in both corpora run once with both comparisons.
+    ig_paths = set()
+    for (proj, kind, d, path) in ig_corpus.enumerate_corpus(args.graphics, args.workspace):
+        ig_paths.add(path)
+    shape_paths = set(p for (_, p) in corpus)
+    corpus = corpus + [("ig/" + proj, path)
+                       for (proj, kind, d, path) in ig_corpus.enumerate_corpus(args.graphics, args.workspace)
+                       if path not in shape_paths]
     if args.only:
         corpus = [c for c in corpus if args.only in c[1]]
     if args.project:
@@ -59,6 +70,9 @@ def main():
     if not corpus:
         print("SKIP: no corpus files found")
         return SKIP_CODE
+
+    ig_bin = os.path.join(args.bin, "pipeline_max_export_ig")
+    ps_paths = [d for d in (os.path.expanduser("~/pipeline_export/common/sfx/ps"),) if os.path.isdir(d)]
 
     os.makedirs(args.out, exist_ok=True)
 
@@ -88,10 +102,12 @@ def main():
         base = os.path.join(args.out, "%05d_%s" % (idx, stem))
         d_dir = os.path.join(base, "direct")
         dc_dir = os.path.join(base, "direct_c")
+        di_dir = os.path.join(base, "direct_ig")
         g_dir = os.path.join(base, "gltf")
         v_dir = os.path.join(base, "via")
         vc_dir = os.path.join(base, "via_c")
-        for d in (d_dir, dc_dir, g_dir, v_dir, vc_dir):
+        vi_dir = os.path.join(base, "via_ig")
+        for d in (d_dir, dc_dir, di_dir, g_dir, v_dir, vc_dir, vi_dir):
             os.makedirs(d, exist_ok=True)
 
         r = subprocess.run([shape_bin, "--db", args.graphics, "--coarse-out", dc_dir, path, d_dir],
@@ -99,7 +115,10 @@ def main():
         res["direct_rc"] = r.returncode
         res["direct_skips"] = skipclasses(r.stdout)
 
-        r = subprocess.run([gltf_bin, "--db", args.graphics, path, g_dir],
+        ps_args = []
+        for pp in ps_paths:
+            ps_args += ["--ps-path", pp]
+        r = subprocess.run([gltf_bin, "--db", args.graphics] + ps_args + [path, g_dir],
                            capture_output=True, text=True)
         res["gltf_rc"] = r.returncode
         res["gltf_skips"] = skipclasses(r.stdout)
@@ -107,7 +126,8 @@ def main():
 
         via_skips = collections.Counter()
         if os.path.isfile(gltf_path):
-            r = subprocess.run([import_bin, "-d", v_dir, "--coarse-dst", vc_dir, gltf_path],
+            r = subprocess.run([import_bin, "-d", v_dir, "--coarse-dst", vc_dir,
+                                "--ig-dst", vi_dir, gltf_path],
                                capture_output=True, text=True)
             res["import_rc"] = r.returncode
             via_skips = skipclasses(r.stdout)
@@ -119,6 +139,24 @@ def main():
         direct_c = shapes_in(dc_dir)
         via = shapes_in(v_dir)
         via_c = shapes_in(vc_dir)
+
+        # IG differential: the direct .ig set vs the glTF nel_igs blob re-emission. Run the
+        # direct exporter for the ig-corpus files and for any file whose glTF carried igs.
+        def igs_in(d):
+            out = {}
+            if os.path.isdir(d):
+                for f in os.listdir(d):
+                    if f.endswith(".ig"):
+                        out[f] = os.path.join(d, f)
+            return out
+
+        via_igs = igs_in(vi_dir)
+        if path in ig_paths or via_igs:
+            r = subprocess.run([ig_bin, "--db", args.graphics] + ps_args + [path, di_dir],
+                               capture_output=True, text=True)
+            # exit 3 = nothing to export (not an error)
+            res["ig_rc"] = 0 if r.returncode in (0, 3) else r.returncode
+        direct_igs = igs_in(di_dir)
 
         ident = 0
         floateq = []
@@ -150,7 +188,27 @@ def main():
                 if name not in dmap:
                     via_only.append(name)
                     mismatch = True
+        ig_ident = 0
+        for name, dpath in sorted(direct_igs.items()):
+            vpath = via_igs.get(name)
+            if not vpath:
+                # unlike shapes there is no staged-coverage class for igs — the writer embeds
+                # every ig the direct route builds, so a missing one is a defect
+                diff.append("ig-missing:" + name)
+                mismatch = True
+                continue
+            if open(dpath, "rb").read() == open(vpath, "rb").read():
+                ig_ident += 1
+            else:
+                mismatch = True
+                diff.append("ig:" + name)
+        for name in sorted(via_igs):
+            if name not in direct_igs:
+                via_only.append("ig:" + name)
+                mismatch = True
+
         res["ident"] = ident
+        res["ig_ident"] = ig_ident
         res["floateq"] = floateq
         res["diff"] = diff
         res["direct_only"] = direct_only
@@ -170,6 +228,7 @@ def main():
 
     stubs = 0
     ident = 0
+    ig_ident = 0
     floateq = []
     diffs = []
     via_only = []
@@ -181,10 +240,13 @@ def main():
         if res.get("stub"):
             stubs += 1
             continue
-        if res.get("direct_rc") != 0 or res.get("gltf_rc") != 0 or res.get("import_rc") != 0:
-            tool_fail.append("%s (rc d=%s g=%s i=%s)" % (res["path"], res.get("direct_rc"),
-                                                         res.get("gltf_rc"), res.get("import_rc")))
+        if res.get("direct_rc") != 0 or res.get("gltf_rc") != 0 or res.get("import_rc") != 0 \
+           or res.get("ig_rc", 0) != 0:
+            tool_fail.append("%s (rc d=%s g=%s i=%s ig=%s)" % (res["path"], res.get("direct_rc"),
+                                                               res.get("gltf_rc"), res.get("import_rc"),
+                                                               res.get("ig_rc", 0)))
         ident += res.get("ident", 0)
+        ig_ident += res.get("ig_ident", 0)
         for n in res.get("floateq", []):
             floateq.append("%s:%s" % (res["proj"], n))
         for n in res.get("diff", []):
@@ -199,9 +261,11 @@ def main():
             print("KEPT %s" % res["kept"])
 
     print()
-    print("GLTF DIFFERENTIAL: %d files (%d stubs); co-produced: %d byte-identical, %d float-eq, "
-          "%d diff; %d direct-only (staged coverage), %d via-only"
-          % (len(results), stubs, ident, len(floateq), len(diffs), direct_only, len(via_only)))
+    print("GLTF DIFFERENTIAL: %d files (%d stubs); co-produced: %d byte-identical shapes + "
+          "%d byte-identical igs, %d float-eq, %d diff; %d direct-only (staged coverage), "
+          "%d via-only"
+          % (len(results), stubs, ident, ig_ident, len(floateq), len(diffs), direct_only,
+             len(via_only)))
     if skip_direct:
         print("    direct skip classes: %s" % ", ".join("%s=%d" % kv for kv in skip_direct.most_common()))
     if skip_via:

@@ -31,6 +31,8 @@ struct CMeshUtilsSettings
 	std::string DestinationDirectoryPath;
 	// With-coarse-mesh shape output (nel-extras glTF import route; empty = same as destination).
 	std::string ShapeCoarseDirectoryPath;
+	// Instance-group (.ig) output (nel-extras glTF import route; empty = same as destination).
+	std::string IGDirectoryPath;
 	std::string ToolDependLog;
 	std::string ToolErrorLog;
 

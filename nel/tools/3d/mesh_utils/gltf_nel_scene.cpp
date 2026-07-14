@@ -108,16 +108,21 @@ struct SGltfDoc
 				if (err) *err = "buffer without uri";
 				return false;
 			}
-			std::string binPath = CFile::getPath(path) + uri;
-			CIFile f;
-			if (!f.open(binPath))
+			// Tolerate an empty buffer (mesh-less scene, e.g. ig-only or all-skip files):
+			// CIFile::open refuses zero-byte files.
+			if (buf->getInt("byteLength", 0) > 0)
 			{
-				if (err) *err = "cannot open " + binPath;
-				return false;
+				std::string binPath = CFile::getPath(path) + uri;
+				CIFile f;
+				if (!f.open(binPath))
+				{
+					if (err) *err = "cannot open " + binPath;
+					return false;
+				}
+				Bin.resize(f.getFileSize());
+				if (!Bin.empty())
+					f.serialBuffer(&Bin[0], (uint)Bin.size());
 			}
-			Bin.resize(f.getFileSize());
-			if (!Bin.empty())
-				f.serialBuffer(&Bin[0], (uint)Bin.size());
 		}
 		return true;
 	}
@@ -181,9 +186,10 @@ struct SGltfDoc
 struct SStats
 {
 	uint Exported;
+	uint Igs;
 	uint Skipped;
 	std::map<std::string, uint> SkipReasons;
-	SStats() : Exported(0), Skipped(0) { }
+	SStats() : Exported(0), Igs(0), Skipped(0) { }
 	void skip(const std::string &r)
 	{
 		++Skipped;
@@ -573,6 +579,71 @@ int exportNelGltfScene(const CMeshUtilsSettings &settings)
 	const CJsonValue *meshes = doc.Json.get("meshes");
 	int ret = EXIT_SUCCESS;
 
+	// Instance groups: the asset-level nel_igs blob list carries each CInstanceGroup's exact
+	// serial stream (dual representation — the per-node nel_ig_name tags are the editable
+	// view; rebuilding an edited ig from them is future work, the blob is authoritative).
+	{
+		const CJsonValue *asset = doc.Json.get("asset");
+		const CJsonValue *aex = asset ? asset->get("extras") : NULL;
+		const CJsonValue *igs = aex ? aex->get("nel_igs") : NULL;
+		std::string igDir = settings.IGDirectoryPath.empty() ? outDir
+			: CPath::standardizePath(settings.IGDirectoryPath, true);
+		if (igs && igs->size())
+			CFile::createDirectoryTree(igDir);
+		for (size_t i = 0; igs && i < igs->size(); ++i)
+		{
+			const CJsonValue *e = igs->at(i);
+			std::string name = e->getString("name", "");
+			std::string hexData = e->getString("data", "");
+			if (name.empty() || hexData.empty() || (hexData.size() % 2))
+			{
+				fprintf(stderr, "ERROR: bad nel_igs entry %u\n", (uint)i);
+				ret = EXIT_FAILURE;
+				continue;
+			}
+			std::vector<uint8> bytes(hexData.size() / 2);
+			bool ok = true;
+			for (size_t k = 0; k < bytes.size() && ok; ++k)
+			{
+				unsigned x = 0;
+				for (int h = 0; h < 2 && ok; ++h)
+				{
+					char c = hexData[k * 2 + h];
+					x <<= 4;
+					if (c >= '0' && c <= '9') x |= (unsigned)(c - '0');
+					else if (c >= 'a' && c <= 'f') x |= (unsigned)(c - 'a' + 10);
+					else ok = false;
+				}
+				bytes[k] = (uint8)x;
+			}
+			if (!ok)
+			{
+				fprintf(stderr, "ERROR: bad nel_igs hex for '%s'\n", name.c_str());
+				ret = EXIT_FAILURE;
+				continue;
+			}
+			std::string igPath = igDir + name + ".ig";
+			try
+			{
+				COFile f;
+				if (!f.open(igPath))
+				{
+					fprintf(stderr, "ERROR: cannot open %s\n", igPath.c_str());
+					ret = EXIT_FAILURE;
+					continue;
+				}
+				f.serialBuffer(&bytes[0], (uint)bytes.size());
+				f.close();
+				++stats.Igs;
+			}
+			catch (const NLMISC::Exception &e2)
+			{
+				fprintf(stderr, "ERROR: %s: %s\n", igPath.c_str(), e2.what());
+				ret = EXIT_FAILURE;
+			}
+		}
+	}
+
 	for (size_t ni = 0; nodes && ni < nodes->size(); ++ni)
 	{
 		const CJsonValue *node = nodes->at(ni);
@@ -701,8 +772,8 @@ int exportNelGltfScene(const CMeshUtilsSettings &settings)
 	CVertexBuffer::SerialOldPreferredMemory = oldVB;
 	CIndexBuffer::SerialOldPreferredMemory = oldIB;
 
-	printf("GLTF-IMPORT %s (%u shapes, %u skipped)\n", settings.SourceFilePath.c_str(),
-	       stats.Exported, stats.Skipped);
+	printf("GLTF-IMPORT %s (%u shapes, %u igs, %u skipped)\n", settings.SourceFilePath.c_str(),
+	       stats.Exported, stats.Igs, stats.Skipped);
 	for (std::map<std::string, uint>::iterator it = stats.SkipReasons.begin(); it != stats.SkipReasons.end(); ++it)
 		printf("SKIPCLASS %s %u\n", it->first.c_str(), it->second);
 	return ret;
