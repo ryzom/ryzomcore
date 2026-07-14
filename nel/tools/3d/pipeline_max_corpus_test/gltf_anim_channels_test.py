@@ -103,6 +103,11 @@ def main():
                     prev = q
         check("channels-wellformed", bad_target == 0 and bad_time == 0 and bad_pair == 0,
               "target %d, time %d, pair %d" % (bad_target, bad_time, bad_pair))
+
+        # bare-track mapping: the COM's own "pos"/"rotquat" tracks have no node prefix and must
+        # land on the selection root (Bip01)
+        bip01 = next((i for i, n in enumerate(d["nodes"]) if n["name"] == "Bip01"), None)
+        check("bare-root-channels", bip01 is not None and bip01 in targets)
         check("quats-unit-aligned", bad_quat == 0 and bad_flip == 0,
               "nonunit %d, flips %d" % (bad_quat, bad_flip))
     finally:

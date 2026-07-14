@@ -1604,7 +1604,8 @@ static int runDiffRig(const char *pathA, const char *pathB, const char *outPath)
 // sampled interop channels are a later additive tier; the blob is the byte-exact carrier).
 // Loads the .max through this tool's own loader/registry, independent of the caller's state.
 // Returns 1 with animOut filled, 3 when nothing to export, -1 on load/serial failure.
-int pmbExportAnimForGltf(const std::string &maxPath, std::vector<uint8> &animOut)
+int pmbExportAnimForGltf(const std::string &maxPath, std::vector<uint8> &animOut,
+                         std::vector<std::string> *bareNodesOut)
 {
 	NL3D::registerSerial3d(); // internally guarded
 
@@ -1667,6 +1668,11 @@ int pmbExportAnimForGltf(const std::string &maxPath, std::vector<uint8> &animOut
 			nodeName += ".";
 		}
 		bool root = node->parent() == rootNode;
+		// Selection nodes exported with an EMPTY prefix own the bare "pos"/"rotquat"/"scale"
+		// and "<target>MorphFactor" track names (the Ryzom per-node convention) — the glTF
+		// sampled-channel tier needs to know which nodes those are.
+		if (bareNodesOut && nodeName.empty())
+			bareNodesOut->push_back(ucstring(node->userName()).toUtf8());
 		addAnimation(animFile, *node, nodeName, root, ssc);
 	}
 

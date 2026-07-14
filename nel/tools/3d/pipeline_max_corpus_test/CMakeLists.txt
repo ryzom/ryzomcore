@@ -209,6 +209,15 @@ IF (Python3_Interpreter_FOUND)
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 	SET_TESTS_PROPERTIES(pipeline_max_gltf_anim_channels PROPERTIES SKIP_RETURN_CODE 77)
 
+	# gltf_morph_targets_test.py: behavior test for standard glTF morph targets (POSITION/NORMAL
+	# deltas + weights + targetNames from the nel_bs_* data; exact-tier streams authoritative).
+	# Visage fixture: counts / names / weights / float-exact POSITION deltas.
+	ADD_TEST(NAME pipeline_max_gltf_morph_targets
+		COMMAND ${Python3_EXECUTABLE} gltf_morph_targets_test.py
+			--bin $<TARGET_FILE_DIR:pipeline_max_export_shape>
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+	SET_TESTS_PROPERTIES(pipeline_max_gltf_morph_targets PROPERTIES SKIP_RETURN_CODE 77)
+
 	# Same shape corpus through the VS2008/Wine x87 reference-codegen build, same rationale as
 	# the other *_vs2008 gates: T1/T2 byte-identity is codegen-independent, and the T3 FLOATEQ
 	# tier (2e-6/32-ULP, normals 1e-4) must hold under the Max-2010-matching compiler/float

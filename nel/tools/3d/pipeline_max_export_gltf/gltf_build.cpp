@@ -210,6 +210,28 @@ void CGltfBuilder::setNodeSkin(sint node, sint skin)
 	m_NodeVals[(size_t)node]->setInt("skin", skin);
 }
 
+void CGltfBuilder::addWeightsChannel(const std::string &animName, sint node,
+                                     const std::vector<float> &times, const std::vector<float> &weights,
+                                     int numTargets)
+{
+	// Same sampler/channel plumbing as addAnimChannel, but the output is a SCALAR accessor
+	// with numTargets values per time sample (glTF "weights" path semantics).
+	addAnimChannel(animName, node, "weights", times, weights, 1);
+	(void)numTargets;
+}
+
+void CGltfBuilder::setMeshMorphMeta(sint mesh, const std::vector<std::string> &names,
+                                    const std::vector<float> &defaults01)
+{
+	CJsonValue *jm = const_cast<CJsonValue *>(m_Meshes->at((size_t)mesh));
+	CJsonValue *w = jm->setArray("weights");
+	for (size_t i = 0; i < defaults01.size(); ++i)
+		w->pushDouble(defaults01[i]);
+	CJsonValue *tn = jm->ensureObject("extras")->setArray("targetNames");
+	for (size_t i = 0; i < names.size(); ++i)
+		tn->pushString(names[i]);
+}
+
 void CGltfBuilder::addAnimChannel(const std::string &animName, sint node, const char *path,
                                   const std::vector<float> &times, const std::vector<float> &values,
                                   int nComp)
@@ -231,7 +253,8 @@ void CGltfBuilder::addAnimChannel(const std::string &animName, sint node, const 
 	float tmin = times[0], tmax = times[times.size() - 1];
 	sint tacc = addAccessor(tbv, COMP_FLOAT, "SCALAR", times.size(), false, &tmin, &tmax, 1);
 	sint vbv = addBufferView(&values[0], values.size() * 4, 0);
-	sint vacc = addAccessor(vbv, COMP_FLOAT, nComp == 4 ? "VEC4" : "VEC3",
+	sint vacc = addAccessor(vbv, COMP_FLOAT,
+	                        nComp == 4 ? "VEC4" : (nComp == 3 ? "VEC3" : "SCALAR"),
 	                        values.size() / nComp, false, NULL, NULL, 0);
 	CJsonValue *samplers = anim->getMutable("samplers");
 	CJsonValue *sampler = samplers->push();
@@ -575,6 +598,7 @@ sint CGltfBuilder::addMesh(const std::string &name, const CMesh::CMeshBuild &mb,
 		std::vector<uint16> joints16;
 		std::vector<float> weights4;
 		std::vector<uint32> vertexIds;
+		std::vector<std::pair<uint32, uint> > firstCorner; // (global face, corner) per vertex
 		std::vector<uint32> indices;
 		indices.reserve(faces.size() * 3);
 		std::string key;
@@ -623,6 +647,7 @@ sint CGltfBuilder::addMesh(const std::string &name, const CMesh::CMeshBuild &mb,
 						}
 					}
 					vertexIds.push_back((uint32)corner.Vertex);
+					firstCorner.push_back(std::make_pair(faces[k], c));
 				}
 				indices.push_back(vid);
 			}
@@ -651,6 +676,33 @@ sint CGltfBuilder::addMesh(const std::string &name, const CMesh::CMeshBuild &mb,
 		prim->setInt("indices", addAccessorU32(&indices[0], indices.size(), TARGET_ELEMENT));
 		if (materialIdx[(size_t)mi->first] >= 0)
 			prim->setInt("material", materialIdx[(size_t)mi->first]);
+
+		// Standard glTF morph targets (viewing tier): POSITION deltas per original vertex id,
+		// NORMAL deltas from the first-occurrence corner (per-corner target normals collapse
+		// to per-vertex here — the exact tier's nel_bs_* corner streams stay authoritative).
+		if (bsList && !bsList->empty())
+		{
+			CJsonValue *targets = prim->setArray("targets");
+			for (size_t bi = 0; bi < bsList->size(); ++bi)
+			{
+				const CMesh::CMeshBuild *bs = (*bsList)[bi];
+				std::vector<float> dpos(nVerts * 3), dnorm(nVerts * 3);
+				for (size_t v = 0; v < nVerts; ++v)
+				{
+					uint32 ov = vertexIds[v];
+					dpos[v * 3 + 0] = bs->Vertices[ov].x - mb.Vertices[ov].x;
+					dpos[v * 3 + 1] = bs->Vertices[ov].y - mb.Vertices[ov].y;
+					dpos[v * 3 + 2] = bs->Vertices[ov].z - mb.Vertices[ov].z;
+					const CMesh::CCorner &bc = bs->Faces[firstCorner[v].first].Corner[firstCorner[v].second];
+					dnorm[v * 3 + 0] = bc.Normal.x - norm[v * 3 + 0];
+					dnorm[v * 3 + 1] = bc.Normal.y - norm[v * 3 + 1];
+					dnorm[v * 3 + 2] = bc.Normal.z - norm[v * 3 + 2];
+				}
+				CJsonValue *tgt = targets->push();
+				tgt->setInt("POSITION", addAccessorFloat(&dpos[0], nVerts, 3, TARGET_ARRAY, true));
+				tgt->setInt("NORMAL", addAccessorFloat(&dnorm[0], nVerts, 3, TARGET_ARRAY, false));
+			}
+		}
 
 		// NeL reconstruction data
 		std::vector<uint32> smGroups(faces.size());

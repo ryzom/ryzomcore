@@ -136,7 +136,10 @@ void pmbIgAddPsSearchPath(const std::string &path);
 
 // From ../pipeline_max_export_anim/main.cpp (compiled in with PMB_ANIM_NO_MAIN): the anim
 // process's whole-file flow, returning the serialized CAnimation (1 = produced, 3 = nothing).
-int pmbExportAnimForGltf(const std::string &maxPath, std::vector<uint8> &animOut);
+// bareNodesOut: selection nodes exported with an EMPTY prefix — they own the bare
+// "pos"/"rotquat"/"scale"/"<target>MorphFactor" track names (Ryzom per-node convention).
+int pmbExportAnimForGltf(const std::string &maxPath, std::vector<uint8> &animOut,
+                         std::vector<std::string> *bareNodesOut = NULL);
 
 static std::string bytesToHex(const std::vector<uint8> &bytes)
 {
@@ -348,6 +351,16 @@ static void computeNodeTRS(INode *node, const NLMISC::CMatrix &parentWorld,
 			computeNodeTRS(ci->second[i], t.World, childrenOf, tmCache, ssc, out, nameSet);
 }
 
+// Morph-carrying mesh node record (viewing tier): feeds the sampled "weights" animation
+// channels — track names are "<raw node name>.<target name>MorphFactor".
+struct SMorphMeshNode
+{
+	std::string RawName;
+	sint Node;
+	std::vector<std::string> Names;
+	std::vector<float> Defaults; // 0..1 (NeL percents / 100)
+};
+
 // Morpher blend-shape targets — verbatim replica of pipeline_max_export_shape's buildBSList
 // (itself the reference's getBSMeshBuild): evaluate each Morpher ref 101+i target through the
 // non-skinned mesh path with finalSpace = the SOURCE node's NodeTM when the source is skinned,
@@ -545,6 +558,7 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 
 	// Pass 2: meshes + per-node NeL appdata on the shape-process node selection
 	TBaseCtxCache ctxCache;
+	std::vector<SMorphMeshNode> morphNodes;
 	for (uint i = 0; i < allNodes.size(); ++i)
 	{
 		INode &node = *allNodes[i];
@@ -792,6 +806,7 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 
 					sint meshIdx = b.addMesh(name, mb, ctx->GltfMats, &err,
 					                         bsList.empty() ? NULL : &bsList, &skinInterop);
+					size_t bsCount = bsList.size();
 					for (uint bi = 0; bi < bsList.size(); ++bi)
 						delete bsList[bi];
 					if (meshIdx < 0)
@@ -813,6 +828,21 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 								w.get(&ibms[ji * 16]);
 							}
 							b.setNodeSkin(nodeIdx[&node], b.addSkin(skinJoints, &ibms[0]));
+						}
+						// Morph meta (viewing tier): mesh.weights defaults + targetNames; record
+						// the node for sampled "weights" channels (BSNames parallels bsList)
+						if (bsCount && ctx->Bbm.BSNames.size() == bsCount)
+						{
+							SMorphMeshNode mn;
+							mn.RawName = name;
+							mn.Node = nodeIdx[&node];
+							mn.Names = ctx->Bbm.BSNames;
+							mn.Defaults.resize(bsCount);
+							for (size_t k = 0; k < bsCount; ++k)
+								mn.Defaults[k] = (k < ctx->Bbm.DefaultBSFactors.size()
+									? ctx->Bbm.DefaultBSFactors[k] : 0.0f) / 100.0f;
+							b.setMeshMorphMeta(meshIdx, mn.Names, mn.Defaults);
+							morphNodes.push_back(mn);
 						}
 						++stats.Meshes;
 						haveMesh = true;
@@ -934,7 +964,8 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 	// tier; the blob is the byte-exact carrier the corpus gates on.
 	{
 		std::vector<uint8> anim;
-		if (pmbExportAnimForGltf(maxPath, anim) == 1 && !anim.empty())
+		std::vector<std::string> bareNodes;
+		if (pmbExportAnimForGltf(maxPath, anim, &bareNodes) == 1 && !anim.empty())
 		{
 			std::string animName = NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(maxPath));
 			CJsonValue *ja = b.assetExtras()->setObject("nel_anim");
@@ -959,20 +990,22 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 				std::set<std::string> trackNames;
 				na.getTrackNames(trackNames);
 				const float fps = 30.0f;
+				// Bare track names ("pos", not "Node.pos") belong to the selection node exported
+				// with an empty prefix — the Ryzom per-node convention.
+				std::string bareRoot = bareNodes.empty() ? std::string() : bareNodes[0];
 				for (std::set<std::string>::const_iterator tn = trackNames.begin(); tn != trackNames.end(); ++tn)
 				{
 					std::string::size_type dot = tn->rfind('.');
-					if (dot == std::string::npos)
-						continue;
-					std::string chan = tn->substr(dot + 1);
+					std::string chan = (dot == std::string::npos) ? *tn : tn->substr(dot + 1);
+					std::string target = (dot == std::string::npos) ? bareRoot : tn->substr(0, dot);
 					const char *path;
 					int nComp;
 					if (chan == "pos") { path = "translation"; nComp = 3; }
 					else if (chan == "rotquat") { path = "rotation"; nComp = 4; }
 					else if (chan == "scale") { path = "scale"; nComp = 3; }
 					else continue;
-					std::map<std::string, sint>::iterator ni = byName.find(tn->substr(0, dot));
-					if (ni == byName.end())
+					std::map<std::string, sint>::iterator ni = byName.find(target);
+					if (target.empty() || ni == byName.end())
 						continue;
 					NL3D::UTrack *tr = na.getTrackByName(tn->c_str());
 					if (!tr)
@@ -1015,6 +1048,57 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 					if (!ok || times.empty())
 						continue;
 					b.addAnimChannel(animName, ni->second, path, times, values, nComp);
+				}
+
+				// Morph factor tracks -> "weights" channels (percent tracks / 100; targets
+				// without a track hold their default). Track name replicates the anim
+				// exporter's addMorphTracks: "<raw node name>.<target name>MorphFactor".
+				for (size_t mi2 = 0; mi2 < morphNodes.size(); ++mi2)
+				{
+					const SMorphMeshNode &mn = morphNodes[mi2];
+					std::vector<NL3D::UTrack *> ftracks(mn.Names.size(), (NL3D::UTrack *)NULL);
+					float t0 = 0.0f, t1 = 0.0f;
+					bool any = false;
+					for (size_t k = 0; k < mn.Names.size(); ++k)
+					{
+						NL3D::UTrack *tr = na.getTrackByName((mn.RawName + "." + mn.Names[k] + "MorphFactor").c_str());
+						if (!tr && mn.RawName == bareRoot)
+							tr = na.getTrackByName((mn.Names[k] + "MorphFactor").c_str());
+						if (!tr)
+							continue;
+						ftracks[k] = tr;
+						if (!any) { t0 = tr->getBeginTime(); t1 = tr->getEndTime(); any = true; }
+						else
+						{
+							t0 = std::min(t0, tr->getBeginTime());
+							t1 = std::max(t1, tr->getEndTime());
+						}
+					}
+					if (!any)
+						continue;
+					uint n = (t1 > t0) ? (uint)((t1 - t0) * fps + 0.5f) + 1 : 1;
+					std::vector<float> times(n), weights;
+					weights.reserve((size_t)n * mn.Names.size());
+					bool ok = true;
+					for (uint s = 0; s < n && ok; ++s)
+					{
+						float t = (s + 1 == n) ? t1 : t0 + (float)s / fps;
+						times[s] = t;
+						for (size_t k = 0; k < mn.Names.size(); ++k)
+						{
+							float w = mn.Defaults[k];
+							if (ftracks[k])
+							{
+								float f = 0.0f;
+								ok = ok && ftracks[k]->interpolate(t, f);
+								w = f / 100.0f;
+							}
+							weights.push_back(w);
+						}
+					}
+					if (!ok)
+						continue;
+					b.addWeightsChannel(animName, mn.Node, times, weights, (int)mn.Names.size());
 				}
 			}
 			catch (const std::exception &e)

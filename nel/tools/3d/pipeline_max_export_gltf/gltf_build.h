@@ -100,6 +100,15 @@ public:
 	void addAnimChannel(const std::string &animName, sint node, const char *path,
 	                    const std::vector<float> &times, const std::vector<float> &values,
 	                    int nComp);
+	// "weights" channel: weights has numTargets floats per time sample.
+	void addWeightsChannel(const std::string &animName, sint node,
+	                       const std::vector<float> &times, const std::vector<float> &weights,
+	                       int numTargets);
+
+	// Morph meta on an existing mesh (viewing tier): mesh.weights defaults (0..1) + the
+	// Blender-convention extras.targetNames. Counts must match the emitted targets.
+	void setMeshMorphMeta(sint mesh, const std::vector<std::string> &names,
+	                      const std::vector<float> &defaults01);
 
 	// Plain viewing mesh (positions/normals/uv + triangle indices, no material, no nel_*
 	// reconstruction data) — used for the tessellated nel_proxy meshes (zones).
