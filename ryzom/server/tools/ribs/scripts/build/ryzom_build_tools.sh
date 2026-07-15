@@ -8,7 +8,7 @@
 #
 # Remote Interface to Bash Scripts
 # - better with barcebue sauce -
-# Copyright (C) 2019 Nuneo (ulukyn@gmail.com)
+# Copyright (C) 2019 Nuneo (nuno@troispetits.net)
 #
 # This program is free software (GPLv3): read https://www.gnu.org/licenses/gpl-3.0.en.html for more details
 #
