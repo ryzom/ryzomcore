@@ -2,7 +2,7 @@ name: "Ryzom Client: cross compile 32-Bit windows client (hunter)"
 
 on:
   push:
-    branches: [ "core4", "feature/*" ]
+    branches: [ "core4", "feature/*", "!feature/atys-core-merge" ]
     paths:
       - .github/workflows/cross-compile-client.yml
       # TODO use nel package instead

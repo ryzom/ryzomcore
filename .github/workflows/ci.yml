@@ -2,7 +2,7 @@ name: "Ryzom Core: CI / CD"
 
 on:
   push:
-    branches: [ "core4", "feature/*", "bugfix/*" ]
+    branches: [ "core4", "feature/*", "bugfix/*", "!feature/atys-core-merge" ]
     paths-ignore:
       - '.devcontainer/**'
       - '.github/workflows/**'

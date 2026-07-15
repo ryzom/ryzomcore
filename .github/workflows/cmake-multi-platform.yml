@@ -2,7 +2,7 @@ name: CMake on multiple platforms
 
 on:
   push:
-    branches: [ "core4", "feature/*" ]
+    branches: [ "core4", "feature/*", "!feature/atys-core-merge" ]
     paths-ignore:
       - '.devcontainer/**'
       - '.github/**.yml'

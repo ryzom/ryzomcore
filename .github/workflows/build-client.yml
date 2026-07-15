@@ -2,7 +2,7 @@ name: "Ryzom Client: build on multiple platforms"
 
 on:
   push:
-    branches: [ "core4", "feature/*" ]
+    branches: [ "core4", "feature/*", "!feature/atys-core-merge" ]
     paths:
       - .github/workflows/build-client.yml
       # TODO use nel package instead

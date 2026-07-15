@@ -2,7 +2,7 @@ name: Emscripten WebGL 2.0 Samples
 
 on:
   push:
-    branches: [ "core4", "feature/*" ]
+    branches: [ "core4", "feature/*", "!feature/atys-core-merge" ]
     paths-ignore:
       - '.devcontainer/**'
       - 'snowballs2/**'
