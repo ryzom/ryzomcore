@@ -167,6 +167,10 @@ int pmbExportClodsForGltf(const std::string &maxPath, bool exportLighting,
 int pmbExportCmbsForGltf(const std::string &inputPath, bool ligoMode,
                          std::vector<std::pair<std::string, std::vector<uint8> > > &filesOut);
 
+// From ../pipeline_max_export_skel/main.cpp (PMB_SKEL_NO_MAIN): the skel process's Bip01-rooted
+// whole-file flow — 1 = produced, 3 = no Bip01, -1 = error.
+int pmbExportSkelForGltf(const std::string &maxPath, std::vector<uint8> &out);
+
 static std::string bytesToHex(const std::vector<uint8> &bytes)
 {
 	std::string hex;
@@ -1165,6 +1169,19 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 			{
 				fprintf(stderr, "WARNING: sampled animation channels failed: %s\n", e.what());
 			}
+		}
+	}
+
+	// Skeleton (.skel): the skel process's Bip01-rooted whole-file flow. Runs LAST of the
+	// rig-touching flows in its own scene instance and clears the per-run rig caches itself.
+	{
+		std::vector<uint8> bytes;
+		if (pmbExportSkelForGltf(maxPath, bytes) == 1 && !bytes.empty())
+		{
+			CJsonValue *js = b.assetExtras()->setObject("nel_skel");
+			js->setString("name", NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(maxPath)));
+			js->set("data")->setString(bytesToHex(bytes));
+			++stats.Others;
 		}
 	}
 

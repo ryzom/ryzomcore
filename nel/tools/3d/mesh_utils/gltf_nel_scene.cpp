@@ -926,11 +926,11 @@ int exportNelGltfScene(const CMeshUtilsSettings &settings)
 	// <name>.pacs_prim — the shared whole-file flows' exact bytes, re-emitted verbatim.
 	{
 		static const struct { const char *Key; const char *Ext; } kSingles[] = {
-			{ "nel_swt", ".swt" }, { "nel_pacs_prim", ".pacs_prim" },
+			{ "nel_swt", ".swt" }, { "nel_pacs_prim", ".pacs_prim" }, { "nel_skel", ".skel" },
 		};
 		const CJsonValue *asset = doc.Json.get("asset");
 		const CJsonValue *aex = asset ? asset->get("extras") : NULL;
-		for (uint si = 0; aex && si < 2; ++si)
+		for (uint si = 0; aex && si < 3; ++si)
 		{
 			const CJsonValue *entry = aex->get(kSingles[si].Key);
 			if (!entry)

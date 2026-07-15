@@ -28,6 +28,7 @@ import pacs_prim_corpus  # pacs_prim source enumeration (per-ecosystem vegetatio
 import veget_corpus  # microveget source enumeration (VegetSourceDirectories)
 import clod_corpus   # character-lod source enumeration
 import cmb_corpus    # collision-mesh source lists (DIRECT_SOURCES; ligo bricks = zone corpus)
+import skel_corpus   # skeleton source enumeration (SkelSourceDirectories)
 
 SKIP_CODE = 77
 
@@ -154,6 +155,15 @@ def main():
             seen_paths.add(p)
             cmb_extra.append(("cmb/" + race, p))
     corpus = corpus + cmb_extra
+    skel_paths = set()
+    skel_extra = []
+    for item in skel_corpus.enumerate_corpus(args.graphics, args.workspace):
+        p = item[-1]
+        skel_paths.add(p)
+        if p not in seen_paths:
+            seen_paths.add(p)
+            skel_extra.append(("skel", p))
+    corpus = corpus + skel_extra
     if args.only:
         corpus = [c for c in corpus if args.only in c[1]]
     if args.project:
@@ -170,6 +180,7 @@ def main():
     veget_bin = os.path.join(args.bin, "pipeline_max_export_veget")
     clod_bin = os.path.join(args.bin, "pipeline_max_export_clod")
     cmb_bin = os.path.join(args.bin, "pipeline_max_export_cmb")
+    skel_bin = os.path.join(args.bin, "pipeline_max_export_skel")
     ps_paths = [d for d in (os.path.expanduser("~/pipeline_export/common/sfx/ps"),) if os.path.isdir(d)]
 
     os.makedirs(args.out, exist_ok=True)
@@ -313,6 +324,14 @@ def main():
             res["pacs_rc"] = 0 if r.returncode in (0, 3) else r.returncode
             singles.append(("pacs_prim", dpath if os.path.isfile(dpath) else None,
                             via_pacs if os.path.isfile(via_pacs) else None))
+        via_skel = os.path.join(v_dir, stem + ".skel")
+        if path in skel_paths or os.path.isfile(via_skel):
+            dpath = os.path.join(base, "direct_skel_" + stem + ".skel")
+            r = subprocess.run([skel_bin, path, dpath], capture_output=True, text=True, timeout=300)
+            # exit 2 = no Bip01 (nothing to export), symmetric with the writer's rc-3 skip
+            res["skel_rc"] = 0 if r.returncode in (0, 2, 3) else r.returncode
+            singles.append(("skel", dpath if os.path.isfile(dpath) else None,
+                            via_skel if os.path.isfile(via_skel) else None))
 
         # Veget differential: direct per-node .veget files vs the nel_vegets blob re-emission
         # (the via reader writes them into the main -d dir).
@@ -569,7 +588,7 @@ def main():
         if res.get("direct_rc") != 0 or res.get("gltf_rc") != 0 or res.get("import_rc") != 0 \
            or res.get("ig_rc", 0) != 0 or res.get("anim_rc", 0) != 0 or res.get("zone_rc", 0) != 0 \
            or res.get("swt_rc", 0) != 0 or res.get("pacs_rc", 0) != 0 or res.get("veget_rc", 0) != 0 \
-           or res.get("clod_rc", 0) != 0 or res.get("cmb_rc", 0) != 0:
+           or res.get("clod_rc", 0) != 0 or res.get("cmb_rc", 0) != 0 or res.get("skel_rc", 0) != 0:
             tool_fail.append("%s (rc d=%s g=%s i=%s ig=%s a=%s z=%s s=%s p=%s v=%s c=%s m=%s)"
                              % (res["path"], res.get("direct_rc"), res.get("gltf_rc"),
                                 res.get("import_rc"), res.get("ig_rc", 0), res.get("anim_rc", 0),
