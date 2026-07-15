@@ -8,7 +8,7 @@
 #  |_|   |_||__| |__||___|  |_||_______||_______||_______||_______|
 #
 # M.A.R.G.U.E.Z (The Dyslexic Merguez)
-# Copyright (C) 2025 Nuneo (ulukyn@gmail.com)
+# Copyright (C) 2025 Nuneo (nuno@troispetits.net)
 #
 # This program is free software (GPLv3): read https://www.gnu.org/licenses/gpl-3.0.en.html for more details
 #
