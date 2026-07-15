@@ -8,7 +8,6 @@ INCLUDE_DIRECTORIES(  ${CMAKE_CURRENT_BINARY_DIR}
 FILE(GLOB SRC *.cpp *.h)
 SET(OVQT_EXT_SYS_SRC  ${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin.h
                       ${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_manager.h
-                      ${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_spec.h
                       ${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_spec.h)
 
 SET(OVQT_PLUG_GEORGES_EDITOR_HDR  georges_editor_plugin.h 
@@ -39,27 +38,53 @@ SET(OVQT_PLUGIN_GEORGES_EDITOR_RCS georges_editor.qrc)
 SET(QT_USE_QTGUI TRUE)
 SET(QT_USE_QTOPENGL TRUE)
 
-QT5_ADD_RESOURCES(OVQT_PLUGIN_GEORGES_EDITOR_RC_SRCS ${OVQT_PLUGIN_GEORGES_EDITOR_RCS})
-QT5_WRAP_CPP(OVQT_PLUG_GEORGES_EDITOR_MOC_SRC ${OVQT_PLUG_GEORGES_EDITOR_HDR})
-QT5_WRAP_UI( OVQT_PLUG_GEORGES_EDITOR_UI_HDRS ${OVQT_PLUG_GEORGES_EDITOR_UIS} )
 
 SOURCE_GROUP(QtResources FILES ${OVQT_PLUG_GEORGES_EDITOR_UIS} ${OVQT_PLUGIN_GEORGES_EDITOR_RCS})
-SOURCE_GROUP(QtGeneratedUiHdr FILES ${OVQT_PLUG_GEORGES_EDITOR_UI_HDRS})
-SOURCE_GROUP(QtGeneratedMocSrc FILES ${OVQT_PLUG_GEORGES_EDITOR_MOC_SRC})
 SOURCE_GROUP("Georges Editor Plugin" FILES ${SRC})
 SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
 
-ADD_LIBRARY(studio_plugin_georges_editor MODULE ${SRC} ${OVQT_PLUG_GEORGES_EDITOR_MOC_SRC} ${OVQT_EXT_SYS_SRC} ${OVQT_PLUG_GEORGES_EDITOR_UI_HDRS} ${OVQT_PLUGIN_GEORGES_EDITOR_RC_SRCS})
+ADD_LIBRARY(studio_plugin_georges_editor MODULE ${OVQT_EXT_SYS_SRC})
+
+target_sources(studio_plugin_georges_editor
+        PRIVATE
+        actions.cpp
+        browser_ctrl.cpp
+        browser_ctrl_pvt.cpp
+        dfn_browser_ctrl.cpp
+        expandable_headerview.cpp
+        filepath_property_manager.cpp
+        formdelegate.cpp
+        formitem.cpp
+        georges.cpp
+        georges_dfn_dialog.cpp
+        georges_dirtree_dialog.cpp
+        georges_dock_widget.cpp
+        georges_editor_form.cpp
+        georges_editor_plugin.cpp
+        georges_filesystem_model.cpp
+        georges_treeview_dialog.cpp
+        georges_typ_dialog.cpp
+        georgesform_model.cpp
+        georgesform_proxy_model.cpp
+        stdpch.cpp
+        typ_browser_ctrl.cpp
+        georges_dfn_dialog.ui
+        georges_dirtree_form.ui
+        georges_editor_form.ui
+        georges_treeview_form.ui
+        georges_typ_dialog.ui
+        georges_editor.qrc
+)
 
 TARGET_LINK_LIBRARIES(studio_plugin_georges_editor
-        PUBLIC
-        studio_plugin_core
         PRIVATE
+        Studio::plugin::core
         NeL::misc
         NeL::georges
         qtpropertybrowser
         ${QtPropertyBrowser_LIBRARY}
-        ${QT_LIBRARIES}
+		Qt::Core
+		Qt::Widgets
         LibXml2::LibXml2
 )
 

@@ -11,35 +11,6 @@ SET(OVQT_EXT_SYS_SRC	${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin.
 			${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_manager.h
 			${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_spec.h)
 
-SET(OVQT_PLUGIN_GUI_EDITOR_HDR
-	gui_editor_plugin.h
-	gui_editor_window.h
-	gui_editor_context.h
-	gui_editor_core_listener.h
-	widget_properties.h
-	widget_hierarchy.h
-	link_list.h
-	link_editor.h
-	proc_list.h
-	proc_editor.h
-	action_editor.h
-	property_browser_ctrl.h
-	project_window.h
-	nelgui_ctrl.h
-	new_property_widget.h
-	new_widget_widget.h
-	add_widget_widget.h
-	editor_selection_watcher.h
-	editor_message_processor.h
-	action_list.h
-	texture_chooser.h
-	action_property_manager.h
-	texture_property_manager.h
-	expression_editor.h
-	expr_link_dlg.h
-	new_gui_dlg.h
-	)
-
 SET(OVQT_PLUGIN_GUI_EDITOR_UIS
 	gui_editor_window.ui
 	widget_properties.ui
@@ -63,32 +34,79 @@ SET(OVQT_PLUGIN_GUI_EDITOR_UIS
 SET(QT_USE_QTGUI TRUE)
 SET(QT_USE_QTOPENGL TRUE)
 
-QT5_ADD_RESOURCES(OVQT_PLUGIN_GUI_EDITOR_RC_SRCS ${OVQT_PLUGIN_GUI_EDITOR_RCS})
-QT5_WRAP_CPP(OVQT_PLUGIN_GUI_EDITOR_MOC_SRC ${OVQT_PLUGIN_GUI_EDITOR_HDR})
-QT5_WRAP_UI(OVQT_PLUGIN_GUI_EDITOR_UI_HDRS ${OVQT_PLUGIN_GUI_EDITOR_UIS})
-
 SOURCE_GROUP(QtResources FILES ${OVQT_PLUGIN_GUI_EDITOR_UIS})
-SOURCE_GROUP(QtGeneratedUiHdr FILES ${OVQT_PLUGIN_GUI_EDITOR_UI_HDRS})
-SOURCE_GROUP(QtGeneratedMocQrcSrc FILES ${OVQT_PLUGIN_GUI_EDITOR_MOC_SRC} OVQT_PLUGIN_GUI_EDITOR_RC_SRCS)
 SOURCE_GROUP("GUI Editor Plugin" FILES ${SRC})
 SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
 
-ADD_LIBRARY(studio_plugin_gui_editor MODULE ${SRC}
-            ${OVQT_PLUGIN_GUI_EDITOR_MOC_SRC}
-            ${OVQT_EXT_SYS_SRC}
-            ${OVQT_PLUGIN_GUI_EDITOR_UI_HDRS}
-            ${OVQT_PLUGIN_GUI_EDITOR_RC_SRCS}
-            )
+ADD_LIBRARY(studio_plugin_gui_editor MODULE ${OVQT_EXT_SYS_SRC})
+
+target_sources(studio_plugin_gui_editor
+        PRIVATE
+        action_editor.cpp
+        action_list.cpp
+        action_property_manager.cpp
+        add_widget_widget.cpp
+        editor_message_processor.cpp
+        editor_selection_watcher.cpp
+        expr_link_dlg.cpp
+        expression_editor.cpp
+        expression_link.cpp
+        expression_loader.cpp
+        expression_node.cpp
+        expression_store.cpp
+        gui_editor_context.cpp
+        gui_editor_core_listener.cpp
+        gui_editor_plugin.cpp
+        gui_editor_window.cpp
+        link_editor.cpp
+        link_list.cpp
+        nelgui_ctrl.cpp
+        new_gui_dlg.cpp
+        new_property_widget.cpp
+        new_widget_widget.cpp
+        proc_editor.cpp
+        proc_list.cpp
+        project_file_parser.cpp
+        project_file_serializer.cpp
+        project_window.cpp
+        property_browser_ctrl.cpp
+        texture_chooser.cpp
+        texture_property_manager.cpp
+        widget_hierarchy.cpp
+        widget_info_serializer.cpp
+        widget_properties.cpp
+        widget_properties_parser.cpp
+        widget_serializer.cpp
+
+        action_editor.ui
+        action_list.ui
+        add_widget_widget.ui
+        expr_link_dlg.ui
+        expression_editor.ui
+        gui_editor_window.ui
+        link_editor.ui
+        link_list.ui
+        new_gui_dlg.ui
+        new_property_widget.ui
+        new_widget_widget.ui
+        proc_editor.ui
+        proc_list.ui
+        project_window.ui
+        texture_chooser.ui
+        widget_hierarchy.ui
+        widget_properties.ui
+)
 
 TARGET_LINK_LIBRARIES(studio_plugin_gui_editor
         PUBLIC
-        studio_plugin_core
+        Studio::plugin::core
         PRIVATE
 		NeL::misc
 		NeL::3d
 		NeL::gui
-        ${QT_LIBRARIES}
-        ${QT_QTOPENGL_LIBRARY}
+		Qt::Core
+		Qt::Gui
+		Qt::Widgets
         ${QtPropertyBrowser_LIBRARY}
         LibXml2::LibXml2
 )

@@ -4,11 +4,15 @@
 #   Copyright (C) 2010 Dzmitry Kamiahin <dnk-88@tut.by>
 #
 #-----------------------------------------------------------------------------
-cmake_minimum_required(VERSION 3.27)
+cmake_minimum_required(VERSION 3.28)
 
 project(Studio VERSION ${RyzomCore_VERSION} LANGUAGES CXX)
 
 find_package(NeL ${RyzomCore_VERSION} REQUIRED COMPONENTS 3d georges gui ligo misc sound)
+
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
 
 # This tells the application(s) where to find the installed data.
 IF(WIN32)

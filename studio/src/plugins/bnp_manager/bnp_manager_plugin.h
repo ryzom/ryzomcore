@@ -27,7 +27,7 @@
 #include <nel/misc/debug.h>
 
 // Qt includes
-#include <QtCore/QObject>
+#include <QObject>
 #include <QtGui/QIcon>
 
 namespace NLMISC
