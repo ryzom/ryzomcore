@@ -1,9 +1,6 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
-// This source file has been modified by the following contributors:
-// Copyright (C) 2013  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
-//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -17,32 +14,43 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef NL_VERTEX_PROGRAM_H
-#define NL_VERTEX_PROGRAM_H
+#ifndef NL_TEXTURE_OFFSCREEN_H
+#define NL_TEXTURE_OFFSCREEN_H
 
 #include "nel/misc/types_nl.h"
-#include "nel/misc/smart_ptr.h"
-#include "nel/3d/program.h"
+#include "nel/3d/texture_blank.h"
 
-#include <list>
 
 namespace NL3D {
 
-class CVertexProgram : public IProgram
+
+/**
+ * Offscreen render target texture. Renders directly into the texture
+ * via FBO (GL) or render target surface (D3D), rather than copying
+ * from the framebuffer.
+ */
+class CTextureOffscreen : public CTextureBlank
 {
 public:
-	/// Constructor
-	CVertexProgram();
-	CVertexProgram(const char *nelvp);
+NLMISC_DECLARE_CLASS(CTextureOffscreen);
 
-	/// Destructor
-	virtual ~CVertexProgram();
+	CTextureOffscreen() { m_NeedsDepthStencil = true; }
+	virtual ~CTextureOffscreen() {}
 
+	virtual bool isOffscreenTexture() const { return true; }
+
+	void setNeedsDepthStencil(bool b) { m_NeedsDepthStencil = b; }
+	bool needsDepthStencil() const { return m_NeedsDepthStencil; }
+
+private:
+
+	bool	m_NeedsDepthStencil;
 };
+
 
 } // NL3D
 
 
-#endif // NL_VERTEX_PROGRAM_H
+#endif // NL_TEXTURE_OFFSCREEN_H
 
-/* End of vertex_program.h */
+/* End of texture_offscreen.h */

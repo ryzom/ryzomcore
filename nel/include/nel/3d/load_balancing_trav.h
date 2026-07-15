@@ -182,6 +182,7 @@ private:
 
 	// The sum of all Pass0 groups.
 	float				_SumNbFacePass0;
+	uint64				_LastAdaptFrameId; // balancing adapts once per real frame (avoid divergence between replicated passes)
 
 	// The loadBalancing balance only visible objects.
 	void				traverseVisibilityList();

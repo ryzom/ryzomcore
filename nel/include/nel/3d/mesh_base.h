@@ -145,8 +145,11 @@ public:
 
 		CMeshBaseBuild();
 
-		// Serialization is not used
-		//void serial(NLMISC::IStream &f);
+		/** Versioned serialization of the pre-build base-mesh state (materials, default
+		 *	transform, flags). Never serialized historically; added as the 1_export ->
+		 *	standalone-lightmapper scene-graph contract — keep versioned from day one.
+		 */
+		void serial(NLMISC::IStream &f);
 	};
 	//@}
 

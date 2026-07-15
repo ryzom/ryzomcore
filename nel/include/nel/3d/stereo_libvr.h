@@ -86,12 +86,27 @@ public:
 
 	/// At the start of a new render target
 	virtual bool wantClear();
+	/// Render scene reflections
+	virtual bool wantSceneReflections();
 	/// The 3D scene
 	virtual bool wantScene();
+	/// Scene post processing effects
+	virtual bool wantSceneEffects();
 	/// Interface within the 3D scene
-	virtual bool wantInterface3D();	
+	virtual bool wantInterface3D();
 	/// 2D Interface
 	virtual bool wantInterface2D();
+
+	/// Is this the first 3D scene of the frame
+	virtual bool isSceneFirst();
+	/// The current reflection pass index during a wantSceneReflections() stage
+	virtual uint getSceneReflectionPass() const;
+	/// The view (eye) index of the current scene or reflections stage
+	virtual uint getSceneView() const;
+	/// Is this the last 3D scene of the frame
+	virtual bool isSceneLast();
+	/// Get the flare context for the current pass
+	virtual uint getFlareContext();
 
 	/// Returns true if a new render target was set, always fase if not using render targets
 	virtual bool beginRenderTarget();
@@ -127,6 +142,7 @@ public:
 private:
 	CStereoLibVRDevicePtr *m_DevicePtr;
 	int m_Stage;
+	uint m_ReflPass; // current reflection pass index during the reflection stages
 	int m_SubStage;
 	CViewport m_LeftViewport;
 	CViewport m_RightViewport;

@@ -524,11 +524,11 @@ protected:
 	  * it may be shared between several scenes)
 	  */
 	typedef std::map<std::string, CVertexBuffer> TMeshName2RamVB;
-	static  TMeshName2RamVB _MeshRamVBs;
+	static  TMeshName2RamVB _MeshRamVBs; // STATIC GPU RESOURCE: Blocks multiple driver instances
 
 	/// vertex buffer used with prerotated meshs
-	static CVertexBuffer			_PreRotatedMeshVB;			  // mesh has no normals
-	static CVertexBuffer			_PreRotatedMeshVBWithNormal;  // mesh has normals
+	static CVertexBuffer			_PreRotatedMeshVB;			  // mesh has no normals. STATIC GPU RESOURCE: Blocks multiple driver instances
+	static CVertexBuffer			_PreRotatedMeshVBWithNormal;  // mesh has normals. STATIC GPU RESOURCE: Blocks multiple driver instances
 
 
 	// we must store them for serialization

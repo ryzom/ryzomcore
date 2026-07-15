@@ -130,6 +130,7 @@ protected:
 	};
 
 	/// the various kind of vertex buffers we need
+	// STATIC GPU RESOURCES: All of these block multiple driver instances
 	static CVertexBuffer _VBPos;
 	static CVertexBuffer _VBPosCol;
 	static CVertexBuffer _VBPosTex1;

@@ -49,6 +49,7 @@ using	NLMISC::CMatrix;
 
 
 class CMeshGeom;
+class CMeshInstance;
 class CSkeletonModel;
 class CMatrix3x4;
 
@@ -129,12 +130,21 @@ public:
 		uint32 nFace, nCorner;
 		uint32 VertVB;
 
+		CVertLink ()
+		{
+			nFace = 0;
+			nCorner = 0;
+			VertVB = 0;
+		}
+
 		CVertLink (uint32 face, uint32 corner, uint32 iVB)
 		{
 			nFace = face;
 			nCorner = corner;
 			VertVB = iVB;
 		}
+
+		void serial(NLMISC::IStream &f);
 	};
 
 	/** Mesh Interface System for MRM
@@ -143,11 +153,15 @@ public:
 	{
 		CVector					Pos;
 		CVector					Normal;
+
+		void serial(NLMISC::IStream &f);
 	};
 	struct	CInterface
 	{
 		// The polygon describing the interface between 2 meshs.
 		std::vector<CInterfaceVertex>	Vertices;
+
+		void serial(NLMISC::IStream &f);
 	};
 	/// For each vertex
 	struct	CInterfaceLink
@@ -160,7 +174,10 @@ public:
 		CInterfaceLink()
 		{
 			InterfaceId= -1;
+			InterfaceVertexId= 0;
 		}
+
+		void serial(NLMISC::IStream &f);
 	};
 
 	/// A mesh information.
@@ -205,8 +222,12 @@ public:
 
 		CMeshBuild();
 
-		// Serialization
-		//void serial(NLMISC::IStream &f);
+		/** Versioned serialization of the pre-build mesh state.
+		 *	Never serialized historically; added as the 1_export -> standalone-lightmapper
+		 *	scene-graph contract (a long-lived pipeline intermediate — keep it versioned
+		 *	and backward-readable from day one).
+		 */
+		void serial(NLMISC::IStream &f);
 
 	};
 	//@}
@@ -461,6 +482,13 @@ public:
 	bool			supportIntersectSkin() const {return _Skinned;}
 	bool			intersectSkin(CTransformShape	*mi, const CMatrix &toRaySpace, float &dist2D, float &distZ, bool computeDist2D);
 
+	// @}
+
+
+	/// \name GPU Skinning
+	// @{
+	bool			supportGPUSkinning() const { return _GPUSkinBuilt; }
+	void			renderGPUSkin(CMeshInstance *mi, CSkeletonModel *skeleton);
 	// @}
 
 
@@ -853,6 +881,27 @@ private:
 	// build the shadow skin, from the VertexBuffer/IndexBuffer
 	void	buildShadowSkin();
 
+	// @}
+
+
+	/// \name GPU Skinning
+	// @{
+	/// GPU skinning vertex buffer (bind-pose data). Immutable once built.
+	CVertexBuffer			_GPUSkinVB;
+	/// GPU skinning combined index buffer for all matrix blocks. Immutable once built.
+	CIndexBuffer			_GPUSkinIB;
+	/// True once _GPUSkinVB and _GPUSkinIB are built.
+	bool					_GPUSkinBuilt;
+	/// Per-material pass info for the GPU IB.
+	struct GPURdrPass
+	{
+		uint32 MaterialId;
+		uint32 IBOffset;	///< First index in _GPUSkinIB
+		uint32 IBCount;		///< Number of indices
+	};
+	std::vector<GPURdrPass>	_GPUSkinPasses;
+	/// Build the GPU skinning VB and IB from the standard vertex data.
+	void	buildGPUSkinVB();
 	// @}
 
 };

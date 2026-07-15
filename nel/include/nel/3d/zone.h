@@ -109,7 +109,9 @@ public:
 
 	public:
 		void			serial(NLMISC::IStream &f);
-		CBindInfo() {NPatchs=0;}
+		// All fields initialized: serial() writes the whole record including unused Next/Edge
+		// slots, so uninitialized values here leak nondeterministic bytes into built .zone files.
+		CBindInfo() {NPatchs=0; ZoneId=0; Next[0]=Next[1]=Next[2]=Next[3]=0; Edge[0]=Edge[1]=Edge[2]=Edge[3]=0;}
 	};
 
 

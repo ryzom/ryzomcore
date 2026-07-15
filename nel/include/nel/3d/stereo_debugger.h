@@ -23,7 +23,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#if !FINAL_VERSION
+// NB: in FINAL_VERSION builds the class exists but is not listed as a
+// selectable device (see IStereoDisplay::listDevices)
 #ifndef NL3D_STEREO_DEBUGGER_H
 #define NL3D_STEREO_DEBUGGER_H
 #include <nel/misc/types_nl.h>
@@ -96,7 +97,9 @@ public:
 	virtual void getCurrentMatrix(uint cid, NL3D::UCamera *camera) const;
 
 	/// At the start of a new render target
-	virtual bool wantClear();		
+	virtual bool wantClear();
+	/// Render scene reflections
+	virtual bool wantSceneReflections();
 	/// The 3D scene
 	virtual bool wantScene();
 	/// Scene post processing effects
@@ -108,8 +111,16 @@ public:
 
 	/// Is this the first 3D scene of the frame
 	virtual bool isSceneFirst();
+
+	/// The current reflection pass index during a wantSceneReflections() stage
+	virtual uint getSceneReflectionPass() const;
+
+	/// The view (eye) index of the current scene or reflections stage
+	virtual uint getSceneView() const;
 	/// Is this the last 3D scene of the frame
 	virtual bool isSceneLast();
+	/// Get the flare context for the current pass
+	virtual uint getFlareContext();
 
 	/// Returns true if a new render target was set, always fase if not using render targets
 	virtual bool beginRenderTarget();
@@ -124,6 +135,7 @@ private:
 
 	int m_Stage;
 	int m_SubStage;
+	uint m_ReflPass; // current reflection pass index during stages 1-2
 
 	CViewport m_LeftViewport;
 	CViewport m_RightViewport;
@@ -141,6 +153,5 @@ private:
 } /* namespace NL3D */
 
 #endif /* #ifndef NL3D_STEREO_DEBUGGER_H */
-#endif /* #if !FINAL_VERSION */
 
 /* end of file */

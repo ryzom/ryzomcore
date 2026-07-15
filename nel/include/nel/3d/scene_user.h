@@ -84,6 +84,11 @@ protected:
 	TWaitingIGList		  _WaitingIGs;
 	UWaterEnvMap		  *_WaterEnvMap;
 
+	// U-level texture wrappers for water reflection info
+	std::vector<CTextureUser *>		_WaterReflectionTextures;
+	// Fill a UWaterReflectionInfo from an internal reflection state
+	void fillWaterReflectionInfo(const CWaterReflectionManager::CActiveReflection &refl, UWaterReflectionInfo &info);
+
 public:
 
 	/// \name Object
@@ -280,6 +285,8 @@ public:
 	virtual	void			setShadowMapBlurSize(uint bs);
 	virtual	void			enableShadowPolySmooth(bool enable);
 	virtual	bool			getEnableShadowPolySmooth() const;
+	virtual	void			enableGPUSkinning(bool enable);
+	virtual	bool			isGPUSkinningEnabled() const;
 	virtual	void			setShadowMapDistFadeStart(float dist);
 	virtual	float			getShadowMapDistFadeStart() const;
 	virtual	void			setShadowMapDistFadeEnd(float dist);
@@ -304,6 +311,33 @@ public:
 	virtual void		  setWaterEnvMap(UWaterEnvMap *waterEnvMap);
 	virtual UWaterEnvMap *getWaterEnvMap() const { return _WaterEnvMap; }
 	virtual void		  updateWaterEnvMaps(TGlobalAnimationTime time);
+	virtual void		  setForceWaterEnvMap(bool force) { _Scene.setForceWaterEnvMap(force); }
+	virtual bool		  getForceWaterEnvMap() const { return _Scene.getForceWaterEnvMap(); }
+	// @}
+
+	/// \name Realtime planar water reflections
+	// @{
+	virtual void		  setMaxRealtimeWaterReflections(sint maxCount) { _Scene.getWaterReflectionManager().setMaxReflections(maxCount); }
+	virtual sint		  getMaxRealtimeWaterReflections() const { return _Scene.getWaterReflectionManager().getMaxReflections(); }
+	virtual void		  setForceRealtimeWaterReflections(bool force) { _Scene.getWaterReflectionManager().setForceReflections(force); }
+	virtual bool		  getForceRealtimeWaterReflections() const { return _Scene.getWaterReflectionManager().getForceReflections(); }
+	virtual uint		  beginWaterReflectionPasses() { return _Scene.getWaterReflectionManager().beginPasses(); }
+	virtual void		  setWaterReflectionView(uint view) { _Scene.getWaterReflectionManager().setCurrentView(view); }
+	virtual uint		  getWaterReflectionView() const { return _Scene.getWaterReflectionManager().getCurrentView(); }
+	virtual void		  beginWaterReflectionPass(uint pass, UWaterReflectionInfo &info);
+	virtual void		  endWaterReflectionPass(uint pass) { _Scene.getWaterReflectionManager().endPass(pass); }
+	virtual void		  endWaterReflectionPasses() { _Scene.getWaterReflectionManager().endPasses(); }
+	virtual bool		  isRenderingWaterReflection() const { return _Scene.getWaterReflectionManager().isRenderingReflection(); }
+	virtual uint		  getNumActiveWaterReflections() const { return _Scene.getWaterReflectionManager().getNumActiveReflections(); }
+	virtual bool		  getActiveWaterReflectionInfo(uint index, UWaterReflectionInfo &info);
+	virtual void		  setWaterReflectionHalfRes(bool halfRes) { _Scene.getWaterReflectionManager().setHalfRes(halfRes); }
+	virtual bool		  getWaterReflectionHalfRes() const { return _Scene.getWaterReflectionManager().getHalfRes(); }
+	virtual void		  setWaterReflectionPow2(bool pow2) { _Scene.getWaterReflectionManager().setPow2(pow2); }
+	virtual bool		  getWaterReflectionPow2() const { return _Scene.getWaterReflectionManager().getPow2(); }
+	virtual void		  setWaterReflectionFixedSize(bool fixedSize) { _Scene.getWaterReflectionManager().setFixedSize(fixedSize); }
+	virtual bool		  getWaterReflectionFixedSize() const { return _Scene.getWaterReflectionManager().getFixedSize(); }
+	virtual void		  setWaterReflectionMaxTextures(sint maxTextures) { _Scene.getWaterReflectionManager().setMaxTextures(maxTextures); }
+	virtual sint		  getWaterReflectionMaxTextures() const { return _Scene.getWaterReflectionManager().getMaxTextures(); }
 	// @}
 
 public:

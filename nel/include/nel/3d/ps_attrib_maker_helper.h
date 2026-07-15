@@ -18,6 +18,7 @@
 #define NL_PS_ATTRIB_MAKER_HELPER_H
 
 #include "nel/3d/ps_attrib_maker.h"
+#include "nel/3d/particle_system.h" // for CParticleSystem::RandomSeed
 
 #include "nel/misc/fast_floor.h" // inline assembly for fast float<->int conversions
 #include "nel/3d/ps_attrib_maker_iterators.h" // some iterators we use
@@ -636,7 +637,8 @@ template <typename T, class F> class CPSAttribMakerT : public CPSAttribMaker<T>
 						break;
 						case CPSInputType::attrUniformRandom:
 						{
-							CRandomIterator it;
+							if (this->m_RandomId == ~0u && loc->getOwner()) this->m_RandomId = loc->getOwner()->allocAttribMakerId();
+							CRandomIterator it(CParticleSystem::RandomSeed ^ lowbias32(this->m_RandomId), startIndex);
 							makeByIterator(it, tab, stride, numAttrib, true, forceClampEntry);
 						}
 						break;
@@ -724,7 +726,8 @@ template <typename T, class F> class CPSAttribMakerT : public CPSAttribMaker<T>
 						break;
 						case CPSInputType::attrUniformRandom:
 						{
-							CRandomIterator it;
+							if (this->m_RandomId == ~0u && loc->getOwner()) this->m_RandomId = loc->getOwner()->allocAttribMakerId();
+							CRandomIterator it(CParticleSystem::RandomSeed ^ lowbias32(this->m_RandomId), startIndex);
 							makeByIterator(it, tab, stride, numAttrib, true, forceClampEntry);
 						}
 						break;
@@ -828,7 +831,8 @@ template <typename T, class F> class CPSAttribMakerT : public CPSAttribMaker<T>
 						break;
 						case CPSInputType::attrUniformRandom:
 						{
-							CRandomIterator it;
+							if (this->m_RandomId == ~0u && loc->getOwner()) this->m_RandomId = loc->getOwner()->allocAttribMakerId();
+							CRandomIterator it(CParticleSystem::RandomSeed ^ lowbias32(this->m_RandomId), startIndex);
 							make4ByIterator(it, tab, stride, numAttrib, true);
 						}
 						break;
@@ -914,7 +918,8 @@ template <typename T, class F> class CPSAttribMakerT : public CPSAttribMaker<T>
 						break;
 						case CPSInputType::attrUniformRandom:
 						{
-							CRandomIterator it;
+							if (this->m_RandomId == ~0u && loc->getOwner()) this->m_RandomId = loc->getOwner()->allocAttribMakerId();
+							CRandomIterator it(CParticleSystem::RandomSeed ^ lowbias32(this->m_RandomId), startIndex);
 							make4ByIterator(it, tab, stride, numAttrib, true);
 						}
 						break;
@@ -1016,7 +1021,8 @@ template <typename T, class F> class CPSAttribMakerT : public CPSAttribMaker<T>
 						break;
 						case CPSInputType::attrUniformRandom:
 						{
-							CRandomIterator it;
+							if (this->m_RandomId == ~0u && loc->getOwner()) this->m_RandomId = loc->getOwner()->allocAttribMakerId();
+							CRandomIterator it(CParticleSystem::RandomSeed ^ lowbias32(this->m_RandomId), startIndex);
 							makeNByIterator(it, tab, stride, numAttrib, nbReplicate, true);
 						}
 						break;
@@ -1102,7 +1108,8 @@ template <typename T, class F> class CPSAttribMakerT : public CPSAttribMaker<T>
 						break;
 						case CPSInputType::attrUniformRandom:
 						{
-							CRandomIterator it;
+							if (this->m_RandomId == ~0u && loc->getOwner()) this->m_RandomId = loc->getOwner()->allocAttribMakerId();
+							CRandomIterator it(CParticleSystem::RandomSeed ^ lowbias32(this->m_RandomId), startIndex);
 							makeNByIterator(it, tab, stride, numAttrib, nbReplicate, true);
 						}
 						break;

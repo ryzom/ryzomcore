@@ -237,7 +237,7 @@ public:
 		if (bSetupVB)
 		{
 			Vertices.setVertexFormat (CVertexBuffer::PositionFlag | CVertexBuffer::TexCoord0Flag);
-			Vertices.setPreferredMemory (CVertexBuffer::RAMVolatile, true);
+			Vertices.setBufferUsage (CVertexBuffer::SmallStream, true);
 			Vertices.setName("CComputedString");
 		}
 		SelectStart= 0;

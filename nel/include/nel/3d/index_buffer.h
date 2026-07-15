@@ -153,16 +153,57 @@ public:
 	friend class CIndexBufferRead;
 
 	/**
-	  * Type of preferred memory
+	  * Buffer usage hint — describes how the buffer will be written/updated.
+	  * See setBufferUsage() for detailed semantics of each value.
 	  */
-	enum TPreferredMemory
+	enum TBufferUsage
 	{
-		RAMPreferred = 0,	// A block of driver RAM memory is allocated for this buffer. The buffer is read/write.
-		AGPPreferred,		// A block of driver AGP memory is allocated for this buffer. The buffer is writeonly.
-		StaticPreferred,	// The buffer will not be modified. A block of driver AGP or VRAM memory is allocated for this buffer. The buffer is writeonly.
-		RAMVolatile,		// A block of temporary driver RAM memory will be returned by lock(). The buffer must be entirely filled after each swapBuffers(). The buffer is writeonly.
-		AGPVolatile,		// A block of temporary driver AGP memory will be returned by lock(). The buffer must be entirely filled after each swapBuffers(). The buffer is writeonly.
-		PreferredCount,
+		/// Written once during init, never modified afterward. Driver may place in VRAM.
+		/// Suitable for static meshes. (Replaces old StaticPreferred.)
+		Immutable = 0,
+
+		/// Small trivial geometry (UI quads, debug draws). Contents undefined after
+		/// swapBuffers — must fill entirely each frame unless keepLocalMemory is set.
+		/// Driver may use pinned memory or client memory. (Replaces old RAMVolatile.)
+		SmallStream,
+
+		/// Full rewrite every frame, ring-buffered so lock never stalls. Contents
+		/// undefined after swapBuffers — must fill entirely each frame unless
+		/// keepLocalMemory is set. Standard pattern for particle systems.
+		/// (Replaces old AGPVolatile.)
+		FullStream,
+
+		/// Full rewrite occasionally (not every frame). Driver orphans on lock so it
+		/// never stalls. Water geometry, skinned mesh vertex streams.
+		/// (Replaces old AGPPreferred for non-landscape use.)
+		FullRewrite,
+
+		/// Partial writes each frame into a static GPU buffer. Dirty pages uploaded
+		/// via a staging stream. Landscape, vegetation.
+		/// (Replaces old AGPPreferred for landscape/vegetation use.)
+		PartialWrite,
+
+		/// CPU-side read/write. GPU only reads. Buffer stays in system RAM.
+		/// Skinned mesh source data, software transform targets.
+		/// (Replaces old RAMPreferred.)
+		CpuReadWrite,
+
+		/// Caller maps unsynchronized and guarantees no write conflicts with
+		/// in-flight GPU reads. Used with allocator-level deferred freeing.
+		/// Fallback: PartialWrite on legacy drivers.
+		UnsynchronizedWrite,
+
+		UsageCount
+	};
+
+
+	/**
+	  * Dirty byte range for partial buffer uploads.
+	  */
+	struct CDirtyRange
+	{
+		uint32 Begin; ///< First dirty byte offset (inclusive)
+		uint32 End;   ///< Last dirty byte offset (exclusive)
 	};
 
 	/**
@@ -220,6 +261,21 @@ public:
 
 	/** Called by the driver implementation during the buffer activation */
 	void					fillBuffer ();
+
+	/// Enable/disable dirty range accumulation. Called by the driver during buffer setup.
+	void					setDirtyTracking(bool enable) { _DirtyTracking = enable; if (!enable) _DirtyRanges.clear(); }
+	bool					getDirtyTracking() const { return _DirtyTracking; }
+
+	/// Mark an index range as dirty (first inclusive, last exclusive index indices).
+	/// Called by engine/user code while the buffer is locked.
+	/// Ignored when dirty tracking is not enabled.
+	void					invalidateRange(uint first, uint last);
+
+	/// Read accumulated dirty byte ranges. Called by the driver during flush.
+	const std::vector<CDirtyRange> &getDirtyRanges() const { return _DirtyRanges; }
+
+	/// Clear accumulated dirty ranges. Called by the driver after uploading.
+	void					clearDirtyRanges() { _DirtyRanges.clear(); }
 	// @}
 
 public:
@@ -227,6 +283,13 @@ public:
 	 *	WARNING: This Class/Method must be thread-safe (ctor/dtor/serial): no static access for instance
 	 *	It can be loaded/called through CAsyncFileManager for instance
 	 * ***********************************************/
+
+	/** Serial write-compatibility switch for export tools: when true, serial() writes the
+	  * pre-TBufferUsage version 2 (the old TPreferredMemory enum values), matching streams
+	  * produced before the buffer-usage refactor. Read code accepts both, always.
+	  * Global, not thread-safe: set once at tool startup (asset export pipelines only).
+	  */
+	static bool				SerialOldPreferredMemory;
 
 	/**
 	  * Default constructor. Make an empty index buffer. No value, no index. Index color format is set to TRGBA.
@@ -258,50 +321,52 @@ public:
 	CIndexBuffer			&operator=(const CIndexBuffer &vb);
 
 	/**
-	  * Set the buffer preferred memory. Default preferred memory is RAM.
+	  * Set the buffer usage hint and keepLocalMemory flag.
 	  *
-	  * Indices can be either 16 or 32 bits
-	  * Default format is 32 bits
+	  * Usage determines how the driver manages the underlying GPU buffer:
 	  *
-	  * Preferre RAM if the buffer is changed several times in the same render pass.
-	  * Preferre AGP if the buffer is changed only one time in the same render pass.
-	  * Preferre Static if the buffer is changed only one time for initialisation.
+	  * - Immutable: Written once during init, never modified. The driver may place
+	  *   the buffer in VRAM. With keepLocalMemory, the shadow copy can be
+	  *   re-uploaded on device-lost recovery, but the driver won't optimise for
+	  *   frequent updates. Suitable for static meshes.
 	  *
-	  * If static memory is chosen, the driver will choose VRAM or AGP depending of the user configuration.
+	  * - SmallStream: Small trivial geometry (UI quads, debug draws). Contents are
+	  *   undefined after swapBuffers — the caller must fill the buffer entirely
+	  *   each frame unless keepLocalMemory is set. The driver may use pinned
+	  *   memory, client memory, or a small shared staging buffer.
 	  *
-	  * If static or RAM memory is preferred, the buffer won't be lost after a driver reset.
+	  * - FullStream: Full rewrite every frame, ring-buffered so lock never stalls.
+	  *   Contents are undefined after swapBuffers — the caller must fill the
+	  *   buffer entirely each frame unless keepLocalMemory is set. With
+	  *   keepLocalMemory, if the buffer is not locked this frame the driver
+	  *   re-streams the previous fill. Standard pattern for particle systems.
 	  *
-	  * If the buffer preferres AGP memory, the buffer is lost after a driver reset. When the buffer is lost, it returns
-	  * in a non resident state. The state must be tested at each pass with isResident(). If the buffer is in a
-	  * non resident state, the user must refill it.
+	  * - FullRewrite: Full rewrite occasionally (not every frame). The driver
+	  *   orphans on lock so it never stalls. Water geometry, skinned mesh vertex
+	  *   streams.
 	  *
-	  * If VRAM memory allocation failed, the driver will try with AGP and then with RAM.
-	  * If AGP memory allocation failed, the driver will try with RAM.
-	  * RAM allocation should never failed.
+	  * - PartialWrite: Partial writes each frame into a static GPU buffer; dirty
+	  *   pages are uploaded via a staging stream. Landscape, vegetation.
 	  *
- 	  *	Performance note:
-	  *	 - for RAM CVertexBuffer, you can read / write as you like.
-	  *	 - for AGP CVertexBuffer, you should write sequentially to take full advantage of the write combiners. You can't read.
-	  *	 - for VRAM CVertexBuffer, you should write only one time, to init. You can't read.
+	  * - CpuReadWrite: CPU-side read/write buffer. The GPU only reads. Used for
+	  *   skinned mesh source data, software transform targets. The buffer stays
+	  *   in system RAM.
 	  *
- 	  * Volatile buffers must be completely filled at each pass. They are lost after each swapBuffers(). They are writeonly.
-	  * Volatile buffers must be resized before the lock call. Only one lock per render must be done with volatile buffers if
-	  * keepLocalMemory is false.
+	  * If keepLocalMemory is true, lock() returns a local (shadow) memory pointer.
+	  * The local memory is copied into resident memory during buffer activation.
+	  * Only the used size (not full capacity) is copied. This allows the driver
+	  * to re-stream unchanged data without the caller having to re-lock.
 	  *
-	  * If keepLocalMemory is true, lock() will return a local memory pointer. The local memory will copied in resident memory
-	  * during the activation of the buffer. The not all the buffer capacity is copied but only the used size.
-	  *
-	  * If the buffer preferres AGP memory, the data are lost.
-	  * The buffer is no more resident.
-	  * The buffer is invalidated.
-	  * The buffer must be unlocked before the call.
+	  * Calling this method makes the buffer non-resident, invalidates it, and
+	  * requires the buffer to be unlocked.
 	  */
-	void setPreferredMemory (TPreferredMemory preferredMemory, bool keepLocalMemory);
+	void setBufferUsage (TBufferUsage usage, bool keepLocalMemory);
 
 	/**
-	  * Get the index buffer preferred memory.
+	  * Get the index buffer usage hint.
 	  */
-	TPreferredMemory getPreferredMemory () const { return _PreferredMemory; }
+	TBufferUsage getBufferUsage () const { return _BufferUsage; }
+
 
 	/**
 	  * Get the keep local memory flag.
@@ -463,14 +528,18 @@ private:
 	// Location of the buffer
 	TLocation				_Location;
 
-	// Prefered memory
-	TPreferredMemory		_PreferredMemory;
+	// Buffer usage hint
+	TBufferUsage			_BufferUsage;
 
 	// Resident buffer size
 	uint32					_ResidentSize;
 
 	// Keep in local memory
 	bool					_KeepLocalMemory;
+
+	// Dirty range tracking for partial uploads
+	std::vector<CDirtyRange>	_DirtyRanges;
+	bool					_DirtyTracking;
 
 	// debug name
 	std::string				_Name;

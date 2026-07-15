@@ -54,7 +54,7 @@ const uint32 IDRV_TOUCHED_ALPHA_TEST		=	0x00000800;
 const uint32 IDRV_TOUCHED_ALPHA_TEST_THRE	=	0x00001000;
 const uint32 IDRV_TOUCHED_TEXENV			=	0x00002000;
 const uint32 IDRV_TOUCHED_TEXGEN			=	0x00004000;
-
+const uint32 IDRV_TOUCHED_TEXMAT			=	0x00008000;
 
 // Start texture touch at 0x10000.
 const uint32 IDRV_TOUCHED_TEX[IDRV_MAT_MAXTEXTURES]		=
@@ -97,6 +97,15 @@ const uint32 IDRV_MAT_USER_TEX_MAT_ALL  =   0x0FF00000;
 
 const uint32 IDRV_MAT_USER_TEX_FIRST_BIT = 20;
 
+/* Water shader draw with calculated reflectivity: the vertex buffer carries
+   a per-vertex reflectivity base (TexCoord0.z, the shape's stylized fresnel)
+   and the water fragment shader derives the blend alpha from it and the
+   luminance of the stage 2 reflection sample, instead of the legacy
+   texture-alpha semantics. Works with either a realtime planar reflection
+   or an artist envmap at stage 2. Runtime-only flag (set on the water
+   render material, never present in streamed content). */
+const uint32 IDRV_MAT_WATER_CALC_REFLECTIVITY	=	0x10000000;
+
 // For TexCoordGen
 const uint32 IDRV_MAT_TEX_GEN_SHIFT  =   2;
 const uint32 IDRV_MAT_TEX_GEN_MASK  =   0x03;
@@ -121,6 +130,8 @@ public:
 	IMaterialDrvInfos(IDriver	*drv, ItMatDrvInfoPtrList it) {_Driver= drv; _DriverIterator= it;}
 	// The virtual dtor is important.
 	virtual ~IMaterialDrvInfos();
+
+	inline IDriver *getDriver() { return _Driver; }
 
 };
 
@@ -389,7 +400,7 @@ public:
 	void					setSpecular( CRGBA specular=CRGBA(0,0,0) );
 	/// Set the shininess part ot material. Useful only if setLighting(true) has been done.
 	void					setShininess( float shininess );
-	/// Set the color material flag. Used when the material is lighted. True to use the diffuse color of the material when lighted, false to use the color vertex.
+	/// Set the color material flag. Used when the material is lighted. True to use vertex color as diffuse in lighting, false to use the material's diffuse color.
 	void					setLightedVertexColor (bool useLightedVertexColor);
 	/// Get the lighted vertex color flag
 	bool					getLightedVertexColor () const;
@@ -397,7 +408,7 @@ public:
 
 	bool					isLighted() const {return (_Flags&IDRV_MAT_LIGHTING)!=0;}
 
-	/// Return true if this material uses color material as diffuse when lighted, else return false if it uses color vertex.
+	/// Return true if vertex color drives diffuse in lighting (GL_COLOR_MATERIAL / D3DMCS_COLOR1), false if material diffuse is used.
 	bool					isLightedVertexColor () const { return (_Flags&IDRV_MAT_LIGHTED_VERTEX_COLOR)!=0;}
 
 	CRGBA					getColor(void) const { return(_Color); }
@@ -730,6 +741,10 @@ public:
 	uint32					getFlags() const {return _Flags;}
 	uint32					getTouched(void)  const { return(_Touched); }
 	void					clearTouched(uint32 flag) { _Touched&=~flag; }
+
+	/// Calculated water reflectivity semantics for this draw (see IDRV_MAT_WATER_CALC_REFLECTIVITY)
+	void					setWaterCalcReflectivity(bool on) { if (on) _Flags|=IDRV_MAT_WATER_CALC_REFLECTIVITY; else _Flags&=~IDRV_MAT_WATER_CALC_REFLECTIVITY; }
+	bool					isWaterCalcReflectivity() const { return (_Flags&IDRV_MAT_WATER_CALC_REFLECTIVITY)!=0; }
 
 
 
