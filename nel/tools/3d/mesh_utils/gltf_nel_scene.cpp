@@ -615,6 +615,30 @@ bool reconstructBaseBuild(const SGltfDoc &doc, const CJsonValue &node, const CJs
 	return true;
 }
 
+// Emit a decoded blob to its file — the shared re-emission discipline of every nel_* blob
+// block below (igs, anim, per-node lists, singles, zones, shape blobs).
+bool writeBlobFile(const std::string &path, std::vector<uint8> &bytes, std::string *err)
+{
+	try
+	{
+		COFile f;
+		if (!f.open(path))
+		{
+			if (err) *err = "cannot open " + path;
+			return false;
+		}
+		if (!bytes.empty())
+			f.serialBuffer(&bytes[0], (uint)bytes.size());
+		f.close();
+		return true;
+	}
+	catch (const NLMISC::Exception &e)
+	{
+		if (err) *err = e.what();
+		return false;
+	}
+}
+
 // MRM parameters from a node's nel_mrm_* extras (defaults = buildMRMParameters' defaults on the
 // writer side, though the writer always emits every key alongside nel_lod_mrm).
 void mrmParamsFromExtras(const CJsonValue &extras, CMRMParameters &parameters)
@@ -711,37 +735,21 @@ int exportNelGltfScene(const CMeshUtilsSettings &settings)
 		{
 			const CJsonValue *e = igs->at(i);
 			std::string name = e->getString("name", "");
-			std::string hexData = e->getString("data", "");
-			if (name.empty() || hexData.empty() || (hexData.size() % 2))
+			std::vector<uint8> bytes;
+			if (name.empty() || name.find("..") != std::string::npos
+				|| !hexToBytes(e->getString("data", ""), bytes) || bytes.empty())
 			{
 				fprintf(stderr, "ERROR: bad nel_igs entry %u\n", (uint)i);
 				ret = EXIT_FAILURE;
 				continue;
 			}
-			std::vector<uint8> bytes;
-			if (!hexToBytes(hexData, bytes))
-			{
-				fprintf(stderr, "ERROR: bad nel_igs hex for '%s'\n", name.c_str());
-				ret = EXIT_FAILURE;
-				continue;
-			}
 			std::string igPath = igDir + name + ".ig";
-			try
-			{
-				COFile f;
-				if (!f.open(igPath))
-				{
-					fprintf(stderr, "ERROR: cannot open %s\n", igPath.c_str());
-					ret = EXIT_FAILURE;
-					continue;
-				}
-				f.serialBuffer(&bytes[0], (uint)bytes.size());
-				f.close();
+			std::string werr;
+			if (writeBlobFile(igPath, bytes, &werr))
 				++stats.Igs;
-			}
-			catch (const NLMISC::Exception &e2)
+			else
 			{
-				fprintf(stderr, "ERROR: %s: %s\n", igPath.c_str(), e2.what());
+				fprintf(stderr, "ERROR: %s: %s\n", igPath.c_str(), werr.c_str());
 				ret = EXIT_FAILURE;
 			}
 		}
@@ -758,7 +766,8 @@ int exportNelGltfScene(const CMeshUtilsSettings &settings)
 		{
 			std::string name = anim->getString("name", "");
 			std::vector<uint8> bytes;
-			if (name.empty() || !hexToBytes(anim->getString("data", ""), bytes) || bytes.empty())
+			if (name.empty() || name.find("..") != std::string::npos
+				|| !hexToBytes(anim->getString("data", ""), bytes) || bytes.empty())
 			{
 				fprintf(stderr, "ERROR: bad nel_anim entry\n");
 				ret = EXIT_FAILURE;
@@ -769,24 +778,12 @@ int exportNelGltfScene(const CMeshUtilsSettings &settings)
 					: CPath::standardizePath(settings.AnimDirectoryPath, true);
 				CFile::createDirectoryTree(animDir);
 				std::string animPath = animDir + name + ".anim";
-				try
+				std::string werr;
+				if (writeBlobFile(animPath, bytes, &werr))
+					++stats.Anims;
+				else
 				{
-					COFile f;
-					if (!f.open(animPath))
-					{
-						fprintf(stderr, "ERROR: cannot open %s\n", animPath.c_str());
-						ret = EXIT_FAILURE;
-					}
-					else
-					{
-						f.serialBuffer(&bytes[0], (uint)bytes.size());
-						f.close();
-						++stats.Anims;
-					}
-				}
-				catch (const NLMISC::Exception &e2)
-				{
-					fprintf(stderr, "ERROR: %s: %s\n", animPath.c_str(), e2.what());
+					fprintf(stderr, "ERROR: %s: %s\n", animPath.c_str(), werr.c_str());
 					ret = EXIT_FAILURE;
 				}
 			}
@@ -817,22 +814,12 @@ int exportNelGltfScene(const CMeshUtilsSettings &settings)
 					continue;
 				}
 				std::string outPath2 = outDir + name + kLists[li].Ext;
-				try
-				{
-					COFile f;
-					if (!f.open(outPath2))
-					{
-						fprintf(stderr, "ERROR: cannot open %s\n", outPath2.c_str());
-						ret = EXIT_FAILURE;
-						continue;
-					}
-					f.serialBuffer(&bytes[0], (uint)bytes.size());
-					f.close();
+				std::string werr;
+				if (writeBlobFile(outPath2, bytes, &werr))
 					++stats.Others;
-				}
-				catch (const NLMISC::Exception &e2)
+				else
 				{
-					fprintf(stderr, "ERROR: %s: %s\n", outPath2.c_str(), e2.what());
+					fprintf(stderr, "ERROR: %s: %s\n", outPath2.c_str(), werr.c_str());
 					ret = EXIT_FAILURE;
 				}
 			}
@@ -856,29 +843,20 @@ int exportNelGltfScene(const CMeshUtilsSettings &settings)
 				continue;
 			std::string name = entry->getString("name", "");
 			std::vector<uint8> bytes;
-			if (name.empty() || !hexToBytes(entry->getString("data", ""), bytes) || bytes.empty())
+			if (name.empty() || name.find("..") != std::string::npos
+				|| !hexToBytes(entry->getString("data", ""), bytes) || bytes.empty())
 			{
 				fprintf(stderr, "ERROR: bad %s entry\n", kSingles[si].Key);
 				ret = EXIT_FAILURE;
 				continue;
 			}
 			std::string outPath2 = outDir + name + kSingles[si].Ext;
-			try
-			{
-				COFile f;
-				if (!f.open(outPath2))
-				{
-					fprintf(stderr, "ERROR: cannot open %s\n", outPath2.c_str());
-					ret = EXIT_FAILURE;
-					continue;
-				}
-				f.serialBuffer(&bytes[0], (uint)bytes.size());
-				f.close();
+			std::string werr;
+			if (writeBlobFile(outPath2, bytes, &werr))
 				++stats.Others;
-			}
-			catch (const NLMISC::Exception &e2)
+			else
 			{
-				fprintf(stderr, "ERROR: %s: %s\n", outPath2.c_str(), e2.what());
+				fprintf(stderr, "ERROR: %s: %s\n", outPath2.c_str(), werr.c_str());
 				ret = EXIT_FAILURE;
 			}
 		}
@@ -908,22 +886,12 @@ int exportNelGltfScene(const CMeshUtilsSettings &settings)
 			}
 			std::string zonePath = zoneDir + name;
 			CFile::createDirectoryTree(CFile::getPath(zonePath));
-			try
-			{
-				COFile f;
-				if (!f.open(zonePath))
-				{
-					fprintf(stderr, "ERROR: cannot open %s\n", zonePath.c_str());
-					ret = EXIT_FAILURE;
-					continue;
-				}
-				f.serialBuffer(&bytes[0], (uint)bytes.size());
-				f.close();
+			std::string werr;
+			if (writeBlobFile(zonePath, bytes, &werr))
 				++stats.Zones;
-			}
-			catch (const NLMISC::Exception &e2)
+			else
 			{
-				fprintf(stderr, "ERROR: %s: %s\n", zonePath.c_str(), e2.what());
+				fprintf(stderr, "ERROR: %s: %s\n", zonePath.c_str(), werr.c_str());
 				ret = EXIT_FAILURE;
 			}
 		}
@@ -980,22 +948,12 @@ int exportNelGltfScene(const CMeshUtilsSettings &settings)
 			if (!blob.empty())
 			{
 				std::string outPath = outDir + shapeName + ".shape";
-				try
-				{
-					COFile f;
-					if (!f.open(outPath))
-					{
-						fprintf(stderr, "ERROR: cannot open %s\n", outPath.c_str());
-						ret = EXIT_FAILURE;
-						continue;
-					}
-					f.serialBuffer(&blob[0], (uint)blob.size());
-					f.close();
+				std::string werr;
+				if (writeBlobFile(outPath, blob, &werr))
 					++stats.Exported;
-				}
-				catch (const NLMISC::Exception &e2)
+				else
 				{
-					fprintf(stderr, "ERROR: %s: %s\n", outPath.c_str(), e2.what());
+					fprintf(stderr, "ERROR: %s: %s\n", outPath.c_str(), werr.c_str());
 					ret = EXIT_FAILURE;
 				}
 				continue;

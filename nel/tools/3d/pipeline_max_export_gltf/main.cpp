@@ -189,6 +189,29 @@ struct SExportStats
 	}
 };
 
+// Asset-level blob embed: every byte-exact process output rides asset.extras as
+// { "name": <output stem>, "data": <hex> } — one object for single-output processes, a list of
+// them for per-node/per-group processes.
+static void embedBlob(CGltfBuilder &b, const char *key, const std::string &name,
+                      const std::vector<uint8> &bytes)
+{
+	CJsonValue *js = b.assetExtras()->setObject(key);
+	js->setString("name", name);
+	js->set("data")->setString(bytesToHex(bytes));
+}
+
+static void embedBlobList(CGltfBuilder &b, const char *key,
+                          const std::vector<std::pair<std::string, std::vector<uint8> > > &files)
+{
+	CJsonValue *jv = b.assetExtras()->setArray(key);
+	for (size_t i = 0; i < files.size(); ++i)
+	{
+		CJsonValue *e = jv->push();
+		e->setString("name", files[i].first);
+		e->set("data")->setString(bytesToHex(files[i].second));
+	}
+}
+
 static bool isGeometryOrShape(CSceneClass *base)
 {
 	if (!base) return false;
@@ -935,13 +958,7 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 		int nIgs = pmbExportIgsForGltf(maxPath, igs);
 		if (nIgs > 0)
 		{
-			CJsonValue *jigs = b.assetExtras()->setArray("nel_igs");
-			for (size_t i = 0; i < igs.size(); ++i)
-			{
-				CJsonValue *e = jigs->push();
-				e->setString("name", igs[i].first);
-				e->set("data")->setString(bytesToHex(igs[i].second));
-			}
+			embedBlobList(b, "nel_igs", igs);
 			stats.Igs = (uint)igs.size();
 		}
 	}
@@ -957,9 +974,7 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 		if (pmbExportAnimForGltf(maxPath, anim, &bareNodes) == 1 && !anim.empty())
 		{
 			std::string animName = NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(maxPath));
-			CJsonValue *ja = b.assetExtras()->setObject("nel_anim");
-			ja->setString("name", animName);
-			ja->set("data")->setString(bytesToHex(anim));
+			embedBlob(b, "nel_anim", animName, anim);
 			stats.Anims = 1;
 
 			// Sampled glTF animation channels (viewing tier): the blob deserialized back into a
@@ -1103,9 +1118,7 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 		std::vector<uint8> bytes;
 		if (pmbExportSkelForGltf(maxPath, bytes) == 1 && !bytes.empty())
 		{
-			CJsonValue *js = b.assetExtras()->setObject("nel_skel");
-			js->setString("name", NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(maxPath)));
-			js->set("data")->setString(bytesToHex(bytes));
+			embedBlob(b, "nel_skel", NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(maxPath)), bytes);
 			++stats.Others;
 		}
 	}
@@ -1120,9 +1133,7 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 		std::vector<uint8> bytes;
 		if (pmbExportLmSceneForGltf(maxPath, exportLighting, lmName, bytes) == 1 && !bytes.empty())
 		{
-			CJsonValue *js = b.assetExtras()->setObject("nel_lmscene");
-			js->setString("name", lmName);
-			js->set("data")->setString(bytesToHex(bytes));
+			embedBlob(b, "nel_lmscene", lmName, bytes);
 			++stats.Others;
 		}
 	}
@@ -1135,9 +1146,7 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 		std::vector<uint8> bytes;
 		if (pmbExportSwtForGltf(maxPath, bytes) == 1 && !bytes.empty())
 		{
-			CJsonValue *js = b.assetExtras()->setObject("nel_swt");
-			js->setString("name", NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(maxPath)));
-			js->set("data")->setString(bytesToHex(bytes));
+			embedBlob(b, "nel_swt", NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(maxPath)), bytes);
 			++stats.Others;
 		}
 	}
@@ -1145,9 +1154,7 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 		std::vector<uint8> bytes;
 		if (pmbExportPacsPrimForGltf(maxPath, bytes) == 1 && !bytes.empty())
 		{
-			CJsonValue *js = b.assetExtras()->setObject("nel_pacs_prim");
-			js->setString("name", NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(maxPath)));
-			js->set("data")->setString(bytesToHex(bytes));
+			embedBlob(b, "nel_pacs_prim", NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(maxPath)), bytes);
 			++stats.Others;
 		}
 	}
@@ -1159,14 +1166,8 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 		uint vskipped = 0;
 		if (pmbExportVegetsForGltf(maxPath, exportLighting, vegets, vskipped) == 0 && !vegets.empty())
 		{
-			CJsonValue *jv = b.assetExtras()->setArray("nel_vegets");
-			for (size_t i = 0; i < vegets.size(); ++i)
-			{
-				CJsonValue *e = jv->push();
-				e->setString("name", vegets[i].first);
-				e->set("data")->setString(bytesToHex(vegets[i].second));
-				++stats.Others;
-			}
+			embedBlobList(b, "nel_vegets", vegets);
+			stats.Others += (uint)vegets.size();
 		}
 	}
 
@@ -1176,14 +1177,8 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 		uint cskipped = 0;
 		if (pmbExportClodsForGltf(maxPath, exportLighting, clods, cskipped) == 0 && !clods.empty())
 		{
-			CJsonValue *jv = b.assetExtras()->setArray("nel_clods");
-			for (size_t i = 0; i < clods.size(); ++i)
-			{
-				CJsonValue *e = jv->push();
-				e->setString("name", clods[i].first);
-				e->set("data")->setString(bytesToHex(clods[i].second));
-				++stats.Others;
-			}
+			embedBlobList(b, "nel_clods", clods);
+			stats.Others += (uint)clods.size();
 		}
 	}
 
@@ -1197,14 +1192,8 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 		std::vector<std::pair<std::string, std::vector<uint8> > > cmbs;
 		if (pmbExportCmbsForGltf(maxPath, ligoCmb, cmbs) == 0 && !cmbs.empty())
 		{
-			CJsonValue *jv = b.assetExtras()->setArray("nel_cmbs");
-			for (size_t i = 0; i < cmbs.size(); ++i)
-			{
-				CJsonValue *e = jv->push();
-				e->setString("name", cmbs[i].first);
-				e->set("data")->setString(bytesToHex(cmbs[i].second));
-				++stats.Others;
-			}
+			embedBlobList(b, "nel_cmbs", cmbs);
+			stats.Others += (uint)cmbs.size();
 		}
 	}
 
@@ -1223,13 +1212,7 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 			        maxPath.c_str());
 		if (nZones > 0)
 		{
-			CJsonValue *jz = b.assetExtras()->setArray("nel_zones");
-			for (size_t i = 0; i < zoneFiles.size(); ++i)
-			{
-				CJsonValue *e = jz->push();
-				e->setString("name", zoneFiles[i].first);
-				e->set("data")->setString(bytesToHex(zoneFiles[i].second));
-			}
+			embedBlobList(b, "nel_zones", zoneFiles);
 			stats.Zones = (uint)zoneFiles.size();
 		}
 		for (size_t i = 0; i < proxies.size(); ++i)
