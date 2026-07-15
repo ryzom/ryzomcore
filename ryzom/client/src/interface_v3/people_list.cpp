@@ -556,7 +556,7 @@ void CPeopleList::readContactGroups()
 	properties.push_back(make_pair(string("title"), "General"));
 	CInterfaceGroup *group = CWidgetManager::getInstance()->getParser()->createGroupInstance("people_list_group_header", "ui:interface", properties, false);
 	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(group);
-	gc->setUCTitle(ucstring("General"));
+	gc->setTitle(std::string("General"));
 	gc->setSavable(false);
 	
 	CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
@@ -612,9 +612,9 @@ void CPeopleList::readContactGroups()
 							CInterfaceGroup *group = CWidgetManager::getInstance()->getParser()->createGroupInstance("people_list_group_header", "ui:interface", properties, false);
 							CGroupContainer *gc = dynamic_cast<CGroupContainer *>(group);
 							if (propGroup == "")
-								gc->setUCTitle(ucstring("General"));
+								gc->setTitle(std::string("General"));
 							else
-								gc->setUCTitle(propGroup);
+								gc->setTitle(propGroup);
 							gc->setSavable(false);
 
 							CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));

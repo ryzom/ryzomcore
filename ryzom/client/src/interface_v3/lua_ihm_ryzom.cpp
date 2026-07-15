@@ -3659,16 +3659,30 @@ bool CLuaIHMRyzom::isPlayerSlotNewbieLand(uint32 slot)
 }
 
 // ***************************************************************************
+#ifdef RYZOM_LUA_UCSTRING
 ucstring	CLuaIHMRyzom::getSheetLocalizedName(const std::string &sheet)
 {
 	return ucstring(STRING_MANAGER::CStringManagerClient::getItemLocalizedName(CSheetId(sheet)));
 }
+#else
+std::string	CLuaIHMRyzom::getSheetLocalizedName(const std::string &sheet)
+{
+	return STRING_MANAGER::CStringManagerClient::getItemLocalizedName(CSheetId(sheet));
+}
+#endif
 
 // ***************************************************************************
+#ifdef RYZOM_LUA_UCSTRING
 ucstring	CLuaIHMRyzom::getSheetLocalizedDesc(const std::string &sheet)
 {
 	return ucstring(STRING_MANAGER::CStringManagerClient::getItemLocalizedDescription(CSheetId(sheet)));
 }
+#else
+std::string	CLuaIHMRyzom::getSheetLocalizedDesc(const std::string &sheet)
+{
+	return STRING_MANAGER::CStringManagerClient::getItemLocalizedDescription(CSheetId(sheet));
+}
+#endif
 
 
 
