@@ -533,14 +533,14 @@ component.createComponent = function(x, y)
 	local comp = r2.newComponent("DeliveryTask")
 	assert(comp)
 
-	local contextualText = i18n.get("uiR2EdDeliveryTask_ContextualText"):toUtf8()
-	local missionText = i18n.get("uiR2EdDeliveryTask_MissionText"):toUtf8()
-	local missionSucceedText = i18n.get("uiR2EdDeliveryTask_MissionSucceededText"):toUtf8()
-	local waitValidationText = i18n.get("uiR2EdDeliveryTask_WaitValidationText"):toUtf8()
-	local broadcastText = i18n.get("uiR2EdDeliveryTask_BroadcastText"):toUtf8()
+	local contextualText = i18n.get("uiR2EdDeliveryTask_ContextualText")
+	local missionText = i18n.get("uiR2EdDeliveryTask_MissionText")
+	local missionSucceedText = i18n.get("uiR2EdDeliveryTask_MissionSucceededText")
+	local waitValidationText = i18n.get("uiR2EdDeliveryTask_WaitValidationText")
+	local broadcastText = i18n.get("uiR2EdDeliveryTask_BroadcastText")
 	
 	comp.Base = r2.Translator.getDebugBase("palette.entities.botobjects.bot_request_item")
-	comp.Name = r2:genInstanceName(i18n.get("uiR2EDDeliveryTask")):toUtf8()			
+	comp.Name = r2:genInstanceName(i18n.get("uiR2EDDeliveryTask"))			
 	
 	comp.ContextualText = contextualText
 	comp.MissionText = missionText
@@ -581,39 +581,39 @@ end
 
 function component:registerMenu(logicEntityMenu)
 	local name = i18n.get("uiR2EdDeliveryTask")
-	logicEntityMenu:addLine(ucstring(name), "lua", "", "DeliveryTask")
+	logicEntityMenu:addLine(name, "lua", "", "DeliveryTask")
 end
 
 function component:getLogicTranslations()
 	local logicTranslations = {
 		["ApplicableActions"] = {
-				["activate"]			= { menu=i18n.get( "uiR2AA0Activate"					):toUtf8(),
-											text=i18n.get( "uiR2AA1Activate"					):toUtf8()},
-				["deactivate"]			= { menu=i18n.get( "uiR2AA0Deactivate"					):toUtf8(),
-											text=i18n.get( "uiR2AA1Deactivate"					):toUtf8()}
+				["activate"]			= { menu=i18n.get( "uiR2AA0Activate"					),
+											text=i18n.get( "uiR2AA1Activate"					)},
+				["deactivate"]			= { menu=i18n.get( "uiR2AA0Deactivate"					),
+											text=i18n.get( "uiR2AA1Deactivate"					)}
 		},
 		["Events"] = {	
-				["activation"]			= { menu=i18n.get( "uiR2Event0Activation"				):toUtf8(), 
-											text=i18n.get( "uiR2Event1Activation"				):toUtf8()},
-				["deactivation"]		= { menu=i18n.get( "uiR2Event0Deactivation"				):toUtf8(), 
-											text=i18n.get( "uiR2Event1Deactivation"				):toUtf8()},
-				["mission asked"]		= { menu=i18n.get( "uiR2Event0MissionGiven"				):toUtf8(), 
-											text=i18n.get( "uiR2Event1MissionGiven"				):toUtf8()},
---				["wait validation"]		= { menu=i18n.get( "uiR2Event0TaskWaitValidation"		):toUtf8(), 
---											text=i18n.get( "uiR2Event1TaskWaitValidation"		):toUtf8()},
-				["delivered"]			= { menu=i18n.get( "uiR2Event0Delivered"	):toUtf8(),
-											text=i18n.get( "uiR2Event1Delivered"	):toUtf8()},
-				["succeeded"]			= { menu=i18n.get( "uiR2Event0TaskSuccess"				):toUtf8(),
-											text=i18n.get( "uiR2Event1TaskSuccess"				):toUtf8()},
+				["activation"]			= { menu=i18n.get( "uiR2Event0Activation"				), 
+											text=i18n.get( "uiR2Event1Activation"				)},
+				["deactivation"]		= { menu=i18n.get( "uiR2Event0Deactivation"				), 
+											text=i18n.get( "uiR2Event1Deactivation"				)},
+				["mission asked"]		= { menu=i18n.get( "uiR2Event0MissionGiven"				), 
+											text=i18n.get( "uiR2Event1MissionGiven"				)},
+--				["wait validation"]		= { menu=i18n.get( "uiR2Event0TaskWaitValidation"		), 
+--											text=i18n.get( "uiR2Event1TaskWaitValidation"		)},
+				["delivered"]			= { menu=i18n.get( "uiR2Event0Delivered"	),
+											text=i18n.get( "uiR2Event1Delivered"	)},
+				["succeeded"]			= { menu=i18n.get( "uiR2Event0TaskSuccess"				),
+											text=i18n.get( "uiR2Event1TaskSuccess"				)},
 		},
 		["Conditions"] = {	
-				["is active"]			= { menu=i18n.get( "uiR2Test0Active"					):toUtf8(), 
-											text=i18n.get( "uiR2Test1Active"					):toUtf8()},
-				["is inactive"]			= { menu=i18n.get( "uiR2Test0Inactive"					):toUtf8(), 
-											text=i18n.get( "uiR2Test1Inactive"					):toUtf8()},
+				["is active"]			= { menu=i18n.get( "uiR2Test0Active"					), 
+											text=i18n.get( "uiR2Test1Active"					)},
+				["is inactive"]			= { menu=i18n.get( "uiR2Test0Inactive"					), 
+											text=i18n.get( "uiR2Test1Inactive"					)},
 
-				["is succeeded"]		= { menu=i18n.get( "uiR2Test0TaskSuccess"				):toUtf8(), 
-											text=i18n.get( "uiR2Test1TaskSuccess"				):toUtf8()},
+				["is succeeded"]		= { menu=i18n.get( "uiR2Test0TaskSuccess"				), 
+											text=i18n.get( "uiR2Test1TaskSuccess"				)},
 
 		}
 	}

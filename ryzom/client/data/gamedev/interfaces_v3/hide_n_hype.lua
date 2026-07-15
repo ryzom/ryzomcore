@@ -271,7 +271,7 @@ function Ryzhide:fetch_json_data(url_to_load)
 end
 
 function Ryzhide:display_message_to_player(msg_type, msg_option, msg_text)
-	local msg = ucstring()
+	local msg 
 	local msg_color = ""
 
 	if(msg_type == "error")then
@@ -284,7 +284,7 @@ function Ryzhide:display_message_to_player(msg_type, msg_option, msg_text)
 		msg_color="FF0F"
 	end
 
-	msg:fromUtf8("@{"..msg_color.."}"..msg_text)
+	msg = "@{"..msg_color.."}"..msg_text
 	displaySystemInfo(msg, msg_option)
 end
 
@@ -368,7 +368,7 @@ function Ryzhide:htmlentities(text)
 	local html_trans_content = ""
 	local html_client_translation = ""
 
-	html_client_translation = i18n.get(text):toUtf8()
+	html_client_translation = i18n.get(text)
 
 	html_trans_content = html_client_translation:gsub("<NotExist:", "{")
 	html_trans_content = html_trans_content:gsub(">", "}")
