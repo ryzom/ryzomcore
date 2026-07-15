@@ -104,23 +104,13 @@
 #include "../pipeline_max/builtin/control_keyframer.h"
 
 #include "../pipeline_max_export_common/max_math.h"
+#include "../pipeline_max_export_common/appdata_util.h"
+#include "../pipeline_max_export_common/export_ids.h"
 
 using namespace PIPELINE::MAX;
 using namespace PIPELINE::MAX::BUILTIN;
 using namespace PIPELINE::MAX::NELPATCH;
 using namespace MAXMATH;
-
-// NeL export AppData sub-ids
-#define NEL3D_APPDATA_DONTEXPORT 1423062565
-#define NEL3D_APPDATA_ZONE_ROTATE 1266703978
-#define NEL3D_APPDATA_ZONE_SYMMETRY 1266703979
-#define NEL3D_APPDATA_LIGO_USE_BOUNDINGBOX 1342141818
-// The ligo maxscript's "passable" property marker (ligo_passable_app); presence = passable.
-#define NEL3D_APPDATA_LIGO_PASSABLE 1304892483
-
-// AppData script-entry key
-static const NLMISC::CClassId APPDATA_SCRIPT_CLASS_ID(0x04d64858, 0x16d1751d);
-static const uint32 APPDATA_SCRIPT_SUPER_CLASS_ID = 4128;
 
 // Scene class ids
 static const NLMISC::CClassId CLASSID_PRS_CTRL(0x00002005, 0x00000000);
@@ -150,30 +140,11 @@ static bool g_verbose = false;
 // ---------------------------------------------------------------------------------------------
 // AppData access (same shape as the other exporters).
 
-static bool getScriptAppData(CSceneClass *sc, uint32 subId, std::string &out)
-{
-	CAnimatable *anim = dynamic_cast<CAnimatable *>(sc);
-	if (!anim) return false;
-	STORAGE::CAppData *ad = anim->appData();
-	if (!ad) return false;
-	STORAGE::CAppData::TMap::const_iterator it = ad->entries().find(
-		STORAGE::CAppData::TKey(APPDATA_SCRIPT_CLASS_ID, APPDATA_SCRIPT_SUPER_CLASS_ID, subId));
-	if (it == ad->entries().end()) return false;
-	CStorageRaw *raw = it->second->value<CStorageRaw>();
-	if (!raw) return false;
-	if (raw->Value.empty() || raw->Value[raw->Value.size() - 1] != '\0') return false;
-	out = std::string(raw->Value.begin(), raw->Value.end() - 1);
-	return true;
-}
-
-static int getScriptAppDataInt(CSceneClass *sc, uint32 subId, int def)
-{
-	std::string s;
-	if (!getScriptAppData(sc, subId, s)) return def;
-	int value = 0;
-	if (sscanf(s.c_str(), "%d", &value) == 1) return value;
-	return def;
-}
+// Shared script AppData readers (pipeline_max_export_common/appdata_util) — formerly
+// file-local copies here (the local Int variant parsed via sscanf; fromString is equivalent
+// over the decimal-string values this convention stores).
+using APPDATA::getScriptAppData;
+using APPDATA::getScriptAppDataInt;
 
 static bool hasScriptAppData(CSceneClass *sc, uint32 subId)
 {
@@ -1777,7 +1748,7 @@ static int exportDirectZone(CScene &scene, const std::string &outPath, SExportCo
 	{
 		CNodeImpl *node = nodes[i].Node;
 		// ExportRykolZone: don't-export appdata check
-		if (getScriptAppDataInt(node, NEL3D_APPDATA_DONTEXPORT, 0)) continue;
+		if (getScriptAppDataInt(node, NEL3D_APPDATA_DONOTEXPORT, 0)) continue;
 
 		int zoneId = zoneIdOverride;
 		if (zoneId < 0)

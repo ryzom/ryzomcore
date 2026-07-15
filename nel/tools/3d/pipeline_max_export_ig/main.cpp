@@ -95,6 +95,8 @@
 #include "../pipeline_max_export_common/max_math.h"
 #include "../pipeline_max_export_common/max_scene.h"
 #include "../pipeline_max_export_common/db_path.h"
+#include "../pipeline_max_export_common/appdata_util.h"
+#include "../pipeline_max_export_common/export_ids.h"
 #include "../pipeline_max_export_common/edit_mesh_mod.h"
 
 using namespace PIPELINE::MAX;
@@ -111,36 +113,12 @@ using MAXSCENE::readObjectOffset;
 using MAXSCENE::getNodeTM;
 using MAXSCENE::SNodeTMCache;
 
-// NeL export AppData sub-ids (plugin_max/nel_mesh_lib/export_appdata.h)
-#define NEL3D_APPDATA_IGNAME 1423062564
-#define NEL3D_APPDATA_ACCEL 1423062561
-#define NEL3D_APPDATA_ACCEL_DEFAULT 32
-#define NEL3D_APPDATA_INSTANCE_NAME 1423062562
-#define NEL3D_APPDATA_DONT_ADD_TO_SCENE 1423062563
-#define NEL3D_APPDATA_INSTANCE_SHAPE 1970
-#define NEL3D_APPDATA_COLLISION 1423062613
-#define NEL3D_APPDATA_CAMERA_COLLISION_MESH_GENERATION 1423062671
-#define NEL3D_APPDATA_LIGHT_DONT_CAST_SHADOW_INTERIOR 1423062636
-#define NEL3D_APPDATA_LIGHT_DONT_CAST_SHADOW_EXTERIOR 1423062637
-#define NEL3D_APPDATA_EXPORT_REALTIME_LIGHT 1423062588
-#define NEL3D_APPDATA_EXPORT_AS_SUN_LIGHT 1423062591
-#define NEL3D_APPDATA_REALTIME_AMBIENT_ADD_SUN 1423062672
-#define NEL3D_APPDATA_OCC_MODEL 84682540
-#define NEL3D_APPDATA_OPEN_OCC_MODEL 84682541
-#define NEL3D_APPDATA_SOUND_GROUP 84682542
-#define NEL3D_APPDATA_ENV_FX 84682543
-
-// AppData script-entry key (the MaxScript utility panel writes these)
-static const NLMISC::CClassId APPDATA_SCRIPT_CLASS_ID(0x04d64858, 0x16d1751d);
-static const uint32 APPDATA_SCRIPT_SUPER_CLASS_ID = 4128;
-
 // Scene class ids (CLASSID_PRS_CTRL / CLASSID_LOOKAT_CTRL come from MAXSCENE, imported above)
 static const NLMISC::CClassId CLASSID_OSM_DERIVED(0x29263a68, 0x405f22f5);
 static const NLMISC::CClassId CLASSID_WSM_DERIVED(0x4ec13906, 0x5578130e);
 static const NLMISC::CClassId CLASSID_RPO(0x368c679f, 0x711c22ee);
 static const NLMISC::CClassId CLASSID_TARGET(0x00001020, 0x00000000);
 static const uint32 CLASSID_PARTA_DUMMY = 0x876234;
-static const uint32 CLASSID_PARTA_NEL_PS = 0x58ce2893;
 static const NLMISC::CClassId CLASSID_PARAM_BLOCK_2(0x00000082, 0x00000000);
 
 // Superclass ids
@@ -166,38 +144,11 @@ static CSceneClassRegistry *g_registry = NULL;
 // AppData access. Script entries are keyed (MAXSCRIPT_UTILITY_CLASS_ID, 4128, subId) and hold
 // null-terminated strings.
 
-static bool getScriptAppData(CSceneClass *sc, uint32 subId, std::string &out)
-{
-	CAnimatable *anim = dynamic_cast<CAnimatable *>(sc);
-	if (!anim) return false;
-	STORAGE::CAppData *ad = anim->appData();
-	if (!ad) return false;
-	STORAGE::CAppData::TMap::const_iterator it = ad->entries().find(
-		STORAGE::CAppData::TKey(APPDATA_SCRIPT_CLASS_ID, APPDATA_SCRIPT_SUPER_CLASS_ID, subId));
-	if (it == ad->entries().end()) return false;
-	CStorageRaw *raw = it->second->value<CStorageRaw>();
-	if (!raw) return false;
-	// getScriptAppData (string variant) requires the last byte to be the null terminator.
-	if (raw->Value.empty() || raw->Value[raw->Value.size() - 1] != '\0') return false;
-	out = std::string(raw->Value.begin(), raw->Value.end() - 1);
-	return true;
-}
-
-static std::string getScriptAppDataStr(CSceneClass *sc, uint32 subId, const std::string &def)
-{
-	std::string s;
-	if (!getScriptAppData(sc, subId, s)) return def;
-	return s;
-}
-
-static int getScriptAppDataInt(CSceneClass *sc, uint32 subId, int def)
-{
-	std::string s;
-	if (!getScriptAppData(sc, subId, s)) return def;
-	int value = 0;
-	if (NLMISC::fromString(s, value)) return value;
-	return def;
-}
+// Shared script AppData readers (pipeline_max_export_common/appdata_util) — formerly
+// file-local copies here.
+using APPDATA::getScriptAppData;
+using APPDATA::getScriptAppDataStr;
+using APPDATA::getScriptAppDataInt;
 
 // ---------------------------------------------------------------------------------------------
 // Object resolution.

@@ -46,6 +46,7 @@
 
 #include "../pipeline_max_export_common/max_math.h"
 #include "../pipeline_max_export_common/max_scene.h"
+#include "../pipeline_max_export_common/appdata_util.h"
 
 namespace PIPELINE {
 namespace MAX {
@@ -129,12 +130,13 @@ const std::string &databaseRoot();
 bool resolveDbPath(const std::string &authoredPath, std::string &out);
 
 // ---------------------------------------------------------------------------------------------
-// Script AppData (MAXSCRIPT_UTILITY_CLASS_ID / 4128 / subId string entries)
+// Script AppData (MAXSCRIPT_UTILITY_CLASS_ID / 4128 / subId string entries) — the shared
+// readers from pipeline_max_export_common; re-exported here for the many SCENELIB call sites.
 
-bool getScriptAppData(CSceneClass *sc, uint32 subId, std::string &out);
-std::string getScriptAppDataStr(CSceneClass *sc, uint32 subId, const std::string &def);
-int getScriptAppDataInt(CSceneClass *sc, uint32 subId, int def);
-float getScriptAppDataFloat(CSceneClass *sc, uint32 subId, float def);
+using APPDATA::getScriptAppData;
+using APPDATA::getScriptAppDataStr;
+using APPDATA::getScriptAppDataInt;
+using APPDATA::getScriptAppDataFloat;
 
 // ---------------------------------------------------------------------------------------------
 // Node classification helpers (shared by the shape exporter's selection gate and the glTF

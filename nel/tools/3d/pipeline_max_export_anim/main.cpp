@@ -77,6 +77,7 @@
 #include "../pipeline_max/builtin/control_keyframer.h"
 
 #include "../pipeline_max_export_common/biped_rig.h"
+#include "../pipeline_max_export_common/export_ids.h"
 #include "../pipeline_max/biped/biped_driven.h"
 #include "biped_anim.h"
 #include "bip_file.h"
@@ -93,11 +94,7 @@ static const sint32 TIME_NEG_INFINITY = (sint32)0x80000000;
 static const sint32 TIME_POS_INFINITY = 0x7fffffff;
 
 // NeL export AppData sub-ids (plugin_max/nel_mesh_lib/export_appdata.h)
-#define NEL3D_APPDATA_INSTANCE_NAME 1423062562
-#define NEL3D_APPDATA_EXPORT_NOTE_TRACK 1423062566
-#define NEL3D_APPDATA_EXPORT_NODE_ANIMATION 1423062800
-#define NEL3D_APPDATA_EXPORT_ANIMATION_PREFIXE_NAME 1423062801
-#define NEL3D_APPDATA_EXPORT_SSS_TRACK 1423062802
+// NeL export AppData sub-ids: pipeline_max_export_common/export_ids.h
 
 static const NLMISC::CClassId CLASSID_PRS_CTRL(0x00002005, 0x00000000);
 static const NLMISC::CClassId CLASSID_LOOKAT_CTRL(0x00002006, 0x00000000);
@@ -107,7 +104,6 @@ static const NLMISC::CClassId CLASSID_MORPHER(0x17bb6854, 0xa5cba2a3);
 static const NLMISC::CClassId CLASSID_PARAM_BLOCK_2(0x00000082, 0x00000000);
 // Scripted-plugin class ids carry a per-script-edit PartB; match PartA only, like the
 // reference exporter (export_nel.h NEL_PARTICLE_SYSTEM_CLASS_ID / BOOL_CONTROL_CLASS_ID).
-static const uint32 CLASSID_PARTA_NEL_PS = 0x58ce2893;
 static const uint32 CLASSID_PARTA_ONOFF_CTRL = 0x984b8d27;
 // Camera superclass (isCamera in the reference)
 static const TSClassId SCLASS_CAMERA = 0x00000020;

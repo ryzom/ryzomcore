@@ -81,6 +81,15 @@ int getScriptAppDataInt(CSceneClass *sc, uint32 subId, int def)
 	return def;
 }
 
+float getScriptAppDataFloat(CSceneClass *sc, uint32 subId, float def)
+{
+	std::string s;
+	if (!getScriptAppData(sc, subId, s)) return def;
+	float value = 0.0f;
+	if (NLMISC::fromString(s, value)) return value;
+	return def;
+}
+
 } /* namespace APPDATA */
 
 /* end of file */

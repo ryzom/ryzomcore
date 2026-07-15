@@ -36,6 +36,8 @@
 #include "../pipeline_max/builtin/node_impl.h"
 #include "../pipeline_max/storage_value.h"
 
+#include "../pipeline_max_export_common/export_ids.h"
+
 using namespace PIPELINE::MAX;
 using namespace PIPELINE::MAX::BUILTIN;
 using namespace SCENELIB;
@@ -43,17 +45,6 @@ using namespace SCENELIB;
 namespace LMSCENE {
 
 // Lightmap appdata sub-ids (plugin_max/nel_mesh_lib/export_appdata.h + calc_lm.h)
-#define NEL3D_APPDATA_LUMELSIZEMUL 1423062567
-#define NEL3D_APPDATA_SOFTSHADOW_RADIUS 1423062568
-#define NEL3D_APPDATA_SOFTSHADOW_CONELENGTH 1423062569
-#define NEL3D_APPDATA_EXPORT_LIGHTMAP_LIGHT 1423062590
-#define NEL3D_APPDATA_EXPORT_LMC_ENABLED 1423062638
-#define NEL3D_APPDATA_EXPORT_LMC_AMBIENT_START 1423062639
-#define NEL3D_APPDATA_EXPORT_LMC_DIFFUSE_START (1423062639 + 16)
-#define NEL3D_APPDATA_LM_ANIMATED_LIGHT 41654685
-#define NEL3D_APPDATA_LM_LIGHT_GROUP 41654687
-#define NEL3D_APPDATA_SOFTSHADOW_RADIUS_DEFAULT 1.4f
-#define NEL3D_APPDATA_SOFTSHADOW_CONELENGTH_DEFAULT 15.0f
 
 // ---------------------------------------------------------------------------------------------
 // Small chunk readers on the light object (same shapes as the ig exporter's light decode)

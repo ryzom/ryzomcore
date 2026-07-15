@@ -36,6 +36,7 @@
 
 #include "../pipeline_max/builtin/node_impl.h"
 #include "../pipeline_max/builtin/reference_maker.h"
+#include "../pipeline_max_export_common/export_ids.h"
 
 using namespace PIPELINE::MAX;
 using namespace PIPELINE::MAX::BUILTIN;
@@ -53,17 +54,6 @@ using MAXSCENE::decompMatrix;
 using MAXSCENE::convertMatrix;
 
 namespace MESHBUILD {
-
-// NeL export AppData sub-ids used here
-#define NEL3D_APPDATA_USE_LIGHT_LOCAL_ATTENUATION 1423062589
-#define NEL3D_APPDATA_CAMERA_COLLISION_MESH_GENERATION 1423062671
-#define NEL3D_APPDATA_VERTEXPROGRAM_ID 1423062592
-#define NEL3D_APPDATA_LOD_SKIN_REDUCTION 1423062555
-#define NEL3D_APPDATA_LOD_NB_LOD 1423062556
-#define NEL3D_APPDATA_LOD_DIVISOR 1423062557
-#define NEL3D_APPDATA_LOD_DISTANCE_FINEST 1423062558
-#define NEL3D_APPDATA_LOD_DISTANCE_MIDDLE 1423062559
-#define NEL3D_APPDATA_LOD_DISTANCE_COARSEST 1423062560
 
 // Morpher modifier (Morpher.dlm) — refs 101+i are the blend-shape target nodes (design §10d).
 static const NLMISC::CClassId CLASSID_MORPHER(0x17bb6854, 0xa5cba2a3);

@@ -40,6 +40,7 @@
 #include "mesh_eval.h"
 #include "../pipeline_max_export_common/parametric_mesh.h"
 #include "../pipeline_max_export_common/biped_rig.h"
+#include "../pipeline_max_export_common/export_ids.h"
 #include "../pipeline_max/builtin/node_impl.h"
 #include "../pipeline_max/builtin/scene_impl.h"
 #include "../pipeline_max/scene.h"
@@ -50,11 +51,6 @@ using namespace PIPELINE::MAX::BUILTIN;
 using namespace MAXMATH;
 using namespace SCENELIB;
 using namespace MESHEVAL;
-
-// NeL export AppData sub-ids (plugin_max/nel_mesh_lib/export_appdata.h)
-#define NEL3D_APPDATA_INTERFACE_FILE 1423062700
-#define NEL3D_APPDATA_INTERFACE_THRESHOLD 1423062701
-#define NEL3D_APPDATA_GET_INTERFACE_NORMAL_FROM_SCENE_OBJECTS 1423062702
 
 namespace IFACEBUILD {
 

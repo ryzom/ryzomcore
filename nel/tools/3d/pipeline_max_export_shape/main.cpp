@@ -90,6 +90,7 @@
 #include "flare_build.h"
 #include "remanence_build.h"
 #include "../pipeline_max_export_common/physique_skin.h"
+#include "../pipeline_max_export_common/export_ids.h"
 #include "interface_build.h"
 #include "lm_scene_build.h"
 #include "../nel_gltf/shape_export_bytes.h"
@@ -106,32 +107,9 @@ using namespace MESHEVAL;
 using namespace MATBUILD;
 using namespace MESHBUILD;
 
-// NeL export AppData sub-ids (plugin_max/nel_mesh_lib/export_appdata.h)
-#define NEL3D_APPDATA_LOD_NAME_COUNT 1423062537
-#define NEL3D_APPDATA_LOD_NAME 1423062538
-#define NEL3D_APPDATA_LOD_BLEND_IN 1423062548
-#define NEL3D_APPDATA_LOD_BLEND_OUT 1423062549
-#define NEL3D_APPDATA_LOD_COARSE_MESH 1423062550
-#define NEL3D_APPDATA_LOD_DYNAMIC_MESH 1423062551
-#define NEL3D_APPDATA_LOD_DIST_MAX 1423062552
-#define NEL3D_APPDATA_LOD_BLEND_LENGTH 1423062553
-#define NEL3D_APPDATA_LOD_MRM 1423062554
-#define NEL3D_APPDATA_ACCEL 1423062561
-#define NEL3D_APPDATA_DONOTEXPORT 1423062565
-#define NEL3D_APPDATA_COLLISION 1423062613
-#define NEL3D_APPDATA_COLLISION_EXTERIOR 1423062614
-#define NEL3D_APPDATA_USE_REMANENCE 1423062631
-#define NEL3D_APPDATA_AUTOMATIC_ANIMATION 1423062617
-#define NEL3D_APPDATA_EXPORT_ANIMATED_MATERIALS 1423062587
-#define NEL3D_APPDATA_INTERFACE_FILE 1423062700
-
-// Scene class part-A ids of the special objects
-#define CLASSID_PARTA_NEL_PS 0x58ce2893
-#define CLASSID_PARTA_NEL_FLARE 0x4e913532
-#define CLASSID_PARTA_NEL_WAVE_MAKER 0x77e24828
-#define CLASSID_PARTA_XREF 0x92aab38c
-static const NLMISC::CClassId CLASSID_PACS_BOX(0x7f374277, 0x5d3971df);
-static const NLMISC::CClassId CLASSID_PACS_CYL(0x62a56810, 0x4b3d601c);
+// NeL export AppData sub-ids + special-object class ids: pipeline_max_export_common/export_ids.h
+using PMAX_EXPORT_IDS::CLASSID_PACS_BOX;
+using PMAX_EXPORT_IDS::CLASSID_PACS_CYL;
 
 static bool g_verbose = false;
 

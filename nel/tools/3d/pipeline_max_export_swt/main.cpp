@@ -59,13 +59,12 @@
 #include "../pipeline_max/biped/biped.h"
 #include "../pipeline_max/builtin/node_impl.h"
 #include "../pipeline_max/builtin/storage/app_data.h"
+#include "../pipeline_max_export_common/export_ids.h"
 
 using namespace PIPELINE::MAX;
 using namespace PIPELINE::MAX::BUILTIN;
 
-// NeL export AppData sub-ids (plugin_max/nel_mesh_lib/export_appdata.h)
-#define NEL3D_APPDATA_EXPORT_SWT 1423062611
-#define NEL3D_APPDATA_EXPORT_SWT_WEIGHT 1423062612
+// NeL export AppData sub-ids: pipeline_max_export_common/export_ids.h
 
 // String-valued NeL AppData script entry (SubId match; same convention as export_anim/skel).
 static bool getNodeScriptAppDataString(CNodeImpl *node, uint32 subId, std::string &out)

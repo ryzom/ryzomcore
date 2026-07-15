@@ -8,7 +8,7 @@
 //
 // The veget maxscript (processes/veget/maxscript/veget_export.ms::isToBeExported) iterates
 // $geometry, keeps only scene-root nodes (parent == undefined) that aren't "Bip01", filters out
-// nel_ps and DONOTEXPORT/CHARACTER_LOD flagged nodes, and emits one .veget per node whose
+// nel_ps and DONOTEXPORT flagged nodes, and emits one .veget per node whose
 // NEL3D_APPDATA_VEGETABLE appdata == "1". Per node: NelExportVegetable
 // (nel_export/nel_export_export.cpp) -> CExportNel::buildVegetableShape
 // (nel_mesh_lib/export_vegetable.cpp): convert to TriObject, build the CMeshBase / CMesh via the
@@ -62,6 +62,7 @@
 #include "../pipeline_max_export_shape/mesh_build.h"
 #include "../pipeline_max_export_common/db_path.h"
 #include "../pipeline_max_export_common/max_scene.h"
+#include "../pipeline_max_export_common/export_ids.h"
 
 #include "../pipeline_max/builtin/scene_impl.h"
 #include "../pipeline_max/builtin/i_node.h"
@@ -75,19 +76,10 @@ using namespace MESHEVAL;
 using namespace MATBUILD;
 using namespace MESHBUILD;
 
-// NeL vegetable appdata sub-ids (plugin_max/nel_mesh_lib/export_appdata.h)
-#define NEL3D_APPDATA_VEGETABLE 1423062580
-#define NEL3D_APPDATA_VEGETABLE_ALPHA_BLEND 1423062581
-#define NEL3D_APPDATA_VEGETABLE_ALPHA_BLEND_ON_LIGHTED 1423062582
-#define NEL3D_APPDATA_VEGETABLE_ALPHA_BLEND_OFF_LIGHTED 1423062583
-#define NEL3D_APPDATA_VEGETABLE_ALPHA_BLEND_OFF_DOUBLE_SIDED 1423062584
-#define NEL3D_APPDATA_BEND_CENTER 1423062585
-#define NEL3D_APPDATA_BEND_FACTOR 1423062586
-#define NEL3D_APPDATA_VEGETABLE_FORCE_BEST_SIDED_LIGHTING 1423062616
-#define NEL3D_APPDATA_DONOTEXPORT 1423062565
-#define NEL3D_APPDATA_CHARACTER_LOD 1423062634
-
-#define NEL3D_APPDATA_BEND_FACTOR_DEFAULT 1.0f
+// NeL vegetable appdata sub-ids: pipeline_max_export_common/export_ids.h. (A former local
+// NEL3D_APPDATA_CHARACTER_LOD define here carried a wrong id — 1423062634 is
+// REMANENCE_SHIFTING_TEXTURE — but was never used; the veget maxscript's isToBeExported
+// filters on nel_ps / DONOTEXPORT / VEGETABLE only.)
 
 // Windows tri-state checkbox constants (BST_UNCHECKED=0, BST_CHECKED=1) — the reference impl
 // mixes 0/1/2 semantics via getScriptAppData integer comparisons; reproduce the same values.
@@ -95,7 +87,6 @@ using namespace MESHBUILD;
 #define VEG_BST_CHECKED 1
 
 // PS class part-A id (skip nel_ps nodes)
-#define CLASSID_PARTA_NEL_PS 0x58ce2893
 
 static bool g_verbose = false;
 

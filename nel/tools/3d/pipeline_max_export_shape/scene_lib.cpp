@@ -84,10 +84,6 @@ const NLMISC::CClassId CLASSID_NEL_BMTEX(0x5a8003f9, 0x043e0955);
 const NLMISC::CClassId CLASSID_PHYSIQUE(0x00000100, 0x00000000);
 const NLMISC::CClassId CLASSID_SKIN(0x0095c6a3, 0x00015666);
 
-// AppData script-entry key (the MaxScript utility panel writes these)
-static const NLMISC::CClassId APPDATA_SCRIPT_CLASS_ID(0x04d64858, 0x16d1751d);
-static const uint32 APPDATA_SCRIPT_SUPER_CLASS_ID = 4128;
-
 // ---------------------------------------------------------------------------------------------
 
 void setDatabaseRoot(const std::string &root)
@@ -160,50 +156,7 @@ bool resolveDbPath(const std::string &authoredPath, std::string &out)
 	return DBPATH::resolve(authoredPath, out);
 }
 
-// ---------------------------------------------------------------------------------------------
-// AppData
-
-bool getScriptAppData(CSceneClass *sc, uint32 subId, std::string &out)
-{
-	CAnimatable *anim = dynamic_cast<CAnimatable *>(sc);
-	if (!anim) return false;
-	STORAGE::CAppData *ad = anim->appData();
-	if (!ad) return false;
-	STORAGE::CAppData::TMap::const_iterator it = ad->entries().find(
-		STORAGE::CAppData::TKey(APPDATA_SCRIPT_CLASS_ID, APPDATA_SCRIPT_SUPER_CLASS_ID, subId));
-	if (it == ad->entries().end()) return false;
-	CStorageRaw *raw = it->second->value<CStorageRaw>();
-	if (!raw) return false;
-	// getScriptAppData (string variant) requires the last byte to be the null terminator.
-	if (raw->Value.empty() || raw->Value[raw->Value.size() - 1] != '\0') return false;
-	out = std::string(raw->Value.begin(), raw->Value.end() - 1);
-	return true;
-}
-
-std::string getScriptAppDataStr(CSceneClass *sc, uint32 subId, const std::string &def)
-{
-	std::string s;
-	if (!getScriptAppData(sc, subId, s)) return def;
-	return s;
-}
-
-int getScriptAppDataInt(CSceneClass *sc, uint32 subId, int def)
-{
-	std::string s;
-	if (!getScriptAppData(sc, subId, s)) return def;
-	int value = 0;
-	if (NLMISC::fromString(s, value)) return value;
-	return def;
-}
-
-float getScriptAppDataFloat(CSceneClass *sc, uint32 subId, float def)
-{
-	std::string s;
-	if (!getScriptAppData(sc, subId, s)) return def;
-	float value = 0.0f;
-	if (NLMISC::fromString(s, value)) return value;
-	return def;
-}
+// AppData readers live in pipeline_max_export_common/appdata_util (re-exported by scene_lib.h).
 
 // ---------------------------------------------------------------------------------------------
 // Node classification helpers

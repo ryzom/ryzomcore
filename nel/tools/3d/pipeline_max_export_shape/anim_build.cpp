@@ -50,6 +50,8 @@
 #include "../pipeline_max/builtin/reference_maker.h"
 #include "../pipeline_max/storage_object.h"
 
+#include "../pipeline_max_export_common/export_ids.h"
+
 using namespace PIPELINE::MAX;
 using namespace PIPELINE::MAX::BUILTIN;
 using namespace SCENELIB;
@@ -59,14 +61,7 @@ using namespace TRACKBUILD;
 namespace SHAPEANIM {
 
 // NeL AppData sub-ids
-#define NEL3D_APPDATA_AUTOMATIC_ANIMATION 1423062617
-#define NEL3D_APPDATA_EXPORT_ANIMATED_MATERIALS 1423062587
-#define NEL3D_APPDATA_DONOTEXPORT 1423062565
-#define NEL3D_APPDATA_COLLISION 1423062613
-#define NEL3D_APPDATA_COLLISION_EXTERIOR 1423062614
 // Lightmap animated light (calc_lm.h): NEL3D_APPDATA_LM = 41654684
-#define NEL3D_APPDATA_LM_ANIMATED_LIGHT 41654685
-#define NEL3D_APPDATA_LM_ANIMATED 41654686
 
 // NeL material v14 param ids (subset)
 #define NLB_MAIN 1

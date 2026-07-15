@@ -69,6 +69,7 @@
 #include "../pipeline_max_export_common/db_path.h"
 #include "../pipeline_max_export_common/max_scene.h"
 #include "../pipeline_max_export_common/physique_skin.h"
+#include "../pipeline_max_export_common/export_ids.h"
 
 #include "../pipeline_max/builtin/scene_impl.h"
 #include "../pipeline_max/builtin/i_node.h"
@@ -82,16 +83,10 @@ using namespace MESHEVAL;
 using namespace MATBUILD;
 using namespace MESHBUILD;
 
-// NeL appdata sub-ids (plugin_max/nel_mesh_lib/export_appdata.h)
-#define NEL3D_APPDATA_DONOTEXPORT 1423062565
-#define NEL3D_APPDATA_CHARACTER_LOD 1423062618
-
-// PS class part-A id (skip nel_ps nodes)
-#define CLASSID_PARTA_NEL_PS 0x58ce2893
-// PACS primitives (export_nel.h)
-static const NLMISC::CClassId CLASSID_NEL_PACS_BOX(0x7f374277, 0x5d3971df);
-static const NLMISC::CClassId CLASSID_NEL_PACS_CYL(0x62a56810, 0x4b3d601c);
-// RklPatch: SCENELIB::CLASSID_RPO
+// NeL appdata sub-ids + special-object class ids: pipeline_max_export_common/export_ids.h
+// (RklPatch: SCENELIB::CLASSID_RPO)
+using PMAX_EXPORT_IDS::CLASSID_PACS_BOX;
+using PMAX_EXPORT_IDS::CLASSID_PACS_CYL;
 
 static bool g_verbose = false;
 
@@ -117,8 +112,8 @@ static bool isToBeExported(INode &node)
 		return false;
 	// Skip nel_ps / pacs prims
 	if (cid.a() == CLASSID_PARTA_NEL_PS
-	    || cid == CLASSID_NEL_PACS_BOX
-	    || cid == CLASSID_NEL_PACS_CYL)
+	    || cid == CLASSID_PACS_BOX
+	    || cid == CLASSID_PACS_CYL)
 		return false;
 
 	// DONOTEXPORT

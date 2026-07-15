@@ -82,6 +82,7 @@
 
 #include "../pipeline_max_export_common/max_scene.h"
 #include "../pipeline_max_export_common/old_param_block.h"
+#include "../pipeline_max_export_common/export_ids.h"
 
 #include <cmath>
 #include <cstdio>
@@ -94,8 +95,8 @@ using namespace PIPELINE::MAX::BUILTIN;
 
 namespace {
 
-const NLMISC::CClassId CLASSID_PACS_BOX(0x7f374277, 0x5d3971df);
-const NLMISC::CClassId CLASSID_PACS_CYL(0x62a56810, 0x4b3d601c);
+using PMAX_EXPORT_IDS::CLASSID_PACS_BOX;
+using PMAX_EXPORT_IDS::CLASSID_PACS_CYL;
 const TSClassId SCLASS_GEOMOBJECT = 0x00000010;
 const TSClassId SCLASS_PARAMBLOCK2 = 0x00000082;
 
