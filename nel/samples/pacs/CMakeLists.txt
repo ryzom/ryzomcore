@@ -4,7 +4,7 @@ ADD_EXECUTABLE(nl_sample_pacs WIN32 ${SRC})
 
 TARGET_COMPILE_DEFINITIONS(nl_sample_pacs PRIVATE "NL_PACS_DATA=\"${NL_SHARE_ABSOLUTE_PREFIX}/nl_sample_pacs/\"")
 
-TARGET_LINK_LIBRARIES(nl_sample_pacs nelmisc nelpacs nel3d)
+TARGET_LINK_LIBRARIES(nl_sample_pacs PRIVATE NeL::misc NeL::pacs NeL::3d)
 NL_DEFAULT_PROPS(nl_sample_pacs "NeL, Samples: PACS")
 NL_ADD_RUNTIME_FLAGS(nl_sample_pacs)
 

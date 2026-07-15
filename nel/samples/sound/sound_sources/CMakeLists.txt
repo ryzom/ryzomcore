@@ -4,7 +4,7 @@ ADD_EXECUTABLE(nl_sample_sound_sources ${SRC})
 
 TARGET_COMPILE_DEFINITIONS(nl_sample_sound_sources PRIVATE "NL_SOUND_DATA=\"${NL_SHARE_ABSOLUTE_PREFIX}/nl_sample_sound/\"")
 
-TARGET_LINK_LIBRARIES(nl_sample_sound_sources nelmisc nelsound)
+TARGET_LINK_LIBRARIES(nl_sample_sound_sources PRIVATE NeL::misc NeL::sound)
 NL_DEFAULT_PROPS(nl_sample_sound_sources "NeL, Samples: Sound: Sound Sources")
 NL_ADD_RUNTIME_FLAGS(nl_sample_sound_sources)
 

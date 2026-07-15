@@ -20,15 +20,16 @@
 // STL includes
 
 // Qt includes
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QUndoStack>
+#include <QtWidgets/QVBoxLayout>
+#include <QtWidgets/QHBoxLayout>
+#include <QtWidgets/QUndoStack>
 
 // NeL includes
 // #include <nel/misc/debug.h>
 #include <nel/misc/i18n.h>
 
 // Project includes
+#include "../../../tools/3d/shared_widgets/common.h"
 #include "main_window.h"
 #include "configuration.h"
 #include "internationalization.h"
@@ -38,15 +39,6 @@ using namespace std;
 using namespace NLMISC;
 
 namespace NLQT {
-
-namespace {
-
-QString nli18n(const char *label)
-{
-	return QString::fromUtf16(CI18N::get(label).c_str());
-}
-
-} /* anonymous namespace */
 
 CGraphicsConfig::CGraphicsConfig(QWidget *parent, CConfiguration *configuration, CInternationalization *internationalization, QUndoStack *undoStack) 
 	: QWidget(parent), m_Configuration(configuration), m_Internationalization(internationalization), m_UndoStack(undoStack), 

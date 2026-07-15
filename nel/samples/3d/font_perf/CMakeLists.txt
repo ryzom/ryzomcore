@@ -4,7 +4,7 @@ ADD_EXECUTABLE(nl_sample_font_perf ${SRC})
 
 TARGET_COMPILE_DEFINITIONS(nl_sample_font_perf PRIVATE "FONT_DIR=\"${NL_SHARE_ABSOLUTE_PREFIX}/nl_sample_font_perf/\"")
 
-TARGET_LINK_LIBRARIES(nl_sample_font_perf nelmisc nel3d)
+TARGET_LINK_LIBRARIES(nl_sample_font_perf PRIVATE NeL::misc NeL::3d)
 NL_DEFAULT_PROPS(nl_sample_font_perf "NeL, Samples, 3D: Font Performance Test")
 NL_ADD_RUNTIME_FLAGS(nl_sample_font_perf)
 

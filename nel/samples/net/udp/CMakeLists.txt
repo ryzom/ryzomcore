@@ -8,12 +8,12 @@ SET(UDP_DIR "UDP_DIR=\"${NL_SHARE_ABSOLUTE_PREFIX}/nl_sample_udp/\"")
 TARGET_COMPILE_DEFINITIONS(nl_sample_udpclient PRIVATE ${UDP_DIR})
 TARGET_COMPILE_DEFINITIONS(nl_sample_udpserver PRIVATE ${UDP_DIR})
 
-TARGET_LINK_LIBRARIES(nl_sample_udpclient nelmisc nelnet)
-TARGET_LINK_LIBRARIES(nl_sample_udpserver nelmisc nelnet)
+TARGET_LINK_LIBRARIES(nl_sample_udpclient PRIVATE NeL::misc NeL::net)
+TARGET_LINK_LIBRARIES(nl_sample_udpserver PRIVATE NeL::misc NeL::net)
 
 IF(WITH_3D)
-  ADD_DEFINITIONS(-DUSE_3D)
-  TARGET_LINK_LIBRARIES(nl_sample_udpclient nel3d)
+  TARGET_COMPILE_DEFINITIONS(nl_sample_udpclient PRIVATE USE_3D)
+  TARGET_LINK_LIBRARIES(nl_sample_udpclient PRIVATE NeL::3d)
 ENDIF()
 
 NL_DEFAULT_PROPS(nl_sample_udpclient "NeL, Samples, Net, UDP: UDP Client")
