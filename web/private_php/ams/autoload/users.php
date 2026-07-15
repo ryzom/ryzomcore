@@ -455,7 +455,7 @@ class Users{
            try {
                //make connection with and put into shard db
                $dbs = new DBLayer("shard");
-               $dbs->update("user", $values, "Login = '$user'");
+               $dbs->execute("UPDATE `user` SET `Password` = :Password WHERE Login = :Login", array('Password' => $pass, 'Login' => $user));
                return "ok";
           }
           catch (PDOException $e) {
@@ -485,7 +485,7 @@ class Users{
            try {
                //make connection with and put into shard db
                $dbs = new DBLayer("shard");
-               $dbs->update("user", $values, "Login = '$user'");
+               $dbs->execute("UPDATE `user` SET `Email` = :Email WHERE Login = :Login", array('Email' => $mail, 'Login' => $user));
                return "ok";
           }
           catch (PDOException $e) {
