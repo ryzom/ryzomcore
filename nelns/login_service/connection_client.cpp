@@ -69,15 +69,6 @@ void sendToClient(CMessage &msgout, TSockId sockId)
 	ClientsServer->send(msgout, sockId);
 }
 
-void string_escape(string &str)
-{
-	string::size_type pos = 0;
-	while((pos=str.find('\'')) != string::npos)
-	{
-		str.replace(pos, 1, " ");
-	}
-}
-
 static void cbClientVerifyLoginPassword(CMessage &msgin, TSockId from, CCallbackNetBase &netbase)
 {
 	//
@@ -93,6 +84,10 @@ static void cbClientVerifyLoginPassword(CMessage &msgin, TSockId from, CCallback
 	msgin.serial (cpassword);
 	msgin.serial (application);
 
+	string loginEsc = sqlEscape(login.toUtf8());
+	string cpasswordEsc = sqlEscape(cpassword);
+	string applicationEsc = sqlEscape(application);
+
 	breakable
 	{
 		CMysqlResult result;
@@ -100,7 +95,7 @@ static void cbClientVerifyLoginPassword(CMessage &msgin, TSockId from, CCallback
 		sint32 nbrow;
 		//const CInetAddress &ia = netbase.hostAddress (from);
 retry:
-		reason = sqlQuery("select * from user where Login='"+login.toUtf8()+"'", nbrow, row, result);
+		reason = sqlQuery("select * from user where Login='"+loginEsc+"'", nbrow, row, result);
 		if(!reason.empty()) break;
 
 		if(nbrow == 0)
@@ -108,7 +103,7 @@ retry:
 			if(IService::getInstance ()->ConfigFile.getVar("AcceptUnknownUsers").asInt () == 1)
 			{
 				// we accept new users, add it
-				string query = "insert into user (Login, Password) values ('"+login.toUtf8()+"', '"+cpassword+"')";
+				string query = "insert into user (Login, Password) values ('"+loginEsc+"', '"+cpasswordEsc+"')";
 				reason = sqlQuery(query, nbrow, row, result);
 				if (!reason.empty()) break;
 				nlinfo("The user %s was inserted in the database for the application '%s'!", login.toUtf8().c_str(), application.c_str());
@@ -158,7 +153,7 @@ retry:
 		reason = sqlQuery("update user set state='Authorized', Cookie='"+c.setToString()+"' where UId=" + NLMISC::toString(uid));
 		if(!reason.empty()) break;
 
-		reason = sqlQuery("select * from shard where Online>0 and ClientApplication='"+application+"'", nbrow, row, result);
+		reason = sqlQuery("select * from shard where Online>0 and ClientApplication='"+applicationEsc+"'", nbrow, row, result);
 		if(!reason.empty()) break;
 
 		// Send success message
