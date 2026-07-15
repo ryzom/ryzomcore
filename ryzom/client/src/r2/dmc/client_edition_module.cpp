@@ -132,48 +132,48 @@ namespace R2 {
 	{
 	public:
 		CServerAnswerMsgScenarioUploaded( const R2::CObject* value)
-			:_Value( value?value->clone():0){}
+			:_Value( value?value->clone():NULL){}
 
 		void ok(CClientEditionModule* client, NLNET::IModuleProxy *server)
 		{
-			client->onScenarioUploaded(server, _Value.get());
+			client->onScenarioUploaded(server, _Value.getPtr());
 		}
 	private:
-		CUniquePtr<R2::CObject> _Value;
+		R2::CObject::TSmartPtr _Value;
 	};
 
 	class CServerAnswerMsgSet: public IServerAnswerMsg
 	{
 	public:
 		CServerAnswerMsgSet(const std::string &instanceId, const std::string &attrName, const R2::CObject* value)
-			:_InstanceId(instanceId), _AttrName(attrName), _Value( value?value->clone():0){}
+			:_InstanceId(instanceId), _AttrName(attrName), _Value( value?value->clone():NULL){}
 
 		void ok(CClientEditionModule* client, NLNET::IModuleProxy *server)
 		{
-			client->onNodeSet(server, _InstanceId, _AttrName, _Value.get());
+			client->onNodeSet(server, _InstanceId, _AttrName, _Value.getPtr());
 		}
 	private:
 		std::string _InstanceId;
 		std::string _AttrName;
-		CUniquePtr<R2::CObject> _Value;
+		R2::CObject::TSmartPtr _Value;
 	};
 
 	class CServerAnswerMsgInserted: public IServerAnswerMsg
 	{
 	public:
 		CServerAnswerMsgInserted(const std::string &instanceId, const std::string &attrName, sint32 position, const std::string &key, const R2::CObject* value)
-			:_InstanceId(instanceId), _AttrName(attrName), _Position(position), _Key(key), _Value( value?value->clone():0){}
+			:_InstanceId(instanceId), _AttrName(attrName), _Position(position), _Key(key), _Value( value?value->clone():NULL){}
 
 		void ok(CClientEditionModule* client, NLNET::IModuleProxy *server)
 		{
-			client->onNodeInserted(server, _InstanceId, _AttrName, _Position, _Key, _Value.get());
+			client->onNodeInserted(server, _InstanceId, _AttrName, _Position, _Key, _Value.getPtr());
 		}
 	private:
 		std::string _InstanceId;
 		std::string _AttrName;
 		sint32 _Position;
 		std::string _Key;
-		CUniquePtr<R2::CObject> _Value;
+		R2::CObject::TSmartPtr _Value;
 	};
 
 	class CServerAnswerMsgErased: public IServerAnswerMsg
@@ -574,7 +574,7 @@ bool CClientEditionModule::onProcessModuleMessage(IModuleProxy *senderModuleProx
 			}
 
 
-			CObject* data = bodyConnection.HighLevel.getData();
+			CObject::TSmartPtr data = bodyConnection.HighLevel.getData();
 			if (!data && bodyConnection.InCache)
 			{
 
@@ -796,9 +796,8 @@ void CClientEditionModule::requestSetNode(const std::string& instanceId, const s
 		if (value->getGhost())
 		{
 			// this is a local value -> forward directly to client
-			CObject *temp = value->clone();
+			CObject::TSmartPtr temp = value->clone();
 			getEditor().getDMC().nodeSet(instanceId, attrName, temp);
-			delete temp; // AJM
 			return;
 		}
 	}
@@ -974,7 +973,7 @@ CObject* CClientEditionModule::getPropertyList(CObject* component) const
 	return component;
 }
 
-CObject* CClientEditionModule::getPaletteElement(const std::string& key)const
+const CObject::TSmartPtr& CClientEditionModule::getPaletteElement(const std::string& key)const
 {
 	//H_AUTO(R2_CClientEditionModule_getPaletteElement)
 	return _Palette->getPaletteElement(key);
@@ -1109,7 +1108,7 @@ void CClientEditionModule::startingScenario(class NLNET::IModuleProxy * /* serve
 			sv.setScenarioToLoad("save/r2_buffer.dat", values, md5, signature, true);
 			_LastReadHeader = values;
 			uint32 lastActIndex = _StartingActIndex;
-			CObject* hlScenario2 =  _Client->getComLuaModule().loadLocal("save/r2_buffer.dat", _LastReadHeader);
+			CObject::TSmartPtr hlScenario2 =  _Client->getComLuaModule().loadLocal("save/r2_buffer.dat", _LastReadHeader);
 			_StartingActIndex  = lastActIndex;
 			if (hlScenario2)
 			{
@@ -1147,10 +1146,10 @@ void CClientEditionModule::startingScenario(class NLNET::IModuleProxy * /* serve
 			_Factory->setMaxId("RtEntryText", 0);
 			_Factory->setMaxId("RtPlotItem", 0);
 
-			CUniquePtr<CObject> rtDataPtr(  _Client->getComLuaModule().translateFeatures(hlScenario , errorMsg) );
-			rtData.setData(rtDataPtr.get());
+			CObject::TSmartPtr rtDataPtr = _Client->getComLuaModule().translateFeatures(hlScenario , errorMsg);
+			rtData.setData(rtDataPtr.getPtr());
 
-			if (rtDataPtr.get())
+			if (rtDataPtr.getPtr())
 			{
 				ok = true;
 				connectionState = "uiR2EDUploadScenario";
@@ -1740,7 +1739,8 @@ void CClientEditionModule::onNodeSet(NLNET::IModuleProxy * /* sender */, const s
 {
 	//H_AUTO(R2_CClientEditionModule_onNodeSet)
 	if (_Mute) return;
-	_Client->nodeSet(instanceId, attrName, value.getData()); //todo ownership
+	CObject::TSmartPtr temp = value.getData();
+	_Client->nodeSet(instanceId, attrName, temp);
 }
 
 // The ServerEditionMode inserts a node on a hl scenario.
@@ -2476,7 +2476,7 @@ void CClientEditionModule::loadScenarioSucceded(const std::string& filename, con
 	}
 
 	R2::getEditor().getUI().displaySystemInfo(CI18N::get("uiR2EDLoadingScenario"), "BC");
-	CObject* object = _Client->getComLuaModule().loadFromBuffer(body, filename, values);
+	CObject::TSmartPtr object = _Client->getComLuaModule().loadFromBuffer(body, filename, values);
 	_LastReadHeader = values;
 	if (object)
 	{

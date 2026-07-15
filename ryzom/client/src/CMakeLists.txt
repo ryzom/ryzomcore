@@ -203,9 +203,6 @@ IF(WITH_RYZOM_CLIENT)
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${LUA_INCLUDE_DIR}
         ${LUABIND_INCLUDE_DIR}
-        ${CURL_INCLUDE_DIRS}
-        ${ZLIB_INCLUDE_DIR}
-        ${OPENSSL_INCLUDE_DIR}
   )
 
   TARGET_INCLUDE_DIRECTORIES(ryzom_client PRIVATE ${CMAKE_SOURCE_DIR}/nel/3rdparty)
@@ -224,14 +221,15 @@ IF(WITH_RYZOM_CLIENT)
               NeL::gui
               NeL::sound
               NeL::sevenzip
-              ryzom_clientsheets
-              ryzom_gameshare
+              NeL::web
+              Ryzom::clientsheets
+              Ryzom::gameshare
               NeL::pacs
               LibXml2::LibXml2
               ${LUA_LIBRARIES}
-              ${LUABIND_LIBRARIES}
+              Luabind::Luabind
               CURL::libcurl
-              ${OPENSSL_LIBRARIES}
+              ZLIB::ZLIB
   )
 
   IF(NOT APPLE AND NOT WIN32)
@@ -247,7 +245,7 @@ IF(WITH_RYZOM_CLIENT)
     TARGET_LINK_LIBRARIES(ryzom_client PRIVATE ${msquic_LIBRARIES})
   ENDIF()
 
-  TARGET_COMPILE_DEFINITIONS(ryzom_client PRIVATE ${CURL_DEFINITIONS} ${LUABIND_DEFINITIONS})
+  TARGET_COMPILE_DEFINITIONS(ryzom_client PRIVATE ${LUABIND_DEFINITIONS})
 
   NL_DEFAULT_PROPS(ryzom_client "Ryzom, Client: Ryzom Client")
   NL_ADD_RUNTIME_FLAGS(ryzom_client)

@@ -57,8 +57,8 @@ using std::string;
 //---------------------------------------------------
 struct CClientConfig
 {
-	enum TDriver3D { DrvAuto = 0, OpenGL, Direct3D, OpenGLES };
-	enum TDriverSound { SoundDrvAuto = 0, SoundDrvOpenAL, SoundDrvDirectSound, SoundDrvXAudio2 };
+	enum TDriver3D { DrvAuto = 0, OpenGL, Direct3D, OpenGLES, OpenGL3 };
+	enum TDriverSound { SoundDrvAuto = 0, SoundDrvFMod, SoundDrvOpenAL, SoundDrvDirectSound, SoundDrvXAudio2 };
 	enum TStageLCTUsage { StageUseNoLCT = 0, StageUseAllLCT, StageUsePosOnlyLCT };
 
 	// the config file must be always be available
@@ -298,6 +298,12 @@ struct CClientConfig
 	bool			Bloom;
 	bool			SquareBloom;
 	float			DensityBloom;
+	/// Max number of water pools with realtime planar reflection per frame (0 = off)
+	sint			MaxWaterReflections;
+	/// Max reflection render target textures per eye (L and R each get up to this many); reflected planes tile into shared textures (-1 = as many as needed)
+	sint			MaxWaterReflectionTextures;
+	/// Dev: force realtime planar reflection on all water surfaces
+	bool			ForceWaterReflections;
 
 	/// Movie Shooter
 	uint			MovieShooterMemory;
@@ -589,6 +595,9 @@ struct CClientConfig
 	/// Racial Animation
 	bool			EnableRacialAnimation;
 
+	/// GPU Skinning
+	bool			GPUSkinning;
+
 	/////////////
 	// OPTIONS //
 	/// Right click select too.
@@ -776,6 +785,9 @@ struct CClientConfig
 
 	// Time to update water envmap
 	float			WaterEnvMapUpdateTime;
+
+	// Force all water bodies to use scene water envmap (DEV)
+	bool			ForceWaterEnvMap;
 
 	// number of frames to profile (0 for start/stop scheme)
 	uint			NumFrameForProfile;

@@ -1,3 +1,5 @@
+FIND_PACKAGE(Luabind REQUIRED)
+
 # Need clientsheets lib for sheets packer tool
 ADD_SUBDIRECTORY(src)
 

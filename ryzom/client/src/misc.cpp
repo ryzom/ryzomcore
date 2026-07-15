@@ -1084,6 +1084,16 @@ void computeCurrentFovAspectRatio(float &fov, float &ar)
 			}
 		}
 	}
+
+	// Adjust FOV for aspect ratios different from the reference 4:3 (800x600).
+	// FoV config value is horizontal FOV designed for 4:3.
+	// Widescreen (ar > 4:3): expand horizontal FOV to preserve vertical FOV (Hor+).
+	// Portrait (ar < 4:3): keep horizontal FOV as-is, vertical expands naturally (Vert+).
+	const float refAR = 4.0f / 3.0f;
+	if (ar > refAR)
+	{
+		fov = 2.0f * atanf(tanf(fov * 0.5f) * ar / refAR);
+	}
 }
 
 // ***************************************************************************

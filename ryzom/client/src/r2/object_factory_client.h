@@ -39,7 +39,7 @@ public:
 	~CObjectRefIdClient();
 	// from CObjectString
 	virtual bool set(const std::string& key, const std::string & value);
-	CObject* clone() const;
+	TSmartPtr clone() const;
 	void	 enable(bool enabled);
 protected:
 	// from CEditor::IInstanceObserver
@@ -70,7 +70,7 @@ class CObjectTableClient : public CObjectTable
 public:
 	CObjectTableClient();
 	void pushOnLuaStack(CLuaState &state, CLuaObject &metatable) const;
-	CObject* clone() const;
+	TSmartPtr clone() const;
 private:
 	mutable CLuaObject _Ref;
 };

@@ -423,9 +423,14 @@ void	beginRenderCanopyPart()
 {
 	SceneRoot->beginPartRender();
 }
-void	endRenderCanopyPart()
+void	endRenderCanopyPart(bool keepTraversals)
 {
-	SceneRoot->endPartRender(false);
+	// keepTraversals matters beyond traversals: without it endPartRender
+	// consumes the scene's ellapsed time, and replicated passes (water
+	// reflections, stereo first eye) run BEFORE the frame's scene pass —
+	// time-integrated state (e.g. flare fades) would then integrate with
+	// dt = 0 for the rest of the frame.
+	SceneRoot->endPartRender(false, true, keepTraversals);
 }
 
 void	beginRenderMainScenePart()
@@ -445,12 +450,14 @@ void	beginRenderSkyPart()
 		sky.getScene()->beginPartRender();
 	}
 }
-void	endRenderSkyPart()
+void	endRenderSkyPart(bool keepTraversals)
 {
 	if (s_SkyMode == NewSky)
 	{
 		CSky &sky = ContinentMngr.cur()->CurrentSky;
-		sky.getScene()->endPartRender(false);
+		// see endRenderCanopyPart — the sun flare fade lives in the sky
+		// scene and integrates its scene's ellapsed time
+		sky.getScene()->endPartRender(false, true, keepTraversals);
 	}
 }
 
@@ -494,6 +501,14 @@ static void renderSkyPart(UScene::TRenderPart renderPart)
 	nlassert(s_SkyMode != NoSky);
 	Driver->setDepthRange(SKY_DEPTH_RANGE_START, 1.f);
 	Driver->enableFog(false);
+	// In water reflection passes the water clip plane is set up in the
+	// reflection camera's eye space; the sky renders camera-centered with
+	// its own view, where that frozen half-space slices arbitrarily
+	// through the sky dome and sun billboards (a visible seam around the
+	// sun in the reflection). The sky needs no water clipping.
+	bool noClipPlane = Scene->isRenderingWaterReflection();
+	if (noClipPlane)
+		static_cast<CDriverUser *>(Driver)->getDriver()->enableClipPlane(0, false);
 	if (s_SkyMode == NewSky)
 	{
 		CSky &sky = ContinentMngr.cur()->CurrentSky;
@@ -511,6 +526,8 @@ static void renderSkyPart(UScene::TRenderPart renderPart)
 				CloudScape->render ();
 		}
 	#endif
+	if (noClipPlane)
+		static_cast<CDriverUser *>(Driver)->getDriver()->enableClipPlane(0, true);
 }
 
 // ***************************************************************************************************************************
@@ -574,7 +591,7 @@ void clearBuffers()
 void renderScene(bool forceFullDetail, bool bloom)
 {
 	CTextureUser *effectRenderTarget = NULL;
-	if (bloom)
+	if (bloom && Driver->supportBloomEffect())
 	{
 		// set bloom parameters before applying bloom effect
 		CBloomEffect::getInstance().setSquareBloom(ClientCfg.SquareBloom);
@@ -594,7 +611,7 @@ void renderScene(bool forceFullDetail, bool bloom)
 	{
 		s_ForceFullDetail.restore();
 	}
-	if (bloom)
+	if (bloom && Driver->supportBloomEffect())
 	{
 		// apply bloom effect
 		CBloomEffect::getInstance().applyBloom();
@@ -609,7 +626,7 @@ void renderScene(bool forceFullDetail, bool bloom)
 void updateWaterEnvMap()
 {
 	#ifdef USE_WATER_ENV_MAP
-	if (WaterEnvMapRefCount > 0) // water env map needed
+	if (WaterEnvMapRefCount > 0 || ClientCfg.ForceWaterEnvMap) // water env map needed
 	{
 		if (!WaterEnvMap)
 		{
@@ -640,7 +657,7 @@ void updateWaterEnvMap()
 		WaterEnvMapRdr.CurrTime = TimeInSec - FirstTimeInSec;
 		WaterEnvMapRdr.CurrWeather = WeatherManager.getWeatherValue();
 		CSky &sky = ContinentMngr.cur()->CurrentSky;
-		WaterEnvMap->setAlpha(sky.getWaterEnvMapAlpha());
+		WaterEnvMap->setAlpha(ClientCfg.ForceWaterEnvMap ? 128 : 255); // Not useful and does not work under D3D, use alpha map instead on your water shape! // sky.getWaterEnvMapAlpha())
 		Scene->updateWaterEnvMaps(TimeInSec - FirstTimeInSec);
 	}
 	#endif
@@ -772,9 +789,9 @@ void drawRenderScene(bool wantTraversals, bool keepTraversals)
 void endRenderScene(bool keepTraversals)
 {
 	// End Part Rendering
-	endRenderSkyPart();
+	endRenderSkyPart(keepTraversals);
 	endRenderMainScenePart(keepTraversals);
-	endRenderCanopyPart();
+	endRenderCanopyPart(keepTraversals);
 
 	// reset depth range
 	Driver->setDepthRange(0.f, CANOPY_DEPTH_RANGE_START);
@@ -1465,14 +1482,11 @@ bool mainLoop()
 				SoundMngr->setListenerOrientation(mat.getJ(), mat.getK());
 			}
 		}
-		if (StereoDisplay)
+		StereoDisplay->updateCamera(0, &MainCam);
+		if (SceneRoot)
 		{
-			StereoDisplay->updateCamera(0, &MainCam);
-			if (SceneRoot)
-			{
-				UCamera cam = SceneRoot->getCam();
-				StereoDisplay->updateCamera(1, &cam);
-			}
+			UCamera cam = SceneRoot->getCam();
+			StereoDisplay->updateCamera(1, &cam);
 		}
 
 		// see if camera is below water (useful for sort order)
@@ -1677,15 +1691,11 @@ bool mainLoop()
 		uint i = 0;
 		CTextureUser *effectRenderTarget = NULL;
 		bool haveEffects = Render && Driver->getPolygonMode() == UDriver::Filled
+			&& Driver->supportBloomEffect()
 			&& (ClientCfg.Bloom || FXAA);
 		bool defaultRenderTarget = false;
 		if (haveEffects)
 		{
-			if (!StereoDisplay)
-			{
-				Driver->beginDefaultRenderTarget();
-				defaultRenderTarget = true;
-			}
 			if (ClientCfg.Bloom)
 			{
 				CBloomEffect::getInstance().setSquareBloom(ClientCfg.SquareBloom);
@@ -1693,14 +1703,22 @@ bool mainLoop()
 			}
 		}
 		bool fullDetail = false;
-		while ((!StereoDisplay && i == 0) || (StereoDisplay && StereoDisplay->nextPass()))
+
+		// Announce the water reflection passes wanted this frame to the
+		// render loop; the display replicates the reflections stage per
+		// pass and per eye
+		if (!ClientCfg.Light && Render)
+			StereoDisplay->setSceneReflectionPasses(Scene->beginWaterReflectionPasses());
+		else
+			StereoDisplay->setSceneReflectionPasses(0);
+
+		while (StereoDisplay->nextPass())
 		{
 			++i;
 			///////////////////
 			// SETUP CAMERAS //
 			///////////////////
 
-			if (StereoDisplay)
 			{
 				// modify cameras for stereo display
 				const CViewport &vp = StereoDisplay->getCurrentViewport();
@@ -1725,23 +1743,107 @@ bool mainLoop()
 			// Commit camera changes
 			commitCamera();
 
+			// Set flare context for this pass (separate context per eye for
+			// stereo, and per water reflection pass — reflected flares keep
+			// their own occlusion state). The sun flare lives in the sky
+			// scene: it needs the context too.
+			Scene->setFlareContext(StereoDisplay->getFlareContext());
+			if (s_SkyMode == NewSky && ContinentMngr.cur())
+				ContinentMngr.cur()->CurrentSky.getScene()->setFlareContext(StereoDisplay->getFlareContext());
+			if (SceneRoot)
+				SceneRoot->setFlareContext(StereoDisplay->getFlareContext());
+
 			//////////////////////////
 			// RENDER THE FRAME  3D //
 			//////////////////////////
 
-			bool stereoRenderTarget = (StereoDisplay != NULL) && StereoDisplay->beginRenderTarget();
+			bool stereoRenderTarget = StereoDisplay->beginRenderTarget();
+			if (!stereoRenderTarget && haveEffects && !defaultRenderTarget && StereoDisplay->wantClear())
+			{
+				Driver->beginDefaultRenderTarget();
+				defaultRenderTarget = true;
+			}
 
-			if (!StereoDisplay || StereoDisplay->wantClear())
+			if (StereoDisplay->wantClear())
 			{
 				// Clear buffers
 				clearBuffers();
 			}
 
-			if (!StereoDisplay || StereoDisplay->wantScene())
+			if (StereoDisplay->wantSceneReflections() || StereoDisplay->wantScene())
 			{
 				if (!ClientCfg.Light && Render)
 				{
-					if (!StereoDisplay || StereoDisplay->isSceneFirst())
+					// A water reflection pass is the same scene render as
+					// the scene pass, replicated with the mirrored camera,
+					// the reflection render target and the water clip plane
+					// (all set up by beginWaterReflectionPass; water, flares
+					// and vegetation exclude themselves at engine level).
+					// TODO: mirror the sky and canopy cameras for the
+					// reflection render (they follow the unmirrored eye)
+					bool reflectionPass = StereoDisplay->wantSceneReflections();
+					uint reflPass = 0;
+					UWaterReflectionInfo reflInfo;
+					CFrustum saveCanopyFrustum;
+					bool canopyFrustumChanged = false;
+
+					Scene->setWaterReflectionView(StereoDisplay->getSceneView());
+					if (reflectionPass)
+					{
+						reflPass = StereoDisplay->getSceneReflectionPass();
+						Scene->beginWaterReflectionPass(reflPass, reflInfo);
+
+						// Mirror the sky and canopy cameras like the main
+						// scene camera (commitCamera set them from the eye
+						// camera), and give them the reflection sub-frustum
+						// and active viewport so they align with the render
+						// target's active region. The next pass's camera
+						// setup and commitCamera restore all of it.
+						CMatrix reflCamMatrix = reflInfo.ReflViewMatrix;
+						reflCamMatrix.invert();
+						CViewport reflViewport;
+						reflViewport.init(reflInfo.UBias, reflInfo.VBias, reflInfo.UScale, reflInfo.VScale);
+						if (s_SkyMode == NewSky)
+						{
+							CSky &sky = ContinentMngr.cur()->CurrentSky;
+							UCamera camSky = sky.getScene()->getCam();
+							sky.getScene()->setViewport(reflViewport);
+							CFrustum skyFrust(reflInfo.FrustumLeft, reflInfo.FrustumRight,
+								reflInfo.FrustumBottom, reflInfo.FrustumTop,
+								reflInfo.FrustumNear, SkyCameraZFar, true);
+							camSky.setFrustum(skyFrust);
+							CMatrix skyCameraMatrix = reflCamMatrix;
+							skyCameraMatrix.setPos(CVector::Null);
+							camSky.setMatrix(skyCameraMatrix);
+						}
+						if (SceneRoot)
+						{
+							UCamera camRoot = SceneRoot->getCam();
+							if (!camRoot.empty())
+							{
+								SceneRoot->setViewport(reflViewport);
+								// scale the sub-frustum window to the canopy camera's near plane
+								CFrustum rootFrust = camRoot.getFrustum();
+								// the canopy frustum is NOT re-set per pass on
+								// non-HMD displays (getCurrentFrustum is a
+								// no-op there), so it must be restored
+								// explicitly after this reflection pass
+								saveCanopyFrustum = rootFrust;
+								canopyFrustumChanged = true;
+								float subScale = rootFrust.Near / reflInfo.FrustumNear;
+								rootFrust.Left = reflInfo.FrustumLeft * subScale;
+								rootFrust.Right = reflInfo.FrustumRight * subScale;
+								rootFrust.Bottom = reflInfo.FrustumBottom * subScale;
+								rootFrust.Top = reflInfo.FrustumTop * subScale;
+								camRoot.setFrustum(rootFrust);
+								camRoot.setPos(reflCamMatrix.getPos());
+								CQuat reflRotQuat;
+								reflCamMatrix.getRot(reflRotQuat);
+								camRoot.setRotQuat(reflRotQuat);
+							}
+						}
+					}
+					else if (StereoDisplay->isSceneFirst())
 					{
 						// nb : force full detail if a screenshot is asked
 						// todo : move outside render code
@@ -1756,12 +1858,28 @@ bool mainLoop()
 						}
 					}
 
-					// Render scene
-					bool wantTraversals = !StereoDisplay || StereoDisplay->isSceneFirst();
-					bool keepTraversals = StereoDisplay && !StereoDisplay->isSceneLast();
+					// Render scene, with this eye's water reflections.
+					// Reflection passes are never the frame's last render:
+					// traversals (and the frame's ellapsed time) are kept.
+					// They also never generate shadow maps: generation runs
+					// mid-render with its own render targets and camera
+					// state (a hazard nested inside the reflection target),
+					// and the maps belong to the eye scene passes.
+					bool wantTraversals = !reflectionPass && StereoDisplay->isSceneFirst();
+					bool keepTraversals = reflectionPass || !StereoDisplay->isSceneLast();
 					doRenderScene(wantTraversals, keepTraversals);
 
-					if (!StereoDisplay || StereoDisplay->isSceneLast())
+					if (reflectionPass)
+					{
+						Scene->endWaterReflectionPass(reflPass);
+						if (canopyFrustumChanged)
+						{
+							UCamera camRoot = SceneRoot->getCam();
+							if (!camRoot.empty())
+								camRoot.setFrustum(saveCanopyFrustum);
+						}
+					}
+					else if (StereoDisplay->isSceneLast())
 					{
 						if (fullDetail)
 						{
@@ -1772,21 +1890,21 @@ bool mainLoop()
 				}
 			}
 
-			if (!StereoDisplay || StereoDisplay->wantSceneEffects())
+			if (StereoDisplay->wantSceneEffects())
 			{
 				if (!ClientCfg.Light && Render && haveEffects)
 				{
-					if (StereoDisplay) Driver->setViewport(NL3D::CViewport());
+					Driver->setViewport(NL3D::CViewport());
 					UCamera	pCam = Scene->getCam();
 					Driver->setMatrixMode2D11();
 					if (FXAA) FXAA->applyEffect();
 					if (ClientCfg.Bloom) CBloomEffect::instance().applyBloom();
 					Driver->setMatrixMode3D(pCam);
-					if (StereoDisplay) Driver->setViewport(StereoDisplay->getCurrentViewport());
+					Driver->setViewport(StereoDisplay->getCurrentViewport());
 				}
 			}
 
-			if (!StereoDisplay || StereoDisplay->wantInterface3D())
+			if (StereoDisplay->wantInterface3D())
 			{
 				if (!ClientCfg.Light)
 				{
@@ -1873,9 +1991,9 @@ bool mainLoop()
 					CGraph::render (ShowInfos);
 				}
 
-			} /* if (!StereoDisplay || StereoDisplay->wantInterface3D()) */
+			} /* if (StereoDisplay->wantInterface3D()) */
 
-			if (!StereoDisplay || StereoDisplay->wantInterface2D())
+			if (StereoDisplay->wantInterface2D())
 			{
 				// Render in 2D Mode to display 2D Interfaces and 2D texts.
 				Driver->setMatrixMode2D11();
@@ -1920,9 +2038,9 @@ bool mainLoop()
 					/*if (!ClientCfg.Light && ClientCfg.Bloom && Render && bloomStage == 2) // NO VR BLOOMZ
 					{
 						// End bloom effect system after drawing the 3d interface (z buffer related).
-						if (StereoDisplay) Driver->setViewport(NL3D::CViewport());
+						Driver->setViewport(NL3D::CViewport());
 						CBloomEffect::instance().endInterfacesDisplayBloom();
-						if (StereoDisplay) Driver->setViewport(StereoDisplay->getCurrentViewport());
+						Driver->setViewport(StereoDisplay->getCurrentViewport());
 						bloomStage = 0;
 					}*/
 				}
@@ -2231,13 +2349,13 @@ bool mainLoop()
 							SoundMngr->drawSounds(camHeigh);
 					}
 				}
-			} /* if (!StereoDisplay || StereoDisplay->wantInterface2D()) */
+			} /* if (StereoDisplay->wantInterface2D()) */
 
-			if (StereoDisplay)
-			{
-				StereoDisplay->endRenderTarget();
-			}
+			StereoDisplay->endRenderTarget();
 		} /* stereo pass */
+
+		if (!ClientCfg.Light && Render)
+			Scene->endWaterReflectionPasses();
 
 		if (defaultRenderTarget)
 		{

@@ -404,6 +404,9 @@ CClientConfig::CClientConfig()
 	Bloom				= true;
 	SquareBloom			= true;
 	DensityBloom		= 255.f;
+	MaxWaterReflections	= 3;
+	MaxWaterReflectionTextures = 1;
+	ForceWaterReflections = false;
 
 	GlobalWindPower		= 0.10f;					// Default is 0.25
 	GlobalWindDirection	= CVector(1,0,0);			// Default direction is X>0
@@ -605,6 +608,7 @@ CClientConfig::CClientConfig()
 	TrykerScale			= 0.88f;
 	ZoraiScale			= 1.25f;
 	EnableRacialAnimation = true;
+	GPUSkinning = true;
 
 	// OPTIONS
 	RunAtTheBeginning	= true;
@@ -673,6 +677,7 @@ CClientConfig::CClientConfig()
 	ExtendedCommands = false;
 
 	WaterEnvMapUpdateTime = 1.f;
+	ForceWaterEnvMap = false;
 
 	NumFrameForProfile = 0;
 	SimulateServerTick = false;
@@ -893,6 +898,7 @@ void CClientConfig::setValues()
 		else if (nlstricmp(varPtr->asString(), "OpenGL") == 0 || nlstricmp(varPtr->asString(), "1") == 0) ClientCfg.Driver3D = CClientConfig::OpenGL;
 		else if (nlstricmp(varPtr->asString(), "Direct3D") == 0 || nlstricmp(varPtr->asString(), "2") == 0) ClientCfg.Driver3D = CClientConfig::Direct3D;
 		else if (nlstricmp(varPtr->asString(), "OpenGLES") == 0 || nlstricmp(varPtr->asString(), "3") == 0) ClientCfg.Driver3D = CClientConfig::OpenGLES;
+		else if (nlstricmp(varPtr->asString(), "OpenGL3") == 0 || nlstricmp(varPtr->asString(), "4") == 0) ClientCfg.Driver3D = CClientConfig::OpenGL3;
 	}
 	else
 		cfgWarning ("Default value used for 'Driver3D' !!!");
@@ -1091,6 +1097,10 @@ void CClientConfig::setValues()
 	READ_BOOL_FV(Bloom)
 	READ_BOOL_FV(SquareBloom)
 	READ_FLOAT_FV(DensityBloom)
+	// Water reflections
+	READ_INT_FV(MaxWaterReflections)
+	READ_INT_FV(MaxWaterReflectionTextures)
+	READ_BOOL_DEV(ForceWaterReflections)
 
 	// FXAA
 	READ_BOOL_FV(FXAA)
@@ -1297,6 +1307,9 @@ void CClientConfig::setValues()
 
 	// EnableRacialAnimation
 	READ_BOOL_FV(EnableRacialAnimation);
+
+	// GPUSkinning
+	READ_BOOL_FV(GPUSkinning);
 
 #if !FINAL_VERSION
 	READ_FLOAT_DEV(FyrosScale);
@@ -1739,6 +1752,7 @@ void CClientConfig::setValues()
 	READ_BOOL_DEV(Check)
 	READ_BOOL_DEV(UsePACSForAll)
 	READ_FLOAT_DEV(WaterEnvMapUpdateTime)
+	READ_BOOL_DEV(ForceWaterEnvMap)
 	READ_BOOL_DEV(BlendForward)
 
 	ClientCfg.ZCPacsPrim = "gen_bt_col_ext.pacs_prim";
@@ -1847,9 +1861,10 @@ void CClientConfig::setValues()
 	{
 		Scene->setGlobalWindPower(ClientCfg.GlobalWindPower);
 		Scene->setGlobalWindDirection(ClientCfg.GlobalWindDirection);
+		Scene->setForceWaterEnvMap(ClientCfg.ForceWaterEnvMap);
 	}
 
-	if (Driver)
+	if (Driver && Driver->supportMonitorColorProperties())
 	{
 		// Set the monitor color properties
 		CMonitorColorProperties monitorColor;
@@ -1873,9 +1888,11 @@ void CClientConfig::setValues()
 		// Run speed and camera dist max are set according to R2 char mode
 		UserEntity->flushR2CharMode();
 	}
-
-	// Initialize the camera distance (after camera dist max)
-	View.setCameraDistanceMaxForPlayer();
+	else
+	{
+		// No user entity yet (initial load) — default to player distance
+		View.setCameraDistanceMaxForPlayer();
+	}
 
 	// draw in client light?
 	if(ClientCfg.Light)

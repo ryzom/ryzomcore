@@ -107,7 +107,7 @@ private:
 		// clone an object, and disable its refids objects (these object would send
 		// creation notifications otherwise)
 	public:
-		static CObject *cloneObject(const CObject *src);
+		static CObject::TSmartPtr cloneObject(const CObject *src);
 	};
 	/** An atomic list of requests.
 	  * Once redo / undo have been called, no other requests can be pushed into this action,

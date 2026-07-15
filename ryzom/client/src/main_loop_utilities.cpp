@@ -64,15 +64,14 @@ void updateFromClientCfg()
 	{
 		nldebug("Apply VR device change");
 		// detach display mode
-		if (StereoDisplay && StereoDisplayAttached)
+		if (StereoDisplayAttached)
 			StereoDisplay->detachFromDisplay();
 		StereoDisplayAttached = false;
 		// re-init
 		releaseStereoDisplayDevice();
 		initStereoDisplayDevice();
 		// try attach display mode
-		if (StereoDisplay)
-			StereoDisplayAttached = StereoDisplay->attachToDisplay();
+		StereoDisplayAttached = StereoDisplay->attachToDisplay();
 		// set latest config display mode if not attached
 		if (!StereoDisplayAttached)
 			setVideoMode(UDriver::CMode(ClientCfg.Width, ClientCfg.Height, (uint8)ClientCfg.Depth,
@@ -198,6 +197,14 @@ void updateFromClientCfg()
 
 	// GRAPHICS - SPECIAL EFFECTS
 	//---------------------------------------------------
+	// Water reflections
+	if (ClientCfg.MaxWaterReflections != LastClientCfg.MaxWaterReflections)
+		Scene->setMaxRealtimeWaterReflections(ClientCfg.MaxWaterReflections);
+	if (ClientCfg.MaxWaterReflectionTextures != LastClientCfg.MaxWaterReflectionTextures)
+		Scene->setWaterReflectionMaxTextures(ClientCfg.MaxWaterReflectionTextures);
+	if (ClientCfg.ForceWaterReflections != LastClientCfg.ForceWaterReflections)
+		Scene->setForceRealtimeWaterReflections(ClientCfg.ForceWaterReflections);
+
 	if (ClientCfg.FxNbMaxPoly != LastClientCfg.FxNbMaxPoly)
 	{
 		if (Scene->getGroupLoadMaxPolygon("Fx") != ClientCfg.FxNbMaxPoly)
@@ -297,6 +304,13 @@ void updateFromClientCfg()
 	if (ClientCfg.HDEntityTexture != LastClientCfg.HDEntityTexture)
 	{
 		// Don't reload Texture, will be done at next Game Start
+	}
+
+	//---------------------------------------------------
+	if (ClientCfg.GPUSkinning != LastClientCfg.GPUSkinning)
+	{
+		if (Scene)
+			Scene->enableGPUSkinning(ClientCfg.GPUSkinning);
 	}
 
 	// INTERFACE works
