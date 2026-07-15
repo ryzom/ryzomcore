@@ -50,7 +50,7 @@
 		if ($log_action == '') 										return false;
 		if ($log_desc == '') 										return false;
 
-		$sql = "INSERT INTO ". NELDB_LOG_TABLE ." ('log_user_id','log_action','log_description','log_date','log_ip') VALUES ('". $userinfo['user_id'] ."','". addslashes($log_action) ."','". addslashes($log_desc) ."','". time() ."','". $NELTOOL['SERVER_VARS']['REMOTE_ADDR'] ."')";
+		$sql = "INSERT INTO ". NELDB_LOG_TABLE ." ('log_user_id','log_action','log_description','log_date','log_ip') VALUES ('". intval($userinfo['user_id']) ."','". $db->sql_escape_string($log_action) ."','". $db->sql_escape_string($log_desc) ."','". time() ."','". $db->sql_escape_string($NELTOOL['SERVER_VARS']['REMOTE_ADDR']) ."')";
 		$db->sql_query($sql);
 
 		return true;

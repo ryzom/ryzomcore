@@ -83,7 +83,7 @@ static void cbWSConnection (const std::string &serviceName, TServiceId sid, void
 	MYSQL_ROW row;
 	sint32 nbrow;
 
-	string query = "select * from shard where WSAddr='"+ia.ipAddress()+"'";
+	string query = "select * from shard where WSAddr='"+sqlEscape(ia.ipAddress())+"'";
 	reason = sqlQuery(query, nbrow, row, result);
 	if (!reason.empty())
 	{
@@ -266,7 +266,7 @@ static void cbWSIdentification (CMessage &msgin, const std::string &serviceName,
 		if(IService::getInstance ()->ConfigFile.getVar("AcceptExternalShards").asInt () == 1)
 		{
 			// we accept new shard, add it
-			query = "insert into shard (ShardId, WsAddr, Online, Name, ClientApplication) values ("+toString(shardId)+", '"+ia.ipAddress ()+"', 1, '"+ia.ipAddress ()+"', '"+application+"')";
+			query = "insert into shard (ShardId, WsAddr, Online, Name, ClientApplication) values ("+toString(shardId)+", '"+sqlEscape(ia.ipAddress())+"', 1, '"+sqlEscape(ia.ipAddress())+"', '"+sqlEscape(application)+"')";
 			reason = sqlQuery(query, nbrow, row, result);
 			if (!reason.empty())
 			{
@@ -531,7 +531,7 @@ static void	cbWSReportFSState(CMessage &msgin, const std::string &serviceName, T
 		}
 	}
 
-	string query = "UPDATE shard SET DynPatchURL='"+dynPatchURL+"' WHERE ShardId='"+toString(shard.ShardId)+"'";
+	string query = "UPDATE shard SET DynPatchURL='"+sqlEscape(dynPatchURL)+"' WHERE ShardId='"+toString(shard.ShardId)+"'";
 	sint ret = mysql_query (DatabaseConnection, query.c_str ());
 	if (ret != 0)
 	{
