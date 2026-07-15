@@ -731,40 +731,37 @@ void loopIngame()
 		if (Driver->isLost()) nlSleep(10);
 		else
 		{
-			uint i = 0;
 			bool effectRender = false;
 			CTextureUser *effectRenderTarget = NULL;
 			bool haveEffects = Driver->getPolygonMode() == UDriver::Filled
 				&& (s_EnableBloom || s_FXAA);
 			bool defaultRenderTarget = false;
-			if (haveEffects)
+			while (StereoDisplay->nextPass())
 			{
-				if (!StereoDisplay)
+				const CViewport &vp = StereoDisplay->getCurrentViewport();
+				Driver->setViewport(vp);
+				Scene->setViewport(vp);
+				SkyScene->setViewport(vp);
+				StereoDisplay->getCurrentFrustum(0, &Camera);
+				StereoDisplay->getCurrentFrustum(0, &SkyCamera);
+				StereoDisplay->getCurrentMatrix(0, &Camera);
+
+				Scene->setFlareContext(StereoDisplay->getFlareContext());
+
+				bool stereoRenderTarget = StereoDisplay->beginRenderTarget();
+				if (!stereoRenderTarget && haveEffects && !defaultRenderTarget && StereoDisplay->wantClear())
 				{
 					Driver->beginDefaultRenderTarget();
 					defaultRenderTarget = true;
 				}
-			}
-			while ((!StereoDisplay && i == 0) || (StereoDisplay && StereoDisplay->nextPass()))
-			{
-				++i;
-				if (StereoDisplay)
+
+				if (StereoDisplay->wantSceneReflections())
 				{
-					const CViewport &vp = StereoDisplay->getCurrentViewport();
-					Driver->setViewport(vp);
-					Scene->setViewport(vp);
-					SkyScene->setViewport(vp);
-					StereoDisplay->getCurrentFrustum(0, &Camera);
-					StereoDisplay->getCurrentFrustum(0, &SkyCamera);
-					StereoDisplay->getCurrentMatrix(0, &Camera);
+					// Render water planar reflections to RTT
+					// TODO: water reflection system renders here
 				}
 
-				if (StereoDisplay)
-				{
-					StereoDisplay->beginRenderTarget();
-				}
-				
-				if (!StereoDisplay || StereoDisplay->wantClear())
+				if (StereoDisplay->wantClear())
 				{
 					effectRender = haveEffects;
 
@@ -772,8 +769,8 @@ void loopIngame()
 					Driver->clearBuffers(CRGBA(0, 0, 127)); // clear all buffers, if you see this blue there's a problem with scene rendering
 				}
 
-				if (!StereoDisplay || StereoDisplay->wantScene())
-				{				
+				if (StereoDisplay->wantScene())
+				{
 					// 02. Render Sky (sky scene)
 					updateSky(); // Render the sky scene before the main scene
 
@@ -784,25 +781,25 @@ void loopIngame()
 					if (!StereoHMD) updateLensFlare(); // Render the lens flare (left eye stretched with stereo...)
 				}
 
-				if (!StereoDisplay || StereoDisplay->wantInterface3D())
+				if (StereoDisplay->wantInterface3D())
 				{
 					if (effectRender)
 					{
-						if (StereoDisplay) Driver->setViewport(NL3D::CViewport());
+						Driver->setViewport(NL3D::CViewport());
 						UCamera	pCam = Scene->getCam();
 						Driver->setMatrixMode2D11();
 						if (s_FXAA) s_FXAA->applyEffect();
 						if (s_EnableBloom) CBloomEffect::instance().applyBloom();
 						Driver->setMatrixMode3D(pCam);
-						if (StereoDisplay) Driver->setViewport(StereoDisplay->getCurrentViewport());
+						Driver->setViewport(StereoDisplay->getCurrentViewport());
 						effectRender = false;
 					}
 
 					// 06. Render Interface 3D (player names)
-					// ... 
+					// ...
 				}
 
-				if (!StereoDisplay || StereoDisplay->wantInterface2D())
+				if (StereoDisplay->wantInterface2D())
 				{
 					// 07. Render Interface 2D (chatboxes etc, optionally does have 3d)
 					updateCompass(); // Update the compass
@@ -812,16 +809,13 @@ void loopIngame()
 					renderEntitiesNames(); // Render the name on top of the other players
 					updateInterface(); // Update interface
 					renderInformation();
-					if (!StereoDisplay) update3dLogo(); // broken with stereo
+					if (!StereoHMD) update3dLogo(); // broken with stereo
 
 					// 08. Render Debug (stuff for dev)
 					// ...
 				}
 
-				if (StereoDisplay)
-				{
-					StereoDisplay->endRenderTarget();
-				}
+				StereoDisplay->endRenderTarget();
 			}
 
 			// 09. Render Buffer
