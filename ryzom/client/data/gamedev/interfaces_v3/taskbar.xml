@@ -965,7 +965,7 @@
 
 
 <template name="win_button_grayed" id="" posparent="parent" posref="TL TL" x="0" y="0" sizeref="w" w="0" h="14"
-	pushflag="" win_name="" test_grayed="%false" color="" color_grayed="" win_unlocked="UI:TEMP:TRUE" >
+	pushflag="" win_name="" test_grayed="%false" color="" color_grayed="">
 
 	<group id="#id" sizeref="w" w="0" h="14" x="#x" y="#y" posref="#posref" posparent="#posparent">
 		<view type="bitmap" id="back" x="8" texture="w_slot_on.tga" scale="true" w="14" h="14" color="#color_grayed" posref="ML ML" global_color="false"/>
@@ -980,14 +980,11 @@
 
 
 		<link expr="@#pushflag" target="but:pushed" />
-		<link expr="ifthenelse(not(#test_grayed), ifthenelse(eq(@#win_unlocked, 1), 1, 0))" target="but:active" />
+		<link expr="ifthenelse(not(#test_grayed), 1, 0)" target="but:active" />
 		<link expr="intToColor(@#color_grayed)" target="back:color_rgba" />
 		<link expr="intToColor(@#color)" target="but:col_normal_rgba,but:col_over_rgba,but:col_pushed_rgba" />
-
-		<link expr="ifthenelse(eq(@#win_unlocked, 1), ifthenelse(eq(@#pushflag,1),makeRGB(255,255,255),intToColor(@#color)), intToColor(@#color))"
-					target="text:color_rgba,key:color_rgba" />
-
-		<link expr="ifthenelse(eq(@#win_unlocked, 1), 'w_slot_on.tga', 'r2ed_toolbar_lock_small.tga')" target="back:texture" />
+		<link expr="ifthenelse(eq(@#pushflag,1),makeRGB(255,255,255),intToColor(@#color))" target="text:color_rgba,key:color_rgba" />
+		<link expr="ifthenelse('w_slot_on.tga'" target="back:texture" />
 
 	</group>
 </template>
@@ -1022,16 +1019,16 @@
 			pushflag="UI:VARIABLES:ISACTIVE:MISSIONS"	win_name="info_player_journal" />
 
 		<instance template="win_button_grayed" id="target"		color="UI:SAVE:WIN:COLORS:PLA" text="uimwTarget" posparent="journal" posref="BL TL" x="0" y="-4"
-			pushflag="UI:VARIABLES:ISACTIVE:TARGET" 	win_name="target" win_unlocked="UI:SAVE:TUTORIAL_ACTIVE_TARGET"  />
+			pushflag="UI:VARIABLES:ISACTIVE:TARGET" 	win_name="target" />
 
 		<instance template="win_button_grayed" id="jauge"		color="UI:SAVE:WIN:COLORS:PLA" text="uimwBars" posparent="target" posref="BL TL" x="0" y="-4"
-			pushflag="UI:VARIABLES:ISACTIVE:PLAYER"		win_name="player"  win_unlocked="UI:SAVE:TUTORIAL_ACTIVE_PLAYER"  />
+			pushflag="UI:VARIABLES:ISACTIVE:PLAYER"		win_name="player" />
 
 		<instance template="win_button" id="bonus_malus"		color="UI:SAVE:WIN:COLORS:PLA" text="uimwBonusMalus" posparent="jauge" posref="BL TL" x="0" y="-4"
 			pushflag="UI:VARIABLES:ISACTIVE:BONUS_MALUS"	win_name="bonus_malus" />
 
 		<instance template="win_button_grayed" id="ency"		color="UI:SAVE:WIN:COLORS:PLA" text="uiWisdomChest" posparent="bonus_malus" posref="BL TL" x="0" y="-4"
-			pushflag="UI:VARIABLES:ISACTIVE:ENCYCLOPEDIA"	win_name="encyclopedia" win_unlocked="UI:SAVE:TUTORIAL_ACTIVE_ENCYCLOPEDIA"  />
+			pushflag="UI:VARIABLES:ISACTIVE:ENCYCLOPEDIA"	win_name="encyclopedia"  />
 
 	</group>
 	<view type="bitmap" id="pla_ico_back" posparent="status" posref="TL TL" x="-22" y="22" texture="W_slot_categorie.tga" global_color="false" />
