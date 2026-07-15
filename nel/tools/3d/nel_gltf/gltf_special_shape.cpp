@@ -48,14 +48,6 @@
 
 #include "gltf_material.h"
 
-#ifdef NL_OS_WINDOWS
-#include <process.h>
-#define NLGLTF_SS_GETPID _getpid
-#else
-#include <unistd.h>
-#define NLGLTF_SS_GETPID getpid
-#endif
-
 using namespace NLMISC;
 using namespace NL3D;
 
@@ -569,62 +561,6 @@ IShape *specialShapeFromExtras(const CJsonValue &extras, const std::string &shap
 		return flareFromExtras(extras, err);
 	if (err) *err = "unknown structural shape class " + shapeClass;
 	return NULL;
-}
-
-bool specialShapeToFileBytes(IShape *shape, std::vector<uint8> &out, std::string *err)
-{
-	// Same route as the direct exporter (pipeline_max_export_shape/main.cpp): export-era
-	// stream flags, temp COFile, then the CWaterShape v7->v4 patch + 14-byte truncation.
-	bool oldVB = CVertexBuffer::SerialOldPreferredMemory;
-	bool oldIB = CIndexBuffer::SerialOldPreferredMemory;
-	CVertexBuffer::SerialOldPreferredMemory = true;
-	CIndexBuffer::SerialOldPreferredMemory = true;
-	char tmpPath[256];
-	snprintf(tmpPath, sizeof(tmpPath), "/tmp/nel_gltf_special_shape.%d.tmp", (int)NLGLTF_SS_GETPID());
-	bool ok = false;
-	try
-	{
-		{
-			COFile ofile;
-			if (!ofile.open(tmpPath))
-			{
-				if (err) *err = "cannot open temp file";
-				throw NLMISC::Exception("temp open");
-			}
-			CShapeStream shapeStream(shape);
-			shapeStream.serial(ofile);
-			ofile.close();
-		}
-		{
-			CIFile ifile;
-			if (!ifile.open(tmpPath))
-			{
-				if (err) *err = "cannot reopen temp file";
-				throw NLMISC::Exception("temp reopen");
-			}
-			out.resize(ifile.getFileSize());
-			if (!out.empty())
-				ifile.serialBuffer(&out[0], (uint)out.size());
-			ifile.close();
-		}
-		CFile::deleteFile(tmpPath);
-		std::string className = shape->getClassName();
-		uint32 len = (uint32)out.size();
-		uint32 waterVerOff = 4 + 8 + 4 + (uint32)className.size();
-		if (className == "CWaterShape" && waterVerOff < len && out[waterVerOff] == 7 && len > 14)
-		{
-			out[waterVerOff] = 4;
-			out.resize(len - 14);
-		}
-		ok = true;
-	}
-	catch (const NLMISC::Exception &e)
-	{
-		if (err && err->empty()) *err = e.what();
-	}
-	CVertexBuffer::SerialOldPreferredMemory = oldVB;
-	CIndexBuffer::SerialOldPreferredMemory = oldIB;
-	return ok;
 }
 
 } /* namespace NLGLTF */

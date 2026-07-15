@@ -35,6 +35,8 @@
 #include <nel/3d/texture_multi_file.h>
 #include <nel/3d/texture_cube.h>
 
+#include "hex_blob.h"
+
 using namespace NLMISC;
 using namespace NL3D;
 
@@ -69,40 +71,6 @@ static bool hexToRgba(const std::string &s, CRGBA &out)
 		v[i] = x;
 	}
 	out.set((uint8)v[0], (uint8)v[1], (uint8)v[2], (uint8)v[3]);
-	return true;
-}
-
-static std::string bytesToHex(const uint8 *d, uint len)
-{
-	std::string out;
-	out.reserve(len * 2);
-	char buf[4];
-	for (uint i = 0; i < len; ++i)
-	{
-		snprintf(buf, sizeof(buf), "%02x", d[i]);
-		out += buf;
-	}
-	return out;
-}
-
-static bool hexToBytes(const std::string &s, std::vector<uint8> &out)
-{
-	if (s.size() % 2) return false;
-	out.resize(s.size() / 2);
-	for (size_t i = 0; i < out.size(); ++i)
-	{
-		unsigned x = 0;
-		for (int k = 0; k < 2; ++k)
-		{
-			char h = s[i * 2 + k];
-			x <<= 4;
-			if (h >= '0' && h <= '9') x |= (unsigned)(h - '0');
-			else if (h >= 'a' && h <= 'f') x |= (unsigned)(h - 'a' + 10);
-			else if (h >= 'A' && h <= 'F') x |= (unsigned)(h - 'A' + 10);
-			else return false;
-		}
-		out[i] = (uint8)x;
-	}
 	return true;
 }
 

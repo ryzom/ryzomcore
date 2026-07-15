@@ -58,12 +58,6 @@ bool specialShapeToExtras(NL3D::IShape *shape, CJsonValue &extras, std::string *
 NL3D::IShape *specialShapeFromExtras(const CJsonValue &extras, const std::string &shapeClass,
                                      std::string *err);
 
-/// Serialize a shape to the exact bytes the direct exporter writes for it: export-era stream
-/// flags, temp-file COFile route, CWaterShape v7->v4 patch + truncation (see
-/// pipeline_max_export_shape/main.cpp for the rationale). Used by the writer's self-check and
-/// by the reader's structural rebuild path.
-bool specialShapeToFileBytes(NL3D::IShape *shape, std::vector<uint8> &out, std::string *err);
-
 } /* namespace NLGLTF */
 
 #endif /* NL_GLTF_SPECIAL_SHAPE_H */

@@ -92,6 +92,7 @@
 #include "../pipeline_max_export_common/physique_skin.h"
 #include "interface_build.h"
 #include "lm_scene_build.h"
+#include "../nel_gltf/shape_export_bytes.h"
 
 #include "../pipeline_max/builtin/scene_impl.h"
 #include "../pipeline_max/builtin/i_node.h"
@@ -1019,97 +1020,21 @@ static int exportFile(const std::string &maxPath, const std::string &outDir, con
 		// LOD_DIST_MAX on zo_flare (300 vs ref 1000) even though every other field matched
 		// byte-for-byte. Now applied inside the mesh/multi-lod branch of buildShapeForNode.
 
-		try
+		// The one shared .shape serializer (nel_gltf/shape_export_bytes.cpp): temp-COFile route
+		// for CMeshMRMGeom's seek-back-then-forward save, CMeshBase v10->v9 and CWaterShape
+		// v7->v4 version patches — see there for the full rationale on each.
 		{
-			// Serialize via a PID+node temp file, then patch the serialMeshBase version byte 10 -> 9:
-			// current NL3D writes CMeshBase version 10 ("Ryzom Core release check", 2024) which adds
-			// no fields over the export-era version 9 — same pure-version-byte class as the zone
-			// v4/v5 byte (see pipeline_max_design.md §10h). Stream layout for the CMeshBase shapes:
-			// "SHAP" + u64 0x1 + u32 nameLen + name + classVersion byte + meshBase version byte.
-			//
-			// COFile-not-CMemStream: CMeshMRMGeom::save uses a seek-back-then-forward pattern to
-			// patch its per-lod offsets after writing each lod (mesh_mrm.cpp:1942-1972). CMemStream
-			// rejects the forward seek because its `length()` (checked in `seek(begin)`) returns the
-			// current write position, not the max ever written — so the writer silently overwrites
-			// its own lod-offset placeholders and the resulting file cannot be loaded (see
-			// pipeline_max_design.md §9 T2 note for the same limitation on the corpus tester). Route
-			// the initial serialize through a real file to sidestep the CMemStream constraint,
-			// exactly the way pipeline_max_corpus_test T2 does.
-			char tmpPath[256];
-			sprintf(tmpPath, "/tmp/pipeline_max_export_shape.%d.tmp", (int)PMB_GETPID());
+			std::string serr;
+			if (NLGLTF::writeShapeExportFile(shape, outPath, &serr))
 			{
-				NLMISC::COFile ofile;
-				if (!ofile.open(tmpPath))
-				{
-					fprintf(stderr, "ERROR: cannot open %s for writing\n", tmpPath);
-					delete shape;
-					continue;
-				}
-				NL3D::CShapeStream shapeStream(shape);
-				shapeStream.serial(ofile);
-				ofile.close();
-			}
-			std::vector<uint8> memBuf;
-			{
-				NLMISC::CIFile ifile;
-				if (!ifile.open(tmpPath))
-				{
-					fprintf(stderr, "ERROR: cannot open %s for reading\n", tmpPath);
-					delete shape;
-					continue;
-				}
-				memBuf.resize(ifile.getFileSize());
-				if (!memBuf.empty())
-					ifile.serialBuffer(&memBuf[0], (uint)memBuf.size());
-				ifile.close();
-			}
-			uint8 *buf = memBuf.empty() ? NULL : &memBuf[0];
-			uint32 len = (uint32)memBuf.size();
-			{
-				std::string className = shape->getClassName();
-				// CMeshBase-derived shapes: CMesh/CMeshMRM/CMeshMRMSkinned write their OWN
-				// version byte first, THEN CMeshBase's version byte — the "+1" skips over the
-				// outer class version to reach CMeshBase's (see the two-level serial in
-				// CMesh::serial calling CMeshBase::serial). For a plain-IShape-derived shape
-				// like CWaterShape there's no inner class, so the version byte sits right at
-				// the end of the class name (no +1 offset).
-				uint32 meshBaseVerOff = 4 + 8 + 4 + (uint32)className.size() + 1;
-				if ((className == "CMesh" || className == "CMeshMRM" || className == "CMeshMRMSkinned")
-					&& meshBaseVerOff < len && buf[meshBaseVerOff] == 10)
-					buf[meshBaseVerOff] = 9;
-				// CWaterShape: reference-era exports are stream version 4 (2004 plugin build).
-				// Our v7 adds RealtimeReflection (1 byte) + fresnel bias/scale/power (12 bytes)
-				// + EnvMapCalcReflectivity (1 byte) at the END of the serial, in that order. To
-				// emit a v4 stream from a v7 in-memory shape: patch the version byte + truncate
-				// the trailing 14 bytes. Safe because those 4 fields sit right at the end and
-				// aren't referenced by any later field (the CMeshBase v10→v9 pattern is a pure
-				// version bump with no data change — this one has data to peel off too, but the
-				// same structural principle applies).
-				uint32 waterVerOff = 4 + 8 + 4 + (uint32)className.size();
-				if (className == "CWaterShape" && waterVerOff < len && buf[waterVerOff] == 7
-					&& len > 14)
-				{
-					buf[waterVerOff] = 4;
-					len -= 14;
-				}
-			}
-			NLMISC::COFile file;
-			if (file.open(outPath))
-			{
-				file.serialBuffer(buf, len);
-				file.close();
 				++stats.Exported;
 				if (g_verbose)
 					printf("OK %s\n", outPath.c_str());
 			}
 			else
 			{
-				fprintf(stderr, "ERROR: cannot open %s for writing\n", outPath.c_str());
+				fprintf(stderr, "ERROR: shape serialization failed for %s: %s\n", outPath.c_str(), serr.c_str());
 			}
-		}
-		catch (const NLMISC::Exception &e)
-		{
-			fprintf(stderr, "ERROR: shape serialization failed for %s: %s\n", outPath.c_str(), e.what());
 		}
 		delete shape;
 	}

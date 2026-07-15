@@ -53,17 +53,11 @@
 #include <nel/3d/vertex_buffer.h>
 #include <nel/3d/index_buffer.h>
 
-#ifdef NL_OS_WINDOWS
-#include <process.h>
-#define NLGLTF_GETPID _getpid
-#else
-#include <unistd.h>
-#define NLGLTF_GETPID getpid
-#endif
-
 #include "../nel_gltf/json_value.h"
 #include "../nel_gltf/gltf_material.h"
 #include "../nel_gltf/gltf_special_shape.h"
+#include "../nel_gltf/shape_export_bytes.h"
+#include "../nel_gltf/hex_blob.h"
 
 #include "mesh_utils.h"
 
@@ -656,83 +650,6 @@ IMeshGeom *buildGeomForSlot(const SGltfDoc &doc, const CJsonValue &slotExtras,
 	return g;
 }
 
-bool hexToBytes(const std::string &hex, std::vector<uint8> &bytes)
-{
-	if (hex.empty() || (hex.size() % 2))
-		return false;
-	bytes.resize(hex.size() / 2);
-	for (size_t k = 0; k < bytes.size(); ++k)
-	{
-		unsigned x = 0;
-		for (int h = 0; h < 2; ++h)
-		{
-			char c = hex[k * 2 + h];
-			x <<= 4;
-			if (c >= '0' && c <= '9') x |= (unsigned)(c - '0');
-			else if (c >= 'a' && c <= 'f') x |= (unsigned)(c - 'a' + 10);
-			else return false;
-		}
-		bytes[k] = (uint8)x;
-	}
-	return true;
-}
-
-// Serialize a shape with the export-era stream conventions: temp COFile (CMeshMRMGeom's save
-// seeks), then the CMeshBase version byte 10 -> 9 patch — same block as the direct exporter.
-bool writeShapeFile(IShape *shape, const std::string &outPath, std::string *err)
-{
-	char tmpPath[256];
-	snprintf(tmpPath, sizeof(tmpPath), "/tmp/mesh_export_gltf.%d.tmp", (int)NLGLTF_GETPID());
-	try
-	{
-		{
-			COFile ofile;
-			if (!ofile.open(tmpPath))
-			{
-				if (err) *err = "cannot open temp file";
-				return false;
-			}
-			CShapeStream shapeStream(shape);
-			shapeStream.serial(ofile);
-			ofile.close();
-		}
-		std::vector<uint8> buf;
-		{
-			CIFile ifile;
-			if (!ifile.open(tmpPath))
-			{
-				if (err) *err = "cannot reopen temp file";
-				return false;
-			}
-			buf.resize(ifile.getFileSize());
-			if (!buf.empty())
-				ifile.serialBuffer(&buf[0], (uint)buf.size());
-			ifile.close();
-		}
-		CFile::deleteFile(tmpPath);
-		std::string className = shape->getClassName();
-		uint32 len = (uint32)buf.size();
-		uint32 meshBaseVerOff = 4 + 8 + 4 + (uint32)className.size() + 1;
-		if ((className == "CMesh" || className == "CMeshMRM" || className == "CMeshMRMSkinned")
-			&& meshBaseVerOff < len && buf[meshBaseVerOff] == 10)
-			buf[meshBaseVerOff] = 9;
-		COFile file;
-		if (!file.open(outPath))
-		{
-			if (err) *err = "cannot open " + outPath;
-			return false;
-		}
-		file.serialBuffer(buf.empty() ? NULL : &buf[0], len);
-		file.close();
-		return true;
-	}
-	catch (const NLMISC::Exception &e)
-	{
-		if (err) *err = e.what();
-		return false;
-	}
-}
-
 } // anonymous namespace
 
 bool isNelGltfFile(const std::string &filePath)
@@ -841,7 +758,7 @@ int exportNelGltfScene(const CMeshUtilsSettings &settings)
 		{
 			std::string name = anim->getString("name", "");
 			std::vector<uint8> bytes;
-			if (name.empty() || !hexToBytes(anim->getString("data", ""), bytes))
+			if (name.empty() || !hexToBytes(anim->getString("data", ""), bytes) || bytes.empty())
 			{
 				fprintf(stderr, "ERROR: bad nel_anim entry\n");
 				ret = EXIT_FAILURE;
@@ -1050,7 +967,7 @@ int exportNelGltfScene(const CMeshUtilsSettings &settings)
 			{
 				std::string cerr;
 				NL3D::IShape *shape = specialShapeFromExtras(*extras, shapeClass, &cerr);
-				if (!shape || !specialShapeToFileBytes(shape, blob, &cerr) || blob.empty())
+				if (!shape || !shapeToExportFileBytes(shape, blob, &cerr) || blob.empty())
 				{
 					fprintf(stderr, "ERROR: structural %s rebuild failed for '%s': %s\n",
 					        shapeClass.c_str(), name.c_str(), cerr.c_str());
@@ -1317,7 +1234,7 @@ int exportNelGltfScene(const CMeshUtilsSettings &settings)
 
 		std::string outPath = (extras->getBool("nel_coarse", false) ? coarseDir : outDir)
 			+ shapeName + ".shape";
-		if (!writeShapeFile(meshBase, outPath, &err))
+		if (!writeShapeExportFile(meshBase, outPath, &err))
 		{
 			fprintf(stderr, "ERROR: gltf-import '%s': %s\n", name.c_str(), err.c_str());
 			ret = EXIT_FAILURE;

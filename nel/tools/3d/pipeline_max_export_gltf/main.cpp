@@ -71,20 +71,14 @@
 #include <nel/3d/index_buffer.h>
 #include <nel/3d/bezier_patch.h>
 
-#ifdef NL_OS_WINDOWS
-#include <process.h>
-#define PMB_GLTF_GETPID _getpid
-#else
-#include <unistd.h>
-#define PMB_GLTF_GETPID getpid
-#endif
-
 #include "../pipeline_max/builtin/scene_impl.h"
 #include "../pipeline_max/builtin/i_node.h"
 #include "../pipeline_max/builtin/node_impl.h"
 
 #include "gltf_build.h"
 #include "../nel_gltf/gltf_special_shape.h"
+#include "../nel_gltf/shape_export_bytes.h"
+#include "../nel_gltf/hex_blob.h"
 
 using namespace PIPELINE::MAX;
 using namespace PIPELINE::MAX::BUILTIN;
@@ -176,81 +170,6 @@ int pmbExportSkelForGltf(const std::string &maxPath, std::vector<uint8> &out);
 // writes (1 = produced, 3 = no lightmap receivers, -1 = error).
 int pmbExportLmSceneForGltf(const std::string &maxPath, bool exportLighting,
                             std::string &nameOut, std::vector<uint8> &out);
-
-static std::string bytesToHex(const std::vector<uint8> &bytes)
-{
-	std::string hex;
-	hex.reserve(bytes.size() * 2);
-	char buf[4];
-	for (size_t k = 0; k < bytes.size(); ++k)
-	{
-		snprintf(buf, sizeof(buf), "%02x", bytes[k]);
-		hex += buf;
-	}
-	return hex;
-}
-
-// Serialize an IShape to the exact bytes the direct exporter's exportFile writes: export-era
-// stream versions, temp-COFile route, then the version patches (CMesh-family CMeshBase v10->v9;
-// CWaterShape v7->v4 + 14-byte truncation) — see pipeline_max_export_shape/main.cpp for the
-// full rationale on each.
-static bool shapeToFileBytes(NL3D::IShape *shape, std::vector<uint8> &out, std::string *err)
-{
-	bool oldVB = NL3D::CVertexBuffer::SerialOldPreferredMemory;
-	bool oldIB = NL3D::CIndexBuffer::SerialOldPreferredMemory;
-	NL3D::CVertexBuffer::SerialOldPreferredMemory = true;
-	NL3D::CIndexBuffer::SerialOldPreferredMemory = true;
-	char tmpPath[256];
-	snprintf(tmpPath, sizeof(tmpPath), "/tmp/pipeline_max_export_gltf.%d.tmp", (int)PMB_GLTF_GETPID());
-	bool ok = false;
-	try
-	{
-		{
-			NLMISC::COFile ofile;
-			if (!ofile.open(tmpPath))
-			{
-				if (err) *err = "cannot open temp file";
-				throw NLMISC::Exception("temp open");
-			}
-			NL3D::CShapeStream shapeStream(shape);
-			shapeStream.serial(ofile);
-			ofile.close();
-		}
-		{
-			NLMISC::CIFile ifile;
-			if (!ifile.open(tmpPath))
-			{
-				if (err) *err = "cannot reopen temp file";
-				throw NLMISC::Exception("temp reopen");
-			}
-			out.resize(ifile.getFileSize());
-			if (!out.empty())
-				ifile.serialBuffer(&out[0], (uint)out.size());
-			ifile.close();
-		}
-		NLMISC::CFile::deleteFile(tmpPath);
-		std::string className = shape->getClassName();
-		uint32 len = (uint32)out.size();
-		uint32 meshBaseVerOff = 4 + 8 + 4 + (uint32)className.size() + 1;
-		if ((className == "CMesh" || className == "CMeshMRM" || className == "CMeshMRMSkinned")
-			&& meshBaseVerOff < len && out[meshBaseVerOff] == 10)
-			out[meshBaseVerOff] = 9;
-		uint32 waterVerOff = 4 + 8 + 4 + (uint32)className.size();
-		if (className == "CWaterShape" && waterVerOff < len && out[waterVerOff] == 7 && len > 14)
-		{
-			out[waterVerOff] = 4;
-			out.resize(len - 14);
-		}
-		ok = true;
-	}
-	catch (const NLMISC::Exception &e)
-	{
-		if (err && err->empty()) *err = e.what();
-	}
-	NL3D::CVertexBuffer::SerialOldPreferredMemory = oldVB;
-	NL3D::CIndexBuffer::SerialOldPreferredMemory = oldIB;
-	return ok;
-}
 
 struct SExportStats
 {
@@ -708,7 +627,7 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 		{
 			std::vector<uint8> bytes;
 			std::string serr;
-			bool ok = shapeToFileBytes(specialShape, bytes, &serr);
+			bool ok = shapeToExportFileBytes(specialShape, bytes, &serr);
 			if (!ok || bytes.empty())
 			{
 				delete specialShape;
@@ -735,7 +654,7 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 					if (re)
 					{
 						std::vector<uint8> rebytes;
-						structuralOk = specialShapeToFileBytes(re, rebytes, &cerr) && rebytes == bytes;
+						structuralOk = shapeToExportFileBytes(re, rebytes, &cerr) && rebytes == bytes;
 						if (!structuralOk && cerr.empty())
 							cerr = "rebuilt shape bytes differ";
 						delete re;
