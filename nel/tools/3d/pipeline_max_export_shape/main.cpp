@@ -158,33 +158,8 @@ struct SExportStats
 
 } // anonymous namespace
 
-// Is this node's evaluated object in the geometry/shapes MaxScript categories?
-static bool isGeometryOrShape(CSceneClass *base)
-{
-	if (!base) return false;
-	TSClassId scid = base->classDesc()->superClassId();
-	return scid == SCLASS_GEOMOBJECT || scid == SCLASS_SHAPE;
-}
-
-// Root node name check ("Bip" prefixed root => skeleton part)
-static INode *rootOf(INode *node)
-{
-	INode *cur = node;
-	int guard = 64;
-	while (cur && guard-- > 0)
-	{
-		if (!dynamic_cast<CNodeImpl *>(cur)) break;
-		INode *p = cur->parent();
-		if (!p || !dynamic_cast<CNodeImpl *>(p)) break;
-		cur = p;
-	}
-	return cur;
-}
-
-static bool startsWithBip(const std::string &s)
-{
-	return s.size() >= 3 && s.compare(0, 3, "Bip") == 0;
-}
+// isGeometryOrShape / rootOf / startsWithBip (the selection-gate node classification) live in
+// scene_lib — shared with the glTF writer's replication of this gate.
 
 // ---------------------------------------------------------------------------------------------
 // PMB_SKIN_DUMP diagnostic — recursive dump of a Physique/Skin mod-app payload.
@@ -281,28 +256,6 @@ static bool tryApplyPhysique(INode &node, NL3D::CMesh::CMeshBuild &buildMesh,
 	return true;
 }
 
-// Interface-weld world matrix per the reference call sites (export_mesh.cpp:1111): Identity
-// for skinned meshes (their VBs are already world space), else worldObjectTM * FromExportSpace
-// (maps the build's local/offset-space verts back to world).
-static NLMISC::CMatrix interfaceToWorldMat(INode &node, SNodeTMCache &tmCache, bool skinned)
-{
-	if (skinned)
-		return NLMISC::CMatrix::Identity;
-	CNodeImpl *n = dynamic_cast<CNodeImpl *>(&node);
-	Matrix3M nodeTM = getNodeTM(&node, tmCache);
-	Point3M opos;
-	QuatM orot;
-	ScaleValueM oscale;
-	readObjectOffset(n, opos, orot, oscale);
-	Matrix3M objectTM = composePRS(opos, orot, oscale) * nodeTM;
-	Matrix3M objectToLocal = objectTM * inverseM3(nodeTM);
-	NLMISC::CMatrix toWorld, fromExportSpace;
-	MAXSCENE::convertMatrix(toWorld, objectTM);
-	MAXSCENE::convertMatrix(fromExportSpace, objectToLocal);
-	fromExportSpace.invert();
-	return toWorld * fromExportSpace;
-}
-
 // Apply the interface weld when the node carries the appdata (post skinning, like the
 // reference; morph targets would skip — none are built yet).
 static void tryApplyInterface(INode &node, NL3D::CMesh::CMeshBuild &buildMesh,
@@ -311,79 +264,11 @@ static void tryApplyInterface(INode &node, NL3D::CMesh::CMeshBuild &buildMesh,
 	if (!IFACEBUILD::useInterfaceMesh(node))
 		return;
 	IFACEBUILD::applyInterfaceToMeshBuild(node, buildMesh,
-	                                      interfaceToWorldMat(node, tmCache, skinned), tmCache);
+	                                      IFACEBUILD::interfaceToWorldMat(node, tmCache, skinned), tmCache);
 }
 
-// Morpher blend-shape targets — the reference's getBSMeshBuild (export_mesh.cpp:1192): for each
-// non-NULL Morpher ref 101+i, evaluate the TARGET node through the non-skinned mesh path with
-// finalSpace = the SOURCE node's NodeTM when the source is skinned (else Identity) — landing the
-// target's verts in the same space as the source's build — then copy the source's (welded)
-// corner normals onto every corner whose vertex is an interface vertex (the reference computes
-// them off a fresh base MeshBuild in the objectToLocal·finalSpace frame, which equals the
-// skinned world frame; our export buildMesh IS that frame with the weld applied, so it serves
-// as the base directly). Targets that fail to evaluate or whose vertex count diverges from the
-// base are skipped with a warning — NL3D's CMRMBuilder::buildBlendShapes dereferences and
-// asserts equal counts (the reference could rely on live Max never failing there).
-static void buildBSList(INode &node, SNodeTMCache &tmCache,
-                        const std::vector<CSceneClass *> &mods,
-                        const NL3D::CMesh::CMeshBuild &exportMesh, bool skinned,
-                        bool exportLighting,
-                        std::vector<NL3D::CMesh::CMeshBuild *> &bsList)
-{
-	static const NLMISC::CClassId CLASSID_MORPHER(0x17bb6854, 0xa5cba2a3);
-	CReferenceMaker *morph = NULL;
-	for (uint i = 0; i < mods.size() && !morph; ++i)
-		if (mods[i]->classDesc()->classId() == CLASSID_MORPHER)
-			morph = dynamic_cast<CReferenceMaker *>(mods[i]);
-	if (!morph)
-		return;
-
-	NLMISC::CMatrix finalSpace = NLMISC::CMatrix::Identity;
-	if (skinned)
-		MAXSCENE::convertMatrix(finalSpace, getNodeTM(&node, tmCache));
-
-	for (uint i = 0; i < 100; ++i)
-	{
-		if (101 + i >= morph->nbReferences())
-			break;
-		INode *target = dynamic_cast<INode *>(morph->getReference(101 + i));
-		if (!target)
-			continue;
-		SEvalMesh tmesh;
-		if (!MESHEVAL::evalNodeMesh(*target, tmesh, NULL))
-		{
-			fprintf(stderr, "WARNING: morph target '%s' of '%s' failed mesh eval; channel dropped\n",
-			        nodeName(*target).c_str(), nodeName(node).c_str());
-			continue;
-		}
-		SMaxMeshBaseBuild tMax;
-		NL3D::CMeshBase::CMeshBaseBuild tBase;
-		buildBaseMeshInterface(tBase, tMax, *target, tmCache, getLocalMatrix(*target, tmCache),
-		                       exportLighting);
-		NL3D::CMesh::CMeshBuild *mb = new NL3D::CMesh::CMeshBuild;
-		buildMeshInterface(tmesh, *mb, tBase, tMax, *target, tmCache, false, &finalSpace);
-		if (mb->Vertices.size() != exportMesh.Vertices.size())
-		{
-			fprintf(stderr, "WARNING: morph target '%s' of '%s' has %u verts vs base %u; channel dropped\n",
-			        nodeName(*target).c_str(), nodeName(node).c_str(),
-			        (uint)mb->Vertices.size(), (uint)exportMesh.Vertices.size());
-			delete mb;
-			continue;
-		}
-		// Interface-vert corner normals come from the (welded) base.
-		if (exportMesh.InterfaceVertexFlag.size() != 0)
-		{
-			for (uint k = 0; k < mb->Faces.size() && k < exportMesh.Faces.size(); ++k)
-				for (uint l = 0; l < 3; ++l)
-				{
-					uint vert = mb->Faces[k].Corner[l].Vertex;
-					if (vert < exportMesh.InterfaceVertexFlag.size() && exportMesh.InterfaceVertexFlag.get(vert))
-						mb->Faces[k].Corner[l].Normal = exportMesh.Faces[k].Corner[l].Normal;
-				}
-		}
-		bsList.push_back(mb);
-	}
-}
+// buildBSList (Morpher blend-shape target list) lives in mesh_build — shared with the glTF
+// writer's morph-target encoding.
 
 // Construct an IMeshGeom (CMeshGeom or CMeshMRMGeom) from a built CMeshBuild — used per LOD slot
 // in the multi-lod path. Caller owns the returned pointer until CMeshMultiLod::build takes it.

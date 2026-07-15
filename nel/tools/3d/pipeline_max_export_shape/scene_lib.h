@@ -137,6 +137,19 @@ int getScriptAppDataInt(CSceneClass *sc, uint32 subId, int def);
 float getScriptAppDataFloat(CSceneClass *sc, uint32 subId, float def);
 
 // ---------------------------------------------------------------------------------------------
+// Node classification helpers (shared by the shape exporter's selection gate and the glTF
+// writer's replication of it)
+
+// Is this node's evaluated object in the geometry/shapes MaxScript categories?
+bool isGeometryOrShape(CSceneClass *base);
+
+// Topmost scene-node ancestor (for the "Bip"-rooted skeleton-part check).
+INode *rootOf(INode *node);
+
+// "Bip" name prefix — the biped skeleton-part naming convention.
+bool startsWithBip(const std::string &s);
+
+// ---------------------------------------------------------------------------------------------
 // Old-style ParamBlock (superclass 0x8) params
 
 struct SPBlockParam

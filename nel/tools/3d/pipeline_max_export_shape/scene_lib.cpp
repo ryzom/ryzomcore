@@ -206,6 +206,35 @@ float getScriptAppDataFloat(CSceneClass *sc, uint32 subId, float def)
 }
 
 // ---------------------------------------------------------------------------------------------
+// Node classification helpers
+
+bool isGeometryOrShape(CSceneClass *base)
+{
+	if (!base) return false;
+	TSClassId scid = base->classDesc()->superClassId();
+	return scid == SCLASS_GEOMOBJECT || scid == SCLASS_SHAPE;
+}
+
+INode *rootOf(INode *node)
+{
+	INode *cur = node;
+	int guard = 64;
+	while (cur && guard-- > 0)
+	{
+		if (!dynamic_cast<CNodeImpl *>(cur)) break;
+		INode *p = cur->parent();
+		if (!p || !dynamic_cast<CNodeImpl *>(p)) break;
+		cur = p;
+	}
+	return cur;
+}
+
+bool startsWithBip(const std::string &s)
+{
+	return s.size() >= 3 && s.compare(0, 3, "Bip") == 0;
+}
+
+// ---------------------------------------------------------------------------------------------
 // Chunk access
 
 IStorageObject *findChunk(CSceneClass *sc, uint16 id)

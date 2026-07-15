@@ -212,50 +212,9 @@ static void embedBlobList(CGltfBuilder &b, const char *key,
 	}
 }
 
-static bool isGeometryOrShape(CSceneClass *base)
-{
-	if (!base) return false;
-	TSClassId scid = base->classDesc()->superClassId();
-	return scid == SCLASS_GEOMOBJECT || scid == SCLASS_SHAPE;
-}
-
-static INode *rootOf(INode *node)
-{
-	INode *cur = node;
-	int guard = 64;
-	while (cur && guard-- > 0)
-	{
-		if (!dynamic_cast<CNodeImpl *>(cur)) break;
-		INode *p = cur->parent();
-		if (!p || !dynamic_cast<CNodeImpl *>(p)) break;
-		cur = p;
-	}
-	return cur;
-}
-
-static bool startsWithBip(const std::string &s)
-{
-	return s.size() >= 3 && s.compare(0, 3, "Bip") == 0;
-}
-
-// Interface-weld world matrix — same derivation as pipeline_max_export_shape/main.cpp
-// (export_mesh.cpp:1111 semantics, non-skinned form).
-static NLMISC::CMatrix interfaceToWorldMat(INode &node, SNodeTMCache &tmCache)
-{
-	CNodeImpl *n = dynamic_cast<CNodeImpl *>(&node);
-	Matrix3M nodeTM = getNodeTM(&node, tmCache);
-	Point3M opos;
-	QuatM orot;
-	ScaleValueM oscale;
-	readObjectOffset(n, opos, orot, oscale);
-	Matrix3M objectTM = composePRS(opos, orot, oscale) * nodeTM;
-	Matrix3M objectToLocal = objectTM * inverseM3(nodeTM);
-	NLMISC::CMatrix toWorld, fromExportSpace;
-	MAXSCENE::convertMatrix(toWorld, objectTM);
-	MAXSCENE::convertMatrix(fromExportSpace, objectToLocal);
-	fromExportSpace.invert();
-	return toWorld * fromExportSpace;
-}
+// isGeometryOrShape / rootOf / startsWithBip (scene_lib) and interfaceToWorldMat
+// (interface_build) are shared with the direct shape exporter — the selection gate and the
+// weld-space derivation must never drift between the routes.
 
 // Per-node glTF TRS + composed world matrix (pass 1). Biped rig nodes decode through the skel
 // exporter's figure-mode reconstruction (biped TM controllers are not PRS — the plain
@@ -340,71 +299,8 @@ struct SMorphMeshNode
 	std::vector<float> Defaults; // 0..1 (NeL percents / 100)
 };
 
-// Morpher blend-shape targets — verbatim replica of pipeline_max_export_shape's buildBSList
-// (itself the reference's getBSMeshBuild): evaluate each Morpher ref 101+i target through the
-// non-skinned mesh path with finalSpace = the SOURCE node's NodeTM when the source is skinned,
-// then copy the source's (welded) corner normals onto interface-vertex corners. Consumed only
-// by the single-mesh MRM branch, exactly like the direct route.
-static void buildBSList(INode &node, SNodeTMCache &tmCache,
-                        const std::vector<CSceneClass *> &mods,
-                        const NL3D::CMesh::CMeshBuild &exportMesh, bool skinned,
-                        bool exportLighting,
-                        std::vector<NL3D::CMesh::CMeshBuild *> &bsList)
-{
-	static const NLMISC::CClassId CLASSID_MORPHER(0x17bb6854, 0xa5cba2a3);
-	CReferenceMaker *morph = NULL;
-	for (uint i = 0; i < mods.size() && !morph; ++i)
-		if (mods[i]->classDesc()->classId() == CLASSID_MORPHER)
-			morph = dynamic_cast<CReferenceMaker *>(mods[i]);
-	if (!morph)
-		return;
-
-	NLMISC::CMatrix finalSpace = NLMISC::CMatrix::Identity;
-	if (skinned)
-		MAXSCENE::convertMatrix(finalSpace, getNodeTM(&node, tmCache));
-
-	for (uint i = 0; i < 100; ++i)
-	{
-		if (101 + i >= morph->nbReferences())
-			break;
-		INode *target = dynamic_cast<INode *>(morph->getReference(101 + i));
-		if (!target)
-			continue;
-		SEvalMesh tmesh;
-		if (!MESHEVAL::evalNodeMesh(*target, tmesh, NULL))
-		{
-			fprintf(stderr, "WARNING: morph target '%s' of '%s' failed mesh eval; channel dropped\n",
-			        nodeName(*target).c_str(), nodeName(node).c_str());
-			continue;
-		}
-		SMaxMeshBaseBuild tMax;
-		NL3D::CMeshBase::CMeshBaseBuild tBase;
-		buildBaseMeshInterface(tBase, tMax, *target, tmCache, getLocalMatrix(*target, tmCache),
-		                       exportLighting);
-		NL3D::CMesh::CMeshBuild *mb = new NL3D::CMesh::CMeshBuild;
-		buildMeshInterface(tmesh, *mb, tBase, tMax, *target, tmCache, false, &finalSpace);
-		if (mb->Vertices.size() != exportMesh.Vertices.size())
-		{
-			fprintf(stderr, "WARNING: morph target '%s' of '%s' has %u verts vs base %u; channel dropped\n",
-			        nodeName(*target).c_str(), nodeName(node).c_str(),
-			        (uint)mb->Vertices.size(), (uint)exportMesh.Vertices.size());
-			delete mb;
-			continue;
-		}
-		// Interface-vert corner normals come from the (welded) base.
-		if (exportMesh.InterfaceVertexFlag.size() != 0)
-		{
-			for (uint k = 0; k < mb->Faces.size() && k < exportMesh.Faces.size(); ++k)
-				for (uint l = 0; l < 3; ++l)
-				{
-					uint vert = mb->Faces[k].Corner[l].Vertex;
-					if (vert < exportMesh.InterfaceVertexFlag.size() && exportMesh.InterfaceVertexFlag.get(vert))
-						mb->Faces[k].Corner[l].Normal = exportMesh.Faces[k].Corner[l].Normal;
-				}
-		}
-		bsList.push_back(mb);
-	}
-}
+// buildBSList (mesh_build, shared with the direct route): Morpher blend-shape targets,
+// consumed only by the single-mesh MRM branch exactly like the direct route.
 
 // Base-mesh context of an export node (materials + base build); LOD slaves build their meshes
 // against their PARENT's context, exactly like the direct route's multi-lod path.
@@ -777,10 +673,8 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 				{
 					if (IFACEBUILD::useInterfaceMesh(node))
 					{
-						// Identity for skinned meshes — their VBs are already world space
-						// (direct route's interfaceToWorldMat skinned case)
 						IFACEBUILD::applyInterfaceToMeshBuild(node, mb,
-							hasPhysique ? NLMISC::CMatrix::Identity : interfaceToWorldMat(node, tmCache),
+							IFACEBUILD::interfaceToWorldMat(node, tmCache, hasPhysique),
 							tmCache);
 						extras->setBool("nel_interface", true);
 					}

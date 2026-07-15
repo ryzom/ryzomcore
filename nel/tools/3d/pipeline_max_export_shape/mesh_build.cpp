@@ -594,6 +594,67 @@ void buildMRMParameters(CSceneClass *node, CMRMParameters &params)
 	params.DistanceCoarsest = getScriptAppDataFloat(node, NEL3D_APPDATA_LOD_DISTANCE_COARSEST, 200.f);
 }
 
+void buildBSList(INode &node, SNodeTMCache &tmCache,
+                 const std::vector<CSceneClass *> &mods,
+                 const NL3D::CMesh::CMeshBuild &exportMesh, bool skinned,
+                 bool exportLighting,
+                 std::vector<NL3D::CMesh::CMeshBuild *> &bsList)
+{
+	static const NLMISC::CClassId CLASSID_MORPHER(0x17bb6854, 0xa5cba2a3);
+	CReferenceMaker *morph = NULL;
+	for (uint i = 0; i < mods.size() && !morph; ++i)
+		if (mods[i]->classDesc()->classId() == CLASSID_MORPHER)
+			morph = dynamic_cast<CReferenceMaker *>(mods[i]);
+	if (!morph)
+		return;
+
+	NLMISC::CMatrix finalSpace = NLMISC::CMatrix::Identity;
+	if (skinned)
+		MAXSCENE::convertMatrix(finalSpace, getNodeTM(&node, tmCache));
+
+	for (uint i = 0; i < 100; ++i)
+	{
+		if (101 + i >= morph->nbReferences())
+			break;
+		INode *target = dynamic_cast<INode *>(morph->getReference(101 + i));
+		if (!target)
+			continue;
+		SEvalMesh tmesh;
+		if (!MESHEVAL::evalNodeMesh(*target, tmesh, NULL))
+		{
+			fprintf(stderr, "WARNING: morph target '%s' of '%s' failed mesh eval; channel dropped\n",
+			        nodeName(*target).c_str(), nodeName(node).c_str());
+			continue;
+		}
+		SMaxMeshBaseBuild tMax;
+		NL3D::CMeshBase::CMeshBaseBuild tBase;
+		buildBaseMeshInterface(tBase, tMax, *target, tmCache, getLocalMatrix(*target, tmCache),
+		                       exportLighting);
+		NL3D::CMesh::CMeshBuild *mb = new NL3D::CMesh::CMeshBuild;
+		buildMeshInterface(tmesh, *mb, tBase, tMax, *target, tmCache, false, &finalSpace);
+		if (mb->Vertices.size() != exportMesh.Vertices.size())
+		{
+			fprintf(stderr, "WARNING: morph target '%s' of '%s' has %u verts vs base %u; channel dropped\n",
+			        nodeName(*target).c_str(), nodeName(node).c_str(),
+			        (uint)mb->Vertices.size(), (uint)exportMesh.Vertices.size());
+			delete mb;
+			continue;
+		}
+		// Interface-vert corner normals come from the (welded) base.
+		if (exportMesh.InterfaceVertexFlag.size() != 0)
+		{
+			for (uint k = 0; k < mb->Faces.size() && k < exportMesh.Faces.size(); ++k)
+				for (uint l = 0; l < 3; ++l)
+				{
+					uint vert = mb->Faces[k].Corner[l].Vertex;
+					if (vert < exportMesh.InterfaceVertexFlag.size() && exportMesh.InterfaceVertexFlag.get(vert))
+						mb->Faces[k].Corner[l].Normal = exportMesh.Faces[k].Corner[l].Normal;
+				}
+		}
+		bsList.push_back(mb);
+	}
+}
+
 } /* namespace MESHBUILD */
 
 /* end of file */

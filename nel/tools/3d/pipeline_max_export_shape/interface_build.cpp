@@ -60,6 +60,27 @@ namespace IFACEBUILD {
 
 // ---------------------------------------------------------------------------------------------
 
+NLMISC::CMatrix interfaceToWorldMat(INode &node, SNodeTMCache &tmCache, bool skinned)
+{
+	if (skinned)
+		return NLMISC::CMatrix::Identity;
+	CNodeImpl *n = dynamic_cast<CNodeImpl *>(&node);
+	Matrix3M nodeTM = getNodeTM(&node, tmCache);
+	Point3M opos;
+	QuatM orot;
+	ScaleValueM oscale;
+	readObjectOffset(n, opos, orot, oscale);
+	Matrix3M objectTM = composePRS(opos, orot, oscale) * nodeTM;
+	Matrix3M objectToLocal = objectTM * inverseM3(nodeTM);
+	NLMISC::CMatrix toWorld, fromExportSpace;
+	MAXSCENE::convertMatrix(toWorld, objectTM);
+	MAXSCENE::convertMatrix(fromExportSpace, objectToLocal);
+	fromExportSpace.invert();
+	return toWorld * fromExportSpace;
+}
+
+// ---------------------------------------------------------------------------------------------
+
 // One interface polygon: WORLD-space ordered border vertices + per-vertex edge normals — the
 // exact structure the reference's CMeshInterface holds (export_mesh_interface.cpp:48-130).
 struct SInterfaceVert
