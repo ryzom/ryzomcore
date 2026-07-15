@@ -25,6 +25,12 @@
  */
 
 #include <nel/misc/types_nl.h>
+
+// MSVC 9.0 (VS2008) has no C99 snprintf/strtoll; the MS spellings are equivalent here.
+#if defined(_MSC_VER) && _MSC_VER < 1900
+#define snprintf _snprintf
+#define strtoll _strtoi64
+#endif
 #include "json_value.h"
 
 #include <cstdio>
@@ -37,8 +43,10 @@ namespace NLGLTF {
 std::string formatJsonFloat(float v)
 {
 	char buf[48];
-	// glTF JSON forbids NaN/Inf tokens; 0.0 keeps the file valid (callers should not feed these)
-	if (v != v || v > 3.5e38f || v < -3.5e38f)
+	// glTF JSON forbids NaN/Inf tokens; 0.0 keeps the file valid (callers should not feed these).
+	// Compared as double: the 3.5e38 bound exceeds FLT_MAX (only ±Inf can reach it), and VC90
+	// rejects an out-of-range float literal outright.
+	if (v != v || (double)v > 3.5e38 || (double)v < -3.5e38)
 		return "0.0";
 	snprintf(buf, sizeof(buf), "%.9g", (double)v);
 	if (!strchr(buf, '.') && !strchr(buf, 'e') && !strchr(buf, 'E'))

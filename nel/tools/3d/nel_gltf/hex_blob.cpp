@@ -25,6 +25,11 @@
  */
 
 #include <nel/misc/types_nl.h>
+
+// MSVC 9.0 (VS2008) has no C99 snprintf; _snprintf is equivalent for our fixed-size formatting.
+#if defined(_MSC_VER) && _MSC_VER < 1900
+#define snprintf _snprintf
+#endif
 #include "hex_blob.h"
 
 #include <cstdio>
