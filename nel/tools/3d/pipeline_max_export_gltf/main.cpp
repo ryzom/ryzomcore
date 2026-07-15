@@ -160,6 +160,13 @@ int pmbExportClodsForGltf(const std::string &maxPath, bool exportLighting,
                           std::vector<std::pair<std::string, std::vector<uint8> > > &out,
                           uint &skipped);
 
+// From ../pipeline_max_export_cmb/main.cpp (PMB_CMB_NO_MAIN): the cmb process's whole-file
+// flow, one (igname, .cmb bytes) pair per collision group. ligoMode follows the zone filename
+// protocol (zonematerial-/zonetransition-/zonespecial- sources take the --ligo path with XRef
+// collision resolution, like the build pipeline invokes it).
+int pmbExportCmbsForGltf(const std::string &inputPath, bool ligoMode,
+                         std::vector<std::pair<std::string, std::vector<uint8> > > &filesOut);
+
 static std::string bytesToHex(const std::vector<uint8> &bytes)
 {
 	std::string hex;
@@ -1216,6 +1223,27 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 				CJsonValue *e = jv->push();
 				e->setString("name", clods[i].first);
 				e->set("data")->setString(bytesToHex(clods[i].second));
+				++stats.Others;
+			}
+		}
+	}
+
+	// Collision mesh builds (.cmb): per-igname outputs from the cmb process, in the nel_cmbs
+	// list. Ligo brick sources (zone filename protocol) take the --ligo path.
+	{
+		std::string stem = NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(maxPath));
+		bool ligoCmb = stem.compare(0, 13, "zonematerial-") == 0
+			|| stem.compare(0, 15, "zonetransition-") == 0
+			|| stem.compare(0, 12, "zonespecial-") == 0;
+		std::vector<std::pair<std::string, std::vector<uint8> > > cmbs;
+		if (pmbExportCmbsForGltf(maxPath, ligoCmb, cmbs) == 0 && !cmbs.empty())
+		{
+			CJsonValue *jv = b.assetExtras()->setArray("nel_cmbs");
+			for (size_t i = 0; i < cmbs.size(); ++i)
+			{
+				CJsonValue *e = jv->push();
+				e->setString("name", cmbs[i].first);
+				e->set("data")->setString(bytesToHex(cmbs[i].second));
 				++stats.Others;
 			}
 		}

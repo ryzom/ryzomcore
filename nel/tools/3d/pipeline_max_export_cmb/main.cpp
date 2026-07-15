@@ -66,6 +66,7 @@
 
 #include <nel/misc/types_nl.h>
 #include <nel/misc/file.h>
+#include <nel/misc/mem_stream.h>
 #include <nel/misc/vector.h>
 #include <nel/misc/matrix.h>
 #include <nel/misc/aabbox.h>
@@ -695,39 +696,13 @@ bool buildCollisionMesh(const std::vector<SCandidate *> &group, MAXSCENE::SNodeT
 
 } /* anonymous namespace */
 
-int main(int argc, char **argv)
+// Whole-file flow shared by the standalone tool and the max2gltf writer (PMB_CMB_NO_MAIN +
+// nel_cmbs blob list): one code path, the blob and the tool's files cannot drift. Returns 0
+// with (igname, .cmb bytes) pairs, 3 when the scene has no collision geometry, 1 on error
+// (partial output kept when some groups succeeded, matching the tool's behavior).
+int pmbExportCmbsForGltf(const std::string &inputPath, bool ligoMode,
+                         std::vector<std::pair<std::string, std::vector<uint8> > > &filesOut)
 {
-	bool ligoMode = false;
-	std::vector<std::string> args;
-	for (int i = 1; i < argc; ++i)
-	{
-		std::string a = argv[i];
-		if (a == "--ligo") ligoMode = true;
-		else if (a == "--db" && i + 1 < argc) { DBPATH::setDefaultRoot(argv[++i]); }
-		else if (a == "--path-alias" && i + 1 < argc)
-		{
-			// --path-alias <windows-prefix>=<root>, same shape as pipeline_max_export_ig — for
-			// corpus content authored under a different drive/root than R:\graphics\...
-			std::string kv = argv[++i];
-			std::string::size_type eq = kv.find('=');
-			if (eq == std::string::npos)
-				fprintf(stderr, "WARNING: --path-alias expects <prefix>=<root>, got '%s'\n", kv.c_str());
-			else
-				DBPATH::addAlias(kv.substr(0, eq), kv.substr(eq + 1));
-		}
-		else args.push_back(a);
-	}
-	if (args.size() < 2)
-	{
-		std::cerr << "usage: pipeline_max_export_cmb [--ligo] [--db <root>] [--path-alias <prefix>=<root>] <input.max> <output_dir>\n";
-		std::cerr << "exit codes: 0 ok, 1 error, 3 nothing to export (no output written)\n";
-		return 1;
-	}
-	std::string inputPath = args[0];
-	std::string outputDir = args[1];
-	while (!outputDir.empty() && (outputDir[outputDir.size() - 1] == '/' || outputDir[outputDir.size() - 1] == '\\'))
-		outputDir.resize(outputDir.size() - 1);
-
 	CSceneClassRegistry reg;
 	CBuiltin::registerClasses(&reg);
 	UPDATE1::CUpdate1::registerClasses(&reg);
@@ -830,7 +805,6 @@ int main(int argc, char **argv)
 	}
 
 	MAXSCENE::SNodeTMCache tmCache;
-	int written = 0;
 	bool hadError = false;
 	for (size_t g = 0; g < groupOrder.size(); ++g)
 	{
@@ -843,16 +817,81 @@ int main(int argc, char **argv)
 			hadError = true;
 			continue;
 		}
-		std::string outPath = outputDir + "/" + igname + ".cmb";
-		NLMISC::COFile file;
-		if (!file.open(outPath)) { std::cerr << "ERROR: cannot open output " << outPath << "\n"; hadError = true; continue; }
-		cmb.serial(file);
-		file.close();
-		++written;
+		try
+		{
+			NLMISC::CMemStream ms;
+			cmb.serial(ms);
+			filesOut.push_back(std::make_pair(igname,
+				std::vector<uint8>(ms.buffer(), ms.buffer() + ms.length())));
+		}
+		catch (const NLMISC::Exception &e)
+		{
+			std::cerr << "ERROR: group \"" << igname << "\" serial failed: " << e.what() << "\n";
+			hadError = true;
+		}
 	}
 
+	if (hadError && filesOut.empty()) return 1;
+	return 0;
+}
+
+#ifndef PMB_CMB_NO_MAIN
+int main(int argc, char **argv)
+{
+	bool ligoMode = false;
+	std::vector<std::string> args;
+	for (int i = 1; i < argc; ++i)
+	{
+		std::string a = argv[i];
+		if (a == "--ligo") ligoMode = true;
+		else if (a == "--db" && i + 1 < argc) { DBPATH::setDefaultRoot(argv[++i]); }
+		else if (a == "--path-alias" && i + 1 < argc)
+		{
+			std::string kv = argv[++i];
+			std::string::size_type eq = kv.find('=');
+			if (eq == std::string::npos)
+				fprintf(stderr, "WARNING: --path-alias expects <prefix>=<root>, got '%s'\n", kv.c_str());
+			else
+				DBPATH::addAlias(kv.substr(0, eq), kv.substr(eq + 1));
+		}
+		else args.push_back(a);
+	}
+	if (args.size() < 2)
+	{
+		std::cerr << "usage: pipeline_max_export_cmb [--ligo] [--db <root>] [--path-alias <prefix>=<root>] <input.max> <output_dir>\n";
+		std::cerr << "exit codes: 0 ok, 1 error, 3 nothing to export (no output written)\n";
+		return 1;
+	}
+	std::string inputPath = args[0];
+	std::string outputDir = args[1];
+	while (!outputDir.empty() && (outputDir[outputDir.size() - 1] == '/' || outputDir[outputDir.size() - 1] == '\\'))
+		outputDir.resize(outputDir.size() - 1);
+
+	std::vector<std::pair<std::string, std::vector<uint8> > > files;
+	int rc = pmbExportCmbsForGltf(inputPath, ligoMode, files);
+	if (rc != 0) return rc;
+	bool hadError = false;
+	int written = 0;
+	for (size_t i = 0; i < files.size(); ++i)
+	{
+		std::string outPath = outputDir + "/" + files[i].first + ".cmb";
+		NLMISC::COFile file;
+		if (!file.open(outPath)) { std::cerr << "ERROR: cannot open output " << outPath << "\n"; hadError = true; continue; }
+		try
+		{
+			file.serialBuffer(&files[i].second[0], (uint)files[i].second.size());
+			file.close();
+			++written;
+		}
+		catch (const NLMISC::Exception &e)
+		{
+			std::cerr << "ERROR: write failed for " << outPath << ": " << e.what() << "\n";
+			hadError = true;
+		}
+	}
 	if (hadError && written == 0) return 1;
 	return 0;
 }
+#endif /* PMB_CMB_NO_MAIN */
 
 /* end of file */

@@ -880,11 +880,11 @@ int exportNelGltfScene(const CMeshUtilsSettings &settings)
 	// <name>.clod — exact bytes verbatim.
 	{
 		static const struct { const char *Key; const char *Ext; } kLists[] = {
-			{ "nel_vegets", ".veget" }, { "nel_clods", ".clod" },
+			{ "nel_vegets", ".veget" }, { "nel_clods", ".clod" }, { "nel_cmbs", ".cmb" },
 		};
 		const CJsonValue *asset = doc.Json.get("asset");
 		const CJsonValue *aex = asset ? asset->get("extras") : NULL;
-		for (uint li = 0; aex && li < 2; ++li)
+		for (uint li = 0; aex && li < 3; ++li)
 		{
 			const CJsonValue *list = aex->get(kLists[li].Key);
 			for (size_t vi = 0; list && vi < list->size(); ++vi)

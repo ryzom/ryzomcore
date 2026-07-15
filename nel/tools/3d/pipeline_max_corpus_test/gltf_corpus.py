@@ -27,6 +27,7 @@ import swt_corpus    # swt-source enumeration helper (SwtSourceDirectories)
 import pacs_prim_corpus  # pacs_prim source enumeration (per-ecosystem vegetations)
 import veget_corpus  # microveget source enumeration (VegetSourceDirectories)
 import clod_corpus   # character-lod source enumeration
+import cmb_corpus    # collision-mesh source lists (DIRECT_SOURCES; ligo bricks = zone corpus)
 
 SKIP_CODE = 77
 
@@ -142,6 +143,17 @@ def main():
             seen_paths.add(p)
             clod_extra.append(("clod", p))
     corpus = corpus + clod_extra
+    cmb_paths = set()
+    cmb_extra = []
+    for (race, subdir, fn) in cmb_corpus.DIRECT_SOURCES:
+        p = os.path.join(args.graphics, "stuff", race, "decors", "constructions", subdir, fn)
+        if not os.path.isfile(p):
+            continue
+        cmb_paths.add(p)
+        if p not in seen_paths:
+            seen_paths.add(p)
+            cmb_extra.append(("cmb/" + race, p))
+    corpus = corpus + cmb_extra
     if args.only:
         corpus = [c for c in corpus if args.only in c[1]]
     if args.project:
@@ -157,6 +169,7 @@ def main():
     pacs_bin = os.path.join(args.bin, "pipeline_max_export_pacs_prim")
     veget_bin = os.path.join(args.bin, "pipeline_max_export_veget")
     clod_bin = os.path.join(args.bin, "pipeline_max_export_clod")
+    cmb_bin = os.path.join(args.bin, "pipeline_max_export_cmb")
     ps_paths = [d for d in (os.path.expanduser("~/pipeline_export/common/sfx/ps"),) if os.path.isdir(d)]
 
     os.makedirs(args.out, exist_ok=True)
@@ -340,6 +353,27 @@ def main():
             res["clod_rc"] = r.returncode
             direct_clods = clods_in(dcl_dir)
 
+        # Cmb differential: direct per-igname .cmb files vs the nel_cmbs blob re-emission.
+        # Ligo brick sources run the tool with --ligo (same filename protocol the writer uses).
+        def cmbs_in(d):
+            out = {}
+            if os.path.isdir(d):
+                for f in os.listdir(d):
+                    if f.endswith(".cmb"):
+                        out[f] = os.path.join(d, f)
+            return out
+
+        via_cmbs = cmbs_in(v_dir)
+        direct_cmbs = {}
+        if path in cmb_paths or path in zone_banks or via_cmbs:
+            dcm_dir = os.path.join(base, "direct_cmb")
+            os.makedirs(dcm_dir, exist_ok=True)
+            ligo_flag = ["--ligo"] if stem.startswith(("zonematerial-", "zonetransition-", "zonespecial-")) else []
+            r = subprocess.run([cmb_bin, "--db", args.graphics] + ligo_flag + [path, dcm_dir],
+                               capture_output=True, text=True, timeout=300)
+            res["cmb_rc"] = 0 if r.returncode in (0, 3) else r.returncode
+            direct_cmbs = cmbs_in(dcm_dir)
+
         via_zones = zones_in(vz_dir)
         zone_refused = False
         if path in zone_banks:
@@ -434,6 +468,21 @@ def main():
                 via_only.append("zone:" + name)
                 mismatch = True
         single_ident = 0
+        for name, dpath in sorted(direct_cmbs.items()):
+            vpath = via_cmbs.get(name)
+            if not vpath:
+                diff.append("cmb-missing:" + name)
+                mismatch = True
+                continue
+            if open(dpath, "rb").read() == open(vpath, "rb").read():
+                single_ident += 1
+            else:
+                mismatch = True
+                diff.append("cmb:" + name)
+        for name in sorted(via_cmbs):
+            if name not in direct_cmbs:
+                via_only.append("cmb:" + name)
+                mismatch = True
         for name, dpath in sorted(direct_clods.items()):
             vpath = via_clods.get(name)
             if not vpath:
@@ -520,12 +569,12 @@ def main():
         if res.get("direct_rc") != 0 or res.get("gltf_rc") != 0 or res.get("import_rc") != 0 \
            or res.get("ig_rc", 0) != 0 or res.get("anim_rc", 0) != 0 or res.get("zone_rc", 0) != 0 \
            or res.get("swt_rc", 0) != 0 or res.get("pacs_rc", 0) != 0 or res.get("veget_rc", 0) != 0 \
-           or res.get("clod_rc", 0) != 0:
-            tool_fail.append("%s (rc d=%s g=%s i=%s ig=%s a=%s z=%s s=%s p=%s v=%s c=%s)"
+           or res.get("clod_rc", 0) != 0 or res.get("cmb_rc", 0) != 0:
+            tool_fail.append("%s (rc d=%s g=%s i=%s ig=%s a=%s z=%s s=%s p=%s v=%s c=%s m=%s)"
                              % (res["path"], res.get("direct_rc"), res.get("gltf_rc"),
                                 res.get("import_rc"), res.get("ig_rc", 0), res.get("anim_rc", 0),
                                 res.get("zone_rc", 0), res.get("swt_rc", 0), res.get("pacs_rc", 0),
-                                res.get("veget_rc", 0), res.get("clod_rc", 0)))
+                                res.get("veget_rc", 0), res.get("clod_rc", 0), res.get("cmb_rc", 0)))
         ident += res.get("ident", 0)
         ig_ident += res.get("ig_ident", 0)
         anim_ident += res.get("anim_ident", 0)
