@@ -529,7 +529,7 @@ void CPSShockWave::getVBnPB(CVertexBuffer *&retVb, CIndexBuffer *&retPb)
 						   (_ColorScheme != NULL ?  CVertexBuffer::PrimaryColorFlag : 0)
 						  );
 		vb.setNumVertices((size * (_NbSeg + 1)) << 1 );
-		vb.setPreferredMemory(CVertexBuffer::AGPVolatile, true);
+		vb.setBufferUsage(CVertexBuffer::FullStream, true);
 		CVertexBufferReadWrite vba;
 		vb.lock (vba);
 		pb.setFormat(NL_DEFAULT_INDEX_BUFFER_FORMAT);

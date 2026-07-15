@@ -82,7 +82,7 @@ public:
 		// get (and build if necessary) the vb and the ib
 		f.getVBnIB(vb, ib);
 		// tmp
-		vb->setPreferredMemory(CVertexBuffer::AGPVolatile, true);
+		vb->setBufferUsage(CVertexBuffer::FullStream, true);
 		IDriver *driver = f.getDriver();
 		const uint maxNumFanLightToDealWith = std::min(FanLightBufSize, f.getNumFanlightsInVB());
 		uint8 *randomPhaseTab = &f._RandomPhaseTab[f._PhaseSmoothness][0];
@@ -519,7 +519,7 @@ void CPSFanLight::getVBnIB(CVertexBuffer *&retVb, CIndexBuffer *&retIb)
 						   (_Tex != NULL ?  CVertexBuffer::TexCoord0Flag : 0)
 						  );
 		vb.setNumVertices(size * (2 + _NbFans));
-		vb.setPreferredMemory(CVertexBuffer::AGPVolatile, true); // keep local memory because of interleaved format
+		vb.setBufferUsage(CVertexBuffer::FullStream, true); // keep local memory because of interleaved format
 		vb.setName("CPSFanLight");
 		ib.setFormat(NL_DEFAULT_INDEX_BUFFER_FORMAT);
 		ib.setNumIndexes(size * _NbFans * 3);

@@ -4,23 +4,22 @@ FILE(GLOB HEADERS ../../include/nel/gui/*.h)
 SOURCE_GROUP("" FILES ${HEADERS} ${SRC})
 
 NL_TARGET_LIB(nelgui ${SRC} ${HEADERS})
-add_project_library_alias(nelgui gui)
+add_library(NeL::gui ALIAS nelgui)
+set_target_properties(nelgui PROPERTIES EXPORT_NAME gui)
 
 TARGET_INCLUDE_DIRECTORIES(nelgui
-        PUBLIC
-        ${LUA_INCLUDE_DIR}
         PRIVATE
+        ${LUA_INCLUDE_DIR}
         ${LUABIND_INCLUDE_DIR}
-        ${CURL_INCLUDE_DIRS}
 )
 
 TARGET_LINK_LIBRARIES(nelgui
         PUBLIC
-        nelmisc
-        nelweb
-        nel3d
+        NeL::misc
+        NeL::web
+        NeL::3d
         ${LUA_LIBRARIES}
-        ${LUABIND_LIBRARIES}
+        Luabind::Luabind
         PRIVATE
         CURL::libcurl
         LibXml2::LibXml2
@@ -31,7 +30,7 @@ NL_ADD_RUNTIME_FLAGS(nelgui)
 
 NL_ADD_LIB_SUFFIX(nelgui)
 
-TARGET_COMPILE_DEFINITIONS(nelgui PRIVATE ${CURL_DEFINITIONS} ${LUABIND_DEFINITIONS})
+TARGET_COMPILE_DEFINITIONS(nelgui PRIVATE ${LUABIND_DEFINITIONS})
 
 IF(WITH_PCH)
   target_precompile_headers(nelgui PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h)

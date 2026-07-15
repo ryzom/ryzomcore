@@ -181,7 +181,7 @@ void CPSUtil::displayArrow(IDriver *driver, const CVector &start, const CVector 
 
 	const float coneSize = size * 0.1f;
 
-	static CIndexBuffer vTab;
+	static CIndexBuffer vTab; // STATIC GPU RESOURCE: Blocks multiple driver instances
 	static const TIndexType vTabIndexes[] =
 	{ 1, 2, 4,
 	  4, 2, 3,

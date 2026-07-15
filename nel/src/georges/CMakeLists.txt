@@ -4,11 +4,12 @@ FILE(GLOB HEADERS ../../include/nel/georges/*.h)
 # SOURCE_GROUP(headers FILES ${HEADERS})
 
 NL_TARGET_LIB(nelgeorges ${HEADERS} ${SRC})
-add_project_library_alias(nelgeorges georges)
+add_library(NeL::georges ALIAS nelgeorges)
+set_target_properties(nelgeorges PROPERTIES EXPORT_NAME georges)
 
 TARGET_LINK_LIBRARIES(nelgeorges
         PUBLIC
-        nelmisc
+        NeL::misc
         PRIVATE
         LibXml2::LibXml2
 )

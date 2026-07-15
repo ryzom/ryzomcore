@@ -33,6 +33,7 @@
 #include "nel/misc/hierarchical_timer.h"
 #include "nel/3d/async_texture_manager.h"
 #include "nel/3d/water_env_map_user.h"
+#include "nel/3d/texture_user.h"
 
 
 using namespace NLMISC;
@@ -950,6 +951,9 @@ CSceneUser::CSceneUser(CDriverUser *drv, bool bSmallScene) : _Scene(bSmallScene)
 
 CSceneUser::~CSceneUser()
 {
+	for (uint i = 0; i < _WaterReflectionTextures.size(); ++i)
+		delete _WaterReflectionTextures[i];
+	_WaterReflectionTextures.clear();
 	_VisualCollisionManagers.clear();
 	_Landscapes.clear();
 	_CloudScapes.clear();
@@ -1058,6 +1062,18 @@ bool			CSceneUser::getEnableShadowPolySmooth() const
 }
 
 // ***************************************************************************
+void			CSceneUser::enableGPUSkinning(bool enable)
+{
+	_Scene.enableGPUSkinning(enable);
+}
+
+// ***************************************************************************
+bool			CSceneUser::isGPUSkinningEnabled() const
+{
+	return _Scene.isGPUSkinningEnabled();
+}
+
+// ***************************************************************************
 void			CSceneUser::setShadowMapDistFadeStart(float dist)
 {
 	_Scene.setShadowMapDistFadeStart(dist);
@@ -1154,6 +1170,77 @@ void CSceneUser::setWaterEnvMap(UWaterEnvMap *waterEnvMap)
 void CSceneUser::updateWaterEnvMaps(TGlobalAnimationTime time)
 {
 	_Scene.updateWaterEnvMaps(time);
+}
+
+// ***************************************************************************
+void CSceneUser::fillWaterReflectionInfo(const CWaterReflectionManager::CActiveReflection &refl, UWaterReflectionInfo &info)
+{
+	// Maintain a U-level wrapper per render target texture (the same pass
+	// index maps to a different texture per view, so match by texture)
+	CTextureUser *wrapper = NULL;
+	for (uint i = 0; i < _WaterReflectionTextures.size(); ++i)
+	{
+		if (_WaterReflectionTextures[i]->getITexture() == refl.Texture)
+		{
+			wrapper = _WaterReflectionTextures[i];
+			break;
+		}
+	}
+	if (!wrapper)
+	{
+		// Sweep wrappers whose render target was released (the wrapper's
+		// smart pointer is the last reference): keeps reallocated targets
+		// from being pinned in memory, without ever deleting a wrapper the
+		// caller may still hold (those textures stay referenced by the
+		// manager's slots until they are replaced)
+		if (_WaterReflectionTextures.size() >= 8)
+		{
+			std::vector<CTextureUser *> kept;
+			kept.reserve(_WaterReflectionTextures.size());
+			for (uint i = 0; i < _WaterReflectionTextures.size(); ++i)
+			{
+				if (_WaterReflectionTextures[i]->getITexture()->getRefCount() <= 1)
+					delete _WaterReflectionTextures[i];
+				else
+					kept.push_back(_WaterReflectionTextures[i]);
+			}
+			_WaterReflectionTextures.swap(kept);
+		}
+		wrapper = new CTextureUser(refl.Texture);
+		_WaterReflectionTextures.push_back(wrapper);
+	}
+
+	info.Texture = wrapper;
+	info.ReflViewMatrix = refl.ReflViewMatrix;
+	info.FrustumLeft = refl.ReflFrustum.Left;
+	info.FrustumRight = refl.ReflFrustum.Right;
+	info.FrustumBottom = refl.ReflFrustum.Bottom;
+	info.FrustumTop = refl.ReflFrustum.Top;
+	info.FrustumNear = refl.ReflFrustum.Near;
+	info.FrustumFar = refl.ReflFrustum.Far;
+	info.UScale = refl.UVScale.U;
+	info.VScale = refl.UVScale.V;
+	info.UBias = refl.UVBias.U;
+	info.VBias = refl.UVBias.V;
+	info.PlaneZ = refl.PlaneZ;
+}
+
+// ***************************************************************************
+void CSceneUser::beginWaterReflectionPass(uint pass, UWaterReflectionInfo &info)
+{
+	CWaterReflectionManager::CActiveReflection refl;
+	_Scene.getWaterReflectionManager().beginPass(pass, refl);
+	fillWaterReflectionInfo(refl, info);
+}
+
+// ***************************************************************************
+bool CSceneUser::getActiveWaterReflectionInfo(uint index, UWaterReflectionInfo &info)
+{
+	const CWaterReflectionManager::CActiveReflection *refl = _Scene.getWaterReflectionManager().getActiveReflectionByIndex(index);
+	if (!refl || !refl->Texture)
+		return false;
+	fillWaterReflectionInfo(*refl, info);
+	return true;
 }
 
 

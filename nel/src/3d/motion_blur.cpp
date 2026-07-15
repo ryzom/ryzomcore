@@ -59,7 +59,7 @@ void CMotionBlur::performMotionBlur(IDriver *driver, float motionBlurAmount)
 	nlassert(driver) ;
 	nlassert(motionBlurAmount >= 0.f && motionBlurAmount <= 1.f) ;
 
-	static CVertexBuffer  vb ;
+	static CVertexBuffer  vb ; // STATIC GPU RESOURCE: Blocks multiple driver instances
 	vb.setVertexFormat(CVertexBuffer::PositionFlag | CVertexBuffer::TexCoord0Flag ) ;
 	vb.setNumVertices(4) ;
 
@@ -71,7 +71,7 @@ void CMotionBlur::performMotionBlur(IDriver *driver, float motionBlurAmount)
 
 	driver->setFrustum(0, (float) width, 0, (float) height, -1, 1, false) ;
 
-	static CMaterial mbMat ;
+	static CMaterial mbMat ; // STATIC GPU RESOURCE: Blocks multiple driver instances
 	{
 		CVertexBufferReadWrite vba;
 		vb.lock (vba);

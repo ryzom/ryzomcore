@@ -61,6 +61,9 @@ bool			CNELU::initDriver (uint w, uint h, uint bpp, bool windowed, nlWindow syst
 	CNELU::Driver = NULL;
 
 	// Init driver.
+#ifdef __EMSCRIPTEN__
+	CNELU::Driver= CDRU::createGlEs3Driver();
+#else
 #ifdef NL_OS_WINDOWS
 	if (direct3d)
 	{
@@ -72,6 +75,7 @@ bool			CNELU::initDriver (uint w, uint h, uint bpp, bool windowed, nlWindow syst
 	{
 		CNELU::Driver= CDRU::createGlDriver();
 	}
+#endif
 
 	if (!CNELU::Driver)
 	{

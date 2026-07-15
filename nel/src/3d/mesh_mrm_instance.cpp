@@ -23,6 +23,7 @@
 #include "nel/3d/shifted_triangle_cache.h"
 #include "nel/3d/u_scene.h"
 #include "nel/3d/scene.h"
+#include "nel/3d/gpu_skin_vp.h"
 
 
 using namespace NLMISC;
@@ -235,6 +236,34 @@ void			CMeshMRMInstance::renderSkinGroupSpecularRdrPass(uint rdrPassId)
 	// render the meshGeom
 	CMeshMRMGeom	&meshGeom= const_cast<CMeshMRMGeom&>(pMesh->getMeshGeom ());
 	meshGeom.renderSkinGroupSpecularRdrPass(this, rdrPassId);
+}
+
+// ***************************************************************************
+bool			CMeshMRMInstance::supportGPUSkinning() const
+{
+	if(Shape)
+	{
+		CMeshMRM	*meshMrm= safe_cast<CMeshMRM*>((IShape*)Shape);
+		return	meshMrm->getMeshGeom().supportGPUSkinning();
+	}
+	else
+		return false;
+}
+// ***************************************************************************
+void			CMeshMRMInstance::renderGPUSkin(float alphaMRM, CSkeletonModel *skeleton)
+{
+	if(Shape && getVisibility() != CHrcTrav::Hide)
+	{
+		CMeshMRM *pMesh = NLMISC::safe_cast<CMeshMRM *>((IShape*)Shape);
+		CMeshMRMGeom	&meshGeom= const_cast<CMeshMRMGeom&>(pMesh->getMeshGeom ());
+		meshGeom.renderGPUSkin(this, alphaMRM, skeleton);
+	}
+}
+
+// ***************************************************************************
+CVertexProgram			*CMeshMRMInstance::getGPUSkinVP() const
+{
+	return getGPUSkinInsertVP();
 }
 
 // ***************************************************************************

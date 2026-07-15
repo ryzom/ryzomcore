@@ -21,7 +21,7 @@
 
 #include "driver_opengl.h"
 #include "nel/3d/texture_cube.h"
-#include "nel/3d/texture_bloom.h"
+#include "nel/3d/texture_offscreen.h"
 #include "nel/misc/rect.h"
 #include "nel/misc/file.h" // temp
 
@@ -163,9 +163,9 @@ bool CTextureDrvInfosGL::initFrameBufferObject(ITexture * tex)
 {
 	if (!InitFBO)
 	{
-		if (tex->isBloomTexture())
+		if (tex->isOffscreenTexture())
 		{
-			AttachDepthStencil = !((CTextureBloom*)tex)->isMode2D();
+			AttachDepthStencil = static_cast<CTextureOffscreen *>(tex)->needsDepthStencil();
 		}
 
 		// generate IDs
@@ -2259,7 +2259,7 @@ bool CDriverGL::setRenderTarget (ITexture *tex, uint32 x, uint32 y, uint32 width
 		// Check the texture is a render target
 		nlassertex (tex->getRenderTarget(), ("The texture must be a render target. Call ITexture::setRenderTarget(true)."));
 
-		if(tex->isBloomTexture() && supportBloomEffect())
+		if(tex->isOffscreenTexture() && supportBloomEffect())
 		{
 			// NOTE: No support for mip map level here!
 

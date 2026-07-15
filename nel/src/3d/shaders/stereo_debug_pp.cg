@@ -1,0 +1,37 @@
+
+void stereo_debug_pp(
+	// Per fragment parameters
+	float2 texCoord : TEXCOORD0,
+
+	// Fragment program constants
+	uniform sampler2D cTex0 : TEX0,
+	uniform sampler2D cTex1 : TEX1,
+
+	// Output color
+	out float4 oCol : COLOR)
+{
+	float4 left = tex2D(cTex0, texCoord);
+	float4 right = tex2D(cTex1, texCoord);
+	float4 avg = (left + right) * 0.5;
+
+	// Max absolute difference across RGB channels
+	float3 d = abs(left.rgb - right.rgb);
+	float md = max(max(d.r, d.g), d.b);
+
+	oCol = avg;
+	if (md >= 0.01)
+	{
+		// Significant difference: red boost
+		oCol.r = 0.5 + (oCol.r * 0.5);
+	}
+	else if (md > 0.0)
+	{
+		// Small difference: blue boost
+		oCol.b = 0.5 + (oCol.b * 0.5);
+	}
+	else
+	{
+		// Identical: green boost
+		oCol.g = 0.5 + (oCol.g * 0.5);
+	}
+}

@@ -110,9 +110,12 @@ bool CDriverGL::compilePixelProgram(NL3D::CPixelProgram *program)
 	// Program setuped ?
 	if (program->m_DrvInfo == NULL)
 	{
+		if (program->m_CompileFailed)
+			return false;
+
 		glDisable(GL_FRAGMENT_PROGRAM_ARB);
 		_PixelProgramEnabled = false;
-		
+
 		// Insert into driver list. (so it is deleted when driver is deleted).
 		ItGPUPrgDrvInfoPtrList it = _GPUPrgDrvInfos.insert(_GPUPrgDrvInfos.end(), (NL3D::IProgramDrvInfos*)NULL);
 
@@ -121,12 +124,13 @@ bool CDriverGL::compilePixelProgram(NL3D::CPixelProgram *program)
 		*it = drvInfo = new CPixelProgamDrvInfosGL(this, it);
 		// Set the pointer
 		program->m_DrvInfo = drvInfo;
-	
+
 		if (!setupPixelProgram(program, drvInfo->ID))
 		{
 			delete drvInfo;
 			program->m_DrvInfo = NULL;
 			//_GPUPrgDrvInfos.erase(it); // not needed as ~IProgramDrvInfos() already does it
+			program->m_CompileFailed = true;
 			return false;
 		}
 	}
@@ -187,6 +191,7 @@ bool CDriverGL::setupPixelProgram(CPixelProgram *program, GLuint id/*, bool &spe
 		if (supportPixelProgram(program->getSource(i)->Profile))
 		{
 			source = program->getSource(i);
+			break;
 		}
 	}
 	if (!source)

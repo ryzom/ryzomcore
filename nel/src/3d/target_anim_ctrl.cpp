@@ -44,6 +44,7 @@ CTargetAnimCtrl::CTargetAnimCtrl()
 	Enabled= true;
 	_EnableToDisableTransition= false;
 	_LastEnabled= true;
+	_LastFrameId= 0;
 }
 
 
@@ -151,9 +152,18 @@ void	CTargetAnimCtrl::execute(CSkeletonModel *model, CBone *bone)
 		currentLSRotation.setAngleAxis(angleAxis);
 	}
 
-	// get the dt of the scene.
+	// get the dt of the scene. Only accumulate once per real frame (avoid double in stereo).
 	CScene	*scene= model->getOwnerScene();
-	float	sceneDt= scene->getEllapsedTime();
+	float	sceneDt;
+	if(scene->getFrameId() != _LastFrameId)
+	{
+		sceneDt= scene->getEllapsedTime();
+		_LastFrameId= scene->getFrameId();
+	}
+	else
+	{
+		sceneDt= 0.f;
+	}
 	float	maxDeltaAngle= MaxAngularVelocity*sceneDt;
 	// get the quat that change from LastRotation to CurrentRotation
 	CQuat	rotMod= _LastLSRotation.conjugate() * currentLSRotation;

@@ -173,8 +173,9 @@ void		CVegetableManager::createVegetableBlendLayersModels(CScene *scene)
 		_ZSortModelLayers[i]->VegetableManager= this;
 		_ZSortModelLayersUW[i]->VegetableManager= this;
 
-		// Set UnderWater layer for _ZSortModelLayersUW
-		_ZSortModelLayersUW[i]->setOrderingLayer(2);
+		// Set UnderWater layer 0 so that with reversed layer ordering (underwater camera),
+		// vegetation renders after water (layer 1) and appears on top.
+		_ZSortModelLayersUW[i]->setOrderingLayer(0);
 	}
 }
 
@@ -1846,6 +1847,25 @@ void			CVegetableManager::unlockBuffers()
 	{
 		_VBHardAllocator[i].unlockBuffer();
 		_VBSoftAllocator[i].unlockBuffer();
+	}
+}
+
+// ***************************************************************************
+void			CVegetableManager::setUnsynchronizedMode(bool enable)
+{
+	// Only hard allocators use UnsynchronizedWrite; soft allocators stay as-is.
+	for(uint i=0; i <CVegetableVBAllocator::VBTypeCount; i++)
+	{
+		_VBHardAllocator[i].setUnsynchronizedMode(enable);
+	}
+}
+
+// ***************************************************************************
+void			CVegetableManager::processDeferredFrees(uint64 swapBufferInFlight)
+{
+	for(uint i=0; i <CVegetableVBAllocator::VBTypeCount; i++)
+	{
+		_VBHardAllocator[i].processDeferredFrees(swapBufferInFlight);
 	}
 }
 

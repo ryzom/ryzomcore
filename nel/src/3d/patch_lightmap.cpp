@@ -1530,6 +1530,10 @@ void		CPatch::resetTileLightInfluences()
 		// Disable all light influence on this point.
 		TileLightInfluences[i].Light[0]= 0xFF;
 		TileLightInfluences[i].Light[1]= 0xFF;
+		// Must be initialized: serial() writes it even when no light is set — an uninitialized
+		// value here leaks nondeterministic bytes into built .zone files.
+		TileLightInfluences[i].setDiffuseLightFactor(0, 0);
+		TileLightInfluences[i].setDiffuseLightFactor(1, 0);
 	}
 }
 

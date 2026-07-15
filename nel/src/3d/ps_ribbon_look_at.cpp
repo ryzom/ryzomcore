@@ -579,7 +579,7 @@ CPSRibbonLookAt::CVBnPB &CPSRibbonLookAt::getVBnPB()
 						   CVertexBuffer::TexCoord0Flag |
 						   (_ColorScheme ? CVertexBuffer::PrimaryColorFlag : 0));
 		vb.setNumVertices(2 * (_UsedNbSegs + 1) * numRibbonInVB );
-		vb.setPreferredMemory(CVertexBuffer::AGPVolatile, true);
+		vb.setBufferUsage(CVertexBuffer::FullStream, true);
 		CVertexBufferReadWrite vba;
 		vb.lock (vba);
 

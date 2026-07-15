@@ -31,6 +31,7 @@
 #include "nel/3d/vertex_stream_manager.h"
 #include "nel/3d/mesh_base_instance.h"
 #include "nel/3d/async_texture_manager.h"
+#include "nel/3d/gpu_skin_vp.h"
 
 
 using namespace std;
@@ -1076,11 +1077,25 @@ void		CSkeletonModel::traverseRender()
 {
 	H_AUTO( NL3D_Skeleton_Render );
 
+	// Inside water reflection passes, entities clip at the exact water
+	// surface instead of the below-surface biased plane: the bias keeps
+	// the waterline seamless on static geometry, but would show the
+	// entity's submerged parts in its reflection. (CLod impostors are
+	// batched and drawn later under the biased plane — far-LOD characters
+	// in a reflection, negligible.)
+	CWaterReflectionManager &wrm = getOwnerScene()->getWaterReflectionManager();
+	const bool entityClip = wrm.isRenderingReflection();
+	if (entityClip)
+		wrm.selectClipBias(getOwnerScene()->getRenderTrav().getDriver(), CWaterReflectionManager::ClipBiasEntity);
+
 	// render as CLod, or render Skins.
 	if(isDisplayedAsLodCharacter())
 		renderCLod();
 	else
 		renderSkins();
+
+	if (entityClip)
+		wrm.selectClipBias(getOwnerScene()->getRenderTrav().getDriver(), CWaterReflectionManager::ClipBiasStatic);
 }
 
 
@@ -1503,13 +1518,76 @@ void			CSkeletonModel::renderSkins()
 void			CSkeletonModel::renderSkinList(NLMISC::CObjectVector<CTransform*, false> &skinList, float alphaMRM)
 {
 	CRenderTrav			&rdrTrav= getOwnerScene()->getRenderTrav();
+	IDriver				*drv= rdrTrav.getDriver();
+
+	// Check if GPU skinning is available (driver supports glsl3vi profile, large UBO arrays, and scene has it enabled)
+	bool gpuSkinAvailable = drv && drv->supportVertexProgram(IProgram::glsl3vi)
+		&& drv->supportLargeUBOArrays()
+		&& getOwnerScene()->isGPUSkinningEnabled();
+
+	// Try GPU skinning first: render GPU-capable skins, collect non-GPU skins for CPU path
+	static std::vector<CTransform*> cpuSkins;
+	cpuSkins.clear();
+
+	if (gpuSkinAvailable)
+	{
+		// Separate GPU-capable and non-GPU skins
+		static std::vector<CTransform*> gpuSkins;
+		gpuSkins.clear();
+
+		for (uint i = 0; i < skinList.size(); i++)
+		{
+			if (skinList[i]->supportGPUSkinning())
+				gpuSkins.push_back(skinList[i]);
+			else
+				cpuSkins.push_back(skinList[i]);
+		}
+
+		// Render GPU skins
+		if (!gpuSkins.empty())
+		{
+			H_AUTO( NL3D_Skin_GPU );
+
+			// Fill bone UBO once for this skeleton, bind at UBBindingSkeleton
+			CUniformBuffer *boneUB = getGPUSkinBoneUBO();
+			fillGPUSkinBoneUBO(boneUB, this);
+			drv->bindUniformBuffer(UBBindingSkeleton, boneUB);
+
+			// Render each GPU skin, switching VP as needed
+			CVertexProgram *activeVP = NULL;
+			for (uint i = 0; i < gpuSkins.size(); i++)
+			{
+				CVertexProgram *vp = gpuSkins[i]->getGPUSkinVP();
+				if (vp != activeVP)
+				{
+					drv->activeVertexProgram(vp);
+					activeVP = vp;
+				}
+				gpuSkins[i]->renderGPUSkin(alphaMRM, this);
+			}
+
+			// Unbind bone UBO and deactivate the insert VP
+			drv->activeVertexProgram(NULL);
+			drv->bindUniformBuffer(UBBindingSkeleton, NULL);
+		}
+	}
+	else
+	{
+		// No GPU skinning, all skins go to CPU path
+		for (uint i = 0; i < skinList.size(); i++)
+			cpuSkins.push_back(skinList[i]);
+	}
+
+	// CPU path for remaining skins
+	if (!cpuSkins.empty())
+	{
 
 	// if the SkinManager is not possible at all, just rendered the std way.
 	if( !rdrTrav.getMeshSkinManager() )
 	{
-		for(uint i=0;i<skinList.size();i++)
+		for(uint i=0;i<cpuSkins.size();i++)
 		{
-			skinList[i]->renderSkin(alphaMRM);
+			cpuSkins[i]->renderSkin(alphaMRM);
 		}
 	}
 	else
@@ -1528,17 +1606,17 @@ void			CSkeletonModel::renderSkinList(NLMISC::CObjectVector<CTransform*, false> 
 		uint	vertexSize= meshSkinManager.getVertexSize();
 
 		// render any skins which do not support SkinGrouping, and fill array of skins to group
-		for(uint i=0;i<skinList.size();i++)
+		for(uint i=0;i<cpuSkins.size();i++)
 		{
 			// If don't support, or if too big to fit in the manager, just renderSkin()
-			if(!skinList[i]->supportSkinGrouping())
+			if(!cpuSkins[i]->supportSkinGrouping())
 			{
 				H_AUTO( NL3D_Skin_NotGrouped );
-				skinList[i]->renderSkin(alphaMRM);
+				cpuSkins[i]->renderSkin(alphaMRM);
 			}
 			else
 			{
-				skinsToGroup.push_back(skinList[i]);
+				skinsToGroup.push_back(cpuSkins[i]);
 			}
 		}
 
@@ -1625,6 +1703,8 @@ void			CSkeletonModel::renderSkinList(NLMISC::CObjectVector<CTransform*, false> 
 			meshSkinManager.swapVBHard();
 		}
 	}
+
+	} // if (!cpuSkins.empty())
 }
 
 

@@ -682,7 +682,7 @@ CRenderStringBuffer::CRenderStringBuffer()
 {
 	// Use color per vertex
 	Vertices.setVertexFormat (CVertexBuffer::PositionFlag | CVertexBuffer::TexCoord0Flag | CVertexBuffer::PrimaryColorFlag);
-	Vertices.setPreferredMemory (CVertexBuffer::RAMVolatile, true);
+	Vertices.setBufferUsage (CVertexBuffer::SmallStream, true);
 	Vertices.setName("CRenderStringBuffer");
 	NumQuads= 0;
 }

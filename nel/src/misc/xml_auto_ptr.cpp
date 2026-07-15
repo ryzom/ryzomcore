@@ -17,6 +17,9 @@
 
 
 #include "stdmisc.h"
+
+#ifndef NL_NO_LIBXML2
+
 #include "nel/misc/xml_auto_ptr.h"
 
 #include <libxml/parser.h>
@@ -49,3 +52,5 @@ CXMLAutoPtr &CXMLAutoPtr::operator = (const char *other)
 	_Value = other;
 	return *this;
 }
+
+#endif // NL_NO_LIBXML2

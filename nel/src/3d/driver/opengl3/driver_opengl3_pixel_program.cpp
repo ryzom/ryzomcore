@@ -1,0 +1,1003 @@
+// NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
+// Copyright (C) 2014-2015  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#include "stdopengl3.h"
+
+#include <sstream>
+
+#include "nel/misc/wang_hash.h"
+
+#include "nel/3d/vertex_program.h"
+#include "nel/3d/light.h"
+
+#include "driver_opengl3.h"
+#include "driver_opengl3_program.h"
+#include "driver_opengl3_vertex_buffer.h"
+
+namespace NL3D {
+namespace NLDRIVERGL3 {
+
+bool operator<(const CPPBuiltin &left, const CPPBuiltin &right)
+{	
+	// Material state
+	if (left.Shader != right.Shader)
+		return left.Shader < right.Shader;
+	if (left.Flags != right.Flags)
+		return left.Flags < right.Flags;
+	if (left.TextureActive != right.TextureActive)
+		return left.TextureActive < right.TextureActive;
+	if (left.TexSamplerMode != right.TexSamplerMode)
+		return left.TexSamplerMode < right.TexSamplerMode;					
+	uint maxTex = maxTextures(left.Shader);
+	if (useTexEnv(left.Shader))
+		for (uint stage = 0; stage < maxTex; ++stage)
+			if (left.TexEnvMode[stage] != right.TexEnvMode[stage])
+				return left.TexEnvMode[stage] < right.TexEnvMode[stage];
+
+	// Driver state
+	if (left.VertexFormat != right.VertexFormat)
+		return left.VertexFormat < right.VertexFormat;
+	if (left.Fog != right.Fog)
+		return right.Fog;
+	if (left.FogMode != right.FogMode)
+		return left.FogMode < right.FogMode;
+	if (left.SpecularSeparate != right.SpecularSeparate)
+		return right.SpecularSeparate;
+	if (left.WorldSpacePosition != right.WorldSpacePosition)
+		return right.WorldSpacePosition;
+	if (left.LightMapScale != right.LightMapScale)
+		return right.LightMapScale;
+	if (left.PPL != right.PPL)
+		return right.PPL;
+	if (left.PPLVertexColor != right.PPLVertexColor)
+		return right.PPLVertexColor;
+	if (left.PPClipPlane != right.PPClipPlane)
+		return right.PPClipPlane;
+
+	return false;
+}
+
+bool operator==(const CPPBuiltin &left, const CPPBuiltin &right)
+{
+	// Material state
+	if (left.Shader != right.Shader)
+		return false;
+	if (left.Flags != right.Flags)
+		return false;
+	if (left.TextureActive != right.TextureActive)
+		return false;
+	if (left.TexSamplerMode != right.TexSamplerMode)
+		return false;
+	uint maxTex = maxTextures(left.Shader);
+	if (useTexEnv(left.Shader))
+		for (uint stage = 0; stage < maxTex; ++stage)
+			if (left.TexEnvMode[stage] != right.TexEnvMode[stage])
+				return false;
+
+	// Driver state
+	if (left.VertexFormat != right.VertexFormat)
+		return false;
+	if (left.Fog != right.Fog)
+		return false;
+	if (left.FogMode != right.FogMode)
+		return false;
+	if (left.SpecularSeparate != right.SpecularSeparate)
+		return false;
+	if (left.WorldSpacePosition != right.WorldSpacePosition)
+		return false;
+	if (left.LightMapScale != right.LightMapScale)
+		return false;
+	if (left.PPL != right.PPL)
+		return false;
+	if (left.PPLVertexColor != right.PPLVertexColor)
+		return false;
+	if (left.PPClipPlane != right.PPClipPlane)
+		return false;
+
+	return true;
+}
+
+size_t CPPBuiltinHashTraits::operator()(const CPPBuiltin & v) const
+{
+#if defined(_WIN64) || (defined(HAVE_X86_64) && !defined(_WIN32))
+	uint32 h32;
+	uint64 h64;
+
+	// Material state
+	h32 = NLMISC::lowbias32((uint32)v.Shader);
+	h64 = NLMISC::wangHash64(((uint64)v.Flags) | ((uint64)v.TextureActive << 32));
+	h64 = NLMISC::wangHash64(h64 ^ (uint64)v.TexSamplerMode);
+	uint maxTex = NL3D::NLDRIVERGL3::maxTextures(v.Shader);
+	if (NL3D::NLDRIVERGL3::useTexEnv(v.Shader))
+		for (uint stage = 0; stage < maxTex; ++stage)
+			h32 = NLMISC::lowbias32(h32 ^ (uint32)v.TexEnvMode[stage]);
+
+	// Driver state
+	h32 = NLMISC::lowbias32(h32 ^ (((uint32)v.VertexFormat) | (v.Fog ? 1 << 16 : 0) | ((uint32)v.FogMode << 17) | (v.SpecularSeparate ? 1 << 19 : 0) | (v.WorldSpacePosition ? 1 << 20 : 0) | (v.LightMapScale ? 1 << 21 : 0) | (v.PPL ? 1 << 22 : 0) | (v.PPLVertexColor ? 1 << 23 : 0) | (v.PPClipPlane ? 1 << 24 : 0)));
+
+	h64 = h64 ^ h32; // NLMISC::wangHash64(h64 ^ h32);
+	nlctassert(sizeof(size_t) >= sizeof(uint64));
+	return (size_t)h64;
+#else
+	uint32 h;
+
+	// Material state
+	h = NLMISC::lowbias32((uint32)v.Shader);
+	h = NLMISC::lowbias32(h ^ (uint32)v.Flags);
+	h = NLMISC::lowbias32(h ^ (uint32)v.TextureActive);
+	h = NLMISC::lowbias32(h ^ (uint32)(v.TexSamplerMode & 0xFFFFFFFF));
+	h = NLMISC::lowbias32(h ^ (uint32)(v.TexSamplerMode >> 32));
+	uint maxTex = NL3D::NLDRIVERGL3::maxTextures(v.Shader);
+	if (NL3D::NLDRIVERGL3::useTexEnv(v.Shader))
+		for (uint stage = 0; stage < maxTex; ++stage)
+			h = NLMISC::lowbias32(h ^ (uint32)v.TexEnvMode[stage]);
+
+	// Driver state
+	h = NLMISC::lowbias32(h ^ (((uint32)v.VertexFormat) | (v.Fog ? 1 << 16 : 0) | ((uint32)v.FogMode << 17) | (v.SpecularSeparate ? 1 << 19 : 0) | (v.WorldSpacePosition ? 1 << 20 : 0) | (v.LightMapScale ? 1 << 21 : 0) | (v.PPL ? 1 << 22 : 0) | (v.PPLVertexColor ? 1 << 23 : 0) | (v.PPClipPlane ? 1 << 24 : 0)));
+
+	nlctassert(sizeof(size_t) >= sizeof(uint32));
+	return (size_t)h;
+#endif
+}
+
+} // NLDRIVERGL3
+} // NL3D
+
+namespace NL3D {
+namespace NLDRIVERGL3 {
+
+namespace /* anonymous */ {
+
+const char *s_ShaderNames[] = 
+{
+	"Normal",
+	"Bump",
+	"Usercolor",
+	"Lightmap",
+	"Specular",
+	"Caustics",
+	"Per-Pixel Lighting",
+	"Per-Pixel Lighting, no specular",
+	"Cloud",
+	"Water"
+};
+
+// Canonical getSupportedShader is CDriverGL3::getSupportedShader in driver_opengl3_material.cpp.
+// setupMaterial writes PPBuiltin.Shader; downstream code reads it from there.
+	
+void ppTexEnv(std::stringstream &ss, const CPPBuiltin &desc)
+{
+	uint maxTex = maxTextures(desc.Shader);
+	CMaterial::CTexEnv texEnv;
+	int embmOffsetStage = -1;
+	for (uint stage = 0; stage < maxTex; ++stage)
+	{
+		if (useTex(desc, stage))
+		{
+			texEnv.EnvPacked = desc.TexEnvMode[stage];
+
+			// If previous stage was EMBM, re-sample this texture with offset UVs
+			if (embmOffsetStage >= 0)
+			{
+				std::string tcExpr;
+				if (stage < maxTex && hasFlag(desc.VertexFormat, g_VertexFlags[TexCoord0 + stage]))
+					tcExpr = std::string(g_AttribNames[TexCoord0 + stage]) + ".st";
+				else if (hasFlag(desc.VertexFormat, g_VertexFlags[TexCoord0]))
+					tcExpr = std::string(g_AttribNames[TexCoord0]) + ".st";
+				else
+					tcExpr = "vec2(0.0, 0.0)";
+				uint64 samplerMode = (desc.TexSamplerMode >> (stage * 2)) & 0x3;
+				ss << "texel" << stage << " = texture(sampler" << stage << ", "
+					<< tcExpr << " + embmOffset" << embmOffsetStage
+					<< ((samplerMode == SamplerCube) ? ".stp);" : ");")
+					<< std::endl;
+				embmOffsetStage = -1;
+			}
+
+			// EMBM stage: compute UV offset, pass through previous color
+			if (texEnv.Env.OpRGB == CMaterial::EMBM)
+			{
+				ss << "vec4 texop" << stage << " = ";
+				if (stage > 0)
+					ss << "texop" << (stage - 1);
+				else
+					ss << "fragColor";
+				ss << "; // EMBM passthrough" << std::endl;
+				ss << "vec2 embmOffset" << stage
+					<< " = vec2(dot(embmMatrix" << stage << ".xy, texel" << stage << ".rg), dot(embmMatrix" << stage << ".zw, texel" << stage << ".rg));"
+					<< std::endl;
+				embmOffsetStage = (int)stage;
+				continue;
+			}
+
+			for (uint arg = 0; arg < 3; ++arg)
+			{
+				// Texop arg
+				ss << "vec4 texop" << stage << "arg" << arg << ";" << std::endl;
+
+				// RGB
+				uint rgbArg = texEnv.getColorArg(arg);
+				uint rgbOp = texEnv.getColorOperand(arg);
+				std::stringstream rgbArgVec;
+				switch (rgbArg)
+				{
+				case CMaterial::Texture:
+					rgbArgVec << "texel" << stage;
+					break;
+				case CMaterial::Previous:
+					if (stage > 0)
+					{
+						rgbArgVec << "texop" << (stage - 1);
+						break;
+					}
+				case CMaterial::Diffuse:
+					rgbArgVec << "fragColor";
+					break;
+				case CMaterial::Constant:
+					rgbArgVec << "constant" << stage;
+					break;
+				}
+				ss << "texop" << stage << "arg" << arg << ".rgb = ";
+				switch (rgbOp) // SrcColor=0, InvSrcColor, SrcAlpha, InvSrcAlpha
+				{
+				case CMaterial::SrcColor:
+					ss << rgbArgVec.str() << ".rgb";
+					break;
+				case CMaterial::InvSrcColor:
+					ss << "vec3(1.0, 1.0, 1.0) - " << rgbArgVec.str() << ".rgb";
+					break;
+				case CMaterial::SrcAlpha:
+					ss << rgbArgVec.str() << ".aaa";
+					break;
+				case CMaterial::InvSrcAlpha:
+					ss << "(1.0 - " << rgbArgVec.str() << ").aaa";
+					break;
+				}
+				ss << ";" << std::endl;
+
+				// Alpha
+				uint alphaArg = texEnv.getAlphaArg(arg);
+				uint alphaOp = texEnv.getAlphaOperand(arg);
+				std::stringstream alphaArgVec;
+				switch (alphaArg)
+				{
+				case CMaterial::Texture:
+					alphaArgVec << "texel" << stage;
+					break;
+				case CMaterial::Previous:
+					if (stage > 0)
+					{
+						alphaArgVec << "texop" << (stage - 1);
+						break;
+					}
+				case CMaterial::Diffuse:
+					alphaArgVec << "fragColor";
+					break;
+				case CMaterial::Constant:
+					alphaArgVec << "constant" << stage;
+					break;
+				}
+				ss << "texop" << stage << "arg" << arg << ".a = ";
+				switch (alphaOp) // SrcColor=0, InvSrcColor, SrcAlpha, InvSrcAlpha
+				{
+				case CMaterial::SrcColor:
+					ss << alphaArgVec.str() << ".a";
+					break;
+				case CMaterial::InvSrcColor:
+					ss << "1.0 - " << alphaArgVec.str() << ".a";
+					break;
+				case CMaterial::SrcAlpha:
+					ss << alphaArgVec.str() << ".a";
+					break;
+				case CMaterial::InvSrcAlpha:
+					ss << "1.0 - " << alphaArgVec.str() << ".a";
+					break;
+				}
+				ss << ";" << std::endl;
+			}
+			ss << "vec4 texop" << stage << ";" << std::endl;
+
+			// RGB
+			switch (texEnv.Env.OpRGB)
+			{
+			case CMaterial::InterpolateConstant:
+				ss << "float texop" << stage << "rgbAs = constant" << stage << ".a;" << std::endl;
+				break;
+			case CMaterial::InterpolatePrevious:
+				if (stage > 0)
+				{
+					ss << "float texop" << stage << "rgbAs = texop" << (stage - 1) << ".a;" << std::endl;
+					break;
+				}
+			case CMaterial::InterpolateDiffuse:
+				ss << "float texop" << stage << "rgbAs = fragColor.a;" << std::endl;
+				break;
+			case CMaterial::InterpolateTexture:
+				ss << "float texop" << stage << "rgbAs = texel" << stage << ".a;" << std::endl;
+				break;
+			}
+			ss << "texop" << stage << ".rgb = ";
+			switch (texEnv.Env.OpRGB)
+			{
+			case CMaterial::Replace:
+				ss << "texop" << stage << "arg0.rgb";
+				break;
+			case CMaterial::Modulate:
+				ss << "texop" << stage << "arg0.rgb * texop" << stage << "arg1.rgb";
+				break;
+			case CMaterial::Add:
+				ss << "texop" << stage << "arg0.rgb + texop" << stage << "arg1.rgb";
+				break;
+			case CMaterial::AddSigned:
+				ss << "texop" << stage << "arg0.rgb + texop" << stage << "arg1.rgb - vec3(0.5, 0.5, 0.5)";
+				break;
+			case CMaterial::InterpolateConstant:
+			case CMaterial::InterpolateDiffuse:
+			case CMaterial::InterpolatePrevious:
+			case CMaterial::InterpolateTexture:
+				ss << "texop" << stage << "arg0.rgb * texop" << stage << "rgbAs + texop" << stage << "arg1.rgb * (1.0 - texop" << stage << "rgbAs)";
+				break;
+			case CMaterial::Mad:
+				ss << "texop" << stage << "arg0.rgb * texop" << stage << "arg1.rgb + texop" << stage << "arg2.rgb";
+				break;
+			default:
+				ss << "texop" << stage << "arg0.rgb"; // Fallback
+				break;
+			}
+			ss << ";" << std::endl;
+
+			// Alpha
+			switch (texEnv.Env.OpAlpha)
+			{
+			case CMaterial::InterpolateConstant:
+				ss << "float texop" << stage << "alphaAs = constant" << stage << ".a;" << std::endl;
+				break;
+			case CMaterial::InterpolatePrevious:
+				if (stage > 0)
+				{
+					ss << "float texop" << stage << "alphaAs = texop" << (stage - 1) << ".a;" << std::endl;
+					break;
+				}
+			case CMaterial::InterpolateDiffuse:
+				ss << "float texop" << stage << "alphaAs = fragColor.a;" << std::endl;
+				break;
+			case CMaterial::InterpolateTexture:
+				ss << "float texop" << stage << "alphaAs = texel" << stage << ".a;" << std::endl;
+				break;
+			}
+			ss << "texop" << stage << ".a = ";
+			switch (texEnv.Env.OpAlpha)
+			{
+			case CMaterial::Replace:
+				ss << "texop" << stage << "arg0.a";
+				break;
+			case CMaterial::Modulate:
+				ss << "texop" << stage << "arg0.a * texop" << stage << "arg1.a";
+				break;
+			case CMaterial::Add:
+				ss << "texop" << stage << "arg0.a + texop" << stage << "arg1.a";
+				break;
+			case CMaterial::AddSigned:
+				ss << "texop" << stage << "arg0.a + texop" << stage << "arg1.a - 0.5";
+				break;
+			case CMaterial::InterpolateConstant:
+			case CMaterial::InterpolateDiffuse:
+			case CMaterial::InterpolatePrevious:
+			case CMaterial::InterpolateTexture:
+				ss << "texop" << stage << "arg0.a * texop" << stage << "alphaAs + texop" << stage << "arg1.a * (1.0 - texop" << stage << "alphaAs)";
+				break;
+			case CMaterial::Mad:
+				ss << "texop" << stage << "arg0.a * texop" << stage << "arg1.a + texop" << stage << "arg2.a";
+				break;
+			default:
+				ss << "texop" << stage << "arg0.a"; // Fallback
+				break;
+			}
+			ss << ";" << std::endl;
+		}
+		else if (stage == 0)
+		{
+			ss << "vec4 texop" << stage << " = fragColor; // no active texture in stage" << std::endl;
+		}
+		else
+		{
+			ss << "vec4 texop" << stage << " = texop" << (stage - 1) << "; // no active texture in stage" << std::endl;
+		}
+	}
+	ss << "fragColor = texop" << (maxTex - 1) << ";" << std::endl;
+}
+
+void ppSpecular(std::stringstream &ss, const CPPBuiltin &desc)
+{
+	if (useTex(desc, 0))
+	{
+		ss << "vec3 specop0 = texel0.rgb * fragColor.rgb;" << std::endl;
+		if (useTex(desc, 1))
+		{
+			ss << "vec4 specop1 = vec4(texel1.rgb * texel0.a + specop0, fragColor.a);" << std::endl;
+		}
+		else
+		{
+			nlwarning("Texture stage 1 (reflection) missing in Specular shader");
+			ss << "vec4 specop1 = vec4(specop0, fragColor.a);" << std::endl;
+		}
+		ss << "fragColor = specop1;" << std::endl;
+	}
+	else if (useTex(desc, 1))
+	{
+		nlwarning("Texture stage 0 (color) missing in Specular shader");
+		ss << "vec4 specop1 = vec4(texel1.rgb + fragColor.rgb, 1.0);" << std::endl;
+		ss << "fragColor = specop1;" << std::endl;
+	}
+	else
+	{
+		nlwarning("PP: No textures defined in Specular shader");
+		// do nothing
+	}
+}
+
+void ppLightmap(std::stringstream &ss, const CPPBuiltin &desc, CGlExtensions &glext)
+{
+	uint nstages;
+	for (nstages = 0; nstages < std::min(glext.MaxFragmentTextureImageUnits, (GLint)IDRV_PROGRAM_MAXSAMPLERS); ++nstages)
+		if (!useTex(desc, nstages))
+			break;
+	if (nstages == 0)
+	{
+		// do nothing
+		nlwarning("PP: Lightmap without textures setup");
+	}
+	else if (nstages == 1)
+	{
+		// Diffuse texture only (no lightmaps this pass), modulated by vertex lighting
+		if (desc.LightMapScale)
+			ss << "fragColor = texel0 * nlLightMapScale * fragColor;" << std::endl;
+		else
+			ss << "fragColor = texel0 * fragColor;" << std::endl;
+	}
+	else
+	{
+		// Accumulate lightmap * factor, then multiply by (vertexLighting + lightmapSum) * diffuseTexture
+		ss << "vec4 lightmapop = vec4(0.0, 0.0, 0.0, 0.0);" << std::endl;
+		for (uint stage = 0; stage < (nstages - 1); ++stage)
+			ss << "lightmapop += texel" << stage << " * constant" << stage << ";" << std::endl;
+		if (desc.LightMapScale)
+			ss << "fragColor.rgb = texel" << (nstages - 1) << ".rgb * nlLightMapScale * (fragColor.rgb + lightmapop.rgb);" << std::endl;
+		else
+			ss << "fragColor.rgb = texel" << (nstages - 1) << ".rgb * (fragColor.rgb + lightmapop.rgb);" << std::endl;
+		ss << "fragColor.a = texel" << (nstages - 1) << ".a;" << std::endl;
+	}
+}
+
+void ppGenerate(std::string &result, const CPPBuiltin &desc, CGlExtensions &glext)
+{
+	std::stringstream ss;
+	ss << "// Builtin Pixel Shader: " << s_ShaderNames[desc.Shader] << std::endl;
+	ss << std::endl;
+
+	ss << "#version 330" << std::endl;
+	ss << "#extension GL_ARB_separate_shader_objects : enable" << std::endl;
+	ss << std::endl;
+
+	ss << "out vec4 fragColor;" << std::endl;
+
+	for (int i = Weight; i < NumOffsets; i++)
+	{
+		// Skip locations used by PPL/fog varyings (declared separately below)
+		if (desc.PPLVertexColor && i == VaryingLocationVertexColor)
+			continue;
+		if (desc.PPL && i == VaryingLocationNormal)
+			continue;
+		if (hasFlag(desc.VertexFormat, g_VertexFlags[i]))
+		{
+			ss << "layout(location = " << i << ") smooth in vec4 ";
+			ss << g_AttribNames[i] << ";" << std::endl;
+		}
+	}
+	ss << std::endl;
+	
+	uint maxTex = maxTextures(desc.Shader);
+	uint maxSam = maxSamplers(desc.Shader, glext);
+
+	for (uint stage = 0; stage < maxSam; ++stage)
+	{
+		if (stage == 1 && desc.Shader == CMaterial::UserColor)
+		{
+			ss << "// user color" << std::endl;
+		}
+		if (useTex(desc, stage))
+		{
+			uint64 samplerMode = (desc.TexSamplerMode >> (stage * 2)) & 0x3;
+			ss << "uniform "
+				<< ((samplerMode == SamplerCube) ? "samplerCube" : "sampler2D")
+				<< " sampler" << stage << ";" << std::endl;
+		}
+	}
+	ss << std::endl;
+
+	// ???
+	ss << "uniform vec4 materialColor;" << std::endl; // ?! what is this doing in PP
+	ss << std::endl;
+
+	// TexEnv
+	switch (desc.Shader)
+	{
+	case CMaterial::Normal:
+	case CMaterial::UserColor:
+	case CMaterial::LightMap:
+		for (uint stage = 0; stage < maxSam; ++stage)
+		{
+			if (useTex(desc, stage))
+			{
+				ss << "uniform vec4 constant" << stage << ";" << std::endl;
+				// Declare EMBM matrix uniform for stages with EMBM tex env op
+				if (stage < maxTex)
+				{
+					CMaterial::CTexEnv stageEnv;
+					stageEnv.EnvPacked = desc.TexEnvMode[stage];
+					if (stageEnv.Env.OpRGB == CMaterial::EMBM)
+						ss << "uniform vec4 embmMatrix" << stage << ";" << std::endl;
+				}
+				ss << std::endl;
+			}
+		}
+		break;
+	}
+
+	// Lightmap scale (x2 mode: legacy halve-then-double)
+	if (desc.LightMapScale)
+		ss << "uniform float nlLightMapScale;" << std::endl;
+
+	// Alpha test
+	if (desc.Flags & IDRV_MAT_ALPHA_TEST)
+	{
+		ss << "uniform float alphaRef;" << std::endl;
+		ss << std::endl;
+	}
+
+	// ecPos varying (needed by fog, PPL, and/or PP clip planes)
+	if (desc.Fog || desc.PPL || desc.PPClipPlane)
+		ss << "layout(location = " << VaryingLocationEcPos << ") smooth in vec4 ecPos;" << std::endl;
+
+	// PP clip plane uniforms
+	if (desc.PPClipPlane)
+	{
+		ss << "uniform int nlClipPlaneMask;" << std::endl;
+		for (int i = 0; i < 6; ++i)
+			ss << "uniform vec4 clipPlane" << i << ";" << std::endl;
+		ss << std::endl;
+	}
+
+	// PPL varyings and uniforms
+	if (desc.PPL)
+	{
+		ss << "layout(location = " << VaryingLocationWorldPos << ") smooth in vec4 worldPos;" << std::endl;
+		ss << "layout(location = " << VaryingLocationNormal << ") smooth in vec4 normal;" << std::endl;
+		if (desc.PPLVertexColor)
+			ss << "layout(location = " << VaryingLocationVertexColor << ") smooth in vec4 vertexColor;" << std::endl;
+
+		ss << "uniform int nlNumPerPixelLights;" << std::endl;
+		ss << "uniform vec4 nlMaterialDiffuse;" << std::endl;
+		ss << "uniform vec4 nlMaterialSpecular;" << std::endl;
+		ss << "uniform float nlMaterialShininess;" << std::endl;
+		ss << "uniform vec3 pzbCameraPos;" << std::endl;
+		ss << "uniform vec3 cameraWorldPos;" << std::endl;
+		for (int i = 0; i < NL_OPENGL3_MAX_LIGHT; ++i)
+		{
+			ss << "uniform int nlPpLightMode" << i << ";" << std::endl;
+			ss << "uniform vec3 ppLight" << i << "DirOrPos;" << std::endl;
+			ss << "uniform vec4 ppLight" << i << "ColDiff;" << std::endl;
+			ss << "uniform vec4 ppLight" << i << "ColSpec;" << std::endl;
+			ss << "uniform float ppLight" << i << "ConstAttn;" << std::endl;
+			ss << "uniform float ppLight" << i << "LinAttn;" << std::endl;
+			ss << "uniform float ppLight" << i << "QuadAttn;" << std::endl;
+			ss << "uniform vec3 ppLight" << i << "SpotDir;" << std::endl;
+			ss << "uniform float ppLight" << i << "SpotCutoff;" << std::endl;
+			ss << "uniform float ppLight" << i << "SpotExp;" << std::endl;
+		}
+		ss << std::endl;
+
+		// computeLightPP function (world-space Blinn-Phong, matches mega PP)
+		ss << "void computeLightPP(int lightMode, vec3 dirOrPos, vec4 colDiff, vec4 colSpec," << std::endl;
+		ss << "                    float shininess, float constAttn, float linAttn, float quadAttn," << std::endl;
+		ss << "                    vec3 spotDir, float spotCutoff, float spotExp," << std::endl;
+		ss << "                    vec3 wsNormal, vec3 wsPos, vec3 eyeDir, vec3 pzbCamPos," << std::endl;
+		ss << "                    inout vec4 pplDiffuse, inout vec4 pplSpecular)" << std::endl;
+		ss << "{" << std::endl;
+		ss << "  if (lightMode < 0) return;" << std::endl;
+		ss << "  vec3 lightDir;" << std::endl;
+		ss << "  float attnFactor = 1.0;" << std::endl;
+		ss << "  if (lightMode == " << (int)CLight::DirectionalLight << ") {" << std::endl;
+		ss << "    lightDir = normalize(-dirOrPos);" << std::endl;
+		ss << "  } else {" << std::endl;
+		ss << "    vec3 lightPosRel = dirOrPos - pzbCamPos;" << std::endl;
+		ss << "    vec3 lightVec = lightPosRel - wsPos;" << std::endl;
+		ss << "    float d = length(lightVec);" << std::endl;
+		ss << "    lightDir = lightVec / d;" << std::endl;
+		ss << "    attnFactor = 1.0 / (constAttn + linAttn * d + quadAttn * d * d);" << std::endl;
+		ss << "    if (lightMode == " << (int)CLight::SpotLight << ") {" << std::endl;
+		ss << "      float sd = dot(-lightDir, normalize(spotDir));" << std::endl;
+		ss << "      attnFactor *= (sd >= spotCutoff) ? pow(sd, spotExp) : 0.0;" << std::endl;
+		ss << "    }" << std::endl;
+		ss << "  }" << std::endl;
+		ss << "  float diff = max(0.0, dot(lightDir, wsNormal));" << std::endl;
+		ss << "  pplDiffuse += diff * attnFactor * colDiff;" << std::endl;
+		ss << "  vec3 h = normalize(lightDir + eyeDir);" << std::endl;
+		ss << "  float spec = diff > 0.0 ? pow(max(0.0, dot(wsNormal, h)), shininess) : 0.0;" << std::endl;
+		ss << "  pplSpecular += spec * attnFactor * colSpec;" << std::endl;
+		ss << "}" << std::endl;
+		ss << std::endl;
+	}
+
+	// Fog
+	if (desc.Fog)
+	{
+		ss << "uniform vec2 fogParams;" << std::endl; // s = start, t = end
+		ss << "uniform vec4 fogColor;" << std::endl;
+		if (desc.FogMode != 0) // Exp or Exp2
+			ss << "uniform float fogDensity;" << std::endl;
+
+		ss << "vec4 applyFog(vec4 col)" << std::endl;
+		ss << "{" << std::endl;
+		ss << "  float z = abs(ecPos.y / ecPos.w);" << std::endl;
+		switch (desc.FogMode)
+		{
+		default: // Linear
+			ss << "  float fogFactor = clamp((fogParams.t - z) / (fogParams.t - fogParams.s), 0.0, 1.0);" << std::endl;
+			break;
+		case 1: // Exp
+			ss << "  float fogFactor = clamp(exp(-fogDensity * z), 0.0, 1.0);" << std::endl;
+			break;
+		case 2: // Exp2
+			ss << "  float fogFactor = clamp(exp(-fogDensity * fogDensity * z * z), 0.0, 1.0);" << std::endl;
+			break;
+		}
+		ss << "  vec4 fColor = mix(fogColor, col, fogFactor);" << std::endl;
+		ss << "  fColor.a = col.a;" << std::endl;
+		ss << "  return fColor;" << std::endl;
+		ss << "}" << std::endl;
+		ss << std::endl;
+	}
+
+	ss << "layout(location = " << VaryingLocationDiffuseColor << ") smooth in vec4 diffuseColor;" << std::endl;
+	if (desc.SpecularSeparate)
+		ss << "layout(location = " << VaryingLocationSpecularColor << ") smooth in vec4 specularColor;" << std::endl;
+	ss << std::endl;
+	
+	ss << "void main(void)" << std::endl;
+	ss << "{" << std::endl;
+
+	// PP clip plane discard (early out before any texture work)
+	if (desc.PPClipPlane)
+	{
+		ss << "{" << std::endl;
+		ss << "  vec4 clipPos = vec4(ecPos.xyz / ecPos.w, 1.0);" << std::endl;
+		for (int i = 0; i < 6; ++i)
+			ss << "  if ((nlClipPlaneMask & " << (1 << i) << ") != 0 && dot(clipPlane" << i << ", clipPos) < 0.0) discard;" << std::endl;
+		ss << "}" << std::endl;
+	}
+
+	// Vertex color (light or unlit diffuse, primary and secondary)
+	ss << "fragColor = diffuseColor;" << std::endl;
+
+	// Per-pixel lighting accumulation
+	if (desc.PPL)
+	{
+		ss << "vec4 pplSpecAccum = vec4(0.0);" << std::endl;
+		ss << "if (nlNumPerPixelLights > 0) {" << std::endl;
+		ss << "  vec3 wsPos = worldPos.xyz / worldPos.w;" << std::endl;
+		ss << "  vec3 wsNormal = normalize(normal.xyz);" << std::endl;
+		ss << "  vec3 eyeDir = normalize(cameraWorldPos - wsPos);" << std::endl;
+		ss << "  vec4 pplDiff = vec4(0.0);" << std::endl;
+		for (int i = 0; i < NL_OPENGL3_MAX_LIGHT; ++i)
+		{
+			ss << "  if (" << i << " < nlNumPerPixelLights)" << std::endl;
+			ss << "    computeLightPP(nlPpLightMode" << i << ", ppLight" << i << "DirOrPos," << std::endl;
+			ss << "      ppLight" << i << "ColDiff * " << (desc.PPLVertexColor ? "vec4(1.0)" : "nlMaterialDiffuse") << "," << std::endl;
+			ss << "      ppLight" << i << "ColSpec * nlMaterialSpecular," << std::endl;
+			ss << "      nlMaterialShininess," << std::endl;
+			ss << "      ppLight" << i << "ConstAttn, ppLight" << i << "LinAttn, ppLight" << i << "QuadAttn," << std::endl;
+			ss << "      ppLight" << i << "SpotDir, ppLight" << i << "SpotCutoff, ppLight" << i << "SpotExp," << std::endl;
+			ss << "      wsNormal, wsPos, eyeDir, pzbCameraPos," << std::endl;
+			ss << "      pplDiff, pplSpecAccum);" << std::endl;
+		}
+		if (desc.PPLVertexColor)
+			ss << "  fragColor.rgb = clamp(fragColor.rgb + pplDiff.rgb * vertexColor.rgb, 0.0, 1.0);" << std::endl;
+		else
+			ss << "  fragColor.rgb = clamp(fragColor.rgb + pplDiff.rgb, 0.0, 1.0);" << std::endl;
+		ss << "}" << std::endl;
+	}
+
+	for (uint stage = 0; stage < maxSam; ++stage)
+	{
+		if (stage == 1 && desc.Shader == CMaterial::UserColor)
+		{
+			ss << "vec4 texel1 = texel0;" << std::endl; // UserColor has one single texture set up in two textures, we optimize this away here
+		}
+		else if (useTex(desc, stage))
+		{
+			ss << "vec4 texel" << stage << " = texture(sampler" << stage << ", ";	
+			if (desc.Shader == CMaterial::LightMap && stage != (maxSam - 1) && useTex(desc, stage + 1) && hasFlag(desc.VertexFormat, g_VertexFlags[TexCoord1]))
+			{
+				ss << g_AttribNames[TexCoord1];
+			}
+			else if (desc.Shader == CMaterial::LightMap && hasFlag(desc.VertexFormat, g_VertexFlags[TexCoord0]))
+			{
+				ss << g_AttribNames[TexCoord0];
+			}
+			else if (stage < maxTex && hasFlag(desc.VertexFormat, g_VertexFlags[TexCoord0 + stage]))
+			{
+				ss << g_AttribNames[TexCoord0 + stage];
+			}
+			else if (hasFlag(desc.VertexFormat, g_VertexFlags[TexCoord0]))
+			{
+				ss << g_AttribNames[TexCoord0];
+			}
+			else
+			{
+				nlwarning("GL3: Pixel Program generated for material with coordinateless texture");
+				ss << "vec4(0.0, 0.0, 0.0, 0.0)";
+			}
+			uint64 samplerMode = (desc.TexSamplerMode >> (stage * 2)) & 0x3;
+			ss << ((samplerMode == SamplerCube) ? ".stp);" : ".st);");
+			ss << std::endl;
+		}
+	}
+
+	switch (desc.Shader)
+	{
+	case CMaterial::Normal:
+	case CMaterial::UserColor:
+		ppTexEnv(ss, desc);
+		break;
+	case CMaterial::Specular:
+		ppSpecular(ss, desc);
+		break;
+	case CMaterial::LightMap:
+		ppLightmap(ss, desc, glext);
+		break;
+	default:
+		nlwarning("GL3: Try to generate unknown shader type (%s)", s_ShaderNames[desc.Shader]);
+		// ss << "fragColor = vec(1.0, 0.0, 0.5, 1.0);" << std::endl;
+		break;
+	}
+
+	// Add specular post-texture (matches legacy GL_COLOR_SUM / GL_SEPARATE_SPECULAR_COLOR)
+	if (desc.SpecularSeparate)
+		ss << "fragColor.rgb += specularColor.rgb;" << std::endl;
+	if (desc.PPL)
+		ss << "fragColor.rgb += pplSpecAccum.rgb;" << std::endl;
+
+	if (desc.Flags & IDRV_MAT_ALPHA_TEST)
+	{
+		ss << "if (fragColor.a <= alphaRef) discard;" << std::endl; // GL_GREATER: pass if alpha > ref
+	}
+
+	if (desc.Fog)
+	{
+		ss << "fragColor = applyFog(fragColor);" << std::endl;
+	}
+
+	ss << "}" << std::endl;
+
+	result = ss.str();
+}
+
+} /* anonymous namespace */
+
+void CDriverGL3::generateBuiltinPixelProgram(CMaterial &mat)
+{
+	CMaterialDrvInfosGL3 *matDrv = static_cast<CMaterialDrvInfosGL3 *>((IMaterialDrvInfos *)(mat._MatDrvInfo));
+	nlassert(matDrv);
+
+	CHashSet<CPPBuiltin, CPPBuiltinHashTraits>::iterator it = m_PPBuiltinCache.find(matDrv->PPBuiltin);
+	if (it != m_PPBuiltinCache.end())
+	{
+		matDrv->PPBuiltin.PixelProgram = it->PixelProgram;
+		return;
+	}
+
+	std::string result;
+	ppGenerate(result, matDrv->PPBuiltin, _Extensions);
+
+	CPixelProgram *program = new CPixelProgram();
+	IProgram::CSource *src = new IProgram::CSource();
+	src->Profile = IProgram::glsl330f;
+	src->DisplayName = "Builtin Pixel Program (" + NLMISC::toString(m_PPBuiltinCache.size()) + ")";
+	src->setSource(result);
+	program->addSource(src);
+
+	nldebug("GL3: Generate '%s'", src->DisplayName.c_str());
+
+	if (!compilePixelProgram(program))
+	{
+		nlwarning("GL3: Builtin PP compilation failed (shader=%d, fmt=0x%x, fog=%d)",
+			(int)matDrv->PPBuiltin.Shader, matDrv->PPBuiltin.VertexFormat, (int)matDrv->PPBuiltin.Fog);
+		delete program;
+		program = NULL;
+	}
+
+	matDrv->PPBuiltin.PixelProgram = program;
+	m_PPBuiltinCache.insert(matDrv->PPBuiltin);
+}
+
+void CPPBuiltin::checkDriverStateTouched(CDriverGL3 *driver) // MUST NOT depend on any state set by checkMaterialStateTouched
+{
+	// Add generated texture coordinates to vertex format // TODO: Eliminate unused flags
+	uint16 vertexFormat = driver->m_VPBuiltinCurrent.VertexFormat;
+	for (sint stage = 0; stage < IDRV_MAT_MAXTEXTURES; ++stage)
+		if (driver->m_VPBuiltinCurrent.TexGenMode[stage] >= 0)
+			vertexFormat |= g_VertexFlags[TexCoord0 + stage];
+	// When a user VP is active, it may output varyings not in the VB.
+	// Use VPVertexFormat from the program to declare matching PP inputs.
+	if (driver->m_UserVertexProgram)
+		vertexFormat |= driver->m_UserVertexProgram->features().VPVertexFormat;
+	vertexFormat &= ~g_VertexFlags[PrimaryColor];
+	vertexFormat &= ~g_VertexFlags[SecondaryColor];
+
+	// Compare values
+	if (VertexFormat != vertexFormat)
+	{
+		VertexFormat = vertexFormat;
+		Touched = true;
+	}
+	if (Fog != driver->m_VPBuiltinCurrent.Fog)
+	{
+		Fog = driver->m_VPBuiltinCurrent.Fog;
+		Touched = true;
+	}
+	uint8 fogMode = (uint8)driver->_FogMode;
+	if (FogMode != fogMode)
+	{
+		FogMode = fogMode;
+		Touched = true;
+	}
+	if (SpecularSeparate != driver->m_VPSpecularOutput)
+	{
+		SpecularSeparate = driver->m_VPSpecularOutput;
+		Touched = true;
+	}
+	if (WorldSpacePosition != driver->m_VPWorldSpacePositionOutput)
+	{
+		WorldSpacePosition = driver->m_VPWorldSpacePositionOutput;
+		Touched = true;
+	}
+	bool ppl = driver->m_VPBuiltinCurrent.NumPerPixelLights > 0;
+	if (PPL != ppl)
+	{
+		PPL = ppl;
+		Touched = true;
+	}
+	bool pplVertexColor = ppl && driver->m_VPBuiltinCurrent.VertexColorLighted;
+	if (PPLVertexColor != pplVertexColor)
+	{
+		PPLVertexColor = pplVertexColor;
+		Touched = true;
+	}
+	bool ppClipPlane = driver->m_VPBuiltinCurrent.PPClipPlane;
+	if (PPClipPlane != ppClipPlane)
+	{
+		PPClipPlane = ppClipPlane;
+		Touched = true;
+	}
+}
+
+// TODO: Restructure — material-derived PPBuiltin state (Shader, Flags, TextureActive,
+// TexSamplerMode, TexEnvMode) should be pushed directly from setupMaterial.
+// LightMap texture state (TextureActive, TexSamplerMode from _CurrentTexture[])
+// should be pushed from setupLightmapPass.
+// These functions are no longer called; kept for reference during restructuring.
+#if 0
+void CPPBuiltin::checkDriverMaterialStateTouched(CDriverGL3 *driver, CMaterial::TShader shader)
+{
+	switch (shader)
+	{
+	case CMaterial::LightMap:
+		// Use Textures from current driver state
+		uint maxSam = maxSamplers(shader, driver->_Extensions);
+		uint32 textureActive = 0;
+		uint64 texSamplerMode = 0;
+		for (uint stage = 0; stage < maxSam; ++stage) // NB: Limited to IDRV_PROGRAM_MAXSAMPLERS here
+		{
+			NL3D::ITexture *tex = driver->_CurrentTexture[stage];
+			if (tex)
+			{
+				textureActive |= (1 << stage);
+				texSamplerMode |= (tex->isTextureCube() ? SamplerCube : Sampler2D) << (stage * 2);
+			}
+		}
+		if (TextureActive != textureActive)
+		{
+			TextureActive = textureActive;
+			Touched = true;
+		}
+		if (TexSamplerMode != texSamplerMode)
+		{
+			TexSamplerMode = texSamplerMode;
+			Touched = true;
+		}
+		break;
+	}
+}
+
+void CPPBuiltin::checkMaterialStateTouched(CMaterial &mat, CMaterial::TShader shader)
+{
+	uint32 touched = !PixelProgram ? IDRV_TOUCHED_ALL : mat.getTouched();
+	if (touched == 0) return;
+
+	if (Shader != shader)
+	{
+		Shader = shader;
+		Touched = true;
+	}
+	uint32 flags = mat.getFlags();
+	flags &= IDRV_MAT_ALPHA_TEST;
+	if (Flags != flags)
+	{
+		Flags = flags;
+		Touched = true;
+	}
+	uint maxTex = maxTextures(shader);
+	if (touched & IDRV_TOUCHED_ALLTEX)
+	{
+		switch (shader)
+		{
+		case CMaterial::LightMap:
+			break;
+		default:
+			uint32 textureActive = 0;
+			uint64 texSamplerMode = 0;
+			for (uint stage = 0; stage < maxTex; ++stage)
+			{
+				NL3D::ITexture *tex = mat._Textures[stage];
+				if (tex)
+				{
+					textureActive |= (1 << stage);
+					texSamplerMode |= (tex->isTextureCube() ? SamplerCube : Sampler2D) << (stage * 2);
+				}
+			}
+			if (TextureActive != textureActive)
+			{
+				TextureActive = textureActive;
+				Touched = true;
+			}
+			if (TexSamplerMode != texSamplerMode)
+			{
+				TexSamplerMode = texSamplerMode;
+				Touched = true;
+			}
+			break;
+		}
+	}
+	if (useTexEnv(shader) && (touched & IDRV_TOUCHED_TEXENV))
+	{
+		for (uint stage = 0; stage < maxTex; ++stage)
+		{
+			if (TexEnvMode[stage] != mat._TexEnvs[stage].EnvPacked)
+			{
+				TexEnvMode[stage] = mat._TexEnvs[stage].EnvPacked;
+				Touched = true;
+			}
+		}
+	}
+
+	mat.clearTouched(0xFFFFFFFF);
+}
+#endif
+
+} // NLDRIVERGL3
+} // NL3D
+

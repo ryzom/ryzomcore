@@ -89,7 +89,8 @@ SOURCE_GROUP("user_classes" FILES ${USER_CLASSES})
 
 
 NL_TARGET_LIB(nelsound ${HEADERS} ${SRC})
-add_project_library_alias(nelsound sound)
+add_library(NeL::sound ALIAS nelsound)
+set_target_properties(nelsound PROPERTIES EXPORT_NAME sound)
 
 IF(HUNTER_ENABLED)
   HUNTER_ADD_PACKAGE(libogg)
@@ -99,8 +100,13 @@ IF(HUNTER_ENABLED)
 
   HUNTER_ADD_PACKAGE(vorbis)
   FIND_PACKAGE(vorbis CONFIG REQUIRED)
-  SET(VORBIS_LIBRARY vorbis::vorbis)
-  SET(VORBISFILE_LIBRARY vorbis::vorbisfile)
+  # add compatibility with vorbis cmake config
+  if(NOT TARGET Vorbis::vorbis)
+	  add_library(Vorbis::vorbis ALIAS vorbis::vorbis)
+  endif()
+  if(NOT TARGET Vorbis::vorbisfile)
+	  add_library(Vorbis::vorbisfile ALIAS vorbis::vorbisfile)
+  endif()
 
   IF(WITH_FFMPEG)
     HUNTER_ADD_PACKAGE(ffmpeg)
@@ -111,14 +117,12 @@ ENDIF()
 
 TARGET_INCLUDE_DIRECTORIES(nelsound
 		PRIVATE
-		${VORBIS_INCLUDE_DIR}
-		${VORBIS_INCLUDE_DIR}/vorbis
 		${OGG_INCLUDE_DIR}
 )
 
-TARGET_LINK_LIBRARIES(nelsound PUBLIC ${VORBISFILE_LIBRARY} ${VORBIS_LIBRARY})
+TARGET_LINK_LIBRARIES(nelsound PRIVATE Vorbis::vorbis Vorbis::vorbisfile)
 
-IF(WITH_STATIC OR ${VORBISFILE_LIBRARY} MATCHES "\\.a")
+IF(WITH_STATIC OR "${VORBISFILE_LIBRARY}" MATCHES "\\.a")
   # Add libogg dependency only if target is static because to libvorbisfile
   TARGET_LINK_LIBRARIES(nelsound PUBLIC ${OGG_LIBRARY})
 ENDIF()
@@ -132,11 +136,11 @@ ENDIF()
 
 TARGET_LINK_LIBRARIES(nelsound
         PUBLIC
-        nelmisc
-        nelligo
-        nelgeorges
-        nel3d
-        nelsnd_lowlevel
+        NeL::misc
+		NeL::ligo
+        NeL::georges
+        NeL::3d
+        NeL::snd_lowlevel
         PRIVATE
         LibXml2::LibXml2
 )

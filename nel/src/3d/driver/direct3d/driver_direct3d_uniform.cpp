@@ -35,6 +35,8 @@ void CDriverD3D::setUniform4f(TProgram program, uint index, float f0, float f1, 
 {
 	H_AUTO_D3D(CDriverD3D_setUniform4f);
 
+	if (index == ~0u) return; // getUniformIndex returns ~0 when uniform not found
+
 	const float tabl[4] = { f0, f1, f2, f3 };
 	switch (program)
 	{
@@ -56,6 +58,8 @@ void CDriverD3D::setUniform4f(TProgram program, uint index, float f0, float f1, 
 void CDriverD3D::setUniform4fv(TProgram program, uint index, size_t num, const float *src)
 {
 	H_AUTO_D3D(CDriverD3D_setUniform4fv);
+
+	if (index == ~0u) return; // getUniformIndex returns ~0 when uniform not found
 
 	switch (program)
 	{
@@ -174,8 +178,9 @@ void CDriverD3D::setUniform4uiv(TProgram program, uint index, size_t num, const 
 
 void CDriverD3D::setUniformMatrix(NL3D::IDriver::TProgram program, uint index, NL3D::IDriver::TMatrix matrix, NL3D::IDriver::TTransform transform)
 {
+	if (index == ~0u) return;
 	H_AUTO_D3D(CDriverD3D_setUniformMatrix);
-	
+
 	D3DXMATRIX mat;
 	D3DXMATRIX *matPtr = NULL;
 	switch (matrix)
@@ -215,6 +220,7 @@ void CDriverD3D::setUniformMatrix(NL3D::IDriver::TProgram program, uint index, N
 
 void CDriverD3D::setUniformFog(NL3D::IDriver::TProgram program, uint index)
 {
+	if (index == ~0u) return;
 	H_AUTO_D3D(CDriverD3D_setUniformFog)
 
 	/* "oFog" must always be between [1, 0] what ever you set in D3DRS_FOGSTART and D3DRS_FOGEND (1 for no fog, 0 for full fog).

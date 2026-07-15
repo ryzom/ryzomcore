@@ -532,15 +532,17 @@ bool CDriverGL::setupMaterial(CMaterial& mat)
 		// Fog Part.
 		//=================
 
-		// Disable fog if dest blend is ONE
-		if (blend && (pShader->DstBlend == GL_ONE))
+		_DriverGLStates.enableFog(_FogEnabled);
+
+		// Use black fog color for additive blend to avoid brightening the scene with fog
+		if (blend && (pShader->DstBlend == GL_ONE) && _FogEnabled)
 		{
-			_DriverGLStates.enableFog(false);
+			static GLfloat blackFog[4] = { 0, 0, 0, 0 };
+			glFogfv(GL_FOG_COLOR, blackFog);
 		}
-		else
+		else if (_FogEnabled)
 		{
-			// Restore fog state to its current value
-			_DriverGLStates.enableFog(_FogEnabled);
+			glFogfv(GL_FOG_COLOR, _CurrentFogColor);
 		}
 
 		// Texture shader part.
@@ -2287,7 +2289,13 @@ void CDriverGL::setupWaterPassARB(const CMaterial &mat)
 	{
 		activateTexture(k, NULL);
 	}
-	nglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, ARBWaterShader[(_FogEnabled ? 1 : 0) | (mat.getTexture(3) != NULL ? 2 : 0)]);
+	uint waterShaderIdx = (_FogEnabled ? 1 : 0) | (mat.getTexture(3) != NULL ? 2 : 0);
+	// Calculated reflectivity: blend alpha from the per-vertex
+	// reflectivity base + reflection luma (variant optional; flat
+	// reflection alpha otherwise)
+	if (mat.isWaterCalcReflectivity() && ARBWaterShader[4])
+		waterShaderIdx |= 4;
+	nglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, ARBWaterShader[waterShaderIdx]);
 	glEnable(GL_FRAGMENT_PROGRAM_ARB);
 
 	// setup the constant
@@ -2459,13 +2467,27 @@ void CDriverGL::setupWaterPass(uint /* pass */)
 	CMaterial &mat = *_CurrentMaterial;
 	nlassert(_CurrentMaterial->getShader() == CMaterial::Water);
 
-	if (_Extensions.NVTextureShader)
+	// Calculated reflectivity draws need the ARB variants (the NV20
+	// texture shader path cannot derive the blend alpha from the
+	// reflection luma); legacy envmap draws keep the original NV-first
+	// order by design intent.
+	// NB: an unexplained failure was observed once on modern NVIDIA at
+	// 96f2f6941: after planar (ARB) water had run in the session, flipping
+	// MaxWaterReflections to 0 left all-NV20 water frames with the stage 2
+	// envmap fetch missing (bump map showing as an opaque scrolling
+	// texture), while an NV20-only session renders fine — root cause not
+	// yet identified (FXAA's ARB fragment programs coexist with NV20 water
+	// without issue, so it is not FP usage per se).
+	const bool calcARB = mat.isWaterCalcReflectivity() && ARBWaterShader[4] != 0;
+	_CurWaterPassIsARB = false;
+	if (_Extensions.NVTextureShader && !calcARB)
 	{
 		setupWaterPassNV20(mat);
 	}
 	else if (ARBWaterShader[0])
 	{
 		setupWaterPassARB(mat);
+		_CurWaterPassIsARB = true;
 	}
 	else if (ATIWaterShaderHandleNoDiffuseMap)
 	{
@@ -2481,6 +2503,14 @@ void CDriverGL::endWaterMultiPass()
 #ifndef USE_OPENGLES
 	nlassert(_CurrentMaterial->getShader() == CMaterial::Water);
 	// NB : as fragment shaders / programs bypass the texture envs, no special env enum is added (c.f CTexEnvSpecial)
+	// mirror the setupWaterPass routing (calculated reflectivity draws
+	// take the ARB path even when NV_texture_shader is present)
+	if (_CurWaterPassIsARB)
+	{
+		glDisable(GL_FRAGMENT_PROGRAM_ARB);
+		_CurWaterPassIsARB = false;
+		return;
+	}
 	if (_Extensions.NVTextureShader) return;
 	if (ARBWaterShader[0])
 	{

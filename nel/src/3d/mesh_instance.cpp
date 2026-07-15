@@ -21,6 +21,7 @@
 #include "nel/3d/skeleton_model.h"
 #include "nel/3d/u_scene.h"
 #include "nel/3d/scene.h"
+#include "nel/3d/gpu_skin_vp.h"
 #include <list>
 
 using namespace std;
@@ -161,6 +162,33 @@ void	CMeshInstance::initRenderFilterType()
 		else
 			_RenderFilterType= UScene::FilterMeshNoVP;
 	}
+}
+
+// ***************************************************************************
+bool			CMeshInstance::supportGPUSkinning() const
+{
+	if(Shape)
+	{
+		CMesh	*pMesh= safe_cast<CMesh*>((IShape*)Shape);
+		return	pMesh->getMeshGeom().supportGPUSkinning();
+	}
+	else
+		return false;
+}
+// ***************************************************************************
+void			CMeshInstance::renderGPUSkin(float alphaMRM, CSkeletonModel *skeleton)
+{
+	if(Shape && getVisibility() != CHrcTrav::Hide)
+	{
+		CMesh *pMesh = NLMISC::safe_cast<CMesh *>((IShape*)Shape);
+		CMeshGeom	&meshGeom= const_cast<CMeshGeom&>(pMesh->getMeshGeom ());
+		meshGeom.renderGPUSkin(this, skeleton);
+	}
+}
+// ***************************************************************************
+CVertexProgram			*CMeshInstance::getGPUSkinVP() const
+{
+	return getGPUSkinSimpleInsertVP();
 }
 
 // ***************************************************************************

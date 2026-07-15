@@ -43,7 +43,7 @@ CCallbackClient::CCallbackClient( TRecordingState rec, const std::string& recfil
 	CBufClient::setDisconnectionCallback (_NewDisconnectionCallback, this);
 
 	_IsAServer = false;
-	_DefaultCallback = NULL;
+	_DefaultCallback = TMsgCallback();
 }
 
 CCallbackClient::~CCallbackClient()

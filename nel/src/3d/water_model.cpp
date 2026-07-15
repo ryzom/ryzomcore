@@ -59,21 +59,46 @@ NLMISC::CRefPtr<IDriver> CWaterModel::_CurrDrv;
 volatile bool forceWaterSimpleRender = false;
 
 //=======================================================================
-void CWaterModel::setupVertexBuffer(CVertexBuffer &vb, uint numWantedVertices, IDriver *drv)
+void CWaterModel::setupVertexBuffer(CVertexBuffer &vb, uint numWantedVertices, IDriver *drv, bool baseChannelUVs)
 {
 	if (!numWantedVertices) return;
-	if (vb.getNumVertices() == 0 || drv != _CurrDrv) // not setupped yet, or driver changed ?
+	// Wanted format: the water-shader path needs positions only, unless
+	// some surface needs the per-vertex channel this frame (planar
+	// reflection UV + reflectivity base in TexCoord0, Float3 — see
+	// wantsCalcReflectivityUVs). The non-water-shader path always has
+	// plain Float2 UVs.
+	uint16 wantedFormat;
+	CVertexBuffer::TType wantedUVType = CVertexBuffer::Float2;
+	if (drv->supportWaterShader() && !baseChannelUVs)
+	{
+		wantedFormat = CVertexBuffer::PositionFlag;
+	}
+	else
+	{
+		wantedFormat = CVertexBuffer::PositionFlag | CVertexBuffer::TexCoord0Flag;
+		// only the water-shader path carries the base in TexCoord0.z; the
+		// non-shader path uses plain Float2 texture coordinates
+		if (baseChannelUVs && drv->supportWaterShader())
+			wantedUVType = CVertexBuffer::Float3;
+	}
+	bool uvTypeChanged = (wantedFormat & CVertexBuffer::TexCoord0Flag) != 0
+		&& vb.getVertexFormat() == wantedFormat
+		&& vb.getValueType(CVertexBuffer::TexCoord0) != wantedUVType;
+	if (vb.getNumVertices() == 0 || drv != _CurrDrv || vb.getVertexFormat() != wantedFormat || uvTypeChanged) // not setupped yet, driver or format changed ?
 	{
 		vb.setNumVertices(0);
 		vb.setName("Water");
-		vb.setPreferredMemory(CVertexBuffer::AGPPreferred, false);
-		if (drv->supportWaterShader())
+		vb.setBufferUsage(CVertexBuffer::FullRewrite, false);
+		if (wantedFormat & CVertexBuffer::TexCoord0Flag)
 		{
-			vb.setVertexFormat(CVertexBuffer::PositionFlag);
+			vb.clearValueEx();
+			vb.addValueEx(CVertexBuffer::Position, CVertexBuffer::Float3);
+			vb.addValueEx(CVertexBuffer::TexCoord0, wantedUVType);
+			vb.initEx();
 		}
 		else
 		{
-			vb.setVertexFormat(CVertexBuffer::PositionFlag | CVertexBuffer::TexCoord0Flag);
+			vb.setVertexFormat(wantedFormat);
 		}
 		_CurrDrv = drv;
 	}
@@ -87,6 +112,21 @@ void CWaterModel::setupVertexBuffer(CVertexBuffer &vb, uint numWantedVertices, I
 }
 
 //=======================================================================
+bool CWaterModel::wantsCalcReflectivityUVs() const
+{
+	nlassert(Shape);
+	CWaterShape *shape = NLMISC::safe_cast<CWaterShape *>((IShape *) Shape);
+	// explicit artist opt-in for always-envmap surfaces
+	if (shape->isEnvMapCalcReflectivityEnabled()) return true;
+	// reflection-capable surfaces keep the calculated reflectivity when
+	// falling back to the envmap (budget, admission, reflections disabled),
+	// so budget swaps between planar and envmap stay visually continuous
+	if (shape->isRealtimeReflectionEnabled()) return true;
+	CScene *scene = getOwnerScene();
+	return scene && scene->getWaterReflectionManager().getForceReflections();
+}
+
+//=======================================================================
 CWaterModel::CWaterModel()
 {
 	setOpacity(false);
@@ -97,6 +137,7 @@ CWaterModel::CWaterModel()
 	_Prev = NULL;
 	_Next = NULL;
 	_MatrixUpdateDate = 0;
+	_PlanarReflection = NULL;
 }
 
 //=======================================================================
@@ -353,7 +394,7 @@ static void DrawPoly2D(CVertexBuffer &vb, IDriver *drv, const NLMISC::CMatrix &m
 			vba.setValueFloat2Ex (WATER_VB_DX,  k, 0, 0);
 		}
 	}
-	static CIndexBuffer ib;
+	static CIndexBuffer ib; // STATIC GPU RESOURCE: Blocks multiple driver instances
 	ib.setNumIndexes(3 * p.Vertices.size());
 	{
 		CIndexBufferReadWrite ibaWrite;
@@ -518,15 +559,19 @@ void	CWaterModel::traverseRender()
 			const uint  doubleWaterHeightMapSize = (WaterHeightMapSize << 1);
 
 
-			sint64 idate = getOwnerScene()->getHrcTrav().CurrentDate;
+			// Animate once per frame: keyed on the scene frame id, NOT the
+			// HRC traversal date — replicated render passes (stereo eyes,
+			// reflections) re-run the HRC pass within one frame, and a
+			// per-traversal key advances the waves once per eye
+			sint64 idate = (sint64)getOwnerScene()->getFrameId();
 
-
-
+			// The height map user window follows the observer on every
+			// render (apps may render without animating)
+			whm.setUserPos((sint) (obsPos.x * invWaterRatio) - (WaterHeightMapSize >> 1),
+				   (sint) (obsPos.y * invWaterRatio) - (WaterHeightMapSize >> 1)
+				  );
 			if (idate != whm.Date)
 			{
-				whm.setUserPos((sint) (obsPos.x * invWaterRatio) - (WaterHeightMapSize >> 1),
-					   (sint) (obsPos.y * invWaterRatio) - (WaterHeightMapSize >> 1)
-					  );
 				nlassert(getOwnerScene()); // this object should have been created from a CWaterShape!
 				whm.animate((float) (getOwnerScene()->getEllapsedTime()));
 				whm.Date = idate;
@@ -913,15 +958,43 @@ void CWaterModel::setupMaterialNVertexShader(IDriver *drv, CWaterShape *shape, c
 	//	setup Water material   //
 	//=========================//
 	shape->initVertexProgram();
-	CVertexProgramWaterVPNoWave *program = shape->_ColorMap ? CWaterShape::_VertexProgramNoWaveDiffuse : CWaterShape::_VertexProgramNoWave;
+	CScene *scene = getOwnerScene();
+	// Realtime planar reflection: reflection UVs come from the vertex buffer
+	// (see fillVBHard) and the reflection texture replaces the envmap.
+	// Underwater views (camera below the plane) always keep the legacy
+	// envmap route: the calculated fresnel base is meaningless from below
+	// (negative camera height saturates it to fully opaque), and the
+	// reflection manager never renders reflections for planes the camera
+	// is under anyway — the 'above' gate on planar only covers the same
+	// frame's camera diving below a plane selected while above it.
+	const bool planar = _PlanarReflection != NULL && above;
+	// Calculated reflectivity over the artist envmap (fallback continuity /
+	// explicit shape option), when the per-vertex base channel is present
+	const bool envCalc = !planar && above
+		&& wantsCalcReflectivityUVs()
+		&& (scene->getWaterVB().getVertexFormat() & CVertexBuffer::TexCoord0Flag) != 0
+		&& scene->getWaterVB().getValueType(CVertexBuffer::TexCoord0) == CVertexBuffer::Float3;
+	CVertexProgramWaterVPNoWave *program = shape->_ColorMap
+		? (planar ? CWaterShape::_VertexProgramNoWavePlanarDiffuse
+			: (envCalc ? CWaterShape::_VertexProgramNoWaveEnvCalcDiffuse : CWaterShape::_VertexProgramNoWaveDiffuse))
+		: (planar ? CWaterShape::_VertexProgramNoWavePlanar
+			: (envCalc ? CWaterShape::_VertexProgramNoWaveEnvCalc : CWaterShape::_VertexProgramNoWave));
 	drv->activeVertexProgram(program);
 	CWaterModel::_WaterMat.setTexture(0, shape->_BumpMap[0]);
 	CWaterModel::_WaterMat.setTexture(1, shape->_BumpMap[1]);
 	CWaterModel::_WaterMat.setTexture(3, shape->_ColorMap);
-	CScene *scene = getOwnerScene();
-	if (!above && shape->_EnvMap[1])
+	// Calculated reflectivity draws derive the blend alpha from the
+	// per-vertex reflectivity base and the reflection luminance (drivers
+	// select a water FP variant on this flag); legacy envmap draws keep the
+	// texture-alpha semantics
+	CWaterModel::_WaterMat.setWaterCalcReflectivity(planar || envCalc);
+	if (planar)
 	{
-		if (shape->_UsesSceneWaterEnvMap[1])
+		CWaterModel::_WaterMat.setTexture(2, _PlanarReflection->Texture);
+	}
+	else if (!above && shape->_EnvMap[1])
+	{
+		if (shape->_UsesSceneWaterEnvMap[1] || scene->getForceWaterEnvMap())
 		{
 			if (scene->getWaterEnvMap())
 			{
@@ -939,7 +1012,7 @@ void CWaterModel::setupMaterialNVertexShader(IDriver *drv, CWaterShape *shape, c
 	}
 	else
 	{
-		if (shape->_UsesSceneWaterEnvMap[0])
+		if (shape->_UsesSceneWaterEnvMap[0] || scene->getForceWaterEnvMap())
 		{
 			if (scene->getWaterEnvMap())
 			{
@@ -956,25 +1029,59 @@ void CWaterModel::setupMaterialNVertexShader(IDriver *drv, CWaterShape *shape, c
 		}
 	}
 	shape->envMapUpdate();
-	if (shape->_ColorMap)
-	{
-		// setup 2x3 matrix for lookup in diffuse map
-		updateDiffuseMapMatrix();
-		drv->setUniform4f(IDriver::VertexProgram, program->idx().DiffuseMapVector0, _ColorMapMatColumn0.x, _ColorMapMatColumn1.x, 0, _ColorMapMatColumn0.x * obsPos.x + _ColorMapMatColumn1.x * obsPos.y + _ColorMapMatPos.x);
-		drv->setUniform4f(IDriver::VertexProgram, program->idx().DiffuseMapVector1, _ColorMapMatColumn0.y, _ColorMapMatColumn1.y, 0, _ColorMapMatColumn0.y * obsPos.x + _ColorMapMatColumn1.y * obsPos.y + _ColorMapMatPos.y);
-	}
-	// set builtins
-	drv->setUniformMatrix(IDriver::VertexProgram, program->getUniformIndex(CProgramIndex::ModelViewProjection), IDriver::ModelViewProjection, IDriver::Identity);
-	drv->setUniformFog(IDriver::VertexProgram, program->getUniformIndex(CProgramIndex::Fog));
 	// retrieve current time
 	double date  = scene->getCurrentTime();
-	// set bumpmaps pos
-	drv->setUniform4f(IDriver::VertexProgram, program->idx().BumpMap0Offset, fmodf(obsPos.x * shape->_HeightMapScale[0].x, 1.f) + (float) fmod(date * shape->_HeightMapSpeed[0].x, 1), fmodf(shape->_HeightMapScale[0].y * obsPos.y, 1.f) + (float) fmod(date * shape->_HeightMapSpeed[0].y, 1), 0.f, 1.f); // bump map 0 offset
-	drv->setUniform4f(IDriver::VertexProgram, program->idx().BumpMap0Scale, shape->_HeightMapScale[0].x, shape->_HeightMapScale[0].y, 0, 0); // bump map 0 scale
-	drv->setUniform4f(IDriver::VertexProgram, program->idx().BumpMap1Offset, fmodf(shape->_HeightMapScale[1].x * obsPos.x, 1.f) + (float) fmod(date * shape->_HeightMapSpeed[1].x, 1), fmodf(shape->_HeightMapScale[1].y * obsPos.y, 1.f) + (float) fmod(date * shape->_HeightMapSpeed[1].y, 1), 0.f, 1.f); // bump map 1 offset
-	drv->setUniform4f(IDriver::VertexProgram, program->idx().BumpMap1Scale, shape->_HeightMapScale[1].x, shape->_HeightMapScale[1].y, 0, 0); // bump map 1 scale
-	drv->setUniform4f(IDriver::VertexProgram, program->idx().ObserverHeight, 0, 0, obsPos.z - zHeight, 1.f);
-	drv->setUniform4f(IDriver::VertexProgram, program->idx().ScaleReflectedRay, 0.5f, 0.5f, 0.f, 1.f); // used to scale reflected ray into the envmap
+
+	// Check if the compiled VP uses the UBO path
+	bool vpUBO = program->source() && program->source()->Features.OnlyUBOs;
+
+	if (vpUBO)
+	{
+		// UBO path: write water params into user VP UBO
+		CWaterShape::_WaterVPUB->lock();
+		CWaterShape::_WaterVPUB->set(CWaterShape::_WaterVPUBOOffsets.BumpMap0Scale, shape->_HeightMapScale[0].x, shape->_HeightMapScale[0].y, 0.f, 0.f);
+		CWaterShape::_WaterVPUB->set(CWaterShape::_WaterVPUBOOffsets.BumpMap0Offset,
+			fmodf(obsPos.x * shape->_HeightMapScale[0].x, 1.f) + (float) fmod(date * shape->_HeightMapSpeed[0].x, 1),
+			fmodf(shape->_HeightMapScale[0].y * obsPos.y, 1.f) + (float) fmod(date * shape->_HeightMapSpeed[0].y, 1), 0.f, 1.f);
+		CWaterShape::_WaterVPUB->set(CWaterShape::_WaterVPUBOOffsets.BumpMap1Scale, shape->_HeightMapScale[1].x, shape->_HeightMapScale[1].y, 0.f, 0.f);
+		CWaterShape::_WaterVPUB->set(CWaterShape::_WaterVPUBOOffsets.BumpMap1Offset,
+			fmodf(shape->_HeightMapScale[1].x * obsPos.x, 1.f) + (float) fmod(date * shape->_HeightMapSpeed[1].x, 1),
+			fmodf(shape->_HeightMapScale[1].y * obsPos.y, 1.f) + (float) fmod(date * shape->_HeightMapSpeed[1].y, 1), 0.f, 1.f);
+		CWaterShape::_WaterVPUB->set(CWaterShape::_WaterVPUBOOffsets.ObserverHeight, 0.f, 0.f, obsPos.z - zHeight, 1.f);
+		CWaterShape::_WaterVPUB->set(CWaterShape::_WaterVPUBOOffsets.ScaleReflectedRay, 0.5f, 0.5f, 0.f, 1.f);
+		if (shape->_ColorMap)
+		{
+			updateDiffuseMapMatrix();
+			CWaterShape::_WaterVPUB->set(CWaterShape::_WaterVPUBOOffsets.DiffuseMapVector0,
+				_ColorMapMatColumn0.x, _ColorMapMatColumn1.x, 0.f,
+				_ColorMapMatColumn0.x * obsPos.x + _ColorMapMatColumn1.x * obsPos.y + _ColorMapMatPos.x);
+			CWaterShape::_WaterVPUB->set(CWaterShape::_WaterVPUBOOffsets.DiffuseMapVector1,
+				_ColorMapMatColumn0.y, _ColorMapMatColumn1.y, 0.f,
+				_ColorMapMatColumn0.y * obsPos.x + _ColorMapMatColumn1.y * obsPos.y + _ColorMapMatPos.y);
+		}
+		CWaterShape::_WaterVPUB->unlock();
+		drv->bindUniformBuffer(UBBindingVertexProgram, CWaterShape::_WaterVPUB);
+	}
+	else
+	{
+		// Legacy path: individual uniforms
+		if (shape->_ColorMap)
+		{
+			updateDiffuseMapMatrix();
+			drv->setUniform4f(IDriver::VertexProgram, program->idx().DiffuseMapVector0, _ColorMapMatColumn0.x, _ColorMapMatColumn1.x, 0, _ColorMapMatColumn0.x * obsPos.x + _ColorMapMatColumn1.x * obsPos.y + _ColorMapMatPos.x);
+			drv->setUniform4f(IDriver::VertexProgram, program->idx().DiffuseMapVector1, _ColorMapMatColumn0.y, _ColorMapMatColumn1.y, 0, _ColorMapMatColumn0.y * obsPos.x + _ColorMapMatColumn1.y * obsPos.y + _ColorMapMatPos.y);
+		}
+		// set builtins
+		drv->setUniformMatrix(IDriver::VertexProgram, program->getUniformIndex(CProgramIndex::ModelViewProjection), IDriver::ModelViewProjection, IDriver::Identity);
+		drv->setUniformFog(IDriver::VertexProgram, program->getUniformIndex(CProgramIndex::Fog));
+		// set bumpmaps pos
+		drv->setUniform4f(IDriver::VertexProgram, program->idx().BumpMap0Offset, fmodf(obsPos.x * shape->_HeightMapScale[0].x, 1.f) + (float) fmod(date * shape->_HeightMapSpeed[0].x, 1), fmodf(shape->_HeightMapScale[0].y * obsPos.y, 1.f) + (float) fmod(date * shape->_HeightMapSpeed[0].y, 1), 0.f, 1.f); // bump map 0 offset
+		drv->setUniform4f(IDriver::VertexProgram, program->idx().BumpMap0Scale, shape->_HeightMapScale[0].x, shape->_HeightMapScale[0].y, 0, 0); // bump map 0 scale
+		drv->setUniform4f(IDriver::VertexProgram, program->idx().BumpMap1Offset, fmodf(shape->_HeightMapScale[1].x * obsPos.x, 1.f) + (float) fmod(date * shape->_HeightMapSpeed[1].x, 1), fmodf(shape->_HeightMapScale[1].y * obsPos.y, 1.f) + (float) fmod(date * shape->_HeightMapSpeed[1].y, 1), 0.f, 1.f); // bump map 1 offset
+		drv->setUniform4f(IDriver::VertexProgram, program->idx().BumpMap1Scale, shape->_HeightMapScale[1].x, shape->_HeightMapScale[1].y, 0, 0); // bump map 1 scale
+		drv->setUniform4f(IDriver::VertexProgram, program->idx().ObserverHeight, 0, 0, obsPos.z - zHeight, 1.f);
+		drv->setUniform4f(IDriver::VertexProgram, program->idx().ScaleReflectedRay, 0.5f, 0.5f, 0.f, 1.f); // used to scale reflected ray into the envmap
+	}
 }
 
 //================================================
@@ -1015,7 +1122,7 @@ void CWaterModel::setupSimpleRender(CWaterShape *shape, const NLMISC::CVector &o
 	CScene *scene = getOwnerScene();
 	if (!above && shape->_EnvMap[1])
 	{
-		if (shape->_UsesSceneWaterEnvMap[1])
+		if (shape->_UsesSceneWaterEnvMap[1] || scene->getForceWaterEnvMap())
 		{
 			if (scene->getWaterEnvMap())
 			{
@@ -1033,7 +1140,7 @@ void CWaterModel::setupSimpleRender(CWaterShape *shape, const NLMISC::CVector &o
 	}
 	else
 	{
-		if (shape->_UsesSceneWaterEnvMap[0])
+		if (shape->_UsesSceneWaterEnvMap[0] || scene->getForceWaterEnvMap())
 		{
 			if (scene->getWaterEnvMap())
 			{
@@ -1213,8 +1320,68 @@ uint CWaterModel::getNumWantedVertices()
 	H_AUTO( NL3D_Water_Render );
 	nlassert(!_ClippedPoly.Vertices.empty());
 	//
-	CRenderTrav					&renderTrav		= getOwnerScene()->getRenderTrav();
+	CScene						*scene = getOwnerScene();
+	CRenderTrav					&renderTrav		= scene->getRenderTrav();
+
+	_PlanarReflection = NULL;
+
 	if (!renderTrav.Perspective || forceWaterSimpleRender) return 0;
+
+	// Realtime planar reflection: report visibility stats and pick up this
+	// frame's reflection for our plane. This runs inside the render
+	// traversal, where the traversal's camera state is up to date (during
+	// the clip traversal, renderTrav.CamPos is still stale from the
+	// previous render — which is the reflection render itself when one ran).
+	// After the perspective/simple-render early-out: the simple water path
+	// ignores planar reflections, so it must not feed the manager either.
+	CWaterReflectionManager &reflMgr = scene->getWaterReflectionManager();
+	if (reflMgr.wantsSurfaceReports())
+	{
+		CWaterShape *reflShape = NLMISC::safe_cast<CWaterShape *>((IShape *) Shape);
+		// Surfaces that can never use the reflection do not report:
+		// their stats would rank the plane and inflate the shared render
+		// target sub-region for pixels that never sample it
+		const bool mayReflect = reflShape->isRealtimeReflectionEnabled() || reflMgr.getForceReflections();
+		const float planeZ = getWorldMatrix().getPos().z;
+		if (mayReflect && renderTrav.CamPos.z > planeZ)
+		{
+			// Project the frustum-clipped poly to screen space [0,1]:
+			// compute the on-screen AABB and area for plane prioritization.
+			// Vertices are frustum-clipped already, so no behind-camera guard needed.
+			const NLMISC::CMatrix &worldMat = getWorldMatrix();
+			const NLMISC::CMatrix &projViewMat = renderTrav.ViewMatrix;
+			const float ooW = 1.f / (renderTrav.Right - renderTrav.Left);
+			const float ooH = 1.f / (renderTrav.Top - renderTrav.Bottom);
+			const uint numVerts = (uint)_ClippedPoly.Vertices.size();
+			static std::vector<NLMISC::CVector2f> scr; // scratch, avoids per-frame alloc
+			scr.resize(numVerts);
+			NLMISC::CVector2f scrMin(1.f, 1.f), scrMax(0.f, 0.f);
+			for (uint k = 0; k < numVerts; ++k)
+			{
+				NLMISC::CVector p = projViewMat * (worldMat * _ClippedPoly.Vertices[k]);
+				float invDepth = 1.f / std::max(p.y, renderTrav.Near);
+				scr[k].set(
+					(renderTrav.Near * p.x * invDepth - renderTrav.Left) * ooW,
+					(renderTrav.Near * p.z * invDepth - renderTrav.Bottom) * ooH);
+				scrMin.x = std::min(scrMin.x, scr[k].x); scrMin.y = std::min(scrMin.y, scr[k].y);
+				scrMax.x = std::max(scrMax.x, scr[k].x); scrMax.y = std::max(scrMax.y, scr[k].y);
+			}
+			float area2 = 0.f; // twice the polygon area (shoelace)
+			for (uint k = 0; k < numVerts; ++k)
+			{
+				const NLMISC::CVector2f &a = scr[k];
+				const NLMISC::CVector2f &b = scr[(k + 1) % numVerts];
+				area2 += a.x * b.y - b.x * a.y;
+			}
+			reflMgr.reportVisibleSurface(planeZ, 0.5f * fabsf(area2), scrMin, scrMax,
+				reflShape->isRealtimeReflectionEnabled());
+
+			// Use this frame's reflection if our plane got one
+			if (reflShape->isRealtimeReflectionEnabled() || reflMgr.getForceReflections())
+				_PlanarReflection = reflMgr.getActiveReflection(planeZ);
+		}
+	}
+
 	// viewer pos in world space
 	const NLMISC::CVector &obsPos = renderTrav.CamPos;
 	// view matrix (inverted cam matrix)
@@ -1535,10 +1702,108 @@ void computeWaterVertexHard(float px, float py, CVector &pos, const CVector &cam
 }
 
 // ***********************************************************************************************************
+// Helper to write water vertices to the shared VB. The water FP blends the
+// planar reflection by alpha = lerp(base, 1, reflection luminance) — the
+// luminance term reproduces the original assets' luminance-derived envmap
+// alpha (Fyros day map: alpha = lerp(0.37, 1, lum)); the per-vertex base is
+// the shape's stylized fresnel (see CWaterShape::setReflectivityFresnel).
+// When realtime planar reflections are active this frame, the VB carries a
+// Float3 TexCoord0 channel: planar surfaces get the reflection UV (vertex projected through
+// the reflected camera's sub-frustum, scaled to the active RT sub-region)
+// plus the per-vertex reflectivity base in z; other surfaces write zeros to
+// keep the stride consistent.
+class CWaterVertexWriter
+{
+public:
+	CWaterVertexWriter(uint8 *dest, uint vtxSize,
+		const CWaterReflectionManager::CActiveReflection *planarRefl,
+		const CVector &modelPos, float camHeight, const CWaterShape *shape)
+		: _Dest(dest), _VtxSize(vtxSize), _PlanarRefl(planarRefl)
+	{
+		// The per-vertex reflectivity base serves both planar draws and
+		// calculated reflectivity over the envmap (fallback surfaces).
+		// The camera can legitimately be under the plane on the envmap
+		// path; the epsilon keeps the math finite (base saturates then)
+		_CamHeight = std::max(1e-3f, camHeight);
+		_CamHeight2 = _CamHeight * _CamHeight;
+		// Reflectivity base curve is an artist parameter on the shape
+		_FresnelBias = shape->getReflectivityFresnelBias();
+		_FresnelScale = shape->getReflectivityFresnelScale();
+		_FresnelPower = shape->getReflectivityFresnelPower();
+		// small integral powers (incl. the default, 2) skip the powf
+		_FresnelIntPower = (_FresnelPower == 2.f || _FresnelPower == 3.f || _FresnelPower == 4.f)
+			? (uint) _FresnelPower : 0;
+		if (planarRefl)
+		{
+			// Fold the model position into the world -> reflected camera transform
+			_ToRefl = planarRefl->ReflViewMatrix;
+			_ToRefl.translate(modelPos);
+			const CFrustum &f = planarRefl->ReflFrustum;
+			_UScale = f.Near / (f.Right - f.Left) * planarRefl->UVScale.U;
+			_UBias = -f.Left / (f.Right - f.Left) * planarRefl->UVScale.U + planarRefl->UVBias.U;
+			_VScale = f.Near / (f.Top - f.Bottom) * planarRefl->UVScale.V;
+			_VBias = -f.Bottom / (f.Top - f.Bottom) * planarRefl->UVScale.V + planarRefl->UVBias.V;
+			_MinDepth = f.Near;
+		}
+	}
+	inline void write(const CVector &pos)
+	{
+		*(CVector *) _Dest = pos;
+		if (_VtxSize > WATER_VERTEX_HARD_SIZE)
+		{
+			float *uv = (float *) (_Dest + WATER_VERTEX_HARD_SIZE);
+			uint numUV = (_VtxSize - WATER_VERTEX_HARD_SIZE) / sizeof(float);
+			if (_PlanarRefl)
+			{
+				CVector q = _ToRefl * pos;
+				float invDepth = 1.f / std::max(q.y, _MinDepth);
+				uv[0] = q.x * invDepth * _UScale + _UBias;
+				uv[1] = q.z * invDepth * _VScale + _VBias;
+			}
+			else
+			{
+				// envmap path: UV comes from the vertex program
+				uv[0] = 0.f;
+				uv[1] = 0.f;
+			}
+			if (numUV >= 3)
+			{
+				// pos is camera-xy-relative at water height, so the
+				// view cosine to the (flat) surface comes cheap
+				float cosT = _CamHeight / sqrtf(pos.x * pos.x + pos.y * pos.y + _CamHeight2);
+				float t = 1.f - cosT;
+				float tp;
+				switch (_FresnelIntPower)
+				{
+				case 2: tp = t * t; break;
+				case 3: tp = t * t * t; break;
+				case 4: tp = (t * t) * (t * t); break;
+				default: tp = powf(t, _FresnelPower); break;
+				}
+				float f = _FresnelBias + _FresnelScale * tp;
+				uv[2] = std::min(1.f, std::max(0.f, f));
+			}
+		}
+		_Dest += _VtxSize;
+	}
+	inline uint8 *dest() const { return _Dest; }
+private:
+	uint8	*_Dest;
+	uint	_VtxSize;
+	const CWaterReflectionManager::CActiveReflection *_PlanarRefl;
+	CMatrix	_ToRefl;
+	float	_UScale, _UBias, _VScale, _VBias, _MinDepth;
+	float	_CamHeight, _CamHeight2;
+	float	_FresnelBias, _FresnelScale, _FresnelPower;
+	uint	_FresnelIntPower;
+};
+
+// ***********************************************************************************************************
 uint CWaterModel::fillVBHard(void *datas, uint startTri)
 {
 	_StartTri = (uint32) startTri;
-	CRenderTrav			  &renderTrav		= getOwnerScene()->getRenderTrav();
+	CScene				  *scene = getOwnerScene();
+	CRenderTrav			  &renderTrav		= scene->getRenderTrav();
 	const NLMISC::CMatrix &camMat = renderTrav.CamMatrix;
 	const sint numStepX = CWaterShape::getScreenXGridSize();
 	const sint numStepY = CWaterShape::getScreenYGridSize();
@@ -1546,8 +1811,12 @@ uint CWaterModel::fillVBHard(void *datas, uint startTri)
 	CVector camJ = camMat.getJ();
 	CVector camK = camMat.getK() * (1.f / numStepY) * (renderTrav.Top - renderTrav.Bottom) / renderTrav.Near;
 	float obsZ = camMat.getPos().z;
-	float denom = getWorldMatrix().getPos().z - obsZ;
-	uint8 *dest = (uint8 *) datas + startTri * WATER_VERTEX_HARD_SIZE * 3;
+	const float zHeight = getWorldMatrix().getPos().z;
+	float denom = zHeight - obsZ;
+	const uint vtxSize = scene->getWaterVB().getVertexSize();
+	CWaterVertexWriter writer((uint8 *) datas + startTri * vtxSize * 3, vtxSize, _PlanarReflection,
+		CVector(camMat.getPos().x, camMat.getPos().y, zHeight), obsZ - zHeight,
+		NLMISC::safe_cast<CWaterShape *>((IShape *) Shape));
 	if (!_ClippedTriNumVerts.empty())
 	{
 		const CVector2f *currVert =  &_ClippedTris.front();
@@ -1563,12 +1832,9 @@ uint CWaterModel::fillVBHard(void *datas, uint startTri)
 			}
 			for(uint l = 0; l < numVerts - 2; ++l)
 			{
-				*(CVector *) dest = unprojectedTri[0];
-				dest += WATER_VERTEX_HARD_SIZE;
-				*(CVector *) dest = unprojectedTri[l + 1];
-				dest += WATER_VERTEX_HARD_SIZE;
-				*(CVector *) dest = unprojectedTri[l + 2];
-				dest += WATER_VERTEX_HARD_SIZE;
+				writer.write(unprojectedTri[0]);
+				writer.write(unprojectedTri[l + 1]);
+				writer.write(unprojectedTri[l + 2]);
 			}
 		}
 	}
@@ -1587,23 +1853,17 @@ uint CWaterModel::fillVBHard(void *datas, uint startTri)
 				computeWaterVertexHard((float) (x + 1), (float) (y + 1), proj[2], camI, camJ, camK, denom);
 				computeWaterVertexHard((float) x, (float) (y + 1), proj[3], camI, camJ, camK, denom);
 				//
-				*(CVector *) dest = proj[0];
-				dest += WATER_VERTEX_HARD_SIZE;
-				*(CVector *) dest = proj[2];
-				dest += WATER_VERTEX_HARD_SIZE;
-				*(CVector *) dest = proj[1];
-				dest += WATER_VERTEX_HARD_SIZE;
-				*(CVector *) dest = proj[0];
-				dest += WATER_VERTEX_HARD_SIZE;
-				*(CVector *) dest = proj[3];
-				dest += WATER_VERTEX_HARD_SIZE;
-				*(CVector *) dest = proj[2];
-				dest += WATER_VERTEX_HARD_SIZE;
+				writer.write(proj[0]);
+				writer.write(proj[2]);
+				writer.write(proj[1]);
+				writer.write(proj[0]);
+				writer.write(proj[3]);
+				writer.write(proj[2]);
 			}
 		}
 	}
-	nlassert((dest - (uint8 * ) datas) % (3 * WATER_VERTEX_HARD_SIZE) == 0);
-	uint endTri = (uint)(dest - (uint8 * ) datas) / (3 * WATER_VERTEX_HARD_SIZE);
+	nlassert((writer.dest() - (uint8 * ) datas) % (3 * vtxSize) == 0);
+	uint endTri = (uint)(writer.dest() - (uint8 * ) datas) / (3 * vtxSize);
 	_NumTris = endTri - _StartTri;
 	return endTri;
 }
@@ -1627,7 +1887,7 @@ void	CWaterModel::traverseRender()
 	{
 		// not supported, simple uniform render
 		drv->setupModelMatrix(getWorldMatrix());
-		static CMaterial waterMat;
+		static CMaterial waterMat; // STATIC GPU RESOURCE: Blocks multiple driver instances
 		static bool initDone = false;
 		if (!initDone)
 		{
@@ -1670,6 +1930,7 @@ void	CWaterModel::traverseRender()
 			drv->activeVertexBuffer(vb);
 			drv->renderRawTriangles(CWaterModel::_WaterMat, _StartTri, _NumTris);
 			drv->activeVertexProgram(NULL);
+			drv->bindUniformBuffer(UBBindingVertexProgram, NULL);
 		}
 		else
 		{
@@ -1687,6 +1948,11 @@ void	CWaterModel::traverseRender()
 bool CWaterModel::clip()
 {
 	H_AUTO( NL3D_Water_Render );
+	// Water must never render into its own reflection. Enforced here at
+	// engine level: render loops (e.g. the client) re-apply their own
+	// scene filter configuration inside the reflection pass, so the
+	// UScene::FilterWater flag cannot carry this invariant.
+	if (getOwnerScene()->getWaterReflectionManager().isRenderingReflection()) return false;
 	CRenderTrav			&renderTrav= getOwnerScene()->getRenderTrav();
 	if (renderTrav.CamPos.z == getWorldMatrix().getPos().z) return false;
 	if(Shape)
@@ -1800,7 +2066,7 @@ void CWaterModel::doSimpleRender(IDriver *drv)
 	}
 	//
 	static std::vector<CSimpleVertexInfo> verts;
-	static CIndexBuffer indices;
+	static CIndexBuffer indices; // STATIC GPU RESOURCE: Blocks multiple driver instances
 	//
 	NLMISC::CPolygon2D &poly = shape->_Poly;
 	uint numVerts = poly.Vertices.size();
@@ -1965,7 +2231,7 @@ void CWaterModel::debugClearClippedPoly()
 //							wave maker implementation
 //=======================================================================================
 
-CWaveMakerModel::CWaveMakerModel() : _Time(0)
+CWaveMakerModel::CWaveMakerModel() : _Time(0), _LastFrameId(0)
 {
 	// AnimDetail behavior: Must be traversed in AnimDetail, even if no channel mixer registered
 	CTransform::setIsForceAnimDetail(true);
@@ -2004,8 +2270,12 @@ void	CWaveMakerModel::traverseAnimDetail()
 	const CVector2f pos2d(worldPos.x, worldPos.y);
 	/// get the water height map
 	CWaterHeightMap &whm = GetWaterPoolManager().getPoolByID(wms->_PoolID);
-	// get the time delta
-	const TAnimationTime deltaT  = std::min(getOwnerScene()->getEllapsedTime(), (TAnimationTime) whm.getPropagationTime());
+	// get the time delta. Only accumulate once per real frame (avoid double in stereo).
+	CScene *ownerScene = getOwnerScene();
+	if (ownerScene->getFrameId() == _LastFrameId)
+		return;
+	_LastFrameId = ownerScene->getFrameId();
+	const TAnimationTime deltaT  = std::min(ownerScene->getEllapsedTime(), (TAnimationTime) whm.getPropagationTime());
 	_Time += deltaT;
 	if (!wms->_ImpulsionMode)
 	{

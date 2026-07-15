@@ -576,10 +576,10 @@ bool CIPv6Address::isAny() const
 uint32 CIPv6Address::hash32() const
 {
 	if (!m_Valid) return 0;
-	uint32 hash = NLMISC::wangHash(((uint32)m_Address[0] | ((uint32)m_Address[1] << 8) | ((uint32)m_Address[2] << 16) | ((uint32)m_Address[3] << 24)));
-	hash = NLMISC::wangHash(hash ^ ((uint32)m_Address[4] | ((uint32)m_Address[5] << 8) | ((uint32)m_Address[6] << 16) | ((uint32)m_Address[7] << 24)));
-	hash = NLMISC::wangHash(hash ^ ((uint32)m_Address[8] | ((uint32)m_Address[9] << 8) | ((uint32)m_Address[10] << 16) | (uint32)(m_Address[11] << 24)));
-	hash = NLMISC::wangHash(hash ^ ((uint32)m_Address[12] | ((uint32)m_Address[13] << 8) | ((uint32)m_Address[14] << 16) | ((uint32)m_Address[15] << 24)));
+	uint32 hash = NLMISC::lowbias32(((uint32)m_Address[0] | ((uint32)m_Address[1] << 8) | ((uint32)m_Address[2] << 16) | ((uint32)m_Address[3] << 24)));
+	hash = NLMISC::lowbias32(hash ^ ((uint32)m_Address[4] | ((uint32)m_Address[5] << 8) | ((uint32)m_Address[6] << 16) | ((uint32)m_Address[7] << 24)));
+	hash = NLMISC::lowbias32(hash ^ ((uint32)m_Address[8] | ((uint32)m_Address[9] << 8) | ((uint32)m_Address[10] << 16) | (uint32)(m_Address[11] << 24)));
+	hash = NLMISC::lowbias32(hash ^ ((uint32)m_Address[12] | ((uint32)m_Address[13] << 8) | ((uint32)m_Address[14] << 16) | ((uint32)m_Address[15] << 24)));
 	return hash;
 }
 

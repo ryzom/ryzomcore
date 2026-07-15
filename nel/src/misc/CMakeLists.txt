@@ -174,7 +174,8 @@ SOURCE_GROUP("crypt" FILES ${NLMISC_CRYPT})
 SOURCE_GROUP("string" FILES ${NLMISC_STRING})
 
 NL_TARGET_LIB(nelmisc ${HEADERS} ${SRC})
-add_project_library_alias(nelmisc misc)
+add_library(NeL::misc ALIAS nelmisc)
+set_target_properties(nelmisc PROPERTIES EXPORT_NAME misc)
 
 target_sources(nelmisc
 		PUBLIC
@@ -226,7 +227,10 @@ IF(GIF_FOUND)
   TARGET_LINK_LIBRARIES(nelmisc PRIVATE GIF::GIF)
 ENDIF()
 
-TARGET_LINK_LIBRARIES(nelmisc PRIVATE PNG::PNG)
+IF(TARGET PNG::PNG)
+  TARGET_LINK_LIBRARIES(nelmisc PRIVATE PNG::PNG)
+  TARGET_COMPILE_DEFINITIONS(nelmisc PRIVATE HAVE_PNG)
+ENDIF()
 
 IF(WIN32)
   TARGET_LINK_LIBRARIES(nelmisc PUBLIC winmm.lib dbghelp)
@@ -248,11 +252,21 @@ TARGET_INCLUDE_DIRECTORIES(nelmisc PRIVATE config_file)
 TARGET_LINK_LIBRARIES(nelmisc
         PUBLIC
         ${CMAKE_THREAD_LIBS_INIT}
-        LibXml2::LibXml2
-        nel_sevenzip
         PRIVATE
+		NeL::sevenzip
         ZLIB::ZLIB
 )
+
+IF(TARGET LibXml2::LibXml2)
+  TARGET_LINK_LIBRARIES(nelmisc PUBLIC LibXml2::LibXml2)
+ELSEIF(LIBXML2_FOUND)
+  TARGET_LINK_LIBRARIES(nelmisc PUBLIC ${LIBXML2_LIBRARIES})
+  TARGET_INCLUDE_DIRECTORIES(nelmisc PUBLIC ${LIBXML2_INCLUDE_DIR})
+ELSE()
+  TARGET_COMPILE_DEFINITIONS(nelmisc PUBLIC NL_NO_LIBXML2)
+ENDIF()
+
+target_compile_definitions(nelmisc PUBLIC $<$<CONFIG:Debug>:NL_DEBUG> $<$<CONFIG:Release>:NL_RELEASE>)
 
 NL_DEFAULT_PROPS(nelmisc "NeL, Library: NeL Misc")
 NL_ADD_RUNTIME_FLAGS(nelmisc)

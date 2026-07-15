@@ -74,7 +74,7 @@ CShadowMapManager::CShadowMapManager()
 	_FillMaterial.setZWrite(false);
 	_FillMaterial.setZFunc(CMaterial::always);
 	_FillMaterial.setDoubleSided(true);
-	_FillQuads.setPreferredMemory(CVertexBuffer::RAMVolatile, true);
+	_FillQuads.setBufferUsage(CVertexBuffer::SmallStream, true);
 
 	// **** Setup Blur
 	_BlurQuads.setVertexFormat(CVertexBuffer::PositionFlag |
@@ -82,7 +82,7 @@ CShadowMapManager::CShadowMapManager()
 		CVertexBuffer::TexCoord1Flag |
 		CVertexBuffer::TexCoord2Flag |
 		CVertexBuffer::TexCoord3Flag);
-	_BlurQuads.setPreferredMemory(CVertexBuffer::RAMVolatile, true);
+	_BlurQuads.setBufferUsage(CVertexBuffer::SmallStream, true);
 
 	// Only 2 quads are used to blur
 	_BlurQuads.setNumVertices(8);
@@ -117,7 +117,7 @@ CShadowMapManager::CShadowMapManager()
 	// *** Setup copy
 	_CopyQuads.setVertexFormat (CVertexBuffer::PositionFlag | CVertexBuffer::TexCoord0Flag);
 	_CopyQuads.setNumVertices(4);
-	_CopyQuads.setPreferredMemory(CVertexBuffer::RAMVolatile, true);
+	_CopyQuads.setBufferUsage(CVertexBuffer::SmallStream, true);
 	CVertexBufferReadWrite vba;
 	_CopyQuads.lock (vba);
 	vba.setVertexCoord (0, CVector (0, 0, 0));
@@ -684,8 +684,8 @@ void			CShadowMapManager::renderProject(CScene *scene)
 	vp.init (0, 0, 0.5f, 0.5f);
 	driver->setupViewport(vp);
 
-	static CVertexBuffer CopyQuads;
-	static CMaterial CopyMaterial;
+	static CVertexBuffer CopyQuads; // STATIC GPU RESOURCE: Blocks multiple driver instances
+	static CMaterial CopyMaterial; // STATIC GPU RESOURCE: Blocks multiple driver instances
 	CopyMaterial.initUnlit();
 	CopyMaterial.setColor(CRGBA::White);
 	CopyMaterial.setZWrite(false);

@@ -22,7 +22,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#if !FINAL_VERSION
 #include "std3d.h"
 #include "nel/3d/stereo_debugger.h"
 
@@ -35,11 +34,12 @@
 #include "nel/3d/u_camera.h"
 #include "nel/3d/u_driver.h"
 #include "nel/3d/material.h"
-#include "nel/3d/texture_bloom.h"
+#include "nel/3d/texture_offscreen.h"
 #include "nel/3d/texture_user.h"
 #include "nel/3d/driver_user.h"
 #include "nel/3d/u_texture.h"
 #include "nel/3d/render_target_manager.h"
+#include "nel/misc/command.h"
 
 using namespace std;
 // using namespace NLMISC;
@@ -52,73 +52,160 @@ namespace NL3D {
 
 namespace {
 
+// Stereo comparison shader (compiled from shaders/stereo_debug_pp.cg):
+//   Identical pixels:           normal average image
+//   Small diff (< ~1%):         blue-tinted (darkened R and G)
+//   Significant diff (>= ~1%):  red-tinted (darkened G and B)
 const char *a_arbfp1 =
 	"!!ARBfp1.0\n"
-	"PARAM c[1] = { { 1, 0, 0.5 } };\n"
+	"OPTION ARB_precision_hint_fastest;\n"
+	"# cgc version 3.1.0013, build date Apr 18 2012\n"
+	"# command line args: -profile arbfp1 -O3 -fastmath -fastprecision\n"
+	"# source file: stereo_debug_pp.cg\n"
+	"#vendor NVIDIA Corporation\n"
+	"#version 3.1.0.13\n"
+	"#profile arbfp1\n"
+	"#program stereo_debug_pp\n"
+	"#semantic stereo_debug_pp.cTex0 : TEX0\n"
+	"#semantic stereo_debug_pp.cTex1 : TEX1\n"
+	"#var float2 texCoord : $vin.TEXCOORD0 : TEX0 : 0 : 1\n"
+	"#var sampler2D cTex0 : TEX0 : texunit 0 : 1 : 1\n"
+	"#var sampler2D cTex1 : TEX1 : texunit 1 : 2 : 1\n"
+	"#var float4 oCol : $vout.COLOR : COL : 3 : 1\n"
+	"#const c[0] = 1 0 0.0099999998 0.5\n"
+	"PARAM c[1] = { { 1, 0, 0.0099999998, 0.5 } };\n"
 	"TEMP R0;\n"
 	"TEMP R1;\n"
 	"TEMP R2;\n"
-	"TEX R0, fragment.texcoord[0], texture[0], 2D;\n"
 	"TEX R1, fragment.texcoord[0], texture[1], 2D;\n"
-	"ADD R2, R0, -R1;\n"
-	"ADD R1, R0, R1;\n"
-	"MUL R1, R1, c[0].z;\n"
-	"ABS R2, R2;\n"
-	"CMP R2, -R2, c[0].x, c[0].y;\n"
-	"ADD_SAT R2.x, R2, R2.y;\n"
-	"ADD_SAT R2.x, R2, R2.z;\n"
-	"ADD_SAT R2.x, R2, R2.w;\n"
-	"ABS R2.x, R2;\n"
+	"TEX R0, fragment.texcoord[0], texture[0], 2D;\n"
+	"ADD R2.xyz, R0, -R1;\n"
+	"ADD R0, R0, R1;\n"
+	"MUL R0, R0, c[0].w;\n"
+	"ABS R2.xyz, R2;\n"
+	"MAX R1.x, R2, R2.y;\n"
+	"MAX R1.x, R1, R2.z;\n"
+	"SLT R1.y, c[0], R1.x;\n"
+	"SGE R1.w, R1.x, c[0].z;\n"
+	"ABS R1.w, R1;\n"
+	"ABS R2.x, R1.y;\n"
+	"MAD R1.z, R0.y, c[0].w, c[0].w;\n"
+	"CMP R1.w, -R1, c[0].y, c[0].x;\n"
 	"CMP R2.x, -R2, c[0].y, c[0];\n"
-	"ABS R0.x, R2;\n"
-	"CMP R2.x, -R0, c[0].y, c[0];\n"
-	"MOV R0.xzw, R1;\n"
-	"MAD R0.y, R1, c[0].z, c[0].z;\n"
-	"CMP R0, -R2.x, R1, R0;\n"
-	"MAD R1.x, R0, c[0].z, c[0].z;\n"
-	"CMP result.color.x, -R2, R1, R0;\n"
-	"MOV result.color.yzw, R0;\n"
+	"MUL R2.x, R2, R1.w;\n"
+	"CMP result.color.y, -R2.x, R1.z, R0;\n"
+	"MAD R1.z, R0, c[0].w, c[0].w;\n"
+	"MUL R0.y, R1, R1.w;\n"
+	"CMP result.color.z, -R0.y, R1, R0;\n"
+	"MAD R0.z, R0.x, c[0].w, c[0].w;\n"
+	"ADD R0.y, R1.x, -c[0].z;\n"
+	"CMP result.color.x, R0.y, R0, R0.z;\n"
+	"MOV result.color.w, R0;\n"
 	"END\n";
+	// 24 instructions, 3 R-regs
 
-const char *a_ps_2_0 = 
+// GLSL 330 version of the same shader for the GL3 driver.
+// Sampler names match CProgramIndex convention for automatic texture unit binding.
+// texCoord0 at location 8 matches TAttribOffset::TexCoord0 from the builtin VP.
+const char *a_glsl330f =
+	"#version 330\n"
+	"#extension GL_ARB_separate_shader_objects : enable\n"
+	"\n"
+	"out vec4 fragColor;\n"
+	"\n"
+	"layout(location = 8) smooth in vec4 texCoord0;\n"
+	"\n"
+	"uniform sampler2D sampler0;\n"
+	"uniform sampler2D sampler1;\n"
+	"\n"
+	"void main()\n"
+	"{\n"
+	"  vec4 left = texture(sampler0, texCoord0.xy);\n"
+	"  vec4 right = texture(sampler1, texCoord0.xy);\n"
+	"  vec4 avg = (left + right) * 0.5;\n"
+	"\n"
+	"  vec3 d = abs(left.rgb - right.rgb);\n"
+	"  float md = max(max(d.r, d.g), d.b);\n"
+	"\n"
+	"  fragColor = avg;\n"
+	"  if (md >= 0.01)\n"
+	"    fragColor.r = 0.5 + (fragColor.r * 0.5);\n"
+	"  else if (md > 0.0)\n"
+	"    fragColor.b = 0.5 + (fragColor.b * 0.5);\n"
+	"  else\n"
+	"    fragColor.g = 0.5 + (fragColor.g * 0.5);\n"
+	"}\n";
+
+// Pipeline-stage source for stereo debugger PP (no uniforms, just samplers).
+const char *a_glsl300esf =
+	"#version 300 es\n"
+	"precision highp float;\n"
+	"precision highp int;\n"
+	"out vec4 fragColor;\n"
+	"smooth in vec4 texCoord0;\n"
+	"uniform sampler2D sampler0;\n"
+	"uniform sampler2D sampler1;\n"
+	"void main()\n"
+	"{\n"
+	"  vec4 left = texture(sampler0, texCoord0.xy);\n"
+	"  vec4 right = texture(sampler1, texCoord0.xy);\n"
+	"  vec4 avg = (left + right) * 0.5;\n"
+	"  vec3 d = abs(left.rgb - right.rgb);\n"
+	"  float md = max(max(d.r, d.g), d.b);\n"
+	"  fragColor = avg;\n"
+	"  if (md >= 0.01)\n"
+	"    fragColor.r = 0.5 + (fragColor.r * 0.5);\n"
+	"  else if (md > 0.0)\n"
+	"    fragColor.b = 0.5 + (fragColor.b * 0.5);\n"
+	"  else\n"
+	"    fragColor.g = 0.5 + (fragColor.g * 0.5);\n"
+	"}\n";
+
+const char *a_ps_2_0 =
 	"ps_2_0\n"
-	// cgc version 3.1.0013, build date Apr 18 2012
-	// command line args: -profile ps_2_0
-	// source file: pp_stereo_debug.cg
-	//vendor NVIDIA Corporation
-	//version 3.1.0.13
-	//profile ps_2_0
-	//program pp_stereo_debug
-	//semantic pp_stereo_debug.cTex0 : TEX0
-	//semantic pp_stereo_debug.cTex1 : TEX1
-	//var float2 texCoord : $vin.TEXCOORD0 : TEX0 : 0 : 1
-	//var sampler2D cTex0 : TEX0 : texunit 0 : 1 : 1
-	//var sampler2D cTex1 : TEX1 : texunit 1 : 2 : 1
-	//var float4 oCol : $vout.COLOR : COL : 3 : 1
-	//const c[0] = 0 1 0.5
+	"// cgc version 3.1.0013, build date Apr 18 2012\n"
+	"// command line args: -profile ps_2_0 -O3 -fastmath -fastprecision\n"
+	"// source file: stereo_debug_pp.cg\n"
+	"//vendor NVIDIA Corporation\n"
+	"//version 3.1.0.13\n"
+	"//profile ps_2_0\n"
+	"//program stereo_debug_pp\n"
+	"//semantic stereo_debug_pp.cTex0 : TEX0\n"
+	"//semantic stereo_debug_pp.cTex1 : TEX1\n"
+	"//var float2 texCoord : $vin.TEXCOORD0 : TEX0 : 0 : 1\n"
+	"//var sampler2D cTex0 : TEX0 : texunit 0 : 1 : 1\n"
+	"//var sampler2D cTex1 : TEX1 : texunit 1 : 2 : 1\n"
+	"//var float4 oCol : $vout.COLOR : COL : 3 : 1\n"
+	"//const c[0] = 0.5 -0.0099999998 1 0\n"
 	"dcl_2d s0\n"
 	"dcl_2d s1\n"
-	"def c0, 0.00000000, 1.00000000, 0.50000000, 0\n"
+	"def c0, 0.50000000, -0.01000000, 1.00000000, 0.00000000\n"
 	"dcl t0.xy\n"
-	"texld r1, t0, s1\n"
-	"texld r2, t0, s0\n"
-	"add r0, r2, -r1\n"
-	"add r1, r2, r1\n"
-	"mul r1, r1, c0.z\n"
-	"abs r0, r0\n"
-	"cmp r0, -r0, c0.x, c0.y\n"
-	"add_pp_sat r0.x, r0, r0.y\n"
-	"add_pp_sat r0.x, r0, r0.z\n"
-	"add_pp_sat r0.x, r0, r0.w\n"
-	"abs_pp r0.x, r0\n"
-	"cmp_pp r0.x, -r0, c0.y, c0\n"
-	"abs_pp r0.x, r0\n"
-	"mov r2.xzw, r1\n"
-	"mad r2.y, r1, c0.z, c0.z\n"
-	"cmp r2, -r0.x, r1, r2\n"
-	"mad r1.x, r2, c0.z, c0.z\n"
-	"mov r0.yzw, r2\n"
-	"cmp r0.x, -r0, r1, r2\n"
+	"texld r0, t0, s1\n"
+	"texld r1, t0, s0\n"
+	"add r2.xyz, r1, -r0\n"
+	"add r1, r1, r0\n"
+	"mul r5, r1, c0.x\n"
+	"abs r2.xyz, r2\n"
+	"max r0.x, r2, r2.y\n"
+	"max r0.x, r0, r2.z\n"
+	"cmp r1.x, -r0, c0.w, c0.z\n"
+	"add r3.x, r0, c0.y\n"
+	"abs_pp r4.x, r1\n"
+	"cmp r3.x, r3, c0.z, c0.w\n"
+	"abs_pp r3.x, r3\n"
+	"cmp_pp r3.x, -r3, c0.z, c0.w\n"
+	"cmp_pp r4.x, -r4, c0.z, c0.w\n"
+	"mad r2.x, r5.y, c0, c0\n"
+	"mul_pp r4.x, r3, r4\n"
+	"cmp r0.y, -r4.x, r5, r2.x\n"
+	"mul_pp r1.x, r3, r1\n"
+	"mad r2.x, r5.z, c0, c0\n"
+	"cmp r0.z, -r1.x, r5, r2.x\n"
+	"mov r0.w, r5\n"
+	"mad r1.x, r5, c0, c0\n"
+	"add r0.x, r0, c0.y\n"
+	"cmp r0.x, r0, r1, r5\n"
 	"mov oC0, r0\n";
 
 class CStereoDebuggerFactory : public IStereoDeviceFactory
@@ -132,9 +219,22 @@ public:
 
 } /* anonymous namespace */
 
-CStereoDebugger::CStereoDebugger() : m_Driver(NULL), m_Stage(0), m_SubStage(0), m_LeftTexU(NULL), m_RightTexU(NULL), m_PixelProgram(NULL)
+// 0 = comparison (default), 1 = left only, 2 = right only
+static int s_StereoDisplayMode = 0;
+
+#if !FINAL_VERSION
+NLMISC_CATEGORISED_COMMAND(nel, stereoDisplayMode, "Set stereo debugger display mode (0=compare, 1=left, 2=right)", "<mode>")
 {
-	
+	if (args.size() != 1) return false;
+	NLMISC::fromString(args[0], s_StereoDisplayMode);
+	if (s_StereoDisplayMode < 0 || s_StereoDisplayMode > 2) s_StereoDisplayMode = 0;
+	return true;
+}
+#endif
+
+CStereoDebugger::CStereoDebugger() : m_Driver(NULL), m_Stage(0), m_SubStage(0), m_ReflPass(0), m_LeftTexU(NULL), m_RightTexU(NULL), m_PixelProgram(NULL)
+{
+
 }
 
 CStereoDebugger::~CStereoDebugger()
@@ -161,6 +261,25 @@ void CStereoDebugger::setDriver(NL3D::UDriver *driver)
 	if (drvInternal->supportBloomEffect() && drvInternal->supportNonPowerOfTwoTextures())
 	{
 		m_PixelProgram = new CPixelProgram();
+		// glsl300esf — pipeline stage source (preferred for linked program path)
+		{
+			IProgram::CSource *source = new IProgram::CSource();
+			source->Features.MaterialFlags = CProgramFeatures::TextureStages;
+			source->Features.NoUniforms = true;
+			source->Profile = IProgram::glsl300esf;
+			source->DisplayName = "glsl300esf/StereoDebug";
+			source->setSourcePtr(a_glsl300esf);
+			m_PixelProgram->addSource(source);
+		}
+		// glsl330f — SSO fallback
+		{
+			IProgram::CSource *source = new IProgram::CSource();
+			source->Features.MaterialFlags = CProgramFeatures::TextureStages;
+			source->Features.NoUniforms = true;
+			source->Profile = IProgram::glsl330f;
+			source->setSourcePtr(a_glsl330f);
+			m_PixelProgram->addSource(source);
+		}
 		// arbfp1
 		{
 			IProgram::CSource *source = new IProgram::CSource();
@@ -179,10 +298,14 @@ void CStereoDebugger::setDriver(NL3D::UDriver *driver)
 		}
 		if (!drvInternal->compilePixelProgram(m_PixelProgram))
 		{
-			nlwarning("No supported pixel program for stereo debugger");
+			nlwarning("STEREO: No supported pixel program for stereo debugger");
 
 			delete m_PixelProgram;
 			m_PixelProgram = NULL;
+		}
+		else
+		{
+			nlinfo("STEREO: Pixel program compiled successfully for stereo debugger");
 		}
 	}
 
@@ -272,7 +395,7 @@ void CStereoDebugger::initTextures()
 	m_Driver->getWindowSize(width, height);
 	NL3D::IDriver *drvInternal = (static_cast<CDriverUser *>(m_Driver))->getDriver();	
 
-	m_LeftTex = new CTextureBloom();
+	m_LeftTex = new CTextureOffscreen();
 	m_LeftTex->setRenderTarget(true);
 	m_LeftTex->setReleasable(false);
 	m_LeftTex->resize(width, height);
@@ -283,7 +406,7 @@ void CStereoDebugger::initTextures()
 	m_LeftTexU = new CTextureUser(m_LeftTex);
 	nlassert(!drvInternal->isTextureRectangle(m_LeftTex)); // not allowed
 
-	m_RightTex = new CTextureBloom();
+	m_RightTex = new CTextureOffscreen();
 	m_RightTex->setRenderTarget(true);
 	m_RightTex->setReleasable(false);
 	m_RightTex->resize(width, height);
@@ -346,6 +469,11 @@ void CStereoDebugger::getOriginalFrustum(uint cid, NL3D::UCamera *camera) const
 }
 
 /// Is there a next pass
+/// Filled mode stages: 1=L reflect, 2=R reflect (both repeated per requested
+/// reflection pass, eye pair adjacent so the right eye can re-render the left
+/// eye's traversal), 3=L scene, 4=R scene, 5=composite
+/// Non-filled mode stages: 1=reflect (repeated per requested reflection
+/// pass), 3=scene (skips 2 so want* conditions are shared)
 bool CStereoDebugger::nextPass()
 {
 	if (m_Driver->getPolygonMode() == UDriver::Filled)
@@ -353,18 +481,25 @@ bool CStereoDebugger::nextPass()
 		switch (m_Stage)
 		{
 		case 0:
-			++m_Stage;
+			m_ReflPass = 0;
+			m_Stage = m_SceneReflectionPasses > 0 ? 1 : 3;
 			m_SubStage = 0;
 			return true;
 		case 1:
-			++m_Stage;
+			m_Stage = 2; // L reflect -> R reflect, same reflection pass
 			m_SubStage = 0;
 			return true;
 		case 2:
-			++m_Stage;
+			++m_ReflPass;
+			m_Stage = m_ReflPass < m_SceneReflectionPasses ? 1 : 3;
 			m_SubStage = 0;
 			return true;
 		case 3:
+		case 4:
+			++m_Stage;
+			m_SubStage = 0;
+			return true;
+		default:
 			m_Stage = 0;
 			m_SubStage = 0;
 			return false;
@@ -375,16 +510,38 @@ bool CStereoDebugger::nextPass()
 		switch (m_Stage)
 		{
 		case 0:
-			++m_Stage;
+			m_ReflPass = 0;
+			m_Stage = m_SceneReflectionPasses > 0 ? 1 : 3;
 			m_SubStage = 0;
 			return true;
 		case 1:
+			++m_ReflPass;
+			if (m_ReflPass < m_SceneReflectionPasses)
+			{
+				m_SubStage = 0;
+				return true; // next reflection pass
+			}
+			m_Stage = 3;
+			m_SubStage = 0;
+			return true;
+		case 3:
 			m_Stage = 0;
 			m_SubStage = 0;
 			return false;
 		}
 	}
 	return false;
+}
+
+uint CStereoDebugger::getSceneReflectionPass() const
+{
+	return m_ReflPass;
+}
+
+uint CStereoDebugger::getSceneView() const
+{
+	// Odd stages are the left eye (1=L reflect, 3=L scene)
+	return (m_Stage % 2) ? 0 : 1;
 }
 
 /// Gets the current viewport
@@ -416,54 +573,77 @@ void CStereoDebugger::getCurrentMatrix(uint cid, NL3D::UCamera *camera) const
 bool CStereoDebugger::wantClear()
 {
 	m_SubStage = 1;
-	return m_Stage != 3;
+	return m_Stage >= 3 && m_Stage <= 4;
 }
-	
+
+/// Render scene reflections
+bool CStereoDebugger::wantSceneReflections()
+{
+	return m_Stage >= 1 && m_Stage <= 2;
+}
+
 /// The 3D scene
 bool CStereoDebugger::wantScene()
 {
 	m_SubStage = 2;
-	return m_Stage != 3;
+	return m_Stage >= 3 && m_Stage <= 4;
 }
 
 /// The 3D scene end (after multiple wantScene)
 bool CStereoDebugger::wantSceneEffects()
 {
-	return m_Stage != 3;
+	return m_Stage >= 3 && m_Stage <= 4;
 }
 
 /// Interface within the 3D scene
 bool CStereoDebugger::wantInterface3D()
 {
 	m_SubStage = 3;
-	return m_Stage == 3;
+	return m_Stage == 5;
 }
-	
+
 /// 2D Interface
 bool CStereoDebugger::wantInterface2D()
 {
 	m_SubStage = 4;
-	return m_Stage == 3;
+	return m_Stage == 5;
 }
 
 bool CStereoDebugger::isSceneFirst()
 {
-	return m_Stage != 3;
+	// Odd stages are left eye (1=L reflect, 3=L scene): run traversals
+	return m_Stage % 2 != 0;
 }
 
 bool CStereoDebugger::isSceneLast()
 {
-	return m_Stage != 3;
+	// Even stages are right eye (2=R reflect, 4=R scene): release traversals
+	if (m_Driver->getPolygonMode() == UDriver::Filled)
+		return m_Stage % 2 == 0;
+	else
+		return m_Stage % 2 != 0; // wireframe: single pass per group, first=last
+}
+
+uint CStereoDebugger::getFlareContext()
+{
+	// Odd stages = left eye, even stages = right eye. Scene stages use
+	// contexts 0/2; the water reflection stages (1, 2) use the dedicated
+	// reflection contexts 4/5 (see the CScene flare context allocation):
+	// their occlusion queries test the mirrored view's depth and must not
+	// cross-feed any other context's fade state.
+	if (m_Stage <= 2)
+		return (m_Stage % 2) ? 4 : 5;
+	return (m_Stage % 2) ? 0 : 2;
 }
 
 /// Returns true if a new render target was set, always fase if not using render targets
 bool CStereoDebugger::beginRenderTarget()
 {
-	if (m_Stage != 3 && m_Driver && (m_Driver->getPolygonMode() == UDriver::Filled))
+	if (m_PixelProgram && m_Stage >= 3 && m_Stage <= 4 && m_Driver && (m_Driver->getPolygonMode() == UDriver::Filled))
 	{
 		if (!m_LeftTexU) getTextures();
-		if (m_Stage % 2) static_cast<CDriverUser *>(m_Driver)->setRenderTarget(*m_RightTexU, 0, 0, 0, 0);
-		else static_cast<CDriverUser *>(m_Driver)->setRenderTarget(*m_LeftTexU, 0, 0, 0, 0);
+		if (m_Stage == 3) static_cast<CDriverUser *>(m_Driver)->setRenderTarget(*m_LeftTexU, 0, 0, 0, 0);
+		else static_cast<CDriverUser *>(m_Driver)->setRenderTarget(*m_RightTexU, 0, 0, 0, 0);
 		return true;
 	}
 	return false;
@@ -472,28 +652,50 @@ bool CStereoDebugger::beginRenderTarget()
 /// Returns true if a render target was fully drawn, always false if not using render targets
 bool CStereoDebugger::endRenderTarget()
 {
-	if (m_Stage != 3 && m_Driver && (m_Driver->getPolygonMode() == UDriver::Filled))
+	if (m_PixelProgram && m_Stage >= 3 && m_Stage <= 4 && m_Driver && (m_Driver->getPolygonMode() == UDriver::Filled))
 	{
 		CTextureUser cu;
 		(static_cast<CDriverUser *>(m_Driver))->setRenderTarget(cu);
-		bool fogEnabled = m_Driver->fogEnabled();
-		m_Driver->enableFog(false);
 
-		m_Driver->setMatrixMode2D11();
-		CViewport vp = CViewport();
-		m_Driver->setViewport(vp);
-		uint32 width, height;
-		NL3D::IDriver *drvInternal = (static_cast<CDriverUser *>(m_Driver))->getDriver();
-		NL3D::CMaterial *mat = m_Mat.getObjectPtr();
-		mat->setTexture(0, m_LeftTexU->getITexture());
-		mat->setTexture(1, m_RightTexU->getITexture());
-		drvInternal->activePixelProgram(m_PixelProgram);
+		// Only draw composite after both eyes are rendered
+		if (m_Stage == 4)
+		{
+			bool fogEnabled = m_Driver->fogEnabled();
+			m_Driver->enableFog(false);
 
-		m_Driver->drawQuad(m_QuadUV, m_Mat);
+			m_Driver->setMatrixMode2D11();
+			CViewport vp = CViewport();
+			m_Driver->setViewport(vp);
+			NL3D::IDriver *drvInternal = (static_cast<CDriverUser *>(m_Driver))->getDriver();
+			NL3D::CMaterial *mat = m_Mat.getObjectPtr();
+			if (s_StereoDisplayMode == 1)
+			{
+				// Left only
+				mat->setTexture(0, m_LeftTexU->getITexture());
+				mat->setTexture(1, NULL);
+				drvInternal->activePixelProgram(NULL);
+			}
+			else if (s_StereoDisplayMode == 2)
+			{
+				// Right only
+				mat->setTexture(0, m_RightTexU->getITexture());
+				mat->setTexture(1, NULL);
+				drvInternal->activePixelProgram(NULL);
+			}
+			else
+			{
+				// Comparison
+				mat->setTexture(0, m_LeftTexU->getITexture());
+				mat->setTexture(1, m_RightTexU->getITexture());
+				drvInternal->activePixelProgram(m_PixelProgram);
+			}
 
-		drvInternal->activePixelProgram(NULL);
-		m_Driver->enableFog(fogEnabled);
-		recycleTextures();
+			m_Driver->drawQuad(m_QuadUV, m_Mat);
+
+			drvInternal->activePixelProgram(NULL);
+			m_Driver->enableFog(fogEnabled);
+			recycleTextures();
+		}
 
 		return true;
 	}
@@ -515,6 +717,5 @@ void CStereoDebugger::listDevices(std::vector<CStereoDeviceInfo> &devicesOut)
 
 } /* namespace NL3D */
 
-#endif /* #if !FINAL_VERSION */
 
 /* end of file */

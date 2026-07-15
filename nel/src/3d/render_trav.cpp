@@ -90,6 +90,18 @@ CRenderTrav::CRenderTrav()
 	_MeshSkinManager= NULL;
 	_ShadowMeshSkinManager= NULL;
 
+	// Light table mode: each unique CPointLight is uploaded to the driver once
+	// per frame via setLightTableEntry(). Per-object rendering then calls
+	// setLights() with indices into the table + per-object influence factors,
+	// instead of calling setLight()/enableLight() with fully modulated CLight
+	// data for every draw. This reduces redundant light uploads when many
+	// objects share the same point lights, and prepares for future UBO/SSBO
+	// based lighting where all lights must be accessible from the shader.
+	_LightTableMode= true;
+	_LightTableActive= false;
+	_LightTableSize= 0;
+	_MaxLightTableSize= (uint)~0;
+
 	_LayersRenderingOrder= true;
 	_FirstWaterModel = NULL;
 }
@@ -234,22 +246,78 @@ void		CRenderTrav::traverse(UScene::TRenderPart renderPart, bool newRender, bool
 		// Render the opaque materials
 		_CurrentPassOpaque = true;
 		OrderOpaqueList.begin();
-		while( OrderOpaqueList.get() != NULL )
+		if(_LightTableMode && _LightTableActive)
 		{
-			CTransform	*tr= OrderOpaqueList.get();
-			#ifdef NL_DEBUG_RENDER_TRAV
-				CTransformShape *trShape = dynamic_cast<CTransformShape *>(tr);
-				if (trShape)
+			// Batched traversal: pre-fill the light table, then render.
+			// When the table is full, render the batch, flush, and continue.
+			while(OrderOpaqueList.get() != NULL)
+			{
+				// Phase 1: collect lights for this batch
+				COrderingTable<CTransform>::CIterator batchStart = OrderOpaqueList.iterator();
+				uint batchCount = 0;
+				while(OrderOpaqueList.get() != NULL)
 				{
-					const std::string *shapeName = Scene->getShapeBank()->getShapeNameFromShapePtr(trShape->Shape);
-					if (shapeName)
+					CTransform *tr = OrderOpaqueList.get();
+					const CLightContribution *lc = NULL;
+					if(tr->isLightable())
 					{
-						nlwarning("Displaying %s", shapeName->c_str());
+						CSkeletonModel *ancestor = tr->getAncestorSkeletonModel();
+						if(ancestor)
+							lc = &ancestor->getLightContribution();
+						else
+							lc = &tr->getLightContribution();
 					}
+					if(!collectObjectLights(lc))
+						break;
+					batchCount++;
+					OrderOpaqueList.next();
 				}
-			#endif
-			tr->traverseRender();
-			OrderOpaqueList.next();
+				COrderingTable<CTransform>::CIterator batchEnd = OrderOpaqueList.iterator();
+
+				// Phase 2: render the batch
+				OrderOpaqueList.setIterator(batchStart);
+				for(uint i = 0; i < batchCount; i++)
+				{
+					#ifdef NL_DEBUG_RENDER_TRAV
+						CTransformShape *trShape = dynamic_cast<CTransformShape *>(OrderOpaqueList.get());
+						if (trShape)
+						{
+							const std::string *shapeName = Scene->getShapeBank()->getShapeNameFromShapePtr(trShape->Shape);
+							if (shapeName)
+							{
+								nlwarning("Displaying %s", shapeName->c_str());
+							}
+						}
+					#endif
+					OrderOpaqueList.get()->traverseRender();
+					OrderOpaqueList.next();
+				}
+
+				// If more objects remain, flush for next batch
+				OrderOpaqueList.setIterator(batchEnd);
+				if(OrderOpaqueList.get() != NULL)
+					flushLightTable();
+			}
+		}
+		else
+		{
+			// Non-table mode: single-pass render
+			while(OrderOpaqueList.get() != NULL)
+			{
+				#ifdef NL_DEBUG_RENDER_TRAV
+					CTransformShape *trShape = dynamic_cast<CTransformShape *>(OrderOpaqueList.get());
+					if (trShape)
+					{
+						const std::string *shapeName = Scene->getShapeBank()->getShapeNameFromShapePtr(trShape->Shape);
+						if (shapeName)
+						{
+							nlwarning("Displaying %s", shapeName->c_str());
+						}
+					}
+				#endif
+				OrderOpaqueList.get()->traverseRender();
+				OrderOpaqueList.next();
+			}
 		}
 
 		/* Render MeshBlock Manager.
@@ -292,15 +360,21 @@ void		CRenderTrav::traverse(UScene::TRenderPart renderPart, bool newRender, bool
 		// Render the Landscape
 		renderLandscapes();
 
-		// Project ShadowMaps.
-		if(Scene->getLandscapePolyDrawingCallback() != NULL)
+		// Project ShadowMaps. Not in water reflection renders: dynamic
+		// entity shadows project onto the ground directly beneath their
+		// casters, which the mirrored view essentially never sees (it is
+		// hidden behind the caster's own reflection) — skip the cost.
+		if (!Scene->getWaterReflectionManager().isRenderingReflection())
 		{
-			Scene->getLandscapePolyDrawingCallback()->beginPolyDrawing();
-		}
-		_ShadowMapManager.renderProject(Scene);
-		if(Scene->getLandscapePolyDrawingCallback())
-		{
-			Scene->getLandscapePolyDrawingCallback()->endPolyDrawing();
+			if(Scene->getLandscapePolyDrawingCallback() != NULL)
+			{
+				Scene->getLandscapePolyDrawingCallback()->beginPolyDrawing();
+			}
+			_ShadowMapManager.renderProject(Scene);
+			if(Scene->getLandscapePolyDrawingCallback())
+			{
+				Scene->getLandscapePolyDrawingCallback()->endPolyDrawing();
+			}
 		}
 
 		// Profile this frame?
@@ -323,14 +397,20 @@ void		CRenderTrav::traverse(UScene::TRenderPart renderPart, bool newRender, bool
 			// setup water models
 			CWaterModel *curr = _FirstWaterModel;
 			uint numWantedVertices = 0;
+			// per-vertex channel: planar reflection UVs + reflectivity base;
+			// armed by active reflections or any visible surface using
+			// calculated reflectivity over its envmap
+			bool baseChannelUVs = Scene->getWaterReflectionManager().needsPlanarUVs();
 			while (curr)
 			{
 				numWantedVertices += curr->getNumWantedVertices();
+				baseChannelUVs = baseChannelUVs || curr->wantsCalcReflectivityUVs();
 				curr = curr->_Next;
 			}
 			if (numWantedVertices != 0)
 			{
-				CWaterModel::setupVertexBuffer(Scene->getWaterVB(), numWantedVertices, getDriver());
+				CWaterModel::setupVertexBuffer(Scene->getWaterVB(), numWantedVertices, getDriver(),
+					baseChannelUVs);
 				//
 				{
 					CVertexBufferReadWrite vbrw;
@@ -588,6 +668,40 @@ void		CRenderTrav::resetLightSetup()
 	{
 		uint i;
 
+		// If in light table mode, handle init/teardown
+		if(_LightTableMode)
+		{
+			if(_LightTableActive)
+			{
+				// Teardown: reset _TableIndex on all tracked point lights
+				for(i=0; i<_LightTablePointLights.size(); ++i)
+				{
+					_LightTablePointLights[i]->setTableIndex(-1);
+				}
+				_LightTablePointLights.clear();
+				_LightTableSize= 0;
+				_LightTableActive= false;
+
+				// Disable table mode in driver so legacy setLight/enableLight resumes
+				Driver->enableLightTableMode(false);
+			}
+			else
+			{
+				// Init: entering table mode for this frame
+				_LightTablePointLights.clear();
+				_LightTableSize= 1;
+				_MaxLightTableSize= Driver->getMaxLightTableSize();
+				_LightTableActive= true;
+
+				// Upload sun as entry 0
+				CLight sunLight;
+				sunLight.setupDirectional(SunAmbient, SunDiffuse, SunSpecular, _SunDirection);
+				Driver->enableLightTableMode(true);
+				Driver->setLightTableSize(1);
+				Driver->setLightTableEntry(0, sunLight);
+			}
+		}
+
 		// Disable all lights.
 		for(i=0; i<Driver->getMaxLight(); ++i)
 		{
@@ -627,6 +741,13 @@ void		CRenderTrav::changeLightSetup(CLightContribution	*lightContribution, bool 
 	// If lighting System disabled, skip
 	if(!LightingSystemEnabled)
 		return;
+
+	// If in light table mode, dispatch to table path
+	if(_LightTableMode && _LightTableActive)
+	{
+		changeLightSetupTable(lightContribution, useLocalAttenuation);
+		return;
+	}
 
 	uint		i;
 
@@ -763,6 +884,192 @@ void		CRenderTrav::changeLightSetup(CLightContribution	*lightContribution, bool 
 }
 
 // ***************************************************************************
+void		CRenderTrav::flushLightTable()
+{
+	// Reset all tracked point lights' table indices
+	for(uint i = 0; i < _LightTablePointLights.size(); ++i)
+	{
+		_LightTablePointLights[i]->setTableIndex(-1);
+	}
+	_LightTablePointLights.clear();
+
+	// Reset table size to 1 (sun stays at index 0)
+	_LightTableSize = 1;
+	Driver->setLightTableSize(1);
+
+	// Clear light contribution cache so next object gets full setup
+	_CacheLightContribution = NULL;
+}
+
+// ***************************************************************************
+bool		CRenderTrav::collectObjectLights(const CLightContribution *lightContribution)
+{
+	if(!lightContribution)
+		return true;
+
+	// Count how many new table slots this object needs
+	uint newLightsNeeded = 0;
+	uint plId = 0;
+	while(lightContribution->PointLight[plId] != NULL)
+	{
+		if(lightContribution->PointLight[plId]->getTableIndex() < 0)
+			newLightsNeeded++;
+		plId++;
+		if(plId >= NL3D_MAX_LIGHT_CONTRIBUTION)
+			break;
+	}
+
+	if(_LightTableSize + newLightsNeeded > _MaxLightTableSize)
+		return false;
+
+	// Register new lights in the table
+	plId = 0;
+	while(lightContribution->PointLight[plId] != NULL)
+	{
+		CPointLight *pl = lightContribution->PointLight[plId];
+		if(pl->getTableIndex() < 0)
+		{
+			sint16 newIdx = (sint16)_LightTableSize;
+			pl->setTableIndex(newIdx);
+			_LightTablePointLights.push_back(pl);
+
+			CLight rawLight;
+			pl->setupDriverLightRaw(rawLight);
+			_LightTableSize = (uint)(newIdx + 1);
+			Driver->setLightTableSize(_LightTableSize);
+			Driver->setLightTableEntry((uint)newIdx, rawLight);
+		}
+		plId++;
+		if(plId >= NL3D_MAX_LIGHT_CONTRIBUTION)
+			break;
+	}
+
+	return true;
+}
+
+// ***************************************************************************
+void		CRenderTrav::changeLightSetupTable(CLightContribution *lightContribution, bool useLocalAttenuation)
+{
+	// Cache check: same CLightContribution* + attenuation mode => skip
+	if (_CacheLightContribution == lightContribution && (lightContribution == NULL || _LastLocalAttenuation == useLocalAttenuation))
+		return;
+
+	_StrongestLightTouched = true;
+
+	if(lightContribution)
+	{
+		// Check if this object's new lights would overflow the table.
+		// Count how many lights need fresh table slots.
+		{
+			uint newLightsNeeded = 0;
+			uint plId = 0;
+			while(lightContribution->PointLight[plId] != NULL)
+			{
+				if(lightContribution->PointLight[plId]->getTableIndex() < 0)
+					newLightsNeeded++;
+				plId++;
+				if(plId >= NL3D_MAX_LIGHT_CONTRIBUTION)
+					break;
+			}
+			if(_LightTableSize + newLightsNeeded > _MaxLightTableSize)
+			{
+				flushLightTable();
+			}
+		}
+
+		// Build parallel arrays of table indices and factors
+		sint16 tableIndices[NL3D_MAX_LIGHT_CONTRIBUTION + 1];
+		uint8 lightFactors[NL3D_MAX_LIGHT_CONTRIBUTION + 1];
+		uint numLights = 0;
+
+		// Slot 0: Sun
+		tableIndices[0] = 0;
+		lightFactors[0] = lightContribution->SunContribution;
+		numLights = 1;
+
+		// Also build _DriverLight[] for VP light setup compatibility
+		{
+			uint ufactor = lightContribution->SunContribution;
+			ufactor += ufactor >> 7;
+			CRGBA finalAmbient = lightContribution->computeCurrentAmbient(SunAmbient);
+			if(lightContribution->UseMergedPointLight)
+				finalAmbient.addRGBOnly(finalAmbient, lightContribution->MergedPointLight);
+			finalAmbient.A = 255;
+			CRGBA sunDiffuse, sunSpecular;
+			sunDiffuse.modulateFromuiRGBOnly(SunDiffuse, ufactor);
+			sunSpecular.modulateFromuiRGBOnly(SunSpecular, ufactor);
+			_DriverLight[0].setupDirectional(finalAmbient, sunDiffuse, sunSpecular, _SunDirection);
+		}
+
+		// Point lights
+		uint plId = 0;
+		while(lightContribution->PointLight[plId] != NULL)
+		{
+			CPointLight *pl = lightContribution->PointLight[plId];
+			uint8 inf;
+			if(useLocalAttenuation)
+				inf = lightContribution->Factor[plId];
+			else
+				inf = lightContribution->AttFactor[plId];
+
+			// Lazy-assign table index if not yet in table
+			if(pl->getTableIndex() < 0)
+			{
+				sint16 newIdx = (sint16)_LightTableSize;
+				pl->setTableIndex(newIdx);
+				_LightTablePointLights.push_back(pl);
+
+				// Upload raw light to driver table
+				CLight rawLight;
+				pl->setupDriverLightRaw(rawLight);
+				_LightTableSize = (uint)(newIdx + 1);
+				Driver->setLightTableSize(_LightTableSize);
+				Driver->setLightTableEntry((uint)newIdx, rawLight);
+			}
+
+			tableIndices[numLights] = pl->getTableIndex();
+			lightFactors[numLights] = inf;
+			numLights++;
+
+			// Also build _DriverLight[] for VP light setup compatibility
+			if(useLocalAttenuation)
+				pl->setupDriverLight(_DriverLight[plId + 1], inf);
+			else
+				pl->setupDriverLightUserAttenuation(_DriverLight[plId + 1], inf);
+
+			plId++;
+			if(plId >= NL3D_MAX_LIGHT_CONTRIBUTION)
+				break;
+		}
+
+		// Compute per-object ambient
+		CRGBA perObjectAmbient = lightContribution->computeCurrentAmbient(SunAmbient);
+		if(lightContribution->UseMergedPointLight)
+			perObjectAmbient.addRGBOnly(perObjectAmbient, lightContribution->MergedPointLight);
+		perObjectAmbient.A = 255;
+
+		// Send to driver
+		Driver->setLights(tableIndices, lightFactors, numLights, 0, perObjectAmbient);
+
+		// Update _NumLightEnabled for VP light setup
+		_NumLightEnabled = plId + 1;
+
+		// Cache
+		_CacheLightContribution = lightContribution;
+		_LastLocalAttenuation = useLocalAttenuation;
+	}
+	else
+	{
+		// NULL lightContribution: disable all
+		Driver->setLights(NULL, NULL, 0, 0, CRGBA::Black);
+
+		_CacheLightContribution = NULL;
+		_NumLightEnabled = 0;
+	}
+}
+
+
+// ***************************************************************************
 // ***************************************************************************
 // VertexProgram LightSetup
 // ***************************************************************************
@@ -868,7 +1175,9 @@ void		CRenderTrav::beginVPLightSetup(CVertexProgramLighted *program, const CMatr
 void		CRenderTrav::changeVPLightSetupMaterial(const CMaterial &mat, bool excludeStrongest)
 {
 	CVertexProgramLighted *program = _VPCurrent;
-	nlassert(program);
+	// UBO-based VPs skip beginVPLightSetup(), so _VPCurrent is NULL.
+	// Material uniforms are handled by the driver's setupUniforms() instead.
+	if (!program) return;
 
 	// Must test if at least done one time.
 	if(!_VPMaterialCacheDirty)
@@ -1178,7 +1487,7 @@ static	void	strReplaceAll(string &strInOut, const string &tokenSrc, const string
 void CVertexProgramLighted::buildInfo()
 {
 	CVertexProgram::buildInfo();
-	if (profile() == nelvp)
+	if (profile() == nelvp || profile() == arbvp1 || profile() == vs_2_0)
 	{
 		// Fixed uniform locations
 		m_IdxLighted.Ambient = m_FeaturesLighted.CtStartNeLVP + 0;
@@ -1192,7 +1501,7 @@ void CVertexProgramLighted::buildInfo()
 			{
 				m_IdxLighted.Specular[i] = m_FeaturesLighted.CtStartNeLVP + 5 + i;
 			}
-			m_IdxLighted.DirOrPos[0] = 9;
+			m_IdxLighted.DirOrPos[0] = m_FeaturesLighted.CtStartNeLVP + 9;
 			for (uint i = 1; i < MaxLight; ++i)
 			{
 				m_IdxLighted.DirOrPos[i] = m_FeaturesLighted.CtStartNeLVP + (12 - 1) + i;
@@ -1216,10 +1525,35 @@ void CVertexProgramLighted::buildInfo()
 	}
 	else
 	{
-		// Named uniform locations
-		// TODO_VP_GLSL
-		// m_IdxLighted.Ambient = getUniformIndex("ambient");
-		// etc
+		// Named uniform locations (GLSL)
+		m_IdxLighted.Ambient = getUniformIndex("ambient");
+		m_IdxLighted.Diffuse[0] = getUniformIndex("diffuse0");
+		m_IdxLighted.Diffuse[1] = getUniformIndex("diffuse1");
+		m_IdxLighted.Diffuse[2] = getUniformIndex("diffuse2");
+		m_IdxLighted.Diffuse[3] = getUniformIndex("diffuse3");
+		m_IdxLighted.DiffuseAlpha = getUniformIndex("diffuseAlpha");
+		if (m_FeaturesLighted.SupportSpecular)
+		{
+			m_IdxLighted.Specular[0] = getUniformIndex("specular0");
+			m_IdxLighted.Specular[1] = getUniformIndex("specular1");
+			m_IdxLighted.Specular[2] = getUniformIndex("specular2");
+			m_IdxLighted.Specular[3] = getUniformIndex("specular3");
+			m_IdxLighted.DirOrPos[0] = getUniformIndex("sunDir");
+			m_IdxLighted.DirOrPos[1] = getUniformIndex("plPos0");
+			m_IdxLighted.DirOrPos[2] = getUniformIndex("plPos1");
+			m_IdxLighted.DirOrPos[3] = getUniformIndex("plPos2");
+			m_IdxLighted.EyePosition = getUniformIndex("eyePos");
+		}
+		else
+		{
+			for (uint i = 0; i < MaxLight; ++i)
+				m_IdxLighted.Specular[i] = ~0;
+			m_IdxLighted.DirOrPos[0] = getUniformIndex("dirOrPos0");
+			m_IdxLighted.DirOrPos[1] = getUniformIndex("dirOrPos1");
+			m_IdxLighted.DirOrPos[2] = getUniformIndex("dirOrPos2");
+			m_IdxLighted.DirOrPos[3] = getUniformIndex("dirOrPos3");
+			m_IdxLighted.EyePosition = ~0;
+		}
 	}
 
 	nlassert(m_IdxLighted.Diffuse[0] != std::numeric_limits<uint>::max());

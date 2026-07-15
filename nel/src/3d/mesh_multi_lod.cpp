@@ -477,7 +477,7 @@ void CMeshMultiLod::renderMeshGeom (uint slot, IDriver *drv, CMeshMultiLodInstan
 				CMeshGeom *meshGeom= safe_cast<CMeshGeom*>(slotRef.MeshGeom);
 
 				// Force corse mesh vertex buffer in system memory
-				const_cast<CVertexBuffer&>(meshGeom->getVertexBuffer ()).setPreferredMemory (CVertexBuffer::RAMPreferred, false);
+				const_cast<CVertexBuffer&>(meshGeom->getVertexBuffer ()).setBufferUsage (CVertexBuffer::CpuReadWrite, false);
 
 				meshGeom->renderSimpleWithMaterial(drv, trans->getWorldMatrix(), material);
 

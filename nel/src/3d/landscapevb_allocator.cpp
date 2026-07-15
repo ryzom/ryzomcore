@@ -59,6 +59,7 @@ CLandscapeVBAllocator::CLandscapeVBAllocator(TType type, const std::string &vbNa
 
 	_ReallocationOccur= false;
 	_NumVerticesAllocated= 0;
+	_UnsynchronizedMode= false;
 	_BufferLocked= false;
 	_LastFarVB = NULL;
 	_LastNearVB = NULL;
@@ -106,6 +107,7 @@ void			CLandscapeVBAllocator::clear()
 {
 	// clear list.
 	_VertexFreeMemory.clear();
+	_DeferredFreeVertices.clear();
 	_NumVerticesAllocated= 0;
 
 	// delete the VB.
@@ -116,6 +118,7 @@ void			CLandscapeVBAllocator::clear()
 
 	// clear other states.
 	_ReallocationOccur= false;
+	_UnsynchronizedMode= false;
 	_Driver= NULL;
 }
 
@@ -189,14 +192,58 @@ uint			CLandscapeVBAllocator::allocateVertex()
 // ***************************************************************************
 void			CLandscapeVBAllocator::deleteVertex(uint vid)
 {
-	// check and Mark as free the vertex. (Debug).
 	nlassert(vid<_NumVerticesAllocated);
 	nlassert(!_VertexInfos[vid].Free);
-	_VertexInfos[vid].Free= true;
 
-	// Add this vertex to the free list.
-	// create a new entry which points to this vertex.
-	_VertexFreeMemory.push_back( vid );
+	if (_UnsynchronizedMode && _Driver)
+	{
+		// Defer the free until the GPU is done with this vertex.
+		// Stamp with counter-1: the vertex was last drawn in the previous frame.
+		uint64 counter = _Driver->getSwapBufferCounter();
+		uint64 stamp = (counter > 0) ? counter - 1 : 0;
+		SDeferredFree df;
+		df.VertexId = vid;
+		df.FrameCounter = stamp;
+		_DeferredFreeVertices.push_back(df);
+	}
+	else
+	{
+		// Immediate free.
+		_VertexInfos[vid].Free= true;
+		_VertexFreeMemory.push_back( vid );
+	}
+}
+
+
+// ***************************************************************************
+void			CLandscapeVBAllocator::processDeferredFrees(uint64 swapBufferInFlight)
+{
+	if (_DeferredFreeVertices.empty()) return;
+
+	size_t writeIdx = 0;
+	for (size_t i = 0; i < _DeferredFreeVertices.size(); ++i)
+	{
+		if (_DeferredFreeVertices[i].FrameCounter < swapBufferInFlight)
+		{
+			// GPU is done with this frame — return vertex to free list.
+			_VertexInfos[_DeferredFreeVertices[i].VertexId].Free = true;
+			_VertexFreeMemory.push_back(_DeferredFreeVertices[i].VertexId);
+		}
+		else
+		{
+			// Still in-flight, keep in deferred queue.
+			_DeferredFreeVertices[writeIdx++] = _DeferredFreeVertices[i];
+		}
+	}
+	_DeferredFreeVertices.resize(writeIdx);
+}
+
+
+// ***************************************************************************
+void			CLandscapeVBAllocator::forceReallocation()
+{
+	if (_NumVerticesAllocated > 0)
+		allocateVertexBuffer(_NumVerticesAllocated);
 }
 
 
@@ -299,8 +346,11 @@ void				CLandscapeVBAllocator::allocateVertexBuffer(uint32 numVertices)
 	// must unlock VBhard before.
 	unlockBuffer();
 
-	// This always works.
-	_VB.setPreferredMemory(CVertexBuffer::AGPPreferred, false);
+	// Choose buffer mode based on driver capability.
+	if (_UnsynchronizedMode)
+		_VB.setBufferUsage(CVertexBuffer::UnsynchronizedWrite, false);
+	else
+		_VB.setBufferUsage(CVertexBuffer::PartialWrite, false);
 	_VB.setNumVertices(numVertices);
 	_VB.setName (_VBName);
 }

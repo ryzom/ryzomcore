@@ -56,6 +56,8 @@ CClipTrav::CClipTrav() : ViewPyramid(6), WorldPyramid(6)
 	ForceNoFrustumClip= false;
 	_QuadGridClipManager= NULL;
 	_TrackClusterVisibility= false;
+	_LastShadowFadeFrameId= 0;
+	_UseClusterVisibilityPosOverride= false;
 }
 
 // ***************************************************************************
@@ -223,7 +225,12 @@ void CClipTrav::traverse()
 	// update the QuadGridClipManager.
 	if(_QuadGridClipManager)
 	{
-		_QuadGridClipManager->updateClustersFromCamera(CamPos);
+		// From the cluster visibility position when overridden (water
+		// reflection passes): this call creates and deletes cluster models
+		// by distance from the camera, and a mirrored below-ground camera
+		// would churn borderline cells on every reflection pass, mutating
+		// clip state between the frame's replicated renders
+		_QuadGridClipManager->updateClustersFromCamera(_UseClusterVisibilityPosOverride ? _ClusterVisibilityPosOverride : CamPos);
 	}
 
 	H_BEFORE( NL3D_TravClip_ClearLists );
@@ -275,23 +282,24 @@ void CClipTrav::traverse()
 	sceneRoot->clipDelChild(RootCluster);
 
 	// In which cluster is the camera ?
+	const CVector &clusterPos = _UseClusterVisibilityPosOverride ? _ClusterVisibilityPosOverride : CamPos;
 	CQuadGrid<CCluster*>::CIterator itAcc;
 	if (Camera->getClusterSystem() == (CInstanceGroup*)-1)
 	{
-		fullSearch(vCluster, CamPos);
+		fullSearch(vCluster, clusterPos);
 		for (i = 0; i < vCluster.size(); ++i)
 			sceneRoot->clipAddChild(vCluster[i]);
 	}
 	else
 	{
 		bool bInWorld = true;
-		Accel.select (CamPos, CamPos);
+		Accel.select (clusterPos, clusterPos);
 		itAcc = Accel.begin();
 		while (itAcc != Accel.end())
 		{
 			CCluster *pCluster = *itAcc;
 			if (pCluster->Group == Camera->getClusterSystem())
-			if (pCluster->isIn (CamPos))
+			if (pCluster->isIn (clusterPos))
 			{
 				sceneRoot->clipAddChild(pCluster);
 				vCluster.push_back (pCluster);
@@ -312,6 +320,7 @@ void CClipTrav::traverse()
 	{
 		vCluster[i]->setCameraIn(true);
 	}
+
 
 
 	H_AFTER( NL3D_TravClip_FindCameraCluster);
@@ -564,7 +573,17 @@ void	CClipTrav::clipShadowCasters()
 
 	CScene::ItShadowCasterList		itShadowCaster;
 
-	float	dFade= NL3D_SMM_FADE_SPEED * Scene->getEllapsedTime();
+	// Only accumulate shadow fades once per real frame (avoid double-accumulation in stereo)
+	float	dFade;
+	if (Scene->getFrameId() != _LastShadowFadeFrameId)
+	{
+		dFade= NL3D_SMM_FADE_SPEED * Scene->getEllapsedTime();
+		_LastShadowFadeFrameId= Scene->getFrameId();
+	}
+	else
+	{
+		dFade= 0.f;
+	}
 	float	distFadeStart= Scene->getShadowMapDistFadeStart();
 	float	distFadeEnd= Scene->getShadowMapDistFadeEnd();
 	float	OODeltaDistFade;
@@ -630,7 +649,12 @@ void	CClipTrav::clipShadowCasters()
 			}
 
 			// If the ShadowMap is visible, add it to the List Of ShadowMap to Render.
-			if(visible)
+			// Not during water reflection renders: reflections neither
+			// generate nor project shadow maps, so casters registered there
+			// are never consumed and would duplicate into the eye renders'
+			// list (each duplicate re-modulates the shadow: near-black
+			// shadows).
+			if(visible && !Scene->getWaterReflectionManager().isRenderingReflection())
 				Scene->getRenderTrav().getShadowMapManager().addShadowCaster(sc);
 
 			// update Fading.

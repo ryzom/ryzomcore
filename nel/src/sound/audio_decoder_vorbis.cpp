@@ -79,7 +79,10 @@ int vorbisSeekFunc(void *datasource, ogg_int64_t offset, int whence)
 		return -1;
 	}
 
-	if (audio_decoder_vorbis->getStream()->seek(SEEK_SET ? audio_decoder_vorbis->getStreamOffset() + (sint32)offset : (sint32)offset, origin)) return 0;
+	sint32 actual_offset = (origin == NLMISC::IStream::begin)
+		? audio_decoder_vorbis->getStreamOffset() + (sint32)offset
+		: (sint32)offset;
+	if (audio_decoder_vorbis->getStream()->seek(actual_offset, origin)) return 0;
 	else return -1;
 }
 

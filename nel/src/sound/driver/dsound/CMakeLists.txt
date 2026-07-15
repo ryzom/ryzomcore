@@ -1,9 +1,25 @@
 FILE(GLOB SRC *.cpp *.h *.def *.rc)
 
+SOURCE_GROUP("" FILES
+		sound_driver_dsound.cpp
+		sound_driver_dsound.h
+		stddsound.cpp
+		stddsound.h
+		driver_dsound.def
+		resources.rc)
+
+SOURCE_GROUP(sfx FILES
+		buffer_dsound.cpp
+		buffer_dsound.h
+		listener_dsound.cpp
+		listener_dsound.h
+		source_dsound.cpp
+		source_dsound.h)
+
 NL_TARGET_DRIVER(nel_drv_dsound_win ${SRC})
 
 TARGET_INCLUDE_DIRECTORIES(nel_drv_dsound_win BEFORE PRIVATE ${DXSDK_INCLUDE_DIR})
-TARGET_LINK_LIBRARIES(nel_drv_dsound_win nelmisc nelsnd_lowlevel ${DXSDK_DSOUND_LIBRARY})
+TARGET_LINK_LIBRARIES(nel_drv_dsound_win NeL::misc NeL::snd_lowlevel ${DXSDK_DSOUND_LIBRARY})
 
 NL_DEFAULT_PROPS(nel_drv_dsound_win "NeL, Driver, Sound: DirectSound")
 NL_ADD_RUNTIME_FLAGS(nel_drv_dsound_win)
