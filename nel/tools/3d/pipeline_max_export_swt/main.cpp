@@ -60,6 +60,7 @@
 #include "../pipeline_max/builtin/node_impl.h"
 #include "../pipeline_max/builtin/storage/app_data.h"
 #include "../pipeline_max_export_common/export_ids.h"
+#include "../pipeline_max_export_common/max_load.h"
 
 using namespace PIPELINE::MAX;
 using namespace PIPELINE::MAX::BUILTIN;
@@ -87,31 +88,13 @@ static bool getNodeScriptAppDataString(CNodeImpl *node, uint32 subId, std::strin
 // Whole-file flow shared by the standalone tool and the max2gltf writer (PMB_SWT_NO_MAIN +
 // nel_swt blob): returns 1 with the serialized CSkeletonWeight bytes, 3 when nothing is
 // flagged, -1 on error. One code path — the tool's file and the blob cannot drift.
-int pmbExportSwtForGltf(const std::string &maxPath, std::vector<uint8> &out)
+int pmbExportSwtForGltf(const std::string &maxPath, PMAXLOAD::SLoadedMax &lm,
+                        std::vector<uint8> &out)
 {
-	CSceneClassRegistry reg;
-	CBuiltin::registerClasses(&reg);
-	UPDATE1::CUpdate1::registerClasses(&reg);
-	EPOLY::CEPoly::registerClasses(&reg);
-	BIPED::CBiped::registerClasses(&reg);
-
-	CStorageOleIn in;
-	if (!in.open(maxPath.c_str())) { std::cerr << "ERROR: not an OLE compound file: " << maxPath << "\n"; return -1; }
-
-	CDllDirectory dll;
-	{ std::vector<uint8> b; if (!in.readStream("DllDirectory", b)) { std::cerr << "ERROR: no DllDirectory stream\n"; return -1; } CStorageStream st(b); dll.serial(st); }
-	dll.parse(VersionUnknown);
-	CClassDirectory3 cd(&dll);
-	{ std::vector<uint8> b; if (!in.readStream("ClassDirectory3", b)) { std::cerr << "ERROR: no ClassDirectory3 stream\n"; return -1; } CStorageStream st(b); cd.serial(st); }
-	cd.parse(VersionUnknown);
-	CScene scene(&reg, &dll, &cd);
-	{ std::vector<uint8> b; if (!in.readStream("Scene", b)) { std::cerr << "ERROR: no Scene stream\n"; return -1; } CStorageStream st(b); scene.serial(st); }
-	scene.parse(VersionUnknown);
-
 	// Walk nodes in scene-container order (the `max select all` enumeration) and collect the
 	// flagged ones, three channels each: rotquat, pos, scale (reference emission order).
 	NL3D::CSkeletonWeight::TNodeArray nodes;
-	CSceneClassContainer *ssc = scene.container();
+	CSceneClassContainer *ssc = lm.Scene->container();
 	for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
 	{
 		CNodeImpl *node = dynamic_cast<CNodeImpl *>(it->second);
@@ -189,7 +172,10 @@ int main(int argc, char **argv)
 		return 1;
 	}
 	std::vector<uint8> bytes;
-	int rc = pmbExportSwtForGltf(argv[1], bytes);
+	PMAXLOAD::SLoadedMax lm;
+	if (!PMAXLOAD::loadMaxFile(argv[1], lm))
+		return 1;
+	int rc = pmbExportSwtForGltf(argv[1], lm, bytes);
 	if (rc == 3) return 3;
 	if (rc != 1) return 1;
 	NLMISC::COFile file;

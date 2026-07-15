@@ -77,6 +77,7 @@ using namespace PIPELINE::MAX::BUILTIN;
 using namespace PIPELINE::MAX::BIPED;
 
 #include "../pipeline_max_export_common/biped_rig.h"
+#include "../pipeline_max_export_common/max_load.h"
 
 using namespace PMAX_RIG;
 
@@ -553,35 +554,18 @@ static void writeSkel(const std::string &path, const std::vector<Bone> &bonesIn)
 // Whole-file flow shared with the max2gltf writer (PMB_SKEL_NO_MAIN + nel_skel blob): the
 // Bip01-rooted skeleton walk serialized to bytes. Returns 1 with the .skel bytes, 3 when the
 // scene has no Bip01, -1 on error.
-int pmbExportSkelForGltf(const std::string &maxPath, std::vector<uint8> &out)
+int pmbExportSkelForGltf(PMAXLOAD::SLoadedMax &lm, std::vector<uint8> &out)
 {
-	CSceneClassRegistry reg;
-	CBuiltin::registerClasses(&reg);
-	UPDATE1::CUpdate1::registerClasses(&reg);
-	EPOLY::CEPoly::registerClasses(&reg);
-	BIPED::CBiped::registerClasses(&reg);
+	bool isBiped = looksLikeBipedFile(*lm.Cd);
 
-	CStorageOleIn in;
-	if (!in.open(maxPath.c_str())) { std::cerr << "cannot open " << maxPath << "\n"; return -1; }
-
-	CDllDirectory dll;
-	{ std::vector<uint8> b; in.readStream("DllDirectory", b); CStorageStream st(b); dll.serial(st); }
-	dll.parse(VersionUnknown);
-	CClassDirectory3 cd(&dll);
-	{ std::vector<uint8> b; in.readStream("ClassDirectory3", b); CStorageStream st(b); cd.serial(st); }
-	cd.parse(VersionUnknown);
-
-	bool isBiped = looksLikeBipedFile(cd);
-	CScene scene(&reg, &dll, &cd);
-	{ std::vector<uint8> b; in.readStream("Scene", b); CStorageStream st(b); scene.serial(st); }
-	scene.parse(VersionUnknown);
-
-	INode *root = scene.container()->scene()->rootNode();
+	INode *root = lm.Scene->container()->scene()->rootNode();
 	INode *bip01 = root->find(ucstring("Bip01"));
 	if (!bip01) return 3;
 
-	// Clear the per-run rig caches (they key scene objects by pointer; a previous flow's scene
-	// is gone by now and allocator reuse could alias) — same reset the standalone main does.
+	// Clear the per-run rig caches and rebuild from this scene — a deterministic fresh
+	// reconstruction, so it is byte-neutral whether the caller shares one parsed scene across
+	// flows (the writer, since the single-parse refactor) or loads its own (the standalone
+	// main, which does the same reset).
 	g_bipedRigs.clear();
 	g_rig = NULL;
 	g_msBones.clear();
@@ -590,12 +574,12 @@ int pmbExportSkelForGltf(const std::string &maxPath, std::vector<uint8> &out)
 	std::set<std::string> nameSet;
 	if (!isBiped)
 	{
-		walkNodeMax(bip01, -1, scene.container(), bones, nameSet);
+		walkNodeMax(bip01, -1, lm.Scene->container(), bones, nameSet);
 	}
 	else
 	{
 		NLMISC::CMatrix rootMat; rootMat.identity();
-		walkNode(bip01, -1, rootMat, scene.container(), bones, nameSet);
+		walkNode(bip01, -1, rootMat, lm.Scene->container(), bones, nameSet);
 		patchFootstepsGround(bones);
 	}
 	if (bones.empty()) return 3;

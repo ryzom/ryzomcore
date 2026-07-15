@@ -83,6 +83,7 @@
 #include "../pipeline_max_export_common/max_scene.h"
 #include "../pipeline_max_export_common/old_param_block.h"
 #include "../pipeline_max_export_common/export_ids.h"
+#include "../pipeline_max_export_common/max_load.h"
 
 #include <cmath>
 #include <cstdio>
@@ -223,32 +224,12 @@ bool decodePrimitive(INode &node, MAXSCENE::SNodeTMCache &tmCache, NLPACS::CPrim
 // Whole-file flow shared by the standalone tool and the max2gltf writer (PMB_PACS_PRIM_NO_MAIN
 // + nel_pacs_prim blob): returns 1 with the serialized XML bytes, 3 when the scene has no PACS
 // primitives, -1 on error. One code path — the tool's file and the blob cannot drift.
-int pmbExportPacsPrimForGltf(const std::string &maxPath, std::vector<uint8> &out)
+int pmbExportPacsPrimForGltf(PMAXLOAD::SLoadedMax &lm, std::vector<uint8> &out)
 {
-	CSceneClassRegistry reg;
-	CBuiltin::registerClasses(&reg);
-	UPDATE1::CUpdate1::registerClasses(&reg);
-	EPOLY::CEPoly::registerClasses(&reg);
-	BIPED::CBiped::registerClasses(&reg);
-	NELPATCH::CNelPatch::registerClasses(&reg);
-
-	CStorageOleIn in;
-	if (!in.open(maxPath.c_str())) { std::cerr << "ERROR: not an OLE compound file: " << maxPath << "\n"; return -1; }
-
-	CDllDirectory dll;
-	{ std::vector<uint8> b; if (!in.readStream("DllDirectory", b)) { std::cerr << "ERROR: no DllDirectory stream\n"; return -1; } CStorageStream st(b); dll.serial(st); }
-	dll.parse(VersionUnknown);
-	CClassDirectory3 cd(&dll);
-	{ std::vector<uint8> b; if (!in.readStream("ClassDirectory3", b)) { std::cerr << "ERROR: no ClassDirectory3 stream\n"; return -1; } CStorageStream st(b); cd.serial(st); }
-	cd.parse(VersionUnknown);
-	CScene scene(&reg, &dll, &cd);
-	{ std::vector<uint8> b; if (!in.readStream("Scene", b)) { std::cerr << "ERROR: no Scene stream\n"; return -1; } CStorageStream st(b); scene.serial(st); }
-	scene.parse(VersionUnknown);
-
 	// Walk nodes in scene-container order (the `geometry` MaxScript category enumeration,
 	// same precedent as pipeline_max_export_ig/_swt), collecting PACS-primitive nodes.
 	std::vector<INode *> candidates;
-	CSceneClassContainer *ssc = scene.container();
+	CSceneClassContainer *ssc = lm.Scene->container();
 	for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
 	{
 		CNodeImpl *node = dynamic_cast<CNodeImpl *>(it->second);
@@ -262,7 +243,7 @@ int pmbExportPacsPrimForGltf(const std::string &maxPath, std::vector<uint8> &out
 
 	if (candidates.empty())
 	{
-		std::cerr << "WARNING: no PACS primitives in " << maxPath << "\n";
+		std::cerr << "WARNING: no PACS primitives in scene\n";
 		return 3;
 	}
 
@@ -307,7 +288,10 @@ int main(int argc, char **argv)
 		return 1;
 	}
 	std::vector<uint8> bytes;
-	int rc = pmbExportPacsPrimForGltf(argv[1], bytes);
+	PMAXLOAD::SLoadedMax lm;
+	if (!PMAXLOAD::loadMaxFile(argv[1], lm))
+		return 1;
+	int rc = pmbExportPacsPrimForGltf(lm, bytes);
 	if (rc == 3) return 3;
 	if (rc != 1) return 1;
 	NLMISC::COFile file;

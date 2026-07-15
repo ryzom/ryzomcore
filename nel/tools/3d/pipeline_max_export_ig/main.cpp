@@ -97,6 +97,7 @@
 #include "../pipeline_max_export_common/db_path.h"
 #include "../pipeline_max_export_common/appdata_util.h"
 #include "../pipeline_max_export_common/export_ids.h"
+#include "../pipeline_max_export_common/max_load.h"
 #include "../pipeline_max_export_common/edit_mesh_mod.h"
 
 using namespace PIPELINE::MAX;
@@ -2699,31 +2700,15 @@ void pmbIgAddPsSearchPath(const std::string &path)
 	g_psSearchPaths.push_back(path);
 }
 
-int pmbExportIgsForGltf(const std::string &maxPath,
+int pmbExportIgsForGltf(PMAXLOAD::SLoadedMax &lm,
                         std::vector<std::pair<std::string, std::vector<uint8> > > &igsOut)
 {
-	CSceneClassRegistry reg;
-	CBuiltin::registerClasses(&reg);
-	UPDATE1::CUpdate1::registerClasses(&reg);
-	EPOLY::CEPoly::registerClasses(&reg);
-	BIPED::CBiped::registerClasses(&reg);
-	NELPATCH::CNelPatch::registerClasses(&reg);
+	// The XRef machinery below resolves referenced scenes against g_registry — point it at the
+	// shared registry the caller's scene was parsed with.
 	CSceneClassRegistry *prevReg = g_registry;
-	g_registry = &reg;
+	g_registry = PMAXLOAD::sceneRegistry();
 
-	CStorageOleIn in;
-	if (!in.open(maxPath.c_str())) { g_registry = prevReg; return -1; }
-	CDllDirectory dll;
-	{ std::vector<uint8> b; if (!in.readStream("DllDirectory", b)) { g_registry = prevReg; return -1; } CStorageStream st(b); dll.serial(st); }
-	dll.parse(VersionUnknown);
-	CClassDirectory3 cd(&dll);
-	{ std::vector<uint8> b; if (!in.readStream("ClassDirectory3", b)) { g_registry = prevReg; return -1; } CStorageStream st(b); cd.serial(st); }
-	cd.parse(VersionUnknown);
-	CScene scene(&reg, &dll, &cd);
-	{ std::vector<uint8> b; if (!in.readStream("Scene", b)) { g_registry = prevReg; return -1; } CStorageStream st(b); scene.serial(st); }
-	scene.parse(VersionUnknown);
-
-	CSceneClassContainer *ssc = scene.container();
+	CSceneClassContainer *ssc = lm.Scene->container();
 	SNodeTMCache tmCache;
 	tmCache.SceneRoot = ssc->scene()->rootNode();
 

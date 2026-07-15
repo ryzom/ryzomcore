@@ -223,14 +223,10 @@ static bool buildVegetableShape(INode &node, SNodeTMCache &tmCache, NL3D::CVeget
 // cannot drift. Serialization uses the export-era stream flags (saved/restored — the writer
 // process doesn't set them globally like this tool's main does).
 
-int pmbExportVegetsForGltf(const std::string &maxPath, bool exportLighting,
+int pmbExportVegetsForGltf(PMAXLOAD::SLoadedMax &lm, bool exportLighting,
                            std::vector<std::pair<std::string, std::vector<uint8> > > &out,
                            uint &skipped)
 {
-	SLoadedMax lm;
-	if (!loadMaxFile(maxPath, lm))
-		return 1;
-
 	CSceneClassContainer *ssc = lm.Scene->container();
 	SNodeTMCache tmCache;
 	tmCache.SceneRoot = NULL;
@@ -347,7 +343,10 @@ int main(int argc, char **argv)
 
 	uint skipped = 0;
 	std::vector<std::pair<std::string, std::vector<uint8> > > files;
-	int ret = pmbExportVegetsForGltf(input, exportLighting, files, skipped);
+	PMAXLOAD::SLoadedMax lm;
+	if (!PMAXLOAD::loadMaxFile(input, lm))
+		return 1;
+	int ret = pmbExportVegetsForGltf(lm, exportLighting, files, skipped);
 	for (size_t i = 0; i < files.size(); ++i)
 	{
 		std::string outPath = outDir + "/" + files[i].first + ".veget";

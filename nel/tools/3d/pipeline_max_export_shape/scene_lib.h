@@ -47,6 +47,7 @@
 #include "../pipeline_max_export_common/max_math.h"
 #include "../pipeline_max_export_common/max_scene.h"
 #include "../pipeline_max_export_common/appdata_util.h"
+#include "../pipeline_max_export_common/max_load.h"
 
 namespace PIPELINE {
 namespace MAX {
@@ -101,25 +102,13 @@ const TSClassId SCLASS_PBLOCK = 0x00000008;
 const TSClassId SCLASS_PBLOCK2 = 0x00000082;
 
 // ---------------------------------------------------------------------------------------------
-// Scene loading
+// Scene loading — the shared loader from pipeline_max_export_common/max_load.h (full registry,
+// one parse per file); re-exported here for the many SCENELIB call sites.
 
-struct SLoadedMax
-{
-	CDllDirectory *Dll;
-	CClassDirectory3 *Cd;
-	CScene *Scene;
-	SLoadedMax() : Dll(NULL), Cd(NULL), Scene(NULL) { }
-};
-
-// One-time registry construction (builtin + update1 + epoly + biped + nelpatch classes).
-CSceneClassRegistry *sceneRegistry();
-
-// Load and parse a .max file's DllDirectory/ClassDirectory3/Scene streams. Returns false and
-// leaves lm empty on failure. Caller owns the pointers (or use loadMaxFileCached).
-bool loadMaxFile(const std::string &path, SLoadedMax &lm);
-
-// Cached load, keyed by resolved path (also caches failure). Used for XRef and interface files.
-SLoadedMax *loadMaxFileCached(const std::string &path);
+using PMAXLOAD::SLoadedMax;
+using PMAXLOAD::sceneRegistry;
+using PMAXLOAD::loadMaxFile;
+using PMAXLOAD::loadMaxFileCached;
 
 // Database root used for XRef / interface-file resolution (the ryzomcore_graphics checkout).
 void setDatabaseRoot(const std::string &root);

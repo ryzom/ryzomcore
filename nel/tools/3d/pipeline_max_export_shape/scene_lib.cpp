@@ -97,60 +97,8 @@ const std::string &databaseRoot()
 	return DBPATH::defaultRoot();
 }
 
-CSceneClassRegistry *sceneRegistry()
-{
-	static CSceneClassRegistry *registry = NULL;
-	if (!registry)
-	{
-		registry = new CSceneClassRegistry();
-		CBuiltin::registerClasses(registry);
-		UPDATE1::CUpdate1::registerClasses(registry);
-		EPOLY::CEPoly::registerClasses(registry);
-		BIPED::CBiped::registerClasses(registry);
-		NELPATCH::CNelPatch::registerClasses(registry);
-	}
-	return registry;
-}
-
-bool loadMaxFile(const std::string &path, SLoadedMax &lm)
-{
-	CStorageOleIn in;
-	if (!in.open(path))
-	{
-		fprintf(stderr, "WARNING: not an OLE compound file: %s\n", path.c_str());
-		return false;
-	}
-	CDllDirectory *dll = new CDllDirectory();
-	CClassDirectory3 *cd = new CClassDirectory3(dll);
-	CScene *scene = new CScene(sceneRegistry(), dll, cd);
-	bool ok = true;
-	{ std::vector<uint8> b; if (in.readStream("DllDirectory", b)) { CStorageStream st(b); dll->serial(st); dll->parse(VersionUnknown); } else ok = false; }
-	if (ok) { std::vector<uint8> b; if (in.readStream("ClassDirectory3", b)) { CStorageStream st(b); cd->serial(st); cd->parse(VersionUnknown); } else ok = false; }
-	if (ok) { std::vector<uint8> b; if (in.readStream("Scene", b)) { CStorageStream st(b); scene->serial(st); scene->parse(VersionUnknown); } else ok = false; }
-	if (!ok)
-	{
-		fprintf(stderr, "WARNING: missing streams in %s\n", path.c_str());
-		delete scene;
-		delete cd;
-		delete dll;
-		return false;
-	}
-	lm.Dll = dll;
-	lm.Cd = cd;
-	lm.Scene = scene;
-	return true;
-}
-
-static std::map<std::string, SLoadedMax> g_loadedScenes;
-
-SLoadedMax *loadMaxFileCached(const std::string &path)
-{
-	std::map<std::string, SLoadedMax>::iterator it = g_loadedScenes.find(path);
-	if (it != g_loadedScenes.end()) return it->second.Scene ? &it->second : NULL;
-	SLoadedMax &lm = g_loadedScenes[path]; // inserted empty: failure is cached too
-	if (!loadMaxFile(path, lm)) return NULL;
-	return &lm;
-}
+// sceneRegistry / loadMaxFile / loadMaxFileCached moved to
+// pipeline_max_export_common/max_load.cpp (re-exported by scene_lib.h).
 
 bool resolveDbPath(const std::string &authoredPath, std::string &out)
 {

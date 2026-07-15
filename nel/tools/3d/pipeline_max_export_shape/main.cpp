@@ -718,11 +718,15 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 static int exportFile(const std::string &maxPath, const std::string &outDir, const std::string &outDirCoarse,
                       const std::string &animDir, const std::string &lmSceneDir,
                       bool exportLighting, SExportStats &stats,
-                      std::vector<uint8> *lmSceneBytesOut = NULL)
+                      std::vector<uint8> *lmSceneBytesOut = NULL,
+                      SLoadedMax *preloaded = NULL)
 {
-	SLoadedMax lm;
-	if (!loadMaxFile(maxPath, lm))
+	// preloaded = the caller's already-parsed scene (the glTF writer parses each .max once and
+	// feeds every process flow the same instance); standalone runs load their own.
+	SLoadedMax lmLocal;
+	if (!preloaded && !loadMaxFile(maxPath, lmLocal))
 		return 1;
+	SLoadedMax &lm = preloaded ? *preloaded : lmLocal;
 
 	CSceneClassContainer *ssc = lm.Scene->container();
 	SNodeTMCache tmCache;
@@ -2017,18 +2021,20 @@ static int compareShapes(const std::string &a, const std::string &b)
 // ---------------------------------------------------------------------------------------------
 
 /** Shared flow for the glTF writer (compiled in with PMB_SHAPE_NO_MAIN): run the shape
- *	exporter's whole per-file flow in lightmap-scene-only mode and return the .lmscene bytes —
- *	byte-identical to a direct `pipeline_max_export_shape --lm-scene` run on the same file.
- *	The caller owns process-wide setup (registerSerial3d, SerialOldPreferredMemory, database
- *	root). Returns 1 with bytes, 3 when the scene has no lightmap receivers, -1 on load error.
+ *	exporter's whole per-file flow in lightmap-scene-only mode over the caller's already-parsed
+ *	scene and return the .lmscene bytes — byte-identical to a direct
+ *	`pipeline_max_export_shape --lm-scene` run on the same file. The caller owns process-wide
+ *	setup (registerSerial3d, SerialOldPreferredMemory, database root). Returns 1 with bytes,
+ *	3 when the scene has no lightmap receivers, -1 on error.
  */
-int pmbExportLmSceneForGltf(const std::string &maxPath, bool exportLighting,
+int pmbExportLmSceneForGltf(const std::string &maxPath, PMAXLOAD::SLoadedMax &lm,
+                            bool exportLighting,
                             std::string &nameOut, std::vector<uint8> &out)
 {
 	out.clear();
 	SExportStats stats;
 	int ret = exportFile(maxPath, std::string(), std::string(), std::string(), std::string(),
-	                     exportLighting, stats, &out);
+	                     exportLighting, stats, &out, &lm);
 	if (ret != 0)
 		return -1;
 	if (out.empty())

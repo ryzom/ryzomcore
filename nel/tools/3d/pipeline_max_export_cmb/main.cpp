@@ -97,6 +97,7 @@
 #include "../pipeline_max_export_common/xref_resolve.h"
 #include "../pipeline_max_export_common/parametric_mesh.h"
 #include "../pipeline_max_export_common/db_path.h"
+#include "../pipeline_max_export_common/max_load.h"
 
 
 #include <algorithm>
@@ -700,21 +701,15 @@ bool buildCollisionMesh(const std::vector<SCandidate *> &group, MAXSCENE::SNodeT
 // nel_cmbs blob list): one code path, the blob and the tool's files cannot drift. Returns 0
 // with (igname, .cmb bytes) pairs, 3 when the scene has no collision geometry, 1 on error
 // (partial output kept when some groups succeeded, matching the tool's behavior).
-int pmbExportCmbsForGltf(const std::string &inputPath, bool ligoMode,
+int pmbExportCmbsForGltf(const std::string &inputPath, PMAXLOAD::SLoadedMax &lm, bool ligoMode,
                          std::vector<std::pair<std::string, std::vector<uint8> > > &filesOut)
 {
-	CSceneClassRegistry reg;
-	CBuiltin::registerClasses(&reg);
-	UPDATE1::CUpdate1::registerClasses(&reg);
-	EPOLY::CEPoly::registerClasses(&reg);
-	BIPED::CBiped::registerClasses(&reg);
-	NELPATCH::CNelPatch::registerClasses(&reg);
-
 	// XRef resolution: shared with pipeline_max_export_ig. --ligo mode's collision nodes are
 	// routinely XRefs into other .max files (§10v open); the registry drives every scene we
-	// pull in as an XRef source. Deduce the DB root from the input path when --db was not
-	// passed — same convention as pipeline_max_export_ig.
-	XREFRESOLVE::configure(&reg);
+	// pull in as an XRef source — the shared one the caller's scene was parsed with. Deduce
+	// the DB root from the input path when --db was not passed — same convention as
+	// pipeline_max_export_ig.
+	XREFRESOLVE::configure(PMAXLOAD::sceneRegistry());
 	if (DBPATH::defaultRoot().empty())
 	{
 		// Strip "/stuff/..." or "/landscape/..." tail to find the DB root the input lives under.
@@ -736,19 +731,6 @@ int pmbExportCmbsForGltf(const std::string &inputPath, bool ligoMode,
 		}
 	}
 
-	CStorageOleIn in;
-	if (!in.open(inputPath)) { std::cerr << "ERROR: not an OLE compound file: " << inputPath << "\n"; return 1; }
-
-	CDllDirectory dll;
-	{ std::vector<uint8> b; if (!in.readStream("DllDirectory", b)) { std::cerr << "ERROR: no DllDirectory stream\n"; return 1; } CStorageStream st(b); dll.serial(st); }
-	dll.parse(VersionUnknown);
-	CClassDirectory3 cd(&dll);
-	{ std::vector<uint8> b; if (!in.readStream("ClassDirectory3", b)) { std::cerr << "ERROR: no ClassDirectory3 stream\n"; return 1; } CStorageStream st(b); cd.serial(st); }
-	cd.parse(VersionUnknown);
-	CScene scene(&reg, &dll, &cd);
-	{ std::vector<uint8> b; if (!in.readStream("Scene", b)) { std::cerr << "ERROR: no Scene stream\n"; return 1; } CStorageStream st(b); scene.serial(st); }
-	scene.parse(VersionUnknown);
-
 	// Select candidates: `geometry`-category nodes flagged COLLISION or COLLISION_EXTERIOR,
 	// in scene-container order (the maxscript's `for m in geometry` enumeration, same precedent
 	// as every other tool in this family). --ligo mode additionally accepts XRefObject nodes,
@@ -756,7 +738,7 @@ int pmbExportCmbsForGltf(const std::string &inputPath, bool ligoMode,
 	// exactly as the reference plugin's EvalWorldState resolves them live; this closes design-
 	// doc §10v's "6 of 1201 brick files export nothing" gap.
 	std::vector<SCandidate> candidates;
-	CSceneClassContainer *ssc = scene.container();
+	CSceneClassContainer *ssc = lm.Scene->container();
 	for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
 	{
 		CNodeImpl *node = dynamic_cast<CNodeImpl *>(it->second);
@@ -868,7 +850,10 @@ int main(int argc, char **argv)
 		outputDir.resize(outputDir.size() - 1);
 
 	std::vector<std::pair<std::string, std::vector<uint8> > > files;
-	int rc = pmbExportCmbsForGltf(inputPath, ligoMode, files);
+	PMAXLOAD::SLoadedMax lm;
+	if (!PMAXLOAD::loadMaxFile(inputPath, lm))
+		return 1;
+	int rc = pmbExportCmbsForGltf(inputPath, lm, ligoMode, files);
 	if (rc != 0) return rc;
 	bool hadError = false;
 	int written = 0;

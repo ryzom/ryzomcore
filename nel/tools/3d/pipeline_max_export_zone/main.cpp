@@ -2005,7 +2005,8 @@ static void pmbCollectDirFiles(const std::string &dir, const std::string &relPre
 	}
 }
 
-int pmbExportZonesForGltf(const std::string &maxPath, const std::string &bankPath,
+int pmbExportZonesForGltf(const std::string &maxPath, PMAXLOAD::SLoadedMax &lm,
+                          const std::string &bankPath,
                           float cellSize, float snap,
                           std::vector<std::pair<std::string, std::vector<uint8> > > &filesOut,
                           std::vector<SPmbZoneProxy> *proxiesOut)
@@ -2024,36 +2025,7 @@ int pmbExportZonesForGltf(const std::string &maxPath, const std::string &bankPat
 
 	NL3D::registerSerial3d(); // internally guarded
 
-	CStorageOleIn in;
-	if (!in.open(maxPath.c_str()))
-		return -1;
-	CSceneClassRegistry reg;
-	CBuiltin::registerClasses(&reg);
-	UPDATE1::CUpdate1::registerClasses(&reg);
-	EPOLY::CEPoly::registerClasses(&reg);
-	BIPED::CBiped::registerClasses(&reg);
-	NELPATCH::CNelPatch::registerClasses(&reg);
-	CDllDirectory dll;
-	CClassDirectory3 cd(&dll);
-	CScene scene(&reg, &dll, &cd);
-	{
-		std::vector<uint8> b;
-		if (!in.readStream("DllDirectory", b)) return -1;
-		{ CStorageStream st(b); dll.serial(st); }
-		dll.parse(VersionUnknown);
-	}
-	{
-		std::vector<uint8> b;
-		if (!in.readStream("ClassDirectory3", b)) return -1;
-		{ CStorageStream st(b); cd.serial(st); }
-		cd.parse(VersionUnknown);
-	}
-	{
-		std::vector<uint8> b;
-		if (!in.readStream("Scene", b)) return -1;
-		{ CStorageStream st(b); scene.serial(st); }
-		scene.parse(VersionUnknown);
-	}
+	CScene &scene = *lm.Scene;
 
 	SExportContext ctx;
 	ctx.BankPath = bankPath;

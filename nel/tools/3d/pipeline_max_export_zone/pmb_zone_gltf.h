@@ -36,6 +36,8 @@
 #include <utility>
 #include <vector>
 
+#include "../pipeline_max_export_common/max_load.h"
+
 /// One authored patch node (pre-symmetry/rotate, world space) for the nel_proxy viewing mesh.
 struct SPmbZoneProxy
 {
@@ -45,13 +47,14 @@ struct SPmbZoneProxy
 };
 
 // Run the NeLLigoExportZone flow (protocol by the .max basename: zonematerial / zonetransition
-// / zonespecial) and hand back every produced file — zones/<name>.zone, zoneligos/<name>.ligozone
-// — as (relative name, bytes). `proxiesOut` (optional) receives the scene's RklPatch nodes as
-// authored CPatchInfo sets for the tessellated viewing proxies. Returns the produced file count,
-// 0 when the basename is not a ligo protocol name or the scene has nothing to export, -1 on
-// failure (load error, or the same authoring errors the standalone tool refuses — e.g. multiple
-// non-frozen NelPatchMesh).
-int pmbExportZonesForGltf(const std::string &maxPath, const std::string &bankPath,
+// / zonespecial) over the caller's already-parsed scene and hand back every produced file —
+// zones/<name>.zone, zoneligos/<name>.ligozone — as (relative name, bytes). `proxiesOut`
+// (optional) receives the scene's RklPatch nodes as authored CPatchInfo sets for the
+// tessellated viewing proxies. Returns the produced file count, 0 when the basename is not a
+// ligo protocol name or the scene has nothing to export, -1 on failure (the same authoring
+// errors the standalone tool refuses — e.g. multiple non-frozen NelPatchMesh).
+int pmbExportZonesForGltf(const std::string &maxPath, PMAXLOAD::SLoadedMax &lm,
+                          const std::string &bankPath,
                           float cellSize, float snap,
                           std::vector<std::pair<std::string, std::vector<uint8> > > &filesOut,
                           std::vector<SPmbZoneProxy> *proxiesOut);

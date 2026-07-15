@@ -78,6 +78,7 @@
 
 #include "../pipeline_max_export_common/biped_rig.h"
 #include "../pipeline_max_export_common/export_ids.h"
+#include "../pipeline_max_export_common/max_load.h"
 #include "../pipeline_max/biped/biped_driven.h"
 #include "biped_anim.h"
 #include "bip_file.h"
@@ -1600,30 +1601,13 @@ static int runDiffRig(const char *pathA, const char *pathB, const char *outPath)
 // sampled interop channels are a later additive tier; the blob is the byte-exact carrier).
 // Loads the .max through this tool's own loader/registry, independent of the caller's state.
 // Returns 1 with animOut filled, 3 when nothing to export, -1 on load/serial failure.
-int pmbExportAnimForGltf(const std::string &maxPath, std::vector<uint8> &animOut,
+int pmbExportAnimForGltf(const std::string &maxPath, PMAXLOAD::SLoadedMax &lm,
+                         std::vector<uint8> &animOut,
                          std::vector<std::string> *bareNodesOut)
 {
 	NL3D::registerSerial3d(); // internally guarded
 
-	CSceneClassRegistry reg;
-	CBuiltin::registerClasses(&reg);
-	UPDATE1::CUpdate1::registerClasses(&reg);
-	EPOLY::CEPoly::registerClasses(&reg);
-	BIPED::CBiped::registerClasses(&reg);
-
-	CStorageOleIn in;
-	if (!in.open(maxPath.c_str())) return -1;
-	CDllDirectory dll;
-	{ std::vector<uint8> b; if (!in.readStream("DllDirectory", b)) return -1; CStorageStream st(b); dll.serial(st); }
-	dll.parse(VersionUnknown);
-	CClassDirectory3 cd(&dll);
-	{ std::vector<uint8> b; if (!in.readStream("ClassDirectory3", b)) return -1; CStorageStream st(b); cd.serial(st); }
-	cd.parse(VersionUnknown);
-	CScene scene(&reg, &dll, &cd);
-	{ std::vector<uint8> b; if (!in.readStream("Scene", b)) return -1; CStorageStream st(b); scene.serial(st); }
-	scene.parse(VersionUnknown);
-
-	CSceneClassContainer *ssc = scene.container();
+	CSceneClassContainer *ssc = lm.Scene->container();
 
 	// Selection: $Bip01 first (case-insensitive), then every EXPORT_NODE_ANIMATION == "1" node
 	// in scene order — identical to main below.

@@ -102,52 +102,59 @@ static std::string g_zoneBank;
 static float g_zoneCellSize = 160.0f;
 static float g_zoneSnap = 1.0f;
 
-// From ../pipeline_max_export_ig/main.cpp (compiled in with PMB_IG_NO_MAIN): the ig process's
-// full selection + buildInstanceGroup flow, returning each ig's serialized bytes.
-int pmbExportIgsForGltf(const std::string &maxPath,
+// The per-process flows compiled in with their PMB_*_NO_MAIN guarded mains. Every flow
+// receives the SAME already-parsed scene (the writer parses each .max exactly once — the
+// pipeline_max parse-once design); the standalone tools load via PMAXLOAD::loadMaxFile and
+// call the identical flow.
+
+// From ../pipeline_max_export_ig/main.cpp: the ig process's full selection +
+// buildInstanceGroup flow, returning each ig's serialized bytes.
+int pmbExportIgsForGltf(PMAXLOAD::SLoadedMax &lm,
                         std::vector<std::pair<std::string, std::vector<uint8> > > &igsOut);
 void pmbIgAddPsSearchPath(const std::string &path);
 
-// From ../pipeline_max_export_anim/main.cpp (compiled in with PMB_ANIM_NO_MAIN): the anim
-// process's whole-file flow, returning the serialized CAnimation (1 = produced, 3 = nothing).
-// bareNodesOut: selection nodes exported with an EMPTY prefix — they own the bare
-// "pos"/"rotquat"/"scale"/"<target>MorphFactor" track names (Ryzom per-node convention).
-int pmbExportAnimForGltf(const std::string &maxPath, std::vector<uint8> &animOut,
+// From ../pipeline_max_export_anim/main.cpp: the anim process's whole-file flow, returning the
+// serialized CAnimation (1 = produced, 3 = nothing). bareNodesOut: selection nodes exported
+// with an EMPTY prefix — they own the bare "pos"/"rotquat"/"scale"/"<target>MorphFactor" track
+// names (Ryzom per-node convention).
+int pmbExportAnimForGltf(const std::string &maxPath, PMAXLOAD::SLoadedMax &lm,
+                         std::vector<uint8> &animOut,
                          std::vector<std::string> *bareNodesOut = NULL);
 
-// From ../pipeline_max_export_swt/main.cpp and ../pipeline_max_export_pacs_prim/main.cpp
-// (PMB_SWT_NO_MAIN / PMB_PACS_PRIM_NO_MAIN): single-output whole-file flows shared with the
-// standalone tools — 1 = produced, 3 = nothing to export, -1 = error.
-int pmbExportSwtForGltf(const std::string &maxPath, std::vector<uint8> &out);
-int pmbExportPacsPrimForGltf(const std::string &maxPath, std::vector<uint8> &out);
+// From ../pipeline_max_export_swt/main.cpp and ../pipeline_max_export_pacs_prim/main.cpp:
+// single-output whole-file flows — 1 = produced, 3 = nothing to export, -1 = error.
+int pmbExportSwtForGltf(const std::string &maxPath, PMAXLOAD::SLoadedMax &lm,
+                        std::vector<uint8> &out);
+int pmbExportPacsPrimForGltf(PMAXLOAD::SLoadedMax &lm, std::vector<uint8> &out);
 
-// From ../pipeline_max_export_veget/main.cpp (PMB_VEGET_NO_MAIN): the veget process's
-// whole-file flow, one (node name, .veget bytes) pair per vegetable node.
-int pmbExportVegetsForGltf(const std::string &maxPath, bool exportLighting,
+// From ../pipeline_max_export_veget/main.cpp: the veget process's whole-file flow, one
+// (node name, .veget bytes) pair per vegetable node.
+int pmbExportVegetsForGltf(PMAXLOAD::SLoadedMax &lm, bool exportLighting,
                            std::vector<std::pair<std::string, std::vector<uint8> > > &out,
                            uint &skipped);
 
-// From ../pipeline_max_export_clod/main.cpp (PMB_CLOD_NO_MAIN): the clod process's whole-file
-// flow, one (node name, .clod bytes) pair per character-lod node.
-int pmbExportClodsForGltf(const std::string &maxPath, bool exportLighting,
+// From ../pipeline_max_export_clod/main.cpp: the clod process's whole-file flow, one
+// (node name, .clod bytes) pair per character-lod node.
+int pmbExportClodsForGltf(PMAXLOAD::SLoadedMax &lm, bool exportLighting,
                           std::vector<std::pair<std::string, std::vector<uint8> > > &out,
                           uint &skipped);
 
-// From ../pipeline_max_export_cmb/main.cpp (PMB_CMB_NO_MAIN): the cmb process's whole-file
-// flow, one (igname, .cmb bytes) pair per collision group. ligoMode follows the zone filename
-// protocol (zonematerial-/zonetransition-/zonespecial- sources take the --ligo path with XRef
-// collision resolution, like the build pipeline invokes it).
-int pmbExportCmbsForGltf(const std::string &inputPath, bool ligoMode,
+// From ../pipeline_max_export_cmb/main.cpp: the cmb process's whole-file flow, one
+// (igname, .cmb bytes) pair per collision group. ligoMode follows the zone filename protocol
+// (zonematerial-/zonetransition-/zonespecial- sources take the --ligo path with XRef collision
+// resolution, like the build pipeline invokes it).
+int pmbExportCmbsForGltf(const std::string &inputPath, PMAXLOAD::SLoadedMax &lm, bool ligoMode,
                          std::vector<std::pair<std::string, std::vector<uint8> > > &filesOut);
 
-// From ../pipeline_max_export_skel/main.cpp (PMB_SKEL_NO_MAIN): the skel process's Bip01-rooted
-// whole-file flow — 1 = produced, 3 = no Bip01, -1 = error.
-int pmbExportSkelForGltf(const std::string &maxPath, std::vector<uint8> &out);
+// From ../pipeline_max_export_skel/main.cpp: the skel process's Bip01-rooted whole-file flow —
+// 1 = produced, 3 = no Bip01, -1 = error.
+int pmbExportSkelForGltf(PMAXLOAD::SLoadedMax &lm, std::vector<uint8> &out);
 
 // From ../pipeline_max_export_shape/main.cpp (PMB_SHAPE_NO_MAIN): the shape exporter's whole
 // per-file flow in lightmap-scene-only mode — the .lmscene bytes a direct `--lm-scene` run
 // writes (1 = produced, 3 = no lightmap receivers, -1 = error).
-int pmbExportLmSceneForGltf(const std::string &maxPath, bool exportLighting,
+int pmbExportLmSceneForGltf(const std::string &maxPath, PMAXLOAD::SLoadedMax &lm,
+                            bool exportLighting,
                             std::string &nameOut, std::vector<uint8> &out);
 
 struct SExportStats
@@ -812,7 +819,7 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 	// byte-exact carrier (dual representation, same rule as animation tracks).
 	{
 		std::vector<std::pair<std::string, std::vector<uint8> > > igs;
-		int nIgs = pmbExportIgsForGltf(maxPath, igs);
+		int nIgs = pmbExportIgsForGltf(lm, igs);
 		if (nIgs > 0)
 		{
 			embedBlobList(b, "nel_igs", igs);
@@ -828,7 +835,7 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 	{
 		std::vector<uint8> anim;
 		std::vector<std::string> bareNodes;
-		if (pmbExportAnimForGltf(maxPath, anim, &bareNodes) == 1 && !anim.empty())
+		if (pmbExportAnimForGltf(maxPath, lm, anim, &bareNodes) == 1 && !anim.empty())
 		{
 			std::string animName = NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(maxPath));
 			embedBlob(b, "nel_anim", animName, anim);
@@ -969,11 +976,13 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 		}
 	}
 
-	// Skeleton (.skel): the skel process's Bip01-rooted whole-file flow. Runs LAST of the
-	// rig-touching flows in its own scene instance and clears the per-run rig caches itself.
+	// Skeleton (.skel): the skel process's Bip01-rooted whole-file flow. It clears the
+	// pointer-keyed rig caches before its walk (a fresh reconstruction from the shared scene —
+	// deterministic, so flows before/after are unaffected; the clear predates the single-parse
+	// refactor, when a previous flow's freed scene could alias under allocator reuse).
 	{
 		std::vector<uint8> bytes;
-		if (pmbExportSkelForGltf(maxPath, bytes) == 1 && !bytes.empty())
+		if (pmbExportSkelForGltf(lm, bytes) == 1 && !bytes.empty())
 		{
 			embedBlob(b, "nel_skel", NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(maxPath)), bytes);
 			++stats.Others;
@@ -988,7 +997,7 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 	{
 		std::string lmName;
 		std::vector<uint8> bytes;
-		if (pmbExportLmSceneForGltf(maxPath, exportLighting, lmName, bytes) == 1 && !bytes.empty())
+		if (pmbExportLmSceneForGltf(maxPath, lm, exportLighting, lmName, bytes) == 1 && !bytes.empty())
 		{
 			embedBlob(b, "nel_lmscene", lmName, bytes);
 			++stats.Others;
@@ -1001,7 +1010,7 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 	// every artifact the .max pipeline produces must be producible from the .gltf.
 	{
 		std::vector<uint8> bytes;
-		if (pmbExportSwtForGltf(maxPath, bytes) == 1 && !bytes.empty())
+		if (pmbExportSwtForGltf(maxPath, lm, bytes) == 1 && !bytes.empty())
 		{
 			embedBlob(b, "nel_swt", NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(maxPath)), bytes);
 			++stats.Others;
@@ -1009,7 +1018,7 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 	}
 	{
 		std::vector<uint8> bytes;
-		if (pmbExportPacsPrimForGltf(maxPath, bytes) == 1 && !bytes.empty())
+		if (pmbExportPacsPrimForGltf(lm, bytes) == 1 && !bytes.empty())
 		{
 			embedBlob(b, "nel_pacs_prim", NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(maxPath)), bytes);
 			++stats.Others;
@@ -1021,7 +1030,7 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 	{
 		std::vector<std::pair<std::string, std::vector<uint8> > > vegets;
 		uint vskipped = 0;
-		if (pmbExportVegetsForGltf(maxPath, exportLighting, vegets, vskipped) == 0 && !vegets.empty())
+		if (pmbExportVegetsForGltf(lm, exportLighting, vegets, vskipped) == 0 && !vegets.empty())
 		{
 			embedBlobList(b, "nel_vegets", vegets);
 			stats.Others += (uint)vegets.size();
@@ -1032,7 +1041,7 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 	{
 		std::vector<std::pair<std::string, std::vector<uint8> > > clods;
 		uint cskipped = 0;
-		if (pmbExportClodsForGltf(maxPath, exportLighting, clods, cskipped) == 0 && !clods.empty())
+		if (pmbExportClodsForGltf(lm, exportLighting, clods, cskipped) == 0 && !clods.empty())
 		{
 			embedBlobList(b, "nel_clods", clods);
 			stats.Others += (uint)clods.size();
@@ -1047,7 +1056,7 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 			|| stem.compare(0, 15, "zonetransition-") == 0
 			|| stem.compare(0, 12, "zonespecial-") == 0;
 		std::vector<std::pair<std::string, std::vector<uint8> > > cmbs;
-		if (pmbExportCmbsForGltf(maxPath, ligoCmb, cmbs) == 0 && !cmbs.empty())
+		if (pmbExportCmbsForGltf(maxPath, lm, ligoCmb, cmbs) == 0 && !cmbs.empty())
 		{
 			embedBlobList(b, "nel_cmbs", cmbs);
 			stats.Others += (uint)cmbs.size();
@@ -1062,7 +1071,7 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 	{
 		std::vector<std::pair<std::string, std::vector<uint8> > > zoneFiles;
 		std::vector<SPmbZoneProxy> proxies;
-		int nZones = pmbExportZonesForGltf(maxPath, g_zoneBank, g_zoneCellSize, g_zoneSnap,
+		int nZones = pmbExportZonesForGltf(maxPath, lm, g_zoneBank, g_zoneCellSize, g_zoneSnap,
 		                                   zoneFiles, &proxies);
 		if (nZones < 0)
 			fprintf(stderr, "WARNING: ligo zone flow failed for %s (nel_zones not emitted)\n",
