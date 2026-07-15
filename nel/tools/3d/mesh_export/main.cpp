@@ -34,6 +34,7 @@ int main(int argc, char *argv[])
 	args.addArg("d", "dst", "destination", "Destination directory path");
 	args.addArg("", "dependlog", "log", "Dependencies log path");
 	args.addArg("", "errorlog", "log", "Errors log path");
+	args.addArg("", "no-nel-extras", "", "Ignore nel_* per-node glTF extras; use Decompose(mTransformation) instead. Validation flag — see wiki: nel_gltf_extras.md.");
 	args.addAdditionalArg("input", "Filename of 3D model to convert", false);
 
 	if (!args.parse(argc, argv)) return EXIT_SUCCESS;
@@ -77,6 +78,9 @@ int main(int argc, char *argv[])
 
 		if (settings.ToolErrorLog.empty())
 			settings.ToolErrorLog = settings.DestinationDirectoryPath + "error.log";
+
+		if (args.haveLongArg("no-nel-extras"))
+			settings.IgnoreNelExtras = true;
 
 		res = exportScene(settings);
 

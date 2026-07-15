@@ -6,7 +6,7 @@ ADD_EXECUTABLE(build_rbank ${SRC})
 
 ADD_DEFINITIONS(-DNL_BRB_CFG="${NL_ETC_PREFIX}/")
 
-TARGET_LINK_LIBRARIES(build_rbank nelpacs nel3d nelligo nelmisc)
+TARGET_LINK_LIBRARIES(build_rbank PRIVATE NeL::pacs NeL::3d NeL::ligo NeL::misc)
 NL_DEFAULT_PROPS(build_rbank "NeL, Tools, PACS: build_rbank")
 NL_ADD_RUNTIME_FLAGS(build_rbank)
 

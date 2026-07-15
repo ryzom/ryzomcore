@@ -1,13 +1,12 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.1)
-CMAKE_POLICY(SET CMP0015 NEW)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.28)
 
 FILE(GLOB SRC htmlcss_test.cpp)
 ADD_EXECUTABLE(htmlcss_test ${SRC})
 TARGET_INCLUDE_DIRECTORIES(htmlcss_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${LUA_INCLUDE_DIR} )
 TARGET_LINK_LIBRARIES(htmlcss_test
         PRIVATE
-        nelmisc
-        nelgui
+        NeL::misc
+        NeL::gui
         ${LUA_LIBRARIES}
         LibXml2::LibXml2
 )

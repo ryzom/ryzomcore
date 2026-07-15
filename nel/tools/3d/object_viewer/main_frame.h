@@ -155,10 +155,12 @@ public:
 	afx_msg void OnShowOcclusionTestMeshs();
 	afx_msg void OnShowFXMatrix();
 	afx_msg void OnShowFXUserMatrix();
+	afx_msg void OnForceWaterReflections();
 	afx_msg void OnUpdateShowSceneMatrix(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateShowFXMatrix(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateShowFXUserMatrix(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateShowOcclusionTestMeshs(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateForceWaterReflections(CCmdUI* pCmdUI);
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnUpdateWindowAnimation(CCmdUI* pCmdUI);

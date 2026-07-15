@@ -4,7 +4,7 @@ SOURCE_GROUP("" FILES ${SRC})
 
 ADD_EXECUTABLE(logic_editor WIN32 ${SRC})
 
-TARGET_LINK_LIBRARIES(logic_editor nelmisc logic_editor_dll)
+TARGET_LINK_LIBRARIES(logic_editor PRIVATE NeL::misc logic_editor_dll)
 NL_DEFAULT_PROPS(logic_editor "NeL, Tools, Logic: Logic Editor")
 NL_ADD_RUNTIME_FLAGS(logic_editor)
 

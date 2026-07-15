@@ -4,7 +4,7 @@ SOURCE_GROUP("" FILES ${SRC})
 
 ADD_EXECUTABLE(tga_cut ${SRC})
 
-TARGET_LINK_LIBRARIES(tga_cut nelmisc)
+TARGET_LINK_LIBRARIES(tga_cut PRIVATE NeL::misc)
 NL_DEFAULT_PROPS(tga_cut "NeL, Tools, 3D: tga_cut")
 NL_ADD_RUNTIME_FLAGS(tga_cut)
 

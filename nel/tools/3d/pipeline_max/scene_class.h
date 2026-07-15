@@ -3,6 +3,8 @@
  * \brief CSceneClass
  * \date 2012-08-20 09:07GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.7
+ * \author Claude Sonnet 5
  * CSceneClass
  */
 
@@ -56,6 +58,8 @@ class ISceneClassDesc;
  * \brief CSceneClass
  * \date 2012-08-19 19:25GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.7
+ * \author Claude Sonnet 5
  * It is recommended to use CRefPtr<T> to refer to any pointers to
  * classes inherited from this class.
  * NOTE: CRefPtr<T> does not delete the class when references go to
@@ -131,6 +135,16 @@ public:
 	inline CSceneClassContainer *container() const { return m_Scene->container(); }
 	//@}
 
+	//! \name Container-bit preservation
+	//@{
+	/// Set by CSceneClassContainer::createChunkById when this object's own chunk was read with
+	/// the container bit unset (a scene-class slot that is a literal 0-byte leaf in the source
+	/// file — every CSceneClass is a CStorageContainer so isContainer() is always true, but the
+	/// file's own bit for this particular slot must be reproduced or T2 byte-identity breaks).
+	inline void setReadAsLeaf(bool readAsLeaf) { m_ReadAsLeaf = readAsLeaf; }
+	virtual bool writeAsContainer() const { return !m_ReadAsLeaf; }
+	//@}
+
 protected:
 	//! \name Methods used by inheriting classes to read and write to the storage safely
 	//@{
@@ -160,13 +174,15 @@ private:
 
 	CScene *m_Scene;
 
+	bool m_ReadAsLeaf;
+
 }; /* class CSceneClass */
 
 template <typename T>
 const T &CSceneClass::getChunkValue(uint16 id)
 {
 	CStorageValue<T> *chunk = static_cast<CStorageValue<T> *>(getChunk(id));
-	if (!chunk) { nlerror("Try to get required chunk value 0x%x but it does not exist, bad file format"); }
+	if (!chunk) { nlerror("Try to get required chunk value 0x%x but it does not exist, bad file format", (uint32)id); }
 	m_ArchivedChunks.push_back(chunk);
 	return chunk->Value;
 }
@@ -184,6 +200,8 @@ void CSceneClass::putChunkValue(uint16 id, const T &value)
  * \brief ISceneClassDesc
  * \date 2012-08-19 19:25GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.7
+ * \author Claude Sonnet 5
  * ISceneClassDesc
  */
 class ISceneClassDesc
@@ -203,6 +221,8 @@ public:
  * \brief CSceneClassDesc
  * \date 2012-08-19 19:25GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.7
+ * \author Claude Sonnet 5
  * CSceneClassDesc
  * Use in a cpp when registering the CClassId.
  */

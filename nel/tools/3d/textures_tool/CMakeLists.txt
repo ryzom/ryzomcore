@@ -2,7 +2,7 @@ FILE(GLOB SRC *.cpp *.h)
 
 ADD_EXECUTABLE(textures_tool ${SRC})
 
-TARGET_LINK_LIBRARIES(textures_tool nelmisc)
+TARGET_LINK_LIBRARIES(textures_tool PRIVATE NeL::misc)
 NL_DEFAULT_PROPS(textures_tool "NeL, Tools, 3D: Textures Tool")
 NL_ADD_RUNTIME_FLAGS(textures_tool)
 

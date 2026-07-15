@@ -3,6 +3,9 @@
  * \brief CBuiltin
  * \date 2012-08-22 09:42GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Sonnet 5
+ * \author Claude Fable 5
+ * \author Claude Opus 4.8
  * CBuiltin
  */
 
@@ -56,6 +59,13 @@
 #include "patch_object.h"
 #include "editable_patch.h"
 
+#include "param_block_2.h"
+
+#include "mtl_base.h"
+#include "multi_mtl.h"
+
+#include "control_keyframer.h"
+
 // using namespace std;
 // using namespace NLMISC;
 
@@ -73,6 +83,11 @@ const CNullSuperClassDesc NullSuperClassDesc(&ReferenceTargetClassDesc, "NullSup
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x00009003> CControlFloatSuperClassDesc;
 const CControlFloatSuperClassDesc ControlFloatSuperClassDesc(&ReferenceTargetClassDesc, "ControlFloatSuperClassUnknown");
 
+// 0x9009 CTRL_COLOR — float RGB color controllers (Bezier Color 0x2011)
+// (0x9005 CTRL_POINT3 is declared further below with the other control superclasses)
+typedef CSuperClassDescUnknown<CReferenceTarget, 0x00009009> CControlColorSuperClassDesc;
+const CControlColorSuperClassDesc ControlColorSuperClassDesc(&ReferenceTargetClassDesc, "ControlColorSuperClassUnknown");
+
 // 0x8 param block, under reftarget directly
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000008> CParamBlockSuperClassDesc;
 const CParamBlockSuperClassDesc ParamBlockSuperClassDesc(&ReferenceTargetClassDesc, "ParamBlockSuperClassUnknown");
@@ -81,17 +96,19 @@ const CParamBlockSuperClassDesc ParamBlockSuperClassDesc(&ReferenceTargetClassDe
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000c20> CUVGenSuperClassDesc;
 const CUVGenSuperClassDesc UVGenSuperClassDesc(&ReferenceTargetClassDesc, "UVGenSuperClassUnknown");
 
-// 0x82 param block 2, under reftarget directly
-typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000082> CParamBlock2SuperClassDesc;
-const CParamBlock2SuperClassDesc ParamBlock2SuperClassDesc(&ReferenceTargetClassDesc, "ParamBlock2SuperClassUnknown");
+// 0x82 param block 2, under reftarget directly — typed: every ParamBlock2 object parses through
+// CParamBlock2 (header + parameter record decode; raw chunks stay authoritative so roundtrip is
+// byte-exact). Unknown ParamBlock2 class ids fall through to CSceneClassUnknown<CParamBlock2>.
+typedef CSuperClassDescUnknown<CParamBlock2, 0x00000082> CParamBlock2SuperClassDesc;
+const CParamBlock2SuperClassDesc ParamBlock2SuperClassDesc(&ParamBlock2ClassDesc, "ParamBlock2SuperClassUnknown");
 
 // 0xc40 output, textureoutput???, under mtlbase
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000c40> CTextureOutputSuperClassDesc;
 const CTextureOutputSuperClassDesc TextureOutputSuperClassDesc(&ReferenceTargetClassDesc, "TextureOutputSuperClassUnknown");
 
-// 0xc10 texmap, under mtlbase
-typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000c10> CTexmapSuperClassDesc;
-const CTexmapSuperClassDesc TexmapSuperClassDesc(&ReferenceTargetClassDesc, "TexmapSuperClassUnknown");
+// 0xc10 texmap, under mtlbase — typed through CMtlBase (shares the material-base name decode).
+typedef CSuperClassDescUnknown<CMtlBase, 0x00000c10> CTexmapSuperClassDesc;
+const CTexmapSuperClassDesc TexmapSuperClassDesc(&MtlBaseClassDesc, "TexmapSuperClassUnknown");
 
 // 0x1080 texmap_container, 'Texmaps' under reftarget directly
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x00001080> CTexmapContainerSuperClassDesc;
@@ -105,9 +122,10 @@ const CShaderSuperClassDesc ShaderSuperClassDesc(&ReferenceTargetClassDesc, "Sha
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x00001110> CSamplerSuperClassDesc;
 const CSamplerSuperClassDesc SamplerSuperClassDesc(&ReferenceTargetClassDesc, "SamplerSuperClassUnknown");
 
-// 0xc00, mtl 'materials', under mtlbase
-typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000c00> CMtlSuperClassDesc;
-const CMtlSuperClassDesc MtlSuperClassDesc(&ReferenceTargetClassDesc, "MtlSuperClassUnknown");
+// 0xc00, mtl 'materials', under mtlbase — typed through CMtlBase (material-base name decode);
+// the Multi/Sub-Object material is exact-registered separately (CMultiMtl, sub-material list).
+typedef CSuperClassDescUnknown<CMtlBase, 0x00000c00> CMtlSuperClassDesc;
+const CMtlSuperClassDesc MtlSuperClassDesc(&MtlBaseClassDesc, "MtlSuperClassUnknown");
 
 // 0xd00, soundobj, under reftarget directly
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000d00> CSoundObjSuperClassDesc;
@@ -193,6 +211,12 @@ const CShadowTypeSuperClassDesc ShadowTypeSuperClassDesc(&ReferenceTargetClassDe
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x00001160> CCustAttribSuperClassDesc;
 const CCustAttribSuperClassDesc CustAttribSuperClassDesc(&ReferenceTargetClassDesc, "CustAttribSuperClassUnknown");
 
+// 0x1190 - camera effect (e.g. "Depth of Field (mental ray)"), directly under ref target;
+// observed in the *_fp.max (first-person hand) corpus files, which crashed the exporter with an
+// unregistered-superclass nlerror before this entry was added.
+typedef CSuperClassDescUnknown<CReferenceTarget, 0x00001190> CCameraEffectSuperClassDesc;
+const CCameraEffectSuperClassDesc CameraEffectSuperClassDesc(&ReferenceTargetClassDesc, "CameraEffectSuperClassUnknown");
+
 // 0x9012 - point4list, controlpoint4, also rgba, under controll???
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x00009012> CControlPoint4SuperClassDesc;
 const CControlPoint4SuperClassDesc ControlPoint4SuperClassDesc(&ReferenceTargetClassDesc, "ControlPoint4SuperClassUnknown");
@@ -269,6 +293,27 @@ void CBuiltin::registerClasses(CSceneClassRegistry *registry)
 	// tvnode (inh ReferenceTarget)
 	registry->add(&TrackViewNodeClassDesc);
 
+	// materials (inh MtlBase, superclass 0xc00 typed through CMtlBase below): the Multi/Sub-Object
+	// material is the one that needs its own type (sub-material list); the rest ride the CMtlBase
+	// superclass fallback with just the material-base name decode.
+	registry->add(&MultiMtlClassDesc);
+
+	// keyframe animation controllers (inh ReferenceTarget; typed key tables, see
+	// control_keyframer.h — registered under their respective control superclasses)
+	registry->add(&CControlPosLinearDesc);
+	registry->add(&CControlRotLinearDesc);
+	registry->add(&CControlScaleLinearDesc);
+	registry->add(&CControlFloatLinearDesc);
+	registry->add(&CControlFloatBezierDesc);
+	registry->add(&CControlPosBezierDesc);
+	registry->add(&CControlPoint3BezierDesc);
+	registry->add(&CControlColorBezierDesc);
+	registry->add(&CControlScaleBezierDesc);
+	registry->add(&CControlPosTCBDesc);
+	registry->add(&CControlRotTCBDesc);
+	registry->add(&CControlScaleTCBDesc);
+	registry->add(&CControlPoint3TCBDesc);
+
 	// object (inh ReferenceMaker)
 	registry->add(&BaseObjectClassDesc);
 	{
@@ -290,6 +335,7 @@ void CBuiltin::registerClasses(CSceneClassRegistry *registry)
 
 	// unimplemented
 	registry->add(&ControlFloatSuperClassDesc);
+	registry->add(&ControlColorSuperClassDesc);
 	registry->add(&ParamBlockSuperClassDesc);
 	registry->add(&UVGenSuperClassDesc);
 	registry->add(&ParamBlock2SuperClassDesc);
@@ -320,6 +366,7 @@ void CBuiltin::registerClasses(CSceneClassRegistry *registry)
 	registry->add(&RenderEffectSuperClassDesc);
 	registry->add(&ShadowTypeSuperClassDesc);
 	registry->add(&CustAttribSuperClassDesc);
+	registry->add(&CameraEffectSuperClassDesc);
 	registry->add(&ControlPoint4SuperClassDesc);
 	registry->add(&UserDataTypeSuperClassDesc);
 	registry->add(&UserTypeSuperClassDesc);

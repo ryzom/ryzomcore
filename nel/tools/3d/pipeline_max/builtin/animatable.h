@@ -3,6 +3,7 @@
  * \brief CAnimatable
  * \date 2012-08-22 08:52GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Fable 5
  * CAnimatable
  */
 
@@ -51,6 +52,7 @@ class CAppData;
  * \brief CAnimatable
  * \date 2012-08-22 08:52GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Fable 5
  * This scene class owns the AppData chunk
  */
 class CAnimatable : public CSceneClass
@@ -78,6 +80,12 @@ public:
 
 	// public
 	STORAGE::CAppData *appData();
+	/// Read access to the 0x2140 chunk: Max's note-track attachment on the Animatable
+	/// (container of 0x0130 note-track count + per note key 0x0100 time / 0x0110 flags /
+	/// 0x0120 UTF-16 note string — see pipeline_max_design.md §10d). Kept verbatim for
+	/// roundtrip; NULL when the source has no note tracks. Only valid between parse and
+	/// clean/disown.
+	inline IStorageObject *noteTracks() const { return m_Unknown2140; }
 
 protected:
 	// inherited

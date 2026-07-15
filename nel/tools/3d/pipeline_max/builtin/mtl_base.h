@@ -3,6 +3,7 @@
  * \brief CMtlBase
  * \date 2012-08-22 08:53GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.8
  * CMtlBase
  */
 
@@ -30,6 +31,7 @@
 #include <nel/misc/types_nl.h>
 
 // STL includes
+#include <string>
 
 // NeL includes
 
@@ -44,7 +46,21 @@ namespace BUILTIN {
  * \brief CMtlBase
  * \date 2012-08-22 08:53GMT
  * \author Jan Boon (Kaetemi)
- * CMtlBase
+ * \author Claude Opus 4.8
+ *
+ * The shared base of every material and texmap scene class (MtlBase). Its only universally
+ * present payload is the material-base container: chunk 0x4000 wraps the base state, whose
+ * 0x4001 child is the material/texmap NAME (UTF-16, sized by the chunk). Older files store the
+ * 0x4001 name chunk bare on the object instead of nested in 0x4000. Everything else that
+ * distinguishes a concrete material — the shader/maps/extended blocks of a Standard material,
+ * the crop/bitmap of a BitmapTex, the NeL-material script flags — lives in ParamBlock2 objects
+ * reached through the reference wiring (see CParamBlock2, max_geometry_formats Part I).
+ *
+ * This class keeps the raw chunks authoritative (parse decodes the name over the orphaned
+ * chunks WITHOUT moving them, build re-emits verbatim — byte-exact roundtrip, the §5/§12.2
+ * discipline). It gives a consumer (the exporter, a live material editor) a typed handle on
+ * every material/texmap with its name, on top of the reference walk (sub-materials, textures)
+ * and the typed CParamBlock2 parameters.
  */
 class CMtlBase : public CReferenceTarget
 {
@@ -52,7 +68,42 @@ public:
 	CMtlBase(CScene *scene);
 	virtual ~CMtlBase();
 
+	// class desc
+	static const ucstring DisplayName;
+	static const char *InternalName;
+	static const char *InternalNameUnknown;
+	static const NLMISC::CClassId ClassId;
+	static const TSClassId SuperClassId;
+
+	// inherited
+	virtual void parse(uint16 version, uint filter = 0);
+	virtual void clean();
+	virtual void build(uint16 version, uint filter = 0);
+	virtual void disown();
+	virtual void init();
+	virtual bool inherits(const NLMISC::CClassId classId) const;
+	virtual const ISceneClassDesc *classDesc() const;
+	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "", uint filter = 0) const;
+
+	/// True when a name chunk (0x4001, bare or under 0x4000) was found.
+	inline bool hasName() const { return m_NameChunk != NULL; }
+	/// The material/texmap name (UTF-8), empty when absent. Valid between parse and clean/disown.
+	std::string name() const;
+
+protected:
+	// inherited
+	virtual IStorageObject *createChunkById(uint16 id, bool container);
+
+private:
+	void decodeName();
+
+	/// The raw UTF-16 name chunk (0x4001), not owned (stays in the orphan list / 0x4000 base).
+	CStorageRaw *m_NameChunk;
+
 }; /* class CMtlBase */
+
+typedef CSceneClassDesc<CMtlBase> CMtlBaseClassDesc;
+extern const CMtlBaseClassDesc MtlBaseClassDesc;
 
 } /* namespace BUILTIN */
 } /* namespace MAX */

@@ -20,17 +20,15 @@ ADD_EXECUTABLE(nl_panoply_preview WIN32 ${SRC}
 	${PANOPLY_MAKER}
 	)
 
-IF(QT_STATIC)
-  SET(PANOPLY_PREVIEW_QT_LIBRARIES ${QT_LIBRARIES})
-ELSE()
-  SET(PANOPLY_PREVIEW_QT_LIBRARIES Qt5::Widgets)
-ENDIF()
-
 TARGET_LINK_LIBRARIES(nl_panoply_preview
-	nelmisc
-	nel3d
-	shared_widgets
-	${PANOPLY_PREVIEW_QT_LIBRARIES})
+		PRIVATE
+		NeL::misc
+		NeL::3d
+		shared_widgets
+        Qt::Core
+        Qt::Gui
+        Qt::Widgets
+)
 
 NL_DEFAULT_PROPS(nl_panoply_preview "NeL, Tools, 3D: panoply_preview")
 NL_ADD_RUNTIME_FLAGS(nl_panoply_preview)

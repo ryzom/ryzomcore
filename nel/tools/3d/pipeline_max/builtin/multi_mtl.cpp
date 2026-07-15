@@ -3,6 +3,7 @@
  * \brief CMultiMtl
  * \date 2012-08-22 08:55GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.8
  * CMultiMtl
  */
 
@@ -29,20 +30,21 @@
 #include "multi_mtl.h"
 
 // STL includes
+#include <cstring>
 
 // NeL includes
-// #include <nel/misc/debug.h>
 
 // Project includes
 
 using namespace std;
-// using namespace NLMISC;
+
+#define PMB_MULTI_SUBCOUNT_CHUNK_ID 0x4002
 
 namespace PIPELINE {
 namespace MAX {
 namespace BUILTIN {
 
-CMultiMtl::CMultiMtl()
+CMultiMtl::CMultiMtl(CScene *scene) : CMtlBase(scene), m_NumSubMaterials(0)
 {
 
 }
@@ -50,6 +52,85 @@ CMultiMtl::CMultiMtl()
 CMultiMtl::~CMultiMtl()
 {
 
+}
+
+const ucstring CMultiMtl::DisplayName = ucstring("MultiMtl");
+const char *CMultiMtl::InternalName = "MultiMtl";
+const NLMISC::CClassId CMultiMtl::ClassId = NLMISC::CClassId(0x00000200, 0x00000000);
+const TSClassId CMultiMtl::SuperClassId = 0x00000c00;
+const CMultiMtlClassDesc MultiMtlClassDesc(&DllPluginDescBuiltin);
+
+void CMultiMtl::parse(uint16 version, uint filter)
+{
+	CMtlBase::parse(version);
+	if (!m_ChunksOwnsPointers)
+	{
+		m_NumSubMaterials = 0;
+		const TStorageObjectContainer &orphans = orphanedChunks();
+		for (TStorageObjectConstIt it = orphans.begin(); it != orphans.end(); ++it)
+		{
+			if (it->first != PMB_MULTI_SUBCOUNT_CHUNK_ID) continue;
+			CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
+			if (raw && raw->Value.size() >= 4)
+			{
+				uint32 n;
+				memcpy(&n, nlVectorData(raw->Value), 4);
+				m_NumSubMaterials = n;
+			}
+			break;
+		}
+	}
+}
+
+void CMultiMtl::clean()
+{
+	CMtlBase::clean();
+}
+
+void CMultiMtl::build(uint16 version, uint filter)
+{
+	CMtlBase::build(version);
+}
+
+void CMultiMtl::disown()
+{
+	m_NumSubMaterials = 0;
+	CMtlBase::disown();
+}
+
+void CMultiMtl::init()
+{
+	CMtlBase::init();
+}
+
+bool CMultiMtl::inherits(const NLMISC::CClassId classId) const
+{
+	if (classId == classDesc()->classId()) return true;
+	return CMtlBase::inherits(classId);
+}
+
+const ISceneClassDesc *CMultiMtl::classDesc() const
+{
+	return &MultiMtlClassDesc;
+}
+
+CMtlBase *CMultiMtl::subMaterial(uint i) const
+{
+	if (i >= m_NumSubMaterials) return NULL;
+	// Sub-materials are references 1..N (reference 0 is the material's own ParamBlock2).
+	CReferenceMaker *r = getReference(i + 1);
+	return dynamic_cast<CMtlBase *>(r);
+}
+
+void CMultiMtl::toStringLocal(std::ostream &ostream, const std::string &pad, uint filter) const
+{
+	CMtlBase::toStringLocal(ostream, pad);
+	ostream << "\n" << pad << "MultiMtl: " << m_NumSubMaterials << " sub-materials";
+}
+
+IStorageObject *CMultiMtl::createChunkById(uint16 id, bool container)
+{
+	return CMtlBase::createChunkById(id, container);
 }
 
 } /* namespace BUILTIN */

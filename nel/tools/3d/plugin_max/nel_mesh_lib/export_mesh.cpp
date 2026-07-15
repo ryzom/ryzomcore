@@ -380,6 +380,26 @@ NL3D::IShape *CExportNel::buildShape (INode& node, TimeValue time, const TInodeP
 								// Build the mesh with the build interface
 								meshMRMSkinned->build (buildBaseMesh, buildMesh, parameters);
 
+								// CMeshMRMSkinned::isCompatible gates the INPUT vertex count,
+								// but MRM construction can grow the post-MRM VB past
+								// NL3D_MESH_SKIN_MANAGER_MAXVERTICES=5000 (the skin-manager's
+								// fixed shared VB size). compileRunTime logs the failure and
+								// clears _RuntimeCompiled; refuse to ship the broken shape and
+								// surface a MessageBox so the artist knows to author LOD_MRM=0
+								// or split the geometry.
+								if (!meshMRMSkinned->isRuntimeCompiled())
+								{
+									std::string msg = "Node '" + CExportNel::getName(node) +
+										"' cannot be exported as CMeshMRMSkinned: the post-MRM "
+										"vertex count exceeds the shared skin-manager buffer "
+										"size (NL3D_MESH_SKIN_MANAGER_MAXVERTICES=5000). Author "
+										"the node with LOD_MRM=0 to export as plain CMesh with "
+										"SkinWeights, or split the geometry so each part fits.";
+									outputErrorMessage(msg);
+									delete meshMRMSkinned;
+									return NULL;
+								}
+
 								// optimize number of material
 								meshMRMSkinned->optimizeMaterialUsage(materialRemap);
 
@@ -1975,8 +1995,31 @@ NL3D::IShape				*CExportNel::buildWaterShape(INode& node, TimeValue time)
 			maxDiffuseMap->GetUVTransform(texMat);
 			
 			NLMISC::CMatrix A, B, C;
-			A.setRot(NLMISC::CVector(v0.x, v0.y, 1), NLMISC::CVector(v1.x, v1.y, 1), NLMISC::CVector(v2.x, v2.y, 1));			
-			Point3 uv[3] = { pMesh->getTVert(i0) * texMat, pMesh->getTVert(i1) * texMat, pMesh->getTVert(i2) * texMat };
+			A.setRot(NLMISC::CVector(v0.x, v0.y, 1), NLMISC::CVector(v1.x, v1.y, 1), NLMISC::CVector(v2.x, v2.y, 1));
+
+			// Look up texture vertex indices through face topology.
+			// Mesh vertex indices and texture vertex indices are separate;
+			// we must find the texture vertex for each mesh vertex via tvFace.
+			uint meshVertIdx[3] = { i0, i1, i2 };
+			Point3 uv[3];
+			int numFaces = pMesh->getNumFaces();
+			for (int vi = 0; vi < 3; ++vi)
+			{
+				uv[vi] = Point3(0, 0, 0);
+				bool found = false;
+				for (int f = 0; f < numFaces && !found; ++f)
+				{
+					for (int c = 0; c < 3; ++c)
+					{
+						if (pMesh->faces[f].v[c] == meshVertIdx[vi])
+						{
+							uv[vi] = pMesh->getTVert(pMesh->tvFace[f].getTVert(c)) * texMat;
+							found = true;
+							break;
+						}
+					}
+				}
+			}
 
 			float cropU = 0.f, cropV = 0.f, cropW = 1.f, cropH = 1.f;
 			// crop result	
@@ -2056,6 +2099,25 @@ NL3D::IShape				*CExportNel::buildWaterShape(INode& node, TimeValue time)
 		int splashEnabled = 1;
 		CExportNel::getValueByNameUsingParamBlock2 (*pNodeMat, "bEnableWaterSplash", (ParamType2)TYPE_BOOL, &splashEnabled, time);
 		ws->enableSplash(splashEnabled != 0);
+
+		// Realtime planar reflection and calculated reflectivity params
+		// (material script >= v15; shape defaults are kept when the params
+		// are absent from older materials)
+		int realtimeReflection = ws->isRealtimeReflectionEnabled() ? 1 : 0;
+		CExportNel::getValueByNameUsingParamBlock2 (*pNodeMat, "bWaterRealtimeReflection", (ParamType2)TYPE_BOOL, &realtimeReflection, time);
+		ws->enableRealtimeReflection(realtimeReflection != 0);
+
+		int envMapCalcReflectivity = ws->isEnvMapCalcReflectivityEnabled() ? 1 : 0;
+		CExportNel::getValueByNameUsingParamBlock2 (*pNodeMat, "bWaterEnvMapCalcReflectivity", (ParamType2)TYPE_BOOL, &envMapCalcReflectivity, time);
+		ws->enableEnvMapCalcReflectivity(envMapCalcReflectivity != 0);
+
+		float fresnelBias = ws->getReflectivityFresnelBias();
+		float fresnelScale = ws->getReflectivityFresnelScale();
+		float fresnelPower = ws->getReflectivityFresnelPower();
+		CExportNel::getValueByNameUsingParamBlock2 (*pNodeMat, "fWaterFresnelBias", (ParamType2)TYPE_FLOAT, &fresnelBias, time);
+		CExportNel::getValueByNameUsingParamBlock2 (*pNodeMat, "fWaterFresnelScale", (ParamType2)TYPE_FLOAT, &fresnelScale, time);
+		CExportNel::getValueByNameUsingParamBlock2 (*pNodeMat, "fWaterFresnelPower", (ParamType2)TYPE_FLOAT, &fresnelPower, time);
+		ws->setReflectivityFresnel(fresnelBias, fresnelScale, fresnelPower);
 
 
 		// Delete the triObject if we should...

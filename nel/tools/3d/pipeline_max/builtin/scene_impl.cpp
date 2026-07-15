@@ -55,7 +55,7 @@ CSceneImpl::~CSceneImpl()
 const ucstring CSceneImpl::DisplayName = ucstring("Scene");
 const char *CSceneImpl::InternalName = "SceneImpl";
 const NLMISC::CClassId CSceneImpl::ClassId = NLMISC::CClassId(0x00002222, 0x00000000);
-const TSClassId CSceneImpl::SuperClassId = CReferenceMaker::SuperClassId;
+const TSClassId CSceneImpl::SuperClassId = 0x00000100; // ReferenceMaker; literal to avoid cross-TU static-init-order dependency
 const CSceneImplClassDesc SceneImplClassDesc(&DllPluginDescBuiltin);
 
 void CSceneImpl::parse(uint16 version, uint filter)

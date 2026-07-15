@@ -4,7 +4,7 @@ SOURCE_GROUP("" FILES ${SRC})
 
 ADD_EXECUTABLE(log_analyser WIN32 ${SRC})
 
-TARGET_LINK_LIBRARIES(log_analyser nelmisc)
+TARGET_LINK_LIBRARIES(log_analyser PRIVATE NeL::misc)
 NL_DEFAULT_PROPS(log_analyser "NeL, Tools, Misc: log_analyser")
 NL_ADD_RUNTIME_FLAGS(log_analyser)
 

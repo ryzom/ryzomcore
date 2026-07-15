@@ -3,6 +3,7 @@
  * \brief CAppData
  * \date 2012-08-21 11:47GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Sonnet 5
  * CAppData
  */
 
@@ -54,6 +55,7 @@ class CAppDataEntry;
  * \brief CAppData
  * \date 2012-08-21 11:47GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Sonnet 5
  * This implements the AppData chunk in the storage
  */
 class CAppData : public CStorageContainer
@@ -118,6 +120,10 @@ protected:
 
 private:
 	TMap m_Entries;
+	/// Entries in original file order (or creation order for authored entries). build() writes
+	/// entries in this order, not m_Entries' key-sorted order, so files whose exporter didn't
+	/// insert entries in (ClassId,SuperClassId,SubId) order still round-trip byte-identically.
+	std::vector<CAppDataEntry *> m_EntryOrder;
 
 }; /* class CAppData */
 
@@ -125,6 +131,7 @@ private:
  * \brief CAppDataEntryKey
  * \date 2012-08-18 18:01GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Sonnet 5
  * CAppDataEntryKey
  */
 class CAppDataEntryKey : public IStorageObject
@@ -150,6 +157,7 @@ public:
  * \brief CAppDataEntry
  * \date 2012-08-21 11:47GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Sonnet 5
  * This implements an entry in the AppData chunk in the storage
  */
 class CAppDataEntry : public CStorageContainer
@@ -254,6 +262,7 @@ T *CAppData::getOrCreate(NLMISC::CClassId classId, TSClassId superClassId, uint3
 		appDataEntry = new CAppDataEntry();
 		appDataEntry->init();
 		m_Entries[key] = appDataEntry;
+		m_EntryOrder.push_back(appDataEntry);
 		appDataEntry->key()->ClassId = classId;
 		appDataEntry->key()->SuperClassId = superClassId;
 		appDataEntry->key()->SubId = subId;

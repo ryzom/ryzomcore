@@ -3,6 +3,7 @@
  * \brief CAppData
  * \date 2012-08-21 11:47GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Sonnet 5
  * CAppData
  */
 
@@ -181,6 +182,7 @@ void CAppData::parse(uint16 version, uint filter)
 		TKey key(entry->key()->ClassId, entry->key()->SuperClassId, entry->key()->SubId);
 		if (m_Entries.find(key) != m_Entries.end()) { nlwarning("Duplicate entry"); disown(); return; }
 		m_Entries[key] = entry;
+		m_EntryOrder.push_back(entry);
 	}
 
 	// Verify or fail
@@ -223,9 +225,13 @@ void CAppData::build(uint16 version, uint filter)
 	headerSize->Value = m_Entries.size();
 	m_Chunks.push_back(TStorageObjectWithId(PMBS_APP_DATA_HEADER_CHUNK_ID, headerSize));
 
-	// Set up the entries
-	for (TMap::iterator it = m_Entries.begin(), end = m_Entries.end(); it != end; ++it)
-		m_Chunks.push_back(TStorageObjectWithId(PMBS_APP_DATA_ENTRY_CHUNK_ID, it->second));
+	// Set up the entries in original file order (or creation order), NOT m_Entries' key-sorted
+	// order — the source exporter does not insert entries sorted by (ClassId,SuperClassId,SubId),
+	// so iterating the map here would silently reorder chunks and break byte-identity (see the
+	// m_EntryOrder comment in the header).
+	nlassert(m_EntryOrder.size() == m_Entries.size());
+	for (std::vector<CAppDataEntry *>::iterator it = m_EntryOrder.begin(), end = m_EntryOrder.end(); it != end; ++it)
+		m_Chunks.push_back(TStorageObjectWithId(PMBS_APP_DATA_ENTRY_CHUNK_ID, *it));
 
 	// Rebuild raw storage
 	CStorageContainer::build(version);
@@ -243,6 +249,7 @@ void CAppData::disown()
 
 	// Disown locally
 	m_Entries.clear();
+	m_EntryOrder.clear();
 
 	// Give ownership back
 	m_ChunksOwnsPointers = true;
@@ -324,6 +331,10 @@ void CAppData::erase(NLMISC::CClassId classId, TSClassId superClassId, uint32 su
 	TKey key(classId, superClassId, subId);
 	TMap::const_iterator it = m_Entries.find(key);
 	if (it == m_Entries.end()) { nldebug("Trying to erase non-existant key, this is allowed, doing nothing"); return; }
+	for (std::vector<CAppDataEntry *>::iterator oit = m_EntryOrder.begin(), oend = m_EntryOrder.end(); oit != oend; ++oit)
+	{
+		if (*oit == it->second) { m_EntryOrder.erase(oit); break; }
+	}
 	m_Entries.erase(key);
 }
 

@@ -8,12 +8,15 @@ TARGET_INCLUDE_DIRECTORIES(object_viewer_widget_qt
 		PUBLIC
 		${CMAKE_CURRENT_BINARY_DIR}
 		${CMAKE_CURRENT_SOURCE_DIR}
-		${NEL_INCLUDE_DIR})
+)
 
 TARGET_LINK_LIBRARIES(object_viewer_widget_qt
-		nelmisc
-		nel3d
-		${QT_LIBRARIES})
+        PUBLIC
+		NeL::misc
+		NeL::3d
+        Qt::Core
+        Qt::Widgets
+)
 
 NL_DEFAULT_PROPS(object_viewer_widget_qt "NeL, Tools, 3D: Object Viewer Qt Widget")
 NL_ADD_RUNTIME_FLAGS(object_viewer_widget_qt)

@@ -6,8 +6,8 @@ ADD_LIBRARY(nel_3dsmax_shared SHARED ${SRC})
 
 TARGET_INCLUDE_DIRECTORIES(nel_3dsmax_shared PRIVATE ${MAXSDK_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(nel_3dsmax_shared 
-							nelmisc
-							nel3d
+							NeL::misc
+							NeL::3d
 							nel_mesh_lib 
 							nel_patch_lib 
 							${MAXSDK_LIBRARIES} 

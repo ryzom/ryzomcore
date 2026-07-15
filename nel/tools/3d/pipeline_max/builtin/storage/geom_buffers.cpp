@@ -3,6 +3,7 @@
  * \brief CGeomBuffers
  * \date 2012-08-25 07:55GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.8
  * CGeomBuffers
  */
 
@@ -49,7 +50,7 @@ namespace STORAGE {
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
-#define PMBS_GEOM_BUFFERS_PARSE 0
+#define PMBS_GEOM_BUFFERS_PARSE 1
 
 // Elevate warnings to errors in this file for stricter reading
 #undef nlwarning
@@ -282,6 +283,34 @@ void CGeomBuffers::disown()
 #else
 	CStorageContainer::disown();
 #endif
+}
+
+const std::vector<NLMISC::CVector> *CGeomBuffers::triVertices() const
+{
+	const CStorageArraySizePre<NLMISC::CVector> *a =
+		dynamic_cast<const CStorageArraySizePre<NLMISC::CVector> *>(findStorageObject(0x0914));
+	return a ? &a->Value : NULL;
+}
+
+const std::vector<CGeomTriIndexInfo> *CGeomBuffers::triFaces() const
+{
+	const CStorageArraySizePre<CGeomTriIndexInfo> *a =
+		dynamic_cast<const CStorageArraySizePre<CGeomTriIndexInfo> *>(findStorageObject(0x0912));
+	return a ? &a->Value : NULL;
+}
+
+const std::vector<CGeomPolyVertexInfo> *CGeomBuffers::polyVertices() const
+{
+	const CStorageArraySizePre<CGeomPolyVertexInfo> *a =
+		dynamic_cast<const CStorageArraySizePre<CGeomPolyVertexInfo> *>(findStorageObject(PBMS_GEOM_BUFFERS_POLY_A_VERTEX_CHUNK_ID));
+	return a ? &a->Value : NULL;
+}
+
+const std::vector<CGeomPolyFaceInfo> *CGeomBuffers::polyFaces() const
+{
+	const CStorageArrayDynSize<CGeomPolyFaceInfo> *a =
+		dynamic_cast<const CStorageArrayDynSize<CGeomPolyFaceInfo> *>(findStorageObject(PBMS_GEOM_BUFFERS_POLY_A_FACE_CHUNK_ID));
+	return a ? &a->Value : NULL;
 }
 
 IStorageObject *CGeomBuffers::createChunkById(uint16 id, bool container)

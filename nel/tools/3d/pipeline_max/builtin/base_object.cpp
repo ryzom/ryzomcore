@@ -56,7 +56,7 @@ const ucstring CBaseObject::DisplayName = ucstring("BaseObject");
 const char *CBaseObject::InternalName = "BaseObject";
 // const char *CBaseObject::InternalNameUnknown = "BaseObjectUnknown";
 const NLMISC::CClassId CBaseObject::ClassId = NLMISC::CClassId(0x71c8167a, 0x5a9f57b2); /* Not official, please correct */
-const TSClassId CBaseObject::SuperClassId = CReferenceTarget::SuperClassId;
+const TSClassId CBaseObject::SuperClassId = 0x00000200; // ReferenceTarget; literal to avoid cross-TU static-init-order dependency
 const CBaseObjectClassDesc BaseObjectClassDesc(&DllPluginDescBuiltin);
 // const CBaseObjectSuperClassDesc BaseObjectSuperClassDesc(&BaseObjectClassDesc);
 
