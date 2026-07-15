@@ -215,6 +215,28 @@ IF(HUNTER_ENABLED)
   if(GIF_FOUND AND NOT TARGET PNG::PNG)
       add_library(PNG::PNG ALIAS PNG::png)
   endif()
+  SET(PNG_LIBRARY   PNG::png)
+  SET(PNG_LIBRARIES PNG::png)
+
+  HUNTER_ADD_PACKAGE(breakpad)
+  FIND_PACKAGE(breakpad CONFIG REQUIRED)
+  TARGET_LINK_LIBRARIES(nelmisc breakpad::libbreakpad_client)
+ELSE()
+  IF(UNIX)
+    IF(APPLE)
+    ELSE()
+      FIND_PATH(BREAKPAD_INCLUDE_DIR client/linux/handler/exception_handler.h
+        PATHS /usr/local/include/breakpad
+        NO_DEFAULT_PATH
+      )
+      FIND_LIBRARY(BREAKPAD_CLIENT_LIB breakpad_client
+        PATHS /usr/local/lib
+        NO_DEFAULT_PATH
+      )
+    ENDIF()
+  ENDIF()
+  TARGET_INCLUDE_DIRECTORIES(nelmisc PRIVATE ${BREAKPAD_INCLUDE_DIR})
+  TARGET_LINK_LIBRARIES(nelmisc ${BREAKPAD_CLIENT_LIB})
 ENDIF()
 
 IF(JPEG_FOUND)

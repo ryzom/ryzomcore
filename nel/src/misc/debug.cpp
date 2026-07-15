@@ -25,8 +25,9 @@
 #ifdef NL_OS_WINDOWS
 #	include <direct.h>
 #	include <tchar.h>
-#	include <imagehlp.h>
-#	pragma comment(lib, "imagehlp.lib")
+//#	include <imagehlp.h>
+//#	pragma comment(lib, "imagehlp.lib")
+#	include "breakpad/client/windows/handler/exception_handler.h"
 #	ifndef getcwd
 #		define getcwd(_a, _b) (_getcwd(_a,_b))
 #	endif
@@ -40,6 +41,7 @@
 #	define IsDebuggerPresent() false
 #   if !defined(NL_OS_MAC) && !defined(__EMSCRIPTEN__)
 #	    include <execinfo.h>
+# 		include "client/linux/handler/exception_handler.h"
 #   endif
 //#	include <malloc.h>
 #	include <errno.h>
@@ -300,147 +302,40 @@ bool _assert_stop(bool &ignoreNextTime, sint line, const char *file, const char 
 
 #ifdef NL_OS_WINDOWS
 
-/*
-// ***************************************************************************
-static DWORD __stdcall GetModuleBase(HANDLE hProcess, DWORD dwReturnAddress)
-{
-	IMAGEHLP_MODULE moduleInfo;
-
-	if (SymGetModuleInfo(hProcess, dwReturnAddress, &moduleInfo))
-		return moduleInfo.BaseOfImage;
-	else
-	{
-		MEMORY_BASIC_INFORMATION memoryBasicInfo;
-
-		if (::VirtualQueryEx(hProcess, (LPVOID) dwReturnAddress,
-			&memoryBasicInfo, sizeof(memoryBasicInfo)))
-		{
-			DWORD cch = 0;
-			wchar_t szFile[MAX_PATH] = { 0 };
-
-			cch = GetModuleFileNameW((HINSTANCE)memoryBasicInfo.AllocationBase,
-								 szFile, MAX_PATH);
-
-			if (cch && (lstrcmpA(szFile, "DBFN")== 0))
-			{
-				if (!SymLoadModule(hProcess,
-				   NULL, "MN",
-				   NULL, (DWORD) memoryBasicInfo.AllocationBase, 0))
-				{
-					DWORD dwError = GetLastError();
-//					nlinfo("Error: %d", dwError);
-				}
-		}
-		else
-		{
-		 if (!SymLoadModule(hProcess,
-			   NULL, ((cch) ? szFile : NULL),
-			   NULL, (DWORD) memoryBasicInfo.AllocationBase, 0))
-			{
-				DWORD dwError = GetLastError();
-//				nlinfo("Error: %d", dwError);
-			 }
-
-		}
-
-		 return (DWORD) memoryBasicInfo.AllocationBase;
-	  }
-//		else
-//			nlinfo("Error is %d", GetLastError());
-	}
-
-	return 0;
-}
-
-LPVOID __stdcall FunctionTableAccess (HANDLE hProcess, DWORD AddrBase)
-{
-	AddrBase = 0x40291f;
-	DWORD addr = SymGetModuleBase (hProcess, AddrBase);
-	HRESULT hr = GetLastError ();
-
-	IMAGEHLP_MODULE moduleInfo;
-	moduleInfo.SizeOfStruct = sizeof(IMAGEHLP_MODULE);
-	SymGetModuleInfo(hProcess, addr, &moduleInfo);
-	hr = GetLastError ();
-	SymLoadModule(hProcess, NULL, NULL, NULL, 0, 0);
-	hr = GetLastError ();
-
-	LPVOID temp = SymFunctionTableAccess (hProcess, AddrBase);
-	hr = GetLastError ();
-	return temp;
-}
-*/
-
 /* can't include dbghelp.h */
 typedef struct _NEL_MINIDUMP_EXCEPTION_INFORMATION {  DWORD ThreadId;  PEXCEPTION_POINTERS ExceptionPointers;  BOOL ClientPointers;
 } NEL_MINIDUMP_EXCEPTION_INFORMATION, *PNEL_MINIDUMP_EXCEPTION_INFORMATION;
 typedef enum _NEL_MINIDUMP_TYPE
 {
-  MiniDumpNormal = 0x00000000,
-  MiniDumpWithDataSegs = 0x00000001,
-  MiniDumpWithFullMemory = 0x00000002,
-  MiniDumpWithHandleData = 0x00000004,
-  MiniDumpFilterMemory = 0x00000010,
-  MiniDumpWithUnloaded = 0x00000020,
-  MiniDumpWithIndirectlyReferencedMemory = 0x00000040,
-  MiniDumpFilterModulePaths = 0x00000080,
-  MiniDumpWithProcessThreadData = 0x00000100,
-  MiniDumpWithPrivateReadWriteMemory = 0x00000200,
-  MiniDumpWithoutOptionalData = 0x00000400,
-  MiniDumpWithFullMemoryInfo = 0x00000800,
-  MiniDumpWithThreadInfo = 0x00001000,
-  MiniDumpWithCodeSegs = 0x00002000
+	MiniDumpNormal = 0x00000000,
+	MiniDumpWithDataSegs = 0x00000001,
+	MiniDumpWithFullMemory = 0x00000002,
+	MiniDumpWithHandleData = 0x00000004,
+	MiniDumpFilterMemory = 0x00000010,
+	MiniDumpWithUnloaded = 0x00000020,
+	MiniDumpWithIndirectlyReferencedMemory = 0x00000040,
+	MiniDumpFilterModulePaths = 0x00000080,
+	MiniDumpWithProcessThreadData = 0x00000100,
+	MiniDumpWithPrivateReadWriteMemory = 0x00000200,
+	MiniDumpWithoutOptionalData = 0x00000400,
+	MiniDumpWithFullMemoryInfo = 0x00000800,
+	MiniDumpWithThreadInfo = 0x00001000,
+	MiniDumpWithCodeSegs = 0x00002000
 } NEL_MINIDUMP_TYPE;
 
 static void DumpMiniDump(PEXCEPTION_POINTERS excpInfo)
 {
-	HANDLE file = CreateFileA (NL_CRASH_DUMP_FILE, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (file)
-	{
-		HMODULE hm = LoadLibraryA ("dbghelp.dll");
-		if (hm)
-		{
-			BOOL (WINAPI* MiniDumpWriteDump)(
-			  HANDLE hProcess,
-			  DWORD ProcessId,
-			  HANDLE hFile,
-			  NEL_MINIDUMP_TYPE DumpType,
-			  PNEL_MINIDUMP_EXCEPTION_INFORMATION ExceptionParam,
-			  PNEL_MINIDUMP_EXCEPTION_INFORMATION UserStreamParam,
-			  PNEL_MINIDUMP_EXCEPTION_INFORMATION CallbackParam
-			) = NULL;
-			*(FARPROC*)&MiniDumpWriteDump = GetProcAddress(hm, "MiniDumpWriteDump");
-			if (MiniDumpWriteDump)
-			{
-				// OutputDebugString(_T("writing minidump\r\n"));
-				NEL_MINIDUMP_EXCEPTION_INFORMATION eInfo;
-				eInfo.ThreadId = GetCurrentThreadId();
-				eInfo.ExceptionPointers = excpInfo;
-				eInfo.ClientPointers = FALSE;
+	string dumpPath = getLogDirectory();
 
-				// note:  MiniDumpWithIndirectlyReferencedMemory does not work on Win98
-				MiniDumpWriteDump(
-					GetCurrentProcess(),
-					GetCurrentProcessId(),
-					file,
-					MiniDumpNormal,
-					excpInfo ? &eInfo : NULL,
-					NULL,
-					NULL);
-			}
-			else
-			{
-				nlwarning ("Can't get proc MiniDumpWriteDump in dbghelp.dll");
-			}
-		}
-		else
-		{
-			nlwarning ("Can't load dbghelp.dll");
-		}
-		CloseHandle (file);
-	}
-	else
-		nlwarning ("Can't create mini dump file");
+	std::wstring wpath = dumpPath.empty() ? L"." : std::wstring(dumpPath.begin(), dumpPath.end());
+	google_breakpad::ExceptionHandler handler(
+		wpath,
+		NULL,
+		NULL,
+		NULL,
+		google_breakpad::ExceptionHandler::HANDLER_NONE
+	);
+	handler.WriteMinidump();
 }
 
 class EDebug : public ETrapDebug
@@ -1055,36 +950,6 @@ void getCallStack(std::string &result, sint skipNFirst)
 void getCallStackAndLog (string &result, sint skipNFirst)
 {
 	getCallStack(result, skipNFirst);
-//#ifdef NL_OS_WINDOWS
-//	try
-//	{
-//		WORKAROUND_VCPP_SYNCHRONOUS_EXCEPTION // force to install a exception frame
-//
-//		DWORD array[1];
-//		array[0] = skipNFirst;
-//		RaiseException (0xACE0ACE, 0, 1, array);
-//	}
-//	catch (const EDebug &e)
-//	{
-//		result += e.what();
-//	}
-//#else
-//
-//	// Make place for stack frames and function names
-//	const uint MaxFrame=64;
-//	void *trace[MaxFrame];
-//	char **messages = (char **)NULL;
-//	int i, trace_size = 0;
-//
-//	trace_size = backtrace(trace, MaxFrame);
-//	messages = backtrace_symbols(trace, trace_size);
-//	result += "Dumping call stack :\n";
-//	for (i=0; i<trace_size; ++i)
-//		result += toString("%i : %s\n", i, messages[i]);
-//	// free the messages
-//	free(messages);
-//#endif
-//
 	result += "-------------------------------\n";
 	result += "\n";
 	if(DefaultMemDisplayer)
@@ -1122,8 +987,8 @@ void getCallStackAndLog (string &result, sint skipNFirst)
 
 void changeLogDirectory(const std::string &dir)
 {
-	if (fd == NULL)return;
 	LogPath = CPath::standardizePath(dir);
+	if (fd == NULL) return;
 	string p = LogPath + "log.log";
 	fd->setParam(p);
 }
@@ -1242,6 +1107,14 @@ void createDebug (const char *logPath, bool logInFile, bool eraseLastLog)
 			INelContext::getInstance().setWindowedApplication(true);
 
 		initDebug2(logInFile);
+
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+		string path = LogPath.empty() ? "." : LogPath;
+		static google_breakpad::MinidumpDescriptor descriptor(path);
+		static google_breakpad::ExceptionHandler handler(
+			descriptor, NULL, NULL, NULL, true, -1
+		);
+#endif
 
 		INelContext::getInstance().setAlreadyCreateSharedAmongThreads(true);
 //		alreadyCreateSharedAmongThreads = true;
