@@ -2,7 +2,7 @@ ADD_EXECUTABLE(pdr_util pdr_util.cpp)
 
 TARGET_LINK_LIBRARIES(pdr_util
         PRIVATE
-        ryzom_gameshare
+        Ryzom::gameshare
         NeL::misc
         NeL::net
         NeL::ligo

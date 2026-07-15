@@ -23,9 +23,9 @@ TARGET_INCLUDE_DIRECTORIES(sheets_packer_shard PRIVATE ${CMAKE_SOURCE_DIR}/ryzom
 
 TARGET_LINK_LIBRARIES(sheets_packer_shard
         PRIVATE
-        ryzom_gameshare
-        ryzom_servershare
-        ryzom_aishare
+        Ryzom::gameshare
+        Ryzom::servershare
+        Ryzom::aishare
         NeL::misc
         NeL::georges
         NeL::net

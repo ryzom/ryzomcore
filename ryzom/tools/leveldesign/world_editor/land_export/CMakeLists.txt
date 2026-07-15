@@ -8,7 +8,7 @@ TARGET_LINK_LIBRARIES(land_export
         PRIVATE
         NeL::misc
         NeL::ligo
-        ryzom_landexport
+        Ryzom::landexport
 )
 
 NL_DEFAULT_PROPS(land_export "Ryzom, Tools, World: Land Export")

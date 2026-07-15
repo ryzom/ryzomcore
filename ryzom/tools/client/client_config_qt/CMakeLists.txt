@@ -1,4 +1,4 @@
-FIND_PACKAGE(OpenGL REQUIRED COMPONENTS OpenGL)
+FIND_PACKAGE(OpenGL REQUIRED)
 
 FILE(GLOB SRC src/*.cpp src/*.h resources/*.rc)
 
@@ -44,7 +44,6 @@ TARGET_INCLUDE_DIRECTORIES(ryzom_configuration_qt
         PRIVATE
         ${CMAKE_CURRENT_BINARY_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}
-        ${NEL_INCLUDE_DIR}
 )
 
 set_property(TARGET ryzom_configuration_qt PROPERTY AUTOUIC_SEARCH_PATHS
@@ -62,8 +61,11 @@ TARGET_LINK_LIBRARIES(ryzom_configuration_qt
         PRIVATE
         NeL::misc
         NeL::3d
-        ${QT_LIBRARIES}
-        OpenGL::OpenGL
+        Qt::Core
+        Qt::Gui
+        Qt::OpenGL
+        Qt::Widgets
+        OpenGL::GL
 )
 
 IF (WITH_PCH)
