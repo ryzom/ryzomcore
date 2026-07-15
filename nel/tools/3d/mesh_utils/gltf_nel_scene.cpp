@@ -57,6 +57,7 @@
 #include "../nel_gltf/gltf_material.h"
 #include "../nel_gltf/gltf_special_shape.h"
 #include "../nel_gltf/shape_export_bytes.h"
+#include "../nel_gltf/mesh_shape_build.h"
 #include "../nel_gltf/hex_blob.h"
 
 #include "mesh_utils.h"
@@ -651,27 +652,19 @@ void mrmParamsFromExtras(const CJsonValue &extras, CMRMParameters &parameters)
 	parameters.DistanceCoarsest = (float)extras.getDouble("nel_mrm_dist_coarsest", 200.0);
 }
 
-// IMeshGeom for one multilod slot — the direct route's buildMeshGeomFor: the slot node's own
-// LOD_MRM appdata picks CMeshMRMGeom (empty morph-target list) or CMeshGeom, built against the
-// PARENT context's material count.
+// IMeshGeom for one multilod slot — the slot node's own nel_lod_mrm extras pick the branch;
+// the geom build itself is the shared NLGLTF::buildMeshGeom the direct route calls too.
 IMeshGeom *buildGeomForSlot(const SGltfDoc &doc, const CJsonValue &slotExtras,
                             const CJsonValue &mesh, uint numMaxMaterial, std::string *err)
 {
 	CMesh::CMeshBuild mb;
 	if (!reconstructMeshBuild(doc, mesh, slotExtras, mb, err))
 		return NULL;
-	if (slotExtras.getBool("nel_lod_mrm", false))
-	{
-		CMRMParameters parameters;
+	bool wantMrm = slotExtras.getBool("nel_lod_mrm", false);
+	CMRMParameters parameters;
+	if (wantMrm)
 		mrmParamsFromExtras(slotExtras, parameters);
-		std::vector<CMesh::CMeshBuild *> bsList; // morph targets: not implemented (direct ditto)
-		CMeshMRMGeom *g = new CMeshMRMGeom;
-		g->build(mb, bsList, numMaxMaterial, parameters);
-		return g;
-	}
-	CMeshGeom *g = new CMeshGeom;
-	g->build(mb, numMaxMaterial);
-	return g;
+	return buildMeshGeom(mb, numMaxMaterial, wantMrm, parameters);
 }
 
 } // anonymous namespace
@@ -1129,43 +1122,23 @@ int exportNelGltfScene(const CMeshUtilsSettings &settings)
 				continue;
 			}
 
-			// Replay the shape build (buildShapeForNode's mesh path)
+			// Replay the shape build — the shared NLGLTF::buildMeshShape the direct route's
+			// buildShapeForNode mesh path calls too (identical inputs through identical code).
 			try
 			{
+				CMRMParameters parameters;
 				if (wantMrm)
-				{
-					CMRMParameters parameters;
 					mrmParamsFromExtras(*extras, parameters);
-					if (CMeshMRMSkinned::isCompatible(mb) && bsList.empty())
-					{
-						CMeshMRMSkinned *meshMRMSkinned = new CMeshMRMSkinned;
-						meshMRMSkinned->build(bbm, mb, parameters);
-						if (!meshMRMSkinned->isRuntimeCompiled())
-						{
-							delete meshMRMSkinned;
-							stats.skip("skinned-maxverts");
-							continue;
-						}
-						meshMRMSkinned->optimizeMaterialUsage(materialRemap);
-						meshBase = meshMRMSkinned;
-					}
-					else
-					{
-						CMeshMRM *meshMRM = new CMeshMRM;
-						meshMRM->build(bbm, mb, bsList, parameters);
-						meshMRM->optimizeMaterialUsage(materialRemap);
-						meshBase = meshMRM;
-					}
-				}
-				else
-				{
-					CMesh *m = new CMesh;
-					m->build(bbm, mb);
-					m->optimizeMaterialUsage(materialRemap);
-					meshBase = m;
-				}
+				std::string skipReason;
+				meshBase = buildMeshShape(bbm, mb, bsList, wantMrm, parameters, materialRemap,
+				                          &skipReason);
 				for (size_t k = 0; k < bsList.size(); ++k)
 					delete bsList[k];
+				if (!meshBase)
+				{
+					stats.skip(skipReason.empty() ? "build" : skipReason);
+					continue;
+				}
 			}
 			catch (const NLMISC::Exception &e)
 			{

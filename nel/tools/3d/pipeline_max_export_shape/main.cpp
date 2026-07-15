@@ -94,6 +94,7 @@
 #include "interface_build.h"
 #include "lm_scene_build.h"
 #include "../nel_gltf/shape_export_bytes.h"
+#include "../nel_gltf/mesh_shape_build.h"
 
 #include "../pipeline_max/builtin/scene_impl.h"
 #include "../pipeline_max/builtin/i_node.h"
@@ -249,23 +250,18 @@ static void tryApplyInterface(INode &node, NL3D::CMesh::CMeshBuild &buildMesh,
 // writer's morph-target encoding.
 
 // Construct an IMeshGeom (CMeshGeom or CMeshMRMGeom) from a built CMeshBuild — used per LOD slot
-// in the multi-lod path. Caller owns the returned pointer until CMeshMultiLod::build takes it.
+// in the multi-lod path (the slot node's own LOD_MRM appdata decides; the geom build itself is
+// the shared NLGLTF::buildMeshGeom both routes call). Caller owns the returned pointer until
+// CMeshMultiLod::build takes it.
 static NL3D::IMeshGeom *buildMeshGeomFor(INode &node, NL3D::CMesh::CMeshBuild &buildMesh,
                                           uint numMaxMaterial)
 {
 	CNodeImpl *n = dynamic_cast<CNodeImpl *>(&node);
-	if (getScriptAppDataInt(n, NEL3D_APPDATA_LOD_MRM, 0))
-	{
-		NL3D::CMRMParameters parameters;
+	NL3D::CMRMParameters parameters;
+	bool wantMrm = getScriptAppDataInt(n, NEL3D_APPDATA_LOD_MRM, 0) != 0;
+	if (wantMrm)
 		buildMRMParameters(n, parameters);
-		std::vector<NL3D::CMesh::CMeshBuild *> bsList; // morph targets: not implemented
-		NL3D::CMeshMRMGeom *g = new NL3D::CMeshMRMGeom;
-		g->build(buildMesh, bsList, numMaxMaterial, parameters);
-		return g;
-	}
-	NL3D::CMeshGeom *g = new NL3D::CMeshGeom;
-	g->build(buildMesh, numMaxMaterial);
-	return g;
+	return NLGLTF::buildMeshGeom(buildMesh, numMaxMaterial, wantMrm, parameters);
 }
 
 // LOD slot flags from a slave's appdata.
@@ -656,59 +652,35 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 		// on their post-MRM VB (both are big ship meshes without LOD_MRM authored).
 		const bool wantMrm = getScriptAppDataInt(n, NEL3D_APPDATA_LOD_MRM, 0) != 0;
 
+		NL3D::CMRMParameters parameters;
+		std::vector<NL3D::CMesh::CMeshBuild *> bsList;
 		if (wantMrm)
 		{
-			NL3D::CMRMParameters parameters;
 			buildMRMParameters(n, parameters);
-
 			// Morpher blend-shape targets — a non-empty bsList forces the CMeshMRM branch (the
-			// reference's isCompatible gate below), which is how the visage files ship as
+			// shared build's isCompatible gate), which is how the visage files ship as
 			// CMeshMRM-with-SkinWeights instead of CMeshMRMSkinned.
-			std::vector<NL3D::CMesh::CMeshBuild *> bsList;
 			buildBSList(node, tmCache, mods, buildMesh, hasPhysique, exportLighting, bsList);
-
-			if (NL3D::CMeshMRMSkinned::isCompatible(buildMesh) && bsList.empty())
-			{
-				NL3D::CMeshMRMSkinned *meshMRMSkinned = new NL3D::CMeshMRMSkinned;
-				meshMRMSkinned->build(buildBaseMesh, buildMesh, parameters);
-				// CMeshMRMSkinned::isCompatible gates the INPUT vertex count, but MRM
-				// construction can grow the vertex count at smoothing-group/material/bone
-				// boundaries past NL3D_MESH_SKIN_MANAGER_MAXVERTICES=5000 (the skin-manager's
-				// fixed shared VB size). CMeshMRMSkinnedGeom::compileRunTime logs the failure
-				// and clears _RuntimeCompiled when that happens; skip the node with an artist-
-				// facing message so the authoring gets fixed (LOD_MRM=0 or split the mesh).
-				if (!meshMRMSkinned->isRuntimeCompiled())
-				{
-					fprintf(stderr, "SKIP shape '%s': CMeshMRMSkinned post-MRM vertex count "
-					                "exceeds NL3D_MESH_SKIN_MANAGER_MAXVERTICES. Author "
-					                "LOD_MRM=0 to export as plain CMesh with SkinWeights, or "
-					                "split the geometry so each part's post-MRM VB fits in "
-					                "the skin-manager buffer.\n",
-					        name.c_str());
-					delete meshMRMSkinned;
-					stats.skip("skinned-maxverts");
-					return NULL;
-				}
-				meshMRMSkinned->optimizeMaterialUsage(materialRemap);
-				meshBase = meshMRMSkinned;
-			}
-			else
-			{
-				NL3D::CMeshMRM *meshMRM = new NL3D::CMeshMRM;
-				meshMRM->build(buildBaseMesh, buildMesh, bsList, parameters);
-				meshMRM->optimizeMaterialUsage(materialRemap);
-				meshBase = meshMRM;
-			}
-			for (uint i = 0; i < bsList.size(); ++i)
-				delete bsList[i];
 		}
-		else
+		// The shared mesh-path shape build (NLGLTF::buildMeshShape — same call on the glTF
+		// import route).
+		std::string skipReason;
+		meshBase = NLGLTF::buildMeshShape(buildBaseMesh, buildMesh, bsList, wantMrm, parameters,
+		                                  materialRemap, &skipReason);
+		for (uint i = 0; i < bsList.size(); ++i)
+			delete bsList[i];
+		if (!meshBase)
 		{
-			NL3D::CMesh *m = new NL3D::CMesh;
-			m->build(buildBaseMesh, buildMesh);
-			// buildMeshMorph: morph targets not implemented (Morpher modifier reports unhandled)
-			m->optimizeMaterialUsage(materialRemap);
-			meshBase = m;
+			// skinned-maxverts: artist-facing message so the authoring gets fixed
+			if (skipReason == "skinned-maxverts")
+				fprintf(stderr, "SKIP shape '%s': CMeshMRMSkinned post-MRM vertex count "
+				                "exceeds NL3D_MESH_SKIN_MANAGER_MAXVERTICES. Author "
+				                "LOD_MRM=0 to export as plain CMesh with SkinWeights, or "
+				                "split the geometry so each part's post-MRM VB fits in "
+				                "the skin-manager buffer.\n",
+				        name.c_str());
+			stats.skip(skipReason.empty() ? "build" : skipReason);
+			return NULL;
 		}
 	}
 
