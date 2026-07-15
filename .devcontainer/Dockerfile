@@ -1,7 +1,7 @@
 FROM ubuntu:24.04
 RUN touch /var/mail/ubuntu && chown ubuntu /var/mail/ubuntu && userdel --remove ubuntu
 
-RUN apt update; \
+RUN apt update && \
     DEBIAN_FRONTEND=noninteractive \
     apt install --yes \
         autoconf \
@@ -14,7 +14,6 @@ RUN apt update; \
         libavcodec-dev \
         libavdevice-dev \
         libavformat-dev \
-        libcpptest-dev \
         libcurl4-openssl-dev \
         libfreetype6-dev \
         libgif-dev \
@@ -35,6 +34,7 @@ RUN apt update; \
         libxml2-dev \
         mingw-w64 \
         mingw-w64-tools \
+        nasm \
         ninja-build \
         qtbase5-dev \
         qttools5-dev \
@@ -52,11 +52,13 @@ RUN apt install --yes \
         git \
         graphviz \
         libxrandr-dev \
-        wget
+        wget \
+        sudo
 
 
-# work arround as there is no debug version available
-RUN cp /lib/x86_64-linux-gnu/libcpptest.so /lib/x86_64-linux-gnu/libcpptestd.so
+# vcpkg
+RUN apt install --yes \
+        curl zip unzip tar
 
 # install msquic
 RUN wget --output-document=/tmp/microsoft.deb https://packages.microsoft.com/config/ubuntu/24.04/packages-microsoft-prod.deb \
@@ -70,7 +72,7 @@ RUN wget --output-document=/tmp/microsoft.deb https://packages.microsoft.com/con
     && sudo mv msquic.h msquic_posix.h quic_sal_stub.h /usr/include/
 
 
-ARG CMAKE_VERSION=3.29.5
+ARG CMAKE_VERSION=3.31.11
 ARG CMAKE_INSTALL_DIR=/opt/cmake-$CMAKE_VERSION
 ARG USERNAME=ryzom
 ARG USER_UID=1000
@@ -89,3 +91,10 @@ RUN groupadd --gid $USER_GID $USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME
 
 USER $USERNAME
+
+ENV VCPKG_ROOT="/home/$USERNAME/vcpkg"
+ENV PATH="$PATH:$VCPKG_ROOT"
+
+RUN git clone https://github.com/microsoft/vcpkg.git $VCPKG_ROOT \
+    && $VCPKG_ROOT/bootstrap-vcpkg.sh -disableMetrics \
+    && vcpkg --version

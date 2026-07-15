@@ -6,15 +6,15 @@ trigger:
       - main/atys-live
 
 jobs:
-  - job: ubuntu20
+  - job: ubuntu24
     timeoutInMinutes: 120
     pool:
-      vmImage: 'ubuntu-20.04'
+      vmImage: 'ubuntu-24.04'
     steps:
     - script: |
         sudo apt update
         sudo apt install --yes software-properties-common
-        wget --quiet https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb
+        wget --quiet https://packages.microsoft.com/config/ubuntu/24.04/packages-microsoft-prod.deb
         sudo dpkg --install packages-microsoft-prod.deb
         sudo apt update
         sudo apt install --yes \
@@ -22,9 +22,9 @@ jobs:
           bison autoconf automake \
           libpng-dev \
           libjpeg-dev \
-          libgif-dev libfreetype6-dev \
+          libgif-dev libfreetype-dev \
           freeglut3-dev \
-          liblua5.2-dev libluabind-dev libcpptest-dev \
+          liblua5.2-dev libluabind-dev \
           libogg-dev libvorbis-dev libopenal-dev \
           libavcodec-dev libavformat-dev libavdevice-dev libswscale-dev libpostproc-dev \
           libmysqlclient-dev \
@@ -40,16 +40,34 @@ jobs:
         wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/quic_sal_stub.h
         sudo mv msquic.h msquic_posix.h quic_sal_stub.h /usr/include/
       displayName: 'Dependencies'
+    - script: echo "##vso[task.setvariable variable=weekKey]$(date +%YW%V)"
+      displayName: 'Week key'
+    - task: Cache@2
+      inputs:
+        key: 'ccache | ubuntu24 | "$(weekKey)"'
+        path: '$(HOME)/.cache/ccache'
+      displayName: 'ccache cache'
+    - script: |
+        ccache --set-config=max_size=1G
+        ccache --set-config=compression=true
+        ccache -z
+      displayName: 'Configure ccache'
     - script: >
         cmake --preset linux-default
         -DCMAKE_SUPPRESS_REGENERATION=ON
         -DWITH_MSQUIC=ON
+        -DCMAKE_C_COMPILER_LAUNCHER=ccache
+        -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+        -DWITH_PCH=OFF
       displayName: 'CMake'
     - script: |
         cat build/CMakeCache.txt
     - script: |
-        cmake --build --preset release
+        cmake --build --preset release --target install
       displayName: 'Make'
+    - script: ccache -s -v || ccache -s
+      displayName: 'ccache stats'
+      condition: always()
     - script: |
         ctest --preset default
       displayName: 'Unit Tests'
@@ -66,13 +84,13 @@ jobs:
         sudo dpkg --install packages-microsoft-prod.deb
         sudo apt update
         sudo apt install --yes \
-          cmake build-essential ninja-build ccache \
+          build-essential ninja-build ccache \
             bison autoconf automake \
             libpng-dev \
             libjpeg-dev \
             libgif-dev libfreetype6-dev \
             freeglut3-dev \
-            liblua5.2-dev libluabind-dev libcpptest-dev \
+            liblua5.2-dev libluabind-dev \
             libogg-dev libvorbis-dev libopenal-dev \
             libavcodec-dev libavformat-dev libavdevice-dev libswscale-dev libpostproc-dev \
             libmysqlclient-dev \
@@ -83,21 +101,43 @@ jobs:
             libgsf-1-dev \
             qtbase5-dev qttools5-dev qttools5-dev-tools \
             libmsquic
+        wget --output-document=/tmp/cmake.sh https://github.com/Kitware/CMake/releases/download/v3.31.11/cmake-3.31.11-linux-x86_64.sh
+        sudo mkdir -p /opt/cmake
+        sudo sh /tmp/cmake.sh --skip-license --prefix=/opt/cmake
+        sudo ln --symbolic --force /opt/cmake/bin/cmake /usr/local/bin/cmake
         wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic.h
         wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic_posix.h
         wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/quic_sal_stub.h
         sudo mv msquic.h msquic_posix.h quic_sal_stub.h /usr/include/
       displayName: 'Dependencies'
+    - script: echo "##vso[task.setvariable variable=weekKey]$(date +%YW%V)"
+      displayName: 'Week key'
+    - task: Cache@2
+      inputs:
+        key: 'ccache | ubuntu22 | "$(weekKey)"'
+        path: '$(HOME)/.cache/ccache'
+      displayName: 'ccache cache'
+    - script: |
+        ccache --set-config=max_size=1G
+        ccache --set-config=compression=true
+        ccache -z
+      displayName: 'Configure ccache'
     - script: >
         cmake --preset linux-default
         -DCMAKE_SUPPRESS_REGENERATION=ON
         -DWITH_MSQUIC=ON
+        -DCMAKE_C_COMPILER_LAUNCHER=ccache
+        -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+        -DWITH_PCH=OFF
       displayName: 'CMake'
     - script: |
         cat build/CMakeCache.txt
     - script: |
-        cmake --build --preset release
+        cmake --build --preset release --target install
       displayName: 'Make'
+    - script: ccache -s -v || ccache -s
+      displayName: 'ccache stats'
+      condition: always()
     - script: |
         ctest --preset default
       displayName: 'Unit Tests'
@@ -106,8 +146,8 @@ jobs:
     strategy:
       matrix:
         ubuntu:
-          vmImage: 'ubuntu-20.04'
-          releaseName: 'Ubuntu20'
+          vmImage: 'ubuntu-24.04'
+          releaseName: 'Ubuntu24'
           aptPackages: >-
             libasound2-dev
             libgl1-mesa-dev
@@ -119,21 +159,25 @@ jobs:
             libmsquic
           cmakeExtra: >-
             -DCMAKE_INSTALL_LIBDIR=lib
-        win2019:
-          vmImage: 'windows-2019'
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+            -DWITH_PCH=OFF
+        win2022:
+          vmImage: 'windows-2022'
           releaseName: 'Win64'
           cmakeExtra: >-
             -DWITH_DRIVER_DIRECT3D=ON
             -DWITH_DRIVER_XAUDIO2=ON
             -DDXSDK_DIR=C:/DXSDK
-        macOS12:
-          vmImage: 'macOS-12'
-          releaseName: 'macOS'
-          MACOSX_DEPLOYMENT_TARGET: 10.12
-          cmakeExtra: >-
-            -DWITH_LIBXML2_ICONV=OFF
-            -DHUNTER_USE_CACHE_SERVERS=NO
-            -GXcode
+        # TODO: Re-enable macOS when Hunter ships a PNG version compatible with Xcode 16+ (fp.h removed)
+        # macOS15:
+        #   vmImage: 'macOS-15'
+        #   releaseName: 'macOS'
+        #   MACOSX_DEPLOYMENT_TARGET: 10.12
+        #   cmakeExtra: >-
+        #     -DWITH_LIBXML2_ICONV=OFF
+        #     -DHUNTER_USE_CACHE_SERVERS=NO
+        #     -GXcode
     timeoutInMinutes: 120
     pool:
       vmImage: $(vmImage)
@@ -141,22 +185,33 @@ jobs:
     - checkout: self
       fetchDepth: 0
     - script: |
-        wget -q https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb
+        wget -q https://packages.microsoft.com/config/ubuntu/24.04/packages-microsoft-prod.deb
         sudo dpkg -i packages-microsoft-prod.deb
         sudo apt update
         sudo apt remove -y man-db
-        sudo apt install -y --no-install-recommends $(aptPackages)
+        sudo apt install -y --no-install-recommends ccache $(aptPackages)
         wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic.h
         wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic_posix.h
         wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/quic_sal_stub.h
         sudo mv msquic.h /usr/include/msquic.h
         sudo mv msquic_posix.h /usr/include/msquic_posix.h
         sudo mv quic_sal_stub.h /usr/include/quic_sal_stub.h
-        wget --output-document=/tmp/cmake.sh https://github.com/Kitware/CMake/releases/download/v3.27.9/cmake-3.27.9-linux-x86_64.sh
-        sudo mkdir /opt/cmake
-        sudo sh /tmp/cmake.sh --skip-license --prefix=/opt/cmake
-        sudo ln --symbolic --force /opt/cmake/bin/cmake /usr/local/bin/cmake
       displayName: '(ubuntu) Dependencies'
+      condition: eq(variables['Agent.JobName'], 'client ubuntu')
+    - script: echo "##vso[task.setvariable variable=weekKey]$(date +%YW%V)"
+      displayName: '(ubuntu) Week key'
+      condition: eq(variables['Agent.JobName'], 'client ubuntu')
+    - task: Cache@2
+      inputs:
+        key: 'ccache | client-ubuntu | "$(weekKey)"'
+        path: '$(HOME)/.cache/ccache'
+      displayName: '(ubuntu) ccache cache'
+      condition: eq(variables['Agent.JobName'], 'client ubuntu')
+    - script: |
+        ccache --set-config=max_size=1G
+        ccache --set-config=compression=true
+        ccache -z
+      displayName: '(ubuntu) Configure ccache'
       condition: eq(variables['Agent.JobName'], 'client ubuntu')
     - task: Cache@2
       inputs:
@@ -192,6 +247,7 @@ jobs:
           -DHUNTER_ROOT=$(Pipeline.Workspace)/.hunter
           -DWITH_DRIVER_OPENAL=ON
           -DWITH_DRIVER_OPENGL=ON
+          -DWITH_DRIVER_OPENGL3=ON
           -DWITH_INSTALL_LIBRARIES=OFF
           -DWITH_NEL_SAMPLES=OFF
           -DWITH_NEL_TESTS=OFF
@@ -205,6 +261,9 @@ jobs:
       inputs:
         workingDirectory: $(Build.BinariesDirectory)
         cmakeArgs: '--build . --config Release'
+    - script: ccache -s -v || ccache -s
+      displayName: '(ubuntu) ccache stats'
+      condition: and(always(), eq(variables['Agent.JobName'], 'client ubuntu'))
     #- task: CMake@1
     #  displayName: 'Install'
     #  inputs:

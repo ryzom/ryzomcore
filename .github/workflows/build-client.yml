@@ -1,4 +1,4 @@
-name: build client on multiple platforms
+name: "Ryzom Client: build on multiple platforms"
 
 on:
   push:
@@ -12,6 +12,9 @@ on:
       - CMakeModules/**
       - CMakeLists.txt
       - CMakePresets.json
+      - vcpkg/**
+      - vcpkg.json
+      - vcpkg-configuration.json
   pull_request:
     branches: [ "core4" ]
     paths:
@@ -23,6 +26,18 @@ on:
       - CMakeModules/**
       - CMakeLists.txt
       - CMakePresets.json
+      - vcpkg/**
+      - vcpkg.json
+      - vcpkg-configuration.json
+
+  workflow_dispatch:
+
+env:
+  VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}/.vcpkg,readwrite"
+  CCACHE_DIR: "${{ github.workspace }}/.ccache"
+  CHOCOLATEY_CACHE: "${{ github.workspace }}/.choco"
+  HUNTER_ROOT: "${{ github.workspace }}/.hunter"
+  MACOSX_DEPLOYMENT_TARGET: 10.13
 
 jobs:
   build:
@@ -32,51 +47,61 @@ jobs:
       fail-fast: false
 
       matrix:
-        os:
-         - ubuntu-24.04
-         - ubuntu-22.04
-         - windows-2025
-         - windows-2022
-         - macos-13
         include:
           - os: windows-2022
-            cmake_preset: windows-client
+            cmake_preset: ci-windows-ryzom-client-hunter
           - os: windows-2025
-            cmake_preset: windows-client
+            cmake_preset: ci-windows-ryzom-client-hunter
+          - os: windows-2025
+            cmake_preset: ci-windows-ryzom-client-vcpkg
+            vcpkg: true
           - os: ubuntu-22.04
             ubuntu_version: 22.04
-            cmake_preset: linux-client
+            cmake_preset: ci-linux-ryzom-client-hunter
+            ccache: true
           - os: ubuntu-24.04
             ubuntu_version: 24.04
-            cmake_preset: linux-client
-          - os: macos-13
-            cmake_preset: macos-client
-            cmake_options: -DHUNTER_USE_CACHE_SERVERS=NO
+            cmake_preset: ci-linux-ryzom-client-hunter
+            ccache: true
+          - os: ubuntu-24.04
+            cmake_preset: ci-linux-ryzom-client-vcpkg
+            vcpkg: true
+          - os: macos-15
+            cmake_preset: ci-macos-ryzom-client-vcpkg
+            vcpkg: true
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: Set reusable strings
-      # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
       id: strings
       shell: bash
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
-        echo "hunter-dir=${{ github.workspace }}/.hunter" >> "$GITHUB_OUTPUT"
+        echo "week=$(date +%YW%V)" >> "$GITHUB_OUTPUT"
 
-    - uses: lukka/get-cmake@v3.29.5
-      if: runner.os == 'Linux'
+    - uses: lukka/get-cmake@latest
       with:
-        cmakeVersion: 3.27.9
+        cmakeVersion: 3.31.11
+
+    - uses: lukka/run-vcpkg@v11
+      if: matrix.vcpkg == true
+
+    - uses: actions/cache/restore@v6
+      if: matrix.vcpkg == true
+      with:
+        path: ${{ github.workspace }}/.vcpkg
+        key: vcpkg-${{ matrix.os }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
 
     - name: Dependencies Linux
-      if: runner.os == 'Linux'
+      if: runner.os == 'Linux' && matrix.vcpkg != true
       run: |
         wget --quiet https://packages.microsoft.com/config/ubuntu/${{ matrix.ubuntu_version }}/packages-microsoft-prod.deb
         sudo dpkg -i packages-microsoft-prod.deb
         sudo apt update
         sudo apt remove --yes man-db
         sudo apt update
-        sudo apt install -y --no-install-recommends \
+        sudo apt install --yes --no-install-recommends \
+          ccache \
           libasound2-dev \
           libgl1-mesa-dev \
           libjack-dev \
@@ -90,59 +115,100 @@ jobs:
         wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/quic_sal_stub.h
         sudo mv msquic.h msquic_posix.h quic_sal_stub.h /usr/include/
 
-    - uses: actions/cache/restore@v4
-      with:
-        path: ${{ steps.strings.outputs.hunter-dir }}
-        key: ${{ matrix.os }}-hunter
+    - name: Dependencies Linux
+      if: runner.os == 'Linux' && matrix.vcpkg == true
+      run: |
+        sudo apt update
+        sudo apt install --yes --no-install-recommends \
+          autoconf autoconf-archive automake libtool nasm libltdl-dev libgl1-mesa-dev
 
-    - uses: actions/cache/restore@v4
+    - name: Dependencies macOS
+      if: runner.os == 'macOS'
+      run: |
+        brew install autoconf autoconf-archive automake libtool
+
+    - uses: actions/cache@v6
+      if: matrix.ccache == true
+      with:
+        path: ${{ env.CCACHE_DIR }}
+        key: ccache-client-${{ matrix.os }}-${{ steps.strings.outputs.week }}-${{ github.sha }}
+        restore-keys: ccache-client-${{ matrix.os }}-${{ steps.strings.outputs.week }}-
+
+    - name: Configure ccache
+      if: matrix.ccache == true
+      run: |
+        ccache --set-config=max_size=1G
+        ccache --set-config=compression=true
+        ccache -z
+
+    - uses: actions/cache/restore@v6
+      with:
+        path: ${{ env.HUNTER_ROOT }}
+        key: ${{ matrix.os }}-hunter-${{ steps.strings.outputs.week }}-${{ github.sha }}
+        restore-keys: ${{ matrix.os }}-hunter-${{ steps.strings.outputs.week }}-
+
+    - uses: actions/cache@v6
       if: runner.os == 'Windows'
       with:
-        path: C:\Users\runneradmin\AppData\Local\Temp\chocolatey
-        key: ${{ matrix.os }}-chocolatey
+        path: C:\DXSDK
+        key: dxsdk-jun2010
+
+    - name: DirectX SDK
+      if: runner.os == 'Windows'
+      shell: cmd
+      run: |
+        IF NOT EXIST C:\DXSDK (
+          aria2c https://download.microsoft.com/download/A/E/7/AE743F1F-632B-4809-87A9-AA1BB3458E31/DXSDK_Jun10.exe
+          7z x DXSDK_Jun10.exe -oC:\ -r -y
+          del DXSDK_Jun10.exe
+        )
+
+    - uses: actions/cache@v6
+      if: runner.os == 'Windows'
+      with:
+        path: ${{ env.CHOCOLATEY_CACHE }}
+        key: choco
 
     - name: Dependencies Windows
       if: runner.os == 'Windows'
       run: |
-        choco install directx-sdk nsis
-
-    - uses: actions/cache/save@v4
-      with:
-        path: C:\Users\runneradmin\AppData\Local\Temp\chocolatey
-        key: ${{ matrix.os }}-chocolatey
+        choco install nsis --cache-location=${{ env.CHOCOLATEY_CACHE }}
 
     - name: Configure CMake
-      env:
-        MACOSX_DEPLOYMENT_TARGET: 10.13
-      run: >
+      run: |
         cmake --preset ${{ matrix.cmake_preset }}
-        ${{ matrix.cmake_options }}
-        -DHUNTER_CONFIGURATION_TYPES=Release
-        -DHUNTER_ENABLED=ON
-        -DHUNTER_ROOT=${{ steps.strings.outputs.hunter-dir }}
-        -S ${{ github.workspace }}
 
-    - uses: actions/cache/save@v4
+    - uses: actions/cache/save@v6
       with:
-        path: ${{ steps.strings.outputs.hunter-dir }}
-        key: ${{ matrix.os }}-hunter
+        path: ${{ env.HUNTER_ROOT }}
+        key: ${{ matrix.os }}-hunter-${{ steps.strings.outputs.week }}-${{ github.sha }}
+
+    - uses: actions/cache/save@v6
+      if: (matrix.vcpkg == true)
+      with:
+        path: ${{ github.workspace }}/.vcpkg
+        key: vcpkg-${{ matrix.os }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
 
     - name: Build
       env:
         MACOSX_DEPLOYMENT_TARGET: 10.13
-      run: cmake --build --preset client
+      run: cmake --build --preset ci-ryzom-client
+
+    - name: ccache stats
+      if: matrix.ccache == true
+      run: ccache -s -v || ccache -s
 
     - name: Package
-      run: cmake --build --preset client --target package
+      run: cpack --preset ci-ryzom-client
 
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       if: ${{ failure() }}
       with:
-        name: ${{ matrix.os }}-logs
+        name: ${{ matrix.os }}-build-logs
         path: build/**/*.log
 
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       with:
-        name: ${{ matrix.os }}-client-package
-        path: build/ryzomcore-*
+        name: ${{ matrix.os }}-client-package${{ matrix.vcpkg && '-vcpkg' }}
+        path: build/ryzom-client/ryzom-client-*
         if-no-files-found: error

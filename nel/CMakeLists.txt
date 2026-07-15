@@ -1,13 +1,6 @@
-IF (COMMAND cmake_policy)
-  IF (POLICY CMP0048)
-    cmake_policy(SET CMP0048 NEW)
-  ENDIF ()
-ENDIF ()
-
 project(NeL VERSION ${RyzomCore_VERSION} LANGUAGES CXX C)
 
 set(project_export_name "${PROJECT_NAME}-targets")
-include(../cmake/add_project_library_alias.cmake)
 
 IF(WITH_STATIC_DRIVERS)
   ADD_DEFINITIONS(-DNL_STATIC)
@@ -25,6 +18,13 @@ IF(WITH_3D)
     HUNTER_ADD_PACKAGE(freetype)
     FIND_PACKAGE(freetype CONFIG REQUIRED)
     SET(FREETYPE_LIBRARIES freetype::freetype)
+  ELSEIF(EMSCRIPTEN)
+    # Emscripten provides FreeType as a port via -sUSE_FREETYPE=1
+    SET(FREETYPE_FOUND TRUE)
+    ADD_LIBRARY(Freetype::Freetype INTERFACE IMPORTED)
+    SET_TARGET_PROPERTIES(Freetype::Freetype PROPERTIES
+      INTERFACE_COMPILE_OPTIONS "-sUSE_FREETYPE=1"
+    )
   ELSE()
     FIND_PACKAGE(Freetype)
   ENDIF() #hunter
@@ -42,11 +42,11 @@ IF(WITH_SOUND AND NOT HUNTER_ENABLED)
   ENDIF()
 
   IF(WITH_DRIVER_OPENAL)
-    FIND_PACKAGE(OpenAL)
+    FIND_PACKAGE(OpenAL REQUIRED)
   ENDIF()
 
   IF(WITH_DRIVER_FMOD)
-    FIND_PACKAGE(FMOD)
+    FIND_PACKAGE(FMOD REQUIRED)
   ENDIF()
 ENDIF()
 
@@ -93,6 +93,9 @@ set(project_namespace "${PROJECT_NAME}")
 set(config_install_dir "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
 set(package_components 3d georges gui ligo misc net pacs sevenzip sound snd_lowlevel) # TODO append in components to have actual list of build targets
 set(package_required_dependencies CURL Freetype)
+set(package_georges_dependencies LibXml2)
+set(package_gui_dependencies Lua Luabind)
+set(package_sound_dependencies Vorbis)
 
 
 set(generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")

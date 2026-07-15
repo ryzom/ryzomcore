@@ -6,9 +6,9 @@
   ],
   "configurePresets": [
     {
+      "name": "ryzom",
       "binaryDir": "${sourceDir}/build/ryzom",
       "installDir": "${sourceDir}/build/install/ryzom",
-      "name": "ryzom",
       "cacheVariables": {
         "WITH_RYZOM": true,
         "WITH_RYZOM_CLIENT": true,
@@ -26,6 +26,26 @@
       }
     },
     {
+      "name": "ryzom-client",
+      "binaryDir": "${sourceDir}/build/ryzom-client",
+      "installDir": "${sourceDir}/build/install/ryzom-client",
+      "cacheVariables": {
+        "FINAL_VERSION": false,
+        "WITH_RYZOM": true,
+        "WITH_RYZOM_CLIENT": true,
+        "WITH_RYZOM_SERVER": false,
+        "WITH_RYZOM_TOOLS": false,
+        "WITH_DRIVER_OPENAL": true,
+        "WITH_DRIVER_OPENGL": true,
+        "WITH_DRIVER_OPENGL3": true,
+        "WITH_INSTALL_LIBRARIES": false,
+        "WITH_NEL_SAMPLES": false,
+        "WITH_NEL_TESTS": false,
+        "WITH_NEL_TOOLS": false,
+        "CPACK_PACKAGE_NAME": "ryzom-client"
+      }
+    },
+    {
       "name": "ci-ryzom",
       "hidden": true,
       "cacheVariables": {
@@ -34,39 +54,148 @@
       }
     },
     {
+      "name": "linux-ryzom",
       "inherits": [
         "linux",
         "ryzom"
-      ],
-      "name": "linux-ryzom"
+      ]
     },
     {
+      "name": "ci-linux-ryzom-static",
       "inherits": [
-        "linux",
         "ci-ryzom",
-        "ryzom"
+        "ccache",
+        "ryzom",
+        "linux"
       ],
-      "name": "ci-linux-ryzom"
+      "cacheVariables": {
+        "WITH_STATIC": true
+      }
     },
     {
+      "name": "ci-linux-ryzom-dynamic",
+      "inherits": [
+        "ci-ryzom",
+        "ccache",
+        "ryzom",
+        "linux"
+      ],
+      "cacheVariables": {
+        "WITH_STATIC": false
+      }
+    },
+    {
+      "name": "ci-linux-ryzom-client-hunter",
+      "inherits": [
+        "hunter",
+        "ccache",
+        "ryzom-client",
+        "linux"
+      ]
+    },
+    {
+      "name": "ci-linux-ryzom-client-vcpkg",
+      "inherits": [
+        "vcpkg",
+        "ryzom-client",
+        "linux"
+      ]
+    },
+    {
+      "name": "windows-ryzom",
       "inherits": [
         "windows",
         "ryzom"
+      ]
+    },
+    {
+      "name": "ci-windows-ryzom-client-hunter",
+      "inherits": [
+        "hunter",
+        "ryzom-client",
+        "windows"
       ],
-      "name": "windows-ryzom"
+      "cacheVariables": {
+        "WITH_DRIVER_DIRECT3D": true,
+        "WITH_DRIVER_XAUDIO2": true,
+        "DXSDK_DIR": "C:/DXSDK"
+      }
+    },
+    {
+      "name": "ci-windows-ryzom-client-vcpkg",
+      "inherits": [
+        "vcpkg",
+        "ryzom-client",
+        "windows"
+      ],
+      "cacheVariables": {
+        "WITH_DRIVER_DIRECT3D": true,
+        "WITH_DRIVER_XAUDIO2": true,
+        "WITH_STATIC_LIBXML2": false,
+        "VCPKG_MANIFEST_NO_DEFAULT_FEATURES": true,
+        "DXSDK_DIR": "C:/DXSDK"
+      }
+    },
+    {
+      "name": "ci-macos-ryzom-client-vcpkg",
+      "inherits": [
+        "vcpkg",
+        "ryzom-client",
+        "macos"
+      ],
+      "cacheVariables": {
+        "WITH_LIBXML2_ICONV": false,
+        "WITH_SSE2": false,
+        "WITH_SSE3": false,
+        "WITH_DRIVER_OPENGL3": false,
+        "CMAKE_THREAD_LIBS_INIT": "-lpthread",
+        "CMAKE_HAVE_THREADS_LIBRARY": true,
+        "CMAKE_USE_WIN32_THREADS_INIT": false,
+        "CMAKE_USE_PTHREADS_INIT": true,
+        "THREADS_PREFER_PTHREAD_FLAG": true
+      }
+    },
+    {
+      "name": "ryzom-client-x86-mingw-hunter",
+      "inherits": [
+        "hunter",
+        "ryzom-client",
+        "x86-mingw"
+      ],
+      "cacheVariables": {
+        "WITH_EXTERNAL": false,
+        "WITH_STATIC_CURL": false
+      }
     }
   ],
   "buildPresets": [
     {
-      "inherits": "release",
       "name": "ryzom",
+      "inherits": "release",
       "configurePreset": "ryzom"
+    },
+    {
+      "name": "ci-linux-ryzom",
+      "inherits": "ryzom",
+      "configurePreset": "ci-linux-ryzom-dynamic"
+    },
+    {
+      "name": "ci-linux-ryzom/install",
+      "inherits": "ci-linux-ryzom",
+      "targets": [
+        "ryzom/install"
+      ]
+    },
+    {
+      "name": "ci-ryzom-client",
+      "configurePreset": "ryzom-client",
+      "configuration": "Release"
     }
   ],
   "testPresets": [
     {
-      "inherits": "default",
       "name": "ryzom",
+      "inherits": "default",
       "configurePreset": "ryzom"
     }
   ],
@@ -74,6 +203,29 @@
     {
       "name": "ryzom",
       "configurePreset": "ryzom"
+    },
+    {
+      "name": "ci-ryzom-client",
+      "configurePreset": "ryzom-client"
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "ci-linux-ryzom",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "ci-linux-ryzom-dynamic"
+        },
+        {
+          "type": "build",
+          "name": "ci-linux-ryzom"
+        },
+        {
+          "type": "build",
+          "name": "ci-linux-ryzom/install"
+        }
+      ]
     }
   ]
 }

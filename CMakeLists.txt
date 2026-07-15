@@ -18,38 +18,15 @@
 #   * To build binary archive, use the 'package' target.
 #     To build source archive, use the 'package_source' target.
 
-CMAKE_MINIMUM_REQUIRED(VERSION 3.22)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.28)
 
 #-----------------------------------------------------------------------------
 # Load some macros.
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/CMakeModules")
 #-----------------------------------------------------------------------------
-# Set CMake 2.6 Policies.
-IF(COMMAND cmake_policy)
-  # Works around warnings libraries linked against that don't
-  # have absolute paths (e.g. -lpthread)
-  cmake_policy(SET CMP0003 NEW)
-
-  # allow to link to qtmain automatically under Windows
-  IF(POLICY CMP0020)
-    CMAKE_POLICY(SET CMP0020 NEW)
-  ENDIF()
-
-  IF (POLICY CMP0048)
-    cmake_policy(SET CMP0048 NEW)
-  ENDIF ()
-ENDIF()
-
-
-#-----------------------------------------------------------------------------
-# Downloads and install Hunger into HUNTER_ROOT directory.
+# Downloads and install Hunter into HUNTER_ROOT directory.
 OPTION(HUNTER_ENABLED "Enable Hunter package manager" OFF)
 IF(HUNTER_ENABLED)
-  cmake_minimum_required(VERSION 3.24)
-
-  IF (POLICY CMP0144)
-    cmake_policy(SET CMP0144 NEW)
-  ENDIF ()
 
   INCLUDE("CMakeModules/HunterGate.cmake")
   HunterGate(
@@ -61,7 +38,6 @@ IF(HUNTER_ENABLED)
   # default options for hunterized build
   SET(WITH_STATIC         ON CACHE BOOL "static" FORCE)
   SET(WITH_STATIC_DRIVERS ON CACHE BOOL "static drivers" FORCE)
-  SET(WITH_STATIC_CURL    ON CACHE BOOL "static curl" FORCE)
   SET(WITH_STATIC_LIBXML2 ON CACHE BOOL "static libxml2" FORCE)
   SET(WITH_STATIC_EXTERNAL ON CACHE BOOL "static external" FORCE)
   SET(WITH_EXTERNAL       OFF CACHE BOOL "external libs" FORCE)
@@ -201,29 +177,56 @@ IF(HUNTER_ENABLED)
   # add compatibility with cmake find module
   if(libxml2_FOUND AND NOT TARGET LibXml2::LibXml2)
       add_library(LibXml2::LibXml2 ALIAS libxml2::libxml2)
+      IF(WITH_STATIC AND WINSOCK2_LIB)
+        # libxml2 with LIBXML_HTTP_ENABLED has some additional dependencies that hunter does not add
+            set_property(TARGET libxml2::libxml2
+                    APPEND
+                    PROPERTY INTERFACE_LINK_LIBRARIES
+                    ${WINSOCK2_LIB}
+            )
+      ENDIF()
   endif()
 
   # cross compiling doesn't quite work on the hunter openssl package therefor compile it separately and use it
   IF(NOT CMAKE_CROSSCOMPILING)
     HUNTER_ADD_PACKAGE(OpenSSL)
   ENDIF()
-  FIND_PACKAGE(OpenSSL REQUIRED)
-  # TODO: is OpenSSL::Crypto only needed for WIN32?
-  SET(OPENSSL_LIBRARIES OpenSSL::SSL OpenSSL::Crypto)
+  FIND_PACKAGE(OpenSSL REQUIRED COMPONENTS Crypto SSL)
 
   # for precompiled headers, not needed if using TARGET_PRECOMPILE_HEADERS() from cmake 3.16+
   SET(ZLIB_INCLUDE_DIR ZLIB_ROOT/include)
 ELSE()
-FIND_PACKAGE(ZLIB REQUIRED)
-FIND_PACKAGE(LibXml2 REQUIRED)
-FIND_PACKAGE(PNG REQUIRED)
-FIND_PACKAGE(OpenSSL REQUIRED)
-FIND_PACKAGE(GIF)
-FIND_PACKAGE(JPEG)
-
-IF(WIN32)
-  SET(OPENSSL_LIBRARIES ${OPENSSL_LIBRARIES} Crypt32.lib)
+IF(EMSCRIPTEN)
+  # For Emscripten builds, zlib and libpng come from Emscripten ports
+  # (-sUSE_ZLIB=1 / -sUSE_LIBPNG=1), same pattern as the FreeType port in
+  # nel/CMakeLists.txt. The options must be present at both compile time
+  # (port headers) and link time (port libraries); INTERFACE options on the
+  # imported targets propagate to consumers of nelmisc. libxml2 stays
+  # unavailable; XML-dependent code is compiled out.
+  ADD_LIBRARY(ZLIB::ZLIB INTERFACE IMPORTED)
+  SET_TARGET_PROPERTIES(ZLIB::ZLIB PROPERTIES
+    INTERFACE_COMPILE_OPTIONS "-sUSE_ZLIB=1"
+    INTERFACE_LINK_OPTIONS "-sUSE_ZLIB=1")
+  SET(ZLIB_FOUND TRUE)
+  SET(ZLIB_INCLUDE_DIRS "")
+  SET(ZLIB_LIBRARIES "")
+  ADD_LIBRARY(PNG::PNG INTERFACE IMPORTED)
+  SET_TARGET_PROPERTIES(PNG::PNG PROPERTIES
+    INTERFACE_COMPILE_OPTIONS "-sUSE_ZLIB=1;-sUSE_LIBPNG=1"
+    INTERFACE_LINK_OPTIONS "-sUSE_ZLIB=1;-sUSE_LIBPNG=1")
+  SET(PNG_FOUND TRUE)
+  SET(LIBXML2_FOUND FALSE)
+  SET(LIBXML2_INCLUDE_DIR "")
+  SET(LIBXML2_LIBRARIES "")
+ELSE()
+  FIND_PACKAGE(ZLIB REQUIRED)
+  FIND_PACKAGE(LibXml2 REQUIRED)
+  FIND_PACKAGE(PNG REQUIRED)
+  FIND_PACKAGE(OpenSSL REQUIRED)
+  FIND_PACKAGE(GIF)
+  FIND_PACKAGE(JPEG)
 ENDIF()
+
 ENDIF() #hunter
 
 IF(WITH_LIBOVR)
@@ -237,13 +240,13 @@ ENDIF()
 NL_CONFIGURE_CHECKS()
 
 IF(WITH_STATIC_LIBXML2)
-  if(HUNTER_ENABLED)
+  if(HUNTER_ENABLED AND TARGET libxml2::libxml2)
       set_property(TARGET libxml2::libxml2
               APPEND
               PROPERTY INTERFACE_COMPILE_DEFINITIONS
               LIBXML_STATIC
       )
-  else()
+  elseif(TARGET LibXml2::LibXml2)
       set_property(TARGET LibXml2::LibXml2
               APPEND
               PROPERTY INTERFACE_COMPILE_DEFINITIONS
@@ -252,7 +255,9 @@ IF(WITH_STATIC_LIBXML2)
   endif ()
 ENDIF()
 
-FIND_PACKAGE(Iconv QUIET)
+IF(NOT EMSCRIPTEN)
+  FIND_PACKAGE(Iconv QUIET)
+ENDIF()
 IF(Iconv_FOUND)
   if(TARGET LibXml2::LibXml2 AND NOT HUNTER_ENABLED)
       set_property(TARGET LibXml2::LibXml2
@@ -261,17 +266,6 @@ IF(Iconv_FOUND)
             Iconv::Iconv
       )
   endif ()
-ENDIF()
-
-IF(WITH_STATIC)
-  # libxml2 could need winsock2 library
-  IF(WINSOCK2_LIB AND TARGET LibXml2::LibXml2 AND NOT HUNTER_ENABLED)
-      set_property(TARGET LibXml2::LibXml2
-            APPEND
-            PROPERTY INTERFACE_LINK_LIBRARIES
-            ${WINSOCK2_LIB}
-      )
-  ENDIF()
 ENDIF()
 
 IF(FINAL_VERSION)
@@ -320,6 +314,10 @@ IF(WITH_QT5)
   FIND_QT5()
 ENDIF()
 
+IF(WITH_QT6)
+  FIND_QT6()
+ENDIF()
+
 #TODO: hunter assimp package
 IF(WITH_ASSIMP)
   FIND_PACKAGE(assimp REQUIRED)
@@ -330,8 +328,6 @@ IF(WITH_MSQUIC)
 ENDIF()
 
 IF(WITH_NEL_TESTS OR WITH_TESTING)
-  FIND_PACKAGE(CppTest)
-
   ENABLE_TESTING()
   # GoogleTest requires at least C++17 not the whole project depends on google test though
   # set(CMAKE_CXX_STANDARD 17)
@@ -339,9 +335,10 @@ IF(WITH_NEL_TESTS OR WITH_TESTING)
   include(FetchContent)
   FetchContent_Declare(
           googletest
-          URL https://github.com/google/googletest/archive/54915d462bb64e9b2bd1a3f0e70c00e6f5d817fb.zip
+          URL https://github.com/google/googletest/archive/52eb8108c5bdec04579160ae17225d66034bd723.zip
           EXCLUDE_FROM_ALL
   )
+  SET(INSTALL_GTEST OFF)
   SET(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
   FetchContent_MakeAvailable(googletest)
   include(GoogleTest)
@@ -362,114 +359,21 @@ IF(WITH_NEL)
       FIND_PACKAGE(Luabind REQUIRED)
     ENDIF()
 
-    FIND_PACKAGE(CURL REQUIRED)
-
-    IF((WIN32 OR CURL_LIBRARIES MATCHES "\\.a") AND WITH_STATIC_CURL)
-      SET(CURL_STATIC ON)
+    IF(EMSCRIPTEN)
+      # CURL not needed for Emscripten builds
     ELSE()
-      SET(CURL_STATIC OFF)
-    ENDIF()
-
-    IF(CURL_STATIC)
-      set_property(TARGET CURL::libcurl
-              APPEND
-              PROPERTY INTERFACE_COMPILE_DEFINITIONS
-              CURL_STATICLIB
-      )
-      set_property(TARGET CURL::libcurl
-              APPEND
-              PROPERTY INTERFACE_INCLUDE_DIRECTORIES
-              ${OPENSSL_INCLUDE_DIR}
-      )
-      set_property(TARGET CURL::libcurl
-              APPEND
-              PROPERTY INTERFACE_LINK_LIBRARIES
-              ${OPENSSL_LIBRARIES}
-      )
-
-      IF(WIN32)
-        set_property(TARGET CURL::libcurl
-                APPEND
-                PROPERTY INTERFACE_LINK_LIBRARIES
-                Crypt32 Cryptui
-        )
-      ELSE()
-        # CURL depends on libidn
-        FIND_LIBRARY(IDN_LIBRARY idn)
-        IF(IDN_LIBRARY)
-          set_property(TARGET CURL::libcurl
-                  APPEND
-                  PROPERTY INTERFACE_LINK_LIBRARIES
-                  ${IDN_LIBRARY}
-          )
-        ENDIF()
-
-        # CURL Macports version can depend on libidn, libidn2, libintl, libpsl and libiconv too
-        IF(APPLE)
-          FIND_LIBRARY(INTL_LIBRARY intl)
-          IF(INTL_LIBRARY)
-            set_property(TARGET CURL::libcurl
-                    APPEND
-                    PROPERTY INTERFACE_LINK_LIBRARIES
-                    ${INTL_LIBRARY}
-            )
-          ENDIF()
-
-          FIND_LIBRARY(IDN2_LIBRARY idn2)
-          IF(IDN2_LIBRARY)
-            set_property(TARGET CURL::libcurl
-                    APPEND
-                    PROPERTY INTERFACE_LINK_LIBRARIES
-                    ${IDN2_LIBRARY}
-            )
-          ENDIF()
-
-          FIND_LIBRARY(PSL_LIBRARY psl)
-          IF(PSL_LIBRARY)
-            set_property(TARGET CURL::libcurl
-                    APPEND
-                    PROPERTY INTERFACE_LINK_LIBRARIES
-                    ${PSL_LIBRARY}
-            )
-          ENDIF()
-
-          FIND_LIBRARY(UNISTRING_LIBRARY unistring)
-          IF(UNISTRING_LIBRARY)
-            set_property(TARGET CURL::libcurl
-                    APPEND
-                    PROPERTY INTERFACE_LINK_LIBRARIES
-                    ${UNISTRING_LIBRARY}
-            )
-          ENDIF()
-
-          set_property(TARGET CURL::libcurl
-                  APPEND
-                  PROPERTY INTERFACE_LINK_LIBRARIES
-                  ${SECURITY_FRAMEWORK}
-          )
-        ENDIF()
-      ENDIF()
-    ENDIF()
+    FIND_PACKAGE(CURL REQUIRED)
+    ENDIF() # !EMSCRIPTEN
   ENDIF() #hunter
 
   INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/nel/include)
   ADD_SUBDIRECTORY(nel)
-
-  # Aliases for targets
-  SET(NELMISC_LIBRARIES NeL::misc)
-  SET(NELNET_LIBRARIES NeL::net)
-  SET(NELLIGO_LIBRARIES NeL::ligo)
-  SET(NELGEORGES_LIBRARIES NeL::georges)
-  SET(NEL3D_LIBRARIES NeL::3d)
-  SET(NELGUI_LIBRARIES NeL::gui)
-  SET(NELSOUND_LIBRARIES NeL::sound)
 
   # allow find_package to find projects from within the mono repo
   list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_BINARY_DIR}/nel/internal")
 ELSE()
 #  FIND_PACKAGE(NeL COMPONENTS 3d misc pacs sound nimp REQUIRED)
   FIND_PACKAGE(NeL REQUIRED)
-  INCLUDE_DIRECTORIES(${NEL_INCLUDE_DIRS})
 ENDIF()
 
 IF(WITH_RYZOM)

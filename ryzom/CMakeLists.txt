@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.27)
+cmake_minimum_required(VERSION 3.28)
 
 project(Ryzom VERSION ${RyzomCore_VERSION} LANGUAGES CXX)
 
@@ -30,3 +30,7 @@ IF(WITH_RYZOM_SERVER OR WITH_RYZOM_TOOLS)
     ADD_SUBDIRECTORY(server)
   ENDIF()
 ENDIF()
+
+if (WITH_TESTING)
+  add_subdirectory(tools/server/test_modules)
+endif ()

@@ -33,26 +33,39 @@
       }
     },
     {
+      "name": "linux-nelns",
       "inherits": [
         "linux",
         "nelns"
-      ],
-      "name": "linux-nelns"
+      ]
     },
     {
+      "name": "ci-linux-nelns",
       "inherits": [
-        "linux",
         "ci-nelns",
-        "nelns"
-      ],
-      "name": "ci-linux-nelns"
+        "nelns",
+        "ccache",
+        "linux"
+      ]
     },
     {
+      "name": "ci-linux-nelns-vcpkg",
+      "inherits": [
+        "ci-nelns",
+        "vcpkg",
+        "nelns",
+        "linux"
+      ],
+      "cacheVariables": {
+        "VCPKG_MANIFEST_FEATURES": "mysql"
+      }
+    },
+    {
+      "name": "windows-nelns",
       "inherits": [
         "windows",
         "nelns"
-      ],
-      "name": "windows-nelns"
+      ]
     }
   ],
   "buildPresets": [
