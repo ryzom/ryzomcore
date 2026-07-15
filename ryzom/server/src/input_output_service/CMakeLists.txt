@@ -16,10 +16,10 @@ TARGET_INCLUDE_DIRECTORIES(ryzom_ios_service PRIVATE ${RZ_SERVER_SRC_DIR} ${MYSQ
 
 TARGET_LINK_LIBRARIES(ryzom_ios_service
         PRIVATE
-        ryzom_adminmodules
-        ryzom_pd
-        ryzom_gameshare
-        ryzom_servershare
+        Ryzom::adminmodules
+        Ryzom::pd
+        Ryzom::gameshare
+        Ryzom::servershare
         NeL::misc
         NeL::net
         NeL::pacs

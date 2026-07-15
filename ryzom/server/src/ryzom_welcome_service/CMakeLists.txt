@@ -6,8 +6,8 @@ TARGET_INCLUDE_DIRECTORIES(ryzom_welcome_service PRIVATE ${RZ_SERVER_SRC_DIR} ${
 
 TARGET_LINK_LIBRARIES(ryzom_welcome_service
         PRIVATE
-        ryzom_adminmodules
-        ryzom_gameshare
+        Ryzom::adminmodules
+        Ryzom::gameshare
         NeL::misc
         NeL::net
 )

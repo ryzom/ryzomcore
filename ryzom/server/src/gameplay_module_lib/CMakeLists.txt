@@ -1,6 +1,7 @@
 FILE(GLOB SRC *.cpp *.h)
 
 NL_TARGET_LIB(ryzom_gameplaymodule ${SRC})
+add_library(Ryzom::gameplaymodule ALIAS ryzom_gameplaymodule)
 
 TARGET_LINK_LIBRARIES(ryzom_gameplaymodule
         PUBLIC
