@@ -183,6 +183,7 @@ PFNGLGENERATEMIPMAPPROC							nglGenerateMipmap;
 PFNGLBLITFRAMEBUFFERPROC						nglBlitFramebuffer;
 PFNGLRENDERBUFFERSTORAGEMULTISAMPLEPROC			nglRenderbufferStorageMultisample;
 PFNGLFRAMEBUFFERTEXTURELAYERPROC				nglFramebufferTextureLayer;
+PFNGLINVALIDATEFRAMEBUFFERPROC					nglInvalidateFramebuffer;
 
 PFNGLACTIVETEXTUREPROC							nglActiveTexture;
 
@@ -503,6 +504,9 @@ static bool setupGLCore(std::vector<const char *> &glext)
 	CHECK_ADDRESS(PFNGLRENDERBUFFERSTORAGEMULTISAMPLEPROC, glRenderbufferStorageMultisample);
 	CHECK_ADDRESS(PFNGLFRAMEBUFFERTEXTURELAYERPROC, glFramebufferTextureLayer);
 
+	// GL 4.3 / ARB_invalidate_subdata: optional on GL 3.3, always available on GLES 3.0
+	nglInvalidateFramebuffer = (PFNGLINVALIDATEFRAMEBUFFERPROC)nglGetProcAddress("glInvalidateFramebuffer");
+
 	CHECK_ADDRESS(PFNGLACTIVETEXTUREPROC, glActiveTexture);
 
 	CHECK_ADDRESS(PFNGLCOMPRESSEDTEXIMAGE3DPROC, glCompressedTexImage3D);
@@ -604,6 +608,14 @@ static bool setupAMDPinnedMemory(std::vector<const char *> &glext)
 }
 
 // *********************************
+static bool setupARBInvalidateSubdata(std::vector<const char *> &glext)
+{
+	CHECK_EXT_2("GL_ARB_invalidate_subdata");
+
+	return true;
+}
+
+// *********************************
 static bool	setupNVXGPUMemoryInfo(std::vector<const char *> &glext)
 {
 	H_AUTO_OGL(setupNVXGPUMemoryInfo);
@@ -700,6 +712,9 @@ bool	registerGlExtensions(CGlExtensions &ext)
 
 	// Check GL_AMD_pinned_memory
 	ext.AMDPinnedMemory = false; // setupAMDPinnedMemory(glext); // TODO: Proper frame sync check
+
+	// Check GL_ARB_invalidate_subdata (GL 4.3 core; optional on GL 3.3)
+	ext.ARBInvalidateSubdata = setupARBInvalidateSubdata(glext);
 
 	// Memory info extensions
 	ext.NVXGPUMemoryInfo = setupNVXGPUMemoryInfo(glext);

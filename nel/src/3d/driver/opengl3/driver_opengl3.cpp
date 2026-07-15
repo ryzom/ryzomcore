@@ -710,6 +710,18 @@ bool CDriverGL3::activeFrameBufferObject(ITexture * tex)
 		}
 		else
 		{
+			// Invalidate depth/stencil attachments before unbinding the FBO.
+			// On ANGLE (Windows/Android WebGL), switching away from an FBO without
+			// invalidating forces an expensive depth/stencil resolve/copy. This hint
+			// tells the driver the data is no longer needed, avoiding the stall.
+			// (STORE_OP_DONT_CARE on Vulkan, DiscardView on D3D11)
+			const GLenum attachments[2] = { GL_DEPTH_ATTACHMENT, GL_STENCIL_ATTACHMENT };
+#ifdef USE_OPENGLES3
+			nglInvalidateFramebuffer(GL_FRAMEBUFFER, 2, attachments);
+#else
+			if (_Extensions.ARBInvalidateSubdata)
+				nglInvalidateFramebuffer(GL_FRAMEBUFFER, 2, attachments);
+#endif
 			_DriverGLStates.forceBindFramebuffer(0);
 			return true;
 		}
@@ -753,7 +765,8 @@ bool CDriverGL3::clearZBuffer(float zval)
 {
 	H_AUTO_OGL(CDriverGL3_clearZBuffer);
 
-	_DriverGLStates.enableZWrite(true);
+	// glClearBufferfv is not affected by the depth write mask (GL spec),
+	// so enableZWrite(true) is not needed here.
 	nglClearBufferfv(GL_DEPTH, 0, &zval);
 
 	return true;
@@ -765,6 +778,19 @@ bool CDriverGL3::clearStencilBuffer(sint stencilval)
 	H_AUTO_OGL(CDriverGL3_clearStencilBuffer)
 
 	nglClearBufferiv(GL_STENCIL, 0, &stencilval);
+
+	return true;
+}
+
+// --------------------------------------------------
+bool CDriverGL3::clearDepthStencil(float zval, sint stencilval)
+{
+	H_AUTO_OGL(CDriverGL3_clearDepthStencil)
+
+	// Combined depth/stencil clear: one GL call instead of two.
+	// On ANGLE/D3D11 this maps to a single ClearDepthStencilView with
+	// D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, avoiding two separate calls.
+	nglClearBufferfi(GL_DEPTH_STENCIL, 0, zval, stencilval);
 
 	return true;
 }
@@ -837,6 +863,21 @@ bool CDriverGL3::swapBuffers()
 	// Fence occurs before the frame swap, because it only is relevant for user supplied buffers. The framebuffer is not our concern
 	_SwapBufferSync[syncI] = nglFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
 	nlassert(_SwapBufferSync[syncI]);
+
+	// Invalidate the default framebuffer's depth/stencil before the swap.
+	// The depth/stencil data is never needed across frames. Without this hint,
+	// ANGLE stores the depth/stencil during present (an expensive resolve/copy
+	// on D3D11, and STORE_OP_STORE on Vulkan). With invalidation, ANGLE can
+	// skip the store (DiscardView on D3D11, STORE_OP_DONT_CARE on Vulkan).
+	{
+		const GLenum attachments[2] = { GL_DEPTH, GL_STENCIL };
+#ifdef USE_OPENGLES3
+		nglInvalidateFramebuffer(GL_FRAMEBUFFER, 2, attachments);
+#else
+		if (_Extensions.ARBInvalidateSubdata)
+			nglInvalidateFramebuffer(GL_FRAMEBUFFER, 2, attachments);
+#endif
+	}
 
 	++_SwapBufferCounter;
 
