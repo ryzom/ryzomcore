@@ -136,6 +136,11 @@ static bool g_verbose = false;
 
 // ---------------------------------------------------------------------------------------------
 
+// Anonymous namespace: the glTF writer (PMB_SHAPE_NO_MAIN) compiles this file into a binary
+// whose own main.cpp defines a DIFFERENT file-scope SExportStats — internal linkage keeps the
+// two types (and their implicitly-inline members) from ODR-colliding across the TUs.
+namespace {
+
 struct SExportStats
 {
 	uint Exported;
@@ -149,6 +154,8 @@ struct SExportStats
 		++SkipReasons[reason];
 	}
 };
+
+} // anonymous namespace
 
 // Is this node's evaluated object in the geometry/shapes MaxScript categories?
 static bool isGeometryOrShape(CSceneClass *base)
@@ -417,7 +424,7 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
                                        const TNodesByName &nodesByName,
                                        bool exportLighting, SExportStats &stats,
                                        CSceneClassContainer *ssc,
-                                       LMSCENE::SCollector *lmc)
+                                       LMSCENE::SCollector *lmc, bool lmOnly)
 {
 	CNodeImpl *n = dynamic_cast<CNodeImpl *>(&node);
 	std::string name = nodeName(node);
@@ -437,6 +444,7 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 	}
 	if (getScriptAppDataInt(n, NEL3D_APPDATA_USE_REMANENCE, 0))
 	{
+		if (lmOnly) return NULL; // specials never collect as lightmap receivers
 		NL3D::IShape *rs = REMANENCEBUILD::buildRemanenceShape(node, tmCache, exportLighting);
 		if (!rs)
 		{
@@ -447,6 +455,7 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 	}
 	if (cid.a() == CLASSID_PARTA_NEL_FLARE)
 	{
+		if (lmOnly) return NULL;
 		NL3D::IShape *fs = FLAREBUILD::buildFlareShape(node, tmCache);
 		if (!fs)
 		{
@@ -457,6 +466,7 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 	}
 	if (hasWaterMaterial(node))
 	{
+		if (lmOnly) return NULL;
 		NL3D::IShape *ws = WATERBUILD::buildWaterShape(node, tmCache);
 		if (!ws)
 		{
@@ -584,6 +594,12 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 		                " lightmap receiver\n", name.c_str());
 		lmCollect = false;
 	}
+	// Lightmap-scene-only mode (the nel_lmscene blob flow): nodes that don't collect as
+	// receivers contribute nothing — skip the expensive mesh eval/build for them. Receiver
+	// nodes still take the FULL build path below so the collected pre-build data (and any
+	// build-failure bail-out) is bit-for-bit the direct --lm-scene run's.
+	if (lmOnly && !lmCollect)
+		return NULL;
 	NL3D::CLightmapReceiver lmRecv;
 	if (lmCollect)
 	{
@@ -865,7 +881,8 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 
 static int exportFile(const std::string &maxPath, const std::string &outDir, const std::string &outDirCoarse,
                       const std::string &animDir, const std::string &lmSceneDir,
-                      bool exportLighting, SExportStats &stats)
+                      bool exportLighting, SExportStats &stats,
+                      std::vector<uint8> *lmSceneBytesOut = NULL)
 {
 	SLoadedMax lm;
 	if (!loadMaxFile(maxPath, lm))
@@ -875,8 +892,12 @@ static int exportFile(const std::string &maxPath, const std::string &outDir, con
 	SNodeTMCache tmCache;
 	tmCache.SceneRoot = NULL;
 
+	// lmSceneBytesOut = lightmap-scene-only mode (nel_lmscene blob): collect the scene graph
+	// exactly like --lm-scene but serialize to memory, skip every file output, and skip the
+	// build of nodes that can't be receivers.
+	const bool lmOnly = lmSceneBytesOut != NULL;
 	LMSCENE::SCollector lmCollector;
-	LMSCENE::SCollector *lmc = lmSceneDir.empty() ? NULL : &lmCollector;
+	LMSCENE::SCollector *lmc = (lmSceneDir.empty() && !lmOnly) ? NULL : &lmCollector;
 
 	// Collect the LOD slave set (case-insensitive) and coarse-mesh info
 	std::set<std::string> lodNames;
@@ -980,9 +1001,15 @@ static int exportFile(const std::string &maxPath, const std::string &outDir, con
 		if (lmc)
 			lmc->CurrentCoarse = haveCoarse;
 
-		NL3D::IShape *shape = buildShapeForNode(node, tmCache, nodesByName, exportLighting, stats, ssc, lmc);
+		NL3D::IShape *shape = buildShapeForNode(node, tmCache, nodesByName, exportLighting, stats, ssc, lmc, lmOnly);
 		if (!shape)
 			continue;
+		if (lmOnly)
+		{
+			// Collection happened inside the build; no shape file output in this mode.
+			delete shape;
+			continue;
+		}
 
 		// setDistMax was previously called uniformly here; the reference exporter's
 		// CExportNel::buildShape gates it on the mesh path only (`!multiLodObject && buildLods`
@@ -1184,18 +1211,48 @@ static int exportFile(const std::string &maxPath, const std::string &outDir, con
 		// Project name = the source scene's file stem (prefixes the lightmap texture names)
 		lmc->Scene.ProjectName = NLMISC::CFile::getFilenameWithoutExtension(maxPath);
 
-		std::string scenePath = lmSceneDir + "/"
-			+ NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(maxPath)) + ".lmscene";
-		try
+		if (lmSceneBytesOut)
 		{
-			lmc->Scene.save(scenePath);
-			printf("LMSCENE %s (%u receivers, %u occluders, %u lights)\n", scenePath.c_str(),
-			       (uint)lmc->Scene.Receivers.size(), (uint)lmc->Scene.Occluders.size(),
-			       (uint)lmc->Scene.Lights.size());
+			// Memory output for the nel_lmscene blob. Serialize through a real file exactly like
+			// save() so the bytes cannot diverge from the direct --lm-scene write (the shape
+			// serializer above takes the same detour for CMemStream's seek limitation).
+			char tmpPath[256];
+			sprintf(tmpPath, "/tmp/pipeline_max_export_shape.%d.lmscene.tmp", (int)PMB_GETPID());
+			try
+			{
+				lmc->Scene.save(tmpPath);
+				NLMISC::CIFile ifile;
+				if (ifile.open(tmpPath))
+				{
+					lmSceneBytesOut->resize(ifile.getFileSize());
+					if (!lmSceneBytesOut->empty())
+						ifile.serialBuffer(&(*lmSceneBytesOut)[0], (uint)lmSceneBytesOut->size());
+					ifile.close();
+				}
+				NLMISC::CFile::deleteFile(tmpPath);
+			}
+			catch (const NLMISC::Exception &e)
+			{
+				lmSceneBytesOut->clear();
+				fprintf(stderr, "ERROR: lmscene serialization failed for %s: %s\n",
+				        maxPath.c_str(), e.what());
+			}
 		}
-		catch (const NLMISC::Exception &e)
+		else
 		{
-			fprintf(stderr, "ERROR: cannot write %s: %s\n", scenePath.c_str(), e.what());
+			std::string scenePath = lmSceneDir + "/"
+				+ NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(maxPath)) + ".lmscene";
+			try
+			{
+				lmc->Scene.save(scenePath);
+				printf("LMSCENE %s (%u receivers, %u occluders, %u lights)\n", scenePath.c_str(),
+				       (uint)lmc->Scene.Receivers.size(), (uint)lmc->Scene.Occluders.size(),
+				       (uint)lmc->Scene.Lights.size());
+			}
+			catch (const NLMISC::Exception &e)
+			{
+				fprintf(stderr, "ERROR: cannot write %s: %s\n", scenePath.c_str(), e.what());
+			}
 		}
 	}
 
@@ -2224,6 +2281,28 @@ static int compareShapes(const std::string &a, const std::string &b)
 
 // ---------------------------------------------------------------------------------------------
 
+/** Shared flow for the glTF writer (compiled in with PMB_SHAPE_NO_MAIN): run the shape
+ *	exporter's whole per-file flow in lightmap-scene-only mode and return the .lmscene bytes —
+ *	byte-identical to a direct `pipeline_max_export_shape --lm-scene` run on the same file.
+ *	The caller owns process-wide setup (registerSerial3d, SerialOldPreferredMemory, database
+ *	root). Returns 1 with bytes, 3 when the scene has no lightmap receivers, -1 on load error.
+ */
+int pmbExportLmSceneForGltf(const std::string &maxPath, bool exportLighting,
+                            std::string &nameOut, std::vector<uint8> &out)
+{
+	out.clear();
+	SExportStats stats;
+	int ret = exportFile(maxPath, std::string(), std::string(), std::string(), std::string(),
+	                     exportLighting, stats, &out);
+	if (ret != 0)
+		return -1;
+	if (out.empty())
+		return 3;
+	nameOut = NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(maxPath));
+	return 1;
+}
+
+#ifndef PMB_SHAPE_NO_MAIN
 int main(int argc, char **argv)
 {
 	NLMISC::CApplicationContext appContext;
@@ -2336,5 +2415,6 @@ int main(int argc, char **argv)
 		printf("SKIPCLASS %s %u\n", it->first.c_str(), it->second);
 	return ret;
 }
+#endif /* !PMB_SHAPE_NO_MAIN */
 
 /* end of file */

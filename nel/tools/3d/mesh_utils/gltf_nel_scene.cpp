@@ -923,14 +923,16 @@ int exportNelGltfScene(const CMeshUtilsSettings &settings)
 	}
 
 	// Single-output process blobs (full parity): nel_swt -> <name>.swt, nel_pacs_prim ->
-	// <name>.pacs_prim — the shared whole-file flows' exact bytes, re-emitted verbatim.
+	// <name>.pacs_prim, nel_skel -> <name>.skel, nel_lmscene -> <name>.lmscene — the shared
+	// whole-file flows' exact bytes, re-emitted verbatim.
 	{
 		static const struct { const char *Key; const char *Ext; } kSingles[] = {
 			{ "nel_swt", ".swt" }, { "nel_pacs_prim", ".pacs_prim" }, { "nel_skel", ".skel" },
+			{ "nel_lmscene", ".lmscene" },
 		};
 		const CJsonValue *asset = doc.Json.get("asset");
 		const CJsonValue *aex = asset ? asset->get("extras") : NULL;
-		for (uint si = 0; aex && si < 3; ++si)
+		for (uint si = 0; aex && si < 4; ++si)
 		{
 			const CJsonValue *entry = aex->get(kSingles[si].Key);
 			if (!entry)

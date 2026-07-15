@@ -10,7 +10,15 @@ SET(SHAPE_SHARED
 	../pipeline_max_export_shape/water_build.cpp
 	../pipeline_max_export_shape/remanence_build.cpp
 	../pipeline_max_export_shape/flare_build.cpp
+	../pipeline_max_export_shape/anim_build.cpp
+	../pipeline_max_export_shape/lm_scene_build.cpp
 )
+
+# The shape exporter's whole per-file flow (exportFile + buildShapeForNode) backs the
+# nel_lmscene blob (lightmap-scene-only mode) — same guarded-main pattern; the writer's own
+# node loop keeps feeding the glTF encoder, this one only runs the --lm-scene collection.
+SET(SHAPE_MAIN ../pipeline_max_export_shape/main.cpp)
+SET_SOURCE_FILES_PROPERTIES(${SHAPE_MAIN} PROPERTIES COMPILE_DEFINITIONS PMB_SHAPE_NO_MAIN)
 
 # The ig exporter's whole per-file flow (selection, XRef resolution, buildInstanceGroup) backs
 # the nel_igs blob — compiled in with its standalone main() guarded out.
@@ -54,6 +62,7 @@ ADD_EXECUTABLE(pipeline_max_export_gltf
 	${SRCS}
 	${HDRS}
 	${SHAPE_SHARED}
+	${SHAPE_MAIN}
 	${IG_SHARED}
 	${ANIM_SHARED}
 	${ZONE_SHARED}

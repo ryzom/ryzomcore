@@ -178,7 +178,7 @@ IF (Python3_Interpreter_FOUND)
 	# 0 via-only — TOTAL co-production; the only skips, mesh-eval=253 and skinned-maxverts=1,
 	# are identical on both routes).
 	ADD_TEST(NAME pipeline_max_gltf_corpus
-		COMMAND ${Python3_EXECUTABLE} gltf_corpus.py --gate --min-identical 29880 --min-anims 5040 --min-zones 2630 --min-singles 6200
+		COMMAND ${Python3_EXECUTABLE} gltf_corpus.py --gate --min-identical 29880 --min-anims 5040 --min-zones 2630 --min-singles 6300
 			--bin $<TARGET_FILE_DIR:pipeline_max_export_shape>
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 	SET_TESTS_PROPERTIES(pipeline_max_gltf_corpus PROPERTIES SKIP_RETURN_CODE 77)

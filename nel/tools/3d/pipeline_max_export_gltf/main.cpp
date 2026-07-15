@@ -171,6 +171,12 @@ int pmbExportCmbsForGltf(const std::string &inputPath, bool ligoMode,
 // whole-file flow — 1 = produced, 3 = no Bip01, -1 = error.
 int pmbExportSkelForGltf(const std::string &maxPath, std::vector<uint8> &out);
 
+// From ../pipeline_max_export_shape/main.cpp (PMB_SHAPE_NO_MAIN): the shape exporter's whole
+// per-file flow in lightmap-scene-only mode — the .lmscene bytes a direct `--lm-scene` run
+// writes (1 = produced, 3 = no lightmap receivers, -1 = error).
+int pmbExportLmSceneForGltf(const std::string &maxPath, bool exportLighting,
+                            std::string &nameOut, std::vector<uint8> &out);
+
 static std::string bytesToHex(const std::vector<uint8> &bytes)
 {
 	std::string hex;
@@ -1180,6 +1186,23 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 		{
 			CJsonValue *js = b.assetExtras()->setObject("nel_skel");
 			js->setString("name", NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(maxPath)));
+			js->set("data")->setString(bytesToHex(bytes));
+			++stats.Others;
+		}
+	}
+
+	// Lightmap scene graph (.lmscene, design doc §11-lm): the 1_export half of the standalone
+	// lightmapper, as produced by the direct exporter's --lm-scene run — receivers as pre-build
+	// mesh data, occluders, and source-fidelity lights. Rides as an asset blob (the pre-build
+	// intermediate is its own versioned NeL contract; the glTF mesh accessors feed the SHAPE
+	// build, not the lightmapper's unwrap).
+	{
+		std::string lmName;
+		std::vector<uint8> bytes;
+		if (pmbExportLmSceneForGltf(maxPath, exportLighting, lmName, bytes) == 1 && !bytes.empty())
+		{
+			CJsonValue *js = b.assetExtras()->setObject("nel_lmscene");
+			js->setString("name", lmName);
 			js->set("data")->setString(bytesToHex(bytes));
 			++stats.Others;
 		}

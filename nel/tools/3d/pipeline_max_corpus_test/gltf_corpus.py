@@ -214,16 +214,20 @@ def main():
         di_dir = os.path.join(base, "direct_ig")
         da_dir = os.path.join(base, "direct_anim")
         dz_dir = os.path.join(base, "direct_zone")
+        dlm_dir = os.path.join(base, "direct_lm")
         g_dir = os.path.join(base, "gltf")
         v_dir = os.path.join(base, "via")
         vc_dir = os.path.join(base, "via_c")
         vi_dir = os.path.join(base, "via_ig")
         va_dir = os.path.join(base, "via_anim")
         vz_dir = os.path.join(base, "via_zone")
-        for d in (d_dir, dc_dir, di_dir, da_dir, dz_dir, g_dir, v_dir, vc_dir, vi_dir, va_dir, vz_dir):
+        for d in (d_dir, dc_dir, di_dir, da_dir, dz_dir, dlm_dir, g_dir, v_dir, vc_dir, vi_dir, va_dir, vz_dir):
             os.makedirs(d, exist_ok=True)
 
-        r = subprocess.run([shape_bin, "--db", args.graphics, "--coarse-out", dc_dir, path, d_dir],
+        # --lm-scene rides the main direct run (same run that produces the .shape set) — the
+        # .lmscene differential's direct side comes for free.
+        r = subprocess.run([shape_bin, "--db", args.graphics, "--coarse-out", dc_dir,
+                            "--lm-scene", dlm_dir, path, d_dir],
                            capture_output=True, text=True)
         res["direct_rc"] = r.returncode
         res["direct_skips"] = skipclasses(r.stdout)
@@ -332,6 +336,13 @@ def main():
             res["skel_rc"] = 0 if r.returncode in (0, 2, 3) else r.returncode
             singles.append(("skel", dpath if os.path.isfile(dpath) else None,
                             via_skel if os.path.isfile(via_skel) else None))
+        # Lightmap scene graph (.lmscene): direct --lm-scene output vs the nel_lmscene blob
+        # re-emission. Direct side already produced by the main shape run above.
+        d_lm = os.path.join(dlm_dir, stem + ".lmscene")
+        via_lm = os.path.join(v_dir, stem + ".lmscene")
+        if os.path.isfile(d_lm) or os.path.isfile(via_lm):
+            singles.append(("lmscene", d_lm if os.path.isfile(d_lm) else None,
+                            via_lm if os.path.isfile(via_lm) else None))
 
         # Veget differential: direct per-node .veget files vs the nel_vegets blob re-emission
         # (the via reader writes them into the main -d dir).
