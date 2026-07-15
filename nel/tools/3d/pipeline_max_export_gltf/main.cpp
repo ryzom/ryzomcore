@@ -437,28 +437,12 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 
 		bool isSlave = lodNames.count(NLMISC::toLowerAscii(name)) != 0;
 
-		// Standalone selection filters (the direct route's exportFile gate). LOD slaves bypass
-		// ALL of them: the direct multilod branch resolves slaves by name and takes them straight
-		// to the mesh eval — no bip/classid/appdata checks on slave nodes.
-		if (!isSlave)
-		{
-			if (startsWithBip(name) || startsWithBip(nodeName(*rootOf(&node))))
-				continue;
-			if (cid == CLASSID_RPO || cid.a() == CLASSID_PARTA_NEL_PS
-				|| cid == CLASSID_PACS_BOX || cid == CLASSID_PACS_CYL || cid == CLASSID_TARGET)
-				continue;
-			{
-				std::string accel = getScriptAppDataStr(n, NEL3D_APPDATA_ACCEL, "");
-				if (!accel.empty() && accel != "0" && accel != "32")
-					continue;
-			}
-			if (getScriptAppDataStr(n, NEL3D_APPDATA_DONOTEXPORT, "") == "1")
-				continue;
-			if (getScriptAppDataStr(n, NEL3D_APPDATA_COLLISION, "") == "1")
-				continue;
-			if (getScriptAppDataStr(n, NEL3D_APPDATA_COLLISION_EXTERIOR, "") == "1")
-				continue;
-		}
+		// The shared standalone-node selection gate (scene_lib — the direct route's exportFile
+		// gate). LOD slaves bypass it entirely: the direct multilod branch resolves slaves by
+		// name and takes them straight to the mesh eval — no bip/classid/appdata checks on
+		// slave nodes.
+		if (!isSlave && !shapeProcessSelectsNode(node, cid))
+			continue;
 
 		// Special shape classes — same dispatch order as buildShapeForNode. Water/remanence/
 		// flare build through the SAME class builders the direct route uses; the built shape

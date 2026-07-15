@@ -151,6 +151,14 @@ INode *rootOf(INode *node);
 // "Bip" name prefix — the biped skeleton-part naming convention.
 bool startsWithBip(const std::string &s);
 
+// The shape process's standalone-node selection gate (shape_export.ms replication, applied
+// after isGeometryOrShape): excludes Bip-rooted skeleton parts, RklPatch / nel_ps / nel_pacs /
+// Target objects, accelerators (accel appdata other than 0/32), and DONOTEXPORT / COLLISION /
+// COLLISION_EXTERIOR-flagged nodes. `cid` = the base object's class id. LOD slaves bypass this
+// gate entirely on both routes (they are resolved by name from their parent). Shared by the
+// direct shape exporter and the glTF writer — the selection must never drift between routes.
+bool shapeProcessSelectsNode(INode &node, const NLMISC::CClassId &cid);
+
 // ---------------------------------------------------------------------------------------------
 // Old-style ParamBlock (superclass 0x8) params
 

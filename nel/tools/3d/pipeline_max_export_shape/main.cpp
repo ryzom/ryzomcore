@@ -810,34 +810,9 @@ static int exportFile(const std::string &maxPath, const std::string &outDir, con
 		if (!isGeometryOrShape(base))
 			continue;
 
-		// Skeleton parts
-		if (startsWithBip(name) || startsWithBip(nodeName(*rootOf(&node))))
-			continue;
-
-		NLMISC::CClassId cid = base->classDesc()->classId();
-		if (cid == CLASSID_RPO)
-			continue;
-		if (cid.a() == CLASSID_PARTA_NEL_PS)
-			continue;
-		if (cid == CLASSID_PACS_BOX || cid == CLASSID_PACS_CYL)
-			continue;
-		// Target objects ((0x1020,0), light/camera look-at anchors) never yield reference
-		// shapes (0 of 3518 references) — the reference exporter produces nothing for them.
-		if (cid == CLASSID_TARGET)
-			continue;
-
-		// Accelerator?
-		{
-			std::string accel = getScriptAppDataStr(n, NEL3D_APPDATA_ACCEL, "");
-			if (!accel.empty() && accel != "0" && accel != "32")
-				continue;
-		}
-
-		if (getScriptAppDataStr(n, NEL3D_APPDATA_DONOTEXPORT, "") == "1")
-			continue;
-		if (getScriptAppDataStr(n, NEL3D_APPDATA_COLLISION, "") == "1")
-			continue;
-		if (getScriptAppDataStr(n, NEL3D_APPDATA_COLLISION_EXTERIOR, "") == "1")
+		// The shared standalone-node selection gate (scene_lib) — Bip parts, special classes,
+		// accelerators, DONOTEXPORT/COLLISION flags.
+		if (!shapeProcessSelectsNode(node, base->classDesc()->classId()))
 			continue;
 
 		// LOD slave?

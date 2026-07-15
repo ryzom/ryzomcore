@@ -54,6 +54,7 @@
 #include "../pipeline_max/builtin/scene_impl.h"
 #include "../pipeline_max/builtin/i_node.h"
 #include "../pipeline_max/builtin/node_impl.h"
+#include "../pipeline_max_export_common/export_ids.h"
 #include "../pipeline_max/builtin/reference_maker.h"
 #include "../pipeline_max/builtin/storage/app_data.h"
 #include "../pipeline_max/builtin/control_keyframer.h"
@@ -185,6 +186,42 @@ INode *rootOf(INode *node)
 bool startsWithBip(const std::string &s)
 {
 	return s.size() >= 3 && s.compare(0, 3, "Bip") == 0;
+}
+
+bool shapeProcessSelectsNode(INode &node, const NLMISC::CClassId &cid)
+{
+	CNodeImpl *n = dynamic_cast<CNodeImpl *>(&node);
+
+	// Skeleton parts
+	if (startsWithBip(nodeName(node)) || startsWithBip(nodeName(*rootOf(&node))))
+		return false;
+
+	if (cid == CLASSID_RPO)
+		return false;
+	if (cid.a() == CLASSID_PARTA_NEL_PS)
+		return false;
+	if (cid == PMAX_EXPORT_IDS::CLASSID_PACS_BOX || cid == PMAX_EXPORT_IDS::CLASSID_PACS_CYL)
+		return false;
+	// Target objects ((0x1020,0), light/camera look-at anchors) never yield reference
+	// shapes (0 of 3518 references) — the reference exporter produces nothing for them.
+	if (cid == CLASSID_TARGET)
+		return false;
+
+	// Accelerator?
+	{
+		std::string accel = getScriptAppDataStr(n, NEL3D_APPDATA_ACCEL, "");
+		if (!accel.empty() && accel != "0" && accel != "32")
+			return false;
+	}
+
+	if (getScriptAppDataStr(n, NEL3D_APPDATA_DONOTEXPORT, "") == "1")
+		return false;
+	if (getScriptAppDataStr(n, NEL3D_APPDATA_COLLISION, "") == "1")
+		return false;
+	if (getScriptAppDataStr(n, NEL3D_APPDATA_COLLISION_EXTERIOR, "") == "1")
+		return false;
+
+	return true;
 }
 
 // ---------------------------------------------------------------------------------------------
