@@ -1,12 +1,16 @@
 #include <nelns/login_service/functions.h>
 
 #include <nel/misc/command.h>
+#include <nel/misc/common.h>
 #include <nel/misc/debug.h>
+#include <nel/net/service.h>
 #include <nelns/login_service/variables.h>
 
 using std::string;
 using NLMISC::ICommand;
 using NLMISC::InfoLog;
+using NLMISC::Exception;
+using NLNET::IService;
 using NLNET::TServiceId;
 
 sint findShard (sint32 shardId)
@@ -190,7 +194,7 @@ void beep (uint freq, uint nb, uint beepDuration, uint pauseDuration)
 			for (uint i = 0; i < nb; i++)
 			{
 				Beep (freq, beepDuration);
-				nlSleep (pauseDuration);
+				NLMISC::nlSleep (pauseDuration);
 			}
 		}
 	}

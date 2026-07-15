@@ -16,7 +16,7 @@ target_compile_features(nelns_login_service
         cxx_return_type_deduction
 )
 
-target_include_directories(nelns_login_service PUBLIC ${ZLIB_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(nelns_login_service PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_link_libraries(nelns_login_service
         MySQL::MySQL
