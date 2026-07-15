@@ -60,9 +60,9 @@ class ShardCommands(RyzomService):
 		self.db = None
 		try:
 			self.db = mysql.connector.connect(
-				host = self.config["DB_webig"]["host"],
-				user = self.config["DB_webig"]["user"],
-				passwd = self.config["DB_webig"]["pass"],
+				host = self.config["db_webig"]["host"],
+				user = self.config["db_webig"]["user"],
+				passwd = self.config["db_webig"]["pass"],
 				database = "webig",
 			)
 			print("MySQL Database connection successful")
@@ -193,39 +193,29 @@ class ShardCommands(RyzomService):
 			return True
 		return False
 
+	def manageMessage(self, i):
+		command = self.getRyzomCommand(i)
+		if command != None:
+			print(f"New Command #{i} = {command}")
+			self.updateActivity(False)
+			if hasattr(self, command[0]) and callable(getattr(self, command[0])) and getattr(self, command[0])(command):
+				self.stats["commands"] += 1
+				self.updateStats()
+		self.current_id = i
+			
 	def checkMessages(self):
 		last_id = self.getLastCommandID()
-		#if self.current_id+1 != last_id+1:
-		#	print("Current:", self.current_id+1, "Last:", last_id)
-		for i in range(self.current_id+1, last_id+1, 1):
-			command = self.getRyzomCommand(i)
-			#command = self.fake_command
-			if command != None:
-				print("New Command", i, command)
-				self.updateActivity(False)
-				if hasattr(self, command[0]) and callable(getattr(self, command[0])) and getattr(self, command[0])(command):
-					self.stats["commands"] += 1
-					self.updateStats()
-				self.next_id = i
+		if self.current_id > last_id:
+			print(f"Back from {self.current_id} to {last_id}")
+			self.manageMessage(last_id)
 
-
-			self.setLastManagedCommandID(i)
-		self.current_id = self.next_id
+		for i in range(self.current_id+1, last_id, 1):
+			self.manageMessage(i)
+		self.setLastManagedCommandID(self.current_id)
 
 	def run(self):
-		#self.fake_command = ["playerConnects", "Ulueta", "YES"]
-		#self.fake_command = ["addFactionChannelToCharacter", "Ulueta", "DYN1"]
-		#self.fake_command = ["removeFactionChannelForCharacter", "Ulueta", "DYN1"]
-		#self.fake_command = ["playerConnects", "Ulueta", ""]
-		#self.fake_command = ['deleteMember', 'Les Senseis Atysiens', 'Ulueta']
 		self.current_id = self.getLastManagedCommandID()
-		last_id = self.getLastCommandID()
-		if self.current_id > last_id:
-			print("Fix current id")
-			self.setLastManagedCommandID(last_id)
-			self.current_id = self.getLastManagedCommandID()
-		self.next_id = self.current_id
-		print("Managing shard commands...")
+		print(f"Managing shard commands from {self.current_id}...")
 		while True:
 			self.checkMessages()
 			self.updateActivity()
@@ -234,4 +224,8 @@ class ShardCommands(RyzomService):
 if __name__ == "__main__":
 	shardCommands = ShardCommands()
 	shardCommands.register()
+	if len(sys.argv) > 1:
+		if sys.argv[1] == "reset":
+			shardCommands.setLastManagedCommandID(0)
+			sys.exit(0)
 	shardCommands.run()

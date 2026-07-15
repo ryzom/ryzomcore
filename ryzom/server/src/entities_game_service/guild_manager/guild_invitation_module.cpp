@@ -29,6 +29,8 @@
 NL_INSTANCE_COUNTER_IMPL(CGuildInvitation);
 NL_INSTANCE_COUNTER_IMPL(CGuildInvitationModule);
 
+extern NLMISC::CVariable<uint32> CurrentEra;
+
 //----------------------------------------------------------------------------
 void CGuildInvitationModule::refuse()
 {
@@ -100,8 +102,12 @@ void CGuildInvitationModule::accept()
 		if (c->getLastGuildId() == guild->getId())
 		{
 			NLMISC::TGameCycle enterTime = c->getGuildEnterTime();
-			nlinfo("back to guild and use last enter time: %u", enterTime);
-			memberCore = _Invitation->getGuild()->newMember(proxy.getId(), enterTime);
+			uint32 enterEra = c->getGuildEnterEra();
+			nlinfo("back to guild and use last enter time: %u %u", enterTime, enterEra);
+			if (enterEra > CurrentEra)
+				enterEra = 0;
+
+			memberCore = _Invitation->getGuild()->newMember(proxy.getId(), enterTime, enterEra);
 		}
 	}
 

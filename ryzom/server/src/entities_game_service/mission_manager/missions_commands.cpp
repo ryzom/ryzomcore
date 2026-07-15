@@ -921,7 +921,7 @@ NLMISC_COMMAND(getItemList, "get list of items of character by filter", "<uid> [
 							string item_stats = toString("%3d|%s|", j, sheet.c_str());
 							if (!extra.empty())
 								itemPtr->getStats(extra, item_stats);
-							log.displayNL(item_stats.c_str());
+							log.displayNL("%s", item_stats.c_str());
 						}
 					}
 				}
@@ -1022,7 +1022,7 @@ NLMISC_COMMAND(getNamedItemList, "get list of named items of character by filter
 							string item_stats = toString("%3d|%s|", j, phraseId.c_str());
 							if (!extra.empty())
 								itemPtr->getStats(extra, item_stats);
-							log.displayNL(item_stats.c_str());
+							log.displayNL("%s", item_stats.c_str());
 						}
 					}
 				}
@@ -1861,6 +1861,8 @@ NLMISC_COMMAND(getPvpPoints, "get pvp points of player (if quantity, give/take/s
 	}
 
 	log.displayNL("%u", points);
+
+	return true;
 }
 
 
@@ -2878,14 +2880,27 @@ NLMISC_COMMAND(grpScript, "executes a script on an event npc group", "<uid> <gro
 		return false;
 	}
 
-	CMessage msgout("EVENT_NPC_GROUP_SCRIPT");
-	uint32 messageVersion = 1;
-	msgout.serial(messageVersion);
-	msgout.serial(nbString);
+	CMessage msgout;
+	if (botsName[0] == '(')
+	{
+		msgout = CMessage("R2_NPC_BOT_SCRIPT_BY_ID");
+		uint32 messageVersion = 1;
+		msgout.serial(messageVersion);
+		uint32 nbMsgArgs = nbString - 1;
+		msgout.serial(nbMsgArgs);
+		msgout.serial(botsName);
+	}
+	else
+	{
+		msgout = CMessage("EVENT_NPC_GROUP_SCRIPT");
+		uint32 messageVersion = 1;
+		msgout.serial(messageVersion);
+		msgout.serial(nbString);
+		msgout.serial(playerEid);
+		msgout.serial(botsName);
+	}
 
-	msgout.serial(playerEid);
-	msgout.serial(botsName);
-	for (uint32 i=2; i<nbString; ++i)
+	for (uint32 i = 2; i < nbString; ++i)
 	{
 		string arg = args[i]+";";
 
@@ -3021,6 +3036,24 @@ NLMISC_COMMAND(temporaryRename, "rename a player for the event", "<uid> <new nam
 	return true;
 }
 
+
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(setName, "rename a player", "<uid> <old name> <new name>")
+{
+	if (args.size() != 3) {
+		log.displayNL("ERR: invalid arg count");
+		return false;
+	}
+
+	GET_ACTIVE_CHARACTER
+
+	string arg = args[1]+" "+args[2];
+	if (IClientCommandForwader::getInstance())
+		IClientCommandForwader::getInstance()->sendCommand("su", "renamePlayer", c->getId(), false, CEntityId::Unknown, arg);
+
+	return true;
+}
+
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(setTitle, "set player title", "<uid> <title>")
 {
@@ -3083,15 +3116,15 @@ NLMISC_COMMAND(getTags, "get player tags", "<uid>")
 
 	GET_ACTIVE_CHARACTER
 
-	log.displayNL(c->getTagPvPA().c_str());
-	log.displayNL(c->getTagPvPB().c_str());
-	log.displayNL(c->getDefaultTagA().c_str());
-	log.displayNL(c->getDefaultTagB().c_str());
-	log.displayNL(c->getTagA().c_str());
-	log.displayNL(c->getTagB().c_str());
-	log.displayNL(c->getTagRightHand().c_str());
-	log.displayNL(c->getTagLeftHand().c_str());
-	log.displayNL(c->getTagHat().c_str());
+	log.displayNL("%s", c->getTagPvPA().c_str());
+	log.displayNL("%s", c->getTagPvPB().c_str());
+	log.displayNL("%s", c->getDefaultTagA().c_str());
+	log.displayNL("%s", c->getDefaultTagB().c_str());
+	log.displayNL("%s", c->getTagA().c_str());
+	log.displayNL("%s", c->getTagB().c_str());
+	log.displayNL("%s", c->getTagRightHand().c_str());
+	log.displayNL("%s", c->getTagLeftHand().c_str());
+	log.displayNL("%s", c->getTagHat().c_str());
 	log.displayNL("%d", c->getVisualPropertyA().directAccessForStructMembers().PropertySubData.WeaponRightHand);
 	log.displayNL("%d", c->getVisualPropertyA().directAccessForStructMembers().PropertySubData.WeaponLeftHand);
 	log.displayNL("%d", c->getVisualPropertyA().directAccessForStructMembers().PropertySubData.HatModel);
@@ -3504,19 +3537,20 @@ NLMISC_COMMAND(mount,"mount the target","<uid> [<eid>]")
 
 	if ( c->getRiderEntity().isNull() )
 	{
-		CEntityId target = c->getTarget();
+		CEntityId e;
 
 		if (args.size() > 1)
 		{
-			CEntityId entityId(args[1]);
-			if (entityId != target)
-				log.displayNL("ERR: Bad target");
+			e = CEntityId(args[1]);
+		}
+		else
+		{
+			e = c->getTarget();
 		}
 
-
-		if( target.getType() == RYZOMID::creature || target.getType() == RYZOMID::npc )
+		if( e.getType() == RYZOMID::creature || e.getType() == RYZOMID::npc )
 		{
-			CEntityBase * mount = CEntityBaseManager::getEntityBasePtr( target );
+			CEntityBase * mount = CEntityBaseManager::getEntityBasePtr( e );
 			if( mount )
 			{
 				const CStaticCreatures * form = mount->getForm();
@@ -3532,7 +3566,7 @@ NLMISC_COMMAND(mount,"mount the target","<uid> [<eid>]")
 						}
 						else
 						{
-							c->mount(c->getTargetDataSetRow(), true);
+							c->mount(mount->getEntityRowId(), true);
 							log.displayNL("OK");
 						}
 					}
@@ -3542,6 +3576,8 @@ NLMISC_COMMAND(mount,"mount the target","<uid> [<eid>]")
 				else
 					log.displayNL("ERR: Entity without form");
 			}
+			else
+					log.displayNL("ERR: Entity is not a mount");
 		}
 		else
 			log.displayNL("ERR: Entity is not creature or npc");
@@ -4650,7 +4686,7 @@ NLMISC_COMMAND(haveBricks, "Return list of player selected learned bricks", "<ui
 	{
 		CSheetId brickId(bricks[i]);
 		if (c->haveBrick(brickId))
-			log.displayNL(bricks[i].c_str());
+			log.displayNL("%s", bricks[i].c_str());
 	}
 
 	return true;

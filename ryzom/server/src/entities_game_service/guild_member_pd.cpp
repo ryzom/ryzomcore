@@ -20,7 +20,7 @@
 
 namespace EGSPD
 {
-	
+
 /* -----------------------------------------
 * Static Implementation of CGuildMemberPD
 * ----------------------------------------- */
@@ -37,7 +37,7 @@ void							CGuildMemberPD::setGrade(CGuildGrade::TGuildGrade __v, bool forceWrit
 	nlassert(__v<CGuildGrade::___TGuildGrade_useSize);
 	if (_Grade != __v)
 	{
-		// callback the manager 
+		// callback the manager
 		IGuildManager::getInstance().guildMemberChanged(this);
 	}
 	if ((_Grade != __v) || forceWrite)
@@ -58,6 +58,18 @@ void							CGuildMemberPD::setEnterTime(uint32 __v, bool forceWrite)
 	}
 	_EnterTime = __v;
 }
+uint32							CGuildMemberPD::getEnterEra() const
+{
+	return _EnterEra;
+}
+void							CGuildMemberPD::setEnterEra(uint32 __v, bool forceWrite)
+{
+	if ((_EnterEra != __v) || forceWrite)
+	{
+		PDSLib.set(3, __BaseRow, (RY_PDS::TColumnIndex)(3), __v, _Id);
+	}
+	_EnterEra = __v;
+}
 CGuildPD*						CGuildMemberPD::getGuild()
 {
 	return _Guild;
@@ -72,6 +84,8 @@ void							CGuildMemberPD::clear()
 	PDSLib.set(3, __BaseRow, (RY_PDS::TColumnIndex)(1), (uint32)(CGuildGrade::TGuildGrade)0);
 	_EnterTime = 0;
 	PDSLib.set(3, __BaseRow, (RY_PDS::TColumnIndex)(2), 0);
+	_EnterEra = 0;
+	PDSLib.set(3, __BaseRow, (RY_PDS::TColumnIndex)(3), 0);
 }
 CGuildMemberPD*					CGuildMemberPD::cast(RY_PDS::IPDBaseData* obj)
 {
@@ -101,6 +115,7 @@ void							CGuildMemberPD::apply(CPersistentDataRecord &__pdr)
 	uint16	__TokId = __pdr.addString("Id");
 	uint16	__TokGrade = __pdr.addString("Grade");
 	uint16	__TokEnterTime = __pdr.addString("EnterTime");
+	uint16	__TokEnterEra = __pdr.addString("EnterEra");
 	_Guild = NULL;
 	while (!__pdr.isEndOfStruct())
 	{
@@ -121,6 +136,10 @@ void							CGuildMemberPD::apply(CPersistentDataRecord &__pdr)
 		{
 			__pdr.pop(__TokEnterTime, _EnterTime);
 		}
+		else if (__pdr.peekNextToken() == __TokEnterEra)
+		{
+			__pdr.pop(__TokEnterEra, _EnterEra);
+		}
 		else
 		{
 			nlwarning("Skipping unrecognised token: %s", __pdr.peekNextTokenName().c_str());
@@ -136,12 +155,14 @@ void							CGuildMemberPD::store(CPersistentDataRecord &__pdr) const
 	uint16	__TokId = __pdr.addString("Id");
 	uint16	__TokGrade = __pdr.addString("Grade");
 	uint16	__TokEnterTime = __pdr.addString("EnterTime");
+	uint16	__TokEnterEra = __pdr.addString("EnterEra");
 	__pdr.push(__TokId, _Id);
 	{
 		std::string	valuename = CGuildGrade::toString(_Grade);
 		__pdr.push(__TokGrade, valuename);
 	}
 	__pdr.push(__TokEnterTime, _EnterTime);
+	__pdr.push(__TokEnterEra, _EnterEra);
 }
 void							CGuildMemberPD::init()
 {
@@ -154,6 +175,7 @@ void							CGuildMemberPD::pds__init(const TCharacterId &Id)
 	_Id = Id;
 	_Grade = (CGuildGrade::TGuildGrade)0;
 	_EnterTime = 0;
+	_EnterEra = 0;
 	_Guild = NULL;
 }
 void							CGuildMemberPD::pds__destroy()
@@ -164,6 +186,7 @@ void							CGuildMemberPD::pds__fetch(RY_PDS::CPData &data)
 	data.serial(_Id);
 	data.serialEnum(_Grade);
 	data.serial(_EnterTime);
+	data.serial(_EnterEra);
 	_Guild = NULL;
 }
 void							CGuildMemberPD::pds__register()
@@ -236,5 +259,5 @@ void							CGuildMemberPD::pds_static__fetch(RY_PDS::IPDBaseData *object, RY_PDS
 }
 // End of static implementation of CGuildMemberPD
 
-	
+
 } // End of EGSPD
