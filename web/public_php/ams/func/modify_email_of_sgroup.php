@@ -16,12 +16,12 @@ function modify_email_of_sgroup(){
 
             $sgroupid = filter_var($_POST['target_id'],FILTER_SANITIZE_NUMBER_INT);
             $group = Support_Group::getGroup($sgroupid);
-            $groupemail = filter_var($_POST['GroupEmail'],FILTER_SANITIZE_STRING);
+            $groupemail = filter_var($_POST['GroupEmail'],FILTER_SANITIZE_FULL_SPECIAL_CHARS);
             if(Users::validEmail($groupemail) || $groupemail == ""){
-                $password = filter_var($_POST['IMAP_Password'],FILTER_SANITIZE_STRING);
+                $password = filter_var($_POST['IMAP_Password'],FILTER_SANITIZE_FULL_SPECIAL_CHARS);
                 $group->setGroupEmail($groupemail);
-                $group->setIMAP_MailServer(filter_var($_POST['IMAP_MailServer'],FILTER_SANITIZE_STRING));
-                $group->setIMAP_Username(filter_var($_POST['IMAP_Username'],FILTER_SANITIZE_STRING));
+                $group->setIMAP_MailServer(filter_var($_POST['IMAP_MailServer'],FILTER_SANITIZE_FULL_SPECIAL_CHARS));
+                $group->setIMAP_Username(filter_var($_POST['IMAP_Username'],FILTER_SANITIZE_FULL_SPECIAL_CHARS));
 
                 //encrypt password!
                 global $cfg;

@@ -424,6 +424,8 @@ function connect_to_ring_db()
 function check_character_belongs_to_guild($charName, $guildName)
 {
 	$ringDb = connect_to_ring_db();
+	$charName = mysqli_real_escape_string($ringDb, $charName);
+	$guildName_escaped = mysqli_real_escape_string($ringDb, $guildName);
 	$res = mysqli_query($ringDb,
 	"SELECT guilds.guild_name FROM guilds
 	JOIN characters ON characters.guild_id=guilds.guild_id

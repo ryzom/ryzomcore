@@ -2,8 +2,8 @@
 
 function reset_password(){
     $email = filter_var($_GET["email"], FILTER_SANITIZE_EMAIL);
-    $user = filter_var($_GET["user"], FILTER_SANITIZE_STRING);
-    $key = filter_var($_GET["key"], FILTER_SANITIZE_STRING);
+    $user = filter_var($_GET["user"], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+    $key = filter_var($_GET["key"], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 
     $target_id = WebUsers::getId($user);
     $webUser = new WebUsers($target_id);

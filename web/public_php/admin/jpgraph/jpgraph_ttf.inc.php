@@ -256,7 +256,7 @@ class LanguageConv {
             $c=ord( substr($isoline,$i,1) );
             $o .= ($c > 223) && ($c < 251) ? '&#'.(1264+$c).';' : chr($c);
         }
-        return utf8_encode($o);
+        return mb_convert_encoding($o, 'UTF-8', 'ISO-8859-1');
     }
 }
 

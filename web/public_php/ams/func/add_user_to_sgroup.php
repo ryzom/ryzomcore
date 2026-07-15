@@ -12,7 +12,7 @@ function add_user_to_sgroup(){
 
         //check if the that executed the task is an admin.
         if( Ticket_User::isAdmin(unserialize($_SESSION['ticket_user'])) &&  isset($_POST['target_id'])){
-            $name = filter_var($_POST['Name'],FILTER_SANITIZE_STRING);
+            $name = filter_var($_POST['Name'],FILTER_SANITIZE_FULL_SPECIAL_CHARS);
             $id = filter_var($_POST['target_id'],FILTER_SANITIZE_NUMBER_INT);
             $user_id = WebUsers::getId($name);
             if ($user_id != ""){
