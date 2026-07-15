@@ -3,8 +3,6 @@ from .common_root import *
 
 def DockerBaseCommand(image, arch, workdir, hunter, interactive=False):
 	res = [ "docker", "run" ]
-	if arch == "386":
-		res += [ "--platform", "linux/386" ]
 	res += [ "--rm" ]
 	if hunter:
 		res += [ "-v", image + "_hunter:/root/.hunter" ]

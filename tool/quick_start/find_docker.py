@@ -8,40 +8,32 @@ import subprocess
 import os
 
 def FindDocker():
-	output = None
 	try:
-		output = subprocess.check_output(['docker', 'images'], stderr=subprocess.DEVNULL, text=True)
+		output = subprocess.check_output(
+			['docker', 'images', '--format', '{{.Repository}}\t{{.Tag}}\t{{.ID}}\t{{.CreatedSince}}\t{{.Size}}'],
+			stderr=subprocess.DEVNULL, text=True)
 	except subprocess.CalledProcessError as e:
 		# print(e.output)
 		return None
 	except FileNotFoundError as e:
 		return None
-	lines = output.splitlines()
-	headers = lines[0].split()
 	entries = {}
-	offsets = []
-	for header in headers:
-		offsets += [ lines[0].find(header) ]
-	# print(headers)
-	# print(offsets)
-	# print(lines)
-	# print(len(lines))
-	for i in range(1, len(lines)):
-		entry = {}
-		for h in range(0, len(headers)):
-			value = None
-			offset = offsets[h]
-			if h + 1 < len(headers):
-				end = offsets[h + 1]
-				value = lines[i][offset:end]
-			else:
-				value = lines[i][offset:]
-			value = value.strip()
-			entry[headers[h]] = value
-		entries[entry["REPOSITORY"]] = entry
-	# print(entries)
-	# if not len(entries):
-	# 	return None
+	for line in output.splitlines():
+		if not line.strip():
+			continue
+		parts = line.split('\t')
+		if len(parts) < 5:
+			continue
+		repo = parts[0].strip()
+		if not repo or repo == '<none>':
+			continue
+		entries[repo] = {
+			"REPOSITORY": repo,
+			"TAG": parts[1].strip(),
+			"IMAGE": parts[2].strip(),
+			"CREATED": parts[3].strip(),
+			"SIZE": parts[4].strip(),
+		}
 	return entries
 
 def FindDockerImages():
