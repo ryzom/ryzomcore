@@ -301,7 +301,7 @@ private:
 	/// Get Hash code
 	uint32		getHashCode() const
 	{
-		return NLMISC::wangHash((uint32)(getIndex()));
+		return NLMISC::lowbias32((uint32)(getIndex()));
 	}
 
 	union

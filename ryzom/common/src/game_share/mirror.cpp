@@ -1255,7 +1255,7 @@ void	CMirror::processServiceEvent( const std::string &serviceName, TServiceId se
 		}
 		else
 		{
-			if ( cbItem.Cb != NULL )
+			if ( cbItem.Cb )
 				cbItem.Cb( serviceName, serviceId, cbItem.Arg );
 		}
 	}
