@@ -65,6 +65,18 @@ public :
 	inline	static const NLMISC::TGameCycle &getGameCycle() { return _GameCycle;	}
 
 	/**
+	 * Get the number of ellapsed game cycles with Era
+	 */
+	inline	static const uint64 getGameCycle(uint32 era)
+	{
+		uint64 realGameCycle = static_cast<uint64>(era);
+		realGameCycle = realGameCycle << 32;
+		realGameCycle |= (static_cast<uint64>(_GameCycle) & 0xFFFFFFFF);
+		return realGameCycle;
+	}
+
+
+	/**
 	 * Get the number of ellapsed game cycles
 	 */
 	static void setGameCycle( NLMISC::TGameCycle gameCycle ) { _GameCycle = gameCycle; }
