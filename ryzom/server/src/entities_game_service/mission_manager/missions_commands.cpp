@@ -921,7 +921,7 @@ NLMISC_COMMAND(getItemList, "get list of items of character by filter", "<uid> [
 							string item_stats = toString("%3d|%s|", j, sheet.c_str());
 							if (!extra.empty())
 								itemPtr->getStats(extra, item_stats);
-							log.displayNL(item_stats.c_str());
+							log.displayNL("%s", item_stats.c_str());
 						}
 					}
 				}
@@ -1022,7 +1022,7 @@ NLMISC_COMMAND(getNamedItemList, "get list of named items of character by filter
 							string item_stats = toString("%3d|%s|", j, phraseId.c_str());
 							if (!extra.empty())
 								itemPtr->getStats(extra, item_stats);
-							log.displayNL(item_stats.c_str());
+							log.displayNL("%s", item_stats.c_str());
 						}
 					}
 				}
@@ -1861,6 +1861,8 @@ NLMISC_COMMAND(getPvpPoints, "get pvp points of player (if quantity, give/take/s
 	}
 
 	log.displayNL("%u", points);
+
+	return true;
 }
 
 
@@ -2878,14 +2880,27 @@ NLMISC_COMMAND(grpScript, "executes a script on an event npc group", "<uid> <gro
 		return false;
 	}
 
-	CMessage msgout("EVENT_NPC_GROUP_SCRIPT");
-	uint32 messageVersion = 1;
-	msgout.serial(messageVersion);
-	msgout.serial(nbString);
+	CMessage msgout;
+	if (botsName[0] == '(')
+	{
+		msgout = CMessage("R2_NPC_BOT_SCRIPT_BY_ID");
+		uint32 messageVersion = 1;
+		msgout.serial(messageVersion);
+		uint32 nbMsgArgs = nbString - 1;
+		msgout.serial(nbMsgArgs);
+		msgout.serial(botsName);
+	}
+	else
+	{
+		msgout = CMessage("EVENT_NPC_GROUP_SCRIPT");
+		uint32 messageVersion = 1;
+		msgout.serial(messageVersion);
+		msgout.serial(nbString);
+		msgout.serial(playerEid);
+		msgout.serial(botsName);
+	}
 
-	msgout.serial(playerEid);
-	msgout.serial(botsName);
-	for (uint32 i=2; i<nbString; ++i)
+	for (uint32 i = 2; i < nbString; ++i)
 	{
 		string arg = args[i]+";";
 
@@ -3021,6 +3036,24 @@ NLMISC_COMMAND(temporaryRename, "rename a player for the event", "<uid> <new nam
 	return true;
 }
 
+
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(setName, "rename a player", "<uid> <old name> <new name>")
+{
+	if (args.size() != 3) {
+		log.displayNL("ERR: invalid arg count");
+		return false;
+	}
+
+	GET_ACTIVE_CHARACTER
+
+	string arg = args[1]+" "+args[2];
+	if (IClientCommandForwader::getInstance())
+		IClientCommandForwader::getInstance()->sendCommand("su", "renamePlayer", c->getId(), false, CEntityId::Unknown, arg);
+
+	return true;
+}
+
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(setTitle, "set player title", "<uid> <title>")
 {
@@ -3083,15 +3116,15 @@ NLMISC_COMMAND(getTags, "get player tags", "<uid>")
 
 	GET_ACTIVE_CHARACTER
 
-	log.displayNL(c->getTagPvPA().c_str());
-	log.displayNL(c->getTagPvPB().c_str());
-	log.displayNL(c->getDefaultTagA().c_str());
-	log.displayNL(c->getDefaultTagB().c_str());
-	log.displayNL(c->getTagA().c_str());
-	log.displayNL(c->getTagB().c_str());
-	log.displayNL(c->getTagRightHand().c_str());
-	log.displayNL(c->getTagLeftHand().c_str());
-	log.displayNL(c->getTagHat().c_str());
+	log.displayNL("%s", c->getTagPvPA().c_str());
+	log.displayNL("%s", c->getTagPvPB().c_str());
+	log.displayNL("%s", c->getDefaultTagA().c_str());
+	log.displayNL("%s", c->getDefaultTagB().c_str());
+	log.displayNL("%s", c->getTagA().c_str());
+	log.displayNL("%s", c->getTagB().c_str());
+	log.displayNL("%s", c->getTagRightHand().c_str());
+	log.displayNL("%s", c->getTagLeftHand().c_str());
+	log.displayNL("%s", c->getTagHat().c_str());
 	log.displayNL("%d", c->getVisualPropertyA().directAccessForStructMembers().PropertySubData.WeaponRightHand);
 	log.displayNL("%d", c->getVisualPropertyA().directAccessForStructMembers().PropertySubData.WeaponLeftHand);
 	log.displayNL("%d", c->getVisualPropertyA().directAccessForStructMembers().PropertySubData.HatModel);
@@ -3417,6 +3450,19 @@ NLMISC_COMMAND(getLastTpTick,"get tick of last teleport","<uid>")
 }
 
 //-----------------------------------------------
+NLMISC_COMMAND(getLastRespawnTick,"get tick of last respawn","<uid>")
+{
+	if (args.size() != 1)
+		return false;
+
+	GET_ACTIVE_CHARACTER;
+
+	log.displayNL("%d", c->getLastRespawnTick());
+
+	return true;
+}
+
+//-----------------------------------------------
 NLMISC_COMMAND(getLastOverSpeedTick,"get tick of last over speed","<uid>")
 {
 	if (args.size() != 1)
@@ -3482,19 +3528,29 @@ NLMISC_COMMAND(getLastExchangeMount,"get tick of last exchange mount","<uid>")
 }
 
 //-----------------------------------------------
-NLMISC_COMMAND(mount,"mount the target","<uid>")
+NLMISC_COMMAND(mount,"mount the target","<uid> [<eid>]")
 {
-	if (args.size() != 1)
+	if (args.size() < 1)
 		return false;
 
 	GET_ACTIVE_CHARACTER;
 
 	if ( c->getRiderEntity().isNull() )
 	{
-		CEntityId target = c->getTarget();
-		if( target.getType() == RYZOMID::creature || target.getType() == RYZOMID::npc )
+		CEntityId e;
+
+		if (args.size() > 1)
 		{
-			CEntityBase * mount = CEntityBaseManager::getEntityBasePtr( target );
+			e = CEntityId(args[1]);
+		}
+		else
+		{
+			e = c->getTarget();
+		}
+
+		if( e.getType() == RYZOMID::creature || e.getType() == RYZOMID::npc )
+		{
+			CEntityBase * mount = CEntityBaseManager::getEntityBasePtr( e );
 			if( mount )
 			{
 				const CStaticCreatures * form = mount->getForm();
@@ -3510,7 +3566,7 @@ NLMISC_COMMAND(mount,"mount the target","<uid>")
 						}
 						else
 						{
-							c->mount(c->getTargetDataSetRow(), true);
+							c->mount(mount->getEntityRowId(), true);
 							log.displayNL("OK");
 						}
 					}
@@ -3520,6 +3576,8 @@ NLMISC_COMMAND(mount,"mount the target","<uid>")
 				else
 					log.displayNL("ERR: Entity without form");
 			}
+			else
+					log.displayNL("ERR: Entity is not a mount");
 		}
 		else
 			log.displayNL("ERR: Entity is not creature or npc");
@@ -3714,6 +3772,19 @@ NLMISC_COMMAND(setTrigger, "set a custom trigger", "<trigger> [<web_app>] [<args
 		CBuildingManager::getInstance()->setCustomTrigger(triggerId, "");
 	log.displayNL("OK");
 	return true;
+}
+
+/*
+setRegionTrigger uiR2_Jungle18 app_arcc action=mScript_Run&script=7624&command=reset_all
+*/
+NLMISC_COMMAND(setRegionTrigger,"set region trigger","<region_name> <app> <params>")
+{
+	if (args.size() == 3)
+	{
+		CZoneManager::getInstance().addRegionTrigger(args[0], args[1]+" "+args[2]);
+		return true;
+	}
+	return false;
 }
 
 //----------------------------------------------------------------------------
@@ -4615,7 +4686,7 @@ NLMISC_COMMAND(haveBricks, "Return list of player selected learned bricks", "<ui
 	{
 		CSheetId brickId(bricks[i]);
 		if (c->haveBrick(brickId))
-			log.displayNL(bricks[i].c_str());
+			log.displayNL("%s", bricks[i].c_str());
 	}
 
 	return true;
@@ -5582,11 +5653,50 @@ NLMISC_COMMAND(setSpecial,"set special values","uid special value")
 
 	GET_ACTIVE_CHARACTER
 
-	uint32 value;
-
-	if (args[1] == "speedswimbonus") {
+	if (args[1] == "speedswimbonus")
+	{
+		uint32 value;
 		NLMISC::fromString(args[2], value);
 		c->setCurrentSpeedSwimBonus(value);
 	}
+
+	if (args[1] == "invisible")
+	{
+		if (args[2] == "1" || strlwr(args[2]) == "on" || strlwr(args[2]) == "true")
+		{
+
+			// check if player is invulnerable, if so do not apply goo damage
+			bool invulnerable = false;
+			CSEffect* effect = c->lookForActiveEffect(EFFECT_FAMILIES::PowerInvulnerability);
+			if (!effect)
+				effect = c->lookForActiveEffect(EFFECT_FAMILIES::Invincibility);
+
+			if (!effect)
+			{
+				c->setInvisibility(true);
+				c->setWhoSeesMe(0);
+				c->setAggroableOverride(false);
+				c->setAggroableSave(false);
+				//c->setAfkState(true);
+				log.displayNL("OK");
+			}
+			else
+				log.displayNL("ERR:INVU");
+		}
+		else
+		{
+			c->setInvisibility(false);
+			c->setWhoSeesMe(~0);
+			c->setAggroableOverride(true);
+			c->setAggroableSave(true);
+			//c->setAfkState(false);
+			log.displayNL("OK");
+		}
+	}
+	return true;
 }
+
+
+
+
 

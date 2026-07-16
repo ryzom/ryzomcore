@@ -171,8 +171,6 @@ end
 function RyzhomeBar:spawnItems()
 	runAH(nil, "remove_shapes", "")
 	for k,v in pairs(RyzhomeBar.spawnedItems) do
-		-- spawnedItem = {shape,x,y,z,a,b,c,scale,url,text,textures}
-		-- addShape("shape", .x, .y, .z, "angle", .scale, collision?, "context", "url", highlight?, transparency?, "texture", "skeleton", "inIgZone?")
 		if v[2] ~= "" and v[3] ~= "" and v[4] ~= "" and v[5] ~= "" and tonumber(v[8]) ~= nil then
 			id = addShape(v[1], tonumber(v[2]), tonumber(v[3]), tonumber(v[4]), "user", tonumber(v[8]), false, v[9], v[10], false, false, v[11])
 			RyzhomeBar.spawnedItems[k][12] = id
@@ -274,4 +272,4 @@ function RyzhomePlace:hl(id)
 end
 
 -- VERSION --
-RYZOM_RYZHOME_TOOLBAR_VERSION = 324
+FILE_RYZHOME_TOOLBAR_VERSION = 129

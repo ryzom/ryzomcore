@@ -1482,6 +1482,24 @@ void CPatchManager::downloadFileWithCurl (const string &source, const string &de
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, fwrite);
 
 		//CurrentFilesToGet++;
+		// Be nice & compatible with CDNs
+		curl_easy_setopt(curl, CURLOPT_USERAGENT, "nel_launcher/1.0");
+
+		// Follow 3xx redirects (CDNs, moved buckets, etc.)
+		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+		curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 10L);
+		curl_easy_setopt(curl, CURLOPT_AUTOREFERER, 1L);
+
+		// Dont let Curl transparently gunzip .ngz/.lzma payloads
+		curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "identity");
+
+		// Reasonable timeouts (otherwise it hangs, then next server, then “uiDLFailed”)
+		curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 15L);
+		curl_easy_setopt(curl, CURLOPT_TIMEOUT, 300L);
+
+		// Optional: more robust against slow connections
+		curl_easy_setopt(curl, CURLOPT_LOW_SPEED_LIMIT, 1024L);   // 1KB/s
+		curl_easy_setopt(curl, CURLOPT_LOW_SPEED_TIME, 30L);
 
 		res = curl_easy_perform(curl);
 
@@ -1611,8 +1629,8 @@ void CPatchManager::decompressFile (const string &filename)
 		deleteFile (filename);
 		throw Exception (err);
 	}
+	std::string dest = NLMISC::CFile::getFilenameWithoutExtension(filename);
 
-	string dest = filename.substr(0, filename.size ()-4);
 	setRWAccess(dest, false);
 	//if(isVerboseLog()) nlinfo("Calling nlfopen('%s','wb')", dest.c_str());
 	FILE *fp = nlfopen (dest, "wb");
@@ -2814,7 +2832,9 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 			string PatchName;
 			try
 			{
-				PatchName = toString("%05d/", rFTP.Patches[j]) + rFTP.FileName.substr(0, rFTP.FileName.size()-4) + toString("_%05d", rFTP.Patches[j]) + ".patch";
+				std::string dest = NLMISC::CFile::getFilenameWithoutExtension(rFTP.FileName);
+
+				PatchName = toString("%05d/", rFTP.Patches[j]) + dest + toString("_%05d", rFTP.Patches[j]) + ".patch";
 				sTranslate = CI18N::get("uiLoginGetFile") + " " + PatchName;
 				pPM->setState(true, sTranslate);
 				progress.Scale = 1.f;
@@ -2831,7 +2851,7 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 			catch (...)
 			{
 				// fallback to patch root directory
-				PatchName = rFTP.FileName.substr(0, rFTP.FileName.size()-4);
+				PatchName = NLMISC::CFile::getFilenameWithoutExtension(rFTP.FileName);
 				PatchName += toString("_%05d", rFTP.Patches[j]) + ".patch";
 				sTranslate = CI18N::get("uiLoginGetFile") + " " + PatchName;
 				pPM->setState(true, sTranslate);

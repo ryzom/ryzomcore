@@ -1329,14 +1329,12 @@ function game:onOverCap()
 	-- Inside
 	if mx > ui.x and mx < ui.x + ui.w and my < ui.y and my > ui.y - ui.h then
 		if getCurrentWindowUnder() == ui then
-			if game.keepExpandStatus or ui.opened == false then return end
 			if game.capExpanded == false then
 				game:expandCapWeb(true)
 			end
 		end
 	else
 	-- Outside
-		if game.keepExpandStatus or ui.opened == false then return end
 		if mx < ui.x or mx > ui.x + ui.w or my > ui.y or my < ui.y - ui.h then
 			if game.capExpanded then
 				game:expandCapWeb(false)
@@ -1352,30 +1350,14 @@ function game:expandCapWeb(expand)
 		game.capExpanded = true
 		ui.pop_min_h = game.ui_cap_expanded_h
 		ui.pop_max_h = game.ui_cap_expanded_h + 1
-		ui:find("header_opened").h = game.ui_cap_expanded_h - 16
+		ui:find("header_opened").h = game.ui_cap_expanded_h
 	else
 		game.capExpanded = false
 		ui.pop_min_h = game.ui_cap_collapsed_h
 		ui.pop_max_h = game.ui_cap_collapsed_h+1
-		ui:find("header_opened").h = game.ui_cap_collapsed_h - 16
+		ui:find("header_opened").h = game.ui_cap_collapsed_h
 	end
 end
-
-function game:keepExpandCapWeb(force)
-	local ui = getUI("ui:interface:cap")
-	if force ~= nil then
-		game.keepExpandStatus = not force
-	end
-
-	if game.keepExpandStatus == false then
-		game.keepExpandStatus = true
-		ui:find("right").texture = "w_win_lock.tga"
-	else
-		game.keepExpandStatus = false
-		ui:find("right").texture = "grey_0.tga"
-	end
-end
-
 
 function game:onCapResize()
 	local ui = getUI("ui:interface:cap")
@@ -1383,44 +1365,9 @@ function game:onCapResize()
 	web.w = ui.w - 18
 end
 
-game.ui_cap_collapsed_h = 65
+game.ui_cap_collapsed_h = 54
 game.ui_cap_expanded_h = 280
-game.ui_cap_w = 292
-
-function game:closeCapHeader()
-	local ui = getUI("ui:interface:cap")
-
-	-- save size
-	game.ui_cap_h = ui.h
-	game.ui_cap_w = ui.w
-
-	-- reduce window size
-	ui.pop_min_w = 292
-	ui.pop_min_h = 50
-	ui.pop_max_w = 292
-	ui.pop_max_h = 50
-	ui.h = 50
-	ui.w = 280
-	getUI("ui:interface:cap:header_closed").h = 34
-end
-
-function game:openCapHeader()
-	local ui = getUI("ui:interface:cap")
-	ui.pop_min_w = 292
-	ui.pop_max_w = 800
-
-	game:expandCapWeb(true)
-
-	if (game.ui_cap_w ~= nil) then
-		ui.w = game.ui_cap_w;
-	end
-end
-
-function game:openFullCap()
-	game.ui_cap_collapsed_h = 65
-	getUI("ui:interface:cap").opened = true
-	game:openCapHeader()
-end
+game.ui_cap_w = 182
 
 function game:resizeCap(value)
 	local ui = getUI("ui:interface:cap")
@@ -1435,50 +1382,41 @@ end
 
 function game:updateCapTooltip()
 	local real_tooltip = game:parseLangText(mission_real_tooltip)
-	getUI("ui:interface:cap:header_opened:cap_group:cap_ctrl").tooltip = getUCtf8("@{FB0F}"..game.CapTitle.."\n@{FFFF}"..game.CapDesc..real_tooltip)
-	getUI("ui:interface:cap:header_closed:cap_group:cap_ctrl").tooltip = getUCtf8("@{FB0F}"..game.CapTitle.."\n@{FFFF}"..game.CapDesc..real_tooltip)
+	getUI("ui:interface:cap:header_opened:cap_group:cap_ctrl").tooltip = getUCtf8("@{FB0F}"..game.CapTitle..real_tooltip)
 end
 
 function game:setCapTitle(text)
 	game.CapTitle = game:parseLangText(text)
-	getUI("ui:interface:cap:header_opened:cap_group:cap_title").hardtext = game.CapTitle
-	game:updateCapTooltip()
-end
-
-function game:setCapDesc(text)
-	game.CapDesc = game:parseLangText(text)
-	getUI("ui:interface:cap:header_opened:cap_group:cap_desc").hardtext = game.CapDesc
-	getUI("ui:interface:cap:header_closed:cap_group:cap_desc").hardtext = game.CapDesc
+	getUI("ui:interface:cap:header_opened:cap_group:cap_title").uc_hardtext_format = game.CapTitle
 	game:updateCapTooltip()
 end
 
 function game:setCapIcon(icon)
 	getUI("ui:interface:cap:header_opened:cap_group:cap_icon").texture = icon
-	getUI("ui:interface:cap:header_closed:cap_group:cap_icon").texture = icon
 end
 
 function game:setCapInfos(infos)
-	getUI("ui:interface:cap:header_opened:cap_group:infos").uc_hardtext_format=getUCtf8(infos)
-	game.CapInfos = infos
 end
 
 function game:informNewCap()
-	local resize = 70
-	if getUI("ui:interface:cap:header_closed").active then
-		getUI("ui:interface:cap:header_closed:cap_group:infos").uc_hardtext_format=getUCtf8("@{0AFF}Nouveau cap disponible")
-		getUI("ui:interface:cap:header_closed").h = 70
-		game.ui_cap_closed_h = 70
-	else
-		getUI("ui:interface:cap:header_opened:cap_group:infos").uc_hardtext_format=getUCtf8("@{0AFF}Nouveau cap disponible")
-		if game.keepExpandStatus then
-			return
-		end
-		getUI("ui:interface:cap:header_opened").h = 70
-		resize = 84
-	end
-	local ui = getUI("ui:interface:cap")
-	ui.pop_min_h = resize
-	ui.pop_max_h = resize+1
+	-- TODO : rewrite this part
+
+	--local resize = 70
+	--if getUI("ui:interface:cap:header_closed").active then
+		--getUI("ui:interface:cap:header_closed:cap_group:infos").uc_hardtext_format=getUCtf8("@{0AFF}Nouveau cap disponible")
+		--getUI("ui:interface:cap:header_closed").h = 70
+		--game.ui_cap_closed_h = 70
+	--else
+		--getUI("ui:interface:cap:header_opened:cap_group:infos").uc_hardtext_format=getUCtf8("@{0AFF}Nouveau cap disponible")
+		--if game.keepExpandStatus then
+			--return
+		--end
+		--getUI("ui:interface:cap:header_opened").h = 70
+		--resize = 84
+	--end
+	--local ui = getUI("ui:interface:cap")
+	--ui.pop_min_h = resize
+	--ui.pop_max_h = resize+1
 end
 
 
@@ -1495,12 +1433,10 @@ end
 
 
 function game:setCapProgress(value, text)
-    if value == nil then
+	if value == nil then
 		getUI("ui:interface:cap:header_opened:cap_group:cap_progress").active = false
-		getUI("ui:interface:cap:header_closed:cap_group:cap_progress").active = false
 	else
 		getUI("ui:interface:cap:header_opened:cap_group:cap_progress").active = true
-		getUI("ui:interface:cap:header_closed:cap_group:cap_progress").active = true
 		if value >= 0 then
 			if value > 100 then
 				game:capOpenUrl(game.CapNextUrl)
@@ -1512,7 +1448,6 @@ function game:setCapProgress(value, text)
 
 	if text ~= nil then
 		getUI("ui:interface:cap:header_opened:cap_group:cap_infos").hardtext = text
-		getUI("ui:interface:cap:header_closed:cap_group:cap_infos").hardtext = text
 	end
 end
 
@@ -1601,8 +1536,6 @@ function setCap(id, element, a, b)
 
 	if element == "t" then
 		game:setCapTitle(a)
-	elseif element == "d" then
-		game:setCapDesc(a)
 	elseif element == "i" then
 		game:setCapIcon(a)
 	elseif element == "p" then
@@ -1798,7 +1731,9 @@ end
 function game:onInGameDbInitialized()
 	--getUI("ui:interface:db_loading").active=false
 	game.InGameDbInitialized = true
-	debug("IG DB initialized")
+	debugInfo("IG DB initialized")
+	game:initWebIg()
+
 	-- Add waiters to guild chests
 	for i=0, 19 do
 		addOnDbChange(getUI("ui:interface:inv_guild"), "@SERVER:GUILD:CHEST:"..tostring(i)..":NAME", "updateChestList()")
@@ -1831,27 +1766,42 @@ function game:onInGameDbInitialized()
 	end
 end
 
-function game:onWebIgReady()
-	-- Call init webig
-	debug("Webig ready")
-	game.webigInitialized = true
-	setOnDraw(getUI("ui:interface:encyclopedia"), "ArkMissionCatalog:startResize()")
-	getUI("ui:interface:webig:content:html"):browse("home")
-	if getDbProp("UI:SAVE:SKIP_TUTORIAL") == 0 then
-		addOnDbChange(getUI("ui:interface"), "@UI:SAVE:MK_MODE", "game:resizeMilkoPad()")
-		help:initWelcome()
+function game:initWebIg()
+	if not game.webigInitialized then
+		game.webigInitialized = true
+		openUrlInBg("https://app.ryzom.com/index.php?init_webig=1")
+
+		game.setupWebigWithDBInitialized = true
+		help:displayWelcome()
+		game:onCapResize()
+		local cap = getUI("ui:interface:cap")
+		setOnDraw(cap, "game:onOverCap()")
+		ArkLessons:init()
+		forceResetInterfaceTimer = 1
+		-- if ui:interface:web_transactions_cap is active, the player have a ALL WINDOWS OPENED bug
+		-- So we will force a reset of the interface
+		setOnDraw(getUI("ui:interface:web_transactions_cap"), "game:forceResetInterface()")
 	end
-
-	game.setupWebigWithDBInitialized = true
-	help:displayWelcome()
-	game:onCapResize()
-	local cap = getUI("ui:interface:cap")
-	setOnDraw(cap, "game:onOverCap()")
-	ArkLessons:init()
-
-	setOnDraw(getUI("ui:interface:ryzhomeMain"), "RyzhomeBar:close()")
 end
 
+function game:forceResetInterface()
+	forceResetInterfaceTimer = forceResetInterfaceTimer - 1
+	if forceResetInterfaceTimer <= 0 then
+		forceResetInterfaceTimer = 100
+		runAH(nil, "milko_menu_do_reset_interface", "")
+	end
+end
+
+function game:onLoadedUi()
+	debugInfo("On Loaded Ui")
+	getUI("ui:interface:webig:content:html"):browse("home")
+	setOnDraw(getUI("ui:interface:ryzhomeMain"), "RyzhomeBar:close()")
+	setOnDraw(getUI("ui:interface:encyclopedia"), "ArkMissionCatalog:startResize()")
+end
+
+function game:onWebIgReady()
+	-- Deprecated
+end
 --------------------------------------------------------------------------------------------------------------
 -- handler called by C++ at the start of a far TP (log to char selection or far tp)
 function game:onFarTpStart()
@@ -2230,4 +2180,4 @@ end
 
 
 -- VERSION --
-RYZOM_INFO_PLAYER_VERSION = 335
+FILE_INFO_PLAYER_VERSION = 182

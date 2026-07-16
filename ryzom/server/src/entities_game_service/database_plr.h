@@ -1,5 +1,7 @@
 
 
+#ifndef INCLUDED_database_PLR_H
+#define INCLUDED_database_PLR_H
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
@@ -17,11 +19,19 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /////////////////////////////////////////////////////////////////
-// WARNING : this is a generated file, don't change it !
+//
+//
+//
+//
+//
+//		WARNING : this is a generated file, don't change it !
+//
+//
+//
+//
+//
+//
 /////////////////////////////////////////////////////////////////
-
-#ifndef INCLUDED_DATABASE_database_PLR_H
-#define INCLUDED_DATABASE_database_PLR_H
 
 #include "nel/misc/string_common.h"
 #include "cdb_group.h"
@@ -10795,4 +10805,4 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 	};
 	
 
-#endif // INCLUDED_DATABASE_database_PLR_H
+#endif // INCLUDED_database_PLR_H

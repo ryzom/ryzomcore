@@ -1,5 +1,7 @@
 
 
+#ifndef INCLUDED_database_GUILD_H
+#define INCLUDED_database_GUILD_H
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
@@ -17,11 +19,19 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /////////////////////////////////////////////////////////////////
-// WARNING : this is a generated file, don't change it !
+//
+//
+//
+//
+//
+//		WARNING : this is a generated file, don't change it !
+//
+//
+//
+//
+//
+//
 /////////////////////////////////////////////////////////////////
-
-#ifndef INCLUDED_DATABASE_database_GUILD_H
-#define INCLUDED_DATABASE_database_GUILD_H
 
 #include "nel/misc/string_common.h"
 #include "cdb_group.h"
@@ -458,6 +468,182 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		TArray &getArray(uint32 index)
 		{
 			nlassert(index < 256);
+			return _Array[index];
+		}
+		
+	};
+		
+	class TCHEST
+	{
+	public:
+		
+	class TArray
+	{
+	public:
+		
+
+	private:
+		ICDBStructNode	*_BranchNode;
+
+		ICDBStructNode	*_NAME;
+		ICDBStructNode	*_VIEW_GRADE;
+		ICDBStructNode	*_PUT_GRADE;
+		ICDBStructNode	*_GET_GRADE;
+		ICDBStructNode	*_BULK_MAX;
+		
+
+	public:
+		void init(ICDBStructNode *parent, uint index);
+
+		// accessor to branch node
+		ICDBStructNode *getCDBNode()
+		{
+			return _BranchNode;
+		}
+
+		
+		void setNAME(CCDBGroup &dbGroup, ucstring value, bool forceSending = false)
+		{
+			
+
+			_setProp(dbGroup.Database, _NAME, value, forceSending);
+		}
+
+		ucstring getNAME(const CCDBGroup &dbGroup)
+		{
+			ucstring value;
+			_getProp(dbGroup.Database, _NAME, value);
+
+			return value;
+		}
+		
+		void setNAME(CCDBGroup &dbGroup, uint32 stringId, bool forceSending = false)
+		{
+			_setProp(dbGroup.Database, _NAME, stringId, forceSending);
+		}
+		uint32 getNAME_id(const CCDBGroup &dbGroup)
+		{
+			uint32 value;
+			_getProp(dbGroup.Database, _NAME, value);
+
+			return value;
+		}
+		
+		ICDBStructNode *getNAMECDBNode()
+		{
+			return _NAME;
+		}
+	
+		void setVIEW_GRADE(CCDBGroup &dbGroup, uint8 value, bool forceSending = false)
+		{
+			
+			// Check that the value is not out of database precision
+			STOP_IF(value > (1<<3)-1, "setVIEW_GRADE : Value out of bound : trying to store "<<value<<" in a unsigned field limited to 3 bits");
+				
+
+			_setProp(dbGroup.Database, _VIEW_GRADE, value, forceSending);
+		}
+
+		uint8 getVIEW_GRADE(const CCDBGroup &dbGroup)
+		{
+			uint8 value;
+			_getProp(dbGroup.Database, _VIEW_GRADE, value);
+
+			return value;
+		}
+		
+		ICDBStructNode *getVIEW_GRADECDBNode()
+		{
+			return _VIEW_GRADE;
+		}
+	
+		void setPUT_GRADE(CCDBGroup &dbGroup, uint8 value, bool forceSending = false)
+		{
+			
+			// Check that the value is not out of database precision
+			STOP_IF(value > (1<<3)-1, "setPUT_GRADE : Value out of bound : trying to store "<<value<<" in a unsigned field limited to 3 bits");
+				
+
+			_setProp(dbGroup.Database, _PUT_GRADE, value, forceSending);
+		}
+
+		uint8 getPUT_GRADE(const CCDBGroup &dbGroup)
+		{
+			uint8 value;
+			_getProp(dbGroup.Database, _PUT_GRADE, value);
+
+			return value;
+		}
+		
+		ICDBStructNode *getPUT_GRADECDBNode()
+		{
+			return _PUT_GRADE;
+		}
+	
+		void setGET_GRADE(CCDBGroup &dbGroup, uint8 value, bool forceSending = false)
+		{
+			
+			// Check that the value is not out of database precision
+			STOP_IF(value > (1<<3)-1, "setGET_GRADE : Value out of bound : trying to store "<<value<<" in a unsigned field limited to 3 bits");
+				
+
+			_setProp(dbGroup.Database, _GET_GRADE, value, forceSending);
+		}
+
+		uint8 getGET_GRADE(const CCDBGroup &dbGroup)
+		{
+			uint8 value;
+			_getProp(dbGroup.Database, _GET_GRADE, value);
+
+			return value;
+		}
+		
+		ICDBStructNode *getGET_GRADECDBNode()
+		{
+			return _GET_GRADE;
+		}
+	
+		void setBULK_MAX(CCDBGroup &dbGroup, uint32 value, bool forceSending = false)
+		{
+			
+
+			_setProp(dbGroup.Database, _BULK_MAX, value, forceSending);
+		}
+
+		uint32 getBULK_MAX(const CCDBGroup &dbGroup)
+		{
+			uint32 value;
+			_getProp(dbGroup.Database, _BULK_MAX, value);
+
+			return value;
+		}
+		
+		ICDBStructNode *getBULK_MAXCDBNode()
+		{
+			return _BULK_MAX;
+		}
+	
+	};
+		
+
+	private:
+		ICDBStructNode	*_BranchNode;
+
+		TArray _Array[20];
+		
+
+	public:
+		void init(ICDBStructNode *parent);
+
+		// accessor to branch node
+		ICDBStructNode *getCDBNode()
+		{
+			return _BranchNode;
+		}
+
+		TArray &getArray(uint32 index)
+		{
+			nlassert(index < 20);
 			return _Array[index];
 		}
 		
@@ -1552,6 +1738,7 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		ICDBStructNode	*_CREATION_DATE;
 		TFAME	_FAME;
 		TMEMBERS	_MEMBERS;
+		TCHEST	_CHEST;
 		TINVENTORY	_INVENTORY;
 		TOUTPOST	_OUTPOST;
 		
@@ -1809,6 +1996,10 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		{
 			return _MEMBERS;
 		}
+		TCHEST &getCHEST()
+		{
+			return _CHEST;
+		}
 		TINVENTORY &getINVENTORY()
 		{
 			return _INVENTORY;
@@ -1847,4 +2038,4 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 	};
 	
 
-#endif // INCLUDED_DATABASE_database_GUILD_H
+#endif // INCLUDED_database_GUILD_H

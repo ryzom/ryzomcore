@@ -819,7 +819,8 @@ COutpost::TChallengeOutpostErrors COutpost::challengeOutpost( CGuild *attackerGu
 
 	nlassert( attackerGuild->getId() != 0 );
 
-	if (!attackerGuild->canAddOutpost())
+
+	if ((getName().substr(0, 14) != "outpost_nexus_") && !attackerGuild->canAddOutpost())
 		return COutpost::TooManyGuildOutposts;
 
 	// validate guild attacker
@@ -842,7 +843,8 @@ COutpost::TChallengeOutpostErrors COutpost::challengeOutpost( CGuild *attackerGu
 				CGuildMember* guild_member = EGS_PD_CAST<CGuildMember*> ( (*it).second );
 				EGS_PD_AST(guild_member);
 
-				if( outpostForm->Level/NumberDayFactorGuildNeedForChallengeOutpost < ((CTickEventHandler::getGameCycle() - guild_member->getEnterTime()) / (days/CTickEventHandler::getGameTimeStep())) )
+				nlinfo("Check Need days = %u, %" NL_I64 "u, %" NL_I64 "u", outpostForm->Level/NumberDayFactorGuildNeedForChallengeOutpost, NLMISC::CTime::getSeconds64bSince1970(), guild_member->getRealEnterTimestamp());
+				if( outpostForm->Level/NumberDayFactorGuildNeedForChallengeOutpost < ((NLMISC::CTime::getSeconds64bSince1970() - guild_member->getRealEnterTimestamp()) / days) )
 				{
 					guildAttackerValid = true;
 					break;
@@ -1412,7 +1414,7 @@ uint32 COutpost::getChallengeCost() const
 TAIAlias COutpost::getRandomSpawnZone() const
 {
 	// choose a random spawn zone
-	sint32 randomCount = RandomGenerator.rand((uint16)_SpawnZones.size() - 1);
+	sint32 randomCount = rand() % ((uint16)_SpawnZones.size() - 1);
 	nlassert(randomCount >= 0 && randomCount < (sint32)_SpawnZones.size());
 	return _SpawnZones[randomCount].alias();
 }

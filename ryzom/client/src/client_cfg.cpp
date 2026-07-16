@@ -313,9 +313,9 @@ CClientConfig::CClientConfig()
 
 	InterfaceScale		= 1.0f;                     // Resize UI
 	InterfaceScale_min	= 0.8f;
-	InterfaceScale_max	= 2.0f;
+	InterfaceScale_max	= 4.0f;
 	InterfaceScale_step	= 0.05;
-	InterfaceScaleAuto  = false;
+	InterfaceScaleAuto  = true;
 	BilinearUI			= true;
 
 	WindowSnapInvert	= false;

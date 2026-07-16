@@ -1,9 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
-// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2021  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -137,7 +137,7 @@
 #include "pvp_manager/pvp_manager_2.h"
 #include "server_share/log_character_gen.h"
 #include "server_share/log_item_gen.h"
-#include "server_share/mongo_wrapper.h"
+#include "server_share/memc_wrapper.h"
 #include "shop_type/character_shopping_list.h"
 #include "shop_type/items_for_sale.h"
 #include "shop_type/offline_character_command.h"
@@ -382,6 +382,7 @@ CCharacter::CCharacter()
 	//	_CarriedWeight = 0;
 	_GuildId = 0;
 	_LastGuildId = 0;
+	_GuildEnterEra = 0;
 	_GuildEnterTime = 0;
 	_UseFactionSymbol = false;
 	_SavedVersion = 0;
@@ -652,7 +653,9 @@ CCharacter::CCharacter()
 	_SelectedOutpost = 0;
 	_ChannelAdded = false;
 	_DuelOpponent = NULL;
+	_IsTeleportFromRespawn = false;
 	_LastTpTick = 0;
+	_LastRespawnTick = 0;
 	_LastOverSpeedTick = 0;
 	_LastMountTick = 0;
 	_LastUnMountTick = 0;
@@ -713,6 +716,7 @@ void CCharacter::clear()
 	_GuildId = 0;
 	_LastGuildId = 0;
 	_GuildEnterTime = 0;
+	_GuildEnterEra = 0;
 	_CreationPointsRepartition = 0;
 	_ForbidAuraUseStartDate = 0;
 	_ForbidAuraUseEndDate = 0;
@@ -1640,8 +1644,19 @@ uint32 CCharacter::tickUpdate()
 		nextUpdate = 8;
 	}
 
+
+	if (hasMoved() && !haveAnyPrivilege() && getInvisibility())
+	{
+		nlinfo("Not Priv, Not afk and Invisible => made visible");
+		setInvisibility(false);
+		setWhoSeesMe(~0);
+		setAggroableOverride(true);
+		setAggroableSave(true);
+	}
+
 	_SavedPosX = _EntityState.X();
 	_SavedPosY = _EntityState.Y();
+
 	// ARK Check Position
 	vector<string> missionToRemove;
 
@@ -2079,6 +2094,9 @@ void CCharacter::respawn(sint32 x, sint32 y, sint32 z, float heading, bool apply
 	CMessage msgout("ENTITY_TELEPORTATION");
 	msgout.serial(_Id);
 
+	// save Last Respawn Tick if player respawns
+	_LastRespawnTick = CTickEventHandler::getGameCycle();
+
 	if (IsRingShard)
 	{
 		nlinfo("Asking GPMS to TP character %s to (0,0) for respawn", _Id.toString().c_str());
@@ -2105,6 +2123,8 @@ void CCharacter::respawn(sint32 x, sint32 y, sint32 z, float heading, bool apply
 //---------------------------------------------------
 void CCharacter::applyRespawnEffects(bool applyDP)
 {
+	_IsTeleportFromRespawn = true;
+
 	CSheetId usedSheet;
 	CSBrickParamJewelAttrs sbrickParam = getJewelAttrs("rez", SLOT_EQUIPMENT::NECKLACE, usedSheet);
 	SM_STATIC_PARAMS_1(params, STRING_MANAGER::sbrick);
@@ -5971,8 +5991,14 @@ void CCharacter::teleportCharacter(sint32 x, sint32 y, sint32 z, bool teleportWi
 		}
 	}
 
-	if (_IntangibleEndDate != ~0 && !fromVortex) // Don't save Last Tp Tick if player respawns or teleport from Vortex
+	if (_IsTeleportFromRespawn && !fromVortex)
+	{
+		_LastRespawnTick = CTickEventHandler::getGameCycle();
+	}
+	else if (!_IsTeleportFromRespawn && !fromVortex)
+	{
 		_LastTpTick = CTickEventHandler::getGameCycle();
+	}
 
 	_TpCoordinate.X = x;
 	_TpCoordinate.Y = y;
@@ -6026,6 +6052,8 @@ void CCharacter::teleportCharacter(sint32 x, sint32 y, sint32 z, bool teleportWi
 	//	respawnMsg.send("AIS");
 	// backup the who sees me property and set it to 0
 	CMirrorPropValue<TYPE_WHO_SEES_ME> whoSeesMe(TheDataset, _EntityRowId, DSPropertyWHO_SEES_ME);
+
+	_IsTeleportFromRespawn = false;
 
 	/*
 	FOR AIS the change of property value AIInstance is handled before the sendAggro message send by setWhoSeesMe
@@ -6734,6 +6762,18 @@ void CCharacter::onAnimalSpawned(CPetSpawnConfirmationMsg::TSpawnError SpawnStat
 			if (c) {
 				c->setIsAPet(true);
 				c->setName("pet_of_"+getName().toString());
+
+				uint32 program = c->getBotChatProgram();
+				if (!(program & (1<<BOTCHATTYPE::WebPageFlag)))
+				{
+					program |= 1 << BOTCHATTYPE::WebPageFlag;
+					c->setBotChatProgram(program);
+				}
+
+				const string &wpn = c->getWebPageName();
+				(string &)wpn = "MENU_MOUNT_IT";
+				const string &wp = c->getWebPage();
+				(string &)wp = toString("app_arcc action=mScript_Run&script_name=MountARenta&player=%s&sheet=%s", getName().toString().c_str(), c->getType().toString().c_str());
 			}
 			CMirrorPropValue<TYPE_FUEL> freeSpeedMode(TheDataset, PetMirrorRow, DSPropertyFUEL);
 			freeSpeedMode = true;
@@ -12061,6 +12101,11 @@ void CCharacter::setLangChannel(const string &lang)
 //-----------------------------------------------------------------------------
 void CCharacter::setNewTitle(const string &title)
 {
+
+#ifdef HAVE_MEMCACHED
+	if (title != _NewTitle)
+		CMemC::setWithIndex("Shard-Command", toString("setNewTitle:%s:%s", getName().toString().c_str(), title.c_str()));
+#endif
 	_NewTitle = title;
 }
 
@@ -15712,7 +15757,13 @@ string CCharacter::getTargetInfos()
 			CMirrorPropValueRO<TYPE_CELL> srcCell(TheDataset, dsr, DSPropertyCELL);
 			sint32 cell = srcCell;
 
-			msg += toString("%.2f|%.2f|%.2f|%.2f|%.4f|%d|", dist, x, y, z, h, cell)+cTarget->getType().toString()+"|"+EGSPD::CPeople::toString(cTarget->getRace())+"|"+toString("%d", cTarget->getGender())+"|"+title;
+			string riderName;
+			CCharacter *rider = PlayerManager.getChar( cTarget->getRiderEntity() );
+			if ( rider )
+				riderName = rider->getName().toString();
+
+
+			msg += toString("%.2f|%.2f|%.2f|%.2f|%.4f|%d|", dist, x, y, z, h, cell)+cTarget->getType().toString()+"|"+EGSPD::CPeople::toString(cTarget->getRace())+"|"+toString("%d", cTarget->getGender())+"|"+title+"|"+riderName;
 		}
 	}
 
@@ -17862,8 +17913,7 @@ TCharConnectionState CCharacter::isFriendCharVisualyOnline(const NLMISC::CEntity
 
 	if (friendChar != NULL)
 	{
-		volatile TFriendVisibility friendMode = friendChar->getFriendVisibility();
-
+		TFriendVisibility friendMode = friendChar->getFriendVisibility();
 		switch (friendMode)
 		{
 		case VisibleToGuildOnly:
@@ -21594,10 +21644,15 @@ void CCharacter::outpostSideChosen(bool neutral, OUTPOSTENUMS::TPVPSide side)
 			if (outpost->getName().substr(0, 14) != "outpost_nexus_")
 			{
 				CGuildMember* member = guild->getMemberFromEId(_Id);
-				if (member != NULL && ((CTickEventHandler::getGameCycle() - member->getEnterTime()) / (86400/CTickEventHandler::getGameTimeStep())) < OutpostDaysForGvX.get())
+				if (member != NULL)
 				{
-					side = OUTPOSTENUMS::UnknownPVPSide;
-					nlinfo("Player %s entertime are < 21d at OP %s", getName().toString().c_str(), outpost->getName().c_str());
+					nlinfo("Check Need days = 21, %" NL_I64 "u, %" NL_I64 "u", NLMISC::CTime::getSeconds64bSince1970(), member->getRealEnterTimestamp());
+					if (((NLMISC::CTime::getSeconds64bSince1970() - member->getRealEnterTimestamp()) / 86400) < OutpostDaysForGvX.get())
+					{
+						side = OUTPOSTENUMS::UnknownPVPSide;
+						nlinfo("Player %s entertime are < 21d at OP %s", getName().toString().c_str(), outpost->getName().c_str());
+						sendDynamicSystemMessage(_EntityRowId, "OUTPOST_CANT_PARTICIPATE_21DAYS");
+					}
 				}
 			}
 
@@ -22708,9 +22763,13 @@ bool CCharacter::setGuildId(uint32 guildId)
 			IShardUnifierEvent::getInstance()->onUpdateCharGuild(_Id, guildId);
 
 		_GuildId = guildId;
-#ifdef HAVE_MONGO
-		CMongo::update("ryzom_users", toString("{'cid': %" NL_I64 "u}", _Id.getShortId()),
-					   toString("{ $set: {'guildId': %d} }", guildId));
+
+#ifdef HAVE_MEMCACHED
+		ucstring name = CEntityIdTranslator::getInstance()->getByEntity(getId());
+		CEntityIdTranslator::removeShardFromName(name);
+		CGuild* guild = CGuildManager::getInstance()->getGuildFromId(guildId);
+		if (guild)
+			CMemC::setWithIndex("Shard-Command", toString("setUserGuild:%s:%s", name.toUtf8().c_str(), guild->getName().toUtf8().c_str()));
 #endif
 		return true;
 	}

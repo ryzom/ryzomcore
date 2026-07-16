@@ -29,6 +29,7 @@
 #include "entities.h"
 #include "entity_cl.h"
 #include "fx_cl.h"
+#include "weather.h"
 #include "forage_source_cl.h"
 #include "item_cl.h"
 #include "pacs_client.h"
@@ -871,15 +872,36 @@ bool CEntityManager::setupInstance(uint32 idx, const vector<string> &keys, const
 		}
 		else if (param == "texture")
 		{
-			if (!values[i].empty())
+			string texture = values[i];
+
+			if (texture == "#season#" || texture.empty())
 			{
-				for(uint j=0;j<instance.getNumMaterials();j++)
+				uint8 selectedTextureSet = (uint8)::computeCurrSeason();
+				instance.selectTextureSet(selectedTextureSet);
+				texture = "";
+			}
+			else if (texture[0] == '#')
+			{
+				uint8 selectedTextureSet;
+				fromString(texture.substr(1), selectedTextureSet);
+				instance.selectTextureSet(selectedTextureSet);
+				texture = "";
+			}
+
+			std::vector<string>texList;
+			if (!texture.empty())
+				splitString(texture, " ", texList);
+
+			for(uint j=0;j<instance.getNumMaterials();j++)
+			{
+
+				if (!texture.empty())
 				{
 					sint numStages = instance.getMaterial(j).getLastTextureStage() + 1;
 					for(sint l = 0; l < numStages; l++)
 					{
 						if (instance.getMaterial(j).isTextureFile((uint) l))
-							instance.getMaterial(j).setTextureFileName(values[i], (uint) l);
+							instance.getMaterial(j).setTextureFileName(texList[std::min((int)j, (int)texList.size()-1)], (uint) l);
 					}
 				}
 			}

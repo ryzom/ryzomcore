@@ -129,8 +129,8 @@ public:
 	}
 
 	/// Select the subdivisions
-	uint8 setChestA(const NLMISC::CEntityId &recipient, uint8 chest) { _ChestsA[recipient] = chest; }
-	uint8 setChestB(const NLMISC::CEntityId &recipient, uint8 chest) { _ChestsB[recipient] = chest; }
+	void setChestA(const NLMISC::CEntityId &recipient, uint8 chest) { _ChestsA[recipient] = chest; }
+	void setChestB(const NLMISC::CEntityId &recipient, uint8 chest) { _ChestsB[recipient] = chest; }
 
 	/// An item has changed (can be a removing)
 	virtual void onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags changeFlags);

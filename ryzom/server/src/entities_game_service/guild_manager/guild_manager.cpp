@@ -29,7 +29,7 @@
 #include "server_share/mail_forum_validator.h"
 #include "game_share/persistent_data_tree.h"
 #include "server_share/log_item_gen.h"
-#include "server_share/mongo_wrapper.h"
+#include "server_share/memc_wrapper.h"
 
 #include "player_manager/player_manager.h"
 #include "player_manager/player.h"
@@ -446,6 +446,7 @@ CGuild *CGuildManager::createGuildProxy(uint32 guildId, const ucstring & guildNa
 //	guild->setVillage(place);
 	guild->setRace(race);
 	guild->setCreationDate( creationDate);
+	guild->setCreationEra( CurrentEra);
 
 //	for ( uint i = 0; i < EGSPD::CSPType::EndSPType; i++ )
 //	{
@@ -825,6 +826,7 @@ void CGuildManager::createGuildStep2(uint32 guildId, const ucstring &guildName, 
 //	guild->setVillage(place);
 	guild->setRace(bot->getRace());
 	guild->setCreationDate( CTickEventHandler::getGameCycle() );
+	guild->setCreationEra( CurrentEra );
 
 //	for ( uint i = 0; i < EGSPD::CSPType::EndSPType; i++ )
 //	{
@@ -851,6 +853,7 @@ void CGuildManager::createGuildStep2(uint32 guildId, const ucstring &guildName, 
 //	guild->incGradeCount( EGSPD::CGuildGrade::Leader );
 	nlassert( memberCore );
 	memberCore->setEnterTime( CTickEventHandler::getGameCycle() );
+	memberCore->setEnterEra( CurrentEra );
 	STOP_IF(!guild->setMemberGrade(memberCore, EGSPD::CGuildGrade::Leader), "Failed to set grade to leader for new guild"<<guildId<<" creator "<<character->getId().toString());
 //	memberCore->setMemberGrade( EGSPD::CGuildGrade::Leader );
 
@@ -861,8 +864,8 @@ void CGuildManager::createGuildStep2(uint32 guildId, const ucstring &guildName, 
 	// broadcast the new guild info
 	IGuildUnifier::getInstance()->guildCreated(guild);
 
-#ifdef HAVE_MONGO
-		CMongo::insert("ryzom_guilds", toString("{ 'guildId': %u, 'name': '%s', 'created': %" NL_I64 "u }", guildId, guildName.toUtf8().c_str(), CTickEventHandler::getGameCycle()));
+#ifdef HAVE_MEMCACHED
+	CMemC::setWithIndex("Shard-Command", toString("createGuildStep2:%s", guildName.toUtf8().c_str()));
 #endif
 
 	// close guild creation interface
@@ -935,9 +938,8 @@ void CGuildManager::deleteGuild(uint32 id)
 			IShardUnifierEvent::getInstance()->removeGuild(id);
 	}
 
-
-#ifdef HAVE_MONGO
-		CMongo::remove("ryzom_guilds", toString("{'guildId': %u}", id));
+#ifdef HAVE_MEMCACHED
+	CMemC::setWithIndex("Shard-Command", toString("deleteGuild:%s", guild->getName().toUtf8().c_str()));
 #endif
 
 	_Container->deleteFromGuilds(id);
@@ -1004,7 +1006,7 @@ void CGuildManager::characterDeleted( CCharacter & user )
 			// check if the current member is the successor
 			if ( successor == NULL ||
 				member->getGrade() < successor->getGrade() ||
-				( member->getGrade() == successor->getGrade() && member->getEnterTime() < successor->getEnterTime() ) )
+				( member->getGrade() == successor->getGrade() && member->getRealEnterTime() < successor->getRealEnterTime() ) )
 			{
 				successor = member;
 			}

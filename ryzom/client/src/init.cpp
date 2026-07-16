@@ -859,6 +859,7 @@ void initLog()
 	AssertLog->addDisplayer (ClientLogDisplayer);
 
 	// Display the client version.
+	nlinfo("Log Directory: %s", getLogDirectory().c_str());
 	nlinfo("RYZOM VERSION: %s", getDebugVersion().c_str());
 	nlinfo("Memory: %s/%s", bytesToHumanReadable(CSystemInfo::availablePhysicalMemory()).c_str(), bytesToHumanReadable(CSystemInfo::totalPhysicalMemory()).c_str());
 	nlinfo("OS: %s", CSystemInfo::getOS().c_str());
@@ -1338,7 +1339,7 @@ void prelogInit()
 //		resetTextContext ("bremenb.ttf", false);
 		resetTextContext ("ryzom.ttf", false);
 
-		CInterfaceManager::getInstance()->setInterfaceScale(1.f, true);
+		CInterfaceManager::getInstance()->setInterfaceScale(1.f, true, true);
 		CViewRenderer::getInstance()->setBilinearFiltering(ClientCfg.BilinearUI);
 
 		CWidgetManager::getInstance()->setWindowSnapInvert(ClientCfg.WindowSnapInvert);

@@ -390,23 +390,6 @@ static uint getNumZones()
 	return (uint)zoneLoaded.size();
 }
 
-static uint16 getZoneIdFromName(const string &zoneName)
-{
-	uint16 zoneId = 0;
-	CVector2f pos;
-	if (getPosFromZoneName(zoneName, pos))
-	{
-		uint x = (uint)pos.x / 160;
-		uint y = -(uint)pos.y / 160;
-		zoneId = (x&255) + (y<<8);
-	}
-	else
-	{
-		nlinfo("no zone...");
-	}
-	return zoneId;
-}
-
 //-----------------------------------------------
 // select :
 // Update global parameters like the texture for the micro veget.
@@ -742,34 +725,14 @@ void CContinent::select(const CVectorD &pos, NLMISC::IProgressCallback &progress
 					completeIsland = R2::CScenarioEntryPoints::getInstance().getCompleteIslandFromCoords(CVector2f((float) UserEntity->pos().x, (float) UserEntity->pos().y));
 					Landscape->refreshAllZonesAround(pos, ClientCfg.Vision + ExtraZoneLoadingVision, zonesAdded, zonesRemoved, progress, completeIsland ? &(completeIsland->ZoneIDs) : NULL);
 
+					LandscapeIGManager.unloadArrayZoneIG(zonesRemoved);
 					for (uint i = 0; i < zonesRemoved.size(); i++)
-						EntitiesMngr.removeInstancesInIgZone(getZoneIdFromName(zonesRemoved[i]));
-
-					for (uint i = 0; i < zonesAdded.size(); i++)
 					{
-						string luaScriptName = CPath::lookup(zonesAdded[i]+".lua", false);
-
-						if (!luaScriptName.empty())
-						{
-							CIFile in;
-							if (in.open(luaScriptName))
-							{
-
-								string luaScript;
-								if (in.readAll(luaScript))
-								{
-									CLuaManager::getInstance().executeLuaScript(luaScript, true);
-									nlinfo("loading %s", luaScriptName.c_str());
-								}
-							}
-						}
-						else
-						{
-							nlinfo("file not found %s", luaScriptName.c_str());
-						}
+						if (!zonesRemoved[i].empty())
+							EntitiesMngr.removeInstancesInIgZone(getZoneIdFromName(zonesRemoved[i]));
 					}
 
-					LandscapeIGManager.unloadArrayZoneIG(zonesRemoved);
+					ContinentMngr.loadZonesLua(zonesAdded);
 					LandscapeIGManager.loadArrayZoneIG(zonesAdded, &igAdded);
 				}
 			}

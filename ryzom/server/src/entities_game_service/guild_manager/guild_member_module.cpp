@@ -112,6 +112,8 @@ void CGuildMemberModule::quitGuild()
 	proxy.cancelAFK();
 	clearOnlineGuildProperties();
 	uint32 enterTime = _GuildMemberCore->getEnterTime();
+	uint32 enterEra = _GuildMemberCore->getEnterEra();
+	uint64 realEnterTime = _GuildMemberCore->getRealEnterTime();
 	guild->deleteMember( _GuildMemberCore );
 	if ( guild->getMembersBegin() == guild->getMembersEnd() )
 	{
@@ -123,10 +125,10 @@ void CGuildMemberModule::quitGuild()
 		CCharacter *c = PlayerManager.getChar(proxy.getId());
 		if (c) {
 			// if player are in guild since 3 days, save it
-			if (((CTickEventHandler::getGameCycle() - enterTime) / (86400/CTickEventHandler::getGameTimeStep())) > 3)
+			if (((CTickEventHandler::getGameCycle(CurrentEra) - realEnterTime) / 8640) > 3)
 			{
-				nlinfo("char in guild since 3 days, set enter time to %u", enterTime);
-				c->setGuildEnterTime(enterTime);
+				nlinfo("char in guild since 3 days, set enter time to %u %u", enterTime, enterEra);
+				c->setGuildEnterTime(enterTime, enterEra);
 				c->setLastGuildId(guild->getId());
 			}
 		}
@@ -366,57 +368,19 @@ void CGuildMemberModule::_inviteCharacterInGuild(CGuildCharProxy& invitor, CGuil
 	}
 
 	// check marauders case (character is neutral/neutral)
-	if (invitedAllegiance.first == PVP_CLAN::Neutral && invitedAllegiance.second == PVP_CLAN::Neutral)
+	if (invitedAllegiance.first == PVP_CLAN::Neutral && invitedAllegiance.second == PVP_CLAN::Neutral && invitedChar->getOrganization() == 5)
 	{
-		// get the marauder index
-		uint32 factionIndex	= CStaticFames::getInstance().getFactionIndex("black_kami");
-
-		if (factionIndex != CStaticFames::INVALID_FACTION_INDEX)
+		// check if the guild is neutral (only neutral guilds can guild marauders)
+		if (guildAllegiance.first != PVP_CLAN::Neutral || guildAllegiance.second != PVP_CLAN::Neutral)
 		{
-			// get marauder fame for invited character
-			sint32 characterFactionFame = CFameInterface::getInstance().getFameIndexed(invitedChar->getId(), factionIndex);
-
-			// character is a marauder only if his marauder fame is at least REQUIRED_MARAUDER_FAME
-			if (characterFactionFame >= REQUIRED_MARAUDER_FAME)
-			{
-#if 0
-				// get marauder fame for the guild (only marauder guilds can guild marauders)
-				sint32 guildFactionFame = CFameInterface::getInstance().getFameIndexed(guild->getEId(), factionIndex);
-
-				// check if the guild is marauder
-				if (guildFactionFame < REQUIRED_MARAUDER_FAME)
-				{
-					SM_STATIC_PARAMS_2( params, STRING_MANAGER::player, STRING_MANAGER::faction );
-					params[0].setEIdAIAlias( target.getId(), CAIAliasTranslator::getInstance()->getAIAlias( target.getId()) );
-					params[1].Enum = factionIndex;
-					invitor.sendSystemMessage("GUILD_INCOMPATIBLE_ALLEGIANCE",params);
-					return;
-				}
-#endif
-				// check if the guild is civilization neutral (only neutral guilds can guild marauders)
-				if (guildAllegiance.first != PVP_CLAN::Neutral)
-				{
-					SM_STATIC_PARAMS_2( params, STRING_MANAGER::player, STRING_MANAGER::faction );
-					params[0].setEIdAIAlias( target.getId(), CAIAliasTranslator::getInstance()->getAIAlias( target.getId()) );
-					params[1].Enum = PVP_CLAN::getFactionIndex(invitedAllegiance.first);
-					invitor.sendSystemMessage("GUILD_INCOMPATIBLE_ALLEGIANCE",params);
-					return;
-				}
-
-				// check if the guild is cult neutral (only neutral guilds can guild marauders)
-				if (guildAllegiance.second != PVP_CLAN::Neutral)
-				{
-					SM_STATIC_PARAMS_2( params, STRING_MANAGER::player, STRING_MANAGER::faction );
-					params[0].setEIdAIAlias( target.getId(), CAIAliasTranslator::getInstance()->getAIAlias( target.getId()) );
-					params[1].Enum = PVP_CLAN::getFactionIndex(invitedAllegiance.second);
-					invitor.sendSystemMessage("GUILD_INCOMPATIBLE_ALLEGIANCE",params);
-					return;
-				}
-			}
-		}
-		else
-		{
-			nlwarning("Unable to find faction 'black_kami'");
+			SM_STATIC_PARAMS_2( params, STRING_MANAGER::player, STRING_MANAGER::faction );
+			params[0].setEIdAIAlias( target.getId(), CAIAliasTranslator::getInstance()->getAIAlias( target.getId()) );
+			if (guildAllegiance.first != PVP_CLAN::Neutral)
+				params[1].Enum = PVP_CLAN::getFactionIndex(invitedAllegiance.first);
+			else
+				params[1].Enum = PVP_CLAN::getFactionIndex(invitedAllegiance.second);
+			invitor.sendSystemMessage("GUILD_INCOMPATIBLE_ALLEGIANCE",params);
+			return;
 		}
 	}
 

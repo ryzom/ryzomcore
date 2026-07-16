@@ -20,9 +20,10 @@
 
 #include <nel/misc/entity_id.h>
 #include <nel/net/unified_network.h>
+#include <nel/misc/eid_translator.h>
 
 #include "game_share/ryzom_mirror_properties.h"
-#include "server_share/mongo_wrapper.h"
+#include "server_share/memc_wrapper.h"
 
 #include "input_output_service.h"
 /*#include "game_share/tick_event_handler.h"
@@ -686,7 +687,7 @@ static void cbCharacterNameAndLang(CMessage& msgin, const string &serviceName, T
 		ci->Language = SM->checkLanguageCode(language);
 		ci->HavePrivilege = havePrivilege;
 
-#ifdef HAVE_MONGO
+#ifdef HAVE_MEMCACHED
 		string cids = "";
 		for ( uint i = 0; i < _ignoreList.size(); i++ )
 		{
@@ -696,8 +697,8 @@ static void cbCharacterNameAndLang(CMessage& msgin, const string &serviceName, T
 			else
 				cids += toString("%u", _ignoreList[i].getShortId());
 		}
-
-		CMongo::update("ryzom_users", toString("{ 'cid': %d}", TheDataset.getEntityId(chId).getShortId()), toString("{ $set:{ 'ignore': [%s] } }", cids.c_str()));
+		CEntityIdTranslator::removeShardFromName(name);
+		CMemC::set(toString("IOS-User-%s-IgnoreList", name.toUtf8().c_str()), cids);
 #endif
 
 		IOS->getChatManager().getClient(chId).setIgnoreList(ignoreList);

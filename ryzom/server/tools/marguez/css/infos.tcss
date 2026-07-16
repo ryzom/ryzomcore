@@ -1,0 +1,33 @@
+InfosPanel {
+	height: 3;
+	border-left: round orange;
+	border-right: round orange;
+	border-bottom: round orange;
+	text-style: bold;
+}
+
+InfosPanel Button {
+	display: none;
+	content-align-horizontal: center;
+	background: #08c;
+	color: black;
+	text-align: left;
+	height: 1;
+	margin-right: 2;
+	border: hidden black;
+}
+
+InfosPanel Button:hover {
+	background: orange;
+}
+
+
+InfosPanel Button.-active {
+	background: white;
+	tint: $background 10%;
+}
+
+
+ActionBar {
+	align-horizontal: right;
+}

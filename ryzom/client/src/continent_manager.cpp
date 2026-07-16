@@ -49,6 +49,7 @@
 #include "weather_manager_client.h"
 #include "interface_v3/interface_manager.h"
 #include "interface_v3/group_map.h"
+#include "zone_util.h"
 //
 #include "input.h"
 
@@ -246,6 +247,34 @@ void CContinentManager::load ()
 		}
 	}
 }// load //
+
+void CContinentManager::loadZoneLua(const string &zone)
+{
+	string luaScriptName = CPath::lookup(zone+".lua", false, false);
+
+	if (!zone.empty())
+	{
+		CIFile in;
+		if (in.open(luaScriptName))
+		{
+
+			string luaScript;
+			if (in.readAll(luaScript))
+			{
+				CLuaManager::getInstance().executeLuaScript(luaScript, true);
+				nlinfo("loading %s", luaScriptName.c_str());
+			}
+		}
+	}
+}
+
+void CContinentManager::loadZonesLua(const vector<string> &zones)
+{
+	for (uint i = 0; i < zones.size(); i++)
+	{
+		loadZoneLua(zones[i]);
+	}
+}
 
 //-----------------------------------------------
 // select :

@@ -551,6 +551,7 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 	ls.registerFunc("readUserChannels", readUserChannels);
 	ls.registerFunc("getMaxDynChan", getMaxDynChan);
 	ls.registerFunc("scrollElement", scrollElement);
+	ls.registerFunc("loadTextures", loadTextures);
 
 	lua_State *L = ls.getStatePointer();
 
@@ -5148,5 +5149,68 @@ int CLuaIHMRyzom::scrollElement(CLuaState &ls)
 		}
 	}
 	ls.pushNil();
+	return 1;
+}
+
+// ---------------------------------------------------------------------------
+// loadTextures(basePath [, uploadDXTC])  OR  loadTextures(textPath, uvPath [, uploadDXTC])
+//
+// Lua usage examples:
+//
+//   -- 1) Base path only, without extension; loads "<base>.tga" + "<base>.txt"
+//   loadTextures("my_sheet", true)
+//
+//   -- 2) Explicit file names
+//   loadTextures("my_sheet.tga", "my_sheet.txt", false)
+//
+// Returns: true on success
+int CLuaIHMRyzom::loadTextures(CLuaState &ls)
+{
+	CLuaStackChecker lsc(&ls, 1);
+	const char *funcName = "loadTextures";
+
+	int top = ls.getTop();
+	// Expect between 1 and 3 arguments
+	CLuaIHM::check(ls, top >= 1 && top <= 3, toString("%s requires at leat 1 or maximum 3 arguments", funcName));
+
+	bool uploadDXTC = false;
+	std::string textFileName;
+	std::string uvFileName;
+
+	// If the last argument is a boolean, treat it as the uploadDXTC flag
+	if (top >= 2 && ls.isBoolean(top))
+	{
+		uploadDXTC = ls.toBoolean(top);
+		top -= 1; // remaining arguments are the string paths
+	}
+
+	if (top == 1)
+	{
+		// Single string: basePath → base.tga + base.txt
+		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
+		std::string base = ls.toString(1);
+		textFileName = base + ".tga";
+		uvFileName = base + ".txt";
+	}
+	else if (top == 2)
+	{
+		// Two strings: textPath, uvPath
+		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
+		CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
+		textFileName = ls.toString(1);
+		uvFileName = ls.toString(2);
+	}
+	else
+	{
+		// Anything else is invalid
+		CLuaIHM::check(ls, false, "Invalid arguments");
+	}
+
+	// Delegate to the C++ interface manager
+	CInterfaceManager *pIM = CInterfaceManager::getInstance();
+	pIM->loadTextures(textFileName, uvFileName, uploadDXTC);
+
+	// Push true to Lua stack to indicate success
+	ls.push(true);
 	return 1;
 }

@@ -282,7 +282,7 @@ function outgame:buildActionPack()
 		sex = "f"
 	end
 
-	getUI("ui:outgame:appear:finish_but").frozen = 1
+	getUI("ui:outgame:appear:finish_but").frozen = false
 	getUI("ui:outgame:appear:job_options:rpbg:html"):browse("https://app.ryzom.com/app_arcc/outgame_rpbg.php?lang="..lang.."&login="..login.."&slot="..tostring(slot).."&sex="..sex)
 
 
@@ -423,6 +423,8 @@ function outgame:launchGame()
 		end
 	end
 	runAH(getUICaller(), "proc", "proc_charsel_play")
+	-- reset webig
+	getUI("ui:outgame:appear:job_options:rpbg:html"):browse("https://app.ryzom.com/index.php?reset_webig=1")
 end
 
 function outgame:loadRPBGPage()
@@ -437,4 +439,4 @@ function outgame:loadRPBGPage()
 end
 
 -- VERSION --
-RYZOM_OUT_V2_APPEAR_VERSION = 324
+FILE_OUT_V2_APPEAR_VERSION = 125

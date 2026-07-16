@@ -357,7 +357,7 @@ void	uncbMsgProcessing(CMessage &msgin, TSockId from, CCallbackNetBase &/* netba
 	if (itcb == uni->_Callbacks.end())
 	{
 		// the callback doesn't exist
-		nlwarning ("HNETL5: Can't find callback '%s' called by service %hu", msgin.getName().c_str(), sid.get());
+		//nlwarning ("HNETL5: Can't find callback '%s' called by service %hu", msgin.getName().c_str(), sid.get());
 	}
 	else
 	{
@@ -2289,7 +2289,7 @@ NLMISC_CATEGORISED_VARIABLE(nel, uint32, TotalCallbackCalled, "Total callback ca
 NLMISC_CATEGORISED_DYNVARIABLE(nel, uint64, SendQueueSize, "current size in bytes of all send queues")
 {
 	nlunreferenced(human);
-	
+
 	if (get)
 	{
 		if (!CUnifiedNetwork::isUsed ())
