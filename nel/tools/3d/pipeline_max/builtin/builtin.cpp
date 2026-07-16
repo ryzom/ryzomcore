@@ -53,6 +53,7 @@
 
 #include "base_object.h"
 #include "object.h"
+#include "shape_object.h"
 #include "geom_object.h"
 #include "tri_object.h"
 #include "poly_object.h"
@@ -233,9 +234,14 @@ const CUserDataTypeSuperClassDesc UserDataTypeSuperClassDesc(&ReferenceTargetCla
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x0000900f> CUserTypeSuperClassDesc;
 const CUserTypeSuperClassDesc UserTypeSuperClassDesc(&ReferenceTargetClassDesc, "UserTypeSuperClassUnknown");
 
-// 0x40 - shape object (text, ...)
-typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000040> CShapeObjectSuperClassDesc;
-const CShapeObjectSuperClassDesc ShapeObjectSuperClassDesc(&GeomObjectClassDesc, "ShapeObjectSuperClassUnknown");
+// 0x40 - shape object (SplineShape, Line, Text, and the parametric spline primitives) — typed:
+// every Shape-superclass object parses through CShapeObject (BezierShape/Spline3D overlay decode;
+// raw chunks stay authoritative so roundtrip is byte-exact). Sits under CObject, NOT CGeomObject:
+// shape objects carry none of the geom-buffer chunks (0x08fe/0x0900) corpus-wide, and the export
+// consumers key mesh detection on dynamic_cast<CGeomObject>. Unknown shape class ids fall through
+// to CSceneClassUnknown<CShapeObject>.
+typedef CSuperClassDescUnknown<CShapeObject, 0x00000040> CShapeObjectSuperClassDesc;
+const CShapeObjectSuperClassDesc ShapeObjectSuperClassDesc(&ShapeObjectClassDesc, "ShapeObjectSuperClassUnknown");
 
 // 0x30 - light object (omni, ...)
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000030> CLightObjectSuperClassDesc;

@@ -68,6 +68,7 @@
 
 #include "../pipeline_max/builtin/param_block.h"
 #include "../pipeline_max/builtin/param_block_2.h"
+#include "../pipeline_max/builtin/shape_object.h"
 #include "../pipeline_max/builtin/mtl_base.h"
 #include "../pipeline_max/builtin/multi_mtl.h"
 #include "../pipeline_max/builtin/reference_maker.h"
@@ -550,6 +551,74 @@ static int oldPbSelfTest(CStorageOleIn &in, CSceneClassRegistry *reg, bool verbo
 	return (nFail || nUnknownIds) ? 1 : 0;
 }
 
+// Parse the Scene stream fully and run the CShapeObject (Shape superclass 0x40) decode
+// consistency check on every shape object: re-encode every decoded knot record from its typed
+// fields and compare against the stored 0x290a payload, verify every Spline3D container is
+// structurally canonical, and surface any BezierShape/Spline3D sibling chunk ids the typed
+// decode did not recognize (must stay empty across the corpus).
+static int shapeSelfTest(CStorageOleIn &in, CSceneClassRegistry *reg, bool verbose)
+{
+	CDllDirectory dll;
+	CClassDirectory3 cd(&dll);
+	CScene scene(reg, &dll, &cd);
+	{
+		std::vector<uint8> b;
+		if (!in.readStream("DllDirectory", b)) { std::cerr << "no DllDirectory\n"; return 2; }
+		CStorageStream ss(b); try { dll.serial(ss); dll.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "dll: " << e.what() << "\n"; return 2; }
+	}
+	{
+		std::vector<uint8> b;
+		if (!in.readStream("ClassDirectory3", b)) { std::cerr << "no ClassDirectory3\n"; return 2; }
+		CStorageStream ss(b); try { cd.serial(ss); cd.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "cd: " << e.what() << "\n"; return 2; }
+	}
+	{
+		std::vector<uint8> b;
+		if (!in.readStream("Scene", b)) { std::cerr << "no Scene\n"; return 2; }
+		CStorageStream ss(b); try { scene.serial(ss); scene.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "scene: " << e.what() << "\n"; return 2; }
+	}
+	uint nObj = 0, nBez = 0, nSplines = 0, nClosed = 0, nKnots = 0, nSteps = 0;
+	uint nFail = 0, nUnknownIds = 0;
+	CSceneClassContainer *ssc = scene.container();
+	for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
+	{
+		BUILTIN::CShapeObject *so = dynamic_cast<BUILTIN::CShapeObject *>(it->second);
+		if (!so) continue;
+		++nObj;
+		nBez += so->numBezierShapes();
+		if (so->hasSteps()) ++nSteps;
+		const std::vector<BUILTIN::CShapeObject::SSpline> &splines = so->splines();
+		nSplines += (uint)splines.size();
+		for (uint s = 0; s < splines.size(); ++s)
+		{
+			nKnots += (uint)splines[s].Knots.size();
+			if (splines[s].closed()) ++nClosed;
+		}
+		std::string err;
+		if (!so->selfTestReencode(err))
+		{
+			++nFail;
+			std::cerr << "  shape selftest FAIL (" << so->classDesc()->classId().toString() << "): " << err << "\n";
+		}
+		if (!so->unknownSiblingIds().empty())
+		{
+			nUnknownIds += (uint)so->unknownSiblingIds().size();
+			for (uint u = 0; u < so->unknownSiblingIds().size(); ++u)
+				std::cerr << "  shape UNKNOWN sibling chunk id 0x" << std::hex
+				          << so->unknownSiblingIds()[u] << std::dec << "\n";
+		}
+		if (verbose)
+			std::cerr << "  shape " << so->classDesc()->classId().toString() << " '"
+			          << ucstring(so->classDesc()->displayName()).toUtf8() << "': "
+			          << so->numBezierShapes() << " beziershapes, " << splines.size()
+			          << " splines, steps " << (so->hasSteps() ? NLMISC::toString(so->steps()) : std::string("-")) << "\n";
+	}
+	std::cout << ((nFail || nUnknownIds) ? "FAIL" : "OK") << " shape-selftest: " << nObj << " objects, "
+	          << nBez << " beziershapes, " << nSplines << " splines (" << nClosed << " closed), "
+	          << nKnots << " knots, " << nSteps << " with-steps, " << nFail << " fail, "
+	          << nUnknownIds << " unknown-ids\n";
+	return (nFail || nUnknownIds) ? 1 : 0;
+}
+
 // Recursive reference-tree dump (used by --uvgen-dump).
 static void dumpRefTree(CSceneClass *obj, int depth, int maxDepth)
 {
@@ -607,6 +676,7 @@ int main(int argc, char **argv)
 	bool verbose = false;
 	bool doPb2SelfTest = false;
 	bool doOldPbSelfTest = false;
+	bool doShapeSelfTest = false;
 	bool doModifySave = false;
 	bool doMtlDump = false;
 	bool doUvgenDump = false;
@@ -621,6 +691,7 @@ int main(int argc, char **argv)
 		else if (a == "--verbose" || a == "-v") verbose = true;
 		else if (a == "--pb2-selftest") doPb2SelfTest = true;
 		else if (a == "--oldpb-selftest") doOldPbSelfTest = true;
+		else if (a == "--shape-selftest") doShapeSelfTest = true;
 		else if (a == "--modify-save-test") doModifySave = true;
 		else if (a == "--mtl-dump") doMtlDump = true;
 		else if (a == "--uvgen-dump") doUvgenDump = true;
@@ -635,7 +706,7 @@ int main(int argc, char **argv)
 	}
 	if (!maxFile)
 	{
-		std::cerr << "usage: pipeline_max_corpus_test [--parse] [--verbose] [--pb2-selftest] [--oldpb-selftest] [--modify-save-test] <input.max>\n";
+		std::cerr << "usage: pipeline_max_corpus_test [--parse] [--verbose] [--pb2-selftest] [--oldpb-selftest] [--shape-selftest] [--modify-save-test] <input.max>\n";
 		return 2;
 	}
 
@@ -659,6 +730,13 @@ int main(int argc, char **argv)
 	if (doOldPbSelfTest)
 	{
 		int rc = oldPbSelfTest(in, &reg, verbose);
+		remove(g_tempPath.c_str());
+		return rc;
+	}
+
+	if (doShapeSelfTest)
+	{
+		int rc = shapeSelfTest(in, &reg, verbose);
 		remove(g_tempPath.c_str());
 		return rc;
 	}
