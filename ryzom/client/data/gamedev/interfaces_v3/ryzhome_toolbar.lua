@@ -188,19 +188,19 @@ function RyzhomeBar:setupItems()
 	for k = 1, 8 do
 		getUI("ui:interface:webig_ryzhome_list_item:header_opened"):find(":but"..tostring(k)).active=false
 		getUI("ui:interface:webig_ryzhome_list_item:header_opened"):find(":icon"..tostring(k)).active=false
-		getUI("ui:interface:webig_ryzhome_list_item:header_opened"):find(":text"..tostring(k)).uc_hardtext=""
-		getUI("ui:interface:webig_ryzhome_list_item:header_opened"):find(":info"..tostring(k)).uc_hardtext=""
+		getUI("ui:interface:webig_ryzhome_list_item:header_opened"):find(":text"..tostring(k)).hardtext=""
+		getUI("ui:interface:webig_ryzhome_list_item:header_opened"):find(":info"..tostring(k)).hardtext=""
 	end
 	if RyzhomeBar.Items[RyzhomeBar.selectedPage] then
 		for k,v in pairs(RyzhomeBar.Items[RyzhomeBar.selectedPage]) do
 			if k ~= nil then
 				getUI("ui:interface:webig_ryzhome_list_item:header_opened"):find(":icon"..tostring(k)).active=true
 				getUI("ui:interface:webig_ryzhome_list_item:header_opened"):find(":but"..tostring(k)).active=true
-				local text = ucstring()
-				text:fromUtf8(v[3])
-				getUI("ui:interface:webig_ryzhome_list_item:header_opened"):find(":text"..tostring(k)).uc_hardtext=text
-				text:fromUtf8(v[4])
-				getUI("ui:interface:webig_ryzhome_list_item:header_opened"):find(":info"..tostring(k)).uc_hardtext=text
+				local text = ""
+				text = v[3]
+				getUI("ui:interface:webig_ryzhome_list_item:header_opened"):find(":text"..tostring(k)).hardtext=text
+				text = v[4]
+				getUI("ui:interface:webig_ryzhome_list_item:header_opened"):find(":info"..tostring(k)).hardtext=text
 			end
 		end
 	end

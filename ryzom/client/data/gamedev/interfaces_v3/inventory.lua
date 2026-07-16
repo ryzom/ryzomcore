@@ -121,7 +121,7 @@ function updateChestList(init)
 				if not isSrvStringAvailable(name_id) then
 					all_str_available = false
 				else
-					ui:addText(ucstring(getSrvString(name_id):toUtf8().."    "))
+					ui:addText(getSrvString(name_id).."    ")
 				end
 			end
 		end

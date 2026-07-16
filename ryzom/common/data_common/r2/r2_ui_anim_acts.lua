@@ -28,7 +28,7 @@ function r2.ui.AnimActs:popMenu()
       if acts[k].Name == "" then
          r2.ScratchUCStr = i18n.get("uiR2EDUnamedAct")
       else
-         r2.ScratchUCStr:fromUtf8(acts[k].Name)
+         r2.ScratchUCStr = acts[k].Name
       end
 		rootMenu:addLine(r2.ScratchUCStr, "lua", "r2.ui.AnimActs:chooseAct(" .. tostring(k) .. ")", "")
 	end

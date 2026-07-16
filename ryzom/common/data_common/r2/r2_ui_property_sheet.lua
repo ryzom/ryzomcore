@@ -148,22 +148,22 @@ r2.WidgetStyles.String =
 				ok = r2.assert(loadstring('return '.. prop.ValidationFun))()(value)
 			end
 			if ok then
-				local ucValue = ucstring()
+				local ucValue = ""
 				--debugInfo("value = " .. tostring(value))
-				ucValue:fromUtf8(value)
-				widget.eb.uc_input_string = ucValue
+				ucValue = value
+				widget.eb.input_string = ucValue
 				widget.eb.Env.CurrString = ucValue			
 				--debugInfo("setting" .. widget.eb.id .. " to " .. tostring(value))
 			else
-				widget.eb.uc_input_string = widget.eb.Env.CurrString
-				widget.eb.input_string = widget.eb.uc_input_string:toUtf8()
+				widget.eb.input_string = widget.eb.Env.CurrString
+				widget.eb.input_string = widget.eb.input_string
 			end
 		end
 
 		local validation = ""
 		
 		if prop.ValidationFun then
-			validation = string.format([[	if not %s(utf8Value) then editBox.uc_input_string = editBox.Env.CurrString; return end]], prop.ValidationFun)
+			validation = string.format([[	if not %s(utf8Value) then editBox.input_string = editBox.Env.CurrString; return end]], prop.ValidationFun)
 		end
 			
 		local onChangeAction = 
@@ -174,7 +174,7 @@ r2.WidgetStyles.String =
 					return
 				end
 
-				local utf8Value = editBox.uc_input_string:toUtf8()
+				local utf8Value = editBox.input_string
 				%s
 				editBox.Env.CurrString = editBox.input_string		
 				r2:requestSetObjectProperty('%s', utf8Value)
@@ -193,9 +193,9 @@ r2.WidgetStyles.String =
 		--debugInfo("Building static text")
 		local function setter(widget, prop, value)
 			--debugInfo("value = " .. tostring(value))
-			local ucValue = ucstring()
-			ucValue:fromUtf8(value)
-			widget.uc_hardtext = ucValue
+			local ucValue = ""
+			ucValue = value
+			widget.hardtext = ucValue
 		end
 		local widgetXml = 
 		string.format([[ <view type="text" id="%s" color="192 192 192 255" posparent="parent" active="true" posref="ML ML" x="4" y="-2"  global_color="true" fontsize="12" shadow="true" hardtext="toto" auto_clamp="true"/> ]], prop.Name)
@@ -206,9 +206,9 @@ r2.WidgetStyles.String =
 		--debugInfo("Building static text")
 		local function setter(widget, prop, value)
 			--debugInfo("value = " .. tostring(value))
-			local ucValue = ucstring()
-			ucValue:fromUtf8(value)
-			widget.uc_hardtext = ucValue
+			local ucValue = ""
+			ucValue = value
+			widget.hardtext = ucValue
 		end
 		local widgetXml = 
 		string.format([[ <view type="text" id="%s" color="192 192 192 255" posparent="parent" active="true" posref="ML ML" x="4" y="-2"  global_color="true" fontsize="12" shadow="true" hardtext="toto" multi_line="true" auto_clamp="true"/> ]], prop.Name)
@@ -282,11 +282,11 @@ end
 function refIdDefaultEventHandler:update(widget, value, target)
 	local text = widget:find("name")		
 	if target then		
-		local newName = ucstring()
-		newName:fromUtf8(target.Name)
-		text.uc_hardtext = newName
+		local newName = ""
+		newName = target.Name
+		text.hardtext = newName
 	else		
-		text.uc_hardtext = i18n.get("uiR2EDNone")
+		text.hardtext = i18n.get("uiR2EDNone")
 	end
 end
 --
@@ -623,8 +623,8 @@ function refIdPlotItemEventHandler:updateSheet(widget, targetPlotItem)
       local dbPath = "LOCAL:R2:PLOT_ITEMS:" .. tostring(k)
       if getDbProp(dbPath .. ":SHEET") == targetPlotItem.SheetId then         
          widget.sheet.sheet = dbPath
-         r2.ScratchUCStr:fromUtf8(targetPlotItem.Name)	
-         widget.t.uc_hardtext = r2.ScratchUCStr
+         r2.ScratchUCStr = targetPlotItem.Name	
+         widget.t.hardtext = r2.ScratchUCStr
          return true
       end
    end   
@@ -644,7 +644,7 @@ function refIdPlotItemEventHandler:update(widget, value, target)
    end      
  
    widget.sheet.sheet = ""
-   widget.t.uc_hardtext = i18n.get("uiR2EDChooseItem")   
+   widget.t.hardtext = i18n.get("uiR2EDChooseItem")   
 end
 
 -- ui handling for selection of plot items from the scenario
@@ -787,7 +787,7 @@ function r2:requestSetObjectProperty(propName, value, isLocal)
 			return -- not really modified -> no op
 		end		
 		local ucActionName = r2:getPropertyTranslation(prop)		
-		r2.requestNewAction(concatUCString(i18n.get("uiR2EDChangePropertyAction"), ucActionName, i18n.get("uiR2EDChangePropertyOf"), target:getDisplayName()))
+		r2.requestNewAction((i18n.get("uiR2EDChangePropertyAction") .. ucActionName .. i18n.get("uiR2EDChangePropertyOf") .. target:getDisplayName()))
 		-- this is a property sheet
 		
 
@@ -1915,7 +1915,7 @@ function r2:buildAllPropertySheetsAndForms()
 		--f:write(r2:encloseXmlScript(xmlScript))
 		--f:flush()
 		--f:close()
-		parseInterfaceFromString(ucstring(r2:encloseXmlScript(xmlScript)):toUtf8())
+		parseInterfaceFromString(r2:encloseXmlScript(xmlScript))
 		local endTime = nltime.getLocalTime()
 		debugInfo(string.format("Reparsing generated xml took %f second", (endTime - startTime) / 1000))
 	end
@@ -2055,7 +2055,7 @@ function propertySheetDisplayerTable:onAttrModified(instance, attributeName, ind
 		local propertySheet = r2:getPropertySheet(instance)
 			if propertySheet then
 				if attributeName == "Name" and instance == r2:getSelectedInstance() then
-					propertySheet.uc_title = concatUCString(i18n.get("uiRE2DPropertiesOf"), instance:getDisplayName())
+					propertySheet.title = (i18n.get("uiRE2DPropertiesOf") .. instance:getDisplayName())
 				end
 				propertySheet.Env.updatePropVisibility()
 			end
@@ -2164,7 +2164,7 @@ function r2:showProperties(instance)
 			end			
 		end		
 		if instance and instance:getClass().BuildPropertySheet then
-			newPropWindow.uc_title = concatUCString(i18n.get("uiRE2DPropertiesOf"), instance:getDisplayName())
+			newPropWindow.title = (i18n.get("uiRE2DPropertiesOf") .. instance:getDisplayName())
 		end
 	end	
 	r2.CurrentPropertyWindow = newPropWindow
@@ -2225,9 +2225,9 @@ function r2:doForm(formName, initialTable, validateCallback, cancelCallback)
 	formUI:center()	
 	formUI:updateCoords()
 	if form.Caption ~= nil then
-		formUI.uc_title = i18n.get(form.Caption)
+		formUI.title = i18n.get(form.Caption)
 	else
-		formUI.uc_title = i18n.get("uiR2EDForm")
+		formUI.title = i18n.get("uiR2EDForm")
 	end
 	r2.CurrentForm = formUI
 	if type(form.onShow) == "function" then

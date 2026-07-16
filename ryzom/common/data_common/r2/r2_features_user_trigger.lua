@@ -222,7 +222,7 @@ function component.createComponent(x, y)
 	assert(comp)
 
 	comp.Base = r2.Translator.getDebugBase("palette.entities.botobjects.user_event")
-	comp.Name = r2:genInstanceName(i18n.get("uiR2ED" .. component.Name)):toUtf8()			
+	comp.Name = r2:genInstanceName(i18n.get("uiR2ED" .. component.Name))			
 	
 	comp.Position.x = x
 	comp.Position.y = y
@@ -315,12 +315,12 @@ function component:getLogicTranslations()
 
 	local logicTranslations = {
 		["ApplicableActions"] = {
-			["trigger"]				= { menu=i18n.get( "uiR2AA0Trigger"			):toUtf8(), 
-										text=i18n.get( "uiR2AA1Trigger"			):toUtf8()},
+			["trigger"]				= { menu=i18n.get( "uiR2AA0Trigger"			), 
+										text=i18n.get( "uiR2AA1Trigger"			)},
 		},
 		["Events"] = {	
-			["triggered"]			= { menu=i18n.get( "uiR2Event0Trigger"		):toUtf8(), 
-										text=i18n.get( "uiR2Event1Trigger"		):toUtf8()},
+			["triggered"]			= { menu=i18n.get( "uiR2Event0Trigger"		), 
+										text=i18n.get( "uiR2Event1Trigger"		)},
 		}
 	}
 	return logicTranslations

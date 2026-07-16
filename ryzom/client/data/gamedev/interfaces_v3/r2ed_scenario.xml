@@ -1000,7 +1000,7 @@
 </group>
 
 <!-- title update -->
-<link expr="depends(@%dm_gift_text)" action="set_server_string" params="value=@%dm_gift_text|target=ui:interface:r2ed_dm_gift:uc_title" />
+<link expr="depends(@%dm_gift_text)" action="set_server_string" params="value=@%dm_gift_text|target=ui:interface:r2ed_dm_gift:title" />
 
 <tree node="r2ed_dm_gift">
 </tree>

@@ -249,7 +249,7 @@ feature.createComponent = function(x, y, hours, minutes, cyclic)
 	assert(comp)
 
 	comp.Base = "palette.entities.botobjects.time_trigger"
-	comp.Name = r2:genInstanceName(i18n.get("uiR2EdNameTimeTriggerFeature")):toUtf8()			
+	comp.Name = r2:genInstanceName(i18n.get("uiR2EdNameTimeTriggerFeature"))			
 	
 	comp.Position.x = x
 	comp.Position.y = y
@@ -406,26 +406,26 @@ function component:getLogicTranslations()
 	-- register trad
 	local logicTranslations = {
 		["ApplicableActions"] = {	
-			["activate"]			= { menu=i18n.get( "uiR2AA0Activate"		):toUtf8(), 
-										text=i18n.get( "uiR2AA1Activate"		):toUtf8()}, 
-			["deactivate"]			= { menu=i18n.get( "uiR2AA0Deactivate"		):toUtf8(), 
-										text=i18n.get( "uiR2AA1Deactivate"		):toUtf8()}, 
-			["trigger"]				= { menu=i18n.get( "uiR2AA0Trigger"			):toUtf8(), 
-										text=i18n.get( "uiR2AA1Trigger"			):toUtf8()},
+			["activate"]			= { menu=i18n.get( "uiR2AA0Activate"		), 
+										text=i18n.get( "uiR2AA1Activate"		)}, 
+			["deactivate"]			= { menu=i18n.get( "uiR2AA0Deactivate"		), 
+										text=i18n.get( "uiR2AA1Deactivate"		)}, 
+			["trigger"]				= { menu=i18n.get( "uiR2AA0Trigger"			), 
+										text=i18n.get( "uiR2AA1Trigger"			)},
 		},
 		["Events"] = {	
-			["On Activation"]		= { menu=i18n.get( "uiR2Event0Activation"	):toUtf8(), 
-										text=i18n.get( "uiR2Event1Activation"	):toUtf8()}, 
-			["On Desactivation"]	= { menu=i18n.get( "uiR2Event0Deactivation"	):toUtf8(), 
-										text=i18n.get( "uiR2Event1Deactivation"	):toUtf8()},
-			["On Trigger"]			= { menu=i18n.get( "uiR2Event0Trigger"		):toUtf8(), 
-										text=i18n.get( "uiR2Event1Trigger"		):toUtf8()},
+			["On Activation"]		= { menu=i18n.get( "uiR2Event0Activation"	), 
+										text=i18n.get( "uiR2Event1Activation"	)}, 
+			["On Desactivation"]	= { menu=i18n.get( "uiR2Event0Deactivation"	), 
+										text=i18n.get( "uiR2Event1Deactivation"	)},
+			["On Trigger"]			= { menu=i18n.get( "uiR2Event0Trigger"		), 
+										text=i18n.get( "uiR2Event1Trigger"		)},
 		},
 		["Conditions"] = {	
-			["is active"]			= { menu=i18n.get( "uiR2Test0Active"		):toUtf8(),
-										text=i18n.get( "uiR2Test1Active"		):toUtf8()},
-			["is finished"]			= { menu=i18n.get( "uiR2Test0TimerFinished"	):toUtf8(), 
-										text=i18n.get( "uiR2Test1TimerFinished"	):toUtf8()},
+			["is active"]			= { menu=i18n.get( "uiR2Test0Active"		),
+										text=i18n.get( "uiR2Test1Active"		)},
+			["is finished"]			= { menu=i18n.get( "uiR2Test0TimerFinished"	), 
+										text=i18n.get( "uiR2Test1TimerFinished"	)},
 		}
 	}
 	return logicTranslations

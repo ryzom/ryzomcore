@@ -480,7 +480,7 @@ if artefact == nil then
             dopact = autopact,
             check = checkbox,
             money = self:formatint(dappers),
-            help = i18n.get("uiArtefactHelp"):toUtf8()
+            help = i18n.get("uiArtefactHelp")
         }) do
             content = string.gsub(content, "#"..k, v)
         end
@@ -531,7 +531,7 @@ if artefact == nil then
         end
 
         local wi = string.gsub(self.web_item, "#Q", s)
-        local desc = item.desc:toUtf8()
+        local desc = item.desc
         -- keep only the name of the zone
         for i = 1, #self.blacklist do
             desc = string.gsub(desc, self.blacklist[i], "")

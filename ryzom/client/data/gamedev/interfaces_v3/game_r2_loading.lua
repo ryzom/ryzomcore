@@ -100,7 +100,7 @@ function GameR2Loading:setScenarioLanguage(header)
 	local lvlWidget = win:find("Language")
 	if header.Language then
 		local language = "uiR2ED"..header.Language
-		lvlWidget.hardtext = i18n.get(language):toUtf8()
+		lvlWidget.hardtext = i18n.get(language)
 	else
 		lvlWidget.hardtext = ""
 	end
@@ -124,7 +124,7 @@ function GameR2Loading:setScenarioRingAccess(header)
 	local okButton = win:find("validate")
 
 	if getDbProp("SERVER:USER:IS_NEWBIE") == 1 and isPlayerFreeTrial() and not header.OtherCharAccess or header.OtherCharAccess ~= "RoSOnly" then
-		accessWidget.hardtext = i18n.get("uiR2EDLoadScenario_No"):toUtf8()
+		accessWidget.hardtext = i18n.get("uiR2EDLoadScenario_No")
 		okButton.frozen = true
 	end
 
@@ -132,9 +132,9 @@ function GameR2Loading:setScenarioRingAccess(header)
 		self.RingAccess = game.checkRingAccess(header.RingPointLevel)
 		if self.RingAccess == true then
 
-			accessWidget.hardtext = i18n.get("uiR2EDLoadScenario_Yes"):toUtf8()
+			accessWidget.hardtext = i18n.get("uiR2EDLoadScenario_Yes")
 		else
-			accessWidget.hardtext = i18n.get("uiR2EDLoadScenario_No"):toUtf8()
+			accessWidget.hardtext = i18n.get("uiR2EDLoadScenario_No")
 		end
 		
 		okButton.frozen = not self.RingAccess
@@ -561,9 +561,9 @@ function GameR2Loading:getTreeTooltip()
 
 	local isInNoobLand = getDbProp("SERVER:USER:IS_NEWBIE")
 	if isInNoobLand == 1 and isPlayerFreeTrial() then
-		tree.tooltip = i18n.get("uiR2EdPropertyToolTip_LoadScenario_LoadScenario_NewbieTreeInfo"):toUtf8()
+		tree.tooltip = i18n.get("uiR2EdPropertyToolTip_LoadScenario_LoadScenario_NewbieTreeInfo")
 	else
-		tree.tooltip = i18n.get("uiR2EdPropertyToolTip_LoadScenario_LoadScenario_TreeInfo"):toUtf8()
+		tree.tooltip = i18n.get("uiR2EdPropertyToolTip_LoadScenario_LoadScenario_TreeInfo")
 	end
 end
 

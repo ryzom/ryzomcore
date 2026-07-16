@@ -140,7 +140,7 @@ component.createComponent = function(x, y)
 	assert(comp)
 
 	comp.Base = "palette.entities.botobjects.milestone"
-	comp.Name = r2:genInstanceName(i18n.get("uiR2EdUserItemFeature")):toUtf8()			
+	comp.Name = r2:genInstanceName(i18n.get("uiR2EdUserItemFeature"))			
 	
 	comp.Position.x = x
 	comp.Position.y = y
@@ -191,7 +191,7 @@ end
 
 function component:registerMenu(logicEntityMenu)
 	local name = i18n.get("uiR2EdUserItemFeature")
-	logicEntityMenu:addLine(ucstring(name), "lua", "", "UserItemFeature")
+	logicEntityMenu:addLine(name, "lua", "", "UserItemFeature")
 end
 
 function component:getLogicEntityAttributes()

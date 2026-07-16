@@ -208,15 +208,15 @@ function r2.setCurrSelectedFile(filename, path)
 				r2.CurrentForm.Env.FormInstance.LoadScenario_Level = ""	
 			end
 			if header.Language then
-				r2.CurrentForm.Env.FormInstance.LoadScenario_Language = i18n.get("uiR2ED"..header.Language):toUtf8()
+				r2.CurrentForm.Env.FormInstance.LoadScenario_Language = i18n.get("uiR2ED"..header.Language)
 			elseif r2.CurrentForm.Env.FormInstance.LoadScenario_Language then
 				r2.CurrentForm.Env.FormInstance.LoadScenario_Language = ""	
 			end
 			if header.RingPointLevel then
 				if r2.checkRingAccess(header.RingPointLevel) == true then
-					r2.CurrentForm.Env.FormInstance.LoadScenario_RingPointsLevel = i18n.get("uiR2EDLoadScenario_Yes"):toUtf8()
+					r2.CurrentForm.Env.FormInstance.LoadScenario_RingPointsLevel = i18n.get("uiR2EDLoadScenario_Yes")
 				else 
-					r2.CurrentForm.Env.FormInstance.LoadScenario_RingPointsLevel = i18n.get("uiR2EDLoadScenario_No"):toUtf8()
+					r2.CurrentForm.Env.FormInstance.LoadScenario_RingPointsLevel = i18n.get("uiR2EDLoadScenario_No")
 				end
 			elseif r2.CurrentForm.Env.FormInstance.LoadScenario_RingPointsLevel then
 				r2.CurrentForm.Env.FormInstance.LoadScenario_RingPointsLevel = ""	
@@ -243,7 +243,7 @@ function r2.setCurrSelectedFileToLoad(filename, path)
 		getUICaller().pushed = true
 	end
 	formInstance.LastFileButton = getUICaller()
-	r2.CurrentForm.Env.FormInstance.LoadScenario_Name = ucstring(filename):toUtf8()
+	r2.CurrentForm.Env.FormInstance.LoadScenario_Name = filename
 
 	if path ~= nil and r2.CurrentForm.Env.FormInstance.Path then
 		r2.CurrentForm.Env.FormInstance.Path = path
@@ -271,17 +271,17 @@ function r2.setCurrSelectedFileToLoad(filename, path)
 				r2.CurrentForm.Env.FormInstance.LoadScenario_Level = ""	
 			end
 			if header.Language then
-				r2.CurrentForm.Env.FormInstance.LoadScenario_Language = i18n.get("uiR2ED"..header.Language):toUtf8()
+				r2.CurrentForm.Env.FormInstance.LoadScenario_Language = i18n.get("uiR2ED"..header.Language)
 			elseif r2.CurrentForm.Env.FormInstance.LoadScenario_Language then
 				r2.CurrentForm.Env.FormInstance.LoadScenario_Language = ""	
 			end
 			if header.RingPointLevel then
 				if r2.checkRingAccess(header.RingPointLevel) == true then
 					r2.CurrentForm.Env.FormInstance.RingAccess = 1
-					r2.CurrentForm.Env.FormInstance.LoadScenario_RingPointsLevel = i18n.get("uiR2EDLoadScenario_Yes"):toUtf8()
+					r2.CurrentForm.Env.FormInstance.LoadScenario_RingPointsLevel = i18n.get("uiR2EDLoadScenario_Yes")
 				else 
 					r2.CurrentForm.Env.FormInstance.RingAccess = 0
-					r2.CurrentForm.Env.FormInstance.LoadScenario_RingPointsLevel = i18n.get("uiR2EDLoadScenario_No"):toUtf8()
+					r2.CurrentForm.Env.FormInstance.LoadScenario_RingPointsLevel = i18n.get("uiR2EDLoadScenario_No")
 				end
 			elseif r2.CurrentForm.Env.FormInstance.LoadScenario_RingPointsLevel then
 				r2.CurrentForm.Env.FormInstance.RingAccess = 0
@@ -311,8 +311,8 @@ local function showFileList(formInstance)
 			local shortFilename = nlfile.getFilename(v)
 			local shortFileEscape=string.gsub(shortFilename, "'", "\\'")
 
-			local shortFilename2 = ucstring(shortFilename):toUtf8()
-			local shortFileEscape2 = ucstring(shortFileEscape):toUtf8()
+			local shortFilename2 = shortFilename
+			local shortFileEscape2 = shortFileEscape
 
 
 			local entry = createGroupInstance("r2ed_filelist_entry", "", 

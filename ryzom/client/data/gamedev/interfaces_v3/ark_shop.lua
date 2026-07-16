@@ -273,8 +273,8 @@ function arkNpcShop:timer(id, len)
 end
 
 function arkNpcShop:StartProgress(id, text, len)
-	local message  = ucstring()
-	message:fromUtf8(text)
+	local message  = ""
+	message = text
 	displaySystemInfo(message, "BC")
 	savedTime = nltime.getLocalTime()
 	getUI("ui:interface:current_action").active=true
@@ -289,8 +289,8 @@ function arkNpcShop:Buy(id)
 	local win = getUI("ui:interface:ark_shop_buy_item")
 	local quantity = win:find("edit"):find("eb").input_string
 	if arkNpcShop.player_can_buy then
-		local message  = ucstring()
-		message:fromUtf8("@{F5FF}"..getUI("ui:interface:target").title..": @{FF0F}I\'m checking to see if you\'re trying to rip him off... ")
+		local message  = ""
+		message = "@{F5FF}"..getUI("ui:interface:target").title..": @{FF0F}I\'m checking to see if you\'re trying to rip him off... "
 		-- displaySystemInfo(message, "BC")
 
 		if arkNpcShop.AtysPoint then
@@ -475,7 +475,7 @@ function arkNpcShop:OpenItemWindow(id, buy)
 	framewin:find("scroll_text").y=arkNpcShop.window_params[1]
 	framewin:find("scroll_text").h=arkNpcShop.window_params[2]
 	framewin.w=arkNpcShop.window_params[3]
-	framewin.uc_title = getUCtf8(item[6])
+	framewin.title = getUCtf8(item[6])
 
 	if buy == true then
 		local html = ""
@@ -539,12 +539,12 @@ function arkNpcShop:updateTexts(id, ctrl, text1, text2, text3)
 		else
 			shop_item:find("ctrl").tooltip = ""
 		end
-		shop_item:find("text1").uc_hardtext_format = text1
-		shop_item:find("text2").uc_hardtext_format = getUCtf8(text2)
+		shop_item:find("text1").hardtext_format = text1
+		shop_item:find("text2").hardtext_format = getUCtf8(text2)
 		if text3 then
-			shop_item:find("text3").uc_hardtext_format = getUCtf8(text3)
+			shop_item:find("text3").hardtext_format = getUCtf8(text3)
 		else
-			shop_item:find("text3").uc_hardtext_format = ""
+			shop_item:find("text3").hardtext_format = ""
 		end
 	end
 end

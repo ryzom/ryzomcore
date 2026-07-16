@@ -392,8 +392,8 @@ function SearchCommand:build_emote_preview(emote_id)
 	
 	local final_emote_text = ""
 
-	local target_name_ui = "[".. i18n.get("uihTarget"):toUtf8() .."]"
-	local play_name_ui = "[".. i18n.get("uimPlayer"):toUtf8() .."]"
+	local target_name_ui = "[".. i18n.get("uihTarget") .."]"
+	local play_name_ui = "[".. i18n.get("uimPlayer") .."]"
 	
 	local target_name_local = "no_target"
 	local player_name = SearchCommand:firstToUpper(self.player_name_local)
@@ -433,15 +433,15 @@ function SearchCommand:build_emote_preview(emote_id)
 		local build_search_emotid_gender_m = build_search_emotid.."_m"
 		
 		if(self.ryzom_emotes_text_list[build_search_emotid] ~= nil)then
-			final_emote_text = final_emote_text .."<tr><td>"..i18n.get("uiEM_Emotes_"..tostring(possible_mode[i])):toUtf8()..": "..self.ryzom_emotes_text_list[build_search_emotid].."</td></tr>"
+			final_emote_text = final_emote_text .."<tr><td>"..i18n.get("uiEM_Emotes_"..tostring(possible_mode[i]))..": "..self.ryzom_emotes_text_list[build_search_emotid].."</td></tr>"
 		end
 		
 		if(self.ryzom_emotes_text_list[build_search_emotid_gender_f] ~= nil)then
-			final_emote_text = final_emote_text .."<tr><td>"..i18n.get("uiEM_Emotes_"..tostring(possible_mode[i])):toUtf8().."-"..i18n.get("uiCP_Sex_Female"):toUtf8()..": ".. self.ryzom_emotes_text_list[build_search_emotid_gender_f].."</td></tr>"
+			final_emote_text = final_emote_text .."<tr><td>"..i18n.get("uiEM_Emotes_"..tostring(possible_mode[i])).."-"..i18n.get("uiCP_Sex_Female")..": ".. self.ryzom_emotes_text_list[build_search_emotid_gender_f].."</td></tr>"
 		end
 		
 		if(self.ryzom_emotes_text_list[build_search_emotid_gender_m] ~= nil)then
-			final_emote_text = final_emote_text .."<tr><td>"..i18n.get("uiEM_Emotes_"..tostring(possible_mode[i])):toUtf8().."-"..i18n.get("uiCP_Sex_Male"):toUtf8()..": ".. self.ryzom_emotes_text_list[build_search_emotid_gender_m].."</td></tr>"
+			final_emote_text = final_emote_text .."<tr><td>"..i18n.get("uiEM_Emotes_"..tostring(possible_mode[i])).."-"..i18n.get("uiCP_Sex_Male")..": ".. self.ryzom_emotes_text_list[build_search_emotid_gender_m].."</td></tr>"
 		end
 		
 		
@@ -449,18 +449,18 @@ function SearchCommand:build_emote_preview(emote_id)
 			if(player_gender == "m")then
 				if(self.ryzom_emotes_text_list[build_search_emotid_gender_m] ~= nil)then
 					current_emote_art_text=self.ryzom_emotes_text_list[build_search_emotid_gender_m]
-					current_action=i18n.get("uiEM_Emotes_"..tostring(possible_mode[i])):toUtf8().."-"..i18n.get("uiCP_Sex_Male"):toUtf8()
+					current_action=i18n.get("uiEM_Emotes_"..tostring(possible_mode[i])).."-"..i18n.get("uiCP_Sex_Male")
 				else
 					current_emote_art_text=self.ryzom_emotes_text_list[build_search_emotid]
-					current_action=i18n.get("uiEM_Emotes_"..tostring(possible_mode[i])):toUtf8()
+					current_action=i18n.get("uiEM_Emotes_"..tostring(possible_mode[i]))
 				end
 			else
 				if(self.ryzom_emotes_text_list[build_search_emotid_gender_f] ~= nil)then
 					current_emote_art_text=self.ryzom_emotes_text_list[build_search_emotid_gender_f]
-					current_action=i18n.get("uiEM_Emotes_"..tostring(possible_mode[i])):toUtf8().."-"..i18n.get("uiCP_Sex_Female"):toUtf8()
+					current_action=i18n.get("uiEM_Emotes_"..tostring(possible_mode[i])).."-"..i18n.get("uiCP_Sex_Female")
 				else
 					current_emote_art_text=self.ryzom_emotes_text_list[build_search_emotid]
-					current_action=i18n.get("uiEM_Emotes_"..tostring(possible_mode[i])):toUtf8()
+					current_action=i18n.get("uiEM_Emotes_"..tostring(possible_mode[i]))
 				end
 			end
 			
@@ -486,8 +486,8 @@ function SearchCommand:build_emote_preview(emote_id)
 	
 	
 		
-	build_current_emote = i18n.get("uiCurrentAction"):toUtf8()..": "..current_action
-	build_current_emote = build_current_emote.."<br>"..i18n.get("uiFaberItemResultHeader"):toUtf8()..": "..current_emote_art_text
+	build_current_emote = i18n.get("uiCurrentAction")..": "..current_action
+	build_current_emote = build_current_emote.."<br>"..i18n.get("uiFaberItemResultHeader")..": "..current_emote_art_text
 
 	SearchCommand:htmlentities(build_current_emote)
 	
@@ -552,9 +552,9 @@ function SearchCommand:pars_command_parameter(command_parameter)
 			--debug(substring)
 			if(string.find(string.lower(substring), "<"))then
 			--debug(substring:match("<(.*)>"))
-				finish_translation_text=finish_translation_text..""..substring:gsub("<(.-)>", i18n.get("uiSearchCommand"..substring:match("<(.*)>")):toUtf8())..">"
+				finish_translation_text=finish_translation_text..""..substring:gsub("<(.-)>", i18n.get("uiSearchCommand"..substring:match("<(.*)>")))..">"
 			else
-				finish_translation_text="<"..finish_translation_text..""..i18n.get("uiSearchCommand"..substring):toUtf8()..":"
+				finish_translation_text="<"..finish_translation_text..""..i18n.get("uiSearchCommand"..substring)..":"
 			end
 		end
 	else
@@ -574,7 +574,7 @@ function SearchCommand:pars_help_on_window(content_of_window,height)
 	local html_help_content=""
 	html_help_content=[[<table width="100%" border="0"><tr><td>]]..content_of_window..[[</td></tr></table>]]
 	
-	whm.title = i18n.get("uiSearchCommandHelp"):toUtf8()
+	whm.title = i18n.get("uiSearchCommandHelp")
 	whm.active = true
 	whm.w = 750
 	whm.h = height
@@ -594,9 +594,9 @@ function SearchCommand:help_show_all(parameter)
 	end
 	
 	if(parameter == "all")then
-		build_content=build_content.."<tr><td colspan=4>######################## "..i18n.get("uiSearchCommandHelp"):toUtf8().." <font size=14><strong>'"..i18n.get("uiSearchCommandAll"):toUtf8().."'</strong></font> #######################</td></tr>"
+		build_content=build_content.."<tr><td colspan=4>######################## "..i18n.get("uiSearchCommandHelp").." <font size=14><strong>'"..i18n.get("uiSearchCommandAll").."'</strong></font> #######################</td></tr>"
 	else
-		build_content=build_content.."<tr><td colspan=4>######################## "..i18n.get("uiSearchCommandHelp"):toUtf8().." <font size=14><strong>'"..i18n.get("uiSearchCommandAll"):toUtf8().."'</strong></font> / "..i18n.get("uiSearchCommandFilter"):toUtf8().." <font size=14><strong>'"..SearchCommand:htmlentities(parameter).."'</strong></font> #######################</td></tr>"
+		build_content=build_content.."<tr><td colspan=4>######################## "..i18n.get("uiSearchCommandHelp").." <font size=14><strong>'"..i18n.get("uiSearchCommandAll").."'</strong></font> / "..i18n.get("uiSearchCommandFilter").." <font size=14><strong>'"..SearchCommand:htmlentities(parameter).."'</strong></font> #######################</td></tr>"
 	end
 	
 	for c = 1, #self.commands_list do
@@ -634,14 +634,14 @@ function SearchCommand:help_show_all(parameter)
 				build_content=build_content.."<tr><td width='10px'>"..count..".</td><td colspan=3><font size=13><strong>"..SearchCommand:htmlentities(self.commands_list[c][4]).." "..arg_display.."</strong></font></td></tr>"
 				if(self.commands_list[c][1] == "emotes")then
 					local path_parts = SearchCommand:split(self.commands_list[c][3], "|")
-					build_content=build_content.."<tr><td>&nbsp;</td><td>"..i18n.get("uiEM_Emotes"):toUtf8()..": '"..i18n.get("uiEM_Emotes"):toUtf8().. " > " ..SearchCommand:htmlentities(tostring(i18n.get(path_parts[2]))).." > ".. SearchCommand:htmlentities(SearchCommand:firstToUpper(self.commands_list[c][4])) .."'</td></tr>"
+					build_content=build_content.."<tr><td>&nbsp;</td><td>"..i18n.get("uiEM_Emotes")..": '"..i18n.get("uiEM_Emotes").. " > " ..SearchCommand:htmlentities(tostring(i18n.get(path_parts[2]))).." > ".. SearchCommand:htmlentities(SearchCommand:firstToUpper(self.commands_list[c][4])) .."'</td></tr>"
 					build_content=build_content.."<tr><td>&nbsp;</td><td>".. SearchCommand:build_emote_preview(path_parts[4]).."</td></tr>"
 				else
-					build_content=build_content.."<tr><td>&nbsp;</td><td>"..i18n.get("uiR2EDScenarioDescription"):toUtf8()..": '"..SearchCommand:htmlentities(tostring(i18n.get(self.commands_list[c][3]))).."'</td></tr>"
+					build_content=build_content.."<tr><td>&nbsp;</td><td>"..i18n.get("uiR2EDScenarioDescription")..": '"..SearchCommand:htmlentities(tostring(i18n.get(self.commands_list[c][3]))).."'</td></tr>"
 				end
 				
-				build_content=build_content.."<tr><td>&nbsp;</td><td>"..i18n.get("uiFrontSelectionType"):toUtf8()..": "..SearchCommand:htmlentities(self.commands_list[c][1]).."</td></tr>"
-				build_content=build_content.."<tr><td>&nbsp;</td><td>"..i18n.get("uiSearchCommandPriv"):toUtf8()..": "..SearchCommand:htmlentities(self.commands_list[c][2]).."</td></tr>"
+				build_content=build_content.."<tr><td>&nbsp;</td><td>"..i18n.get("uiFrontSelectionType")..": "..SearchCommand:htmlentities(self.commands_list[c][1]).."</td></tr>"
+				build_content=build_content.."<tr><td>&nbsp;</td><td>"..i18n.get("uiSearchCommandPriv")..": "..SearchCommand:htmlentities(self.commands_list[c][2]).."</td></tr>"
 				
 				for ac = 1, max_arguments do
 					build_content=build_content.."<tr><td>&nbsp;</td><td>arg"..ac.." :</td></tr>"
@@ -715,7 +715,7 @@ function SearchCommand:help(uiId,input)
 	local found_command_for_help = {}
 	
 	if(command_split[1]:match("^%**$") ~= nil)then
-		displaySystemInfo(ucstring(command_split[1].." : "..i18n.get("uiCommandNotExists"):toUtf8()), "SYS")
+		displaySystemInfo(command_split[1].." : "..i18n.get("uiCommandNotExists"), "SYS")
 		do return end
 	else
 	    --debug("here_inside")
@@ -740,7 +740,7 @@ function SearchCommand:help(uiId,input)
 	--debug("build_html")
 	
 		build_content=build_content.."<table width='100%' border=0>"
-		build_content=build_content.."<tr><td colspan=3>######################## "..i18n.get("uiSearchCommandHelp"):toUtf8().." <font size=14><strong>'"..command_split[1].."'</strong></font> / "..#found_command_for_help.." #######################</td></tr>"
+		build_content=build_content.."<tr><td colspan=3>######################## "..i18n.get("uiSearchCommandHelp").." <font size=14><strong>'"..command_split[1].."'</strong></font> / "..#found_command_for_help.." #######################</td></tr>"
 		--show help for command input
 		local command_found = 0
 		for c = 1, #self.commands_list do
@@ -781,14 +781,14 @@ function SearchCommand:help(uiId,input)
     				if(self.commands_list[c][1] == "emotes")then
     				    --debug("self.commands_list[c][3]"..self.commands_list[c][3])
     					local path_parts = SearchCommand:split(self.commands_list[c][3], "|")
-    					build_content=build_content.."<tr><td>&nbsp;</td><td>"..i18n.get("uiEM_Emotes"):toUtf8()..": '"..i18n.get("uiEM_Emotes"):toUtf8().. " > " ..SearchCommand:htmlentities(tostring(i18n.get(path_parts[2]))).." > ".. SearchCommand:htmlentities(SearchCommand:firstToUpper(self.commands_list[c][4])) .."'</td></tr>"
+    					build_content=build_content.."<tr><td>&nbsp;</td><td>"..i18n.get("uiEM_Emotes")..": '"..i18n.get("uiEM_Emotes").. " > " ..SearchCommand:htmlentities(tostring(i18n.get(path_parts[2]))).." > ".. SearchCommand:htmlentities(SearchCommand:firstToUpper(self.commands_list[c][4])) .."'</td></tr>"
     					build_content=build_content.."<tr><td>&nbsp;</td><td>".. SearchCommand:build_emote_preview(path_parts[4]).."</td></tr>"
     				else
-    					build_content=build_content.."<tr><td>&nbsp;</td><td>"..i18n.get("uiR2EDScenarioDescription"):toUtf8()..": '"..SearchCommand:htmlentities(tostring(i18n.get(self.commands_list[c][3]))).."'</td></tr>"
+    					build_content=build_content.."<tr><td>&nbsp;</td><td>"..i18n.get("uiR2EDScenarioDescription")..": '"..SearchCommand:htmlentities(tostring(i18n.get(self.commands_list[c][3]))).."'</td></tr>"
     				end
     				
-    				build_content=build_content.."<tr><td>&nbsp;</td><td>"..i18n.get("uiFrontSelectionType"):toUtf8()..": "..SearchCommand:htmlentities(self.commands_list[c][1]).."</td></tr>"
-    				build_content=build_content.."<tr><td>&nbsp;</td><td>"..i18n.get("uiSearchCommandPriv"):toUtf8()..": "..SearchCommand:htmlentities(self.commands_list[c][2]).."</td></tr>"
+    				build_content=build_content.."<tr><td>&nbsp;</td><td>"..i18n.get("uiFrontSelectionType")..": "..SearchCommand:htmlentities(self.commands_list[c][1]).."</td></tr>"
+    				build_content=build_content.."<tr><td>&nbsp;</td><td>"..i18n.get("uiSearchCommandPriv")..": "..SearchCommand:htmlentities(self.commands_list[c][2]).."</td></tr>"
     				
     				for ac = 1, max_arguments do
     					build_content=build_content.."<tr><td>&nbsp;</td><td>arg"..ac.." :</td></tr>"
@@ -822,7 +822,7 @@ function SearchCommand:help(uiId,input)
 		build_content=build_content.."<tr><td colspan=3>######################################################################</td></tr>"
 		
 		if(command_found == 0)then
-			displaySystemInfo(ucstring(command_split[1].." : "..i18n.get("uiCommandNotExists"):toUtf8()), "SYS")
+			displaySystemInfo(command_split[1].." : "..i18n.get("uiCommandNotExists"), "SYS")
 		else
 			--debug("pars_help")
 			SearchCommand:pars_help_on_window(build_content, 350)
@@ -1018,7 +1018,7 @@ function SearchCommand:search(uiId)
 		local max_string_count = string.len(input_text)
 		if(max_string_count == 1)then
 			self.command_self=""
-			SearchCommand:write_command_help(uiId,i18n.get("uiSearchCommandInitDialog"):toUtf8())
+			SearchCommand:write_command_help(uiId,i18n.get("uiSearchCommandInitDialog"))
 			SearchCommand:close_modal(uiId)
 			
 			--update process_status
@@ -1474,7 +1474,7 @@ function SearchCommand:search_build_argument_list(uiId,command_to_show_argument)
 					argument_help=argument_help.." "..self.command_parameter_list[max_arguments+1+ma]
 				end
 			end
-			argument_help=argument_help.." "..i18n.get("uiSearchCommandWarningParameter"):toUtf8()
+			argument_help=argument_help.." "..i18n.get("uiSearchCommandWarningParameter")
 		end
 		
 		if(self.command_self == "a" and #self.command_parameter_list >= 2)then
@@ -1790,7 +1790,7 @@ function SearchCommand:show_more_options(uiId)
 	--fill menu window
 	
 	if(found_commands == 1)then
-		menu:addLine(ucstring(i18n.get("uiSearchCommandFound"):toUtf8()..": "..#self.valid_commands_list), "lua", "SearchCommand:close_modal(\""..uiId.."\")", "")
+		menu:addLine(i18n.get("uiSearchCommandFound")..": "..#self.valid_commands_list, "lua", "SearchCommand:close_modal(\""..uiId.."\")", "")
 		for c = 1, display_max_found do
 			if(SearchCommand:get_command_type(self.valid_commands_list[c]) ~= "emotes")then
 				menu:addLine(getUCtf8(c..". "..self.valid_commands_list[c]), "lua", "SearchCommand:check_autocomplet_click(\""..uiId.."\","..c..")", "")
@@ -1800,9 +1800,9 @@ function SearchCommand:show_more_options(uiId)
 	
 	if(found_emotes == 1)then
 		if(found_commands == 0)then
-			menu:addLine(ucstring(i18n.get("uiSearchEmotesFound"):toUtf8()..": "..#self.valid_commands_list), "lua", "SearchCommand:close_modal(\""..uiId.."\")", "")
+			menu:addLine(i18n.get("uiSearchEmotesFound")..": "..#self.valid_commands_list, "lua", "SearchCommand:close_modal(\""..uiId.."\")", "")
 		else
-			menu:addLine(ucstring(i18n.get("uiEM_Emotes"):toUtf8()..":"), "lua", "SearchCommand:close_modal(\""..uiId.."\")", "")
+			menu:addLine(i18n.get("uiEM_Emotes")..":", "lua", "SearchCommand:close_modal(\""..uiId.."\")", "")
 		end
 		
 		for c = 1, display_max_found do

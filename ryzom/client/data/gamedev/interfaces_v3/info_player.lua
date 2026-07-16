@@ -144,7 +144,7 @@ function game:displayMagicProtect(dbVal)
 	local	uiText= ui.val;
 
 	-- set the text (percentage)
-	uiText.uc_hardtext= tostring(val) .. "%";
+	uiText.hardtext= tostring(val) .. "%";
 
 	-- set color and global color according to maximum reached or not
 	if(val >= vMax) then
@@ -238,7 +238,7 @@ function game:displayMagicResist(dbVal)
 	local	uiText= ui.val;
 
 	-- set the text (final value)
-	uiText.uc_hardtext= tostring(val);
+	uiText.hardtext= tostring(val);
 
 	-- set color and global color according to maximum reached or not
 	if(val >= vMax) then
@@ -297,14 +297,14 @@ function game:onDrawNpcWebPage()
 		if(available) then
 			local	ucUrl
 			if config.Local == 1 then
-				ucUrl = ucstring(NicoMagicURL) -- for test in local mode
+				ucUrl = NicoMagicURL -- for test in local mode
 			else
 				ucUrl = getDynString(self.NpcWebPage.UrlTextId);
 			end
 			-- browse
 			local	uiStr= getUIId(getUICaller());
 			-- if the url
-			local utf8Url = ucUrl:toUtf8()
+			local utf8Url = ucUrl
 			local isRing = string.find(utf8Url, "ring_access_point=1") ~= nil
 			if isRing then
 				getUI("ui:interface:npc_web_browser").active = false
@@ -355,7 +355,7 @@ end
 
 function game:getOpenAppPageMessage()
 	local ucUrl = getDynString(self.NpcWebPage.UrlTextId)
-	local url = ucUrl:toUtf8()
+	local url = ucUrl
 	surl = url:split("&")
 	for i=1,#surl do
 		if surl[i]:sub(1, 12) == "open_message" then
@@ -368,7 +368,7 @@ end
 function game:onDbChangeAppPage()
 	if getDbProp("UI:VARIABLES:CURRENT_SERVER_TICK") > self.NpcWebPage.Timeout then
 		local npcName = getTargetName()
-		local message  = ucstring()
+		local message  = ""
 		local text  = ""
 		if game.appNpcMessages[npcName] ~= nil then
 			text = game.appNpcMessages[npcName]
@@ -380,7 +380,7 @@ function game:onDbChangeAppPage()
 		else
 			text = findReplaceAll(text, "%s", npcName)
 		end
-		message:fromUtf8(game:parseLangText(text))
+		message = game:parseLangText(text)
 		displaySystemInfo(message, "ZON")
 		removeOnDbChange(getUI("ui:interface:npc_web_browser"),"@UI:VARIABLES:CURRENT_SERVER_TICK")
 	end
@@ -403,7 +403,7 @@ function game:startNpcWebPage()
 			removeOnDbChange(getUI("ui:interface:npc_web_browser"),"@UI:VARIABLES:CURRENT_SERVER_TICK")
 		end
 		local ucUrl = getDynString(self.NpcWebPage.UrlTextId)
-		local utf8Url = ucUrl:toUtf8()
+		local utf8Url = ucUrl
 
 		if utf8Url:sub(1, 4) == "http" then
 			runAH(nil, "browse", "name=ui:interface:npc_web_browser:content:html|url=release_wk.html|localize=1");
@@ -670,30 +670,30 @@ function game:getPvpEffects()
 				fmt = i18n.get('uiPvPEffect_' .. getRegionByAlias(id) .. '_Bonus');
 				fmt = replacePvpEffectParam(fmt, param);
 				if (textBonus ~= '') then
-					textBonus = concatUCString(textBonus, '\n\n');
+					textBonus = (textBonus .. '\n\n');
 				end
-				textBonus = concatUCString(textBonus, fmt);
+				textBonus = (textBonus .. fmt);
 			else
 				hasMalus = true;
 				fmt = i18n.get('uiPvPEffect_' .. getRegionByAlias(id) .. '_Malus');
 				fmt = replacePvpEffectParam(fmt, param);
 				if (textMalus ~= '') then
-					textMalus = concatUCString(textMalus, '\n\n');
+					textMalus = (textMalus .. '\n\n');
 				end
-				textMalus = concatUCString(textMalus, fmt);
+				textMalus = (textMalus .. fmt);
 			end;
 		end
 	end
 
 	if (hasBonus) then
-		uiGroup.pvpEffectsBonusMalusInfo.uc_hardtext_format 	= i18n.get('uiPvpEffectBonus');
-		uiGroup.pvpEffectsBonusMalus.uc_hardtext_format 		= textBonus;
+		uiGroup.pvpEffectsBonusMalusInfo.hardtext_format 	= i18n.get('uiPvpEffectBonus');
+		uiGroup.pvpEffectsBonusMalus.hardtext_format 		= textBonus;
 	elseif (hasMalus) then
-		uiGroup.pvpEffectsBonusMalusInfo.uc_hardtext_format 	= i18n.get('uiPvpEffectMalus');
-		uiGroup.pvpEffectsBonusMalus.uc_hardtext_format 		= textMalus;
+		uiGroup.pvpEffectsBonusMalusInfo.hardtext_format 	= i18n.get('uiPvpEffectMalus');
+		uiGroup.pvpEffectsBonusMalus.hardtext_format 		= textMalus;
 	else
-		uiGroup.pvpEffectsBonusMalusInfo.uc_hardtext_format 	= '';
-		uiGroup.pvpEffectsBonusMalus.uc_hardtext_format 		= '';
+		uiGroup.pvpEffectsBonusMalusInfo.hardtext_format 	= '';
+		uiGroup.pvpEffectsBonusMalus.hardtext_format 		= '';
 	end
 
 end
@@ -736,7 +736,7 @@ function game:getAllegiancePoints()
 		text = findReplaceAll(text, '%faction', self:getFactionName(civ));
 		text = findReplaceAll(text, '%points', tostring(civPoints));
 	end
-	uiGroup.civ_allegiance_pts.uc_hardtext_format = text;
+	uiGroup.civ_allegiance_pts.hardtext_format = text;
 
 	-- cult allegiance
 	if (cult == self.TPVPClan.None or cult == self.TPVPClan.Neutral) then
@@ -746,7 +746,7 @@ function game:getAllegiancePoints()
 		text = findReplaceAll(text, '%faction', self:getFactionName(cult));
 		text = findReplaceAll(text, '%points', tostring(cultPoints));
 	end
-	uiGroup.cult_allegiance_pts.uc_hardtext_format = text;
+	uiGroup.cult_allegiance_pts.hardtext_format = text;
 end
 
 ------------------------------------------------------------------------------------------------------------
@@ -754,7 +754,7 @@ function game:updateAllegiance(path, uiText)
 	local	alleg = getDbProp(path);
 
 	local text = i18n.get('uiFameAllegiance' .. tostring(alleg) );
-	getUICaller()[uiText].uc_hardtext= text;
+	getUICaller()[uiText].hardtext= text;
 end
 
 ------------------------------------------------------------------------------------------------------------
@@ -793,28 +793,28 @@ function game:tooltipDeltaValue(base, max)
 
 	local text;
 	if (val == 0) then
-		text = concatUCString('@{FFFF}', tostring(max));
+		text = ('@{FFFF}' .. tostring(max));
 	else
 		if (val > 0) then
 			-- bonus
-			text = concatUCString('@{FFFF}', tostring(max));
-			text = concatUCString(text, ' (');
-			text = concatUCString(text, tostring(base));
-			text = concatUCString(text, '@{0F0F}');
-			text = concatUCString(text, ' + ');
-			text = concatUCString(text, tostring(val));
-			text = concatUCString(text, '@{FFFF}');
-			text = concatUCString(text, ')');
+			text = ('@{FFFF}' .. tostring(max));
+			text = (text .. ' (');
+			text = (text .. tostring(base));
+			text = (text .. '@{0F0F}');
+			text = (text .. ' + ');
+			text = (text .. tostring(val));
+			text = (text .. '@{FFFF}');
+			text = (text .. ')');
 		else
 			-- malus
-			text = concatUCString('@{FFFF}', tostring(max));
-			text = concatUCString(text, ' (');
-			text = concatUCString(text, tostring(base));
-			text = concatUCString(text, '@{E42F}');
-			text = concatUCString(text, ' - ');
-			text = concatUCString(text, tostring(math.abs(val)));
-			text = concatUCString(text, '@{FFFF}');
-			text = concatUCString(text, ')');
+			text = ('@{FFFF}' .. tostring(max));
+			text = (text .. ' (');
+			text = (text .. tostring(base));
+			text = (text .. '@{E42F}');
+			text = (text .. ' - ');
+			text = (text .. tostring(math.abs(val)));
+			text = (text .. '@{FFFF}');
+			text = (text .. ')');
 		end
 	end
 
@@ -1043,7 +1043,7 @@ function RingPlayerInfo:updateRRPSLevel(dbVal, tooltip)
 	local	uiText= ui.val;
 
 	-- set the text
-	uiText.uc_hardtext= tostring(val)
+	uiText.hardtext= tostring(val)
 
 	self:tooltipRRPs(dbVal, tooltip)
 end
@@ -1103,13 +1103,13 @@ end
 function game:updateOrganization(path, uiOrgText, uiStatusText, uiPointsText)
 
 	local org = getDbProp(path.."1:VALUE")
-	getUICaller()[uiOrgText].uc_hardtext =  i18n.get('uiOrganization_' .. org)
+	getUICaller()[uiOrgText].hardtext =  i18n.get('uiOrganization_' .. org)
 
 	local status = getDbProp(path.."2:VALUE")
-	getUICaller()[uiStatusText].uc_hardtext= status
+	getUICaller()[uiStatusText].hardtext= status
 
 	local points = getDbProp(path.."3:VALUE")
-	getUICaller()[uiPointsText].uc_hardtext= points
+	getUICaller()[uiPointsText].hardtext= points
 
 end
 
@@ -1387,7 +1387,7 @@ end
 
 function game:setCapTitle(text)
 	game.CapTitle = game:parseLangText(text)
-	getUI("ui:interface:cap:header_opened:cap_group:cap_title").uc_hardtext_format = game.CapTitle
+	getUI("ui:interface:cap:header_opened:cap_group:cap_title").hardtext_format = game.CapTitle
 	game:updateCapTooltip()
 end
 
@@ -1403,11 +1403,11 @@ function game:informNewCap()
 
 	--local resize = 70
 	--if getUI("ui:interface:cap:header_closed").active then
-		--getUI("ui:interface:cap:header_closed:cap_group:infos").uc_hardtext_format=getUCtf8("@{0AFF}Nouveau cap disponible")
+		--getUI("ui:interface:cap:header_closed:cap_group:infos").hardtext_format=getUCtf8("@{0AFF}Nouveau cap disponible")
 		--getUI("ui:interface:cap:header_closed").h = 70
 		--game.ui_cap_closed_h = 70
 	--else
-		--getUI("ui:interface:cap:header_opened:cap_group:infos").uc_hardtext_format=getUCtf8("@{0AFF}Nouveau cap disponible")
+		--getUI("ui:interface:cap:header_opened:cap_group:infos").hardtext_format=getUCtf8("@{0AFF}Nouveau cap disponible")
 		--if game.keepExpandStatus then
 			--return
 		--end
@@ -1639,10 +1639,10 @@ function game:updateMissionJournalHeader()
 	win.header_active = headerActive
 	win.right_button_enabled = headerActive
 	if headerActive then
-		win.uc_title_opened = i18n.get("uiJournalTitle")
+		win.title_opened = i18n.get("uiJournalTitle")
 		win.content_y_offset = 0
 	else
-		win.uc_title_opened = ucstring("")
+		win.title_opened = ""
 		win.content_y_offset = win.header_opened.h_real + 3
 	end
 end
@@ -1985,7 +1985,7 @@ function game:ensureWebMissionVisibility()
 			dbPath = "SERVER:MISSIONS:" .. tostring(missionIndex) .. ":GOALS:" .. tostring(stepIndex) .. ":TEXT"
 			local stringID = getDbProp(dbPath)
 			local uctext = getDynString(stringID)
-			local text = uctext:toUtf8()
+			local text = uctext
 			if text ~= "" and game.WebMissionLastDesc[stepIndex] ~= text then
 				game.WebMissionLastDesc[stepIndex] = text
 				if string.sub(text, 1, 4) == "@WEB" then
@@ -1998,7 +1998,7 @@ function game:ensureWebMissionVisibility()
 						break
 					end
 				else
-					currStep.uc_hardtext = uctext
+					currStep.hardtext = uctext
 				end
 			end
 		end
@@ -2075,7 +2075,7 @@ function game:addRpJob(jobtype, id, value, rpjobs)
 			end
 
 			local base = getUI(base_path..":t")
-			base.hardtext = i18n.get(name):toUtf8()
+			base.hardtext = i18n.get(name)
 			local ui = getUI(base_path..":icon")
 			ui.texture = name..".tga"
 			local echelon = getUI(base_path..":echelon_value")
@@ -2085,7 +2085,7 @@ function game:addRpJob(jobtype, id, value, rpjobs)
 			if (echelon_value >= 60) then
 				bar.color = "255 0 0 255"
 				bar.w = "368"
-				t.hardtext = i18n.get("uiRpjobMaxLevel"):toUtf8()
+				t.hardtext = i18n.get("uiRpjobMaxLevel")
 				t.color = "255 255 0 255"
 			else
 				bar.color = tostring(math.floor((105*quantity)/maxlevel)).." "..tostring(100+math.floor((155*quantity)/maxlevel)).." "..tostring(math.floor((105*quantity)/maxlevel)).." 255"
@@ -2148,11 +2148,11 @@ end
 
 --------------------------------------------------------------------------------------------------------------
 function game:setInfoPlayerCharacterRace()
-	getUI("ui:interface:info_player_skills:content:basics_skills:character_race_name").uc_hardtext = i18n.get("io"..getUserRace())
+	getUI("ui:interface:info_player_skills:content:basics_skills:character_race_name").hardtext = i18n.get("io"..getUserRace())
 end
 
 function game:arkTitlesAddClassics()
-	local current_title = getUI("ui:interface:player:header_opened:player_title").uc_hardtext
+	local current_title = getUI("ui:interface:player:header_opened:player_title").hardtext
 	runAH(nil, "title_init_combobox", "")
 	local cb = getUI("ui:interface:info_player_skills:content:webinfos:title:player_title")
 	local ui = getUI("ui:interface:encyclopedia:content:htmlC")

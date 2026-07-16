@@ -219,7 +219,7 @@ function game:addSpawnShapesByZone(zone, continent, name, displayIcon, setup, fi
 	game.spawnShapesByZone[continent][name][8] = Json.decode(setup[8])
 
 	if not text then
-		text =  i18n.get("uiWisdomChest"):toUtf8()
+		text =  i18n.get("uiWisdomChest")
 	end
 
 	if not icon then
