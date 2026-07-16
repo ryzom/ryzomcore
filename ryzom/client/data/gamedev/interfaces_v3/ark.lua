@@ -65,8 +65,8 @@ function broadcast(text, t)
 	if t == nil then
 		t = "AMB"
 	end
-	local message  = ucstring()
-	text = message:fromUtf8(tostring(text))
+	local message = tostring(text)
+	text = message
 	displaySystemInfo(message, t)
 end
 
@@ -119,7 +119,7 @@ function ArkUpdateItemVariant(db, id, vp, val, skin)
 	item:find("resell").active = false
 	item:find("apply").active = false
 	item:find("v").hardtext = id
-	item:find("infos").hardtext = i18n.get("uiPhraseTotal"):toUtf8().." = 0"
+	item:find("infos").hardtext = i18n.get("uiPhraseTotal").." = 0"
 
 	if db ~= nil then
 		if ArkItemVariantQuantities[db] ~= nil and ArkItemVariantQuantities[db][id] ~= nil then
@@ -129,7 +129,7 @@ function ArkUpdateItemVariant(db, id, vp, val, skin)
 					item:find("apply").active = true
 				end
 				if item:find("infos") ~= nil then
-					item:find("infos").hardtext = i18n.get("uiPhraseTotal"):toUtf8().." = "..tostring(ArkItemVariantQuantities[db][id])
+					item:find("infos").hardtext = i18n.get("uiPhraseTotal").." = "..tostring(ArkItemVariantQuantities[db][id])
 				end
 			end
 			if ArkItemVariantQuantities[db][id] >= ArkItemVariantMinToSell[db] and ArkItemExchange[db] == true then
@@ -412,11 +412,11 @@ end
 
 function ArkMissionCatalog:UpdateMissionTexts(win, id, text1, text2)
 	local w = win:find("ark_mission_"..id)
-	local text = ucstring()
-	text:fromUtf8(text1)
-	w:find("text1").uc_hardtext = text
-	text:fromUtf8(text2)
-	w:find("text2").uc_hardtext = text
+	local text = ""
+	text = text1
+	w:find("text1").hardtext = text
+	text = text2
+	w:find("text2").hardtext = text
 end
 
 function ArkMissionCatalog:startResize()
@@ -794,8 +794,8 @@ S2E1.texts["ru"][5] = {"Из коры доносится грохот.",
 "Ты снова встаешь."}
 
 function utf8decode(text)
-	local utext = ucstring()
-	utext:fromUtf8(text)
+	local utext = ""
+	utext = text
 	return utext
 end
 

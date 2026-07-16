@@ -45,24 +45,24 @@ function game.RingAccessPointFilter:init()
 	local levelCB = filterScenarioWnd:find("level"):find("combo_box")
 	assert(levelCB)
 	levelCB:resetTexts()
-	levelCB:addText(ucstring(i18n.get("uiScenarioLevel_Any")))
-	levelCB:addText(ucstring("1-50"))
-	levelCB:addText(ucstring("51-100"))
-	levelCB:addText(ucstring("101-150"))
-	levelCB:addText(ucstring("151-200"))
-	levelCB:addText(ucstring("201-250"))
+	levelCB:addText(i18n.get("uiScenarioLevel_Any"))
+	levelCB:addText("1-50")
+	levelCB:addText("51-100")
+	levelCB:addText("101-150")
+	levelCB:addText("151-200")
+	levelCB:addText("201-250")
 	levelCB.selection = 0
 
 	local genreCB = filterScenarioWnd:find("genre"):find("combo_box")
 	assert(genreCB)
 	genreCB:resetTexts()
-	genreCB:addText(ucstring(i18n.get("uiScenarioOrient_Any")))
-	genreCB:addText(ucstring(i18n.get("uiScenarioOrient_NewbieTraining")))
-	genreCB:addText(ucstring(i18n.get("uiScenarioOrient_StoryTelling")))
-	genreCB:addText(ucstring(i18n.get("uiScenarioOrient_Mistery")))
-	genreCB:addText(ucstring(i18n.get("uiScenarioOrient_HackSlash")))
-	genreCB:addText(ucstring(i18n.get("uiScenarioOrient_GuildTraining")))
-	genreCB:addText(ucstring(i18n.get("uiScenarioOrient_Other")))
+	genreCB:addText(i18n.get("uiScenarioOrient_Any"))
+	genreCB:addText(i18n.get("uiScenarioOrient_NewbieTraining"))
+	genreCB:addText(i18n.get("uiScenarioOrient_StoryTelling"))
+	genreCB:addText(i18n.get("uiScenarioOrient_Mistery"))
+	genreCB:addText(i18n.get("uiScenarioOrient_HackSlash"))
+	genreCB:addText(i18n.get("uiScenarioOrient_GuildTraining"))
+	genreCB:addText(i18n.get("uiScenarioOrient_Other"))
 	genreCB.selection = 0
 	
 	local name = filterScenarioWnd:find("name"):find("edit_box_group")
@@ -85,10 +85,10 @@ function game.RingAccessPointFilter:getURLParameters()
 	local filterScenarioWnd = self:getWnd()
 	assert(filterScenarioWnd)
 
-	local owner = filterScenarioWnd:find("owner"):find("edit_box_group").uc_input_string	
+	local owner = filterScenarioWnd:find("owner"):find("edit_box_group").input_string	
 	local level = self.LevelToURLParam[filterScenarioWnd:find("level"):find("combo_box").selection]	   
 	local orientation = self.OrientationToURLParam[filterScenarioWnd:find("genre"):find("combo_box").selection]
-	local name = filterScenarioWnd:find("name"):find("edit_box_group").uc_input_string	
+	local name = filterScenarioWnd:find("name"):find("edit_box_group").input_string	
 	local charSlot = getCharSlot()
 
 	local result = string.format("&owner=%s&level=%s&orientation=%s&name=%s&charSlot=%u", encodeURLUnicodeParam(owner), level, orientation, encodeURLUnicodeParam(name), charSlot)
@@ -107,12 +107,12 @@ function game.RingAccessPointFilter:validate()
 	end
    local ucUrl
    if config.Local == 1 then
-			ucUrl = ucstring(NicoMagicURL) -- for test in local mode				
+			ucUrl = NicoMagicURL -- for test in local mode				
    else
          ucUrl = getDynString(game.NpcWebPage.UrlTextId)
    end	
    debugInfo(tostring(ucUrl))
-	local utf8Url = ucUrl:toUtf8()	
+	local utf8Url = ucUrl	
 	local browser = getUI("ui:interface:npc_web_browser"):find("html")
 	-- when in ring mode, add the parameters ourselves. 60 second is the timout for zope....
 	browseNpcWebPage(getUIId(browser), utf8Url .. self:getURLParameters(), false, 60)

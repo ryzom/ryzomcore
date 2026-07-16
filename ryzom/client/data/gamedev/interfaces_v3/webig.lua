@@ -13,9 +13,9 @@ if (webig.urls==nil) then
 end
 
 function getUCtf8(text)
-	local uctext = ucstring()
+	local uctext = ""
 	if type(text) == "string" then
-		uctext:fromUtf8(text)
+		uctext = text
 		return uctext
 	end
 	return text

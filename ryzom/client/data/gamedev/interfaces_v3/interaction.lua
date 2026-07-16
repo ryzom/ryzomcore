@@ -526,7 +526,7 @@ function game:updateTargetConsiderUI()
 	end
 
 	if impossible then
-		wgToolTip.tooltip = concatUCString(wgToolTip.tooltip, ucstring("\n"), i18n.get("uittConsiderUnknownLevel"))
+		wgToolTip.tooltip = (wgToolTip.tooltip .. "\n" .. i18n.get("uittConsiderUnknownLevel"))
 	end
 end
 
@@ -838,7 +838,7 @@ function game:openChannels()
 					if getDbProp("UI:SAVE:ISENABLED:DYNAMIC_CHAT"..i) == 1 then
 						local cname = getDbProp("SERVER:DYN_CHAT:CHANNEL"..i..":NAME")
 						if isDynStringAvailable(cname) then
-							local chan = getDynString(cname):toUtf8()
+							local chan = getDynString(cname)
 							-- already opened?
 							if channels[id].name == chan then found = true end
 						end
@@ -894,7 +894,7 @@ function game:saveChannel(verbose)
 		if getDbProp("UI:SAVE:ISENABLED:DYNAMIC_CHAT"..i) == 1 then
 			local cname = getDbProp("SERVER:DYN_CHAT:CHANNEL"..i..":NAME")
 			if isDynStringAvailable(cname) then
-				local chan = getDynString(cname):toUtf8()
+				local chan = getDynString(cname)
 				local found = false
 				-- avoid empty cvar case
 				if getClientCfgVar("ChannelIgnoreFilter") then
@@ -940,7 +940,7 @@ function game:chatWelcomeMsg(input)
 		if type(input) == "number" then
 			local id = getDbProp("SERVER:DYN_CHAT:CHANNEL"..input..":NAME")
 			if isDynStringAvailable(id) then
-				name = getDynString(id):toUtf8()
+				name = getDynString(id)
 				-- variable for this session
 				if getDbProp(temp..name) == 0 then
 					-- faction, nation and organization
@@ -954,9 +954,9 @@ function game:chatWelcomeMsg(input)
 						marauder = i18n.get("uiFameMarauders"),
 						ranger = i18n.get("uiOrganization_7")
 					}) do
-						if name == v:toUtf8() then
+						if name == v then
 							msg = i18n.get("uiWelcome_"..k)
-							name = v:toUtf8()
+							name = v
 						end
 					end
 				end
