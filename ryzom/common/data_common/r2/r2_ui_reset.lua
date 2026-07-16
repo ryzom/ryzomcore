@@ -385,7 +385,7 @@ function r2:onChangeDesktop(desktopIndex)
 		-- set new title for th "keys" window
 		local keys = getUI("ui:interface:keys")
 		if keys then
-			keys.uc_title = i18n.get("uiR2EDEditingKeys")
+			keys.title = i18n.get("uiR2EDEditingKeys")
 		end
 	
 		if r2.UserComponentsManager then
@@ -426,7 +426,7 @@ function r2:onChangeDesktop(desktopIndex)
 
 		local keys = getUI("ui:interface:keys")
 		if keys then
-			keys.uc_title = i18n.get("uiR2EDTestOrDMKeys")
+			keys.title = i18n.get("uiR2EDTestOrDMKeys")
 		end
 
 	----------------------------------------------------------------------------------------------------------
@@ -473,7 +473,7 @@ function r2:onChangeDesktop(desktopIndex)
 		r2.ui.AnimBar:updateDMControlledEntitiesWindow()					
 		local keys = getUI("ui:interface:keys")
 		if keys then
-			keys.uc_title = i18n.get("uiR2EDTestOrDMKeys")
+			keys.title = i18n.get("uiR2EDTestOrDMKeys")
 		end
 	end	
 

@@ -204,9 +204,9 @@ function r2.logicComponents:updateElementTitle(classUI, eltUI, showPartIndex)
 	-- title
 	local title = eltUI:find("title")
 	assert(title)
-	local uc_title = ucstring()
-	uc_title:fromUtf8(partIndex..eltName)
-	title.uc_hardtext_format = uc_title 
+	local title = ""
+	title = partIndex..eltName
+	title.hardtext_format = title 
 end
 
 ------ REMOVE ELEMENT INST ----------------------------------------

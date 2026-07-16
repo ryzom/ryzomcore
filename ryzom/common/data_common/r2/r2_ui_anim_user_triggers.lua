@@ -22,7 +22,7 @@ function r2.ui.AnimUserTriggers:popMenu()
 	if not triggers then return end
 	for k = 1, table.getn(triggers) do
 		if triggers[k].Act == 0 or triggers[k].Act == r2.getCurrentActIndex() then
-			r2.ScratchUCStr:fromUtf8(triggers[k].Name)
+			r2.ScratchUCStr = triggers[k].Name
 			rootMenu:addLine(r2.ScratchUCStr, "lua",
 							 string.format("r2.ui.AnimUserTriggers:fireTrigger(%d, %d)", triggers[k].Act, triggers[k].Id), "")
 		end
@@ -46,8 +46,8 @@ function r2.ui.AnimUserTriggers:fireTrigger(triggerAct, triggerId)
 	r2.triggerUserTrigger(triggerAct, triggerId)
 	local trig = self:findTrigger(triggerAct, triggerId)
 	if trig then
-		r2.ScratchUCStr:fromUtf8(trig.Name)
-		displaySystemInfo(concatUCString(i18n.get("uiR2EDTriggering"), r2.ScratchUCStr), "BC")	
+		r2.ScratchUCStr = trig.Name
+		displaySystemInfo((i18n.get("uiR2EDTriggering") .. r2.ScratchUCStr), "BC")	
 	end
 end
 
