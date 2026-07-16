@@ -3019,7 +3019,7 @@ text_y="-2"
 </proc>
 
 <group type="container" id="feature_help" w="370" pop_min_w="370" pop_max_w="370" h="550" pop_min_h="550" pop_max_h="550"
- title="" global_color="false" header_color="UI:SAVE:WIN:COLORS:R2_FEATURE_HELP" uc_title=""
+ title="" global_color="false" header_color="UI:SAVE:WIN:COLORS:R2_FEATURE_HELP"
  title_bar_open="false" open_button="false" force_open_out="true" right_button="false"
  lockable="true" openable="false" opened="true" movable="true" active="false" savable="true" >	
 

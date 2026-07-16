@@ -1592,7 +1592,7 @@
             w="0"
             h="0" />
       <link expr="getPriceWithFame(@#value,@#value_fame)"
-            target="val1:uc_hardtext" />
+            target="val1:hardtext" />
       <link expr="ifthenelse(eq(@UI:TEMP:TRADE_ITEM:IS_SELL_DLG,1),ifthenelse(eq(@#value,@#value_fame),localize('uittPriceWithFameEqual'),localize('uittPriceWithFameDiff')),'')"
             target="tt:tooltip" />
     </group>
@@ -1639,7 +1639,7 @@
             hardtext=""
             global_color="false" />
       <link expr="getBonusOnResale(@#value_high,@#value_low)"
-            target="val1:uc_hardtext" />
+            target="val1:hardtext" />
     </group>
   </template>
   <!-- the modal -->
