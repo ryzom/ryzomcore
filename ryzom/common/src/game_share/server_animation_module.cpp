@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2019-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -365,7 +365,7 @@ public:
 	typedef std::map<uint32, TCharacterInfo> TCharacterInfos;
 
 public:
-	CUniquePtr<CObject> RtData;
+	CObject::TSmartPtr RtData;
 	TScenarioHeaderSerializer ScenarioHeader;
 	TSessionId SessionId;
 	//vector<userId>
@@ -1137,7 +1137,7 @@ bool CServerAnimationModule::queueSession(CAnimationSession* session, bool /* ru
 			// binary
 			COFile output;
 			output.open("outpout.rt.bin");
-			CObjectSerializerServer serializer( session->RtData.get());
+			CObjectSerializerServer serializer( session->RtData.getPtr());
 			serializer.serial(output);
 			output.flush();
 			output.close();
@@ -1811,7 +1811,7 @@ bool CServerAnimationModule::translateActToPrimitive(CInstanceMap& components, C
 		CObject* tree = act->getAttr("UserTriggers");
 		if (!tree || !tree->isTable())
 		{
-			nlwarning("R2An: Data corrupted");
+			nlwarning("R2An: Data corrupted: UserTriggers missing");
 			return false;
 		}
 		uint32 lastnode = tree->getSize();
@@ -1824,7 +1824,7 @@ bool CServerAnimationModule::translateActToPrimitive(CInstanceMap& components, C
 				|| !node->isString("Name")
 				|| !node->isString("Grp")	)
 			{
-				nlwarning("R2An: Data corrupted");
+				nlwarning("R2An: Data corrupted: Invalid UserTrigger");
 				return false;
 			}
 
@@ -1883,7 +1883,7 @@ bool CServerAnimationModule::doMakeAnimationSession(CAnimationSession* animSessi
 	std::vector<CPrimitives> primDocs;
 
 
-	CObject* rtScenario = animSession->RtData.get();
+	CObject* rtScenario = animSession->RtData.getPtr();
 
 	uint32 aiInstance = animSession->AiInstance;
 
@@ -1895,14 +1895,14 @@ bool CServerAnimationModule::doMakeAnimationSession(CAnimationSession* animSessi
 
 	// build instance map
  	CInstanceMap components("Id");
-	components.set(animSession->RtData.get());//default + act courant
+	components.set(animSession->RtData.getPtr());//default + act courant
 
 	//Create Plot items
 
 	CObject* plotItems = rtScenario->getAttr("PlotItems");
 	if (!plotItems || !plotItems->isTable())
 	{
-		nlwarning("R2An: Data corrupted:session '%u'",sessionId.asInt());
+		nlwarning("R2An: Data corrupted:session '%u': missing PlotItems",sessionId.asInt());
 		return false;
 	}
 
@@ -1919,7 +1919,7 @@ bool CServerAnimationModule::doMakeAnimationSession(CAnimationSession* animSessi
 			|| !plotItem->isString("Comment")
 			)
 		{
-			nlwarning("R2An: Data corrupted:session '%u'",sessionId.asInt());
+			nlwarning("R2An: Data corrupted:session '%u': Invalid PlotItem",sessionId.asInt());
 			return false;
 		}
 
@@ -1960,7 +1960,7 @@ bool CServerAnimationModule::doMakeAnimationSession(CAnimationSession* animSessi
 		CObject* locations = rtScenario->getAttr("Locations");
 		if (!locations || !locations->isTable())
 		{
-			nlwarning("R2An: Data corrupted");
+			nlwarning("R2An: Data corrupted: Missing Locations");
 			return false;
 		}
 		uint32 lastLocation = locations->getSize();
@@ -1976,7 +1976,7 @@ bool CServerAnimationModule::doMakeAnimationSession(CAnimationSession* animSessi
 
 				)
 			{
-				nlwarning("R2An: Data corrupted:session '%u'",sessionId.asInt());
+				nlwarning("R2An: Data corrupted:session '%u': Invalid Location",sessionId.asInt());
 				return false;
 			}
 
@@ -2013,7 +2013,7 @@ bool CServerAnimationModule::doMakeAnimationSession(CAnimationSession* animSessi
 		bool ok = translateActToPrimitive(components, animSession, act, firstAct, primDocs[firstAct] ); //TODO
 		if (!ok)
 		{
-			nlwarning("R2An: Data corrupted:session '%u'",sessionId.asInt());
+			nlwarning("R2An: Data corrupted:session '%u': Failed Act translation",sessionId.asInt());
 			return false;
 		}
 	}
@@ -3572,7 +3572,7 @@ bool CServerAnimationModule::onProcessModuleMessage(IModuleProxy *senderModulePr
 
 			CAnimationSession* session = new CAnimationSession();
 			session->CurrentAct = 0;
-			session->RtData.reset( obj.getData() );
+			session->RtData = obj.getData();
 			session->SessionId = sessionId;
 			queueSession(session, false);
 
@@ -3622,7 +3622,7 @@ void CServerAnimationModule::scheduleStartSessionImpl(const CAnimationMessageAni
 		session->ConnectedChars.push_back(*first);
 	}
 
-	session->RtData.reset( msg.RtData.getData() );
+	session->RtData = msg.RtData.getData();
 	session->SessionId = msg.SessionId;
 	session->AiInstance = msg.AiInstance;
 	session->InitialAct = msg.StartingAct;

@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -16,6 +19,8 @@
 
 #ifndef NL_TREE_H_
 #define NL_TREE_H_
+
+#include "nel/misc/types_nl.h"
 
 #include <vector>
 #include <map>
@@ -33,7 +38,11 @@ class CTree
 
 	public:
 
-		struct greater : public std::binary_function<std::pair<double,int> , std::pair<double,int> , bool> {
+		struct greater 
+#ifndef NL_CPP17
+			: public std::binary_function<std::pair<double,int> , std::pair<double,int> , bool> 
+#endif
+		{
 			bool operator()(std::pair<double,int> x, std::pair<double,int> y) const
 			{
 				return x.first > y.first;

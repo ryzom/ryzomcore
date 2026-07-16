@@ -7,26 +7,34 @@ SET(OVQT_EXT_SYS_SRC	${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin.
 			${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_manager.h
 			${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_spec.h)
 
-SET(OVQT_PLUG_SHEET_BUILDER_HDR sheetbuilderconfgdialog.h sheetbuilderdialog.h ovqt_sheet_builder.h)
-
 SET(QT_USE_QTGUI TRUE)
 SET(QT_USE_QTOPENGL TRUE)
 
-QT4_WRAP_CPP(OVQT_PLUG_SHEET_BUILDER_MOC_SRC ${OVQT_PLUG_SHEET_BUILDER_HDR})
-
-SOURCE_GROUP(QtGeneratedMocSrc FILES ${OVQT_PLUG_SHEET_BUILDER_MOC_SRC})
 SOURCE_GROUP("Sheet builder Plugin" FILES ${SRC})
 SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
 
-ADD_LIBRARY(studio_plugin_sheet_builder MODULE ${SRC} ${OVQT_PLUG_SHEET_BUILDER_MOC_SRC} ${OVQT_EXT_SYS_SRC})
+ADD_LIBRARY(studio_plugin_sheet_builder MODULE ${OVQT_EXT_SYS_SRC})
 
-TARGET_LINK_LIBRARIES(studio_plugin_sheet_builder studio_plugin_core nelmisc ${QT_LIBRARIES})
+target_sources(studio_plugin_sheet_builder
+        PRIVATE
+        ovqt_sheet_builder.cpp
+        sheetbuilderconfgdialog.cpp
+        sheetbuilderdialog.cpp
+)
+
+TARGET_LINK_LIBRARIES(studio_plugin_sheet_builder
+        PRIVATE
+        Studio::plugin::core
+        NeL::misc
+        Qt::Core
+        Qt::Widgets
+)
 
 NL_DEFAULT_PROPS(studio_plugin_sheet_builder "Tools: Studio Plugin: Sheet builder")
 NL_ADD_RUNTIME_FLAGS(studio_plugin_sheet_builder)
 NL_ADD_LIB_SUFFIX(studio_plugin_sheet_builder)
 
-ADD_DEFINITIONS(-DQT_PLUGIN -DQT_SHARED ${QT_DEFINITIONS})
+TARGET_COMPILE_DEFINITIONS(studio_plugin_sheet_builder PRIVATE QT_PLUGIN QT_SHARED ${QT_DEFINITIONS})
 
 
 IF(WIN32)

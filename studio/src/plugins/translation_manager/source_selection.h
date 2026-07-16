@@ -22,10 +22,10 @@
 
 #include "ui_source_selection.h"
 
-#include <QtCore/QObject>
-#include <QtGui/QDialog>
-#include <QtCore/QString>
-#include <QtGui/QListWidgetItem>
+#include <QObject>
+#include <QDialog>
+#include <QString>
+#include <QListWidgetItem>
 
 #include <map>
 

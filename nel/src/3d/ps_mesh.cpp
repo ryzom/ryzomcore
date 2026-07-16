@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2011  Robert TIMM (rti) <mail@rtti.de>
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -1568,7 +1569,13 @@ void CPSConstraintMesh::serial(NLMISC::IStream &f)
 		{
 			// remove path
 			TMeshNameVect meshNamesWithoutPath = _MeshShapeFileName;
-			std::transform(meshNamesWithoutPath.begin(), meshNamesWithoutPath.end(), meshNamesWithoutPath.begin(), std::ptr_fun(NLMISC::CFile::getFilename));
+			std::transform(meshNamesWithoutPath.begin(), meshNamesWithoutPath.end(), meshNamesWithoutPath.begin(), 
+#ifndef NL_CPP17
+				std::ptr_fun(NLMISC::CFile::getFilename)
+#else
+			    std::bind(&NLMISC::CFile::getFilename, std::placeholders::_1)
+#endif
+			);
 			f.serialCont(meshNamesWithoutPath);
 		}
 		else
@@ -2214,7 +2221,7 @@ void CPSConstraintMesh::CMeshDisplayShare::buildVB(CVertexBuffer &dest, const CV
 	/// we duplicate the original mesh data's 'ConstraintMeshBufSize' times, eventually adding a color
 	nlassert(destFormat == meshVb.getVertexFormat() || destFormat == (meshVb.getVertexFormat() | (uint32) CVertexBuffer::PrimaryColorFlag) );
 	dest.setVertexFormat(destFormat);
-	dest.setPreferredMemory(CVertexBuffer::AGPVolatile, true);
+	dest.setBufferUsage(CVertexBuffer::FullStream, true);
 	dest.setNumVertices(ConstraintMeshBufSize * meshVb.getNumVertices());
 	for(uint k = 0; k < CVertexBuffer::MaxStage; ++k)
 	{

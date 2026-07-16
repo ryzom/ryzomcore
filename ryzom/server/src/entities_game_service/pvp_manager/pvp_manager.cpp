@@ -74,7 +74,6 @@ void CPVPManager::initPVPIslands()
 //----------------------------------------------------------------------------
 void CPVPManager::release()
 {
-	nlassert( _Instance );
 	delete _Instance;
 	_Instance = NULL;
 }

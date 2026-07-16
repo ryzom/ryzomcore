@@ -21,7 +21,7 @@
 #define QT_QTPROPERTYBROWSER_IMPORT 
 
 #include <QWidget>
-#include <3rdparty/qtpropertybrowser/qtpropertymanager.h>
+#include <qtpropertybrowser/qtpropertymanager.h>
 
 /////////////////////////////////////////////////////////////////////// Manager /////////////////////////////////////////////////////////////////
 

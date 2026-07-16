@@ -24,11 +24,11 @@
 
 // Qt includes
 #include <QtCore/QPair>
-#include <QtGui/QGraphicsObject>
-#include <QtGui/QGraphicsScene>
-#include <QtGui/QGraphicsPolygonItem>
-#include <QtGui/QGraphicsRectItem>
-#include <QtGui/QGraphicsSceneMouseEvent>
+#include <QGraphicsObject>
+#include <QGraphicsScene>
+#include <QGraphicsPolygonItem>
+#include <QGraphicsRectItem>
+#include <QGraphicsSceneMouseEvent>
 
 namespace WorldEditor
 {

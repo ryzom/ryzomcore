@@ -429,7 +429,7 @@ void PluginSpec::kill()
 	bool b = loader->unload();
 	if( !b )
 	{
-		nlinfo( "Plugin %s couldn't be unloaded.", this->m_name.toAscii().data() );
+		nlinfo( "Plugin %s couldn't be unloaded.", this->m_name.toLatin1().data() );
 	}
 
 	//delete m_plugin;

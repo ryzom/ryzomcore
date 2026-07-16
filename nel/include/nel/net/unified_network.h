@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2020-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -22,6 +22,9 @@
 
 #include "nel/misc/types_nl.h"
 
+#if !(defined(NL_COMP_VC) && NL_COMP_VC_VERSION < 100)
+#include <functional>
+#endif
 #include <vector>
 #include <string>
 
@@ -182,14 +185,45 @@ public:
  * \param serviceName name of the service that is un/registered to the naming service
  * \param arg a pointer initialized by the user
  */
-typedef void (*TUnifiedNetCallback) (const std::string &serviceName, TServiceId sid, void *arg);
+#if defined(NL_COMP_VC) && NL_COMP_VC_VERSION < 100
+typedef NLMISC::CCallback<void, const std::string &, TServiceId, void *> TUnifiedNetCallback;
+#else
+typedef std::function<void(const std::string &serviceName, TServiceId sid, void *arg)> TUnifiedNetCallback;
+#endif
 
 /** Callback function type for message processing
  * \param msgin message received
  * \param serviceName name of the service that sent the message
  * \param sid id of the service that sent the message
  */
-typedef void (*TUnifiedMsgCallback) (CMessage &msgin, const std::string &serviceName, TServiceId sid);
+#if defined(NL_COMP_VC) && NL_COMP_VC_VERSION < 100
+typedef NLMISC::CCallback<void, CMessage &, const std::string &, TServiceId> TUnifiedMsgCallback;
+#else
+typedef std::function<void(CMessage &msgin, const std::string &serviceName, TServiceId sid)> TUnifiedMsgCallback;
+#endif
+
+#if !(defined(NL_COMP_VC) && NL_COMP_VC_VERSION < 100)
+/** Helper to get the address of a function in order to compare two callbacks
+ *
+ * \tparam R return type of the callback
+ * \tparam Args arguments type of the callback
+ * \param callback the callback
+ * \return address of the callback
+ */
+template <typename R, typename... Args>
+size_t getAddress(std::function<R(Args...)> callback) {
+	typedef R(functionType)(Args...);
+	auto ** functionPointer = callback.template target<functionType*>();
+
+	return reinterpret_cast<size_t>(*functionPointer);
+}
+
+inline bool
+operator==(const TUnifiedNetCallback& a, const TUnifiedNetCallback& b) noexcept {
+	return getAddress(a) == getAddress(b);
+}
+#endif
+
 
 /// Callback items. See CMsgSocket::update() for an explanation on how the callbacks are called.
 struct TUnifiedCallbackItem
@@ -256,7 +290,7 @@ public:
 	 * \param rec recording state to know if we have to record or replay messages
 	 * \return false if the instance startup was denied by the naming service
 	 */
-	bool	init (const CInetAddress *addr, CCallbackNetBase::TRecordingState rec, const std::string &shortName, uint16 port, TServiceId &sid );
+	bool	init (const CInetHost *addr, CCallbackNetBase::TRecordingState rec, const std::string &shortName, uint16 port, TServiceId &sid );
 
 	/** Registers to the Naming Service, and connects to the present services
 	 */
@@ -282,8 +316,7 @@ public:
 	 *
 	 * Warning: currently, this method must not be called within a network callback.
 	 */
-	void	addService(const std::string &name, const CInetAddress &addr, bool sendId = true, bool external = true, TServiceId sid=TServiceId(), bool autoRetry = true, bool shouldBeAlreayInserted = false);
-	void	addService(const std::string &name, const std::vector<CInetAddress> &addr, bool sendId = true, bool external = true, TServiceId sid=TServiceId(), bool autoRetry = true, bool shouldBeAlreayInserted = false);
+	void	addService(const std::string &name, const CInetHost &addr, bool sendId = true, bool external = true, TServiceId sid=TServiceId(), bool autoRetry = true, bool shouldBeAlreayInserted = false);
 
 	/** Adds a callback array in the system. You can add callback only *after* adding the server, the client or the group.
 	 */
@@ -524,7 +557,7 @@ private:
 		/// Used for debug purpose
 		uint						AutoCheck;
 		/// The external connection address
-		std::vector<CInetAddress>	ExtAddress;
+		CInetHost					ExtAddress;
 		/// Connection to the service (me be > 1)
 		std::vector<TConnection>	Connections;
 		/// This is used to associate a nid (look addNetworkAssociation) with a TConnection.
@@ -585,7 +618,7 @@ private:
 				uint j;
 				for (j = 0; j < ExtAddress.size (); j++)
 				{
-					if (ExtAddress[j].internalNetAddress() == networkAssociations[i])
+					if (ExtAddress.addresses()[j].internalNetAddress() == networkAssociations[i])
 					{
 						// we found an association, add it
 						if (i >= NetworkConnectionAssociations.size ())
@@ -692,7 +725,7 @@ private:
 //	static CUnifiedNetwork						*_Instance;
 
 	/// Naming service
-	NLNET::CInetAddress							_NamingServiceAddr;
+	NLNET::CInetHost							_NamingServiceAddr;
 
 	/// for each nid, which network address
 	std::vector<uint32>							_NetworkAssociations;

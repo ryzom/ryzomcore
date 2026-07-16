@@ -28,7 +28,7 @@
 // Qt includes
 #include <QtCore/QMap>
 #include <QtCore/QString>
-#include <QtGui/QPixmap>
+#include <QPixmap>
 #include <QAbstractListModel>
 
 namespace LandscapeEditor

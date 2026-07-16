@@ -313,7 +313,8 @@ void CActionHistoric::requestSetNode(const std::string& instanceId,const std::st
 		if (value->getGhost())
 		{
 			// direct effect, assumed to be local display only
-			getEditor().getDMC().nodeSet(instanceId, attrName, value->clone());
+			CObject::TSmartPtr temp = value->clone();
+			getEditor().getDMC().nodeSet(instanceId, attrName, temp);
 			return;
 		}
 	}
@@ -455,10 +456,10 @@ void CActionHistoric::CAction::undo(IDynamicMapClient *dmc, CScenario &scenario)
 //////////////
 
 //====================================================================================
-CObject *CActionHistoric::CRequestBase::cloneObject(const CObject *src)
+CObject::TSmartPtr CActionHistoric::CRequestBase::cloneObject(const CObject *src)
 {
 	//H_AUTO(R2_CRequestBase_cloneObject)
-	CObject *result = src->clone();
+	CObject::TSmartPtr result = src->clone();
 	struct CDisableRefIDs : public IObjectVisitor
 	{
 		virtual void visit(CObjectRefId &obj)

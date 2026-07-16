@@ -2,21 +2,23 @@ FILE(GLOB SRC *.cpp *.h)
 
 ADD_EXECUTABLE(ryzom_monitor_service WIN32 ${SRC})
 
-INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR} ${MYSQL_INCLUDE_DIR})
+TARGET_INCLUDE_DIRECTORIES(ryzom_monitor_service PRIVATE ${RZ_SERVER_SRC_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_monitor_service
-						${RYZOM_GAMESHARE_LIBRARIES}
-						${MYSQL_LIBRARIES}
-						${NELMISC_LIBRARIES} 
-						${NELNET_LIBRARIES}
-						${NELGEORGES_LIBRARIES})
+        PRIVATE
+        Ryzom::gameshare
+        MySQL::MySQL
+        NeL::misc
+        NeL::net
+        NeL::georges
+)
 
 NL_DEFAULT_PROPS(ryzom_monitor_service "Ryzom, Services: Monitor Service (MOS)")
 NL_ADD_RUNTIME_FLAGS(ryzom_monitor_service)
 
-IF(WITH_PCH)
-  ADD_NATIVE_PRECOMPILED_HEADER(ryzom_monitor_service ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.cpp)
-ENDIF()
+IF (WITH_PCH)
+    target_precompile_headers(ryzom_monitor_service PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h)
+ENDIF ()
 
 INSTALL(TARGETS ryzom_monitor_service RUNTIME DESTINATION sbin COMPONENT services)
 

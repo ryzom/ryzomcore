@@ -69,6 +69,16 @@ inline uint64 wangHash64Inv(uint64 key)
 	return key;
 }
 
+/// Low-bias 32-bit integer hash (hash-prospector variant)
+/// Coefficients from https://github.com/skeeto/hash-prospector/issues/19
+inline uint32 lowbias32(uint32 x)
+{
+	x ^= x >> 16; x *= 0x21f0aaadu;
+	x ^= x >> 15; x *= 0x735a2d97u;
+	x ^= x >> 15;
+	return x;
+}
+
 } /* namespace NLMISC */
 
 #endif // NLMISC_WANG_HASH_H

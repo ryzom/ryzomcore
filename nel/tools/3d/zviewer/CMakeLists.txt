@@ -8,7 +8,7 @@ ENDIF()
 
 ADD_DEFINITIONS(-DNL_ZVIEWER_CFG="${NL_ETC_PREFIX}/")
 
-TARGET_LINK_LIBRARIES(zviewer nelmisc nel3d)
+TARGET_LINK_LIBRARIES(zviewer PRIVATE NeL::misc NeL::3d)
 NL_DEFAULT_PROPS(zviewer "NeL, Tools, 3D: Zone Viewer")
 NL_ADD_RUNTIME_FLAGS(zviewer)
 

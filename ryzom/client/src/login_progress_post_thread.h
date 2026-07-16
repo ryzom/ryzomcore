@@ -19,8 +19,6 @@
 
 #include "nel/misc/thread.h"
 #include "nel/misc/singleton.h"
-#include "game_share/http_client.h"
-
 
 namespace NLMISC
 {

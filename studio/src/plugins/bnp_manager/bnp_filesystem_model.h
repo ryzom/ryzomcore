@@ -17,7 +17,7 @@
 #ifndef BNP_FILESYSTEM_MODEL_H
 #define BNP_FILESYSTEM_MODEL_H
 
-#include <QtGui/QFileSystemModel>
+#include <QFileSystemModel>
 
 namespace BNPManager
 {

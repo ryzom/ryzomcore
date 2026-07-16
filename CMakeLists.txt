@@ -18,41 +18,33 @@
 #   * To build binary archive, use the 'package' target.
 #     To build source archive, use the 'package_source' target.
 
+CMAKE_MINIMUM_REQUIRED(VERSION 3.28)
+
 #-----------------------------------------------------------------------------
 # Load some macros.
-SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/CMakeModules")
 #-----------------------------------------------------------------------------
-# Set CMake 2.6 Policies.
-IF(COMMAND cmake_policy)
-  # Works around warnings libraries linked against that don't
-  # have absolute paths (e.g. -lpthread)
-  cmake_policy(SET CMP0003 NEW)
-
-  # allow to link to qtmain automatically under Windows
-  IF(POLICY CMP0020)
-    CMAKE_POLICY(SET CMP0020 NEW)
-  ENDIF()
-ENDIF()
-
-
-#-----------------------------------------------------------------------------
-# Downloads and install Hunger into HUNTER_ROOT directory.
+# Downloads and install Hunter into HUNTER_ROOT directory.
 OPTION(HUNTER_ENABLED "Enable Hunter package manager" OFF)
 IF(HUNTER_ENABLED)
+
   INCLUDE("CMakeModules/HunterGate.cmake")
   HunterGate(
-    URL "https://github.com/cpp-pm/hunter/archive/v0.23.321.tar.gz"
-    SHA1 "5e53cbb0429037ea8e2592bfd92704b8ff3ab492"
+    URL "https://github.com/cpp-pm/hunter/archive/v0.26.1.tar.gz"
+    SHA1 "e41ac7a18c49b35ebac99ff2b5244317b2638a65"
     FILEPATH "${CMAKE_CURRENT_LIST_DIR}/CMakeModules/HunterConfig.cmake"
   )
 
   # default options for hunterized build
   SET(WITH_STATIC         ON CACHE BOOL "static" FORCE)
   SET(WITH_STATIC_DRIVERS ON CACHE BOOL "static drivers" FORCE)
-  SET(WITH_STATIC_CURL    ON CACHE BOOL "static curl" FORCE)
   SET(WITH_STATIC_LIBXML2 ON CACHE BOOL "static libxml2" FORCE)
   SET(WITH_STATIC_EXTERNAL ON CACHE BOOL "static external" FORCE)
   SET(WITH_EXTERNAL       OFF CACHE BOOL "external libs" FORCE)
+ 
+ # Workaround for PCH compilation issue, from curl intsizeof depencency
+  ADD_DEFINITIONS(-D__STDC_LIMIT_MACROS)
+  # TODO: Still applicable after switching to CMake's builtin precompiled header support?
 ENDIF()
 
 
@@ -61,9 +53,6 @@ ENDIF()
 INCLUDE(nel)
 INCLUDE(ConfigureChecks)
 INCLUDE(CheckDepends)
-INCLUDE(${CMAKE_ROOT}/Modules/Documentation.cmake OPTIONAL)
-
-MESSAGE("EXTERNAL ${WITH_EXTERNAL}")
 
 # Force out of source builds.
 CHECK_OUT_OF_SOURCE()
@@ -77,17 +66,13 @@ ELSE()
   SET(CURRENT_YEAR "2019")
 ENDIF()
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
-PROJECT(RyzomCore CXX C)
-SET(NL_VERSION_MAJOR 1)
-SET(NL_VERSION_MINOR 1)
-SET(NL_VERSION_PATCH 0 CACHE STRING "Patch version")
+PROJECT(RyzomCore VERSION 4.1.0.0 LANGUAGES CXX C)
+SET(NL_VERSION_MAJOR ${RyzomCore_VERSION_MAJOR})
+SET(NL_VERSION_MINOR ${RyzomCore_VERSION_MINOR})
+SET(NL_VERSION_PATCH ${RyzomCore_VERSION_PATCH} CACHE STRING "Patch version")
+SET(NL_VERSION_BUILD ${RyzomCore_VERSION_TWEAK} CACHE STRING "Build number")
 SET(YEAR "2001-${CURRENT_YEAR}")
 SET(AUTHOR "Winch Gate and The Ryzom Core Community")
-
-SET(RYZOM_VERSION_MAJOR 3)
-SET(RYZOM_VERSION_MINOR 6)
-SET(RYZOM_VERSION_PATCH 0)
 
 #-----------------------------------------------------------------------------
 # Redirect output files
@@ -124,14 +109,16 @@ RYZOM_SETUP_PREFIX_PATHS()
 
 #-----------------------------------------------------------------------------
 # Default values for URL's
-SET(RYZOM_CLIENT_CREATE_ACCOUNT_URL  "https://open.ryzom.dev/ams/" CACHE STRING "Ryzom Client Create Account URL")
-SET(RYZOM_CLIENT_EDIT_ACCOUNT_URL    "https://open.ryzom.dev/ams/" CACHE STRING "Ryzom Client Edit Account URL")
-SET(RYZOM_CLIENT_FORGET_PASSWORD_URL "https://open.ryzom.dev/ams/" CACHE STRING "Ryzom Client Forget Password URL")
-SET(RYZOM_CLIENT_PATCH_URL           "https://cdn.ryzom.dev/open/patch/" CACHE STRING "Ryzom Client Patch URL")
-SET(RYZOM_CLIENT_APP_NAME            "default")
+SET(RYZOM_CLIENT_CREATE_ACCOUNT_URL     "https://core.ryzom.dev/ams/" CACHE STRING "Ryzom Client Create Account URL")
+SET(RYZOM_CLIENT_EDIT_ACCOUNT_URL       "https://core.ryzom.dev/ams/" CACHE STRING "Ryzom Client Edit Account URL")
+SET(RYZOM_CLIENT_FORGET_PASSWORD_URL    "https://core.ryzom.dev/ams/" CACHE STRING "Ryzom Client Forget Password URL")
+SET(RYZOM_CLIENT_PATCH_URL              "https://cdn.ryzom.dev/core4/patch/" CACHE STRING "Ryzom Client Patch URL")
+SET(RYZOM_CLIENT_APP_NAME               "core4")
 
-SET(RYZOM_WEBIG_MAIN_URL             "https://open.ryzom.dev/" CACHE STRING "Ryzom Client WebIG Main URL")
-SET(RYZOM_WEBIG_TRUSTED_DOMAIN       "open.ryzom.dev" CACHE STRING "Ryzom Client WebIG Trusted Domain")
+SET(RYZOM_CLIENT_RELEASENOTES_URL       "https://core4.ryzom.dev/releasenotes/index.php" CACHE STRING "Ryzom Client Release Notes URL")
+SET(RYZOM_CLIENT_RELEASENOTES_RING_URL  "https://core4.ryzom.dev/releasenotes_ring/index.php" CACHE STRING "Ryzom Client Release Notes URL")
+
+SET(RYZOM_CLIENT_UI_FEATURE_FLAG        "ryzomcore" CACHE STRING "Ryzom Client UI Feature Flag")
 
 #-----------------------------------------------------------------------------
 # urls when compiling ryzom live client
@@ -143,8 +130,13 @@ IF(WITH_RYZOM_LIVE)
   SET(RYZOM_CLIENT_PATCH_URL           "http://dl.ryzom.com/patch_live")
   SET(RYZOM_CLIENT_APP_NAME            "ryzom_live")
 
-  SET(RYZOM_WEBIG_MAIN_URL             "https://app.ryzom.com/")
-  SET(RYZOM_WEBIG_TRUSTED_DOMAIN       "app.ryzom.com")
+  SET(RYZOM_CLIENT_RELEASENOTES_URL       "https://app.ryzom.com/app_releasenotes/index.php")
+  SET(RYZOM_CLIENT_RELEASENOTES_RING_URL  "https://app.ryzom.com/app_releasenotes/index.php")
+
+  SET(RYZOM_CLIENT_UI_FEATURE_FLAG        "ryzomforge")
+
+  # can be removed after lua ucstring cleanup
+  ADD_DEFINITIONS(-DRYZOM_LUA_UCSTRING)
 ENDIF()
 
 #-----------------------------------------------------------------------------
@@ -161,37 +153,80 @@ IF(WIN32)
 ENDIF()
 
 IF(HUNTER_ENABLED)
+  # This fix is for compiling OpenSSL in Azure Pipeline linux agent where ENV{SYSTEM} == "build"
+  IF(DEFINED ENV{SYSTEM} AND UNIX AND NOT APPLE)
+    STRING(TOUPPER "$ENV{SYSTEM}" _tmp)
+    IF (_tmp STREQUAL "BUILD")
+      UNSET(ENV{SYSTEM})
+    ENDIF()
+    UNSET(_tmp)
+  ENDIF()
   ## TODO: hack for freetype hunter package
   SET(ON 1)
   ##
   HUNTER_ADD_PACKAGE(ZLIB)
 
   FIND_PACKAGE(ZLIB CONFIG REQUIRED)
-  SET(ZLIB_LIBRARY ZLIB::zlib)
+  # add compatibility with cmake findZLIB module
+  if(ZLIB_FOUND AND NOT TARGET ZLIB::ZLIB)
+      add_library(ZLIB::ZLIB ALIAS ZLIB::zlib)
+  endif()
 
   HUNTER_ADD_PACKAGE(libxml2)
   FIND_PACKAGE(libxml2 CONFIG REQUIRED)
-  SET(LIBXML2_LIBRARIES ${LIBXML2_LIBRARIES} libxml2::libxml2)
+  # add compatibility with cmake find module
+  if(libxml2_FOUND AND NOT TARGET LibXml2::LibXml2)
+      add_library(LibXml2::LibXml2 ALIAS libxml2::libxml2)
+      IF(WITH_STATIC AND WINSOCK2_LIB)
+        # libxml2 with LIBXML_HTTP_ENABLED has some additional dependencies that hunter does not add
+            set_property(TARGET libxml2::libxml2
+                    APPEND
+                    PROPERTY INTERFACE_LINK_LIBRARIES
+                    ${WINSOCK2_LIB}
+            )
+      ENDIF()
+  endif()
 
-  HUNTER_ADD_PACKAGE(OpenSSL)
-  FIND_PACKAGE(OpenSSL REQUIRED)
-  # TODO: is OpenSSL::Crypto only needed for WIN32?
-  SET(OPENSSL_LIBRARIES OpenSSL::SSL OpenSSL::Crypto)
+  # cross compiling doesn't quite work on the hunter openssl package therefor compile it separately and use it
+  IF(NOT CMAKE_CROSSCOMPILING)
+    HUNTER_ADD_PACKAGE(OpenSSL)
+  ENDIF()
+  FIND_PACKAGE(OpenSSL REQUIRED COMPONENTS Crypto SSL)
 
   # for precompiled headers, not needed if using TARGET_PRECOMPILE_HEADERS() from cmake 3.16+
   SET(ZLIB_INCLUDE_DIR ZLIB_ROOT/include)
-  SET(LIBXML2_INCLUDE_DIR ${LIBXML2_ROOT}/include/libxml2)
 ELSE()
-FIND_PACKAGE(ZLIB REQUIRED)
-FIND_PACKAGE(LibXml2 REQUIRED)
-FIND_PACKAGE(PNG REQUIRED)
-FIND_PACKAGE(OpenSSL REQUIRED)
-FIND_PACKAGE(GIF)
-FIND_PACKAGE(Jpeg)
-
-IF(WIN32)
-  SET(OPENSSL_LIBRARIES ${OPENSSL_LIBRARIES} Crypt32.lib)
+IF(EMSCRIPTEN)
+  # For Emscripten builds, zlib and libpng come from Emscripten ports
+  # (-sUSE_ZLIB=1 / -sUSE_LIBPNG=1), same pattern as the FreeType port in
+  # nel/CMakeLists.txt. The options must be present at both compile time
+  # (port headers) and link time (port libraries); INTERFACE options on the
+  # imported targets propagate to consumers of nelmisc. libxml2 stays
+  # unavailable; XML-dependent code is compiled out.
+  ADD_LIBRARY(ZLIB::ZLIB INTERFACE IMPORTED)
+  SET_TARGET_PROPERTIES(ZLIB::ZLIB PROPERTIES
+    INTERFACE_COMPILE_OPTIONS "-sUSE_ZLIB=1"
+    INTERFACE_LINK_OPTIONS "-sUSE_ZLIB=1")
+  SET(ZLIB_FOUND TRUE)
+  SET(ZLIB_INCLUDE_DIRS "")
+  SET(ZLIB_LIBRARIES "")
+  ADD_LIBRARY(PNG::PNG INTERFACE IMPORTED)
+  SET_TARGET_PROPERTIES(PNG::PNG PROPERTIES
+    INTERFACE_COMPILE_OPTIONS "-sUSE_ZLIB=1;-sUSE_LIBPNG=1"
+    INTERFACE_LINK_OPTIONS "-sUSE_ZLIB=1;-sUSE_LIBPNG=1")
+  SET(PNG_FOUND TRUE)
+  SET(LIBXML2_FOUND FALSE)
+  SET(LIBXML2_INCLUDE_DIR "")
+  SET(LIBXML2_LIBRARIES "")
+ELSE()
+  FIND_PACKAGE(ZLIB REQUIRED)
+  FIND_PACKAGE(LibXml2 REQUIRED)
+  FIND_PACKAGE(PNG REQUIRED)
+  FIND_PACKAGE(OpenSSL REQUIRED)
+  FIND_PACKAGE(GIF)
+  FIND_PACKAGE(JPEG)
 ENDIF()
+
 ENDIF() #hunter
 
 IF(WITH_LIBOVR)
@@ -205,45 +240,33 @@ ENDIF()
 NL_CONFIGURE_CHECKS()
 
 IF(WITH_STATIC_LIBXML2)
-  SET(LIBXML2_DEFINITIONS ${LIBXML2_DEFINITIONS} -DLIBXML_STATIC)
+  if(HUNTER_ENABLED AND TARGET libxml2::libxml2)
+      set_property(TARGET libxml2::libxml2
+              APPEND
+              PROPERTY INTERFACE_COMPILE_DEFINITIONS
+              LIBXML_STATIC
+      )
+  elseif(TARGET LibXml2::LibXml2)
+      set_property(TARGET LibXml2::LibXml2
+              APPEND
+              PROPERTY INTERFACE_COMPILE_DEFINITIONS
+              LIBXML_STATIC
+      )
+  endif ()
 ENDIF()
 
-IF(WITH_LIBXML2_ICONV)
-  FIND_PACKAGE(Iconv REQUIRED)
-  INCLUDE_DIRECTORIES(${ICONV_INCLUDE_DIR})
-  SET(LIBXML2_LIBRARIES ${LIBXML2_LIBRARIES} ${ICONV_LIBRARIES})
+IF(NOT EMSCRIPTEN)
+  FIND_PACKAGE(Iconv QUIET)
 ENDIF()
-
-IF(WITH_STATIC)
-  # libxml2 could need winsock2 library
-  IF(WINSOCK2_LIB)
-    SET(LIBXML2_LIBRARIES ${LIBXML2_LIBRARIES} ${WINSOCK2_LIB})
-  ENDIF()
-
-  IF(UNIX)
-    # under Linux and OS X, recent libxml2 versions are linked against liblzma
-    FIND_PACKAGE(LibLZMA)
-    IF(LIBLZMA_LIBRARIES)
-      SET(LIBXML2_LIBRARIES ${LIBXML2_LIBRARIES} ${LIBLZMA_LIBRARIES})
-    ENDIF()
-
-    # under Linux and OS X, recent libxml2 versions are linked against libicu
-    # FIND_PACKAGE(Icu)
-    FIND_LIBRARY(ICU_LIBRARY icuuc)
-    IF(ICU_LIBRARY)
-       FIND_LIBRARY(ICU_DATA_LIBRARY icudata)
-       IF(ICU_LIBRARY)
-         MESSAGE(STATUS "ICU UC was found: ${ICU_LIBRARY}")
-       ELSE()
-         MESSAGE(STATUS "ICU UC was NOT found")
-       ENDIF()
-       SET(LIBXML2_LIBRARIES ${LIBXML2_LIBRARIES} ${ICU_DATA_LIBRARY} ${ICU_LIBRARY})
-    ENDIF()
-
-  ENDIF()
+IF(Iconv_FOUND)
+  if(TARGET LibXml2::LibXml2 AND NOT HUNTER_ENABLED)
+      set_property(TARGET LibXml2::LibXml2
+            APPEND
+            PROPERTY INTERFACE_LINK_LIBRARIES
+            Iconv::Iconv
+      )
+  endif ()
 ENDIF()
-
-INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules/PCHSupport.cmake)
 
 IF(FINAL_VERSION)
   ADD_DEFINITIONS(-DFINAL_VERSION=1)
@@ -291,11 +314,8 @@ IF(WITH_QT5)
   FIND_QT5()
 ENDIF()
 
-IF(WITH_QT)
-  SET(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${QTDIR} $ENV{QTDIR})
-
-  # Use Qt 4
-  FIND_PACKAGE(Qt4 COMPONENTS QtCore QtGui QtXml QtOpenGL REQUIRED)
+IF(WITH_QT6)
+  FIND_QT6()
 ENDIF()
 
 #TODO: hunter assimp package
@@ -303,11 +323,29 @@ IF(WITH_ASSIMP)
   FIND_PACKAGE(assimp REQUIRED)
 ENDIF()
 
-IF(WITH_NEL)
-  IF(WITH_NEL_TESTS)
-    FIND_PACKAGE(CppTest)
-  ENDIF()
+IF(WITH_MSQUIC)
+  FIND_PACKAGE(msquic REQUIRED)
+ENDIF()
 
+IF(WITH_NEL_TESTS OR WITH_TESTING)
+  ENABLE_TESTING()
+  # GoogleTest requires at least C++17 not the whole project depends on google test though
+  # set(CMAKE_CXX_STANDARD 17)
+  # set(CMAKE_CXX_STANDARD_REQUIRED ON)
+  include(FetchContent)
+  FetchContent_Declare(
+          googletest
+          URL https://github.com/google/googletest/archive/52eb8108c5bdec04579160ae17225d66034bd723.zip
+          EXCLUDE_FROM_ALL
+  )
+  SET(INSTALL_GTEST OFF)
+  SET(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+  FetchContent_MakeAvailable(googletest)
+  include(GoogleTest)
+  include(cmake/add_test_executable.cmake)
+ENDIF()
+
+IF(WITH_NEL)
   IF(HUNTER_ENABLED)
     IF(WITH_GUI)
       HUNTER_ADD_PACKAGE(luabind)
@@ -316,80 +354,26 @@ IF(WITH_NEL)
 
     HUNTER_ADD_PACKAGE(CURL)
     FIND_PACKAGE(CURL CONFIG REQUIRED)
-    # TODO: for nelgui
-    SET(CURL_LIBRARIES CURL::libcurl libxml2::libxml2)
   ELSE()
     IF(WITH_GUI)
       FIND_PACKAGE(Luabind REQUIRED)
     ENDIF()
 
-    FIND_PACKAGE(CURL REQUIRED)
-
-    IF((WIN32 OR CURL_LIBRARIES MATCHES "\\.a") AND WITH_STATIC_CURL)
-      SET(CURL_STATIC ON)
+    IF(EMSCRIPTEN)
+      # CURL not needed for Emscripten builds
     ELSE()
-      SET(CURL_STATIC OFF)
-    ENDIF()
-
-    IF(CURL_STATIC)
-      SET(CURL_DEFINITIONS -DCURL_STATICLIB)
-
-      LIST(APPEND CURL_INCLUDE_DIRS ${OPENSSL_INCLUDE_DIR})
-      LIST(APPEND CURL_LIBRARIES ${OPENSSL_LIBRARIES})
-
-      IF(WIN32)
-        LIST(APPEND CURL_LIBRARIES Crypt32 Cryptui)
-      ELSE()
-        # CURL depends on libidn
-        FIND_LIBRARY(IDN_LIBRARY idn)
-        IF(IDN_LIBRARY)
-          LIST(APPEND CURL_LIBRARIES ${IDN_LIBRARY})
-        ENDIF()
-
-        # CURL Macports version can depend on libidn, libidn2, libintl, libpsl and libiconv too
-        IF(APPLE)
-          FIND_LIBRARY(INTL_LIBRARY intl)
-          IF(INTL_LIBRARY)
-            LIST(APPEND CURL_LIBRARIES ${INTL_LIBRARY})
-          ENDIF()
-
-          FIND_LIBRARY(IDN2_LIBRARY idn2)
-          IF(IDN2_LIBRARY)
-            LIST(APPEND CURL_LIBRARIES ${IDN2_LIBRARY})
-          ENDIF()
-
-          FIND_LIBRARY(PSL_LIBRARY psl)
-          IF(PSL_LIBRARY)
-            LIST(APPEND CURL_LIBRARIES ${PSL_LIBRARY})
-          ENDIF()
-
-          FIND_LIBRARY(UNISTRING_LIBRARY unistring)
-          IF(UNISTRING_LIBRARY)
-            LIST(APPEND CURL_LIBRARIES ${UNISTRING_LIBRARY})
-          ENDIF()
-
-          LIST(APPEND CURL_LIBRARIES ${SECURITY_FRAMEWORK})
-        ENDIF()
-      ENDIF()
-    ENDIF()
+    FIND_PACKAGE(CURL REQUIRED)
+    ENDIF() # !EMSCRIPTEN
   ENDIF() #hunter
 
   INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/nel/include)
   ADD_SUBDIRECTORY(nel)
 
-  # Aliases for targets
-  SET(NELMISC_LIBRARIES nelmisc)
-  SET(NELNET_LIBRARIES nelnet)
-  SET(NELLIGO_LIBRARIES nelligo)
-  SET(NELGEORGES_LIBRARIES nelgeorges)
-  SET(NEL3D_LIBRARIES nel3d)
-  SET(NELGUI_LIBRARIES nelgui)
-  SET(NELSOUND_LIBRARIES nelsound)
-  SET(NELPACS_LIBRARIES nelpacs)
+  # allow find_package to find projects from within the mono repo
+  list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_BINARY_DIR}/nel/internal")
 ELSE()
 #  FIND_PACKAGE(NeL COMPONENTS 3d misc pacs sound nimp REQUIRED)
   FIND_PACKAGE(NeL REQUIRED)
-  INCLUDE_DIRECTORIES(${NEL_INCLUDE_DIRS})
 ENDIF()
 
 IF(WITH_RYZOM)
@@ -433,7 +417,6 @@ ENDIF()
 
 IF(WITH_NEL_TESTS)
   ENABLE_TESTING()
-  ADD_TEST(nel_unit_test ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/nel_unit_test --html)
   IF(BUILD_DASHBOARD)
     INCLUDE(Dart)
     SET(SVNCOMMAND svn)
@@ -445,35 +428,35 @@ ENDIF()
 # packaging information
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Ryzom Core MMORPG Framework")
 SET(CPACK_PACKAGE_VENDOR "Ryzom Core")
-SET(CPACK_PACKAGE_DESCRIPTION_FILE ${CMAKE_SOURCE_DIR}/README)
+string(TOLOWER ${CMAKE_PROJECT_NAME} PROJECT_NAME_LOWER)
+SET(CPACK_PACKAGE_NAME ${PROJECT_NAME_LOWER} CACHE STRING "")
+SET(CPACK_PACKAGE_DESCRIPTION_FILE ${CMAKE_SOURCE_DIR}/README.md)
 SET(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/COPYING)
-SET(CPACK_PACKAGE_VERSION_MAJOR "${NL_VERSION_MAJOR}")
-SET(CPACK_PACKAGE_VERSION_MINOR "${NL_VERSION_MINOR}")
-SET(CPACK_PACKAGE_VERSION_PATCH "${NL_VERSION_PATCH}")
 SET(CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_BINARY_DIR};NeL;ALL;/")
 SET(CPACK_PACKAGE_EXECUTABLES "ryzomcore${NL_VERSION}" "ryzomcore")
-SET(CPACK_SET_DESTDIR TRUE)
 
 # NSIS Specific Packing Setup
 SET(CPACK_PACKAGE_INSTALL_REGISTRY_KEY "RyzomCore")
+SET(CPACK_PACKAGE_VERSION ${PROJECT_VERSION}) # to include tweak part of version
 SET(CPACK_NSIS_MODIFY_PATH "ON")
-SET(CPACK_NSIS_MUI_ICON ${CMAKE_SOURCE_DIR}/resources/nevraxpill.ico)
-SET(CPACK_NSIS_MUI_UNIICON ${CMAKE_SOURCE_DIR}/resources/nevraxpill.ico)
-SET(CPACK_PACKAGE_ICON ${CMAKE_SOURCE_DIR}/resources\\\\nel.bmp)
+SET(CPACK_NSIS_MUI_ICON ${CMAKE_SOURCE_DIR}/nel/resources/nevraxpill.ico)
+SET(CPACK_NSIS_MUI_UNIICON ${CMAKE_SOURCE_DIR}/nel/resources/nevraxpill.ico)
+SET(CPACK_PACKAGE_ICON ${CMAKE_SOURCE_DIR}/nel/resources\\\\nel.bmp)
 SET(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY} RyzomCore")
 SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\dev.ryzom.com")
 SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\dev.ryzom.com\\\\projects\\\\nel\\\\wiki")
 SET(CPACK_NSIS_CONTACT "matt.raykowski@gmail.com")
 
 ## Source Packages
-SET(CPACK_PACKAGE_FILE_NAME "ryzomcore-${NL_VERSION}")
-SET(CPACK_SOURCE_PACKAGE_FILE_NAME "ryzomcore-${NL_VERSION}")
+# remove os part of file name
+SET(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}")
+SET(CPACK_SOURCE_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}")
 IF(WIN32)
   #SET(CPACK_GENERATOR "NSIS")
   SET(CPACK_GENERATOR "NSIS;ZIP")
   SET(CPACK_SOURCE_GENERATOR "ZIP")
 ELSE()
-  SET(CPACK_GENERATOR "TGZ")
+  SET(CPACK_GENERATOR "TGZ;STGZ")
   SET(CPACK_SOURCE_GENERATOR "TGZ")
 ENDIF()
 set(CPACK_SOURCE_IGNORE_FILES

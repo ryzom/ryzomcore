@@ -55,9 +55,11 @@
 #include <utility>
 #include <vector>
 
-#include <nel/misc/types_nl.h>
+#include "nel/misc/types_nl.h"
 
+#ifndef NL_NO_LIBXML2
 #include <libxml/parser.h>
+#endif
 
 #ifdef NL_OS_WINDOWS
 #	define WIN32_LEAN_AND_MEAN
@@ -69,8 +71,8 @@
 #		define WINVER 0x0500
 #		define NOMINMAX
 #	endif
-#	include <WinSock2.h>
-#	include <Windows.h>
+#	include <winsock2.h>
+#	include <windows.h>
 #endif
 
 #endif // NL_STDMISC_H

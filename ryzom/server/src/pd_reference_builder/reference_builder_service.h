@@ -62,9 +62,9 @@ public:
 		Completed
 	};
 
-	volatile TTaskState	State;
-	volatile bool		AskedToStop;
-	volatile bool		ExecutionSuccess;
+	NLMISC::CAtomicEnum<TTaskState> State;
+	NLMISC::CAtomicBool AskedToStop;
+	NLMISC::CAtomicBool ExecutionSuccess;
 
 public:
 

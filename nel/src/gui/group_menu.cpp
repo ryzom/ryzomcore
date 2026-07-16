@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2020  Winch Gate Property Limited
+// Copyright (C) 2010-2022  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
@@ -129,9 +129,11 @@ namespace NLGUI
 		_SelectionView = NULL;
 		_GroupList = NULL;
 		_GroupMenu = NULL;
+		_MouseOver = -1;
 		_Selected = -1;
 		_MaxVisibleLine = -1;
 		_ScrollBar = NULL;
+		_ScrollToView = false;
 	}
 
 	// ------------------------------------------------------------------------------------------------
@@ -604,6 +606,7 @@ namespace NLGUI
 				_GroupList->setMaxH(widgetMaxH*_MaxVisibleLine+_GroupList->getSpace()*(_MaxVisibleLine-1));
 				if (_ScrollBar == NULL)
 				{
+					_ScrollToView = true;
 					_ScrollBar = new CCtrlScroll(CViewBase::TCtorParam());
 					_ScrollBar->setParent (this);
 					_ScrollBar->setParentPos (_GroupList);
@@ -890,8 +893,8 @@ namespace NLGUI
 		_SelectionView->setH (8);
 		_SelectionView->setY (4);
 
-
-		if (_Selected != -1 && _Lines[_Selected].ViewText != NULL)
+		sint highlight = _MouseOver != -1 ? _MouseOver : _Selected;
+		if (highlight != -1 && _Lines[highlight].ViewText != NULL)
 		{
 			CRGBA col= _GroupMenu->_HighLightOver;
 
@@ -899,10 +902,20 @@ namespace NLGUI
 			_SelectionView->setModulateGlobalColor(getModulateGlobalColor());
 
 			// get refElm and refElmYReal
-			GET_REF_ELM(_Selected)
+			GET_REF_ELM(highlight)
 
 			_SelectionView->setH (refElmHReal);
 			_SelectionView->setY (refElmYReal - this->getYReal());
+		}
+
+		// initial scroll after becoming active
+		if (_ScrollBar && _ScrollToView)
+		{
+			_ScrollToView = false;
+			if (_Selected != -1 && _Lines[_Selected].ViewText != NULL)
+				_ScrollBar->ensureVisible(_Lines[_Selected].ViewText, Hotspot_Tx, Hotspot_Mx);
+			else
+				_ScrollBar->setTrackPos(_GroupList->getHReal());
 		}
 	}
 
@@ -919,12 +932,12 @@ namespace NLGUI
 			(xMouse < (_XReal + _WReal))&&
 			(yMouse > _YReal) &&
 			(yMouse <= (_YReal+ _HReal))))
-			_Selected= -1;
+			_MouseOver = -1;
 
 	//	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 		// Highlight (background under the selection)
-		if (_Selected != -1)
+		if (_MouseOver != -1 || _Selected != -1)
 		{
 			// display hightlight
 			if(_GroupMenu->_HighLightOver.A > 0)
@@ -954,7 +967,7 @@ namespace NLGUI
 				}
 				else
 				{
-					if (i == _Selected) // Colors when the text is selected
+					if (i == _MouseOver) // Colors when the text is selected
 					{
 						_Lines[i].ViewText->Over = true;
 						_Lines[i].ViewText->setColor (_Lines[i].ViewText->OldColorOver);
@@ -992,7 +1005,7 @@ namespace NLGUI
 		if (event.getType() == NLGUI::CEventDescriptor::mouse)
 		{
 			const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
-			_Selected = -1;
+			_MouseOver = -1;
 
 			// TODO First check sub menus that can be not in the area of this menu
 
@@ -1000,6 +1013,9 @@ namespace NLGUI
 				(eventDesc.getX() < (_XReal + _WReal))&&
 				(eventDesc.getY() > _YReal) &&
 				(eventDesc.getY() <= (_YReal+ _HReal))))
+				return false;
+
+			if (_ScrollBar && _ScrollBar->isIn(eventDesc.getX(), eventDesc.getY()))
 				return false;
 
 			uint32 i = 0;
@@ -1016,7 +1032,7 @@ namespace NLGUI
 						if ((eventDesc.getY() > refElmYReal) &&
 							(eventDesc.getY() <= (refElmYReal + refElmHReal + _GroupList->getSpace())))
 						{
-							_Selected = i;
+							_MouseOver = i;
 							break;
 						}
 					}
@@ -1026,16 +1042,16 @@ namespace NLGUI
 			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup)
 			{
 				// If a line is selected and the line is not grayed
-				if ((_Selected != -1) && (!_Lines[i].ViewText->getGrayed()))
+				if ((_MouseOver != -1) && (!_Lines[i].ViewText->getGrayed()))
 				{
 
-					CAHManager::getInstance()->runActionHandler (	_Lines[_Selected].AHName,
+					CAHManager::getInstance()->runActionHandler (	_Lines[_MouseOver].AHName,
 											CWidgetManager::getInstance()->getCtrlLaunchingModal(),
-											_Lines[_Selected].AHParams );
+											_Lines[_MouseOver].AHParams );
 
-					if (_SubMenus[_Selected] != NULL)
+					if (_SubMenus[_MouseOver] != NULL)
 					{
-						openSubMenu (_Selected);
+						openSubMenu (_MouseOver);
 					}
 					else
 					{
@@ -1054,11 +1070,11 @@ namespace NLGUI
 			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightup)
 			{
 				// If a line is selected and the line is not grayed and has right click action handler
-				if ((_Selected != -1) && (!_Lines[i].ViewText->getGrayed()) && !_Lines[_Selected].AHRightClick.empty())
+				if ((_MouseOver != -1) && (!_Lines[i].ViewText->getGrayed()) && !_Lines[_MouseOver].AHRightClick.empty())
 				{
-					CAHManager::getInstance()->runActionHandler (	_Lines[_Selected].AHRightClick,
+					CAHManager::getInstance()->runActionHandler (	_Lines[_MouseOver].AHRightClick,
 											CWidgetManager::getInstance()->getCtrlLaunchingModal(),
-											_Lines[_Selected].AHRightClickParams );
+											_Lines[_MouseOver].AHRightClickParams );
 					return true;
 				}
 			}
@@ -1416,7 +1432,14 @@ namespace NLGUI
 		_Lines.erase(_Lines.begin() + index);
 
 		//invalidate selection
-		_Selected = -1;
+		_MouseOver = -1;
+		if (_Selected != -1)
+		{
+			if (_Selected == index)
+				_Selected = -1;
+			else if (_Selected > index)
+				_Selected--;
+		}
 
 		if(_SubMenus[index])
 		{
@@ -1451,6 +1474,7 @@ namespace NLGUI
 	// ------------------------------------------------------------------------------------------------
 	void	CGroupSubMenu::reset()
 	{
+		_Selected = -1;
 		uint lineCount = (uint)_Lines.size();
 		for(sint k = lineCount - 1; k >= 0; --k)
 		{
@@ -1661,10 +1685,10 @@ namespace NLGUI
 			}
 		}
 
-		if(_ScrollBar && _GroupList)
-			_ScrollBar->setTrackPos(_GroupList->getHReal());
-
 		CGroupFrame::setActive(state);
+
+		// handle scrolling in next updateCoords() call
+		_ScrollToView = true;
 	}
 
 	// ------------------------------------------------------------------------------------------------
@@ -2534,6 +2558,10 @@ namespace NLGUI
 		}
 
 		CGroupFrame::setActive (state);
+
+		// skip rest if being hidden
+		if (!state)
+			return;
 
 		// must recompute now the pos of the menu
 		uint32 i;

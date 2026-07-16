@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -25,10 +25,13 @@
 #include "fe_types.h"
 
 #ifdef NL_OS_WINDOWS
+#	include <winsock2.h>
 #	ifndef NL_COMP_MINGW
 #		define NOMINMAX
 #	endif
 #	include <windows.h>
+// Windows includes for `sockaddr_in6` and `WSAStringToAddressW`
+#	include <ws2ipdef.h>
 #elif defined NL_OS_UNIX
 
 #include <unistd.h>
@@ -53,21 +56,21 @@ volatile uint32 CFEReceiveTask::LastUDPPacketReceived = 0;
  */
 
 /// Constructor
-TReceivedMessage::TReceivedMessage()
+TReceivedMessage::TReceivedMessage() : QuicUser(nullptr)
 {
-	VAddrFrom.resize( sizeof(sockaddr_in) );
+	VAddrFrom.resize(sizeof(sockaddr_in6));
 }
 
 /// Return a vector containing the address info
 void	TReceivedMessage::addressToVector()
 {
-	memcpy( &*VAddrFrom.begin(), AddrFrom.sockAddr(), sizeof(sockaddr_in) );
+	AddrFrom.toSockAddrInet6((sockaddr_in6 *)(&*VAddrFrom.begin()));
 }
 
 /// Set address with address info from specified vector
 void	TReceivedMessage::vectorToAddress()
 {
-	AddrFrom.setSockAddr( (sockaddr_in*)&*VAddrFrom.begin() );
+	AddrFrom.fromSockAddrInet6((sockaddr_in6 *)&*VAddrFrom.begin());
 }
 
 
@@ -202,9 +205,12 @@ void CFEReceiveTask::run()
 /*
  * Set new write queue
  */
-void CFEReceiveTask::setWriteQueue( CBufFIFO *writequeue )
+CBufFIFO *CFEReceiveTask::swapWriteQueue(CBufFIFO *writeQueue)
 {
-	CSynchronized<CBufFIFO*>::CAccessor wq( &_WriteQueue );
-	wq.value() = writequeue;
+	CSynchronized<CBufFIFO *>::CAccessor wq(&_WriteQueue);
+	CBufFIFO *previous = wq.value();
+	wq.value() = writeQueue;
+	return previous;
 }
 
+/* end of file */

@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2019-2022  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -651,7 +651,7 @@ void CPlugin::init(IPluginAccess *pluginAccess)
 		{
 			for(uint k = 0; k < (uint) path->size(); ++k)
 			{
-				NLMISC::CPath::addSearchPath(path->asString(k), false, false);
+				NLMISC::CPath::addSearchPath(_PluginAccess->transformProjectPath(path->asString(k)), false, false);
 			}
 		}
 

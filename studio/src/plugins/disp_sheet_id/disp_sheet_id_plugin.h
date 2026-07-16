@@ -38,6 +38,7 @@ namespace SheetIdViewPlugin
 class DispSheetIdPlugin : public QObject, public ExtensionSystem::IPlugin
 {
 	Q_OBJECT
+	Q_PLUGIN_METADATA(IID IPlugin_iid FILE "plugin-metadata.json")
 	Q_INTERFACES(ExtensionSystem::IPlugin)
 public:
 

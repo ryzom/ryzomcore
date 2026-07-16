@@ -20,11 +20,11 @@
 // STL includes
 
 // Qt includes
-#include <QtGui/QtGui>
-#include <QtGui/QTreeView>
-#include <QtGui/QDirModel>
-#include <QtGui/QUndoStack>
-#include <QtGui/QScrollArea>
+#include <QtWidgets/QtWidgets>
+#include <QtWidgets/QTreeView>
+#include <QtWidgets/QFileSystemModel>
+#include <QtWidgets/QUndoStack>
+#include <QtWidgets/QScrollArea>
 
 // NeL includes
 // #include <nel/misc/debug.h>
@@ -32,7 +32,8 @@
 #include <nel/3d/u_driver.h>
 
 // Project includes
-#include "command_log.h"
+#include "../../../tools/3d/shared_widgets/common.h"
+#include "../../../tools/3d/shared_widgets/command_log.h"
 #include "graphics_viewport.h"
 #include "graphics_config.h"
 
@@ -40,15 +41,6 @@ using namespace std;
 using namespace NLMISC;
 
 namespace NLQT {
-
-namespace {
-
-QString nli18n(const char *label)
-{
-	return QString::fromUtf16(CI18N::get(label).c_str());
-}
-
-} /* anonymous namespace */
 
 CMainWindow::CMainWindow(const QMap<QString, QSize> &customSizeHints, QWidget *parent, Qt::WindowFlags flags)
 	: QMainWindow(parent, flags),
@@ -238,23 +230,23 @@ void CMainWindow::translateActions()
 
 void CMainWindow::createMenus()
 {
-	m_FileMenu = menuBar()->addMenu(QString::null);
+	m_FileMenu = menuBar()->addMenu(QString());
 	//m_FileMenu->addAction(saveAct);
 	//m_FileMenu->addSeparator();
 	m_FileMenu->addAction(m_QuitAct);
 
-	m_EditMenu = menuBar()->addMenu(QString::null);
+	m_EditMenu = menuBar()->addMenu(QString());
 	m_EditMenu->addAction(m_UndoAct);
 	m_EditMenu->addAction(m_RedoAct);
 
-	m_ViewportMenu = menuBar()->addMenu(QString::null);
+	m_ViewportMenu = menuBar()->addMenu(QString());
 	m_ViewportMenu->addAction(m_SaveScreenshotAct);
 	
-	m_WidgetsMenu = menuBar()->addMenu(QString::null);
+	m_WidgetsMenu = menuBar()->addMenu(QString());
 	
 	menuBar()->addSeparator();
 	
-	m_HelpMenu = menuBar()->addMenu(QString::null);
+	m_HelpMenu = menuBar()->addMenu(QString());
 	m_HelpMenu->addAction(m_AboutAct);
 }
 
@@ -269,11 +261,11 @@ void CMainWindow::translateMenus()
 
 void CMainWindow::createToolBars()
 {
-	m_FileToolBar = addToolBar(QString::null);
+	m_FileToolBar = addToolBar(QString());
 	m_FileToolBar->addAction(m_QuitAct);
 	m_FileToolBar->addAction(m_PrintDebugAct);
 
-	m_EditToolBar = addToolBar(QString::null);
+	m_EditToolBar = addToolBar(QString());
 	m_EditToolBar->addAction(m_AboutAct);
 }
 
@@ -314,7 +306,7 @@ void CMainWindow::createDockWindows()
 	{
 		m_CommandLogDock = new QDockWidget(this);
 		m_CommandLogDock->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
-		m_CommandLog = new CCommandLog(m_CommandLogDock);
+		m_CommandLog = new CCommandLogDisplayer(m_CommandLogDock);
 		m_CommandLogDock->setWidget(m_CommandLog);
 		addDockWidget(Qt::BottomDockWidgetArea, m_CommandLogDock);
 		m_WidgetsMenu->addAction(m_CommandLogDock->toggleViewAction());
@@ -339,7 +331,8 @@ void CMainWindow::createDockWindows()
 		m_AssetTreeDock = new QDockWidget(this);
 		m_AssetTreeDock->setAllowedAreas(Qt::AllDockWidgetAreas);
 		m_AssetTreeView = new QTreeView(m_AssetTreeDock);
-		m_AssetTreeModel = new QDirModel();
+		m_AssetTreeModel = new QFileSystemModel();
+		m_AssetTreeModel->setRootPath(QDir::currentPath());
 		m_AssetTreeView->setModel(m_AssetTreeModel);
 		m_AssetTreeView->setSortingEnabled(true);
 		m_AssetTreeDock->setWidget(m_AssetTreeView);

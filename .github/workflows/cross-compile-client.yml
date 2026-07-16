@@ -1,0 +1,130 @@
+name: "Ryzom Client: cross compile 32-Bit windows client (hunter)"
+
+on:
+  push:
+    branches: [ "core4", "feature/*", "!feature/atys-core-merge" ]
+    paths:
+      - .github/workflows/cross-compile-client.yml
+      # TODO use nel package instead
+      - nel/**
+      - ryzom/**
+      - cmake/**
+      - CMakeModules/**
+      - CMakeLists.txt
+      - CMakePresets.json
+  pull_request:
+    branches: [ "core4" ]
+    paths:
+      - .github/workflows/cross-compile-client.yml
+      # TODO use nel package instead
+      - nel/**
+      - ryzom/**
+      - cmake/**
+      - CMakeModules/**
+      - CMakeLists.txt
+      - CMakePresets.json
+  workflow_dispatch:
+
+env:
+  CCACHE_DIR: "${{ github.workspace }}/.ccache"
+  HUNTER_ROOT: "${{ github.workspace }}/.hunter"
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+
+    steps:
+    - uses: actions/checkout@v7
+    - name: Set reusable strings
+      id: strings
+      shell: bash
+      run: |
+        COMMIT_HASH=${{ github.sha }}
+        echo "version=sha.${COMMIT_HASH:0:8}" >> "$GITHUB_OUTPUT"
+        echo "week=$(date +%YW%V)" >> "$GITHUB_OUTPUT"
+
+    - uses: lukka/get-cmake@latest
+      with:
+        cmakeVersion: 3.31.11
+
+    - name: Dependencies
+      run: |
+        sudo apt update
+        sudo apt install --yes \
+        ccache \
+        libasound2-dev \
+        libgl1-mesa-dev \
+        libjack-dev \
+        libpulse-dev \
+        libxrandr-dev \
+        libxrender-dev \
+        libxxf86vm-dev \
+        mingw-w64 \
+        mingw-w64-tools \
+        nsis \
+        ninja-build
+
+    - uses: actions/cache/restore@v6
+      id: openssl
+      with:
+        path: ${{ github.workspace }}/build/openssl
+        key: openssl
+
+    - name: openssl
+      if: steps.openssl.outputs.cache-hit != 'true'
+      run: |
+        git clone --depth 1 --branch openssl-3.0.12 https://github.com/openssl/openssl.git ${{ github.workspace }}/build/openssl
+        cd ${{ github.workspace }}/build/openssl
+        ./Configure mingw --cross-compile-prefix=i686-w64-mingw32- --prefix=/usr/i686-w64-mingw32
+        make
+
+    - uses: actions/cache/save@v6
+      if: steps.openssl.outputs.cache-hit != 'true'
+      with:
+        path: ${{ github.workspace }}/build/openssl
+        key: openssl
+
+    - name: install openssl
+      run: |
+        cd ${{ github.workspace }}/build/openssl
+        sudo make install
+
+    - name: Set up ccache
+      uses: actions/cache@v6
+      with:
+        path: ${{ env.CCACHE_DIR }}
+        key: ccache-cross-mingw-${{ steps.strings.outputs.week }}-${{ github.sha }}
+        restore-keys: ccache-cross-mingw-${{ steps.strings.outputs.week }}-
+
+    - name: Configure ccache
+      run: |
+        ccache --set-config=max_size=1G
+        ccache --set-config=compression=true
+        ccache -z
+
+    - name: Cache Hunter Dependencies
+      uses: actions/cache@v6
+      with:
+        path: ${{ env.HUNTER_ROOT }}
+        key: hunter-ubuntu-24.04-mingw-${{ steps.strings.outputs.week }}-${{ github.sha }}
+        restore-keys: hunter-ubuntu-24.04-mingw-${{ steps.strings.outputs.week }}-
+
+    - name: Configure CMake
+      run: >
+        cmake --preset ryzom-client-x86-mingw-hunter
+
+    - name: Build
+      run: cmake --build --preset ci-ryzom-client
+
+    - name: ccache stats
+      if: always()
+      run: ccache -s -v || ccache -s
+
+    - name: Package
+      run: cpack --preset ci-ryzom-client
+
+    - uses: actions/upload-artifact@v7
+      with:
+        name: ryzom-client-win32-${{ steps.strings.outputs.version }}
+        path: build/ryzom-client/ryzom-client-*
+        if-no-files-found: error

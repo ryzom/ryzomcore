@@ -109,5 +109,3 @@ QWidget *GeorgesEditorContext::widget()
 }
 
 }
-
-Q_EXPORT_PLUGIN(GeorgesQt::GeorgesEditorPlugin)

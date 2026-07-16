@@ -19,7 +19,6 @@
 #include "bnp_file.h"
 
 // Qt includes
-#include <QtGui/QWidget>
 
 // NeL includes
 #include <nel/misc/debug.h>
@@ -60,8 +59,8 @@ void BnpFileListDialog::setupTable(int nbrows)
 	labels << tr("Filename") << tr("Size");
 	m_ui.tableWidget->setHorizontalHeaderLabels(labels);
 
-	m_ui.tableWidget->horizontalHeader()->setResizeMode(0, QHeaderView::Interactive);
-	m_ui.tableWidget->horizontalHeader()->setResizeMode(1, QHeaderView::Stretch );
+	m_ui.tableWidget->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Interactive);
+	m_ui.tableWidget->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch );
 	m_ui.tableWidget->verticalHeader()->hide();
 
 	// set vertical size a little bit smaller

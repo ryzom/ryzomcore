@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2014-2015  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2021  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -34,8 +34,8 @@
 #	ifndef NL_COMP_MINGW
 #		define NOMINMAX
 #	endif
-#	include <WinSock2.h>
-#	include <Windows.h>
+#	include <winsock2.h>
+#	include <windows.h>
 typedef unsigned long ulong;
 #endif // NL_OS_WINDOWS
 

@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS `neltool_annotations` (
 --
 
 INSERT INTO `neltool_annotations` (`annotation_id`, `annotation_domain_id`, `annotation_shard_id`, `annotation_data`, `annotation_user_name`, `annotation_date`) VALUES
-(1, NULL, 106, 'Welcome to the Shard Admin Website!', 'vl', 1272378352);
+(1, NULL, 106, 'Welcome to the Shard Admin Website!', 'admin', 1272378352);
 
 -- --------------------------------------------------------
 

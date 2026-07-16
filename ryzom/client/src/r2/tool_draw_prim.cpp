@@ -606,9 +606,8 @@ void CToolDrawPrim::commit()
 					CObject *wp = getDMC().newComponent(_PrimType == Road ? "WayPoint" : "RegionVertex");
 					if (wp)
 					{
-						CObject *newPos = buildVector(offset + CVectorD(_Points[k]));
+						CObject::TSmartPtr newPos = buildVector(offset + CVectorD(_Points[k]));
 						getDMC().requestSetNode(sons[k]->getDisplayedInstance()->getId(), "Position", newPos);
-						delete newPos;
 					}
 				}
 			}

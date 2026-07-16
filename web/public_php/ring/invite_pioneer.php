@@ -42,9 +42,9 @@
 	if (isset($_POST["execute"]))
 	{
 		// lookup in the database to convert character name into
-		global $DBHost, $RingDBUserName, $RingDBPassword;
+		global $DBHost, $DBPort, $RingDBUserName, $RingDBPassword;
 
-		$link = mysqli_connect($DBHost, $RingDBUserName, $RingDBPassword) or die ("Can't connect to database host:$DBHost user:$RingDBUserName");
+		$link = mysqli_connect($DBHost, $RingDBUserName, $RingDBPassword, NULL, $DBPort) or die ("Can't connect to database host:$DBHost user:$RingDBUserName");
 		mysqli_select_db($link, $domainInfo['ring_db_name']) or die ("Can't access to the table dbname:" . $domainInfo['ring_db_name']);
 		
 		// extract the character that have the specified name

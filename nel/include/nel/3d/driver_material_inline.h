@@ -390,6 +390,7 @@ inline void                 CMaterial::enableUserTexMat(uint stage, bool enabled
 			_TexUserMat.reset();
 		}
 	}
+	_Touched |= IDRV_TOUCHED_TEXMAT;
 }
 
 // ***************************************************************************
@@ -405,6 +406,7 @@ inline void				  CMaterial::setUserTexMat(uint stage, const NLMISC::CMatrix &m)
 	nlassert(isUserTexMatEnabled(stage));
 	nlassert(_TexUserMat.get() != NULL);
 	_TexUserMat->TexMat[stage] = m;
+	_Touched |= IDRV_TOUCHED_TEXMAT;
 }
 
 // ***************************************************************************

@@ -45,8 +45,8 @@ function create_ticket(){
             if(  ($_POST['target_id'] == $_SESSION['id']) ||  Ticket_User::isMod(unserialize($_SESSION['ticket_user']))  ){
 
                 $category = filter_var($_POST['Category'], FILTER_SANITIZE_NUMBER_INT);
-                $title = filter_var($_POST['Title'], FILTER_SANITIZE_STRING);
-                $content = filter_var($_POST['Content'], FILTER_SANITIZE_STRING);
+                $title = filter_var($_POST['Title'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+                $content = filter_var($_POST['Content'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
                 try{
                     if($_POST['target_id'] == $_SESSION['id']){
                         //if the ticket is being made for the executing user himself

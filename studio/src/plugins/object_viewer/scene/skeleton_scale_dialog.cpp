@@ -21,8 +21,8 @@
 #include "skeleton_scale_dialog.h"
 
 // Qt include
-#include <QtGui/QMessageBox>
-#include <QtGui/QFileDialog>
+#include <QMessageBox>
+#include <QFileDialog>
 
 // NeL includes
 #include <nel/misc/file.h>

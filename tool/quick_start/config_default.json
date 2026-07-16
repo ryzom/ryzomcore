@@ -1,0 +1,144 @@
+{
+  "Domains": { "default": {} },
+  "Defaults": {
+    "ClientCreateAccountUrl": "https://core.ryzom.dev/ams/",
+    "ClientEditAccountUrl": "https://core.ryzom.dev/ams/",
+    "ClientForgetPasswordUrl": "https://core.ryzom.dev/ams/",
+    "ClientPatchUrl": "https://cdn.ryzom.dev/default/patch/",
+    "ClientReleaseNotesUrl": "https://default.ryzom.dev/releasenotes/index.php",
+    "ClientReleaseNotesRingUrl": "https://default.ryzom.dev/releasenotes_ring/index.php",
+    "ClientDomain": "default"
+  },
+  "3dsMax": {
+    "Executable": "",
+    "UserDirectory": ""
+  },
+  "SignTool": {
+    "Executable": "C:\\Program Files\\Microsoft SDKs\\Windows\\v6.0A\\Bin\\signtool.exe",
+    "Sha1": "",
+    "Timestamp": "http://timestamp.comodoca.com/authenticode"
+  },
+  "UseNinja": true,
+  "Paths": {
+    "Python27": "external/python27",
+    "Python3": "external/python3",
+    "Perl": "external/perl",
+    "RRDtool": "external/rrdtool",
+    "MariaDB": "external/mariadb",
+    "Nginx": "external/nginx",
+    "PHP": "external/php",
+    "phpMyAdmin": "external/phpmyadmin",
+    "Dependencies": "external/dependencies",
+    "Aria2": "external/utils",
+    "Ninja": "external/utils",
+    "Jom": "external/utils"
+  },
+  "WorkingDirs": {
+    "crash_report": "pipeline/client_dev",
+    "ryzom_client": "pipeline/client_dev",
+    "ryzom_configuration_qt": "pipeline/client_dev",
+    "ryzom_client_patcher": "pipeline/client_install/win64",
+    "ryzom_ai_service": "pipeline/shard_dev/ais_fyros",
+    "ryzom_backup_service": "pipeline/shard_dev/bms_master",
+    "ryzom_dynamic_scenario_service": "pipeline/shard_dev/dss",
+    "ryzom_entities_game_service": "pipeline/shard_dev/egs_mainland",
+    "ryzom_frontend_service": "pipeline/shard_dev/fes_mainland_01",
+    "ryzom_general_utilities_service": "pipeline/shard_dev/gus",
+    "ryzom_gpm_service": "pipeline/shard_dev/gpms_mainland",
+    "ryzom_ios_service": "pipeline/shard_dev/ios_mainland",
+    "ryzom_logger_service": "pipeline/shard_dev/lgs_unifier_01",
+    "ryzom_log_analyser_service": "pipeline/shard_dev/las",
+    "ryzom_mail_forum_service": "pipeline/shard_dev/mfs",
+    "ryzom_mirror_service": "pipeline/shard_dev/ms_mainland",
+    "ryzom_monitor_service": "pipeline/shard_dev/mos",
+    "ryzom_patchman_service": "patchman/terminal_dev",
+    "ryzom_reference_builder_service": "pipeline/shard_dev/rbs",
+    "ryzom_pd_support_service": "pipeline/shard_dev/pdss",
+    "ryzom_persistant_data_service": "pipeline/shard_dev/pds",
+    "ryzom_admin_service": "pipeline/shard_dev/ras",
+    "ryzom_naming_service": "pipeline/shard_dev/rns_mainland",
+    "ryzom_welcome_service": "pipeline/shard_dev/rws_mainland",
+    "ryzom_session_browser_service": "pipeline/shard_dev/sbs_mainland_01",
+    "ryzom_shard_unifier_service": "pipeline/shard_dev/su",
+    "ryzom_tick_service": "pipeline/shard_dev/ts_mainland"
+  },
+  "Toolchain": {
+    "Preference": [
+      "Win7/VS/v143/x64",
+      "Win7/VS/v142/x64",
+      "Win7/VS/v141/x64",
+      "Win7/VS/v140/x64",
+      "Win7/VS/v143/x64/H",
+      "Win7/VS/v142/x64/H",
+      "Win7/VS/v141/x64/H",
+      "Win7/VS/v140/x64/H",
+      "Win7/VS/v120/x64",
+      "Win7/VS/v110/x64",
+      "Win2k/VS/v90/x86",
+      "WinXP/VS/v141_xp/x86",
+      "WinXP/VS/v140_xp/x86",
+      "WinXP/VS/v141_xp/x86/H",
+      "WinXP/VS/v140_xp/x86/H",
+      "WinXP/VS/v120_xp/x86",
+      "WinXP/VS/v110_xp/x86",
+      "WinXP/VS/v100/x86",
+      "Win98/VS/v80/x86"
+    ],
+    "Native": {
+      "Filter": [
+        { "Native": true, "Hunter": false },
+        { "OS": "Win7", "Platform": "x64", "HasMFC": true, "Hunter": false },
+        { "OS": "Win7", "Platform": "x64", "Hunter": false },
+        { "OS": "Win7", "Platform": "x64" }
+      ],
+      "Qt": [ "qt5", "qt4", "qt6" ]
+    },
+    "Server": {
+      "Filter": [
+        { "OSId": "ubuntu", "OSCodename": "focal", "Platform": "amd64", "Hunter": false }
+      ]
+    },
+    "Client": {
+      "win32": { 
+        "Filter": [
+          { "OS": "Win98", "Platform": "x86", "Hunter": false },
+          { "OS": "Win2k", "Platform": "x86", "Hunter": false },
+          { "OS": "WinXP", "Platform": "x86", "Hunter": false },
+          { "OS": "Win7", "Platform": "x86", "Hunter": false },
+          { "OS": "WinXP", "Platform": "x86" },
+          { "OS": "Win7", "Platform": "x86" }
+        ],
+        "Qt": [ "qt4_static", "qt5_static", "qt6_static" ]
+      },
+      "win64": {
+        "Filter": [
+          { "OS": "WinXP", "Platform": "x64", "Hunter": false },
+          { "OS": "Win7", "Platform": "x64", "Hunter": false },
+          { "OS": "Win7", "Platform": "x64" }
+        ],
+        "Qt": [ "qt5_static", "qt4_static", "qt6_static" ]
+      },
+      "linux32": {
+        "Filter": [
+          { "OSId": "steamrt", "OSCodename": "scout", "Platform": "386", "Hunter": true }
+        ],
+        "CMake": [
+          "-DCUSTOM_FLAGS=-march=i686"
+        ]
+      },
+      "linux64": {
+        "Filter": [
+          { "OSId": "steamrt", "OSCodename": "scout", "Platform": "amd64", "Hunter": true }
+        ]
+      }
+    },
+    "PluginMax": { }
+  },
+  "Fallback": {
+    "PrefixBin": [ ],
+    "QtPluginBin": "",
+    "Client": "",
+    "Server": "",
+    "Tools": ""
+  }
+}

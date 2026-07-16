@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2016  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2016-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -154,7 +154,7 @@ void sendUDP (CUdpSock *client, const uint8 *packet, uint32 packetSize, const CI
 	nlassert (packet != NULL);
 	nlassert (packetSize > 0);
 
-#ifdef FINAL_VERSION
+#if !FINAL_VERSION
 	if ((float)rand()/(float)(RAND_MAX)*100.0f >= PacketLoss)
 	{
 		sint32 lag = Lag /*+ (rand()%40) - 20*/;// void disordering
@@ -201,7 +201,7 @@ void sendUDP (CUdpSock *client, const uint8 *packet, uint32 packetSize, const CI
 			{
 				sendUDPNow (client, packet, packetSize, addr);
 			}
-#ifdef FINAL_VERSION
+#if !FINAL_VERSION
 		}
 	}
 #endif

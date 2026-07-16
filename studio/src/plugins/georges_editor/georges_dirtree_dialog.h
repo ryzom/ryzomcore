@@ -21,7 +21,7 @@
 #define GEORGES_DIRTREE_DIALOG_H
 
 // Qt includes
-#include <QtGui/QWidget>
+#include <QWidget>
 
 // STL includes
 

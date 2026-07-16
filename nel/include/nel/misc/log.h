@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -90,12 +93,11 @@ public:
 	/// Find the process name if nobody call setProcessName before
 	static void setDefaultProcessName ();
 
-	/// If !noDisplayer(), sets line and file parameters, and enters the mutex. If !noDisplayer(), don't forget to call display...() after, to release the mutex.
-	void setPosition (sint line, const char *fileName, const char *funcName = NULL);
+#if defined(NL_OS_WINDOWS) && !defined(__GNUC__)
+#define USE_LOG_CHECK_TYPES
+#endif
 
-
-#ifdef NL_OS_WINDOWS
-
+#ifdef USE_LOG_CHECK_TYPES
 #define CHECK_TYPES2(__a,__b) \
 	inline __a(const char *fmt) { __b(fmt); } \
 	template<class A> __a(const char *fmt, A a) { _check(a); __b(fmt, a); } \
@@ -183,12 +185,20 @@ public:
 
 	/// Do not call this unless you know why you're doing it, it kills the debug/log system!
 	static void releaseProcessName();
+	
+	/// Explicit copy constructor
+	CLog(const CLog &other);
 
-protected:
+private:
+	friend class CSetLogPosition;
+	
+	/// If !noDisplayer(), sets line and file parameters, and enters the mutex. If !noDisplayer(), don't forget to call display...() after, to release the mutex.
+	void setPosition (sint line, const char *fileName, const char *funcName = NULL);
 
-	/// Symetric to setPosition(). Automatically called by display...(). Do not call if noDisplayer().
+	/// Symetric to setPosition(). Automatically called CSetLogPosition
 	void unsetPosition();
 
+protected:
 	/// Returns true if the string must be logged, according to the current filter
 	bool passFilter( const char *filter );
 

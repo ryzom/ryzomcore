@@ -170,7 +170,9 @@ SOURCE_GROUP(Driver FILES
         program.cpp
         ../../include/nel/3d/program.h
         gpu_program_params.cpp
-        ../../include/nel/3d/gpu_program_params.h)
+        ../../include/nel/3d/gpu_program_params.h
+        gpu_skin_vp.cpp
+        ../../include/nel/3d/gpu_skin_vp.h)
 
 SOURCE_GROUP(Font FILES
         computed_string.cpp
@@ -283,8 +285,7 @@ SOURCE_GROUP(Textures FILES
         texture_blank.cpp
         ../../include/nel/3d/texture_blank.h
         texture_blend.cpp
-        ../../include/nel/3d/texture_bloom.h
-        texture_bloom.cpp
+        ../../include/nel/3d/texture_offscreen.h
         ../../include/nel/3d/texture_blend.h
         texture_bump.cpp
         ../../include/nel/3d/texture_bump.h
@@ -711,31 +712,55 @@ SOURCE_GROUP(Stereo FILES
 		stereo_libvr.cpp
         ../../include/nel/3d/stereo_libvr.h
 		stereo_debugger.cpp
-		../../include/nel/3d/stereo_debugger.h)
+		../../include/nel/3d/stereo_debugger.h
+		stereo_passthrough.cpp
+		../../include/nel/3d/stereo_passthrough.h)
 
 NL_TARGET_LIB(nel3d ${HEADERS} ${SRC})
+add_library(NeL::3d ALIAS nel3d)
+set_target_properties(nel3d PROPERTIES EXPORT_NAME 3d)
 
-INCLUDE_DIRECTORIES(${FREETYPE_INCLUDE_DIRS})
-INCLUDE_DIRECTORIES(${LIBVR_INCLUDE_DIR})
+TARGET_LINK_LIBRARIES(nel3d
+        #PUBLIC
+        NeL::misc
+        #PRIVATE
+        ${LIBOVR_LIBRARIES}
+        ${LIBVR_LIBRARY}
+)
+TARGET_COMPILE_DEFINITIONS(nel3d
+        PRIVATE
+        ${LIBOVR_DEFINITIONS}
+        ${LIBVR_DEFINITIONS}
+)
+TARGET_INCLUDE_DIRECTORIES(nel3d
+        PRIVATE
+        ${LIBVR_INCLUDE_DIR}
+)
 
-TARGET_LINK_LIBRARIES(nel3d nelmisc ${FREETYPE_LIBRARIES} ${LIBOVR_LIBRARIES} ${LIBVR_LIBRARY})
+IF(FREETYPE_FOUND)
+    TARGET_LINK_LIBRARIES(nel3d
+            #PRIVATE
+            Freetype::Freetype
+    )
+    TARGET_COMPILE_DEFINITIONS(nel3d PRIVATE HAVE_FREETYPE)
+ELSE()
+    TARGET_COMPILE_DEFINITIONS(nel3d PRIVATE NL_DONT_USE_EXTERNAL_CODE)
+ENDIF()
+
 NL_DEFAULT_PROPS(nel3d "NeL, Library: NeL 3D")
 NL_ADD_RUNTIME_FLAGS(nel3d)
 NL_ADD_STATIC_VID_DRIVERS(nel3d)
 
 NL_ADD_LIB_SUFFIX(nel3d)
 
-ADD_DEFINITIONS(${LIBOVR_DEFINITIONS})
-ADD_DEFINITIONS(${LIBVR_DEFINITIONS})
-
 IF(WITH_PCH)
-  ADD_NATIVE_PRECOMPILED_HEADER(nel3d ${CMAKE_CURRENT_SOURCE_DIR}/std3d.h ${CMAKE_CURRENT_SOURCE_DIR}/std3d.cpp)
+  target_precompile_headers(nel3d PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/std3d.h)
 ENDIF()
 
 NL_GEN_PC(nel-3d.pc)
 
-IF((WITH_INSTALL_LIBRARIES AND WITH_STATIC) OR NOT WITH_STATIC)
-  INSTALL(TARGETS nel3d LIBRARY DESTINATION ${NL_LIB_PREFIX} ARCHIVE DESTINATION ${NL_LIB_PREFIX} COMPONENT libraries)
+IF(WITH_INSTALL_LIBRARIES OR NOT WITH_STATIC)
+  INSTALL(TARGETS nel3d EXPORT "${project_export_name}" LIBRARY DESTINATION ${NL_LIB_PREFIX} ARCHIVE DESTINATION ${NL_LIB_PREFIX} COMPONENT libraries)
 ENDIF()
 
 ADD_SUBDIRECTORY(driver)

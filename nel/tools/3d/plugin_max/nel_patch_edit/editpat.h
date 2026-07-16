@@ -633,7 +633,7 @@ class EditPatchMod : public Modifier, IPatchOps, IPatchSelect, ISubMtlAPI, Attac
 
 		// From Animatable
 		void DeleteThis() { delete this; }
-		void GetClassName(TSTR& s) { s= TSTR(_T("EditPatchNeLMod")); }
+		virtual void GetClassName(NL_GET_CLASS_NAME_PARAMS) NL_GET_CLASS_NAME_CONST NL_OVERRIDE { s= TSTR(_T("EditPatchNeLMod")); }
 		Class_ID ClassID() { return Class_ID(0x4dd14a3c, 0x4ac23c0c); }
 		void* GetInterface(ULONG id);
 
@@ -751,7 +751,11 @@ class EditPatchMod : public Modifier, IPatchOps, IPatchSelect, ISubMtlAPI, Attac
 		void BeginEditParams( IObjParam  *ip, ULONG flags, Animatable *prev );
 		void EndEditParams( IObjParam *ip, ULONG flags, Animatable *next );
 		RefTargetHandle Clone(RemapDir& remap = DefaultRemapDir());
+#if (MAX_VERSION_MAJOR < 24)
 		GET_OBJECT_NAME_CONST MCHAR *GetObjectName() { return GetString(IDS_TH_EDITPATCH); }
+#else
+		const MCHAR *GetObjectName(bool localized) const { if (localized) return GetString(IDS_TH_EDITPATCH); else return _T("NeL Patch Edit"); }
+#endif
 		void ActivateSubobjSel(int level, XFormModes& modes );
 		int NeedUseSubselButton() { return 0; }
 		void SelectSubPatch(int index);
@@ -929,6 +933,9 @@ class EditPatchClassDesc:public ClassDesc {
 		return new EditPatchMod; 
 	}
 	const MCHAR *	ClassName() { return _M("NeL Edit"); }
+#if (MAX_VERSION_MAJOR >= 24)
+	virtual const TCHAR *NonLocalizedClassName() NL_OVERRIDE { return _M("NeL Edit"); }
+#endif
 	SClass_ID		SuperClassID() { return OSM_CLASS_ID; }
 	Class_ID		ClassID() { return Class_ID(0x4dd14a3c, 0x4ac23c0c); }
 	const MCHAR* 	Category() { return _M("NeL Tools");}

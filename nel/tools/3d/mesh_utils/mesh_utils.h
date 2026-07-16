@@ -32,6 +32,13 @@ struct CMeshUtilsSettings
 	std::string ToolDependLog;
 	std::string ToolErrorLog;
 
+	// Validation flag: when set, reader ignores every nel_* per-node extras and reconstructs
+	// transforms from aiNode::mTransformation via Decompose(). Used to confirm the fallback
+	// path (which is what artist-authored glTFs without our extras hit) still produces a
+	// working skeleton, and to measure the accuracy floor of that path.
+	// See wiki: nel_gltf_extras.md.
+	bool IgnoreNelExtras;
+
 	// Relative Directories
 	/*std::string ShapeDirectory;
 	std::string IGDirectory;

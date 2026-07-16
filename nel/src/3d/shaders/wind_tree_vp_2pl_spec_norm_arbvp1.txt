@@ -1,0 +1,140 @@
+!!ARBvp1.0
+# cgc version 3.1.0013, build date Apr 18 2012
+# command line args: -profile arbvp1 -O3 -DNUM_POINT_LIGHTS=2 -DUSE_SPECULAR -DUSE_NORMALIZE
+# source file: wind_tree_vp.cg
+#vendor NVIDIA Corporation
+#version 3.1.0.13
+#profile arbvp1
+#program wind_tree_vp
+#semantic mvp : C0
+#semantic fog : C6
+#semantic windLevel1 : C15
+#semantic windLevel2 : C16
+#semantic windLevel3 : C20
+#semantic ambient : C24
+#semantic diffuse0 : C25
+#semantic diffuse1 : C26
+#semantic diffuse2 : C27
+#semantic diffuse3 : C28
+#semantic specular0 : C29
+#semantic specular1 : C30
+#semantic specular2 : C31
+#semantic specular3 : C32
+#semantic sunDir : C33
+#semantic diffuseAlpha : C34
+#semantic eyePos : C35
+#semantic plPos0 : C36
+#semantic plPos1 : C37
+#var float4 iPos : $vin.POSITION : POSITION : 0 : 1
+#var float4 iNormal : $vin.NORMAL : NORMAL : 1 : 1
+#var float4 iColor : $vin.COLOR0 : COLOR0 : 2 : 1
+#var float4 iTexCoord : $vin.TEXCOORD0 : TEXCOORD0 : 3 : 1
+#var float4 oPos : $vout.POSITION : HPOS : 4 : 1
+#var float4 oCol0 : $vout.COLOR0 : COL0 : 5 : 1
+#var float4 oCol1 : $vout.COLOR1 : COL1 : 6 : 1
+#var float4 oTex0 : $vout.TEXCOORD0 : TEX0 : 7 : 1
+#var float oFog : $vout.FOG : FOGC : 8 : 1
+#var float4x4 mvp : C0 : c[0], 4 : -1 : 1
+#var float4 fog : C6 : c[6] : -1 : 1
+#var float4 windLevel1 : C15 : c[15] : -1 : 1
+#var float4 windLevel2[0] :  : c[16] : -1 : 1
+#var float4 windLevel2[1] :  : c[17] : -1 : 1
+#var float4 windLevel2[2] :  : c[18] : -1 : 1
+#var float4 windLevel2[3] :  : c[19] : -1 : 1
+#var float4 windLevel3[0] :  : c[20] : -1 : 1
+#var float4 windLevel3[1] :  : c[21] : -1 : 1
+#var float4 windLevel3[2] :  : c[22] : -1 : 1
+#var float4 windLevel3[3] :  : c[23] : -1 : 1
+#var float4 ambient : C24 : c[24] : -1 : 1
+#var float4 diffuse0 : C25 : c[25] : -1 : 1
+#var float4 diffuse1 : C26 : c[26] : -1 : 1
+#var float4 diffuse2 : C27 : c[27] : -1 : 1
+#var float4 diffuse3 : C28 : c[28] : -1 : 0
+#var float4 specular0 : C29 : c[29] : -1 : 1
+#var float4 specular1 : C30 : c[30] : -1 : 1
+#var float4 specular2 : C31 : c[31] : -1 : 1
+#var float4 specular3 : C32 : c[32] : -1 : 0
+#var float4 sunDir : C33 : c[33] : -1 : 1
+#var float4 diffuseAlpha : C34 : c[34] : -1 : 1
+#var float4 eyePos : C35 : c[35] : -1 : 1
+#var float4 plPos0 : C36 : c[36] : -1 : 1
+#var float4 plPos1 : C37 : c[37] : -1 : 1
+#const c[4] = 3.99 3 1 0
+#const c[5] = 0 -1 -2
+PARAM c[38] = { program.local[0..3],
+		{ 3.99, 3, 1, 0 },
+		{ 0, -1, -2 },
+		program.local[6..37] };
+TEMP R0;
+TEMP R1;
+TEMP R2;
+TEMP R3;
+TEMP R4;
+TEMP R5;
+TEMP R6;
+ADDRESS A0;
+MUL R0.x, vertex.color, c[4].y;
+ADD R0.xyz, R0.x, c[5];
+MIN R0.xyz, R0, c[4].z;
+MAX R1.xyz, R0, c[4].w;
+MUL R0.xy, vertex.color.yzzw, c[4].x;
+ARL A0.x, R0.x;
+MAD R2.xyz, R1.x, c[15], vertex.position;
+MAD R2.xyz, R1.y, c[A0.x + 16], R2;
+ARL A0.x, R0.y;
+MAD R2.xyz, c[A0.x + 20], R1.z, R2;
+ADD R0.xyz, -R2, c[36];
+DP3 R0.w, R0, R0;
+RSQ R1.x, R0.w;
+ADD R5.xyz, -R2, c[35];
+DP3 R0.w, R5, R5;
+RSQ R1.w, R0.w;
+MUL R0.xyz, R1.x, R0;
+MAD R1.xyz, R1.w, R5, R0;
+DP3 R2.w, R1, R1;
+RSQ R2.w, R2.w;
+DP3 R0.w, vertex.normal, vertex.normal;
+RSQ R0.w, R0.w;
+MUL R3.xyz, R0.w, vertex.normal;
+MUL R1.xyz, R2.w, R1;
+DP3 R1.y, R3, R1;
+ADD R4.xyz, -R2, c[37];
+DP3 R2.w, R4, R4;
+RSQ R3.w, R2.w;
+DP3 R1.x, R3, R0;
+MOV R1.z, c[29].w;
+LIT R6.yz, R1.xyzz;
+MAD R1.xyz, R1.w, R5, c[33];
+DP3 R4.w, R1, R1;
+RSQ R2.w, R4.w;
+MUL R1.xyz, R2.w, R1;
+DP3 R1.y, R3, R1;
+MUL R4.xyz, R3.w, R4;
+MAD R5.xyz, R1.w, R5, R4;
+DP3 R2.w, R5, R5;
+RSQ R2.w, R2.w;
+MUL R5.xyz, R2.w, R5;
+MOV R2.w, vertex.position;
+DP3 R5.y, R3, R5;
+DP3 R1.x, R3, c[33];
+MOV R1.z, c[29].w;
+LIT R1.yz, R1.xyzz;
+MUL R0, R6.z, c[30];
+MAD R0, R1.z, c[29], R0;
+MUL R1, R1.y, c[25];
+ADD R1, R1, c[24];
+MAD R1, R6.y, c[26], R1;
+MOV R5.z, c[29].w;
+DP3 R5.x, R3, R4;
+LIT R3.yz, R5.xyzz;
+MAD result.color.secondary, R3.z, c[31], R0;
+MAD R0, R3.y, c[27], R1;
+MAD result.color, R0, c[34].zzzx, c[34].xxxw;
+DP4 result.position.w, R2, c[3];
+DP4 result.position.z, R2, c[2];
+DP4 result.position.y, R2, c[1];
+DP4 result.position.x, R2, c[0];
+DP4 result.fogcoord.x, R2, c[6];
+MOV result.texcoord[0], vertex.texcoord[0];
+END
+# 63 instructions, 7 R-regs

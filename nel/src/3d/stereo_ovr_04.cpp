@@ -55,7 +55,7 @@
 #include "nel/3d/u_camera.h"
 #include "nel/3d/u_driver.h"
 #include "nel/3d/material.h"
-#include "nel/3d/texture_bloom.h"
+#include "nel/3d/texture_offscreen.h"
 #include "nel/3d/texture_user.h"
 #include "nel/3d/driver_user.h"
 #include "nel/3d/u_texture.h"
@@ -166,7 +166,7 @@ static float lerp(float f0, float f1, float factor)
 	return (f1 * factor) + (f0 * (1.0f - factor));
 }
 
-CStereoOVR::CStereoOVR(const CStereoOVRDeviceFactory *factory) : m_DevicePtr(NULL), m_Stage(0), m_SubStage(0), m_OrientationCached(false), m_Driver(NULL), m_SceneTexture(NULL), m_GUITexture(NULL), m_EyePosition(0.0f, 0.09f, 0.15f), m_Scale(1.0f), m_AttachedDisplay(false)
+CStereoOVR::CStereoOVR(const CStereoOVRDeviceFactory *factory) : m_DevicePtr(NULL), m_Stage(0), m_SubStage(0), m_ReflPass(0), m_OrientationCached(false), m_Driver(NULL), m_SceneTexture(NULL), m_GUITexture(NULL), m_EyePosition(0.0f, 0.09f, 0.15f), m_Scale(1.0f), m_AttachedDisplay(false)
 {
 	nlctassert(NL_OVR_EYE_COUNT == ovrEye_Count);
 
@@ -305,7 +305,7 @@ CStereoOVR::CStereoOVR(const CStereoOVRDeviceFactory *factory) : m_DevicePtr(NUL
 
 		// create distortion mesh vertex buffer
 		m_VB[eye].setVertexFormat(CVertexBuffer::PositionFlag | CVertexBuffer::TexCoord0Flag | CVertexBuffer::TexCoord1Flag | CVertexBuffer::TexCoord2Flag | CVertexBuffer::PrimaryColorFlag);
-		m_VB[eye].setPreferredMemory(CVertexBuffer::StaticPreferred, true);
+		m_VB[eye].setBufferUsage(CVertexBuffer::Immutable, true);
 		m_VB[eye].setNumVertices(meshData.VertexCount);
 		{
 			CVertexBufferReadWrite vba;
@@ -336,7 +336,7 @@ CStereoOVR::CStereoOVR(const CStereoOVRDeviceFactory *factory) : m_DevicePtr(NUL
 
 		// create distortion mesh index buffer
 		m_IB[eye].setFormat(NL_DEFAULT_INDEX_BUFFER_FORMAT);
-		m_IB[eye].setPreferredMemory(CIndexBuffer::StaticPreferred, true);
+		m_IB[eye].setBufferUsage(CIndexBuffer::Immutable, true);
 		m_IB[eye].setNumIndexes(meshData.IndexCount);
 		{
 			CIndexBufferReadWrite iba;
@@ -568,12 +568,30 @@ bool CStereoOVR::nextPass()
 			// draw interface 2d (onto render target)
 			return true;
 		case 2:
-			++m_Stage;
 			m_SubStage = 0;
+			if (m_SceneReflectionPasses > 0)
+			{
+				m_ReflPass = 0;
+				m_Stage = 21;
+				// stage 21: water reflection pass, left eye
+				// (odd/even stage ids keep the eye parity convention)
+				return true;
+			}
+			m_Stage = 3;
 			// stage 3:
 			// (initBloom)
 			// clear buffer
 			// draw scene left
+			return true;
+		case 21:
+			m_Stage = 22;
+			m_SubStage = 0;
+			// stage 22: water reflection pass, right eye
+			return true;
+		case 22:
+			++m_ReflPass;
+			m_Stage = (m_ReflPass < m_SceneReflectionPasses) ? 21 : 3;
+			m_SubStage = 0;
 			return true;
 		case 3:
 			++m_Stage;
@@ -620,8 +638,21 @@ bool CStereoOVR::nextPass()
 		switch (m_Stage)
 		{
 		case 0:
-			++m_Stage;
 			m_SubStage = 0;
+			if (m_SceneReflectionPasses > 0)
+			{
+				m_ReflPass = 0;
+				m_Stage = 21; // water reflection passes, single eye
+				return true;
+			}
+			++m_Stage;
+			return true;
+		case 21:
+			++m_ReflPass;
+			m_SubStage = 0;
+			if (m_ReflPass < m_SceneReflectionPasses)
+				return true; // next reflection pass
+			m_Stage = 1;
 			return true;
 		case 1:
 			m_Stage = 0;
@@ -686,7 +717,12 @@ bool CStereoOVR::wantClear()
 	}
 	return m_Driver->getPolygonMode() != UDriver::Filled;
 }
-	
+
+bool CStereoOVR::wantSceneReflections()
+{
+	return m_Stage == 21 || m_Stage == 22;
+}
+
 bool CStereoOVR::wantScene()
 {
 	switch (m_Stage)
@@ -737,23 +773,48 @@ bool CStereoOVR::isSceneFirst()
 	switch (m_Stage)
 	{
 	case 3:
+	case 21:
 		return true;
 	case 4:
+	case 22:
 		return false;
 	}
 	return m_Driver->getPolygonMode() != UDriver::Filled;
+}
+
+uint CStereoOVR::getSceneReflectionPass() const
+{
+	return m_ReflPass;
+}
+
+uint CStereoOVR::getSceneView() const
+{
+	// Odd stages are the left eye
+	return (m_Stage % 2) ? 0 : 1;
 }
 
 bool CStereoOVR::isSceneLast()
 {
 	switch (m_Stage)
 	{
+	case 21:
+	case 22:
+		return false; // reflection passes are never the frame's last render
 	case 3:
 		return false;
 	case 4:
 		return true;
 	}
 	return m_Driver->getPolygonMode() != UDriver::Filled;
+}
+
+uint CStereoOVR::getFlareContext()
+{
+	// Eyes use contexts 0/2; the water reflection stages (21, 22) use the
+	// dedicated reflection contexts 4/5 (mirrored-view occlusion, own fade)
+	if (m_Stage >= 21)
+		return (m_Stage % 2) ? 4 : 5;
+	return (m_Stage % 2) ? 0 : 2;
 }
 
 /// Returns non-NULL if a new render target was set
@@ -768,7 +829,7 @@ bool CStereoOVR::beginRenderTarget()
 		nlassert(!m_GUITexture);
 		uint32 width, height;
 		m_Driver->getWindowSize(width, height);
-		m_GUITexture = m_Driver->getRenderTargetManager().getRenderTarget(width, height, true, UTexture::RGBA8888);
+		m_GUITexture = m_Driver->getRenderTargetManager().getRenderTarget(width, height, false, UTexture::RGBA8888);
 		static_cast<CDriverUser *>(m_Driver)->setRenderTarget(*m_GUITexture);
 		m_Driver->clearBuffers(NLMISC::CRGBA(0, 0, 0, 0));
 		return true;
@@ -892,11 +953,11 @@ void CStereoOVR::renderGUI()
 		quadUV.Uv3 = CUV(0.f,  1.f);
 		
 		const uint nbQuads = 128;
-		static CVertexBuffer vb;
-		static CIndexBuffer ib;
-		
+		static CVertexBuffer vb; // STATIC GPU RESOURCE: Blocks multiple driver instances
+		static CIndexBuffer ib; // STATIC GPU RESOURCE: Blocks multiple driver instances
+
 		vb.setVertexFormat(CVertexBuffer::PositionFlag | CVertexBuffer::TexCoord0Flag);
-		vb.setPreferredMemory(CVertexBuffer::RAMVolatile, false);
+		vb.setBufferUsage(CVertexBuffer::SmallStream, false);
 		vb.setNumVertices((nbQuads + 1) * 2);
 
 		{
@@ -921,7 +982,7 @@ void CStereoOVR::renderGUI()
 		}
 
 		ib.setFormat(NL_DEFAULT_INDEX_BUFFER_FORMAT);
-		ib.setPreferredMemory(CIndexBuffer::RAMVolatile, false);
+		ib.setBufferUsage(CIndexBuffer::SmallStream, false);
 		ib.setNumIndexes(nbQuads * 6);
 
 		{

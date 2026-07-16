@@ -223,7 +223,7 @@ void CComLuaModule::callTranslateFeatures(CObject* scenario)
 }
 	
 
-CObject* CComLuaModule::translateFeatures(CObject* hlScenario, std::string& errorMsg) const
+CObject::TSmartPtr CComLuaModule::translateFeatures(CObject* hlScenario, std::string& errorMsg) const
 {
 	if (!hlScenario)
 	{
@@ -239,7 +239,7 @@ CObject* CComLuaModule::translateFeatures(CObject* hlScenario, std::string& erro
 		errorMsg = NLMISC::toString( "error running function 'doTranslateFeatures': %s", lua_tostring(_LuaState, -1));
 		return 0;
 	}
-	CObject* ret = getObjectFromLua(_LuaState, -1);	
+	CObject::TSmartPtr ret = getObjectFromLua(_LuaState, -1);
 	return ret;
 }
 
@@ -251,7 +251,7 @@ sint CComLuaModule::luaAddPaletteElement(lua_State* state)
 	CComLuaModule* this2 = getInstance(state);
 	nlassert(this2);
 	std::string key( lua_tostring(state, 1) );	
-	CObject* object = this2->getObjectFromLua(state, 2);	
+	CObject::TSmartPtr object = this2->getObjectFromLua(state, 2);
 	this2->_Client->addPaletteElement(key, object);
 	return  0;	
 }
@@ -264,12 +264,11 @@ sint CComLuaModule::luaGetPropertyValue(lua_State* state)
 	luaL_checktype(state, 2, LUA_TSTRING);
 	CComLuaModule* this2 = getInstance(state);
 	nlassert(this2);
-	CObject* object = this2->getObjectFromLua(state, 1);
+	CObject::TSmartPtr object = this2->getObjectFromLua(state, 1);
 	std::string attrName( lua_tostring(state, 2) );
 	CObject* toRet = this2->_Client->getPropertyValue(object, attrName);
 	this2->setObjectToLua(state, toRet);
-	delete object;	
-	return  1;	
+	return  1;
 }
 
 /*sint CComLuaModule::luaGetPropertyList(lua_State* state)
@@ -385,9 +384,9 @@ sint CComLuaModule::luaRegisterGenerator(lua_State* state)
 	luaL_checktype(state, 1, LUA_TTABLE);
 	CComLuaModule* this2 = getInstance(state);
 	assert(this2);
-	CObject* object = this2->getObjectFromLua(state, 1);
+	CObject::TSmartPtr object = this2->getObjectFromLua(state, 1);
  	this2->_Client->registerGenerator(object);
-	return  0;	
+	return  0;
 }
 
 sint CComLuaModule::luaShow(lua_State* state)
@@ -402,7 +401,7 @@ sint CComLuaModule::luaRequestUpdateRtScenario(lua_State* state)
 {
 	CComLuaModule* this2 = getInstance(state);
 	assert(this2);
-	CObject* object = this2->getObjectFromLua(state, 1);
+	CObject::TSmartPtr object = this2->getObjectFromLua(state, 1);
 	assert(object);
 	this2->_Client->requestUpdateRtScenario(object);
 	return 0;
@@ -413,10 +412,9 @@ sint CComLuaModule::luaRequestCreateScenario(lua_State* state)
 	luaL_checktype(state, 1, LUA_TTABLE);
 	CComLuaModule* this2 = getInstance(state);
 	nlassert(this2);
-	CObject* object = this2->getObjectFromLua(state, 1);
+	CObject::TSmartPtr object = this2->getObjectFromLua(state, 1);
 	nlassert(object);
 	this2->_Client->requestCreateScenario(object);
-	delete object;
 	return 0;
 }
 
@@ -429,11 +427,11 @@ sint CComLuaModule::luaPrint(lua_State* state)
 //	luaL_checktype(state, 1, LUA_TSTRING);
 	CComLuaModule* this2 = getInstance(state);
 	nlassert(this2);
-	CObject* object = this2->getObjectFromLua(state, 1);
+	CObject::TSmartPtr object = this2->getObjectFromLua(state, 1);
 	if(!object)
 	{
 		nlinfo("nil");
-		return 0;	
+		return 0;
 	}
 	std::stringstream ss;
 	std::string s;
@@ -442,10 +440,8 @@ sint CComLuaModule::luaPrint(lua_State* state)
 	{
 		nlinfo("%s", s.c_str());
 	}
-	
 
 	//this2->_Client->requestCreateScenario(object);
-	delete object;
 	return 0;
 }
 
@@ -508,13 +504,12 @@ sint CComLuaModule::requestInsertNode(lua_State* state, bool isGhost)
 	std::string attrName(lua_tostring(state, 2));
 	sint position(static_cast<sint>(lua_tonumber(state, 3)));
 	std::string key(lua_tostring(state, 4));
-	CObject* value = getObjectFromLua(state, 5);
+	CObject::TSmartPtr value = getObjectFromLua(state, 5);
 //	value->setGhost(isGhost);
 	CComLuaModule* this2 = getInstance(state);
 	nlassert(this2);
 	this2->_Client->requestInsertNode(
 		instanceId, attrName, position, key, value);
-	delete value;
 	return 0;
 }
 
@@ -539,7 +534,7 @@ sint CComLuaModule::luaRequestSetNode(lua_State* state)
 
 	std::string instanceId(lua_tostring(state, 1));
 	std::string attrName(lua_tostring(state, 2));
-	CObject* value = getObjectFromLua(state, 3);
+	CObject::TSmartPtr value = getObjectFromLua(state, 3);
 	if (value == NULL)
 	{
 		nlwarning("requestSetNode : bad type for argument 3");
@@ -548,7 +543,6 @@ sint CComLuaModule::luaRequestSetNode(lua_State* state)
 	CComLuaModule* this2 = getInstance(state);
 	nlassert(this2);
 	this2->_Client->requestSetNode(	instanceId, attrName, value);
-	delete value;
 	return 0;
 }
 
@@ -754,7 +748,7 @@ void CComLuaModule::setObjectToLua(lua_State* state, CObject* object)
 }
 
 
-CObject* CComLuaModule::getObjectFromLua(lua_State* state, sint idx)
+CObject::TSmartPtr CComLuaModule::getObjectFromLua(lua_State* state, sint idx)
 {	
 	lua_pushvalue(state, idx);
 
@@ -845,7 +839,7 @@ CObject* CComLuaModule::getObjectFromLua(lua_State* state, sint idx)
 				{
 					key = lua_tostring(state, -2);
 				}
-				CObject* object = getObjectFromLua(state, -1);
+				CObject::TSmartPtr object = getObjectFromLua(state, -1);
 				if (object)
 				{
 					table->add(key, object);
@@ -867,9 +861,9 @@ CObject* CComLuaModule::getObjectFromLua(lua_State* state, sint idx)
 }
 
 
-CObject* CComLuaModule::loadLocal(const std::string& filename)
+CObject::TSmartPtr CComLuaModule::loadLocal(const std::string& filename)
 {
-	CObject* object = NULL;
+	CObject::TSmartPtr object;
 	if (lua_dofile(_LuaState, filename.c_str()) == 0)
 	{
 		lua_getglobal(_LuaState, "scenario");
@@ -890,7 +884,7 @@ CObject* CComLuaModule::loadLocal(const std::string& filename)
 bool CComLuaModule::load(const std::string& filename)
 {
 	
-	CObject* object = loadLocal(filename);
+	CObject::TSmartPtr object = loadLocal(filename);
 	if (!object)
 	{
 		nlwarning("Error while loading %s", filename.c_str());
@@ -909,7 +903,7 @@ sint CComLuaModule::luaUpdateScenario(lua_State* state)
 	luaL_checktype(state, 1, LUA_TTABLE);
 
 //			lua_pushvalue(state, 1);
-	CObject* object = getObjectFromLua(state);
+	CObject::TSmartPtr object = getObjectFromLua(state);
 	lua_pushliteral(state, "tmp1");
 	lua_pushliteral(state, "tmp1");
 	lua_pushliteral(state, "tmp1");

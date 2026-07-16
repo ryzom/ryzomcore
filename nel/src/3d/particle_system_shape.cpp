@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2012  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2012-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -232,7 +232,7 @@ CParticleSystem *CParticleSystemShape::instanciatePS(CScene &scene, NLMISC::CCon
 	}
 
 	// avoid prb with concurrent thread (may happen if an instance group containing ps is loaded in background)
-	s_PSSMutex.enter();
+	NLMISC::CAutoMutex<NLMISC::CMutex> lock(s_PSSMutex);
 
 
 	#ifdef PS_FAST_ALLOC
@@ -304,8 +304,6 @@ CParticleSystem *CParticleSystemShape::instanciatePS(CScene &scene, NLMISC::CCon
 			PSBlockAllocator = NULL;
 		}
 	#endif
-
-	s_PSSMutex.leave();
 
 	/*NLMISC::TTicks end = NLMISC::CTime::getPerformanceTime();
 	nlinfo("instanciation time = %.2f", (float) (1000 * NLMISC::CTime::ticksToSecond(end - start)));	*/
@@ -400,7 +398,7 @@ void CParticleSystemShape::flushTextures(IDriver &driver, uint selectedTexture)
 	}
 	else
 	{
-		s_PSSMutex.enter();
+		NLMISC::CAutoMutex<NLMISC::CMutex> lock(s_PSSMutex);
 
 		// must create an instance just to flush the textures
 		CParticleSystem *myInstance = NULL;
@@ -445,7 +443,6 @@ void CParticleSystemShape::flushTextures(IDriver &driver, uint selectedTexture)
 		#ifdef PS_FAST_ALLOC
 			PSBlockAllocator = NULL;
 		#endif
-		s_PSSMutex.leave();
 	}
 	for(uint k = 0; k < _CachedTex.size(); ++k)
 	{

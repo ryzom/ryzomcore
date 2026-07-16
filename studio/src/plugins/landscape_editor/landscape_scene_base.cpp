@@ -22,9 +22,9 @@
 #include <nel/misc/debug.h>
 
 // Qt includes
-#include <QtGui/QPainter>
-#include <QtGui/QGraphicsPixmapItem>
-#include <QtGui/QGraphicsSimpleTextItem>
+#include <QPainter>
+#include <QGraphicsPixmapItem>
+#include <QGraphicsSimpleTextItem>
 #include <QApplication>
 
 namespace LandscapeEditor
@@ -78,7 +78,7 @@ QGraphicsItem *LandscapeSceneBase::createItemZone(const LigoData &data, const Zo
 		return 0;
 
 	// Rotate the image counter clockwise
-	QMatrix matrix;
+	QTransform matrix;
 	matrix.rotate(-data.rot * 90.0);
 
 	QGraphicsPixmapItem *item;

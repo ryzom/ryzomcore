@@ -4,18 +4,18 @@
  ====================
 
 
-ZVIEWER permet de visioner une ou plusieurs zones exportées depuis 3DSMax 
+ZVIEWER permet de visioner une ou plusieurs zones exportÃ©es depuis 3DSMax 
 au format de NeL, en utilisant le moteur.
 
 
 1. Le fichier zviewer.cfg
    -----------------------
 
-Le répertoire d'où est exécuté le programme doit contenir le fichier ZVIEWER.CFG
-qui contient les paramètres de configuration. Sans ce fichier aucune zone ne sera 
-affichée.
-Lorsqu'il n'y a pas de fichier de configuration à l'execution un fichier type est
-généré.
+Le rÃ©pertoire d'oÃ¹ est exÃ©cutÃ© le programme doit contenir le fichier ZVIEWER.CFG
+qui contient les paramÃ¨tres de configuration. Sans ce fichier aucune zone ne sera 
+affichÃ©e.
+Lorsqu'il n'y a pas de fichier de configuration Ã  l'execution un fichier type est
+gÃ©nÃ©rÃ©.
 
 Exemple de config :
 
@@ -57,8 +57,8 @@ Depth :
 nombre de couleurs (32bits,24bits,...).
 
 Position :
-position initiale (x,y,z). Correspond aux coordonnées dans Max (Generic Units).
-La position est automatiquement snapée au sol quelque soit la coordonnée en z.
+position initiale (x,y,z). Correspond aux coordonnÃ©es dans Max (Generic Units).
+La position est automatiquement snapÃ©e au sol quelque soit la coordonnÃ©e en z.
 
 EyesHeight :
 hauteur des yeux pour le mode Walk.
@@ -73,7 +73,7 @@ LandscapeTileNear :
 valeur du near. Plus cette valeur est grande, plus la zone du near est grande.
 
 LandscapeThreshold :
-seuil utilisé pour la subdivision adaptative. Quand la valeur augmente, la qualité
+seuil utilisÃ© pour la subdivision adaptative. Quand la valeur augmente, la qualitÃ©
 de la subdivision diminue (reduit le temps de calcul). Mis au minimum par defaut (0.001).
 
 BanksPath :
@@ -89,18 +89,18 @@ Zones :
 liste des noms des zones
 
 
-2. Les déplacements
+2. Les dÃ©placements
    ----------------
 
-Les déplacements se font à l'aide de la combinaison clavier/souris. 
-Il existe 2 modes de déplacement : FreeLook et Walk (defaut). 
+Les dÃ©placements se font Ã  l'aide de la combinaison clavier/souris. 
+Il existe 2 modes de dÃ©placement : FreeLook et Walk (defaut). 
 
-- Le mode FreeLook permet de se déplacer dans la direction du regard(idem cstrike). 
-- Dans le mode Walk le déplacement se fait au niveau du sol, à hauteur des yeux. 
-  L'utilisateur reste collé au sol.
+- Le mode FreeLook permet de se dÃ©placer dans la direction du regard(idem cstrike). 
+- Dans le mode Walk le dÃ©placement se fait au niveau du sol, Ã  hauteur des yeux. 
+  L'utilisateur reste collÃ© au sol.
 
 La souris permet d'orienter le regard dans toutes les directions
-Le clavier permet de se déplacer.
+Le clavier permet de se dÃ©placer.
 
 
 3. Les touches
@@ -110,11 +110,11 @@ F1       : Afficher/Masquer les infos
 F3       : basculer entre le mode plein et le mode fil de fer
 F12      : faire un screenshot
 ESPACE   : basculer entre les modes Walk et Free-Look
-RETURN   : libérer ou capturer la souris
+RETURN   : libÃ©rer ou capturer la souris
 UP       : avancer
 DOWN     : reculer
-LEFT     : déplacement latéral à gauche
-RIGHT    : déplacement latéral à droite
+LEFT     : dÃ©placement latÃ©ral Ã  gauche
+RIGHT    : dÃ©placement latÃ©ral Ã  droite
 SHIFT    : augmenter l'altitude 
 CTRL     : baisser d'altitude 
 1        : 5 km/h

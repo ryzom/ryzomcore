@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013-2014  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -71,7 +72,7 @@ namespace GUIEditor
 		NLMISC::CPath::remapExtension( "png", "tga", true );
 
 		w->init();
-		w->createTextContext( "Ryzom.ttf" );
+		w->createTextContext("uiFontSans");
 
 		NLGUI::CAHManager::setEditorMode( true );
 		NLGUI::CLuaManager::setEditorMode( true );

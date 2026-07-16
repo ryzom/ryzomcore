@@ -1,9 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2019  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2020-2021  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -208,9 +208,10 @@ namespace NLGUI
 	// ***************************************************************************
 	bool getCssLength (float &value, std::string &unit, const std::string &str, bool neg)
 	{
-		static const std::set<std::string> knownUnits = {
+		static const std::string knownUnitsArr[] = {
 			"%", "rem", "em", "px", "pt", "vw", "vh", "vi", "vb", "vmin", "vmax"
 		};
+		static const std::set<std::string> knownUnits(knownUnitsArr, &knownUnitsArr[sizeof(knownUnitsArr) / sizeof(knownUnitsArr[0])]);
 
 		std::string::size_type pos = 0;
 		std::string::size_type len = str.size();

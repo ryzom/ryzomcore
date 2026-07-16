@@ -3,6 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013-2014  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -23,6 +24,9 @@
 #define RZ_INTERFACE_PARSER_H
 
 #include "nel/misc/types_nl.h"
+
+#include <stack>
+
 #include "nel/3d/u_texture.h"
 #include "nel/gui/ctrl_sheet_selection.h"
 #include "nel/gui/interface_link.h"
@@ -150,6 +154,7 @@ namespace NLGUI
 		void removeAllModules();
 
 		// Called by each parse in parseXMLDocument
+		bool solveFeatureFlags(xmlNodePtr cur);
 		bool solveDefine(xmlNodePtr cur);
 		bool solveStyle(xmlNodePtr cur);
 
@@ -298,6 +303,20 @@ namespace NLGUI
 		TVarMap								_DefineMap;
 
 		bool	validDefineChar(char c) const;
+
+	public:
+		inline void clearFeatureFlags() { m_FeatureFlags.clear(); }
+		inline void addFeatureFlag(const std::string &flag) { m_FeatureFlags.insert(flag); }
+
+	private:
+		bool checkFeatureFlags(const char *str, ptrdiff_t len = 0) const;
+
+		/// Enabled feature flags (e.g. "ryzomclassic", "contexticons", etc...)
+	    /// Used by <if ... flags="..." \> blocks
+		std::set<std::string> m_FeatureFlags;
+		std::stack<int> m_FlagStack;
+		
+	protected:
 
 		class	CStyleProperty
 		{

@@ -18,6 +18,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdmisc.h"
+
+#ifndef NL_NO_LIBXML2
+
 #include "nel/misc/cdb_branch_observing_handler.h"
 
 #ifdef DEBUG_NEW
@@ -207,3 +210,5 @@ namespace NLMISC{
 	}
 }
 
+
+#endif // NL_NO_LIBXML2

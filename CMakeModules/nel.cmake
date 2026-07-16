@@ -67,6 +67,43 @@ MACRO(NL_DEFAULT_PROPS name label)
     ENDIF()
   ENDIF()
 
+  # VS2008-era toolchains that cannot run CMake's mt.exe manifest embedding (the VS2008/Wine
+  # trees — mt.exe page-faults under Wine outright) would otherwise ship DLLs/EXEs WITHOUT
+  # their VC90 SxS manifest; on real Windows the CRT then never resolves through WinSxS and
+  # LoadLibrary fails with error 126 (hit by the 3ds Max plugin set, PMD §10z-seize). Embed the
+  # dependent-assembly manifest through the resource compiler instead (RT_MANIFEST = type 24;
+  # id 1 for EXEs, id 2 = ISOLATIONAWARE for DLLs) — rc.exe works fine under Wine. Directories
+  # that compile with MFC (_AFXDLL via ADD_DEFINITIONS, e.g. object_viewer) get the CRT+MFC
+  # manifest. The manifests reference the RTM version (9.0.21022.8); publisher policy upgrades
+  # to whatever VC90 SP1 redist the target machine carries — the VS2008 default convention.
+  # Gate: NL_EMBED_SXS_MANIFEST_RC is set by the toolchain that needs it (the Wine one sets it
+  # in vs2008-toolchain.cmake); real-Windows builds keep CMake's own mt-based embedding and
+  # must NOT also get a resource-compiled manifest (mt would collide with the existing
+  # RT_MANIFEST resource).
+  IF(NL_EMBED_SXS_MANIFEST_RC AND MSVC AND MSVC_VERSION LESS 1600
+     AND (${type} STREQUAL SHARED_LIBRARY OR ${type} STREQUAL MODULE_LIBRARY OR ${type} STREQUAL EXECUTABLE))
+    IF(${type} STREQUAL EXECUTABLE)
+      SET(_NL_MANIFEST_ID 1)
+    ELSE()
+      SET(_NL_MANIFEST_ID 2)
+    ENDIF()
+    # MFC detection: the _AFXDLL directory definition when it is already set at this point, or
+    # the explicit NL_SXS_MANIFEST_MFC target property for directories that ADD_DEFINITIONS
+    # after NL_DEFAULT_PROPS (object_viewer does).
+    GET_DIRECTORY_PROPERTY(_NL_DIR_DEFS COMPILE_DEFINITIONS)
+    GET_TARGET_PROPERTY(_NL_TGT_MFC ${name} NL_SXS_MANIFEST_MFC)
+    IF("${_NL_DIR_DEFS}" MATCHES "_AFXDLL" OR _NL_TGT_MFC)
+      SET(_NL_MANIFEST_SRC ${CMAKE_SOURCE_DIR}/CMakeModules/manifests/vc90_crt_mfc.manifest)
+    ELSE()
+      SET(_NL_MANIFEST_SRC ${CMAKE_SOURCE_DIR}/CMakeModules/manifests/vc90_crt.manifest)
+    ENDIF()
+    # The manifest is copied next to the generated .rc and referenced by bare filename —
+    # rc.exe resolves it relative to the .rc file's own directory, path-convention-free.
+    CONFIGURE_FILE(${_NL_MANIFEST_SRC} ${CMAKE_CURRENT_BINARY_DIR}/${name}_sxs.manifest COPYONLY)
+    FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${name}_sxs.rc "${_NL_MANIFEST_ID} 24 \"${name}_sxs.manifest\"\n")
+    TARGET_SOURCES(${name} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/${name}_sxs.rc)
+  ENDIF()
+
   IF(${type} STREQUAL EXECUTABLE AND WIN32 AND NOT MINGW)
     # check if using a GUI
     GET_TARGET_PROPERTY(_VALUE ${name} WIN32_EXECUTABLE)
@@ -116,9 +153,25 @@ MACRO(NL_ADD_RUNTIME_FLAGS name)
 #      LINK_FLAGS_RELEASE "${CMAKE_LINK_FLAGS_RELEASE}")
   ENDIF()
   IF(WITH_STLPORT)
-    TARGET_LINK_LIBRARIES(${name} ${STLPORT_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+    TARGET_LINK_LIBRARIES(${name} PRIVATE ${STLPORT_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
   ENDIF()
 ENDMACRO(NL_ADD_RUNTIME_FLAGS)
+
+###
+# Fix for MFC "regular DLL" targets (LNK2005 DllMain conflict).
+# _USRDLL tells MFC this is a regular DLL (not an extension DLL), which controls
+# DLL entry point setup and library pragma directives in MFC headers.
+# Argument: name - the MFC SHARED library target.
+###
+MACRO(NL_MFC_DLL_WORKAROUND name)
+  IF(MSVC)
+    TARGET_COMPILE_DEFINITIONS(${name} PRIVATE _USRDLL)
+    TARGET_LINK_LIBRARIES(${name} PRIVATE
+      $<$<CONFIG:Debug>:mfcs140ud>
+      $<$<CONFIG:Release>:mfcs140u>
+    )
+  ENDIF()
+ENDMACRO(NL_MFC_DLL_WORKAROUND)
 
 MACRO(NL_ADD_STATIC_VID_DRIVERS name)
 IF(HUNTER_ENABLED)
@@ -133,8 +186,14 @@ IF(HUNTER_ENABLED)
   IF(WITH_DRIVER_OPENGL)
     TARGET_LINK_LIBRARIES(${name} nel_drv_opengl${drv_suffix})
   ENDIF()
+  IF(WITH_DRIVER_OPENGL3)
+    TARGET_LINK_LIBRARIES(${name} nel_drv_opengl3${drv_suffix})
+  ENDIF()
   IF(WITH_DRIVER_OPENGLES)
     TARGET_LINK_LIBRARIES(${name} nel_drv_opengles${drv_suffix})
+  ENDIF()
+  IF(WITH_DRIVER_OPENGLES3)
+    TARGET_LINK_LIBRARIES(${name} nel_drv_opengles3${drv_suffix})
   ENDIF()
 ELSE()
   IF(WITH_STATIC_DRIVERS)
@@ -151,12 +210,28 @@ ELSE()
         TARGET_LINK_LIBRARIES(${name} nel_drv_opengl)
       ENDIF()
     ENDIF()
+	
+    IF(WITH_DRIVER_OPENGL3)
+      IF(WIN32)
+        TARGET_LINK_LIBRARIES(${name} nel_drv_opengl3_win)
+      ELSE(WIN32)
+        TARGET_LINK_LIBRARIES(${name} nel_drv_opengl3)
+      ENDIF()
+    ENDIF()
 
     IF(WITH_DRIVER_OPENGLES)
       IF(WIN32)
         TARGET_LINK_LIBRARIES(${name} nel_drv_opengles_win)
       ELSE()
         TARGET_LINK_LIBRARIES(${name} nel_drv_opengles)
+      ENDIF()
+    ENDIF()
+
+    IF(WITH_DRIVER_OPENGLES3)
+      IF(WIN32)
+        TARGET_LINK_LIBRARIES(${name} nel_drv_opengles3_win)
+      ELSE()
+        TARGET_LINK_LIBRARIES(${name} nel_drv_opengles3)
       ENDIF()
     ENDIF()
   ENDIF()
@@ -234,7 +309,7 @@ Remove the CMakeCache.txt file and try again from another folder, e.g.:
 ENDMACRO(CHECK_OUT_OF_SOURCE)
 
 MACRO(NL_SETUP_DEFAULT_OPTIONS)
-  IF(WITH_QT)
+  IF(WITH_QT5)
     OPTION(WITH_STUDIO              "Build Core Studio"                             OFF )
   ENDIF()
 
@@ -263,11 +338,6 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   ELSE()
     OPTION(WITH_STATIC_CURL       "With static curl"                              OFF)
   ENDIF()
-  IF(APPLE)
-    OPTION(WITH_LIBXML2_ICONV     "With libxml2 using iconv"                      ON )
-  ELSE()
-    OPTION(WITH_LIBXML2_ICONV     "With libxml2 using iconv"                      OFF)
-  ENDIF()
   OPTION(WITH_STATIC_DRIVERS      "With static drivers."                          OFF)
   IF(WIN32)
     OPTION(WITH_EXTERNAL          "With provided external."                       ON )
@@ -285,15 +355,17 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
 
   OPTION(WITH_ASSIMP              "Use assimp exporter"                           OFF)
   OPTION(WITH_LIBGSF              "Use libgsf for max file library"               OFF)
+  OPTION(WITH_PIPELINE_NATIVE_OLE "Use the native OLE/CFB backend for the max file library (no libgsf)" ON )
 
   OPTION(WITH_FFMPEG              "Use ffmpeg for audio decoder"                  OFF)
+  OPTION(WITH_MSQUIC              "Use msquic for QUIC networking support"        OFF)
 
   ###
   # GUI toolkits
   ###
   OPTION(WITH_GTK                 "With GTK Support"                              OFF)
-  OPTION(WITH_QT                  "With Qt 4 Support"                             OFF)
   OPTION(WITH_QT5                 "With Qt 5 Support"                             OFF)
+  OPTION(WITH_QT6                 "With Qt 6 Support"                             OFF)
 
   IF(WIN32 AND MFC_FOUND)
     OPTION(WITH_MFC               "With MFC Support"                              ON )
@@ -324,7 +396,6 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
 
   OPTION(WITH_RYZOM_LIVE          "Use ryzom.com urls"                            ON)
 
-  OPTION(WITH_MONGODB             "Compile server with MongoDB support"           ON)
   OPTION(WITH_PATCHMAN_SERVICE    "Compile Ryzom server patchman service"         OFF)
 ENDMACRO(NL_SETUP_DEFAULT_OPTIONS)
 
@@ -346,7 +417,9 @@ MACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)
   # Drivers Support
   ###
   OPTION(WITH_DRIVER_OPENGL       "Build OpenGL Driver (3D)"                      ON )
+  OPTION(WITH_DRIVER_OPENGL3      "Build OpenGL3 Driver (3D)"                     OFF)
   OPTION(WITH_DRIVER_OPENGLES     "Build OpenGL ES Driver (3D)"                   OFF)
+  OPTION(WITH_DRIVER_OPENGLES3    "Build OpenGL ES 3.0 Driver (3D)"              OFF)
   OPTION(WITH_DRIVER_DIRECT3D     "Build Direct3D Driver (3D)"                    OFF)
   OPTION(WITH_DRIVER_OPENAL       "Build OpenAL Driver (Sound)"                   ON )
   OPTION(WITH_DRIVER_FMOD         "Build FMOD Driver (Sound)"                     OFF)
@@ -361,13 +434,19 @@ MACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)
   OPTION(WITH_NEL_MAXPLUGIN       "Build NeL 3dsMax Plugin"                       OFF)
   OPTION(WITH_NEL_SAMPLES         "Build NeL Samples"                             ON )
   OPTION(WITH_NEL_TESTS           "Build NeL Unit Tests"                          ON )
+  OPTION(WITH_TESTING             "Build Tests"                                   ON )
 
   OPTION(WITH_LIBOVR              "With LibOVR support"                           OFF)
   OPTION(WITH_LIBVR               "With LibVR support"                            OFF)
   OPTION(WITH_PERFHUD             "With NVIDIA PerfHUD support"                   OFF)
 
-  OPTION(WITH_SSE2                "With SSE2"                                     ON )
-  OPTION(WITH_SSE3                "With SSE3"                                     ON )
+  IF(NOT EMSCRIPTEN)
+    OPTION(WITH_SSE2                "With SSE2"                                     ON )
+    OPTION(WITH_SSE3                "With SSE3"                                     ON )
+  ELSE()
+    SET(WITH_SSE2 OFF)
+    SET(WITH_SSE3 OFF)
+  ENDIF()
 
   OPTION(WITH_XRANDR              "With XRandR extension"                         ON )
 
@@ -399,6 +478,7 @@ MACRO(NL_SETUP_RYZOM_DEFAULT_OPTIONS)
   OPTION(WITH_LUA51               "Build Ryzom Core using Lua 5.1"                ON )
   OPTION(WITH_LUA52               "Build Ryzom Core using Lua 5.2"                OFF)
   OPTION(WITH_LUA53               "Build Ryzom Core using Lua 5.3"                OFF)
+  OPTION(WITH_LUA54               "Build Ryzom Core using Lua 5.4"                OFF)
   OPTION(WITH_RYZOM_CLIENT_UAC    "Ask to run as Administrator"                   OFF)
   OPTION(WITH_RYZOM_PATCH         "Enable Ryzom in-game patch support"            OFF)
   OPTION(WITH_RYZOM_CUSTOM_PATCH_SERVER "Only use patch server from CFG file"     OFF)
@@ -449,6 +529,35 @@ MACRO(NL_SETUP_BUILD)
       SET(CMAKE_BUILD_TYPE "Release" CACHE STRING "" FORCE)
     ENDIF()
   ENDIF()
+  
+  set(NL_CPP_STANDARD_SET OFF)
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 9)
+    set(CMAKE_CXX_STANDARD 17)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+    set(CMAKE_C_STANDARD 11)
+    set(CMAKE_C_STANDARD_REQUIRED ON)
+    set(NL_CPP_STANDARD_SET ON)
+  elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 6)
+    set(CMAKE_CXX_STANDARD 14)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+    set(CMAKE_C_STANDARD 11)
+    set(CMAKE_C_STANDARD_REQUIRED ON)
+    set(NL_CPP_STANDARD_SET ON)
+  elseif(MSVC)
+    if(MSVC_VERSION GREATER_EQUAL 1920)
+      set(CMAKE_CXX_STANDARD 17)
+      set(CMAKE_CXX_STANDARD_REQUIRED ON)
+      set(CMAKE_C_STANDARD 11)
+      set(CMAKE_C_STANDARD_REQUIRED ON)
+      set(NL_CPP_STANDARD_SET ON)
+    elseif(MSVC_VERSION GREATER_EQUAL 1910)
+      set(CMAKE_CXX_STANDARD 14)
+      set(CMAKE_CXX_STANDARD_REQUIRED ON)
+      set(CMAKE_C_STANDARD 11)
+      set(CMAKE_C_STANDARD_REQUIRED ON)
+      set(NL_CPP_STANDARD_SET ON)
+    endif()
+  endif()
 
   IF(CMAKE_CXX_LIBRARY_ARCHITECTURE)
     SET(HOST_CPU ${CMAKE_CXX_LIBRARY_ARCHITECTURE})
@@ -466,7 +575,11 @@ MACRO(NL_SETUP_BUILD)
 
   # If not specified, use the same CPU as host
   IF(NOT TARGET_CPU)
-    SET(TARGET_CPU ${HOST_CPU})
+    IF(EMSCRIPTEN)
+      SET(TARGET_CPU "wasm")
+    ELSE()
+      SET(TARGET_CPU ${HOST_CPU})
+    ENDIF()
   ENDIF()
 
   IF(TARGET_CPU MATCHES "(amd|AMD|x86_)64")
@@ -919,10 +1032,12 @@ MACRO(NL_SETUP_BUILD)
             ADD_PLATFORM_LINKFLAGS("-Wl,-macosx_version_min,${CMAKE_OSX_DEPLOYMENT_TARGET}")
           ENDIF()
         ENDIF()
-
-        # use libc++ under OX X to be able to use new C++ features (and else it'll use GCC 4.2.1 STL)
-        # minimum target is now OS X 10.7
-        SET(PLATFORM_CXXFLAGS "${PLATFORM_CXXFLAGS} -stdlib=libc++")
+        
+        IF(NOT NL_CPP_STANDARD_SET)
+          # use libc++ under OX X to be able to use new C++ features (and else it'll use GCC 4.2.1 STL)
+          # minimum target is now OS X 10.7
+          SET(PLATFORM_CXXFLAGS "${PLATFORM_CXXFLAGS} -stdlib=libc++")
+        ENDIF()
 
         ADD_PLATFORM_LINKFLAGS("-Wl,-headerpad_max_install_names")
 
@@ -941,14 +1056,18 @@ MACRO(NL_SETUP_BUILD)
     ENDIF()
 
     # use c++0x standard to use std::unique_ptr and std::shared_ptr
-    IF(CMAKE_CXX11_EXTENSION_COMPILE_OPTION)
-      SET(PLATFORM_CXXFLAGS "${PLATFORM_CXXFLAGS} ${CMAKE_CXX11_EXTENSION_COMPILE_OPTION}")
+    IF(NOT NL_CPP_STANDARD_SET)
+      IF(CMAKE_CXX11_EXTENSION_COMPILE_OPTION)
+        SET(PLATFORM_CXXFLAGS "${PLATFORM_CXXFLAGS} ${CMAKE_CXX11_EXTENSION_COMPILE_OPTION}")
+      ENDIF()
     ENDIF()
 
     ADD_PLATFORM_FLAGS("-D_REENTRANT")
 
     # hardening
-    ADD_PLATFORM_FLAGS("-D_FORTIFY_SOURCE=2")
+    IF(NOT EMSCRIPTEN)
+      ADD_PLATFORM_FLAGS("-D_FORTIFY_SOURCE=2")
+    ENDIF()
 
     IF(NOT WITH_LOW_MEMORY)
       ADD_PLATFORM_FLAGS("-pipe")
@@ -1020,17 +1139,21 @@ MACRO(NL_SETUP_BUILD)
     ENDIF()
 
     # hardening
-    ADD_PLATFORM_FLAGS("-fstack-protector --param=ssp-buffer-size=4")
+    IF(NOT EMSCRIPTEN)
+      ADD_PLATFORM_FLAGS("-fstack-protector --param=ssp-buffer-size=4")
 
-    # If -fstack-protector or -fstack-protector-all enabled, enable too new warnings and fix possible link problems
-    IF(WITH_WARNINGS)
-      ADD_PLATFORM_FLAGS("-Wstack-protector")
+      # If -fstack-protector or -fstack-protector-all enabled, enable too new warnings and fix possible link problems
+      IF(WITH_WARNINGS)
+        ADD_PLATFORM_FLAGS("-Wstack-protector")
+      ENDIF()
     ENDIF()
 
     # Fix undefined reference to `__stack_chk_fail' error
-    ADD_PLATFORM_LINKFLAGS("-lc")
+    IF(NOT MINGW)
+      ADD_PLATFORM_LINKFLAGS("-lc")
+    ENDIF()
 
-    IF(NOT APPLE)
+    IF(NOT APPLE AND NOT EMSCRIPTEN)
       ADD_PLATFORM_LINKFLAGS("-Wl,--no-undefined -Wl,--as-needed")
 
       IF(WITH_STATIC_RUNTIMES)
@@ -1038,7 +1161,7 @@ MACRO(NL_SETUP_BUILD)
       ENDIF()
     ENDIF()
 
-    IF(NOT APPLE)
+    IF(NOT APPLE AND NOT MINGW AND NOT EMSCRIPTEN)
       # hardening
       ADD_PLATFORM_LINKFLAGS("-Wl,-Bsymbolic-functions -Wl,-z,relro -Wl,-z,now")
     ENDIF()
@@ -1049,7 +1172,9 @@ MACRO(NL_SETUP_BUILD)
       IF(APPLE)
         SET(NL_RELEASE_LINKFLAGS "-Wl,-dead_strip ${NL_RELEASE_LINKFLAGS}")
       ELSE()
-        SET(NL_RELEASE_LINKFLAGS "-Wl,-s ${NL_RELEASE_LINKFLAGS}")
+        IF(NOT EMSCRIPTEN)
+          SET(NL_RELEASE_LINKFLAGS "-Wl,-s ${NL_RELEASE_LINKFLAGS}")
+        ENDIF()
       ENDIF()
     ENDIF()
 
@@ -1059,8 +1184,8 @@ MACRO(NL_SETUP_BUILD)
 ENDMACRO()
 
 MACRO(NL_SETUP_BUILD_FLAGS)
-  SET(CMAKE_C_FLAGS ${PLATFORM_CFLAGS} CACHE STRING "" FORCE)
-  SET(CMAKE_CXX_FLAGS ${PLATFORM_CXXFLAGS} CACHE STRING "" FORCE)
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${PLATFORM_CFLAGS}" CACHE STRING "" FORCE)
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PLATFORM_CXXFLAGS}" CACHE STRING "" FORCE)
   SET(CMAKE_EXE_LINKER_FLAGS ${PLATFORM_LINKFLAGS} CACHE STRING "" FORCE)
   SET(CMAKE_MODULE_LINKER_FLAGS ${PLATFORM_LINKFLAGS} CACHE STRING "" FORCE)
   SET(CMAKE_SHARED_LINKER_FLAGS ${PLATFORM_LINKFLAGS} CACHE STRING "" FORCE)
@@ -1273,7 +1398,9 @@ MACRO(SETUP_EXTERNAL)
     SET(CMAKE_USE_PTHREADS_INIT 1)
     SET(Threads_FOUND TRUE)
   ELSE()
-    SET(THREADS_HAVE_PTHREAD_ARG ON)
+    IF(NOT MSVC)
+      SET(THREADS_HAVE_PTHREAD_ARG ON)
+    ENDIF()
     FIND_PACKAGE(Threads)
     # TODO: replace all -l<lib> by absolute path to <lib> in CMAKE_THREAD_LIBS_INIT
   ENDIF()

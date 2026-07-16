@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2021  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -621,11 +621,19 @@ void initMainLoop()
 		if(MainCam.empty())
 			nlerror("initMainLoop: Cannot Create the main camera.");
 
+		// realtime water reflection budget (each admitted plane costs a
+		// scene render per eye, but planes tile into the shared reflection
+		// textures); force flag is a dev configuration
+		Scene->setMaxRealtimeWaterReflections(ClientCfg.MaxWaterReflections);
+		Scene->setWaterReflectionMaxTextures(ClientCfg.MaxWaterReflectionTextures);
+		Scene->setForceRealtimeWaterReflections(ClientCfg.ForceWaterReflections);
+
 		// setup load balancing
 		Scene->setPolygonBalancingMode(UScene::PolygonBalancingClamp);
 		Scene->setGroupLoadMaxPolygon("Skin", ClientCfg.SkinNbMaxPoly);
 		Scene->setGroupLoadMaxPolygon("Fx", ClientCfg.FxNbMaxPoly);
 		Scene->setMaxSkeletonsInNotCLodForm(ClientCfg.NbMaxSkeletonNotCLod);
+		Scene->enableGPUSkinning(ClientCfg.GPUSkinning);
 		// separate group for mouse/target selection reticle
 		Scene->setGroupLoadMaxPolygon("SelectionFx", 10000);
 		// enable Scene Lighting
@@ -635,6 +643,7 @@ void initMainLoop()
 		// Setup the global Wind from cfg.
 		Scene->setGlobalWindPower(ClientCfg.GlobalWindPower);
 		Scene->setGlobalWindDirection(ClientCfg.GlobalWindDirection);
+		Scene->setForceWaterEnvMap(ClientCfg.ForceWaterEnvMap);
 
 		// init the clustered sound system
 		if (SoundMngr != NULL)
@@ -1334,6 +1343,12 @@ void initMainLoop()
 			LastGameCycle = NetMngr.getCurrentServerTick();
 			while(LastGameCycle == NetMngr.getCurrentServerTick())
 			{
+				// Do not spin forever when the connection died while
+				// loading (e.g. a transport-level shutdown): the server
+				// tick will never advance. The main loop's disconnection
+				// handling takes over from here.
+				if (NetMngr.getConnectionState() == CNetworkConnection::Disconnect)
+					break;
 				// Event server get events
 				CInputHandlerManager::getInstance()->pumpEventsNoIM();
 				// Update Network.
@@ -1374,6 +1389,7 @@ void initMainLoop()
 
 	// Re-initialise the mouse (will be now in hardware mode, if required)
 	SetMousePosFirstTime = true;
+	ResetMouseCaptureState();
 	InitMouseWithCursor (ClientCfg.HardwareCursor && !StereoDisplayAttached); // the return value of enableLowLevelMouse() has already been tested at startup
 
 	// Re-initialise the keyboard, now in low-level mode, if required
@@ -1449,6 +1465,9 @@ void initMainLoop()
 
 	// enable/disable bloom config interface
 	initBloomConfigUI();
+
+	// enable/disable GPU skinning config interface
+	initGPUSkinningConfigUI();
 
 	// popup to offer hardware cursor activation
 	initHardwareCursor();
@@ -1748,5 +1767,22 @@ void initBloomConfigUI()
 	{
 		if(group)
 			group->setDefaultContextHelp(std::string());
+	}
+}
+
+// ***************************************************************************
+void initGPUSkinningConfigUI()
+{
+	bool supported = Driver->supportGPUSkinning();
+
+	CCtrlBaseButton *button = dynamic_cast<CCtrlBaseButton *>(
+		CWidgetManager::getInstance()->getElementFromId(
+			"ui:interface:game_config:content:char:gpu_skinning:c"));
+	if (button)
+		button->setFrozen(!supported);
+
+	if (!supported)
+	{
+		ClientCfg.writeBool("GPUSkinning", false);
 	}
 }

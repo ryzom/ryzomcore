@@ -11,6 +11,20 @@
 		}
 	}
 
+	if (!function_exists('eregi')) {
+		/** removed from php 7.0.0 */
+		function eregi($pattern, $line, &$match = array()) {
+			return preg_match('/'.$pattern.'/i', $line, $match);
+		}
+	}
+
+	if (!function_exists('ereg_replace')) {
+		/** removed from php 7.0.0 */
+		function ereg_replace($pattern, $replacement, $string) {
+			return preg_replace('/'.$pattern.'/', $replacement, $string);
+		}
+	}
+
 	/*
 	 * pushes some data in the debug variable
 	 */
@@ -50,7 +64,7 @@
 		if ($log_action == '') 										return false;
 		if ($log_desc == '') 										return false;
 
-		$sql = "INSERT INTO ". NELDB_LOG_TABLE ." ('log_user_id','log_action','log_description','log_date','log_ip') VALUES ('". $userinfo['user_id'] ."','". addslashes($log_action) ."','". addslashes($log_desc) ."','". time() ."','". $NELTOOL['SERVER_VARS']['REMOTE_ADDR'] ."')";
+		$sql = "INSERT INTO ". NELDB_LOG_TABLE ." ('log_user_id','log_action','log_description','log_date','log_ip') VALUES ('". intval($userinfo['user_id']) ."','". $db->sql_escape_string($log_action) ."','". $db->sql_escape_string($log_desc) ."','". time() ."','". $db->sql_escape_string($NELTOOL['SERVER_VARS']['REMOTE_ADDR']) ."')";
 		$db->sql_query($sql);
 
 		return true;
@@ -81,7 +95,7 @@
 
 	       $i = $j = 0;
 
-	       while (@list($key,$value) = @each($input))
+	       foreach ($input as $key => $value)
 	       {
 	           if( !( isset( $chunks[$i] ) ) )
 	           {

@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2019-2022  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -455,6 +455,11 @@ NLMISC::CConfigFile &CMainFrame::getConfigFile()
 	CWorldEditorApp* wea = static_cast<CWorldEditorApp*>(theApp);
 
 	return wea->PluginConfig;
+}
+
+std::string CMainFrame::transformProjectPath(const std::string &path)
+{
+	return theApp.transformProjectPath(path);
 }
 
 void CMainFrame::onLogicChanged(const std::vector<NLLIGO::CPrimRegion*> &regions)
@@ -1289,7 +1294,7 @@ struct CViewerConfig
 		ShapePath = "./";
 		MapsPath = "./";
 		Bank = "bank.bank";
-		FontPath = "\\\\server\\code\\fonts\\arialuni.ttf";
+		FontPath = "R:\\graphics\\fonts\\noto_sans.ttf";
 		ZFar = 1000;
 		LandscapeTileNear = 50.0f;
 		LandscapeThreshold = 0.001f;
@@ -1370,10 +1375,10 @@ struct CViewerConfig
 			this->LandscapeThreshold = cvLandscapeThreshold.asFloat();
 
 			CConfigFile::CVar &cvBanksPath = cf.getVar("BanksPath");
-			this->BanksPath = cvBanksPath.asString();
+			this->BanksPath = theApp.transformProjectPath(cvBanksPath.asString());
 
 			CConfigFile::CVar &cvTilesPath = cf.getVar("TilesPath");
-			this->TilesPath = cvTilesPath.asString();
+			this->TilesPath = theApp.transformProjectPath(cvTilesPath.asString());
 
 			CConfigFile::CVar &cvUseDDS = cf.getVar("UseDDS");
 			this->UseDDS = cvUseDDS.asInt() ? true : false;
@@ -1385,16 +1390,16 @@ struct CViewerConfig
 			this->Bank = cvBank.asString();
 			
 			CConfigFile::CVar &cvZonesPath = cf.getVar("ZonesPath");
-			this->ZonesPath = cvZonesPath.asString();
+			this->ZonesPath = theApp.transformProjectPath(cvZonesPath.asString());
 
 			CConfigFile::CVar &cvIgPath = cf.getVar("IgPath");
-			this->IgPath = cvIgPath.asString();
+			this->IgPath = theApp.transformProjectPath(cvIgPath.asString());
 
 			CConfigFile::CVar &cvShapePath = cf.getVar("ShapePath");
-			this->ShapePath = cvShapePath.asString();
+			this->ShapePath = theApp.transformProjectPath(cvShapePath.asString());
 
 			CConfigFile::CVar &cvMapsPath = cf.getVar("MapsPath");
-			this->MapsPath = cvMapsPath.asString();
+			this->MapsPath = theApp.transformProjectPath(cvMapsPath.asString());
 
 			CConfigFile::CVar &cvHeightFieldName = cf.getVar("HeightFieldName");
 			this->HeightFieldName = cvHeightFieldName.asString();
@@ -3386,7 +3391,7 @@ void CMainFrame::OnHelpFinder()
 	}
 	else
 	{
-		openDoc((theApp.ExePath+"world_editor.html"));
+		openDoc((theApp.ProjectRoot.size() ? theApp.ProjectRoot + "code/ryzom/tools/leveldesign/install/" : theApp.ExePath) + "world_editor.html");
 	}
 }
 
@@ -3982,7 +3987,7 @@ void CMainFrame::getWindowCoordinates(NLMISC::CVector &vmin, NLMISC::CVector &vm
 
 void CMainFrame::OnHelpHistory() 
 {
-	string filename = theApp.ExePath+"history.txt";
+	string filename = (theApp.ProjectRoot.size() ? theApp.ProjectRoot + "code/ryzom/tools/leveldesign/install/" : theApp.ExePath) + "history.txt";
 	if (!openDoc(filename))
 	{
 		theApp.errorMessage ("Can't open the file %s", filename.c_str ());
@@ -4353,8 +4358,8 @@ void CMainFrame::OnMissionCompiler()
 		return;
 	}
 	
-	TCHAR path[MAX_PATH];
-	_tcscpy(path, nlUtf8ToTStr(var->asString()));
+	std::string spath = theApp.transformProjectPath(var->asString());
+	tstring path = utf8ToTStr(spath);
 
 	SHELLEXECUTEINFO ExecuteInfo;    
 	memset(&ExecuteInfo, 0, sizeof(ExecuteInfo));
@@ -4363,14 +4368,14 @@ void CMainFrame::OnMissionCompiler()
 	ExecuteInfo.fMask        = 0;
 	ExecuteInfo.hwnd         = 0;
 	ExecuteInfo.lpVerb       = _T("open");
-	ExecuteInfo.lpFile       = _T("mission_compiler_fe_r.exe");
+	ExecuteInfo.lpFile       = _T("ryzom_mission_compiler_fe.exe");
 	ExecuteInfo.lpParameters = 0;
-	ExecuteInfo.lpDirectory  = path;
+	ExecuteInfo.lpDirectory  = path.c_str();
 	ExecuteInfo.nShow        = SW_SHOW;
 	ExecuteInfo.hInstApp     = 0;
 
 	if(ShellExecuteEx(&ExecuteInfo) == FALSE)
-		errorMessage("File not found : mission_compiler_fe_r.exe !");
+		errorMessage("File not found : ryzom_mission_compiler_fe.exe !");
 }
 
 // ***************************************************************************

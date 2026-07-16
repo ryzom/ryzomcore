@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -67,14 +67,13 @@ CTcpSock::CTcpSock( SOCKET sock, const CInetAddress& remoteaddr ) :
 	CSock( sock, remoteaddr )
 {}
 
-
 /* Connection. You can reconnect a socket after being disconnected.
  * This method does not return a boolean, otherwise a programmer could ignore the result and no
  * exception would be thrown if connection fails :
  * - If addr is not valid, an exception ESocket is thrown
  * - If connect() fails for another reason, an exception ESocketConnectionFailed is thrown
  */
-void CTcpSock::connect( const CInetAddress& addr )
+void CTcpSock::connect( const CInetHost & addrs )
 {
 	// Create a new socket
 	if ( _Sock != INVALID_SOCKET )
@@ -91,7 +90,7 @@ void CTcpSock::connect( const CInetAddress& addr )
 	setKeepAlive(true);
 
 	// Connection
-	CSock::connect( addr );
+	CSock::connect( addrs );
 }
 
 

@@ -86,7 +86,7 @@
 	{
 		$result = sqlquery("SELECT view_row.name AS user_name, variable.name AS var_name, path, warning_bound, error_bound, alarm_order, view_row.filter as varfilter, view_table.filter as viewfilter, display, auto_display, view_row.vid AS vid ".
 								 "FROM variable, view_row, view_table ".
-								 "WHERE variable.command='variable' AND (view_table.uid='$uid' OR view_table.uid='$gid') AND view_table.tid='$tid' AND view_row.tid='$tid' AND variable.vid=view_row.vid ORDER BY view_row.ordering");
+								 "WHERE variable.command='variable' AND (view_table.uid='".intval($uid)."' OR view_table.uid='".intval($gid)."') AND view_table.tid='".intval($tid)."' AND view_row.tid='".intval($tid)."' AND variable.vid=view_row.vid ORDER BY view_row.ordering");
 
 		while ($result && ($arr=sqlfetch($result)))
 		{
@@ -153,7 +153,7 @@
 	
 	function vcmp($a, $b)
 	{
-		return ($a["_path_"] == $b["_path_"] ? 0 : $a["_path_"] < $b["_path_"] ? -1 : 1);
+		return ($a["_path_"] == $b["_path_"] ? 0 : ($a["_path_"] < $b["_path_"] ? -1 : 1));
 	}
 
 	function displayResult($result, $vardisp, $bounds, $privilege, $condensed=false, $autoDisplay=true)
@@ -930,7 +930,7 @@
 		{
 			$bloc = "";
 			$level = 0;
-			while ($i<strlen($query) && (($char=$query{$i})!='.' || $level!=0))
+			while ($i<strlen($query) && (($char=$query[$i])!='.' || $level!=0))
 			{
 				if ($char == '[')			++$level;
 				else if ($char == ']')	--$level;
@@ -949,7 +949,7 @@
 	{
 		$i=strlen($query)-1;
 		$level = 0;
-		while ($i>=0 && (($char=$query{$i})!='.' || $level!=0))
+		while ($i>=0 && (($char=$query[$i])!='.' || $level!=0))
 		{
 			if ($char == '[')			++$level;
 			else if ($char == ']')	--$level;
@@ -974,7 +974,7 @@
 	{
 		$i=0;
 		$level = 0;
-		while ($i<strlen($query) && (($char=$query{$i})!='.' || $level!=0))
+		while ($i<strlen($query) && (($char=$query[$i])!='.' || $level!=0))
 		{
 			if ($char == '[')			++$level;
 			else if ($char == ']')	--$level;
@@ -1003,7 +1003,7 @@
 
 	function factorizeForwardBloc($bloc)
 	{
-		if ($bloc{0} != '[')
+		if ($bloc[0] != '[')
 			return $bloc;
 
 		$queries = splitBloc($bloc);
@@ -1069,7 +1069,7 @@
 
 	function factorizeBackwardBloc($bloc)
 	{
-		if ($bloc{0} != '[')
+		if ($bloc[0] != '[')
 			return $bloc;
 
 		$queries = splitBloc($bloc);
@@ -1135,13 +1135,13 @@
 
 	function splitBloc($bloc)
 	{
-		if ($bloc{0} != '[')
+		if ($bloc[0] != '[')
 		{
 			$arr[] = $bloc;
 		}
 		else
 		{
-			if ($bloc{strlen($bloc)-1}!=']')
+			if ($bloc[strlen($bloc)-1]!=']')
 				echo "Error on bloc '$bloc', unexpected character after ']'<br>\n";
 
 			$i=1;
@@ -1149,7 +1149,7 @@
 			{
 				$alt = "";
 				$level = 0;
-				while ( $i<strlen($bloc)-1 && ( ($char=$bloc{$i}) != ','  ||  $level!=0 ) )
+				while ( $i<strlen($bloc)-1 && ( ($char=$bloc[$i]) != ','  ||  $level!=0 ) )
 				{
 					if ($char == '[')			++$level;
 					else if ($char == ']')	--$level;
@@ -1187,7 +1187,7 @@
 	function isAtom($atom)
 	{
 		for ($i=0; $i<strlen($atom); ++$i)
-			if ($atom{$i} == '.' || $atom{$i} == '[')
+			if ($atom[$i] == '.' || $atom[$i] == '[')
 				return false;
 		return true;
 	}

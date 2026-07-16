@@ -287,9 +287,9 @@ public:
 
 
 	REFLECT_EXPORT_START(CInterface3DShape, CInterfaceElement)
-		REFLECT_FLOAT("getBBoxSizeX", getBBoxSizeX, setPosX);
-		REFLECT_FLOAT("getBBoxSizeY", getBBoxSizeY, setPosX);
-		REFLECT_FLOAT("getBBoxSizeZ", getBBoxSizeZ, setPosX);
+		REFLECT_FLOAT ("getBBoxSizeX", getBBoxSizeX, setPosX);
+		REFLECT_FLOAT ("getBBoxSizeY", getBBoxSizeY, setPosX);
+		REFLECT_FLOAT ("getBBoxSizeZ", getBBoxSizeZ, setPosX);
 		REFLECT_FLOAT ("posx", getPosX, setPosX);
 		REFLECT_FLOAT ("posy", getPosY, setPosY);
 		REFLECT_FLOAT ("posz", getPosZ, setPosZ);

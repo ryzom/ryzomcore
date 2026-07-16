@@ -406,6 +406,30 @@
 		</parameter>
 		<parameter hardtext="uiTalkCmdMsg" type="%action_param_user" name="text"/>
 	</action>
+	<action name="talk_message" hardtext="uiTalkMem">
+		<parameter hardtext="uiTalkMemMsg" type="%action_param_constant" value="0">
+			<value value="00" hardtext="uiTalkMemMsg00"/>
+			<value value="01" hardtext="uiTalkMemMsg01"/>
+			<value value="02" hardtext="uiTalkMemMsg02"/>
+			<value value="03" hardtext="uiTalkMemMsg03"/>
+			<value value="04" hardtext="uiTalkMemMsg04"/>
+			<value value="05" hardtext="uiTalkMemMsg05"/>
+			<value value="06" hardtext="uiTalkMemMsg06"/>
+			<value value="07" hardtext="uiTalkMemMsg07"/>
+			<value value="08" hardtext="uiTalkMemMsg08"/>
+			<value value="09" hardtext="uiTalkMemMsg09"/>
+			<value value="10" hardtext="uiTalkMemMsg10"/>
+			<value value="11" hardtext="uiTalkMemMsg11"/>
+			<value value="12" hardtext="uiTalkMemMsg12"/>
+			<value value="13" hardtext="uiTalkMemMsg13"/>
+			<value value="14" hardtext="uiTalkMemMsg14"/>
+			<value value="15" hardtext="uiTalkMemMsg15"/>
+			<value value="16" hardtext="uiTalkMemMsg16"/>
+			<value value="17" hardtext="uiTalkMemMsg17"/>
+			<value value="18" hardtext="uiTalkMemMsg18"/>
+			<value value="19" hardtext="uiTalkMemMsg19"/>
+		</parameter>
+	</action>
 </action_category>
 
 <action_category name="view" hardtext="uiView" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm">

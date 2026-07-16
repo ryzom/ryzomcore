@@ -1,0 +1,308 @@
+name: Emscripten WebGL 2.0 Samples
+
+on:
+  push:
+    branches: [ "core4", "feature/*", "!feature/atys-core-merge" ]
+    paths-ignore:
+      - '.devcontainer/**'
+      - 'snowballs2/**'
+  pull_request:
+    branches: [ "core4" ]
+    paths-ignore:
+      - '.devcontainer/**'
+      - 'snowballs2/**'
+  workflow_dispatch:
+
+env:
+  EM_VERSION: 3.1.61
+  BUILD_TYPE: Release
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install ccache
+        run: sudo apt-get install -y ccache
+
+      - name: Cache ccache
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/ccache
+          key: ccache-emscripten-${{ env.EM_VERSION }}-${{ hashFiles('.github/workflows/emscripten-samples.yml') }}-${{ github.sha }}
+          restore-keys: ccache-emscripten-${{ env.EM_VERSION }}-${{ hashFiles('.github/workflows/emscripten-samples.yml') }}-
+
+      - name: Configure ccache
+        run: |
+          ccache --set-config=max_size=1G
+          ccache --set-config=compression=true
+          ccache -z
+
+      - name: Setup Emscripten
+        uses: mymindstorm/setup-emsdk@v16
+        with:
+          version: ${{ env.EM_VERSION }}
+          no-cache: true
+
+      - name: Checkout graphics assets (sparse)
+        run: |
+          git clone --filter=blob:none --sparse --depth=1 \
+            https://github.com/ryzom/ryzomcore_graphics.git ${{ github.workspace }}/../ryzomcore_graphics
+          cd ${{ github.workspace }}/../ryzomcore_graphics
+          git sparse-checkout set landscape/water
+
+      - name: Verify Emscripten
+        run: emcc --version
+
+      - name: Configure CMake
+        env:
+          EM_FROZEN_CACHE: ""
+        run: |
+          mkdir -p build
+          cd build
+          emcmake cmake .. \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+            -DWITH_PCH=OFF \
+            -DWITH_STATIC=ON \
+            -DWITH_STATIC_DRIVERS=ON \
+            -DWITH_DRIVER_OPENGL=OFF \
+            -DWITH_DRIVER_OPENGLES=OFF \
+            -DWITH_DRIVER_OPENGL3=OFF \
+            -DWITH_DRIVER_OPENGLES3=ON \
+            -DWITH_NEL_SAMPLES=ON \
+            -DWITH_NEL_TOOLS=OFF \
+            -DWITH_NEL_TESTS=OFF \
+            -DWITH_RYZOM=OFF \
+            -DWITH_RYZOM_CLIENT=OFF \
+            -DWITH_RYZOM_SERVER=OFF \
+            -DWITH_RYZOM_TOOLS=OFF \
+            -DWITH_NELNS=OFF \
+            -DWITH_SNOWBALLS=OFF \
+            -DWITH_GUI=OFF \
+            -DWITH_SOUND=OFF \
+            -DWITH_LOGIC=OFF \
+            -DWITH_PACS=OFF \
+            -DWITH_GEORGES=OFF \
+            -DWITH_LIGO=OFF \
+            -DWITH_NET=OFF \
+            -DWITH_WEB=OFF \
+            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
+
+      - name: Build samples
+        env:
+          EM_FROZEN_CACHE: ""
+        run: |
+          cd build
+          emmake make -j$(nproc) \
+            nl_sample_clip_plane \
+            nl_sample_nelvp \
+            nl_sample_planar_reflection \
+            nl_sample_ppl \
+            nl_sample_water \
+            nl_sample_font
+
+      - name: ccache stats
+        if: always()
+        run: ccache -s
+
+      - name: Prepare Pages artifact
+        run: |
+          mkdir -p pages
+          # Copy built sample files
+          for sample in clip_plane nelvp planar_reflection ppl water font; do
+            cp build/bin/nl_sample_${sample}.js pages/
+            cp build/bin/nl_sample_${sample}.wasm pages/
+            # Copy any embedded data files
+            if [ -f "build/bin/nl_sample_${sample}.data" ]; then
+              cp "build/bin/nl_sample_${sample}.data" pages/
+            fi
+          done
+          # Generate per-sample HTML host pages
+          for sample in clip_plane nelvp planar_reflection ppl water font; do
+            title=$(echo "$sample" | sed 's/_/ /g; s/\b\(.\)/\u\1/g')
+            cat > pages/nl_sample_${sample}.html << 'SAMPLEEOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <title>NeL Sample (WebGL 2.0)</title>
+            <style>
+              body {
+                margin: 0; background: #1a1a2e;
+                display: flex; justify-content: center; align-items: center; height: 100vh;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+              }
+              canvas { display: block; width: 800px; height: 600px; }
+              #loading {
+                position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                text-align: center; z-index: 10; color: #e0e0e0; min-width: 320px;
+              }
+              #loading-title { font-size: 1.5rem; color: #e94560; margin-bottom: 1.2rem; }
+              .bar-outer {
+                width: 300px; height: 6px; background: #0f3460; border-radius: 3px;
+                overflow: hidden; margin: 0 auto;
+              }
+              .bar-inner {
+                width: 0%; height: 100%; background: #e94560; border-radius: 3px;
+                transition: width 0.15s ease-out;
+              }
+              #task-bar .bar-inner { background: #0f7460; }
+              #global-label, #task-label {
+                font-size: 0.75rem; color: #666; margin-top: 0.2rem; margin-bottom: 0.6rem;
+              }
+              #loading-tasks {
+                text-align: left; display: inline-block;
+                font-size: 0.85rem; line-height: 1.6;
+                margin-top: 0.6rem;
+              }
+              .task { color: #555; }
+              .task.active { color: #a0a0b0; }
+              .task.done { color: #4a7; }
+              .task-icon { display: inline-block; width: 1.2em; text-align: center; }
+              .task-detail { color: #666; font-size: 0.8em; }
+            </style>
+          </head>
+          <body>
+            <div id="loading">
+              <div id="loading-title">NeL 3D</div>
+              <div id="global-bar" class="bar-outer"><div class="bar-inner"></div></div>
+              <div id="global-label"></div>
+              <div id="task-bar" class="bar-outer"><div class="bar-inner"></div></div>
+              <div id="task-label"></div>
+              <div id="loading-tasks"></div>
+            </div>
+            <canvas id="canvas" width="800" height="600" oncontextmenu="event.preventDefault()"></canvas>
+            <script>
+          (function() {
+            var globalBarEl = document.querySelector('#global-bar .bar-inner');
+            var globalLabelEl = document.getElementById('global-label');
+            var taskBarEl = document.querySelector('#task-bar .bar-inner');
+            var taskLabelEl = document.getElementById('task-label');
+            var tasksEl = document.getElementById('loading-tasks');
+            var loadEl = document.getElementById('loading');
+            var tasks = {}, taskOrder = [];
+            var tasksDone = 0;
+            var activeTask = null;
+            function setGlobalBar(f) { globalBarEl.style.width = Math.min(100, Math.round(f * 100)) + '%'; }
+            function setTaskBar(f) { taskBarEl.style.width = Math.min(100, Math.round(f * 100)) + '%'; }
+            function update() {
+              setGlobalBar(taskOrder.length > 0 ? tasksDone / taskOrder.length : 0);
+              if (activeTask) {
+                var f = activeTask.total > 0 ? activeTask.step / activeTask.total : 0;
+                setTaskBar(f);
+                taskLabelEl.textContent = activeTask.name + ' ' + activeTask.step + ' / ' + activeTask.total;
+              }
+              globalLabelEl.textContent = tasksDone + ' / ' + taskOrder.length;
+              var html = '';
+              for (var i = 0; i < taskOrder.length; i++) {
+                var t = tasks[taskOrder[i]];
+                var done = t.step >= t.total && t.total > 0;
+                var cls = done ? 'done' : (t.active ? 'active' : '');
+                var icon = done ? '\u2713' : (t.active ? '\u25B8' : '\u00B7');
+                html += '<div class="task ' + cls + '"><span class="task-icon">' + icon + '</span>' + t.name;
+                if (t.active && !done && t.total > 0)
+                  html += ' <span class="task-detail">' + t.step + ' / ' + t.total + '</span>';
+                html += '</div>';
+              }
+              tasksEl.innerHTML = html;
+            }
+            function checkTaskDone(t) {
+              if (t.total > 0 && t.step >= t.total && !t.counted) {
+                t.counted = true;
+                tasksDone++;
+              }
+            }
+            window.nlBeginTask = function(name, total) {
+              if (!tasks[name]) {
+                tasks[name] = { name: name, step: 0, total: 0, active: false, counted: false };
+                taskOrder.push(name);
+              }
+              tasks[name].total += total;
+              tasks[name].active = true;
+              activeTask = tasks[name];
+              setTaskBar(0);
+              update();
+            };
+            window.nlStepTask = function(name) {
+              if (!tasks[name]) return;
+              tasks[name].step++;
+              activeTask = tasks[name];
+              checkTaskDone(tasks[name]);
+              update();
+            };
+            window.nlLoadingComplete = function() { loadEl.style.display = 'none'; };
+            // Pre-register all known tasks so the full list is visible from the start
+            var knownTasks = ['Downloading', 'Compiling vertex shaders', 'Compiling pixel shaders', 'Linking shader programs'];
+            for (var i = 0; i < knownTasks.length; i++) {
+              tasks[knownTasks[i]] = { name: knownTasks[i], step: 0, total: 0, active: false, counted: false };
+              taskOrder.push(knownTasks[i]);
+            }
+            // WASM download: starts immediately
+            var wasmDone = false;
+            var wasmTask = tasks['Downloading'];
+            wasmTask.total = 100;
+            wasmTask.active = true;
+            activeTask = wasmTask;
+            update();
+            window.Module = {
+              canvas: document.getElementById('canvas'),
+              setStatus: function(text) {
+                if (wasmDone) return;
+                if (!text) {
+                  wasmDone = true;
+                  wasmTask.step = wasmTask.total;
+                  checkTaskDone(wasmTask);
+                  update();
+                  return;
+                }
+                var m = text.match(/\((\d+)\/(\d+)\)/);
+                if (m) {
+                  wasmTask.step = Math.round(100 * parseInt(m[1]) / parseInt(m[2]));
+                  update();
+                }
+              },
+              monitorRunDependencies: function(left) {
+                if (left === 0 && !wasmDone) {
+                  wasmDone = true;
+                  wasmTask.step = wasmTask.total;
+                  checkTaskDone(wasmTask);
+                  update();
+                }
+              }
+            };
+          })();
+            </script>
+          SAMPLEEOF
+            # Append the title and sample-specific script tag (needs shell variable expansion)
+            sed -i "s|<title>NeL Sample (WebGL 2.0)</title>|<title>NeL Sample - ${title} (WebGL 2.0)</title>|" pages/nl_sample_${sample}.html
+            echo "  <script src=\"nl_sample_${sample}.js\"></script>" >> pages/nl_sample_${sample}.html
+            echo "  </body>" >> pages/nl_sample_${sample}.html
+            echo "  </html>" >> pages/nl_sample_${sample}.html
+          done
+          # Generate index page
+          cp ${{ github.workspace }}/nel/samples/3d/index.html pages/index.html
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: pages
+
+  deploy:
+    needs: build
+    if: github.ref == 'refs/heads/core4' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

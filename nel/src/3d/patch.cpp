@@ -82,6 +82,9 @@ CPatch::CPatch()
 	NoiseRotation= 0;
 	// No smooth by default.
 	_CornerSmoothFlag= 0;
+	// Must be initialized: CZone::build() only masks the smooth bits in, and serial() writes the
+	// whole byte — an uninitialized value here leaks nondeterministic bits into built .zone files.
+	Flags= 0;
 
 	// MasterBlock never clipped.
 	MasterBlock.resetClip();

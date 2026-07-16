@@ -1,0 +1,1865 @@
+// NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
+// Copyright (C) 2010  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2014-2015  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#include "stdopengl3.h"
+
+#include "driver_opengl3.h"
+#include "nel/3d/texture_cube.h"
+#include "nel/3d/texture_offscreen.h"
+#include "nel/misc/rect.h"
+#include "nel/misc/file.h" // temp
+
+// Define this to force nearest filter (debug)
+// #define NEL_FORCE_NEAREST
+
+using	namespace NLMISC;
+using	namespace std;
+
+
+//#define NEL_DUMP_UPLOAD_TIME
+
+
+#ifdef NEL_DUMP_UPLOAD_TIME
+	#define NEL_MEASURE_UPLOAD_TIME_START NLMISC::TTicks startTick = CTime::getPerformanceTime();
+	#define NEL_MEASURE_UPLOAD_TIME_END NLMISC::TTicks endTick = CTime::getPerformanceTime(); \
+		nlinfo("3D: upload time = %.2f ms", (float) (1000 * (CTime::ticksToSecond(endTick) - CTime::ticksToSecond(startTick))));
+#else
+	#define NEL_MEASURE_UPLOAD_TIME_START
+	#define NEL_MEASURE_UPLOAD_TIME_END
+#endif
+
+namespace NL3D {
+namespace NLDRIVERGL3 {
+
+// ***************************************************************************
+CTextureDrvInfosGL3::CTextureDrvInfosGL3(IDriver *drv, ItTexDrvInfoPtrMap it, CDriverGL3 *drvGl, bool isRectangleTexture) : ITextureDrvInfos(drv, it)
+{
+	H_AUTO_OGL(CTextureDrvInfosGL3_CTextureDrvInfosGL3)
+	//nldebug("3D: CTextureDrvInfosGL3::ctor()");
+	// The id is auto created here.
+	glGenTextures(1,&ID);
+
+	Compressed = false;
+	MipMap = false;
+	TextureMemory = 0;
+
+	// Nb: at Driver dtor, all tex infos are deleted, so _Driver is always valid.
+	_Driver= drvGl;
+
+	TextureMode = isRectangleTexture?GL_TEXTURE_RECTANGLE:GL_TEXTURE_2D;
+
+	FBOId = 0;
+
+	InitFBO = false;
+	AttachDepthStencil = true;
+}
+// ***************************************************************************
+CTextureDrvInfosGL3::~CTextureDrvInfosGL3()
+{
+	H_AUTO_OGL(CTextureDrvInfosGL3_CTextureDrvInfosGLDtor)
+	// The id is auto deleted here.
+	glDeleteTextures(1,&ID);
+
+	// release profiling texture mem.
+	_Driver->_AllocatedTextureMemory-= TextureMemory;
+
+	// release in TextureUsed.
+	_Driver->_TextureUsed.erase (this);
+
+	if (InitFBO)
+	{
+		nglDeleteFramebuffers(1, &FBOId);
+	}
+}
+
+CDepthStencilFBO::CDepthStencilFBO(CDriverGL3 *driver, uint width, uint height)
+{
+	nldebug("3D: Init shared FBO");
+
+	m_Driver = driver;
+	Width = width;
+	Height = height;
+
+	// GL 3.3 core: always use packed depth-stencil.
+	// GL_RENDERBUFFER is a setup-only binding point: bind to allocate storage via
+	// nglRenderbufferStorage, then reference by ID in nglFramebufferRenderbuffer.
+	// It is never read or depended on during rendering, so not tracked in the state cache.
+	nglGenRenderbuffers(1, &DepthFBOId);
+	StencilFBOId = DepthFBOId;
+	nglBindRenderbuffer(GL_RENDERBUFFER, DepthFBOId);
+	nglRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+
+	nlassert(DepthFBOId);
+
+	driver->_DepthStencilFBOs.push_back(this);
+}
+
+CDepthStencilFBO::~CDepthStencilFBO()
+{
+	// driver remove
+	m_Driver->_DepthStencilFBOs.erase(std::find(m_Driver->_DepthStencilFBOs.begin(), m_Driver->_DepthStencilFBOs.end(), this));
+
+	if (DepthFBOId)
+	{
+		nldebug("3D: Release shared FBO");
+		nglDeleteRenderbuffers(1, &DepthFBOId);
+		DepthFBOId = 0;
+		StencilFBOId = 0;
+	}
+}
+
+// ***************************************************************************
+bool CTextureDrvInfosGL3::initFrameBufferObject(ITexture * tex)
+{
+	if (!InitFBO)
+	{
+		if (tex->isOffscreenTexture())
+		{
+			AttachDepthStencil = static_cast<CTextureOffscreen *>(tex)->needsDepthStencil();
+		}
+
+		// generate IDs
+		nglGenFramebuffers(1, &FBOId);
+
+		// initialize FBO
+		_Driver->_DriverGLStates.forceBindFramebuffer(FBOId);
+		nglFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, TextureMode, ID, 0);
+
+		// attach depth/stencil render to FBO
+		if (AttachDepthStencil)
+		{
+			for (std::vector<CDepthStencilFBO *>::iterator it(_Driver->_DepthStencilFBOs.begin()), end(_Driver->_DepthStencilFBOs.end()); it != end; ++it)
+			{
+				if ((*it)->Width == tex->getWidth() && (*it)->Height == tex->getHeight())
+				{
+					DepthStencilFBO = (*it);
+					break;
+				}
+			}
+
+			if (!DepthStencilFBO)
+			{
+				DepthStencilFBO = new CDepthStencilFBO(_Driver, tex->getWidth(), tex->getHeight());
+			}
+
+			// GL 3.3 core: use GL_DEPTH_STENCIL_ATTACHMENT for packed depth-stencil
+			nglFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
+				GL_RENDERBUFFER, DepthStencilFBO->DepthFBOId);
+		}
+
+		// check status
+		GLenum status;
+		status = (GLenum) nglCheckFramebufferStatus(GL_FRAMEBUFFER);
+
+		switch(status) {
+#ifdef GL_FRAMEBUFFER_COMPLETE
+			case GL_FRAMEBUFFER_COMPLETE:
+				InitFBO = true;
+				break;
+#endif
+#ifdef GL_FRAMEBUFFER_UNSUPPORTED
+			case GL_FRAMEBUFFER_UNSUPPORTED:
+				nlwarning("Unsupported framebuffer format");
+				break;
+#endif
+#ifdef GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT
+			case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+				nlwarning("Framebuffer incomplete attachment");
+				break;
+#endif
+#ifdef GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT
+			case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+				nlwarning("Framebuffer incomplete, missing attachment");
+				break;
+#endif
+#ifdef GL_FRAMEBUFFER_INCOMPLETE_DUPLICATE_ATTACHMENT
+			case GL_FRAMEBUFFER_INCOMPLETE_DUPLICATE_ATTACHMENT:
+				nlwarning("Framebuffer incomplete, duplicate attachment");
+				break;
+#endif
+#ifdef GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS
+			case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS:
+				nlwarning("Framebuffer incomplete, attached images must have same dimensions");
+				break;
+#endif
+#ifdef GL_FRAMEBUFFER_INCOMPLETE_FORMATS
+			case GL_FRAMEBUFFER_INCOMPLETE_FORMATS:
+				nlwarning("Framebuffer incomplete, attached images must have same format");
+				break;
+#endif
+#ifdef GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER
+			case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+				nlwarning("Framebuffer incomplete, missing draw buffer");
+				break;
+#endif
+#ifdef GL_FRAMEBUFFER_BINDING
+			case GL_FRAMEBUFFER_BINDING:
+				nlwarning("Framebuffer BINDING_EXT");
+				break;
+#endif
+#ifdef GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE
+			case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
+				nlwarning("Framebuffer incomplete multisample");
+				break;
+#endif
+			default:
+				nlwarning("Framebuffer incomplete status %d", (sint)status);
+		}
+
+		// clean up resources if allocation failed
+		if (!InitFBO)
+		{
+			nglDeleteFramebuffers(1, &FBOId);
+
+			if (AttachDepthStencil)
+			{
+				DepthStencilFBO = NULL;
+			}
+		}
+
+	}
+
+	return InitFBO;
+}
+
+// ***************************************************************************
+bool CTextureDrvInfosGL3::activeFrameBufferObject(ITexture * tex)
+{
+	if (tex)
+	{
+		if (initFrameBufferObject(tex))
+		{
+			_Driver->_DriverGLStates.forceBindTexture(TextureMode, 0);
+			_Driver->_DriverGLStates.forceBindFramebuffer(FBOId);
+		}
+		else
+			return false;
+	}
+	else
+	{
+		_Driver->_DriverGLStates.forceBindFramebuffer(0);
+	}
+
+	return true;
+}
+
+// ***************************************************************************
+// Get the glText mirror of an existing setuped texture.
+static inline CTextureDrvInfosGL3* getTextureGl(ITexture& tex)
+{
+	H_AUTO_OGL(getTextureGl)
+	CTextureDrvInfosGL3*	gltex;
+	gltex= (CTextureDrvInfosGL3*)(ITextureDrvInfos*)(tex.TextureDrvShare->DrvTexture);
+	return gltex;
+}
+
+// ***************************************************************************
+// Translation of TexFmt mode.
+GLint	CDriverGL3::getGlTextureFormat(ITexture& tex, bool &compressed)
+{
+	H_AUTO_OGL(CDriverGL3_getGlTextureFormat)
+	ITexture::TUploadFormat		texfmt= tex.getUploadFormat();
+
+	// If auto, retrieve the pixel format of the bitmap.
+	if (texfmt== ITexture::Auto)
+	{
+		switch(tex.getPixelFormat())
+		{
+			case CBitmap::RGBA:
+				if (_ForceDXTCCompression && tex.allowDegradation())
+					texfmt= ITexture::DXTC5;
+				else
+					texfmt= ITexture::RGBA8888;
+				break;
+			case CBitmap::DXTC1: texfmt= ITexture::DXTC1; break;
+			case CBitmap::DXTC1Alpha: texfmt= ITexture::DXTC1Alpha; break;
+			case CBitmap::DXTC3: texfmt= ITexture::DXTC3; break;
+			case CBitmap::DXTC5: texfmt= ITexture::DXTC5; break;
+			case CBitmap::Luminance: texfmt= ITexture::Luminance; break;
+			case CBitmap::Alpha: texfmt= ITexture::Alpha; break;
+			case CBitmap::AlphaLuminance: texfmt= ITexture::AlphaLuminance; break;
+			case CBitmap::DsDt: texfmt= ITexture::DsDt; break;
+			default: texfmt= ITexture::RGBA8888; break;
+		}
+	}
+
+	// Get gl tex format, try S3TC compressed ones.
+	if (_Extensions.EXTTextureCompressionS3TC)
+	{
+		compressed= true;
+		// Try Compressed ones.
+		switch(texfmt)
+		{
+#ifdef GL_COMPRESSED_RGB_S3TC_DXT1_EXT
+			case ITexture::DXTC1:		return GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
+#endif
+#ifdef GL_COMPRESSED_RGBA_S3TC_DXT1_EXT
+			case ITexture::DXTC1Alpha:	return GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+#endif
+#ifdef GL_COMPRESSED_RGBA_S3TC_DXT3_EXT
+			case ITexture::DXTC3:		return GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+#endif
+#ifdef GL_COMPRESSED_RGBA_S3TC_DXT5_EXT
+			case ITexture::DXTC5:		return GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+#endif
+			default: break;
+		}
+	}
+
+	// Get standard gl tex format.
+	compressed= false;
+	switch(texfmt)
+	{
+		case ITexture::RGBA8888: return GL_RGBA8;
+		case ITexture::RGBA4444: return GL_RGBA4;
+		case ITexture::RGBA5551: return GL_RGB5_A1;
+		case ITexture::RGB888: return GL_RGB8;
+		case ITexture::RGB565: return GL_RGB5;
+#ifdef USE_OPENGLES3
+		// WebGL 2.0: No texture swizzle support, so Alpha/Luminance textures
+		// must be uploaded as RGBA and converted on the CPU side.
+		case ITexture::Luminance: return GL_RGBA8;
+		case ITexture::Alpha: return GL_RGBA8;
+		case ITexture::AlphaLuminance: return GL_RGBA8;
+#else
+		case ITexture::Luminance: return GL_R8; // GL_LUMINANCE8;
+		case ITexture::Alpha: return GL_R8; // GL_ALPHA8;
+		case ITexture::AlphaLuminance: return GL_RG8; // GL_LUMINANCE8_ALPHA8;
+#endif
+		case ITexture::DsDt:
+			return GL_RG8_SNORM; // Signed normalized for du/dv bump map data
+		break;
+		default:
+		break;
+	}
+
+	return GL_RGBA8;
+}
+
+// ***************************************************************************
+static GLint	getGlSrcTextureFormat(ITexture &tex, GLint glfmt)
+{
+	H_AUTO_OGL(getGlSrcTextureFormat)
+
+	// Is destination format is alpha or lumiance ?
+	if ((glfmt==GL_R8)||(glfmt==GL_RG8)||(glfmt==GL_RG8_SNORM))
+	{
+		switch(tex.getPixelFormat())
+		{
+		case CBitmap::Alpha:	return GL_RED; // GL_ALPHA;
+		case CBitmap::AlphaLuminance:	return GL_RG; // GL_LUMINANCE_ALPHA;
+		case CBitmap::Luminance:	return GL_RED; // GL_LUMINANCE;
+		default: break;
+		}
+	}
+
+	if (glfmt == GL_RG8 || glfmt == GL_RG8_SNORM)
+		return GL_RG;
+
+	// Else, not a Src format for upload, or RGBA.
+	return GL_RGBA;
+}
+
+// ***************************************************************************
+static GLenum getGlSrcTextureComponentType(ITexture &tex, GLint texSrcFormat)
+{
+	H_AUTO_OGL(getGlSrcTextureComponentType);
+
+	if (tex.getPixelFormat() == CBitmap::DsDt)
+		return GL_BYTE;
+
+	return GL_UNSIGNED_BYTE;
+}
+
+// ***************************************************************************
+uint				CDriverGL3::computeMipMapMemoryUsage(uint w, uint h, GLint glfmt) const
+{
+	H_AUTO_OGL(CDriverGL3_computeMipMapMemoryUsage)
+	switch(glfmt)
+	{
+#ifdef GL_RGBA8
+	case GL_RGBA8:		return w*h* 4;
+#endif
+#ifdef GL_RGBA
+	case GL_RGBA:		return w*h* 4;
+#endif
+	// Well this is ugly, but simple :). GeForce 888 is stored as 32 bits.
+#ifdef GL_RGB8
+	case GL_RGB8:		return w*h* 4;
+#endif
+#ifdef GL_RGB
+	case GL_RGB:		return w*h* 4;
+#endif
+#ifdef GL_RGBA4
+	case GL_RGBA4:		return w*h* 2;
+#endif
+#ifdef GL_RGB5_A1
+	case GL_RGB5_A1:	return w*h* 2;
+#endif
+#ifdef GL_RGB5
+	case GL_RGB5:		return w*h* 2;
+#endif
+#ifdef GL_R8
+	case GL_R8:	return w*h* 1;
+#endif
+#ifdef GL_RED
+	case GL_RED:	return w*h* 1;
+#endif
+#ifdef GL_RG8
+	case GL_RG8:	return w*h* 2;
+#endif
+#ifdef GL_RG8_SNORM
+	case GL_RG8_SNORM:	return w*h* 2; // DsDt (EMBM) bump map format
+#endif
+#ifdef GL_RG
+	case GL_RG:	return w*h* 2;
+#endif
+#ifdef GL_COMPRESSED_RGB_S3TC_DXT1_EXT
+	case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:	return w*h /2;
+#endif
+#ifdef GL_COMPRESSED_RGBA_S3TC_DXT1_EXT
+	case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:	return w*h /2;
+#endif
+#ifdef GL_COMPRESSED_RGBA_S3TC_DXT3_EXT
+	case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:	return w*h* 1;
+#endif
+#ifdef GL_COMPRESSED_RGBA_S3TC_DXT5_EXT
+	case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:	return w*h* 1;
+#endif
+	}
+
+	// One format has not been coded.
+	nlstop;
+
+	/// ???
+	return w*h* 4;
+}
+
+// ***************************************************************************
+// Translation of Wrap mode.
+static inline GLenum	translateWrapToGl(ITexture::TWrapMode mode, const CGlExtensions	&extensions)
+{
+	H_AUTO_OGL(translateWrapToGl)
+	if (mode== ITexture::Repeat)
+		return GL_REPEAT;
+	
+	return GL_CLAMP_TO_EDGE;
+}
+
+// ***************************************************************************
+static inline GLenum	translateMagFilterToGl(CTextureDrvInfosGL3 *glText)
+{
+	H_AUTO_OGL(translateMagFilterToGl)
+#ifdef NEL_FORCE_NEAREST
+	return GL_NEAREST;
+#else // NEL_FORCE_NEAREST
+	switch(glText->MagFilter)
+	{
+		case ITexture::Linear: return GL_LINEAR;
+		case ITexture::Nearest: return GL_NEAREST;
+		default: break;
+	}
+
+	nlstop;
+	return GL_LINEAR;
+#endif // NEL_FORCE_NEAREST
+}
+
+
+// ***************************************************************************
+static inline GLenum	translateMinFilterToGl(CTextureDrvInfosGL3 *glText)
+{
+	H_AUTO_OGL(translateMinFilterToGl)
+#ifdef NEL_FORCE_NEAREST
+	return GL_NEAREST;
+#else // NEL_FORCE_NEAREST
+
+	if (glText->MipMap)
+	{
+		switch(glText->MinFilter)
+		{
+			case ITexture::NearestMipMapOff: return GL_NEAREST;
+			case ITexture::NearestMipMapNearest: return GL_NEAREST_MIPMAP_NEAREST;
+			case ITexture::NearestMipMapLinear: return GL_NEAREST_MIPMAP_LINEAR;
+			case ITexture::LinearMipMapOff: return GL_LINEAR;
+			case ITexture::LinearMipMapNearest: return GL_LINEAR_MIPMAP_NEAREST;
+			case ITexture::LinearMipMapLinear: return GL_LINEAR_MIPMAP_LINEAR;
+			default: break;
+		}
+	}
+	else
+	{
+		switch(glText->MinFilter)
+		{
+			case ITexture::NearestMipMapOff:
+			case ITexture::NearestMipMapNearest:
+			case ITexture::NearestMipMapLinear:
+				 return GL_NEAREST;
+			case ITexture::LinearMipMapOff:
+			case ITexture::LinearMipMapNearest:
+			case ITexture::LinearMipMapLinear:
+				 return GL_LINEAR;
+			default: break;
+		}
+	}
+
+	nlstop;
+	return GL_LINEAR;
+#endif // NEL_FORCE_NEAREST
+}
+
+// ***************************************************************************
+static inline bool		sameDXTCFormat(ITexture &tex, GLint glfmt)
+{
+	H_AUTO_OGL(sameDXTCFormat);
+
+#ifdef GL_COMPRESSED_RGB_S3TC_DXT1_EXT
+	if (glfmt==GL_COMPRESSED_RGB_S3TC_DXT1_EXT && tex.PixelFormat==CBitmap::DXTC1)
+		return true;
+#endif
+
+#ifdef GL_COMPRESSED_RGBA_S3TC_DXT1_EXT
+	if (glfmt==GL_COMPRESSED_RGBA_S3TC_DXT1_EXT && tex.PixelFormat==CBitmap::DXTC1Alpha)
+		return true;
+#endif
+
+#ifdef GL_COMPRESSED_RGBA_S3TC_DXT3_EXT
+	if (glfmt==GL_COMPRESSED_RGBA_S3TC_DXT3_EXT && tex.PixelFormat==CBitmap::DXTC3)
+		return true;
+#endif
+
+#ifdef GL_COMPRESSED_RGBA_S3TC_DXT5_EXT
+	if (glfmt==GL_COMPRESSED_RGBA_S3TC_DXT5_EXT && tex.PixelFormat==CBitmap::DXTC5)
+		return true;
+#endif
+
+	return false;
+}
+
+// ***************************************************************************
+static inline bool		isDXTCFormat(GLint glfmt)
+{
+	H_AUTO_OGL(isDXTCFormat);
+
+#ifdef GL_COMPRESSED_RGB_S3TC_DXT1_EXT
+	if (glfmt==GL_COMPRESSED_RGB_S3TC_DXT1_EXT)
+		return true;
+#endif
+
+#ifdef GL_COMPRESSED_RGBA_S3TC_DXT1_EXT
+	if (glfmt==GL_COMPRESSED_RGBA_S3TC_DXT1_EXT)
+		return true;
+#endif
+
+#ifdef GL_COMPRESSED_RGBA_S3TC_DXT3_EXT
+	if (glfmt==GL_COMPRESSED_RGBA_S3TC_DXT3_EXT)
+		return true;
+#endif
+
+#ifdef GL_COMPRESSED_RGBA_S3TC_DXT5_EXT
+	if (glfmt==GL_COMPRESSED_RGBA_S3TC_DXT5_EXT)
+		return true;
+#endif
+
+	return false;
+}
+
+// ***************************************************************************
+bool CDriverGL3::setupTexture (ITexture& tex)
+{
+	H_AUTO_OGL(setupTexture)
+	bool nTmp;
+	return setupTextureEx (tex, true, nTmp);
+}
+
+// ***************************************************************************
+#ifndef NL_DEBUG
+	inline
+#endif
+void CDriverGL3::bindTextureWithMode(ITexture &tex)
+{
+	CTextureDrvInfosGL3*	gltext;
+	gltext= getTextureGl(tex);
+	// system of "backup the previous binded texture" seems to not work with some drivers....
+	_DriverGLStates.activeTexture(0);
+	if (tex.isTextureCube())
+	{
+		// FIXME GL3 TEXTUREMODE _DriverGLStates.setTextureMode(CDriverGLStates3::TextureCubeMap);
+		// Bind this texture
+		_DriverGLStates.forceBindTexture(GL_TEXTURE_CUBE_MAP, gltext->ID);
+	}
+	else
+	{
+		// FIXME GL3 TEXTUREMODE CDriverGLStates3::TTextureMode textureMode= CDriverGLStates3::Texture2D;
+
+		// FIXME GL3 TEXTUREMODE if (gltext->TextureMode == GL_TEXTURE_RECTANGLE)
+		// FIXME GL3 TEXTUREMODE 	textureMode = CDriverGLStates3::TextureRect;
+
+		// FIXME GL3 TEXTUREMODE _DriverGLStates.setTextureMode(textureMode);
+		// Bind this texture
+		_DriverGLStates.forceBindTexture(gltext->TextureMode, gltext->ID);
+	}
+}
+
+// ***************************************************************************
+#ifndef NL_DEBUG
+	inline
+#endif
+void CDriverGL3::setupTextureBasicParameters(ITexture &tex)
+{
+	CTextureDrvInfosGL3*	gltext;
+	gltext = getTextureGl(tex);
+	// TODO: possible cache here, but beware, this is called just after texture creation as well, so these fields
+	// haven't ever been filled.
+	gltext->WrapS = tex.getWrapS();
+	gltext->WrapT = tex.getWrapT();
+	gltext->MagFilter = tex.getMagFilter();
+	gltext->MinFilter = tex.getMinFilter();
+	if (tex.isTextureCube())
+	{
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, translateWrapToGl(ITexture::Clamp, _Extensions));
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, translateWrapToGl(ITexture::Clamp, _Extensions));
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, translateWrapToGl(ITexture::Clamp, _Extensions));
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, translateMagFilterToGl(gltext));
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, translateMinFilterToGl(gltext));
+
+		if (_AnisotropicFilter > 1.f && gltext->MinFilter > ITexture::NearestMipMapLinear)
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_ANISOTROPY_EXT, _AnisotropicFilter);
+	}
+	else
+	{
+		glTexParameteri(gltext->TextureMode,GL_TEXTURE_WRAP_S, translateWrapToGl(gltext->WrapS, _Extensions));
+		glTexParameteri(gltext->TextureMode,GL_TEXTURE_WRAP_T, translateWrapToGl(gltext->WrapT, _Extensions));
+		glTexParameteri(gltext->TextureMode,GL_TEXTURE_MAG_FILTER, translateMagFilterToGl(gltext));
+		glTexParameteri(gltext->TextureMode,GL_TEXTURE_MIN_FILTER, translateMinFilterToGl(gltext));
+
+		if (_AnisotropicFilter > 1.f && gltext->MinFilter > ITexture::NearestMipMapLinear)
+			glTexParameteri(gltext->TextureMode, GL_TEXTURE_MAX_ANISOTROPY_EXT, _AnisotropicFilter);
+	}
+	switch (tex.getUploadFormat())
+	{
+		case ITexture::Luminance:
+		case ITexture::Alpha:
+		{
+#ifndef USE_OPENGLES3
+			// Desktop GL3.3: Use texture swizzle to replicate R channel to all RGBA
+			static const GLint swizzleMask[] = { GL_RED, GL_RED, GL_RED, GL_RED };
+			glTexParameteriv(gltext->TextureMode, GL_TEXTURE_SWIZZLE_RGBA, swizzleMask);
+#endif
+			break;
+		}
+		case ITexture::AlphaLuminance:
+		case ITexture::DsDt:
+		{
+#ifndef USE_OPENGLES3
+			static const GLint swizzleMask[] = { GL_RED, GL_GREEN, GL_RED, GL_GREEN };
+			glTexParameteriv(gltext->TextureMode, GL_TEXTURE_SWIZZLE_RGBA, swizzleMask);
+#endif
+			break;
+		}
+	}
+	//
+	tex.clearFilterOrWrapModeTouched();
+}
+
+// ***************************************************************************
+bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded, bool bMustRecreateSharedTexture)
+{
+	H_AUTO_OGL(setupTextureEx)
+	//nldebug("3D: CDriverGL3::setupTextureEx(%016p, %d, %d, %d)", &tex, bUpload, bAllUploaded, bMustRecreateSharedTexture);
+	bAllUploaded = false;
+
+	// 0. Create/Retrieve the driver texture.
+	//=======================================
+	bool mustCreate = false;
+	if (!tex.TextureDrvShare)
+	{
+		//nldebug("3D:   creating CTextureDrvShare()");
+		// insert into driver list. (so it is deleted when driver is deleted).
+		ItTexDrvSharePtrList it = _TexDrvShares.insert(_TexDrvShares.end(), (NL3D::CTextureDrvShare*)NULL);
+		// create and set iterator, for future deletion.
+		*it = tex.TextureDrvShare = new CTextureDrvShare(this, it, &tex);
+
+		// Must (re)-create the texture.
+		mustCreate = true;
+	}
+
+	// Does the texture has been touched ?
+	if ((!tex.touched()) && (!mustCreate))
+	{
+		// if wrap mode or filter mode is touched, update it here
+		if (tex.filterOrWrapModeTouched())
+		{
+			activateTexture(0, NULL); // unbind any previous texture
+			bindTextureWithMode(tex);
+			//
+			setupTextureBasicParameters(tex); // setup what has changed (will reset the touch flag)
+
+			// Disable texture 0
+			_CurrentTexture[0] = NULL;
+			_CurrentTextureInfoGL[0] = NULL;
+			// FIXME GL3 TEXTUREMODE _DriverGLStates.setTextureMode(CDriverGLStates3::TextureDisabled);
+			//
+		}
+		//
+		return true; // Do not do anything
+	}
+
+	// 1. If modified, may (re)load texture part or all of the texture.
+	//=================================================================
+
+	bool mustLoadAll = false;
+	bool mustLoadPart = false;
+
+	// To avoid any delete/new ptr problem, disable all texturing.
+	/* If an old texture is deleted, _CurrentTexture[*] and _CurrentTextureInfoGL[*] are invalid.
+		But this is grave only if a new texture is created, with the same pointer (bad luck).
+		Since an newly allocated texture always pass here before use, we are sure to avoid any problems.
+	*/
+	for (uint stage = 0; stage < std::min(_Extensions.MaxFragmentTextureImageUnits, (GLint)IDRV_PROGRAM_MAXSAMPLERS); ++stage)
+	{
+		activateTexture(stage, NULL);
+	}
+
+	// A. Share mgt.
+	//==============
+	if (tex.supportSharing())
+	{
+		// Try to get the shared texture.
+
+		// Create the shared Name.
+		std::string	name;
+		getTextureShareName (tex, name);
+
+		// Destructor of texture infos locks _SyncTexDrvInfos, so any existing pointers must be deleted outside the lock
+		NLMISC::CSmartPtr<ITextureDrvInfos> maybeDeleted;
+
+		// insert or get the texture.
+		{
+			CSynchronized<TTexDrvInfoPtrMap>::CAccessor access(&_SyncTexDrvInfos);
+			TTexDrvInfoPtrMap &rTexDrvInfos = access.value();
+
+			ItTexDrvInfoPtrMap	itTex;
+			itTex= rTexDrvInfos.find(name);
+
+			// texture not found?
+			if (itTex==rTexDrvInfos.end())
+			{
+				// insert into driver map. (so it is deleted when driver is deleted).
+				itTex= (rTexDrvInfos.insert(make_pair(name, (ITextureDrvInfos*)NULL))).first;
+				// keep old value, so it only gets deleted after we release the lock on _SyncTexDrvInfos
+				maybeDeleted = tex.TextureDrvShare->DrvTexture;
+				// create and set iterator, for future deletion.
+				itTex->second= tex.TextureDrvShare->DrvTexture = new CTextureDrvInfosGL3(this, itTex, this, isTextureRectangle(&tex));
+
+				// need to load ALL this texture.
+				mustLoadAll= true;
+			}
+			else
+			{
+				// keep old value, so it only gets deleted after we release the lock on _SyncTexDrvInfos
+				maybeDeleted = tex.TextureDrvShare->DrvTexture;
+				tex.TextureDrvShare->DrvTexture= itTex->second;
+
+				if (bMustRecreateSharedTexture)
+					// reload this shared texture (user request)
+					mustLoadAll= true;
+				else
+					// Do not need to reload this texture, even if the format/mipmap has changed, since we found this
+					// couple in the map.
+					mustLoadAll= false;
+			}
+		}
+		// Do not test if part of texture may need to be computed, because Rect invalidation is incompatible
+		// with texture sharing.
+	}
+	else
+	{
+		// If texture not already created.
+		if (!tex.TextureDrvShare->DrvTexture)
+		{
+			// Must create it. Create auto a GL id (in constructor).
+			// Do not insert into the map. This un-shared texture will be deleted at deletion of the texture.
+			// Inform ITextureDrvInfos by passing NULL _Driver.
+			tex.TextureDrvShare->DrvTexture = new CTextureDrvInfosGL3(NULL, ItTexDrvInfoPtrMap(), this, isTextureRectangle(&tex));
+
+			// need to load ALL this texture.
+			mustLoadAll= true;
+		}
+		else if (tex.isAllInvalidated())
+			mustLoadAll= true;
+		else if (tex.touched())
+			mustLoadPart= true;
+	}
+
+	// B. Setup texture.
+	//==================
+	if (mustLoadAll || mustLoadPart)
+	{
+		// system of "backup the previous binded texture" seems to not work with some drivers....
+		bindTextureWithMode(tex);
+
+		CTextureDrvInfosGL3*	gltext;
+		gltext= getTextureGl(tex);
+
+		// glPixelStorei controls how glTexImage2D/glTexSubImage2D unpack client memory.
+		// It is transient upload state, not rendering state: set before the upload call,
+		// reset to defaults immediately after. Not tracked in the state cache.
+		glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+
+		// a. Load All the texture case.
+		//==============================
+		if (mustLoadAll)
+		{
+			// profiling. sub old textre memory usage, and reset.
+			_AllocatedTextureMemory-= gltext->TextureMemory;
+			gltext->TextureMemory= 0;
+
+
+			if (tex.isTextureCube())
+			{
+				CTextureCube *pTC = NLMISC::safe_cast<CTextureCube *>(&tex);
+
+				// Regenerate all the texture.
+				tex.generate();
+
+				for (uint nText = 0; nText < 6; ++nText)
+				if (pTC->getTexture((CTextureCube::TFace)nText) != NULL)
+				{
+					ITexture *pTInTC = pTC->getTexture((CTextureCube::TFace)nText);
+
+					// In open GL, we have to flip the faces of the cube map
+					if (((CTextureCube::TFace)nText) == CTextureCube::positive_x)
+						pTInTC->flipH();
+					if (((CTextureCube::TFace)nText) == CTextureCube::negative_x)
+						pTInTC->flipH();
+					if (((CTextureCube::TFace)nText) == CTextureCube::positive_y)
+						pTInTC->flipH();
+					if (((CTextureCube::TFace)nText) == CTextureCube::negative_y)
+						pTInTC->flipH();
+					if (((CTextureCube::TFace)nText) == CTextureCube::positive_z)
+						pTInTC->flipV();
+					if (((CTextureCube::TFace)nText) == CTextureCube::negative_z)
+						pTInTC->flipV();
+
+					// Get the correct texture format from texture...
+					GLint	glfmt= getGlTextureFormat(*pTInTC, gltext->Compressed);
+					GLint	glSrcFmt= getGlSrcTextureFormat(*pTInTC, glfmt);
+					GLenum  glSrcType= getGlSrcTextureComponentType(*pTInTC,glSrcFmt);
+
+					sint	nMipMaps;
+					if (glSrcFmt==GL_RGBA && pTInTC->getPixelFormat()!=CBitmap::RGBA)
+						pTInTC->convertToType(CBitmap::RGBA);
+					if (tex.mipMapOn())
+					{
+						pTInTC->buildMipMaps();
+						nMipMaps= pTInTC->getMipMapCount();
+					}
+					else
+						nMipMaps= 1;
+
+					// MipMap upload?
+					gltext->MipMap= nMipMaps>1;
+
+					// Fill mipmaps.
+					for (sint i=0;i<nMipMaps;i++)
+					{
+						void	*ptr= pTInTC->getPixels(i).getPtr();
+						uint	w= pTInTC->getWidth(i);
+						uint	h= pTInTC->getHeight(i);
+						if (bUpload)
+						{
+							NEL_MEASURE_UPLOAD_TIME_START
+							glTexImage2D (NLCubeFaceToGLCubeFace[nText], i, glfmt, w, h, 0, glSrcFmt, glSrcType, ptr);
+							bAllUploaded = true;
+							NEL_MEASURE_UPLOAD_TIME_END
+						}
+						else
+						{
+							NEL_MEASURE_UPLOAD_TIME_START
+							glTexImage2D (NLCubeFaceToGLCubeFace[nText], i, glfmt, w, h, 0, glSrcFmt, glSrcType, NULL);
+							NEL_MEASURE_UPLOAD_TIME_END
+						}
+						// profiling: count TextureMemory usage.
+						gltext->TextureMemory+= computeMipMapMemoryUsage(w, h, glfmt);
+					}
+				}
+			}
+			else
+			{
+				// Regenerate all the texture.
+				tex.generate();
+
+				if (tex.getSize()>0)
+				{
+					// Get the correct texture format from texture...
+					GLint	glfmt= getGlTextureFormat(tex, gltext->Compressed);
+					GLint	glSrcFmt= getGlSrcTextureFormat(tex, glfmt);
+					GLenum  glSrcType= getGlSrcTextureComponentType(tex,glSrcFmt);
+
+					// DXTC: if same format, and same mipmapOn/Off, use glTexCompressedImage*.
+					// We cannot build the mipmaps if they are not here.
+					if (_Extensions.EXTTextureCompressionS3TC && sameDXTCFormat(tex, glfmt))
+					{
+						sint	nMipMaps = 1;
+
+						if (tex.mipMapOn())
+							nMipMaps= tex.getMipMapCount();
+
+						// MipMap upload?
+						gltext->MipMap= nMipMaps>1;
+
+						// Degradation in Size allowed only if DXTC texture are provided with mipmaps.
+						// Because use them to resize !!!
+						uint	decalMipMapResize= 0;
+						if (_ForceTextureResizePower>0 && tex.allowDegradation() && nMipMaps>1)
+						{
+							decalMipMapResize= min(_ForceTextureResizePower, (uint)(nMipMaps-1));
+						}
+
+						// Fill mipmaps.
+						for (sint i=decalMipMapResize;i<nMipMaps;i++)
+						{
+							void	*ptr= tex.getPixels(i).getPtr();
+							sint	size= tex.getPixels(i).size();
+							if (bUpload)
+							{
+								nglCompressedTexImage2D(GL_TEXTURE_2D, i-decalMipMapResize, glfmt,
+															tex.getWidth(i),tex.getHeight(i), 0, size, ptr);
+								bAllUploaded = true;
+							}
+							else
+							{
+								//glCompressedTexImage2DARB (GL_TEXTURE_2D, i-decalMipMapResize, glfmt,
+								//							tex.getWidth(i),tex.getHeight(i), 0, size, NULL);
+								NEL_MEASURE_UPLOAD_TIME_START
+
+								glTexImage2D (gltext->TextureMode, i-decalMipMapResize, glfmt, tex.getWidth(i), tex.getHeight(i),
+												0, glSrcFmt, glSrcType, NULL);
+								NEL_MEASURE_UPLOAD_TIME_END
+							}
+
+							// profiling: count TextureMemory usage.
+							gltext->TextureMemory+= tex.getPixels(i).size();
+						}
+					}
+					else
+					{
+						sint	nMipMaps;
+#ifdef USE_OPENGLES3
+						// WebGL 2.0: No texture swizzle. Convert Alpha/Luminance to RGBA
+						// using a temporary copy so the original texture data is preserved.
+						CBitmap::TType origFormat = tex.getPixelFormat();
+						bool needsConvert = (glSrcFmt == GL_RGBA && origFormat != CBitmap::RGBA);
+						CBitmap tmpTex;
+						if (needsConvert)
+						{
+							bUpload = true;
+							tmpTex = tex;
+							tmpTex.convertToType(CBitmap::RGBA);
+						}
+						CBitmap &uploadTex = needsConvert ? tmpTex : tex;
+#else
+						if (glSrcFmt==GL_RGBA && tex.getPixelFormat()!=CBitmap::RGBA)
+						{
+							bUpload = true; // Force all upload
+							tex.convertToType(CBitmap::RGBA);
+						}
+						CBitmap &uploadTex = tex;
+#endif
+
+						// Degradation in Size.
+						if (_ForceTextureResizePower>0 && tex.allowDegradation())
+						{
+							uint	w= uploadTex.getWidth(0) >> _ForceTextureResizePower;
+							uint	h= uploadTex.getHeight(0) >> _ForceTextureResizePower;
+							w= max(1U, w);
+							h= max(1U, h);
+							uploadTex.resample(w, h);
+						}
+
+						if (tex.mipMapOn())
+						{
+							uploadTex.buildMipMaps();
+							nMipMaps= uploadTex.getMipMapCount();
+						}
+						else
+							nMipMaps= 1;
+
+						// MipMap upload?
+						gltext->MipMap= nMipMaps>1;
+
+						// Fill mipmaps.
+						for (sint i=0;i<nMipMaps;i++)
+						{
+							void	*ptr= uploadTex.getPixels(i).getPtr();
+							uint	w= uploadTex.getWidth(i);
+							uint	h= uploadTex.getHeight(i);
+
+							if (bUpload)
+							{
+								NEL_MEASURE_UPLOAD_TIME_START
+								glTexImage2D (gltext->TextureMode, i, glfmt, w, h, 0,glSrcFmt, glSrcType, ptr);
+								NEL_MEASURE_UPLOAD_TIME_END
+								bAllUploaded = true;
+							}
+							else
+							{
+								NEL_MEASURE_UPLOAD_TIME_START
+								glTexImage2D (gltext->TextureMode, i, glfmt, w, h, 0,glSrcFmt, glSrcType, NULL);
+								NEL_MEASURE_UPLOAD_TIME_END
+							}
+							// profiling: count TextureMemory usage.
+							gltext->TextureMemory += computeMipMapMemoryUsage (w, h, glfmt);
+						}
+					}
+				}
+			}
+			//printf("%d,%d,%d\n", tex.getMipMapCount(), tex.getWidth(0), tex.getHeight(0));
+
+			// profiling. add new TextureMemory usage.
+			_AllocatedTextureMemory+= gltext->TextureMemory;
+		}
+		// b. Load part of the texture case.
+		//==================================
+		// Uses a PBO (Pixel Buffer Object) for async upload. Each rect is orphaned+mapped into
+		// the PBO, then glTexSubImage2D reads from the PBO asynchronously via DMA, avoiding
+		// pipeline stalls that occur with raw CPU pointer uploads.
+		// NOTE: WebGL 2.0 / GLES 3.0 does not support glMapBufferRange on GL_PIXEL_UNPACK_BUFFER,
+		// so we use direct glTexSubImage2D uploads instead.
+		else if (mustLoadPart && !gltext->Compressed)
+		{
+			// Regenerate wanted part of the texture.
+			tex.generate();
+
+			if (tex.getSize() > 0)
+			{
+				// Get the correct texture format from texture...
+				//===============================================
+				bool dummy;
+				GLint glfmt = getGlTextureFormat(tex, dummy);
+				GLint glSrcFmt = getGlSrcTextureFormat(tex, glfmt);
+				GLenum glSrcType = getGlSrcTextureComponentType(tex, glSrcFmt);
+
+				sint nMipMaps;
+#ifndef USE_OPENGLES3
+				if (glSrcFmt == GL_RGBA && tex.getPixelFormat() != CBitmap::RGBA)
+					tex.convertToType(CBitmap::RGBA);
+#endif
+				if (tex.mipMapOn())
+				{
+					bool hadMipMap = tex.getMipMapCount() > 1;
+					tex.buildMipMaps();
+					nMipMaps = tex.getMipMapCount();
+					if (!hadMipMap)
+						tex.releaseMipMaps();
+				}
+				else
+					nMipMaps = 1;
+
+#ifdef USE_OPENGLES3
+				// WebGL 2.0: No MapBufferRange on PBOs and no texture swizzle.
+				// For Alpha/Luminance textures, convert rect data to RGBA on the fly.
+				for (list<NLMISC::CRect>::iterator itRect = tex._ListInvalidRect.begin(); itRect != tex._ListInvalidRect.end(); itRect++)
+				{
+					CRect &rect = *itRect;
+					sint x0 = rect.X;
+					sint y0 = rect.Y;
+					sint x1 = rect.X + rect.Width;
+					sint y1 = rect.Y + rect.Height;
+
+					for (sint i = 0; i < nMipMaps; i++)
+					{
+						uint8 *ptr = (uint8 *)tex.getPixels(i).getPtr();
+						sint w = tex.getWidth(i);
+						sint h = tex.getHeight(i);
+						clamp(x0, 0, w);
+						clamp(y0, 0, h);
+						clamp(x1, x0, w);
+						clamp(y1, y0, h);
+
+						sint rectW = x1 - x0;
+						sint rectH = y1 - y0;
+						if (rectW <= 0 || rectH <= 0)
+							goto next_mipmap_gles;
+
+						if (bUpload)
+						{
+							sint pixelSize = (sint)(tex.getPixels(i).size() / (w * h));
+
+							// Check if we need to convert Alpha/Luminance to RGBA
+							if (pixelSize == 1 && glSrcFmt == GL_RGBA)
+							{
+								// Convert rect data from Alpha (1 byte) to RGBA (4 bytes) in temp buffer
+								bool isAlpha = (tex.getUploadFormat() == ITexture::Alpha);
+								std::vector<uint8> tmpBuf(rectW * rectH * 4);
+								for (sint row = 0; row < rectH; ++row)
+								{
+									uint8 *src = ptr + (y0 + row) * w + x0;
+									uint8 *dst = &tmpBuf[row * rectW * 4];
+									for (sint col = 0; col < rectW; ++col)
+									{
+										if (isAlpha)
+										{
+											// Alpha: R=255, G=255, B=255, A=alpha_value
+											dst[0] = 255;
+											dst[1] = 255;
+											dst[2] = 255;
+											dst[3] = src[col];
+										}
+										else
+										{
+											// Luminance: R=lum, G=lum, B=lum, A=255
+											dst[0] = src[col];
+											dst[1] = src[col];
+											dst[2] = src[col];
+											dst[3] = 255;
+										}
+										dst += 4;
+									}
+								}
+								glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+								glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
+								glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
+								glTexSubImage2D(GL_TEXTURE_2D, i, x0, y0, rectW, rectH, GL_RGBA, GL_UNSIGNED_BYTE, &tmpBuf[0]);
+							}
+							else if (pixelSize == 2 && glSrcFmt == GL_RGBA)
+							{
+								// AlphaLuminance: convert 2 bytes to RGBA
+								std::vector<uint8> tmpBuf(rectW * rectH * 4);
+								for (sint row = 0; row < rectH; ++row)
+								{
+									uint8 *src = ptr + ((y0 + row) * w + x0) * 2;
+									uint8 *dst = &tmpBuf[row * rectW * 4];
+									for (sint col = 0; col < rectW; ++col)
+									{
+										dst[0] = src[0]; // lum
+										dst[1] = src[0]; // lum
+										dst[2] = src[0]; // lum
+										dst[3] = src[1]; // alpha
+										src += 2;
+										dst += 4;
+									}
+								}
+								glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+								glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
+								glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
+								glTexSubImage2D(GL_TEXTURE_2D, i, x0, y0, rectW, rectH, GL_RGBA, GL_UNSIGNED_BYTE, &tmpBuf[0]);
+							}
+							else
+							{
+								// Standard format: upload directly
+								glPixelStorei(GL_UNPACK_ROW_LENGTH, w);
+								glPixelStorei(GL_UNPACK_SKIP_ROWS, y0);
+								glPixelStorei(GL_UNPACK_SKIP_PIXELS, x0);
+								glTexSubImage2D(GL_TEXTURE_2D, i, x0, y0, rectW, rectH, glSrcFmt, glSrcType, ptr);
+							}
+						}
+
+					next_mipmap_gles:
+						x0 = x0 / 2;
+						y0 = y0 / 2;
+						x1 = (x1 + 1) / 2;
+						y1 = (y1 + 1) / 2;
+					}
+				}
+				glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+				glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
+				glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
+#else
+				// Bind PBO for async upload
+				_DriverGLStates.forceBindPixelUnpackBuffer(_PixelUploadPBO);
+
+				// For all rect, update the texture/mipmap.
+				//===============================================
+				list<NLMISC::CRect>::iterator itRect;
+				for (itRect = tex._ListInvalidRect.begin(); itRect != tex._ListInvalidRect.end(); itRect++)
+				{
+					CRect &rect = *itRect;
+					sint x0 = rect.X;
+					sint y0 = rect.Y;
+					sint x1 = rect.X + rect.Width;
+					sint y1 = rect.Y + rect.Height;
+
+					// Fill mipmaps.
+					for (sint i = 0; i < nMipMaps; i++)
+					{
+						void *ptr = tex.getPixels(i).getPtr();
+						sint w = tex.getWidth(i);
+						sint h = tex.getHeight(i);
+						clamp(x0, 0, w);
+						clamp(y0, 0, h);
+						clamp(x1, x0, w);
+						clamp(y1, y0, h);
+
+						sint rectW = x1 - x0;
+						sint rectH = y1 - y0;
+						if (rectW <= 0 || rectH <= 0)
+							goto next_mipmap;
+
+						if (bUpload)
+						{
+							sint pixelSize = (sint)(tex.getPixels(i).size() / (w * h));
+							sint rectBytes = rectW * rectH * pixelSize;
+
+							// Orphan PBO (driver allocates fresh storage, no sync needed)
+							nglBufferData(GL_PIXEL_UNPACK_BUFFER, rectBytes, NULL, GL_STREAM_DRAW);
+
+							// Map and copy rect rows into packed PBO
+							void *pboPtr = nglMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, rectBytes,
+								GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+							if (pboPtr)
+							{
+								uint8 *src = (uint8 *)ptr + y0 * w * pixelSize + x0 * pixelSize;
+								sint srcStride = w * pixelSize;
+								sint dstStride = rectW * pixelSize;
+								for (sint row = 0; row < rectH; ++row)
+									memcpy((uint8 *)pboPtr + row * dstStride, src + row * srcStride, dstStride);
+								nglUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+							}
+
+							// Async upload from PBO (data is packed, no row padding).
+						// Transient upload state — see note in setupTexture().
+							glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+							glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
+							glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
+							glTexSubImage2D(GL_TEXTURE_2D, i, x0, y0, rectW, rectH, glSrcFmt, glSrcType, NULL);
+						}
+
+					next_mipmap:
+						// Next mipmap!!
+						// floor .
+						x0 = x0 / 2;
+						y0 = y0 / 2;
+						// ceil.
+						x1 = (x1 + 1) / 2;
+						y1 = (y1 + 1) / 2;
+					}
+				}
+
+				// Unbind PBO, reset transient pixel store state
+				_DriverGLStates.forceBindPixelUnpackBuffer(0);
+				glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+				glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
+				glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
+#endif
+			}
+		}
+
+		// Release, if wanted.
+		if (tex.getReleasable())
+			tex.release();
+
+		// Basic parameters.
+		//==================
+		setupTextureBasicParameters(tex);
+
+		// Disable texture 0
+		_CurrentTexture[0]= NULL;
+		_CurrentTextureInfoGL[0]= NULL;
+		// FIXME GL3 TEXTUREMODE _DriverGLStates.setTextureMode(CDriverGLStates3::TextureDisabled);
+	}
+
+	// The texture is correctly setuped.
+	tex.clearTouched();
+	return true;
+}
+
+// ***************************************************************************
+bool CDriverGL3::uploadTexture (ITexture& tex, CRect& rect, uint8 nNumMipMap)
+{
+	H_AUTO_OGL(uploadTexture)
+	if (tex.TextureDrvShare == NULL)
+		return false; // Texture not created
+	if (tex.TextureDrvShare->DrvTexture == NULL)
+		return false; // Texture not created
+	if (tex.isTextureCube())
+		return false;
+
+	nlassert(nNumMipMap<(uint8)tex.getMipMapCount());
+
+	// validate rect.
+	sint x0 = rect.X;
+	sint y0 = rect.Y;
+	sint x1 = rect.X+rect.Width;
+	sint y1 = rect.Y+rect.Height;
+	sint w = tex.getWidth (nNumMipMap);
+	sint h = tex.getHeight (nNumMipMap);
+	clamp (x0, 0, w);
+	clamp (y0, 0, h);
+	clamp (x1, x0, w);
+	clamp (y1, y0, h);
+
+	// bind the texture to upload
+	CTextureDrvInfosGL3*	gltext;
+	gltext = getTextureGl (tex);
+
+	// system of "backup the previous binded texture" seems to not work with some drivers....
+	_DriverGLStates.activeTexture (0);
+	// FIXME GL3 TEXTUREMODE CDriverGLStates3::TTextureMode textureMode= CDriverGLStates3::Texture2D;
+
+	// FIXME GL3 TEXTUREMODE if (gltext->TextureMode == GL_TEXTURE_RECTANGLE)
+	// FIXME GL3 TEXTUREMODE 	textureMode = CDriverGLStates3::TextureRect;
+
+	// FIXME GL3 TEXTUREMODE _DriverGLStates.setTextureMode (textureMode);
+	// Bind this texture, for reload...
+	_DriverGLStates.forceBindTexture(gltext->TextureMode, gltext->ID);
+
+	// Transient upload state, not rendering state — see note in setupTexture().
+	glPixelStorei (GL_UNPACK_ALIGNMENT, 1);
+
+	bool dummy;
+	GLint glfmt = getGlTextureFormat (tex, dummy);
+	GLint glSrcFmt = getGlSrcTextureFormat (tex, glfmt);
+	GLenum  glSrcType= getGlSrcTextureComponentType(tex,glSrcFmt);
+
+	// If DXTC format
+	if (_Extensions.EXTTextureCompressionS3TC && sameDXTCFormat(tex, glfmt))
+	{
+
+		sint nUploadMipMaps;
+		if (tex.mipMapOn())
+			nUploadMipMaps = tex.getMipMapCount();
+		else
+			nUploadMipMaps = 1;
+
+		uint decalMipMapResize = 0;
+		if (_ForceTextureResizePower>0 && tex.allowDegradation() && nUploadMipMaps>1)
+		{
+			decalMipMapResize = min(_ForceTextureResizePower, (uint)(nUploadMipMaps-1));
+		}
+
+		// Compute src compressed size and location
+		sint imageSize = (x1-x0)*(y1-y0);
+		void *ptr = tex.getPixels(nNumMipMap).getPtr();
+
+		// If DXTC1 or DXTC1A, then 4 bits/texel else 8 bits/texel
+		if (glfmt == GL_COMPRESSED_RGB_S3TC_DXT1_EXT || glfmt == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT)
+		{
+			imageSize /= 2;
+			ptr = (uint8*)ptr + y0*w/2 + x0/2;
+		}
+		else
+		{
+			ptr = (uint8*)ptr + y0*w + x0;
+		}
+
+		// Upload
+
+		if (decalMipMapResize > nNumMipMap)
+		{
+			_CurrentTexture[0]= NULL;
+			_CurrentTextureInfoGL[0]= NULL;
+			// FIXME GL3 TEXTUREMODE _DriverGLStates.setTextureMode (CDriverGLStates3::TextureDisabled);
+			return false;
+		}
+
+		nlassert (((x0&3) == 0) && ((y0&3) == 0));
+		if ((w>=4) && (h>=4))
+		{
+			nglCompressedTexSubImage2D(
+				GL_TEXTURE_2D, nNumMipMap-decalMipMapResize,
+				x0, y0, (x1-x0), (y1-y0), glfmt, imageSize, ptr);
+		}
+		else
+		{
+			// The CompressedTexSubImage2DARB function do not work properly if width or height
+			// of the mipmap is less than 4 pixel so we use the other form. (its not really time critical
+			// to upload 16 bytes so we can do it twice if texture is cut)
+			imageSize = tex.getPixels(nNumMipMap).size();
+			nglCompressedTexImage2D(
+				GL_TEXTURE_2D, nNumMipMap-decalMipMapResize,
+										glfmt, w, h, 0, imageSize, ptr);
+		}
+	}
+	else
+	{
+		// glSrcFmt and ITexture format must be identical
+		nlassert (glSrcFmt!=GL_RGBA || tex.getPixelFormat()==CBitmap::RGBA);
+
+		void	*ptr= tex.getPixels(nNumMipMap).getPtr();
+
+		// Transient upload state — see note in setupTexture().
+		glPixelStorei (GL_UNPACK_ROW_LENGTH, w);
+		glPixelStorei (GL_UNPACK_SKIP_ROWS, y0);
+		glPixelStorei (GL_UNPACK_SKIP_PIXELS, x0);
+		glTexSubImage2D (GL_TEXTURE_2D, nNumMipMap, x0, y0, x1-x0, y1-y0, glSrcFmt,glSrcType, ptr);
+
+		// Reset transient pixel store state
+		glPixelStorei (GL_UNPACK_ROW_LENGTH, 0);
+		glPixelStorei (GL_UNPACK_SKIP_ROWS, 0);
+		glPixelStorei (GL_UNPACK_SKIP_PIXELS, 0);
+	}
+
+	// Disable texture 0
+	_CurrentTexture[0]= NULL;
+	_CurrentTextureInfoGL[0]= NULL;
+	// FIXME GL3 TEXTUREMODE _DriverGLStates.setTextureMode (CDriverGLStates3::TextureDisabled);
+
+	return true;
+}
+
+// ***************************************************************************
+bool CDriverGL3::uploadTextureCube (ITexture& tex, CRect& /* rect */, uint8 /* nNumMipMap */, uint8 /* nNumFace */)
+{
+	H_AUTO_OGL(uploadTextureCube)
+	if (tex.TextureDrvShare == NULL)
+		return false; // Texture not created
+	if (!tex.isTextureCube())
+		return false;
+
+	return true;
+}
+
+// ***************************************************************************
+bool CDriverGL3::activateTexture(uint stage, ITexture *tex)
+{
+	H_AUTO_OGL(activateTexture)
+	if (_CurrentTexture[stage] != tex)
+	{
+		_DriverGLStates.activeTexture(stage);
+		if (tex && tex->TextureDrvShare)
+		{
+			// get the drv info. should be not NULL.
+			CTextureDrvInfosGL3 *gltext;
+			gltext = getTextureGl(*tex);
+
+			// Profile, log the use of this texture
+			//=========================================
+			if (_SumTextureMemoryUsed)
+			{
+				// Insert the pointer of this texture
+				_TextureUsed.insert (gltext);
+			}
+
+			if (tex->isTextureCube())
+			{
+				// setup texture mode, after activeTexture()
+				// FIXME GL3 TEXTUREMODE _DriverGLStates.setTextureMode(CDriverGLStates3::TextureCubeMap);
+
+				// Activate texturing...
+				//======================
+
+				// If the shared texture is the same than before, no op.
+				if (_CurrentTextureInfoGL[stage] != gltext)
+				{
+					// Cache setup.
+					_CurrentTextureInfoGL[stage] = gltext;
+
+					// setup this texture
+					_DriverGLStates.forceBindTexture(GL_TEXTURE_CUBE_MAP, gltext->ID);
+
+					// Change parameters of texture, if necessary.
+					//============================================
+					if (gltext->MagFilter!= tex->getMagFilter())
+					{
+						gltext->MagFilter= tex->getMagFilter();
+						glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MAG_FILTER, translateMagFilterToGl(gltext));
+					}
+					if (gltext->MinFilter!= tex->getMinFilter())
+					{
+						gltext->MinFilter= tex->getMinFilter();
+						glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MIN_FILTER, translateMinFilterToGl(gltext));
+					}
+				}
+			}
+			else
+			{
+				// setup texture mode, after activeTexture()
+				// FIXME GL3 TEXTUREMODE CDriverGLStates3::TTextureMode textureMode= CDriverGLStates3::Texture2D;
+				// FIXME GL3 TEXTUREMODE if (gltext->TextureMode == GL_TEXTURE_RECTANGLE)
+				// FIXME GL3 TEXTUREMODE 	textureMode = CDriverGLStates3::TextureRect;
+				// FIXME GL3 TEXTUREMODE _DriverGLStates.setTextureMode(/*CDriverGLStates3::Texture2D*/textureMode);
+
+				// Activate texture...
+				//======================
+
+				// If the shared texture is the same than before, no op.
+				if (_CurrentTextureInfoGL[stage] != gltext)
+				{
+					// Cache setup.
+					_CurrentTextureInfoGL[stage]= gltext;
+
+					// setup this texture
+					_DriverGLStates.forceBindTexture(gltext->TextureMode, gltext->ID);
+
+
+					// Change parameters of texture, if necessary.
+					//============================================
+					if (gltext->WrapS!= tex->getWrapS())
+					{
+						gltext->WrapS= tex->getWrapS();
+						glTexParameteri(gltext->TextureMode,GL_TEXTURE_WRAP_S, translateWrapToGl(gltext->WrapS, _Extensions));
+					}
+					if (gltext->WrapT!= tex->getWrapT())
+					{
+						gltext->WrapT= tex->getWrapT();
+						glTexParameteri(gltext->TextureMode,GL_TEXTURE_WRAP_T, translateWrapToGl(gltext->WrapT, _Extensions));
+					}
+					if (gltext->MagFilter!= tex->getMagFilter())
+					{
+						gltext->MagFilter= tex->getMagFilter();
+						glTexParameteri(gltext->TextureMode,GL_TEXTURE_MAG_FILTER, translateMagFilterToGl(gltext));
+					}
+					if (gltext->MinFilter!= tex->getMinFilter())
+					{
+						gltext->MinFilter= tex->getMinFilter();
+						glTexParameteri(gltext->TextureMode,GL_TEXTURE_MIN_FILTER, translateMinFilterToGl(gltext));
+					}
+				}
+			}
+		}
+		else
+		{
+			// Force no texturing for this stage. Deliberately cache-only:
+			// the GL binding is left in place (deferred state; avoids bind
+			// churn when materials alternate stage counts, and direct-bound
+			// textures such as shadow maps must survive material stage
+			// disables). The WebGL rendering-feedback-loop invariant (an
+			// FBO-attached texture must not stay bound to a sampler unit)
+			// is established in setRenderTarget, which unbinds all units
+			// through the GL states cache when a render target is bound.
+			_CurrentTextureInfoGL[stage] = NULL;
+			// setup texture mode, after activeTexture()
+			// FIXME GL3 TEXTUREMODE _DriverGLStates.setTextureMode(CDriverGLStates3::TextureDisabled);
+
+			/*if (_Extensions.ATITextureEnvCombine3)
+			{
+				// very strange bug with ATI cards : when a texture is set to NULL at a stage, the stage is still active sometimes...
+				activateTexEnvMode(stage, _TexEnvReplace); // set the whole stage to replace fix the problem
+			}*/
+		}
+
+		_CurrentTexture[stage]= tex;
+	}
+
+	return true;
+}
+
+
+// This maps the CMaterial::TTexOperator
+static	const	GLenum	OperatorLUT[9]= { GL_REPLACE, GL_MODULATE, GL_ADD, GL_ADD_SIGNED_EXT, GL_INTERPOLATE_EXT, GL_INTERPOLATE_EXT, GL_INTERPOLATE_EXT, GL_INTERPOLATE_EXT, GL_BUMP_ENVMAP_ATI };
+
+// This maps the CMaterial::TTexSource
+static	const	GLenum	SourceLUT[4]= { GL_TEXTURE, GL_PREVIOUS_EXT, GL_PRIMARY_COLOR_EXT, GL_CONSTANT_EXT };
+
+// This maps the CMaterial::TTexOperand
+static	const	GLenum	OperandLUT[4]= { GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA };
+
+// This maps the CMaterial::TTexOperator, used for openGL Arg2 setup.
+static	const	GLenum	InterpolateSrcLUT[8]= { GL_TEXTURE, GL_TEXTURE, GL_TEXTURE, GL_TEXTURE, GL_TEXTURE, GL_PREVIOUS_EXT, GL_PRIMARY_COLOR_EXT, GL_CONSTANT_EXT };
+/*
+// ***************************************************************************
+void		CDriverGL3::forceActivateTexEnvMode(uint stage, const CMaterial::CTexEnv  &env)
+{
+	H_AUTO_OGL(forceActivateTexEnvMode)
+	// cache mgt.
+	_CurrentTexEnv[stage].EnvPacked= env.EnvPacked;
+	// Disable Special tex env f().
+	//_CurrentTexEnvSpecial[stage]= TexEnvSpecialDisabled;
+}
+*//*
+// ***************************************************************************
+void		CDriverGL3::activateTexEnvColor(uint stage, NLMISC::CRGBA col)
+{
+	H_AUTO_OGL(CDriverGL3_activateTexEnvColor)
+	if (col != _CurrentTexEnv[stage].ConstantColor)
+	{
+		forceActivateTexEnvColor(stage, col);
+	}
+}*/
+/*
+// ***************************************************************************
+void		CDriverGL3::activateTexEnvMode(uint stage, const CMaterial::CTexEnv  &env)
+{
+	H_AUTO_OGL(CDriverGL3_activateTexEnvMode)
+	// If a special Texture environnement is setuped, or if not the same normal texture environnement,
+	// must setup a new normal Texture environnement.
+	if (_CurrentTexEnvSpecial[stage] != TexEnvSpecialDisabled || _CurrentTexEnv[stage].EnvPacked!= env.EnvPacked)
+	{
+		forceActivateTexEnvMode(stage, env);
+	}
+}*/
+
+/*
+// ***************************************************************************
+void		CDriverGL3::activateTexEnvColor(uint stage, const CMaterial::CTexEnv  &env)
+{
+	H_AUTO_OGL(CDriverGL3_activateTexEnvColor)
+	if (_CurrentTexEnv[stage].ConstantColor!= env.ConstantColor)
+	{
+		forceActivateTexEnvColor(stage, env);
+	}
+}
+*/
+
+// ***************************************************************************
+void		CDriverGL3::forceDXTCCompression(bool dxtcComp)
+{
+	H_AUTO_OGL(CDriverGL3_forceDXTCCompression)
+	_ForceDXTCCompression= dxtcComp;
+}
+
+// ***************************************************************************
+void		CDriverGL3::setAnisotropicFilter(sint filtering)
+{
+	H_AUTO_OGL(CDriverGL3_setAnisotropicFiltering);
+
+	if (!_Extensions.EXTTextureFilterAnisotropic) return;
+
+	if (filtering < 0 || filtering > _Extensions.EXTTextureFilterAnisotropicMaximum)
+	{
+		// set maximum value for anisotropic filter
+		_AnisotropicFilter = _Extensions.EXTTextureFilterAnisotropicMaximum;
+	}
+	else
+	{
+		// set specified value for anisotropic filter
+		_AnisotropicFilter = filtering;
+	}
+}
+
+// ***************************************************************************
+uint		CDriverGL3::getAnisotropicFilter() const
+{
+	H_AUTO_OGL(CDriverGL3_getAnisotropicFilter);
+
+	return (uint)_AnisotropicFilter;
+}
+
+// ***************************************************************************
+uint		CDriverGL3::getAnisotropicFilterMaximum() const
+{
+	H_AUTO_OGL(CDriverGL3_getAnisotropicFilterMaximum);
+
+	return (uint)_Extensions.EXTTextureFilterAnisotropicMaximum;
+}
+
+// ***************************************************************************
+void		CDriverGL3::forceTextureResize(uint divisor)
+{
+	H_AUTO_OGL(CDriverGL3_forceTextureResize)
+	clamp(divisor, 1U, 256U);
+
+	// 16 -> 4.
+	_ForceTextureResizePower= getPowerOf2(divisor);
+}
+
+
+// ***************************************************************************
+void		CDriverGL3::swapTextureHandle(ITexture &tex0, ITexture &tex1)
+{
+	H_AUTO_OGL(CDriverGL3_swapTextureHandle)
+	// ensure creation of both texture
+	setupTexture(tex0);
+	setupTexture(tex1);
+
+	// avoid any problem, disable all textures
+	for (uint stage = 0; stage < std::min(_Extensions.MaxFragmentTextureImageUnits, (GLint)IDRV_PROGRAM_MAXSAMPLERS); ++stage)
+	{
+		activateTexture(stage, NULL);
+	}
+
+	// get the handle.
+	CTextureDrvInfosGL3	*t0= getTextureGl(tex0);
+	CTextureDrvInfosGL3	*t1= getTextureGl(tex1);
+
+	/* Swap contents. Can't swap directly the pointers cause would have to change all CTextureDrvShare which point on
+		Can't do swap(*t0, *t1), because must keep the correct _DriverIterator
+	*/
+	swap(t0->ID, t1->ID);
+	swap(t0->MipMap, t1->MipMap);
+	swap(t0->Compressed, t1->Compressed);
+	swap(t0->TextureMemory, t1->TextureMemory);
+	swap(t0->WrapS, t1->WrapS);
+	swap(t0->WrapT, t1->WrapT);
+	swap(t0->MagFilter, t1->MagFilter);
+	swap(t0->MinFilter, t1->MinFilter);
+	swap(t0->TextureMode, t1->TextureMode);
+	swap(t0->FBOId, t1->FBOId);
+	swap(t0->DepthStencilFBO, t1->DepthStencilFBO);
+	swap(t0->InitFBO, t1->InitFBO);
+	// swap(t0->AttachDepthStencil, t1->AttachDepthStencil); ?
+}
+
+
+// ***************************************************************************
+uintptr_t CDriverGL3::getTextureHandle(const ITexture &tex)
+{
+	H_AUTO_OGL(CDriverGL3_getTextureHandle)
+	// If DrvShare not setuped
+	if (!tex.TextureDrvShare)
+		return 0;
+
+	// If DrvInfo not setuped
+	const CTextureDrvInfosGL3	*t0= (const CTextureDrvInfosGL3*)(const ITextureDrvInfos*)(tex.TextureDrvShare->DrvTexture);
+	if (!t0)
+		return 0;
+
+	return t0->ID;
+}
+
+// ***************************************************************************
+
+/*
+	GL 3.3: render to texture always uses FBOs.
+	setRenderTarget (tex) activates the FBO for the texture and sets the viewport.
+	setRenderTarget (NULL) deactivates the FBO and restores the viewport.
+ */
+
+bool CDriverGL3::setRenderTarget (ITexture *tex, uint32 x, uint32 y, uint32 width, uint32 height, uint32 mipmapLevel, uint32 cubeFace)
+{
+	H_AUTO_OGL(CDriverGL3_setRenderTarget)
+
+	// make backup of offscreen buffer to old texture if not using FBOs
+	if (!_RenderTargetFBO && _TextureTarget && _TextureTargetUpload && (_TextureTarget != tex || _TextureTargetCubeFace != cubeFace))
+	{
+		// Flush it
+		copyFrameBufferToTexture (_TextureTarget, _TextureTargetLevel, _TextureTargetX, _TextureTargetY, 0,
+			0, _TextureTargetWidth, _TextureTargetHeight, _TextureTargetCubeFace);
+	}
+
+	// Set a new texture as render target ?
+	if (tex)
+	{
+		// Check the texture is a render target
+		nlassertex (tex->getRenderTarget(), ("The texture must be a render target. Call ITexture::setRenderTarget(true)."));
+
+		// Use FBO path for CTextureOffscreen (bloom, FXAA, water env maps).
+		// CTextureMem (shadows, clouds) uses legacy copy-from-framebuffer path.
+		if (tex->isOffscreenTexture())
+		{
+			getViewport(_OldViewport);
+
+			if (!width) width = tex->getWidth();
+			if (!height) height = tex->getHeight();
+
+			_RenderTargetFBO = tex;
+
+			// Unbind all texture units: the target texture may still be
+			// bound as a sampler from an earlier draw, and WebGL/ANGLE
+			// treats that as a rendering feedback loop, silently dropping
+			// every draw call into the FBO (desktop GL does not enforce
+			// this, making the failure GLES-specific). Unbind through the
+			// GL states cache, not activateTexture(stage, NULL): texture
+			// setup/upload paths can leave a texture GL-bound while
+			// _CurrentTexture[] already says NULL, which would defeat the
+			// unbind exactly on the frame a render target is (re)created.
+			for (uint stage = 0; stage < (uint)IDRV_PROGRAM_MAXSAMPLERS; ++stage)
+			{
+				_DriverGLStates.unbindTexture(stage);
+				_CurrentTexture[stage] = NULL;
+				_CurrentTextureInfoGL[stage] = NULL;
+			}
+
+			CViewport newVP;
+			newVP.init(0, 0, (float)width / (float)tex->getWidth(),
+			                  (float)height / (float)tex->getHeight());
+			setupViewport(newVP);
+
+			return activeFrameBufferObject(tex);
+		}
+
+		// Legacy path: backup parameters for copy-from-framebuffer
+		_TextureTargetLevel = mipmapLevel;
+		_TextureTargetX = x;
+		_TextureTargetY = y;
+		_TextureTargetWidth = width;
+		_TextureTargetHeight = height;
+		_TextureTargetUpload = true;
+		_TextureTargetCubeFace = cubeFace;
+	}
+	else if (_RenderTargetFBO)
+	{
+		activeFrameBufferObject(NULL);
+		setupViewport(_OldViewport);
+		_OldViewport = _CurrViewport;
+
+		_RenderTargetFBO = NULL;
+		return false;
+	}
+
+	// Backup the texture
+	_TextureTarget = tex;
+
+	// Update the viewport
+	setupViewport (_CurrViewport);
+
+	// Update the scissor
+	setupScissor (_CurrScissor);
+
+	_RenderTargetFBO = NULL;
+	_OldViewport = _CurrViewport;
+
+	return true;
+}
+
+// ***************************************************************************
+
+bool CDriverGL3::copyTargetToTexture (ITexture *tex,
+												 uint32 offsetx,
+												 uint32 offsety,
+												 uint32 x,
+												 uint32 y,
+												 uint32 width,
+												 uint32 height,
+		                                         uint32 mipmapLevel)
+{
+	H_AUTO_OGL(CDriverGL3_copyTargetToTexture)
+	if (!_TextureTarget)
+		return false;
+	_TextureTargetUpload = false;
+	if ((width == 0) || (height == 0))
+	{
+		uint32 _width;
+		uint32 _height;
+		getRenderTargetSize (_width, _height);
+		if (width == 0)
+			width = _width;
+		if (height == 0)
+			height = _height;
+	}
+	copyFrameBufferToTexture(tex, mipmapLevel, offsetx, offsety, x, y, width, height);
+	return true;
+}
+
+// ***************************************************************************
+
+bool CDriverGL3::getRenderTargetSize (uint32 &width, uint32 &height)
+{
+	H_AUTO_OGL(CDriverGL3_getRenderTargetSize)
+	NLMISC::CSmartPtr<ITexture> tex = _RenderTargetFBO ? _RenderTargetFBO : (_TextureTarget ? _TextureTarget : NULL);
+	if (tex)
+	{
+		width = tex->getWidth();
+		height = tex->getHeight();
+	}
+	else
+	{
+		getWindowSize(width, height);
+	}
+
+	return false;
+}
+
+// ***************************************************************************
+
+} // NLDRIVERGL3
+} // NL3D

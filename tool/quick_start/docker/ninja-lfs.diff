@@ -1,0 +1,24 @@
+From 382ea5d9d218ecbde1d46bfc8880d4057c13a169 Mon Sep 17 00:00:00 2001
+From: Jan Boon <jan.boon@kaetemi.be>
+Date: Tue, 22 Feb 2022 10:43:36 +0800
+Subject: [PATCH] Largefile patch
+
+---
+ configure.py | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/configure.py b/configure.py
+index cded265..dda5589 100755
+--- a/configure.py
++++ b/configure.py
+@@ -340,6 +340,7 @@ else:
+               '-fno-rtti',
+               '-fno-exceptions',
+               '-fvisibility=hidden', '-pipe',
++              '-D_LARGEFILE_SOURCE', '-D_FILE_OFFSET_BITS=64',
+               '-DNINJA_PYTHON="%s"' % options.with_python]
+     if options.debug:
+         cflags += ['-D_GLIBCXX_DEBUG', '-D_GLIBCXX_DEBUG_PEDANTIC']
+-- 
+2.34.1.windows.1
+

@@ -1,0 +1,43 @@
+ps_2_0
+// cgc version 3.1.0013, build date Apr 18 2012
+// command line args: -profile ps_2_0 -O3 -fastmath -fastprecision -DUSE_DIFFUSE
+// source file: Y:/ryzomcore4/code/nel/src/3d/shaders/water_fp.cg
+//vendor NVIDIA Corporation
+//version 3.1.0.13
+//profile ps_2_0
+//program water_fp
+//semantic water_fp.bump0ScaleBias : C0
+//semantic water_fp.bump1ScaleBias : C1
+//semantic water_fp.nlTex0 : TEX0
+//semantic water_fp.nlTex1 : TEX1
+//semantic water_fp.nlTex2 : TEX2
+//semantic water_fp.nlTex3 : TEX3
+//var float2 bump0TexCoord : $vin.TEXCOORD0 : TEX0 : 0 : 1
+//var float2 bump1TexCoord : $vin.TEXCOORD1 : TEX1 : 1 : 1
+//var float2 envMapTexCoord : $vin.TEXCOORD2 : TEX2 : 2 : 1
+//var float2 diffuseTexCoord : $vin.TEXCOORD3 : TEX3 : 3 : 1
+//var float4 bump0ScaleBias : C0 : c[0] : 4 : 1
+//var float4 bump1ScaleBias : C1 : c[1] : 5 : 1
+//var sampler2D nlTex0 : TEX0 : texunit 0 : 6 : 1
+//var sampler2D nlTex1 : TEX1 : texunit 1 : 7 : 1
+//var sampler2D nlTex2 : TEX2 : texunit 2 : 8 : 1
+//var sampler2D nlTex3 : TEX3 : texunit 3 : 9 : 1
+//var float4 oCol : $vout.COLOR : COL : 10 : 1
+dcl_2d s0
+dcl_2d s1
+dcl_2d s2
+dcl_2d s3
+dcl t0.xy
+dcl t1.xy
+dcl t2.xy
+dcl t3.xy
+texld r0, t0, s0
+mad r0.xy, r0, c0.x, c0.y
+add r0.xy, r0, t1
+texld r0, r0, s1
+mad r0.xy, r0, c1.x, c1.y
+add r1.xy, r0, t2
+texld r0, t3, s3
+texld r1, r1, s2
+mul r0, r1, r0
+mov oC0, r0

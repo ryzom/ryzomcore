@@ -375,6 +375,7 @@ public:
 	bool							Hardware:1;
 	bool							Volatile:1; 		// Volatile vertex buffer
 	bool							VolatileRAM:1;
+	bool							UnsynchronizedWrite:1;	// Use D3DLOCK_NOOVERWRITE
 	uint8							Stride:8;
 	uint							VolatileLockTime;	// Volatile vertex buffer
 	DWORD							Usage;
@@ -932,7 +933,7 @@ public:
 	// Buffer
 	virtual bool			clear2D(CRGBA rgba);
 	virtual bool			clearZBuffer(float zval=1);
-	virtual bool			clearStencilBuffer(float stencilval=0);
+	virtual bool			clearStencilBuffer(sint stencilval=0);
 	virtual void			setColorMask (bool bRed, bool bGreen, bool bBlue, bool bAlpha);
 	virtual bool			swapBuffers();
 	virtual void			getBuffer (CBitmap &bitmap);	// Only 32 bits back buffer supported
@@ -1032,6 +1033,8 @@ public:
 	// Misc
 	virtual TMessageBoxId	systemMessageBox (const char* message, const char* title, TMessageBoxType type=okType, TMessageBoxIcon icon=noIcon);
 	virtual uint64			getSwapBufferCounter() const { return _SwapBufferCounter; }
+	virtual bool			isTripleBufferPipelined() const { return true; }
+	virtual uint64			getSwapBufferInFlight() const { return (_SwapBufferCounter > _MaxFrameLatency) ? _SwapBufferCounter - _MaxFrameLatency : 0; }
 
 	// Inputs
 	virtual void			showCursor (bool b);
@@ -1057,15 +1060,29 @@ public:
 	virtual void			setLightMapDynamicLight (bool enable, const CLight& light);
 	// todo hulud d3d light
 	virtual void			setPerPixelLightingLight(CRGBA /* diffuse */, CRGBA /* specular */, float /* shininess */) {}
+
+	virtual void			enableLightTableMode(bool enable);
+	virtual void			setLightTableSize(uint count);
+	virtual void			setLightTableEntry(uint index, const CLight &light);
+	virtual void			setLights(
+		const sint16 *tableIndices,
+		const uint8 *factors,
+		uint numLights,
+		uint numPerPixelLights,
+		NLMISC::CRGBA ambient);
+
 	virtual void			setAmbientColor (CRGBA color);
 
 	// Fog
 	virtual	bool			fogEnabled();
 	virtual	void			enableFog(bool enable);
 	virtual	void			setupFog(float start, float end, CRGBA color);
+	virtual	void			setupFogMode(TFogMode mode = FogLinear, float density = 1.f);
 	virtual	float			getFogStart() const;
 	virtual	float			getFogEnd() const;
 	virtual	CRGBA			getFogColor() const;
+	virtual	TFogMode		getFogMode() const;
+	virtual	float			getFogDensity() const;
 
 	// Texture addressing modes
 	// todo hulud d3d adressing mode
@@ -1073,6 +1090,9 @@ public:
 	virtual	bool			supportMADOperator() const;
 	// todo hulud d3d adressing mode
 	virtual bool			supportWaterShader() const;
+
+	virtual bool			cubemapZPositiveForward() const { return true; }
+
 	// todo hulud d3d adressing mode
 	virtual bool			supportTextureAddrMode(CMaterial::TTexAddressingMode /* mode */) const {return false;};
 	// todo hulud d3d adressing mode
@@ -1083,6 +1103,7 @@ public:
 	virtual bool			isEMBMSupportedAtStage(uint stage) const;
 	virtual void			setEMBMMatrix(const uint stage, const float mat[4]);
 	virtual bool			supportPerPixelLighting(bool /* specular */) const {return false;};
+	virtual bool			supportWorldSpacePPL() const { return false; }
 
 	// index offset support
 	virtual bool			supportIndexOffset() const { return true; /* always supported with D3D driver */ }
@@ -1093,6 +1114,7 @@ public:
 	virtual	NLMISC::CRGBA	getBlendConstantColor() const;
 
 	// Monitor properties
+	virtual bool			supportMonitorColorProperties () const;
 	virtual bool			setMonitorColorProperties (const CMonitorColorProperties &properties);
 
 	// Polygon smoothing
@@ -1265,6 +1287,9 @@ public:
 	virtual void			stencilFunc(TStencilFunc stencilFunc, int ref, uint mask);
 	virtual void			stencilOp(TStencilOp fail, TStencilOp zfail, TStencilOp zpass);
 	virtual void			stencilMask(uint mask);
+
+	virtual void			enableClipPlane(uint index, bool enable);
+	virtual void			setClipPlane(uint index, const NLMISC::CPlane &plane);
 
 	uint32					getMaxVertexIndex() const { return _MaxVertexIndex; }
 
@@ -1464,7 +1489,7 @@ public:
 		IDirect3DVertexBuffer9			*VertexBuffer;
 		UINT							Offset;
 		UINT							Stride;
-		CVertexBuffer::TPreferredMemory	PrefferedMemory;
+		CVertexBuffer::TBufferUsage		PrefferedMemory;
 		DWORD							Usage; // d3d vb usage
 		uint							ColorOffset; // Fix for Radeon 7xxx series (see remark in CDriverD3D::createVertexDeclaration)
 		virtual void apply(CDriverD3D *driver);
@@ -1606,6 +1631,11 @@ public:
 
 	// Update all modified render states, assume current material is still alive
 	void updateRenderVariablesInternal();
+
+	// Upload user clip plane equations in the convention required by the
+	// pipeline about to draw (world space for fixed function, clip space
+	// when a vertex shader is bound). Called from updateRenderVariablesInternal().
+	void updateClipPlanes();
 
 	// Reset the driver, release the lost resources
 	bool reset (const GfxMode& mode);
@@ -1921,7 +1951,7 @@ public:
 	}
 
 	// Set the vertex buffer
-	inline void setVertexBuffer (IDirect3DVertexBuffer9 *vertexBuffer, UINT offset, UINT stride, bool useVertexColor, uint size, CVertexBuffer::TPreferredMemory pm, DWORD usage, uint colorOffset)
+	inline void setVertexBuffer (IDirect3DVertexBuffer9 *vertexBuffer, UINT offset, UINT stride, bool useVertexColor, uint size, CVertexBuffer::TBufferUsage pm, DWORD usage, uint colorOffset)
 	{
 		H_AUTO_D3D(CDriverD3D_setVertexBuffer);
 		nlassert (_DeviceInterface);
@@ -2064,6 +2094,9 @@ public:
 		{
 			theMatrix.Matrix = matrix;
 			touchRenderVariable (&theMatrix);
+			// Clip plane equations uploaded in clip space (shader mode) depend on view/projection
+			if (type == D3DTS_VIEW || type == D3DTS_PROJECTION)
+				++_ViewProjId;
 		}
 	}
 
@@ -2433,6 +2466,8 @@ private:
 	float					_FrustumZFar;
 	float					_FogStart;
 	float					_FogEnd;
+	TFogMode				_FogMode;
+	float					_FogDensity;
 
 	// Vertex memory available
 	uint32					_AGPMemoryAllocated;
@@ -2445,6 +2480,7 @@ private:
 	bool					_TextureCubeSupported;
 	bool					_VertexProgram;
 	bool					_PixelProgram;
+	uint16					_VertexProgramVersion;
 	uint16					_PixelProgramVersion;
 	bool					_DisableHardwareVertexProgram;
 	bool					_DisableHardwarePixelProgram;
@@ -2644,6 +2680,11 @@ private:
 	CD3DShaderFX					_ShaderCloud;
 	CD3DShaderFX					_ShaderWaterNoDiffuse;
 	CD3DShaderFX					_ShaderWaterDiffuse;
+	// Calculated reflectivity variants (ps_2_0 derives the blend alpha
+	// from the per-vertex reflectivity base + reflection luma; the ps_1_x
+	// techniques keep the flat reflection alpha)
+	CD3DShaderFX					_ShaderWaterCalcNoDiffuse;
+	CD3DShaderFX					_ShaderWaterCalcDiffuse;
 
 
 	// Backup frame buffer
@@ -2656,6 +2697,7 @@ private:
 	static const uint32		ReleaseVersion;
 
 	uint64 _SwapBufferCounter;
+	uint64 _MaxFrameLatency;
 
 	// occlusion query
 	bool						_OcclusionQuerySupported;
@@ -2681,6 +2723,21 @@ private:
 	DWORD			_CurStencilOpZFail;
 	DWORD			_CurStencilOpZPass;
 	DWORD			_CurStencilWriteMask;
+	DWORD			_CurClipPlaneEnable;
+
+	// User clip planes, stored in (PZB-adjusted) NeL world space. D3D9
+	// interprets SetClipPlane equations in WORLD space with the fixed
+	// function pipeline but in CLIP space when a vertex shader is bound,
+	// so updateClipPlanes() (re)uploads the equations in the convention of
+	// the pipeline about to draw — refreshed when the equations, the
+	// pipeline type, or (in shader mode) the view/projection change.
+	enum { MaxClipPlane = 6 };
+	float			_ClipPlaneWorld[MaxClipPlane][4];
+	uint			_ClipPlaneSetMask;		// planes with a valid equation
+	bool			_ClipPlaneDirty;		// equations changed since last upload
+	bool			_ClipPlaneShaderMode;	// convention currently uploaded
+	uint			_ClipPlaneViewProjId;	// _ViewProjId at last shader-mode upload
+	uint			_ViewProjId;			// bumped when view/projection matrices change
 
 public:
 
@@ -2696,6 +2753,9 @@ public:
 	// this is the backup of standard lighting (cause GL states may be modified by Lightmap Dynamic Lighting)
 	CLight						_UserLight0;
 	bool						_UserLightEnable[MaxLight];
+	// Light table
+	bool						_LightTableMode;
+	std::vector<CLight>			_LightTable;
 	// methods to enable / disable DX light, without affecting _LightMapDynamicLight*, or _UserLight0*
 	void			setLightInternal(uint8 num, const CLight& light);
 	void			enableLightInternal(uint8 num, bool enable);

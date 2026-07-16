@@ -176,6 +176,17 @@ MACRO(FIND_PACKAGE_HELPER NAME INCLUDE)
 
   SET(_INCLUDE_PATHS)
   SET(_LIBRARY_PATHS)
+  # Check for root directories passed to CMake with -DXXX_ROOT=...
+  IF(DEFINED ENV{${_UPNAME_FIXED}_ROOT})
+    SET(_TMP ${${_UPNAME_FIXED}_ROOT})
+    GET_FILENAME_COMPONENT(_TMP ${_TMP} ABSOLUTE)
+    LIST(APPEND _INCLUDE_PATHS ${_TMP}/include ${_TMP})
+    LIST(APPEND _LIBRARY_PATHS ${_TMP}/lib${LIB_SUFFIX})
+
+    IF(_IS_VERBOSE)
+      MESSAGE(STATUS "Using ${_UPNAME_FIXED}_ROOT as root directory ${_TMP}")
+    ENDIF()
+  ENDIF()
 
   # Check for root directories passed to CMake with -DXXX_DIR=...
   IF(DEFINED ${_UPNAME_FIXED}_DIR)
@@ -212,7 +223,7 @@ MACRO(FIND_PACKAGE_HELPER NAME INCLUDE)
     ENDFOREACH()
   ENDIF()
 
-  IF(UNIX)
+  IF(UNIX AND NOT DEFINED ENV{${_UPNAME_FIXED}_ROOT})
     # Append UNIX standard include paths
     SET(_UNIX_INCLUDE_PATHS)
 
@@ -262,11 +273,16 @@ MACRO(FIND_PACKAGE_HELPER NAME INCLUDE)
   ENDIF()
 
   # Append environment variables XXX_DIR
-  LIST(APPEND _LIBRARY_PATHS
-    $ENV{${_UPNAME}_DIR}/lib${LIB_SUFFIX}
-    $ENV{${_UPNAME_FIXED}_DIR}/lib${LIB_SUFFIX})
+  IF(DEFINED ENV{${_UPNAME}_DIR})
+    LIST(APPEND _LIBRARY_PATHS
+      $ENV{${_UPNAME}_DIR}/lib${LIB_SUFFIX})
+  ENDIF()
+  IF(DEFINED ENV{${_UPNAME_FIXED}_DIR})
+    LIST(APPEND _LIBRARY_PATHS
+      $ENV{${_UPNAME_FIXED}_DIR}/lib${LIB_SUFFIX})
+  ENDIF()
 
-  IF(UNIX)
+  IF(UNIX AND NOT DEFINED ENV{${_UPNAME_FIXED}_ROOT})
     SET(_UNIX_LIBRARY_PATHS)
 
     # Append multiarch libraries paths
@@ -311,15 +327,30 @@ MACRO(FIND_PACKAGE_HELPER NAME INCLUDE)
   LIST(REMOVE_DUPLICATES _DEBUG_LIBRARIES)
 
   # Search for release library
-  FIND_LIBRARY(${_UPNAME_FIXED}_LIBRARY_RELEASE
-    NAMES
-    ${_RELEASE_LIBRARIES}
-    HINTS ${PKG_${_NAME_FIXED}_LIBRARY_DIRS}
-    PATHS
-    ${_LIBRARY_PATHS}
-    ${_UNIX_LIBRARY_PATHS}
-    NO_CMAKE_SYSTEM_PATH
-  )
+  IF(DEFINED ENV{${_UPNAME_FIXED}_ROOT} AND NOT WIN32)
+    FIND_LIBRARY(${_UPNAME_FIXED}_LIBRARY_RELEASE
+      NAMES
+      ${_RELEASE_LIBRARIES}
+      HINTS ${PKG_${_NAME_FIXED}_LIBRARY_DIRS}
+      PATHS
+      ${_LIBRARY_PATHS}
+      ${_UNIX_LIBRARY_PATHS}
+      NO_CMAKE_PATH 
+      NO_CMAKE_SYSTEM_PATH
+      NO_CMAKE_ENVIRONMENT_PATH
+      NO_SYSTEM_ENVIRONMENT_PATH
+    )
+  ELSE()
+    FIND_LIBRARY(${_UPNAME_FIXED}_LIBRARY_RELEASE
+      NAMES
+      ${_RELEASE_LIBRARIES}
+      HINTS ${PKG_${_NAME_FIXED}_LIBRARY_DIRS}
+      PATHS
+      ${_LIBRARY_PATHS}
+      ${_UNIX_LIBRARY_PATHS}
+      NO_CMAKE_SYSTEM_PATH
+    )
+  ENDIF()
 
   IF(_IS_VERBOSE)
     IF(${_UPNAME_FIXED}_LIBRARY_RELEASE)
@@ -330,15 +361,30 @@ MACRO(FIND_PACKAGE_HELPER NAME INCLUDE)
   ENDIF()
 
   # Search for debug library
-  FIND_LIBRARY(${_UPNAME_FIXED}_LIBRARY_DEBUG
-    NAMES
-    ${_DEBUG_LIBRARIES}
-    HINTS ${PKG_${_NAME_FIXED}_LIBRARY_DIRS}
-    PATHS
-    ${_LIBRARY_PATHS}
-    ${_UNIX_LIBRARY_PATHS}
-    NO_CMAKE_SYSTEM_PATH
-  )
+  IF(DEFINED ENV{${_UPNAME_FIXED}_ROOT} AND NOT WIN32)
+    FIND_LIBRARY(${_UPNAME_FIXED}_LIBRARY_DEBUG
+      NAMES
+      ${_DEBUG_LIBRARIES}
+      HINTS ${PKG_${_NAME_FIXED}_LIBRARY_DIRS}
+      PATHS
+      ${_LIBRARY_PATHS}
+      ${_UNIX_LIBRARY_PATHS}
+      NO_CMAKE_PATH 
+      NO_CMAKE_SYSTEM_PATH
+      NO_CMAKE_ENVIRONMENT_PATH
+      NO_SYSTEM_ENVIRONMENT_PATH
+    )
+  ELSE()
+    FIND_LIBRARY(${_UPNAME_FIXED}_LIBRARY_DEBUG
+      NAMES
+      ${_DEBUG_LIBRARIES}
+      HINTS ${PKG_${_NAME_FIXED}_LIBRARY_DIRS}
+      PATHS
+      ${_LIBRARY_PATHS}
+      ${_UNIX_LIBRARY_PATHS}
+      NO_CMAKE_SYSTEM_PATH
+    )
+  ENDIF()
 
   IF(_IS_VERBOSE)
     IF(${_UPNAME_FIXED}_LIBRARY_DEBUG)
@@ -614,89 +660,6 @@ MACRO(FIND_LIBRARY_HELPER NAME)
   MARK_AS_ADVANCED(${_UPNAME_FIXED}_LIBRARY_RELEASE ${_UPNAME_FIXED}_LIBRARY_DEBUG)
 ENDMACRO()
 
-MACRO(FIND_LIBCURL)
-  IF(NOT CURL_FOUND)
-    FIND_PACKAGE(CURL REQUIRED)
-
-    IF(WIN32 OR CURL_LIBRARY MATCHES "\\.a" OR WITH_STATIC_CURL)
-      SET(CURL_STATIC ON)
-    ELSE()
-      SET(CURL_STATIC OFF)
-    ENDIF()
-
-    IF(CURL_STATIC)
-      SET(CURL_DEFINITIONS -DCURL_STATICLIB)
-
-      IF(UNIX)
-        # CURL can depend on libidn
-        FIND_LIBRARY(IDN_LIBRARY idn)
-        IF(IDN_LIBRARY)
-          LIST(APPEND CURL_LIBRARIES ${IDN_LIBRARY})
-        ENDIF()
-
-        # CURL Macports version can depend on libidn, libintl and libiconv too
-        IF(APPLE)
-          FIND_LIBRARY(INTL_LIBRARY intl)
-          IF(INTL_LIBRARY)
-            LIST(APPEND CURL_LIBRARIES ${INTL_LIBRARY})
-          ENDIF()
-        ELSE()
-          # Only used by libcurl under Linux
-          FIND_PACKAGE(OpenSSL REQUIRED)
-
-          #IF(WIN32)
-          #  SET(OPENSSL_LIBRARIES ${OPENSSL_LIBRARIES} Crypt32.lib)
-          #ENDIF()
-
-          # Only Linux version of libcurl depends on OpenSSL
-          LIST(APPEND CURL_INCLUDE_DIRS ${OPENSSL_INCLUDE_DIR})
-          LIST(APPEND CURL_LIBRARIES ${OPENSSL_LIBRARIES})
-        ENDIF()
-      ENDIF()
-    ENDIF()
-  ENDIF()
-ENDMACRO()
-
-MACRO(FIND_LIBXML2)
-  IF(NOT LIBXML2_FOUND)
-    FIND_PACKAGE(LibXml2 REQUIRED)
-
-    IF(WIN32 OR WITH_STATIC_LIBXML2)
-      LIST(APPEND LIBXML2_DEFINITIONS -DLIBXML_STATIC)
-    ENDIF()
-
-    IF(WITH_LIBXML2_ICONV)
-      FIND_PACKAGE(Iconv REQUIRED)
-#      LIST(APPEND CURL_INCLUDE_DIRS ${ICONV_INCLUDE_DIR})
-      LIST(APPEND LIBXML2_LIBRARIES ${ICONV_LIBRARIES})
-    ENDIF()
-
-    IF(WITH_STATIC)
-      # libxml2 could need winsock2 library
-      IF(WIN32)
-        FIND_LIBRARY(WINSOCK2_LIB ws2_32)
-      
-        IF(WINSOCK2_LIB)
-          LIST(APPEND LIBXML2_LIBRARIES ${WINSOCK2_LIB})
-        ENDIF()
-
-        FIND_LIBRARY(CRYPT32_LIB Crypt32)
-
-        IF(CRYPT32_LIB)
-          LIST(APPEND LIBXML2_LIBRARIES ${CRYPT32_LIB})
-        ENDIF()
-      ELSE()
-        # under Linux and OS X, recent libxml2 versions are linked against liblzma
-        FIND_PACKAGE(LibLZMA)
-
-        IF(LIBLZMA_LIBRARIES)
-          LIST(APPEND LIBXML2_LIBRARIES ${LIBLZMA_LIBRARIES})
-        ENDIF()
-      ENDIF()
-    ENDIF()
-  ENDIF()
-ENDMACRO()
-
 MACRO(ADD_QT_LIBRARY _NAME)
   IF(WIN32)
     SET(_PREFIX "Qt5")
@@ -756,7 +719,15 @@ MACRO(ADD_QT_SYSTEM_LIBRARY _NAME)
 ENDMACRO()
 
 MACRO(FIND_QT5)
-  CMAKE_MINIMUM_REQUIRED(VERSION 2.8.11 FATAL_ERROR)
+  CMAKE_MINIMUM_REQUIRED(VERSION 3.28..4.1.1 FATAL_ERROR)
+
+  # qt5 required cxx 11, not the whole project depends on qt though
+  #set(CMAKE_CXX_STANDARD 11)
+  #set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+  set(CMAKE_AUTOMOC ON)
+  set(CMAKE_AUTORCC ON)
+  set(CMAKE_AUTOUIC ON)
 
   SET(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${QTDIR} $ENV{QTDIR})
 
@@ -767,6 +738,7 @@ MACRO(FIND_QT5)
     GET_TARGET_PROPERTY(_FILE Qt5::Core IMPORTED_LOCATION_RELEASE)
 
     SET(QT_VERSION "${Qt5Core_VERSION_STRING}")
+    SET(QT_VERSION_MAJOR 5)
     SET(_VERSION "${QT_VERSION}")
 
     IF(_FILE MATCHES "\\.(lib|a)$")
@@ -797,7 +769,7 @@ MACRO(FIND_QT5)
 
     IF(QT_STATIC)
       FIND_PACKAGE(PNG REQUIRED)
-      FIND_PACKAGE(Jpeg REQUIRED)
+      FIND_PACKAGE(JPEG REQUIRED)
 
       ADD_DEFINITIONS(-DQT_STATICPLUGIN)
 
@@ -907,7 +879,7 @@ MACRO(FIND_QT5)
 
       ADD_QT_PLUGIN(accessible qtaccessiblewidgets)
 
-      LIST(APPEND QT_LIBRARIES ${PNG_LIBRARIES} ${JPEG_LIBRARY})
+      LIST(APPEND QT_LIBRARIES ${PNG_LIBRARIES} JPEG::JPEG)
 
       # Network
       LIST(APPEND QT_LIBRARIES Qt5::Network Qt5::Xml)
@@ -955,5 +927,119 @@ MACRO(FIND_QT5)
     ENDIF()
   ELSE()
     MESSAGE(WARNING "Unable to find Qt 5")
+  ENDIF()
+ENDMACRO()
+
+MACRO(FIND_QT6)
+  CMAKE_MINIMUM_REQUIRED(VERSION 3.28..4.1.1 FATAL_ERROR)
+
+  set(CMAKE_AUTOMOC ON)
+  set(CMAKE_AUTORCC ON)
+  set(CMAKE_AUTOUIC ON)
+
+  SET(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${QTDIR} $ENV{QTDIR})
+
+  FIND_PACKAGE(Qt6Core QUIET)
+
+  IF(Qt6Core_FOUND)
+    # Check if we are using Qt static or shared libraries
+    GET_TARGET_PROPERTY(_FILE Qt6::Core IMPORTED_LOCATION_RELEASE)
+
+    # Qt6 uses standard CMake _VERSION variable (not _VERSION_STRING like Qt5)
+    SET(QT_VERSION "${Qt6Core_VERSION}")
+    SET(QT_VERSION_MAJOR 6)
+    SET(_VERSION "${QT_VERSION}")
+
+    IF(_FILE MATCHES "\\.(lib|a)$")
+      SET(QT_STATIC ON)
+      SET(_VERSION "${_VERSION} static version")
+    ELSE()
+      SET(QT_STATIC OFF)
+      SET(_VERSION "${_VERSION} shared version")
+    ENDIF()
+
+    MESSAGE(STATUS "Found Qt ${_VERSION}")
+
+    # These variables are not defined with Qt6 CMake modules
+    GET_TARGET_PROPERTY(_qt6Core_install_prefix Qt6::Core IMPORT_PREFIX)
+    IF(NOT _qt6Core_install_prefix)
+      GET_TARGET_PROPERTY(_qt6Core_location Qt6::Core LOCATION)
+      GET_FILENAME_COMPONENT(_qt6Core_install_prefix "${_qt6Core_location}" DIRECTORY)
+      GET_FILENAME_COMPONENT(_qt6Core_install_prefix "${_qt6Core_install_prefix}" DIRECTORY)
+    ENDIF()
+    SET(QT_BINARY_DIR "${_qt6Core_install_prefix}/bin")
+    SET(QT_LIBRARY_DIR "${_qt6Core_install_prefix}/lib")
+    SET(QT_PLUGINS_DIR "${_qt6Core_install_prefix}/plugins")
+    SET(QT_TRANSLATIONS_DIR "${_qt6Core_install_prefix}/translations")
+
+    # Fix wrong include directories under Mac OS X
+    INCLUDE_DIRECTORIES("${_qt6Core_install_prefix}/include")
+
+    FIND_PACKAGE(Qt6Gui)
+    FIND_PACKAGE(Qt6Widgets)
+    FIND_PACKAGE(Qt6OpenGLWidgets QUIET)
+    FIND_PACKAGE(Qt6OpenGL QUIET)
+    FIND_PACKAGE(Qt6Xml)
+    FIND_PACKAGE(Qt6LinguistTools QUIET)
+    FIND_PACKAGE(Qt6Network)
+
+    IF(QT_STATIC)
+      FIND_PACKAGE(PNG REQUIRED)
+      FIND_PACKAGE(JPEG REQUIRED)
+
+      ADD_DEFINITIONS(-DQT_STATICPLUGIN)
+
+      # Qt6 handles transitive dependencies much better than Qt5,
+      # so the static library list is simpler.
+      SET(QT_LIBRARIES Qt6::Widgets Qt6::Gui Qt6::Network Qt6::Xml Qt6::Core)
+
+      IF(TARGET Qt6::OpenGLWidgets)
+        LIST(APPEND QT_LIBRARIES Qt6::OpenGLWidgets)
+      ENDIF()
+      IF(TARGET Qt6::OpenGL)
+        LIST(APPEND QT_LIBRARIES Qt6::OpenGL)
+      ENDIF()
+
+      LIST(APPEND QT_LIBRARIES ${PNG_LIBRARIES} JPEG::JPEG)
+      LIST(APPEND QT_LIBRARIES ${ZLIB_LIBRARIES})
+
+      IF(WIN32)
+        LIST(APPEND QT_LIBRARIES
+          ${WINSDK_LIBRARY_DIR}/Imm32.lib
+          ${WINSDK_LIBRARY_DIR}/OpenGL32.lib
+          ${WINSDK_LIBRARY_DIR}/WinMM.Lib
+          ${WINSDK_LIBRARY_DIR}/Crypt32.lib
+          ${WINSDK_LIBRARY_DIR}/WS2_32.Lib
+          ${WINSDK_LIBRARY_DIR}/IPHlpApi.Lib)
+      ELSEIF(APPLE)
+        FIND_LIBRARY(IOKIT_FRAMEWORK IOKit)
+        FIND_LIBRARY(COCOA_FRAMEWORK Cocoa)
+        FIND_LIBRARY(SYSTEMCONFIGURATION_FRAMEWORK SystemConfiguration)
+        FIND_LIBRARY(OPENGL_FRAMEWORK NAMES OpenGL)
+
+        LIST(APPEND QT_LIBRARIES
+          ${COCOA_FRAMEWORK}
+          ${SYSTEMCONFIGURATION_FRAMEWORK}
+          ${IOKIT_FRAMEWORK}
+          ${OPENGL_FRAMEWORK})
+      ELSE()
+        FIND_PACKAGE(Threads)
+        LIST(APPEND QT_LIBRARIES ${CMAKE_THREAD_LIBS_INIT} ${CMAKE_DL_LIBS})
+      ENDIF()
+
+      IF(OPENSSL_FOUND)
+        LIST(APPEND QT_LIBRARIES ${OPENSSL_LIBRARIES})
+      ENDIF()
+    ELSE()
+      SET(QT_LIBRARIES Qt6::Widgets Qt6::Network Qt6::Xml Qt6::Gui Qt6::Core)
+      IF(TARGET Qt6::OpenGLWidgets)
+        LIST(APPEND QT_LIBRARIES Qt6::OpenGLWidgets)
+      ENDIF()
+      IF(TARGET Qt6::OpenGL)
+        LIST(APPEND QT_LIBRARIES Qt6::OpenGL)
+      ENDIF()
+    ENDIF()
+  ELSE()
+    MESSAGE(WARNING "Unable to find Qt 6")
   ENDIF()
 ENDMACRO()

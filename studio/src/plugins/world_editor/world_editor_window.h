@@ -24,8 +24,8 @@
 #include "ui_world_editor_window.h"
 
 // Qt includes
-#include <QtGui/QUndoStack>
-#include <QtGui/QLabel>
+#include <QUndoStack>
+#include <QLabel>
 #include <QtCore/QTimer>
 #include <QtCore/QSignalMapper>
 #include <QtOpenGL/QGLWidget>

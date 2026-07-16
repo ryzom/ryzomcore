@@ -984,7 +984,6 @@
 		<link expr="intToColor(@#color_grayed)" target="back:color_rgba" />
 		<link expr="intToColor(@#color)" target="but:col_normal_rgba,but:col_over_rgba,but:col_pushed_rgba" />
 		<link expr="ifthenelse(eq(@#pushflag,1),makeRGB(255,255,255),intToColor(@#color))" target="text:color_rgba,key:color_rgba" />
-		<link expr="ifthenelse('w_slot_on.tga'" target="back:texture" />
 
 	</group>
 </template>

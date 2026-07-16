@@ -108,12 +108,12 @@ function inviteOwnerInSession($charId, $domainId, $sessionId)
 	$RSMPort = $addr[1];
 	
 	global $rsmProxy, $rsmSkel, $userId, $charId, $callbackClient, /*$SessionId,*/ $SessionToolsResult;
-	global $DBHost, $RingDBUserName, $RingDBPassword;
+	global $DBHost, $DBPort, $RingDBUserName, $RingDBPassword;
 
 	$SessionId = $sessionId;
 	$DomainId = $domainId;
 
-	$link = mysqli_connect($DBHost, $RingDBUserName, $RingDBPassword) or die("Can't connect to ring database");
+	$link = mysqli_connect($DBHost, $RingDBUserName, $RingDBPassword, NULL, $DBPort) or die("Can't connect to ring database");
 	mysqli_select_db($link, $domainInfo['ring_db_name']) or die ("Can't access to the db dbname:" . $domainInfo['ring_db_name']);
 
 	$sessionId = (int) $sessionId;

@@ -2,7 +2,7 @@
 // Copyright (C) 2010-2019  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2020-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -659,6 +659,56 @@ public:
 
 private:
 	uint32 _min,_max;
+};
+
+
+//-------------------------------------------------------------------------------------------
+// 	set_punctual_state_timeout
+//-------------------------------------------------------------------------------------------
+
+class CAILogicActionSetPunctualStateTimeout : public IAILogicAction
+{
+public:
+	// init is called just after instantiation to give class a chance to parse arguments and
+	// deal with sub actions
+	CAILogicActionSetPunctualStateTimeout(const std::vector<std::string> &args, const std::vector<IAILogicAction::TSmartPtr> &subActions, const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
+	{
+		if (!subActions.empty())
+			nlwarning("sub-actions of 'set punctual state timeout' are ignored");
+
+		switch (args.size())
+		{
+		case 2:
+			NLMISC::fromString(args[0], _min); if (args[0] != NLMISC::toString(_min)) goto BadArgs;
+			NLMISC::fromString(args[1], _max); if (args[1] != NLMISC::toString(_max)) goto BadArgs;
+			break;
+		case 1:
+			NLMISC::fromString(args[0], _min); if (args[0] != NLMISC::toString(_min)) goto BadArgs;
+			_max = _min;
+			break;
+		default:
+		BadArgs:
+			nlwarning("Invalid arguments for 'set punctual state timeout'");
+			_min = 0;
+			_max = 0;
+		}
+	}
+
+	// this is the executeAction 'callback' for the action type.
+	// NOTE: This code should be fast and compact as it may be called very large numbers of times
+	// depending on the whim of the level designers
+	virtual bool executeAction(CStateInstance *entity, const IAIEvent *event)
+	{
+		uint t = _min;
+		if (_min != _max)
+			t += CAIS::rand32(_max - _min);
+		entity->timerPunctTimeout().set(t);
+		entity->getDebugHistory()->addHistory("GRP Set Punctual State Timeout: %u", t);
+		return true;
+	}
+
+private:
+	uint32 _min, _max;
 };
 
 
@@ -1462,70 +1512,57 @@ public:
 };
 //-------------------------------------------------------------------------------------------
 // Same as CAILogicActionConditionIf but the condition is evaluated dynamicaly not at loading of primitive(eg primitive 1 modify primitive 2)
-class CAILogicActionDynamicIf : public IAILogicAction, public CAIVariableParser
+class CAILogicActionDynamicIf : public IAILogicAction
 {
 public:
-	CAILogicActionDynamicIf (const std::vector<std::string> &args, const std::vector<IAILogicAction::TSmartPtr> 
+	CAILogicActionDynamicIf (const std::vector<std::string> &args, const std::vector<IAILogicAction::TSmartPtr>
 								&subActions, const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
 	{
 		if (args.empty())
 		{
-			nlwarning("condition_if (%s) need arguments !", eventNode->fullName().c_str());
+			nlwarning("dynamic_if (%s) need arguments !", eventNode->fullName().c_str());
 			return;
 		}
 		if (subActions.empty())
 		{
-			nlwarning("condition_if (%s) need sub action !", eventNode->fullName().c_str());
+			nlwarning("dynamic_if (%s) need sub action !", eventNode->fullName().c_str());
 			return;
 		}
 		_SubActions = subActions;
-		_Args = args;
-		//_EventFullName = eventNode->fullName();
-		if (!_Args.empty())
+
+		// Wrap the expression in an if block that calls setConditionSuccess
+		std::vector<std::string> wrappedArgs = args;
+		if (!wrappedArgs.empty())
 		{
-			std::string oldValue = _Args[_Args.size()-1];
-			_Args[_Args.size()-1] = std::string("if (") + oldValue + std::string("){()setConditionSuccess(1);} else { ()setConditionSuccess(0); }");
+			std::string oldValue = wrappedArgs[wrappedArgs.size()-1];
+			wrappedArgs[wrappedArgs.size()-1] = std::string("if (") + oldValue + std::string("){()setConditionSuccess(1);} else { ()setConditionSuccess(0); }");
 		}
 
+		// Compile once at construction time (bytecode is stateless and deterministic)
+		_Code = AICOMP::CCompiler::getInstance().compileCode(wrappedArgs, eventNode->fullName() + std::string(":dynamic if"));
 	}
 
 	bool	executeAction(CStateInstance	*entity,const IAIEvent *event)
 	{
-				// parse the argument string.
-
-		if (_Args.empty()) { return false; }
+		if (_Code.isNull()) { return false; }
 		if (_SubActions.empty()){ return false;}
-		
-		
-		NLMISC::CSmartPtr<const  AIVM::CByteCode> codePtr =  AICOMP::CCompiler::getInstance().compileCode(_Args, _EventFullName + std::string(":dynamic if"));
-		
+
 		CAILogicDynamicIfHelper::setConditionSuccess(false);
-		if (!codePtr.isNull())
-		{
-			entity->getPersistentStateInstance()->interpretCode(entity, codePtr);
-		}
-		
+		entity->getPersistentStateInstance()->interpretCode(entity, _Code);
+
 		if ( CAILogicDynamicIfHelper::getConditionSuccess() )
 		{
 			_SubActions[0]->executeAction(entity, event);
 		}
 		else if (_SubActions.size() == 2)
 		{
-
 			_SubActions[1]->executeAction(entity, event);
 		}
 		return true;
 	}
 protected:
-	CAIVariableParser::TVariable	_Var1;
-	CAIVariableParser::TOperator	_Op;
-	CAIVariableParser::TVariable	_Var2;
-
 	std::vector<IAILogicAction::TSmartPtr> _SubActions;
-	std::vector<std::string> _Args;
-
-	std::string _EventFullName;
-	static bool _Condition;
+	NLMISC::CSmartPtr<const AIVM::CByteCode> _Code;
 };
 
 //-------------------------------------------------------------------------------------------
@@ -2646,7 +2683,11 @@ groupFound:
 			}
 
 		}
+#ifndef NL_CPP17
 		std::random_shuffle(cellZones.begin(), cellZones.end());
+#else
+		std::shuffle(cellZones.begin(), cellZones.end(), CAIS::instance().RandomGenerator);
+#endif
 
 		const	CNpcZone	*spawnZone;
 		FOREACH(itCellZone, vector<CCellZone*>, cellZones)
@@ -3244,6 +3285,7 @@ IAILogicAction	*CAIEventReaction::newAILogicAction(const char *name,
 	BUILD(	"punctual_state_end",	CAILogicActionPunctualStateEnd	)
 	BUILD(	"random_select",		CAILogicActionRandomSelect		)
 	BUILD(	"set_state_timeout",	CAILogicActionSetStateTimeout	)
+	BUILD(	"set_punctual_state_timeout", CAILogicActionSetPunctualStateTimeout	)
 	BUILD(	"set_timer_t0",			CAILogicActionSetTimerT0		)
 	BUILD(	"set_timer_t1",			CAILogicActionSetTimerT1		)
 	BUILD(	"set_timer_t2",			CAILogicActionSetTimerT2		)

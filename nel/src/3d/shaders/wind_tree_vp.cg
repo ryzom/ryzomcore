@@ -1,0 +1,169 @@
+// wind_tree_vp.cg
+// Hierarchical wind tree vertex program with per-vertex Gouraud lighting.
+//
+// Compile: cgc -entry wind_tree_vp -profile arbvp1|vs_2_0 -O3
+//   -DNUM_POINT_LIGHTS=n (0-3) [-DUSE_SPECULAR] [-DUSE_NORMALIZE]
+//
+// Post-process for arbvp1: replace "program.local" with "program.env"
+// Post-process for vs_2_0: strip comment header
+
+#ifndef NUM_POINT_LIGHTS
+#define NUM_POINT_LIGHTS 0
+#endif
+
+// Transform
+uniform float4x4 mvp : register(c0);
+uniform float4 fog : register(c6);
+
+// Wind animation
+uniform float4 windLevel1 : register(c15);
+uniform float4 windLevel2[4] : register(c16);
+uniform float4 windLevel3[4] : register(c20);
+
+// Lighting
+uniform float4 ambient : register(c24);       // CTS+0
+uniform float4 diffuse0 : register(c25);      // CTS+1
+uniform float4 diffuse1 : register(c26);      // CTS+2
+uniform float4 diffuse2 : register(c27);      // CTS+3
+uniform float4 diffuse3 : register(c28);      // CTS+4
+
+#ifdef USE_SPECULAR
+  uniform float4 specular0 : register(c29);   // CTS+5  .w = shininess
+  uniform float4 specular1 : register(c30);   // CTS+6
+  uniform float4 specular2 : register(c31);   // CTS+7
+  uniform float4 specular3 : register(c32);   // CTS+8
+  uniform float4 sunDir : register(c33);      // CTS+9
+  uniform float4 diffuseAlpha : register(c34);// CTS+10
+  uniform float4 eyePos : register(c35);      // CTS+11
+  #if NUM_POINT_LIGHTS >= 1
+    uniform float4 plPos0 : register(c36);    // CTS+12
+  #endif
+  #if NUM_POINT_LIGHTS >= 2
+    uniform float4 plPos1 : register(c37);    // CTS+13
+  #endif
+  #if NUM_POINT_LIGHTS >= 3
+    uniform float4 plPos2 : register(c38);    // CTS+14
+  #endif
+#else
+  uniform float4 dirOrPos0 : register(c29);   // CTS+5  sun dir
+  #if NUM_POINT_LIGHTS >= 1
+    uniform float4 dirOrPos1 : register(c30); // CTS+6  PL0 pos
+  #endif
+  #if NUM_POINT_LIGHTS >= 2
+    uniform float4 dirOrPos2 : register(c31); // CTS+7  PL1 pos
+  #endif
+  #if NUM_POINT_LIGHTS >= 3
+    uniform float4 dirOrPos3 : register(c32); // CTS+8  PL2 pos
+  #endif
+  uniform float4 diffuseAlpha : register(c33);// CTS+9
+#endif
+
+void wind_tree_vp(
+  float4 iPos      : POSITION,
+  float4 iNormal   : NORMAL,
+  float4 iColor    : COLOR0,
+  float4 iTexCoord : TEXCOORD0,
+  out float4 oPos  : POSITION,
+  out float4 oCol0 : COLOR0,
+#ifdef USE_SPECULAR
+  out float4 oCol1 : COLOR1,
+#endif
+  out float4 oTex0 : TEXCOORD0,
+  out float  oFog  : FOG
+)
+{
+  // --- Wind Animation ---
+  // Extract 3 hierarchy blend factors from vertex color R channel
+  float3 factors = saturate(iPos.www * 0.0 + iColor.xxx * 3.0 + float3(0.0, -1.0, -2.0));
+  float4 pos = iPos;
+  pos.xyz += windLevel1.xyz * factors.x;
+
+  // Phase indices from G and B channels (0..3.99 -> int 0..3)
+  float2 phase = iColor.yz * 3.99;
+  int idx2 = (int)phase.x;
+  pos.xyz += windLevel2[idx2].xyz * factors.y;
+  int idx3 = (int)phase.y;
+  pos.xyz += windLevel3[idx3].xyz * factors.z;
+
+  // --- Lighting ---
+  float3 N = iNormal.xyz;
+#ifdef USE_NORMALIZE
+  N = normalize(N);
+#endif
+
+  float4 litColor = ambient;
+
+#ifdef USE_SPECULAR
+  float shininess = specular0.w;
+  float3 V = normalize(eyePos.xyz - pos.xyz);
+
+  // Sun
+  float3 H = normalize(sunDir.xyz + V);
+  float4 lr = lit(dot(N, sunDir.xyz), dot(N, H), shininess);
+  litColor += lr.y * diffuse0;
+  float4 spec = lr.z * specular0;
+
+  #if NUM_POINT_LIGHTS >= 1
+  {
+    float3 L = normalize(plPos0.xyz - pos.xyz);
+    H = normalize(L + V);
+    lr = lit(dot(N, L), dot(N, H), shininess);
+    litColor += lr.y * diffuse1;
+    spec += lr.z * specular1;
+  }
+  #endif
+  #if NUM_POINT_LIGHTS >= 2
+  {
+    float3 L = normalize(plPos1.xyz - pos.xyz);
+    H = normalize(L + V);
+    lr = lit(dot(N, L), dot(N, H), shininess);
+    litColor += lr.y * diffuse2;
+    spec += lr.z * specular2;
+  }
+  #endif
+  #if NUM_POINT_LIGHTS >= 3
+  {
+    float3 L = normalize(plPos2.xyz - pos.xyz);
+    H = normalize(L + V);
+    lr = lit(dot(N, L), dot(N, H), shininess);
+    litColor += lr.y * diffuse3;
+    spec += lr.z * specular3;
+  }
+  #endif
+
+  oCol1 = saturate(spec);
+  oCol0 = saturate(litColor * diffuseAlpha.zzzx + diffuseAlpha.xxxw);
+
+#else // Non-specular
+
+  // Sun
+  litColor += max(0.0, dot(N, dirOrPos0.xyz)) * diffuse0;
+
+  #if NUM_POINT_LIGHTS >= 1
+  {
+    float3 L = normalize(dirOrPos1.xyz - pos.xyz);
+    litColor += max(0.0, dot(N, L)) * diffuse1;
+  }
+  #endif
+  #if NUM_POINT_LIGHTS >= 2
+  {
+    float3 L = normalize(dirOrPos2.xyz - pos.xyz);
+    litColor += max(0.0, dot(N, L)) * diffuse2;
+  }
+  #endif
+  #if NUM_POINT_LIGHTS >= 3
+  {
+    float3 L = normalize(dirOrPos3.xyz - pos.xyz);
+    litColor += max(0.0, dot(N, L)) * diffuse3;
+  }
+  #endif
+
+  oCol0 = saturate(litColor * diffuseAlpha.zzzx + diffuseAlpha.xxxw);
+
+#endif // USE_SPECULAR
+
+  // --- Transform & Output ---
+  oPos = mul(mvp, pos);
+  oTex0 = iTexCoord;
+  oFog = dot(fog, pos);
+}

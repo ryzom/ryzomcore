@@ -21,7 +21,7 @@
 #include "attrib_widget.h"
 
 // Qt includes
-#include <QtGui/QInputDialog>
+#include <QInputDialog>
 
 // NeL includes
 #include <nel/3d/ps_attrib_maker.h>

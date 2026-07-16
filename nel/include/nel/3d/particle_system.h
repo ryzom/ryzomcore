@@ -137,6 +137,9 @@ public:
 
 		//// get the scene set by setScene()
 		CScene *getScene() const { return _Scene; }
+
+		/// Allocate a sequential ID for attrib makers (deterministic random seeding)
+		uint32 allocAttribMakerId() { return _NextAttribMakerId++; }
 		//@}
 
 	// *****************************************************************************************************
@@ -1128,6 +1131,11 @@ private:
 	/// Last update date of the system. Useful with sharing only, to avoid several motions.
 	sint64					 _LastUpdateDate;
 
+	/// Frame ID deduplication for stereo rendering: prevents double-processing of
+	/// animation and render state updates when the scene is rendered multiple times per frame.
+	uint64					 _LastAnimFrameId;
+	uint64					 _LastRenderFrameId;
+
 	// current edited element located (edition purpose only)
 	CPSLocated				 *_CurrEditedElementLocated;
 	// current edited located bindable, NULL means all binadable of a located. (edition purpose only)
@@ -1142,6 +1150,7 @@ private:
 
 	CScene					*_Scene;
 
+	uint32					_NextAttribMakerId; // sequential counter for deterministic attrib maker IDs
 
 	// contains the name of the system. (VERSION >= 2 only)
 	std::string _Name;
@@ -1253,6 +1262,7 @@ public:
 	static TAnimationTime								InverseTotalEllapsedTime;
 	static TAnimationTime								RealEllapsedTime;
 	static float										RealEllapsedTimeRatio;
+	static uint32										RandomSeed; // deterministic seed for CRandomIterator, set per frame from _FrameId
 	static bool											InsideSimLoop;
 	static bool											InsideRemoveLoop;
 	static bool											InsideNewElementsLoop;

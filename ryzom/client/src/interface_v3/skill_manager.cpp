@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2019-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -148,21 +148,21 @@ void CSkillManager::initInGame()
 
 
 	// **** Player State management
-	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
+	NLGUI::CDBManager *pCDBM = NLGUI::CDBManager::getInstance();
 	// get now the nodes on Skill values
 	for(i=0;i<SKILLS::NUM_SKILLS;i++)
 	{
-		_SkillValues[i]= NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:CHARACTER_INFO:SKILLS:%d:SKILL", i), false);
-		_SkillBaseValues[i]= NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:CHARACTER_INFO:SKILLS:%d:BaseSKILL", i), false);
+		_SkillValues[i] = pCDBM->getDbProp(toString("SERVER:CHARACTER_INFO:SKILLS:%d:SKILL", i), false);
+		_SkillBaseValues[i] = pCDBM->getDbProp(toString("SERVER:CHARACTER_INFO:SKILLS:%d:BaseSKILL", i), false);
 	}
 
 	// compute max child values
 	computeMaxChildValues(); // must be called after setting all _SkillBaseValues
 
 	// Get a node used to inform interface that a skill has changed
-	_TrackSkillChange= NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:TRACK_SKILL_CHANGE", true);
+	_TrackSkillChange = pCDBM->getDbProp("UI:VARIABLES:TRACK_SKILL_CHANGE", true);
 	// Add a branch observer on skill value change
-	NLGUI::CDBManager::getInstance()->addBranchObserver( "SERVER:CHARACTER_INFO:SKILLS", &_SkillChangeObs );
+	pCDBM->addBranchObserver("SERVER:CHARACTER_INFO:SKILLS", &_SkillChangeObs);
 }
 
 // ***************************************************************************

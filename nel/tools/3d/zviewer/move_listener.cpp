@@ -69,7 +69,7 @@ CMoveListener::CMoveListener()
 \****************************************************************/
 void CMoveListener::changeViewMatrix()
 {
-	float time = (sint64)(_CurrentTime-_LastTime)*0.001f;
+	const float time(deltaTimeInSeconds());
 
 	// Forward
 	if(CNELU::AsyncListener.isKeyDown(KeyUP))
@@ -204,8 +204,6 @@ void CMoveListener::operator()(const CEvent& event)
 			_Scene->getDriver()->setMousePos(0.5,0.5);
 		}
 	}
-
-	changeViewMatrix();
 }
 
 

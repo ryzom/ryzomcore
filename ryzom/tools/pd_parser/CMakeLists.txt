@@ -2,7 +2,10 @@ FILE(GLOB SRC *.cpp *.h)
 
 ADD_EXECUTABLE(pd_parser ${SRC})
 
-TARGET_LINK_LIBRARIES(pd_parser nelmisc)
+TARGET_LINK_LIBRARIES(pd_parser
+        PRIVATE
+        NeL::misc
+)
 
 NL_DEFAULT_PROPS(pd_parser "Ryzom, Tools: PD Parser")
 NL_ADD_RUNTIME_FLAGS(pd_parser)

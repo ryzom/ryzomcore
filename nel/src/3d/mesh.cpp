@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2021  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -31,6 +34,7 @@
 #include "nel/3d/visual_collision_mesh.h"
 #include "nel/3d/meshvp_wind_tree.h"
 #include "nel/3d/vertex_stream_manager.h"
+#include "nel/3d/gpu_skin_vp.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -131,6 +135,7 @@ CMeshGeom::CMeshGeom()
 	_BoneIdComputed = false;
 	_BoneIdExtended= false;
 	_PreciseClipping= false;
+	_GPUSkinBuilt= false;
 }
 
 
@@ -441,7 +446,7 @@ void	CMeshGeom::build (CMesh::CMeshBuild &m, uint numMaxMaterial)
 
 	// Set the vertex buffer preferred memory
 	bool avoidVBHard= _Skinned || ( _MeshMorpher && !_MeshMorpher->BlendShapes.empty() );
-	_VBuffer.setPreferredMemory (avoidVBHard?CVertexBuffer::RAMPreferred:CVertexBuffer::StaticPreferred, false);
+	_VBuffer.setBufferUsage (avoidVBHard?CVertexBuffer::CpuReadWrite:CVertexBuffer::Immutable, false);
 
 	// End!!
 	// Some runtime not serialized compilation
@@ -535,7 +540,7 @@ void	CMeshGeom::render(IDriver *drv, CTransformShape *trans, float polygonCount,
 
 	// Soft vb if not supported by the driver
 	if (drv->slowUnlockVertexBufferHard())
-		_VBuffer.setPreferredMemory (CVertexBuffer::RAMPreferred, false);
+		_VBuffer.setBufferUsage (CVertexBuffer::CpuReadWrite, false);
 
 	// get the skeleton model to which I am binded (else NULL).
 	CSkeletonModel		*skeleton;
@@ -602,6 +607,8 @@ void	CMeshGeom::render(IDriver *drv, CTransformShape *trans, float polygonCount,
 	bool	useMeshVP= _MeshVertexProgram != NULL;
 	if( useMeshVP )
 	{
+		nlassert(_VBuffer.getVertexFormat() == (CVertexBuffer::PositionFlag | CVertexBuffer::NormalFlag | CVertexBuffer::TexCoord0Flag | CVertexBuffer::PrimaryColorFlag));
+		
 		CMatrix		invertedObjectMatrix;
 		invertedObjectMatrix = trans->getWorldMatrix().inverted();
 		// really ok if success to begin VP
@@ -1063,7 +1070,7 @@ void	CMeshGeom::compileRunTime()
 		_SupportMBRFlags|= MBRSortPerMaterial;
 
 	bool avoidVBHard= _Skinned || ( _MeshMorpher && !_MeshMorpher->BlendShapes.empty() );
-	_VBuffer.setPreferredMemory (avoidVBHard?CVertexBuffer::RAMPreferred:CVertexBuffer::StaticPreferred, false);
+	_VBuffer.setBufferUsage (avoidVBHard?CVertexBuffer::CpuReadWrite:CVertexBuffer::Immutable, false);
 }
 
 // ***************************************************************************
@@ -1642,6 +1649,8 @@ void	CMeshGeom::computeBonesId (CSkeletonModel *skeleton)
 		_BoneIdExtended= true;
 	}
 
+	// Build GPU skinning VB now that bone indices are remapped
+	buildGPUSkinVB();
 }
 
 
@@ -2074,7 +2083,7 @@ void	CMeshGeom::profileSceneRender(CRenderTrav *rdrTrav, CTransformShape *trans,
 			_VBuffer.getVertexFormat(), triCount);
 
 		// VBHard
-		if(_VBuffer.getPreferredMemory()!=CVertexBuffer::RAMPreferred)
+		if(_VBuffer.getBufferUsage()!=CVertexBuffer::CpuReadWrite)
 			rdrTrav->Scene->BenchRes.NumMeshVBufferHard++;
 		else
 			rdrTrav->Scene->BenchRes.NumMeshVBufferStd++;
@@ -2430,7 +2439,6 @@ CMesh::CCorner::CCorner()
 // ***************************************************************************
 void CMesh::CCorner::serial(NLMISC::IStream &f)
 {
-	nlassert(0); // not used
 	f.serial(Vertex);
 	f.serial(Normal);
 	for(int i=0;i<CVertexBuffer::MaxStage;++i) f.serial(Uvws[i]);
@@ -2458,21 +2466,70 @@ void CMesh::CSkinWeight::serial(NLMISC::IStream &f)
 }
 
 // ***************************************************************************
-/* Serialization is not used.
+void CMesh::CVertLink::serial(NLMISC::IStream &f)
+{
+	f.serial(nFace);
+	f.serial(nCorner);
+	f.serial(VertVB);
+}
+
+// ***************************************************************************
+void CMesh::CInterfaceVertex::serial(NLMISC::IStream &f)
+{
+	f.serial(Pos);
+	f.serial(Normal);
+}
+
+// ***************************************************************************
+void CMesh::CInterface::serial(NLMISC::IStream &f)
+{
+	f.serialCont(Vertices);
+}
+
+// ***************************************************************************
+void CMesh::CInterfaceLink::serial(NLMISC::IStream &f)
+{
+	f.serial(InterfaceId);
+	f.serial(InterfaceVertexId);
+}
+
+// ***************************************************************************
 void CMesh::CMeshBuild::serial(NLMISC::IStream &f)
 {
-	sint	ver= f.serialVersion(0);
+	/* Versioned pre-build mesh state — the 1_export -> standalone-lightmapper scene-graph
+	 * contract (never serialized before that; see mesh.h). Bump the version and keep old
+	 * readers working when fields change. */
+	(void)f.serialVersion(0);
 
-	// Serial mesh base (material info).
-	CMeshBaseBuild::serial(f);
+	f.serial(VertexFlags);
+	for(uint i=0;i<CVertexBuffer::MaxStage;++i) f.serial(NumCoords[i]);
+	for(uint i=0;i<CVertexBuffer::MaxStage;++i) f.serial(UVRouting[i]);
+	f.serialCont(Vertices);
+	f.serialCont(SkinWeights);
+	f.serialCont(BonesNames);
+	f.serialCont(Faces);
+	f.serialCont(BlendShapes);
+	f.serialCont(VertLink);
 
-	// Serial Geometry.
-	f.serial( VertexFlags );
-	f.serialCont( Vertices );
-	f.serialCont( SkinWeights );
-	f.serialCont( Faces );
+	// MeshVertexProgram: polymorphic smart pointer (same discipline as CMeshGeom::serial)
+	{
+		IMeshVertexProgram *mvp;
+		if (f.isReading())
+		{
+			f.serialPolyPtr(mvp);
+			MeshVertexProgram = mvp;
+		}
+		else
+		{
+			mvp = MeshVertexProgram;
+			f.serialPolyPtr(mvp);
+		}
+	}
 
-}*/
+	f.serialCont(Interfaces);
+	f.serialCont(InterfaceLinks);
+	f.serial(InterfaceVertexFlag);
+}
 
 
 // ************************************
@@ -2820,6 +2877,245 @@ void	CMesh::buildSystemGeometry()
 	totalMem+= _SystemGeometry.Vertices.size()*sizeof(CVector);
 	totalMem+= _SystemGeometry.Triangles.size()*sizeof(uint32);
 	nlinfo("CMesh: TotalMem: %d", totalMem);*/
+}
+
+
+// ***************************************************************************
+void	CMeshGeom::buildGPUSkinVB()
+{
+	if (_GPUSkinBuilt)
+		return;
+
+	// Only for skinned meshes
+	if (!_Skinned)
+		return;
+
+	// No GPU skinning with mesh vertex program (wind trees etc.)
+	if (_MeshVertexProgram)
+		return;
+
+	// No GPU skinning with blend shapes (need CPU morpher)
+	if (_MeshMorpher && !_MeshMorpher->BlendShapes.empty())
+		return;
+
+	// Only support the simplified VB format (same constraint as CPU vertex stream path)
+	if (!_OriginalSkinNormals.size() || _OriginalTGSpace.size())
+		return;
+
+	uint numVertices = (uint)_OriginalSkinVertices.size();
+	if (numVertices == 0 || _MatrixBlocks.empty())
+		return;
+
+	// Build vertex-to-block ownership map by scanning all matrix blocks' IBs
+	std::vector<sint> vertexBlock(numVertices, -1);
+	for (uint b = 0; b < _MatrixBlocks.size(); b++)
+	{
+		CMatrixBlock &mb = _MatrixBlocks[b];
+		for (uint rp = 0; rp < mb.RdrPass.size(); rp++)
+		{
+			CIndexBuffer &srcIB = mb.RdrPass[rp].PBlock;
+			CIndexBufferRead iba;
+			srcIB.lock(iba);
+			uint numIdx = srcIB.getNumIndexes();
+			if (iba.getFormat() == CIndexBuffer::Indices32)
+			{
+				const uint32 *pIdx = (const uint32 *)iba.getPtr();
+				for (uint i = 0; i < numIdx; i++)
+				{
+					if (pIdx[i] < numVertices && vertexBlock[pIdx[i]] < 0)
+						vertexBlock[pIdx[i]] = (sint)b;
+				}
+			}
+			else
+			{
+				const uint16 *pIdx = (const uint16 *)iba.getPtr();
+				for (uint i = 0; i < numIdx; i++)
+				{
+					if (pIdx[i] < numVertices && vertexBlock[pIdx[i]] < 0)
+						vertexBlock[pIdx[i]] = (sint)b;
+				}
+			}
+		}
+	}
+
+	// Read palette/weight data from VBuffer
+	CVertexBufferRead vba;
+	_VBuffer.lock(vba);
+	bool hasUV = (_VBuffer.getVertexFormat() & CVertexBuffer::TexCoord0Flag) != 0;
+
+	// Validate all bone indices fit within GPU skinning limits
+	for (uint v = 0; v < numVertices; v++)
+	{
+		if (vertexBlock[v] < 0) continue;
+		CMatrixBlock &mb = _MatrixBlocks[vertexBlock[v]];
+		const CPaletteSkin *pal = (const CPaletteSkin *)vba.getPaletteSkinPointer(v);
+		const float *wgt = (const float *)vba.getWeightPointer(v);
+		for (uint i = 0; i < NL3D_MESH_SKINNING_MAX_MATRIX; i++)
+		{
+			if (wgt[i] > 0 || i == 0)
+			{
+				uint32 skelBoneIdx = mb.MatrixId[pal->MatrixId[i]];
+				if (skelBoneIdx >= NL3D_GPU_SKIN_MAX_BONES)
+					return; // Fall back to CPU skinning
+			}
+		}
+	}
+
+	// Setup GPU VB format: Position + Normal + TexCoord0 + Weight + PaletteSkin
+	_GPUSkinVB.clearValueEx();
+	_GPUSkinVB.addValueEx(CVertexBuffer::Position, CVertexBuffer::Float3);
+	_GPUSkinVB.addValueEx(CVertexBuffer::Normal, CVertexBuffer::Float3);
+	_GPUSkinVB.addValueEx(CVertexBuffer::TexCoord0, CVertexBuffer::Float2);
+	_GPUSkinVB.addValueEx(CVertexBuffer::Weight, CVertexBuffer::Float4);
+	_GPUSkinVB.addValueEx(CVertexBuffer::PaletteSkin, CVertexBuffer::UChar4);
+	_GPUSkinVB.initEx();
+	_GPUSkinVB.setBufferUsage(CVertexBuffer::Immutable, false);
+	_GPUSkinVB.setNumVertices(numVertices);
+
+	{
+		CVertexBufferReadWrite vbaGpu;
+		_GPUSkinVB.lock(vbaGpu);
+
+		for (uint v = 0; v < numVertices; v++)
+		{
+			// Position (bind-pose)
+			vbaGpu.setValueFloat3Ex(CVertexBuffer::Position, v, _OriginalSkinVertices[v]);
+
+			// Normal (bind-pose)
+			vbaGpu.setValueFloat3Ex(CVertexBuffer::Normal, v, _OriginalSkinNormals[v]);
+
+			// UV
+			float u = 0, vc = 0;
+			if (hasUV)
+			{
+				const CUV *uv = vba.getTexCoordPointer(v, 0);
+				u = uv->U;
+				vc = uv->V;
+			}
+			vbaGpu.setValueFloat2Ex(CVertexBuffer::TexCoord0, v, u, vc);
+
+			// Weight (unchanged from VBuffer)
+			const float *wgt = (const float *)vba.getWeightPointer(v);
+			vbaGpu.setValueFloat4Ex(CVertexBuffer::Weight, v, wgt[0], wgt[1], wgt[2], wgt[3]);
+
+			// PaletteSkin: remap per-block-local indices to skeleton bone indices
+			if (vertexBlock[v] >= 0)
+			{
+				CMatrixBlock &mb = _MatrixBlocks[vertexBlock[v]];
+				const CPaletteSkin *pal = (const CPaletteSkin *)vba.getPaletteSkinPointer(v);
+				vbaGpu.setValueUChar4Ex(CVertexBuffer::PaletteSkin, v,
+					CRGBA((uint8)mb.MatrixId[pal->MatrixId[0]],
+					       (uint8)mb.MatrixId[pal->MatrixId[1]],
+					       (uint8)mb.MatrixId[pal->MatrixId[2]],
+					       (uint8)mb.MatrixId[pal->MatrixId[3]]));
+			}
+			else
+			{
+				vbaGpu.setValueUChar4Ex(CVertexBuffer::PaletteSkin, v, CRGBA(0, 0, 0, 0));
+			}
+		}
+	}
+
+	// Build combined IB by merging all matrix blocks' render passes, grouped by MaterialId.
+	// First, collect all materials used and count total indices.
+	std::map<uint32, uint32> materialIndexCount;
+	for (uint b = 0; b < _MatrixBlocks.size(); b++)
+	{
+		for (uint rp = 0; rp < _MatrixBlocks[b].RdrPass.size(); rp++)
+		{
+			CRdrPass &pass = _MatrixBlocks[b].RdrPass[rp];
+			materialIndexCount[pass.MaterialId] += pass.PBlock.getNumIndexes();
+		}
+	}
+
+	uint32 totalIndices = 0;
+	for (std::map<uint32, uint32>::iterator it = materialIndexCount.begin(); it != materialIndexCount.end(); ++it)
+		totalIndices += it->second;
+
+	_GPUSkinIB.setFormat(NL_MESH_INDEX_FORMAT);
+	_GPUSkinIB.setBufferUsage(CIndexBuffer::Immutable, false);
+	_GPUSkinIB.setNumIndexes(totalIndices);
+
+	_GPUSkinPasses.clear();
+
+	{
+		CIndexBufferReadWrite iba;
+		_GPUSkinIB.lock(iba);
+		uint32 offset = 0;
+
+		for (std::map<uint32, uint32>::iterator it = materialIndexCount.begin(); it != materialIndexCount.end(); ++it)
+		{
+			uint32 matId = it->first;
+			GPURdrPass gpuPass;
+			gpuPass.MaterialId = matId;
+			gpuPass.IBOffset = offset;
+			gpuPass.IBCount = 0;
+
+			// Copy all triangles for this material from all matrix blocks
+			for (uint b = 0; b < _MatrixBlocks.size(); b++)
+			{
+				for (uint rp = 0; rp < _MatrixBlocks[b].RdrPass.size(); rp++)
+				{
+					CRdrPass &pass = _MatrixBlocks[b].RdrPass[rp];
+					if (pass.MaterialId != matId)
+						continue;
+
+					CIndexBufferRead srcIba;
+					pass.PBlock.lock(srcIba);
+					uint32 numIdx = pass.PBlock.getNumIndexes();
+					uint32 numTris = numIdx / 3;
+
+					for (uint32 t = 0; t < numTris; t++)
+					{
+						uint32 i0, i1, i2;
+						if (srcIba.getFormat() == CIndexBuffer::Indices16)
+						{
+							const uint16 *p = (const uint16 *)srcIba.getPtr(t * 3);
+							i0 = p[0]; i1 = p[1]; i2 = p[2];
+						}
+						else
+						{
+							const uint32 *p = (const uint32 *)srcIba.getPtr(t * 3);
+							i0 = p[0]; i1 = p[1]; i2 = p[2];
+						}
+						iba.setTri(offset + gpuPass.IBCount + t * 3, i0, i1, i2);
+					}
+					gpuPass.IBCount += numIdx;
+				}
+			}
+
+			offset += gpuPass.IBCount;
+			_GPUSkinPasses.push_back(gpuPass);
+		}
+	}
+
+	_GPUSkinBuilt = true;
+}
+
+
+// ***************************************************************************
+void	CMeshGeom::renderGPUSkin(CMeshInstance *mi, CSkeletonModel *skeleton)
+{
+	nlassert(_GPUSkinBuilt);
+
+	CScene *ownerScene = mi->getOwnerScene();
+	CRenderTrav *renderTrav = &ownerScene->getRenderTrav();
+	IDriver *drv = renderTrav->getDriver();
+	nlassert(drv);
+
+	// Activate the static GPU skin VB and combined IB
+	drv->activeVertexBuffer(_GPUSkinVB);
+	drv->activeIndexBuffer(_GPUSkinIB);
+
+	// Render each material pass
+	for (uint rp = 0; rp < _GPUSkinPasses.size(); rp++)
+	{
+		const GPURdrPass &pass = _GPUSkinPasses[rp];
+		if (pass.IBCount == 0) continue;
+
+		CMaterial &material = mi->Materials[pass.MaterialId];
+		drv->renderTriangles(material, pass.IBOffset, pass.IBCount / 3);
+	}
 }
 
 

@@ -4,17 +4,19 @@ LIST(REMOVE_ITEM SRC ${CMAKE_CURRENT_SOURCE_DIR}/service.cpp ${CMAKE_CURRENT_SOU
 
 ADD_EXECUTABLE(ryzom_dynamic_scenario_service WIN32 ${SRC})
 
-INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR})
+TARGET_INCLUDE_DIRECTORIES(ryzom_dynamic_scenario_service PRIVATE ${RZ_SERVER_SRC_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_dynamic_scenario_service
-						ryzom_adminmodules
-						${RYZOM_GAMESHARE_LIBRARIES}
-						ryzom_servershare
-						ryzom_aishare
-						${NELMISC_LIBRARIES}
-						${NELNET_LIBRARIES}
-						${NELGEORGES_LIBRARIES}
-						${NELLIGO_LIBRARIES})
+        PRIVATE
+        Ryzom::adminmodules
+        Ryzom::gameshare
+        Ryzom::servershare
+        Ryzom::aishare
+        NeL::misc
+        NeL::net
+        NeL::georges
+        NeL::ligo
+)
 
 NL_DEFAULT_PROPS(ryzom_dynamic_scenario_service "Ryzom, Services: Dynamic Scenario Service (DSS)")
 NL_ADD_RUNTIME_FLAGS(ryzom_dynamic_scenario_service)

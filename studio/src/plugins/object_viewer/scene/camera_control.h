@@ -23,13 +23,13 @@
 // STL includes
 
 // Qt includes
-#include <QtCore/QSignalMapper>
-#include <QtGui/QAction>
-#include <QtGui/QComboBox>
-#include <QtGui/QSpinBox>
-#include <QtGui/QLabel>
-#include <QtGui/QMenu>
-#include <QtGui/QToolBar>
+#include <QSignalMapper>
+#include <QAction>
+#include <QComboBox>
+#include <QSpinBox>
+#include <QLabel>
+#include <QMenu>
+#include <QToolBar>
 
 // NeL includes
 #include <nel/3d/u_camera.h>

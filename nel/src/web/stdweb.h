@@ -55,7 +55,7 @@
 #include <utility>
 #include <vector>
 
-#include <nel/misc/types_nl.h>
+#include "nel/misc/types_nl.h"
 
 #ifdef NL_OS_WINDOWS
 #	define WIN32_LEAN_AND_MEAN
@@ -67,8 +67,8 @@
 #		define WINVER 0x0500
 #		define NOMINMAX
 #	endif
-#	include <WinSock2.h>
-#	include <Windows.h>
+#	include <winsock2.h>
+#	include <windows.h>
 #	include <wincrypt.h>
 #	ifdef X509_NAME
 #		undef X509_NAME
@@ -83,6 +83,6 @@
 
 #include <curl/curl.h>
 
-#include <nel/misc/debug.h>
+#include "nel/misc/debug.h"
 
 #endif // NL_STDWEB_H

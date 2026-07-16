@@ -22,6 +22,7 @@
 
 #include "nel/misc/types_nl.h"
 #include "nel/misc/quat.h"
+#include "nel/misc/matrix.h"
 #include "animation_time.h"
 #include <map>
 
@@ -80,6 +81,29 @@ public:
 	virtual ~ILandscapePolyDrawingCallback() {}
 	virtual void beginPolyDrawing() = 0;
 	virtual void endPolyDrawing() = 0;
+};
+
+class UDriver;
+class CFrustum;
+class UTexture;
+
+// info for a realtime water reflection pass or an active reflection
+struct UWaterReflectionInfo
+{
+	/// Reflection render target texture (owned by the scene; valid until the next reflection passes)
+	UTexture		*Texture;
+	/// World -> reflected camera space matrix
+	NLMISC::CMatrix	ReflViewMatrix;
+	/// Off-center sub-frustum used for the reflection render (Left, Right, Bottom, Top, Near, Far)
+	float			FrustumLeft, FrustumRight, FrustumBottom, FrustumTop, FrustumNear, FrustumFar;
+	/** Maps the sub-frustum's [0,1] projection onto the render target's
+	  * active sub-region (tile): uv = bias + projection * scale. Several
+	  * passes may tile into one shared render target. The active viewport
+	  * of the render target is (UBias, VBias, UScale, VScale). */
+	float			UScale, VScale;
+	float			UBias, VBias;
+	/// Water plane height
+	float			PlaneZ;
 };
 
 
@@ -594,6 +618,11 @@ public:
 	/// get Enable Polygon Smoothing flag
 	virtual	bool			getEnableShadowPolySmooth() const =0;
 
+	/// Enable/Disable GPU Skinning (requires driver support for glsl3vi profile)
+	virtual	void			enableGPUSkinning(bool enable) =0;
+	/// get GPU Skinning enabled flag
+	virtual	bool			isGPUSkinningEnabled() const =0;
+
 	/// ShadowMap Distance Fade Start (40 default)
 	virtual	void			setShadowMapDistFadeStart(float dist) =0;
 	virtual	float			getShadowMapDistFadeStart() const =0;
@@ -641,6 +670,72 @@ public:
 	  * Should be called at the beginning of the frame before anything is rendered.
 	  */
 	virtual void		  updateWaterEnvMaps(TGlobalAnimationTime time) = 0;
+	/// Force all water surfaces in the scene to use the scene water envmap
+	virtual void		  setForceWaterEnvMap(bool force) = 0;
+	virtual bool		  getForceWaterEnvMap() const = 0;
+	// @}
+
+	/// \name Realtime planar water reflections
+	// @{
+	/** Maximum number of water planes rendered with realtime planar reflection
+	  * per frame, largest on-screen planes prioritized.
+	  * -1 = unlimited, 0 = realtime reflections disabled (default -1). */
+	virtual void		  setMaxRealtimeWaterReflections(sint maxCount) = 0;
+	virtual sint		  getMaxRealtimeWaterReflections() const = 0;
+	/// Enable realtime reflection on all water surfaces regardless of the per-shape artist flag
+	virtual void		  setForceRealtimeWaterReflections(bool force) = 0;
+	virtual bool		  getForceRealtimeWaterReflections() const = 0;
+	/** Select the water planes to reflect this frame and save the scene and
+	  * driver state; returns the number of reflection passes to render.
+	  * Call once per frame before the scene render (in the scene
+	  * reflections pass of the render loop), with the scene camera set up
+	  * for the frame. For each pass, call beginWaterReflectionPass(), render
+	  * the scene content through your own render logic (the reflected
+	  * camera is set as the scene camera; use keepTrav-style flags as for
+	  * any replicated pass), then endWaterReflectionPass(); finish with
+	  * endWaterReflectionPasses() (safe to call when zero passes were
+	  * returned). */
+	virtual uint		  beginWaterReflectionPasses() = 0;
+	/** Select the current water reflection view (eye), default 0. Stereo
+	  * render loops set this before each eye's reflection pass and before
+	  * each eye's scene render, so every eye reflects from its own camera.
+	  * Reflections are rendered and published per view; plane selection is
+	  * shared. */
+	virtual void		  setWaterReflectionView(uint view) = 0;
+	virtual uint		  getWaterReflectionView() const = 0;
+	/** Set up a reflection pass: binds and clears the render target,
+	  * restricts rendering to the active sub-region, sets the scene camera
+	  * to the reflected camera and enables the water clip plane. Pass state
+	  * for the caller's own drawing is returned in 'info'. */
+	virtual void		  beginWaterReflectionPass(uint pass, UWaterReflectionInfo &info) = 0;
+	/// Publish the reflection rendered by the pass for the coming main render
+	virtual void		  endWaterReflectionPass(uint pass) = 0;
+	/// Restore scene and driver state after the reflection passes
+	virtual void		  endWaterReflectionPasses() = 0;
+	/// True while rendering inside a water reflection pass
+	virtual bool		  isRenderingWaterReflection() const = 0;
+	/// Number of water planes with an active realtime reflection this frame
+	virtual uint		  getNumActiveWaterReflections() const = 0;
+	/// Debug/display info for an active reflection (index 0..getNumActiveWaterReflections()-1)
+	virtual bool		  getActiveWaterReflectionInfo(uint index, UWaterReflectionInfo &info) = 0;
+	/// Render reflections at half resolution (default true)
+	virtual void		  setWaterReflectionHalfRes(bool halfRes) = 0;
+	virtual bool		  getWaterReflectionHalfRes() const = 0;
+	/// Round reflection render target sizes down to powers of two (default true)
+	virtual void		  setWaterReflectionPow2(bool pow2) = 0;
+	virtual bool		  getWaterReflectionPow2() const = 0;
+	/// Fixed window-derived render target allocation with active sub-region (default true); false = dynamic allocation
+	virtual void		  setWaterReflectionFixedSize(bool fixedSize) = 0;
+	virtual bool		  getWaterReflectionFixedSize() const = 0;
+	/** Maximum reflection render target textures per view (eye). In fixed
+	  * allocation mode, reflection passes pack their active sub-regions as
+	  * tiles into shared textures, so the reflection budget can be raised
+	  * without one render target allocation per water plane; when the
+	  * texture budget is full, tiles shrink to fit instead of dropping
+	  * planes. -1 = as many textures as needed (default). Ignored in
+	  * dynamic allocation mode. */
+	virtual void		  setWaterReflectionMaxTextures(sint maxTextures) = 0;
+	virtual sint		  getWaterReflectionMaxTextures() const = 0;
 	// @}
 };
 

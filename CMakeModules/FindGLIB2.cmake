@@ -1,217 +1,151 @@
-# - Try to find GLib2
-# Once done this will define
+# SPDX-FileCopyrightText: 2008 Laurent Montel <montel@kde.org>
 #
-#  GLIB2_FOUND - system has GLib2
-#  GLIB2_INCLUDE_DIRS - the GLib2 include directory
-#  GLIB2_LIBRARIES - Link these to use GLib2
-#
-#  HAVE_GLIB_GREGEX_H  glib has gregex.h header and 
-#                      supports g_regex_match_simple
-#
-#  Copyright (c) 2006 Andreas Schneider <mail@cynapses.org>
-#  Copyright (c) 2006 Philippe Bernery <philippe.bernery@gmail.com>
-#  Copyright (c) 2007 Daniel Gollub <dgollub@suse.de>
-#  Copyright (c) 2007 Alban Browaeys <prahal@yahoo.com>
-#  Copyright (c) 2008 Michael Bell <michael.bell@web.de>
-#  Copyright (c) 2008 Bjoern Ricks <bjoern.ricks@googlemail.com>
-#
-#  Redistribution and use is allowed according to the terms of the New
-#  BSD license.
-#  For details see the accompanying COPYING-CMAKE-SCRIPTS file.
-#
+# SPDX-License-Identifier: BSD-3-Clause
 
 
-IF (GLIB2_LIBRARIES AND GLIB2_INCLUDE_DIRS )
-  # in cache already
-  SET(GLIB2_FOUND TRUE)
-ELSE (GLIB2_LIBRARIES AND GLIB2_INCLUDE_DIRS )
+#[=======================================================================[.rst:
+FindGLIB2
+---------
 
-  INCLUDE(FindPkgConfig)
+Try to locate the GLib2 library.
+If found, this will define the following variables:
 
-  ## Glib
-  IF ( GLIB2_FIND_REQUIRED )
-    SET( _pkgconfig_REQUIRED "REQUIRED" )
-  ELSE ( GLIB2_FIND_REQUIRED )
-    SET( _pkgconfig_REQUIRED "" )
-  ENDIF ( GLIB2_FIND_REQUIRED )
+``GLIB2_FOUND``
+    True if the GLib2 library is available
+``GLIB2_INCLUDE_DIRS``
+    The GLib2 include directories
+``GLIB2_LIBRARIES``
+    The GLib2 libraries for linking
+``GLIB2_INCLUDE_DIR``
+    Deprecated, use ``GLIB2_INCLUDE_DIRS``
+``GLIB2_LIBRARY``
+    Deprecated, use ``GLIB2_LIBRARIES``
 
-  IF ( GLIB2_MIN_VERSION )
-    PKG_SEARCH_MODULE( GLIB2 ${_pkgconfig_REQUIRED} glib-2.0>=${GLIB2_MIN_VERSION} )
-  ELSE ( GLIB2_MIN_VERSION )
-    PKG_SEARCH_MODULE( GLIB2 ${_pkgconfig_REQUIRED} glib-2.0 )
-  ENDIF ( GLIB2_MIN_VERSION )
-  IF ( PKG_CONFIG_FOUND )
-    IF ( GLIB2_FOUND )
-      SET ( GLIB2_CORE_FOUND TRUE )
-    ELSE ( GLIB2_FOUND )
-      SET ( GLIB2_CORE_FOUND FALSE )
-    ENDIF ( GLIB2_FOUND )
-  ENDIF ( PKG_CONFIG_FOUND )
+If ``GLIB2_FOUND`` is TRUE, it will also define the following
+imported target:
 
-  # Look for glib2 include dir and libraries w/o pkgconfig
-  IF ( NOT GLIB2_FOUND AND NOT PKG_CONFIG_FOUND )
-    FIND_PATH(
-      _glibconfig_include_DIR
-    NAMES
-      glibconfig.h
-    PATHS
-      /opt/gnome/lib64
-      /opt/gnome/lib
-      /opt/lib/
-      /opt/local/lib
-      /sw/lib/
-      /usr/lib64
-      /usr/lib
-      /usr/local/include
-      ${CMAKE_LIBRARY_PATH}
-    PATH_SUFFIXES
-      glib-2.0/include
-    )
+``GLIB2::GLIB2``
+    The GLIB2 library
+``GLIB2::GTHREAD2``
+    The GThread2 library (since 6.7.0)
+``GLIB2::GOBJECT``
+    The GObject library (since 6.7.0)
+``GLIB2::GIO``
+    The GIO library (since 6.7.0)
 
-    FIND_PATH(
-      _glib2_include_DIR
-    NAMES
-      glib.h
-    PATHS
-      /opt/gnome/include
-      /opt/local/include
-      /sw/include
-      /usr/include
-      /usr/local/include
-    PATH_SUFFIXES
-      glib-2.0
-    )
+Since 5.41.0.
+#]=======================================================================]
 
-    #MESSAGE(STATUS "Glib headers: ${_glib2_include_DIR}")
+find_package(PkgConfig QUIET)
+pkg_check_modules(PC_GLIB2 QUIET glib-2.0)
 
-    FIND_LIBRARY(
-      _glib2_link_DIR
-    NAMES
-      glib-2.0
-      glib
-    PATHS
-      /opt/gnome/lib
-      /opt/local/lib
-      /sw/lib
-      /usr/lib
-      /usr/local/lib
-    )
-    IF ( _glib2_include_DIR AND _glib2_link_DIR )
-        SET ( _glib2_FOUND TRUE )
-    ENDIF ( _glib2_include_DIR AND _glib2_link_DIR )
+find_path(GLIB2_INCLUDE_DIRS
+        NAMES glib.h
+        HINTS ${PC_GLIB2_INCLUDEDIR}
+        PATH_SUFFIXES glib-2.0)
 
+find_library(GLIB2_LIBRARIES
+        NAMES glib-2.0
+        HINTS ${PC_GLIB2_LIBDIR}
+)
 
-    IF ( _glib2_FOUND )
-        SET ( GLIB2_INCLUDE_DIRS ${_glib2_include_DIR} ${_glibconfig_include_DIR} )
-        SET ( GLIB2_LIBRARIES ${_glib2_link_DIR} )
-        SET ( GLIB2_CORE_FOUND TRUE )
-    ELSE ( _glib2_FOUND )
-        SET ( GLIB2_CORE_FOUND FALSE )
-    ENDIF ( _glib2_FOUND )
+pkg_check_modules(PC_GTHREAD2 QUIET gthread-2.0)
 
-    # Handle dependencies
-    # libintl
-    IF ( NOT LIBINTL_FOUND )
-      FIND_PATH(LIBINTL_INCLUDE_DIR
-      NAMES
-        libintl.h
-      PATHS
-        /opt/gnome/include
-        /opt/local/include
-        /sw/include
-        /usr/include
-        /usr/local/include
-      )
+find_library(GTHREAD2_LIBRARIES
+        NAMES gthread-2.0
+        HINTS ${PC_GTHREAD2_LIBDIR}
+)
 
-      FIND_LIBRARY(LIBINTL_LIBRARY
-      NAMES
-        intl
-      PATHS
-        /opt/gnome/lib
-        /opt/local/lib
-        /sw/lib
-        /usr/local/lib
-        /usr/lib
-      )
+pkg_check_modules(PC_GOBJECT QUIET gobject-2.0)
 
-      IF (LIBINTL_LIBRARY AND LIBINTL_INCLUDE_DIR)
-        SET (LIBINTL_FOUND TRUE)
-      ENDIF (LIBINTL_LIBRARY AND LIBINTL_INCLUDE_DIR)
-    ENDIF ( NOT LIBINTL_FOUND )
+find_path(GLIB2_GOBJECT_INCLUDE_DIRS
+        NAMES glib-object.h
+        HINTS ${PC_GOBJECT_INCLUDEDIR}
+        PATH_SUFFIXES glib-2.0)
 
-    # libiconv
-    IF ( NOT LIBICONV_FOUND )
-      FIND_PATH(LIBICONV_INCLUDE_DIR
-      NAMES
-        iconv.h
-      PATHS
-        /opt/gnome/include
-        /opt/local/include
-        /opt/local/include
-        /sw/include
-        /sw/include
-        /usr/local/include
-        /usr/include
-      PATH_SUFFIXES
-        glib-2.0
-      )
+find_library(GLIB2_GOBJECT_LIBRARIES
+        NAMES gobject-2.0
+        HINTS ${PC_GOBJECT_LIBDIR}
+)
 
-      FIND_LIBRARY(LIBICONV_LIBRARY
-      NAMES
-        iconv
-      PATHS
-        /opt/gnome/lib
-        /opt/local/lib
-        /sw/lib
-        /usr/lib
-        /usr/local/lib
-      )
+pkg_check_modules(PC_GIO QUIET gio-2.0)
 
-      IF (LIBICONV_LIBRARY AND LIBICONV_INCLUDE_DIR)
-        SET (LIBICONV_FOUND TRUE)
-      ENDIF (LIBICONV_LIBRARY AND LIBICONV_INCLUDE_DIR)
-    ENDIF ( NOT LIBICONV_FOUND )
+find_path(GLIB2_GIO_INCLUDE_DIRS
+        NAMES gio/gio.h
+        HINTS ${PC_GIO_INCLUDEDIR}
+        PATH_SUFFIXES glib-2.0)
 
-    IF (LIBINTL_FOUND)
-      SET (GLIB2_LIBRARIES ${GLIB2_LIBRARIES} ${LIBINTL_LIBRARY})
-      SET (GLIB2_INCLUDE_DIRS ${GLIB2_INCLUDE_DIRS} ${LIBINTL_INCLUDE_DIR})
-    ENDIF (LIBINTL_FOUND)
+find_library(GLIB2_GIO_LIBRARIES
+        NAMES gio-2.0
+        HINTS ${PC_GIO_LIBDIR}
+)
 
-    IF (LIBICONV_FOUND)
-      SET (GLIB2_LIBRARIES ${GLIB2_LIBRARIES} ${LIBICONV_LIBRARY})
-      SET (GLIB2_INCLUDE_DIRS ${GLIB2_INCLUDE_DIRS} ${LIBICONV_INCLUDE_DIR})
-    ENDIF (LIBICONV_FOUND)
+# search the glibconfig.h include dir under the same root where the library is found
+get_filename_component(glib2LibDir "${GLIB2_LIBRARIES}" PATH)
 
-  ENDIF ( NOT GLIB2_FOUND AND NOT PKG_CONFIG_FOUND )
-  ##
+find_path(GLIB2_INTERNAL_INCLUDE_DIR glibconfig.h
+        PATH_SUFFIXES glib-2.0/include
+        HINTS ${PC_GLIB2_INCLUDEDIR} "${glib2LibDir}" ${CMAKE_SYSTEM_LIBRARY_PATH})
 
-  IF (GLIB2_CORE_FOUND AND GLIB2_INCLUDE_DIRS AND GLIB2_LIBRARIES)
-    SET (GLIB2_FOUND TRUE)
-  ENDIF (GLIB2_CORE_FOUND AND GLIB2_INCLUDE_DIRS AND GLIB2_LIBRARIES)
+# not sure if this include dir is optional or required
+# for now it is optional
+if(GLIB2_INTERNAL_INCLUDE_DIR)
+    list(APPEND GLIB2_INCLUDE_DIRS "${GLIB2_INTERNAL_INCLUDE_DIR}")
+    list(APPEND GLIB2_GOBJECT_INCLUDE_DIRS "${GLIB2_INTERNAL_INCLUDE_DIR}")
+    list(APPEND GLIB2_GIO_INCLUDE_DIRS "${GLIB2_INTERNAL_INCLUDE_DIR}")
+endif()
 
-  IF (GLIB2_FOUND)
-    IF (NOT GLIB2_FIND_QUIETLY)
-      MESSAGE (STATUS "Found GLib2: ${GLIB2_LIBRARIES} ${GLIB2_INCLUDE_DIRS}")
-    ENDIF (NOT GLIB2_FIND_QUIETLY)
-  ELSE (GLIB2_FOUND)
-    IF (GLIB2_FIND_REQUIRED)
-      MESSAGE (SEND_ERROR "Could not find GLib2")
-    ENDIF (GLIB2_FIND_REQUIRED)
-  ENDIF (GLIB2_FOUND)
+# Deprecated synonyms
+set(GLIB2_INCLUDE_DIR "${GLIB2_INCLUDE_DIRS}")
+set(GLIB2_LIBRARY "${GLIB2_LIBRARIES}")
+set(GLIB2_GOBJECT_INCLUDE_DIR "${GLIB2_GOBJECT_INCLUDE_DIRS}")
+set(GLIB2_GOBJECT_LIBRARY "${GLIB2_GOBJECT_LIBRARIES}")
+set(GLIB2_GIO_INCLUDE_DIR "${GLIB2_GIO_INCLUDE_DIRS}")
+set(GLIB2_GIO_LIBRARY "${GLIB2_GIO_LIBRARIES}")
 
-  # show the GLIB2_INCLUDE_DIRS and GLIB2_LIBRARIES variables only in the advanced view
-  MARK_AS_ADVANCED(GLIB2_INCLUDE_DIRS GLIB2_LIBRARIES)
-  MARK_AS_ADVANCED(LIBICONV_INCLUDE_DIR LIBICONV_LIBRARY)
-  MARK_AS_ADVANCED(LIBINTL_INCLUDE_DIR LIBINTL_LIBRARY)
+if(GLIB2_GOBJECT_LIBRARIES AND GLIB2_GOBJECT_INCLUDE_DIRS)
+    set(GLIB2_GOBJECT_FOUND TRUE)
+endif()
 
-ENDIF (GLIB2_LIBRARIES AND GLIB2_INCLUDE_DIRS)
+if(GLIB2_GIO_LIBRARIES AND GLIB2_GIO_INCLUDE_DIRS)
+    set(GLIB2_GIO_FOUND TRUE)
+endif()
 
-IF ( GLIB2_FOUND )
-	# Check if system has a newer version of glib
-	# which supports g_regex_match_simple
-	INCLUDE( CheckIncludeFiles )
-	SET( CMAKE_REQUIRED_INCLUDES ${GLIB2_INCLUDE_DIRS} )
-	CHECK_INCLUDE_FILES ( glib/gregex.h HAVE_GLIB_GREGEX_H )
-	# Reset CMAKE_REQUIRED_INCLUDES
-	SET( CMAKE_REQUIRED_INCLUDES "" )
-ENDIF( GLIB2_FOUND )
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(GLIB2
+        REQUIRED_VARS GLIB2_LIBRARIES GTHREAD2_LIBRARIES GLIB2_INCLUDE_DIRS
+        HANDLE_COMPONENTS)
+
+if(GLIB2_FOUND AND NOT TARGET GLIB2::GLIB2)
+    add_library(GLIB2::GLIB2 UNKNOWN IMPORTED)
+    set_target_properties(GLIB2::GLIB2 PROPERTIES
+            IMPORTED_LOCATION "${GLIB2_LIBRARIES}"
+            INTERFACE_LINK_LIBRARIES "${GTHREAD2_LIBRARIES}"
+            INTERFACE_INCLUDE_DIRECTORIES "${GLIB2_INCLUDE_DIRS}")
+endif()
+
+if(GLIB2_GOBJECT_FOUND AND NOT TARGET GLIB2::GOBJECT)
+    add_library(GLIB2::GOBJECT UNKNOWN IMPORTED)
+    set_target_properties(GLIB2::GOBJECT PROPERTIES
+            IMPORTED_LOCATION "${GLIB2_GOBJECT_LIBRARIES}"
+            INTERFACE_INCLUDE_DIRECTORIES "${GLIB2_GOBJECT_INCLUDE_DIRS}")
+endif()
+
+if(GLIB2_GIO_FOUND AND NOT TARGET GLIB2::GIO)
+    add_library(GLIB2::GIO UNKNOWN IMPORTED)
+    set_target_properties(GLIB2::GIO PROPERTIES
+            IMPORTED_LOCATION "${GLIB2_GIO_LIBRARIES}"
+            INTERFACE_INCLUDE_DIRECTORIES "${GLIB2_GIO_INCLUDE_DIRS}")
+endif()
+
+mark_as_advanced(GLIB2_INCLUDE_DIRS GLIB2_INCLUDE_DIR
+        GLIB2_LIBRARIES GLIB2_LIBRARY
+        GLIB2_GOBJECT_INCLUDE_DIRS GLIB2_GOBJECT_INCLUDE_DIR
+        GLIB2_GOBJECT_LIBRARIES GLIB2_GOBJECT_LIBRARY
+        GLIB2_GIO_INCLUDE_DIRS GLIB2_GIO_INCLUDE_DIR
+        GLIB2_GIO_LIBRARIES GLIB2_GIO_LIBRARY)
+
+include(FeatureSummary)
+set_package_properties(GLIB2 PROPERTIES
+        URL "https://wiki.gnome.org/Projects/GLib"
+        DESCRIPTION "Event loop and utility library")

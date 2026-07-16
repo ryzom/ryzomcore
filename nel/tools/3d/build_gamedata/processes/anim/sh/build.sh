@@ -5,9 +5,9 @@ rm log.log 2> /dev/null
 echo ------- > log.log
 echo --- Build anim : optimze >> log.log
 echo ------- >> log.log
-echo ------- 
-echo --- Build anim : optimze 
-echo ------- 
+echo -------
+echo --- Build anim : optimze
+echo -------
 date >> log.log
 date
 

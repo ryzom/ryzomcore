@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2019  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013-2014  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
@@ -118,6 +118,8 @@ namespace NLGUI
 		// Force only a subset of letter to be displayed. Default is 0/0xFFFFFFFF
 		void enableStringSelection(uint start, uint end);
 		void disableStringSelection();
+		void setShadowInSelection(bool s) { m_DisableShadowInSelection = !s; }
+		bool getShadowInSelection() const { return !m_DisableShadowInSelection; }
 
 		/// Get displayed text
 		std::string		getText() const { return _Text; }
@@ -451,6 +453,7 @@ namespace NLGUI
 		bool	_StrikeThrough : 1;
 		bool    _ContinuousUpdate : 1;
 		bool	_Setuped : 1;
+		bool	m_DisableShadowInSelection : 1;
 
 		uint	_TextSelectionStart;
 		uint	_TextSelectionEnd;

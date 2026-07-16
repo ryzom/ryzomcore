@@ -2831,13 +2831,13 @@ void CGroupMap::addLandMark(TLandMarkButtonVect &destList, const NLMISC::CVector
 void CGroupMap::addUserLandMark(const NLMISC::CVector2f &pos, const ucstring &title, NLMISC::CRGBA color)
 {
 	if (_CurContinent == NULL) return;
-
+	
 	CUserLandMark ulm;
 	mapToWorld(ulm.Pos, pos);
 	ulm.Title = title;
 	ulm.Type = 5;
 	_CurContinent->UserLandMarks.push_back(ulm);
-
+	
 	CLandMarkOptions options(_UserLMOptions);
 	options.ColorNormal = options.ColorOver = options.ColorPushed = color;
 	// create a new button and add it to the list

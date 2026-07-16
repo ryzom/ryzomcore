@@ -22,6 +22,8 @@
 
 // Qt includes
 #include <QMainWindow>
+#include <QSize>
+#include <QString>
 
 // NeL includes
 #include <nel/misc/rgba.h>
@@ -34,7 +36,6 @@
 // ...
 
 class QTreeView;
-class QDirModel;
 class QUndoStack;
 class QScrollArea;
 
@@ -56,7 +57,7 @@ class CMainWindow : public QMainWindow
 	Q_OBJECT
 
 public:
-	CMainWindow(const QMap<QString, QSize> &customSizeHints, QWidget *parent = 0, Qt::WindowFlags flags = 0);
+	CMainWindow(const QMap<QString, QSize> &customSizeHints, QWidget *parent = nullptr, Qt::WindowFlags flags = Qt::WindowFlags());
 	virtual ~CMainWindow();
 
 	inline QMenu *widgetsMenu() { return m_WidgetsMenu; }

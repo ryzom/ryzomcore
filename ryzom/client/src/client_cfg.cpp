@@ -1,9 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2020  Winch Gate Property Limited
+// Copyright (C) 2010-2022  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2010  Robert TIMM (rti) <mail@rtti.de>
-// Copyright (C) 2010-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2010-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 // Copyright (C) 2011-2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
 //
@@ -328,6 +328,9 @@ CClientConfig::CClientConfig()
 	Local				= false;					// Default is Net Mode.
 	FSHost				= "";						// Default Host.
 
+	QuicConnection		= true;
+	QuicCertValidation	= true;
+
 	TexturesInterface.push_back("texture_interfaces_v3_2x");
 	TexturesInterfaceDXTC.push_back("texture_interfaces_dxtc_2x");
 
@@ -401,6 +404,9 @@ CClientConfig::CClientConfig()
 	Bloom				= true;
 	SquareBloom			= true;
 	DensityBloom		= 255.f;
+	MaxWaterReflections	= 3;
+	MaxWaterReflectionTextures = 1;
+	ForceWaterReflections = false;
 
 	GlobalWindPower		= 0.10f;					// Default is 0.25
 	GlobalWindDirection	= CVector(1,0,0);			// Default direction is X>0
@@ -435,15 +441,15 @@ CClientConfig::CClientConfig()
 	PatchletUrl.clear();
 	PatchVersion.clear();
 
-	WebIgMainDomain = RYZOM_WEBIG_MAIN_URL;						// https://open.ryzom.dev/"
-	WebIgTrustedDomains.push_back(RYZOM_WEBIG_TRUSTED_DOMAIN);	// open.ryzom.dev
+	WebIgMainDomain.clear();
+	WebIgTrustedDomains.clear();
 	WebIgNotifInterval = 10; // time in minutes
 
 	CurlMaxConnections = 5;
 	CurlCABundle.clear();
 
-	RingReleaseNotePath = WebIgMainDomain + "/app_releasenotes/index.php";
-	ReleaseNotePath = WebIgMainDomain + "/app_releasenotes/index.php";
+	RingReleaseNotePath = RYZOM_CLIENT_RELEASENOTES_RING_URL;
+	ReleaseNotePath = RYZOM_CLIENT_RELEASENOTES_URL;
 
 
 	///////////////
@@ -514,6 +520,8 @@ CClientConfig::CClientConfig()
 	End_BG				= "end_bg.tga";				// Default name for the last background file.
 	IntroNevrax_BG		= "launcher_nevrax.tga";
 	IntroNVidia_BG		= "launcher_nvidia.tga";
+
+	UiFeatureFlags.push_back(RYZOM_CLIENT_UI_FEATURE_FLAG);
 
 	TipsY				= 0.07f;
 	TeleportInfoY		= 0.23f;
@@ -600,6 +608,7 @@ CClientConfig::CClientConfig()
 	TrykerScale			= 0.88f;
 	ZoraiScale			= 1.25f;
 	EnableRacialAnimation = true;
+	GPUSkinning = true;
 
 	// OPTIONS
 	RunAtTheBeginning	= true;
@@ -668,6 +677,7 @@ CClientConfig::CClientConfig()
 	ExtendedCommands = false;
 
 	WaterEnvMapUpdateTime = 1.f;
+	ForceWaterEnvMap = false;
 
 	NumFrameForProfile = 0;
 	SimulateServerTick = false;
@@ -725,7 +735,7 @@ CClientConfig::CClientConfig()
 
 	R2EDLoadDynamicFeatures	= 0;
 
-	CheckR2ScenarioMD5 = true;
+	CheckR2ScenarioMD5 = false;
 
 	DisplayTPReason = false;
 
@@ -809,6 +819,8 @@ void CClientConfig::setValues()
 	// r2ed interfaces
 	READ_STRINGVECTOR_FV(XMLR2EDInterfaceFiles);
 
+	READ_STRINGVECTOR_FV(UiFeatureFlags)
+
 	// logos
 	READ_STRINGVECTOR_FV(Logos);
 
@@ -886,6 +898,7 @@ void CClientConfig::setValues()
 		else if (nlstricmp(varPtr->asString(), "OpenGL") == 0 || nlstricmp(varPtr->asString(), "1") == 0) ClientCfg.Driver3D = CClientConfig::OpenGL;
 		else if (nlstricmp(varPtr->asString(), "Direct3D") == 0 || nlstricmp(varPtr->asString(), "2") == 0) ClientCfg.Driver3D = CClientConfig::Direct3D;
 		else if (nlstricmp(varPtr->asString(), "OpenGLES") == 0 || nlstricmp(varPtr->asString(), "3") == 0) ClientCfg.Driver3D = CClientConfig::OpenGLES;
+		else if (nlstricmp(varPtr->asString(), "OpenGL3") == 0 || nlstricmp(varPtr->asString(), "4") == 0) ClientCfg.Driver3D = CClientConfig::OpenGL3;
 	}
 	else
 		cfgWarning ("Default value used for 'Driver3D' !!!");
@@ -917,6 +930,9 @@ void CClientConfig::setValues()
 #endif // FINAL_VERSION
 	// FSHost
 	READ_STRING_FV(FSHost)
+	// QUIC
+	READ_BOOL_FV(QuicConnection)
+	READ_BOOL_FV(QuicCertValidation)
 
 	READ_BOOL_DEV(DisplayAccountButtons)
 
@@ -1081,6 +1097,10 @@ void CClientConfig::setValues()
 	READ_BOOL_FV(Bloom)
 	READ_BOOL_FV(SquareBloom)
 	READ_FLOAT_FV(DensityBloom)
+	// Water reflections
+	READ_INT_FV(MaxWaterReflections)
+	READ_INT_FV(MaxWaterReflectionTextures)
+	READ_BOOL_DEV(ForceWaterReflections)
 
 	// FXAA
 	READ_BOOL_FV(FXAA)
@@ -1171,8 +1191,8 @@ void CClientConfig::setValues()
 	READ_STRING_DEV(ReleaseNotePath)
 #endif
 
-	/////////////////////////
-	// NEW PATCHLET SYSTEM //
+	/////////////////////////////
+	// GARBAGE PATCHLET SYSTEM //
 	READ_STRING_FV(PatchletUrl)
 
 	///////////
@@ -1287,6 +1307,9 @@ void CClientConfig::setValues()
 
 	// EnableRacialAnimation
 	READ_BOOL_FV(EnableRacialAnimation);
+
+	// GPUSkinning
+	READ_BOOL_FV(GPUSkinning);
 
 #if !FINAL_VERSION
 	READ_FLOAT_DEV(FyrosScale);
@@ -1729,6 +1752,7 @@ void CClientConfig::setValues()
 	READ_BOOL_DEV(Check)
 	READ_BOOL_DEV(UsePACSForAll)
 	READ_FLOAT_DEV(WaterEnvMapUpdateTime)
+	READ_BOOL_DEV(ForceWaterEnvMap)
 	READ_BOOL_DEV(BlendForward)
 
 	ClientCfg.ZCPacsPrim = "gen_bt_col_ext.pacs_prim";
@@ -1837,9 +1861,10 @@ void CClientConfig::setValues()
 	{
 		Scene->setGlobalWindPower(ClientCfg.GlobalWindPower);
 		Scene->setGlobalWindDirection(ClientCfg.GlobalWindDirection);
+		Scene->setForceWaterEnvMap(ClientCfg.ForceWaterEnvMap);
 	}
 
-	if (Driver)
+	if (Driver && Driver->supportMonitorColorProperties())
 	{
 		// Set the monitor color properties
 		CMonitorColorProperties monitorColor;
@@ -1863,9 +1888,11 @@ void CClientConfig::setValues()
 		// Run speed and camera dist max are set according to R2 char mode
 		UserEntity->flushR2CharMode();
 	}
-
-	// Initialize the camera distance (after camera dist max)
-	View.setCameraDistanceMaxForPlayer();
+	else
+	{
+		// No user entity yet (initial load) — default to player distance
+		View.setCameraDistanceMaxForPlayer();
+	}
 
 	// draw in client light?
 	if(ClientCfg.Light)
@@ -2133,37 +2160,39 @@ void CClientConfig::init(const string &configFileName)
 	// load the config files
 	ClientCfg.ConfigFile.load (configFileName);
 
-	CConfigFile::CVar *pCV;
+	CConfigFile::CVar *varPtr;
 	// check language code is supported
-	pCV = ClientCfg.ConfigFile.getVarPtr("LanguageCode");
-	if (pCV)
+	varPtr = ClientCfg.ConfigFile.getVarPtr("LanguageCode");
+	if (varPtr)
 	{
-		std::string lang = pCV->asString();
+		std::string lang = varPtr->asString();
 		if (!CI18N::isLanguageCodeSupported(lang))
 		{
 			nlinfo("Unsupported language code \"%s\" fallback on default", lang.c_str());
 			// fallback to default language
 			ClientCfg.LanguageCode = CI18N::getSystemLanguageCode();
 			// update ConfigFile variable
-			pCV->setAsString(ClientCfg.LanguageCode);
+			varPtr->setAsString(ClientCfg.LanguageCode);
 			ClientCfg.ConfigFile.save();
 		}
 	}
 
 	// update the ConfigFile variable in the config file
-	pCV = ClientCfg.ConfigFile.getVarPtr("ClientVersion");
-	if (pCV)
+	varPtr = ClientCfg.ConfigFile.getVarPtr("ClientVersion");
+	if (varPtr)
 	{
-		std::string str = pCV->asString ();
+		std::string str = varPtr->asString ();
 		if (str != getVersion() && ClientCfg.SaveConfig)
 		{
 			nlinfo ("Update and save the ClientVersion variable in config file %s -> %s", str.c_str(), getVersion().c_str());
-			pCV->setAsString(getVersion());
+			varPtr->setAsString(getVersion());
 			ClientCfg.ConfigFile.save();
 		}
 	}
 	else
+	{
 		nlwarning ("There's no ClientVersion variable in the config file!");
+	}
 
 }// init //
 

@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2020-2022  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -85,7 +85,7 @@ void CSoundPlugin::init(IPluginAccess *pluginAccess)
 	_PluginAccess = pluginAccess;
 	_PluginName="Sound Plugin";
 
-	LoadDlg = new CLoadDialog;
+	LoadDlg = new CLoadDialog();
 	LoadDlg->Create(IDD_DIALOG_LOAD);
 	LoadDlg->Message = "Initializing mixer";
 	LoadDlg->UpdateData(FALSE);
@@ -106,7 +106,7 @@ void CSoundPlugin::init(IPluginAccess *pluginAccess)
 		CConfigFile::CVar *psearchPath = cf.getVarPtr("SearchPath");
 		for (uint i=0; i<psearchPath->size(); ++i)
 		{
-			std::string path = psearchPath->asString(i);
+			std::string path = _PluginAccess->transformProjectPath(psearchPath->asString(i));
 			LoadDlg->Message = (std::string("Adding search path \"")+path+"\"").c_str();
 			LoadDlg->UpdateData(FALSE);
 			LoadDlg->RedrawWindow();
@@ -139,7 +139,7 @@ void CSoundPlugin::ReInit()
 	CConfigFile &cf = _PluginAccess->getConfigFile();
 	std::string packedSheetPath;
 	CConfigFile::CVar *ppackedSheetPath = cf.getVarPtr("PackedSheetPath");
-	packedSheetPath = ppackedSheetPath->asString();
+	packedSheetPath = _PluginAccess->transformProjectPath(ppackedSheetPath->asString());
 	
 	LoadDlg = new CLoadDialog;
 	LoadDlg->Create(IDD_DIALOG_LOAD);
@@ -181,7 +181,7 @@ void CSoundPlugin::ReInit()
 
 	// create the audio mixer.
 	_Mixer = UAudioMixer::createAudioMixer();
-	_Mixer->setSamplePath(cf.getVar("SamplePath").asString());
+	_Mixer->setSamplePath(_PluginAccess->transformProjectPath(cf.getVar("SamplePath").asString()));
 	_Mixer->setPackedSheetOption(packedSheetPath, true);
 	try
 	{

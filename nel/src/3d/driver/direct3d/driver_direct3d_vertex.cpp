@@ -54,6 +54,7 @@ CVBDrvInfosD3D::CVBDrvInfosD3D(CDriverD3D *drv, ItVBDrvInfoPtrList it, CVertexBu
 	ColorOffset = 0;
 	VertexBuffer = NULL;
 	Usage = 0;
+	UnsynchronizedWrite = false;
 	VolatileVertexBuffer = NULL;
 	VertexDeclNoDiffuse = NULL;
 	#ifdef NL_DEBUG
@@ -177,7 +178,10 @@ uint8	*CVBDrvInfosD3D::lock (uint begin, uint end, bool readOnly)
 		}
 
 		void *pbData;
-		if (VertexBuffer->Lock ( begin, end-begin, &pbData, readOnly?D3DLOCK_READONLY:0) != D3D_OK)
+		DWORD lockFlags = readOnly ? D3DLOCK_READONLY : 0;
+		if (UnsynchronizedWrite && !readOnly)
+			lockFlags = D3DLOCK_NOOVERWRITE;
+		if (VertexBuffer->Lock ( begin, end-begin, &pbData, lockFlags) != D3D_OK)
 			return NULL;
 
 		// Lock Profile?
@@ -360,37 +364,43 @@ bool CDriverD3D::activeVertexBuffer(CVertexBuffer& VB)
 
 		// Create the vertex buffer
 		const uint size = VB.capacity()*VB.getVertexSize();
-		uint preferredMemory = 0;
+		CVertexBuffer::TLocation location = CVertexBuffer::RAMResident;
 		if (_DisableHardwareVertexArrayAGP)
 		{
-			preferredMemory = CVertexBuffer::RAMResident;
+			location = CVertexBuffer::RAMResident;
 			info->Volatile = false;
 		}
 		else
 		{
-			switch (VB.getPreferredMemory ())
+			switch (VB.getBufferUsage ())
 			{
-			case CVertexBuffer::RAMPreferred:
-				preferredMemory = CVertexBuffer::RAMResident;
+			case CVertexBuffer::CpuReadWrite:
+				location = CVertexBuffer::RAMResident;
 				info->Volatile = false;
 				break;
-			case CVertexBuffer::AGPPreferred:
-				preferredMemory = CVertexBuffer::AGPResident;
+			case CVertexBuffer::FullRewrite:
+			case CVertexBuffer::PartialWrite:
+				location = CVertexBuffer::AGPResident;
 				info->Volatile = false;
 				break;
-			case CVertexBuffer::StaticPreferred:
+			case CVertexBuffer::UnsynchronizedWrite:
+				location = CVertexBuffer::AGPResident;
+				info->Volatile = false;
+				info->UnsynchronizedWrite = true;
+				break;
+			case CVertexBuffer::Immutable:
 				if (getStaticMemoryToVRAM())
-					preferredMemory = CVertexBuffer::VRAMResident;
+					location = CVertexBuffer::VRAMResident;
 				else
-					preferredMemory = CVertexBuffer::AGPResident;
+					location = CVertexBuffer::AGPResident;
 				info->Volatile = false;
 				break;
-			case CVertexBuffer::RAMVolatile:
-				preferredMemory = CVertexBuffer::RAMResident;
+			case CVertexBuffer::SmallStream:
+				location = CVertexBuffer::RAMResident;
 				info->Volatile = true;
 				break;
-			case CVertexBuffer::AGPVolatile:
-				preferredMemory = CVertexBuffer::AGPResident;
+			case CVertexBuffer::FullStream:
+				location = CVertexBuffer::AGPResident;
 				info->Volatile = true;
 				break;
 			}
@@ -401,29 +411,32 @@ bool CDriverD3D::activeVertexBuffer(CVertexBuffer& VB)
 		{
 			nlassert (info->VertexBuffer == NULL);
 			info->Hardware = false;
-			info->VolatileRAM = preferredMemory == CVertexBuffer::RAMResident;
+			info->VolatileRAM = location == CVertexBuffer::RAMResident;
 		}
 		else
 		{
 			// Offset will be 0
 			info->Offset = 0;
 
-			bool success;
-			do
+			// Try to allocate at the requested location, falling back toward RAM
+			bool success = false;
+			for (sint loc = (sint)location; loc >= 0; --loc)
 			{
-				success = _DeviceInterface->CreateVertexBuffer(size, RemapVertexBufferUsage[preferredMemory],
-					0, RemapVertexBufferPool[preferredMemory], &(info->VertexBuffer), NULL) == D3D_OK;
+				success = _DeviceInterface->CreateVertexBuffer(size, RemapVertexBufferUsage[loc],
+					0, RemapVertexBufferPool[loc], &(info->VertexBuffer), NULL) == D3D_OK;
 				if (success)
+				{
+					location = (CVertexBuffer::TLocation)loc;
 					break;
+				}
 			}
-			while (preferredMemory--);
 			if (!success)
 				return false;
 
 			++vertexCount;
 
 			// Hardware ?
-			info->Hardware = preferredMemory != CVertexBuffer::RAMResident;
+			info->Hardware = location != CVertexBuffer::RAMResident;
 
 			// Stats
 			if (info->Hardware)
@@ -432,7 +445,7 @@ bool CDriverD3D::activeVertexBuffer(CVertexBuffer& VB)
 
 		// Release the local vertex buffer
 		VB.DrvInfos = info;
-		VB.setLocation ((CVertexBuffer::TLocation)preferredMemory);
+		VB.setLocation (location);
 
 		// Force the vertex buffer update
 		touchRenderVariable (&_VertexDeclCache);
@@ -446,8 +459,8 @@ bool CDriverD3D::activeVertexBuffer(CVertexBuffer& VB)
 	VB.fillBuffer ();
 
 	setVertexDecl (info->VertexDecl, info->VertexDeclAliasDiffuseToSpecular, info->VertexDeclNoDiffuse, info->Stride);
-	//setVertexBuffer (info->VertexBuffer, info->Offset, info->Stride, info->UseVertexColor, VB.getNumVertices(), VB.getPreferredMemory(), info->Usage, info->ColorOffset);
-	setVertexBuffer (info->VertexBuffer, info->Offset, info->Stride, info->UseVertexColor, VB.getNumVertices(), VB.getPreferredMemory(), info->Usage, info->ColorOffset);
+	//setVertexBuffer (info->VertexBuffer, info->Offset, info->Stride, info->UseVertexColor, VB.getNumVertices(), VB.getBufferUsage(), info->Usage, info->ColorOffset);
+	setVertexBuffer (info->VertexBuffer, info->Offset, info->Stride, info->UseVertexColor, VB.getNumVertices(), VB.getBufferUsage(), info->Usage, info->ColorOffset);
 
 
 	// Set UVRouting

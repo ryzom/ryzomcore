@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2020-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -154,7 +154,7 @@ bool sendEmail (const string &smtpServer, const string &from, const string &to, 
 			formatedSMTPServer = smtpServer;
 		}
 
-		sock.connect(CInetAddress(formatedSMTPServer, 25));
+		sock.connect(CInetHost(formatedSMTPServer, 25));
 
 		if (!sock.connected())
 		{
@@ -183,7 +183,7 @@ bool sendEmail (const string &smtpServer, const string &from, const string &to, 
 		{
 			if (DefaultFrom.empty())
 			{
-				formatedFrom = CInetAddress::localHost().hostName();
+				formatedFrom = CInetHost::localHostName();
 				formatedFrom += "@gnu.org";
 			}
 			else

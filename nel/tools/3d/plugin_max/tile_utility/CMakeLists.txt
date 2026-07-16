@@ -4,10 +4,10 @@ SOURCE_GROUP("" FILES ${SRC})
 
 ADD_LIBRARY(tile_utility SHARED ${SRC})
 
-INCLUDE_DIRECTORIES(${MAXSDK_INCLUDE_DIR})
+TARGET_INCLUDE_DIRECTORIES(tile_utility PRIVATE ${MAXSDK_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(tile_utility 
-							nelmisc
-							nel3d
+							NeL::misc
+							NeL::3d
 							nel_mesh_lib
 							nel_patch_lib 
 							nel_3dsmax_shared
@@ -20,6 +20,6 @@ NL_DEFAULT_PROPS(tile_utility "MAX Plugin: Tile Utility")
 NL_ADD_RUNTIME_FLAGS(tile_utility)
 NL_ADD_LIB_SUFFIX(tile_utility)
 
-ADD_DEFINITIONS(${MAXSDK_DEFINITIONS})
+TARGET_COMPILE_DEFINITIONS(tile_utility PRIVATE ${MAXSDK_DEFINITIONS})
 
 INSTALL(TARGETS tile_utility RUNTIME DESTINATION maxplugin/plugins LIBRARY DESTINATION ${NL_LIB_PREFIX} ARCHIVE DESTINATION ${NL_LIB_PREFIX} COMPONENT libraries)

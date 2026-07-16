@@ -4,7 +4,7 @@
 // This source file has been modified by the following contributors:
 // Copyright (C) 2010  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
 // Copyright (C) 2010  Robert TIMM (rti) <mail@rtti.de>
-// Copyright (C) 2015-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2015-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -34,6 +34,11 @@
 #include <cstdarg>
 #include <cstdlib>
 #include <algorithm>
+
+#ifdef NL_CPP11
+#include <random>
+#include <atomic>
+#endif
 
 #ifdef NL_OS_WINDOWS
 #	include <process.h>
@@ -391,7 +396,7 @@ inline float nlroundf(float x)
 #endif
 
 // Wrapper for fopen to be able to open files with an UTF-8 filename
-FILE *nlfopen(const std::string &filename, const std::string &mode);
+FILE *nlfopen(const std::string &filename, const char *mode);
 
 /** Signed 64 bit fseek. Same interface as fseek
   */

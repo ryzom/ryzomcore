@@ -31,4 +31,11 @@
 <key name="KeyTAB" action="login_tab" context="edit"/>
 <key name="KeyBACK" action="edit_back" context="edit" repeat="1"/>
 
+<!-- debug -->
+<key name="KeyQ" ctrl="1" shift="1" menu="1" action="debug_login_prev_screen"/>
+<key name="KeyA" ctrl="1" shift="1" menu="1" action="debug_login_next_screen"/>
+<key name="KeyR" ctrl="1" shift="1" menu="1" action="debug_login_reload_ui"/>
+<key name="KeyH" ctrl="1" shift="1" menu="1" action="debug_login_toggle_help"/>
+<key name="KeyD" ctrl="1" shift="1" menu="1" action="debug_login_ui"/>
+
 </interface_config>

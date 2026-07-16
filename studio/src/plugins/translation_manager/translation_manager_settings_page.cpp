@@ -23,10 +23,10 @@
 #include "../core/icore.h"
 
 // Qt includes
-#include <QtCore/QSettings>
-#include <QtGui/QWidget>
-#include <QtGui/QFileDialog>
-#include <QtGui/QListWidgetItem>
+#include <QSettings>
+#include <QWidget>
+#include <QFileDialog>
+#include <QListWidgetItem>
 
 namespace TranslationManager
 {

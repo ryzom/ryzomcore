@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2022  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -64,7 +67,8 @@ NL3D::IShape *CExportNel::buildRemanence(INode& node, TimeValue time)
 	srs->setMaterial(materials[0]);
 	// 
 	// get geometry
-
+	
+	TimeValue tv = _Ip->GetTime();
 	ObjectState os = node.EvalWorldState(_Ip->GetTime());		
 	Object *obj = node.EvalWorldState(time).obj;	
 	if (obj->SuperClassID() != SHAPE_CLASS_ID)
@@ -73,8 +77,14 @@ NL3D::IShape *CExportNel::buildRemanence(INode& node, TimeValue time)
 		return NULL;
 	}
 	
-	ShapeObject *so = (ShapeObject *) obj;	
-	if (so->NumberOfCurves() != 1 || so->NumberOfPieces(time, 0) == 0)
+	ShapeObject *so = (ShapeObject *)obj;
+	if (
+#if MAX_VERSION_MAJOR >= 20
+		so->NumberOfCurves(tv) != 1 
+#else
+		so->NumberOfCurves() != 1 
+#endif
+		|| so->NumberOfPieces(time, 0) == 0)
 	{
 		buildRemanenceError(this, node, "Remanence export : %s should only contain one curve with at least one segment!");		
 		return NULL;

@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2022  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -500,7 +503,7 @@ void CCmdArgs::displayVersion()
 {
 	// display a verbose version string
 #ifdef BUILD_DATE
-	printf("%s %s (built on %s)\nCopyright (C) %s\n", _ProgramName.c_str(), _Version.c_str(), BUILD_DATE, COPYRIGHT);
+	printf("%s %s (built on %s)\n%s\n", _ProgramName.c_str(), _Version.c_str(), BUILD_DATE, COPYRIGHT);
 #endif
 }
 

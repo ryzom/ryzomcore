@@ -4,6 +4,6 @@ IF(WIN32)
   ENDIF()
 ENDIF()
 
-IF(WITH_QT)
+IF(WITH_QT5)
   ADD_SUBDIRECTORY(nel_launcher_qt)
 ENDIF()

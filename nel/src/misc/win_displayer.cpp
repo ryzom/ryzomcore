@@ -361,7 +361,7 @@ void CWinDisplayer::setTitleBar (const string &titleBar)
 		wn += titleBar;
 		wn += ": ";
 	}
-	wn += "Nel Service Console (compiled " __DATE__ " " __TIME__ " in " + nlMode + " mode)";
+	wn += "Nel Service Console (compiled " __DATE__ " " __TIME__ " in " NL_MODE_STR " mode)";
 
 	nldebug("SERVICE: Set title bar to '%s'", wn.c_str());
 

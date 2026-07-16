@@ -58,6 +58,7 @@ class	CShadowMap;
 class	CMaterial;
 class	IDriver;
 class CInstanceUser;
+class CVertexProgram;
 
 // ***************************************************************************
 // ClassIds.
@@ -669,6 +670,19 @@ protected:
 	virtual	void			renderSkinGroupPrimitives(uint /* baseVertex */, std::vector<CSkinSpecularRdrPass> &/* specularRdrPasses */, uint /* skinIndex */) { }
 	/// Render a specific specular renderPass returned by renderSkinGroupPrimitives
 	virtual	void			renderSkinGroupSpecularRdrPass(uint /* rdrPass */) { }
+
+	/** Deriver may support GPU Skinning if isSkinnable().
+	 *	If true, the skeleton may use the GPU skinning render path instead of CPU skinning.
+	 *	Deriver should return the mesh geom that has GPU skin VB/IB ready.
+	 */
+	virtual	bool			supportGPUSkinning() const {return false;}
+	/** if supportGPUSkinning(), called to render the skin using GPU skinning.
+	 *	\param alphaMRM the MRM interpolation value [0,1]
+	 *	\param skeleton the skeleton model providing bone matrices
+	 */
+	virtual	void			renderGPUSkin(float /* alphaMRM */, CSkeletonModel * /* skeleton */) { }
+	/// if supportGPUSkinning(), return the insert VP to use for this skin type.
+	virtual	CVertexProgram	*getGPUSkinVP() const { return NULL; }
 
 	/// Special Skinning For ShadowMapping
 	virtual	bool			supportShadowSkinGrouping() const {return false;}

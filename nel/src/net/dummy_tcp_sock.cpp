@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -28,9 +31,9 @@ namespace NLNET {
 /*
  * Set only the remote address
  */
-void CDummyTcpSock::connect( const CInetAddress& addr )
+void CDummyTcpSock::connect( const CInetHost& addr )
 {
-	_RemoteAddr = addr;
+	_RemoteAddr = addr.address();
 	_Sock = 100;
 
 	_BytesReceived = 0;
@@ -40,7 +43,7 @@ void CDummyTcpSock::connect( const CInetAddress& addr )
 	//sync.value() = true;
 	_Connected = true;
 
-	LNETL0_DEBUG( "LNETL0: Socket connected to %s", addr.asString().c_str() );
+	LNETL0_DEBUG( "LNETL0: Socket connected to %s", addr.toStringLong().c_str() );
 }
 
 

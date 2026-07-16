@@ -101,6 +101,7 @@ short_authors["Botanic"] = "botanic"
 short_authors["Matthew Lagoe@MatthewLagoe-PC <Matthew Lagoe@MatthewLagoe-PC>"] = "botanic"
 short_authors["Botanic <admin@tempestintheaether.org>"] = "botanic"
 short_authors["kaetemi <kaetemi@gmail.com>"] = "kaetemi"
+short_authors["kaetemi <jan.boon@kaetemi.be>"] = "kaetemi"
 short_authors["Jan Boon <jan.boon@kaetemi.be>"] = "kaetemi"
 short_authors["Jan Boon <kaetemi@no-break.space>"] = "kaetemi"
 short_authors["Jan Boon <kaetemi@gmail.com>"] = "kaetemi"
@@ -110,6 +111,7 @@ short_authors["kaetemi@users.sourceforge.net <kaetemi@users.sourceforge.net>"] =
 short_authors["kaetemi@kaevm.localdomain <kaetemi@kaevm.localdomain>"] = "kaetemi"
 short_authors["Jan Boon (Kaetemi)"] = "kaetemi"
 short_authors["NO-BREAK SPACE OÜ <support@no-break.space>"] = "-" # bot
+short_authors["Polyverse OÜ <support@polyverse.dev>"] = "-" # bot
 short_authors["Ryzom Pipeline <ryzom-pipeline@kaetemi.be>"] = "-" # bot
 short_authors["Nimetu <nimetu@gmail.com>"] = "nimetu"
 short_authors["nimetu@gmail.com <nimetu@gmail.com>"] = "nimetu"
@@ -206,9 +208,16 @@ override_author["43452ea27c6e92488d8bd1417b2aee60d75d8a68"] = "-" # Header
 override_author["8e21fed1e6b79bf92f6364c7cb4f0c56e1dda103"] = "-" # Header cleanup
 override_author["c8e562f37781d62ebc54b68ef74f7693de79a907"] = "-" # Header cleanup
 override_author["dc734ed66226b257becae9fcd140898e14510e6a"] = "-" # Header cleanup
+override_author["e97cf09e043e2e4b6f0f899b9230f4b6303fcc23"] = "/" # Initial commit.
 override_author["a3a074f455a3f52e6fa4d44214f6c34289fa6f8c"] = "-" # Sync
 override_author["141e7c645966ee3475097a75a65def8c9bd7086a"] = "-" # Sync
 override_author["e6a617b8bcd1630dba5fc3b6ae9815775ba2c19d"] = "-" # Sync
+override_author["41c8499bd4f1e6229a03c954132fcc5ba4f5dc3e"] = "-" # Sync
+override_author["ecf990f8ae8e04d946ce1d5519c065dc6fedf4c4"] = "-" # Sync
+override_author["b4638c79699b6ce84fdeff9e9f413b8c6a56a905"] = "winch_gate" # Sync
+override_author["6a79a5bf0ff4be9deaf0a6d5d0b3815b456891c5"] = "winch_gate" # Sync
+override_author["678d888b5cfbb1d6785ff3a23c32d19a8fd60ccb"] = "winch_gate" # Sync
+override_author["2889e81d63f3f5400cfe87d59ad6d1517ec30323"] = "winch_gate" # Sync
 
 # Exclude some paths
 exclude_paths = { }
@@ -218,6 +227,16 @@ exclude_paths["nel/src/3d/driver/opengl/EGL"] = True
 exclude_paths["nel/src/3d/driver/opengl/GLES"] = True
 exclude_paths["nel/src/3d/driver/opengl/KHR"] = True
 exclude_paths["studio/src/3rdparty"] = True
+exclude_paths["ryzom/common/src/game_share/ring_session_manager_itf.cpp"] = True
+exclude_paths["ryzom/common/src/game_share/ring_session_manager_itf.h"] = True
+exclude_paths["ryzom/server/src/entities_game_service/database_guild.cpp"] = True
+exclude_paths["ryzom/server/src/entities_game_service/database_guild.h"] = True
+exclude_paths["ryzom/server/src/entities_game_service/database_outpost.cpp"] = True
+exclude_paths["ryzom/server/src/entities_game_service/database_outpost.h"] = True
+exclude_paths["ryzom/server/src/entities_game_service/database_plr.cpp"] = True
+exclude_paths["ryzom/server/src/entities_game_service/database_plr.h"] = True
+exclude_paths["ryzom/server/src/shard_unifier_service/database_mapping.cpp"] = True
+exclude_paths["ryzom/server/src/shard_unifier_service/database_mapping.h"] = True
 
 # Programmatical remappings
 def remap_author(blob, commit, author):

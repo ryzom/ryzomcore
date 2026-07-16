@@ -1,5 +1,5 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2022  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2016  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
@@ -543,7 +543,7 @@ void	CBitMemStream::serial(std::string &b)
 /*
  * Serial string
  */
-inline	void		CBitMemStream::serial(ucstring &b)
+void		CBitMemStream::serial(ucstring &b)
 {
 #ifdef LOG_ALL_TRAFFIC
 	sint32 bitpos = getPosInBit();

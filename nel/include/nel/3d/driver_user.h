@@ -192,6 +192,7 @@ public:
 	virtual	void			clearBuffers(CRGBA col= CRGBA(255,255,255,255));
 	/// This swap the back and front buffer (ALL the buffer :) ).
 	virtual	void			swapBuffers();
+	virtual bool			isFrameReady();
 	virtual void            finish();
 	virtual void            flush();
 
@@ -208,6 +209,8 @@ public:
 	virtual	void			enableFog(bool enable);
 	/// setup fog parameters. fog must enabled to see result. start and end are in [0,1] range.
 	virtual	void			setupFog(float start, float end, CRGBA color);
+	/// setup fog mode and density. mode/density are orthogonal to start/end/color.
+	virtual	void			setupFogMode(uint mode = 0, float density = 1.f);
 	// @}
 
 	/// \name Light support.
@@ -230,6 +233,12 @@ public:
 	virtual void			stencilFunc(TStencilFunc stencilFunc, int ref, uint mask);
 	virtual void			stencilOp(TStencilOp fail, TStencilOp zfail, TStencilOp zpass);
 	virtual void			stencilMask(uint mask);
+	// @}
+
+	/// \name Clip planes
+	// @{
+	virtual void			enableClipPlane(uint index, bool enable);
+	virtual void			setClipPlane(uint index, const NLMISC::CPlane &plane);
 	// @}
 
 	/// \name Scene gestion.
@@ -483,6 +492,7 @@ public:
 	virtual uint			getAnisotropicFilter() const;
 	virtual uint			getAnisotropicFilterMaximum() const;
 	virtual void			forceTextureResize(uint divisor);
+	virtual bool			supportMonitorColorProperties () const;
 	virtual bool			setMonitorColorProperties (const CMonitorColorProperties &properties);
 	// @}
 
@@ -543,6 +553,10 @@ public:
 	virtual	bool				supportMADOperator() const;
 
 	virtual	bool				supportBloomEffect() const;
+
+	virtual	bool				supportGPUSkinning() const;
+
+	virtual	bool				supportLargeUBOArrays() const;
 
 	/// \name Bench
 	// @{

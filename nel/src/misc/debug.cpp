@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 // Copyright (C) 2015  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
 //
 // This program is free software: you can redistribute it and/or modify
@@ -39,11 +39,10 @@
 #elif defined NL_OS_UNIX
 #	include <unistd.h>
 #	define IsDebuggerPresent() false
-#	ifndef NL_OS_MAC
-#		include <execinfo.h>
+#   if !defined(NL_OS_MAC) && !defined(__EMSCRIPTEN__)
+#	    include <execinfo.h>
 # 		include "client/linux/handler/exception_handler.h"
-#	else
-#	endif
+#   endif
 //#	include <malloc.h>
 #	include <errno.h>
 #endif
@@ -282,7 +281,7 @@ void _assertex_stop_0(bool &ignoreNextTime, sint line, const char *file, const c
 		NLMISC::DefaultMsgBoxDisplayer->IgnoreNextTime = ignoreNextTime;
 	else if(!INelContext::getInstance().getNoAssert())
 		INelContext::getInstance().setDebugNeedAssert(true);
-	NLMISC::AssertLog->setPosition (line, file, funcName);
+	NLMISC::CSetLogPosition logPos__(NLMISC::AssertLog, line, file, funcName);
 	if(exp)		NLMISC::AssertLog->displayNL ("\"%s\" ", exp);
 	else		NLMISC::AssertLog->displayNL ("STOP");
 }
@@ -463,7 +462,48 @@ public:
 	void addStackAndLogToReason (ULONG_PTR /* skipNFirst */ = 0)
 	{
 #ifdef NL_OS_WINDOWS
-#elif !defined(NL_OS_MAC)
+		// ace hack
+/*		skipNFirst = 0;
+
+		DWORD symOptions = SymGetOptions();
+		symOptions |= SYMOPT_LOAD_LINES;
+		symOptions &= ~SYMOPT_UNDNAME;
+		SymSetOptions (symOptions);
+
+		nlverify (SymInitialize(getProcessHandle(), NULL, FALSE) == TRUE);
+
+		STACKFRAME callStack;
+		::ZeroMemory (&callStack, sizeof(callStack));
+		callStack.AddrPC.Mode      = AddrModeFlat;
+		callStack.AddrPC.Offset    = m_pexp->ContextRecord->Eip;
+		callStack.AddrStack.Mode   = AddrModeFlat;
+		callStack.AddrStack.Offset = m_pexp->ContextRecord->Esp;
+		callStack.AddrFrame.Mode   = AddrModeFlat;
+		callStack.AddrFrame.Offset = m_pexp->ContextRecord->Ebp;
+
+		_Reason += "\nCallstack:\n";
+		_Reason += "-------------------------------\n";
+		for (sint32 i = 0; ; i++)
+		{
+			SetLastError(0);
+			BOOL res = StackWalk (IMAGE_FILE_MACHINE_I386, getProcessHandle(), GetCurrentThread(), &callStack,
+				m_pexp->ContextRecord, NULL, FunctionTableAccess, GetModuleBase, NULL);
+
+			if (res == FALSE || callStack.AddrFrame.Offset == 0)
+				break;
+
+			string symInfo, srcInfo;
+
+			if (i >= skipNFirst)
+			{
+				srcInfo = getSourceInfo (callStack.AddrPC.Offset);
+				symInfo = getFuncInfo (callStack.AddrPC.Offset, callStack.AddrFrame.Offset);
+				_Reason += srcInfo + ": " + symInfo + "\n";
+			}
+		}
+		SymCleanup(getProcessHandle());
+		*/
+#elif !defined(NL_OS_MAC) && !defined(__EMSCRIPTEN__)
 		// Make place for stack frames and function names
 		const uint MaxFrame=64;
 		void *trace[MaxFrame];
@@ -891,14 +931,11 @@ void getCallStack(std::string &result, sint skipNFirst)
 	{
 		result += e.what();
 	}
-#elif !defined(NL_OS_MAC)
-	// Make place for stack frames and function names
-	const uint MaxFrame=64;
+#elif !defined(NL_OS_MAC) && !defined(__EMSCRIPTEN__)
+	const int MaxFrame = 64;
 	void *trace[MaxFrame];
 	char **messages = (char **)NULL;
 	int i, trace_size = 0;
-
-	// on mac, require at least os 10.5
 	trace_size = backtrace(trace, MaxFrame);
 	messages = backtrace_symbols(trace, trace_size);
 	result += "Dumping call stack :\n";

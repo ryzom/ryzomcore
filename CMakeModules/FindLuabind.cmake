@@ -10,27 +10,41 @@ MACRO(FIND_CORRECT_LUA_VERSION)
   IF(LUABIND_LIBRARY_RELEASE MATCHES "\\.so")
     INCLUDE(CheckDepends)
 
-    # check for Lua 5.3
-    SET(LUA53_LIBRARIES liblua5.3 liblua-5.3 liblua.so.5.3)
+    # check for Lua 5.4
+    SET(LUA54_LIBRARIES liblua5.4 liblua-5.4 liblua.so.5.4)
 
-    FOREACH(_LIB ${LUA53_LIBRARIES})
+    FOREACH(_LIB ${LUA54_LIBRARIES})
       CHECK_LINKED_LIBRARY(LUABIND_LIBRARY_RELEASE _LIB LUALIB_FOUND)
       IF(LUALIB_FOUND)
-        MESSAGE(STATUS "Luabind is using Lua 5.3")
-        FIND_PACKAGE(Lua53 REQUIRED)
+        MESSAGE(STATUS "Luabind is using Lua 5.4")
+        FIND_PACKAGE(Lua REQUIRED 5.4)
         BREAK()
       ENDIF()
     ENDFOREACH()
 
     IF(NOT LUALIB_FOUND)
+      # check for Lua 5.3
+      SET(LUA53_LIBRARIES liblua5.3 liblua-5.3 liblua.so.5.3)
+
+      FOREACH(_LIB ${LUA53_LIBRARIES})
+        CHECK_LINKED_LIBRARY(LUABIND_LIBRARY_RELEASE _LIB LUALIB_FOUND)
+        IF(LUALIB_FOUND)
+          MESSAGE(STATUS "Luabind is using Lua 5.3")
+          FIND_PACKAGE(Lua REQUIRED 5.3)
+          BREAK()
+        ENDIF()
+      ENDFOREACH()
+    ENDIF()
+
+    IF(NOT LUALIB_FOUND)
       # check for Lua 5.2
-      SET(LUA52_LIBRARIES liblua5.2 liblua-5.2 liblua.so.5.2)
+      SET(LUA52_LIBRARIES liblua5.2 liblua5.2.so liblua-5.2 liblua.so.5.2)
 
       FOREACH(_LIB ${LUA52_LIBRARIES})
         CHECK_LINKED_LIBRARY(LUABIND_LIBRARY_RELEASE _LIB LUALIB_FOUND)
         IF(LUALIB_FOUND)
           MESSAGE(STATUS "Luabind is using Lua 5.2")
-          FIND_PACKAGE(Lua52 REQUIRED)
+          FIND_PACKAGE(Lua REQUIRED 5.2)
           BREAK()
         ENDIF()
       ENDFOREACH()
@@ -44,7 +58,7 @@ MACRO(FIND_CORRECT_LUA_VERSION)
         CHECK_LINKED_LIBRARY(LUABIND_LIBRARY_RELEASE _LIB LUALIB_FOUND)
         IF(LUALIB_FOUND)
           MESSAGE(STATUS "Luabind is using Lua 5.1")
-          FIND_PACKAGE(Lua51 REQUIRED)
+          FIND_PACKAGE(Lua REQUIRED 5.1)
           BREAK()
         ENDIF()
       ENDFOREACH()
@@ -58,7 +72,7 @@ MACRO(FIND_CORRECT_LUA_VERSION)
         CHECK_LINKED_LIBRARY(LUABIND_LIBRARY_RELEASE _LIB LUALIB_FOUND)
         IF(LUALIB_FOUND)
           MESSAGE(STATUS "Luabind is using Lua 5.0")
-          FIND_PACKAGE(Lua50 REQUIRED)
+          FIND_PACKAGE(Lua REQUIRED 5.0)
           BREAK()
         ENDIF()
       ENDFOREACH()
@@ -74,15 +88,15 @@ MACRO(FIND_CORRECT_LUA_VERSION)
       FIND_PACKAGE(Lua CONFIG REQUIRED)
       SET(LUA_LIBRARIES Lua::lua_lib)
     ELSEIF(WITH_LUA54)
-      FIND_PACKAGE(Lua54 REQUIRED)
+      FIND_PACKAGE(Lua REQUIRED 5.4)
     ELSEIF(WITH_LUA53)
-      FIND_PACKAGE(Lua53 REQUIRED)
+      FIND_PACKAGE(Lua REQUIRED 5.3)
     ELSEIF(WITH_LUA52)
-      FIND_PACKAGE(Lua52 REQUIRED)
+      FIND_PACKAGE(Lua REQUIRED 5.2)
     ELSEIF(WITH_LUA51)
-      FIND_PACKAGE(Lua51 REQUIRED)
+      FIND_PACKAGE(Lua REQUIRED 5.1)
     ELSE()
-      FIND_PACKAGE(Lua50 REQUIRED)
+      FIND_PACKAGE(Lua REQUIRED 5.0)
     ENDIF()
   ENDIF()
 ENDMACRO()
@@ -103,11 +117,6 @@ IF(WITH_LUA54)
 
   LIST(APPEND LIBRARY_NAME_RELEASE luabind_lua54)
   LIST(APPEND LIBRARY_NAME_DEBUG luabind_lua54d)
-ENDIF()
-
-IF(HUNTER_ENABLED)
-  LIST(APPEND LIBRARY_NAME_RELEASE luabind luabind09)
-  LIST(APPEND LIBRARY_NAME_DEBUG luabindd luabind09-d)
 ENDIF()
 
 IF(WITH_LUA53)
@@ -156,8 +165,8 @@ IF(WITH_STLPORT)
 ENDIF()
 
 # generic libraries names
-LIST(APPEND LIBRARY_NAME_RELEASE luabind libluabind)
-LIST(APPEND LIBRARY_NAME_DEBUG luabind_d luabindd libluabind_d libluabindd)
+LIST(APPEND LIBRARY_NAME_RELEASE luabind luabind09 libluabind)
+LIST(APPEND LIBRARY_NAME_DEBUG luabind_d luabindd luabind09-d libluabind_d libluabindd)
 
 FIND_PACKAGE_HELPER(Luabind luabind/luabind.hpp RELEASE ${LIBRARY_NAME_RELEASE} DEBUG ${LIBRARY_NAME_DEBUG})
 
@@ -180,6 +189,7 @@ IF(LUABIND_INCLUDE_DIR AND Boost_INCLUDE_DIR)
 ENDIF()
 
 IF(LUABIND_FOUND)
+  SET(Luabind_FOUND TRUE)
   SET(LUABIND_INCLUDE_DIR ${LUABIND_INCLUDE_DIR} ${Boost_INCLUDE_DIR})
   # Check if luabind/version.hpp exists
   FIND_FILE(LUABIND_VERSION_FILE luabind/version.hpp PATHS ${LUABIND_INCLUDE_DIR})
@@ -188,6 +198,40 @@ IF(LUABIND_FOUND)
   ENDIF()
 
   FIND_CORRECT_LUA_VERSION()
+
+  if(NOT TARGET Luabind::Luabind)
+    add_library(Luabind::Luabind UNKNOWN IMPORTED)
+    set_target_properties(
+            Luabind::Luabind
+            PROPERTIES
+            INTERFACE_INCLUDE_DIRECTORIES "${LUABIND_INCLUDE_DIR}"
+    )
+    if(LUABIND_LIBRARY_RELEASE)
+      set_target_properties(
+              Luabind::Luabind
+              PROPERTIES
+              IMPORTED_LOCATION "${LUABIND_LIBRARY_RELEASE}"
+              IMPORTED_LOCATION_RELEASE "${LUABIND_LIBRARY_RELEASE}"
+      )
+    endif ()
+    # NB: if(LUABIND_LIBRARY_DEBUG) without dereference: if(${VAR}) tests the
+    # VALUE (a path) as a constant, which is always false, silently linking
+    # the release runtime into debug builds
+    if(LUABIND_LIBRARY_DEBUG)
+      set_target_properties(
+              Luabind::Luabind
+              PROPERTIES
+              IMPORTED_LOCATION_DEBUG "${LUABIND_LIBRARY_DEBUG}"
+      )
+      if(NOT LUABIND_LIBRARY_RELEASE)
+        set_target_properties(
+                Luabind::Luabind
+                PROPERTIES
+                IMPORTED_LOCATION "${LUABIND_LIBRARY_DEBUG}"
+        )
+      endif ()
+    endif ()
+  endif ()
 
   IF(NOT Luabind_FIND_QUIETLY)
     MESSAGE(STATUS "Found Luabind: ${LUABIND_LIBRARIES}")

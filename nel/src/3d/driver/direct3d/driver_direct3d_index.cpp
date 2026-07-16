@@ -248,37 +248,39 @@ bool CDriverD3D::activeIndexBuffer(CIndexBuffer& IB)
 		*ite = info;
 		// Create the index buffer
 		const uint size = (uint)IB.capacity();
-		uint preferredMemory = 0;
+		CIndexBuffer::TLocation location = CIndexBuffer::RAMResident;
 		if (_DisableHardwareIndexArrayAGP)
 		{
-			preferredMemory = CIndexBuffer::RAMResident;
+			location = CIndexBuffer::RAMResident;
 			info->Volatile = false;
 		}
 		else
 		{
-			switch (IB.getPreferredMemory ())
+			switch (IB.getBufferUsage ())
 			{
-			case CIndexBuffer::RAMPreferred:
-				preferredMemory = CIndexBuffer::RAMResident;
+			case CIndexBuffer::CpuReadWrite:
+				location = CIndexBuffer::RAMResident;
 				info->Volatile = false;
 				break;
-			case CIndexBuffer::AGPPreferred:
-				preferredMemory = CIndexBuffer::AGPResident;
+			case CIndexBuffer::FullRewrite:
+			case CIndexBuffer::PartialWrite:
+			case CIndexBuffer::UnsynchronizedWrite:
+				location = CIndexBuffer::AGPResident;
 				info->Volatile = false;
 				break;
-			case CIndexBuffer::StaticPreferred:
+			case CIndexBuffer::Immutable:
 				if (getStaticMemoryToVRAM())
-					preferredMemory = CIndexBuffer::VRAMResident;
+					location = CIndexBuffer::VRAMResident;
 				else
-					preferredMemory = CIndexBuffer::AGPResident;
+					location = CIndexBuffer::AGPResident;
 				info->Volatile = false;
 				break;
-			case CIndexBuffer::RAMVolatile:
-				preferredMemory = CIndexBuffer::RAMResident;
+			case CIndexBuffer::SmallStream:
+				location = CIndexBuffer::RAMResident;
 				info->Volatile = true;
 				break;
-			case CIndexBuffer::AGPVolatile:
-				preferredMemory = CIndexBuffer::AGPResident;
+			case CIndexBuffer::FullStream:
+				location = CIndexBuffer::AGPResident;
 				info->Volatile = true;
 				break;
 			}
@@ -297,25 +299,27 @@ bool CDriverD3D::activeIndexBuffer(CIndexBuffer& IB)
 			if (info->Volatile)
 			{
 				nlassert (info->IndexBuffer == NULL);
-				info->VolatileRAM = preferredMemory == CIndexBuffer::RAMResident;
+				info->VolatileRAM = location == CIndexBuffer::RAMResident;
 			}
 			else
 			{
 				// Offset will be 0
 				info->Offset = 0;
 				bool success = false;
-				do
+				for (sint loc = (sint)location; loc >= 0; --loc)
 				{
 					success = _DeviceInterface->CreateIndexBuffer(size*IB.getIndexNumBytes(),
-						RemapIndexBufferUsage[preferredMemory],
+						RemapIndexBufferUsage[loc],
 						IB.getFormat() == CIndexBuffer::Indices32 ? D3DFMT_INDEX32 : D3DFMT_INDEX16,
-						RemapIndexBufferPool[preferredMemory],
+						RemapIndexBufferPool[loc],
 						&(info->IndexBuffer), NULL) == D3D_OK;
 
 					if (success)
+					{
+						location = (CIndexBuffer::TLocation)loc;
 						break;
+					}
 				}
-				while (preferredMemory--);
 				if (!success)
 					return false;
 				++indexCount;
@@ -325,7 +329,7 @@ bool CDriverD3D::activeIndexBuffer(CIndexBuffer& IB)
 		}
 		// Release the local index buffer
 		IB.DrvInfos = info;
-		IB.setLocation((CIndexBuffer::TLocation)preferredMemory);
+		IB.setLocation(location);
 	}
 
 	// Set the current index buffer

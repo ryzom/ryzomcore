@@ -1,5 +1,8 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2021  Winch Gate Property Limited
+// Copyright (C) 2010-2022  Winch Gate Property Limited
+//
+// This source file has been modified by the following contributors:
+// Copyright (C) 2021  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -30,9 +33,10 @@ namespace NLGUI
 
 bool CSSLength::parseValue(const std::string &value, bool allowPercent, bool allowNegative)
 {
-	static const std::set<std::string> knownUnits = {
+	static const std::string knownUnitsArr[] = {
 		"%", "rem", "em", "px", "pt", "vw", "vh", "vi", "vb", "vmin", "vmax"
 	};
+	static const std::set<std::string> knownUnits(knownUnitsArr, &knownUnitsArr[sizeof(knownUnitsArr) / sizeof(knownUnitsArr[0])]);
 
 	std::string::size_type pos = 0;
 	std::string::size_type len = value.size();
@@ -65,10 +69,17 @@ bool CSSLength::parseValue(const std::string &value, bool allowPercent, bool all
 	}
 
 	std::string unit = toLowerAscii(value.substr(pos));
+	if (!allowPercent && unit == "%")
+		return false;
+
 	if (knownUnits.count(unit))
 	{
 		std::string tmpstr = value.substr(0, pos);
-		return fromString(tmpstr, m_Value);
+		if (fromString(tmpstr, m_Value))
+		{
+			setUnit(unit);
+			return true;
+		}
 	}
 
 	return false;

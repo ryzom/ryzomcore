@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2019  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013-2014  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
@@ -100,6 +100,7 @@ namespace NLGUI
 		_TextSelection= false;
 		_TextSelectionStart= 0;
 		_TextSelectionEnd= std::numeric_limits<uint>::max();
+		m_DisableShadowInSelection = true;
 
 		_InvalidTextContext= true;
 		_FirstLineX = 0;
@@ -1030,10 +1031,7 @@ namespace NLGUI
 
 			if (_MultiLine)
 			{
-				if (NLMISC::startsWith(propPtr, "u:"))
-					setTextFormatTaged(std::string(propPtr).substr(2));
-				else
-					setTextFormatTaged(CI18N::get(propPtr));
+				setTextFormatTaged(CI18N::get(propPtr));
 			}
 			else
 			{
@@ -1192,9 +1190,10 @@ namespace NLGUI
 		{
 			if (_Lines.empty()) return;
 
+			bool drawShadow = !(_TextSelection && m_DisableShadowInSelection);
 			TextContext->setHotSpot (UTextContext::BottomLeft);
-			TextContext->setShaded (_Shadow);
-			TextContext->setShadeOutline (_ShadowOutline);
+			TextContext->setShaded (_Shadow && drawShadow);
+			TextContext->setShadeOutline (_ShadowOutline && drawShadow);
 			TextContext->setShadeColor (shcol);
 			TextContext->setShadeExtent (_ShadowX*oow, _ShadowY*ooh);
 			TextContext->setFontSize (_FontSize*_Scale);
@@ -1324,9 +1323,10 @@ namespace NLGUI
 		{
 			nlassert(_Index != 0xFFFFFFFF);
 
+			bool drawShadow = !(_TextSelection && m_DisableShadowInSelection);
 			TextContext->setHotSpot (UTextContext::BottomLeft);
-			TextContext->setShaded (_Shadow);
-			TextContext->setShadeOutline (_ShadowOutline);
+			TextContext->setShaded (_Shadow && drawShadow);
+			TextContext->setShadeOutline (_ShadowOutline && drawShadow);
 			TextContext->setShadeColor (shcol);
 			TextContext->setShadeExtent (_ShadowX*oow, _ShadowY*ooh);
 			TextContext->setFontSize (_FontSize*_Scale);

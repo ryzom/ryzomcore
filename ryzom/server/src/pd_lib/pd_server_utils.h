@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -498,6 +501,24 @@ private:
 
 };
 
+class CPDSLogDisplay
+{
+private:
+	NLMISC::CLog *m_Log;
+
+public:
+	CPDSLogDisplay(NLMISC::CLog *log)
+	    : m_Log(log)
+	{
+	}
+
+	NLMISC::CLog *display(const char *format, const char *str)
+	{
+		m_Log->display(format, str);
+		return m_Log;
+	}
+};
+
 #define	PDS_FULL_DEBUG_LEVEL	3
 #define	PDS_NORMAL_DEBUG_LEVEL	2
 #define	PDS_MINIMAL_DEBUG_LEVEL	1
@@ -507,11 +528,11 @@ private:
 #define	PDS_DEBUG_LEVEL			PDS_FULL_DEBUG_LEVEL
 
 
-#define PDS_DEBUG_IN_L(obj, level)							if (level <= 0 || !RY_PDS::PDVerbose || level > RY_PDS::PDVerboseLevel) {} else NLMISC::createDebug (), NLMISC::DebugLog->setPosition( __LINE__, __FILE__ ),	NLMISC::DebugLog->display("%s:", obj->getContextualIndentifier().c_str()),		NLMISC::DebugLog->displayNL
+#define PDS_DEBUG_IN_L(obj, level)							if (level <= 0 || !RY_PDS::PDVerbose || level > RY_PDS::PDVerboseLevel) {} else (NLMISC::createDebug (), CPDSLogDisplay(NLMISC::CSetLogPosition(NLMISC::DebugLog, __LINE__, __FILE__ ).log()).display("%s:", obj->getContextualIndentifier().c_str()))->displayNL
 
 #define PDS_DEBUG_IN(obj)									PDS_DEBUG_IN_L(obj, PDS_DEBUG_LEVEL)
-#define PDS_INFO_IN(obj)									NLMISC::createDebug (), NLMISC::InfoLog->setPosition( __LINE__, __FILE__ ),		NLMISC::InfoLog->display("%s:", obj->getContextualIndentifier().c_str()),		NLMISC::InfoLog->displayNL
-#define PDS_WARNING_IN(obj)									NLMISC::createDebug (), NLMISC::WarningLog->setPosition( __LINE__, __FILE__ ),	NLMISC::WarningLog->display("%s:", obj->getContextualIndentifier().c_str()),	NLMISC::WarningLog->displayNL
+#define PDS_INFO_IN(obj)									(NLMISC::createDebug (), CPDSLogDisplay(NLMISC::CSetLogPosition(NLMISC::InfoLog,  __LINE__, __FILE__ ).log()).display("%s:", obj->getContextualIndentifier().c_str()))->displayNL
+#define PDS_WARNING_IN(obj)									(NLMISC::createDebug (), CPDSLogDisplay(NLMISC::CSetLogPosition(NLMISC::WarningLog,  __LINE__, __FILE__ ).log()).display("%s:", obj->getContextualIndentifier().c_str()))->displayNL
 
 #define	PDS_DEBUG_L(level)	PDS_DEBUG_IN_L(this, level)
 

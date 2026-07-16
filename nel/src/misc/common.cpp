@@ -23,7 +23,7 @@
 #include "nel/misc/common.h"
 
 #ifdef NL_OS_WINDOWS
-#	include <ShellAPI.h>
+#	include <shellapi.h>
 #	include <io.h>
 #	include <tchar.h>
 
@@ -1688,12 +1688,12 @@ void displayDwordBits( uint32 b, uint nbits, sint beginpos, bool displayBegin, N
 	}
 }
 
-FILE* nlfopen(const std::string &filename, const std::string &mode)
+FILE* nlfopen(const std::string &filename, const char *mode)
 {
 #ifdef NL_OS_WINDOWS
 	return _wfopen(nlUtf8ToWide(filename), nlUtf8ToWide(mode));
 #else
-	return fopen(filename.c_str(), mode.c_str());
+	return fopen(filename.c_str(), mode);
 #endif
 }
 

@@ -1,8 +1,9 @@
-FILE(GLOB SRC *.cpp *.h)
+ADD_EXECUTABLE(occ2huff occ2huff.cpp)
 
-ADD_EXECUTABLE(occ2huff ${SRC})
-
-TARGET_LINK_LIBRARIES(occ2huff nelmisc)
+TARGET_LINK_LIBRARIES(occ2huff
+        PRIVATE
+        NeL::misc
+)
 
 NL_DEFAULT_PROPS(occ2huff "Ryzom, Tools: occ2huff")
 NL_ADD_RUNTIME_FLAGS(occ2huff)

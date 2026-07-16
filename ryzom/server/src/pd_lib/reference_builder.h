@@ -53,7 +53,7 @@ public:
 					  const std::string& logPath,
 					  const std::string& mintimestamp,
 					  const std::string& maxtimestamp,
-					  volatile bool* stopAsked = NULL);
+					  NLMISC::CAtomicBool* stopAsked = NULL);
 
 
 private:
@@ -81,7 +81,7 @@ private:
 							  const std::string& logPath,
 							  const std::string& mintimestamp,
 							  const std::string& maxtimestamp,
-							  volatile bool* stopAsked = NULL);
+							  NLMISC::CAtomicBool* stopAsked = NULL);
 
 	/// Apply delta
 	static bool	updateReference(std::vector<TUpdateList>& updateList,
@@ -89,7 +89,7 @@ private:
 								const CTimestamp& endTimestamp,
 								const std::string& refRootPath,
 								const std::string& refPath,
-								volatile bool* stopAsked = NULL);
+								NLMISC::CAtomicBool* stopAsked = NULL);
 
 	/// Build update list
 	static bool	buildUpdateList(std::vector<TUpdateList>& updateList, const std::string& filePath);

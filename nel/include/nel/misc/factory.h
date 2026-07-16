@@ -71,11 +71,8 @@ public:
 	 */
 	void registerClass(const KeyType &key, IFactoryRegister<BaseClass> *factoryRegister)
 	{
-		// TODO: Removed assert because of crash of fes in 2019. We need found why... (ulukyn)
-		//nlassert(_FactoryRegisters.find(key) == _FactoryRegisters.end());
-		//_FactoryRegisters.insert(std::make_pair(key, factoryRegister));
-		if (_FactoryRegisters.find(key) == _FactoryRegisters.end())
-			_FactoryRegisters.insert(std::make_pair(key, factoryRegister));
+		nlassert(_FactoryRegisters.find(key) == _FactoryRegisters.end());
+		_FactoryRegisters.insert(std::make_pair(key, factoryRegister));
 	}
 
 	/** Create a new instance of a factorable object.

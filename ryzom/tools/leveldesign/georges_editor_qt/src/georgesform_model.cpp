@@ -258,7 +258,7 @@ namespace NLQT
 	Qt::ItemFlags CGeorgesFormModel::flags(const QModelIndex& index) const {
 
 		if (!index.isValid())
-			return 0;
+			return {};
 
 		Qt::ItemFlags returnValue = Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 

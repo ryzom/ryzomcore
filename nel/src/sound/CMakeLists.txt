@@ -89,6 +89,8 @@ SOURCE_GROUP("user_classes" FILES ${USER_CLASSES})
 
 
 NL_TARGET_LIB(nelsound ${HEADERS} ${SRC})
+add_library(NeL::sound ALIAS nelsound)
+set_target_properties(nelsound PROPERTIES EXPORT_NAME sound)
 
 IF(HUNTER_ENABLED)
   HUNTER_ADD_PACKAGE(libogg)
@@ -98,8 +100,13 @@ IF(HUNTER_ENABLED)
 
   HUNTER_ADD_PACKAGE(vorbis)
   FIND_PACKAGE(vorbis CONFIG REQUIRED)
-  SET(VORBIS_LIBRARY vorbis::vorbis)
-  SET(VORBISFILE_LIBRARY vorbis::vorbisfile)
+  # add compatibility with vorbis cmake config
+  if(NOT TARGET Vorbis::vorbis)
+	  add_library(Vorbis::vorbis ALIAS vorbis::vorbis)
+  endif()
+  if(NOT TARGET Vorbis::vorbisfile)
+	  add_library(Vorbis::vorbisfile ALIAS vorbis::vorbisfile)
+  endif()
 
   IF(WITH_FFMPEG)
     HUNTER_ADD_PACKAGE(ffmpeg)
@@ -108,41 +115,48 @@ IF(HUNTER_ENABLED)
   ENDIF()
 ENDIF()
 
-INCLUDE_DIRECTORIES(${VORBIS_INCLUDE_DIR})
-INCLUDE_DIRECTORIES(${OGG_INCLUDE_DIR})
+TARGET_INCLUDE_DIRECTORIES(nelsound
+		PRIVATE
+		${OGG_INCLUDE_DIR}
+)
 
-TARGET_LINK_LIBRARIES(nelsound ${VORBISFILE_LIBRARY} ${VORBIS_LIBRARY})
+TARGET_LINK_LIBRARIES(nelsound PRIVATE Vorbis::vorbis Vorbis::vorbisfile)
 
-IF(WITH_STATIC)
+IF(WITH_STATIC OR "${VORBISFILE_LIBRARY}" MATCHES "\\.a")
   # Add libogg dependency only if target is static because to libvorbisfile
-  TARGET_LINK_LIBRARIES(nelsound ${OGG_LIBRARY})
+  TARGET_LINK_LIBRARIES(nelsound PUBLIC ${OGG_LIBRARY})
 ENDIF()
 
 IF(FFMPEG_FOUND)
-	ADD_DEFINITIONS(-DFFMPEG_ENABLED)
-	INCLUDE_DIRECTORIES(${FFMPEG_INCLUDE_DIRS})
-	TARGET_LINK_LIBRARIES(nelsound ${FFMPEG_LIBRARIES})
+	TARGET_COMPILE_DEFINITIONS(nelsound PRIVATE FFMPEG_ENABLED)
+	TARGET_INCLUDE_DIRECTORIES(nelsound PRIVATE ${FFMPEG_INCLUDE_DIRS})
+	TARGET_LINK_LIBRARIES(nelsound PUBLIC ${FFMPEG_LIBRARIES})
 ENDIF()
 
 
-INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
-
-TARGET_LINK_LIBRARIES(nelsound nelmisc nelligo nelgeorges nel3d nelsnd_lowlevel)
+TARGET_LINK_LIBRARIES(nelsound
+        PUBLIC
+        NeL::misc
+		NeL::ligo
+        NeL::georges
+        NeL::3d
+        NeL::snd_lowlevel
+        PRIVATE
+        LibXml2::LibXml2
+)
 NL_DEFAULT_PROPS(nelsound "NeL, Library: NeL Sound")
 NL_ADD_RUNTIME_FLAGS(nelsound)
 
 NL_ADD_LIB_SUFFIX(nelsound)
 
-ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
-
 IF(WITH_PCH)
-  ADD_NATIVE_PRECOMPILED_HEADER(nelsound ${CMAKE_CURRENT_SOURCE_DIR}/stdsound.h ${CMAKE_CURRENT_SOURCE_DIR}/stdsound.cpp)
+  target_precompile_headers(nelsound PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/stdsound.h)
 ENDIF()
 
 NL_GEN_PC(nel-sound.pc)
 
-IF((WITH_INSTALL_LIBRARIES AND WITH_STATIC) OR NOT WITH_STATIC)
-  INSTALL(TARGETS nelsound LIBRARY DESTINATION ${NL_LIB_PREFIX} ARCHIVE DESTINATION ${NL_LIB_PREFIX} COMPONENT libraries)
+IF(WITH_INSTALL_LIBRARIES OR NOT WITH_STATIC)
+  INSTALL(TARGETS nelsound EXPORT "${project_export_name}" LIBRARY DESTINATION ${NL_LIB_PREFIX} ARCHIVE DESTINATION ${NL_LIB_PREFIX} COMPONENT libraries)
 ENDIF()
 
 ADD_SUBDIRECTORY(driver)

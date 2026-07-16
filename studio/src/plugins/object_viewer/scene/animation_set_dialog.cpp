@@ -21,7 +21,7 @@
 #include "animation_set_dialog.h"
 
 // Qt includes
-#include <QtGui/QFileDialog>
+#include <QFileDialog>
 
 // NeL includes
 

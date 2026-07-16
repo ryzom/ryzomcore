@@ -116,7 +116,9 @@ std::string getDebugVersion()
 
 bool isStereoAvailable()
 {
-#ifdef NL_STEREO_AVAILABLE
+#if !FINAL_VERSION
+	return true;
+#elif defined(NL_STEREO_AVAILABLE)
 	return true;
 #else
 	return false;

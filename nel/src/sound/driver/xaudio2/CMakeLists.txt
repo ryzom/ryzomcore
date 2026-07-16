@@ -1,5 +1,13 @@
 FILE(GLOB SRC *.cpp *.h *.def *.rc)
 
+SOURCE_GROUP("" FILES
+		sound_driver_xaudio2.cpp
+		sound_driver_xaudio2.h
+		stdxaudio2.cpp
+		stdxaudio2.h
+		driver_xaudio2.def
+		resources.rc)
+
 SOURCE_GROUP(sfx FILES
         buffer_xaudio2.cpp
         buffer_xaudio2.h
@@ -12,35 +20,25 @@ SOURCE_GROUP(sfx\\utility FILES
         adpcm_xaudio2.cpp
 		adpcm_xaudio2.h)
 
-SOURCE_GROUP(music_remove FILES
-        music_channel_xaudio2.cpp
-		music_channel_xaudio2.h)
-		
-SOURCE_GROUP(music_remove\\utility FILES
-        music_buffer.cpp
-		music_buffer.h
-		music_buffer_vorbis.cpp
-		music_buffer_vorbis.h)
-
 SOURCE_GROUP(efx FILES
         effect_xaudio2.cpp
         effect_xaudio2.h)
 		
 NL_TARGET_DRIVER(nel_drv_xaudio2_win ${SRC})
 
-INCLUDE_DIRECTORIES(BEFORE ${DXSDK_INCLUDE_DIR})
+TARGET_INCLUDE_DIRECTORIES(nel_drv_xaudio2_win BEFORE PRIVATE ${DXSDK_INCLUDE_DIR})
 
-TARGET_LINK_LIBRARIES(nel_drv_xaudio2_win nelmisc nelsnd_lowlevel ${DXSDK_XAUDIO_LIBRARY})
+TARGET_LINK_LIBRARIES(nel_drv_xaudio2_win NeL::misc NeL::snd_lowlevel ${DXSDK_XAUDIO_LIBRARY})
 
 NL_DEFAULT_PROPS(nel_drv_xaudio2_win "NeL, Driver, Sound: XAudio2")
 NL_ADD_RUNTIME_FLAGS(nel_drv_xaudio2_win)
 NL_ADD_LIB_SUFFIX(nel_drv_xaudio2_win)
 
 IF(WITH_PCH)
-  ADD_NATIVE_PRECOMPILED_HEADER(nel_drv_xaudio2_win ${CMAKE_CURRENT_SOURCE_DIR}/stdxaudio2.h ${CMAKE_CURRENT_SOURCE_DIR}/stdxaudio2.cpp)
+  target_precompile_headers(nel_drv_xaudio2_win PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/stdxaudio2.h)
 ENDIF()
 
-IF((WITH_INSTALL_LIBRARIES AND WITH_STATIC_DRIVERS) OR NOT WITH_STATIC_DRIVERS)
+IF(WITH_INSTALL_LIBRARIES OR NOT WITH_STATIC_DRIVERS)
   INSTALL(TARGETS nel_drv_xaudio2_win RUNTIME DESTINATION ${NL_DRIVER_PREFIX} LIBRARY DESTINATION ${NL_DRIVER_PREFIX} ARCHIVE DESTINATION ${NL_LIB_PREFIX} COMPONENT driverssound)
   IF(WITH_MAXPLUGIN)
     INSTALL(TARGETS nel_drv_xaudio2_win RUNTIME DESTINATION maxplugin COMPONENT driverssound)

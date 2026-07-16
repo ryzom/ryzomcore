@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -28,6 +31,8 @@ CBuilderConfig::CBuilderConfig()
 	CachePath = "island_packed_zones_cache";
 	CWMapCachePath = "island_cwmap_cache";
 	OutputPath = "islands_col_meshes";
+	CompleteIslandsFile = "r2_islands.xml";
+	EntryPointsFile = "r2_entry_points.txt";
 	CamSpeed = 100;
 	Fly = false;
 	HeightMapsAsTga = false;
@@ -74,6 +79,18 @@ void CBuilderConfig::build(NLMISC::CConfigFile &cf)
 		{
 			CWMapList[k] = cwMapListVar->asString(k);
 		}
+	}
+	//
+	CConfigFile::CVar *completeIslandsFileVar = cf.getVarPtr("CompleteIslandsFile");
+	if (completeIslandsFileVar)
+	{
+		CompleteIslandsFile = completeIslandsFileVar->asString();
+	}
+	//
+	CConfigFile::CVar *entryPointsFileVar = cf.getVarPtr("EntryPointsFile");
+	if (entryPointsFileVar)
+	{
+		EntryPointsFile = entryPointsFileVar->asString();
 	}
 	//
 	CConfigFile::CVar *camSpeedVar = cf.getVarPtr("CamSpeed");

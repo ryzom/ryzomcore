@@ -66,10 +66,10 @@ CCoarseMeshManager::CCoarseMeshManager()
 	_VBuffer.setVertexFormat(NL3D_COARSEMESH_VERTEX_FORMAT_MGR);
 	_VBuffer.setNumVertices(NL3D_COARSEMESH_VERTEXBUFFER_SIZE);
 	_VBuffer.setName("CCoarseMeshManager");
-	_VBuffer.setPreferredMemory(CVertexBuffer::AGPVolatile, false);
+	_VBuffer.setBufferUsage(CVertexBuffer::FullStream, false);
 	_Triangles.setFormat(NL_COARSE_MESH_INDEX_FORMAT);
 	_Triangles.setNumIndexes(NL3D_COARSEMESH_TRIANGLE_SIZE*3);
-	_Triangles.setPreferredMemory(CIndexBuffer::RAMVolatile, false); // TODO : see if agp index is better
+	_Triangles.setBufferUsage(CIndexBuffer::SmallStream, false); // TODO : see if agp index is better
 	_CurrentNumVertices= 0;
 	_CurrentNumTriangles= 0;
 	NL_SET_IB_NAME(_Triangles, "CCoarseMeshManager");

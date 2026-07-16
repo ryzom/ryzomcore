@@ -36,8 +36,11 @@
 #define NEL3DWIDGET QGLWidget
 #endif
 
-
 #include "../core_global.h"
+
+#ifdef NL_OS_UNIX
+#include <X11/Xlib.h>
+#endif
 
 namespace NL3D
 {

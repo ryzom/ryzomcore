@@ -1,0 +1,6 @@
+{
+  "Name" : "ExamplePlugin",
+  "Version" : "0.2",
+  "Vendor": "dnk-88",
+  "Description": "Example ovqt plugin."
+}

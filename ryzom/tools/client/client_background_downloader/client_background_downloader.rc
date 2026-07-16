@@ -1,0 +1,394 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// French (France) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_FRA)
+#ifdef _WIN32
+LANGUAGE LANG_FRENCH, SUBLANG_FRENCH
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_FRA)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 12, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""res\\client_background_downloader.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""l.fra\\afxres.rc""          // Standard components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_MAIN_ICON           ICON    DISCARDABLE     "icon1.ico"
+IDI_TRAY_ICON           ICON    DISCARDABLE     "ico00001.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_CLIENT_BACKGROUND_DOWNLOADER_DIALOG DIALOGEX 0, 0, 344, 271
+STYLE DS_MODALFRAME | WS_MINIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | 
+    WS_SYSMENU
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "Ryzom background downloader"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    COMBOBOX        IDC_THREAD_PRIORITY,264,255,75,88,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Progress1",IDC_PROGRESS,"msctls_progress32",PBS_SMOOTH,
+                    10,255,253,13
+    CONTROL         138,IDC_STATUS_BITMAP,"Static",SS_BITMAP,7,240,20,20,
+                    WS_EX_TRANSPARENT
+    CONTROL         129,IDC_STATIC,"Static",SS_BITMAP,6,8,333,231
+    LTEXT           "...",IDC_STATUS_STRING,26,242,311,9
+    PUSHBUTTON      "Bypass",IDC_BYPASS,282,240,56,13
+END
+
+IDD_CLOSE_WARNING DIALOG DISCARDABLE  0, 0, 397, 77
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Ryzom background downloader"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,155,59,92,14
+    LTEXT           "Close warning",IDC_CLOSE_WARNING,96,17,279,23
+    CONTROL         "Check1",IDC_DONT_SHOW_AGAIN,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,97,46,292,10
+    CONTROL         134,IDC_STATIC,"Static",SS_BITMAP,1,17,85,39
+END
+
+IDD_INSTALL_STEP DIALOG DISCARDABLE  0, 0, 488, 301
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "uiBGD_RyzomInstaller"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "uiBGD_NextStep",IDOK,413,270,66,24
+    DEFPUSHBUTTON   "uiBGD_Exit",ID_CANCEL,341,270,69,24
+    CONTROL         152,IDC_STATIC,"Static",SS_BITMAP,7,7,233,289
+    CONTROL         "uiBGD_NewInstall",IDC_NEWINSTALL,"Button",
+                    BS_AUTORADIOBUTTON,251,226,227,11
+    CONTROL         "uiBGD_Repair",IDC_REPAIR,"Button",BS_AUTORADIOBUTTON | 
+                    WS_DISABLED,251,241,228,11
+    GROUPBOX        "",IDC_STATIC,245,215,238,43
+    GROUPBOX        "",IDC_STATIC,245,261,237,36
+    CONTROL         "",IDC_INTRO_TEXT,"RICHEDIT",ES_MULTILINE | WS_DISABLED | 
+                    WS_BORDER | WS_TABSTOP,245,6,240,207
+END
+
+IDD_INSTALL_TASK DIALOGEX 0, 0, 441, 307
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "uiBGD_RyzomInstaller"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "uiBGD_Quit",IDEXIT,367,270,62,15
+    CONTROL         "Progress1",IDC_PROGRESS,"msctls_progress32",PBS_SMOOTH,
+                    13,270,348,12
+    LTEXT           "",IDC_STATUS_TEXT,15,284,346,16
+    CONTROL         155,IDC_BG_BITMAP,"Static",SS_BITMAP | SS_REALSIZEIMAGE,
+                    7,8,427,295
+    LTEXT           "",IDC_REMAINING_TIME,264,246,165,15,0,WS_EX_RIGHT
+    CONTROL         "Custom1",IDC_WEB_PAGE,"WebPage",WS_TABSTOP,7,8,427,295
+    CONTROL         "",IDC_TASK_TYPE,"RICHEDIT",ES_MULTILINE | WS_DISABLED | 
+                    WS_TABSTOP,44,246,127,21
+    CONTROL         185,IDC_PROGRESS_BITMAP,"Static",SS_BITMAP,9,241,32,30
+END
+
+IDD_ERROR_BOX DIALOG DISCARDABLE  0, 0, 389, 150
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "uiBGD_RyzomInstaller"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "uiBGD_Exit",IDOK,133,116,62,21
+    PUSHBUTTON      "uiBGD_Help",IDHELP,196,116,57,20
+    CONTROL         158,IDC_STATIC,"Static",SS_BITMAP,1,4,87,40
+    LTEXT           "Static",IDC_ERROR_MSG,136,5,246,68
+    LTEXT           "uiBGD_ResumeDownloadInfo",IDC_RESUME_MSG,7,85,351,31
+    ICON            IDI_MAIN_ICON,IDC_STATIC,361,85,20,20
+    CONTROL         180,IDC_STATIC,"Static",SS_BITMAP,359,92,7,7
+END
+
+IDD_CHOOSE_PACKAGE DIALOG DISCARDABLE  0, 0, 488, 301
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "uiBGD_RyzomInstaller"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "uiBGD_NextStep",IDOK,413,270,66,24
+    DEFPUSHBUTTON   "uiBGD_Exit",ID_CANCEL,341,270,69,24
+    CONTROL         160,IDC_STATIC,"Static",SS_BITMAP,7,7,233,289
+    GROUPBOX        "",IDC_STATIC,245,213,237,48
+    GROUPBOX        "",IDC_STATIC,245,261,237,36
+    CONTROL         "uiBGD_FullInstall",IDC_FULL_PACKAGE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,258,221,144,16
+    CONTROL         "uiBGD_Torrent",IDC_TORRENT,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,258,239,144,16
+    CONTROL         "",IDC_PACKAGE_TEXT,"RICHEDIT",ES_MULTILINE | 
+                    WS_DISABLED | WS_BORDER | WS_TABSTOP,245,7,238,205
+END
+
+IDD_INSTALL_SUCCESS DIALOG DISCARDABLE  0, 0, 488, 301
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "uiBGD_RyzomInstaller"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "uiBGD_FinishInstall",IDOK,411,268,69,24
+    CONTROL         164,IDC_STATIC,"Static",SS_BITMAP,7,7,233,289
+    CONTROL         "uiBGD_StartRyzomNow",IDC_START_RYZOM_NOW,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,254,241,226,22
+    GROUPBOX        "",IDC_STATIC,246,237,234,31
+    CONTROL         "",IDC_CONGRATS,"RICHEDIT",ES_MULTILINE | WS_DISABLED | 
+                    WS_BORDER | WS_TABSTOP,246,13,234,224
+END
+
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040c04b0"
+        BEGIN
+            VALUE "Comments", "\0"
+            VALUE "CompanyName", "GameForge France\0"
+            VALUE "FileDescription", "Ryzom Background Downloader\0"
+            VALUE "FileVersion", "1, 0, 0, 1\0"
+            VALUE "InternalName", "client_background_downloader\0"
+            VALUE "LegalCopyright", "Copyright (C) 2007 GameForge France\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "client_background_downloader.EXE\0"
+            VALUE "PrivateBuild", "\0"
+            VALUE "ProductName", "Application client_background_downloader\0"
+            VALUE "ProductVersion", "1, 0, 0, 1\0"
+            VALUE "SpecialBuild", "\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x40c, 1200
+    END
+END
+
+#endif    // !_MAC
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_CLIENT_BACKGROUND_DOWNLOADER_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 337
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 264
+    END
+
+    IDD_CLOSE_WARNING, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 390
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 70
+    END
+
+    IDD_INSTALL_STEP, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 481
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 294
+    END
+
+    IDD_INSTALL_TASK, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 434
+        TOPMARGIN, 9
+        BOTTOMMARGIN, 301
+    END
+
+    IDD_ERROR_BOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 382
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 143
+    END
+
+    IDD_CHOOSE_PACKAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 179
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 88
+    END
+
+    IDD_INSTALL_SUCCESS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 480
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 275
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_DOWNLOADER_BG       BITMAP  DISCARDABLE     "downloader_bg.bmp"
+IDB_BG_TRAY             BITMAP  DISCARDABLE     "ry_bg_tray.bmp"
+IDB_DL_STOP             BITMAP  DISCARDABLE     "dl_stop.bmp"
+IDB_PROGRESS_0          BITMAP  DISCARDABLE     "progress_icon_0.bmp"
+IDB_PROGRESS_1          BITMAP  DISCARDABLE     "progress_icon_1.bmp"
+IDB_PROGRESS_SUCCESS    BITMAP  DISCARDABLE     "progress_success.bmp"
+IDB_PROGRESS_PAUSED     BITMAP  DISCARDABLE     "progress_paused.bmp"
+IDB_INTRO               BITMAP  DISCARDABLE     "intro.bmp"
+IDB_BACKGROUND0         BITMAP  DISCARDABLE     "background_0.bmp"
+IDB_ERROR_LOGO          BITMAP  DISCARDABLE     "error_logo.bmp"
+IDB_PACKAGE             BITMAP  DISCARDABLE     "package.bmp"
+IDB_INSTALL_SUCCESS     BITMAP  DISCARDABLE     "install_success.bmp"
+IDB_APP_SHORTCUT        BITMAP  DISCARDABLE     "shortcut_bmp.bmp"
+IDB_TEST_ALPHA          BITMAP  DISCARDABLE     "test_alpha.bmp"
+IDB_PROGRESS_BG         BITMAP  DISCARDABLE     "progress_bg.bmp"
+IDB_PROGRESS_FG         BITMAP  DISCARDABLE     "progress_fg.bmp"
+IDB_PROGRESS_ANIM       BITMAP  DISCARDABLE     "progress_anim_sh.bmp"
+IDB_PROGRESS_FAIL       BITMAP  DISCARDABLE     "progress_failed.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_TRAY_MENU MENU DISCARDABLE 
+BEGIN
+    POPUP "tray"
+    BEGIN
+        MENUITEM "Show/Hide downloader",        IDM_SHOW_HIDE
+        MENUITEM "Exit",                        IDM_DOWNLOADER_EXIT
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+IDD_CLIENT_BACKGROUND_DOWNLOADER_DIALOG DLGINIT
+BEGIN
+    IDC_THREAD_PRIORITY, 0x403, 7, 0
+0x6150, 0x7375, 0x6465, "\000" 
+    IDC_THREAD_PRIORITY, 0x403, 13, 0
+0x6f4c, 0x2077, 0x7270, 0x6f69, 0x6972, 0x7974, "\000" 
+    IDC_THREAD_PRIORITY, 0x403, 16, 0
+0x6f4e, 0x6d72, 0x6c61, 0x7020, 0x6972, 0x726f, 0x7469, 0x0079, 
+    0
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// UXT
+//
+
+IDR_FR_UXT              UXT     DISCARDABLE     "..\\..\\translation\\translated\\fr.uxt"
+IDR_EN_UXT              UXT     DISCARDABLE     "..\\..\\translation\\translated\\en.uxt"
+IDR_DE_UXT              UXT     DISCARDABLE     "..\\..\\translation\\translated\\de.uxt"
+IDR_WK_UXT              UXT     DISCARDABLE     "..\\..\\translation\\work\\wk.uxt"
+#endif    // French (France) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_FRA)
+#ifdef _WIN32
+LANGUAGE 12, 1
+#pragma code_page(1252)
+#endif //_WIN32
+#include "res\client_background_downloader.rc2"  // non-Microsoft Visual C++ edited resources
+#include "l.fra\afxres.rc"          // Standard components
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

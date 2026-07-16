@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2020  Winch Gate Property Limited
+// Copyright (C) 2010-2022  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013-2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
@@ -64,15 +64,14 @@ void updateFromClientCfg()
 	{
 		nldebug("Apply VR device change");
 		// detach display mode
-		if (StereoDisplay && StereoDisplayAttached)
+		if (StereoDisplayAttached)
 			StereoDisplay->detachFromDisplay();
 		StereoDisplayAttached = false;
 		// re-init
 		releaseStereoDisplayDevice();
 		initStereoDisplayDevice();
 		// try attach display mode
-		if (StereoDisplay)
-			StereoDisplayAttached = StereoDisplay->attachToDisplay();
+		StereoDisplayAttached = StereoDisplay->attachToDisplay();
 		// set latest config display mode if not attached
 		if (!StereoDisplayAttached)
 			setVideoMode(UDriver::CMode(ClientCfg.Width, ClientCfg.Height, (uint8)ClientCfg.Depth,
@@ -198,6 +197,14 @@ void updateFromClientCfg()
 
 	// GRAPHICS - SPECIAL EFFECTS
 	//---------------------------------------------------
+	// Water reflections
+	if (ClientCfg.MaxWaterReflections != LastClientCfg.MaxWaterReflections)
+		Scene->setMaxRealtimeWaterReflections(ClientCfg.MaxWaterReflections);
+	if (ClientCfg.MaxWaterReflectionTextures != LastClientCfg.MaxWaterReflectionTextures)
+		Scene->setWaterReflectionMaxTextures(ClientCfg.MaxWaterReflectionTextures);
+	if (ClientCfg.ForceWaterReflections != LastClientCfg.ForceWaterReflections)
+		Scene->setForceRealtimeWaterReflections(ClientCfg.ForceWaterReflections);
+
 	if (ClientCfg.FxNbMaxPoly != LastClientCfg.FxNbMaxPoly)
 	{
 		if (Scene->getGroupLoadMaxPolygon("Fx") != ClientCfg.FxNbMaxPoly)
@@ -299,6 +306,13 @@ void updateFromClientCfg()
 		// Don't reload Texture, will be done at next Game Start
 	}
 
+	//---------------------------------------------------
+	if (ClientCfg.GPUSkinning != LastClientCfg.GPUSkinning)
+	{
+		if (Scene)
+			Scene->enableGPUSkinning(ClientCfg.GPUSkinning);
+	}
+
 	// INTERFACE works
 
 
@@ -326,8 +340,19 @@ void updateFromClientCfg()
 	bool	mustReloadSoundMngrContinent= false;
 
 	// disable/enable sound?
-	if (ClientCfg.SoundOn != LastClientCfg.SoundOn)
+	if (ClientCfg.SoundOn != LastClientCfg.SoundOn || ClientCfg.DriverSound != LastClientCfg.DriverSound)
 	{
+		// changing sound driver
+		if (ClientCfg.DriverSound != LastClientCfg.DriverSound)
+		{
+			if (SoundMngr)
+			{
+				nlwarning("Changing sound driver...");
+				delete SoundMngr;
+				SoundMngr = NULL;
+			}
+		}
+
 		if (SoundMngr && !ClientCfg.SoundOn)
 		{
 			nlwarning("Deleting sound manager...");

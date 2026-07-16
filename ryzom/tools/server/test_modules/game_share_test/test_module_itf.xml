@@ -1,0 +1,22 @@
+<generator header_tag="TEST_MODULE_INTERFACE">
+	<namespace name="TST_MOD_ITF">
+
+		<module_interface name="CTestModuleInterface">
+
+			<method name="noParam" msg="TMI_NP">
+
+			</method>
+
+
+			<method name="twoWayInvoke" msg="TMI_TWI">
+
+				<return type="uint32"/>
+
+				<param type="uint32" name="value1"/>
+				<param type="uint32" name="value2"/>
+			</method>
+
+		</module_interface>
+	</namespace>
+</generator>
+

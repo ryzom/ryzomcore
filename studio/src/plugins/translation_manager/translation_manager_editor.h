@@ -21,12 +21,12 @@
 #ifndef TRANSLATION_MANAGER_EDITOR_H
 #define TRANSLATION_MANAGER_EDITOR_H
 
-#include <QtCore/QObject>
-#include <QtGui/QWidget>
-#include <QtGui/QMdiArea>
-#include <QtGui/QMdiSubWindow>
-#include <QtGui/QUndoStack>
-#include <QtCore/QFileInfo>
+#include <QObject>
+#include <QWidget>
+#include <QMdiArea>
+#include <QMdiSubWindow>
+#include <QUndoStack>
+#include <QFileInfo>
 
 namespace TranslationManager
 {

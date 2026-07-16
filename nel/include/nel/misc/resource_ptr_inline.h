@@ -57,6 +57,8 @@ template <class TPtr, class TKey, class TResourceFinder> SMART_INLINE void	CReso
 		}
 		else
 		{
+			// Guarantueed by !pinfo->IsNullPtrInfo
+			nlassumeex(pinfo != &CRefCount::NullPtrInfo);
 			// If the CResourcePtr still point to a valid object.
 			if(pinfo->Ptr)
 			{

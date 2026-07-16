@@ -489,6 +489,9 @@ public:
 	bool		getFXUserMatrixVisible() const { return _FXUserMatrixVisible; }
 	void		setOcclusionTestMeshsVisible(bool visible) { _OcclusionTestMeshsVisible = visible; }
 	bool		getOcclusionTestMeshsVisible() const { return _OcclusionTestMeshsVisible; }
+	// enable realtime reflection on all water surfaces regardless of the per-shape artist flag
+	void		setForceWaterReflections(bool force);
+	bool		getForceWaterReflections() const;
 
 	
 

@@ -1,0 +1,12 @@
+add_test_executable(snowballs_server_position_physics_test
+        physics.test.cpp
+        ../snowballs/position/physics.cpp
+)
+target_include_directories(snowballs_server_position_physics_test
+        PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/..
+)
+target_link_libraries(snowballs_server_position_physics_test
+        PRIVATE
+        NeL::misc
+)

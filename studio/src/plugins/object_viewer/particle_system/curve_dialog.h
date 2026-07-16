@@ -27,10 +27,10 @@
 #include <nel/3d/ps_float.h>
 
 // Qt includes
-#include <QtGui/QDialog>
-#include <QtGui/QGridLayout>
-#include <QtGui/QHeaderView>
-#include <QtGui/QWidget>
+#include <QDialog>
+#include <QGridLayout>
+#include <QHeaderView>
+#include <QWidget>
 
 // Project includes
 #include "hoverpoints.h"

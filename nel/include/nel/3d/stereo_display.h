@@ -118,13 +118,15 @@ public:
 	virtual void getCurrentMatrix(uint cid, NL3D::UCamera *camera) const = 0;
 
 	/// At the start of a new render target
-	virtual bool wantClear() = 0;		
+	virtual bool wantClear() = 0;
+	/// Render scene reflections (water planar reflections)
+	virtual bool wantSceneReflections() = 0;
 	/// The 3D scene
 	virtual bool wantScene() = 0;
 	/// Scene post processing effects
 	virtual bool wantSceneEffects() = 0;
 	/// Interface within the 3D scene
-	virtual bool wantInterface3D() = 0;	
+	virtual bool wantInterface3D() = 0;
 	/// 2D Interface
 	virtual bool wantInterface2D() = 0;
 
@@ -132,6 +134,24 @@ public:
 	virtual bool isSceneFirst() = 0;
 	/// Is this the last 3D scene of the frame
 	virtual bool isSceneLast() = 0;
+
+	/** Set the number of scene reflection passes wanted this frame (e.g.
+	  * one per admitted water plane). Call before the first nextPass() of
+	  * the frame. The display replicates its scene reflections stage once
+	  * per pass — and per eye for stereo displays, with the two eye stages
+	  * of the same pass adjacent so the second eye can re-render the first
+	  * eye's render traversal (isSceneFirst()). Zero skips the reflections
+	  * stage entirely. */
+	virtual void setSceneReflectionPasses(uint count) { m_SceneReflectionPasses = count; }
+	/// The current reflection pass index during a wantSceneReflections() stage
+	virtual uint getSceneReflectionPass() const { return 0; }
+	/** The view (eye) index of the current scene or scene reflections
+	  * stage: 0 for the first/only eye, 1 for the second. Used to select
+	  * per-view resources such as water reflections. */
+	virtual uint getSceneView() const { return 0; }
+
+	/// Get the flare context for the current pass (see the CScene flare context allocation). Different eyes and reflection passes must use different contexts.
+	virtual uint getFlareContext() = 0;
 
 	/// Returns true if a new render target was set, always fase if not using render targets
 	virtual bool beginRenderTarget() = 0;
@@ -144,7 +164,10 @@ public:
 	static IStereoDisplay *createDevice(const CStereoDeviceInfo &deviceInfo);
 	static void releaseUnusedLibraries();
 	static void releaseAllLibraries();
-	
+
+protected:
+	uint m_SceneReflectionPasses;
+
 }; /* class IStereoDisplay */
 
 } /* namespace NL3D */

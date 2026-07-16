@@ -1,17 +1,20 @@
-FILE(GLOB SRC *.cpp *.h)
+FILE(GLOB SRC *.cpp *.h *.rc)
 
 ADD_LIBRARY(world_editor_graph_plugin SHARED ${SRC})
 
-TARGET_LINK_LIBRARIES(world_editor_graph_plugin 
-							nelmisc
-							nel3d
-							nelsound
-							nelsnd_lowlevel
-							ryzom_mission_compiler_lib)
-							
+TARGET_LINK_LIBRARIES(world_editor_graph_plugin
+        PUBLIC
+        NeL::misc
+        NeL::3d
+        NeL::sound
+        NeL::snd_lowlevel
+        Ryzom::mission_compiler_lib
+)
+
 NL_DEFAULT_PROPS(world_editor_graph_plugin "Ryzom, Tools, World: World Editor Graph Plugin")
 NL_ADD_RUNTIME_FLAGS(world_editor_graph_plugin)
 NL_ADD_LIB_SUFFIX(world_editor_graph_plugin)
+NL_MFC_DLL_WORKAROUND(world_editor_graph_plugin)
 
 ADD_DEFINITIONS(${MFC_DEFINITIONS} -DWIN32_DLL_EXPORTS)
 

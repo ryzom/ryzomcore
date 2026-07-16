@@ -19,10 +19,10 @@
 
 
 #include "property_browser_ctrl.h"
-#include "../../3rdparty/qtpropertybrowser/QtVariantPropertyManager"
-#include "../../3rdparty/qtpropertybrowser/QtEnumPropertyManager"
-#include "../../3rdparty/qtpropertybrowser/QtTreePropertyBrowser"
-#include "../../3rdparty/qtpropertybrowser/QtEnumEditorFactory"
+#include <qtpropertybrowser/QtVariantPropertyManager>
+#include <qtpropertybrowser/QtEnumPropertyManager>
+#include <qtpropertybrowser/QtTreePropertyBrowser>
+#include <qtpropertybrowser/QtEnumEditorFactory>
 #include "nel/gui/interface_group.h"
 #include "nel/gui/widget_manager.h"
 #include <typeinfo>

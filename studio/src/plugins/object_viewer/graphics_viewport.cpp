@@ -17,17 +17,17 @@
 
 */
 
+// Qt includes
+#include <QAction>
+#include <QResizeEvent>
+#include <QColorDialog>
+#include <QFileDialog>
+
 #include "stdpch.h"
 #include "graphics_viewport.h"
 #include "../core/Nel3DWidget/nel3d_widget.h"
 
 // STL includes
-
-// Qt includes
-#include <QtGui/QAction>
-#include <QtGui/QResizeEvent>
-#include <QtGui/QColorDialog>
-#include <QtGui/QFileDialog>
 
 // NeL includes
 #include <nel/misc/rgba.h>

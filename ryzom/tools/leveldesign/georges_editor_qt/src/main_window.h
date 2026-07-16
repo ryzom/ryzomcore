@@ -24,8 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // STL includes
 
 // Qt includes
-
-#include <QtGui/QMainWindow>
+#include <QMainWindow>
 #include <QPlainTextEdit>
 
 // NeL includes

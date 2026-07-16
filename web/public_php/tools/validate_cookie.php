@@ -18,7 +18,7 @@
 	{
 		$domainInfo = getDomainInfo($domainId);
 		
-		global $DBHost, $RingDBUserName, $RingDBPassword, $AcceptUnknownUser;
+		global $DBHost, $DBPort, $RingDBUserName, $RingDBPassword, $AcceptUnknownUser;
 		
 		if (!isset($_COOKIE["ryzomId"]))
 		{
@@ -42,7 +42,7 @@
 		}
 
 		// check the cookie in the database		
-		$link = mysqli_connect($DBHost, $RingDBUserName, $RingDBPassword) or die ("Can't connect to database host:$DBHost user:$RingDBUserName");
+		$link = mysqli_connect($DBHost, $RingDBUserName, $RingDBPassword, NULL, $DBPort) or die ("Can't connect to database host:$DBHost user:$RingDBUserName");
 		mysqli_select_db($link, $domainInfo['ring_db_name']) or die ("Can't access to the table dbname:" . $domainInfo['ring_db_name']);
 
 		$cookie = mysqli_real_escape_string($link, $cookie);
@@ -66,7 +66,7 @@
 		$userId = $row["user_id"];
 		$domainId = $row["current_domain_id"];
 //		$charId = ($userId*16) + (getCharSlot()) & 0xf;
-		$charId = $userId*16 + getCharSlot();
+		$charId = intval($userId*16 + getCharSlot());
 		
 		return true;
 	}
@@ -75,9 +75,9 @@
 	{
 		global $_GET, $_POST;		
 		if (isset($_GET["charSlot"]))
-			return $_GET["charSlot"];
+			return intval($_GET["charSlot"]);
 		else if (isset($_POST["charSlot"]))
-			return $_POST["charSlot"];
+			return intval($_POST["charSlot"]);
 		else
 			return 0; // temp dev: use 0 as the "ring character"
 	}

@@ -1,0 +1,57 @@
+<html>
+<head>
+<title>Inbox</title>
+<meta HTTP-EQUIV="content-type" CONTENT="text/html; charset=UTF-8">
+</head>
+
+<body bgcolor="#333333" text="#FFFFFF">
+<form method='post' action='confirm_remove_mail.php'>
+<table width="100%" height="100%">
+  <tr> 
+    <td valign="top"> 
+      <table width="100%">
+        <tr> 
+          <td height="80"> 
+              <table width="100%" border="00" cellspacing="8" bgcolor="#000000" >
+                <tr valign="middle"> 
+                  <td width="2%"><img src="web_inbox.gif"></td>
+                  <td width="98%" ><h1><i>uiMFInbox</i></h1></td>
+                </tr>
+              </table>
+          </td>
+        </tr>
+        <tr>
+          <td> 
+          <table valign="middle" width="100%" cellspacing="2" l_margin="4">
+            <tr bgcolor="#000000"> 
+			<h5>
+              <td width="2%" height="30" bgcolor="#333333"></td>
+              <td width="22%"><i>uiMFFrom</i></td>
+              <td width="58%"><i>uiMFSubject</i></td>
+              <td width="18%"><i>uiMFDate</i></td>
+			</h5>
+            </tr>
+%%MAILS%%
+          </table>
+          </td>
+        </tr>
+        <tr>
+          <td> 
+            <table width="100%">
+              <tr valign="middle"> 
+				<td><a href="%%PREVIOUS%%"><img src="web_previous.gif" global_color alt="uiWebPrevious" ></a></td>
+%%LINKS%%
+				<td width="100%"><a href="%%NEXT%%"><img src="web_next.gif" global_color alt="uiWebNext" ></a></td>
+                <td><input type="image" name="del2" value="Submit" src="web_del.gif" alt="uiWebDelMessage" ></td>
+                <td><a href="new_mail.php"><img src="web_send.gif" alt="uiWebNewMessage" ></a></td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+</form>
+</body>
+</html>

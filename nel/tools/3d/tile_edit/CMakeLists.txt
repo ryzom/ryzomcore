@@ -9,14 +9,14 @@ LIST(REMOVE_ITEM SRC ${SRC2})
 
 ADD_EXECUTABLE(tile_edit WIN32 ${SRC} tile_edit_exe.rc)
 
-TARGET_LINK_LIBRARIES(tile_edit nelmisc nel3d)
+TARGET_LINK_LIBRARIES(tile_edit PRIVATE NeL::misc NeL::3d)
 NL_DEFAULT_PROPS(tile_edit "NeL, Tools, 3D: Tile Editor")
 NL_ADD_RUNTIME_FLAGS(tile_edit)
 
 ADD_DEFINITIONS(${MFC_DEFINITIONS})
 
 IF(WITH_PCH)
-  ADD_NATIVE_PRECOMPILED_HEADER(tile_edit ${CMAKE_CURRENT_SOURCE_DIR}/stdafx.h ${CMAKE_CURRENT_SOURCE_DIR}/stdafx.cpp)
+  target_precompile_headers(tile_edit PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/stdafx.h)
 ENDIF()
 
 INSTALL(TARGETS tile_edit RUNTIME DESTINATION ${NL_BIN_PREFIX} COMPONENT tools3d)

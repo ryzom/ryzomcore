@@ -56,7 +56,7 @@ namespace R2
 
 		bool runLuaScript(const std::string& filename, std::string& errorMsg);
 
-		CObject* translateFeatures(CObject* hlScenario, std::string& errorMsg) const;
+		CObject::TSmartPtr translateFeatures(CObject* hlScenario, std::string& errorMsg) const;
 		
 		void loadFeatures();
 		
@@ -121,11 +121,11 @@ namespace R2
 
 		static void setObjectToLua(lua_State* state, CObject* object);
 		
-		static CObject* getObjectFromLua(lua_State* state, sint idx=-1);
+		static CObject::TSmartPtr getObjectFromLua(lua_State* state, sint idx=-1);
 
 		bool load(const std::string& filename);
 
-		CObject* loadLocal(const std::string& filename);
+		CObject::TSmartPtr loadLocal(const std::string& filename);
 		
 		static sint luaUpdateScenario(lua_State* state);
 		

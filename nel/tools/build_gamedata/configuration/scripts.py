@@ -6,8 +6,8 @@
 # \author Jan Boon (Kaetemi)
 # Useful scripts
 # 
-# NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-# Copyright (C) 2009-2014  by authors
+# NeL - MMORPG Framework <https://wiki.ryzom.dev/>
+# Copyright (C) 2009-2022  by authors
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -23,7 +23,35 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
 
-import time, sys, os, shutil, subprocess, distutils.dir_util, multiprocessing, math
+import time, sys, os, shutil, subprocess, distutils.dir_util, multiprocessing, math, socket
+
+NeLQuickStartDir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))))), os.path.normcase("tool/quick_start"))
+
+def findNeLRootRecurse(dirPath):
+	configDir = os.path.join(dirPath, ".nel")
+	if os.path.isdir(configDir):
+		return dirPath
+	parentPath = os.path.dirname(dirPath)
+	if parentPath == dirPath:
+		return None
+	return findNeLRootRecurse(parentPath)
+
+def findNeLRoot():
+	return findNeLRootRecurse(NeLQuickStartDir)
+
+NeLRootDir = findNeLRoot()
+NeLConfigDir = None
+if NeLRootDir:
+	NeLConfigDir = os.path.join(NeLRootDir, ".nel")
+
+if NeLConfigDir:
+	sys.path.append(NeLConfigDir)
+
+del findNeLRootRecurse
+del findNeLRoot
+
+NeLHostId = socket.gethostname().lower()
+NeLPlatformId = sys.platform.lower()
 
 ActiveProjectDirectory = os.getenv("NELBUILDACTIVEPROJECT", "configuration/project")
 sys.path.append(ActiveProjectDirectory)
@@ -94,6 +122,20 @@ def needUpdateLogRemoveDest(log, source, dest):
 		return 1
 	printLog(log, "MISSING " + source)
 	printLog(log, "SKIP " + dest)
+	return 0
+
+def needUpdateLogRemoveDestSilentSkip(log, source, dest):
+	if (os.path.isfile(source)):
+		if (os.path.isfile(dest)):
+			if (os.stat(source).st_mtime > os.stat(dest).st_mtime):
+				os.remove(dest)
+				printLog(log, source + " -> " + dest)
+				return 1
+			else:
+				return 0
+		printLog(log, source + " -> " + dest)
+		return 1
+	printLog(log, "MISSING " + source)
 	return 0
 
 def copyFileList(log, dir_source, dir_target, files):

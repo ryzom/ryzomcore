@@ -21,9 +21,9 @@
 #include "particle_workspace_page.h"
 
 // Qt includes
-#include <QtGui/QWidget>
-#include <QtGui/QFileDialog>
-#include <QtGui/QMessageBox>
+#include <QWidget>
+#include <QFileDialog>
+#include <QMessageBox>
 
 // NeL includes
 

@@ -439,6 +439,14 @@ namespace NLGUI
 	}
 
 	// ------------------------------------------------------------------------------------------------
+	std::string CInterfaceElement::getPosParent() const
+	{
+		std::string id;
+		getPosParent(id);
+		return id;
+	}
+
+	// ------------------------------------------------------------------------------------------------
 	std::string CInterfaceElement::getSizeRefAsString() const
 	{
 		return getSizeRefAsString( _SizeRef, _SizeDivW, _SizeDivH );

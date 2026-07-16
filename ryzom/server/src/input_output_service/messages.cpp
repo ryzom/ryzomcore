@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2021  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -687,7 +690,6 @@ static void cbCharacterNameAndLang(CMessage& msgin, const string &serviceName, T
 		ci->Language = SM->checkLanguageCode(language);
 		ci->HavePrivilege = havePrivilege;
 
-#ifdef HAVE_MEMCACHED
 		string cids = "";
 		for ( uint i = 0; i < _ignoreList.size(); i++ )
 		{
@@ -697,6 +699,7 @@ static void cbCharacterNameAndLang(CMessage& msgin, const string &serviceName, T
 			else
 				cids += toString("%u", _ignoreList[i].getShortId());
 		}
+#ifdef HAVE_MEMCACHED
 		CEntityIdTranslator::removeShardFromName(name);
 		CMemC::set(toString("IOS-User-%s-IgnoreList", name.toUtf8().c_str()), cids);
 #endif

@@ -26,9 +26,9 @@
 #include "expandable_headerview.h"
 
 // Qt includes
-#include <QtGui/QDockWidget>
-#include <QtGui/QUndoCommand>
-#include <QtGui/QUndoStack>
+#include <QDockWidget>
+#include <QUndoCommand>
+#include <QUndoStack>
 
 
 // STL includes

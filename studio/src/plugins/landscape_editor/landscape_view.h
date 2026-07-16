@@ -21,8 +21,8 @@
 #include "landscape_editor_global.h"
 
 // Qt includes
-#include <QtGui/QGraphicsView>
-#include <QtGui/QWheelEvent>
+#include <QGraphicsView>
+#include <QWheelEvent>
 
 namespace LandscapeEditor
 {

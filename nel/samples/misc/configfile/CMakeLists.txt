@@ -2,9 +2,9 @@ FILE(GLOB SRC *.cpp)
 
 ADD_EXECUTABLE(nl_sample_configfile ${SRC})
 
-ADD_DEFINITIONS(-DNL_SAMPLE_CFG="\\"${NL_SHARE_ABSOLUTE_PREFIX}/nl_sample_configfile/\\"")
+TARGET_COMPILE_DEFINITIONS(nl_sample_configfile PRIVATE "NL_SAMPLE_CFG=\"${NL_SHARE_ABSOLUTE_PREFIX}/nl_sample_configfile/\"")
 
-TARGET_LINK_LIBRARIES(nl_sample_configfile nelmisc)
+TARGET_LINK_LIBRARIES(nl_sample_configfile PRIVATE NeL::misc)
 NL_DEFAULT_PROPS(nl_sample_configfile "NeL, Samples, Misc: Config Files")
 NL_ADD_RUNTIME_FLAGS(nl_sample_configfile)
 

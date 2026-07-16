@@ -92,8 +92,18 @@ public:
 	// Allocate free vertices in VB. (AGP or RAM). work with locked or unlocked buffer.
 	// NB: if reallocationOccurs(), then ALL data are lost.
 	uint			allocateVertex();
-	// Delete free vertices in VB. (AGP or RAM).
+	// Delete free vertices in VB. (AGP or RAM). In unsynchronized mode, deferred until GPU is done.
 	void			deleteVertex(uint vid);
+
+	/// \name Unsynchronized write mode (deferred freeing).
+	// @{
+	void			setUnsynchronizedMode(bool enable) { _UnsynchronizedMode = enable; }
+	bool			getUnsynchronizedMode() const { return _UnsynchronizedMode; }
+	// Process deferred frees: release vertices whose GPU frames have completed.
+	void			processDeferredFrees(uint64 swapBufferInFlight);
+	// Force reallocation of the vertex buffer at current size (for VP threshold changes).
+	void			forceReallocation();
+	// @}
 	// @}
 
 
@@ -106,6 +116,7 @@ public:
 	void			lockBuffer(CNearVertexBufferInfo &tileVB);
 	void			unlockBuffer();
 	bool			bufferLocked() const {return _BufferLocked;}
+	CVertexBuffer	&getVertexBuffer() { return _VB; }
 
 	/** activate the VB or the VBHard in Driver setuped. nlassert if driver is NULL or if buffer is locked.
 	 * If vertexProgram possible, activate the vertexProgram too.
@@ -135,6 +146,15 @@ private:
 	std::vector<uint>			_VertexFreeMemory;
 	std::vector<CVertexInfo>	_VertexInfos;
 	uint						_NumVerticesAllocated;
+
+	// Unsynchronized write mode: deferred freeing until GPU is done.
+	bool						_UnsynchronizedMode;
+	struct SDeferredFree
+	{
+		uint	VertexId;
+		uint64	FrameCounter;
+	};
+	std::vector<SDeferredFree>	_DeferredFreeVertices;
 
 	class CFarVertexBufferInfo	*_LastFarVB;
 	class CNearVertexBufferInfo	*_LastNearVB;

@@ -1,5 +1,5 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010-2020  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2010  Robert TIMM (rti) <mail@rtti.de>
@@ -373,7 +373,7 @@ public:
 	virtual bool			clear2D(CRGBA rgba);
 
 	virtual bool			clearZBuffer(float zval=1);
-	virtual bool			clearStencilBuffer(float stencilval=0);
+	virtual bool			clearStencilBuffer(sint stencilval=0);
 	virtual void			setColorMask (bool bRed, bool bGreen, bool bBlue, bool bAlpha);
 	virtual void			setDepthRange(float znear, float zfar);
 	virtual	void			getDepthRange(float &znear, float &zfar) const;
@@ -600,6 +600,16 @@ public:
 
 	virtual void			setLightMapDynamicLight (bool enable, const CLight& light);
 
+	virtual void			enableLightTableMode(bool enable);
+	virtual void			setLightTableSize(uint count);
+	virtual void			setLightTableEntry(uint index, const CLight &light);
+	virtual void			setLights(
+		const sint16 *tableIndices,
+		const uint8 *factors,
+		uint numLights,
+		uint numPerPixelLights,
+		NLMISC::CRGBA ambient);
+
 	virtual void			setAmbientColor (CRGBA color);
 
 	/// \name Fog support.
@@ -608,9 +618,12 @@ public:
 	virtual	void			enableFog(bool enable);
 	/// setup fog parameters. fog must enabled to see result. start and end are in [0,1] range.
 	virtual	void			setupFog(float start, float end, CRGBA color);
+	virtual	void			setupFogMode(TFogMode mode = FogLinear, float density = 1.f);
 	virtual	float			getFogStart() const;
 	virtual	float			getFogEnd() const;
 	virtual	CRGBA			getFogColor() const;
+	virtual	TFogMode		getFogMode() const;
+	virtual	float			getFogDensity() const;
 	// @}
 
 	/// \name texture addressing modes
@@ -618,6 +631,8 @@ public:
 	virtual bool			supportTextureShaders() const;
 
 	virtual bool			supportWaterShader() const;
+
+	virtual bool			cubemapZPositiveForward() const { return false; }
 
 	virtual bool			supportTextureAddrMode(CMaterial::TTexAddressingMode mode) const;
 
@@ -632,6 +647,7 @@ public:
 	// @}
 
 	virtual bool			supportPerPixelLighting(bool specular) const;
+	virtual bool			supportWorldSpacePPL() const { return false; }
 
 
 	/// \name Misc
@@ -639,6 +655,7 @@ public:
 	virtual	bool			supportBlendConstantColor() const;
 	virtual	void			setBlendConstantColor(NLMISC::CRGBA col);
 	virtual	NLMISC::CRGBA	getBlendConstantColor() const;
+	virtual bool			supportMonitorColorProperties () const;
 	virtual bool			setMonitorColorProperties (const CMonitorColorProperties &properties);
 	virtual	void			finish();
 	virtual	void			flush();
@@ -697,6 +714,10 @@ public:
 	virtual void			stencilOp(TStencilOp fail, TStencilOp zfail, TStencilOp zpass);
 	virtual void			stencilMask(uint mask);
 
+	virtual void			enableClipPlane(uint index, bool enable);
+	virtual void			setClipPlane(uint index, const NLMISC::CPlane &plane);
+	virtual bool			supportVertexProgramClipPlanes() const;
+
 	GfxMode						_CurrentMode;
 	sint32						_WindowX;
 	sint32						_WindowY;
@@ -707,7 +728,7 @@ public:
 #endif
 
 private:
-	virtual class IVertexBufferHardGL	*createVertexBufferHard(uint size, uint numVertices, CVertexBuffer::TPreferredMemory vbType, CVertexBuffer *vb);
+	virtual class IVertexBufferHardGL	*createVertexBufferHard(uint size, uint numVertices, CVertexBuffer::TBufferUsage vbType, CVertexBuffer *vb);
 	friend class					CTextureDrvInfosGL;
 	friend class					CVertexProgamDrvInfosGL;
 	friend class					CPixelProgamDrvInfosGL;
@@ -896,6 +917,8 @@ private:
 	// Fog.
 	bool					_FogEnabled;
 	float					_FogEnd, _FogStart;
+	TFogMode				_FogMode;
+	float					_FogDensity;
 	GLfloat					_CurrentFogColor[4];
 
 
@@ -927,6 +950,10 @@ private:
 	// this is the backup of standard lighting (cause GL states may be modified by Lightmap Dynamic Lighting)
 	CLight						_UserLight0;
 	bool						_UserLightEnable[MaxLight];
+
+	// Light table
+	bool						_LightTableMode;
+	std::vector<CLight>			_LightTable;
 
 	//\name description of the per pixel light
 	// @{
@@ -1465,6 +1492,17 @@ private:
 		bool compileNVVertexProgram (CVertexProgram *program);
 		bool compileARBVertexProgram (CVertexProgram *program);
 		bool compileEXTVertexShader (CVertexProgram *program);
+
+		/** nelvp dispatch: prefer the ARB path over the NV path?
+		  * The NV-first order elsewhere is deliberate: some older hardware
+		  * advertised GL_ARB_vertex_program but was unreliable with it. Only
+		  * prefer ARB when GL_NV_vertex_program2_option is also present
+		  * (GeForce6+ era drivers), which is what enables the user clip
+		  * plane program variant that the NV VP1.0 path ignores by spec.
+		  * Must be used consistently by compile, activation, and program id
+		  * generation (CVertexProgamDrvInfosGL ctor).
+		  */
+		bool preferARBVertexProgram() const { return _Extensions.ARBVertexProgram && _Extensions.NVVertexProgram2Option; }
 	//@}
 
 
@@ -1497,6 +1535,10 @@ private:
 	bool							_VertexProgramEnabled;
 	// Track state of activePixelProgram()
 	bool							_PixelProgramEnabled;
+
+	// Mask of user clip planes currently enabled (mirror of enableClipPlane).
+	// Used to select the clip variant of vertex programs on the ARB path.
+	uint							_UserClipPlaneEnableMask;
 
 	// Say if last setupGlArrays() was a VertexProgram setup.
 	bool							_LastSetupGLArrayVertexProgram;
@@ -1561,7 +1603,7 @@ private:
 			static const uint _EVSNumConstant;
 			//
 			bool   setupEXTVertexShader(const CVPParser::TProgram &program, GLuint id, uint variants[EVSNumVariants], uint16 &usedInputRegisters);
-			bool   setupARBVertexProgram (const CVPParser::TProgram &parsedProgram, GLuint id, bool &specularWritten);
+			bool   setupARBVertexProgram (const CVPParser::TProgram &parsedProgram, GLuint id, bool &specularWritten, bool clip);
 			//
 	// @}
 
@@ -1582,7 +1624,15 @@ private:
 			GLuint ATIWaterShaderHandle; // water support on R200
 			GLuint ATICloudShaderHandle; // cloud support for R200 and more
 
-			GLuint ARBWaterShader[4]; // water support on R300, NV30 & the like
+			// water support on R300, NV30 & the like
+			// [fog | diffuse<<1 | calcReflectivity<<2]; [4..7] = calculated
+			// reflectivity variants (blend alpha from per-vertex reflectivity
+			// base + reflection luma), 0 when unavailable
+			GLuint ARBWaterShader[8];
+			// water pass routing for endWaterMultiPass (calculated
+			// reflectivity draws take the ARB path even when
+			// NV_texture_shader is present)
+			bool   _CurWaterPassIsARB;
 
 
 			void   initFragmentShaders();
@@ -1658,6 +1708,15 @@ class CVertexProgamDrvInfosGL : public IProgramDrvInfos
 public:
 	// The GL Id.
 	GLuint					ID;
+
+	/** ARB path: optional user-clip-plane variant of the program
+	  * (OPTION NV_vertex_program2, writes result.clip[0..5] from the
+	  * clip-space plane equations at program.env[96..101]). 0 if absent.
+	  * Bound instead of ID while user clip planes are enabled; the written
+	  * clip distances only take effect for planes that are glEnable'd, so
+	  * fixed function and program draws can coexist per-draw.
+	  */
+	GLuint					ClipID;
 
 	// ARB_vertex_program specific -> must know if specular part is written
 	bool					SpecularWritten;

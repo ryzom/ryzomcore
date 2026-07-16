@@ -17,7 +17,7 @@
 #ifndef GEORGES_FILESYSTEM_MODEL_H
 #define GEORGES_FILESYSTEM_MODEL_H
 
-#include <QtGui/QFileSystemModel>
+#include <QFileSystemModel>
 #include <QSortFilterProxyModel>
 
 namespace GeorgesQt

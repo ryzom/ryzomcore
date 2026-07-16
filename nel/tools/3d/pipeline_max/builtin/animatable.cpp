@@ -3,6 +3,7 @@
  * \brief CAnimatable
  * \date 2012-08-22 08:52GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Fable 5
  * CAnimatable
  */
 
@@ -45,7 +46,7 @@ namespace PIPELINE {
 namespace MAX {
 namespace BUILTIN {
 
-CAnimatable::CAnimatable(CScene *scene) : CSceneClass(scene), m_AppData(NULL)
+CAnimatable::CAnimatable(CScene *scene) : CSceneClass(scene), m_Unknown2140(NULL), m_AppData(NULL)
 {
 
 }

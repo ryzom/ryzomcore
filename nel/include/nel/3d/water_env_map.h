@@ -77,6 +77,7 @@ private:
 	TGlobalAnimationTime			 _UpdateTime;
 	TGlobalAnimationTime			 _StartRenderTime;
 	uint							 _NumRenderedFaces;
+	// STATIC GPU RESOURCES: All of these block multiple driver instances
 	static CVertexBuffer			 _TestVB;  // tmp a simple sphere to test result of mapping
 	static CIndexBuffer				 _TestIB;
 	static CVertexBuffer			 _FlattenVB; // vb to map cube map top hemisphere to a 2D map
@@ -87,6 +88,7 @@ private:
 	uint							 _EnvCubicSize;
 	uint							 _Env2DSize;
 	uint8							 _Alpha;
+	bool							 _D3DConvention; // D3D cubemap Z convention differs from GL
 private:
 	void initFlattenVB();
 	void initTestVB(); // tmp

@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010-2018  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -394,7 +397,7 @@ namespace INVENTORIES
 					if (b)
 						_ItemProp[i] = 0;
 					else
-						bms.serial((uint32&)_ItemProp[i], DataBitSize[i]);
+						bms.serial((uint32 &)_ItemProp[i], DataBitSize[i]);
 				}
 			}
 			else
@@ -404,7 +407,7 @@ namespace INVENTORIES
 					bool b = (_ItemProp[i] == 0);
 					bms.serialBit(b);
 					if (!b)
-						bms.serial((uint32&)_ItemProp[i], DataBitSize[i]);
+						bms.serial((uint32 &)_ItemProp[i], DataBitSize[i]);
 				}
 			}
 		}

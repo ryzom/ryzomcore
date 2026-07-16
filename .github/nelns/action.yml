@@ -1,0 +1,131 @@
+name: build
+description: build
+inputs:
+  os:
+    description: os
+    required: true
+  cmake-preset:
+    description: cmake preset to use for configure step
+    required: true
+  install-dir:
+    description: install directory
+    required: true
+  build-dir:
+    description: build directory
+    required: true
+  build-version:
+    description: build version
+    required: true
+  docker:
+    description: build docker image
+    required: false
+    default: 'false'
+  image-group:
+    description: image group
+    required: true
+  image-version:
+    description: image version
+    required: true
+  vcpkg-cache-dir:
+    description: cache directory for vcpkg
+    required: false
+    default: "${{ github.workspace }}/.vcpkg"
+runs:
+  using: composite
+  steps:
+    - uses: lukka/get-cmake@latest
+      with:
+        cmakeVersion: "^3.31.11"
+
+    - uses: lukka/run-vcpkg@v11
+
+    - uses: actions/cache/restore@v5
+      id: vcpkg-cache
+      with:
+        path: ${{ inputs.vcpkg-cache-dir}}
+        key: vcpkg-${{ inputs.os }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
+
+    - name: Dependencies Linux
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        sudo apt update
+        sudo apt install --yes \
+          build-essential bison ccache\
+          autoconf autoconf-archive automake libtool \
+          libpng-dev \
+          libjpeg-dev \
+          libgif-dev libfreetype-dev \
+          freeglut3-dev \
+          liblua5.2-dev libluabind-dev \
+          libogg-dev libvorbis-dev libopenal-dev \
+          libavcodec-dev libavformat-dev libavdevice-dev libswscale-dev libpostproc-dev \
+          libmysqlclient-dev \
+          libcurl4-openssl-dev libssl-dev \
+          libsquish-dev \
+          libgsf-1-dev \
+          qtbase5-dev qttools5-dev qttools5-dev-tools
+
+    - name: Install NeL
+      if: runner.os == 'Linux'
+      shell: bash
+      run: >
+        sh ${{ inputs.build-dir }}/nel-*.sh
+        --skip-license
+        --include-subdir
+        --prefix=${{ inputs.install-dir }}
+
+    - name: Configure ccache
+      shell: bash
+      run: |
+        ccache --set-config=max_size=1G
+        ccache --set-config=compression=true
+        ccache -z
+
+    - name: Configure CMake
+      if: runner.os == 'Linux'
+      env:
+        VCPKG_BINARY_SOURCES: "clear;files,${{ inputs.vcpkg-cache-dir }},readwrite"
+      shell: bash
+      run: cmake --preset ${{ inputs.cmake-preset }}
+
+    - uses: actions/cache/save@v5
+      if: ( ! cancelled() )
+      with:
+        path: ${{ inputs.vcpkg-cache-dir }}
+        key: ${{ steps.vcpkg-cache.outputs.cache-primary-key }}
+
+    - name: Build
+      shell: bash
+      run: cmake --build --preset nelns --target install
+
+    - name: ccache stats
+      if: always()
+      shell: bash
+      run: ccache -s -v || ccache -s
+
+    - name: Test
+      shell: bash
+      run: |
+        export LD_LIBRARY_PATH=$(realpath ${{ inputs.install-dir }}/nel-*/lib):${LD_LIBRARY_PATH}
+        ctest --preset nelns
+
+    - uses: actions/upload-artifact@v4
+      if: ( !cancelled() )
+      with:
+        name: nelns-${{ inputs.os }}-${{ inputs.cmake-preset }}-${{ github.sha }}-test-results
+        if-no-files-found: error
+        path: build/reports/*.xml
+
+    - name: Package
+      shell: bash
+      run: cpack --preset nelns -R "${{ inputs.build-version }}"
+
+    - name: Build Docker image
+      shell: bash
+      if: inputs.docker == 'true'
+      run: |
+        IMAGE_TAG="${{ inputs.image-group }}/ryzomcore-nelns:${{ inputs.image-version }}"
+        docker build . --file nelns/docker/Dockerfile --tag "${IMAGE_TAG}"
+        docker save --output=${{ inputs.build-dir }}/nelns/nelns-docker-${{ inputs.build-version }}.tar "${IMAGE_TAG}"
+

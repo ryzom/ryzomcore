@@ -21,5 +21,3 @@
 // and not in this file
 
 #include "stdafx.h"
-
-void nlmax_shared_stdafx_dummy() { }

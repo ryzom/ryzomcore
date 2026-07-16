@@ -28,9 +28,9 @@
 #include <QtCore/QHash>
 #include <QtCore/QObject>
 #include <QtCore/QList>
-#include <QtGui/QMenu>
-#include <QtGui/QAction>
-#include <QtGui/QMenuBar>
+#include <QMenu>
+#include <QAction>
+#include <QMenuBar>
 
 namespace Core
 {

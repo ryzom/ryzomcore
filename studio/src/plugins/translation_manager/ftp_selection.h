@@ -10,12 +10,12 @@
 
 #include "ui_ftp_selection.h"
 
-#include <QtCore/QObject>
-#include <QtCore/QUrl>
-#include <QtGui/QDialog>
-#include <QtCore/QString>
-#include <QtGui/QWidget>
-#include <QtCore/QFile>
+#include <QObject>
+#include <QUrl>
+#include <QDialog>
+#include <QString>
+#include <QWidget>
+#include <QFile>
 #include <QtNetwork>
 
 namespace TranslationManager
@@ -41,7 +41,7 @@ private Q_SLOTS:
 
 private:
 	Ui::FtpSelectionDialog _ui;
-	QFtp *conn;
+	QNetworkAccessManager *conn;
 	QHash<QString, bool> isDirectory;
 	QString currentPath;
 };

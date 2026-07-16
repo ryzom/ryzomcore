@@ -27,7 +27,7 @@
 
 // Qt includes
 #include <QtCore/QObject>
-#include <QtGui/QIcon>
+#include <QIcon>
 
 namespace NLMISC
 {
@@ -41,6 +41,7 @@ class LandscapeEditorWindow;
 class LandscapeEditorPlugin : public QObject, public ExtensionSystem::IPlugin
 {
 	Q_OBJECT
+	Q_PLUGIN_METADATA(IID IPlugin_iid FILE "plugin-metadata.json")
 	Q_INTERFACES(ExtensionSystem::IPlugin)
 public:
 

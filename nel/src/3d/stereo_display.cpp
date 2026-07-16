@@ -49,8 +49,9 @@ using namespace std;
 namespace NL3D {
 
 IStereoDisplay::IStereoDisplay()
+	: m_SceneReflectionPasses(1) // legacy default: one reflections stage per frame
 {
-	
+
 }
 
 IStereoDisplay::~IStereoDisplay()

@@ -118,6 +118,7 @@ int main(int argc, char* argv[])
 	CPath::remapExtension("dds", "png", true);
 	//
 	R2::CScenarioEntryPoints &sep = R2::CScenarioEntryPoints::getInstance();
+	sep.setFiles(builderConfig.CompleteIslandsFile, builderConfig.EntryPointsFile);
 	try
 	{
 		sep.loadCompleteIslands();

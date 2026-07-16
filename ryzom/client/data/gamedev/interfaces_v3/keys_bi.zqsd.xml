@@ -257,7 +257,7 @@
 	<key name="N/A" action="show_hide" params="target" />
 	<key name="KeyF" action="show_hide" params="contact_list" />
 	<key name="KeyT" action="show_hide" params="team_list" />
-	<key name="N/A" actionq="show_hide" params="main_chat" />
+	<key name="N/A" action="show_hide" params="main_chat" />
 	<key name="N/A" action="dock_undock_chat" params="SYSTEM_INFO" />
 	<key name="KeyD" shift="1" ctrl="1" action="show_hide" params="debug_info" />
 	<key name="KeyM" shift="1" action="show_hide" params="mailbox" />

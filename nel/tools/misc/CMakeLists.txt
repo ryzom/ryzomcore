@@ -1,5 +1,5 @@
 # always compile crash report
-IF(WITH_QT OR WITH_QT5)
+IF(WITH_QT5)
   ADD_SUBDIRECTORY(crash_report)
 ENDIF()
 
@@ -13,9 +13,9 @@ IF(WITH_NEL_TOOLS)
   ADD_SUBDIRECTORY(xml_packer)
   ADD_SUBDIRECTORY(utf_generator)
 
-  IF(WITH_QT OR WITH_QT5)
-    ADD_SUBDIRECTORY(words_dic_qt)
+  IF(WITH_QT5)
     ADD_SUBDIRECTORY(message_box_qt)
+    ADD_SUBDIRECTORY(words_dic_qt)
   ENDIF()
 
   IF(WIN32)

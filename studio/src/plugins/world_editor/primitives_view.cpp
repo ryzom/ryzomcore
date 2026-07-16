@@ -34,8 +34,8 @@
 #include <QContextMenuEvent>
 #include <QMessageBox>
 #include <QApplication>
-#include <QtGui/QMenu>
-#include <QtGui/QFileDialog>
+#include <QMenu>
+#include <QFileDialog>
 
 namespace WorldEditor
 {

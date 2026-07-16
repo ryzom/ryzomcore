@@ -99,7 +99,7 @@ void CSoundSystem::init()
 		_AudioMixer->getDevices(devices);
 		NLSOUND::UAudioMixer::CInitInfo audioInfo;
 		audioInfo.AutoLoadSample = settings->value(Constants::SOUND_AUTO_LOAD_SAMPLE, true).toBool();
-		audioInfo.EnableOccludeObstruct = settings->value(Constants::SOUND_ENABLE_OCCLUDE_OBSTRUCT, true).toBool();
+		audioInfo.EnableOcclusionObstruction = settings->value(Constants::SOUND_ENABLE_OCCLUDE_OBSTRUCT, true).toBool();
 		audioInfo.EnableReverb = settings->value(Constants::SOUND_ENABLE_REVERB, true).toBool();
 		audioInfo.ManualRolloff = settings->value(Constants::SOUND_MANUAL_ROLL_OFF, true).toBool();
 		audioInfo.ForceSoftware = settings->value(Constants::SOUND_FORCE_SOFTWARE, false).toBool();
@@ -162,7 +162,7 @@ void CSoundSystem::play(const std::string &soundName)
 {
 	if (_AudioMixer)
 	{
-		NLSOUND::USource *src = _AudioMixer->createSource(NLMISC::CSheetId(soundName, "sound"), true);
+		NLSOUND::USource *src = _AudioMixer->createSource(NLMISC::CStringMapper::map(soundName), true);
 		if (src)
 		{
 			// FIXME: Use relative positioning, and set pos to 0,0,0
@@ -182,7 +182,7 @@ NLSOUND::USource *CSoundSystem::create(const std::string &soundName)
 {
 	if (_AudioMixer)
 	{
-		NLSOUND::USource *src = _AudioMixer->createSource(NLMISC::CSheetId(soundName, "sound"), false);
+		NLSOUND::USource *src = _AudioMixer->createSource(NLMISC::CStringMapper::map(soundName), false);
 		if (src)
 		{
 			// FIXME: Use relative positioning, and set pos to 0,0,0

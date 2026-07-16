@@ -37,7 +37,7 @@
 #include <nel/net/service.h>
 
 #ifdef NL_OS_WINDOWS
-#include <Windows.h>
+#include <windows.h>
 #endif
 
 using namespace std;

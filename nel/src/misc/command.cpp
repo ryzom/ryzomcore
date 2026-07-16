@@ -52,9 +52,8 @@ ICommand::ICommand(const char *categoryName, const char *commandName, const char
 
 	if (comm != LocalCommands->end ())
 	{
-		nlinfo("command with same name: %s", commandName);
 		// 2 commands have the same name
-		// nlstopex (("There are 2 commands that have the same name in the project (command name '%s'), skip the second definition", commandName));
+		nlstopex (("There are 2 commands that have the same name in the project (command name '%s'), skip the second definition", commandName));
 	}
 	else
 	{
@@ -390,7 +389,7 @@ end:
 			else
 			{
 				if (!quiet)
-					log.displayNL("Command '%s' : can't found object named '%s'",
+					log.displayNL("Command '%s' : can't find object named '%s'",
 						cp.CommandName.c_str(),
 						objectName.c_str());
 			}

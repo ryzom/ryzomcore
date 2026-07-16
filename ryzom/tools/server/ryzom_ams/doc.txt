@@ -1,1 +1,0 @@
-The following variables are required and must be set to a variable (not constant) and called before including ams_lib/libinclude.php

@@ -27,7 +27,7 @@
 #include <nel/misc/debug.h>
 
 // Qt includes
-#include <QtCore/QObject>
+#include <QObject>
 #include <QtGui/QIcon>
 
 namespace NLMISC
@@ -47,6 +47,7 @@ class m_BnpManagerWindow;
 class BNPManagerPlugin : public QObject, public ExtensionSystem::IPlugin
 {
     Q_OBJECT
+	Q_PLUGIN_METADATA(IID IPlugin_iid FILE "plugin-metadata.json")
     Q_INTERFACES(ExtensionSystem::IPlugin)
 
 public:

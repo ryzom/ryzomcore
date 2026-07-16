@@ -678,10 +678,9 @@ CInterfaceElement* CInterface3DScene::getElement (const string &id)
 		if (id == _IGs[i]->getId())
 			return _IGs[i];
 
-	for (i = 0; i < _Shapes.size(); ++i) {
+	for (i = 0; i < _Shapes.size(); ++i)
 		if (id == _Shapes[i]->getId() || id == toString("shape#%d", i))
 			return _Shapes[i];
-	}
 
 	for (i = 0; i < _Cameras.size(); ++i)
 		if (id == _Cameras[i]->getId() || id == toString("camera#%d", i))

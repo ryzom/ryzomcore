@@ -3,6 +3,7 @@
  * \brief CStorageArray
  * \date 2012-08-21 11:33GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.7
  * CStorageArray
  */
 
@@ -50,6 +51,7 @@ namespace MAX {
  * \brief CStorageArray
  * \date 2012-08-21 11:33GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.7
  * WARNING: sizeof(TType) should match the serialized size,
  * otherwise you must specialize the getSize and setSize functions!
  */
@@ -157,7 +159,9 @@ void CStorageArraySizePre<T>::setSize(sint32 size)
 template <typename T>
 bool CStorageArraySizePre<T>::getSize(sint32 &size) const
 {
-	size = CStorageArray<T>::getSize(size) + sizeof(uint32);
+	sint32 innerSize = 0;
+	if (!CStorageArray<T>::getSize(innerSize)) return false;
+	size = innerSize + (sint32)sizeof(uint32);
 	return true;
 }
 

@@ -21,7 +21,7 @@
 // STL includes
 
 // Qt includes
-#include <QtGui/QMainWindow>
+#include <QtWidgets/QMainWindow>
 
 // NeL includes
 #include <nel/misc/rgba.h>
@@ -36,7 +36,7 @@
 #include "sound_utilities.h"
 
 class QTreeView;
-class QDirModel;
+class QFileSystemModel;
 class QUndoStack;
 class QScrollArea;
 
@@ -62,7 +62,7 @@ namespace NLSOUND {
 }
 
 namespace NLQT {
-	class CCommandLog;
+	class CCommandLogDisplayer;
 	class CGraphicsViewport;
 	class CGraphicsConfig;
 
@@ -77,7 +77,7 @@ class CMainWindow : public QMainWindow
 	Q_OBJECT
 
 public:
-	CMainWindow(const QMap<QString, QSize> &customSizeHints, QWidget *parent = 0, Qt::WindowFlags flags = 0);
+	CMainWindow(const QMap<QString, QSize> &customSizeHints, QWidget *parent = nullptr, Qt::WindowFlags flags = Qt::WindowFlags());
 	virtual ~CMainWindow();
 
 	virtual void setVisible(bool visible);
@@ -130,7 +130,7 @@ private:
 
 	CGraphicsViewport *m_GraphicsViewport;
 
-	CCommandLog *m_CommandLog;
+	CCommandLogDisplayer *m_CommandLog;
 	QDockWidget *m_CommandLogDock;
 
 	CGraphicsConfig *m_GraphicsConfig;
@@ -138,7 +138,7 @@ private:
 	QDockWidget *m_GraphicsConfigDock;
 
 	QTreeView *m_AssetTreeView;
-	QDirModel *m_AssetTreeModel;
+	QFileSystemModel *m_AssetTreeModel;
 	QDockWidget *m_AssetTreeDock;
 	
 	QMenu *m_FileMenu;

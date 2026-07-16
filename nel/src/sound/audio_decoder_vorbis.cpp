@@ -7,7 +7,7 @@
  */
 
 // NeL - MMORPG Framework <https://wiki.ryzom.dev/>
-// Copyright (C) 2008-2012  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2008-2022  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2016  Winch Gate Property Limited
@@ -79,7 +79,10 @@ int vorbisSeekFunc(void *datasource, ogg_int64_t offset, int whence)
 		return -1;
 	}
 
-	if (audio_decoder_vorbis->getStream()->seek(SEEK_SET ? audio_decoder_vorbis->getStreamOffset() + (sint32)offset : (sint32)offset, origin)) return 0;
+	sint32 actual_offset = (origin == NLMISC::IStream::begin)
+		? audio_decoder_vorbis->getStreamOffset() + (sint32)offset
+		: (sint32)offset;
+	if (audio_decoder_vorbis->getStream()->seek(actual_offset, origin)) return 0;
 	else return -1;
 }
 
@@ -180,13 +183,17 @@ uint32 CAudioDecoderVorbis::getNextBytes(uint8 *buffer, uint32 minimum, uint32 m
 				nlwarning("ov_read returned OV_HOLE");
 				break;
 			case OV_EINVAL:
+				_IsMusicEnded = true;
 				nlwarning("ov_read returned OV_EINVAL");
 				break;
 			case OV_EBADLINK:
+				_IsMusicEnded = true;
 				nlwarning("ov_read returned OV_EBADLINK");
 				break;
 			default:
+				_IsMusicEnded = true;
 				nlwarning("ov_read returned %d", br);
+				break;
 			}
 		}
 	} while (bytes_read < minimum);

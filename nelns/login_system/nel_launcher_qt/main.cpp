@@ -1,4 +1,4 @@
-#include <QtGui/QApplication>
+#include <QApplication>
 #include "nel/misc/app_context.h"
 #include "nel_launcher_dlg.h"
 

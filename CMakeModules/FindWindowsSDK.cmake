@@ -207,17 +207,35 @@ MACRO(FIND_WINSDK_VERSION_HEADERS)
 ENDMACRO()
 
 MACRO(USE_CURRENT_WINSDK)
-  SET(WINSDK_DIR "")
+  # unset(... CACHE), not SET(... ""): a plain SET creates a normal
+  # variable that shadows the cache entry of the same name, and find_path()
+  # treats the mere existence of that normal variable (even empty) as
+  # "already resolved", silently skipping the search below regardless of
+  # valid HINTS - confirmed in isolation, independent of any cross-compile
+  # or root-path setting.
+  UNSET(WINSDK_DIR CACHE)
   SET(WINSDK_VERSION "")
   SET(WINSDK_VERSION_FULL "")
 
   # Use WINSDK environment variable
   IF(WINSDKENV_DIR)
-    FIND_PATH(WINSDK_DIR Windows.h
+    # Search for a nested path from the candidate root (matching the
+    # pattern Find3dsMaxSDK.cmake/FindDirectXSDK.cmake use), not a bare
+    # filename with HINTS already pointing inside Include/ - find_path()
+    # returns the directory *containing* the found file, so the previous
+    # form returned .../Include itself as WINSDK_DIR, not the SDK root the
+    # rest of this macro expects (later code appends /Include again,
+    # doubling the path - confirmed in isolation).
+    FIND_PATH(WINSDK_DIR Include/Windows.h
       HINTS
-      ${WINSDKENV_DIR}/Include/um
-      ${WINSDKENV_DIR}/Include
+      ${WINSDKENV_DIR}
     )
+    IF(NOT WINSDK_DIR)
+      FIND_PATH(WINSDK_DIR Include/um/Windows.h
+        HINTS
+        ${WINSDKENV_DIR}
+      )
+    ENDIF()
   ENDIF()
 
   # Use INCLUDE environment variable

@@ -1,0 +1,10 @@
+About the project : client_background_downloader_extern_res :
+==============================================================
+
+When including an external resource file in a .exe, VC++6 doesn't detect properly that the file
+has changed, and the resource file rebuild does not occur.
+To solve this problem, this utility project add a custom build step on the external files to "touch" the resource file,
+if these file are detected to be modified -> this force a recompilation of the resource file.
+The project is added as a dependency of client_background_downloader to ensure that this step will be taken first.
+For now, the final client_background_downaloder_rd.exe has the language files included has resources.
+

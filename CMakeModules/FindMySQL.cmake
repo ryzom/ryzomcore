@@ -9,11 +9,21 @@
 #
 # Redistribution and use is allowed according to the terms of the BSD license.
 # For details see the accompanying COPYING-CMAKE-SCRIPTS file.
+find_package(PkgConfig QUIET)
+pkg_check_modules(PC_MYSQL QUIET libmysql)
+pkg_check_modules(PC_MARIADB QUIET libmariadb)
 
-IF(MYSQL_INCLUDE_DIR AND MYSQL_LIBRARIES)
+if(MYSQL_INCLUDE_DIR AND MYSQL_LIBRARIES)
    SET(MYSQL_FOUND TRUE)
-
-ELSE()
+elseif (PC_MYSQL_FOUND)
+  SET(MYSQL_FOUND TRUE)
+  set(MYSQL_INCLUDE_DIR ${PC_MYSQL_INCLUDE_DIRS})
+  SET(MYSQL_LIBRARIES ${PC_MYSQL_LINK_LIBRARIES})
+elseif (PC_MARIADB_FOUND)
+  SET(MYSQL_FOUND TRUE)
+  set(MYSQL_INCLUDE_DIR ${PC_MARIADB_INCLUDE_DIRS})
+  SET(MYSQL_LIBRARIES ${PC_MARIADB_LINK_LIBRARIES})
+else()
 
   FIND_PATH(MYSQL_INCLUDE_DIR mysql.h
       PATH_SUFFIXES mysql mariadb
@@ -95,3 +105,15 @@ ELSE()
   MARK_AS_ADVANCED(MYSQL_LIBRARY_RELEASE MYSQL_LIBRARY_DEBUG)
 
 ENDIF()
+
+# alias target to get usage requirements automatically
+if(MYSQL_FOUND AND NOT TARGET MySQL::MySQL)
+    set(MySQL_FOUND TRUE)
+    add_library(MySQL::MySQL INTERFACE IMPORTED)
+    set_target_properties(
+            MySQL::MySQL
+            PROPERTIES
+            INTERFACE_INCLUDE_DIRECTORIES "${MYSQL_INCLUDE_DIR}"
+    )
+    target_link_libraries(MySQL::MySQL INTERFACE ${MYSQL_LIBRARIES})
+endif()

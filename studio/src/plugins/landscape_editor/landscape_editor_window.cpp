@@ -35,10 +35,10 @@
 
 // Qt includes
 #include <QtCore/QSettings>
-#include <QtGui/QMenu>
-#include <QtGui/QFileDialog>
-#include <QtGui/QMessageBox>
-#include <QtGui/QStatusBar>
+#include <QMenu>
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QStatusBar>
 
 namespace LandscapeEditor
 {

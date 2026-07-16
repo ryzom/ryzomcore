@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -31,7 +34,7 @@
 namespace NLNET {
 
 
-class CInetAddress;
+class CInetHost;
 
 /// Type of network events (if changed, don't forget to change EventToString() and StringToEvent()
 enum TNetworkEvent { Sending, Receiving, Connecting, ConnFailing, Accepting, Disconnecting, Error };
@@ -136,7 +139,7 @@ public:
 	TNetworkEvent	checkNextOne( sint64 updatecounter );
 
 	/// Get the first stored connection attempt corresponding to addr
-	TNetworkEvent	replayConnectionAttempt( const CInetAddress& addr );
+	TNetworkEvent	replayConnectionAttempt( const CInetHost& addr );
 
 	/// Stop playback
 	void	stopReplay();

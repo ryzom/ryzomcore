@@ -1,45 +1,5 @@
-INCLUDE_DIRECTORIES(
-		${CMAKE_CURRENT_BINARY_DIR} 
-		${CMAKE_CURRENT_SOURCE_DIR} 
-		${NEL_INCLUDE_DIR}
-		../../../../../nel/tools/3d/object_viewer_widget/src
-		${QT_INCLUDES})
-INCLUDE( ${QT_USE_FILE} )
-
-FILE(GLOB GEORGES_EDITOR_SRC *.cpp *.h)
-
-SET(GEORGES_EDITOR_HDR 
-	georges_dirtree_dialog.h 
-	georges_treeview_dialog.h 
-	main_window.h
-	objectviewer_dialog.h
-	settings_dialog.h 
-	progress_dialog.h 
-	new_dialog.h 
-	completer_line_edit.h
-	georges_splash.h)
-	
-SET(GEORGES_EDITOR_UIS 
-	settings_form.ui 
-	objectviewer_form.ui 
-	log_form.ui 
-	georges_treeview_form.ui 
-	georges_dirtree_form.ui 
-	new_form.ui
-	splash.ui)
-	
-SET(GEORGES_EDITOR_RCS georges_editor_qt.qrc)
-
 SET(QT_USE_QTGUI TRUE)
 SET(QT_USE_QTOPENGL TRUE)
-
-QT4_ADD_RESOURCES( GEORGES_EDITOR_RC_SRCS ${GEORGES_EDITOR_RCS} )
-QT4_WRAP_CPP( GEORGES_EDITOR_MOC_SRCS ${GEORGES_EDITOR_HDR} )
-QT4_WRAP_UI( GEORGES_EDITOR_UI_HDRS ${GEORGES_EDITOR_UIS} )
-
-SOURCE_GROUP(QtResources FILES ${GEORGES_EDITOR_UIS} ${GEORGES_EDITOR_RCS})
-SOURCE_GROUP(QtGeneratedUiHdr FILES ${GEORGES_EDITOR_UI_HDRS})
-SOURCE_GROUP(QtGeneratedMocSrc FILES ${GEORGES_EDITOR_MOC_SRCS})
 
 if(APPLE)
   SET(MACOSX_BUNDLE_INFO_STRING "Georges Editor Qt")
@@ -52,22 +12,66 @@ if(APPLE)
   SET(MACOSX_BUNDLE_COPYRIGHT ${AUTHOR})
 ENDIF()
 
-ADD_EXECUTABLE(georges_editor_qt WIN32 MACOSX_BUNDLE ${GEORGES_EDITOR_SRC} ${GEORGES_EDITOR_MOC_SRCS} ${GEORGES_EDITOR_RC_SRCS} ${GEORGES_EDITOR_UI_HDRS})
+ADD_EXECUTABLE(georges_editor_qt WIN32 MACOSX_BUNDLE)
+
+target_sources(georges_editor_qt
+        PRIVATE
+        completer_line_edit.cpp
+        configuration.cpp
+        entity.cpp
+        filesystem_model.cpp
+        formdelegate.cpp
+        formitem.cpp
+        georges.cpp
+        georges_dirtree_dialog.cpp
+        georges_splash.cpp
+        georges_treeview_dialog.cpp
+        georgesform_model.cpp
+        georgesform_proxy_model.cpp
+        log_dialog.cpp
+        main.cpp
+        main_window.cpp
+        modules.cpp
+        new_dialog.cpp
+        objectviewer_dialog.cpp
+        progress_dialog.cpp
+        qt_displayer.cpp
+        settings_dialog.cpp
+        stdpch.cpp
+        georges_editor_qt.qrc
+        georges_dirtree_form.ui
+        georges_treeview_form.ui
+        log_form.ui
+        new_form.ui
+        objectviewer_form.ui
+        settings_form.ui
+        splash.ui
+)
+
+TARGET_INCLUDE_DIRECTORIES(georges_editor_qt
+		PRIVATE
+		${CMAKE_CURRENT_BINARY_DIR}
+		${CMAKE_CURRENT_SOURCE_DIR}
+		../../../../../nel/tools/3d/object_viewer_widget/src
+)
+
 
 TARGET_LINK_LIBRARIES(georges_editor_qt
-		nelmisc 
-		nel3d
-		nelgeorges
-		${QT_LIBRARIES}
-		${QT_QTOPENGL_LIBRARY}
-		${QT_QTMAIN_LIBRARY})
+		PRIVATE
+		NeL::misc
+		NeL::3d
+		NeL::georges
+		Qt::Core
+		Qt::OpenGL
+		Qt::Widgets
+)
 
-ADD_DEFINITIONS(-DQT_NO_KEYWORDS ${QT_DEFINITIONS})
+TARGET_COMPILE_DEFINITIONS(georges_editor_qt PRIVATE QT_NO_KEYWORDS ${QT_DEFINITIONS})
 NL_DEFAULT_PROPS(georges_editor_qt "Ryzom, Tools, World: Georges Editor Qt")
 NL_ADD_RUNTIME_FLAGS(georges_editor_qt)
 
 IF(WITH_PCH)
-  ADD_NATIVE_PRECOMPILED_HEADER(georges_editor_qt ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.cpp)
+  target_precompile_headers(georges_editor_qt PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h)
 ENDIF()
 
 INSTALL(TARGETS georges_editor_qt RUNTIME DESTINATION ${RYZOM_BIN_PREFIX} COMPONENT runtime BUNDLE DESTINATION /Applications)

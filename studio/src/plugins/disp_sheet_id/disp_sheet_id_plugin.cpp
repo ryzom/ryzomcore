@@ -26,11 +26,11 @@
 
 // Qt includes
 #include <QtCore/QObject>
-#include <QtGui/QMessageBox>
-#include <QtGui/QMainWindow>
-#include <QtGui/QMenu>
-#include <QtGui/QAction>
-#include <QtGui/QMenuBar>
+#include <QMessageBox>
+#include <QMainWindow>
+#include <QMenu>
+#include <QAction>
+#include <QMenuBar>
 
 // NeL includes
 #include "nel/misc/debug.h"
@@ -87,5 +87,3 @@ void DispSheetIdPlugin::setNelContext(NLMISC::INelContext *nelContext)
 #endif // NL_OS_WINDOWS
 	m_LibContext = new NLMISC::CLibraryContext(*nelContext);
 }
-
-Q_EXPORT_PLUGIN(DispSheetIdPlugin)

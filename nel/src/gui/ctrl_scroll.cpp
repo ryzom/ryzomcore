@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2020  Winch Gate Property Limited
+// Copyright (C) 2010-2022  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
@@ -1434,6 +1434,8 @@ namespace NLGUI
 		childElement->getCorner(childX, childY, childHotSpot);
 		if (_Vertical)
 		{
+			// remove previous scroll offset from child
+			childY -= _Target->getOfsY();
 			sint32	maxHReal= _Target->getMaxHReal();
 			sint32	hReal=	  _Target->getHReal();
 			if(hReal > maxHReal)
@@ -1475,6 +1477,8 @@ namespace NLGUI
 		}
 		else
 		{
+			// remove previous scroll offset from child
+			childX -= _Target->getOfsX();
 			sint32	maxWReal= _Target->getMaxWReal();
 			sint32	wReal=	  _Target->getWReal();
 			if(wReal > maxWReal)

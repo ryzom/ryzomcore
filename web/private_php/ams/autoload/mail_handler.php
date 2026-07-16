@@ -415,8 +415,7 @@ class Mail_Handler{
     
         preg_match_all("/=\?UTF-8\?B\?([^\?]+)\?=/i",$str, $arr);
         for ($i=0;$i<count($arr[1]);$i++){ 
-            $str=ereg_replace(ereg_replace("\?","\?",
-               $arr[0][$i]),base64_decode($arr[1][$i]),$str);
+            $str=str_replace($arr[0][$i],base64_decode($arr[1][$i]),$str);
         }
         return $str;
     
@@ -462,7 +461,7 @@ class Mail_Handler{
             }
     
             if($structure->type == 1) /* multipart */ {
-                while(list($index, $sub_structure) = each($structure->parts)) {
+                foreach($structure->parts as $index => $sub_structure) {
                     if($part_number) {
                         $prefix = $part_number . '.';
                     } else {

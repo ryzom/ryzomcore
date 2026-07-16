@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -436,7 +439,10 @@ private:
  * Predicate to compare two pointed deposits using their kami anger level.
  * If a value is -1, it is not considered as lower.
  */
-struct CHasLowerKamiAngerPred : std::binary_function< CDeposit*, CDeposit*, bool >
+struct CHasLowerKamiAngerPred 
+#ifndef NL_CPP17
+	: std::binary_function< CDeposit*, CDeposit*, bool >
+#endif
 {
 	bool operator() ( CDeposit *d1, CDeposit *d2 )
 	{

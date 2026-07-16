@@ -23,6 +23,7 @@
 #include "nel/misc/common.h"
 #include "nel/misc/thread.h"
 #include "nel/misc/command.h"
+#include "nel/misc/atomic.h"
 
 #include "stdin_monitor_thread.h"
 
@@ -54,7 +55,7 @@ namespace NLNET
 
 	private:
 		std::string _NextCommand;
-		volatile bool _CommandWaiting;
+		NLMISC::CAtomicBool _CommandWaiting;
 
 	};
 

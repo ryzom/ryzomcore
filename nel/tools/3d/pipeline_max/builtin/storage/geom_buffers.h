@@ -3,6 +3,7 @@
  * \brief CGeomBuffers
  * \date 2012-08-25 07:55GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.8
  * CGeomBuffers
  */
 
@@ -103,6 +104,7 @@ struct CGeomPolyFaceInfo
  * \brief CGeomBuffers
  * \date 2012-08-25 07:55GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.8
  * CGeomBuffers
  */
 class CGeomBuffers : public CStorageContainer
@@ -118,6 +120,26 @@ public:
 	virtual void clean();
 	virtual void build(uint16 version, uint filter = 0);
 	virtual void disown();
+
+	//! \name Typed geometry access (valid when the typed leaf serializers are enabled — the
+	//! PMBS_GEOM_BUFFERS_PARSE default). NULL when the chunk is absent or rode through raw.
+	//@{
+	/// The tri-mesh vertex array (chunk 0x0914, count-prefixed CVector[]).
+	const std::vector<NLMISC::CVector> *triVertices() const;
+	/// The tri-mesh face array (chunk 0x0912, count-prefixed CGeomTriIndexInfo[] — a,b,c indices
+	/// plus the two per-face dwords; note the field names alwaysOne/smoothingGroups are the 2012
+	/// labels — the corpus-validated meaning is smGroup at offset 12 and faceFlags (matID in the
+	/// high word) at offset 16, see pipeline_max_design.md §10i).
+	const std::vector<CGeomTriIndexInfo> *triFaces() const;
+	/// The poly-mesh vertex array (chunk 0x0100, count-prefixed CGeomPolyVertexInfo[]) — carries
+	/// the vertex position plus a per-vertex uint32 the format uses as an internal id (max_geometry_formats
+	/// Part C 0x0100). Used by the EditablePoly path in the shape exporter (design doc §10i M2).
+	const std::vector<CGeomPolyVertexInfo> *polyVertices() const;
+	/// The poly-mesh face array (chunk 0x011a, CGeomPolyFaceInfo[]) — variable-size records with
+	/// vertex list, optional matID / smoothing group / triangulation cuts. Use
+	/// CGeomObject::triangulatePolyFace to convert each face to triangles.
+	const std::vector<CGeomPolyFaceInfo> *polyFaces() const;
+	//@}
 
 protected:
 	virtual IStorageObject *createChunkById(uint16 id, bool container);

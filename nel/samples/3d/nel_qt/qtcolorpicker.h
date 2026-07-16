@@ -46,11 +46,11 @@
 
 #ifndef QTCOLORPICKER_H
 #define QTCOLORPICKER_H
-#include <QtGui/QPushButton>
+#include <QtWidgets/QPushButton>
 #include <QtCore/QString>
 #include <QtGui/QColor>
 
-#include <QtGui/QLabel>
+#include <QtWidgets/QLabel>
 #include <QtCore/QEvent>
 #include <QtGui/QFocusEvent>
 
@@ -70,7 +70,7 @@ public:
 
     ~QtColorPicker();
 
-    void insertColor(const QColor &color, const QString &text = QString::null, int index = -1);
+    void insertColor(const QColor &color, const QString &text = QString(), int index = -1);
 
     QColor currentColor() const;
 

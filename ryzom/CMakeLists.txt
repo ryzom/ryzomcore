@@ -1,3 +1,9 @@
+cmake_minimum_required(VERSION 3.28)
+
+project(Ryzom VERSION ${RyzomCore_VERSION} LANGUAGES CXX)
+
+find_package(NeL ${RyzomCore_VERSION} REQUIRED COMPONENTS misc net ligo georges 3d gui sound sevenzip pacs)
+
 #-----------------------------------------------------------------------------
 #Platform specifics
 
@@ -24,3 +30,7 @@ IF(WITH_RYZOM_SERVER OR WITH_RYZOM_TOOLS)
     ADD_SUBDIRECTORY(server)
   ENDIF()
 ENDIF()
+
+if (WITH_TESTING)
+  add_subdirectory(tools/server/test_modules)
+endif ()

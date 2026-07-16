@@ -22,7 +22,6 @@
 // Qt includes
 #include <QtGui>
 #include <QTreeView>
-#include <QDirModel>
 #include <QUndoStack>
 #include <QScrollArea>
 #include <QApplication>
@@ -48,15 +47,6 @@ using namespace std;
 using namespace NLMISC;
 
 namespace NLTOOLS {
-
-namespace {
-
-QString nli18n(const char *label)
-{
-	return QString::fromUtf16((const ushort *)CI18N::get(label).c_str());
-}
-
-} /* anonymous namespace */
 
 CMainWindow::CMainWindow(const QMap<QString, QSize> &customSizeHints, QWidget *parent, Qt::WindowFlags flags)
 	: QMainWindow(parent, flags),
@@ -95,9 +85,9 @@ void CMainWindow::createActions()
 
 void CMainWindow::createMenus()
 {
-	m_WidgetsMenu = menuBar()->addMenu(QString::null);
+	m_WidgetsMenu = menuBar()->addMenu(QString());
 	
-	m_HelpMenu = menuBar()->addMenu(QString::null);
+	m_HelpMenu = menuBar()->addMenu(QString());
 	m_HelpMenu->addAction(m_AboutAct);
 
 	m_WidgetsMenu->setTitle(tr("Widgets"));

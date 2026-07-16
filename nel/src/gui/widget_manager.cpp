@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013-2014  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2013-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2013-2022  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -435,7 +435,22 @@ namespace NLGUI
 			CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
 			CInterfaceElement *pIEL = rMG.Group->getElement (sEltId);
 			if (pIEL != NULL)
+			{
+#if !FINAL_VERSION
+				if (m_LoggedMissingElement.find(sEltId) != m_LoggedMissingElement.end())
+				{
+					m_LoggedMissingElement.erase(sEltId);
+					nlwarning("Previously missing UI element with Id '%s' was now found!", sEltId.c_str());
+				}
+#endif
 				return pIEL;
+			}
+		}
+
+		if (m_LoggedMissingElement.find(sEltId) == m_LoggedMissingElement.end())
+		{
+			m_LoggedMissingElement.insert(sEltId);
+			nlwarning("Could not find UI element from Id '%s'...", sEltId.c_str());
 		}
 		return NULL;
 	}
@@ -1200,7 +1215,7 @@ namespace NLGUI
 
 					// Copy all aspects to the view
 					vtDst->setLocalized (vtSrc->isLocalized());
-					vtDst->setText (vtSrc->getText());
+					vtDst->setText (vtSrc->getHardText());
 					vtDst->setFontSize (vtSrc->getFontSize());
 					vtDst->setColor (vtSrc->getColor());
 					vtDst->setModulateGlobalColor(vtSrc->getModulateGlobalColor());

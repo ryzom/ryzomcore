@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2021  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -47,7 +50,7 @@ CBufNetBase::CBufNetBase( bool isDataAvailablePipeSelfManaged ) :
 CBufNetBase::CBufNetBase() :
 #endif
 	_RecvFifo("CBufNetBase::_RecvFifo"),
-	_DisconnectionCallback( NULL ),
+	_DisconnectionCallback(),
 	_DisconnectionCbArg( NULL ),
 	_MaxExpectedBlockSize( DefaultMaxExpectedBlockSize ),
 	_MaxSentBlockSize( DefaultMaxSentBlockSize ),

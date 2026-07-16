@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2013-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2013-2022  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -50,6 +50,7 @@
 
 #include "nel/sound/u_audio_mixer.h"
 #include "nel/3d/water_pool_manager.h"
+#include "nel/3d/water_reflection_manager.h"
 #include "nel/3d/landscape_model.h"
 #include "nel/3d/visual_collision_manager.h"
 #include "nel/3d/visual_collision_entity.h"
@@ -279,16 +280,51 @@ CObjectViewer::CObjectViewer ()
 // ***************************************************************************
 std::string CObjectViewer::getModulePath() const
 {
-	// Get the configuration file path (located in same directory as module)
-	HMODULE hModule = AfxGetInstanceHandle();
-	nlassert(hModule); // shouldn't be null now anymore in any case
-	nlassert(hModule != GetModuleHandle(NULL)); // if this is dll, the module handle can't be same as exe
-	TCHAR sModulePath[256];
-	int res = GetModuleFileName(hModule, sModulePath, 256); nlassert(res);
-	nldebug("Object viewer module path is '%s'", sModulePath);
-
-	SPath = NLMISC::CFile::getPath(tStrToUtf8(sModulePath));
-
+	// Check environment
+	if (SPath.empty())
+	{
+		wchar_t buf[MAX_PATH];
+		buf[0] = L'\0';
+		DWORD len = GetEnvironmentVariableW(L"%RC_ROOT%", buf, _countof(buf));
+		if (len)
+			SPath = NLMISC::CPath::standardizePath(NLMISC::wideToUtf8(buf, len), true) + ".nel/tools/";
+	}
+	// Check project
+	if (SPath.empty())
+	{
+		wchar_t buf[MAX_PATH];
+		DWORD len = GetCurrentDirectoryW(_countof(buf), buf);
+		std::string cwd = NLMISC::CPath::standardizePath(NLMISC::wideToUtf8(buf, len), false);
+		std::vector<std::string> cwdv;
+		NLMISC::explode(cwd, std::string("/"), cwdv, false);
+		std::vector<std::string> paths;
+		paths.reserve(cwdv.size());
+		std::string path = "";
+		for (size_t i = 0; i < cwdv.size(); ++i)
+		{
+			path += cwdv[i] + "/";
+			paths.push_back(path);
+		}
+		for (ptrdiff_t i = (ptrdiff_t)paths.size() - 1; i >= 0; --i)
+		{
+			if (NLMISC::CFile::isDirectory(paths[i] + ".nel"))
+			{
+				SPath = paths[i] + ".nel/tools/";
+				break;
+			}
+		}
+	}
+	if (SPath.empty())
+	{
+		wchar_t buf[MAX_PATH];
+		// Get the configuration file path (located in same directory as module)
+		HMODULE hModule = AfxGetInstanceHandle();
+		nlassert(hModule); // shouldn't be null now anymore in any case
+		nlassert(hModule != GetModuleHandle(NULL)); // if this is dll, the module handle can't be same as exe
+		int res = GetModuleFileNameW(hModule, buf, MAX_PATH); nlassert(res);
+		SPath = NLMISC::CFile::getPath(wideToUtf8(buf));
+	}
+	nldebug("Object viewer configuration path is '%s'", SPath.c_str());
 	return SPath + "object_viewer.cfg";
 }
 
@@ -1192,11 +1228,33 @@ void CObjectViewer::go ()
 					(*it)->goPreRender();
 				}
 			}
+			// Render realtime water reflection passes into their render
+			// targets (replicated scene renders through the reflected
+			// camera, same pattern as the client and the water sample)
+			{
+				CWaterReflectionManager &wrm = CNELU::Scene->getWaterReflectionManager();
+				uint numReflPasses = wrm.beginPasses();
+				for (uint reflPass = 0; reflPass < numReflPasses; ++reflPass)
+				{
+					CWaterReflectionManager::CActiveReflection refl;
+					wrm.beginPass(reflPass, refl);
+					CNELU::Scene->beginPartRender();
+					// doHrcPass on (replicated renders must match the main
+					// render), no shadow map generation inside reflections,
+					// keep traversals so the main render below still
+					// consumes the frame's ellapsed time
+					CNELU::Scene->renderPart(UScene::RenderAll, true, false, true);
+					CNELU::Scene->endPartRender(true);
+					wrm.endPass(reflPass);
+				}
+				wrm.endPasses();
+			}
+
 			// Render the CS
-			if (_CS) _CS->render ();			
-			
-			// Draw the scene		
-			CNELU::Scene->render();	
+			if (_CS) _CS->render ();
+
+			// Draw the scene
+			CNELU::Scene->render();
 			
 			// call of callback list
 			{
@@ -1485,6 +1543,20 @@ void CObjectViewer::go ()
 	}
 	while (!CNELU::AsyncListener.isKeyPushed(KeyESCAPE)&&CNELU::Driver->isActive());
 	_InstanceRunning = false;
+}
+
+// ***************************************************************************
+
+void CObjectViewer::setForceWaterReflections(bool force)
+{
+	CNELU::Scene->getWaterReflectionManager().setForceReflections(force);
+}
+
+// ***************************************************************************
+
+bool CObjectViewer::getForceWaterReflections() const
+{
+	return CNELU::Scene->getWaterReflectionManager().getForceReflections();
 }
 
 // ***************************************************************************

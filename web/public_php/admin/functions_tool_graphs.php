@@ -148,6 +148,7 @@
 		{
 			if ($handle = opendir($dir))
 			{
+				$filelist = array();
 				while (($file = readdir($handle)) !== false)
 				{
 					if (($file != '.') && ($file != '..'))
@@ -316,7 +317,7 @@
 
 			$val_data = explode(' ', $tmp_data[2]);
 
-			$result['ref'][] = $tmp_data[1] - $base;
+			$result['ref'][] = trim($tmp_data[1]) - $base;
 			$result['val'][] = trim($val_data[1]);
 		}
 

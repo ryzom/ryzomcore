@@ -36,7 +36,7 @@ public:
 	CVertexProgram(const char *nelvp);
 
 	/// Destructor
-	virtual ~CVertexProgram ();
+	virtual ~CVertexProgram();
 
 };
 

@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2019-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2019-2021  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -408,8 +408,11 @@ namespace NLGUI
 	// Check if domain is on TrustedDomain
 	bool CGroupHTML::isTrustedDomain(const string &domain)
 	{
+		if (domain == options.webServerDomain)
+			return true;
+
 		vector<string>::iterator it;
-		it = find ( options.trustedDomains.begin(), options.trustedDomains.end(), domain);
+		it = find(options.trustedDomains.begin(), options.trustedDomains.end(), domain);
 		return it != options.trustedDomains.end();
 	}
 
@@ -3420,6 +3423,16 @@ namespace NLGUI
 
 			string finalUrl;
 			bool isLocal = lookupLocalFile (finalUrl, _URL.c_str(), true);
+
+			if (!isLocal && _URL.c_str()[0] == '/')
+			{
+				if (options.webServer.empty())
+				{
+					// Try again later
+					return;
+				}
+				finalUrl = options.webServer + finalUrl;
+			}
 
 			_URL = finalUrl;
 

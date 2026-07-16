@@ -9,39 +9,39 @@
 // config_user.php file.
 
 // Variables for database access to the www/CMS database (only if support role)
-$cfg['db']['web']['host']    = '%amsSqlHostname%';
-$cfg['db']['web']['port']    = '3306';
+$cfg['db']['web']['host']    = '%nelSqlHostname%';
+$cfg['db']['web']['port']    = '%nelSqlPort%';
+$cfg['db']['web']['user']    = '%nelSqlUsername%';
+$cfg['db']['web']['pass']    = '%nelSqlPassword%';
 $cfg['db']['web']['name']    = '%amsDatabase%';
-$cfg['db']['web']['user']    = '%amsSqlUsername%';
-$cfg['db']['web']['pass']    = '%amsSqlPassword%';
 
 // Variables for database access to the lib database (only if support role)
-$cfg['db']['lib']['host']    = '%amsSqlHostname%';
-$cfg['db']['lib']['port']    = '3306';
+$cfg['db']['lib']['host']    = '%nelSqlHostname%';
+$cfg['db']['lib']['port']    = '%nelSqlPort%';
+$cfg['db']['lib']['user']    = '%nelSqlUsername%';
+$cfg['db']['lib']['pass']    = '%nelSqlPassword%';
 $cfg['db']['lib']['name']    = '%amsLibDatabase%';
-$cfg['db']['lib']['user']    = '%amsSqlUsername%';
-$cfg['db']['lib']['pass']    = '%amsSqlPassword%';
 
 // Variables for database access to the shard database
 $cfg['db']['shard']['host']  = '%nelSqlHostname%';
-$cfg['db']['shard']['port']  = '3306';
-$cfg['db']['shard']['name']  = '%nelDatabase%';
+$cfg['db']['shard']['port']  = '%nelSqlPort%';
 $cfg['db']['shard']['user']  = '%nelSqlUsername%';
 $cfg['db']['shard']['pass']  = '%nelSqlPassword%';
+$cfg['db']['shard']['name']  = '%nelDatabase%';
 
 // Variables for database access to the ring_open database (only if domain role)
 $cfg['db']['ring']['host']   = '%nelSqlHostname%';
-$cfg['db']['ring']['port']   = '3306';
-$cfg['db']['ring']['name']   = '%domainDatabase%';
+$cfg['db']['ring']['port']   = '%nelSqlPort%';
 $cfg['db']['ring']['user']   = '%nelSqlUsername%';
 $cfg['db']['ring']['pass']   = '%nelSqlPassword%';
+$cfg['db']['ring']['name']   = '%domainDatabase%';
 
 // Variables for database access to the nel_tool database (only if service role)
 $cfg['db']['tool']['host']   = '%nelSqlHostname%';
-$cfg['db']['tool']['port']   = '3306';
-$cfg['db']['tool']['name']   = '%toolDatabase%';
+$cfg['db']['tool']['port']   = '%nelSqlPort%';
 $cfg['db']['tool']['user']   = '%nelSqlUsername%';
 $cfg['db']['tool']['pass']   = '%nelSqlPassword%';
+$cfg['db']['tool']['name']   = '%toolDatabase%';
 
 // To connect to an IMAP server running on port 143 on the local machine,
 // do the following: $mbox = imap_open("{localhost:143}INBOX", "user_id", "password");
@@ -130,6 +130,9 @@ $FORCE_INGAME = false;
 $FILE_STORAGE_PATH = $PUBLIC_PHP_PATH . '/ams/files/';
 $FILE_WEB_PATH = $BASE_WEBPATH . 'files/';
 
+// Shard web storage (without final /)
+$USERS_DIR = '%domainUsersDir%';
+
 // Setup password
 $NEL_SETUP_PASSWORD = '%nelSetupPassword%';
 
@@ -141,6 +144,49 @@ $NEL_SETUP_VERSION_CONFIGURED = (int)'%nelSetupVersion%';
 
 // Get installed version
 require_once('setup/version.php');
+
+$isWebRequest = PHP_SAPI !== 'cli';
+$setupDir = realpath(__DIR__ . '/setup');
+$scriptFilename = isset($_SERVER['SCRIPT_FILENAME']) ? realpath($_SERVER['SCRIPT_FILENAME']) : false;
+$isSetupScript = $setupDir !== false && $scriptFilename !== false
+	&& strpos(str_replace('\\', '/', $scriptFilename), str_replace('\\', '/', $setupDir) . '/') === 0;
+$requiresUpgrade = $NEL_SETUP_VERSION_CONFIGURED < $NEL_SETUP_VERSION;
+if ($isWebRequest && !$isSetupScript && $requiresUpgrade) {
+	$scriptName = isset($_SERVER['SCRIPT_NAME']) ? str_replace('\\', '/', $_SERVER['SCRIPT_NAME']) : '';
+	$scriptDirectoryName = rtrim(trim(str_replace('\\', '/', dirname($scriptName)), '/'), '/');
+	$scriptDirectory = ($scriptDirectoryName === '' || $scriptDirectoryName === '.') ? '/' : '/' . $scriptDirectoryName;
+	$loginDirectorySuffix = '/login';
+	$loginResponsePrefix = '0:';
+	$isLoginScript = $scriptName !== ''
+		&& basename($scriptName) === 'r2_login.php'
+		&& strlen($scriptDirectory) >= strlen($loginDirectorySuffix)
+		&& substr($scriptDirectory, -strlen($loginDirectorySuffix)) === $loginDirectorySuffix;
+	$loginMaintenanceMessage = $loginResponsePrefix . 'Service temporarily unavailable while a database upgrade is pending. Please try again later.';
+	header('HTTP/1.1 503 Service Unavailable');
+	header('Retry-After: 3600');
+	if ($isLoginScript) {
+		header('Content-Type: text/plain; charset=utf-8');
+		die($loginMaintenanceMessage);
+	} else {
+		header('Content-Type: text/html; charset=utf-8');
+		$maintenancePage = <<<'HTML'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maintenance</title>
+</head>
+<body style="font-family:sans-serif;max-width:48rem;margin:3rem auto;padding:0 1rem;">
+<h1>Maintenance pending</h1>
+<p>The website is temporarily unavailable while a database upgrade is pending.</p>
+<p>Please try again later or contact the server administrator for upgrade progress.</p>
+</body>
+</html>
+HTML;
+		die($maintenancePage);
+	}
+}
 
 // Override user parameters
 require_once('config_user.php');

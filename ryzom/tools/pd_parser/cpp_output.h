@@ -422,7 +422,7 @@ public:
 			if (!description.empty())
 				*this << description << "\n";
 			*this << "\n";
-			*this << "$Id: cpp_output.h,v 1.15 2004/12/13 17:19:01 legros Exp $\n";
+			*this << "$Id$\n";
 			*this << "*/\n\n";
 		}
 	}

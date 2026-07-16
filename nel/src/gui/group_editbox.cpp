@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2018  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013-2014  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
@@ -755,6 +755,9 @@ namespace NLGUI
 		// Display the selection if needed
 		if (_CurrSelection == this && _SelectCursorPos!=_CursorPos)
 		{
+			// flush so that selection quad is covering text
+			rVR.flush();
+
 			sint32	blankTextId= rVR.getBlankTextureId();
 			CRGBA	col= _BackSelectColor;
 			col.A= CWidgetManager::getInstance()->getGlobalColorForContent().A;

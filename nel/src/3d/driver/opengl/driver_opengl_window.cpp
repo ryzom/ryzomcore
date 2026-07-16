@@ -1,5 +1,5 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010-2020  Winch Gate Property Limited
+// Copyright (C) 2010-2022  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2010  Robert TIMM (rti) <mail@rtti.de>
@@ -679,8 +679,9 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 	// Retrieve the WGL extensions before init the driver.
 
 	// Offscreen mode ?
-	if (_CurrentMode.OffScreen)
+	if (mode.OffScreen)
 	{
+		_CurrentMode.OffScreen = true;
 		if (!createWindow(mode)) return false;
 
 		HWND tmpHWND = _win;
@@ -3265,6 +3266,16 @@ bool CDriverGL::isActive()
 #endif // NL_OS_UNIX
 
 	return res;
+}
+
+// ***************************************************************************
+bool CDriverGL::supportMonitorColorProperties () const
+{
+#ifdef NL_OS_WINDOWS
+	return _NeedToRestoreGammaRamp;
+#else
+	return false;
+#endif
 }
 
 // ***************************************************************************

@@ -58,7 +58,7 @@ void cbnbNewDisconnection (TSockId from, void *data)
 #endif
 
 	// Call the client callback if necessary
-	if (base->_DisconnectionCallback != NULL)
+	if (base->_DisconnectionCallback)
 		base->_DisconnectionCallback (from, base->_DisconnectionCbArg);
 }
 
@@ -70,11 +70,11 @@ CCallbackNetBase::CCallbackNetBase(  TRecordingState /* rec */, const string& /*
 	:	_BytesSent(0),
 		_BytesReceived(0),
 		_NewDisconnectionCallback(cbnbNewDisconnection),
-		_DefaultCallback(NULL),
-		_PreDispatchCallback(NULL),
+		_DefaultCallback(),
+		_PreDispatchCallback(),
 		_FirstUpdate (true),
 		_UserData(NULL),
-		_DisconnectionCallback(NULL),
+		_DisconnectionCallback(),
 		_DisconnectionCbArg(NULL)
 #ifdef USE_MESSAGE_RECORDER
 		, _MR_RecordingState(rec), _MR_UpdateCounter(0)
@@ -114,7 +114,7 @@ void *CCallbackNetBase::getUserData()
  */
 void CCallbackNetBase::addCallbackArray (const TCallbackItem *callbackarray, sint arraysize)
 {
-	if (arraysize == 1 && callbackarray[0].Callback == NULL && strlen(callbackarray[0].Key) == 0)
+	if (arraysize == 1 && !callbackarray[0].Callback && strlen(callbackarray[0].Key) == 0)
 	{
 		// it's an empty array, ignore it
 		return;
@@ -176,10 +176,10 @@ void CCallbackNetBase::processOneMessage ()
 		}
 	}
 
-	TMsgCallback	cb = NULL;
+	TMsgCallback	cb;
 	if (pos < 0 || pos >= (sint16) _CallbackArray.size ())
 	{
-		if (_DefaultCallback == NULL)
+		if (!_DefaultCallback)
 		{
 			nlwarning ("LNETL3NB_CB: Callback %s not found in _CallbackArray", msgin.toString().c_str());
 		}
@@ -200,15 +200,15 @@ void CCallbackNetBase::processOneMessage ()
 		nlwarning ("LNETL3NB_CB: %s try to call the callback %s but only %s is authorized. Disconnect him!", tsid->asString().c_str(), msgin.toString().c_str(), tsid->AuthorizedCallback.c_str());
 		disconnect (tsid);
 	}
-	else if (cb == NULL)
+	else if (!cb)
 	{
 		nlwarning ("LNETL3NB_CB: Callback %s is NULL, can't call it", msgin.toString().c_str());
 	}
 	else
 	{
-		LNETL3_DEBUG ("LNETL3NB_CB: Calling callback (%s)%s", msgin.getName().c_str(), (cb==_DefaultCallback)?" DEFAULT_CB":"");
+		LNETL3_DEBUG ("LNETL3NB_CB: Calling callback (%s)", msgin.getName().c_str());
 
-		if (_PreDispatchCallback != NULL)
+		if (_PreDispatchCallback)
 		{
 			// call the pre dispatch callback
 			_PreDispatchCallback(msgin, realid, *this);

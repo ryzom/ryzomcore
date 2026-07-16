@@ -117,10 +117,15 @@ void CScreenshotIslands::init()
 	CPath::remapExtension("dds", "png", true);
 
 	// get the scenario entry points file
-	CConfigFile::CVar * epFile = cf.getVarPtr("CompleteIslandsFile");
+	CConfigFile::CVar * ciFile = cf.getVarPtr("CompleteIslandsFile");
+	if(ciFile)
+	{
+		_CompleteIslandsFile = ciFile->asString();
+	}
+	CConfigFile::CVar * epFile = cf.getVarPtr("EntryPointsFile");
 	if(epFile)
 	{
-		_CompleteIslandsFile = epFile->asString();
+		_EntryPointsFile = epFile->asString();
 	}
 
 	// get the out directory path
@@ -286,31 +291,18 @@ bool CScreenshotIslands::getPosFromZoneName(const std::string &name, NLMISC::CVe
 //-------------------------------------------------------------------------------------------------
 void CScreenshotIslands::searchIslandsBorders()
 {
-	vector<string> filenames;
-	list<string> zonelFiles;
-
-	map< CVector2f, bool> islandsMap;
+	vector<string> zonelFiles;
+	map<CVector2f, bool> islandsMap;
 	
 	TContinentsData::iterator itCont(_ContinentsData.begin()), lastCont(_ContinentsData.end());
 	for( ; itCont != lastCont ; ++itCont)
 	{
 		// for each continent we recover a map of zonel files whith position of 
 		// left/bottom point of each zone for keys
-		filenames.clear();
 		zonelFiles.clear();
+		CPath::getFileList("zonel", zonelFiles); // MAYBE FIXME: Constrain to continent (although we only build one continent at a time...)
 
-		string bnpFileName = itCont->first + ".bnp";
-		CBigFile::getInstance().list(bnpFileName.c_str(), filenames); // FIXME FIXME NOT READING FROM BNP!
-
-		for(uint i=0; i<filenames.size(); i++)
-		{
-			if(CFile::getExtension(filenames[i]) == "zonel")
-			{
-				zonelFiles.push_back(filenames[i]);
-			}
-		}
-
-		list<string>::iterator itZonel(zonelFiles.begin()), lastZonel(zonelFiles.end());
+		vector<string>::iterator itZonel(zonelFiles.begin()), lastZonel(zonelFiles.end());
 		for( ; itZonel != lastZonel ; ++itZonel)
 		{	
 			CVector2f position;
@@ -1106,7 +1098,9 @@ void CScreenshotIslands::loadIslands()
 {
 	// load entryPoints
 	map< string, CVector2f > islands;
-	CScenarioEntryPoints scenarioEntryPoints = CScenarioEntryPoints::getInstance();
+	CScenarioEntryPoints &scenarioEntryPoints = CScenarioEntryPoints::getInstance();
+
+	scenarioEntryPoints.setFiles(_CompleteIslandsFile, _EntryPointsFile);
 
 	scenarioEntryPoints.loadFromFile();
 	const CScenarioEntryPoints::TEntryPoints& entryPoints =  scenarioEntryPoints.getEntryPoints();
@@ -1198,43 +1192,68 @@ void CScreenshotIslands::loadIslands()
 		}
 	}
 
+	CScenarioEntryPoints::TCompleteIslands completeIslands; // Copy (empty if using separate xml files)
+	completeIslands.reserve(entryPoints.size());
 
-	CScenarioEntryPoints::TCompleteIslands completeIslands(entryPoints.size());
+	vector<string> zonelFiles;
+	CPath::getFileList("zonel", zonelFiles);
+	map<string, CVector2f> zonePosMap;
+	for (vector<string>::iterator it(zonelFiles.begin()), end(zonelFiles.end()); it != end; ++it)
+	{
+		CVector2f pos;
+		if (getPosFromZoneName(*it, pos))
+			zonePosMap[CFile::getFilenameWithoutExtension(*it)] = pos;
+	}
 
-	uint completeIslandsNb = 0;
-	for(uint e=0; e<entryPoints.size(); e++)
-	{	
-		const CScenarioEntryPoints::CEntryPoint & entry = entryPoints[e];
+	for (uint e = 0; e < entryPoints.size(); e++)
+	{
+		const CScenarioEntryPoints::CEntryPoint &entry = entryPoints[e];
 
-		CScenarioEntryPoints::CCompleteIsland completeIsland;
-		completeIsland.Island = entry.Island;
-		completeIsland.Package = entry.Package;
-
-		for(itCont=_ContinentsData.begin(); itCont!=_ContinentsData.end(); ++itCont)
+		for (itCont = _ContinentsData.begin(); itCont != _ContinentsData.end(); ++itCont) // Look through all continents
 		{
-			list< string >::const_iterator itIsland(itCont->second.Islands.begin()), lastIsland(itCont->second.Islands.end());
-			for( ; itIsland != lastIsland ; ++itIsland)
+			list<string>::const_iterator itIsland(itCont->second.Islands.begin()), lastIsland(itCont->second.Islands.end()); // Look through all islands
+			for (; itIsland != lastIsland; ++itIsland)
 			{
-				if(*itIsland == entry.Island)
+				if (*itIsland == entry.Island)
 				{
-					completeIsland.Continent = CSString(itCont->first);
-					if(_IslandsData.find(entry.Island)!=_IslandsData.end())
+					TIslandsData::iterator islandIt = _IslandsData.find(entry.Island);
+					if (islandIt != _IslandsData.end())
 					{
-						completeIsland.XMin = _IslandsData[entry.Island].getBoundXMin();
-						completeIsland.YMin = _IslandsData[entry.Island].getBoundYMin();
-						completeIsland.XMax = _IslandsData[entry.Island].getBoundXMax();
-						completeIsland.YMax = _IslandsData[entry.Island].getBoundYMax();
-						completeIslands[completeIslandsNb] = completeIsland;
-						completeIslandsNb++;
+						// Island found in the current build context
+						completeIslands.resize(completeIslands.size() + 1);
+						CScenarioEntryPoints::CCompleteIsland &island = completeIslands[completeIslands.size() - 1];
+
+						// Update data from r2_entry_points.txt
+						island.Island = entry.Island;
+						// island.Package = entry.Package; // Loaded from txt
+
+						// Update from _ContinentsData
+						island.Continent = CSString(itCont->first);
+
+						// Update from _IslandsData
+						island.XMin = islandIt->second.getBoundXMin();
+						island.YMin = islandIt->second.getBoundYMin();
+						island.XMax = islandIt->second.getBoundXMax();
+						island.YMax = islandIt->second.getBoundYMax();
+
+						sint32 zonelXMin = ((uint)(island.XMin / 160)) * 160;
+						sint32 zonelYMin = ((uint)(island.YMin / 160) - 1) * 160;
+						sint32 zonelXMax = ((uint)(island.XMax / 160)) * 160;
+						sint32 zonelYMax = ((uint)(island.YMax / 160) - 1) * 160;
+
+						// List all zones
+						for (map<string, CVector2f>::iterator it(zonePosMap.begin()), end(zonePosMap.end()); it != end; ++it)
+							if (it->second.x >= zonelXMin && it->second.x <= zonelXMax
+								&& it->second.y >= zonelYMin && it->second.y <= zonelYMax)
+								island.Zones.push_back(NLMISC::toUpperAscii(it->first));
 					}
 					break;
 				}
 			}
 		}
 	}
-	completeIslands.resize(completeIslandsNb);
 	
-	CScenarioEntryPoints::getInstance().saveXMLFile(completeIslands, _CompleteIslandsFile);
+	scenarioEntryPoints.saveXMLFile(completeIslands, _CompleteIslandsFile);
 }
 
 //--------------------------------------------------------------------------------

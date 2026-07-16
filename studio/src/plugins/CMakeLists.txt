@@ -12,7 +12,8 @@ IF(WITH_GUI)
   ADD_SUBDIRECTORY(gui_editor)
 ENDIF()
 
-ADD_SUBDIRECTORY(translation_manager)
+# QFtp isn't available anymore only as a standalone module
+#ADD_SUBDIRECTORY(translation_manager)
 ADD_SUBDIRECTORY(tile_editor)
 ADD_SUBDIRECTORY(bnp_manager)
 # Note: Temporarily disabled until development continues.

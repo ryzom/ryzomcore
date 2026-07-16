@@ -184,8 +184,8 @@ function displayAllShards(&$onlineShardsBySessionId)
 	}
 
 	// List all shards of the domain, including offline ones
-	global $DBName, $DBHost, $DBUserName, $DBPassword;
-	$link = mysqli_connect($DBHost, $DBUserName, $DBPassword) or die("Can't connect to nel database");
+	global $DBName, $DBHost, $DBPort, $DBUserName, $DBPassword;
+	$link = mysqli_connect($DBHost, $DBUserName, $DBPassword, NULL, $DBPort) or die("Can't connect to nel database");
 	mysqli_select_db($link, $DBName) or die ("Can't access to the db dbname:$DBName");
 
 	$domainId = (int) $domainId;

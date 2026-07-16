@@ -55,11 +55,11 @@
 #endif
 #include <dxgi.h>
 #include <initguid.h>
-#include <CGuid.h>
-#	include <ObjBase.h>
+#include <cguid.h>
+#	include <objbase.h>
 #	ifdef _WIN32_WINNT_WIN7
 		// only supported by Windows 7 Platform SDK
-#		include <ShObjIdl.h>
+#		include <shobjidl.h>
 #		define TASKBAR_PROGRESS 1
 #	endif
 #elif defined(NL_OS_UNIX) && !defined(NL_OS_MAC)

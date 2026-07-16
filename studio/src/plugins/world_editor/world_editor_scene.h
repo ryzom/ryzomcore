@@ -25,7 +25,7 @@
 // NeL includes
 
 // Qt includes
-#include <QtGui/QUndoStack>
+#include <QUndoStack>
 
 namespace WorldEditor
 {

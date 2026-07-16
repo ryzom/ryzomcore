@@ -1,9 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2020  Winch Gate Property Limited
+// Copyright (C) 2010-2022  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2010  Robert TIMM (rti) <mail@rtti.de>
-// Copyright (C) 2010-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2010-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 // Copyright (C) 2011-2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
 //
 // This program is free software: you can redistribute it and/or modify
@@ -57,8 +57,8 @@ using std::string;
 //---------------------------------------------------
 struct CClientConfig
 {
-	enum TDriver3D { DrvAuto = 0, OpenGL, Direct3D, OpenGLES };
-	enum TDriverSound { SoundDrvAuto = 0, SoundDrvOpenAL, SoundDrvDirectSound, SoundDrvXAudio2 };
+	enum TDriver3D { DrvAuto = 0, OpenGL, Direct3D, OpenGLES, OpenGL3 };
+	enum TDriverSound { SoundDrvAuto = 0, SoundDrvFMod, SoundDrvOpenAL, SoundDrvDirectSound, SoundDrvXAudio2 };
 	enum TStageLCTUsage { StageUseNoLCT = 0, StageUseAllLCT, StageUsePosOnlyLCT };
 
 	// the config file must be always be available
@@ -106,6 +106,9 @@ struct CClientConfig
 
 	/// vector of XML file names that describe R2 editor
 	std::vector<string> XMLR2EDInterfaceFiles;
+
+	/// Feature flags for UI XML files
+	std::vector<string> UiFeatureFlags;
 
 	/// logo that are displayed
 	std::vector<string>	Logos;
@@ -173,6 +176,9 @@ struct CClientConfig
 	bool			Local;
 	/// Host.
 	string			FSHost;
+	/// QUIC
+	bool			QuicConnection;
+	bool			QuicCertValidation;
 	/// Login.
 	bool			DisplayAccountButtons;
 	string			CreateAccountURL;
@@ -292,6 +298,12 @@ struct CClientConfig
 	bool			Bloom;
 	bool			SquareBloom;
 	float			DensityBloom;
+	/// Max number of water pools with realtime planar reflection per frame (0 = off)
+	sint			MaxWaterReflections;
+	/// Max reflection render target textures per eye (L and R each get up to this many); reflected planes tile into shared textures (-1 = as many as needed)
+	sint			MaxWaterReflectionTextures;
+	/// Dev: force realtime planar reflection on all water surfaces
+	bool			ForceWaterReflections;
 
 	/// Movie Shooter
 	uint			MovieShooterMemory;
@@ -317,13 +329,13 @@ struct CClientConfig
 	// NEW PATCHING SYSTEM //
 	bool			PatchWanted;
 	std::string		PatchUrl;
-	std::string		PatchletUrl;
 	std::string		PatchVersion;
+	std::string		PatchletUrl;
 
 	std::string		RingReleaseNotePath;
 	std::string		ReleaseNotePath;
 
-	std::string		WebIgMainDomain;
+	std::string     WebIgMainDomain;
 	std::vector<string>	WebIgTrustedDomains;
 	uint			WebIgNotifInterval; // value in minutes for notification thread
 
@@ -583,6 +595,9 @@ struct CClientConfig
 	/// Racial Animation
 	bool			EnableRacialAnimation;
 
+	/// GPU Skinning
+	bool			GPUSkinning;
+
 	/////////////
 	// OPTIONS //
 	/// Right click select too.
@@ -770,6 +785,9 @@ struct CClientConfig
 
 	// Time to update water envmap
 	float			WaterEnvMapUpdateTime;
+
+	// Force all water bodies to use scene water envmap (DEV)
+	bool			ForceWaterEnvMap;
 
 	// number of frames to profile (0 for start/stop scheme)
 	uint			NumFrameForProfile;

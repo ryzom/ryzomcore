@@ -59,6 +59,9 @@ void	SetMouseSpeed (float speed);
 // Use this method to set the cursor acceleration
 void	SetMouseAcceleration (uint accel);
 
+// reset mouse capture state (release capture, clear button state)
+void ResetMouseCaptureState();
+
 // handle capturing of mouse on button up / button down
 void HandleSystemCursorCapture(const NLMISC::CEvent &event);
 

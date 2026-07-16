@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2019-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2019-2022  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -81,7 +81,7 @@ BOOL CNameDlg::OnInitDialog()
 	NLMISC::CConfigFile::CVar *var = getMainFrame()->getConfigFile().getVarPtr("BotNamePath");
 	if (var)
 	{
-		m_dataDir = NLMISC::CPath::standardizePath(var->asString());
+		m_dataDir = theApp.transformProjectPath(NLMISC::CPath::standardizePath(var->asString()));
 	}
 	else
 	{

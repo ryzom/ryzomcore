@@ -1,0 +1,78 @@
+vs_2_0
+// cgc version 3.1.0013, build date Apr 18 2012
+// command line args: -profile vs_2_0 -O3 -DNUM_POINT_LIGHTS=0 -DUSE_NORMALIZE
+// source file: wind_tree_vp.cg
+//vendor NVIDIA Corporation
+//version 3.1.0.13
+//profile vs_2_0
+//program wind_tree_vp
+//semantic mvp : C0
+//semantic fog : C6
+//semantic windLevel1 : C15
+//semantic windLevel2 : C16
+//semantic windLevel3 : C20
+//semantic ambient : C24
+//semantic diffuse0 : C25
+//semantic diffuse1 : C26
+//semantic diffuse2 : C27
+//semantic diffuse3 : C28
+//semantic dirOrPos0 : C29
+//semantic diffuseAlpha : C33
+//var float4 iPos : $vin.POSITION0 : ATTR0 : 0 : 1
+//var float4 iNormal : $vin.NORMAL0 : ATTR1 : 1 : 1
+//var float4 iColor : $vin.COLOR0 : ATTR2 : 2 : 1
+//var float4 iTexCoord : $vin.TEXCOORD0 : ATTR3 : 3 : 1
+//var float4 oPos : $vout.POSITION : HPOS : 4 : 1
+//var float4 oCol0 : $vout.COLOR0 : COL0 : 5 : 1
+//var float4 oTex0 : $vout.TEXCOORD0 : TEX0 : 6 : 1
+//var float oFog : $vout.FOG0 : FOGC : 7 : 1
+//var float4x4 mvp : C0 : c[0], 4 : -1 : 1
+//var float4 fog : C6 : c[6] : -1 : 1
+//var float4 windLevel1 : C15 : c[15] : -1 : 1
+//var float4 windLevel2[0] :  : c[16] : -1 : 1
+//var float4 windLevel2[1] :  : c[17] : -1 : 1
+//var float4 windLevel2[2] :  : c[18] : -1 : 1
+//var float4 windLevel2[3] :  : c[19] : -1 : 1
+//var float4 windLevel3[0] :  : c[20] : -1 : 1
+//var float4 windLevel3[1] :  : c[21] : -1 : 1
+//var float4 windLevel3[2] :  : c[22] : -1 : 1
+//var float4 windLevel3[3] :  : c[23] : -1 : 1
+//var float4 ambient : C24 : c[24] : -1 : 1
+//var float4 diffuse0 : C25 : c[25] : -1 : 1
+//var float4 diffuse1 : C26 : c[26] : -1 : 0
+//var float4 diffuse2 : C27 : c[27] : -1 : 0
+//var float4 diffuse3 : C28 : c[28] : -1 : 0
+//var float4 dirOrPos0 : C29 : c[29] : -1 : 1
+//var float4 diffuseAlpha : C33 : c[33] : -1 : 1
+//const c[4] = 3 0 -1 -2
+//const c[5] = 1 3.99
+def c4, 3.00000000, 0.00000000, -1.00000000, -2.00000000
+def c5, 1.00000000, 3.99000001, 0, 0
+dcl_color0 v2
+dcl_position0 v0
+dcl_normal0 v1
+dcl_texcoord0 v3
+mad r0.xyz, v2.x, c4.x, c4.yzww
+min r0.xyz, r0, c5.x
+max r1.xyz, r0, c4.y
+mul r0.xy, v2.yzzw, c5.y
+mova a0.x, r0
+mad r2.xyz, r1.x, c15, v0
+mad r2.xyz, r1.y, c[a0.x + 16], r2
+dp3 r0.w, v1, v1
+rsq r1.x, r0.w
+mova a0.x, r0.y
+mad r0.xyz, c[a0.x + 20], r1.z, r2
+mov r0.w, v0
+mul r1.xyz, r1.x, v1
+dp3 r1.x, r1, c29
+max r1.x, r1, c4.y
+mul r1, r1.x, c25
+add r1, r1, c24
+dp4 oPos.w, r0, c3
+dp4 oPos.z, r0, c2
+dp4 oPos.y, r0, c1
+dp4 oPos.x, r0, c0
+dp4 oFog, r0.xyzw, c6.xyzw
+mad oD0, r1, c33.zzzx, c33.xxxw
+mov oT0, v3

@@ -1,0 +1,4 @@
+; 2-column space indentation
+[*.xml]
+indent_style = space
+indent_size = 2

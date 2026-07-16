@@ -31,6 +31,9 @@
 #include <queue>
 #endif
 
+#if !(defined(NL_COMP_VC) && NL_COMP_VC_VERSION < 100)
+#include <functional>
+#endif
 #include <vector>
 
 
@@ -43,7 +46,11 @@ class CCallbackNetBase;
  * msgin contains parameters of the message
  * from is the SockId of the connection, for a client, from is always the same value
  */
-typedef void (*TMsgCallback) (CMessage &msgin, TSockId from, CCallbackNetBase &netbase);
+#if defined(NL_COMP_VC) && NL_COMP_VC_VERSION < 100
+typedef NLMISC::CCallback<void, CMessage &, TSockId, CCallbackNetBase &> TMsgCallback;
+#else
+typedef std::function<void(CMessage &msgin, TSockId from, CCallbackNetBase &netbase)> TMsgCallback;
+#endif
 
 
 /// Callback items. See CMsgSocket::update() for an explanation on how the callbacks are called.

@@ -21,9 +21,9 @@
 #include "direction_widget.h"
 
 // Qt includes
-#include <QtGui/QInputDialog>
-#include <QtGui/QPainter>
-#include <QtGui/QMouseEvent>
+#include <QInputDialog>
+#include <QPainter>
+#include <QMouseEvent>
 
 // NeL includes
 #include <nel/misc/vector.h>

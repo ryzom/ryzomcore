@@ -33,6 +33,11 @@
 #define new DEBUG_NEW
 #endif
 
+// Enable the GLSL water VP sources (UBO pipeline-stage variant for the
+// linked program path, plus SSO fallback). Drivers that don't support these
+// profiles simply select the nelvp source instead.
+#define NL_WATER_VP_GLSL 1
+
 namespace NL3D {
 
 
@@ -87,14 +92,169 @@ DP4 o[TEX3].x, v[0], c[11];           #compute uv for diffuse texture			\n\
 DP4 o[TEX3].y, v[0], c[12];													    \n\
 END";
 
-CVertexProgramWaterVPNoWave::CVertexProgramWaterVPNoWave(bool diffuse)
+// Planar reflection variant: reflection UVs are computed per vertex on the
+// CPU (projected through the reflected camera's sub-frustum, see
+// CWaterModel::fillVBHard) and passed through TexCoord0 (v[8]).
+static const char *WaterVPNoWavePlanar =
+"!!VP1.0                                                                        \n\
+ DP4 o[HPOS].x, c[0], v[0];	          #transform vertex in view space	        \n\
+ DP4 o[HPOS].y, c[1], v[0];												        \n\
+ DP4 o[HPOS].z, c[2], v[0];												        \n\
+ DP4 o[HPOS].w, c[3], v[0];												        \n\
+ DP4 o[FOGC].x, c[4], v[0];	      #setup fog					                \n\
+ MUL R3, v[0], c[5];			      #compute bump 0 uv's			            \n\
+ ADD o[TEX0], R3, c[6];										                    \n\
+ MUL R3, v[0], c[7];			      #compute bump 1 uv's			            \n\
+ ADD o[TEX1], R3, c[8];											                \n\
+ MOV o[TEX2], v[8];			      #planar reflection uv from vertex	            \n\
+ END";
+
+static const char *WaterVPNoWavePlanarDiffuse =
+"!!VP1.0\n\
+DP4 o[HPOS].x, c[0], v[0];	          #transform vertex in view space	        \n\
+DP4 o[HPOS].y, c[1], v[0];												        \n\
+DP4 o[HPOS].z, c[2], v[0];												        \n\
+DP4 o[HPOS].w, c[3], v[0];												        \n\
+DP4 o[FOGC].x, c[4], v[0];	          #setup fog					            \n\
+MUL R3, v[0], c[5];			          #compute bump 0 uv's			            \n\
+ADD o[TEX0], R3, c[6];										                    \n\
+MUL R3, v[0], c[7];			          #compute bump 1 uv's			            \n\
+ADD o[TEX1], R3, c[8];											                \n\
+MOV o[TEX2], v[8];			          #planar reflection uv from vertex	        \n\
+DP4 o[TEX3].x, v[0], c[11];           #compute uv for diffuse texture			\n\
+DP4 o[TEX3].y, v[0], c[12];													    \n\
+END";
+
+// Calculated reflectivity over the artist envmap: the reflected-ray UV as
+// usual, plus the per-vertex reflectivity base passed through o[TEX2].z
+// (from TexCoord0.z, see CWaterModel::fillVBHard).
+static const char *WaterVPNoWaveEnvCalc =
+"!!VP1.0                                                                        \n\
+ DP4 o[HPOS].x, c[0], v[0];	          #transform vertex in view space	        \n\
+ DP4 o[HPOS].y, c[1], v[0];												        \n\
+ DP4 o[HPOS].z, c[2], v[0];												        \n\
+ DP4 o[HPOS].w, c[3], v[0];												        \n\
+ DP4 o[FOGC].x, c[4], v[0];	      #setup fog					                \n\
+ MUL R3, v[0], c[5];			      #compute bump 0 uv's			            \n\
+ ADD o[TEX0], R3, c[6];										                    \n\
+ MUL R3, v[0], c[7];			      #compute bump 1 uv's			            \n\
+ ADD o[TEX1], R3, c[8];											                \n\
+ ADD R0, c[9], -v[0];			      #r1 = eye - vertex						\n\
+ DP3 R1, R0, R0;				      #r1 = eye - vertex, r2 = (eye - vertex)^2	\n\
+ RSQ R1, R1.x;					      #r1 = eye - vertex, r2 = 1/d(eye, vertex)	\n\
+ MUL R0, R0, R1;                                                                \n\
+ MAD o[TEX2], -R0, c[10], c[10];		  #envmap tex coord						\n\
+ MOV o[TEX2].z, v[8].z;			      #per-vertex reflectivity base				\n\
+ END";
+
+static const char *WaterVPNoWaveEnvCalcDiffuse =
+"!!VP1.0\n\
+DP4 o[HPOS].x, c[0], v[0];	          #transform vertex in view space	        \n\
+DP4 o[HPOS].y, c[1], v[0];												        \n\
+DP4 o[HPOS].z, c[2], v[0];												        \n\
+DP4 o[HPOS].w, c[3], v[0];												        \n\
+DP4 o[FOGC].x, c[4], v[0];	          #setup fog					            \n\
+MUL R3, v[0], c[5];			          #compute bump 0 uv's			            \n\
+ADD o[TEX0], R3, c[6];										                    \n\
+MUL R3, v[0], c[7];			          #compute bump 1 uv's			            \n\
+ADD o[TEX1], R3, c[8];											                \n\
+ADD R0, c[9], -v[0];			      #r1 = eye - vertex						\n\
+DP3 R1, R0, R0;				          #r1 = eye - vertex, r2 = (eye - vertex)^2	\n\
+RSQ R1, R1.x;					      #r1 = eye - vertex, r2 = 1/d(eye, vertex)	\n\
+MUL R0, R0, R1;                                                                 \n\
+MAD o[TEX2], -R0, c[10], c[10];		  #envmap tex coord							\n\
+MOV o[TEX2].z, v[8].z;			      #per-vertex reflectivity base				\n\
+DP4 o[TEX3].x, v[0], c[11];           #compute uv for diffuse texture			\n\
+DP4 o[TEX3].y, v[0], c[12];													    \n\
+END";
+
+// GLSL body for water VP UBO path.
+// modelViewProjection and modelView come from NlModel UBO (UsesObjectUBO).
+// Water-specific params come from NlWaterVP user UBO (UBBindingVertexProgram).
+// Fog is not used in VP — PP handles fog via ecPos.
+// USE_PLANAR: reflection UVs come from TexCoord0 (attribute location 8,
+// computed per vertex on the CPU) instead of the envmap reflected ray.
+static const char *WaterVPGLSL_UBO_Body =
+	"layout(location = 0) in vec4 vposition;\n"
+	"#if defined(USE_PLANAR) || defined(USE_ENV_CALC)\n"
+	"layout(location = 8) in vec4 vtexcoord0;\n"
+	"#endif\n"
+	"smooth out vec4 texCoord0;\n"
+	"smooth out vec4 texCoord1;\n"
+	"smooth out vec4 texCoord2;\n"
+	"#ifdef USE_DIFFUSE\n"
+	"smooth out vec4 texCoord3;\n"
+	"#endif\n"
+	"smooth out vec4 ecPos;\n"
+	"// bumpMap0Scale..scaleReflectedRay from NlWaterVP user UBO\n"
+	"// modelViewProjection, modelView from NlModel UBO\n"
+	"void main()\n"
+	"{\n"
+	"  gl_Position = modelViewProjection * vposition;\n"
+	"  ecPos = modelView * vposition;\n"
+	"  texCoord0 = vposition * bumpMap0Scale + bumpMap0Offset;\n"
+	"  texCoord1 = vposition * bumpMap1Scale + bumpMap1Offset;\n"
+	"#ifdef USE_PLANAR\n"
+	"  texCoord2 = vtexcoord0;\n"
+	"#else\n"
+	"  vec4 toObs = observerHeight - vposition;\n"
+	"  float invLen = inversesqrt(dot(toObs.xyz, toObs.xyz));\n"
+	"  toObs *= invLen;\n"
+	"  texCoord2 = -toObs * scaleReflectedRay + scaleReflectedRay;\n"
+	"#ifdef USE_ENV_CALC\n"
+	"  texCoord2.z = vtexcoord0.z;\n"
+	"#endif\n"
+	"#endif\n"
+	"#ifdef USE_DIFFUSE\n"
+	"  texCoord3 = vec4(dot(vposition, diffuseMapVector0), dot(vposition, diffuseMapVector1), 0.0, 0.0);\n"
+	"#endif\n"
+	"}\n";
+
+CVertexProgramWaterVPNoWave::CVertexProgramWaterVPNoWave(bool diffuse, bool planar, bool envCalc)
 {
+	nlassert(!(planar && envCalc));
 	m_Diffuse = diffuse;
-	// nelvp
+	m_Planar = planar;
+	m_EnvCalc = envCalc;
+
+	// Unresolved uniform indices must be ~0u: setUniform* skips those.
+	// (A zero-initialized index silently writes constant register c[0].)
+	m_Idx.BumpMap0Scale = std::numeric_limits<uint>::max();
+	m_Idx.BumpMap0Offset = std::numeric_limits<uint>::max();
+	m_Idx.BumpMap1Scale = std::numeric_limits<uint>::max();
+	m_Idx.BumpMap1Offset = std::numeric_limits<uint>::max();
+	m_Idx.ObserverHeight = std::numeric_limits<uint>::max();
+	m_Idx.ScaleReflectedRay = std::numeric_limits<uint>::max();
+	m_Idx.DiffuseMapVector0 = std::numeric_limits<uint>::max();
+	m_Idx.DiffuseMapVector1 = std::numeric_limits<uint>::max();
+
+	// Build UBO format (once, shared across all water VP variants)
+	if (!CWaterShape::_WaterVPUBFormat)
+	{
+		CUniformBufferFormat *fmt = new CUniformBufferFormat();
+		fmt->Name = "NlWaterVP";
+		CWaterShape::_WaterVPUBOOffsets.BumpMap0Scale = fmt->push("bumpMap0Scale", CUniformBufferFormat::FloatVec4);
+		CWaterShape::_WaterVPUBOOffsets.BumpMap0Offset = fmt->push("bumpMap0Offset", CUniformBufferFormat::FloatVec4);
+		CWaterShape::_WaterVPUBOOffsets.BumpMap1Scale = fmt->push("bumpMap1Scale", CUniformBufferFormat::FloatVec4);
+		CWaterShape::_WaterVPUBOOffsets.BumpMap1Offset = fmt->push("bumpMap1Offset", CUniformBufferFormat::FloatVec4);
+		CWaterShape::_WaterVPUBOOffsets.ObserverHeight = fmt->push("observerHeight", CUniformBufferFormat::FloatVec4);
+		CWaterShape::_WaterVPUBOOffsets.ScaleReflectedRay = fmt->push("scaleReflectedRay", CUniformBufferFormat::FloatVec4);
+		CWaterShape::_WaterVPUBOOffsets.DiffuseMapVector0 = fmt->push("diffuseMapVector0", CUniformBufferFormat::FloatVec4);
+		CWaterShape::_WaterVPUBOOffsets.DiffuseMapVector1 = fmt->push("diffuseMapVector1", CUniformBufferFormat::FloatVec4);
+		CWaterShape::_WaterVPUBFormat = fmt;
+		CWaterShape::_WaterVPUB = new CUniformBuffer();
+		CWaterShape::_WaterVPUB->Format = *fmt;
+	}
+
+	// nelvp — used by all drivers; GL3 auto-converts to GLSL
 	{
 		CSource *source = new CSource();
 		source->Profile = nelvp;
 		source->DisplayName = "WaterVPNoWave/nelvp";
+		if (planar) source->DisplayName += "/planar";
+		if (envCalc) source->DisplayName += "/envCalc";
+		// ParamIndices are identical across variants; planar variants simply
+		// don't read observerHeight/scaleReflectedRay (harmless to set)
 		source->ParamIndices["modelViewProjection"] = 0;
 		source->ParamIndices["fog"] = 4;
 		source->ParamIndices["bumpMap0Scale"] = 5;
@@ -108,28 +268,111 @@ CVertexProgramWaterVPNoWave::CVertexProgramWaterVPNoWave(bool diffuse)
 			source->DisplayName += "/diffuse";
 			source->ParamIndices["diffuseMapVector0"] = 11;
 			source->ParamIndices["diffuseMapVector1"] = 12;
-			source->setSourcePtr(WaterVPNoWaveDiffuse);
+			source->setSourcePtr(planar ? WaterVPNoWavePlanarDiffuse
+				: (envCalc ? WaterVPNoWaveEnvCalcDiffuse : WaterVPNoWaveDiffuse));
 		}
 		else
 		{
-			source->setSourcePtr(WaterVPNoWave);
+			source->setSourcePtr(planar ? WaterVPNoWavePlanar
+				: (envCalc ? WaterVPNoWaveEnvCalc : WaterVPNoWave));
 		}
 		addSource(source);
 	}
-	// glsl330v
+#ifdef NL_WATER_VP_GLSL
+	// glsl300esv — pipeline stage UBO source (preferred for linked program path)
 	{
-		// TODO_VP_GLSL
-		// CSource *source = new CSource();
-		// source->Profile = glsl330v;
-		// source->DisplayName = "WaterVPNoWave/glsl330v";
-		// if (diffuse) source->DisplayName += "/diffuse";
-		// source->setSource...
-		// addSource(source);
+		CSource *source = new CSource();
+		source->Profile = glsl300esv;
+		source->Features.OnlyUBOs = true;
+		source->Features.UsesObjectUBO = true;
+		source->UniformBufferFormats[UBBindingVertexProgram] = CWaterShape::_WaterVPUBFormat;
+		source->DisplayName = "glsl300esv/WaterVPNoWave/UBO";
+		if (planar) source->DisplayName += "/planar";
+		if (envCalc) source->DisplayName += "/envCalc";
+		if (diffuse) source->DisplayName += "/diffuse";
+		std::string src =
+			"#version 300 es\n"
+			"precision highp float;\n"
+			"precision highp int;\n";
+		if (planar) src += "#define USE_PLANAR\n";
+		if (envCalc) src += "#define USE_ENV_CALC\n";
+		if (diffuse) src += "#define USE_DIFFUSE\n";
+		src += WaterVPGLSL_UBO_Body;
+		source->setSource(src);
+		addSource(source);
 	}
+	// glsl330v — SSO fallback
+	{
+		CSource *source = new CSource();
+		source->Profile = glsl330v;
+		source->DisplayName = "WaterVPNoWave/glsl330v";
+		if (planar) source->DisplayName += "/planar";
+		if (envCalc) source->DisplayName += "/envCalc";
+		if (diffuse) source->DisplayName += "/diffuse";
+		std::string src =
+			"#version 330\n"
+			"#extension GL_ARB_separate_shader_objects : enable\n";
+		if (planar) src += "#define USE_PLANAR\n";
+		if (envCalc) src += "#define USE_ENV_CALC\n";
+		if (diffuse) src += "#define USE_DIFFUSE\n";
+		src +=
+			"layout(location = 0) in vec4 vposition;\n"
+			"#if defined(USE_PLANAR) || defined(USE_ENV_CALC)\n"
+			"layout(location = 8) in vec4 vtexcoord0;\n"
+			"#endif\n"
+			"out gl_PerVertex { vec4 gl_Position; };\n"
+			"layout(location = 8) smooth out vec4 texCoord0;\n"
+			"layout(location = 9) smooth out vec4 texCoord1;\n"
+			"layout(location = 10) smooth out vec4 texCoord2;\n"
+			"#ifdef USE_DIFFUSE\n"
+			"layout(location = 11) smooth out vec4 texCoord3;\n"
+			"#endif\n"
+			"layout(location = 0) smooth out vec4 ecPos;\n"
+			"uniform mat4 modelViewProjection;\n"
+			"uniform mat4 modelView;\n"
+			"uniform vec4 bumpMap0Scale;\n"
+			"uniform vec4 bumpMap0Offset;\n"
+			"uniform vec4 bumpMap1Scale;\n"
+			"uniform vec4 bumpMap1Offset;\n"
+			"uniform vec4 observerHeight;\n"
+			"uniform vec4 scaleReflectedRay;\n"
+			"#ifdef USE_DIFFUSE\n"
+			"uniform vec4 diffuseMapVector0;\n"
+			"uniform vec4 diffuseMapVector1;\n"
+			"#endif\n"
+			"void main()\n"
+			"{\n"
+			"  gl_Position = modelViewProjection * vposition;\n"
+			"  ecPos = modelView * vposition;\n"
+			"  texCoord0 = vposition * bumpMap0Scale + bumpMap0Offset;\n"
+			"  texCoord1 = vposition * bumpMap1Scale + bumpMap1Offset;\n"
+			"#ifdef USE_PLANAR\n"
+			"  texCoord2 = vtexcoord0;\n"
+			"#else\n"
+			"  vec4 toObs = observerHeight - vposition;\n"
+			"  float invLen = inversesqrt(dot(toObs.xyz, toObs.xyz));\n"
+			"  toObs *= invLen;\n"
+			"  texCoord2 = -toObs * scaleReflectedRay + scaleReflectedRay;\n"
+	"#ifdef USE_ENV_CALC\n"
+	"  texCoord2.z = vtexcoord0.z;\n"
+	"#endif\n"
+			"#endif\n"
+			"#ifdef USE_DIFFUSE\n"
+			"  texCoord3 = vec4(dot(vposition, diffuseMapVector0), dot(vposition, diffuseMapVector1), 0.0, 0.0);\n"
+			"#endif\n"
+			"}\n";
+		source->setSource(src);
+		addSource(source);
+	}
+#endif // NL_WATER_VP_GLSL
 }
 
 void CVertexProgramWaterVPNoWave::buildInfo()
 {
+	// UBO source doesn't have individual uniforms — indices stay at default (~0u)
+	if (source() && source()->Features.OnlyUBOs)
+		return;
+
 	m_Idx.BumpMap0Scale = getUniformIndex("bumpMap0Scale");
 	nlassert(m_Idx.BumpMap0Scale != std::numeric_limits<uint>::max());
 	m_Idx.BumpMap0Offset = getUniformIndex("bumpMap0Offset");
@@ -138,10 +381,15 @@ void CVertexProgramWaterVPNoWave::buildInfo()
 	nlassert(m_Idx.BumpMap1Scale != std::numeric_limits<uint>::max());
 	m_Idx.BumpMap1Offset = getUniformIndex("bumpMap1Offset");
 	nlassert(m_Idx.BumpMap1Offset != std::numeric_limits<uint>::max());
-	m_Idx.ObserverHeight = getUniformIndex("observerHeight");
-	nlassert(m_Idx.ObserverHeight != std::numeric_limits<uint>::max());
-	m_Idx.ScaleReflectedRay = getUniformIndex("scaleReflectedRay");
-	nlassert(m_Idx.ScaleReflectedRay != std::numeric_limits<uint>::max());
+	// Planar variants don't read these; on named-uniform paths the GL
+	// compiler eliminates them and the lookup legitimately fails
+	if (!m_Planar)
+	{
+		m_Idx.ObserverHeight = getUniformIndex("observerHeight");
+		nlassert(m_Idx.ObserverHeight != std::numeric_limits<uint>::max());
+		m_Idx.ScaleReflectedRay = getUniformIndex("scaleReflectedRay");
+		nlassert(m_Idx.ScaleReflectedRay != std::numeric_limits<uint>::max());
+	}
 	if (m_Diffuse)
 	{
 		m_Idx.DiffuseMapVector0 = getUniformIndex("diffuseMapVector0");
@@ -265,6 +513,13 @@ NLMISC::CSmartPtr<CVertexProgram>		CWaterShape::_VertexProgramNoBumpDiffuse;*/
 // water with no waves
 NLMISC::CSmartPtr<CVertexProgramWaterVPNoWave>		CWaterShape::_VertexProgramNoWave;
 NLMISC::CSmartPtr<CVertexProgramWaterVPNoWave>		CWaterShape::_VertexProgramNoWaveDiffuse;
+NLMISC::CSmartPtr<CVertexProgramWaterVPNoWave>		CWaterShape::_VertexProgramNoWavePlanar;
+NLMISC::CSmartPtr<CVertexProgramWaterVPNoWave>		CWaterShape::_VertexProgramNoWavePlanarDiffuse;
+NLMISC::CSmartPtr<CVertexProgramWaterVPNoWave>		CWaterShape::_VertexProgramNoWaveEnvCalc;
+NLMISC::CSmartPtr<CVertexProgramWaterVPNoWave>		CWaterShape::_VertexProgramNoWaveEnvCalcDiffuse;
+CWaterShape::CWaterVPUBOOffsets						CWaterShape::_WaterVPUBOOffsets;
+NLMISC::CSmartPtr<CUniformBufferFormat>				CWaterShape::_WaterVPUBFormat;
+NLMISC::CSmartPtr<CUniformBuffer>					CWaterShape::_WaterVPUB;
 
 
 /** Build a vertex program for water depending on requirements
@@ -299,7 +554,7 @@ static CVertexProgram *BuildWaterVP(bool diffuseMap, bool bumpMap, bool use2Bump
 /*
  * Constructor
  */
-CWaterShape::CWaterShape() :  _WaterPoolID(0), _TransitionRatio(0.6f), _WaveHeightFactor(3), _ComputeLightmap(false), _SplashEnabled(true)
+CWaterShape::CWaterShape() :  _WaterPoolID(0), _TransitionRatio(0.6f), _WaveHeightFactor(3), _ComputeLightmap(false), _SplashEnabled(true), _RealtimeReflection(false), _ReflFresnelBias(0.15f), _ReflFresnelScale(0.85f), _ReflFresnelPower(2.f), _EnvMapCalcReflectivity(false)
 {
 	/* ***********************************************
 	 *	WARNING: This Class/Method must be thread-safe (ctor/dtor/serial): no static access for instance
@@ -400,6 +655,10 @@ void CWaterShape::initVertexProgram()
 		// no waves
 		_VertexProgramNoWave = new CVertexProgramWaterVPNoWave(false);
 		_VertexProgramNoWaveDiffuse = new CVertexProgramWaterVPNoWave(true);
+		_VertexProgramNoWavePlanar = new CVertexProgramWaterVPNoWave(false, true);
+		_VertexProgramNoWavePlanarDiffuse = new CVertexProgramWaterVPNoWave(true, true);
+		_VertexProgramNoWaveEnvCalc = new CVertexProgramWaterVPNoWave(false, false, true);
+		_VertexProgramNoWaveEnvCalcDiffuse = new CVertexProgramWaterVPNoWave(true, false, true);
 		created = true;
 	}
 }
@@ -533,9 +792,12 @@ void CWaterShape::serial(NLMISC::IStream &f)
 	 *	It can be loaded/called through CAsyncFileManager for instance
 	 * ***********************************************/
 
+	// version 7 : added '_EnvMapCalcReflectivity' flag
+	// version 6 : added realtime reflection reflectivity fresnel params
+	// version 5 : added '_RealtimeReflection' flag
 	// version 4 : added scene water env map
 	// version 3 : added '_Splashenabled' flag
-	sint ver = f.serialVersion(4);
+	sint ver = f.serialVersion(7);
 	// serial 'shape'
 	f.serial(_Poly);
 	// serial heightMap identifier
@@ -587,6 +849,15 @@ void CWaterShape::serial(NLMISC::IStream &f)
 	{
 		f.serial(_UsesSceneWaterEnvMap[0], _UsesSceneWaterEnvMap[1]);
 	}
+
+	if (ver >= 5)
+		f.serial(_RealtimeReflection);
+
+	if (ver >= 6)
+		f.serial(_ReflFresnelBias, _ReflFresnelScale, _ReflFresnelPower);
+
+	if (ver >= 7)
+		f.serial(_EnvMapCalcReflectivity);
 
 	// tmp
 	/*

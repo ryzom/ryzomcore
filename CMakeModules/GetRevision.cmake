@@ -1,5 +1,3 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6.3)
-
 # ROOT_DIR should be set to root of the repository (where to find the .svn or .hg directory)
 # SOURCE_DIR should be set to root of your code (where to find CMakeLists.txt)
 # BINARY_DIR should be set to root of your build directory
@@ -124,7 +122,9 @@ IF(SOURCE_DIR AND NOT DEFINED REVISION)
   ENDIF()
 ENDIF()
 
-IF(DEFINED REVISION)
+IF(NOT NL_VERSION_BUILD EQUAL 0)
+  SET(REVISION ${NL_VERSION_BUILD})
+ELSEIF(DEFINED REVISION)
   MESSAGE(STATUS "Found revision ${REVISION}")
 ELSE()
   SET(REVISION 0)

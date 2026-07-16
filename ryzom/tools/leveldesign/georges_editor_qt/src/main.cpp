@@ -2,7 +2,7 @@
 #include <nel/misc/app_context.h>
 
 // Qt includes
-#include <QtGui/QApplication>
+#include <QApplication>
 #include <QDir>
 #include <QFile>
 #include <QDateTime>
@@ -53,10 +53,10 @@ namespace NLQT
 
 } /* namespace NLQT */
 
-void messageHandler(QtMsgType p_type, const char* p_msg) 
+void messageHandler(QtMsgType p_type, const QMessageLogContext& p_context, const QString& p_msg)
 {
 
-	fprintf(stderr, "%s\n", p_msg);
+	fprintf(stderr, "%s\n", qPrintable(p_msg));
 
 	QFile file("qt.log");
 	file.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
@@ -119,7 +119,7 @@ int main(int argc, char **argv)
 		if (QFile::exists("qt.log"))
 			QFile::remove("qt.log");
 
-		qInstallMsgHandler(messageHandler);
+		qInstallMessageHandler(messageHandler);
 #if NLQT_USE_LOG
 		// create toverhex_client.log
 		// filedisplayer only deletes the 001 etc

@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -598,7 +601,7 @@ bool CConfigFile::areRyzomDataInstalledIn(const QString &directory) const
 	if (dir.entryList(QStringList() << "*.bnp", QDir::Files).size() < 200) return false;
 
 	//  ryzom.ttf or fonts.bnp is required
-	if (!dir.exists("fonts/ryzom.ttf") && !dir.exists("fonts.bnp")) return false;
+	if (!dir.exists("fonts/noto_sans.ttf") && !dir.exists("fonts.bnp")) return false;
 
 	//  gamedev.bnp is required
 	if (!dir.exists("gamedev.bnp")) return false;

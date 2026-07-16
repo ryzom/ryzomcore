@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2018  Winch Gate Property Limited
+// Copyright (C) 2010-2022  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
@@ -1083,6 +1083,16 @@ void computeCurrentFovAspectRatio(float &fov, float &ar)
 				ar = float(mode.Width) / float(mode.Height);
 			}
 		}
+	}
+
+	// Adjust FOV for aspect ratios different from the reference 4:3 (800x600).
+	// FoV config value is horizontal FOV designed for 4:3.
+	// Widescreen (ar > 4:3): expand horizontal FOV to preserve vertical FOV (Hor+).
+	// Portrait (ar < 4:3): keep horizontal FOV as-is, vertical expands naturally (Vert+).
+	const float refAR = 4.0f / 3.0f;
+	if (ar > refAR)
+	{
+		fov = 2.0f * atanf(tanf(fov * 0.5f) * ar / refAR);
 	}
 }
 

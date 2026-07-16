@@ -85,7 +85,7 @@ inline uint8 getCivilisationId(CPeople::TPeople people)
 	return 0xFF;
 }
 
-/// Return the pet type, 1 for Mount, 2 for Packer, 3 for Creature (pets) (otherwise 0)
+/// Return the pet type, 1 for Mount, 2 for Packer, 3 for Creature (pets)  (otherwise 0)
 inline uint	getPetType( CPeople::TPeople peopleType )
 {
  	switch ( peopleType )

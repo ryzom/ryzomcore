@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -19,6 +22,7 @@
 
 // contains the logger
 #include "nel/misc/log.h"
+#include "nel/misc/debug.h"
 #include "nel/misc/string_common.h"
 
 // contains standard displayers
@@ -62,12 +66,12 @@ int main (int /* argc */, char ** /* argv */)
 	// They could add the date, the process name and so on.
 	// Before each display/displayNL, you have to set the position of where the display
 	// occurs. If you don't do that, the position will not be displayed on the displayers.
-	logger.setPosition (__LINE__, __FILE__);
-	logger.display ("display using display() %d\n", 1);
+	CSetLogPosition(&logger, __LINE__, __FILE__).log()
+		->display ("display using display() %d\n", 1);
 
 	// display the string with decoration and a new line at the end of the string.
-	logger.setPosition (__LINE__, __FILE__);
-	logger.displayNL ("display using displayNL() %d", 2);
+	CSetLogPosition(&logger, __LINE__, __FILE__).log()
+		->displayNL ("display using displayNL() %d", 2);
 
 	// display the string without decoration.
 	logger.displayRaw ("display using displayRaw() %d\n", 3);

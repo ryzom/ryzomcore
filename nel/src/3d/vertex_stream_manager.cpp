@@ -78,7 +78,7 @@ void			CVertexStreamManager::init(IDriver *driver, uint vertexFormat, uint maxVe
 			_VB[i].setUVRouting (j, 0);
 
 		_VB[i].setNumVertices (maxVertices);
-		_VB[i].setPreferredMemory (CVertexBuffer::AGPPreferred, false);
+		_VB[i].setBufferUsage (CVertexBuffer::FullRewrite, false);
 		_VB[i].setName(vbName + NLMISC::toString(i));
 	}
 
@@ -97,7 +97,7 @@ void			CVertexStreamManager::init(IDriver *driver, uint vertexFormat, uint maxVe
 		for (j=0; j<CVertexBuffer::MaxStage; j++)
 			_VBVolatile.setUVRouting (j, 0);
 		_VBVolatile.setNumVertices (maxVertices);
-		_VBVolatile.setPreferredMemory (CVertexBuffer::AGPVolatile, false);
+		_VBVolatile.setBufferUsage (CVertexBuffer::FullStream, false);
 		_VBVolatile.setName(vbName + "Volatile");
 		_SupportVolatileVB = true;
 	}

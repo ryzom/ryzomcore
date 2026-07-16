@@ -1,0 +1,6 @@
+luabind provides CMake targets:
+
+find_package(Luabind REQUIRED)
+
+target_link_libraries(main PRIVATE ${LUABIND_LIBRARIES})
+target_compile_definitions(main PRIVATE ${LUABIND_DEFINITIONS})

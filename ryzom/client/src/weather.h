@@ -75,6 +75,9 @@ class CWeatherFunctionParamsSheetBase;
 class CWeatherFunction;
 
 
+// reset server driven weather state (call when transitioning between shards)
+void resetWeatherDBState();
+
 // update server driven weather value
 void updateDBDrivenWeatherValue();
 

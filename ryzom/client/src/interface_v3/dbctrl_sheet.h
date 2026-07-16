@@ -569,7 +569,7 @@ public:
 	// set item FABER_STAT_TYPE
 	void setItemRMFaberStatType(sint32 fss);
 
-	// get item PREREQUISIT_VALID. true of no DB
+	// get item PREREQUISIT_VALID. true if no DB
 	bool getItemPrerequisitValid() const;
 	NLMISC::CCDBNodeLeaf *getItemPrerequisitValidPtr() const;
 	// set item PREREQUISIT_VALID
@@ -840,7 +840,7 @@ protected:
 	static NLMISC::CSmartPtr<CSPhraseComAdpater> _PhraseAdapter;
 
 	sint64		_NotifyAnimEndTime;
-
+	
 	mutable CControlSheetInfoWaiter _ItemInfoWaiter;
 private:
 	mutable TSheetType			_ActualType;

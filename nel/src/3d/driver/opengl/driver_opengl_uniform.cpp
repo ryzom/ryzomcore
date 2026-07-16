@@ -40,6 +40,7 @@ namespace NLDRIVERGL {
 
 inline void CDriverGL::setUniform4fInl(TProgram program, uint index, float f0, float f1, float f2, float f3)
 {
+	if (index == ~0u) return;
 	H_AUTO_OGL(CDriverGL_setUniform4f);
 
 #ifndef USE_OPENGLES
@@ -75,6 +76,7 @@ inline void CDriverGL::setUniform4fInl(TProgram program, uint index, float f0, f
 
 inline void CDriverGL::setUniform4fvInl(TProgram program, uint index, size_t num, const float *src)
 {
+	if (index == ~0u) return;
 	H_AUTO_OGL(CDriverGL_setUniform4fv);
 
 #ifndef USE_OPENGLES
@@ -245,6 +247,7 @@ const uint CDriverGL::GLTransform[IDriver::NumTransform]=
 
 void CDriverGL::setUniformMatrix(NL3D::IDriver::TProgram program, uint index, NL3D::IDriver::TMatrix matrix, NL3D::IDriver::TTransform transform)
 {
+	if (index == ~0u) return;
 	H_AUTO_OGL(CDriverGL_setUniformMatrix);
 
 #ifndef USE_OPENGLES
@@ -311,8 +314,9 @@ void CDriverGL::setUniformMatrix(NL3D::IDriver::TProgram program, uint index, NL
 
 void CDriverGL::setUniformFog(NL3D::IDriver::TProgram program, uint index)
 {
+	if (index == ~0u) return;
 	H_AUTO_OGL(CDriverGL_setUniformFog)
-	
+
 	const float *values = _ModelViewMatrix.get();
 	CDriverGL::setUniform4fInl(program, index, -values[2], -values[6], -values[10], -values[14]);
 }

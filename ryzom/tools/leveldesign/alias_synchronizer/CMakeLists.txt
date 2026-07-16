@@ -1,8 +1,9 @@
-FILE(GLOB SRC *.cpp *.h)
+ADD_EXECUTABLE(alias_synchronizer alias_synchronizer.cpp)
 
-ADD_EXECUTABLE(alias_synchronizer ${SRC})
-
-TARGET_LINK_LIBRARIES(alias_synchronizer nelmisc nelligo)
+TARGET_LINK_LIBRARIES(alias_synchronizer PRIVATE
+        NeL::misc
+        NeL::ligo
+)
 
 NL_DEFAULT_PROPS(alias_synchronizer "Ryzom, Tools, Misc: Alias Synchronizer")
 NL_ADD_RUNTIME_FLAGS(alias_synchronizer)

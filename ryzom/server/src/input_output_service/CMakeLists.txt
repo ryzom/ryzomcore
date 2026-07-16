@@ -1,46 +1,48 @@
 FILE(GLOB SRC *.cpp *.h)
 
 LIST(REMOVE_ITEM SRC
-			${CMAKE_CURRENT_SOURCE_DIR}/bot_chat_manager.cpp
-			${CMAKE_CURRENT_SOURCE_DIR}/bot_chat_manager.h
-			${CMAKE_CURRENT_SOURCE_DIR}/ios_chat_log.cpp
-			${CMAKE_CURRENT_SOURCE_DIR}/ios_chat_log.h
-			${CMAKE_CURRENT_SOURCE_DIR}/ios_chat_log_inline.h
-			${CMAKE_CURRENT_SOURCE_DIR}/ios_pd.cpp
-			${CMAKE_CURRENT_SOURCE_DIR}/ios_pd.h
-			${CMAKE_CURRENT_SOURCE_DIR}/ios_pd_inline.h)
+        ${CMAKE_CURRENT_SOURCE_DIR}/bot_chat_manager.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/bot_chat_manager.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/ios_chat_log.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/ios_chat_log.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/ios_chat_log_inline.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/ios_pd.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/ios_pd.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/ios_pd_inline.h)
 
 ADD_EXECUTABLE(ryzom_ios_service WIN32 ${SRC})
 
-INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR} ${MYSQL_INCLUDE_DIR})
+TARGET_INCLUDE_DIRECTORIES(ryzom_ios_service PRIVATE ${RZ_SERVER_SRC_DIR} ${MYSQL_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_ios_service
-					ryzom_adminmodules
-					ryzom_pd
-					${RYZOM_GAMESHARE_LIBRARIES}
-					ryzom_servershare
-					${NELMISC_LIBRARIES}
-					${NELNET_LIBRARIES}
-					${NELPACS_LIBRARIES}
-					${NELGEORGES_LIBRARIES}
-					${NELLIGO_LIBRARIES})
+        PRIVATE
+        Ryzom::adminmodules
+        Ryzom::pd
+        Ryzom::gameshare
+        Ryzom::servershare
+        NeL::misc
+        NeL::net
+        NeL::pacs
+        NeL::georges
+        NeL::ligo
+)
 
 IF(WITH_MONGODB)
-  TARGET_LINK_LIBRARIES(ryzom_ios_service ${MONGO_LIBRARIES})
+  TARGET_LINK_LIBRARIES(ryzom_ios_service PRIVATE ${MONGO_LIBRARIES})
   ADD_DEFINITIONS(${MONGO_DEFINITIONS})
 ENDIF()
 
 IF(WITH_MEMCACHED)
-  TARGET_LINK_LIBRARIES(ryzom_ios_service ${MEMCACHED_LIBRARIES})
+  TARGET_LINK_LIBRARIES(ryzom_ios_service PRIVATE ${MEMCACHED_LIBRARIES})
   ADD_DEFINITIONS(${MEMCACHED_DEFINITIONS})
 ENDIF()
 
 NL_DEFAULT_PROPS(ryzom_ios_service "Ryzom, Services: Input Output Service (IOS)")
 NL_ADD_RUNTIME_FLAGS(ryzom_ios_service)
 
-IF(WITH_PCH)
-  ADD_NATIVE_PRECOMPILED_HEADER(ryzom_ios_service ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.cpp)
-ENDIF()
+IF (WITH_PCH)
+    target_precompile_headers(ryzom_ios_service PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h)
+ENDIF ()
 
 INSTALL(TARGETS ryzom_ios_service RUNTIME DESTINATION sbin COMPONENT services)
 

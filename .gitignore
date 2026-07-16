@@ -93,7 +93,6 @@ ylwrap
 .mode_static
 
 # Visual Studio garbage
-.vscode/
 *.opensdf
 UpgradeLog*.XML
 _UpgradeReport_Files
@@ -164,11 +163,11 @@ snowballs/build/*
 ryzom/build/*
 build/*
 build-2010/*
-build/*
 install/*
 build_*
 install_*
 nel/tools/build_gamedata/configuration/buildsite.py
+cmake-build-*
 
 # Linux nel compile
 nel/build/nel-config
@@ -269,11 +268,15 @@ web/public_php/db_version_tool
 web/public_php/db_version_web
 web/public_php/role_service
 web/public_php/role_support
+web/public_php/role_admin
 web/public_php/role_domain
 web/public_php/db_version_ring
 web/public_php/config_user.php
 nel/tools/build_gamedata/processes/pz/build_world_packed_col.cfg
 nel/tools/build_gamedata/processes/cartographer/island_screenshots.cfg
+
+# machine specific files
+CMakeUserPresets.json
 
 # Configs
 ryzom/server/www/config.php
@@ -288,3 +291,5 @@ server_open_status
 
 setup.ini
 ryzom/server/www/login/server_open_status
+
+.claude/settings.local.json

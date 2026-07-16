@@ -47,8 +47,8 @@ CShadowPolyReceiver::CShadowPolyReceiver(uint quadGridSize, float quadGridCellSi
 	_VB.setVertexFormat(CVertexBuffer::PositionFlag);
 	_VB.setName("CShadowPolyReceiver");
 	// lock volatile, to avoid cpu stall when rendering multiple shadows in the same polyReceiver
-	_VB.setPreferredMemory(CVertexBuffer::RAMVolatile, false);
-	_RenderTriangles.setPreferredMemory(CIndexBuffer::RAMVolatile, false);
+	_VB.setBufferUsage(CVertexBuffer::SmallStream, false);
+	_RenderTriangles.setBufferUsage(CIndexBuffer::SmallStream, false);
 	_RenderTriangles.setFormat(NL_DEFAULT_INDEX_BUFFER_FORMAT);
 	NL_SET_IB_NAME(_RenderTriangles, "CShadowPolyReceiver");
 }

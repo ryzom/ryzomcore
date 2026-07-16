@@ -20,8 +20,6 @@
 #ifndef NL_UCSTRING_H
 #define NL_UCSTRING_H
 
-#define RYZOM_LUA_UCSTRING
-
 #include "types_nl.h"
 #include "debug.h"
 

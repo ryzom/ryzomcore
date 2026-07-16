@@ -1,13 +1,13 @@
+FIND_PACKAGE(QtPropertyBrowser REQUIRED)
+
 INCLUDE_DIRECTORIES(  ${CMAKE_CURRENT_BINARY_DIR}
                       ${CMAKE_CURRENT_SOURCE_DIR}
                       ${QT_INCLUDES}
-                      ${LIBXML2_INCLUDE_DIR}
-                      ${CMAKE_CURRENT_SOURCE_DIR}/../../3rdparty/qtpropertybrowser)
+                      ${QtPropertyBrowser_INCLUDE_DIR})
 
 FILE(GLOB SRC *.cpp *.h)
 SET(OVQT_EXT_SYS_SRC  ${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin.h
                       ${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_manager.h
-                      ${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_spec.h
                       ${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_spec.h)
 
 SET(OVQT_PLUG_GEORGES_EDITOR_HDR  georges_editor_plugin.h 
@@ -38,29 +38,65 @@ SET(OVQT_PLUGIN_GEORGES_EDITOR_RCS georges_editor.qrc)
 SET(QT_USE_QTGUI TRUE)
 SET(QT_USE_QTOPENGL TRUE)
 
-QT4_ADD_RESOURCES(OVQT_PLUGIN_GEORGES_EDITOR_RC_SRCS ${OVQT_PLUGIN_GEORGES_EDITOR_RCS})
-QT4_WRAP_CPP(OVQT_PLUG_GEORGES_EDITOR_MOC_SRC ${OVQT_PLUG_GEORGES_EDITOR_HDR})
-QT4_WRAP_UI( OVQT_PLUG_GEORGES_EDITOR_UI_HDRS ${OVQT_PLUG_GEORGES_EDITOR_UIS} )
 
 SOURCE_GROUP(QtResources FILES ${OVQT_PLUG_GEORGES_EDITOR_UIS} ${OVQT_PLUGIN_GEORGES_EDITOR_RCS})
-SOURCE_GROUP(QtGeneratedUiHdr FILES ${OVQT_PLUG_GEORGES_EDITOR_UI_HDRS})
-SOURCE_GROUP(QtGeneratedMocSrc FILES ${OVQT_PLUG_GEORGES_EDITOR_MOC_SRC})
 SOURCE_GROUP("Georges Editor Plugin" FILES ${SRC})
 SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
 
-ADD_LIBRARY(studio_plugin_georges_editor MODULE ${SRC} ${OVQT_PLUG_GEORGES_EDITOR_MOC_SRC} ${OVQT_EXT_SYS_SRC} ${OVQT_PLUG_GEORGES_EDITOR_UI_HDRS} ${OVQT_PLUGIN_GEORGES_EDITOR_RC_SRCS})
+ADD_LIBRARY(studio_plugin_georges_editor MODULE ${OVQT_EXT_SYS_SRC})
 
-TARGET_LINK_LIBRARIES(studio_plugin_georges_editor studio_plugin_core nelmisc nelgeorges qt_property_browser ${QT_LIBRARIES} ${LIBXML2_LIBRARIES})
+target_sources(studio_plugin_georges_editor
+        PRIVATE
+        actions.cpp
+        browser_ctrl.cpp
+        browser_ctrl_pvt.cpp
+        dfn_browser_ctrl.cpp
+        expandable_headerview.cpp
+        filepath_property_manager.cpp
+        formdelegate.cpp
+        formitem.cpp
+        georges.cpp
+        georges_dfn_dialog.cpp
+        georges_dirtree_dialog.cpp
+        georges_dock_widget.cpp
+        georges_editor_form.cpp
+        georges_editor_plugin.cpp
+        georges_filesystem_model.cpp
+        georges_treeview_dialog.cpp
+        georges_typ_dialog.cpp
+        georgesform_model.cpp
+        georgesform_proxy_model.cpp
+        stdpch.cpp
+        typ_browser_ctrl.cpp
+        georges_dfn_dialog.ui
+        georges_dirtree_form.ui
+        georges_editor_form.ui
+        georges_treeview_form.ui
+        georges_typ_dialog.ui
+        georges_editor.qrc
+)
+
+TARGET_LINK_LIBRARIES(studio_plugin_georges_editor
+        PRIVATE
+        Studio::plugin::core
+        NeL::misc
+        NeL::georges
+        qtpropertybrowser
+        ${QtPropertyBrowser_LIBRARY}
+		Qt::Core
+		Qt::Widgets
+        LibXml2::LibXml2
+)
 
 NL_DEFAULT_PROPS(studio_plugin_georges_editor "Tools: Studio Plugin: Georges Editor")
 NL_ADD_RUNTIME_FLAGS(studio_plugin_georges_editor)
 NL_ADD_LIB_SUFFIX(studio_plugin_georges_editor)
 
-ADD_DEFINITIONS(-DQT_PLUGIN -DQT_SHARED ${QT_DEFINITIONS})
+TARGET_COMPILE_DEFINITIONS(studio_plugin_georges_editor PRIVATE QT_PLUGIN QT_SHARED ${QT_DEFINITIONS})
 
 
 IF(WITH_PCH)
-  ADD_NATIVE_PRECOMPILED_HEADER(studio_plugin_georges_editor ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.cpp)
+  target_precompile_headers(studio_plugin_georges_editor PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h)
 ENDIF()
 
 IF(WIN32)

@@ -182,7 +182,7 @@ void CTile_edit_dlg::on_editTileSetPushButton_clicked()
 	if (nindex != -1) 
 	{
 		tileBankBrowser=tileBank;
-		CTile_browser_dlg *tileBrowser = new CTile_browser_dlg((QWidget*)this,(Qt::WindowFlags)0);
+		CTile_browser_dlg *tileBrowser = new CTile_browser_dlg((QWidget*)this, Qt::WindowFlags());
 		tileBrowser->initDialog(nindex);
 		if ( tileBrowser->exec() )
 		{

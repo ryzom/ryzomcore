@@ -6,12 +6,12 @@ LIST(REMOVE_ITEM SRC	${CMAKE_CURRENT_SOURCE_DIR}/last_lightmap.cpp
 
 ADD_LIBRARY(nel_export SHARED ${SRC} nel_export.rc)
 
-INCLUDE_DIRECTORIES(${MAXSDK_INCLUDE_DIR})
+TARGET_INCLUDE_DIRECTORIES(nel_export PRIVATE ${MAXSDK_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(nel_export
-							nelmisc 
-							nelpacs
-							nel3d
+							NeL::misc
+							NeL::pacs
+							NeL::3d
 							nel_mesh_lib 
 							nel_patch_lib
 							nel_3dsmax_shared 
@@ -25,10 +25,10 @@ NL_ADD_RUNTIME_FLAGS(nel_export)
 NL_ADD_LIB_SUFFIX(nel_export)
 SET_TARGET_PROPERTIES(nel_export PROPERTIES SUFFIX ".dlu")
 
-ADD_DEFINITIONS(${MAXSDK_DEFINITIONS})
+TARGET_COMPILE_DEFINITIONS(nel_export PRIVATE ${MAXSDK_DEFINITIONS})
 
 IF(WITH_PCH)
-  ADD_NATIVE_PRECOMPILED_HEADER(nel_export ${CMAKE_CURRENT_SOURCE_DIR}/std_afx.h ${CMAKE_CURRENT_SOURCE_DIR}/std_afx.cpp)
+  target_precompile_headers(nel_export PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/std_afx.h)
 ENDIF()
 
 INSTALL(TARGETS nel_export RUNTIME DESTINATION maxplugin/plugins LIBRARY DESTINATION ${NL_LIB_PREFIX} ARCHIVE DESTINATION ${NL_LIB_PREFIX} COMPONENT libraries)

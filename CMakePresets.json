@@ -1,0 +1,11 @@
+{
+  "version": 6,
+  "include": [
+    "cmake/CMakePresets.base.json",
+    "nel/CMakePresets.json",
+    "nelns/CMakePresets.json",
+    "ryzom/CMakePresets.json",
+    "snowballs2/CMakePresets.json",
+    "studio/CMakePresets.json"
+  ]
+}

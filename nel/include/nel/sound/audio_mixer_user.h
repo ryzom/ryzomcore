@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2010  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
-// Copyright (C) 2012-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2012-2021  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -348,7 +348,8 @@ public:
 	virtual void getMusicExtensions(std::vector<std::string> &extensions);
 
 	inline IReverbEffect *getReverbEffect() { return _ReverbEffect; }
-	inline bool useEnvironmentEffects() const { return _UseEax; }
+	inline bool useReverb() const { return m_EnableReverb; }
+	inline bool useOcclusionObstruction() const { return m_EnableOcclusionObstruction; }
 
 	//@{
 	//\name Reverb environment functions
@@ -486,7 +487,8 @@ private:
 	/// flag for usage of ADPCM mixing
 	bool						_UseADPCM;
 	/// flag for usage of eax
-	bool						_UseEax;
+	bool						m_EnableReverb;
+	bool						m_EnableOcclusionObstruction;
 
 	/// The vector of curently free tracks.
 	std::vector<CTrack *>		_FreeTracks;

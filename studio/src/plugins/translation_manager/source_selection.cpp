@@ -21,7 +21,7 @@
 
 #include "source_selection.h"
 
-#include <QtGui/QListWidget>
+#include <QListWidget>
 
 namespace TranslationManager
 {

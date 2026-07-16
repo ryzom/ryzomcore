@@ -26,6 +26,7 @@
 #include "nel/3d/vertex_buffer.h"
 #include "nel/3d/texture_emboss.h"
 #include "nel/3d/driver.h"
+#include "nel/3d/water_reflection_manager.h"
 
 
 namespace MISC
@@ -100,8 +101,13 @@ public:
 	// fill vertex buffer with this shape datas, and returns pointer to next free location
 	uint fillVB(void *dataStart, uint startTri, IDriver &drv);
 
-	// setup vertex buffer before render
-	static void setupVertexBuffer(CVertexBuffer &vb, uint numWantedVertices, IDriver *drv);
+	// setup vertex buffer before render; planarUVs adds a TexCoord0 channel
+	// for realtime planar reflection UVs on the water-shader path
+	static void setupVertexBuffer(CVertexBuffer &vb, uint numWantedVertices, IDriver *drv, bool baseChannelUVs);
+	/** True when this surface wants the per-vertex reflectivity base channel
+	  * in the water VB: reflection-capable shapes (fallback continuity) and
+	  * shapes flagged for calculated reflectivity over the artist envmap. */
+	bool wantsCalcReflectivityUVs() const;
 
 	// For Debug purpose
 	void	debugDumpMem(void* &clippedPolyBegin, void* &clippedPolyEnd);
@@ -123,13 +129,18 @@ private:
 	NLMISC::CVector2f		  _ColorMapMatColumn0, _ColorMapMatColumn1, _ColorMapMatPos;
 	uint64					  _MatrixUpdateDate;
 	// vertex buffer for simple rendering
-	static CMaterial		  _WaterMat;
-	static CMaterial		  _SimpleWaterMat;
+	static CMaterial		  _WaterMat; // STATIC GPU RESOURCE: Blocks multiple driver instances
+	static CMaterial		  _SimpleWaterMat; // STATIC GPU RESOURCE: Blocks multiple driver instances
 	// grid cells that are exactly inside the poly
 	NLMISC::CPolygon2D::TRasterVect	 _Inside;
 	sint							 _MinYInside;
 	// water surface clipped by frustum
 	NLMISC::CPolygon		   _ClippedPoly;
+	// active realtime planar reflection for this surface's plane, or NULL
+	// (set during getNumWantedVertices() — inside the render traversal,
+	// where the traversal camera state is fresh — from the scene's water
+	// reflection manager; valid for the current render only)
+	const CWaterReflectionManager::CActiveReflection *_PlanarReflection;
 	// link into list of water model to display
 public:
 	CWaterModel **_Prev;
@@ -182,6 +193,7 @@ protected:
 
 	friend class	CWaveMakerShape;
 	TAnimationTime  _Time;
+	uint64          _LastFrameId; // avoid double-accumulation in stereo
 };
 
 // tmp for debug

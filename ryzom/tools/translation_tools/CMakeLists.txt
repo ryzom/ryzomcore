@@ -4,7 +4,12 @@ SOURCE_GROUP("" FILES ${SRC})
 
 ADD_EXECUTABLE(translation_tools ${SRC})
 
-TARGET_LINK_LIBRARIES(translation_tools nelmisc nelligo nelgeorges)
+TARGET_LINK_LIBRARIES(translation_tools
+        PRIVATE
+        NeL::misc
+        NeL::ligo
+        NeL::georges
+)
 
 NL_DEFAULT_PROPS(translation_tools "Ryzom, Tools, Misc: Translation Tools")
 NL_ADD_RUNTIME_FLAGS(translation_tools)

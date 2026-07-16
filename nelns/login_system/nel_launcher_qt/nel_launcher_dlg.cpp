@@ -1,7 +1,7 @@
 #include "nel_launcher_dlg.h"
 #include "connection.h"
 
-#include <QtGui/QMessageBox>
+#include <QMessageBox>
 
 #ifndef NL_OS_WINDOWS
 #define _chdir chdir
@@ -72,8 +72,8 @@ void CNelLauncherDlg::clickedSignUp()
 
 void CNelLauncherDlg::clickedLogin()
 {
-	std::string username = leUsername->text().toUtf8();
-	std::string password = lePassword->text().toUtf8();
+	std::string username = leUsername->text().toStdString();
+	std::string password = lePassword->text().toStdString();
 
 	nlinfo("received login attempt for %s with %s", username.c_str(), password.c_str());
 
@@ -81,8 +81,8 @@ void CNelLauncherDlg::clickedLogin()
 	// TODO
 
 	// Disable buttons while logging in.
-	pbLogin->setEnabled(FALSE);
-	pbSignup->setEnabled(FALSE);
+	pbLogin->setEnabled(false);
+	pbSignup->setEnabled(false);
 
 	// Check the login and password.
 	//string res = checkLogin(l, p, ConfigFile.getVar("Application").asString(0));
@@ -115,15 +115,15 @@ void CNelLauncherDlg::clickedLogin()
 			tblShardList->setItem(row,3,shardName);
 			nlinfo("inserting row %d into table widget. %d" , row, tblShardList->rowCount());
 		}
-		pbConnect->setEnabled(TRUE);
+		pbConnect->setEnabled(true);
 	}
 	else
 	{
 		QMessageBox::about(this, "Failed Login", "Failed to log in to Login Service: " + QString(res.c_str()));
 		// Enable buttons if logging in fails.
-		pbLogin->setEnabled(TRUE);
-		pbSignup->setEnabled(TRUE);
-		pbConnect->setEnabled(FALSE);
+		pbLogin->setEnabled(true);
+		pbSignup->setEnabled(true);
+		pbConnect->setEnabled(false);
 	}
 }
 
@@ -137,7 +137,7 @@ void CNelLauncherDlg::doubleClickedShard(int row, int column)
 
 void CNelLauncherDlg::clickedConnect()
 {
-	pbConnect->setEnabled(FALSE);
+	pbConnect->setEnabled(false);
 	TShardList shards = m_Connection.getShards();
 	nlinfo("a shard was double clicked. row selected: %d", tblShardList->currentRow());
 	if(tblShardList->currentRow() < 0)
@@ -145,7 +145,7 @@ void CNelLauncherDlg::clickedConnect()
 		QMessageBox::about(this, "Connect to Shard", "Please, select a shard and then press Connect button.");
 	}
 
-	pbConnect->setEnabled(FALSE);
+	pbConnect->setEnabled(false);
 
 	CShard shard = shards[tblShardList->currentRow()];
 
@@ -181,7 +181,7 @@ void CNelLauncherDlg::clickedConnect()
 			strcpy(buf[i], vargs[i].c_str());
 			//strcat(buf[i], '\0');
 		}
-		buf[nArgs]=NULL;
+		buf[nArgs]=nullptr;
 
 		if(!dir.empty())
 			_chdir(dir.c_str());
@@ -189,7 +189,7 @@ void CNelLauncherDlg::clickedConnect()
 		if(_execvp(rapp.c_str(), buf) == -1)
 		{
 			QMessageBox::about(this, "Launch Client", "Can't execute the game (error code 17)");
-			pbConnect->setEnabled(TRUE);
+			pbConnect->setEnabled(true);
 		}
 		else
 		{
@@ -202,6 +202,6 @@ void CNelLauncherDlg::clickedConnect()
 	else
 	{
 		QMessageBox::about(this, "Connect to Shard", res.c_str());
-		pbConnect->setEnabled(TRUE);
+		pbConnect->setEnabled(true);
 	}
 }

@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2019-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2019-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -68,7 +68,10 @@ CCharacterShoppingList::~CCharacterShoppingList()
 }
 
 //-----------------------------------------------------------------------------
-struct TTradeItemCmp : public std::binary_function< TItemTradePtr, TItemTradePtr, bool>
+struct TTradeItemCmp 
+#ifndef NL_CPP17
+	: public std::binary_function< TItemTradePtr, TItemTradePtr, bool>
+#endif
 {
 	// operator < in fact
 	bool operator () (const TItemTradePtr &lItemPtr, const TItemTradePtr &rItemPtr) const

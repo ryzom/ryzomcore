@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2021  Winch Gate Property Limited
+// Copyright (C) 2010-2022  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
@@ -758,6 +758,10 @@ namespace NLGUI
 			groupMenu->setBaseX(pCB->getXReal());
 			groupMenu->setY(pCB->getYReal());
 			groupMenu->setBaseY(pCB->getYReal());
+
+			sint selected = pCB->getSelection();
+			if (selected >= 0)
+				groupMenu->setSelected((uint)selected);
 
 			// Must ensure the combo menu has same windows priority than the combo box window
 			CInterfaceGroup		*rootWin= pCB->getRootWindow();

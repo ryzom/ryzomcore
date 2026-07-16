@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -339,7 +342,10 @@ namespace STRING_MANAGER
 		}
 	};
 
-	struct TTestWorksheetItem : public std::unary_function<TWorksheet::TRow, bool>
+	struct TTestWorksheetItem 
+#ifndef NL_CPP17
+		: public std::unary_function<TWorksheet::TRow, bool>
+#endif
 	{
 		ucstring	Identifier;
 		TTestWorksheetItem(const std::string &identifier)
@@ -386,7 +392,10 @@ namespace STRING_MANAGER
 	};
 
 	template<class ItemType>
-	struct TTestItem : public std::unary_function<ItemType, bool>
+	struct TTestItem 
+#ifndef NL_CPP17
+		: public std::unary_function<ItemType, bool>
+#endif
 	{
 		std::string	Identifier;
 		TTestItem(const std::string &identifier)

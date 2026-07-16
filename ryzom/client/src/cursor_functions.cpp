@@ -900,7 +900,7 @@ void contextWebIG(bool rightClick, bool dblClick)
 		if (pGC != NULL)
 			pGC->setActive(false);
 
-		if (selectedInstanceURL.substr(0, 5) == "@LUA ") 
+		if (selectedInstanceURL.substr(0, 5) == "@LUA ")
 		{
 			string header = toString("doubleClick = %s\nrightClick = %s\nSelectedInstanceId = %u\n", dblClick?"true":"false", rightClick?"true":"false", InstanceId);
 			CLuaManager::getInstance().executeLuaScript(header+selectedInstanceURL.substr(5), true);
@@ -921,7 +921,7 @@ void contextARKitect(bool rightClick, bool dblClick)
 	string header = toString("doubleClick = %s\nrightClick = %s\nSelectedInstanceId = %u\n", dblClick?"true":"false", rightClick?"true":"false", InstanceId);
 
 	CLuaManager::getInstance().executeLuaScript(header+selectedInstanceURL, true);
-	
+
 }// contextARKitect //
 
 

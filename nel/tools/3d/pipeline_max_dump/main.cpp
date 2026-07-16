@@ -1,3 +1,10 @@
+/**
+ * \file main.cpp
+ * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.7
+ * \author Claude Sonnet 5
+ * \author Claude Fable 5
+ */
 /*
  * Copyright (C) 2012  by Jan Boon (Kaetemi)
  *
@@ -20,17 +27,17 @@
 #include <nel/misc/types_nl.h>
 #include <nel/misc/common.h>
 
-#include <gsf/gsf-infile-msole.h>
-#include <gsf/gsf-infile.h>
-#include <gsf/gsf-input-stdio.h>
-#include <gsf/gsf-utils.h>
-#include <gsf/gsf-doc-meta-data.h>
-#include <gsf/gsf-msole-utils.h>
-#include <glib/gi18n.h>
 #include <string.h>
 #include <cstdio>
 #include <iostream>
 #include <fstream>
+#ifdef NL_OS_WINDOWS
+#include <process.h>
+#define PMD_GETPID _getpid
+#else
+#include <unistd.h>
+#define PMD_GETPID getpid
+#endif
 
 #include <vector>
 #include <utility>
@@ -38,6 +45,7 @@
 #include <nel/misc/file.h>
 #include <nel/misc/vector.h>
 
+#include "../pipeline_max/storage_ole.h"
 #include "../pipeline_max/storage_stream.h"
 #include "../pipeline_max/storage_object.h"
 #include "../pipeline_max/dll_directory.h"
@@ -51,6 +59,8 @@
 #include "../pipeline_max/builtin/builtin.h"
 #include "../pipeline_max/update1/update1.h"
 #include "../pipeline_max/epoly/epoly.h"
+#include "../pipeline_max/biped/biped.h"
+#include "../pipeline_max/nelpatch/nelpatch.h"
 
 #include "../pipeline_max/builtin/storage/app_data.h"
 #include "../pipeline_max/builtin/storage/geom_buffers.h"
@@ -73,6 +83,8 @@ using namespace PIPELINE::MAX::EPOLY;
 //static const char *filename = "/home/kaetemi/3dsMax/scenes/geomobjects.max";
 static const char *filename = "/mnt/tsurugi/ryzom-assets/database/landscape/ligo/desert/pipeline_max/zonematerial-converted-165_eg.max";
 static const char *streamname = "Scene";
+
+// Overridden by argv[1] if provided.
 
 #define PBMS_GEOM_BUFFERS_POLY_A_VERTEX_CHUNK_ID 0x0100
 #define PBMS_GEOM_BUFFERS_POLY_A_EDGE_CHUNK_ID 0x010a
@@ -137,72 +149,50 @@ int main(int argc, char **argv)
 	//printf("Pipeline Max Dump (Temporary Tool)\n");
 
 	char const *me = (argv[0] ? argv[0] : "pipeline_max_dump");
-	g_set_prgname(me);
-	gsf_init();
+
+	if (argc > 1)
+		filename = argv[1];
 
 	// Register all plugin classes
 	CSceneClassRegistry sceneClassRegistry;
 	CBuiltin::registerClasses(&sceneClassRegistry);
 	CUpdate1::registerClasses(&sceneClassRegistry);
 	CEPoly::registerClasses(&sceneClassRegistry);
+	BIPED::CBiped::registerClasses(&sceneClassRegistry);
+	NELPATCH::CNelPatch::registerClasses(&sceneClassRegistry);
 
-	GsfInfile *infile;
-	GError *error = NULL;
-	GsfInput *src;
-	char *display_name;
-
-	src = gsf_input_stdio_new(filename, &error);
-
-	if (error)
+	PIPELINE::MAX::CStorageOleIn infile;
+	if (!infile.open(filename))
 	{
-		display_name = g_filename_display_name(filename);
-		g_printerr (_("%s: Failed to open %s: %s\n"),
-			    g_get_prgname (),
-			    display_name,
-			    error->message);
-		g_free(display_name);
+		std::cerr << me << ": Failed to open " << filename << " as an OLE compound file\n";
 		return 1;
 	}
 
-	infile = gsf_infile_msole_new(src, NULL);
-
-	if (!infile)
-	{
-		display_name = g_filename_display_name(filename);
-		g_printerr (_("%s: Failed to recognize %s as an archive\n"),
-				g_get_prgname (),
-				display_name);
-		g_free (display_name);
-		return 1;
-	}
-
-	display_name = g_filename_display_name(filename);
-	//g_print("%s\n", display_name);
-	g_free(display_name);
-	// g_print("%s\n", streamname);
 	std::cout << "\n";
 
-	GsfInput *input = NULL;
-
+	std::vector<uint8> streamBytes;
 
 	PIPELINE::MAX::CDllDirectory dllDirectory;
-	input = gsf_infile_child_by_name(infile, "DllDirectory");
+	infile.readStream("DllDirectory", streamBytes);
 	{
-		PIPELINE::MAX::CStorageStream instream(input);
+		PIPELINE::MAX::CStorageStream instream(streamBytes);
 		PIPELINE::MAX::CStorageContainer ctr;
 		ctr.serial(instream);
+		// PID-suffixed temp path so concurrent invocations don't clobber each other
+		// (same pattern as pipeline_max_corpus_test), removed after the reserial check.
+		std::string tempPath = "/tmp/pipeline_max_dump." + NLMISC::toString((sint32)PMD_GETPID()) + ".tmp";
 		{
-			NLMISC::COFile of("temp.bin");
+			NLMISC::COFile of(tempPath);
 			ctr.serial(of); // out
 			// nldebug("Written %i bytes", of.getPos());
 		}
 		{
-			NLMISC::CIFile inf("temp.bin");
+			NLMISC::CIFile inf(tempPath);
 			dllDirectory.serial(inf); // in
 		}
+		std::remove(tempPath.c_str());
 		//dllDirectory.serial(instream);
 	}
-	g_object_unref(input);
 	//dllDirectory.toString(std::cout);
 	//std::cout << "\n";
 	dllDirectory.parse(PIPELINE::MAX::VersionUnknown); // parse the structure to readable data
@@ -219,12 +209,11 @@ int main(int argc, char **argv)
 
 
 	PIPELINE::MAX::CClassDirectory3 classDirectory3(&dllDirectory);
-	input = gsf_infile_child_by_name(infile, "ClassDirectory3");
+	infile.readStream("ClassDirectory3", streamBytes);
 	{
-		PIPELINE::MAX::CStorageStream instream(input);
+		PIPELINE::MAX::CStorageStream instream(streamBytes);
 		classDirectory3.serial(instream);
 	}
-	g_object_unref(input);
 	//classDirectory3.toString(std::cout);
 	//std::cout << "\n";
 	classDirectory3.parse(PIPELINE::MAX::VersionUnknown); // parse the structure to readable data
@@ -242,12 +231,11 @@ int main(int argc, char **argv)
 
 	PIPELINE::MAX::CScene scene(&sceneClassRegistry, &dllDirectory, &classDirectory3);
 	//PIPELINE::MAX::CStorageContainer scene;
-	input = gsf_infile_child_by_name(infile, "Scene");
+	infile.readStream("Scene", streamBytes);
 	{
-		PIPELINE::MAX::CStorageStream instream(input);
+		PIPELINE::MAX::CStorageStream instream(streamBytes);
 		scene.serial(instream);
 	}
-	g_object_unref(input);
 	//classDirectory3.toString(std::cout);
 	//std::cout << "\n";
 	scene.parse(PIPELINE::MAX::VersionUnknown); // parse the structure to readable data
@@ -363,11 +351,6 @@ int main(int argc, char **argv)
 	g_object_unref(input);
 	*/
 
-
-	g_object_unref(infile);
-	g_object_unref(src);
-
-	gsf_shutdown();
 
 	return 0;
 }

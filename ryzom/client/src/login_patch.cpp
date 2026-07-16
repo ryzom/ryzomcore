@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2014  Matthew LAGOE (Botanic) <cyberempires@gmail.com>
-// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2021  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -484,6 +484,10 @@ void CPatchManager::getInfoToDisp(SPatchInfo &piOut)
 			uint32 nTotalPatchesSize = 0;
 			for (uint32 j = 0; j < rFTP.PatcheSizes.size(); ++j)
 				nTotalPatchesSize += rFTP.PatcheSizes[j];
+
+			// Use LZMA size if available and smaller than patch chain
+			if (rFTP.SZFileSize != 0 && rFTP.SZFileSize < nTotalPatchesSize)
+				nTotalPatchesSize = rFTP.SZFileSize;
 
 			SPatchInfo::SCat c;
 			c.Name = sCatName;
@@ -2185,8 +2189,8 @@ void CPatchManager::getCorruptedFileInfo(const SFileToPatch &ftp, string &sTrans
 // ****************************************************************************
 CCheckThread::CCheckThread(bool includeBackgroundPatch)
 {
-	Ended = false;
 	CheckOk = false;
+	Ended = false;
 	TotalFileToCheck = 0;
 	CurrentFileChecked = 0;
 	IncludeBackgroundPatch = includeBackgroundPatch;
@@ -2467,8 +2471,8 @@ void CCheckThread::run ()
 // ****************************************************************************
 CPatchThread::CPatchThread(bool commitPatch)
 {
-	Ended = false;
 	PatchOk = false;
+	Ended = false;
 	CurrentFilePatched = 0;
 	PatchSizeProgress = 0;
 	_CommitPatch = commitPatch;
@@ -3089,8 +3093,8 @@ bool CPatchThread::xDeltaPatch(const string &patch, const string &src, const str
 CScanDataThread::CScanDataThread()
 {
 	AskForCancel= false;
-	Ended = false;
 	CheckOk = false;
+	Ended = false;
 	TotalFileToScan = 1;
 	CurrentFileScanned = 1;
 }

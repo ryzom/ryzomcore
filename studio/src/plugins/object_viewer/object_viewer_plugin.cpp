@@ -84,5 +84,3 @@ QWidget *CObjectViewerContext::widget()
 }
 
 }
-
-Q_EXPORT_PLUGIN(NLQT::ObjectViewerPlugin)

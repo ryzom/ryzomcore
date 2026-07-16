@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.1 $" State="modified">
+  <STRUCT>
+    <STRUCT Name="basics">
+      <ATOM Name="origin" Value="fyros"/>
+      <ATOM Name="family" Value="melee weapon"/>
+      <STRUCT Name="EquipmentInfo">
+        <ARRAY Name="EquipmentSlots">
+          <ATOM Value="Right Hand"/>
+        </ARRAY>
+      </STRUCT>
+    </STRUCT>
+    <STRUCT Name="3d">
+      <ATOM Name="shape" Value="FY_Wea_hache2M.shape"/>
+      <ATOM Name="shape_female" Value="FY_Wea_hache2M.shape"/>
+      <ATOM Name="icon background" Value="BK_fyros.tga"/>
+      <ATOM Name="anim_set" Value="2H"/>
+    </STRUCT>
+    <STRUCT Name="faber">
+      <STRUCT Name="Create">
+        <ATOM Name="Cost" Value="HP Default"/>
+        <ATOM Name="Difficulty" Value="(&quot;basics.quality level&quot;-4)*10*(0.9-0.1*(&quot;#faber.Create.MP 1&quot;+&quot;#faber.Create.MP 2&quot;+&quot;#faber.Create.MP 3&quot;+&quot;#faber.Create.MP 4&quot;+&quot;#faber.Create.MP 5&quot;))"/>
+      </STRUCT>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Fri Jul 05 10:15:18 2002 (mauduit) .3d.shape = TR_HOM_VISAGE.shape
+Fri Jul 05 10:25:30 2002 (mauduit) .3d.shape = Tr_Wea_Hache2M.shape
+Thu Jul 11 11:34:49 2002 (mauduit) .3d.anim_set = 2H
+Thu Jul 11 11:34:49 2002 (mauduit) .3d.shape_female = Tr_Wea_Hache2M.shape
+Thu Jul 11 11:34:49 2002 (mauduit) .basics.EquipmentInfo.EquipmentSlots[0] = Right Hand
+Thu Jul 11 11:34:49 2002 (mauduit) .basics.family = melee weapon
+Thu Jul 11 11:34:49 2002 (mauduit) .basics.origin = tryker
+Thu Jul 11 11:34:49 2002 (mauduit) formName Resized = 1
+Thu Jul 11 13:33:18 2002 (mauduit) .3d.shape = FY_Wea_hache2M.shape
+Thu Jul 11 13:33:18 2002 (mauduit) .3d.shape_female = FY_Wea_hache2M.shape
+Thu Jul 11 13:33:18 2002 (mauduit) .basics.origin = fyros
+Tue Aug 27 15:02:55 2002 (wuibout) .3d.icon background = BK_fyros.tga</LOG>
+</FORM>

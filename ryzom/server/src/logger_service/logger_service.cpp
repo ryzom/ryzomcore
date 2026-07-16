@@ -334,7 +334,7 @@ class CLoggerServiceMod
 
 	struct TThreadStatus
 	{
-		volatile TQueryStatus	ThreadStatus;
+		NLMISC::CAtomicEnum<TQueryStatus> ThreadStatus;
 		string			StatusString;
 
 		TThreadStatus(TQueryStatus	threadStatus, const string &statusString)

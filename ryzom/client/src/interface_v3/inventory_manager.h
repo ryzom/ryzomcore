@@ -87,7 +87,7 @@ public:
 	uint16 getQuantity() const						{ return (uint16)			(Quantity ? Quantity->getValue16() : 0); }
 	uint32 getCreateTime() const					{ return (uint32)			(CreateTime ? CreateTime->getValue32() : 0); }
 	uint32 getSerial() const						{ return (uint32)			(Serial ? Serial->getValue32() : 0); }
-	uint8  getUserColor() const						{ return (uint8)			(UserColor ? UserColor->getValue16() : 0); }
+	uint8  getUserColor() const						{ return (uint8)			(UserColor ? UserColor->getValue8() : 0); }
 	uint32 getPrice() const							{ return (uint32)			(Price ? Price->getValue32() : 0); }
 	uint32 getWeight() const						{ return (uint32)			(Weight ? Weight->getValue32() : 0); }
 	uint32 getNameId() const						{ return (uint32)			(NameId ? NameId->getValue32() : 0); }

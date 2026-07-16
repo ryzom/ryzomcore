@@ -30,7 +30,7 @@
 
 // Qt includes
 #include <QApplication>
-#include <QtGui/QProgressDialog>
+#include <QProgressDialog>
 
 namespace LandscapeEditor
 {
@@ -70,7 +70,7 @@ QVariant ListZonesModel::data(const QModelIndex &index, int role) const
 	case Qt::DecorationRole:
 	{
 		QPixmap *pixmap = getPixmap(m_listNames.at(index.row()));
-		return qVariantFromValue(*pixmap);
+		return QVariant::fromValue(*pixmap);
 	}
 	default:
 		return QVariant();

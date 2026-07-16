@@ -42,6 +42,9 @@ public:
 	int 			IsPublic() { return 1; }
 	void *			Create(BOOL loading = FALSE) { return new VertexPaint(); }
 	const MCHAR *	ClassName() { return GetString(IDS_CLASS_NAME); }
+#if (MAX_VERSION_MAJOR >= 24)
+	virtual const TCHAR *NonLocalizedClassName() NL_OVERRIDE { return _M("Nel VertexTreePaint"); }
+#endif
 	SClass_ID		SuperClassID() { return OSM_CLASS_ID; }
 	Class_ID		ClassID() { return VERTEX_TREE_PAINT_CLASS_ID; }
 	const MCHAR* 	Category() { return GetString(IDS_CATEGORY); }
@@ -512,7 +515,11 @@ Animatable* VertexPaint::SubAnim(int i)
 	return NULL;
 }
 
+#if (MAX_VERSION_MAJOR < 24)
 TSTR VertexPaint::SubAnimName(int i)
+#else
+TSTR VertexPaint::SubAnimName(int i, bool localized)
+#endif
 {
 	return _T("");
 }

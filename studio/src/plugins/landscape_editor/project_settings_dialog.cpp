@@ -26,8 +26,8 @@
 
 // Qt includes
 #include <QtCore/QSettings>
-#include <QtGui/QFileDialog>
-#include <QtGui/QFileDialog>
+#include <QFileDialog>
+#include <QFileDialog>
 
 namespace LandscapeEditor
 {

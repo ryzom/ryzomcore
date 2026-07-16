@@ -36,7 +36,7 @@ class CMesh;
 class CFlareModel : public CTransformShape
 {
 public:
-	enum { MaxNumContext = 4 };
+	enum { MaxNumContext = 8 }; // see CScene flare context allocation
 	enum { OcclusionTestFrameDelay = 2 }; // number of frame to wait before occlusion result is collected
 	/// Constructor
 	CFlareModel();
@@ -63,10 +63,10 @@ private:
 	uint64					 _LastRenderIntervalBegin[MaxNumContext]; // Interval of frames during which this flare was traversed for render
 	uint64					 _LastRenderIntervalEnd[MaxNumContext];
 	uint64					 _NumFrameForOcclusionQuery[MaxNumContext]; // number of frames that were necessary to get the occlusion query result
-	static CMaterial		 _OcclusionQueryMaterial;
-	static CMaterial		 _DrawQueryMaterial;
+	static CMaterial		 _OcclusionQueryMaterial; // STATIC GPU RESOURCE: Blocks multiple driver instances
+	static CMaterial		 _DrawQueryMaterial; // STATIC GPU RESOURCE: Blocks multiple driver instances
 	static bool				 _OcclusionQuerySettuped;
-	static CVertexBuffer	 _OcclusionQueryVB;
+	static CVertexBuffer	 _OcclusionQueryVB; // STATIC GPU RESOURCE: Blocks multiple driver instances
 private:
 	void resetOcclusionQuerries();
 	// Issue an occlusion query with the given mesh to get the visibility ratio

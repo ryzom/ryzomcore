@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -135,6 +138,8 @@ namespace R2
 		// get the vector of complete islands
 		const TCompleteIslands&  getCompleteIslands();
 
+		void setFiles(const std::string &completeIslandsFilename, const std::string &entryPointsFilename);
+
 	private:
 		//-------------------------------------------------------------------------
 		// this is a singleton so prevent instantiation
@@ -184,7 +189,8 @@ namespace R2
 		NLMISC::CVector2f	_LastTestedCoords;
 		CCompleteIsland		*_LastFoundIsland;
 
-		std::string _CompleteIslandsFilename;
+		bool _HardIslandsPath;
+		std::vector<std::string> _CompleteIslandsFilenames;
 		std::string _EntryPointsFilename;
 	};
 

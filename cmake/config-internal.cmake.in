@@ -1,0 +1,14 @@
+@PACKAGE_INIT@
+
+set(_@PROJECT_NAME@_supported_components @package_components@)
+
+foreach(_comp ${@PROJECT_NAME@_FIND_COMPONENTS})
+  if (NOT _comp IN_LIST _@PROJECT_NAME@_supported_components)
+    set(@PROJECT_NAME@_NOT_FOUND_MESSAGE "Unsupported component: ${_comp}")
+  else ()
+    set(@PROJECT_NAME@_${_comp}_FOUND TRUE)
+  endif()
+endforeach()
+
+
+check_required_components(@PROJECT_NAME@)

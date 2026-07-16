@@ -1,0 +1,68 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "ryzom-core",
+  "version-string": "4.1.0.0",
+  "dependencies": [
+    "curl",
+    {
+      "name": "freetype",
+      "default-features": false,
+      "features": [
+        "error-strings"
+      ]
+    },
+    {
+      "name": "directxsdk",
+      "platform": "windows"
+    },
+    "giflib",
+    "libogg",
+    "libvorbis",
+    "libpng",
+    "libjpeg-turbo",
+    {
+      "name": "libxml2",
+      "default-features": false,
+      "features": [
+        "zlib"
+      ]
+    },
+    "lua",
+    "luabind",
+    "msquic",
+    "openal-soft",
+    "opengl",
+    "openssl",
+    "zlib",
+    "gtest"
+  ],
+  "overrides": [
+    {
+      "name": "openal-soft",
+      "version": "1.24.3"
+    }
+  ],
+  "default-features": [
+    "pipeline-max"
+  ],
+  "features": {
+    "pipeline-max": {
+      "description": "Builds with tools for pipeline using max",
+      "dependencies": [
+        "boost-algorithm"
+      ]
+    },
+    "qt": {
+      "description": "Builds with QT",
+      "dependencies": [
+        "qt5"
+      ]
+    },
+    "mysql": {
+      "description": "Builds with MySQL",
+      "dependencies": [
+        "libmariadb"
+      ]
+    }
+  }
+}

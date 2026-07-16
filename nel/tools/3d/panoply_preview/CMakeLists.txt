@@ -11,29 +11,24 @@ FILE(GLOB PANOPLY_MAKER ../panoply_maker/color_modifier.cpp ../panoply_maker/col
 SOURCE_GROUP("" FILES ${SRCS} ${HDRS} ${RSRC} ${RESOURCES})
 SOURCE_GROUP("panoply_maker" FILES ${PANOPLY_MAKER})
 
-SET(CMAKE_AUTOMOC ON)
-
-QT5_ADD_RESOURCES(RESOURCE_ADDED ${RESOURCES})
 
 ADD_EXECUTABLE(nl_panoply_preview WIN32 ${SRC}
 	${SRCS}
 	${HDRS}
 	${RSRC}
-	${RESOURCE_ADDED}
+	${RESOURCES}
 	${PANOPLY_MAKER}
 	)
 
-IF(QT_STATIC)
-  SET(PANOPLY_PREVIEW_QT_LIBRARIES ${QT_LIBRARIES})
-ELSE()
-  SET(PANOPLY_PREVIEW_QT_LIBRARIES Qt5::Widgets)
-ENDIF()
-
 TARGET_LINK_LIBRARIES(nl_panoply_preview
-	nelmisc
-	nel3d
-	shared_widgets
-	${PANOPLY_PREVIEW_QT_LIBRARIES})
+		PRIVATE
+		NeL::misc
+		NeL::3d
+		shared_widgets
+        Qt::Core
+        Qt::Gui
+        Qt::Widgets
+)
 
 NL_DEFAULT_PROPS(nl_panoply_preview "NeL, Tools, 3D: panoply_preview")
 NL_ADD_RUNTIME_FLAGS(nl_panoply_preview)

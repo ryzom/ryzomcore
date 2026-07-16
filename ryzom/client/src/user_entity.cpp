@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2013-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2013-2021  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -186,6 +186,9 @@ CUserEntity::CUserEntity()
 	_MoveToAction= CUserEntity::None;
 	_MoveToDist= 0.0;
 	_MoveToColStartTime= 0;
+
+	_LastSentClientTick = 0;
+
 	_HeadPitch = Pi/2;
 	_FollowForceHeadPitch= false;
 
@@ -1728,6 +1731,10 @@ void CUserEntity::moveToAction(CEntityCL *ent)
 //-----------------------------------------------
 bool CUserEntity::sendToServer(CBitMemStream &out)
 {
+	if (NetMngr.getCurrentClientTick() == _LastSentClientTick)
+	{
+		return false;
+	}
 	if(GenericMsgHeaderMngr.pushNameToStream("POSITION", out))
 	{
 		// Backup the position sent.
@@ -1739,6 +1746,7 @@ bool CUserEntity::sendToServer(CBitMemStream &out)
 		positionMsg.Z = (sint32)(pos().z * 1000);
 		positionMsg.Heading = frontYaw();
 		out.serial(positionMsg);
+		_LastSentClientTick = NetMngr.getCurrentClientTick();
 		return true;
 	}
 	else

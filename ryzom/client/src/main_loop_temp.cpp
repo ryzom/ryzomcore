@@ -103,7 +103,7 @@ void tempDumpColPolys()
 		if (!initDone)
 		{
 			vb.setVertexFormat(CVertexBuffer::PositionFlag);
-			vb.setPreferredMemory(CVertexBuffer::AGPVolatile, false);
+			vb.setBufferUsage(CVertexBuffer::FullStream, false);
 			material.initUnlit();
 			material.setDoubleSided(true);
 			material.setZFunc(CMaterial::lessequal);

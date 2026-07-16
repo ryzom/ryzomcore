@@ -362,6 +362,7 @@ NLMISC_COMMAND(deleteGroup, "delete group <name>", "name")
 	}
 }
 
+
 NLMISC_COMMAND(naked, "get naked !", "")
 {
 	std::string handPath = "LOCAL:INVENTORY:HAND:";

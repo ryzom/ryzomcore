@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2019-2022  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -78,6 +78,9 @@ class Tile_utilityClassDesc:public ClassDesc2
 		return &theTile_utility;
 	}
 	const TCHAR *	ClassName() {return _T("NeL Tile Bank");}
+#if (MAX_VERSION_MAJOR >= 24)
+	virtual const TCHAR *NonLocalizedClassName() NL_OVERRIDE { return _M("NeL Tile Bank"); }
+#endif
 	SClass_ID		SuperClassID() {return UTILITY_CLASS_ID;}
 	Class_ID		ClassID() {return TILE_UTILITY_CLASS_ID;}
 	const MCHAR* 	Category() {return _M("NeL Tools");}

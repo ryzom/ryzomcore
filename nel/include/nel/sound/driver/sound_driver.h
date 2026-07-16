@@ -1,5 +1,5 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010-2020  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2012  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
@@ -83,8 +83,6 @@ public:
 	/// Driver creation flags, to configure behaviour, or check feature availability.
 	enum TSoundOptions
 	{
-		/// Enable EAX/I3DL2 environment effects. (not implemented on FMod driver).
-		OptionEnvironmentEffects = 0x01, 
 		/// Allow the user to use the ADPCM encoding. (verify availability with getOption)
 		OptionAllowADPCM = 0x02, 
 		/// Force software buffering (always true for XAudio2).
@@ -103,6 +101,10 @@ public:
 		OptionLocalBufferCopy = 0x10, 
 		/// Use to check availability of buffer streaming. (verify with getOption)
 		OptionHasBufferStreaming = 0x20, 
+		/// Enable reverb
+		OptionReverbEffect = 0x40,
+		/// Enable occlusion & obstruction
+		OptionFilterEffect = 0x80,
 	};
 
 	/** The interface must be implemented and provided to the driver
@@ -127,6 +129,12 @@ public:
 
 	/// Return driver name from type.
 	static const char *getDriverName(TDriver driverType);
+	/// Return driver dll filename, empty if unsupported driver
+	static std::string getDriverFileName(TDriver driverType);
+	/** Return possibly available drivers for current platform.
+	 * If no drivers are available, return empty list.
+	 */
+	static std::vector<ISoundDriver::TDriver> getAvailableDrivers();
 	/** The static method which builds the sound driver instance
 	 * In case of failure, can throw one of these ESoundDriver exception objects:
 	 * ESoundDriverNotFound, ESoundDriverCorrupted, ESoundDriverOldVersion, ESoundDriverUnknownVersion
@@ -204,7 +212,6 @@ public:
 	
 private:
 	std::string _DllName;
-	
 };
 
 

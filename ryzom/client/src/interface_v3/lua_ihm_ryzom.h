@@ -228,8 +228,8 @@ private:
 	static bool	isPlayerSlotNewbieLand(uint32 slot);  // test if one of the player slot is a newbieland one, if not so, client must be patched in order to continue
 
 	// GameInfo
-	static ucstring	getSheetLocalizedName(const std::string &sheet);
-	static ucstring	getSheetLocalizedDesc(const std::string &sheet);
+	static ucstring getSheetLocalizedName(const std::string &sheet);
+	static ucstring getSheetLocalizedDesc(const std::string &sheet);
 	static sint32 getSkillIdFromName(const std::string &def);
 #ifdef RYZOM_LUA_UCSTRING
 	static ucstring	getSkillLocalizedName(sint32 skillId);

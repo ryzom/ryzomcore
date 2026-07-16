@@ -21,7 +21,7 @@
 #include "particle_force_page.h"
 
 // Qt includes
-#include <QtGui/QMessageBox>
+#include <QMessageBox>
 
 // NeL includes
 #include <nel/3d/particle_system.h>

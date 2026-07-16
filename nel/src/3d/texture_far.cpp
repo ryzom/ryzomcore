@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -1952,8 +1955,8 @@ void NL3D_drawFarTileInFarTextureAlpha (const NL3D_CComputeTileFar* pTileFar)
 			for (x=0; x<pTileFar->Size; x++)
 			{
 				// Read and write a pixel
-				register uint alpha=pSrcLine->A;
-				register uint oneLessAlpha=255-pSrcLine->A;
+				NL_REGISTER uint alpha=pSrcLine->A;
+				NL_REGISTER uint oneLessAlpha=255-pSrcLine->A;
 				pDstLine->R=(uint8)(((((uint)pSrcLine->R*(uint)pSrcLightingLine->R)>>8)*alpha+(uint)pDstLine->R*oneLessAlpha)>>8);
 				pDstLine->G=(uint8)(((((uint)pSrcLine->G*(uint)pSrcLightingLine->G)>>8)*alpha+(uint)pDstLine->G*oneLessAlpha)>>8);
 				pDstLine->B=(uint8)(((((uint)pSrcLine->B*(uint)pSrcLightingLine->B)>>8)*alpha+(uint)pDstLine->B*oneLessAlpha)>>8);
@@ -2081,8 +2084,8 @@ void NL3D_drawFarTileInFarTextureAdditiveAlpha (const NL3D_CComputeTileFar* pTil
 		for (x=0; x<pTileFar->Size; x++)
 		{
 			// Read and write a pixel
-			register uint alpha=pSrcLine->A;
-			register uint oneLessAlpha=255-pSrcLine->A;
+			NL_REGISTER uint alpha=pSrcLine->A;
+			NL_REGISTER uint oneLessAlpha=255-pSrcLine->A;
 
 			// Read and write a pixel
 			uint nTmp=(((uint)pSrcLine->R*(uint)pSrcLightingLine->R)>>8)+(uint)pSrcAddLine->R;

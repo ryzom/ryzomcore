@@ -3,6 +3,7 @@
  * \brief CMultiMtl
  * \date 2012-08-22 08:55GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.8
  * CMultiMtl
  */
 
@@ -34,6 +35,7 @@
 // NeL includes
 
 // Project includes
+#include "mtl_base.h"
 
 namespace PIPELINE {
 namespace MAX {
@@ -43,20 +45,55 @@ namespace BUILTIN {
  * \brief CMultiMtl
  * \date 2012-08-22 08:55GMT
  * \author Jan Boon (Kaetemi)
- * CMultiMtl
+ * \author Claude Opus 4.8
+ *
+ * The Multi/Sub-Object material, ClassId {0x200, 0}, superclass 0xc00. It holds N sub-materials:
+ * reference 0 is the material's own ParamBlock2, references 1..N are the sub-materials, and the
+ * sub-material count rides in chunk 0x4002 (see max_geometry_formats Part I.6). This typed class
+ * exposes the sub-material list on top of the CMtlBase name; the raw chunks stay authoritative
+ * (byte-exact roundtrip).
  */
-class CMultiMtl
+class CMultiMtl : public CMtlBase
 {
-protected:
-	// pointers
-	// ...
-
-	// instances
-	// ...
 public:
-	CMultiMtl();
+	CMultiMtl(CScene *scene);
 	virtual ~CMultiMtl();
+
+	// class desc
+	static const ucstring DisplayName;
+	static const char *InternalName;
+	static const NLMISC::CClassId ClassId;
+	static const TSClassId SuperClassId;
+
+	// inherited
+	virtual void parse(uint16 version, uint filter = 0);
+	virtual void clean();
+	virtual void build(uint16 version, uint filter = 0);
+	virtual void disown();
+	virtual void init();
+	virtual bool inherits(const NLMISC::CClassId classId) const;
+	virtual const ISceneClassDesc *classDesc() const;
+	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "", uint filter = 0) const;
+
+	//! \name Sub-material access (valid between parse and clean/disown)
+	//@{
+	/// Declared sub-material count (chunk 0x4002); 0 when absent.
+	inline uint numSubMaterials() const { return m_NumSubMaterials; }
+	/// Sub-material i (0-based; resolves to reference slot i+1), NULL when out of range.
+	CMtlBase *subMaterial(uint i) const;
+	//@}
+
+protected:
+	// inherited
+	virtual IStorageObject *createChunkById(uint16 id, bool container);
+
+private:
+	uint m_NumSubMaterials;
+
 }; /* class CMultiMtl */
+
+typedef CSceneClassDesc<CMultiMtl> CMultiMtlClassDesc;
+extern const CMultiMtlClassDesc MultiMtlClassDesc;
 
 } /* namespace BUILTIN */
 } /* namespace MAX */

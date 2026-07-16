@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2019-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2019-2021  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -85,7 +85,10 @@ namespace NLGUI
 			/// Language code of the browser( e.g.: en, hu )
 			std::string languageCode;
 			/// List of domains the widget can consider secure.
-			std::vector< std::string > trustedDomains;
+			std::vector<std::string> trustedDomains;
+			/// Web server
+			std::string webServer;
+			std::string webServerDomain;
 			/// Maximum concurrent MultiCurl connections per CGroupHTML instance
 			sint32 curlMaxConnections;
 
