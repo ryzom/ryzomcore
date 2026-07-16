@@ -91,6 +91,7 @@
 #include "../pipeline_max/builtin/storage/app_data.h"
 #include "../pipeline_max/builtin/geom_object.h"
 #include "../pipeline_max/builtin/control_keyframer.h"
+#include "../pipeline_max/builtin/param_block.h"
 
 #include "../pipeline_max_export_common/max_math.h"
 #include "../pipeline_max_export_common/max_scene.h"
@@ -649,37 +650,22 @@ struct SPBlockParam
 
 static void readPBlockParams(CSceneClass *pblock, std::map<sint32, SPBlockParam> &out)
 {
-	const CStorageContainer::TStorageObjectContainer &po = pblock->orphanedChunks();
-	for (CStorageContainer::TStorageObjectConstIt it = po.begin(); it != po.end(); ++it)
+	// Delegates to the library's typed BUILTIN::CParamBlock (every superclass-0x8 object parses
+	// through it — one decode path); thin copy onto the legacy per-index map shape.
+	CParamBlock *pb = dynamic_cast<CParamBlock *>(pblock);
+	if (!pb) return;
+	const std::vector<CParamBlock::SParam> &params = pb->params();
+	for (std::vector<CParamBlock::SParam>::const_iterator it = params.begin(); it != params.end(); ++it)
 	{
-		if (it->first != 0x0002) continue;
-		CStorageContainer *pc = dynamic_cast<CStorageContainer *>(it->second);
-		if (!pc) continue;
-		sint32 idx = -1;
-		for (CStorageContainer::TStorageObjectConstIt cit = pc->chunks().begin(); cit != pc->chunks().end(); ++cit)
-		{
-			CStorageRaw *cr = dynamic_cast<CStorageRaw *>(cit->second);
-			if (!cr) continue;
-			if (cit->first == 0x0003 && cr->Value.size() == 4)
-				memcpy(&idx, nlVectorData(cr->Value), 4);
-			else if (cit->first == 0x0102 && cr->Value.size() == 12 && idx >= 0)
-			{
-				SPBlockParam p;
-				p.IsPoint3 = true;
-				memcpy(p.V, nlVectorData(cr->Value), 12);
-				out[idx] = p;
-			}
-			else if (cit->first != 0x0004 && cr->Value.size() == 4 && idx >= 0)
-			{
-				SPBlockParam p;
-				p.IsPoint3 = false;
-				p.IsInt = (cit->first == 0x0101);
-				p.V[1] = p.V[2] = 0.0f;
-				memcpy(p.V, nlVectorData(cr->Value), 4);
-				memcpy(&p.I, nlVectorData(cr->Value), 4);
-				out[idx] = p;
-			}
-		}
+		if (it->Index < 0 || !it->HasConstant) continue;
+		SPBlockParam p;
+		p.IsPoint3 = it->Kind == CParamBlock::KindPoint3;
+		p.IsInt = it->Kind == CParamBlock::KindInt;
+		p.I = p.IsPoint3 ? 0 : it->I;
+		p.V[0] = it->F[0];
+		p.V[1] = it->Kind == CParamBlock::KindPoint3 ? it->F[1] : 0.0f;
+		p.V[2] = it->Kind == CParamBlock::KindPoint3 ? it->F[2] : 0.0f;
+		out[it->Index] = p;
 	}
 }
 

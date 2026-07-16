@@ -66,6 +66,7 @@
 #include "../pipeline_max/biped/biped.h"
 #include "../pipeline_max/nelpatch/nelpatch.h"
 
+#include "../pipeline_max/builtin/param_block.h"
 #include "../pipeline_max/builtin/param_block_2.h"
 #include "../pipeline_max/builtin/mtl_base.h"
 #include "../pipeline_max/builtin/multi_mtl.h"
@@ -476,6 +477,79 @@ static int pb2SelfTest(CStorageOleIn &in, CSceneClassRegistry *reg, bool verbose
 	return nFail ? 1 : 0;
 }
 
+// Parse the Scene stream fully and run the CParamBlock (old-style ParamBlock, superclass 0x8)
+// write-direction self-check on every ParamBlock object: re-encode each decoded constant from
+// its typed value and compare against the stored bytes. Also surfaces any entry-leaf chunk ids
+// the typed decode did not recognize (must stay empty across the corpus) and counts animated
+// (controller-backed) parameters and their t=0 resolution rate.
+static int oldPbSelfTest(CStorageOleIn &in, CSceneClassRegistry *reg, bool verbose)
+{
+	CDllDirectory dll;
+	CClassDirectory3 cd(&dll);
+	CScene scene(reg, &dll, &cd);
+	{
+		std::vector<uint8> b;
+		if (!in.readStream("DllDirectory", b)) { std::cerr << "no DllDirectory\n"; return 2; }
+		CStorageStream ss(b); try { dll.serial(ss); dll.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "dll: " << e.what() << "\n"; return 2; }
+	}
+	{
+		std::vector<uint8> b;
+		if (!in.readStream("ClassDirectory3", b)) { std::cerr << "no ClassDirectory3\n"; return 2; }
+		CStorageStream ss(b); try { cd.serial(ss); cd.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "cd: " << e.what() << "\n"; return 2; }
+	}
+	{
+		std::vector<uint8> b;
+		if (!in.readStream("Scene", b)) { std::cerr << "no Scene\n"; return 2; }
+		CStorageStream ss(b); try { scene.serial(ss); scene.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "scene: " << e.what() << "\n"; return 2; }
+	}
+	uint nPb = 0, nParams = 0, nFail = 0, nUnknownIds = 0;
+	uint nAnim = 0, nAnimResolved = 0;
+	CSceneClassContainer *ssc = scene.container();
+	for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
+	{
+		BUILTIN::CParamBlock *pb = dynamic_cast<BUILTIN::CParamBlock *>(it->second);
+		if (!pb) continue;
+		++nPb;
+		nParams += (uint)pb->params().size();
+		std::string err;
+		if (!pb->selfTestReencode(err))
+		{
+			++nFail;
+			std::cerr << "  oldpb selftest FAIL: " << err << "\n";
+		}
+		if (!pb->unknownEntryChunkIds().empty())
+		{
+			nUnknownIds += (uint)pb->unknownEntryChunkIds().size();
+			for (uint u = 0; u < pb->unknownEntryChunkIds().size(); ++u)
+				std::cerr << "  oldpb UNKNOWN entry chunk id 0x" << std::hex
+				          << pb->unknownEntryChunkIds()[u] << std::dec << "\n";
+		}
+		const std::vector<BUILTIN::CParamBlock::SParam> &ps = pb->params();
+		for (uint i = 0; i < ps.size(); ++i)
+		{
+			if (!ps[i].Animated) continue;
+			++nAnim;
+			float v;
+			if (pb->getFloatAt0(ps[i].Index, v)) ++nAnimResolved;
+			if (verbose)
+			{
+				CSceneClass *ctrl = dynamic_cast<CSceneClass *>(pb->controllerForParam(ps[i].Index));
+				std::cerr << "  oldpb anim idx " << ps[i].Index << " marker 0x" << std::hex
+				          << ps[i].ValueChunkId << std::dec << " slot " << ps[i].RefSlot << " -> "
+				          << (ctrl ? ctrl->classDesc()->classId().toString() : std::string("<null>"))
+				          << " sc=0x" << std::hex << (ctrl ? ctrl->classDesc()->superClassId() : 0) << std::dec
+				          << " '" << (ctrl ? ucstring(ctrl->classDesc()->displayName()).toUtf8() : std::string()) << "'\n";
+			}
+		}
+	}
+	std::cout << ((nFail || nUnknownIds) ? "FAIL" : "OK") << " oldpb-selftest: " << nPb << " blocks, "
+	          << nParams << " params, " << nFail << " fail, " << nUnknownIds << " unknown-ids; anim "
+	          << nAnimResolved << "/" << nAnim << " resolved at t=0\n";
+	if (verbose && !nFail && !nUnknownIds)
+		std::cerr << "  (all " << nPb << " ParamBlock objects re-encode byte-exact)\n";
+	return (nFail || nUnknownIds) ? 1 : 0;
+}
+
 // Recursive reference-tree dump (used by --uvgen-dump).
 static void dumpRefTree(CSceneClass *obj, int depth, int maxDepth)
 {
@@ -532,6 +606,7 @@ int main(int argc, char **argv)
 	bool doT2 = false;
 	bool verbose = false;
 	bool doPb2SelfTest = false;
+	bool doOldPbSelfTest = false;
 	bool doModifySave = false;
 	bool doMtlDump = false;
 	bool doUvgenDump = false;
@@ -545,6 +620,7 @@ int main(int argc, char **argv)
 		if (a == "--parse") doT2 = true;
 		else if (a == "--verbose" || a == "-v") verbose = true;
 		else if (a == "--pb2-selftest") doPb2SelfTest = true;
+		else if (a == "--oldpb-selftest") doOldPbSelfTest = true;
 		else if (a == "--modify-save-test") doModifySave = true;
 		else if (a == "--mtl-dump") doMtlDump = true;
 		else if (a == "--uvgen-dump") doUvgenDump = true;
@@ -559,7 +635,7 @@ int main(int argc, char **argv)
 	}
 	if (!maxFile)
 	{
-		std::cerr << "usage: pipeline_max_corpus_test [--parse] [--verbose] [--pb2-selftest] [--modify-save-test] <input.max>\n";
+		std::cerr << "usage: pipeline_max_corpus_test [--parse] [--verbose] [--pb2-selftest] [--oldpb-selftest] [--modify-save-test] <input.max>\n";
 		return 2;
 	}
 
@@ -576,6 +652,13 @@ int main(int argc, char **argv)
 	if (doPb2SelfTest)
 	{
 		int rc = pb2SelfTest(in, &reg, verbose);
+		remove(g_tempPath.c_str());
+		return rc;
+	}
+
+	if (doOldPbSelfTest)
+	{
+		int rc = oldPbSelfTest(in, &reg, verbose);
 		remove(g_tempPath.c_str());
 		return rc;
 	}

@@ -59,6 +59,7 @@
 #include "patch_object.h"
 #include "editable_patch.h"
 
+#include "param_block.h"
 #include "param_block_2.h"
 
 #include "mtl_base.h"
@@ -88,9 +89,12 @@ const CControlFloatSuperClassDesc ControlFloatSuperClassDesc(&ReferenceTargetCla
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x00009009> CControlColorSuperClassDesc;
 const CControlColorSuperClassDesc ControlColorSuperClassDesc(&ReferenceTargetClassDesc, "ControlColorSuperClassUnknown");
 
-// 0x8 param block, under reftarget directly
-typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000008> CParamBlockSuperClassDesc;
-const CParamBlockSuperClassDesc ParamBlockSuperClassDesc(&ReferenceTargetClassDesc, "ParamBlockSuperClassUnknown");
+// 0x8 old param block, under reftarget directly — typed: every old-style ParamBlock object
+// parses through CParamBlock (per-parameter entry decode incl. the animated compact
+// reference-slot mapping; raw chunks stay authoritative so roundtrip is byte-exact). Unknown
+// ParamBlock class ids fall through to CSceneClassUnknown<CParamBlock>.
+typedef CSuperClassDescUnknown<CParamBlock, 0x00000008> CParamBlockSuperClassDesc;
+const CParamBlockSuperClassDesc ParamBlockSuperClassDesc(&ParamBlockClassDesc, "ParamBlockSuperClassUnknown");
 
 // 0xc20 uv gen, sub of mtlbase
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000c20> CUVGenSuperClassDesc;

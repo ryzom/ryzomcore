@@ -47,6 +47,7 @@
 #include "../pipeline_max/builtin/mtl_base.h"
 #include "../pipeline_max/builtin/multi_mtl.h"
 #include "../pipeline_max/builtin/node_impl.h"
+#include "../pipeline_max/builtin/param_block.h"
 #include "../pipeline_max/builtin/reference_maker.h"
 #include "../pipeline_max/storage_object.h"
 
@@ -170,39 +171,15 @@ static CSceneClass *findUVGen(CSceneClass *obj, int depth)
 
 static CControlKeyFramerBase *uvController(CSceneClass *texmap, int coord)
 {
+	// The StdUVGen coord params live on the UVGen's reference 0 = an old ParamBlock; an ANIMATED
+	// param's controller occupies the block's compact reference slots in entry order — the typed
+	// CParamBlock decodes that mapping (§10k; formerly an inline 0x0002 chunk walk here).
 	CSceneClass *uvgen = findUVGen(texmap, 3);
 	CReferenceMaker *urm = dynamic_cast<CReferenceMaker *>(uvgen);
 	if (!urm || urm->nbReferences() == 0) return NULL;
-	CSceneClass *pblock = dynamic_cast<CSceneClass *>(urm->getReference(0));
-	CStorageContainer *pc = dynamic_cast<CStorageContainer *>(pblock);
-	CReferenceMaker *prm = dynamic_cast<CReferenceMaker *>(pblock);
-	if (!pc || !prm) return NULL;
-
-	int refSlot = 0;
-	for (CStorageContainer::TStorageObjectConstIt it = pc->chunks().begin(); it != pc->chunks().end(); ++it)
-	{
-		if (it->first != 0x0002) continue;
-		CStorageContainer *e = dynamic_cast<CStorageContainer *>(it->second);
-		if (!e) continue;
-		sint32 idx = -1;
-		bool animated = false;
-		for (CStorageContainer::TStorageObjectConstIt st = e->chunks().begin(); st != e->chunks().end(); ++st)
-		{
-			if (st->first == 0x0003)
-			{
-				CStorageRaw *rw = dynamic_cast<CStorageRaw *>(st->second);
-				if (rw && rw->Value.size() == 4) memcpy(&idx, nlVectorData(rw->Value), 4);
-			}
-			else if (st->first == 0x0200)
-				animated = true;
-		}
-		if (animated)
-		{
-			if (idx == coord) return dynamic_cast<CControlKeyFramerBase *>(prm->getReference(refSlot));
-			++refSlot;
-		}
-	}
-	return NULL;
+	CParamBlock *pblock = dynamic_cast<CParamBlock *>(urm->getReference(0));
+	if (!pblock) return NULL;
+	return dynamic_cast<CControlKeyFramerBase *>(pblock->controllerForParam(coord));
 }
 
 static uint addTexTracks(NL3D::CAnimation &animation, CSceneClass *texmap, uint stage, const std::string &mtlName)
