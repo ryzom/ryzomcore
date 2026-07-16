@@ -62,10 +62,10 @@
   <define id="force_level_15"
           value="consider_7.tga" />
   <proc id="proc_target_changed_nameid">
-    <action handler="set_target_name" params="slot=@@UI:VARIABLES:TARGET:SLOT|target=ui:interface:target:uc_title|title=ui:interface:target:header_opened:target_title:uc_hardtext" />
+    <action handler="set_target_name" params="slot=@@UI:VARIABLES:TARGET:SLOT|target=ui:interface:target:title|title=ui:interface:target:header_opened:target_title:hardtext" />
   </proc>
   <proc id="proc_target_changed">
-    <action handler="set_target_name" params="slot=@@UI:VARIABLES:TARGET:SLOT|target=ui:interface:target:uc_title|title=ui:interface:target:header_opened:target_title:uc_hardtext" />
+    <action handler="set_target_name" params="slot=@@UI:VARIABLES:TARGET:SLOT|target=ui:interface:target:title|title=ui:interface:target:header_opened:target_title:hardtext" />
     <action handler="lua" params="game:updateTargetConsiderUI(0)" />
   </proc>
   <link expr="depends(@%target_name_id)"
@@ -1708,7 +1708,7 @@
       <!-- links to display the name of the team mate -->
       <link expr="depends(@SERVER:GROUP:#team_mate_index:NAME)"
             action="set_server_id"
-            params="value=@SERVER:GROUP:#team_mate_index:NAME|target=uc_title|remove_title=1" />
+            params="value=@SERVER:GROUP:#team_mate_index:NAME|target=title|remove_title=1" />
       <!-- links to change the name color if it is the target -->
       <link expr="ifthenelse(eq(@SERVER:GROUP:#team_mate_index:UID,@UI:VARIABLES:TARGET:UID),
                                                                 '255 0 0 255',

@@ -1560,7 +1560,7 @@
 <proc id="proc_appear_name_enter">
 	<action handler="reset_keyboard_focus" />
 	<action handler="play_sound" params="name=summary_enter_name" />
-	<action handler="ask_valid_name" params="target=ui:outgame:appear_name:eb:uc_input_string|dblink=UI:TEMP:NAME_VALID" />
+	<action handler="ask_valid_name" params="target=ui:outgame:appear_name:eb:input_string|dblink=UI:TEMP:NAME_VALID" />
 </proc>
 
 <proc id="proc_appear_name_cancel">
