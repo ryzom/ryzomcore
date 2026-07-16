@@ -43,6 +43,7 @@
 
 #include "../pipeline_max/builtin/storage/app_data.h"
 #include "../pipeline_max/builtin/control_keyframer.h"
+#include "../pipeline_max/builtin/node_impl.h"
 #include "../pipeline_max/biped/biped_driven.h"
 
 #include "max_scene.h" // non-biped walkNodeMax: DefaultPos from the Max quotient matrix
@@ -122,7 +123,7 @@ bool readCtrlDefault(CSceneClass *sc, uint16 chunkId, void *dst, size_t nBytes)
 //                              physical dimensions in Max biped's convention (X=length along the
 //                              bone, Y=width, Z=depth), which for straight-chain descendants
 //                              equals the LOCAL POSITION OFFSET of the child from this bone.
-#define CHUNK_NODE_096C 0x096c
+// All three decode through the typed CNodeImpl overlay (objectOffsetPos/Rot/Scale[Vec]).
 
 // Returns true if the node's TM controller (getReference(0)) is a biped BipDriven_Control
 // (ClassId {0x9154, 0}). Uses classDesc() from the scene class registry which was populated by
@@ -164,17 +165,15 @@ float getNodeScriptAppDataFloat(INode *node, uint32 subId, float def)
 }
 
 // Read 0x096c off the node itself and return the CVector part (Max biped bone dimensions).
-// Returns (0,0,0) if the chunk isn't present.
+// Returns (0,0,0) if the chunk isn't present. Typed CNodeImpl overlay (formerly a
+// findChunkAnywhere walk here).
 NLMISC::CVector readNodeBoneDimensions(INode *node)
 {
 	NLMISC::CVector v = NLMISC::CVector::Null;
-	CSceneClass *n = dynamic_cast<CSceneClass *>(node);
+	BUILTIN::CNodeImpl *n = dynamic_cast<BUILTIN::CNodeImpl *>(node);
 	if (!n) return v;
-	IStorageObject *chunk = findChunkAnywhere(n, CHUNK_NODE_096C);
-	if (!chunk) return v;
-	CStorageRaw *raw = dynamic_cast<CStorageRaw *>(chunk);
-	if (!raw || raw->Value.size() < 12) return v;
-	memcpy(&v, nlVectorData(raw->Value), 12);
+	float s[3];
+	if (n->objectOffsetScaleVec(s)) { v.x = s[0]; v.y = s[1]; v.z = s[2]; }
 	return v;
 }
 

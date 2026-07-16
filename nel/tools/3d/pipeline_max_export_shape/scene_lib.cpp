@@ -192,19 +192,6 @@ CStorageRaw *findRawChunk(CSceneClass *sc, uint16 id)
 	return dynamic_cast<CStorageRaw *>(findChunk(sc, id));
 }
 
-uint32 readNodeDword(CNodeImpl *node, uint16 chunkId, bool &found)
-{
-	found = false;
-	uint32 fl = 0;
-	CStorageRaw *raw = findRawChunk(node, chunkId);
-	if (raw && raw->Value.size() >= 4)
-	{
-		memcpy(&fl, nlVectorData(raw->Value), 4);
-		found = true;
-	}
-	return fl;
-}
-
 // ---------------------------------------------------------------------------------------------
 // Old ParamBlock
 

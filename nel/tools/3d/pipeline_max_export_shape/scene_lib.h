@@ -263,9 +263,9 @@ typedef MAXSCENE::SNodeTMCache SNodeTMCache;
 // GetNodeTM(0) replication with memoization.
 using MAXSCENE::getNodeTM;
 
-// Node state flags chunk 0x0963 bit 0x40 = hidden; rendering-control chunk 0x099c bits
-// 0x0200 = cast-shadows, 0x0400 = receive-shadows.
-uint32 readNodeDword(CNodeImpl *node, uint16 chunkId, bool &found);
+// Node state flags (0x0963 bit 0x40 = hidden) and rendering-control flags (0x099c bits
+// 0x0200 = cast-shadows, 0x0400 = receive-shadows) are typed CNodeImpl overlay accessors now
+// (nodeFlags/isHidden/renderFlags).
 
 // The node's object-offset TRS (chunks 0x096a pos, 0x096b rot, 0x096c ScaleValue).
 using MAXSCENE::readObjectOffset;

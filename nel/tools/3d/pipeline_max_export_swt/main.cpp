@@ -102,25 +102,8 @@ int pmbExportSwtForGltf(const std::string &maxPath, PMAXLOAD::SLoadedMax &lm,
 		// `max select all` skips hidden nodes; the swt maxscript unhides categories but not
 		// per-node hidden state. Node flag chunk 0x0963 bit 0x40 = hidden (byte-validated on
 		// max_top.max, whose hidden Dummy01..18 carry the SWT appdata but are absent from the
-		// reference export).
-		{
-			CStorageRaw *flags = dynamic_cast<CStorageRaw *>(node->findStorageObject(0x0963));
-			bool foundFlags = false;
-			uint32 fl = 0;
-			if (flags && flags->Value.size() >= 4) { memcpy(&fl, nlVectorData(flags->Value), 4); foundFlags = true; }
-			if (!foundFlags)
-			{
-				const CStorageContainer::TStorageObjectContainer &orphans = node->orphanedChunks();
-				for (CStorageContainer::TStorageObjectConstIt oit = orphans.begin(); oit != orphans.end(); ++oit)
-				{
-					if (oit->first != 0x0963) continue;
-					CStorageRaw *raw = dynamic_cast<CStorageRaw *>(oit->second);
-					if (raw && raw->Value.size() >= 4) { memcpy(&fl, nlVectorData(raw->Value), 4); }
-					break;
-				}
-			}
-			if (fl & 0x40) continue; // hidden
-		}
+		// reference export). Typed CNodeImpl overlay (formerly an inline chunk walk here).
+		if (node->isHidden()) continue;
 		std::string flag;
 		if (!getNodeScriptAppDataString(node, NEL3D_APPDATA_EXPORT_SWT, flag)) continue;
 		if (atoi(flag.c_str()) == 0) continue; // BST_UNCHECKED

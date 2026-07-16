@@ -431,36 +431,9 @@ static std::string getNelObjectName(INode &node)
 //     Observed 0x4b00f0xx / 0x4b00f6xx / 0x4b00d6xx; bits 0x0200/0x0400 clear exactly on the
 //     nodes whose reference ig instances carry DontCastShadow=true (cast+receive shadow pair;
 //     0x0200 = cast-shadows, 0x0400 = receive-shadows — discriminated by the canope class: 0x4b00d4xx receives but does not cast, matching DontCastShadow=true in its reference).
-#define NODE_FLAGS_CHUNK_ID 0x0963
+// The 0x0963/0x099c reads themselves are the typed CNodeImpl overlay now (nodeFlags/renderFlags).
 #define NODE_FLAG_HIDDEN 0x00000040
-#define NODE_RENDERFLAGS_CHUNK_ID 0x099c
 #define NODE_RENDERFLAG_CASTSHADOW 0x00000200
-
-static uint32 readNodeDword(CNodeImpl *node, uint16 chunkId, bool &found)
-{
-	found = false;
-	uint32 fl = 0;
-	CStorageRaw *flags = dynamic_cast<CStorageRaw *>(node->findStorageObject(chunkId));
-	if (flags && flags->Value.size() >= 4)
-	{
-		memcpy(&fl, nlVectorData(flags->Value), 4);
-		found = true;
-		return fl;
-	}
-	const CStorageContainer::TStorageObjectContainer &orphans = node->orphanedChunks();
-	for (CStorageContainer::TStorageObjectConstIt oit = orphans.begin(); oit != orphans.end(); ++oit)
-	{
-		if (oit->first != chunkId) continue;
-		CStorageRaw *raw = dynamic_cast<CStorageRaw *>(oit->second);
-		if (raw && raw->Value.size() >= 4)
-		{
-			memcpy(&fl, nlVectorData(raw->Value), 4);
-			found = true;
-		}
-		break;
-	}
-	return fl;
-}
 
 // ---------------------------------------------------------------------------------------------
 // Ligo brick ig export (build_gamedata processes/ligo, nel_ligo_export.ms): the same
@@ -1589,9 +1562,9 @@ static NL3D::CInstanceGroup *buildInstanceGroup(const std::vector<INode *> &vect
 			sint appDataCameraCol = getScriptAppDataInt(pNodeImpl, NEL3D_APPDATA_CAMERA_COLLISION_MESH_GENERATION, 0);
 			aIGArray[nNumIG].Visible = appDataCameraCol != 3;
 
-			// DontCastShadow from the node's CastShadows rendering-control flag.
-			bool flagsFound = false;
-			uint32 rendFlags = readNodeDword(pNodeImpl, NODE_RENDERFLAGS_CHUNK_ID, flagsFound);
+			// DontCastShadow from the node's CastShadows rendering-control flag (typed overlay).
+			uint32 rendFlags = 0;
+			bool flagsFound = pNodeImpl->renderFlags(rendFlags);
 			aIGArray[nNumIG].DontCastShadow = flagsFound && (rendFlags & NODE_RENDERFLAG_CASTSHADOW) == 0;
 
 			aIGArray[nNumIG].DontCastShadowForInterior = getScriptAppDataInt(pNodeImpl, NEL3D_APPDATA_LIGHT_DONT_CAST_SHADOW_INTERIOR, 0) ? true : false;
@@ -2302,8 +2275,8 @@ static void dumpNodes(CSceneClassContainer *ssc, SNodeTMCache &tmCache)
 		CNodeImpl *node = dynamic_cast<CNodeImpl *>(it->second);
 		if (!node) continue;
 		CSceneClass *obj = baseObjectOf(*node);
-		bool flagsFound = false;
-		uint32 flags = readNodeDword(node, NODE_FLAGS_CHUNK_ID, flagsFound);
+		uint32 flags = 0;
+		bool flagsFound = node->nodeFlags(flags);
 		std::string ig = getScriptAppDataStr(node, NEL3D_APPDATA_IGNAME, "");
 		Matrix3M tm = getNodeTM(node, tmCache);
 		INode *parent = node->parent();

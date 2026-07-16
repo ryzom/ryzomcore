@@ -109,6 +109,7 @@
 #include "../pipeline_max/builtin/control_keyframer.h"
 
 #include "../pipeline_max_export_common/max_math.h"
+#include "../pipeline_max_export_common/max_scene.h"
 #include "../pipeline_max_export_common/appdata_util.h"
 #include "../pipeline_max_export_common/export_ids.h"
 
@@ -355,16 +356,8 @@ static Matrix3M getObjectTM(CNodeImpl *node, SNodeTMCache &cache)
 	scale.s.x = scale.s.y = scale.s.z = 1.0f;
 	scale.q.x = scale.q.y = scale.q.z = 0.0f;
 	scale.q.w = 1.0f;
-	bool any = false;
-	const CStorageContainer::TStorageObjectContainer &orphans = node->orphanedChunks();
-	for (CStorageContainer::TStorageObjectConstIt it = orphans.begin(); it != orphans.end(); ++it)
-	{
-		CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
-		if (!raw) continue;
-		if (it->first == 0x096a && raw->Value.size() >= 12) { memcpy(&pos, nlVectorData(raw->Value), 12); any = true; }
-		else if (it->first == 0x096b && raw->Value.size() >= 16) { memcpy(&rot, nlVectorData(raw->Value), 16); any = true; }
-		else if (it->first == 0x096c && raw->Value.size() >= 28) { memcpy(&scale.s, nlVectorData(raw->Value), 12); memcpy(&scale.q, (const uint8 *)nlVectorData(raw->Value) + 12, 16); any = true; }
-	}
+	// Typed CNodeImpl overlay via the shared reader (formerly an inline orphan walk here).
+	bool any = MAXSCENE::readObjectOffset(node, pos, rot, scale);
 	Matrix3M nodeTM = getNodeTM(node, cache);
 	if (!any) return nodeTM;
 	Matrix3M offsetTM = composePRS(pos, rot, scale);

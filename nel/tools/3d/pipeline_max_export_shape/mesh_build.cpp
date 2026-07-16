@@ -58,7 +58,7 @@ namespace MESHBUILD {
 // Morpher modifier (Morpher.dlm) — refs 101+i are the blend-shape target nodes (design §10d).
 static const NLMISC::CClassId CLASSID_MORPHER(0x17bb6854, 0xa5cba2a3);
 
-#define NODE_RENDERFLAGS_CHUNK_ID 0x099c
+// Rendering-control flag bits (chunk 0x099c, read via the typed CNodeImpl renderFlags overlay).
 #define NODE_RENDERFLAG_CASTSHADOW 0x00000200
 #define NODE_RENDERFLAG_RCVSHADOW 0x00000400
 
@@ -258,9 +258,9 @@ void buildBaseMeshInterface(CMeshBase::CMeshBaseBuild &buildMesh, SMaxMeshBaseBu
 {
 	CNodeImpl *n = dynamic_cast<CNodeImpl *>(&node);
 
-	// Shadow flags from the rendering-control dword
-	bool found = false;
-	uint32 renderFlags = n ? readNodeDword(n, NODE_RENDERFLAGS_CHUNK_ID, found) : 0;
+	// Shadow flags from the rendering-control dword (typed CNodeImpl overlay)
+	uint32 renderFlags = 0;
+	bool found = n && n->renderFlags(renderFlags);
 	if (!found) renderFlags = NODE_RENDERFLAG_CASTSHADOW | NODE_RENDERFLAG_RCVSHADOW;
 	buildMesh.bCastShadows = (renderFlags & NODE_RENDERFLAG_CASTSHADOW) != 0;
 	buildMesh.bRcvShadows = (renderFlags & NODE_RENDERFLAG_RCVSHADOW) != 0;

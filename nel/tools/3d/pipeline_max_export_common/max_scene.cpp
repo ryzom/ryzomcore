@@ -169,15 +169,20 @@ bool readObjectOffset(INode *node, Point3M &pos, QuatM &rot, ScaleValueM &scale)
 	scale.s.x = scale.s.y = scale.s.z = 1.0f;
 	scale.q.x = scale.q.y = scale.q.z = 0.0f;
 	scale.q.w = 1.0f;
-	CSceneClass *sc = dynamic_cast<CSceneClass *>(node);
-	if (!sc) return false;
+	// The typed CNodeImpl overlay decodes the offset chunks (0x096a/0x096b/0x096c) at parse —
+	// one decode path, in the library (formerly a findRawChunk walk here).
+	CNodeImpl *n = dynamic_cast<CNodeImpl *>(node);
+	if (!n) return false;
 	bool any = false;
-	CStorageRaw *raw = findRawChunk(sc, 0x096a);
-	if (raw && raw->Value.size() >= 12) { memcpy(&pos, nlVectorData(raw->Value), 12); any = true; }
-	raw = findRawChunk(sc, 0x096b);
-	if (raw && raw->Value.size() >= 16) { memcpy(&rot, nlVectorData(raw->Value), 16); any = true; }
-	raw = findRawChunk(sc, 0x096c);
-	if (raw && raw->Value.size() >= 28) { memcpy(&scale, nlVectorData(raw->Value), 28); any = true; }
+	float p3[3], q4[4], s3[3];
+	if (n->objectOffsetPos(p3)) { pos.x = p3[0]; pos.y = p3[1]; pos.z = p3[2]; any = true; }
+	if (n->objectOffsetRot(q4)) { rot.x = q4[0]; rot.y = q4[1]; rot.z = q4[2]; rot.w = q4[3]; any = true; }
+	if (n->objectOffsetScale(s3, q4))
+	{
+		scale.s.x = s3[0]; scale.s.y = s3[1]; scale.s.z = s3[2];
+		scale.q.x = q4[0]; scale.q.y = q4[1]; scale.q.z = q4[2]; scale.q.w = q4[3];
+		any = true;
+	}
 	return any;
 }
 
