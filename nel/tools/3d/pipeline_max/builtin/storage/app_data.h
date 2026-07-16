@@ -4,6 +4,7 @@
  * \date 2012-08-21 11:47GMT
  * \author Jan Boon (Kaetemi)
  * \author Claude Sonnet 5
+ * \author Claude Fable 5
  * CAppData
  */
 
@@ -110,6 +111,25 @@ public:
 	T *getOrCreate(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId);
 	/// Erases an appdata chunk.
 	void erase(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId);
+
+	//! \name NeL export script AppData entries
+	//! Every `NEL3D_APPDATA_*` entry the NeL export scripts store is keyed
+	//! (ScriptClassId, ScriptSuperClassId, subId) with a null-terminated string payload
+	//! (booleans/enums as decimal-string text — see design doc §8 and
+	//! plugin_max/nel_mesh_lib/export_appdata.h).
+	//@{
+	/// The MAXSCRIPT utility key the NeL export script entries are stored under.
+	static const NLMISC::CClassId ScriptClassId;   // (0x04d64858, 0x16d1751d)
+	static const TSClassId ScriptSuperClassId;     // 4128
+	/// Read a script entry's string value. Returns false when the entry is absent or the
+	/// payload lacks the trailing NUL the convention requires.
+	bool getScriptString(uint32 subId, std::string &out);
+	/// Create-or-overwrite a script entry with the null-terminated string convention — the
+	/// write half of programmatic export-flag editing (e.g. toggling DONOTEXPORT). The entry
+	/// value re-serializes through the normal entry build, so the rewrite stays byte-exact for
+	/// an unchanged value and byte-local for a changed one.
+	bool setScriptString(uint32 subId, const std::string &value);
+	//@}
 
 	// read access
 	/// Return the entries map, do not modify directly

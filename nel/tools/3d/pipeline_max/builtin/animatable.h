@@ -79,7 +79,14 @@ public:
 	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "", uint filter = 0) const;
 
 	// public
+	/// The AppData container, CREATED (empty, parsed-state) when the object has none — the
+	/// authoring accessor. Readers should use existingAppData() instead: creating an empty
+	/// container as a side effect of a read is wasteful, and before the clean() guard below it
+	/// aborted any subsequent scene clean/build (the fresh container is indistinguishable from
+	/// a double-cleaned one to CAppData::clean's coding-error check).
 	STORAGE::CAppData *appData();
+	/// The AppData container if the source carried one (or authoring created one), else NULL.
+	inline STORAGE::CAppData *existingAppData() const { return m_AppData; }
 	/// Read access to the 0x2140 chunk: Max's note-track attachment on the Animatable
 	/// (container of 0x0130 note-track count + per note key 0x0100 time / 0x0110 flags /
 	/// 0x0120 UTF-16 note string — see pipeline_max_design.md §10d). Kept verbatim for

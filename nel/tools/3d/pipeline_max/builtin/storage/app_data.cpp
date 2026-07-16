@@ -4,6 +4,7 @@
  * \date 2012-08-21 11:47GMT
  * \author Jan Boon (Kaetemi)
  * \author Claude Sonnet 5
+ * \author Claude Fable 5
  * CAppData
  */
 
@@ -30,6 +31,7 @@
 #include "app_data.h"
 
 // STL includes
+#include <cstring>
 
 // NeL includes
 // #include <nel/misc/debug.h>
@@ -325,6 +327,39 @@ void CAppData::fill(NLMISC::CClassId classId, TSClassId superClassId, uint32 sub
 	// unlock(classId, superClassId, subId, size);
 }
 */
+const NLMISC::CClassId CAppData::ScriptClassId = NLMISC::CClassId(0x04d64858, 0x16d1751d);
+const TSClassId CAppData::ScriptSuperClassId = 4128;
+
+bool CAppData::getScriptString(uint32 subId, std::string &out)
+{
+	// Deliberately NOT get<T>: absent sub-ids are the NORM on this read path (every exporter
+	// queries dozens of optional flags per node), and get<T>'s miss-path nldebug is not free —
+	// beyond the volume, the colored std displayer leaves its ANSI reset leading the NEXT
+	// stdout line, which corrupted the exporters' machine-readable tag lines (LIGHTMAP/MAPEXT
+	// et al) and silently broke the corpus drivers' startswith parsing. Quiet miss, like the
+	// pre-typed readers.
+	if (m_ChunksOwnsPointers) return false; // not parsed
+	TMap::const_iterator it = m_Entries.find(TKey(ScriptClassId, ScriptSuperClassId, subId));
+	if (it == m_Entries.end()) return false;
+	CStorageRaw *raw = it->second->value<CStorageRaw>();
+	if (!raw) return false;
+	// Script AppData strings are null-terminated; require the trailing NUL like every reader of
+	// this convention (skel/anim/swt/ig/shape).
+	if (raw->Value.empty() || raw->Value[raw->Value.size() - 1] != '\0') return false;
+	out = std::string(raw->Value.begin(), raw->Value.end() - 1);
+	return true;
+}
+
+bool CAppData::setScriptString(uint32 subId, const std::string &value)
+{
+	CStorageRaw *raw = getOrCreate<CStorageRaw>(ScriptClassId, ScriptSuperClassId, subId);
+	if (!raw) return false;
+	raw->Value.resize(value.size() + 1);
+	if (!value.empty()) memcpy(&raw->Value[0], value.c_str(), value.size());
+	raw->Value[value.size()] = '\0';
+	return true;
+}
+
 void CAppData::erase(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId)
 {
 	if (m_ChunksOwnsPointers) { nlwarning("Not parsed"); return; }

@@ -66,6 +66,8 @@
 #include "../pipeline_max/biped/biped.h"
 #include "../pipeline_max/nelpatch/nelpatch.h"
 
+#include "../pipeline_max/builtin/animatable.h"
+#include "../pipeline_max/builtin/storage/app_data.h"
 #include "../pipeline_max/builtin/param_block.h"
 #include "../pipeline_max/builtin/param_block_2.h"
 #include "../pipeline_max/builtin/shape_object.h"
@@ -213,7 +215,10 @@ static bool loadContainer(const CStorageOleIn &in, const char *name, CStorageCon
 // to the original, and (c) the Scene stream differs from the original ONLY in the modified
 // parameter's payload bytes (a surgical, byte-localized edit — nothing else moved). This is the
 // "programmatically adjust existing .max files" capability the material editor is built on.
-static int modifySaveTest(CStorageOleIn &in, CSceneClassRegistry *reg, const std::string &tempMax, bool verbose)
+// appDataMode: instead of a ParamBlock2 parameter, modify a script AppData entry through the
+// typed CAppData::setScriptString (same-length one-byte toggle so the surgical byte-locality
+// assertions below apply unchanged) — the end-to-end proof of programmatic export-flag editing.
+static int modifySaveTest(CStorageOleIn &in, CSceneClassRegistry *reg, const std::string &tempMax, bool verbose, bool appDataMode)
 {
 	// All chunk streams read verbatim for byte-exact write-back of the unmodified ones + the
 	// original-vs-rewritten comparison.
@@ -255,8 +260,42 @@ static int modifySaveTest(CStorageOleIn &in, CSceneClassRegistry *reg, const std
 	CSceneClassContainer *ssc = scene.container();
 	sint32 targetIndex = -1;
 	uint16 targetParam = 0;
-	int targetKind = 0; // 1 float, 2 int, 3 bool, 4 color
+	int targetKind = 0; // 1 float, 2 int, 3 bool, 4 color; appDataMode: 5 script string
 	float newF = 1234.5f; sint32 newI = 0x5eed1234; float newC[3] = { 0.125f, 0.5f, 0.875f };
+	uint32 targetSubId = 0; std::string newS;
+	if (appDataMode)
+	{
+		// First script AppData entry with a non-empty string value; toggle its first byte with
+		// ^0x01 (same length, and decimal-string digits stay digits: '0'<->'1', '2'<->'3', ...).
+		sint32 idx = 0;
+		for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end() && targetIndex < 0; ++it, ++idx)
+		{
+			BUILTIN::CAnimatable *anim = dynamic_cast<BUILTIN::CAnimatable *>(it->second);
+			if (!anim) continue;
+			BUILTIN::STORAGE::CAppData *ad = anim->existingAppData();
+			if (!ad) continue;
+			for (BUILTIN::STORAGE::CAppData::TMap::const_iterator eit = ad->entries().begin(); eit != ad->entries().end(); ++eit)
+			{
+				if (eit->first.ClassId != BUILTIN::STORAGE::CAppData::ScriptClassId
+					|| eit->first.SuperClassId != BUILTIN::STORAGE::CAppData::ScriptSuperClassId) continue;
+				std::string cur;
+				if (!ad->getScriptString(eit->first.SubId, cur) || cur.empty()) continue;
+				newS = cur;
+				newS[0] = (char)(newS[0] ^ 0x01);
+				if (!ad->setScriptString(eit->first.SubId, newS)) continue;
+				targetIndex = idx;
+				targetSubId = eit->first.SubId;
+				targetKind = 5;
+				break;
+			}
+		}
+		if (targetIndex < 0)
+		{
+			std::cout << "SKIP appdata-modify-save: no non-empty script AppData entry found\n";
+			return 0;
+		}
+	}
+	else
 	{
 		sint32 idx = 0;
 		for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end() && targetIndex < 0; ++it, ++idx)
@@ -319,7 +358,7 @@ static int modifySaveTest(CStorageOleIn &in, CSceneClassRegistry *reg, const std
 		std::cout << "SKIP modify-save: no modifiable ParamBlock2 parameter found\n";
 		return 0;
 	}
-	if (verbose)
+	if (verbose && !appDataMode)
 	{
 		// In-memory read-back right after the modify (isolates modify vs. serialize).
 		BUILTIN::CParamBlock2 *pb2 = dynamic_cast<BUILTIN::CParamBlock2 *>(ssc->getByStorageIndex((uint32)targetIndex));
@@ -365,6 +404,18 @@ static int modifySaveTest(CStorageOleIn &in, CSceneClassRegistry *reg, const std
 		if (ok) { std::vector<uint8> b; if (in2.readStream("ClassDirectory3", b)) { CStorageStream ss(b); try { cd2.serial(ss); cd2.parse(VersionUnknown); } catch (...) { ok = false; } } else ok = false; }
 		if (ok) { std::vector<uint8> b; if (in2.readStream("Scene", b)) { CStorageStream ss(b); try { scene2.serial(ss); scene2.parse(VersionUnknown); } catch (...) { ok = false; } } else ok = false; }
 		if (!ok) { std::cerr << "reload parse failed\n"; ++fails; }
+		else if (appDataMode)
+		{
+			BUILTIN::CAnimatable *anim = dynamic_cast<BUILTIN::CAnimatable *>(scene2.container()->getByStorageIndex((uint32)targetIndex));
+			BUILTIN::STORAGE::CAppData *ad = anim ? anim->existingAppData() : NULL;
+			std::string back;
+			bool good = ad && ad->getScriptString(targetSubId, back) && back == newS;
+			if (!good)
+			{
+				if (verbose) std::cerr << "  got script '" << back << "' want '" << newS << "'\n";
+				std::cerr << "modified script AppData entry did not read back the new value\n"; ++fails;
+			}
+		}
 		else
 		{
 			BUILTIN::CParamBlock2 *pb2 = dynamic_cast<BUILTIN::CParamBlock2 *>(scene2.container()->getByStorageIndex((uint32)targetIndex));
@@ -405,8 +456,12 @@ static int modifySaveTest(CStorageOleIn &in, CSceneClassRegistry *reg, const std
 		}
 	}
 
-	std::cout << (fails ? "FAIL" : "OK") << " modify-save: param 0x" << std::hex << targetParam << std::dec
-	          << " kind " << targetKind << " @storage " << targetIndex << ", " << fails << " fail\n";
+	if (appDataMode)
+		std::cout << (fails ? "FAIL" : "OK") << " appdata-modify-save: subId " << targetSubId
+		          << " @storage " << targetIndex << ", " << fails << " fail\n";
+	else
+		std::cout << (fails ? "FAIL" : "OK") << " modify-save: param 0x" << std::hex << targetParam << std::dec
+		          << " kind " << targetKind << " @storage " << targetIndex << ", " << fails << " fail\n";
 	return fails ? 1 : 0;
 }
 
@@ -619,6 +674,85 @@ static int shapeSelfTest(CStorageOleIn &in, CSceneClassRegistry *reg, bool verbo
 	return (nFail || nUnknownIds) ? 1 : 0;
 }
 
+// Parse the Scene stream fully and run the CAppData script-entry write-path self-check: for
+// every script AppData entry (the NEL3D_APPDATA_* MAXSCRIPT-keyed, null-terminated-string
+// entries), read the string through the typed getScriptString, write the SAME value back
+// through setScriptString, then rebuild the whole Scene stream and require byte-identity with
+// the source — the idempotent-set proof that the write path reproduces the stored layout.
+static int appDataSelfTest(CStorageOleIn &in, CSceneClassRegistry *reg, bool verbose)
+{
+	CDllDirectory dll;
+	CClassDirectory3 cd(&dll);
+	CScene scene(reg, &dll, &cd);
+	std::vector<uint8> sceneBytes;
+	{
+		std::vector<uint8> b;
+		if (!in.readStream("DllDirectory", b)) { std::cerr << "no DllDirectory\n"; return 2; }
+		CStorageStream ss(b); try { dll.serial(ss); dll.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "dll: " << e.what() << "\n"; return 2; }
+	}
+	{
+		std::vector<uint8> b;
+		if (!in.readStream("ClassDirectory3", b)) { std::cerr << "no ClassDirectory3\n"; return 2; }
+		CStorageStream ss(b); try { cd.serial(ss); cd.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "cd: " << e.what() << "\n"; return 2; }
+	}
+	{
+		if (!in.readStream("Scene", sceneBytes)) { std::cerr << "no Scene\n"; return 2; }
+		CStorageStream ss(sceneBytes); try { scene.serial(ss); scene.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "scene: " << e.what() << "\n"; return 2; }
+	}
+	uint nObj = 0, nEntries = 0, nNonString = 0, nSetFail = 0, nReadbackFail = 0;
+	CSceneClassContainer *ssc = scene.container();
+	for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
+	{
+		BUILTIN::CAnimatable *anim = dynamic_cast<BUILTIN::CAnimatable *>(it->second);
+		if (!anim) continue;
+		BUILTIN::STORAGE::CAppData *ad = anim->existingAppData();
+		if (!ad) continue;
+		bool counted = false;
+		// Collect the script sub-ids first — setScriptString may not mutate the map during walk
+		// (it doesn't for existing keys, but keep the walk clean).
+		std::vector<uint32> subIds;
+		for (BUILTIN::STORAGE::CAppData::TMap::const_iterator eit = ad->entries().begin(); eit != ad->entries().end(); ++eit)
+		{
+			if (eit->first.ClassId != BUILTIN::STORAGE::CAppData::ScriptClassId
+				|| eit->first.SuperClassId != BUILTIN::STORAGE::CAppData::ScriptSuperClassId) continue;
+			subIds.push_back(eit->first.SubId);
+		}
+		for (uint i = 0; i < subIds.size(); ++i)
+		{
+			if (!counted) { ++nObj; counted = true; }
+			++nEntries;
+			std::string value;
+			if (!ad->getScriptString(subIds[i], value))
+			{
+				// Entry exists under the script key but is not a null-terminated string —
+				// counted (a corpus-wide nonzero count would mean the convention is wrong).
+				++nNonString;
+				continue;
+			}
+			if (!ad->setScriptString(subIds[i], value)) { ++nSetFail; continue; }
+			std::string back;
+			if (!ad->getScriptString(subIds[i], back) || back != value) ++nReadbackFail;
+		}
+	}
+	// Rebuild the Scene stream and require byte-identity with the source (idempotent set).
+	bool byteIdentical = false;
+	try
+	{
+		scene.clean(); scene.build(VersionUnknown); scene.disown();
+		std::vector<uint8> rebuilt = writeContainerToTemp(scene, g_tempPath);
+		byteIdentical = (rebuilt == sceneBytes);
+	}
+	catch (std::exception &e) { std::cerr << "rebuild: " << e.what() << "\n"; }
+	bool fail = nSetFail || nReadbackFail || !byteIdentical;
+	std::cout << (fail ? "FAIL" : "OK") << " appdata-selftest: " << nObj << " objects, "
+	          << nEntries << " script entries, " << nNonString << " non-string, "
+	          << nSetFail << " set-fail, " << nReadbackFail << " readback-fail, rebuild "
+	          << (byteIdentical ? "byte-identical" : "DIFFERS") << "\n";
+	if (verbose && !fail)
+		std::cerr << "  (idempotent setScriptString over every script entry keeps the Scene stream byte-identical)\n";
+	return fail ? 1 : 0;
+}
+
 // Recursive reference-tree dump (used by --uvgen-dump).
 static void dumpRefTree(CSceneClass *obj, int depth, int maxDepth)
 {
@@ -677,7 +811,9 @@ int main(int argc, char **argv)
 	bool doPb2SelfTest = false;
 	bool doOldPbSelfTest = false;
 	bool doShapeSelfTest = false;
+	bool doAppDataSelfTest = false;
 	bool doModifySave = false;
+	bool doAppDataModifySave = false;
 	bool doMtlDump = false;
 	bool doUvgenDump = false;
 	const char *dumpScene = NULL;
@@ -692,7 +828,9 @@ int main(int argc, char **argv)
 		else if (a == "--pb2-selftest") doPb2SelfTest = true;
 		else if (a == "--oldpb-selftest") doOldPbSelfTest = true;
 		else if (a == "--shape-selftest") doShapeSelfTest = true;
+		else if (a == "--appdata-selftest") doAppDataSelfTest = true;
 		else if (a == "--modify-save-test") doModifySave = true;
+		else if (a == "--appdata-modify-save-test") doAppDataModifySave = true;
 		else if (a == "--mtl-dump") doMtlDump = true;
 		else if (a == "--uvgen-dump") doUvgenDump = true;
 		else if (a == "--dump-scene" && i + 1 < argc) dumpScene = argv[++i];
@@ -706,7 +844,7 @@ int main(int argc, char **argv)
 	}
 	if (!maxFile)
 	{
-		std::cerr << "usage: pipeline_max_corpus_test [--parse] [--verbose] [--pb2-selftest] [--oldpb-selftest] [--shape-selftest] [--modify-save-test] <input.max>\n";
+		std::cerr << "usage: pipeline_max_corpus_test [--parse] [--verbose] [--pb2-selftest] [--oldpb-selftest] [--shape-selftest] [--appdata-selftest] [--modify-save-test] [--appdata-modify-save-test] <input.max>\n";
 		return 2;
 	}
 
@@ -741,10 +879,17 @@ int main(int argc, char **argv)
 		return rc;
 	}
 
-	if (doModifySave)
+	if (doAppDataSelfTest)
+	{
+		int rc = appDataSelfTest(in, &reg, verbose);
+		remove(g_tempPath.c_str());
+		return rc;
+	}
+
+	if (doModifySave || doAppDataModifySave)
 	{
 		std::string tempMax = "/tmp/pipeline_max_modify_save." + NLMISC::toString((sint32)PMCT_GETPID()) + ".max";
-		int rc = modifySaveTest(in, &reg, tempMax, verbose);
+		int rc = modifySaveTest(in, &reg, tempMax, verbose, doAppDataModifySave);
 		remove(tempMax.c_str());
 		remove(g_tempPath.c_str());
 		return rc;

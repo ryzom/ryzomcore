@@ -88,7 +88,11 @@ void CAnimatable::parse(uint16 version, uint filter)
 void CAnimatable::clean()
 {
 	CSceneClass::clean();
-	if (m_AppData) m_AppData->clean();
+	// A freshly created AppData (authoring: appData() on an object that had none) has no source
+	// chunks to clean — and CAppData::clean's empty-chunks state is otherwise its double-clean
+	// coding-error check, which is fatal. Skip it; build populates the fresh container (or
+	// discards it when it stays empty).
+	if (m_AppData && !m_AppData->chunks().empty()) m_AppData->clean();
 }
 
 void CAnimatable::build(uint16 version, uint filter)

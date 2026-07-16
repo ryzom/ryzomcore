@@ -38,31 +38,17 @@ using namespace PIPELINE::MAX::BUILTIN;
 
 namespace APPDATA {
 
-namespace {
-
-// MAXSCRIPT_UTILITY_CLASS_ID / superclass, per plugin_max/nel_mesh_lib/export_appdata.h — the
-// key every NEL3D_APPDATA_* script entry is stored under (see pipeline_max_design.md §8).
-const NLMISC::CClassId ScriptClassId(0x04d64858, 0x16d1751d);
-const uint32 ScriptSuperClassId = 4128;
-
-} /* anonymous namespace */
-
 bool getScriptAppData(CSceneClass *sc, uint32 subId, std::string &out)
 {
+	// The script-entry key and the null-terminated string convention live in the typed
+	// CAppData now (getScriptString/setScriptString — the library also carries the write half).
 	CAnimatable *anim = dynamic_cast<CAnimatable *>(sc);
 	if (!anim) return false;
-	STORAGE::CAppData *ad = anim->appData();
+	// existingAppData, not appData — a read must not create an empty AppData container as a
+	// side effect (appData() is the authoring accessor).
+	STORAGE::CAppData *ad = anim->existingAppData();
 	if (!ad) return false;
-	STORAGE::CAppData::TMap::const_iterator it = ad->entries().find(
-		STORAGE::CAppData::TKey(ScriptClassId, ScriptSuperClassId, subId));
-	if (it == ad->entries().end()) return false;
-	CStorageRaw *raw = it->second->value<CStorageRaw>();
-	if (!raw) return false;
-	// Script AppData strings are null-terminated; require the trailing NUL like every other
-	// reader of this convention (skel/anim/swt/ig/shape).
-	if (raw->Value.empty() || raw->Value[raw->Value.size() - 1] != '\0') return false;
-	out = std::string(raw->Value.begin(), raw->Value.end() - 1);
-	return true;
+	return ad->getScriptString(subId, out);
 }
 
 std::string getScriptAppDataStr(CSceneClass *sc, uint32 subId, const std::string &def)
