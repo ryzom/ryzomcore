@@ -137,6 +137,8 @@ aes_state.txt
 # Python cache
 *.pyd
 *.pyc
+__pycache__/
+*.egg-info/
 
 # Qt compiler
 moc_*.cpp
