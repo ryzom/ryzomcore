@@ -1,17 +1,20 @@
 #!/bin/env python3
 #############################################
-# | ___ \|_   _|| ___ \/  ___|
-# | |_/ /  | |  | |_/ /\ `--.
-# |    /   | |  | ___ \ `--. \
-# | |\ \ __| |__| |_/ //\__/ /
-# \_| \_(_)___(_)____(_)____(_)
+# ______                           _____ _                   _   _____           _
+# | ___ \                         /  ___| |                 | | |_   _|         | |
+# | |_/ /   _ _______  _ __ ___   \ `--.| |__   __ _ _ __ __| |   | | ___   ___ | |___
+# |    / | | |_  / _ \| '_ ` _ \   `--. \ '_ \ / _` | '__/ _` |   | |/ _ \ / _ \| / __|
+# | |\ \ |_| |/ / (_) | | | | | | /\__/ / | | | (_| | | | (_| |   | | (_) | (_) | \__ \
+# \_| \_\__, /___\___/|_| |_| |_| \____/|_| |_|\__,_|_|  \__,_|   \_/\___/ \___/|_|___/
+#        __/ |
+#       |___/
 #
-# Remote Interface to Bash Scripts
-# - better with barcebue sauce -
-# Copyright (C) 2019-2026 Nuneo (ulukyn@gmail.com)
+# Ryzom Shard Tools 
+# Copyright (C) 2019-2026 Nuneo (nuno@troispetits.net)
 #
 # This program is free software (GPLv3): read https://www.gnu.org/licenses/gpl-3.0.en.html for more details
 #
+
 import os
 import sys
 import time
