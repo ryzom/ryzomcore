@@ -344,7 +344,6 @@ extern const float BIPED_EPS_TWIST;
 
 // Chunk access + node helpers
 PIPELINE::MAX::IStorageObject *findChunkAnywhere(PIPELINE::MAX::CSceneClass *sc, uint16 id);
-bool readRawBytes(PIPELINE::MAX::CSceneClass *sc, uint16 chunkId, void *dst, size_t nBytes);
 bool readCtrlDefault(PIPELINE::MAX::CSceneClass *sc, uint16 chunkId, void *dst, size_t nBytes);
 bool isBipedBoneNode(PIPELINE::MAX::BUILTIN::INode *node);
 bool isBipedComNode(PIPELINE::MAX::BUILTIN::INode *node);

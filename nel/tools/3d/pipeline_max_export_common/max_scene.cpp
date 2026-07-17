@@ -34,6 +34,7 @@
 #include "../pipeline_max/builtin/node_impl.h"
 #include "../pipeline_max/builtin/reference_maker.h"
 #include "../pipeline_max/builtin/control_keyframer.h"
+#include "../pipeline_max/builtin/control_transform.h"
 
 using namespace PIPELINE::MAX;
 using namespace PIPELINE::MAX::BUILTIN;
@@ -41,56 +42,14 @@ using namespace MAXMATH;
 
 namespace MAXSCENE {
 
-const NLMISC::CClassId CLASSID_PRS_CTRL(0x00002005, 0x00000000);
-const NLMISC::CClassId CLASSID_LOOKAT_CTRL(0x00002006, 0x00000000);
-
-// PRS sub-controller default-value chunk ids.
-#define CHUNK_CTRL_POS_VALUE 0x2503
-#define CHUNK_CTRL_ROT_VALUE 0x2504
-#define CHUNK_CTRL_SCALE_VALUE 0x2505
-#define CHUNK_CTRL_FLOAT_VALUE 0x2501
-
-// ---------------------------------------------------------------------------------------------
-
-static CStorageRaw *findRawChunk(CSceneClass *sc, uint16 id)
-{
-	if (!sc) return NULL;
-	for (CStorageContainer::TStorageObjectConstIt it = sc->orphanedChunks().begin(); it != sc->orphanedChunks().end(); ++it)
-		if (it->first == id) return dynamic_cast<CStorageRaw *>(it->second);
-	for (CStorageContainer::TStorageObjectConstIt it = sc->chunks().begin(); it != sc->chunks().end(); ++it)
-		if (it->first == id) return dynamic_cast<CStorageRaw *>(it->second);
-	return NULL;
-}
-
-// Read a controller's default-value chunk: the typed keyframer's claimed default, else the raw
-// orphan chunk (for a controller that is still an unknown pass-through).
-static bool readCtrlDefaultBytes(CSceneClass *sc, uint16 chunkId, void *dst, size_t nBytes)
-{
-	CControlKeyFramerBase *kf = dynamic_cast<CControlKeyFramerBase *>(sc);
-	if (kf)
-	{
-		uint size = 0;
-		const uint8 *data = kf->defaultValue(size);
-		if (data && size >= nBytes)
-		{
-			memcpy(dst, data, nBytes);
-			return true;
-		}
-	}
-	CStorageRaw *raw = findRawChunk(sc, chunkId);
-	if (raw && raw->Value.size() >= nBytes)
-	{
-		memcpy(dst, nlVectorData(raw->Value), nBytes);
-		return true;
-	}
-	return false;
-}
-
 // ---------------------------------------------------------------------------------------------
 // Controller value at t=0. The evaluation lives in the library (CControlKeyFramerBase::
 // {pos,rot,scale,float}ValueAt0 — key-bracket at tick 0 else default-value chunk); these wrap it
-// into the MAXMATH value types, keeping the raw-chunk fallback for controllers that are not typed
-// keyframers.
+// into the MAXMATH value types. There is deliberately NO raw-chunk fallback for non-keyframer
+// controllers: the corpus-wide 0x9008 inventory (design doc §10j-dix) established that no
+// non-keyframer sub-controller carries a default-value chunk (0x2501/0x2503/0x2504/0x2505)
+// anywhere, Max 3 included — the historical fallback never fired, and a non-keyframer resolves
+// to the caller-side identity/zero default exactly as before.
 
 Point3M posValueAt0(CSceneClass *ctrl)
 {
@@ -99,9 +58,7 @@ Point3M posValueAt0(CSceneClass *ctrl)
 	{
 		float v[3];
 		if (kf->posValueAt0(v)) { p.x = v[0]; p.y = v[1]; p.z = v[2]; }
-		return p;
 	}
-	readCtrlDefaultBytes(ctrl, CHUNK_CTRL_POS_VALUE, &p, 12);
 	return p;
 }
 
@@ -112,9 +69,7 @@ QuatM rotValueAt0(CSceneClass *ctrl)
 	{
 		float v[4];
 		if (kf->rotValueAt0(v)) { q.x = v[0]; q.y = v[1]; q.z = v[2]; q.w = v[3]; }
-		return q;
 	}
-	readCtrlDefaultBytes(ctrl, CHUNK_CTRL_ROT_VALUE, &q, 16);
 	return q;
 }
 
@@ -132,18 +87,6 @@ ScaleValueM scaleValueAt0(CSceneClass *ctrl)
 			s.s.x = v[0]; s.s.y = v[1]; s.s.z = v[2];
 			s.q.x = v[3]; s.q.y = v[4]; s.q.z = v[5]; s.q.w = v[6];
 		}
-		return s;
-	}
-	// Default chunk 0x2505: CVector scale + CQuat axis system (28 bytes) on a non-keyframer.
-	uint8 buf[28];
-	if (readCtrlDefaultBytes(ctrl, CHUNK_CTRL_SCALE_VALUE, buf, 28))
-	{
-		memcpy(&s.s, buf, 12);
-		memcpy(&s.q, buf + 12, 16);
-	}
-	else if (readCtrlDefaultBytes(ctrl, CHUNK_CTRL_SCALE_VALUE, buf, 12))
-	{
-		memcpy(&s.s, buf, 12);
 	}
 	return s;
 }
@@ -155,9 +98,7 @@ float floatValueAt0(CSceneClass *ctrl, float def)
 	{
 		float fv;
 		if (kf->floatValueAt0(fv)) v = fv;
-		return v;
 	}
-	readCtrlDefaultBytes(ctrl, CHUNK_CTRL_FLOAT_VALUE, &v, 4);
 	return v;
 }
 
@@ -204,20 +145,19 @@ Matrix3M getNodeTM(INode *node, SNodeTMCache &cache)
 	scale.q.w = 1.0f;
 
 	CReferenceMaker *tm = dynamic_cast<CReferenceMaker *>(node->getReference(0));
-	CSceneClass *tmsc = dynamic_cast<CSceneClass *>(tm);
-	if (tmsc && tmsc->classDesc()->classId() == CLASSID_PRS_CTRL && tm->nbReferences() >= 3)
+	if (CControlPRS *prs = dynamic_cast<CControlPRS *>(tm))
 	{
-		pos = posValueAt0(dynamic_cast<CSceneClass *>(tm->getReference(0)));
-		rot = rotValueAt0(dynamic_cast<CSceneClass *>(tm->getReference(1)));
-		scale = scaleValueAt0(dynamic_cast<CSceneClass *>(tm->getReference(2)));
+		pos = posValueAt0(dynamic_cast<CSceneClass *>(prs->positionController()));
+		rot = rotValueAt0(dynamic_cast<CSceneClass *>(prs->rotationController()));
+		scale = scaleValueAt0(dynamic_cast<CSceneClass *>(prs->scaleController()));
 	}
-	else if (tmsc && tmsc->classDesc()->classId() == CLASSID_LOOKAT_CTRL && tm->nbReferences() >= 2)
+	else if (CControlLookAt *la = dynamic_cast<CControlLookAt *>(tm))
 	{
 		// LookAt (target lights/cameras): position from ref 1; rotation is target-computed and not
 		// needed for the current consumers (identity rotation part).
-		pos = posValueAt0(dynamic_cast<CSceneClass *>(tm->getReference(1)));
+		pos = posValueAt0(dynamic_cast<CSceneClass *>(la->positionController()));
 	}
-	else if (tmsc)
+	else if (CSceneClass *tmsc = dynamic_cast<CSceneClass *>(tm))
 	{
 		fprintf(stderr, "WARNING: node '%s' TM controller %s is not PRS; identity local TM used\n",
 		        ucstring(node->userName()).toUtf8().c_str(), tmsc->classDesc()->classId().toString().c_str());

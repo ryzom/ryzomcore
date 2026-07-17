@@ -7,12 +7,14 @@
  *   0x0912 u32 count + count x { u32 v0, v1, v2; u32 smGroup; u32 faceFlags } — faceFlags is
  *   the Max Face::flags dword: edge-visibility low bits, matID in the HIGH WORD;
  *   0x0924/0x0928/0x092a u32s; 0x092c/0x092d/0x092e BitArray containers (selections);
- *   map channels, repeated per stored channel IN FILE ORDER:
+ *   map channels, repeated per stored channel IN FILE ORDER (typed in the library since
+ *   §10j-neuf — CGeomBuffers::mapChannels()):
  *     0x0959 u32 = channel index (1.. UVW, 0 = vertex color);
  *     0x2398 u32 (support flag, 1 in the corpus);
  *     0x2394 u32 count + count x Point3 map vertices;
  *     0x2396 u32 count + count x (u32 t0, t1, t2) map faces (parallel to mesh faces);
- *   0x0952/0x0953/0x0956/0x094c vertex-data channels (soft selection floats etc.) — not needed.
+ *   0x0952/0x0953/0x0956/0x0958/0x094c vertex-data channels (soft selection floats etc.) — not
+ *   needed, stay raw.
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
  * \author Claude Opus 4.8
@@ -50,6 +52,7 @@
 #include "../pipeline_max/builtin/node_impl.h"
 #include "../pipeline_max/builtin/reference_maker.h"
 #include "../pipeline_max/builtin/derived_object.h"
+#include "../pipeline_max/builtin/control_transform.h"
 
 #include "../pipeline_max_export_common/edit_mesh_mod.h"
 #include "../pipeline_max_export_common/map_extender_mod.h"
@@ -68,15 +71,6 @@ namespace MESHEVAL {
 
 // ---------------------------------------------------------------------------------------------
 // GeomBuffers (Mesh) decode
-
-static bool readCountPrefixed(CStorageRaw *raw, uint stride, const void **data, uint32 &count)
-{
-	if (!raw || raw->Value.size() < 4) return false;
-	memcpy(&count, nlVectorData(raw->Value), 4);
-	if (raw->Value.size() < 4 + (size_t)count * stride) return false;
-	*data = nlVectorData(raw->Value) + 4;
-	return true;
-}
 
 static bool extractEditableMesh(CSceneClass *obj, SEvalMesh &out, const std::string &name)
 {
@@ -111,44 +105,31 @@ static bool extractEditableMesh(CSceneClass *obj, SEvalMesh &out, const std::str
 		if (!ff->empty()) memcpy(&out.Faces[0], &(*ff)[0], ff->size() * 20);
 	}
 
-	// Map channels: iterate the container chunks in file order; 0x0959 announces the channel
-	// index for the following 0x2394/0x2396 pair.
+	// Map channels: the typed CGeomBuffers map-channel view (chunk groups in file order; a group
+	// whose 0x0959 announce is absent keeps Channel -1 and is dropped, matching the historical
+	// raw read). CVector/CGeomTriIndex share the byte layout of Point3M/SMapFace, so the bulk
+	// copies reproduce the exact bytes the raw path used.
 	{
-		int currentChannel = -1;
-		for (CStorageContainer::TStorageObjectConstIt it = gb->chunks().begin(); it != gb->chunks().end(); ++it)
+		std::vector<STORAGE::CGeomBuffers::CMapChannelView> channels;
+		gb->mapChannels(channels);
+		for (uint c = 0; c < channels.size(); ++c)
 		{
-			CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
-			if (!raw) continue;
-			if (it->first == 0x0959 && raw->Value.size() >= 4)
+			const STORAGE::CGeomBuffers::CMapChannelView &ch = channels[c];
+			if (ch.Channel < 0) continue;
+			if (ch.Verts)
 			{
-				uint32 chan;
-				memcpy(&chan, nlVectorData(raw->Value), 4);
-				currentChannel = (int)chan;
+				SMapChannel &mc = out.Maps[ch.Channel];
+				mc.Verts.resize(ch.Verts->size());
+				if (!ch.Verts->empty()) memcpy(&mc.Verts[0], &(*ch.Verts)[0], ch.Verts->size() * 12);
 			}
-			else if (it->first == 0x2394 && currentChannel >= 0)
+			if (ch.Faces)
 			{
-				const void *data;
-				uint32 n;
-				if (readCountPrefixed(raw, 12, &data, n))
-				{
-					SMapChannel &mc = out.Maps[currentChannel];
-					mc.Verts.resize(n);
-					if (n) memcpy(&mc.Verts[0], data, (size_t)n * 12);
-				}
-			}
-			else if (it->first == 0x2396 && currentChannel >= 0)
-			{
-				const void *data;
-				uint32 n;
-				if (readCountPrefixed(raw, 12, &data, n))
-				{
-					SMapChannel &mc = out.Maps[currentChannel];
-					mc.Faces.resize(n);
-					if (n) memcpy(&mc.Faces[0], data, (size_t)n * 12);
-					if (n != out.Faces.size())
-						fprintf(stderr, "WARNING: mesh '%s' channel %d face count %u != mesh %u\n",
-						        name.c_str(), currentChannel, n, (uint)out.Faces.size());
-				}
+				SMapChannel &mc = out.Maps[ch.Channel];
+				mc.Faces.resize(ch.Faces->size());
+				if (!ch.Faces->empty()) memcpy(&mc.Faces[0], &(*ch.Faces)[0], ch.Faces->size() * 12);
+				if (ch.Faces->size() != out.Faces.size())
+					fprintf(stderr, "WARNING: mesh '%s' channel %d face count %u != mesh %u\n",
+					        name.c_str(), (int)ch.Channel, (uint)ch.Faces->size(), (uint)out.Faces.size());
 			}
 		}
 		// Drop channels that came through incomplete (no faces): they cannot be exported.
@@ -456,14 +437,11 @@ static void applyXForm(CSceneClass *mod, CStorageContainer *app, SEvalMesh &mesh
 	CReferenceMaker *mrm = dynamic_cast<CReferenceMaker *>(mod);
 	for (uint r = 0; mrm && r < mrm->nbReferences(); ++r)
 	{
-		CSceneClass *ref = dynamic_cast<CSceneClass *>(mrm->getReference(r));
-		if (!ref) continue;
-		if (ref->classDesc()->classId() == CLASSID_PRS_CTRL)
+		if (CControlPRS *prs = dynamic_cast<CControlPRS *>(mrm->getReference(r)))
 		{
-			CReferenceMaker *prs = dynamic_cast<CReferenceMaker *>(ref);
-			Point3M gp = posValueAt0(dynamic_cast<CSceneClass *>(prs->getReference(0)));
-			QuatM gr = rotValueAt0(dynamic_cast<CSceneClass *>(prs->getReference(1)));
-			ScaleValueM gs = scaleValueAt0(dynamic_cast<CSceneClass *>(prs->getReference(2)));
+			Point3M gp = posValueAt0(dynamic_cast<CSceneClass *>(prs->positionController()));
+			QuatM gr = rotValueAt0(dynamic_cast<CSceneClass *>(prs->rotationController()));
+			ScaleValueM gs = scaleValueAt0(dynamic_cast<CSceneClass *>(prs->scaleController()));
 			gizmo = composePRS(gp, gr, gs);
 		}
 	}

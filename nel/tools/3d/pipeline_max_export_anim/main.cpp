@@ -76,6 +76,7 @@
 #include "../pipeline_max/builtin/derived_object.h"
 #include "../pipeline_max/builtin/storage/app_data.h"
 #include "../pipeline_max/builtin/control_keyframer.h"
+#include "../pipeline_max/builtin/control_transform.h"
 
 #include "../pipeline_max_export_common/biped_rig.h"
 #include "../pipeline_max_export_common/export_ids.h"
@@ -98,8 +99,7 @@ static const sint32 TIME_POS_INFINITY = 0x7fffffff;
 // NeL export AppData sub-ids (plugin_max/nel_mesh_lib/export_appdata.h)
 // NeL export AppData sub-ids: pipeline_max_export_common/export_ids.h
 
-static const NLMISC::CClassId CLASSID_PRS_CTRL(0x00002005, 0x00000000);
-static const NLMISC::CClassId CLASSID_LOOKAT_CTRL(0x00002006, 0x00000000);
+// (PRS/LookAt TM controllers are the typed CControlPRS/CControlLookAt since §10j-dix)
 static const NLMISC::CClassId CLASSID_BIPED_VHT_CTRL(0x00009156, 0x00000000);
 static const NLMISC::CClassId CLASSID_MORPHER(0x17bb6854, 0xa5cba2a3);
 static const NLMISC::CClassId CLASSID_PARAM_BLOCK_2(0x00000082, 0x00000000);
@@ -832,38 +832,37 @@ static void addNodeTracks(NL3D::CAnimation &animation, INode &node, const std::s
                           CSSSBuild *ssBuilder)
 {
 	CReferenceMaker *transform = node.getReference(0);
-	CSceneClass *tmsc = transform ? dynamic_cast<CSceneClass *>(transform) : NULL;
-	bool isPrs = tmsc && tmsc->classDesc()->classId() == CLASSID_PRS_CTRL;
-	bool isLookAt = tmsc && tmsc->classDesc()->classId() == CLASSID_LOOKAT_CTRL;
+	CControlPRS *prs = dynamic_cast<CControlPRS *>(transform);
+	CControlLookAt *lookAt = dynamic_cast<CControlLookAt *>(transform);
 
-	if (isPrs || isLookAt)
+	if (prs || lookAt)
 	{
-		// Export order matches the reference: scale, rotation, position, then camera extras.
-		NL3D::ITrack *track = buildATrack(transform->getReference(isPrs ? 2 : 3), typeScale);
+		// Export order matches the reference: scale, rotation, position, then camera extras
+		// (typed sub-controller slots on CControlPRS/CControlLookAt — §10j-dix).
+		NL3D::ITrack *track = buildATrack(prs ? prs->scaleController() : lookAt->scaleController(), typeScale);
 		addTrackChecked(animation, parentName + NL3D::ITransformable::getScaleValueName(), track);
 
-		if (isPrs)
+		if (prs)
 		{
-			track = buildATrack(transform->getReference(1), typeRotation);
+			track = buildATrack(prs->rotationController(), typeRotation);
 			addTrackChecked(animation, parentName + NL3D::ITransformable::getRotQuatValueName(), track);
 		}
 
-		track = buildATrack(transform->getReference(isPrs ? 0 : 1), typePos);
+		track = buildATrack(prs ? prs->positionController() : lookAt->positionController(), typePos);
 		addTrackChecked(animation, parentName + NL3D::ITransformable::getPosValueName(), track);
 
 		// Camera roll + target position (reference: only when isCamera(node)).
-		if (isLookAt && nodeIsCamera(node))
+		if (lookAt && nodeIsCamera(node))
 		{
-			track = buildATrack(transform->getReference(2), typeFloat);
+			track = buildATrack(lookAt->rollController(), typeFloat);
 			addTrackChecked(animation, parentName + NL3D::CCamera::getRollValueName(), track);
 
-			CNodeImpl *target = dynamic_cast<CNodeImpl *>(transform->getReference(0));
+			CNodeImpl *target = dynamic_cast<CNodeImpl *>(lookAt->targetNode());
 			if (target)
 			{
-				CReferenceMaker *ttm = target->getReference(0);
-				if (ttm && dynamic_cast<CSceneClass *>(ttm) && ttm->classDesc()->classId() == CLASSID_PRS_CTRL)
+				if (CControlPRS *tprs = dynamic_cast<CControlPRS *>(target->getReference(0)))
 				{
-					track = buildATrack(ttm->getReference(0), typePos);
+					track = buildATrack(tprs->positionController(), typePos);
 					addTrackChecked(animation, parentName + NL3D::CCamera::getTargetValueName(), track);
 				}
 			}

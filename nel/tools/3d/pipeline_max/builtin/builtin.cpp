@@ -69,6 +69,7 @@
 #include "multi_mtl.h"
 
 #include "control_keyframer.h"
+#include "control_transform.h"
 
 // using namespace std;
 // using namespace NLMISC;
@@ -331,6 +332,12 @@ void CBuiltin::registerClasses(CSceneClassRegistry *registry)
 	registry->add(&CControlRotTCBDesc);
 	registry->add(&CControlScaleTCBDesc);
 	registry->add(&CControlPoint3TCBDesc);
+
+	// node-transform controllers (inh ReferenceTarget; typed sub-controller slots, see
+	// control_transform.h — exact classes under the 0x9008 ControlTransform superclass, the
+	// CBipedDriven registration pattern)
+	registry->add(&ControlPRSClassDesc);
+	registry->add(&ControlLookAtClassDesc);
 
 	// object (inh ReferenceMaker)
 	registry->add(&BaseObjectClassDesc);

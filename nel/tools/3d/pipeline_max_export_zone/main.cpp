@@ -108,6 +108,7 @@
 #include "../pipeline_max/builtin/storage/app_data.h"
 #include "../pipeline_max/builtin/derived_object.h"
 #include "../pipeline_max/builtin/control_keyframer.h"
+#include "../pipeline_max/builtin/control_transform.h"
 
 #include "../pipeline_max_export_common/max_math.h"
 #include "../pipeline_max_export_common/max_scene.h"
@@ -119,18 +120,13 @@ using namespace PIPELINE::MAX::BUILTIN;
 using namespace PIPELINE::MAX::NELPATCH;
 using namespace MAXMATH;
 
-// Scene class ids (OSM/WSM Derived wrappers are the typed CDerivedObject/CWSMDerivedObject now)
-static const NLMISC::CClassId CLASSID_PRS_CTRL(0x00002005, 0x00000000);
+// Scene class ids (OSM/WSM Derived wrappers are the typed CDerivedObject/CWSMDerivedObject now;
+// the PRS TM controller is the typed CControlPRS since §10j-dix)
 static const NLMISC::CClassId CLASSID_NEL_EDIT_PATCH(0x4dd14a3c, 0x4ac23c0c);
 // NeL Patch Painter (nel_patch_paint): local data is the same final-patch shape (0x1140 +
 // 0x4001) with no vertex mapper — the stored final patch is the evaluated output verbatim
 // (PaintPatchData::Apply).
 static const NLMISC::CClassId CLASSID_NEL_PATCH_PAINT(0x0c49560f, 0x3c3d68e7);
-
-// PRS sub-controller default-value chunk ids
-#define CHUNK_CTRL_POS_VALUE 0x2503
-#define CHUNK_CTRL_ROT_VALUE 0x2504
-#define CHUNK_CTRL_SCALE_VALUE 0x2505
 
 // Node frozen marker: empty chunk 0x0976 on the node (corpus-established: the boundary
 // reference zones carry it, the exported zone does not; transition cells carry none).
@@ -156,7 +152,13 @@ static bool hasScriptAppData(CSceneClass *sc, uint32 subId)
 // ---------------------------------------------------------------------------------------------
 // PRS controller values at t=0 and node TM (GetNodeTM(0)); same replication as the ig exporter.
 
-static bool readCtrlDefaultBytes(CSceneClass *sc, uint16 chunkId, void *dst, size_t nBytes)
+// Read a controller's default-value chunk through the typed keyframer. No raw-chunk fallback:
+// the corpus-wide 0x9008 inventory (design doc §10j-dix) established that no non-keyframer
+// sub-controller carries a 0x2503/0x2504/0x2505 chunk anywhere, so the historical raw-orphan
+// scan here never fired. (The zone TM path otherwise keeps its own local, no-lerp t=0
+// evaluation — zone is x87-precision-sensitive, so it is deliberately NOT folded onto
+// MAXSCENE's interpolating readers.)
+static bool readCtrlDefaultBytes(CSceneClass *sc, void *dst, size_t nBytes)
 {
 	CControlKeyFramerBase *kf = dynamic_cast<CControlKeyFramerBase *>(sc);
 	if (kf)
@@ -168,22 +170,6 @@ static bool readCtrlDefaultBytes(CSceneClass *sc, uint16 chunkId, void *dst, siz
 			memcpy(dst, data, nBytes);
 			return true;
 		}
-	}
-	if (!sc) return false;
-	IStorageObject *so = sc->findStorageObject(chunkId);
-	if (!so)
-	{
-		const CStorageContainer::TStorageObjectContainer &orphans = sc->orphanedChunks();
-		for (CStorageContainer::TStorageObjectConstIt it = orphans.begin(); it != orphans.end(); ++it)
-		{
-			if (it->first == chunkId) { so = it->second; break; }
-		}
-	}
-	CStorageRaw *raw = dynamic_cast<CStorageRaw *>(so);
-	if (raw && raw->Value.size() >= nBytes)
-	{
-		memcpy(dst, nlVectorData(raw->Value), nBytes);
-		return true;
 	}
 	return false;
 }
@@ -227,7 +213,7 @@ static Point3M posValueAt0(CSceneClass *ctrl)
 			return p;
 		}
 	}
-	readCtrlDefaultBytes(ctrl, CHUNK_CTRL_POS_VALUE, &p, 12);
+	readCtrlDefaultBytes(ctrl, &p, 12);
 	return p;
 }
 
@@ -252,7 +238,7 @@ static QuatM rotValueAt0(CSceneClass *ctrl)
 			return q;
 		}
 	}
-	readCtrlDefaultBytes(ctrl, CHUNK_CTRL_ROT_VALUE, &q, 16);
+	readCtrlDefaultBytes(ctrl, &q, 16);
 	return q;
 }
 
@@ -291,12 +277,12 @@ static ScaleValueM scaleValueAt0(CSceneClass *ctrl)
 		}
 	}
 	uint8 buf[28];
-	if (readCtrlDefaultBytes(ctrl, CHUNK_CTRL_SCALE_VALUE, buf, 28))
+	if (readCtrlDefaultBytes(ctrl, buf, 28))
 	{
 		memcpy(&s.s, buf, 12);
 		memcpy(&s.q, buf + 12, 16);
 	}
-	else if (readCtrlDefaultBytes(ctrl, CHUNK_CTRL_SCALE_VALUE, buf, 12))
+	else if (readCtrlDefaultBytes(ctrl, buf, 12))
 	{
 		memcpy(&s.s, buf, 12);
 	}
@@ -322,14 +308,13 @@ static Matrix3M getNodeTM(INode *node, SNodeTMCache &cache)
 	scale.q.w = 1.0f;
 
 	CReferenceMaker *tm = dynamic_cast<CReferenceMaker *>(node->getReference(0));
-	CSceneClass *tmsc = dynamic_cast<CSceneClass *>(tm);
-	if (tmsc && tmsc->classDesc()->classId() == CLASSID_PRS_CTRL && tm->nbReferences() >= 3)
+	if (CControlPRS *prs = dynamic_cast<CControlPRS *>(tm))
 	{
-		pos = posValueAt0(dynamic_cast<CSceneClass *>(tm->getReference(0)));
-		rot = rotValueAt0(dynamic_cast<CSceneClass *>(tm->getReference(1)));
-		scale = scaleValueAt0(dynamic_cast<CSceneClass *>(tm->getReference(2)));
+		pos = posValueAt0(dynamic_cast<CSceneClass *>(prs->positionController()));
+		rot = rotValueAt0(dynamic_cast<CSceneClass *>(prs->rotationController()));
+		scale = scaleValueAt0(dynamic_cast<CSceneClass *>(prs->scaleController()));
 	}
-	else if (tmsc)
+	else if (CSceneClass *tmsc = dynamic_cast<CSceneClass *>(tm))
 	{
 		fprintf(stderr, "WARNING: node '%s' TM controller %s is not PRS; identity local TM used\n",
 		        ucstring(node->userName()).toUtf8().c_str(), tmsc->classDesc()->classId().toString().c_str());

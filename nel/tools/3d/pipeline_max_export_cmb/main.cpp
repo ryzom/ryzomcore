@@ -89,6 +89,7 @@
 #include "../pipeline_max/builtin/reference_maker.h"
 #include "../pipeline_max/builtin/geom_object.h"
 #include "../pipeline_max/builtin/derived_object.h"
+#include "../pipeline_max/builtin/control_transform.h"
 #include "../pipeline_max/builtin/storage/geom_buffers.h"
 
 #include "../pipeline_max_export_common/max_scene.h"
@@ -316,13 +317,11 @@ bool extractObjectMesh(INode &node, CSceneClass *rawObj, std::vector<NLMISC::CVe
 						op.MirrorCopy = OLDPBLOCK::paramInt(params, 1) != 0;
 						op.MirrorOffset = OLDPBLOCK::paramFloat(params, 2);
 					}
-					else if (ref->classDesc()->classId() == NLMISC::CClassId(0x00002005, 0x00000000))
+					else if (CControlPRS *prm = dynamic_cast<CControlPRS *>(ref))
 					{
-						CReferenceMaker *prm = dynamic_cast<CReferenceMaker *>(ref);
-						CSceneClass *pc = dynamic_cast<CSceneClass *>(prm->getReference(0));
-						MAXMATH::Point3M gp = MAXSCENE::posValueAt0(pc);
-						MAXMATH::QuatM gr = MAXSCENE::rotValueAt0(dynamic_cast<CSceneClass *>(prm->getReference(1)));
-						MAXMATH::ScaleValueM gs = MAXSCENE::scaleValueAt0(dynamic_cast<CSceneClass *>(prm->getReference(2)));
+						MAXMATH::Point3M gp = MAXSCENE::posValueAt0(dynamic_cast<CSceneClass *>(prm->positionController()));
+						MAXMATH::QuatM gr = MAXSCENE::rotValueAt0(dynamic_cast<CSceneClass *>(prm->rotationController()));
+						MAXMATH::ScaleValueM gs = MAXSCENE::scaleValueAt0(dynamic_cast<CSceneClass *>(prm->scaleController()));
 						op.GizmoTM = MAXMATH::composePRS(gp, gr, gs);
 					}
 				}

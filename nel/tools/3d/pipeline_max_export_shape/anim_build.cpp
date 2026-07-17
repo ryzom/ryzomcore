@@ -44,6 +44,7 @@
 #include "scene_lib.h"
 #include "../pipeline_max_export_common/track_build.h"
 #include "../pipeline_max/builtin/control_keyframer.h"
+#include "../pipeline_max/builtin/control_transform.h"
 #include "../pipeline_max/builtin/mtl_base.h"
 #include "../pipeline_max/builtin/multi_mtl.h"
 #include "../pipeline_max/builtin/node_impl.h"
@@ -73,9 +74,7 @@ namespace SHAPEANIM {
 #define NLP_TTEXTURE_1 0x10
 #define MAX_TEX_STAGE 8
 
-// Class ids
-static const NLMISC::CClassId CLASSID_PRS_CTRL(0x00002005, 0x00000000);
-static const NLMISC::CClassId CLASSID_LOOKAT_CTRL(0x00002006, 0x00000000);
+// Class ids (PRS/LookAt are the typed CControlPRS/CControlLookAt since §10j-dix)
 static const NLMISC::CClassId CLASSID_MORPHER(0x17bb6854, 0xa5cba2a3);
 // Light superclasses / Omni class for light detection
 static const TSClassId SCLASS_LIGHT = 0x00000030;
@@ -120,22 +119,22 @@ static uint addNodeTracks(NL3D::CAnimation &animation, INode &node)
 {
 	uint n = 0;
 	CReferenceMaker *transform = node.getReference(0);
-	CSceneClass *tmsc = transform ? dynamic_cast<CSceneClass *>(transform) : NULL;
-	bool isPrs = tmsc && tmsc->classDesc()->classId() == CLASSID_PRS_CTRL;
-	bool isLookAt = tmsc && tmsc->classDesc()->classId() == CLASSID_LOOKAT_CTRL;
-	if (!isPrs && !isLookAt) return 0;
+	CControlPRS *prs = dynamic_cast<CControlPRS *>(transform);
+	CControlLookAt *lookAt = dynamic_cast<CControlLookAt *>(transform);
+	if (!prs && !lookAt) return 0;
 
-	// Export order matches the reference: scale, rotation, position.
-	NL3D::ITrack *track = buildATrack(transform->getReference(isPrs ? 2 : 3), typeScale);
+	// Export order matches the reference: scale, rotation, position (typed sub-controller slots
+	// on CControlPRS/CControlLookAt — §10j-dix).
+	NL3D::ITrack *track = buildATrack(prs ? prs->scaleController() : lookAt->scaleController(), typeScale);
 	if (track) { addTrackChecked(animation, NL3D::ITransformable::getScaleValueName(), track); ++n; }
 
-	if (isPrs)
+	if (prs)
 	{
-		track = buildATrack(transform->getReference(1), typeRotation);
+		track = buildATrack(prs->rotationController(), typeRotation);
 		if (track) { addTrackChecked(animation, NL3D::ITransformable::getRotQuatValueName(), track); ++n; }
 	}
 
-	track = buildATrack(transform->getReference(isPrs ? 0 : 1), typePos);
+	track = buildATrack(prs ? prs->positionController() : lookAt->positionController(), typePos);
 	if (track) { addTrackChecked(animation, NL3D::ITransformable::getPosValueName(), track); ++n; }
 
 	return n;

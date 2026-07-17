@@ -92,6 +92,7 @@
 #include "../pipeline_max/builtin/geom_object.h"
 #include "../pipeline_max/builtin/derived_object.h"
 #include "../pipeline_max/builtin/control_keyframer.h"
+#include "../pipeline_max/builtin/control_transform.h"
 #include "../pipeline_max/builtin/param_block.h"
 
 #include "../pipeline_max_export_common/max_math.h"
@@ -107,8 +108,6 @@ using namespace PIPELINE::MAX::BUILTIN;
 using namespace MAXMATH;
 
 // Shared Max scene-graph transform helpers (formerly file-local copies here); see max_scene.h.
-using MAXSCENE::CLASSID_PRS_CTRL;
-using MAXSCENE::CLASSID_LOOKAT_CTRL;
 using MAXSCENE::posValueAt0;
 using MAXSCENE::rotValueAt0;
 using MAXSCENE::scaleValueAt0;
@@ -116,7 +115,7 @@ using MAXSCENE::readObjectOffset;
 using MAXSCENE::getNodeTM;
 using MAXSCENE::SNodeTMCache;
 
-// Scene class ids (CLASSID_PRS_CTRL / CLASSID_LOOKAT_CTRL come from MAXSCENE, imported above;
+// Scene class ids (the PRS/LookAt TM controllers are the typed CControlPRS/CControlLookAt;
 // OSM/WSM Derived wrappers are the typed CDerivedObject/CWSMDerivedObject now)
 static const NLMISC::CClassId CLASSID_RPO(0x368c679f, 0x711c22ee);
 static const NLMISC::CClassId CLASSID_TARGET(0x00001020, 0x00000000);
@@ -753,11 +752,9 @@ static bool convertMaxLight(NL3D::CPointLightNamed &plNamed, INode &node, SNodeT
 	NLMISC::CVector direction(0, 0, -1);
 	if (kind == maxLightTargetSpot)
 	{
-		CReferenceMaker *tm = dynamic_cast<CReferenceMaker *>(node.getReference(0));
-		CSceneClass *tmsc = dynamic_cast<CSceneClass *>(tm);
 		INode *target = NULL;
-		if (tmsc && tmsc->classDesc()->classId() == CLASSID_LOOKAT_CTRL)
-			target = dynamic_cast<INode *>(tm->getReference(0));
+		if (CControlLookAt *la = dynamic_cast<CControlLookAt *>(node.getReference(0)))
+			target = dynamic_cast<INode *>(la->targetNode());
 		if (target)
 		{
 			Matrix3M targetTM = getNodeTM(target, tmCache);
@@ -1362,12 +1359,11 @@ static bool nodeWorldMesh(INode &node, SNodeTMCache &tmCache, SMeshData &out)
 							if (params.find(1) != params.end()) op.MirrorCopy = (params[1].IsInt ? params[1].I : (sint)params[1].V[0]) != 0;
 							if (params.find(2) != params.end() && !params[2].IsInt) op.MirrorOffset = params[2].V[0];
 						}
-						else if (ref->classDesc()->classId() == NLMISC::CClassId(0x00002005, 0x00000000))
+						else if (CControlPRS *prm = dynamic_cast<CControlPRS *>(ref))
 						{
-							CSceneClass *pc = dynamic_cast<CSceneClass *>(dynamic_cast<CReferenceMaker *>(ref)->getReference(0));
-							Point3M gp = posValueAt0(pc);
-							QuatM gr = rotValueAt0(dynamic_cast<CSceneClass *>(dynamic_cast<CReferenceMaker *>(ref)->getReference(1)));
-							ScaleValueM gs = scaleValueAt0(dynamic_cast<CSceneClass *>(dynamic_cast<CReferenceMaker *>(ref)->getReference(2)));
+							Point3M gp = posValueAt0(dynamic_cast<CSceneClass *>(prm->positionController()));
+							QuatM gr = rotValueAt0(dynamic_cast<CSceneClass *>(prm->rotationController()));
+							ScaleValueM gs = scaleValueAt0(dynamic_cast<CSceneClass *>(prm->scaleController()));
 							op.GizmoTM = composePRS(gp, gr, gs);
 						}
 					}

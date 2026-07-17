@@ -77,23 +77,14 @@ IStorageObject *findChunkAnywhere(CSceneClass *sc, uint16 id)
 	return NULL;
 }
 
-bool readRawBytes(CSceneClass *sc, uint16 chunkId, void *dst, size_t nBytes)
-{
-	IStorageObject *chunk = findChunkAnywhere(sc, chunkId);
-	if (!chunk) return false;
-	CStorageRaw *raw = dynamic_cast<CStorageRaw *>(chunk);
-	if (!raw) return false;
-	if (raw->Value.size() < nBytes) return false;
-	memcpy(dst, nlVectorData(raw->Value), nBytes);
-	return true;
-}
-
-// Read a controller's default-value chunk (0x2503/0x2504/0x2505). The keyframe controllers are
-// typed now (CControlKeyFramerBase claims the default-value chunk out of the orphan list), so
-// prefer the typed accessor and keep the raw orphan scan as the fallback for any controller
-// class that is still an unknown pass-through.
+// Read a controller's default-value chunk (0x2503 pos CVector / 0x2504 rot CQuat / 0x2505 scale
+// CVector+CQuat) through the typed keyframer (CControlKeyFramerBase claims the default-value
+// chunk out of the orphan list). No raw-chunk fallback: the corpus-wide 0x9008 sub-controller
+// inventory (design doc §10j-dix) established that no non-keyframer controller carries any of
+// those chunks, so the historical raw orphan scan here never fired.
 bool readCtrlDefault(CSceneClass *sc, uint16 chunkId, void *dst, size_t nBytes)
 {
+	(void)chunkId;
 	PIPELINE::MAX::BUILTIN::CControlKeyFramerBase *ctrl = dynamic_cast<PIPELINE::MAX::BUILTIN::CControlKeyFramerBase *>(sc);
 	if (ctrl)
 	{
@@ -105,7 +96,7 @@ bool readCtrlDefault(CSceneClass *sc, uint16 chunkId, void *dst, size_t nBytes)
 			return true;
 		}
 	}
-	return readRawBytes(sc, chunkId, dst, nBytes);
+	return false;
 }
 
 // PRS controller chunk ids (super 0x900b/c/d Bezier variants)

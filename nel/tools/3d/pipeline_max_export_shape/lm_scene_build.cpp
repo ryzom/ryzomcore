@@ -34,6 +34,7 @@
 
 #include "../pipeline_max/builtin/i_node.h"
 #include "../pipeline_max/builtin/node_impl.h"
+#include "../pipeline_max/builtin/control_transform.h"
 #include "../pipeline_max/storage_value.h"
 
 #include "../pipeline_max_export_common/export_ids.h"
@@ -247,11 +248,9 @@ bool convertLightmapLight(NL3D::CLightmapLight &out, INode &node, SCENELIB::SNod
 	out.Direction = NLMISC::CVector(0, 0, -1);
 	if (kind == kindTargetSpot || kind == kindTargetDir)
 	{
-		CReferenceMaker *tm = dynamic_cast<CReferenceMaker *>(node.getReference(0));
-		CSceneClass *tmsc = dynamic_cast<CSceneClass *>(tm);
 		INode *target = NULL;
-		if (tmsc && tmsc->classDesc()->classId() == CLASSID_LOOKAT_CTRL)
-			target = dynamic_cast<INode *>(tm->getReference(0));
+		if (CControlLookAt *la = dynamic_cast<CControlLookAt *>(node.getReference(0)))
+			target = dynamic_cast<INode *>(la->targetNode());
 		if (target)
 		{
 			MAXMATH::Matrix3M targetTM = MAXSCENE::getNodeTM(target, tmCache);

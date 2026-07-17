@@ -4,6 +4,7 @@
  * \date 2012-08-25 07:55GMT
  * \author Jan Boon (Kaetemi)
  * \author Claude Opus 4.8
+ * \author Claude Fable 5
  * CGeomBuffers
  */
 
@@ -139,6 +140,36 @@ public:
 	/// vertex list, optional matID / smoothing group / triangulation cuts. Use
 	/// CGeomObject::triangulatePolyFace to convert each face to triangles.
 	const std::vector<CGeomPolyFaceInfo> *polyFaces() const;
+	//@}
+
+	//! \name Typed map channels (tri mesh path)
+	//! The map-channel chunk family, repeated per stored channel IN FILE ORDER inside this
+	//! container (corpus-established, design doc §10j-neuf): 0x0959 uint32 channel index
+	//! (0 = vertex color, 1.. = UVW; 0..5 observed), 0x2398 uint32 support flag (1 on every
+	//! corpus instance), 0x2394 count-prefixed CVector map vertices, 0x2396 count-prefixed
+	//! CGeomTriIndex map-face corner triples (parallel to the 0x0912 mesh faces; count equality
+	//! holds corpus-wide). The family occurs on EditableMesh objects only — the EditablePoly
+	//! MNMesh channel storage is a different id set that stays raw. One Max 3 witness carries a
+	//! group with no leading 0x0959 (Channel stays -1); consumers drop it, matching the
+	//! historical raw read.
+	//@{
+	struct CMapChannelView
+	{
+		CMapChannelView() : Channel(-1), SupportFlag(0), HasSupportFlag(false), Verts(NULL), Faces(NULL) { }
+		/// 0x0959 value; -1 when the group lacks the announce leaf (one Max 3 corpus witness).
+		sint32 Channel;
+		/// 0x2398 value (1 corpus-wide), valid when HasSupportFlag.
+		uint32 SupportFlag;
+		bool HasSupportFlag;
+		/// 0x2394 map vertices (UVW as CVector; RGB for channel 0). NULL when the group lacks it.
+		const std::vector<NLMISC::CVector> *Verts;
+		/// 0x2396 per-face map corner indices into Verts. NULL when the group lacks it.
+		const std::vector<CGeomTriIndex> *Faces;
+	};
+	/// Collect the stored map-channel groups in file order. Valid when the typed leaf
+	/// serializers are enabled (the PMBS_GEOM_BUFFERS_PARSE default); raw-form chunks (a scene
+	/// that rode through untyped) are not decoded here.
+	void mapChannels(std::vector<CMapChannelView> &out) const;
 	//@}
 
 protected:

@@ -70,8 +70,6 @@ using PIPELINE::MAX::BUILTIN::INode;
 using PIPELINE::MAX::BUILTIN::CReferenceMaker;
 
 // Well-known scene class identities
-using MAXSCENE::CLASSID_PRS_CTRL;
-using MAXSCENE::CLASSID_LOOKAT_CTRL;
 // (The OSM/WSM Derived wrapper identities live on the typed classes now:
 // PIPELINE::MAX::BUILTIN::CDerivedObject / CWSMDerivedObject — dynamic_cast to CDerivedObject
 // catches both wrapper kinds.)
@@ -247,7 +245,8 @@ bool resolveNelBoolAt0(const std::vector<SPB2Block> &blocks, uint block, uint16 
 
 // ---------------------------------------------------------------------------------------------
 // Controller values at t=0 (PRS sub-controllers; typed keyframer key tables bracketed at t=0,
-// else the default-value chunks 0x2503/0x2504/0x2505)
+// else the keyframer's claimed default-value chunk 0x2503/0x2504/0x2505 — non-keyframer
+// controllers yield the identity/zero default, see max_scene.h §10j-dix note)
 
 using MAXSCENE::posValueAt0;
 using MAXSCENE::rotValueAt0;

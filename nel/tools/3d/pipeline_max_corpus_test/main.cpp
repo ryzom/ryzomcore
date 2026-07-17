@@ -81,6 +81,11 @@
 #include "../pipeline_max/builtin/multi_mtl.h"
 #include "../pipeline_max/builtin/reference_maker.h"
 #include "../pipeline_max/builtin/control_keyframer.h"
+#include "../pipeline_max/builtin/control_transform.h"
+#include "../pipeline_max/builtin/geom_object.h"
+#include "../pipeline_max/builtin/storage/geom_buffers.h"
+#include "../pipeline_max/builtin/i_node.h"
+#include "../pipeline_max/storage_array.h"
 
 using namespace PIPELINE::MAX;
 
@@ -1042,6 +1047,508 @@ static int mapExtSelfTest(const char *maxFile, CStorageOleIn &in, CSceneClassReg
 	return fail ? 1 : 0;
 }
 
+// --- Map-channel selftest helpers (dual raw/typed readers: the inventory sweep runs BEFORE the
+// typed leaf serializers are enabled, the validation sweep after — same code reads both forms).
+
+// Read a 4-byte uint32 leaf that may be raw (pre-typing) or CStorageValue<uint32> (typed).
+// Returns false when the chunk is neither form or the raw size is not exactly 4.
+static bool gbReadU32(IStorageObject *so, uint32 &out)
+{
+	if (CStorageValue<uint32> *v = dynamic_cast<CStorageValue<uint32> *>(so)) { out = v->Value; return true; }
+	CStorageRaw *raw = dynamic_cast<CStorageRaw *>(so);
+	if (!raw || raw->Value.size() != 4) return false;
+	memcpy(&out, nlVectorData(raw->Value), 4);
+	return true;
+}
+
+// Element count of a count-prefixed stride-12 array leaf (raw or typed CStorageArraySizePre
+// of CVector / CGeomTriIndex). Returns false on any shape violation (stride remainder, stored
+// count != byte-derived count, size < 4).
+static bool gbReadArray12Count(IStorageObject *so, uint32 &count)
+{
+	if (CStorageArraySizePre<NLMISC::CVector> *tv = dynamic_cast<CStorageArraySizePre<NLMISC::CVector> *>(so))
+	{ count = (uint32)tv->Value.size(); return true; }
+	if (CStorageArraySizePre<BUILTIN::STORAGE::CGeomTriIndex> *tf = dynamic_cast<CStorageArraySizePre<BUILTIN::STORAGE::CGeomTriIndex> *>(so))
+	{ count = (uint32)tf->Value.size(); return true; }
+	CStorageRaw *raw = dynamic_cast<CStorageRaw *>(so);
+	if (!raw || raw->Value.size() < 4) return false;
+	uint32 stored = 0;
+	memcpy(&stored, nlVectorData(raw->Value), 4);
+	if ((raw->Value.size() - 4) % 12) return false;
+	if (stored != (raw->Value.size() - 4) / 12) return false;
+	count = stored;
+	return true;
+}
+
+// Parse the Scene stream fully; on every GeomObject's GeomBuffers (0x08fe) container, inventory
+// every chunk id (GBINV lines, bucketed by the object's concrete class) and validate the
+// map-channel chunk family — 0x0959 channel index (4 B), 0x2398 support flag (4 B), 0x2394
+// count-prefixed Point3 map verts, 0x2396 count-prefixed uint32-triple map faces (parallel to
+// the 0x0912 mesh faces) — the grammar mesh_eval's extractEditableMesh reads: 0x0959 announces
+// the channel for the following 0x2394/0x2396 pair, in file order. Prints per-container family
+// sequence signatures (GBSEQ lines) and a one-line summary. Shape violations (bad sizes, stride
+// remainders, count mismatches, a family chunk with the container bit, 0x2394/0x2396 without a
+// preceding 0x0959) are structural findings (expected 0 — they gate). Face-count disparity vs
+// 0x0912 is counted informationally (mesh_eval warns + drops those channels). Once the typed
+// leaf serializers are enabled, the same sweep counts the typed forms (typed=... in the
+// summary) — the byte-exactness of the typed write path is T2's job, not this test's.
+static int mapChannelSelfTest(const char *maxFile, CStorageOleIn &in, CSceneClassRegistry *reg, bool verbose)
+{
+	CDllDirectory dll;
+	CClassDirectory3 cd(&dll);
+	CScene scene(reg, &dll, &cd);
+	{
+		std::vector<uint8> b;
+		if (!in.readStream("DllDirectory", b)) { std::cerr << "no DllDirectory\n"; return 2; }
+		CStorageStream ss(b); try { dll.serial(ss); dll.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "dll: " << e.what() << "\n"; return 2; }
+	}
+	{
+		std::vector<uint8> b;
+		if (!in.readStream("ClassDirectory3", b)) { std::cerr << "no ClassDirectory3\n"; return 2; }
+		CStorageStream ss(b); try { cd.serial(ss); cd.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "cd: " << e.what() << "\n"; return 2; }
+	}
+	{
+		std::vector<uint8> b;
+		if (!in.readStream("Scene", b)) { std::cerr << "no Scene\n"; return 2; }
+		CStorageStream ss(b); try { scene.serial(ss); scene.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "scene: " << e.what() << "\n"; return 2; }
+	}
+	uint nObj = 0, nWithMaps = 0, nChannels = 0, nViolations = 0, nOrphanFamily = 0;
+	uint nFaceCountMismatch = 0, nTyped = 0, nRawForm = 0, nViewMismatch = 0;
+	uint64 nMapVerts = 0, nMapFaces = 0;
+	sint32 chanMin = 0x7FFFFFFF, chanMax = -0x7FFFFFFF;
+	uint n2398One = 0, n2398Other = 0;
+	TChunkInv inv;
+	std::map<std::string, uint> seqHist;
+	CSceneClassContainer *ssc = scene.container();
+	for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
+	{
+		BUILTIN::CGeomObject *geom = dynamic_cast<BUILTIN::CGeomObject *>(it->second);
+		if (!geom) continue;
+		BUILTIN::STORAGE::CGeomBuffers *gb = geom->geomBuffers();
+		if (!gb) continue;
+		++nObj;
+		std::string cls = geom->classDesc()->internalName();
+		// Inventory every direct child of the GeomBuffers container.
+		for (CStorageContainer::TStorageObjectConstIt ct = gb->chunks().begin(); ct != gb->chunks().end(); ++ct)
+		{
+			uint32 size = 0xFFFFFFFFu;
+			sint32 sz = 0;
+			if (CStorageRaw *raw = dynamic_cast<CStorageRaw *>(ct->second)) size = (uint32)raw->Value.size();
+			else if (ct->second->getSize(sz)) size = (uint32)sz;
+			invAdd(inv, cls, ct->first, size, ct->second->isContainer());
+		}
+		// Map-channel family grammar walk, file order (the mesh_eval read).
+		uint32 triFaces = 0;
+		bool haveTriFaces = false;
+		{
+			IStorageObject *ff = gb->findStorageObject(0x0912);
+			if (ff) haveTriFaces = gbReadArray12Count(ff, triFaces); // 20-byte stride — raw only
+			// typed form: CStorageArraySizePre<CGeomTriIndexInfo>
+			if (!haveTriFaces && ff)
+			{
+				if (CStorageArraySizePre<BUILTIN::STORAGE::CGeomTriIndexInfo> *tf
+					= dynamic_cast<CStorageArraySizePre<BUILTIN::STORAGE::CGeomTriIndexInfo> *>(ff))
+				{ triFaces = (uint32)tf->Value.size(); haveTriFaces = true; }
+				else if (CStorageRaw *raw = dynamic_cast<CStorageRaw *>(ff))
+				{
+					if (raw->Value.size() >= 4)
+					{
+						uint32 stored = 0;
+						memcpy(&stored, nlVectorData(raw->Value), 4);
+						if (raw->Value.size() == 4 + (size_t)stored * 20) { triFaces = stored; haveTriFaces = true; }
+					}
+				}
+			}
+		}
+		bool anyFamily = false;
+		sint32 currentChannel = -1;
+		uint32 curMapVerts = 0;
+		bool haveCurMapVerts = false;
+		std::string seq;
+		for (CStorageContainer::TStorageObjectConstIt ct = gb->chunks().begin(); ct != gb->chunks().end(); ++ct)
+		{
+			uint16 id = ct->first;
+			if (id != 0x0959 && id != 0x2398 && id != 0x2394 && id != 0x2396) continue;
+			anyFamily = true;
+			if (dynamic_cast<CStorageRaw *>(ct->second)) ++nRawForm; else ++nTyped;
+			if (ct->second->isContainer())
+			{
+				++nViolations;
+				std::cerr << "  mapchannel VIOLATION: family id 0x" << std::hex << id << std::dec
+				          << " with container bit (" << maxFile << ")\n";
+				continue;
+			}
+			if (id == 0x0959)
+			{
+				uint32 chan = 0;
+				if (!gbReadU32(ct->second, chan))
+				{
+					++nViolations;
+					std::cerr << "  mapchannel VIOLATION: 0x0959 not a 4-byte value (" << maxFile << ")\n";
+					continue;
+				}
+				currentChannel = (sint32)chan;
+				haveCurMapVerts = false;
+				++nChannels;
+				if (currentChannel < chanMin) chanMin = currentChannel;
+				if (currentChannel > chanMax) chanMax = currentChannel;
+				char buf[16]; snprintf(buf, sizeof(buf), "59(%d) ", (int)currentChannel); seq += buf;
+			}
+			else if (id == 0x2398)
+			{
+				uint32 v = 0;
+				if (!gbReadU32(ct->second, v))
+				{
+					++nViolations;
+					std::cerr << "  mapchannel VIOLATION: 0x2398 not a 4-byte value (" << maxFile << ")\n";
+					continue;
+				}
+				if (v == 1) ++n2398One; else ++n2398Other;
+				if (v == 1) seq += "98 ";
+				else { char buf[16]; snprintf(buf, sizeof(buf), "98(%u) ", v); seq += buf; }
+				if (currentChannel < 0) ++nOrphanFamily; // informational, see below
+			}
+			else // 0x2394 / 0x2396
+			{
+				uint32 count = 0;
+				if (!gbReadArray12Count(ct->second, count))
+				{
+					++nViolations;
+					std::cerr << "  mapchannel VIOLATION: 0x" << std::hex << id << std::dec
+					          << " bad count-prefixed stride-12 shape (" << maxFile << ")\n";
+					continue;
+				}
+				if (currentChannel < 0)
+				{
+					// Corpus-witnessed once (Max 3 snowballs PI_PO_tree_A.max): a '2398 2394 2396'
+					// group with no leading 0x0959 announce. Informational — mesh_eval drops such
+					// a channel by design (currentChannel < 0), and the typed leaves don't care.
+					++nOrphanFamily;
+					std::cerr << "  mapchannel ORPHAN: 0x" << std::hex << id << std::dec
+					          << " without preceding 0x0959 (" << maxFile << ")\n";
+				}
+				if (id == 0x2394) { nMapVerts += count; curMapVerts = count; haveCurMapVerts = true; seq += "94 "; }
+				else
+				{
+					nMapFaces += count;
+					seq += "96 ";
+					if (haveTriFaces && count != triFaces) ++nFaceCountMismatch;
+					(void)curMapVerts; (void)haveCurMapVerts;
+				}
+			}
+		}
+		if (anyFamily)
+		{
+			++nWithMaps;
+			if (!seq.empty() && seq[seq.size() - 1] == ' ') seq.resize(seq.size() - 1);
+			++seqHist[cls + ": " + seq];
+			if (verbose)
+				std::cerr << "  mapchannel " << cls << " seq: " << seq << "\n";
+		}
+		// Cross-check the typed CGeomBuffers::mapChannels() view against the chunk walk (only
+		// meaningful once the typed leaf serializers are enabled; raw-form chunks yield an empty
+		// view and nTyped == 0 above).
+		{
+			std::vector<BUILTIN::STORAGE::CGeomBuffers::CMapChannelView> view;
+			gb->mapChannels(view);
+			uint vChannels = 0, walkChannels = 0;
+			uint64 vVerts = 0, vFaces = 0;
+			for (uint c = 0; c < view.size(); ++c)
+			{
+				if (view[c].Channel >= 0) ++vChannels;
+				if (view[c].Verts) vVerts += view[c].Verts->size();
+				if (view[c].Faces) vFaces += view[c].Faces->size();
+			}
+			// Recompute the walk's totals for THIS container to compare.
+			uint64 wVerts = 0, wFaces = 0;
+			for (CStorageContainer::TStorageObjectConstIt ct = gb->chunks().begin(); ct != gb->chunks().end(); ++ct)
+			{
+				uint32 count = 0;
+				if (ct->first == 0x0959) ++walkChannels;
+				else if (ct->first == 0x2394 && gbReadArray12Count(ct->second, count)) wVerts += count;
+				else if (ct->first == 0x2396 && gbReadArray12Count(ct->second, count)) wFaces += count;
+			}
+			// A raw-form (untyped) container legitimately yields an empty view; only compare when
+			// the view saw anything or the container is fully typed.
+			bool anyTypedHere = !view.empty();
+			if (anyTypedHere && (vChannels != walkChannels || vVerts != wVerts || vFaces != wFaces))
+			{
+				++nViewMismatch;
+				std::cerr << "  mapchannel VIEW MISMATCH: channels " << vChannels << "/" << walkChannels
+				          << " verts " << vVerts << "/" << wVerts << " faces " << vFaces << "/" << wFaces
+				          << " (" << maxFile << ")\n";
+			}
+		}
+	}
+	// Where else do the family ids sit? Sweep every scene object's orphaned chunks for the four
+	// ids (the RPO patch object claims its object-level Mesh-cache copies internally; anything
+	// showing up HERE would be an unclaimed occurrence outside GeomBuffers).
+	uint nOrphanLevelFamily = 0;
+	for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
+	{
+		CSceneClass *sc = dynamic_cast<CSceneClass *>(it->second);
+		if (!sc) continue;
+		for (CStorageContainer::TStorageObjectConstIt ot = sc->orphanedChunks().begin(); ot != sc->orphanedChunks().end(); ++ot)
+		{
+			if (ot->first == 0x0959 || ot->first == 0x2398 || ot->first == 0x2394 || ot->first == 0x2396)
+			{
+				++nOrphanLevelFamily;
+				CStorageRaw *raw = dynamic_cast<CStorageRaw *>(ot->second);
+				std::cout << "GBOBJLVL cls=" << sc->classDesc()->internalName() << " id=0x" << std::hex
+				          << ot->first << std::dec << " size=" << (raw ? (uint32)raw->Value.size() : 0xFFFFFFFFu) << "\n";
+			}
+		}
+	}
+	invPrint(inv, "GBINV");
+	for (std::map<std::string, uint>::const_iterator st = seqHist.begin(); st != seqHist.end(); ++st)
+		std::cout << "GBSEQ n=" << st->second << " " << st->first << "\n";
+	bool fail = nViolations || nViewMismatch;
+	std::cout << (fail ? "FAIL" : "OK") << " mapchannel-selftest: " << nObj << " geom-objects, "
+	          << nWithMaps << " with-maps, " << nChannels << " channels (min "
+	          << (nChannels ? chanMin : 0) << " max " << (nChannels ? chanMax : 0) << "), "
+	          << nMapVerts << " mapverts, " << nMapFaces << " mapfaces, 2398 one/other "
+	          << n2398One << "/" << n2398Other << ", " << nFaceCountMismatch << " facecount-mismatch, "
+	          << nTyped << " typed, " << nRawForm << " raw, " << nViolations << " violations, "
+	          << nViewMismatch << " view-mismatch, "
+	          << nOrphanFamily << " orphan-family, " << nOrphanLevelFamily << " objlevel\n";
+	return fail ? 1 : 0;
+}
+
+// Parse the Scene stream fully and inventory every transform controller (superclass 0x9008):
+// class-id histogram (CTCLS lines), own-chunk inventory bucketed per class (CTINV lines), and,
+// for the PRS (0x2005) / LookAt (0x2006) classes, the reference-slot layout — PRS refs 0/1/2 =
+// pos/rot/scale sub-controllers, LookAt refs 0/1/2/3 = target-node/pos/roll/scale — with a
+// per-slot histogram of the sub-controller classes (PRSSUB lines: class, superclass, typed-
+// keyframer or not, key count, presence+size of the default-value chunk 0x2503/0x2504/0x2505/
+// 0x2501 wherever a non-keyframer carries one). This doubles as the §12.2 corpus inventory for
+// typing PRS/LookAt and as the standing validation that the typed accessors agree with the raw
+// slot reads once CControlPRS/CControlLookAt exist.
+static int prsSelfTest(const char *maxFile, CStorageOleIn &in, CSceneClassRegistry *reg, bool verbose)
+{
+	CDllDirectory dll;
+	CClassDirectory3 cd(&dll);
+	CScene scene(reg, &dll, &cd);
+	{
+		std::vector<uint8> b;
+		if (!in.readStream("DllDirectory", b)) { std::cerr << "no DllDirectory\n"; return 2; }
+		CStorageStream ss(b); try { dll.serial(ss); dll.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "dll: " << e.what() << "\n"; return 2; }
+	}
+	{
+		std::vector<uint8> b;
+		if (!in.readStream("ClassDirectory3", b)) { std::cerr << "no ClassDirectory3\n"; return 2; }
+		CStorageStream ss(b); try { cd.serial(ss); cd.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "cd: " << e.what() << "\n"; return 2; }
+	}
+	{
+		std::vector<uint8> b;
+		if (!in.readStream("Scene", b)) { std::cerr << "no Scene\n"; return 2; }
+		CStorageStream ss(b); try { scene.serial(ss); scene.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "scene: " << e.what() << "\n"; return 2; }
+	}
+	static const NLMISC::CClassId prsClassId(0x00002005, 0x00000000);
+	static const NLMISC::CClassId lookAtClassId(0x00002006, 0x00000000);
+	uint nCtrl = 0, nPrs = 0, nLookAt = 0, nOther = 0;
+	uint nMismatch = 0, nTypedPrs = 0, nTypedLookAt = 0, nForeignSc = 0;
+	uint nValPos = 0, nValRot = 0, nValScale = 0;
+	std::map<std::string, uint> clsHist;   // per transform-controller class
+	std::map<std::string, uint> refHist;   // "cls nbrefs=N"
+	std::map<std::string, uint> subHist;   // per (owner, slot, sub-class...) line
+	std::map<std::string, uint> seqHist;   // own-chunk order signature per class
+	TChunkInv inv;
+	CSceneClassContainer *ssc = scene.container();
+	for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
+	{
+		CSceneClass *sc = dynamic_cast<CSceneClass *>(it->second);
+		if (!sc || sc->classDesc()->superClassId() != 0x00009008) continue;
+		++nCtrl;
+		NLMISC::CClassId cid = sc->classDesc()->classId();
+		++clsHist[cid.toString()];
+		// Own-chunk inventory. After parse, m_Chunks still lists every original chunk (parse copies
+		// the pointers onto the orphan list without clearing m_Chunks — ownership is the flag), so
+		// chunks() alone is the complete, duplicate-free inventory for claimed AND unclaimed ids.
+		char lvl[24];
+		snprintf(lvl, sizeof(lvl), "%08x.%08x", (uint32)cid.a(), (uint32)cid.b());
+		std::string seq;
+		for (CStorageContainer::TStorageObjectConstIt ct = sc->chunks().begin(); ct != sc->chunks().end(); ++ct)
+		{
+			CStorageRaw *raw = dynamic_cast<CStorageRaw *>(ct->second);
+			invAdd(inv, lvl, ct->first, raw ? (uint32)raw->Value.size() : 0xFFFFFFFFu, ct->second->isContainer());
+			char tok[12];
+			snprintf(tok, sizeof(tok), "%x ", ct->first);
+			seq += tok;
+		}
+		BUILTIN::CReferenceMaker *rm = dynamic_cast<BUILTIN::CReferenceMaker *>(sc);
+		uint nbRefs = rm ? rm->nbReferences() : 0;
+		++refHist[std::string(lvl) + " nbrefs=" + NLMISC::toString(nbRefs)];
+		bool isPrs = (cid == prsClassId);
+		bool isLookAt = (cid == lookAtClassId);
+		if (isPrs) ++nPrs;
+		else if (isLookAt) ++nLookAt;
+		else ++nOther;
+		// Typed-class validation (once CControlPRS/CControlLookAt are registered): the exact-id
+		// object must BE the typed class, its slot accessors must agree with the raw reference
+		// reads, and its valueAt0 helpers must agree with the sub-keyframer's own eval.
+		if (isPrs)
+		{
+			BUILTIN::CControlPRS *prs = dynamic_cast<BUILTIN::CControlPRS *>(sc);
+			if (!prs)
+			{
+				++nMismatch;
+				std::cerr << "  prs TYPED MISS: 0x2005 object is not CControlPRS (" << maxFile << ")\n";
+			}
+			else
+			{
+				++nTypedPrs;
+				if (prs->positionController() != rm->getReference(0)
+					|| prs->rotationController() != rm->getReference(1)
+					|| prs->scaleController() != rm->getReference(2))
+				{
+					++nMismatch;
+					std::cerr << "  prs SLOT MISMATCH (" << maxFile << ")\n";
+				}
+				float p[3], q[4], s7[7];
+				bool tp = prs->posValueAt0(p), tr = prs->rotValueAt0(q), ts = prs->scaleValueAt0(s7);
+				BUILTIN::CControlKeyFramerBase *kp = dynamic_cast<BUILTIN::CControlKeyFramerBase *>(rm->getReference(0));
+				BUILTIN::CControlKeyFramerBase *kr = dynamic_cast<BUILTIN::CControlKeyFramerBase *>(rm->getReference(1));
+				BUILTIN::CControlKeyFramerBase *ks = dynamic_cast<BUILTIN::CControlKeyFramerBase *>(rm->getReference(2));
+				float p2[3], q2[4], s2[7];
+				bool rp = kp && kp->posValueAt0(p2), rr = kr && kr->rotValueAt0(q2), rs = ks && ks->scaleValueAt0(s2);
+				bool bad = (tp != rp) || (tr != rr) || (ts != rs)
+					|| (tp && memcmp(p, p2, 12)) || (tr && memcmp(q, q2, 16)) || (ts && memcmp(s7, s2, 28));
+				if (bad)
+				{
+					++nMismatch;
+					std::cerr << "  prs VALUEAT0 MISMATCH (" << maxFile << ")\n";
+				}
+				if (tp) ++nValPos;
+				if (tr) ++nValRot;
+				if (ts) ++nValScale;
+			}
+		}
+		else if (isLookAt)
+		{
+			BUILTIN::CControlLookAt *la = dynamic_cast<BUILTIN::CControlLookAt *>(sc);
+			if (!la)
+			{
+				++nMismatch;
+				std::cerr << "  lookat TYPED MISS: 0x2006 object is not CControlLookAt (" << maxFile << ")\n";
+			}
+			else
+			{
+				++nTypedLookAt;
+				if (la->targetNode() != rm->getReference(0)
+					|| la->positionController() != rm->getReference(1)
+					|| la->rollController() != rm->getReference(2)
+					|| la->scaleController() != rm->getReference(3))
+				{
+					++nMismatch;
+					std::cerr << "  lookat SLOT MISMATCH (" << maxFile << ")\n";
+				}
+				float p[3];
+				if (la->posValueAt0(p)) ++nValPos;
+			}
+		}
+		if (isPrs || isLookAt)
+		{
+			if (!seq.empty() && seq[seq.size() - 1] == ' ') seq.resize(seq.size() - 1);
+			++seqHist[std::string(isPrs ? "prs: " : "lookat: ") + seq];
+		}
+		if (rm)
+		{
+			// Slot inventory for EVERY transform-controller class (PRS/LookAt are the typed
+			// targets; the biped classes 0x9154/0x9156/0x3011 ride along so the biped_rig
+			// getLocalTransform path's possible inputs are inventoried too).
+			for (uint slot = 0; slot < nbRefs && slot < 5; ++slot)
+			{
+				CSceneClass *sub = dynamic_cast<CSceneClass *>(rm->getReference(slot));
+				std::ostringstream line;
+				line << (isPrs ? "prs" : isLookAt ? "lookat" : lvl) << " slot=" << slot;
+				if (!sub) line << " null";
+				else
+				{
+					line << " cls=" << sub->classDesc()->classId().toString()
+					     << " sc=0x" << std::hex << sub->classDesc()->superClassId() << std::dec;
+					if (dynamic_cast<BUILTIN::INode *>(sub)) line << " node";
+					BUILTIN::CControlKeyFramerBase *kf = dynamic_cast<BUILTIN::CControlKeyFramerBase *>(sub);
+					if (kf)
+					{
+						line << " kf keys=" << (kf->keyCount() ? "y" : "0");
+						uint dsz = 0;
+						line << " def=" << (kf->defaultValue(dsz) ? NLMISC::toString(dsz) : std::string("-"));
+					}
+					else
+					{
+						// Non-keyframer: full own-chunk inventory (what would the raw default-value
+						// fallback find on it?), bucketed under sub.<classid>.
+						{
+							char slvl[32];
+							snprintf(slvl, sizeof(slvl), "sub.%08x.%08x",
+							         (uint32)sub->classDesc()->classId().a(), (uint32)sub->classDesc()->classId().b());
+							for (CStorageContainer::TStorageObjectConstIt ct = sub->chunks().begin(); ct != sub->chunks().end(); ++ct)
+							{
+								CStorageRaw *raw = dynamic_cast<CStorageRaw *>(ct->second);
+								invAdd(inv, slvl, ct->first, raw ? (uint32)raw->Value.size() : 0xFFFFFFFFu, ct->second->isContainer());
+							}
+						}
+						static const uint16 defIds[4] = { 0x2501, 0x2503, 0x2504, 0x2505 };
+						for (uint d = 0; d < 4; ++d)
+						{
+							uint32 sz = 0xFFFFFFFFu;
+							bool found = false;
+							for (CStorageContainer::TStorageObjectConstIt ot = sub->orphanedChunks().begin(); ot != sub->orphanedChunks().end() && !found; ++ot)
+								if (ot->first == defIds[d])
+								{
+									found = true;
+									if (CStorageRaw *raw = dynamic_cast<CStorageRaw *>(ot->second)) sz = (uint32)raw->Value.size();
+								}
+							for (CStorageContainer::TStorageObjectConstIt ct = sub->chunks().begin(); ct != sub->chunks().end() && !found; ++ct)
+								if (ct->first == defIds[d])
+								{
+									found = true;
+									if (CStorageRaw *raw = dynamic_cast<CStorageRaw *>(ct->second)) sz = (uint32)raw->Value.size();
+								}
+							if (found)
+								line << " def" << std::hex << defIds[d] << std::dec << "=" << sz;
+						}
+					}
+				}
+				++subHist[line.str()];
+			}
+		}
+		if (verbose)
+			std::cerr << "  ctrltm " << cid.toString() << " nbrefs=" << nbRefs << "\n";
+	}
+	for (std::map<std::string, uint>::const_iterator ht = clsHist.begin(); ht != clsHist.end(); ++ht)
+		std::cout << "CTCLS n=" << ht->second << " cls=" << ht->first << "\n";
+	for (std::map<std::string, uint>::const_iterator ht = refHist.begin(); ht != refHist.end(); ++ht)
+		std::cout << "CTREF n=" << ht->second << " " << ht->first << "\n";
+	for (std::map<std::string, uint>::const_iterator ht = subHist.begin(); ht != subHist.end(); ++ht)
+		std::cout << "PRSSUB n=" << ht->second << " " << ht->first << "\n";
+	for (std::map<std::string, uint>::const_iterator ht = seqHist.begin(); ht != seqHist.end(); ++ht)
+		std::cout << "CTSEQ n=" << ht->second << " " << ht->first << "\n";
+	invPrint(inv, "CTINV");
+	// PRS/LookAt class ids under a FOREIGN superclass would pass a classid compare but not the
+	// typed registration — prove there are none (the consumers moved from classid compares to
+	// dynamic_cast on the typed classes).
+	for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
+	{
+		CSceneClass *sc = dynamic_cast<CSceneClass *>(it->second);
+		if (!sc || sc->classDesc()->superClassId() == 0x00009008) continue;
+		NLMISC::CClassId cid = sc->classDesc()->classId();
+		if (cid == prsClassId || cid == lookAtClassId)
+		{
+			++nForeignSc;
+			std::cerr << "  prs FOREIGN SUPERCLASS: " << cid.toString() << " sc=0x" << std::hex
+			          << sc->classDesc()->superClassId() << std::dec << " (" << maxFile << ")\n";
+		}
+	}
+	bool fail = nMismatch || nForeignSc;
+	std::cout << (fail ? "FAIL" : "OK") << " prs-selftest: " << nCtrl << " transform-ctrls, "
+	          << nPrs << " prs (" << nTypedPrs << " typed), " << nLookAt << " lookat ("
+	          << nTypedLookAt << " typed), " << nOther << " other, valueat0 p/r/s "
+	          << nValPos << "/" << nValRot << "/" << nValScale << ", "
+	          << nMismatch << " mismatch, " << nForeignSc << " foreign-sc\n";
+	return fail ? 1 : 0;
+}
+
 // Parse the Scene stream fully and run the CAppData script-entry write-path self-check: for
 // every script AppData entry (the NEL3D_APPDATA_* MAXSCRIPT-keyed, null-terminated-string
 // entries), read the string through the typed getScriptString, write the SAME value back
@@ -1182,6 +1689,8 @@ int main(int argc, char **argv)
 	bool doDerivedSelfTest = false;
 	bool doMeshDeltaSelfTest = false;
 	bool doMapExtSelfTest = false;
+	bool doMapChannelSelfTest = false;
+	bool doPrsSelfTest = false;
 	bool doAppDataSelfTest = false;
 	bool doModifySave = false;
 	bool doAppDataModifySave = false;
@@ -1202,6 +1711,8 @@ int main(int argc, char **argv)
 		else if (a == "--derived-selftest") doDerivedSelfTest = true;
 		else if (a == "--meshdelta-selftest") doMeshDeltaSelfTest = true;
 		else if (a == "--mapext-selftest") doMapExtSelfTest = true;
+		else if (a == "--mapchannel-selftest") doMapChannelSelfTest = true;
+		else if (a == "--prs-selftest") doPrsSelfTest = true;
 		else if (a == "--appdata-selftest") doAppDataSelfTest = true;
 		else if (a == "--modify-save-test") doModifySave = true;
 		else if (a == "--appdata-modify-save-test") doAppDataModifySave = true;
@@ -1218,7 +1729,7 @@ int main(int argc, char **argv)
 	}
 	if (!maxFile)
 	{
-		std::cerr << "usage: pipeline_max_corpus_test [--parse] [--verbose] [--pb2-selftest] [--oldpb-selftest] [--shape-selftest] [--derived-selftest] [--meshdelta-selftest] [--mapext-selftest] [--appdata-selftest] [--modify-save-test] [--appdata-modify-save-test] <input.max>\n";
+		std::cerr << "usage: pipeline_max_corpus_test [--parse] [--verbose] [--pb2-selftest] [--oldpb-selftest] [--shape-selftest] [--derived-selftest] [--meshdelta-selftest] [--mapext-selftest] [--mapchannel-selftest] [--prs-selftest] [--appdata-selftest] [--modify-save-test] [--appdata-modify-save-test] <input.max>\n";
 		return 2;
 	}
 
@@ -1270,6 +1781,20 @@ int main(int argc, char **argv)
 	if (doMapExtSelfTest)
 	{
 		int rc = mapExtSelfTest(maxFile, in, &reg, verbose);
+		remove(g_tempPath.c_str());
+		return rc;
+	}
+
+	if (doMapChannelSelfTest)
+	{
+		int rc = mapChannelSelfTest(maxFile, in, &reg, verbose);
+		remove(g_tempPath.c_str());
+		return rc;
+	}
+
+	if (doPrsSelfTest)
+	{
+		int rc = prsSelfTest(maxFile, in, &reg, verbose);
 		remove(g_tempPath.c_str());
 		return rc;
 	}
