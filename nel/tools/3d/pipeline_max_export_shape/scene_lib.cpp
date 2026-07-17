@@ -60,6 +60,7 @@
 #include "../pipeline_max/builtin/control_keyframer.h"
 #include "../pipeline_max/builtin/param_block.h"
 #include "../pipeline_max/builtin/param_block_2.h"
+#include "../pipeline_max/builtin/derived_object.h"
 
 #include "../pipeline_max_export_common/db_path.h"
 
@@ -69,8 +70,6 @@ using namespace MAXMATH;
 
 namespace SCENELIB {
 
-const NLMISC::CClassId CLASSID_OSM_DERIVED(0x29263a68, 0x405f22f5);
-const NLMISC::CClassId CLASSID_WSM_DERIVED(0x4ec13906, 0x5578130e);
 const NLMISC::CClassId CLASSID_RPO(0x368c679f, 0x711c22ee);
 const NLMISC::CClassId CLASSID_TARGET(0x00001020, 0x00000000);
 const NLMISC::CClassId CLASSID_EDITABLE_MESH(0xe44f10b3, 0x00000000);
@@ -402,60 +401,36 @@ CSceneClass *baseObjectOf(CSceneClass *obj, std::vector<CSceneClass *> *mods,
 {
 	// Deep OSM chains exist in the corpus (cococlaw LOD: 20+ nested OSM Derived wrappers
 	// before the Editable Mesh). Guard must clear that depth; a seen-set breaks pure cycles.
-	// SuperClassId of OSM Derived is often 0 on the unknown-class path — identify by ClassId.
 	int guard = 256;
 	std::set<CSceneClass *> seen;
 	while (obj && guard-- > 0)
 	{
 		if (!seen.insert(obj).second)
 			break; // cycle
-		NLMISC::CClassId cid = obj->classDesc()->classId();
-		if (cid.a() == 0x92aab38c)
+		if (obj->classDesc()->classId().a() == 0x92aab38c)
 		{
 			CSceneClass *resolved = resolveXRefObject(obj, 0);
 			if (!resolved) return obj; // unresolvable: keep the wrapper
 			obj = resolved;
 			continue;
 		}
-		if (cid != CLASSID_OSM_DERIVED && cid != CLASSID_WSM_DERIVED) break;
-		CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(obj);
-		CSceneClass *base = NULL;
-		uint modCountBefore = mods ? (uint)mods->size() : 0;
-		for (uint i = 0; rm && i < rm->nbReferences(); ++i)
+		CDerivedObject *d = dynamic_cast<CDerivedObject *>(obj);
+		if (!d) break;
+		for (uint i = 0; i < d->modifierCount(); ++i)
 		{
-			CSceneClass *r = dynamic_cast<CSceneClass *>(rm->getReference(i));
-			if (!r) continue;
-			TSClassId scid = r->classDesc()->superClassId();
-			// GeomObject / Shape / derived-object wrappers are bases. Modifiers are stack
-			// entries. Controllers and other non-geometry refs on the OSM array are ignored.
-			if (scid == SCLASS_OSMODIFIER || scid == SCLASS_WSMODIFIER)
-			{
-				if (mods) mods->push_back(r);
-				continue;
-			}
-			if (scid == SCLASS_GEOMOBJECT || scid == SCLASS_SHAPE
-			    || r->classDesc()->classId() == CLASSID_OSM_DERIVED
-			    || r->classDesc()->classId() == CLASSID_WSM_DERIVED
-			    || r->classDesc()->classId().a() == 0x92aab38c)
-			{
-				base = r;
-			}
+			if (mods) mods->push_back(d->modifier(i));
+			if (modApps) modApps->push_back(d->modApp(i));
 		}
-		if (modApps)
-		{
-			// mod-app local data: the wrapper's orphaned 0x2500 containers, one per modifier
-			// slot in reference order
-			std::vector<CStorageContainer *> apps;
-			const CStorageContainer::TStorageObjectContainer &orphans = obj->orphanedChunks();
-			for (CStorageContainer::TStorageObjectConstIt it = orphans.begin(); it != orphans.end(); ++it)
-				if (it->first == 0x2500)
-					apps.push_back(dynamic_cast<CStorageContainer *>(it->second));
-			// pad/truncate to the modifier count of THIS wrapper
-			uint nMods = mods ? (uint)mods->size() - modCountBefore : (uint)apps.size();
-			for (uint m = 0; m < nMods; ++m)
-				modApps->push_back(m < apps.size() ? apps[m] : NULL);
-		}
+		// This walk only descends into GeomObject / Shape / nested-wrapper / XRef bases; a
+		// Helper or Camera base (the corpus "MO" wrapper class) stops it and returns the
+		// wrapper — the historical allow-list behavior, which mesh consumers rely on.
+		CSceneClass *base = d->baseObject();
 		if (!base) break;
+		TSClassId scid = base->classDesc()->superClassId();
+		if (scid != SCLASS_GEOMOBJECT && scid != SCLASS_SHAPE
+		    && !dynamic_cast<CDerivedObject *>(base)
+		    && base->classDesc()->classId().a() != 0x92aab38c)
+			break;
 		obj = base;
 	}
 	return obj;

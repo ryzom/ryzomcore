@@ -53,6 +53,8 @@
 
 #include "base_object.h"
 #include "object.h"
+#include "derived_object.h"
+#include "wsm_derived_object.h"
 #include "shape_object.h"
 #include "geom_object.h"
 #include "tri_object.h"
@@ -302,6 +304,12 @@ void CBuiltin::registerClasses(CSceneClassRegistry *registry)
 
 	// tvnode (inh ReferenceTarget)
 	registry->add(&TrackViewNodeClassDesc);
+
+	// derived-object wrappers (inh ReferenceTarget) — the modifier-stack holders. NOT resolved
+	// through ClassDirectory3: CSceneClassContainer::createChunkById maps their fixed chunk ids
+	// 0x2032/0x2033 to these registrations directly (superclass 0x0 — the file stores none).
+	registry->add(&DerivedObjectClassDesc);
+	registry->add(&WSMDerivedObjectClassDesc);
 
 	// materials (inh MtlBase, superclass 0xc00 typed through CMtlBase below): the Multi/Sub-Object
 	// material is the one that needs its own type (sub-material list); the rest ride the CMtlBase

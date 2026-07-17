@@ -71,6 +71,8 @@
 #include "../pipeline_max/builtin/param_block.h"
 #include "../pipeline_max/builtin/param_block_2.h"
 #include "../pipeline_max/builtin/shape_object.h"
+#include "../pipeline_max/builtin/derived_object.h"
+#include "../pipeline_max/builtin/wsm_derived_object.h"
 #include "../pipeline_max/builtin/mtl_base.h"
 #include "../pipeline_max/builtin/multi_mtl.h"
 #include "../pipeline_max/builtin/reference_maker.h"
@@ -674,6 +676,70 @@ static int shapeSelfTest(CStorageOleIn &in, CSceneClassRegistry *reg, bool verbo
 	return (nFail || nUnknownIds) ? 1 : 0;
 }
 
+// Parse the Scene stream fully and verify the CDerivedObject typed slot model on every OSM/WSM
+// Derived wrapper: slot/mod-app count parity, contiguous 0x2500 run, single base at the last
+// reference slot, canonical mod-app children (0x2510[52]/0x2511[24]/0x2512/0x2513[4]), no
+// unknown orphan ids. Absent 0x2510/0x2512 are the norm (not misses); any structural anomaly
+// dumps the file path.
+static int derivedSelfTest(const char *maxFile, CStorageOleIn &in, CSceneClassRegistry *reg, bool verbose)
+{
+	CDllDirectory dll;
+	CClassDirectory3 cd(&dll);
+	CScene scene(reg, &dll, &cd);
+	{
+		std::vector<uint8> b;
+		if (!in.readStream("DllDirectory", b)) { std::cerr << "no DllDirectory\n"; return 2; }
+		CStorageStream ss(b); try { dll.serial(ss); dll.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "dll: " << e.what() << "\n"; return 2; }
+	}
+	{
+		std::vector<uint8> b;
+		if (!in.readStream("ClassDirectory3", b)) { std::cerr << "no ClassDirectory3\n"; return 2; }
+		CStorageStream ss(b); try { cd.serial(ss); cd.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "cd: " << e.what() << "\n"; return 2; }
+	}
+	{
+		std::vector<uint8> b;
+		if (!in.readStream("Scene", b)) { std::cerr << "no Scene\n"; return 2; }
+		CStorageStream ss(b); try { scene.serial(ss); scene.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "scene: " << e.what() << "\n"; return 2; }
+	}
+	uint nOsm = 0, nWsm = 0, nSlots = 0, nApps = 0, nTM = 0, nData = 0, nBase = 0, nZeroMod = 0;
+	uint nAnomaly = 0;
+	CSceneClassContainer *ssc = scene.container();
+	for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
+	{
+		BUILTIN::CDerivedObject *d = dynamic_cast<BUILTIN::CDerivedObject *>(it->second);
+		if (!d) continue;
+		if (dynamic_cast<BUILTIN::CWSMDerivedObject *>(it->second)) ++nWsm; else ++nOsm;
+		nSlots += d->modifierCount();
+		if (!d->modifierCount()) ++nZeroMod;
+		if (d->hasBase()) ++nBase;
+		for (uint i = 0; i < d->modifierCount(); ++i)
+		{
+			if (d->modApp(i)) ++nApps;
+			float tm[12];
+			if (d->modContextTM(i, tm)) ++nTM;
+			if (d->localModData(i)) ++nData;
+		}
+		std::string err;
+		if (!d->selfTest(err))
+		{
+			++nAnomaly;
+			std::cerr << "  derived selftest ANOMALY (" << maxFile << ", "
+			          << d->classDesc()->internalName() << "): " << err << "\n";
+		}
+		else if (verbose)
+		{
+			std::cerr << "  derived " << d->classDesc()->internalName() << ": "
+			          << d->modifierCount() << " modifiers, base "
+			          << (d->baseObject() ? d->baseObject()->classDesc()->classId().toString() : std::string("<none>")) << "\n";
+		}
+	}
+	std::cout << (nAnomaly ? "FAIL" : "OK") << " derived-selftest: " << nOsm << " osm, " << nWsm
+	          << " wsm, " << nSlots << " slots, " << nApps << " modapps, " << nTM << " tms, "
+	          << nData << " localdata, " << nBase << " base, " << nZeroMod << " zero-mod, "
+	          << nAnomaly << " anomaly\n";
+	return nAnomaly ? 1 : 0;
+}
+
 // Parse the Scene stream fully and run the CAppData script-entry write-path self-check: for
 // every script AppData entry (the NEL3D_APPDATA_* MAXSCRIPT-keyed, null-terminated-string
 // entries), read the string through the typed getScriptString, write the SAME value back
@@ -811,6 +877,7 @@ int main(int argc, char **argv)
 	bool doPb2SelfTest = false;
 	bool doOldPbSelfTest = false;
 	bool doShapeSelfTest = false;
+	bool doDerivedSelfTest = false;
 	bool doAppDataSelfTest = false;
 	bool doModifySave = false;
 	bool doAppDataModifySave = false;
@@ -828,6 +895,7 @@ int main(int argc, char **argv)
 		else if (a == "--pb2-selftest") doPb2SelfTest = true;
 		else if (a == "--oldpb-selftest") doOldPbSelfTest = true;
 		else if (a == "--shape-selftest") doShapeSelfTest = true;
+		else if (a == "--derived-selftest") doDerivedSelfTest = true;
 		else if (a == "--appdata-selftest") doAppDataSelfTest = true;
 		else if (a == "--modify-save-test") doModifySave = true;
 		else if (a == "--appdata-modify-save-test") doAppDataModifySave = true;
@@ -844,7 +912,7 @@ int main(int argc, char **argv)
 	}
 	if (!maxFile)
 	{
-		std::cerr << "usage: pipeline_max_corpus_test [--parse] [--verbose] [--pb2-selftest] [--oldpb-selftest] [--shape-selftest] [--appdata-selftest] [--modify-save-test] [--appdata-modify-save-test] <input.max>\n";
+		std::cerr << "usage: pipeline_max_corpus_test [--parse] [--verbose] [--pb2-selftest] [--oldpb-selftest] [--shape-selftest] [--derived-selftest] [--appdata-selftest] [--modify-save-test] [--appdata-modify-save-test] <input.max>\n";
 		return 2;
 	}
 
@@ -875,6 +943,13 @@ int main(int argc, char **argv)
 	if (doShapeSelfTest)
 	{
 		int rc = shapeSelfTest(in, &reg, verbose);
+		remove(g_tempPath.c_str());
+		return rc;
+	}
+
+	if (doDerivedSelfTest)
+	{
+		int rc = derivedSelfTest(maxFile, in, &reg, verbose);
 		remove(g_tempPath.c_str());
 		return rc;
 	}

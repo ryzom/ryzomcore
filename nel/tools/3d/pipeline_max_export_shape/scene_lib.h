@@ -72,8 +72,9 @@ using PIPELINE::MAX::BUILTIN::CReferenceMaker;
 // Well-known scene class identities
 using MAXSCENE::CLASSID_PRS_CTRL;
 using MAXSCENE::CLASSID_LOOKAT_CTRL;
-extern const NLMISC::CClassId CLASSID_OSM_DERIVED;
-extern const NLMISC::CClassId CLASSID_WSM_DERIVED;
+// (The OSM/WSM Derived wrapper identities live on the typed classes now:
+// PIPELINE::MAX::BUILTIN::CDerivedObject / CWSMDerivedObject — dynamic_cast to CDerivedObject
+// catches both wrapper kinds.)
 extern const NLMISC::CClassId CLASSID_RPO;
 extern const NLMISC::CClassId CLASSID_TARGET;
 extern const NLMISC::CClassId CLASSID_EDITABLE_MESH;

@@ -73,6 +73,7 @@
 #include "../pipeline_max/builtin/i_node.h"
 #include "../pipeline_max/builtin/node_impl.h"
 #include "../pipeline_max/builtin/reference_maker.h"
+#include "../pipeline_max/builtin/derived_object.h"
 #include "../pipeline_max/builtin/storage/app_data.h"
 #include "../pipeline_max/builtin/control_keyframer.h"
 
@@ -100,7 +101,6 @@ static const sint32 TIME_POS_INFINITY = 0x7fffffff;
 static const NLMISC::CClassId CLASSID_PRS_CTRL(0x00002005, 0x00000000);
 static const NLMISC::CClassId CLASSID_LOOKAT_CTRL(0x00002006, 0x00000000);
 static const NLMISC::CClassId CLASSID_BIPED_VHT_CTRL(0x00009156, 0x00000000);
-static const NLMISC::CClassId CLASSID_OSM_DERIVED(0x29263a68, 0x405f22f5);
 static const NLMISC::CClassId CLASSID_MORPHER(0x17bb6854, 0xa5cba2a3);
 static const NLMISC::CClassId CLASSID_PARAM_BLOCK_2(0x00000082, 0x00000000);
 // Scripted-plugin class ids carry a per-script-edit PartB; match PartA only, like the
@@ -885,14 +885,14 @@ static void addNodeTracks(NL3D::CAnimation &animation, INode &node, const std::s
 // "MorphFactor", replicating CExportNel::addMorphTracks.
 static void addMorphTracks(NL3D::CAnimation &animation, INode &node, const std::string &parentName)
 {
-	CReferenceMaker *obj = objectOfNode(node);
-	if (!obj || obj->classDesc()->classId() != CLASSID_OSM_DERIVED) return;
+	CDerivedObject *obj = dynamic_cast<CDerivedObject *>(objectOfNode(node));
+	if (!obj) return;
 	CReferenceMaker *morpher = NULL;
-	for (uint i = 0; i < obj->nbReferences() && !morpher; ++i)
+	for (uint i = 0; i < obj->modifierCount() && !morpher; ++i)
 	{
-		CReferenceMaker *mod = obj->getReference(i);
+		CSceneClass *mod = obj->modifier(i);
 		if (mod && mod->classDesc()->classId() == CLASSID_MORPHER)
-			morpher = mod;
+			morpher = dynamic_cast<CReferenceMaker *>(mod);
 	}
 	if (!morpher) return;
 

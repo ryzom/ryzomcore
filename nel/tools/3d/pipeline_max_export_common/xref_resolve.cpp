@@ -36,6 +36,7 @@
 #include "../pipeline_max/scene.h"
 #include "../pipeline_max/builtin/node_impl.h"
 #include "../pipeline_max/builtin/reference_maker.h"
+#include "../pipeline_max/builtin/derived_object.h"
 
 #include <nel/misc/common.h>
 #include <nel/misc/ucstring.h>
@@ -176,12 +177,9 @@ CSceneClass *resolveXRefObject(CSceneClass *xrefObj, int depth)
 
 CSceneClass *baseObjectOfObj(CSceneClass *obj, int depth)
 {
-	const TSClassId SCLASS_OSMODIFIER = 0x00000810;
-	const TSClassId SCLASS_WSMODIFIER = 0x00000820;
 	int guard = 16;
 	while (obj && guard-- > 0)
 	{
-		NLMISC::CClassId cid = obj->classDesc()->classId();
 		if (isXRefObject(obj))
 		{
 			CSceneClass *resolved = resolveXRefObject(obj, depth);
@@ -189,17 +187,9 @@ CSceneClass *baseObjectOfObj(CSceneClass *obj, int depth)
 			obj = resolved;
 			continue;
 		}
-		if (cid != CLASSID_OSM_DERIVED && cid != CLASSID_WSM_DERIVED) break;
-		CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(obj);
-		CSceneClass *base = NULL;
-		for (uint i = 0; rm && i < rm->nbReferences(); ++i)
-		{
-			CSceneClass *r = dynamic_cast<CSceneClass *>(rm->getReference(i));
-			if (!r) continue;
-			TSClassId scid = r->classDesc()->superClassId();
-			if (scid == SCLASS_OSMODIFIER || scid == SCLASS_WSMODIFIER) continue;
-			base = r;
-		}
+		CDerivedObject *derived = dynamic_cast<CDerivedObject *>(obj);
+		if (!derived) break;
+		CSceneClass *base = derived->baseObject();
 		if (!base) break;
 		obj = base;
 	}

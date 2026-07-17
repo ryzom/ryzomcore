@@ -42,6 +42,8 @@
 #include "scene_class_registry.h"
 #include "scene_class_unknown.h"
 #include "builtin/scene_impl.h"
+#include "builtin/derived_object.h"
+#include "builtin/wsm_derived_object.h"
 
 using namespace std;
 // using namespace NLMISC;
@@ -199,15 +201,21 @@ IStorageObject *CSceneClassContainer::createChunkById(uint16 id, bool container)
 	CSceneClass *sceneClass = NULL;
 	switch (id)
 	{
-		// Known unknown special identifiers...
+		// Special identifiers NOT resolved through ClassDirectory3 — the derived-object wrappers
+		// (the modifier-stack holders) live at fixed chunk ids. Resolve through the registry's
+		// exact class entries (superclass 0x0 — the file stores none; CBuiltin registers
+		// CDerivedObject/CWSMDerivedObject there), falling back to a reference-target-typed
+		// unknown for registries that don't carry the typed classes.
 	case 0x2032:
-		sceneClass = m_SceneClassRegistry->createUnknown(m_Scene, 0x0, NLMISC::CClassId(0x29263a68, 0x405f22f5), ucstring("OSM Derived"), ucstring("Internal"), ucstring("Internal"));
+		sceneClass = m_SceneClassRegistry->create(m_Scene, BUILTIN::CDerivedObject::SuperClassId, BUILTIN::CDerivedObject::ClassId);
+		if (!sceneClass)
+			sceneClass = m_SceneClassRegistry->createUnknown(m_Scene, 0x0, NLMISC::CClassId(0x29263a68, 0x405f22f5), ucstring("OSM Derived"), ucstring("Internal"), ucstring("Internal"));
 		break;
 	case 0x2033:
-		sceneClass = m_SceneClassRegistry->createUnknown(m_Scene, 0x0, NLMISC::CClassId(0x4ec13906, 0x5578130e), ucstring("WSM Derived"), ucstring("Internal"), ucstring("Internal"));
+		sceneClass = m_SceneClassRegistry->create(m_Scene, BUILTIN::CWSMDerivedObject::SuperClassId, BUILTIN::CWSMDerivedObject::ClassId);
+		if (!sceneClass)
+			sceneClass = m_SceneClassRegistry->createUnknown(m_Scene, 0x0, NLMISC::CClassId(0x4ec13906, 0x5578130e), ucstring("WSM Derived"), ucstring("Internal"), ucstring("Internal"));
 		break;
-		// return new CSceneClass(m_Scene); // TODO: Make dummy dllentry and classentry for these...
-		// return static_cast<IStorageObject *>(new CSceneClassUnknown<CSceneClass>(dllEntry, classEntry));
 	default:
 		{
 			const CClassEntry *classEntry = m_ClassDirectory3->get(id);

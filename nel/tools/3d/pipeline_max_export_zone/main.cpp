@@ -106,6 +106,7 @@
 #include "../pipeline_max/builtin/node_impl.h"
 #include "../pipeline_max/builtin/reference_maker.h"
 #include "../pipeline_max/builtin/storage/app_data.h"
+#include "../pipeline_max/builtin/derived_object.h"
 #include "../pipeline_max/builtin/control_keyframer.h"
 
 #include "../pipeline_max_export_common/max_math.h"
@@ -118,19 +119,13 @@ using namespace PIPELINE::MAX::BUILTIN;
 using namespace PIPELINE::MAX::NELPATCH;
 using namespace MAXMATH;
 
-// Scene class ids
+// Scene class ids (OSM/WSM Derived wrappers are the typed CDerivedObject/CWSMDerivedObject now)
 static const NLMISC::CClassId CLASSID_PRS_CTRL(0x00002005, 0x00000000);
-static const NLMISC::CClassId CLASSID_OSM_DERIVED(0x29263a68, 0x405f22f5);
-static const NLMISC::CClassId CLASSID_WSM_DERIVED(0x4ec13906, 0x5578130e);
 static const NLMISC::CClassId CLASSID_NEL_EDIT_PATCH(0x4dd14a3c, 0x4ac23c0c);
 // NeL Patch Painter (nel_patch_paint): local data is the same final-patch shape (0x1140 +
 // 0x4001) with no vertex mapper — the stored final patch is the evaluated output verbatim
 // (PaintPatchData::Apply).
 static const NLMISC::CClassId CLASSID_NEL_PATCH_PAINT(0x0c49560f, 0x3c3d68e7);
-
-// Superclass ids
-static const TSClassId SCLASS_OSMODIFIER = 0x00000810;
-static const TSClassId SCLASS_WSMODIFIER = 0x00000820;
 
 // PRS sub-controller default-value chunk ids
 #define CHUNK_CTRL_POS_VALUE 0x2503
@@ -405,24 +400,13 @@ static CStorageRaw *rawChildOf(const CStorageContainer *c, uint16 id)
 	return NULL;
 }
 
-// The modifier per-node local data of derived-object modifier slot modIndex: the wrapper's
-// 0x2500 containers in reference order, each containing 0x2512 -> 0x1000 (the edit-patch
-// local data wrapper).
-static CStorageContainer *editPatchLocalData(CSceneClass *derived, uint modIndex)
+// The modifier per-node local data of derived-object modifier slot modIndex: the typed slot's
+// 0x2512 LocalModData container -> 0x1000 (the edit-patch local data wrapper).
+static CStorageContainer *editPatchLocalData(CDerivedObject *derived, uint modIndex)
 {
-	const CStorageContainer::TStorageObjectContainer &orphans = derived->orphanedChunks();
-	uint slot = 0;
-	for (CStorageContainer::TStorageObjectConstIt it = orphans.begin(); it != orphans.end(); ++it)
-	{
-		if (it->first != 0x2500) continue;
-		if (slot++ != modIndex) continue;
-		CStorageContainer *slotC = dynamic_cast<CStorageContainer *>(it->second);
-		if (!slotC) return NULL;
-		CStorageContainer *data = containerChild(slotC, 0x2512);
-		if (!data) return NULL;
-		return containerChild(data, 0x1000);
-	}
-	return NULL;
+	CStorageContainer *data = dynamic_cast<CStorageContainer *>(derived->localModData(modIndex));
+	if (!data) return NULL;
+	return containerChild(data, 0x1000);
 }
 
 // Apply the NeL Edit Patch modifier local data over the current patch state.
@@ -791,38 +775,26 @@ static bool evalNodePatch(CNodeImpl *node, SEvalPatch &out, std::string &err)
 	if (!obj) { err = "node without object"; return false; }
 
 	// Collect the modifier stack (top first) down to the base object.
-	std::vector<std::pair<CSceneClass *, uint> > editMods; // (derived wrapper, modifier index)
+	std::vector<std::pair<CDerivedObject *, uint> > editMods; // (derived wrapper, modifier slot)
 	int guard = 8;
 	while (obj && guard-- > 0)
 	{
-		NLMISC::CClassId cid = obj->classDesc()->classId();
-		if (cid != CLASSID_OSM_DERIVED && cid != CLASSID_WSM_DERIVED) break;
-		CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(obj);
-		if (!rm) { err = "derived object is not a reference maker"; return false; }
-		CSceneClass *base = NULL;
-		uint modIndex = 0;
-		for (uint i = 0; i < rm->nbReferences(); ++i)
+		CDerivedObject *derived = dynamic_cast<CDerivedObject *>(obj);
+		if (!derived) break;
+		for (uint m = 0; m < derived->modifierCount(); ++m)
 		{
-			CSceneClass *r = dynamic_cast<CSceneClass *>(rm->getReference(i));
-			if (!r) continue;
-			TSClassId scid = r->classDesc()->superClassId();
-			if (scid == SCLASS_OSMODIFIER || scid == SCLASS_WSMODIFIER)
+			NLMISC::CClassId mcid = derived->modifier(m)->classDesc()->classId();
+			if (mcid == CLASSID_NEL_EDIT_PATCH || mcid == CLASSID_NEL_PATCH_PAINT)
 			{
-				if (r->classDesc()->classId() == CLASSID_NEL_EDIT_PATCH
-					|| r->classDesc()->classId() == CLASSID_NEL_PATCH_PAINT)
-				{
-					editMods.push_back(std::pair<CSceneClass *, uint>(obj, modIndex));
-				}
-				else
-				{
-					fprintf(stderr, "WARNING: node '%s': unsupported modifier %s on patch stack, treated as pass-through\n",
-					        ucstring(node->userName()).toUtf8().c_str(), r->classDesc()->classId().toString().c_str());
-				}
-				++modIndex;
-				continue;
+				editMods.push_back(std::pair<CDerivedObject *, uint>(derived, m));
 			}
-			base = r;
+			else
+			{
+				fprintf(stderr, "WARNING: node '%s': unsupported modifier %s on patch stack, treated as pass-through\n",
+				        ucstring(node->userName()).toUtf8().c_str(), mcid.toString().c_str());
+			}
 		}
+		CSceneClass *base = derived->baseObject();
 		if (!base) { err = "derived object without base object"; return false; }
 		obj = base;
 	}
@@ -1352,23 +1324,9 @@ static bool nodeIsRklPatch(CNodeImpl *node)
 	int guard = 8;
 	while (obj && guard-- > 0)
 	{
-		NLMISC::CClassId cid = obj->classDesc()->classId();
-		if (cid == CLASSID_OSM_DERIVED || cid == CLASSID_WSM_DERIVED)
-		{
-			CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(obj);
-			CSceneClass *base = NULL;
-			for (uint i = 0; rm && i < rm->nbReferences(); ++i)
-			{
-				CSceneClass *r = dynamic_cast<CSceneClass *>(rm->getReference(i));
-				if (!r) continue;
-				TSClassId scid = r->classDesc()->superClassId();
-				if (scid == SCLASS_OSMODIFIER || scid == SCLASS_WSMODIFIER) continue;
-				base = r;
-			}
-			obj = base;
-			continue;
-		}
-		break;
+		CDerivedObject *derived = dynamic_cast<CDerivedObject *>(obj);
+		if (!derived) break;
+		obj = derived->baseObject();
 	}
 	return obj && dynamic_cast<CRklPatchObject *>(obj);
 }

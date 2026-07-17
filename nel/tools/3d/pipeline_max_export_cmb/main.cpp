@@ -88,6 +88,7 @@
 #include "../pipeline_max/builtin/node_impl.h"
 #include "../pipeline_max/builtin/reference_maker.h"
 #include "../pipeline_max/builtin/geom_object.h"
+#include "../pipeline_max/builtin/derived_object.h"
 #include "../pipeline_max/builtin/storage/geom_buffers.h"
 
 #include "../pipeline_max_export_common/max_scene.h"
@@ -117,14 +118,10 @@ const uint32 NEL3D_APPDATA_COLLISION = 1423062613;
 const uint32 NEL3D_APPDATA_COLLISION_EXTERIOR = 1423062614;
 const uint32 NEL3D_APPDATA_IGNAME = 1423062564;
 
-// Derived-object wrapper classes and modifier superclasses — the pair the object walk uses to
-// unwrap the modifier stack down to the base object; shared with pipeline_max_export_ig.
-using XREFRESOLVE::CLASSID_OSM_DERIVED;
-using XREFRESOLVE::CLASSID_WSM_DERIVED;
+// XRef resolution (shared with pipeline_max_export_ig). Derived-object wrappers are the typed
+// CDerivedObject/CWSMDerivedObject — the object walk unwraps modifier stacks through them.
 using XREFRESOLVE::isXRefObject;
 using XREFRESOLVE::resolveXRefObject;
-const TSClassId SCLASS_OSMODIFIER = 0x00000810;
-const TSClassId SCLASS_WSMODIFIER = 0x00000820;
 
 const float WELD_THRESHOLD = 0.005f;
 const sint GRID_SIZE = 64;
@@ -284,30 +281,12 @@ bool extractObjectMesh(INode &node, CSceneClass *rawObj, std::vector<NLMISC::CVe
 			obj = resolved;
 			continue;
 		}
-		NLMISC::CClassId cid = obj->classDesc()->classId();
-		if (cid != CLASSID_OSM_DERIVED && cid != CLASSID_WSM_DERIVED) break;
-		CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(obj);
-		CSceneClass *base = NULL;
-		std::vector<CSceneClass *> mods;
-		for (uint i = 0; rm && i < rm->nbReferences(); ++i)
+		CDerivedObject *derived = dynamic_cast<CDerivedObject *>(obj);
+		if (!derived) break;
+		for (uint m = 0; m < derived->modifierCount(); ++m)
 		{
-			CSceneClass *r = dynamic_cast<CSceneClass *>(rm->getReference(i));
-			if (!r) continue;
-			TSClassId scid = r->classDesc()->superClassId();
-			if (scid == SCLASS_OSMODIFIER || scid == SCLASS_WSMODIFIER) { mods.push_back(r); continue; }
-			base = r;
-		}
-		std::vector<CStorageContainer *> modApps;
-		{
-			const CStorageContainer::TStorageObjectContainer &orphans = obj->orphanedChunks();
-			for (CStorageContainer::TStorageObjectConstIt it = orphans.begin(); it != orphans.end(); ++it)
-				if (it->first == 0x2500)
-					modApps.push_back(dynamic_cast<CStorageContainer *>(it->second));
-		}
-		for (uint m = 0; m < mods.size(); ++m)
-		{
-			NLMISC::CClassId mcid = mods[m]->classDesc()->classId();
-			CStorageContainer *app = m < modApps.size() ? modApps[m] : NULL;
+			NLMISC::CClassId mcid = derived->modifier(m)->classDesc()->classId();
+			CStorageContainer *app = derived->modApp(m);
 			if (mcid == NLMISC::CClassId(0x00000050, 0x00000000)) // Edit Mesh
 			{
 				SModOp op;
@@ -324,7 +303,7 @@ bool extractObjectMesh(INode &node, CSceneClass *rawObj, std::vector<NLMISC::CVe
 				op.MirrorAxis = 0;
 				op.MirrorOffset = 0.0f;
 				op.MirrorCopy = false;
-				CReferenceMaker *mrm = dynamic_cast<CReferenceMaker *>(mods[m]);
+				CReferenceMaker *mrm = dynamic_cast<CReferenceMaker *>(derived->modifier(m));
 				for (uint r = 0; mrm && r < mrm->nbReferences(); ++r)
 				{
 					CSceneClass *ref = dynamic_cast<CSceneClass *>(mrm->getReference(r));
@@ -347,16 +326,7 @@ bool extractObjectMesh(INode &node, CSceneClass *rawObj, std::vector<NLMISC::CVe
 						op.GizmoTM = MAXMATH::composePRS(gp, gr, gs);
 					}
 				}
-				if (app)
-				{
-					for (CStorageContainer::TStorageObjectConstIt it = app->chunks().begin(); it != app->chunks().end(); ++it)
-					{
-						if (it->first != 0x2510) continue;
-						CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
-						if (raw && raw->Value.size() >= 48)
-							memcpy(op.CtxTM.m, nlVectorData(raw->Value), 48);
-					}
-				}
+				CDerivedObject::modAppContextTM(app, &op.CtxTM.m[0][0]);
 				opStack.push_back(op);
 			}
 			else if (mcid != NLMISC::CClassId(0x000f72b1, 0x00000000)) // UVW Map: geometry-neutral
@@ -365,6 +335,7 @@ bool extractObjectMesh(INode &node, CSceneClass *rawObj, std::vector<NLMISC::CVe
 					ucstring(node.userName()).toUtf8().c_str(), mcid.toString().c_str());
 			}
 		}
+		CSceneClass *base = derived->baseObject();
 		if (!base) break;
 		obj = base;
 	}

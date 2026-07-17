@@ -35,6 +35,7 @@
 #include "old_param_block.h"
 #include "max_scene.h"
 #include "../pipeline_max/builtin/reference_maker.h"
+#include "../pipeline_max/builtin/derived_object.h"
 #include "../pipeline_max/storage_object.h"
 
 using namespace PIPELINE::MAX;
@@ -385,17 +386,7 @@ bool applyUvwMap(CSceneClass *mod, CStorageContainer *modApp, SMeshView &mesh,
 
 	// Mod-context TM (0x2510)
 	Matrix3M ctx = Matrix3M::identity();
-	if (modApp)
-	{
-		for (CStorageContainer::TStorageObjectConstIt it = modApp->chunks().begin();
-		     it != modApp->chunks().end(); ++it)
-		{
-			if (it->first != 0x2510) continue;
-			CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
-			if (raw && raw->Value.size() >= 48)
-				memcpy(ctx.m, nlVectorData(raw->Value), 48);
-		}
-	}
+	PIPELINE::MAX::BUILTIN::CDerivedObject::modAppContextTM(modApp, &ctx.m[0][0]);
 
 	// object → map space: p_map = p_obj * ctx * Inverse(gizmo)
 	// +0.5 bias on planar axes so a Fit-centered gizmo of size = bbox maps to [0,1]

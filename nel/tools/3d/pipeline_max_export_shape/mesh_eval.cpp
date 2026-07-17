@@ -49,6 +49,7 @@
 #include "../pipeline_max/builtin/storage/geom_buffers.h"
 #include "../pipeline_max/builtin/node_impl.h"
 #include "../pipeline_max/builtin/reference_maker.h"
+#include "../pipeline_max/builtin/derived_object.h"
 
 #include "../pipeline_max_export_common/edit_mesh_mod.h"
 #include "../pipeline_max_export_common/map_extender_mod.h"
@@ -248,28 +249,21 @@ static bool extractEditablePoly(CSceneClass *obj, SEvalMesh &out, const std::str
 // COLORLIST_CHUNKID 0x120); mod-app framing corpus-verified against ge_mission_maduk.max.
 static bool readVertexPaintColors(CStorageContainer *app, std::vector<uint32> &out)
 {
-	if (!app) return false;
-	// Descend into 0x2512 (payload container), find 0x0120 leaf.
-	const CStorageContainer::TStorageObjectContainer &c = app->chunks();
-	for (CStorageContainer::TStorageObjectConstIt it = c.begin(); it != c.end(); ++it)
+	// Descend into 0x2512 (the LocalModData payload container), find the 0x0120 leaf.
+	CStorageContainer *pl = dynamic_cast<CStorageContainer *>(CDerivedObject::modAppLocalModData(app));
+	if (!pl) return false;
+	const CStorageContainer::TStorageObjectContainer &pc = pl->chunks();
+	for (CStorageContainer::TStorageObjectConstIt jt = pc.begin(); jt != pc.end(); ++jt)
 	{
-		if (it->first != 0x2512) continue;
-		CStorageContainer *pl = dynamic_cast<CStorageContainer *>(it->second);
-		if (!pl) return false;
-		const CStorageContainer::TStorageObjectContainer &pc = pl->chunks();
-		for (CStorageContainer::TStorageObjectConstIt jt = pc.begin(); jt != pc.end(); ++jt)
-		{
-			if (jt->first != 0x0120) continue;
-			CStorageRaw *raw = dynamic_cast<CStorageRaw *>(jt->second);
-			if (!raw || raw->Value.size() < 4) return false;
-			uint32 numColors = 0;
-			memcpy(&numColors, nlVectorData(raw->Value), 4);
-			if (raw->Value.size() < 4 + (size_t)numColors * 4) return false;
-			out.resize(numColors);
-			memcpy(&out[0], nlVectorData(raw->Value) + 4, (size_t)numColors * 4);
-			return true;
-		}
-		return false;
+		if (jt->first != 0x0120) continue;
+		CStorageRaw *raw = dynamic_cast<CStorageRaw *>(jt->second);
+		if (!raw || raw->Value.size() < 4) return false;
+		uint32 numColors = 0;
+		memcpy(&numColors, nlVectorData(raw->Value), 4);
+		if (raw->Value.size() < 4 + (size_t)numColors * 4) return false;
+		out.resize(numColors);
+		memcpy(&out[0], nlVectorData(raw->Value) + 4, (size_t)numColors * 4);
+		return true;
 	}
 	return false;
 }
@@ -473,16 +467,7 @@ static void applyXForm(CSceneClass *mod, CStorageContainer *app, SEvalMesh &mesh
 			gizmo = composePRS(gp, gr, gs);
 		}
 	}
-	if (app)
-	{
-		for (CStorageContainer::TStorageObjectConstIt it = app->chunks().begin(); it != app->chunks().end(); ++it)
-		{
-			if (it->first != 0x2510) continue;
-			CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
-			if (raw && raw->Value.size() >= 48)
-				memcpy(ctx.m, nlVectorData(raw->Value), 48);
-		}
-	}
+	CDerivedObject::modAppContextTM(app, &ctx.m[0][0]);
 	Matrix3M full = ctx * gizmo * inverseM3(ctx);
 	for (uint i = 0; i < mesh.Verts.size(); ++i)
 	{

@@ -49,6 +49,7 @@
 #include "../pipeline_max/builtin/node_impl.h"
 #include "../pipeline_max/builtin/param_block.h"
 #include "../pipeline_max/builtin/reference_maker.h"
+#include "../pipeline_max/builtin/derived_object.h"
 #include "../pipeline_max/storage_object.h"
 
 #include "../pipeline_max_export_common/export_ids.h"
@@ -75,7 +76,6 @@ namespace SHAPEANIM {
 // Class ids
 static const NLMISC::CClassId CLASSID_PRS_CTRL(0x00002005, 0x00000000);
 static const NLMISC::CClassId CLASSID_LOOKAT_CTRL(0x00002006, 0x00000000);
-static const NLMISC::CClassId CLASSID_OSM_DERIVED(0x29263a68, 0x405f22f5);
 static const NLMISC::CClassId CLASSID_MORPHER(0x17bb6854, 0xa5cba2a3);
 // Light superclasses / Omni class for light detection
 static const TSClassId SCLASS_LIGHT = 0x00000030;
@@ -321,14 +321,14 @@ static uint addLightTracks(NL3D::CAnimation &animation, INode &node)
 
 static uint addMorphTracks(NL3D::CAnimation &animation, INode &node)
 {
-	CReferenceMaker *obj = dynamic_cast<CReferenceMaker *>(node.getReference(1));
-	if (!obj || obj->classDesc()->classId() != CLASSID_OSM_DERIVED) return 0;
+	CDerivedObject *obj = dynamic_cast<CDerivedObject *>(node.getReference(1));
+	if (!obj) return 0;
 	CReferenceMaker *morpher = NULL;
-	for (uint i = 0; i < obj->nbReferences() && !morpher; ++i)
+	for (uint i = 0; i < obj->modifierCount() && !morpher; ++i)
 	{
-		CReferenceMaker *mod = obj->getReference(i);
+		CSceneClass *mod = obj->modifier(i);
 		if (mod && mod->classDesc()->classId() == CLASSID_MORPHER)
-			morpher = mod;
+			morpher = dynamic_cast<CReferenceMaker *>(mod);
 	}
 	if (!morpher) return 0;
 

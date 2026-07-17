@@ -90,6 +90,7 @@
 #include "../pipeline_max/builtin/reference_maker.h"
 #include "../pipeline_max/builtin/storage/app_data.h"
 #include "../pipeline_max/builtin/geom_object.h"
+#include "../pipeline_max/builtin/derived_object.h"
 #include "../pipeline_max/builtin/control_keyframer.h"
 #include "../pipeline_max/builtin/param_block.h"
 
@@ -115,9 +116,8 @@ using MAXSCENE::readObjectOffset;
 using MAXSCENE::getNodeTM;
 using MAXSCENE::SNodeTMCache;
 
-// Scene class ids (CLASSID_PRS_CTRL / CLASSID_LOOKAT_CTRL come from MAXSCENE, imported above)
-static const NLMISC::CClassId CLASSID_OSM_DERIVED(0x29263a68, 0x405f22f5);
-static const NLMISC::CClassId CLASSID_WSM_DERIVED(0x4ec13906, 0x5578130e);
+// Scene class ids (CLASSID_PRS_CTRL / CLASSID_LOOKAT_CTRL come from MAXSCENE, imported above;
+// OSM/WSM Derived wrappers are the typed CDerivedObject/CWSMDerivedObject now)
 static const NLMISC::CClassId CLASSID_RPO(0x368c679f, 0x711c22ee);
 static const NLMISC::CClassId CLASSID_TARGET(0x00001020, 0x00000000);
 static const uint32 CLASSID_PARTA_DUMMY = 0x876234;
@@ -129,8 +129,6 @@ static const TSClassId SCLASS_SHAPE = 0x00000040;
 static const TSClassId SCLASS_LIGHT = 0x00000030;
 static const TSClassId SCLASS_CAMERA = 0x00000020;
 static const TSClassId SCLASS_HELPER = 0x00000050;
-static const TSClassId SCLASS_OSMODIFIER = 0x00000810;
-static const TSClassId SCLASS_WSMODIFIER = 0x00000820;
 
 static bool g_verbose = false;
 // Search directories for .ps shapes (the clusterize link test needs the FX AABBox, like the
@@ -164,8 +162,7 @@ static CSceneClass *baseObjectOfObj(CSceneClass *obj, int depth)
 	int guard = 16;
 	while (obj && guard-- > 0)
 	{
-		NLMISC::CClassId cid = obj->classDesc()->classId();
-		if (cid.a() == 0x92aab38c)
+		if (obj->classDesc()->classId().a() == 0x92aab38c)
 		{
 			// XRefObject: resolve to the referenced file's object.
 			CSceneClass *resolved = resolveXRefObject(obj, depth);
@@ -173,19 +170,10 @@ static CSceneClass *baseObjectOfObj(CSceneClass *obj, int depth)
 			obj = resolved;
 			continue;
 		}
-		if (cid != CLASSID_OSM_DERIVED && cid != CLASSID_WSM_DERIVED) break;
-		// Derived object: modifiers (superclass 0x810/0x820) + the base object. Take the last
-		// reference that is not a modifier.
-		CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(obj);
-		CSceneClass *base = NULL;
-		for (uint i = 0; rm && i < rm->nbReferences(); ++i)
-		{
-			CSceneClass *r = dynamic_cast<CSceneClass *>(rm->getReference(i));
-			if (!r) continue;
-			TSClassId scid = r->classDesc()->superClassId();
-			if (scid == SCLASS_OSMODIFIER || scid == SCLASS_WSMODIFIER) continue;
-			base = r;
-		}
+		// Derived object (typed): unwrap to the base object (the last non-modifier reference).
+		CDerivedObject *derived = dynamic_cast<CDerivedObject *>(obj);
+		if (!derived) break;
+		CSceneClass *base = derived->baseObject();
 		if (!base) break;
 		obj = base;
 	}
@@ -1339,35 +1327,12 @@ static bool nodeWorldMesh(INode &node, SNodeTMCache &tmCache, SMeshData &out)
 				obj = resolved;
 				continue;
 			}
-			if (cid != CLASSID_OSM_DERIVED && cid != CLASSID_WSM_DERIVED) break;
-			CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(obj);
-			CSceneClass *base = NULL;
-			std::vector<CSceneClass *> mods;
-			for (uint i = 0; rm && i < rm->nbReferences(); ++i)
+			CDerivedObject *derived = dynamic_cast<CDerivedObject *>(obj);
+			if (!derived) break;
+			for (uint m = 0; m < derived->modifierCount(); ++m)
 			{
-				CSceneClass *r = dynamic_cast<CSceneClass *>(rm->getReference(i));
-				if (!r) continue;
-				TSClassId scid = r->classDesc()->superClassId();
-				if (scid == SCLASS_OSMODIFIER || scid == SCLASS_WSMODIFIER)
-				{
-					mods.push_back(r);
-					continue;
-				}
-				base = r;
-			}
-			// mod-app local data: the wrapper's orphaned 0x2500 containers, one per modifier
-			// slot in reference order
-			std::vector<CStorageContainer *> modApps;
-			{
-				const CStorageContainer::TStorageObjectContainer &orphans = obj->orphanedChunks();
-				for (CStorageContainer::TStorageObjectConstIt it = orphans.begin(); it != orphans.end(); ++it)
-					if (it->first == 0x2500)
-						modApps.push_back(dynamic_cast<CStorageContainer *>(it->second));
-			}
-			for (uint m = 0; m < mods.size(); ++m)
-			{
-				NLMISC::CClassId mcid = mods[m]->classDesc()->classId();
-				CStorageContainer *app = m < modApps.size() ? modApps[m] : NULL;
+				NLMISC::CClassId mcid = derived->modifier(m)->classDesc()->classId();
+				CStorageContainer *app = derived->modApp(m);
 				if (mcid == NLMISC::CClassId(0x00000050, 0x00000000)) // Edit Mesh
 				{
 					SModOp op;
@@ -1384,7 +1349,7 @@ static bool nodeWorldMesh(INode &node, SNodeTMCache &tmCache, SMeshData &out)
 					op.MirrorAxis = 0;
 					op.MirrorOffset = 0.0f;
 					op.MirrorCopy = false;
-					CReferenceMaker *mrm = dynamic_cast<CReferenceMaker *>(mods[m]);
+					CReferenceMaker *mrm = dynamic_cast<CReferenceMaker *>(derived->modifier(m));
 					for (uint r = 0; mrm && r < mrm->nbReferences(); ++r)
 					{
 						CSceneClass *ref = dynamic_cast<CSceneClass *>(mrm->getReference(r));
@@ -1406,16 +1371,7 @@ static bool nodeWorldMesh(INode &node, SNodeTMCache &tmCache, SMeshData &out)
 							op.GizmoTM = composePRS(gp, gr, gs);
 						}
 					}
-					if (app)
-					{
-						for (CStorageContainer::TStorageObjectConstIt it = app->chunks().begin(); it != app->chunks().end(); ++it)
-						{
-							if (it->first != 0x2510) continue;
-							CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
-							if (raw && raw->Value.size() >= 48)
-								memcpy(op.CtxTM.m, nlVectorData(raw->Value), 48);
-						}
-					}
+					CDerivedObject::modAppContextTM(app, &op.CtxTM.m[0][0]);
 					opStack.push_back(op);
 				}
 				else if (mcid != NLMISC::CClassId(0x000f72b1, 0x00000000)) // UVW Map: geometry-neutral
@@ -1424,6 +1380,7 @@ static bool nodeWorldMesh(INode &node, SNodeTMCache &tmCache, SMeshData &out)
 					        ucstring(n->userName()).toUtf8().c_str(), mcid.toString().c_str());
 				}
 			}
+			CSceneClass *base = derived->baseObject();
 			if (!base) break;
 			obj = base;
 		}
@@ -2036,18 +1993,9 @@ static NL3D::CInstanceGroup *exportIgForName(CSceneClassContainer *ssc, SNodeTMC
 			CSceneClass *unwrapped = source;
 			for (int guard = 0; unwrapped && guard < 8; ++guard)
 			{
-				NLMISC::CClassId cid = unwrapped->classDesc()->classId();
-				if (cid != CLASSID_OSM_DERIVED && cid != CLASSID_WSM_DERIVED) break;
-				CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(unwrapped);
-				CSceneClass *base = NULL;
-				for (uint i = 0; rm && i < rm->nbReferences(); ++i)
-				{
-					CSceneClass *r = dynamic_cast<CSceneClass *>(rm->getReference(i));
-					if (!r) continue;
-					TSClassId scid_i = r->classDesc()->superClassId();
-					if (scid_i == SCLASS_OSMODIFIER || scid_i == SCLASS_WSMODIFIER) continue;
-					base = r;
-				}
+				CDerivedObject *derived = dynamic_cast<CDerivedObject *>(unwrapped);
+				if (!derived) break;
+				CSceneClass *base = derived->baseObject();
 				if (!base) break;
 				unwrapped = base;
 			}
