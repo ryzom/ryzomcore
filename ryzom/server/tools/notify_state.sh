@@ -23,9 +23,10 @@ COMMAND=$1
 
 CWD=$(dirname "$0")
 SHARD_PATH=$(get_ini_var shard path /etc/ryzom/shard.ini)
+SHARD_WEB=$(get_ini_var notify token /etc/ryzom/shard.ini)
 NOTIFY_URL_SERVICE_RESTARTED=$(get_ini_var notify url_services /etc/ryzom/shard.ini)
 NOTIFY_URL_KEY=$(get_ini_var notify token /etc/ryzom/shard.ini)
-STATUS=$(cat /home/nevrax/www/login/server_open_status)
+STATUS=$(cat $SHARD_WEB/login/server_open_status)
 
 if [[ "$COMMAND" == "ServiceStarted" ]]
 then
