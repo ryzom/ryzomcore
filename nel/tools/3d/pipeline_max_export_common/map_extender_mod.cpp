@@ -3,6 +3,7 @@
  * \brief See map_extender_mod.h.
  * \author Jan Boon (Kaetemi)
  * \author Grok 4.5
+ * \author Claude Fable 5
  */
 
 /*
@@ -31,27 +32,22 @@
 #include <nel/misc/common.h>
 
 #include "../pipeline_max/storage_object.h"
-#include "../pipeline_max/storage_value.h"
+#include "../pipeline_max/builtin/derived_object.h"
+#include "../pipeline_max/builtin/storage/map_extender_cache.h"
 
 using namespace PIPELINE::MAX;
 using namespace NLMISC;
+using PIPELINE::MAX::BUILTIN::CDerivedObject;
+using PIPELINE::MAX::BUILTIN::STORAGE::CMapExtenderCache;
 
 namespace MAPEXT {
 
+// LITERAL value, deliberately NOT `= CMapExtenderCache::ModifierClassId`: a cross-TU chain of
+// dynamically-initialized statics reads 0 under MSVC when this TU initializes first (the
+// static-init-order fiasco that broke the RklPatch superclass on the VS2008 build — see the
+// vs2008 build notes). With the copy-init form the x87 shape build silently lost every Map
+// Extender apply (isMapExtenderModifier never matched); x64 ELF init order masked it.
 const CClassId CLASSID_MAP_EXTENDER(0x2ec82081, 0x045a6271);
-
-// Chunk ids inside the 0x2512 Mesh-like map-channel cache (corpus-constant functional set).
-// The plugin writes a flattened Mesh-style stream for the single map channel it owns; only the
-// four count/vert/face records are required for export. Remaining siblings (0x03ec edge flags,
-// 0x03ed–0x03fa selection/named-sets/etc., 0x044c) are Mesh-format companions and are ignored.
-enum
-{
-	CHUNK_MAP_VERT_COUNT = 0x03e8, // uint32 nVerts
-	CHUNK_MAP_VERTS      = 0x03e9, // nVerts × Point3 (UVW)
-	CHUNK_MAP_FACE_COUNT = 0x03ea, // uint32 nFaces
-	CHUNK_MAP_FACES      = 0x03eb, // nFaces × (uint32 t0, t1, t2)
-	CHUNK_MAP_CHANNEL    = 0x03f3  // uint32 channel index (1 or 2 in the corpus; default 1)
-};
 
 bool isMapExtenderModifier(CSceneClass *mod)
 {
@@ -60,233 +56,59 @@ bool isMapExtenderModifier(CSceneClass *mod)
 	    && mod->classDesc()->superClassId() == SCLASS_OSMODIFIER;
 }
 
-// ---------------------------------------------------------------------------------------------
-// Raw Max chunk-stream walker over a byte buffer (0x2512 is almost always a LEAF whose payload
-// is still chunk-formatted — the container bit is clear in every corpus instance surveyed).
-
-struct SChunkView
+// Locate the 0x2512 LocalModData under \a modApp. Prefer a direct 0x2512 child of the 0x2500
+// app; some call sites hand the OSM wrapper (with 0x2500 still nested) — fall through like
+// PHYSIQUESKIN. The payload object itself may be a raw leaf or a typed container; the typed
+// CMapExtenderCache decode handles both forms.
+static IStorageObject *find2512(CStorageContainer *modApp)
 {
-	uint16 Id;
-	bool Container;
-	const uint8 *Data;
-	uint32 Size;
-};
-
-static bool walkTopLevelChunks(const uint8 *p, const uint8 *end, std::vector<SChunkView> &out)
-{
-	out.clear();
-	while (p + 6 <= end)
+	if (!modApp) return NULL;
+	IStorageObject *lmd = CDerivedObject::modAppLocalModData(modApp);
+	if (lmd) return lmd;
+	for (CStorageContainer::TStorageObjectConstIt it = modApp->chunks().begin();
+	     it != modApp->chunks().end(); ++it)
 	{
-		uint16 id = 0;
-		uint32 size = 0;
-		memcpy(&id, p, 2);
-		memcpy(&size, p + 2, 4);
-		uint hdr = 6;
-		bool cont = false;
-		if (size == 0)
-		{
-			// 64-bit size extension
-			if (p + 14 > end) return false;
-			uint64 size64 = 0;
-			memcpy(&size64, p + 6, 8);
-			cont = (size64 & ((uint64)1 << 63)) != 0;
-			size64 &= ~((uint64)1 << 63);
-			if (size64 > 0x7FFFFFFFull) return false;
-			size = (uint32)size64;
-			hdr = 14;
-		}
-		else
-		{
-			cont = (size & 0x80000000u) != 0;
-			size &= 0x7FFFFFFFu;
-		}
-		if (size < hdr || p + size > end) return false;
-		SChunkView cv;
-		cv.Id = id;
-		cv.Container = cont;
-		cv.Data = p + hdr;
-		cv.Size = size - hdr;
-		out.push_back(cv);
-		p += size;
+		if (it->first != 0x2500) continue;
+		CStorageContainer *nested = dynamic_cast<CStorageContainer *>(it->second);
+		if (!nested) continue;
+		lmd = CDerivedObject::modAppLocalModData(nested);
+		if (lmd) return lmd;
 	}
-	return p == end || p < end; // trailing padding is tolerated (none observed)
-}
-
-static const SChunkView *findChunk(const std::vector<SChunkView> &chunks, uint16 id)
-{
-	for (uint i = 0; i < chunks.size(); ++i)
-		if (chunks[i].Id == id) return &chunks[i];
 	return NULL;
 }
 
-// Collect top-level children of 0x2512 whether it is a typed container or a raw leaf.
-static bool load2512Children(CStorageContainer *modApp, std::vector<SChunkView> &out,
-                             std::vector<uint8> &ownedRaw, std::string *err)
-{
-	out.clear();
-	ownedRaw.clear();
-	if (!modApp)
-	{
-		if (err) *err = "null modApp";
-		return false;
-	}
-
-	// Prefer a direct 0x2512 child of the 0x2500 app. Some call sites hand the OSM wrapper
-	// (with 0x2500 still nested) — fall through like PHYSIQUESKIN.
-	CStorageContainer *app = modApp;
-	CStorageContainer *c2512 = NULL;
-	CStorageRaw *raw2512 = NULL;
-	for (CStorageContainer::TStorageObjectConstIt it = app->chunks().begin();
-	     it != app->chunks().end(); ++it)
-	{
-		if (it->first == 0x2512)
-		{
-			c2512 = dynamic_cast<CStorageContainer *>(it->second);
-			raw2512 = dynamic_cast<CStorageRaw *>(it->second);
-			break;
-		}
-		if (it->first == 0x2500)
-		{
-			CStorageContainer *nested = dynamic_cast<CStorageContainer *>(it->second);
-			if (nested)
-			{
-				for (CStorageContainer::TStorageObjectConstIt jt = nested->chunks().begin();
-				     jt != nested->chunks().end(); ++jt)
-				{
-					if (jt->first != 0x2512) continue;
-					c2512 = dynamic_cast<CStorageContainer *>(jt->second);
-					raw2512 = dynamic_cast<CStorageRaw *>(jt->second);
-					break;
-				}
-			}
-		}
-	}
-
-	if (c2512)
-	{
-		// Container form (rewrite_assets also handles both): children are CStorageRaw leaves
-		// holding the payload bytes. Typed CStorageValue<uint32> is accepted for the count
-		// chunks if a future typed parse claims them.
-		// First pass: collect raws and size typed values so we can pack ownedRaw stably.
-		std::vector<std::pair<uint16, uint32> > typedU32;
-		for (CStorageContainer::TStorageObjectConstIt it = c2512->chunks().begin();
-		     it != c2512->chunks().end(); ++it)
-		{
-			CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
-			if (raw)
-			{
-				SChunkView cv;
-				cv.Id = it->first;
-				cv.Container = false;
-				cv.Data = (const uint8 *)nlVectorData(raw->Value);
-				cv.Size = (uint32)raw->Value.size();
-				out.push_back(cv);
-				continue;
-			}
-			CStorageValue<uint32> *u32 = dynamic_cast<CStorageValue<uint32> *>(it->second);
-			if (u32)
-				typedU32.push_back(std::make_pair(it->first, u32->Value));
-		}
-		if (!typedU32.empty())
-		{
-			ownedRaw.resize(typedU32.size() * 4);
-			for (uint i = 0; i < typedU32.size(); ++i)
-			{
-				memcpy(&ownedRaw[i * 4], &typedU32[i].second, 4);
-				SChunkView cv;
-				cv.Id = typedU32[i].first;
-				cv.Container = false;
-				cv.Data = &ownedRaw[i * 4];
-				cv.Size = 4;
-				out.push_back(cv);
-			}
-		}
-		if (!out.empty()) return true;
-	}
-
-	if (!raw2512 || raw2512->Value.empty())
-	{
-		if (err) *err = "Map Extender mod-app missing 0x2512 cache";
-		return false;
-	}
-
-	const uint8 *p = (const uint8 *)nlVectorData(raw2512->Value);
-	const uint8 *end = p + raw2512->Value.size();
-	if (!walkTopLevelChunks(p, end, out))
-	{
-		if (err) *err = "Map Extender 0x2512 is not a well-formed chunk stream";
-		return false;
-	}
-	return !out.empty();
-}
-
-static bool decodeFromChildren(const std::vector<SChunkView> &kids, SMapChannel &out, std::string *err)
-{
-	const SChunkView *cVerts = findChunk(kids, CHUNK_MAP_VERT_COUNT);
-	const SChunkView *verts = findChunk(kids, CHUNK_MAP_VERTS);
-	const SChunkView *cFaces = findChunk(kids, CHUNK_MAP_FACE_COUNT);
-	const SChunkView *faces = findChunk(kids, CHUNK_MAP_FACES);
-	if (!cVerts || !verts || !cFaces || !faces)
-	{
-		if (err) *err = "Map Extender cache missing 0x03e8/0x03e9/0x03ea/0x03eb";
-		return false;
-	}
-	if (cVerts->Size < 4 || cFaces->Size < 4)
-	{
-		if (err) *err = "Map Extender count chunks too small";
-		return false;
-	}
-	uint32 nVerts = 0, nFaces = 0;
-	memcpy(&nVerts, cVerts->Data, 4);
-	memcpy(&nFaces, cFaces->Data, 4);
-	if (verts->Size != nVerts * 12u)
-	{
-		if (err) *err = "Map Extender 0x03e9 size mismatch vs 0x03e8 count";
-		return false;
-	}
-	if (faces->Size != nFaces * 12u)
-	{
-		if (err) *err = "Map Extender 0x03eb size mismatch vs 0x03ea count";
-		return false;
-	}
-
-	int channel = 1;
-	const SChunkView *ch = findChunk(kids, CHUNK_MAP_CHANNEL);
-	if (ch && ch->Size >= 4)
-	{
-		uint32 c = 0;
-		memcpy(&c, ch->Data, 4);
-		channel = (int)c;
-	}
-
-	out.Channel = channel;
-	out.UVs.resize(nVerts);
-	if (nVerts)
-		memcpy(&out.UVs[0], verts->Data, (size_t)nVerts * 12);
-	out.FaceUVs.resize((size_t)nFaces * 3);
-	if (nFaces)
-		memcpy(&out.FaceUVs[0], faces->Data, (size_t)nFaces * 12);
-
-	// Validate face indices reference the UV array.
-	for (uint32 i = 0; i < nFaces * 3; ++i)
-	{
-		if (out.FaceUVs[i] >= nVerts)
-		{
-			if (err) *err = "Map Extender face index out of range";
-			return false;
-		}
-	}
-	return true;
-}
-
+// Thin copy from the typed library decode (BUILTIN::STORAGE::CMapExtenderCache, design-doc
+// §10j-huit) into the SMapChannel evaluation record. The cache format knowledge (leaf/container
+// dual form, functional chunk set, size rules) lives on the typed class now, corpus-selftested;
+// this wrapper keeps the historical error strings and the face-index range check.
 bool readMapExtenderCache(CStorageContainer *modApp, SMapChannel &out, std::string *err)
 {
 	out = SMapChannel();
-	std::vector<SChunkView> kids;
-	std::vector<uint8> owned;
-	if (!load2512Children(modApp, kids, owned, err))
+	IStorageObject *lmd = find2512(modApp);
+	if (!lmd)
+	{
+		if (err) *err = modApp ? "Map Extender mod-app missing 0x2512 cache" : "null modApp";
 		return false;
-	return decodeFromChildren(kids, out, err);
+	}
+	CMapExtenderCache cache;
+	if (!cache.decode(lmd))
+	{
+		if (err) *err = cache.lastError();
+		return false;
+	}
+	if (!cache.faceCornersValid())
+	{
+		if (err) *err = "Map Extender face index out of range";
+		return false;
+	}
+	out.Channel = cache.channel();
+	out.UVs.resize(cache.numVerts());
+	if (cache.numVerts())
+		memcpy(&out.UVs[0], nlVectorData(cache.uvwWords()), (size_t)cache.numVerts() * 12);
+	out.FaceUVs.resize((size_t)cache.numFaces() * 3);
+	if (cache.numFaces())
+		memcpy(&out.FaceUVs[0], nlVectorData(cache.faceCorners()), (size_t)cache.numFaces() * 12);
+	return true;
 }
 
 bool applyMapExtender(CSceneClass *mod, CStorageContainer *modApp, uint currentFaceCount,

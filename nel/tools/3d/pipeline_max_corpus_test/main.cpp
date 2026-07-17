@@ -46,8 +46,10 @@
 #include <cstdio>
 #include <cstring>
 #include <iostream>
+#include <map>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "../pipeline_max/storage_ole.h"
@@ -68,6 +70,8 @@
 
 #include "../pipeline_max/builtin/animatable.h"
 #include "../pipeline_max/builtin/storage/app_data.h"
+#include "../pipeline_max/builtin/storage/mesh_delta.h"
+#include "../pipeline_max/builtin/storage/map_extender_cache.h"
 #include "../pipeline_max/builtin/param_block.h"
 #include "../pipeline_max/builtin/param_block_2.h"
 #include "../pipeline_max/builtin/shape_object.h"
@@ -740,6 +744,304 @@ static int derivedSelfTest(const char *maxFile, CStorageOleIn &in, CSceneClassRe
 	return nAnomaly ? 1 : 0;
 }
 
+// Per-chunk-id inventory accumulator for the mesh-delta / mapext selftests (§12.2: corpus
+// inventory rides the same sweep as the validation). Keyed on (level, id); prints one
+// machine-readable line per entry for the sweep driver to aggregate corpus-wide.
+struct SChunkInvEntry
+{
+	uint Count;
+	uint32 MinSize, MaxSize;
+	uint Containers;
+	SChunkInvEntry() : Count(0), MinSize(0xFFFFFFFFu), MaxSize(0), Containers(0) { }
+};
+typedef std::map<std::pair<std::string, uint16>, SChunkInvEntry> TChunkInv;
+
+static void invAdd(TChunkInv &inv, const std::string &level, uint16 id, uint32 size, bool container)
+{
+	SChunkInvEntry &e = inv[std::make_pair(level, id)];
+	++e.Count;
+	if (size < e.MinSize) e.MinSize = size;
+	if (size > e.MaxSize) e.MaxSize = size;
+	if (container) ++e.Containers;
+}
+
+static void invPrint(const TChunkInv &inv, const char *tag)
+{
+	for (TChunkInv::const_iterator it = inv.begin(); it != inv.end(); ++it)
+	{
+		std::cout << tag << " level=" << it->first.first << " id=0x" << std::hex << it->first.second
+		          << std::dec << " n=" << it->second.Count << " minsz=" << it->second.MinSize
+		          << " maxsz=" << it->second.MaxSize << " cont=" << it->second.Containers << "\n";
+	}
+}
+
+// Parse the Scene stream fully, and on every Edit Mesh modifier slot (ClassId (0x50, 0),
+// superclass 0x810) of every OSM/WSM Derived wrapper decode the 0x2512 MeshDelta payload
+// through the typed CMeshDelta overlay codec and verify the decode re-encodes every typed
+// chunk bit-exactly (uninitialized 0x0210 corner words included). Prints the chunk-id/size
+// inventory (MDINV lines) for the corpus histogram, delete-bitmap shape stats (MDBITS line),
+// and a one-line summary. Unknown/irregular ids are structural findings (expected 0).
+static int meshDeltaSelfTest(const char *maxFile, CStorageOleIn &in, CSceneClassRegistry *reg, bool verbose)
+{
+	CDllDirectory dll;
+	CClassDirectory3 cd(&dll);
+	CScene scene(reg, &dll, &cd);
+	{
+		std::vector<uint8> b;
+		if (!in.readStream("DllDirectory", b)) { std::cerr << "no DllDirectory\n"; return 2; }
+		CStorageStream ss(b); try { dll.serial(ss); dll.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "dll: " << e.what() << "\n"; return 2; }
+	}
+	{
+		std::vector<uint8> b;
+		if (!in.readStream("ClassDirectory3", b)) { std::cerr << "no ClassDirectory3\n"; return 2; }
+		CStorageStream ss(b); try { cd.serial(ss); cd.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "cd: " << e.what() << "\n"; return 2; }
+	}
+	{
+		std::vector<uint8> b;
+		if (!in.readStream("Scene", b)) { std::cerr << "no Scene\n"; return 2; }
+		CStorageStream ss(b); try { scene.serial(ss); scene.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "scene: " << e.what() << "\n"; return 2; }
+	}
+	static const NLMISC::CClassId editMeshClassId(0x00000050, 0x00000000);
+	uint nApps = 0, nNoData = 0, nNoDelta = 0, nDecoded = 0;
+	uint nMoves = 0, nCVerts = 0, nCFaces = 0, nRemap = 0, nAttribs = 0, nDelV = 0, nDelF = 0;
+	uint nFail = 0, nUnknown = 0, nIrregular = 0, nExtraDelta = 0;
+	uint nBitsDword = 0, nBitsByte = 0, nBitsOther = 0, nBitsPadNonZero = 0;
+	TChunkInv inv;
+	CSceneClassContainer *ssc = scene.container();
+	for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
+	{
+		BUILTIN::CDerivedObject *d = dynamic_cast<BUILTIN::CDerivedObject *>(it->second);
+		if (!d) continue;
+		for (uint i = 0; i < d->modifierCount(); ++i)
+		{
+			CSceneClass *mod = d->modifier(i);
+			if (!mod || mod->classDesc()->classId() != editMeshClassId
+				|| mod->classDesc()->superClassId() != 0x810) continue;
+			++nApps;
+			IStorageObject *lmd = d->localModData(i);
+			if (!lmd) { ++nNoData; continue; }
+			BUILTIN::STORAGE::CMeshDelta md;
+			if (!md.decode(lmd)) { ++nNoDelta; continue; }
+			++nDecoded;
+			nMoves += (uint)md.moves().size();
+			nCVerts += (uint)md.createdVerts().size();
+			nCFaces += (uint)md.createdFaces().size();
+			nRemap += (uint)md.faceRemap().size();
+			nAttribs += (uint)md.faceAttribs().size();
+			if (md.delVerts().Present) ++nDelV;
+			if (md.delFaces().Present) ++nDelF;
+			nExtraDelta += md.extraDeltaContainers();
+			for (uint u = 0; u < md.unknownLocalDataIds().size(); ++u)
+			{
+				++nUnknown;
+				std::cerr << "  meshdelta UNKNOWN 2512-level chunk id 0x" << std::hex
+				          << md.unknownLocalDataIds()[u] << std::dec << " (" << maxFile << ")\n";
+			}
+			for (uint u = 0; u < md.unknownDeltaIds().size(); ++u)
+			{
+				++nUnknown;
+				std::cerr << "  meshdelta UNKNOWN 4000-level chunk id 0x" << std::hex
+				          << md.unknownDeltaIds()[u] << std::dec << " (" << maxFile << ")\n";
+			}
+			for (uint u = 0; u < md.irregularIds().size(); ++u)
+			{
+				++nIrregular;
+				std::cerr << "  meshdelta IRREGULAR chunk id 0x" << std::hex
+				          << md.irregularIds()[u] << std::dec << " (" << maxFile << ")\n";
+			}
+			std::string err;
+			if (!md.selfTestReencode(err))
+			{
+				++nFail;
+				std::cerr << "  meshdelta selftest FAIL (" << maxFile << "): " << err << "\n";
+			}
+			for (uint c = 0; c < md.localDataChildren().size(); ++c)
+				invAdd(inv, "2512", md.localDataChildren()[c].Id, md.localDataChildren()[c].Size,
+				       md.localDataChildren()[c].Container);
+			for (uint c = 0; c < md.deltaChildren().size(); ++c)
+				invAdd(inv, "4000", md.deltaChildren()[c].Id, md.deltaChildren()[c].Size,
+				       md.deltaChildren()[c].Container);
+			// Descend one level for the inventory: the delete/selection bitmap containers and
+			// the recognized-untyped 0x0340/0x0430 containers (their children land at level
+			// "sub<id>"), plus per-instance MDREC lines for the recognized-untyped record-table
+			// leaves (size + leading dword — the sweep driver tests the count-prefix stride
+			// hypotheses corpus-wide without typing them).
+			{
+				CStorageContainer *c2512 = dynamic_cast<CStorageContainer *>(lmd);
+				CStorageContainer *c4000 = NULL;
+				if (c2512)
+					for (CStorageContainer::TStorageObjectConstIt jt = c2512->chunks().begin(); jt != c2512->chunks().end() && !c4000; ++jt)
+						if (jt->first == 0x4000) c4000 = dynamic_cast<CStorageContainer *>(jt->second);
+				if (c4000)
+				{
+					for (CStorageContainer::TStorageObjectConstIt jt = c4000->chunks().begin(); jt != c4000->chunks().end(); ++jt)
+					{
+						uint16 id = jt->first;
+						if (id == 0x0170 || id == 0x0270 || id == 0x0340
+							|| id == 0x0400 || id == 0x0410 || id == 0x0420 || id == 0x0430)
+						{
+							CStorageContainer *sub = dynamic_cast<CStorageContainer *>(jt->second);
+							if (!sub) continue;
+							char lvl[16];
+							snprintf(lvl, sizeof(lvl), "sub%03x", id);
+							for (CStorageContainer::TStorageObjectConstIt kt = sub->chunks().begin(); kt != sub->chunks().end(); ++kt)
+							{
+								CStorageRaw *raw = dynamic_cast<CStorageRaw *>(kt->second);
+								invAdd(inv, lvl, kt->first, raw ? (uint32)raw->Value.size() : 0,
+								       kt->second && kt->second->isContainer());
+							}
+						}
+						else if (id == 0x0230 || id == 0x0330 || id == 0x0334 || id == 0x0338
+							|| id == 0x033b || id == 0x0360 || id == 0x0120 || id == 0x0200)
+						{
+							CStorageRaw *raw = dynamic_cast<CStorageRaw *>(jt->second);
+							if (!raw) continue;
+							uint32 head = 0;
+							if (raw->Value.size() >= 4) memcpy(&head, nlVectorData(raw->Value), 4);
+							std::cout << "MDREC id=0x" << std::hex << id << std::dec
+							          << " size=" << raw->Value.size() << " head=" << head << "\n";
+						}
+					}
+				}
+			}
+			// Delete-bitmap shape stats: packed payload size vs the dword-padded / byte-padded
+			// rule, and whether any pad bit beyond BitCount is set (uninit-tail witness).
+			const BUILTIN::STORAGE::CMeshDelta::SBitArray *bas[2] = { &md.delVerts(), &md.delFaces() };
+			for (uint b = 0; b < 2; ++b)
+			{
+				if (!bas[b]->Present) continue;
+				size_t nBytes = ((size_t)bas[b]->BitCount + 7) / 8;
+				size_t nDwordBytes = (((size_t)bas[b]->BitCount + 31) / 32) * 4;
+				if (bas[b]->Packed.size() == nDwordBytes) ++nBitsDword;
+				else if (bas[b]->Packed.size() == nBytes) ++nBitsByte;
+				else ++nBitsOther;
+				bool padNonZero = false;
+				for (size_t k = bas[b]->BitCount; k < bas[b]->Packed.size() * 8; ++k)
+					if ((bas[b]->Packed[k / 8] >> (k % 8)) & 1) { padNonZero = true; break; }
+				if (padNonZero) ++nBitsPadNonZero;
+			}
+			if (verbose)
+				std::cerr << "  meshdelta app " << nApps << ": " << md.moves().size() << " moves, "
+				          << md.createdVerts().size() << " cverts, " << md.createdFaces().size()
+				          << " cfaces, " << md.faceRemap().size() << " remap, "
+				          << md.faceAttribs().size() << " attribs\n";
+		}
+	}
+	invPrint(inv, "MDINV");
+	if (nDelV || nDelF)
+		std::cout << "MDBITS dword=" << nBitsDword << " byte=" << nBitsByte << " other=" << nBitsOther
+		          << " padnonzero=" << nBitsPadNonZero << "\n";
+	bool fail = nFail || nUnknown || nIrregular || nExtraDelta;
+	std::cout << (fail ? "FAIL" : "OK") << " meshdelta-selftest: " << nApps << " apps, "
+	          << nDecoded << " decoded, " << nNoData << " no-data, " << nNoDelta << " no-delta, "
+	          << nMoves << " moves, " << nCVerts << " cverts, " << nCFaces << " cfaces, "
+	          << nRemap << " remap, " << nAttribs << " attribs, " << nDelV << " delv, " << nDelF
+	          << " delf, " << nFail << " fail, " << nUnknown << " unknown-ids, " << nIrregular
+	          << " irregular, " << nExtraDelta << " extra-delta\n";
+	return fail ? 1 : 0;
+}
+
+// Parse the Scene stream fully, and on every Map Extender modifier slot (ClassId
+// (0x2ec82081, 0x045a6271), superclass 0x810) decode the 0x2512 cache through the typed
+// CMapExtenderCache overlay codec (raw-leaf and container forms) and verify the functional
+// chunks re-encode bit-exactly. Prints the chunk-id/size inventory (MXINV lines) and a
+// one-line summary. Unknown ids are structural findings (expected 0).
+static int mapExtSelfTest(const char *maxFile, CStorageOleIn &in, CSceneClassRegistry *reg, bool verbose)
+{
+	CDllDirectory dll;
+	CClassDirectory3 cd(&dll);
+	CScene scene(reg, &dll, &cd);
+	{
+		std::vector<uint8> b;
+		if (!in.readStream("DllDirectory", b)) { std::cerr << "no DllDirectory\n"; return 2; }
+		CStorageStream ss(b); try { dll.serial(ss); dll.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "dll: " << e.what() << "\n"; return 2; }
+	}
+	{
+		std::vector<uint8> b;
+		if (!in.readStream("ClassDirectory3", b)) { std::cerr << "no ClassDirectory3\n"; return 2; }
+		CStorageStream ss(b); try { cd.serial(ss); cd.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "cd: " << e.what() << "\n"; return 2; }
+	}
+	{
+		std::vector<uint8> b;
+		if (!in.readStream("Scene", b)) { std::cerr << "no Scene\n"; return 2; }
+		CStorageStream ss(b); try { scene.serial(ss); scene.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "scene: " << e.what() << "\n"; return 2; }
+	}
+	uint nApps = 0, nNoData = 0, nEmpty = 0, nDecoded = 0, nDecodeFail = 0, nLeaf = 0, nContainer = 0;
+	uint64 nVertsTotal = 0, nFacesTotal = 0;
+	uint nChan1 = 0, nChan2 = 0, nChanOther = 0, nBadCorners = 0;
+	uint nFail = 0, nUnknown = 0;
+	TChunkInv inv;
+	CSceneClassContainer *ssc = scene.container();
+	for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
+	{
+		BUILTIN::CDerivedObject *d = dynamic_cast<BUILTIN::CDerivedObject *>(it->second);
+		if (!d) continue;
+		for (uint i = 0; i < d->modifierCount(); ++i)
+		{
+			CSceneClass *mod = d->modifier(i);
+			if (!mod || mod->classDesc()->classId() != BUILTIN::STORAGE::CMapExtenderCache::ModifierClassId
+				|| mod->classDesc()->superClassId() != 0x810) continue;
+			++nApps;
+			IStorageObject *lmd = d->localModData(i);
+			if (!lmd) { ++nNoData; continue; }
+			BUILTIN::STORAGE::CMapExtenderCache mx;
+			bool ok = mx.decode(lmd);
+			for (uint c = 0; c < mx.children().size(); ++c)
+				invAdd(inv, "2512", mx.children()[c].Id, mx.children()[c].Size, mx.children()[c].Container);
+			for (uint u = 0; u < mx.unknownIds().size(); ++u)
+			{
+				++nUnknown;
+				std::cerr << "  mapext UNKNOWN cache chunk id 0x" << std::hex
+				          << mx.unknownIds()[u] << std::dec << " (" << maxFile << ")\n";
+			}
+			if (!ok)
+			{
+				if (mx.emptyLeaf())
+				{
+					// Corpus-witnessed "no cache saved" state (never-evaluated modifier) —
+					// counted, not a failure.
+					++nEmpty;
+					continue;
+				}
+				++nDecodeFail;
+				std::cerr << "  mapext decode FAIL (" << maxFile << "): " << mx.lastError() << "\n";
+				continue;
+			}
+			++nDecoded;
+			if (mx.leafForm()) ++nLeaf; else ++nContainer;
+			nVertsTotal += mx.numVerts();
+			nFacesTotal += mx.numFaces();
+			if (mx.channel() == 1) ++nChan1;
+			else if (mx.channel() == 2) ++nChan2;
+			else ++nChanOther;
+			if (!mx.faceCornersValid())
+			{
+				++nBadCorners;
+				std::cerr << "  mapext face corner out of range (" << maxFile << ")\n";
+			}
+			std::string err;
+			if (!mx.selfTestReencode(err))
+			{
+				++nFail;
+				std::cerr << "  mapext selftest FAIL (" << maxFile << "): " << err << "\n";
+			}
+			if (verbose)
+				std::cerr << "  mapext cache " << nApps << ": " << mx.numVerts() << " uvw verts, "
+				          << mx.numFaces() << " faces, channel " << mx.channel()
+				          << (mx.leafForm() ? " (leaf)" : " (container)") << "\n";
+		}
+	}
+	invPrint(inv, "MXINV");
+	bool fail = nFail || nUnknown || nDecodeFail || nBadCorners;
+	std::cout << (fail ? "FAIL" : "OK") << " mapext-selftest: " << nApps << " apps, "
+	          << nDecoded << " decoded (" << nLeaf << " leaf, " << nContainer << " container), "
+	          << nNoData << " no-data, " << nEmpty << " empty, " << nDecodeFail << " decode-fail, " << nVertsTotal
+	          << " uvwverts, " << nFacesTotal << " faces, chan1 " << nChan1 << ", chan2 " << nChan2
+	          << ", chanother " << nChanOther << ", " << nBadCorners << " bad-corners, " << nFail
+	          << " fail, " << nUnknown << " unknown-ids\n";
+	return fail ? 1 : 0;
+}
+
 // Parse the Scene stream fully and run the CAppData script-entry write-path self-check: for
 // every script AppData entry (the NEL3D_APPDATA_* MAXSCRIPT-keyed, null-terminated-string
 // entries), read the string through the typed getScriptString, write the SAME value back
@@ -878,6 +1180,8 @@ int main(int argc, char **argv)
 	bool doOldPbSelfTest = false;
 	bool doShapeSelfTest = false;
 	bool doDerivedSelfTest = false;
+	bool doMeshDeltaSelfTest = false;
+	bool doMapExtSelfTest = false;
 	bool doAppDataSelfTest = false;
 	bool doModifySave = false;
 	bool doAppDataModifySave = false;
@@ -896,6 +1200,8 @@ int main(int argc, char **argv)
 		else if (a == "--oldpb-selftest") doOldPbSelfTest = true;
 		else if (a == "--shape-selftest") doShapeSelfTest = true;
 		else if (a == "--derived-selftest") doDerivedSelfTest = true;
+		else if (a == "--meshdelta-selftest") doMeshDeltaSelfTest = true;
+		else if (a == "--mapext-selftest") doMapExtSelfTest = true;
 		else if (a == "--appdata-selftest") doAppDataSelfTest = true;
 		else if (a == "--modify-save-test") doModifySave = true;
 		else if (a == "--appdata-modify-save-test") doAppDataModifySave = true;
@@ -912,7 +1218,7 @@ int main(int argc, char **argv)
 	}
 	if (!maxFile)
 	{
-		std::cerr << "usage: pipeline_max_corpus_test [--parse] [--verbose] [--pb2-selftest] [--oldpb-selftest] [--shape-selftest] [--derived-selftest] [--appdata-selftest] [--modify-save-test] [--appdata-modify-save-test] <input.max>\n";
+		std::cerr << "usage: pipeline_max_corpus_test [--parse] [--verbose] [--pb2-selftest] [--oldpb-selftest] [--shape-selftest] [--derived-selftest] [--meshdelta-selftest] [--mapext-selftest] [--appdata-selftest] [--modify-save-test] [--appdata-modify-save-test] <input.max>\n";
 		return 2;
 	}
 
@@ -950,6 +1256,20 @@ int main(int argc, char **argv)
 	if (doDerivedSelfTest)
 	{
 		int rc = derivedSelfTest(maxFile, in, &reg, verbose);
+		remove(g_tempPath.c_str());
+		return rc;
+	}
+
+	if (doMeshDeltaSelfTest)
+	{
+		int rc = meshDeltaSelfTest(maxFile, in, &reg, verbose);
+		remove(g_tempPath.c_str());
+		return rc;
+	}
+
+	if (doMapExtSelfTest)
+	{
+		int rc = mapExtSelfTest(maxFile, in, &reg, verbose);
 		remove(g_tempPath.c_str());
 		return rc;
 	}
