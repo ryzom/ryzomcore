@@ -1,0 +1,60 @@
+<interface_config>
+
+<!-- Mouse pointer (textures come from the interface atlas) -->
+<group id="pointer_layer" posref="BL BL" x="0" y="0" sizeref="wh" w="0" h="0" active="true">
+	<view type="generic_pointer" id="pointer" posref="BL BL" x="0" y="0" w="32" h="32"
+		color="255 255 255 255"
+		tx_default="curs_default.tga"
+		tx_move_window="curs_default.tga"
+		tx_colpick="curs_pick.tga"
+		tx_pan="curs_pan.tga"
+		tx_can_pan="curs_can_pan.tga" />
+</group>
+
+<proc id="proc_open_about">
+	<action handler="enter_modal" params="group=ui:sample:about" />
+</proc>
+
+<proc id="proc_close_about">
+	<action handler="leave_modal" params="" />
+</proc>
+
+<!-- ******************** -->
+<!-- * Welcome window   * -->
+<!-- ******************** -->
+
+<group type="container" id="welcome" w="420" pop_min_w="420" pop_max_w="420" h="240" pop_min_h="240" pop_max_h="240"
+	title="NeL GUI sample" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
+	title_bar_open="false" open_button="false" right_button="false" lockable="true" openable="false"
+	opened="true" movable="true" active="true" x="80" y="420">
+	<group id="header_closed" x="0" y="0" h="12" posref="TL TL"></group>
+	<group id="header_opened" x="0" y="0" w="0" h="16" posref="TL TL"></group>
+	<group id="content" x="0" y="0" posref="TL TL" w="0" h="0">
+		<view type="text" id="title" posref="TM TM" x="0" y="-24" color="255 255 255 255" fontsize="14" shadow="true" global_color="false"
+			hardtext="The legacy w_ interface skin" />
+		<view type="text" id="intro" posref="TL TL" x="12" y="-52" color="255 255 255 255" fontsize="12" shadow="true" global_color="false"
+			multi_line="true" multi_line_space="2"
+			hardtext="This window is drawn with the original beveled reference skin (w_header_*, w_l0_*), the style the shipped game later replaced name-for-name with the skin_* set. Drag the title bar to move the window; drag the corner to resize it." />
+		<ctrl style="text_button_16" id="bt_about" x="-12" y="10" posref="BR BR" onclick_l="proc" params_l="proc_open_about" hardtext="About" />
+		<ctrl style="text_button_16" id="bt_quit" x="12" y="10" posref="BL BL" onclick_l="sample_quit" params_l="" hardtext="Quit" />
+	</group>
+</group>
+<tree node="welcome"></tree>
+
+<!-- ******************** -->
+<!-- * About modal      * -->
+<!-- ******************** -->
+
+<group type="modal" id="about" exit_click_out="true" w="360" h="110" options="skin_modal" mouse_pos="false"
+	posref="MM MM" x="0" y="0">
+	<group id="content" x="0" y="0" posref="TL TL" sizeref="wh" w="0" h="0">
+		<view type="text" id="title" posref="TM TM" x="0" y="-16" color="255 255 255 255" fontsize="13" shadow="true" global_color="false"
+			hardtext="NeL GUI widget showcase" />
+		<view type="text" id="line" posref="TM TM" x="0" y="-40" color="255 255 255 200" fontsize="11" shadow="true" global_color="false"
+			multi_line="true" multi_line_space="2"
+			hardtext="Interface textures are packed at build time from the public ryzomcore_graphics repository." />
+		<ctrl style="button_ok" x="0" y="8" posref="BM BM" onclick_l="proc" params_l="proc_close_about" hardtext="OK" />
+	</group>
+</group>
+
+</interface_config>

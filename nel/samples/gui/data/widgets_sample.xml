@@ -1,0 +1,22 @@
+<interface_config>
+
+<!-- Widget styles shared by the showcase windows (legacy "w_" skin) -->
+
+<style style="text_button_16" type="text_button" button_type="push_button"
+	tx_normal="w_text_button_normal" tx_pushed="w_text_button_pushed" tx_over="w_text_button_over"
+	global_color_normal="false" global_color_over="false" global_color_pushed="false"
+	text_y="0" fontsize="10" shadow="true" case_mode="%case_upper" wmargin="8"
+	text_color_normal="255 255 255 128" text_color_pushed="255 255 255 255" text_color_over="255 255 255 255" />
+
+<style style="button_ok" type="text_button" id="ok" button_type="push_button"
+	tx_normal="w_text_button_normal" tx_pushed="w_text_button_pushed" tx_over="w_text_button_over"
+	global_color_normal="false" global_color_over="false" global_color_pushed="false"
+	text_y="0" fontsize="10" shadow="true" case_mode="%case_upper" wmargin="8" />
+
+<style style="tab_button" type="tab_button" button_type="radio_button" x="-2" posref="TR TL"
+	tx_normal="w_tab_normal" tx_pushed="w_tab_pushed" tx_over="w_tab_over"
+	global_color_normal="false" global_color_over="false" global_color_pushed="false"
+	text_y="0" fontsize="10" shadow="true" case_mode="%case_upper" wmargin="8"
+	text_color_normal="255 255 255 128" text_color_pushed="255 255 255 255" text_color_over="255 255 255 255" />
+
+</interface_config>
