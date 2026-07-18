@@ -305,6 +305,18 @@ IF (Python3_Interpreter_FOUND)
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 	SET_TESTS_PROPERTIES(pipeline_max_lightmap_corpus PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 10800)
 
+	# rpo_paint_corpus.py: the zone painter's RPatchMesh write path (design doc §14-paint) —
+	# corpus-wide decode->encode byte-identity on every 0x08FD / 0x4001 blob (--rpo-selftest)
+	# plus the whole-file NULL-EDIT save proof on every blob-carrying file
+	# (--rpo-modify-save-test: every blob pushed through the write path in place, whole .max
+	# rewritten, every stream must stay byte-identical). Floors pin the 2026-07-18 landing
+	# coverage (7190 rpo + 1660 snapshots over 8743 files).
+	ADD_TEST(NAME pipeline_max_rpo_paint_corpus
+		COMMAND ${Python3_EXECUTABLE} rpo_paint_corpus.py --gate
+			--bin $<TARGET_FILE_DIR:pipeline_max_corpus_test>
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+	SET_TESTS_PROPERTIES(pipeline_max_rpo_paint_corpus PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 3600)
+
 	IF (TARGET unit_test)
 		ADD_DEPENDENCIES(unit_test pipeline_max_corpus_test pipeline_max_export_skel pipeline_max_export_anim pipeline_max_export_swt pipeline_max_export_ig pipeline_max_export_zone pipeline_max_export_shape pipeline_max_export_pacs_prim pipeline_max_export_cmb pipeline_max_export_veget pipeline_max_export_clod shape_lightmapper)
 	ENDIF (TARGET unit_test)
