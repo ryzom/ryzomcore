@@ -3,27 +3,40 @@
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
  */
-// Standalone zone painter, milestone P3a (design doc §14-paint): load a .max directly through
-// pipeline_max, assemble the painting landscape the way the in-Max painter's NeL thread did
-// (plugin_max/nel_patch_paint paint.cpp myThread), and save the .max back through the proven
-// P1/P2 write path. No painting operations yet (P3b) — this milestone is load -> landscape
-// viewer -> null-edit save, plus headless batch modes that need no 3D driver.
+// Standalone zone painter (design doc §14-paint): load a .max directly through pipeline_max,
+// assemble the painting landscape the way the in-Max painter's NeL thread did
+// (plugin_max/nel_patch_paint paint.cpp myThread), paint tiles against a user-selected tile
+// bank (P3b: the tile brush with automatic transitions, rotation, 128/256, undo — see
+// paint_core.h), and save the .max back through the proven P1/P2 write path.
 //
 // Modes:
 //   (default)      viewer: CNELU + CLandscapeModel painting scene, tile bank from --bank,
-//                  CEvent3dMouseListener edit3d orbiting the landscape bbox center, ESC or
-//                  window close to exit. The GL driver is loaded dynamically at runtime.
+//                  CEvent3dMouseListener edit3d orbiting the landscape bbox center. LEFT MOUSE
+//                  paints the selected tile set, right mouse picks the set under the cursor,
+//                  PgUp/PgDn (and 0-9) select the tile set, B toggles 128/256, Ctrl+Z / Ctrl+E
+//                  undo/redo, ESC or window close exits (--save writes the result). HUD text
+//                  via --font (any .ttf; defaults to a system font when present).
 //   --screenshot   same scene setup, render one refined frame, dump the framebuffer to .tga
-//                  and exit (the future visual gate).
+//                  and exit (the visual gate; combine with --paint-script for before/after).
+//   --paint-script headless (or viewer pre-pass) scripted painting: one op per line,
+//                  '#' comments — `tile <zone> <patch> <u> <v> <tileSet> [rot]`,
+//                  `tile256 ...` (same args), `clear <zone> <patch> <u> <v>`, `clear256 ...`,
+//                  `undo`, `redo`, `seed <n>`. Ops go through the SAME implementations as the
+//                  mouse path (single op layer in paint_core).
+//   --save         write-back + whole-file save after ops: each (possibly tile-mutated)
+//                  pristine carrier blob is encoded into its P2 write-target (topmost 0x4001
+//                  snapshot, else base 0x08FD via setRPatch), the Scene stream is rebuilt and
+//                  every other stream kept verbatim (OLE class id preserved).
+//   --null-edit    the same write-back path with no ops at all: evaluate, resolve carriers,
+//                  write back untouched pristine blobs, save to --out. With --verify-identical
+//                  every stream must byte-compare against the input (the §14-paint null-edit
+//                  property, now THROUGH the paint save path).
 //   --dump-zones   headless proof of the eval->weld->build path: write every built CZone
 //                  (serial version 4, the reference era) and report patch/bind/border counts.
-//   --null-edit    headless save proof: resolve every RPatchMesh blob in the file (base
-//                  0x08FD via CRklPatchObject::setRPatch, modifier snapshot 0x4001 via
-//                  NELPATCH::encodeRPatchMesh into the raw leaf — decode then re-encode, no
-//                  changes), rebuild the Scene stream, write the whole .max to --out (other
-//                  streams verbatim, OLE class id preserved). With --verify-identical the
-//                  output must be byte-identical to the input, stream by stream (the
-//                  §14-paint P2 null-edit property).
+//   --dump-rpo     dump every carrier's pristine tile records (the mechanical verification
+//                  surface for the paint round-trip); runs after --paint-script when given.
+//   --dump-bank-xref / --dump-carrier-blob   bank xref table / raw carrier blob bytes, for
+//                  the transition-witness and surgical-diff checks.
 //
 // Scene assembly replicates the painter plugin: per RklPatch node evalNodePatch + object TM
 // at t=0 -> buildPatchInfo in authored space (NO symmetry/rotate — the painting scene shows
@@ -31,8 +44,8 @@
 // -> cross-zone open-edge weld (the paint.cpp WELD_THRESOLD port, session-only, never
 // persisted) -> CZone::build -> CZoneCornerSmoother -> Landscape.addZone. Frozen nodes
 // (empty node chunk 0x0976) are boundary-reference display like the exporter's boundary
-// bricks: they participate in the landscape and the weld but are flagged — they will not be
-// paint targets in P3b.
+// bricks: they participate in the landscape, the weld and the metaTile graph but are never
+// paint targets and their carrier blobs are never rewritten.
 
 /*
  * Copyright (C) 2026  by authors
@@ -73,10 +86,12 @@
 
 #include <nel/3d/camera.h>
 #include <nel/3d/event_mouse_listener.h>
+#include <nel/3d/font_manager.h>
 #include <nel/3d/landscape.h>
 #include <nel/3d/landscape_model.h>
 #include <nel/3d/nelu.h>
 #include <nel/3d/register_3d.h>
+#include <nel/3d/text_context.h>
 #include <nel/3d/tile_bank.h>
 #include <nel/3d/viewport.h>
 #include <nel/3d/zone.h>
@@ -141,7 +156,13 @@ using namespace MAXMATH;
 // header doc for the include contract this file follows).
 #include "../pipeline_max_export_common/patch_eval.h"
 
+// The tile painting core (P3b): metaTile graph, transition solver, pristine carrier state,
+// live-landscape mirror, undo, write-back.
+#include "paint_core.h"
+
 static bool g_verbose = false;
+// Result of the viewer script pre-pass (propagated as the viewer exit code for scripted gates)
+static int g_ViewerScriptRc = 0;
 
 // ---------------------------------------------------------------------------------------------
 // Zone writing (--dump-zones): current CZone::serial writes version 5; the references are
@@ -181,6 +202,7 @@ struct SPaintZone
 	uint ZoneId;
 	std::vector<NL3D::CPatchInfo> Patches;
 	std::vector<NL3D::CBorderVertex> BorderVertices; // session-only, filled by the weld pass
+	SEvalPatch Ep; // evaluated topology, kept for the paint core's metaTile graph (P3b)
 };
 
 static bool buildPaintZones(CScene &scene, std::vector<SPaintZone> &zones)
@@ -211,6 +233,7 @@ static bool buildPaintZones(CScene &scene, std::vector<SPaintZone> &zones)
 			fprintf(stderr, "WARNING: node '%s': %s (zone skipped)\n", name.c_str(), err.c_str());
 			continue;
 		}
+		pz.Ep = ep;
 		zones.push_back(pz);
 		if (g_verbose)
 			printf("zone %u '%s'%s: %u patches\n", pz.ZoneId, pz.Name.c_str(),
@@ -368,9 +391,9 @@ static int dumpZones(std::vector<SPaintZone> &zones, uint welds, const std::stri
 }
 
 // ---------------------------------------------------------------------------------------------
-// Null-edit save: the P2 whole-file save flow (modeled on the corpus harness'
-// rpoModifySaveTest). Every RPatchMesh blob decode->encode in place, Scene stream rebuilt from
-// the typed graph, every other stream verbatim, OLE class id preserved.
+// Whole-file save: rebuilt Scene stream + every other stream verbatim + OLE class id (the P2
+// flow, modeled on the corpus harness' rpoModifySaveTest). The caller mutates the parsed scene
+// (paint write-back) BEFORE calling; a null edit through this same path is byte-identical.
 
 // Serialize a container to a temp file and read the file bytes back. CMemStream's write-mode
 // seek-back fails during leaveChunk; COFile handles seeks freely, so temp-file roundtrip is
@@ -394,7 +417,7 @@ static std::vector<uint8> writeContainerToTemp(CStorageContainer &ctr, const std
 	return out;
 }
 
-static int nullEditSave(const std::string &input, const std::string &output, bool verifyIdentical)
+static int saveWholeFile(const std::string &input, const std::string &output, CScene &scene, bool verifyIdentical)
 {
 	// The known .max stream set (same list as the corpus harness save tests).
 	static const char *kStreams[] = {
@@ -415,50 +438,6 @@ static int nullEditSave(const std::string &input, const std::string &output, boo
 		}
 		haveClassId = in.getClassId(classId);
 	}
-
-	PMAXLOAD::SLoadedMax lm;
-	if (!PMAXLOAD::loadMaxFile(input, lm)) { fprintf(stderr, "ERROR: cannot load %s\n", input.c_str()); return 1; }
-	CScene &scene = *lm.Scene;
-
-	// Push every blob through the write path in place: base RPO 0x08FD via setRPatch, modifier
-	// snapshot 0x4001 (per-node local data 0x2512 -> 0x1000) via encodeRPatchMesh into the raw
-	// leaf. Decode->encode is corpus-proven byte-identity (P1), so a null edit is a no-op.
-	uint nRpo = 0, nSnap = 0, fails = 0;
-	CSceneClassContainer *ssc = scene.container();
-	for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
-	{
-		if (CRklPatchObject *rpo = dynamic_cast<CRklPatchObject *>(it->second))
-		{
-			const CStorageRaw *raw = rpo->rpoChunk();
-			if (!raw) continue;
-			SRPatchMesh rp;
-			std::string err;
-			if (!decodeRpoChunk(nlVectorData(raw->Value), raw->Value.size(), rp, err))
-			{ fprintf(stderr, "ERROR: 0x08fd decode: %s\n", err.c_str()); ++fails; continue; }
-			if (!rpo->setRPatch(rp))
-			{ fprintf(stderr, "ERROR: setRPatch failed\n"); ++fails; continue; }
-			++nRpo;
-			continue;
-		}
-		CDerivedObject *d = dynamic_cast<CDerivedObject *>(it->second);
-		if (!d) continue;
-		for (uint i = 0; i < d->modifierCount(); ++i)
-		{
-			CStorageContainer *data = dynamic_cast<CStorageContainer *>(d->localModData(i));
-			if (!data) continue;
-			CStorageContainer *wrap = containerChild(data, 0x1000);
-			if (!wrap) continue;
-			CStorageRaw *rfp = rawChildOf(wrap, 0x4001);
-			if (!rfp) continue;
-			SRPatchMesh rp;
-			std::string err;
-			if (!decodeRPatchMesh(nlVectorData(rfp->Value), rfp->Value.size(), rp, err))
-			{ fprintf(stderr, "ERROR: 0x4001 decode: %s\n", err.c_str()); ++fails; continue; }
-			encodeRPatchMesh(rp, rfp->Value);
-			++nSnap;
-		}
-	}
-	if (fails) return 1;
 
 	// Rebuild the Scene stream from the typed graph (§5 lifecycle) and write the whole file.
 	std::string tempPath = NLMISC::toString("/tmp/zone_painter.%d.tmp", (int)ZP_GETPID());
@@ -507,14 +486,123 @@ static int nullEditSave(const std::string &input, const std::string &output, boo
 			}
 		}
 	}
-
-	printf("%s null-edit: %u rpo, %u snapshots, %u stream diffs -> %s\n",
-	       diffs ? "FAIL" : "OK", nRpo, nSnap, diffs, output.c_str());
-
-	delete lm.Scene;
-	delete lm.Cd;
-	delete lm.Dll;
+	if (verifyIdentical)
+		printf("%s null-edit: %u stream diffs -> %s\n", diffs ? "FAIL" : "OK", diffs, output.c_str());
+	else
+		printf("OK save -> %s\n", output.c_str());
 	return diffs ? 1 : 0;
+}
+
+// Build the paint core inputs from the assembled zones (pointers into the final zones vector).
+static void buildPaintInputs(std::vector<SPaintZone> &zones, std::vector<ZPPAINT::SPaintZoneInput> &inputs)
+{
+	inputs.clear();
+	for (size_t i = 0; i < zones.size(); ++i)
+	{
+		ZPPAINT::SPaintZoneInput in;
+		in.Node = zones[i].Node;
+		in.Frozen = zones[i].Frozen;
+		in.ZoneId = zones[i].ZoneId;
+		in.Name = zones[i].Name;
+		in.Patches = &zones[i].Patches;
+		in.Pm = &zones[i].Ep.Pm;
+		in.EvalRp = &zones[i].Ep.Rp;
+		inputs.push_back(in);
+	}
+}
+
+// ---------------------------------------------------------------------------------------------
+// Scripted paint mode: one op per line, same op layer as the mouse path (see the file header
+// for the command list). Any FAILed op fails the run (scripts are curated test inputs).
+
+static int runPaintScript(ZPPAINT::CPaintCore &core, const std::string &path)
+{
+	std::ifstream ifs(path.c_str());
+	if (!ifs) { fprintf(stderr, "ERROR: cannot open script %s\n", path.c_str()); return 1; }
+	std::string line;
+	int lineNo = 0;
+	int fails = 0;
+	while (std::getline(ifs, line))
+	{
+		++lineNo;
+		std::string::size_type hash = line.find('#');
+		if (hash != std::string::npos) line.erase(hash);
+		std::vector<std::string> tok;
+		{
+			std::string cur;
+			for (size_t i = 0; i <= line.size(); ++i)
+			{
+				char c = (i < line.size()) ? line[i] : ' ';
+				if (c == ' ' || c == '\t' || c == '\r') { if (!cur.empty()) { tok.push_back(cur); cur.clear(); } }
+				else cur += c;
+			}
+		}
+		if (tok.empty()) continue;
+		std::string err;
+		bool ok = true;
+		if ((tok[0] == "tile" || tok[0] == "tile256") && tok.size() >= 6)
+		{
+			uint zone, patch, u, v;
+			int ts, rot = 0;
+			NLMISC::fromString(tok[1], zone);
+			NLMISC::fromString(tok[2], patch);
+			NLMISC::fromString(tok[3], u);
+			NLMISC::fromString(tok[4], v);
+			NLMISC::fromString(tok[5], ts);
+			if (tok.size() >= 7) NLMISC::fromString(tok[6], rot);
+			ok = core.opTile(zone, patch, u, v, ts, rot, tok[0] == "tile256", err);
+		}
+		else if (tok[0] == "rot" && tok.size() >= 6)
+		{
+			// Re-put the tile's own base tile set at the requested rotation (goes through the
+			// same put/transition machinery as a paint).
+			uint zone, patch, u, v;
+			int rot;
+			NLMISC::fromString(tok[1], zone);
+			NLMISC::fromString(tok[2], patch);
+			NLMISC::fromString(tok[3], u);
+			NLMISC::fromString(tok[4], v);
+			NLMISC::fromString(tok[5], rot);
+			ZPPAINT::CTileDescP desc;
+			core.getTile(zone, (sint32)(patch * ZP_NUM_TILE_SEL + v * ZP_MAX_TILE_IN_PATCH + u), desc);
+			if (desc.isEmpty()) { ok = false; err = "rot on an empty tile"; }
+			else
+			{
+				int ts = core.tileSetOfTile(desc.getLayer(0).Tile);
+				if (ts < 0) { ok = false; err = "rot: tile without bank xref"; }
+				else ok = core.opTile(zone, patch, u, v, ts, rot, desc.getCase() != 0, err);
+			}
+		}
+		else if ((tok[0] == "clear" || tok[0] == "clear256") && tok.size() >= 5)
+		{
+			uint zone, patch, u, v;
+			NLMISC::fromString(tok[1], zone);
+			NLMISC::fromString(tok[2], patch);
+			NLMISC::fromString(tok[3], u);
+			NLMISC::fromString(tok[4], v);
+			ok = core.opClear(zone, patch, u, v, tok[0] == "clear256", err);
+		}
+		else if (tok[0] == "undo") { ok = core.opUndo(); if (!ok) err = "undo stack empty"; }
+		else if (tok[0] == "redo") { ok = core.opRedo(); if (!ok) err = "redo stack empty"; }
+		else if (tok[0] == "seed" && tok.size() >= 2)
+		{
+			uint s;
+			NLMISC::fromString(tok[1], s);
+			srand(s);
+		}
+		else
+		{
+			fprintf(stderr, "ERROR: script line %d: bad command '%s'\n", lineNo, tok[0].c_str());
+			return 1;
+		}
+		if (ok) printf("OK line %d: %s (%u tile writes)\n", lineNo, tok[0].c_str(), core.strokeSetCount());
+		else
+		{
+			printf("FAIL line %d: %s: %s\n", lineNo, tok[0].c_str(), err.c_str());
+			++fails;
+		}
+	}
+	return fails ? 1 : 0;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -542,31 +630,158 @@ static const float kLightMultiply = 1.f;
 static const uint kMainWidth = 800;
 static const uint kMainHeight = 600;
 
-static int runViewer(std::vector<SPaintZone> &zones, const std::string &bankPath, bool bankRecursive,
-                     const std::vector<std::string> &searchPaths, const std::string &screenshotPath)
+// The tile bank (the plugin took it from the tile_utility choice; here it is --bank). Tile
+// texture paths become CPath-resolvable relative names, seeded with the bank file's directory
+// (recursive on request) plus any extra search paths.
+static bool loadBankFile(const std::string &bankPath, bool bankRecursive,
+                         const std::vector<std::string> &searchPaths, NL3D::CTileBank &bank)
 {
-	// The tile bank (the plugin took it from the tile_utility choice; here it is --bank).
-	NL3D::CTileBank bank;
 	try
 	{
 		NLMISC::CIFile file;
-		if (!file.open(bankPath)) { fprintf(stderr, "ERROR: cannot open bank %s\n", bankPath.c_str()); return 1; }
+		if (!file.open(bankPath)) { fprintf(stderr, "ERROR: cannot open bank %s\n", bankPath.c_str()); return false; }
 		bank.serial(file);
 		bank.computeXRef();
 	}
 	catch (const NLMISC::Exception &e)
 	{
 		fprintf(stderr, "ERROR: bank: %s\n", e.what());
-		return 1;
+		return false;
 	}
-	// Make the tile texture paths resolvable: relative names looked up through CPath, seeded
-	// with the bank file's directory (recursive on request).
 	bank.makeAllPathRelative();
 	bank.setAbsPath("");
 	NLMISC::CPath::addSearchPath(NLMISC::CFile::getPath(bankPath), bankRecursive, false);
 	for (size_t i = 0; i < searchPaths.size(); ++i)
 		NLMISC::CPath::addSearchPath(searchPaths[i], true, false);
+	return true;
+}
 
+// The viewer's paint mouse listener (plugin MouseListener port, tile mode only): left button
+// paints through the shared op layer, right button picks the tile set under the cursor,
+// Ctrl+Z / Ctrl+E undo/redo. The edit3d navigation stays on the middle mouse.
+class CPaintMouseListener : public NLMISC::IEventListener
+{
+public:
+	ZPPAINT::CPaintCore *Core;
+	NL3D::CEvent3dMouseListener *Nav;
+	NL3D::CViewport Viewport;
+	int CurTileSet;
+	bool Mode256;
+	bool Pressed;
+	float MouseX, MouseY;
+	bool HaveHover;
+	uint HoverZone;
+	sint32 HoverTile;
+	uint StrokeZone;
+	sint32 StrokeTile;
+
+	CPaintMouseListener() : Core(NULL), Nav(NULL), CurTileSet(0), Mode256(false), Pressed(false),
+		MouseX(0.5f), MouseY(0.5f), HaveHover(false), HoverZone(0), HoverTile(-1), StrokeZone(0), StrokeTile(-1) { }
+
+	void updateHover()
+	{
+		HaveHover = false;
+		if (!Core) return;
+		NLMISC::CVector pos, dir, hit;
+		Viewport.getRayWithPoint(MouseX, MouseY, pos, dir, NL3D::CNELU::Camera->getMatrix(), NL3D::CNELU::Camera->getFrustum());
+		uint zone;
+		sint32 tile;
+		if (Core->pickTile(pos, dir, zone, tile, hit))
+		{
+			HaveHover = true;
+			HoverZone = zone;
+			HoverTile = tile;
+		}
+	}
+
+	virtual void operator()(const NLMISC::CEvent &event)
+	{
+		if (!Core) return;
+		if (event == NLMISC::EventMouseDownId)
+		{
+			NLMISC::CEventMouse *mouse = (NLMISC::CEventMouse *)&event;
+			MouseX = mouse->X;
+			MouseY = mouse->Y;
+			if (mouse->Button == NLMISC::leftButton)
+			{
+				updateHover();
+				if (HaveHover && !Core->zoneFrozen(HoverZone))
+				{
+					std::string err;
+					if (Core->opTileStroke(HoverZone, HoverTile, CurTileSet, Mode256, true, err))
+					{
+						Pressed = true;
+						StrokeZone = HoverZone;
+						StrokeTile = HoverTile;
+					}
+				}
+			}
+			if (mouse->Button == NLMISC::rightButton)
+			{
+				// Pick: current tile set = the base layer's set under the cursor
+				updateHover();
+				if (HaveHover)
+				{
+					ZPPAINT::CTileDescP desc;
+					Core->getTile(HoverZone, HoverTile, desc);
+					if (!desc.isEmpty())
+					{
+						int tileSet, number;
+						NL3D::CTileBank::TTileType type;
+						// the bank the core paints against resolves the xref
+						CurTileSet = -1;
+						(void)number;
+						(void)type;
+						(void)tileSet;
+						CurTileSet = Core->tileSetOfTile(desc.getLayer(0).Tile);
+					}
+				}
+			}
+		}
+		else if (event == NLMISC::EventMouseUpId)
+		{
+			NLMISC::CEventMouse *mouse = (NLMISC::CEventMouse *)&event;
+			if (mouse->Button == NLMISC::leftButton && Pressed)
+			{
+				Pressed = false;
+				Core->endStroke();
+			}
+		}
+		else if (event == NLMISC::EventMouseMoveId)
+		{
+			NLMISC::CEventMouse *mouse = (NLMISC::CEventMouse *)&event;
+			MouseX = mouse->X;
+			MouseY = mouse->Y;
+			if (Pressed && (mouse->Button & NLMISC::leftButton))
+			{
+				updateHover();
+				if (HaveHover && (HoverTile != StrokeTile || HoverZone != StrokeZone) && !Core->zoneFrozen(HoverZone))
+				{
+					std::string err;
+					if (Core->opTileStroke(HoverZone, HoverTile, CurTileSet, Mode256, false, err))
+					{
+						StrokeZone = HoverZone;
+						StrokeTile = HoverTile;
+					}
+				}
+			}
+		}
+		else if (event == NLMISC::EventKeyDownId)
+		{
+			NLMISC::CEventKeyDown *keyDown = (NLMISC::CEventKeyDown *)&event;
+			if (keyDown->FirstTime && (keyDown->Button & NLMISC::ctrlKeyButton))
+			{
+				if (keyDown->Key == NLMISC::KeyZ) Core->opUndo();
+				if (keyDown->Key == NLMISC::KeyE) Core->opRedo();
+			}
+		}
+	}
+};
+
+static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CPaintCore *core,
+                     const std::string &screenshotPath, const std::string &fontPath,
+                     const std::string &scriptPath)
+{
 	// Landscape bbox in world space (camera + mouse hotspot).
 	NLMISC::CAABBox bbox;
 	bool bboxInit = false;
@@ -640,7 +855,40 @@ static int runViewer(std::vector<SPaintZone> &zones, const std::string &bankPath
 		NL3D::CNELU::EventServer.addListener(NLMISC::EventDestroyWindowId, &closeListener);
 		NL3D::CNELU::EventServer.addListener(NLMISC::EventCloseWindowId, &closeListener);
 
+		// Paint listener: live-landscape mirror + the mouse op path
+		CPaintMouseListener paintListener;
+		if (core)
+		{
+			core->attachLandscape(&theLand->Landscape);
+			paintListener.Core = core;
+			paintListener.Nav = &mouseListener;
+			paintListener.Viewport = viewport;
+			NL3D::CNELU::EventServer.addListener(NLMISC::EventMouseDownId, &paintListener);
+			NL3D::CNELU::EventServer.addListener(NLMISC::EventMouseUpId, &paintListener);
+			NL3D::CNELU::EventServer.addListener(NLMISC::EventMouseMoveId, &paintListener);
+			NL3D::CNELU::EventServer.addListener(NLMISC::EventKeyDownId, &paintListener);
+		}
+
+		// HUD text (any TrueType through the font manager; silently disabled without a font)
+		NL3D::CFontManager fontManager;
+		NL3D::CTextContext textContext;
+		bool hudText = false;
+		if (!fontPath.empty() && NLMISC::CFile::fileExists(fontPath))
+		{
+			textContext.init(NL3D::CNELU::Driver, &fontManager);
+			textContext.setFontGenerator(fontPath);
+			textContext.setHotSpot(NL3D::CComputedString::TopLeft);
+			textContext.setColor(NLMISC::CRGBA(255, 255, 255));
+			textContext.setFontSize(16);
+			hudText = true;
+		}
+
 		theLand->enableAdditive(true);
+
+		// Scripted pre-pass (the ops mirror straight into the attached live landscape)
+		g_ViewerScriptRc = 0;
+		if (core && !scriptPath.empty())
+			g_ViewerScriptRc = runPaintScript(*core, scriptPath);
 
 		if (!screenshotPath.empty())
 		{
@@ -672,6 +920,27 @@ static int runViewer(std::vector<SPaintZone> &zones, const std::string &bankPath
 			do
 			{
 				NL3D::CNELU::EventServer.pump();
+
+				// Tile set selection keys (plugin: the texture panel; here PgUp/PgDn + 0-9 + B)
+				if (core)
+				{
+					uint count = core->tileSetCount();
+					if (count)
+					{
+						if (NL3D::CNELU::AsyncListener.isKeyPushed(NLMISC::KeyPRIOR))
+							paintListener.CurTileSet = (paintListener.CurTileSet + (int)count - 1) % (int)count;
+						if (NL3D::CNELU::AsyncListener.isKeyPushed(NLMISC::KeyNEXT))
+							paintListener.CurTileSet = (paintListener.CurTileSet + 1) % (int)count;
+						for (int k = 0; k <= 9; ++k)
+							if (NL3D::CNELU::AsyncListener.isKeyPushed((NLMISC::TKey)(NLMISC::Key0 + k)) && k < (int)count)
+								paintListener.CurTileSet = k;
+					}
+					if (NL3D::CNELU::AsyncListener.isKeyPushed(NLMISC::KeyB))
+						paintListener.Mode256 = !paintListener.Mode256;
+					if (!paintListener.Pressed)
+						paintListener.updateHover();
+				}
+
 				NLMISC::CMatrix camKey = mouseListener.getViewMatrix();
 				NL3D::CNELU::Camera->setMatrix(camKey);
 				NL3D::CNELU::clearBuffers(NLMISC::CRGBA(90, 90, 90));
@@ -681,6 +950,38 @@ static int runViewer(std::vector<SPaintZone> &zones, const std::string &bankPath
 					theLand->Landscape.setRefineMode(false);
 					theLand->Landscape.refineAll(camKey.getPos());
 				}
+
+				// Hovered tile outline (world-space lines after the scene render)
+				if (core && paintListener.HaveHover)
+				{
+					NLMISC::CVector c[4];
+					if (core->tileCorners(paintListener.HoverZone, paintListener.HoverTile, c) == 0)
+					{
+						NLMISC::CVector lift(0.f, 0.f, 0.15f);
+						NLMISC::CRGBA col = core->zoneFrozen(paintListener.HoverZone) ? NLMISC::CRGBA(255, 64, 64) : NLMISC::CRGBA(255, 255, 0);
+						NL3D::CNELU::Driver->setupModelMatrix(NLMISC::CMatrix::Identity);
+						for (int l = 0; l < 4; ++l)
+							NL3D::CDRU::drawLine(c[l] + lift, c[(l + 1) & 3] + lift, col, *NL3D::CNELU::Driver);
+					}
+				}
+
+				// HUD text
+				if (core && hudText)
+				{
+					textContext.setColor(NLMISC::CRGBA(255, 255, 255));
+					textContext.printfAt(0.01f, 0.98f, "TileSet %d/%u '%s'  %s  undo %u",
+					                     paintListener.CurTileSet, core->tileSetCount(),
+					                     core->tileSetName(paintListener.CurTileSet).c_str(),
+					                     paintListener.Mode256 ? "256" : "128", core->undoDepth());
+					if (paintListener.HaveHover)
+					{
+						sint32 t = paintListener.HoverTile;
+						textContext.printfAt(0.01f, 0.95f, "zone %u patch %d tile (%d,%d)%s",
+						                     paintListener.HoverZone, (int)(t / 256), (int)(t % 256 % 16), (int)(t % 256 / 16),
+						                     core->zoneFrozen(paintListener.HoverZone) ? " FROZEN" : "");
+					}
+				}
+
 				NL3D::CNELU::swapBuffers();
 				NL3D::CNELU::screenshot(); // F12, same convenience as the other NeL viewers
 			}
@@ -690,6 +991,14 @@ static int runViewer(std::vector<SPaintZone> &zones, const std::string &bankPath
 		mouseListener.removeFromServer(NL3D::CNELU::EventServer);
 		NL3D::CNELU::EventServer.removeListener(NLMISC::EventDestroyWindowId, &closeListener);
 		NL3D::CNELU::EventServer.removeListener(NLMISC::EventCloseWindowId, &closeListener);
+		if (core)
+		{
+			core->attachLandscape(NULL);
+			NL3D::CNELU::EventServer.removeListener(NLMISC::EventMouseDownId, &paintListener);
+			NL3D::CNELU::EventServer.removeListener(NLMISC::EventMouseUpId, &paintListener);
+			NL3D::CNELU::EventServer.removeListener(NLMISC::EventMouseMoveId, &paintListener);
+			NL3D::CNELU::EventServer.removeListener(NLMISC::EventKeyDownId, &paintListener);
+		}
 		NL3D::CNELU::release();
 	}
 	catch (const NL3D::EDru &e)
@@ -702,7 +1011,7 @@ static int runViewer(std::vector<SPaintZone> &zones, const std::string &bankPath
 		fprintf(stderr, "ERROR: %s\n", e.what());
 		return 1;
 	}
-	return 0;
+	return g_ViewerScriptRc;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -715,16 +1024,24 @@ int main(int argc, char **argv)
 	args.setDescription("Standalone zone painter (design doc \xc2\xa7" "14-paint). Default mode opens the "
 	                    "painting landscape viewer; the headless modes need no 3D driver.");
 	args.addAdditionalArg("input.max", "Input .max scene");
-	args.addArg("", "bank", "bank", "Tile bank (.smallbank/.bank); required for the viewer/screenshot modes");
+	args.addArg("", "bank", "bank", "Tile bank (.smallbank/.bank); required for painting and the viewer/screenshot modes");
 	args.addArg("", "bank-recursive", "", "Add the bank directory to the texture search path recursively");
 	args.addArg("", "search-path", "dir", "Extra recursive texture search path (repeatable)", false);
 	args.addArg("", "out", "output.max", "Output .max for --null-edit (in-place save is refused)");
-	args.addArg("", "cellsize", "meters", "Ligo cell size (default 100; reserved for the painting core)");
-	args.addArg("", "snap", "meters", "Ligo snap (default 1; reserved for the painting core)");
-	args.addArg("", "null-edit", "", "Headless: decode+re-encode every RPatchMesh blob, rebuild, save to --out");
+	args.addArg("", "save", "output.max", "Write-back + whole-file save after ops (in-place save is refused)");
+	args.addArg("", "cellsize", "meters", "Ligo cell size for the zone-symmetry state (default 100)");
+	args.addArg("", "snap", "meters", "Ligo snap for the zone-symmetry state (default 1)");
+	args.addArg("", "paint-script", "file", "Scripted paint ops (headless without a display mode)");
+	args.addArg("", "seed", "n", "Random seed for the paint ops (default 1; ops use a cycle counter for base tiles)");
+	args.addArg("", "lock-borders", "", "Lock tiles bordering frozen zones or open edges (plugin lockBorders)");
+	args.addArg("", "null-edit", "", "Headless: resolve carriers, write back untouched pristine blobs, save to --out");
 	args.addArg("", "verify-identical", "", "With --null-edit: byte-compare the output against the input");
 	args.addArg("", "dump-zones", "dir", "Headless: write every built display CZone and report counts");
+	args.addArg("", "dump-rpo", "", "Dump every carrier's pristine tile records to stdout");
+	args.addArg("", "dump-bank-xref", "", "Dump the bank's tile -> (set, number, type) xref table to stdout");
+	args.addArg("", "dump-carrier-blob", "dir", "Write each zone's original carrier blob bytes to <dir>/zone<id>.blob");
 	args.addArg("", "screenshot", "out.tga", "Render one frame to a .tga and exit");
+	args.addArg("", "font", "file.ttf", "HUD font for the viewer (default: a system font when present)");
 	args.addArg("", "verbose", "", "Verbose output");
 	if (!args.parse(argc, argv))
 		return 1;
@@ -737,26 +1054,47 @@ int main(int argc, char **argv)
 	float snap = 1.f;
 	if (args.haveLongArg("cellsize")) NLMISC::fromString(args.getLongArg("cellsize")[0], cellSize);
 	if (args.haveLongArg("snap")) NLMISC::fromString(args.getLongArg("snap")[0], snap);
-	(void)cellSize; // the painting core (P3b) consumes these for the zone-symmetry state
-	(void)snap;
-
-	if (args.haveLongArg("null-edit"))
+	uint seed = 1;
+	if (args.haveLongArg("seed")) NLMISC::fromString(args.getLongArg("seed")[0], seed);
+	srand(seed);
+	std::string scriptPath = args.haveLongArg("paint-script") ? args.getLongArg("paint-script")[0] : std::string();
+	std::string savePath = args.haveLongArg("save") ? args.getLongArg("save")[0] : std::string();
+	std::string fontPath = args.haveLongArg("font") ? args.getLongArg("font")[0] : std::string();
+	if (fontPath.empty())
 	{
-		if (!args.haveLongArg("out"))
-		{
-			fprintf(stderr, "ERROR: --null-edit refuses to save in place; give --out <output.max>\n");
-			return 1;
-		}
-		return nullEditSave(input, args.getLongArg("out")[0], args.haveLongArg("verify-identical"));
+		// Default HUD font: a common system TrueType (HUD text silently off when absent)
+		const char *sysFont = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
+		if (NLMISC::CFile::fileExists(sysFont)) fontPath = sysFont;
+	}
+	bool nullEdit = args.haveLongArg("null-edit");
+	bool doDumpRpo = args.haveLongArg("dump-rpo");
+	bool doDumpXRef = args.haveLongArg("dump-bank-xref");
+	std::string dumpBlobDir = args.haveLongArg("dump-carrier-blob") ? args.getLongArg("dump-carrier-blob")[0] : std::string();
+	// Viewer runs for --screenshot and for the plain interactive invocation (a paint script
+	// without a display mode is headless; the dump-only modes are headless too).
+	bool viewerMode = !nullEdit && !args.haveLongArg("dump-zones")
+		&& (args.haveLongArg("screenshot") || (scriptPath.empty() && !doDumpRpo && !doDumpXRef && dumpBlobDir.empty()));
+
+	if (nullEdit && !args.haveLongArg("out"))
+	{
+		fprintf(stderr, "ERROR: --null-edit refuses to save in place; give --out <output.max>\n");
+		return 1;
+	}
+	if (!savePath.empty() && savePath == input)
+	{
+		fprintf(stderr, "ERROR: --save refuses to save in place\n");
+		return 1;
 	}
 
-	// Landscape modes.
+	// Load + assemble the painting zones (all modes; the null-edit path exercises exactly the
+	// paint save path with zero ops).
 	NL3D::registerSerial3d();
 	PMAXLOAD::SLoadedMax lm;
 	if (!PMAXLOAD::loadMaxFile(input, lm)) { fprintf(stderr, "ERROR: cannot load %s\n", input.c_str()); return 1; }
 
 	std::vector<SPaintZone> zones;
-	if (!buildPaintZones(*lm.Scene, zones))
+	bool haveZones = buildPaintZones(*lm.Scene, zones);
+	if (!haveZones && !nullEdit)
 	{
 		fprintf(stderr, "ERROR: no displayable RklPatch zone in %s\n", input.c_str());
 		return 1;
@@ -767,15 +1105,84 @@ int main(int argc, char **argv)
 	if (args.haveLongArg("dump-zones"))
 		return dumpZones(zones, welds, args.getLongArg("dump-zones")[0]);
 
-	if (bankPath.empty())
+	// The tile bank: required for paint ops and display; the null-edit/dump paths run without.
+	NL3D::CTileBank bank;
+	bool haveBank = false;
+	if (!bankPath.empty())
 	{
-		fprintf(stderr, "ERROR: the viewer/screenshot modes need --bank <bank.smallbank>\n");
+		std::vector<std::string> searchPaths;
+		if (args.haveLongArg("search-path")) searchPaths = args.getLongArg("search-path");
+		if (!loadBankFile(bankPath, bankRecursive, searchPaths, bank)) return 1;
+		haveBank = true;
+	}
+	if ((viewerMode || !scriptPath.empty()) && !haveBank)
+	{
+		fprintf(stderr, "ERROR: this mode needs --bank <bank.smallbank>\n");
 		return 1;
 	}
-	std::vector<std::string> searchPaths;
-	if (args.haveLongArg("search-path")) searchPaths = args.getLongArg("search-path");
-	std::string screenshotPath = args.haveLongArg("screenshot") ? args.getLongArg("screenshot")[0] : std::string();
-	return runViewer(zones, bankPath, bankRecursive, searchPaths, screenshotPath);
+
+	// The painting core over the assembled zones
+	ZPPAINT::CPaintCore core;
+	std::vector<ZPPAINT::SPaintZoneInput> inputs;
+	buildPaintInputs(zones, inputs);
+	{
+		std::string err;
+		if (!core.init(inputs, haveBank ? &bank : NULL, cellSize, snap, args.haveLongArg("lock-borders"), err))
+		{
+			fprintf(stderr, "ERROR: paint core: %s\n", err.c_str());
+			return 1;
+		}
+	}
+
+	if (doDumpXRef)
+	{
+		if (!haveBank) { fprintf(stderr, "ERROR: --dump-bank-xref needs --bank\n"); return 1; }
+		core.dumpBankXRef(stdout);
+	}
+	if (!dumpBlobDir.empty())
+	{
+		NLMISC::CFile::createDirectoryTree(dumpBlobDir);
+		for (size_t i = 0; i < zones.size(); ++i)
+		{
+			std::vector<uint8> blob;
+			if (!core.dumpCarrierBlob(zones[i].ZoneId, blob)) continue;
+			std::string path = dumpBlobDir + NLMISC::toString("/zone%u.blob", zones[i].ZoneId);
+			NLMISC::COFile f;
+			if (f.open(path) && !blob.empty()) f.serialBuffer(nlVectorData(blob), (uint)blob.size());
+		}
+	}
+
+	int rc = 0;
+	if (viewerMode)
+	{
+		std::string screenshotPath = args.haveLongArg("screenshot") ? args.getLongArg("screenshot")[0] : std::string();
+		rc = runViewer(zones, bank, &core, screenshotPath, fontPath, scriptPath);
+	}
+	else if (!scriptPath.empty())
+	{
+		rc = runPaintScript(core, scriptPath);
+	}
+
+	if (doDumpRpo)
+		core.dumpRpo(stdout);
+
+	// Save flows: --null-edit (untouched write-back, optional byte-compare) or --save (after ops)
+	if (nullEdit)
+	{
+		std::string err;
+		if (!core.writeBack(err)) { fprintf(stderr, "ERROR: write-back: %s\n", err.c_str()); return 1; }
+		int saveRc = saveWholeFile(input, args.getLongArg("out")[0], *lm.Scene, args.haveLongArg("verify-identical"));
+		return saveRc ? saveRc : rc;
+	}
+	if (!savePath.empty())
+	{
+		std::string err;
+		if (!core.writeBack(err)) { fprintf(stderr, "ERROR: write-back: %s\n", err.c_str()); return 1; }
+		int saveRc = saveWholeFile(input, savePath, *lm.Scene, false);
+		if (saveRc) return saveRc;
+	}
+
+	return rc;
 }
 
 /* end of file */
