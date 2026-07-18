@@ -339,6 +339,13 @@ public:
 	// into the attached landscape's driver.
 	void preloadTiles(NL3D::IDriver *driver);
 
+	// Stored painter UI flags from the FIRST paint-bearing NeL Patch Painter modifier's local
+	// data (RPO_INCLUDE_MESHES 0x4003 / RPO_PRELOAD_TILES 0x4010, BOOL payloads; per-modifier
+	// state in the plugin — the first one found wins here). -1 = no painter modifier carries
+	// the chunk in this file.
+	sint storedIncludeMeshes() const { return m_StoredIncludeMeshes; }
+	sint storedPreloadTiles() const { return m_StoredPreloadTiles; }
+
 	// Mouse pick: world ray -> (zone, tileId). Uses the display bezier patches.
 	bool pickTile(const NLMISC::CVector &pos, const NLMISC::CVector &dir, uint &zone, sint32 &tileId,
 	              NLMISC::CVector &hit);
@@ -403,6 +410,8 @@ private:
 	sint32 m_StrokeOldZone;
 	uint m_BrushSize;  // 0-2 (plugin brushSize)
 	uint m_TileGroup;  // 0 = none, 1..12 (plugin TileGroup)
+	sint m_StoredIncludeMeshes; // -1 unknown / 0 / 1 (RPO_INCLUDE_MESHES 0x4003)
+	sint m_StoredPreloadTiles;  // -1 unknown / 0 / 1 (RPO_PRELOAD_TILES 0x4010)
 
 	// Per-tileset group tile lists (paint_ui CBankCont port): set-local 128/256 indices whose
 	// bank tile carries the group flag and a diffuse name.

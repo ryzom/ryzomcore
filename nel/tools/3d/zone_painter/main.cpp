@@ -160,6 +160,10 @@ using namespace MAXMATH;
 // live-landscape mirror, undo, write-back.
 #include "paint_core.h"
 
+// Include-meshes context display + scene lights (P3d; own TU — the SCENELIB evaluation
+// headers must not share a TU with the patch_eval implementation unit above).
+#include "context_display.h"
+
 static bool g_verbose = false;
 // Result of the viewer script pre-pass (propagated as the viewer exit code for scripted gates)
 static int g_ViewerScriptRc = 0;
@@ -170,6 +174,7 @@ static uint g_ViewerBrushHardness = 128;
 static uint g_ViewerBrushOpacity = 255;
 static uint g_ViewerDisplaceIndex = 0;
 static bool g_PreloadTiles = false;
+static bool g_IncludeMeshes = false;
 
 // ---------------------------------------------------------------------------------------------
 // Zone writing (--dump-zones): current CZone::serial writes version 5; the references are
@@ -982,6 +987,7 @@ public:
 };
 
 static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CPaintCore *core,
+                     PMAXLOAD::SLoadedMax &lm,
                      const std::string &screenshotPath, const std::string &fontPath,
                      const std::string &scriptPath)
 {
@@ -1078,6 +1084,29 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 			// Preload flush (plugin preloadTiles): all tile sets into the driver
 			if (g_PreloadTiles)
 				core->preloadTiles(NL3D::CNELU::Driver);
+		}
+
+		// Scene point lights (CPaintLight parity — unconditional in the plugin's myThread)
+		{
+			uint nPaintLights = ZPCTX::setupPaintLights(lm, theLand->Landscape, *NL3D::CNELU::Scene);
+			if (g_verbose || nPaintLights)
+				printf("paint lights: %u point-light models\n", nPaintLights);
+		}
+
+		// Include-meshes context display (the plugin's includeMeshes branch: meshes + scene
+		// ambient + driver lights)
+		if (g_IncludeMeshes)
+		{
+			ZPCTX::SContextStats ctxStats;
+			ZPCTX::addContextMeshes(lm, NL3D::CNELU::Scene, NL3D::CNELU::ShapeBank, theLand, ctxStats);
+			NLMISC::CRGBA ambient(0, 0, 0);
+			bool haveAmbient = ZPCTX::decodeSceneAmbient(lm, ambient);
+			if (haveAmbient)
+				NL3D::CNELU::Driver->setAmbientColor(ambient);
+			uint nDriverLights = ZPCTX::setupDriverLights(lm, NL3D::CNELU::Driver);
+			printf("context meshes: %u built, %u skipped; driver lights: %u; ambient: %s\n",
+			       ctxStats.Built, ctxStats.Skipped, nDriverLights,
+			       haveAmbient ? NLMISC::toString("%u,%u,%u", ambient.R, ambient.G, ambient.B).c_str() : "default (not decoded)");
 		}
 
 		// HUD text (any TrueType through the font manager; silently disabled without a font)
@@ -1305,7 +1334,10 @@ int main(int argc, char **argv)
 	args.addArg("", "hardness", "0-255", "Viewer color brush hardness (default 128)");
 	args.addArg("", "opacity", "0-255", "Viewer color brush opacity (default 255)");
 	args.addArg("", "displace-index", "0-15", "Viewer displace paint index (default 0)");
-	args.addArg("", "preload-tiles", "", "Viewer: flush every tile set's tiles at startup (plugin preloadTiles)");
+	args.addArg("", "preload-tiles", "", "Viewer: flush every tile set's tiles at startup (overrides the stored 0x4010 flag on)");
+	args.addArg("", "no-preload-tiles", "", "Viewer: force the preload flush off (overrides the stored flag)");
+	args.addArg("", "include-meshes", "", "Viewer: display the scene's non-zone meshes + ambient + lights (overrides the stored 0x4003 flag on)");
+	args.addArg("", "no-include-meshes", "", "Viewer: force the context-mesh display off (overrides the stored flag)");
 	args.addArg("", "null-edit", "", "Headless: resolve carriers, write back untouched pristine blobs, save to --out");
 	args.addArg("", "verify-identical", "", "With --null-edit: byte-compare the output against the input");
 	args.addArg("", "dump-zones", "dir", "Headless: write every built display CZone and report counts");
@@ -1416,7 +1448,14 @@ int main(int argc, char **argv)
 	if (args.haveLongArg("hardness")) NLMISC::fromString(args.getLongArg("hardness")[0], g_ViewerBrushHardness);
 	if (args.haveLongArg("opacity")) NLMISC::fromString(args.getLongArg("opacity")[0], g_ViewerBrushOpacity);
 	if (args.haveLongArg("displace-index")) NLMISC::fromString(args.getLongArg("displace-index")[0], g_ViewerDisplaceIndex);
-	g_PreloadTiles = args.haveLongArg("preload-tiles");
+	// Stored-flag defaults (RPO_INCLUDE_MESHES 0x4003 / RPO_PRELOAD_TILES 0x4010 from the
+	// first paint-bearing painter modifier); explicit CLI flags override either way.
+	g_PreloadTiles = core.storedPreloadTiles() == 1;
+	if (args.haveLongArg("preload-tiles")) g_PreloadTiles = true;
+	if (args.haveLongArg("no-preload-tiles")) g_PreloadTiles = false;
+	g_IncludeMeshes = core.storedIncludeMeshes() == 1;
+	if (args.haveLongArg("include-meshes")) g_IncludeMeshes = true;
+	if (args.haveLongArg("no-include-meshes")) g_IncludeMeshes = false;
 
 	if (doDumpXRef)
 	{
@@ -1440,7 +1479,7 @@ int main(int argc, char **argv)
 	if (viewerMode)
 	{
 		std::string screenshotPath = args.haveLongArg("screenshot") ? args.getLongArg("screenshot")[0] : std::string();
-		rc = runViewer(zones, bank, &core, screenshotPath, fontPath, scriptPath);
+		rc = runViewer(zones, bank, &core, lm, screenshotPath, fontPath, scriptPath);
 	}
 	else if (!scriptPath.empty())
 	{
@@ -1448,7 +1487,11 @@ int main(int argc, char **argv)
 	}
 
 	if (doDumpRpo)
+	{
+		printf("STORED-FLAGS includeMeshes=%d preloadTiles=%d\n",
+		       core.storedIncludeMeshes(), core.storedPreloadTiles());
 		core.dumpRpo(stdout);
+	}
 
 	// Save flows: --null-edit (untouched write-back, optional byte-compare) or --save (after ops)
 	if (nullEdit)

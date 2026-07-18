@@ -99,6 +99,8 @@ CPaintCore::CPaintCore()
 	m_StrokeSets = 0;
 	m_BrushSize = 0;
 	m_TileGroup = 0;
+	m_StoredIncludeMeshes = -1;
+	m_StoredPreloadTiles = -1;
 }
 
 CPaintCore::~CPaintCore()
@@ -168,6 +170,41 @@ static bool zpResolveCarrier(CNodeImpl *node, CRklPatchObject *&rpo, CStorageRaw
 	return true;
 }
 
+// Stored painter UI flags: RPO_INCLUDE_MESHES 0x4003 / RPO_PRELOAD_TILES 0x4010 in the
+// modifier per-node local data (siblings of the RFINALPATCH 0x4001 in the 0x1000 wrapper).
+// BOTH patch plugins persist 0x4003 (PaintPatchData AND EditPatchData save the same
+// includeMeshes UI state); 0x4010 is painter-only. ON DISK the payload is a single C++ bool
+// byte (the chunks ride the 64-bit header extension in the corpus); tolerate any size >= 1
+// and read byte 0. First modifier (top-first) carrying the chunk wins.
+static void zpHarvestPainterFlags(CNodeImpl *node, sint &includeMeshes, sint &preloadTiles)
+{
+	CSceneClass *obj = dynamic_cast<CSceneClass *>(node->getReference(1));
+	int guard = 8;
+	while (obj && guard-- > 0)
+	{
+		CDerivedObject *derived = dynamic_cast<CDerivedObject *>(obj);
+		if (!derived) break;
+		for (uint m = 0; m < derived->modifierCount(); ++m)
+		{
+			CSceneClass *mod = derived->modifier(m);
+			if (!mod) continue;
+			NLMISC::CClassId mcid = mod->classDesc()->classId();
+			if (mcid != ZP_CLASSID_NEL_PATCH_PAINT && mcid != ZP_CLASSID_NEL_EDIT_PATCH) continue;
+			CStorageContainer *data = dynamic_cast<CStorageContainer *>(derived->localModData(m));
+			if (!data) continue;
+			CStorageContainer *wrap = zpContainerChild(data, 0x1000);
+			if (!wrap) continue;
+			CStorageRaw *im = zpRawChild(wrap, 0x4003);
+			if (im && !im->Value.empty() && includeMeshes < 0)
+				includeMeshes = im->Value[0] ? 1 : 0;
+			CStorageRaw *pt = zpRawChild(wrap, 0x4010);
+			if (pt && !pt->Value.empty() && preloadTiles < 0)
+				preloadTiles = pt->Value[0] ? 1 : 0;
+		}
+		obj = derived->baseObject();
+	}
+}
+
 // ---------------------------------------------------------------------------------------------
 // init
 
@@ -184,6 +221,7 @@ bool CPaintCore::init(const std::vector<SPaintZoneInput> &zones, NL3D::CTileBank
 	{
 		SZone z;
 		z.In = zones[i];
+		zpHarvestPainterFlags(zones[i].Node, m_StoredIncludeMeshes, m_StoredPreloadTiles);
 		CRklPatchObject *rpo;
 		CStorageRaw *leaf;
 		if (!zpResolveCarrier(zones[i].Node, rpo, leaf, err))
