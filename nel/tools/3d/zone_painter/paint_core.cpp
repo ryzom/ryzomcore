@@ -44,8 +44,10 @@
 #include "paint_core.h"
 
 #include <nel/misc/plane.h>
+#include <nel/3d/driver.h>
 #include <nel/3d/landscape.h>
 #include <nel/3d/patch.h>
+#include <nel/3d/tile_color.h>
 #include <nel/3d/tile_element.h>
 
 #include <algorithm>
@@ -95,6 +97,8 @@ CPaintCore::CPaintCore()
 	m_StrokeOldTile = -1;
 	m_StrokeOldZone = -1;
 	m_StrokeSets = 0;
+	m_BrushSize = 0;
+	m_TileGroup = 0;
 }
 
 CPaintCore::~CPaintCore()
@@ -286,6 +290,38 @@ bool CPaintCore::init(const std::vector<SPaintZoneInput> &zones, NL3D::CTileBank
 		m_Zones.push_back(z);
 	}
 
+	// Per-tileset group tile lists (paint_ui CBankCont port): set-local indices of tiles whose
+	// bank record carries the group flag and a diffuse file name.
+	if (bank)
+	{
+		m_GroupTile128.resize(bank->getTileSetCount());
+		m_GroupTile256.resize(bank->getTileSetCount());
+		for (sint ts = 0; ts < bank->getTileSetCount(); ++ts)
+		{
+			const NL3D::CTileSet *set = bank->getTileSet(ts);
+			m_GroupTile128[ts].resize(NL3D_CTILE_NUM_GROUP);
+			m_GroupTile256[ts].resize(NL3D_CTILE_NUM_GROUP);
+			for (uint group = 0; group < NL3D_CTILE_NUM_GROUP; ++group)
+			{
+				sint tile;
+				for (tile = 0; tile < set->getNumTile128(); ++tile)
+				{
+					const NL3D::CTile *pt = bank->getTile(set->getTile128(tile));
+					if ((pt->getGroupFlags() & (1 << group))
+						&& !pt->getRelativeFileName(NL3D::CTile::diffuse).empty())
+						m_GroupTile128[ts][group].push_back((uint)tile);
+				}
+				for (tile = 0; tile < set->getNumTile256(); ++tile)
+				{
+					const NL3D::CTile *pt = bank->getTile(set->getTile256(tile));
+					if ((pt->getGroupFlags() & (1 << group))
+						&& !pt->getRelativeFileName(NL3D::CTile::diffuse).empty())
+						m_GroupTile256[ts][group].push_back((uint)tile);
+				}
+			}
+		}
+	}
+
 	buildMeta(err);
 	return true;
 }
@@ -420,6 +456,16 @@ void CPaintCore::buildMeta(std::string &err)
 				t->Voisins[1] = (v == nV - 1) ? NULL : &z.Meta[p * ZP_NUM_TILE_SEL + (v + 1) * ZP_MAX_TILE_IN_PATCH + u];
 				t->Voisins[0] = (u == 0) ? NULL : &z.Meta[p * ZP_NUM_TILE_SEL + v * ZP_MAX_TILE_IN_PATCH + u - 1];
 				t->Voisins[2] = (u == nU - 1) ? NULL : &z.Meta[p * ZP_NUM_TILE_SEL + v * ZP_MAX_TILE_IN_PATCH + u + 1];
+				// World center/radius over the display bezier quad (color brush range tests,
+				// same scheme as the plugin's DoPaint tile map)
+				const NL3D::CBezierPatch &bp = (*z.In.Patches)[p].Patch;
+				NLMISC::CVector c0 = bp.eval((float)u / nU, (float)v / nV);
+				NLMISC::CVector c1 = bp.eval((float)(u + 1) / nU, (float)v / nV);
+				NLMISC::CVector c2 = bp.eval((float)(u + 1) / nU, (float)(v + 1) / nV);
+				NLMISC::CVector c3 = bp.eval((float)u / nU, (float)(v + 1) / nV);
+				t->Center = (c0 + c1 + c2 + c3) / 4.f;
+				t->Radius = std::max(std::max((c0 - t->Center).norm(), (c1 - t->Center).norm()),
+				                     std::max((c2 - t->Center).norm(), (c3 - t->Center).norm()));
 			}
 		}
 	}
@@ -756,9 +802,39 @@ std::vector<NL3D::CTileElement> *CPaintCore::changeTileArray(uint zone, uint pat
 	return &it->second;
 }
 
+std::vector<NL3D::CTileColor> *CPaintCore::changeColorArray(uint zone, uint patch)
+{
+	if (!m_Landscape) return NULL;
+	std::pair<int, int> key((int)m_Zones[zone].In.ZoneId, (int)patch);
+	TColorChangeMap::iterator it = m_ColorChanges.find(key);
+	if (it == m_ColorChanges.end())
+	{
+		NL3D::CZone *lz = m_Landscape->getZone((sint)m_Zones[zone].In.ZoneId);
+		if (!lz) return NULL;
+		it = m_ColorChanges.insert(std::make_pair(key, lz->getPatchColor((sint)patch))).first;
+	}
+	return &it->second;
+}
+
 void CPaintCore::applyChanges()
 {
-	if (!m_Landscape || m_Changes.empty()) { m_Changes.clear(); return; }
+	// Color-only batches ride the same apply (changePatchTextureAndColor takes either or both)
+	if (!m_Landscape || (m_Changes.empty() && m_ColorChanges.empty()))
+	{
+		m_Changes.clear();
+		m_ColorChanges.clear();
+		return;
+	}
+	// Fold color-only patches into the walk below by inserting their keys with NULL tiles
+	for (TColorChangeMap::iterator ic = m_ColorChanges.begin(); ic != m_ColorChanges.end(); ++ic)
+	{
+		if (m_Changes.find(ic->first) == m_Changes.end())
+		{
+			NL3D::CZone *zone = m_Landscape->getZone(ic->first.first);
+			if (zone)
+				zone->changePatchTextureAndColor(ic->first.second, NULL, &ic->second);
+		}
+	}
 
 	// Neighbor tesselation refresh set
 	std::set<std::pair<uint, uint> > setNewPatch;
@@ -792,27 +868,43 @@ void CPaintCore::applyChanges()
 	{
 		NL3D::CZone *zone = m_Landscape->getZone(ite->first.first);
 		if (!zone) continue;
-		zone->changePatchTextureAndColor(ite->first.second, &ite->second, NULL);
+		TColorChangeMap::iterator ic = m_ColorChanges.find(ite->first);
+		zone->changePatchTextureAndColor(ite->first.second, &ite->second,
+		                                 ic != m_ColorChanges.end() ? &ic->second : NULL);
 		zone->refreshTesselationGeometry(ite->first.second);
 	}
 	m_Changes.clear();
+	m_ColorChanges.clear();
 }
 
 // ---------------------------------------------------------------------------------------------
-// selectTile port (group selection dropped: always the global 128/256 list of the set).
+// selectTile port (with the plugin's group selection: group 0 = the set's global list,
+// 1..12 = the bank group's set-local tile list).
 
-int CPaintCore::selectTile(uint tileSet, bool selectCycle, bool _256)
+int CPaintCore::selectTile(uint tileSet, bool selectCycle, bool _256, uint group)
 {
 	if ((sint)tileSet >= m_Bank->getTileSetCount()) return -1;
 	const NL3D::CTileSet *ts = m_Bank->getTileSet((sint)tileSet);
 	uint32 index = selectCycle ? m_TileCycle++ : (uint32)rand();
 	if (_256)
 	{
-		if (!ts->getNumTile256()) return -1;
-		return ts->getTile256((sint)(index % (uint32)ts->getNumTile256()));
+		if (group == 0)
+		{
+			if (!ts->getNumTile256()) return -1;
+			return ts->getTile256((sint)(index % (uint32)ts->getNumTile256()));
+		}
+		const std::vector<uint> &groupArray = m_GroupTile256[tileSet][group - 1];
+		if (groupArray.empty()) return -1;
+		return ts->getTile256((sint)groupArray[index % (uint32)groupArray.size()]);
 	}
-	if (!ts->getNumTile128()) return -1;
-	return ts->getTile128((sint)(index % (uint32)ts->getNumTile128()));
+	if (group == 0)
+	{
+		if (!ts->getNumTile128()) return -1;
+		return ts->getTile128((sint)(index % (uint32)ts->getNumTile128()));
+	}
+	const std::vector<uint> &groupArray = m_GroupTile128[tileSet][group - 1];
+	if (groupArray.empty()) return -1;
+	return ts->getTile128((sint)groupArray[index % (uint32)groupArray.size()]);
 }
 
 bool CPaintCore::isLocked(SPaintTile *tile, uint8 mask) const
@@ -1106,8 +1198,30 @@ bool CPaintCore::propagateBorder(SPaintTile *tile, int curRotation, int curTileS
 	{
 		if (l == 0)
 		{
-			// Base layer: a full tile of the lowest set (random; the plugin group bias dropped)
-			int nTile = selectTile((uint)ite->TileSet, false, false);
+			// Base layer: a full tile of the lowest set. When the tile being rewritten was a
+			// single-layer tile of the same set, prefer a tile from that tile's bank groups
+			// (the plugin's group bias, keeps painted group patterns coherent).
+			int nTile = -1;
+			if (backup.getNumLayer() == 1 && (int)backup.getLayer(0).Tile < m_Bank->getTileCount())
+			{
+				int tileSet, number;
+				NL3D::CTileBank::TTileType type;
+				m_Bank->getTileXRef(backup.getLayer(0).Tile, tileSet, number, type);
+				if (tileSet == ite->TileSet)
+				{
+					uint flags = m_Bank->getTile(backup.getLayer(0).Tile)->getGroupFlags();
+					for (int f = 0; f < NL3D_CTILE_NUM_GROUP; ++f)
+					{
+						if (flags & (1u << f))
+						{
+							nTile = selectTile((uint)ite->TileSet, false, false, (uint)(f + 1));
+							if (nTile != -1) break;
+						}
+					}
+				}
+			}
+			if (nTile == -1)
+				nTile = selectTile((uint)ite->TileSet, false, false, 0);
 			if (nTile == -1) return false;
 			finalIndex[0].Tile = (uint16)nTile;
 			finalIndex[0].Rotate = (uint8)(ite->Rotate & 3);
@@ -1607,7 +1721,8 @@ bool CPaintCore::putATile(SPaintTile *pTile, int tileSet, int curRotation, bool 
 			{
 				if (l == 0)
 				{
-					int nT = selectTile((uint)setIndex[l].TileSet, false, false);
+					// (plugin: explicit group 0 here — the fallback base ignores the group bias)
+					int nT = selectTile((uint)setIndex[l].TileSet, false, false, 0);
 					if (nT == -1) return false;
 					finalIndex[l].Tile = (uint16)nT;
 					finalIndex[l].Rotate = (uint8)(setIndex[l].Rotate & 3);
@@ -1850,12 +1965,22 @@ void CPaintCore::applyUndoList(const std::vector<SUndoTile> &list, bool useOld)
 	if (useOld)
 	{
 		for (int i = (int)list.size() - 1; i >= 0; --i)
-			setTile(list[i].Zone, list[i].TileId, list[i].Old, NULL, false, true);
+		{
+			if (list[i].Kind == 1)
+				setColorRaw(list[i].Zone, (uint)list[i].Patch, list[i].S, list[i].T, list[i].OldColor, false);
+			else
+				setTile(list[i].Zone, list[i].TileId, list[i].Old, NULL, false, true);
+		}
 	}
 	else
 	{
 		for (size_t i = 0; i < list.size(); ++i)
-			setTile(list[i].Zone, list[i].TileId, list[i].New, NULL, false, true);
+		{
+			if (list[i].Kind == 1)
+				setColorRaw(list[i].Zone, (uint)list[i].Patch, list[i].S, list[i].T, list[i].NewColor, false);
+			else
+				setTile(list[i].Zone, list[i].TileId, list[i].New, NULL, false, true);
+		}
 	}
 	applyChanges();
 }
@@ -1878,6 +2003,654 @@ bool CPaintCore::opRedo()
 	applyUndoList(list, false);
 	m_UndoStack.push_back(list);
 	return true;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Vertex colors (CPaintColor port). Colors live in the pristine SRpoPatch.Colors as raw
+// 0xAARRGGBB (the on-disk uint32; the high byte is the alpha the original get/setVertexColor
+// round-trips). PRISTINE DISCIPLINE: only these values ever mutate; the display mirror writes
+// the 565 conversion into the live zone color arrays.
+
+uint32 CPaintCore::getColorRaw(uint zoneIdx, uint patch, sint32 s, sint32 t) const
+{
+	const SRpoPatch &up = pristineOf(zoneIdx)->Patches[patch];
+	int os = (1 << up.NbTilesU) + 1;
+	return up.Colors[s + t * os];
+}
+
+void CPaintCore::setColorRaw(uint zoneIdx, uint patch, sint32 s, sint32 t, uint32 color, bool undo)
+{
+	SRpoPatch &up = pristineOf(zoneIdx)->Patches[patch];
+	int os = (1 << up.NbTilesU) + 1;
+	uint32 old = up.Colors[s + t * os];
+	up.Colors[s + t * os] = color;
+	++m_StrokeSets;
+
+	// Display mirror: every zone sharing the carrier shows the same grid
+	if (m_Landscape)
+	{
+		const std::vector<uint> &shared = m_Carriers[m_Zones[zoneIdx].Carrier].Zones;
+		for (size_t i = 0; i < shared.size(); ++i)
+		{
+			std::vector<NL3D::CTileColor> *arr = changeColorArray(shared[i], patch);
+			if (!arr) continue;
+			NLMISC::CRGBA rgba((uint8)((color >> 16) & 0xff), (uint8)((color >> 8) & 0xff), (uint8)(color & 0xff));
+			(*arr)[s + t * os].Color565 = rgba.get565();
+		}
+	}
+
+	if (undo)
+	{
+		SUndoTile u;
+		u.Kind = 1;
+		u.Zone = zoneIdx;
+		u.Patch = (sint32)patch;
+		u.S = s;
+		u.T = t;
+		u.OldColor = old;
+		u.NewColor = color;
+		m_CurStroke.push_back(u);
+	}
+}
+
+// getVertexInNeighbor port: grid vertex vertexId of tile (0=(u,v), 1=(u,v+1), 2=(u+1,v+1),
+// 3=(u+1,v)) mapped through neighbor edge n into the neighbor patch's grid slot.
+static bool zpVertexInNeighbor(SPaintTile *tile, int vertexId, int neighbor,
+                               SColorSlot &out, SPaintTile *&outTile, int &outVertexId)
+{
+	if (!tile->Voisins[neighbor]) return false;
+	int neighborVertexId = (((vertexId == neighbor) ? vertexId - 1 : vertexId + 1) + tile->Rotate[neighbor]) & 3;
+	SPaintTile *nt = tile->Voisins[neighbor];
+	out.ZoneIdx = (uint)nt->Zone;
+	out.Patch = nt->Patch;
+	out.S = nt->U + (((neighborVertexId == 2) || (neighborVertexId == 3)) ? 1 : 0);
+	out.T = nt->V + (((neighborVertexId == 1) || (neighborVertexId == 2)) ? 1 : 0);
+	outTile = nt;
+	outVertexId = neighborVertexId;
+	return true;
+}
+
+// Transitive co-location closure of a grid vertex: BFS over (tile, vertexId) pairs across the
+// two edges adjacent to the vertex, using the stitched metaTile graph (intra-mesh edges, binds
+// and the welded cross-zone borders all included). Every slot in the closure denotes the same
+// world vertex; painting writes them all with the identical value (the continuity rule).
+void CPaintCore::vertexClosure(uint zoneIdx, SPaintTile *tile, int vertexId, std::vector<SColorSlot> &out)
+{
+	out.clear();
+	std::set<SColorSlot> seen;
+	std::vector<std::pair<SPaintTile *, int> > queue;
+	std::set<std::pair<SPaintTile *, int> > visited;
+	queue.push_back(std::make_pair(tile, vertexId));
+	while (!queue.empty())
+	{
+		SPaintTile *t = queue.back().first;
+		int vid = queue.back().second;
+		queue.pop_back();
+		if (!visited.insert(std::make_pair(t, vid)).second) continue;
+		SColorSlot slot;
+		slot.ZoneIdx = (uint)t->Zone;
+		slot.Patch = t->Patch;
+		slot.S = t->U + ((vid == 2 || vid == 3) ? 1 : 0);
+		slot.T = t->V + ((vid == 1 || vid == 2) ? 1 : 0);
+		if (seen.insert(slot).second) out.push_back(slot);
+		// The two edges adjacent to this vertex are vid and (vid-1)&3 (plugin diagram)
+		for (int k = 0; k < 2; ++k)
+		{
+			int n = k ? ((vid - 1) & 3) : vid;
+			SColorSlot nslot;
+			SPaintTile *nt;
+			int nvid;
+			if (zpVertexInNeighbor(t, vid, n, nslot, nt, nvid))
+				queue.push_back(std::make_pair(nt, nvid));
+		}
+		// Sibling tiles of the SAME patch sharing this vertex map to the same slot; enqueue
+		// them so their outward edges are explored too (corner closure around the vertex).
+		int du = (vid == 2 || vid == 3) ? 0 : -1; // grid tiles adjacent to the vertex
+		int dv = (vid == 1 || vid == 2) ? 0 : -1;
+		for (int su = 0; su <= 1; ++su)
+		for (int sv = 0; sv <= 1; ++sv)
+		{
+			int uu = (int)t->U + du + su;
+			int vv = (int)t->V + dv + sv;
+			if (uu < 0 || vv < 0) continue;
+			if ((uint)uu >= orderS((uint)t->Zone, (uint)t->Patch) || (uint)vv >= orderT((uint)t->Zone, (uint)t->Patch)) continue;
+			SPaintTile *st = &m_Zones[t->Zone].Meta[t->Patch * ZP_NUM_TILE_SEL + vv * ZP_MAX_TILE_IN_PATCH + uu];
+			if (st->TileId < 0) continue;
+			// vertexId of the shared vertex within st
+			int svid;
+			int ds = slot.S - st->U, dt = slot.T - st->V;
+			if (ds == 0 && dt == 0) svid = 0;
+			else if (ds == 0 && dt == 1) svid = 1;
+			else if (ds == 1 && dt == 1) svid = 2;
+			else svid = 3;
+			queue.push_back(std::make_pair(st, svid));
+		}
+	}
+	(void)zoneIdx;
+}
+
+bool CPaintCore::setVertexColorShared(const std::vector<SColorSlot> &slots, NLMISC::CRGBA color, uint blend)
+{
+	// Frozen zones' carriers are never rewritten: their slots drop out of the write set (the
+	// plugin painted the live zone's boundary freely against frozen neighbor zones too); the
+	// continuity guarantee holds across every WRITABLE slot of the closure.
+	std::vector<SColorSlot> writable;
+	for (size_t i = 0; i < slots.size(); ++i)
+		if (!m_Zones[slots[i].ZoneIdx].In.Frozen) writable.push_back(slots[i]);
+	if (writable.empty()) return false;
+	// Blend ONCE against the primary slot's old color, then write the identical result to
+	// every co-located slot: shared border vertices get the same color on both sides even
+	// when the sides' stored colors had drifted.
+	uint32 oldRaw = getColorRaw(writable[0].ZoneIdx, (uint)writable[0].Patch, writable[0].S, writable[0].T);
+	NLMISC::CRGBA old((uint8)((oldRaw >> 16) & 0xff), (uint8)((oldRaw >> 8) & 0xff), (uint8)(oldRaw & 0xff), (uint8)(oldRaw >> 24));
+	NLMISC::CRGBA blended;
+	blended.blendFromui(old, color, blend);
+	uint32 raw = ((uint32)blended.A << 24) | ((uint32)blended.R << 16) | ((uint32)blended.G << 8) | blended.B;
+	for (size_t i = 0; i < writable.size(); ++i)
+		setColorRaw(writable[i].ZoneIdx, (uint)writable[i].Patch, writable[i].S, writable[i].T, raw, true);
+	return true;
+}
+
+// Nearest grid tile of a zone to a world point (explicit-hit brush seeding).
+bool CPaintCore::nearestTile(uint zone, const NLMISC::CVector &pos, sint32 &tileId)
+{
+	uint zi = (uint)-1;
+	for (size_t i = 0; i < m_Zones.size(); ++i)
+		if (m_Zones[i].In.ZoneId == zone) { zi = (uint)i; break; }
+	if (zi == (uint)-1) return false;
+	float best = 1e30f;
+	tileId = -1;
+	SZone &z = m_Zones[zi];
+	for (size_t k = 0; k < z.Meta.size(); ++k)
+	{
+		if (z.Meta[k].TileId < 0) continue;
+		float d = (z.Meta[k].Center - pos).norm();
+		if (d < best)
+		{
+			best = d;
+			tileId = z.Meta[k].TileId;
+		}
+	}
+	return tileId >= 0;
+}
+
+bool CPaintCore::opColorVertex(uint zone, uint patch, sint32 s, sint32 t, NLMISC::CRGBA color, uint blend, std::string &err)
+{
+	uint zi = (uint)-1;
+	for (size_t i = 0; i < m_Zones.size(); ++i)
+		if (m_Zones[i].In.ZoneId == zone) { zi = (uint)i; break; }
+	if (zi == (uint)-1) { err = "unknown zone id"; return false; }
+	if (patch >= m_Zones[zi].In.EvalRp->Patches.size()) { err = "patch out of range"; return false; }
+	sint32 os = (sint32)orderS(zi, patch), ot = (sint32)orderT(zi, patch);
+	if (s < 0 || s > os || t < 0 || t > ot) { err = "vertex out of range"; return false; }
+	// Find a tile adjacent to the vertex + its vertexId
+	sint32 tu = std::min(std::max(s - 1, (sint32)0), os - 1);
+	sint32 tv = std::min(std::max(t - 1, (sint32)0), ot - 1);
+	// prefer the tile whose top-left is the vertex when possible
+	if (s < os && t < ot) { tu = s; tv = t; }
+	SPaintTile *tile = &m_Zones[zi].Meta[patch * ZP_NUM_TILE_SEL + tv * ZP_MAX_TILE_IN_PATCH + tu];
+	if (tile->TileId < 0) { err = "tile not in grid"; return false; }
+	int ds = (int)(s - tile->U), dt = (int)(t - tile->V);
+	int vid = (ds == 0 && dt == 0) ? 0 : (ds == 0 && dt == 1) ? 1 : (ds == 1 && dt == 1) ? 2 : 3;
+	std::vector<SColorSlot> slots;
+	vertexClosure(zi, tile, vid, slots);
+	m_StrokeSets = 0;
+	bool ok = setVertexColorShared(slots, color, blend > 256 ? 256 : blend);
+	applyChanges();
+	endStroke();
+	if (!ok) err = "vertex frozen";
+	return ok;
+}
+
+// The color brush (CPaintColor::paint/paintATile/paintAVertex port): walk the metaTile graph
+// from the seed within the radius; each candidate grid vertex is blended ONCE (distance/
+// hardness/opacity falloff against its world position on the display bezier surface) and
+// written through its whole closure.
+bool CPaintCore::opColorBrush(uint zone, sint32 seedTileId, const NLMISC::CVector &hit, float radius,
+                              NLMISC::CRGBA color, uint hardness, uint opacity, std::string &err)
+{
+	uint zi = (uint)-1;
+	for (size_t i = 0; i < m_Zones.size(); ++i)
+		if (m_Zones[i].In.ZoneId == zone) { zi = (uint)i; break; }
+	if (zi == (uint)-1) { err = "unknown zone id"; return false; }
+	SPaintTile *seed = metaAt(zi, seedTileId);
+	if (!seed) { err = "tile not in grid"; return false; }
+	if (radius <= 0.f) { err = "bad radius"; return false; }
+	float hard = (float)(hardness > 255 ? 255 : hardness) / 255.f;
+	float opa = (float)(opacity > 255 ? 255 : opacity) / 255.f;
+
+	m_StrokeSets = 0;
+
+	// BFS tiles in range
+	std::set<SPaintTile *> visited;
+	std::vector<SPaintTile *> queue;
+	queue.push_back(seed);
+	std::set<SColorSlot> vertexDone; // canonical (first) slot of each painted closure
+	uint painted = 0;
+	while (!queue.empty())
+	{
+		SPaintTile *t = queue.back();
+		queue.pop_back();
+		if (!visited.insert(t).second) continue;
+		if ((t->Center - hit).norm() > radius + t->Radius) continue;
+		// Candidate vertices: the plugin's per-tile scheme (top-left always, border extras);
+		// visiting all four corners is equivalent under the closure dedup.
+		for (int vid = 0; vid < 4; ++vid)
+		{
+			std::vector<SColorSlot> slots;
+			vertexClosure(zi, t, vid, slots);
+			if (slots.empty()) continue;
+			// dedup by the closure's canonical (minimal) slot
+			SColorSlot canon = slots[0];
+			for (size_t i = 1; i < slots.size(); ++i)
+				if (slots[i] < canon) canon = slots[i];
+			if (!vertexDone.insert(canon).second) continue;
+			// World position of the vertex on the display surface
+			const SZone &vz = m_Zones[canon.ZoneIdx];
+			const NL3D::CBezierPatch &bp = (*vz.In.Patches)[canon.Patch].Patch;
+			float os = (float)orderS(canon.ZoneIdx, (uint)canon.Patch);
+			float ot = (float)orderT(canon.ZoneIdx, (uint)canon.Patch);
+			NLMISC::CVector pos = bp.eval((float)canon.S / os, (float)canon.T / ot);
+			float dist = (pos - hit).norm();
+			if (dist > radius) continue;
+			// Blend with distance (paintAVertex): 256*opa*((1-hard)*blendDist + hard)
+			float blendDist = (radius - dist) / radius;
+			float finalFactor = 256.f * opa * ((1.f - hard) * blendDist + hard);
+			uint blend = (uint)std::max(std::min(finalFactor, 256.f), 0.f);
+			if (setVertexColorShared(slots, color, blend)) ++painted;
+		}
+		for (int n = 0; n < 4; ++n)
+			if (t->Voisins[n]) queue.push_back(t->Voisins[n]);
+	}
+	applyChanges();
+	if (!painted) { err = "no vertex in range (or frozen)"; return false; }
+	return true;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Region fills (CFillPatch ports)
+
+bool CPaintCore::isLockedEx(SPaintTile *tile)
+{
+	if (!m_LockBorders) return false;
+	CTileDescP backup;
+	getTileIdx((uint)tile->Zone, tile->TileId, backup);
+	if (backup.getCase() > 0)
+	{
+		if (tile->U & 1) tile = tile->Voisins[0];
+		if (!tile) return true;
+		if (tile->V & 1) tile = tile->Voisins[3];
+		if (!tile) return true;
+		int nRot;
+		SPaintTile *r = tile->getRight256(0, nRot);
+		SPaintTile *b = tile->getBottom256(0, nRot);
+		SPaintTile *rb = tile->getRightBottom256(0, nRot);
+		return tile->Locked != 0 || !r || r->Locked != 0 || !b || b->Locked != 0 || !rb || rb->Locked != 0;
+	}
+	return tile->Locked != 0;
+}
+
+bool CPaintCore::isLocked256(SPaintTile *tile)
+{
+	if (!m_LockBorders) return false;
+	if (tile->U & 1) tile = tile->Voisins[0];
+	if (!tile) return true;
+	if (tile->V & 1) tile = tile->Voisins[3];
+	if (!tile) return true;
+	if (tile->Locked) return true;
+	if (!tile->Voisins[2] || tile->Voisins[2]->Locked) return true;
+	if (!tile->Voisins[1] || tile->Voisins[1]->Locked) return true;
+	if (!tile->Voisins[2]->Voisins[1] || tile->Voisins[2]->Voisins[1]->Locked) return true;
+	return false;
+}
+
+// CFillPatch::fillTile port: fill every tile of the patch with a random tile of the set;
+// borders whose outside neighbor is non-empty and not (single layer, same set, matching
+// rotation) are CLEARED instead — the plugin's rule, which by construction leaves only legal
+// seams (same-set, empty or cleared).
+bool CPaintCore::fillTileImpl(uint zi, uint patch, int tileSet, int rot, bool _256)
+{
+	CTileDescP descFill;
+	uint numU = orderS(zi, patch), numV = orderT(zi, patch);
+	if (m_Zones[zi].In.Frozen) return false;
+	for (uint v = 0; v < numV; v += (1u << (_256 ? 1 : 0)))
+	for (uint u = 0; u < numU; u += (1u << (_256 ? 1 : 0)))
+	{
+		int nTile = 0;
+		if (tileSet != -1)
+		{
+			nTile = selectTile((uint)tileSet, false, _256, m_TileGroup);
+			if (nTile == -1) return false;
+		}
+		uint span = _256 ? 1 : 0;
+		bool locked = false, nearLocked = false;
+		uint uu, vv;
+		for (vv = 0; vv <= span && !locked; ++vv)
+		for (uu = 0; uu <= span; ++uu)
+		{
+			SPaintTile *t = &m_Zones[zi].Meta[patch * ZP_NUM_TILE_SEL + (vv + v) * ZP_MAX_TILE_IN_PATCH + uu + u];
+			if (_256 ? isLocked256(t) : isLockedEx(t)) { locked = true; break; }
+			for (uint n = 0; n < 4; ++n)
+				if (t->Voisins[n] && (_256 ? isLocked256(t->Voisins[n]) : isLockedEx(t->Voisins[n])))
+					nearLocked = true;
+		}
+		if (locked) continue;
+		if (nearLocked)
+		{
+			for (vv = 0; vv <= span; ++vv)
+			for (uu = 0; uu <= span; ++uu)
+				clearATile(&m_Zones[zi].Meta[patch * ZP_NUM_TILE_SEL + (vv + v) * ZP_MAX_TILE_IN_PATCH + uu + u], _256, !_256);
+			continue;
+		}
+		// Compatibility of the outside borders
+		bool compatible = true;
+		if (tileSet != -1)
+		{
+			for (vv = 0; vv <= span && compatible; ++vv)
+			for (uu = 0; uu <= span && compatible; ++uu)
+			{
+				SPaintTile *t = &m_Zones[zi].Meta[patch * ZP_NUM_TILE_SEL + (vv + v) * ZP_MAX_TILE_IN_PATCH + uu + u];
+				for (uint n = 0; n < 4; ++n)
+				{
+					SPaintTile *nb = t->Voisins[n];
+					if (nb && ((uint)nb->Zone != zi || nb->Patch != (sint32)patch))
+					{
+						CTileDescP descNei;
+						getTileIdx((uint)nb->Zone, nb->TileId, descNei);
+						if (descNei.getNumLayer() == 0) continue;
+						if (descNei.getNumLayer() == 1
+							&& (int)descNei.getLayer(0).Rotate == ((t->Rotate[n] + rot) & 3)
+							&& (int)descNei.getLayer(0).Tile < m_Bank->getTileCount())
+						{
+							int neiTileSet, number;
+							NL3D::CTileBank::TTileType type;
+							m_Bank->getTileXRef(descNei.getLayer(0).Tile, neiTileSet, number, type);
+							if (tileSet == neiTileSet) continue;
+						}
+						compatible = false;
+						break;
+					}
+				}
+			}
+		}
+		if (compatible)
+		{
+			for (vv = 0; vv <= span; ++vv)
+			for (uu = 0; uu <= span; ++uu)
+			{
+				SPaintTile *t = &m_Zones[zi].Meta[patch * ZP_NUM_TILE_SEL + (vv + v) * ZP_MAX_TILE_IN_PATCH + uu + u];
+				if (tileSet != -1)
+				{
+					if (_256)
+					{
+						switch (((uu & 1) << 1) | (vv & 1))
+						{
+						case 0: descFill.setTile(1, ((0 - rot) & 3) + 1, 0, CTileIdx(nTile, rot), CTileIdx(), CTileIdx()); break;
+						case 1: descFill.setTile(1, ((1 - rot) & 3) + 1, 0, CTileIdx(nTile, rot), CTileIdx(), CTileIdx()); break;
+						case 2: descFill.setTile(1, ((3 - rot) & 3) + 1, 0, CTileIdx(nTile, rot), CTileIdx(), CTileIdx()); break;
+						case 3: descFill.setTile(1, ((2 - rot) & 3) + 1, 0, CTileIdx(nTile, rot), CTileIdx(), CTileIdx()); break;
+						}
+					}
+					else
+						descFill.setTile(1, 0, 0, CTileIdx(nTile, rot), CTileIdx(), CTileIdx());
+				}
+				else
+					descFill.setTile(0, 0, 0, CTileIdx(), CTileIdx(), CTileIdx());
+				CTileDescP descOrig;
+				getTileIdx(zi, t->TileId, descOrig);
+				descFill.setDisplace(descOrig.getDisplace());
+				setTile(zi, t->TileId, descFill, NULL, true);
+			}
+		}
+		else
+		{
+			for (vv = 0; vv <= span; ++vv)
+			for (uu = 0; uu <= span; ++uu)
+				clearATile(&m_Zones[zi].Meta[patch * ZP_NUM_TILE_SEL + (vv + v) * ZP_MAX_TILE_IN_PATCH + uu + u], _256, !_256);
+		}
+	}
+	return true;
+}
+
+bool CPaintCore::opFillTile(uint zone, uint patch, int tileSet, int rot, bool _256, std::string &err)
+{
+	if (!m_Bank) { err = "no tile bank loaded"; return false; }
+	uint zi = (uint)-1;
+	for (size_t i = 0; i < m_Zones.size(); ++i)
+		if (m_Zones[i].In.ZoneId == zone) { zi = (uint)i; break; }
+	if (zi == (uint)-1) { err = "unknown zone id"; return false; }
+	if (patch >= m_Zones[zi].In.EvalRp->Patches.size()) { err = "patch out of range"; return false; }
+	if (tileSet >= m_Bank->getTileSetCount()) { err = "tile set out of range"; return false; }
+	m_StrokeSets = 0;
+	bool ok = fillTileImpl(zi, patch, tileSet, rot & 3, _256);
+	applyChanges();
+	endStroke();
+	if (!ok) err = "fill failed (frozen zone or empty tile set)";
+	return ok;
+}
+
+// CFillPatch::fillColor port. Deviation from the plugin (which wrote only the filled patch's
+// grid): border vertices write through their closures so the neighbor patches' shared
+// vertices stay continuous (the series' continuity rule).
+bool CPaintCore::opFillColor(uint zone, uint patch, NLMISC::CRGBA color, uint blend, std::string &err)
+{
+	uint zi = (uint)-1;
+	for (size_t i = 0; i < m_Zones.size(); ++i)
+		if (m_Zones[i].In.ZoneId == zone) { zi = (uint)i; break; }
+	if (zi == (uint)-1) { err = "unknown zone id"; return false; }
+	if (patch >= m_Zones[zi].In.EvalRp->Patches.size()) { err = "patch out of range"; return false; }
+	if (m_Zones[zi].In.Frozen) { err = "zone frozen"; return false; }
+	sint32 numU = (sint32)orderS(zi, patch) + 1;
+	sint32 numV = (sint32)orderT(zi, patch) + 1;
+	m_StrokeSets = 0;
+	if (blend > 256) blend = 256;
+	for (sint32 t = 0; t < numV; ++t)
+	for (sint32 s = 0; s < numU; ++s)
+	{
+		// closure via the adjacent tile
+		sint32 tu = std::min(std::max(s - 1, (sint32)0), numU - 2);
+		sint32 tv = std::min(std::max(t - 1, (sint32)0), numV - 2);
+		if (s < numU - 1 && t < numV - 1) { tu = s; tv = t; }
+		SPaintTile *tile = &m_Zones[zi].Meta[patch * ZP_NUM_TILE_SEL + tv * ZP_MAX_TILE_IN_PATCH + tu];
+		if (tile->TileId < 0) continue;
+		int ds = (int)(s - tile->U), dt = (int)(t - tile->V);
+		int vid = (ds == 0 && dt == 0) ? 0 : (ds == 0 && dt == 1) ? 1 : (ds == 1 && dt == 1) ? 2 : 3;
+		std::vector<SColorSlot> slots;
+		vertexClosure(zi, tile, vid, slots);
+		setVertexColorShared(slots, color, blend);
+	}
+	applyChanges();
+	endStroke();
+	return true;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Displace painting (PutADisplacetile / fillDisplace ports; explicit index instead of the
+// plugin's DisplaceTile UI state). The displace bits and the v9 Noise byte stay in sync (the
+// P3b mapping); the live mirror shows the new noise through the tesselation refresh.
+
+void CPaintCore::displaceOne(SPaintTile *tile, uint displace)
+{
+	CTileDescP desc;
+	getTileIdx((uint)tile->Zone, tile->TileId, desc);
+	int t0 = (int)desc.getLayer(0).Tile;
+	if (desc.isEmpty() || t0 < 0 || t0 >= m_Bank->getTileCount()) return; // plugin: valid layer 0 only
+	desc.setDisplace((uint8)(displace & 0xf));
+	setTile((uint)tile->Zone, tile->TileId, desc, NULL, true, true);
+}
+
+bool CPaintCore::opDisplace(uint zone, uint patch, uint u, uint v, uint displace, std::string &err)
+{
+	if (!m_Bank) { err = "no tile bank loaded"; return false; }
+	uint zi = (uint)-1;
+	for (size_t i = 0; i < m_Zones.size(); ++i)
+		if (m_Zones[i].In.ZoneId == zone) { zi = (uint)i; break; }
+	if (zi == (uint)-1) { err = "unknown zone id"; return false; }
+	if (patch >= m_Zones[zi].In.EvalRp->Patches.size()) { err = "patch out of range"; return false; }
+	if (u >= orderS(zi, patch) || v >= orderT(zi, patch)) { err = "tile out of range"; return false; }
+	if (displace > 15) { err = "displace out of range"; return false; }
+	SPaintTile *t = metaAt(zi, (sint32)(patch * ZP_NUM_TILE_SEL + v * ZP_MAX_TILE_IN_PATCH + u));
+	if (!t) { err = "tile not in grid"; return false; }
+	if (t->Frozen) { err = "tile frozen"; return false; }
+	m_StrokeSets = 0;
+	displaceOne(t, displace);
+	applyChanges();
+	endStroke();
+	if (!m_StrokeSets) { err = "tile empty or unresolvable layer 0"; return false; }
+	return true;
+}
+
+bool CPaintCore::opRawTile(uint zone, uint patch, uint u, uint v, int tile, int rot, std::string &err)
+{
+	uint zi = (uint)-1;
+	for (size_t i = 0; i < m_Zones.size(); ++i)
+		if (m_Zones[i].In.ZoneId == zone) { zi = (uint)i; break; }
+	if (zi == (uint)-1) { err = "unknown zone id"; return false; }
+	if (patch >= m_Zones[zi].In.EvalRp->Patches.size()) { err = "patch out of range"; return false; }
+	if (u >= orderS(zi, patch) || v >= orderT(zi, patch)) { err = "tile out of range"; return false; }
+	SPaintTile *t = metaAt(zi, (sint32)(patch * ZP_NUM_TILE_SEL + v * ZP_MAX_TILE_IN_PATCH + u));
+	if (!t) { err = "tile not in grid"; return false; }
+	if (t->Frozen) { err = "tile frozen"; return false; }
+	m_StrokeSets = 0;
+	CTileDescP desc;
+	desc.setTile(1, 0, 0, CTileIdx(tile, rot & 3), CTileIdx(), CTileIdx());
+	setTile(zi, t->TileId, desc, NULL, true);
+	applyChanges();
+	endStroke();
+	return true;
+}
+
+bool CPaintCore::opFillDisplace(uint zone, uint patch, uint displace, std::string &err)
+{
+	if (!m_Bank) { err = "no tile bank loaded"; return false; }
+	uint zi = (uint)-1;
+	for (size_t i = 0; i < m_Zones.size(); ++i)
+		if (m_Zones[i].In.ZoneId == zone) { zi = (uint)i; break; }
+	if (zi == (uint)-1) { err = "unknown zone id"; return false; }
+	if (patch >= m_Zones[zi].In.EvalRp->Patches.size()) { err = "patch out of range"; return false; }
+	if (m_Zones[zi].In.Frozen) { err = "zone frozen"; return false; }
+	if (displace > 15) { err = "displace out of range"; return false; }
+	m_StrokeSets = 0;
+	uint numU = orderS(zi, patch), numV = orderT(zi, patch);
+	for (uint v = 0; v < numV; ++v)
+	for (uint u = 0; u < numU; ++u)
+	{
+		SPaintTile *t = &m_Zones[zi].Meta[patch * ZP_NUM_TILE_SEL + v * ZP_MAX_TILE_IN_PATCH + u];
+		if (t->TileId >= 0 && !t->Frozen) displaceOne(t, displace);
+	}
+	applyChanges();
+	endStroke();
+	return true;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Seam legality report: every adjacent non-empty tile pair must agree on the shared corner
+// tile sets after rotation adjustment (the GetBorderDesc invariant the transition machinery
+// maintains). Illegal pairs are printed; the count is returned.
+
+uint CPaintCore::checkSeams(uint zone, FILE *out)
+{
+	uint zi = (uint)-1;
+	for (size_t i = 0; i < m_Zones.size(); ++i)
+		if (m_Zones[i].In.ZoneId == zone) { zi = (uint)i; break; }
+	if (zi == (uint)-1) return 0;
+	uint illegal = 0, pairs = 0;
+	SZone &z = m_Zones[zi];
+	for (size_t k = 0; k < z.Meta.size(); ++k)
+	{
+		SPaintTile *t = &z.Meta[k];
+		if (t->TileId < 0) continue;
+		CTileDescP desc;
+		getTileIdx(zi, t->TileId, desc);
+		if (desc.isEmpty()) continue;
+		CTileSetIdx corner[4];
+		NL3D::CTileSet::TFlagBorder border[4][3];
+		CTileDescP idx;
+		for (int c = 0; c < 4; ++c) { corner[c].TileSet = -1; corner[c].Rotate = 0; }
+		if (!getBorderDesc(t, corner, border, &idx)) continue; // unresolvable (stale bank refs)
+		for (uint e = 0; e < 4; ++e)
+		{
+			SPaintTile *nb = t->Voisins[e];
+			if (!nb) continue;
+			CTileDescP ndesc;
+			getTileIdx((uint)nb->Zone, nb->TileId, ndesc);
+			if (ndesc.isEmpty()) continue;
+			CTileSetIdx ncorner[4];
+			NL3D::CTileSet::TFlagBorder nborder[4][3];
+			CTileDescP nidx;
+			for (int c = 0; c < 4; ++c) { ncorner[c].TileSet = -1; ncorner[c].Rotate = 0; }
+			if (!getBorderDesc(nb, ncorner, nborder, &nidx)) continue;
+			++pairs;
+			// Shared corners: my edge e endpoints (corners e, (e+1)&3) vs the neighbor's edge
+			// (2+e+rotate)&3 endpoints. The legality criterion is TILE SET identity at the
+			// shared corners: a set discontinuity with no transition covering it is a visible
+			// crack. Rotation is deliberately NOT compared — full-tile rotations of
+			// non-oriented sets are free across rotated seams (authored corpus zones carry
+			// them; PropagateBorder only constrains rotation within an active repaint).
+			int edge = (2 + (int)e + t->Rotate[e]) & 3;
+			CTileSetIdx a1 = ncorner[(edge + 1) & 3];
+			CTileSetIdx a2 = ncorner[edge];
+			if (corner[e].TileSet != a1.TileSet || corner[(e + 1) & 3].TileSet != a2.TileSet)
+			{
+				++illegal;
+				fprintf(out, "ILLEGAL seam: zone %u tile %d,%d edge %u vs zone %u tile %d,%d: (set %d / %d) vs (set %d / %d)\n",
+				        zone, (int)t->U, (int)t->V, e, m_Zones[nb->Zone].In.ZoneId, (int)nb->U, (int)nb->V,
+				        corner[e].TileSet, corner[(e + 1) & 3].TileSet, a1.TileSet, a2.TileSet);
+			}
+		}
+	}
+	fprintf(out, "SEAMS zone %u: %u adjacent non-empty pairs, %u illegal\n", zone, pairs, illegal);
+	return illegal;
+}
+
+bool CPaintCore::dumpClosure(uint zone, uint patch, sint32 s, sint32 t, FILE *out)
+{
+	uint zi = (uint)-1;
+	for (size_t i = 0; i < m_Zones.size(); ++i)
+		if (m_Zones[i].In.ZoneId == zone) { zi = (uint)i; break; }
+	if (zi == (uint)-1) return false;
+	if (patch >= m_Zones[zi].In.EvalRp->Patches.size()) return false;
+	sint32 os = (sint32)orderS(zi, patch), ot = (sint32)orderT(zi, patch);
+	if (s < 0 || s > os || t < 0 || t > ot) return false;
+	sint32 tu = std::min(std::max(s - 1, (sint32)0), os - 1);
+	sint32 tv = std::min(std::max(t - 1, (sint32)0), ot - 1);
+	if (s < os && t < ot) { tu = s; tv = t; }
+	SPaintTile *tile = &m_Zones[zi].Meta[patch * ZP_NUM_TILE_SEL + tv * ZP_MAX_TILE_IN_PATCH + tu];
+	if (tile->TileId < 0) return false;
+	int ds = (int)(s - tile->U), dt = (int)(t - tile->V);
+	int vid = (ds == 0 && dt == 0) ? 0 : (ds == 0 && dt == 1) ? 1 : (ds == 1 && dt == 1) ? 2 : 3;
+	std::vector<SColorSlot> slots;
+	vertexClosure(zi, tile, vid, slots);
+	for (size_t i = 0; i < slots.size(); ++i)
+	{
+		const SZone &sz = m_Zones[slots[i].ZoneIdx];
+		const NL3D::CBezierPatch &bp = (*sz.In.Patches)[slots[i].Patch].Patch;
+		float sos = (float)orderS(slots[i].ZoneIdx, (uint)slots[i].Patch);
+		float sot = (float)orderT(slots[i].ZoneIdx, (uint)slots[i].Patch);
+		NLMISC::CVector pos = bp.eval((float)slots[i].S / sos, (float)slots[i].T / sot);
+		fprintf(out, "CLOSURE zone %u patch %d s %d t %d pos %.3f %.3f %.3f\n",
+		        sz.In.ZoneId, (int)slots[i].Patch, (int)slots[i].S, (int)slots[i].T, pos.x, pos.y, pos.z);
+	}
+	return true;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Preload flush (myThread preloadTiles port, over every tile set).
+
+void CPaintCore::preloadTiles(NL3D::IDriver *driver)
+{
+	if (!m_Bank || !m_Landscape || !driver) return;
+	for (sint ts = 0; ts < m_Bank->getTileSetCount(); ++ts)
+	{
+		const NL3D::CTileSet *tileSet = m_Bank->getTileSet(ts);
+		sint tl;
+		for (tl = 0; tl < tileSet->getNumTile128(); ++tl)
+			m_Landscape->flushTiles(driver, (uint16)tileSet->getTile128(tl), 1);
+		for (tl = 0; tl < tileSet->getNumTile256(); ++tl)
+			m_Landscape->flushTiles(driver, (uint16)tileSet->getTile256(tl), 1);
+		for (tl = 0; tl < NL3D::CTileSet::count; ++tl)
+			m_Landscape->flushTiles(driver, (uint16)tileSet->getTransition(tl)->getTile(), 1);
+	}
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -2012,6 +2785,9 @@ void CPaintCore::dumpRpo(FILE *out) const
 				        t.Layer[1].Tile, t.Layer[1].Rotate,
 				        t.Layer[2].Tile, t.Layer[2].Rotate);
 			}
+			for (int v = 0; v < ot + 1; ++v)
+			for (int u = 0; u < os + 1; ++u)
+				fprintf(out, "  color %d %d: 0x%08x\n", u, v, up.Colors[u + v * (os + 1)]);
 		}
 	}
 }
@@ -2055,6 +2831,23 @@ void CPaintCore::getTile(uint zone, sint32 tileId, CTileDescP &desc) const
 		}
 	}
 	desc.setEmpty();
+}
+
+bool CPaintCore::getColor(uint zone, uint patch, sint32 s, sint32 t, uint32 &color) const
+{
+	for (size_t i = 0; i < m_Zones.size(); ++i)
+	{
+		if (m_Zones[i].In.ZoneId == zone)
+		{
+			if (patch >= pristineOf((uint)i)->Patches.size()) return false;
+			const SRpoPatch &up = pristineOf((uint)i)->Patches[patch];
+			sint32 os = (1 << up.NbTilesU) + 1, ot = (1 << up.NbTilesV) + 1;
+			if (s < 0 || s >= os || t < 0 || t >= ot) return false;
+			color = up.Colors[s + t * os];
+			return true;
+		}
+	}
+	return false;
 }
 
 uint CPaintCore::tileSetCount() const

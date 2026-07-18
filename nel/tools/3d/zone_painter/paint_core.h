@@ -76,6 +76,7 @@
 
 namespace NL3D {
 class CLandscape;
+class IDriver;
 }
 
 namespace PIPELINE {
@@ -181,8 +182,10 @@ struct SPaintTile
 	uint8 Locked; // per-edge bit: neighbor missing or frozen
 	SPaintTile *Voisins[4];
 	uint8 Rotate[4];
+	NLMISC::CVector Center; // world center of the tile quad (color brush range test)
+	float Radius;           // max corner distance from Center
 
-	SPaintTile() : Patch(-1), TileId(-1), Zone(-1), U(0), V(0), Frozen(false), Locked(0)
+	SPaintTile() : Patch(-1), TileId(-1), Zone(-1), U(0), V(0), Frozen(false), Locked(0), Radius(0.f)
 	{
 		Voisins[0] = Voisins[1] = Voisins[2] = Voisins[3] = NULL;
 		Rotate[0] = Rotate[1] = Rotate[2] = Rotate[3] = 0;
@@ -238,13 +241,37 @@ struct SPaintZoneInput
 	const PIPELINE::MAX::NELPATCH::SRPatchMesh *EvalRp; // evaluated rp (binds, tile orders)
 };
 
-// Undo delta: one tile record change (bounded LIFO of strokes).
+// Undo delta: one tile-record or color-vertex change (bounded LIFO of strokes).
 struct SUndoTile
 {
+	uint8 Kind; // 0 = tile record, 1 = color vertex
 	uint Zone;
-	sint32 TileId;
+	sint32 TileId; // tile kind
 	CTileDescP Old;
 	CTileDescP New;
+	sint32 Patch, S, T;         // color kind: grid slot
+	uint32 OldColor, NewColor;  // color kind: raw 0xAARRGGBB values
+	SUndoTile() : Kind(0), Zone(0), TileId(-1), Patch(-1), S(0), T(0), OldColor(0), NewColor(0) { }
+};
+
+// One color-grid slot (zone index + patch + grid coordinates); closures of co-located slots
+// across patch seams and welded cross-zone borders receive identical colors.
+struct SColorSlot
+{
+	uint ZoneIdx;
+	sint32 Patch;
+	sint32 S, T;
+	bool operator<(const SColorSlot &o) const
+	{
+		if (ZoneIdx != o.ZoneIdx) return ZoneIdx < o.ZoneIdx;
+		if (Patch != o.Patch) return Patch < o.Patch;
+		if (S != o.S) return S < o.S;
+		return T < o.T;
+	}
+	bool operator==(const SColorSlot &o) const
+	{
+		return ZoneIdx == o.ZoneIdx && Patch == o.Patch && S == o.S && T == o.T;
+	}
 };
 
 // ---------------------------------------------------------------------------------------------
@@ -272,16 +299,56 @@ public:
 	// Continue a mouse stroke on tile id (rotation tracked via CalcRotPath like the plugin).
 	bool opTileStroke(uint zone, sint32 tileId, int tileSet, bool _256, bool first, std::string &err);
 	bool opClear(uint zone, uint patch, uint u, uint v, bool _256, std::string &err);
+	// Exact vertex color write (blend 0-256; 256 = replace). Writes the whole co-location
+	// closure (seam continuity, see setVertexColorShared).
+	bool opColorVertex(uint zone, uint patch, sint32 s, sint32 t, NLMISC::CRGBA color, uint blend, std::string &err);
+	// The vertex color brush at a world hit point (CPaintColor::paint port): radius in meters,
+	// hardness/opacity 0-255. Mouse and the script `cbrush` share this (the script derives the
+	// hit from a vertical pick at the given XY).
+	bool opColorBrush(uint zone, sint32 seedTileId, const NLMISC::CVector &hit, float radius,
+	                  NLMISC::CRGBA color, uint hardness, uint opacity, std::string &err);
+	// Region fills (CFillPatch ports): tile fill (tileSet -1 = clear; incompatible borders are
+	// cleared, the plugin rule), color fill, displace fill.
+	bool opFillTile(uint zone, uint patch, int tileSet, int rot, bool _256, std::string &err);
+	bool opFillColor(uint zone, uint patch, NLMISC::CRGBA color, uint blend, std::string &err);
+	bool opFillDisplace(uint zone, uint patch, uint displace, std::string &err);
+	// Displace paint (PutADisplacetile port; explicit index 0-15, Noise kept in sync).
+	bool opDisplace(uint zone, uint patch, uint u, uint v, uint displace, std::string &err);
+	// DEBUG op: write one raw single-layer record with NO transition solving (negative control
+	// for checkSeams and a low-level repair affordance; not a plugin op).
+	bool opRawTile(uint zone, uint patch, uint u, uint v, int tile, int rot, std::string &err);
 	bool opUndo();
 	bool opRedo();
 	void endStroke();
 
+	// Tile brush size (0-2 -> the plugin's recursTile depths {0,4,8}; mouse strokes only) and
+	// tile group bias (0 = none, 1..12 = bank group).
+	void setBrushSize(uint s) { m_BrushSize = s > 2 ? 2 : s; }
+	uint brushSize() const { return m_BrushSize; }
+	void setTileGroup(uint g) { m_TileGroup = g > 12 ? 12 : g; }
+	uint tileGroup() const { return m_TileGroup; }
+
+	// Seam legality report (validation surface): every adjacent non-empty tile pair must agree
+	// on the shared corner tile sets (the GetBorderDesc invariant PropagateBorder maintains).
+	// Returns the number of illegal seams; prints them to out.
+	uint checkSeams(uint zone, FILE *out);
+	// Print a color vertex's co-location closure (continuity validation surface).
+	bool dumpClosure(uint zone, uint patch, sint32 s, sint32 t, FILE *out);
+
+	// Preload flush (plugin preloadTiles): flush every tile set's 128/256/transition tiles
+	// into the attached landscape's driver.
+	void preloadTiles(NL3D::IDriver *driver);
+
 	// Mouse pick: world ray -> (zone, tileId). Uses the display bezier patches.
 	bool pickTile(const NLMISC::CVector &pos, const NLMISC::CVector &dir, uint &zone, sint32 &tileId,
 	              NLMISC::CVector &hit);
+	// Nearest grid tile of a zone to a world point (explicit-hit brush seeding).
+	bool nearestTile(uint zone, const NLMISC::CVector &pos, sint32 &tileId);
 
 	// Read a tile (from the pristine carrier, display-space transform applied).
 	void getTile(uint zone, sint32 tileId, CTileDescP &desc) const;
+	// Read a color vertex (raw 0xAARRGGBB from the pristine carrier); zone id based.
+	bool getColor(uint zone, uint patch, sint32 s, sint32 t, uint32 &color) const;
 
 	// Carrier write-back: encode each (possibly tile-mutated) pristine blob into its carrier
 	// (0x4001 leaf via encodeRPatchMesh, base 0x08FD via setRPatch). Carriers whose owning
@@ -334,6 +401,13 @@ private:
 	int m_StrokeRotation; // plugin EPM_PaintMouseProc::Rotation
 	sint32 m_StrokeOldTile;
 	sint32 m_StrokeOldZone;
+	uint m_BrushSize;  // 0-2 (plugin brushSize)
+	uint m_TileGroup;  // 0 = none, 1..12 (plugin TileGroup)
+
+	// Per-tileset group tile lists (paint_ui CBankCont port): set-local 128/256 indices whose
+	// bank tile carries the group flag and a diffuse name.
+	std::vector<std::vector<std::vector<uint> > > m_GroupTile128; // [tileSet][group][i]
+	std::vector<std::vector<std::vector<uint> > > m_GroupTile256;
 
 	// undo
 	std::vector<SUndoTile> m_CurStroke;
@@ -341,9 +415,11 @@ private:
 	std::deque<std::vector<SUndoTile> > m_RedoStack;
 	uint m_StrokeSets;
 
-	// display mirror batch (CNelPatchChanger port)
+	// display mirror batch (CNelPatchChanger port; tiles + colors per (zoneId, patch))
 	typedef std::map<std::pair<int, int>, std::vector<NL3D::CTileElement> > TChangeMap;
+	typedef std::map<std::pair<int, int>, std::vector<NL3D::CTileColor> > TColorChangeMap;
 	TChangeMap m_Changes;
+	TColorChangeMap m_ColorChanges;
 
 	// --- internals (ports of the plugin functions of the same names) ---
 	uint orderS(uint zone, uint patch) const;
@@ -359,8 +435,22 @@ private:
 	void setTile(uint zone, sint32 tileId, const CTileDescP &desc,
 	             std::vector<SUndoTile> *backupStack, bool undo, bool updateDisplace = false);
 	std::vector<NL3D::CTileElement> *changeTileArray(uint zone, uint patch);
+	std::vector<NL3D::CTileColor> *changeColorArray(uint zone, uint patch);
 	void applyChanges();
-	int selectTile(uint tileSet, bool selectCycle, bool _256);
+	int selectTile(uint tileSet, bool selectCycle, bool _256) { return selectTile(tileSet, selectCycle, _256, m_TileGroup); }
+	int selectTile(uint tileSet, bool selectCycle, bool _256, uint group);
+	// colors (index-based internals)
+	uint32 getColorRaw(uint zoneIdx, uint patch, sint32 s, sint32 t) const;
+	void setColorRaw(uint zoneIdx, uint patch, sint32 s, sint32 t, uint32 color, bool undo);
+	// co-location closure of a grid vertex across seams (getVertexInNeighbor port, transitive)
+	void vertexClosure(uint zoneIdx, SPaintTile *tile, int vertexId, std::vector<SColorSlot> &out);
+	// blend once, write the whole closure identically; false when the closure touches a frozen
+	// zone (or, under lockBorders, an open/frozen border)
+	bool setVertexColorShared(const std::vector<SColorSlot> &slots, NLMISC::CRGBA color, uint blend);
+	bool fillTileImpl(uint zoneIdx, uint patch, int tileSet, int rot, bool _256);
+	bool isLockedEx(SPaintTile *tile);
+	bool isLocked256(SPaintTile *tile);
+	void displaceOne(SPaintTile *tile, uint displace);
 	bool isLocked(SPaintTile *tile, uint8 mask = 0xff) const;
 	bool getBorderDesc(SPaintTile *tile, CTileSetIdx corner[4], NL3D::CTileSet::TFlagBorder border[4][3],
 	                   CTileDescP *index);

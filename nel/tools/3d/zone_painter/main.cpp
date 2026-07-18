@@ -163,6 +163,13 @@ using namespace MAXMATH;
 static bool g_verbose = false;
 // Result of the viewer script pre-pass (propagated as the viewer exit code for scripted gates)
 static int g_ViewerScriptRc = 0;
+// Viewer paint defaults (CLI-configurable)
+static NLMISC::CRGBA g_ViewerBrushColor(255, 255, 255, 255);
+static float g_ViewerBrushRadius = 8.f;
+static uint g_ViewerBrushHardness = 128;
+static uint g_ViewerBrushOpacity = 255;
+static uint g_ViewerDisplaceIndex = 0;
+static bool g_PreloadTiles = false;
 
 // ---------------------------------------------------------------------------------------------
 // Zone writing (--dump-zones): current CZone::serial writes version 5; the references are
@@ -590,6 +597,144 @@ static int runPaintScript(ZPPAINT::CPaintCore &core, const std::string &path)
 			NLMISC::fromString(tok[1], s);
 			srand(s);
 		}
+		else if (tok[0] == "color" && tok.size() >= 6)
+		{
+			// color <zone> <patch> <s> <t> <rrggbb> [blend 0-256]
+			uint zone, patch;
+			sint32 s, t;
+			uint blend = 256;
+			NLMISC::fromString(tok[1], zone);
+			NLMISC::fromString(tok[2], patch);
+			NLMISC::fromString(tok[3], s);
+			NLMISC::fromString(tok[4], t);
+			uint32 rgb = (uint32)strtoul(tok[5].c_str(), NULL, 16);
+			if (tok.size() >= 7) NLMISC::fromString(tok[6], blend);
+			NLMISC::CRGBA col((uint8)((rgb >> 16) & 0xff), (uint8)((rgb >> 8) & 0xff), (uint8)(rgb & 0xff), 255);
+			ok = core.opColorVertex(zone, patch, s, t, col, blend, err);
+		}
+		else if (tok[0] == "cbrush" && tok.size() >= 8)
+		{
+			// cbrush <zone> <worldX> <worldY> <radius> <rrggbb> <hardness 0-255> <opacity 0-255> [worldZ]
+			// Without Z the hit comes from a vertical pick at (x, y) (the mouse-ray stand-in);
+			// with Z the hit is explicit (steep terrain, exact-vertex validation).
+			uint zone;
+			float x, y, radius;
+			uint hardness, opacity;
+			NLMISC::fromString(tok[1], zone);
+			NLMISC::fromString(tok[2], x);
+			NLMISC::fromString(tok[3], y);
+			NLMISC::fromString(tok[4], radius);
+			uint32 rgb = (uint32)strtoul(tok[5].c_str(), NULL, 16);
+			NLMISC::fromString(tok[6], hardness);
+			NLMISC::fromString(tok[7], opacity);
+			NLMISC::CRGBA col((uint8)((rgb >> 16) & 0xff), (uint8)((rgb >> 8) & 0xff), (uint8)(rgb & 0xff), 255);
+			uint hitZone = zone;
+			sint32 hitTile = -1;
+			NLMISC::CVector hit;
+			if (tok.size() >= 9)
+			{
+				float zc;
+				NLMISC::fromString(tok[8], zc);
+				hit.set(x, y, zc);
+				if (!core.nearestTile(zone, hit, hitTile)) { ok = false; err = "no tile in zone"; }
+			}
+			else if (!core.pickTile(NLMISC::CVector(x, y, 20000.f), NLMISC::CVector(0.f, 0.f, -1.f), hitZone, hitTile, hit))
+			{ ok = false; err = "no tile under the brush position"; }
+			else if (hitZone != zone) { ok = false; err = NLMISC::toString("pick landed in zone %u", hitZone); }
+			if (ok)
+			{
+				ok = core.opColorBrush(hitZone, hitTile, hit, radius, col, hardness, opacity, err);
+				core.endStroke();
+			}
+		}
+		else if ((tok[0] == "fill" || tok[0] == "fill256") && tok.size() >= 4)
+		{
+			// fill <zone> <patch> <tileSet> [rot]
+			uint zone, patch;
+			int ts, rot = 0;
+			NLMISC::fromString(tok[1], zone);
+			NLMISC::fromString(tok[2], patch);
+			NLMISC::fromString(tok[3], ts);
+			if (tok.size() >= 5) NLMISC::fromString(tok[4], rot);
+			ok = core.opFillTile(zone, patch, ts, rot, tok[0] == "fill256", err);
+		}
+		else if (tok[0] == "cfill" && tok.size() >= 4)
+		{
+			// cfill <zone> <patch> <rrggbb> [blend 0-256]
+			uint zone, patch;
+			uint blend = 256;
+			NLMISC::fromString(tok[1], zone);
+			NLMISC::fromString(tok[2], patch);
+			uint32 rgb = (uint32)strtoul(tok[3].c_str(), NULL, 16);
+			if (tok.size() >= 5) NLMISC::fromString(tok[4], blend);
+			NLMISC::CRGBA col((uint8)((rgb >> 16) & 0xff), (uint8)((rgb >> 8) & 0xff), (uint8)(rgb & 0xff), 255);
+			ok = core.opFillColor(zone, patch, col, blend, err);
+		}
+		else if (tok[0] == "displace" && tok.size() >= 6)
+		{
+			// displace <zone> <patch> <u> <v> <0-15>
+			uint zone, patch, u, v, d;
+			NLMISC::fromString(tok[1], zone);
+			NLMISC::fromString(tok[2], patch);
+			NLMISC::fromString(tok[3], u);
+			NLMISC::fromString(tok[4], v);
+			NLMISC::fromString(tok[5], d);
+			ok = core.opDisplace(zone, patch, u, v, d, err);
+		}
+		else if (tok[0] == "dfill" && tok.size() >= 4)
+		{
+			// dfill <zone> <patch> <0-15>
+			uint zone, patch, d;
+			NLMISC::fromString(tok[1], zone);
+			NLMISC::fromString(tok[2], patch);
+			NLMISC::fromString(tok[3], d);
+			ok = core.opFillDisplace(zone, patch, d, err);
+		}
+		else if (tok[0] == "brush" && tok.size() >= 2)
+		{
+			uint b;
+			NLMISC::fromString(tok[1], b);
+			core.setBrushSize(b);
+		}
+		else if (tok[0] == "group" && tok.size() >= 2)
+		{
+			uint g;
+			NLMISC::fromString(tok[1], g);
+			core.setTileGroup(g);
+		}
+		else if (tok[0] == "dumpclosure" && tok.size() >= 5)
+		{
+			// dumpclosure <zone> <patch> <s> <t> — print the vertex's co-location closure
+			uint zone, patch;
+			sint32 s, t;
+			NLMISC::fromString(tok[1], zone);
+			NLMISC::fromString(tok[2], patch);
+			NLMISC::fromString(tok[3], s);
+			NLMISC::fromString(tok[4], t);
+			ok = core.dumpClosure(zone, patch, s, t, stdout);
+			if (!ok) err = "bad vertex";
+		}
+		else if (tok[0] == "rawtile" && tok.size() >= 6)
+		{
+			// DEBUG: rawtile <zone> <patch> <u> <v> <tile> [rot] — raw record, no solver
+			uint zone, patch, u, v;
+			int tile, rot = 0;
+			NLMISC::fromString(tok[1], zone);
+			NLMISC::fromString(tok[2], patch);
+			NLMISC::fromString(tok[3], u);
+			NLMISC::fromString(tok[4], v);
+			NLMISC::fromString(tok[5], tile);
+			if (tok.size() >= 7) NLMISC::fromString(tok[6], rot);
+			ok = core.opRawTile(zone, patch, u, v, tile, rot, err);
+		}
+		else if (tok[0] == "checkseams" && tok.size() >= 2)
+		{
+			uint zone;
+			NLMISC::fromString(tok[1], zone);
+			uint illegal = core.checkSeams(zone, stdout);
+			ok = illegal == 0;
+			if (!ok) err = NLMISC::toString("%u illegal seams", illegal);
+		}
 		else
 		{
 			fprintf(stderr, "ERROR: script line %d: bad command '%s'\n", lineNo, tok[0].c_str());
@@ -662,6 +807,8 @@ static bool loadBankFile(const std::string &bankPath, bool bankRecursive,
 class CPaintMouseListener : public NLMISC::IEventListener
 {
 public:
+	enum TPaintMode { ModeTile = 0, ModeColor, ModeDisplace };
+
 	ZPPAINT::CPaintCore *Core;
 	NL3D::CEvent3dMouseListener *Nav;
 	NL3D::CViewport Viewport;
@@ -674,9 +821,38 @@ public:
 	sint32 HoverTile;
 	uint StrokeZone;
 	sint32 StrokeTile;
+	// P3c modes
+	int Mode; // TPaintMode
+	NLMISC::CRGBA BrushColor;
+	float BrushRadius;
+	uint BrushHardness, BrushOpacity; // 0-255
+	uint DisplaceIndex;               // 0-15
 
 	CPaintMouseListener() : Core(NULL), Nav(NULL), CurTileSet(0), Mode256(false), Pressed(false),
-		MouseX(0.5f), MouseY(0.5f), HaveHover(false), HoverZone(0), HoverTile(-1), StrokeZone(0), StrokeTile(-1) { }
+		MouseX(0.5f), MouseY(0.5f), HaveHover(false), HoverZone(0), HoverTile(-1), StrokeZone(0), StrokeTile(-1),
+		Mode(ModeTile), BrushColor(255, 255, 255, 255), BrushRadius(8.f), BrushHardness(128), BrushOpacity(255),
+		DisplaceIndex(0) { }
+
+	// One paint action at the current hover (shared by click and drag)
+	void paintAtHover()
+	{
+		std::string err;
+		if (Mode == ModeColor)
+		{
+			NLMISC::CVector pos, dir, hit;
+			Viewport.getRayWithPoint(MouseX, MouseY, pos, dir, NL3D::CNELU::Camera->getMatrix(), NL3D::CNELU::Camera->getFrustum());
+			uint zone;
+			sint32 tile;
+			if (Core->pickTile(pos, dir, zone, tile, hit) && !Core->zoneFrozen(zone))
+				Core->opColorBrush(zone, tile, hit, BrushRadius, BrushColor, BrushHardness, BrushOpacity, err);
+		}
+		else if (Mode == ModeDisplace)
+		{
+			sint32 t = HoverTile;
+			Core->opDisplace(HoverZone, (uint)(t / ZP_NUM_TILE_SEL), (uint)(t % ZP_NUM_TILE_SEL % ZP_MAX_TILE_IN_PATCH),
+			                 (uint)(t % ZP_NUM_TILE_SEL / ZP_MAX_TILE_IN_PATCH), DisplaceIndex, err);
+		}
+	}
 
 	void updateHover()
 	{
@@ -707,9 +883,19 @@ public:
 				updateHover();
 				if (HaveHover && !Core->zoneFrozen(HoverZone))
 				{
-					std::string err;
-					if (Core->opTileStroke(HoverZone, HoverTile, CurTileSet, Mode256, true, err))
+					if (Mode == ModeTile)
 					{
+						std::string err;
+						if (Core->opTileStroke(HoverZone, HoverTile, CurTileSet, Mode256, true, err))
+						{
+							Pressed = true;
+							StrokeZone = HoverZone;
+							StrokeTile = HoverTile;
+						}
+					}
+					else
+					{
+						paintAtHover();
 						Pressed = true;
 						StrokeZone = HoverZone;
 						StrokeTile = HoverTile;
@@ -718,22 +904,30 @@ public:
 			}
 			if (mouse->Button == NLMISC::rightButton)
 			{
-				// Pick: current tile set = the base layer's set under the cursor
+				// Pick under the cursor: tile mode = the base layer's set; color mode = the
+				// vertex color; displace mode = the tile's displace index
 				updateHover();
 				if (HaveHover)
 				{
 					ZPPAINT::CTileDescP desc;
 					Core->getTile(HoverZone, HoverTile, desc);
-					if (!desc.isEmpty())
+					if (Mode == ModeTile)
 					{
-						int tileSet, number;
-						NL3D::CTileBank::TTileType type;
-						// the bank the core paints against resolves the xref
-						CurTileSet = -1;
-						(void)number;
-						(void)type;
-						(void)tileSet;
-						CurTileSet = Core->tileSetOfTile(desc.getLayer(0).Tile);
+						if (!desc.isEmpty())
+							CurTileSet = Core->tileSetOfTile(desc.getLayer(0).Tile);
+					}
+					else if (Mode == ModeColor)
+					{
+						sint32 t = HoverTile;
+						uint32 raw;
+						if (Core->getColor(HoverZone, (uint)(t / ZP_NUM_TILE_SEL),
+						                   (sint32)(t % ZP_NUM_TILE_SEL % ZP_MAX_TILE_IN_PATCH),
+						                   (sint32)(t % ZP_NUM_TILE_SEL / ZP_MAX_TILE_IN_PATCH), raw))
+							BrushColor = NLMISC::CRGBA((uint8)((raw >> 16) & 0xff), (uint8)((raw >> 8) & 0xff), (uint8)(raw & 0xff), 255);
+					}
+					else if (Mode == ModeDisplace)
+					{
+						DisplaceIndex = desc.getDisplace();
 					}
 				}
 			}
@@ -757,9 +951,18 @@ public:
 				updateHover();
 				if (HaveHover && (HoverTile != StrokeTile || HoverZone != StrokeZone) && !Core->zoneFrozen(HoverZone))
 				{
-					std::string err;
-					if (Core->opTileStroke(HoverZone, HoverTile, CurTileSet, Mode256, false, err))
+					if (Mode == ModeTile)
 					{
+						std::string err;
+						if (Core->opTileStroke(HoverZone, HoverTile, CurTileSet, Mode256, false, err))
+						{
+							StrokeZone = HoverZone;
+							StrokeTile = HoverTile;
+						}
+					}
+					else
+					{
+						paintAtHover();
 						StrokeZone = HoverZone;
 						StrokeTile = HoverTile;
 					}
@@ -863,10 +1066,18 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 			paintListener.Core = core;
 			paintListener.Nav = &mouseListener;
 			paintListener.Viewport = viewport;
+			paintListener.BrushColor = g_ViewerBrushColor;
+			paintListener.BrushRadius = g_ViewerBrushRadius;
+			paintListener.BrushHardness = g_ViewerBrushHardness;
+			paintListener.BrushOpacity = g_ViewerBrushOpacity;
+			paintListener.DisplaceIndex = g_ViewerDisplaceIndex;
 			NL3D::CNELU::EventServer.addListener(NLMISC::EventMouseDownId, &paintListener);
 			NL3D::CNELU::EventServer.addListener(NLMISC::EventMouseUpId, &paintListener);
 			NL3D::CNELU::EventServer.addListener(NLMISC::EventMouseMoveId, &paintListener);
 			NL3D::CNELU::EventServer.addListener(NLMISC::EventKeyDownId, &paintListener);
+			// Preload flush (plugin preloadTiles): all tile sets into the driver
+			if (g_PreloadTiles)
+				core->preloadTiles(NL3D::CNELU::Driver);
 		}
 
 		// HUD text (any TrueType through the font manager; silently disabled without a font)
@@ -921,7 +1132,8 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 			{
 				NL3D::CNELU::EventServer.pump();
 
-				// Tile set selection keys (plugin: the texture panel; here PgUp/PgDn + 0-9 + B)
+				// Tile set selection keys (plugin: the texture panel; here PgUp/PgDn + 0-9 + B),
+				// paint modes T/C/D, brush sizes +/-, group G, displace index [ ], fill F
 				if (core)
 				{
 					uint count = core->tileSetCount();
@@ -937,8 +1149,47 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 					}
 					if (NL3D::CNELU::AsyncListener.isKeyPushed(NLMISC::KeyB))
 						paintListener.Mode256 = !paintListener.Mode256;
+					if (NL3D::CNELU::AsyncListener.isKeyPushed(NLMISC::KeyT))
+						paintListener.Mode = CPaintMouseListener::ModeTile;
+					if (NL3D::CNELU::AsyncListener.isKeyPushed(NLMISC::KeyC))
+						paintListener.Mode = CPaintMouseListener::ModeColor;
+					if (NL3D::CNELU::AsyncListener.isKeyPushed(NLMISC::KeyD))
+						paintListener.Mode = CPaintMouseListener::ModeDisplace;
+					if (NL3D::CNELU::AsyncListener.isKeyPushed(NLMISC::KeyADD))
+					{
+						if (paintListener.Mode == CPaintMouseListener::ModeColor)
+							paintListener.BrushRadius = std::min(paintListener.BrushRadius * 1.5f, 32.f);
+						else
+							core->setBrushSize(core->brushSize() + 1);
+					}
+					if (NL3D::CNELU::AsyncListener.isKeyPushed(NLMISC::KeySUBTRACT))
+					{
+						if (paintListener.Mode == CPaintMouseListener::ModeColor)
+							paintListener.BrushRadius = std::max(paintListener.BrushRadius / 1.5f, 2.f);
+						else if (core->brushSize() > 0)
+							core->setBrushSize(core->brushSize() - 1);
+					}
+					if (NL3D::CNELU::AsyncListener.isKeyPushed(NLMISC::KeyG))
+						core->setTileGroup((core->tileGroup() + 1) % 13);
+					if (NL3D::CNELU::AsyncListener.isKeyPushed(NLMISC::KeyLBRACKET))
+						paintListener.DisplaceIndex = (paintListener.DisplaceIndex + 15) % 16;
+					if (NL3D::CNELU::AsyncListener.isKeyPushed(NLMISC::KeyRBRACKET))
+						paintListener.DisplaceIndex = (paintListener.DisplaceIndex + 1) % 16;
 					if (!paintListener.Pressed)
 						paintListener.updateHover();
+					// F: fill the patch under the cursor per mode
+					if (NL3D::CNELU::AsyncListener.isKeyPushed(NLMISC::KeyF) && paintListener.HaveHover
+						&& !core->zoneFrozen(paintListener.HoverZone))
+					{
+						std::string err;
+						uint patch = (uint)(paintListener.HoverTile / ZP_NUM_TILE_SEL);
+						if (paintListener.Mode == CPaintMouseListener::ModeTile)
+							core->opFillTile(paintListener.HoverZone, patch, paintListener.CurTileSet, 0, paintListener.Mode256, err);
+						else if (paintListener.Mode == CPaintMouseListener::ModeColor)
+							core->opFillColor(paintListener.HoverZone, patch, paintListener.BrushColor, 256, err);
+						else
+							core->opFillDisplace(paintListener.HoverZone, patch, paintListener.DisplaceIndex, err);
+					}
 				}
 
 				NLMISC::CMatrix camKey = mouseListener.getViewMatrix();
@@ -968,18 +1219,31 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 				// HUD text
 				if (core && hudText)
 				{
+					static const char *modeNames[3] = { "TILE", "COLOR", "DISPLACE" };
 					textContext.setColor(NLMISC::CRGBA(255, 255, 255));
-					textContext.printfAt(0.01f, 0.98f, "TileSet %d/%u '%s'  %s  undo %u",
+					textContext.printfAt(0.01f, 0.98f, "[%s] TileSet %d/%u '%s'  %s  brush %u  group %u  undo %u",
+					                     modeNames[paintListener.Mode % 3],
 					                     paintListener.CurTileSet, core->tileSetCount(),
 					                     core->tileSetName(paintListener.CurTileSet).c_str(),
-					                     paintListener.Mode256 ? "256" : "128", core->undoDepth());
+					                     paintListener.Mode256 ? "256" : "128", core->brushSize(),
+					                     core->tileGroup(), core->undoDepth());
+					if (paintListener.Mode == CPaintMouseListener::ModeColor)
+						textContext.printfAt(0.01f, 0.955f, "color %02x%02x%02x  radius %.1fm  hardness %u  opacity %u",
+						                     paintListener.BrushColor.R, paintListener.BrushColor.G, paintListener.BrushColor.B,
+						                     paintListener.BrushRadius, paintListener.BrushHardness, paintListener.BrushOpacity);
+					else if (paintListener.Mode == CPaintMouseListener::ModeDisplace)
+						textContext.printfAt(0.01f, 0.955f, "displace index %u", paintListener.DisplaceIndex);
 					if (paintListener.HaveHover)
 					{
 						sint32 t = paintListener.HoverTile;
-						textContext.printfAt(0.01f, 0.95f, "zone %u patch %d tile (%d,%d)%s",
+						textContext.printfAt(0.01f, 0.93f, "zone %u patch %d tile (%d,%d)%s",
 						                     paintListener.HoverZone, (int)(t / 256), (int)(t % 256 % 16), (int)(t % 256 / 16),
 						                     core->zoneFrozen(paintListener.HoverZone) ? " FROZEN" : "");
 					}
+					// Brush color swatch
+					if (paintListener.Mode == CPaintMouseListener::ModeColor)
+						NL3D::CDRU::drawQuad(0.30f, 0.955f, 0.32f, 0.975f, *NL3D::CNELU::Driver,
+						                     paintListener.BrushColor, viewport);
 				}
 
 				NL3D::CNELU::swapBuffers();
@@ -1034,6 +1298,14 @@ int main(int argc, char **argv)
 	args.addArg("", "paint-script", "file", "Scripted paint ops (headless without a display mode)");
 	args.addArg("", "seed", "n", "Random seed for the paint ops (default 1; ops use a cycle counter for base tiles)");
 	args.addArg("", "lock-borders", "", "Lock tiles bordering frozen zones or open edges (plugin lockBorders)");
+	args.addArg("", "brush", "0-2", "Tile brush size for mouse strokes (recursion depths 0/4/8)");
+	args.addArg("", "group", "0-12", "Tile group bias (0 = none)");
+	args.addArg("", "color", "rrggbb", "Viewer color brush color (default ffffff)");
+	args.addArg("", "radius", "meters", "Viewer color brush radius (default 8; keys +/- range 2-32)");
+	args.addArg("", "hardness", "0-255", "Viewer color brush hardness (default 128)");
+	args.addArg("", "opacity", "0-255", "Viewer color brush opacity (default 255)");
+	args.addArg("", "displace-index", "0-15", "Viewer displace paint index (default 0)");
+	args.addArg("", "preload-tiles", "", "Viewer: flush every tile set's tiles at startup (plugin preloadTiles)");
 	args.addArg("", "null-edit", "", "Headless: resolve carriers, write back untouched pristine blobs, save to --out");
 	args.addArg("", "verify-identical", "", "With --null-edit: byte-compare the output against the input");
 	args.addArg("", "dump-zones", "dir", "Headless: write every built display CZone and report counts");
@@ -1133,6 +1405,18 @@ int main(int argc, char **argv)
 			return 1;
 		}
 	}
+	if (args.haveLongArg("brush")) { uint b; NLMISC::fromString(args.getLongArg("brush")[0], b); core.setBrushSize(b); }
+	if (args.haveLongArg("group")) { uint g; NLMISC::fromString(args.getLongArg("group")[0], g); core.setTileGroup(g); }
+	if (args.haveLongArg("color"))
+	{
+		uint32 rgb = (uint32)strtoul(args.getLongArg("color")[0].c_str(), NULL, 16);
+		g_ViewerBrushColor = NLMISC::CRGBA((uint8)((rgb >> 16) & 0xff), (uint8)((rgb >> 8) & 0xff), (uint8)(rgb & 0xff), 255);
+	}
+	if (args.haveLongArg("radius")) NLMISC::fromString(args.getLongArg("radius")[0], g_ViewerBrushRadius);
+	if (args.haveLongArg("hardness")) NLMISC::fromString(args.getLongArg("hardness")[0], g_ViewerBrushHardness);
+	if (args.haveLongArg("opacity")) NLMISC::fromString(args.getLongArg("opacity")[0], g_ViewerBrushOpacity);
+	if (args.haveLongArg("displace-index")) NLMISC::fromString(args.getLongArg("displace-index")[0], g_ViewerDisplaceIndex);
+	g_PreloadTiles = args.haveLongArg("preload-tiles");
 
 	if (doDumpXRef)
 	{
