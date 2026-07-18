@@ -62,6 +62,7 @@
 #define ZONE_PAINTER_PAINT_CORE_H
 
 #include <nel/misc/types_nl.h>
+#include <nel/misc/bitmap.h>
 #include <nel/misc/vector.h>
 #include <nel/3d/tile_bank.h>
 #include <nel/3d/zone.h>
@@ -304,7 +305,11 @@ public:
 	bool opColorVertex(uint zone, uint patch, sint32 s, sint32 t, NLMISC::CRGBA color, uint blend, std::string &err);
 	// The vertex color brush at a world hit point (CPaintColor::paint port): radius in meters,
 	// hardness/opacity 0-255. Mouse and the script `cbrush` share this (the script derives the
-	// hit from a vertical pick at the given XY).
+	// hit from a vertical pick at the given XY). With an active brush mask (loadBrush port) the
+	// per-vertex blend is additionally modulated by the mask bitmap: the mask spans the brush
+	// circle on a plane perpendicular to the seed tile's display normal (the plugin's hit-quad
+	// topVector), sampled bilinearly, luminance mean (R+G+B)/3 scaling the blend — an all-white
+	// mask is bit-identical to no mask (blend*255/255). Per-hit stamp; not stroke-oriented.
 	bool opColorBrush(uint zone, sint32 seedTileId, const NLMISC::CVector &hit, float radius,
 	                  NLMISC::CRGBA color, uint hardness, uint opacity, std::string &err);
 	// Region fills (CFillPatch ports): tile fill (tileSet -1 = clear; incompatible borders are
@@ -312,7 +317,10 @@ public:
 	bool opFillTile(uint zone, uint patch, int tileSet, int rot, bool _256, std::string &err);
 	bool opFillColor(uint zone, uint patch, NLMISC::CRGBA color, uint blend, std::string &err);
 	bool opFillDisplace(uint zone, uint patch, uint displace, std::string &err);
-	// Displace paint (PutADisplacetile port; explicit index 0-15, Noise kept in sync).
+	// Displace paint (PutADisplacetile port; explicit index 0-15, Noise kept in sync). The
+	// brush size applies exactly like the plugin's displace path (PutDisplace -> RecursTile in
+	// displace mode: recursion depths {0,4,8}, 128 grid, one PutADisplacetile per reached
+	// tile); brush 0 keeps the historical single-tile behavior.
 	bool opDisplace(uint zone, uint patch, uint u, uint v, uint displace, std::string &err);
 	// DEBUG op: write one raw single-layer record with NO transition solving (negative control
 	// for checkSeams and a low-level repair affordance; not a plugin op).
@@ -321,12 +329,25 @@ public:
 	bool opRedo();
 	void endStroke();
 
-	// Tile brush size (0-2 -> the plugin's recursTile depths {0,4,8}; mouse strokes only) and
-	// tile group bias (0 = none, 1..12 = bank group).
+	// Tile brush size (0-2 -> the plugin's recursTile depths {0,4,8}; tile mouse strokes and
+	// the displace op) and tile group bias (0 = none, 1..12 = bank group).
 	void setBrushSize(uint s) { m_BrushSize = s > 2 ? 2 : s; }
 	uint brushSize() const { return m_BrushSize; }
 	void setTileGroup(uint g) { m_TileGroup = g > 12 ? 12 : g; }
 	uint tileGroup() const { return m_TileGroup; }
+	// Live lockBorders toggle (plugin LockBorders key; init sets the CLI default).
+	void setLockBorders(bool b) { m_LockBorders = b; }
+	bool lockBordersOn() const { return m_LockBorders; }
+
+	// Color-brush bitmap mask (CPaintColor loadBrush/setBrushMode port). The mask file is any
+	// .tga (grayscale loads as luminance, converted to RGBA like the plugin); loading turns the
+	// mask mode on. setBrushMaskMode only turns on when a mask is loaded (plugin semantics);
+	// returns the resulting mode.
+	bool loadBrushMask(const std::string &fileName, std::string &err);
+	void clearBrushMask();
+	bool setBrushMaskMode(bool on);
+	bool brushMaskMode() const { return m_BrushMaskMode; }
+	const std::string &brushMaskName() const { return m_BrushMaskName; }
 
 	// Seam legality report (validation surface): every adjacent non-empty tile pair must agree
 	// on the shared corner tile sets (the GetBorderDesc invariant PropagateBorder maintains).
@@ -410,6 +431,11 @@ private:
 	sint32 m_StrokeOldZone;
 	uint m_BrushSize;  // 0-2 (plugin brushSize)
 	uint m_TileGroup;  // 0 = none, 1..12 (plugin TileGroup)
+	// color-brush mask state (CPaintColor _BrushBitmap/_bBrush port)
+	NLMISC::CBitmap m_BrushMask;
+	bool m_BrushMaskLoaded;
+	bool m_BrushMaskMode;
+	std::string m_BrushMaskName;
 	sint m_StoredIncludeMeshes; // -1 unknown / 0 / 1 (RPO_INCLUDE_MESHES 0x4003)
 	sint m_StoredPreloadTiles;  // -1 unknown / 0 / 1 (RPO_PRELOAD_TILES 0x4010)
 
@@ -460,6 +486,8 @@ private:
 	bool isLockedEx(SPaintTile *tile);
 	bool isLocked256(SPaintTile *tile);
 	void displaceOne(SPaintTile *tile, uint displace);
+	// RecursTile displace-mode port (PutDisplace path): displaceOne per reached tile, 128 grid.
+	void recursDisplace(SPaintTile *tile, uint displace, int recurs, std::set<SPaintTile *> &alreadyRecursed);
 	bool isLocked(SPaintTile *tile, uint8 mask = 0xff) const;
 	bool getBorderDesc(SPaintTile *tile, CTileSetIdx corner[4], NL3D::CTileSet::TFlagBorder border[4][3],
 	                   CTileDescP *index);

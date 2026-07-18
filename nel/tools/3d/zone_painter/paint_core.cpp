@@ -43,6 +43,8 @@
 #include <nel/misc/types_nl.h>
 #include "paint_core.h"
 
+#include <nel/misc/file.h>
+#include <nel/misc/path.h>
 #include <nel/misc/plane.h>
 #include <nel/3d/driver.h>
 #include <nel/3d/landscape.h>
@@ -76,6 +78,7 @@ static const NLMISC::CClassId ZP_CLASSID_NEL_PATCH_PAINT(0x0c49560f, 0x3c3d68e7)
 
 static const int ZP_MAX_UNDO = 64;
 static const int ZP_DEPTH_SEARCH_MAX = 10; // plugin DEPTH_SEARCH_MAX (CalcRotPath)
+static const int ZP_BRUSH_VALUE[3] = { 0, 4, 8 }; // plugin brushValue[BRUSH_COUNT] recursion depths
 
 static bool g_WarnedInvalidTileSet = false;
 static void warnInvalidTileSet()
@@ -99,6 +102,8 @@ CPaintCore::CPaintCore()
 	m_StrokeSets = 0;
 	m_BrushSize = 0;
 	m_TileGroup = 0;
+	m_BrushMaskLoaded = false;
+	m_BrushMaskMode = false;
 	m_StoredIncludeMeshes = -1;
 	m_StoredPreloadTiles = -1;
 }
@@ -1981,7 +1986,9 @@ bool CPaintCore::opTileStroke(uint zone, sint32 tileId, int tileSet, bool _256, 
 
 	m_StrokeSets = 0;
 	std::set<SPaintTile *> alreadyRecursed;
-	recursTile(t, tileSet, 0 /* brush 0 for P3b */, alreadyRecursed, first, m_StrokeRotation, _256);
+	// Brush size -> recursion depth, the plugin's PutTile call: brushValue[brushSize] with the
+	// same depth whether 128 or 256 (RecursTile steps -2 per 256 hop).
+	recursTile(t, tileSet, ZP_BRUSH_VALUE[m_BrushSize], alreadyRecursed, first, m_StrokeRotation, _256);
 	applyChanges();
 	m_StrokeOldTile = (sint32)tileId;
 	m_StrokeOldZone = (sint32)zi;
@@ -2240,10 +2247,72 @@ bool CPaintCore::opColorVertex(uint zone, uint patch, sint32 s, sint32 t, NLMISC
 	return ok;
 }
 
+// Color-brush bitmap mask (CPaintColor::loadBrush port): any .tga; grayscale files load as
+// luminance (loadGrayscaleAsAlpha(false)), converted to RGBA — the sampling path reads RGB and
+// averages, exactly like the plugin. Loading turns the mask mode on (the plugin's
+// SelectColorBrush flow called setBrushMode(true) right after loadBrush).
+bool CPaintCore::loadBrushMask(const std::string &fileName, std::string &err)
+{
+	std::string path = fileName;
+	if (!NLMISC::CFile::fileExists(path))
+	{
+		std::string looked = NLMISC::CPath::lookup(fileName, false, false);
+		if (!looked.empty()) path = looked;
+	}
+	try
+	{
+		NLMISC::CIFile inputFile;
+		if (!inputFile.open(path))
+		{
+			err = "cannot open brush mask " + fileName;
+			return false;
+		}
+		NLMISC::CBitmap bitmap;
+		bitmap.loadGrayscaleAsAlpha(false);
+		if (!bitmap.load(inputFile))
+		{
+			err = "cannot read brush mask " + path;
+			return false;
+		}
+		if (!bitmap.convertToType(NLMISC::CBitmap::RGBA))
+		{
+			err = "cannot convert brush mask " + path;
+			return false;
+		}
+		m_BrushMask = bitmap;
+	}
+	catch (const NLMISC::Exception &e)
+	{
+		err = std::string("brush mask: ") + e.what();
+		return false;
+	}
+	m_BrushMaskLoaded = m_BrushMask.getWidth() != 0 && m_BrushMask.getHeight() != 0;
+	m_BrushMaskMode = m_BrushMaskLoaded;
+	m_BrushMaskName = m_BrushMaskLoaded ? NLMISC::CFile::getFilename(path) : std::string();
+	if (!m_BrushMaskLoaded) { err = "empty brush mask " + path; return false; }
+	return true;
+}
+
+void CPaintCore::clearBrushMask()
+{
+	m_BrushMask.reset();
+	m_BrushMaskLoaded = false;
+	m_BrushMaskMode = false;
+	m_BrushMaskName.clear();
+}
+
+bool CPaintCore::setBrushMaskMode(bool on)
+{
+	// Plugin setBrushMode: only on when a valid bitmap is loaded
+	m_BrushMaskMode = on && m_BrushMaskLoaded;
+	return m_BrushMaskMode;
+}
+
 // The color brush (CPaintColor::paint/paintATile/paintAVertex port): walk the metaTile graph
 // from the seed within the radius; each candidate grid vertex is blended ONCE (distance/
 // hardness/opacity falloff against its world position on the display bezier surface) and
-// written through its whole closure.
+// written through its whole closure. Active mask: per-vertex blend modulated by the mask
+// bitmap projected on the brush plane (see the header doc; paintAVertex port).
 bool CPaintCore::opColorBrush(uint zone, sint32 seedTileId, const NLMISC::CVector &hit, float radius,
                               NLMISC::CRGBA color, uint hardness, uint opacity, std::string &err)
 {
@@ -2256,6 +2325,36 @@ bool CPaintCore::opColorBrush(uint zone, sint32 seedTileId, const NLMISC::CVecto
 	if (radius <= 0.f) { err = "bad radius"; return false; }
 	float hard = (float)(hardness > 255 ? 255 : hardness) / 255.f;
 	float opa = (float)(opacity > 255 ? 255 : opacity) / 255.f;
+
+	// Brush-plane base vectors (CPaintColor::paint port). The plugin's topVector is the hit
+	// tile quad's normal ((p1-p0)^(p2-p0) over corners (u,v),(u,v+1),(u+1,v+1)); the seed tile
+	// plays that role here (deterministic from the display bezier, headless-stable).
+	bool maskOn = m_BrushMaskMode && m_BrushMaskLoaded;
+	NLMISC::CVector paintBaseX, paintBaseY;
+	if (maskOn)
+	{
+		const NL3D::CBezierPatch &sbp = (*m_Zones[zi].In.Patches)[seed->Patch].Patch;
+		float snU = (float)orderS(zi, (uint)seed->Patch);
+		float snV = (float)orderT(zi, (uint)seed->Patch);
+		NLMISC::CVector p0 = sbp.eval((float)seed->U / snU, (float)seed->V / snV);
+		NLMISC::CVector p1 = sbp.eval((float)seed->U / snU, (float)(seed->V + 1) / snV);
+		NLMISC::CVector p2 = sbp.eval((float)(seed->U + 1) / snU, (float)(seed->V + 1) / snV);
+		NLMISC::CVector topVector = ((p1 - p0) ^ (p2 - p0)).normed();
+		if (fabs(topVector * NLMISC::CVector::K) > fabs(topVector * NLMISC::CVector::J))
+		{
+			paintBaseX = NLMISC::CVector::J ^ topVector;
+			paintBaseX.normalize();
+			paintBaseY = topVector ^ paintBaseX;
+			paintBaseY.normalize();
+		}
+		else
+		{
+			paintBaseX = topVector ^ NLMISC::CVector::K;
+			paintBaseX.normalize();
+			paintBaseY = topVector ^ paintBaseX;
+			paintBaseY.normalize();
+		}
+	}
 
 	m_StrokeSets = 0;
 
@@ -2295,6 +2394,23 @@ bool CPaintCore::opColorBrush(uint zone, sint32 seedTileId, const NLMISC::CVecto
 			float blendDist = (radius - dist) / radius;
 			float finalFactor = 256.f * opa * ((1.f - hard) * blendDist + hard);
 			uint blend = (uint)std::max(std::min(finalFactor, 256.f), 0.f);
+			// Mask modulation (paintAVertex "Use a brush ?" branch, exact integer arithmetic):
+			// project the vertex delta on the brush plane, sample the bitmap bilinearly,
+			// scale the blend by the sampled luminance mean. All-white mask: blend*255/255.
+			if (maskOn)
+			{
+				NLMISC::CVector deltaPos = pos - hit;
+				float bitmapX = (1.f + (paintBaseX * deltaPos) / radius) / 2.f;
+				float bitmapY = (1.f + (paintBaseY * deltaPos) / radius) / 2.f;
+				NLMISC::CRGBAF colorF = m_BrushMask.getColor(bitmapX, bitmapY);
+				colorF *= 255.f;
+				NLMISC::CRGBA maskColor;
+				maskColor.R = (uint8)colorF.R;
+				maskColor.G = (uint8)colorF.G;
+				maskColor.B = (uint8)colorF.B;
+				maskColor.A = (maskColor.R + maskColor.G + maskColor.B) / 3;
+				blend = blend * maskColor.A / 255;
+			}
 			if (setVertexColorShared(slots, color, blend)) ++painted;
 		}
 		for (int n = 0; n < 4; ++n)
@@ -2517,6 +2633,28 @@ void CPaintCore::displaceOne(SPaintTile *tile, uint displace)
 	setTile((uint)tile->Zone, tile->TileId, desc, NULL, true, true);
 }
 
+// RecursTile displace-mode port (the plugin's PutDisplace path): one PutADisplacetile per tile
+// not already recursed, then spread depth-first on the 128 grid (PutDisplace always passes
+// _256=false). Frozen tiles are skipped — the plugin wrote through SetTile freely, but frozen
+// carriers are immutable reference display in this tool (the series' invariant).
+void CPaintCore::recursDisplace(SPaintTile *pTile, uint displace, int recurs, std::set<SPaintTile *> &alreadyRecursed)
+{
+	if (alreadyRecursed.find(pTile) == alreadyRecursed.end())
+	{
+		alreadyRecursed.insert(pTile);
+		if (!pTile->Frozen)
+			displaceOne(pTile, displace);
+	}
+	if (recurs > 0)
+	{
+		for (int i = 0; i < 4; ++i)
+		{
+			if (pTile->Voisins[i])
+				recursDisplace(pTile->Voisins[i], displace, recurs - 1, alreadyRecursed);
+		}
+	}
+}
+
 bool CPaintCore::opDisplace(uint zone, uint patch, uint u, uint v, uint displace, std::string &err)
 {
 	if (!m_Bank) { err = "no tile bank loaded"; return false; }
@@ -2531,7 +2669,10 @@ bool CPaintCore::opDisplace(uint zone, uint patch, uint u, uint v, uint displace
 	if (!t) { err = "tile not in grid"; return false; }
 	if (t->Frozen) { err = "tile frozen"; return false; }
 	m_StrokeSets = 0;
-	displaceOne(t, displace);
+	// The plugin's displace put rode the same brush recursion as the tile put (PutDisplace ->
+	// RecursTile depth brushValue[brushSize]); depth 0 == the historical single-tile behavior.
+	std::set<SPaintTile *> alreadyRecursed;
+	recursDisplace(t, displace, ZP_BRUSH_VALUE[m_BrushSize], alreadyRecursed);
 	applyChanges();
 	endStroke();
 	if (!m_StrokeSets) { err = "tile empty or unresolvable layer 0"; return false; }

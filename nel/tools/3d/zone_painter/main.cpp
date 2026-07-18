@@ -21,8 +21,15 @@
 //   --paint-script headless (or viewer pre-pass) scripted painting: one op per line,
 //                  '#' comments — `tile <zone> <patch> <u> <v> <tileSet> [rot]`,
 //                  `tile256 ...` (same args), `clear <zone> <patch> <u> <v>`, `clear256 ...`,
-//                  `undo`, `redo`, `seed <n>`. Ops go through the SAME implementations as the
-//                  mouse path (single op layer in paint_core).
+//                  `undo`, `redo`, `seed <n>`, `mask <file.tga|none>` (color-brush bitmap
+//                  mask, P3e). Ops go through the SAME implementations as the mouse path
+//                  (single op layer in paint_core).
+//
+// P3e additions: color-brush bitmap masks (plugin loadBrush port; shipped set in brushes/,
+// CLI --brush-mask, viewer cycle key, script `mask`), the displace area brush (plugin
+// PutDisplace recursion; brush sizes 0-2 = depths 0/4/8), keys/vars cfg loading (plugin
+// LoadKeyCfg/LoadVarCfg port over --keys-cfg/--vars-cfg or the default cwd names — see the
+// --help description for the accepted variable sets), and live hardness/opacity keys.
 //   --save         write-back + whole-file save after ops: each (possibly tile-mutated)
 //                  pristine carrier blob is encoded into its P2 write-target (topmost 0x4001
 //                  snapshot, else base 0x08FD via setRPatch), the Scene stream is rebuilt and
@@ -77,12 +84,14 @@
 #include <nel/misc/bitmap.h>
 #include <nel/misc/cmd_args.h>
 #include <nel/misc/common.h>
+#include <nel/misc/config_file.h>
 #include <nel/misc/event_listener.h>
 #include <nel/misc/event_server.h>
 #include <nel/misc/events.h>
 #include <nel/misc/file.h>
 #include <nel/misc/mem_stream.h>
 #include <nel/misc/path.h>
+#include <nel/misc/time_nl.h>
 
 #include <nel/3d/camera.h>
 #include <nel/3d/event_mouse_listener.h>
@@ -178,6 +187,275 @@ static bool g_PreloadTiles = false;
 static bool g_IncludeMeshes = false;
 static std::string g_InputPath;
 static std::string g_BankPath;
+// Shipped brush mask cycle (viewer SelectColorBrush key; 0 = none, i = g_MaskFiles[i-1])
+static std::vector<std::string> g_MaskFiles;
+static int g_MaskCycle = 0;
+
+// ---------------------------------------------------------------------------------------------
+// keys.cfg / vars.cfg (plugin paint_ui.cpp LoadKeyCfg/LoadVarCfg port). The plugin read BOTH
+// variable sets from one keys.cfg next to the plugin dll (NLMISC::CConfigFile: the file itself
+// defines the Key* constants, then `Action = KeyX;` assignments — the original keys.cfg parses
+// verbatim). Here: --keys-cfg / --vars-cfg CLI paths, else zone_painter_keys.cfg /
+// zone_painter_vars.cfg in the cwd, else the hardcoded defaults below (identical to the
+// pre-cfg tool). One file may serve both loaders, exactly like the plugin.
+//
+// Key actions keep the plugin's cfg NAMES (a plugin-era keys.cfg rebinds them unchanged);
+// values are NeL TKey codes (== the Windows VK codes the plugin used). Actions without a
+// standalone-tool equivalent are accepted and ignored (documented in --help): Select, Pick,
+// ToggleColor, BackgroundColor, ToggleArrows, Zouille, AutomaticLighting, GetState,
+// ResetPatch. ZoomIn/ZoomOut are implemented but default UNBOUND (0) because the plugin's
+// default keys 1/2 select tile sets in this tool.
+
+enum TPainterKey
+{
+	ZPK_Select = 0,
+	ZPK_Pick,
+	ZPK_Fill0,
+	ZPK_Fill1,
+	ZPK_Fill2,
+	ZPK_Fill3,
+	ZPK_MModeTile,
+	ZPK_MModeColor,
+	ZPK_MModeDisplace,
+	ZPK_ToggleColor,
+	ZPK_SizeUp,
+	ZPK_SizeDown,
+	ZPK_ToggleTileSize,
+	ZPK_GroupUp,
+	ZPK_GroupDown,
+	ZPK_BackgroundColor,
+	ZPK_ToggleArrows,
+	ZPK_HardnessUp,
+	ZPK_HardnessDown,
+	ZPK_OpacityUp,
+	ZPK_OpacityDown,
+	ZPK_Zouille,
+	ZPK_AutomaticLighting,
+	ZPK_SelectColorBrush,
+	ZPK_ToggleColorBrushMode,
+	ZPK_LockBorders,
+	ZPK_ZoomIn,
+	ZPK_ZoomOut,
+	ZPK_GetState,
+	ZPK_ResetPatch,
+	ZPK_KeyCounter
+};
+
+// The plugin's cfg variable names (paint_ui.cpp PainterKeysName, order preserved)
+static const char *kPainterKeysName[ZPK_KeyCounter] =
+{
+	"Select",
+	"Pick",
+	"Fill0",
+	"Fill1",
+	"Fill2",
+	"Fill3",
+	"ModeTile",
+	"ModeColor",
+	"ModeDisplace",
+	"ToggleColor",
+	"SizeUp",
+	"SizeDown",
+	"ToggleTileSize",
+	"GroupUp",
+	"GroupDown",
+	"BackgroundColor",
+	"ToggleArrows",
+	"HardnessUp",
+	"HardnessDown",
+	"OpacityUp",
+	"OpacityDown",
+	"Zouille",
+	"AutomaticLighting",
+	"SelectColorBrush",
+	"ToggleColorBrushMode",
+	"LockBorders",
+	"ZoomIn",
+	"ZoomOut",
+	"GetState",
+	"ResetPatch",
+};
+
+// Tool defaults: the pre-cfg hardcoded viewer keys stay on their keys (T/C/D, +/-, B, G, F);
+// new actions land on free keys (documented in --help). 0 = unbound.
+static uint g_PainterKeys[ZPK_KeyCounter] =
+{
+	0,                    // Select (in-plugin paint-modifier action; no tool equivalent)
+	0,                    // Pick (the tool picks on right mouse, hardcoded)
+	NLMISC::KeyF,         // Fill0 (the pre-cfg F fill, rotation 0)
+	NLMISC::KeyF6,        // Fill1 (plugin default)
+	NLMISC::KeyF7,        // Fill2 (plugin default)
+	NLMISC::KeyF8,        // Fill3 (plugin default)
+	NLMISC::KeyT,         // ModeTile
+	NLMISC::KeyC,         // ModeColor
+	NLMISC::KeyD,         // ModeDisplace
+	0,                    // ToggleColor (single brush color in this tool)
+	NLMISC::KeyADD,       // SizeUp
+	NLMISC::KeySUBTRACT,  // SizeDown
+	NLMISC::KeyB,         // ToggleTileSize
+	NLMISC::KeyG,         // GroupUp
+	NLMISC::KeyV,         // GroupDown (plugin default)
+	0,                    // BackgroundColor
+	0,                    // ToggleArrows
+	NLMISC::KeyHOME,      // HardnessUp (plugin PgUp/PgDn select tile sets here)
+	NLMISC::KeyEND,       // HardnessDown
+	NLMISC::KeyINSERT,    // OpacityUp
+	NLMISC::KeyDELETE,    // OpacityDown
+	0,                    // Zouille
+	0,                    // AutomaticLighting
+	NLMISC::KeyS,         // SelectColorBrush (cycles the shipped mask set; plugin default key)
+	NLMISC::KeyQ,         // ToggleColorBrushMode (plugin default)
+	NLMISC::KeyL,         // LockBorders (plugin default)
+	0,                    // ZoomIn (bindable; plugin default Key1 selects a tile set here)
+	0,                    // ZoomOut
+	0,                    // GetState
+	0,                    // ResetPatch
+};
+
+// paint_ui.cpp light/zoom variable defaults (LoadVarCfg overrides; identical to the previous
+// hardcoded painting-scene constants)
+static NLMISC::CVector g_LightDirection(1.f, 1.f, -1.f);
+static NLMISC::CRGBA g_LightDiffuse(255, 255, 255);
+static NLMISC::CRGBA g_LightAmbiant(0, 0, 0);
+static float g_LightMultiply = 1.f;
+static float g_ZoomSpeed = 300.f;
+
+// LoadKeyCfg port: per-action lookup, absent/typed-wrong names silently keep the default (the
+// plugin's per-var try/catch). `required` = the path came from the CLI (missing file is fatal);
+// the default-named cwd file is optional. Parse errors are always fatal.
+static bool loadKeysCfg(const std::string &path, bool required)
+{
+	if (!NLMISC::CFile::fileExists(path))
+	{
+		if (required) { fprintf(stderr, "ERROR: keys cfg not found: %s\n", path.c_str()); return false; }
+		return true;
+	}
+	NLMISC::CConfigFile cf;
+	try
+	{
+		cf.load(path);
+	}
+	catch (const NLMISC::Exception &e)
+	{
+		fprintf(stderr, "ERROR: keys cfg %s: %s\n", path.c_str(), e.what());
+		return false;
+	}
+	uint loaded = 0;
+	for (uint key = 0; key < ZPK_KeyCounter; ++key)
+	{
+		try
+		{
+			NLMISC::CConfigFile::CVar &value = cf.getVar(kPainterKeysName[key]);
+			g_PainterKeys[key] = (uint)value.asInt();
+			++loaded;
+		}
+		catch (const NLMISC::EConfigFile &)
+		{
+			// keep the default (plugin behavior)
+		}
+	}
+	printf("keys cfg %s: %u binding(s) applied\n", path.c_str(), loaded);
+	return true;
+}
+
+// LoadVarCfg port: the exact plugin variable set — LightDirection (3 floats), LightDiffuse /
+// LightAmbiant (3 ints), LightMultiply (float), ZoomSpeed (float). Same per-var tolerance.
+static bool loadVarsCfg(const std::string &path, bool required)
+{
+	if (!NLMISC::CFile::fileExists(path))
+	{
+		if (required) { fprintf(stderr, "ERROR: vars cfg not found: %s\n", path.c_str()); return false; }
+		return true;
+	}
+	NLMISC::CConfigFile cf;
+	try
+	{
+		cf.load(path);
+	}
+	catch (const NLMISC::Exception &e)
+	{
+		fprintf(stderr, "ERROR: vars cfg %s: %s\n", path.c_str(), e.what());
+		return false;
+	}
+	uint loaded = 0;
+	try
+	{
+		NLMISC::CConfigFile::CVar &lightDirection = cf.getVar("LightDirection");
+		if (lightDirection.size() == 3)
+		{
+			g_LightDirection.x = lightDirection.asFloat(0);
+			g_LightDirection.y = lightDirection.asFloat(1);
+			g_LightDirection.z = lightDirection.asFloat(2);
+			++loaded;
+		}
+	}
+	catch (const NLMISC::EConfigFile &)
+	{
+	}
+	try
+	{
+		NLMISC::CConfigFile::CVar &lightDiffuse = cf.getVar("LightDiffuse");
+		if (lightDiffuse.size() == 3)
+		{
+			g_LightDiffuse.R = (uint8)lightDiffuse.asInt(0);
+			g_LightDiffuse.G = (uint8)lightDiffuse.asInt(1);
+			g_LightDiffuse.B = (uint8)lightDiffuse.asInt(2);
+			++loaded;
+		}
+	}
+	catch (const NLMISC::EConfigFile &)
+	{
+	}
+	try
+	{
+		NLMISC::CConfigFile::CVar &lightAmbiant = cf.getVar("LightAmbiant");
+		if (lightAmbiant.size() == 3)
+		{
+			g_LightAmbiant.R = (uint8)lightAmbiant.asInt(0);
+			g_LightAmbiant.G = (uint8)lightAmbiant.asInt(1);
+			g_LightAmbiant.B = (uint8)lightAmbiant.asInt(2);
+			++loaded;
+		}
+	}
+	catch (const NLMISC::EConfigFile &)
+	{
+	}
+	try
+	{
+		NLMISC::CConfigFile::CVar &lightMultiply = cf.getVar("LightMultiply");
+		g_LightMultiply = lightMultiply.asFloat();
+		++loaded;
+	}
+	catch (const NLMISC::EConfigFile &)
+	{
+	}
+	try
+	{
+		NLMISC::CConfigFile::CVar &zoomSpeed = cf.getVar("ZoomSpeed");
+		g_ZoomSpeed = zoomSpeed.asFloat();
+		++loaded;
+	}
+	catch (const NLMISC::EConfigFile &)
+	{
+	}
+	printf("vars cfg %s: %u variable(s) applied (light %u,%u,%u dir %.3f,%.3f,%.3f mul %.2f zoom %.1f)\n",
+	       path.c_str(), loaded, g_LightDiffuse.R, g_LightDiffuse.G, g_LightDiffuse.B,
+	       g_LightDirection.x, g_LightDirection.y, g_LightDirection.z, g_LightMultiply, g_ZoomSpeed);
+	return true;
+}
+
+// Bound-key test helpers (0 = unbound)
+static bool zpKeyPushed(TPainterKey action)
+{
+	uint k = g_PainterKeys[action];
+	return k != 0 && NL3D::CNELU::AsyncListener.isKeyPushed((NLMISC::TKey)k);
+}
+
+static bool zpKeyDown(TPainterKey action)
+{
+	uint k = g_PainterKeys[action];
+	return k != 0 && NL3D::CNELU::AsyncListener.isKeyDown((NLMISC::TKey)k);
+}
 
 // ---------------------------------------------------------------------------------------------
 // Zone writing (--dump-zones): current CZone::serial writes version 5; the references are
@@ -710,6 +988,14 @@ static int runPaintScript(ZPPAINT::CPaintCore &core, const std::string &path)
 			NLMISC::fromString(tok[1], g);
 			core.setTileGroup(g);
 		}
+		else if (tok[0] == "mask" && tok.size() >= 2)
+		{
+			// mask <file.tga|none> — color-brush bitmap mask (CPath-resolved)
+			if (tok[1] == "none")
+				core.clearBrushMask();
+			else
+				ok = core.loadBrushMask(tok[1], err);
+		}
 		else if (tok[0] == "dumpclosure" && tok.size() >= 5)
 		{
 			// dumpclosure <zone> <patch> <s> <t> — print the vertex's co-location closure
@@ -774,11 +1060,7 @@ public:
 	}
 };
 
-// paint_ui.cpp default light setup (the cfg overrides are P3b UI territory).
-static const NLMISC::CVector kLightDirection(1.f, 1.f, -1.f);
-static const NLMISC::CRGBA kLightDiffuse(255, 255, 255);
-static const NLMISC::CRGBA kLightAmbiant(0, 0, 0);
-static const float kLightMultiply = 1.f;
+// The light setup lives in g_Light* above (paint_ui.cpp defaults, vars-cfg overridable).
 
 static const uint kMainWidth = 800;
 static const uint kMainHeight = 600;
@@ -1032,8 +1314,8 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 		theLand->Landscape.setTileNear(10000.f);
 		theLand->Landscape.TileBank = bank;
 		theLand->Landscape.enableAutomaticLighting(false);
-		theLand->Landscape.setupAutomaticLightDir(kLightDirection);
-		theLand->Landscape.setupStaticLight(kLightDiffuse, kLightAmbiant, kLightMultiply);
+		theLand->Landscape.setupAutomaticLightDir(g_LightDirection);
+		theLand->Landscape.setupStaticLight(g_LightDiffuse, g_LightAmbiant, g_LightMultiply);
 
 		for (size_t i = 0; i < zones.size(); ++i)
 		{
@@ -1178,12 +1460,19 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 		{
 			// MAIN LOOP (paint.cpp: pump, camera from the mouse listener, render; first frame
 			// switches refine mode off and computes the full tessellation).
+			NLMISC::TTime lastFrameTime = NLMISC::CTime::getLocalTime();
 			do
 			{
 				NL3D::CNELU::EventServer.pump();
 
-				// Tile set selection keys (plugin: the texture panel; here PgUp/PgDn + 0-9 + B),
-				// paint modes T/C/D, brush sizes +/-, group G, displace index [ ], fill F
+				// Frame dt (the plugin's zoom timing)
+				NLMISC::TTime nowTime = NLMISC::CTime::getLocalTime();
+				float dt = (float)(nowTime - lastFrameTime) / 1000.f;
+				lastFrameTime = nowTime;
+
+				// Tile set selection keys (plugin: the texture panel; here PgUp/PgDn + 0-9) and
+				// displace index [ ] stay hardcoded; the plugin-era actions ride the rebindable
+				// key table (see kPainterKeysName / --keys-cfg).
 				if (core)
 				{
 					uint count = core->tileSetCount();
@@ -1197,49 +1486,90 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 							if (NL3D::CNELU::AsyncListener.isKeyPushed((NLMISC::TKey)(NLMISC::Key0 + k)) && k < (int)count)
 								paintListener.CurTileSet = k;
 					}
-					if (NL3D::CNELU::AsyncListener.isKeyPushed(NLMISC::KeyB))
+					if (zpKeyPushed(ZPK_ToggleTileSize))
 						paintListener.Mode256 = !paintListener.Mode256;
-					if (NL3D::CNELU::AsyncListener.isKeyPushed(NLMISC::KeyT))
+					if (zpKeyPushed(ZPK_MModeTile))
 						paintListener.Mode = CPaintMouseListener::ModeTile;
-					if (NL3D::CNELU::AsyncListener.isKeyPushed(NLMISC::KeyC))
+					if (zpKeyPushed(ZPK_MModeColor))
 						paintListener.Mode = CPaintMouseListener::ModeColor;
-					if (NL3D::CNELU::AsyncListener.isKeyPushed(NLMISC::KeyD))
+					if (zpKeyPushed(ZPK_MModeDisplace))
 						paintListener.Mode = CPaintMouseListener::ModeDisplace;
-					if (NL3D::CNELU::AsyncListener.isKeyPushed(NLMISC::KeyADD))
+					if (zpKeyPushed(ZPK_SizeUp))
 					{
 						if (paintListener.Mode == CPaintMouseListener::ModeColor)
 							paintListener.BrushRadius = std::min(paintListener.BrushRadius * 1.5f, 32.f);
 						else
 							core->setBrushSize(core->brushSize() + 1);
 					}
-					if (NL3D::CNELU::AsyncListener.isKeyPushed(NLMISC::KeySUBTRACT))
+					if (zpKeyPushed(ZPK_SizeDown))
 					{
 						if (paintListener.Mode == CPaintMouseListener::ModeColor)
 							paintListener.BrushRadius = std::max(paintListener.BrushRadius / 1.5f, 2.f);
 						else if (core->brushSize() > 0)
 							core->setBrushSize(core->brushSize() - 1);
 					}
-					if (NL3D::CNELU::AsyncListener.isKeyPushed(NLMISC::KeyG))
+					if (zpKeyPushed(ZPK_GroupUp))
 						core->setTileGroup((core->tileGroup() + 1) % 13);
+					if (zpKeyPushed(ZPK_GroupDown))
+						core->setTileGroup((core->tileGroup() + 12) % 13);
 					if (NL3D::CNELU::AsyncListener.isKeyPushed(NLMISC::KeyLBRACKET))
 						paintListener.DisplaceIndex = (paintListener.DisplaceIndex + 15) % 16;
 					if (NL3D::CNELU::AsyncListener.isKeyPushed(NLMISC::KeyRBRACKET))
 						paintListener.DisplaceIndex = (paintListener.DisplaceIndex + 1) % 16;
+					// Live hardness/opacity (plugin: +-0.2 on a 0..1 float; 51/255 == the same
+					// steps on the tool's 0-255 scale)
+					if (zpKeyPushed(ZPK_HardnessUp))
+						paintListener.BrushHardness = std::min(paintListener.BrushHardness + 51u, 255u);
+					if (zpKeyPushed(ZPK_HardnessDown))
+						paintListener.BrushHardness = paintListener.BrushHardness >= 51u ? paintListener.BrushHardness - 51u : 0u;
+					if (zpKeyPushed(ZPK_OpacityUp))
+						paintListener.BrushOpacity = std::min(paintListener.BrushOpacity + 51u, 255u);
+					if (zpKeyPushed(ZPK_OpacityDown))
+						paintListener.BrushOpacity = paintListener.BrushOpacity >= 51u ? paintListener.BrushOpacity - 51u : 0u;
+					// Brush mask cycle + mode toggle (plugin SelectColorBrush was a file dialog;
+					// the standalone key cycles the shipped set: none -> mask1 -> ... -> none)
+					if (zpKeyPushed(ZPK_SelectColorBrush) && !g_MaskFiles.empty())
+					{
+						g_MaskCycle = (g_MaskCycle + 1) % ((int)g_MaskFiles.size() + 1);
+						std::string err;
+						if (g_MaskCycle == 0)
+							core->clearBrushMask();
+						else if (!core->loadBrushMask(g_MaskFiles[g_MaskCycle - 1], err))
+							fprintf(stderr, "WARNING: %s\n", err.c_str());
+					}
+					if (zpKeyPushed(ZPK_ToggleColorBrushMode))
+						core->setBrushMaskMode(!core->brushMaskMode());
+					if (zpKeyPushed(ZPK_LockBorders))
+						core->setLockBorders(!core->lockBordersOn());
 					if (!paintListener.Pressed)
 						paintListener.updateHover();
-					// F: fill the patch under the cursor per mode
-					if (NL3D::CNELU::AsyncListener.isKeyPushed(NLMISC::KeyF) && paintListener.HaveHover
-						&& !core->zoneFrozen(paintListener.HoverZone))
+					// Fill0-3: fill the patch under the cursor per mode (the rotation applies to
+					// the tile fill, like the plugin's four fill modes)
+					for (int fillRot = 0; fillRot < 4; ++fillRot)
 					{
+						if (!zpKeyPushed((TPainterKey)(ZPK_Fill0 + fillRot))) continue;
+						if (!paintListener.HaveHover || core->zoneFrozen(paintListener.HoverZone)) continue;
 						std::string err;
 						uint patch = (uint)(paintListener.HoverTile / ZP_NUM_TILE_SEL);
 						if (paintListener.Mode == CPaintMouseListener::ModeTile)
-							core->opFillTile(paintListener.HoverZone, patch, paintListener.CurTileSet, 0, paintListener.Mode256, err);
+							core->opFillTile(paintListener.HoverZone, patch, paintListener.CurTileSet, fillRot, paintListener.Mode256, err);
 						else if (paintListener.Mode == CPaintMouseListener::ModeColor)
 							core->opFillColor(paintListener.HoverZone, patch, paintListener.BrushColor, 256, err);
 						else
 							core->opFillDisplace(paintListener.HoverZone, patch, paintListener.DisplaceIndex, err);
 					}
+				}
+
+				// Zoom keys (plugin myThread zoom: ZoomSpeed * dt along the view direction;
+				// unbound by default, cfg-bindable)
+				if (zpKeyDown(ZPK_ZoomIn) || zpKeyDown(ZPK_ZoomOut))
+				{
+					float zoom = 0.f;
+					if (zpKeyDown(ZPK_ZoomIn)) zoom += g_ZoomSpeed * dt;
+					if (zpKeyDown(ZPK_ZoomOut)) zoom -= g_ZoomSpeed * dt;
+					NLMISC::CMatrix zoomMat = mouseListener.getViewMatrix();
+					zoomMat.setPos(zoomMat.getPos() + zoomMat.getJ() * zoom);
+					mouseListener.setMatrix(zoomMat);
 				}
 
 				NLMISC::CMatrix camKey = mouseListener.getViewMatrix();
@@ -1271,16 +1601,18 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 				{
 					static const char *modeNames[3] = { "TILE", "COLOR", "DISPLACE" };
 					textContext.setColor(NLMISC::CRGBA(255, 255, 255));
-					textContext.printfAt(0.01f, 0.98f, "[%s] TileSet %d/%u '%s'  %s  brush %u  group %u  undo %u",
+					textContext.printfAt(0.01f, 0.98f, "[%s] TileSet %d/%u '%s'  %s  brush %u  group %u  undo %u%s",
 					                     modeNames[paintListener.Mode % 3],
 					                     paintListener.CurTileSet, core->tileSetCount(),
 					                     core->tileSetName(paintListener.CurTileSet).c_str(),
 					                     paintListener.Mode256 ? "256" : "128", core->brushSize(),
-					                     core->tileGroup(), core->undoDepth());
+					                     core->tileGroup(), core->undoDepth(),
+					                     core->lockBordersOn() ? "  LOCK" : "");
 					if (paintListener.Mode == CPaintMouseListener::ModeColor)
-						textContext.printfAt(0.01f, 0.955f, "color %02x%02x%02x  radius %.1fm  hardness %u  opacity %u",
+						textContext.printfAt(0.01f, 0.955f, "color %02x%02x%02x  radius %.1fm  hardness %u  opacity %u  mask %s",
 						                     paintListener.BrushColor.R, paintListener.BrushColor.G, paintListener.BrushColor.B,
-						                     paintListener.BrushRadius, paintListener.BrushHardness, paintListener.BrushOpacity);
+						                     paintListener.BrushRadius, paintListener.BrushHardness, paintListener.BrushOpacity,
+						                     core->brushMaskMode() ? core->brushMaskName().c_str() : "off");
 					else if (paintListener.Mode == CPaintMouseListener::ModeDisplace)
 						textContext.printfAt(0.01f, 0.955f, "displace index %u", paintListener.DisplaceIndex);
 					if (paintListener.HaveHover)
@@ -1336,7 +1668,19 @@ int main(int argc, char **argv)
 
 	NLMISC::CCmdArgs args;
 	args.setDescription("Standalone zone painter (design doc \xc2\xa7" "14-paint). Default mode opens the "
-	                    "painting landscape viewer; the headless modes need no 3D driver.");
+	                    "painting landscape viewer; the headless modes need no 3D driver.\n"
+	                    "Config files (plugin keys.cfg port, NLMISC::CConfigFile syntax; one file may serve both):\n"
+	                    "  keys cfg (--keys-cfg, else ./zone_painter_keys.cfg): rebinds the plugin-era actions by name,\n"
+	                    "  values are NeL TKey codes (the plugin's keys.cfg Key* constant block parses verbatim).\n"
+	                    "  Honored: ModeTile ModeColor ModeDisplace SizeUp SizeDown ToggleTileSize GroupUp GroupDown\n"
+	                    "  Fill0 Fill1 Fill2 Fill3 HardnessUp HardnessDown OpacityUp OpacityDown SelectColorBrush\n"
+	                    "  ToggleColorBrushMode LockBorders ZoomIn ZoomOut (defaults: T C D + - B G V F F6 F7 F8\n"
+	                    "  Home End Insert Delete S Q L, zoom unbound). Accepted+ignored (no tool equivalent):\n"
+	                    "  Select Pick ToggleColor BackgroundColor ToggleArrows Zouille AutomaticLighting GetState ResetPatch.\n"
+	                    "  vars cfg (--vars-cfg, else ./zone_painter_vars.cfg): LightDirection {x,y,z}, LightDiffuse {r,g,b},\n"
+	                    "  LightAmbiant {r,g,b}, LightMultiply, ZoomSpeed (the plugin LoadVarCfg set).\n"
+	                    "Fixed viewer keys: PgUp/PgDn + 0-9 tile set, [ ] displace index, Ctrl+Z/Ctrl+E undo/redo,\n"
+	                    "F12 screenshot, ESC quit.");
 	args.addAdditionalArg("input.max", "Input .max scene");
 	args.addArg("", "bank", "bank", "Tile bank (.smallbank/.bank); required for painting and the viewer/screenshot modes");
 	args.addArg("", "bank-recursive", "", "Add the bank directory to the texture search path recursively");
@@ -1348,12 +1692,16 @@ int main(int argc, char **argv)
 	args.addArg("", "paint-script", "file", "Scripted paint ops (headless without a display mode)");
 	args.addArg("", "seed", "n", "Random seed for the paint ops (default 1; ops use a cycle counter for base tiles)");
 	args.addArg("", "lock-borders", "", "Lock tiles bordering frozen zones or open edges (plugin lockBorders)");
-	args.addArg("", "brush", "0-2", "Tile brush size for mouse strokes (recursion depths 0/4/8)");
+	args.addArg("", "brush", "0-2", "Brush size for tile mouse strokes and displace painting (recursion depths 0/4/8)");
 	args.addArg("", "group", "0-12", "Tile group bias (0 = none)");
 	args.addArg("", "color", "rrggbb", "Viewer color brush color (default ffffff)");
 	args.addArg("", "radius", "meters", "Viewer color brush radius (default 8; keys +/- range 2-32)");
-	args.addArg("", "hardness", "0-255", "Viewer color brush hardness (default 128)");
-	args.addArg("", "opacity", "0-255", "Viewer color brush opacity (default 255)");
+	args.addArg("", "hardness", "0-255", "Viewer color brush hardness (default 128; live keys Home/End)");
+	args.addArg("", "opacity", "0-255", "Viewer color brush opacity (default 255; live keys Insert/Delete)");
+	args.addArg("", "brush-mask", "file.tga", "Color-brush bitmap mask (CPath-resolved; plugin loadBrush port; script op `mask <file|none>`)");
+	args.addArg("", "brush-dir", "dir", "Brush mask directory for the viewer cycle key (default: <exe dir>/brushes, else ./brushes)");
+	args.addArg("", "keys-cfg", "file", "Key bindings config (see the description; default zone_painter_keys.cfg in cwd when present)");
+	args.addArg("", "vars-cfg", "file", "Light/zoom variables config (see the description; default zone_painter_vars.cfg in cwd when present)");
 	args.addArg("", "displace-index", "0-15", "Viewer displace paint index (default 0)");
 	args.addArg("", "db", "root", "Database root for authored-path texture resolution (default: derived from the input path)");
 	args.addArg("", "preload-tiles", "", "Viewer: flush every tile set's tiles at startup (overrides the stored 0x4010 flag on)");
@@ -1375,6 +1723,38 @@ int main(int argc, char **argv)
 	std::string input = args.getAdditionalArg("input.max")[0];
 	g_InputPath = input;
 	g_verbose = args.haveLongArg("verbose");
+	// Cfg loaders (plugin LoadKeyCfg/LoadVarCfg port): CLI path, else the default cwd name,
+	// else the hardcoded defaults stand. No cfg present == the pre-cfg tool, identically.
+	{
+		bool cfgOk = args.haveLongArg("keys-cfg")
+			? loadKeysCfg(args.getLongArg("keys-cfg")[0], true)
+			: loadKeysCfg("zone_painter_keys.cfg", false);
+		if (!cfgOk) return 1;
+		cfgOk = args.haveLongArg("vars-cfg")
+			? loadVarsCfg(args.getLongArg("vars-cfg")[0], true)
+			: loadVarsCfg("zone_painter_vars.cfg", false);
+		if (!cfgOk) return 1;
+	}
+	// Shipped brush-mask set for the viewer cycle key (SelectColorBrush)
+	{
+		std::string brushDir;
+		if (args.haveLongArg("brush-dir")) brushDir = args.getLongArg("brush-dir")[0];
+		else
+		{
+			std::string exeDir = NLMISC::CFile::getPath(argv[0]);
+			if (!exeDir.empty() && NLMISC::CFile::isDirectory(exeDir + "brushes")) brushDir = exeDir + "brushes";
+			else if (NLMISC::CFile::isDirectory("brushes")) brushDir = "brushes";
+		}
+		if (!brushDir.empty())
+		{
+			std::vector<std::string> files;
+			NLMISC::CPath::getPathContent(brushDir, false, false, true, files);
+			for (size_t i = 0; i < files.size(); ++i)
+				if (NLMISC::toLowerAscii(NLMISC::CFile::getExtension(files[i])) == "tga")
+					g_MaskFiles.push_back(files[i]);
+			std::sort(g_MaskFiles.begin(), g_MaskFiles.end());
+		}
+	}
 	std::string bankPath = args.haveLongArg("bank") ? args.getLongArg("bank")[0] : std::string();
 	g_BankPath = bankPath;
 	bool bankRecursive = args.haveLongArg("bank-recursive");
@@ -1466,6 +1846,20 @@ int main(int argc, char **argv)
 	}
 	if (args.haveLongArg("brush")) { uint b; NLMISC::fromString(args.getLongArg("brush")[0], b); core.setBrushSize(b); }
 	if (args.haveLongArg("group")) { uint g; NLMISC::fromString(args.getLongArg("group")[0], g); core.setTileGroup(g); }
+	if (args.haveLongArg("brush-mask"))
+	{
+		std::string err;
+		if (!core.loadBrushMask(args.getLongArg("brush-mask")[0], err))
+		{
+			fprintf(stderr, "ERROR: %s\n", err.c_str());
+			return 1;
+		}
+		// Start the viewer cycle on the loaded mask when it is one of the shipped set
+		for (size_t i = 0; i < g_MaskFiles.size(); ++i)
+			if (NLMISC::CFile::getFilename(g_MaskFiles[i]) == core.brushMaskName())
+				g_MaskCycle = (int)i + 1;
+		printf("brush mask: %s\n", core.brushMaskName().c_str());
+	}
 	if (args.haveLongArg("color"))
 	{
 		uint32 rgb = (uint32)strtoul(args.getLongArg("color")[0].c_str(), NULL, 16);
