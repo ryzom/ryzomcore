@@ -382,20 +382,32 @@ void addContextMeshes(PMAXLOAD::SLoadedMax &lm, NL3D::CScene *scene, NL3D::CShap
 		if (!node) continue;
 		std::string name = SCENELIB::nodeName(*node);
 		if (isDebugMarker(name)) continue;
-		CSceneClass *obj = unwrapObject(node);
+		// XRef-RESOLVING object walk (SCENELIB::baseObjectOf, the same one the mesh eval uses):
+		// the buildings of village/town bricks are XRefObject nodes referencing construction
+		// .max files, and the XRefObject wrapper's registered superclass is 0x60 — a wrapper-
+		// level superclass test drops every one of them silently. Resolve first, then gate.
+		CSceneClass *obj = SCENELIB::baseObjectOf(*node, NULL, NULL);
 		if (!obj) continue;
+		if (obj->classDesc()->classId().a() == 0x92aab38c)
+		{
+			// Unresolvable XRef (missing referenced file) — the resolver already warned.
+			++stats.Skipped;
+			continue;
+		}
 		// The plugin's viewport rule: zones stay in the landscape; every other buildable mesh
 		// displays. GeomObject superclass gates out lights/cameras/helpers/splines silently.
 		if (obj->classDesc()->superClassId() != ZP_SCLASS_GEOMOBJECT) continue;
 		if (dynamic_cast<NELPATCH::CRklPatchObject *>(obj)) continue;
 
 		// Property-respecting display filters — the flags that mark meta-geometry never meant
-		// to render: hidden nodes (what kept collision/cluster helpers out of the Max viewport
-		// too), collision meshes, accelerator cluster/portal volumes, PACS primitives and
-		// light/camera targets. DONOTEXPORT stays VISIBLE by design: it marks export
-		// exclusion, not viewport invisibility (reference geometry showed in Max).
+		// to render: collision meshes, accelerator cluster/portal volumes, PACS primitives and
+		// light/camera targets. The node HIDDEN flag is deliberately IGNORED, like the
+		// plugin's buildShape walk: village/town bricks are saved with the XRef'd buildings
+		// hidden (terrain-work viewport state), and the painting scene wants them as context —
+		// measured corpus-side, hidden catches ONLY those (all meta-geometry carries the
+		// appdata/class marks). DONOTEXPORT likewise stays visible (export exclusion, not
+		// viewport invisibility).
 		{
-			if (node->isHidden()) { ++stats.Filtered; ++stats.FilteredHidden; continue; }
 			NLMISC::CClassId ocid = obj->classDesc()->classId();
 			if (ocid == PMAX_EXPORT_IDS::CLASSID_PACS_BOX || ocid == PMAX_EXPORT_IDS::CLASSID_PACS_CYL
 				|| ocid == SCENELIB::CLASSID_TARGET) { ++stats.Filtered; ++stats.FilteredClass; continue; }
