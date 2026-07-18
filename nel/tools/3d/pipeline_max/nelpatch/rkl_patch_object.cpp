@@ -173,6 +173,19 @@ bool CRklPatchObject::decodePatch(SPatchMesh &out, std::string &err) const
 	return decodePatchMesh(m_Claimed, out, err);
 }
 
+bool CRklPatchObject::setRPatch(const SRPatchMesh &in)
+{
+	for (TStorageObjectContainer::iterator it = m_Claimed.begin(), end = m_Claimed.end(); it != end; ++it)
+	{
+		if (it->first != 0x08fd) continue;
+		CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
+		if (!raw) return false;
+		encodeRpoChunk(in, raw->Value);
+		return true;
+	}
+	return false;
+}
+
 IStorageObject *CRklPatchObject::createChunkById(uint16 id, bool container)
 {
 	// All leaf chunks default to CStorageRaw and containers to CStorageContainer already;

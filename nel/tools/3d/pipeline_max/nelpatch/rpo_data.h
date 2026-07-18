@@ -53,8 +53,11 @@ namespace NELPATCH {
 /// One tile layer reference (bool8 reserved + int32 tile + int32 rotate on disk)
 struct SRpoTileLayer
 {
+	uint8 Reserved;  // the on-disk bool8 (the v9 writer emits false; retained for re-encode)
 	sint32 Tile;     // tile index in the bank, or -1/0x7fffffff-style empty markers per _Num
 	sint32 Rotate;   // 0..3
+
+	SRpoTileLayer() : Reserved(0), Tile(0), Rotate(0) { }
 };
 
 /// Per-tile record (v9: uint16 num, uint16 flags, uint8 noise, 3 layers)
@@ -64,6 +67,9 @@ struct SRpoTile
 	uint16 Flags;    // case (bits 0-2) + displace noise (bits 3-6), see tileDesc
 	uint8 Noise;     // v9 displace noise byte (duplicates the flags bits through setDisplace)
 	SRpoTileLayer Layer[3];
+	sint32 OldA, OldB; // v1/v2 only: the two legacy ints per tile (retained for re-encode)
+
+	SRpoTile() : Num(0), Flags(0), Noise(0), OldA(0), OldB(0) { }
 };
 
 /// Per-patch user info
@@ -99,6 +105,11 @@ struct SRPatchMesh
 	uint8 KeepMapping;
 	sint32 TransitionType; // trailer as written by the v9-era writer (see A.4)
 	sint32 SelLevel;
+	uint8 TrailerCount;    // how many of the two trailer ints the blob carried (0/1/2) — the
+	                       // original loader tolerates their absence; re-encode must match
+
+	SRPatchMesh() : Version(9), TileTessLevel(0), ModeTile(0), KeepMapping(0),
+		TransitionType(0), SelLevel(0), TrailerCount(2) { }
 };
 
 /// Decode an RPatchMesh blob from raw bytes (chunk 0x4001 payload, or 0x08FD payload past the
@@ -107,6 +118,14 @@ bool decodeRPatchMesh(const uint8 *data, size_t size, SRPatchMesh &out, std::str
 
 /// Decode the 0x08FD chunk payload (uint32 rpoVersion == 0, then the blob).
 bool decodeRpoChunk(const uint8 *data, size_t size, SRPatchMesh &out, std::string &err);
+
+/// Encode an RPatchMesh blob (chunk 0x4001 payload layout) — the exact inverse of
+/// decodeRPatchMesh, version-faithful across the same v1-v9 range (the legacy retention
+/// fields make decode-encode the identity on every valid blob).
+void encodeRPatchMesh(const SRPatchMesh &in, std::vector<uint8> &out);
+
+/// Encode the 0x08FD chunk payload (uint32 rpoVersion 0, then the blob).
+void encodeRpoChunk(const SRPatchMesh &in, std::vector<uint8> &out);
 
 // ---------------------------------------------------------------------------------------------
 // Max PatchMesh chunk stream. Chunk ids scoped to the PatchMesh stream (they appear flat on the

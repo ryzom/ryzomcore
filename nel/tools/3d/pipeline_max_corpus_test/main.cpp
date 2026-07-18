@@ -67,6 +67,7 @@
 #include "../pipeline_max/epoly/epoly.h"
 #include "../pipeline_max/biped/biped.h"
 #include "../pipeline_max/nelpatch/nelpatch.h"
+#include "../pipeline_max/nelpatch/rkl_patch_object.h"
 
 #include "../pipeline_max/builtin/animatable.h"
 #include "../pipeline_max/builtin/storage/app_data.h"
@@ -1628,6 +1629,121 @@ static int appDataSelfTest(CStorageOleIn &in, CSceneClassRegistry *reg, bool ver
 	return fail ? 1 : 0;
 }
 
+// Parse the Scene stream fully and verify the RPatchMesh blob codec (nelpatch/rpo_data
+// encodeRPatchMesh) is the byte-identity inverse of the decoder on every blob in the file:
+// the 0x08FD chunk of every RklPatch object (base RPO state) and the 0x4001 RFINALPATCH leaf
+// of every NeL Edit Patch / NeL Patch Painter modifier snapshot (per-node local data 0x2512 ->
+// 0x1000). This is the write-direction proof the standalone zone painter's save path rides on
+// (design-doc: overlay data, paired corpus-wide re-encode selftest). Prints an RPOV version
+// histogram line per version seen, and flags 0x4001 leaves under unexpected modifier classes.
+static int rpoSelfTest(const char *maxFile, CStorageOleIn &in, CSceneClassRegistry *reg, bool verbose)
+{
+	CDllDirectory dll;
+	CClassDirectory3 cd(&dll);
+	CScene scene(reg, &dll, &cd);
+	{
+		std::vector<uint8> b;
+		if (!in.readStream("DllDirectory", b)) { std::cerr << "no DllDirectory\n"; return 2; }
+		CStorageStream ss(b); try { dll.serial(ss); dll.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "dll: " << e.what() << "\n"; return 2; }
+	}
+	{
+		std::vector<uint8> b;
+		if (!in.readStream("ClassDirectory3", b)) { std::cerr << "no ClassDirectory3\n"; return 2; }
+		CStorageStream ss(b); try { cd.serial(ss); cd.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "cd: " << e.what() << "\n"; return 2; }
+	}
+	{
+		std::vector<uint8> b;
+		if (!in.readStream("Scene", b)) { std::cerr << "no Scene\n"; return 2; }
+		CStorageStream ss(b); try { scene.serial(ss); scene.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "scene: " << e.what() << "\n"; return 2; }
+	}
+	// The two modifier classes whose per-node local data carries an RFINALPATCH 0x4001 blob
+	// (both save through RPatchMesh::Save; the zone exporter evaluates the same snapshots).
+	static const NLMISC::CClassId nelEditPatchClassId(0x4dd14a3c, 0x4ac23c0c);
+	static const NLMISC::CClassId nelPatchPaintClassId(0x0c49560f, 0x3c3d68e7);
+	uint nRpo = 0, nSnap = 0, nDecodeFail = 0, nMismatch = 0, nOtherClass = 0;
+	std::map<uint32, uint> versionInv;
+	CSceneClassContainer *ssc = scene.container();
+	for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
+	{
+		if (NELPATCH::CRklPatchObject *rpo = dynamic_cast<NELPATCH::CRklPatchObject *>(it->second))
+		{
+			const CStorageRaw *raw = rpo->rpoChunk();
+			if (!raw) continue; // no 0x08FD chunk claimed (never observed; not an RPO state)
+			++nRpo;
+			NELPATCH::SRPatchMesh rp;
+			std::string err;
+			if (!NELPATCH::decodeRpoChunk(nlVectorData(raw->Value), raw->Value.size(), rp, err))
+			{
+				++nDecodeFail;
+				std::cerr << "  rpo selftest DECODE FAIL 0x08fd (" << maxFile << "): " << err << "\n";
+				continue;
+			}
+			++versionInv[rp.Version];
+			std::vector<uint8> re;
+			NELPATCH::encodeRpoChunk(rp, re);
+			if (re != raw->Value)
+			{
+				++nMismatch;
+				std::cerr << "  rpo selftest REENCODE MISMATCH 0x08fd (" << maxFile << "): "
+				          << raw->Value.size() << " -> " << re.size() << " bytes\n";
+			}
+			continue;
+		}
+		BUILTIN::CDerivedObject *d = dynamic_cast<BUILTIN::CDerivedObject *>(it->second);
+		if (!d) continue;
+		for (uint i = 0; i < d->modifierCount(); ++i)
+		{
+			CStorageContainer *data = dynamic_cast<CStorageContainer *>(d->localModData(i));
+			if (!data) continue;
+			// local data wrapper 0x1000 -> RFINALPATCH 0x4001 raw leaf
+			CStorageContainer *wrap = NULL;
+			for (CStorageContainer::TStorageObjectConstIt jt = data->chunks().begin(); jt != data->chunks().end() && !wrap; ++jt)
+				if (jt->first == 0x1000) wrap = dynamic_cast<CStorageContainer *>(jt->second);
+			if (!wrap) continue;
+			CStorageRaw *rfp = NULL;
+			for (CStorageContainer::TStorageObjectConstIt jt = wrap->chunks().begin(); jt != wrap->chunks().end() && !rfp; ++jt)
+				if (jt->first == 0x4001) rfp = dynamic_cast<CStorageRaw *>(jt->second);
+			if (!rfp) continue;
+			CSceneClass *mod = d->modifier(i);
+			const NLMISC::CClassId modClass = mod ? mod->classDesc()->classId() : NLMISC::CClassId::Null;
+			if (modClass != nelEditPatchClassId && modClass != nelPatchPaintClassId)
+			{
+				++nOtherClass;
+				std::cerr << "  rpo selftest UNEXPECTED 0x4001 under modifier class "
+				          << modClass.toString() << " (" << maxFile << ")\n";
+			}
+			++nSnap;
+			NELPATCH::SRPatchMesh rp;
+			std::string err;
+			if (!NELPATCH::decodeRPatchMesh(nlVectorData(rfp->Value), rfp->Value.size(), rp, err))
+			{
+				++nDecodeFail;
+				std::cerr << "  rpo selftest DECODE FAIL 0x4001 (" << maxFile << "): " << err << "\n";
+				continue;
+			}
+			++versionInv[rp.Version];
+			std::vector<uint8> re;
+			NELPATCH::encodeRPatchMesh(rp, re);
+			if (re != rfp->Value)
+			{
+				++nMismatch;
+				std::cerr << "  rpo selftest REENCODE MISMATCH 0x4001 (" << maxFile << "): "
+				          << rfp->Value.size() << " -> " << re.size() << " bytes\n";
+			}
+			if (verbose)
+				std::cerr << "  rpo snapshot v" << rp.Version << " (" << rp.Patches.size()
+				          << " ui patches) under " << modClass.toString() << "\n";
+		}
+	}
+	for (std::map<uint32, uint>::const_iterator vt = versionInv.begin(); vt != versionInv.end(); ++vt)
+		std::cout << "RPOV v=" << vt->first << " n=" << vt->second << "\n";
+	bool fail = nDecodeFail || nMismatch || nOtherClass;
+	std::cout << (fail ? "FAIL" : "OK") << " rpo-selftest: " << nRpo << " rpo, " << nSnap
+	          << " snapshots, " << nDecodeFail << " decode-fail, " << nMismatch << " mismatch, "
+	          << nOtherClass << " other-class\n";
+	return fail ? 1 : 0;
+}
+
 // Recursive reference-tree dump (used by --uvgen-dump).
 static void dumpRefTree(CSceneClass *obj, int depth, int maxDepth)
 {
@@ -1692,6 +1808,7 @@ int main(int argc, char **argv)
 	bool doMapChannelSelfTest = false;
 	bool doPrsSelfTest = false;
 	bool doAppDataSelfTest = false;
+	bool doRpoSelfTest = false;
 	bool doModifySave = false;
 	bool doAppDataModifySave = false;
 	bool doMtlDump = false;
@@ -1714,6 +1831,7 @@ int main(int argc, char **argv)
 		else if (a == "--mapchannel-selftest") doMapChannelSelfTest = true;
 		else if (a == "--prs-selftest") doPrsSelfTest = true;
 		else if (a == "--appdata-selftest") doAppDataSelfTest = true;
+		else if (a == "--rpo-selftest") doRpoSelfTest = true;
 		else if (a == "--modify-save-test") doModifySave = true;
 		else if (a == "--appdata-modify-save-test") doAppDataModifySave = true;
 		else if (a == "--mtl-dump") doMtlDump = true;
@@ -1729,7 +1847,7 @@ int main(int argc, char **argv)
 	}
 	if (!maxFile)
 	{
-		std::cerr << "usage: pipeline_max_corpus_test [--parse] [--verbose] [--pb2-selftest] [--oldpb-selftest] [--shape-selftest] [--derived-selftest] [--meshdelta-selftest] [--mapext-selftest] [--mapchannel-selftest] [--prs-selftest] [--appdata-selftest] [--modify-save-test] [--appdata-modify-save-test] <input.max>\n";
+		std::cerr << "usage: pipeline_max_corpus_test [--parse] [--verbose] [--pb2-selftest] [--oldpb-selftest] [--shape-selftest] [--derived-selftest] [--meshdelta-selftest] [--mapext-selftest] [--mapchannel-selftest] [--prs-selftest] [--appdata-selftest] [--rpo-selftest] [--modify-save-test] [--appdata-modify-save-test] <input.max>\n";
 		return 2;
 	}
 
@@ -1802,6 +1920,13 @@ int main(int argc, char **argv)
 	if (doAppDataSelfTest)
 	{
 		int rc = appDataSelfTest(in, &reg, verbose);
+		remove(g_tempPath.c_str());
+		return rc;
+	}
+
+	if (doRpoSelfTest)
+	{
+		int rc = rpoSelfTest(maxFile, in, &reg, verbose);
 		remove(g_tempPath.c_str());
 		return rc;
 	}

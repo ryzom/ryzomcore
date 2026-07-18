@@ -88,6 +88,12 @@ public:
 	/// Decode the PatchMesh stream chunks
 	bool decodePatch(SPatchMesh &out, std::string &err) const;
 
+	// write access (valid between parse and clean/disown; the geometry chunks stay verbatim)
+	/// Replace the 0x08FD payload with the re-encoded blob (rpoVersion 0 + encodeRPatchMesh).
+	/// Returns false when the object has no 0x08FD chunk. Decode-encode is byte-identity, so
+	/// writing back an unmodified decode leaves the file byte-exact.
+	bool setRPatch(const SRPatchMesh &in);
+
 protected:
 	// inherited
 	virtual IStorageObject *createChunkById(uint16 id, bool container);

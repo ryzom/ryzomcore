@@ -88,11 +88,8 @@ bool decodeRPatchMesh(const uint8 *data, size_t size, SRPatchMesh &out, std::str
 			SRpoTile &t = p.Tiles[j];
 			if (v < 3)
 			{
-				// Two discarded ints per tile; tiles empty.
-				sint32 oldA, oldB;
-				if (!r.value(oldA) || !r.value(oldB)) { err = "blob truncated at v1/v2 tile"; return false; }
-				t.Num = 0; t.Flags = 0; t.Noise = 0;
-				memset(t.Layer, 0, sizeof(t.Layer));
+				// Two legacy ints per tile; tiles empty (retained for byte-faithful re-encode).
+				if (!r.value(t.OldA) || !r.value(t.OldB)) { err = "blob truncated at v1/v2 tile"; return false; }
 				continue;
 			}
 			if (!r.value(t.Num)) { err = "blob truncated at tile num"; return false; }
@@ -108,8 +105,7 @@ bool decodeRPatchMesh(const uint8 *data, size_t size, SRPatchMesh &out, std::str
 			else t.Noise = 0; // pre-v9: no noise stored; the original loader randomizes at load
 			for (int k = 0; k < 3; ++k)
 			{
-				uint8 reserved;
-				if (!r.value(reserved) || !r.value(t.Layer[k].Tile) || !r.value(t.Layer[k].Rotate))
+				if (!r.value(t.Layer[k].Reserved) || !r.value(t.Layer[k].Tile) || !r.value(t.Layer[k].Rotate))
 				{ err = "blob truncated at tile layer"; return false; }
 			}
 		}
@@ -145,8 +141,9 @@ bool decodeRPatchMesh(const uint8 *data, size_t size, SRPatchMesh &out, std::str
 	// authority — wiki Part A.4). Genuinely old writers may end earlier; bound by size.
 	out.TransitionType = 0;
 	out.SelLevel = 0;
-	if (r.Pos + 4 <= r.Size) r.value(out.TransitionType);
-	if (r.Pos + 4 <= r.Size) r.value(out.SelLevel);
+	out.TrailerCount = 0;
+	if (r.Pos + 4 <= r.Size) { r.value(out.TransitionType); out.TrailerCount = 1; }
+	if (r.Pos + 4 <= r.Size) { r.value(out.SelLevel); out.TrailerCount = 2; }
 	if (r.Pos != r.Size) { err = "blob trailing bytes"; return false; }
 	return true;
 }
@@ -158,6 +155,104 @@ bool decodeRpoChunk(const uint8 *data, size_t size, SRPatchMesh &out, std::strin
 	memcpy(&rpoVersion, data, 4);
 	if (rpoVersion != 0) { err = "unexpected rpoVersion"; return false; }
 	return decodeRPatchMesh(data + 4, size - 4, out, err);
+}
+
+// ---------------------------------------------------------------------------------------------
+// RPatchMesh blob encode: the exact inverse of decodeRPatchMesh (mirrors RPatchMesh::Save with
+// the same version branches the decoder consumes, so decode-encode is the identity byte-wise).
+
+namespace {
+
+struct CBlobWriter
+{
+	std::vector<uint8> &Out;
+	CBlobWriter(std::vector<uint8> &out) : Out(out) { }
+	void write(const void *src, size_t n)
+	{
+		size_t pos = Out.size();
+		Out.resize(pos + n);
+		memcpy(&Out[pos], src, n);
+	}
+	template <typename T>
+	void value(const T &v) { write(&v, sizeof(T)); }
+};
+
+} /* anonymous namespace */
+
+void encodeRPatchMesh(const SRPatchMesh &in, std::vector<uint8> &out)
+{
+	out.clear();
+	CBlobWriter w(out);
+	const uint32 v = in.Version;
+	w.value(in.Version);
+
+	w.value((sint32)in.Patches.size());
+	for (size_t i = 0; i < in.Patches.size(); ++i)
+	{
+		const SRpoPatch &p = in.Patches[i];
+		w.value(p.NbTilesU);
+		w.value(p.NbTilesV);
+		w.value((sint32)p.Tiles.size());
+		for (size_t j = 0; j < p.Tiles.size(); ++j)
+		{
+			const SRpoTile &t = p.Tiles[j];
+			if (v < 3)
+			{
+				w.value(t.OldA);
+				w.value(t.OldB);
+				continue;
+			}
+			w.value(t.Num);
+			if (v >= 5) w.value(t.Flags);
+			if (v >= 9) w.value(t.Noise);
+			for (int k = 0; k < 3; ++k)
+			{
+				w.value(t.Layer[k].Reserved);
+				w.value(t.Layer[k].Tile);
+				w.value(t.Layer[k].Rotate);
+			}
+		}
+		w.value((sint32)p.Colors.size());
+		for (size_t j = 0; j < p.Colors.size(); ++j)
+			w.value(p.Colors[j]);
+		if (v >= 7)
+			for (int e = 0; e < 4; ++e)
+				w.value(p.EdgeFlags[e]);
+	}
+
+	w.value((sint32)in.Verts.size());
+	for (size_t i = 0; i < in.Verts.size(); ++i)
+	{
+		const SRpoVertexBind &b = in.Verts[i];
+		w.value(b.Binded);
+		w.value(b.Type);
+		w.value(b.Edge);
+		w.value(b.Patch);
+		w.value(b.Before);
+		w.value(b.Before2);
+		w.value(b.After);
+		w.value(b.After2);
+		w.value(b.T);
+		w.value(b.Type2);
+		w.value(b.PrimVert);
+	}
+
+	w.value(in.TileTessLevel);
+	w.value(in.ModeTile);
+	w.value(in.KeepMapping);
+	if (in.TrailerCount >= 1) w.value(in.TransitionType);
+	if (in.TrailerCount >= 2) w.value(in.SelLevel);
+}
+
+void encodeRpoChunk(const SRPatchMesh &in, std::vector<uint8> &out)
+{
+	out.clear();
+	const uint32 rpoVersion = 0;
+	CBlobWriter w(out);
+	w.value(rpoVersion);
+	std::vector<uint8> blob;
+	encodeRPatchMesh(in, blob);
+	if (!blob.empty()) w.write(&blob[0], blob.size());
 }
 
 // ---------------------------------------------------------------------------------------------
