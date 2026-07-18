@@ -36,6 +36,8 @@
 #include <nel/misc/types_nl.h>
 #include "context_display.h"
 
+#include <nel/misc/file.h>
+#include <nel/misc/path.h>
 #include <nel/misc/smart_ptr.h>
 #include <nel/3d/driver.h>
 #include <nel/3d/landscape.h>
@@ -46,6 +48,8 @@
 #include <nel/3d/point_light_model.h>
 #include <nel/3d/scene.h>
 #include <nel/3d/shape_bank.h>
+#include <nel/3d/texture_file.h>
+#include <nel/3d/texture_multi_file.h>
 #include <nel/3d/transform_shape.h>
 
 #include <cstdio>
@@ -57,10 +61,12 @@
 #include "../pipeline_max/builtin/node_impl.h"
 #include "../pipeline_max/builtin/derived_object.h"
 #include "../pipeline_max/builtin/control_keyframer.h"
+#include "../pipeline_max/builtin/param_block_2.h"
 #include "../pipeline_max/nelpatch/rkl_patch_object.h"
 
 #include "../pipeline_max_export_common/max_load.h"
 #include "../pipeline_max_export_common/appdata_util.h"
+#include "../pipeline_max_export_common/db_path.h"
 #include "../pipeline_max_export_common/export_ids.h"
 
 #include "../pipeline_max_export_shape/scene_lib.h"
@@ -107,6 +113,263 @@ static NLMISC::CMatrix toNelMatrix(const MAXMATH::Matrix3M &m)
 	return out;
 }
 
+// ---------------------------------------------------------------------------------------------
+// Out-of-the-box texture resolution (see the header). The authored paths ride the ParamBlock2
+// storage: the PBBitmap value's trailing 0x0003 container carries { BitmapInfo blob, UTF-16
+// file path, UTF-16 device } (the same location the material decode's file-name read uses),
+// and scripted texmaps (multi-bitmap slots, water bumps, ...) keep authored paths in filename
+// STRING params. Both forms observed corpus-wide as absolute "R:\graphics\..." paths.
+
+static bool looksLikeAuthoredPath(const std::string &s)
+{
+	if (s.size() < 4 || s.size() > 260) return false;
+	return s.find(":\\") != std::string::npos || s.find(":/") != std::string::npos;
+}
+
+// Database root from the input path when unset (the ig/cmb convention: parent of the first
+// stuff/landscape/graphics/database component walking up).
+void ensureDbRootFrom(const std::string &inputPath)
+{
+	if (!DBPATH::defaultRoot().empty()) return;
+	std::string abs = inputPath;
+	std::string::size_type slash = abs.find_last_of("/\\");
+	while (slash != std::string::npos)
+	{
+		abs.resize(slash);
+		slash = abs.find_last_of("/\\");
+		if (slash != std::string::npos)
+		{
+			std::string tail = abs.substr(slash + 1);
+			if (tail == "stuff" || tail == "landscape" || tail == "graphics" || tail == "database")
+			{
+				DBPATH::setDefaultRoot(abs.substr(0, slash));
+				break;
+			}
+		}
+	}
+}
+
+// dds answers .tga/.png lookups (the converted sets); registered once, before any search path
+// (CPath requires remaps first).
+static void ensureExtensionRemaps()
+{
+	static bool remapped = false;
+	if (!remapped)
+	{
+		NLMISC::CPath::remapExtension("dds", "tga", true);
+		NLMISC::CPath::remapExtension("dds", "png", true);
+		remapped = true;
+	}
+}
+
+uint registerContextTexturePaths(PMAXLOAD::SLoadedMax &lm, const std::string &inputPath,
+                                 const std::string &bankPath,
+                                 uint &resolvedOut, uint &missingOut)
+{
+	resolvedOut = 0;
+	missingOut = 0;
+
+	// The game-facing texture set: shapes reference .tga names while the converted textures
+	// next to the ecosystem bank are .dds — register the extension remap BEFORE any search
+	// path so the .dds files also answer .tga lookups, and add the bank's sibling map dir
+	// (~/.../ecosystems/<eco>/map, the build_gamedata-converted set) when present.
+	ensureExtensionRemaps();
+	if (!bankPath.empty())
+	{
+		std::string mapDir = NLMISC::CFile::getPath(bankPath) + "../map";
+		if (NLMISC::CFile::isDirectory(mapDir))
+			NLMISC::CPath::addSearchPath(mapDir, false, false);
+	}
+
+	ensureDbRootFrom(inputPath);
+
+	// Authored path collection over every ParamBlock2 in the scene
+	std::set<std::string> authored;
+	CSceneClassContainer *ssc = lm.Scene->container();
+	for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
+	{
+		CParamBlock2 *pb = dynamic_cast<CParamBlock2 *>(it->second);
+		if (!pb) continue;
+		// (a) PBBitmap trailing 0x0003 containers (orphaned): child index 1 = UTF-16 path
+		const CStorageContainer::TStorageObjectContainer &orphans = pb->orphanedChunks();
+		for (CStorageContainer::TStorageObjectConstIt ot = orphans.begin(); ot != orphans.end(); ++ot)
+		{
+			if (ot->first != 0x0003) continue;
+			CStorageContainer *c = dynamic_cast<CStorageContainer *>(ot->second);
+			if (!c) continue;
+			uint idx = 0;
+			for (CStorageContainer::TStorageObjectConstIt jt = c->chunks().begin(); jt != c->chunks().end(); ++jt, ++idx)
+			{
+				if (idx != 1) continue;
+				CStorageRaw *raw = dynamic_cast<CStorageRaw *>(jt->second);
+				if (!raw) break;
+				ucstring us;
+				us.resize(raw->Value.size() / 2);
+				if (!us.empty()) memcpy(&us[0], nlVectorData(raw->Value), us.size() * 2);
+				std::string path = us.toUtf8();
+				while (!path.empty() && path[path.size() - 1] == '\0') path.resize(path.size() - 1);
+				if (looksLikeAuthoredPath(path)) authored.insert(path);
+				break;
+			}
+		}
+		// (b) filename string params (scripted texmap slots etc.)
+		const std::vector<CParamBlock2::SParam> &params = pb->params();
+		for (size_t p = 0; p < params.size(); ++p)
+			if (looksLikeAuthoredPath(params[p].S))
+				authored.insert(params[p].S);
+	}
+
+	// Resolve through DBPATH; register each resolved file's directory once
+	std::set<std::string> dirs;
+	for (std::set<std::string>::const_iterator at = authored.begin(); at != authored.end(); ++at)
+	{
+		std::string disk;
+		if (DBPATH::resolve(*at, disk))
+		{
+			++resolvedOut;
+			dirs.insert(NLMISC::CFile::getPath(disk));
+		}
+		else
+		{
+			++missingOut;
+			fprintf(stderr, "WARNING: context texture path unresolved: %s\n", at->c_str());
+		}
+	}
+	for (std::set<std::string>::const_iterator dt = dirs.begin(); dt != dirs.end(); ++dt)
+		NLMISC::CPath::addSearchPath(*dt, false, false);
+	return (uint)dirs.size();
+}
+
+// Collect every texture file name of a material stage set
+static void collectMaterialTexNames(const NL3D::CMaterial &mat, std::set<std::string> &names)
+{
+	for (uint s = 0; s < NL3D::IDRV_MAT_MAXTEXTURES; ++s)
+	{
+		NL3D::ITexture *tex = mat.getTexture((uint8)s);
+		if (!tex) continue;
+		if (NL3D::CTextureFile *tf = dynamic_cast<NL3D::CTextureFile *>(tex))
+		{
+			if (!tf->getFileName().empty()) names.insert(tf->getFileName());
+		}
+		else if (NL3D::CTextureMultiFile *tm = dynamic_cast<NL3D::CTextureMultiFile *>(tex))
+		{
+			for (uint i = 0; i < tm->getNumFileName(); ++i)
+				if (!tm->getFileName(i).empty()) names.insert(tm->getFileName(i));
+		}
+	}
+}
+
+void resolveContextShapeTextures(const SContextStats &stats, uint &resolvedOut, uint &missingOut)
+{
+	resolvedOut = 0;
+	missingOut = 0;
+	std::set<std::string> names;
+	for (size_t i = 0; i < stats.Shapes.size(); ++i)
+	{
+		NL3D::CMeshBase *mb = dynamic_cast<NL3D::CMeshBase *>(stats.Shapes[i]);
+		if (!mb) continue;
+		for (uint m = 0; m < mb->getNbMaterial(); ++m)
+			collectMaterialTexNames(mb->getMaterial(m), names);
+	}
+	resolveNamesWithSeasons(names, "context texture", resolvedOut, missingOut);
+}
+
+// Shared season-variant resolution: a name that doesn't resolve as-is gets remapped to its
+// first season-postfixed variant that does (_sp first, the reference default; the dds
+// extension remap answers .tga/.png lookups from the converted sets).
+void resolveNamesWithSeasons(const std::set<std::string> &names, const char *what,
+                             uint &resolvedOut, uint &missingOut)
+{
+	static const char *seasons[4] = { "_sp", "_su", "_au", "_wi" };
+	for (std::set<std::string>::const_iterator it = names.begin(); it != names.end(); ++it)
+	{
+		if (!NLMISC::CPath::lookup(*it, false, false).empty())
+		{
+			++resolvedOut;
+			continue;
+		}
+		// Seasonal fallback: name.tga -> name_sp.tga (etc.), served by the dds remap
+		std::string base = NLMISC::CFile::getFilenameWithoutExtension(*it);
+		std::string ext = NLMISC::CFile::getExtension(*it);
+		bool found = false;
+		for (int s = 0; s < 4 && !found; ++s)
+		{
+			std::string candidate = base + seasons[s] + (ext.empty() ? "" : "." + ext);
+			if (!NLMISC::CPath::lookup(candidate, false, false).empty())
+			{
+				NLMISC::CPath::remapFile(*it, candidate);
+				++resolvedOut;
+				found = true;
+			}
+		}
+		if (!found)
+		{
+			++missingOut;
+			// NULL what = quiet (the bank references its ecosystem's whole tile set; entries a
+			// given zone never loads are expected to be absent — the load path warns for real).
+			if (what)
+				fprintf(stderr, "WARNING: %s not found (any season): %s\n", what, it->c_str());
+		}
+	}
+}
+
+void resolveBankTextures(NL3D::CTileBank &bank, const std::string &bankPath,
+                         uint &resolvedOut, uint &missingOut)
+{
+	resolvedOut = 0;
+	missingOut = 0;
+	ensureExtensionRemaps();
+	// The build-converted sets sit next to the smallbank: tiles/ (seasonal tile + alpha-noise
+	// .dds) and diplace/ (displacement maps).
+	if (!bankPath.empty())
+	{
+		std::string tilesDir = NLMISC::CFile::getPath(bankPath) + "../tiles";
+		if (NLMISC::CFile::isDirectory(tilesDir))
+			NLMISC::CPath::addSearchPath(tilesDir, false, false);
+		std::string displaceDir = NLMISC::CFile::getPath(bankPath) + "../diplace";
+		if (NLMISC::CFile::isDirectory(displaceDir))
+			NLMISC::CPath::addSearchPath(displaceDir, false, false);
+		// The converted sets are incomplete (e.g. the alphanoise c/d transition families exist
+		// only as sources): fall back to the workspace source tree
+		// <dbroot>/landscape/_texture_tiles/<eco>[_<season>], recursive (transitions/ subdirs),
+		// eco from the bank file name. Missing dirs skip silently (foreign banks).
+		if (!DBPATH::defaultRoot().empty())
+		{
+			static const char *seasonDirs[5] = { "", "_sp", "_su", "_au", "_wi" };
+			std::string eco = NLMISC::CFile::getFilenameWithoutExtension(bankPath);
+			std::string base = DBPATH::defaultRoot() + "/landscape/_texture_tiles/" + eco;
+			for (int s = 0; s < 5; ++s)
+			{
+				std::string dir = base + seasonDirs[s];
+				if (NLMISC::CFile::isDirectory(dir))
+					NLMISC::CPath::addSearchPath(dir, true, false);
+			}
+		}
+	}
+	// Every texture name the bank references, as the BASENAME the loader will request
+	// (makeAllPathRelative already ran; stored names may still carry authored subdirs).
+	std::set<std::string> names;
+	for (sint t = 0; t < bank.getTileCount(); ++t)
+	{
+		const NL3D::CTile *tile = bank.getTile(t);
+		if (!tile) continue;
+		for (int b = 0; b < NL3D::CTile::bitmapCount; ++b)
+		{
+			std::string name = tile->getRelativeFileName((NL3D::CTile::TBitmap)b);
+			if (name.empty()) continue;
+			for (size_t k = 0; k < name.size(); ++k)
+				if (name[k] == '\\') name[k] = '/';
+			names.insert(NLMISC::CFile::getFilename(name));
+		}
+	}
+	for (uint d = 0; d < bank.getDisplacementMapCount(); ++d)
+	{
+		const char *name = bank.getDisplacementMap(d);
+		if (name && *name) names.insert(NLMISC::CFile::getFilename(name));
+	}
+	resolveNamesWithSeasons(names, NULL, resolvedOut, missingOut);
+}
+
 void addContextMeshes(PMAXLOAD::SLoadedMax &lm, NL3D::CScene *scene, NL3D::CShapeBank *shapeBank,
                       NL3D::CLandscapeModel *land, SContextStats &stats)
 {
@@ -125,6 +388,22 @@ void addContextMeshes(PMAXLOAD::SLoadedMax &lm, NL3D::CScene *scene, NL3D::CShap
 		// displays. GeomObject superclass gates out lights/cameras/helpers/splines silently.
 		if (obj->classDesc()->superClassId() != ZP_SCLASS_GEOMOBJECT) continue;
 		if (dynamic_cast<NELPATCH::CRklPatchObject *>(obj)) continue;
+
+		// Property-respecting display filters — the flags that mark meta-geometry never meant
+		// to render: hidden nodes (what kept collision/cluster helpers out of the Max viewport
+		// too), collision meshes, accelerator cluster/portal volumes, PACS primitives and
+		// light/camera targets. DONOTEXPORT stays VISIBLE by design: it marks export
+		// exclusion, not viewport invisibility (reference geometry showed in Max).
+		{
+			if (node->isHidden()) { ++stats.Filtered; ++stats.FilteredHidden; continue; }
+			NLMISC::CClassId ocid = obj->classDesc()->classId();
+			if (ocid == PMAX_EXPORT_IDS::CLASSID_PACS_BOX || ocid == PMAX_EXPORT_IDS::CLASSID_PACS_CYL
+				|| ocid == SCENELIB::CLASSID_TARGET) { ++stats.Filtered; ++stats.FilteredClass; continue; }
+			std::string accel = APPDATA::getScriptAppDataStr(node, NEL3D_APPDATA_ACCEL, "");
+			if (!accel.empty() && accel != "0" && accel != "32") { ++stats.Filtered; ++stats.FilteredAccel; continue; }
+			if (APPDATA::getScriptAppDataStr(node, NEL3D_APPDATA_COLLISION, "") == "1") { ++stats.Filtered; ++stats.FilteredCollision; continue; }
+			if (APPDATA::getScriptAppDataStr(node, NEL3D_APPDATA_COLLISION_EXTERIOR, "") == "1") { ++stats.Filtered; ++stats.FilteredCollision; continue; }
+		}
 
 		// Plain-mesh build through the shared shape evaluation (the clod reuse route).
 		MAXMATH::Matrix3M localTM = MESHBUILD::getLocalMatrix(*node, tmCache);
@@ -178,6 +457,7 @@ void addContextMeshes(PMAXLOAD::SLoadedMax &lm, NL3D::CScene *scene, NL3D::CShap
 		inst->setMatrix(toNelMatrix(SCENELIB::getNodeTM(node, tmCache)));
 		// The plugin's "Big hack to sort": clip-parent the instance under the landscape model
 		land->clipAddChild(inst);
+		stats.Shapes.push_back(mesh);
 		++stats.Built;
 	}
 }

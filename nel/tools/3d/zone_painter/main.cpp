@@ -145,6 +145,7 @@
 #include "../pipeline_max_export_common/max_math.h"
 #include "../pipeline_max_export_common/max_scene.h"
 #include "../pipeline_max_export_common/max_load.h"
+#include "../pipeline_max_export_common/db_path.h"
 
 using namespace PIPELINE::MAX;
 using namespace PIPELINE::MAX::BUILTIN;
@@ -175,6 +176,8 @@ static uint g_ViewerBrushOpacity = 255;
 static uint g_ViewerDisplaceIndex = 0;
 static bool g_PreloadTiles = false;
 static bool g_IncludeMeshes = false;
+static std::string g_InputPath;
+static std::string g_BankPath;
 
 // ---------------------------------------------------------------------------------------------
 // Zone writing (--dump-zones): current CZone::serial writes version 5; the references are
@@ -803,6 +806,13 @@ static bool loadBankFile(const std::string &bankPath, bool bankRecursive,
 	NLMISC::CPath::addSearchPath(NLMISC::CFile::getPath(bankPath), bankRecursive, false);
 	for (size_t i = 0; i < searchPaths.size(); ++i)
 		NLMISC::CPath::addSearchPath(searchPaths[i], true, false);
+	// Landscape-side season resolution: the bank references unpostfixed names, the workspace
+	// carries season-postfixed converted files (tiles/ + diplace/ siblings of the smallbank).
+	{
+		uint resolved = 0, missing = 0;
+		ZPCTX::resolveBankTextures(bank, bankPath, resolved, missing);
+		printf("bank textures: %u resolved, %u missing\n", resolved, missing);
+	}
 	return true;
 }
 
@@ -1097,15 +1107,26 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 		// ambient + driver lights)
 		if (g_IncludeMeshes)
 		{
+			// Out-of-the-box texture resolution: authored material paths -> DBPATH -> CPath,
+			// plus the ecosystem's converted map dir and the seasonal-name fallback
+			uint texResolved = 0, texMissing = 0;
+			uint texDirs = ZPCTX::registerContextTexturePaths(lm, g_InputPath, g_BankPath, texResolved, texMissing);
+			printf("context textures: %u authored paths resolved, %u unresolved, %u directories registered\n",
+			       texResolved, texMissing, texDirs);
 			ZPCTX::SContextStats ctxStats;
 			ZPCTX::addContextMeshes(lm, NL3D::CNELU::Scene, NL3D::CNELU::ShapeBank, theLand, ctxStats);
+			uint shapeTexResolved = 0, shapeTexMissing = 0;
+			ZPCTX::resolveContextShapeTextures(ctxStats, shapeTexResolved, shapeTexMissing);
+			printf("context shape textures: %u resolved, %u missing\n", shapeTexResolved, shapeTexMissing);
 			NLMISC::CRGBA ambient(0, 0, 0);
 			bool haveAmbient = ZPCTX::decodeSceneAmbient(lm, ambient);
 			if (haveAmbient)
 				NL3D::CNELU::Driver->setAmbientColor(ambient);
 			uint nDriverLights = ZPCTX::setupDriverLights(lm, NL3D::CNELU::Driver);
-			printf("context meshes: %u built, %u skipped; driver lights: %u; ambient: %s\n",
-			       ctxStats.Built, ctxStats.Skipped, nDriverLights,
+			printf("context meshes: %u built, %u skipped, %u filtered (hidden %u, collision %u, accel %u, class %u); driver lights: %u; ambient: %s\n",
+			       ctxStats.Built, ctxStats.Skipped, ctxStats.Filtered,
+			       ctxStats.FilteredHidden, ctxStats.FilteredCollision, ctxStats.FilteredAccel, ctxStats.FilteredClass,
+			       nDriverLights,
 			       haveAmbient ? NLMISC::toString("%u,%u,%u", ambient.R, ambient.G, ambient.B).c_str() : "default (not decoded)");
 		}
 
@@ -1334,6 +1355,7 @@ int main(int argc, char **argv)
 	args.addArg("", "hardness", "0-255", "Viewer color brush hardness (default 128)");
 	args.addArg("", "opacity", "0-255", "Viewer color brush opacity (default 255)");
 	args.addArg("", "displace-index", "0-15", "Viewer displace paint index (default 0)");
+	args.addArg("", "db", "root", "Database root for authored-path texture resolution (default: derived from the input path)");
 	args.addArg("", "preload-tiles", "", "Viewer: flush every tile set's tiles at startup (overrides the stored 0x4010 flag on)");
 	args.addArg("", "no-preload-tiles", "", "Viewer: force the preload flush off (overrides the stored flag)");
 	args.addArg("", "include-meshes", "", "Viewer: display the scene's non-zone meshes + ambient + lights (overrides the stored 0x4003 flag on)");
@@ -1351,8 +1373,10 @@ int main(int argc, char **argv)
 		return 1;
 
 	std::string input = args.getAdditionalArg("input.max")[0];
+	g_InputPath = input;
 	g_verbose = args.haveLongArg("verbose");
 	std::string bankPath = args.haveLongArg("bank") ? args.getLongArg("bank")[0] : std::string();
+	g_BankPath = bankPath;
 	bool bankRecursive = args.haveLongArg("bank-recursive");
 	float cellSize = 100.f;
 	float snap = 1.f;
@@ -1416,6 +1440,9 @@ int main(int argc, char **argv)
 	{
 		std::vector<std::string> searchPaths;
 		if (args.haveLongArg("search-path")) searchPaths = args.getLongArg("search-path");
+		// DB root before the bank resolution: the workspace _texture_tiles source fallbacks
+		// derive from it (the bank path itself sits in the export tree, not the workspace).
+		ZPCTX::ensureDbRootFrom(input);
 		if (!loadBankFile(bankPath, bankRecursive, searchPaths, bank)) return 1;
 		haveBank = true;
 	}
@@ -1450,6 +1477,7 @@ int main(int argc, char **argv)
 	if (args.haveLongArg("displace-index")) NLMISC::fromString(args.getLongArg("displace-index")[0], g_ViewerDisplaceIndex);
 	// Stored-flag defaults (RPO_INCLUDE_MESHES 0x4003 / RPO_PRELOAD_TILES 0x4010 from the
 	// first paint-bearing painter modifier); explicit CLI flags override either way.
+	if (args.haveLongArg("db")) DBPATH::setDefaultRoot(args.getLongArg("db")[0]);
 	g_PreloadTiles = core.storedPreloadTiles() == 1;
 	if (args.haveLongArg("preload-tiles")) g_PreloadTiles = true;
 	if (args.haveLongArg("no-preload-tiles")) g_PreloadTiles = false;

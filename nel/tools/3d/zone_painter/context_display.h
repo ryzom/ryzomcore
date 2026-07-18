@@ -40,11 +40,14 @@
 #include <nel/misc/types_nl.h>
 #include <nel/misc/rgba.h>
 
+#include <set>
 #include <string>
 #include <vector>
 
 namespace NL3D {
+class IShape;
 class CScene;
+class CTileBank;
 class CShapeBank;
 class CLandscape;
 class CLandscapeModel;
@@ -60,9 +63,55 @@ namespace ZPCTX {
 struct SContextStats
 {
 	uint Built;
-	uint Skipped; // eligible mesh nodes whose build failed (warned)
-	SContextStats() : Built(0), Skipped(0) { }
+	uint Skipped;  // eligible mesh nodes whose build failed (warned)
+	uint Filtered; // meta-geometry excluded by node properties (breakdown below)
+	uint FilteredHidden, FilteredCollision, FilteredAccel, FilteredClass;
+	std::vector<NL3D::IShape *> Shapes; // built shapes (bank-owned; texture resolution walks them)
+	SContextStats() : Built(0), Skipped(0), Filtered(0),
+		FilteredHidden(0), FilteredCollision(0), FilteredAccel(0), FilteredClass(0) { }
 };
+
+/** Out-of-the-box texture resolution for the context meshes: the built shapes carry BARE
+ *	texture names (the export convention), but the materials' ParamBlock2 storage retains the
+ *	AUTHORED absolute paths (the "R:\\graphics\\..." class) — in the PBBitmap trailing 0x0003
+ *	containers (UTF-16 path child) and in filename string params. Every authored path is
+ *	resolved through DBPATH (the same mapping the xref/ig machinery uses; the database root is
+ *	derived from the input path with the ig/cmb convention when unset) and each resolved
+ *	file's DIRECTORY is registered on CPath (deduplicated, non-recursive). --search-path stays
+ *	as an additional override. Returns the number of directories registered.
+ */
+uint registerContextTexturePaths(PMAXLOAD::SLoadedMax &lm, const std::string &inputPath,
+                                 const std::string &bankPath,
+                                 uint &resolvedOut, uint &missingOut);
+
+/** Second-stage texture resolution over the BUILT shapes' material texture names: names the
+ *	registered directories cannot serve (the game-facing seasonal vegetation set — shapes
+ *	store `name.tga`, only `name_sp.dds` etc. exist, converted next to the ecosystem bank)
+ *	are remapped per file to the first season variant found (spring first, the reference
+ *	default). Fills resolved/missing counts over the unique texture names.
+ */
+void resolveContextShapeTextures(const SContextStats &stats, uint &resolvedOut, uint &missingOut);
+
+/** Out-of-the-box texture resolution for the LANDSCAPE side: the bank references unpostfixed
+ *	authored names (tile diffuse/additive/alpha bitmaps, displacement maps — e.g.
+ *	alpha_noiseb_00.png) while the workspace carries only season-postfixed converted files
+ *	(ecosystems/<eco>/tiles/<base>_<season>.dds next to the smallbank, or the
+ *	landscape/_texture_tiles/<eco>_<season> sources). Registers the bank's sibling tiles/ and
+ *	diplace/ dirs plus a per-name CPath::remapFile to the first season variant found (_sp
+ *	first, the reference default) — the same fallback the context-mesh names use. */
+void resolveBankTextures(NL3D::CTileBank &bank, const std::string &bankPath,
+                         uint &resolvedOut, uint &missingOut);
+
+/// Shared season-variant name resolution (see resolveBankTextures): remaps each unresolvable
+/// name to its first season-postfixed variant on the path (_sp default-first). NULL what =
+/// no per-name warnings (expected-absent sets).
+void resolveNamesWithSeasons(const std::set<std::string> &names, const char *what,
+                             uint &resolvedOut, uint &missingOut);
+
+/// Derive the DBPATH default root from a workspace file path when unset (the ig/cmb
+/// convention). Called by the texture registration; call early when the bank resolution needs
+/// the workspace source fallbacks before any context pass runs.
+void ensureDbRootFrom(const std::string &inputPath);
 
 /** Build every eligible non-zone mesh node of the loaded scene into a display shape and
  *	instance it into the viewer scene (ShapeBank->add + createInstance + clipAddChild under the
