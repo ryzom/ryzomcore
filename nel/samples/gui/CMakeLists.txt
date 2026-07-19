@@ -53,7 +53,7 @@ IF(EMSCRIPTEN)
   TARGET_COMPILE_DEFINITIONS(nl_sample_gui PRIVATE
     "GUI_SAMPLE_DATA_DIR=\"/share/nl_sample_gui/data\""
     "GUI_SAMPLE_ASSETS_DIR=\"/share/nl_sample_gui/assets\""
-    "GUI_SAMPLE_FONT=\"/share/nl_sample_gui/basic.ttf\"")
+    "GUI_SAMPLE_FONT=\"/share/nl_sample_gui/ingame.ttf\"")
 
   SET(GUI_PRELOAD_FLAGS "")
   STRING(APPEND GUI_PRELOAD_FLAGS " --preload-file \"${CMAKE_CURRENT_SOURCE_DIR}/data@/share/nl_sample_gui/data\"")
@@ -61,7 +61,7 @@ IF(EMSCRIPTEN)
   STRING(APPEND GUI_PRELOAD_FLAGS " --preload-file \"${GUI_SAMPLE_ASSETS_DIR}/gui_sample_atlas.txt@/share/nl_sample_gui/assets/gui_sample_atlas.txt\"")
   # loose files read outside the atlas (color picker palette)
   STRING(APPEND GUI_PRELOAD_FLAGS " --preload-file \"${GUI_SAMPLE_ASSETS_DIR}/color_palette.png@/share/nl_sample_gui/assets/color_palette.png\"")
-  STRING(APPEND GUI_PRELOAD_FLAGS " --preload-file \"${NL_GRAPHICS_DIR}/fonts/basic.ttf@/share/nl_sample_gui/basic.ttf\"")
+  STRING(APPEND GUI_PRELOAD_FLAGS " --preload-file \"${NL_GRAPHICS_DIR}/fonts/ingame.ttf@/share/nl_sample_gui/ingame.ttf\"")
 
   SET_TARGET_PROPERTIES(nl_sample_gui PROPERTIES
     SUFFIX ".js"
@@ -79,7 +79,7 @@ ELSE()
   TARGET_COMPILE_DEFINITIONS(nl_sample_gui PRIVATE
     "GUI_SAMPLE_DATA_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/data\""
     "GUI_SAMPLE_ASSETS_DIR=\"${GUI_SAMPLE_ASSETS_DIR}\""
-    "GUI_SAMPLE_FONT=\"${NL_GRAPHICS_DIR}/fonts/basic.ttf\"")
+    "GUI_SAMPLE_FONT=\"${NL_GRAPHICS_DIR}/fonts/ingame.ttf\"")
 ENDIF()
 
 INSTALL(TARGETS nl_sample_gui RUNTIME DESTINATION ${NL_BIN_PREFIX} COMPONENT samplesgui)
