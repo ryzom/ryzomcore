@@ -212,9 +212,19 @@ IF(EMSCRIPTEN)
     INTERFACE_COMPILE_OPTIONS "-sUSE_ZLIB=1;-sUSE_LIBPNG=1"
     INTERFACE_LINK_OPTIONS "-sUSE_ZLIB=1;-sUSE_LIBPNG=1")
   SET(PNG_FOUND TRUE)
-  SET(LIBXML2_FOUND FALSE)
-  SET(LIBXML2_INCLUDE_DIR "")
-  SET(LIBXML2_LIBRARIES "")
+  # libxml2 becomes available when a cross-built static libxml2 is provided
+  # (e.g. -DLibXml2_DIR=<prefix>/lib/cmake/libxml2-<version>); without one,
+  # XML-dependent code is compiled out as before.
+  FIND_PACKAGE(LibXml2 QUIET CONFIG)
+  IF(TARGET LibXml2::LibXml2)
+    SET(LIBXML2_FOUND TRUE)
+  ELSE()
+    SET(LIBXML2_FOUND FALSE)
+    SET(LIBXML2_INCLUDE_DIR "")
+    SET(LIBXML2_LIBRARIES "")
+  ENDIF()
+  # OpenSSL only when provided (stub or cross-built) via OPENSSL_* variables
+  FIND_PACKAGE(OpenSSL QUIET)
 ELSE()
   FIND_PACKAGE(ZLIB REQUIRED)
   FIND_PACKAGE(LibXml2 REQUIRED)
@@ -357,7 +367,9 @@ IF(WITH_NEL)
     ENDIF()
 
     IF(EMSCRIPTEN)
-      # CURL not needed for Emscripten builds
+      # CURL only when a cross-built (or stub) curl is provided via
+      # -DCURL_INCLUDE_DIR/-DCURL_LIBRARY; requests fail gracefully with a stub.
+      FIND_PACKAGE(CURL QUIET)
     ELSE()
     FIND_PACKAGE(CURL REQUIRED)
     ENDIF() # !EMSCRIPTEN

@@ -241,7 +241,11 @@ int main(int argc, char **argv)
 	if (!args.parse(argc, argv))
 		return EXIT_FAILURE;
 
+#ifdef __EMSCRIPTEN__
+	uint width = 1600, height = 1200; // the showcase layout targets this size
+#else
 	uint width = 1024, height = 768;
+#endif
 	if (args.haveLongArg("size"))
 	{
 		std::string s = args.getLongArg("size").front();
@@ -278,7 +282,11 @@ int main(int argc, char **argv)
 	// Render literal text; the sample does not ship translation tables
 	CI18N::setNoResolution(true);
 
+#ifdef __EMSCRIPTEN__
+	s_Driver = UDriver::createDriver(0, UDriver::OpenGlEs3);
+#else
 	s_Driver = UDriver::createDriver(0, false, 0);
+#endif
 	nlassert(s_Driver);
 	s_Driver->setDisplay(UDriver::CMode(width, height, 32, true));
 	s_Driver->setWindowTitle(ucstring("NeL GUI sample"));

@@ -59,6 +59,8 @@ IF(EMSCRIPTEN)
   STRING(APPEND GUI_PRELOAD_FLAGS " --preload-file \"${CMAKE_CURRENT_SOURCE_DIR}/data@/share/nl_sample_gui/data\"")
   STRING(APPEND GUI_PRELOAD_FLAGS " --preload-file \"${GUI_SAMPLE_ASSETS_DIR}/gui_sample_atlas.png@/share/nl_sample_gui/assets/gui_sample_atlas.png\"")
   STRING(APPEND GUI_PRELOAD_FLAGS " --preload-file \"${GUI_SAMPLE_ASSETS_DIR}/gui_sample_atlas.txt@/share/nl_sample_gui/assets/gui_sample_atlas.txt\"")
+  # loose files read outside the atlas (color picker palette)
+  STRING(APPEND GUI_PRELOAD_FLAGS " --preload-file \"${GUI_SAMPLE_ASSETS_DIR}/color_palette.png@/share/nl_sample_gui/assets/color_palette.png\"")
   STRING(APPEND GUI_PRELOAD_FLAGS " --preload-file \"${NL_GRAPHICS_DIR}/fonts/basic.ttf@/share/nl_sample_gui/basic.ttf\"")
 
   SET_TARGET_PROPERTIES(nl_sample_gui PROPERTIES
