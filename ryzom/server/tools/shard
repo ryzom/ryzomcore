@@ -31,10 +31,15 @@
 AGENT_URL="${RIBS_LOCAL_AGENT:-http://127.0.0.1:9081}"
 SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
 
+# Direct requests (not proxied by the central server) carry no X-Ribs-Groups
+# header, so the agent treats them as belonging to no group. "dev" has full
+# rights, hence its use here for this local admin CLI.
+RIBS_GROUPS="${RIBS_GROUPS:-dev}"
+
 # ── Helpers ──────────────────────────────────────────────────────────────────
 
-_get()  { curl -sf "$AGENT_URL$1"; }
-_post() { curl -sf -X POST "$AGENT_URL$1"; }
+_get()  { curl -sf -H "X-Ribs-Groups: $RIBS_GROUPS" "$AGENT_URL$1"; }
+_post() { curl -sf -H "X-Ribs-Groups: $RIBS_GROUPS" -X POST "$AGENT_URL$1"; }
 
 _require_name() {
 	if [ -z "$1" ]; then
@@ -188,7 +193,7 @@ cmd_log() {
 	fi
 	echo "Streaming $stream log for '$1' (Ctrl+C to stop)..."
 	# SSE stream: extract data lines only
-	curl -sf -N "$AGENT_URL/process/$1/log/$stream" \
+	curl -sf -N -H "X-Ribs-Groups: $RIBS_GROUPS" "$AGENT_URL/process/$1/log/$stream" \
 		| grep --line-buffered "^data:" \
 		| sed -u 's/^data: [0-9.]*  *//'
 }
