@@ -23,7 +23,7 @@
 <!-- * Launcher window  * -->
 <!-- ******************** -->
 
-<group type="container" id="launcher" w="180" pop_min_w="180" pop_max_w="180" h="370" pop_min_h="370" pop_max_h="370"
+<group type="container" id="launcher" w="180" pop_min_w="180" pop_max_w="180" h="400" pop_min_h="400" pop_max_h="400"
 	title="Showcase" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
 	title_bar_open="false" open_button="false" right_button="false" lockable="false" openable="false"
 	opened="true" movable="true" active="true" x="8" y="1190">
@@ -38,7 +38,8 @@
 		<ctrl style="text_button_16" id="bt_menus"   x="0"  y="-8" posparent="bt_lists"   posref="BL TL" onclick_l="proc" params_l="proc_toggle|menus"   hardtext="Menus + Combo" />
 		<ctrl style="text_button_16" id="bt_tabs"    x="0"  y="-8" posparent="bt_menus"   posref="BL TL" onclick_l="proc" params_l="proc_toggle|tabs"    hardtext="Tabs" />
 		<ctrl style="text_button_16" id="bt_colors"  x="0"  y="-8" posparent="bt_tabs"    posref="BL TL" onclick_l="proc" params_l="proc_toggle|colors"  hardtext="Color Picker" />
-		<ctrl style="text_button_16" id="bt_about"   x="0"  y="-8" posparent="bt_colors"  posref="BL TL" onclick_l="proc" params_l="proc_open_about" hardtext="About" />
+		<ctrl style="text_button_16" id="bt_rollout" x="0"  y="-8" posparent="bt_colors"  posref="BL TL" onclick_l="proc" params_l="proc_toggle|rollout" hardtext="Rollout List" />
+		<ctrl style="text_button_16" id="bt_about"   x="0"  y="-8" posparent="bt_rollout" posref="BL TL" onclick_l="proc" params_l="proc_open_about" hardtext="About" />
 		<ctrl style="text_button_16" id="bt_quit"    x="0"  y="-8" posparent="bt_about"   posref="BL TL" onclick_l="sample_quit" params_l="" hardtext="Quit" />
 	</group>
 </group>
@@ -77,7 +78,7 @@
 <group type="container" id="buttons" options="layer1" w="300" pop_min_w="300" pop_max_w="300" h="240" pop_min_h="240" pop_max_h="240"
 	title="Buttons" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
 	title_bar_open="false" open_button="false" right_button="true" lockable="false" openable="false"
-	opened="true" movable="true" active="true" x="200" y="840">
+	opened="true" movable="true" active="true" x="270" y="840">
 	<group id="header_closed" x="0" y="0" h="12" posref="TL TL"></group>
 	<group id="header_opened" x="0" y="0" w="0" h="14" posref="TL TL"></group>
 	<group id="content" x="0" y="0" posref="TL TL" w="0" h="0">
@@ -299,6 +300,57 @@
 </group>
 <tree node="colors"></tree>
 <link expr="makeRGB(@UI:TEMP:COL:R, @UI:TEMP:COL:G, @UI:TEMP:COL:B, 255)" target="ui:sample:colors:content:swatch:color" />
+
+<!-- ********************************* -->
+<!-- * Popin child containers        * -->
+<!-- * (friends/guild style rollout) * -->
+<!-- ********************************* -->
+
+<group type="container" id="rollout" w="240" pop_min_w="240" pop_max_w="240" h="330" pop_min_h="330" pop_max_h="330"
+	title="Rollout (popin list)" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
+	title_bar_open="false" open_button="false" right_button="true" lockable="false" openable="false"
+	opened="true" movable="true" active="true" x="8" y="740">
+	<group id="header_closed" x="0" y="0" h="12" posref="TL TL"></group>
+	<group id="header_opened" x="0" y="0" w="0" h="16" posref="TL TL"></group>
+	<group id="content" x="0" y="0" posref="TL TL" w="0" h="0"></group>
+</group>
+
+<group type="container" id="roll_friends" w="220" title="Friends" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
+	opened="true" openable="true" movable="true" active="true" resizer="false" lockable="false">
+	<group id="header_closed" x="0" y="0" h="12" posref="TL TL"></group>
+	<group id="header_opened" x="0" y="0" w="0" h="14" posref="TL TL"></group>
+	<group id="content" x="0" y="0" posref="TL TL" w="0" h="52">
+		<view type="bitmap" id="on1" posref="TL TL" x="12" y="-4" texture="w_online.tga" global_color="false" />
+		<view type="text" id="n1" posparent="on1" posref="MR ML" x="6" fontsize="10" shadow="true" global_color="false" color="200 255 200 255" hardtext="Kaetemi (online)" />
+		<view type="bitmap" id="on2" posparent="on1" posref="BL TL" y="-6" texture="w_offline.tga" global_color="false" />
+		<view type="text" id="n2" posparent="on2" posref="MR ML" x="6" fontsize="10" shadow="true" global_color="false" color="255 255 255 140" hardtext="Yubo (offline)" />
+	</group>
+</group>
+
+<group type="container" id="roll_guild" w="220" title="Guild" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
+	opened="true" openable="true" movable="true" active="true" resizer="false" lockable="false">
+	<group id="header_closed" x="0" y="0" h="12" posref="TL TL"></group>
+	<group id="header_opened" x="0" y="0" w="0" h="14" posref="TL TL"></group>
+	<group id="content" x="0" y="0" posref="TL TL" w="0" h="34">
+		<view type="text" id="g1" posref="TL TL" x="12" y="-4" fontsize="10" shadow="true" global_color="false" color="255 255 255 220" hardtext="A guild-style popin container." />
+	</group>
+</group>
+
+<group type="container" id="roll_officers" w="200" title="Officers (closed)" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
+	opened="false" openable="true" movable="true" active="true" resizer="false" lockable="false">
+	<group id="header_closed" x="0" y="0" h="12" posref="TL TL"></group>
+	<group id="header_opened" x="0" y="0" w="0" h="14" posref="TL TL"></group>
+	<group id="content" x="0" y="0" posref="TL TL" w="0" h="30">
+		<view type="text" id="o1" posref="TL TL" x="12" y="-4" fontsize="10" shadow="true" global_color="false" color="255 255 255 220" hardtext="Nested grandchild (layer 2)." />
+	</group>
+</group>
+
+<tree node="rollout">
+	<tree node="roll_friends" />
+	<tree node="roll_guild">
+		<tree node="roll_officers" />
+	</tree>
+</tree>
 
 <!-- ******************** -->
 <!-- * About modal      * -->
