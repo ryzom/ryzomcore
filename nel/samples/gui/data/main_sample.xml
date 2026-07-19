@@ -310,7 +310,7 @@
 <!-- * header_closed.                                        * -->
 <!-- ********************************************************* -->
 
-<group type="container" id="rollout" w="260" pop_min_w="260" pop_max_w="260" h="330" pop_min_h="330" pop_max_h="330"
+<group type="container" id="rollout" w="260" pop_min_w="260" pop_max_w="260" h="250" pop_min_h="250" pop_max_h="250"
 	title="Contacts" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
 	title_bar_open="false" open_button="false" right_button="true" lockable="false" openable="false"
 	opened="true" movable="true" active="true" x="8" y="740">
@@ -374,10 +374,74 @@
 	</group>
 </group>
 
+<group type="container" id="fr_capryni" w="240" title="Capryni" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
+	openable="false" opened="false" movable="false" movable_in_parent_list="true" active="true" resizer="false" lockable="false">
+	<group id="header_closed" x="0" y="0" h="12" posref="TL TL">
+		<view type="bitmap" id="online" posref="MR MR" x="-20" texture="w_online.tga" global_color="false" />
+	</group>
+</group>
+
+<group type="container" id="fr_mektoub" w="240" title="Mektoub" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
+	openable="false" opened="false" movable="false" movable_in_parent_list="true" active="true" resizer="false" lockable="false">
+	<group id="header_closed" x="0" y="0" h="12" posref="TL TL">
+		<view type="bitmap" id="online" posref="MR MR" x="-20" texture="w_offline.tga" global_color="false" />
+	</group>
+</group>
+
+<group type="container" id="fr_ragus" w="240" title="Ragus" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
+	openable="false" opened="false" movable="false" movable_in_parent_list="true" active="true" resizer="false" lockable="false">
+	<group id="header_closed" x="0" y="0" h="12" posref="TL TL">
+		<view type="bitmap" id="online" posref="MR MR" x="-20" texture="w_online.tga" global_color="false" />
+	</group>
+</group>
+
+<group type="container" id="fr_torbak" w="240" title="Torbak" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
+	openable="false" opened="false" movable="false" movable_in_parent_list="true" active="true" resizer="false" lockable="false">
+	<group id="header_closed" x="0" y="0" h="12" posref="TL TL">
+		<view type="bitmap" id="online" posref="MR MR" x="-20" texture="w_online.tga" global_color="false" />
+	</group>
+</group>
+
+<group type="container" id="fr_kipee" w="240" title="Kipee" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
+	openable="false" opened="false" movable="false" movable_in_parent_list="true" active="true" resizer="false" lockable="false">
+	<group id="header_closed" x="0" y="0" h="12" posref="TL TL">
+		<view type="bitmap" id="online" posref="MR MR" x="-20" texture="w_offline.tga" global_color="false" />
+	</group>
+</group>
+
+<group type="container" id="fr_kirosta" w="240" title="Kirosta" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
+	openable="false" opened="false" movable="false" movable_in_parent_list="true" active="true" resizer="false" lockable="false">
+	<group id="header_closed" x="0" y="0" h="12" posref="TL TL">
+		<view type="bitmap" id="online" posref="MR MR" x="-20" texture="w_online.tga" global_color="false" />
+	</group>
+</group>
+
+<group type="container" id="fr_zerx" w="240" title="Zerx" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
+	openable="false" opened="false" movable="false" movable_in_parent_list="true" active="true" resizer="false" lockable="false">
+	<group id="header_closed" x="0" y="0" h="12" posref="TL TL">
+		<view type="bitmap" id="online" posref="MR MR" x="-20" texture="w_offline.tga" global_color="false" />
+	</group>
+</group>
+
+<group type="container" id="fr_javing" w="240" title="Javing" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
+	openable="false" opened="false" movable="false" movable_in_parent_list="true" active="true" resizer="false" lockable="false">
+	<group id="header_closed" x="0" y="0" h="12" posref="TL TL">
+		<view type="bitmap" id="online" posref="MR MR" x="-20" texture="w_online.tga" global_color="false" />
+	</group>
+</group>
+
 <tree node="rollout">
 	<tree node="roll_friends">
 		<tree node="fr_kaetemi" />
 		<tree node="fr_yubo" />
+		<tree node="fr_capryni" />
+		<tree node="fr_mektoub" />
+		<tree node="fr_ragus" />
+		<tree node="fr_torbak" />
+		<tree node="fr_kipee" />
+		<tree node="fr_kirosta" />
+		<tree node="fr_zerx" />
+		<tree node="fr_javing" />
 	</tree>
 	<tree node="roll_guild">
 		<tree node="gd_gingo" />
