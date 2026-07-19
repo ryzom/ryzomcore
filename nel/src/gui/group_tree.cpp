@@ -323,7 +323,7 @@ namespace NLGUI
 			if (open)	Opened = convertBool(open);
 
 			CXMLAutoPtr show((const char*) xmlGetProp (cur,   (xmlChar*)"show"));
-			if (open)	Show = convertBool(show);
+			if (show)	Show = convertBool(show);
 
 			CXMLAutoPtr ah((const char*) xmlGetProp (cur,   (xmlChar*)"handler"));
 			if (ah)		AHName = (const char*)ah;

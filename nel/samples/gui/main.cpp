@@ -44,8 +44,11 @@
 #include <nel/3d/u_text_context.h>
 
 #include <nel/gui/action_handler.h>
+#include <nel/gui/dbgroup_combo_box.h>
 #include <nel/gui/event_listener.h>
+#include <nel/gui/interface_link.h>
 #include <nel/gui/interface_group.h>
+#include <nel/gui/lua_manager.h>
 #include <nel/gui/view_pointer.h>
 #include <nel/gui/view_renderer.h>
 #include <nel/gui/widget_manager.h>
@@ -146,6 +149,54 @@ public:
 };
 REGISTER_ACTION_HANDLER(CAHLeaveModal, "leave_modal");
 
+// Stacked modals: NLGUI has pushModalWindow/popModalWindow but no action
+// handlers for them (the client registers its own); mirror them here.
+class CAHPushModal : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase *pCaller, const std::string &params)
+	{
+		std::string group = getParam(params, "group");
+		CWidgetManager::getInstance()->pushModalWindow(pCaller, group);
+	}
+};
+REGISTER_ACTION_HANDLER(CAHPushModal, "push_modal");
+
+class CAHPopModal : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		CWidgetManager::getInstance()->popModalWindow();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHPopModal, "pop_modal");
+
+// Open a menu group as a modal window (client convention "active_menu")
+class CAHActiveMenu : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase *pCaller, const std::string &params)
+	{
+		std::string menuId = getParam(params, "menu");
+		if (!menuId.empty())
+			CWidgetManager::getInstance()->enableModalWindow(pCaller, menuId);
+	}
+};
+REGISTER_ACTION_HANDLER(CAHActiveMenu, "active_menu");
+
+// The "lua" handler also lives in the Ryzom client; NLGUI itself invokes
+// it for <group lua_class="...">, onclick_l="lua" and <link> lua actions.
+class CAHLua : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params)
+	{
+		CLuaManager::getInstance().executeLuaScript(params, true);
+	}
+};
+REGISTER_ACTION_HANDLER(CAHLua, "lua");
+
 void renderOneFrame()
 {
 	s_Driver->EventServer.pump();
@@ -209,6 +260,11 @@ int main(int argc, char **argv)
 			fromString(args.getLongArg("frames").front(), s_ScreenshotFrame);
 	}
 
+	// Loose-file textures (e.g. the color picker palette) are png on disk
+	// while interface definitions use the canonical .tga names; remap before
+	// the search paths are indexed
+	CPath::remapExtension("png", "tga", true);
+
 	// Search paths: sample interface definitions + generated atlas + font
 	CPath::addSearchPath(GUI_SAMPLE_DATA_DIR, true, false);
 	CPath::addSearchPath(GUI_SAMPLE_ASSETS_DIR, false, false);
@@ -232,6 +288,10 @@ int main(int argc, char **argv)
 		font = CPath::lookup(CFile::getFilename(font));
 	s_TextContext = s_Driver->createTextContext(font);
 	nlassert(s_TextContext);
+
+	// Pump triggered <link> updates whenever database observers flush
+	// (the client creates the same updater in its interface manager)
+	new CInterfaceLink::CInterfaceLinkUpdater(); // leaked once, process lifetime
 
 	CViewRenderer::setDriver(s_Driver);
 	CViewRenderer::setTextContext(s_TextContext);
@@ -261,9 +321,16 @@ int main(int argc, char **argv)
 
 	nlinfo("Interface parsed");
 
+	// The combo box machinery resolves its dropdown menus through these
+	// application-provided ids (the client points them at ui:interface:*)
+	CDBGroupComboBox::selectMenu = "ui:sample:combo_box_select_menu";
+	CDBGroupComboBox::selectMenuOut = "ui:sample:combo_box_select_menu";
+	CDBGroupComboBox::measureMenu = "ui:sample:combo_box_measure_menu";
+
 	CWidgetManager::getInstance()->updateAllLocalisedElements();
 	nlinfo("Localised elements updated");
 	CWidgetManager::getInstance()->activateMasterGroup(MASTER_GROUP, true);
+	CInterfaceLink::updateAllLinks(); // initial evaluation; afterwards links run on database changes
 	nlinfo("Master group activated");
 
 	// Route driver events into the widget manager

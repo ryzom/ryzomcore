@@ -26,12 +26,23 @@ ELSE()
   SET(NL_BUILD_INTERFACE_TOOL build_interface)
 ENDIF()
 
+# A few textures used by the showcase live outside interfaces/v3 (e.g. the
+# color picker palette in v3_fullscreen). Stage those single files into an
+# extras directory that is packed into the atlas alongside the v3 set.
+SET(GUI_SAMPLE_EXTRA_TEXTURES
+  "${NL_GRAPHICS_DIR}/interfaces/v3_fullscreen/color_palette.png")
+SET(GUI_SAMPLE_EXTRAS_DIR "${CMAKE_CURRENT_BINARY_DIR}/extra_textures")
+
 ADD_CUSTOM_COMMAND(
   OUTPUT "${GUI_SAMPLE_ASSETS_DIR}/gui_sample_atlas.png" "${GUI_SAMPLE_ASSETS_DIR}/gui_sample_atlas.txt"
   COMMAND ${CMAKE_COMMAND} -E make_directory "${GUI_SAMPLE_ASSETS_DIR}"
-  COMMAND ${NL_BUILD_INTERFACE_TOOL} -k -f png "${GUI_SAMPLE_ASSETS_DIR}/gui_sample_atlas.png" "${NL_GRAPHICS_DIR}/interfaces/v3"
+  COMMAND ${CMAKE_COMMAND} -E make_directory "${GUI_SAMPLE_EXTRAS_DIR}"
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different ${GUI_SAMPLE_EXTRA_TEXTURES} "${GUI_SAMPLE_EXTRAS_DIR}"
+  # the color picker reads its palette as a loose file (it needs pixel access)
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different ${GUI_SAMPLE_EXTRA_TEXTURES} "${GUI_SAMPLE_ASSETS_DIR}"
+  COMMAND ${NL_BUILD_INTERFACE_TOOL} -k -f png "${GUI_SAMPLE_ASSETS_DIR}/gui_sample_atlas.png" "${NL_GRAPHICS_DIR}/interfaces/v3" "${GUI_SAMPLE_EXTRAS_DIR}"
   DEPENDS ${NL_BUILD_INTERFACE_TOOL}
-  COMMENT "Packing GUI sample interface atlas from ${NL_GRAPHICS_DIR}/interfaces/v3")
+  COMMENT "Packing GUI sample interface atlas from ${NL_GRAPHICS_DIR}/interfaces/v3 (+ staged extras)")
 
 ADD_CUSTOM_TARGET(nl_sample_gui_assets DEPENDS
   "${GUI_SAMPLE_ASSETS_DIR}/gui_sample_atlas.png"
