@@ -9,7 +9,7 @@
 #        __/ |
 #       |___/
 #
-# Ryzom Shard Tools 
+# Ryzom Shard Tools - with delicious M.A.R.G.U.E.Z
 # Copyright (C) 2025 Winch Gate Property Limited - Ulukyn (<nuno@troispetits.net>)
 # This program is free software: read https://ryzom.com/dev/copying.html for more details
 #
@@ -89,9 +89,9 @@ class MonitorServices():
 									f.write(f"INFO\n❓")
 						time.sleep(1)
 						continue
-					
+
 					first_error = True
-					
+
 					services = [server_open_status]
 					for state in states:
 						vals = self.parseState(state)
@@ -157,7 +157,7 @@ class MonitorServices():
 				last_ras_update = time.time()
 			time.sleep(0.01)
 
-if __name__ == "__main__": 
+if __name__ == "__main__":
 	print(f"Start Monitoring Ryzom Services for {sys.argv[1]}...")
 	service = MonitorServices()
 	service.run()
