@@ -2750,7 +2750,9 @@ namespace NLGUI
 			if (_Content != NULL)
 				h += _Content->getHReal();
 
-			if (_List != NULL)
+			// original layout: with an open child list, the frame stops
+			// here and the list hangs in the open section below
+			if (_List != NULL && (pLayer->FrameCoversOpenList || !bHasChild))
 				h += _List->getHReal();
 
 			h -= _ContentYOffset;

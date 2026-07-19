@@ -128,6 +128,12 @@ namespace NLGUI
 		sint32 Tile_T, Tile_B, Tile_L, Tile_R;
 		sint32 Tile_B_Open, Tile_EM_Open, Tile_M_Open;
 
+		// When false, the frame of an opened container stops below the
+		// header and content; the child list hangs in the open section
+		// (original layout: side rail and ending strip framing it).
+		// Default true: the frame stretches over the open child list.
+		bool FrameCoversOpenList;
+
 		sint32 Scrollbar_Offset_X;
 		sint32 Scrollbar_W;
 		sint32 TxId_B_Scrollbar, W_B_Scrollbar, H_B_Scrollbar;

@@ -52,7 +52,9 @@
 
 <options type="layer" name="layer0">
 
-	<param name="title_font_size" value="13" />
+	<param name="frame_covers_open_list" value="false" />
+
+	<param name="title_font_size" value="11" />
 	<param name="title_offset_x" value="8" />
 	<param name="title_offset_y" value="-7" />
 	<param name="title_offset_openable_x" value="20" />
@@ -125,6 +127,8 @@
      skin_l1_* renames and layers 2/3 already keep most of the w_ names). -->
 <options type="layer" name="layer1">
 
+	<param name="frame_covers_open_list" value="false" />
+
 	<param name="title_font_size" value="11" />
 	<param name="title_offset_x" value="8" />
 	<param name="title_offset_y" value="-4" />
@@ -191,6 +195,8 @@
 
 <options type="layer" name="layer2">
 
+	<param name="frame_covers_open_list" value="false" />
+
 	<param name="title_font_size" value="10" />
 	<param name="title_offset_x" value="8" />
 	<param name="title_offset_y" value="-3" />
@@ -255,6 +261,8 @@
 
 <!-- The w_l3_* set has no *_open pieces; layer3 windows are not openable -->
 <options type="layer" name="layer3">
+
+	<param name="frame_covers_open_list" value="false" />
 
 	<param name="title_font_size" value="10" />
 	<param name="title_offset_x" value="8" />
