@@ -1,0 +1,5 @@
+FIND_PACKAGE(MySQL)
+
+IF(MYSQL_FOUND)
+  ADD_SUBDIRECTORY(sheets_packer_shard)
+ENDIF()
