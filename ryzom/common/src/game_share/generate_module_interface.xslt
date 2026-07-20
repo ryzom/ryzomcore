@@ -2079,7 +2079,7 @@ namespace <xsl:value-of select="@name"/>
 
 </xsl:text>	<xsl:for-each select="property[@db_col]">
 				<xsl:choose>
-					<xsl:when test="@enum='true' or @enum='smart'">
+					<xsl:when test="@enum='true' or @enum='smart' or @enum='bitset'">
 <xsl:text>			{
 				std::string s;
 				result->getField(</xsl:text><xsl:value-of select="position()-1"/>, s);
@@ -2147,7 +2147,7 @@ ERROR : parent/child relation support only 'map' or 'vector' cont specification 
 			result->fetchRow();
 			<xsl:for-each select="../property[@db_col]">
 				<xsl:choose>
-					<xsl:when test="@enum='true' or @enum='smart'">
+					<xsl:when test="@enum='true' or @enum='smart' or @enum='bitset'">
 			{
 				std::string s;
 				result->getField(<xsl:value-of select="position()-1"/>, s);
@@ -2228,7 +2228,7 @@ ERROR : parent/child relation support only 'map' or 'vector' cont specification 
 			result->fetchRow();
 			<xsl:for-each select="../property[@db_col]">
 				<xsl:choose>
-					<xsl:when test="@enum='true' or @enum='smart'">
+					<xsl:when test="@enum='true' or @enum='smart' or @enum='bitset'">
 			{
 				std::string s;
 				result->getField(<xsl:value-of select="position()-1"/>, s);
