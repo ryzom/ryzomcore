@@ -244,7 +244,12 @@ void CStaticItem::init(bool doDelete)
 {
 	Family			= ITEMFAMILY::UNDEFINED;
 	Type			= ITEM_TYPE::UNDEFINED;
-	
+
+	// only set by readGeorges() for Family == ITEMFAMILY::TELEPORT, but always
+	// serialized: default them so non-teleport items don't pack uninitialized memory
+	TpType			= TELEPORT_TYPES::NONE;
+	TpEcosystem		= ECOSYSTEM::unknown;
+
 	clearPtrs(doDelete);
 
 	Skill			= SKILLS::unknown;

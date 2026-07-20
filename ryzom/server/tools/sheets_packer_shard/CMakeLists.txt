@@ -19,7 +19,7 @@ ADD_EXECUTABLE(sheets_packer_shard ${SRC} ${EGSSHEETS}
         ${CMAKE_SOURCE_DIR}/ryzom/server/src/ai_service/commands_mlf.cpp)
 
 
-TARGET_INCLUDE_DIRECTORIES(sheets_packer_shard PRIVATE ${CMAKE_SOURCE_DIR}/ryzom/common/src ${CMAKE_SOURCE_DIR}/ryzom/server/src ${CMAKE_SOURCE_DIR}/ryzom/tools/sheets_packer_shard ${CMAKE_SOURCE_DIR}/ryzom/server/src/entities_game_service)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/ryzom/common/src ${CMAKE_SOURCE_DIR}/ryzom/server/src ${CMAKE_SOURCE_DIR}/ryzom/server/tools/sheets_packer_shard ${CMAKE_SOURCE_DIR}/ryzom/server/src/entities_game_service)
 
 TARGET_LINK_LIBRARIES(sheets_packer_shard
         PRIVATE
