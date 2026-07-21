@@ -65,8 +65,9 @@ struct SStartupSelection
  * worlds may be empty (Screen C / empty list). On StartupOpenZone, *selection is filled
  * and the same select functions the buttons call were used.
  *
- * screenshotPath: if non-empty, render one frame of the first screen and return
- * StartupScreenshotDone without entering the interactive loop.
+ * screenshotPath: if non-empty, render one frame and return StartupScreenshotDone.
+ * screenshotWorld: with screenshotPath, pre-select this world (WorldName or GraphicsRoot
+ *   basename) and show Screen B (continent grid / ecosystem list) instead of Screen A.
  *
  * folderBrowserEnabled: when true (M2c+), empty worlds open Screen C; Browse works.
  */
@@ -76,7 +77,8 @@ EStartupResult runStartupFlow(NL3D::UDriver *driver,
                               const std::string &screenshotPath,
                               SStartupSelection &selection,
                               bool folderBrowserEnabled,
-                              const std::string &initialBrowsePath = std::string());
+                              const std::string &initialBrowsePath = std::string(),
+                              const std::string &screenshotWorld = std::string());
 
 /** Same selection path buttons use — for --startup-auto thin wrapper reuse. */
 bool startupSelectWorldZone(const std::vector<ZPWS::SWorldEntry> &worlds,

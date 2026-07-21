@@ -29,6 +29,8 @@
 #include <algorithm>
 #include <cstdio>
 #include <cstring>
+#include <climits>
+#include <cstdlib> // realpath (POSIX)
 
 #include <nel/misc/config_file.h>
 #include <nel/misc/file.h>
@@ -54,6 +56,21 @@ std::string normalizeDir(const std::string &path)
 	std::string abs = CPath::makePathAbsolute(path, CPath::getCurrentPath(), true);
 	abs = CPath::standardizePath(abs, false); // no trailing slash
 	return rstripSlash(abs);
+}
+
+/** Resolve symlinks so a graphics root and its real path do not list twice (M3c nit). */
+static std::string canonicalizeDir(const std::string &path)
+{
+	std::string n = normalizeDir(path);
+	if (n.empty())
+		return n;
+#if !defined(NL_OS_WINDOWS)
+	char buf[PATH_MAX];
+	if (realpath(n.c_str(), buf) != NULL)
+		return rstripSlash(std::string(buf));
+#endif
+	// Windows: normalizeDir already absolute+standardized; junction resolve is optional
+	return n;
 }
 
 std::string dirBasename(const std::string &path)
@@ -101,9 +118,10 @@ static std::string firstBankInDir(const std::string &dir)
 
 static bool sameWorld(const SWorldEntry &a, const SWorldEntry &b)
 {
+	// Compare canonical GraphicsRoot so symlink + realpath of the same tree dedup
 	return a.Kind == b.Kind
-		&& a.GraphicsRoot == b.GraphicsRoot
-		&& a.WorldName == b.WorldName;
+		&& a.WorldName == b.WorldName
+		&& canonicalizeDir(a.GraphicsRoot) == canonicalizeDir(b.GraphicsRoot);
 }
 
 static void appendUnique(std::vector<SWorldEntry> &out, const SWorldEntry &w)
@@ -150,7 +168,8 @@ static bool zoneEntryLess(const SZoneEntry &a, const SZoneEntry &b)
 
 void fingerprintWorkspace(const std::string &graphicsRoot, std::vector<SWorldEntry> &out)
 {
-	std::string G = normalizeDir(graphicsRoot);
+	// Store the realpath so discovery from a symlink and from its target share one entry
+	std::string G = canonicalizeDir(graphicsRoot);
 	if (G.empty() || !CFile::isDirectory(G))
 		return;
 

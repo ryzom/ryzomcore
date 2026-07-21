@@ -2245,6 +2245,9 @@ int main(int argc, char **argv)
 	// Test plumbing (thin wrappers over the same selection functions the UI buttons call)
 	args.addArg("", "startup-auto", "workspace/zone", "Skip startup UI: select workspace+zone by name and open the viewer");
 	args.addArg("", "startup-screenshot", "out.tga", "Render one frame of the first startup screen and exit (M2b+)");
+	args.addArg("", "startup-screen", "world",
+	            "With --startup-screenshot: pre-select this world (name or graphics-root basename) and capture Screen B "
+	            "(continent coordinate grid or ecosystem zone list) instead of Screen A");
 	args.addArg("", "panel-save-test", "copy|overwrite",
 	            "Headless: after --paint-script, invoke the same panel save path (zpSaveTo / zpSaveOverwrite). "
 	            "copy writes <basename>_painted.max under --out's directory (or cwd). overwrite first copies the "
@@ -2433,9 +2436,11 @@ int main(int argc, char **argv)
 			const bool folderBrowserEnabled = true; // Screen C wired in M2c; Browse enabled
 			std::string shotPath = args.haveLongArg("startup-screenshot")
 				? args.getLongArg("startup-screenshot")[0] : std::string();
+			std::string shotWorld = args.haveLongArg("startup-screen")
+				? args.getLongArg("startup-screen")[0] : std::string();
 			ZPUI::EStartupResult sr = ZPUI::runStartupFlow(
 				sharedDriver, sharedEditorUI, worlds, shotPath, selection, folderBrowserEnabled,
-				seedFolder);
+				seedFolder, shotWorld);
 
 			if (sr == ZPUI::StartupScreenshotDone)
 			{

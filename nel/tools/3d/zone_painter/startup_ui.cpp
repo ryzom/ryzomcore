@@ -31,8 +31,11 @@
 #include "editor_ui.h"
 
 #include <algorithm>
+#include <climits>
 #include <cstdio>
 #include <cstring>
+#include <map>
+#include <utility>
 
 #include <nel/misc/algo.h>
 #include <nel/misc/bitmap.h>
@@ -270,6 +273,138 @@ static std::string thumbTextureName(const ZPWS::SZoneEntry &z)
 	return base + ".tga";
 }
 
+/** Parent a template instance under an existing group at an absolute offset (continent grid). */
+static CInterfaceGroup *spawnUnder(CInterfaceGroup *parent, const char *templateName,
+                                   const std::vector<std::pair<std::string, std::string> > &params,
+                                   sint32 x, sint32 y, sint32 w, sint32 h)
+{
+	if (!parent)
+		return NULL;
+	IParser *parser = CWidgetManager::getInstance()->getParser();
+	CInterfaceGroup *g = NULL;
+	if (!params.empty())
+		g = parser->createGroupInstance(templateName, parent->getId(), &params[0], (uint)params.size());
+	else
+		g = parser->createGroupInstance(templateName, parent->getId(),
+		                                (const std::pair<std::string, std::string> *)NULL, 0);
+	if (!g)
+		return NULL;
+	g->setParent(parent);
+	g->setParentPos(parent);
+	g->setPosRef(Hotspot_TL);
+	g->setParentPosRef(Hotspot_TL);
+	g->setX(x);
+	g->setY(y);
+	g->setW(w);
+	g->setH(h);
+	g->setActive(true);
+	parent->addGroup(g);
+	return g;
+}
+
+/** Continent Screen B: name-derived grid (row vertical, col letters horizontal). */
+static void populateContinentGrid(const ZPWS::SWorldEntry &world)
+{
+	std::map<std::pair<int, int>, int> cell; // (row,col) -> zone index
+	int minR = INT_MAX, maxR = INT_MIN, minC = INT_MAX, maxC = INT_MIN;
+	uint nParse = 0;
+	for (size_t i = 0; i < s_Sess.Zones.size(); ++i)
+	{
+		int r = 0, c = 0;
+		if (!ZPWS::parseContinentZoneName(s_Sess.Zones[i].Basename, r, c))
+			continue;
+		cell[std::make_pair(r, c)] = (int)i;
+		if (r < minR) minR = r;
+		if (r > maxR) maxR = r;
+		if (c < minC) minC = c;
+		if (c > maxC) maxC = c;
+		++nParse;
+	}
+
+	if (nParse == 0)
+	{
+		// Unparseable names: flat list fallback
+		for (size_t i = 0; i < s_Sess.Zones.size(); ++i)
+		{
+			std::vector<std::pair<std::string, std::string> > p;
+			char idbuf[32], idxbuf[32];
+			snprintf(idbuf, sizeof(idbuf), "z%u", (uint)i);
+			snprintf(idxbuf, sizeof(idxbuf), "%d", (int)i);
+			p.push_back(std::make_pair(std::string("id"), std::string(idbuf)));
+			p.push_back(std::make_pair(std::string("title"), s_Sess.Zones[i].Basename));
+			p.push_back(std::make_pair(std::string("idx"), std::string(idxbuf)));
+			p.push_back(std::make_pair(std::string("thumb"), std::string("w_box_blank.tga")));
+			spawnRow("zp_zone_row", "ui:zp:zone_browser:content:list_scroll:text_list", p);
+		}
+		return;
+	}
+
+	const int cellW = 46;
+	const int cellH = 26;
+	const int nCols = maxC - minC + 1;
+	const int rowW = nCols * cellW + 4;
+
+	// Higher row numbers at the top (map-like: north / higher Y up)
+	for (int r = maxR; r >= minR; --r)
+	{
+		std::vector<std::pair<std::string, std::string> > rp;
+		char rid[32];
+		snprintf(rid, sizeof(rid), "gr%d", r);
+		rp.push_back(std::make_pair(std::string("id"), std::string(rid)));
+		CInterfaceGroup *row = spawnRow("zp_zone_grid_row",
+		                                "ui:zp:zone_browser:content:list_scroll:text_list", rp);
+		if (!row)
+			continue;
+		row->setW(rowW);
+		row->setH(cellH);
+
+		for (int c = minC; c <= maxC; ++c)
+		{
+			const int x = (c - minC) * cellW;
+			std::map<std::pair<int, int>, int>::const_iterator it = cell.find(std::make_pair(r, c));
+			if (it == cell.end())
+			{
+				std::vector<std::pair<std::string, std::string> > ep;
+				char eid[40];
+				snprintf(eid, sizeof(eid), "ge%d_%d", r, c);
+				ep.push_back(std::make_pair(std::string("id"), std::string(eid)));
+				spawnUnder(row, "zp_zone_grid_empty", ep, x, 0, cellW, cellH);
+				continue;
+			}
+			const int zi = it->second;
+			const ZPWS::SZoneEntry &z = s_Sess.Zones[zi];
+			std::vector<std::pair<std::string, std::string> > p;
+			char idbuf[40], idxbuf[32];
+			snprintf(idbuf, sizeof(idbuf), "gc%d_%d", r, c);
+			snprintf(idxbuf, sizeof(idxbuf), "%d", zi);
+			p.push_back(std::make_pair(std::string("id"), std::string(idbuf)));
+			// Cell shows the zone basename (actual casing); neighbor count in status only
+			p.push_back(std::make_pair(std::string("title"), z.Basename));
+			p.push_back(std::make_pair(std::string("idx"), std::string(idxbuf)));
+			spawnUnder(row, "zp_zone_grid_cell", p, x, 0, cellW, cellH);
+		}
+	}
+
+	if (CGroupList *list = findList("ui:zp:zone_browser:content:list_scroll:text_list"))
+		list->invalidateCoords();
+
+	// Status: grid extent + hint that neighbors load on open
+	if (CViewText *t = findText("ui:zp:zone_browser:content:world_sub"))
+	{
+		std::string colLo = ZPWS::continentZoneName(0, minC);
+		std::string colHi = ZPWS::continentZoneName(0, maxC);
+		// continentZoneName is "0_XX"; show just the two letters
+		std::string::size_type u1 = colLo.find('_');
+		std::string::size_type u2 = colHi.find('_');
+		std::string lettersLo = (u1 != std::string::npos) ? colLo.substr(u1 + 1) : colLo;
+		std::string lettersHi = (u2 != std::string::npos) ? colHi.substr(u2 + 1) : colHi;
+		t->setHardText(world.GraphicsRoot
+		               + NLMISC::toString("  |  rows %d..%d  cols %s..%s  (%u zones; open loads neighbors)",
+		                                  minR, maxR, lettersLo.c_str(), lettersHi.c_str(),
+		                                  (uint)s_Sess.Zones.size()));
+	}
+}
+
 static void populateZoneList()
 {
 	clearList("ui:zp:zone_browser:content:list_scroll:text_list");
@@ -286,11 +421,18 @@ static void populateZoneList()
 
 	ZPWS::listZones(world, s_Sess.Zones);
 
+	// Continents: name-derived coordinate grid (M3c). Ecosystems keep the grouped list.
+	if (world.Kind == ZPWS::Continent)
+	{
+		populateContinentGrid(world);
+		return;
+	}
+
 	std::string lastGroup;
 	for (size_t i = 0; i < s_Sess.Zones.size(); ++i)
 	{
 		const ZPWS::SZoneEntry &z = s_Sess.Zones[i];
-		if (world.Kind == ZPWS::Ecosystem && z.Group != lastGroup)
+		if (z.Group != lastGroup)
 		{
 			lastGroup = z.Group;
 			std::vector<std::pair<std::string, std::string> > hp;
@@ -309,15 +451,7 @@ static void populateZoneList()
 		char idbuf[32];
 		snprintf(idbuf, sizeof(idbuf), "z%u", (uint)i);
 		p.push_back(std::make_pair(std::string("id"), std::string(idbuf)));
-		// Continent: show how many 8-ring neighbors will load as read-only context
-		std::string title = z.Basename;
-		if (world.Kind == ZPWS::Continent)
-		{
-			uint n = ZPWS::countContinentNeighbors(world, z);
-			if (n > 0)
-				title += NLMISC::toString("  (+ %u neighbors)", n);
-		}
-		p.push_back(std::make_pair(std::string("title"), title));
+		p.push_back(std::make_pair(std::string("title"), z.Basename));
 		char idxbuf[32];
 		snprintf(idxbuf, sizeof(idxbuf), "%d", (int)i);
 		p.push_back(std::make_pair(std::string("idx"), std::string(idxbuf)));
@@ -585,7 +719,8 @@ EStartupResult runStartupFlow(UDriver *driver,
                               const std::string &screenshotPath,
                               SStartupSelection &selection,
                               bool folderBrowserEnabled,
-                              const std::string &initialBrowsePath)
+                              const std::string &initialBrowsePath,
+                              const std::string &screenshotWorld)
 {
 	if (!driver || !editorUI || !editorUI->isReady())
 	{
@@ -602,19 +737,55 @@ EStartupResult runStartupFlow(UDriver *driver,
 	else
 		s_Sess.FolderPath = ZPWS::normalizeDir(CPath::getCurrentPath());
 
-	// First screen: world list when non-empty; folder browser only when enabled + empty
-	if (worlds.empty() && folderBrowserEnabled)
-		showScreen(ScreenFolder);
-	else
-		showScreen(ScreenWorld);
+	// First screen: world list when non-empty; folder browser only when enabled + empty.
+	// --startup-screen <world> (with --startup-screenshot) jumps to Screen B for that world.
+	bool openedScreenB = false;
+	if (!screenshotPath.empty() && !screenshotWorld.empty() && !worlds.empty())
+	{
+		int wi = -1;
+		for (size_t i = 0; i < worlds.size(); ++i)
+		{
+			if (worlds[i].WorldName == screenshotWorld
+			    || ZPWS::dirBasename(worlds[i].GraphicsRoot) == screenshotWorld)
+			{
+				if (worlds[i].BankOk)
+				{
+					wi = (int)i;
+					break;
+				}
+				if (wi < 0)
+					wi = (int)i; // remember disabled match but prefer BankOk
+			}
+		}
+		if (wi >= 0 && worlds[wi].BankOk)
+		{
+			s_Sess.SelectedWorld = wi;
+			showScreen(ScreenZone);
+			openedScreenB = true;
+			printf("startup-screenshot: Screen B for world '%s'\n", worlds[wi].WorldName.c_str());
+		}
+		else
+		{
+			fprintf(stderr, "WARNING: startup-screen: world '%s' not found or no bank; showing Screen A\n",
+			        screenshotWorld.c_str());
+		}
+	}
+	if (!openedScreenB)
+	{
+		if (worlds.empty() && folderBrowserEnabled)
+			showScreen(ScreenFolder);
+		else
+			showScreen(ScreenWorld);
+	}
 
 	driver->setWindowTitle(ucstring("zone_painter — startup"));
 
-	// One-frame screenshot of the first screen
+	// One-frame screenshot of the selected screen
 	if (!screenshotPath.empty())
 	{
-		// Two update passes so dynamically-spawned list rows get real coords
+		// Extra update passes so dynamically-spawned grid/list rows get real coords
 		driver->EventServer.pump();
+		editorUI->update();
 		editorUI->update();
 		editorUI->update();
 		driver->clearBuffers(CRGBA(40, 44, 52));
