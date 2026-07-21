@@ -476,11 +476,15 @@ void CEditorUI::syncPanelFromBridge()
 	if (CCtrlBaseButton *btn = findButton("ui:zp:painter:content:mode_displace"))
 		btn->setPushed(b->Mode == 2);
 
-	// Tile set label
+	// Tile set label (1-based index; unnamed sets show as (unnamed) not empty quotes)
 	if (CViewText *t = findText("ui:zp:painter:content:tileset_info"))
 	{
 		char buf[192];
-		snprintf(buf, sizeof(buf), "%d/%u '%s'", b->CurTileSet, b->TileSetCount, b->TileSetName);
+		const char *name = b->TileSetName;
+		if (!name || !name[0])
+			name = "(unnamed)";
+		const int oneBased = b->TileSetCount ? (b->CurTileSet + 1) : 0;
+		snprintf(buf, sizeof(buf), "%d/%u %s", oneBased, b->TileSetCount, name);
 		t->setHardText(buf);
 	}
 
