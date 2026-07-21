@@ -5,18 +5,18 @@
 <style style="text_button_16" type="text_button" button_type="push_button"
 	tx_normal="w_text_button_normal" tx_pushed="w_text_button_pushed" tx_over="w_text_button_over"
 	global_color_normal="false" global_color_over="false" global_color_pushed="false"
-	text_y="0" fontsize="12" shadow="true" case_mode="%case_upper" wmargin="8"
+	text_y="0" fontsize="14" shadow="true" case_mode="%case_upper" wmargin="8"
 	text_color_normal="255 255 255 128" text_color_pushed="255 255 255 255" text_color_over="255 255 255 255" />
 
 <style style="button_ok" type="text_button" id="ok" button_type="push_button"
 	tx_normal="w_text_button_normal" tx_pushed="w_text_button_pushed" tx_over="w_text_button_over"
 	global_color_normal="false" global_color_over="false" global_color_pushed="false"
-	text_y="0" fontsize="12" shadow="true" case_mode="%case_upper" wmargin="8" />
+	text_y="0" fontsize="14" shadow="true" case_mode="%case_upper" wmargin="8" />
 
 <style style="tab_button" type="tab_button" button_type="radio_button" x="-2" posref="TR TL"
 	tx_normal="w_tab_normal" tx_pushed="w_tab_pushed" tx_over="w_tab_over"
 	global_color_normal="false" global_color_over="false" global_color_pushed="false"
-	text_y="0" fontsize="12" shadow="true" case_mode="%case_upper" wmargin="8"
+	text_y="0" fontsize="14" shadow="true" case_mode="%case_upper" wmargin="8"
 	text_color_normal="255 255 255 128" text_color_pushed="255 255 255 255" text_color_over="255 255 255 255" />
 
 <!-- Beveled box decoration (w_box_* set) -->
@@ -37,7 +37,7 @@
 </template>
 
 <!-- Single/multi-line edit box in a beveled border (matches client widgets.xml) -->
-<template name="edit_box_widget" active="true" posref="TL TL" text_x="0" text_y="0" text_ref="BL BL" child_resize_h="true" child_resize_hmargin="8" multi_line="false" x="0" y="0" w="0" h="0" sizeref="" id="eb" posparent="parent" onenter="" params="" reset_focus_on_hide="true" enter_loose_focus="true" prompt="" enter_recover_focus="true" max_num_bytes="0" max_num_chars="255" menu_r="" onchange="" onchange_params="" entry_type="text" keep="true" max_historic="10" fontsize="12" shadow="true" backup_father_container_pos="false" want_return="false" clear_on_escape="false" color="255 255 255 255" bg_texture="w_box_blank.tga" on_focus_lost="" on_focus_lost_params="" max_float_prec="5" negative_filter="" render_layer="0">
+<template name="edit_box_widget" active="true" posref="TL TL" text_x="0" text_y="0" text_ref="BL BL" child_resize_h="true" child_resize_hmargin="8" multi_line="false" x="0" y="0" w="0" h="0" sizeref="" id="eb" posparent="parent" onenter="" params="" reset_focus_on_hide="true" enter_loose_focus="true" prompt="" enter_recover_focus="true" max_num_bytes="0" max_num_chars="255" menu_r="" onchange="" onchange_params="" entry_type="text" keep="true" max_historic="10" fontsize="14" shadow="true" backup_father_container_pos="false" want_return="false" clear_on_escape="false" color="255 255 255 255" bg_texture="w_box_blank.tga" on_focus_lost="" on_focus_lost_params="" max_float_prec="5" negative_filter="" render_layer="0">
 	<group id="#id" posparent="#posparent" posref="#posref" x="#x" y="#y" w="#w" h="#h" sizeref="#sizeref" child_resize_h="#child_resize_h" child_resize_hmargin="#child_resize_hmargin" active="#active">
 		<group type="edit_box" sizeref="w" w="-8" id="eb" posref="TL TL" x="4" y="-4" child_resize_h="true" onenter="#onenter" params="#params" onchange="#onchange" onchange_params="#onchange_params" max_num_bytes="#max_num_bytes" max_num_chars="#max_num_chars" prompt="#prompt" enter_loose_focus="#enter_loose_focus" enter_recover_focus="#enter_recover_focus" entry_type="#entry_type" reset_focus_on_hide="#reset_focus_on_hide" menu_r="#menu_r" max_historic="#max_historic" want_return="#want_return" clear_on_escape="#clear_on_escape" backup_father_container_pos="#backup_father_container_pos" on_focus_lost="#on_focus_lost" on_focus_lost_params="#on_focus_lost_params" max_float_prec="#max_float_prec" negative_filter="#negative_filter" render_layer="#render_layer">
 			<view type="bitmap" id="bg" scale="true" sizeref="hw" h="0" w="0" texture="#bg_texture" inherit_gc_alpha="true" render_layer="#render_layer" />
@@ -60,7 +60,7 @@
 	<instance template="box_widget" render_layer="#render_layer" id="back" sizeref="wh" w="0" h="0" />
 	<view type="bitmap" render_layer="#render_layer" id="arrow" posref="MR MR" x="-4" texture="w_arrow_down_2.tga" />
 	<!-- x=2 left pad; y=-1 optical vertical center in the 20px beveled box -->
-	<view type="text" id="text" render_layer="#render_layer" posref="ML ML" x="2" y="-1" fontsize="14" color="255 255 255 255" shadow="true" global_color="false" />
+	<view type="text" id="text" render_layer="#render_layer" posref="ML ML" x="2" y="-1" fontsize="16" color="255 255 255 255" shadow="true" global_color="false" />
 	<ctrl type="button" render_layer="#render_layer" button_type="push_button" id="select" sizeref="wh" w="0" h="0" col_over="255 255 255 90" tx_over="blank.tga" scale="true" />
 </template>
 
@@ -75,18 +75,18 @@
 </template>
 
 <!-- Base menu + the two menus the combo box machinery requires -->
-<group type="menu" id="base_menu" mouse_pos="true" exit_click_b="true" space="1" fontsize="14" shadow="true"
+<group type="menu" id="base_menu" mouse_pos="true" exit_click_b="true" space="1" fontsize="16" shadow="true"
 	color="255 255 255 200" shadow_color="0 0 0 255" color_over="0 0 0 255" shadow_color_over="0 0 0 0"
 	color_grayed="255 255 255 64" shadow_color_grayed="0 0 0 255" highlight_over="255 255 255 150" case_mode="%case_normal"></group>
 
 <group type="menu" id="combo_box_select_menu" posref="BL TL" x="0" y="0" mouse_pos="false" space="2" shadow="false"
 	color="255 255 255 128" shadow_color="0 0 0 255" color_over="255 255 255 255" shadow_color_over="0 0 0 255"
-	color_grayed="0 0 0 255" shadow_color_grayed="155 155 155 255" fontsize="14" highlight_over="255 255 255 128"
+	color_grayed="0 0 0 255" shadow_color_grayed="155 155 155 255" fontsize="16" highlight_over="255 255 255 128"
 	force_inside_screen="true"></group>
 
 <group type="menu" id="combo_box_measure_menu" posref="BL TL" x="0" y="0" active="false" mouse_pos="false" space="2" shadow="false"
 	color="255 255 255 128" shadow_color="0 0 0 255" color_over="255 255 255 255" shadow_color_over="0 0 0 255"
-	color_grayed="0 0 0 255" shadow_color_grayed="155 155 155 255" fontsize="14" highlight_over="255 255 255 128"
+	color_grayed="0 0 0 255" shadow_color_grayed="155 155 155 255" fontsize="16" highlight_over="255 255 255 128"
 	force_inside_screen="true" />
 
 </interface_config>
