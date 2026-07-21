@@ -460,6 +460,19 @@ public:
 		Category = MP_CATEGORY::Undefined;
 		Family	 = RM_FAMILY::Unknown;
 		//IsForMission = false;
+
+		// readGeorges() has a bug: it reads the sheet's "HarvestSkill" value
+		// into CStaticItem::Skill instead of CMP::HarvestSkill, so this field
+		// is never actually set from the sheet. serial() writes it
+		// unconditionally regardless, so default it here to avoid packing
+		// uninitialized memory (not fixing the readGeorges() assignment
+		// itself, since that could change existing gameplay behavior).
+		Ecosystem    = ECOSYSTEM::unknown;
+		HarvestSkill = SKILLS::unknown;
+		StatEnergy   = 0;
+		MaxQuality   = 0;
+		Rarity       = 0;
+		MpColor      = 0;
 	}
 
 	/// Init the 'group <--> string' mapping
