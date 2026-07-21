@@ -127,7 +127,7 @@
 		<!-- Left column: horizontal slider + gauges; right column: vertical slider -->
 		<view type="text" id="l1" posref="TL TL" x="12" y="-10" fontsize="14" shadow="true" global_color="false" color="255 255 255 200" hardtext="slider drives the gauges:" />
 		<ctrl type="scroll" id="sh" posparent="l1" posref="BL TL" x="0" y="-10" w="200" h="8" vertical="false" align="L" min="0" max="255" value="UI:TEMP:SLIDERH" tracksize="24"
-			tx_topright="w_scroll_r.tga" tx_middle="w_scroll_l123_m.tga" tx_bottomleft="w_scroll_l.tga" />
+			tx_topright="w_scroll_r.tga" tx_middle="w_scroll_m.tga" tx_bottomleft="w_scroll_l.tga" />
 		<view type="text_number" id="shv" posparent="sh" posref="MR ML" x="10" y="0" value="UI:TEMP:SLIDERH" fontsize="16" shadow="true" global_color="false" color="150 255 150 255" />
 		<view type="bar" id="bar1" posparent="sh" posref="BL TL" x="0" y="-14" value="UI:TEMP:SLIDERH" range="255" color="255 255 255 255" global_color="false" />
 		<view type="bar3" id="bar3" posparent="bar1" posref="BL TL" x="0" y="-10"
