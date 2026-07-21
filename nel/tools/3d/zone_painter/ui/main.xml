@@ -42,22 +42,30 @@
 	</group>
 </template>
 
-<!-- Continent grid cell (M3c): uniform size, zone basename, case preserved. -->
-<template name="zp_zone_grid_cell" keep="true" id="" title="" idx="0">
-	<group id="#id" w="46" h="26">
-		<ctrl style="text_button_16_name" id="btn" posref="TL TL" x="0" y="0" w="44" h="24"
-			hardtext="#title" onclick_l="zp_select_zone" params_l="#idx" />
+<!-- Continent board cell (M5a): minesweeper-style square stamp (ms_cell idiom).
+     Brick cover is the hit target; name + optional thumb draw above it (later siblings). -->
+<template name="zp_board_cell" keep="true" id="" title="" idx="0" thumb="">
+	<group id="#id" w="52" h="52">
+		<!-- Brick face = minesweeper cover pattern; selected texture on hover. -->
+		<ctrl type="button" id="btn" button_type="push_button" posref="MM MM" x="0" y="0"
+			scale="true" sizeref="wh" w="-2" h="-2"
+			tx_normal="w_slot_brick.tga" tx_pushed="w_slot_brick.tga" tx_over="w_slot_brick_selected.tga"
+			global_color_normal="false" global_color_pushed="false" global_color_over="false"
+			onclick_l="zp_select_zone" params_l="#idx" />
+		<!-- Optional embedded/.png thumb (M5b activates when a cache path exists). -->
+		<view type="bitmap" id="thumb" posref="TM TM" x="0" y="-4" w="40" h="24" scale="true"
+			texture="#thumb" global_color="false" active="false" />
+		<view type="text" id="t" posref="BM BM" x="0" y="4" fontsize="10" shadow="true"
+			global_color="false" color="255 255 255 255" hardtext="#title" />
 	</group>
 </template>
 
-<!-- Empty grid gap (no file at this coordinate). -->
-<template name="zp_zone_grid_empty" keep="true" id="">
-	<group id="#id" w="46" h="26" />
-</template>
-
-<!-- One grid row container; cells are parented under it at runtime. -->
-<template name="zp_zone_grid_row" keep="true" id="">
-	<group id="#id" w="740" h="26" />
+<!-- Empty fringe cell: visibly empty, non-interactive placeholder (no button). -->
+<template name="zp_board_empty" keep="true" id="">
+	<group id="#id" w="52" h="52">
+		<view type="bitmap" id="bg" posref="MM MM" scale="true" sizeref="wh" w="-2" h="-2"
+			texture="w_box_blank.tga" global_color="false" color="45 48 56 220" />
+	</group>
 </template>
 
 <!-- Folder browser row (M2c): directory name button. -->
@@ -128,7 +136,7 @@
 		<ctrl style="text_button_radio" id="layout_3x3" posparent="layout_2x2" posref="MR ML" x="4" y="0"
 			onclick_l="zp_set_instances" params_l="3x3" hardtext="3x3" active="false" />
 
-		<!-- y offset: -8 under world_sub (continent) or below layout row (ecosystem; set in code) -->
+		<!-- Ecosystem list: vertical scroll_text (unchanged). y: -8 under world_sub or below layout row. -->
 		<group type="scroll_text" id="list_scroll" posparent="world_sub" posref="BL TL" x="0" y="-8" w="750" h="350" min_height="180" max_height="400">
 			<group type="list" id="text_list" shadow="true" fontsize="12" color="255 255 255 255" space="1"
 				global_color="false" posref="TL TL" x="4" y="-4" sizeref="hw" w="-24" h="-8" maxelements="2000" />
@@ -136,7 +144,22 @@
 				tx_topright="w_scroll_l0_t.tga" tx_middle="w_scroll_l0_m.tga" tx_bottomleft="w_scroll_l0_b.tga" />
 		</group>
 
-		<ctrl style="text_button_16" id="btn_back" posparent="list_scroll" posref="BL TL" x="4" y="-10"
+		<!-- Continent board (M5a): minesweeper-style cell stamps + dual-axis scroll (interface_notes pattern).
+		     board.w/h = content size (set in code); max_w/max_h = viewport clip.
+		     Scroll targets use absolute ids (relative "board" fails while board_host starts inactive). -->
+		<group id="board_host" posparent="world_sub" posref="BL TL" x="0" y="-8" w="750" h="350" active="false">
+			<group id="board" posref="TL TL" x="0" y="0" w="52" h="52" max_w="730" max_h="330">
+			</group>
+			<ctrl type="scroll" id="sv" posref="TR TR" x="-2" y="0" w="8" h="330" align="T"
+				tx_topright="w_scroll_l0_t.tga" tx_middle="w_scroll_l0_m.tga" tx_bottomleft="w_scroll_l0_b.tga"
+				target="ui:zp:zone_browser:content:board_host:board" />
+			<ctrl type="scroll" id="sh" posref="BL BL" x="0" y="2" w="730" h="8" vertical="false" align="L"
+				tx_topright="w_scroll_r.tga" tx_middle="w_scroll_m.tga" tx_bottomleft="w_scroll_l.tga"
+				target="ui:zp:zone_browser:content:board_host:board" />
+		</group>
+
+		<!-- Back is content-anchored so it stays visible for both list and board modes. -->
+		<ctrl style="text_button_16" id="btn_back" posref="BL BL" x="12" y="12"
 			onclick_l="zp_zone_back" params_l="" hardtext="Back" />
 	</group>
 </group>

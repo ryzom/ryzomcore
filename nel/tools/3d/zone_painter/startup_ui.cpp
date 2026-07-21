@@ -35,6 +35,7 @@
 #include <cstdio>
 #include <cstring>
 #include <map>
+#include <set>
 #include <utility>
 
 #include <nel/misc/algo.h>
@@ -48,6 +49,7 @@
 
 #include <nel/gui/action_handler.h>
 #include <nel/gui/ctrl_base_button.h>
+#include <nel/gui/ctrl_scroll.h>
 #include <nel/gui/group_container.h>
 #include <nel/gui/group_list.h>
 #include <nel/gui/interface_group.h>
@@ -276,7 +278,7 @@ static std::string thumbTextureName(const ZPWS::SZoneEntry &z)
 	return base + ".tga";
 }
 
-/** Parent a template instance under an existing group at an absolute offset (continent grid). */
+/** Parent a template instance under an existing group at an absolute offset (continent board). */
 static CInterfaceGroup *spawnUnder(CInterfaceGroup *parent, const char *templateName,
                                    const std::vector<std::pair<std::string, std::string> > &params,
                                    sint32 x, sint32 y, sint32 w, sint32 h)
@@ -305,28 +307,51 @@ static CInterfaceGroup *spawnUnder(CInterfaceGroup *parent, const char *template
 	return g;
 }
 
-/** Continent Screen B: name-derived grid (row vertical, col letters horizontal). */
+/** Toggle Screen B list (ecosystem) vs minesweeper board (continent). */
+static void setZoneBrowserMode(bool continentBoard)
+{
+	if (CInterfaceElement *el = CWidgetManager::getInstance()->getElementFromId(
+	        "ui:zp:zone_browser:content:list_scroll"))
+		el->setActive(!continentBoard);
+	if (CInterfaceElement *el = CWidgetManager::getInstance()->getElementFromId(
+	        "ui:zp:zone_browser:content:board_host"))
+		el->setActive(continentBoard);
+}
+
+static void clearBoard()
+{
+	if (CInterfaceGroup *board = findGroup("ui:zp:zone_browser:content:board_host:board"))
+	{
+		board->clearGroups();
+		board->setOfsX(0);
+		board->setOfsY(0);
+	}
+}
+
+/**
+ * Continent Screen B (M5a): minesweeper-style square cell board.
+ * Cell set = used zones + empty 8-neighbor fringe (nothing beyond). Dual-axis scroll
+ * when the board exceeds the host viewport (NLGUI group max_w/max_h + CCtrlScroll).
+ */
 static void populateContinentGrid(const ZPWS::SWorldEntry &world)
 {
-	std::map<std::pair<int, int>, int> cell; // (row,col) -> zone index
-	int minR = INT_MAX, maxR = INT_MIN, minC = INT_MAX, maxC = INT_MIN;
+	const int kCell = 52; // square; matches zp_board_* templates
+
+	std::map<std::pair<int, int>, int> used; // (row,col) -> zone index
 	uint nParse = 0;
 	for (size_t i = 0; i < s_Sess.Zones.size(); ++i)
 	{
 		int r = 0, c = 0;
 		if (!ZPWS::parseContinentZoneName(s_Sess.Zones[i].Basename, r, c))
 			continue;
-		cell[std::make_pair(r, c)] = (int)i;
-		if (r < minR) minR = r;
-		if (r > maxR) maxR = r;
-		if (c < minC) minC = c;
-		if (c > maxC) maxC = c;
+		used[std::make_pair(r, c)] = (int)i;
 		++nParse;
 	}
 
 	if (nParse == 0)
 	{
-		// Unparseable names: flat list fallback
+		// Unparseable names: flat list fallback (ecosystem-style)
+		setZoneBrowserMode(false);
 		for (size_t i = 0; i < s_Sess.Zones.size(); ++i)
 		{
 			std::vector<std::pair<std::string, std::string> > p;
@@ -342,69 +367,140 @@ static void populateContinentGrid(const ZPWS::SWorldEntry &world)
 		return;
 	}
 
-	const int cellW = 46;
-	const int cellH = 26;
-	const int nCols = maxC - minC + 1;
-	const int rowW = nCols * cellW + 4;
-
-	// Higher row numbers at the top (map-like: north / higher Y up)
-	for (int r = maxR; r >= minR; --r)
+	// Fringe = empty 8-neighbors of at least one used cell
+	std::set<std::pair<int, int> > fringe;
+	for (std::map<std::pair<int, int>, int>::const_iterator it = used.begin(); it != used.end(); ++it)
 	{
-		std::vector<std::pair<std::string, std::string> > rp;
-		char rid[32];
-		snprintf(rid, sizeof(rid), "gr%d", r);
-		rp.push_back(std::make_pair(std::string("id"), std::string(rid)));
-		CInterfaceGroup *row = spawnRow("zp_zone_grid_row",
-		                                "ui:zp:zone_browser:content:list_scroll:text_list", rp);
-		if (!row)
-			continue;
-		row->setW(rowW);
-		row->setH(cellH);
-
-		for (int c = minC; c <= maxC; ++c)
+		const int r = it->first.first;
+		const int c = it->first.second;
+		for (int dr = -1; dr <= 1; ++dr)
 		{
-			const int x = (c - minC) * cellW;
-			std::map<std::pair<int, int>, int>::const_iterator it = cell.find(std::make_pair(r, c));
-			if (it == cell.end())
+			for (int dc = -1; dc <= 1; ++dc)
 			{
-				std::vector<std::pair<std::string, std::string> > ep;
-				char eid[40];
-				snprintf(eid, sizeof(eid), "ge%d_%d", r, c);
-				ep.push_back(std::make_pair(std::string("id"), std::string(eid)));
-				spawnUnder(row, "zp_zone_grid_empty", ep, x, 0, cellW, cellH);
-				continue;
+				if (dr == 0 && dc == 0)
+					continue;
+				const int nr = r + dr;
+				const int nc = c + dc;
+				const std::pair<int, int> key(nr, nc);
+				if (used.find(key) == used.end())
+					fringe.insert(key);
 			}
-			const int zi = it->second;
-			const ZPWS::SZoneEntry &z = s_Sess.Zones[zi];
-			std::vector<std::pair<std::string, std::string> > p;
-			char idbuf[40], idxbuf[32];
-			snprintf(idbuf, sizeof(idbuf), "gc%d_%d", r, c);
-			snprintf(idxbuf, sizeof(idxbuf), "%d", zi);
-			p.push_back(std::make_pair(std::string("id"), std::string(idbuf)));
-			// Cell shows the zone basename (actual casing); neighbor count in status only
-			p.push_back(std::make_pair(std::string("title"), z.Basename));
-			p.push_back(std::make_pair(std::string("idx"), std::string(idxbuf)));
-			spawnUnder(row, "zp_zone_grid_cell", p, x, 0, cellW, cellH);
 		}
 	}
 
-	if (CGroupList *list = findList("ui:zp:zone_browser:content:list_scroll:text_list"))
-		list->invalidateCoords();
+	// Bounding box of used+fringe for board pixel size (north-up: higher row at top)
+	int minR = INT_MAX, maxR = INT_MIN, minC = INT_MAX, maxC = INT_MIN;
+	for (std::map<std::pair<int, int>, int>::const_iterator it = used.begin(); it != used.end(); ++it)
+	{
+		if (it->first.first < minR) minR = it->first.first;
+		if (it->first.first > maxR) maxR = it->first.first;
+		if (it->first.second < minC) minC = it->first.second;
+		if (it->first.second > maxC) maxC = it->first.second;
+	}
+	for (std::set<std::pair<int, int> >::const_iterator it = fringe.begin(); it != fringe.end(); ++it)
+	{
+		if (it->first < minR) minR = it->first;
+		if (it->first > maxR) maxR = it->first;
+		if (it->second < minC) minC = it->second;
+		if (it->second > maxC) maxC = it->second;
+	}
 
-	// Status: grid extent + hint that neighbors load on open
+	const int nRows = maxR - minR + 1;
+	const int nCols = maxC - minC + 1;
+	const int boardW = nCols * kCell;
+	const int boardH = nRows * kCell;
+
+	setZoneBrowserMode(true);
+	clearBoard();
+
+	CInterfaceGroup *board = findGroup("ui:zp:zone_browser:content:board_host:board");
+	if (!board)
+	{
+		fprintf(stderr, "WARNING: startup UI: continent board group missing\n");
+		return;
+	}
+
+	// Content size + viewport clip (scroll bars target this group)
+	board->setW(boardW);
+	board->setH(boardH);
+	board->setMaxW(730);
+	board->setMaxH(330);
+	board->setOfsX(0);
+	board->setOfsY(0);
+
+	// Used cells (clickable)
+	for (std::map<std::pair<int, int>, int>::const_iterator it = used.begin(); it != used.end(); ++it)
+	{
+		const int r = it->first.first;
+		const int c = it->first.second;
+		const int zi = it->second;
+		const ZPWS::SZoneEntry &z = s_Sess.Zones[zi];
+		// x increases east (col); y is negative down from TL, so higher row (north) is closer to 0
+		const sint32 x = (c - minC) * kCell;
+		const sint32 y = -((maxR - r) * kCell);
+
+		std::vector<std::pair<std::string, std::string> > p;
+		char idbuf[48], idxbuf[32];
+		snprintf(idbuf, sizeof(idbuf), "gc%d_%d", r, c);
+		snprintf(idxbuf, sizeof(idxbuf), "%d", zi);
+		p.push_back(std::make_pair(std::string("id"), std::string(idbuf)));
+		p.push_back(std::make_pair(std::string("title"), z.Basename));
+		p.push_back(std::make_pair(std::string("idx"), std::string(idxbuf)));
+		// M5b fills real thumbs; M5a leaves the bitmap inactive via empty texture name
+		p.push_back(std::make_pair(std::string("thumb"), std::string("w_box_blank.tga")));
+		CInterfaceGroup *cell = spawnUnder(board, "zp_board_cell", p, x, y, kCell, kCell);
+		if (cell)
+		{
+			if (CViewBitmap *thumb = dynamic_cast<CViewBitmap *>(cell->getView("thumb")))
+				thumb->setActive(false); // no empty dark square until a real thumb exists (M5b)
+		}
+	}
+
+	// Fringe placeholders (non-interactive)
+	for (std::set<std::pair<int, int> >::const_iterator it = fringe.begin(); it != fringe.end(); ++it)
+	{
+		const int r = it->first;
+		const int c = it->second;
+		const sint32 x = (c - minC) * kCell;
+		const sint32 y = -((maxR - r) * kCell);
+		std::vector<std::pair<std::string, std::string> > ep;
+		char eid[48];
+		snprintf(eid, sizeof(eid), "ge%d_%d", r, c);
+		ep.push_back(std::make_pair(std::string("id"), std::string(eid)));
+		spawnUnder(board, "zp_board_empty", ep, x, y, kCell, kCell);
+	}
+
+	// (Re)bind dual-axis scroll targets after board_host is active (XML target may miss while inactive).
+	if (CCtrlScroll *sv = dynamic_cast<CCtrlScroll *>(
+	        CWidgetManager::getInstance()->getElementFromId("ui:zp:zone_browser:content:board_host:sv")))
+		sv->setTarget(board);
+	if (CCtrlScroll *sh = dynamic_cast<CCtrlScroll *>(
+	        CWidgetManager::getInstance()->getElementFromId("ui:zp:zone_browser:content:board_host:sh")))
+		sh->setTarget(board);
+
+	board->invalidateCoords();
+	if (CInterfaceGroup *host = findGroup("ui:zp:zone_browser:content:board_host"))
+		host->invalidateCoords();
+
+	// Status: board extent + silhouette stats
 	if (CViewText *t = findText("ui:zp:zone_browser:content:world_sub"))
 	{
-		std::string colLo = ZPWS::continentZoneName(0, minC);
-		std::string colHi = ZPWS::continentZoneName(0, maxC);
-		// continentZoneName is "0_XX"; show just the two letters
+		// Letter labels clamp to AA for negative fringe cols (display only).
+		const int colLoIdx = minC < 0 ? 0 : minC;
+		const int colHiIdx = maxC < 0 ? 0 : maxC;
+		std::string colLo = ZPWS::continentZoneName(0, colLoIdx);
+		std::string colHi = ZPWS::continentZoneName(0, colHiIdx);
 		std::string::size_type u1 = colLo.find('_');
 		std::string::size_type u2 = colHi.find('_');
 		std::string lettersLo = (u1 != std::string::npos) ? colLo.substr(u1 + 1) : colLo;
 		std::string lettersHi = (u2 != std::string::npos) ? colHi.substr(u2 + 1) : colHi;
+		if (minC < 0) lettersLo = NLMISC::toString("%d", minC);
+		if (maxC < 0) lettersHi = NLMISC::toString("%d", maxC);
 		t->setHardText(world.GraphicsRoot
-		               + NLMISC::toString("  |  rows %d..%d  cols %s..%s  (%u zones; open loads neighbors)",
-		                                  minR, maxR, lettersLo.c_str(), lettersHi.c_str(),
-		                                  (uint)s_Sess.Zones.size()));
+		               + NLMISC::toString(
+		                     "  |  rows %d..%d  cols %s..%s  (%u zones + %u fringe; open loads neighbors)",
+		                     minR, maxR, lettersLo.c_str(), lettersHi.c_str(),
+		                     (uint)used.size(), (uint)fringe.size()));
 	}
 }
 
@@ -425,10 +521,14 @@ static void setLayoutSelectorVisible(bool visible)
 		if (CInterfaceElement *el = CWidgetManager::getInstance()->getElementFromId(ids[i]))
 			el->setActive(visible);
 	}
-	// Drop the zone list under the layout row (or tight under world_sub on continents)
+	// Drop the zone list / board under the layout row (or tight under world_sub on continents)
+	const sint32 y = visible ? -40 : -8;
 	if (CInterfaceElement *list = CWidgetManager::getInstance()->getElementFromId(
 	        "ui:zp:zone_browser:content:list_scroll"))
-		list->setY(visible ? -40 : -8);
+		list->setY(y);
+	if (CInterfaceElement *board = CWidgetManager::getInstance()->getElementFromId(
+	        "ui:zp:zone_browser:content:board_host"))
+		board->setY(y);
 }
 
 /** Sync radio pushed state to s_Sess.InstanceLayout. */
@@ -454,6 +554,7 @@ static void syncLayoutRadios()
 static void populateZoneList()
 {
 	clearList("ui:zp:zone_browser:content:list_scroll:text_list");
+	clearBoard();
 	if (!s_Sess.Worlds || s_Sess.SelectedWorld < 0
 	    || s_Sess.SelectedWorld >= (int)s_Sess.Worlds->size())
 		return;
@@ -473,12 +574,14 @@ static void populateZoneList()
 
 	ZPWS::listZones(world, s_Sess.Zones);
 
-	// Continents: name-derived coordinate grid (M3c). Ecosystems keep the grouped list.
+	// Continents: minesweeper-style board (M5a). Ecosystems keep the grouped list.
 	if (world.Kind == ZPWS::Continent)
 	{
 		populateContinentGrid(world);
 		return;
 	}
+
+	setZoneBrowserMode(false);
 
 	std::string lastGroup;
 	for (size_t i = 0; i < s_Sess.Zones.size(); ++i)
