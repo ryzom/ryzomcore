@@ -110,6 +110,22 @@ bool encodeDib24(const NLMISC::CBitmap &bmp, std::vector<uint8> &outDib, uint ma
 bool thumbRoundtripIdentical(const std::string &maxPath, std::string &err);
 
 /**
+ * Build a replacement SummaryInformation stream for maxPath with `bmp` as the
+ * new PIDSI_THUMBNAIL (scaled to maxDim). Returns false if the input SI cannot
+ * be parsed (or is missing and cannot be synthesized). On success, outStream is
+ * the full SI bytes to write into the OLE container.
+ *
+ * When gateRoundtrip is true, requires that a keep-existing re-encode of the
+ * input SI is byte-identical first (warn-and-skip safety for odd Max variants).
+ */
+bool buildSummaryInformationWithThumbnail(const std::string &maxPath,
+                                          const NLMISC::CBitmap &bmp,
+                                          std::vector<uint8> &outStream,
+                                          uint maxDim = 128,
+                                          bool gateRoundtrip = true,
+                                          std::string *err = NULL);
+
+/**
  * Build a CF_DIB (clipboard format 8) CLIPDATA property value (VT_CF) from a DIB.
  * Layout: type=71, cbSize, ulClipFmt=-1, cf=8, dib bytes.
  */

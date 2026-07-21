@@ -349,12 +349,40 @@ void openSaveDialog()
 	std::string prefill = std::string(b->EditableBasename) + "_painted.max";
 	if (CGroupEditBox *eb = findEditBox("ui:zp:save_dialog:content:copy_name"))
 		eb->setInputString(prefill);
+	// M5c: thumbnail checkbox defaults on
+	b->UpdateThumbnail = true;
+	if (CCtrlBaseButton *tb = dynamic_cast<CCtrlBaseButton *>(
+	        CWidgetManager::getInstance()->getElementFromId("ui:zp:save_dialog:content:update_thumb")))
+		tb->setPushed(true);
 	CWidgetManager::getInstance()->enableModalWindow(NULL, "ui:zp:save_dialog");
 }
+
+class CAHZpSaveThumbToggle : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (!b) return;
+		// Toggle button reports new pushed state after click via getPushed
+		if (CCtrlBaseButton *tb = dynamic_cast<CCtrlBaseButton *>(
+		        CWidgetManager::getInstance()->getElementFromId("ui:zp:save_dialog:content:update_thumb")))
+			b->UpdateThumbnail = tb->getPushed();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpSaveThumbToggle, "zp_save_thumb_toggle");
 
 void forceShowSaveDialogForShot()
 {
 	openSaveDialog();
+}
+
+static void syncThumbWantFromModal(SPaintUIBridge *b)
+{
+	if (!b) return;
+	if (CCtrlBaseButton *tb = dynamic_cast<CCtrlBaseButton *>(
+	        CWidgetManager::getInstance()->getElementFromId("ui:zp:save_dialog:content:update_thumb")))
+		b->UpdateThumbnail = tb->getPushed();
 }
 
 class CAHZpSaveOverwrite : public IActionHandler
@@ -364,6 +392,8 @@ public:
 	{
 		SPaintUIBridge *b = getPaintUIBridge();
 		if (!b || !b->saveOverwrite) return;
+		syncThumbWantFromModal(b);
+		// Bridge UpdateThumbnail is read by main.cpp via g_PaintCtx.WantThumbnail before save
 		if (b->saveOverwrite())
 		{
 			setSaveModalStatus("Saved (overwrite).");

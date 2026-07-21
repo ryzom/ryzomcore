@@ -953,7 +953,14 @@ static std::vector<uint8> writeContainerToTemp(CStorageContainer &ctr, const std
 	return out;
 }
 
-static int saveWholeFile(const std::string &input, const std::string &output, CScene &scene, bool verifyIdentical)
+/**
+ * Whole-file save. Non-Scene streams come from `input` verbatim unless
+ * summaryOverride is non-NULL, in which case SummaryInformation is replaced
+ * (M5c thumbnail write). --null-edit / plain --save pass NULL so SI is untouched.
+ */
+static int saveWholeFile(const std::string &input, const std::string &output, CScene &scene,
+                         bool verifyIdentical,
+                         const std::vector<uint8> *summaryOverride = NULL)
 {
 	// The known .max stream set (same list as the corpus harness save tests).
 	static const char *kStreams[] = {
@@ -973,6 +980,17 @@ static int saveWholeFile(const std::string &input, const std::string &output, CS
 			if (in.readStream(*n, b)) { present.push_back(*n); rawOrig.push_back(b); }
 		}
 		haveClassId = in.getClassId(classId);
+	}
+
+	// If we have a new SI and the stream was absent, append it.
+	const std::string kSI = ZPTHUMB::kSummaryInformationStream;
+	bool haveSI = false;
+	for (size_t i = 0; i < present.size(); ++i)
+		if (present[i] == kSI) { haveSI = true; break; }
+	if (summaryOverride && !haveSI)
+	{
+		present.push_back(kSI);
+		rawOrig.push_back(std::vector<uint8>()); // placeholder; overridden below
 	}
 
 	// Rebuild the Scene stream from the typed graph (§5 lifecycle) and write the whole file.
@@ -997,8 +1015,12 @@ static int saveWholeFile(const std::string &input, const std::string &output, CS
 		CStorageOleOut out;
 		for (size_t i = 0; i < present.size(); ++i)
 		{
-			if (present[i] == "Scene") out.addStream("Scene", newScene);
-			else out.addStream(present[i], rawOrig[i]);
+			if (present[i] == "Scene")
+				out.addStream("Scene", newScene);
+			else if (summaryOverride && present[i] == kSI)
+				out.addStream(present[i], *summaryOverride);
+			else
+				out.addStream(present[i], rawOrig[i]);
 		}
 		if (haveClassId) out.setClassId(classId);
 		if (!out.write(output)) { fprintf(stderr, "ERROR: cannot create %s\n", output.c_str()); return 1; }
@@ -1013,11 +1035,13 @@ static int saveWholeFile(const std::string &input, const std::string &output, CS
 		{
 			std::vector<uint8> b2;
 			in2.readStream(present[i], b2);
-			if (b2 != rawOrig[i])
+			const std::vector<uint8> &expect =
+				(summaryOverride && present[i] == kSI) ? *summaryOverride : rawOrig[i];
+			if (b2 != expect)
 			{
 				fprintf(stderr, "ERROR: stream %s NOT byte-identical (%u -> %u bytes)\n",
 				        (present[i][0] == '\05' ? present[i].substr(1) : present[i]).c_str(),
-				        (uint)rawOrig[i].size(), (uint)b2.size());
+				        (uint)expect.size(), (uint)b2.size());
 				++diffs;
 			}
 		}
@@ -1025,7 +1049,7 @@ static int saveWholeFile(const std::string &input, const std::string &output, CS
 	if (verifyIdentical)
 		printf("%s null-edit: %u stream diffs -> %s\n", diffs ? "FAIL" : "OK", diffs, output.c_str());
 	else
-		printf("OK save -> %s\n", output.c_str());
+		printf("OK save -> %s%s\n", output.c_str(), summaryOverride ? " (thumbnail updated)" : "");
 	return diffs ? 1 : 0;
 }
 
@@ -1564,12 +1588,25 @@ struct SPaintCtx
 	std::string SavePath;
 	PIPELINE::MAX::CScene *Scene; // Max scene for whole-file save (editable file only)
 	bool InteractiveSave;         // startup interactive without --save => Save modal
+	bool WantThumbnail;           // CLI --thumbnail or modal checkbox (M5c)
+	// Live viewer hooks for top-down thumbnail capture (valid only while runViewer runs)
+	NL3D::UDriver *UDriver;
+	NL3D::UScene *UScene;
+	NL3D::CLandscapeModel *Land;
+	NL3D::CCamera *Camera;
+	std::vector<SPaintZone> *Zones;
 	SPaintCtx()
-		: Active(false), Core(NULL), Paint(NULL), Scene(NULL), InteractiveSave(false)
+		: Active(false), Core(NULL), Paint(NULL), Scene(NULL), InteractiveSave(false),
+		  WantThumbnail(false), UDriver(NULL), UScene(NULL), Land(NULL), Camera(NULL), Zones(NULL)
 	{
 	}
 };
 static SPaintCtx g_PaintCtx;
+// CLI --thumbnail: set before save so zpSaveTo / headless save path pick it up
+static bool g_CliWantThumbnail = false;
+// Captured top-down thumb (survives runViewer teardown for post-viewer --save)
+static NLMISC::CBitmap g_CapturedThumb;
+static bool g_HaveCapturedThumb = false;
 
 // Last save status for HUD / callers (also printed to stderr on failure)
 static std::string g_LastSaveStatus;
@@ -1669,9 +1706,145 @@ static void zpFill(int rot)
 }
 
 /**
+ * Top-down orthographic capture of the PRIMARY zone only (instances/neighbors stay in
+ * the landscape but the camera frames the primary bbox). Square crop, no GUI.
+ */
+static bool captureTopDownThumbnail(NLMISC::CBitmap &out)
+{
+	out.reset();
+	if (!g_PaintCtx.UDriver || !g_PaintCtx.UScene || !g_PaintCtx.Land || !g_PaintCtx.Camera
+	    || !g_PaintCtx.Zones || g_PaintCtx.Zones->empty())
+		return false;
+
+	// Primary zone = index 0 (editable); build bbox from its patches only.
+	const SPaintZone &primary = (*g_PaintCtx.Zones)[0];
+	NLMISC::CAABBox bbox;
+	bool init = false;
+	for (size_t p = 0; p < primary.Patches.size(); ++p)
+	{
+		const NL3D::CBezierPatch &bp = primary.Patches[p].Patch;
+		for (uint v = 0; v < 4; ++v)
+		{
+			if (!init) { bbox.setCenter(bp.Vertices[v]); bbox.setHalfSize(NLMISC::CVector::Null); init = true; }
+			else bbox.extend(bp.Vertices[v]);
+		}
+		for (uint v = 0; v < 8; ++v) bbox.extend(bp.Tangents[v]);
+		for (uint v = 0; v < 4; ++v) bbox.extend(bp.Interiors[v]);
+	}
+	if (!init)
+		return false;
+
+	NLMISC::CVector center = bbox.getCenter();
+	// Square half-extent from XY footprint (Z is up)
+	const float hx = std::max(bbox.getHalfSize().x, 1.f);
+	const float hy = std::max(bbox.getHalfSize().y, 1.f);
+	const float half = std::max(hx, hy) * 1.05f;
+	const float zTop = bbox.getMax().z + std::max(bbox.getHalfSize().z * 2.f, 50.f);
+
+	NL3D::CCamera *camera = g_PaintCtx.Camera;
+	// Save camera
+	const NLMISC::CMatrix oldMat = camera->getMatrix();
+	const NL3D::CFrustum oldFrust = camera->getFrustum();
+
+	// Ortho top-down: look along -Z, Y north-ish
+	NLMISC::CMatrix camMat;
+	camMat.identity();
+	// I = +X, J = -Z (look down), K = +Y (up on screen = north if Y is north)
+	NLMISC::CVector I(1, 0, 0);
+	NLMISC::CVector J(0, 0, -1);
+	NLMISC::CVector K(0, 1, 0);
+	camMat.setRot(I, J, K, true);
+	camMat.setPos(NLMISC::CVector(center.x, center.y, zTop));
+	camera->setTransformMode(NL3D::ITransformable::DirectMatrix);
+	camera->setMatrix(camMat);
+	camera->setFrustum(-half, half, -half, half, 0.1f, zTop - bbox.getMin().z + 100.f, /*perspective=*/false);
+
+	NL3D::UDriver *udriver = g_PaintCtx.UDriver;
+	NL3D::UScene *uscene = g_PaintCtx.UScene;
+	NL3D::IDriver *driver = static_cast<NL3D::CDriverUser *>(udriver)->getDriver();
+
+	// Hide GUI for a clean thumb
+	const bool wasUi = false;
+	(void)wasUi;
+	ZPUI::CEditorUI *ed = NULL;
+	// Render two frames (refine)
+	g_PaintCtx.Land->Landscape.setRefineMode(true);
+	udriver->clearBuffers(NLMISC::CRGBA(40, 40, 40));
+	uscene->render();
+	g_PaintCtx.Land->Landscape.setRefineMode(false);
+	g_PaintCtx.Land->Landscape.refineAll(camMat.getPos());
+	udriver->clearBuffers(NLMISC::CRGBA(40, 40, 40));
+	uscene->render();
+	udriver->swapBuffers();
+
+	NLMISC::CBitmap full;
+	driver->getBuffer(full);
+	// Restore camera
+	camera->setMatrix(oldMat);
+	camera->setFrustum(oldFrust);
+
+	if (full.getWidth() == 0 || full.getHeight() == 0)
+		return false;
+
+	// Center square crop
+	const uint fw = full.getWidth();
+	const uint fh = full.getHeight();
+	const uint side = std::min(fw, fh);
+	const uint x0 = (fw - side) / 2;
+	const uint y0 = (fh - side) / 2;
+	out.resize(side, side, NLMISC::CBitmap::RGBA, true);
+	if (full.getPixelFormat() != NLMISC::CBitmap::RGBA)
+		full.convertToType(NLMISC::CBitmap::RGBA);
+	out.blit(full, (sint)x0, (sint)y0, (sint)side, (sint)side, 0, 0);
+	return out.getWidth() > 0;
+}
+
+/** Build optional SI override when WantThumbnail is set; no override means leave SI alone. */
+static bool prepareThumbnailOverride(const std::string &srcMax, std::vector<uint8> &siOut, bool &haveOverride)
+{
+	haveOverride = false;
+	siOut.clear();
+	// Interactive modal: honor the "Update thumbnail" checkbox (default on).
+	if (g_PaintCtx.InteractiveSave)
+	{
+		if (ZPUI::SPaintUIBridge *b = ZPUI::getPaintUIBridge())
+			g_PaintCtx.WantThumbnail = b->UpdateThumbnail;
+	}
+	if (!g_PaintCtx.WantThumbnail && !g_CliWantThumbnail)
+		return true; // not requested — OK, no override
+
+	NLMISC::CBitmap bmp;
+	if (captureTopDownThumbnail(bmp))
+	{
+		g_CapturedThumb.swap(bmp);
+		g_HaveCapturedThumb = true;
+	}
+	else if (g_HaveCapturedThumb)
+	{
+		bmp = g_CapturedThumb;
+	}
+	else
+	{
+		fprintf(stderr, "WARNING: thumbnail: capture failed (need a display — use xvfb-run and "
+		        "--screenshot or interactive save); SI left unchanged\n");
+		return true; // save continues without thumb update
+	}
+	std::string err;
+	if (!ZPTHUMB::buildSummaryInformationWithThumbnail(srcMax, bmp, siOut, 128, true, &err))
+	{
+		fprintf(stderr, "WARNING: thumbnail: %s — SI left unchanged\n", err.c_str());
+		return true;
+	}
+	haveOverride = true;
+	printf("OK thumbnail: %ux%u -> SummaryInformation\n", bmp.getWidth(), bmp.getHeight());
+	return true;
+}
+
+/**
  * Write-back + whole-file save to `target`. Single save implementation for panel modal,
  * --save, and --panel-save-test. Non-Scene OLE streams are read from InputPath (the opened
  * editable file); the Scene stream is rebuilt from the mutated Max scene.
+ * Thumbnail write only when WantThumbnail/CLI --thumbnail is set (M5c).
  */
 static bool zpSaveTo(const std::string &target)
 {
@@ -1697,7 +1870,11 @@ static bool zpSaveTo(const std::string &target)
 	}
 	// OLE non-Scene streams come from the original opened file (not the target).
 	const std::string &srcForStreams = g_PaintCtx.InputPath.empty() ? target : g_PaintCtx.InputPath;
-	int saveRc = saveWholeFile(srcForStreams, target, *g_PaintCtx.Scene, false);
+	std::vector<uint8> siOverride;
+	bool haveSi = false;
+	prepareThumbnailOverride(srcForStreams, siOverride, haveSi);
+	int saveRc = saveWholeFile(srcForStreams, target, *g_PaintCtx.Scene, false,
+	                           haveSi ? &siOverride : NULL);
 	if (saveRc != 0)
 	{
 		g_LastSaveStatus = "save failed -> " + target;
@@ -1753,7 +1930,11 @@ static bool zpSaveOverwrite()
 		return false;
 	}
 	// Write new content to temp (OLE streams from original; Scene from mutated graph)
-	int saveRc = saveWholeFile(orig, tempPath, *g_PaintCtx.Scene, false);
+	std::vector<uint8> siOverride;
+	bool haveSi = false;
+	prepareThumbnailOverride(orig, siOverride, haveSi);
+	int saveRc = saveWholeFile(orig, tempPath, *g_PaintCtx.Scene, false,
+	                           haveSi ? &siOverride : NULL);
 	if (saveRc != 0 || !NLMISC::CFile::fileExists(tempPath))
 	{
 		g_LastSaveStatus = "overwrite: temp write failed";
@@ -2002,6 +2183,12 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 		g_PaintCtx.SavePath = savePath;
 		g_PaintCtx.Scene = lm.Scene;
 		g_PaintCtx.InteractiveSave = g_InteractiveSave;
+		g_PaintCtx.WantThumbnail = g_CliWantThumbnail; // CLI default; modal may toggle
+		g_PaintCtx.UDriver = udriver;
+		g_PaintCtx.UScene = uscene;
+		g_PaintCtx.Land = theLand;
+		g_PaintCtx.Camera = camera;
+		g_PaintCtx.Zones = &zones;
 		paintBridge.selectMode = zpSelectMode;
 		paintBridge.selectTileSetDelta = zpSelectTileSetDelta;
 		paintBridge.toggleTileSize = zpToggleTileSize;
@@ -2129,6 +2316,18 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 			{
 				btm.writeTGA(fs, 24);
 				printf("OK screenshot: %ux%u -> %s\n", btm.getWidth(), btm.getHeight(), screenshotPath.c_str());
+			}
+			// Pre-capture top-down thumb while the landscape is live (for --save --thumbnail).
+			if (g_CliWantThumbnail || g_PaintCtx.WantThumbnail)
+			{
+				NLMISC::CBitmap thumb;
+				if (captureTopDownThumbnail(thumb))
+				{
+					g_CapturedThumb.swap(thumb);
+					g_HaveCapturedThumb = true;
+					printf("OK thumbnail pre-capture: %ux%u\n",
+					       g_CapturedThumb.getWidth(), g_CapturedThumb.getHeight());
+				}
 			}
 		}
 		else
@@ -2464,10 +2663,16 @@ int main(int argc, char **argv)
 	args.addArg("", "thumb-roundtrip-test", "file.max",
 	            "Headless: parse and re-encode SummaryInformation with the UNCHANGED thumbnail; "
 	            "exit 0 only if the stream is byte-identical (M5c property-set gate)");
+	args.addArg("", "thumbnail", "",
+	            "With --save: render a top-down orthographic thumbnail of the primary zone and "
+	            "write it into SummaryInformation PIDSI_THUMBNAIL (requires a display — use "
+	            "xvfb-run for headless). Plain --save and --null-edit never touch the thumbnail. "
+	            "Interactive Save modal has an 'update thumbnail' checkbox (default on).");
 	if (!args.parse(argc, argv))
 		return 1;
 
 	g_verbose = args.haveLongArg("verbose");
+	g_CliWantThumbnail = args.haveLongArg("thumbnail");
 
 	// Hidden M5b/M5c thumbnail tools (no driver / scene required)
 	if (args.haveLongArg("thumb-roundtrip-test"))
@@ -2923,8 +3128,11 @@ int main(int argc, char **argv)
 	// Viewer runs for --screenshot and for the plain interactive invocation (a paint script
 	// without a display mode is headless; the dump-only modes are headless too).
 	// --panel-save-test is always headless (same path as paint-script without display).
+	// --save --thumbnail needs a display pass to capture the top-down view (use xvfb-run).
+	const bool needThumbDisplay = g_CliWantThumbnail && !savePath.empty();
 	bool viewerMode = !nullEdit && !args.haveLongArg("dump-zones") && panelSaveTest.empty()
-		&& (args.haveLongArg("screenshot") || (scriptPath.empty() && !doDumpRpo && !doDumpXRef && dumpBlobDir.empty()));
+		&& (args.haveLongArg("screenshot") || needThumbDisplay
+		    || (scriptPath.empty() && !doDumpRpo && !doDumpXRef && dumpBlobDir.empty()));
 
 	if (nullEdit && !args.haveLongArg("out"))
 	{
@@ -3109,6 +3317,12 @@ int main(int argc, char **argv)
 	if (viewerMode)
 	{
 		std::string screenshotPath = args.haveLongArg("screenshot") ? args.getLongArg("screenshot")[0] : std::string();
+		// --save --thumbnail without --screenshot: one-shot display capture then exit (xvfb-friendly)
+		if (needThumbDisplay && screenshotPath.empty())
+		{
+			NLMISC::CFile::createDirectoryTree("/tmp/zp_ui");
+			screenshotPath = "/tmp/zp_ui/_thumb_capture.tga";
+		}
 		rc = runViewer(zones, bank, &core, lm, screenshotPath, fontPath, scriptPath, savePath,
 		               sharedDriver, sharedEditorUI);
 	}
@@ -3247,7 +3461,19 @@ int main(int argc, char **argv)
 		if (!core.writeBack(err)) { fprintf(stderr, "ERROR: write-back: %s\n", err.c_str()); return 1; }
 		// Write-back only mutates carriers with AnyUnfrozen; neighbor (forceFrozen) carriers
 		// are never rewritten — only the editable file's Scene is saved.
-		int saveRc = saveWholeFile(input, savePath, *lm.Scene, false);
+		// Thumbnail write only with --thumbnail (and a prior viewer capture into g_PaintCtx).
+		std::vector<uint8> siOverride;
+		bool haveSi = false;
+		if (g_CliWantThumbnail)
+		{
+			g_PaintCtx.WantThumbnail = true;
+			// If the viewer already ran, capture hooks may still be cleared — re-check.
+			prepareThumbnailOverride(input, siOverride, haveSi);
+			if (!haveSi)
+				fprintf(stderr, "WARNING: --thumbnail: no capture available; combine with a display "
+				        "run (e.g. --screenshot /tmp/x.tga) or interactive save. SI left unchanged.\n");
+		}
+		int saveRc = saveWholeFile(input, savePath, *lm.Scene, false, haveSi ? &siOverride : NULL);
 		if (saveRc) return saveRc;
 	}
 

@@ -735,6 +735,79 @@ bool thumbRoundtripIdentical(const std::string &maxPath, std::string &err)
 	return true;
 }
 
+bool buildSummaryInformationWithThumbnail(const std::string &maxPath,
+                                          const CBitmap &bmp,
+                                          std::vector<uint8> &outStream,
+                                          uint maxDim,
+                                          bool gateRoundtrip,
+                                          std::string *err)
+{
+	outStream.clear();
+	if (err) err->clear();
+
+	std::vector<uint8> inStream;
+	const bool haveSI = readSummaryInformationStream(maxPath, inStream);
+
+	if (haveSI && gateRoundtrip)
+	{
+		std::vector<uint8> rt;
+		if (!rebuildSummaryInformationWithThumbnail(inStream, NULL, rt, 128, true) || rt != inStream)
+		{
+			if (err) *err = "roundtrip gate failed; refusing to rewrite SummaryInformation";
+			return false;
+		}
+	}
+
+	if (haveSI)
+	{
+		if (!rebuildSummaryInformationWithThumbnail(inStream, &bmp, outStream, maxDim, false))
+		{
+			if (err) *err = "rebuild with new thumbnail failed";
+			return false;
+		}
+		return true;
+	}
+
+	// Synthesize a minimal SummaryInformation when the stream is absent.
+	SPropSet ps;
+	ps.ByteOrder = 0xFFFE;
+	ps.Version = 0;
+	ps.SysId = 0x00020105; // Windows NT
+	memset(ps.Clsid, 0, 16);
+	SPropSection sec;
+	memcpy(sec.FmtId, kFmtidSummaryInformation, 16);
+	{
+		SPropEntry pe;
+		pe.Pid = kPidCodePage;
+		pe.Type = kVtI2;
+		pe.Value.resize(8, 0);
+		pe.Value[0] = (uint8)kVtI2;
+		pe.Value[4] = 0xe4;
+		pe.Value[5] = 0x04; // 1252
+		sec.Props.push_back(pe);
+	}
+	{
+		std::vector<uint8> dib;
+		if (!encodeDib24(bmp, dib, maxDim))
+		{
+			if (err) *err = "DIB encode failed";
+			return false;
+		}
+		SPropEntry pe;
+		pe.Pid = kPidThumbnail;
+		pe.Type = kVtCf;
+		wrapDibAsVtCfProperty(dib, pe.Value);
+		sec.Props.push_back(pe);
+	}
+	ps.Sections.push_back(sec);
+	if (!serializePropertySet(ps, outStream))
+	{
+		if (err) *err = "synthesize SummaryInformation failed";
+		return false;
+	}
+	return true;
+}
+
 } // namespace ZPTHUMB
 
 /* end of file */
