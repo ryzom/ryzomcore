@@ -57,7 +57,9 @@ enum EStartupResult
 struct SStartupSelection
 {
 	ZPWS::SWorldEntry World;
-	ZPWS::SZoneEntry Zone;
+	ZPWS::SZoneEntry Zone; // first / primary (compat with single-open callers)
+	/** All editable zones for this open (M6b multi-select). Empty means {Zone} only. */
+	std::vector<ZPWS::SZoneEntry> EditableZones;
 	/** Ecosystem self-instance layout ("1x1".."3x3"); empty means 1x1. Continent ignores. */
 	std::string InstanceLayout;
 };
@@ -82,7 +84,8 @@ EStartupResult runStartupFlow(NL3D::UDriver *driver,
                               const std::string &initialBrowsePath = std::string(),
                               const std::string &screenshotWorld = std::string());
 
-/** Same selection path buttons use — for --startup-auto thin wrapper reuse. */
+/** Same selection path buttons use — for --startup-auto thin wrapper reuse.
+ *	Supports multi: "world/zoneA+zoneB" fills EditableZones (M6b). */
 bool startupSelectWorldZone(const std::vector<ZPWS::SWorldEntry> &worlds,
                             const std::string &autoPath,
                             SStartupSelection &selection,

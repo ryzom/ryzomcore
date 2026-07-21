@@ -51,6 +51,7 @@
 #include <nel/gui/action_handler.h>
 #include <nel/gui/ctrl_base_button.h>
 #include <nel/gui/ctrl_scroll.h>
+#include <nel/gui/ctrl_text_button.h>
 #include <nel/gui/group_container.h>
 #include <nel/gui/group_list.h>
 #include <nel/gui/interface_group.h>
@@ -86,7 +87,9 @@ struct SStartupSession
 	std::vector<ZPWS::SWorldEntry> *Worlds;
 	std::vector<ZPWS::SZoneEntry> Zones;
 	int SelectedWorld; // index into *Worlds
-	int SelectedZone;  // index into Zones
+	int SelectedZone;  // index into Zones (single open; last L-clicked)
+	/** Pending multi-select (M6b): zone indices into Zones (used cells only). */
+	std::set<int> PendingSelect;
 	std::string FolderPath;
 	std::string StatusMsg;
 	/** Ecosystem open layout (M4b): "1x1" default; options 2x1/1x2/2x2/3x3. */
@@ -337,6 +340,56 @@ static void setZoneBrowserMode(bool continentBoard)
 	if (CInterfaceElement *el = CWidgetManager::getInstance()->getElementFromId(
 	        "ui:zp:zone_browser:content:board_host"))
 		el->setActive(continentBoard);
+	// Multi-select chrome is continent-board only (M6b/M6c)
+	if (CInterfaceElement *el = CWidgetManager::getInstance()->getElementFromId(
+	        "ui:zp:zone_browser:content:board_legend"))
+		el->setActive(continentBoard);
+	if (CInterfaceElement *el = CWidgetManager::getInstance()->getElementFromId(
+	        "ui:zp:zone_browser:content:btn_open_sel"))
+		el->setActive(continentBoard);
+}
+
+/** Update Open-selection button label/frozen + optional status (M6b). */
+static void refreshBoardSelectionUI()
+{
+	const uint n = (uint)s_Sess.PendingSelect.size();
+	if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(
+	        CWidgetManager::getInstance()->getElementFromId("ui:zp:zone_browser:content:btn_open_sel")))
+	{
+		btn->setFrozen(n == 0);
+		char buf[64];
+		if (n == 0)
+			snprintf(buf, sizeof(buf), "Open selection");
+		else
+			snprintf(buf, sizeof(buf), "Open selection (%u)", n);
+		if (CCtrlTextButton *tb = dynamic_cast<CCtrlTextButton *>(btn))
+			tb->setHardText(buf);
+	}
+	// Append selection count on the board legend when non-zero
+	if (CViewText *t = findText("ui:zp:zone_browser:content:board_legend"))
+	{
+		if (n == 0)
+			t->setHardText("L-click open · R-click select · fringe = empty");
+		else
+			t->setHardText(NLMISC::toString(
+			    "L-click open · R-click select · fringe = empty  |  %u selected", n));
+	}
+}
+
+/** Set board cell pushed highlight for one zone index (if the cell exists). */
+static void setBoardCellSelected(int zoneIdx, bool selected)
+{
+	if (zoneIdx < 0) return;
+	int r = 0, c = 0;
+	if ((size_t)zoneIdx >= s_Sess.Zones.size())
+		return;
+	if (!ZPWS::parseContinentZoneName(s_Sess.Zones[zoneIdx].Basename, r, c))
+		return;
+	char idbuf[96];
+	snprintf(idbuf, sizeof(idbuf), "ui:zp:zone_browser:content:board_host:board:gc%d_%d:btn", r, c);
+	if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(
+	        CWidgetManager::getInstance()->getElementFromId(idbuf)))
+		btn->setPushed(selected);
 }
 
 static void clearBoard()
@@ -475,6 +528,9 @@ static void populateContinentGrid(const ZPWS::SWorldEntry &world)
 		{
 			if (CViewBitmap *thumb = dynamic_cast<CViewBitmap *>(cell->getView("thumb")))
 				thumb->setActive(!thumbTex.empty());
+			// Restore multi-select highlight (M6b)
+			if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(cell->getCtrl("btn")))
+				btn->setPushed(s_Sess.PendingSelect.count(zi) != 0);
 		}
 	}
 
@@ -524,6 +580,7 @@ static void populateContinentGrid(const ZPWS::SWorldEntry &world)
 		                     minR, maxR, lettersLo.c_str(), lettersHi.c_str(),
 		                     (uint)used.size(), (uint)fringe.size()));
 	}
+	refreshBoardSelectionUI();
 }
 
 /** Show/hide ecosystem layout radios and push list below them when active. */
@@ -577,6 +634,7 @@ static void populateZoneList()
 {
 	clearList("ui:zp:zone_browser:content:list_scroll:text_list");
 	clearBoard();
+	s_Sess.PendingSelect.clear();
 	if (!s_Sess.Worlds || s_Sess.SelectedWorld < 0
 	    || s_Sess.SelectedWorld >= (int)s_Sess.Worlds->size())
 		return;
@@ -743,11 +801,17 @@ bool startupSelectWorldZone(const std::vector<ZPWS::SWorldEntry> &worlds,
                             std::string &err)
 {
 	ZPWS::SWorldEntry w;
-	ZPWS::SZoneEntry z;
-	if (!ZPWS::selectAuto(worlds, autoPath, w, z, err))
+	std::vector<ZPWS::SZoneEntry> zones;
+	if (!ZPWS::selectAutoMulti(worlds, autoPath, w, zones, err))
 		return false;
+	if (zones.empty())
+	{
+		err = "startup-auto: no zones resolved";
+		return false;
+	}
 	selection.World = w;
-	selection.Zone = z;
+	selection.Zone = zones[0];
+	selection.EditableZones = zones;
 	return true;
 }
 
@@ -758,14 +822,28 @@ static void applyWorldSelection(int idx)
 	if (!(*s_Sess.Worlds)[idx].BankOk)
 		return;
 	s_Sess.SelectedWorld = idx;
+	s_Sess.PendingSelect.clear();
 	showScreen(ScreenZone);
 }
 
+/** L-click: open immediately (single zone, current behavior). */
 static void applyZoneSelection(int idx)
 {
 	if (idx < 0 || idx >= (int)s_Sess.Zones.size())
 		return;
 	s_Sess.SelectedZone = idx;
+	s_Sess.PendingSelect.clear();
+	s_Sess.PendingSelect.insert(idx); // for EditableZones fill
+	s_Sess.OpenZone = true;
+}
+
+/** Commit PendingSelect (or single SelectedZone) into an open request. */
+static void applyOpenSelection()
+{
+	if (s_Sess.PendingSelect.empty())
+		return;
+	// Prefer lowest index as primary for title/compat
+	s_Sess.SelectedZone = *s_Sess.PendingSelect.begin();
 	s_Sess.OpenZone = true;
 }
 
@@ -804,6 +882,44 @@ public:
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpSelectZone, "zp_select_zone");
+
+class CAHZpToggleZoneSelect : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase *pCaller, const std::string &params)
+	{
+		if (!s_Sess.Active) return;
+		int idx = -1;
+		fromString(params, idx);
+		if (idx < 0 || idx >= (int)s_Sess.Zones.size())
+			return;
+		// Only used cells (fringe has no button / this AH)
+		if (s_Sess.PendingSelect.count(idx))
+			s_Sess.PendingSelect.erase(idx);
+		else
+			s_Sess.PendingSelect.insert(idx);
+		const bool on = s_Sess.PendingSelect.count(idx) != 0;
+		if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(pCaller))
+			btn->setPushed(on);
+		else
+			setBoardCellSelected(idx, on);
+		refreshBoardSelectionUI();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpToggleZoneSelect, "zp_toggle_zone_select");
+
+class CAHZpOpenSelection : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		if (!s_Sess.Active) return;
+		if (s_Sess.PendingSelect.empty())
+			return;
+		applyOpenSelection();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpOpenSelection, "zp_open_selection");
 
 class CAHZpSetInstances : public IActionHandler
 {
@@ -1063,6 +1179,22 @@ EStartupResult runStartupFlow(UDriver *driver,
 			{
 				selection.World = worlds[s_Sess.SelectedWorld];
 				selection.Zone = s_Sess.Zones[s_Sess.SelectedZone];
+				// Multi-select editable set (M6b); empty PendingSelect still has one via L-click path
+				selection.EditableZones.clear();
+				if (!s_Sess.PendingSelect.empty())
+				{
+					for (std::set<int>::const_iterator it = s_Sess.PendingSelect.begin();
+					     it != s_Sess.PendingSelect.end(); ++it)
+					{
+						if (*it >= 0 && *it < (int)s_Sess.Zones.size())
+							selection.EditableZones.push_back(s_Sess.Zones[*it]);
+					}
+					// Primary = first pending (lowest index) for title/compat
+					if (!selection.EditableZones.empty())
+						selection.Zone = selection.EditableZones[0];
+				}
+				else
+					selection.EditableZones.push_back(selection.Zone);
 				// Ecosystem layout for self-instances; continents always 1x1
 				if (selection.World.Kind == ZPWS::Ecosystem)
 					selection.InstanceLayout = s_Sess.InstanceLayout;

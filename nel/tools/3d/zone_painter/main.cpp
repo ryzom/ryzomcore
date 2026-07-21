@@ -224,8 +224,22 @@ static bool g_LoadNeighbors = false;
 // World/zone selected via startup (for neighbor discovery); empty on legacy path
 static ZPWS::SWorldEntry g_StartupWorld;
 static ZPWS::SZoneEntry g_StartupZone;
+// Multi-select editable set (M6b); empty means single g_StartupZone only
+static std::vector<ZPWS::SZoneEntry> g_StartupEditableZones;
 // Neighbor .max scenes kept alive for the session (texture resolution / node pointers)
 static std::vector<PMAXLOAD::SLoadedMax *> g_NeighborScenes;
+// Extra editable .max scenes beyond the primary stack `lm` (M6b multi-open)
+static std::vector<PMAXLOAD::SLoadedMax *> g_ExtraEditableScenes;
+// Per-editable-file zone-id membership for dirty tracking / per-file save (M6b)
+struct SEditableFileInfo
+{
+	std::string Path;
+	std::string Basename;
+	PMAXLOAD::SLoadedMax *Lm; // NULL = primary stack lm
+	std::vector<uint> ZoneIds;
+	SEditableFileInfo() : Lm(NULL) {}
+};
+static std::vector<SEditableFileInfo> g_EditableFiles;
 // Ecosystem self-instances (ui M4a): layout grid Cols x Rows (1x1 = off). Primary zones sit
 // at the layout origin; remaining cells are display-level duplicates sharing the same Node
 // pointers (paint_core carrier keying) with geometry translated by whole-footprint steps.
@@ -1850,11 +1864,92 @@ static bool prepareThumbnailOverride(const std::string &srcMax, std::vector<uint
 	return true;
 }
 
+/** Scene for one editable file (primary uses g_PaintCtx.Scene; extras keep their Lm). */
+static PIPELINE::MAX::CScene *editableScene(const SEditableFileInfo &efi)
+{
+	if (efi.Lm)
+		return efi.Lm->Scene;
+	return g_PaintCtx.Scene;
+}
+
+/** Count dirty editable files (M6b panel indicator). */
+static uint countDirtyEditableFiles()
+{
+	if (!g_PaintCtx.Core) return 0;
+	uint n = 0;
+	for (size_t i = 0; i < g_EditableFiles.size(); ++i)
+		if (g_PaintCtx.Core->anyZoneDirty(g_EditableFiles[i].ZoneIds))
+			++n;
+	return n;
+}
+
+/**
+ * Atomic overwrite of one path: temp → optional one-time .bak → rename.
+ * Caller has already writeBack'd. Uses `src` for non-Scene OLE streams and `scene` for Scene.
+ */
+static bool saveOneOverwrite(const std::string &orig, PIPELINE::MAX::CScene &scene, bool doThumb)
+{
+	if (orig.empty() || !NLMISC::CFile::fileExists(orig))
+	{
+		fprintf(stderr, "ERROR: overwrite: original missing: %s\n", orig.c_str());
+		return false;
+	}
+	std::string dir = NLMISC::CFile::getPath(orig);
+	std::string base = NLMISC::CFile::getFilename(orig);
+	std::string tempPath = dir + NLMISC::toString(".zone_painter_save_%d_%s.tmp",
+	                                              (int)ZP_GETPID(), base.c_str());
+	if (NLMISC::CFile::fileExists(tempPath))
+		NLMISC::CFile::deleteFile(tempPath);
+
+	std::vector<uint8> siOverride;
+	bool haveSi = false;
+	if (doThumb)
+		prepareThumbnailOverride(orig, siOverride, haveSi);
+	int saveRc = saveWholeFile(orig, tempPath, scene, false, haveSi ? &siOverride : NULL);
+	if (saveRc != 0 || !NLMISC::CFile::fileExists(tempPath))
+	{
+		fprintf(stderr, "ERROR: overwrite: temp write failed for %s\n", orig.c_str());
+		if (NLMISC::CFile::fileExists(tempPath))
+			NLMISC::CFile::deleteFile(tempPath);
+		return false;
+	}
+	std::string bakPath = orig + ".bak";
+	if (!NLMISC::CFile::fileExists(bakPath))
+	{
+		if (!NLMISC::CFile::copyFile(bakPath, orig, /*failIfExists=*/true))
+		{
+			fprintf(stderr, "ERROR: overwrite: could not create %s\n", bakPath.c_str());
+			NLMISC::CFile::deleteFile(tempPath);
+			return false;
+		}
+		printf("OK backup -> %s\n", bakPath.c_str());
+	}
+	else
+		printf("backup kept (already exists): %s\n", bakPath.c_str());
+
+	if (!NLMISC::CFile::moveFile(orig, tempPath))
+	{
+		if (!NLMISC::CFile::copyFile(orig, tempPath, /*failIfExists=*/false)
+		    || !NLMISC::CFile::deleteFile(tempPath))
+		{
+			fprintf(stderr, "ERROR: overwrite: rename/copy failed for %s (temp %s)\n",
+			        orig.c_str(), tempPath.c_str());
+			return false;
+		}
+	}
+	if (NLMISC::CFile::fileExists(tempPath))
+		NLMISC::CFile::deleteFile(tempPath);
+	printf("OK save (overwrite) -> %s\n", orig.c_str());
+	return true;
+}
+
 /**
  * Write-back + whole-file save to `target`. Single save implementation for panel modal,
  * --save, and --panel-save-test. Non-Scene OLE streams are read from InputPath (the opened
  * editable file); the Scene stream is rebuilt from the mutated Max scene.
  * Thumbnail write only when WantThumbnail/CLI --thumbnail is set (M5c).
+ *
+ * CLI multi-file (M6b): errors if more than one editable file is dirty (single-path --save).
  */
 static bool zpSaveTo(const std::string &target)
 {
@@ -1871,6 +1966,19 @@ static bool zpSaveTo(const std::string &target)
 		fprintf(stderr, "ERROR: %s\n", g_LastSaveStatus.c_str());
 		return false;
 	}
+	// Multi-file: --save is single-path only
+	if (g_EditableFiles.size() > 1)
+	{
+		uint dirty = countDirtyEditableFiles();
+		if (dirty > 1)
+		{
+			g_LastSaveStatus = "save: multiple dirty editable files — use interactive save-all "
+			                   "(Overwrite), not --save <one.path>";
+			fprintf(stderr, "ERROR: %s (%u dirty of %u)\n",
+			        g_LastSaveStatus.c_str(), dirty, (uint)g_EditableFiles.size());
+			return false;
+		}
+	}
 	std::string err;
 	if (!g_PaintCtx.Core->writeBack(err))
 	{
@@ -1878,28 +1986,46 @@ static bool zpSaveTo(const std::string &target)
 		fprintf(stderr, "ERROR: %s\n", g_LastSaveStatus.c_str());
 		return false;
 	}
-	// OLE non-Scene streams come from the original opened file (not the target).
-	const std::string &srcForStreams = g_PaintCtx.InputPath.empty() ? target : g_PaintCtx.InputPath;
+	// Pick the (only) dirty file's scene when multi; else primary
+	const SEditableFileInfo *srcFile = NULL;
+	if (!g_EditableFiles.empty())
+	{
+		for (size_t i = 0; i < g_EditableFiles.size(); ++i)
+		{
+			if (g_PaintCtx.Core->anyZoneDirty(g_EditableFiles[i].ZoneIds)
+			    || g_EditableFiles.size() == 1)
+			{
+				srcFile = &g_EditableFiles[i];
+				if (g_EditableFiles.size() > 1)
+					break; // first dirty
+			}
+		}
+		if (!srcFile)
+			srcFile = &g_EditableFiles[0];
+	}
+	const std::string &srcForStreams = srcFile ? srcFile->Path
+		: (g_PaintCtx.InputPath.empty() ? target : g_PaintCtx.InputPath);
+	PIPELINE::MAX::CScene *scene = srcFile ? editableScene(*srcFile) : g_PaintCtx.Scene;
 	std::vector<uint8> siOverride;
 	bool haveSi = false;
 	prepareThumbnailOverride(srcForStreams, siOverride, haveSi);
-	int saveRc = saveWholeFile(srcForStreams, target, *g_PaintCtx.Scene, false,
+	int saveRc = saveWholeFile(srcForStreams, target, *scene, false,
 	                           haveSi ? &siOverride : NULL);
 	if (saveRc != 0)
 	{
 		g_LastSaveStatus = "save failed -> " + target;
 		return false;
 	}
+	if (srcFile)
+		g_PaintCtx.Core->markZonesSaved(srcFile->ZoneIds);
 	g_LastSaveStatus = "OK save -> " + target;
 	printf("OK save (panel) -> %s\n", target.c_str());
 	return true;
 }
 
 /**
- * In-place overwrite of the opened .max: write to a temp in the same directory, create a
- * one-time `<file>.max.bak` only if no .bak exists yet (never clobber an existing backup),
- * then atomically rename the temp over the original. Failure at any step leaves the original
- * untouched.
+ * In-place overwrite: for multi-select (M6b) this is save-all — each dirty editable file
+ * gets temp → one-time .bak → rename. Single-file path unchanged.
  */
 static bool zpSaveOverwrite()
 {
@@ -1910,27 +2036,6 @@ static bool zpSaveOverwrite()
 		fprintf(stderr, "ERROR: %s\n", g_LastSaveStatus.c_str());
 		return false;
 	}
-	const std::string &orig = g_PaintCtx.InputPath;
-	if (orig.empty())
-	{
-		g_LastSaveStatus = "overwrite: no input path";
-		fprintf(stderr, "ERROR: %s\n", g_LastSaveStatus.c_str());
-		return false;
-	}
-	if (!NLMISC::CFile::fileExists(orig))
-	{
-		g_LastSaveStatus = "overwrite: original missing: " + orig;
-		fprintf(stderr, "ERROR: %s\n", g_LastSaveStatus.c_str());
-		return false;
-	}
-
-	std::string dir = NLMISC::CFile::getPath(orig);
-	std::string base = NLMISC::CFile::getFilename(orig);
-	std::string tempPath = dir + NLMISC::toString(".zone_painter_save_%d_%s.tmp",
-	                                              (int)ZP_GETPID(), base.c_str());
-	// Drop any leftover temp from a previous crash
-	if (NLMISC::CFile::fileExists(tempPath))
-		NLMISC::CFile::deleteFile(tempPath);
 
 	std::string err;
 	if (!g_PaintCtx.Core->writeBack(err))
@@ -1939,58 +2044,54 @@ static bool zpSaveOverwrite()
 		fprintf(stderr, "ERROR: %s\n", g_LastSaveStatus.c_str());
 		return false;
 	}
-	// Write new content to temp (OLE streams from original; Scene from mutated graph)
-	std::vector<uint8> siOverride;
-	bool haveSi = false;
-	prepareThumbnailOverride(orig, siOverride, haveSi);
-	int saveRc = saveWholeFile(orig, tempPath, *g_PaintCtx.Scene, false,
-	                           haveSi ? &siOverride : NULL);
-	if (saveRc != 0 || !NLMISC::CFile::fileExists(tempPath))
-	{
-		g_LastSaveStatus = "overwrite: temp write failed";
-		fprintf(stderr, "ERROR: %s\n", g_LastSaveStatus.c_str());
-		if (NLMISC::CFile::fileExists(tempPath))
-			NLMISC::CFile::deleteFile(tempPath);
-		return false;
-	}
 
-	// One-time backup: only if <file>.bak does not already exist
-	std::string bakPath = orig + ".bak";
-	if (!NLMISC::CFile::fileExists(bakPath))
+	// Single-file legacy path when g_EditableFiles empty/one and only InputPath known
+	if (g_EditableFiles.size() <= 1)
 	{
-		if (!NLMISC::CFile::copyFile(bakPath, orig, /*failIfExists=*/true))
+		const std::string &orig = g_EditableFiles.empty() ? g_PaintCtx.InputPath
+		                                                  : g_EditableFiles[0].Path;
+		PIPELINE::MAX::CScene *scene = g_EditableFiles.empty() ? g_PaintCtx.Scene
+		                                                       : editableScene(g_EditableFiles[0]);
+		if (!saveOneOverwrite(orig, *scene, /*doThumb=*/true))
 		{
-			g_LastSaveStatus = "overwrite: could not create " + bakPath;
-			fprintf(stderr, "ERROR: %s (original left untouched)\n", g_LastSaveStatus.c_str());
-			NLMISC::CFile::deleteFile(tempPath);
+			g_LastSaveStatus = "overwrite failed -> " + orig;
 			return false;
 		}
-		printf("OK backup -> %s\n", bakPath.c_str());
-	}
-	else
-	{
-		printf("backup kept (already exists): %s\n", bakPath.c_str());
+		if (!g_EditableFiles.empty())
+			g_PaintCtx.Core->markZonesSaved(g_EditableFiles[0].ZoneIds);
+		g_LastSaveStatus = "OK overwrite -> " + orig;
+		return true;
 	}
 
-	// Atomic replace: rename temp over original
-	if (!NLMISC::CFile::moveFile(orig, tempPath))
+	// Multi: save each dirty file (or all if none marked dirty yet after writeBack —
+	// dirty uses OriginalBytes; writeBack does not refresh it, so dirty still correct)
+	uint saved = 0, skipped = 0;
+	for (size_t i = 0; i < g_EditableFiles.size(); ++i)
 	{
-		// Fallback: copy+delete if rename across devices fails
-		if (!NLMISC::CFile::copyFile(orig, tempPath, /*failIfExists=*/false)
-		    || !NLMISC::CFile::deleteFile(tempPath))
+		SEditableFileInfo &efi = g_EditableFiles[i];
+		if (!g_PaintCtx.Core->anyZoneDirty(efi.ZoneIds))
 		{
-			g_LastSaveStatus = "overwrite: rename/copy onto original failed";
-			fprintf(stderr, "ERROR: %s (temp left at %s; original may be intact)\n",
-			        g_LastSaveStatus.c_str(), tempPath.c_str());
+			++skipped;
+			continue;
+		}
+		PIPELINE::MAX::CScene *scene = editableScene(efi);
+		// Thumbnail only for the primary file (first)
+		if (!saveOneOverwrite(efi.Path, *scene, /*doThumb=*/(i == 0)))
+		{
+			g_LastSaveStatus = "overwrite failed -> " + efi.Path;
 			return false;
 		}
+		g_PaintCtx.Core->markZonesSaved(efi.ZoneIds);
+		++saved;
 	}
-	// moveFile may leave temp gone; ensure cleanup if copy path left it
-	if (NLMISC::CFile::fileExists(tempPath))
-		NLMISC::CFile::deleteFile(tempPath);
-
-	g_LastSaveStatus = "OK overwrite -> " + orig;
-	printf("OK save (overwrite) -> %s\n", orig.c_str());
+	if (saved == 0)
+	{
+		g_LastSaveStatus = "overwrite: nothing dirty";
+		printf("save-all: nothing dirty (%u files)\n", (uint)g_EditableFiles.size());
+		return true;
+	}
+	g_LastSaveStatus = NLMISC::toString("OK save-all: %u file(s) (%u clean)", saved, skipped);
+	printf("%s\n", g_LastSaveStatus.c_str());
 	return true;
 }
 
@@ -2060,6 +2161,9 @@ static void zpFillBridgeState(ZPUI::SPaintUIBridge &bridge)
 		bridge.SeasonCount = g_PaintCtx.AvailableSeasons
 			? (uint)g_PaintCtx.AvailableSeasons->size() : 0;
 	}
+	// Multi-file dirty (M6b)
+	bridge.EditableFileCount = g_EditableFiles.empty() ? 1u : (uint)g_EditableFiles.size();
+	bridge.DirtyFileCount = countDirtyEditableFiles();
 }
 
 // Shared viewer host: when externalDriver is non-NULL, runViewer uses it and does not
@@ -2122,10 +2226,21 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 			fprintf(stderr, "ERROR: runViewer: external driver is null\n");
 			return 1;
 		}
-		// Window title: zone_painter — <editable zone> (+N neighbors / xN instances)
+		// Window title: zone_painter — <editable zone(s)> (+N neighbors / xN instances)
 		{
 			std::string title = "zone_painter";
-			if (!g_StartupZone.Basename.empty())
+			if (g_EditableFiles.size() > 1)
+			{
+				title += " — ";
+				for (size_t i = 0; i < g_EditableFiles.size() && i < 4; ++i)
+				{
+					if (i) title += "+";
+					title += g_EditableFiles[i].Basename;
+				}
+				if (g_EditableFiles.size() > 4)
+					title += NLMISC::toString("+%u", (uint)(g_EditableFiles.size() - 4));
+			}
+			else if (!g_StartupZone.Basename.empty())
 				title += " — " + g_StartupZone.Basename;
 			else if (!g_InputPath.empty())
 				title += " — " + NLMISC::CFile::getFilename(g_InputPath);
@@ -2466,6 +2581,32 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 					}
 					// Push live state into the NLGUI bridge for two-way panel sync
 					zpFillBridgeState(paintBridge);
+					// Window title dirty mark (M6b): append " *" when any editable is dirty
+					{
+						std::string title = "zone_painter";
+						if (g_EditableFiles.size() > 1)
+						{
+							title += " — ";
+							for (size_t i = 0; i < g_EditableFiles.size() && i < 4; ++i)
+							{
+								if (i) title += "+";
+								title += g_EditableFiles[i].Basename;
+							}
+							if (g_EditableFiles.size() > 4)
+								title += NLMISC::toString("+%u", (uint)(g_EditableFiles.size() - 4));
+						}
+						else if (!g_StartupZone.Basename.empty())
+							title += " — " + g_StartupZone.Basename;
+						else if (!g_InputPath.empty())
+							title += " — " + NLMISC::CFile::getFilename(g_InputPath);
+						if (!g_NeighborScenes.empty())
+							title += NLMISC::toString(" (+%u neighbors)", (uint)g_NeighborScenes.size());
+						if (g_InstanceCount > 1)
+							title += NLMISC::toString(" (x%u instances)", g_InstanceCount);
+						if (paintBridge.DirtyFileCount)
+							title += " *";
+						udriver->setWindowTitle(ucstring(title));
+					}
 				}
 
 				// Zoom keys (plugin myThread zoom: ZoomSpeed * dt along the view direction;
@@ -2672,12 +2813,16 @@ int main(int argc, char **argv)
 	args.addArg("", "font", "file.ttf", "HUD font for the viewer (default: a system font when present)");
 	args.addArg("", "verbose", "", "Verbose output");
 	// Test plumbing (thin wrappers over the same selection functions the UI buttons call)
-	args.addArg("", "startup-auto", "workspace/zone[?query]",
+	args.addArg("", "startup-auto", "workspace/zone[+zone...][?query]",
 	            "Skip startup UI: select workspace+zone by name and open the viewer. "
-	            "Optional ?query after the zone: ampersand-separated key=value pairs. "
+	            "Multi-select (continents, M6b): plus-separated zone basenames "
+	            "(\"world/zoneA+zoneB+zoneC\") opens all editable plus the union of their "
+	            "8-rings as frozen context (neighbors default on; ?neighbors=off respected). "
+	            "Optional ?query after the zone list: ampersand-separated key=value pairs. "
 	            "Supported keys: neighbors=on|off (continents; default on), "
 	            "instances=NxM (ecosystem self-instances; see --instances). "
 	            "Examples: lacustre/material-fond?instances=2x2  "
+	            "snowballs/4_AC+4_AD  "
 	            "fyros_newbieland/15_AE?neighbors=off  "
 	            "lacustre/material-fond?instances=2x1&neighbors=off");
 	args.addArg("", "startup-screenshot", "out.tga", "Render one frame of the first startup screen and exit (M2b+)");
@@ -2951,10 +3096,17 @@ int main(int argc, char **argv)
 				return 1;
 			}
 			haveSelection = true;
-			printf("startup-auto: world '%s' (%s) zone '%s' neighbors=%s instances=%ux%u\n",
+			printf("startup-auto: world '%s' (%s) zone(s) ",
 			       selection.World.WorldName.c_str(),
-			       selection.World.Kind == ZPWS::Ecosystem ? "ecosystem" : "continent",
-			       selection.Zone.Basename.c_str(),
+			       selection.World.Kind == ZPWS::Ecosystem ? "ecosystem" : "continent");
+			if (selection.EditableZones.empty())
+				printf("'%s'", selection.Zone.Basename.c_str());
+			else
+			{
+				for (size_t zi = 0; zi < selection.EditableZones.size(); ++zi)
+					printf("%s'%s'", zi ? "+" : "", selection.EditableZones[zi].Basename.c_str());
+			}
+			printf(" neighbors=%s instances=%ux%u\n",
 			       g_LoadNeighbors ? "on" : "off",
 			       g_InstanceCols, g_InstanceRows);
 		}
@@ -3052,7 +3204,12 @@ int main(int argc, char **argv)
 		}
 
 		// Configure exactly what the CLI flags would have: bank, search path, input
-		input = selection.Zone.MaxPath;
+		// Multi-select: primary is first editable; keep full list for assembly (M6b)
+		g_StartupEditableZones = selection.EditableZones;
+		if (g_StartupEditableZones.empty())
+			g_StartupEditableZones.push_back(selection.Zone);
+		input = g_StartupEditableZones[0].MaxPath;
+		selection.Zone = g_StartupEditableZones[0];
 		if (!args.haveLongArg("bank"))
 		{
 			g_BankPath = selection.World.BankPath;
@@ -3208,42 +3365,103 @@ int main(int argc, char **argv)
 
 	// Load + assemble the painting zones (all modes; the null-edit path exercises exactly the
 	// paint save path with zero ops).
+	// M6b: N editable files + M frozen union-ring neighbors. Zone-id bases stay sparse.
 	NL3D::registerSerial3d();
 	PMAXLOAD::SLoadedMax lm;
 	if (!PMAXLOAD::loadMaxFile(input, lm)) { fprintf(stderr, "ERROR: cannot load %s\n", input.c_str()); return 1; }
 
-	std::vector<SPaintZone> zones;
-	// Editable file first (zone ids from 0); only its carriers are write targets.
-	bool haveZones = buildPaintZones(*lm.Scene, zones, /*zoneIdOffset=*/0, /*forceFrozen=*/false);
-	if (!haveZones && !nullEdit)
+	// Editable list: multi-select set, or single primary from input path
+	std::vector<ZPWS::SZoneEntry> editables = g_StartupEditableZones;
+	if (editables.empty())
 	{
-		fprintf(stderr, "ERROR: no displayable RklPatch zone in %s\n", input.c_str());
-		return 1;
+		ZPWS::SZoneEntry one;
+		one.MaxPath = input;
+		one.Basename = NLMISC::CFile::getFilenameWithoutExtension(input);
+		editables.push_back(one);
 	}
-	const size_t primaryZoneCount = zones.size();
+
+	std::vector<SPaintZone> zones;
+	g_EditableFiles.clear();
+	g_ExtraEditableScenes.clear();
+
+	// --- Editable files (unfrozen write targets) ---
+	for (size_t ei = 0; ei < editables.size(); ++ei)
+	{
+		PMAXLOAD::SLoadedMax *sceneLm = NULL;
+		if (ei == 0)
+		{
+			sceneLm = &lm; // primary stack scene
+		}
+		else
+		{
+			PMAXLOAD::SLoadedMax *extra = new PMAXLOAD::SLoadedMax();
+			if (!PMAXLOAD::loadMaxFile(editables[ei].MaxPath, *extra))
+			{
+				fprintf(stderr, "ERROR: cannot load editable %s\n", editables[ei].MaxPath.c_str());
+				delete extra;
+				return 1;
+			}
+			g_ExtraEditableScenes.push_back(extra);
+			sceneLm = extra;
+		}
+		const uint base = (uint)(ei * 1000);
+		const size_t before = zones.size();
+		bool ok = buildPaintZones(*sceneLm->Scene, zones, base, /*forceFrozen=*/false);
+		if (!ok && ei == 0 && !nullEdit)
+		{
+			fprintf(stderr, "ERROR: no displayable RklPatch zone in %s\n", editables[ei].MaxPath.c_str());
+			return 1;
+		}
+		if (!ok)
+		{
+			fprintf(stderr, "WARNING: editable has no paint zones: %s\n", editables[ei].MaxPath.c_str());
+		}
+		SEditableFileInfo efi;
+		efi.Path = editables[ei].MaxPath;
+		efi.Basename = editables[ei].Basename;
+		efi.Lm = (ei == 0) ? NULL : sceneLm;
+		for (size_t zi = before; zi < zones.size(); ++zi)
+			efi.ZoneIds.push_back(zones[zi].ZoneId);
+		g_EditableFiles.push_back(efi);
+		if (ei > 0 || editables.size() > 1)
+			printf("editable[%u] '%s' zoneIdBase=%u zones=%u\n",
+			       (uint)ei, efi.Basename.c_str(), base, (uint)efi.ZoneIds.size());
+	}
+	const size_t primaryZoneCount = g_EditableFiles.empty() ? 0 : g_EditableFiles[0].ZoneIds.size();
+	// primaryZoneCount for instances = zones from first file only (before instances append)
+	// rebuild: count of zones from first file at base 0
+	size_t primaryOnlyCount = 0;
+	for (size_t i = 0; i < zones.size(); ++i)
+		if (zones[i].ZoneId < 1000) ++primaryOnlyCount;
+	const size_t instancePrimaryCount = primaryOnlyCount;
 
 	// Ecosystem self-instances (M4a): display clones of the primary zones at footprint offsets.
 	// Same Node pointers → paint_core shares one pristine carrier; weld joins opposite edges.
-	if (g_InstanceCount > 1 && primaryZoneCount > 0)
+	// Multi-edit continent open rejects instances (already gated ecosystem-only).
+	if (g_InstanceCount > 1 && instancePrimaryCount > 0)
 	{
 		if (g_StartupWorld.Kind == ZPWS::Continent)
 		{
 			fprintf(stderr, "ERROR: --instances is ecosystem-only (not available on continents)\n");
 			return 1;
 		}
-		appendInstanceZones(zones, primaryZoneCount, g_InstanceCols, g_InstanceRows, cellSize);
+		if (editables.size() > 1)
+		{
+			fprintf(stderr, "ERROR: --instances is single-brick only (not multi-select)\n");
+			return 1;
+		}
+		appendInstanceZones(zones, instancePrimaryCount, g_InstanceCols, g_InstanceRows, cellSize);
 	}
 
-	// Continent neighbors as frozen read-only context (M3b). Ecosystems stay single-file
-	// (aside from M4a self-instances above).
+	// Continent neighbors as frozen read-only context (M3b / M6b union ring).
 	// Neighbors join landscape, cross-zone weld, and metaTile graph; carriers never written
 	// (forceFrozen => AnyUnfrozen stays false; writeBack skips frozen-only carriers).
-	if (g_LoadNeighbors && g_StartupWorld.Kind == ZPWS::Continent && !g_StartupZone.Basename.empty())
+	if (g_LoadNeighbors && g_StartupWorld.Kind == ZPWS::Continent && !editables.empty())
 	{
 		std::vector<ZPWS::SZoneEntry> neigh;
-		ZPWS::listContinentNeighbors(g_StartupWorld, g_StartupZone, neigh);
-		printf("neighbors: loading %u of 8-ring around '%s'\n",
-		       (uint)neigh.size(), g_StartupZone.Basename.c_str());
+		ZPWS::listContinentNeighborUnion(g_StartupWorld, editables, neigh);
+		printf("neighbors: loading %u frozen (union 8-ring of %u editable)\n",
+		       (uint)neigh.size(), (uint)editables.size());
 		for (size_t ni = 0; ni < neigh.size(); ++ni)
 		{
 			PMAXLOAD::SLoadedMax *nlm = new PMAXLOAD::SLoadedMax();
@@ -3254,9 +3472,10 @@ int main(int argc, char **argv)
 				continue;
 			}
 			uint base = nextZoneIdBase(zones);
-			// Use a sparse base so node-index gaps in a file never collide
-			if (base < (uint)((ni + 1) * 1000))
-				base = (uint)((ni + 1) * 1000);
+			// Sparse base above all editables (editables use 0,1000,2000,...)
+			const uint minBase = (uint)((editables.size() + ni + 1) * 1000);
+			if (base < minBase)
+				base = minBase;
 			bool ok = buildPaintZones(*nlm->Scene, zones, base, /*forceFrozen=*/true);
 			if (!ok)
 			{
@@ -3498,39 +3717,65 @@ int main(int argc, char **argv)
 		}
 		else // overwrite
 		{
-			// Operate on a COPY of the input in outDir — never the real source file
-			std::string workCopy = outDir + baseWithExt;
-			if (NLMISC::CFile::getPath(NLMISC::CPath::makePathAbsolute(workCopy, outDir, true))
-			    == NLMISC::CFile::getPath(NLMISC::CPath::makePathAbsolute(input, NLMISC::CPath::getCurrentPath(), true))
-			    && NLMISC::CFile::getFilename(workCopy) == NLMISC::CFile::getFilename(input)
-			    && NLMISC::CPath::makePathAbsolute(workCopy, outDir, true)
-			       == NLMISC::CPath::makePathAbsolute(input, NLMISC::CPath::getCurrentPath(), true))
+			// Multi-file (M6b): editable paths must already be sandbox copies (e.g. under /tmp).
+			// zpSaveOverwrite walks g_EditableFiles; refuse anything outside /tmp.
+			if (g_EditableFiles.size() > 1)
 			{
-				// Same path as input — refuse
-				fprintf(stderr, "ERROR: panel-save-test overwrite would touch the real input; give --out <dir/file> outside the source tree\n");
-				g_PaintCtx = SPaintCtx();
-				return 1;
+				for (size_t i = 0; i < g_EditableFiles.size(); ++i)
+				{
+					const std::string &p = g_EditableFiles[i].Path;
+					if (p.find("/tmp/") == std::string::npos)
+					{
+						fprintf(stderr, "ERROR: panel-save-test multi overwrite refuses path outside /tmp: %s\n",
+						        p.c_str());
+						g_PaintCtx = SPaintCtx();
+						return 1;
+					}
+				}
+				if (!zpSaveOverwrite())
+				{
+					g_PaintCtx = SPaintCtx();
+					return 1;
+				}
+				printf("OK panel-save-test multi overwrite (%u editable files)\n",
+				       (uint)g_EditableFiles.size());
 			}
-			if (NLMISC::CFile::fileExists(workCopy))
-				NLMISC::CFile::deleteFile(workCopy);
-			if (!NLMISC::CFile::copyFile(workCopy, input, false))
+			else
 			{
-				fprintf(stderr, "ERROR: panel-save-test: cannot copy input to %s\n", workCopy.c_str());
-				g_PaintCtx = SPaintCtx();
-				return 1;
+				// Operate on a COPY of the input in outDir — never the real source file
+				std::string workCopy = outDir + baseWithExt;
+				if (NLMISC::CFile::getPath(NLMISC::CPath::makePathAbsolute(workCopy, outDir, true))
+				    == NLMISC::CFile::getPath(NLMISC::CPath::makePathAbsolute(input, NLMISC::CPath::getCurrentPath(), true))
+				    && NLMISC::CFile::getFilename(workCopy) == NLMISC::CFile::getFilename(input)
+				    && NLMISC::CPath::makePathAbsolute(workCopy, outDir, true)
+				       == NLMISC::CPath::makePathAbsolute(input, NLMISC::CPath::getCurrentPath(), true))
+				{
+					// Same path as input — refuse
+					fprintf(stderr, "ERROR: panel-save-test overwrite would touch the real input; give --out <dir/file> outside the source tree\n");
+					g_PaintCtx = SPaintCtx();
+					return 1;
+				}
+				if (NLMISC::CFile::fileExists(workCopy))
+					NLMISC::CFile::deleteFile(workCopy);
+				if (!NLMISC::CFile::copyFile(workCopy, input, false))
+				{
+					fprintf(stderr, "ERROR: panel-save-test: cannot copy input to %s\n", workCopy.c_str());
+					g_PaintCtx = SPaintCtx();
+					return 1;
+				}
+				std::string bakPath = workCopy + ".bak";
+				g_PaintCtx.InputPath = workCopy;
+				// Keep g_EditableFiles[0].Path pointing at workCopy for dirty/save
+				if (!g_EditableFiles.empty())
+					g_EditableFiles[0].Path = workCopy;
+				if (!zpSaveOverwrite())
+				{
+					g_PaintCtx = SPaintCtx();
+					return 1;
+				}
+				printf("OK panel-save-test overwrite -> %s (bak %s)\n",
+				       workCopy.c_str(), NLMISC::CFile::fileExists(bakPath) ? "present" : "missing");
 			}
-			// Also remove a stale .bak so the first overwrite creates a fresh one
-			std::string bakPath = workCopy + ".bak";
-			// Keep existing bak if present only when re-testing twice; first run starts clean:
-			// leave bak alone if user is testing "second overwrite keeps bak" — they pre-seed.
-			g_PaintCtx.InputPath = workCopy;
-			if (!zpSaveOverwrite())
-			{
-				g_PaintCtx = SPaintCtx();
-				return 1;
-			}
-			printf("OK panel-save-test overwrite -> %s (bak %s)\n",
-			       workCopy.c_str(), NLMISC::CFile::fileExists(bakPath) ? "present" : "missing");
 		}
 		g_PaintCtx = SPaintCtx();
 		return rc;
@@ -3546,29 +3791,30 @@ int main(int argc, char **argv)
 	}
 	if (!savePath.empty())
 	{
-		std::string err;
-		if (!core.writeBack(err)) { fprintf(stderr, "ERROR: write-back: %s\n", err.c_str()); return 1; }
-		// Write-back only mutates carriers with AnyUnfrozen; neighbor (forceFrozen) carriers
-		// are never rewritten — only the editable file's Scene is saved.
-		// Thumbnail write only with --thumbnail (and a prior viewer capture into g_PaintCtx).
-		std::vector<uint8> siOverride;
-		bool haveSi = false;
-		if (g_CliWantThumbnail)
+		// Route through zpSaveTo so multi-file dirty policy (M6b) is enforced:
+		// --save is single-path and errors when more than one editable file is dirty.
+		g_PaintCtx = SPaintCtx();
+		g_PaintCtx.Active = true;
+		g_PaintCtx.Core = &core;
+		g_PaintCtx.Scene = lm.Scene;
+		g_PaintCtx.InputPath = input;
+		g_PaintCtx.SavePath = savePath;
+		g_PaintCtx.WantThumbnail = g_CliWantThumbnail;
+		if (!zpSaveTo(savePath))
 		{
-			g_PaintCtx.WantThumbnail = true;
-			// If the viewer already ran, capture hooks may still be cleared — re-check.
-			prepareThumbnailOverride(input, siOverride, haveSi);
-			if (!haveSi)
-				fprintf(stderr, "WARNING: --thumbnail: no capture available; combine with a display "
-				        "run (e.g. --screenshot /tmp/x.tga) or interactive save. SI left unchanged.\n");
+			g_PaintCtx = SPaintCtx();
+			return 1;
 		}
-		int saveRc = saveWholeFile(input, savePath, *lm.Scene, false, haveSi ? &siOverride : NULL);
-		if (saveRc) return saveRc;
+		g_PaintCtx = SPaintCtx();
 	}
 
 	for (size_t i = 0; i < g_NeighborScenes.size(); ++i)
 		delete g_NeighborScenes[i];
 	g_NeighborScenes.clear();
+	for (size_t i = 0; i < g_ExtraEditableScenes.size(); ++i)
+		delete g_ExtraEditableScenes[i];
+	g_ExtraEditableScenes.clear();
+	g_EditableFiles.clear();
 
 	return rc;
 }

@@ -117,12 +117,30 @@ std::string zoneThumbnailPath(const SWorldEntry &world, const std::string &maxBa
  * Resolve --startup-auto "workspace-name/zone-basename".
  * workspace-name matches WorldName or the GraphicsRoot directory basename.
  * zone-basename is without .max. On failure fills err and returns false.
+ *
+ * Multi-select (ui M6b): "workspace-name/zoneA+zoneB+zoneC" selects multiple zones
+ * (plus-separated). zoneOut is the first; zoneOuts receives all in order. Single-zone
+ * paths still fill zoneOuts with one entry when the multi overload is used.
  */
 bool selectAuto(const std::vector<SWorldEntry> &worlds,
                 const std::string &autoPath,
                 SWorldEntry &worldOut,
                 SZoneEntry &zoneOut,
                 std::string &err);
+
+bool selectAutoMulti(const std::vector<SWorldEntry> &worlds,
+                     const std::string &autoPath,
+                     SWorldEntry &worldOut,
+                     std::vector<SZoneEntry> &zonesOut,
+                     std::string &err);
+
+/**
+ * Union of 8-ring neighbors of every zone in `centers`, excluding any basename already
+ * in centers. Continent-only; empty for ecosystems. Used by multi-open assembly (M6b).
+ */
+void listContinentNeighborUnion(const SWorldEntry &world,
+                                const std::vector<SZoneEntry> &centers,
+                                std::vector<SZoneEntry> &out);
 
 // Find world by name (WorldName or GraphicsRoot basename); BankOk worlds only unless allowDisabled.
 const SWorldEntry *findWorld(const std::vector<SWorldEntry> &worlds,

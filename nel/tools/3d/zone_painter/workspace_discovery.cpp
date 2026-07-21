@@ -31,6 +31,8 @@
 #include <cstring>
 #include <climits>
 #include <cstdlib> // realpath (POSIX)
+#include <map>
+#include <set>
 
 #include <nel/misc/config_file.h>
 #include <nel/misc/file.h>
@@ -419,7 +421,26 @@ bool selectAuto(const std::vector<SWorldEntry> &worlds,
                 SZoneEntry &zoneOut,
                 std::string &err)
 {
+	std::vector<SZoneEntry> zones;
+	if (!selectAutoMulti(worlds, autoPath, worldOut, zones, err))
+		return false;
+	if (zones.empty())
+	{
+		err = "startup-auto: no zones resolved";
+		return false;
+	}
+	zoneOut = zones[0];
+	return true;
+}
+
+bool selectAutoMulti(const std::vector<SWorldEntry> &worlds,
+                     const std::string &autoPath,
+                     SWorldEntry &worldOut,
+                     std::vector<SZoneEntry> &zonesOut,
+                     std::string &err)
+{
 	err.clear();
+	zonesOut.clear();
 	std::string ap = autoPath;
 	// strip quotes leftover
 	if (ap.size() >= 2 && ((ap[0] == '"' && ap[ap.size() - 1] == '"') || (ap[0] == '\'' && ap[ap.size() - 1] == '\'')))
@@ -428,14 +449,38 @@ bool selectAuto(const std::vector<SWorldEntry> &worlds,
 	std::string::size_type slash = ap.find_last_of("/\\");
 	if (slash == std::string::npos || slash == 0 || slash + 1 >= ap.size())
 	{
-		err = "startup-auto expects \"<workspace-name>/<zone-basename>\", got '" + autoPath + "'";
+		err = "startup-auto expects \"<workspace-name>/<zone-basename>[+zone...]\", got '" + autoPath + "'";
 		return false;
 	}
 	std::string wsName = ap.substr(0, slash);
-	std::string zoneName = ap.substr(slash + 1);
-	// strip optional .max
-	if (isMaxPath(zoneName))
-		zoneName = CFile::getFilenameWithoutExtension(zoneName);
+	std::string zonePart = ap.substr(slash + 1);
+
+	// Split zoneA+zoneB+zoneC (multi-select M6b); single name works too
+	std::vector<std::string> zoneNames;
+	{
+		std::string::size_type start = 0;
+		while (start <= zonePart.size())
+		{
+			std::string::size_type plus = zonePart.find('+', start);
+			std::string one = zonePart.substr(start, plus == std::string::npos ? std::string::npos : plus - start);
+			// trim whitespace
+			while (!one.empty() && (one[0] == ' ' || one[0] == '\t')) one.erase(0, 1);
+			while (!one.empty() && (one[one.size() - 1] == ' ' || one[one.size() - 1] == '\t')) one.erase(one.size() - 1);
+			if (!one.empty())
+			{
+				if (isMaxPath(one))
+					one = CFile::getFilenameWithoutExtension(one);
+				zoneNames.push_back(one);
+			}
+			if (plus == std::string::npos) break;
+			start = plus + 1;
+		}
+	}
+	if (zoneNames.empty())
+	{
+		err = "startup-auto: empty zone list in '" + autoPath + "'";
+		return false;
+	}
 
 	// Collect candidate worlds matching the workspace token
 	std::vector<const SWorldEntry *> candidates;
@@ -452,48 +497,80 @@ bool selectAuto(const std::vector<SWorldEntry> &worlds,
 		return false;
 	}
 
-	// Prefer exact WorldName; among matches find the zone
-	const SWorldEntry *exact = NULL;
-	const SWorldEntry *foundWorld = NULL;
-	SZoneEntry foundZone;
+	// Prefer exact WorldName world that contains ALL requested zones
+	const SWorldEntry *bestWorld = NULL;
+	std::vector<SZoneEntry> bestZones;
 	for (size_t i = 0; i < candidates.size(); ++i)
 	{
 		std::vector<SZoneEntry> zones;
 		listZones(*candidates[i], zones);
-		for (size_t z = 0; z < zones.size(); ++z)
+		std::vector<SZoneEntry> matched;
+		bool all = true;
+		for (size_t n = 0; n < zoneNames.size(); ++n)
 		{
-			if (zones[z].Basename == zoneName)
+			bool hit = false;
+			for (size_t z = 0; z < zones.size(); ++z)
 			{
-				if (candidates[i]->WorldName == wsName)
+				if (zones[z].Basename == zoneNames[n])
 				{
-					exact = candidates[i];
-					foundZone = zones[z];
+					matched.push_back(zones[z]);
+					hit = true;
 					break;
 				}
-				if (!foundWorld)
-				{
-					foundWorld = candidates[i];
-					foundZone = zones[z];
-				}
 			}
+			if (!hit) { all = false; break; }
 		}
-		if (exact)
-			break;
+		if (!all)
+			continue;
+		if (candidates[i]->WorldName == wsName)
+		{
+			worldOut = *candidates[i];
+			zonesOut = matched;
+			return true;
+		}
+		if (!bestWorld)
+		{
+			bestWorld = candidates[i];
+			bestZones = matched;
+		}
 	}
-	if (exact)
+	if (bestWorld)
 	{
-		worldOut = *exact;
-		zoneOut = foundZone;
+		worldOut = *bestWorld;
+		zonesOut = bestZones;
 		return true;
 	}
-	if (foundWorld)
-	{
-		worldOut = *foundWorld;
-		zoneOut = foundZone;
-		return true;
-	}
-	err = "startup-auto: zone '" + zoneName + "' not found under workspace '" + wsName + "'";
+	err = "startup-auto: zone(s) not found under workspace '" + wsName + "' (wanted";
+	for (size_t n = 0; n < zoneNames.size(); ++n)
+		err += (n ? "+" : " ") + zoneNames[n];
+	err += ")";
 	return false;
+}
+
+void listContinentNeighborUnion(const SWorldEntry &world,
+                                const std::vector<SZoneEntry> &centers,
+                                std::vector<SZoneEntry> &out)
+{
+	out.clear();
+	if (world.Kind != Continent || centers.empty())
+		return;
+	std::set<std::string> centerNames;
+	for (size_t i = 0; i < centers.size(); ++i)
+		centerNames.insert(centers[i].Basename);
+	std::map<std::string, SZoneEntry> unionMap;
+	for (size_t i = 0; i < centers.size(); ++i)
+	{
+		std::vector<SZoneEntry> neigh;
+		listContinentNeighbors(world, centers[i], neigh);
+		for (size_t n = 0; n < neigh.size(); ++n)
+		{
+			if (centerNames.count(neigh[n].Basename))
+				continue;
+			unionMap[neigh[n].Basename] = neigh[n];
+		}
+	}
+	for (std::map<std::string, SZoneEntry>::const_iterator it = unionMap.begin(); it != unionMap.end(); ++it)
+		out.push_back(it->second);
 }
 
 // ---------------------------------------------------------------------------------------------

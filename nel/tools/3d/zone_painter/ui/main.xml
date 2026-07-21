@@ -47,12 +47,13 @@
      Brick cover is the hit target; name + optional thumb draw above it (later siblings). -->
 <template name="zp_board_cell" keep="true" id="" title="" idx="0" thumb="">
 	<group id="#id" w="52" h="52">
-		<!-- Brick face = minesweeper cover pattern; selected texture on hover. -->
-		<ctrl type="button" id="btn" button_type="push_button" posref="MM MM" x="0" y="0"
+		<!-- Brick face = minesweeper cover; R-click toggles multi-select (M6b); L-click opens. -->
+		<ctrl type="button" id="btn" button_type="toggle_button" posref="MM MM" x="0" y="0"
 			scale="true" sizeref="wh" w="-2" h="-2"
-			tx_normal="w_slot_brick.tga" tx_pushed="w_slot_brick.tga" tx_over="w_slot_brick_selected.tga"
+			tx_normal="w_slot_brick.tga" tx_pushed="w_slot_brick_selected.tga" tx_over="w_slot_brick_selected.tga"
 			global_color_normal="false" global_color_pushed="false" global_color_over="false"
-			onclick_l="zp_select_zone" params_l="#idx" />
+			onclick_l="zp_select_zone" params_l="#idx"
+			onclick_r="zp_toggle_zone_select" params_r="#idx" />
 		<!-- Optional embedded/.png thumb (M5b activates when a cache path exists). -->
 		<view type="bitmap" id="thumb" posref="TM TM" x="0" y="-4" w="40" h="24" scale="true"
 			texture="#thumb" global_color="false" active="false" />
@@ -159,9 +160,14 @@
 				target="ui:zp:zone_browser:content:board_host:board" />
 		</group>
 
-		<!-- Back is content-anchored so it stays visible for both list and board modes. -->
+		<!-- Legend + multi-open (M6b/M6c). Back stays content-anchored for list and board modes. -->
+		<view type="text" id="board_legend" posref="BL BL" x="12" y="36" fontsize="10" shadow="true"
+			global_color="false" color="180 190 200 200"
+			hardtext="L-click open · R-click select · fringe = empty" active="false" />
 		<ctrl style="text_button_16" id="btn_back" posref="BL BL" x="12" y="12"
 			onclick_l="zp_zone_back" params_l="" hardtext="Back" />
+		<ctrl style="text_button_16" id="btn_open_sel" posparent="btn_back" posref="MR ML" x="8" y="0"
+			onclick_l="zp_open_selection" params_l="" hardtext="Open selection" active="false" />
 	</group>
 </group>
 <tree node="zone_browser"></tree>
@@ -218,8 +224,12 @@
 		<ctrl style="text_button_16" id="btn_season" posparent="season_info" posref="MR ML" x="6" y="0"
 			onclick_l="zp_season_next" params_l="" hardtext="Next" />
 
+		<!-- Multi-file dirty indicator (M6b) -->
+		<view type="text" id="files_info" posparent="season_info" posref="BL TL" x="0" y="-2" fontsize="10" shadow="true"
+			global_color="false" color="200 200 210 220" hardtext="1 file" />
+
 		<!-- Mode radio row -->
-		<view type="text" id="lbl_mode" posparent="season_info" posref="BL TL" x="0" y="-6" fontsize="11" shadow="true"
+		<view type="text" id="lbl_mode" posparent="files_info" posref="BL TL" x="0" y="-6" fontsize="11" shadow="true"
 			global_color="false" color="255 255 255 180" hardtext="Mode" />
 		<ctrl style="text_button_radio" id="mode_tile" posparent="lbl_mode" posref="BL TL" x="0" y="-4"
 			pushed="true" onclick_l="zp_mode" params_l="0" hardtext="Tile" />

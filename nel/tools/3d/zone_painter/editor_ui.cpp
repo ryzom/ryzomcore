@@ -356,7 +356,21 @@ void openSaveDialog()
 	SPaintUIBridge *b = getPaintUIBridge();
 	if (!b) return;
 	resetSaveCopyButtonLabel();
-	setSaveModalStatus("");
+	// Multi-file (M6b): Overwrite is save-all of dirty editables
+	if (b->EditableFileCount > 1)
+	{
+		setSaveModalStatus(NLMISC::toString(
+		    "Save-all: %u file(s), %u dirty (Overwrite writes each dirty file in place)",
+		    b->EditableFileCount, b->DirtyFileCount));
+		if (CCtrlTextButton *btn = findTextButton("ui:zp:save_dialog:content:btn_overwrite"))
+			btn->setHardText("Overwrite all");
+	}
+	else
+	{
+		setSaveModalStatus("");
+		if (CCtrlTextButton *btn = findTextButton("ui:zp:save_dialog:content:btn_overwrite"))
+			btn->setHardText("Overwrite");
+	}
 	// Prefill edit box with <basename>_painted.max
 	std::string prefill = std::string(b->EditableBasename) + "_painted.max";
 	if (CGroupEditBox *eb = findEditBox("ui:zp:save_dialog:content:copy_name"))
@@ -736,6 +750,23 @@ void CEditorUI::syncPanelFromBridge()
 	}
 	if (CCtrlBaseButton *btn = findButton("ui:zp:painter:content:btn_season"))
 		btn->setFrozen(b->SeasonCount < 2);
+
+	// Multi-file dirty indicator (M6b): "N files, M dirty"
+	if (CViewText *t = findText("ui:zp:painter:content:files_info"))
+	{
+		char buf[64];
+		if (b->EditableFileCount <= 1)
+		{
+			if (b->DirtyFileCount)
+				snprintf(buf, sizeof(buf), "1 file, dirty");
+			else
+				snprintf(buf, sizeof(buf), "1 file");
+		}
+		else
+			snprintf(buf, sizeof(buf), "%u files, %u dirty",
+			         b->EditableFileCount, b->DirtyFileCount);
+		t->setHardText(buf);
+	}
 
 	// Save enabled only with --save
 	if (CCtrlBaseButton *btn = findButton("ui:zp:painter:content:btn_save"))

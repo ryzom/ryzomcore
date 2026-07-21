@@ -106,6 +106,9 @@ struct SPaintUIBridge
 	char SeasonLabel[32];
 	/** Number of discovered season variants (0 = no seasonal tiles; button frozen). */
 	uint SeasonCount;
+	/** Editable file count + dirty count (M6b multi-session; 1/0 for single). */
+	uint EditableFileCount;
+	uint DirtyFileCount;
 
 	SPaintUIBridge()
 		: selectMode(NULL), selectTileSetDelta(NULL), toggleTileSize(NULL),
@@ -114,7 +117,8 @@ struct SPaintUIBridge
 		  seasonNext(NULL),
 		  HaveCore(false), Mode(0), CurTileSet(0), TileSetCount(0), Mode256(false),
 		  BrushSize(0), TileGroup(0), LockBorders(false), UndoDepth(0), CanSave(false),
-		  InteractiveSave(false), InstanceCount(1), UpdateThumbnail(true), SeasonCount(0)
+		  InteractiveSave(false), InstanceCount(1), UpdateThumbnail(true), SeasonCount(0),
+		  EditableFileCount(1), DirtyFileCount(0)
 	{
 		TileSetName[0] = 0;
 		EditableBasename[0] = 0;

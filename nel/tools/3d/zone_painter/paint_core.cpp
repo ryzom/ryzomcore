@@ -2939,6 +2939,81 @@ bool CPaintCore::writeBack(std::string &err)
 	return true;
 }
 
+bool CPaintCore::isZoneDirty(uint zoneId) const
+{
+	for (size_t i = 0; i < m_Zones.size(); ++i)
+	{
+		if (m_Zones[i].In.ZoneId != zoneId)
+			continue;
+		const SCarrier &car = m_Carriers[m_Zones[i].Carrier];
+		if (!car.AnyUnfrozen)
+			return false;
+		std::vector<uint8> cur;
+		if (car.SnapLeaf)
+			encodeRPatchMesh(*car.Pristine, cur);
+		else
+			encodeRpoChunk(*car.Pristine, cur);
+		return cur != car.OriginalBytes;
+	}
+	return false;
+}
+
+bool CPaintCore::anyZoneDirty(const std::vector<uint> &zoneIds) const
+{
+	// Dedup by carrier so multi-instance zones of one file count once
+	std::set<uint> carriers;
+	for (size_t z = 0; z < zoneIds.size(); ++z)
+	{
+		for (size_t i = 0; i < m_Zones.size(); ++i)
+		{
+			if (m_Zones[i].In.ZoneId != zoneIds[z])
+				continue;
+			carriers.insert(m_Zones[i].Carrier);
+			break;
+		}
+	}
+	for (std::set<uint>::const_iterator it = carriers.begin(); it != carriers.end(); ++it)
+	{
+		const SCarrier &car = m_Carriers[*it];
+		if (!car.AnyUnfrozen)
+			continue;
+		std::vector<uint8> cur;
+		if (car.SnapLeaf)
+			encodeRPatchMesh(*car.Pristine, cur);
+		else
+			encodeRpoChunk(*car.Pristine, cur);
+		if (cur != car.OriginalBytes)
+			return true;
+	}
+	return false;
+}
+
+void CPaintCore::markZonesSaved(const std::vector<uint> &zoneIds)
+{
+	std::set<uint> carriers;
+	for (size_t z = 0; z < zoneIds.size(); ++z)
+	{
+		for (size_t i = 0; i < m_Zones.size(); ++i)
+		{
+			if (m_Zones[i].In.ZoneId != zoneIds[z])
+				continue;
+			carriers.insert(m_Zones[i].Carrier);
+			break;
+		}
+	}
+	for (std::set<uint>::const_iterator it = carriers.begin(); it != carriers.end(); ++it)
+	{
+		SCarrier &car = m_Carriers[*it];
+		if (!car.AnyUnfrozen)
+			continue;
+		// Prefer the already-written leaf payload when writeBack ran; else re-encode.
+		if (car.SnapLeaf)
+			car.OriginalBytes = car.SnapLeaf->Value;
+		else
+			encodeRpoChunk(*car.Pristine, car.OriginalBytes);
+	}
+}
+
 void CPaintCore::dumpRpo(FILE *out) const
 {
 	for (size_t c = 0; c < m_Carriers.size(); ++c)

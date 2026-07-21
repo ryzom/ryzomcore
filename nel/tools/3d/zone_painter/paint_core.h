@@ -393,6 +393,15 @@ public:
 	// zones are all frozen are skipped (never mutated either; ops enforce it per tile).
 	bool writeBack(std::string &err);
 
+	// Dirty detection (ui M6b multi-file save): compare re-encoded pristine to OriginalBytes.
+	// Zone id is the landscape/session id (SPaintZoneInput::ZoneId). Frozen zones are never dirty.
+	bool isZoneDirty(uint zoneId) const;
+	/** True when any unfrozen carrier of the listed zone ids differs from its load-time blob. */
+	bool anyZoneDirty(const std::vector<uint> &zoneIds) const;
+	/** After a successful per-file save: refresh OriginalBytes from the current pristine encode
+	 *	so subsequent dirty checks go false (write-target policy unchanged). */
+	void markZonesSaved(const std::vector<uint> &zoneIds);
+
 	// Carrier tile-record dump (the mechanical verification surface).
 	void dumpRpo(FILE *out) const;
 	// Bank xref dump: tile -> (tileSet, number, type) for every bank tile.
