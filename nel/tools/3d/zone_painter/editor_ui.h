@@ -96,6 +96,8 @@ struct SPaintUIBridge
 	bool InteractiveSave;
 	char EditableBasename[128]; // zone basename for default copy name
 	char InputDir[512];         // directory of the opened .max (copy targets)
+	/** Self-instance count (1 = off); panel shows INSTANCED xN when > 1 (ui M4b). */
+	uint InstanceCount;
 
 	SPaintUIBridge()
 		: selectMode(NULL), selectTileSetDelta(NULL), toggleTileSize(NULL),
@@ -103,7 +105,7 @@ struct SPaintUIBridge
 		  undo(NULL), redo(NULL), fill(NULL), save(NULL), saveTo(NULL), saveOverwrite(NULL),
 		  HaveCore(false), Mode(0), CurTileSet(0), TileSetCount(0), Mode256(false),
 		  BrushSize(0), TileGroup(0), LockBorders(false), UndoDepth(0), CanSave(false),
-		  InteractiveSave(false)
+		  InteractiveSave(false), InstanceCount(1)
 	{
 		TileSetName[0] = 0;
 		EditableBasename[0] = 0;

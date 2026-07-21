@@ -58,6 +58,8 @@ struct SStartupSelection
 {
 	ZPWS::SWorldEntry World;
 	ZPWS::SZoneEntry Zone;
+	/** Ecosystem self-instance layout ("1x1".."3x3"); empty means 1x1. Continent ignores. */
+	std::string InstanceLayout;
 };
 
 /**

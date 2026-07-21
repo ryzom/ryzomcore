@@ -1827,6 +1827,7 @@ static void zpFillBridgeState(ZPUI::SPaintUIBridge &bridge)
 	// Interactive modal flow: always enabled. Legacy / --save: only with a save path.
 	bridge.CanSave = g_PaintCtx.InteractiveSave || !g_PaintCtx.SavePath.empty();
 	bridge.InteractiveSave = g_PaintCtx.InteractiveSave;
+	bridge.InstanceCount = g_InstanceCount;
 	{
 		std::string base = NLMISC::CFile::getFilenameWithoutExtension(g_PaintCtx.InputPath);
 		strncpy(bridge.EditableBasename, base.c_str(), sizeof(bridge.EditableBasename) - 1);
@@ -2686,11 +2687,12 @@ int main(int argc, char **argv)
 			}
 			// StartupOpenZone
 			haveSelection = true;
-			// Interactive open: apply --instances if given (Screen B layout selector is M4b)
-			if (!instancesFromCli.empty())
+			// Interactive open layout: CLI --instances overrides Screen B selector
+			std::string layoutSpec = !instancesFromCli.empty() ? instancesFromCli : selection.InstanceLayout;
+			if (!layoutSpec.empty() && layoutSpec != "1x1")
 			{
 				std::string ierr;
-				if (!parseInstanceLayout(instancesFromCli, g_InstanceCols, g_InstanceRows, ierr))
+				if (!parseInstanceLayout(layoutSpec, g_InstanceCols, g_InstanceRows, ierr))
 				{
 					fprintf(stderr, "ERROR: %s\n", ierr.c_str());
 					return 1;
@@ -2724,11 +2726,20 @@ int main(int argc, char **argv)
 		// Interactive save modal when no --save was given (with --save: one-click direct)
 		g_InteractiveSave = !args.haveLongArg("save");
 
-		// Remember successful world entry
+		// Remember successful world entry + last open layout (ecosystem self-instances)
 		{
 			ZPWS::SStartupCfg save;
 			save.LastGraphicsFolder = selection.World.GraphicsRoot;
 			save.LastWorld = selection.World.WorldName;
+			if (g_InstanceCount > 1)
+				save.LastInstances = NLMISC::toString("%ux%u", g_InstanceCols, g_InstanceRows);
+			else if (!selection.InstanceLayout.empty())
+				save.LastInstances = selection.InstanceLayout;
+			else
+				save.LastInstances = "1x1";
+			// Preserve prior LastInstances when CLI/auto set instances without UI selection field
+			if (save.LastInstances.empty())
+				save.LastInstances = "1x1";
 			ZPWS::saveStartupCfg(save);
 		}
 	}

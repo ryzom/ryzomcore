@@ -82,6 +82,8 @@ struct SStartupCfg
 {
 	std::string LastGraphicsFolder;
 	std::string LastWorld;
+	/** Ecosystem open layout: "1x1" (default) / "2x1" / "1x2" / "2x2" / "3x3" (ui M4b). */
+	std::string LastInstances;
 };
 
 // Path helpers

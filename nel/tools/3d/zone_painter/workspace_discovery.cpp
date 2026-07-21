@@ -543,7 +543,14 @@ bool loadStartupCfg(SStartupCfg &cfg)
 	catch (const EConfigFile &)
 	{
 	}
-	return !cfg.LastGraphicsFolder.empty() || !cfg.LastWorld.empty();
+	try
+	{
+		cfg.LastInstances = cf.getVar("LastInstances").asString();
+	}
+	catch (const EConfigFile &)
+	{
+	}
+	return !cfg.LastGraphicsFolder.empty() || !cfg.LastWorld.empty() || !cfg.LastInstances.empty();
 }
 
 void saveStartupCfg(const SStartupCfg &cfg)
@@ -558,6 +565,8 @@ void saveStartupCfg(const SStartupCfg &cfg)
 	fprintf(f, "// zone_painter startup config (auto-written; safe to delete)\n");
 	fprintf(f, "LastGraphicsFolder = \"%s\";\n", cfg.LastGraphicsFolder.c_str());
 	fprintf(f, "LastWorld = \"%s\";\n", cfg.LastWorld.c_str());
+	if (!cfg.LastInstances.empty())
+		fprintf(f, "LastInstances = \"%s\";\n", cfg.LastInstances.c_str());
 	fclose(f);
 }
 

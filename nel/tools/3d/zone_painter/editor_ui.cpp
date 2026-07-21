@@ -666,6 +666,19 @@ void CEditorUI::syncPanelFromBridge()
 		t->setHardText(buf);
 	}
 
+	// Self-instance indicator (M4b)
+	if (CViewText *t = findText("ui:zp:painter:content:instance_info"))
+	{
+		if (b->InstanceCount > 1)
+		{
+			char buf[48];
+			snprintf(buf, sizeof(buf), "INSTANCED x%u", b->InstanceCount);
+			t->setHardText(buf);
+		}
+		else
+			t->setHardText("");
+	}
+
 	// Save enabled only with --save
 	if (CCtrlBaseButton *btn = findButton("ui:zp:painter:content:btn_save"))
 		btn->setFrozen(!b->CanSave);

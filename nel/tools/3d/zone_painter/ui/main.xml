@@ -114,7 +114,22 @@
 		<view type="text" id="world_sub" posparent="world_title" posref="BL TL" x="0" y="-2" fontsize="10" shadow="true"
 			global_color="false" color="180 190 200 200" hardtext="" />
 
-		<group type="scroll_text" id="list_scroll" posparent="world_sub" posref="BL TL" x="0" y="-8" w="750" h="380" min_height="200" max_height="420">
+		<!-- Ecosystem open layout (self-instances, M4b). Hidden on continents (active toggled in code). -->
+		<view type="text" id="layout_label" posparent="world_sub" posref="BL TL" x="0" y="-6" fontsize="11" shadow="true"
+			global_color="false" color="255 255 255 180" hardtext="Open layout (self-instances):" active="false" />
+		<ctrl style="text_button_radio" id="layout_1x1" posparent="layout_label" posref="BL TL" x="0" y="-2"
+			pushed="true" onclick_l="zp_set_instances" params_l="1x1" hardtext="1x1" active="false" />
+		<ctrl style="text_button_radio" id="layout_2x1" posparent="layout_1x1" posref="MR ML" x="4" y="0"
+			onclick_l="zp_set_instances" params_l="2x1" hardtext="2x1" active="false" />
+		<ctrl style="text_button_radio" id="layout_1x2" posparent="layout_2x1" posref="MR ML" x="4" y="0"
+			onclick_l="zp_set_instances" params_l="1x2" hardtext="1x2" active="false" />
+		<ctrl style="text_button_radio" id="layout_2x2" posparent="layout_1x2" posref="MR ML" x="4" y="0"
+			onclick_l="zp_set_instances" params_l="2x2" hardtext="2x2" active="false" />
+		<ctrl style="text_button_radio" id="layout_3x3" posparent="layout_2x2" posref="MR ML" x="4" y="0"
+			onclick_l="zp_set_instances" params_l="3x3" hardtext="3x3" active="false" />
+
+		<!-- y offset: -8 under world_sub (continent) or below layout row (ecosystem; set in code) -->
+		<group type="scroll_text" id="list_scroll" posparent="world_sub" posref="BL TL" x="0" y="-8" w="750" h="350" min_height="180" max_height="400">
 			<group type="list" id="text_list" shadow="true" fontsize="12" color="255 255 255 255" space="1"
 				global_color="false" posref="TL TL" x="4" y="-4" sizeref="hw" w="-24" h="-8" maxelements="2000" />
 			<ctrl type="scroll" id="scroll_bar" align="T" posref="TR TR" x="-4" y="-4" w="8" sizeref="h" h="-8"
@@ -169,8 +184,12 @@
 	<group id="header_opened" x="0" y="0" w="0" h="16" posref="TL TL"></group>
 	<group id="content" x="0" y="0" posref="TL TL" w="0" h="0">
 
+		<!-- Instance indicator (M4b; empty when not self-instanced) -->
+		<view type="text" id="instance_info" posref="TL TL" x="10" y="-6" fontsize="11" shadow="true"
+			global_color="false" color="120 255 160 255" hardtext="" />
+
 		<!-- Mode radio row -->
-		<view type="text" id="lbl_mode" posref="TL TL" x="10" y="-8" fontsize="11" shadow="true"
+		<view type="text" id="lbl_mode" posparent="instance_info" posref="BL TL" x="0" y="-6" fontsize="11" shadow="true"
 			global_color="false" color="255 255 255 180" hardtext="Mode" />
 		<ctrl style="text_button_radio" id="mode_tile" posparent="lbl_mode" posref="BL TL" x="0" y="-4"
 			pushed="true" onclick_l="zp_mode" params_l="0" hardtext="Tile" />

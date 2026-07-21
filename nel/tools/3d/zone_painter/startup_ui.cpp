@@ -86,9 +86,12 @@ struct SStartupSession
 	int SelectedZone;  // index into Zones
 	std::string FolderPath;
 	std::string StatusMsg;
+	/** Ecosystem open layout (M4b): "1x1" default; options 2x1/1x2/2x2/3x3. */
+	std::string InstanceLayout;
 	SStartupSession()
 		: Active(false), Quit(false), OpenZone(false), FolderBrowserEnabled(false),
-		  Screen(ScreenNone), Worlds(NULL), SelectedWorld(-1), SelectedZone(-1)
+		  Screen(ScreenNone), Worlds(NULL), SelectedWorld(-1), SelectedZone(-1),
+		  InstanceLayout("1x1")
 	{
 	}
 };
@@ -405,6 +408,49 @@ static void populateContinentGrid(const ZPWS::SWorldEntry &world)
 	}
 }
 
+/** Show/hide ecosystem layout radios and push list below them when active. */
+static void setLayoutSelectorVisible(bool visible)
+{
+	static const char *ids[] = {
+		"ui:zp:zone_browser:content:layout_label",
+		"ui:zp:zone_browser:content:layout_1x1",
+		"ui:zp:zone_browser:content:layout_2x1",
+		"ui:zp:zone_browser:content:layout_1x2",
+		"ui:zp:zone_browser:content:layout_2x2",
+		"ui:zp:zone_browser:content:layout_3x3",
+		NULL
+	};
+	for (int i = 0; ids[i]; ++i)
+	{
+		if (CInterfaceElement *el = CWidgetManager::getInstance()->getElementFromId(ids[i]))
+			el->setActive(visible);
+	}
+	// Drop the zone list under the layout row (or tight under world_sub on continents)
+	if (CInterfaceElement *list = CWidgetManager::getInstance()->getElementFromId(
+	        "ui:zp:zone_browser:content:list_scroll"))
+		list->setY(visible ? -40 : -8);
+}
+
+/** Sync radio pushed state to s_Sess.InstanceLayout. */
+static void syncLayoutRadios()
+{
+	const char *layouts[] = { "1x1", "2x1", "1x2", "2x2", "3x3", NULL };
+	const char *ids[] = {
+		"ui:zp:zone_browser:content:layout_1x1",
+		"ui:zp:zone_browser:content:layout_2x1",
+		"ui:zp:zone_browser:content:layout_1x2",
+		"ui:zp:zone_browser:content:layout_2x2",
+		"ui:zp:zone_browser:content:layout_3x3",
+		NULL
+	};
+	for (int i = 0; layouts[i]; ++i)
+	{
+		if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(
+		        CWidgetManager::getInstance()->getElementFromId(ids[i])))
+			btn->setPushed(s_Sess.InstanceLayout == layouts[i]);
+	}
+}
+
 static void populateZoneList()
 {
 	clearList("ui:zp:zone_browser:content:list_scroll:text_list");
@@ -418,6 +464,12 @@ static void populateZoneList()
 		               + (world.Kind == ZPWS::Ecosystem ? "  (ecosystem)" : "  (continent)"));
 	if (CViewText *t = findText("ui:zp:zone_browser:content:world_sub"))
 		t->setHardText(world.GraphicsRoot);
+
+	// Layout selector is ecosystem-only (self-instances). Continents hide it.
+	const bool eco = (world.Kind == ZPWS::Ecosystem);
+	setLayoutSelectorVisible(eco);
+	if (eco)
+		syncLayoutRadios();
 
 	ZPWS::listZones(world, s_Sess.Zones);
 
@@ -573,6 +625,11 @@ static void applyZoneSelection(int idx)
 	s_Sess.OpenZone = true;
 }
 
+static bool isSupportedInstanceLayout(const std::string &s)
+{
+	return s == "1x1" || s == "2x1" || s == "1x2" || s == "2x2" || s == "3x3";
+}
+
 // ---------------------------------------------------------------------------------------------
 // Action handlers
 
@@ -603,6 +660,21 @@ public:
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpSelectZone, "zp_select_zone");
+
+class CAHZpSetInstances : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params)
+	{
+		if (!s_Sess.Active) return;
+		std::string layout = NLMISC::toLowerAscii(params);
+		if (!isSupportedInstanceLayout(layout))
+			return;
+		s_Sess.InstanceLayout = layout;
+		syncLayoutRadios();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpSetInstances, "zp_set_instances");
 
 class CAHZpZoneBack : public IActionHandler
 {
@@ -736,6 +808,14 @@ EStartupResult runStartupFlow(UDriver *driver,
 		s_Sess.FolderPath = ZPWS::normalizeDir(initialBrowsePath);
 	else
 		s_Sess.FolderPath = ZPWS::normalizeDir(CPath::getCurrentPath());
+	// Remembered open layout (ecosystem self-instances)
+	{
+		ZPWS::SStartupCfg cfg;
+		if (ZPWS::loadStartupCfg(cfg) && isSupportedInstanceLayout(cfg.LastInstances))
+			s_Sess.InstanceLayout = cfg.LastInstances;
+		else
+			s_Sess.InstanceLayout = "1x1";
+	}
 
 	// First screen: world list when non-empty; folder browser only when enabled + empty.
 	// --startup-screen <world> (with --startup-screenshot) jumps to Screen B for that world.
@@ -839,6 +919,11 @@ EStartupResult runStartupFlow(UDriver *driver,
 			{
 				selection.World = worlds[s_Sess.SelectedWorld];
 				selection.Zone = s_Sess.Zones[s_Sess.SelectedZone];
+				// Ecosystem layout for self-instances; continents always 1x1
+				if (selection.World.Kind == ZPWS::Ecosystem)
+					selection.InstanceLayout = s_Sess.InstanceLayout;
+				else
+					selection.InstanceLayout = "1x1";
 				result = StartupOpenZone;
 				break;
 			}
