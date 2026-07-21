@@ -49,6 +49,8 @@
 #include <nel/gui/event_listener.h>
 #include <nel/gui/interface_link.h>
 #include <nel/gui/interface_group.h>
+#include <nel/gui/lua_helper.h>
+#include <nel/gui/lua_ihm.h>
 #include <nel/gui/lua_manager.h>
 #include <nel/gui/view_pointer.h>
 #include <nel/gui/view_renderer.h>
@@ -198,6 +200,22 @@ public:
 };
 REGISTER_ACTION_HANDLER(CAHLua, "lua");
 
+// NLGUI's Lua bindings leave widget lookup to the embedder (the client
+// registers its own getUI); data scripts need it to reach widgets by id
+int luaGetUI(CLuaState &ls)
+{
+	CLuaIHM::checkArgCount(ls, "getUI", 1);
+	CLuaIHM::check(ls, ls.isString(1), "getUI() requires a string");
+	std::string id;
+	ls.toString(1, id);
+	CInterfaceElement *element = CWidgetManager::getInstance()->getElementFromId(id);
+	if (element)
+		CLuaIHM::pushUIOnStack(ls, element);
+	else
+		ls.pushNil();
+	return 1;
+}
+
 void renderOneFrame()
 {
 	s_Driver->EventServer.pump();
@@ -330,15 +348,23 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
+	// Bring up the interface Lua state before parsing: initLUA registers the
+	// stock NLGUI API (setOnDraw, nltime, ...) — the parser does NOT call it
+	// itself, the embedder must (the client does the same) — and the sample
+	// adds its own entry points on top of it
+	IParser *parser = CWidgetManager::getInstance()->getParser();
+	parser->initLUA();
+	CLuaManager::getInstance().getLuaState()->registerFunc("getUI", luaGetUI);
+
 	// Parse the sample interface definition
 	std::vector<std::string> xmlFiles;
 	xmlFiles.push_back("config_sample.xml");
 	xmlFiles.push_back("widgets_sample.xml");
 	xmlFiles.push_back("main_sample.xml");
+	xmlFiles.push_back("minesweeper_sample.xml");
 
 	nlinfo("Atlas loaded");
 
-	IParser *parser = CWidgetManager::getInstance()->getParser();
 	if (!parser->parseInterface(xmlFiles, false))
 	{
 		nlwarning("Unable to parse the sample interface definition");

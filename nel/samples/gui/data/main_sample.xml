@@ -23,7 +23,7 @@
 <!-- * Launcher window  * -->
 <!-- ******************** -->
 
-<group type="container" id="launcher" w="176" pop_min_w="176" pop_max_w="176" h="284" pop_min_h="284" pop_max_h="284"
+<group type="container" id="launcher" w="176" pop_min_w="176" pop_max_w="176" h="306" pop_min_h="306" pop_max_h="306"
 	title="Showcase" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
 	title_bar_open="false" open_button="false" right_button="false" lockable="false" openable="false"
 	opened="true" movable="true" active="true" x="8" y="712">
@@ -40,7 +40,8 @@
 		<ctrl style="text_button_16" id="bt_tabs"    x="0"  y="-6" posparent="bt_menus"   posref="BL TL" onclick_l="proc" params_l="proc_toggle|tabs"    hardtext="Tabs" />
 		<ctrl style="text_button_16" id="bt_colors"  x="0"  y="-6" posparent="bt_tabs"    posref="BL TL" onclick_l="proc" params_l="proc_toggle|colors"  hardtext="Color Picker" />
 		<ctrl style="text_button_16" id="bt_rollout" x="0"  y="-6" posparent="bt_colors"  posref="BL TL" onclick_l="proc" params_l="proc_toggle|rollout" hardtext="Rollout List" />
-		<ctrl style="text_button_16" id="bt_about"   x="0"  y="-6" posparent="bt_rollout" posref="BL TL" onclick_l="proc" params_l="proc_open_about" hardtext="About" />
+		<ctrl style="text_button_16" id="bt_mines"   x="0"  y="-6" posparent="bt_rollout" posref="BL TL" onclick_l="proc" params_l="proc_toggle|minesweeper" hardtext="Minesweeper" />
+		<ctrl style="text_button_16" id="bt_about"   x="0"  y="-6" posparent="bt_mines"  posref="BL TL" onclick_l="proc" params_l="proc_open_about" hardtext="About" />
 		<ctrl style="text_button_16" id="bt_quit"    x="0"  y="-6" posparent="bt_about"   posref="BL TL" onclick_l="sample_quit" params_l="" hardtext="Quit" />
 	</group>
 </group>
