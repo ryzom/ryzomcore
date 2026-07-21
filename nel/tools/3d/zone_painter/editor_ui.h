@@ -8,6 +8,9 @@
  * embedding contract). Owns atlas/parser init, per-frame update+draw, visibility
  * (F10 / ToggleUI), and wantsMouse() so paint/orbit do not punch through windows.
  *
+ * Paint ops never live here: a SPaintUIBridge points at named handlers owned by
+ * runViewer so keys and GUI buttons share one implementation.
+ *
  * TU hygiene: this unit must NOT include patch_eval.h or context_display.h /
  * SCENELIB headers (see main.cpp include contract).
  */
@@ -55,6 +58,53 @@ namespace ZPUI {
 class CPointerButtonListener;
 
 /**
+ * Bridge between the viewer paint state and the NLGUI action handlers.
+ * runViewer fills the state fields each frame and installs the function
+ * pointers once; action handlers call the functions (never reimplement ops).
+ */
+struct SPaintUIBridge
+{
+	// Named handlers (same paths as the keyboard)
+	void (*selectMode)(int mode);       // 0=Tile 1=Color 2=Displace
+	void (*selectTileSetDelta)(int d);  // -1 / +1
+	void (*toggleTileSize)();           // 128 <-> 256
+	void (*brushSizeDelta)(int d);      // -1 / +1 (0..2 for tile/disp)
+	void (*groupDelta)(int d);          // -1 / +1 (mod 13)
+	void (*toggleLockBorders)();
+	void (*undo)();
+	void (*redo)();
+	void (*fill)(int rot);              // 0..3
+	void (*save)();                     // write-back + whole-file; no exit
+
+	// State snapshot for panel sync (filled by runViewer each frame)
+	bool HaveCore;
+	int Mode;
+	int CurTileSet;
+	uint TileSetCount;
+	char TileSetName[128];
+	bool Mode256;
+	uint BrushSize;
+	uint TileGroup;
+	bool LockBorders;
+	uint UndoDepth;
+	bool CanSave;
+
+	SPaintUIBridge()
+		: selectMode(NULL), selectTileSetDelta(NULL), toggleTileSize(NULL),
+		  brushSizeDelta(NULL), groupDelta(NULL), toggleLockBorders(NULL),
+		  undo(NULL), redo(NULL), fill(NULL), save(NULL),
+		  HaveCore(false), Mode(0), CurTileSet(0), TileSetCount(0), Mode256(false),
+		  BrushSize(0), TileGroup(0), LockBorders(false), UndoDepth(0), CanSave(false)
+	{
+		TileSetName[0] = 0;
+	}
+};
+
+/** Install / clear the process-wide bridge (action handlers look it up). */
+void setPaintUIBridge(SPaintUIBridge *bridge);
+SPaintUIBridge *getPaintUIBridge();
+
+/**
  * Viewer-side NLGUI shell. init() is optional-fail: if the atlas or interface
  * XML is missing the viewer continues with keyboard+HUD only.
  */
@@ -70,7 +120,7 @@ public:
 
 	void shutdown();
 
-	/** Per-frame widget clock + coord check (call after EventServer.pump). */
+	/** Per-frame: push bridge state into widgets, then widget clock + coords. */
 	void update();
 
 	/** Draw GUI over the 3D scene (after scene render, before swap). */
@@ -86,6 +136,8 @@ public:
 	void toggleVisible();
 
 private:
+	void syncPanelFromBridge();
+
 	bool _Ready;
 	bool _Visible;
 	NL3D::UDriver *_Driver;

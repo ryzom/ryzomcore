@@ -26,6 +26,9 @@
 
 #include "editor_ui.h"
 
+#include <cstdio>
+#include <cstring>
+
 #include <nel/misc/algo.h>
 #include <nel/misc/events.h>
 #include <nel/misc/file.h>
@@ -36,11 +39,13 @@
 #include <nel/3d/u_text_context.h>
 
 #include <nel/gui/action_handler.h>
+#include <nel/gui/ctrl_base_button.h>
 #include <nel/gui/event_listener.h>
 #include <nel/gui/interface_group.h>
 #include <nel/gui/interface_link.h>
 #include <nel/gui/view_pointer.h>
 #include <nel/gui/view_renderer.h>
+#include <nel/gui/view_text.h>
 #include <nel/gui/widget_manager.h>
 
 #ifndef ZONE_PAINTER_UI_DIR
@@ -61,9 +66,14 @@ namespace ZPUI {
 
 const char *CEditorUI::MASTER_GROUP = "ui:zp";
 
+// Process-wide bridge (runViewer installs; action handlers call through it)
+static SPaintUIBridge *s_Bridge = NULL;
+
+void setPaintUIBridge(SPaintUIBridge *bridge) { s_Bridge = bridge; }
+SPaintUIBridge *getPaintUIBridge() { return s_Bridge; }
+
 // ---------------------------------------------------------------------------------------------
-// Pointer button mirror (from nel/samples/gui): NLGUI keeps pointer position up to date but
-// nothing feeds button-down state; embedders must mirror driver mouse events into the pointer.
+// Pointer button mirror (from nel/samples/gui)
 
 class CPointerButtonListener : public NLMISC::IEventListener
 {
@@ -117,9 +127,7 @@ public:
 	}
 };
 
-// Minimal client-side action handlers the interface XML may invoke (proc / modals).
-// Full painter ops land as zp_* handlers in M1c.
-
+// Minimal client-side action handlers the interface XML may invoke
 class CAHProc : public IActionHandler
 {
 public:
@@ -163,6 +171,134 @@ public:
 REGISTER_ACTION_HANDLER(CAHSubmitQuickHelp, "submit_quick_help");
 
 // ---------------------------------------------------------------------------------------------
+// Paint action handlers: thin wrappers over the bridge (no second op implementation)
+
+class CAHZpMode : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params)
+	{
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (!b || !b->selectMode) return;
+		int mode = 0;
+		fromString(params, mode);
+		b->selectMode(mode);
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpMode, "zp_mode");
+
+class CAHZpTileSet : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params)
+	{
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (!b || !b->selectTileSetDelta) return;
+		int d = 0;
+		fromString(params, d);
+		b->selectTileSetDelta(d);
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpTileSet, "zp_tileset");
+
+class CAHZpToggle256 : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->toggleTileSize) b->toggleTileSize();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpToggle256, "zp_toggle_256");
+
+class CAHZpBrush : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params)
+	{
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (!b || !b->brushSizeDelta) return;
+		int d = 0;
+		fromString(params, d);
+		b->brushSizeDelta(d);
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpBrush, "zp_brush");
+
+class CAHZpGroup : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params)
+	{
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (!b || !b->groupDelta) return;
+		int d = 0;
+		fromString(params, d);
+		b->groupDelta(d);
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpGroup, "zp_group");
+
+class CAHZpLockBorders : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->toggleLockBorders) b->toggleLockBorders();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpLockBorders, "zp_lock_borders");
+
+class CAHZpUndo : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->undo) b->undo();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpUndo, "zp_undo");
+
+class CAHZpRedo : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->redo) b->redo();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpRedo, "zp_redo");
+
+class CAHZpFill : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params)
+	{
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (!b || !b->fill) return;
+		int rot = 0;
+		fromString(params, rot);
+		b->fill(rot);
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpFill, "zp_fill");
+
+class CAHZpSave : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->save) b->save();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpSave, "zp_save");
+
+// ---------------------------------------------------------------------------------------------
 
 CEditorUI::CEditorUI()
 	: _Ready(false), _Visible(true), _Driver(NULL), _TextContext(NULL),
@@ -179,7 +315,6 @@ static std::string resolveDataDir()
 {
 	if (CFile::isDirectory(ZONE_PAINTER_UI_DIR))
 		return ZONE_PAINTER_UI_DIR;
-	// Exe-relative fallback: <exe>/ui then ./ui
 	return "ui";
 }
 
@@ -199,7 +334,6 @@ static std::string resolveFont(const std::string &hint)
 	std::string looked = CPath::lookup(CFile::getFilename(ZONE_PAINTER_FONT), false, false, false);
 	if (!looked.empty())
 		return looked;
-	// Last resort: system font used by the HUD
 	const char *sysFont = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
 	if (CFile::fileExists(sysFont))
 		return sysFont;
@@ -214,7 +348,6 @@ bool CEditorUI::init(UDriver *driver, const std::string &fontPathHint)
 
 	_Driver = driver;
 
-	// Loose-file textures: png on disk, .tga names in interface XML (sample contract)
 	CPath::remapExtension("png", "tga", true);
 
 	const std::string dataDir = resolveDataDir();
@@ -222,7 +355,6 @@ bool CEditorUI::init(UDriver *driver, const std::string &fontPathHint)
 	CPath::addSearchPath(dataDir, true, false);
 	CPath::addSearchPath(assetsDir, false, false);
 
-	// Render literal hardtext; this tool does not ship translation tables
 	CI18N::setNoResolution(true);
 
 	std::string font = resolveFont(fontPathHint);
@@ -237,10 +369,8 @@ bool CEditorUI::init(UDriver *driver, const std::string &fontPathHint)
 		fprintf(stderr, "WARNING: editor UI: createTextContext failed; NLGUI disabled\n");
 		return false;
 	}
-	// fontsize means pixels (client disables the height-ratio the same way)
 	_TextContext->setKeep800x600Ratio(false);
 
-	// Pump triggered <link> updates whenever database observers flush
 	new CInterfaceLink::CInterfaceLinkUpdater(); // leaked once, process lifetime
 
 	CViewRenderer::setDriver(_Driver);
@@ -280,7 +410,6 @@ bool CEditorUI::init(UDriver *driver, const std::string &fontPathHint)
 	CWidgetManager::getInstance()->activateMasterGroup(MASTER_GROUP, true);
 	CInterfaceLink::updateAllLinks();
 
-	// Route driver events into the widget manager (before paint/nav so wantsMouse sees them)
 	_GuiListener = new CEventListener();
 	_GuiListener->addToServer(&_Driver->EventServer);
 	_PointerButtons = new CPointerButtonListener();
@@ -323,10 +452,78 @@ void CEditorUI::shutdown()
 	_HwCursors.clear();
 }
 
+static CViewText *findText(const char *id)
+{
+	return dynamic_cast<CViewText *>(CWidgetManager::getInstance()->getElementFromId(id));
+}
+
+static CCtrlBaseButton *findButton(const char *id)
+{
+	return dynamic_cast<CCtrlBaseButton *>(CWidgetManager::getInstance()->getElementFromId(id));
+}
+
+void CEditorUI::syncPanelFromBridge()
+{
+	SPaintUIBridge *b = getPaintUIBridge();
+	if (!b || !b->HaveCore)
+		return;
+
+	// Mode radios
+	if (CCtrlBaseButton *btn = findButton("ui:zp:painter:content:mode_tile"))
+		btn->setPushed(b->Mode == 0);
+	if (CCtrlBaseButton *btn = findButton("ui:zp:painter:content:mode_color"))
+		btn->setPushed(b->Mode == 1);
+	if (CCtrlBaseButton *btn = findButton("ui:zp:painter:content:mode_displace"))
+		btn->setPushed(b->Mode == 2);
+
+	// Tile set label
+	if (CViewText *t = findText("ui:zp:painter:content:tileset_info"))
+	{
+		char buf[192];
+		snprintf(buf, sizeof(buf), "%d/%u '%s'", b->CurTileSet, b->TileSetCount, b->TileSetName);
+		t->setHardText(buf);
+	}
+
+	// 256 toggle
+	if (CCtrlBaseButton *btn = findButton("ui:zp:painter:content:toggle_256"))
+		btn->setPushed(b->Mode256);
+
+	// Brush / group
+	if (CViewText *t = findText("ui:zp:painter:content:brush_info"))
+	{
+		char buf[32];
+		snprintf(buf, sizeof(buf), "%u", b->BrushSize);
+		t->setHardText(buf);
+	}
+	if (CViewText *t = findText("ui:zp:painter:content:group_info"))
+	{
+		char buf[32];
+		snprintf(buf, sizeof(buf), "%u", b->TileGroup);
+		t->setHardText(buf);
+	}
+
+	// Lock borders
+	if (CCtrlBaseButton *btn = findButton("ui:zp:painter:content:lock_borders"))
+		btn->setPushed(b->LockBorders);
+
+	// Undo depth
+	if (CViewText *t = findText("ui:zp:painter:content:undo_info"))
+	{
+		char buf[32];
+		snprintf(buf, sizeof(buf), "%u", b->UndoDepth);
+		t->setHardText(buf);
+	}
+
+	// Save enabled only with --save
+	if (CCtrlBaseButton *btn = findButton("ui:zp:painter:content:btn_save"))
+		btn->setFrozen(!b->CanSave);
+}
+
 void CEditorUI::update()
 {
 	if (!_Ready || !_Visible)
 		return;
+	syncPanelFromBridge();
 	CWidgetManager *wm = CWidgetManager::getInstance();
 	wm->sendClockTickEvent();
 	wm->checkCoords();

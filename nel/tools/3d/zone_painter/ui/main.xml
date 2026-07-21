@@ -18,18 +18,88 @@
 		tx_can_pan="curs_can_pan.tga" />
 </group>
 
-<!-- Painter panel: top-right corner so the terrain baseline stays visible in screenshots. -->
-<group type="container" id="painter" w="200" pop_min_w="180" pop_max_w="280" h="96" pop_min_h="80" pop_max_h="400"
+<!--
+  Painter control panel (M1c). Top-right corner keeps the terrain baseline visible
+  in screenshots. All onclick handlers call the shared paint-action bridge (same
+  code paths as the keyboard). State labels are refreshed each frame from C++.
+-->
+<group type="container" id="painter" w="220" pop_min_w="200" pop_max_w="280" h="340" pop_min_h="280" pop_max_h="480"
 	title="Painter" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
 	title_bar_open="false" open_button="false" right_button="true" lockable="false" openable="false"
-	opened="true" movable="true" active="true" x="592" y="592">
+	opened="true" movable="true" active="true" x="572" y="592">
 	<group id="header_closed" x="0" y="0" h="12" posref="TL TL"></group>
 	<group id="header_opened" x="0" y="0" w="0" h="16" posref="TL TL"></group>
 	<group id="content" x="0" y="0" posref="TL TL" w="0" h="0">
-		<view type="text" id="hint" posref="TL TL" x="12" y="-10" fontsize="12" shadow="true"
-			global_color="false" color="255 255 255 220" hardtext="F10 toggle UI" />
-		<view type="text" id="status" posparent="hint" posref="BL TL" y="-6" fontsize="12" shadow="true"
-			global_color="false" color="180 220 255 255" hardtext="NLGUI embedded" />
+
+		<!-- Mode radio row -->
+		<view type="text" id="lbl_mode" posref="TL TL" x="10" y="-8" fontsize="11" shadow="true"
+			global_color="false" color="255 255 255 180" hardtext="Mode" />
+		<ctrl style="text_button_radio" id="mode_tile" posparent="lbl_mode" posref="BL TL" x="0" y="-4"
+			pushed="true" onclick_l="zp_mode" params_l="0" hardtext="Tile" />
+		<ctrl style="text_button_radio" id="mode_color" posparent="mode_tile" posref="MR ML" x="4" y="0"
+			onclick_l="zp_mode" params_l="1" hardtext="Color" />
+		<ctrl style="text_button_radio" id="mode_displace" posparent="mode_color" posref="MR ML" x="4" y="0"
+			onclick_l="zp_mode" params_l="2" hardtext="Disp" />
+
+		<!-- Tile set -->
+		<view type="text" id="lbl_tileset" posparent="mode_tile" posref="BL TL" x="0" y="-10" fontsize="11" shadow="true"
+			global_color="false" color="255 255 255 180" hardtext="Tile set" />
+		<view type="text" id="tileset_info" posparent="lbl_tileset" posref="BL TL" y="-2" fontsize="12" shadow="true"
+			global_color="false" color="180 220 255 255" hardtext="0 / 0" />
+		<ctrl style="text_button_16" id="tileset_prev" posparent="tileset_info" posref="BL TL" x="0" y="-4"
+			onclick_l="zp_tileset" params_l="-1" hardtext="&lt;" />
+		<ctrl style="text_button_16" id="tileset_next" posparent="tileset_prev" posref="MR ML" x="4" y="0"
+			onclick_l="zp_tileset" params_l="+1" hardtext="&gt;" />
+		<ctrl style="text_button_toggle" id="toggle_256" posparent="tileset_next" posref="MR ML" x="8" y="0"
+			onclick_l="zp_toggle_256" params_l="" hardtext="256" />
+
+		<!-- Brush size 0-2 -->
+		<view type="text" id="lbl_brush" posparent="tileset_prev" posref="BL TL" x="0" y="-10" fontsize="11" shadow="true"
+			global_color="false" color="255 255 255 180" hardtext="Brush size" />
+		<view type="text" id="brush_info" posparent="lbl_brush" posref="MR ML" x="8" y="0" fontsize="12" shadow="true"
+			global_color="false" color="180 220 255 255" hardtext="0" />
+		<ctrl style="text_button_16" id="brush_down" posparent="lbl_brush" posref="BL TL" x="0" y="-4"
+			onclick_l="zp_brush" params_l="-1" hardtext="-" />
+		<ctrl style="text_button_16" id="brush_up" posparent="brush_down" posref="MR ML" x="4" y="0"
+			onclick_l="zp_brush" params_l="+1" hardtext="+" />
+
+		<!-- Tile group -->
+		<view type="text" id="lbl_group" posparent="brush_down" posref="BL TL" x="0" y="-10" fontsize="11" shadow="true"
+			global_color="false" color="255 255 255 180" hardtext="Group" />
+		<view type="text" id="group_info" posparent="lbl_group" posref="MR ML" x="8" y="0" fontsize="12" shadow="true"
+			global_color="false" color="180 220 255 255" hardtext="0" />
+		<ctrl style="text_button_16" id="group_down" posparent="lbl_group" posref="BL TL" x="0" y="-4"
+			onclick_l="zp_group" params_l="-1" hardtext="-" />
+		<ctrl style="text_button_16" id="group_up" posparent="group_down" posref="MR ML" x="4" y="0"
+			onclick_l="zp_group" params_l="+1" hardtext="+" />
+
+		<!-- Lock borders -->
+		<ctrl style="text_button_toggle" id="lock_borders" posparent="group_down" posref="BL TL" x="0" y="-10"
+			onclick_l="zp_lock_borders" params_l="" hardtext="Lock borders" />
+
+		<!-- Undo / redo / fill -->
+		<ctrl style="text_button_16" id="btn_undo" posparent="lock_borders" posref="BL TL" x="0" y="-10"
+			onclick_l="zp_undo" params_l="" hardtext="Undo" />
+		<ctrl style="text_button_16" id="btn_redo" posparent="btn_undo" posref="MR ML" x="4" y="0"
+			onclick_l="zp_redo" params_l="" hardtext="Redo" />
+		<view type="text" id="undo_info" posparent="btn_redo" posref="MR ML" x="8" y="0" fontsize="11" shadow="true"
+			global_color="false" color="200 200 200 220" hardtext="0" />
+
+		<ctrl style="text_button_16" id="btn_fill0" posparent="btn_undo" posref="BL TL" x="0" y="-6"
+			onclick_l="zp_fill" params_l="0" hardtext="Fill" />
+		<ctrl style="text_button_16" id="btn_fill1" posparent="btn_fill0" posref="MR ML" x="4" y="0"
+			onclick_l="zp_fill" params_l="1" hardtext="F1" />
+		<ctrl style="text_button_16" id="btn_fill2" posparent="btn_fill1" posref="MR ML" x="4" y="0"
+			onclick_l="zp_fill" params_l="2" hardtext="F2" />
+		<ctrl style="text_button_16" id="btn_fill3" posparent="btn_fill2" posref="MR ML" x="4" y="0"
+			onclick_l="zp_fill" params_l="3" hardtext="F3" />
+
+		<!-- Save (frozen when no save path given) -->
+		<ctrl style="text_button_16" id="btn_save" posparent="btn_fill0" posref="BL TL" x="0" y="-12"
+			onclick_l="zp_save" params_l="" hardtext="Save" />
+		<view type="text" id="hint" posparent="btn_save" posref="BL TL" x="0" y="-8" fontsize="10" shadow="true"
+			global_color="false" color="255 255 255 140" hardtext="F10 hide  ESC quit" />
+
 	</group>
 </group>
 <tree node="painter"></tree>

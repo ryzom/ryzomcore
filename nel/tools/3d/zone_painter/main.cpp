@@ -1323,10 +1323,159 @@ static void zpViewerScreenshot(NL3D::IDriver *driver, NLMISC::CEventListenerAsyn
 	nlinfo("Screenshot '%s' saved", filename.c_str());
 }
 
+// ---------------------------------------------------------------------------------------------
+// Shared paint actions: keyboard AND NLGUI call these (no second op implementation).
+// Live for the duration of runViewer only (g_PaintCtx.Active).
+
+struct SPaintCtx
+{
+	bool Active;
+	ZPPAINT::CPaintCore *Core;
+	CPaintMouseListener *Paint;
+	std::string InputPath;
+	std::string SavePath;
+	PIPELINE::MAX::CScene *Scene; // Max scene for whole-file save
+	SPaintCtx() : Active(false), Core(NULL), Paint(NULL), Scene(NULL) { }
+};
+static SPaintCtx g_PaintCtx;
+
+static void zpSelectMode(int mode)
+{
+	if (!g_PaintCtx.Active || !g_PaintCtx.Paint) return;
+	if (mode < 0) mode = 0;
+	if (mode > 2) mode = 2;
+	g_PaintCtx.Paint->Mode = mode;
+}
+
+static void zpSelectTileSetDelta(int d)
+{
+	if (!g_PaintCtx.Active || !g_PaintCtx.Core || !g_PaintCtx.Paint) return;
+	uint count = g_PaintCtx.Core->tileSetCount();
+	if (!count) return;
+	int n = (int)count;
+	int cur = g_PaintCtx.Paint->CurTileSet;
+	cur = (cur + d) % n;
+	if (cur < 0) cur += n;
+	g_PaintCtx.Paint->CurTileSet = cur;
+}
+
+static void zpSelectTileSetAbs(int idx)
+{
+	if (!g_PaintCtx.Active || !g_PaintCtx.Core || !g_PaintCtx.Paint) return;
+	uint count = g_PaintCtx.Core->tileSetCount();
+	if (!count || idx < 0 || idx >= (int)count) return;
+	g_PaintCtx.Paint->CurTileSet = idx;
+}
+
+static void zpToggleTileSize()
+{
+	if (!g_PaintCtx.Active || !g_PaintCtx.Paint) return;
+	g_PaintCtx.Paint->Mode256 = !g_PaintCtx.Paint->Mode256;
+}
+
+static void zpBrushSizeDelta(int d)
+{
+	if (!g_PaintCtx.Active || !g_PaintCtx.Core || !g_PaintCtx.Paint) return;
+	if (g_PaintCtx.Paint->Mode == CPaintMouseListener::ModeColor)
+	{
+		if (d > 0)
+			g_PaintCtx.Paint->BrushRadius = std::min(g_PaintCtx.Paint->BrushRadius * 1.5f, 32.f);
+		else if (d < 0)
+			g_PaintCtx.Paint->BrushRadius = std::max(g_PaintCtx.Paint->BrushRadius / 1.5f, 2.f);
+	}
+	else
+	{
+		int bs = (int)g_PaintCtx.Core->brushSize() + d;
+		if (bs < 0) bs = 0;
+		if (bs > 2) bs = 2;
+		g_PaintCtx.Core->setBrushSize((uint)bs);
+	}
+}
+
+static void zpGroupDelta(int d)
+{
+	if (!g_PaintCtx.Active || !g_PaintCtx.Core) return;
+	int g = (int)g_PaintCtx.Core->tileGroup() + d;
+	g = ((g % 13) + 13) % 13;
+	g_PaintCtx.Core->setTileGroup((uint)g);
+}
+
+static void zpToggleLockBorders()
+{
+	if (!g_PaintCtx.Active || !g_PaintCtx.Core) return;
+	g_PaintCtx.Core->setLockBorders(!g_PaintCtx.Core->lockBordersOn());
+}
+
+static void zpUndo()
+{
+	if (!g_PaintCtx.Active || !g_PaintCtx.Core) return;
+	g_PaintCtx.Core->opUndo();
+}
+
+static void zpRedo()
+{
+	if (!g_PaintCtx.Active || !g_PaintCtx.Core) return;
+	g_PaintCtx.Core->opRedo();
+}
+
+static void zpFill(int rot)
+{
+	if (!g_PaintCtx.Active || !g_PaintCtx.Core || !g_PaintCtx.Paint) return;
+	CPaintMouseListener &pl = *g_PaintCtx.Paint;
+	if (!pl.HaveHover || g_PaintCtx.Core->zoneFrozen(pl.HoverZone)) return;
+	std::string err;
+	uint patch = (uint)(pl.HoverTile / ZP_NUM_TILE_SEL);
+	if (pl.Mode == CPaintMouseListener::ModeTile)
+		g_PaintCtx.Core->opFillTile(pl.HoverZone, patch, pl.CurTileSet, rot, pl.Mode256, err);
+	else if (pl.Mode == CPaintMouseListener::ModeColor)
+		g_PaintCtx.Core->opFillColor(pl.HoverZone, patch, pl.BrushColor, 256, err);
+	else
+		g_PaintCtx.Core->opFillDisplace(pl.HoverZone, patch, pl.DisplaceIndex, err);
+}
+
+static void zpSave()
+{
+	if (!g_PaintCtx.Active || !g_PaintCtx.Core || !g_PaintCtx.Scene) return;
+	if (g_PaintCtx.SavePath.empty())
+	{
+		fprintf(stderr, "WARNING: save: no --save path given\n");
+		return;
+	}
+	std::string err;
+	if (!g_PaintCtx.Core->writeBack(err))
+	{
+		fprintf(stderr, "ERROR: write-back: %s\n", err.c_str());
+		return;
+	}
+	int saveRc = saveWholeFile(g_PaintCtx.InputPath, g_PaintCtx.SavePath, *g_PaintCtx.Scene, false);
+	if (saveRc == 0)
+		printf("OK save (panel) -> %s\n", g_PaintCtx.SavePath.c_str());
+}
+
+// Fill the UI bridge state snapshot (labels / button push state).
+static void zpFillBridgeState(ZPUI::SPaintUIBridge &bridge)
+{
+	bridge.HaveCore = g_PaintCtx.Active && g_PaintCtx.Core && g_PaintCtx.Paint;
+	if (!bridge.HaveCore) return;
+	CPaintMouseListener &pl = *g_PaintCtx.Paint;
+	bridge.Mode = pl.Mode;
+	bridge.CurTileSet = pl.CurTileSet;
+	bridge.TileSetCount = g_PaintCtx.Core->tileSetCount();
+	std::string name = g_PaintCtx.Core->tileSetName(pl.CurTileSet);
+	strncpy(bridge.TileSetName, name.c_str(), sizeof(bridge.TileSetName) - 1);
+	bridge.TileSetName[sizeof(bridge.TileSetName) - 1] = 0;
+	bridge.Mode256 = pl.Mode256;
+	bridge.BrushSize = g_PaintCtx.Core->brushSize();
+	bridge.TileGroup = g_PaintCtx.Core->tileGroup();
+	bridge.LockBorders = g_PaintCtx.Core->lockBordersOn();
+	bridge.UndoDepth = g_PaintCtx.Core->undoDepth();
+	bridge.CanSave = !g_PaintCtx.SavePath.empty();
+}
+
 static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CPaintCore *core,
                      PMAXLOAD::SLoadedMax &lm,
                      const std::string &screenshotPath, const std::string &fontPath,
-                     const std::string &scriptPath)
+                     const std::string &scriptPath, const std::string &savePath)
 {
 	// Landscape bbox in world space (camera + mouse hotspot).
 	NLMISC::CAABBox bbox;
@@ -1436,6 +1585,26 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 
 		// Paint listener: live-landscape mirror + the mouse op path
 		CPaintMouseListener paintListener;
+		// Shared paint actions (keys + NLGUI); bridge lives for the viewer session.
+		ZPUI::SPaintUIBridge paintBridge;
+		g_PaintCtx.Active = (core != NULL);
+		g_PaintCtx.Core = core;
+		g_PaintCtx.Paint = &paintListener;
+		g_PaintCtx.InputPath = g_InputPath;
+		g_PaintCtx.SavePath = savePath;
+		g_PaintCtx.Scene = lm.Scene;
+		paintBridge.selectMode = zpSelectMode;
+		paintBridge.selectTileSetDelta = zpSelectTileSetDelta;
+		paintBridge.toggleTileSize = zpToggleTileSize;
+		paintBridge.brushSizeDelta = zpBrushSizeDelta;
+		paintBridge.groupDelta = zpGroupDelta;
+		paintBridge.toggleLockBorders = zpToggleLockBorders;
+		paintBridge.undo = zpUndo;
+		paintBridge.redo = zpRedo;
+		paintBridge.fill = zpFill;
+		paintBridge.save = zpSave;
+		ZPUI::setPaintUIBridge(&paintBridge);
+
 		if (core)
 		{
 			core->attachLandscape(&theLand->Landscape);
@@ -1523,6 +1692,8 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 			theLand->Landscape.refineAll(pos);
 			udriver->clearBuffers(NLMISC::CRGBA(90, 90, 90));
 			uscene->render();
+			// Sync panel labels before capture so the screenshot shows live state
+			zpFillBridgeState(paintBridge);
 			editorUI.update();
 			editorUI.draw();
 			udriver->swapBuffers();
@@ -1561,8 +1732,8 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 				if (zpKeyPushed(ZPK_ToggleUI))
 					editorUI.toggleVisible();
 
-				// Tile set selection keys (plugin: the texture panel; here PgUp/PgDn + 0-9) and
-				// displace index [ ] stay hardcoded; the plugin-era actions ride the rebindable
+				// Tile set / mode / brush keys → shared named handlers (same as NLGUI buttons).
+				// PgUp/PgDn + 0-9 and [ ] displace stay hardcoded; rebindable actions ride the
 				// key table (see kPainterKeysName / --keys-cfg).
 				if (core)
 				{
@@ -1570,39 +1741,29 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 					if (count)
 					{
 						if (udriver->AsyncListener.isKeyPushed(NLMISC::KeyPRIOR))
-							paintListener.CurTileSet = (paintListener.CurTileSet + (int)count - 1) % (int)count;
+							zpSelectTileSetDelta(-1);
 						if (udriver->AsyncListener.isKeyPushed(NLMISC::KeyNEXT))
-							paintListener.CurTileSet = (paintListener.CurTileSet + 1) % (int)count;
+							zpSelectTileSetDelta(+1);
 						for (int k = 0; k <= 9; ++k)
 							if (udriver->AsyncListener.isKeyPushed((NLMISC::TKey)(NLMISC::Key0 + k)) && k < (int)count)
-								paintListener.CurTileSet = k;
+								zpSelectTileSetAbs(k);
 					}
 					if (zpKeyPushed(ZPK_ToggleTileSize))
-						paintListener.Mode256 = !paintListener.Mode256;
+						zpToggleTileSize();
 					if (zpKeyPushed(ZPK_MModeTile))
-						paintListener.Mode = CPaintMouseListener::ModeTile;
+						zpSelectMode(CPaintMouseListener::ModeTile);
 					if (zpKeyPushed(ZPK_MModeColor))
-						paintListener.Mode = CPaintMouseListener::ModeColor;
+						zpSelectMode(CPaintMouseListener::ModeColor);
 					if (zpKeyPushed(ZPK_MModeDisplace))
-						paintListener.Mode = CPaintMouseListener::ModeDisplace;
+						zpSelectMode(CPaintMouseListener::ModeDisplace);
 					if (zpKeyPushed(ZPK_SizeUp))
-					{
-						if (paintListener.Mode == CPaintMouseListener::ModeColor)
-							paintListener.BrushRadius = std::min(paintListener.BrushRadius * 1.5f, 32.f);
-						else
-							core->setBrushSize(core->brushSize() + 1);
-					}
+						zpBrushSizeDelta(+1);
 					if (zpKeyPushed(ZPK_SizeDown))
-					{
-						if (paintListener.Mode == CPaintMouseListener::ModeColor)
-							paintListener.BrushRadius = std::max(paintListener.BrushRadius / 1.5f, 2.f);
-						else if (core->brushSize() > 0)
-							core->setBrushSize(core->brushSize() - 1);
-					}
+						zpBrushSizeDelta(-1);
 					if (zpKeyPushed(ZPK_GroupUp))
-						core->setTileGroup((core->tileGroup() + 1) % 13);
+						zpGroupDelta(+1);
 					if (zpKeyPushed(ZPK_GroupDown))
-						core->setTileGroup((core->tileGroup() + 12) % 13);
+						zpGroupDelta(-1);
 					if (udriver->AsyncListener.isKeyPushed(NLMISC::KeyLBRACKET))
 						paintListener.DisplaceIndex = (paintListener.DisplaceIndex + 15) % 16;
 					if (udriver->AsyncListener.isKeyPushed(NLMISC::KeyRBRACKET))
@@ -1631,26 +1792,19 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 					if (zpKeyPushed(ZPK_ToggleColorBrushMode))
 						core->setBrushMaskMode(!core->brushMaskMode());
 					if (zpKeyPushed(ZPK_LockBorders))
-						core->setLockBorders(!core->lockBordersOn());
+						zpToggleLockBorders();
 					if (!paintListener.Pressed && !editorUI.wantsMouse())
 						paintListener.updateHover();
 					else if (editorUI.wantsMouse())
 						paintListener.HaveHover = false;
-					// Fill0-3: fill the patch under the cursor per mode (the rotation applies to
-					// the tile fill, like the plugin's four fill modes)
+					// Fill0-3 through the shared fill handler
 					for (int fillRot = 0; fillRot < 4; ++fillRot)
 					{
-						if (!zpKeyPushed((TPainterKey)(ZPK_Fill0 + fillRot))) continue;
-						if (!paintListener.HaveHover || core->zoneFrozen(paintListener.HoverZone)) continue;
-						std::string err;
-						uint patch = (uint)(paintListener.HoverTile / ZP_NUM_TILE_SEL);
-						if (paintListener.Mode == CPaintMouseListener::ModeTile)
-							core->opFillTile(paintListener.HoverZone, patch, paintListener.CurTileSet, fillRot, paintListener.Mode256, err);
-						else if (paintListener.Mode == CPaintMouseListener::ModeColor)
-							core->opFillColor(paintListener.HoverZone, patch, paintListener.BrushColor, 256, err);
-						else
-							core->opFillDisplace(paintListener.HoverZone, patch, paintListener.DisplaceIndex, err);
+						if (zpKeyPushed((TPainterKey)(ZPK_Fill0 + fillRot)))
+							zpFill(fillRot);
 					}
+					// Push live state into the NLGUI bridge for two-way panel sync
+					zpFillBridgeState(paintBridge);
 				}
 
 				// Zoom keys (plugin myThread zoom: ZoomSpeed * dt along the view direction;
@@ -1732,6 +1886,8 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 		}
 
 		editorUI.shutdown();
+		ZPUI::setPaintUIBridge(NULL);
+		g_PaintCtx = SPaintCtx();
 		mouseListener.removeFromServer(udriver->EventServer);
 		udriver->EventServer.removeListener(NLMISC::EventDestroyWindowId, &closeListener);
 		udriver->EventServer.removeListener(NLMISC::EventCloseWindowId, &closeListener);
@@ -1751,6 +1907,8 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 	}
 	catch (const NL3D::EDru &e)
 	{
+		ZPUI::setPaintUIBridge(NULL);
+		g_PaintCtx = SPaintCtx();
 		g_ViewerAsync = NULL;
 		if (udriver) { udriver->release(); delete udriver; }
 		fprintf(stderr, "ERROR: 3D driver: %s\n", e.what());
@@ -1758,6 +1916,8 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 	}
 	catch (const NLMISC::Exception &e)
 	{
+		ZPUI::setPaintUIBridge(NULL);
+		g_PaintCtx = SPaintCtx();
 		g_ViewerAsync = NULL;
 		if (udriver) { udriver->release(); delete udriver; }
 		fprintf(stderr, "ERROR: %s\n", e.what());
@@ -2008,7 +2168,7 @@ int main(int argc, char **argv)
 	if (viewerMode)
 	{
 		std::string screenshotPath = args.haveLongArg("screenshot") ? args.getLongArg("screenshot")[0] : std::string();
-		rc = runViewer(zones, bank, &core, lm, screenshotPath, fontPath, scriptPath);
+		rc = runViewer(zones, bank, &core, lm, screenshotPath, fontPath, scriptPath, savePath);
 	}
 	else if (!scriptPath.empty())
 	{
