@@ -30,6 +30,7 @@
 #ifdef __EMSCRIPTEN__
 #	include <emscripten.h>
 #	include <emscripten/html5.h>
+#	include "emscripten_event_emitter.h"
 #elif defined(NL_OS_MAC)
 #	import "mac/cocoa_window_delegate.h"
 #	import "mac/cocoa_application_delegate.h"
@@ -642,6 +643,15 @@ bool CDriverGL3::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool r
 		// Mark window as valid so isActive() returns true
 		_win = 1;
 		_WindowVisible = true;
+
+		// Release old emitters and hook mouse/keyboard/touch input on the canvas
+		while (_EventEmitter.getNumEmitters() != 0)
+		{
+			_EventEmitter.removeEmitter(_EventEmitter.getEmitter(_EventEmitter.getNumEmitters() - 1));
+		}
+		NLMISC::CEmscriptenEventEmitter *ee = new NLMISC::CEmscriptenEventEmitter();
+		ee->init(NL_EMSCRIPTEN_CANVAS);
+		_EventEmitter.addEmitter(ee, true /*must delete*/);
 	}
 
 #elif defined(NL_OS_WINDOWS)
