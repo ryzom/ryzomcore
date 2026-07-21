@@ -362,6 +362,7 @@ int main(int argc, char **argv)
 	xmlFiles.push_back("widgets_sample.xml");
 	xmlFiles.push_back("main_sample.xml");
 	xmlFiles.push_back("minesweeper_sample.xml");
+	xmlFiles.push_back("console_sample.xml");
 
 	nlinfo("Atlas loaded");
 
