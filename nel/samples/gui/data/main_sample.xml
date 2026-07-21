@@ -149,8 +149,7 @@
 	</group>
 </group>
 <tree node="sliders"></tree>
-<!-- no gt() in the base expression set: >200 becomes not(not(max(x-200, 0))) -->
-<link expr="not(not(max(sub(@UI:TEMP:SLIDERH, 200), 0)))" target="ui:sample:sliders:content:warn:active" />
+<link expr="gt(@UI:TEMP:SLIDERH, 200)" target="ui:sample:sliders:content:warn:active" />
 
 <!-- ********************** -->
 <!-- * Edit boxes (layer0) * -->
