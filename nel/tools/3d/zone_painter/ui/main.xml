@@ -1,0 +1,37 @@
+<interface_config>
+
+<!-- Master group: viewer is 800x600 (matches kMainWidth/kMainHeight). -->
+<root id="zp" x="0" y="0" w="800" h="600" active="true" />
+
+<define id="case_normal" value="0" />
+<define id="case_lower" value="1" />
+<define id="case_upper" value="2" />
+
+<!-- Mouse pointer (textures from the interface atlas) -->
+<group id="pointer_layer" posref="BL BL" x="0" y="0" sizeref="wh" w="0" h="0" active="true">
+	<view type="generic_pointer" id="pointer" posref="BL BL" x="0" y="0" w="32" h="32"
+		color="255 255 255 255"
+		tx_default="curs_default.tga"
+		tx_move_window="curs_default.tga"
+		tx_colpick="curs_pick.tga"
+		tx_pan="curs_pan.tga"
+		tx_can_pan="curs_can_pan.tga" />
+</group>
+
+<!-- Painter panel: top-right corner so the terrain baseline stays visible in screenshots. -->
+<group type="container" id="painter" w="200" pop_min_w="180" pop_max_w="280" h="96" pop_min_h="80" pop_max_h="400"
+	title="Painter" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
+	title_bar_open="false" open_button="false" right_button="true" lockable="false" openable="false"
+	opened="true" movable="true" active="true" x="592" y="592">
+	<group id="header_closed" x="0" y="0" h="12" posref="TL TL"></group>
+	<group id="header_opened" x="0" y="0" w="0" h="16" posref="TL TL"></group>
+	<group id="content" x="0" y="0" posref="TL TL" w="0" h="0">
+		<view type="text" id="hint" posref="TL TL" x="12" y="-10" fontsize="12" shadow="true"
+			global_color="false" color="255 255 255 220" hardtext="F10 toggle UI" />
+		<view type="text" id="status" posparent="hint" posref="BL TL" y="-6" fontsize="12" shadow="true"
+			global_color="false" color="180 220 255 255" hardtext="NLGUI embedded" />
+	</group>
+</group>
+<tree node="painter"></tree>
+
+</interface_config>

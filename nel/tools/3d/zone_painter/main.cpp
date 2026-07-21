@@ -181,6 +181,9 @@ using namespace MAXMATH;
 // headers must not share a TU with the patch_eval implementation unit above).
 #include "context_display.h"
 
+// In-engine NLGUI shell (own TU — must not pull patch_eval / SCENELIB into editor_ui.cpp).
+#include "editor_ui.h"
+
 static bool g_verbose = false;
 // Result of the viewer script pre-pass (propagated as the viewer exit code for scripted gates)
 static int g_ViewerScriptRc = 0;
@@ -245,6 +248,7 @@ enum TPainterKey
 	ZPK_ZoomOut,
 	ZPK_GetState,
 	ZPK_ResetPatch,
+	ZPK_ToggleUI,
 	ZPK_KeyCounter
 };
 
@@ -281,6 +285,7 @@ static const char *kPainterKeysName[ZPK_KeyCounter] =
 	"ZoomOut",
 	"GetState",
 	"ResetPatch",
+	"ToggleUI",
 };
 
 // Tool defaults: the pre-cfg hardcoded viewer keys stay on their keys (T/C/D, +/-, B, G, F);
@@ -317,6 +322,7 @@ static uint g_PainterKeys[ZPK_KeyCounter] =
 	0,                    // ZoomOut
 	0,                    // GetState
 	0,                    // ResetPatch
+	NLMISC::KeyF10,       // ToggleUI (NLGUI panel visibility)
 };
 
 // paint_ui.cpp light/zoom variable defaults (LoadVarCfg overrides; identical to the previous
@@ -1119,6 +1125,7 @@ public:
 	ZPPAINT::CPaintCore *Core;
 	NL3D::CEvent3dMouseListener *Nav;
 	NL3D::CCamera *Camera; // unwrapped from UScene::getCam()
+	ZPUI::CEditorUI *EditorUI;
 	NL3D::CViewport Viewport;
 	int CurTileSet;
 	bool Mode256;
@@ -1136,10 +1143,12 @@ public:
 	uint BrushHardness, BrushOpacity; // 0-255
 	uint DisplaceIndex;               // 0-15
 
-	CPaintMouseListener() : Core(NULL), Nav(NULL), Camera(NULL), CurTileSet(0), Mode256(false), Pressed(false),
+	CPaintMouseListener() : Core(NULL), Nav(NULL), Camera(NULL), EditorUI(NULL), CurTileSet(0), Mode256(false), Pressed(false),
 		MouseX(0.5f), MouseY(0.5f), HaveHover(false), HoverZone(0), HoverTile(-1), StrokeZone(0), StrokeTile(-1),
 		Mode(ModeTile), BrushColor(255, 255, 255, 255), BrushRadius(8.f), BrushHardness(128), BrushOpacity(255),
 		DisplaceIndex(0) { }
+
+	bool guiWantsMouse() const { return EditorUI && EditorUI->wantsMouse(); }
 
 	// One paint action at the current hover (shared by click and drag)
 	void paintAtHover()
@@ -1181,6 +1190,27 @@ public:
 	virtual void operator()(const NLMISC::CEvent &event)
 	{
 		if (!Core) return;
+		// Keyboard undo/redo always works; mouse is consumed when over the GUI.
+		if (event == NLMISC::EventKeyDownId)
+		{
+			NLMISC::CEventKeyDown *keyDown = (NLMISC::CEventKeyDown *)&event;
+			if (keyDown->FirstTime && (keyDown->Button & NLMISC::ctrlKeyButton))
+			{
+				if (keyDown->Key == NLMISC::KeyZ) Core->opUndo();
+				if (keyDown->Key == NLMISC::KeyE) Core->opRedo();
+			}
+			return;
+		}
+		if (guiWantsMouse())
+		{
+			// Abort an in-progress stroke if the pointer enters a GUI window mid-drag
+			if (Pressed && (event == NLMISC::EventMouseUpId || event == NLMISC::EventMouseMoveId))
+			{
+				Pressed = false;
+				Core->endStroke();
+			}
+			return;
+		}
 		if (event == NLMISC::EventMouseDownId)
 		{
 			NLMISC::CEventMouse *mouse = (NLMISC::CEventMouse *)&event;
@@ -1275,15 +1305,6 @@ public:
 						StrokeTile = HoverTile;
 					}
 				}
-			}
-		}
-		else if (event == NLMISC::EventKeyDownId)
-		{
-			NLMISC::CEventKeyDown *keyDown = (NLMISC::CEventKeyDown *)&event;
-			if (keyDown->FirstTime && (keyDown->Button & NLMISC::ctrlKeyButton))
-			{
-				if (keyDown->Key == NLMISC::KeyZ) Core->opUndo();
-				if (keyDown->Key == NLMISC::KeyE) Core->opRedo();
 			}
 		}
 	}
@@ -1394,6 +1415,11 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 		camera->setMatrix(camMat);
 		camera->setPerspective(75.f * (float)NLMISC::Pi / 180.f, 1.33f, 0.1f, 10000.f);
 
+		// In-engine NLGUI shell (optional: soft-fails if atlas/XML missing; keyboard+HUD remain).
+		// Init before paint/nav listeners so GUI event routing is registered first.
+		ZPUI::CEditorUI editorUI;
+		editorUI.init(udriver, fontPath);
+
 		// Mouse listener: edit3d orbiting the landscape center (the plugin's hotspot was the
 		// selection center).
 		NL3D::CEvent3dMouseListener mouseListener;
@@ -1416,6 +1442,7 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 			paintListener.Core = core;
 			paintListener.Nav = &mouseListener;
 			paintListener.Camera = camera;
+			paintListener.EditorUI = &editorUI;
 			paintListener.Viewport = viewport;
 			paintListener.BrushColor = g_ViewerBrushColor;
 			paintListener.BrushRadius = g_ViewerBrushRadius;
@@ -1488,13 +1515,16 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 
 		if (!screenshotPath.empty())
 		{
-			// One refined frame -> .tga -> exit (the visual gate).
+			// One refined frame -> .tga -> exit (the visual gate). GUI is drawn into this
+			// frame so M1b+ screenshots show the Painter panel over the terrain.
 			udriver->clearBuffers(NLMISC::CRGBA(90, 90, 90));
 			uscene->render();
 			theLand->Landscape.setRefineMode(false);
 			theLand->Landscape.refineAll(pos);
 			udriver->clearBuffers(NLMISC::CRGBA(90, 90, 90));
 			uscene->render();
+			editorUI.update();
+			editorUI.draw();
 			udriver->swapBuffers();
 			NLMISC::CBitmap btm;
 			driver->getBuffer(btm);
@@ -1516,12 +1546,20 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 			NLMISC::TTime lastFrameTime = NLMISC::CTime::getLocalTime();
 			do
 			{
+				// Snapshot the orbit matrix so GUI mouse capture can discard nav deltas
+				NLMISC::CMatrix navMatBefore = mouseListener.getViewMatrix();
 				udriver->EventServer.pump();
+				if (editorUI.wantsMouse())
+					mouseListener.setMatrix(navMatBefore);
 
 				// Frame dt (the plugin's zoom timing)
 				NLMISC::TTime nowTime = NLMISC::CTime::getLocalTime();
 				float dt = (float)(nowTime - lastFrameTime) / 1000.f;
 				lastFrameTime = nowTime;
+
+				// F10 / ToggleUI: show/hide the NLGUI shell (keys still work either way)
+				if (zpKeyPushed(ZPK_ToggleUI))
+					editorUI.toggleVisible();
 
 				// Tile set selection keys (plugin: the texture panel; here PgUp/PgDn + 0-9) and
 				// displace index [ ] stay hardcoded; the plugin-era actions ride the rebindable
@@ -1594,8 +1632,10 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 						core->setBrushMaskMode(!core->brushMaskMode());
 					if (zpKeyPushed(ZPK_LockBorders))
 						core->setLockBorders(!core->lockBordersOn());
-					if (!paintListener.Pressed)
+					if (!paintListener.Pressed && !editorUI.wantsMouse())
 						paintListener.updateHover();
+					else if (editorUI.wantsMouse())
+						paintListener.HaveHover = false;
 					// Fill0-3: fill the patch under the cursor per mode (the rotation applies to
 					// the tile fill, like the plugin's four fill modes)
 					for (int fillRot = 0; fillRot < 4; ++fillRot)
@@ -1681,12 +1721,17 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 						                     paintListener.BrushColor, viewport);
 				}
 
+				// NLGUI over the 3D scene (after scene/HUD, before swap)
+				editorUI.update();
+				editorUI.draw();
+
 				udriver->swapBuffers();
 				zpViewerScreenshot(driver, udriver->AsyncListener); // F12 convenience
 			}
 			while (!udriver->AsyncListener.isKeyPushed(NLMISC::KeyESCAPE) && closeListener.WindowActive && udriver->isActive());
 		}
 
+		editorUI.shutdown();
 		mouseListener.removeFromServer(udriver->EventServer);
 		udriver->EventServer.removeListener(NLMISC::EventDestroyWindowId, &closeListener);
 		udriver->EventServer.removeListener(NLMISC::EventCloseWindowId, &closeListener);
@@ -1740,6 +1785,7 @@ int main(int argc, char **argv)
 	                    "  Select Pick ToggleColor BackgroundColor ToggleArrows Zouille AutomaticLighting GetState ResetPatch.\n"
 	                    "  vars cfg (--vars-cfg, else ./zone_painter_vars.cfg): LightDirection {x,y,z}, LightDiffuse {r,g,b},\n"
 	                    "  LightAmbiant {r,g,b}, LightMultiply, ZoomSpeed (the plugin LoadVarCfg set).\n"
+	                    "  ToggleUI (default F10: show/hide the in-engine NLGUI panel).\n"
 	                    "Fixed viewer keys: PgUp/PgDn + 0-9 tile set, [ ] displace index, Ctrl+Z/Ctrl+E undo/redo,\n"
 	                    "F12 screenshot, ESC quit.");
 	args.addAdditionalArg("input.max", "Input .max scene");
