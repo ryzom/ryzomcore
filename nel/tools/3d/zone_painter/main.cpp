@@ -187,6 +187,9 @@ using namespace MAXMATH;
 // Workspace fingerprint / discovery / startup.cfg (own TU — NLMISC only).
 #include "workspace_discovery.h"
 
+// Startup screens A/B/C (own TU — NLGUI + discovery; no patch_eval / SCENELIB).
+#include "startup_ui.h"
+
 static bool g_verbose = false;
 // Result of the viewer script pre-pass (propagated as the viewer exit code for scripted gates)
 static int g_ViewerScriptRc = 0;
@@ -1601,6 +1604,8 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 			editorUI->init(udriver, fontPath);
 		// Ensure the Painter panel is active for the viewer session (startup screens hide it).
 		editorUI->setVisible(true);
+		ZPUI::startupHideAllScreens();
+		ZPUI::startupShowPainter(true);
 
 		// Mouse listener: edit3d orbiting the landscape center (the plugin's hotspot was the
 		// selection center).
@@ -1881,13 +1886,19 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 				{
 					static const char *modeNames[3] = { "TILE", "COLOR", "DISPLACE" };
 					textContext.setColor(NLMISC::CRGBA(255, 255, 255));
-					textContext.printfAt(0.01f, 0.98f, "[%s] TileSet %d/%u '%s'  %s  brush %u  group %u  undo %u%s",
-					                     modeNames[paintListener.Mode % 3],
-					                     paintListener.CurTileSet, core->tileSetCount(),
-					                     core->tileSetName(paintListener.CurTileSet).c_str(),
-					                     paintListener.Mode256 ? "256" : "128", core->brushSize(),
-					                     core->tileGroup(), core->undoDepth(),
-					                     core->lockBordersOn() ? "  LOCK" : "");
+					// HUD matches the Painter panel: 1-based set index, (unnamed) for empty names
+					{
+						std::string tsName = core->tileSetName(paintListener.CurTileSet);
+						if (tsName.empty()) tsName = "(unnamed)";
+						const uint tsCount = core->tileSetCount();
+						const int tsOneBased = tsCount ? (paintListener.CurTileSet + 1) : 0;
+						textContext.printfAt(0.01f, 0.98f, "[%s] TileSet %d/%u %s  %s  brush %u  group %u  undo %u%s",
+						                     modeNames[paintListener.Mode % 3],
+						                     tsOneBased, tsCount, tsName.c_str(),
+						                     paintListener.Mode256 ? "256" : "128", core->brushSize(),
+						                     core->tileGroup(), core->undoDepth(),
+						                     core->lockBordersOn() ? "  LOCK" : "");
+					}
 					if (paintListener.Mode == CPaintMouseListener::ModeColor)
 						textContext.printfAt(0.01f, 0.955f, "color %02x%02x%02x  radius %.1fm  hardness %u  opacity %u  mask %s",
 						                     paintListener.BrushColor.R, paintListener.BrushColor.G, paintListener.BrushColor.B,
@@ -2085,7 +2096,14 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	// ---- Startup flow: discover + optional --startup-auto (UI screens land in M2b) ----
+	// Shared UDriver + EditorUI for the startup screens and (optionally) the viewer.
+	// Owned here when the startup path opens a window; runViewer receives them and must
+	// not release them. Legacy .max path still lets runViewer create its own driver.
+	NL3D::UDriver *sharedDriver = NULL;
+	ZPUI::CEditorUI *sharedEditorUI = NULL;
+	bool ownsSharedHost = false;
+
+	// ---- Startup flow: discover + auto / interactive screens ----
 	if (startupPath)
 	{
 		ZPWS::SStartupCfg scfg;
@@ -2107,50 +2125,112 @@ int main(int argc, char **argv)
 				       worlds[i].BankOk ? "" : " (no bank)");
 		}
 
-		if (args.haveLongArg("startup-screenshot"))
+		ZPUI::SStartupSelection selection;
+		bool haveSelection = false;
+
+		if (args.haveLongArg("startup-auto"))
 		{
-			// M2b will render Screen A/C; M2a only needs the flag recognized.
-			fprintf(stderr, "ERROR: --startup-screenshot requires the startup screens (M2b+)\n");
-			return 1;
+			// Thin wrapper: same selectAuto the buttons call (no UI required)
+			std::string err;
+			if (!ZPUI::startupSelectWorldZone(worlds, args.getLongArg("startup-auto")[0], selection, err))
+			{
+				fprintf(stderr, "ERROR: %s\n", err.c_str());
+				return 1;
+			}
+			haveSelection = true;
+			printf("startup-auto: world '%s' (%s) zone '%s'\n",
+			       selection.World.WorldName.c_str(),
+			       selection.World.Kind == ZPWS::Ecosystem ? "ecosystem" : "continent",
+			       selection.Zone.Basename.c_str());
+		}
+		else
+		{
+			// Interactive (or --startup-screenshot): one shared UDriver + EditorUI
+			std::string fontPathEarly = args.haveLongArg("font") ? args.getLongArg("font")[0] : std::string();
+			if (fontPathEarly.empty())
+			{
+				const char *sysFont = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
+				if (NLMISC::CFile::fileExists(sysFont)) fontPathEarly = sysFont;
+			}
+			NL3D::CScene::registerBasics();
+			sharedDriver = NL3D::UDriver::createDriver(0, false, 0);
+			if (!sharedDriver)
+			{
+				fprintf(stderr, "ERROR: UDriver::createDriver failed (no 3D driver?)\n");
+				return 1;
+			}
+			if (!sharedDriver->setDisplay(NL3D::UDriver::CMode(kMainWidth, kMainHeight, 32, true)))
+			{
+				fprintf(stderr, "ERROR: UDriver::setDisplay failed\n");
+				delete sharedDriver;
+				return 1;
+			}
+			sharedEditorUI = new ZPUI::CEditorUI();
+			if (!sharedEditorUI->init(sharedDriver, fontPathEarly))
+			{
+				fprintf(stderr, "ERROR: editor UI init failed for startup screens\n");
+				sharedDriver->release();
+				delete sharedDriver;
+				delete sharedEditorUI;
+				return 1;
+			}
+			ownsSharedHost = true;
+
+			const bool folderBrowserEnabled = true; // Screen C wired in M2c; Browse enabled
+			std::string shotPath = args.haveLongArg("startup-screenshot")
+				? args.getLongArg("startup-screenshot")[0] : std::string();
+			ZPUI::EStartupResult sr = ZPUI::runStartupFlow(
+				sharedDriver, sharedEditorUI, worlds, shotPath, selection, folderBrowserEnabled,
+				seedFolder);
+
+			if (sr == ZPUI::StartupScreenshotDone)
+			{
+				sharedEditorUI->shutdown();
+				delete sharedEditorUI;
+				sharedDriver->release();
+				delete sharedDriver;
+				return 0;
+			}
+			if (sr == ZPUI::StartupError)
+			{
+				sharedEditorUI->shutdown();
+				delete sharedEditorUI;
+				sharedDriver->release();
+				delete sharedDriver;
+				return 1;
+			}
+			if (sr == ZPUI::StartupQuit)
+			{
+				sharedEditorUI->shutdown();
+				delete sharedEditorUI;
+				sharedDriver->release();
+				delete sharedDriver;
+				return 0;
+			}
+			// StartupOpenZone
+			haveSelection = true;
 		}
 
-		if (!args.haveLongArg("startup-auto"))
+		if (!haveSelection)
 		{
-			// M2a: auto path only. Interactive world select arrives with Screens A+B (M2b).
-			fprintf(stderr, "ERROR: interactive startup UI not yet available; use --startup-auto \"workspace/zone\"\n");
-			fprintf(stderr, "  (discovered %u workspace(s)%s)\n", (uint)worlds.size(),
-			        worlds.empty() ? "; pass a graphics folder or run from a NeL root tree" : "");
+			fprintf(stderr, "ERROR: startup flow produced no zone selection\n");
 			return 1;
 		}
-
-		std::string autoPath = args.getLongArg("startup-auto")[0];
-		ZPWS::SWorldEntry world;
-		ZPWS::SZoneEntry zone;
-		std::string err;
-		if (!ZPWS::selectAuto(worlds, autoPath, world, zone, err))
-		{
-			fprintf(stderr, "ERROR: %s\n", err.c_str());
-			return 1;
-		}
-		printf("startup-auto: world '%s' (%s) zone '%s'\n",
-		       world.WorldName.c_str(),
-		       world.Kind == ZPWS::Ecosystem ? "ecosystem" : "continent",
-		       zone.Basename.c_str());
 
 		// Configure exactly what the CLI flags would have: bank, search path, input
-		input = zone.MaxPath;
+		input = selection.Zone.MaxPath;
 		if (!args.haveLongArg("bank"))
 		{
-			g_BankPath = world.BankPath;
+			g_BankPath = selection.World.BankPath;
 			g_ForceBankRecursive = true;
 		}
-		g_StartupTexturePath = world.TextureSearchPath;
+		g_StartupTexturePath = selection.World.TextureSearchPath;
 
 		// Remember successful world entry
 		{
 			ZPWS::SStartupCfg save;
-			save.LastGraphicsFolder = world.GraphicsRoot;
-			save.LastWorld = world.WorldName;
+			save.LastGraphicsFolder = selection.World.GraphicsRoot;
+			save.LastWorld = selection.World.WorldName;
 			ZPWS::saveStartupCfg(save);
 		}
 	}
@@ -2342,11 +2422,29 @@ int main(int argc, char **argv)
 	if (viewerMode)
 	{
 		std::string screenshotPath = args.haveLongArg("screenshot") ? args.getLongArg("screenshot")[0] : std::string();
-		rc = runViewer(zones, bank, &core, lm, screenshotPath, fontPath, scriptPath, savePath);
+		rc = runViewer(zones, bank, &core, lm, screenshotPath, fontPath, scriptPath, savePath,
+		               sharedDriver, sharedEditorUI);
 	}
 	else if (!scriptPath.empty())
 	{
 		rc = runPaintScript(core, scriptPath);
+	}
+
+	// Tear down the shared startup host after the viewer (viewer does not own it)
+	if (ownsSharedHost)
+	{
+		if (sharedEditorUI)
+		{
+			sharedEditorUI->shutdown();
+			delete sharedEditorUI;
+			sharedEditorUI = NULL;
+		}
+		if (sharedDriver)
+		{
+			sharedDriver->release();
+			delete sharedDriver;
+			sharedDriver = NULL;
+		}
 	}
 
 	if (doDumpRpo)
