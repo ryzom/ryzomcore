@@ -1,7 +1,7 @@
 <interface_config>
 
-<!-- Master group of the sample interface -->
-<root id="sample" x="0" y="0" w="800" h="600" active="true" />
+<!-- Master group of the sample interface (showcase layout targets 1600x1200) -->
+<root id="sample" x="0" y="0" w="1600" h="1200" active="true" />
 
 <define id="case_normal" value="0" />
 <define id="case_lower" value="1" />
@@ -54,7 +54,8 @@
 
 	<param name="frame_covers_open_list" value="false" />
 
-	<param name="title_font_size" value="11" />
+	<!-- Match client layer0 metrics: 13pt title fills the 24px w_header bar -->
+	<param name="title_font_size" value="13" />
 	<param name="title_offset_x" value="8" />
 	<param name="title_offset_y" value="-7" />
 	<param name="title_offset_openable_x" value="20" />

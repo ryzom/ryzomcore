@@ -241,11 +241,8 @@ int main(int argc, char **argv)
 	if (!args.parse(argc, argv))
 		return EXIT_FAILURE;
 
-#ifdef __EMSCRIPTEN__
-	uint width = 1600, height = 1200; // the showcase layout targets this size
-#else
-	uint width = 1024, height = 768;
-#endif
+	// Showcase window positions are laid out for 1600x1200
+	uint width = 1600, height = 1200;
 	if (args.haveLongArg("size"))
 	{
 		std::string s = args.getLongArg("size").front();
