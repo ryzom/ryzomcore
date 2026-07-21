@@ -399,6 +399,7 @@ int main(int argc, char **argv)
 	args.addArg("", "screenshot", "file.png", "Save a screenshot and exit");
 	args.addArg("", "frames", "count", "Frame to capture for --screenshot (default 8)");
 	args.addArg("", "size", "WxH", "Window size (default 1280x720)");
+	args.addArg("", "xml", "file.xml", "Extra interface XML file(s) to parse after the sample set");
 	args.addArg("", "font-probe", "", "Print renderer font metrics per size and exit");
 	if (!args.parse(argc, argv))
 		return EXIT_FAILURE;
@@ -509,6 +510,12 @@ int main(int argc, char **argv)
 	xmlFiles.push_back("console_sample.xml");
 	xmlFiles.push_back("inventory_sample.xml");
 	xmlFiles.push_back("help_sample.xml");
+	if (args.haveLongArg("xml"))
+	{
+		std::vector<std::string> extra = args.getLongArg("xml");
+		for (uint i = 0; i < extra.size(); ++i)
+			xmlFiles.push_back(extra[i]);
+	}
 
 	nlinfo("Atlas loaded");
 
