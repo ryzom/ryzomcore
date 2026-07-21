@@ -135,6 +135,31 @@ void saveStartupCfg(const SStartupCfg &cfg); // best-effort
 // True when path looks like a .max file (by extension; may not exist yet)
 bool isMaxPath(const std::string &path);
 
+// ---------------------------------------------------------------------------------------------
+// Continent zone grid names (ligo convention)
+//
+// Reference: nel/tools/3d/zone_lib/zone_utility.cpp getZoneNameByCoord / getZoneCoordByName,
+// and nel/tools/3d/tga_cut/tga_cut.cpp getZoneNameFromXY:
+//   basename = "<row>_<L1><L2>" where row is a decimal Y index and
+//   col = (L1-'A')*26 + (L2-'A')  (two uppercase letters, A..Z).
+// Example: 3_AR -> row=3, col=(0)*26+17 = 17.
+
+/** Parse a continent zone basename; returns false if not <row>_<AA>. */
+bool parseContinentZoneName(const std::string &basename, int &row, int &col);
+
+/** Build basename from grid coords (matches getZoneNameByCoord). */
+std::string continentZoneName(int row, int col);
+
+/**
+ * List the 8-ring neighbor .max files of a continent zone that exist under world.MaxDir.
+ * Does not include the center zone. Empty for ecosystems or unparseable names.
+ */
+void listContinentNeighbors(const SWorldEntry &world, const SZoneEntry &zone,
+                            std::vector<SZoneEntry> &out);
+
+/** Count of existing 8-ring neighbors (convenience for Screen B subtitles). */
+uint countContinentNeighbors(const SWorldEntry &world, const SZoneEntry &zone);
+
 } // namespace ZPWS
 
 #endif // ZONE_PAINTER_WORKSPACE_DISCOVERY_H

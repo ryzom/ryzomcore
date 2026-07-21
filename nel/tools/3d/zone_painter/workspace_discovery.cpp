@@ -542,6 +542,86 @@ void saveStartupCfg(const SStartupCfg &cfg)
 	fclose(f);
 }
 
+// ---------------------------------------------------------------------------------------------
+// Continent zone grid (ligo getZoneNameByCoord / getZoneNameFromXY convention)
+
+bool parseContinentZoneName(const std::string &basename, int &row, int &col)
+{
+	row = 0;
+	col = 0;
+	std::string::size_type us = basename.find('_');
+	if (us == std::string::npos || us == 0 || us + 3 != basename.size())
+		return false;
+	// row digits
+	for (size_t i = 0; i < us; ++i)
+		if (basename[i] < '0' || basename[i] > '9')
+			return false;
+	if (!NLMISC::fromString(basename.substr(0, us), row))
+		return false;
+	// two letters
+	char a = basename[us + 1];
+	char b = basename[us + 2];
+	if (a >= 'a' && a <= 'z') a = char(a - 'a' + 'A');
+	if (b >= 'a' && b <= 'z') b = char(b - 'a' + 'A');
+	if (a < 'A' || a > 'Z' || b < 'A' || b > 'Z')
+		return false;
+	col = (int)(a - 'A') * 26 + (int)(b - 'A');
+	return true;
+}
+
+std::string continentZoneName(int row, int col)
+{
+	// getZoneNameByCoord / getLettersFromNum: col -> two letters
+	if (row < 0 || col < 0 || col >= 26 * 26)
+		return std::string();
+	char L1 = char('A' + (col / 26));
+	char L2 = char('A' + (col % 26));
+	return NLMISC::toString("%d_%c%c", row, L1, L2);
+}
+
+void listContinentNeighbors(const SWorldEntry &world, const SZoneEntry &zone,
+                            std::vector<SZoneEntry> &out)
+{
+	out.clear();
+	if (world.Kind != Continent || world.MaxDir.empty())
+		return;
+	int row = 0, col = 0;
+	if (!parseContinentZoneName(zone.Basename, row, col))
+		return;
+	// 8-ring: row±1 × col±1 excluding center
+	for (int dr = -1; dr <= 1; ++dr)
+	{
+		for (int dc = -1; dc <= 1; ++dc)
+		{
+			if (dr == 0 && dc == 0)
+				continue;
+			int nr = row + dr;
+			int nc = col + dc;
+			if (nr < 0 || nc < 0)
+				continue;
+			std::string name = continentZoneName(nr, nc);
+			if (name.empty())
+				continue;
+			std::string path = world.MaxDir + "/" + name + ".max";
+			if (!CFile::fileExists(path))
+				continue;
+			SZoneEntry z;
+			z.MaxPath = path;
+			z.Basename = name;
+			z.Group = "other";
+			z.ThumbnailPath.clear();
+			out.push_back(z);
+		}
+	}
+}
+
+uint countContinentNeighbors(const SWorldEntry &world, const SZoneEntry &zone)
+{
+	std::vector<SZoneEntry> n;
+	listContinentNeighbors(world, zone, n);
+	return (uint)n.size();
+}
+
 } // namespace ZPWS
 
 /* end of file */

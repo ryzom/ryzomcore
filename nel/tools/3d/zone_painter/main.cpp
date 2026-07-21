@@ -209,6 +209,13 @@ static std::string g_StartupTexturePath;
 static bool g_ForceBankRecursive = false;
 // Startup interactive (or startup-auto) without --save: panel Save opens the modal
 static bool g_InteractiveSave = false;
+// Continent neighbor loading (M3b): default on for startup/auto, off for legacy .max path
+static bool g_LoadNeighbors = false;
+// World/zone selected via startup (for neighbor discovery); empty on legacy path
+static ZPWS::SWorldEntry g_StartupWorld;
+static ZPWS::SZoneEntry g_StartupZone;
+// Neighbor .max scenes kept alive for the session (texture resolution / node pointers)
+static std::vector<PMAXLOAD::SLoadedMax *> g_NeighborScenes;
 // Shipped brush mask cycle (viewer SelectColorBrush key; 0 = none, i = g_MaskFiles[i-1])
 static std::vector<std::string> g_MaskFiles;
 static int g_MaskCycle = 0;
@@ -526,11 +533,20 @@ struct SPaintZone
 	SEvalPatch Ep; // evaluated topology, kept for the paint core's metaTile graph (P3b)
 };
 
-static bool buildPaintZones(CScene &scene, std::vector<SPaintZone> &zones)
+/**
+ * Append paint zones from one Max scene.
+ * zoneIdOffset: first zone id for this file (must not collide with existing zones).
+ * forceFrozen: true for continent neighbor files (same semantics as 0x0976 boundary
+ *   reference zones: landscape + weld + metaTile graph, never paint targets, carriers
+ *   never rewritten because AnyUnfrozen stays false).
+ */
+static bool buildPaintZones(CScene &scene, std::vector<SPaintZone> &zones,
+                            uint zoneIdOffset, bool forceFrozen)
 {
 	std::vector<SZoneNode> nodes;
 	collectZoneNodes(scene, nodes);
 	SNodeTMCache tmCache;
+	bool any = false;
 	for (size_t i = 0; i < nodes.size(); ++i)
 	{
 		CNodeImpl *node = nodes[i].Node;
@@ -546,21 +562,39 @@ static bool buildPaintZones(CScene &scene, std::vector<SPaintZone> &zones)
 		Matrix3M objectTM = getObjectTM(node, tmCache);
 		SPaintZone pz;
 		pz.Node = node;
-		pz.Frozen = nodes[i].Frozen;
+		// Neighbor files have no 0x0976 marker; forceFrozen marks them read-only context.
+		pz.Frozen = forceFrozen || nodes[i].Frozen;
 		pz.Name = name;
-		pz.ZoneId = (uint)i;
-		if (!buildPatchInfo(ep, objectTM, (int)i, pz.Patches, err))
+		pz.ZoneId = zoneIdOffset + (uint)i;
+		if (!buildPatchInfo(ep, objectTM, (int)pz.ZoneId, pz.Patches, err))
 		{
 			fprintf(stderr, "WARNING: node '%s': %s (zone skipped)\n", name.c_str(), err.c_str());
 			continue;
 		}
 		pz.Ep = ep;
 		zones.push_back(pz);
+		any = true;
 		if (g_verbose)
 			printf("zone %u '%s'%s: %u patches\n", pz.ZoneId, pz.Name.c_str(),
 			       pz.Frozen ? " FROZEN" : "", (uint)pz.Patches.size());
 	}
-	return !zones.empty();
+	return any;
+}
+
+/** Next free zone id base after the highest already-assigned id (leave a gap of 1). */
+static uint nextZoneIdBase(const std::vector<SPaintZone> &zones)
+{
+	uint maxId = 0;
+	bool any = false;
+	for (size_t i = 0; i < zones.size(); ++i)
+	{
+		if (!any || zones[i].ZoneId > maxId)
+		{
+			maxId = zones[i].ZoneId;
+			any = true;
+		}
+	}
+	return any ? (maxId + 1) : 0;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -1690,11 +1724,15 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 			fprintf(stderr, "ERROR: runViewer: external driver is null\n");
 			return 1;
 		}
-		// Window title: zone_painter — <file> when a zone is open
+		// Window title: zone_painter — <editable zone> (+N neighbors when loaded)
 		{
 			std::string title = "zone_painter";
-			if (!g_InputPath.empty())
+			if (!g_StartupZone.Basename.empty())
+				title += " — " + g_StartupZone.Basename;
+			else if (!g_InputPath.empty())
 				title += " — " + NLMISC::CFile::getFilename(g_InputPath);
+			if (!g_NeighborScenes.empty())
+				title += NLMISC::toString(" (+%u neighbors)", (uint)g_NeighborScenes.size());
 			udriver->setWindowTitle(ucstring(title));
 		}
 		uscene = udriver->createScene(false);
@@ -2211,6 +2249,10 @@ int main(int argc, char **argv)
 	            "Headless: after --paint-script, invoke the same panel save path (zpSaveTo / zpSaveOverwrite). "
 	            "copy writes <basename>_painted.max under --out's directory (or cwd). overwrite first copies the "
 	            "input .max into that directory and operates on the copy (never the real source). Requires --paint-script.");
+	args.addArg("", "neighbors", "on|off",
+	            "Continent startup: load 8-ring neighbor .max files as frozen read-only context "
+	            "(default on for interactive/startup-auto, off for the legacy .max path). "
+	            "Also accepted as ?neighbors=off on --startup-auto.");
 	if (!args.parse(argc, argv))
 		return 1;
 
@@ -2293,20 +2335,67 @@ int main(int argc, char **argv)
 		ZPUI::SStartupSelection selection;
 		bool haveSelection = false;
 
+		// Neighbors default ON for the startup path (CLI --neighbors overrides; query can too)
+		g_LoadNeighbors = true;
+		if (args.haveLongArg("neighbors"))
+		{
+			std::string n = NLMISC::toLowerAscii(args.getLongArg("neighbors")[0]);
+			if (n == "off" || n == "0" || n == "false" || n == "no")
+				g_LoadNeighbors = false;
+			else if (n == "on" || n == "1" || n == "true" || n == "yes")
+				g_LoadNeighbors = true;
+			else
+			{
+				fprintf(stderr, "ERROR: --neighbors expects on|off, got '%s'\n",
+				        args.getLongArg("neighbors")[0].c_str());
+				return 1;
+			}
+		}
+
 		if (args.haveLongArg("startup-auto"))
 		{
-			// Thin wrapper: same selectAuto the buttons call (no UI required)
+			// Thin wrapper: same selectAuto the buttons call (no UI required).
+			// Optional query: workspace/zone?neighbors=off
+			std::string autoArg = args.getLongArg("startup-auto")[0];
+			std::string autoPath = autoArg;
+			std::string::size_type qpos = autoArg.find('?');
+			if (qpos != std::string::npos)
+			{
+				autoPath = autoArg.substr(0, qpos);
+				std::string query = autoArg.substr(qpos + 1);
+				// Parse simple key=value pairs
+				std::string::size_type start = 0;
+				while (start < query.size())
+				{
+					std::string::size_type amp = query.find('&', start);
+					std::string pair = query.substr(start, amp == std::string::npos ? std::string::npos : amp - start);
+					std::string::size_type eq = pair.find('=');
+					std::string key = eq == std::string::npos ? pair : pair.substr(0, eq);
+					std::string val = eq == std::string::npos ? std::string() : pair.substr(eq + 1);
+					if (NLMISC::toLowerAscii(key) == "neighbors")
+					{
+						std::string v = NLMISC::toLowerAscii(val);
+						if (v == "off" || v == "0" || v == "false" || v == "no")
+							g_LoadNeighbors = false;
+						else if (v == "on" || v == "1" || v == "true" || v == "yes")
+							g_LoadNeighbors = true;
+					}
+					if (amp == std::string::npos) break;
+					start = amp + 1;
+				}
+			}
 			std::string err;
-			if (!ZPUI::startupSelectWorldZone(worlds, args.getLongArg("startup-auto")[0], selection, err))
+			if (!ZPUI::startupSelectWorldZone(worlds, autoPath, selection, err))
 			{
 				fprintf(stderr, "ERROR: %s\n", err.c_str());
 				return 1;
 			}
 			haveSelection = true;
-			printf("startup-auto: world '%s' (%s) zone '%s'\n",
+			printf("startup-auto: world '%s' (%s) zone '%s' neighbors=%s\n",
 			       selection.World.WorldName.c_str(),
 			       selection.World.Kind == ZPWS::Ecosystem ? "ecosystem" : "continent",
-			       selection.Zone.Basename.c_str());
+			       selection.Zone.Basename.c_str(),
+			       g_LoadNeighbors ? "on" : "off");
 		}
 		else
 		{
@@ -2390,6 +2479,8 @@ int main(int argc, char **argv)
 			g_ForceBankRecursive = true;
 		}
 		g_StartupTexturePath = selection.World.TextureSearchPath;
+		g_StartupWorld = selection.World;
+		g_StartupZone = selection.Zone;
 
 		// Interactive save modal when no --save was given (with --save: one-click direct)
 		g_InteractiveSave = !args.haveLongArg("save");
@@ -2400,6 +2491,17 @@ int main(int argc, char **argv)
 			save.LastGraphicsFolder = selection.World.GraphicsRoot;
 			save.LastWorld = selection.World.WorldName;
 			ZPWS::saveStartupCfg(save);
+		}
+	}
+	else
+	{
+		// Legacy .max path: neighbors off unless explicitly enabled
+		g_LoadNeighbors = false;
+		if (args.haveLongArg("neighbors"))
+		{
+			std::string n = NLMISC::toLowerAscii(args.getLongArg("neighbors")[0]);
+			if (n == "on" || n == "1" || n == "true" || n == "yes")
+				g_LoadNeighbors = true; // no-op without a continent world context
 		}
 	}
 
@@ -2505,14 +2607,63 @@ int main(int argc, char **argv)
 	if (!PMAXLOAD::loadMaxFile(input, lm)) { fprintf(stderr, "ERROR: cannot load %s\n", input.c_str()); return 1; }
 
 	std::vector<SPaintZone> zones;
-	bool haveZones = buildPaintZones(*lm.Scene, zones);
+	// Editable file first (zone ids from 0); only its carriers are write targets.
+	bool haveZones = buildPaintZones(*lm.Scene, zones, /*zoneIdOffset=*/0, /*forceFrozen=*/false);
 	if (!haveZones && !nullEdit)
 	{
 		fprintf(stderr, "ERROR: no displayable RklPatch zone in %s\n", input.c_str());
 		return 1;
 	}
+
+	// Continent neighbors as frozen read-only context (M3b). Ecosystems stay single-file.
+	// Neighbors join landscape, cross-zone weld, and metaTile graph; carriers never written
+	// (forceFrozen => AnyUnfrozen stays false; writeBack skips frozen-only carriers).
+	if (g_LoadNeighbors && g_StartupWorld.Kind == ZPWS::Continent && !g_StartupZone.Basename.empty())
+	{
+		std::vector<ZPWS::SZoneEntry> neigh;
+		ZPWS::listContinentNeighbors(g_StartupWorld, g_StartupZone, neigh);
+		printf("neighbors: loading %u of 8-ring around '%s'\n",
+		       (uint)neigh.size(), g_StartupZone.Basename.c_str());
+		for (size_t ni = 0; ni < neigh.size(); ++ni)
+		{
+			PMAXLOAD::SLoadedMax *nlm = new PMAXLOAD::SLoadedMax();
+			if (!PMAXLOAD::loadMaxFile(neigh[ni].MaxPath, *nlm))
+			{
+				fprintf(stderr, "WARNING: neighbor load failed: %s\n", neigh[ni].MaxPath.c_str());
+				delete nlm;
+				continue;
+			}
+			uint base = nextZoneIdBase(zones);
+			// Use a sparse base so node-index gaps in a file never collide
+			if (base < (uint)((ni + 1) * 1000))
+				base = (uint)((ni + 1) * 1000);
+			bool ok = buildPaintZones(*nlm->Scene, zones, base, /*forceFrozen=*/true);
+			if (!ok)
+			{
+				fprintf(stderr, "WARNING: neighbor has no paint zones: %s\n", neigh[ni].MaxPath.c_str());
+				delete nlm;
+				continue;
+			}
+			g_NeighborScenes.push_back(nlm);
+			printf("  neighbor '%s' zoneIdBase=%u FROZEN\n", neigh[ni].Basename.c_str(), base);
+		}
+	}
+
 	uint welds = weldPaintZones(zones);
-	if (g_verbose) printf("weld: %u cross-zone edges\n", welds);
+	// Count bound edges / cross-zone binds for verification
+	uint totalBound = 0, totalCross = 0;
+	for (size_t i = 0; i < zones.size(); ++i)
+	for (size_t p = 0; p < zones[i].Patches.size(); ++p)
+	for (uint e = 0; e < 4; ++e)
+	{
+		const NL3D::CPatchInfo::CBindInfo &b = zones[i].Patches[p].BindEdges[e];
+		if (b.NPatchs == 0) continue;
+		++totalBound;
+		if (b.ZoneId != zones[i].ZoneId) ++totalCross;
+	}
+	printf("weld: %u cross-zone edges; binds: %u total, %u cross-zone; zones: %u (%u neighbor files)\n",
+	       welds, totalBound, totalCross, (uint)zones.size(), (uint)g_NeighborScenes.size());
+	if (g_verbose) printf("weld detail: %u welds applied this session\n", welds);
 
 	if (args.haveLongArg("dump-zones"))
 		return dumpZones(zones, welds, args.getLongArg("dump-zones")[0]);
@@ -2636,8 +2787,22 @@ int main(int argc, char **argv)
 	{
 		printf("STORED-FLAGS includeMeshes=%d preloadTiles=%d\n",
 		       core.storedIncludeMeshes(), core.storedPreloadTiles());
+		// Sanity: frozen-only carriers are excluded from write-back (neighbor files)
+		{
+			uint frozenZones = 0, unfrozenZones = 0;
+			for (size_t i = 0; i < zones.size(); ++i)
+			{
+				if (zones[i].Frozen) ++frozenZones;
+				else ++unfrozenZones;
+			}
+			printf("zones: %u unfrozen (editable) + %u frozen (neighbors/boundary refs)\n",
+			       unfrozenZones, frozenZones);
+		}
 		core.dumpRpo(stdout);
 	}
+
+	// Free neighbor scenes at session end (after any save that only mutates the editable scene)
+	// — kept alive through paint/viewer so node pointers stay valid.
 
 	// --panel-save-test: after the script, invoke the same zpSaveTo / zpSaveOverwrite the
 	// interactive modal uses (headless, no driver). Never writes into the source graphics tree.
@@ -2729,9 +2894,15 @@ int main(int argc, char **argv)
 	{
 		std::string err;
 		if (!core.writeBack(err)) { fprintf(stderr, "ERROR: write-back: %s\n", err.c_str()); return 1; }
+		// Write-back only mutates carriers with AnyUnfrozen; neighbor (forceFrozen) carriers
+		// are never rewritten — only the editable file's Scene is saved.
 		int saveRc = saveWholeFile(input, savePath, *lm.Scene, false);
 		if (saveRc) return saveRc;
 	}
+
+	for (size_t i = 0; i < g_NeighborScenes.size(); ++i)
+		delete g_NeighborScenes[i];
+	g_NeighborScenes.clear();
 
 	return rc;
 }

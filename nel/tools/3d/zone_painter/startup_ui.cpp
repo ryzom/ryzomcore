@@ -309,7 +309,15 @@ static void populateZoneList()
 		char idbuf[32];
 		snprintf(idbuf, sizeof(idbuf), "z%u", (uint)i);
 		p.push_back(std::make_pair(std::string("id"), std::string(idbuf)));
-		p.push_back(std::make_pair(std::string("title"), z.Basename));
+		// Continent: show how many 8-ring neighbors will load as read-only context
+		std::string title = z.Basename;
+		if (world.Kind == ZPWS::Continent)
+		{
+			uint n = ZPWS::countContinentNeighbors(world, z);
+			if (n > 0)
+				title += NLMISC::toString("  (+ %u neighbors)", n);
+		}
+		p.push_back(std::make_pair(std::string("title"), title));
 		char idxbuf[32];
 		snprintf(idxbuf, sizeof(idxbuf), "%d", (int)i);
 		p.push_back(std::make_pair(std::string("idx"), std::string(idxbuf)));
