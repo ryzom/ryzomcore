@@ -56,6 +56,13 @@
 // (empty node chunk 0x0976) are boundary-reference display like the exporter's boundary
 // bricks: they participate in the landscape, the weld and the metaTile graph but are never
 // paint targets and their carrier blobs are never rewritten.
+//
+// ui M4c: self-instance weld creates self-adjacency in the metaTile graph (primary edge
+// stitches to the instance's opposite edge; instance tiles map to the same pristine slots as
+// the primary's opposite edge). Transition paint adjacent to that seam propagates across it
+// through the ordinary PropagateBorder recursion (visited is SPaintTile*, not carrier tile
+// identity). Verified on lacustre/material-fond?instances=2x1: recursion terminates, checkseams
+// stays 0 illegal on primary and instance; no paint_core gate required.
 
 /*
  * Copyright (C) 2026  by authors
@@ -2422,7 +2429,14 @@ int main(int argc, char **argv)
 	args.addArg("", "font", "file.ttf", "HUD font for the viewer (default: a system font when present)");
 	args.addArg("", "verbose", "", "Verbose output");
 	// Test plumbing (thin wrappers over the same selection functions the UI buttons call)
-	args.addArg("", "startup-auto", "workspace/zone", "Skip startup UI: select workspace+zone by name and open the viewer");
+	args.addArg("", "startup-auto", "workspace/zone[?query]",
+	            "Skip startup UI: select workspace+zone by name and open the viewer. "
+	            "Optional ?query after the zone: ampersand-separated key=value pairs. "
+	            "Supported keys: neighbors=on|off (continents; default on), "
+	            "instances=NxM (ecosystem self-instances; see --instances). "
+	            "Examples: lacustre/material-fond?instances=2x2  "
+	            "fyros_newbieland/15_AE?neighbors=off  "
+	            "lacustre/material-fond?instances=2x1&neighbors=off");
 	args.addArg("", "startup-screenshot", "out.tga", "Render one frame of the first startup screen and exit (M2b+)");
 	args.addArg("", "startup-screen", "world",
 	            "With --startup-screenshot: pre-select this world (name or graphics-root basename) and capture Screen B "
@@ -2439,8 +2453,10 @@ int main(int argc, char **argv)
 	            "Ecosystem startup: self-instance the brick on an NxM layout grid (supported: 1x1, "
 	            "2x1, 1x2, 2x2, 3x3). Primary zone at the origin; other cells are display duplicates "
 	            "sharing one paint carrier (stroke on any instance appears on all; edges weld to the "
-	            "brick's opposite edge). Footprint step = geometry AABB rounded up to --cellsize. "
-	            "Ecosystem-only (error on continents). Also ?instances=2x2 on --startup-auto. "
+	            "brick's opposite edge — self-adjacency for the transition solver). "
+	            "Footprint step = geometry AABB rounded up to --cellsize (ecosystem default 160). "
+	            "Ecosystem-only (error on continents). Same as ?instances=NxM on --startup-auto "
+	            "(query overrides CLI when both are given). "
 	            "Ignored with a warning on the legacy .max path.");
 	if (!args.parse(argc, argv))
 		return 1;
