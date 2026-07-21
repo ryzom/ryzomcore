@@ -793,7 +793,7 @@ void loadRawMaterial( UFormElm &root, CStaticItem *item, const CSheetId &sheetId
 			item->Mp->Ecosystem = ECOSYSTEM::stringToEcosystem( val );
 		
 		if(mp->getValueByName( val, "HarvestSkill"))
-			item->Skill = SKILLS::toSkill( val );
+			item->Mp->HarvestSkill = SKILLS::toSkill( val );
 		
 		if (mp->getValueByName( val, "Category"))
 			item->Mp->Category = MP_CATEGORY::stringToMPCategory( val );
