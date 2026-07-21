@@ -200,6 +200,63 @@ public:
 };
 REGISTER_ACTION_HANDLER(CAHLua, "lua");
 
+// The widget manager keeps the pointer position up to date, but nothing in
+// NLGUI feeds it the mouse button state — the client mirrors its driver
+// events into the pointer in its input handler; do the same here so data
+// scripts can poll drag gestures
+class CPointerButtonListener : public NLMISC::IEventListener
+{
+	uint _DownButtons;
+	virtual void operator()(const NLMISC::CEvent &event)
+	{
+		CViewPointerBase *pointer = CWidgetManager::getInstance()->getPointer();
+		if (!pointer)
+			return;
+		if (event == EventMouseDownId)
+		{
+			CEventMouseDown &em = (CEventMouseDown &)event;
+			_DownButtons |= em.Button & (leftButton | middleButton | rightButton);
+			pointer->setPointerDown(em.Button == leftButton);
+			pointer->setPointerMiddleDown(em.Button == middleButton);
+			pointer->setPointerRightDown(em.Button == rightButton);
+		}
+		else if (event == EventMouseUpId)
+		{
+			CEventMouseUp &em = (CEventMouseUp &)event;
+			_DownButtons &= ~(em.Button & (leftButton | middleButton | rightButton));
+			if (_DownButtons == 0)
+			{
+				pointer->setPointerDown(false);
+				pointer->setPointerMiddleDown(false);
+				pointer->setPointerRightDown(false);
+			}
+		}
+		else if (event == EventSetFocusId)
+		{
+			_DownButtons = 0;
+			pointer->setPointerDown(false);
+			pointer->setPointerMiddleDown(false);
+			pointer->setPointerRightDown(false);
+		}
+	}
+
+public:
+	CPointerButtonListener() : _DownButtons(0) {}
+	void addToServer(CEventServer &server)
+	{
+		server.addListener(EventMouseDownId, this);
+		server.addListener(EventMouseUpId, this);
+		server.addListener(EventSetFocusId, this);
+	}
+	void removeFromServer(CEventServer &server)
+	{
+		server.removeListener(EventMouseDownId, this);
+		server.removeListener(EventMouseUpId, this);
+		server.removeListener(EventSetFocusId, this);
+	}
+};
+CPointerButtonListener *s_PointerButtonListener = NULL;
+
 // NLGUI's Lua bindings leave widget lookup to the embedder (the client
 // registers its own getUI); data scripts need it to reach widgets by id
 int luaGetUI(CLuaState &ls)
@@ -214,6 +271,33 @@ int luaGetUI(CLuaState &ls)
 	else
 		ls.pushNil();
 	return 1;
+}
+
+// Mouse polling for data scripts, same names and signatures as the client
+// exposes (getMousePos/getMouseDown); coordinates are interface pixels,
+// the space widget x_real/y_real reflected properties live in
+int luaGetMousePos(CLuaState &ls)
+{
+	sint32 x = -1, y = -1;
+	CViewPointerBase *pointer = CWidgetManager::getInstance()->getPointer();
+	if (pointer)
+		pointer->getPointerPos(x, y);
+	ls.push(x);
+	ls.push(y);
+	return 2;
+}
+
+int luaGetMouseDown(CLuaState &ls)
+{
+	bool down = false;
+	sint32 x = -1, y = -1;
+	CViewPointerBase *pointer = CWidgetManager::getInstance()->getPointer();
+	if (pointer)
+		down = pointer->getPointerDown(x, y);
+	ls.push(down);
+	ls.push(x);
+	ls.push(y);
+	return 3;
 }
 
 void renderOneFrame()
@@ -355,6 +439,8 @@ int main(int argc, char **argv)
 	IParser *parser = CWidgetManager::getInstance()->getParser();
 	parser->initLUA();
 	CLuaManager::getInstance().getLuaState()->registerFunc("getUI", luaGetUI);
+	CLuaManager::getInstance().getLuaState()->registerFunc("getMousePos", luaGetMousePos);
+	CLuaManager::getInstance().getLuaState()->registerFunc("getMouseDown", luaGetMouseDown);
 
 	// Parse the sample interface definition
 	std::vector<std::string> xmlFiles;
@@ -363,6 +449,7 @@ int main(int argc, char **argv)
 	xmlFiles.push_back("main_sample.xml");
 	xmlFiles.push_back("minesweeper_sample.xml");
 	xmlFiles.push_back("console_sample.xml");
+	xmlFiles.push_back("inventory_sample.xml");
 
 	nlinfo("Atlas loaded");
 
@@ -392,6 +479,8 @@ int main(int argc, char **argv)
 	// Route driver events into the widget manager
 	s_GuiListener = new CEventListener();
 	s_GuiListener->addToServer(&s_Driver->EventServer);
+	s_PointerButtonListener = new CPointerButtonListener();
+	s_PointerButtonListener->addToServer(s_Driver->EventServer);
 	s_Driver->AsyncListener.addToServer(s_Driver->EventServer);
 
 	nlinfo("Entering main loop");
@@ -411,6 +500,8 @@ int main(int argc, char **argv)
 
 	s_GuiListener->removeFromServer();
 	delete s_GuiListener;
+	s_PointerButtonListener->removeFromServer(s_Driver->EventServer);
+	delete s_PointerButtonListener;
 
 	CWidgetManager::getInstance()->reset();
 	CWidgetManager::getInstance()->getParser()->removeAll();
