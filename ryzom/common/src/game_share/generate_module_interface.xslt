@@ -988,7 +988,9 @@ namespace <xsl:value-of select="@name"/>
 		<xsl:for-each select="property[@name != $uniqueId and @db_col]">
 			<xsl:choose>
 				<xsl:when test="@enum='true' or @enum='smart'">
-		qs += "'"+_<xsl:value-of select="@name"/><xsl:text>.toString()+"'";
+		qs += _<xsl:value-of select="@name"/>.isValid()<xsl:text>
+			? "'"+_</xsl:text><xsl:value-of select="@name"/><xsl:text>.toString()+"'"
+			: "DEFAULT(</xsl:text><xsl:value-of select="@db_col"/><xsl:text>)";
 </xsl:text>
 				</xsl:when>
 				<xsl:when test="@date='true'">
@@ -1011,7 +1013,9 @@ namespace <xsl:value-of select="@name"/>
 		<xsl:for-each select="property[@db_col]">
 			<xsl:choose>
 				<xsl:when test="@enum='true' or @enum='smart'">
-		qs += "'"+_<xsl:value-of select="@name"/><xsl:text>.toString()+"'";
+		qs += _<xsl:value-of select="@name"/>.isValid()<xsl:text>
+			? "'"+_</xsl:text><xsl:value-of select="@name"/><xsl:text>.toString()+"'"
+			: "DEFAULT(</xsl:text><xsl:value-of select="@db_col"/><xsl:text>)";
 </xsl:text>
 				</xsl:when>
 				<xsl:when test="@date='true'">
@@ -1037,7 +1041,9 @@ namespace <xsl:value-of select="@name"/>
 		<xsl:for-each select="property[@db_col]">
 			<xsl:choose>
 				<xsl:when test="@enum='true' or @enum='smart'">
-			qs += "'"+_<xsl:value-of select="@name"/>.toString()+"'";
+			qs += _<xsl:value-of select="@name"/>.isValid()<xsl:text>
+				? "'"+_</xsl:text><xsl:value-of select="@name"/><xsl:text>.toString()+"'"
+				: "DEFAULT(</xsl:text><xsl:value-of select="@db_col"/><xsl:text>)";</xsl:text>
 				</xsl:when>
 				<xsl:when test="@date='true'">
 			qs += "'"+MSW::encodeDate(_<xsl:value-of select="@name"/>)<xsl:text>+"'";
@@ -1062,7 +1068,9 @@ namespace <xsl:value-of select="@name"/>
 		<xsl:for-each select="property[@name != $uniqueId and @db_col]">
 			<xsl:choose>
 				<xsl:when test="@enum='true' or @enum='smart'">
-		qs += "<xsl:value-of select="@db_col"/> = '"+_<xsl:value-of select="@name"/><xsl:text>.toString()+"'";
+		qs += "<xsl:value-of select="@db_col"/> = " + (_<xsl:value-of select="@name"/>.isValid()<xsl:text>
+			? "'"+_</xsl:text><xsl:value-of select="@name"/><xsl:text>.toString()+"'"
+			: "DEFAULT(</xsl:text><xsl:value-of select="@db_col"/><xsl:text>)");
 </xsl:text>
 				</xsl:when>
 				<xsl:when test="@date='true'">
@@ -1085,7 +1093,9 @@ namespace <xsl:value-of select="@name"/>
 		<xsl:for-each select="property[@db_col]">
 			<xsl:choose>
 				<xsl:when test="@enum='true' or @enum='smart'">
-		qs += "<xsl:value-of select="@db_col"/> = '"+_<xsl:value-of select="@name"/><xsl:text>.toString()+"'";
+		qs += "<xsl:value-of select="@db_col"/> = " + (_<xsl:value-of select="@name"/>.isValid()<xsl:text>
+			? "'"+_</xsl:text><xsl:value-of select="@name"/><xsl:text>.toString()+"'"
+			: "DEFAULT(</xsl:text><xsl:value-of select="@db_col"/><xsl:text>)");
 </xsl:text>
 				</xsl:when>
 				<xsl:when test="@date='true'">
