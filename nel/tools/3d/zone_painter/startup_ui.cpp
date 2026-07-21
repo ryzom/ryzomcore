@@ -29,6 +29,7 @@
 
 #include "startup_ui.h"
 #include "editor_ui.h"
+#include "max_thumbnail.h"
 
 #include <algorithm>
 #include <climits>
@@ -265,17 +266,37 @@ static void populateWorldList()
 		          toString("%u workspace(s)", (uint)worlds.size()));
 }
 
-static std::string thumbTextureName(const ZPWS::SZoneEntry &z)
+/**
+ * Resolve browser thumbnail texture name for a zone (M5b).
+ * Priority: embedded .max OLE thumb (cached tga) → zonebitmaps png → none (empty).
+ * Adds the cache/png directory to the search path when needed.
+ */
+static std::string thumbTextureName(ZPWS::SZoneEntry &z)
 {
-	if (z.ThumbnailPath.empty())
-		return std::string("w_box_blank.tga"); // atlas placeholder when no thumb
-	// Ensure the directory is on the search path so the basename resolves
-	std::string dir = CFile::getPath(z.ThumbnailPath);
-	if (!dir.empty())
-		CPath::addSearchPath(dir, false, false);
-	// png→tga remap is set in editor_ui init; request as .tga name
-	std::string base = CFile::getFilenameWithoutExtension(z.ThumbnailPath);
-	return base + ".tga";
+	// Prefer embedded OLE thumbnail (lazy extract into thumbcache/)
+	if (!z.MaxPath.empty())
+	{
+		std::string cached;
+		if (ZPTHUMB::ensureCachedThumbnail(z.MaxPath, cached) && !cached.empty())
+		{
+			z.ThumbnailPath = cached;
+			std::string dir = CFile::getPath(cached);
+			if (!dir.empty())
+				CPath::addSearchPath(dir, false, false);
+			return CFile::getFilenameWithoutExtension(cached) + ".tga";
+		}
+	}
+	// Fall back to zonebitmaps png (ecosystem)
+	if (!z.ThumbnailPath.empty() && CFile::fileExists(z.ThumbnailPath))
+	{
+		std::string dir = CFile::getPath(z.ThumbnailPath);
+		if (!dir.empty())
+			CPath::addSearchPath(dir, false, false);
+		// png→tga remap is set in editor_ui init
+		return CFile::getFilenameWithoutExtension(z.ThumbnailPath) + ".tga";
+	}
+	z.ThumbnailPath.clear();
+	return std::string(); // caller hides the thumb slot
 }
 
 /** Parent a template instance under an existing group at an absolute offset (continent board). */
@@ -446,13 +467,14 @@ static void populateContinentGrid(const ZPWS::SWorldEntry &world)
 		p.push_back(std::make_pair(std::string("id"), std::string(idbuf)));
 		p.push_back(std::make_pair(std::string("title"), z.Basename));
 		p.push_back(std::make_pair(std::string("idx"), std::string(idxbuf)));
-		// M5b fills real thumbs; M5a leaves the bitmap inactive via empty texture name
-		p.push_back(std::make_pair(std::string("thumb"), std::string("w_box_blank.tga")));
+		// Mutable zone entry for cache path write-back
+		std::string thumbTex = thumbTextureName(s_Sess.Zones[zi]);
+		p.push_back(std::make_pair(std::string("thumb"), thumbTex.empty() ? std::string("w_box_blank.tga") : thumbTex));
 		CInterfaceGroup *cell = spawnUnder(board, "zp_board_cell", p, x, y, kCell, kCell);
 		if (cell)
 		{
 			if (CViewBitmap *thumb = dynamic_cast<CViewBitmap *>(cell->getView("thumb")))
-				thumb->setActive(false); // no empty dark square until a real thumb exists (M5b)
+				thumb->setActive(!thumbTex.empty());
 		}
 	}
 
@@ -586,7 +608,7 @@ static void populateZoneList()
 	std::string lastGroup;
 	for (size_t i = 0; i < s_Sess.Zones.size(); ++i)
 	{
-		const ZPWS::SZoneEntry &z = s_Sess.Zones[i];
+		ZPWS::SZoneEntry &z = s_Sess.Zones[i];
 		if (z.Group != lastGroup)
 		{
 			lastGroup = z.Group;
@@ -599,6 +621,9 @@ static void populateZoneList()
 			{
 				if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(row->getCtrl("btn")))
 					btn->setFrozen(true);
+				// Group headers never show a thumb slot
+				if (CViewBitmap *thumb = dynamic_cast<CViewBitmap *>(row->getView("thumb")))
+					thumb->setActive(false);
 			}
 		}
 
@@ -610,8 +635,24 @@ static void populateZoneList()
 		char idxbuf[32];
 		snprintf(idxbuf, sizeof(idxbuf), "%d", (int)i);
 		p.push_back(std::make_pair(std::string("idx"), std::string(idxbuf)));
-		p.push_back(std::make_pair(std::string("thumb"), thumbTextureName(z)));
-		spawnRow("zp_zone_row", "ui:zp:zone_browser:content:list_scroll:text_list", p);
+		std::string thumbTex = thumbTextureName(z);
+		p.push_back(std::make_pair(std::string("thumb"), thumbTex.empty() ? std::string("w_box_blank.tga") : thumbTex));
+		if (CInterfaceGroup *row = spawnRow("zp_zone_row", "ui:zp:zone_browser:content:list_scroll:text_list", p))
+		{
+			if (CViewBitmap *thumb = dynamic_cast<CViewBitmap *>(row->getView("thumb")))
+				thumb->setActive(!thumbTex.empty());
+			// When no thumb, tuck the open button to the left edge (no empty dark square)
+			if (thumbTex.empty())
+			{
+				if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(row->getCtrl("btn")))
+				{
+					btn->setParentPos(row);
+					btn->setPosRef(Hotspot_ML);
+					btn->setParentPosRef(Hotspot_ML);
+					btn->setX(4);
+				}
+			}
+		}
 	}
 }
 

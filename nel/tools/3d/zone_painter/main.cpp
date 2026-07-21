@@ -124,6 +124,7 @@
 #include <nel/3d/zone_symmetrisation.h>
 
 #include "../pipeline_max/storage_ole.h"
+#include "max_thumbnail.h"
 
 #include <algorithm>
 #include <cmath>
@@ -2458,10 +2459,66 @@ int main(int argc, char **argv)
 	            "Ecosystem-only (error on continents). Same as ?instances=NxM on --startup-auto "
 	            "(query overrides CLI when both are given). "
 	            "Ignored with a warning on the legacy .max path.");
+	args.addArg("", "thumb-extract", "out.tga",
+	            "Headless: extract OLE PIDSI_THUMBNAIL from the input .max into out.tga (and refresh thumbcache); exit");
+	args.addArg("", "thumb-roundtrip-test", "file.max",
+	            "Headless: parse and re-encode SummaryInformation with the UNCHANGED thumbnail; "
+	            "exit 0 only if the stream is byte-identical (M5c property-set gate)");
 	if (!args.parse(argc, argv))
 		return 1;
 
 	g_verbose = args.haveLongArg("verbose");
+
+	// Hidden M5b/M5c thumbnail tools (no driver / scene required)
+	if (args.haveLongArg("thumb-roundtrip-test"))
+	{
+		std::string f = args.getLongArg("thumb-roundtrip-test")[0];
+		std::string err;
+		if (ZPTHUMB::thumbRoundtripIdentical(f, err))
+		{
+			printf("OK thumb-roundtrip: byte-identical SummaryInformation -> %s\n", f.c_str());
+			return 0;
+		}
+		fprintf(stderr, "FAIL thumb-roundtrip: %s (%s)\n", err.c_str(), f.c_str());
+		return 1;
+	}
+	if (args.haveLongArg("thumb-extract"))
+	{
+		if (!args.haveAdditionalArg("input"))
+		{
+			fprintf(stderr, "ERROR: --thumb-extract needs an input .max\n");
+			return 1;
+		}
+		std::string maxPath = args.getAdditionalArg("input")[0];
+		std::string outTga = args.getLongArg("thumb-extract")[0];
+		NLMISC::CBitmap bmp;
+		if (!ZPTHUMB::extractThumbnailBitmap(maxPath, bmp))
+		{
+			fprintf(stderr, "FAIL thumb-extract: no thumbnail in %s\n", maxPath.c_str());
+			return 1;
+		}
+		try
+		{
+			NLMISC::COFile of(outTga);
+			if (!bmp.writeTGA(of, 32, false))
+			{
+				fprintf(stderr, "FAIL thumb-extract: writeTGA %s\n", outTga.c_str());
+				return 1;
+			}
+		}
+		catch (...)
+		{
+			fprintf(stderr, "FAIL thumb-extract: cannot write %s\n", outTga.c_str());
+			return 1;
+		}
+		std::string cached;
+		ZPTHUMB::ensureCachedThumbnail(maxPath, cached);
+		printf("OK thumb-extract: %ux%u -> %s (cache %s) mtime=%u\n",
+		       bmp.getWidth(), bmp.getHeight(), outTga.c_str(),
+		       cached.empty() ? "(none)" : cached.c_str(),
+		       NLMISC::CFile::getFileModificationDate(maxPath));
+		return 0;
+	}
 
 	// Resolve the first positional: .max => legacy, directory => startup seed, absent => startup.
 	std::string input;

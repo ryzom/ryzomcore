@@ -32,11 +32,12 @@
 	</group>
 </template>
 
-<!-- Zone row (ecosystem list): optional 32x32 thumb + open button. idx is zones[] index. -->
+<!-- Zone row (ecosystem list): optional 32x32 thumb + open button. idx is zones[] index.
+     Code deactivates thumb when no embedded/.png preview exists (no empty dark square). -->
 <template name="zp_zone_row" keep="true" id="" title="" idx="0" thumb="">
 	<group id="#id" w="560" h="36">
 		<view type="bitmap" id="thumb" posref="ML ML" x="4" y="0" w="32" h="32" scale="true"
-			texture="#thumb" global_color="false" color="255 255 255 255" />
+			texture="#thumb" global_color="false" color="255 255 255 255" active="false" />
 		<ctrl style="text_button_16_name" id="btn" posparent="thumb" posref="MR ML" x="8" y="0" w="500"
 			hardtext="#title" onclick_l="zp_select_zone" params_l="#idx" />
 	</group>
