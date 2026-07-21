@@ -49,7 +49,9 @@
 // Scene assembly replicates the painter plugin: per RklPatch node evalNodePatch + object TM
 // at t=0 -> buildPatchInfo in authored space (NO symmetry/rotate — the painting scene shows
 // what the artist authored; zoneId = node collection index like the plugin's vectMesh index)
-// -> cross-zone open-edge weld (the paint.cpp WELD_THRESOLD port, session-only, never
+// -> optional ecosystem self-instances (ui M4a: --instances / ?instances=NxM display clones
+// at whole-footprint offsets, same Node pointers so paint_core shares one carrier; ids from
+// 10000) -> cross-zone open-edge weld (the paint.cpp WELD_THRESOLD port, session-only, never
 // persisted) -> CZone::build -> CZoneCornerSmoother -> Landscape.addZone. Frozen nodes
 // (empty node chunk 0x0976) are boundary-reference display like the exporter's boundary
 // bricks: they participate in the landscape, the weld and the metaTile graph but are never
@@ -216,6 +218,14 @@ static ZPWS::SWorldEntry g_StartupWorld;
 static ZPWS::SZoneEntry g_StartupZone;
 // Neighbor .max scenes kept alive for the session (texture resolution / node pointers)
 static std::vector<PMAXLOAD::SLoadedMax *> g_NeighborScenes;
+// Ecosystem self-instances (ui M4a): layout grid Cols x Rows (1x1 = off). Primary zones sit
+// at the layout origin; remaining cells are display-level duplicates sharing the same Node
+// pointers (paint_core carrier keying) with geometry translated by whole-footprint steps.
+// Instance zone ids use the sparse base kInstanceZoneIdBase (CBorderVertex ids are uint16).
+static const uint kInstanceZoneIdBase = 10000;
+static uint g_InstanceCols = 1;
+static uint g_InstanceRows = 1;
+static uint g_InstanceCount = 1; // Cols*Rows when active; 1 when off
 // Shipped brush mask cycle (viewer SelectColorBrush key; 0 = none, i = g_MaskFiles[i-1])
 static std::vector<std::string> g_MaskFiles;
 static int g_MaskCycle = 0;
@@ -595,6 +605,169 @@ static uint nextZoneIdBase(const std::vector<SPaintZone> &zones)
 		}
 	}
 	return any ? (maxId + 1) : 0;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Ecosystem brick self-instances (ui M4a): display-level duplicates at whole-footprint offsets.
+//
+// NL3D landscape zones are baked in world space, so an "instance" is another CZone with its own
+// zoneId whose patch geometry is the primary's geometry + offset, while paint state stays on
+// the shared carrier (same Node pointer → same leaf/rpo key in paint_core).
+//
+// Footprint step: geometry AABB in X/Y of the primary zones, each axis rounded UP to the
+// nearest multiple of --cellsize (default 100). A 1x1 brick self-tiles at cellsize spacing;
+// a wider brick at its rounded W×H. Mask-accurate / L-shaped footprints are a later refinement
+// (AABB rectangle only this milestone). Layouts: 2x1, 1x2, 2x2, 3x3 (primary at origin).
+
+/** Parse "NxM" (case-insensitive x). Fills cols/rows; 1x1 is valid (no-op). */
+static bool parseInstanceLayout(const std::string &s, uint &cols, uint &rows, std::string &err)
+{
+	cols = 1;
+	rows = 1;
+	std::string t = NLMISC::toLowerAscii(s);
+	std::string::size_type x = t.find('x');
+	if (x == std::string::npos || x == 0 || x + 1 >= t.size())
+	{
+		err = "instances layout expects NxM (e.g. 2x2), got '" + s + "'";
+		return false;
+	}
+	if (!NLMISC::fromString(t.substr(0, x), cols) || !NLMISC::fromString(t.substr(x + 1), rows)
+	    || cols < 1 || rows < 1 || cols > 8 || rows > 8)
+	{
+		err = "instances layout out of range or unparseable: '" + s + "' (use 1..8 per axis)";
+		return false;
+	}
+	// Supported named layouts this milestone (plus 1x1 = off)
+	const bool ok = (cols == 1 && rows == 1)
+		|| (cols == 2 && rows == 1)
+		|| (cols == 1 && rows == 2)
+		|| (cols == 2 && rows == 2)
+		|| (cols == 3 && rows == 3);
+	if (!ok)
+	{
+		err = "unsupported instances layout '" + s + "' (supported: 1x1, 2x1, 1x2, 2x2, 3x3)";
+		return false;
+	}
+	return true;
+}
+
+/**
+ * Footprint step in world X/Y: AABB of primary zones, each axis ceil'd to a multiple of cellSize.
+ * Empty primary => cellSize on both axes.
+ */
+static void computeFootprintStep(const std::vector<SPaintZone> &zones, size_t primaryBegin,
+                                 size_t primaryEnd, float cellSize, float &stepX, float &stepY)
+{
+	if (cellSize <= 0.f) cellSize = 100.f;
+	NLMISC::CAABBox bbox;
+	bool init = false;
+	for (size_t i = primaryBegin; i < primaryEnd && i < zones.size(); ++i)
+	{
+		for (size_t p = 0; p < zones[i].Patches.size(); ++p)
+		{
+			const NL3D::CBezierPatch &bp = zones[i].Patches[p].Patch;
+			for (uint v = 0; v < 4; ++v)
+			{
+				if (!init) { bbox.setCenter(bp.Vertices[v]); bbox.setHalfSize(NLMISC::CVector::Null); init = true; }
+				else bbox.extend(bp.Vertices[v]);
+			}
+			for (uint v = 0; v < 8; ++v) bbox.extend(bp.Tangents[v]);
+			for (uint v = 0; v < 4; ++v) bbox.extend(bp.Interiors[v]);
+		}
+	}
+	float w = 0.f, h = 0.f;
+	if (init)
+	{
+		NLMISC::CVector mn = bbox.getMin();
+		NLMISC::CVector mx = bbox.getMax();
+		w = mx.x - mn.x;
+		h = mx.y - mn.y;
+	}
+	// Round UP to nearest multiple of cellSize (at least one cell)
+	stepX = (float)(std::ceil((double)w / (double)cellSize) * (double)cellSize);
+	stepY = (float)(std::ceil((double)h / (double)cellSize) * (double)cellSize);
+	if (stepX < cellSize) stepX = cellSize;
+	if (stepY < cellSize) stepY = cellSize;
+}
+
+/** Display clone of a primary zone at world offset (dx,dy); shares Node (carrier) with source. */
+static SPaintZone cloneInstanceZone(const SPaintZone &src, uint zoneId, float dx, float dy,
+                                    uint cellX, uint cellY)
+{
+	SPaintZone pz = src;
+	pz.ZoneId = zoneId;
+	pz.Name = src.Name + NLMISC::toString(" (inst %ux%u)", cellX, cellY);
+	pz.BorderVertices.clear();
+	// Ep (topology) is a value copy — same binds/orders; Patches are world-space display.
+	for (size_t p = 0; p < pz.Patches.size(); ++p)
+	{
+		NL3D::CPatchInfo &pi = pz.Patches[p];
+		for (uint v = 0; v < 4; ++v)
+		{
+			pi.Patch.Vertices[v].x += dx;
+			pi.Patch.Vertices[v].y += dy;
+		}
+		for (uint v = 0; v < 8; ++v)
+		{
+			pi.Patch.Tangents[v].x += dx;
+			pi.Patch.Tangents[v].y += dy;
+		}
+		for (uint v = 0; v < 4; ++v)
+		{
+			pi.Patch.Interiors[v].x += dx;
+			pi.Patch.Interiors[v].y += dy;
+		}
+		// Remap intra-zone bind ZoneIds to this instance (session weld fills cross-zone later)
+		for (uint e = 0; e < 4; ++e)
+		{
+			if (pi.BindEdges[e].NPatchs != 0 && pi.BindEdges[e].ZoneId == (uint16)src.ZoneId)
+				pi.BindEdges[e].ZoneId = (uint16)zoneId;
+		}
+	}
+	return pz;
+}
+
+/**
+ * Append display instances for layout cols x rows (primary already at origin).
+ * Returns number of zone entries appended. zone ids start at kInstanceZoneIdBase.
+ */
+static uint appendInstanceZones(std::vector<SPaintZone> &zones, size_t primaryCount,
+                                uint cols, uint rows, float cellSize)
+{
+	if (cols <= 1 && rows <= 1) return 0;
+	if (primaryCount == 0 || zones.size() < primaryCount) return 0;
+
+	float stepX = 0.f, stepY = 0.f;
+	computeFootprintStep(zones, 0, primaryCount, cellSize, stepX, stepY);
+
+	uint nextId = kInstanceZoneIdBase;
+	// Ensure we stay under uint16 for CBorderVertex / BindEdges ZoneId
+	const uint needIds = (cols * rows - 1) * (uint)primaryCount;
+	if (nextId + needIds >= 65535)
+	{
+		fprintf(stderr, "ERROR: instance zone id range would exceed uint16 (need %u ids from %u)\n",
+		        needIds, nextId);
+		return 0;
+	}
+
+	uint appended = 0;
+	for (uint cy = 0; cy < rows; ++cy)
+	for (uint cx = 0; cx < cols; ++cx)
+	{
+		if (cx == 0 && cy == 0) continue; // primary already present
+		const float dx = (float)cx * stepX;
+		const float dy = (float)cy * stepY;
+		for (size_t i = 0; i < primaryCount; ++i)
+		{
+			zones.push_back(cloneInstanceZone(zones[i], nextId, dx, dy, cx, cy));
+			++nextId;
+			++appended;
+		}
+	}
+	printf("instances: layout %ux%u  footprint step (%.1f, %.1f)  primary zones %u  display zones +%u (ids from %u)\n",
+	       cols, rows, stepX, stepY, (uint)primaryCount, appended, kInstanceZoneIdBase);
+	printf("  note: footprint is geometry AABB rounded up to cellsize; mask-accurate L-shapes are later\n");
+	return appended;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -1724,7 +1897,7 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 			fprintf(stderr, "ERROR: runViewer: external driver is null\n");
 			return 1;
 		}
-		// Window title: zone_painter — <editable zone> (+N neighbors when loaded)
+		// Window title: zone_painter — <editable zone> (+N neighbors / xN instances)
 		{
 			std::string title = "zone_painter";
 			if (!g_StartupZone.Basename.empty())
@@ -1733,6 +1906,8 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 				title += " — " + NLMISC::CFile::getFilename(g_InputPath);
 			if (!g_NeighborScenes.empty())
 				title += NLMISC::toString(" (+%u neighbors)", (uint)g_NeighborScenes.size());
+			if (g_InstanceCount > 1)
+				title += NLMISC::toString(" (x%u instances)", g_InstanceCount);
 			udriver->setWindowTitle(ucstring(title));
 		}
 		uscene = udriver->createScene(false);
@@ -2105,6 +2280,9 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 						                     core->brushMaskMode() ? core->brushMaskName().c_str() : "off");
 					else if (paintListener.Mode == CPaintMouseListener::ModeDisplace)
 						textContext.printfAt(0.01f, 0.955f, "displace index %u", paintListener.DisplaceIndex);
+					if (g_InstanceCount > 1)
+						textContext.printfAt(0.01f, 0.905f, "INSTANCED x%u  (%ux%u layout; shared paint backing)",
+						                     g_InstanceCount, g_InstanceCols, g_InstanceRows);
 					if (paintListener.HaveHover)
 					{
 						sint32 t = paintListener.HoverTile;
@@ -2256,6 +2434,13 @@ int main(int argc, char **argv)
 	            "Continent startup: load 8-ring neighbor .max files as frozen read-only context "
 	            "(default on for interactive/startup-auto, off for the legacy .max path). "
 	            "Also accepted as ?neighbors=off on --startup-auto.");
+	args.addArg("", "instances", "NxM",
+	            "Ecosystem startup: self-instance the brick on an NxM layout grid (supported: 1x1, "
+	            "2x1, 1x2, 2x2, 3x3). Primary zone at the origin; other cells are display duplicates "
+	            "sharing one paint carrier (stroke on any instance appears on all; edges weld to the "
+	            "brick's opposite edge). Footprint step = geometry AABB rounded up to --cellsize. "
+	            "Ecosystem-only (error on continents). Also ?instances=2x2 on --startup-auto. "
+	            "Ignored with a warning on the legacy .max path.");
 	if (!args.parse(argc, argv))
 		return 1;
 
@@ -2355,12 +2540,21 @@ int main(int argc, char **argv)
 			}
 		}
 
+		// Instances layout (ecosystem self-tile). CLI --instances; also ?instances= on auto.
+		g_InstanceCols = 1;
+		g_InstanceRows = 1;
+		g_InstanceCount = 1;
+		std::string instancesFromCli;
+		if (args.haveLongArg("instances"))
+			instancesFromCli = args.getLongArg("instances")[0];
+
 		if (args.haveLongArg("startup-auto"))
 		{
 			// Thin wrapper: same selectAuto the buttons call (no UI required).
-			// Optional query: workspace/zone?neighbors=off
+			// Optional query: workspace/zone?neighbors=off&instances=2x2
 			std::string autoArg = args.getLongArg("startup-auto")[0];
 			std::string autoPath = autoArg;
+			std::string instancesFromQuery;
 			std::string::size_type qpos = autoArg.find('?');
 			if (qpos != std::string::npos)
 			{
@@ -2375,7 +2569,8 @@ int main(int argc, char **argv)
 					std::string::size_type eq = pair.find('=');
 					std::string key = eq == std::string::npos ? pair : pair.substr(0, eq);
 					std::string val = eq == std::string::npos ? std::string() : pair.substr(eq + 1);
-					if (NLMISC::toLowerAscii(key) == "neighbors")
+					std::string keyL = NLMISC::toLowerAscii(key);
+					if (keyL == "neighbors")
 					{
 						std::string v = NLMISC::toLowerAscii(val);
 						if (v == "off" || v == "0" || v == "false" || v == "no")
@@ -2383,9 +2578,25 @@ int main(int argc, char **argv)
 						else if (v == "on" || v == "1" || v == "true" || v == "yes")
 							g_LoadNeighbors = true;
 					}
+					else if (keyL == "instances")
+					{
+						instancesFromQuery = val;
+					}
 					if (amp == std::string::npos) break;
 					start = amp + 1;
 				}
+			}
+			// Query wins over CLI when both set (more specific on the zone path)
+			std::string instancesSpec = !instancesFromQuery.empty() ? instancesFromQuery : instancesFromCli;
+			if (!instancesSpec.empty())
+			{
+				std::string ierr;
+				if (!parseInstanceLayout(instancesSpec, g_InstanceCols, g_InstanceRows, ierr))
+				{
+					fprintf(stderr, "ERROR: %s\n", ierr.c_str());
+					return 1;
+				}
+				g_InstanceCount = g_InstanceCols * g_InstanceRows;
 			}
 			std::string err;
 			if (!ZPUI::startupSelectWorldZone(worlds, autoPath, selection, err))
@@ -2393,12 +2604,19 @@ int main(int argc, char **argv)
 				fprintf(stderr, "ERROR: %s\n", err.c_str());
 				return 1;
 			}
+			// Instances are ecosystem-only
+			if (g_InstanceCount > 1 && selection.World.Kind != ZPWS::Ecosystem)
+			{
+				fprintf(stderr, "ERROR: ?instances= / --instances is ecosystem-only (not available on continents)\n");
+				return 1;
+			}
 			haveSelection = true;
-			printf("startup-auto: world '%s' (%s) zone '%s' neighbors=%s\n",
+			printf("startup-auto: world '%s' (%s) zone '%s' neighbors=%s instances=%ux%u\n",
 			       selection.World.WorldName.c_str(),
 			       selection.World.Kind == ZPWS::Ecosystem ? "ecosystem" : "continent",
 			       selection.Zone.Basename.c_str(),
-			       g_LoadNeighbors ? "on" : "off");
+			       g_LoadNeighbors ? "on" : "off",
+			       g_InstanceCols, g_InstanceRows);
 		}
 		else
 		{
@@ -2468,6 +2686,22 @@ int main(int argc, char **argv)
 			}
 			// StartupOpenZone
 			haveSelection = true;
+			// Interactive open: apply --instances if given (Screen B layout selector is M4b)
+			if (!instancesFromCli.empty())
+			{
+				std::string ierr;
+				if (!parseInstanceLayout(instancesFromCli, g_InstanceCols, g_InstanceRows, ierr))
+				{
+					fprintf(stderr, "ERROR: %s\n", ierr.c_str());
+					return 1;
+				}
+				g_InstanceCount = g_InstanceCols * g_InstanceRows;
+			}
+			if (g_InstanceCount > 1 && selection.World.Kind != ZPWS::Ecosystem)
+			{
+				fprintf(stderr, "ERROR: --instances is ecosystem-only (not available on continents)\n");
+				return 1;
+			}
 		}
 
 		if (!haveSelection)
@@ -2508,6 +2742,15 @@ int main(int argc, char **argv)
 			if (n == "on" || n == "1" || n == "true" || n == "yes")
 				g_LoadNeighbors = true; // no-op without a continent world context
 		}
+		// Instances are ecosystem-startup only; warn and ignore on the legacy path
+		if (args.haveLongArg("instances"))
+		{
+			fprintf(stderr, "WARNING: --instances is ignored on the legacy .max path "
+			                "(use --startup-auto \"eco/brick?instances=2x2\" or the ecosystem UI)\n");
+		}
+		g_InstanceCols = 1;
+		g_InstanceRows = 1;
+		g_InstanceCount = 1;
 	}
 
 	// If still no input after startup handling, fail
@@ -2552,7 +2795,12 @@ int main(int argc, char **argv)
 	std::string bankPath = args.haveLongArg("bank") ? args.getLongArg("bank")[0] : g_BankPath;
 	g_BankPath = bankPath;
 	bool bankRecursive = args.haveLongArg("bank-recursive") || g_ForceBankRecursive;
+	// Default cell size: 100 (historical tool default) on the legacy path; 160 on ecosystem
+	// startup (Ryzom ligo cell). Instance footprint steps round the geometry AABB up to this
+	// value — a wrong cellsize leaves a gap and zero welds across self-instance seams.
 	float cellSize = 100.f;
+	if (g_StartupWorld.Kind == ZPWS::Ecosystem && !g_StartupWorld.WorldName.empty())
+		cellSize = 160.f;
 	float snap = 1.f;
 	if (args.haveLongArg("cellsize")) NLMISC::fromString(args.getLongArg("cellsize")[0], cellSize);
 	if (args.haveLongArg("snap")) NLMISC::fromString(args.getLongArg("snap")[0], snap);
@@ -2619,8 +2867,22 @@ int main(int argc, char **argv)
 		fprintf(stderr, "ERROR: no displayable RklPatch zone in %s\n", input.c_str());
 		return 1;
 	}
+	const size_t primaryZoneCount = zones.size();
 
-	// Continent neighbors as frozen read-only context (M3b). Ecosystems stay single-file.
+	// Ecosystem self-instances (M4a): display clones of the primary zones at footprint offsets.
+	// Same Node pointers → paint_core shares one pristine carrier; weld joins opposite edges.
+	if (g_InstanceCount > 1 && primaryZoneCount > 0)
+	{
+		if (g_StartupWorld.Kind == ZPWS::Continent)
+		{
+			fprintf(stderr, "ERROR: --instances is ecosystem-only (not available on continents)\n");
+			return 1;
+		}
+		appendInstanceZones(zones, primaryZoneCount, g_InstanceCols, g_InstanceRows, cellSize);
+	}
+
+	// Continent neighbors as frozen read-only context (M3b). Ecosystems stay single-file
+	// (aside from M4a self-instances above).
 	// Neighbors join landscape, cross-zone weld, and metaTile graph; carriers never written
 	// (forceFrozen => AnyUnfrozen stays false; writeBack skips frozen-only carriers).
 	if (g_LoadNeighbors && g_StartupWorld.Kind == ZPWS::Continent && !g_StartupZone.Basename.empty())

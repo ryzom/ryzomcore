@@ -20,6 +20,16 @@
  * copy re-encodes byte-identical (P1), so the paint save path is a proven no-op for a null
  * edit.
  *
+ * DISPLAY INSTANCES / SHARED BACKING (ui M4a): carriers are keyed by the leaf or base RPO
+ * POINTER. Multiple SPaintZoneInput entries that resolve to the same pointer (same Node stack
+ * — e.g. ecosystem brick self-instances at world offsets) share ONE pristine SRPatchMesh and
+ * one SCarrier::Zones membership list. setTile / setColorRaw already fan the live-landscape
+ * mirror to every zone in that list; writeBack encodes the carrier once. Ops addressed at any
+ * instance zone id therefore mutate the same paint state as the primary (one undo entry path
+ * per write; byte-identical save vs painting the primary alone). No separate zoneId→backing
+ * alias table is required: pointer keying is the alias. tileDesc mapping and write-target
+ * policy are unchanged.
+ *
  * tileDesc <-> SRpoTile mapping (plugin nel_patch_lib/nel_patch_mesh.h <-> nelpatch/rpo_data.h,
  * the on-disk v9 record P1 encodes):
  *   _Num                 <-> SRpoTile.Num       used-layer count 0..3 (0 = empty tile)
