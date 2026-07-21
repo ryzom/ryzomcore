@@ -518,7 +518,13 @@ static void populateContinentGrid(const ZPWS::SWorldEntry &world)
 		snprintf(idbuf, sizeof(idbuf), "gc%d_%d", r, c);
 		snprintf(idxbuf, sizeof(idxbuf), "%d", zi);
 		p.push_back(std::make_pair(std::string("id"), std::string(idbuf)));
-		p.push_back(std::make_pair(std::string("title"), z.Basename));
+		// Cell title: short grid form (4_AC / 193_EC) so prefixed converted names fit the stamp
+		{
+			std::string title = ZPWS::continentZoneName(r, c);
+			if (title.empty())
+				title = z.Basename;
+			p.push_back(std::make_pair(std::string("title"), title));
+		}
 		p.push_back(std::make_pair(std::string("idx"), std::string(idxbuf)));
 		// Mutable zone entry for cache path write-back
 		std::string thumbTex = thumbTextureName(s_Sess.Zones[zi]);

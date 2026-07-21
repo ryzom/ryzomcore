@@ -654,18 +654,25 @@ bool parseContinentZoneName(const std::string &basename, int &row, int &col)
 {
 	row = 0;
 	col = 0;
-	std::string::size_type us = basename.find('_');
-	if (us == std::string::npos || us == 0 || us + 3 != basename.size())
+	// Strip any prefix ending in '-' (zonematerial-converted-193_ec → 193_ec).
+	// Bare names (4_AC) have no dash and are matched as-is.
+	std::string work = basename;
+	std::string::size_type dash = work.rfind('-');
+	if (dash != std::string::npos)
+		work = work.substr(dash + 1);
+
+	std::string::size_type us = work.find('_');
+	if (us == std::string::npos || us == 0 || us + 3 != work.size())
 		return false;
 	// row digits
 	for (size_t i = 0; i < us; ++i)
-		if (basename[i] < '0' || basename[i] > '9')
+		if (work[i] < '0' || work[i] > '9')
 			return false;
-	if (!NLMISC::fromString(basename.substr(0, us), row))
+	if (!NLMISC::fromString(work.substr(0, us), row))
 		return false;
-	// two letters
-	char a = basename[us + 1];
-	char b = basename[us + 2];
+	// two letters (case-insensitive → upper)
+	char a = work[us + 1];
+	char b = work[us + 2];
 	if (a >= 'a' && a <= 'z') a = char(a - 'a' + 'A');
 	if (b >= 'a' && b <= 'z') b = char(b - 'a' + 'A');
 	if (a < 'A' || a > 'Z' || b < 'A' || b > 'Z')
@@ -693,6 +700,48 @@ void listContinentNeighbors(const SWorldEntry &world, const SZoneEntry &zone,
 	int row = 0, col = 0;
 	if (!parseContinentZoneName(zone.Basename, row, col))
 		return;
+
+	// Index MaxDir by parsed grid coord so prefixed (zonematerial-converted-193_ec)
+	// and bare (4_AC) names resolve the same way. Prefer a neighbor that shares the
+	// center's prefix when two files map to one cell (rare).
+	std::string centerPrefix;
+	{
+		std::string::size_type dash = zone.Basename.rfind('-');
+		if (dash != std::string::npos)
+			centerPrefix = zone.Basename.substr(0, dash + 1);
+	}
+	std::map<std::pair<int, int>, SZoneEntry> byCoord;
+	std::vector<std::string> files;
+	CPath::getPathContent(world.MaxDir, false, false, true, files);
+	for (size_t i = 0; i < files.size(); ++i)
+	{
+		if (!isMaxPath(files[i]))
+			continue;
+		SZoneEntry z;
+		z.MaxPath = files[i];
+		z.Basename = CFile::getFilenameWithoutExtension(files[i]);
+		z.Group = "other";
+		z.ThumbnailPath.clear();
+		int r = 0, c = 0;
+		if (!parseContinentZoneName(z.Basename, r, c))
+			continue;
+		const std::pair<int, int> key(r, c);
+		std::map<std::pair<int, int>, SZoneEntry>::iterator it = byCoord.find(key);
+		if (it == byCoord.end())
+			byCoord[key] = z;
+		else if (!centerPrefix.empty())
+		{
+			// Prefer same prefix as the center zone
+			const std::string &exist = it->second.Basename;
+			const bool existMatch = exist.size() >= centerPrefix.size()
+				&& exist.compare(0, centerPrefix.size(), centerPrefix) == 0;
+			const bool newMatch = z.Basename.size() >= centerPrefix.size()
+				&& z.Basename.compare(0, centerPrefix.size(), centerPrefix) == 0;
+			if (newMatch && !existMatch)
+				it->second = z;
+		}
+	}
+
 	// 8-ring: row±1 × col±1 excluding center
 	for (int dr = -1; dr <= 1; ++dr)
 	{
@@ -704,18 +753,14 @@ void listContinentNeighbors(const SWorldEntry &world, const SZoneEntry &zone,
 			int nc = col + dc;
 			if (nr < 0 || nc < 0)
 				continue;
-			std::string name = continentZoneName(nr, nc);
-			if (name.empty())
+			std::map<std::pair<int, int>, SZoneEntry>::const_iterator it =
+				byCoord.find(std::make_pair(nr, nc));
+			if (it == byCoord.end())
 				continue;
-			std::string path = world.MaxDir + "/" + name + ".max";
-			if (!CFile::fileExists(path))
+			// Skip if the file is the center itself (same path)
+			if (it->second.Basename == zone.Basename)
 				continue;
-			SZoneEntry z;
-			z.MaxPath = path;
-			z.Basename = name;
-			z.Group = "other";
-			z.ThumbnailPath.clear();
-			out.push_back(z);
+			out.push_back(it->second);
 		}
 	}
 }

@@ -163,8 +163,13 @@ bool isMaxPath(const std::string &path);
 //   basename = "<row>_<L1><L2>" where row is a decimal Y index and
 //   col = (L1-'A')*26 + (L2-'A')  (two uppercase letters, A..Z).
 // Example: 3_AR -> row=3, col=(0)*26+17 = 17.
+//
+// Prefixed forms (ui M7b): any prefix ending in '-' is stripped before the match, so
+// "zonematerial-converted-193_ec" and "193_EC" both parse to row=193, col=EC.
+// Letters are case-insensitive. Neighbor lookup indexes MaxDir by parsed coords so
+// mixed bare/prefixed basenames share one board.
 
-/** Parse a continent zone basename; returns false if not <row>_<AA>. */
+/** Parse a continent zone basename; returns false if not [prefix-]<row>_<AA>. */
 bool parseContinentZoneName(const std::string &basename, int &row, int &col);
 
 /** Build basename from grid coords (matches getZoneNameByCoord). */

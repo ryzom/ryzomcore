@@ -2872,7 +2872,14 @@ int main(int argc, char **argv)
 	                    "continent-style max/zones layouts) by walking up from cwd for a .nel NeL root, or from\n"
 	                    "an optional folder argument, then opens the in-engine world/zone picker. Remembered\n"
 	                    "last folder lives in the app config dir (startup.cfg); no .nel directory is created.\n"
+	                    "Continent grid names: bare <row>_<AA> (e.g. 4_AC) and prefixed forms that end with that\n"
+	                    "pattern after a final '-' (e.g. zonematerial-converted-193_ec) place on the minesweeper\n"
+	                    "board and resolve 8-ring neighbors; unparseable sets fall back to a flat list.\n"
 	                    "Legacy: zone_painter <input.max> --bank <bank> [...] behaves exactly as before.\n"
+	                    "Painter panel (NLGUI): mode Tile/Color/Disp, tile set ±, 256, brush size 0-2, group,\n"
+	                    "Color section (radius 2-32, hardness/opacity 0-255, color swatch, mask cycle, mask mode),\n"
+	                    "Displace index 0-15, lock borders, undo/redo, fill, season Next (Y), multi-file dirty,\n"
+	                    "Save (interactive modal or --save). Keys and panel share one handler layer.\n"
 	                    "Config files (plugin keys.cfg port, NLMISC::CConfigFile syntax; one file may serve both):\n"
 	                    "  keys cfg (--keys-cfg, else ./zone_painter_keys.cfg): rebinds the plugin-era actions by name,\n"
 	                    "  values are NeL TKey codes (the plugin's keys.cfg Key* constant block parses verbatim).\n"
@@ -2906,14 +2913,20 @@ int main(int argc, char **argv)
 	args.addArg("", "brush", "0-2", "Brush size for tile mouse strokes and displace painting (recursion depths 0/4/8)");
 	args.addArg("", "group", "0-12", "Tile group bias (0 = none)");
 	args.addArg("", "color", "rrggbb", "Viewer color brush color (default ffffff)");
-	args.addArg("", "radius", "meters", "Viewer color brush radius (default 8; keys +/- range 2-32)");
-	args.addArg("", "hardness", "0-255", "Viewer color brush hardness (default 128; live keys Home/End)");
-	args.addArg("", "opacity", "0-255", "Viewer color brush opacity (default 255; live keys Insert/Delete)");
-	args.addArg("", "brush-mask", "file.tga", "Color-brush bitmap mask (CPath-resolved; plugin loadBrush port; script op `mask <file|none>`)");
+	args.addArg("", "radius", "meters",
+	            "Viewer color brush radius (default 8; keys SizeUp/Down in Color mode and panel Radius ±: ×1.5/÷1.5, clamp 2-32)");
+	args.addArg("", "hardness", "0-255",
+	            "Viewer color brush hardness (default 128; keys Home/End and panel Hard ± step 51)");
+	args.addArg("", "opacity", "0-255",
+	            "Viewer color brush opacity (default 255; keys Insert/Delete and panel Opacity ± step 51)");
+	args.addArg("", "brush-mask", "file.tga",
+	            "Color-brush bitmap mask (CPath-resolved; plugin loadBrush port; script op `mask <file|none>`; "
+	            "panel Mask button / S key cycles shipped brushes)");
 	args.addArg("", "brush-dir", "dir", "Brush mask directory for the viewer cycle key (default: <exe dir>/brushes, else ./brushes)");
 	args.addArg("", "keys-cfg", "file", "Key bindings config (see the description; default zone_painter_keys.cfg in cwd when present)");
 	args.addArg("", "vars-cfg", "file", "Light/zoom variables config (see the description; default zone_painter_vars.cfg in cwd when present)");
-	args.addArg("", "displace-index", "0-15", "Viewer displace paint index (default 0)");
+	args.addArg("", "displace-index", "0-15",
+	            "Viewer displace paint index (default 0; keys [ ] and panel Displace ±)");
 	args.addArg("", "db", "root", "Database root for authored-path texture resolution (default: derived from the input path)");
 	args.addArg("", "preload-tiles", "", "Viewer: flush every tile set's tiles at startup (overrides the stored 0x4010 flag on)");
 	args.addArg("", "no-preload-tiles", "", "Viewer: force the preload flush off (overrides the stored flag)");
@@ -2934,6 +2947,7 @@ int main(int argc, char **argv)
 	            "Multi-select (continents, M6b): plus-separated zone basenames "
 	            "(\"world/zoneA+zoneB+zoneC\") opens all editable plus the union of their "
 	            "8-rings as frozen context (neighbors default on; ?neighbors=off respected). "
+	            "Basenames may be bare grid names (4_AC) or prefixed (zonematerial-converted-193_ec). "
 	            "Optional ?query after the zone list: ampersand-separated key=value pairs. "
 	            "Supported keys: neighbors=on|off (continents; default on), "
 	            "instances=NxM (ecosystem self-instances; see --instances). "
