@@ -44,6 +44,7 @@
 #include <nel/3d/u_text_context.h>
 
 #include <nel/gui/action_handler.h>
+#include <nel/gui/db_manager.h>
 #include <nel/gui/dbgroup_combo_box.h>
 #include <nel/gui/event_listener.h>
 #include <nel/gui/interface_link.h>
@@ -355,6 +356,9 @@ int main(int argc, char **argv)
 	CWidgetManager::getInstance()->updateAllLocalisedElements();
 	nlinfo("Localised elements updated");
 	CWidgetManager::getInstance()->activateMasterGroup(MASTER_GROUP, true);
+	// select_number::parse writes min into its DB leaf, wiping the sample default
+	if (NLMISC::CCDBNodeLeaf *sel = CDBManager::getInstance()->getDbProp("UI:TEMP:SELNUM", false))
+		sel->setValue32(3);
 	CInterfaceLink::updateAllLinks(); // initial evaluation; afterwards links run on database changes
 	nlinfo("Master group activated");
 

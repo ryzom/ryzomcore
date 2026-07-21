@@ -37,11 +37,11 @@
 </template>
 
 <!-- Single/multi-line edit box in a beveled border (matches client widgets.xml) -->
-<template name="edit_box_widget" active="true" posref="TL TL" text_x="0" text_y="0" text_ref="BL BL" child_resize_h="true" child_resize_hmargin="8" multi_line="false" x="0" y="0" w="0" h="0" sizeref="" id="eb" posparent="parent" onenter="" params="" reset_focus_on_hide="true" enter_loose_focus="true" prompt="" enter_recover_focus="true" max_num_bytes="0" max_num_chars="255" menu_r="" onchange="" onchange_params="" entry_type="text" keep="true" max_historic="10" fontsize="14" shadow="true" backup_father_container_pos="false" want_return="false" clear_on_escape="false" color="255 255 255 255" bg_texture="w_box_blank.tga" on_focus_lost="" on_focus_lost_params="" max_float_prec="5" negative_filter="" render_layer="0">
+<template name="edit_box_widget" active="true" posref="TL TL" text_x="0" text_y="2" text_ref="BL BL" child_resize_h="true" child_resize_hmargin="8" multi_line="false" x="0" y="0" w="0" h="0" sizeref="" id="eb" posparent="parent" onenter="" params="" reset_focus_on_hide="true" enter_loose_focus="true" prompt="" enter_recover_focus="true" max_num_bytes="0" max_num_chars="255" menu_r="" onchange="" onchange_params="" entry_type="text" keep="true" max_historic="10" fontsize="14" shadow="true" backup_father_container_pos="false" want_return="false" clear_on_escape="false" color="255 255 255 255" bg_texture="w_box_blank.tga" on_focus_lost="" on_focus_lost_params="" max_float_prec="5" negative_filter="" render_layer="0">
 	<group id="#id" posparent="#posparent" posref="#posref" x="#x" y="#y" w="#w" h="#h" sizeref="#sizeref" child_resize_h="#child_resize_h" child_resize_hmargin="#child_resize_hmargin" active="#active">
 		<group type="edit_box" sizeref="w" w="-8" id="eb" posref="TL TL" x="4" y="-4" child_resize_h="true" onenter="#onenter" params="#params" onchange="#onchange" onchange_params="#onchange_params" max_num_bytes="#max_num_bytes" max_num_chars="#max_num_chars" prompt="#prompt" enter_loose_focus="#enter_loose_focus" enter_recover_focus="#enter_recover_focus" entry_type="#entry_type" reset_focus_on_hide="#reset_focus_on_hide" menu_r="#menu_r" max_historic="#max_historic" want_return="#want_return" clear_on_escape="#clear_on_escape" backup_father_container_pos="#backup_father_container_pos" on_focus_lost="#on_focus_lost" on_focus_lost_params="#on_focus_lost_params" max_float_prec="#max_float_prec" negative_filter="#negative_filter" render_layer="#render_layer">
 			<view type="bitmap" id="bg" scale="true" sizeref="hw" h="0" w="0" texture="#bg_texture" inherit_gc_alpha="true" render_layer="#render_layer" />
-			<!-- BL BL + small y nudge keeps the caret/prompt optically centered in the 4px-padded box -->
+			<!-- BL BL; default text_y=2 lifts the baseline so glyphs without descenders sit in the optical center of the beveled box -->
 			<view id="edit_text" type="text" x="#text_x" y="#text_y" posref="#text_ref" multi_line="#multi_line" multi_line_space="0" fontsize="#fontsize" color="#color" shadow="#shadow" hardtext="" global_color="false" render_layer="#render_layer" />
 		</group>
 		<view type="bitmap" id="tlb" texture="w_box_top_left.tga" posparent="eb" posref="TL BR" inherit_gc_alpha="true" render_layer="#render_layer" />
@@ -59,8 +59,8 @@
 <template name="combo_box_def1" keep="true" render_layer="0">
 	<instance template="box_widget" render_layer="#render_layer" id="back" sizeref="wh" w="0" h="0" />
 	<view type="bitmap" render_layer="#render_layer" id="arrow" posref="MR MR" x="-4" texture="w_arrow_down_2.tga" />
-	<!-- x=2 left pad; y=-1 optical vertical center in the 20px beveled box -->
-	<view type="text" id="text" render_layer="#render_layer" posref="ML ML" x="2" y="-1" fontsize="14" color="255 255 255 255" shadow="true" global_color="false" />
+	<!-- x=2 left pad; y=1 optical vertical center in the 20px beveled box (ingame.ttf 14pt sits ~2px low at y=0) -->
+	<view type="text" id="text" render_layer="#render_layer" posref="ML ML" x="2" y="1" fontsize="14" color="255 255 255 255" shadow="true" global_color="false" />
 	<ctrl type="button" render_layer="#render_layer" button_type="push_button" id="select" sizeref="wh" w="0" h="0" col_over="255 255 255 90" tx_over="blank.tga" scale="true" />
 </template>
 
