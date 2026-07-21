@@ -10,7 +10,8 @@
 // paint_core.h), and save the .max back through the proven P1/P2 write path.
 //
 // Modes:
-//   (default)      viewer: CNELU + CLandscapeModel painting scene, tile bank from --bank,
+//   (default)      viewer: UDriver/UScene + CLandscapeModel painting scene (unwrapped to
+//                  IDriver/CScene for the landscape assembly), tile bank from --bank,
 //                  CEvent3dMouseListener edit3d orbiting the landscape bbox center. LEFT MOUSE
 //                  paints the selected tile set, right mouse picks the set under the cursor,
 //                  PgUp/PgDn (and 0-9) select the tile set, B toggles 128/256, Ctrl+Z / Ctrl+E
@@ -94,14 +95,20 @@
 #include <nel/misc/time_nl.h>
 
 #include <nel/3d/camera.h>
+#include <nel/3d/driver_user.h>
+#include <nel/3d/dru.h>
 #include <nel/3d/event_mouse_listener.h>
 #include <nel/3d/font_manager.h>
 #include <nel/3d/landscape.h>
 #include <nel/3d/landscape_model.h>
-#include <nel/3d/nelu.h>
 #include <nel/3d/register_3d.h>
+#include <nel/3d/scene.h>
+#include <nel/3d/scene_user.h>
 #include <nel/3d/text_context.h>
 #include <nel/3d/tile_bank.h>
+#include <nel/3d/u_camera.h>
+#include <nel/3d/u_driver.h>
+#include <nel/3d/u_scene.h>
 #include <nel/3d/viewport.h>
 #include <nel/3d/zone.h>
 #include <nel/3d/zone_corner_smoother.h>
@@ -444,17 +451,20 @@ static bool loadVarsCfg(const std::string &path, bool required)
 	return true;
 }
 
-// Bound-key test helpers (0 = unbound)
+// Bound-key test helpers (0 = unbound). g_ViewerAsync is the viewer's UDriver AsyncListener
+// (set for the duration of runViewer; headless modes never touch it).
+static NLMISC::CEventListenerAsync *g_ViewerAsync = NULL;
+
 static bool zpKeyPushed(TPainterKey action)
 {
 	uint k = g_PainterKeys[action];
-	return k != 0 && NL3D::CNELU::AsyncListener.isKeyPushed((NLMISC::TKey)k);
+	return k != 0 && g_ViewerAsync && g_ViewerAsync->isKeyPushed((NLMISC::TKey)k);
 }
 
 static bool zpKeyDown(TPainterKey action)
 {
 	uint k = g_PainterKeys[action];
-	return k != 0 && NL3D::CNELU::AsyncListener.isKeyDown((NLMISC::TKey)k);
+	return k != 0 && g_ViewerAsync && g_ViewerAsync->isKeyDown((NLMISC::TKey)k);
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -1108,6 +1118,7 @@ public:
 
 	ZPPAINT::CPaintCore *Core;
 	NL3D::CEvent3dMouseListener *Nav;
+	NL3D::CCamera *Camera; // unwrapped from UScene::getCam()
 	NL3D::CViewport Viewport;
 	int CurTileSet;
 	bool Mode256;
@@ -1125,7 +1136,7 @@ public:
 	uint BrushHardness, BrushOpacity; // 0-255
 	uint DisplaceIndex;               // 0-15
 
-	CPaintMouseListener() : Core(NULL), Nav(NULL), CurTileSet(0), Mode256(false), Pressed(false),
+	CPaintMouseListener() : Core(NULL), Nav(NULL), Camera(NULL), CurTileSet(0), Mode256(false), Pressed(false),
 		MouseX(0.5f), MouseY(0.5f), HaveHover(false), HoverZone(0), HoverTile(-1), StrokeZone(0), StrokeTile(-1),
 		Mode(ModeTile), BrushColor(255, 255, 255, 255), BrushRadius(8.f), BrushHardness(128), BrushOpacity(255),
 		DisplaceIndex(0) { }
@@ -1137,7 +1148,7 @@ public:
 		if (Mode == ModeColor)
 		{
 			NLMISC::CVector pos, dir, hit;
-			Viewport.getRayWithPoint(MouseX, MouseY, pos, dir, NL3D::CNELU::Camera->getMatrix(), NL3D::CNELU::Camera->getFrustum());
+			Viewport.getRayWithPoint(MouseX, MouseY, pos, dir, Camera->getMatrix(), Camera->getFrustum());
 			uint zone;
 			sint32 tile;
 			if (Core->pickTile(pos, dir, zone, tile, hit) && !Core->zoneFrozen(zone))
@@ -1154,9 +1165,9 @@ public:
 	void updateHover()
 	{
 		HaveHover = false;
-		if (!Core) return;
+		if (!Core || !Camera) return;
 		NLMISC::CVector pos, dir, hit;
-		Viewport.getRayWithPoint(MouseX, MouseY, pos, dir, NL3D::CNELU::Camera->getMatrix(), NL3D::CNELU::Camera->getFrustum());
+		Viewport.getRayWithPoint(MouseX, MouseY, pos, dir, Camera->getMatrix(), Camera->getFrustum());
 		uint zone;
 		sint32 tile;
 		if (Core->pickTile(pos, dir, zone, tile, hit))
@@ -1278,6 +1289,19 @@ public:
 	}
 };
 
+// F12 screenshot convenience (CNELU::screenshot port; uses the unwrapped IDriver).
+static void zpViewerScreenshot(NL3D::IDriver *driver, NLMISC::CEventListenerAsync &async)
+{
+	if (!async.isKeyPushed(NLMISC::KeyF12))
+		return;
+	NLMISC::CBitmap btm;
+	driver->getBuffer(btm);
+	std::string filename = NLMISC::CFile::findNewFile("screenshot.tga");
+	NLMISC::COFile fs(filename);
+	btm.writeTGA(fs, 24);
+	nlinfo("Screenshot '%s' saved", filename.c_str());
+}
+
 static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CPaintCore *core,
                      PMAXLOAD::SLoadedMax &lm,
                      const std::string &screenshotPath, const std::string &fontPath,
@@ -1300,17 +1324,45 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 	}
 	NLMISC::CVector center = bbox.getCenter();
 
+	NL3D::UDriver *udriver = NULL;
+	NL3D::UScene *uscene = NULL;
 	try
 	{
+		// UDriver/UScene port of the previous CNELU init (needed for NLGUI's CViewRenderer,
+		// which requires UDriver). Low-level landscape assembly unwraps to IDriver/CScene.
+		NL3D::CScene::registerBasics();
 		NL3D::CViewport viewport;
-		if (!NL3D::CNELU::init(kMainWidth, kMainHeight, viewport))
+		udriver = NL3D::UDriver::createDriver(0, false, 0);
+		if (!udriver)
 		{
-			fprintf(stderr, "ERROR: CNELU::init failed (no 3D driver?)\n");
+			fprintf(stderr, "ERROR: UDriver::createDriver failed (no 3D driver?)\n");
 			return 1;
 		}
+		if (!udriver->setDisplay(NL3D::UDriver::CMode(kMainWidth, kMainHeight, 32, true)))
+		{
+			fprintf(stderr, "ERROR: UDriver::setDisplay failed\n");
+			delete udriver;
+			return 1;
+		}
+		udriver->setWindowTitle(ucstring("zone_painter"));
+		uscene = udriver->createScene(false);
+		if (!uscene)
+		{
+			fprintf(stderr, "ERROR: UDriver::createScene failed\n");
+			udriver->release();
+			delete udriver;
+			return 1;
+		}
+		uscene->setViewport(viewport);
+
+		NL3D::IDriver *driver = static_cast<NL3D::CDriverUser *>(udriver)->getDriver();
+		NL3D::CScene &scene = static_cast<NL3D::CSceneUser *>(uscene)->getScene();
+		NL3D::CCamera *camera = uscene->getCam().getObjectPtr();
+		NL3D::CShapeBank *shapeBank = scene.getShapeBank();
+		g_ViewerAsync = &udriver->AsyncListener;
 
 		// The painting landscape (paint.cpp myThread).
-		NL3D::CLandscapeModel *theLand = (NL3D::CLandscapeModel *)NL3D::CNELU::Scene->createModel(NL3D::LandscapeModelId);
+		NL3D::CLandscapeModel *theLand = (NL3D::CLandscapeModel *)scene.createModel(NL3D::LandscapeModelId);
 		theLand->Landscape.setTileNear(10000.f);
 		theLand->Landscape.TileBank = bank;
 		theLand->Landscape.enableAutomaticLighting(false);
@@ -1338,23 +1390,23 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 		camMat.identity();
 		camMat.setRot(I, J, K, true);
 		camMat.setPos(pos);
-		NL3D::CNELU::Camera->setTransformMode(NL3D::ITransformable::DirectMatrix);
-		NL3D::CNELU::Camera->setMatrix(camMat);
-		NL3D::CNELU::Camera->setPerspective(75.f * (float)NLMISC::Pi / 180.f, 1.33f, 0.1f, 10000.f);
+		camera->setTransformMode(NL3D::ITransformable::DirectMatrix);
+		camera->setMatrix(camMat);
+		camera->setPerspective(75.f * (float)NLMISC::Pi / 180.f, 1.33f, 0.1f, 10000.f);
 
 		// Mouse listener: edit3d orbiting the landscape center (the plugin's hotspot was the
 		// selection center).
 		NL3D::CEvent3dMouseListener mouseListener;
 		mouseListener.setMatrix(camMat);
-		mouseListener.setFrustrum(NL3D::CNELU::Camera->getFrustum());
+		mouseListener.setFrustrum(camera->getFrustum());
 		mouseListener.setViewport(viewport);
 		mouseListener.setHotSpot(center);
 		mouseListener.setMouseMode(NL3D::CEvent3dMouseListener::edit3d);
-		mouseListener.addToServer(NL3D::CNELU::EventServer);
+		mouseListener.addToServer(udriver->EventServer);
 
 		CWindowCloseListener closeListener;
-		NL3D::CNELU::EventServer.addListener(NLMISC::EventDestroyWindowId, &closeListener);
-		NL3D::CNELU::EventServer.addListener(NLMISC::EventCloseWindowId, &closeListener);
+		udriver->EventServer.addListener(NLMISC::EventDestroyWindowId, &closeListener);
+		udriver->EventServer.addListener(NLMISC::EventCloseWindowId, &closeListener);
 
 		// Paint listener: live-landscape mirror + the mouse op path
 		CPaintMouseListener paintListener;
@@ -1363,24 +1415,25 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 			core->attachLandscape(&theLand->Landscape);
 			paintListener.Core = core;
 			paintListener.Nav = &mouseListener;
+			paintListener.Camera = camera;
 			paintListener.Viewport = viewport;
 			paintListener.BrushColor = g_ViewerBrushColor;
 			paintListener.BrushRadius = g_ViewerBrushRadius;
 			paintListener.BrushHardness = g_ViewerBrushHardness;
 			paintListener.BrushOpacity = g_ViewerBrushOpacity;
 			paintListener.DisplaceIndex = g_ViewerDisplaceIndex;
-			NL3D::CNELU::EventServer.addListener(NLMISC::EventMouseDownId, &paintListener);
-			NL3D::CNELU::EventServer.addListener(NLMISC::EventMouseUpId, &paintListener);
-			NL3D::CNELU::EventServer.addListener(NLMISC::EventMouseMoveId, &paintListener);
-			NL3D::CNELU::EventServer.addListener(NLMISC::EventKeyDownId, &paintListener);
+			udriver->EventServer.addListener(NLMISC::EventMouseDownId, &paintListener);
+			udriver->EventServer.addListener(NLMISC::EventMouseUpId, &paintListener);
+			udriver->EventServer.addListener(NLMISC::EventMouseMoveId, &paintListener);
+			udriver->EventServer.addListener(NLMISC::EventKeyDownId, &paintListener);
 			// Preload flush (plugin preloadTiles): all tile sets into the driver
 			if (g_PreloadTiles)
-				core->preloadTiles(NL3D::CNELU::Driver);
+				core->preloadTiles(driver);
 		}
 
 		// Scene point lights (CPaintLight parity — unconditional in the plugin's myThread)
 		{
-			uint nPaintLights = ZPCTX::setupPaintLights(lm, theLand->Landscape, *NL3D::CNELU::Scene);
+			uint nPaintLights = ZPCTX::setupPaintLights(lm, theLand->Landscape, scene);
 			if (g_verbose || nPaintLights)
 				printf("paint lights: %u point-light models\n", nPaintLights);
 		}
@@ -1396,15 +1449,15 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 			printf("context textures: %u authored paths resolved, %u unresolved, %u directories registered\n",
 			       texResolved, texMissing, texDirs);
 			ZPCTX::SContextStats ctxStats;
-			ZPCTX::addContextMeshes(lm, NL3D::CNELU::Scene, NL3D::CNELU::ShapeBank, theLand, ctxStats);
+			ZPCTX::addContextMeshes(lm, &scene, shapeBank, theLand, ctxStats);
 			uint shapeTexResolved = 0, shapeTexMissing = 0;
 			ZPCTX::resolveContextShapeTextures(ctxStats, shapeTexResolved, shapeTexMissing);
 			printf("context shape textures: %u resolved, %u missing\n", shapeTexResolved, shapeTexMissing);
 			NLMISC::CRGBA ambient(0, 0, 0);
 			bool haveAmbient = ZPCTX::decodeSceneAmbient(lm, ambient);
 			if (haveAmbient)
-				NL3D::CNELU::Driver->setAmbientColor(ambient);
-			uint nDriverLights = ZPCTX::setupDriverLights(lm, NL3D::CNELU::Driver);
+				driver->setAmbientColor(ambient);
+			uint nDriverLights = ZPCTX::setupDriverLights(lm, driver);
 			printf("context meshes: %u built, %u skipped, %u filtered (hidden %u, collision %u, accel %u, class %u); driver lights: %u; ambient: %s\n",
 			       ctxStats.Built, ctxStats.Skipped, ctxStats.Filtered,
 			       ctxStats.FilteredHidden, ctxStats.FilteredCollision, ctxStats.FilteredAccel, ctxStats.FilteredClass,
@@ -1418,7 +1471,7 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 		bool hudText = false;
 		if (!fontPath.empty() && NLMISC::CFile::fileExists(fontPath))
 		{
-			textContext.init(NL3D::CNELU::Driver, &fontManager);
+			textContext.init(driver, &fontManager);
 			textContext.setFontGenerator(fontPath);
 			textContext.setHotSpot(NL3D::CComputedString::TopLeft);
 			textContext.setColor(NLMISC::CRGBA(255, 255, 255));
@@ -1436,15 +1489,15 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 		if (!screenshotPath.empty())
 		{
 			// One refined frame -> .tga -> exit (the visual gate).
-			NL3D::CNELU::clearBuffers(NLMISC::CRGBA(90, 90, 90));
-			NL3D::CNELU::Scene->render();
+			udriver->clearBuffers(NLMISC::CRGBA(90, 90, 90));
+			uscene->render();
 			theLand->Landscape.setRefineMode(false);
 			theLand->Landscape.refineAll(pos);
-			NL3D::CNELU::clearBuffers(NLMISC::CRGBA(90, 90, 90));
-			NL3D::CNELU::Scene->render();
-			NL3D::CNELU::swapBuffers();
+			udriver->clearBuffers(NLMISC::CRGBA(90, 90, 90));
+			uscene->render();
+			udriver->swapBuffers();
 			NLMISC::CBitmap btm;
-			NL3D::CNELU::Driver->getBuffer(btm);
+			driver->getBuffer(btm);
 			NLMISC::COFile fs;
 			if (!fs.open(screenshotPath))
 			{
@@ -1463,7 +1516,7 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 			NLMISC::TTime lastFrameTime = NLMISC::CTime::getLocalTime();
 			do
 			{
-				NL3D::CNELU::EventServer.pump();
+				udriver->EventServer.pump();
 
 				// Frame dt (the plugin's zoom timing)
 				NLMISC::TTime nowTime = NLMISC::CTime::getLocalTime();
@@ -1478,12 +1531,12 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 					uint count = core->tileSetCount();
 					if (count)
 					{
-						if (NL3D::CNELU::AsyncListener.isKeyPushed(NLMISC::KeyPRIOR))
+						if (udriver->AsyncListener.isKeyPushed(NLMISC::KeyPRIOR))
 							paintListener.CurTileSet = (paintListener.CurTileSet + (int)count - 1) % (int)count;
-						if (NL3D::CNELU::AsyncListener.isKeyPushed(NLMISC::KeyNEXT))
+						if (udriver->AsyncListener.isKeyPushed(NLMISC::KeyNEXT))
 							paintListener.CurTileSet = (paintListener.CurTileSet + 1) % (int)count;
 						for (int k = 0; k <= 9; ++k)
-							if (NL3D::CNELU::AsyncListener.isKeyPushed((NLMISC::TKey)(NLMISC::Key0 + k)) && k < (int)count)
+							if (udriver->AsyncListener.isKeyPushed((NLMISC::TKey)(NLMISC::Key0 + k)) && k < (int)count)
 								paintListener.CurTileSet = k;
 					}
 					if (zpKeyPushed(ZPK_ToggleTileSize))
@@ -1512,9 +1565,9 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 						core->setTileGroup((core->tileGroup() + 1) % 13);
 					if (zpKeyPushed(ZPK_GroupDown))
 						core->setTileGroup((core->tileGroup() + 12) % 13);
-					if (NL3D::CNELU::AsyncListener.isKeyPushed(NLMISC::KeyLBRACKET))
+					if (udriver->AsyncListener.isKeyPushed(NLMISC::KeyLBRACKET))
 						paintListener.DisplaceIndex = (paintListener.DisplaceIndex + 15) % 16;
-					if (NL3D::CNELU::AsyncListener.isKeyPushed(NLMISC::KeyRBRACKET))
+					if (udriver->AsyncListener.isKeyPushed(NLMISC::KeyRBRACKET))
 						paintListener.DisplaceIndex = (paintListener.DisplaceIndex + 1) % 16;
 					// Live hardness/opacity (plugin: +-0.2 on a 0..1 float; 51/255 == the same
 					// steps on the tool's 0-255 scale)
@@ -1573,9 +1626,9 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 				}
 
 				NLMISC::CMatrix camKey = mouseListener.getViewMatrix();
-				NL3D::CNELU::Camera->setMatrix(camKey);
-				NL3D::CNELU::clearBuffers(NLMISC::CRGBA(90, 90, 90));
-				NL3D::CNELU::Scene->render();
+				camera->setMatrix(camKey);
+				udriver->clearBuffers(NLMISC::CRGBA(90, 90, 90));
+				uscene->render();
 				if (theLand->Landscape.getRefineMode())
 				{
 					theLand->Landscape.setRefineMode(false);
@@ -1590,9 +1643,9 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 					{
 						NLMISC::CVector lift(0.f, 0.f, 0.15f);
 						NLMISC::CRGBA col = core->zoneFrozen(paintListener.HoverZone) ? NLMISC::CRGBA(255, 64, 64) : NLMISC::CRGBA(255, 255, 0);
-						NL3D::CNELU::Driver->setupModelMatrix(NLMISC::CMatrix::Identity);
+						driver->setupModelMatrix(NLMISC::CMatrix::Identity);
 						for (int l = 0; l < 4; ++l)
-							NL3D::CDRU::drawLine(c[l] + lift, c[(l + 1) & 3] + lift, col, *NL3D::CNELU::Driver);
+							NL3D::CDRU::drawLine(c[l] + lift, c[(l + 1) & 3] + lift, col, *driver);
 					}
 				}
 
@@ -1624,36 +1677,44 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 					}
 					// Brush color swatch
 					if (paintListener.Mode == CPaintMouseListener::ModeColor)
-						NL3D::CDRU::drawQuad(0.30f, 0.955f, 0.32f, 0.975f, *NL3D::CNELU::Driver,
+						NL3D::CDRU::drawQuad(0.30f, 0.955f, 0.32f, 0.975f, *driver,
 						                     paintListener.BrushColor, viewport);
 				}
 
-				NL3D::CNELU::swapBuffers();
-				NL3D::CNELU::screenshot(); // F12, same convenience as the other NeL viewers
+				udriver->swapBuffers();
+				zpViewerScreenshot(driver, udriver->AsyncListener); // F12 convenience
 			}
-			while (!NL3D::CNELU::AsyncListener.isKeyPushed(NLMISC::KeyESCAPE) && closeListener.WindowActive);
+			while (!udriver->AsyncListener.isKeyPushed(NLMISC::KeyESCAPE) && closeListener.WindowActive && udriver->isActive());
 		}
 
-		mouseListener.removeFromServer(NL3D::CNELU::EventServer);
-		NL3D::CNELU::EventServer.removeListener(NLMISC::EventDestroyWindowId, &closeListener);
-		NL3D::CNELU::EventServer.removeListener(NLMISC::EventCloseWindowId, &closeListener);
+		mouseListener.removeFromServer(udriver->EventServer);
+		udriver->EventServer.removeListener(NLMISC::EventDestroyWindowId, &closeListener);
+		udriver->EventServer.removeListener(NLMISC::EventCloseWindowId, &closeListener);
 		if (core)
 		{
 			core->attachLandscape(NULL);
-			NL3D::CNELU::EventServer.removeListener(NLMISC::EventMouseDownId, &paintListener);
-			NL3D::CNELU::EventServer.removeListener(NLMISC::EventMouseUpId, &paintListener);
-			NL3D::CNELU::EventServer.removeListener(NLMISC::EventMouseMoveId, &paintListener);
-			NL3D::CNELU::EventServer.removeListener(NLMISC::EventKeyDownId, &paintListener);
+			udriver->EventServer.removeListener(NLMISC::EventMouseDownId, &paintListener);
+			udriver->EventServer.removeListener(NLMISC::EventMouseUpId, &paintListener);
+			udriver->EventServer.removeListener(NLMISC::EventMouseMoveId, &paintListener);
+			udriver->EventServer.removeListener(NLMISC::EventKeyDownId, &paintListener);
 		}
-		NL3D::CNELU::release();
+		g_ViewerAsync = NULL;
+		udriver->release();
+		delete udriver;
+		udriver = NULL;
+		uscene = NULL;
 	}
 	catch (const NL3D::EDru &e)
 	{
+		g_ViewerAsync = NULL;
+		if (udriver) { udriver->release(); delete udriver; }
 		fprintf(stderr, "ERROR: 3D driver: %s\n", e.what());
 		return 1;
 	}
 	catch (const NLMISC::Exception &e)
 	{
+		g_ViewerAsync = NULL;
+		if (udriver) { udriver->release(); delete udriver; }
 		fprintf(stderr, "ERROR: %s\n", e.what());
 		return 1;
 	}
