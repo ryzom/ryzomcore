@@ -1669,16 +1669,21 @@ static void zpToggleTileSize()
 	g_PaintCtx.Paint->Mode256 = !g_PaintCtx.Paint->Mode256;
 }
 
+/** Color brush radius step (×1.5 / ÷1.5, clamp 2..32). Shared by SizeUp/Down in Color mode and panel. */
+static void zpColorRadiusDelta(int d)
+{
+	if (!g_PaintCtx.Active || !g_PaintCtx.Paint) return;
+	if (d > 0)
+		g_PaintCtx.Paint->BrushRadius = std::min(g_PaintCtx.Paint->BrushRadius * 1.5f, 32.f);
+	else if (d < 0)
+		g_PaintCtx.Paint->BrushRadius = std::max(g_PaintCtx.Paint->BrushRadius / 1.5f, 2.f);
+}
+
 static void zpBrushSizeDelta(int d)
 {
 	if (!g_PaintCtx.Active || !g_PaintCtx.Core || !g_PaintCtx.Paint) return;
 	if (g_PaintCtx.Paint->Mode == CPaintMouseListener::ModeColor)
-	{
-		if (d > 0)
-			g_PaintCtx.Paint->BrushRadius = std::min(g_PaintCtx.Paint->BrushRadius * 1.5f, 32.f);
-		else if (d < 0)
-			g_PaintCtx.Paint->BrushRadius = std::max(g_PaintCtx.Paint->BrushRadius / 1.5f, 2.f);
-	}
+		zpColorRadiusDelta(d);
 	else
 	{
 		int bs = (int)g_PaintCtx.Core->brushSize() + d;
@@ -1694,6 +1699,54 @@ static void zpGroupDelta(int d)
 	int g = (int)g_PaintCtx.Core->tileGroup() + d;
 	g = ((g % 13) + 13) % 13;
 	g_PaintCtx.Core->setTileGroup((uint)g);
+}
+
+/** Hardness ± (plugin ±0.2 on 0..1 → ±51 on 0..255). Keys Home/End + panel. */
+static void zpHardnessDelta(int d)
+{
+	if (!g_PaintCtx.Active || !g_PaintCtx.Paint) return;
+	int v = (int)g_PaintCtx.Paint->BrushHardness + d;
+	if (v < 0) v = 0;
+	if (v > 255) v = 255;
+	g_PaintCtx.Paint->BrushHardness = (uint)v;
+}
+
+/** Opacity ± (same step scale as hardness). Keys Insert/Delete + panel. */
+static void zpOpacityDelta(int d)
+{
+	if (!g_PaintCtx.Active || !g_PaintCtx.Paint) return;
+	int v = (int)g_PaintCtx.Paint->BrushOpacity + d;
+	if (v < 0) v = 0;
+	if (v > 255) v = 255;
+	g_PaintCtx.Paint->BrushOpacity = (uint)v;
+}
+
+/** Cycle brush mask: none → file1 → … → none (S key / panel). */
+static void zpCycleBrushMask()
+{
+	if (!g_PaintCtx.Active || !g_PaintCtx.Core || g_MaskFiles.empty()) return;
+	g_MaskCycle = (g_MaskCycle + 1) % ((int)g_MaskFiles.size() + 1);
+	std::string err;
+	if (g_MaskCycle == 0)
+		g_PaintCtx.Core->clearBrushMask();
+	else if (!g_PaintCtx.Core->loadBrushMask(g_MaskFiles[g_MaskCycle - 1], err))
+		fprintf(stderr, "WARNING: %s\n", err.c_str());
+}
+
+/** Toggle color-brush mask mode (Q key / panel). */
+static void zpToggleMaskMode()
+{
+	if (!g_PaintCtx.Active || !g_PaintCtx.Core) return;
+	g_PaintCtx.Core->setBrushMaskMode(!g_PaintCtx.Core->brushMaskMode());
+}
+
+/** Displace paint index ±1 mod 16 ([ ] keys / panel). */
+static void zpDisplaceIndexDelta(int d)
+{
+	if (!g_PaintCtx.Active || !g_PaintCtx.Paint) return;
+	int v = ((int)g_PaintCtx.Paint->DisplaceIndex + d) % 16;
+	if (v < 0) v += 16;
+	g_PaintCtx.Paint->DisplaceIndex = (uint)v;
 }
 
 static void zpToggleLockBorders()
@@ -2164,6 +2217,24 @@ static void zpFillBridgeState(ZPUI::SPaintUIBridge &bridge)
 	// Multi-file dirty (M6b)
 	bridge.EditableFileCount = g_EditableFiles.empty() ? 1u : (uint)g_EditableFiles.size();
 	bridge.DirtyFileCount = countDirtyEditableFiles();
+	// Color / displace (M7a)
+	bridge.ColorRadius = pl.BrushRadius;
+	bridge.ColorHardness = pl.BrushHardness;
+	bridge.ColorOpacity = pl.BrushOpacity;
+	bridge.ColorR = pl.BrushColor.R;
+	bridge.ColorG = pl.BrushColor.G;
+	bridge.ColorB = pl.BrushColor.B;
+	bridge.DisplaceIndex = pl.DisplaceIndex;
+	bridge.BrushMaskMode = g_PaintCtx.Core->brushMaskMode();
+	{
+		// Panel button: mask basename when a mask is loaded, else "none"
+		// (HUD still shows "off" when mask mode is disabled — different concern.)
+		std::string lab = "none";
+		if (!g_PaintCtx.Core->brushMaskName().empty())
+			lab = NLMISC::CFile::getFilename(g_PaintCtx.Core->brushMaskName());
+		strncpy(bridge.BrushMaskLabel, lab.c_str(), sizeof(bridge.BrushMaskLabel) - 1);
+		bridge.BrushMaskLabel[sizeof(bridge.BrushMaskLabel) - 1] = 0;
+	}
 }
 
 // Shared viewer host: when externalDriver is non-NULL, runViewer uses it and does not
@@ -2355,6 +2426,12 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 		paintBridge.saveTo = zpSaveTo;
 		paintBridge.saveOverwrite = zpSaveOverwrite;
 		paintBridge.seasonNext = zpSeasonNext;
+		paintBridge.colorRadiusDelta = zpColorRadiusDelta;
+		paintBridge.hardnessDelta = zpHardnessDelta;
+		paintBridge.opacityDelta = zpOpacityDelta;
+		paintBridge.cycleBrushMask = zpCycleBrushMask;
+		paintBridge.toggleMaskMode = zpToggleMaskMode;
+		paintBridge.displaceIndexDelta = zpDisplaceIndexDelta;
 		ZPUI::setPaintUIBridge(&paintBridge);
 
 		if (core)
@@ -2444,6 +2521,52 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 			theLand->Landscape.refineAll(pos);
 			udriver->clearBuffers(NLMISC::CRGBA(90, 90, 90));
 			uscene->render();
+			// Dev-only: ZONE_PAINTER_SHOT_MODE=color|displace selects mode for panel shots (M7a).
+			{
+				const char *shotMode = getenv("ZONE_PAINTER_SHOT_MODE");
+				if (shotMode && core)
+				{
+					if (strcmp(shotMode, "color") == 0 || strcmp(shotMode, "1") == 0)
+						zpSelectMode(CPaintMouseListener::ModeColor);
+					else if (strcmp(shotMode, "displace") == 0 || strcmp(shotMode, "2") == 0)
+						zpSelectMode(CPaintMouseListener::ModeDisplace);
+					else if (strcmp(shotMode, "tile") == 0 || strcmp(shotMode, "0") == 0)
+						zpSelectMode(CPaintMouseListener::ModeTile);
+				}
+			}
+			// Dev-only: ZONE_PAINTER_PANEL_ACTION_TEST drives a panel action-handler path once
+			// (proves panel → same shared handler as keys). Values: hardness+|hardness-|opacity+|
+			// opacity-|radius+|radius-|displace+|displace-|mask|maskmode
+			{
+				const char *act = getenv("ZONE_PAINTER_PANEL_ACTION_TEST");
+				if (act && act[0] && core)
+				{
+					ZPUI::SPaintUIBridge *b = ZPUI::getPaintUIBridge();
+					const uint hardBefore = paintListener.BrushHardness;
+					const uint opacBefore = paintListener.BrushOpacity;
+					const float radBefore = paintListener.BrushRadius;
+					const uint dispBefore = paintListener.DisplaceIndex;
+					const bool maskModeBefore = core->brushMaskMode();
+					if (strcmp(act, "hardness+") == 0 && b && b->hardnessDelta) b->hardnessDelta(+51);
+					else if (strcmp(act, "hardness-") == 0 && b && b->hardnessDelta) b->hardnessDelta(-51);
+					else if (strcmp(act, "opacity+") == 0 && b && b->opacityDelta) b->opacityDelta(+51);
+					else if (strcmp(act, "opacity-") == 0 && b && b->opacityDelta) b->opacityDelta(-51);
+					else if (strcmp(act, "radius+") == 0 && b && b->colorRadiusDelta) b->colorRadiusDelta(+1);
+					else if (strcmp(act, "radius-") == 0 && b && b->colorRadiusDelta) b->colorRadiusDelta(-1);
+					else if (strcmp(act, "displace+") == 0 && b && b->displaceIndexDelta) b->displaceIndexDelta(+1);
+					else if (strcmp(act, "displace-") == 0 && b && b->displaceIndexDelta) b->displaceIndexDelta(-1);
+					else if (strcmp(act, "mask") == 0 && b && b->cycleBrushMask) b->cycleBrushMask();
+					else if (strcmp(act, "maskmode") == 0 && b && b->toggleMaskMode) b->toggleMaskMode();
+					printf("panel-action-test %s: hardness %u->%u opacity %u->%u radius %.1f->%.1f "
+					       "displace %u->%u maskmode %d->%d mask='%s'\n",
+					       act, hardBefore, paintListener.BrushHardness,
+					       opacBefore, paintListener.BrushOpacity,
+					       radBefore, paintListener.BrushRadius,
+					       dispBefore, paintListener.DisplaceIndex,
+					       (int)maskModeBefore, (int)core->brushMaskMode(),
+					       core->brushMaskName().empty() ? "none" : core->brushMaskName().c_str());
+				}
+			}
 			// Sync panel labels before capture so the screenshot shows live state
 			zpFillBridgeState(paintBridge);
 			// Dev-only: ZONE_PAINTER_SAVE_MODAL_SHOT=1 opens the Save modal for one frame
@@ -2538,33 +2661,23 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 						zpGroupDelta(+1);
 					if (zpKeyPushed(ZPK_GroupDown))
 						zpGroupDelta(-1);
+					// Displace / hardness / opacity / mask: shared handlers (keys + panel M7a)
 					if (udriver->AsyncListener.isKeyPushed(NLMISC::KeyLBRACKET))
-						paintListener.DisplaceIndex = (paintListener.DisplaceIndex + 15) % 16;
+						zpDisplaceIndexDelta(-1);
 					if (udriver->AsyncListener.isKeyPushed(NLMISC::KeyRBRACKET))
-						paintListener.DisplaceIndex = (paintListener.DisplaceIndex + 1) % 16;
-					// Live hardness/opacity (plugin: +-0.2 on a 0..1 float; 51/255 == the same
-					// steps on the tool's 0-255 scale)
+						zpDisplaceIndexDelta(+1);
 					if (zpKeyPushed(ZPK_HardnessUp))
-						paintListener.BrushHardness = std::min(paintListener.BrushHardness + 51u, 255u);
+						zpHardnessDelta(+51);
 					if (zpKeyPushed(ZPK_HardnessDown))
-						paintListener.BrushHardness = paintListener.BrushHardness >= 51u ? paintListener.BrushHardness - 51u : 0u;
+						zpHardnessDelta(-51);
 					if (zpKeyPushed(ZPK_OpacityUp))
-						paintListener.BrushOpacity = std::min(paintListener.BrushOpacity + 51u, 255u);
+						zpOpacityDelta(+51);
 					if (zpKeyPushed(ZPK_OpacityDown))
-						paintListener.BrushOpacity = paintListener.BrushOpacity >= 51u ? paintListener.BrushOpacity - 51u : 0u;
-					// Brush mask cycle + mode toggle (plugin SelectColorBrush was a file dialog;
-					// the standalone key cycles the shipped set: none -> mask1 -> ... -> none)
-					if (zpKeyPushed(ZPK_SelectColorBrush) && !g_MaskFiles.empty())
-					{
-						g_MaskCycle = (g_MaskCycle + 1) % ((int)g_MaskFiles.size() + 1);
-						std::string err;
-						if (g_MaskCycle == 0)
-							core->clearBrushMask();
-						else if (!core->loadBrushMask(g_MaskFiles[g_MaskCycle - 1], err))
-							fprintf(stderr, "WARNING: %s\n", err.c_str());
-					}
+						zpOpacityDelta(-51);
+					if (zpKeyPushed(ZPK_SelectColorBrush))
+						zpCycleBrushMask();
 					if (zpKeyPushed(ZPK_ToggleColorBrushMode))
-						core->setBrushMaskMode(!core->brushMaskMode());
+						zpToggleMaskMode();
 					if (zpKeyPushed(ZPK_LockBorders))
 						zpToggleLockBorders();
 					if (zpKeyPushed(ZPK_SeasonNext))

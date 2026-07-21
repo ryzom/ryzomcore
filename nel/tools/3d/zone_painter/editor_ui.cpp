@@ -45,6 +45,7 @@
 #include <nel/gui/group_editbox.h>
 #include <nel/gui/interface_group.h>
 #include <nel/gui/interface_link.h>
+#include <nel/gui/view_bitmap.h>
 #include <nel/gui/view_pointer.h>
 #include <nel/gui/view_renderer.h>
 #include <nel/gui/view_text.h>
@@ -300,6 +301,86 @@ public:
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpSeasonNext, "zp_season_next");
+
+// Color / displace panel (M7a) — thin wrappers over bridge (same as keys)
+
+class CAHZpColorRadius : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params)
+	{
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (!b || !b->colorRadiusDelta) return;
+		int d = 0;
+		fromString(params, d);
+		b->colorRadiusDelta(d);
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpColorRadius, "zp_color_radius");
+
+class CAHZpHardness : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params)
+	{
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (!b || !b->hardnessDelta) return;
+		int d = 0;
+		fromString(params, d);
+		b->hardnessDelta(d);
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpHardness, "zp_hardness");
+
+class CAHZpOpacity : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params)
+	{
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (!b || !b->opacityDelta) return;
+		int d = 0;
+		fromString(params, d);
+		b->opacityDelta(d);
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpOpacity, "zp_opacity");
+
+class CAHZpCycleMask : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->cycleBrushMask) b->cycleBrushMask();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpCycleMask, "zp_cycle_mask");
+
+class CAHZpMaskMode : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->toggleMaskMode) b->toggleMaskMode();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpMaskMode, "zp_mask_mode");
+
+class CAHZpDisplace : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params)
+	{
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (!b || !b->displaceIndexDelta) return;
+		int d = 0;
+		fromString(params, d);
+		b->displaceIndexDelta(d);
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpDisplace, "zp_displace");
 
 class CAHZpSave : public IActionHandler
 {
@@ -771,6 +852,59 @@ void CEditorUI::syncPanelFromBridge()
 	// Save enabled only with --save
 	if (CCtrlBaseButton *btn = findButton("ui:zp:painter:content:btn_save"))
 		btn->setFrozen(!b->CanSave);
+
+	// ---- Color / displace (M7a): always-visible; section labels highlight on active mode ----
+	const bool colorActive = (b->Mode == 1);
+	const bool displaceActive = (b->Mode == 2);
+	const NLMISC::CRGBA colActive(255, 220, 140, 255);
+	const NLMISC::CRGBA colIdle(255, 255, 255, 140);
+
+	if (CViewText *t = findText("ui:zp:painter:content:lbl_color"))
+		t->setColor(colorActive ? colActive : colIdle);
+	if (CViewText *t = findText("ui:zp:painter:content:lbl_displace"))
+		t->setColor(displaceActive ? colActive : colIdle);
+
+	// Color radius (2-32m; SizeUp/Down keys share zp_brush when Mode==Color)
+	if (CViewText *t = findText("ui:zp:painter:content:radius_info"))
+	{
+		char buf[32];
+		snprintf(buf, sizeof(buf), "%.1f", b->ColorRadius);
+		t->setHardText(buf);
+	}
+	if (CViewText *t = findText("ui:zp:painter:content:hard_info"))
+	{
+		char buf[32];
+		snprintf(buf, sizeof(buf), "%u", b->ColorHardness);
+		t->setHardText(buf);
+	}
+	if (CViewText *t = findText("ui:zp:painter:content:opac_info"))
+	{
+		char buf[32];
+		snprintf(buf, sizeof(buf), "%u", b->ColorOpacity);
+		t->setHardText(buf);
+	}
+	// Display-only color swatch (solid modulate on blank box)
+	if (CViewBitmap *sw = dynamic_cast<CViewBitmap *>(
+	        CWidgetManager::getInstance()->getElementFromId("ui:zp:painter:content:color_swatch")))
+	{
+		sw->setColor(NLMISC::CRGBA((uint8)b->ColorR, (uint8)b->ColorG, (uint8)b->ColorB, 255));
+	}
+	// Mask cycle button face = current mask basename or "none"
+	if (CCtrlTextButton *btn = findTextButton("ui:zp:painter:content:btn_mask"))
+	{
+		const char *lab = b->BrushMaskLabel[0] ? b->BrushMaskLabel : "none";
+		btn->setHardText(lab);
+	}
+	if (CCtrlBaseButton *btn = findButton("ui:zp:painter:content:btn_mask_mode"))
+		btn->setPushed(b->BrushMaskMode);
+
+	// Displace index 0-15
+	if (CViewText *t = findText("ui:zp:painter:content:disp_info"))
+	{
+		char buf[32];
+		snprintf(buf, sizeof(buf), "%u", b->DisplaceIndex);
+		t->setHardText(buf);
+	}
 }
 
 void CEditorUI::update()

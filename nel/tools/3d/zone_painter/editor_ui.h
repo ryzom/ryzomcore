@@ -81,6 +81,14 @@ struct SPaintUIBridge
 	bool (*saveOverwrite)();
 	/** Cycle landscape season textures (ui M6a); no-op when <2 seasons available. */
 	void (*seasonNext)();
+	// Color / displace (ui M7a) — same paths as keyboard Home/End/Ins/Del/S/Q/[ ]
+	/** Color brush radius ± (×1.5 / ÷1.5, clamp 2..32); panel always; keys via brushSizeDelta in Color mode. */
+	void (*colorRadiusDelta)(int d);
+	void (*hardnessDelta)(int d);     // ± step (keys use ±51 on 0..255)
+	void (*opacityDelta)(int d);
+	void (*cycleBrushMask)();         // none → mask1 → … → none (S key)
+	void (*toggleMaskMode)();         // Q key
+	void (*displaceIndexDelta)(int d); // ±1 mod 16 ([ ] keys)
 
 	// State snapshot for panel sync (filled by runViewer each frame)
 	bool HaveCore;
@@ -109,21 +117,37 @@ struct SPaintUIBridge
 	/** Editable file count + dirty count (M6b multi-session; 1/0 for single). */
 	uint EditableFileCount;
 	uint DirtyFileCount;
+	// Color brush snapshot (M7a)
+	float ColorRadius;              // meters, 2..32
+	uint ColorHardness;             // 0..255
+	uint ColorOpacity;              // 0..255
+	uint ColorR, ColorG, ColorB;    // swatch
+	char BrushMaskLabel[64];        // basename or "none"
+	bool BrushMaskMode;             // Q-key mask-mode toggle
+	uint DisplaceIndex;             // 0..15
 
 	SPaintUIBridge()
 		: selectMode(NULL), selectTileSetDelta(NULL), toggleTileSize(NULL),
 		  brushSizeDelta(NULL), groupDelta(NULL), toggleLockBorders(NULL),
 		  undo(NULL), redo(NULL), fill(NULL), save(NULL), saveTo(NULL), saveOverwrite(NULL),
-		  seasonNext(NULL),
+		  seasonNext(NULL), colorRadiusDelta(NULL), hardnessDelta(NULL), opacityDelta(NULL),
+		  cycleBrushMask(NULL), toggleMaskMode(NULL), displaceIndexDelta(NULL),
 		  HaveCore(false), Mode(0), CurTileSet(0), TileSetCount(0), Mode256(false),
 		  BrushSize(0), TileGroup(0), LockBorders(false), UndoDepth(0), CanSave(false),
 		  InteractiveSave(false), InstanceCount(1), UpdateThumbnail(true), SeasonCount(0),
-		  EditableFileCount(1), DirtyFileCount(0)
+		  EditableFileCount(1), DirtyFileCount(0),
+		  ColorRadius(8.f), ColorHardness(128), ColorOpacity(255),
+		  ColorR(255), ColorG(255), ColorB(255), BrushMaskMode(false), DisplaceIndex(0)
 	{
 		TileSetName[0] = 0;
 		EditableBasename[0] = 0;
 		InputDir[0] = 0;
 		SeasonLabel[0] = 0;
+		BrushMaskLabel[0] = 'n';
+		BrushMaskLabel[1] = 'o';
+		BrushMaskLabel[2] = 'n';
+		BrushMaskLabel[3] = 'e';
+		BrushMaskLabel[4] = 0;
 	}
 };
 
