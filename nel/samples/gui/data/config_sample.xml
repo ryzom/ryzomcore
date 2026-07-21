@@ -1,7 +1,7 @@
 <interface_config>
 
-<!-- Master group of the sample interface (showcase layout targets 1600x1200) -->
-<root id="sample" x="0" y="0" w="1600" h="1200" active="true" />
+<!-- Master group of the sample interface (showcase layout targets 1280x720) -->
+<root id="sample" x="0" y="0" w="1280" h="720" active="true" />
 
 <define id="case_normal" value="0" />
 <define id="case_lower" value="1" />

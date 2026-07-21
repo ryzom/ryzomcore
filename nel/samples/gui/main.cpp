@@ -237,12 +237,13 @@ int main(int argc, char **argv)
 	args.addArg("d", "data", "path", "Extra data directory to add to the search path");
 	args.addArg("", "screenshot", "file.png", "Save a screenshot and exit");
 	args.addArg("", "frames", "count", "Frame to capture for --screenshot (default 8)");
-	args.addArg("", "size", "WxH", "Window size (default 1024x768)");
+	args.addArg("", "size", "WxH", "Window size (default 1280x720)");
+	args.addArg("", "font-probe", "", "Print renderer font metrics per size and exit");
 	if (!args.parse(argc, argv))
 		return EXIT_FAILURE;
 
-	// Showcase window positions are laid out for 1600x1200
-	uint width = 1600, height = 1200;
+	// Showcase window positions are laid out for 1280x720
+	uint width = 1280, height = 720;
 	if (args.haveLongArg("size"))
 	{
 		std::string s = args.getLongArg("size").front();
@@ -293,6 +294,25 @@ int main(int argc, char **argv)
 		font = CPath::lookup(CFile::getFilename(font));
 	s_TextContext = s_Driver->createTextContext(font);
 	nlassert(s_TextContext);
+	// fontsize means pixels: without this, sizes scale by windowHeight/600
+	// (the client disables the ratio the same way in resetTextContext)
+	s_TextContext->setKeep800x600Ratio(false);
+
+	if (args.haveLongArg("font-probe"))
+	{
+		// Print the metrics the UI renderer actually uses, per font size
+		for (uint32 fs = 8; fs <= 16; ++fs)
+		{
+			s_TextContext->setFontSize(fs);
+			UTextContext::CStringInfo caps = s_TextContext->getStringInfo(ucstring("HEADER"));
+			UTextContext::CStringInfo mixed = s_TextContext->getStringInfo(ucstring("Sliders, gauges and links gjpqy"));
+			printf("fontsize %2u: caps h=%4.1f  mixed h=%4.1f (below baseline %4.1f)\n",
+				fs, caps.StringHeight, mixed.StringHeight, -mixed.StringLine);
+		}
+		s_Driver->deleteTextContext(s_TextContext);
+		s_Driver->release();
+		return EXIT_SUCCESS;
+	}
 
 	// Pump triggered <link> updates whenever database observers flush
 	// (the client creates the same updater in its interface manager)
