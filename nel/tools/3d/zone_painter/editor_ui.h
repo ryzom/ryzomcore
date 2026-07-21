@@ -79,6 +79,8 @@ struct SPaintUIBridge
 	bool (*saveTo)(const std::string &target);
 	/** In-place overwrite: temp → optional one-time .bak → rename (modal "Overwrite"). */
 	bool (*saveOverwrite)();
+	/** Cycle landscape season textures (ui M6a); no-op when <2 seasons available. */
+	void (*seasonNext)();
 
 	// State snapshot for panel sync (filled by runViewer each frame)
 	bool HaveCore;
@@ -100,18 +102,24 @@ struct SPaintUIBridge
 	uint InstanceCount;
 	/** M5c: modal "Update thumbnail" checkbox (default true for interactive save). */
 	bool UpdateThumbnail;
+	/** Current season label for the panel ("spring" / "auto" / ...). */
+	char SeasonLabel[32];
+	/** Number of discovered season variants (0 = no seasonal tiles; button frozen). */
+	uint SeasonCount;
 
 	SPaintUIBridge()
 		: selectMode(NULL), selectTileSetDelta(NULL), toggleTileSize(NULL),
 		  brushSizeDelta(NULL), groupDelta(NULL), toggleLockBorders(NULL),
 		  undo(NULL), redo(NULL), fill(NULL), save(NULL), saveTo(NULL), saveOverwrite(NULL),
+		  seasonNext(NULL),
 		  HaveCore(false), Mode(0), CurTileSet(0), TileSetCount(0), Mode256(false),
 		  BrushSize(0), TileGroup(0), LockBorders(false), UndoDepth(0), CanSave(false),
-		  InteractiveSave(false), InstanceCount(1), UpdateThumbnail(true)
+		  InteractiveSave(false), InstanceCount(1), UpdateThumbnail(true), SeasonCount(0)
 	{
 		TileSetName[0] = 0;
 		EditableBasename[0] = 0;
 		InputDir[0] = 0;
+		SeasonLabel[0] = 0;
 	}
 };
 

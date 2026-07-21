@@ -97,16 +97,54 @@ void resolveContextShapeTextures(const SContextStats &stats, uint &resolvedOut, 
  *	alpha_noiseb_00.png) while the workspace carries only season-postfixed converted files
  *	(ecosystems/<eco>/tiles/<base>_<season>.dds next to the smallbank, or the
  *	landscape/_texture_tiles/<eco>_<season> sources). Registers the bank's sibling tiles/ and
- *	diplace/ dirs plus a per-name CPath::remapFile to the first season variant found (_sp
- *	first, the reference default) — the same fallback the context-mesh names use. */
+ *	diplace/ dirs plus a per-name CPath::remapFile to a season-postfixed variant (preferred
+ *	season first when set via setSeasonPreference, else discovery order starting at _sp) —
+ *	the same fallback the context-mesh names use. Re-calling after a preference change
+ *	re-applies remaps (live season toggle). */
 void resolveBankTextures(NL3D::CTileBank &bank, const std::string &bankPath,
                          uint &resolvedOut, uint &missingOut);
 
-/// Shared season-variant name resolution (see resolveBankTextures): remaps each unresolvable
-/// name to its first season-postfixed variant on the path (_sp default-first). NULL what =
-/// no per-name warnings (expected-absent sets).
+/// Shared season-variant name resolution (see resolveBankTextures). NULL what =
+/// no per-name warnings (expected-absent sets). When a season preference is set and that
+/// postfix exists, remaps even if an unpostfixed or other-season file already resolves.
 void resolveNamesWithSeasons(const std::set<std::string> &names, const char *what,
                              uint &resolvedOut, uint &missingOut);
+
+// ---------------------------------------------------------------------------------------------
+// Season preference (ui M6a). Painting data is season-independent; only texture remaps change.
+
+/** Season codes: "sp" spring, "su" summer, "au" autumn, "wi" winter. Empty = auto (first
+ *	available postfix, historically _sp). Invalid codes return false without changing state. */
+bool setSeasonPreference(const std::string &code);
+/** Current preference code ("sp"/"su"/"au"/"wi") or empty when auto/unset. */
+const std::string &seasonPreference();
+/** Human label for the current preference (or "auto"). */
+std::string seasonPreferenceLabel();
+
+/**
+ * Probe which season postfixes actually exist for a bank/workspace:
+ *  - sibling converted tiles next to the bank (`../tiles/*_<season>.dds`)
+ *  - source dirs `<dbroot>/landscape/_texture_tiles/<eco>_<season>/`
+ * Only seasons with at least one resolvable file/dir are returned, in sp/su/au/wi order.
+ * When none are found (e.g. snowballs unpostfixed tiles), the list is empty and the toggle
+ * is a no-op.
+ */
+void discoverAvailableSeasons(const std::string &bankPath,
+                              std::vector<std::string> &seasonsOut);
+
+/** Cycle preference among discovered seasons (no-op when empty or size 1). Returns true when
+ *	the preference changed. */
+bool cycleSeasonPreference(const std::vector<std::string> &available);
+
+/**
+ * Live landscape reload after a season preference change: re-resolve bank remaps, release
+ * every loaded tile so CTextureFile paths re-lookup through CPath, then optionally preload.
+ * Paint state (tile indices / colors / displace) is untouched. Context-mesh materials are
+ * NOT re-resolved (disproportionate; they keep the textures loaded at open).
+ */
+void reloadLandscapeSeasonTextures(NL3D::CTileBank &bank, const std::string &bankPath,
+                                   NL3D::CLandscape *landscape, NL3D::IDriver *driver,
+                                   bool preload);
 
 /// Derive the DBPATH default root from a workspace file path when unset (the ig/cmb
 /// convention). Called by the texture registration; call early when the bank resolution needs

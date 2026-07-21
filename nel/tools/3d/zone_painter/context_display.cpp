@@ -55,6 +55,9 @@
 #include <cstdio>
 #include <map>
 #include <set>
+#include <vector>
+
+#include <nel/3d/tile_bank.h>
 
 #include "../pipeline_max/scene.h"
 #include "../pipeline_max/builtin/scene_impl.h"
@@ -274,27 +277,110 @@ void resolveContextShapeTextures(const SContextStats &stats, uint &resolvedOut, 
 	resolveNamesWithSeasons(names, "context texture", resolvedOut, missingOut);
 }
 
-// Shared season-variant resolution: a name that doesn't resolve as-is gets remapped to its
-// first season-postfixed variant that does (_sp first, the reference default; the dds
-// extension remap answers .tga/.png lookups from the converted sets).
+// Season preference (ui M6a). Empty = auto (try sp first, historical default).
+static std::string s_SeasonPref;
+
+static const char *kSeasonCodes[4] = { "sp", "su", "au", "wi" };
+
+static bool isSeasonCode(const std::string &c)
+{
+	for (int i = 0; i < 4; ++i)
+		if (c == kSeasonCodes[i])
+			return true;
+	return false;
+}
+
+bool setSeasonPreference(const std::string &code)
+{
+	std::string c = NLMISC::toLowerAscii(code);
+	if (c.empty())
+	{
+		s_SeasonPref.clear();
+		return true;
+	}
+	if (!isSeasonCode(c))
+		return false;
+	s_SeasonPref = c;
+	return true;
+}
+
+const std::string &seasonPreference()
+{
+	return s_SeasonPref;
+}
+
+std::string seasonPreferenceLabel()
+{
+	if (s_SeasonPref.empty())
+		return "auto";
+	if (s_SeasonPref == "sp") return "spring";
+	if (s_SeasonPref == "su") return "summer";
+	if (s_SeasonPref == "au") return "autumn";
+	if (s_SeasonPref == "wi") return "winter";
+	return s_SeasonPref;
+}
+
+/** Build try-order of season postfixes ("_sp", ...) with preferred first. */
+static void seasonTryOrder(std::string out[4], int &nOut)
+{
+	nOut = 0;
+	// Preferred first when set
+	if (!s_SeasonPref.empty())
+	{
+		out[nOut++] = std::string("_") + s_SeasonPref;
+	}
+	for (int i = 0; i < 4; ++i)
+	{
+		std::string p = std::string("_") + kSeasonCodes[i];
+		bool already = false;
+		for (int j = 0; j < nOut; ++j)
+			if (out[j] == p) { already = true; break; }
+		if (!already)
+			out[nOut++] = p;
+	}
+}
+
+// Shared season-variant resolution. When a season preference is set and that postfix exists
+// on the path, remaps even if an unpostfixed (or previously remapped other-season) name already
+// resolves — so live toggles re-point CPath. Otherwise: as-is first, then first postfix that
+// hits (_sp historically first). Extension remaps serve .tga/.png -> .dds.
 void resolveNamesWithSeasons(const std::set<std::string> &names, const char *what,
                              uint &resolvedOut, uint &missingOut)
 {
-	static const char *seasons[4] = { "_sp", "_su", "_au", "_wi" };
+	std::string order[4];
+	int nOrder = 0;
+	seasonTryOrder(order, nOrder);
+
 	for (std::set<std::string>::const_iterator it = names.begin(); it != names.end(); ++it)
 	{
+		std::string base = NLMISC::CFile::getFilenameWithoutExtension(*it);
+		std::string ext = NLMISC::CFile::getExtension(*it);
+		const std::string extPart = ext.empty() ? std::string() : ("." + ext);
+
+		// Forced preference: always try preferred postfix first and remap when found.
+		if (!s_SeasonPref.empty())
+		{
+			std::string preferred = base + "_" + s_SeasonPref + extPart;
+			if (!NLMISC::CPath::lookup(preferred, false, false).empty())
+			{
+				NLMISC::CPath::remapFile(*it, preferred);
+				++resolvedOut;
+				continue;
+			}
+		}
+
+		// As-is (unpostfixed or already correct on disk)
 		if (!NLMISC::CPath::lookup(*it, false, false).empty())
 		{
 			++resolvedOut;
 			continue;
 		}
-		// Seasonal fallback: name.tga -> name_sp.tga (etc.), served by the dds remap
-		std::string base = NLMISC::CFile::getFilenameWithoutExtension(*it);
-		std::string ext = NLMISC::CFile::getExtension(*it);
+
+		// Seasonal fallback in try-order
 		bool found = false;
-		for (int s = 0; s < 4 && !found; ++s)
+		for (int s = 0; s < nOrder && !found; ++s)
 		{
-			std::string candidate = base + seasons[s] + (ext.empty() ? "" : "." + ext);
+			std::string candidate = base + order[s] + extPart;
 			if (!NLMISC::CPath::lookup(candidate, false, false).empty())
 			{
 				NLMISC::CPath::remapFile(*it, candidate);
@@ -309,6 +395,134 @@ void resolveNamesWithSeasons(const std::set<std::string> &names, const char *wha
 			// given zone never loads are expected to be absent — the load path warns for real).
 			if (what)
 				fprintf(stderr, "WARNING: %s not found (any season): %s\n", what, it->c_str());
+		}
+	}
+}
+
+void discoverAvailableSeasons(const std::string &bankPath, std::vector<std::string> &seasonsOut)
+{
+	seasonsOut.clear();
+	if (bankPath.empty())
+		return;
+
+	// eco name from bank file (lacustre.smallbank -> lacustre)
+	std::string eco = NLMISC::CFile::getFilenameWithoutExtension(bankPath);
+	// Converted tiles next to the smallbank: ../tiles or sibling *_tiles under export tree
+	std::string tilesDir = NLMISC::CFile::getPath(bankPath) + "../tiles";
+	// Also common: <bankdir> itself or bank path with _bank suffix replaced by _tiles
+	std::string bankDir = NLMISC::CFile::getPath(bankPath);
+	std::string bankBase = NLMISC::CFile::getFilenameWithoutExtension(bankPath);
+	// core4_data style: lacustre_bank/lacustre.smallbank -> lacustre_tiles/
+	std::string exportTiles;
+	{
+		std::string parent = bankDir;
+		// strip trailing slash
+		while (!parent.empty() && (parent[parent.size() - 1] == '/' || parent[parent.size() - 1] == '\\'))
+			parent.erase(parent.size() - 1);
+		// parent dir name
+		std::string::size_type sl = parent.find_last_of("/\\");
+		std::string leaf = (sl == std::string::npos) ? parent : parent.substr(sl + 1);
+		std::string grand = (sl == std::string::npos) ? std::string() : parent.substr(0, sl);
+		if (leaf.size() > 5 && leaf.compare(leaf.size() - 5, 5, "_bank") == 0)
+		{
+			std::string tilesLeaf = leaf.substr(0, leaf.size() - 5) + "_tiles";
+			exportTiles = grand.empty() ? tilesLeaf : (grand + "/" + tilesLeaf);
+		}
+	}
+
+	for (int s = 0; s < 4; ++s)
+	{
+		const char *code = kSeasonCodes[s];
+		const std::string postfix = std::string("_") + code;
+		bool found = false;
+
+		// Source season directory under the graphics workspace
+		if (!DBPATH::defaultRoot().empty())
+		{
+			std::string dir = DBPATH::defaultRoot() + "/landscape/_texture_tiles/" + eco + postfix;
+			if (NLMISC::CFile::isDirectory(dir))
+				found = true;
+		}
+
+		// Converted sibling tiles/ (scan for *_{season}.dds)
+		if (!found)
+		{
+			const char *dirs[] = { tilesDir.c_str(), exportTiles.c_str(), bankDir.c_str(), NULL };
+			for (int d = 0; dirs[d] && !found; ++d)
+			{
+				if (!dirs[d][0] || !NLMISC::CFile::isDirectory(dirs[d]))
+					continue;
+				std::vector<std::string> files;
+				NLMISC::CPath::getPathContent(dirs[d], false, false, true, files);
+				const std::string needle = postfix + ".dds";
+				const std::string needlePng = postfix + ".png";
+				const std::string needleTga = postfix + ".tga";
+				for (size_t f = 0; f < files.size() && !found; ++f)
+				{
+					std::string bn = NLMISC::toLowerAscii(NLMISC::CFile::getFilename(files[f]));
+					if (bn.size() >= needle.size()
+					    && (bn.compare(bn.size() - needle.size(), needle.size(), needle) == 0
+					        || bn.compare(bn.size() - needlePng.size(), needlePng.size(), needlePng) == 0
+					        || bn.compare(bn.size() - needleTga.size(), needleTga.size(), needleTga) == 0))
+						found = true;
+				}
+			}
+		}
+
+		if (found)
+			seasonsOut.push_back(code);
+	}
+}
+
+bool cycleSeasonPreference(const std::vector<std::string> &available)
+{
+	if (available.size() < 2)
+		return false;
+	// Find current index (or -1 if auto/not in list)
+	int cur = -1;
+	for (size_t i = 0; i < available.size(); ++i)
+	{
+		if (available[i] == s_SeasonPref)
+		{
+			cur = (int)i;
+			break;
+		}
+	}
+	// Advance: auto or unknown -> first; last -> first
+	int next = (cur < 0) ? 0 : ((cur + 1) % (int)available.size());
+	if (available[next] == s_SeasonPref)
+		return false;
+	s_SeasonPref = available[next];
+	return true;
+}
+
+void reloadLandscapeSeasonTextures(NL3D::CTileBank &bank, const std::string &bankPath,
+                                   NL3D::CLandscape *landscape, NL3D::IDriver *driver,
+                                   bool preload)
+{
+	uint resolved = 0, missing = 0;
+	resolveBankTextures(bank, bankPath, resolved, missing);
+	printf("season reload (%s): bank textures %u resolved, %u missing\n",
+	       seasonPreferenceLabel().c_str(), resolved, missing);
+	if (!landscape)
+		return;
+	// Drop every loaded tile so the next flush/draw re-creates CTextureFile through CPath
+	// remaps. TileTextureMap RefPtrs go NULL; findTileTexture recreates on demand.
+	landscape->releaseTiles(0, 65536);
+	if (preload && driver)
+	{
+		// Flush every tileset entry (same as CPaintCore::preloadTiles)
+		for (sint ts = 0; ts < bank.getTileSetCount(); ++ts)
+		{
+			const NL3D::CTileSet *tileSet = bank.getTileSet(ts);
+			if (!tileSet) continue;
+			sint tl;
+			for (tl = 0; tl < tileSet->getNumTile128(); ++tl)
+				landscape->flushTiles(driver, (uint16)tileSet->getTile128(tl), 1);
+			for (tl = 0; tl < tileSet->getNumTile256(); ++tl)
+				landscape->flushTiles(driver, (uint16)tileSet->getTile256(tl), 1);
+			for (tl = 0; tl < NL3D::CTileSet::count; ++tl)
+				landscape->flushTiles(driver, (uint16)tileSet->getTransition(tl)->getTile(), 1);
 		}
 	}
 }

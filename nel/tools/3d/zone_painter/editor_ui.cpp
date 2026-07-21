@@ -289,6 +289,18 @@ public:
 };
 REGISTER_ACTION_HANDLER(CAHZpFill, "zp_fill");
 
+class CAHZpSeasonNext : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->seasonNext && b->SeasonCount > 1)
+			b->seasonNext();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpSeasonNext, "zp_season_next");
+
 class CAHZpSave : public IActionHandler
 {
 public:
@@ -708,6 +720,22 @@ void CEditorUI::syncPanelFromBridge()
 		else
 			t->setHardText("");
 	}
+
+	// Season variant (M6a)
+	if (CViewText *t = findText("ui:zp:painter:content:season_info"))
+	{
+		if (b->SeasonCount == 0)
+			t->setHardText("Season: (none)");
+		else
+		{
+			char buf[64];
+			snprintf(buf, sizeof(buf), "Season: %s",
+			         b->SeasonLabel[0] ? b->SeasonLabel : "auto");
+			t->setHardText(buf);
+		}
+	}
+	if (CCtrlBaseButton *btn = findButton("ui:zp:painter:content:btn_season"))
+		btn->setFrozen(b->SeasonCount < 2);
 
 	// Save enabled only with --save
 	if (CCtrlBaseButton *btn = findButton("ui:zp:painter:content:btn_save"))

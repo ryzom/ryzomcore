@@ -286,6 +286,7 @@ enum TPainterKey
 	ZPK_GetState,
 	ZPK_ResetPatch,
 	ZPK_ToggleUI,
+	ZPK_SeasonNext, // ui M6a: cycle landscape season textures
 	ZPK_KeyCounter
 };
 
@@ -323,6 +324,7 @@ static const char *kPainterKeysName[ZPK_KeyCounter] =
 	"GetState",
 	"ResetPatch",
 	"ToggleUI",
+	"SeasonNext",
 };
 
 // Tool defaults: the pre-cfg hardcoded viewer keys stay on their keys (T/C/D, +/-, B, G, F);
@@ -360,6 +362,7 @@ static uint g_PainterKeys[ZPK_KeyCounter] =
 	0,                    // GetState
 	0,                    // ResetPatch
 	NLMISC::KeyF10,       // ToggleUI (NLGUI panel visibility)
+	NLMISC::KeyY,         // SeasonNext (ui M6a; free key — cycle season textures)
 };
 
 // paint_ui.cpp light/zoom variable defaults (LoadVarCfg overrides; identical to the previous
@@ -1595,12 +1598,19 @@ struct SPaintCtx
 	NL3D::CLandscapeModel *Land;
 	NL3D::CCamera *Camera;
 	std::vector<SPaintZone> *Zones;
+	// Season toggle (M6a): bank + path for re-resolve; available codes from discovery
+	NL3D::CTileBank *Bank;
+	std::string BankPath;
+	std::vector<std::string> *AvailableSeasons;
 	SPaintCtx()
 		: Active(false), Core(NULL), Paint(NULL), Scene(NULL), InteractiveSave(false),
-		  WantThumbnail(false), UDriver(NULL), UScene(NULL), Land(NULL), Camera(NULL), Zones(NULL)
+		  WantThumbnail(false), UDriver(NULL), UScene(NULL), Land(NULL), Camera(NULL), Zones(NULL),
+		  Bank(NULL), AvailableSeasons(NULL)
 	{
 	}
 };
+// Discovered season codes for the open bank (filled at bank load; empty = no seasonal tiles)
+static std::vector<std::string> g_AvailableSeasons;
 static SPaintCtx g_PaintCtx;
 // CLI --thumbnail: set before save so zpSaveTo / headless save path pick it up
 static bool g_CliWantThumbnail = false;
@@ -1996,6 +2006,23 @@ static void zpSaveDirect()
 	zpSaveTo(g_PaintCtx.SavePath);
 }
 
+/** Cycle season preference + live-flush landscape tile textures (paint state untouched). */
+static void zpSeasonNext()
+{
+	if (!g_PaintCtx.Active || !g_PaintCtx.AvailableSeasons || g_PaintCtx.AvailableSeasons->size() < 2)
+		return;
+	if (!ZPCTX::cycleSeasonPreference(*g_PaintCtx.AvailableSeasons))
+		return;
+	printf("season: %s\n", ZPCTX::seasonPreferenceLabel().c_str());
+	if (!g_PaintCtx.Bank || !g_PaintCtx.Land || !g_PaintCtx.UDriver)
+		return;
+	NL3D::IDriver *driver = static_cast<NL3D::CDriverUser *>(g_PaintCtx.UDriver)->getDriver();
+	// Live flush (preferred over full session reload): re-remap CPath season postfixes,
+	// releaseTiles so CTextureFile re-looks up, optional preload flush.
+	ZPCTX::reloadLandscapeSeasonTextures(*g_PaintCtx.Bank, g_PaintCtx.BankPath,
+	                                     &g_PaintCtx.Land->Landscape, driver, g_PreloadTiles);
+}
+
 // Fill the UI bridge state snapshot (labels / button push state).
 static void zpFillBridgeState(ZPUI::SPaintUIBridge &bridge)
 {
@@ -2024,6 +2051,14 @@ static void zpFillBridgeState(ZPUI::SPaintUIBridge &bridge)
 		std::string dir = NLMISC::CFile::getPath(g_PaintCtx.InputPath);
 		strncpy(bridge.InputDir, dir.c_str(), sizeof(bridge.InputDir) - 1);
 		bridge.InputDir[sizeof(bridge.InputDir) - 1] = 0;
+	}
+	// Season (M6a)
+	{
+		std::string lab = ZPCTX::seasonPreferenceLabel();
+		strncpy(bridge.SeasonLabel, lab.c_str(), sizeof(bridge.SeasonLabel) - 1);
+		bridge.SeasonLabel[sizeof(bridge.SeasonLabel) - 1] = 0;
+		bridge.SeasonCount = g_PaintCtx.AvailableSeasons
+			? (uint)g_PaintCtx.AvailableSeasons->size() : 0;
 	}
 }
 
@@ -2189,6 +2224,9 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 		g_PaintCtx.Land = theLand;
 		g_PaintCtx.Camera = camera;
 		g_PaintCtx.Zones = &zones;
+		g_PaintCtx.Bank = &bank;
+		g_PaintCtx.BankPath = g_BankPath;
+		g_PaintCtx.AvailableSeasons = &g_AvailableSeasons;
 		paintBridge.selectMode = zpSelectMode;
 		paintBridge.selectTileSetDelta = zpSelectTileSetDelta;
 		paintBridge.toggleTileSize = zpToggleTileSize;
@@ -2201,6 +2239,7 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 		paintBridge.save = zpSaveDirect;
 		paintBridge.saveTo = zpSaveTo;
 		paintBridge.saveOverwrite = zpSaveOverwrite;
+		paintBridge.seasonNext = zpSeasonNext;
 		ZPUI::setPaintUIBridge(&paintBridge);
 
 		if (core)
@@ -2413,6 +2452,8 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 						core->setBrushMaskMode(!core->brushMaskMode());
 					if (zpKeyPushed(ZPK_LockBorders))
 						zpToggleLockBorders();
+					if (zpKeyPushed(ZPK_SeasonNext))
+						zpSeasonNext();
 					if (!paintListener.Pressed && !editorUI->wantsMouse())
 						paintListener.updateHover();
 					else if (editorUI->wantsMouse())
@@ -2589,6 +2630,8 @@ int main(int argc, char **argv)
 	                    "  vars cfg (--vars-cfg, else ./zone_painter_vars.cfg): LightDirection {x,y,z}, LightDiffuse {r,g,b},\n"
 	                    "  LightAmbiant {r,g,b}, LightMultiply, ZoomSpeed (the plugin LoadVarCfg set).\n"
 	                    "  ToggleUI (default F10: show/hide the in-engine NLGUI panel).\n"
+	                    "  SeasonNext (default Y: cycle landscape season textures among variants that exist for\n"
+	                    "  the open bank — spring/summer/autumn/winter; paint indices/colors/displace untouched).\n"
 	                    "Fixed viewer keys: PgUp/PgDn + 0-9 tile set, [ ] displace index, Ctrl+Z/Ctrl+E undo/redo,\n"
 	                    "F12 screenshot, ESC quit.");
 	// Optional first positional: .max (legacy) or folder (startup seed). Absent => startup flow.
@@ -2649,6 +2692,11 @@ int main(int argc, char **argv)
 	            "Continent startup: load 8-ring neighbor .max files as frozen read-only context "
 	            "(default on for interactive/startup-auto, off for the legacy .max path). "
 	            "Also accepted as ?neighbors=off on --startup-auto.");
+	args.addArg("", "season", "sp|su|au|wi",
+	            "Initial landscape season texture preference (spring/summer/autumn/winter). "
+	            "Default: auto (first available postfix, historically spring). Only seasons that "
+	            "resolve for the open bank are offered by SeasonNext / the panel button; painting "
+	            "data is season-independent.");
 	args.addArg("", "instances", "NxM",
 	            "Ecosystem startup: self-instance the brick on an NxM layout grid (supported: 1x1, "
 	            "2x1, 1x2, 2x2, 3x3). Primary zone at the origin; other cells are display duplicates "
@@ -2673,6 +2721,19 @@ int main(int argc, char **argv)
 
 	g_verbose = args.haveLongArg("verbose");
 	g_CliWantThumbnail = args.haveLongArg("thumbnail");
+
+	// Season preference (M6a) before bank load so the first resolveBankTextures uses it
+	if (args.haveLongArg("season"))
+	{
+		std::string s = NLMISC::toLowerAscii(args.getLongArg("season")[0]);
+		if (!ZPCTX::setSeasonPreference(s))
+		{
+			fprintf(stderr, "ERROR: --season expects sp|su|au|wi, got '%s'\n",
+			        args.getLongArg("season")[0].c_str());
+			return 1;
+		}
+		printf("season: preference '%s' (%s)\n", s.c_str(), ZPCTX::seasonPreferenceLabel().c_str());
+	}
 
 	// Hidden M5b/M5c thumbnail tools (no driver / scene required)
 	if (args.haveLongArg("thumb-roundtrip-test"))
@@ -3241,6 +3302,34 @@ int main(int argc, char **argv)
 		ZPCTX::ensureDbRootFrom(input);
 		if (!loadBankFile(bankPath, bankRecursive, searchPaths, bank)) return 1;
 		haveBank = true;
+		// Season discovery for the open bank (panel/SeasonNext only offer what resolves)
+		g_AvailableSeasons.clear();
+		ZPCTX::discoverAvailableSeasons(bankPath, g_AvailableSeasons);
+		if (!g_AvailableSeasons.empty())
+		{
+			printf("season: available");
+			for (size_t si = 0; si < g_AvailableSeasons.size(); ++si)
+				printf("%s%s", si ? "," : " ", g_AvailableSeasons[si].c_str());
+			printf(" (preference %s)\n", ZPCTX::seasonPreferenceLabel().c_str());
+			// If CLI picked a season that does not resolve, warn but keep it (fallback chain still works)
+			if (!ZPCTX::seasonPreference().empty())
+			{
+				bool ok = false;
+				for (size_t si = 0; si < g_AvailableSeasons.size(); ++si)
+					if (g_AvailableSeasons[si] == ZPCTX::seasonPreference()) { ok = true; break; }
+				if (!ok)
+					fprintf(stderr, "WARNING: --season '%s' not found among available variants; "
+					        "resolution will fall back to the first hit\n",
+					        ZPCTX::seasonPreference().c_str());
+			}
+			// Auto-pick first available when preference empty (stable default = first = sp when present)
+			else if (g_AvailableSeasons.size() >= 1)
+			{
+				// Leave empty preference as historical "try sp first then others" in resolve order
+			}
+		}
+		else
+			printf("season: no seasonal tile variants found for this bank (toggle disabled)\n");
 	}
 	if ((viewerMode || !scriptPath.empty()) && !haveBank)
 	{

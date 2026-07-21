@@ -212,8 +212,14 @@
 		<view type="text" id="instance_info" posref="TL TL" x="10" y="-6" fontsize="11" shadow="true"
 			global_color="false" color="120 255 160 255" hardtext="" />
 
+		<!-- Season variant toggle (M6a; frozen when <2 seasons resolve) -->
+		<view type="text" id="season_info" posparent="instance_info" posref="BL TL" x="0" y="-4" fontsize="11" shadow="true"
+			global_color="false" color="255 220 140 255" hardtext="Season: auto" />
+		<ctrl style="text_button_16" id="btn_season" posparent="season_info" posref="MR ML" x="6" y="0"
+			onclick_l="zp_season_next" params_l="" hardtext="Next" />
+
 		<!-- Mode radio row -->
-		<view type="text" id="lbl_mode" posparent="instance_info" posref="BL TL" x="0" y="-6" fontsize="11" shadow="true"
+		<view type="text" id="lbl_mode" posparent="season_info" posref="BL TL" x="0" y="-6" fontsize="11" shadow="true"
 			global_color="false" color="255 255 255 180" hardtext="Mode" />
 		<ctrl style="text_button_radio" id="mode_tile" posparent="lbl_mode" posref="BL TL" x="0" y="-4"
 			pushed="true" onclick_l="zp_mode" params_l="0" hardtext="Tile" />
