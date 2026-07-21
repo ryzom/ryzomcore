@@ -2781,7 +2781,10 @@ int main(int argc, char **argv)
 	args.addArg("", "bank-recursive", "", "Add the bank directory to the texture search path recursively");
 	args.addArg("", "search-path", "dir", "Extra recursive texture search path (repeatable)", false);
 	args.addArg("", "out", "output.max", "Output .max for --null-edit (in-place save is refused)");
-	args.addArg("", "save", "output.max", "Write-back + whole-file save after ops (in-place save is refused)");
+	args.addArg("", "save", "output.max",
+	            "Write-back + whole-file save after ops (in-place save is refused). "
+	            "Multi-select sessions (M6b): errors if more than one editable file is dirty — "
+	            "use the interactive Save modal (Overwrite all) for multi-file write-back.");
 	args.addArg("", "cellsize", "meters", "Ligo cell size for the zone-symmetry state (default 100)");
 	args.addArg("", "snap", "meters", "Ligo snap for the zone-symmetry state (default 1)");
 	args.addArg("", "paint-script", "file", "Scripted paint ops (headless without a display mode)");

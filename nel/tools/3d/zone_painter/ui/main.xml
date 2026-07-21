@@ -206,7 +206,7 @@
   Painter control panel (M1c). Inactive until the viewer starts (startup flow hides it).
   Top-right corner keeps the terrain baseline visible in screenshots.
 -->
-<group type="container" id="painter" w="220" pop_min_w="200" pop_max_w="280" h="340" pop_min_h="280" pop_max_h="480"
+<group type="container" id="painter" w="220" pop_min_w="200" pop_max_w="280" h="380" pop_min_h="300" pop_max_h="520"
 	title="Painter" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
 	title_bar_open="false" open_button="false" right_button="true" lockable="false" openable="false"
 	opened="true" movable="true" active="false" x="572" y="592">
@@ -295,7 +295,7 @@
 		<ctrl style="text_button_16" id="btn_save" posparent="btn_fill0" posref="BL TL" x="0" y="-12"
 			onclick_l="zp_save" params_l="" hardtext="Save" />
 		<view type="text" id="hint" posparent="btn_save" posref="BL TL" x="0" y="-8" fontsize="10" shadow="true"
-			global_color="false" color="255 255 255 140" hardtext="F10 hide  ESC quit" />
+			global_color="false" color="255 255 255 140" hardtext="Y season  F10 hide  ESC quit" />
 
 	</group>
 </group>
