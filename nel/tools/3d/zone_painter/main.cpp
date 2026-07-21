@@ -184,6 +184,9 @@ using namespace MAXMATH;
 // In-engine NLGUI shell (own TU — must not pull patch_eval / SCENELIB into editor_ui.cpp).
 #include "editor_ui.h"
 
+// Workspace fingerprint / discovery / startup.cfg (own TU — NLMISC only).
+#include "workspace_discovery.h"
+
 static bool g_verbose = false;
 // Result of the viewer script pre-pass (propagated as the viewer exit code for scripted gates)
 static int g_ViewerScriptRc = 0;
@@ -197,6 +200,10 @@ static bool g_PreloadTiles = false;
 static bool g_IncludeMeshes = false;
 static std::string g_InputPath;
 static std::string g_BankPath;
+// Extra texture search path derived by the startup flow (empty on the legacy CLI path)
+static std::string g_StartupTexturePath;
+// When true, bank directory is searched recursively (startup flow always wants this)
+static bool g_ForceBankRecursive = false;
 // Shipped brush mask cycle (viewer SelectColorBrush key; 0 = none, i = g_MaskFiles[i-1])
 static std::vector<std::string> g_MaskFiles;
 static int g_MaskCycle = 0;
@@ -1472,10 +1479,16 @@ static void zpFillBridgeState(ZPUI::SPaintUIBridge &bridge)
 	bridge.CanSave = !g_PaintCtx.SavePath.empty();
 }
 
+// Shared viewer host: when externalDriver is non-NULL, runViewer uses it and does not
+// create/release the driver (startup flow owns one UDriver for screens + viewer). When
+// externalEditorUI is non-NULL it is reused (already init'd); otherwise a local CEditorUI
+// is constructed and shut down here. Headless modes never call runViewer.
 static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CPaintCore *core,
                      PMAXLOAD::SLoadedMax &lm,
                      const std::string &screenshotPath, const std::string &fontPath,
-                     const std::string &scriptPath, const std::string &savePath)
+                     const std::string &scriptPath, const std::string &savePath,
+                     NL3D::UDriver *externalDriver = NULL,
+                     ZPUI::CEditorUI *externalEditorUI = NULL)
 {
 	// Landscape bbox in world space (camera + mouse hotspot).
 	NLMISC::CAABBox bbox;
@@ -1494,33 +1507,50 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 	}
 	NLMISC::CVector center = bbox.getCenter();
 
-	NL3D::UDriver *udriver = NULL;
+	NL3D::UDriver *udriver = externalDriver;
+	const bool ownsDriver = (externalDriver == NULL);
 	NL3D::UScene *uscene = NULL;
+	ZPUI::CEditorUI localEditorUI;
+	ZPUI::CEditorUI *editorUI = externalEditorUI ? externalEditorUI : &localEditorUI;
+	const bool ownsEditorUI = (externalEditorUI == NULL);
 	try
 	{
 		// UDriver/UScene port of the previous CNELU init (needed for NLGUI's CViewRenderer,
 		// which requires UDriver). Low-level landscape assembly unwraps to IDriver/CScene.
 		NL3D::CScene::registerBasics();
 		NL3D::CViewport viewport;
-		udriver = NL3D::UDriver::createDriver(0, false, 0);
-		if (!udriver)
+		if (ownsDriver)
 		{
-			fprintf(stderr, "ERROR: UDriver::createDriver failed (no 3D driver?)\n");
+			udriver = NL3D::UDriver::createDriver(0, false, 0);
+			if (!udriver)
+			{
+				fprintf(stderr, "ERROR: UDriver::createDriver failed (no 3D driver?)\n");
+				return 1;
+			}
+			if (!udriver->setDisplay(NL3D::UDriver::CMode(kMainWidth, kMainHeight, 32, true)))
+			{
+				fprintf(stderr, "ERROR: UDriver::setDisplay failed\n");
+				delete udriver;
+				return 1;
+			}
+		}
+		else if (!udriver)
+		{
+			fprintf(stderr, "ERROR: runViewer: external driver is null\n");
 			return 1;
 		}
-		if (!udriver->setDisplay(NL3D::UDriver::CMode(kMainWidth, kMainHeight, 32, true)))
+		// Window title: zone_painter — <file> when a zone is open
 		{
-			fprintf(stderr, "ERROR: UDriver::setDisplay failed\n");
-			delete udriver;
-			return 1;
+			std::string title = "zone_painter";
+			if (!g_InputPath.empty())
+				title += " — " + NLMISC::CFile::getFilename(g_InputPath);
+			udriver->setWindowTitle(ucstring(title));
 		}
-		udriver->setWindowTitle(ucstring("zone_painter"));
 		uscene = udriver->createScene(false);
 		if (!uscene)
 		{
 			fprintf(stderr, "ERROR: UDriver::createScene failed\n");
-			udriver->release();
-			delete udriver;
+			if (ownsDriver) { udriver->release(); delete udriver; }
 			return 1;
 		}
 		uscene->setViewport(viewport);
@@ -1566,8 +1596,11 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 
 		// In-engine NLGUI shell (optional: soft-fails if atlas/XML missing; keyboard+HUD remain).
 		// Init before paint/nav listeners so GUI event routing is registered first.
-		ZPUI::CEditorUI editorUI;
-		editorUI.init(udriver, fontPath);
+		// When the startup flow already inited the shell, reuse it (do not re-init).
+		if (ownsEditorUI)
+			editorUI->init(udriver, fontPath);
+		// Ensure the Painter panel is active for the viewer session (startup screens hide it).
+		editorUI->setVisible(true);
 
 		// Mouse listener: edit3d orbiting the landscape center (the plugin's hotspot was the
 		// selection center).
@@ -1611,7 +1644,7 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 			paintListener.Core = core;
 			paintListener.Nav = &mouseListener;
 			paintListener.Camera = camera;
-			paintListener.EditorUI = &editorUI;
+			paintListener.EditorUI = editorUI;
 			paintListener.Viewport = viewport;
 			paintListener.BrushColor = g_ViewerBrushColor;
 			paintListener.BrushRadius = g_ViewerBrushRadius;
@@ -1694,8 +1727,8 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 			uscene->render();
 			// Sync panel labels before capture so the screenshot shows live state
 			zpFillBridgeState(paintBridge);
-			editorUI.update();
-			editorUI.draw();
+			editorUI->update();
+			editorUI->draw();
 			udriver->swapBuffers();
 			NLMISC::CBitmap btm;
 			driver->getBuffer(btm);
@@ -1720,7 +1753,7 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 				// Snapshot the orbit matrix so GUI mouse capture can discard nav deltas
 				NLMISC::CMatrix navMatBefore = mouseListener.getViewMatrix();
 				udriver->EventServer.pump();
-				if (editorUI.wantsMouse())
+				if (editorUI->wantsMouse())
 					mouseListener.setMatrix(navMatBefore);
 
 				// Frame dt (the plugin's zoom timing)
@@ -1730,7 +1763,7 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 
 				// F10 / ToggleUI: show/hide the NLGUI shell (keys still work either way)
 				if (zpKeyPushed(ZPK_ToggleUI))
-					editorUI.toggleVisible();
+					editorUI->toggleVisible();
 
 				// Tile set / mode / brush keys → shared named handlers (same as NLGUI buttons).
 				// PgUp/PgDn + 0-9 and [ ] displace stay hardcoded; rebindable actions ride the
@@ -1793,9 +1826,9 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 						core->setBrushMaskMode(!core->brushMaskMode());
 					if (zpKeyPushed(ZPK_LockBorders))
 						zpToggleLockBorders();
-					if (!paintListener.Pressed && !editorUI.wantsMouse())
+					if (!paintListener.Pressed && !editorUI->wantsMouse())
 						paintListener.updateHover();
-					else if (editorUI.wantsMouse())
+					else if (editorUI->wantsMouse())
 						paintListener.HaveHover = false;
 					// Fill0-3 through the shared fill handler
 					for (int fillRot = 0; fillRot < 4; ++fillRot)
@@ -1876,8 +1909,8 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 				}
 
 				// NLGUI over the 3D scene (after scene/HUD, before swap)
-				editorUI.update();
-				editorUI.draw();
+				editorUI->update();
+				editorUI->draw();
 
 				udriver->swapBuffers();
 				zpViewerScreenshot(driver, udriver->AsyncListener); // F12 convenience
@@ -1885,7 +1918,8 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 			while (!udriver->AsyncListener.isKeyPushed(NLMISC::KeyESCAPE) && closeListener.WindowActive && udriver->isActive());
 		}
 
-		editorUI.shutdown();
+		if (ownsEditorUI)
+			editorUI->shutdown();
 		ZPUI::setPaintUIBridge(NULL);
 		g_PaintCtx = SPaintCtx();
 		mouseListener.removeFromServer(udriver->EventServer);
@@ -1899,18 +1933,26 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 			udriver->EventServer.removeListener(NLMISC::EventMouseMoveId, &paintListener);
 			udriver->EventServer.removeListener(NLMISC::EventKeyDownId, &paintListener);
 		}
+		// Drop the painting UScene; the shared driver (startup flow) keeps its display.
+		if (uscene)
+		{
+			udriver->deleteScene(uscene);
+			uscene = NULL;
+		}
 		g_ViewerAsync = NULL;
-		udriver->release();
-		delete udriver;
-		udriver = NULL;
-		uscene = NULL;
+		if (ownsDriver)
+		{
+			udriver->release();
+			delete udriver;
+			udriver = NULL;
+		}
 	}
 	catch (const NL3D::EDru &e)
 	{
 		ZPUI::setPaintUIBridge(NULL);
 		g_PaintCtx = SPaintCtx();
 		g_ViewerAsync = NULL;
-		if (udriver) { udriver->release(); delete udriver; }
+		if (ownsDriver && udriver) { udriver->release(); delete udriver; }
 		fprintf(stderr, "ERROR: 3D driver: %s\n", e.what());
 		return 1;
 	}
@@ -1919,7 +1961,7 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 		ZPUI::setPaintUIBridge(NULL);
 		g_PaintCtx = SPaintCtx();
 		g_ViewerAsync = NULL;
-		if (udriver) { udriver->release(); delete udriver; }
+		if (ownsDriver && udriver) { udriver->release(); delete udriver; }
 		fprintf(stderr, "ERROR: %s\n", e.what());
 		return 1;
 	}
@@ -1935,6 +1977,11 @@ int main(int argc, char **argv)
 	NLMISC::CCmdArgs args;
 	args.setDescription("Standalone zone painter (design doc \xc2\xa7" "14-paint). Default mode opens the "
 	                    "painting landscape viewer; the headless modes need no 3D driver.\n"
+	                    "Startup (no .max argument): discovers graphics workspaces (ecosystem ligo roots and\n"
+	                    "continent-style max/zones layouts) by walking up from cwd for a .nel NeL root, or from\n"
+	                    "an optional folder argument, then opens the in-engine world/zone picker. Remembered\n"
+	                    "last folder lives in the app config dir (startup.cfg); no .nel directory is created.\n"
+	                    "Legacy: zone_painter <input.max> --bank <bank> [...] behaves exactly as before.\n"
 	                    "Config files (plugin keys.cfg port, NLMISC::CConfigFile syntax; one file may serve both):\n"
 	                    "  keys cfg (--keys-cfg, else ./zone_painter_keys.cfg): rebinds the plugin-era actions by name,\n"
 	                    "  values are NeL TKey codes (the plugin's keys.cfg Key* constant block parses verbatim).\n"
@@ -1948,8 +1995,9 @@ int main(int argc, char **argv)
 	                    "  ToggleUI (default F10: show/hide the in-engine NLGUI panel).\n"
 	                    "Fixed viewer keys: PgUp/PgDn + 0-9 tile set, [ ] displace index, Ctrl+Z/Ctrl+E undo/redo,\n"
 	                    "F12 screenshot, ESC quit.");
-	args.addAdditionalArg("input.max", "Input .max scene");
-	args.addArg("", "bank", "bank", "Tile bank (.smallbank/.bank); required for painting and the viewer/screenshot modes");
+	// Optional first positional: .max (legacy) or folder (startup seed). Absent => startup flow.
+	args.addAdditionalArg("input", "Input .max scene (legacy) or graphics/seed folder (startup); omit for discovery", true, false);
+	args.addArg("", "bank", "bank", "Tile bank (.smallbank/.bank); required for the legacy .max path (auto-derived in startup flow)");
 	args.addArg("", "bank-recursive", "", "Add the bank directory to the texture search path recursively");
 	args.addArg("", "search-path", "dir", "Extra recursive texture search path (repeatable)", false);
 	args.addArg("", "out", "output.max", "Output .max for --null-edit (in-place save is refused)");
@@ -1984,12 +2032,136 @@ int main(int argc, char **argv)
 	args.addArg("", "screenshot", "out.tga", "Render one frame to a .tga and exit");
 	args.addArg("", "font", "file.ttf", "HUD font for the viewer (default: a system font when present)");
 	args.addArg("", "verbose", "", "Verbose output");
+	// Test plumbing (thin wrappers over the same selection functions the UI buttons call)
+	args.addArg("", "startup-auto", "workspace/zone", "Skip startup UI: select workspace+zone by name and open the viewer");
+	args.addArg("", "startup-screenshot", "out.tga", "Render one frame of the first startup screen and exit (M2b+)");
 	if (!args.parse(argc, argv))
 		return 1;
 
-	std::string input = args.getAdditionalArg("input.max")[0];
-	g_InputPath = input;
 	g_verbose = args.haveLongArg("verbose");
+
+	// Resolve the first positional: .max => legacy, directory => startup seed, absent => startup.
+	std::string input;
+	std::string seedFolder;
+	bool startupPath = false;
+	if (args.haveAdditionalArg("input"))
+	{
+		std::string pos = args.getAdditionalArg("input")[0];
+		if (ZPWS::isMaxPath(pos))
+		{
+			input = pos;
+		}
+		else if (NLMISC::CFile::isDirectory(pos))
+		{
+			startupPath = true;
+			seedFolder = pos;
+		}
+		else if (NLMISC::CFile::fileExists(pos))
+		{
+			fprintf(stderr, "ERROR: first argument must be a .max file or a directory, got '%s'\n", pos.c_str());
+			return 1;
+		}
+		else
+		{
+			fprintf(stderr, "ERROR: path not found: %s\n", pos.c_str());
+			return 1;
+		}
+	}
+	else
+	{
+		startupPath = true;
+	}
+
+	// Headless legacy modes still require a .max input
+	const bool headlessLegacyNeedMax = args.haveLongArg("null-edit")
+		|| args.haveLongArg("dump-zones")
+		|| args.haveLongArg("dump-rpo")
+		|| args.haveLongArg("dump-bank-xref")
+		|| args.haveLongArg("dump-carrier-blob")
+		|| args.haveLongArg("paint-script");
+	if (startupPath && headlessLegacyNeedMax && !args.haveLongArg("startup-auto"))
+	{
+		fprintf(stderr, "ERROR: headless modes need an input .max (legacy path)\n");
+		return 1;
+	}
+
+	// ---- Startup flow: discover + optional --startup-auto (UI screens land in M2b) ----
+	if (startupPath)
+	{
+		ZPWS::SStartupCfg scfg;
+		ZPWS::loadStartupCfg(scfg);
+
+		std::vector<ZPWS::SWorldEntry> worlds;
+		ZPWS::discoverWorkspaces(seedFolder, scfg.LastGraphicsFolder, worlds);
+		if (g_verbose)
+		{
+			printf("discovery: %u world(s)", (uint)worlds.size());
+			if (!seedFolder.empty()) printf(" seed='%s'", seedFolder.c_str());
+			printf("\n");
+			for (size_t i = 0; i < worlds.size(); ++i)
+				printf("  %s '%s' root=%s bank=%s%s\n",
+				       worlds[i].Kind == ZPWS::Ecosystem ? "eco" : "continent",
+				       worlds[i].WorldName.c_str(),
+				       worlds[i].GraphicsRoot.c_str(),
+				       worlds[i].BankPath.c_str(),
+				       worlds[i].BankOk ? "" : " (no bank)");
+		}
+
+		if (args.haveLongArg("startup-screenshot"))
+		{
+			// M2b will render Screen A/C; M2a only needs the flag recognized.
+			fprintf(stderr, "ERROR: --startup-screenshot requires the startup screens (M2b+)\n");
+			return 1;
+		}
+
+		if (!args.haveLongArg("startup-auto"))
+		{
+			// M2a: auto path only. Interactive world select arrives with Screens A+B (M2b).
+			fprintf(stderr, "ERROR: interactive startup UI not yet available; use --startup-auto \"workspace/zone\"\n");
+			fprintf(stderr, "  (discovered %u workspace(s)%s)\n", (uint)worlds.size(),
+			        worlds.empty() ? "; pass a graphics folder or run from a NeL root tree" : "");
+			return 1;
+		}
+
+		std::string autoPath = args.getLongArg("startup-auto")[0];
+		ZPWS::SWorldEntry world;
+		ZPWS::SZoneEntry zone;
+		std::string err;
+		if (!ZPWS::selectAuto(worlds, autoPath, world, zone, err))
+		{
+			fprintf(stderr, "ERROR: %s\n", err.c_str());
+			return 1;
+		}
+		printf("startup-auto: world '%s' (%s) zone '%s'\n",
+		       world.WorldName.c_str(),
+		       world.Kind == ZPWS::Ecosystem ? "ecosystem" : "continent",
+		       zone.Basename.c_str());
+
+		// Configure exactly what the CLI flags would have: bank, search path, input
+		input = zone.MaxPath;
+		if (!args.haveLongArg("bank"))
+		{
+			g_BankPath = world.BankPath;
+			g_ForceBankRecursive = true;
+		}
+		g_StartupTexturePath = world.TextureSearchPath;
+
+		// Remember successful world entry
+		{
+			ZPWS::SStartupCfg save;
+			save.LastGraphicsFolder = world.GraphicsRoot;
+			save.LastWorld = world.WorldName;
+			ZPWS::saveStartupCfg(save);
+		}
+	}
+
+	// If still no input after startup handling, fail
+	if (input.empty())
+	{
+		fprintf(stderr, "ERROR: no input .max resolved\n");
+		return 1;
+	}
+	g_InputPath = input;
 	// Cfg loaders (plugin LoadKeyCfg/LoadVarCfg port): CLI path, else the default cwd name,
 	// else the hardcoded defaults stand. No cfg present == the pre-cfg tool, identically.
 	{
@@ -2022,9 +2194,9 @@ int main(int argc, char **argv)
 			std::sort(g_MaskFiles.begin(), g_MaskFiles.end());
 		}
 	}
-	std::string bankPath = args.haveLongArg("bank") ? args.getLongArg("bank")[0] : std::string();
+	std::string bankPath = args.haveLongArg("bank") ? args.getLongArg("bank")[0] : g_BankPath;
 	g_BankPath = bankPath;
-	bool bankRecursive = args.haveLongArg("bank-recursive");
+	bool bankRecursive = args.haveLongArg("bank-recursive") || g_ForceBankRecursive;
 	float cellSize = 100.f;
 	float snap = 1.f;
 	if (args.haveLongArg("cellsize")) NLMISC::fromString(args.getLongArg("cellsize")[0], cellSize);
@@ -2087,6 +2259,8 @@ int main(int argc, char **argv)
 	{
 		std::vector<std::string> searchPaths;
 		if (args.haveLongArg("search-path")) searchPaths = args.getLongArg("search-path");
+		if (!g_StartupTexturePath.empty())
+			searchPaths.push_back(g_StartupTexturePath);
 		// DB root before the bank resolution: the workspace _texture_tiles source fallbacks
 		// derive from it (the bank path itself sits in the export tree, not the workspace).
 		ZPCTX::ensureDbRootFrom(input);
