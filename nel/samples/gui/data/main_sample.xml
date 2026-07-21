@@ -57,17 +57,17 @@
 	<group id="header_closed" x="0" y="0" h="12" posref="TL TL"></group>
 	<group id="header_opened" x="0" y="0" w="0" h="16" posref="TL TL"></group>
 	<group id="content" x="0" y="0" posref="TL TL" w="0" h="0">
-		<view type="text" id="t1" posref="TL TL" x="12" y="-10" fontsize="14" shadow="true" global_color="false" color="255 255 255 255" hardtext="Plain text 14" />
-		<view type="text" id="t2" posparent="t1" posref="BL TL" y="-4" fontsize="10" shadow="false" global_color="false" color="180 220 255 255" hardtext="colored small text without shadow" />
-		<view type="text" id="t3" posparent="t2" posref="BL TL" y="-4" fontsize="10" shadow="true" case_mode="%case_upper" global_color="false" color="255 220 150 255" hardtext="upper case mode text" />
+		<view type="text" id="t1" posref="TL TL" x="12" y="-10" fontsize="16" shadow="true" global_color="false" color="255 255 255 255" hardtext="Plain text 16" />
+		<view type="text" id="t2" posparent="t1" posref="BL TL" y="-4" fontsize="12" shadow="false" global_color="false" color="180 220 255 255" hardtext="colored small text without shadow" />
+		<view type="text" id="t3" posparent="t2" posref="BL TL" y="-4" fontsize="12" shadow="true" case_mode="%case_upper" global_color="false" color="255 220 150 255" hardtext="upper case mode text" />
 		<!-- Width tuned for even three-line wrap (no orphan last word) -->
-		<view type="text" id="t4" posparent="t3" posref="BL TL" y="-8" fontsize="10" shadow="true" global_color="false" color="255 255 255 200" multi_line="true" multi_line_space="2" line_maxw="250" sizeref=""
+		<view type="text" id="t4" posparent="t3" posref="BL TL" y="-8" fontsize="12" shadow="true" global_color="false" color="255 255 255 200" multi_line="true" multi_line_space="2" line_maxw="250" sizeref=""
 			hardtext="A multi-line text view: line breaking uses the available width and a per-line spacing value." />
 		<view type="bitmap" id="b1" posref="TR TR" x="-14" y="-12" texture="w_slot_item.tga" global_color="false" />
 		<view type="bitmap" id="b2" posparent="b1" posref="BL TL" y="-6" texture="w_slot_item.tga" scale="true" w="64" h="64" global_color="false" />
 		<view type="bitmap" id="b3" posparent="b2" posref="BL TL" y="-6" texture="w_line_hor.tga" scale="true" w="96" h="4" global_color="false" />
-		<view type="text" id="numlabel" posref="BL BL" x="12" y="36" fontsize="10" shadow="true" global_color="false" color="255 255 255 255" hardtext="text_number / digit views:" />
-		<view type="text_number" id="num" posparent="numlabel" posref="BL TL" y="-6" value="UI:TEMP:SLIDERH" fontsize="12" shadow="true" global_color="false" color="150 255 150 255" />
+		<view type="text" id="numlabel" posref="BL BL" x="12" y="36" fontsize="12" shadow="true" global_color="false" color="255 255 255 255" hardtext="text_number / digit views:" />
+		<view type="text_number" id="num" posparent="numlabel" posref="BL TL" y="-6" value="UI:TEMP:SLIDERH" fontsize="14" shadow="true" global_color="false" color="150 255 150 255" />
 		<view type="digit" id="dig" posparent="num" posref="MR ML" x="16" y="0" value="UI:TEMP:SLIDERH" numdigit="3" wspace="1" color="255 255 255 255" />
 	</group>
 </group>
@@ -84,7 +84,7 @@
 	<group id="header_closed" x="0" y="0" h="12" posref="TL TL"></group>
 	<group id="header_opened" x="0" y="0" w="0" h="14" posref="TL TL"></group>
 	<group id="content" x="0" y="0" posref="TL TL" w="0" h="0">
-		<view type="text" id="l1" posref="TL TL" x="12" y="-8" fontsize="10" shadow="true" global_color="false" color="255 255 255 200" hardtext="push / toggle / radio buttons:" />
+		<view type="text" id="l1" posref="TL TL" x="12" y="-8" fontsize="12" shadow="true" global_color="false" color="255 255 255 200" hardtext="push / toggle / radio buttons:" />
 		<ctrl type="button" id="push1" button_type="push_button" posparent="l1" posref="BL TL" x="0" y="-6"
 			tx_normal="w_close_0.tga" tx_pushed="w_close_1.tga" tx_over="w_button_12_over.tga" global_color_normal="false" global_color_pushed="false" />
 		<ctrl type="button" id="tog1" button_type="toggle_button" posparent="push1" posref="MR ML" x="10"
@@ -97,10 +97,10 @@
 			tx_normal="w_opacity_on.tga" tx_pushed="w_slot_on.tga" tx_over="w_slot_on.tga" color="255 255 255 255" col_pushed="255 255 255 255" col_over="255 255 255 0" />
 		<ctrl type="button" id="rad3" button_type="radio_button" posparent="rad2" posref="MR ML" x="8"
 			tx_normal="w_opacity_on.tga" tx_pushed="w_slot_on.tga" tx_over="w_slot_on.tga" color="255 255 255 255" col_pushed="255 255 255 255" col_over="255 255 255 0" />
-		<view type="text" id="l2" posparent="push1" posref="BL TL" x="0" y="-10" fontsize="10" shadow="true" global_color="false" color="255 255 255 200" hardtext="text buttons (w_text_button skin):" />
+		<view type="text" id="l2" posparent="push1" posref="BL TL" x="0" y="-10" fontsize="12" shadow="true" global_color="false" color="255 255 255 200" hardtext="text buttons (w_text_button skin):" />
 		<ctrl style="text_button_16" id="tb1" posparent="l2" posref="BL TL" x="0" y="-6" onclick_l="" params_l="" hardtext="Normal" />
 		<ctrl style="text_button_16" id="tb2" posparent="tb1" posref="MR ML" x="8" onclick_l="" params_l="" hardtext="Another" />
-		<view type="text" id="l3" posparent="tb1" posref="BL TL" x="0" y="-10" fontsize="10" shadow="true" global_color="false" color="255 255 255 200" hardtext="arrow + scale buttons:" />
+		<view type="text" id="l3" posparent="tb1" posref="BL TL" x="0" y="-10" fontsize="12" shadow="true" global_color="false" color="255 255 255 200" hardtext="arrow + scale buttons:" />
 		<ctrl type="button" id="ar1" button_type="push_button" posparent="l3" posref="BL TL" x="0" y="-6"
 			tx_normal="w_arrow_up_1.tga" tx_pushed="w_arrow_up_1.tga" tx_over="w_button_10_over.tga" global_color_normal="false" />
 		<ctrl type="button" id="ar2" button_type="push_button" posparent="ar1" posref="MR ML" x="6"
@@ -117,7 +117,7 @@
 <!-- * Sliders + bars (layer0) * -->
 <!-- *************************** -->
 
-<group type="container" id="sliders" w="400" pop_min_w="400" pop_max_w="400" h="196" pop_min_h="196" pop_max_h="196"
+<group type="container" id="sliders" w="400" pop_min_w="400" pop_max_w="400" h="200" pop_min_h="200" pop_max_h="200"
 	title="Sliders, gauges and links" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
 	title_bar_open="false" open_button="false" right_button="true" lockable="false" openable="false"
 	opened="true" movable="true" active="true" x="588" y="712">
@@ -125,23 +125,23 @@
 	<group id="header_opened" x="0" y="0" w="0" h="16" posref="TL TL"></group>
 	<group id="content" x="0" y="0" posref="TL TL" w="0" h="0">
 		<!-- Left column: horizontal slider + gauges; right column: vertical slider -->
-		<view type="text" id="l1" posref="TL TL" x="12" y="-10" fontsize="10" shadow="true" global_color="false" color="255 255 255 200" hardtext="slider drives the gauges:" />
+		<view type="text" id="l1" posref="TL TL" x="12" y="-10" fontsize="12" shadow="true" global_color="false" color="255 255 255 200" hardtext="slider drives the gauges:" />
 		<ctrl type="scroll" id="sh" posparent="l1" posref="BL TL" x="0" y="-10" w="200" h="8" vertical="false" align="L" min="0" max="255" value="UI:TEMP:SLIDERH" tracksize="24"
 			tx_topright="w_scroll_r.tga" tx_middle="w_scroll_l123_m.tga" tx_bottomleft="w_scroll_l.tga" />
-		<view type="text_number" id="shv" posparent="sh" posref="MR ML" x="10" y="0" value="UI:TEMP:SLIDERH" fontsize="12" shadow="true" global_color="false" color="150 255 150 255" />
+		<view type="text_number" id="shv" posparent="sh" posref="MR ML" x="10" y="0" value="UI:TEMP:SLIDERH" fontsize="14" shadow="true" global_color="false" color="150 255 150 255" />
 		<view type="bar" id="bar1" posparent="sh" posref="BL TL" x="0" y="-14" value="UI:TEMP:SLIDERH" range="255" color="255 255 255 255" global_color="false" />
 		<view type="bar3" id="bar3" posparent="bar1" posref="BL TL" x="0" y="-10"
 			value1="UI:TEMP:SLIDERH" range1="255" color1="255 80 80 255"
 			value2="UI:TEMP:SLIDERV" range2="255" color2="80 255 80 255"
 			value3="UI:TEMP:SELNUM" range3="10" color3="80 80 255 255" global_color="false" />
-		<view type="text_quantity" id="qty" posparent="bar3" posref="BL TL" x="0" y="-12" value="UI:TEMP:QTY" valuemax="UI:TEMP:QTYMAX" fontsize="10" shadow="true" global_color="false" color="255 255 255 255" />
-		<view type="text" id="l2" posparent="qty" posref="BL TL" x="0" y="-10" fontsize="10" shadow="true" global_color="false" color="255 255 255 200" hardtext="link warning above 200:" />
+		<view type="text_quantity" id="qty" posparent="bar3" posref="BL TL" x="0" y="-12" value="UI:TEMP:QTY" valuemax="UI:TEMP:QTYMAX" fontsize="12" shadow="true" global_color="false" color="255 255 255 255" />
+		<view type="text" id="l2" posparent="qty" posref="BL TL" x="0" y="-10" fontsize="12" shadow="true" global_color="false" color="255 255 255 200" hardtext="link warning above 200:" />
 		<view type="bitmap" id="warn" posparent="l2" posref="MR ML" x="8" y="0" texture="w_warning.tga" global_color="false" active="false" />
 		<!-- Vertical slider inset ~40px from the right border -->
-		<view type="text" id="l3" posref="TR TR" x="-40" y="-10" fontsize="10" shadow="true" global_color="false" color="255 255 255 200" hardtext="vertical:" />
-		<ctrl type="scroll" id="sv" posparent="l3" posref="BM TM" y="-6" w="8" h="130" vertical="true" align="B" min="0" max="255" value="UI:TEMP:SLIDERV" tracksize="24"
+		<view type="text" id="l3" posref="TR TR" x="-40" y="-10" fontsize="12" shadow="true" global_color="false" color="255 255 255 200" hardtext="vertical:" />
+		<ctrl type="scroll" id="sv" posparent="l3" posref="BM TM" y="-6" w="8" h="110" vertical="true" align="B" min="0" max="255" value="UI:TEMP:SLIDERV" tracksize="24"
 			tx_topright="w_scroll_l0_t.tga" tx_middle="w_scroll_l0_m.tga" tx_bottomleft="w_scroll_l0_b.tga" />
-		<view type="text_number" id="svv" posparent="sv" posref="BM TM" y="-6" value="UI:TEMP:SLIDERV" fontsize="12" shadow="true" global_color="false" color="150 255 150 255" />
+		<view type="text_number" id="svv" posparent="sv" posref="BM TM" y="-6" value="UI:TEMP:SLIDERV" fontsize="14" shadow="true" global_color="false" color="150 255 150 255" />
 	</group>
 </group>
 <tree node="sliders"></tree>
@@ -159,13 +159,13 @@
 	<group id="header_closed" x="0" y="0" h="12" posref="TL TL"></group>
 	<group id="header_opened" x="0" y="0" w="0" h="16" posref="TL TL"></group>
 	<group id="content" x="0" y="0" posref="TL TL" w="0" h="0">
-		<view type="text" id="l1" posref="TL TL" x="12" y="-8" fontsize="10" shadow="true" global_color="false" color="255 255 255 200" hardtext="single line (click, then type):" />
+		<view type="text" id="l1" posref="TL TL" x="12" y="-8" fontsize="12" shadow="true" global_color="false" color="255 255 255 200" hardtext="single line (click, then type):" />
 		<instance template="edit_box_widget" id="eb_text" posparent="l1" posref="BL TL" x="0" y="-4" w="280" prompt="&gt; " entry_type="text" max_num_chars="64" />
-		<view type="text" id="l2" posparent="eb_text" posref="BL TL" x="0" y="-8" fontsize="10" shadow="true" global_color="false" color="255 255 255 200" hardtext="integer entry:" />
+		<view type="text" id="l2" posparent="eb_text" posref="BL TL" x="0" y="-8" fontsize="12" shadow="true" global_color="false" color="255 255 255 200" hardtext="integer entry:" />
 		<instance template="edit_box_widget" id="eb_int" posparent="l2" posref="BL TL" x="0" y="-4" w="100" entry_type="positive_integer" max_num_chars="6" />
-		<view type="text" id="l3" posparent="eb_int" posref="BL TL" x="0" y="-8" fontsize="10" shadow="true" global_color="false" color="255 255 255 200" hardtext="scroll text (mouse wheel):" />
+		<view type="text" id="l3" posparent="eb_int" posref="BL TL" x="0" y="-8" fontsize="12" shadow="true" global_color="false" color="255 255 255 200" hardtext="scroll text (mouse wheel):" />
 		<group type="scroll_text" id="st" posparent="l3" posref="BL TL" x="0" y="-4" w="348" h="120" min_height="120" max_height="120">
-			<group type="list" id="text_list" shadow="true" fontsize="10" color="255 255 255 255" space="3" global_color="false" posref="TL TL" x="8" y="-6" sizeref="hw" w="-24" h="-12"
+			<group type="list" id="text_list" shadow="true" fontsize="12" color="255 255 255 255" space="3" global_color="false" posref="TL TL" x="8" y="-6" sizeref="hw" w="-24" h="-12"
 				hardtext="This is a scroll_text group. It combines a text list with the w_ scrollbar so long content can be scrolled with the mouse wheel or by dragging the thumb. The quick brown fox jumps over the lazy dog. Portez ce vieux whisky au juge blond qui fume. Voix ambigue d'un coeur qui au zephyr prefere les jattes de kiwis. Sphinx of black quartz, judge my vow. Pack my box with five dozen liquor jugs. The five boxing wizards jump quickly. How vexingly quick daft zebras jump. Jived fox nymph grabs quick waltz. Glib jocks quiz nymph to vex dwarf." />
 			<ctrl type="scroll" id="scroll_bar" align="T" posref="TR TR" x="-4" y="-4" w="8" sizeref="h" h="-8"
 				tx_topright="w_scroll_l0_t.tga" tx_middle="w_scroll_l0_m.tga" tx_bottomleft="w_scroll_l0_b.tga" />
@@ -178,17 +178,17 @@
 <!-- * List + tree (layer2) * -->
 <!-- *********************** -->
 
-<group type="container" id="lists" w="276" pop_min_w="276" pop_max_w="276" h="160" pop_min_h="160" pop_max_h="160"
+<group type="container" id="lists" w="276" pop_min_w="276" pop_max_w="276" h="190" pop_min_h="190" pop_max_h="190"
 	title="List and tree" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
 	title_bar_open="false" open_button="false" right_button="true" lockable="false" openable="false"
 	opened="true" movable="true" active="true" x="996" y="712">
 	<group id="header_closed" x="0" y="0" h="12" posref="TL TL"></group>
 	<group id="header_opened" x="0" y="0" w="0" h="14" posref="TL TL"></group>
 	<group id="content" x="0" y="0" posref="TL TL" w="0" h="0">
-		<view type="text" id="l1" posref="TL TL" x="12" y="-8" fontsize="10" shadow="true" global_color="false" color="255 255 255 200" multi_line="true" multi_line_space="2" line_maxw="244" sizeref=""
+		<view type="text" id="l1" posref="TL TL" x="12" y="-8" fontsize="12" shadow="true" global_color="false" color="255 255 255 200" multi_line="true" multi_line_space="2" line_maxw="244" sizeref=""
 			hardtext="group_list is the runtime-filled stack used by chat and the scroll text window; group_tree below (arbo_* fold arrows):" />
-		<group type="tree" id="tree" posparent="l1" posref="BL TL" x="4" y="-10" col_over="255 255 255 48" col_select="255 255 255 80" fontsize="10">
-			<node id="root" name="Atys" opened="true" fontsize="10">
+		<group type="tree" id="tree" posparent="l1" posref="BL TL" x="4" y="-10" col_over="255 255 255 48" col_select="255 255 255 80" fontsize="12">
+			<node id="root" name="Atys" opened="true" fontsize="12">
 				<node id="forest" name="Forest" opened="true">
 					<node id="yubo" name="Yubo" />
 					<node id="gingo" name="Gingo" />
@@ -219,16 +219,16 @@
 	</action>
 </group>
 
-<group type="container" id="menus" w="276" pop_min_w="276" pop_max_w="276" h="140" pop_min_h="140" pop_max_h="140"
+<group type="container" id="menus" w="276" pop_min_w="276" pop_max_w="276" h="152" pop_min_h="152" pop_max_h="152"
 	title="Menus, combo, select number" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
 	title_bar_open="false" open_button="false" right_button="true" lockable="false" openable="false"
-	opened="true" movable="true" active="true" x="996" y="544">
+	opened="true" movable="true" active="true" x="996" y="514">
 	<group id="header_closed" x="0" y="0" h="12" posref="TL TL"></group>
 	<group id="header_opened" x="0" y="0" w="0" h="14" posref="TL TL"></group>
 	<group id="content" x="0" y="0" posref="TL TL" w="0" h="0" group_onclick_r="active_menu" group_params_r="menu=ui:sample:sample_menu">
 		<ctrl style="text_button_16" id="bt_menu" posref="TL TL" x="12" y="-10" onclick_l="active_menu" params_l="menu=ui:sample:sample_menu" hardtext="Open Menu" />
-		<view type="text" id="l0" posparent="bt_menu" posref="MR ML" x="8" y="0" fontsize="10" shadow="true" global_color="false" color="255 255 255 160" hardtext="(or right-click here)" />
-		<view type="text" id="l1" posparent="bt_menu" posref="BL TL" x="0" y="-12" fontsize="10" shadow="true" global_color="false" color="255 255 255 200" hardtext="combo box:" />
+		<view type="text" id="l0" posparent="bt_menu" posref="MR ML" x="8" y="0" fontsize="12" shadow="true" global_color="false" color="255 255 255 160" hardtext="(or right-click here)" />
+		<view type="text" id="l1" posparent="bt_menu" posref="BL TL" x="0" y="-12" fontsize="12" shadow="true" global_color="false" color="255 255 255 200" hardtext="combo box:" />
 		<group type="combo_box" id="combo" posparent="l1" posref="BL TL" x="0" y="-4" w="180" h="20" value="UI:TEMP:COMBO">
 			<instance template="combo_box_def1" />
 			<combo_text name="Fyros" />
@@ -236,11 +236,11 @@
 			<combo_text name="Tryker" />
 			<combo_text name="Zorai" />
 		</group>
-		<view type="text" id="l2" posparent="combo" posref="BL TL" x="0" y="-12" fontsize="10" shadow="true" global_color="false" color="255 255 255 200" hardtext="select_number (menu entry sets it too):" />
+		<view type="text" id="l2" posparent="combo" posref="BL TL" x="0" y="-12" fontsize="12" shadow="true" global_color="false" color="255 255 255 200" hardtext="select_number (menu entry sets it too):" />
 		<!-- Client SNH layout: 16x16 slot, number with x=-1 y=-2 optical center, arrows at group TR/BR -->
 		<group type="select_number" id="selnum" posparent="l2" posref="BL TL" x="0" y="-6" w="32" h="20" value="UI:TEMP:SELNUM" min="0" max="9" delta="1" loop="true">
 			<view type="bitmap" id="slot_number" posref="ML ML" texture="w_slot_number.tga" global_color="false" />
-			<view type="text" id="number" posparent="slot_number" posref="MM MM" x="-1" y="-2" fontsize="12" shadow="true" global_color="false" color="255 255 255 255" hardtext="0" />
+			<view type="text" id="number" posparent="slot_number" posref="MM MM" x="-1" y="-2" fontsize="14" shadow="true" global_color="false" color="255 255 255 255" hardtext="0" />
 			<ctrl type="button" id="arrow_up" button_type="push_button" posref="TR TR"
 				tx_normal="w_arrow_up_2.tga" tx_pushed="w_arrow_up_2.tga" tx_over="w_button_10_over.tga" global_color_normal="false" />
 			<ctrl type="button" id="arrow_down" button_type="push_button" posref="BR BR"
@@ -257,7 +257,7 @@
 <group type="container" id="tabs" w="276" pop_min_w="276" pop_max_w="276" h="120" pop_min_h="120" pop_max_h="120"
 	title="Tabs" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
 	title_bar_open="false" open_button="false" right_button="true" lockable="false" openable="false"
-	opened="true" movable="true" active="true" x="996" y="396">
+	opened="true" movable="true" active="true" x="996" y="354">
 	<group id="header_closed" x="0" y="0" h="12" posref="TL TL"></group>
 	<group id="header_opened" x="0" y="0" w="0" h="14" posref="TL TL"></group>
 	<group id="content" x="0" y="0" posref="TL TL" w="0" h="0">
@@ -268,14 +268,14 @@
 			<ctrl style="tab_button" id="tab2" posparent="tab1" group="content:tab_c" hardtext="Gamma" />
 		</group>
 		<group id="tab_a" posparent="tabsel" posref="BL TL" x="2" y="-8" sizeref="w" w="0" h="90">
-			<view type="text" id="t" posref="TL TL" fontsize="11" shadow="true" global_color="false" color="200 255 200 255" multi_line="true" multi_line_space="2" sizeref="w" w="0" hardtext="First tab content. Tab buttons use the w_tab_* textures." />
+			<view type="text" id="t" posref="TL TL" fontsize="13" shadow="true" global_color="false" color="200 255 200 255" multi_line="true" multi_line_space="2" sizeref="w" w="0" hardtext="First tab content. Tab buttons use the w_tab_* textures." />
 		</group>
 		<group id="tab_b" posparent="tabsel" posref="BL TL" x="2" y="-8" sizeref="w" w="0" h="90" active="false">
-			<view type="text" id="t" posref="TL TL" fontsize="11" shadow="true" global_color="false" color="255 220 150 255" multi_line="true" multi_line_space="2" sizeref="w" w="-40" hardtext="Second tab content, selected with the radio-style tab row." />
+			<view type="text" id="t" posref="TL TL" fontsize="13" shadow="true" global_color="false" color="255 220 150 255" multi_line="true" multi_line_space="2" sizeref="w" w="-40" hardtext="Second tab content, selected with the radio-style tab row." />
 			<view type="bitmap" id="b" posref="BR BR" x="0" y="0" texture="w_slot_spell.tga" global_color="false" />
 		</group>
 		<group id="tab_c" posparent="tabsel" posref="BL TL" x="2" y="-8" sizeref="w" w="0" h="90" active="false">
-			<view type="text" id="t" posref="TL TL" fontsize="11" shadow="true" global_color="false" color="180 220 255 255" multi_line="true" multi_line_space="2" sizeref="w" w="0" hardtext="Third tab content: the tab group shows exactly one associated child group." />
+			<view type="text" id="t" posref="TL TL" fontsize="13" shadow="true" global_color="false" color="180 220 255 255" multi_line="true" multi_line_space="2" sizeref="w" w="0" hardtext="Third tab content: the tab group shows exactly one associated child group." />
 		</group>
 	</group>
 </group>
@@ -292,17 +292,17 @@
 	<group id="header_closed" x="0" y="0" h="12" posref="TL TL"></group>
 	<group id="header_opened" x="0" y="0" w="0" h="16" posref="TL TL"></group>
 	<group id="content" x="0" y="0" posref="TL TL" w="0" h="0">
-		<view type="text" id="l1" posref="TL TL" x="12" y="-8" fontsize="10" shadow="true" global_color="false" color="255 255 255 200" hardtext="drag over the palette:" />
+		<view type="text" id="l1" posref="TL TL" x="12" y="-8" fontsize="12" shadow="true" global_color="false" color="255 255 255 200" hardtext="drag over the palette:" />
 		<ctrl type="colpick" id="cp" posparent="l1" posref="BL TL" x="0" y="-6" texture="color_palette.tga"
 			dbcolr="UI:TEMP:COL:R" dbcolg="UI:TEMP:COL:G" dbcolb="UI:TEMP:COL:B" dbcola="UI:TEMP:COL:A" />
 		<!-- Swatch + RGB values on one row under the palette so the window stays narrow -->
 		<view type="bitmap" id="swatch" posparent="cp" posref="BL TL" x="0" y="-10" texture="blank.tga" scale="true" w="28" h="28" global_color="false" color="255 128 0 255" />
-		<view type="text" id="lr" posparent="swatch" posref="MR ML" x="12" y="0" fontsize="10" shadow="true" global_color="false" color="255 150 150 255" hardtext="R" />
-		<view type="text_number" id="vr" posparent="lr" posref="MR ML" x="4" y="0" value="UI:TEMP:COL:R" fontsize="10" shadow="true" global_color="false" color="255 150 150 255" />
-		<view type="text" id="lg" posparent="vr" posref="MR ML" x="12" y="0" fontsize="10" shadow="true" global_color="false" color="150 255 150 255" hardtext="G" />
-		<view type="text_number" id="vg" posparent="lg" posref="MR ML" x="4" y="0" value="UI:TEMP:COL:G" fontsize="10" shadow="true" global_color="false" color="150 255 150 255" />
-		<view type="text" id="lb" posparent="vg" posref="MR ML" x="12" y="0" fontsize="10" shadow="true" global_color="false" color="150 150 255 255" hardtext="B" />
-		<view type="text_number" id="vb" posparent="lb" posref="MR ML" x="4" y="0" value="UI:TEMP:COL:B" fontsize="10" shadow="true" global_color="false" color="150 150 255 255" />
+		<view type="text" id="lr" posparent="swatch" posref="MR ML" x="12" y="0" fontsize="12" shadow="true" global_color="false" color="255 150 150 255" hardtext="R" />
+		<view type="text_number" id="vr" posparent="lr" posref="MR ML" x="4" y="0" value="UI:TEMP:COL:R" fontsize="12" shadow="true" global_color="false" color="255 150 150 255" />
+		<view type="text" id="lg" posparent="vr" posref="MR ML" x="12" y="0" fontsize="12" shadow="true" global_color="false" color="150 255 150 255" hardtext="G" />
+		<view type="text_number" id="vg" posparent="lg" posref="MR ML" x="4" y="0" value="UI:TEMP:COL:G" fontsize="12" shadow="true" global_color="false" color="150 255 150 255" />
+		<view type="text" id="lb" posparent="vg" posref="MR ML" x="12" y="0" fontsize="12" shadow="true" global_color="false" color="150 150 255 255" hardtext="B" />
+		<view type="text_number" id="vb" posparent="lb" posref="MR ML" x="4" y="0" value="UI:TEMP:COL:B" fontsize="12" shadow="true" global_color="false" color="150 150 255 255" />
 	</group>
 </group>
 <tree node="colors"></tree>
@@ -468,9 +468,9 @@
 		<view type="text" id="title" posref="TM TM" x="0" y="-14" color="255 255 255 255" fontsize="13" shadow="true" global_color="false"
 			hardtext="NeL GUI widget showcase" />
 		<!-- Two short centered lines that fit inside the modal width -->
-		<view type="text" id="line1" posref="TM TM" x="0" y="-36" color="255 255 255 200" fontsize="11" shadow="true" global_color="false"
+		<view type="text" id="line1" posref="TM TM" x="0" y="-36" color="255 255 255 200" fontsize="13" shadow="true" global_color="false"
 			hardtext="Textures packed at build time from" />
-		<view type="text" id="line2" posref="TM TM" x="0" y="-52" color="255 255 255 200" fontsize="11" shadow="true" global_color="false"
+		<view type="text" id="line2" posref="TM TM" x="0" y="-52" color="255 255 255 200" fontsize="13" shadow="true" global_color="false"
 			hardtext="the public ryzomcore_graphics repo." />
 		<ctrl style="text_button_16" id="more" x="14" y="10" posref="BL BL" onclick_l="push_modal" params_l="group=ui:sample:about2" hardtext="More" />
 		<ctrl style="button_ok" x="0" y="10" posref="BM BM" onclick_l="leave_modal" params_l="" hardtext="OK" />
@@ -481,9 +481,9 @@
 <group type="modal" id="about2" exit_click_out="false" w="260" h="96" options="skin_modal" mouse_pos="false"
 	posref="MM MM" x="36" y="-36">
 	<group id="content" x="0" y="0" posref="TL TL" sizeref="wh" w="0" h="0">
-		<view type="text" id="t1" posref="TM TM" x="0" y="-16" color="255 255 255 255" fontsize="11" shadow="true" global_color="false"
+		<view type="text" id="t1" posref="TM TM" x="0" y="-16" color="255 255 255 255" fontsize="13" shadow="true" global_color="false"
 			hardtext="A stacked modal" />
-		<view type="text" id="t2" posref="TM TM" x="0" y="-34" color="255 255 255 200" fontsize="11" shadow="true" global_color="false"
+		<view type="text" id="t2" posref="TM TM" x="0" y="-34" color="255 255 255 200" fontsize="13" shadow="true" global_color="false"
 			hardtext="(push_modal / pop_modal)" />
 		<ctrl style="button_ok" x="0" y="10" posref="BM BM" onclick_l="pop_modal" params_l="" hardtext="Back" />
 	</group>
