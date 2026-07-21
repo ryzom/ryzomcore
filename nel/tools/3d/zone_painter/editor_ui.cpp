@@ -40,7 +40,9 @@
 
 #include <nel/gui/action_handler.h>
 #include <nel/gui/ctrl_base_button.h>
+#include <nel/gui/ctrl_text_button.h>
 #include <nel/gui/event_listener.h>
+#include <nel/gui/group_editbox.h>
 #include <nel/gui/interface_group.h>
 #include <nel/gui/interface_link.h>
 #include <nel/gui/view_pointer.h>
@@ -293,10 +295,156 @@ public:
 	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
 	{
 		SPaintUIBridge *b = getPaintUIBridge();
-		if (b && b->save) b->save();
+		if (!b || !b->CanSave) return;
+		// Interactive flow without --save: open the overwrite/copy modal.
+		// CLI --save (including startup-auto + --save): one-click direct save.
+		if (b->InteractiveSave)
+			openSaveDialog();
+		else if (b->save)
+			b->save();
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpSave, "zp_save");
+
+// ---------------------------------------------------------------------------------------------
+// Save modal (interactive flow only)
+
+static bool s_SaveCopyConfirm = false;
+
+static CViewText *findTextEarly(const char *id)
+{
+	return dynamic_cast<CViewText *>(CWidgetManager::getInstance()->getElementFromId(id));
+}
+
+static CCtrlTextButton *findTextButton(const char *id)
+{
+	return dynamic_cast<CCtrlTextButton *>(CWidgetManager::getInstance()->getElementFromId(id));
+}
+
+static CGroupEditBox *findEditBox(const char *id)
+{
+	return dynamic_cast<CGroupEditBox *>(CWidgetManager::getInstance()->getElementFromId(id));
+}
+
+static void setSaveModalStatus(const std::string &msg)
+{
+	if (CViewText *t = findTextEarly("ui:zp:save_dialog:content:status"))
+		t->setHardText(msg);
+}
+
+static void resetSaveCopyButtonLabel()
+{
+	s_SaveCopyConfirm = false;
+	if (CCtrlTextButton *btn = findTextButton("ui:zp:save_dialog:content:btn_copy"))
+		btn->setHardText("Save copy");
+}
+
+void openSaveDialog()
+{
+	SPaintUIBridge *b = getPaintUIBridge();
+	if (!b) return;
+	resetSaveCopyButtonLabel();
+	setSaveModalStatus("");
+	// Prefill edit box with <basename>_painted.max
+	std::string prefill = std::string(b->EditableBasename) + "_painted.max";
+	if (CGroupEditBox *eb = findEditBox("ui:zp:save_dialog:content:copy_name"))
+		eb->setInputString(prefill);
+	CWidgetManager::getInstance()->enableModalWindow(NULL, "ui:zp:save_dialog");
+}
+
+void forceShowSaveDialogForShot()
+{
+	openSaveDialog();
+}
+
+class CAHZpSaveOverwrite : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (!b || !b->saveOverwrite) return;
+		if (b->saveOverwrite())
+		{
+			setSaveModalStatus("Saved (overwrite).");
+			CWidgetManager::getInstance()->disableModalWindow();
+			resetSaveCopyButtonLabel();
+		}
+		else
+			setSaveModalStatus("Overwrite failed (see stderr).");
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpSaveOverwrite, "zp_save_overwrite");
+
+class CAHZpSaveCopy : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (!b || !b->saveTo) return;
+
+		std::string name;
+		if (CGroupEditBox *eb = findEditBox("ui:zp:save_dialog:content:copy_name"))
+			name = eb->getInputString();
+		// Strip whitespace
+		while (!name.empty() && (name[0] == ' ' || name[0] == '\t')) name.erase(0, 1);
+		while (!name.empty() && (name[name.size() - 1] == ' ' || name[name.size() - 1] == '\t'))
+			name.resize(name.size() - 1);
+		if (name.empty())
+		{
+			setSaveModalStatus("Enter a file name.");
+			return;
+		}
+		// Absolute or relative to the opened .max directory
+		std::string target;
+		if (!name.empty() && name[0] == '/')
+			target = name;
+		else
+		{
+			std::string dir = b->InputDir;
+			if (!dir.empty() && dir[dir.size() - 1] != '/' && dir[dir.size() - 1] != '\\')
+				dir += "/";
+			target = dir + name;
+		}
+		if (toLowerAscii(CFile::getExtension(target)).empty())
+			target += ".max";
+
+		if (CFile::fileExists(target) && !s_SaveCopyConfirm)
+		{
+			s_SaveCopyConfirm = true;
+			if (CCtrlTextButton *btn = findTextButton("ui:zp:save_dialog:content:btn_copy"))
+				btn->setHardText("Confirm overwrite");
+			setSaveModalStatus("File exists — click again to overwrite.");
+			return;
+		}
+
+		if (b->saveTo(target))
+		{
+			setSaveModalStatus("Saved copy.");
+			CWidgetManager::getInstance()->disableModalWindow();
+			resetSaveCopyButtonLabel();
+		}
+		else
+		{
+			setSaveModalStatus("Save copy failed (see stderr).");
+			resetSaveCopyButtonLabel();
+		}
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpSaveCopy, "zp_save_copy");
+
+class CAHZpSaveCancel : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		resetSaveCopyButtonLabel();
+		setSaveModalStatus("");
+		CWidgetManager::getInstance()->disableModalWindow();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpSaveCancel, "zp_save_cancel");
 
 // ---------------------------------------------------------------------------------------------
 

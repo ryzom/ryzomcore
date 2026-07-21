@@ -74,7 +74,11 @@ struct SPaintUIBridge
 	void (*undo)();
 	void (*redo)();
 	void (*fill)(int rot);              // 0..3
-	void (*save)();                     // write-back + whole-file; no exit
+	void (*save)();                     // panel Save: modal (interactive) or direct (--save)
+	/** Write-back + whole-file save to an arbitrary path (modal "Save copy", test hook). */
+	bool (*saveTo)(const std::string &target);
+	/** In-place overwrite: temp → optional one-time .bak → rename (modal "Overwrite"). */
+	bool (*saveOverwrite)();
 
 	// State snapshot for panel sync (filled by runViewer each frame)
 	bool HaveCore;
@@ -88,17 +92,30 @@ struct SPaintUIBridge
 	bool LockBorders;
 	uint UndoDepth;
 	bool CanSave;
+	/** When true, Save opens the overwrite/copy modal (startup interactive, no --save). */
+	bool InteractiveSave;
+	char EditableBasename[128]; // zone basename for default copy name
+	char InputDir[512];         // directory of the opened .max (copy targets)
 
 	SPaintUIBridge()
 		: selectMode(NULL), selectTileSetDelta(NULL), toggleTileSize(NULL),
 		  brushSizeDelta(NULL), groupDelta(NULL), toggleLockBorders(NULL),
-		  undo(NULL), redo(NULL), fill(NULL), save(NULL),
+		  undo(NULL), redo(NULL), fill(NULL), save(NULL), saveTo(NULL), saveOverwrite(NULL),
 		  HaveCore(false), Mode(0), CurTileSet(0), TileSetCount(0), Mode256(false),
-		  BrushSize(0), TileGroup(0), LockBorders(false), UndoDepth(0), CanSave(false)
+		  BrushSize(0), TileGroup(0), LockBorders(false), UndoDepth(0), CanSave(false),
+		  InteractiveSave(false)
 	{
 		TileSetName[0] = 0;
+		EditableBasename[0] = 0;
+		InputDir[0] = 0;
 	}
 };
+
+/** Open the Save modal (Overwrite / Save copy / Cancel). Prefills copy name. */
+void openSaveDialog();
+
+/** Dev/test: force the Save modal open for one screenshot frame (env/guard callers). */
+void forceShowSaveDialogForShot();
 
 /** Install / clear the process-wide bridge (action handlers look it up). */
 void setPaintUIBridge(SPaintUIBridge *bridge);

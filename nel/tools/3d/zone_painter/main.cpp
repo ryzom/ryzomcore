@@ -207,6 +207,8 @@ static std::string g_BankPath;
 static std::string g_StartupTexturePath;
 // When true, bank directory is searched recursively (startup flow always wants this)
 static bool g_ForceBankRecursive = false;
+// Startup interactive (or startup-auto) without --save: panel Save opens the modal
+static bool g_InteractiveSave = false;
 // Shipped brush mask cycle (viewer SelectColorBrush key; 0 = none, i = g_MaskFiles[i-1])
 static std::vector<std::string> g_MaskFiles;
 static int g_MaskCycle = 0;
@@ -1335,7 +1337,8 @@ static void zpViewerScreenshot(NL3D::IDriver *driver, NLMISC::CEventListenerAsyn
 
 // ---------------------------------------------------------------------------------------------
 // Shared paint actions: keyboard AND NLGUI call these (no second op implementation).
-// Live for the duration of runViewer only (g_PaintCtx.Active).
+// Live for the duration of runViewer only (g_PaintCtx.Active). Also used by the headless
+// --panel-save-test hook (same zpSaveTo / zpSaveOverwrite functions).
 
 struct SPaintCtx
 {
@@ -1344,10 +1347,17 @@ struct SPaintCtx
 	CPaintMouseListener *Paint;
 	std::string InputPath;
 	std::string SavePath;
-	PIPELINE::MAX::CScene *Scene; // Max scene for whole-file save
-	SPaintCtx() : Active(false), Core(NULL), Paint(NULL), Scene(NULL) { }
+	PIPELINE::MAX::CScene *Scene; // Max scene for whole-file save (editable file only)
+	bool InteractiveSave;         // startup interactive without --save => Save modal
+	SPaintCtx()
+		: Active(false), Core(NULL), Paint(NULL), Scene(NULL), InteractiveSave(false)
+	{
+	}
 };
 static SPaintCtx g_PaintCtx;
+
+// Last save status for HUD / callers (also printed to stderr on failure)
+static std::string g_LastSaveStatus;
 
 static void zpSelectMode(int mode)
 {
@@ -1443,7 +1453,143 @@ static void zpFill(int rot)
 		g_PaintCtx.Core->opFillDisplace(pl.HoverZone, patch, pl.DisplaceIndex, err);
 }
 
-static void zpSave()
+/**
+ * Write-back + whole-file save to `target`. Single save implementation for panel modal,
+ * --save, and --panel-save-test. Non-Scene OLE streams are read from InputPath (the opened
+ * editable file); the Scene stream is rebuilt from the mutated Max scene.
+ */
+static bool zpSaveTo(const std::string &target)
+{
+	g_LastSaveStatus.clear();
+	if (!g_PaintCtx.Core || !g_PaintCtx.Scene)
+	{
+		g_LastSaveStatus = "save: no paint core/scene";
+		fprintf(stderr, "ERROR: %s\n", g_LastSaveStatus.c_str());
+		return false;
+	}
+	if (target.empty())
+	{
+		g_LastSaveStatus = "save: empty target path";
+		fprintf(stderr, "ERROR: %s\n", g_LastSaveStatus.c_str());
+		return false;
+	}
+	std::string err;
+	if (!g_PaintCtx.Core->writeBack(err))
+	{
+		g_LastSaveStatus = "write-back: " + err;
+		fprintf(stderr, "ERROR: %s\n", g_LastSaveStatus.c_str());
+		return false;
+	}
+	// OLE non-Scene streams come from the original opened file (not the target).
+	const std::string &srcForStreams = g_PaintCtx.InputPath.empty() ? target : g_PaintCtx.InputPath;
+	int saveRc = saveWholeFile(srcForStreams, target, *g_PaintCtx.Scene, false);
+	if (saveRc != 0)
+	{
+		g_LastSaveStatus = "save failed -> " + target;
+		return false;
+	}
+	g_LastSaveStatus = "OK save -> " + target;
+	printf("OK save (panel) -> %s\n", target.c_str());
+	return true;
+}
+
+/**
+ * In-place overwrite of the opened .max: write to a temp in the same directory, create a
+ * one-time `<file>.max.bak` only if no .bak exists yet (never clobber an existing backup),
+ * then atomically rename the temp over the original. Failure at any step leaves the original
+ * untouched.
+ */
+static bool zpSaveOverwrite()
+{
+	g_LastSaveStatus.clear();
+	if (!g_PaintCtx.Core || !g_PaintCtx.Scene)
+	{
+		g_LastSaveStatus = "overwrite: no paint core/scene";
+		fprintf(stderr, "ERROR: %s\n", g_LastSaveStatus.c_str());
+		return false;
+	}
+	const std::string &orig = g_PaintCtx.InputPath;
+	if (orig.empty())
+	{
+		g_LastSaveStatus = "overwrite: no input path";
+		fprintf(stderr, "ERROR: %s\n", g_LastSaveStatus.c_str());
+		return false;
+	}
+	if (!NLMISC::CFile::fileExists(orig))
+	{
+		g_LastSaveStatus = "overwrite: original missing: " + orig;
+		fprintf(stderr, "ERROR: %s\n", g_LastSaveStatus.c_str());
+		return false;
+	}
+
+	std::string dir = NLMISC::CFile::getPath(orig);
+	std::string base = NLMISC::CFile::getFilename(orig);
+	std::string tempPath = dir + NLMISC::toString(".zone_painter_save_%d_%s.tmp",
+	                                              (int)ZP_GETPID(), base.c_str());
+	// Drop any leftover temp from a previous crash
+	if (NLMISC::CFile::fileExists(tempPath))
+		NLMISC::CFile::deleteFile(tempPath);
+
+	std::string err;
+	if (!g_PaintCtx.Core->writeBack(err))
+	{
+		g_LastSaveStatus = "write-back: " + err;
+		fprintf(stderr, "ERROR: %s\n", g_LastSaveStatus.c_str());
+		return false;
+	}
+	// Write new content to temp (OLE streams from original; Scene from mutated graph)
+	int saveRc = saveWholeFile(orig, tempPath, *g_PaintCtx.Scene, false);
+	if (saveRc != 0 || !NLMISC::CFile::fileExists(tempPath))
+	{
+		g_LastSaveStatus = "overwrite: temp write failed";
+		fprintf(stderr, "ERROR: %s\n", g_LastSaveStatus.c_str());
+		if (NLMISC::CFile::fileExists(tempPath))
+			NLMISC::CFile::deleteFile(tempPath);
+		return false;
+	}
+
+	// One-time backup: only if <file>.bak does not already exist
+	std::string bakPath = orig + ".bak";
+	if (!NLMISC::CFile::fileExists(bakPath))
+	{
+		if (!NLMISC::CFile::copyFile(bakPath, orig, /*failIfExists=*/true))
+		{
+			g_LastSaveStatus = "overwrite: could not create " + bakPath;
+			fprintf(stderr, "ERROR: %s (original left untouched)\n", g_LastSaveStatus.c_str());
+			NLMISC::CFile::deleteFile(tempPath);
+			return false;
+		}
+		printf("OK backup -> %s\n", bakPath.c_str());
+	}
+	else
+	{
+		printf("backup kept (already exists): %s\n", bakPath.c_str());
+	}
+
+	// Atomic replace: rename temp over original
+	if (!NLMISC::CFile::moveFile(orig, tempPath))
+	{
+		// Fallback: copy+delete if rename across devices fails
+		if (!NLMISC::CFile::copyFile(orig, tempPath, /*failIfExists=*/false)
+		    || !NLMISC::CFile::deleteFile(tempPath))
+		{
+			g_LastSaveStatus = "overwrite: rename/copy onto original failed";
+			fprintf(stderr, "ERROR: %s (temp left at %s; original may be intact)\n",
+			        g_LastSaveStatus.c_str(), tempPath.c_str());
+			return false;
+		}
+	}
+	// moveFile may leave temp gone; ensure cleanup if copy path left it
+	if (NLMISC::CFile::fileExists(tempPath))
+		NLMISC::CFile::deleteFile(tempPath);
+
+	g_LastSaveStatus = "OK overwrite -> " + orig;
+	printf("OK save (overwrite) -> %s\n", orig.c_str());
+	return true;
+}
+
+/** Panel Save when --save was given: one-click direct write to SavePath (no modal). */
+static void zpSaveDirect()
 {
 	if (!g_PaintCtx.Active || !g_PaintCtx.Core || !g_PaintCtx.Scene) return;
 	if (g_PaintCtx.SavePath.empty())
@@ -1451,15 +1597,7 @@ static void zpSave()
 		fprintf(stderr, "WARNING: save: no --save path given\n");
 		return;
 	}
-	std::string err;
-	if (!g_PaintCtx.Core->writeBack(err))
-	{
-		fprintf(stderr, "ERROR: write-back: %s\n", err.c_str());
-		return;
-	}
-	int saveRc = saveWholeFile(g_PaintCtx.InputPath, g_PaintCtx.SavePath, *g_PaintCtx.Scene, false);
-	if (saveRc == 0)
-		printf("OK save (panel) -> %s\n", g_PaintCtx.SavePath.c_str());
+	zpSaveTo(g_PaintCtx.SavePath);
 }
 
 // Fill the UI bridge state snapshot (labels / button push state).
@@ -1479,7 +1617,17 @@ static void zpFillBridgeState(ZPUI::SPaintUIBridge &bridge)
 	bridge.TileGroup = g_PaintCtx.Core->tileGroup();
 	bridge.LockBorders = g_PaintCtx.Core->lockBordersOn();
 	bridge.UndoDepth = g_PaintCtx.Core->undoDepth();
-	bridge.CanSave = !g_PaintCtx.SavePath.empty();
+	// Interactive modal flow: always enabled. Legacy / --save: only with a save path.
+	bridge.CanSave = g_PaintCtx.InteractiveSave || !g_PaintCtx.SavePath.empty();
+	bridge.InteractiveSave = g_PaintCtx.InteractiveSave;
+	{
+		std::string base = NLMISC::CFile::getFilenameWithoutExtension(g_PaintCtx.InputPath);
+		strncpy(bridge.EditableBasename, base.c_str(), sizeof(bridge.EditableBasename) - 1);
+		bridge.EditableBasename[sizeof(bridge.EditableBasename) - 1] = 0;
+		std::string dir = NLMISC::CFile::getPath(g_PaintCtx.InputPath);
+		strncpy(bridge.InputDir, dir.c_str(), sizeof(bridge.InputDir) - 1);
+		bridge.InputDir[sizeof(bridge.InputDir) - 1] = 0;
+	}
 }
 
 // Shared viewer host: when externalDriver is non-NULL, runViewer uses it and does not
@@ -1631,6 +1779,7 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 		g_PaintCtx.InputPath = g_InputPath;
 		g_PaintCtx.SavePath = savePath;
 		g_PaintCtx.Scene = lm.Scene;
+		g_PaintCtx.InteractiveSave = g_InteractiveSave;
 		paintBridge.selectMode = zpSelectMode;
 		paintBridge.selectTileSetDelta = zpSelectTileSetDelta;
 		paintBridge.toggleTileSize = zpToggleTileSize;
@@ -1640,7 +1789,9 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 		paintBridge.undo = zpUndo;
 		paintBridge.redo = zpRedo;
 		paintBridge.fill = zpFill;
-		paintBridge.save = zpSave;
+		paintBridge.save = zpSaveDirect;
+		paintBridge.saveTo = zpSaveTo;
+		paintBridge.saveOverwrite = zpSaveOverwrite;
 		ZPUI::setPaintUIBridge(&paintBridge);
 
 		if (core)
@@ -1732,6 +1883,16 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 			uscene->render();
 			// Sync panel labels before capture so the screenshot shows live state
 			zpFillBridgeState(paintBridge);
+			// Dev-only: ZONE_PAINTER_SAVE_MODAL_SHOT=1 opens the Save modal for one frame
+			// so interactive save UI can be verified headlessly (M3a).
+			{
+				const char *modalShot = getenv("ZONE_PAINTER_SAVE_MODAL_SHOT");
+				if (modalShot && modalShot[0] && modalShot[0] != '0'
+				    && g_PaintCtx.InteractiveSave)
+				{
+					ZPUI::forceShowSaveDialogForShot();
+				}
+			}
 			editorUI->update();
 			editorUI->draw();
 			udriver->swapBuffers();
@@ -2046,6 +2207,10 @@ int main(int argc, char **argv)
 	// Test plumbing (thin wrappers over the same selection functions the UI buttons call)
 	args.addArg("", "startup-auto", "workspace/zone", "Skip startup UI: select workspace+zone by name and open the viewer");
 	args.addArg("", "startup-screenshot", "out.tga", "Render one frame of the first startup screen and exit (M2b+)");
+	args.addArg("", "panel-save-test", "copy|overwrite",
+	            "Headless: after --paint-script, invoke the same panel save path (zpSaveTo / zpSaveOverwrite). "
+	            "copy writes <basename>_painted.max under --out's directory (or cwd). overwrite first copies the "
+	            "input .max into that directory and operates on the copy (never the real source). Requires --paint-script.");
 	if (!args.parse(argc, argv))
 		return 1;
 
@@ -2226,6 +2391,9 @@ int main(int argc, char **argv)
 		}
 		g_StartupTexturePath = selection.World.TextureSearchPath;
 
+		// Interactive save modal when no --save was given (with --save: one-click direct)
+		g_InteractiveSave = !args.haveLongArg("save");
+
 		// Remember successful world entry
 		{
 			ZPWS::SStartupCfg save;
@@ -2286,6 +2454,22 @@ int main(int argc, char **argv)
 	srand(seed);
 	std::string scriptPath = args.haveLongArg("paint-script") ? args.getLongArg("paint-script")[0] : std::string();
 	std::string savePath = args.haveLongArg("save") ? args.getLongArg("save")[0] : std::string();
+	std::string panelSaveTest = args.haveLongArg("panel-save-test") ? args.getLongArg("panel-save-test")[0] : std::string();
+	if (!panelSaveTest.empty())
+	{
+		std::string mode = NLMISC::toLowerAscii(panelSaveTest);
+		if (mode != "copy" && mode != "overwrite")
+		{
+			fprintf(stderr, "ERROR: --panel-save-test expects copy|overwrite, got '%s'\n", panelSaveTest.c_str());
+			return 1;
+		}
+		panelSaveTest = mode;
+		if (scriptPath.empty())
+		{
+			fprintf(stderr, "ERROR: --panel-save-test requires --paint-script\n");
+			return 1;
+		}
+	}
 	std::string fontPath = args.haveLongArg("font") ? args.getLongArg("font")[0] : std::string();
 	if (fontPath.empty())
 	{
@@ -2299,7 +2483,8 @@ int main(int argc, char **argv)
 	std::string dumpBlobDir = args.haveLongArg("dump-carrier-blob") ? args.getLongArg("dump-carrier-blob")[0] : std::string();
 	// Viewer runs for --screenshot and for the plain interactive invocation (a paint script
 	// without a display mode is headless; the dump-only modes are headless too).
-	bool viewerMode = !nullEdit && !args.haveLongArg("dump-zones")
+	// --panel-save-test is always headless (same path as paint-script without display).
+	bool viewerMode = !nullEdit && !args.haveLongArg("dump-zones") && panelSaveTest.empty()
 		&& (args.haveLongArg("screenshot") || (scriptPath.empty() && !doDumpRpo && !doDumpXRef && dumpBlobDir.empty()));
 
 	if (nullEdit && !args.haveLongArg("out"))
@@ -2452,6 +2637,84 @@ int main(int argc, char **argv)
 		printf("STORED-FLAGS includeMeshes=%d preloadTiles=%d\n",
 		       core.storedIncludeMeshes(), core.storedPreloadTiles());
 		core.dumpRpo(stdout);
+	}
+
+	// --panel-save-test: after the script, invoke the same zpSaveTo / zpSaveOverwrite the
+	// interactive modal uses (headless, no driver). Never writes into the source graphics tree.
+	if (!panelSaveTest.empty() && rc == 0)
+	{
+		// Output directory: directory of --out if given, else cwd
+		std::string outDir = NLMISC::CPath::getCurrentPath();
+		if (args.haveLongArg("out"))
+		{
+			std::string outArg = args.getLongArg("out")[0];
+			std::string p = NLMISC::CFile::getPath(outArg);
+			if (!p.empty())
+				outDir = p;
+			else if (NLMISC::CFile::isDirectory(outArg))
+				outDir = outArg;
+		}
+		if (!outDir.empty() && outDir[outDir.size() - 1] != '/' && outDir[outDir.size() - 1] != '\\')
+			outDir += "/";
+		std::string base = NLMISC::CFile::getFilenameWithoutExtension(input);
+		std::string baseWithExt = NLMISC::CFile::getFilename(input);
+
+		// Install paint ctx so zpSaveTo / zpSaveOverwrite see the core + scene
+		g_PaintCtx = SPaintCtx();
+		g_PaintCtx.Active = true;
+		g_PaintCtx.Core = &core;
+		g_PaintCtx.Scene = lm.Scene;
+		g_PaintCtx.InputPath = input;
+		g_PaintCtx.InteractiveSave = true;
+
+		if (panelSaveTest == "copy")
+		{
+			std::string target = outDir + base + "_painted.max";
+			if (!zpSaveTo(target))
+			{
+				g_PaintCtx = SPaintCtx();
+				return 1;
+			}
+			printf("OK panel-save-test copy -> %s\n", target.c_str());
+		}
+		else // overwrite
+		{
+			// Operate on a COPY of the input in outDir — never the real source file
+			std::string workCopy = outDir + baseWithExt;
+			if (NLMISC::CFile::getPath(NLMISC::CPath::makePathAbsolute(workCopy, outDir, true))
+			    == NLMISC::CFile::getPath(NLMISC::CPath::makePathAbsolute(input, NLMISC::CPath::getCurrentPath(), true))
+			    && NLMISC::CFile::getFilename(workCopy) == NLMISC::CFile::getFilename(input)
+			    && NLMISC::CPath::makePathAbsolute(workCopy, outDir, true)
+			       == NLMISC::CPath::makePathAbsolute(input, NLMISC::CPath::getCurrentPath(), true))
+			{
+				// Same path as input — refuse
+				fprintf(stderr, "ERROR: panel-save-test overwrite would touch the real input; give --out <dir/file> outside the source tree\n");
+				g_PaintCtx = SPaintCtx();
+				return 1;
+			}
+			if (NLMISC::CFile::fileExists(workCopy))
+				NLMISC::CFile::deleteFile(workCopy);
+			if (!NLMISC::CFile::copyFile(workCopy, input, false))
+			{
+				fprintf(stderr, "ERROR: panel-save-test: cannot copy input to %s\n", workCopy.c_str());
+				g_PaintCtx = SPaintCtx();
+				return 1;
+			}
+			// Also remove a stale .bak so the first overwrite creates a fresh one
+			std::string bakPath = workCopy + ".bak";
+			// Keep existing bak if present only when re-testing twice; first run starts clean:
+			// leave bak alone if user is testing "second overwrite keeps bak" — they pre-seed.
+			g_PaintCtx.InputPath = workCopy;
+			if (!zpSaveOverwrite())
+			{
+				g_PaintCtx = SPaintCtx();
+				return 1;
+			}
+			printf("OK panel-save-test overwrite -> %s (bak %s)\n",
+			       workCopy.c_str(), NLMISC::CFile::fileExists(bakPath) ? "present" : "missing");
+		}
+		g_PaintCtx = SPaintCtx();
+		return rc;
 	}
 
 	// Save flows: --null-edit (untouched write-back, optional byte-compare) or --save (after ops)
