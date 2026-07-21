@@ -47,6 +47,7 @@
 #include <nel/gui/db_manager.h>
 #include <nel/gui/dbgroup_combo_box.h>
 #include <nel/gui/event_listener.h>
+#include <nel/gui/group_html.h>
 #include <nel/gui/interface_link.h>
 #include <nel/gui/interface_group.h>
 #include <nel/gui/lua_helper.h>
@@ -124,9 +125,9 @@ public:
 		splitString(params, "|", paramList);
 		if (paramList.empty())
 			return;
-		std::string procName = paramList.front();
-		paramList.erase(paramList.begin());
-		CWidgetManager::getInstance()->runProcedure(procName, pCaller, paramList);
+		// the whole list goes along, name included: procedure @0 refers to
+		// paramList[1] (the client's handler does the same)
+		CWidgetManager::getInstance()->runProcedure(paramList.front(), pCaller, paramList);
 	}
 };
 REGISTER_ACTION_HANDLER(CAHProc, "proc");
@@ -199,6 +200,63 @@ public:
 	}
 };
 REGISTER_ACTION_HANDLER(CAHLua, "lua");
+
+// Every action handler run is also forwarded to the quick-help event
+// system (the client records progress with it); provide the sink so each
+// click doesn't warn into the log
+class CAHSubmitQuickHelp : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+	}
+};
+REGISTER_ACTION_HANDLER(CAHSubmitQuickHelp, "submit_quick_help");
+
+// Links and buttons inside group_html fire these handlers; they live in
+// the client, not in NLGUI. Minimal versions: resolve the html group from
+// the "name" param and drive it.
+CGroupHTML *getHtmlGroup(const std::string &params)
+{
+	std::string name = IActionHandler::getParam(params, "name");
+	return dynamic_cast<CGroupHTML *>(CWidgetManager::getInstance()->getElementFromId(name));
+}
+
+class CAHBrowse : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params)
+	{
+		CGroupHTML *html = getHtmlGroup(params);
+		if (html)
+			html->browse(getParam(params, "url").c_str());
+	}
+};
+REGISTER_ACTION_HANDLER(CAHBrowse, "browse");
+
+class CAHBrowseUndo : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params)
+	{
+		CGroupHTML *html = getHtmlGroup(params);
+		if (html)
+			html->browseUndo();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHBrowseUndo, "browse_undo");
+
+class CAHBrowseRedo : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params)
+	{
+		CGroupHTML *html = getHtmlGroup(params);
+		if (html)
+			html->browseRedo();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHBrowseRedo, "browse_redo");
 
 // The widget manager keeps the pointer position up to date, but nothing in
 // NLGUI feeds it the mouse button state — the client mirrors its driver
@@ -450,6 +508,7 @@ int main(int argc, char **argv)
 	xmlFiles.push_back("minesweeper_sample.xml");
 	xmlFiles.push_back("console_sample.xml");
 	xmlFiles.push_back("inventory_sample.xml");
+	xmlFiles.push_back("help_sample.xml");
 
 	nlinfo("Atlas loaded");
 
