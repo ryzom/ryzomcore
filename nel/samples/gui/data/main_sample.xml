@@ -77,7 +77,7 @@
 <!-- * Buttons (layer1) * -->
 <!-- ******************** -->
 
-<group type="container" id="buttons" options="layer1" w="300" pop_min_w="300" pop_max_w="300" h="152" pop_min_h="152" pop_max_h="152"
+<group type="container" id="buttons" w="300" pop_min_w="300" pop_max_w="300" h="152" pop_min_h="152" pop_max_h="152"
 	title="Buttons" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
 	title_bar_open="false" open_button="false" right_button="true" lockable="false" openable="false"
 	opened="true" movable="true" active="true" x="272" y="494">
@@ -178,7 +178,7 @@
 <!-- * List + tree (layer2) * -->
 <!-- *********************** -->
 
-<group type="container" id="lists" options="layer2" w="276" pop_min_w="276" pop_max_w="276" h="160" pop_min_h="160" pop_max_h="160"
+<group type="container" id="lists" w="276" pop_min_w="276" pop_max_w="276" h="160" pop_min_h="160" pop_max_h="160"
 	title="List and tree" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
 	title_bar_open="false" open_button="false" right_button="true" lockable="false" openable="false"
 	opened="true" movable="true" active="true" x="996" y="712">
@@ -219,7 +219,7 @@
 	</action>
 </group>
 
-<group type="container" id="menus" options="layer1" w="276" pop_min_w="276" pop_max_w="276" h="140" pop_min_h="140" pop_max_h="140"
+<group type="container" id="menus" w="276" pop_min_w="276" pop_max_w="276" h="140" pop_min_h="140" pop_max_h="140"
 	title="Menus, combo, select number" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
 	title_bar_open="false" open_button="false" right_button="true" lockable="false" openable="false"
 	opened="true" movable="true" active="true" x="996" y="544">
@@ -254,7 +254,7 @@
 <!-- * Tabs (layer3)    * -->
 <!-- ******************** -->
 
-<group type="container" id="tabs" options="layer3" w="276" pop_min_w="276" pop_max_w="276" h="120" pop_min_h="120" pop_max_h="120"
+<group type="container" id="tabs" w="276" pop_min_w="276" pop_max_w="276" h="120" pop_min_h="120" pop_max_h="120"
 	title="Tabs" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
 	title_bar_open="false" open_button="false" right_button="true" lockable="false" openable="false"
 	opened="true" movable="true" active="true" x="996" y="396">

@@ -54,12 +54,11 @@
 
 	<param name="frame_covers_open_list" value="false" />
 
-	<!-- Match client layer0 metrics: 13pt title fills the 24px w_header bar -->
 	<param name="title_font_size" value="13" />
 	<param name="title_offset_x" value="8" />
-	<param name="title_offset_y" value="-7" />
+	<param name="title_offset_y" value="-4" />
 	<param name="title_offset_openable_x" value="20" />
-	<param name="title_offset_openable_y" value="-7" />
+	<param name="title_offset_openable_y" value="-4" />
 
 	<param name="scrollbar_offset_x" value="6" />
 	<param name="scrollbar_size_w" value="8" />
@@ -73,8 +72,8 @@
 	<param name="open_state_offset_x" value="6" />
 	<param name="open_state_offset_y" value="-10" />
 
-	<param name="right_button_offset_x" value="-8" />
-	<param name="right_button_offset_y" value="-9" />
+	<param name="right_button_offset_x" value="-6" />
+	<param name="right_button_offset_y" value="-5" />
 	<param name="right_button_tx_deactive" value="w_win_close.tga" />
 	<param name="right_button_tx_popup" value="w_win_popup.tga" />
 	<param name="right_button_tx_popin" value="w_win_popin.tga" />
@@ -130,10 +129,10 @@
 
 	<param name="frame_covers_open_list" value="false" />
 
-	<param name="title_font_size" value="11" />
+	<param name="title_font_size" value="13" />
 	<param name="title_offset_x" value="8" />
 	<param name="title_offset_y" value="-4" />
-	<param name="title_offset_openable_x" value="18" />
+	<param name="title_offset_openable_x" value="20" />
 	<param name="title_offset_openable_y" value="-4" />
 	<param name="header_h" value="14" />
 
@@ -198,11 +197,11 @@
 
 	<param name="frame_covers_open_list" value="false" />
 
-	<param name="title_font_size" value="10" />
+	<param name="title_font_size" value="13" />
 	<param name="title_offset_x" value="8" />
-	<param name="title_offset_y" value="-3" />
+	<param name="title_offset_y" value="-4" />
 	<param name="title_offset_openable_x" value="20" />
-	<param name="title_offset_openable_y" value="-3" />
+	<param name="title_offset_openable_y" value="-4" />
 	<param name="header_h" value="12" />
 
 	<param name="scrollbar_offset_x" value="6" />
@@ -217,7 +216,7 @@
 	<param name="open_state_offset_y" value="-5" />
 
 	<param name="right_button_offset_x" value="-6" />
-	<param name="right_button_offset_y" value="-3" />
+	<param name="right_button_offset_y" value="-5" />
 	<param name="right_button_tx_deactive" value="w_win_close.tga" />
 	<param name="right_button_tx_popup" value="w_win_popup.tga" />
 	<param name="right_button_tx_popin" value="w_win_popin.tga" />
@@ -265,11 +264,11 @@
 
 	<param name="frame_covers_open_list" value="false" />
 
-	<param name="title_font_size" value="10" />
+	<param name="title_font_size" value="13" />
 	<param name="title_offset_x" value="8" />
-	<param name="title_offset_y" value="-3" />
-	<param name="title_offset_openable_x" value="22" />
-	<param name="title_offset_openable_y" value="-3" />
+	<param name="title_offset_y" value="-4" />
+	<param name="title_offset_openable_x" value="20" />
+	<param name="title_offset_openable_y" value="-4" />
 	<param name="header_h" value="10" />
 
 	<param name="scrollbar_offset_x" value="6" />
@@ -284,7 +283,7 @@
 	<param name="open_state_offset_y" value="-5" />
 
 	<param name="right_button_offset_x" value="-6" />
-	<param name="right_button_offset_y" value="-4" />
+	<param name="right_button_offset_y" value="-5" />
 	<param name="right_button_tx_deactive" value="w_win_close.tga" />
 	<param name="right_button_tx_popup" value="w_win_popup.tga" />
 	<param name="right_button_tx_popin" value="w_win_popin.tga" />
