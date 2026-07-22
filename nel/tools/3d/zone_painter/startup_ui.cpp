@@ -220,29 +220,16 @@ static void populateWorldList()
 			wroteEcoHdr = true;
 			std::vector<std::pair<std::string, std::string> > hp;
 			hp.push_back(std::make_pair(std::string("id"), std::string("hdr_eco")));
-			hp.push_back(std::make_pair(std::string("title"), std::string("— Ecosystems —")));
-			hp.push_back(std::make_pair(std::string("subtitle"), std::string("")));
-			hp.push_back(std::make_pair(std::string("idx"), std::string("-1")));
-			if (CInterfaceGroup *row = spawnRow("zp_world_row", "ui:zp:world_select:content:list_scroll:text_list", hp))
-			{
-				// freeze the header button
-				if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(row->getCtrl("btn")))
-					btn->setFrozen(true);
-			}
+			hp.push_back(std::make_pair(std::string("title"), std::string("Ecosystems")));
+			spawnRow("zp_list_header", "ui:zp:world_select:content:list_scroll:text_list", hp);
 		}
 		if (w.Kind == ZPWS::Continent && !wroteContHdr)
 		{
 			wroteContHdr = true;
 			std::vector<std::pair<std::string, std::string> > hp;
 			hp.push_back(std::make_pair(std::string("id"), std::string("hdr_cont")));
-			hp.push_back(std::make_pair(std::string("title"), std::string("— Continents —")));
-			hp.push_back(std::make_pair(std::string("subtitle"), std::string("")));
-			hp.push_back(std::make_pair(std::string("idx"), std::string("-1")));
-			if (CInterfaceGroup *row = spawnRow("zp_world_row", "ui:zp:world_select:content:list_scroll:text_list", hp))
-			{
-				if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(row->getCtrl("btn")))
-					btn->setFrozen(true);
-			}
+			hp.push_back(std::make_pair(std::string("title"), std::string("Continents")));
+			spawnRow("zp_list_header", "ui:zp:world_select:content:list_scroll:text_list", hp);
 		}
 
 		std::vector<std::pair<std::string, std::string> > p;
@@ -1108,19 +1095,8 @@ static void populateZoneList()
 			lastGroup = z.Group;
 			std::vector<std::pair<std::string, std::string> > hp;
 			hp.push_back(std::make_pair(std::string("id"), std::string("zg_") + lastGroup));
-			hp.push_back(std::make_pair(std::string("title"), std::string("— ") + lastGroup + " —"));
-			hp.push_back(std::make_pair(std::string("idx"), std::string("-1")));
-			hp.push_back(std::make_pair(std::string("thumb"), std::string("w_box_blank.tga")));
-			if (CInterfaceGroup *row = spawnRow("zp_zone_row", "ui:zp:zone_browser:content:list_scroll:text_list", hp))
-			{
-				if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(row->getCtrl("btn")))
-					btn->setFrozen(true);
-				// Group headers never show a thumb slot / frame well
-				if (CViewBitmap *thumb = dynamic_cast<CViewBitmap *>(row->getView("thumb")))
-					thumb->setActive(false);
-				if (CInterfaceGroup *fr = row->getGroup("thumb_frame"))
-					fr->setActive(false);
-			}
+			hp.push_back(std::make_pair(std::string("title"), lastGroup));
+			spawnRow("zp_list_header", "ui:zp:zone_browser:content:list_scroll:text_list", hp);
 		}
 
 		std::vector<std::pair<std::string, std::string> > p;
