@@ -830,7 +830,7 @@ void openSaveDialog()
 	// M5c: thumbnail checkbox defaults on
 	b->UpdateThumbnail = true;
 	if (CCtrlBaseButton *tb = dynamic_cast<CCtrlBaseButton *>(
-	        CWidgetManager::getInstance()->getElementFromId("ui:zp:save_dialog:content:update_thumb")))
+	        CWidgetManager::getInstance()->getElementFromId("ui:zp:save_dialog:content:update_thumb:box")))
 		tb->setPushed(true);
 	CWidgetManager::getInstance()->enableModalWindow(NULL, "ui:zp:save_dialog");
 }
@@ -845,7 +845,7 @@ public:
 		if (!b) return;
 		// Toggle button reports new pushed state after click via getPushed
 		if (CCtrlBaseButton *tb = dynamic_cast<CCtrlBaseButton *>(
-		        CWidgetManager::getInstance()->getElementFromId("ui:zp:save_dialog:content:update_thumb")))
+		        CWidgetManager::getInstance()->getElementFromId("ui:zp:save_dialog:content:update_thumb:box")))
 			b->UpdateThumbnail = tb->getPushed();
 	}
 };
@@ -1484,7 +1484,7 @@ static void syncThumbWantFromModal(SPaintUIBridge *b)
 {
 	if (!b) return;
 	if (CCtrlBaseButton *tb = dynamic_cast<CCtrlBaseButton *>(
-	        CWidgetManager::getInstance()->getElementFromId("ui:zp:save_dialog:content:update_thumb")))
+	        CWidgetManager::getInstance()->getElementFromId("ui:zp:save_dialog:content:update_thumb:box")))
 		b->UpdateThumbnail = tb->getPushed();
 }
 

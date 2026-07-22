@@ -97,12 +97,16 @@
 			tx_normal="w_sound_off.tga" tx_pushed="w_sound_on.tga" tx_over="w_button_14_over.tga" global_color_normal="false" global_color_pushed="false" />
 		<ctrl type="button" id="tog2" button_type="toggle_button" posparent="tog1" posref="MR ML" x="10"
 			tx_normal="w_button_filter_off.tga" tx_pushed="w_button_filter_on.tga" tx_over="" global_color_normal="false" global_color_pushed="false" />
+		<!-- tx_normal/tx_pushed match the zp_checkbox_row convention: blank slot when unselected,
+		     checkmark when selected. (Swapped before M25d — with radio_button pushed="true" a
+		     no-op pre-fix, nothing ever rendered pushed so the mismatch was never visible; the
+		     engine parse-order fix now applies rad1's pushed state, which made it visible.) -->
 		<ctrl type="button" id="rad1" button_type="radio_button" posparent="tog2" posref="MR ML" x="16" pushed="true"
-			tx_normal="w_opacity_on.tga" tx_pushed="w_slot_on.tga" tx_over="w_slot_on.tga" color="255 255 255 255" col_pushed="255 255 255 255" col_over="255 255 255 0" />
+			tx_normal="w_slot_on.tga" tx_pushed="w_opacity_on.tga" tx_over="w_slot_on.tga" color="255 255 255 255" col_pushed="255 255 255 255" col_over="255 255 255 0" />
 		<ctrl type="button" id="rad2" button_type="radio_button" posparent="rad1" posref="MR ML" x="8"
-			tx_normal="w_opacity_on.tga" tx_pushed="w_slot_on.tga" tx_over="w_slot_on.tga" color="255 255 255 255" col_pushed="255 255 255 255" col_over="255 255 255 0" />
+			tx_normal="w_slot_on.tga" tx_pushed="w_opacity_on.tga" tx_over="w_slot_on.tga" color="255 255 255 255" col_pushed="255 255 255 255" col_over="255 255 255 0" />
 		<ctrl type="button" id="rad3" button_type="radio_button" posparent="rad2" posref="MR ML" x="8"
-			tx_normal="w_opacity_on.tga" tx_pushed="w_slot_on.tga" tx_over="w_slot_on.tga" color="255 255 255 255" col_pushed="255 255 255 255" col_over="255 255 255 0" />
+			tx_normal="w_slot_on.tga" tx_pushed="w_opacity_on.tga" tx_over="w_slot_on.tga" color="255 255 255 255" col_pushed="255 255 255 255" col_over="255 255 255 0" />
 		<!-- M21b: labeled checkbox rows (w_ slot/opacity pair; box or label toggles) -->
 		<view type="text" id="l_cb" posparent="push1" posref="BL TL" x="0" y="-10" fontsize="14" shadow="true" global_color="false" color="255 255 255 200" hardtext="checkboxes (labeled rows):" />
 		<instance template="checkbox_row" id="cb_on" posparent="l_cb" posref="BL TL" x="0" y="-4" w="260" pushed="true"

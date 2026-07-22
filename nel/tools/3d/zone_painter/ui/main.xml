@@ -282,7 +282,10 @@
 	<group id="header_closed" x="0" y="0" h="12" posref="TL TL"></group>
 	<group id="header_opened" x="0" y="0" w="0" h="16" posref="TL TL"></group>
 	<group id="content" x="0" y="0" posref="TL TL" w="0" h="0">
-		<view type="text" id="path_label" posref="TL TL" x="12" y="-8" fontsize="11" shadow="true"
+		<!-- M25c: orientation hint, matching the world/zone browser screens' hint line. -->
+		<view type="text" id="hint" posref="TL TL" x="12" y="-8" fontsize="11" shadow="true"
+			global_color="false" color="255 255 255 160" hardtext="Navigate to a folder with an ecosystem or continent workspace." />
+		<view type="text" id="path_label" posparent="hint" posref="BL TL" x="0" y="-6" fontsize="11" shadow="true"
 			global_color="false" color="180 220 255 255" hardtext="/" line_maxw="530" />
 		<view type="text" id="status" posparent="path_label" posref="BL TL" x="0" y="-4" fontsize="11" shadow="true"
 			global_color="false" color="255 200 120 220" hardtext="" />
@@ -747,9 +750,10 @@
 				fontsize="12" color="255 255 255 255" shadow="true" hardtext="" global_color="false" />
 		</group>
 
-		<!-- M5c: update OLE embedded thumbnail (default on) -->
-		<ctrl style="text_button_toggle" id="update_thumb" posparent="copy_name" posref="BL TL" x="0" y="-10"
-			pushed="true" onclick_l="zp_save_thumb_toggle" params_l="" hardtext="Update thumbnail" />
+		<!-- M5c: update OLE embedded thumbnail (default on). M25c: labeled checkbox (M21 idiom)
+		     for consistency with the panel's Mask mode / Lock borders / Prop rows. -->
+		<instance template="zp_checkbox_row" id="update_thumb" posparent="copy_name" posref="BL TL" x="0" y="-10"
+			label="Update thumbnail" onclick="zp_save_thumb_toggle" params="" pushed="true" />
 
 		<ctrl style="text_button_16" id="btn_overwrite" posref="BL BL" x="16" y="16"
 			onclick_l="zp_save_overwrite" params_l="" hardtext="Overwrite" />
