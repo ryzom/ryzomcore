@@ -249,6 +249,9 @@ bool isSessionBoardVisible();
 /** Rebuild cell fills/markers from the bridge (call after open/close/save/paint/place). */
 void refreshSessionBoardStates();
 
+/** Repopulate + refresh after an op that changes eco occupancy (blocks appear/move). */
+void refreshBoardAfterSessionOp();
+
 /** Dev/test: open the close-confirm modal for one screenshot frame. */
 void forceShowCloseConfirmForShot(const std::string &basename = std::string());
 

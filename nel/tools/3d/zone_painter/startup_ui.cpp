@@ -2251,7 +2251,11 @@ static bool boardCellUnderPointer(int &cx, int &cy)
 
 void sessionBoardDragBegin()
 {
+	// Disarm FIRST, executing or not — the caller invokes unconditionally so a pumped
+	// script can never leave a stale arm behind (M24 review).
 	s_BoardDragArmed = false;
+	if (ZPSCRIPT::isExecuting())
+		return;
 	if (!s_SessionBoardVisible || !s_SessionBridge || !s_SessionBridge->World
 	    || s_SessionBridge->World->Kind != ZPWS::Ecosystem
 	    || !s_SessionBridge->scratchDragDrop)
@@ -2265,6 +2269,8 @@ void sessionBoardDragEnd(bool copyModifier)
 	if (!s_BoardDragArmed)
 		return;
 	s_BoardDragArmed = false;
+	if (ZPSCRIPT::isExecuting())
+		return;
 	if (!s_SessionBoardVisible || !s_SessionBridge || !s_SessionBridge->scratchDragDrop)
 		return;
 	int tx = 0, ty = 0;
@@ -2366,7 +2372,7 @@ bool isSessionBoardVisible()
 
 // Cell-action popup handlers
 /** M24a: per-file board ops change eco occupancy (blocks appear/disappear) — repopulate. */
-static void refreshBoardAfterSessionOp()
+void refreshBoardAfterSessionOp()
 {
 	if (s_SessionBridge && s_SessionBridge->World
 	    && s_SessionBridge->World->Kind == ZPWS::Ecosystem)
@@ -2572,7 +2578,7 @@ public:
 		std::string err;
 		if (!s_SessionBridge->scratchRotate(cx, cy, +1, err))
 			fprintf(stderr, "scratch rotate CW (%d,%d): %s\n", cx, cy, err.c_str());
-		refreshSessionBoardStates();
+		refreshBoardAfterSessionOp(); // occupancy changed — repopulate, not just re-tint
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpInstRotCW, "zp_inst_rot_cw");
@@ -2590,7 +2596,7 @@ public:
 		std::string err;
 		if (!s_SessionBridge->scratchRotate(cx, cy, -1, err))
 			fprintf(stderr, "scratch rotate CCW (%d,%d): %s\n", cx, cy, err.c_str());
-		refreshSessionBoardStates();
+		refreshBoardAfterSessionOp(); // occupancy changed — repopulate, not just re-tint
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpInstRotCCW, "zp_inst_rot_ccw");
@@ -2608,7 +2614,7 @@ public:
 		std::string err;
 		if (!s_SessionBridge->scratchMirror(cx, cy, err))
 			fprintf(stderr, "scratch mirror (%d,%d): %s\n", cx, cy, err.c_str());
-		refreshSessionBoardStates();
+		refreshBoardAfterSessionOp(); // occupancy changed — repopulate, not just re-tint
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpInstMirror, "zp_inst_mirror");
@@ -2626,7 +2632,7 @@ public:
 		std::string err;
 		if (!s_SessionBridge->scratchRemove(cx, cy, err))
 			fprintf(stderr, "scratch remove (%d,%d): %s\n", cx, cy, err.c_str());
-		refreshSessionBoardStates();
+		refreshBoardAfterSessionOp(); // occupancy changed — repopulate, not just re-tint
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpInstRemove, "zp_inst_remove");

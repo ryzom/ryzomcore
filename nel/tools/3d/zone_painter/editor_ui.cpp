@@ -90,6 +90,7 @@ SPaintUIBridge *getPaintUIBridge() { return s_Bridge; }
 class CPointerButtonListener : public NLMISC::IEventListener
 {
 	uint _DownButtons;
+	bool _DragCopyMod;
 	virtual void operator()(const NLMISC::CEvent &event)
 	{
 		CViewPointerBase *pointer = CWidgetManager::getInstance()->getPointer();
@@ -102,16 +103,25 @@ class CPointerButtonListener : public NLMISC::IEventListener
 			pointer->setPointerDown(em.Button == leftButton);
 			pointer->setPointerMiddleDown(em.Button == middleButton);
 			pointer->setPointerRightDown(em.Button == rightButton);
-			// M24d: arm a session-board drag from the cell under the pointer
-			if ((em.Button & leftButton) && !ZPSCRIPT::isExecuting())
+			// M24d: arm a session-board drag from the cell under the pointer. Latch the
+			// copy modifier HERE — the X11 emitter posts bare buttons on mouse-up (only
+			// Windows carries modifiers there), so Ctrl/Shift must be read at down.
+			// Call unconditionally: the hook itself disarms while a script executes
+			// (a guard out here would leave a stale arm across a pumped script).
+			if (em.Button & leftButton)
+			{
+				_DragCopyMod = (em.Button & (ctrlButton | shiftButton)) != 0;
 				sessionBoardDragBegin();
+			}
 		}
 		else if (event == EventMouseUpId)
 		{
 			CEventMouseUp &em = (CEventMouseUp &)event;
-			// M24d: drop before the button-state mirror clears (Ctrl/Shift = copy)
-			if ((em.Button & leftButton) && !ZPSCRIPT::isExecuting())
-				sessionBoardDragEnd((em.Button & (ctrlButton | shiftButton)) != 0);
+			// M24d: drop before the button-state mirror clears (Ctrl/Shift = copy;
+			// down-latched modifier OR'd with the up event's for platforms that send it)
+			if (em.Button & leftButton)
+				sessionBoardDragEnd(_DragCopyMod
+				                    || (em.Button & (ctrlButton | shiftButton)) != 0);
 			_DownButtons &= ~(em.Button & (leftButton | middleButton | rightButton));
 			if (_DownButtons == 0)
 			{
@@ -130,7 +140,7 @@ class CPointerButtonListener : public NLMISC::IEventListener
 	}
 
 public:
-	CPointerButtonListener() : _DownButtons(0) {}
+	CPointerButtonListener() : _DownButtons(0), _DragCopyMod(false) {}
 	void addToServer(CEventServer &server)
 	{
 		server.addListener(EventMouseDownId, this);
