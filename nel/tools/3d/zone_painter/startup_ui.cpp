@@ -627,7 +627,9 @@ static void applySessionCellState(CInterfaceGroup *cell, const std::string &base
 		setBoardCellFillRGBA(cell, NLMISC::CRGBA(40, 90, 100, 200), NLMISC::CRGBA(50, 110, 120, 220));
 		break;
 	case CellScratchEmpty:
-		setBoardCellFillRGBA(cell, NLMISC::CRGBA(30, 32, 36, 120), NLMISC::CRGBA(40, 44, 50, 160));
+		// M24d: open placeable slot — clearly lighter than the board backdrop (the old
+		// near-transparent tint made empty wells invisible)
+		setBoardCellFillRGBA(cell, NLMISC::CRGBA(82, 90, 100, 255), NLMISC::CRGBA(108, 118, 130, 255));
 		break;
 	case CellScratchContext:
 		// Read-only context brick (M16c) — same dim RO tint as continent RO
@@ -2137,15 +2139,18 @@ static void populateScratchBoard()
 			thumb->setActive(false);
 		if (CInterfaceGroup *fr = cell->getGroup("thumb_frame"))
 			fr->setActive(false);
-		if (CCtrlButton *btn = dynamic_cast<CCtrlButton *>(cell->getCtrl("btn")))
-		{
-			btn->setScale(true);
-			btn->setW(kCell);
-			btn->setH(kCell);
-		}
 		ESessionCellState st = CellScratchEmpty;
 		if (s_SessionBridge && s_SessionBridge->getCellState)
 			s_SessionBridge->getCellState(z.Basename, st);
+		if (CCtrlButton *btn = dynamic_cast<CCtrlButton *>(cell->getCtrl("btn")))
+		{
+			btn->setScale(true);
+			// M24d board legibility: EMPTY wells render inset so the backdrop shows as
+			// grid lines between open slots; occupied blocks stay full-size contiguous.
+			const sint32 inset = (st == CellScratchEmpty) ? kCell - 6 : kCell;
+			btn->setW(inset);
+			btn->setH(inset);
+		}
 		applySessionCellState(cell, z.Basename, st);
 	}
 
