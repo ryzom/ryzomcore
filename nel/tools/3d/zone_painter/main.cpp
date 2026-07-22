@@ -5910,6 +5910,7 @@ static bool scratchMaskConflicts(int ox, int oy, uint rot, bool mirror, int skip
 	return scratchMaskConflictsSrc(hm, fw, fh, ox, oy, rot, mirror, skipIdx, err);
 }
 
+
 /** Legacy rect-overlap helper (still used for quick block sizing checks). */
 static bool scratchBlocksOverlap(int ax, int ay, int aw, int ah, int bx, int by, int bw, int bh)
 {
@@ -6190,6 +6191,9 @@ static bool loadOnePlaceContext(std::vector<SPaintZone> &zones, float cellSize,
 	return true;
 }
 
+static bool contextCandidateConflicts(size_t idx, int nx, int ny, uint nrot, bool nmirror,
+                                      std::string &err);
+
 static bool scratchPlaceContext(int cx, int cy, const std::string &basename, std::string &err)
 {
 	if (scratchHomeOccupies(cx, cy))
@@ -6232,66 +6236,43 @@ static bool scratchPlaceContext(int cx, int cy, const std::string &basename, std
 	}
 	// After load, multi-cell mask is filled in loadOnePlaceContext — re-check collisions
 	// against the derived mask (1×1 provisional may have missed multi-cell overlap).
+	// M24d: a conflicting placement auto-shifts to the nearest fitting cell instead of
+	// rolling back (the brick still loads; the user drags it into place afterwards).
 	if (!g_PlaceContextSpecs.empty())
 	{
-		SPlaceContextSpec &loaded = g_PlaceContextSpecs.back();
-		const int cw = loaded.CellsW > 0 ? loaded.CellsW : 1;
-		const int ch = loaded.CellsH > 0 ? loaded.CellsH : 1;
-		std::vector<bool> cm = loaded.Mask;
-		if (cm.empty()) cm.assign((size_t)cw * (size_t)ch, true);
-		// Home collision
-		if (masksCollide(scratchHomeMask(), scratchFw(), scratchFh(), 0, 0, 0, false,
-		                 cm, cw, ch, loaded.Dx, loaded.Dy, loaded.Rot, loaded.Mirror))
+		const size_t li = g_PlaceContextSpecs.size() - 1;
+		std::string cerr;
+		if (contextCandidateConflicts(li, g_PlaceContextSpecs[li].Dx, g_PlaceContextSpecs[li].Dy,
+		                              g_PlaceContextSpecs[li].Rot, g_PlaceContextSpecs[li].Mirror,
+		                              cerr))
 		{
-			g_PlaceContextSpecs.pop_back();
-			scratchRebuild(err);
-			err = "context mask overlaps home footprint";
-			return false;
-		}
-		for (size_t i = 0; i + 1 < g_PlaceContextSpecs.size(); ++i)
-		{
-			const SPlaceContextSpec &o = g_PlaceContextSpecs[i];
-			const int ow = o.CellsW > 0 ? o.CellsW : 1;
-			const int oh = o.CellsH > 0 ? o.CellsH : 1;
-			std::vector<bool> om = o.Mask;
-			if (om.empty()) om.assign((size_t)ow * (size_t)oh, true);
-			if (masksCollide(cm, cw, ch, loaded.Dx, loaded.Dy, loaded.Rot, loaded.Mirror,
-			                 om, ow, oh, o.Dx, o.Dy, o.Rot, o.Mirror))
+			bool placed = false;
+			for (int r = 1; r <= 12 && !placed; ++r)
+			for (int dy = -r; dy <= r && !placed; ++dy)
+			for (int dx = -r; dx <= r && !placed; ++dx)
+			{
+				if (std::max(std::abs(dx), std::abs(dy)) != r) continue;
+				std::string tmp;
+				if (!contextCandidateConflicts(li, cx + dx, cy + dy,
+				                               g_PlaceContextSpecs[li].Rot,
+				                               g_PlaceContextSpecs[li].Mirror, tmp))
+				{
+					g_PlaceContextSpecs[li].Dx = cx + dx;
+					g_PlaceContextSpecs[li].Dy = cy + dy;
+					placed = true;
+				}
+			}
+			if (!placed)
 			{
 				g_PlaceContextSpecs.pop_back();
 				scratchRebuild(err);
-				err = "context mask overlaps another context";
+				err = cerr + " (no nearby fit)";
 				return false;
 			}
-		}
-		for (size_t i = 0; i < g_Places.size(); ++i)
-		{
-			if (masksCollide(scratchHomeMask(), scratchFw(), scratchFh(),
-			                 g_Places[i].CellX, g_Places[i].CellY,
-			                 g_Places[i].Rot, g_Places[i].Mirror,
-			                 cm, cw, ch, loaded.Dx, loaded.Dy, loaded.Rot, loaded.Mirror))
-			{
-				g_PlaceContextSpecs.pop_back();
-				scratchRebuild(err);
-				err = "context mask overlaps instance";
-				return false;
-			}
-		}
-		for (size_t i = 1; i < g_EditableFiles.size(); ++i)
-		{
-			const SEditableFileInfo &ef = g_EditableFiles[i];
-			const int ew = ef.CellsW > 0 ? ef.CellsW : 1;
-			const int eh = ef.CellsH > 0 ? ef.CellsH : 1;
-			std::vector<bool> em = ef.Mask;
-			if (em.empty()) em.assign((size_t)ew * (size_t)eh, true);
-			if (masksCollide(cm, cw, ch, loaded.Dx, loaded.Dy, loaded.Rot, loaded.Mirror,
-			                 em, ew, eh, ef.CellX, ef.CellY, 0, false))
-			{
-				g_PlaceContextSpecs.pop_back();
-				scratchRebuild(err);
-				err = "context mask overlaps open file '" + ef.Basename + "'";
-				return false;
-			}
+			fprintf(stderr, "place-context: '%s' does not fit at (%d,%d) — auto-shifted to (%d,%d)\n",
+			        g_PlaceContextSpecs[li].Basename.c_str(), cx, cy,
+			        g_PlaceContextSpecs[li].Dx, g_PlaceContextSpecs[li].Dy);
+			return scratchRebuild(err);
 		}
 	}
 	return true;
@@ -6431,6 +6412,108 @@ static bool scratchGetContextTransform(int cx, int cy, uint &rot, bool &mirror)
 	return true;
 }
 
+// Forwards for the drag dispatch (defined below with the placement ops)
+static bool scratchPlace(int cx, int cy, std::string &err);
+static bool scratchPlaceInstanceOf(int cx, int cy, const std::string &basenameIn, std::string &err);
+static bool scratchEditableConflicts(size_t idx, std::string &err);
+
+/**
+ * M24d: board drag-drop — move (or copy, Ctrl/Shift held) whatever occupies the grab
+ * cell so its block origin shifts by the drag delta. Move keeps identity (instance
+ * transform, context file, open file); copy duplicates (home → home instance, instance
+ * → same-source instance, context → second placement, open file → instance of it).
+ */
+static bool scratchDragDrop(int fx, int fy, int tx, int ty, bool copy, std::string &err)
+{
+	const int dx = tx - fx, dy = ty - fy;
+	if (dx == 0 && dy == 0) { err = "same cell"; return false; }
+	size_t idx = 0;
+	if (scratchHomeOccupies(fx, fy))
+	{
+		if (!copy)
+		{
+			err = "home is the layout origin (copy-drag places an instance)";
+			return false;
+		}
+		return scratchPlace(tx, ty, err);
+	}
+	if (scratchFindPlace(fx, fy, idx))
+	{
+		SInstancePlace pl = g_Places[idx];
+		const int nx = pl.CellX + dx, ny = pl.CellY + dy;
+		std::vector<bool> sm;
+		int sfw = 1, sfh = 1;
+		instanceSourceFootprint(pl, sm, sfw, sfh);
+		if (copy)
+		{
+			if (scratchMaskConflictsSrc(sm, sfw, sfh, nx, ny, pl.Rot, pl.Mirror, -1, err))
+				return false;
+			SInstancePlace np = pl;
+			np.CellX = nx;
+			np.CellY = ny;
+			g_Places.push_back(np);
+			g_InstanceCount = 1 + (uint)g_Places.size();
+			return scratchRebuild(err);
+		}
+		if (scratchMaskConflictsSrc(sm, sfw, sfh, nx, ny, pl.Rot, pl.Mirror, (int)idx, err))
+			return false;
+		g_Places[idx].CellX = nx;
+		g_Places[idx].CellY = ny;
+		return scratchRebuild(err);
+	}
+	if (scratchFindContext(fx, fy, idx))
+	{
+		const int nx = g_PlaceContextSpecs[idx].Dx + dx, ny = g_PlaceContextSpecs[idx].Dy + dy;
+		if (copy)
+		{
+			SPlaceContextSpec np = g_PlaceContextSpecs[idx];
+			np.Dx = nx;
+			np.Dy = ny;
+			g_PlaceContextSpecs.push_back(np);
+			std::string cerr;
+			if (contextCandidateConflicts(g_PlaceContextSpecs.size() - 1, nx, ny,
+			                              np.Rot, np.Mirror, cerr))
+			{
+				g_PlaceContextSpecs.pop_back();
+				err = cerr;
+				return false;
+			}
+			return scratchRebuild(err);
+		}
+		std::string cerr;
+		if (contextCandidateConflicts(idx, nx, ny, g_PlaceContextSpecs[idx].Rot,
+		                              g_PlaceContextSpecs[idx].Mirror, cerr))
+		{
+			err = cerr;
+			return false;
+		}
+		g_PlaceContextSpecs[idx].Dx = nx;
+		g_PlaceContextSpecs[idx].Dy = ny;
+		return scratchRebuild(err);
+	}
+	if (scratchFindEditableAt(fx, fy, idx))
+	{
+		SEditableFileInfo &ef = g_EditableFiles[idx];
+		const int nx = ef.CellX + dx, ny = ef.CellY + dy;
+		if (copy)
+			return scratchPlaceInstanceOf(nx, ny, ef.Basename, err);
+		const int ox = ef.CellX, oy = ef.CellY;
+		ef.CellX = nx;
+		ef.CellY = ny;
+		std::string cerr;
+		if (scratchEditableConflicts(idx, cerr))
+		{
+			ef.CellX = ox;
+			ef.CellY = oy;
+			err = cerr;
+			return false;
+		}
+		return scratchRebuild(err);
+	}
+	err = "nothing to drag at cell";
+	return false;
+}
+
 static bool scratchGetContext(int cx, int cy, std::string &basename)
 {
 	size_t idx = 0;
@@ -6545,11 +6628,36 @@ static bool scratchOpenEditable(int cx, int cy, const std::string &basenameIn, s
 	if (ok)
 	{
 		// Mask known only after rebuild — collision means the open does not fit here.
+		// M24d: auto-shift to the nearest fitting cell (spiral) instead of refusing —
+		// a large brick still loads, the user drags it into place afterwards.
 		std::string cerr;
 		if (scratchEditableConflicts(g_EditableFiles.size() - 1, cerr))
 		{
-			ok = false;
-			rerr = cerr + NLMISC::toString(" at (%d,%d)", cx, cy);
+			SEditableFileInfo &ne = g_EditableFiles.back();
+			bool placed = false;
+			for (int r = 1; r <= 12 && !placed; ++r)
+			for (int dy = -r; dy <= r && !placed; ++dy)
+			for (int dx = -r; dx <= r && !placed; ++dx)
+			{
+				if (std::max(std::abs(dx), std::abs(dy)) != r) continue;
+				ne.CellX = cx + dx;
+				ne.CellY = cy + dy;
+				std::string tmp;
+				if (!scratchEditableConflicts(g_EditableFiles.size() - 1, tmp))
+					placed = true;
+			}
+			if (placed)
+			{
+				fprintf(stderr, "scratch open editable: '%s' does not fit at (%d,%d) — "
+				        "auto-shifted to (%d,%d)\n",
+				        ze.Basename.c_str(), cx, cy, ne.CellX, ne.CellY);
+				ok = scratchRebuild(rerr);
+			}
+			else
+			{
+				ok = false;
+				rerr = cerr + NLMISC::toString(" at (%d,%d) (no nearby fit)", cx, cy);
+			}
 		}
 	}
 	if (!ok)
@@ -7593,6 +7701,8 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 				sessionBridge.scratchRotateContext = scratchRotateContext;
 				sessionBridge.scratchMirrorContext = scratchMirrorContext;
 				sessionBridge.scratchGetContextTransform = scratchGetContextTransform;
+				// M24d: board drag move/copy
+				sessionBridge.scratchDragDrop = scratchDragDrop;
 				g_SessionOpsAvailable = true;
 				sessionBridge.closeZone = sessionCloseZone;
 				sessionBridge.saveZone = sessionSaveZone;
@@ -7902,7 +8012,30 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 				const char *showB = getenv("ZONE_PAINTER_SHOW_BOARD");
 				if (showB && showB[0] && showB[0] != '0')
 					ZPUI::setSessionBoardVisible(true);
-				const char *bact = getenv("ZONE_PAINTER_BOARD_ACTION");
+				// M24d: BOARD_DRAG="fx,fy:tx,ty[:copy]" drives scratchDragDrop headlessly (E2E)
+			{
+				const char *bdrag = getenv("ZONE_PAINTER_BOARD_DRAG");
+				if (bdrag && bdrag[0])
+				{
+					int fx = 0, fy = 0, tx = 0, ty = 0;
+					char copyBuf[16] = { 0 };
+					const int n = sscanf(bdrag, "%d,%d:%d,%d:%15s", &fx, &fy, &tx, &ty, copyBuf);
+					if (n >= 4)
+					{
+						std::string derr;
+						const bool copy = n >= 5 && copyBuf[0] && copyBuf[0] != '0';
+						if (!scratchDragDrop(fx, fy, tx, ty, copy, derr))
+							fprintf(stderr, "board-drag test (%d,%d)->(%d,%d)%s: %s\n",
+							        fx, fy, tx, ty, copy ? " copy" : "", derr.c_str());
+						else
+							printf("board-drag test (%d,%d)->(%d,%d)%s: OK\n",
+							       fx, fy, tx, ty, copy ? " copy" : "");
+					}
+					else
+						fprintf(stderr, "board-drag test: expects fx,fy:tx,ty[:copy]\n");
+				}
+			}
+			const char *bact = getenv("ZONE_PAINTER_BOARD_ACTION");
 				if (bact && bact[0])
 				{
 					std::string act(bact);
@@ -9455,6 +9588,39 @@ args.addArg("", "instances", "NxM",
 			g_EditableFiles.push_back(efi);
 			placeEcoEditableRange(zones, g_EditableFiles.back(), before, zones.size(),
 			                      cellSize, snap);
+			// M24d: auto-shift when the requested cell does not fit (mirrors the board op)
+			{
+				std::string cerr;
+				if (scratchEditableConflicts(g_EditableFiles.size() - 1, cerr))
+				{
+					SEditableFileInfo &ne = g_EditableFiles.back();
+					const int bx = ne.CellX, by = ne.CellY;
+					bool placed = false;
+					for (int r = 1; r <= 12 && !placed; ++r)
+					for (int sy = -r; sy <= r && !placed; ++sy)
+					for (int sx = -r; sx <= r && !placed; ++sx)
+					{
+						if (std::max(std::abs(sx), std::abs(sy)) != r) continue;
+						ne.CellX = bx + sx;
+						ne.CellY = by + sy;
+						std::string tmp;
+						if (!scratchEditableConflicts(g_EditableFiles.size() - 1, tmp))
+							placed = true;
+					}
+					if (!placed)
+					{
+						fprintf(stderr, "ERROR: --open-editable: '%s' does not fit at (%d,%d): %s\n",
+						        ze.Basename.c_str(), bx, by, cerr.c_str());
+						return 1;
+					}
+					translateZonesXY(zones, before, zones.size(),
+					                 (float)(ne.CellX - bx) * cellSize,
+					                 (float)(ne.CellY - by) * cellSize);
+					fprintf(stderr, "open-editable: '%s' does not fit at (%d,%d) — "
+					        "auto-shifted to (%d,%d)\n",
+					        ze.Basename.c_str(), bx, by, ne.CellX, ne.CellY);
+				}
+			}
 			printf("open-editable: '%s' @ (%d,%d) zoneIdBase=%u footprint %dx%d\n",
 			       ze.Basename.c_str(), oe.Cx, oe.Cy, base,
 			       g_EditableFiles.back().CellsW, g_EditableFiles.back().CellsH);

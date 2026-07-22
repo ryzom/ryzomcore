@@ -98,6 +98,12 @@ bool startupSelectWorldZone(const std::vector<ZPWS::SWorldEntry> &worlds,
 void startupHideAllScreens();
 void startupShowPainter(bool show);
 
+/** M24d board drag: pointer listener feeds left-button transitions here (eco board only).
+ *	Begin arms a drag from the cell under the pointer; end drops onto the cell under the
+ *	pointer (copyModifier = Ctrl/Shift held on release). No-ops when the board is hidden. */
+void sessionBoardDragBegin();
+void sessionBoardDragEnd(bool copyModifier);
+
 // ---------------------------------------------------------------------------------------------
 // Session board hub (ui M11a/M12c) — over the live viewer (session intact).
 // Continent: working-set open/close/save/toggle. Ecosystem: scratch board for brick instances
@@ -200,6 +206,9 @@ struct SSessionBoardBridge
 	bool (*scratchRotateContext)(int cx, int cy, int delta, std::string &err);
 	bool (*scratchMirrorContext)(int cx, int cy, std::string &err);
 	bool (*scratchGetContextTransform)(int cx, int cy, uint &rot, bool &mirror);
+	/** M24d: drag move/copy — shift the block whose cell is (fromCx,fromCy) by the drag
+	 *	delta; copy=true duplicates (Ctrl/Shift-drag; home copies as a home instance). */
+	bool (*scratchDragDrop)(int fromCx, int fromCy, int toCx, int toCy, bool copy, std::string &err);
 	/** Home brick display name. */
 	std::string ScratchHomeName;
 	/** Primary footprint size in fine cells (M14a multi-cell occupancy). */
@@ -222,6 +231,7 @@ struct SSessionBoardBridge
 		  scratchPlaceInstanceOf(NULL), scratchOpenFileCount(NULL), scratchGetInstanceSource(NULL),
 		  scratchGetHintAt(NULL), scratchHintNames(NULL),
 		  scratchRotateContext(NULL), scratchMirrorContext(NULL), scratchGetContextTransform(NULL),
+		  scratchDragDrop(NULL),
 		  FootprintCellsW(1), FootprintCellsH(1), FootprintMask(NULL)
 	{
 	}

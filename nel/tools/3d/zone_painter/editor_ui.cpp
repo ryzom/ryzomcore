@@ -26,6 +26,7 @@
 
 #include "editor_ui.h"
 #include "script_api.h"
+#include "startup_ui.h" // M24d: session-board drag hooks (pointer listener feeds them)
 #include "max_thumbnail.h"
 
 #include <cstdio>
@@ -101,10 +102,16 @@ class CPointerButtonListener : public NLMISC::IEventListener
 			pointer->setPointerDown(em.Button == leftButton);
 			pointer->setPointerMiddleDown(em.Button == middleButton);
 			pointer->setPointerRightDown(em.Button == rightButton);
+			// M24d: arm a session-board drag from the cell under the pointer
+			if ((em.Button & leftButton) && !ZPSCRIPT::isExecuting())
+				sessionBoardDragBegin();
 		}
 		else if (event == EventMouseUpId)
 		{
 			CEventMouseUp &em = (CEventMouseUp &)event;
+			// M24d: drop before the button-state mirror clears (Ctrl/Shift = copy)
+			if ((em.Button & leftButton) && !ZPSCRIPT::isExecuting())
+				sessionBoardDragEnd((em.Button & (ctrlButton | shiftButton)) != 0);
 			_DownButtons &= ~(em.Button & (leftButton | middleButton | rightButton));
 			if (_DownButtons == 0)
 			{

@@ -2160,6 +2160,80 @@ static void populateScratchBoard()
 		host->invalidateCoords();
 }
 
+// ---------------------------------------------------------------------------------------------
+// M24d board drag move/copy (drag = move, Ctrl/Shift-drag = copy — the file-manager idiom).
+// The pointer listener (editor_ui) feeds raw left-button transitions; cells resolve via the
+// NLGUI under-pointer stack, so no board geometry math and button clicks (down+up on the
+// SAME cell) stay untouched.
+
+static bool s_BoardDragArmed = false;
+static int s_BoardDragFromX = 0, s_BoardDragFromY = 0;
+
+/** Board cell under the pointer (id ...:board_host:board:gc<r>_<c>...) → (cx,cy). */
+static bool boardCellUnderPointer(int &cx, int &cy)
+{
+	const std::vector<CCtrlBase *> &ctrls = CWidgetManager::getInstance()->getCtrlsUnderPointer();
+	for (size_t i = 0; i < ctrls.size(); ++i)
+	{
+		if (!ctrls[i]) continue;
+		const std::string &id = ctrls[i]->getId();
+		std::string::size_type pos = id.find(":board_host:board:gc");
+		if (pos == std::string::npos) continue;
+		std::string rest = id.substr(pos + strlen(":board_host:board:gc"));
+		std::string::size_type us = rest.find('_');
+		if (us == std::string::npos) continue;
+		std::string::size_type end = rest.find(':', us);
+		std::string rowS = rest.substr(0, us);
+		std::string colS = end == std::string::npos ? rest.substr(us + 1)
+		                                            : rest.substr(us + 1, end - us - 1);
+		int r = 0, c = 0;
+		if (!NLMISC::fromString(rowS, r) || !NLMISC::fromString(colS, c)) continue;
+		// spawn ids are gc<row=cy>_<col=cx>
+		cy = r;
+		cx = c;
+		return true;
+	}
+	return false;
+}
+
+void sessionBoardDragBegin()
+{
+	s_BoardDragArmed = false;
+	if (!s_SessionBoardVisible || !s_SessionBridge || !s_SessionBridge->World
+	    || s_SessionBridge->World->Kind != ZPWS::Ecosystem
+	    || !s_SessionBridge->scratchDragDrop)
+		return;
+	if (boardCellUnderPointer(s_BoardDragFromX, s_BoardDragFromY))
+		s_BoardDragArmed = true;
+}
+
+void sessionBoardDragEnd(bool copyModifier)
+{
+	if (!s_BoardDragArmed)
+		return;
+	s_BoardDragArmed = false;
+	if (!s_SessionBoardVisible || !s_SessionBridge || !s_SessionBridge->scratchDragDrop)
+		return;
+	int tx = 0, ty = 0;
+	if (!boardCellUnderPointer(tx, ty))
+		return;
+	if (tx == s_BoardDragFromX && ty == s_BoardDragFromY)
+		return; // plain click — the cell button handles it
+	std::string err;
+	if (!s_SessionBridge->scratchDragDrop(s_BoardDragFromX, s_BoardDragFromY, tx, ty,
+	                                      copyModifier, err))
+	{
+		fprintf(stderr, "board drag (%d,%d)->(%d,%d)%s: %s\n",
+		        s_BoardDragFromX, s_BoardDragFromY, tx, ty,
+		        copyModifier ? " copy" : "", err.c_str());
+		if (CViewText *t = findText("ui:zp:zone_browser:content:world_sub"))
+			t->setHardText(err);
+		return;
+	}
+	populateScratchBoard();
+	refreshSessionBoardStates();
+}
+
 void setSessionBoardVisible(bool visible)
 {
 	if (!s_SessionBridge || !s_SessionBridge->World)
