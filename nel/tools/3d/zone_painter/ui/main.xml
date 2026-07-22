@@ -47,7 +47,11 @@
      art). Code activates thumb_frame+thumb only when a preview exists (no empty dark square
      for missing thumbs) and re-anchors "btn"+"name" to the row's own left edge when there's
      no thumb (unchanged from before — see the C++ hasThumb tuck).
-     M10e: no row-level multi-select concept — L-click opens immediately; leave as-is. -->
+     M10e: no row-level multi-select concept — L-click opens immediately; leave as-is.
+     M25p9: NO hairline separator here unlike zp_folder_row/zp_world_row — with the thumbnail
+     icon this reads as a WinXP-style grouped tile view, not a detail listview, and grid lines
+     are the wrong idiom for a tile view (user direction). Hover/press tint stays as the
+     per-tile selection highlight, same as icon-view selection in that reference. -->
 <template name="zp_zone_row" keep="true" id="" title="" idx="0" thumb="">
 	<group id="#id" w="560" h="36">
 		<!-- 9-slice inset (w_box_frame); inactive until a real thumb is bound. -->
@@ -63,9 +67,6 @@
 			onclick_l="zp_select_zone" params_l="#idx" />
 		<view type="text" id="name" posparent="btn" posref="ML ML" x="8" y="0" fontsize="12" shadow="true"
 			global_color="false" color="230 232 235 255" hardtext="#title" />
-		<!-- Hairline listview separator (M25p9 — same idiom as zp_folder_row). -->
-		<view type="bitmap" id="sep" posref="BL BL" x="0" y="0" w="560" h="1" scale="true"
-			texture="blank.tga" global_color="false" color="255 255 255 35" />
 	</group>
 </template>
 
