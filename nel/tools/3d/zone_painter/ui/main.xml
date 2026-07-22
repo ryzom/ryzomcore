@@ -345,6 +345,16 @@
 	<group id="header_opened" x="0" y="0" w="0" h="16" posref="TL TL"></group>
 	<group id="content" x="0" y="0" posref="TL TL" w="0" h="0">
 
+		<!--
+		  M18d: solid panel fill under all mode sections.
+		  Container chrome (w_l0_blank) can fail to paint a non-zero content rect when
+		  setH + CGroupList mode reflow leave content HReal too small for the blank
+		  quad (drawRotFlipBitmap early-outs on height<=0) — text/buttons still draw.
+		  Explicit full-bleed blank.tga restores the dark backdrop in every mode.
+		-->
+		<view type="bitmap" id="panel_bg" posref="TL TL" x="0" y="0" sizeref="wh" w="0" h="0"
+			texture="blank.png" scale="true" color="55 58 64 245" global_color="false" />
+
 		<!-- ==== Slim header (M14c): instance + files + TILES palette only ==== -->
 		<view type="text" id="instance_info" posref="TL TL" x="10" y="-4" fontsize="10" shadow="true"
 			global_color="false" color="120 255 160 255" hardtext="" />

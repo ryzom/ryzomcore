@@ -1651,20 +1651,31 @@ void CEditorUI::syncPanelFromBridge()
 	// Force list reflow + resize the painter container to the active content height.
 	// M14c slim: header ~40; sec tile 118 / color 148 / disp 80 / prop 200;
 	// footer 72; list space 4; chrome ~28.
+	// M18d: never shrink below a chrome-safe floor — if wantH underestimates the real
+	// content, CGroupContainer blank height can go <=0 and the solid panel fill vanishes
+	// (text/buttons still draw). Floor keeps w_l0 chrome + panel_bg readable in all modes.
 	if (CInterfaceGroup *body = findGroupEl(kBody))
 		body->invalidateCoords();
 	{
 		const sint32 secH = tileActive ? 118 : (colorActive ? 148 : (displaceActive ? 80 : (propActive ? 200 : 80)));
-		const sint32 wantH = 40 + secH + 4 + 72 + 28;
+		const sint32 wantH = 40 + secH + 4 + 72 + 36; // +36 chrome (was 28; M18d safer)
 		if (CInterfaceGroup *win = findGroupEl(kPainterWin))
 		{
 			sint32 h = wantH;
-			if (h < 160) h = 160;
+			if (h < 180) h = 180;
 			if (h > 480) h = 480;
 			if (win->getH() != h)
 			{
 				win->setH(h);
 				win->invalidateCoords();
+			}
+			// Keep the window active/opened so layer0 chrome + content panel_bg draw.
+			if (!win->getActive())
+				win->setActive(true);
+			if (CGroupContainer *gc = dynamic_cast<CGroupContainer *>(win))
+			{
+				if (!gc->isOpen())
+					gc->setOpen(true);
 			}
 		}
 	}

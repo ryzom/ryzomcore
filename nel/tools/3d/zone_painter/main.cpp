@@ -3432,25 +3432,93 @@ static void zpClearPropSelection()
 }
 
 /**
- * M18a zone outline — 3D boundary-edge polylines (accepted fallback).
+ * M18d zone outline — outer perimeter only, chained into closed loops.
  *
- * Silhouette feasibility: a true screen-space silhouette would project every tessellated
- * tile triangle, compute the 2D union of screen edges, and discard occluded / interior
- * edges each frame (camera-dependent, O(tiles) plus a 2D edge map). On a multi-patch
- * lacustre brick that cost is interactive in isolation but still multiplies with
- * selection+hover and is more complex than the visual need. The zone's outer patch edges
- * (open mesh edges + edges not shared with another patch of the same mesh — i.e. edges
- * that become cross-zone welds after session assembly) already form the visible mesh
- * boundary against the grey clear color and against non-same meshes. Tessellated along
- * the display CBezierPatch and lifted slightly (same idiom as the tile hover quad).
- * Thin = one CDRU line; thick = three layered lines with small lateral/Z offsets.
+ * Edge set (authoritative adjacency, not a raw open-edge scan):
+ *   - PatchMesh edge shared by two patches of THIS mesh → interior.
+ *   - CPatchInfo::BindEdges with NPatchs!=0 and ZoneId==this zone → same-zone neighbor
+ *     (shared edge, 1-1/1-2/1-4 binds via dividEdge/offsetEdge) → interior.
+ *   - BindEdges NPatchs==0 or ZoneId!=this (cross-zone weld) → outer perimeter.
+ * M18a gated the BindEdges test on Rp vert Binded flags, so intra-zone bind seams that
+ * are open in PatchMesh still drew as "boundary" (interior tangle / bowties).
+ *
+ * Connectivity: tessellate each outer edge along CBezierPatch in V[e]→V[(e+1)&3] order,
+ * chain by mesh vertex endpoints into closed loop polylines. One polyline per loop.
+ * Rendering: project to screen-space CDRU lines (no depth test — overdraw accepted;
+ * priority is correct perimeter geometry). Thin hover / thick multi-pass selection.
  */
+struct SZpBoundEdge
+{
+	uint Patch;
+	uint Edge; // 0..3
+	sint32 V0; // mesh vert at start (param t=0)
+	sint32 V1; // mesh vert at end   (param t=1)
+	bool Reverse; // tessellate bezier opposite to V0→V1 if edge record is flipped
+};
+
+static void zpEvalPatchEdgePoint(const NL3D::CBezierPatch &bp, uint e, float t,
+                                 NLMISC::CVector &out)
+{
+	// Edge param: e0 s=0 t:0→1, e1 t=1 s:0→1, e2 s=1 t:1→0, e3 t=0 s:1→0
+	// Matches V[e] → V[(e+1)&3] with V0=(0,0), V1=(0,1), V2=(1,1), V3=(1,0).
+	float s = 0.f, tv = 0.f;
+	switch (e & 3)
+	{
+	case 0: s = 0.f; tv = t; break;
+	case 1: s = t; tv = 1.f; break;
+	case 2: s = 1.f; tv = 1.f - t; break;
+	default: s = 1.f - t; tv = 0.f; break;
+	}
+	out = bp.eval(s, tv);
+}
+
+static bool zpIsZoneOuterBoundaryEdge(const SPaintZone &pz, size_t p, uint e)
+{
+	if (p >= pz.Patches.size())
+		return false;
+	const SPatchMesh &pm = pz.Ep.Pm;
+	// 1) PatchMesh topology: two patches of this mesh share the edge → interior.
+	if (p < pm.Patches.size())
+	{
+		const sint32 edgeIdx = pm.Patches[p].Edge[e];
+		if (edgeIdx >= 0 && (size_t)edgeIdx < pm.Edges.size())
+		{
+			const SPmEdge &edge = pm.Edges[(size_t)edgeIdx];
+			sint32 other = -1;
+			if (!edge.Patches.empty())
+			{
+				if (edge.Patches[0] == (sint32)p)
+				{
+					if (edge.Patches.size() > 1)
+						other = edge.Patches[1];
+				}
+				else
+					other = edge.Patches[0];
+			}
+			if (other >= 0 && (size_t)other < pm.Patches.size())
+				return false;
+		}
+	}
+	// 2) BindEdges (session-welded): same-zone neighbor (any NPatchs) → interior.
+	//    Cross-zone welds (ZoneId != this) stay outer for THIS zone's silhouette.
+	//    NPatchs==0 is a true open / outer edge.
+	const NL3D::CPatchInfo::CBindInfo &bi = pz.Patches[p].BindEdges[e];
+	if (bi.NPatchs != 0 && bi.ZoneId == (uint16)pz.ZoneId)
+		return false;
+	return true;
+}
+
+/** Collect outer boundary edges, chain into closed loops, tessellate each loop. */
 static void zpCollectZoneBoundaryPolylines(const SPaintZone &pz, uint segsPerEdge,
                                            std::vector<NLMISC::CVector> &outPts,
-                                           std::vector<uint> &outSegCounts)
+                                           std::vector<uint> &outSegCounts,
+                                           uint *outLoopCount = NULL,
+                                           uint *outEdgeCount = NULL)
 {
 	outPts.clear();
 	outSegCounts.clear();
+	if (outLoopCount) *outLoopCount = 0;
+	if (outEdgeCount) *outEdgeCount = 0;
 	if (pz.Patches.empty() || pz.Ep.Pm.Patches.empty())
 		return;
 	const SPatchMesh &pm = pz.Ep.Pm;
@@ -3458,84 +3526,179 @@ static void zpCollectZoneBoundaryPolylines(const SPaintZone &pz, uint segsPerEdg
 		segsPerEdge = 2;
 	const uint nPts = segsPerEdge + 1;
 
+	// --- gather outer edges ---
+	std::vector<SZpBoundEdge> bounds;
+	bounds.reserve(pm.Patches.size() * 2);
 	for (size_t p = 0; p < pm.Patches.size() && p < pz.Patches.size(); ++p)
 	{
+		const SPmPatch &pp = pm.Patches[p];
 		for (uint e = 0; e < 4; ++e)
 		{
-			const sint32 edgeIdx = pm.Patches[p].Edge[e];
-			bool isBoundary = true;
+			if (!zpIsZoneOuterBoundaryEdge(pz, p, e))
+				continue;
+			SZpBoundEdge be;
+			be.Patch = (uint)p;
+			be.Edge = e;
+			be.V0 = pp.V[e];
+			be.V1 = pp.V[(e + 1) & 3];
+			be.Reverse = false;
+			// Prefer PatchMesh edge endpoint orientation when available
+			const sint32 edgeIdx = pp.Edge[e];
 			if (edgeIdx >= 0 && (size_t)edgeIdx < pm.Edges.size())
 			{
-				const SPmEdge &edge = pm.Edges[(size_t)edgeIdx];
-				// Shared by two patches of THIS mesh → interior, skip.
-				// Patches.size()==1 (or missing second) → open / outer edge.
-				sint32 other = -1;
-				if (edge.Patches.size() > 0)
-				{
-					if (edge.Patches[0] == (sint32)p)
-					{
-						if (edge.Patches.size() > 1)
-							other = edge.Patches[1];
-					}
-					else
-						other = edge.Patches[0];
-				}
-				if (other >= 0 && (size_t)other < pm.Patches.size())
-					isBoundary = false;
+				const SPmEdge &ed = pm.Edges[(size_t)edgeIdx];
+				// Keep bezier V[e]→V[(e+1)] order; only flag if mesh edge is flipped vs that
+				if (ed.V1 == be.V1 && ed.V2 == be.V0)
+					be.Reverse = false; // still tessellate along patch edge dir
 			}
-			// Also skip intra-mesh bind seams (edge open in PatchMesh but bound via RPO verts).
-			if (isBoundary && !pz.Ep.Rp.Verts.empty() && edgeIdx >= 0)
-			{
-				const SPmPatch &pp = pm.Patches[p];
-				const int v0 = pp.V[e];
-				const int v1 = pp.V[(e + 1) & 3];
-				bool bindSeam = false;
-				if (v0 >= 0 && (size_t)v0 < pz.Ep.Rp.Verts.size() && pz.Ep.Rp.Verts[(size_t)v0].Binded)
-					bindSeam = true;
-				if (v1 >= 0 && (size_t)v1 < pz.Ep.Rp.Verts.size() && pz.Ep.Rp.Verts[(size_t)v1].Binded)
-					bindSeam = true;
-				// Only treat as interior bind if the bind targets another patch of this mesh.
-				if (bindSeam)
-				{
-					// Conservative: if either corner is Binded, the edge is often a bind
-					// half; the paint_core path still uses open edges for true outer
-					// perimeter. Prefer drawing when CPatchInfo BindEdges reports NPatchs==0
-					// (true open / will-be-cross-zone).
-					if (p < pz.Patches.size() && pz.Patches[p].BindEdges[e].NPatchs != 0
-					    && pz.Patches[p].BindEdges[e].ZoneId == (uint16)pz.ZoneId)
-						isBoundary = false;
-				}
-			}
-			if (!isBoundary)
-				continue;
-
-			const NL3D::CBezierPatch &bp = pz.Patches[p].Patch;
-			// Edge param along the bezier: e0 s=0 t:0→1, e1 t=1 s:0→1, e2 s=1 t:1→0, e3 t=0 s:1→0
-			outSegCounts.push_back(nPts);
-			for (uint i = 0; i < nPts; ++i)
-			{
-				const float t = (float)i / (float)segsPerEdge;
-				float s = 0.f, tv = 0.f;
-				switch (e)
-				{
-				case 0: s = 0.f; tv = t; break;
-				case 1: s = t; tv = 1.f; break;
-				case 2: s = 1.f; tv = 1.f - t; break;
-				default: s = 1.f - t; tv = 0.f; break;
-				}
-				outPts.push_back(bp.eval(s, tv));
-			}
+			bounds.push_back(be);
 		}
 	}
+	if (outEdgeCount) *outEdgeCount = (uint)bounds.size();
+	if (bounds.empty())
+		return;
+
+	// --- adjacency: mesh vert → incident bound-edge indices ---
+	// Fall back to quantized world pos when V indices are invalid / unmatched (rare binds).
+	std::map<sint32, std::vector<uint> > byVert;
+	for (uint i = 0; i < (uint)bounds.size(); ++i)
+	{
+		if (bounds[i].V0 >= 0)
+			byVert[bounds[i].V0].push_back(i);
+		if (bounds[i].V1 >= 0 && bounds[i].V1 != bounds[i].V0)
+			byVert[bounds[i].V1].push_back(i);
+	}
+
+	// --- walk closed loops ---
+	std::vector<bool> used(bounds.size(), false);
+	uint loops = 0;
+	for (uint start = 0; start < (uint)bounds.size(); ++start)
+	{
+		if (used[start])
+			continue;
+		// Build ordered edge sequence for this loop
+		std::vector<uint> loopEdges;
+		std::vector<bool> loopFwd; // true = walk V0→V1, false = V1→V0
+		uint cur = start;
+		sint32 enterVert = bounds[start].V0; // arrive at V0, leave toward V1
+		// Prefer starting so we walk V0→V1
+		bool fwd = true;
+		uint guard = 0;
+		const uint guardMax = (uint)bounds.size() + 2;
+		while (!used[cur] && guard++ < guardMax)
+		{
+			used[cur] = true;
+			loopEdges.push_back(cur);
+			loopFwd.push_back(fwd);
+			const SZpBoundEdge &be = bounds[cur];
+			sint32 leaveVert = fwd ? be.V1 : be.V0;
+			// Find next unused edge incident to leaveVert
+			uint next = cur;
+			bool nextFwd = true;
+			bool found = false;
+			std::map<sint32, std::vector<uint> >::const_iterator it = byVert.find(leaveVert);
+			if (it != byVert.end())
+			{
+				const std::vector<uint> &cand = it->second;
+				for (size_t c = 0; c < cand.size(); ++c)
+				{
+					const uint ei = cand[c];
+					if (used[ei])
+						continue;
+					const SZpBoundEdge &nb = bounds[ei];
+					if (nb.V0 == leaveVert)
+					{
+						next = ei;
+						nextFwd = true;
+						found = true;
+						break;
+					}
+					if (nb.V1 == leaveVert)
+					{
+						next = ei;
+						nextFwd = false;
+						found = true;
+						break;
+					}
+				}
+			}
+			if (!found)
+				break; // open chain (should not happen for a closed perimeter)
+			// Closed when we return to start edge's start vert after ≥1 edge
+			if (leaveVert == enterVert && !loopEdges.empty())
+			{
+				// actually closed only if next would be start — handled by used[start]
+				// If leaveVert is enterVert after first edge only, degenerate; continue.
+			}
+			cur = next;
+			fwd = nextFwd;
+			if (cur == start)
+				break;
+		}
+		// If walk stopped without consuming a full cycle, still emit what we have
+		if (loopEdges.empty())
+			continue;
+		++loops;
+
+		// Tessellate loop as one continuous polyline (shared endpoints once)
+		std::vector<NLMISC::CVector> loopPts;
+		for (size_t li = 0; li < loopEdges.size(); ++li)
+		{
+			const SZpBoundEdge &be = bounds[loopEdges[li]];
+			const bool goFwd = loopFwd[li];
+			const NL3D::CBezierPatch &bp = pz.Patches[be.Patch].Patch;
+			// For edges after the first, skip the duplicated start point
+			const uint i0 = (li == 0) ? 0 : 1;
+			for (uint i = i0; i < nPts; ++i)
+			{
+				const float tRaw = (float)i / (float)segsPerEdge;
+				const float t = goFwd ? tRaw : (1.f - tRaw);
+				NLMISC::CVector pt;
+				zpEvalPatchEdgePoint(bp, be.Edge, t, pt);
+				loopPts.push_back(pt);
+			}
+		}
+		// Close the loop visually: append first point if not already coincident
+		if (loopPts.size() >= 2)
+		{
+			const NLMISC::CVector &a = loopPts.front();
+			const NLMISC::CVector &b = loopPts.back();
+			if ((a - b).sqrnorm() > 1e-6f)
+				loopPts.push_back(a);
+		}
+		if (loopPts.size() >= 2)
+		{
+			outSegCounts.push_back((uint)loopPts.size());
+			outPts.insert(outPts.end(), loopPts.begin(), loopPts.end());
+		}
+	}
+	// Orphan edges not reached by a loop walk (broken adjacency) — emit as single segs
+	for (uint i = 0; i < (uint)bounds.size(); ++i)
+	{
+		if (used[i])
+			continue;
+		used[i] = true;
+		const SZpBoundEdge &be = bounds[i];
+		const NL3D::CBezierPatch &bp = pz.Patches[be.Patch].Patch;
+		outSegCounts.push_back(nPts);
+		for (uint k = 0; k < nPts; ++k)
+		{
+			const float t = (float)k / (float)segsPerEdge;
+			NLMISC::CVector pt;
+			zpEvalPatchEdgePoint(bp, be.Edge, t, pt);
+			outPts.push_back(pt);
+		}
+		++loops; // count as degenerate 1-edge "loop"
+	}
+	if (outLoopCount) *outLoopCount = loops;
 }
 
 /**
- * Draw zone boundary as screen-space polylines (M18a).
+ * Draw zone boundary as screen-space polylines (M18a/M18d).
  *
- * Project each tessellated boundary point through the camera and draw with the 2D
- * CDRU::drawLine (Z always, viewport-space). Avoids landscape Z-fighting and matrix
- * clobber after UScene::render / NLGUI — more reliable than 3D unlit lines for this
- * overlay. Thin = 1px; thick = multi-pass with small screen-space offsets.
+ * Project tessellated loop points through the camera; 2D CDRU::drawLine (Z always).
+ * No depth test — occluded segments overdraw (acceptable; geometry correctness first).
+ * Thin = 1px; thick = multi-pass with small screen-space offsets.
  */
 static void zpDrawZoneOutline(NL3D::IDriver *driver, NL3D::CCamera *camera,
                               const NL3D::CViewport &viewport,
@@ -3545,7 +3708,8 @@ static void zpDrawZoneOutline(NL3D::IDriver *driver, NL3D::CCamera *camera,
 		return;
 	std::vector<NLMISC::CVector> pts;
 	std::vector<uint> segs;
-	zpCollectZoneBoundaryPolylines(pz, thick ? 16 : 10, pts, segs);
+	uint nLoops = 0, nEdges = 0;
+	zpCollectZoneBoundaryPolylines(pz, thick ? 16 : 10, pts, segs, &nLoops, &nEdges);
 	if (pts.empty() || segs.empty())
 	{
 		static bool s_EmptyOnce = false;
@@ -3561,7 +3725,6 @@ static void zpDrawZoneOutline(NL3D::IDriver *driver, NL3D::CCamera *camera,
 	const NLMISC::CMatrix viewMat = camera->getMatrix().inverted();
 	const NL3D::CFrustum &fr = camera->getFrustum();
 	const float zLift = 0.4f;
-	// Project world pts → NDC [0..1]² (CFrustum::project)
 	std::vector<NLMISC::CVector> proj;
 	proj.resize(pts.size());
 	std::vector<bool> ok(pts.size(), false);
@@ -3571,12 +3734,11 @@ static void zpDrawZoneOutline(NL3D::IDriver *driver, NL3D::CCamera *camera,
 		w.z += zLift;
 		const NLMISC::CVector eye = viewMat * w;
 		if (eye.y <= fr.Near * 0.5f)
-			continue; // behind / too near
+			continue;
 		proj[i] = fr.project(eye);
 		ok[i] = true;
 	}
 	const int passes = thick ? 5 : 1;
-	// Screen-space pixel offsets (viewport is 0..1 for CDRU 2D lines)
 	const float ox[5] = { 0.f, 0.0015f, -0.0015f, 0.f, 0.f };
 	const float oy[5] = { 0.f, 0.f, 0.f, 0.0015f, -0.0015f };
 	size_t base = 0;
@@ -3592,7 +3754,6 @@ static void zpDrawZoneOutline(NL3D::IDriver *driver, NL3D::CCamera *camera,
 				continue;
 			const NLMISC::CVector &a = proj[base + i];
 			const NLMISC::CVector &b = proj[base + i + 1];
-			// Clip-ish: both ends roughly on screen
 			if ((a.x < -0.2f && b.x < -0.2f) || (a.x > 1.2f && b.x > 1.2f)
 			    || (a.y < -0.2f && b.y < -0.2f) || (a.y > 1.2f && b.y > 1.2f))
 				continue;
@@ -3609,10 +3770,22 @@ static void zpDrawZoneOutline(NL3D::IDriver *driver, NL3D::CCamera *camera,
 	static bool s_CountOnce = false;
 	if (!s_CountOnce)
 	{
-		printf("prop-outline: zone %u '%s' boundary_edges=%u pts=%u drawn=%u thick=%d (screen-space)\n",
-		       pz.ZoneId, pz.Name.c_str(), (uint)segs.size(), (uint)pts.size(),
-		       nDrawn, (int)thick);
+		printf("prop-outline: zone %u '%s' loops=%u boundary_edges=%u polylines=%u pts=%u drawn=%u thick=%d (screen-space, no Z-test)\n",
+		       pz.ZoneId, pz.Name.c_str(), nLoops, nEdges, (uint)segs.size(),
+		       (uint)pts.size(), nDrawn, (int)thick);
 		s_CountOnce = true;
+	}
+	else
+	{
+		// Always log once per zone id change (selection screenshots)
+		static uint s_LastLoggedZone = (uint)-1;
+		if (pz.ZoneId != s_LastLoggedZone)
+		{
+			printf("prop-outline: zone %u '%s' loops=%u boundary_edges=%u polylines=%u pts=%u thick=%d\n",
+			       pz.ZoneId, pz.Name.c_str(), nLoops, nEdges, (uint)segs.size(),
+			       (uint)pts.size(), (int)thick);
+			s_LastLoggedZone = pz.ZoneId;
+		}
 	}
 }
 
@@ -6280,13 +6453,20 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 			}
 			// Refresh bridge after season/palette/board env hooks
 			zpFillBridgeState(paintBridge);
-			// Re-render scene then Prop outlines + HUD (shot path previously skipped these —
-			// only the interactive loop drew hover/selection lines).
+			// Re-render scene, NLGUI panel, then Prop outlines + HUD.
+			// M18d draw order: scene → UI → outlines/HUD. M18a drew outlines/HUD before
+			// UI; 2D CDRU + textContext after landscape left driver state that could make
+			// container chrome blank quads early-out (panel text floated, no solid fill).
+			// UI first restores the solid Painter backdrop; outlines overdraw on top.
 			{
 				NLMISC::CMatrix camMat = mouseListener.getViewMatrix();
 				camera->setMatrix(camMat);
 				udriver->clearBuffers(NLMISC::CRGBA(90, 90, 90));
 				uscene->render();
+			}
+			editorUI->update();
+			editorUI->draw();
+			{
 				if (core && paintListener.Mode == CPaintMouseListener::ModeProp)
 				{
 					NLMISC::TTime t0 = NLMISC::CTime::getLocalTime();
@@ -6329,8 +6509,6 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 					textContext.printfAt(0.01f, 0.01f, "T/C/D/R mode  O board  Y season  P tiles  F10 UI  ESC");
 				}
 			}
-			editorUI->update();
-			editorUI->draw();
 			udriver->swapBuffers();
 			NLMISC::CBitmap btm;
 			driver->getBuffer(btm);
@@ -6511,7 +6689,11 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 					theLand->Landscape.refineAll(camKey.getPos());
 				}
 
-				// Hovered tile outline (paint modes) OR zone boundary outline (Prop mode M18a)
+				// M18d: NLGUI after landscape, BEFORE outlines/HUD (solid panel backdrop).
+				editorUI->update();
+				editorUI->draw();
+
+				// Hovered tile outline (paint modes) OR zone boundary outline (Prop mode M18a/d)
 				if (core && paintListener.Mode == CPaintMouseListener::ModeProp)
 				{
 					// Timing note (printed once): boundary-edge outline cost on the working set.
@@ -6625,10 +6807,6 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 						NL3D::CDRU::drawQuad(0.30f, 0.955f, 0.32f, 0.975f, *driver,
 						                     paintListener.BrushColor, viewport);
 				}
-
-				// NLGUI over the 3D scene (after scene/HUD, before swap)
-				editorUI->update();
-				editorUI->draw();
 
 				udriver->swapBuffers();
 				zpViewerScreenshot(driver, udriver->AsyncListener); // F12 convenience
