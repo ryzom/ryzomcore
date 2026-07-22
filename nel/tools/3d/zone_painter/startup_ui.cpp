@@ -50,6 +50,7 @@
 
 #include <nel/gui/action_handler.h>
 #include <nel/gui/ctrl_base_button.h>
+#include <nel/gui/ctrl_button.h>
 #include <nel/gui/ctrl_scroll.h>
 #include <nel/gui/ctrl_text_button.h>
 #include <nel/gui/group_container.h>
@@ -376,7 +377,29 @@ static void refreshBoardSelectionUI()
 	}
 }
 
-/** Set board cell pushed highlight for one zone index (if the cell exists). */
+/**
+ * Explorer-style board multi-select fill (M10e).
+ * Same tone as palette cells: NeL CGroupTree col_select default (255 128 128 128).
+ * Applied as blank.tga button face color (not setPushed brick chrome).
+ */
+static const CRGBA kBoardCellSelFill(255, 128, 128, 128);
+static const CRGBA kBoardCellSelHover(255, 128, 128, 64);
+static const CRGBA kBoardCellSelNone(0, 0, 0, 0);
+
+static void setBoardCellSelFill(CInterfaceGroup *cell, bool selected)
+{
+	if (!cell)
+		return;
+	if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(cell->getCtrl("btn")))
+	{
+		const CRGBA c = selected ? kBoardCellSelFill : kBoardCellSelNone;
+		btn->setColor(c);
+		btn->setColorPushed(c);
+		btn->setColorOver(selected ? kBoardCellSelFill : kBoardCellSelHover);
+	}
+}
+
+/** Set board cell flat selection fill for one zone index (if the cell exists). */
 static void setBoardCellSelected(int zoneIdx, bool selected)
 {
 	if (zoneIdx < 0) return;
@@ -389,7 +412,12 @@ static void setBoardCellSelected(int zoneIdx, bool selected)
 	snprintf(idbuf, sizeof(idbuf), "ui:zp:zone_browser:content:board_host:board:gc%d_%d:btn", r, c);
 	if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(
 	        CWidgetManager::getInstance()->getElementFromId(idbuf)))
-		btn->setPushed(selected);
+	{
+		const CRGBA c = selected ? kBoardCellSelFill : kBoardCellSelNone;
+		btn->setColor(c);
+		btn->setColorPushed(c);
+		btn->setColorOver(selected ? kBoardCellSelFill : kBoardCellSelHover);
+	}
 }
 
 static void clearBoard()
@@ -544,9 +572,21 @@ static void populateContinentGrid(const ZPWS::SWorldEntry &world)
 			// M10a: activate 9-slice well only when a real thumb is bound
 			if (CInterfaceGroup *fr = cell->getGroup("thumb_frame"))
 				fr->setActive(hasThumb);
-			// Restore multi-select highlight (M6b)
-			if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(cell->getCtrl("btn")))
-				btn->setPushed(s_Sess.PendingSelect.count(zi) != 0);
+			// Force full-cell hit/fill size. blank.tga is 4×4; without scale, updateCoords
+			// resets the button to texture size every frame. Include CCtrlButton::setScale.
+			if (CCtrlButton *btn = dynamic_cast<CCtrlButton *>(cell->getCtrl("btn")))
+			{
+				btn->setScale(true);
+				btn->setW(kCell);
+				btn->setH(kCell);
+			}
+			else if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(cell->getCtrl("btn")))
+			{
+				btn->setW(kCell);
+				btn->setH(kCell);
+			}
+			// Restore multi-select flat fill (M6b / M10e Explorer-style)
+			setBoardCellSelFill(cell, s_Sess.PendingSelect.count(zi) != 0);
 		}
 	}
 
@@ -921,8 +961,14 @@ public:
 		else
 			s_Sess.PendingSelect.insert(idx);
 		const bool on = s_Sess.PendingSelect.count(idx) != 0;
+		// Drive Explorer-style blank.tga fill via setColor (not setPushed brick chrome).
 		if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(pCaller))
-			btn->setPushed(on);
+		{
+			const CRGBA c = on ? kBoardCellSelFill : kBoardCellSelNone;
+			btn->setColor(c);
+			btn->setColorPushed(c);
+			btn->setColorOver(on ? kBoardCellSelFill : kBoardCellSelHover);
+		}
 		else
 			setBoardCellSelected(idx, on);
 		refreshBoardSelectionUI();
@@ -1125,6 +1171,31 @@ EStartupResult runStartupFlow(UDriver *driver,
 			showScreen(ScreenZone);
 			openedScreenB = true;
 			printf("startup-screenshot: Screen B for world '%s'\n", worlds[wi].WorldName.c_str());
+			// Dev-only: ZONE_PAINTER_BOARD_SELECT pre-selects a used cell so M10e
+			// Explorer-style multi-select fill is visible in headless board shots.
+			// "1"/"true"/"yes" => first zone (index 0). Numeric >=0 => that zone index.
+			if (worlds[wi].Kind == ZPWS::Continent && !s_Sess.Zones.empty())
+			{
+				const char *bsel = getenv("ZONE_PAINTER_BOARD_SELECT");
+				if (bsel && bsel[0] && !(bsel[0] == '0' && bsel[1] == 0))
+				{
+					int zi = 0;
+					// bare "1" is the common truthy flag (first cell), not index 1
+					if (std::string(bsel) == "1" || std::string(bsel) == "true"
+					    || std::string(bsel) == "yes")
+						zi = 0;
+					else if (bsel[0] >= '0' && bsel[0] <= '9')
+						fromString(std::string(bsel), zi);
+					if (zi < 0 || zi >= (int)s_Sess.Zones.size())
+						zi = 0;
+					s_Sess.PendingSelect.clear();
+					s_Sess.PendingSelect.insert(zi);
+					setBoardCellSelected(zi, true);
+					refreshBoardSelectionUI();
+					printf("startup-screenshot: board multi-select zone %d ('%s')\n",
+					       zi, s_Sess.Zones[zi].Basename.c_str());
+				}
+			}
 		}
 		else
 		{

@@ -1111,7 +1111,42 @@ void rebuildTilesetPalette(NL3D::CTileBank *bank, const std::string &bankPath,
 	}
 }
 
-/** Highlight the current tileset cell (toggle_button pushed state). */
+/**
+ * Explorer-style cell selection fill (M10e).
+ * Color matches NeL CGroupTree default col_select (255 128 128 128) — the w_ skin's
+ * list-row selection tone. Applied as a modulated blank.tga button face behind the
+ * texture well + label (same mechanism as the color swatch; not setPushed brick chrome).
+ */
+static const CRGBA kCellSelFill(255, 128, 128, 128);
+static const CRGBA kCellSelHover(255, 128, 128, 64);
+static const CRGBA kCellSelNone(0, 0, 0, 0);
+
+static void setCellSelFill(CInterfaceGroup *cell, bool selected)
+{
+	if (!cell)
+		return;
+	if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(cell->getCtrl("btn")))
+	{
+		const CRGBA c = selected ? kCellSelFill : kCellSelNone;
+		btn->setColor(c);
+		btn->setColorPushed(c);
+		btn->setColorOver(selected ? kCellSelFill : kCellSelHover);
+	}
+}
+
+static void setCellSelFillByBtnPath(const char *btnPath, bool selected)
+{
+	if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(
+	        CWidgetManager::getInstance()->getElementFromId(btnPath)))
+	{
+		const CRGBA c = selected ? kCellSelFill : kCellSelNone;
+		btn->setColor(c);
+		btn->setColorPushed(c);
+		btn->setColorOver(selected ? kCellSelFill : kCellSelHover);
+	}
+}
+
+/** Highlight the current tileset cell (flat blank.tga fill via setColor, M10e). */
 static void syncPaletteHighlight(int curTileSet, uint tileSetCount)
 {
 	if (s_PaletteBuiltCount <= 0)
@@ -1126,25 +1161,21 @@ static void syncPaletteHighlight(int curTileSet, uint tileSetCount)
 	{
 		char idbuf[96];
 		snprintf(idbuf, sizeof(idbuf), "%s:ts%03d:btn", kPaletteGridId, s_PaletteLastHighlight);
-		if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(
-		        CWidgetManager::getInstance()->getElementFromId(idbuf)))
-			btn->setPushed(false);
+		setCellSelFillByBtnPath(idbuf, false);
 	}
 	if (tileSetCount && curTileSet >= 0 && curTileSet < (int)tileSetCount
 	    && curTileSet < s_PaletteBuiltCount)
 	{
 		char idbuf[96];
 		snprintf(idbuf, sizeof(idbuf), "%s:ts%03d:btn", kPaletteGridId, curTileSet);
-		if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(
-		        CWidgetManager::getInstance()->getElementFromId(idbuf)))
-			btn->setPushed(true);
+		setCellSelFillByBtnPath(idbuf, true);
 		s_PaletteLastHighlight = curTileSet;
 	}
 	else
 		s_PaletteLastHighlight = -1;
 }
 
-/** Highlight the current displace cell (ui M9a). */
+/** Highlight the current displace cell (flat blank.tga fill via setColor, M10e). */
 static void syncDisplaceHighlight(uint displaceIndex)
 {
 	if (s_DisplaceBuiltCount <= 0)
@@ -1157,17 +1188,13 @@ static void syncDisplaceHighlight(uint displaceIndex)
 	{
 		char idbuf[96];
 		snprintf(idbuf, sizeof(idbuf), "%s:dp%03d:btn", kPaletteDispGridId, s_DisplaceLastHighlight);
-		if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(
-		        CWidgetManager::getInstance()->getElementFromId(idbuf)))
-			btn->setPushed(false);
+		setCellSelFillByBtnPath(idbuf, false);
 	}
 	if (cur >= 0 && cur < s_DisplaceBuiltCount)
 	{
 		char idbuf[96];
 		snprintf(idbuf, sizeof(idbuf), "%s:dp%03d:btn", kPaletteDispGridId, cur);
-		if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(
-		        CWidgetManager::getInstance()->getElementFromId(idbuf)))
-			btn->setPushed(true);
+		setCellSelFillByBtnPath(idbuf, true);
 		s_DisplaceLastHighlight = cur;
 	}
 	else
