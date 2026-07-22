@@ -1646,6 +1646,8 @@ static void zpSelectMode(int mode)
 	g_PaintCtx.Paint->Mode = mode;
 }
 
+static void zpRebuildTilesetPalette(); // fwd: tileset pick may refresh displace previews
+
 static void zpSelectTileSetDelta(int d)
 {
 	if (!g_PaintCtx.Active || !g_PaintCtx.Core || !g_PaintCtx.Paint) return;
@@ -1655,7 +1657,11 @@ static void zpSelectTileSetDelta(int d)
 	int cur = g_PaintCtx.Paint->CurTileSet;
 	cur = (cur + d) % n;
 	if (cur < 0) cur += n;
+	if (cur == g_PaintCtx.Paint->CurTileSet)
+		return;
 	g_PaintCtx.Paint->CurTileSet = cur;
+	// Displace map files are per-tileset (M9a).
+	zpRebuildTilesetPalette();
 }
 
 static void zpSelectTileSetAbs(int idx)
@@ -1663,7 +1669,11 @@ static void zpSelectTileSetAbs(int idx)
 	if (!g_PaintCtx.Active || !g_PaintCtx.Core || !g_PaintCtx.Paint) return;
 	uint count = g_PaintCtx.Core->tileSetCount();
 	if (!count || idx < 0 || idx >= (int)count) return;
+	const int prev = g_PaintCtx.Paint->CurTileSet;
 	g_PaintCtx.Paint->CurTileSet = idx;
+	// Displace map files are per-tileset; refresh the palette section when the set changes (M9a).
+	if (prev != idx)
+		zpRebuildTilesetPalette();
 }
 
 static void zpToggleTileSize()
@@ -1750,6 +1760,15 @@ static void zpDisplaceIndexDelta(int d)
 	int v = ((int)g_PaintCtx.Paint->DisplaceIndex + d) % 16;
 	if (v < 0) v += 16;
 	g_PaintCtx.Paint->DisplaceIndex = (uint)v;
+}
+
+/** Absolute displace index 0-15 (palette cell / panel action test); same field as [ ] keys. */
+static void zpDisplaceIndexAbs(int idx)
+{
+	if (!g_PaintCtx.Active || !g_PaintCtx.Paint) return;
+	if (idx < 0) idx = 0;
+	if (idx > 15) idx = 15;
+	g_PaintCtx.Paint->DisplaceIndex = (uint)idx;
 }
 
 static void zpToggleLockBorders()
@@ -2170,15 +2189,18 @@ static std::string zpSeasonCacheKey()
 	return pref.empty() ? std::string("auto") : pref;
 }
 
-/** Rebuild the Tiles palette grid (ui M8); no-op without a bank. */
+/** Rebuild the Tiles + Displace palette grids (ui M8/M9a); no-op without a bank. */
 static void zpRebuildTilesetPalette()
 {
+	int ts = 0;
+	if (g_PaintCtx.Paint)
+		ts = g_PaintCtx.Paint->CurTileSet;
 	if (!g_PaintCtx.Bank)
 	{
-		ZPUI::rebuildTilesetPalette(NULL, std::string(), zpSeasonCacheKey());
+		ZPUI::rebuildTilesetPalette(NULL, std::string(), zpSeasonCacheKey(), ts);
 		return;
 	}
-	ZPUI::rebuildTilesetPalette(g_PaintCtx.Bank, g_PaintCtx.BankPath, zpSeasonCacheKey());
+	ZPUI::rebuildTilesetPalette(g_PaintCtx.Bank, g_PaintCtx.BankPath, zpSeasonCacheKey(), ts);
 }
 
 static void zpTogglePalette()
@@ -2485,6 +2507,7 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 		paintBridge.cycleBrushMask = zpCycleBrushMask;
 		paintBridge.toggleMaskMode = zpToggleMaskMode;
 		paintBridge.displaceIndexDelta = zpDisplaceIndexDelta;
+		paintBridge.displaceIndexAbs = zpDisplaceIndexAbs;
 		paintBridge.togglePalette = zpTogglePalette;
 		ZPUI::setPaintUIBridge(&paintBridge);
 
@@ -2592,7 +2615,7 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 			}
 			// Dev-only: ZONE_PAINTER_PANEL_ACTION_TEST drives a panel action-handler path once
 			// (proves panel → same shared handler as keys). Values: hardness+|hardness-|opacity+|
-			// opacity-|radius+|radius-|displace+|displace-|mask|maskmode|tileset:N|palette
+			// opacity-|radius+|radius-|displace+|displace-|displace:N|mask|maskmode|tileset:N|palette
 			{
 				const char *act = getenv("ZONE_PAINTER_PANEL_ACTION_TEST");
 				if (act && act[0] && core)
@@ -2612,6 +2635,12 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 					else if (strcmp(act, "radius-") == 0 && b && b->colorRadiusDelta) b->colorRadiusDelta(-1);
 					else if (strcmp(act, "displace+") == 0 && b && b->displaceIndexDelta) b->displaceIndexDelta(+1);
 					else if (strcmp(act, "displace-") == 0 && b && b->displaceIndexDelta) b->displaceIndexDelta(-1);
+					else if (strncmp(act, "displace:", 9) == 0 && b && b->displaceIndexAbs)
+					{
+						int idx = 0;
+						NLMISC::fromString(std::string(act + 9), idx);
+						b->displaceIndexAbs(idx);
+					}
 					else if (strcmp(act, "mask") == 0 && b && b->cycleBrushMask) b->cycleBrushMask();
 					else if (strcmp(act, "maskmode") == 0 && b && b->toggleMaskMode) b->toggleMaskMode();
 					else if (strncmp(act, "tileset:", 8) == 0 && b && b->selectTileSetAbs)
@@ -2645,11 +2674,15 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 					ZPUI::forceShowSaveDialogForShot();
 				}
 			}
-			// Dev-only: ZONE_PAINTER_PALETTE_SHOT=1 opens the Tiles palette for the frame (M8).
+			// Dev-only: ZONE_PAINTER_PALETTE_SHOT=1 opens the Tiles palette for the frame (M8/M9a).
+			// ZONE_PAINTER_PALETTE_SCROLL=disp scrolls the body to the Displace section.
 			{
 				const char *palShot = getenv("ZONE_PAINTER_PALETTE_SHOT");
 				if (palShot && palShot[0] && palShot[0] != '0')
 					ZPUI::setTilesetPaletteVisible(true);
+				const char *palScroll = getenv("ZONE_PAINTER_PALETTE_SCROLL");
+				if (palScroll && (strcmp(palScroll, "disp") == 0 || strcmp(palScroll, "displace") == 0))
+					ZPUI::scrollPaletteToDisplaceSection();
 			}
 			// Dev-only: ZONE_PAINTER_SEASON_NEXT=1 cycles season once before capture (M8 season-follow).
 			{

@@ -92,6 +92,8 @@ struct SPaintUIBridge
 	void (*cycleBrushMask)();         // none → mask1 → … → none (S key)
 	void (*toggleMaskMode)();         // Q key
 	void (*displaceIndexDelta)(int d); // ±1 mod 16 ([ ] keys)
+	/** Absolute displace index 0-15 (palette cell); shared path with [ ] / panel stepper. */
+	void (*displaceIndexAbs)(int idx);
 	/** Show/hide the Tiles palette window (ui M8; key TogglePalette / panel button). */
 	void (*togglePalette)();
 
@@ -138,7 +140,7 @@ struct SPaintUIBridge
 		  undo(NULL), redo(NULL), fill(NULL), save(NULL), saveTo(NULL), saveOverwrite(NULL),
 		  seasonNext(NULL), colorRadiusDelta(NULL), hardnessDelta(NULL), opacityDelta(NULL),
 		  cycleBrushMask(NULL), toggleMaskMode(NULL), displaceIndexDelta(NULL),
-		  togglePalette(NULL),
+		  displaceIndexAbs(NULL), togglePalette(NULL),
 		  HaveCore(false), Mode(0), CurTileSet(0), TileSetCount(0), Mode256(false),
 		  BrushSize(0), TileGroup(0), LockBorders(false), UndoDepth(0), CanSave(false),
 		  InteractiveSave(false), InstanceCount(1), UpdateThumbnail(true), SeasonCount(0),
@@ -165,19 +167,22 @@ void openSaveDialog();
 void forceShowSaveDialogForShot();
 
 /**
- * Rebuild the Tiles palette grid from the loaded bank (ui M8).
- * Picks the first resolvable 128 diffuse per set, caches a 64x64 TGA under
- * thumbcache/tileset/ keyed by bank+set+season, and fills the scrollable grid.
- * Call after bank load and after each season preference change.
- * bank may be NULL (clears the grid). seasonKey tags the cache (e.g. "sp"/"auto").
+ * Rebuild the Tiles palette from the loaded bank (ui M8 + M9a).
+ * Fills the tileset grid (64px diffuse previews under thumbcache/tileset/) and the
+ * Displace section (indices 0-15, noise-map previews under thumbcache/displace/).
+ * tilesetForDisplace selects which set's _DisplacementBitmap maps sub-index → file
+ * (current painter tileset; falls back to 0). bank may be NULL (clears both grids).
  */
 void rebuildTilesetPalette(NL3D::CTileBank *bank, const std::string &bankPath,
-                           const std::string &seasonKey);
+                           const std::string &seasonKey, int tilesetForDisplace = 0);
 
 /** Show/hide / toggle the Tiles palette window (ui M8). */
 void setTilesetPaletteVisible(bool visible);
 void toggleTilesetPalette();
 bool isTilesetPaletteVisible();
+
+/** Dev/test: scroll the palette body so the Displace section is in view (M9a shots). */
+void scrollPaletteToDisplaceSection();
 
 /** Install / clear the process-wide bridge (action handlers look it up). */
 void setPaintUIBridge(SPaintUIBridge *bridge);

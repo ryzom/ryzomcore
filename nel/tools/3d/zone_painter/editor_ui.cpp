@@ -416,6 +416,21 @@ public:
 };
 REGISTER_ACTION_HANDLER(CAHZpDisplace, "zp_displace");
 
+/** Absolute displace index from the palette grid (ui M9a) — same path as [ ] keys. */
+class CAHZpDisplaceAbs : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params)
+	{
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (!b || !b->displaceIndexAbs) return;
+		int idx = 0;
+		fromString(params, idx);
+		b->displaceIndexAbs(idx);
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpDisplaceAbs, "zp_displace_abs");
+
 class CAHZpSave : public IActionHandler
 {
 public:
@@ -519,17 +534,26 @@ void forceShowSaveDialogForShot()
 }
 
 // ---------------------------------------------------------------------------------------------
-// Tileset palette (ui M8)
+// Tileset + Displace palette (ui M8 / M9a)
 
 static const sint32 kPaletteCellW = 96;
 static const sint32 kPaletteCellH = 92;
 static const sint32 kPaletteCols = 3;
 static const sint32 kPaletteThumb = 64;
-static const char *kPaletteGridId = "ui:zp:tiles_palette:content:grid_host:grid";
+static const sint32 kPaletteHeaderH = 18;
+static const sint32 kPaletteSectionGap = 10;
+static const char *kPaletteBodyId = "ui:zp:tiles_palette:content:grid_host:body";
+static const char *kPaletteGridId = "ui:zp:tiles_palette:content:grid_host:body:grid";
+static const char *kPaletteDispGridId = "ui:zp:tiles_palette:content:grid_host:body:disp_grid";
+static const char *kPaletteLblTilesId = "ui:zp:tiles_palette:content:grid_host:body:lbl_tiles";
+static const char *kPaletteLblDispId = "ui:zp:tiles_palette:content:grid_host:body:lbl_disp";
 static const char *kPaletteWinId = "ui:zp:tiles_palette";
 
 static int s_PaletteBuiltCount = 0;
 static int s_PaletteLastHighlight = -1;
+static int s_DisplaceBuiltCount = 0;
+static int s_DisplaceLastHighlight = -1;
+static int s_DisplacePaletteTileset = -1;
 static bool s_PaletteVisible = false;
 
 static CInterfaceGroup *findGroupEl(const char *id)
@@ -566,20 +590,34 @@ void toggleTilesetPalette()
 	setTilesetPaletteVisible(!s_PaletteVisible);
 }
 
+void scrollPaletteToDisplaceSection()
+{
+	CInterfaceGroup *body = findGroupEl(kPaletteBodyId);
+	if (!body)
+		return;
+	CInterfaceElement *lbl = CWidgetManager::getInstance()->getElementFromId(kPaletteLblDispId);
+	if (!lbl)
+		return;
+	const sint32 want = -lbl->getY() - 8;
+	if (want > 0)
+		body->setOfsY(want);
+}
+
 /** Spawn a palette cell under the grid (same idiom as the continent board). */
 static CInterfaceGroup *spawnPaletteCell(CInterfaceGroup *parent,
+                                         const char *templateName,
                                          const std::vector<std::pair<std::string, std::string> > &params,
                                          sint32 x, sint32 y)
 {
-	if (!parent)
+	if (!parent || !templateName)
 		return NULL;
 	IParser *parser = CWidgetManager::getInstance()->getParser();
 	CInterfaceGroup *g = NULL;
 	if (!params.empty())
-		g = parser->createGroupInstance("zp_tileset_cell", parent->getId(),
+		g = parser->createGroupInstance(templateName, parent->getId(),
 		                                &params[0], (uint)params.size());
 	else
-		g = parser->createGroupInstance("zp_tileset_cell", parent->getId(),
+		g = parser->createGroupInstance(templateName, parent->getId(),
 		                                (const std::pair<std::string, std::string> *)NULL, 0);
 	if (!g)
 		return NULL;
@@ -666,110 +704,306 @@ static std::string tilesetDisplayName(NL3D::CTileBank *bank, int setIndex,
 	return base;
 }
 
-void rebuildTilesetPalette(NL3D::CTileBank *bank, const std::string &bankPath,
-                           const std::string &seasonKey)
+/**
+ * Resolve a displacement-map source for paint sub-index 0-15 via a tileset's
+ * _DisplacementBitmap → bank.getDisplacementMap. Also returns bank-global map id.
+ */
+static std::string resolveDisplaceSource(NL3D::CTileBank *bank, int tileset, int subIdx,
+                                         int *mapIdOut = NULL, std::string *storedNameOut = NULL)
 {
+	if (mapIdOut) *mapIdOut = -1;
+	if (storedNameOut) storedNameOut->clear();
+	if (!bank || subIdx < 0 || subIdx > 15)
+		return std::string();
+	if (bank->getTileSetCount() <= 0)
+		return std::string();
+	if (tileset < 0 || tileset >= bank->getTileSetCount())
+		tileset = 0;
+	const NL3D::CTileSet *ts = bank->getTileSet(tileset);
+	if (!ts)
+		return std::string();
+	const uint mapId = ts->getDisplacementTile((NL3D::CTileSet::TDisplacement)subIdx);
+	if (mapIdOut) *mapIdOut = (int)mapId;
+	if (mapId >= bank->getDisplacementMapCount())
+		return std::string();
+	const char *name = bank->getDisplacementMap(mapId);
+	if (!name || !*name)
+		return std::string();
+	std::string stored = name;
+	for (size_t k = 0; k < stored.size(); ++k)
+		if (stored[k] == '\\') stored[k] = '/';
+	std::string base = CFile::getFilename(stored);
+	if (storedNameOut)
+		*storedNameOut = base;
+	// Basename first (resolveBankTextures remaps + CPath search on tiles/displace dirs)
+	std::string path = CPath::lookup(base, false, false);
+	if (path.empty())
+		path = CPath::lookup(stored, false, false);
+	return path;
+}
+
+void rebuildTilesetPalette(NL3D::CTileBank *bank, const std::string &bankPath,
+                           const std::string &seasonKey, int tilesetForDisplace)
+{
+	CInterfaceGroup *body = findGroupEl(kPaletteBodyId);
 	CInterfaceGroup *grid = findGroupEl(kPaletteGridId);
+	CInterfaceGroup *dispGrid = findGroupEl(kPaletteDispGridId);
 	if (!grid)
 	{
 		// UI not ready / soft-fail path
 		s_PaletteBuiltCount = 0;
 		s_PaletteLastHighlight = -1;
+		s_DisplaceBuiltCount = 0;
+		s_DisplaceLastHighlight = -1;
+		s_DisplacePaletteTileset = -1;
 		return;
 	}
 	grid->clearGroups();
+	if (dispGrid)
+		dispGrid->clearGroups();
 	s_PaletteBuiltCount = 0;
 	s_PaletteLastHighlight = -1;
-
-	if (!bank)
-	{
-		grid->setW(kPaletteCellW);
-		grid->setH(kPaletteCellH);
-		return;
-	}
-
-	const sint nSets = bank->getTileSetCount();
-	if (nSets <= 0)
-	{
-		grid->setW(kPaletteCellW);
-		grid->setH(kPaletteCellH);
-		return;
-	}
+	s_DisplaceBuiltCount = 0;
+	s_DisplaceLastHighlight = -1;
+	s_DisplacePaletteTileset = -1;
 
 	const int cols = kPaletteCols;
-	const int rows = (nSets + cols - 1) / cols;
-	grid->setW(cols * kPaletteCellW);
-	grid->setH(rows * kPaletteCellH);
-	grid->setOfsX(0);
-	grid->setOfsY(0);
+	sint32 tsH = kPaletteCellH;
+	sint32 dispH = kPaletteCellH;
+	sint nSets = 0;
 
-	// Ensure cache dir is on the NLGUI search path (once per rebuild is fine)
-	std::string cacheDir = ZPTHUMB::tilesetPreviewCacheDir();
-	if (!cacheDir.empty())
-		CPath::addSearchPath(cacheDir, false, false);
+	// Cache dirs on the NLGUI search path
+	std::string tsCacheDir = ZPTHUMB::tilesetPreviewCacheDir();
+	if (!tsCacheDir.empty())
+		CPath::addSearchPath(tsCacheDir, false, false);
+	std::string dispCacheDir = ZPTHUMB::displacePreviewCacheDir();
+	if (!dispCacheDir.empty())
+		CPath::addSearchPath(dispCacheDir, false, false);
 
+	// ---- Tilesets ----
 	uint withPreview = 0;
 	uint nameOnly = 0;
-	for (sint i = 0; i < nSets; ++i)
+	if (bank)
 	{
-		const int col = i % cols;
-		const int row = i / cols;
-		const sint32 x = col * kPaletteCellW;
-		const sint32 y = -(row * kPaletteCellH);
-
-		std::string storedDiffuse;
-		std::string source = firstResolvableDiffuse(bank, (int)i, &storedDiffuse);
-		std::string setName = tilesetDisplayName(bank, (int)i, storedDiffuse);
-		if (setName.empty())
-			setName = "(unnamed)";
-		// Short label: "1 name" (1-based index for the artist)
-		char title[160];
-		snprintf(title, sizeof(title), "%d %s", (int)(i + 1), setName.c_str());
-		// Truncate very long names so the 96px cell stays readable (keep index prefix)
-		if (strlen(title) > 16)
+		nSets = bank->getTileSetCount();
+		if (nSets > 0)
 		{
-			title[13] = '.';
-			title[14] = '.';
-			title[15] = '.';
-			title[16] = 0;
-		}
-
-		std::string thumbTex;
-		if (!source.empty())
-		{
-			std::string cached;
-			if (ZPTHUMB::ensureTilesetPreview(bankPath, (int)i, seasonKey, source, cached, kPaletteThumb)
-			    && !cached.empty())
+			const int rows = (nSets + cols - 1) / cols;
+			tsH = rows * kPaletteCellH;
+			grid->setW(cols * kPaletteCellW);
+			grid->setH(tsH);
+			for (sint i = 0; i < nSets; ++i)
 			{
-				thumbTex = CFile::getFilenameWithoutExtension(cached) + ".tga";
-				++withPreview;
+				const int col = i % cols;
+				const int row = i / cols;
+				const sint32 x = col * kPaletteCellW;
+				const sint32 y = -(row * kPaletteCellH);
+
+				std::string storedDiffuse;
+				std::string source = firstResolvableDiffuse(bank, (int)i, &storedDiffuse);
+				std::string setName = tilesetDisplayName(bank, (int)i, storedDiffuse);
+				if (setName.empty())
+					setName = "(unnamed)";
+				char title[160];
+				snprintf(title, sizeof(title), "%d %s", (int)(i + 1), setName.c_str());
+				if (strlen(title) > 16)
+				{
+					title[13] = '.';
+					title[14] = '.';
+					title[15] = '.';
+					title[16] = 0;
+				}
+
+				std::string thumbTex;
+				if (!source.empty())
+				{
+					std::string cached;
+					if (ZPTHUMB::ensureTilesetPreview(bankPath, (int)i, seasonKey, source, cached, kPaletteThumb)
+					    && !cached.empty())
+					{
+						thumbTex = CFile::getFilenameWithoutExtension(cached) + ".tga";
+						++withPreview;
+					}
+				}
+				if (thumbTex.empty())
+					++nameOnly;
+
+				std::vector<std::pair<std::string, std::string> > p;
+				char idbuf[32], idxbuf[16];
+				snprintf(idbuf, sizeof(idbuf), "ts%03d", (int)i);
+				snprintf(idxbuf, sizeof(idxbuf), "%d", (int)i);
+				p.push_back(std::make_pair(std::string("id"), std::string(idbuf)));
+				p.push_back(std::make_pair(std::string("title"), std::string(title)));
+				p.push_back(std::make_pair(std::string("idx"), std::string(idxbuf)));
+				p.push_back(std::make_pair(std::string("thumb"),
+				                           thumbTex.empty() ? std::string("w_box_blank.tga") : thumbTex));
+
+				CInterfaceGroup *cell = spawnPaletteCell(grid, "zp_tileset_cell", p, x, y);
+				if (cell)
+				{
+					if (CViewBitmap *thumb = dynamic_cast<CViewBitmap *>(cell->getView("thumb")))
+						thumb->setActive(!thumbTex.empty());
+				}
 			}
+			s_PaletteBuiltCount = (int)nSets;
 		}
-		if (thumbTex.empty())
-			++nameOnly;
-
-		std::vector<std::pair<std::string, std::string> > p;
-		char idbuf[32], idxbuf[16];
-		snprintf(idbuf, sizeof(idbuf), "ts%03d", (int)i);
-		snprintf(idxbuf, sizeof(idxbuf), "%d", (int)i);
-		p.push_back(std::make_pair(std::string("id"), std::string(idbuf)));
-		p.push_back(std::make_pair(std::string("title"), std::string(title)));
-		p.push_back(std::make_pair(std::string("idx"), std::string(idxbuf)));
-		p.push_back(std::make_pair(std::string("thumb"),
-		                           thumbTex.empty() ? std::string("w_box_blank.tga") : thumbTex));
-
-		CInterfaceGroup *cell = spawnPaletteCell(grid, p, x, y);
-		if (cell)
+		else
 		{
-			if (CViewBitmap *thumb = dynamic_cast<CViewBitmap *>(cell->getView("thumb")))
-				thumb->setActive(!thumbTex.empty());
+			grid->setW(kPaletteCellW);
+			grid->setH(kPaletteCellH);
 		}
 	}
-	s_PaletteBuiltCount = (int)nSets;
+	else
+	{
+		grid->setW(kPaletteCellW);
+		grid->setH(kPaletteCellH);
+	}
+
+	// ---- Displace (paint indices 0-15 via tilesetForDisplace mapping) ----
+	uint dispPreview = 0;
+	uint dispNameOnly = 0;
+	uint bankMapCount = bank ? bank->getDisplacementMapCount() : 0;
+	int useTs = tilesetForDisplace;
+	if (bank && bank->getTileSetCount() > 0)
+	{
+		if (useTs < 0 || useTs >= bank->getTileSetCount())
+			useTs = 0;
+	}
+	else
+		useTs = 0;
+
+	if (dispGrid && bank)
+	{
+		const int nDisp = 16; // paint sub-noise 0..15
+		const int drows = (nDisp + cols - 1) / cols;
+		dispH = drows * kPaletteCellH;
+		dispGrid->setW(cols * kPaletteCellW);
+		dispGrid->setH(dispH);
+
+		for (int i = 0; i < nDisp; ++i)
+		{
+			const int col = i % cols;
+			const int row = i / cols;
+			const sint32 x = col * kPaletteCellW;
+			const sint32 y = -(row * kPaletteCellH);
+
+			int mapId = -1;
+			std::string storedName;
+			std::string source = resolveDisplaceSource(bank, useTs, i, &mapId, &storedName);
+
+			char title[160];
+			if (!storedName.empty())
+			{
+				// "3 falaisen…" — index + short stem
+				std::string stem = CFile::getFilenameWithoutExtension(storedName);
+				snprintf(title, sizeof(title), "%d %s", i, stem.c_str());
+			}
+			else
+				snprintf(title, sizeof(title), "%d (empty)", i);
+			if (strlen(title) > 16)
+			{
+				title[13] = '.';
+				title[14] = '.';
+				title[15] = '.';
+				title[16] = 0;
+			}
+
+			std::string thumbTex;
+			if (!source.empty() && mapId >= 0)
+			{
+				std::string cached;
+				if (ZPTHUMB::ensureDisplacePreview(bankPath, mapId, source, cached, kPaletteThumb)
+				    && !cached.empty())
+				{
+					thumbTex = CFile::getFilenameWithoutExtension(cached) + ".tga";
+					++dispPreview;
+				}
+			}
+			if (thumbTex.empty())
+				++dispNameOnly;
+
+			std::vector<std::pair<std::string, std::string> > p;
+			char idbuf[32], idxbuf[16];
+			snprintf(idbuf, sizeof(idbuf), "dp%03d", i);
+			snprintf(idxbuf, sizeof(idxbuf), "%d", i);
+			p.push_back(std::make_pair(std::string("id"), std::string(idbuf)));
+			p.push_back(std::make_pair(std::string("title"), std::string(title)));
+			p.push_back(std::make_pair(std::string("idx"), std::string(idxbuf)));
+			p.push_back(std::make_pair(std::string("thumb"),
+			                           thumbTex.empty() ? std::string("w_box_blank.tga") : thumbTex));
+
+			CInterfaceGroup *cell = spawnPaletteCell(dispGrid, "zp_displace_cell", p, x, y);
+			if (cell)
+			{
+				if (CViewBitmap *thumb = dynamic_cast<CViewBitmap *>(cell->getView("thumb")))
+					thumb->setActive(!thumbTex.empty());
+			}
+		}
+		s_DisplaceBuiltCount = nDisp;
+		s_DisplacePaletteTileset = useTs;
+	}
+	else if (dispGrid)
+	{
+		dispGrid->setW(kPaletteCellW);
+		dispGrid->setH(kPaletteCellH);
+	}
+
+	// ---- Layout body: Tilesets header + grid, then Displace header + grid ----
+	const sint32 yTilesLbl = -2;
+	const sint32 yTsGrid = -(kPaletteHeaderH);
+	const sint32 yDispLbl = yTsGrid - tsH - kPaletteSectionGap;
+	const sint32 yDispGrid = yDispLbl - kPaletteHeaderH;
+	const sint32 bodyH = -yDispGrid + dispH + 8;
+
+	if (CInterfaceElement *el = CWidgetManager::getInstance()->getElementFromId(kPaletteLblTilesId))
+	{
+		el->setY(yTilesLbl);
+		el->setX(4);
+	}
+	grid->setX(0);
+	grid->setY(yTsGrid);
+	if (CInterfaceElement *el = CWidgetManager::getInstance()->getElementFromId(kPaletteLblDispId))
+	{
+		el->setY(yDispLbl);
+		el->setX(4);
+	}
+	if (dispGrid)
+	{
+		dispGrid->setX(0);
+		dispGrid->setY(yDispGrid);
+	}
+	if (body)
+	{
+		body->setW(cols * kPaletteCellW);
+		body->setH(bodyH > 0 ? bodyH : kPaletteCellH);
+		body->setOfsX(0);
+		body->setOfsY(0);
+	}
+
 	printf("tiles palette: %d sets (%u previews, %u name-only) season=%s cache=%s\n",
 	       (int)nSets, withPreview, nameOnly,
 	       seasonKey.empty() ? "auto" : seasonKey.c_str(),
-	       cacheDir.c_str());
+	       tsCacheDir.c_str());
+	printf("displace palette: 16 indices via tileset %d (%u previews, %u name-only); "
+	       "bank maps=%u cache=%s\n",
+	       useTs, dispPreview, dispNameOnly, bankMapCount, dispCacheDir.c_str());
+	// Report which files the bank actually carries (basename list, truncated)
+	if (bank && bankMapCount > 0)
+	{
+		printf("displace bank maps:");
+		uint listed = 0;
+		for (uint m = 0; m < bankMapCount && listed < 24; ++m)
+		{
+			const char *nm = bank->getDisplacementMap(m);
+			if (!nm || !*nm)
+				continue;
+			printf(" %s", CFile::getFilename(nm).c_str());
+			++listed;
+		}
+		if (bankMapCount > listed)
+			printf(" …(+%u)", bankMapCount - listed);
+		printf("\n");
+	}
 }
 
 /** Highlight the current tileset cell (toggle_button pushed state). */
@@ -803,6 +1037,73 @@ static void syncPaletteHighlight(int curTileSet, uint tileSetCount)
 	}
 	else
 		s_PaletteLastHighlight = -1;
+}
+
+/** Highlight the current displace cell (ui M9a). */
+static void syncDisplaceHighlight(uint displaceIndex)
+{
+	if (s_DisplaceBuiltCount <= 0)
+		return;
+	const int cur = (int)(displaceIndex % 16);
+	if (s_DisplaceLastHighlight == cur)
+		return;
+	// Clear previous
+	if (s_DisplaceLastHighlight >= 0 && s_DisplaceLastHighlight < s_DisplaceBuiltCount)
+	{
+		char idbuf[96];
+		snprintf(idbuf, sizeof(idbuf), "%s:dp%03d:btn", kPaletteDispGridId, s_DisplaceLastHighlight);
+		if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(
+		        CWidgetManager::getInstance()->getElementFromId(idbuf)))
+			btn->setPushed(false);
+	}
+	if (cur >= 0 && cur < s_DisplaceBuiltCount)
+	{
+		char idbuf[96];
+		snprintf(idbuf, sizeof(idbuf), "%s:dp%03d:btn", kPaletteDispGridId, cur);
+		if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(
+		        CWidgetManager::getInstance()->getElementFromId(idbuf)))
+			btn->setPushed(true);
+		s_DisplaceLastHighlight = cur;
+	}
+	else
+		s_DisplaceLastHighlight = -1;
+}
+
+/**
+ * When Displace mode is active, gently scroll the palette so the Displace header
+ * is visible (optional M9a nicety). Does not pin it to the top so Tilesets stay
+ * reachable; skips when ZONE_PAINTER_PALETTE_SHOT is set (headless shots want ofs 0
+ * or an explicit displace focus via ZONE_PAINTER_SHOT_MODE alone is fine).
+ */
+static void emphasizeDisplaceSection(bool displaceActive)
+{
+	if (!s_PaletteVisible || !displaceActive)
+		return;
+	// Headless palette shots: leave scroll alone so both sections are reproducible.
+	const char *palShot = getenv("ZONE_PAINTER_PALETTE_SHOT");
+	if (palShot && palShot[0] && palShot[0] != '0')
+		return;
+	CInterfaceGroup *body = findGroupEl(kPaletteBodyId);
+	if (!body)
+		return;
+	CInterfaceElement *lbl = CWidgetManager::getInstance()->getElementFromId(kPaletteLblDispId);
+	if (!lbl)
+		return;
+	// Only nudge if the Displace label is currently below the visible viewport (~400px).
+	const sint32 lblY = lbl->getY(); // negative from body top
+	const sint32 ofs = body->getOfsY();
+	const sint32 viewH = 400;
+	// Visible range in body coords: [-ofs, -ofs-viewH]
+	const sint32 visTop = -ofs;
+	const sint32 visBot = -ofs - viewH;
+	if (lblY < visBot + 40)
+	{
+		// Scroll just enough that the header is ~1/3 down the viewport
+		const sint32 want = -lblY - viewH / 3;
+		if (want > 0)
+			body->setOfsY(want);
+	}
+	(void)visTop;
 }
 
 static void syncThumbWantFromModal(SPaintUIBridge *b)
@@ -1229,6 +1530,8 @@ void CEditorUI::syncPanelFromBridge()
 
 	// Tiles palette selection highlight (ui M8) — stays in sync with keys/panel/pick
 	syncPaletteHighlight(b->CurTileSet, b->TileSetCount);
+	// Displace palette highlight (ui M9a)
+	syncDisplaceHighlight(b->DisplaceIndex);
 	// Track close-via-X: container may deactivate without going through togglePalette
 	{
 		CInterfaceElement *el = CWidgetManager::getInstance()->getElementFromId(kPaletteWinId);
@@ -1237,6 +1540,8 @@ void CEditorUI::syncPanelFromBridge()
 	}
 	if (CCtrlBaseButton *btn = findButton("ui:zp:painter:content:btn_palette"))
 		btn->setPushed(s_PaletteVisible);
+	// Optional: auto-scroll palette toward Displace when that mode is active
+	emphasizeDisplaceSection(displaceActive);
 }
 
 void CEditorUI::update()

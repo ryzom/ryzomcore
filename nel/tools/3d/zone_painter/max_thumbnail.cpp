@@ -647,6 +647,127 @@ bool ensureTilesetPreview(const std::string &bankPath, int setIndex,
 }
 
 // ---------------------------------------------------------------------------------------------
+// Displacement palette previews (ui M9a)
+
+std::string displacePreviewCacheDir()
+{
+	std::string dir = thumbCacheDir() + "/displace";
+	if (!CFile::isDirectory(dir))
+		CFile::createDirectoryTree(dir);
+	return dir;
+}
+
+std::string cachedDisplacePreviewPath(const std::string &bankPath, int mapIndex, uint32 sourceMtime)
+{
+	if (bankPath.empty() || mapIndex < 0)
+		return std::string();
+	std::string abs = CPath::makePathAbsolute(bankPath, CPath::getCurrentPath(), false);
+	while (!abs.empty() && (abs[abs.size() - 1] == '/' || abs[abs.size() - 1] == '\\'))
+		abs.resize(abs.size() - 1);
+	uint32 h = hashPath(abs);
+	return displacePreviewCacheDir() + "/"
+		+ NLMISC::toString("%08x_m%03d_%08x.tga", h, mapIndex, sourceMtime);
+}
+
+bool ensureDisplacePreview(const std::string &bankPath, int mapIndex,
+                           const std::string &sourcePath, std::string &outTgaPath,
+                           uint sidePx)
+{
+	outTgaPath.clear();
+	if (sourcePath.empty() || !CFile::fileExists(sourcePath))
+		return false;
+	if (sidePx == 0)
+		sidePx = 64;
+
+	uint32 mtime = CFile::getFileModificationDate(sourcePath);
+	std::string cache = cachedDisplacePreviewPath(bankPath, mapIndex, mtime);
+	if (cache.empty())
+		return false;
+	if (CFile::fileExists(cache))
+	{
+		outTgaPath = cache;
+		return true;
+	}
+
+	// Load noise map (typically 32x32 grayscale). Never viewed by the agent as an image.
+	CBitmap bmp;
+	try
+	{
+		CIFile in;
+		if (!in.open(sourcePath))
+			return false;
+		bmp.load(in);
+	}
+	catch (...)
+	{
+		return false;
+	}
+	if (bmp.getWidth() == 0 || bmp.getHeight() == 0)
+		return false;
+	if (bmp.getPixelFormat() != CBitmap::RGBA)
+		bmp.convertToType(CBitmap::RGBA);
+
+	const uint sw = bmp.getWidth();
+	const uint sh = bmp.getHeight();
+	const CObjectVector<uint8> &srcPx = bmp.getPixels();
+
+	// Luminance min/max (displacement maps are signed-ish around mid-gray; stretch for readability)
+	uint8 minL = 255, maxL = 0;
+	for (uint y = 0; y < sh; ++y)
+	{
+		for (uint x = 0; x < sw; ++x)
+		{
+			const size_t si = ((size_t)y * sw + x) * 4;
+			// Prefer R (luminance textures store gray in RGB equally after convert)
+			uint8 l = srcPx[si];
+			if (l < minL) minL = l;
+			if (l > maxL) maxL = l;
+		}
+	}
+	const int range = (int)maxL - (int)minL;
+
+	// Point upsample + contrast stretch into a fresh RGBA bitmap
+	CBitmap out;
+	out.resize(sidePx, sidePx, CBitmap::RGBA);
+	CObjectVector<uint8> &dstPx = out.getPixels();
+	for (uint y = 0; y < sidePx; ++y)
+	{
+		const uint sy = (sh == 0) ? 0 : (y * sh) / sidePx;
+		for (uint x = 0; x < sidePx; ++x)
+		{
+			const uint sx = (sw == 0) ? 0 : (x * sw) / sidePx;
+			const size_t si = ((size_t)sy * sw + sx) * 4;
+			uint8 l = srcPx[si];
+			if (range > 0)
+				l = (uint8)((((int)l - (int)minL) * 255) / range);
+			else
+				l = 128;
+			const size_t di = ((size_t)y * sidePx + x) * 4;
+			dstPx[di + 0] = l;
+			dstPx[di + 1] = l;
+			dstPx[di + 2] = l;
+			dstPx[di + 3] = 255;
+		}
+	}
+
+	displacePreviewCacheDir();
+	try
+	{
+		COFile of(cache);
+		if (!out.writeTGA(of, 32, false))
+			return false;
+	}
+	catch (...)
+	{
+		return false;
+	}
+	if (!CFile::fileExists(cache))
+		return false;
+	outTgaPath = cache;
+	return true;
+}
+
+// ---------------------------------------------------------------------------------------------
 // Encode / write helpers (M5c)
 
 bool encodeDib24(const CBitmap &bmpIn, std::vector<uint8> &outDib, uint maxDim)

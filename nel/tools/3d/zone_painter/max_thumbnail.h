@@ -154,6 +154,28 @@ bool ensureTilesetPreview(const std::string &bankPath, int setIndex,
                           const std::string &seasonKey, const std::string &sourcePath,
                           std::string &outTgaPath, uint sidePx = 64);
 
+// ---------------------------------------------------------------------------------------------
+// Displacement palette previews (ui M9a): 64x64 TGA cache under thumbcache/displace/
+// Point-upsampled from 32x32 noise maps with min..max contrast stretch (signed-ish raw).
+
+/** Absolute displace-preview cache directory (created on demand). */
+std::string displacePreviewCacheDir();
+
+/**
+ * Cache path: thumbcache/displace/<bankhash>_m<mapIdx>_<srcmtime>.tga
+ * Keyed by bank + global displacement-map index + source mtime (maps are season-invariant).
+ */
+std::string cachedDisplacePreviewPath(const std::string &bankPath, int mapIndex, uint32 sourceMtime);
+
+/**
+ * Ensure a 64x64 grayscale preview for one bank displacement map.
+ * Loads sourcePath, stretches luminance min..max to 0..255, point-upsamples to sidePx,
+ * writes TGA cache. Returns true and sets outTgaPath on success.
+ */
+bool ensureDisplacePreview(const std::string &bankPath, int mapIndex,
+                           const std::string &sourcePath, std::string &outTgaPath,
+                           uint sidePx = 64);
+
 } // namespace ZPTHUMB
 
 #endif // ZONE_PAINTER_MAX_THUMBNAIL_H
