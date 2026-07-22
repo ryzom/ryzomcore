@@ -6338,6 +6338,7 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 			udriver->clearBuffers(NLMISC::CRGBA(90, 90, 90));
 			uscene->render();
 			// Dev-only: ZONE_PAINTER_SHOT_MODE=color|displace selects mode for panel shots (M7a).
+			// ZONE_PAINTER_ROLLOUTS=all force-opens every rollout (handled in syncPanelFromBridge, M22).
 			{
 				const char *shotMode = getenv("ZONE_PAINTER_SHOT_MODE");
 				if (shotMode && core)

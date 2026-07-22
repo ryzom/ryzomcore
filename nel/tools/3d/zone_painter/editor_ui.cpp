@@ -754,10 +754,10 @@ void setTilesetPaletteVisible(bool visible)
 {
 	s_PaletteVisible = visible;
 	setContainerActive(kPaletteWinId, visible);
-	// Panel toggle button face (if present)
+	// Panel toggle button face (Tiles rollout, M22)
 	if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(
 	        CWidgetManager::getInstance()->getElementFromId(
-	            "ui:zp:painter:content:body:sec_paint:btn_palette"))) // paint-common (M20a)
+	            "ui:zp:roll_tiles:content:btn_palette")))
 		btn->setPushed(visible);
 }
 
@@ -1601,20 +1601,24 @@ void CEditorUI::syncPanelFromBridge()
 	if (!b || !b->HaveCore)
 		return;
 
-	// Nested under content:body:sec_* (M10d mode-grouped list). Header file/dirty
-	// stays at content:; paint-common TILES/LOCK/FILL in sec_paint (M20a); hint in
-	// sec_footer. Toolbar holds mode/season/undo (M14c).
-	static const char *kSecPaint = "ui:zp:painter:content:body:sec_paint";
-	static const char *kSecTile = "ui:zp:painter:content:body:sec_tile";
-	static const char *kSecColor = "ui:zp:painter:content:body:sec_color";
-	static const char *kSecDisp = "ui:zp:painter:content:body:sec_disp";
-	static const char *kSecProp = "ui:zp:painter:content:body:sec_prop";
-	static const char *kSecFooter = "ui:zp:painter:content:body:sec_footer";
-	static const char *kBody = "ui:zp:painter:content:body";
+	// M22: Max-style rollout containers under the painter tree list.
+	// Paths are top-level ids (ui:zp:roll_*) — tree attach keeps short ids under root.
+	// Content widgets live at :content:<id>. Toolbar holds mode/season/undo (M14c).
+	static const char *kRollSession = "ui:zp:roll_session";
+	static const char *kRollTiles = "ui:zp:roll_tiles";
+	static const char *kRollBrush = "ui:zp:roll_brush";
+	static const char *kRollFill = "ui:zp:roll_fill";
+	static const char *kRollDisplace = "ui:zp:roll_displace";
+	static const char *kRollProperties = "ui:zp:roll_properties";
+	static const char *kSessionC = "ui:zp:roll_session:content";
+	static const char *kTilesC = "ui:zp:roll_tiles:content";
+	static const char *kBrushC = "ui:zp:roll_brush:content";
+	static const char *kFillC = "ui:zp:roll_fill:content";
+	static const char *kDispC = "ui:zp:roll_displace:content";
+	static const char *kPropC = "ui:zp:roll_properties:content";
 	static const char *kPainterWin = "ui:zp:painter";
 	static const char *kToolbar = "ui:zp:toolbar";
-	// M20a palette path (btn moved into sec_paint)
-	static const char *kBtnPalette = "ui:zp:painter:content:body:sec_paint:btn_palette";
+	static const char *kBtnPalette = "ui:zp:roll_tiles:content:btn_palette";
 
 	// Ensure toolbar is visible once the viewer panel is live
 	if (CInterfaceGroup *tb = findGroupEl(kToolbar))
@@ -1634,28 +1638,75 @@ void CEditorUI::syncPanelFromBridge()
 	if (CCtrlBaseButton *btn = findButton("ui:zp:toolbar:header_closed:mode_prop"))
 		btn->setPushed(b->Mode == 3);
 
-	// ---- M10d/M18a/M20a: mode sections + paint-common ----
-	// Keys, radios, and terrain-pick side effects all funnel Mode through the bridge,
-	// so this runs for every path. Keyboard shortcuts keep working when widgets hide.
-	// ModeProp (3): sec_prop only — TILES/LOCK/FILL are paint tools (hidden).
+	// ---- M22: mode-gated rollout VISIBILITY (not collapse) ----
+	// Non-applicable rollouts are fully hidden. Open/collapsed is remembered per
+	// rollout across mode switches (setActive does not touch isOpen).
+	//   Tile → Session+Tiles+Brush+Fill
+	//   Color → Session+Brush+Fill
+	//   Displace → Session+Displace+Brush+Fill
+	//   Prop → Session+Properties
 	const bool tileActive = (b->Mode == 0);
 	const bool colorActive = (b->Mode == 1);
 	const bool displaceActive = (b->Mode == 2);
 	const bool propActive = (b->Mode == 3);
-	const bool paintCommonActive = !propActive; // Tile/Color/Displace
-	if (CInterfaceGroup *g = findGroupEl(kSecPaint))
-		g->setActive(paintCommonActive);
-	if (CInterfaceGroup *g = findGroupEl(kSecTile))
-		g->setActive(tileActive);
-	if (CInterfaceGroup *g = findGroupEl(kSecColor))
-		g->setActive(colorActive);
-	if (CInterfaceGroup *g = findGroupEl(kSecDisp))
-		g->setActive(displaceActive);
-	if (CInterfaceGroup *g = findGroupEl(kSecProp))
-		g->setActive(propActive);
-	// Footer (hint) always on (list reflows when mode / paint-common toggle).
-	if (CInterfaceGroup *g = findGroupEl(kSecFooter))
+	const bool brushActive = tileActive || colorActive || displaceActive;
+	const bool fillActive = brushActive; // paint-common fill tools
+	if (CInterfaceGroup *g = findGroupEl(kRollSession))
 		g->setActive(true);
+	if (CInterfaceGroup *g = findGroupEl(kRollTiles))
+		g->setActive(tileActive);
+	if (CInterfaceGroup *g = findGroupEl(kRollBrush))
+		g->setActive(brushActive);
+	if (CInterfaceGroup *g = findGroupEl(kRollFill))
+		g->setActive(fillActive);
+	if (CInterfaceGroup *g = findGroupEl(kRollDisplace))
+		g->setActive(displaceActive);
+	if (CInterfaceGroup *g = findGroupEl(kRollProperties))
+		g->setActive(propActive);
+
+	// ZONE_PAINTER_ROLLOUTS=all: force-open every rollout once (full-column shot).
+	// ZONE_PAINTER_ROLLOUTS=collapsed: close all except Session (header/arrow crop).
+	// Does not change mode visibility; combine with SHOT_MODE for a mode's column.
+	{
+		static bool s_RolloutsEnvDone = false;
+		const char *ra = getenv("ZONE_PAINTER_ROLLOUTS");
+		if (ra && !s_RolloutsEnvDone)
+		{
+			s_RolloutsEnvDone = true;
+			static const char *kAllRolls[] = {
+				kRollSession, kRollTiles, kRollBrush, kRollFill, kRollDisplace, kRollProperties
+			};
+			const bool forceOpen = (strcmp(ra, "all") == 0 || strcmp(ra, "1") == 0);
+			const bool forceCollapse = (strcmp(ra, "collapsed") == 0 || strcmp(ra, "closed") == 0);
+			if (forceOpen || forceCollapse)
+			{
+				for (uint i = 0; i < sizeof(kAllRolls) / sizeof(kAllRolls[0]); ++i)
+				{
+					if (CGroupContainer *gc = dynamic_cast<CGroupContainer *>(
+					        CWidgetManager::getInstance()->getElementFromId(kAllRolls[i])))
+					{
+						if (forceOpen)
+						{
+							if (!gc->isOpen())
+								gc->open();
+						}
+						else if (forceCollapse)
+						{
+							// Keep Session open so the panel isn't an empty bar.
+							const bool isSession = (strcmp(kAllRolls[i], kRollSession) == 0);
+							if (isSession)
+							{
+								if (!gc->isOpen())
+									gc->open();
+							}
+							else if (gc->isOpen())
+								gc->close();
+						}
+					}
+				}
+			}
+		}
+	}
 
 	// M20a: hide Tiles palette window while Prop is active; restore when leaving if
 	// it was open (paint palette is meaningless over property edit).
@@ -1688,38 +1739,20 @@ void CEditorUI::syncPanelFromBridge()
 		}
 	}
 
-	// Force list reflow + resize the painter container to the active content height.
-	// M20a: header ~28 (file/dirty only); sec_paint 64 when paint mode; mode sec
-	// tile 118 / color 148 / disp 80 / prop 200; footer hint 28; list space 4; chrome ~36.
-	// M18d: never shrink below a chrome-safe floor — if wantH underestimates the real
-	// content, CGroupContainer blank height can go <=0 and the solid panel fill vanishes
-	// (text/buttons still draw). Floor keeps w_l0 chrome + panel_bg readable in all modes.
-	if (CInterfaceGroup *body = findGroupEl(kBody))
-		body->invalidateCoords();
+	// Parent painter: keep open/active. Height is owned by pop_min/max + resizer
+	// (tree-list scroll when open rollouts exceed max H) — no mode-based setH.
+	if (CInterfaceGroup *win = findGroupEl(kPainterWin))
 	{
-		const sint32 secH = tileActive ? 118 : (colorActive ? 148 : (displaceActive ? 80 : (propActive ? 200 : 80)));
-		const sint32 paintH = paintCommonActive ? 64 : 0;
-		const sint32 spaces = 4 + (paintCommonActive ? 4 : 0); // body space between active kids
-		const sint32 wantH = 28 + paintH + secH + 28 + spaces + 36;
-		if (CInterfaceGroup *win = findGroupEl(kPainterWin))
+		if (!win->getActive())
+			win->setActive(true);
+		if (CGroupContainer *gc = dynamic_cast<CGroupContainer *>(win))
 		{
-			sint32 h = wantH;
-			if (h < 180) h = 180;
-			if (h > 480) h = 480;
-			if (win->getH() != h)
-			{
-				win->setH(h);
-				win->invalidateCoords();
-			}
-			// Keep the window active/opened so layer0 chrome + content panel_bg draw.
-			if (!win->getActive())
-				win->setActive(true);
-			if (CGroupContainer *gc = dynamic_cast<CGroupContainer *>(win))
-			{
-				if (!gc->isOpen())
-					gc->setOpen(true);
-			}
+			if (!gc->isOpen())
+				gc->setOpen(true);
+			gc->invalidateCoords();
 		}
+		else
+			win->invalidateCoords();
 	}
 
 	// Tile set label (1-based index; unnamed sets show as (unnamed) not empty quotes)
@@ -1730,37 +1763,34 @@ void CEditorUI::syncPanelFromBridge()
 			name = "(unnamed)";
 		const int oneBased = b->TileSetCount ? (b->CurTileSet + 1) : 0;
 		snprintf(buf, sizeof(buf), "%d/%u %s", oneBased, b->TileSetCount, name);
-		if (CViewText *t = findText((std::string(kSecTile) + ":tileset_info").c_str()))
+		if (CViewText *t = findText((std::string(kTilesC) + ":tileset_info").c_str()))
 			t->setHardText(buf);
 	}
 
 	// 256 toggle
-	if (CCtrlBaseButton *btn = findButton((std::string(kSecTile) + ":toggle_256").c_str()))
+	if (CCtrlBaseButton *btn = findButton((std::string(kTilesC) + ":toggle_256").c_str()))
 		btn->setPushed(b->Mode256);
 
-	// Brush size (shown in Tile AND Displace sections — same underlying value)
+	// Brush size — single readout in shared Brush rollout (M22)
 	{
 		char buf[32];
 		snprintf(buf, sizeof(buf), "%u", b->BrushSize);
-		if (CViewText *t = findText((std::string(kSecTile) + ":brush_info").c_str()))
-			t->setHardText(buf);
-		if (CViewText *t = findText((std::string(kSecDisp) + ":brush_info_d").c_str()))
+		if (CViewText *t = findText((std::string(kBrushC) + ":brush_info").c_str()))
 			t->setHardText(buf);
 	}
-	if (CViewText *t = findText((std::string(kSecTile) + ":group_info").c_str()))
+	if (CViewText *t = findText((std::string(kTilesC) + ":group_info").c_str()))
 	{
 		char buf[32];
 		snprintf(buf, sizeof(buf), "%u", b->TileGroup);
 		t->setHardText(buf);
 	}
 
-	// Lock borders (paint-common sec_paint, M20a)
-	// M21a: lock_borders is a zp_checkbox_row; canonical box is :box
-	if (CCtrlBaseButton *btn = findButton((std::string(kSecPaint) + ":lock_borders:box").c_str()))
+	// Lock borders (Fill rollout); zp_checkbox_row :box
+	if (CCtrlBaseButton *btn = findButton((std::string(kFillC) + ":lock_borders:box").c_str()))
 		btn->setPushed(b->LockBorders);
 
-	// Self-instance indicator (M4b)
-	if (CViewText *t = findText("ui:zp:painter:content:instance_info"))
+	// Self-instance indicator (M4b) — Session rollout
+	if (CViewText *t = findText((std::string(kSessionC) + ":instance_info").c_str()))
 	{
 		if (b->InstanceCount > 1)
 		{
@@ -1786,8 +1816,8 @@ void CEditorUI::syncPanelFromBridge()
 	if (CCtrlBaseButton *btn = findButton("ui:zp:toolbar:header_closed:btn_save"))
 		btn->setFrozen(!b->CanSave);
 
-	// Multi-file dirty indicator (M6b): "N files, M dirty"
-	if (CViewText *t = findText("ui:zp:painter:content:files_info"))
+	// Multi-file dirty indicator (M6b): "N files, M dirty" — Session rollout
+	if (CViewText *t = findText((std::string(kSessionC) + ":files_info").c_str()))
 	{
 		char buf[64];
 		if (b->EditableFileCount <= 1)
@@ -1803,20 +1833,20 @@ void CEditorUI::syncPanelFromBridge()
 		t->setHardText(buf);
 	}
 
-	// Color radius / hardness / opacity (Color section)
-	if (CViewText *t = findText((std::string(kSecColor) + ":radius_info").c_str()))
+	// Color radius / hardness / opacity (shared Brush rollout)
+	if (CViewText *t = findText((std::string(kBrushC) + ":radius_info").c_str()))
 	{
 		char buf[32];
 		snprintf(buf, sizeof(buf), "%.1f", b->ColorRadius);
 		t->setHardText(buf);
 	}
-	if (CViewText *t = findText((std::string(kSecColor) + ":hard_info").c_str()))
+	if (CViewText *t = findText((std::string(kBrushC) + ":hard_info").c_str()))
 	{
 		char buf[32];
 		snprintf(buf, sizeof(buf), "%u", b->ColorHardness);
 		t->setHardText(buf);
 	}
-	if (CViewText *t = findText((std::string(kSecColor) + ":opac_info").c_str()))
+	if (CViewText *t = findText((std::string(kBrushC) + ":opac_info").c_str()))
 	{
 		char buf[32];
 		snprintf(buf, sizeof(buf), "%u", b->ColorOpacity);
@@ -1827,7 +1857,7 @@ void CEditorUI::syncPanelFromBridge()
 		const NLMISC::CRGBA col((uint8)b->ColorR, (uint8)b->ColorG, (uint8)b->ColorB, 255);
 		if (CCtrlBaseButton *sw = dynamic_cast<CCtrlBaseButton *>(
 		        CWidgetManager::getInstance()->getElementFromId(
-		            (std::string(kSecColor) + ":color_swatch").c_str())))
+		            (std::string(kBrushC) + ":color_swatch").c_str())))
 		{
 			sw->setColor(col);
 			sw->setColorPushed(col);
@@ -1835,7 +1865,7 @@ void CEditorUI::syncPanelFromBridge()
 		}
 	}
 	// RGB readout next to swatch
-	if (CViewText *t = findText((std::string(kSecColor) + ":color_rgb").c_str()))
+	if (CViewText *t = findText((std::string(kBrushC) + ":color_rgb").c_str()))
 	{
 		char buf[32];
 		snprintf(buf, sizeof(buf), "%u %u %u", b->ColorR, b->ColorG, b->ColorB);
@@ -1848,35 +1878,35 @@ void CEditorUI::syncPanelFromBridge()
 			s_ColorPickerVisible = el->getActive();
 	}
 	// Mask cycle button face = current mask basename or "none"
-	if (CCtrlTextButton *btn = findTextButton((std::string(kSecColor) + ":btn_mask").c_str()))
+	if (CCtrlTextButton *btn = findTextButton((std::string(kBrushC) + ":btn_mask").c_str()))
 	{
 		const char *lab = b->BrushMaskLabel[0] ? b->BrushMaskLabel : "none";
 		btn->setHardText(lab);
 	}
 	// M21a: btn_mask_mode is a zp_checkbox_row; canonical box is :box
-	if (CCtrlBaseButton *btn = findButton((std::string(kSecColor) + ":btn_mask_mode:box").c_str()))
+	if (CCtrlBaseButton *btn = findButton((std::string(kBrushC) + ":btn_mask_mode:box").c_str()))
 		btn->setPushed(b->BrushMaskMode);
 
 	// Displace index 0-15
-	if (CViewText *t = findText((std::string(kSecDisp) + ":disp_info").c_str()))
+	if (CViewText *t = findText((std::string(kDispC) + ":disp_info").c_str()))
 	{
 		char buf[32];
 		snprintf(buf, sizeof(buf), "%u", b->DisplaceIndex);
 		t->setHardText(buf);
 	}
 
-	// Prop section (M18b)
+	// Properties rollout (M18b / M22)
 	if (propActive)
 	{
-		if (CViewText *t = findText((std::string(kSecProp) + ":prop_name").c_str()))
+		if (CViewText *t = findText((std::string(kPropC) + ":prop_name").c_str()))
 			t->setHardText(b->PropHaveSelection
 			                   ? (b->PropZoneName[0] ? b->PropZoneName : "(unnamed)")
 			                   : "(no selection)");
-		if (CViewText *t = findText((std::string(kSecProp) + ":prop_file").c_str()))
+		if (CViewText *t = findText((std::string(kPropC) + ":prop_file").c_str()))
 			t->setHardText(b->PropHaveSelection ? b->PropFileBasename : "");
-		if (CViewText *t = findText((std::string(kSecProp) + ":prop_fp").c_str()))
+		if (CViewText *t = findText((std::string(kPropC) + ":prop_fp").c_str()))
 			t->setHardText(b->PropHaveSelection ? b->PropFootprint : "");
-		if (CViewText *t = findText((std::string(kSecProp) + ":prop_meta").c_str()))
+		if (CViewText *t = findText((std::string(kPropC) + ":prop_meta").c_str()))
 		{
 			char buf[96];
 			if (!b->PropHaveSelection)
@@ -1887,32 +1917,32 @@ void CEditorUI::syncPanelFromBridge()
 				         b->PropDirty ? "  dirty" : "");
 			t->setHardText(buf);
 		}
-		if (CViewText *t = findText((std::string(kSecProp) + ":prop_rot").c_str()))
+		if (CViewText *t = findText((std::string(kPropC) + ":prop_rot").c_str()))
 		{
 			char buf[16];
 			snprintf(buf, sizeof(buf), "%d", b->PropRotate);
 			t->setHardText(buf);
 		}
 		// M21a: prop_* are zp_checkbox_row groups; bridge drives :box (+ freeze :lbl)
-		if (CCtrlBaseButton *btn = findButton((std::string(kSecProp) + ":prop_sym:box").c_str()))
+		if (CCtrlBaseButton *btn = findButton((std::string(kPropC) + ":prop_sym:box").c_str()))
 			btn->setPushed(b->PropSymmetry);
-		if (CCtrlBaseButton *btn = findButton((std::string(kSecProp) + ":prop_pass:box").c_str()))
+		if (CCtrlBaseButton *btn = findButton((std::string(kPropC) + ":prop_pass:box").c_str()))
 			btn->setPushed(b->PropPassable);
-		if (CCtrlBaseButton *btn = findButton((std::string(kSecProp) + ":prop_bbox:box").c_str()))
+		if (CCtrlBaseButton *btn = findButton((std::string(kPropC) + ":prop_bbox:box").c_str()))
 			btn->setPushed(b->PropUseBBox);
-		if (CViewText *t = findText((std::string(kSecProp) + ":prop_status").c_str()))
+		if (CViewText *t = findText((std::string(kPropC) + ":prop_status").c_str()))
 			t->setHardText(b->PropStatus);
 		// Freeze steppers + checkbox rows when no selection / read-only
 		const bool fr = !b->PropHaveSelection || !b->PropEditable;
-		if (CCtrlBaseButton *btn = findButton((std::string(kSecProp) + ":rot_down").c_str()))
+		if (CCtrlBaseButton *btn = findButton((std::string(kPropC) + ":rot_down").c_str()))
 			btn->setFrozen(fr);
-		if (CCtrlBaseButton *btn = findButton((std::string(kSecProp) + ":rot_up").c_str()))
+		if (CCtrlBaseButton *btn = findButton((std::string(kPropC) + ":rot_up").c_str()))
 			btn->setFrozen(fr);
 		// Box + label hit both frozen; caption text dimmed so disabled is obvious
 		const char *propRows[] = { "prop_sym", "prop_pass", "prop_bbox" };
 		for (uint i = 0; i < sizeof(propRows) / sizeof(propRows[0]); ++i)
 		{
-			const std::string base = std::string(kSecProp) + ":" + propRows[i];
+			const std::string base = std::string(kPropC) + ":" + propRows[i];
 			if (CCtrlBaseButton *btn = findButton((base + ":box").c_str()))
 				btn->setFrozen(fr);
 			if (CCtrlBaseButton *btn = findButton((base + ":lbl").c_str()))
