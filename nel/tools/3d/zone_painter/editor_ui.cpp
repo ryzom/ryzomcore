@@ -663,7 +663,7 @@ void setTilesetPaletteVisible(bool visible)
 	setContainerActive(kPaletteWinId, visible);
 	// Panel toggle button face (if present)
 	if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(
-	        CWidgetManager::getInstance()->getElementFromId("ui:zp:painter:content:btn_palette")))
+	        CWidgetManager::getInstance()->getElementFromId("ui:zp:painter:content:btn_palette"))) // common header
 		btn->setPushed(visible);
 }
 
@@ -1480,7 +1480,16 @@ void CEditorUI::syncPanelFromBridge()
 	if (!b || !b->HaveCore)
 		return;
 
-	// Mode radios
+	// Nested under content:body:sec_* (M10d mode-grouped list). Common header/footer
+	// stay at content: / content:body:sec_footer:.
+	static const char *kSecTile = "ui:zp:painter:content:body:sec_tile";
+	static const char *kSecColor = "ui:zp:painter:content:body:sec_color";
+	static const char *kSecDisp = "ui:zp:painter:content:body:sec_disp";
+	static const char *kSecFooter = "ui:zp:painter:content:body:sec_footer";
+	static const char *kBody = "ui:zp:painter:content:body";
+	static const char *kPainterWin = "ui:zp:painter";
+
+	// Mode radios (common header)
 	if (CCtrlBaseButton *btn = findButton("ui:zp:painter:content:mode_tile"))
 		btn->setPushed(b->Mode == 0);
 	if (CCtrlBaseButton *btn = findButton("ui:zp:painter:content:mode_color"))
@@ -1488,8 +1497,45 @@ void CEditorUI::syncPanelFromBridge()
 	if (CCtrlBaseButton *btn = findButton("ui:zp:painter:content:mode_displace"))
 		btn->setPushed(b->Mode == 2);
 
+	// ---- M10d: show only the section for the current paint mode ----
+	// Keys, radios, and terrain-pick side effects all funnel Mode through the bridge,
+	// so this runs for every path. Keyboard shortcuts keep working when widgets hide.
+	const bool tileActive = (b->Mode == 0);
+	const bool colorActive = (b->Mode == 1);
+	const bool displaceActive = (b->Mode == 2);
+	if (CInterfaceGroup *g = findGroupEl(kSecTile))
+		g->setActive(tileActive);
+	if (CInterfaceGroup *g = findGroupEl(kSecColor))
+		g->setActive(colorActive);
+	if (CInterfaceGroup *g = findGroupEl(kSecDisp))
+		g->setActive(displaceActive);
+	// Footer always on (list reflows when mode sections toggle).
+	if (CInterfaceGroup *g = findGroupEl(kSecFooter))
+		g->setActive(true);
+	// Force list reflow + resize the painter container to the active content height.
+	// Section heights (XML): tile 92, color 148, disp 56; footer 110; list space 4;
+	// common header ~72; container chrome ~28 → total ≈ 72+sec+4+110+28.
+	if (CInterfaceGroup *body = findGroupEl(kBody))
+		body->invalidateCoords();
+	{
+		// Section heights must match ui/main.xml sec_* h attributes.
+		const sint32 secH = tileActive ? 118 : (colorActive ? 148 : 80);
+		const sint32 wantH = 72 + secH + 4 + 110 + 28; // header + sec + gap + footer + chrome
+		if (CInterfaceGroup *win = findGroupEl(kPainterWin))
+		{
+			// Clamp to pop_min/max band declared in XML (220..520)
+			sint32 h = wantH;
+			if (h < 220) h = 220;
+			if (h > 520) h = 520;
+			if (win->getH() != h)
+			{
+				win->setH(h);
+				win->invalidateCoords();
+			}
+		}
+	}
+
 	// Tile set label (1-based index; unnamed sets show as (unnamed) not empty quotes)
-	if (CViewText *t = findText("ui:zp:painter:content:tileset_info"))
 	{
 		char buf[192];
 		const char *name = b->TileSetName;
@@ -1497,33 +1543,34 @@ void CEditorUI::syncPanelFromBridge()
 			name = "(unnamed)";
 		const int oneBased = b->TileSetCount ? (b->CurTileSet + 1) : 0;
 		snprintf(buf, sizeof(buf), "%d/%u %s", oneBased, b->TileSetCount, name);
-		t->setHardText(buf);
+		if (CViewText *t = findText((std::string(kSecTile) + ":tileset_info").c_str()))
+			t->setHardText(buf);
 	}
 
 	// 256 toggle
-	if (CCtrlBaseButton *btn = findButton("ui:zp:painter:content:toggle_256"))
+	if (CCtrlBaseButton *btn = findButton((std::string(kSecTile) + ":toggle_256").c_str()))
 		btn->setPushed(b->Mode256);
 
-	// Brush / group
-	if (CViewText *t = findText("ui:zp:painter:content:brush_info"))
+	// Brush size (shown in Tile AND Displace sections — same underlying value)
 	{
 		char buf[32];
 		snprintf(buf, sizeof(buf), "%u", b->BrushSize);
-		t->setHardText(buf);
+		if (CViewText *t = findText((std::string(kSecTile) + ":brush_info").c_str()))
+			t->setHardText(buf);
+		if (CViewText *t = findText((std::string(kSecDisp) + ":brush_info_d").c_str()))
+			t->setHardText(buf);
 	}
-	if (CViewText *t = findText("ui:zp:painter:content:group_info"))
+	if (CViewText *t = findText((std::string(kSecTile) + ":group_info").c_str()))
 	{
 		char buf[32];
 		snprintf(buf, sizeof(buf), "%u", b->TileGroup);
 		t->setHardText(buf);
 	}
 
-	// Lock borders
-	if (CCtrlBaseButton *btn = findButton("ui:zp:painter:content:lock_borders"))
+	// Lock borders / undo (footer)
+	if (CCtrlBaseButton *btn = findButton((std::string(kSecFooter) + ":lock_borders").c_str()))
 		btn->setPushed(b->LockBorders);
-
-	// Undo depth
-	if (CViewText *t = findText("ui:zp:painter:content:undo_info"))
+	if (CViewText *t = findText((std::string(kSecFooter) + ":undo_info").c_str()))
 	{
 		char buf[32];
 		snprintf(buf, sizeof(buf), "%u", b->UndoDepth);
@@ -1577,34 +1624,23 @@ void CEditorUI::syncPanelFromBridge()
 	}
 
 	// Save enabled only with --save
-	if (CCtrlBaseButton *btn = findButton("ui:zp:painter:content:btn_save"))
+	if (CCtrlBaseButton *btn = findButton((std::string(kSecFooter) + ":btn_save").c_str()))
 		btn->setFrozen(!b->CanSave);
 
-	// ---- Color / displace (M7a): always-visible; section labels highlight on active mode ----
-	const bool colorActive = (b->Mode == 1);
-	const bool displaceActive = (b->Mode == 2);
-	const NLMISC::CRGBA colActive(255, 220, 140, 255);
-	const NLMISC::CRGBA colIdle(255, 255, 255, 140);
-
-	if (CViewText *t = findText("ui:zp:painter:content:lbl_color"))
-		t->setColor(colorActive ? colActive : colIdle);
-	if (CViewText *t = findText("ui:zp:painter:content:lbl_displace"))
-		t->setColor(displaceActive ? colActive : colIdle);
-
-	// Color radius (2-32m; SizeUp/Down keys share zp_brush when Mode==Color)
-	if (CViewText *t = findText("ui:zp:painter:content:radius_info"))
+	// Color radius / hardness / opacity (Color section)
+	if (CViewText *t = findText((std::string(kSecColor) + ":radius_info").c_str()))
 	{
 		char buf[32];
 		snprintf(buf, sizeof(buf), "%.1f", b->ColorRadius);
 		t->setHardText(buf);
 	}
-	if (CViewText *t = findText("ui:zp:painter:content:hard_info"))
+	if (CViewText *t = findText((std::string(kSecColor) + ":hard_info").c_str()))
 	{
 		char buf[32];
 		snprintf(buf, sizeof(buf), "%u", b->ColorHardness);
 		t->setHardText(buf);
 	}
-	if (CViewText *t = findText("ui:zp:painter:content:opac_info"))
+	if (CViewText *t = findText((std::string(kSecColor) + ":opac_info").c_str()))
 	{
 		char buf[32];
 		snprintf(buf, sizeof(buf), "%u", b->ColorOpacity);
@@ -1614,7 +1650,8 @@ void CEditorUI::syncPanelFromBridge()
 	{
 		const NLMISC::CRGBA col((uint8)b->ColorR, (uint8)b->ColorG, (uint8)b->ColorB, 255);
 		if (CCtrlBaseButton *sw = dynamic_cast<CCtrlBaseButton *>(
-		        CWidgetManager::getInstance()->getElementFromId("ui:zp:painter:content:color_swatch")))
+		        CWidgetManager::getInstance()->getElementFromId(
+		            (std::string(kSecColor) + ":color_swatch").c_str())))
 		{
 			sw->setColor(col);
 			sw->setColorPushed(col);
@@ -1622,7 +1659,7 @@ void CEditorUI::syncPanelFromBridge()
 		}
 	}
 	// RGB readout next to swatch
-	if (CViewText *t = findText("ui:zp:painter:content:color_rgb"))
+	if (CViewText *t = findText((std::string(kSecColor) + ":color_rgb").c_str()))
 	{
 		char buf[32];
 		snprintf(buf, sizeof(buf), "%u %u %u", b->ColorR, b->ColorG, b->ColorB);
@@ -1635,16 +1672,16 @@ void CEditorUI::syncPanelFromBridge()
 			s_ColorPickerVisible = el->getActive();
 	}
 	// Mask cycle button face = current mask basename or "none"
-	if (CCtrlTextButton *btn = findTextButton("ui:zp:painter:content:btn_mask"))
+	if (CCtrlTextButton *btn = findTextButton((std::string(kSecColor) + ":btn_mask").c_str()))
 	{
 		const char *lab = b->BrushMaskLabel[0] ? b->BrushMaskLabel : "none";
 		btn->setHardText(lab);
 	}
-	if (CCtrlBaseButton *btn = findButton("ui:zp:painter:content:btn_mask_mode"))
+	if (CCtrlBaseButton *btn = findButton((std::string(kSecColor) + ":btn_mask_mode").c_str()))
 		btn->setPushed(b->BrushMaskMode);
 
 	// Displace index 0-15
-	if (CViewText *t = findText("ui:zp:painter:content:disp_info"))
+	if (CViewText *t = findText((std::string(kSecDisp) + ":disp_info").c_str()))
 	{
 		char buf[32];
 		snprintf(buf, sizeof(buf), "%u", b->DisplaceIndex);

@@ -250,12 +250,13 @@
 <tree node="folder_browser"></tree>
 
 <!--
-  Painter control panel (M1c + M7a color/displace). Inactive until the viewer starts.
+  Painter control panel (M1c + M7a + M10d mode-grouped). Inactive until the viewer starts.
   Top-right corner keeps the terrain baseline visible in screenshots.
-  Color + Displace sections are always visible; labels highlight when that mode is active
-  (fits height budget without show/hide posparent gaps).
+  Body is a CGroupList: only the section for the current paint mode is active; inactive
+  sections reflow with no posparent gaps. Common header/footer always visible.
+  Container height is resized on mode change in syncPanelFromBridge (M10d).
 -->
-<group type="container" id="painter" w="220" pop_min_w="200" pop_max_w="280" h="520" pop_min_h="360" pop_max_h="580"
+<group type="container" id="painter" w="220" pop_min_w="200" pop_max_w="280" h="340" pop_min_h="220" pop_max_h="520"
 	title="Painter" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
 	title_bar_open="false" open_button="false" right_button="true" lockable="false" openable="false"
 	opened="true" movable="true" active="false" x="572" y="592">
@@ -263,6 +264,7 @@
 	<group id="header_opened" x="0" y="0" w="0" h="16" posref="TL TL"></group>
 	<group id="content" x="0" y="0" posref="TL TL" w="0" h="0">
 
+		<!-- ==== Common header (always visible) ==== -->
 		<!-- Instance indicator (M4b; empty when not self-instanced) -->
 		<view type="text" id="instance_info" posref="TL TL" x="10" y="-4" fontsize="10" shadow="true"
 			global_color="false" color="120 255 160 255" hardtext="" />
@@ -277,7 +279,7 @@
 		<view type="text" id="files_info" posparent="season_info" posref="BL TL" x="0" y="-1" fontsize="10" shadow="true"
 			global_color="false" color="200 200 210 220" hardtext="1 file" />
 
-		<!-- Mode radio row -->
+		<!-- Mode radio row + Tiles palette (palette covers tilesets AND displace maps) -->
 		<view type="text" id="lbl_mode" posparent="files_info" posref="BL TL" x="0" y="-4" fontsize="10" shadow="true"
 			global_color="false" color="255 255 255 180" hardtext="Mode" />
 		<ctrl style="text_button_radio" id="mode_tile" posparent="lbl_mode" posref="BL TL" x="0" y="-2"
@@ -286,127 +288,140 @@
 			onclick_l="zp_mode" params_l="1" hardtext="Color" />
 		<ctrl style="text_button_radio" id="mode_displace" posparent="mode_color" posref="MR ML" x="4" y="0"
 			onclick_l="zp_mode" params_l="2" hardtext="Disp" />
-
-		<!-- Tile set (+ Tiles palette toggle, ui M8) -->
-		<view type="text" id="lbl_tileset" posparent="mode_tile" posref="BL TL" x="0" y="-6" fontsize="10" shadow="true"
-			global_color="false" color="255 255 255 180" hardtext="Tile set" />
-		<view type="text" id="tileset_info" posparent="lbl_tileset" posref="BL TL" y="-1" fontsize="11" shadow="true"
-			global_color="false" color="180 220 255 255" hardtext="0 / 0" />
-		<ctrl style="text_button_16" id="tileset_prev" posparent="tileset_info" posref="BL TL" x="0" y="-2"
-			onclick_l="zp_tileset" params_l="-1" hardtext="&lt;" />
-		<ctrl style="text_button_16" id="tileset_next" posparent="tileset_prev" posref="MR ML" x="4" y="0"
-			onclick_l="zp_tileset" params_l="+1" hardtext="&gt;" />
-		<ctrl style="text_button_toggle" id="toggle_256" posparent="tileset_next" posref="MR ML" x="8" y="0"
-			onclick_l="zp_toggle_256" params_l="" hardtext="256" />
-		<ctrl style="text_button_toggle" id="btn_palette" posparent="toggle_256" posref="MR ML" x="4" y="0"
+		<ctrl style="text_button_toggle" id="btn_palette" posparent="mode_displace" posref="MR ML" x="8" y="0"
 			onclick_l="zp_toggle_palette" params_l="" hardtext="Tiles" />
 
-		<!-- Brush size 0-2 (tile/disp recursion; color mode uses Radius below via same keys) -->
-		<view type="text" id="lbl_brush" posparent="tileset_prev" posref="BL TL" x="0" y="-6" fontsize="10" shadow="true"
-			global_color="false" color="255 255 255 180" hardtext="Brush size" />
-		<view type="text" id="brush_info" posparent="lbl_brush" posref="MR ML" x="8" y="0" fontsize="11" shadow="true"
-			global_color="false" color="180 220 255 255" hardtext="0" />
-		<ctrl style="text_button_16" id="brush_down" posparent="lbl_brush" posref="BL TL" x="0" y="-2"
-			onclick_l="zp_brush" params_l="-1" hardtext="-" />
-		<ctrl style="text_button_16" id="brush_up" posparent="brush_down" posref="MR ML" x="4" y="0"
-			onclick_l="zp_brush" params_l="+1" hardtext="+" />
+		<!--
+		  Mode-grouped body (M10d): CGroupList auto-stacks active children.
+		  Only one of sec_tile / sec_color / sec_disp is active at a time; sec_footer
+		  is always active. Toggling active reflows without posparent gaps.
+		-->
+		<group type="list" id="body" posparent="mode_tile" posref="BL TL" x="0" y="-6" w="200"
+			space="4" maxelements="8" dynamic_display_size="true" addelt="B" align="L">
 
-		<!-- Tile group -->
-		<view type="text" id="lbl_group" posparent="brush_down" posref="BL TL" x="0" y="-6" fontsize="10" shadow="true"
-			global_color="false" color="255 255 255 180" hardtext="Group" />
-		<view type="text" id="group_info" posparent="lbl_group" posref="MR ML" x="8" y="0" fontsize="11" shadow="true"
-			global_color="false" color="180 220 255 255" hardtext="0" />
-		<ctrl style="text_button_16" id="group_down" posparent="lbl_group" posref="BL TL" x="0" y="-2"
-			onclick_l="zp_group" params_l="-1" hardtext="-" />
-		<ctrl style="text_button_16" id="group_up" posparent="group_down" posref="MR ML" x="4" y="0"
-			onclick_l="zp_group" params_l="+1" hardtext="+" />
+			<!-- Tile section (ModeTile only): tileset + 256 + brush size + group -->
+			<group id="sec_tile" w="200" h="118" child_resize_h="false">
+				<view type="text" id="lbl_tileset" posref="TL TL" x="0" y="-2" fontsize="10" shadow="true"
+					global_color="false" color="255 255 255 180" hardtext="Tile set" />
+				<view type="text" id="tileset_info" posparent="lbl_tileset" posref="BL TL" y="-1" fontsize="11" shadow="true"
+					global_color="false" color="180 220 255 255" hardtext="0 / 0" />
+				<ctrl style="text_button_16" id="tileset_prev" posparent="tileset_info" posref="BL TL" x="0" y="-2"
+					onclick_l="zp_tileset" params_l="-1" hardtext="&lt;" />
+				<ctrl style="text_button_16" id="tileset_next" posparent="tileset_prev" posref="MR ML" x="4" y="0"
+					onclick_l="zp_tileset" params_l="+1" hardtext="&gt;" />
+				<ctrl style="text_button_toggle" id="toggle_256" posparent="tileset_next" posref="MR ML" x="8" y="0"
+					onclick_l="zp_toggle_256" params_l="" hardtext="256" />
+				<!-- Brush size 0-2 (tile recursion; same value as Displace section) -->
+				<view type="text" id="lbl_brush" posparent="tileset_prev" posref="BL TL" x="0" y="-6" fontsize="10" shadow="true"
+					global_color="false" color="255 255 255 180" hardtext="Brush size" />
+				<view type="text" id="brush_info" posparent="lbl_brush" posref="MR ML" x="8" y="0" fontsize="11" shadow="true"
+					global_color="false" color="180 220 255 255" hardtext="0" />
+				<ctrl style="text_button_16" id="brush_down" posparent="lbl_brush" posref="BL TL" x="0" y="-2"
+					onclick_l="zp_brush" params_l="-1" hardtext="-" />
+				<ctrl style="text_button_16" id="brush_up" posparent="brush_down" posref="MR ML" x="4" y="0"
+					onclick_l="zp_brush" params_l="+1" hardtext="+" />
+				<!-- Tile group bias -->
+				<view type="text" id="lbl_group" posparent="brush_down" posref="BL TL" x="0" y="-6" fontsize="10" shadow="true"
+					global_color="false" color="255 255 255 180" hardtext="Group" />
+				<view type="text" id="group_info" posparent="lbl_group" posref="MR ML" x="8" y="0" fontsize="11" shadow="true"
+					global_color="false" color="180 220 255 255" hardtext="0" />
+				<ctrl style="text_button_16" id="group_down" posparent="lbl_group" posref="BL TL" x="0" y="-2"
+					onclick_l="zp_group" params_l="-1" hardtext="-" />
+				<ctrl style="text_button_16" id="group_up" posparent="group_down" posref="MR ML" x="4" y="0"
+					onclick_l="zp_group" params_l="+1" hardtext="+" />
+			</group>
 
-		<!-- Color section (M7a/M9b/M10a; always visible, label highlights in Color mode) -->
-		<view type="text" id="lbl_color" posparent="group_down" posref="BL TL" x="0" y="-8" fontsize="10" shadow="true"
-			global_color="false" color="255 255 255 140" hardtext="Color" />
-		<!-- 9-slice well + solid color face (blank.tga, color-modulated) — opens picker (M9b). -->
-		<group type="frame" id="color_swatch_well" options="w_box_frame" posparent="lbl_color" posref="MR ML" x="8" y="0"
-			w="22" h="16" color="255 255 255 255" global_color="false" display="true" />
-		<ctrl type="button" id="color_swatch" button_type="push_button" posparent="color_swatch_well" posref="MM MM" x="0" y="0"
-			w="14" h="8" scale="true"
-			tx_normal="blank.tga" tx_pushed="blank.tga" tx_over="blank.tga"
-			global_color_normal="false" global_color_pushed="false" global_color_over="false"
-			onclick_l="zp_open_color_picker" params_l="" />
-		<!-- RGB readout next to the swatch (display-only this round) -->
-		<view type="text" id="color_rgb" posparent="color_swatch_well" posref="MR ML" x="4" y="0" fontsize="9" shadow="true"
-			global_color="false" color="200 210 220 255" hardtext="255 255 255" />
-		<view type="text" id="lbl_radius" posparent="lbl_color" posref="BL TL" x="0" y="-2" fontsize="10" shadow="true"
-			global_color="false" color="255 255 255 160" hardtext="Radius" />
-		<view type="text" id="radius_info" posparent="lbl_radius" posref="MR ML" x="6" y="0" fontsize="11" shadow="true"
-			global_color="false" color="180 220 255 255" hardtext="8.0" />
-		<!-- Radius ±: same ×1.5/÷1.5 clamp as SizeUp/Down in Color mode (always adjusts radius) -->
-		<ctrl style="text_button_16" id="radius_down" posparent="lbl_radius" posref="BL TL" x="0" y="-2"
-			onclick_l="zp_color_radius" params_l="-1" hardtext="-" />
-		<ctrl style="text_button_16" id="radius_up" posparent="radius_down" posref="MR ML" x="4" y="0"
-			onclick_l="zp_color_radius" params_l="+1" hardtext="+" />
+			<!-- Color section (ModeColor only): swatch + R G B, radius, hardness, opacity, mask -->
+			<group id="sec_color" w="200" h="148" child_resize_h="false" active="false">
+				<view type="text" id="lbl_color" posref="TL TL" x="0" y="-2" fontsize="10" shadow="true"
+					global_color="false" color="255 220 140 255" hardtext="Color" />
+				<!-- 9-slice well + solid color face — opens picker (M9b). -->
+				<group type="frame" id="color_swatch_well" options="w_box_frame" posparent="lbl_color" posref="MR ML" x="8" y="0"
+					w="22" h="16" color="255 255 255 255" global_color="false" display="true" />
+				<ctrl type="button" id="color_swatch" button_type="push_button" posparent="color_swatch_well" posref="MM MM" x="0" y="0"
+					w="14" h="8" scale="true"
+					tx_normal="blank.tga" tx_pushed="blank.tga" tx_over="blank.tga"
+					global_color_normal="false" global_color_pushed="false" global_color_over="false"
+					onclick_l="zp_open_color_picker" params_l="" />
+				<view type="text" id="color_rgb" posparent="color_swatch_well" posref="MR ML" x="4" y="0" fontsize="9" shadow="true"
+					global_color="false" color="200 210 220 255" hardtext="255 255 255" />
+				<view type="text" id="lbl_radius" posparent="lbl_color" posref="BL TL" x="0" y="-2" fontsize="10" shadow="true"
+					global_color="false" color="255 255 255 160" hardtext="Radius" />
+				<view type="text" id="radius_info" posparent="lbl_radius" posref="MR ML" x="6" y="0" fontsize="11" shadow="true"
+					global_color="false" color="180 220 255 255" hardtext="8.0" />
+				<ctrl style="text_button_16" id="radius_down" posparent="lbl_radius" posref="BL TL" x="0" y="-2"
+					onclick_l="zp_color_radius" params_l="-1" hardtext="-" />
+				<ctrl style="text_button_16" id="radius_up" posparent="radius_down" posref="MR ML" x="4" y="0"
+					onclick_l="zp_color_radius" params_l="+1" hardtext="+" />
+				<view type="text" id="lbl_hard" posparent="radius_down" posref="BL TL" x="0" y="-4" fontsize="10" shadow="true"
+					global_color="false" color="255 255 255 160" hardtext="Hard" />
+				<view type="text" id="hard_info" posparent="lbl_hard" posref="MR ML" x="6" y="0" fontsize="11" shadow="true"
+					global_color="false" color="180 220 255 255" hardtext="128" />
+				<ctrl style="text_button_16" id="hard_down" posparent="lbl_hard" posref="BL TL" x="0" y="-2"
+					onclick_l="zp_hardness" params_l="-51" hardtext="-" />
+				<ctrl style="text_button_16" id="hard_up" posparent="hard_down" posref="MR ML" x="4" y="0"
+					onclick_l="zp_hardness" params_l="+51" hardtext="+" />
+				<view type="text" id="lbl_opac" posparent="hard_down" posref="BL TL" x="0" y="-4" fontsize="10" shadow="true"
+					global_color="false" color="255 255 255 160" hardtext="Opacity" />
+				<view type="text" id="opac_info" posparent="lbl_opac" posref="MR ML" x="6" y="0" fontsize="11" shadow="true"
+					global_color="false" color="180 220 255 255" hardtext="255" />
+				<ctrl style="text_button_16" id="opac_down" posparent="lbl_opac" posref="BL TL" x="0" y="-2"
+					onclick_l="zp_opacity" params_l="-51" hardtext="-" />
+				<ctrl style="text_button_16" id="opac_up" posparent="opac_down" posref="MR ML" x="4" y="0"
+					onclick_l="zp_opacity" params_l="+51" hardtext="+" />
+				<!-- Mask cycle (S key) + mask mode (Q key) -->
+				<ctrl style="text_button_16" id="btn_mask" posparent="opac_down" posref="BL TL" x="0" y="-4"
+					onclick_l="zp_cycle_mask" params_l="" hardtext="none" />
+				<ctrl style="text_button_toggle" id="btn_mask_mode" posparent="btn_mask" posref="MR ML" x="4" y="0"
+					onclick_l="zp_mask_mode" params_l="" hardtext="Mask" />
+			</group>
 
-		<view type="text" id="lbl_hard" posparent="radius_down" posref="BL TL" x="0" y="-4" fontsize="10" shadow="true"
-			global_color="false" color="255 255 255 160" hardtext="Hard" />
-		<view type="text" id="hard_info" posparent="lbl_hard" posref="MR ML" x="6" y="0" fontsize="11" shadow="true"
-			global_color="false" color="180 220 255 255" hardtext="128" />
-		<ctrl style="text_button_16" id="hard_down" posparent="lbl_hard" posref="BL TL" x="0" y="-2"
-			onclick_l="zp_hardness" params_l="-51" hardtext="-" />
-		<ctrl style="text_button_16" id="hard_up" posparent="hard_down" posref="MR ML" x="4" y="0"
-			onclick_l="zp_hardness" params_l="+51" hardtext="+" />
+			<!-- Displace section (ModeDisplace only): index stepper + brush size (shared value) -->
+			<group id="sec_disp" w="200" h="80" child_resize_h="false" active="false">
+				<view type="text" id="lbl_displace" posref="TL TL" x="0" y="-2" fontsize="10" shadow="true"
+					global_color="false" color="255 220 140 255" hardtext="Displace" />
+				<view type="text" id="disp_info" posparent="lbl_displace" posref="MR ML" x="6" y="0" fontsize="11" shadow="true"
+					global_color="false" color="180 220 255 255" hardtext="0" />
+				<ctrl style="text_button_16" id="disp_down" posparent="lbl_displace" posref="BL TL" x="0" y="-2"
+					onclick_l="zp_displace" params_l="-1" hardtext="-" />
+				<ctrl style="text_button_16" id="disp_up" posparent="disp_down" posref="MR ML" x="4" y="0"
+					onclick_l="zp_displace" params_l="+1" hardtext="+" />
+				<!-- Same brush-size mechanism as Tile section (shared zp_brush / BrushSize) -->
+				<view type="text" id="lbl_brush_d" posparent="disp_down" posref="BL TL" x="0" y="-6" fontsize="10" shadow="true"
+					global_color="false" color="255 255 255 180" hardtext="Brush size" />
+				<view type="text" id="brush_info_d" posparent="lbl_brush_d" posref="MR ML" x="8" y="0" fontsize="11" shadow="true"
+					global_color="false" color="180 220 255 255" hardtext="0" />
+				<ctrl style="text_button_16" id="brush_down_d" posparent="lbl_brush_d" posref="BL TL" x="0" y="-2"
+					onclick_l="zp_brush" params_l="-1" hardtext="-" />
+				<ctrl style="text_button_16" id="brush_up_d" posparent="brush_down_d" posref="MR ML" x="4" y="0"
+					onclick_l="zp_brush" params_l="+1" hardtext="+" />
+			</group>
 
-		<view type="text" id="lbl_opac" posparent="hard_down" posref="BL TL" x="0" y="-4" fontsize="10" shadow="true"
-			global_color="false" color="255 255 255 160" hardtext="Opacity" />
-		<view type="text" id="opac_info" posparent="lbl_opac" posref="MR ML" x="6" y="0" fontsize="11" shadow="true"
-			global_color="false" color="180 220 255 255" hardtext="255" />
-		<ctrl style="text_button_16" id="opac_down" posparent="lbl_opac" posref="BL TL" x="0" y="-2"
-			onclick_l="zp_opacity" params_l="-51" hardtext="-" />
-		<ctrl style="text_button_16" id="opac_up" posparent="opac_down" posref="MR ML" x="4" y="0"
-			onclick_l="zp_opacity" params_l="+51" hardtext="+" />
+			<!-- Footer common: lock / undo / fill / save (always visible, last list child) -->
+			<group id="sec_footer" w="200" h="110" child_resize_h="false">
+				<ctrl style="text_button_toggle" id="lock_borders" posref="TL TL" x="0" y="-2"
+					onclick_l="zp_lock_borders" params_l="" hardtext="Lock borders" />
+				<ctrl style="text_button_16" id="btn_undo" posparent="lock_borders" posref="BL TL" x="0" y="-6"
+					onclick_l="zp_undo" params_l="" hardtext="Undo" />
+				<ctrl style="text_button_16" id="btn_redo" posparent="btn_undo" posref="MR ML" x="4" y="0"
+					onclick_l="zp_redo" params_l="" hardtext="Redo" />
+				<view type="text" id="undo_info" posparent="btn_redo" posref="MR ML" x="8" y="0" fontsize="10" shadow="true"
+					global_color="false" color="200 200 200 220" hardtext="0" />
+				<ctrl style="text_button_16" id="btn_fill0" posparent="btn_undo" posref="BL TL" x="0" y="-4"
+					onclick_l="zp_fill" params_l="0" hardtext="Fill" />
+				<ctrl style="text_button_16" id="btn_fill1" posparent="btn_fill0" posref="MR ML" x="4" y="0"
+					onclick_l="zp_fill" params_l="1" hardtext="F1" />
+				<ctrl style="text_button_16" id="btn_fill2" posparent="btn_fill1" posref="MR ML" x="4" y="0"
+					onclick_l="zp_fill" params_l="2" hardtext="F2" />
+				<ctrl style="text_button_16" id="btn_fill3" posparent="btn_fill2" posref="MR ML" x="4" y="0"
+					onclick_l="zp_fill" params_l="3" hardtext="F3" />
+				<ctrl style="text_button_16" id="btn_save" posparent="btn_fill0" posref="BL TL" x="0" y="-8"
+					onclick_l="zp_save" params_l="" hardtext="Save" />
+				<view type="text" id="hint" posparent="btn_save" posref="BL TL" x="0" y="-6" fontsize="9" shadow="true"
+					global_color="false" color="255 255 255 140" hardtext="P tiles  Y season  F10  ESC" />
+			</group>
 
-		<!-- Mask cycle (S key): button face shows current mask name or "none" -->
-		<ctrl style="text_button_16" id="btn_mask" posparent="opac_down" posref="BL TL" x="0" y="-4"
-			onclick_l="zp_cycle_mask" params_l="" hardtext="none" />
-		<!-- Mask mode toggle (Q key) -->
-		<ctrl style="text_button_toggle" id="btn_mask_mode" posparent="btn_mask" posref="MR ML" x="4" y="0"
-			onclick_l="zp_mask_mode" params_l="" hardtext="Mask" />
-
-		<!-- Displace section (M7a; always visible, label highlights in Displace mode) -->
-		<view type="text" id="lbl_displace" posparent="btn_mask" posref="BL TL" x="0" y="-8" fontsize="10" shadow="true"
-			global_color="false" color="255 255 255 140" hardtext="Displace" />
-		<view type="text" id="disp_info" posparent="lbl_displace" posref="MR ML" x="6" y="0" fontsize="11" shadow="true"
-			global_color="false" color="180 220 255 255" hardtext="0" />
-		<ctrl style="text_button_16" id="disp_down" posparent="lbl_displace" posref="BL TL" x="0" y="-2"
-			onclick_l="zp_displace" params_l="-1" hardtext="-" />
-		<ctrl style="text_button_16" id="disp_up" posparent="disp_down" posref="MR ML" x="4" y="0"
-			onclick_l="zp_displace" params_l="+1" hardtext="+" />
-
-		<!-- Lock borders -->
-		<ctrl style="text_button_toggle" id="lock_borders" posparent="disp_down" posref="BL TL" x="0" y="-8"
-			onclick_l="zp_lock_borders" params_l="" hardtext="Lock borders" />
-
-		<!-- Undo / redo / fill -->
-		<ctrl style="text_button_16" id="btn_undo" posparent="lock_borders" posref="BL TL" x="0" y="-6"
-			onclick_l="zp_undo" params_l="" hardtext="Undo" />
-		<ctrl style="text_button_16" id="btn_redo" posparent="btn_undo" posref="MR ML" x="4" y="0"
-			onclick_l="zp_redo" params_l="" hardtext="Redo" />
-		<view type="text" id="undo_info" posparent="btn_redo" posref="MR ML" x="8" y="0" fontsize="10" shadow="true"
-			global_color="false" color="200 200 200 220" hardtext="0" />
-
-		<ctrl style="text_button_16" id="btn_fill0" posparent="btn_undo" posref="BL TL" x="0" y="-4"
-			onclick_l="zp_fill" params_l="0" hardtext="Fill" />
-		<ctrl style="text_button_16" id="btn_fill1" posparent="btn_fill0" posref="MR ML" x="4" y="0"
-			onclick_l="zp_fill" params_l="1" hardtext="F1" />
-		<ctrl style="text_button_16" id="btn_fill2" posparent="btn_fill1" posref="MR ML" x="4" y="0"
-			onclick_l="zp_fill" params_l="2" hardtext="F2" />
-		<ctrl style="text_button_16" id="btn_fill3" posparent="btn_fill2" posref="MR ML" x="4" y="0"
-			onclick_l="zp_fill" params_l="3" hardtext="F3" />
-
-		<!-- Save: frozen without CLI save on legacy; always on in interactive modal flow -->
-		<ctrl style="text_button_16" id="btn_save" posparent="btn_fill0" posref="BL TL" x="0" y="-8"
-			onclick_l="zp_save" params_l="" hardtext="Save" />
-		<view type="text" id="hint" posparent="btn_save" posref="BL TL" x="0" y="-6" fontsize="9" shadow="true"
-			global_color="false" color="255 255 255 140" hardtext="P tiles  Y season  F10  ESC" />
-
+		</group>
 	</group>
 </group>
 <tree node="painter"></tree>
