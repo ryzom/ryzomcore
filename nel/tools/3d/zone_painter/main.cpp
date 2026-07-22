@@ -3907,11 +3907,14 @@ int main(int argc, char **argv)
 	            "resolve for the open bank are offered by SeasonNext / the panel button; painting "
 	            "data is season-independent.");
 	args.addArg("", "all-zones", "",
-            "Open every non-frozen RklPatch as a paint target (pre-M11b open-everything). "
-            "Default is exporter-faithful eligibility: only the zone(s) the zone/ligo export "
-            "pipeline would export are editable; other zones in the file load as read-only "
-            "context. Null-edit and carrier write-back still cover the whole file. "
-            "Paint-script zone indices address PAINTABLE (unfrozen) zone ids.");
+            "Open every non-frozen (non-0x0976) RklPatch as a paint target — pre-M11b "
+            "open-everything. Default is exporter-faithful eligibility (M11b), mirroring "
+            "pipeline_max_export_zone + nel_ligo_export.ms / zone_export.ms: "
+            "zonematerial-/zonespecial- → single non-frozen RklPatch (name-match cell token "
+            "when multiple); zonetransition- → all non-frozen; else ExportRykolZone first "
+            "findID-able node. Other zones load as read-only context display. [NELLIGO] "
+            "markers skipped. Null-edit / write-back still whole-file; paint-script zone "
+            "ids address PAINTABLE zones only.");
 args.addArg("", "instances", "NxM",
 	            "Ecosystem startup: self-instance the brick on an NxM layout grid (supported: 1x1, "
 	            "2x1, 1x2, 2x2, 3x3). Primary zone at the origin; other cells are display duplicates "
