@@ -1128,7 +1128,10 @@ static bool writeNeighborHintsToScene(CScene &scene, const std::string &fileBase
 
 /**
  * Collect current RO context files as hints for the given editable (board save).
- * Offsets = SContextFile::CellX/Y recorded at load. Excludes other editables.
+ * Offsets = SContextFile::CellX/Y recorded at load / place-context (fine cells relative
+ * to the primary footprint origin). These are the same offsets placement consumes, so
+ * write → reopen round-trips: for freestanding bricks they are board cells; for
+ * converted absolute-authored bricks they equal authored origin deltas (M19).
  */
 static void collectHintsFromLoadedContext(std::vector<SNeighborHint> &out)
 {
@@ -1161,10 +1164,54 @@ static void writeNeighborHintsIfBoardSession()
 }
 
 /**
+ * Authored footprint origin (snapped AABB min of patch geometry after object TM) for one
+ * zone node. Same reference computeFootprintRect uses for placement. False if eval fails.
+ */
+static bool zoneNodeAuthoredFootprintOrigin(CNodeImpl *node, SNodeTMCache &tmCache,
+                                            float cellSize, float &originX, float &originY)
+{
+	originX = originY = 0.f;
+	if (!node) return false;
+	if (cellSize <= 0.f) cellSize = 160.f;
+	SEvalPatch ep;
+	std::string err;
+	if (!evalNodePatch(node, ep, err)) return false;
+	Matrix3M objectTM = getObjectTM(node, tmCache);
+	std::vector<NL3D::CPatchInfo> patches;
+	if (!buildPatchInfo(ep, objectTM, 0, patches, err) || patches.empty()) return false;
+	NLMISC::CAABBox bbox;
+	bool init = false;
+	for (size_t p = 0; p < patches.size(); ++p)
+	{
+		const NL3D::CBezierPatch &bp = patches[p].Patch;
+		for (uint v = 0; v < 4; ++v)
+		{
+			if (!init) { bbox.setCenter(bp.Vertices[v]); bbox.setHalfSize(NLMISC::CVector::Null); init = true; }
+			else bbox.extend(bp.Vertices[v]);
+		}
+		for (uint v = 0; v < 8; ++v) bbox.extend(bp.Tangents[v]);
+		for (uint v = 0; v < 4; ++v) bbox.extend(bp.Interiors[v]);
+	}
+	if (!init) return false;
+	const NLMISC::CVector mn = bbox.getMin();
+	originX = (float)(std::floor((double)mn.x / (double)cellSize) * (double)cellSize);
+	originY = (float)(std::floor((double)mn.y / (double)cellSize) * (double)cellSize);
+	return true;
+}
+
+/**
  * Extract neighbor hints from embedded frozen/ineligible zone nodes in a scene.
- * Prefer continent grid deltas when both the eligible node name and the embedded
- * name parse as [prefix-]<row>_<AA> (converted bricks). Else quantize object-TM
- * translation deltas by cellSize. Basenames keep the authored node name (e.g. "199_DY").
+ *
+ * Offsets are fine-cell deltas of authored footprint origins (geometry AABB min snapped
+ * to the cell grid) relative to the eligible zone — the same origin placement uses so
+ * that translation = intended(cellOffset) - authoredOrigin(neighbor) round-trips:
+ *   converted bricks already in absolute/shared space → delta matches authored separation → ~0 move
+ *   freestanding origin-authored bricks → delta from embedded layout / TM → full offset
+ *
+ * Falls back to object-TM deltas when geometry eval fails. Basenames keep the authored
+ * node name (e.g. "199_DY") for resolveHintToZone. Continent name-grid deltas are NOT
+ * used for placement offsets: name row increases in -Y world and AABB spillover makes
+ * name col/row a poor proxy for footprint origin (M19).
  */
 static bool extractEmbeddedNeighborHints(CScene &scene, const std::string &fileBasename,
                                          float cellSize, std::vector<SNeighborHint> &out)
@@ -1177,26 +1224,23 @@ static bool extractEmbeddedNeighborHints(CScene &scene, const std::string &fileB
 	std::vector<bool> eligible;
 	computeZoneEligibility(nodes, fileBasename, eligible);
 
-	// Eligible anchor: name + TM
+	// Eligible anchor: authored footprint origin (geometry), TM fallback
 	SNodeTMCache tmCache;
 	float origX = 0.f, origY = 0.f;
 	bool haveOrig = false;
-	std::string eligibleName;
-	int eRow = 0, eCol = 0;
-	bool haveEGrid = false;
 	for (size_t i = 0; i < nodes.size(); ++i)
 	{
 		if (!(i < eligible.size() && eligible[i] && !nodes[i].Frozen))
 			continue;
-		eligibleName = ucstring(nodes[i].Node->userName()).toUtf8();
-		Matrix3M tm = getObjectTM(nodes[i].Node, tmCache);
-		origX = tm.m[3][0];
-		origY = tm.m[3][1];
-		haveOrig = true;
-		haveEGrid = ZPWS::parseContinentZoneName(eligibleName, eRow, eCol);
-		// Also try file basename (zonematerial-converted-200_dz)
-		if (!haveEGrid)
-			haveEGrid = ZPWS::parseContinentZoneName(fileBasename, eRow, eCol);
+		if (zoneNodeAuthoredFootprintOrigin(nodes[i].Node, tmCache, cellSize, origX, origY))
+			haveOrig = true;
+		else
+		{
+			Matrix3M tm = getObjectTM(nodes[i].Node, tmCache);
+			origX = tm.m[3][0];
+			origY = tm.m[3][1];
+			haveOrig = true;
+		}
 		break;
 	}
 	if (!haveOrig)
@@ -1204,14 +1248,15 @@ static bool extractEmbeddedNeighborHints(CScene &scene, const std::string &fileB
 		for (size_t i = 0; i < nodes.size(); ++i)
 		{
 			if (nodes[i].Frozen) continue;
-			eligibleName = ucstring(nodes[i].Node->userName()).toUtf8();
-			Matrix3M tm = getObjectTM(nodes[i].Node, tmCache);
-			origX = tm.m[3][0];
-			origY = tm.m[3][1];
-			haveOrig = true;
-			haveEGrid = ZPWS::parseContinentZoneName(eligibleName, eRow, eCol);
-			if (!haveEGrid)
-				haveEGrid = ZPWS::parseContinentZoneName(fileBasename, eRow, eCol);
+			if (zoneNodeAuthoredFootprintOrigin(nodes[i].Node, tmCache, cellSize, origX, origY))
+				haveOrig = true;
+			else
+			{
+				Matrix3M tm = getObjectTM(nodes[i].Node, tmCache);
+				origX = tm.m[3][0];
+				origY = tm.m[3][1];
+				haveOrig = true;
+			}
 			break;
 		}
 	}
@@ -1224,13 +1269,12 @@ static bool extractEmbeddedNeighborHints(CScene &scene, const std::string &fileB
 		std::string name = ucstring(nodes[i].Node->userName()).toUtf8();
 		if (name.empty()) continue;
 
+		float nx = 0.f, ny = 0.f;
 		int dx = 0, dy = 0;
-		int nRow = 0, nCol = 0;
-		if (haveEGrid && ZPWS::parseContinentZoneName(name, nRow, nCol))
+		if (zoneNodeAuthoredFootprintOrigin(nodes[i].Node, tmCache, cellSize, nx, ny))
 		{
-			// Continent convention: col = X, row = Y
-			dx = nCol - eCol;
-			dy = nRow - eRow;
+			dx = (int)std::lround((double)(nx - origX) / (double)cellSize);
+			dy = (int)std::lround((double)(ny - origY) / (double)cellSize);
 		}
 		else
 		{
@@ -1493,11 +1537,9 @@ static void loadNeighborContextFiles(std::vector<SPaintZone> &zones, float cellS
 			p.Zone = ze;
 			p.Dx = hints[hi].Dx;
 			p.Dy = hints[hi].Dy;
-			// Continent files sit in absolute world space (no translate). Ecosystem brick
-			// files are freestanding footprints — place at the hint cell offset relative to
-			// the primary footprint origin. Appdata hints store fine cells; embedded name
-			// deltas from continent grid tokens are also treated as fine-cell steps for
-			// placement (footprint-accurate multi-cell adjacency is the M17 mask work).
+			// Continent files sit in absolute world space (no translate — identical to
+			// applying the unified rule when hints == authored origin deltas). Ecosystem
+			// always places via authored-origin-relative translation (M19).
 			p.Translate = (g_StartupWorld.Kind == ZPWS::Ecosystem);
 			(void)source;
 			(void)fw;
@@ -1532,7 +1574,13 @@ static void loadNeighborContextFiles(std::vector<SPaintZone> &zones, float cellS
 		}
 		if (p.Translate && before < zones.size())
 		{
-			// Shift so context footprint origin lands at homeOrigin + (dx,dy)*cellSize
+			// M19 unified placement:
+			//   translation = intendedWorldPos(cellOffset) - authoredFootprintOrigin(neighbor)
+			//   intendedWorldPos = primary authored footprint origin + cellOffset * cellSize
+			// Authored origin = snapped geometry AABB min (computeFootprintRect), not an
+			// assumed (0,0). Converted bricks whose hints equal their authored deltas get
+			// ~zero translation and stay continuous; freestanding origin-authored bricks
+			// receive the full intended offset.
 			float cOx = 0.f, cOy = 0.f, cSx = 0.f, cSy = 0.f;
 			int cw = 1, ch = 1;
 			computeFootprintRect(zones, before, zones.size(), cellSize, cOx, cOy, cSx, cSy, cw, ch);
@@ -5134,6 +5182,7 @@ static bool loadOnePlaceContext(std::vector<SPaintZone> &zones, float cellSize,
 		computeFootprintRect(zones, before, zones.size(), cellSize, cOx, cOy, cSx, cSy, cw, ch);
 		cmask.assign((size_t)cw * (size_t)ch, true);
 	}
+	// M19 same rule as neighbor load: intended(cell) - authoredFootprintOrigin
 	const float wantX = homeOriginX + (float)pc.Dx * cellSize;
 	const float wantY = homeOriginY + (float)pc.Dy * cellSize;
 	translateZonesXY(zones, before, zones.size(), wantX - cOx, wantY - cOy);
