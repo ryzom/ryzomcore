@@ -415,14 +415,33 @@ const SWorldEntry *findWorld(const std::vector<SWorldEntry> &worlds,
 	return NULL;
 }
 
+/** True when path is preferRoot or a descendant (normalized absolute dirs, no trailing slash). */
+static bool pathUnderRoot(const std::string &path, const std::string &preferRoot)
+{
+	if (preferRoot.empty() || path.empty())
+		return false;
+	const std::string p = normalizeDir(path);
+	const std::string r = normalizeDir(preferRoot);
+	if (p.empty() || r.empty())
+		return false;
+	if (p == r)
+		return true;
+	// directory boundary: r is a strict prefix of p followed by a path separator
+	if (p.size() > r.size() && p.compare(0, r.size(), r) == 0
+	    && (p[r.size()] == '/' || p[r.size()] == '\\'))
+		return true;
+	return false;
+}
+
 bool selectAuto(const std::vector<SWorldEntry> &worlds,
                 const std::string &autoPath,
                 SWorldEntry &worldOut,
                 SZoneEntry &zoneOut,
-                std::string &err)
+                std::string &err,
+                const std::string &preferRoot)
 {
 	std::vector<SZoneEntry> zones;
-	if (!selectAutoMulti(worlds, autoPath, worldOut, zones, err))
+	if (!selectAutoMulti(worlds, autoPath, worldOut, zones, err, preferRoot))
 		return false;
 	if (zones.empty())
 	{
@@ -437,7 +456,8 @@ bool selectAutoMulti(const std::vector<SWorldEntry> &worlds,
                      const std::string &autoPath,
                      SWorldEntry &worldOut,
                      std::vector<SZoneEntry> &zonesOut,
-                     std::string &err)
+                     std::string &err,
+                     const std::string &preferRoot)
 {
 	err.clear();
 	zonesOut.clear();
@@ -497,9 +517,11 @@ bool selectAutoMulti(const std::vector<SWorldEntry> &worlds,
 		return false;
 	}
 
-	// Prefer exact WorldName world that contains ALL requested zones
+	// Score every full match; do not return the first WorldName hit (seed vs remembered).
+	// Priority (high → low): under preferRoot, exact WorldName, discovery order.
 	const SWorldEntry *bestWorld = NULL;
 	std::vector<SZoneEntry> bestZones;
+	int bestScore = -1;
 	for (size_t i = 0; i < candidates.size(); ++i)
 	{
 		std::vector<SZoneEntry> zones;
@@ -522,14 +544,17 @@ bool selectAutoMulti(const std::vector<SWorldEntry> &worlds,
 		}
 		if (!all)
 			continue;
+		int score = 0;
+		if (pathUnderRoot(candidates[i]->GraphicsRoot, preferRoot)
+		    || pathUnderRoot(candidates[i]->MaxDir, preferRoot))
+			score += 1000;
 		if (candidates[i]->WorldName == wsName)
+			score += 100;
+		// Stable tie-break: earlier discovery index (seed is collected before remembered)
+		score += (int)(candidates.size() - i);
+		if (score > bestScore)
 		{
-			worldOut = *candidates[i];
-			zonesOut = matched;
-			return true;
-		}
-		if (!bestWorld)
-		{
+			bestScore = score;
 			bestWorld = candidates[i];
 			bestZones = matched;
 		}

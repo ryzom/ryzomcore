@@ -85,11 +85,14 @@ EStartupResult runStartupFlow(NL3D::UDriver *driver,
                               const std::string &screenshotWorld = std::string());
 
 /** Same selection path buttons use — for --startup-auto thin wrapper reuse.
- *	Supports multi: "world/zoneA+zoneB" fills EditableZones (M6b). */
+ *	Supports multi: "world/zoneA+zoneB" fills EditableZones (M6b).
+ *	preferRoot: pass the CLI seed folder so a seed workspace wins over LastGraphicsFolder
+ *	when both expose the same WorldName (see ZPWS::selectAutoMulti). */
 bool startupSelectWorldZone(const std::vector<ZPWS::SWorldEntry> &worlds,
                             const std::string &autoPath,
                             SStartupSelection &selection,
-                            std::string &err);
+                            std::string &err,
+                            const std::string &preferRoot = std::string());
 
 /** Show/hide startup windows + painter panel. */
 void startupHideAllScreens();

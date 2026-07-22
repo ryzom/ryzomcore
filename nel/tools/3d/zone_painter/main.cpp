@@ -1011,14 +1011,50 @@ static std::string encodeNeighborHintsString(std::vector<SNeighborHint> hints)
 }
 
 /** Read appdata neighbor hints from a node's script AppData; false if absent/unusable. */
-static bool readNeighborHintsFromNode(CNodeImpl *node, std::vector<SNeighborHint> &out)
+static bool readNeighborHintsFromNode(CNodeImpl *node, std::vector<SNeighborHint> &out,
+                                      std::string *rawOut = NULL)
 {
 	out.clear();
+	if (rawOut) rawOut->clear();
 	if (!node) return false;
 	std::string raw;
 	if (!APPDATA::getScriptAppData(node, NEL3D_APPDATA_PAINTER_NEIGHBOR_HINTS, raw))
 		return false;
+	if (rawOut) *rawOut = raw;
 	return parseNeighborHintsString(raw, out);
+}
+
+/**
+ * Shared appdata neighbor-hint read (session open + --dump-neighbor-hints).
+ * Scans eligible non-frozen zone nodes first (write target), then any zone node
+ * that carries the key (defensive if eligibility order differs after a resave).
+ * rawOut: optional raw payload string when found.
+ */
+static bool readNeighborHintsFromScene(CScene &scene, const std::string &fileBasename,
+                                       std::vector<SNeighborHint> &out, std::string *rawOut = NULL)
+{
+	out.clear();
+	if (rawOut) rawOut->clear();
+	std::vector<SZoneNode> nodes;
+	collectZoneNodes(scene, nodes);
+	std::vector<bool> eligible;
+	computeZoneEligibility(nodes, fileBasename, eligible);
+	// (1) eligible non-frozen (same node writeNeighborHintsToScene targets)
+	for (size_t i = 0; i < nodes.size(); ++i)
+	{
+		if (i < eligible.size() && eligible[i] && !nodes[i].Frozen)
+		{
+			if (readNeighborHintsFromNode(nodes[i].Node, out, rawOut))
+				return true;
+		}
+	}
+	// (2) any zone node (covers edge cases: eligibility drift / frozen write host)
+	for (size_t i = 0; i < nodes.size(); ++i)
+	{
+		if (readNeighborHintsFromNode(nodes[i].Node, out, rawOut))
+			return true;
+	}
+	return false;
 }
 
 /**
@@ -1265,24 +1301,9 @@ static void collectNeighborHints(CScene &scene, const std::string &fileBasename,
 	resolvedOut.clear();
 	sourceOut = "none";
 
-	// (1) appdata
-	{
-		std::vector<SZoneNode> nodes;
-		collectZoneNodes(scene, nodes);
-		std::vector<bool> eligible;
-		computeZoneEligibility(nodes, fileBasename, eligible);
-		for (size_t i = 0; i < nodes.size(); ++i)
-		{
-			if (i < eligible.size() && eligible[i] && !nodes[i].Frozen)
-			{
-				if (readNeighborHintsFromNode(nodes[i].Node, hintsOut))
-				{
-					sourceOut = "appdata";
-					break;
-				}
-			}
-		}
-	}
+	// (1) appdata — same helper as --dump-neighbor-hints (M16d)
+	if (readNeighborHintsFromScene(scene, fileBasename, hintsOut))
+		sourceOut = "appdata";
 	// (2) embedded copies
 	if (sourceOut == "none")
 	{
@@ -5546,7 +5567,7 @@ args.addArg("", "instances", "NxM",
 		}
 	}
 
-	// Headless: dump neighbor hints for a .max and exit
+	// Headless: dump neighbor hints for a .max and exit (shared read with session open)
 	if (args.haveLongArg("dump-neighbor-hints"))
 	{
 		std::string path = args.getLongArg("dump-neighbor-hints")[0];
@@ -5559,29 +5580,16 @@ args.addArg("", "instances", "NxM",
 		}
 		const std::string basen = NLMISC::CFile::getFilenameWithoutExtension(path);
 		std::vector<SNeighborHint> hints;
-		std::vector<SZoneNode> nodes;
-		collectZoneNodes(*lm.Scene, nodes);
-		std::vector<bool> eligible;
-		computeZoneEligibility(nodes, basen, eligible);
 		std::string source = "none";
 		std::string raw;
-		for (size_t i = 0; i < nodes.size(); ++i)
+		if (readNeighborHintsFromScene(*lm.Scene, basen, hints, &raw))
 		{
-			if (i < eligible.size() && eligible[i] && !nodes[i].Frozen)
-			{
-				if (APPDATA::getScriptAppData(nodes[i].Node, NEL3D_APPDATA_PAINTER_NEIGHBOR_HINTS, raw))
-				{
-					source = "appdata";
-					printf("neighbor-hints appdata raw: %s\n", raw.c_str());
-					parseNeighborHintsString(raw, hints);
-					break;
-				}
-			}
+			source = "appdata";
+			printf("neighbor-hints appdata raw: %s\n", raw.c_str());
 		}
-		if (source == "none")
+		else if (extractEmbeddedNeighborHints(*lm.Scene, basen, 160.f, hints))
 		{
-			if (extractEmbeddedNeighborHints(*lm.Scene, basen, 160.f, hints))
-				source = "embedded";
+			source = "embedded";
 		}
 		printf("neighbor-hints dump '%s': source=%s count=%u\n", basen.c_str(), source.c_str(),
 		       (uint)hints.size());
@@ -5849,7 +5857,9 @@ args.addArg("", "instances", "NxM",
 			}
 			g_InstanceCount = 1 + (uint)g_Places.size();
 			std::string err;
-			if (!ZPUI::startupSelectWorldZone(worlds, autoPath, selection, err))
+			// Pass seed so a seeded temp workspace wins over LastGraphicsFolder when both
+			// expose the same WorldName (M16d: reopen must open the file we just saved).
+			if (!ZPUI::startupSelectWorldZone(worlds, autoPath, selection, err, seedFolder))
 			{
 				fprintf(stderr, "ERROR: %s\n", err.c_str());
 				return 1;
@@ -5861,9 +5871,10 @@ args.addArg("", "instances", "NxM",
 				return 1;
 			}
 			haveSelection = true;
-			printf("startup-auto: world '%s' (%s) zone(s) ",
+			printf("startup-auto: world '%s' (%s) root='%s' zone(s) ",
 			       selection.World.WorldName.c_str(),
-			       selection.World.Kind == ZPWS::Ecosystem ? "ecosystem" : "continent");
+			       selection.World.Kind == ZPWS::Ecosystem ? "ecosystem" : "continent",
+			       selection.World.GraphicsRoot.c_str());
 			if (selection.EditableZones.empty())
 				printf("'%s'", selection.Zone.Basename.c_str());
 			else
@@ -5874,6 +5885,8 @@ args.addArg("", "instances", "NxM",
 			printf(" neighbors=%s places=%u\n",
 			       g_LoadNeighbors ? "on" : "off",
 			       (uint)g_Places.size());
+			if (!selection.Zone.MaxPath.empty())
+				printf("session open: %s\n", selection.Zone.MaxPath.c_str());
 		}
 		else
 		{

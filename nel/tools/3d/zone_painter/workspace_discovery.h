@@ -121,18 +121,26 @@ std::string zoneThumbnailPath(const SWorldEntry &world, const std::string &maxBa
  * Multi-select (ui M6b): "workspace-name/zoneA+zoneB+zoneC" selects multiple zones
  * (plus-separated). zoneOut is the first; zoneOuts receives all in order. Single-zone
  * paths still fill zoneOuts with one entry when the multi overload is used.
+ *
+ * preferRoot (optional): when several BankOk worlds share the same WorldName (typical:
+ * CLI seed folder + LastGraphicsFolder both contribute lacustre/…), prefer the world
+ * whose GraphicsRoot is preferRoot or sits under it. Without this, alphabetical
+ * GraphicsRoot order silently picks the remembered graphics tree over a seed workspace
+ * that holds the file the user just saved (M16d: session-open never saw neighbor hints).
  */
 bool selectAuto(const std::vector<SWorldEntry> &worlds,
                 const std::string &autoPath,
                 SWorldEntry &worldOut,
                 SZoneEntry &zoneOut,
-                std::string &err);
+                std::string &err,
+                const std::string &preferRoot = std::string());
 
 bool selectAutoMulti(const std::vector<SWorldEntry> &worlds,
                      const std::string &autoPath,
                      SWorldEntry &worldOut,
                      std::vector<SZoneEntry> &zonesOut,
-                     std::string &err);
+                     std::string &err,
+                     const std::string &preferRoot = std::string());
 
 /**
  * Union of 8-ring neighbors of every zone in `centers`, excluding any basename already

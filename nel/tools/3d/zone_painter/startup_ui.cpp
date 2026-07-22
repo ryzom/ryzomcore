@@ -1140,11 +1140,12 @@ static void showScreen(EScreen screen)
 bool startupSelectWorldZone(const std::vector<ZPWS::SWorldEntry> &worlds,
                             const std::string &autoPath,
                             SStartupSelection &selection,
-                            std::string &err)
+                            std::string &err,
+                            const std::string &preferRoot)
 {
 	ZPWS::SWorldEntry w;
 	std::vector<ZPWS::SZoneEntry> zones;
-	if (!ZPWS::selectAutoMulti(worlds, autoPath, w, zones, err))
+	if (!ZPWS::selectAutoMulti(worlds, autoPath, w, zones, err, preferRoot))
 		return false;
 	if (zones.empty())
 	{
