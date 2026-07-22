@@ -253,14 +253,26 @@ static float g_SessionCellSize = 160.f;
 static float g_SessionSnap = 1.f;
 static bool g_SessionLockBorders = false;
 static NL3D::CTileBank *g_SessionBank = NULL;
-// Ecosystem self-instances (ui M4a): layout grid Cols x Rows (1x1 = off). Primary zones sit
-// at the layout origin; remaining cells are display-level duplicates sharing the same Node
-// pointers (paint_core carrier keying) with geometry translated by whole-footprint steps.
+// Ecosystem self-instances (ui M4a/M12): board-driven placements. Primary zones sit at the
+// layout origin (rot 0, no mirror); each --place adds a display-level duplicate sharing the
+// same Node pointers (paint_core carrier keying) with geometry translated by whole-footprint
+// steps and optionally rotated/mirrored. --instances NxM is a deprecated alias that expands
+// to translation-only placements for the non-origin cells of the grid.
 // Instance zone ids use the sparse base kInstanceZoneIdBase (CBorderVertex ids are uint16).
 static const uint kInstanceZoneIdBase = 10000;
+struct SInstancePlace
+{
+	int CellX, CellY; // footprint-cell offsets from primary origin
+	uint Rot;         // 0..3 CCW (NEL3D_APPDATA_ZONE_ROTATE / CZoneRegion::Rot)
+	bool Mirror;      // Flip (NEL3D_APPDATA_ZONE_SYMMETRY / CZoneRegion::Flip)
+	SInstancePlace() : CellX(0), CellY(0), Rot(0), Mirror(false) { }
+	SInstancePlace(int x, int y, uint r, bool m) : CellX(x), CellY(y), Rot(r), Mirror(m) { }
+};
+static std::vector<SInstancePlace> g_Places; // empty = primary only
+// Legacy NxN reporting (deprecated --instances / Screen B layout)
 static uint g_InstanceCols = 1;
 static uint g_InstanceRows = 1;
-static uint g_InstanceCount = 1; // Cols*Rows when active; 1 when off
+static uint g_InstanceCount = 1; // 1 + g_Places.size()
 // Shipped brush mask cycle (viewer SelectColorBrush key; 0 = none, i = g_MaskFiles[i-1])
 static std::vector<std::string> g_MaskFiles;
 static int g_MaskCycle = 0;
@@ -585,6 +597,10 @@ struct SPaintZone
 	std::vector<NL3D::CPatchInfo> Patches;
 	std::vector<NL3D::CBorderVertex> BorderVertices; // session-only, filled by the weld pass
 	SEvalPatch Ep; // evaluated topology, kept for the paint core's metaTile graph (P3b)
+	// Display transform (M12): primary = (0,false); instances carry placement rot/mirror
+	uint Rotate;
+	bool Symmetry;
+	SPaintZone() : Node(NULL), Frozen(false), ZoneId(0), Rotate(0), Symmetry(false) { }
 };
 
 // Exporter-faithful zone eligibility (M11b).
@@ -827,22 +843,79 @@ static uint nextZoneIdBase(const std::vector<SPaintZone> &zones)
 }
 
 // ---------------------------------------------------------------------------------------------
-// Ecosystem brick self-instances (ui M4a): display-level duplicates at whole-footprint offsets.
+// Ecosystem brick self-instances (ui M4a/M12): display-level duplicates at whole-footprint
+// offsets with optional rotation/mirror (board-driven placements).
 //
 // NL3D landscape zones are baked in world space, so an "instance" is another CZone with its own
-// zoneId whose patch geometry is the primary's geometry + offset, while paint state stays on
-// the shared carrier (same Node pointer → same leaf/rpo key in paint_core).
+// zoneId whose patch geometry is the primary's geometry transformed (translate + rot/mirror
+// about the primary AABB center), while paint state stays on the shared carrier (same Node
+// pointer → same leaf/rpo key in paint_core). Per-zone Rotate/Symmetry feed paint_core's
+// transformDesc assembly so picks and paint ops compensate into primary-space storage.
 //
 // Footprint step: geometry AABB in X/Y of the primary zones, each axis rounded UP to the
-// nearest multiple of --cellsize (default 100). A 1x1 brick self-tiles at cellsize spacing;
-// a wider brick at its rounded W×H. Mask-accurate / L-shaped footprints are a later refinement
-// (AABB rectangle only this milestone). Layouts: 2x1, 1x2, 2x2, 3x3 (primary at origin).
+// nearest multiple of --cellsize. Mask-accurate / L-shaped footprints are a later refinement
+// (AABB rectangle only).
 
-/** Parse "NxM" (case-insensitive x). Fills cols/rows; 1x1 is valid (no-op). */
-static bool parseInstanceLayout(const std::string &s, uint &cols, uint &rows, std::string &err)
+/** Parse "dx,dy[,rot][,m]" — cell offsets, rot 0..3, optional mirror (m|1|true). */
+static bool parsePlaceSpec(const std::string &s, SInstancePlace &out, std::string &err)
+{
+	out = SInstancePlace();
+	std::vector<std::string> parts;
+	{
+		std::string cur;
+		for (size_t i = 0; i <= s.size(); ++i)
+		{
+			char c = (i < s.size()) ? s[i] : ',';
+			if (c == ',') { parts.push_back(cur); cur.clear(); }
+			else cur += c;
+		}
+	}
+	if (parts.size() < 2 || parts.size() > 4)
+	{
+		err = "place expects dx,dy[,rot][,m], got '" + s + "'";
+		return false;
+	}
+	if (!NLMISC::fromString(parts[0], out.CellX) || !NLMISC::fromString(parts[1], out.CellY))
+	{
+		err = "place dx,dy unparseable: '" + s + "'";
+		return false;
+	}
+	if (out.CellX == 0 && out.CellY == 0)
+	{
+		err = "place 0,0 is the primary (omit it); got '" + s + "'";
+		return false;
+	}
+	if (parts.size() >= 3 && !parts[2].empty())
+	{
+		if (!NLMISC::fromString(parts[2], out.Rot) || out.Rot > 3)
+		{
+			err = "place rot must be 0..3, got '" + parts[2] + "'";
+			return false;
+		}
+	}
+	if (parts.size() >= 4 && !parts[3].empty())
+	{
+		std::string m = NLMISC::toLowerAscii(parts[3]);
+		if (m == "1" || m == "m" || m == "true" || m == "yes" || m == "flip")
+			out.Mirror = true;
+		else if (m == "0" || m == "false" || m == "no")
+			out.Mirror = false;
+		else
+		{
+			err = "place mirror expects 0|1|m, got '" + parts[3] + "'";
+			return false;
+		}
+	}
+	return true;
+}
+
+/** Parse deprecated "NxM" layout into translation-only places (non-origin cells). */
+static bool parseInstanceLayout(const std::string &s, uint &cols, uint &rows,
+                                std::vector<SInstancePlace> &places, std::string &err)
 {
 	cols = 1;
 	rows = 1;
+	places.clear();
 	std::string t = NLMISC::toLowerAscii(s);
 	std::string::size_type x = t.find('x');
 	if (x == std::string::npos || x == 0 || x + 1 >= t.size())
@@ -856,7 +929,6 @@ static bool parseInstanceLayout(const std::string &s, uint &cols, uint &rows, st
 		err = "instances layout out of range or unparseable: '" + s + "' (use 1..8 per axis)";
 		return false;
 	}
-	// Supported named layouts this milestone (plus 1x1 = off)
 	const bool ok = (cols == 1 && rows == 1)
 		|| (cols == 2 && rows == 1)
 		|| (cols == 1 && rows == 2)
@@ -866,6 +938,12 @@ static bool parseInstanceLayout(const std::string &s, uint &cols, uint &rows, st
 	{
 		err = "unsupported instances layout '" + s + "' (supported: 1x1, 2x1, 1x2, 2x2, 3x3)";
 		return false;
+	}
+	for (uint cy = 0; cy < rows; ++cy)
+	for (uint cx = 0; cx < cols; ++cx)
+	{
+		if (cx == 0 && cy == 0) continue;
+		places.push_back(SInstancePlace((int)cx, (int)cy, 0, false));
 	}
 	return true;
 }
@@ -909,33 +987,87 @@ static void computeFootprintStep(const std::vector<SPaintZone> &zones, size_t pr
 	if (stepY < cellSize) stepY = cellSize;
 }
 
-/** Display clone of a primary zone at world offset (dx,dy); shares Node (carrier) with source. */
+/** XY transform: mirror about Y (X flip, land/maxscript scale[-1,1,1]), then rot 0..3 CCW about pivot, then translate. */
+static void transformInstanceXY(float &x, float &y, float pivotX, float pivotY,
+                                float dx, float dy, uint rot, bool mirror)
+{
+	float lx = x - pivotX;
+	float ly = y - pivotY;
+	if (mirror)
+		lx = -lx;
+	float rx = lx, ry = ly;
+	switch (rot & 3)
+	{
+	case 0: rx = lx;  ry = ly;  break;
+	case 1: rx = -ly; ry = lx;  break; // 90° CCW
+	case 2: rx = -lx; ry = -ly; break; // 180°
+	case 3: rx = ly;  ry = -lx; break; // 270° CCW
+	}
+	x = rx + pivotX + dx;
+	y = ry + pivotY + dy;
+}
+
+/** Primary AABB center (XY) used as rot/mirror pivot for instances. */
+static void computePrimaryPivot(const std::vector<SPaintZone> &zones, size_t primaryBegin,
+                                size_t primaryEnd, float &px, float &py)
+{
+	NLMISC::CAABBox bbox;
+	bool init = false;
+	for (size_t i = primaryBegin; i < primaryEnd && i < zones.size(); ++i)
+	{
+		for (size_t p = 0; p < zones[i].Patches.size(); ++p)
+		{
+			const NL3D::CBezierPatch &bp = zones[i].Patches[p].Patch;
+			for (uint v = 0; v < 4; ++v)
+			{
+				if (!init) { bbox.setCenter(bp.Vertices[v]); bbox.setHalfSize(NLMISC::CVector::Null); init = true; }
+				else bbox.extend(bp.Vertices[v]);
+			}
+		}
+	}
+	if (init)
+	{
+		NLMISC::CVector c = bbox.getCenter();
+		px = c.x;
+		py = c.y;
+	}
+	else
+	{
+		px = py = 0.f;
+	}
+}
+
+/**
+ * Display clone of a primary zone at footprint cell placement with rot/mirror.
+ * Shares Node (carrier) with source. Geometry is transformed; tiles stay authored-space
+ * until applyInstanceDisplayTiles (after bank load) / paint_core transformDesc.
+ */
 static SPaintZone cloneInstanceZone(const SPaintZone &src, uint zoneId, float dx, float dy,
-                                    uint cellX, uint cellY)
+                                    float pivotX, float pivotY, const SInstancePlace &place)
 {
 	SPaintZone pz = src;
 	pz.ZoneId = zoneId;
-	pz.Name = src.Name + NLMISC::toString(" (inst %ux%u)", cellX, cellY);
+	pz.Rotate = place.Rot & 3;
+	pz.Symmetry = place.Mirror;
+	std::string tag = NLMISC::toString(" (inst %d,%d", place.CellX, place.CellY);
+	if (pz.Rotate) tag += NLMISC::toString(" R%u", pz.Rotate * 90);
+	if (pz.Symmetry) tag += " M";
+	tag += ")";
+	pz.Name = src.Name + tag;
 	pz.BorderVertices.clear();
 	// Ep (topology) is a value copy — same binds/orders; Patches are world-space display.
 	for (size_t p = 0; p < pz.Patches.size(); ++p)
 	{
 		NL3D::CPatchInfo &pi = pz.Patches[p];
 		for (uint v = 0; v < 4; ++v)
-		{
-			pi.Patch.Vertices[v].x += dx;
-			pi.Patch.Vertices[v].y += dy;
-		}
+			transformInstanceXY(pi.Patch.Vertices[v].x, pi.Patch.Vertices[v].y,
+			                    pivotX, pivotY, dx, dy, pz.Rotate, pz.Symmetry);
 		for (uint v = 0; v < 8; ++v)
-		{
-			pi.Patch.Tangents[v].x += dx;
-			pi.Patch.Tangents[v].y += dy;
-		}
+			transformInstanceXY(pi.Patch.Tangents[v].x, pi.Patch.Tangents[v].y,
+			                    pivotX, pivotY, dx, dy, pz.Rotate, pz.Symmetry);
 		for (uint v = 0; v < 4; ++v)
-		{
-			pi.Patch.Interiors[v].x += dx;
-			pi.Patch.Interiors[v].y += dy;
-		}
+			transformInstanceXY(pi.Patch.Interiors[v].x, pi.Patch.Interiors[v].y,
+			                    pivotX, pivotY, dx, dy, pz.Rotate, pz.Symmetry);
 		// Remap intra-zone bind ZoneIds to this instance (session weld fills cross-zone later)
 		for (uint e = 0; e < 4; ++e)
 		{
@@ -947,21 +1079,22 @@ static SPaintZone cloneInstanceZone(const SPaintZone &src, uint zoneId, float dx
 }
 
 /**
- * Append display instances for layout cols x rows (primary already at origin).
+ * Append display instances for g_Places (primary already at origin).
  * Returns number of zone entries appended. zone ids start at kInstanceZoneIdBase.
  */
 static uint appendInstanceZones(std::vector<SPaintZone> &zones, size_t primaryCount,
-                                uint cols, uint rows, float cellSize)
+                                const std::vector<SInstancePlace> &places, float cellSize)
 {
-	if (cols <= 1 && rows <= 1) return 0;
+	if (places.empty()) return 0;
 	if (primaryCount == 0 || zones.size() < primaryCount) return 0;
 
 	float stepX = 0.f, stepY = 0.f;
 	computeFootprintStep(zones, 0, primaryCount, cellSize, stepX, stepY);
+	float pivotX = 0.f, pivotY = 0.f;
+	computePrimaryPivot(zones, 0, primaryCount, pivotX, pivotY);
 
 	uint nextId = kInstanceZoneIdBase;
-	// Ensure we stay under uint16 for CBorderVertex / BindEdges ZoneId
-	const uint needIds = (cols * rows - 1) * (uint)primaryCount;
+	const uint needIds = (uint)places.size() * (uint)primaryCount;
 	if (nextId + needIds >= 65535)
 	{
 		fprintf(stderr, "ERROR: instance zone id range would exceed uint16 (need %u ids from %u)\n",
@@ -970,23 +1103,97 @@ static uint appendInstanceZones(std::vector<SPaintZone> &zones, size_t primaryCo
 	}
 
 	uint appended = 0;
-	for (uint cy = 0; cy < rows; ++cy)
-	for (uint cx = 0; cx < cols; ++cx)
+	for (size_t pi = 0; pi < places.size(); ++pi)
 	{
-		if (cx == 0 && cy == 0) continue; // primary already present
-		const float dx = (float)cx * stepX;
-		const float dy = (float)cy * stepY;
+		const SInstancePlace &pl = places[pi];
+		const float dx = (float)pl.CellX * stepX;
+		const float dy = (float)pl.CellY * stepY;
 		for (size_t i = 0; i < primaryCount; ++i)
 		{
-			zones.push_back(cloneInstanceZone(zones[i], nextId, dx, dy, cx, cy));
+			zones.push_back(cloneInstanceZone(zones[i], nextId, dx, dy, pivotX, pivotY, pl));
 			++nextId;
 			++appended;
 		}
 	}
-	printf("instances: layout %ux%u  footprint step (%.1f, %.1f)  primary zones %u  display zones +%u (ids from %u)\n",
-	       cols, rows, stepX, stepY, (uint)primaryCount, appended, kInstanceZoneIdBase);
+	printf("instances: %u place(s)  footprint step (%.1f, %.1f)  pivot (%.1f, %.1f)  primary zones %u  display zones +%u (ids from %u)\n",
+	       (uint)places.size(), stepX, stepY, pivotX, pivotY, (uint)primaryCount, appended, kInstanceZoneIdBase);
+	for (size_t pi = 0; pi < places.size(); ++pi)
+	{
+		const SInstancePlace &pl = places[pi];
+		printf("  place[%u] cell (%d,%d) rot %u%s\n",
+		       (uint)pi, pl.CellX, pl.CellY, pl.Rot, pl.Mirror ? " mirror" : "");
+	}
 	printf("  note: footprint is geometry AABB rounded up to cellsize; mask-accurate L-shapes are later\n");
 	return appended;
+}
+
+/**
+ * After bank load: transform display CPatchInfo tile elements on rotated/mirrored instances
+ * so the initial landscape matches GetTile display space (plugin exportZone transform path).
+ * Uses CPatchInfo::transform (symmetry + rotate + tile bank), which also remounts U under
+ * symmetry. Geometry is already in place from cloneInstanceZone — only tile/color/bind
+ * remounts from CPatchInfo::transform's symmetry branch apply here; rotation-only adjusts
+ * tile orients / transitions / 256 cases without reshuffling control points again.
+ *
+ * IMPORTANT: CPatchInfo::transform also swaps control-point indices under symmetry. Our
+ * geometry was already mirrored in world space; re-swapping would double-apply topology.
+ * For M12 we therefore only apply the tile-element half for rotation, and for mirror we
+ * rely on paint_core's live transformDesc + the already-mirrored geometry (initial tiles
+ * for mirrored instances are approximate until first paint refresh; M12c can tighten).
+ */
+static void applyInstanceDisplayTiles(std::vector<SPaintZone> &zones, NL3D::CTileBank *bank)
+{
+	if (!bank) return;
+	for (size_t zi = 0; zi < zones.size(); ++zi)
+	{
+		SPaintZone &pz = zones[zi];
+		if (pz.Rotate == 0 && !pz.Symmetry) continue;
+		// Rotation-only tile orient/transition remap (matches CPatchInfo::transform tile loop
+		// with symmetry=false). Mirror tile U remap deferred with live setTile path.
+		if (pz.Symmetry && pz.Rotate == 0) continue; // geometry already mirrored; tiles via paint path
+		const uint rotate = pz.Rotate & 3;
+		if (rotate == 0) continue;
+		for (size_t p = 0; p < pz.Patches.size(); ++p)
+		{
+			NL3D::CPatchInfo &pi = pz.Patches[p];
+			std::vector<NL3D::CTileElement> tiles = pi.Tiles;
+			for (int v = 0; v < pi.OrderT; ++v)
+			for (int u = 0; u < pi.OrderS; ++u)
+			{
+				NL3D::CTileElement &element = pi.Tiles[u + v * pi.OrderS];
+				element = tiles[u + v * pi.OrderS];
+				for (int l = 0; l < 3; ++l)
+				{
+					if (element.Tile[l] == 0xffff) continue;
+					uint tile = element.Tile[l];
+					uint tileRotation = element.getTileOrient(l);
+					uint tileRotate = rotate;
+					bool tileSymmetry = false;
+					if (!NL3D::CPatchInfo::getTileSymmetryRotate(*bank, tile, tileSymmetry, tileRotate))
+						continue;
+					if (!NL3D::CPatchInfo::transformTile(*bank, tile, tileRotation, tileSymmetry, (4 - tileRotate) & 3, false))
+						continue;
+					element.Tile[l] = (uint16)tile;
+					element.setTileOrient(l, (uint8)(tileRotation & 3));
+				}
+				if (element.Tile[0] != 0xffff)
+				{
+					bool is256 = false;
+					uint8 uvOff = 0;
+					element.getTile256Info(is256, uvOff);
+					if (is256)
+					{
+						uint tileRotate = rotate;
+						bool tileSymmetry = false;
+						uint tileRotation = tiles[u + v * pi.OrderS].getTileOrient(0);
+						NL3D::CPatchInfo::getTileSymmetryRotate(*bank, element.Tile[0], tileSymmetry, tileRotate);
+						NL3D::CPatchInfo::transform256Case(*bank, uvOff, tileRotation, tileSymmetry, (4 - tileRotate) & 3, false);
+						element.setTile256Info(true, uvOff);
+					}
+				}
+			}
+		}
+	}
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -1299,6 +1506,8 @@ static void buildPaintInputs(std::vector<SPaintZone> &zones, std::vector<ZPPAINT
 		in.Patches = &zones[i].Patches;
 		in.Pm = &zones[i].Ep.Pm;
 		in.EvalRp = &zones[i].Ep.Rp;
+		in.Rotate = zones[i].Rotate;
+		in.Symmetry = zones[i].Symmetry;
 		inputs.push_back(in);
 	}
 }
@@ -3884,8 +4093,9 @@ int main(int argc, char **argv)
 	            "Basenames may be bare grid names (4_AC) or prefixed (zonematerial-converted-193_ec). "
 	            "Optional ?query after the zone list: ampersand-separated key=value pairs. "
 	            "Supported keys: neighbors=on|off (continents; default on), "
-	            "instances=NxM (ecosystem self-instances; see --instances). "
-	            "Examples: lacustre/material-fond?instances=2x2  "
+	            "place=dx,dy[,rot][,m] (ecosystem self-instances; see --place), "
+	            "instances=NxM (deprecated alias for translation-only places; see --instances). "
+	            "Examples: lacustre/material-fond?place=1,0,1  "
 	            "snowballs/4_AC+4_AD  "
 	            "fyros_newbieland/15_AE?neighbors=off  "
 	            "lacustre/material-fond?instances=2x1&neighbors=off");
@@ -3915,14 +4125,18 @@ int main(int argc, char **argv)
             "findID-able node. Other zones load as read-only context display. [NELLIGO] "
             "markers skipped. Null-edit / write-back still whole-file; paint-script zone "
             "ids address PAINTABLE zones only.");
+args.addArg("", "place", "dx,dy[,rot][,m]",
+	            "Ecosystem: place a self-instance of the open brick at footprint-cell (dx,dy) "
+	            "with optional rotation 0..3 (90° CCW steps) and mirror (m|1). Repeatable. "
+	            "Primary stays at origin rot 0. Display-level duplicates share one paint carrier; "
+	            "picks and paint ops inverse-map through the instance transform (plugin "
+	            "transformDesc assembly). Footprint step = geometry AABB ceil'd to --cellsize. "
+	            "Ecosystem-only. Also ?place=dx,dy,rot (use repeated --place on CLI).",
+	            false);
 args.addArg("", "instances", "NxM",
-	            "Ecosystem startup: self-instance the brick on an NxM layout grid (supported: 1x1, "
-	            "2x1, 1x2, 2x2, 3x3). Primary zone at the origin; other cells are display duplicates "
-	            "sharing one paint carrier (stroke on any instance appears on all; edges weld to the "
-	            "brick's opposite edge — self-adjacency for the transition solver). "
-	            "Footprint step = geometry AABB rounded up to --cellsize (ecosystem default 160). "
-	            "Ecosystem-only (error on continents). Same as ?instances=NxM on --startup-auto "
-	            "(query overrides CLI when both are given). "
+	            "DEPRECATED alias (M12): expands to translation-only --place for each non-origin "
+	            "cell of an NxM grid (supported: 1x1, 2x1, 1x2, 2x2, 3x3). Prefer --place. "
+	            "Ecosystem-only. Same as ?instances=NxM on --startup-auto. "
 	            "Ignored with a warning on the legacy .max path.");
 	args.addArg("", "thumb-extract", "out.tga",
 	            "Headless: extract OLE PIDSI_THUMBNAIL from the input .max into out.tga (and refresh thumbcache); exit");
@@ -4101,21 +4315,38 @@ args.addArg("", "instances", "NxM",
 			}
 		}
 
-		// Instances layout (ecosystem self-tile). CLI --instances; also ?instances= on auto.
+		// Instance placements (ecosystem self-tile). CLI --place / --instances; also query on auto.
+		g_Places.clear();
 		g_InstanceCols = 1;
 		g_InstanceRows = 1;
 		g_InstanceCount = 1;
 		std::string instancesFromCli;
 		if (args.haveLongArg("instances"))
 			instancesFromCli = args.getLongArg("instances")[0];
+		if (args.haveLongArg("place"))
+		{
+			const std::vector<std::string> &pv = args.getLongArg("place");
+			for (size_t i = 0; i < pv.size(); ++i)
+			{
+				SInstancePlace pl;
+				std::string perr;
+				if (!parsePlaceSpec(pv[i], pl, perr))
+				{
+					fprintf(stderr, "ERROR: %s\n", perr.c_str());
+					return 1;
+				}
+				g_Places.push_back(pl);
+			}
+		}
 
 		if (args.haveLongArg("startup-auto"))
 		{
 			// Thin wrapper: same selectAuto the buttons call (no UI required).
-			// Optional query: workspace/zone?neighbors=off&instances=2x2
+			// Optional query: workspace/zone?neighbors=off&place=1,0,1&instances=2x2
 			std::string autoArg = args.getLongArg("startup-auto")[0];
 			std::string autoPath = autoArg;
 			std::string instancesFromQuery;
+			std::vector<SInstancePlace> placesFromQuery;
 			std::string::size_type qpos = autoArg.find('?');
 			if (qpos != std::string::npos)
 			{
@@ -4143,22 +4374,46 @@ args.addArg("", "instances", "NxM",
 					{
 						instancesFromQuery = val;
 					}
+					else if (keyL == "place")
+					{
+						SInstancePlace pl;
+						std::string perr;
+						if (!parsePlaceSpec(val, pl, perr))
+						{
+							fprintf(stderr, "ERROR: %s\n", perr.c_str());
+							return 1;
+						}
+						placesFromQuery.push_back(pl);
+					}
 					if (amp == std::string::npos) break;
 					start = amp + 1;
 				}
 			}
-			// Query wins over CLI when both set (more specific on the zone path)
+			// Query places append to CLI --place; deprecated --instances expands if no places yet
+			for (size_t i = 0; i < placesFromQuery.size(); ++i)
+				g_Places.push_back(placesFromQuery[i]);
 			std::string instancesSpec = !instancesFromQuery.empty() ? instancesFromQuery : instancesFromCli;
-			if (!instancesSpec.empty())
+			if (!instancesSpec.empty() && g_Places.empty())
 			{
 				std::string ierr;
-				if (!parseInstanceLayout(instancesSpec, g_InstanceCols, g_InstanceRows, ierr))
+				std::vector<SInstancePlace> layoutPlaces;
+				if (!parseInstanceLayout(instancesSpec, g_InstanceCols, g_InstanceRows, layoutPlaces, ierr))
 				{
 					fprintf(stderr, "ERROR: %s\n", ierr.c_str());
 					return 1;
 				}
-				g_InstanceCount = g_InstanceCols * g_InstanceRows;
+				if (!layoutPlaces.empty())
+				{
+					fprintf(stderr, "NOTE: --instances / ?instances= is deprecated; use --place (expanded %ux%u → %u place(s))\n",
+					        g_InstanceCols, g_InstanceRows, (uint)layoutPlaces.size());
+					g_Places = layoutPlaces;
+				}
 			}
+			else if (!instancesSpec.empty() && !g_Places.empty())
+			{
+				fprintf(stderr, "NOTE: ignoring --instances / ?instances= because --place / ?place= is set\n");
+			}
+			g_InstanceCount = 1 + (uint)g_Places.size();
 			std::string err;
 			if (!ZPUI::startupSelectWorldZone(worlds, autoPath, selection, err))
 			{
@@ -4166,9 +4421,9 @@ args.addArg("", "instances", "NxM",
 				return 1;
 			}
 			// Instances are ecosystem-only
-			if (g_InstanceCount > 1 && selection.World.Kind != ZPWS::Ecosystem)
+			if (!g_Places.empty() && selection.World.Kind != ZPWS::Ecosystem)
 			{
-				fprintf(stderr, "ERROR: ?instances= / --instances is ecosystem-only (not available on continents)\n");
+				fprintf(stderr, "ERROR: --place / --instances is ecosystem-only (not available on continents)\n");
 				return 1;
 			}
 			haveSelection = true;
@@ -4182,9 +4437,9 @@ args.addArg("", "instances", "NxM",
 				for (size_t zi = 0; zi < selection.EditableZones.size(); ++zi)
 					printf("%s'%s'", zi ? "+" : "", selection.EditableZones[zi].Basename.c_str());
 			}
-			printf(" neighbors=%s instances=%ux%u\n",
+			printf(" neighbors=%s places=%u\n",
 			       g_LoadNeighbors ? "on" : "off",
-			       g_InstanceCols, g_InstanceRows);
+			       (uint)g_Places.size());
 		}
 		else
 		{
@@ -4254,21 +4509,32 @@ args.addArg("", "instances", "NxM",
 			}
 			// StartupOpenZone
 			haveSelection = true;
-			// Interactive open layout: CLI --instances overrides Screen B selector
-			std::string layoutSpec = !instancesFromCli.empty() ? instancesFromCli : selection.InstanceLayout;
-			if (!layoutSpec.empty() && layoutSpec != "1x1")
+			// Interactive open: CLI --place already filled g_Places; else --instances / Screen B layout
+			if (g_Places.empty())
 			{
-				std::string ierr;
-				if (!parseInstanceLayout(layoutSpec, g_InstanceCols, g_InstanceRows, ierr))
+				std::string layoutSpec = !instancesFromCli.empty() ? instancesFromCli : selection.InstanceLayout;
+				if (!layoutSpec.empty() && layoutSpec != "1x1")
 				{
-					fprintf(stderr, "ERROR: %s\n", ierr.c_str());
-					return 1;
+					std::string ierr;
+					std::vector<SInstancePlace> layoutPlaces;
+					if (!parseInstanceLayout(layoutSpec, g_InstanceCols, g_InstanceRows, layoutPlaces, ierr))
+					{
+						fprintf(stderr, "ERROR: %s\n", ierr.c_str());
+						return 1;
+					}
+					if (!layoutPlaces.empty())
+					{
+						if (!instancesFromCli.empty())
+							fprintf(stderr, "NOTE: --instances is deprecated; use --place (expanded %ux%u → %u place(s))\n",
+							        g_InstanceCols, g_InstanceRows, (uint)layoutPlaces.size());
+						g_Places = layoutPlaces;
+					}
 				}
-				g_InstanceCount = g_InstanceCols * g_InstanceRows;
 			}
-			if (g_InstanceCount > 1 && selection.World.Kind != ZPWS::Ecosystem)
+			g_InstanceCount = 1 + (uint)g_Places.size();
+			if (!g_Places.empty() && selection.World.Kind != ZPWS::Ecosystem)
 			{
-				fprintf(stderr, "ERROR: --instances is ecosystem-only (not available on continents)\n");
+				fprintf(stderr, "ERROR: --place / --instances is ecosystem-only (not available on continents)\n");
 				return 1;
 			}
 		}
@@ -4303,13 +4569,12 @@ args.addArg("", "instances", "NxM",
 			ZPWS::SStartupCfg save;
 			save.LastGraphicsFolder = selection.World.GraphicsRoot;
 			save.LastWorld = selection.World.WorldName;
-			if (g_InstanceCount > 1)
+			if (g_InstanceCols > 1 || g_InstanceRows > 1)
 				save.LastInstances = NLMISC::toString("%ux%u", g_InstanceCols, g_InstanceRows);
 			else if (!selection.InstanceLayout.empty())
 				save.LastInstances = selection.InstanceLayout;
 			else
 				save.LastInstances = "1x1";
-			// Preserve prior LastInstances when CLI/auto set instances without UI selection field
 			if (save.LastInstances.empty())
 				save.LastInstances = "1x1";
 			ZPWS::saveStartupCfg(save);
@@ -4326,11 +4591,12 @@ args.addArg("", "instances", "NxM",
 				g_LoadNeighbors = true; // no-op without a continent world context
 		}
 		// Instances are ecosystem-startup only; warn and ignore on the legacy path
-		if (args.haveLongArg("instances"))
+		if (args.haveLongArg("instances") || args.haveLongArg("place"))
 		{
-			fprintf(stderr, "WARNING: --instances is ignored on the legacy .max path "
-			                "(use --startup-auto \"eco/brick?instances=2x2\" or the ecosystem UI)\n");
+			fprintf(stderr, "WARNING: --place / --instances is ignored on the legacy .max path "
+			                "(use --startup-auto \"eco/brick?place=1,0,1\" or the ecosystem UI)\n");
 		}
+		g_Places.clear();
 		g_InstanceCols = 1;
 		g_InstanceRows = 1;
 		g_InstanceCount = 1;
@@ -4515,22 +4781,23 @@ args.addArg("", "instances", "NxM",
 		if (zones[i].ZoneId < 1000) ++primaryOnlyCount;
 	const size_t instancePrimaryCount = primaryOnlyCount;
 
-	// Ecosystem self-instances (M4a): display clones of the primary zones at footprint offsets.
-	// Same Node pointers → paint_core shares one pristine carrier; weld joins opposite edges.
+	// Ecosystem self-instances (M4a/M12): display clones at --place offsets (rot/mirror).
+	// Same Node pointers → paint_core shares one pristine carrier; weld joins transformed edges.
 	// Multi-edit continent open rejects instances (already gated ecosystem-only).
-	if (g_InstanceCount > 1 && instancePrimaryCount > 0)
+	if (!g_Places.empty() && instancePrimaryCount > 0)
 	{
 		if (g_StartupWorld.Kind == ZPWS::Continent)
 		{
-			fprintf(stderr, "ERROR: --instances is ecosystem-only (not available on continents)\n");
+			fprintf(stderr, "ERROR: --place / --instances is ecosystem-only (not available on continents)\n");
 			return 1;
 		}
 		if (editables.size() > 1)
 		{
-			fprintf(stderr, "ERROR: --instances is single-brick only (not multi-select)\n");
+			fprintf(stderr, "ERROR: --place / --instances is single-brick only (not multi-select)\n");
 			return 1;
 		}
-		appendInstanceZones(zones, instancePrimaryCount, g_InstanceCols, g_InstanceRows, cellSize);
+		appendInstanceZones(zones, instancePrimaryCount, g_Places, cellSize);
+		g_InstanceCount = 1 + (uint)g_Places.size();
 	}
 
 	// Continent neighbors as frozen read-only context (M3b / M6b union ring).
@@ -4635,6 +4902,10 @@ args.addArg("", "instances", "NxM",
 		fprintf(stderr, "ERROR: this mode needs --bank <bank.smallbank>\n");
 		return 1;
 	}
+
+	// Rotated instance display tiles (landscape initial state matches GetTile display space)
+	if (haveBank && !g_Places.empty())
+		applyInstanceDisplayTiles(zones, &bank);
 
 	// Session rebuild params (M11a; used if the board mutates the working set mid-viewer)
 	g_SessionCellSize = cellSize;

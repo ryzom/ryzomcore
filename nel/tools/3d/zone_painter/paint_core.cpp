@@ -9,9 +9,10 @@
 //                                    cross-zone links driven by the P3a weld's bind records)
 //   getBindedEdge                 -> getBindedEdge
 //   GetTile/SetTile               -> getTile/setTile (pristine carrier state + display mirror)
-//   transformDesc/transformInvDesc-> same names (authored-space scene: per-zone Symmetry=false,
-//                                    Rotate=0, so the transform collapses to identity; the
-//                                    symVector consultation is kept for parity)
+//   transformDesc/transformInvDesc-> same names (plugin SetTile/GetTile: per-zone Symmetry/
+//                                    Rotate from EPM_Mesh; GetTile = transformDesc(sym,4-rot),
+//                                    SetTile Max write = transformInvDesc(sym,4-rot); landscape
+//                                    mirror remaps through each shared zone's transform)
 //   selectTile                    -> selectTile (group selection dropped, see header)
 //   GetBorderDesc/FindTransition/
 //   getLayer/PropagateBorder      -> same names (patch-subobject clips and TileTrick dropped)
@@ -670,13 +671,12 @@ void CPaintCore::setTileDesc(uint zone, sint32 tileId, const CTileDescP &desc)
 	++m_StrokeSets;
 }
 
-// transformDesc port. The authored-space scene has Symmetry=false / Rotate=0 for every zone, so
-// this is an intended identity; the full symVector-consulting logic is kept for parity with the
-// plugin (and becomes live if a symmetric display space is ever assembled).
+// transformDesc port (plugin paint.cpp). Live under per-zone Symmetry/Rotate (M12 display
+// instances / land placement Flip/Rot). goofy states come from the per-zone CZoneSymmetrisation.
 void CPaintCore::transformDesc(CTileDescP &desc, bool symmetry, uint rotate, uint zone, sint32 tileId) const
 {
 	rotate &= 3;
-	if (!symmetry && rotate == 0) return; // fast identity (see note above)
+	if (!symmetry && rotate == 0) return; // fast identity
 	uint patch = (uint)(tileId / ZP_NUM_TILE_SEL);
 	uint ttile = (uint)(tileId % ZP_NUM_TILE_SEL);
 	uint v = ttile / ZP_MAX_TILE_IN_PATCH;
@@ -763,11 +763,13 @@ void CPaintCore::transformInvDesc(CTileDescP &desc, bool symmetry, uint rotate, 
 void CPaintCore::getTileIdx(uint zone, sint32 tileId, CTileDescP &desc) const
 {
 	getTileRaw(zone, tileId, desc);
-	// Authored display space: Symmetry=false, Rotate=0
-	transformDesc(desc, false, 0, zone, tileId);
+	// Plugin GetTile: authored → display via transformDesc(sym, 4-rot)
+	const SPaintZoneInput &in = m_Zones[zone].In;
+	transformDesc(desc, in.Symmetry, (4 - in.Rotate) & 3, zone, tileId);
 }
 
 // SetTile port: pristine write + display mirror into every zone sharing the carrier.
+// Plugin-faithful transform assembly (paint.cpp SetTile with EPM_Mesh::Rotate/Symmetry).
 void CPaintCore::setTile(uint zone, sint32 tileId, const CTileDescP &desc,
                          std::vector<SUndoTile> *backupStack, bool undo, bool updateDisplace)
 {
@@ -786,12 +788,17 @@ void CPaintCore::setTile(uint zone, sint32 tileId, const CTileDescP &desc,
 	if (!updateDisplace)
 		maxDesc.setDisplace(oldDesc.getDisplace());
 
-	// Authored write (identity transform in this scene)
+	// Display → authored (plugin: transformInvDesc(sym, 4-rot))
+	const SPaintZoneInput &srcIn = m_Zones[zone].In;
 	CTileDescP authored = maxDesc;
-	transformInvDesc(authored, false, 0, zone, tileId);
+	transformInvDesc(authored, srcIn.Symmetry, (4 - srcIn.Rotate) & 3, zone, tileId);
 	setTileDesc(zone, tileId, authored);
 
-	// Display mirror: all zones sharing this carrier show the same tile record.
+	// Intermediate like plugin copyDesc: undo only source symmetry (rotation left for remap)
+	CTileDescP copyDesc = maxDesc;
+	transformInvDesc(copyDesc, srcIn.Symmetry, 0, zone, tileId);
+
+	// Display mirror: each shared zone gets transformDesc through ITS transform
 	if (m_Landscape)
 	{
 		const std::vector<uint> &shared = m_Carriers[m_Zones[zone].Carrier].Zones;
@@ -802,11 +809,17 @@ void CPaintCore::setTile(uint zone, sint32 tileId, const CTileDescP &desc,
 			int ttile = tileId % ZP_NUM_TILE_SEL;
 			int v = ttile / ZP_MAX_TILE_IN_PATCH;
 			int u = ttile % ZP_MAX_TILE_IN_PATCH;
+			int os = (int)orderS(zi, (uint)patch);
+			// Plugin: under symmetry, landscape U is flipped
+			if (m_Zones[zi].In.Symmetry)
+				u = os - u - 1;
 			std::vector<NL3D::CTileElement> *arr = changeTileArray(zi, (uint)patch);
 			if (!arr) continue;
-			int os = (int)orderS(zi, (uint)patch);
+			// Plugin: transformInvDesc(src.sym, 4-src.rot) then transformDesc(i.sym, 4-i.rot)
+			CTileDescP nelDesc = copyDesc;
+			transformInvDesc(nelDesc, srcIn.Symmetry, (4 - srcIn.Rotate) & 3, zone, tileId);
+			transformDesc(nelDesc, m_Zones[zi].In.Symmetry, (4 - m_Zones[zi].In.Rotate) & 3, zi, tileId);
 			NL3D::CTileElement &te = (*arr)[u + v * os];
-			const CTileDescP &nelDesc = maxDesc; // display == authored here
 			for (int l = 0; l < 3; ++l)
 			{
 				if (l >= nelDesc.getNumLayer())
@@ -2085,16 +2098,20 @@ void CPaintCore::setColorRaw(uint zoneIdx, uint patch, sint32 s, sint32 t, uint3
 	up.Colors[s + t * os] = color;
 	++m_StrokeSets;
 
-	// Display mirror: every zone sharing the carrier shows the same grid
+	// Display mirror: every zone sharing the carrier; S flips under Symmetry (plugin paint_vcolor)
 	if (m_Landscape)
 	{
 		const std::vector<uint> &shared = m_Carriers[m_Zones[zoneIdx].Carrier].Zones;
 		for (size_t i = 0; i < shared.size(); ++i)
 		{
-			std::vector<NL3D::CTileColor> *arr = changeColorArray(shared[i], patch);
+			uint zi = shared[i];
+			std::vector<NL3D::CTileColor> *arr = changeColorArray(zi, patch);
 			if (!arr) continue;
+			sint32 ds = s;
+			if (m_Zones[zi].In.Symmetry)
+				ds = os - s - 1;
 			NLMISC::CRGBA rgba((uint8)((color >> 16) & 0xff), (uint8)((color >> 8) & 0xff), (uint8)(color & 0xff));
-			(*arr)[s + t * os].Color565 = rgba.get565();
+			(*arr)[ds + t * os].Color565 = rgba.get565();
 		}
 	}
 
@@ -3152,8 +3169,7 @@ void CPaintCore::getTile(uint zone, sint32 tileId, CTileDescP &desc) const
 	{
 		if (m_Zones[i].In.ZoneId == zone)
 		{
-			getTileRaw((uint)i, tileId, desc);
-			transformDesc(desc, false, 0, (uint)i, tileId);
+			getTileIdx((uint)i, tileId, desc);
 			return;
 		}
 	}

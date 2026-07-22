@@ -20,15 +20,18 @@
  * copy re-encodes byte-identical (P1), so the paint save path is a proven no-op for a null
  * edit.
  *
- * DISPLAY INSTANCES / SHARED BACKING (ui M4a): carriers are keyed by the leaf or base RPO
+ * DISPLAY INSTANCES / SHARED BACKING (ui M4a/M12): carriers are keyed by the leaf or base RPO
  * POINTER. Multiple SPaintZoneInput entries that resolve to the same pointer (same Node stack
- * — e.g. ecosystem brick self-instances at world offsets) share ONE pristine SRPatchMesh and
- * one SCarrier::Zones membership list. setTile / setColorRaw already fan the live-landscape
- * mirror to every zone in that list; writeBack encodes the carrier once. Ops addressed at any
- * instance zone id therefore mutate the same paint state as the primary (one undo entry path
- * per write; byte-identical save vs painting the primary alone). No separate zoneId→backing
- * alias table is required: pointer keying is the alias. tileDesc mapping and write-target
- * policy are unchanged.
+ * — e.g. ecosystem brick self-instances at world offsets / rotations) share ONE pristine
+ * SRPatchMesh and one SCarrier::Zones membership list. setTile / setColorRaw fan the live-
+ * landscape mirror to every zone in that list (with per-zone transformDesc for tile orients);
+ * writeBack encodes the carrier once. Ops addressed at any instance zone id therefore mutate
+ * the same paint state as the primary. Per-zone Symmetry/Rotate (plugin EPM_Mesh appdata,
+ * land CZoneRegion Flip/Rot) assemble the transformDesc display space: GetTile uses
+ * transformDesc(sym, 4-rot), SetTile uses transformInvDesc(sym, 4-rot) for the Max write and
+ * remaps the landscape mirror through each shared zone's transform (plugin SetTile port).
+ * Color display remaps S under symmetry only (plugin paint_vcolor). tileDesc mapping and
+ * write-target policy are unchanged.
  *
  * tileDesc <-> SRpoTile mapping (plugin nel_patch_lib/nel_patch_mesh.h <-> nelpatch/rpo_data.h,
  * the on-disk v9 record P1 encodes):
@@ -250,6 +253,14 @@ struct SPaintZoneInput
 	const std::vector<NL3D::CPatchInfo> *Patches;       // display patchinfo, world space
 	const PIPELINE::MAX::NELPATCH::SPatchMesh *Pm;      // evaluated topology (edges, patch verts)
 	const PIPELINE::MAX::NELPATCH::SRPatchMesh *EvalRp; // evaluated rp (binds, tile orders)
+	// Display-space transform of this zone (plugin EPM_Mesh::Rotate/Symmetry from
+	// NEL3D_APPDATA_ZONE_ROTATE / _SYMMETRY; land placement CZoneRegion Rot/Flip).
+	// Primary authored bricks are (0, false). Rotated/mirrored self-instances set these
+	// so getTile/setTile assemble transformDesc (ui M12).
+	uint Rotate;   // 0..3, 90° CCW steps
+	bool Symmetry; // mirror (Flip)
+	SPaintZoneInput() : Node(NULL), Frozen(false), ZoneId(0), Patches(NULL), Pm(NULL), EvalRp(NULL),
+	                    Rotate(0), Symmetry(false) { }
 };
 
 // Undo delta: one tile-record or color-vertex change (bounded LIFO of strokes).
