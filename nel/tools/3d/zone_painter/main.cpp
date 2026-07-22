@@ -218,6 +218,9 @@ using namespace MAXMATH;
 // Startup screens A/B/C (own TU — NLGUI + discovery; no patch_eval / SCENELIB).
 #include "startup_ui.h"
 
+// painterscript (ui M23): MaxScript-like Lua over the op layer (own TU, NLGUI-lua only).
+#include "script_api.h"
+
 static bool g_verbose = false;
 // Result of the viewer script pre-pass (propagated as the viewer exit code for scripted gates)
 static int g_ViewerScriptRc = 0;
@@ -601,6 +604,12 @@ static bool loadVarsCfg(const std::string &path, bool required)
 // Bound-key test helpers (0 = unbound). g_ViewerAsync is the viewer's UDriver AsyncListener
 // (set for the duration of runViewer; headless modes never touch it).
 static NLMISC::CEventListenerAsync *g_ViewerAsync = NULL;
+// painterscript (ui M23a): --lua-script path; file-static so runViewer's pre-pass sees
+// it without widening the signature (mirrors scriptPath's flow).
+static std::string g_LuaScriptPath;
+// painterscript pump (ui M23a): while a script pumps the UI, viewer input is locked
+// (paint/nav ignored; ESC requests cancel). Checked by CPaintMouseListener.
+static bool g_ScriptUiLock = false;
 
 static bool zpKeyPushed(TPainterKey action)
 {
@@ -2922,31 +2931,31 @@ static void buildPaintInputs(std::vector<SPaintZone> &zones, std::vector<ZPPAINT
 // Forward: M18b prop write (defined with Prop helpers below).
 static bool zpWriteZoneProp(uint zoneId, const std::string &which, int value, std::string &err);
 
-static int runPaintScript(ZPPAINT::CPaintCore &core, const std::string &path)
+// One canonical script op — the --paint-script vocabulary; painterscript (script_api,
+// ui M23) executes through the SAME function so Lua ops are byte-equivalent to file ops.
+// Blank/comment-only lines return true with *opName empty. Unknown commands set
+// *unknownCmd (runPaintScript aborts the file on those, preserving pre-M23 behavior).
+static bool zpExecScriptOp(ZPPAINT::CPaintCore &core, const std::string &rawLine,
+                           std::string &err, std::string *opName, bool *unknownCmd)
 {
-	std::ifstream ifs(path.c_str());
-	if (!ifs) { fprintf(stderr, "ERROR: cannot open script %s\n", path.c_str()); return 1; }
-	std::string line;
-	int lineNo = 0;
-	int fails = 0;
-	while (std::getline(ifs, line))
+	if (opName) opName->clear();
+	if (unknownCmd) *unknownCmd = false;
+	std::string line = rawLine;
+	std::string::size_type hash = line.find('#');
+	if (hash != std::string::npos) line.erase(hash);
+	std::vector<std::string> tok;
 	{
-		++lineNo;
-		std::string::size_type hash = line.find('#');
-		if (hash != std::string::npos) line.erase(hash);
-		std::vector<std::string> tok;
+		std::string cur;
+		for (size_t i = 0; i <= line.size(); ++i)
 		{
-			std::string cur;
-			for (size_t i = 0; i <= line.size(); ++i)
-			{
-				char c = (i < line.size()) ? line[i] : ' ';
-				if (c == ' ' || c == '\t' || c == '\r') { if (!cur.empty()) { tok.push_back(cur); cur.clear(); } }
-				else cur += c;
-			}
+			char c = (i < line.size()) ? line[i] : ' ';
+			if (c == ' ' || c == '\t' || c == '\r') { if (!cur.empty()) { tok.push_back(cur); cur.clear(); } }
+			else cur += c;
 		}
-		if (tok.empty()) continue;
-		std::string err;
-		bool ok = true;
+	}
+	if (tok.empty()) return true;
+	if (opName) *opName = tok[0];
+	bool ok = true;
 		if ((tok[0] == "tile" || tok[0] == "tile256") && tok.size() >= 6)
 		{
 			uint zone, patch, u, v;
@@ -3153,15 +3162,38 @@ static int runPaintScript(ZPPAINT::CPaintCore &core, const std::string &path)
 			ok = illegal == 0;
 			if (!ok) err = NLMISC::toString("%u illegal seams", illegal);
 		}
-		else
+	else
+	{
+		if (unknownCmd) *unknownCmd = true;
+		err = NLMISC::toString("bad command '%s'", tok[0].c_str());
+		ok = false;
+	}
+	return ok;
+}
+
+static int runPaintScript(ZPPAINT::CPaintCore &core, const std::string &path)
+{
+	std::ifstream ifs(path.c_str());
+	if (!ifs) { fprintf(stderr, "ERROR: cannot open script %s\n", path.c_str()); return 1; }
+	std::string line;
+	int lineNo = 0;
+	int fails = 0;
+	while (std::getline(ifs, line))
+	{
+		++lineNo;
+		std::string err, op;
+		bool unknown = false;
+		bool ok = zpExecScriptOp(core, line, err, &op, &unknown);
+		if (op.empty()) continue;
+		if (unknown)
 		{
-			fprintf(stderr, "ERROR: script line %d: bad command '%s'\n", lineNo, tok[0].c_str());
+			fprintf(stderr, "ERROR: script line %d: %s\n", lineNo, err.c_str());
 			return 1;
 		}
-		if (ok) printf("OK line %d: %s (%u tile writes)\n", lineNo, tok[0].c_str(), core.strokeSetCount());
+		if (ok) printf("OK line %d: %s (%u tile writes)\n", lineNo, op.c_str(), core.strokeSetCount());
 		else
 		{
-			printf("FAIL line %d: %s: %s\n", lineNo, tok[0].c_str(), err.c_str());
+			printf("FAIL line %d: %s: %s\n", lineNo, op.c_str(), err.c_str());
 			++fails;
 		}
 	}
@@ -3309,6 +3341,7 @@ public:
 	virtual void operator()(const NLMISC::CEvent &event)
 	{
 		if (!Core) return;
+		if (g_ScriptUiLock) return; // painterscript pump: input locked (ESC handled by the pump)
 		// Keyboard undo/redo always works; mouse is consumed when over the GUI.
 		if (event == NLMISC::EventKeyDownId)
 		{
@@ -4745,6 +4778,134 @@ static bool zpSaveOverwrite()
 	}
 	g_LastSaveStatus = NLMISC::toString("OK save-all: %u file(s) (%u clean)", saved, skipped);
 	printf("%s\n", g_LastSaveStatus.c_str());
+	return true;
+}
+
+// ---------------------------------------------------------------------------------------------
+// painterscript host (ui M23a): the Lua binding's window into the op layer. All calls
+// route through the SAME functions the keys/UI/--paint-script use (single op layer).
+
+static bool zpScriptExecOp(const std::string &line, std::string &err)
+{
+	if (!g_PaintCtx.Core) { err = "no active paint session"; return false; }
+	std::string op;
+	bool unknown = false;
+	return zpExecScriptOp(*g_PaintCtx.Core, line, err, &op, &unknown);
+}
+
+static void zpScriptZonesInfo(std::vector<ZPSCRIPT::SZoneInfo> &out)
+{
+	out.clear();
+	if (!g_PaintCtx.Zones) return;
+	const std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
+	std::string primaryBase = NLMISC::CFile::getFilenameWithoutExtension(g_PaintCtx.InputPath);
+	for (size_t i = 0; i < zones.size(); ++i)
+	{
+		ZPSCRIPT::SZoneInfo zi;
+		zi.Id = zones[i].ZoneId;
+		zi.Name = zones[i].Name;
+		zi.Frozen = zones[i].Frozen;
+		zi.Editable = !zones[i].Frozen;
+		zi.Dirty = g_PaintCtx.Core ? g_PaintCtx.Core->isZoneDirty(zones[i].ZoneId) : false;
+		// Source file: primary-file zones get the input basename; multi-session files are
+		// tracked per id range in g_EditableFiles.
+		zi.File = primaryBase;
+		for (size_t f = 0; f < g_EditableFiles.size(); ++f)
+		{
+			const std::vector<uint> &ids = g_EditableFiles[f].ZoneIds;
+			for (size_t k = 0; k < ids.size(); ++k)
+				if (ids[k] == zones[i].ZoneId)
+					zi.File = NLMISC::CFile::getFilenameWithoutExtension(g_EditableFiles[f].Path);
+		}
+		out.push_back(zi);
+	}
+}
+
+static bool zpScriptGetZoneProp(uint zoneId, const std::string &which, int &value, std::string &err)
+{
+	const SPaintZone *pz = zpFindPaintZone(zoneId);
+	if (!pz || !pz->Node) { err = NLMISC::toString("no zone %u", zoneId); return false; }
+	SZoneProps p;
+	zpReadZoneProps(const_cast<CNodeImpl *>(pz->Node), p);
+	if (which == "rotate") value = p.Rotate;
+	else if (which == "symmetry") value = p.Symmetry ? 1 : 0;
+	else if (which == "passable") value = p.Passable ? 1 : 0;
+	else if (which == "usebbox") value = p.UseBoundingBox ? 1 : 0;
+	else { err = "unknown property '" + which + "' (rotate|symmetry|passable|usebbox)"; return false; }
+	return true;
+}
+
+// Viewer-only host capabilities (screenshot / pump / cancel) are installed by runViewer.
+static bool (*g_ScriptScreenshotFn)(const std::string &path, std::string &err) = NULL;
+static void (*g_ScriptPumpFn)() = NULL;
+static bool g_ScriptCancel = false;
+static bool zpScriptCancelRequested() { return g_ScriptCancel; }
+
+static ZPSCRIPT::SScriptHost g_ScriptHost;
+
+/** (Re)install the painterscript host for the current capabilities. bridge may be NULL. */
+static void zpInstallScriptHost(ZPUI::SPaintUIBridge *bridgePtr)
+{
+	g_ScriptHost.execOp = zpScriptExecOp;
+	g_ScriptHost.zonesInfo = zpScriptZonesInfo;
+	g_ScriptHost.getZoneProp = zpScriptGetZoneProp;
+	g_ScriptHost.saveTo = zpSaveTo;
+	g_ScriptHost.saveAll = zpSaveOverwrite;
+	g_ScriptHost.screenshot = g_ScriptScreenshotFn;
+	g_ScriptHost.pumpUI = g_ScriptPumpFn;
+	g_ScriptHost.cancelRequested = zpScriptCancelRequested;
+	g_ScriptHost.bridge = bridgePtr;
+	ZPSCRIPT::setHost(&g_ScriptHost);
+}
+
+// painterscript viewer pump (ui M23a): refresh gated at >100ms of processing since the
+// last actual pump so tight script loops cost nothing; input locked except ESC=cancel.
+struct SScriptPumpCtx
+{
+	NL3D::UDriver *Driver;
+	NL3D::UScene *Scene;
+	ZPUI::CEditorUI *Ui;
+	NL3D::CEvent3dMouseListener *Nav;
+	NLMISC::TTime LastPump;
+	SScriptPumpCtx() : Driver(NULL), Scene(NULL), Ui(NULL), Nav(NULL), LastPump(0) { }
+};
+static SScriptPumpCtx g_PumpCtx;
+
+static void zpScriptPumpImpl()
+{
+	if (!g_PumpCtx.Driver || !g_PumpCtx.Scene)
+		return;
+	NLMISC::TTime now = NLMISC::CTime::getLocalTime();
+	if (g_PumpCtx.LastPump != 0 && now - g_PumpCtx.LastPump < 100)
+		return;
+	g_PumpCtx.LastPump = now;
+	g_ScriptUiLock = true;
+	NLMISC::CMatrix navBefore;
+	if (g_PumpCtx.Nav) navBefore = g_PumpCtx.Nav->getViewMatrix();
+	g_PumpCtx.Driver->EventServer.pump();
+	if (g_PumpCtx.Nav) g_PumpCtx.Nav->setMatrix(navBefore); // discard nav during scripts
+	if (g_PumpCtx.Driver->AsyncListener.isKeyPushed(NLMISC::KeyESCAPE))
+		g_ScriptCancel = true;
+	g_PumpCtx.Driver->clearBuffers(NLMISC::CRGBA(90, 90, 90));
+	g_PumpCtx.Scene->render();
+	if (g_PumpCtx.Ui) { g_PumpCtx.Ui->update(); g_PumpCtx.Ui->draw(); }
+	g_PumpCtx.Driver->swapBuffers();
+	g_ScriptUiLock = false;
+}
+
+static bool zpScriptScreenshotImpl(const std::string &path, std::string &err)
+{
+	if (!g_PumpCtx.Driver || !g_PumpCtx.Scene) { err = "screenshot: viewer only"; return false; }
+	g_PumpCtx.Driver->clearBuffers(NLMISC::CRGBA(90, 90, 90));
+	g_PumpCtx.Scene->render();
+	if (g_PumpCtx.Ui) { g_PumpCtx.Ui->update(); g_PumpCtx.Ui->draw(); }
+	g_PumpCtx.Driver->swapBuffers();
+	NLMISC::CBitmap btm;
+	static_cast<NL3D::CDriverUser *>(g_PumpCtx.Driver)->getDriver()->getBuffer(btm);
+	NLMISC::COFile fs;
+	if (!fs.open(path)) { err = "cannot open " + path; return false; }
+	btm.writeTGA(fs, 24);
+	printf("OK lua screenshot: -> %s\n", path.c_str());
 	return true;
 }
 
@@ -6200,6 +6361,17 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 		paintBridge.propToggleUseBBox = zpPropToggleUseBBox;
 		ZPUI::setPaintUIBridge(&paintBridge);
 
+		// painterscript host (ui M23a): viewer capabilities + bridge-backed state
+		g_PumpCtx.Driver = udriver;
+		g_PumpCtx.Scene = uscene;
+		g_PumpCtx.Ui = editorUI;
+		g_PumpCtx.Nav = &mouseListener;
+		g_PumpCtx.LastPump = 0;
+		g_ScriptCancel = false;
+		g_ScriptScreenshotFn = zpScriptScreenshotImpl;
+		g_ScriptPumpFn = zpScriptPumpImpl;
+		zpInstallScriptHost(&paintBridge);
+
 		// M11a/M12c session board bridge (continent working set / ecosystem scratch)
 		ZPUI::SSessionBoardBridge sessionBridge;
 		if (!g_StartupWorld.MaxDir.empty()
@@ -6326,6 +6498,8 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 		g_ViewerScriptRc = 0;
 		if (core && !scriptPath.empty())
 			g_ViewerScriptRc = runPaintScript(*core, scriptPath);
+		if (core && g_ViewerScriptRc == 0 && !g_LuaScriptPath.empty())
+			g_ViewerScriptRc = ZPSCRIPT::runFile(g_LuaScriptPath);
 
 		if (!screenshotPath.empty())
 		{
@@ -7086,6 +7260,8 @@ int main(int argc, char **argv)
 	args.addArg("", "cellsize", "meters", "Ligo cell size for the zone-symmetry state (default 100)");
 	args.addArg("", "snap", "meters", "Ligo snap for the zone-symmetry state (default 1)");
 	args.addArg("", "paint-script", "file", "Scripted paint ops (headless without a display mode)");
+	args.addArg("", "lua-script", "file", "painterscript: Lua over the same op layer (painter.* API; "
+	            "headless or viewer pre-pass; see the wiki painterscript stories)");
 	args.addArg("", "seed", "n", "Random seed for the paint ops (default 1; ops use a cycle counter for base tiles)");
 	args.addArg("", "lock-borders", "", "Lock tiles bordering frozen zones or open edges (plugin lockBorders)");
 	args.addArg("", "brush", "0-2", "Brush size for tile mouse strokes and displace painting (recursion depths 0/4/8)");
@@ -7390,7 +7566,8 @@ args.addArg("", "instances", "NxM",
 		|| args.haveLongArg("dump-rpo")
 		|| args.haveLongArg("dump-bank-xref")
 		|| args.haveLongArg("dump-carrier-blob")
-		|| args.haveLongArg("paint-script");
+		|| args.haveLongArg("paint-script")
+		|| args.haveLongArg("lua-script");
 	if (startupPath && headlessLegacyNeedMax && !args.haveLongArg("startup-auto"))
 	{
 		fprintf(stderr, "ERROR: headless modes need an input .max (legacy path)\n");
@@ -7801,6 +7978,8 @@ args.addArg("", "instances", "NxM",
 	if (args.haveLongArg("seed")) NLMISC::fromString(args.getLongArg("seed")[0], seed);
 	srand(seed);
 	std::string scriptPath = args.haveLongArg("paint-script") ? args.getLongArg("paint-script")[0] : std::string();
+	std::string luaScriptPath = args.haveLongArg("lua-script") ? args.getLongArg("lua-script")[0] : std::string();
+	g_LuaScriptPath = luaScriptPath;
 	std::string savePath = args.haveLongArg("save") ? args.getLongArg("save")[0] : std::string();
 	std::string panelSaveTest = args.haveLongArg("panel-save-test") ? args.getLongArg("panel-save-test")[0] : std::string();
 	if (!panelSaveTest.empty())
@@ -7832,7 +8011,8 @@ args.addArg("", "instances", "NxM",
 	const bool needThumbDisplay = g_CliWantThumbnail && !savePath.empty();
 	bool viewerMode = !nullEdit && !args.haveLongArg("dump-zones") && panelSaveTest.empty()
 		&& (args.haveLongArg("screenshot") || needThumbDisplay
-		    || (scriptPath.empty() && !doDumpRpo && !doDumpXRef && dumpBlobDir.empty()));
+		    || (scriptPath.empty() && luaScriptPath.empty()
+		        && !doDumpRpo && !doDumpXRef && dumpBlobDir.empty()));
 
 	if (nullEdit && !args.haveLongArg("out"))
 	{
@@ -8129,9 +8309,18 @@ args.addArg("", "instances", "NxM",
 		rc = runViewer(zones, bank, &core, lm, screenshotPath, fontPath, scriptPath, savePath,
 		               sharedDriver, sharedEditorUI);
 	}
-	else if (!scriptPath.empty())
+	else if (!scriptPath.empty() || !luaScriptPath.empty())
 	{
-		rc = runPaintScript(core, scriptPath);
+		// Headless scripted painting: paint-script first (when given), then painterscript.
+		// Both run through the SAME zpExecScriptOp op layer.
+		rc = 0;
+		if (!scriptPath.empty())
+			rc = runPaintScript(core, scriptPath);
+		if (rc == 0 && !luaScriptPath.empty())
+		{
+			zpInstallScriptHost(NULL);
+			rc = ZPSCRIPT::runFile(luaScriptPath);
+		}
 	}
 
 	// Tear down the shared startup host after the viewer (viewer does not own it)
