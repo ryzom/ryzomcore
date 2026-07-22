@@ -48,6 +48,7 @@
 #include <nel/gui/db_manager.h>
 #include <nel/gui/event_listener.h>
 #include <nel/gui/group_container.h>
+#include <nel/gui/group_menu.h>
 #include <nel/gui/group_editbox.h>
 #include <nel/gui/interface_group.h>
 #include <nel/gui/interface_link.h>
@@ -348,6 +349,38 @@ public:
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpSeasonNext, "zp_season_next");
+
+/** M14c: open season picker modal listing available seasons (toolbar season button). */
+class CAHZpSeasonMenu : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase *pCaller, const std::string & /* params */)
+	{
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (!b || b->SeasonCount < 1)
+			return;
+		if (b->seasonMenuFill)
+			b->seasonMenuFill(NULL); // bridge shows/hides s0..s3 buttons
+		CWidgetManager::getInstance()->enableModalWindow(pCaller, "ui:zp:season_menu");
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpSeasonMenu, "zp_season_menu");
+
+/** M14c: pick a specific season code from the menu (params = sp|su|au|wi). */
+class CAHZpSeasonSelect : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params)
+	{
+		CWidgetManager::getInstance()->disableModalWindow();
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (!b || !b->seasonSelect)
+			return;
+		if (!params.empty())
+			b->seasonSelect(params);
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpSeasonSelect, "zp_season_select");
 
 // Color / displace panel (M7a) — thin wrappers over bridge (same as keys)
 
@@ -1520,20 +1553,28 @@ void CEditorUI::syncPanelFromBridge()
 		return;
 
 	// Nested under content:body:sec_* (M10d mode-grouped list). Common header/footer
-	// stay at content: / content:body:sec_footer:.
+	// stay at content: / content:body:sec_footer:. Toolbar holds mode/season/undo (M14c).
 	static const char *kSecTile = "ui:zp:painter:content:body:sec_tile";
 	static const char *kSecColor = "ui:zp:painter:content:body:sec_color";
 	static const char *kSecDisp = "ui:zp:painter:content:body:sec_disp";
 	static const char *kSecFooter = "ui:zp:painter:content:body:sec_footer";
 	static const char *kBody = "ui:zp:painter:content:body";
 	static const char *kPainterWin = "ui:zp:painter";
+	static const char *kToolbar = "ui:zp:toolbar";
 
-	// Mode radios (common header)
-	if (CCtrlBaseButton *btn = findButton("ui:zp:painter:content:mode_tile"))
+	// Ensure toolbar is visible once the viewer panel is live
+	if (CInterfaceGroup *tb = findGroupEl(kToolbar))
+	{
+		if (!tb->getActive())
+			tb->setActive(true);
+	}
+
+	// Mode radios on TOOLBAR (M14c); panel radios removed
+	if (CCtrlBaseButton *btn = findButton("ui:zp:toolbar:content:mode_tile"))
 		btn->setPushed(b->Mode == 0);
-	if (CCtrlBaseButton *btn = findButton("ui:zp:painter:content:mode_color"))
+	if (CCtrlBaseButton *btn = findButton("ui:zp:toolbar:content:mode_color"))
 		btn->setPushed(b->Mode == 1);
-	if (CCtrlBaseButton *btn = findButton("ui:zp:painter:content:mode_displace"))
+	if (CCtrlBaseButton *btn = findButton("ui:zp:toolbar:content:mode_displace"))
 		btn->setPushed(b->Mode == 2);
 
 	// ---- M10d: show only the section for the current paint mode ----
@@ -1552,20 +1593,18 @@ void CEditorUI::syncPanelFromBridge()
 	if (CInterfaceGroup *g = findGroupEl(kSecFooter))
 		g->setActive(true);
 	// Force list reflow + resize the painter container to the active content height.
-	// Section heights (XML): tile 118, color 148, disp 80; footer 120; list space 4;
-	// common header ~72; container chrome ~28 → total ≈ 72+sec+4+120+28.
+	// M14c slim: header ~40 (instance+files+Tiles); sec tile 118 / color 148 / disp 80;
+	// footer 72; list space 4; chrome ~28.
 	if (CInterfaceGroup *body = findGroupEl(kBody))
 		body->invalidateCoords();
 	{
-		// Section heights must match ui/main.xml sec_* h attributes.
 		const sint32 secH = tileActive ? 118 : (colorActive ? 148 : 80);
-		const sint32 wantH = 72 + secH + 4 + 120 + 28; // header + sec + gap + footer + chrome
+		const sint32 wantH = 40 + secH + 4 + 72 + 28;
 		if (CInterfaceGroup *win = findGroupEl(kPainterWin))
 		{
-			// Clamp to pop_min/max band declared in XML (220..520)
 			sint32 h = wantH;
-			if (h < 220) h = 220;
-			if (h > 520) h = 520;
+			if (h < 160) h = 160;
+			if (h > 480) h = 480;
 			if (win->getH() != h)
 			{
 				win->setH(h);
@@ -1606,15 +1645,9 @@ void CEditorUI::syncPanelFromBridge()
 		t->setHardText(buf);
 	}
 
-	// Lock borders / undo (footer)
+	// Lock borders (footer)
 	if (CCtrlBaseButton *btn = findButton((std::string(kSecFooter) + ":lock_borders").c_str()))
 		btn->setPushed(b->LockBorders);
-	if (CViewText *t = findText((std::string(kSecFooter) + ":undo_info").c_str()))
-	{
-		char buf[32];
-		snprintf(buf, sizeof(buf), "%u", b->UndoDepth);
-		t->setHardText(buf);
-	}
 
 	// Self-instance indicator (M4b)
 	if (CViewText *t = findText("ui:zp:painter:content:instance_info"))
@@ -1629,21 +1662,19 @@ void CEditorUI::syncPanelFromBridge()
 			t->setHardText("");
 	}
 
-	// Season variant (M6a)
-	if (CViewText *t = findText("ui:zp:painter:content:season_info"))
+	// Season face on TOOLBAR (M14c): shows current season; frozen when <2 seasons
+	if (CCtrlTextButton *btn = dynamic_cast<CCtrlTextButton *>(
+	        CWidgetManager::getInstance()->getElementFromId("ui:zp:toolbar:content:btn_season")))
 	{
-		if (b->SeasonCount == 0)
-			t->setHardText("Season: (none)");
-		else
-		{
-			char buf[64];
-			snprintf(buf, sizeof(buf), "Season: %s",
-			         b->SeasonLabel[0] ? b->SeasonLabel : "auto");
-			t->setHardText(buf);
-		}
+		const char *lab = b->SeasonLabel[0] ? b->SeasonLabel : "auto";
+		// Uppercase face (SPRING / SUMMER / …)
+		std::string up = NLMISC::toUpperAscii(lab);
+		btn->setHardText(up);
+		btn->setFrozen(b->SeasonCount < 1);
 	}
-	if (CCtrlBaseButton *btn = findButton("ui:zp:painter:content:btn_season"))
-		btn->setFrozen(b->SeasonCount < 2);
+	// Toolbar SAVE frozen when save unavailable
+	if (CCtrlBaseButton *btn = findButton("ui:zp:toolbar:content:btn_save"))
+		btn->setFrozen(!b->CanSave);
 
 	// Multi-file dirty indicator (M6b): "N files, M dirty"
 	if (CViewText *t = findText("ui:zp:painter:content:files_info"))
@@ -1661,10 +1692,6 @@ void CEditorUI::syncPanelFromBridge()
 			         b->EditableFileCount, b->DirtyFileCount);
 		t->setHardText(buf);
 	}
-
-	// Save enabled only with --save
-	if (CCtrlBaseButton *btn = findButton((std::string(kSecFooter) + ":btn_save").c_str()))
-		btn->setFrozen(!b->CanSave);
 
 	// Color radius / hardness / opacity (Color section)
 	if (CViewText *t = findText((std::string(kSecColor) + ":radius_info").c_str()))

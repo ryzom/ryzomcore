@@ -263,45 +263,92 @@
 <tree node="folder_browser"></tree>
 
 <!--
-  Painter control panel (M1c + M7a + M10d mode-grouped). Inactive until the viewer starts.
-  Top-right corner keeps the terrain baseline visible in screenshots.
-  Body is a CGroupList: only the section for the current paint mode is active; inactive
-  sections reflow with no posparent gaps. Common header/footer always visible.
-  Container height is resized on mode change in syncPanelFromBridge (M10d).
+  Top toolbar (M14c): horizontal, square text-only buttons, left drag grip.
+  Idiom from ryzom client hands bar (inventory.xml gestionsets L486: movable container,
+  header_active=false, right_button=false, no title bar) + left grip strip (w_box_frame).
+  Groups: BOARD SAVE | UNDO REDO | TILE COLOR DISP | <season>
 -->
-<group type="container" id="painter" w="220" pop_min_w="200" pop_max_w="280" h="340" pop_min_h="220" pop_max_h="520"
+<group type="container" id="toolbar" title="" w="440" h="44" pop_min_w="400" pop_max_w="560" pop_min_h="44" pop_max_h="44"
+	global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
+	header_active="false" right_button="false" open_button="false" openable="false" resizer="false"
+	movable="true" opened="true" active="false" lockable="false" savable="false"
+	x="8" y="592">
+	<!-- Full-height header_closed so CCtrlMover track covers the bar (gestionsets idiom). -->
+	<group id="header_closed" x="0" y="0" h="44" w="430" posref="TL TL" />
+	<group id="header_opened" x="0" y="0" w="0" h="0" posref="TL TL" active="false" />
+	<group id="content" x="0" y="0" posref="TL TL" w="430" h="40">
+		<!-- Left drag grip: slim w_box 9-slice strip -->
+		<group type="frame" id="grip" options="w_box_frame" posref="ML ML" x="4" y="0" w="10" h="28"
+			color="200 200 210 220" global_color="false" display="true" />
+		<!-- BOARD SAVE — use text_button_16 if compact style missing; absolute chain -->
+		<ctrl style="text_button_16" id="btn_board" posparent="grip" posref="MR ML" x="6" y="0" w="40" h="28"
+			onclick_l="zp_toggle_board" params_l="" hardtext="BOARD" />
+		<ctrl style="text_button_16" id="btn_save" posparent="btn_board" posref="MR ML" x="2" y="0" w="36" h="28"
+			onclick_l="zp_save" params_l="" hardtext="SAVE" />
+		<!-- separator -->
+		<view type="bitmap" id="sep1" posparent="btn_save" posref="MR ML" x="4" y="0" w="2" h="20"
+			texture="blank.tga" scale="true" color="140 145 155 200" global_color="false" />
+		<!-- UNDO REDO -->
+		<ctrl style="text_button_16" id="btn_undo" posparent="sep1" posref="MR ML" x="4" y="0" w="36" h="28"
+			onclick_l="zp_undo" params_l="" hardtext="UNDO" />
+		<ctrl style="text_button_16" id="btn_redo" posparent="btn_undo" posref="MR ML" x="2" y="0" w="36" h="28"
+			onclick_l="zp_redo" params_l="" hardtext="REDO" />
+		<!-- separator -->
+		<view type="bitmap" id="sep2" posparent="btn_redo" posref="MR ML" x="4" y="0" w="2" h="20"
+			texture="blank.tga" scale="true" color="140 145 155 200" global_color="false" />
+		<!-- TILE COLOR DISP (mode radios; pushed state synced) -->
+		<ctrl style="text_button_radio" id="mode_tile" posparent="sep2" posref="MR ML" x="4" y="0" w="36" h="28"
+			pushed="true" onclick_l="zp_mode" params_l="0" hardtext="TILE" />
+		<ctrl style="text_button_radio" id="mode_color" posparent="mode_tile" posref="MR ML" x="2" y="0" w="40" h="28"
+			onclick_l="zp_mode" params_l="1" hardtext="COLOR" />
+		<ctrl style="text_button_radio" id="mode_displace" posparent="mode_color" posref="MR ML" x="2" y="0" w="36" h="28"
+			onclick_l="zp_mode" params_l="2" hardtext="DISP" />
+		<!-- separator -->
+		<view type="bitmap" id="sep3" posparent="mode_displace" posref="MR ML" x="4" y="0" w="2" h="20"
+			texture="blank.tga" scale="true" color="140 145 155 200" global_color="false" />
+		<!-- Season face (current season); opens context menu of available seasons -->
+		<ctrl style="text_button_16" id="btn_season" posparent="sep3" posref="MR ML" x="4" y="0" w="72" h="28"
+			onclick_l="zp_season_menu" params_l="" hardtext="SPRING" />
+	</group>
+</group>
+<tree node="toolbar"></tree>
+
+<!-- Season picker modal (M14c): buttons filled/shown at open from discovered seasons. -->
+<group type="modal" id="season_menu" exit_click_out="true" w="160" h="160" options="skin_modal"
+	mouse_pos="true" posref="TL TL" x="200" y="500" active="false">
+	<group id="content" x="0" y="0" posref="TL TL" sizeref="wh" w="0" h="0">
+		<view type="text" id="title" posref="TM TM" x="0" y="-10" color="255 220 140 255" fontsize="11"
+			shadow="true" global_color="false" hardtext="Season" />
+		<ctrl style="text_button_16" id="s0" posparent="title" posref="BM TM" x="0" y="-8" w="120"
+			onclick_l="zp_season_select" params_l="sp" hardtext="SPRING" active="false" />
+		<ctrl style="text_button_16" id="s1" posparent="s0" posref="BL TL" x="0" y="-4" w="120"
+			onclick_l="zp_season_select" params_l="su" hardtext="SUMMER" active="false" />
+		<ctrl style="text_button_16" id="s2" posparent="s1" posref="BL TL" x="0" y="-4" w="120"
+			onclick_l="zp_season_select" params_l="au" hardtext="AUTUMN" active="false" />
+		<ctrl style="text_button_16" id="s3" posparent="s2" posref="BL TL" x="0" y="-4" w="120"
+			onclick_l="zp_season_select" params_l="wi" hardtext="WINTER" active="false" />
+	</group>
+</group>
+
+<!--
+  Painter control panel (M1c + M7a + M10d + M14c slim). Mode/season/undo/board/save
+  live on the top toolbar now. Panel keeps mode-specific sections, LOCK, FILL, TILES.
+  Container height is resized on mode change in syncPanelFromBridge (M10d/M14c).
+-->
+<group type="container" id="painter" w="220" pop_min_w="200" pop_max_w="280" h="280" pop_min_h="160" pop_max_h="480"
 	title="Painter" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
 	title_bar_open="false" open_button="false" right_button="true" lockable="false" openable="false"
-	opened="true" movable="true" active="false" x="572" y="592">
+	opened="true" movable="true" active="false" x="572" y="552">
 	<group id="header_closed" x="0" y="0" h="12" posref="TL TL"></group>
 	<group id="header_opened" x="0" y="0" w="0" h="16" posref="TL TL"></group>
 	<group id="content" x="0" y="0" posref="TL TL" w="0" h="0">
 
-		<!-- ==== Common header (always visible) ==== -->
-		<!-- Instance indicator (M4b; empty when not self-instanced) -->
+		<!-- ==== Slim header (M14c): instance + files + TILES palette only ==== -->
 		<view type="text" id="instance_info" posref="TL TL" x="10" y="-4" fontsize="10" shadow="true"
 			global_color="false" color="120 255 160 255" hardtext="" />
-
-		<!-- Season variant toggle (M6a; frozen when <2 seasons resolve) -->
-		<view type="text" id="season_info" posparent="instance_info" posref="BL TL" x="0" y="-2" fontsize="10" shadow="true"
-			global_color="false" color="255 220 140 255" hardtext="Season: auto" />
-		<ctrl style="text_button_16" id="btn_season" posparent="season_info" posref="MR ML" x="6" y="0"
-			onclick_l="zp_season_next" params_l="" hardtext="Next" />
-
-		<!-- Multi-file dirty indicator (M6b) -->
-		<view type="text" id="files_info" posparent="season_info" posref="BL TL" x="0" y="-1" fontsize="10" shadow="true"
+		<view type="text" id="files_info" posparent="instance_info" posref="BL TL" x="0" y="-2" fontsize="10" shadow="true"
 			global_color="false" color="200 200 210 220" hardtext="1 file" />
-
-		<!-- Mode radio row + Tiles palette (palette covers tilesets AND displace maps) -->
-		<view type="text" id="lbl_mode" posparent="files_info" posref="BL TL" x="0" y="-4" fontsize="10" shadow="true"
-			global_color="false" color="255 255 255 180" hardtext="Mode" />
-		<ctrl style="text_button_radio" id="mode_tile" posparent="lbl_mode" posref="BL TL" x="0" y="-2"
-			pushed="true" onclick_l="zp_mode" params_l="0" hardtext="Tile" />
-		<ctrl style="text_button_radio" id="mode_color" posparent="mode_tile" posref="MR ML" x="4" y="0"
-			onclick_l="zp_mode" params_l="1" hardtext="Color" />
-		<ctrl style="text_button_radio" id="mode_displace" posparent="mode_color" posref="MR ML" x="4" y="0"
-			onclick_l="zp_mode" params_l="2" hardtext="Disp" />
-		<ctrl style="text_button_toggle" id="btn_palette" posparent="mode_displace" posref="MR ML" x="8" y="0"
+		<ctrl style="text_button_toggle" id="btn_palette" posparent="files_info" posref="BL TL" x="0" y="-4"
 			onclick_l="zp_toggle_palette" params_l="" hardtext="Tiles" />
 
 		<!--
@@ -309,7 +356,7 @@
 		  Only one of sec_tile / sec_color / sec_disp is active at a time; sec_footer
 		  is always active. Toggling active reflows without posparent gaps.
 		-->
-		<group type="list" id="body" posparent="mode_tile" posref="BL TL" x="0" y="-6" w="200"
+		<group type="list" id="body" posparent="btn_palette" posref="BL TL" x="0" y="-6" w="200"
 			space="4" maxelements="8" dynamic_display_size="true" addelt="B" align="L">
 
 			<!-- Tile section (ModeTile only): tileset + 256 + brush size + group -->
@@ -410,17 +457,11 @@
 					onclick_l="zp_brush" params_l="+1" hardtext="+" />
 			</group>
 
-			<!-- Footer common: lock / undo / fill / save / board (always visible, last list child) -->
-			<group id="sec_footer" w="200" h="120" child_resize_h="false">
+			<!-- Footer slim (M14c): lock + fill + hint (undo/save/board/mode live on toolbar) -->
+			<group id="sec_footer" w="200" h="72" child_resize_h="false">
 				<ctrl style="text_button_toggle" id="lock_borders" posref="TL TL" x="0" y="-2"
 					onclick_l="zp_lock_borders" params_l="" hardtext="Lock borders" />
-				<ctrl style="text_button_16" id="btn_undo" posparent="lock_borders" posref="BL TL" x="0" y="-6"
-					onclick_l="zp_undo" params_l="" hardtext="Undo" />
-				<ctrl style="text_button_16" id="btn_redo" posparent="btn_undo" posref="MR ML" x="4" y="0"
-					onclick_l="zp_redo" params_l="" hardtext="Redo" />
-				<view type="text" id="undo_info" posparent="btn_redo" posref="MR ML" x="8" y="0" fontsize="10" shadow="true"
-					global_color="false" color="200 200 200 220" hardtext="0" />
-				<ctrl style="text_button_16" id="btn_fill0" posparent="btn_undo" posref="BL TL" x="0" y="-4"
+				<ctrl style="text_button_16" id="btn_fill0" posparent="lock_borders" posref="BL TL" x="0" y="-6"
 					onclick_l="zp_fill" params_l="0" hardtext="Fill" />
 				<ctrl style="text_button_16" id="btn_fill1" posparent="btn_fill0" posref="MR ML" x="4" y="0"
 					onclick_l="zp_fill" params_l="1" hardtext="F1" />
@@ -428,13 +469,8 @@
 					onclick_l="zp_fill" params_l="2" hardtext="F2" />
 				<ctrl style="text_button_16" id="btn_fill3" posparent="btn_fill2" posref="MR ML" x="4" y="0"
 					onclick_l="zp_fill" params_l="3" hardtext="F3" />
-				<ctrl style="text_button_16" id="btn_save" posparent="btn_fill0" posref="BL TL" x="0" y="-8"
-					onclick_l="zp_save" params_l="" hardtext="Save" />
-				<!-- M11a: session board hub (continent; O / ToggleBoard). -->
-				<ctrl style="text_button_16" id="btn_board" posparent="btn_save" posref="MR ML" x="8" y="0"
-					onclick_l="zp_toggle_board" params_l="" hardtext="BOARD" />
-				<view type="text" id="hint" posparent="btn_save" posref="BL TL" x="0" y="-6" fontsize="9" shadow="true"
-					global_color="false" color="255 255 255 140" hardtext="P tiles  O board  Y season  F10  ESC" />
+				<view type="text" id="hint" posparent="btn_fill0" posref="BL TL" x="0" y="-6" fontsize="9" shadow="true"
+					global_color="false" color="255 255 255 140" hardtext="T/C/D mode  O board  Y season  P tiles  F10  ESC" />
 			</group>
 
 		</group>

@@ -197,6 +197,10 @@ using namespace MAXMATH;
 
 // In-engine NLGUI shell (own TU — must not pull patch_eval / SCENELIB into editor_ui.cpp).
 #include "editor_ui.h"
+#include <nel/gui/ctrl_base.h>
+#include <nel/gui/ctrl_base_button.h>
+#include <nel/gui/ctrl_text_button.h>
+#include <nel/gui/widget_manager.h>
 
 // Workspace fingerprint / discovery / startup.cfg (own TU — NLMISC only).
 #include "workspace_discovery.h"
@@ -3497,13 +3501,9 @@ static bool sessionToggleEditable(const std::string &basename, bool saveFirst, b
 	return true;
 }
 
-/** Cycle season preference + live-flush landscape tile textures (paint state untouched). */
-static void zpSeasonNext()
+/** Apply current season preference + live-flush landscape tile textures (paint state untouched). */
+static void zpSeasonApplyFlush()
 {
-	if (!g_PaintCtx.Active || !g_PaintCtx.AvailableSeasons || g_PaintCtx.AvailableSeasons->size() < 2)
-		return;
-	if (!ZPCTX::cycleSeasonPreference(*g_PaintCtx.AvailableSeasons))
-		return;
 	printf("season: %s\n", ZPCTX::seasonPreferenceLabel().c_str());
 	if (!g_PaintCtx.Bank || !g_PaintCtx.Land || !g_PaintCtx.UDriver)
 		return;
@@ -3514,6 +3514,84 @@ static void zpSeasonNext()
 	                                     &g_PaintCtx.Land->Landscape, driver, g_PreloadTiles);
 	// Palette previews follow the season (ui M8): regenerate/invalidate cached thumbs.
 	zpRebuildTilesetPalette();
+}
+
+/** Cycle season preference + live-flush (Y key / SeasonNext). */
+static void zpSeasonNext()
+{
+	if (!g_PaintCtx.Active || !g_PaintCtx.AvailableSeasons || g_PaintCtx.AvailableSeasons->size() < 2)
+		return;
+	if (!ZPCTX::cycleSeasonPreference(*g_PaintCtx.AvailableSeasons))
+		return;
+	zpSeasonApplyFlush();
+}
+
+/** Select a specific season code (toolbar menu, M14c). */
+static void zpSeasonSelect(const std::string &code)
+{
+	if (!g_PaintCtx.Active)
+		return;
+	if (!ZPCTX::setSeasonPreference(code))
+	{
+		fprintf(stderr, "season select: unknown code '%s'\n", code.c_str());
+		return;
+	}
+	// If available list is non-empty, require membership (or empty = auto)
+	if (g_PaintCtx.AvailableSeasons && !g_PaintCtx.AvailableSeasons->empty() && !code.empty())
+	{
+		bool ok = false;
+		for (size_t i = 0; i < g_PaintCtx.AvailableSeasons->size(); ++i)
+			if ((*g_PaintCtx.AvailableSeasons)[i] == code) { ok = true; break; }
+		if (!ok)
+		{
+			fprintf(stderr, "season select: '%s' not available for this bank\n", code.c_str());
+			return;
+		}
+	}
+	zpSeasonApplyFlush();
+}
+
+/** Show season picker buttons for discovered seasons (M14c modal s0..s3). */
+static void zpSeasonMenuFill(void * /*unused*/)
+{
+	static const char *kIds[4] = {
+		"ui:zp:season_menu:content:s0",
+		"ui:zp:season_menu:content:s1",
+		"ui:zp:season_menu:content:s2",
+		"ui:zp:season_menu:content:s3",
+	};
+	for (int i = 0; i < 4; ++i)
+	{
+		NLGUI::CInterfaceElement *el = NLGUI::CWidgetManager::getInstance()->getElementFromId(kIds[i]);
+		if (!el) continue;
+		el->setActive(false);
+	}
+	if (!g_PaintCtx.AvailableSeasons) return;
+	const size_t n = g_PaintCtx.AvailableSeasons->size();
+	for (size_t i = 0; i < n && i < 4; ++i)
+	{
+		const std::string &code = (*g_PaintCtx.AvailableSeasons)[i];
+		std::string lab = code;
+		if (code == "sp") lab = "SPRING";
+		else if (code == "su") lab = "SUMMER";
+		else if (code == "au") lab = "AUTUMN";
+		else if (code == "wi") lab = "WINTER";
+		else lab = NLMISC::toUpperAscii(code);
+		NLGUI::CInterfaceElement *el = NLGUI::CWidgetManager::getInstance()->getElementFromId(kIds[i]);
+		if (!el) continue;
+		el->setActive(true);
+		if (NLGUI::CCtrlTextButton *tb = dynamic_cast<NLGUI::CCtrlTextButton *>(el))
+		{
+			tb->setHardText(lab);
+			// params_l already set in XML to sp/su/au/wi in order — remap if discovery order differs
+		}
+		// Rebind onclick params to actual code
+		if (NLGUI::CCtrlBaseButton *btn = dynamic_cast<NLGUI::CCtrlBaseButton *>(el))
+		{
+			btn->setActionOnLeftClick("zp_season_select");
+			btn->setParamsOnLeftClick(code);
+		}
+	}
 }
 
 // Fill the UI bridge state snapshot (labels / button push state).
@@ -3790,6 +3868,8 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 		paintBridge.saveTo = zpSaveTo;
 		paintBridge.saveOverwrite = zpSaveOverwrite;
 		paintBridge.seasonNext = zpSeasonNext;
+		paintBridge.seasonSelect = zpSeasonSelect;
+		paintBridge.seasonMenuFill = zpSeasonMenuFill;
 		paintBridge.colorRadiusDelta = zpColorRadiusDelta;
 		paintBridge.hardnessDelta = zpHardnessDelta;
 		paintBridge.opacityDelta = zpOpacityDelta;
@@ -4112,6 +4192,16 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 					ZPUI::forceShowInstanceActionForShot(
 						std::string(iaShot) == "1" ? std::string("I:1,0") : std::string(iaShot));
 				}
+				// M14c: open season picker modal for one screenshot frame
+				const char *smShot = getenv("ZONE_PAINTER_SEASON_MENU_SHOT");
+				if (smShot && smShot[0] && smShot[0] != '0')
+				{
+					NLGUI::CInterfaceElement *btn = NLGUI::CWidgetManager::getInstance()->getElementFromId(
+						"ui:zp:toolbar:content:btn_season");
+					NLGUI::CCtrlBase *caller = dynamic_cast<NLGUI::CCtrlBase *>(btn);
+					zpSeasonMenuFill(NULL);
+					NLGUI::CWidgetManager::getInstance()->enableModalWindow(caller, "ui:zp:season_menu");
+				}
 			}
 			// Refresh bridge after season/palette/board env hooks
 			zpFillBridgeState(paintBridge);
@@ -4322,13 +4412,15 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 						const uint tsCount = paintBridge.TileSetCount
 							? paintBridge.TileSetCount : core->tileSetCount();
 						const int tsOneBased = tsCount ? (paintListener.CurTileSet + 1) : 0;
-						textContext.printfAt(0.01f, 0.98f, "[%s] TileSet %d/%u %s  %s  brush %u  group %u  undo %u%s",
+						textContext.printfAt(0.01f, 0.98f, "[%s] TileSet %d/%u %s  %s  brush %u  group %u  undo %u%s  %s",
 						                     modeNames[paintListener.Mode % 3],
 						                     tsOneBased, tsCount, tsName,
 						                     paintListener.Mode256 ? "256" : "128", core->brushSize(),
 						                     core->tileGroup(), core->undoDepth(),
-						                     core->lockBordersOn() ? "  LOCK" : "");
+						                     core->lockBordersOn() ? "  LOCK" : "",
+						                     paintBridge.SeasonLabel[0] ? paintBridge.SeasonLabel : "auto");
 					}
+					textContext.printfAt(0.01f, 0.01f, "T/C/D mode  O board  Y season  P tiles  F10 UI  ESC");
 					if (paintListener.Mode == CPaintMouseListener::ModeColor)
 						textContext.printfAt(0.01f, 0.955f, "color %02x%02x%02x  radius %.1fm  hardness %u  opacity %u  mask %s",
 						                     paintListener.BrushColor.R, paintListener.BrushColor.G, paintListener.BrushColor.B,
@@ -4432,13 +4524,14 @@ int main(int argc, char **argv)
 	                    "pattern after a final '-' (e.g. zonematerial-converted-193_ec) place on the minesweeper\n"
 	                    "board and resolve 8-ring neighbors; unparseable sets fall back to a flat list.\n"
 	                    "Legacy: zone_painter <input.max> --bank <bank> [...] behaves exactly as before.\n"
-	                    "Painter panel (NLGUI): mode Tile/Color/Disp, tile set ±, 256, Tiles palette toggle, brush size 0-2,\n"
-	                    "group, Color section (radius 2-32, hardness/opacity 0-255, color swatch, mask cycle, mask mode),\n"
-	                    "Displace index 0-15, lock borders, undo/redo, fill, season Next (Y), multi-file dirty,\n"
-	                    "Save (interactive modal or --save). Keys and panel share one handler layer.\n"
+	                    "Top toolbar (M14c, 3ds-Max vibe): movable bar with left drag grip (client hands-bar idiom),\n"
+	                    "square text buttons BOARD SAVE | UNDO REDO | TILE COLOR DISP | <season face>. Season opens a\n"
+	                    "context menu of available seasons; mode buttons show pushed state. Keys T/C/D, O, Y, undo/redo\n"
+	                    "still work. Slim Painter panel: tile set ± / 256 / brush / group, Color section, Displace,\n"
+	                    "lock borders, fill, Tiles palette toggle, multi-file dirty. Save modal same as before.\n"
 	                    "Tiles palette (ui M8): second movable window with one thumbnail cell per bank tileset\n"
 	                    "(64px preview from the first resolvable 128 diffuse, name + 1-based index). Click selects\n"
-	                    "through the same absolute handler as digit keys / right-click pick; season Next rebuilds\n"
+	                    "through the same absolute handler as digit keys / right-click pick; season change rebuilds\n"
 	                    "previews. Toggle with P (TogglePalette) or the panel Tiles button.\n"
 	                    "Config files (plugin keys.cfg port, NLMISC::CConfigFile syntax; one file may serve both):\n"
 	                    "  keys cfg (--keys-cfg, else ./zone_painter_keys.cfg): rebinds the plugin-era actions by name,\n"
@@ -4451,10 +4544,10 @@ int main(int argc, char **argv)
 	                    "  Zouille AutomaticLighting GetState ResetPatch.\n"
 	                    "  vars cfg (--vars-cfg, else ./zone_painter_vars.cfg): LightDirection {x,y,z}, LightDiffuse {r,g,b},\n"
 	                    "  LightAmbiant {r,g,b}, LightMultiply, ZoomSpeed (the plugin LoadVarCfg set).\n"
-	                    "  ToggleUI (default F10: show/hide the in-engine NLGUI panel).\n"
+	                    "  ToggleUI (default F10: show/hide the in-engine NLGUI panel + toolbar).\n"
 	                    "  SeasonNext (default Y: cycle landscape season textures among variants that exist for\n"
 	                    "  the open bank — spring/summer/autumn/winter; paint indices/colors/displace untouched;\n"
-	                    "  tileset palette previews re-resolve to the new season).\n"
+	                    "  tileset palette previews re-resolve to the new season; toolbar season face updates).\n"
 	                    "  TogglePalette (default P: show/hide the Tiles thumbnail palette).\n"
 	                    "  ToggleBoard (default O: session board hub — continent working set, or ecosystem\n"
 	                    "    scratch board for brick instances: empty cell places an instance; instance cell\n"

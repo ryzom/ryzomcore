@@ -84,6 +84,10 @@ struct SPaintUIBridge
 	bool (*saveOverwrite)();
 	/** Cycle landscape season textures (ui M6a); no-op when <2 seasons available. */
 	void (*seasonNext)();
+	/** Select a specific season code (sp|su|au|wi); same live-flush path as seasonNext (M14c). */
+	void (*seasonSelect)(const std::string &code);
+	/** Fill a CGroupMenu with available seasons (M14c toolbar menu). Menu is CGroupMenu*. */
+	void (*seasonMenuFill)(void *menu);
 	// Color / displace (ui M7a) — same paths as keyboard Home/End/Ins/Del/S/Q/[ ]
 	/** Color brush radius ± (×1.5 / ÷1.5, clamp 2..32); panel always; keys via brushSizeDelta in Color mode. */
 	void (*colorRadiusDelta)(int d);
@@ -142,7 +146,8 @@ struct SPaintUIBridge
 		  toggleTileSize(NULL),
 		  brushSizeDelta(NULL), groupDelta(NULL), toggleLockBorders(NULL),
 		  undo(NULL), redo(NULL), fill(NULL), save(NULL), saveTo(NULL), saveOverwrite(NULL),
-		  seasonNext(NULL), colorRadiusDelta(NULL), hardnessDelta(NULL), opacityDelta(NULL),
+		  seasonNext(NULL), seasonSelect(NULL), seasonMenuFill(NULL),
+		  colorRadiusDelta(NULL), hardnessDelta(NULL), opacityDelta(NULL),
 		  cycleBrushMask(NULL), toggleMaskMode(NULL), displaceIndexDelta(NULL),
 		  displaceIndexAbs(NULL), togglePalette(NULL), toggleBoard(NULL), setBrushColor(NULL),
 		  HaveCore(false), Mode(0), CurTileSet(0), TileSetCount(0), Mode256(false),
