@@ -4327,6 +4327,13 @@ static void zpDrawZoneOutline(NL3D::IDriver *driver, NL3D::CCamera *camera,
 	const int passes = thick ? 5 : 1;
 	const float ox[5] = { 0.f, 0.0015f, -0.0015f, 0.f, 0.f };
 	const float oy[5] = { 0.f, 0.f, 0.f, 0.0015f, -0.0015f };
+	// M25p4: this is a screen-space overlay (no Z-test, drawn via the driver directly) so it
+	// paints straight over the NLGUI panel/toolbar wherever its projected screen position lands
+	// there, instead of being occluded by it. Cull segments whose endpoints fall under an active
+	// GUI window (same pixel-hit-test the app already uses for wantsMouse()) rather than fight
+	// over draw order against the GUI's own rendering.
+	uint32 winW = 0, winH = 0;
+	driver->getWindowSize(winW, winH);
 	size_t base = 0;
 	uint nDrawn = 0;
 	for (size_t si = 0; si < segs.size(); ++si)
@@ -4343,6 +4350,14 @@ static void zpDrawZoneOutline(NL3D::IDriver *driver, NL3D::CCamera *camera,
 			if ((a.x < -0.2f && b.x < -0.2f) || (a.x > 1.2f && b.x > 1.2f)
 			    || (a.y < -0.2f && b.y < -0.2f) || (a.y > 1.2f && b.y > 1.2f))
 				continue;
+			if (winW && winH)
+			{
+				NLGUI::CWidgetManager *wm = NLGUI::CWidgetManager::getInstance();
+				const sint32 ax = (sint32)(a.x * winW), ay = (sint32)(a.y * winH);
+				const sint32 bx = (sint32)(b.x * winW), by = (sint32)(b.y * winH);
+				if (wm->getWindowUnder(ax, ay) || wm->getWindowUnder(bx, by))
+					continue;
+			}
 			for (int pass = 0; pass < passes; ++pass)
 			{
 				NL3D::CDRU::drawLine(a.x + ox[pass], a.y + oy[pass],
@@ -8337,6 +8352,9 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 			editorUI->update();
 			editorUI->draw();
 			{
+				// M25p4: zpDrawZoneOutline now culls segments that fall under an active GUI
+				// window (see its comment) instead of painting over the just-drawn panel, so
+				// this can stay after the GUI draw as it always was.
 				if (core && paintListener.Mode == CPaintMouseListener::ModeProp)
 				{
 					NLMISC::TTime t0 = NLMISC::CTime::getLocalTime();
@@ -8568,6 +8586,9 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 				editorUI->update();
 				editorUI->draw();
 
+				// M25p4: zpDrawZoneOutline now culls segments that fall under an active GUI window
+				// (see its comment) instead of painting over the just-drawn panel, so this can stay
+				// after the GUI draw as it always was.
 				// Hovered tile outline (paint modes) OR zone boundary outline (Prop mode M18a/d)
 				if (core && paintListener.Mode == CPaintMouseListener::ModeProp)
 				{
