@@ -324,6 +324,12 @@ static uint g_InstanceCount = 1; // 1 + g_Places.size()
 static std::vector<std::string> g_MaskFiles;
 static int g_MaskCycle = 0;
 
+// Prop mode selection (ui M18a): persists across mode switches, visible only in Prop mode,
+// cleared on working-set rebuild (session open/close/place). Hover is transient.
+static bool g_HavePropSelection = false;
+static uint g_SelectedZoneId = 0;
+static std::string g_PropStatusMsg; // click "read-only" / selection name (HUD + panel)
+
 // ---------------------------------------------------------------------------------------------
 // keys.cfg / vars.cfg (plugin paint_ui.cpp LoadKeyCfg/LoadVarCfg port). The plugin read BOTH
 // variable sets from one keys.cfg next to the plugin dll (NLMISC::CConfigFile: the file itself
@@ -350,6 +356,7 @@ enum TPainterKey
 	ZPK_MModeTile,
 	ZPK_MModeColor,
 	ZPK_MModeDisplace,
+	ZPK_MModeProp, // ui M18a: property-edit mode (zone select + outlines)
 	ZPK_ToggleColor,
 	ZPK_SizeUp,
 	ZPK_SizeDown,
@@ -390,6 +397,7 @@ static const char *kPainterKeysName[ZPK_KeyCounter] =
 	"ModeTile",
 	"ModeColor",
 	"ModeDisplace",
+	"ModeProp",
 	"ToggleColor",
 	"SizeUp",
 	"SizeDown",
@@ -430,6 +438,7 @@ static uint g_PainterKeys[ZPK_KeyCounter] =
 	NLMISC::KeyT,         // ModeTile
 	NLMISC::KeyC,         // ModeColor
 	NLMISC::KeyD,         // ModeDisplace
+	NLMISC::KeyR,         // ModeProp (ui M18a; free — T/C/D modes, O board, P palette, Y season)
 	0,                    // ToggleColor (single brush color in this tool)
 	NLMISC::KeyADD,       // SizeUp
 	NLMISC::KeySUBTRACT,  // SizeDown
@@ -3080,13 +3089,19 @@ static bool loadBankFile(const std::string &bankPath, bool bankRecursive,
 	return true;
 }
 
+// Forward decls for Prop mode (M18a) — helpers defined with zpSelectMode below.
+static bool zpZoneIsPropSelectable(uint zoneId);
+static void zpClearPropSelection();
+static const SPaintZone *zpFindPaintZone(uint zoneId);
+
 // The viewer's paint mouse listener (plugin MouseListener port, tile mode only): left button
 // paints through the shared op layer, right button picks the tile set under the cursor,
 // Ctrl+Z / Ctrl+E undo/redo. The edit3d navigation stays on the middle mouse.
+// ModeProp (M18a): left click selects editable zones instead of painting.
 class CPaintMouseListener : public NLMISC::IEventListener
 {
 public:
-	enum TPaintMode { ModeTile = 0, ModeColor, ModeDisplace };
+	enum TPaintMode { ModeTile = 0, ModeColor, ModeDisplace, ModeProp };
 
 	ZPPAINT::CPaintCore *Core;
 	NL3D::CEvent3dMouseListener *Nav;
@@ -3102,7 +3117,7 @@ public:
 	sint32 HoverTile;
 	uint StrokeZone;
 	sint32 StrokeTile;
-	// P3c modes
+	// P3c modes (+ ModeProp M18a)
 	int Mode; // TPaintMode
 	NLMISC::CRGBA BrushColor;
 	float BrushRadius;
@@ -3116,9 +3131,11 @@ public:
 
 	bool guiWantsMouse() const { return EditorUI && EditorUI->wantsMouse(); }
 
-	// One paint action at the current hover (shared by click and drag)
+	// One paint action at the current hover (shared by click and drag). Prop mode never paints.
 	void paintAtHover()
 	{
+		if (Mode == ModeProp)
+			return;
 		std::string err;
 		if (Mode == ModeColor)
 		{
@@ -3147,6 +3164,9 @@ public:
 		sint32 tile;
 		if (Core->pickTile(pos, dir, zone, tile, hit))
 		{
+			// Prop mode: only hover editable (unfrozen primary) zones — no outline on RO/instance.
+			if (Mode == ModeProp && !zpZoneIsPropSelectable(zone))
+				return;
 			HaveHover = true;
 			HoverZone = zone;
 			HoverTile = tile;
@@ -3184,6 +3204,34 @@ public:
 			MouseY = mouse->Y;
 			if (mouse->Button == NLMISC::leftButton)
 			{
+				// Prop mode: click selects (or reports read-only); no paint stroke.
+				if (Mode == ModeProp)
+				{
+					NLMISC::CVector pos, dir, hit;
+					Viewport.getRayWithPoint(MouseX, MouseY, pos, dir, Camera->getMatrix(), Camera->getFrustum());
+					uint zone = 0;
+					sint32 tile = -1;
+					if (Core->pickTile(pos, dir, zone, tile, hit))
+					{
+						if (zpZoneIsPropSelectable(zone))
+						{
+							g_HavePropSelection = true;
+							g_SelectedZoneId = zone;
+							const SPaintZone *pz = zpFindPaintZone(zone);
+							g_PropStatusMsg = pz ? ("selected " + pz->Name) : NLMISC::toString("selected zone %u", zone);
+						}
+						else
+						{
+							g_PropStatusMsg = "read-only";
+						}
+					}
+					else
+					{
+						// Empty click clears selection (modern object-selection feel)
+						zpClearPropSelection();
+					}
+					return;
+				}
 				updateHover();
 				if (HaveHover && !Core->zoneFrozen(HoverZone))
 				{
@@ -3209,7 +3257,9 @@ public:
 			if (mouse->Button == NLMISC::rightButton)
 			{
 				// Pick under the cursor: tile mode = the base layer's set; color mode = the
-				// vertex color; displace mode = the tile's displace index
+				// vertex color; displace mode = the tile's displace index. Prop: no pick.
+				if (Mode == ModeProp)
+					return;
 				updateHover();
 				if (HaveHover)
 				{
@@ -3250,6 +3300,8 @@ public:
 			NLMISC::CEventMouse *mouse = (NLMISC::CEventMouse *)&event;
 			MouseX = mouse->X;
 			MouseY = mouse->Y;
+			if (Mode == ModeProp)
+				return; // hover updated each frame in the main loop
 			if (Pressed && (mouse->Button & NLMISC::leftButton))
 			{
 				updateHover();
@@ -3337,8 +3389,221 @@ static void zpSelectMode(int mode)
 {
 	if (!g_PaintCtx.Active || !g_PaintCtx.Paint) return;
 	if (mode < 0) mode = 0;
-	if (mode > 2) mode = 2;
+	if (mode > 3) mode = 3; // Tile / Color / Displace / Prop (M18a)
 	g_PaintCtx.Paint->Mode = mode;
+}
+
+/** Prop-mode selectable: unfrozen primary (not instance / not RO context). */
+static bool zpZoneIsPropSelectable(uint zoneId)
+{
+	if (zoneId >= kInstanceZoneIdBase)
+		return false;
+	if (!g_PaintCtx.Core)
+		return false;
+	return !g_PaintCtx.Core->zoneFrozen(zoneId);
+}
+
+static void zpClearPropSelection()
+{
+	g_HavePropSelection = false;
+	g_SelectedZoneId = 0;
+	g_PropStatusMsg.clear();
+}
+
+/**
+ * M18a zone outline — 3D boundary-edge polylines (accepted fallback).
+ *
+ * Silhouette feasibility: a true screen-space silhouette would project every tessellated
+ * tile triangle, compute the 2D union of screen edges, and discard occluded / interior
+ * edges each frame (camera-dependent, O(tiles) plus a 2D edge map). On a multi-patch
+ * lacustre brick that cost is interactive in isolation but still multiplies with
+ * selection+hover and is more complex than the visual need. The zone's outer patch edges
+ * (open mesh edges + edges not shared with another patch of the same mesh — i.e. edges
+ * that become cross-zone welds after session assembly) already form the visible mesh
+ * boundary against the grey clear color and against non-same meshes. Tessellated along
+ * the display CBezierPatch and lifted slightly (same idiom as the tile hover quad).
+ * Thin = one CDRU line; thick = three layered lines with small lateral/Z offsets.
+ */
+static void zpCollectZoneBoundaryPolylines(const SPaintZone &pz, uint segsPerEdge,
+                                           std::vector<NLMISC::CVector> &outPts,
+                                           std::vector<uint> &outSegCounts)
+{
+	outPts.clear();
+	outSegCounts.clear();
+	if (pz.Patches.empty() || pz.Ep.Pm.Patches.empty())
+		return;
+	const SPatchMesh &pm = pz.Ep.Pm;
+	if (segsPerEdge < 2)
+		segsPerEdge = 2;
+	const uint nPts = segsPerEdge + 1;
+
+	for (size_t p = 0; p < pm.Patches.size() && p < pz.Patches.size(); ++p)
+	{
+		for (uint e = 0; e < 4; ++e)
+		{
+			const sint32 edgeIdx = pm.Patches[p].Edge[e];
+			bool isBoundary = true;
+			if (edgeIdx >= 0 && (size_t)edgeIdx < pm.Edges.size())
+			{
+				const SPmEdge &edge = pm.Edges[(size_t)edgeIdx];
+				// Shared by two patches of THIS mesh → interior, skip.
+				// Patches.size()==1 (or missing second) → open / outer edge.
+				sint32 other = -1;
+				if (edge.Patches.size() > 0)
+				{
+					if (edge.Patches[0] == (sint32)p)
+					{
+						if (edge.Patches.size() > 1)
+							other = edge.Patches[1];
+					}
+					else
+						other = edge.Patches[0];
+				}
+				if (other >= 0 && (size_t)other < pm.Patches.size())
+					isBoundary = false;
+			}
+			// Also skip intra-mesh bind seams (edge open in PatchMesh but bound via RPO verts).
+			if (isBoundary && !pz.Ep.Rp.Verts.empty() && edgeIdx >= 0)
+			{
+				const SPmPatch &pp = pm.Patches[p];
+				const int v0 = pp.V[e];
+				const int v1 = pp.V[(e + 1) & 3];
+				bool bindSeam = false;
+				if (v0 >= 0 && (size_t)v0 < pz.Ep.Rp.Verts.size() && pz.Ep.Rp.Verts[(size_t)v0].Binded)
+					bindSeam = true;
+				if (v1 >= 0 && (size_t)v1 < pz.Ep.Rp.Verts.size() && pz.Ep.Rp.Verts[(size_t)v1].Binded)
+					bindSeam = true;
+				// Only treat as interior bind if the bind targets another patch of this mesh.
+				if (bindSeam)
+				{
+					// Conservative: if either corner is Binded, the edge is often a bind
+					// half; the paint_core path still uses open edges for true outer
+					// perimeter. Prefer drawing when CPatchInfo BindEdges reports NPatchs==0
+					// (true open / will-be-cross-zone).
+					if (p < pz.Patches.size() && pz.Patches[p].BindEdges[e].NPatchs != 0
+					    && pz.Patches[p].BindEdges[e].ZoneId == (uint16)pz.ZoneId)
+						isBoundary = false;
+				}
+			}
+			if (!isBoundary)
+				continue;
+
+			const NL3D::CBezierPatch &bp = pz.Patches[p].Patch;
+			// Edge param along the bezier: e0 s=0 t:0→1, e1 t=1 s:0→1, e2 s=1 t:1→0, e3 t=0 s:1→0
+			outSegCounts.push_back(nPts);
+			for (uint i = 0; i < nPts; ++i)
+			{
+				const float t = (float)i / (float)segsPerEdge;
+				float s = 0.f, tv = 0.f;
+				switch (e)
+				{
+				case 0: s = 0.f; tv = t; break;
+				case 1: s = t; tv = 1.f; break;
+				case 2: s = 1.f; tv = 1.f - t; break;
+				default: s = 1.f - t; tv = 0.f; break;
+				}
+				outPts.push_back(bp.eval(s, tv));
+			}
+		}
+	}
+}
+
+/**
+ * Draw zone boundary as screen-space polylines (M18a).
+ *
+ * Project each tessellated boundary point through the camera and draw with the 2D
+ * CDRU::drawLine (Z always, viewport-space). Avoids landscape Z-fighting and matrix
+ * clobber after UScene::render / NLGUI — more reliable than 3D unlit lines for this
+ * overlay. Thin = 1px; thick = multi-pass with small screen-space offsets.
+ */
+static void zpDrawZoneOutline(NL3D::IDriver *driver, NL3D::CCamera *camera,
+                              const NL3D::CViewport &viewport,
+                              const SPaintZone &pz, const NLMISC::CRGBA &col, bool thick)
+{
+	if (!driver || !camera)
+		return;
+	std::vector<NLMISC::CVector> pts;
+	std::vector<uint> segs;
+	zpCollectZoneBoundaryPolylines(pz, thick ? 16 : 10, pts, segs);
+	if (pts.empty() || segs.empty())
+	{
+		static bool s_EmptyOnce = false;
+		if (!s_EmptyOnce)
+		{
+			printf("prop-outline: no boundary segs for zone %u '%s' (patches=%u edges=%u)\n",
+			       pz.ZoneId, pz.Name.c_str(), (uint)pz.Patches.size(),
+			       (uint)pz.Ep.Pm.Edges.size());
+			s_EmptyOnce = true;
+		}
+		return;
+	}
+	const NLMISC::CMatrix viewMat = camera->getMatrix().inverted();
+	const NL3D::CFrustum &fr = camera->getFrustum();
+	const float zLift = 0.4f;
+	// Project world pts → NDC [0..1]² (CFrustum::project)
+	std::vector<NLMISC::CVector> proj;
+	proj.resize(pts.size());
+	std::vector<bool> ok(pts.size(), false);
+	for (size_t i = 0; i < pts.size(); ++i)
+	{
+		NLMISC::CVector w = pts[i];
+		w.z += zLift;
+		const NLMISC::CVector eye = viewMat * w;
+		if (eye.y <= fr.Near * 0.5f)
+			continue; // behind / too near
+		proj[i] = fr.project(eye);
+		ok[i] = true;
+	}
+	const int passes = thick ? 5 : 1;
+	// Screen-space pixel offsets (viewport is 0..1 for CDRU 2D lines)
+	const float ox[5] = { 0.f, 0.0015f, -0.0015f, 0.f, 0.f };
+	const float oy[5] = { 0.f, 0.f, 0.f, 0.0015f, -0.0015f };
+	size_t base = 0;
+	uint nDrawn = 0;
+	for (size_t si = 0; si < segs.size(); ++si)
+	{
+		const uint n = segs[si];
+		if (n < 2 || base + n > pts.size())
+			break;
+		for (uint i = 0; i + 1 < n; ++i)
+		{
+			if (!ok[base + i] || !ok[base + i + 1])
+				continue;
+			const NLMISC::CVector &a = proj[base + i];
+			const NLMISC::CVector &b = proj[base + i + 1];
+			// Clip-ish: both ends roughly on screen
+			if ((a.x < -0.2f && b.x < -0.2f) || (a.x > 1.2f && b.x > 1.2f)
+			    || (a.y < -0.2f && b.y < -0.2f) || (a.y > 1.2f && b.y > 1.2f))
+				continue;
+			for (int pass = 0; pass < passes; ++pass)
+			{
+				NL3D::CDRU::drawLine(a.x + ox[pass], a.y + oy[pass],
+				                     b.x + ox[pass], b.y + oy[pass],
+				                     *driver, col, viewport);
+				++nDrawn;
+			}
+		}
+		base += n;
+	}
+	static bool s_CountOnce = false;
+	if (!s_CountOnce)
+	{
+		printf("prop-outline: zone %u '%s' boundary_edges=%u pts=%u drawn=%u thick=%d (screen-space)\n",
+		       pz.ZoneId, pz.Name.c_str(), (uint)segs.size(), (uint)pts.size(),
+		       nDrawn, (int)thick);
+		s_CountOnce = true;
+	}
+}
+
+/** Find SPaintZone by landscape zone id (g_PaintCtx.Zones). */
+static const SPaintZone *zpFindPaintZone(uint zoneId)
+{
+	if (!g_PaintCtx.Zones)
+		return NULL;
+	for (size_t i = 0; i < g_PaintCtx.Zones->size(); ++i)
+		if ((*g_PaintCtx.Zones)[i].ZoneId == zoneId)
+			return &(*g_PaintCtx.Zones)[i];
+	return NULL;
 }
 
 static void zpRebuildTilesetPalette(); // fwd: tileset pick may refresh displace previews
@@ -4028,6 +4293,9 @@ static bool rebuildWorkingSet(std::string &err, uint &outWelds)
 	}
 	std::map<const void *, std::vector<uint8> > originals;
 	g_PaintCtx.Core->stashOriginalBytes(originals);
+
+	// Prop selection is session-local to the zone id set (M18a) — clear on working-set change.
+	zpClearPropSelection();
 
 	// Snapshot previous zone ids for landscape remove
 	std::vector<uint> oldIds;
@@ -5401,6 +5669,42 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 						zpSelectMode(CPaintMouseListener::ModeDisplace);
 					else if (strcmp(shotMode, "tile") == 0 || strcmp(shotMode, "0") == 0)
 						zpSelectMode(CPaintMouseListener::ModeTile);
+					else if (strcmp(shotMode, "prop") == 0 || strcmp(shotMode, "3") == 0)
+						zpSelectMode(CPaintMouseListener::ModeProp);
+				}
+				// Dev-only: ZONE_PAINTER_PROP_SELECT=zoneId forces Prop selection for shots (M18a).
+				// ZONE_PAINTER_PROP_HOVER=zoneId forces hover outline; ZONE_PAINTER_PROP_RO=1
+				// pretends a read-only click status (status line).
+				{
+					const char *psel = getenv("ZONE_PAINTER_PROP_SELECT");
+					if (psel && psel[0] && core)
+					{
+						uint zid = 0;
+						NLMISC::fromString(std::string(psel), zid);
+						if (zpZoneIsPropSelectable(zid))
+						{
+							g_HavePropSelection = true;
+							g_SelectedZoneId = zid;
+							const SPaintZone *pz = zpFindPaintZone(zid);
+							g_PropStatusMsg = pz ? ("selected " + pz->Name)
+							                     : NLMISC::toString("selected zone %u", zid);
+						}
+					}
+					const char *phov = getenv("ZONE_PAINTER_PROP_HOVER");
+					if (phov && phov[0] && core)
+					{
+						uint zid = 0;
+						NLMISC::fromString(std::string(phov), zid);
+						if (zpZoneIsPropSelectable(zid))
+						{
+							paintListener.HaveHover = true;
+							paintListener.HoverZone = zid;
+							paintListener.HoverTile = 0;
+						}
+					}
+					const char *pro = getenv("ZONE_PAINTER_PROP_RO");
+					if (pro && pro[0] && pro[0] != '0')
+						g_PropStatusMsg = "read-only";
 				}
 			}
 			// Dev-only: ZONE_PAINTER_PANEL_ACTION_TEST drives a panel action-handler path once
@@ -5606,6 +5910,55 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 			}
 			// Refresh bridge after season/palette/board env hooks
 			zpFillBridgeState(paintBridge);
+			// Re-render scene then Prop outlines + HUD (shot path previously skipped these —
+			// only the interactive loop drew hover/selection lines).
+			{
+				NLMISC::CMatrix camMat = mouseListener.getViewMatrix();
+				camera->setMatrix(camMat);
+				udriver->clearBuffers(NLMISC::CRGBA(90, 90, 90));
+				uscene->render();
+				if (core && paintListener.Mode == CPaintMouseListener::ModeProp)
+				{
+					NLMISC::TTime t0 = NLMISC::CTime::getLocalTime();
+					if (g_HavePropSelection)
+					{
+						const SPaintZone *sel = zpFindPaintZone(g_SelectedZoneId);
+						if (sel)
+							zpDrawZoneOutline(driver, camera, viewport, *sel, NLMISC::CRGBA(255, 170, 40), true);
+					}
+					if (paintListener.HaveHover
+					    && !(g_HavePropSelection && paintListener.HoverZone == g_SelectedZoneId))
+					{
+						const SPaintZone *hov = zpFindPaintZone(paintListener.HoverZone);
+						if (hov)
+							zpDrawZoneOutline(driver, camera, viewport, *hov, NLMISC::CRGBA(255, 255, 0), false);
+					}
+					const NLMISC::TTime dt = NLMISC::CTime::getLocalTime() - t0;
+					printf("prop-outline: boundary-edge draw ~%u ms (hover+sel) on current working set\n",
+					       (uint)dt);
+				}
+				if (core && hudText)
+				{
+					static const char *modeNames[4] = { "TILE", "COLOR", "DISPLACE", "PROP" };
+					const int mi = paintListener.Mode;
+					const char *mname = modeNames[(mi >= 0 && mi < 4) ? mi : 0];
+					textContext.setColor(NLMISC::CRGBA(255, 255, 255));
+					if (paintListener.Mode == CPaintMouseListener::ModeProp)
+					{
+						textContext.printfAt(0.01f, 0.98f, "[%s] click zone to select  undo %u",
+						                     mname, core->undoDepth());
+						if (!g_PropStatusMsg.empty())
+							textContext.printfAt(0.01f, 0.955f, "%s", g_PropStatusMsg.c_str());
+						else if (g_HavePropSelection)
+							textContext.printfAt(0.01f, 0.955f, "selected zone %u", g_SelectedZoneId);
+						else
+							textContext.printfAt(0.01f, 0.955f, "no selection");
+					}
+					else
+						textContext.printfAt(0.01f, 0.98f, "[%s]", mname);
+					textContext.printfAt(0.01f, 0.01f, "T/C/D/R mode  O board  Y season  P tiles  F10 UI  ESC");
+				}
+			}
 			editorUI->update();
 			editorUI->draw();
 			udriver->swapBuffers();
@@ -5695,6 +6048,8 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 						zpSelectMode(CPaintMouseListener::ModeColor);
 					if (zpKeyPushed(ZPK_MModeDisplace))
 						zpSelectMode(CPaintMouseListener::ModeDisplace);
+					if (zpKeyPushed(ZPK_MModeProp))
+						zpSelectMode(CPaintMouseListener::ModeProp);
 					if (zpKeyPushed(ZPK_SizeUp))
 						zpBrushSizeDelta(+1);
 					if (zpKeyPushed(ZPK_SizeDown))
@@ -5786,8 +6141,37 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 					theLand->Landscape.refineAll(camKey.getPos());
 				}
 
-				// Hovered tile outline (world-space lines after the scene render)
-				if (core && paintListener.HaveHover)
+				// Hovered tile outline (paint modes) OR zone boundary outline (Prop mode M18a)
+				if (core && paintListener.Mode == CPaintMouseListener::ModeProp)
+				{
+					// Timing note (printed once): boundary-edge outline cost on the working set.
+					static bool s_TimedOutline = false;
+					NLMISC::TTime t0 = 0;
+					if (!s_TimedOutline)
+						t0 = NLMISC::CTime::getLocalTime();
+					// Selection thick (white/orange); hover thin yellow — only when not the selection.
+					if (g_HavePropSelection)
+					{
+						const SPaintZone *sel = zpFindPaintZone(g_SelectedZoneId);
+						if (sel)
+							zpDrawZoneOutline(driver, camera, viewport, *sel, NLMISC::CRGBA(255, 170, 40), true);
+					}
+					if (paintListener.HaveHover
+					    && !(g_HavePropSelection && paintListener.HoverZone == g_SelectedZoneId))
+					{
+						const SPaintZone *hov = zpFindPaintZone(paintListener.HoverZone);
+						if (hov)
+							zpDrawZoneOutline(driver, camera, viewport, *hov, NLMISC::CRGBA(255, 255, 0), false);
+					}
+					if (!s_TimedOutline)
+					{
+						const NLMISC::TTime dt = NLMISC::CTime::getLocalTime() - t0;
+						printf("prop-outline: boundary-edge draw ~%u ms (hover+sel) on current working set\n",
+						       (uint)dt);
+						s_TimedOutline = true;
+					}
+				}
+				else if (core && paintListener.HaveHover)
 				{
 					NLMISC::CVector c[4];
 					if (core->tileCorners(paintListener.HoverZone, paintListener.HoverTile, c) == 0)
@@ -5803,7 +6187,7 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 				// HUD text
 				if (core && hudText)
 				{
-					static const char *modeNames[3] = { "TILE", "COLOR", "DISPLACE" };
+					static const char *modeNames[4] = { "TILE", "COLOR", "DISPLACE", "PROP" };
 					textContext.setColor(NLMISC::CRGBA(255, 255, 255));
 					// HUD matches the Painter panel: 1-based set index; name from bridge
 					// (includes diffuse-stem fallback when smallbank set names are empty).
@@ -5813,15 +6197,26 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 						const uint tsCount = paintBridge.TileSetCount
 							? paintBridge.TileSetCount : core->tileSetCount();
 						const int tsOneBased = tsCount ? (paintListener.CurTileSet + 1) : 0;
-						textContext.printfAt(0.01f, 0.98f, "[%s] TileSet %d/%u %s  %s  brush %u  group %u  undo %u%s  %s",
-						                     modeNames[paintListener.Mode % 3],
-						                     tsOneBased, tsCount, tsName,
-						                     paintListener.Mode256 ? "256" : "128", core->brushSize(),
-						                     core->tileGroup(), core->undoDepth(),
-						                     core->lockBordersOn() ? "  LOCK" : "",
-						                     paintBridge.SeasonLabel[0] ? paintBridge.SeasonLabel : "auto");
+						const int mi = paintListener.Mode;
+						const char *mname = modeNames[(mi >= 0 && mi < 4) ? mi : 0];
+						if (paintListener.Mode == CPaintMouseListener::ModeProp)
+						{
+							textContext.printfAt(0.01f, 0.98f, "[%s] click zone to select  undo %u  %s",
+							                     mname, core->undoDepth(),
+							                     paintBridge.SeasonLabel[0] ? paintBridge.SeasonLabel : "auto");
+						}
+						else
+						{
+							textContext.printfAt(0.01f, 0.98f, "[%s] TileSet %d/%u %s  %s  brush %u  group %u  undo %u%s  %s",
+							                     mname,
+							                     tsOneBased, tsCount, tsName,
+							                     paintListener.Mode256 ? "256" : "128", core->brushSize(),
+							                     core->tileGroup(), core->undoDepth(),
+							                     core->lockBordersOn() ? "  LOCK" : "",
+							                     paintBridge.SeasonLabel[0] ? paintBridge.SeasonLabel : "auto");
+						}
 					}
-					textContext.printfAt(0.01f, 0.01f, "T/C/D mode  O board  Y season  P tiles  F10 UI  ESC");
+					textContext.printfAt(0.01f, 0.01f, "T/C/D/R mode  O board  Y season  P tiles  F10 UI  ESC");
 					if (paintListener.Mode == CPaintMouseListener::ModeColor)
 						textContext.printfAt(0.01f, 0.955f, "color %02x%02x%02x  radius %.1fm  hardness %u  opacity %u  mask %s",
 						                     paintListener.BrushColor.R, paintListener.BrushColor.G, paintListener.BrushColor.B,
@@ -5829,15 +6224,31 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 						                     core->brushMaskMode() ? core->brushMaskName().c_str() : "off");
 					else if (paintListener.Mode == CPaintMouseListener::ModeDisplace)
 						textContext.printfAt(0.01f, 0.955f, "displace index %u", paintListener.DisplaceIndex);
+					else if (paintListener.Mode == CPaintMouseListener::ModeProp)
+					{
+						if (!g_PropStatusMsg.empty())
+							textContext.printfAt(0.01f, 0.955f, "%s", g_PropStatusMsg.c_str());
+						else if (g_HavePropSelection)
+							textContext.printfAt(0.01f, 0.955f, "selected zone %u", g_SelectedZoneId);
+						else
+							textContext.printfAt(0.01f, 0.955f, "no selection");
+					}
 					if (g_InstanceCount > 1)
 						textContext.printfAt(0.01f, 0.905f, "INSTANCED x%u  (%ux%u layout; shared paint backing)",
 						                     g_InstanceCount, g_InstanceCols, g_InstanceRows);
-					if (paintListener.HaveHover)
+					if (paintListener.HaveHover && paintListener.Mode != CPaintMouseListener::ModeProp)
 					{
 						sint32 t = paintListener.HoverTile;
 						textContext.printfAt(0.01f, 0.93f, "zone %u patch %d tile (%d,%d)%s",
 						                     paintListener.HoverZone, (int)(t / 256), (int)(t % 256 % 16), (int)(t % 256 / 16),
 						                     core->zoneFrozen(paintListener.HoverZone) ? " FROZEN" : "");
+					}
+					else if (paintListener.HaveHover && paintListener.Mode == CPaintMouseListener::ModeProp)
+					{
+						const SPaintZone *hov = zpFindPaintZone(paintListener.HoverZone);
+						textContext.printfAt(0.01f, 0.93f, "hover zone %u %s",
+						                     paintListener.HoverZone,
+						                     hov ? hov->Name.c_str() : "");
 					}
 					// Brush color swatch
 					if (paintListener.Mode == CPaintMouseListener::ModeColor)
@@ -5926,9 +6337,10 @@ int main(int argc, char **argv)
 	                    "board and resolve 8-ring neighbors; unparseable sets fall back to a flat list.\n"
 	                    "Legacy: zone_painter <input.max> --bank <bank> [...] behaves exactly as before.\n"
 	                    "Top toolbar (M14c, 3ds-Max vibe): movable bar with left drag grip (client hands-bar idiom),\n"
-	                    "square text buttons BOARD SAVE | UNDO REDO | TILE COLOR DISP | <season face>. Season opens a\n"
-	                    "context menu of available seasons; mode buttons show pushed state. Keys T/C/D, O, Y, undo/redo\n"
+	                    "square text buttons BOARD SAVE | UNDO REDO | TILE COLOR DISP PROP | <season face>. Season opens a\n"
+	                    "context menu of available seasons; mode buttons show pushed state. Keys T/C/D/R, O, Y, undo/redo\n"
 	                    "still work. Slim Painter panel: tile set ± / 256 / brush / group, Color section, Displace,\n"
+	                    "Prop mode (M18a: zone select + boundary outlines; property panel M18b),\n"
 	                    "lock borders, fill, Tiles palette toggle, multi-file dirty. Save modal same as before.\n"
 	                    "Tiles palette (ui M8): second movable window with one thumbnail cell per bank tileset\n"
 	                    "(64px preview from the first resolvable 128 diffuse, name + 1-based index). Click selects\n"
@@ -5937,10 +6349,12 @@ int main(int argc, char **argv)
 	                    "Config files (plugin keys.cfg port, NLMISC::CConfigFile syntax; one file may serve both):\n"
 	                    "  keys cfg (--keys-cfg, else ./zone_painter_keys.cfg): rebinds the plugin-era actions by name,\n"
 	                    "  values are NeL TKey codes (the plugin's keys.cfg Key* constant block parses verbatim).\n"
-	                    "  Honored: ModeTile ModeColor ModeDisplace SizeUp SizeDown ToggleTileSize GroupUp GroupDown\n"
+	                    "  Honored: ModeTile ModeColor ModeDisplace ModeProp SizeUp SizeDown ToggleTileSize GroupUp GroupDown\n"
 	                    "  Fill0 Fill1 Fill2 Fill3 HardnessUp HardnessDown OpacityUp OpacityDown SelectColorBrush\n"
 	                    "  ToggleColorBrushMode LockBorders ZoomIn ZoomOut ToggleUI SeasonNext TogglePalette ToggleBoard\n"
-	                    "  (defaults: T C D + - B G V F F6 F7 F8 Home End Insert Delete S Q L, F10, Y, P; zoom unbound).\n"
+	                    "  (defaults: T C D R + - B G V F F6 F7 F8 Home End Insert Delete S Q L, F10, Y, P; zoom unbound).\n"
+	                    "  ModeProp (default R): property-edit mode — hover thin zone outline, click selects thick;\n"
+	                    "  only editable (unfrozen primary) zones; RO/instance click reports read-only (M18a).\n"
 	                    "  Accepted+ignored (no tool equivalent): Select Pick ToggleColor BackgroundColor ToggleArrows\n"
 	                    "  Zouille AutomaticLighting GetState ResetPatch.\n"
 	                    "  vars cfg (--vars-cfg, else ./zone_painter_vars.cfg): LightDirection {x,y,z}, LightDiffuse {r,g,b},\n"

@@ -1569,7 +1569,7 @@ void CEditorUI::syncPanelFromBridge()
 			tb->setActive(true);
 	}
 
-	// Mode radios on TOOLBAR (M14c); panel radios removed
+	// Mode radios on TOOLBAR (M14c + M18a PROP); panel radios removed
 	// M15: buttons live under header_closed (gestionsets closed-bar idiom), not content
 	if (CCtrlBaseButton *btn = findButton("ui:zp:toolbar:header_closed:mode_tile"))
 		btn->setPushed(b->Mode == 0);
@@ -1577,13 +1577,17 @@ void CEditorUI::syncPanelFromBridge()
 		btn->setPushed(b->Mode == 1);
 	if (CCtrlBaseButton *btn = findButton("ui:zp:toolbar:header_closed:mode_displace"))
 		btn->setPushed(b->Mode == 2);
+	if (CCtrlBaseButton *btn = findButton("ui:zp:toolbar:header_closed:mode_prop"))
+		btn->setPushed(b->Mode == 3);
 
-	// ---- M10d: show only the section for the current paint mode ----
+	// ---- M10d/M18a: show only the section for the current paint mode ----
 	// Keys, radios, and terrain-pick side effects all funnel Mode through the bridge,
 	// so this runs for every path. Keyboard shortcuts keep working when widgets hide.
+	// ModeProp (3): no tile/color/disp section yet in M18a (M18b adds sec_prop).
 	const bool tileActive = (b->Mode == 0);
 	const bool colorActive = (b->Mode == 1);
 	const bool displaceActive = (b->Mode == 2);
+	const bool propActive = (b->Mode == 3);
 	if (CInterfaceGroup *g = findGroupEl(kSecTile))
 		g->setActive(tileActive);
 	if (CInterfaceGroup *g = findGroupEl(kSecColor))
@@ -1595,11 +1599,11 @@ void CEditorUI::syncPanelFromBridge()
 		g->setActive(true);
 	// Force list reflow + resize the painter container to the active content height.
 	// M14c slim: header ~40 (instance+files+Tiles); sec tile 118 / color 148 / disp 80;
-	// footer 72; list space 4; chrome ~28.
+	// prop (M18a placeholder) 0; footer 72; list space 4; chrome ~28.
 	if (CInterfaceGroup *body = findGroupEl(kBody))
 		body->invalidateCoords();
 	{
-		const sint32 secH = tileActive ? 118 : (colorActive ? 148 : 80);
+		const sint32 secH = tileActive ? 118 : (colorActive ? 148 : (displaceActive ? 80 : (propActive ? 40 : 80)));
 		const sint32 wantH = 40 + secH + 4 + 72 + 28;
 		if (CInterfaceGroup *win = findGroupEl(kPainterWin))
 		{

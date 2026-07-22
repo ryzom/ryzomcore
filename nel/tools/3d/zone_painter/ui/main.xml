@@ -267,15 +267,15 @@
   Client gestionsets idiom: opened=false, header_active=false, no content stack.
   Height is driven by header_closed only (opened=true stacked HeaderH+content and
   left a tall empty gray band above the buttons). Groups:
-  BOARD SAVE | UNDO REDO | TILE COLOR DISP | <season>
+  BOARD SAVE | UNDO REDO | TILE COLOR DISP PROP | <season>
 -->
-<group type="container" id="toolbar" title="" w="456" h="36" pop_min_w="420" pop_max_w="560" pop_min_h="36" pop_max_h="36"
+<group type="container" id="toolbar" title="" w="500" h="36" pop_min_w="460" pop_max_w="600" pop_min_h="36" pop_max_h="36"
 	global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
 	header_active="false" right_button="false" open_button="false" openable="false" resizer="false"
 	movable="true" opened="false" active="false" lockable="false" savable="false"
 	x="8" y="592">
 	<!-- Full-height header_closed = mover track + button strip (gestionsets idiom). -->
-	<group id="header_closed" x="0" y="0" h="28" w="446" posref="TL TL">
+	<group id="header_closed" x="0" y="0" h="28" w="490" posref="TL TL">
 		<!-- Left drag grip: slim w_box 9-slice, same height as buttons -->
 		<group type="frame" id="grip" options="w_box_frame" posref="ML ML" x="3" y="0" w="8" h="22"
 			color="200 200 210 220" global_color="false" display="true" />
@@ -295,15 +295,17 @@
 		<!-- group separator -->
 		<view type="bitmap" id="sep2" posparent="btn_redo" posref="MR ML" x="4" y="0" w="1" h="18"
 			texture="blank.tga" scale="true" color="120 125 135 220" global_color="false" />
-		<!-- TILE COLOR DISP (mode radios; pushed state synced from C++) -->
+		<!-- TILE COLOR DISP PROP (mode radios; pushed state synced from C++) -->
 		<ctrl style="zp_tb_radio" id="mode_tile" posparent="sep2" posref="MR ML" x="4" y="0" w="40" h="26"
 			pushed="true" onclick_l="zp_mode" params_l="0" hardtext="TILE" />
 		<ctrl style="zp_tb_radio" id="mode_color" posparent="mode_tile" posref="MR ML" x="2" y="0" w="44" h="26"
 			onclick_l="zp_mode" params_l="1" hardtext="COLOR" />
 		<ctrl style="zp_tb_radio" id="mode_displace" posparent="mode_color" posref="MR ML" x="2" y="0" w="40" h="26"
 			onclick_l="zp_mode" params_l="2" hardtext="DISP" />
+		<ctrl style="zp_tb_radio" id="mode_prop" posparent="mode_displace" posref="MR ML" x="2" y="0" w="40" h="26"
+			onclick_l="zp_mode" params_l="3" hardtext="PROP" />
 		<!-- group separator -->
-		<view type="bitmap" id="sep3" posparent="mode_displace" posref="MR ML" x="4" y="0" w="1" h="18"
+		<view type="bitmap" id="sep3" posparent="mode_prop" posref="MR ML" x="4" y="0" w="1" h="18"
 			texture="blank.tga" scale="true" color="120 125 135 220" global_color="false" />
 		<!-- Season face: fixed width so SPRING/SUMMER/AUTUMN/WINTER don't reflow the strip -->
 		<ctrl style="zp_tb_btn" id="btn_season" posparent="sep3" posref="MR ML" x="4" y="0" w="80" h="26"
@@ -470,7 +472,7 @@
 				<ctrl style="text_button_16" id="btn_fill3" posparent="btn_fill2" posref="MR ML" x="4" y="0"
 					onclick_l="zp_fill" params_l="3" hardtext="F3" />
 				<view type="text" id="hint" posparent="btn_fill0" posref="BL TL" x="0" y="-6" fontsize="9" shadow="true"
-					global_color="false" color="255 255 255 140" hardtext="T/C/D mode  O board  Y season  P tiles  F10  ESC" />
+					global_color="false" color="255 255 255 140" hardtext="T/C/D/R mode  O board  Y season  P tiles  F10  ESC" />
 			</group>
 
 		</group>
