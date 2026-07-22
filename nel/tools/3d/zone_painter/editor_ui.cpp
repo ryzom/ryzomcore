@@ -1794,6 +1794,7 @@ void CEditorUI::syncPanelFromBridge()
 	static const char *kPainterWin = "ui:zp:painter";
 	static const char *kToolbar = "ui:zp:toolbar";
 	static const char *kBtnPalette = "ui:zp:roll_tiles:content:btn_palette";
+	static const char *kBtnPaletteDisp = "ui:zp:roll_displace:content:btn_palette_disp";
 
 	// Ensure toolbar is visible once the viewer panel is live
 	if (CInterfaceGroup *tb = findGroupEl(kToolbar))
@@ -2138,6 +2139,8 @@ void CEditorUI::syncPanelFromBridge()
 			s_PaletteVisible = el->getActive();
 	}
 	if (CCtrlBaseButton *btn = findButton(kBtnPalette))
+		btn->setPushed(s_PaletteVisible);
+	if (CCtrlBaseButton *btn = findButton(kBtnPaletteDisp))
 		btn->setPushed(s_PaletteVisible);
 	// Optional: auto-scroll palette toward Displace when that mode is active
 	emphasizeDisplaceSection(displaceActive);

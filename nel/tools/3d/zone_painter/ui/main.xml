@@ -633,7 +633,7 @@
 	active="true" resizer="false" lockable="false">
 	<group id="header_closed" x="0" y="0" h="14" posref="TL TL"></group>
 	<group id="header_opened" x="0" y="0" h="14" posref="TL TL"></group>
-	<group id="content" x="0" y="0" h="36" posref="TL TL">
+	<group id="content" x="0" y="0" h="60" posref="TL TL">
 		<view type="text" id="lbl_displace" posref="TL TL" x="6" y="-4" fontsize="10" shadow="true"
 			global_color="false" color="255 220 140 255" hardtext="Displace" />
 		<view type="text" id="disp_info" posparent="lbl_displace" posref="MR ML" x="6" y="0" fontsize="11" shadow="true"
@@ -642,6 +642,8 @@
 			onclick_l="zp_displace" params_l="-1" hardtext="-" />
 		<ctrl style="text_button_16" id="disp_up" posparent="disp_down" posref="MR ML" x="4" y="0"
 			onclick_l="zp_displace" params_l="+1" hardtext="+" />
+		<ctrl style="text_button_toggle" id="btn_palette_disp" posparent="disp_down" posref="BL TL" x="0" y="-6"
+			onclick_l="zp_toggle_palette" params_l="" hardtext="Palette" />
 	</group>
 </group>
 
@@ -714,11 +716,11 @@
 				<group id="disp_grid" posref="TL TL" x="0" y="-220" w="96" h="92">
 				</group>
 			</group>
+			<!-- Vertical only: the grid is a fixed 3-col width that always fits the
+			     viewport (never reflows on resize), so a horizontal scrollbar would
+			     just be permanent dead chrome. -->
 			<ctrl type="scroll" id="sv" posref="TR TR" x="-2" y="0" w="8" h="400" align="T"
 				tx_topright="w_scroll_l0_t.tga" tx_middle="w_scroll_l0_m.tga" tx_bottomleft="w_scroll_l0_b.tga"
-				target="ui:zp:tiles_palette:content:grid_host:body" />
-			<ctrl type="scroll" id="sh" posref="BL BL" x="0" y="2" w="280" h="8" vertical="false" align="L"
-				tx_topright="w_scroll_r.tga" tx_middle="w_scroll_m.tga" tx_bottomleft="w_scroll_l.tga"
 				target="ui:zp:tiles_palette:content:grid_host:body" />
 		</group>
 	</group>
