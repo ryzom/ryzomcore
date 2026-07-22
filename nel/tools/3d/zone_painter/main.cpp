@@ -15,8 +15,8 @@
 //                  CEvent3dMouseListener edit3d orbiting the landscape bbox center. LEFT MOUSE
 //                  paints the selected tile set, right mouse picks the set under the cursor,
 //                  PgUp/PgDn (and 0-9) select the tile set, B toggles 128/256, Ctrl+Z / Ctrl+E
-//                  undo/redo, ESC or window close exits (--save writes the result). HUD text
-//                  via --font (any .ttf; defaults to a system font when present).
+//                  undo/redo, ESC or window close exits (--save writes the result). Optional
+//                  3D HUD overlay text via --font (any .ttf; off unless given).
 //   --screenshot   same scene setup, render one refined frame, dump the framebuffer to .tga
 //                  and exit (the visual gate; combine with --paint-script for before/after).
 //   --paint-script headless (or viewer pre-pass) scripted painting: one op per line,
@@ -5995,8 +5995,19 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 		// In-engine NLGUI shell (optional: soft-fails if atlas/XML missing; keyboard+HUD remain).
 		// Init before paint/nav listeners so GUI event routing is registered first.
 		// When the startup flow already inited the shell, reuse it (do not re-init).
+		// NLGUI always needs a TTF (panel labels). Default a system font when --font is
+		// absent; the 3D HUD textContext below stays OFF unless --font was explicit (M18e).
 		if (ownsEditorUI)
-			editorUI->init(udriver, fontPath);
+		{
+			std::string uiFont = fontPath;
+			if (uiFont.empty())
+			{
+				const char *sysFont = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
+				if (NLMISC::CFile::fileExists(sysFont))
+					uiFont = sysFont;
+			}
+			editorUI->init(udriver, uiFont);
+		}
 		// Ensure the Painter panel is active for the viewer session (startup screens hide it).
 		editorUI->setVisible(true);
 		ZPUI::startupHideAllScreens();
@@ -6170,7 +6181,11 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 			       haveAmbient ? NLMISC::toString("%u,%u,%u", ambient.R, ambient.G, ambient.B).c_str() : "default (not decoded)");
 		}
 
-		// HUD text (any TrueType through the font manager; silently disabled without a font)
+		// 3D HUD overlay text — ONLY when --font is explicit (M18e).
+		// Pre-M18 clean screenshots had no HUD text; M18a/b defaulted a system TTF into
+		// fontPath so hudText was always on, and M18d's scene→UI→HUD order then made that
+		// text actually visible (and post-UI matrix state could leave it oversized). Panel
+		// status/hints already cover the same info; keep the optional tiny HUD opt-in.
 		NL3D::CFontManager fontManager;
 		NL3D::CTextContext textContext;
 		bool hudText = false;
@@ -6453,14 +6468,26 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 			}
 			// Refresh bridge after season/palette/board env hooks
 			zpFillBridgeState(paintBridge);
-			// Re-render scene, NLGUI panel, then Prop outlines + HUD.
-			// M18d draw order: scene → UI → outlines/HUD. M18a drew outlines/HUD before
-			// UI; 2D CDRU + textContext after landscape left driver state that could make
-			// container chrome blank quads early-out (panel text floated, no solid fill).
-			// UI first restores the solid Painter backdrop; outlines overdraw on top.
+			// M18e capture sequence (restores pre-M18 refine discipline; keeps M18d draw order):
+			//   clear → scene → setRefineMode(false)+refineAll → clear → scene (refined)
+			//   → NLGUI → outlines → optional HUD (--font only)
+			//   → getBuffer (BACK, before swap) → swap.
+			// The early seed refine above may leave the backbuffer refined, but M18a/d's later
+			// clear+re-render without a fresh refineAll produced shredded terrain (fresh M18d
+			// binary verified). Re-run the full refine pair immediately before overlays so the
+			// captured frame is the refined second render. getBuffer before swap so glReadPixels
+			// hits the just-drawn back buffer (default read target).
 			{
 				NLMISC::CMatrix camMat = mouseListener.getViewMatrix();
 				camera->setMatrix(camMat);
+				const NLMISC::CVector camPos = camMat.getPos();
+				// Full refine pair (mode true seed → refineAll → second render). Mode may already
+				// be false from the early seed; re-open progressive mode so refineAll rebuilds.
+				theLand->Landscape.setRefineMode(true);
+				udriver->clearBuffers(NLMISC::CRGBA(90, 90, 90));
+				uscene->render();
+				theLand->Landscape.setRefineMode(false);
+				theLand->Landscape.refineAll(camPos);
 				udriver->clearBuffers(NLMISC::CRGBA(90, 90, 90));
 				uscene->render();
 			}
@@ -6509,9 +6536,10 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 					textContext.printfAt(0.01f, 0.01f, "T/C/D/R mode  O board  Y season  P tiles  F10 UI  ESC");
 				}
 			}
-			udriver->swapBuffers();
+			// Read the just-drawn backbuffer BEFORE swap (glReadPixels default = GL_BACK).
 			NLMISC::CBitmap btm;
 			driver->getBuffer(btm);
+			udriver->swapBuffers();
 			NLMISC::COFile fs;
 			if (!fs.open(screenshotPath))
 			{
@@ -6683,10 +6711,14 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 				camera->setMatrix(camKey);
 				udriver->clearBuffers(NLMISC::CRGBA(90, 90, 90));
 				uscene->render();
+				// First frame: full refine then re-render so the swapped buffer is not the
+				// coarse seed tessellation (M18e — same refine-then-second-render as shot).
 				if (theLand->Landscape.getRefineMode())
 				{
 					theLand->Landscape.setRefineMode(false);
 					theLand->Landscape.refineAll(camKey.getPos());
+					udriver->clearBuffers(NLMISC::CRGBA(90, 90, 90));
+					uscene->render();
 				}
 
 				// M18d: NLGUI after landscape, BEFORE outlines/HUD (solid panel backdrop).
@@ -6965,7 +6997,7 @@ int main(int argc, char **argv)
 	args.addArg("", "dump-bank-xref", "", "Dump the bank's tile -> (set, number, type) xref table to stdout");
 	args.addArg("", "dump-carrier-blob", "dir", "Write each zone's original carrier blob bytes to <dir>/zone<id>.blob");
 	args.addArg("", "screenshot", "out.tga", "Render one frame to a .tga and exit");
-	args.addArg("", "font", "file.ttf", "HUD font for the viewer (default: a system font when present)");
+	args.addArg("", "font", "file.ttf", "Enable 3D HUD overlay text with this TrueType font (off unless given; NLGUI uses a system font either way)");
 	args.addArg("", "verbose", "", "Verbose output");
 	// Test plumbing (thin wrappers over the same selection functions the UI buttons call)
 	args.addArg("", "startup-auto", "workspace/zone[+zone...][?query]",
@@ -7664,13 +7696,9 @@ args.addArg("", "instances", "NxM",
 			return 1;
 		}
 	}
+	// HUD textContext is opt-in via --font only (M18e). Empty fontPath → no 3D HUD overlay.
+	// NLGUI still gets a system TTF inside runViewer / the startup host when --font is absent.
 	std::string fontPath = args.haveLongArg("font") ? args.getLongArg("font")[0] : std::string();
-	if (fontPath.empty())
-	{
-		// Default HUD font: a common system TrueType (HUD text silently off when absent)
-		const char *sysFont = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
-		if (NLMISC::CFile::fileExists(sysFont)) fontPath = sysFont;
-	}
 	bool nullEdit = args.haveLongArg("null-edit");
 	bool doDumpRpo = args.haveLongArg("dump-rpo");
 	bool doDumpXRef = args.haveLongArg("dump-bank-xref");
