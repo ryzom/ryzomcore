@@ -1887,6 +1887,14 @@ void forceShowInstanceActionForShot(const std::string &basename)
 	openInstanceActionPopup(b);
 }
 
+void forceShowEmptyCellForShot(const std::string &basename)
+{
+	std::string b = basename;
+	if (b.empty())
+		b = "E:1,0";
+	openEmptyCellPopup(b);
+}
+
 void refreshSessionBoardStates()
 {
 	if (!s_SessionBoardVisible || !s_Sess.SessionMode)
@@ -2639,16 +2647,16 @@ static void openEmptyCellPopup(const std::string &basename)
 	s_Sess.PendingActionBasename = basename;
 	if (CViewText *t = findText("ui:zp:empty_cell_action:content:title"))
 		t->setHardText("Empty cell");
-	if (CViewText *t = findText("ui:zp:empty_cell_action:content:status"))
-		t->setHardText(basename);
 	// M24c: saved-neighbor hint for this cell → one-click open offers at the top
 	std::string hintName;
 	bool haveHint = false;
 	{
 		char sk = 0;
 		int cx = 0, cy = 0;
-		if (parseScratchBasename(basename, sk, cx, cy) && sk == 'E'
-		    && s_SessionBridge && s_SessionBridge->scratchGetHintAt)
+		const bool parsed = parseScratchBasename(basename, sk, cx, cy);
+		if (CViewText *t = findText("ui:zp:empty_cell_action:content:status"))
+			t->setHardText(parsed ? NLMISC::toString("Cell %d,%d", cx, cy) : basename);
+		if (parsed && sk == 'E' && s_SessionBridge && s_SessionBridge->scratchGetHintAt)
 			haveHint = s_SessionBridge->scratchGetHintAt(cx, cy, hintName);
 	}
 	if (CCtrlTextButton *b = dynamic_cast<CCtrlTextButton *>(CWidgetManager::getInstance()
@@ -2663,6 +2671,24 @@ static void openEmptyCellPopup(const std::string &basename)
 		b->setActive(haveHint);
 		if (haveHint) b->setHardText("Open '" + stripLigoFamilyPrefix(hintName) + "' editable");
 	}
+	// The XML lays out all six rows at fixed offsets from "title" (not chained
+	// sibling-to-sibling) so the two optional hint rows can be skipped without
+	// leaving a dead gap above "Open editable…" when this cell has no saved hint
+	// (the common case). Slide the remaining rows up to close the gap, and shrink
+	// the modal to match so there's no trailing dead space either.
+	static const char *kRowIds[4] = { "btn_editable", "btn_context", "btn_instance", "btn_cancel" };
+	static const sint32 kRowYWithHint[4] = { -112, -144, -176, -212 };
+	static const sint32 kRowYNoHint[4] = { -48, -80, -112, -148 };
+	const sint32 *rowY = haveHint ? kRowYWithHint : kRowYNoHint;
+	for (int i = 0; i < 4; ++i)
+	{
+		std::string id = std::string("ui:zp:empty_cell_action:content:") + kRowIds[i];
+		if (CInterfaceElement *el = CWidgetManager::getInstance()->getElementFromId(id))
+			el->setY(rowY[i]);
+	}
+	if (CInterfaceGroup *modal = dynamic_cast<CInterfaceGroup *>(
+	        CWidgetManager::getInstance()->getElementFromId("ui:zp:empty_cell_action")))
+		modal->setH(haveHint ? 250 : 186);
 	s_Sess.StatusMsg = haveHint ? ("hint:" + hintName) : std::string();
 	CWidgetManager::getInstance()->enableModalWindow(NULL, "ui:zp:empty_cell_action");
 }

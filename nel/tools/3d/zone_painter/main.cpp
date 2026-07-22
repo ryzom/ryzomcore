@@ -8291,6 +8291,13 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 					ZPUI::forceShowInstanceActionForShot(
 						std::string(iaShot) == "1" ? std::string("I:1,0") : std::string(iaShot));
 				}
+				const char *ecShot = getenv("ZONE_PAINTER_EMPTY_CELL_SHOT");
+				if (ecShot && ecShot[0] && ecShot[0] != '0')
+				{
+					ZPUI::setSessionBoardVisible(true);
+					ZPUI::forceShowEmptyCellForShot(
+						std::string(ecShot) == "1" ? std::string("E:1,0") : std::string(ecShot));
+				}
 				// M14c: open season picker modal for one screenshot frame
 				const char *smShot = getenv("ZONE_PAINTER_SEASON_MENU_SHOT");
 				if (smShot && smShot[0] && smShot[0] != '0')

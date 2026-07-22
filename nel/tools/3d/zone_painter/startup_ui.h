@@ -261,6 +261,9 @@ void forceShowCellActionForShot(const std::string &basename = std::string());
 /** Dev/test: open the instance-action popup (ecosystem scratch) for one screenshot frame. */
 void forceShowInstanceActionForShot(const std::string &basename = std::string());
 
+/** Dev/test: open the empty-cell popup (ecosystem scratch) for one screenshot frame. */
+void forceShowEmptyCellForShot(const std::string &basename = std::string());
+
 } // namespace ZPUI
 
 #endif // ZONE_PAINTER_STARTUP_UI_H

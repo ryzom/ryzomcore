@@ -833,18 +833,23 @@
 			shadow="true" global_color="false" hardtext="Empty cell" />
 		<view type="text" id="status" posparent="title" posref="BM TM" x="0" y="-4" color="200 210 220 220"
 			fontsize="10" shadow="true" global_color="false" hardtext="" />
-		<!-- M24c saved-neighbor hint offers (activated + labeled per cell) -->
+		<!-- M24c saved-neighbor hint offers (activated + labeled per cell).
+		     All six rows anchor to "title" (not chained sibling-to-sibling) and are
+		     repositioned from C++ (openEmptyCellPopup) each time the popup opens, so
+		     hiding the hint rows when a cell has no saved hint (the common case)
+		     closes the gap instead of leaving two button-heights of dead space
+		     above "Open editable…" (M25 review finding). -->
 		<ctrl style="text_button_16" id="btn_hint_ro" posref="TM TM" x="0" y="-48" active="false"
 			onclick_l="zp_empty_hint_ro" params_l="" hardtext="Open hint (read-only)" />
-		<ctrl style="text_button_16" id="btn_hint_ed" posparent="btn_hint_ro" posref="BL TL" x="0" y="-6" active="false"
+		<ctrl style="text_button_16" id="btn_hint_ed" posref="TM TM" x="0" y="-80" active="false"
 			onclick_l="zp_empty_hint_ed" params_l="" hardtext="Open hint editable" />
-		<ctrl style="text_button_16" id="btn_editable" posparent="btn_hint_ed" posref="BL TL" x="0" y="-6"
+		<ctrl style="text_button_16" id="btn_editable" posref="TM TM" x="0" y="-112"
 			onclick_l="zp_empty_open_editable" params_l="" hardtext="Open editable…" />
-		<ctrl style="text_button_16" id="btn_context" posparent="btn_editable" posref="BL TL" x="0" y="-6"
+		<ctrl style="text_button_16" id="btn_context" posref="TM TM" x="0" y="-144"
 			onclick_l="zp_empty_place_context" params_l="" hardtext="Open read-only…" />
-		<ctrl style="text_button_16" id="btn_instance" posparent="btn_context" posref="BL TL" x="0" y="-6"
+		<ctrl style="text_button_16" id="btn_instance" posref="TM TM" x="0" y="-176"
 			onclick_l="zp_empty_place_instance" params_l="" hardtext="Place self-instance" />
-		<ctrl style="text_button_16" id="btn_cancel" posparent="btn_instance" posref="BL TL" x="0" y="-10"
+		<ctrl style="text_button_16" id="btn_cancel" posref="TM TM" x="0" y="-212"
 			onclick_l="zp_empty_cancel" params_l="" hardtext="Cancel" />
 	</group>
 </group>
