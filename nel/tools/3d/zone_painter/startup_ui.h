@@ -119,8 +119,9 @@ enum ESessionCellState
 	// Ecosystem scratch (M12c/M16c):
 	CellScratchHome,      ///< open brick home cell (editable fill)
 	CellScratchInstance,  ///< placed instance (distinct tint; label carries R90/M glyphs)
-	CellScratchEmpty,     ///< empty scratch well (quiet)
-	CellScratchContext    ///< read-only context brick at cell (M16c; dim RO tint + name)
+	CellScratchEmpty,     ///< UNLOCKED empty well (edge-adjacent to occupied / hint-named)
+	CellScratchContext,   ///< read-only context brick at cell (M16c; dim RO tint + name)
+	CellScratchLocked     ///< M24d: locked cell — dim, no open menu (drag target only)
 };
 
 /**

@@ -6034,6 +6034,11 @@ static bool scratchGetCellState(const std::string &basename, ZPUI::ESessionCellS
 		out = ZPUI::CellOpenEditable;
 		return true;
 	}
+	if (basename.size() >= 4 && basename[0] == 'L' && basename[1] == ':')
+	{
+		out = ZPUI::CellScratchLocked;
+		return true;
+	}
 	if (basename.size() >= 4 && basename[0] == 'E' && basename[1] == ':')
 	{
 		// Empty unless a place-context or open file occupies this cell

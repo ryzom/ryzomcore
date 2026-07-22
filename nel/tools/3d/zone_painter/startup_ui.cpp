@@ -484,9 +484,9 @@ static bool parseScratchBasename(const std::string &base, char &kind, int &cx, i
 			return false;
 		return true;
 	}
-	if (base.size() >= 4 && base[0] == 'E' && base[1] == ':')
+	if (base.size() >= 4 && (base[0] == 'E' || base[0] == 'L') && base[1] == ':')
 	{
-		kind = 'E';
+		kind = base[0];
 		std::string rest = base.substr(2);
 		std::string::size_type comma = rest.find(',');
 		if (comma == std::string::npos) return false;
@@ -627,9 +627,13 @@ static void applySessionCellState(CInterfaceGroup *cell, const std::string &base
 		setBoardCellFillRGBA(cell, NLMISC::CRGBA(40, 90, 100, 200), NLMISC::CRGBA(50, 110, 120, 220));
 		break;
 	case CellScratchEmpty:
-		// M24d: open placeable slot — clearly lighter than the board backdrop (the old
-		// near-transparent tint made empty wells invisible)
-		setBoardCellFillRGBA(cell, NLMISC::CRGBA(82, 90, 100, 255), NLMISC::CRGBA(108, 118, 130, 255));
+		// M24d: UNLOCKED slot (edge-adjacent to occupied, or hint-named) — clearly
+		// lighter than the backdrop and the locked cells
+		setBoardCellFillRGBA(cell, NLMISC::CRGBA(96, 108, 122, 255), NLMISC::CRGBA(126, 140, 156, 255));
+		break;
+	case CellScratchLocked:
+		// M24d: locked cell — dim/inert (no open menu; still a drag-drop target)
+		setBoardCellFillRGBA(cell, NLMISC::CRGBA(46, 49, 54, 255), NLMISC::CRGBA(56, 60, 66, 255));
 		break;
 	case CellScratchContext:
 		// Read-only context brick (M16c) — same dim RO tint as continent RO
@@ -705,8 +709,27 @@ static void applySessionCellState(CInterfaceGroup *cell, const std::string &base
 				t->setHardText(lab);
 			}
 		}
-		else if (st == CellScratchEmpty)
+		else if (st == CellScratchLocked)
 			t->setHardText("");
+		else if (st == CellScratchEmpty)
+		{
+			// M24d: unlocked well named by a saved hint shows the neighbor's short name
+			// (dim) so the remembered layout is visible before opening anything
+			std::string hintName;
+			int hx = 0, hy = 0;
+			if (parseScratchBasename(basename, sk, hx, hy) && sk == 'E'
+			    && s_SessionBridge && s_SessionBridge->scratchGetHintAt
+			    && s_SessionBridge->scratchGetHintAt(hx, hy, hintName))
+			{
+				setBoardCellLabel(t, stripLigoFamilyPrefix(hintName));
+				t->setColor(NLMISC::CRGBA(180, 190, 200, 150));
+			}
+			else
+			{
+				t->setHardText("");
+				t->setColor(NLMISC::CRGBA(255, 255, 255, 255));
+			}
+		}
 		else if (st == CellScratchContext)
 		{
 			// Basename form C:cx,cy:brickname — label the brick (short)
@@ -1296,6 +1319,8 @@ static void applyZoneSelection(int idx)
 				std::string err;
 				if (sk == 'H')
 					return; // home: no action
+				if (sk == 'L')
+					return; // M24d locked cell: no menu (drag target only)
 				// Empty: popup Place instance / Place context (M16c)
 				if (sk == 'E')
 				{
@@ -1936,6 +1961,51 @@ static bool scratchHomeMaskOccupied(int cx, int cy, int fw, int fh)
 	return (*s_SessionBridge->FootprintMask)[(size_t)(cx + cy * fw)];
 }
 
+/** Coded basename when (cx,cy) is OCCUPIED (home/open file/instance/context); else empty. */
+static std::string scratchOccupiedCellName(int cx, int cy, int fw, int fh)
+{
+	// Home multi-cell block — only MASKED cells (M17)
+	if (scratchHomeMaskOccupied(cx, cy, fw, fh))
+		return NLMISC::toString("H:%d,%d", cx, cy);
+	// M24a open-file block (editable or demoted RO) placed on the board
+	int fox = 0, foy = 0;
+	std::string fname;
+	bool fedit = true;
+	if (s_SessionBridge && s_SessionBridge->scratchGetEditableAt
+	    && s_SessionBridge->scratchGetEditableAt(cx, cy, fox, foy, fname, fedit))
+	{
+		if (cx == fox && cy == foy)
+			return NLMISC::toString("F:%d,%d:%s", fox, foy, fname.c_str());
+		return NLMISC::toString("F:%d,%d@%d,%d:%s", fox, foy, cx, cy, fname.c_str());
+	}
+	if (s_SessionBridge && s_SessionBridge->scratchGetInstanceOrigin)
+	{
+		int ox = 0, oy = 0;
+		uint rot = 0;
+		bool mir = false;
+		if (s_SessionBridge->scratchGetInstanceOrigin(cx, cy, ox, oy, rot, mir))
+		{
+			// Origin cell gets "I:ox,oy" (label); other block cells get "@cx,cy" (tint only)
+			if (cx == ox && cy == oy)
+				return NLMISC::toString("I:%d,%d", ox, oy);
+			return NLMISC::toString("I:%d,%d@%d,%d", ox, oy, cx, cy);
+		}
+	}
+	else if (s_SessionBridge && s_SessionBridge->scratchGetInstance)
+	{
+		uint rot = 0;
+		bool mir = false;
+		if (s_SessionBridge->scratchGetInstance(cx, cy, rot, mir))
+			return NLMISC::toString("I:%d,%d", cx, cy);
+	}
+	// M16c context brick at this cell?
+	std::string cname;
+	if (s_SessionBridge && s_SessionBridge->scratchGetContext
+	    && s_SessionBridge->scratchGetContext(cx, cy, cname))
+		return NLMISC::toString("C:%d,%d:%s", cx, cy, cname.c_str());
+	return std::string();
+}
+
 static void populateScratchBoard()
 {
 	const int kCell = 52;
@@ -2016,72 +2086,49 @@ static void populateScratchBoard()
 	for (int cx = minC; cx <= maxC; ++cx)
 	{
 		ZPWS::SZoneEntry z;
-		int fox = 0, foy = 0;
-		std::string fname;
-		bool fedit = true;
-		// Home multi-cell block — only MASKED cells (M17)
-		if (scratchHomeMaskOccupied(cx, cy, fw, fh))
-			z.Basename = NLMISC::toString("H:%d,%d", cx, cy);
-		// M24a open-file block (editable or demoted RO) placed on the board
-		else if (s_SessionBridge && s_SessionBridge->scratchGetEditableAt
-		         && s_SessionBridge->scratchGetEditableAt(cx, cy, fox, foy, fname, fedit))
-		{
-			if (cx == fox && cy == foy)
-				z.Basename = NLMISC::toString("F:%d,%d:%s", fox, foy, fname.c_str());
-			else
-				z.Basename = NLMISC::toString("F:%d,%d@%d,%d:%s", fox, foy, cx, cy, fname.c_str());
-		}
-		else if (s_SessionBridge && s_SessionBridge->scratchGetInstanceOrigin)
-		{
-			int ox = 0, oy = 0;
-			uint rot = 0;
-			bool mir = false;
-			if (s_SessionBridge->scratchGetInstanceOrigin(cx, cy, ox, oy, rot, mir))
-			{
-				// Origin cell gets "I:ox,oy" (label); other block cells get "@cx,cy" (tint only)
-				if (cx == ox && cy == oy)
-					z.Basename = NLMISC::toString("I:%d,%d", ox, oy);
-				else
-					z.Basename = NLMISC::toString("I:%d,%d@%d,%d", ox, oy, cx, cy);
-			}
-			else
-			{
-				// M16c context brick at this cell?
-				std::string cname;
-				if (s_SessionBridge->scratchGetContext
-				    && s_SessionBridge->scratchGetContext(cx, cy, cname))
-					z.Basename = NLMISC::toString("C:%d,%d:%s", cx, cy, cname.c_str());
-				else
-					z.Basename = NLMISC::toString("E:%d,%d", cx, cy);
-			}
-		}
-		else if (s_SessionBridge && s_SessionBridge->scratchGetInstance)
-		{
-			uint rot = 0;
-			bool mir = false;
-			if (s_SessionBridge->scratchGetInstance(cx, cy, rot, mir))
-				z.Basename = NLMISC::toString("I:%d,%d", cx, cy);
-			else
-			{
-				std::string cname;
-				if (s_SessionBridge->scratchGetContext
-				    && s_SessionBridge->scratchGetContext(cx, cy, cname))
-					z.Basename = NLMISC::toString("C:%d,%d:%s", cx, cy, cname.c_str());
-				else
-					z.Basename = NLMISC::toString("E:%d,%d", cx, cy);
-			}
-		}
-		else
-		{
-			std::string cname;
-			if (s_SessionBridge && s_SessionBridge->scratchGetContext
-			    && s_SessionBridge->scratchGetContext(cx, cy, cname))
-				z.Basename = NLMISC::toString("C:%d,%d:%s", cx, cy, cname.c_str());
-			else
-				z.Basename = NLMISC::toString("E:%d,%d", cx, cy);
-		}
+		z.Basename = scratchOccupiedCellName(cx, cy, fw, fh);
 		used[std::make_pair(cy, cx)] = (int)s_Sess.Zones.size();
 		s_Sess.Zones.push_back(z);
+	}
+
+	// M24d unlock model (the user story: placing a block UNLOCKS its hor/ver neighbors):
+	// empty cells edge-adjacent to any occupied cell — or named by a saved-neighbor hint —
+	// are open wells ("E:"); every other empty cell renders LOCKED ("L:", dim, no menu,
+	// still a drag target). Diagonal contact alone does not unlock (ligo border rule).
+	// Occupancy snapshot FIRST — pass 2 rewrites empties to E:/L:, and testing rewritten
+	// neighbors would cascade the unlock across the whole board.
+	std::set<std::pair<int, int> > occ;
+	for (int cy = minR; cy <= maxR; ++cy)
+	for (int cx = minC; cx <= maxC; ++cx)
+	{
+		std::map<std::pair<int, int>, int>::iterator it = used.find(std::make_pair(cy, cx));
+		if (it != used.end() && !s_Sess.Zones[(size_t)it->second].Basename.empty())
+			occ.insert(std::make_pair(cy, cx));
+	}
+	for (int cy = minR; cy <= maxR; ++cy)
+	for (int cx = minC; cx <= maxC; ++cx)
+	{
+		std::map<std::pair<int, int>, int>::iterator it = used.find(std::make_pair(cy, cx));
+		if (it == used.end()) continue;
+		ZPWS::SZoneEntry &z = s_Sess.Zones[(size_t)it->second];
+		if (!z.Basename.empty()) continue; // occupied
+		bool unlocked = false;
+		static const int kAdj[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+		for (int a = 0; a < 4 && !unlocked; ++a)
+		{
+			const int nx = cx + kAdj[a][0], ny = cy + kAdj[a][1];
+			if (occ.count(std::make_pair(ny, nx)))
+				unlocked = true;
+			else if ((nx < minC || nx > maxC || ny < minR || ny > maxR)
+			         && !scratchOccupiedCellName(nx, ny, fw, fh).empty())
+				unlocked = true; // occupied just outside the window bounds
+		}
+		if (!unlocked && s_SessionBridge && s_SessionBridge->scratchGetHintAt)
+		{
+			std::string hintName;
+			unlocked = s_SessionBridge->scratchGetHintAt(cx, cy, hintName);
+		}
+		z.Basename = NLMISC::toString(unlocked ? "E:%d,%d" : "L:%d,%d", cx, cy);
 	}
 
 	const int nRows = maxR - minR + 1;
@@ -2145,9 +2192,10 @@ static void populateScratchBoard()
 		if (CCtrlButton *btn = dynamic_cast<CCtrlButton *>(cell->getCtrl("btn")))
 		{
 			btn->setScale(true);
-			// M24d board legibility: EMPTY wells render inset so the backdrop shows as
-			// grid lines between open slots; occupied blocks stay full-size contiguous.
-			const sint32 inset = (st == CellScratchEmpty) ? kCell - 6 : kCell;
+			// M24d board legibility: EMPTY/LOCKED wells render inset so the backdrop
+			// shows as grid lines; occupied blocks stay full-size contiguous.
+			const sint32 inset = (st == CellScratchEmpty || st == CellScratchLocked)
+			                         ? kCell - 6 : kCell;
 			btn->setW(inset);
 			btn->setH(inset);
 		}
