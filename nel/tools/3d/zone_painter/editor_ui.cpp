@@ -45,6 +45,7 @@
 #include <nel/gui/action_handler.h>
 #include <nel/gui/ctrl_base_button.h>
 #include <nel/gui/ctrl_text_button.h>
+#include <nel/gui/db_manager.h>
 #include <nel/gui/event_listener.h>
 #include <nel/gui/group_container.h>
 #include <nel/gui/group_editbox.h>
@@ -430,6 +431,87 @@ public:
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpDisplaceAbs, "zp_displace_abs");
+
+// Color picker (ui M9b)
+
+static const char *kColorPickerWinId = "ui:zp:color_picker";
+static bool s_ColorPickerVisible = false;
+
+static void syncColorDbFromBridge()
+{
+	SPaintUIBridge *b = getPaintUIBridge();
+	if (!b) return;
+	if (CCDBNodeLeaf *n = CDBManager::getInstance()->getDbProp("UI:TEMP:COL:R", false))
+		n->setValue32((sint32)b->ColorR);
+	if (CCDBNodeLeaf *n = CDBManager::getInstance()->getDbProp("UI:TEMP:COL:G", false))
+		n->setValue32((sint32)b->ColorG);
+	if (CCDBNodeLeaf *n = CDBManager::getInstance()->getDbProp("UI:TEMP:COL:B", false))
+		n->setValue32((sint32)b->ColorB);
+	if (CCDBNodeLeaf *n = CDBManager::getInstance()->getDbProp("UI:TEMP:COL:A", false))
+		n->setValue32(255);
+	CInterfaceLink::updateAllLinks();
+}
+
+bool isColorPickerVisible()
+{
+	return s_ColorPickerVisible;
+}
+
+void setColorPickerVisible(bool visible)
+{
+	s_ColorPickerVisible = visible;
+	if (CGroupContainer *c = dynamic_cast<CGroupContainer *>(
+	        CWidgetManager::getInstance()->getElementFromId(kColorPickerWinId)))
+		c->setActive(visible);
+	else if (CInterfaceGroup *g = dynamic_cast<CInterfaceGroup *>(
+	             CWidgetManager::getInstance()->getElementFromId(kColorPickerWinId)))
+		g->setActive(visible);
+	if (visible)
+		syncColorDbFromBridge();
+}
+
+void toggleColorPicker()
+{
+	setColorPickerVisible(!s_ColorPickerVisible);
+}
+
+void forceShowColorPickerForShot()
+{
+	setColorPickerVisible(true);
+}
+
+class CAHZpOpenColorPicker : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		// Toggle: second click on the swatch closes it
+		toggleColorPicker();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpOpenColorPicker, "zp_open_color_picker");
+
+class CAHZpColorPicked : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (!b || !b->setBrushColor) return;
+		sint32 r = 255, g = 255, bl = 255;
+		if (CCDBNodeLeaf *n = CDBManager::getInstance()->getDbProp("UI:TEMP:COL:R", false))
+			r = n->getValue32();
+		if (CCDBNodeLeaf *n = CDBManager::getInstance()->getDbProp("UI:TEMP:COL:G", false))
+			g = n->getValue32();
+		if (CCDBNodeLeaf *n = CDBManager::getInstance()->getDbProp("UI:TEMP:COL:B", false))
+			bl = n->getValue32();
+		if (r < 0) r = 0; if (r > 255) r = 255;
+		if (g < 0) g = 0; if (g > 255) g = 255;
+		if (bl < 0) bl = 0; if (bl > 255) bl = 255;
+		b->setBrushColor((int)r, (int)g, (int)bl);
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpColorPicked, "zp_color_picked");
 
 class CAHZpSave : public IActionHandler
 {
@@ -1505,11 +1587,29 @@ void CEditorUI::syncPanelFromBridge()
 		snprintf(buf, sizeof(buf), "%u", b->ColorOpacity);
 		t->setHardText(buf);
 	}
-	// Display-only color swatch (solid modulate on blank box)
-	if (CViewBitmap *sw = dynamic_cast<CViewBitmap *>(
-	        CWidgetManager::getInstance()->getElementFromId("ui:zp:painter:content:color_swatch")))
+	// Clickable color swatch (M9b): button face modulated to the brush color
 	{
-		sw->setColor(NLMISC::CRGBA((uint8)b->ColorR, (uint8)b->ColorG, (uint8)b->ColorB, 255));
+		const NLMISC::CRGBA col((uint8)b->ColorR, (uint8)b->ColorG, (uint8)b->ColorB, 255);
+		if (CCtrlBaseButton *sw = dynamic_cast<CCtrlBaseButton *>(
+		        CWidgetManager::getInstance()->getElementFromId("ui:zp:painter:content:color_swatch")))
+		{
+			sw->setColor(col);
+			sw->setColorPushed(col);
+			sw->setColorOver(col);
+		}
+	}
+	// RGB readout next to swatch
+	if (CViewText *t = findText("ui:zp:painter:content:color_rgb"))
+	{
+		char buf[32];
+		snprintf(buf, sizeof(buf), "%u %u %u", b->ColorR, b->ColorG, b->ColorB);
+		t->setHardText(buf);
+	}
+	// Track color-picker close-via-X
+	{
+		CInterfaceElement *el = CWidgetManager::getInstance()->getElementFromId(kColorPickerWinId);
+		if (el)
+			s_ColorPickerVisible = el->getActive();
 	}
 	// Mask cycle button face = current mask basename or "none"
 	if (CCtrlTextButton *btn = findTextButton("ui:zp:painter:content:btn_mask"))

@@ -96,6 +96,8 @@ struct SPaintUIBridge
 	void (*displaceIndexAbs)(int idx);
 	/** Show/hide the Tiles palette window (ui M8; key TogglePalette / panel button). */
 	void (*togglePalette)();
+	/** Set brush color RGB 0-255 (color picker / panel); same field as --color. */
+	void (*setBrushColor)(int r, int g, int b);
 
 	// State snapshot for panel sync (filled by runViewer each frame)
 	bool HaveCore;
@@ -140,7 +142,7 @@ struct SPaintUIBridge
 		  undo(NULL), redo(NULL), fill(NULL), save(NULL), saveTo(NULL), saveOverwrite(NULL),
 		  seasonNext(NULL), colorRadiusDelta(NULL), hardnessDelta(NULL), opacityDelta(NULL),
 		  cycleBrushMask(NULL), toggleMaskMode(NULL), displaceIndexDelta(NULL),
-		  displaceIndexAbs(NULL), togglePalette(NULL),
+		  displaceIndexAbs(NULL), togglePalette(NULL), setBrushColor(NULL),
 		  HaveCore(false), Mode(0), CurTileSet(0), TileSetCount(0), Mode256(false),
 		  BrushSize(0), TileGroup(0), LockBorders(false), UndoDepth(0), CanSave(false),
 		  InteractiveSave(false), InstanceCount(1), UpdateThumbnail(true), SeasonCount(0),
@@ -183,6 +185,13 @@ bool isTilesetPaletteVisible();
 
 /** Dev/test: scroll the palette body so the Displace section is in view (M9a shots). */
 void scrollPaletteToDisplaceSection();
+
+/** Show/hide the brush color picker window (ui M9b). */
+void setColorPickerVisible(bool visible);
+void toggleColorPicker();
+bool isColorPickerVisible();
+/** Dev/test: force the color picker open for one screenshot frame. */
+void forceShowColorPickerForShot();
 
 /** Install / clear the process-wide bridge (action handlers look it up). */
 void setPaintUIBridge(SPaintUIBridge *bridge);

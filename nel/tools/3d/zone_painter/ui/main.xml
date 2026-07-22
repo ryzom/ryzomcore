@@ -305,12 +305,18 @@
 		<ctrl style="text_button_16" id="group_up" posparent="group_down" posref="MR ML" x="4" y="0"
 			onclick_l="zp_group" params_l="+1" hardtext="+" />
 
-		<!-- Color section (M7a; always visible, label highlights in Color mode) -->
+		<!-- Color section (M7a/M9b; always visible, label highlights in Color mode) -->
 		<view type="text" id="lbl_color" posparent="group_down" posref="BL TL" x="0" y="-8" fontsize="10" shadow="true"
 			global_color="false" color="255 255 255 140" hardtext="Color" />
-		<!-- Display-only brush color swatch -->
-		<view type="bitmap" id="color_swatch" posparent="lbl_color" posref="MR ML" x="8" y="0" w="18" h="12" scale="true"
-			texture="w_box_blank.tga" global_color="false" color="255 255 255 255" />
+		<!-- Clickable brush color swatch — opens the color picker (M9b). -->
+		<ctrl type="button" id="color_swatch" button_type="push_button" posparent="lbl_color" posref="MR ML" x="8" y="0"
+			w="18" h="12" scale="true"
+			tx_normal="w_box_blank.tga" tx_pushed="w_box_blank.tga" tx_over="w_box_blank.tga"
+			global_color_normal="false" global_color_pushed="false" global_color_over="false"
+			onclick_l="zp_open_color_picker" params_l="" />
+		<!-- RGB readout next to the swatch (display-only this round) -->
+		<view type="text" id="color_rgb" posparent="color_swatch" posref="MR ML" x="4" y="0" fontsize="9" shadow="true"
+			global_color="false" color="200 210 220 255" hardtext="255 255 255" />
 		<view type="text" id="lbl_radius" posparent="lbl_color" posref="BL TL" x="0" y="-2" fontsize="10" shadow="true"
 			global_color="false" color="255 255 255 160" hardtext="Radius" />
 		<view type="text" id="radius_info" posparent="lbl_radius" posref="MR ML" x="6" y="0" fontsize="11" shadow="true"
@@ -422,6 +428,41 @@
 	</group>
 </group>
 <tree node="tiles_palette"></tree>
+
+<!-- ===================================================================== -->
+<!-- Brush color picker (ui M9b) — CCtrlColPick + sample palette texture   -->
+<!-- ===================================================================== -->
+<group type="container" id="color_picker" w="300" pop_min_w="280" pop_max_w="320" h="160" pop_min_h="150" pop_max_h="200"
+	title="Brush color" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
+	title_bar_open="false" open_button="false" right_button="true" lockable="false" openable="false"
+	opened="true" movable="true" active="false" x="250" y="420">
+	<group id="header_closed" x="0" y="0" h="12" posref="TL TL"></group>
+	<group id="header_opened" x="0" y="0" w="0" h="16" posref="TL TL"></group>
+	<group id="content" x="0" y="0" posref="TL TL" w="0" h="0">
+		<view type="text" id="l1" posref="TL TL" x="10" y="-8" fontsize="11" shadow="true"
+			global_color="false" color="255 255 255 200" hardtext="drag over the palette:" />
+		<!-- color_palette.tga remaps from staged color_palette.png (loose + atlas). -->
+		<ctrl type="colpick" id="cp" posparent="l1" posref="BL TL" x="0" y="-6" texture="color_palette.tga"
+			dbcolr="UI:TEMP:COL:R" dbcolg="UI:TEMP:COL:G" dbcolb="UI:TEMP:COL:B" dbcola="UI:TEMP:COL:A"
+			onchange="zp_color_picked" onchange_params="" />
+		<view type="bitmap" id="swatch" posparent="cp" posref="BL TL" x="0" y="-8" texture="w_box_blank.tga"
+			scale="true" w="28" h="28" global_color="false" color="255 255 255 255" />
+		<view type="text" id="lr" posparent="swatch" posref="MR ML" x="10" y="1" fontsize="12" shadow="true"
+			global_color="false" color="255 150 150 255" hardtext="R" />
+		<view type="text_number" id="vr" posparent="lr" posref="MR ML" x="4" y="0" value="UI:TEMP:COL:R"
+			fontsize="12" shadow="true" global_color="false" color="255 150 150 255" />
+		<view type="text" id="lg" posparent="vr" posref="MR ML" x="10" y="0" fontsize="12" shadow="true"
+			global_color="false" color="150 255 150 255" hardtext="G" />
+		<view type="text_number" id="vg" posparent="lg" posref="MR ML" x="4" y="0" value="UI:TEMP:COL:G"
+			fontsize="12" shadow="true" global_color="false" color="150 255 150 255" />
+		<view type="text" id="lb" posparent="vg" posref="MR ML" x="10" y="0" fontsize="12" shadow="true"
+			global_color="false" color="150 150 255 255" hardtext="B" />
+		<view type="text_number" id="vb" posparent="lb" posref="MR ML" x="4" y="0" value="UI:TEMP:COL:B"
+			fontsize="12" shadow="true" global_color="false" color="150 150 255 255" />
+	</group>
+</group>
+<tree node="color_picker"></tree>
+<link expr="makeRGB(@UI:TEMP:COL:R, @UI:TEMP:COL:G, @UI:TEMP:COL:B, 255)" target="ui:zp:color_picker:content:swatch:color" />
 
 <!-- ===================================================================== -->
 <!-- Save modal (interactive flow only; M3a)                               -->

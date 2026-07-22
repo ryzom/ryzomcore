@@ -1771,6 +1771,17 @@ static void zpDisplaceIndexAbs(int idx)
 	g_PaintCtx.Paint->DisplaceIndex = (uint)idx;
 }
 
+/** Brush color from the color picker (M9b); same field CLI --color initializes. */
+static void zpSetBrushColor(int r, int g, int b)
+{
+	if (r < 0) r = 0; if (r > 255) r = 255;
+	if (g < 0) g = 0; if (g > 255) g = 255;
+	if (b < 0) b = 0; if (b > 255) b = 255;
+	g_ViewerBrushColor = NLMISC::CRGBA((uint8)r, (uint8)g, (uint8)b, 255);
+	if (g_PaintCtx.Paint)
+		g_PaintCtx.Paint->BrushColor = g_ViewerBrushColor;
+}
+
 static void zpToggleLockBorders()
 {
 	if (!g_PaintCtx.Active || !g_PaintCtx.Core) return;
@@ -2509,6 +2520,7 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 		paintBridge.displaceIndexDelta = zpDisplaceIndexDelta;
 		paintBridge.displaceIndexAbs = zpDisplaceIndexAbs;
 		paintBridge.togglePalette = zpTogglePalette;
+		paintBridge.setBrushColor = zpSetBrushColor;
 		ZPUI::setPaintUIBridge(&paintBridge);
 
 		if (core)
@@ -2615,7 +2627,8 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 			}
 			// Dev-only: ZONE_PAINTER_PANEL_ACTION_TEST drives a panel action-handler path once
 			// (proves panel → same shared handler as keys). Values: hardness+|hardness-|opacity+|
-			// opacity-|radius+|radius-|displace+|displace-|displace:N|mask|maskmode|tileset:N|palette
+			// opacity-|radius+|radius-|displace+|displace-|displace:N|color:rrggbb|
+			// mask|maskmode|tileset:N|palette|colorpicker
 			{
 				const char *act = getenv("ZONE_PAINTER_PANEL_ACTION_TEST");
 				if (act && act[0] && core)
@@ -2627,6 +2640,9 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 					const uint dispBefore = paintListener.DisplaceIndex;
 					const int tsBefore = paintListener.CurTileSet;
 					const bool maskModeBefore = core->brushMaskMode();
+					const uint crBefore = paintListener.BrushColor.R;
+					const uint cgBefore = paintListener.BrushColor.G;
+					const uint cbBefore = paintListener.BrushColor.B;
 					if (strcmp(act, "hardness+") == 0 && b && b->hardnessDelta) b->hardnessDelta(+51);
 					else if (strcmp(act, "hardness-") == 0 && b && b->hardnessDelta) b->hardnessDelta(-51);
 					else if (strcmp(act, "opacity+") == 0 && b && b->opacityDelta) b->opacityDelta(+51);
@@ -2641,6 +2657,15 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 						NLMISC::fromString(std::string(act + 9), idx);
 						b->displaceIndexAbs(idx);
 					}
+					else if (strncmp(act, "color:", 6) == 0 && b && b->setBrushColor)
+					{
+						// color:rrggbb hex (6 digits)
+						unsigned rgb = 0;
+						sscanf(act + 6, "%x", &rgb);
+						b->setBrushColor((int)((rgb >> 16) & 0xff),
+						                 (int)((rgb >> 8) & 0xff),
+						                 (int)(rgb & 0xff));
+					}
 					else if (strcmp(act, "mask") == 0 && b && b->cycleBrushMask) b->cycleBrushMask();
 					else if (strcmp(act, "maskmode") == 0 && b && b->toggleMaskMode) b->toggleMaskMode();
 					else if (strncmp(act, "tileset:", 8) == 0 && b && b->selectTileSetAbs)
@@ -2651,15 +2676,20 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 					}
 					else if (strcmp(act, "palette") == 0 && b && b->togglePalette)
 						b->togglePalette();
+					else if (strcmp(act, "colorpicker") == 0)
+						ZPUI::toggleColorPicker();
 					printf("panel-action-test %s: hardness %u->%u opacity %u->%u radius %.1f->%.1f "
-					       "displace %u->%u tileset %d->%d maskmode %d->%d mask='%s'\n",
+					       "displace %u->%u tileset %d->%d maskmode %d->%d mask='%s' "
+					       "color %u,%u,%u->%u,%u,%u\n",
 					       act, hardBefore, paintListener.BrushHardness,
 					       opacBefore, paintListener.BrushOpacity,
 					       radBefore, paintListener.BrushRadius,
 					       dispBefore, paintListener.DisplaceIndex,
 					       tsBefore, paintListener.CurTileSet,
 					       (int)maskModeBefore, (int)core->brushMaskMode(),
-					       core->brushMaskName().empty() ? "none" : core->brushMaskName().c_str());
+					       core->brushMaskName().empty() ? "none" : core->brushMaskName().c_str(),
+					       crBefore, cgBefore, cbBefore,
+					       paintListener.BrushColor.R, paintListener.BrushColor.G, paintListener.BrushColor.B);
 				}
 			}
 			// Sync panel labels before capture so the screenshot shows live state
@@ -2683,6 +2713,12 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 				const char *palScroll = getenv("ZONE_PAINTER_PALETTE_SCROLL");
 				if (palScroll && (strcmp(palScroll, "disp") == 0 || strcmp(palScroll, "displace") == 0))
 					ZPUI::scrollPaletteToDisplaceSection();
+			}
+			// Dev-only: ZONE_PAINTER_COLOR_PICKER_SHOT=1 opens the brush color picker (M9b).
+			{
+				const char *cpShot = getenv("ZONE_PAINTER_COLOR_PICKER_SHOT");
+				if (cpShot && cpShot[0] && cpShot[0] != '0')
+					ZPUI::forceShowColorPickerForShot();
 			}
 			// Dev-only: ZONE_PAINTER_SEASON_NEXT=1 cycles season once before capture (M8 season-follow).
 			{
