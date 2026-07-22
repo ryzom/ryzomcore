@@ -134,6 +134,35 @@
 	</group>
 </template>
 
+<!-- M21a: labeled checkbox row (w_ checkbox pair from help/browser + game_config tgcw_checkbox).
+     Idiom: square toggle_button `box` is the canonical control (bridge setPushed/setFrozen
+     target :box). Label is a second transparent push_button `lbl` that calls the SAME
+     onclick handler as the box — so clicking either the square or the text toggles.
+     A non-interactive text view sits on top of `lbl` for the sentence-case caption.
+     Bridge re-syncs box pushed-state after either hit (AH toggles the property; sync
+     writes the result back). Frozen grays the box (half-tone) and the label hit. -->
+<template name="zp_checkbox_row" keep="true" id="" label="" onclick="" params=""
+	posparent="parent" posref="TL TL" x="0" y="0" pushed="false" w="200">
+	<group id="#id" posparent="#posparent" posref="#posref" x="#x" y="#y" w="#w" h="18">
+		<!-- Unchecked = empty slot; checked = filled (help checkbox_bitmap_* pair). -->
+		<ctrl type="button" id="box" button_type="toggle_button" posref="ML ML" x="0" y="0"
+			tx_normal="w_slot_on.tga" tx_pushed="w_opacity_on.tga" tx_over="w_slot_on.tga"
+			color="255 255 255 255" col_pushed="255 255 255 255" col_over="255 255 255 0"
+			global_color_normal="false" global_color_pushed="false" global_color_over="false"
+			pushed="#pushed"
+			onclick_l="#onclick" params_l="#params" />
+		<!-- Transparent hit target covering the caption width (same AH as box). -->
+		<ctrl type="button" id="lbl" button_type="push_button" posparent="box" posref="MR ML" x="2" y="0"
+			w="170" h="16" scale="true"
+			tx_normal="blank.tga" tx_pushed="blank.tga" tx_over="blank.tga"
+			color="0 0 0 0" col_pushed="0 0 0 0" col_over="255 255 255 20"
+			global_color_normal="false" global_color_pushed="false" global_color_over="false"
+			onclick_l="#onclick" params_l="#params" />
+		<view type="text" id="t" posparent="box" posref="MR ML" x="6" y="0" fontsize="11" shadow="true"
+			global_color="false" color="255 255 255 220" hardtext="#label" />
+	</group>
+</template>
+
 <!-- ===================================================================== -->
 <!-- Screen A — world select                                               -->
 <!-- ===================================================================== -->
@@ -405,7 +434,7 @@
 			</group>
 
 			<!-- Color section (ModeColor only): swatch + R G B, radius, hardness, opacity, mask -->
-			<group id="sec_color" w="200" h="148" child_resize_h="false" active="false">
+			<group id="sec_color" w="200" h="164" child_resize_h="false" active="false">
 				<view type="text" id="lbl_color" posref="TL TL" x="0" y="-2" fontsize="10" shadow="true"
 					global_color="false" color="255 220 140 255" hardtext="Color" />
 				<!-- 9-slice well + solid color face — opens picker (M9b). -->
@@ -442,11 +471,11 @@
 					onclick_l="zp_opacity" params_l="-51" hardtext="-" />
 				<ctrl style="text_button_16" id="opac_up" posparent="opac_down" posref="MR ML" x="4" y="0"
 					onclick_l="zp_opacity" params_l="+51" hardtext="+" />
-				<!-- Mask cycle (S key) + mask mode (Q key) -->
+				<!-- Mask cycle (S key) stays a button; mask mode (Q) is a checkbox row (M21a). -->
 				<ctrl style="text_button_16" id="btn_mask" posparent="opac_down" posref="BL TL" x="0" y="-4"
 					onclick_l="zp_cycle_mask" params_l="" hardtext="none" />
-				<ctrl style="text_button_toggle" id="btn_mask_mode" posparent="btn_mask" posref="MR ML" x="4" y="0"
-					onclick_l="zp_mask_mode" params_l="" hardtext="Mask" />
+				<instance template="zp_checkbox_row" id="btn_mask_mode" posparent="btn_mask" posref="BL TL" x="0" y="-4"
+					label="Mask mode" onclick="zp_mask_mode" params="" />
 			</group>
 
 			<!-- Displace section (ModeDisplace only): index stepper + brush size (shared value) -->
@@ -471,7 +500,7 @@
 			</group>
 
 			<!-- Prop section (ModeProp only, M18b): read-only info + export toggles -->
-			<group id="sec_prop" w="200" h="200" child_resize_h="false" active="false">
+			<group id="sec_prop" w="200" h="188" child_resize_h="false" active="false">
 				<view type="text" id="prop_name" posref="TL TL" x="0" y="-2" fontsize="11" shadow="true"
 					global_color="false" color="255 220 140 255" hardtext="(no selection)" />
 				<view type="text" id="prop_file" posparent="prop_name" posref="BL TL" x="0" y="-1" fontsize="9" shadow="true"
@@ -489,13 +518,13 @@
 					onclick_l="zp_prop_rotate" params_l="-1" hardtext="-" />
 				<ctrl style="text_button_16" id="rot_up" posparent="rot_down" posref="MR ML" x="4" y="0"
 					onclick_l="zp_prop_rotate" params_l="+1" hardtext="+" />
-				<!-- Toggles -->
-				<ctrl style="text_button_toggle" id="prop_sym" posparent="rot_down" posref="BL TL" x="0" y="-6"
-					onclick_l="zp_prop_symmetry" params_l="" hardtext="Ligo Symmetry" />
-				<ctrl style="text_button_toggle" id="prop_pass" posparent="prop_sym" posref="BL TL" x="0" y="-4"
-					onclick_l="zp_prop_passable" params_l="" hardtext="Passable" />
-				<ctrl style="text_button_toggle" id="prop_bbox" posparent="prop_pass" posref="BL TL" x="0" y="-4"
-					onclick_l="zp_prop_usebbox" params_l="" hardtext="Use Bounding Box" />
+				<!-- M21a: real checkboxes (sentence case); same zp_prop_* handlers -->
+				<instance template="zp_checkbox_row" id="prop_sym" posparent="rot_down" posref="BL TL" x="0" y="-6"
+					label="Ligo symmetry" onclick="zp_prop_symmetry" params="" />
+				<instance template="zp_checkbox_row" id="prop_pass" posparent="prop_sym" posref="BL TL" x="0" y="-2"
+					label="Passable" onclick="zp_prop_passable" params="" />
+				<instance template="zp_checkbox_row" id="prop_bbox" posparent="prop_pass" posref="BL TL" x="0" y="-2"
+					label="Use bounding box" onclick="zp_prop_usebbox" params="" />
 				<view type="text" id="prop_status" posparent="prop_bbox" posref="BL TL" x="0" y="-4" fontsize="9" shadow="true"
 					global_color="false" color="255 200 120 220" hardtext="" />
 			</group>
@@ -504,9 +533,9 @@
 			<group id="sec_paint" w="200" h="64" child_resize_h="false">
 				<ctrl style="text_button_toggle" id="btn_palette" posref="TL TL" x="0" y="-2"
 					onclick_l="zp_toggle_palette" params_l="" hardtext="Tiles" />
-				<ctrl style="text_button_toggle" id="lock_borders" posparent="btn_palette" posref="BL TL" x="0" y="-6"
-					onclick_l="zp_lock_borders" params_l="" hardtext="Lock borders" />
-				<ctrl style="text_button_16" id="btn_fill0" posparent="lock_borders" posref="BL TL" x="0" y="-6"
+				<instance template="zp_checkbox_row" id="lock_borders" posparent="btn_palette" posref="BL TL" x="0" y="-4"
+					label="Lock borders" onclick="zp_lock_borders" params="" />
+				<ctrl style="text_button_16" id="btn_fill0" posparent="lock_borders" posref="BL TL" x="0" y="-4"
 					onclick_l="zp_fill" params_l="0" hardtext="Fill" />
 				<ctrl style="text_button_16" id="btn_fill1" posparent="btn_fill0" posref="MR ML" x="4" y="0"
 					onclick_l="zp_fill" params_l="1" hardtext="F1" />

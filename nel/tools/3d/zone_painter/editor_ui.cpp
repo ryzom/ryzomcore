@@ -1755,7 +1755,8 @@ void CEditorUI::syncPanelFromBridge()
 	}
 
 	// Lock borders (paint-common sec_paint, M20a)
-	if (CCtrlBaseButton *btn = findButton((std::string(kSecPaint) + ":lock_borders").c_str()))
+	// M21a: lock_borders is a zp_checkbox_row; canonical box is :box
+	if (CCtrlBaseButton *btn = findButton((std::string(kSecPaint) + ":lock_borders:box").c_str()))
 		btn->setPushed(b->LockBorders);
 
 	// Self-instance indicator (M4b)
@@ -1852,7 +1853,8 @@ void CEditorUI::syncPanelFromBridge()
 		const char *lab = b->BrushMaskLabel[0] ? b->BrushMaskLabel : "none";
 		btn->setHardText(lab);
 	}
-	if (CCtrlBaseButton *btn = findButton((std::string(kSecColor) + ":btn_mask_mode").c_str()))
+	// M21a: btn_mask_mode is a zp_checkbox_row; canonical box is :box
+	if (CCtrlBaseButton *btn = findButton((std::string(kSecColor) + ":btn_mask_mode:box").c_str()))
 		btn->setPushed(b->BrushMaskMode);
 
 	// Displace index 0-15
@@ -1891,26 +1893,33 @@ void CEditorUI::syncPanelFromBridge()
 			snprintf(buf, sizeof(buf), "%d", b->PropRotate);
 			t->setHardText(buf);
 		}
-		if (CCtrlBaseButton *btn = findButton((std::string(kSecProp) + ":prop_sym").c_str()))
+		// M21a: prop_* are zp_checkbox_row groups; bridge drives :box (+ freeze :lbl)
+		if (CCtrlBaseButton *btn = findButton((std::string(kSecProp) + ":prop_sym:box").c_str()))
 			btn->setPushed(b->PropSymmetry);
-		if (CCtrlBaseButton *btn = findButton((std::string(kSecProp) + ":prop_pass").c_str()))
+		if (CCtrlBaseButton *btn = findButton((std::string(kSecProp) + ":prop_pass:box").c_str()))
 			btn->setPushed(b->PropPassable);
-		if (CCtrlBaseButton *btn = findButton((std::string(kSecProp) + ":prop_bbox").c_str()))
+		if (CCtrlBaseButton *btn = findButton((std::string(kSecProp) + ":prop_bbox:box").c_str()))
 			btn->setPushed(b->PropUseBBox);
 		if (CViewText *t = findText((std::string(kSecProp) + ":prop_status").c_str()))
 			t->setHardText(b->PropStatus);
-		// Freeze steppers when no selection
+		// Freeze steppers + checkbox rows when no selection / read-only
 		const bool fr = !b->PropHaveSelection || !b->PropEditable;
 		if (CCtrlBaseButton *btn = findButton((std::string(kSecProp) + ":rot_down").c_str()))
 			btn->setFrozen(fr);
 		if (CCtrlBaseButton *btn = findButton((std::string(kSecProp) + ":rot_up").c_str()))
 			btn->setFrozen(fr);
-		if (CCtrlBaseButton *btn = findButton((std::string(kSecProp) + ":prop_sym").c_str()))
-			btn->setFrozen(fr);
-		if (CCtrlBaseButton *btn = findButton((std::string(kSecProp) + ":prop_pass").c_str()))
-			btn->setFrozen(fr);
-		if (CCtrlBaseButton *btn = findButton((std::string(kSecProp) + ":prop_bbox").c_str()))
-			btn->setFrozen(fr);
+		// Box + label hit both frozen; caption text dimmed so disabled is obvious
+		const char *propRows[] = { "prop_sym", "prop_pass", "prop_bbox" };
+		for (uint i = 0; i < sizeof(propRows) / sizeof(propRows[0]); ++i)
+		{
+			const std::string base = std::string(kSecProp) + ":" + propRows[i];
+			if (CCtrlBaseButton *btn = findButton((base + ":box").c_str()))
+				btn->setFrozen(fr);
+			if (CCtrlBaseButton *btn = findButton((base + ":lbl").c_str()))
+				btn->setFrozen(fr);
+			if (CViewText *t = findText((base + ":t").c_str()))
+				t->setColor(fr ? CRGBA(160, 160, 160, 140) : CRGBA(255, 255, 255, 220));
+		}
 	}
 
 	// Tiles palette selection highlight (ui M8) — stays in sync with keys/panel/pick
