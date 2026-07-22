@@ -176,11 +176,20 @@
 #include "../pipeline_max_export_common/max_scene.h"
 #include "../pipeline_max_export_common/max_load.h"
 #include "../pipeline_max_export_common/db_path.h"
+#include "../pipeline_max_export_common/appdata_util.h"
+#include "../pipeline_max_export_common/export_ids.h"
 
 using namespace PIPELINE::MAX;
 using namespace PIPELINE::MAX::BUILTIN;
 using namespace PIPELINE::MAX::NELPATCH;
 using namespace MAXMATH;
+
+// M16 neighbor-hints appdata id — registered in export_ids.h as
+// NEL3D_APPDATA_PAINTER_NEIGHBOR_HINTS (M16b). Local alias keeps M16a readable before
+// the define lands; M16b switches call sites to the macro (same value).
+#ifndef NEL3D_APPDATA_PAINTER_NEIGHBOR_HINTS
+#define NEL3D_APPDATA_PAINTER_NEIGHBOR_HINTS 1423062900
+#endif
 
 // Patch-state eval + RPO->CPatchInfo conversion: the shared unit of the zone exporter and this
 // painter. Header-only static implementation unit (zone x87 tier is TU-sensitive; see the
@@ -227,14 +236,30 @@ static std::string g_StartupTexturePath;
 static bool g_ForceBankRecursive = false;
 // Startup interactive (or startup-auto) without --save: panel Save opens the modal
 static bool g_InteractiveSave = false;
-// Continent neighbor loading (M3b): default on for startup/auto, off for legacy .max path
+// Continent/ecosystem neighbor loading (M3b/M16): default on for startup/auto, off for legacy
 static bool g_LoadNeighbors = false;
+// Board-driven session (startup interactive / --startup-auto). Not the legacy direct-.max path.
+static bool g_BoardSession = false;
+// Escape hatch: board sessions display embedded non-eligible/frozen copies (M16a default: skip).
+static bool g_EmbeddedContext = false;
 // World/zone selected via startup (for neighbor discovery); empty on legacy path
 static ZPWS::SWorldEntry g_StartupWorld;
 static ZPWS::SZoneEntry g_StartupZone;
 // Multi-select editable set (M6b); empty means single g_StartupZone only
 static std::vector<ZPWS::SZoneEntry> g_StartupEditableZones;
-// Neighbor .max scenes kept alive for the session (texture resolution / node pointers)
+// RO context files loaded for the session (continent ring / eco hints / place-context).
+// Owns SLoadedMax; cleared on rebuild. Cell offsets are relative to primary footprint origin.
+struct SContextFile
+{
+	std::string Path;
+	std::string Basename;
+	int CellX, CellY;
+	bool TranslateGeom; // ecosystem: shift geometry to cell; continent natural coords: false
+	PMAXLOAD::SLoadedMax *Lm;
+	SContextFile() : CellX(0), CellY(0), TranslateGeom(false), Lm(NULL) {}
+};
+static std::vector<SContextFile> g_ContextFiles;
+// Legacy name used throughout; points at scenes inside g_ContextFiles
 static std::vector<PMAXLOAD::SLoadedMax *> g_NeighborScenes;
 // Extra editable .max scenes beyond the primary stack `lm` (M6b multi-open)
 static std::vector<PMAXLOAD::SLoadedMax *> g_ExtraEditableScenes;
@@ -779,14 +804,24 @@ static void computeZoneEligibility(const std::vector<SZoneNode> &nodes,
 		eligible[nonFrozen[0]] = true;
 }
 
+/** True when board sessions should omit embedded non-eligible/frozen display copies (M16a). */
+static bool boardSkipEmbedded()
+{
+	return g_BoardSession && !g_EmbeddedContext;
+}
+
 /**
  * Append paint zones from one Max scene.
  * zoneIdOffset: first zone id for this file (must not collide with existing zones).
- * forceFrozen: true for continent neighbor files (same semantics as 0x0976 boundary
- *   reference zones: landscape + weld + metaTile graph, never paint targets, carriers
- *   never rewritten because AnyUnfrozen stays false).
- * fileBasename: used for exporter-faithful eligibility (M11b); empty = treat as --all-zones
- *   for this file only when forceFrozen (neighbors ignore eligibility).
+ * forceFrozen: true for neighbor/context files (landscape + weld + metaTile, never paint,
+ *   carriers never rewritten because AnyUnfrozen stays false).
+ * fileBasename: used for exporter-faithful eligibility (M11b).
+ *
+ * M16a board authority: when boardSkipEmbedded(), non-eligible and 0x0976 nodes are NOT
+ * displayed (logged and skipped). Neighbor files under the same rule only surface their
+ * eligible zone(s) as RO. Legacy direct-.max and --embedded-context keep pre-M16 display
+ * of embedded RO copies. Save still round-trips every carrier byte-faithfully (load-time
+ * display filter only — nodes remain in the scene graph).
  */
 static bool buildPaintZones(CScene &scene, std::vector<SPaintZone> &zones,
                             uint zoneIdOffset, bool forceFrozen,
@@ -795,17 +830,39 @@ static bool buildPaintZones(CScene &scene, std::vector<SPaintZone> &zones,
 	std::vector<SZoneNode> nodes;
 	collectZoneNodes(scene, nodes);
 	std::vector<bool> eligible;
-	if (forceFrozen)
-		eligible.assign(nodes.size(), false); // neighbors: all RO
+	// Always compute eligibility when we may skip or when not force-frozen.
+	// Neighbor files under board authority need eligibility to pick the real brick zone.
+	if (forceFrozen && !boardSkipEmbedded())
+		eligible.assign(nodes.size(), false); // legacy neighbor: all RO display
 	else
 		computeZoneEligibility(nodes, fileBasename, eligible);
+
+	const bool skipEmb = boardSkipEmbedded();
 	SNodeTMCache tmCache;
 	bool any = false;
-	uint nEligible = 0, nRo = 0;
+	uint nEligible = 0, nRo = 0, nSkipped = 0;
+	std::string skippedNames;
 	for (size_t i = 0; i < nodes.size(); ++i)
 	{
 		CNodeImpl *node = nodes[i].Node;
 		std::string name = ucstring(node->userName()).toUtf8();
+		const bool fileFrozen = nodes[i].Frozen;
+		const bool isEligible = (i < eligible.size() && eligible[i]);
+
+		// Board authority: never display embedded 0x0976 or non-eligible nodes.
+		// Neighbor load (forceFrozen) under board: only eligible zone(s) as RO.
+		if (skipEmb)
+		{
+			if (fileFrozen || !isEligible)
+			{
+				if (nSkipped++) skippedNames += ", ";
+				skippedNames += name;
+				if (fileFrozen) skippedNames += "[0x0976]";
+				else skippedNames += "[ineligible]";
+				continue;
+			}
+		}
+
 		SEvalPatch ep;
 		std::string err;
 		if (!evalNodePatch(node, ep, err))
@@ -817,9 +874,8 @@ static bool buildPaintZones(CScene &scene, std::vector<SPaintZone> &zones,
 		Matrix3M objectTM = getObjectTM(node, tmCache);
 		SPaintZone pz;
 		pz.Node = node;
-		// Neighbor files / non-eligible / 0x0976 → read-only context (still displayed).
-		const bool fileFrozen = nodes[i].Frozen;
-		const bool ineligible = !forceFrozen && (i >= eligible.size() || !eligible[i]);
+		// Neighbor files / non-eligible / 0x0976 → read-only context (when displayed).
+		const bool ineligible = !forceFrozen && !isEligible;
 		pz.Frozen = forceFrozen || fileFrozen || ineligible;
 		pz.Name = name;
 		pz.ZoneId = zoneIdOffset + (uint)i;
@@ -836,9 +892,13 @@ static bool buildPaintZones(CScene &scene, std::vector<SPaintZone> &zones,
 			printf("zone %u '%s'%s: %u patches\n", pz.ZoneId, pz.Name.c_str(),
 			       pz.Frozen ? " FROZEN" : "", (uint)pz.Patches.size());
 	}
+	if (skipEmb && nSkipped)
+		printf("board authority '%s': skipped %u embedded/non-eligible zone(s): %s\n",
+		       fileBasename.c_str(), nSkipped, skippedNames.c_str());
 	if (!forceFrozen && any)
-		printf("eligibility '%s': %u editable, %u read-only context (all-zones=%s)\n",
-		       fileBasename.c_str(), nEligible, nRo, g_AllZones ? "on" : "off");
+		printf("eligibility '%s': %u editable, %u read-only context (all-zones=%s board-skip=%s)\n",
+		       fileBasename.c_str(), nEligible, nRo, g_AllZones ? "on" : "off",
+		       skipEmb ? "on" : "off");
 	return any;
 }
 
@@ -857,6 +917,526 @@ static uint nextZoneIdBase(const std::vector<SPaintZone> &zones)
 	}
 	return any ? (maxId + 1) : 0;
 }
+
+// Forward: defined with footprint helpers below (used by M16 neighbor load).
+static void computeFootprintRect(const std::vector<SPaintZone> &zones, size_t primaryBegin,
+                                 size_t primaryEnd, float cellSize,
+                                 float &originX, float &originY,
+                                 float &stepX, float &stepY,
+                                 int &cellsW, int &cellsH);
+
+// ---------------------------------------------------------------------------------------------
+// Neighbor hints (M16a/b) — versioned appdata on the eligible node + embedded-copy fallback.
+//
+// Format: single string value  v1|dx,dy:basename|dx,dy:basename|...
+//   dx,dy  = integer cell offsets relative to the eligible zone's footprint origin
+//   basename = file basename without .max
+// Unknown future versions: parser ignores the entry (tolerates, does not fail open).
+
+struct SNeighborHint
+{
+	int Dx, Dy;
+	std::string Basename;
+	SNeighborHint() : Dx(0), Dy(0) {}
+	SNeighborHint(int dx, int dy, const std::string &b) : Dx(dx), Dy(dy), Basename(b) {}
+};
+
+/** Parse appdata payload; returns false if absent/empty/unknown version. */
+static bool parseNeighborHintsString(const std::string &raw, std::vector<SNeighborHint> &out)
+{
+	out.clear();
+	if (raw.empty()) return false;
+	// Split on '|'
+	std::vector<std::string> parts;
+	{
+		std::string::size_type pos = 0;
+		while (pos <= raw.size())
+		{
+			std::string::size_type bar = raw.find('|', pos);
+			if (bar == std::string::npos) { parts.push_back(raw.substr(pos)); break; }
+			parts.push_back(raw.substr(pos, bar - pos));
+			pos = bar + 1;
+		}
+	}
+	if (parts.empty()) return false;
+	const std::string &ver = parts[0];
+	if (ver != "v1")
+	{
+		// Unknown future version: ignore the entry (tolerate)
+		printf("neighbor-hints: ignore unknown version '%s'\n", ver.c_str());
+		return false;
+	}
+	for (size_t i = 1; i < parts.size(); ++i)
+	{
+		if (parts[i].empty()) continue;
+		// dx,dy:basename
+		std::string::size_type colon = parts[i].find(':');
+		if (colon == std::string::npos) continue;
+		std::string coords = parts[i].substr(0, colon);
+		std::string base = parts[i].substr(colon + 1);
+		if (base.empty()) continue;
+		std::string::size_type comma = coords.find(',');
+		if (comma == std::string::npos) continue;
+		int dx = 0, dy = 0;
+		if (!NLMISC::fromString(coords.substr(0, comma), dx)) continue;
+		if (!NLMISC::fromString(coords.substr(comma + 1), dy)) continue;
+		// Strip accidental .max
+		std::string::size_type dot = base.rfind('.');
+		if (dot != std::string::npos && NLMISC::toLowerAscii(base.substr(dot)) == ".max")
+			base = base.substr(0, dot);
+		out.push_back(SNeighborHint(dx, dy, base));
+	}
+	return !out.empty();
+}
+
+static bool neighborHintLess(const SNeighborHint &a, const SNeighborHint &b)
+{
+	if (a.Dy != b.Dy) return a.Dy < b.Dy;
+	if (a.Dx != b.Dx) return a.Dx < b.Dx;
+	return NLMISC::toLowerAscii(a.Basename) < NLMISC::toLowerAscii(b.Basename);
+}
+
+/** Deterministic encode: sort by (dy, dx, basename) then emit v1|... */
+static std::string encodeNeighborHintsString(std::vector<SNeighborHint> hints)
+{
+	std::sort(hints.begin(), hints.end(), neighborHintLess);
+	// Dedup identical (dx,dy,basename)
+	std::vector<SNeighborHint> uniq;
+	for (size_t i = 0; i < hints.size(); ++i)
+	{
+		if (!uniq.empty()
+		    && uniq.back().Dx == hints[i].Dx && uniq.back().Dy == hints[i].Dy
+		    && NLMISC::toLowerAscii(uniq.back().Basename) == NLMISC::toLowerAscii(hints[i].Basename))
+			continue;
+		uniq.push_back(hints[i]);
+	}
+	std::string s = "v1";
+	for (size_t i = 0; i < uniq.size(); ++i)
+		s += NLMISC::toString("|%d,%d:%s", uniq[i].Dx, uniq[i].Dy, uniq[i].Basename.c_str());
+	return s;
+}
+
+/** Read appdata neighbor hints from a node's script AppData; false if absent/unusable. */
+static bool readNeighborHintsFromNode(CNodeImpl *node, std::vector<SNeighborHint> &out)
+{
+	out.clear();
+	if (!node) return false;
+	std::string raw;
+	if (!APPDATA::getScriptAppData(node, NEL3D_APPDATA_PAINTER_NEIGHBOR_HINTS, raw))
+		return false;
+	return parseNeighborHintsString(raw, out);
+}
+
+/**
+ * Extract neighbor hints from embedded frozen/ineligible zone nodes in a scene.
+ * Prefer continent grid deltas when both the eligible node name and the embedded
+ * name parse as [prefix-]<row>_<AA> (converted bricks). Else quantize object-TM
+ * translation deltas by cellSize. Basenames keep the authored node name (e.g. "199_DY").
+ */
+static bool extractEmbeddedNeighborHints(CScene &scene, const std::string &fileBasename,
+                                         float cellSize, std::vector<SNeighborHint> &out)
+{
+	out.clear();
+	if (cellSize <= 0.f) cellSize = 160.f;
+	std::vector<SZoneNode> nodes;
+	collectZoneNodes(scene, nodes);
+	if (nodes.empty()) return false;
+	std::vector<bool> eligible;
+	computeZoneEligibility(nodes, fileBasename, eligible);
+
+	// Eligible anchor: name + TM
+	SNodeTMCache tmCache;
+	float origX = 0.f, origY = 0.f;
+	bool haveOrig = false;
+	std::string eligibleName;
+	int eRow = 0, eCol = 0;
+	bool haveEGrid = false;
+	for (size_t i = 0; i < nodes.size(); ++i)
+	{
+		if (!(i < eligible.size() && eligible[i] && !nodes[i].Frozen))
+			continue;
+		eligibleName = ucstring(nodes[i].Node->userName()).toUtf8();
+		Matrix3M tm = getObjectTM(nodes[i].Node, tmCache);
+		origX = tm.m[3][0];
+		origY = tm.m[3][1];
+		haveOrig = true;
+		haveEGrid = ZPWS::parseContinentZoneName(eligibleName, eRow, eCol);
+		// Also try file basename (zonematerial-converted-200_dz)
+		if (!haveEGrid)
+			haveEGrid = ZPWS::parseContinentZoneName(fileBasename, eRow, eCol);
+		break;
+	}
+	if (!haveOrig)
+	{
+		for (size_t i = 0; i < nodes.size(); ++i)
+		{
+			if (nodes[i].Frozen) continue;
+			eligibleName = ucstring(nodes[i].Node->userName()).toUtf8();
+			Matrix3M tm = getObjectTM(nodes[i].Node, tmCache);
+			origX = tm.m[3][0];
+			origY = tm.m[3][1];
+			haveOrig = true;
+			haveEGrid = ZPWS::parseContinentZoneName(eligibleName, eRow, eCol);
+			if (!haveEGrid)
+				haveEGrid = ZPWS::parseContinentZoneName(fileBasename, eRow, eCol);
+			break;
+		}
+	}
+	if (!haveOrig) return false;
+
+	for (size_t i = 0; i < nodes.size(); ++i)
+	{
+		const bool isEligible = (i < eligible.size() && eligible[i]);
+		if (isEligible && !nodes[i].Frozen) continue; // self
+		std::string name = ucstring(nodes[i].Node->userName()).toUtf8();
+		if (name.empty()) continue;
+
+		int dx = 0, dy = 0;
+		int nRow = 0, nCol = 0;
+		if (haveEGrid && ZPWS::parseContinentZoneName(name, nRow, nCol))
+		{
+			// Continent convention: col = X, row = Y
+			dx = nCol - eCol;
+			dy = nRow - eRow;
+		}
+		else
+		{
+			Matrix3M tm = getObjectTM(nodes[i].Node, tmCache);
+			dx = (int)std::lround((double)(tm.m[3][0] - origX) / (double)cellSize);
+			dy = (int)std::lround((double)(tm.m[3][1] - origY) / (double)cellSize);
+		}
+		if (dx == 0 && dy == 0) continue;
+		out.push_back(SNeighborHint(dx, dy, name));
+	}
+	return !out.empty();
+}
+
+/** Resolve a hint basename to a real .max in the world (exact, case-insens, suffix match). */
+static bool resolveHintToZone(const ZPWS::SWorldEntry &world, const std::string &hintBase,
+                              ZPWS::SZoneEntry &out)
+{
+	if (world.MaxDir.empty() || hintBase.empty()) return false;
+	static std::vector<ZPWS::SZoneEntry> s_listed;
+	static std::string s_dir;
+	if (s_dir != world.MaxDir)
+	{
+		ZPWS::listZones(world, s_listed);
+		s_dir = world.MaxDir;
+	}
+	const std::string want = NLMISC::toLowerAscii(hintBase);
+	// 1) exact basename
+	for (size_t i = 0; i < s_listed.size(); ++i)
+	{
+		if (NLMISC::toLowerAscii(s_listed[i].Basename) == want)
+		{
+			out = s_listed[i];
+			return true;
+		}
+	}
+	// 2) basename ends with -hint or _hint token (zonematerial-converted-199_dy vs 199_DY)
+	//    also ends-with the hint after a final dash
+	for (size_t i = 0; i < s_listed.size(); ++i)
+	{
+		const std::string b = NLMISC::toLowerAscii(s_listed[i].Basename);
+		if (b.size() >= want.size()
+		    && b.compare(b.size() - want.size(), want.size(), want) == 0)
+		{
+			// require boundary: start or non-alnum before match
+			if (b.size() == want.size()
+			    || b[b.size() - want.size() - 1] == '-'
+			    || b[b.size() - want.size() - 1] == '_')
+			{
+				out = s_listed[i];
+				return true;
+			}
+		}
+	}
+	// 3) continent grid: parse hint as row_col and find by coords
+	{
+		int row = 0, col = 0;
+		if (ZPWS::parseContinentZoneName(hintBase, row, col))
+		{
+			for (size_t i = 0; i < s_listed.size(); ++i)
+			{
+				int r = 0, c = 0;
+				if (ZPWS::parseContinentZoneName(s_listed[i].Basename, r, c)
+				    && r == row && c == col)
+				{
+					out = s_listed[i];
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+/**
+ * Neighbor suggestion priority (M16a):
+ *   (1) appdata neighbor hints on the eligible node
+ *   (2) names + cell offsets from embedded frozen/ineligible copies
+ *   (3) continent grid-name 8-ring (empty for ecosystems)
+ * Fills out with resolved real files; reports unresolved and skips them.
+ * sourceOut: "appdata" | "embedded" | "grid" | "none"
+ */
+static void collectNeighborHints(CScene &scene, const std::string &fileBasename,
+                                 const ZPWS::SWorldEntry &world, float cellSize,
+                                 std::vector<SNeighborHint> &hintsOut,
+                                 std::vector<ZPWS::SZoneEntry> &resolvedOut,
+                                 std::string &sourceOut)
+{
+	hintsOut.clear();
+	resolvedOut.clear();
+	sourceOut = "none";
+
+	// (1) appdata
+	{
+		std::vector<SZoneNode> nodes;
+		collectZoneNodes(scene, nodes);
+		std::vector<bool> eligible;
+		computeZoneEligibility(nodes, fileBasename, eligible);
+		for (size_t i = 0; i < nodes.size(); ++i)
+		{
+			if (i < eligible.size() && eligible[i] && !nodes[i].Frozen)
+			{
+				if (readNeighborHintsFromNode(nodes[i].Node, hintsOut))
+				{
+					sourceOut = "appdata";
+					break;
+				}
+			}
+		}
+	}
+	// (2) embedded copies
+	if (sourceOut == "none")
+	{
+		if (extractEmbeddedNeighborHints(scene, fileBasename, cellSize, hintsOut))
+			sourceOut = "embedded";
+	}
+	// (3) continent grid
+	if (sourceOut == "none" && world.Kind == ZPWS::Continent)
+	{
+		ZPWS::SZoneEntry center;
+		center.Basename = fileBasename;
+		// Path not required for listContinentNeighbors (uses Basename + MaxDir index)
+		std::vector<ZPWS::SZoneEntry> neigh;
+		ZPWS::listContinentNeighbors(world, center, neigh);
+		int crow = 0, ccol = 0;
+		const bool haveC = ZPWS::parseContinentZoneName(fileBasename, crow, ccol);
+		for (size_t i = 0; i < neigh.size(); ++i)
+		{
+			int nr = 0, nc = 0;
+			int dx = 0, dy = 0;
+			if (haveC && ZPWS::parseContinentZoneName(neigh[i].Basename, nr, nc))
+			{
+				// zone names: row is Y, col is X → dx=col delta, dy=row delta
+				dx = nc - ccol;
+				dy = nr - crow;
+			}
+			hintsOut.push_back(SNeighborHint(dx, dy, neigh[i].Basename));
+			resolvedOut.push_back(neigh[i]);
+		}
+		if (!hintsOut.empty())
+			sourceOut = "grid";
+		return; // already resolved
+	}
+
+	// Resolve basenames for appdata/embedded sources
+	for (size_t i = 0; i < hintsOut.size(); ++i)
+	{
+		ZPWS::SZoneEntry ze;
+		if (!resolveHintToZone(world, hintsOut[i].Basename, ze))
+		{
+			fprintf(stderr, "WARNING: neighbor hint unresolved (skipped): %d,%d:%s\n",
+			        hintsOut[i].Dx, hintsOut[i].Dy, hintsOut[i].Basename.c_str());
+			continue;
+		}
+		// Prefer the real file basename in the stored hint for later write-back
+		hintsOut[i].Basename = ze.Basename;
+		resolvedOut.push_back(ze);
+	}
+	printf("neighbor-hints: source=%s raw=%u resolved=%u\n",
+	       sourceOut.c_str(), (uint)hintsOut.size(), (uint)resolvedOut.size());
+}
+
+/** Translate all patch geometry of zones[begin..end) by (dx,dy) world units. */
+static void translateZonesXY(std::vector<SPaintZone> &zones, size_t begin, size_t end,
+                             float dx, float dy)
+{
+	for (size_t i = begin; i < end && i < zones.size(); ++i)
+	{
+		for (size_t p = 0; p < zones[i].Patches.size(); ++p)
+		{
+			NL3D::CPatchInfo &pi = zones[i].Patches[p];
+			for (uint v = 0; v < 4; ++v)
+			{
+				pi.Patch.Vertices[v].x += dx;
+				pi.Patch.Vertices[v].y += dy;
+			}
+			for (uint v = 0; v < 8; ++v)
+			{
+				pi.Patch.Tangents[v].x += dx;
+				pi.Patch.Tangents[v].y += dy;
+			}
+			for (uint v = 0; v < 4; ++v)
+			{
+				pi.Patch.Interiors[v].x += dx;
+				pi.Patch.Interiors[v].y += dy;
+			}
+		}
+	}
+}
+
+/**
+ * Clear and free all context/neighbor scenes.
+ * Callers must not hold dangling zone Node pointers from those scenes.
+ */
+static void clearContextFiles()
+{
+	for (size_t i = 0; i < g_ContextFiles.size(); ++i)
+		delete g_ContextFiles[i].Lm;
+	g_ContextFiles.clear();
+	g_NeighborScenes.clear();
+}
+
+/**
+ * Load RO context files from the hint chain for each editable center (board-driven).
+ * Continent without hints falls back to grid. Ecosystem needs appdata/embedded/place-context.
+ * skipBasenames: already-open editables (not re-loaded as RO).
+ */
+static void loadNeighborContextFiles(std::vector<SPaintZone> &zones, float cellSize,
+                                     const std::vector<std::string> &skipBasenames)
+{
+	clearContextFiles();
+	if (!g_LoadNeighbors) return;
+	if (g_StartupWorld.MaxDir.empty()) return;
+	if (!g_BoardSession && g_StartupWorld.Kind != ZPWS::Continent) return;
+
+	// Home footprint origin (for ecosystem translation): from primary zones already built
+	float homeOriginX = 0.f, homeOriginY = 0.f, stepX = 0.f, stepY = 0.f;
+	int fw = 1, fh = 1;
+	if (!zones.empty())
+	{
+		size_t primaryEnd = 0;
+		for (size_t i = 0; i < zones.size(); ++i)
+			if (zones[i].ZoneId < 1000) primaryEnd = i + 1;
+		if (primaryEnd > 0)
+			computeFootprintRect(zones, 0, primaryEnd, cellSize,
+			                     homeOriginX, homeOriginY, stepX, stepY, fw, fh);
+	}
+	if (fw < 1) fw = 1;
+	if (fh < 1) fh = 1;
+
+	std::set<std::string> skip;
+	for (size_t i = 0; i < skipBasenames.size(); ++i)
+		skip.insert(NLMISC::toLowerAscii(skipBasenames[i]));
+	// Also skip basenames already queued
+	std::set<std::string> loaded;
+
+	// Collect from each editable file's scene
+	struct SPending
+	{
+		ZPWS::SZoneEntry Zone;
+		int Dx, Dy;
+		bool Translate;
+	};
+	std::vector<SPending> pending;
+
+	for (size_t ei = 0; ei < g_EditableFiles.size(); ++ei)
+	{
+		if (!g_EditableFiles[ei].Editable) continue;
+		PMAXLOAD::SLoadedMax *lm = g_EditableFiles[ei].Lm ? g_EditableFiles[ei].Lm : g_PrimaryLm;
+		if (!lm || !lm->Scene) continue;
+
+		std::vector<SNeighborHint> hints;
+		std::vector<ZPWS::SZoneEntry> resolved;
+		std::string source;
+		collectNeighborHints(*lm->Scene, g_EditableFiles[ei].Basename, g_StartupWorld,
+		                     cellSize, hints, resolved, source);
+		// Pair hints with resolved (resolved may be shorter if some failed)
+		// Re-resolve to keep (dx,dy) pairing
+		for (size_t hi = 0; hi < hints.size(); ++hi)
+		{
+			ZPWS::SZoneEntry ze;
+			if (!resolveHintToZone(g_StartupWorld, hints[hi].Basename, ze))
+				continue;
+			const std::string key = NLMISC::toLowerAscii(ze.Basename);
+			if (skip.count(key) || loaded.count(key))
+				continue;
+			loaded.insert(key);
+			SPending p;
+			p.Zone = ze;
+			p.Dx = hints[hi].Dx;
+			p.Dy = hints[hi].Dy;
+			// Continent files sit in absolute world space (no translate). Ecosystem brick
+			// files are freestanding footprints — place at the hint cell offset relative to
+			// the primary footprint origin. Appdata hints store fine cells; embedded name
+			// deltas from continent grid tokens are also treated as fine-cell steps for
+			// placement (footprint-accurate multi-cell adjacency is the M17 mask work).
+			p.Translate = (g_StartupWorld.Kind == ZPWS::Ecosystem);
+			(void)source;
+			(void)fw;
+			(void)fh;
+			pending.push_back(p);
+		}
+	}
+
+	// M16c place-context entries already in g_ContextFiles? (filled before call) — none yet
+	// CLI --place-context handled separately via g_PlaceContextSpecs
+
+	printf("neighbors: loading %u context file(s)\n", (uint)pending.size());
+	for (size_t ni = 0; ni < pending.size(); ++ni)
+	{
+		const SPending &p = pending[ni];
+		PMAXLOAD::SLoadedMax *nlm = new PMAXLOAD::SLoadedMax();
+		if (!PMAXLOAD::loadMaxFile(p.Zone.MaxPath, *nlm))
+		{
+			fprintf(stderr, "WARNING: neighbor load failed: %s\n", p.Zone.MaxPath.c_str());
+			delete nlm;
+			continue;
+		}
+		uint base = nextZoneIdBase(zones);
+		const uint minBase = (uint)((g_EditableFiles.size() + g_ContextFiles.size() + 1) * 1000);
+		if (base < minBase) base = minBase;
+		const size_t before = zones.size();
+		if (!buildPaintZones(*nlm->Scene, zones, base, /*forceFrozen=*/true, p.Zone.Basename))
+		{
+			fprintf(stderr, "WARNING: neighbor has no paint zones: %s\n", p.Zone.MaxPath.c_str());
+			delete nlm;
+			continue;
+		}
+		if (p.Translate && before < zones.size())
+		{
+			// Shift so context footprint origin lands at homeOrigin + (dx,dy)*cellSize
+			float cOx = 0.f, cOy = 0.f, cSx = 0.f, cSy = 0.f;
+			int cw = 1, ch = 1;
+			computeFootprintRect(zones, before, zones.size(), cellSize, cOx, cOy, cSx, cSy, cw, ch);
+			const float wantX = homeOriginX + (float)p.Dx * cellSize;
+			const float wantY = homeOriginY + (float)p.Dy * cellSize;
+			translateZonesXY(zones, before, zones.size(), wantX - cOx, wantY - cOy);
+		}
+		SContextFile cf;
+		cf.Path = p.Zone.MaxPath;
+		cf.Basename = p.Zone.Basename;
+		cf.CellX = p.Dx;
+		cf.CellY = p.Dy;
+		cf.TranslateGeom = p.Translate;
+		cf.Lm = nlm;
+		g_ContextFiles.push_back(cf);
+		g_NeighborScenes.push_back(nlm);
+		printf("  context '%s' @ cell (%d,%d) zoneIdBase=%u FROZEN%s\n",
+		       cf.Basename.c_str(), cf.CellX, cf.CellY, base,
+		       p.Translate ? " (translated)" : "");
+	}
+}
+
+// CLI --place-context specs (M16c); applied after primary load
+struct SPlaceContextSpec
+{
+	int Dx, Dy;
+	std::string Basename;
+};
+static std::vector<SPlaceContextSpec> g_PlaceContextSpecs;
 
 // ---------------------------------------------------------------------------------------------
 // Ecosystem brick self-instances (ui M4a/M12): display-level duplicates at whole-footprint
@@ -2916,10 +3496,8 @@ static bool rebuildWorkingSet(std::string &err, uint &outWelds)
 	for (size_t i = 0; i < g_PaintCtx.Zones->size(); ++i)
 		oldIds.push_back((*g_PaintCtx.Zones)[i].ZoneId);
 
-	// Drop neighbor scenes (will re-load ring); keep editable scenes
-	for (size_t i = 0; i < g_NeighborScenes.size(); ++i)
-		delete g_NeighborScenes[i];
-	g_NeighborScenes.clear();
+	// Drop neighbor/context scenes (will re-load via hint chain); keep editable scenes
+	clearContextFiles();
 
 	// Rebuild zones vector
 	std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
@@ -2962,45 +3540,14 @@ static bool rebuildWorkingSet(std::string &err, uint &outWelds)
 		}
 	}
 
-	// Continent union 8-ring of EDITABLE files only
-	if (g_LoadNeighbors && g_StartupWorld.Kind == ZPWS::Continent)
+	// M16: neighbor/context via hint chain (appdata → embedded → continent grid)
 	{
-		std::vector<ZPWS::SZoneEntry> centers;
+		std::vector<std::string> skip;
 		for (size_t i = 0; i < g_EditableFiles.size(); ++i)
-		{
-			if (!g_EditableFiles[i].Editable)
-				continue;
-			ZPWS::SZoneEntry z;
-			z.MaxPath = g_EditableFiles[i].Path;
-			z.Basename = g_EditableFiles[i].Basename;
-			centers.push_back(z);
-		}
-		std::vector<ZPWS::SZoneEntry> neigh;
-		if (!centers.empty())
-			ZPWS::listContinentNeighborUnion(g_StartupWorld, centers, neigh);
-		// Exclude basenames already open as editable files
-		for (size_t ni = 0; ni < neigh.size(); ++ni)
-		{
-			if (findEditableByBasename(neigh[ni].Basename))
-				continue;
-			PMAXLOAD::SLoadedMax *nlm = new PMAXLOAD::SLoadedMax();
-			if (!PMAXLOAD::loadMaxFile(neigh[ni].MaxPath, *nlm))
-			{
-				fprintf(stderr, "WARNING: neighbor load failed: %s\n", neigh[ni].MaxPath.c_str());
-				delete nlm;
-				continue;
-			}
-			uint base = nextZoneIdBase(zones);
-			const uint minBase = (uint)((g_EditableFiles.size() + g_NeighborScenes.size() + 1) * 1000);
-			if (base < minBase)
-				base = minBase;
-			if (!buildPaintZones(*nlm->Scene, zones, base, /*forceFrozen=*/true, neigh[ni].Basename))
-			{
-				delete nlm;
-				continue;
-			}
-			g_NeighborScenes.push_back(nlm);
-		}
+			skip.push_back(g_EditableFiles[i].Basename);
+		loadNeighborContextFiles(zones, g_SessionCellSize, skip);
+		// Re-apply place-context specs (M16c) after rebuild
+		// (loadNeighborContextFiles only reads hints; place-context re-applied at initial load)
 	}
 
 	outWelds = weldPaintZones(zones);
@@ -3264,31 +3811,14 @@ static bool sessionGetCellState(const std::string &basename, ZPUI::ESessionCellS
 			(void)i;
 		}
 	}
-	// Track open neighbors by comparing against neighbor load list path basenames
-	// (re-list is heavy; mark closed if not in editables — ring is auto, not board-shown as open RO
-	// unless we also opened the file as RO via toggle). For board, neighbors of open editables
-	// show as open-RO when their FILE is in the ring:
-	if (g_StartupWorld.Kind == ZPWS::Continent && !g_EditableFiles.empty())
+	// Loaded RO context (hint chain / place-context / continent ring)
+	for (size_t i = 0; i < g_ContextFiles.size(); ++i)
 	{
-		std::vector<ZPWS::SZoneEntry> centers;
-		for (size_t i = 0; i < g_EditableFiles.size(); ++i)
+		if (NLMISC::toLowerAscii(g_ContextFiles[i].Basename)
+		    == NLMISC::toLowerAscii(basename))
 		{
-			if (!g_EditableFiles[i].Editable) continue;
-			ZPWS::SZoneEntry z;
-			z.Basename = g_EditableFiles[i].Basename;
-			z.MaxPath = g_EditableFiles[i].Path;
-			centers.push_back(z);
-		}
-		std::vector<ZPWS::SZoneEntry> neigh;
-		if (!centers.empty())
-			ZPWS::listContinentNeighborUnion(g_StartupWorld, centers, neigh);
-		for (size_t i = 0; i < neigh.size(); ++i)
-		{
-			if (NLMISC::toLowerAscii(neigh[i].Basename) == NLMISC::toLowerAscii(basename))
-			{
-				out = ZPUI::CellOpenReadOnly;
-				return true;
-			}
+			out = ZPUI::CellOpenReadOnly;
+			return true;
 		}
 	}
 	return true; // closed
@@ -4626,9 +5156,21 @@ int main(int argc, char **argv)
 	            "copy writes <basename>_painted.max under --out's directory (or cwd). overwrite first copies the "
 	            "input .max into that directory and operates on the copy (never the real source). Requires --paint-script.");
 	args.addArg("", "neighbors", "on|off",
-	            "Continent startup: load 8-ring neighbor .max files as frozen read-only context "
-	            "(default on for interactive/startup-auto, off for the legacy .max path). "
+	            "Board/continent startup: load neighbor .max files as frozen read-only context "
+	            "via the M16 hint chain (appdata → embedded names → continent grid; default on "
+	            "for interactive/startup-auto, off for the legacy .max path). "
 	            "Also accepted as ?neighbors=off on --startup-auto.");
+	args.addArg("", "embedded-context", "",
+	            "Board sessions: display embedded non-eligible/frozen zone copies from the open "
+	            "file (pre-M16). Default is board authority — those copies are skipped and used "
+	            "only as neighbor-name hints. Legacy direct-.max path always shows them.");
+	args.addArg("", "place-context", "dx,dy:basename",
+	            "Ecosystem/board: load an existing world brick file as frozen read-only context "
+	            "at fine-cell offset (dx,dy) relative to the primary footprint origin. Repeatable. "
+	            "Headless equivalent of the scratch-board context placement (M16c).");
+	args.addArg("", "dump-neighbor-hints", "file.max",
+	            "Headless: print the painter neighbor-hints appdata (and embedded fallback) for "
+	            "the eligible node of file.max; exit. Does not open the viewer.");
 	args.addArg("", "season", "sp|su|au|wi",
 	            "Initial landscape season texture preference (spring/summer/autumn/winter). "
 	            "Default: auto (first available postfix, historically spring). Only seasons that "
@@ -4676,8 +5218,90 @@ args.addArg("", "instances", "NxM",
 	g_verbose = args.haveLongArg("verbose");
 	g_CliWantThumbnail = args.haveLongArg("thumbnail");
 	g_AllZones = args.haveLongArg("all-zones");
+	g_EmbeddedContext = args.haveLongArg("embedded-context");
 	if (g_AllZones)
 		printf("eligibility: --all-zones (open every non-frozen RklPatch as paint target)\n");
+	if (g_EmbeddedContext)
+		printf("board: --embedded-context (show embedded non-eligible/frozen copies)\n");
+
+	// --place-context dx,dy:basename (repeatable)
+	if (args.haveLongArg("place-context"))
+	{
+		const std::vector<std::string> &pcs = args.getLongArg("place-context");
+		for (size_t i = 0; i < pcs.size(); ++i)
+		{
+			std::string::size_type colon = pcs[i].find(':');
+			if (colon == std::string::npos)
+			{
+				fprintf(stderr, "ERROR: --place-context expects dx,dy:basename, got '%s'\n",
+				        pcs[i].c_str());
+				return 1;
+			}
+			std::string coords = pcs[i].substr(0, colon);
+			std::string base = pcs[i].substr(colon + 1);
+			std::string::size_type comma = coords.find(',');
+			SPlaceContextSpec pc;
+			if (comma == std::string::npos
+			    || !NLMISC::fromString(coords.substr(0, comma), pc.Dx)
+			    || !NLMISC::fromString(coords.substr(comma + 1), pc.Dy)
+			    || base.empty())
+			{
+				fprintf(stderr, "ERROR: --place-context expects dx,dy:basename, got '%s'\n",
+				        pcs[i].c_str());
+				return 1;
+			}
+			// strip .max
+			std::string::size_type dot = base.rfind('.');
+			if (dot != std::string::npos && NLMISC::toLowerAscii(base.substr(dot)) == ".max")
+				base = base.substr(0, dot);
+			pc.Basename = base;
+			g_PlaceContextSpecs.push_back(pc);
+		}
+	}
+
+	// Headless: dump neighbor hints for a .max and exit
+	if (args.haveLongArg("dump-neighbor-hints"))
+	{
+		std::string path = args.getLongArg("dump-neighbor-hints")[0];
+		NL3D::registerSerial3d();
+		PMAXLOAD::SLoadedMax lm;
+		if (!PMAXLOAD::loadMaxFile(path, lm) || !lm.Scene)
+		{
+			fprintf(stderr, "ERROR: cannot load %s\n", path.c_str());
+			return 1;
+		}
+		const std::string basen = NLMISC::CFile::getFilenameWithoutExtension(path);
+		std::vector<SNeighborHint> hints;
+		std::vector<SZoneNode> nodes;
+		collectZoneNodes(*lm.Scene, nodes);
+		std::vector<bool> eligible;
+		computeZoneEligibility(nodes, basen, eligible);
+		std::string source = "none";
+		std::string raw;
+		for (size_t i = 0; i < nodes.size(); ++i)
+		{
+			if (i < eligible.size() && eligible[i] && !nodes[i].Frozen)
+			{
+				if (APPDATA::getScriptAppData(nodes[i].Node, NEL3D_APPDATA_PAINTER_NEIGHBOR_HINTS, raw))
+				{
+					source = "appdata";
+					printf("neighbor-hints appdata raw: %s\n", raw.c_str());
+					parseNeighborHintsString(raw, hints);
+					break;
+				}
+			}
+		}
+		if (source == "none")
+		{
+			if (extractEmbeddedNeighborHints(*lm.Scene, basen, 160.f, hints))
+				source = "embedded";
+		}
+		printf("neighbor-hints dump '%s': source=%s count=%u\n", basen.c_str(), source.c_str(),
+		       (uint)hints.size());
+		for (size_t i = 0; i < hints.size(); ++i)
+			printf("  %d,%d:%s\n", hints[i].Dx, hints[i].Dy, hints[i].Basename.c_str());
+		return 0;
+	}
 
 	// Season preference (M6a) before bank load so the first resolveBankTextures uses it
 	if (args.haveLongArg("season"))
@@ -4798,6 +5422,7 @@ args.addArg("", "instances", "NxM",
 	// ---- Startup flow: discover + auto / interactive screens ----
 	if (startupPath)
 	{
+		g_BoardSession = true; // M16: board authority + neighbor hint chain
 		ZPWS::SStartupCfg scfg;
 		ZPWS::loadStartupCfg(scfg);
 
@@ -5104,7 +5729,8 @@ args.addArg("", "instances", "NxM",
 	}
 	else
 	{
-		// Legacy .max path: neighbors off unless explicitly enabled
+		// Legacy .max path: board authority off; neighbors off unless explicitly enabled
+		g_BoardSession = false;
 		g_LoadNeighbors = false;
 		if (args.haveLongArg("neighbors"))
 		{
@@ -5117,6 +5743,12 @@ args.addArg("", "instances", "NxM",
 		{
 			fprintf(stderr, "WARNING: --place / --instances is ignored on the legacy .max path "
 			                "(use --startup-auto \"eco/brick?place=1,0,1\" or the ecosystem UI)\n");
+		}
+		if (!g_PlaceContextSpecs.empty())
+		{
+			fprintf(stderr, "WARNING: --place-context is ignored on the legacy .max path "
+			                "(use --startup-auto with a board session)\n");
+			g_PlaceContextSpecs.clear();
 		}
 		g_Places.clear();
 		g_InstanceCols = 1;
@@ -5334,39 +5966,87 @@ args.addArg("", "instances", "NxM",
 		g_InstanceCount = 1 + (uint)g_Places.size();
 	}
 
-	// Continent neighbors as frozen read-only context (M3b / M6b union ring).
+	// RO neighbors/context (M3b / M16 hint chain).
 	// Neighbors join landscape, cross-zone weld, and metaTile graph; carriers never written
 	// (forceFrozen => AnyUnfrozen stays false; writeBack skips frozen-only carriers).
-	if (g_LoadNeighbors && g_StartupWorld.Kind == ZPWS::Continent && !editables.empty())
+	// Priority: appdata hints → embedded-copy names → continent grid. Board sessions also
+	// skip embedded display copies (boardSkipEmbedded) so only REAL neighbor files show.
+	if (g_LoadNeighbors && !editables.empty()
+	    && (g_BoardSession || g_StartupWorld.Kind == ZPWS::Continent))
 	{
-		std::vector<ZPWS::SZoneEntry> neigh;
-		ZPWS::listContinentNeighborUnion(g_StartupWorld, editables, neigh);
-		printf("neighbors: loading %u frozen (union 8-ring of %u editable)\n",
-		       (uint)neigh.size(), (uint)editables.size());
-		for (size_t ni = 0; ni < neigh.size(); ++ni)
+		std::vector<std::string> skip;
+		for (size_t i = 0; i < editables.size(); ++i)
+			skip.push_back(editables[i].Basename);
+		loadNeighborContextFiles(zones, cellSize, skip);
+	}
+
+	// M16c: --place-context "dx,dy:basename" (ecosystem / board) — load as RO at offset
+	for (size_t pci = 0; pci < g_PlaceContextSpecs.size(); ++pci)
+	{
+		const SPlaceContextSpec &pc = g_PlaceContextSpecs[pci];
+		ZPWS::SZoneEntry ze;
+		if (g_StartupWorld.MaxDir.empty()
+		    || !resolveHintToZone(g_StartupWorld, pc.Basename, ze))
 		{
-			PMAXLOAD::SLoadedMax *nlm = new PMAXLOAD::SLoadedMax();
-			if (!PMAXLOAD::loadMaxFile(neigh[ni].MaxPath, *nlm))
-			{
-				fprintf(stderr, "WARNING: neighbor load failed: %s\n", neigh[ni].MaxPath.c_str());
-				delete nlm;
-				continue;
-			}
-			uint base = nextZoneIdBase(zones);
-			// Sparse base above all editables (editables use 0,1000,2000,...)
-			const uint minBase = (uint)((editables.size() + ni + 1) * 1000);
-			if (base < minBase)
-				base = minBase;
-			bool ok = buildPaintZones(*nlm->Scene, zones, base, /*forceFrozen=*/true);
-			if (!ok)
-			{
-				fprintf(stderr, "WARNING: neighbor has no paint zones: %s\n", neigh[ni].MaxPath.c_str());
-				delete nlm;
-				continue;
-			}
-			g_NeighborScenes.push_back(nlm);
-			printf("  neighbor '%s' zoneIdBase=%u FROZEN\n", neigh[ni].Basename.c_str(), base);
+			// Try as path under MaxDir even without full world list
+			fprintf(stderr, "WARNING: --place-context unresolved: %d,%d:%s\n",
+			        pc.Dx, pc.Dy, pc.Basename.c_str());
+			continue;
 		}
+		// Skip if already loaded as context or editable
+		bool already = false;
+		if (findEditableByBasename(ze.Basename)) already = true;
+		for (size_t i = 0; i < g_ContextFiles.size() && !already; ++i)
+			if (NLMISC::toLowerAscii(g_ContextFiles[i].Basename)
+			    == NLMISC::toLowerAscii(ze.Basename))
+				already = true;
+		if (already)
+		{
+			printf("place-context: '%s' already in working set (skip)\n", ze.Basename.c_str());
+			continue;
+		}
+		PMAXLOAD::SLoadedMax *nlm = new PMAXLOAD::SLoadedMax();
+		if (!PMAXLOAD::loadMaxFile(ze.MaxPath, *nlm))
+		{
+			fprintf(stderr, "WARNING: place-context load failed: %s\n", ze.MaxPath.c_str());
+			delete nlm;
+			continue;
+		}
+		uint base = nextZoneIdBase(zones);
+		const uint minBase = (uint)((g_EditableFiles.size() + g_ContextFiles.size() + 1) * 1000);
+		if (base < minBase) base = minBase;
+		const size_t before = zones.size();
+		if (!buildPaintZones(*nlm->Scene, zones, base, /*forceFrozen=*/true, ze.Basename))
+		{
+			delete nlm;
+			continue;
+		}
+		// Translate to placed cell (always for place-context)
+		float homeOriginX = 0.f, homeOriginY = 0.f, stepX = 0.f, stepY = 0.f;
+		int fw = 1, fh = 1;
+		size_t primaryEnd = 0;
+		for (size_t i = 0; i < zones.size(); ++i)
+			if (zones[i].ZoneId < 1000) primaryEnd = i + 1;
+		if (primaryEnd > 0)
+			computeFootprintRect(zones, 0, primaryEnd, cellSize,
+			                     homeOriginX, homeOriginY, stepX, stepY, fw, fh);
+		float cOx = 0.f, cOy = 0.f, cSx = 0.f, cSy = 0.f;
+		int cw = 1, ch = 1;
+		computeFootprintRect(zones, before, zones.size(), cellSize, cOx, cOy, cSx, cSy, cw, ch);
+		const float wantX = homeOriginX + (float)pc.Dx * cellSize;
+		const float wantY = homeOriginY + (float)pc.Dy * cellSize;
+		translateZonesXY(zones, before, zones.size(), wantX - cOx, wantY - cOy);
+		SContextFile cf;
+		cf.Path = ze.MaxPath;
+		cf.Basename = ze.Basename;
+		cf.CellX = pc.Dx;
+		cf.CellY = pc.Dy;
+		cf.TranslateGeom = true;
+		cf.Lm = nlm;
+		g_ContextFiles.push_back(cf);
+		g_NeighborScenes.push_back(nlm);
+		printf("place-context: '%s' @ (%d,%d) FROZEN translated\n",
+		       cf.Basename.c_str(), cf.CellX, cf.CellY);
 	}
 
 	uint welds = weldPaintZones(zones);
