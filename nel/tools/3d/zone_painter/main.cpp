@@ -607,6 +607,7 @@ static NLMISC::CEventListenerAsync *g_ViewerAsync = NULL;
 // painterscript (ui M23a): --lua-script path; file-static so runViewer's pre-pass sees
 // it without widening the signature (mirrors scriptPath's flow).
 static std::string g_LuaScriptPath;
+static std::string g_StartupLuaPath; // --startup-lua (else ./zone_painter_startup.lua), M23d
 // painterscript pump (ui M23a): while a script pumps the UI, viewer input is locked
 // (paint/nav ignored; ESC requests cancel). Checked by CPaintMouseListener.
 static bool g_ScriptUiLock = false;
@@ -3259,17 +3260,34 @@ static bool zpExecScriptOp(ZPPAINT::CPaintCore &core, const std::string &rawLine
 		}
 		else if (tok[0] == "tstroke" && tok.size() >= 6)
 	{
-		// tstroke <zone> <patch> <u> <v> <set> [rot-reserved] — the MOUSE tile-stroke path
-		// (brush-size recursion via opTileStroke), for recorder replay fidelity (ui M23b).
-		uint zone, patch, u, v; int ts;
+		// tstroke <zone> <patch> <u> <v> <set> [big 0|1] — the MOUSE tile-stroke path
+		// (brush-size recursion via opTileStroke), for recorder replay fidelity (ui M23b;
+		// M23d adds the 256 flag so recorded 256-mode strokes replay identically).
+		uint zone, patch, u, v; int ts, big = 0;
 		NLMISC::fromString(tok[1], zone);
 		NLMISC::fromString(tok[2], patch);
 		NLMISC::fromString(tok[3], u);
 		NLMISC::fromString(tok[4], v);
 		NLMISC::fromString(tok[5], ts);
+		if (tok.size() >= 7) NLMISC::fromString(tok[6], big);
 		sint32 tileId = (sint32)(patch * ZP_NUM_TILE_SEL + v * ZP_MAX_TILE_IN_PATCH + u);
-		ok = core.opTileStroke(zone, tileId, ts, false, true, err);
+		ok = core.opTileStroke(zone, tileId, ts, big != 0, true, err);
 		core.endStroke();
+	}
+	else if (tok[0] == "lockborders" && tok.size() >= 2)
+	{
+		// lockborders <0|1> — plugin lockBorders state (M23d op so recorded scripts
+		// replay headless; CLI --lock-borders sets the same core flag).
+		uint on = 0;
+		NLMISC::fromString(tok[1], on);
+		core.setLockBorders(on != 0);
+	}
+	else if (tok[0] == "maskmode" && tok.size() >= 2)
+	{
+		// maskmode <0|1> — color-brush mask-mode gate (Q key equivalent, M23d op).
+		uint on = 0;
+		NLMISC::fromString(tok[1], on);
+		core.setBrushMaskMode(on != 0);
 	}
 	else if (tok[0] == "checkseams" && tok.size() >= 2)
 		{
@@ -3531,10 +3549,11 @@ public:
 						std::string err;
 						if (Core->opTileStroke(HoverZone, HoverTile, CurTileSet, Mode256, true, err))
 						{
-							ZPSCRIPT::record(NLMISC::toString("painter.tileStroke(%u, %u, %u, %u, %d)",
+							ZPSCRIPT::record(NLMISC::toString("painter.tileStroke(%u, %u, %u, %u, %d%s)",
 								HoverZone, (uint)(HoverTile / ZP_NUM_TILE_SEL),
 								(uint)(HoverTile % ZP_NUM_TILE_SEL % ZP_MAX_TILE_IN_PATCH),
-								(uint)(HoverTile % ZP_NUM_TILE_SEL / ZP_MAX_TILE_IN_PATCH), CurTileSet));
+								(uint)(HoverTile % ZP_NUM_TILE_SEL / ZP_MAX_TILE_IN_PATCH), CurTileSet,
+								Mode256 ? ", true" : ""));
 							Pressed = true;
 							StrokeZone = HoverZone;
 							StrokeTile = HoverTile;
@@ -3607,10 +3626,11 @@ public:
 						std::string err;
 						if (Core->opTileStroke(HoverZone, HoverTile, CurTileSet, Mode256, false, err))
 						{
-							ZPSCRIPT::record(NLMISC::toString("painter.tileStroke(%u, %u, %u, %u, %d)",
+							ZPSCRIPT::record(NLMISC::toString("painter.tileStroke(%u, %u, %u, %u, %d%s)",
 								HoverZone, (uint)(HoverTile / ZP_NUM_TILE_SEL),
 								(uint)(HoverTile % ZP_NUM_TILE_SEL % ZP_MAX_TILE_IN_PATCH),
-								(uint)(HoverTile % ZP_NUM_TILE_SEL / ZP_MAX_TILE_IN_PATCH), CurTileSet));
+								(uint)(HoverTile % ZP_NUM_TILE_SEL / ZP_MAX_TILE_IN_PATCH), CurTileSet,
+								Mode256 ? ", true" : ""));
 							StrokeZone = HoverZone;
 							StrokeTile = HoverTile;
 						}
@@ -3683,6 +3703,21 @@ static bool g_HaveCapturedThumb = false;
 
 // Last save status for HUD / callers (also printed to stderr on failure)
 static std::string g_LastSaveStatus;
+
+/** Quote a string as a Lua literal for recorder lines. */
+static std::string luaQuote(const std::string &s)
+{
+	std::string r = "\"";
+	for (size_t i = 0; i < s.size(); ++i)
+	{
+		char c = s[i];
+		if (c == '"' || c == '\\') { r += '\\'; r += c; }
+		else if (c == '\n') r += "\\n";
+		else r += c;
+	}
+	r += "\"";
+	return r;
+}
 
 static void zpSelectMode(int mode)
 {
@@ -4327,6 +4362,8 @@ static void zpPropToggleUseBBox()
 	std::string err;
 	if (!zpWriteZoneProp(g_SelectedZoneId, "usebbox", p.UseBoundingBox ? 0 : 1, err))
 		g_PropStatusMsg = err;
+	else
+		ZPSCRIPT::record(NLMISC::toString("painter.setZoneProp(%u, \"usebbox\", %d)", g_SelectedZoneId, p.UseBoundingBox ? 0 : 1));
 }
 
 /** Basename of the editable file owning a zone id (panel readout). */
@@ -4407,10 +4444,30 @@ static void zpSelectTileSetAbs(int idx)
 		zpRebuildTilesetPalette();
 }
 
+/** Absolute 128/256 tile mode (painterscript M23d); records the resulting state. */
+static void zpSetTileSize256(bool on)
+{
+	if (!g_PaintCtx.Active || !g_PaintCtx.Paint) return;
+	if (g_PaintCtx.Paint->Mode256 == on) return;
+	g_PaintCtx.Paint->Mode256 = on;
+	ZPSCRIPT::record(on ? "painter.set256(true)" : "painter.set256(false)");
+}
+
 static void zpToggleTileSize()
 {
 	if (!g_PaintCtx.Active || !g_PaintCtx.Paint) return;
-	g_PaintCtx.Paint->Mode256 = !g_PaintCtx.Paint->Mode256;
+	zpSetTileSize256(!g_PaintCtx.Paint->Mode256);
+}
+
+/** Absolute color brush radius (meters, clamp 2..32); records the resulting state. */
+static void zpColorRadiusAbs(float m)
+{
+	if (!g_PaintCtx.Active || !g_PaintCtx.Paint) return;
+	if (m < 2.f) m = 2.f;
+	if (m > 32.f) m = 32.f;
+	if (g_PaintCtx.Paint->BrushRadius == m) return;
+	g_PaintCtx.Paint->BrushRadius = m;
+	ZPSCRIPT::record(NLMISC::toString("painter.setRadius(%.3f)", m));
 }
 
 /** Color brush radius step (×1.5 / ÷1.5, clamp 2..32). Shared by SizeUp/Down in Color mode and panel. */
@@ -4418,9 +4475,9 @@ static void zpColorRadiusDelta(int d)
 {
 	if (!g_PaintCtx.Active || !g_PaintCtx.Paint) return;
 	if (d > 0)
-		g_PaintCtx.Paint->BrushRadius = std::min(g_PaintCtx.Paint->BrushRadius * 1.5f, 32.f);
+		zpColorRadiusAbs(g_PaintCtx.Paint->BrushRadius * 1.5f);
 	else if (d < 0)
-		g_PaintCtx.Paint->BrushRadius = std::max(g_PaintCtx.Paint->BrushRadius / 1.5f, 2.f);
+		zpColorRadiusAbs(g_PaintCtx.Paint->BrushRadius / 1.5f);
 }
 
 static void zpBrushSizeDelta(int d)
@@ -4433,7 +4490,11 @@ static void zpBrushSizeDelta(int d)
 		int bs = (int)g_PaintCtx.Core->brushSize() + d;
 		if (bs < 0) bs = 0;
 		if (bs > 2) bs = 2;
-		g_PaintCtx.Core->setBrushSize((uint)bs);
+		if ((uint)bs != g_PaintCtx.Core->brushSize())
+		{
+			g_PaintCtx.Core->setBrushSize((uint)bs);
+			ZPSCRIPT::record(NLMISC::toString("painter.setBrushSize(%d)", bs));
+		}
 	}
 }
 
@@ -4446,24 +4507,40 @@ static void zpGroupDelta(int d)
 	ZPSCRIPT::record(NLMISC::toString("painter.setTileGroup(%d)", g));
 }
 
+/** Absolute hardness 0..255 (painterscript M23d); records the resulting state. */
+static void zpHardnessAbs(int v)
+{
+	if (!g_PaintCtx.Active || !g_PaintCtx.Paint) return;
+	if (v < 0) v = 0;
+	if (v > 255) v = 255;
+	if (g_PaintCtx.Paint->BrushHardness == (uint)v) return;
+	g_PaintCtx.Paint->BrushHardness = (uint)v;
+	ZPSCRIPT::record(NLMISC::toString("painter.setHardness(%d)", v));
+}
+
 /** Hardness ± (plugin ±0.2 on 0..1 → ±51 on 0..255). Keys Home/End + panel. */
 static void zpHardnessDelta(int d)
 {
 	if (!g_PaintCtx.Active || !g_PaintCtx.Paint) return;
-	int v = (int)g_PaintCtx.Paint->BrushHardness + d;
+	zpHardnessAbs((int)g_PaintCtx.Paint->BrushHardness + d);
+}
+
+/** Absolute opacity 0..255 (painterscript M23d); records the resulting state. */
+static void zpOpacityAbs(int v)
+{
+	if (!g_PaintCtx.Active || !g_PaintCtx.Paint) return;
 	if (v < 0) v = 0;
 	if (v > 255) v = 255;
-	g_PaintCtx.Paint->BrushHardness = (uint)v;
+	if (g_PaintCtx.Paint->BrushOpacity == (uint)v) return;
+	g_PaintCtx.Paint->BrushOpacity = (uint)v;
+	ZPSCRIPT::record(NLMISC::toString("painter.setOpacity(%d)", v));
 }
 
 /** Opacity ± (same step scale as hardness). Keys Insert/Delete + panel. */
 static void zpOpacityDelta(int d)
 {
 	if (!g_PaintCtx.Active || !g_PaintCtx.Paint) return;
-	int v = (int)g_PaintCtx.Paint->BrushOpacity + d;
-	if (v < 0) v = 0;
-	if (v > 255) v = 255;
-	g_PaintCtx.Paint->BrushOpacity = (uint)v;
+	zpOpacityAbs((int)g_PaintCtx.Paint->BrushOpacity + d);
 }
 
 /** Cycle brush mask: none → file1 → … → none (S key / panel). */
@@ -4473,16 +4550,24 @@ static void zpCycleBrushMask()
 	g_MaskCycle = (g_MaskCycle + 1) % ((int)g_MaskFiles.size() + 1);
 	std::string err;
 	if (g_MaskCycle == 0)
+	{
 		g_PaintCtx.Core->clearBrushMask();
+		ZPSCRIPT::record("painter.setBrushMask(\"none\")");
+	}
 	else if (!g_PaintCtx.Core->loadBrushMask(g_MaskFiles[g_MaskCycle - 1], err))
 		fprintf(stderr, "WARNING: %s\n", err.c_str());
+	else
+		ZPSCRIPT::record(NLMISC::toString("painter.setBrushMask(%s)",
+			luaQuote(g_MaskFiles[g_MaskCycle - 1]).c_str()));
 }
 
-/** Toggle color-brush mask mode (Q key / panel). */
+/** Toggle color-brush mask mode (Q key / panel). Records via the op-backed setter line. */
 static void zpToggleMaskMode()
 {
 	if (!g_PaintCtx.Active || !g_PaintCtx.Core) return;
-	g_PaintCtx.Core->setBrushMaskMode(!g_PaintCtx.Core->brushMaskMode());
+	const bool on = !g_PaintCtx.Core->brushMaskMode();
+	g_PaintCtx.Core->setBrushMaskMode(on);
+	ZPSCRIPT::record(on ? "painter.setMaskMode(true)" : "painter.setMaskMode(false)");
 }
 
 /** Displace paint index ±1 mod 16 ([ ] keys / panel). */
@@ -4491,7 +4576,9 @@ static void zpDisplaceIndexDelta(int d)
 	if (!g_PaintCtx.Active || !g_PaintCtx.Paint) return;
 	int v = ((int)g_PaintCtx.Paint->DisplaceIndex + d) % 16;
 	if (v < 0) v += 16;
+	if (g_PaintCtx.Paint->DisplaceIndex == (uint)v) return;
 	g_PaintCtx.Paint->DisplaceIndex = (uint)v;
+	ZPSCRIPT::record(NLMISC::toString("painter.setDisplaceIndex(%d)", v));
 }
 
 /** Absolute displace index 0-15 (palette cell / panel action test); same field as [ ] keys. */
@@ -4500,7 +4587,9 @@ static void zpDisplaceIndexAbs(int idx)
 	if (!g_PaintCtx.Active || !g_PaintCtx.Paint) return;
 	if (idx < 0) idx = 0;
 	if (idx > 15) idx = 15;
+	if (g_PaintCtx.Paint->DisplaceIndex == (uint)idx) return;
 	g_PaintCtx.Paint->DisplaceIndex = (uint)idx;
+	ZPSCRIPT::record(NLMISC::toString("painter.setDisplaceIndex(%d)", idx));
 }
 
 /** Brush color from the color picker (M9b); same field CLI --color initializes. */
@@ -4512,12 +4601,15 @@ static void zpSetBrushColor(int r, int g, int b)
 	g_ViewerBrushColor = NLMISC::CRGBA((uint8)r, (uint8)g, (uint8)b, 255);
 	if (g_PaintCtx.Paint)
 		g_PaintCtx.Paint->BrushColor = g_ViewerBrushColor;
+	ZPSCRIPT::record(NLMISC::toString("painter.setBrushColor(%d, %d, %d)", r, g, b));
 }
 
 static void zpToggleLockBorders()
 {
 	if (!g_PaintCtx.Active || !g_PaintCtx.Core) return;
-	g_PaintCtx.Core->setLockBorders(!g_PaintCtx.Core->lockBordersOn());
+	const bool on = !g_PaintCtx.Core->lockBordersOn();
+	g_PaintCtx.Core->setLockBorders(on);
+	ZPSCRIPT::record(on ? "painter.setLockBorders(true)" : "painter.setLockBorders(false)");
 }
 
 static void zpUndo()
@@ -4542,11 +4634,23 @@ static void zpFill(int rot)
 	std::string err;
 	uint patch = (uint)(pl.HoverTile / ZP_NUM_TILE_SEL);
 	if (pl.Mode == CPaintMouseListener::ModeTile)
-		g_PaintCtx.Core->opFillTile(pl.HoverZone, patch, pl.CurTileSet, rot, pl.Mode256, err);
+	{
+		if (g_PaintCtx.Core->opFillTile(pl.HoverZone, patch, pl.CurTileSet, rot, pl.Mode256, err))
+			ZPSCRIPT::record(NLMISC::toString("painter.fillTile(%u, %u, %d, %d, %s)",
+				pl.HoverZone, patch, pl.CurTileSet, rot, pl.Mode256 ? "true" : "false"));
+	}
 	else if (pl.Mode == CPaintMouseListener::ModeColor)
-		g_PaintCtx.Core->opFillColor(pl.HoverZone, patch, pl.BrushColor, 256, err);
+	{
+		if (g_PaintCtx.Core->opFillColor(pl.HoverZone, patch, pl.BrushColor, 256, err))
+			ZPSCRIPT::record(NLMISC::toString("painter.fillColor(%u, %u, \"%02x%02x%02x\")",
+				pl.HoverZone, patch, pl.BrushColor.R, pl.BrushColor.G, pl.BrushColor.B));
+	}
 	else
-		g_PaintCtx.Core->opFillDisplace(pl.HoverZone, patch, pl.DisplaceIndex, err);
+	{
+		if (g_PaintCtx.Core->opFillDisplace(pl.HoverZone, patch, pl.DisplaceIndex, err))
+			ZPSCRIPT::record(NLMISC::toString("painter.fillDisplace(%u, %u, %u)",
+				pl.HoverZone, patch, pl.DisplaceIndex));
+	}
 }
 
 /**
@@ -6070,6 +6174,8 @@ static bool sessionToggleEditable(const std::string &basename, bool saveFirst, b
 static void zpSeasonApplyFlush()
 {
 	printf("season: %s\n", ZPCTX::seasonPreferenceLabel().c_str());
+	ZPSCRIPT::record(NLMISC::toString("painter.setSeason(%s)",
+		luaQuote(ZPCTX::seasonPreference()).c_str()));
 	if (!g_PaintCtx.Bank || !g_PaintCtx.Land || !g_PaintCtx.UDriver)
 		return;
 	NL3D::IDriver *driver = static_cast<NL3D::CDriverUser *>(g_PaintCtx.UDriver)->getDriver();
@@ -6532,6 +6638,10 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 		paintBridge.propToggleSymmetry = zpPropToggleSymmetry;
 		paintBridge.propTogglePassable = zpPropTogglePassable;
 		paintBridge.propToggleUseBBox = zpPropToggleUseBBox;
+		paintBridge.setTileSize256 = zpSetTileSize256;
+		paintBridge.setHardnessAbs = zpHardnessAbs;
+		paintBridge.setOpacityAbs = zpOpacityAbs;
+		paintBridge.setColorRadiusAbs = zpColorRadiusAbs;
 		ZPUI::setPaintUIBridge(&paintBridge);
 
 		// painterscript host (ui M23a): viewer capabilities + bridge-backed state
@@ -6668,6 +6778,27 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 
 		theLand->enableAdditive(true);
 
+		// User startup script (M23d): --startup-lua path, else ./zone_painter_startup.lua
+		// when present (same convention as keys/vars cfg). Runs once per viewer session,
+		// before any CLI scripted pre-pass; errors are reported but never abort the viewer.
+		if (core)
+		{
+			std::string startupLua = g_StartupLuaPath;
+			bool explicitStartup = !startupLua.empty();
+			if (!explicitStartup && NLMISC::CFile::fileExists("zone_painter_startup.lua"))
+				startupLua = "zone_painter_startup.lua";
+			if (!startupLua.empty())
+			{
+				if (explicitStartup && !NLMISC::CFile::fileExists(startupLua))
+					fprintf(stderr, "WARNING: --startup-lua: no such file: %s\n", startupLua.c_str());
+				else
+				{
+					printf("startup script: %s\n", startupLua.c_str());
+					ZPSCRIPT::runFile(startupLua);
+				}
+			}
+		}
+
 		// Scripted pre-pass (the ops mirror straight into the attached live landscape)
 		g_ViewerScriptRc = 0;
 		if (core && !scriptPath.empty())
@@ -6801,6 +6932,14 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 					       crBefore, cgBefore, cbBefore,
 					       paintListener.BrushColor.R, paintListener.BrushColor.G, paintListener.BrushColor.B);
 				}
+			}
+			// Dev-only: ZONE_PAINTER_DUMP_RECORDER=1 prints the recorder buffer after the
+			// panel-action test (recorder E2E: enable recording via --lua-script pre-pass,
+			// drive a handler, assert the recorded painter.* line).
+			{
+				const char *dumpRec = getenv("ZONE_PAINTER_DUMP_RECORDER");
+				if (dumpRec && dumpRec[0] && dumpRec[0] != '0')
+					printf("recorder dump:\n%s--- end recorder ---\n", ZPSCRIPT::recorderText().c_str());
 			}
 			// Sync panel labels before capture so the screenshot shows live state
 			zpFillBridgeState(paintBridge);
@@ -7440,6 +7579,8 @@ int main(int argc, char **argv)
 	args.addArg("", "paint-script", "file", "Scripted paint ops (headless without a display mode)");
 	args.addArg("", "lua-script", "file", "painterscript: Lua over the same op layer (painter.* API; "
 	            "headless or viewer pre-pass; see the wiki painterscript stories)");
+	args.addArg("", "startup-lua", "file", "painterscript run once at viewer-session start "
+	            "(default: ./zone_painter_startup.lua when present; errors never abort the viewer)");
 	args.addArg("", "seed", "n", "Random seed for the paint ops (default 1; ops use a cycle counter for base tiles)");
 	args.addArg("", "lock-borders", "", "Lock tiles bordering frozen zones or open edges (plugin lockBorders)");
 	args.addArg("", "brush", "0-2", "Brush size for tile mouse strokes and displace painting (recursion depths 0/4/8)");
@@ -8158,6 +8299,8 @@ args.addArg("", "instances", "NxM",
 	std::string scriptPath = args.haveLongArg("paint-script") ? args.getLongArg("paint-script")[0] : std::string();
 	std::string luaScriptPath = args.haveLongArg("lua-script") ? args.getLongArg("lua-script")[0] : std::string();
 	g_LuaScriptPath = luaScriptPath;
+	if (args.haveLongArg("startup-lua"))
+		g_StartupLuaPath = args.getLongArg("startup-lua")[0];
 	std::string savePath = args.haveLongArg("save") ? args.getLongArg("save")[0] : std::string();
 	std::string panelSaveTest = args.haveLongArg("panel-save-test") ? args.getLongArg("panel-save-test")[0] : std::string();
 	if (!panelSaveTest.empty())

@@ -109,6 +109,12 @@ struct SPaintUIBridge
 	void (*propToggleSymmetry)();
 	void (*propTogglePassable)();
 	void (*propToggleUseBBox)();
+	// M23d painterscript absolute state setters (recorder-replay faithful; the frame-synced
+	// snapshot fields below are STALE mid-script, so scripts must not derive from them)
+	void (*setTileSize256)(bool on);
+	void (*setHardnessAbs)(int v);    // 0..255
+	void (*setOpacityAbs)(int v);     // 0..255
+	void (*setColorRadiusAbs)(float m); // clamp 2..32
 
 	// State snapshot for panel sync (filled by runViewer each frame)
 	bool HaveCore;
@@ -171,6 +177,8 @@ struct SPaintUIBridge
 		  displaceIndexAbs(NULL), togglePalette(NULL), toggleBoard(NULL), setBrushColor(NULL),
 		  propRotateDelta(NULL), propToggleSymmetry(NULL), propTogglePassable(NULL),
 		  propToggleUseBBox(NULL),
+		  setTileSize256(NULL), setHardnessAbs(NULL), setOpacityAbs(NULL),
+		  setColorRadiusAbs(NULL),
 		  HaveCore(false), Mode(0), CurTileSet(0), TileSetCount(0), Mode256(false),
 		  BrushSize(0), TileGroup(0), LockBorders(false), UndoDepth(0), CanSave(false),
 		  InteractiveSave(false), InstanceCount(1), UpdateThumbnail(true), SeasonCount(0),

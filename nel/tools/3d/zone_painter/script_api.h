@@ -115,6 +115,10 @@ const std::string &lastError();
 /** True while a painter script is executing (recorder re-entrance guard). */
 bool isExecuting();
 
+/** Cancel the executing script at its next pumpUI() (Script-window CANCEL / ESC-equivalent).
+ *	No-op when no script is executing. */
+void requestCancel();
+
 // Recorder (M23b window feeds from this; API available from M23a)
 void setRecording(bool on);
 bool isRecording();

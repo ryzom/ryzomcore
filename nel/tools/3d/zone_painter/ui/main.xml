@@ -661,6 +661,8 @@
 			onclick_l="zp_script_copyrec" params_l="" hardtext="REC>ED" />
 		<ctrl style="text_button_16" id="btn_clear" posparent="btn_copyrec" posref="MR ML" x="6" y="0"
 			onclick_l="zp_script_clear" params_l="" hardtext="CLEAR" />
+		<ctrl style="text_button_16" id="btn_cancel" posparent="btn_clear" posref="MR ML" x="6" y="0"
+			onclick_l="zp_script_cancel" params_l="" hardtext="CANCEL" />
 		<view type="text" id="lbl_out" posparent="btn_run" posref="BL TL" x="0" y="-6" fontsize="10" shadow="true"
 			global_color="false" color="255 220 140 255" hardtext="Output" />
 		<group type="frame" id="out_frame" options="w_box_frame" posparent="lbl_out" posref="BL TL" x="0" y="-2"

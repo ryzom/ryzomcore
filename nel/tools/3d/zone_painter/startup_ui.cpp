@@ -28,6 +28,7 @@
  */
 
 #include "startup_ui.h"
+#include "script_api.h"
 #include "editor_ui.h"
 #include "max_thumbnail.h"
 
@@ -1280,6 +1281,7 @@ class CAHZpSelectWorld : public IActionHandler
 public:
 	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params)
 	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		if (!s_Sess.Active) return;
 		int idx = -1;
 		fromString(params, idx);
@@ -1294,6 +1296,7 @@ class CAHZpSelectZone : public IActionHandler
 public:
 	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params)
 	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		if (!s_Sess.Active) return;
 		int idx = -1;
 		fromString(params, idx);
@@ -1308,6 +1311,7 @@ class CAHZpToggleZoneSelect : public IActionHandler
 public:
 	virtual void execute(CCtrlBase *pCaller, const std::string &params)
 	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		if (!s_Sess.Active) return;
 		// Session hub: R-click unused (L-click handles open/actions)
 		if (s_Sess.SessionMode) return;
@@ -1341,6 +1345,7 @@ class CAHZpOpenSelection : public IActionHandler
 public:
 	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
 	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		if (!s_Sess.Active) return;
 		if (s_Sess.PendingSelect.empty())
 			return;
@@ -1354,6 +1359,7 @@ class CAHZpSetInstances : public IActionHandler
 public:
 	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params)
 	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		if (!s_Sess.Active) return;
 		std::string layout = NLMISC::toLowerAscii(params);
 		if (!isSupportedInstanceLayout(layout))
@@ -1369,6 +1375,7 @@ class CAHZpZoneBack : public IActionHandler
 public:
 	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
 	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		if (s_Sess.SessionMode)
 		{
 			// Session hub: treat as back-to-painting
@@ -1388,6 +1395,7 @@ class CAHZpBackToPaint : public IActionHandler
 public:
 	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
 	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		setSessionBoardVisible(false);
 	}
 };
@@ -1401,6 +1409,7 @@ class CAHZpBrowse : public IActionHandler
 public:
 	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
 	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		if (!s_Sess.Active) return;
 		if (!s_Sess.FolderBrowserEnabled)
 		{
@@ -1419,6 +1428,7 @@ class CAHZpStartupQuit : public IActionHandler
 public:
 	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
 	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		if (!s_Sess.Active) return;
 		s_Sess.Quit = true;
 	}
@@ -1430,6 +1440,7 @@ class CAHZpFolderEnter : public IActionHandler
 public:
 	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params)
 	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		if (!s_Sess.Active) return;
 		if (params.empty()) return;
 		// params is the absolute path (may be ".." encoded as the parent path already)
@@ -1444,6 +1455,7 @@ class CAHZpFolderSelect : public IActionHandler
 public:
 	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
 	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		if (!s_Sess.Active || !s_Sess.Worlds) return;
 		// Fingerprint this folder / scan subdirs like root detection, then go to Screen A
 		std::vector<ZPWS::SWorldEntry> found;
@@ -1467,6 +1479,7 @@ class CAHZpFolderCancel : public IActionHandler
 public:
 	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
 	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		if (!s_Sess.Active) return;
 		// Cancel back to world list even if empty
 		showScreen(ScreenWorld);
@@ -2124,6 +2137,7 @@ class CAHZpCellClose : public IActionHandler
 public:
 	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
 	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		CWidgetManager::getInstance()->disableModalWindow();
 		const std::string base = s_Sess.PendingActionBasename;
 		if (base.empty() || !s_SessionBridge || !s_SessionBridge->closeZone)
@@ -2148,6 +2162,7 @@ class CAHZpCellSave : public IActionHandler
 public:
 	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
 	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		CWidgetManager::getInstance()->disableModalWindow();
 		const std::string base = s_Sess.PendingActionBasename;
 		if (base.empty() || !s_SessionBridge || !s_SessionBridge->saveZone)
@@ -2167,6 +2182,7 @@ class CAHZpCellToggle : public IActionHandler
 public:
 	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
 	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		CWidgetManager::getInstance()->disableModalWindow();
 		const std::string base = s_Sess.PendingActionBasename;
 		if (base.empty() || !s_SessionBridge || !s_SessionBridge->toggleEditable)
@@ -2201,6 +2217,7 @@ class CAHZpCellActionCancel : public IActionHandler
 public:
 	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
 	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		CWidgetManager::getInstance()->disableModalWindow();
 		s_Sess.PendingActionBasename.clear();
 	}
@@ -2213,6 +2230,7 @@ class CAHZpCloseConfirmSave : public IActionHandler
 public:
 	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
 	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		CWidgetManager::getInstance()->disableModalWindow();
 		const std::string base = s_Sess.PendingActionBasename;
 		if (base.empty() || !s_SessionBridge)
@@ -2241,6 +2259,7 @@ class CAHZpCloseConfirmDiscard : public IActionHandler
 public:
 	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
 	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		CWidgetManager::getInstance()->disableModalWindow();
 		const std::string base = s_Sess.PendingActionBasename;
 		if (base.empty() || !s_SessionBridge)
@@ -2269,6 +2288,7 @@ class CAHZpCloseConfirmCancel : public IActionHandler
 public:
 	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
 	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		CWidgetManager::getInstance()->disableModalWindow();
 		s_Sess.StatusMsg.clear();
 		s_Sess.PendingActionBasename.clear();
@@ -2302,6 +2322,7 @@ class CAHZpInstRotCW : public IActionHandler
 public:
 	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
 	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		CWidgetManager::getInstance()->disableModalWindow();
 		int cx = 0, cy = 0;
 		if (!scratchParsePending(cx, cy) || !s_SessionBridge || !s_SessionBridge->scratchRotate)
@@ -2319,6 +2340,7 @@ class CAHZpInstRotCCW : public IActionHandler
 public:
 	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
 	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		CWidgetManager::getInstance()->disableModalWindow();
 		int cx = 0, cy = 0;
 		if (!scratchParsePending(cx, cy) || !s_SessionBridge || !s_SessionBridge->scratchRotate)
@@ -2336,6 +2358,7 @@ class CAHZpInstMirror : public IActionHandler
 public:
 	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
 	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		CWidgetManager::getInstance()->disableModalWindow();
 		int cx = 0, cy = 0;
 		if (!scratchParsePending(cx, cy) || !s_SessionBridge || !s_SessionBridge->scratchMirror)
@@ -2353,6 +2376,7 @@ class CAHZpInstRemove : public IActionHandler
 public:
 	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
 	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		CWidgetManager::getInstance()->disableModalWindow();
 		int cx = 0, cy = 0;
 		if (!scratchParsePending(cx, cy) || !s_SessionBridge || !s_SessionBridge->scratchRemove)
@@ -2370,6 +2394,7 @@ class CAHZpInstCancel : public IActionHandler
 public:
 	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
 	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		CWidgetManager::getInstance()->disableModalWindow();
 		s_Sess.PendingActionBasename.clear();
 	}
@@ -2467,6 +2492,7 @@ class CAHZpEmptyPlaceInstance : public IActionHandler
 public:
 	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
 	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		CWidgetManager::getInstance()->disableModalWindow();
 		char sk = 0;
 		int cx = 0, cy = 0;
@@ -2489,6 +2515,7 @@ class CAHZpEmptyPlaceContext : public IActionHandler
 public:
 	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
 	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		CWidgetManager::getInstance()->disableModalWindow();
 		char sk = 0;
 		int cx = 0, cy = 0;
@@ -2504,6 +2531,7 @@ class CAHZpEmptyCancel : public IActionHandler
 public:
 	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
 	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		CWidgetManager::getInstance()->disableModalWindow();
 		s_Sess.PendingActionBasename.clear();
 	}
@@ -2515,6 +2543,7 @@ class CAHZpContextRemove : public IActionHandler
 public:
 	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
 	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		CWidgetManager::getInstance()->disableModalWindow();
 		const std::string &base = s_Sess.PendingActionBasename;
 		int cx = 0, cy = 0;
@@ -2545,6 +2574,7 @@ class CAHZpContextCancel : public IActionHandler
 public:
 	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
 	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		CWidgetManager::getInstance()->disableModalWindow();
 		s_Sess.PendingActionBasename.clear();
 	}
@@ -2556,6 +2586,7 @@ class CAHZpContextPick : public IActionHandler
 public:
 	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params)
 	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		CWidgetManager::getInstance()->disableModalWindow();
 		uint idx = 0;
 		if (!NLMISC::fromString(params, idx) || idx >= s_ContextPickerNames.size())
@@ -2579,6 +2610,7 @@ class CAHZpContextPickerCancel : public IActionHandler
 public:
 	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
 	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		CWidgetManager::getInstance()->disableModalWindow();
 	}
 };

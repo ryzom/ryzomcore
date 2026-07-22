@@ -57,6 +57,7 @@ static SScriptHost *s_Host = NULL;
 static bool s_Registered = false;
 static bool s_Executing = false;
 static bool s_Recording = false;
+static bool s_CancelReq = false; // Script-window CANCEL button (M23d); ESC rides the host
 static std::string s_Recorder;
 static std::string s_Output;
 static std::string s_LastError;
@@ -64,6 +65,7 @@ static std::string s_LastError;
 void setHost(SScriptHost *host) { s_Host = host; }
 SScriptHost *getHost() { return s_Host; }
 bool isExecuting() { return s_Executing; }
+void requestCancel() { if (s_Executing) s_CancelReq = true; }
 void setRecording(bool on) { s_Recording = on; }
 bool isRecording() { return s_Recording; }
 const std::string &recorderText() { return s_Recorder; }
@@ -184,20 +186,28 @@ static int lFillTile(CLuaState &ls) // painter.fillTile(zone,patch,set[,rot[,big
 		(uint)a[0], (uint)a[1], (uint)a[2], (uint)rot));
 }
 
-static int lPaintColor(CLuaState &ls) // painter.paintColor(zone,patch,u,v,"rrggbb")
+static int lPaintColor(CLuaState &ls) // painter.paintColor(zone,patch,u,v,"rrggbb"[,blend 0-256])
 {
 	double a[4]; std::string err, rgb;
-	if (!argNumbers(ls, 4, a, "paintColor(zone,patch,u,v,\"rrggbb\")", err)) return retErr(ls, err);
-	if (!argString(ls, 5, rgb)) return retErr(ls, "usage: paintColor(zone,patch,u,v,\"rrggbb\")");
+	if (!argNumbers(ls, 4, a, "paintColor(zone,patch,u,v,\"rrggbb\"[,blend])", err)) return retErr(ls, err);
+	if (!argString(ls, 5, rgb)) return retErr(ls, "usage: paintColor(zone,patch,u,v,\"rrggbb\"[,blend])");
+	double blend;
+	if (argNumber(ls, 6, blend))
+		return execOpRet(ls, toString("color %u %u %u %u %s %u",
+			(uint)a[0], (uint)a[1], (uint)a[2], (uint)a[3], rgb.c_str(), (uint)blend));
 	return execOpRet(ls, toString("color %u %u %u %u %s",
 		(uint)a[0], (uint)a[1], (uint)a[2], (uint)a[3], rgb.c_str()));
 }
 
-static int lFillColor(CLuaState &ls) // painter.fillColor(zone,patch,"rrggbb")
+static int lFillColor(CLuaState &ls) // painter.fillColor(zone,patch,"rrggbb"[,blend 0-256])
 {
 	double a[2]; std::string err, rgb;
-	if (!argNumbers(ls, 2, a, "fillColor(zone,patch,\"rrggbb\")", err)) return retErr(ls, err);
-	if (!argString(ls, 3, rgb)) return retErr(ls, "usage: fillColor(zone,patch,\"rrggbb\")");
+	if (!argNumbers(ls, 2, a, "fillColor(zone,patch,\"rrggbb\"[,blend])", err)) return retErr(ls, err);
+	if (!argString(ls, 3, rgb)) return retErr(ls, "usage: fillColor(zone,patch,\"rrggbb\"[,blend])");
+	double blend;
+	if (argNumber(ls, 4, blend))
+		return execOpRet(ls, toString("cfill %u %u %s %u",
+			(uint)a[0], (uint)a[1], rgb.c_str(), (uint)blend));
 	return execOpRet(ls, toString("cfill %u %u %s", (uint)a[0], (uint)a[1], rgb.c_str()));
 }
 
@@ -218,12 +228,13 @@ static int lColorBrush(CLuaState &ls) // painter.colorBrush(zone,x,y,radius,"rrg
 		(uint)a[0], a[1], a[2], a[3], rgb.c_str(), (uint)hard, (uint)opac));
 }
 
-static int lTileStroke(CLuaState &ls) // painter.tileStroke(zone,patch,u,v,set) — mouse-path stroke (brush size applies)
+static int lTileStroke(CLuaState &ls) // painter.tileStroke(zone,patch,u,v,set[,big]) — mouse-path stroke (brush size applies)
 {
 	double a[5]; std::string err;
-	if (!argNumbers(ls, 5, a, "tileStroke(zone,patch,u,v,set)", err)) return retErr(ls, err);
-	return execOpRet(ls, toString("tstroke %u %u %u %u %u",
-		(uint)a[0], (uint)a[1], (uint)a[2], (uint)a[3], (uint)a[4]));
+	if (!argNumbers(ls, 5, a, "tileStroke(zone,patch,u,v,set[,big])", err)) return retErr(ls, err);
+	bool big = argBoolOpt(ls, 6, false);
+	return execOpRet(ls, toString("tstroke %u %u %u %u %u %u",
+		(uint)a[0], (uint)a[1], (uint)a[2], (uint)a[3], (uint)a[4], big ? 1u : 0u));
 }
 
 static int lPaintDisplace(CLuaState &ls) // painter.paintDisplace(zone,patch,u,v,index)
@@ -257,6 +268,18 @@ static int lSetBrushMask(CLuaState &ls) // painter.setBrushMask("file.tga"|"none
 {
 	std::string s; if (!argString(ls, 1, s)) return retErr(ls, "usage: setBrushMask(\"file.tga\"|\"none\")");
 	return execOpRet(ls, "mask " + s);
+}
+
+static int lSetLockBorders(CLuaState &ls) // painter.setLockBorders(bool) — core state, headless-capable
+{
+	bool on = argBoolOpt(ls, 1, true);
+	return execOpRet(ls, on ? "lockborders 1" : "lockborders 0");
+}
+
+static int lSetMaskMode(CLuaState &ls) // painter.setMaskMode(bool) — core state, headless-capable
+{
+	bool on = argBoolOpt(ls, 1, true);
+	return execOpRet(ls, on ? "maskmode 1" : "maskmode 0");
 }
 
 static int lUndo(CLuaState &ls) { return execOpRet(ls, "undo"); }
@@ -376,7 +399,8 @@ static int lCloseZone(CLuaState &ls) // painter.closeZone("basename"[,saveFirst[
 static int lPumpUI(CLuaState &ls) // painter.pumpUI() -> true, or false when cancel was requested
 {
 	if (s_Host && s_Host->pumpUI) s_Host->pumpUI();
-	bool cancelled = s_Host && s_Host->cancelRequested && s_Host->cancelRequested();
+	bool cancelled = s_CancelReq
+		|| (s_Host && s_Host->cancelRequested && s_Host->cancelRequested());
 	ls.push(!cancelled);
 	return 1;
 }
@@ -449,6 +473,42 @@ static int lSetSeason(CLuaState &ls) // painter.setSeason("sp"|"su"|"au"|"wi")
 	return retOk(ls);
 }
 
+static int lSet256(CLuaState &ls) // painter.set256(bool) — 128/256 mouse-stroke mode
+{
+	bool on = argBoolOpt(ls, 1, true);
+	ZPUI::SPaintUIBridge *b = bridge();
+	if (!b || !b->setTileSize256) return retErr(ls, "set256: viewer only");
+	b->setTileSize256(on);
+	return retOk(ls);
+}
+
+static int lSetHardness(CLuaState &ls) // painter.setHardness(0..255)
+{
+	double v; if (!argNumber(ls, 1, v)) return retErr(ls, "usage: setHardness(0..255)");
+	ZPUI::SPaintUIBridge *b = bridge();
+	if (!b || !b->setHardnessAbs) return retErr(ls, "setHardness: viewer only");
+	b->setHardnessAbs((int)v);
+	return retOk(ls);
+}
+
+static int lSetOpacity(CLuaState &ls) // painter.setOpacity(0..255)
+{
+	double v; if (!argNumber(ls, 1, v)) return retErr(ls, "usage: setOpacity(0..255)");
+	ZPUI::SPaintUIBridge *b = bridge();
+	if (!b || !b->setOpacityAbs) return retErr(ls, "setOpacity: viewer only");
+	b->setOpacityAbs((int)v);
+	return retOk(ls);
+}
+
+static int lSetRadius(CLuaState &ls) // painter.setRadius(meters 2..32)
+{
+	double v; if (!argNumber(ls, 1, v)) return retErr(ls, "usage: setRadius(meters)");
+	ZPUI::SPaintUIBridge *b = bridge();
+	if (!b || !b->setColorRadiusAbs) return retErr(ls, "setRadius: viewer only");
+	b->setColorRadiusAbs((float)v);
+	return retOk(ls);
+}
+
 // ---------------------------------------------------------------------------------------------
 // Recorder API (window lands in M23b; the API is stable from M23a)
 
@@ -511,6 +571,9 @@ static const char *kBootstrap =
 	"  paintDisplace = __zp_paintDisplace, fillDisplace = __zp_fillDisplace,\n"
 	"  setBrushSize = __zp_setBrushSize, setTileGroup = __zp_setTileGroup,\n"
 	"  setBrushMask = __zp_setBrushMask,\n"
+	"  setLockBorders = __zp_setLockBorders, setMaskMode = __zp_setMaskMode,\n"
+	"  set256 = __zp_set256, setHardness = __zp_setHardness,\n"
+	"  setOpacity = __zp_setOpacity, setRadius = __zp_setRadius,\n"
 	"  undo = __zp_undo, redo = __zp_redo, seed = __zp_seed, checkSeams = __zp_checkSeams,\n"
 	"  setZoneProp = __zp_setZoneProp, getZoneProp = __zp_getZoneProp,\n"
 	"  zones = __zp_zones, save = __zp_save, saveAll = __zp_saveAll,\n"
@@ -545,6 +608,12 @@ bool ensureLua()
 	ls->registerFunc("__zp_setBrushSize", lSetBrushSize);
 	ls->registerFunc("__zp_setTileGroup", lSetTileGroup);
 	ls->registerFunc("__zp_setBrushMask", lSetBrushMask);
+	ls->registerFunc("__zp_setLockBorders", lSetLockBorders);
+	ls->registerFunc("__zp_setMaskMode", lSetMaskMode);
+	ls->registerFunc("__zp_set256", lSet256);
+	ls->registerFunc("__zp_setHardness", lSetHardness);
+	ls->registerFunc("__zp_setOpacity", lSetOpacity);
+	ls->registerFunc("__zp_setRadius", lSetRadius);
 	ls->registerFunc("__zp_undo", lUndo);
 	ls->registerFunc("__zp_redo", lRedo);
 	ls->registerFunc("__zp_seed", lSeed);
@@ -588,6 +657,7 @@ static int runInternal(const std::string &code, const std::string &label)
 	}
 	CLuaState *ls = CLuaManager::getInstance().getLuaState();
 	s_LastError.clear();
+	s_CancelReq = false;
 	s_Executing = true;
 	bool ok = false;
 	try
