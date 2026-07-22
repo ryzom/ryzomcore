@@ -22,19 +22,28 @@
 <!-- Startup row templates (filled at runtime via createGroupInstance)     -->
 <!-- ===================================================================== -->
 
-<!-- World row: primary button + path subtitle. idx is the worlds[] index. -->
+<!-- World row (M25p7: flat listbox, not a button — see zp_folder_row for the rationale).
+     primary hit row + path subtitle. idx is the worlds[] index. -->
 <template name="zp_world_row" keep="true" id="" title="" subtitle="" idx="0">
-	<group id="#id" w="520" h="40">
-		<ctrl style="text_button_16_name" id="btn" posref="TL TL" x="4" y="-2" w="500"
-			hardtext="#title" onclick_l="zp_select_world" params_l="#idx" />
-		<view type="text" id="sub" posparent="btn" posref="BL TL" x="6" y="-1" fontsize="10" shadow="true"
-			global_color="false" color="180 190 200 200" hardtext="#subtitle" line_maxw="500" />
+	<group id="#id" w="500" h="34">
+		<ctrl type="button" id="btn" button_type="push_button" posref="TL TL" x="0" y="0" w="500" h="34" scale="true"
+			tx_normal="blank.tga" tx_pushed="blank.tga" tx_over="blank.tga"
+			color="0 0 0 0" col_pushed="70 120 190 100" col_over="70 120 190 55"
+			global_color_normal="false" global_color_pushed="false" global_color_over="false"
+			onclick_l="zp_select_world" params_l="#idx" />
+		<view type="text" id="name" posparent="btn" posref="TL TL" x="6" y="-5" fontsize="12" shadow="true"
+			global_color="false" color="230 232 235 255" hardtext="#title" />
+		<view type="text" id="sub" posparent="name" posref="BL TL" x="0" y="-1" fontsize="10" shadow="true"
+			global_color="false" color="170 180 190 200" hardtext="#subtitle" line_maxw="490" />
 	</group>
 </template>
 
-<!-- Zone row (ecosystem list): optional 32x32 thumb in a CGroupFrame inset + open button.
-     idx is zones[] index. Code activates thumb_frame+thumb only when a preview exists
-     (no empty dark square for missing thumbs).
+<!-- Zone row (ecosystem list, M25p7: flat listbox): optional 32x32 thumb in a CGroupFrame
+     inset + a transparent hit row (was a bordered text button next to the thumb — same
+     wall-of-buttons issue as the folder browser, just partly hidden behind real thumbnail
+     art). Code activates thumb_frame+thumb only when a preview exists (no empty dark square
+     for missing thumbs) and re-anchors "btn"+"name" to the row's own left edge when there's
+     no thumb (unchanged from before — see the C++ hasThumb tuck).
      M10e: no row-level multi-select concept — L-click opens immediately; leave as-is. -->
 <template name="zp_zone_row" keep="true" id="" title="" idx="0" thumb="">
 	<group id="#id" w="560" h="36">
@@ -44,8 +53,13 @@
 			<view type="bitmap" id="thumb" posref="MM MM" w="28" h="28" scale="true"
 				texture="#thumb" global_color="false" color="255 255 255 255" active="false" />
 		</group>
-		<ctrl style="text_button_16_name" id="btn" posparent="thumb_frame" posref="MR ML" x="8" y="0" w="500"
-			hardtext="#title" onclick_l="zp_select_zone" params_l="#idx" />
+		<ctrl type="button" id="btn" button_type="push_button" posparent="thumb_frame" posref="MR ML" x="4" y="0" w="500" h="36" scale="true"
+			tx_normal="blank.tga" tx_pushed="blank.tga" tx_over="blank.tga"
+			color="0 0 0 0" col_pushed="70 120 190 100" col_over="70 120 190 55"
+			global_color_normal="false" global_color_pushed="false" global_color_over="false"
+			onclick_l="zp_select_zone" params_l="#idx" />
+		<view type="text" id="name" posparent="btn" posref="ML ML" x="8" y="0" fontsize="12" shadow="true"
+			global_color="false" color="230 232 235 255" hardtext="#title" />
 	</group>
 </template>
 
@@ -137,16 +151,23 @@
 	</group>
 </template>
 
-<!-- Folder browser row (M2c): directory name button + workspace tag right after it (M25p5).
-     Tag chains off the button itself (posparent="btn"), which auto-fits to its text width
-     despite the declared w — anchoring the tag to the fixed row width instead left a big
-     disconnected gap for short names (caught visually, not just by the row being too wide
-     for the scroll_text's clipped area, which was the first bug here). -->
+<!-- Folder browser row (M2c/M25p7): a plain listbox row, not a button. Every row used to be
+     a full bordered pill button (text_button_16_name) stacked in a column — technically a
+     list, but it read as a wall of separate buttons rather than a file listing (user: "the
+     actual folder list is still a janky panel of buttons"). Real Win98 listboxes have no
+     border at rest; the row is flat text and only the classic blue selection bar appears on
+     hover/click. `hit` is a transparent full-row button (blank.tga, invisible at rest) purely
+     for the click target and that highlight; `name`/`tag` are plain text on top. -->
 <template name="zp_folder_row" keep="true" id="" title="" path="" tag="">
-	<group id="#id" w="500" h="28">
-		<ctrl style="text_button_16_name" id="btn" posref="TL TL" x="4" y="-2" w="360"
-			hardtext="#title" onclick_l="zp_folder_enter" params_l="#path" />
-		<view type="text" id="tag" posparent="btn" posref="MR ML" x="10" y="0" fontsize="10" shadow="true"
+	<group id="#id" w="500" h="18">
+		<ctrl type="button" id="hit" button_type="push_button" posref="TL TL" x="0" y="0" w="500" h="18" scale="true"
+			tx_normal="blank.tga" tx_pushed="blank.tga" tx_over="blank.tga"
+			color="0 0 0 0" col_pushed="70 120 190 100" col_over="70 120 190 55"
+			global_color_normal="false" global_color_pushed="false" global_color_over="false"
+			onclick_l="zp_folder_enter" params_l="#path" />
+		<view type="text" id="name" posparent="hit" posref="ML ML" x="6" y="0" fontsize="11" shadow="true"
+			global_color="false" color="230 232 235 255" hardtext="#title" />
+		<view type="text" id="tag" posparent="name" posref="MR ML" x="10" y="0" fontsize="10" shadow="true"
 			global_color="false" color="255 200 120 220" hardtext="#tag" />
 	</group>
 </template>
@@ -195,6 +216,14 @@
 		<view type="text" id="status" posparent="hint" posref="BL TL" x="0" y="-4" fontsize="11" shadow="true"
 			global_color="false" color="255 200 120 220" hardtext="" />
 
+		<!-- M25p8: sunken 9-slice backdrop (w_box_frame — same dark-top/left, light-bottom/right
+		     bevel the Script window's code editor already uses) so the list reads as an inset
+		     panel rather than rows of text floating on the bare window background ("this isn't
+		     shitty flat web dev"). A sibling behind list_scroll, not a wrapping parent, so
+		     scroll_text keeps its own min/max-height resize behavior untouched; sized to its
+		     nominal w/h, which happens to line up with text_list's existing x=4/y=-4 padding. -->
+		<group type="frame" id="list_frame" options="w_box_frame" posparent="status" posref="BL TL" x="0" y="-8"
+			w="530" h="360" color="255 255 255 255" global_color="false" display="true" />
 		<!-- Scrollable stack of world rows (list id must be text_list for scroll_text) -->
 		<group type="scroll_text" id="list_scroll" posparent="status" posref="BL TL" x="0" y="-8" w="530" h="360" min_height="200" max_height="400">
 			<group type="list" id="text_list" shadow="true" fontsize="12" color="255 255 255 255" space="2"
@@ -240,6 +269,9 @@
 		<ctrl style="text_button_radio" id="layout_3x3" posparent="layout_2x2" posref="MR ML" x="4" y="0"
 			onclick_l="zp_set_instances" params_l="3x3" hardtext="3x3" active="false" />
 
+		<!-- M25p8: sunken 9-slice backdrop, see world_select's list_scroll for the rationale. -->
+		<group type="frame" id="list_frame" options="w_box_frame" posparent="world_sub" posref="BL TL" x="0" y="-8"
+			w="750" h="350" color="255 255 255 255" global_color="false" display="true" />
 		<!-- Ecosystem list: vertical scroll_text (unchanged). y: -8 under world_sub or below layout row. -->
 		<group type="scroll_text" id="list_scroll" posparent="world_sub" posref="BL TL" x="0" y="-8" w="750" h="350" min_height="180" max_height="400">
 			<group type="list" id="text_list" shadow="true" fontsize="12" color="255 255 255 255" space="1"
@@ -295,17 +327,23 @@
 		     classic Open-dialog "Look in:" combo + toolbar. Address-bar-style path field
 		     anyone can type/paste an arbitrary destination into; Up covers the one-level-back
 		     case with a single click, same as it always has. -->
-		<view type="text" id="goto_lbl" posref="TL TL" x="12" y="-10" fontsize="11" shadow="true"
+		<view type="text" id="goto_lbl" posref="TL TL" x="12" y="-9" fontsize="11" shadow="true"
 			global_color="false" color="180 200 220 220" hardtext="Look in:" />
-		<group type="edit_box" id="goto_path" posparent="goto_lbl" posref="MR ML" x="6" y="0" w="368" h="20"
-			prompt="" max_num_chars="500" entry_type="text"
-			enter_loose_focus="false" enter_recover_focus="true" reset_focus_on_hide="true"
-			want_return="false" clear_on_escape="false">
-			<view type="bitmap" id="bg" scale="true" sizeref="hw" texture="w_box_blank.tga" inherit_gc_alpha="true" />
-			<view id="edit_text" type="text" x="2" y="2" posref="BL BL" multi_line="false"
-				fontsize="11" color="255 255 255 255" shadow="true" hardtext="" global_color="false" />
+		<!-- M25p8: proper sunken 9-slice bevel (w_box_frame — dark top/left, light bottom/right,
+		     same asset the Script window's code editor already uses correctly) instead of a flat
+		     w_box_blank fill with no border at all ("this isn't shitty flat web dev"). The frame
+		     draws its own blank-texture interior; the nested edit_box needs no bg of its own. -->
+		<group type="frame" id="goto_frame" options="w_box_frame" posparent="goto_lbl" posref="MR ML" x="6" y="5"
+			w="368" h="20" color="255 255 255 255" global_color="false" display="true">
+			<group type="edit_box" id="goto_path" posref="TL TL" x="4" y="-4" w="360" h="12"
+				prompt="" max_num_chars="500" entry_type="text"
+				enter_loose_focus="false" enter_recover_focus="true" reset_focus_on_hide="true"
+				want_return="false" clear_on_escape="false">
+				<view id="edit_text" type="text" x="0" y="1" posref="TL TL" multi_line="false"
+					fontsize="11" color="255 255 255 255" shadow="true" hardtext="" global_color="false" />
+			</group>
 		</group>
-		<ctrl style="text_button_16" id="btn_go" posparent="goto_path" posref="MR ML" x="6" y="0"
+		<ctrl style="text_button_16" id="btn_go" posparent="goto_frame" posref="MR ML" x="6" y="0"
 			onclick_l="zp_folder_go" params_l="" hardtext="Go" />
 		<ctrl style="text_button_16" id="btn_up" posparent="btn_go" posref="MR ML" x="6" y="0"
 			onclick_l="zp_folder_up" params_l="" hardtext="Up" />
@@ -320,8 +358,13 @@
 		<view type="text" id="count" posparent="status" posref="BL TL" x="0" y="-2" fontsize="10" shadow="true"
 			global_color="false" color="180 190 200 200" hardtext="" />
 
+		<!-- M25p8: sunken 9-slice backdrop, see world_select's list_scroll for the rationale. -->
+		<group type="frame" id="list_frame" options="w_box_frame" posparent="count" posref="BL TL" x="0" y="-6"
+			w="530" h="300" color="255 255 255 255" global_color="false" display="true" />
 		<group type="scroll_text" id="list_scroll" posparent="count" posref="BL TL" x="0" y="-6" w="530" h="300" min_height="150" max_height="380">
-			<group type="list" id="text_list" shadow="true" fontsize="12" color="255 255 255 255" space="2"
+			<!-- space=0: a listbox is a continuous stack of flat rows, not spaced-out buttons
+			     (M25p7 — the hover/selection bar on each row is what separates them visually). -->
+			<group type="list" id="text_list" shadow="true" fontsize="12" color="255 255 255 255" space="0"
 				global_color="false" posref="TL TL" x="4" y="-4" sizeref="hw" w="-24" h="-8" maxelements="500" />
 			<ctrl type="scroll" id="scroll_bar" align="T" posref="TR TR" x="-4" y="-4" w="8" sizeref="h" h="-8"
 				tx_topright="w_scroll_l0_t.tga" tx_middle="w_scroll_l0_m.tga" tx_bottomleft="w_scroll_l0_b.tga" />
@@ -770,19 +813,22 @@
 
 		<view type="text" id="copy_lbl" posref="TL TL" x="16" y="-48" color="180 200 220 255" fontsize="11"
 			shadow="true" global_color="false" hardtext="Copy as:" />
-		<!-- Simple single-line edit box for the copy filename -->
-		<group type="edit_box" id="copy_name" posparent="copy_lbl" posref="BL TL" x="0" y="-6" w="320" h="20"
-			prompt="" max_num_chars="200" entry_type="text"
-			enter_loose_focus="false" enter_recover_focus="true" reset_focus_on_hide="true"
-			want_return="false" clear_on_escape="false">
-			<view type="bitmap" id="bg" scale="true" sizeref="hw" texture="w_box_blank.tga" inherit_gc_alpha="true" />
-			<view id="edit_text" type="text" x="2" y="2" posref="BL BL" multi_line="false"
-				fontsize="12" color="255 255 255 255" shadow="true" hardtext="" global_color="false" />
+		<!-- Simple single-line edit box for the copy filename. M25p8: proper sunken 9-slice
+		     bevel (w_box_frame) instead of a flat w_box_blank fill with no border. -->
+		<group type="frame" id="copy_frame" options="w_box_frame" posparent="copy_lbl" posref="BL TL" x="0" y="-6"
+			w="320" h="22" color="255 255 255 255" global_color="false" display="true">
+			<group type="edit_box" id="copy_name" posref="TL TL" x="4" y="-5" w="312" h="13"
+				prompt="" max_num_chars="200" entry_type="text"
+				enter_loose_focus="false" enter_recover_focus="true" reset_focus_on_hide="true"
+				want_return="false" clear_on_escape="false">
+				<view id="edit_text" type="text" x="0" y="1" posref="TL TL" multi_line="false"
+					fontsize="12" color="255 255 255 255" shadow="true" hardtext="" global_color="false" />
+			</group>
 		</group>
 
 		<!-- M5c: update OLE embedded thumbnail (default on). M25c: labeled checkbox (M21 idiom)
 		     for consistency with the panel's Mask mode / Lock borders / Prop rows. -->
-		<instance template="zp_checkbox_row" id="update_thumb" posparent="copy_name" posref="BL TL" x="0" y="-10"
+		<instance template="zp_checkbox_row" id="update_thumb" posparent="copy_frame" posref="BL TL" x="0" y="-10"
 			label="Update thumbnail" onclick="zp_save_thumb_toggle" params="" pushed="true" />
 
 		<ctrl style="text_button_16" id="btn_overwrite" posref="BL BL" x="16" y="16"

@@ -825,7 +825,7 @@ void openSaveDialog()
 	}
 	// Prefill edit box with <basename>_painted.max
 	std::string prefill = std::string(b->EditableBasename) + "_painted.max";
-	if (CGroupEditBox *eb = findEditBox("ui:zp:save_dialog:content:copy_name"))
+	if (CGroupEditBox *eb = findEditBox("ui:zp:save_dialog:content:copy_frame:copy_name"))
 		eb->setInputString(prefill);
 	// M5c: thumbnail checkbox defaults on
 	b->UpdateThumbnail = true;
@@ -1520,7 +1520,7 @@ public:
 		if (!b || !b->saveTo) return;
 
 		std::string name;
-		if (CGroupEditBox *eb = findEditBox("ui:zp:save_dialog:content:copy_name"))
+		if (CGroupEditBox *eb = findEditBox("ui:zp:save_dialog:content:copy_frame:copy_name"))
 			name = eb->getInputString();
 		// Strip whitespace
 		while (!name.empty() && (name[0] == ' ' || name[0] == '\t')) name.erase(0, 1);

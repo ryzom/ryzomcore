@@ -1169,7 +1169,7 @@ static void populateFolderList()
 	if (s_Sess.FolderPath.empty())
 		s_Sess.FolderPath = ZPWS::normalizeDir(CPath::getCurrentPath());
 
-	if (CGroupEditBox *eb = findEditBox("ui:zp:folder_browser:content:goto_path"))
+	if (CGroupEditBox *eb = findEditBox("ui:zp:folder_browser:content:goto_frame:goto_path"))
 		eb->setInputString(s_Sess.FolderPath);
 	setStatus("ui:zp:folder_browser:content:status", "");
 
@@ -1600,7 +1600,7 @@ public:
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		if (!s_Sess.Active) return;
-		CGroupEditBox *eb = findEditBox("ui:zp:folder_browser:content:goto_path");
+		CGroupEditBox *eb = findEditBox("ui:zp:folder_browser:content:goto_frame:goto_path");
 		if (!eb) return;
 		std::string typed = eb->getInputString();
 		// Trim surrounding whitespace (stray copy-paste padding).
