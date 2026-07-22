@@ -184,12 +184,6 @@ using namespace PIPELINE::MAX::BUILTIN;
 using namespace PIPELINE::MAX::NELPATCH;
 using namespace MAXMATH;
 
-// M16 neighbor-hints appdata id — registered in export_ids.h as
-// NEL3D_APPDATA_PAINTER_NEIGHBOR_HINTS (M16b). Local alias keeps M16a readable before
-// the define lands; M16b switches call sites to the macro (same value).
-#ifndef NEL3D_APPDATA_PAINTER_NEIGHBOR_HINTS
-#define NEL3D_APPDATA_PAINTER_NEIGHBOR_HINTS 1423062900
-#endif
 
 // Patch-state eval + RPO->CPatchInfo conversion: the shared unit of the zone exporter and this
 // painter. Header-only static implementation unit (zone x87 tier is TU-sensitive; see the
@@ -1025,6 +1019,88 @@ static bool readNeighborHintsFromNode(CNodeImpl *node, std::vector<SNeighborHint
 	if (!APPDATA::getScriptAppData(node, NEL3D_APPDATA_PAINTER_NEIGHBOR_HINTS, raw))
 		return false;
 	return parseNeighborHintsString(raw, out);
+}
+
+/**
+ * Write neighbor-hints appdata on the eligible node of `scene` (board-session save only).
+ * Shape matches Max setAppData / every other NEL3D_APPDATA_* entry:
+ *   AppData chunk 0x2150 on the node (CAnimatable)
+ *   entry key = (ScriptClassId 0x04d64858/0x16d1751d, SuperClassId 4128, subId)
+ *   value = StorageRaw null-terminated string
+ * Deterministic encode (same neighbor set → byte-identical resave).
+ */
+static bool writeNeighborHintsToScene(CScene &scene, const std::string &fileBasename,
+                                      const std::vector<SNeighborHint> &hints)
+{
+	std::vector<SZoneNode> nodes;
+	collectZoneNodes(scene, nodes);
+	std::vector<bool> eligible;
+	computeZoneEligibility(nodes, fileBasename, eligible);
+	CNodeImpl *target = NULL;
+	for (size_t i = 0; i < nodes.size(); ++i)
+	{
+		if (i < eligible.size() && eligible[i] && !nodes[i].Frozen)
+		{
+			target = nodes[i].Node;
+			break;
+		}
+	}
+	if (!target)
+	{
+		fprintf(stderr, "WARNING: neighbor-hints write: no eligible node in '%s'\n",
+		        fileBasename.c_str());
+		return false;
+	}
+	// Authoring accessor creates AppData container when absent
+	STORAGE::CAppData *ad = target->appData();
+	if (!ad)
+	{
+		fprintf(stderr, "WARNING: neighbor-hints write: appData() failed on '%s'\n",
+		        fileBasename.c_str());
+		return false;
+	}
+	const std::string payload = encodeNeighborHintsString(hints);
+	if (!ad->setScriptString(NEL3D_APPDATA_PAINTER_NEIGHBOR_HINTS, payload))
+	{
+		fprintf(stderr, "WARNING: neighbor-hints write: setScriptString failed\n");
+		return false;
+	}
+	printf("neighbor-hints write '%s': %s\n", fileBasename.c_str(), payload.c_str());
+	return true;
+}
+
+/**
+ * Collect current RO context files as hints for the given editable (board save).
+ * Offsets = SContextFile::CellX/Y recorded at load. Excludes other editables.
+ */
+static void collectHintsFromLoadedContext(std::vector<SNeighborHint> &out)
+{
+	out.clear();
+	for (size_t i = 0; i < g_ContextFiles.size(); ++i)
+	{
+		const SContextFile &cf = g_ContextFiles[i];
+		if (cf.Basename.empty()) continue;
+		out.push_back(SNeighborHint(cf.CellX, cf.CellY, cf.Basename));
+	}
+}
+
+// Forward: defined with multi-file save helpers
+static PIPELINE::MAX::CScene *editableScene(const SEditableFileInfo &efi);
+
+/** Board-session only: stamp neighbor hints onto every editable scene before save. */
+static void writeNeighborHintsIfBoardSession()
+{
+	if (!g_BoardSession) return;
+	std::vector<SNeighborHint> hints;
+	collectHintsFromLoadedContext(hints);
+	// Spec: record every loaded read-only neighbor file (g_ContextFiles).
+	for (size_t i = 0; i < g_EditableFiles.size(); ++i)
+	{
+		if (!g_EditableFiles[i].Editable) continue;
+		PIPELINE::MAX::CScene *sc = editableScene(g_EditableFiles[i]);
+		if (!sc) continue;
+		writeNeighborHintsToScene(*sc, g_EditableFiles[i].Basename, hints);
+	}
 }
 
 /**
@@ -3242,6 +3318,8 @@ static bool zpSaveTo(const std::string &target)
 		fprintf(stderr, "ERROR: %s\n", g_LastSaveStatus.c_str());
 		return false;
 	}
+	// M16b: board-session saves stamp neighbor-hints appdata (legacy --save does not)
+	writeNeighborHintsIfBoardSession();
 	// Pick the (only) dirty file's scene when multi; else primary
 	const SEditableFileInfo *srcFile = NULL;
 	if (!g_EditableFiles.empty())
@@ -3300,6 +3378,8 @@ static bool zpSaveOverwrite()
 		fprintf(stderr, "ERROR: %s\n", g_LastSaveStatus.c_str());
 		return false;
 	}
+	// M16b: board-session overwrite stamps neighbor-hints appdata
+	writeNeighborHintsIfBoardSession();
 
 	// Single-file legacy path when g_EditableFiles empty/one and only InputPath known
 	if (g_EditableFiles.size() <= 1)
@@ -3319,13 +3399,19 @@ static bool zpSaveOverwrite()
 		return true;
 	}
 
-	// Multi: save each dirty file (or all if none marked dirty yet after writeBack —
-	// dirty uses OriginalBytes; writeBack does not refresh it, so dirty still correct)
+	// Multi: save each dirty file. Board sessions also rewrite clean editables when
+	// neighbor hints changed (always write editables after stamp — paint dirty OR board).
 	uint saved = 0, skipped = 0;
 	for (size_t i = 0; i < g_EditableFiles.size(); ++i)
 	{
 		SEditableFileInfo &efi = g_EditableFiles[i];
-		if (!g_PaintCtx.Core->anyZoneDirty(efi.ZoneIds))
+		const bool dirty = g_PaintCtx.Core->anyZoneDirty(efi.ZoneIds);
+		if (!dirty && !g_BoardSession)
+		{
+			++skipped;
+			continue;
+		}
+		if (!efi.Editable)
 		{
 			++skipped;
 			continue;
@@ -3441,7 +3527,8 @@ static bool sessionSaveOneFile(SEditableFileInfo &efi, std::string &err)
 		err = "no paint core";
 		return false;
 	}
-	if (!g_PaintCtx.Core->anyZoneDirty(efi.ZoneIds))
+	// Board sessions always rewrite to stamp neighbor hints (even if paint clean).
+	if (!g_PaintCtx.Core->anyZoneDirty(efi.ZoneIds) && !g_BoardSession)
 	{
 		err = "not dirty";
 		return true; // no-op success
@@ -3452,6 +3539,8 @@ static bool sessionSaveOneFile(SEditableFileInfo &efi, std::string &err)
 		err = "write-back: " + wbErr;
 		return false;
 	}
+	if (g_BoardSession)
+		writeNeighborHintsIfBoardSession();
 	PIPELINE::MAX::CScene *scene = editableScene(efi);
 	if (!scene)
 	{

@@ -141,6 +141,16 @@
 #define NEL3D_APPDATA_LIGO_PASSABLE 1304892483
 #define NEL3D_APPDATA_LIGO_USE_BOUNDINGBOX 1342141818
 
+// Zone painter (ui M16) — neighbor hints written on board-session save.
+// Value is a single null-terminated script string (MAXSCRIPT_UTILITY_CLASS_ID / superclass
+// 4128, same shape as every other NEL3D_APPDATA_* entry Max setAppData would produce):
+//   v1|dx,dy:basename|dx,dy:basename|...
+// dx,dy are integer cell offsets relative to the eligible zone's footprint origin;
+// basename is the neighbor .max file basename without extension. Variable-length (no fixed
+// 8-slot ring). Unknown future versions: readers ignore the entry. Chosen after a full-repo
+// NEL3D_APPDATA id clash scan — 1423062900 was free (gap after EXPORT_SSS_TRACK 1423062802).
+#define NEL3D_APPDATA_PAINTER_NEIGHBOR_HINTS 1423062900
+
 // ---------------------------------------------------------------------------------------------
 // Special-object scene class identities the selection gates dispatch on. Part-A-only ids (the
 // part-B varies per object instance) as plain macros; full ids as CClassId constants.
