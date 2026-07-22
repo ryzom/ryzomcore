@@ -547,6 +547,14 @@ private:
 	                bool first, int rotation, bool _256);
 	uint8 calcRotPath(SPaintTile *from, SPaintTile *to, int depth, int rotate, int &dx, int &dy, int &cost);
 	SPaintTile *metaAt(uint zone, sint32 tileId);
+	// Self-instance duals: other zones sharing the same carrier+tileId (same pristine slot,
+	// distinct meta graphs). M13b — paint must visit/propagate through every dual or the
+	// instance-side seam graph is under-constrained relative to the primary-side path.
+	void collectDuals(SPaintTile *tile, std::vector<SPaintTile *> &out) const;
+	void markVisitedWithDuals(SPaintTile *tile, std::set<SPaintTile *> &visited) const;
+	// Local seam legality around a tile (GetBorderDesc corner TileSet identity, same as checkSeams).
+	bool tileSeamsLegal(SPaintTile *tile) const;
+	bool visitedSeamsLegal(const std::set<SPaintTile *> &visited) const;
 	void buildMeta(std::string &err);
 	void stitchEdge(uint zi, uint p, uint e, uint zj, uint pp, uint ee, int dividEdge, int offsetEdge);
 	int getBindedEdge(uint zone, int nPatch, int nVertInPatch) const;

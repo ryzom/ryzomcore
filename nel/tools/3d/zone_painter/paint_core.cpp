@@ -405,6 +405,74 @@ SPaintTile *CPaintCore::metaAt(uint zone, sint32 tileId)
 	return t->TileId >= 0 ? t : NULL;
 }
 
+void CPaintCore::collectDuals(SPaintTile *tile, std::vector<SPaintTile *> &out) const
+{
+	out.clear();
+	if (!tile || tile->TileId < 0) return;
+	const uint zi = (uint)tile->Zone;
+	if (zi >= m_Zones.size()) return;
+	const uint carrier = m_Zones[zi].Carrier;
+	const std::vector<uint> &shared = m_Carriers[carrier].Zones;
+	if (shared.size() <= 1) return;
+	for (size_t s = 0; s < shared.size(); ++s)
+	{
+		const uint zj = shared[s];
+		if (zj == zi) continue;
+		if (tile->TileId < 0 || (size_t)tile->TileId >= m_Zones[zj].Meta.size()) continue;
+		SPaintTile *d = const_cast<SPaintTile *>(&m_Zones[zj].Meta[tile->TileId]);
+		if (d->TileId >= 0) out.push_back(d);
+	}
+}
+
+void CPaintCore::markVisitedWithDuals(SPaintTile *tile, std::set<SPaintTile *> &visited) const
+{
+	if (!tile) return;
+	visited.insert(tile);
+	std::vector<SPaintTile *> duals;
+	collectDuals(tile, duals);
+	for (size_t i = 0; i < duals.size(); ++i)
+		visited.insert(duals[i]);
+}
+
+bool CPaintCore::tileSeamsLegal(SPaintTile *tile) const
+{
+	if (!tile || tile->TileId < 0) return true;
+	CTileDescP desc;
+	getTileIdx((uint)tile->Zone, tile->TileId, desc);
+	if (desc.isEmpty()) return true;
+	CTileSetIdx corner[4];
+	NL3D::CTileSet::TFlagBorder border[4][3];
+	CTileDescP idx;
+	for (int c = 0; c < 4; ++c) { corner[c].TileSet = -1; corner[c].Rotate = 0; }
+	if (!const_cast<CPaintCore *>(this)->getBorderDesc(tile, corner, border, &idx)) return true;
+	for (uint e = 0; e < 4; ++e)
+	{
+		SPaintTile *nb = tile->Voisins[e];
+		if (!nb) continue;
+		CTileDescP ndesc;
+		getTileIdx((uint)nb->Zone, nb->TileId, ndesc);
+		if (ndesc.isEmpty()) continue;
+		CTileSetIdx ncorner[4];
+		NL3D::CTileSet::TFlagBorder nborder[4][3];
+		CTileDescP nidx;
+		for (int c = 0; c < 4; ++c) { ncorner[c].TileSet = -1; ncorner[c].Rotate = 0; }
+		if (!const_cast<CPaintCore *>(this)->getBorderDesc(nb, ncorner, nborder, &nidx)) continue;
+		int edge = (2 + (int)e + tile->Rotate[e]) & 3;
+		CTileSetIdx a1 = ncorner[(edge + 1) & 3];
+		CTileSetIdx a2 = ncorner[edge];
+		if (corner[e].TileSet != a1.TileSet || corner[(e + 1) & 3].TileSet != a2.TileSet)
+			return false;
+	}
+	return true;
+}
+
+bool CPaintCore::visitedSeamsLegal(const std::set<SPaintTile *> &visited) const
+{
+	for (std::set<SPaintTile *>::const_iterator it = visited.begin(); it != visited.end(); ++it)
+		if (!tileSeamsLegal(*it)) return false;
+	return true;
+}
+
 // getBindedEdge port: which edge of nPatch the bound vertex nVertInPatch's bind seam lies on.
 int CPaintCore::getBindedEdge(uint zone, int nPatch, int nVertInPatch) const
 {
@@ -1077,7 +1145,10 @@ bool CPaintCore::propagateBorder(SPaintTile *tile, int curRotation, int curTileS
 	getTileIdx((uint)tile->Zone, tile->TileId, backup);
 	if (backup.isEmpty()) return true;
 
-	visited.insert(tile);
+	// M13b: mark dual meta tiles (shared carrier, same tileId) visited so the solver does not
+	// re-enter the same pristine slot through the other zone's graph mid-propagation. Dual
+	// neighbor links are still walked at the end of this function.
+	markVisitedWithDuals(tile, visited);
 
 	bool _256 = backup.getCase() > 0;
 
@@ -1610,7 +1681,8 @@ bool CPaintCore::putATile(SPaintTile *pTile, int tileSet, int curRotation, bool 
 		if (!other || isLocked(other) || other->Frozen) return false;
 	}
 
-	visited.insert(pTile);
+	// M13b: seed + duals share one pristine slot; mark all so dual graphs cannot re-seed it.
+	markVisitedWithDuals(pTile, visited);
 
 	if (tileSet == -1)
 		return clearATile(pTile, _256);
@@ -1627,15 +1699,15 @@ bool CPaintCore::putATile(SPaintTile *pTile, int tileSet, int curRotation, bool 
 		SPaintTile *other = pTile->getRight256(0, nRot);
 		desc.setTile(1, 1 + ((-curRotation - 1) & 3), 0, CTileIdx(nTile, (curRotation - nRot) & 3), CTileIdx(), CTileIdx());
 		setTile((uint)other->Zone, other->TileId, desc, &backupStack, true);
-		visited.insert(other);
+		markVisitedWithDuals(other, visited);
 		other = pTile->getBottom256(0, nRot);
 		desc.setTile(1, 1 + ((-curRotation + 1) & 3), 0, CTileIdx(nTile, (curRotation - nRot) & 3), CTileIdx(), CTileIdx());
 		setTile((uint)other->Zone, other->TileId, desc, &backupStack, true);
-		visited.insert(other);
+		markVisitedWithDuals(other, visited);
 		other = pTile->getRightBottom256(0, nRot);
 		desc.setTile(1, 1 + ((-curRotation + 2) & 3), 0, CTileIdx(nTile, (curRotation - nRot) & 3), CTileIdx(), CTileIdx());
 		setTile((uint)other->Zone, other->TileId, desc, &backupStack, true);
-		visited.insert(other);
+		markVisitedWithDuals(other, visited);
 	}
 	else
 	{
@@ -1696,6 +1768,32 @@ bool CPaintCore::putATile(SPaintTile *pTile, int tileSet, int curRotation, bool 
 				{
 					bContinue = false;
 					break;
+				}
+			}
+		}
+	}
+	// M13b: dual meta tiles (same carrier+tileId on another zone) own complementary
+	// voisin graphs under self-instance welds. After the seed zone's neighbors, also
+	// propagate from each dual's unvisited neighbors. Interior duals are already marked
+	// visited via markVisitedWithDuals so this is a no-op away from the weld; near-seam
+	// paints gain the primary (or instance) side of the shared slot.
+	if (bContinue)
+	{
+		std::vector<SPaintTile *> duals;
+		collectDuals(pTile, duals);
+		for (size_t di = 0; di < duals.size() && bContinue; ++di)
+		{
+			SPaintTile *d = duals[di];
+			for (int i = 0; i < 4; ++i)
+			{
+				uint ii = (offset + i) & 0x3;
+				if (d->Voisins[ii] && visited.find(d->Voisins[ii]) == visited.end())
+				{
+					if (!propagateBorder(d->Voisins[ii], (d->Rotate[ii] + curRotation) & 3, tileSet, visited, backupStack))
+					{
+						bContinue = false;
+						break;
+					}
 				}
 			}
 		}
@@ -1852,9 +1950,31 @@ bool CPaintCore::putATile(SPaintTile *pTile, int tileSet, int curRotation, bool 
 			default: return false;
 			}
 			setTile((uint)pTile->Zone, pTile->TileId, desc, NULL, true);
+			// M13b residual gate: transition-at-pick must also leave legal seams
+			if (!tileSeamsLegal(pTile))
+			{
+				getTileIdx((uint)pTile->Zone, pTile->TileId, desc);
+				// already wrote; revert seed to pre-op backup
+				setTile((uint)pTile->Zone, pTile->TileId, backup, NULL, true);
+				return false;
+			}
 		}
 		else
 		{
+			return false;
+		}
+	}
+	else
+	{
+		// M13b residual gate: full put claimed success — refuse if any touched tile has an
+		// illegal seam (hard UV/rot cases the dual-graph walk still cannot close; primary
+		// and instance both hit them). Revert the stroke so no illegal state persists.
+		if (!visitedSeamsLegal(visited))
+		{
+			fprintf(stderr, "putATile: refuse write that would leave illegal seams (zone %u tileId %d)\n",
+			        (uint)pTile->Zone, (int)pTile->TileId);
+			for (int back = (int)backupStack.size() - 1; back >= 0; --back)
+				setTile(backupStack[back].Zone, backupStack[back].TileId, backupStack[back].Old, NULL, true);
 			return false;
 		}
 	}
