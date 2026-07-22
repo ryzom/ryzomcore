@@ -55,6 +55,7 @@
 #include <nel/gui/ctrl_scroll.h>
 #include <nel/gui/ctrl_text_button.h>
 #include <nel/gui/group_container.h>
+#include <nel/gui/group_editbox.h>
 #include <nel/gui/group_list.h>
 #include <nel/gui/interface_group.h>
 #include <nel/gui/interface_parser.h>
@@ -130,6 +131,11 @@ static CGroupList *findList(const char *id)
 static CGroupContainer *findContainer(const char *id)
 {
 	return dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId(id));
+}
+
+static CGroupEditBox *findEditBox(const char *id)
+{
+	return dynamic_cast<CGroupEditBox *>(CWidgetManager::getInstance()->getElementFromId(id));
 }
 
 static void setContainerActive(const char *id, bool active)
@@ -1132,33 +1138,55 @@ static void populateZoneList()
 	}
 }
 
+/** Tag shown at the right of a folder row (M25p5): a cheap fingerprint (a handful of
+ *  isDirectory/fileExists checks — the same call scanChildrenForWorkspaces already makes for
+ *  every candidate during startup discovery) so browsing shows which folders actually lead
+ *  somewhere instead of it being a blind guess which subdir to open. */
+static std::string folderWorkspaceTag(const std::string &dirPath)
+{
+	std::vector<ZPWS::SWorldEntry> found;
+	ZPWS::fingerprintWorkspace(dirPath, found);
+	if (found.empty())
+		return std::string();
+	uint eco = 0, cont = 0;
+	for (size_t i = 0; i < found.size(); ++i)
+	{
+		if (found[i].Kind == ZPWS::Ecosystem)
+			++eco;
+		else
+			++cont;
+	}
+	if (eco && !cont)
+		return eco == 1 ? std::string("ecosystem") : toString("%u ecosystems", eco);
+	if (cont && !eco)
+		return std::string("continent");
+	return std::string("workspace");
+}
+
 static void populateFolderList()
 {
 	clearList("ui:zp:folder_browser:content:list_scroll:text_list");
 	if (s_Sess.FolderPath.empty())
 		s_Sess.FolderPath = ZPWS::normalizeDir(CPath::getCurrentPath());
 
-	if (CViewText *t = findText("ui:zp:folder_browser:content:path_label"))
-		t->setHardText(s_Sess.FolderPath);
+	if (CGroupEditBox *eb = findEditBox("ui:zp:folder_browser:content:goto_path"))
+		eb->setInputString(s_Sess.FolderPath);
 	setStatus("ui:zp:folder_browser:content:status", "");
 
-	// ".." parent row
+	// Up: fixed control instead of a ".." row buried in a scrolling list — same destination,
+	// but always in the same place and disabled outright at the filesystem root.
 	{
-		std::string parent = CFile::getPath(s_Sess.FolderPath);
-		parent = ZPWS::normalizeDir(parent);
-		if (!parent.empty() && parent != s_Sess.FolderPath)
-		{
-			std::vector<std::pair<std::string, std::string> > p;
-			p.push_back(std::make_pair(std::string("id"), std::string("dotdot")));
-			p.push_back(std::make_pair(std::string("title"), std::string("..")));
-			p.push_back(std::make_pair(std::string("path"), parent));
-			spawnRow("zp_folder_row", "ui:zp:folder_browser:content:list_scroll:text_list", p);
-		}
+		std::string parent = ZPWS::normalizeDir(CFile::getPath(s_Sess.FolderPath));
+		const bool hasParent = !parent.empty() && parent != s_Sess.FolderPath;
+		if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(
+		        CWidgetManager::getInstance()->getElementFromId("ui:zp:folder_browser:content:btn_up")))
+			btn->setFrozen(!hasParent);
 	}
 
 	std::vector<std::string> children;
 	CPath::getPathContent(s_Sess.FolderPath, false, true, false, children);
 	std::sort(children.begin(), children.end());
+	uint nShown = 0;
 	for (size_t i = 0; i < children.size(); ++i)
 	{
 		std::string child = children[i];
@@ -1171,17 +1199,24 @@ static void populateFolderList()
 		if (name == "." || name == "..")
 			continue;
 
+		std::string childPath = ZPWS::normalizeDir(child);
 		std::vector<std::pair<std::string, std::string> > p;
 		char idbuf[32];
 		snprintf(idbuf, sizeof(idbuf), "f%u", (uint)i);
 		p.push_back(std::make_pair(std::string("id"), std::string(idbuf)));
 		p.push_back(std::make_pair(std::string("title"), name));
-		p.push_back(std::make_pair(std::string("path"), ZPWS::normalizeDir(child)));
+		p.push_back(std::make_pair(std::string("path"), childPath));
+		p.push_back(std::make_pair(std::string("tag"), folderWorkspaceTag(childPath)));
 		spawnRow("zp_folder_row", "ui:zp:folder_browser:content:list_scroll:text_list", p);
+		++nShown;
 	}
 
 	if (CGroupList *list = findList("ui:zp:folder_browser:content:list_scroll:text_list"))
 		list->invalidateCoords();
+
+	if (CViewText *t = findText("ui:zp:folder_browser:content:count"))
+		t->setHardText(nShown == 0 ? std::string("No subfolders here")
+		                           : toString("%u folder(s)", nShown));
 }
 
 static void showScreen(EScreen screen)
@@ -1539,6 +1574,53 @@ public:
 };
 REGISTER_ACTION_HANDLER(CAHZpFolderEnter, "zp_folder_enter");
 
+/** M25p5: dedicated Up control (was a ".." row mixed into the scrolling list). */
+class CAHZpFolderUp : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		if (!s_Sess.Active) return;
+		std::string parent = ZPWS::normalizeDir(CFile::getPath(s_Sess.FolderPath));
+		if (parent.empty() || parent == s_Sess.FolderPath)
+			return; // already at the filesystem root
+		s_Sess.FolderPath = parent;
+		populateFolderList();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpFolderUp, "zp_folder_up");
+
+/** M25p5: address-bar-style direct path entry — type or paste any path, Go jumps to it.
+ *  Complements the breadcrumb (ancestors only) with arbitrary destinations. */
+class CAHZpFolderGo : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		if (!s_Sess.Active) return;
+		CGroupEditBox *eb = findEditBox("ui:zp:folder_browser:content:goto_path");
+		if (!eb) return;
+		std::string typed = eb->getInputString();
+		// Trim surrounding whitespace (stray copy-paste padding).
+		size_t b = typed.find_first_not_of(" \t");
+		size_t e = typed.find_last_not_of(" \t");
+		typed = (b == std::string::npos) ? std::string() : typed.substr(b, e - b + 1);
+		if (typed.empty())
+			return;
+		std::string norm = ZPWS::normalizeDir(typed);
+		if (norm.empty() || !CFile::isDirectory(norm))
+		{
+			setStatus("ui:zp:folder_browser:content:status", "Not a folder: " + typed);
+			return;
+		}
+		s_Sess.FolderPath = norm;
+		populateFolderList();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpFolderGo, "zp_folder_go");
+
 class CAHZpFolderSelect : public IActionHandler
 {
 public:
@@ -1684,7 +1766,23 @@ EStartupResult runStartupFlow(UDriver *driver,
 	if (!openedScreenB)
 	{
 		if (worlds.empty() && folderBrowserEnabled)
+		{
 			showScreen(ScreenFolder);
+			// Dev-only: ZONE_PAINTER_FOLDER_PATH re-navigates the folder browser to an
+			// arbitrary directory for headless shots — the real screen only ever auto-lands
+			// on a directory where nothing fingerprinted nearby (by construction, since that's
+			// what put it on this screen), so this is the only way to headlessly screenshot
+			// the list showing a row that fingerprints (the workspace tag, M25p5).
+			if (!screenshotPath.empty())
+			{
+				const char *fp = getenv("ZONE_PAINTER_FOLDER_PATH");
+				if (fp && fp[0] && CFile::isDirectory(fp))
+				{
+					s_Sess.FolderPath = ZPWS::normalizeDir(fp);
+					populateFolderList();
+				}
+			}
+		}
 		else
 			showScreen(ScreenWorld);
 	}

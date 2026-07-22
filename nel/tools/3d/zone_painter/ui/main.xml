@@ -137,11 +137,17 @@
 	</group>
 </template>
 
-<!-- Folder browser row (M2c): directory name button. -->
-<template name="zp_folder_row" keep="true" id="" title="" path="">
-	<group id="#id" w="520" h="28">
-		<ctrl style="text_button_16_name" id="btn" posref="TL TL" x="4" y="-2" w="500"
+<!-- Folder browser row (M2c): directory name button + workspace tag right after it (M25p5).
+     Tag chains off the button itself (posparent="btn"), which auto-fits to its text width
+     despite the declared w — anchoring the tag to the fixed row width instead left a big
+     disconnected gap for short names (caught visually, not just by the row being too wide
+     for the scroll_text's clipped area, which was the first bug here). -->
+<template name="zp_folder_row" keep="true" id="" title="" path="" tag="">
+	<group id="#id" w="500" h="28">
+		<ctrl style="text_button_16_name" id="btn" posref="TL TL" x="4" y="-2" w="360"
 			hardtext="#title" onclick_l="zp_folder_enter" params_l="#path" />
+		<view type="text" id="tag" posparent="btn" posref="MR ML" x="10" y="0" fontsize="10" shadow="true"
+			global_color="false" color="255 200 120 220" hardtext="#tag" />
 	</group>
 </template>
 
@@ -275,22 +281,46 @@
 <!-- ===================================================================== -->
 <!-- Screen C — folder browser (M2c; inactive until enabled)               -->
 <!-- ===================================================================== -->
-<group type="container" id="folder_browser" w="560" pop_min_w="480" pop_max_w="700" h="460" pop_min_h="320" pop_max_h="560"
+<group type="container" id="folder_browser" w="560" pop_min_w="480" pop_max_w="700" h="480" pop_min_h="340" pop_max_h="580"
 	title="zone_painter — browse for graphics" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
 	title_bar_open="false" open_button="false" right_button="true" lockable="false" openable="false"
 	opened="true" movable="true" active="false" x="120" y="520">
 	<group id="header_closed" x="0" y="0" h="12" posref="TL TL"></group>
 	<group id="header_opened" x="0" y="0" w="0" h="16" posref="TL TL"></group>
 	<group id="content" x="0" y="0" posref="TL TL" w="0" h="0">
-		<!-- M25c: orientation hint, matching the world/zone browser screens' hint line. -->
-		<view type="text" id="hint" posref="TL TL" x="12" y="-8" fontsize="11" shadow="true"
-			global_color="false" color="255 255 255 160" hardtext="Navigate to a folder with an ecosystem or continent workspace." />
-		<view type="text" id="path_label" posparent="hint" posref="BL TL" x="0" y="-6" fontsize="11" shadow="true"
-			global_color="false" color="180 220 255 255" hardtext="/" line_maxw="530" />
-		<view type="text" id="status" posparent="path_label" posref="BL TL" x="0" y="-4" fontsize="11" shadow="true"
-			global_color="false" color="255 200 120 220" hardtext="" />
+		<!-- M25p6: one sparse Win98 "Look in:" toolbar row — was a breadcrumb chip trail
+		     plus a separate Up button plus a separate path row (M25p5); user feedback was
+		     "less button party on a sheet, more Windows 98", so this drops the chip row
+		     entirely and folds Up into the same line as the path field, same idea as a
+		     classic Open-dialog "Look in:" combo + toolbar. Address-bar-style path field
+		     anyone can type/paste an arbitrary destination into; Up covers the one-level-back
+		     case with a single click, same as it always has. -->
+		<view type="text" id="goto_lbl" posref="TL TL" x="12" y="-10" fontsize="11" shadow="true"
+			global_color="false" color="180 200 220 220" hardtext="Look in:" />
+		<group type="edit_box" id="goto_path" posparent="goto_lbl" posref="MR ML" x="6" y="0" w="368" h="20"
+			prompt="" max_num_chars="500" entry_type="text"
+			enter_loose_focus="false" enter_recover_focus="true" reset_focus_on_hide="true"
+			want_return="false" clear_on_escape="false">
+			<view type="bitmap" id="bg" scale="true" sizeref="hw" texture="w_box_blank.tga" inherit_gc_alpha="true" />
+			<view id="edit_text" type="text" x="2" y="2" posref="BL BL" multi_line="false"
+				fontsize="11" color="255 255 255 255" shadow="true" hardtext="" global_color="false" />
+		</group>
+		<ctrl style="text_button_16" id="btn_go" posparent="goto_path" posref="MR ML" x="6" y="0"
+			onclick_l="zp_folder_go" params_l="" hardtext="Go" />
+		<ctrl style="text_button_16" id="btn_up" posparent="btn_go" posref="MR ML" x="6" y="0"
+			onclick_l="zp_folder_up" params_l="" hardtext="Up" />
 
-		<group type="scroll_text" id="list_scroll" posparent="status" posref="BL TL" x="0" y="-8" w="530" h="320" min_height="160" max_height="380">
+		<!-- Sunken-panel separator (same rule idiom as zp_list_header) between the toolbar
+		     and the list, a plain Win98 dialog convention. -->
+		<view type="bitmap" id="rule" posparent="goto_lbl" posref="BL TL" x="0" y="-10" w="536" h="1"
+			texture="blank.tga" scale="true" global_color="false" color="255 255 255 60" />
+
+		<view type="text" id="status" posparent="rule" posref="BL TL" x="0" y="-8" fontsize="11" shadow="true"
+			global_color="false" color="255 200 120 220" hardtext="" />
+		<view type="text" id="count" posparent="status" posref="BL TL" x="0" y="-2" fontsize="10" shadow="true"
+			global_color="false" color="180 190 200 200" hardtext="" />
+
+		<group type="scroll_text" id="list_scroll" posparent="count" posref="BL TL" x="0" y="-6" w="530" h="300" min_height="150" max_height="380">
 			<group type="list" id="text_list" shadow="true" fontsize="12" color="255 255 255 255" space="2"
 				global_color="false" posref="TL TL" x="4" y="-4" sizeref="hw" w="-24" h="-8" maxelements="500" />
 			<ctrl type="scroll" id="scroll_bar" align="T" posref="TR TR" x="-4" y="-4" w="8" sizeref="h" h="-8"
