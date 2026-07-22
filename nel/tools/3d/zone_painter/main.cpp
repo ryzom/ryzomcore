@@ -49,10 +49,11 @@
 // Scene assembly replicates the painter plugin: per RklPatch node evalNodePatch + object TM
 // at t=0 -> buildPatchInfo in authored space (NO symmetry/rotate — the painting scene shows
 // what the artist authored; zoneId = node collection index like the plugin's vectMesh index)
-// -> optional ecosystem self-instances (ui M4a/M12: --place dx,dy[,rot][,m]; --instances NxM
-// is a deprecated translation-only alias). Display clones at footprint-cell offsets with
-// optional rot/mirror about the primary AABB center; same Node pointers so paint_core shares
-// one carrier; ids from 10000. Per-zone Rotate/Symmetry feed transformDesc (plugin GetTile/
+// -> optional ecosystem self-instances (ui M4a/M12/M14a: --place dx,dy[,rot][,m]; --instances
+// NxM is a deprecated translation-only alias). Display clones with rot/mirror about the
+// FOOTPRINT block center (origin snapped to cell grid + half step); place (dx,dy) is the
+// min-corner cell of the transformed block. Same Node pointers so paint_core shares one
+// carrier; ids from 10000. Per-zone Rotate/Symmetry feed transformDesc (plugin GetTile/
 // SetTile). -> cross-zone open-edge weld (paint.cpp WELD_THRESOLD port, session-only) ->
 // CZone::build -> CZoneCornerSmoother -> Landscape.addZone. Frozen nodes (0x0976) are
 // boundary-reference display: landscape + weld + metaTile graph, never paint targets, never
@@ -255,22 +256,31 @@ static float g_SessionCellSize = 160.f;
 static float g_SessionSnap = 1.f;
 static bool g_SessionLockBorders = false;
 static NL3D::CTileBank *g_SessionBank = NULL;
-// Ecosystem self-instances (ui M4a/M12): board-driven placements. Primary zones sit at the
-// layout origin (rot 0, no mirror); each --place adds a display-level duplicate sharing the
-// same Node pointers (paint_core carrier keying) with geometry translated by whole-footprint
-// steps and optionally rotated/mirrored. --instances NxM is a deprecated alias that expands
-// to translation-only placements for the non-origin cells of the grid.
+// Ecosystem self-instances (ui M4a/M12/M14a): board-driven placements. Primary zones sit at
+// the layout origin (rot 0, no mirror); each --place adds a display-level duplicate sharing
+// the same Node pointers (paint_core carrier keying) with geometry transformed about the
+// FOOTPRINT-block center and translated so the transformed block's min-corner lands at the
+// place origin cell. --instances NxM is a deprecated alias that expands to translation-only
+// placements for the non-origin cells of a grid of whole footprints.
+//
+// Place convention (M14a): CellX,CellY = origin (min-corner) of the TRANSFORMED footprint
+// block in fine cells of --cellsize, relative to the primary footprint origin cell (0,0).
+// Primary home occupies [0,fw)×[0,fh). A rot-0 instance at (fw,0) sits immediately east of
+// home (adjacent blocks). Rot 1/3 transpose occupancy to fh×fw. Overlapping blocks refused.
 // Instance zone ids use the sparse base kInstanceZoneIdBase (CBorderVertex ids are uint16).
 static const uint kInstanceZoneIdBase = 10000;
 struct SInstancePlace
 {
-	int CellX, CellY; // footprint-cell offsets from primary origin
+	int CellX, CellY; // origin cell of transformed footprint block (fine cells; see above)
 	uint Rot;         // 0..3 CCW (NEL3D_APPDATA_ZONE_ROTATE / CZoneRegion::Rot)
 	bool Mirror;      // Flip (NEL3D_APPDATA_ZONE_SYMMETRY / CZoneRegion::Flip)
 	SInstancePlace() : CellX(0), CellY(0), Rot(0), Mirror(false) { }
 	SInstancePlace(int x, int y, uint r, bool m) : CellX(x), CellY(y), Rot(r), Mirror(m) { }
 };
 static std::vector<SInstancePlace> g_Places; // empty = primary only
+// Primary footprint in fine cells (set by appendInstanceZones / computeFootprintRect)
+static int g_FootprintCellsW = 1;
+static int g_FootprintCellsH = 1;
 // Legacy NxN reporting (deprecated --instances / Screen B layout)
 static uint g_InstanceCols = 1;
 static uint g_InstanceRows = 1;
@@ -911,9 +921,14 @@ static bool parsePlaceSpec(const std::string &s, SInstancePlace &out, std::strin
 	return true;
 }
 
-/** Parse deprecated "NxM" layout into translation-only places (non-origin cells). */
+/**
+ * Parse deprecated "NxM" layout into translation-only places (non-origin cells).
+ * Cell coordinates are fine-cell origins: slot (cx,cy) → origin (cx*fw, cy*fh) so
+ * adjacent footprint slots abut (M14a). fw/fh default 1 when footprint not yet known.
+ */
 static bool parseInstanceLayout(const std::string &s, uint &cols, uint &rows,
-                                std::vector<SInstancePlace> &places, std::string &err)
+                                std::vector<SInstancePlace> &places, std::string &err,
+                                int fw = 0, int fh = 0)
 {
 	cols = 1;
 	rows = 1;
@@ -941,21 +956,30 @@ static bool parseInstanceLayout(const std::string &s, uint &cols, uint &rows,
 		err = "unsupported instances layout '" + s + "' (supported: 1x1, 2x1, 1x2, 2x2, 3x3)";
 		return false;
 	}
+	if (fw < 1) fw = (g_FootprintCellsW > 0) ? g_FootprintCellsW : 1;
+	if (fh < 1) fh = (g_FootprintCellsH > 0) ? g_FootprintCellsH : 1;
 	for (uint cy = 0; cy < rows; ++cy)
 	for (uint cx = 0; cx < cols; ++cx)
 	{
 		if (cx == 0 && cy == 0) continue;
-		places.push_back(SInstancePlace((int)cx, (int)cy, 0, false));
+		places.push_back(SInstancePlace((int)cx * fw, (int)cy * fh, 0, false));
 	}
 	return true;
 }
 
 /**
- * Footprint step in world X/Y: AABB of primary zones, each axis ceil'd to a multiple of cellSize.
- * Empty primary => cellSize on both axes.
+ * Footprint rect (M14a): AABB of primary zones, origin snapped DOWN to the cell grid,
+ * size ceil'd UP to whole cells. Empty primary => 1×1 cell at (0,0).
+ *
+ * Pivot for rot/mirror is the FOOTPRINT block center (origin + half step), not the raw
+ * geometry AABB center — so rotation/mirror map grid cells to grid cells by construction
+ * for any integer W×H (square and non-square). Mask-accurate L-shapes are later.
  */
-static void computeFootprintStep(const std::vector<SPaintZone> &zones, size_t primaryBegin,
-                                 size_t primaryEnd, float cellSize, float &stepX, float &stepY)
+static void computeFootprintRect(const std::vector<SPaintZone> &zones, size_t primaryBegin,
+                                 size_t primaryEnd, float cellSize,
+                                 float &originX, float &originY,
+                                 float &stepX, float &stepY,
+                                 int &cellsW, int &cellsH)
 {
 	if (cellSize <= 0.f) cellSize = 100.f;
 	NLMISC::CAABBox bbox;
@@ -974,19 +998,105 @@ static void computeFootprintStep(const std::vector<SPaintZone> &zones, size_t pr
 			for (uint v = 0; v < 4; ++v) bbox.extend(bp.Interiors[v]);
 		}
 	}
-	float w = 0.f, h = 0.f;
-	if (init)
+	if (!init)
 	{
-		NLMISC::CVector mn = bbox.getMin();
-		NLMISC::CVector mx = bbox.getMax();
-		w = mx.x - mn.x;
-		h = mx.y - mn.y;
+		originX = originY = 0.f;
+		stepX = stepY = cellSize;
+		cellsW = cellsH = 1;
+		return;
 	}
-	// Round UP to nearest multiple of cellSize (at least one cell)
-	stepX = (float)(std::ceil((double)w / (double)cellSize) * (double)cellSize);
-	stepY = (float)(std::ceil((double)h / (double)cellSize) * (double)cellSize);
-	if (stepX < cellSize) stepX = cellSize;
-	if (stepY < cellSize) stepY = cellSize;
+	const NLMISC::CVector mn = bbox.getMin();
+	const NLMISC::CVector mx = bbox.getMax();
+	// Snap origin down to cell grid so the footprint rect is a clean cell block
+	originX = (float)(std::floor((double)mn.x / (double)cellSize) * (double)cellSize);
+	originY = (float)(std::floor((double)mn.y / (double)cellSize) * (double)cellSize);
+	const float extX = mx.x - originX;
+	const float extY = mx.y - originY;
+	cellsW = (int)std::ceil((double)extX / (double)cellSize);
+	cellsH = (int)std::ceil((double)extY / (double)cellSize);
+	if (cellsW < 1) cellsW = 1;
+	if (cellsH < 1) cellsH = 1;
+	stepX = (float)cellsW * cellSize;
+	stepY = (float)cellsH * cellSize;
+}
+
+/** Footprint step only (compat helper). */
+static void computeFootprintStep(const std::vector<SPaintZone> &zones, size_t primaryBegin,
+                                 size_t primaryEnd, float cellSize, float &stepX, float &stepY)
+{
+	float ox = 0.f, oy = 0.f;
+	int cw = 1, ch = 1;
+	computeFootprintRect(zones, primaryBegin, primaryEnd, cellSize, ox, oy, stepX, stepY, cw, ch);
+}
+
+/** Occupied block size after rot (mirror alone does not change the axis-aligned cell AABB). */
+static void footprintBlockSize(int cellsW, int cellsH, uint rot, bool /*mirror*/,
+                               int &outW, int &outH)
+{
+	if (rot & 1) { outW = cellsH; outH = cellsW; }
+	else { outW = cellsW; outH = cellsH; }
+}
+
+/**
+ * After rotating/mirroring a block about its own center, return the new min-corner origin
+ * (relative to the old origin) and the new size. Uses continuous center + half-extents so
+ * same-parity W×H stay on-grid; different-parity half-cells round with floor (unit-tested).
+ */
+static void footprintBlockAfterTransform(int cellsW, int cellsH, uint rot, bool mirror,
+                                         int &originDX, int &originDY, int &outW, int &outH)
+{
+	// Transform the continuous rect [0,W]×[0,H] about center (W/2,H/2)
+	const double W = (double)cellsW, H = (double)cellsH;
+	const double cx = W * 0.5, cy = H * 0.5;
+	const double corners[4][2] = { { 0, 0 }, { W, 0 }, { W, H }, { 0, H } };
+	double minX = 1e300, minY = 1e300, maxX = -1e300, maxY = -1e300;
+	for (int i = 0; i < 4; ++i)
+	{
+		double lx = corners[i][0] - cx;
+		double ly = corners[i][1] - cy;
+		if (mirror) lx = -lx;
+		double rx = lx, ry = ly;
+		switch (rot & 3)
+		{
+		case 0: rx = lx;  ry = ly;  break;
+		case 1: rx = -ly; ry = lx;  break;
+		case 2: rx = -lx; ry = -ly; break;
+		case 3: rx = ly;  ry = -lx; break;
+		}
+		const double x = rx + cx;
+		const double y = ry + cy;
+		if (x < minX) minX = x;
+		if (y < minY) minY = y;
+		if (x > maxX) maxX = x;
+		if (y > maxY) maxY = y;
+	}
+	originDX = (int)std::floor(minX + 1e-9);
+	originDY = (int)std::floor(minY + 1e-9);
+	outW = (int)std::floor(maxX - minX + 0.5);
+	outH = (int)std::floor(maxY - minY + 0.5);
+	if (outW < 1) outW = 1;
+	if (outH < 1) outH = 1;
+}
+
+/** Unit-check synthetic W≠H occupancy (no corpus brick is non-square multi-cell). */
+static void unitCheckFootprintOccupancy()
+{
+	int odx = 0, ody = 0, ow = 0, oh = 0;
+	footprintBlockAfterTransform(2, 1, 1, false, odx, ody, ow, oh);
+	const int w21 = ow, h21 = oh, dx21 = odx, dy21 = ody;
+	const bool ok21 = (w21 == 1 && h21 == 2);
+	footprintBlockAfterTransform(3, 2, 1, false, odx, ody, ow, oh);
+	const int w32 = ow, h32 = oh;
+	const bool ok32 = (w32 == 2 && h32 == 3);
+	footprintBlockAfterTransform(8, 8, 1, false, odx, ody, ow, oh);
+	const bool ok88 = (ow == 8 && oh == 8 && odx == 0 && ody == 0);
+	footprintBlockAfterTransform(2, 1, 0, true, odx, ody, ow, oh);
+	const bool okM = (ow == 2 && oh == 1);
+	printf("footprint unit-check: 2×1 R1 → %dx%d originΔ (%d,%d) %s; 3×2 R1 → %dx%d %s; "
+	       "8×8 R1 origin-stable %s; 2×1 M size-stable %s\n",
+	       w21, h21, dx21, dy21, ok21 ? "OK" : "FAIL",
+	       w32, h32, ok32 ? "OK" : "FAIL",
+	       ok88 ? "OK" : "FAIL", okM ? "OK" : "FAIL");
 }
 
 /** XY transform: mirror about Y (X flip, land/maxscript scale[-1,1,1]), then rot 0..3 CCW about pivot, then translate. */
@@ -1009,34 +1119,49 @@ static void transformInstanceXY(float &x, float &y, float pivotX, float pivotY,
 	y = ry + pivotY + dy;
 }
 
-/** Primary AABB center (XY) used as rot/mirror pivot for instances. */
+/**
+ * Pivot = footprint block center (origin snapped to cell grid + half step).
+ * Matches AABB center for grid-aligned square footprints; for W≠H keeps rot/mirror
+ * cell-grid faithful (M14a).
+ */
 static void computePrimaryPivot(const std::vector<SPaintZone> &zones, size_t primaryBegin,
-                                size_t primaryEnd, float &px, float &py)
+                                size_t primaryEnd, float cellSize, float &px, float &py)
 {
-	NLMISC::CAABBox bbox;
-	bool init = false;
-	for (size_t i = primaryBegin; i < primaryEnd && i < zones.size(); ++i)
+	float ox = 0.f, oy = 0.f, sx = 0.f, sy = 0.f;
+	int cw = 1, ch = 1;
+	computeFootprintRect(zones, primaryBegin, primaryEnd, cellSize, ox, oy, sx, sy, cw, ch);
+	px = ox + sx * 0.5f;
+	py = oy + sy * 0.5f;
+}
+
+/**
+ * World translation after rot/mirror about pivot so the transformed footprint's min-corner
+ * lands at board cell (placeX, placeY) — primary footprint origin cell is (0,0).
+ */
+static void computePlaceTranslation(float originX, float originY, float stepX, float stepY,
+                                    float pivotX, float pivotY, float cellSize,
+                                    int placeX, int placeY, uint rot, bool mirror,
+                                    float &outDx, float &outDy)
+{
+	// Transform the four corners of the primary footprint rect about the pivot
+	float xs[4] = { originX, originX + stepX, originX + stepX, originX };
+	float ys[4] = { originY, originY, originY + stepY, originY + stepY };
+	float tminX = 0.f, tminY = 0.f;
+	for (int i = 0; i < 4; ++i)
 	{
-		for (size_t p = 0; p < zones[i].Patches.size(); ++p)
+		float x = xs[i], y = ys[i];
+		transformInstanceXY(x, y, pivotX, pivotY, 0.f, 0.f, rot, mirror);
+		if (i == 0) { tminX = x; tminY = y; }
+		else
 		{
-			const NL3D::CBezierPatch &bp = zones[i].Patches[p].Patch;
-			for (uint v = 0; v < 4; ++v)
-			{
-				if (!init) { bbox.setCenter(bp.Vertices[v]); bbox.setHalfSize(NLMISC::CVector::Null); init = true; }
-				else bbox.extend(bp.Vertices[v]);
-			}
+			if (x < tminX) tminX = x;
+			if (y < tminY) tminY = y;
 		}
 	}
-	if (init)
-	{
-		NLMISC::CVector c = bbox.getCenter();
-		px = c.x;
-		py = c.y;
-	}
-	else
-	{
-		px = py = 0.f;
-	}
+	const float desiredX = originX + (float)placeX * cellSize;
+	const float desiredY = originY + (float)placeY * cellSize;
+	outDx = desiredX - tminX;
+	outDy = desiredY - tminY;
 }
 
 /**
@@ -1082,6 +1207,7 @@ static SPaintZone cloneInstanceZone(const SPaintZone &src, uint zoneId, float dx
 
 /**
  * Append display instances for g_Places (primary already at origin).
+ * Place (dx,dy) = min-corner cell of the transformed footprint block (M14a).
  * Returns number of zone entries appended. zone ids start at kInstanceZoneIdBase.
  */
 static uint appendInstanceZones(std::vector<SPaintZone> &zones, size_t primaryCount,
@@ -1090,10 +1216,21 @@ static uint appendInstanceZones(std::vector<SPaintZone> &zones, size_t primaryCo
 	if (places.empty()) return 0;
 	if (primaryCount == 0 || zones.size() < primaryCount) return 0;
 
-	float stepX = 0.f, stepY = 0.f;
-	computeFootprintStep(zones, 0, primaryCount, cellSize, stepX, stepY);
-	float pivotX = 0.f, pivotY = 0.f;
-	computePrimaryPivot(zones, 0, primaryCount, pivotX, pivotY);
+	float originX = 0.f, originY = 0.f, stepX = 0.f, stepY = 0.f;
+	int cellsW = 1, cellsH = 1;
+	computeFootprintRect(zones, 0, primaryCount, cellSize, originX, originY, stepX, stepY, cellsW, cellsH);
+	g_FootprintCellsW = cellsW;
+	g_FootprintCellsH = cellsH;
+	float pivotX = originX + stepX * 0.5f;
+	float pivotY = originY + stepY * 0.5f;
+
+	// One-shot synthetic W≠H occupancy math (corpus bricks are square multi-cell)
+	static bool s_UnitChecked = false;
+	if (!s_UnitChecked)
+	{
+		unitCheckFootprintOccupancy();
+		s_UnitChecked = true;
+	}
 
 	uint nextId = kInstanceZoneIdBase;
 	const uint needIds = (uint)places.size() * (uint)primaryCount;
@@ -1108,24 +1245,35 @@ static uint appendInstanceZones(std::vector<SPaintZone> &zones, size_t primaryCo
 	for (size_t pi = 0; pi < places.size(); ++pi)
 	{
 		const SInstancePlace &pl = places[pi];
-		const float dx = (float)pl.CellX * stepX;
-		const float dy = (float)pl.CellY * stepY;
+		float dx = 0.f, dy = 0.f;
+		computePlaceTranslation(originX, originY, stepX, stepY, pivotX, pivotY, cellSize,
+		                        pl.CellX, pl.CellY, pl.Rot & 3, pl.Mirror, dx, dy);
+		int bw = 0, bh = 0;
+		footprintBlockSize(cellsW, cellsH, pl.Rot, pl.Mirror, bw, bh);
 		for (size_t i = 0; i < primaryCount; ++i)
 		{
 			zones.push_back(cloneInstanceZone(zones[i], nextId, dx, dy, pivotX, pivotY, pl));
 			++nextId;
 			++appended;
 		}
+		printf("  place[%u] origin cell (%d,%d) rot %u%s  occupies %dx%d cells [%d,%d)×[%d,%d)\n",
+		       (uint)pi, pl.CellX, pl.CellY, pl.Rot, pl.Mirror ? " mirror" : "",
+		       bw, bh, pl.CellX, pl.CellX + bw, pl.CellY, pl.CellY + bh);
 	}
-	printf("instances: %u place(s)  footprint step (%.1f, %.1f)  pivot (%.1f, %.1f)  primary zones %u  display zones +%u (ids from %u)\n",
-	       (uint)places.size(), stepX, stepY, pivotX, pivotY, (uint)primaryCount, appended, kInstanceZoneIdBase);
-	for (size_t pi = 0; pi < places.size(); ++pi)
-	{
-		const SInstancePlace &pl = places[pi];
-		printf("  place[%u] cell (%d,%d) rot %u%s\n",
-		       (uint)pi, pl.CellX, pl.CellY, pl.Rot, pl.Mirror ? " mirror" : "");
-	}
-	printf("  note: footprint is geometry AABB rounded up to cellsize; mask-accurate L-shapes are later\n");
+	printf("instances: %u place(s)  footprint %dx%d cells step (%.1f, %.1f)  origin (%.1f, %.1f)  "
+	       "pivot (%.1f, %.1f)  primary zones %u  display zones +%u (ids from %u)\n",
+	       (uint)places.size(), cellsW, cellsH, stepX, stepY, originX, originY,
+	       pivotX, pivotY, (uint)primaryCount, appended, kInstanceZoneIdBase);
+	printf("  note: place dx,dy = min-corner of transformed block in fine cells; "
+	       "home occupies [0,%d)×[0,%d); mask-accurate L-shapes are later\n",
+	       cellsW, cellsH);
+	// Pivot grid-alignment check for multi-cell square (material-bassin 8×8)
+	const float halfCell = cellSize * 0.5f;
+	const bool pivotOnHalf = (std::fabs(std::fmod((double)pivotX, (double)halfCell)) < 1e-3
+	                          || std::fabs(std::fmod((double)pivotX, (double)halfCell) - halfCell) < 1e-3);
+	(void)pivotOnHalf;
+	printf("  pivot grid: pivot (%.3f, %.3f) = origin + half-step (%.3f, %.3f)\n",
+	       pivotX, pivotY, stepX * 0.5f, stepY * 0.5f);
 	return appended;
 }
 
@@ -2887,15 +3035,64 @@ static bool rebuildWorkingSet(std::string &err, uint &outWelds)
 }
 
 // ---------------------------------------------------------------------------------------------
-// Ecosystem scratch board callbacks (M12c)
+// Ecosystem scratch board callbacks (M12c / M14a multi-cell occupancy)
 
+static int scratchFw() { return g_FootprintCellsW > 0 ? g_FootprintCellsW : 1; }
+static int scratchFh() { return g_FootprintCellsH > 0 ? g_FootprintCellsH : 1; }
+
+/** True if cell (cx,cy) lies in the primary home footprint [0,fw)×[0,fh). */
+static bool scratchHomeOccupies(int cx, int cy)
+{
+	const int fw = scratchFw(), fh = scratchFh();
+	return cx >= 0 && cy >= 0 && cx < fw && cy < fh;
+}
+
+/** True if place block (origin + transformed size) contains (cx,cy). */
+static bool scratchPlaceOccupies(const SInstancePlace &pl, int cx, int cy)
+{
+	int bw = 0, bh = 0;
+	footprintBlockSize(scratchFw(), scratchFh(), pl.Rot, pl.Mirror, bw, bh);
+	return cx >= pl.CellX && cy >= pl.CellY && cx < pl.CellX + bw && cy < pl.CellY + bh;
+}
+
+/** Find place whose occupied block contains (cx,cy). */
 static bool scratchFindPlace(int cx, int cy, size_t &idx)
 {
 	for (size_t i = 0; i < g_Places.size(); ++i)
 	{
-		if (g_Places[i].CellX == cx && g_Places[i].CellY == cy)
+		if (scratchPlaceOccupies(g_Places[i], cx, cy))
 		{
 			idx = i;
+			return true;
+		}
+	}
+	return false;
+}
+
+/** Axis-aligned block overlap (half-open intervals). */
+static bool scratchBlocksOverlap(int ax, int ay, int aw, int ah, int bx, int by, int bw, int bh)
+{
+	return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
+}
+
+/** True if a candidate block overlaps home or any place except skipIdx (-1 = none). */
+static bool scratchBlockConflicts(int ox, int oy, int bw, int bh, int skipIdx, std::string &err)
+{
+	const int fw = scratchFw(), fh = scratchFh();
+	if (scratchBlocksOverlap(ox, oy, bw, bh, 0, 0, fw, fh))
+	{
+		err = "block overlaps home footprint";
+		return true;
+	}
+	for (size_t i = 0; i < g_Places.size(); ++i)
+	{
+		if ((int)i == skipIdx) continue;
+		int pw = 0, ph = 0;
+		footprintBlockSize(fw, fh, g_Places[i].Rot, g_Places[i].Mirror, pw, ph);
+		if (scratchBlocksOverlap(ox, oy, bw, bh, g_Places[i].CellX, g_Places[i].CellY, pw, ph))
+		{
+			err = NLMISC::toString("block overlaps instance at (%d,%d)",
+			                       g_Places[i].CellX, g_Places[i].CellY);
 			return true;
 		}
 	}
@@ -2907,13 +3104,15 @@ static bool scratchRebuild(std::string &err)
 	uint welds = 0;
 	if (!rebuildWorkingSet(err, welds))
 		return false;
-	printf("scratch rebuild: %u place(s), %u welds\n", (uint)g_Places.size(), welds);
+	printf("scratch rebuild: %u place(s), footprint %dx%d, %u welds\n",
+	       (uint)g_Places.size(), scratchFw(), scratchFh(), welds);
 	return true;
 }
 
 static bool scratchGetCellState(const std::string &basename, ZPUI::ESessionCellState &out)
 {
-	if (basename == "H" || basename == "HOME")
+	// Multi-cell: basenames H:cx,cy / I:ox,oy@cx,cy / E:cx,cy (also accept bare H / I:ox,oy)
+	if (basename == "H" || basename == "HOME" || (basename.size() >= 2 && basename[0] == 'H' && basename[1] == ':'))
 	{
 		out = g_PaintCtx.Core && !g_EditableFiles.empty()
 		          && g_PaintCtx.Core->anyZoneDirty(g_EditableFiles[0].ZoneIds)
@@ -2936,9 +3135,9 @@ static bool scratchGetCellState(const std::string &basename, ZPUI::ESessionCellS
 
 static bool scratchPlace(int cx, int cy, std::string &err)
 {
-	if (cx == 0 && cy == 0)
+	if (scratchHomeOccupies(cx, cy))
 	{
-		err = "cannot place on home cell";
+		err = "cannot place on home footprint";
 		return false;
 	}
 	size_t idx = 0;
@@ -2947,11 +3146,20 @@ static bool scratchPlace(int cx, int cy, std::string &err)
 		err = "cell already occupied";
 		return false;
 	}
+	const int fw = scratchFw(), fh = scratchFh();
+	// Place origin at the clicked cell, rot 0 → occupies [cx,cx+fw)×[cy,cy+fh)
+	if (scratchBlockConflicts(cx, cy, fw, fh, -1, err))
+		return false;
 	g_Places.push_back(SInstancePlace(cx, cy, 0, false));
 	g_InstanceCount = 1 + (uint)g_Places.size();
 	return scratchRebuild(err);
 }
 
+/**
+ * Rotate about the instance's footprint-block center (M14a): update Rot and recompute
+ * origin so it remains the min-corner of the transformed block; refuse if the new
+ * block would overlap home or another instance.
+ */
 static bool scratchRotate(int cx, int cy, int delta, std::string &err)
 {
 	size_t idx = 0;
@@ -2960,7 +3168,22 @@ static bool scratchRotate(int cx, int cy, int delta, std::string &err)
 		err = "no instance at cell";
 		return false;
 	}
-	g_Places[idx].Rot = (uint)((int)g_Places[idx].Rot + delta) & 3;
+	SInstancePlace pl = g_Places[idx];
+	const int fw = scratchFw(), fh = scratchFh();
+	int oldW = 0, oldH = 0;
+	footprintBlockSize(fw, fh, pl.Rot, pl.Mirror, oldW, oldH);
+	const double ctrX = (double)pl.CellX + 0.5 * (double)oldW;
+	const double ctrY = (double)pl.CellY + 0.5 * (double)oldH;
+	const uint newRot = (uint)((int)pl.Rot + delta) & 3;
+	int newW = 0, newH = 0;
+	footprintBlockSize(fw, fh, newRot, pl.Mirror, newW, newH);
+	const int newOx = (int)std::floor(ctrX - 0.5 * (double)newW + 1e-9);
+	const int newOy = (int)std::floor(ctrY - 0.5 * (double)newH + 1e-9);
+	if (scratchBlockConflicts(newOx, newOy, newW, newH, (int)idx, err))
+		return false;
+	g_Places[idx].Rot = newRot;
+	g_Places[idx].CellX = newOx;
+	g_Places[idx].CellY = newOy;
 	return scratchRebuild(err);
 }
 
@@ -2972,6 +3195,7 @@ static bool scratchMirror(int cx, int cy, std::string &err)
 		err = "no instance at cell";
 		return false;
 	}
+	// Mirror alone keeps the axis-aligned cell AABB; only the geometry flips.
 	g_Places[idx].Mirror = !g_Places[idx].Mirror;
 	return scratchRebuild(err);
 }
@@ -2994,6 +3218,19 @@ static bool scratchGetInstance(int cx, int cy, uint &rot, bool &mirror)
 	size_t idx = 0;
 	if (!scratchFindPlace(cx, cy, idx))
 		return false;
+	rot = g_Places[idx].Rot;
+	mirror = g_Places[idx].Mirror;
+	return true;
+}
+
+/** Resolve any cell in a block to the place origin (for board labels / popups). */
+static bool scratchGetInstanceOrigin(int cx, int cy, int &ox, int &oy, uint &rot, bool &mirror)
+{
+	size_t idx = 0;
+	if (!scratchFindPlace(cx, cy, idx))
+		return false;
+	ox = g_Places[idx].CellX;
+	oy = g_Places[idx].CellY;
 	rot = g_Places[idx].Rot;
 	mirror = g_Places[idx].Mirror;
 	return true;
@@ -3590,9 +3827,12 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 				sessionBridge.scratchMirror = scratchMirror;
 				sessionBridge.scratchRemove = scratchRemove;
 				sessionBridge.scratchGetInstance = scratchGetInstance;
+				sessionBridge.scratchGetInstanceOrigin = scratchGetInstanceOrigin;
 				sessionBridge.ScratchHomeName = g_StartupZone.Basename.empty()
 					? g_StartupWorld.WorldName
 					: g_StartupZone.Basename;
+				sessionBridge.FootprintCellsW = scratchFw();
+				sessionBridge.FootprintCellsH = scratchFh();
 			}
 			ZPUI::setSessionBoardBridge(&sessionBridge);
 		}
@@ -4311,14 +4551,16 @@ int main(int argc, char **argv)
             "markers skipped. Null-edit / write-back still whole-file; paint-script zone "
             "ids address PAINTABLE zones only.");
 args.addArg("", "place", "dx,dy[,rot][,m]",
-	            "Ecosystem: place a self-instance of the open brick at footprint-cell (dx,dy) "
-	            "with optional rotation 0..3 (90° CCW steps) and mirror (m|1|true). Repeatable. "
-	            "Primary stays at origin rot 0 / no mirror. Geometry is rotated/mirrored about "
-	            "the primary AABB center; initial tile display remounts U under mirror and "
-	            "applies transformTile (M13c) so a fresh place matches painted-then-mirrored "
-	            "before any stroke. Display clones share one paint carrier; picks and paint "
-	            "ops inverse-map through transformDesc. Footprint step = geometry AABB ceil'd "
-	            "to --cellsize. Ecosystem-only. Also ?place=dx,dy,rot on --startup-auto.",
+	            "Ecosystem: place a self-instance whose TRANSFORMED footprint block has min-corner "
+	            "at fine cell (dx,dy) relative to the primary footprint origin (0,0). Optional "
+	            "rotation 0..3 (90° CCW) and mirror (m|1|true). Repeatable. Primary home occupies "
+	            "[0,fw)×[0,fh) cells (fw,fh from AABB ceil'd to --cellsize); a rot-0 instance at "
+	            "(fw,0) sits immediately east of home. Geometry is rotated/mirrored about the "
+	            "FOOTPRINT block center (origin + half step), then translated so the block origin "
+	            "lands at (dx,dy). Initial tile display remounts U under mirror and applies "
+	            "transformTile (M13c). Display clones share one paint carrier; picks/paint ops "
+	            "inverse-map through transformDesc. Overlapping blocks refused on the scratch "
+	            "board. Ecosystem-only. Also ?place=dx,dy,rot on --startup-auto.",
 	            false);
 args.addArg("", "instances", "NxM",
 	            "DEPRECATED alias (M12): expands to translation-only --place for each non-origin "
@@ -4968,7 +5210,19 @@ args.addArg("", "instances", "NxM",
 		if (zones[i].ZoneId < 1000) ++primaryOnlyCount;
 	const size_t instancePrimaryCount = primaryOnlyCount;
 
-	// Ecosystem self-instances (M4a/M12): display clones at --place offsets (rot/mirror).
+	// Always derive primary footprint cell counts (scratch board multi-cell occupancy, M14a)
+	if (instancePrimaryCount > 0)
+	{
+		float ox = 0.f, oy = 0.f, sx = 0.f, sy = 0.f;
+		int cw = 1, ch = 1;
+		computeFootprintRect(zones, 0, instancePrimaryCount, cellSize, ox, oy, sx, sy, cw, ch);
+		g_FootprintCellsW = cw;
+		g_FootprintCellsH = ch;
+		printf("footprint: %dx%d cells  step (%.1f, %.1f)  origin (%.1f, %.1f)  pivot (%.1f, %.1f)\n",
+		       cw, ch, sx, sy, ox, oy, ox + sx * 0.5f, oy + sy * 0.5f);
+	}
+
+	// Ecosystem self-instances (M4a/M12/M14a): display clones at --place offsets (rot/mirror).
 	// Same Node pointers → paint_core shares one pristine carrier; weld joins transformed edges.
 	// Multi-edit continent open rejects instances (already gated ecosystem-only).
 	if (!g_Places.empty() && instancePrimaryCount > 0)

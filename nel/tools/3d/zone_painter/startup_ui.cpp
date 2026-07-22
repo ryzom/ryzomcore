@@ -378,7 +378,7 @@ static void refreshBoardSelectionUI()
 			                 && s_SessionBridge->World->Kind == ZPWS::Ecosystem;
 			if (eco)
 				t->setHardText(
-				    "Scratch: home=fill · empty=place instance · inst=R CW/CCW/Mirror/Remove · "
+				    "Scratch: home=block · empty=place (block origin) · inst=R CW/CCW/Mirror/Remove · "
 				    "glyph R90/M · O/BOARD back");
 			else
 				t->setHardText(
@@ -451,7 +451,12 @@ static void setBoardCellSelFill(CInterfaceGroup *cell, bool selected)
 	                     selected ? kBoardCellSelFill : kBoardCellSelHover);
 }
 
-/** Parse scratch basenames: "H", "I:cx,cy", "E:cx,cy". */
+/**
+ * Parse scratch basenames (M12c/M14a):
+ *   "H" | "H:cx,cy"  home cell (multi-cell home stamps H:x,y)
+ *   "I:ox,oy"        instance (ox,oy = block origin; any cell in the block uses the origin id)
+ *   "E:cx,cy"        empty
+ */
 static bool parseScratchBasename(const std::string &base, char &kind, int &cx, int &cy)
 {
 	kind = 0;
@@ -459,6 +464,17 @@ static bool parseScratchBasename(const std::string &base, char &kind, int &cx, i
 	if (base == "H" || base == "HOME")
 	{
 		kind = 'H';
+		return true;
+	}
+	if (base.size() >= 2 && base[0] == 'H' && base[1] == ':')
+	{
+		kind = 'H';
+		std::string rest = base.substr(2);
+		std::string::size_type comma = rest.find(',');
+		if (comma == std::string::npos) return false;
+		if (!NLMISC::fromString(rest.substr(0, comma), cx)
+		    || !NLMISC::fromString(rest.substr(comma + 1), cy))
+			return false;
 		return true;
 	}
 	if (base.size() >= 4 && (base[0] == 'I' || base[0] == 'E') && base[1] == ':')
@@ -511,23 +527,39 @@ static void applySessionCellState(CInterfaceGroup *cell, const std::string &base
 		int cx = 0, cy = 0;
 		if (st == CellScratchHome)
 		{
-			std::string home = s_SessionBridge && !s_SessionBridge->ScratchHomeName.empty()
-			                   ? s_SessionBridge->ScratchHomeName
-			                   : std::string("HOME");
-			// Truncate long brick names for the stamp
-			if (home.size() > 10) home = home.substr(0, 9) + "…";
-			t->setHardText(home);
+			// Multi-cell home (M14a): label only on origin cell (0,0); others stay tinted blank
+			parseScratchBasename(basename, sk, cx, cy);
+			if (cx != 0 || cy != 0)
+				t->setHardText("");
+			else
+			{
+				std::string home = s_SessionBridge && !s_SessionBridge->ScratchHomeName.empty()
+				                   ? s_SessionBridge->ScratchHomeName
+				                   : std::string("HOME");
+				// Truncate long brick names for the stamp (M14b will wrap + strip prefix)
+				if (home.size() > 10) home = home.substr(0, 9) + "…";
+				t->setHardText(home);
+			}
 		}
 		else if (st == CellScratchInstance && parseScratchBasename(basename, sk, cx, cy))
 		{
+			// Label only on the block origin cell; other cells of the block are tint-only
+			int ox = cx, oy = cy;
 			uint rot = 0;
 			bool mir = false;
-			if (s_SessionBridge && s_SessionBridge->scratchGetInstance)
+			if (s_SessionBridge && s_SessionBridge->scratchGetInstanceOrigin)
+				s_SessionBridge->scratchGetInstanceOrigin(cx, cy, ox, oy, rot, mir);
+			else if (s_SessionBridge && s_SessionBridge->scratchGetInstance)
 				s_SessionBridge->scratchGetInstance(cx, cy, rot, mir);
-			std::string lab = NLMISC::toString("%d,%d", cx, cy);
-			if (rot) lab += NLMISC::toString(" R%u", rot * 90);
-			if (mir) lab += " M";
-			t->setHardText(lab);
+			if (cx != ox || cy != oy)
+				t->setHardText("");
+			else
+			{
+				std::string lab = NLMISC::toString("%d,%d", ox, oy);
+				if (rot) lab += NLMISC::toString(" R%u", rot * 90);
+				if (mir) lab += " M";
+				t->setHardText(lab);
+			}
 		}
 		else if (st == CellScratchEmpty)
 			t->setHardText("");
@@ -1638,23 +1670,83 @@ void refreshSessionBoardStates()
 }
 
 /**
- * Ecosystem scratch board (M12c): 7×7 cell grid centered on home (0,0).
- * Basenames: H (home), I:cx,cy (instance), E:cx,cy (empty). Bridge owns place list.
+ * Ecosystem scratch board (M12c/M14a): fine-cell grid covering home + instances + margin.
+ *
+ * Convention (M14a): each board cell is one --cellsize unit. Primary home occupies the
+ * rectangle [0,fw)×[0,fh) (all cells tinted home; label on origin only). Each instance
+ * claims its transformed block [ox,ox+bw)×[oy,oy+bh) (per-cell tint + label on origin).
+ * Placement legality refuses overlapping blocks.
+ *
+ * Basenames: H:cx,cy | I:ox,oy | E:cx,cy. Bridge owns the place list.
  */
 static void populateScratchBoard()
 {
 	const int kCell = 52;
-	const int kHalf = 3; // cells -3..3
+	const int fw = (s_SessionBridge && s_SessionBridge->FootprintCellsW > 0)
+	                   ? s_SessionBridge->FootprintCellsW : 1;
+	const int fh = (s_SessionBridge && s_SessionBridge->FootprintCellsH > 0)
+	                   ? s_SessionBridge->FootprintCellsH : 1;
+
+	// Bounds: home + every instance block + at least 1 cell of empty margin (cap extent)
+	int minC = 0, maxC = fw - 1, minR = 0, maxR = fh - 1;
+	// Probe a generous window for instances (bridge lookup is O(places))
+	const int kProbe = 24;
+	for (int cy = -kProbe; cy <= kProbe + fh; ++cy)
+	for (int cx = -kProbe; cx <= kProbe + fw; ++cx)
+	{
+		if (s_SessionBridge && s_SessionBridge->scratchGetInstanceOrigin)
+		{
+			int ox = 0, oy = 0;
+			uint rot = 0;
+			bool mir = false;
+			if (s_SessionBridge->scratchGetInstanceOrigin(cx, cy, ox, oy, rot, mir))
+			{
+				// Expand by this cell
+				if (cx < minC) minC = cx;
+				if (cx > maxC) maxC = cx;
+				if (cy < minR) minR = cy;
+				if (cy > maxR) maxR = cy;
+			}
+		}
+		else if (s_SessionBridge && s_SessionBridge->scratchGetInstance)
+		{
+			uint rot = 0;
+			bool mir = false;
+			if (s_SessionBridge->scratchGetInstance(cx, cy, rot, mir))
+			{
+				if (cx < minC) minC = cx;
+				if (cx > maxC) maxC = cx;
+				if (cy < minR) minR = cy;
+				if (cy > maxR) maxR = cy;
+			}
+		}
+	}
+	// Margin of empty wells around occupied
+	minC -= 1; maxC += 1; minR -= 1; maxR += 1;
+	// Keep a usable minimum for 1×1 bricks (roughly the old 7×7)
+	if (maxC - minC < 6) { const int mid = (minC + maxC) / 2; minC = mid - 3; maxC = mid + 3; }
+	if (maxR - minR < 6) { const int mid = (minR + maxR) / 2; minR = mid - 3; maxR = mid + 3; }
 
 	// Build synthetic zone list for click indices
 	s_Sess.Zones.clear();
 	std::map<std::pair<int, int>, int> used; // (cy,cx) as row,col
-	for (int cy = -kHalf; cy <= kHalf; ++cy)
-	for (int cx = -kHalf; cx <= kHalf; ++cx)
+	for (int cy = minR; cy <= maxR; ++cy)
+	for (int cx = minC; cx <= maxC; ++cx)
 	{
 		ZPWS::SZoneEntry z;
-		if (cx == 0 && cy == 0)
-			z.Basename = "H";
+		// Home multi-cell block
+		if (cx >= 0 && cy >= 0 && cx < fw && cy < fh)
+			z.Basename = NLMISC::toString("H:%d,%d", cx, cy);
+		else if (s_SessionBridge && s_SessionBridge->scratchGetInstanceOrigin)
+		{
+			int ox = 0, oy = 0;
+			uint rot = 0;
+			bool mir = false;
+			if (s_SessionBridge->scratchGetInstanceOrigin(cx, cy, ox, oy, rot, mir))
+				z.Basename = NLMISC::toString("I:%d,%d", ox, oy);
+			else
+				z.Basename = NLMISC::toString("E:%d,%d", cx, cy);
+		}
 		else if (s_SessionBridge && s_SessionBridge->scratchGetInstance)
 		{
 			uint rot = 0;
@@ -1670,11 +1762,10 @@ static void populateScratchBoard()
 		s_Sess.Zones.push_back(z);
 	}
 
-	const int nRows = 2 * kHalf + 1;
-	const int nCols = 2 * kHalf + 1;
+	const int nRows = maxR - minR + 1;
+	const int nCols = maxC - minC + 1;
 	const int boardW = nCols * kCell;
 	const int boardH = nRows * kCell;
-	const int minR = -kHalf, maxR = kHalf, minC = -kHalf;
 
 	setZoneBrowserMode(true);
 	clearBoard();

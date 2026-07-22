@@ -147,25 +147,34 @@ struct SSessionBoardBridge
 	/** True when basename is open as editable (not RO neighbor). */
 	bool (*isEditable)(const std::string &basename);
 
-	// Ecosystem scratch board (M12c) — cell basenames "H" (home), "I:cx,cy", "E:cx,cy"
-	/** Place instance at empty cell (cx,cy). */
+	// Ecosystem scratch board (M12c/M14a) — cell basenames:
+	//   "H:cx,cy" home cell of multi-cell footprint (also bare "H" for 1×1 origin)
+	//   "I:ox,oy" instance origin (labels); non-origin block cells share state via lookup
+	//   "E:cx,cy" empty
+	/** Place instance with block origin at empty cell (cx,cy); refuses overlap. */
 	bool (*scratchPlace)(int cx, int cy, std::string &err);
-	/** Rotate instance CW (+1) or CCW (-1). */
+	/** Rotate instance CW (+1) or CCW (-1) about its footprint-block center; updates origin. */
 	bool (*scratchRotate)(int cx, int cy, int delta, std::string &err);
 	/** Toggle mirror on instance. */
 	bool (*scratchMirror)(int cx, int cy, std::string &err);
-	/** Remove instance at cell. */
+	/** Remove instance whose block contains cell. */
 	bool (*scratchRemove)(int cx, int cy, std::string &err);
 	/** Query instance transform for label glyphs; false if not an instance cell. */
 	bool (*scratchGetInstance)(int cx, int cy, uint &rot, bool &mirror);
+	/** Resolve any cell in a block to the place origin (ox,oy) + transform. */
+	bool (*scratchGetInstanceOrigin)(int cx, int cy, int &ox, int &oy, uint &rot, bool &mirror);
 	/** Home brick display name. */
 	std::string ScratchHomeName;
+	/** Primary footprint size in fine cells (M14a multi-cell occupancy). */
+	int FootprintCellsW;
+	int FootprintCellsH;
 
 	SSessionBoardBridge()
 		: World(NULL), getCellState(NULL), openZone(NULL), closeZone(NULL),
 		  saveZone(NULL), toggleEditable(NULL), isDirty(NULL), isOpen(NULL), isEditable(NULL),
 		  scratchPlace(NULL), scratchRotate(NULL), scratchMirror(NULL), scratchRemove(NULL),
-		  scratchGetInstance(NULL)
+		  scratchGetInstance(NULL), scratchGetInstanceOrigin(NULL),
+		  FootprintCellsW(1), FootprintCellsH(1)
 	{
 	}
 };
