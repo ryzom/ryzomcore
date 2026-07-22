@@ -378,6 +378,25 @@
 	<param name="tx_br" value="cm_br.tga" />
 </options>
 
+<!-- CGroupFrame display type: legacy w_box 9-slice (native 4px corners/edges + blank fill).
+     Use on <group type="frame" options="w_box_frame" ...>. tile_*=0 = stretch edges, not tile. -->
+<options name="w_box_frame">
+	<param name="tx_tl" value="w_box_top_left.tga" />
+	<param name="tx_t" value="w_box_top.tga" />
+	<param name="tx_tr" value="w_box_top_right.tga" />
+	<param name="tx_l" value="w_box_left.tga" />
+	<param name="tx_r" value="w_box_right.tga" />
+	<param name="tx_blank" value="w_box_blank.tga" />
+	<param name="tx_bl" value="w_box_bot_left.tga" />
+	<param name="tx_b" value="w_box_bot.tga" />
+	<param name="tx_br" value="w_box_bot_right.tga" />
+	<param name="tile_t" value="0" />
+	<param name="tile_l" value="0" />
+	<param name="tile_blank" value="0" />
+	<param name="tile_r" value="0" />
+	<param name="tile_b" value="0" />
+</options>
+
 <options name="text_selection">
 	<param name="back_select_color" value="255 255 255 255" />
 	<param name="text_select_color" value="0 0 0 255" />

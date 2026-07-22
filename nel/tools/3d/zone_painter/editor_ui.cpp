@@ -974,7 +974,21 @@ void rebuildTilesetPalette(NL3D::CTileBank *bank, const std::string &bankPath,
 			std::string source = resolveDisplaceSource(bank, useTs, i, &mapId, &storedName);
 
 			char title[160];
-			if (!storedName.empty())
+			// EmptyDisplacementMap is the bank sentinel for "no noise" (tile_bank.cpp setEmpty).
+			// Also treat unresolved / missing filenames as empty for the label.
+			bool isEmptyMap = storedName.empty();
+			if (!isEmptyMap)
+			{
+				std::string stem = CFile::getFilenameWithoutExtension(storedName);
+				// case-insensitive match on the magic sentinel name
+				std::string lower = stem;
+				for (size_t k = 0; k < lower.size(); ++k)
+					if (lower[k] >= 'A' && lower[k] <= 'Z')
+						lower[k] = (char)(lower[k] - 'A' + 'a');
+				if (lower == "emptydisplacementmap")
+					isEmptyMap = true;
+			}
+			if (!isEmptyMap)
 			{
 				// "3 falaisen…" — index + short stem
 				std::string stem = CFile::getFilenameWithoutExtension(storedName);

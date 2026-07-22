@@ -29,6 +29,7 @@
 
 #include "max_thumbnail.h"
 
+#include <cmath>
 #include <cstdio>
 #include <cstring>
 #include <algorithm>
@@ -665,8 +666,9 @@ std::string cachedDisplacePreviewPath(const std::string &bankPath, int mapIndex,
 	while (!abs.empty() && (abs[abs.size() - 1] == '/' || abs[abs.size() - 1] == '\\'))
 		abs.resize(abs.size() - 1);
 	uint32 h = hashPath(abs);
+	// _g1 suffix: M10a tone map (min..max + sqrt). Bump when preview math changes.
 	return displacePreviewCacheDir() + "/"
-		+ NLMISC::toString("%08x_m%03d_%08x.tga", h, mapIndex, sourceMtime);
+		+ NLMISC::toString("%08x_m%03d_%08x_g1.tga", h, mapIndex, sourceMtime);
 }
 
 bool ensureDisplacePreview(const std::string &bankPath, int mapIndex,
@@ -726,7 +728,8 @@ bool ensureDisplacePreview(const std::string &bankPath, int mapIndex,
 	}
 	const int range = (int)maxL - (int)minL;
 
-	// Point upsample + contrast stretch into a fresh RGBA bitmap
+	// Point upsample + min..max stretch + sqrt gamma lift (M10a) so structure is
+	// readable at 64px — raw noise often clusters near black after linear stretch alone.
 	CBitmap out;
 	out.resize(sidePx, sidePx, CBitmap::RGBA);
 	CObjectVector<uint8> &dstPx = out.getPixels();
@@ -737,11 +740,17 @@ bool ensureDisplacePreview(const std::string &bankPath, int mapIndex,
 		{
 			const uint sx = (sw == 0) ? 0 : (x * sw) / sidePx;
 			const size_t si = ((size_t)sy * sw + sx) * 4;
-			uint8 l = srcPx[si];
+			const uint8 raw = srcPx[si];
+			float t;
 			if (range > 0)
-				l = (uint8)((((int)l - (int)minL) * 255) / range);
+				t = (float)((int)raw - (int)minL) / (float)range;
 			else
-				l = 128;
+				t = 0.5f;
+			if (t < 0.f) t = 0.f;
+			if (t > 1.f) t = 1.f;
+			// sqrt gamma lift: mid-tones pop; near-black structure stays visible
+			t = std::sqrt(t);
+			const uint8 l = (uint8)(t * 255.f + 0.5f);
 			const size_t di = ((size_t)y * sidePx + x) * 4;
 			dstPx[di + 0] = l;
 			dstPx[di + 1] = l;

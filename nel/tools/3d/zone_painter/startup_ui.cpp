@@ -436,7 +436,13 @@ static void populateContinentGrid(const ZPWS::SWorldEntry &world)
 			p.push_back(std::make_pair(std::string("title"), s_Sess.Zones[i].Basename));
 			p.push_back(std::make_pair(std::string("idx"), std::string(idxbuf)));
 			p.push_back(std::make_pair(std::string("thumb"), std::string("w_box_blank.tga")));
-			spawnRow("zp_zone_row", "ui:zp:zone_browser:content:list_scroll:text_list", p);
+			if (CInterfaceGroup *row = spawnRow("zp_zone_row", "ui:zp:zone_browser:content:list_scroll:text_list", p))
+			{
+				if (CViewBitmap *thumb = dynamic_cast<CViewBitmap *>(row->getView("thumb")))
+					thumb->setActive(false);
+				if (CInterfaceGroup *fr = row->getGroup("thumb_frame"))
+					fr->setActive(false);
+			}
 		}
 		return;
 	}
@@ -532,8 +538,12 @@ static void populateContinentGrid(const ZPWS::SWorldEntry &world)
 		CInterfaceGroup *cell = spawnUnder(board, "zp_board_cell", p, x, y, kCell, kCell);
 		if (cell)
 		{
+			const bool hasThumb = !thumbTex.empty();
 			if (CViewBitmap *thumb = dynamic_cast<CViewBitmap *>(cell->getView("thumb")))
-				thumb->setActive(!thumbTex.empty());
+				thumb->setActive(hasThumb);
+			// M10a: activate 9-slice well only when a real thumb is bound
+			if (CInterfaceGroup *fr = cell->getGroup("thumb_frame"))
+				fr->setActive(hasThumb);
 			// Restore multi-select highlight (M6b)
 			if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(cell->getCtrl("btn")))
 				btn->setPushed(s_Sess.PendingSelect.count(zi) != 0);
@@ -685,9 +695,11 @@ static void populateZoneList()
 			{
 				if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(row->getCtrl("btn")))
 					btn->setFrozen(true);
-				// Group headers never show a thumb slot
+				// Group headers never show a thumb slot / frame well
 				if (CViewBitmap *thumb = dynamic_cast<CViewBitmap *>(row->getView("thumb")))
 					thumb->setActive(false);
+				if (CInterfaceGroup *fr = row->getGroup("thumb_frame"))
+					fr->setActive(false);
 			}
 		}
 
@@ -703,10 +715,14 @@ static void populateZoneList()
 		p.push_back(std::make_pair(std::string("thumb"), thumbTex.empty() ? std::string("w_box_blank.tga") : thumbTex));
 		if (CInterfaceGroup *row = spawnRow("zp_zone_row", "ui:zp:zone_browser:content:list_scroll:text_list", p))
 		{
+			const bool hasThumb = !thumbTex.empty();
 			if (CViewBitmap *thumb = dynamic_cast<CViewBitmap *>(row->getView("thumb")))
-				thumb->setActive(!thumbTex.empty());
-			// When no thumb, tuck the open button to the left edge (no empty dark square)
-			if (thumbTex.empty())
+				thumb->setActive(hasThumb);
+			// M10a: 9-slice well only when a real thumb is bound (no empty dark square)
+			if (CInterfaceGroup *fr = row->getGroup("thumb_frame"))
+				fr->setActive(hasThumb);
+			// When no thumb, tuck the open button to the left edge
+			if (!hasThumb)
 			{
 				if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(row->getCtrl("btn")))
 				{

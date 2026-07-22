@@ -32,34 +32,44 @@
 	</group>
 </template>
 
-<!-- Zone row (ecosystem list): optional 32x32 thumb + open button. idx is zones[] index.
-     Code deactivates thumb when no embedded/.png preview exists (no empty dark square). -->
+<!-- Zone row (ecosystem list): optional 32x32 thumb in a CGroupFrame inset + open button.
+     idx is zones[] index. Code activates thumb_frame+thumb only when a preview exists
+     (no empty dark square for missing thumbs). -->
 <template name="zp_zone_row" keep="true" id="" title="" idx="0" thumb="">
 	<group id="#id" w="560" h="36">
-		<view type="bitmap" id="thumb" posref="ML ML" x="4" y="0" w="32" h="32" scale="true"
-			texture="#thumb" global_color="false" color="255 255 255 255" active="false" />
-		<ctrl style="text_button_16_name" id="btn" posparent="thumb" posref="MR ML" x="8" y="0" w="500"
+		<!-- 9-slice inset (w_box_frame); inactive until a real thumb is bound. -->
+		<group type="frame" id="thumb_frame" options="w_box_frame" posref="ML ML" x="2" y="0" w="36" h="36"
+			color="255 255 255 255" global_color="false" display="true" active="false">
+			<view type="bitmap" id="thumb" posref="MM MM" w="28" h="28" scale="true"
+				texture="#thumb" global_color="false" color="255 255 255 255" active="false" />
+		</group>
+		<ctrl style="text_button_16_name" id="btn" posparent="thumb_frame" posref="MR ML" x="8" y="0" w="500"
 			hardtext="#title" onclick_l="zp_select_zone" params_l="#idx" />
 	</group>
 </template>
 
-<!-- Tileset palette cell (M8): 64px thumb + name/index; L-click selects via zp_tileset_abs. -->
+<!-- Tileset palette cell (M8/M10a): 64px thumb in CGroupFrame inset + name/index.
+     L-click selects via zp_tileset_abs. Brick remains hit target; pushed = selection. -->
 <template name="zp_tileset_cell" keep="true" id="" title="" idx="0" thumb="">
 	<group id="#id" w="96" h="92">
-		<!-- Brick face = hit target; pushed = current selection highlight. -->
+		<!-- Hit target + selection highlight (behind the 9-slice inset). -->
 		<ctrl type="button" id="btn" button_type="toggle_button" posref="MM MM" x="0" y="0"
 			scale="true" sizeref="wh" w="-2" h="-2"
 			tx_normal="w_slot_brick.tga" tx_pushed="w_slot_brick_selected.tga" tx_over="w_slot_brick_selected.tga"
 			global_color_normal="false" global_color_pushed="false" global_color_over="false"
 			onclick_l="zp_tileset_abs" params_l="#idx" />
-		<view type="bitmap" id="thumb" posref="TM TM" x="0" y="-6" w="64" h="64" scale="true"
-			texture="#thumb" global_color="false" color="255 255 255 255" active="false" />
+		<!-- Crisp 9-slice well around the 64px preview (no stretched blank border). -->
+		<group type="frame" id="inset" options="w_box_frame" posref="TM TM" x="0" y="-4" w="72" h="72"
+			color="255 255 255 255" global_color="false" display="true">
+			<view type="bitmap" id="thumb" posref="MM MM" w="64" h="64" scale="true"
+				texture="#thumb" global_color="false" color="255 255 255 255" active="false" />
+		</group>
 		<view type="text" id="t" posref="BM BM" x="0" y="4" fontsize="9" shadow="true"
 			global_color="false" color="255 255 255 255" hardtext="#title" />
 	</group>
 </template>
 
-<!-- Displace palette cell (M9a): same chrome; L-click selects via zp_displace_abs (0-15). -->
+<!-- Displace palette cell (M9a/M10a): same chrome; L-click selects via zp_displace_abs (0-15). -->
 <template name="zp_displace_cell" keep="true" id="" title="" idx="0" thumb="">
 	<group id="#id" w="96" h="92">
 		<ctrl type="button" id="btn" button_type="toggle_button" posref="MM MM" x="0" y="0"
@@ -67,15 +77,18 @@
 			tx_normal="w_slot_brick.tga" tx_pushed="w_slot_brick_selected.tga" tx_over="w_slot_brick_selected.tga"
 			global_color_normal="false" global_color_pushed="false" global_color_over="false"
 			onclick_l="zp_displace_abs" params_l="#idx" />
-		<view type="bitmap" id="thumb" posref="TM TM" x="0" y="-6" w="64" h="64" scale="true"
-			texture="#thumb" global_color="false" color="255 255 255 255" active="false" />
+		<group type="frame" id="inset" options="w_box_frame" posref="TM TM" x="0" y="-4" w="72" h="72"
+			color="255 255 255 255" global_color="false" display="true">
+			<view type="bitmap" id="thumb" posref="MM MM" w="64" h="64" scale="true"
+				texture="#thumb" global_color="false" color="255 255 255 255" active="false" />
+		</group>
 		<view type="text" id="t" posref="BM BM" x="0" y="4" fontsize="9" shadow="true"
 			global_color="false" color="220 230 255 255" hardtext="#title" />
 	</group>
 </template>
 
-<!-- Continent board cell (M5a): minesweeper-style square stamp (ms_cell idiom).
-     Brick cover is the hit target; name + optional thumb draw above it (later siblings). -->
+<!-- Continent board cell (M5a/M10a): minesweeper-style square stamp (ms_cell idiom).
+     Brick cover is the hit target; optional thumb sits in a 9-slice well. -->
 <template name="zp_board_cell" keep="true" id="" title="" idx="0" thumb="">
 	<group id="#id" w="52" h="52">
 		<!-- Brick face = minesweeper cover; R-click toggles multi-select (M6b); L-click opens. -->
@@ -85,19 +98,22 @@
 			global_color_normal="false" global_color_pushed="false" global_color_over="false"
 			onclick_l="zp_select_zone" params_l="#idx"
 			onclick_r="zp_toggle_zone_select" params_r="#idx" />
-		<!-- Optional embedded/.png thumb (M5b activates when a cache path exists). -->
-		<view type="bitmap" id="thumb" posref="TM TM" x="0" y="-4" w="40" h="24" scale="true"
-			texture="#thumb" global_color="false" active="false" />
+		<!-- Optional embedded/.png thumb well (M5b activates when a cache path exists). -->
+		<group type="frame" id="thumb_frame" options="w_box_frame" posref="TM TM" x="0" y="-3" w="44" h="28"
+			color="255 255 255 255" global_color="false" display="true" active="false">
+			<view type="bitmap" id="thumb" posref="MM MM" w="36" h="20" scale="true"
+				texture="#thumb" global_color="false" active="false" />
+		</group>
 		<view type="text" id="t" posref="BM BM" x="0" y="4" fontsize="10" shadow="true"
 			global_color="false" color="255 255 255 255" hardtext="#title" />
 	</group>
 </template>
 
-<!-- Empty fringe cell: visibly empty, non-interactive placeholder (no button). -->
+<!-- Empty fringe cell: non-interactive 9-slice well (no stretched blank fill). -->
 <template name="zp_board_empty" keep="true" id="">
 	<group id="#id" w="52" h="52">
-		<view type="bitmap" id="bg" posref="MM MM" scale="true" sizeref="wh" w="-2" h="-2"
-			texture="w_box_blank.tga" global_color="false" color="45 48 56 220" />
+		<group type="frame" id="bg" options="w_box_frame" posref="MM MM" w="48" h="48"
+			color="90 100 110 200" global_color="false" display="true" />
 	</group>
 </template>
 
@@ -305,17 +321,19 @@
 		<ctrl style="text_button_16" id="group_up" posparent="group_down" posref="MR ML" x="4" y="0"
 			onclick_l="zp_group" params_l="+1" hardtext="+" />
 
-		<!-- Color section (M7a/M9b; always visible, label highlights in Color mode) -->
+		<!-- Color section (M7a/M9b/M10a; always visible, label highlights in Color mode) -->
 		<view type="text" id="lbl_color" posparent="group_down" posref="BL TL" x="0" y="-8" fontsize="10" shadow="true"
 			global_color="false" color="255 255 255 140" hardtext="Color" />
-		<!-- Clickable brush color swatch — opens the color picker (M9b). -->
-		<ctrl type="button" id="color_swatch" button_type="push_button" posparent="lbl_color" posref="MR ML" x="8" y="0"
-			w="18" h="12" scale="true"
-			tx_normal="w_box_blank.tga" tx_pushed="w_box_blank.tga" tx_over="w_box_blank.tga"
+		<!-- 9-slice well + solid color face (blank.tga, color-modulated) — opens picker (M9b). -->
+		<group type="frame" id="color_swatch_well" options="w_box_frame" posparent="lbl_color" posref="MR ML" x="8" y="0"
+			w="22" h="16" color="255 255 255 255" global_color="false" display="true" />
+		<ctrl type="button" id="color_swatch" button_type="push_button" posparent="color_swatch_well" posref="MM MM" x="0" y="0"
+			w="14" h="8" scale="true"
+			tx_normal="blank.tga" tx_pushed="blank.tga" tx_over="blank.tga"
 			global_color_normal="false" global_color_pushed="false" global_color_over="false"
 			onclick_l="zp_open_color_picker" params_l="" />
 		<!-- RGB readout next to the swatch (display-only this round) -->
-		<view type="text" id="color_rgb" posparent="color_swatch" posref="MR ML" x="4" y="0" fontsize="9" shadow="true"
+		<view type="text" id="color_rgb" posparent="color_swatch_well" posref="MR ML" x="4" y="0" fontsize="9" shadow="true"
 			global_color="false" color="200 210 220 255" hardtext="255 255 255" />
 		<view type="text" id="lbl_radius" posparent="lbl_color" posref="BL TL" x="0" y="-2" fontsize="10" shadow="true"
 			global_color="false" color="255 255 255 160" hardtext="Radius" />
@@ -445,9 +463,12 @@
 		<ctrl type="colpick" id="cp" posparent="l1" posref="BL TL" x="0" y="-6" texture="color_palette.tga"
 			dbcolr="UI:TEMP:COL:R" dbcolg="UI:TEMP:COL:G" dbcolb="UI:TEMP:COL:B" dbcola="UI:TEMP:COL:A"
 			onchange="zp_color_picked" onchange_params="" />
-		<view type="bitmap" id="swatch" posparent="cp" posref="BL TL" x="0" y="-8" texture="w_box_blank.tga"
+		<!-- Preview swatch in a crisp 9-slice well (M10a); color via makeRGB link. -->
+		<group type="frame" id="swatch_well" options="w_box_frame" posparent="cp" posref="BL TL" x="0" y="-8"
+			w="36" h="36" color="255 255 255 255" global_color="false" display="true" />
+		<view type="bitmap" id="swatch" posparent="swatch_well" posref="MM MM" texture="blank.tga"
 			scale="true" w="28" h="28" global_color="false" color="255 255 255 255" />
-		<view type="text" id="lr" posparent="swatch" posref="MR ML" x="10" y="1" fontsize="12" shadow="true"
+		<view type="text" id="lr" posparent="swatch_well" posref="MR ML" x="10" y="1" fontsize="12" shadow="true"
 			global_color="false" color="255 150 150 255" hardtext="R" />
 		<view type="text_number" id="vr" posparent="lr" posref="MR ML" x="4" y="0" value="UI:TEMP:COL:R"
 			fontsize="12" shadow="true" global_color="false" color="255 150 150 255" />
