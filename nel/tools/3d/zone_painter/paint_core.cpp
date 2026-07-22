@@ -996,7 +996,11 @@ void CPaintCore::setTile(uint zone, sint32 tileId, const CTileDescP &desc,
 		u.Zone = zone;
 		u.TileId = tileId;
 		u.Old = oldDesc;
-		u.New = desc;
+		// Record what was APPLIED, not what was requested: with updateDisplace off the
+		// displace byte was forced back to oldDesc's value above, and redo replays New
+		// with updateDisplace on — recording the raw caller desc would zero a preserved
+		// displace on undo+redo (state after redo must equal state after the op).
+		u.New = maxDesc;
 		m_CurStroke.push_back(u);
 	}
 }
@@ -2794,10 +2798,15 @@ bool CPaintCore::fillTileImpl(uint zi, uint patch, int tileSet, int rot, bool _2
 		uint span = _256 ? 1 : 0;
 		bool locked = false, nearLocked = false;
 		uint uu, vv;
+		// A 256 block on an odd-order patch overlaps dead default cells (TileId -1).
+		// The plugin's fixed 16x16 UI_PATCH::Tile array made writes to those slack
+		// entries harmless no-ops; the port's Tiles are sized OrderS x OrderT, so
+		// dead cells must be skipped per-cell everywhere below (never indexed).
 		for (vv = 0; vv <= span && !locked; ++vv)
 		for (uu = 0; uu <= span; ++uu)
 		{
 			SPaintTile *t = &m_Zones[zi].Meta[patch * ZP_NUM_TILE_SEL + (vv + v) * ZP_MAX_TILE_IN_PATCH + uu + u];
+			if (t->TileId < 0) continue;
 			if (_256 ? isLocked256(t) : isLockedEx(t)) { locked = true; break; }
 			for (uint n = 0; n < 4; ++n)
 				if (t->Voisins[n] && (_256 ? isLocked256(t->Voisins[n]) : isLockedEx(t->Voisins[n])))
@@ -2808,7 +2817,11 @@ bool CPaintCore::fillTileImpl(uint zi, uint patch, int tileSet, int rot, bool _2
 		{
 			for (vv = 0; vv <= span; ++vv)
 			for (uu = 0; uu <= span; ++uu)
-				clearATile(&m_Zones[zi].Meta[patch * ZP_NUM_TILE_SEL + (vv + v) * ZP_MAX_TILE_IN_PATCH + uu + u], _256, !_256);
+			{
+				SPaintTile *t = &m_Zones[zi].Meta[patch * ZP_NUM_TILE_SEL + (vv + v) * ZP_MAX_TILE_IN_PATCH + uu + u];
+				if (t->TileId < 0) continue;
+				clearATile(t, _256, !_256);
+			}
 			continue;
 		}
 		// Compatibility of the outside borders
@@ -2819,6 +2832,7 @@ bool CPaintCore::fillTileImpl(uint zi, uint patch, int tileSet, int rot, bool _2
 			for (uu = 0; uu <= span && compatible; ++uu)
 			{
 				SPaintTile *t = &m_Zones[zi].Meta[patch * ZP_NUM_TILE_SEL + (vv + v) * ZP_MAX_TILE_IN_PATCH + uu + u];
+				if (t->TileId < 0) continue;
 				for (uint n = 0; n < 4; ++n)
 				{
 					SPaintTile *nb = t->Voisins[n];
@@ -2848,6 +2862,7 @@ bool CPaintCore::fillTileImpl(uint zi, uint patch, int tileSet, int rot, bool _2
 			for (uu = 0; uu <= span; ++uu)
 			{
 				SPaintTile *t = &m_Zones[zi].Meta[patch * ZP_NUM_TILE_SEL + (vv + v) * ZP_MAX_TILE_IN_PATCH + uu + u];
+				if (t->TileId < 0) continue;
 				if (tileSet != -1)
 				{
 					if (_256)
@@ -2875,7 +2890,11 @@ bool CPaintCore::fillTileImpl(uint zi, uint patch, int tileSet, int rot, bool _2
 		{
 			for (vv = 0; vv <= span; ++vv)
 			for (uu = 0; uu <= span; ++uu)
-				clearATile(&m_Zones[zi].Meta[patch * ZP_NUM_TILE_SEL + (vv + v) * ZP_MAX_TILE_IN_PATCH + uu + u], _256, !_256);
+			{
+				SPaintTile *t = &m_Zones[zi].Meta[patch * ZP_NUM_TILE_SEL + (vv + v) * ZP_MAX_TILE_IN_PATCH + uu + u];
+				if (t->TileId < 0) continue;
+				clearATile(t, _256, !_256);
+			}
 		}
 	}
 	return true;
@@ -3460,11 +3479,24 @@ bool CPaintCore::dumpCarrierBlob(uint zone, std::vector<uint8> &out) const
 
 void CPaintCore::getTile(uint zone, sint32 tileId, CTileDescP &desc) const
 {
-	// public overload: zone is a zone ID
+	// public overload: zone is a zone ID. Untrusted input (script `rot` op, window
+	// pick) — bounds-check before the raw accessors index pristine arrays.
 	for (size_t i = 0; i < m_Zones.size(); ++i)
 	{
 		if (m_Zones[i].In.ZoneId == zone)
 		{
+			if (tileId < 0) { desc.setEmpty(); return; }
+			uint patch = (uint)tileId / ZP_NUM_TILE_SEL;
+			uint tile = (uint)tileId % ZP_NUM_TILE_SEL;
+			uint v = tile / ZP_MAX_TILE_IN_PATCH;
+			uint u = tile % ZP_MAX_TILE_IN_PATCH;
+			const PIPELINE::MAX::NELPATCH::SRPatchMesh *rpo = pristineOf((uint)i);
+			if (!rpo || patch >= rpo->Patches.size()
+			    || u >= orderS((uint)i, patch) || v >= orderT((uint)i, patch))
+			{
+				desc.setEmpty();
+				return;
+			}
 			getTileIdx((uint)i, tileId, desc);
 			return;
 		}

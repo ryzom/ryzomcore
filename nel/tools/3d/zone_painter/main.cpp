@@ -1511,13 +1511,28 @@ static bool authoredAABB(const std::vector<SPaintZone> &zones, size_t begin, siz
 }
 
 /**
+ * Deep-free a loaded .max: Scene / ClassDirectory3 / DllDirectory, then the struct —
+ * the same teardown order as loadMaxFile's own failure path. Never call on
+ * loadMaxFileCached results (cache owns those). Callers must not hold zone Node or
+ * carrier pointers into the scene (free only after the working set no longer does).
+ */
+static void freeLoadedMax(PMAXLOAD::SLoadedMax *lm)
+{
+	if (!lm) return;
+	delete lm->Scene;
+	delete lm->Cd;
+	delete lm->Dll;
+	delete lm;
+}
+
+/**
  * Clear and free all context/neighbor scenes.
  * Callers must not hold dangling zone Node pointers from those scenes.
  */
 static void clearContextFiles()
 {
 	for (size_t i = 0; i < g_ContextFiles.size(); ++i)
-		delete g_ContextFiles[i].Lm;
+		freeLoadedMax(g_ContextFiles[i].Lm);
 	g_ContextFiles.clear();
 	g_NeighborScenes.clear();
 }
@@ -1689,7 +1704,7 @@ static void loadNeighborContextFiles(std::vector<SPaintZone> &zones, float cellS
 		if (!buildPaintZones(*nlm->Scene, zones, base, /*forceFrozen=*/true, p.Zone.Basename))
 		{
 			fprintf(stderr, "WARNING: neighbor has no paint zones: %s\n", p.Zone.MaxPath.c_str());
-			delete nlm;
+			freeLoadedMax(nlm);
 			continue;
 		}
 		if (!p.Translate && before < zones.size() && havePrimaryBox)
@@ -1738,7 +1753,7 @@ static void loadNeighborContextFiles(std::vector<SPaintZone> &zones, float cellS
 						        p.Zone.Basename.c_str(), nb.getCenter().x, nb.getCenter().y,
 						        primaryBox.getCenter().x, primaryBox.getCenter().y);
 						zones.erase(zones.begin() + before, zones.end());
-						delete nlm;
+						freeLoadedMax(nlm);
 						continue;
 					}
 				}
@@ -5244,16 +5259,22 @@ static const ZPWS::SZoneEntry *findWorldZone(const std::string &basename)
 		return NULL;
 	static std::vector<ZPWS::SZoneEntry> s_listed;
 	static std::string s_listedDir;
-	if (s_listedDir != g_StartupWorld.MaxDir)
+	// Cached list, but a miss re-lists once: the board re-lists on every open, so a
+	// zone file created mid-session (e.g. "Save copy" into the world dir) must be
+	// openable here too, not stuck behind a process-lifetime cache.
+	for (int attempt = 0; attempt < 2; ++attempt)
 	{
-		ZPWS::listZones(g_StartupWorld, s_listed);
-		s_listedDir = g_StartupWorld.MaxDir;
-	}
-	for (size_t i = 0; i < s_listed.size(); ++i)
-	{
-		if (NLMISC::toLowerAscii(s_listed[i].Basename)
-		    == NLMISC::toLowerAscii(basename))
-			return &s_listed[i];
+		if (attempt == 1 || s_listedDir != g_StartupWorld.MaxDir)
+		{
+			ZPWS::listZones(g_StartupWorld, s_listed);
+			s_listedDir = g_StartupWorld.MaxDir;
+		}
+		for (size_t i = 0; i < s_listed.size(); ++i)
+		{
+			if (NLMISC::toLowerAscii(s_listed[i].Basename)
+			    == NLMISC::toLowerAscii(basename))
+				return &s_listed[i];
+		}
 	}
 	return NULL;
 }
@@ -5309,6 +5330,9 @@ static bool rebuildWorkingSet(std::string &err, uint &outWelds)
 		err = "session rebuild: viewer not live";
 		return false;
 	}
+	// Live lock-borders survives re-init (the L-key/panel/script toggle only touches the
+	// core; without this capture every board op reverted it to the CLI startup value).
+	g_SessionLockBorders = g_PaintCtx.Core->lockBordersOn();
 	// Preserve dirty OriginalBytes across re-init
 	std::string wbErr;
 	if (!g_PaintCtx.Core->writeBack(wbErr))
@@ -5643,7 +5667,7 @@ static bool loadOnePlaceContext(std::vector<SPaintZone> &zones, float cellSize,
 	const size_t before = zones.size();
 	if (!buildPaintZones(*nlm->Scene, zones, base, /*forceFrozen=*/true, ze.Basename))
 	{
-		delete nlm;
+		freeLoadedMax(nlm);
 		err = "no zones in " + ze.Basename;
 		return false;
 	}
@@ -6013,10 +6037,14 @@ static bool sessionOpenZone(const std::string &basename, std::string &err)
 	uint welds = 0;
 	if (!rebuildWorkingSet(err, welds))
 	{
-		// rollback
+		// Rollback + rebuild again so the session is not left half-torn; deep-free the
+		// new scene only after the core no longer references it.
 		g_EditableFiles.pop_back();
 		g_ExtraEditableScenes.pop_back();
-		delete extra;
+		std::string err2;
+		uint w2 = 0;
+		rebuildWorkingSet(err2, w2);
+		freeLoadedMax(extra);
 		return false;
 	}
 	printf("session open: '%s' editable; welds=%u\n", basename.c_str(), welds);
@@ -6059,8 +6087,11 @@ static bool sessionCloseZone(const std::string &basename, bool saveFirst, bool f
 		err = "cannot close the last editable zone";
 		return false;
 	}
-	// Remove from lists; free scene if heap-owned (extra). Primary stack lm stays alive
-	// until process exit but is dropped from the working set (not re-assembled).
+	// Remove from lists. The parsed scene (heap-owned extras) is deep-freed only AFTER
+	// the rebuild re-inits the core — until then the old core/carriers still point into
+	// it. Primary stack lm stays alive until process exit but is dropped from the
+	// working set (not re-assembled).
+	SEditableFileInfo closedCopy = *efi; // rollback copy (efi invalidated by erase)
 	PMAXLOAD::SLoadedMax *toFree = efi->Lm;
 	const bool wasPrimary = (toFree == NULL);
 	for (size_t i = 0; i < g_EditableFiles.size(); ++i)
@@ -6081,7 +6112,6 @@ static bool sessionCloseZone(const std::string &basename, bool saveFirst, bool f
 				break;
 			}
 		}
-		delete toFree;
 	}
 	// Point g_PaintCtx.Scene at a remaining editable after primary close
 	if (wasPrimary && !g_EditableFiles.empty())
@@ -6093,7 +6123,17 @@ static bool sessionCloseZone(const std::string &basename, bool saveFirst, bool f
 	}
 	uint welds = 0;
 	if (!rebuildWorkingSet(err, welds))
+	{
+		// Best-effort rollback: restore the file and rebuild again so the session is
+		// not left half-torn (zones/landscape/core inconsistent with g_EditableFiles).
+		g_EditableFiles.push_back(closedCopy);
+		if (toFree) g_ExtraEditableScenes.push_back(toFree);
+		std::string err2;
+		uint w2 = 0;
+		rebuildWorkingSet(err2, w2);
 		return false;
+	}
+	freeLoadedMax(toFree);
 	printf("session close: '%s'; welds=%u\n", basename.c_str(), welds);
 	return true;
 }
