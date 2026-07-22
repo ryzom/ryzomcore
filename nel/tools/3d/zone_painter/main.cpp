@@ -1478,6 +1478,37 @@ static void translateZonesXY(std::vector<SPaintZone> &zones, size_t begin, size_
 	}
 }
 
+/** Scale all patch geometry of zones[begin..end) about the world origin (unit conversion). */
+static void scaleZonesXYZ(std::vector<SPaintZone> &zones, size_t begin, size_t end, float s)
+{
+	for (size_t i = begin; i < end && i < zones.size(); ++i)
+	{
+		for (size_t p = 0; p < zones[i].Patches.size(); ++p)
+		{
+			NL3D::CPatchInfo &pi = zones[i].Patches[p];
+			for (uint v = 0; v < 4; ++v) pi.Patch.Vertices[v] *= s;
+			for (uint v = 0; v < 8; ++v) pi.Patch.Tangents[v] *= s;
+			for (uint v = 0; v < 4; ++v) pi.Patch.Interiors[v] *= s;
+		}
+	}
+}
+
+/** Authored-space AABB (patch corners) over zones[begin..end); false when empty. */
+static bool authoredAABB(const std::vector<SPaintZone> &zones, size_t begin, size_t end,
+                         NLMISC::CAABBox &out)
+{
+	bool init = false;
+	for (size_t i = begin; i < end && i < zones.size(); ++i)
+	for (size_t p = 0; p < zones[i].Patches.size(); ++p)
+	for (uint v = 0; v < 4; ++v)
+	{
+		const NLMISC::CVector &pt = zones[i].Patches[p].Patch.Vertices[v];
+		if (!init) { out.setCenter(pt); out.setHalfSize(NLMISC::CVector::Null); init = true; }
+		else out.extend(pt);
+	}
+	return init;
+}
+
 /**
  * Clear and free all context/neighbor scenes.
  * Callers must not hold dangling zone Node pointers from those scenes.
@@ -1629,6 +1660,16 @@ static void loadNeighborContextFiles(std::vector<SPaintZone> &zones, float cellS
 	// M16c place-context entries already in g_ContextFiles? (filled before call) — none yet
 	// CLI --place-context handled separately via g_PlaceContextSpecs
 
+	// Primary authored extent for the continent placement sanity check below.
+	NLMISC::CAABBox primaryBox;
+	bool havePrimaryBox = false;
+	{
+		size_t primaryEnd = 0;
+		for (size_t i = 0; i < zones.size(); ++i)
+			if (zones[i].ZoneId < 1000) primaryEnd = i + 1;
+		havePrimaryBox = authoredAABB(zones, 0, primaryEnd, primaryBox);
+	}
+
 	printf("neighbors: loading %u context file(s)\n", (uint)pending.size());
 	for (size_t ni = 0; ni < pending.size(); ++ni)
 	{
@@ -1649,6 +1690,58 @@ static void loadNeighborContextFiles(std::vector<SPaintZone> &zones, float cellS
 			fprintf(stderr, "WARNING: neighbor has no paint zones: %s\n", p.Zone.MaxPath.c_str());
 			delete nlm;
 			continue;
+		}
+		if (!p.Translate && before < zones.size() && havePrimaryBox)
+		{
+			// Continent context placement sanity (source units drift): snowballs 5_AC.max is
+			// authored in inches (values 39.37x meters) with NO distinguishing unit metadata
+			// anywhere in the file — its Config/SceneImpl chunks match the meters-authored
+			// siblings — yet the shipped 2002 reference zone sits at authored/39.37. Absolute
+			// placement of such a file lands kilometers off-grid (and blanked the session
+			// camera before the editable-only framing fix). Detect by distance to the primary
+			// and try the known unit ratios both ways; unmatched files are dropped as context
+			// (the name hint chain keeps them listed).
+			NLMISC::CAABBox nb;
+			if (authoredAABB(zones, before, zones.size(), nb))
+			{
+				const float span = std::max(
+					std::max(primaryBox.getHalfSize().x, primaryBox.getHalfSize().y) * 2.f, cellSize);
+				const float tol = 3.f * span;
+				NLMISC::CVector d = nb.getCenter() - primaryBox.getCenter();
+				d.z = 0.f;
+				if (d.norm() > tol)
+				{
+					// meters<->inches/cm/feet/mm, either direction
+					static const float kUnitRatios[] = {
+						0.0254f, 0.01f, 0.3048f, 0.001f,
+						39.3700787f, 100.f, 3.2808399f, 1000.f };
+					float matched = 0.f;
+					for (uint ri = 0; ri < sizeof(kUnitRatios) / sizeof(kUnitRatios[0]); ++ri)
+					{
+						NLMISC::CVector ds = nb.getCenter() * kUnitRatios[ri] - primaryBox.getCenter();
+						ds.z = 0.f;
+						if (ds.norm() <= tol) { matched = kUnitRatios[ri]; break; }
+					}
+					if (matched != 0.f)
+					{
+						scaleZonesXYZ(zones, before, zones.size(), matched);
+						fprintf(stderr, "WARNING: context '%s' authored off-grid (center %.0f,%.0f) — "
+						        "unit-normalized x%g\n",
+						        p.Zone.Basename.c_str(), nb.getCenter().x, nb.getCenter().y, matched);
+					}
+					else
+					{
+						fprintf(stderr, "WARNING: context '%s' authored far off-grid "
+						        "(center %.0f,%.0f vs primary %.0f,%.0f, no unit ratio fits) — "
+						        "SKIPPED as context\n",
+						        p.Zone.Basename.c_str(), nb.getCenter().x, nb.getCenter().y,
+						        primaryBox.getCenter().x, primaryBox.getCenter().y);
+						zones.erase(zones.begin() + before, zones.end());
+						delete nlm;
+						continue;
+					}
+				}
+			}
 		}
 		if (p.Translate && before < zones.size())
 		{
@@ -2743,9 +2836,19 @@ static int dumpZones(std::vector<SPaintZone> &zones, uint welds, const std::stri
 			fprintf(stderr, "ERROR: cannot write %s\n", path.c_str());
 			return 1;
 		}
-		printf("zone %u '%s'%s: %u patches, %u bound edges (%u cross-zone), %u border verts -> %s\n",
+		NLMISC::CAABBox zb;
+		bool zbInit = false;
+		for (size_t p = 0; p < pz.Patches.size(); ++p)
+		for (uint v = 0; v < 4; ++v)
+		{
+			if (!zbInit) { zb.setCenter(pz.Patches[p].Patch.Vertices[v]); zb.setHalfSize(NLMISC::CVector::Null); zbInit = true; }
+			else zb.extend(pz.Patches[p].Patch.Vertices[v]);
+		}
+		printf("zone %u '%s'%s: %u patches, %u bound edges (%u cross-zone), %u border verts, "
+		       "bbox (%.1f,%.1f)-(%.1f,%.1f) -> %s\n",
 		       pz.ZoneId, pz.Name.c_str(), pz.Frozen ? " FROZEN" : "",
-		       (uint)pz.Patches.size(), bound, cross, (uint)pz.BorderVertices.size(), path.c_str());
+		       (uint)pz.Patches.size(), bound, cross, (uint)pz.BorderVertices.size(),
+		       zb.getMin().x, zb.getMin().y, zb.getMax().x, zb.getMax().y, path.c_str());
 		totalPatches += (uint)pz.Patches.size();
 		totalBound += bound;
 		totalCross += cross;
@@ -6213,20 +6316,27 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
                      NL3D::UDriver *externalDriver = NULL,
                      ZPUI::CEditorUI *externalEditorUI = NULL)
 {
-	// Landscape bbox in world space (camera + mouse hotspot).
+	// Camera/hotspot bbox in world space. Frame the EDITABLE zones only (the plugin's
+	// hotspot was the selection center) — frozen context stays visible around them but a
+	// stray context file must not be able to displace the whole view. Fall back to all
+	// zones when nothing is editable.
 	NLMISC::CAABBox bbox;
 	bool bboxInit = false;
+	for (int pass = 0; pass < 2 && !bboxInit; ++pass)
 	for (size_t i = 0; i < zones.size(); ++i)
-	for (size_t p = 0; p < zones[i].Patches.size(); ++p)
 	{
-		const NL3D::CBezierPatch &bp = zones[i].Patches[p].Patch;
-		for (uint v = 0; v < 4; ++v)
+		if (pass == 0 && zones[i].Frozen) continue;
+		for (size_t p = 0; p < zones[i].Patches.size(); ++p)
 		{
-			if (!bboxInit) { bbox.setCenter(bp.Vertices[v]); bbox.setHalfSize(NLMISC::CVector::Null); bboxInit = true; }
-			else bbox.extend(bp.Vertices[v]);
+			const NL3D::CBezierPatch &bp = zones[i].Patches[p].Patch;
+			for (uint v = 0; v < 4; ++v)
+			{
+				if (!bboxInit) { bbox.setCenter(bp.Vertices[v]); bbox.setHalfSize(NLMISC::CVector::Null); bboxInit = true; }
+				else bbox.extend(bp.Vertices[v]);
+			}
+			for (uint v = 0; v < 8; ++v) bbox.extend(bp.Tangents[v]);
+			for (uint v = 0; v < 4; ++v) bbox.extend(bp.Interiors[v]);
 		}
-		for (uint v = 0; v < 8; ++v) bbox.extend(bp.Tangents[v]);
-		for (uint v = 0; v < 4; ++v) bbox.extend(bp.Interiors[v]);
 	}
 	NLMISC::CVector center = bbox.getCenter();
 
@@ -6320,6 +6430,9 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 
 		// Camera looking at the bbox center from a sensible distance (the plugin inherited the
 		// Max viewport matrix; standalone starts from a canonical three-quarter view).
+		printf("view: framing bbox min=(%.1f,%.1f,%.1f) max=(%.1f,%.1f,%.1f) radius=%.1f\n",
+		       bbox.getMin().x, bbox.getMin().y, bbox.getMin().z,
+		       bbox.getMax().x, bbox.getMax().y, bbox.getMax().z, bbox.getRadius());
 		float dist = std::max(bbox.getRadius() * 2.0f, 10.f);
 		NLMISC::CVector dir = NLMISC::CVector(-0.55f, -0.65f, 0.55f).normed();
 		NLMISC::CVector pos = center + dir * dist;
