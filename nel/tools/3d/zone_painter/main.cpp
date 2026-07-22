@@ -1164,15 +1164,14 @@ static void writeNeighborHintsIfBoardSession()
 }
 
 /**
- * Authored footprint origin (snapped AABB min of patch geometry after object TM) for one
- * zone node. Same reference computeFootprintRect uses for placement. False if eval fails.
+ * Unsnapped AABB min of patch geometry after object TM (M20b). Placement still floors via
+ * zoneNodeAuthoredFootprintOrigin / computeFootprintRect; hint offsets quantize raw deltas.
  */
-static bool zoneNodeAuthoredFootprintOrigin(CNodeImpl *node, SNodeTMCache &tmCache,
-                                            float cellSize, float &originX, float &originY)
+static bool zoneNodeAuthoredFootprintRawMin(CNodeImpl *node, SNodeTMCache &tmCache,
+                                            float &minX, float &minY)
 {
-	originX = originY = 0.f;
+	minX = minY = 0.f;
 	if (!node) return false;
-	if (cellSize <= 0.f) cellSize = 160.f;
 	SEvalPatch ep;
 	std::string err;
 	if (!evalNodePatch(node, ep, err)) return false;
@@ -1194,24 +1193,44 @@ static bool zoneNodeAuthoredFootprintOrigin(CNodeImpl *node, SNodeTMCache &tmCac
 	}
 	if (!init) return false;
 	const NLMISC::CVector mn = bbox.getMin();
-	originX = (float)(std::floor((double)mn.x / (double)cellSize) * (double)cellSize);
-	originY = (float)(std::floor((double)mn.y / (double)cellSize) * (double)cellSize);
+	minX = mn.x;
+	minY = mn.y;
+	return true;
+}
+
+/**
+ * Authored footprint origin (snapped AABB min of patch geometry after object TM) for one
+ * zone node. Same reference computeFootprintRect uses for placement. False if eval fails.
+ */
+static bool zoneNodeAuthoredFootprintOrigin(CNodeImpl *node, SNodeTMCache &tmCache,
+                                            float cellSize, float &originX, float &originY)
+{
+	originX = originY = 0.f;
+	if (cellSize <= 0.f) cellSize = 160.f;
+	float minX = 0.f, minY = 0.f;
+	if (!zoneNodeAuthoredFootprintRawMin(node, tmCache, minX, minY)) return false;
+	originX = (float)(std::floor((double)minX / (double)cellSize) * (double)cellSize);
+	originY = (float)(std::floor((double)minY / (double)cellSize) * (double)cellSize);
 	return true;
 }
 
 /**
  * Extract neighbor hints from embedded frozen/ineligible zone nodes in a scene.
  *
- * Offsets are fine-cell deltas of authored footprint origins (geometry AABB min snapped
- * to the cell grid) relative to the eligible zone — the same origin placement uses so
- * that translation = intended(cellOffset) - authoredOrigin(neighbor) round-trips:
- *   converted bricks already in absolute/shared space → delta matches authored separation → ~0 move
- *   freestanding origin-authored bricks → delta from embedded layout / TM → full offset
+ * Offsets are fine-cell deltas of authored footprint AABB mins relative to the eligible
+ * zone (M19/M20b). M20b root cause: flooring each min independently before subtracting
+ * collapses multi-cell / spillover neighbors whose mins land in the same floor cell
+ * (e.g. 201_DY and 201_DZ both (0,-1) on 200_dz). Fix: lround(rawΔ / cellSize) so
+ * sub-cell separation is preserved; v1 integer fine-cell format unchanged.
+ *
+ * Placement still uses floor-snapped origins (computeFootprintRect). When the primary
+ * scene still carries the named embedded copy, freestanding neighbors are placed by
+ * matching that copy's floor origin (M20b emb-floor path) so weld acceptance stays at
+ * the M19 island quality even when recorded (dx,dy) differ from floor-only keys.
  *
  * Falls back to object-TM deltas when geometry eval fails. Basenames keep the authored
  * node name (e.g. "199_DY") for resolveHintToZone. Continent name-grid deltas are NOT
- * used for placement offsets: name row increases in -Y world and AABB spillover makes
- * name col/row a poor proxy for footprint origin (M19).
+ * used for placement offsets (M19).
  */
 static bool extractEmbeddedNeighborHints(CScene &scene, const std::string &fileBasename,
                                          float cellSize, std::vector<SNeighborHint> &out)
@@ -1224,21 +1243,21 @@ static bool extractEmbeddedNeighborHints(CScene &scene, const std::string &fileB
 	std::vector<bool> eligible;
 	computeZoneEligibility(nodes, fileBasename, eligible);
 
-	// Eligible anchor: authored footprint origin (geometry), TM fallback
+	// Eligible anchor: raw AABB min (geometry), TM fallback
 	SNodeTMCache tmCache;
-	float origX = 0.f, origY = 0.f;
+	float rawOx = 0.f, rawOy = 0.f;
 	bool haveOrig = false;
 	for (size_t i = 0; i < nodes.size(); ++i)
 	{
 		if (!(i < eligible.size() && eligible[i] && !nodes[i].Frozen))
 			continue;
-		if (zoneNodeAuthoredFootprintOrigin(nodes[i].Node, tmCache, cellSize, origX, origY))
+		if (zoneNodeAuthoredFootprintRawMin(nodes[i].Node, tmCache, rawOx, rawOy))
 			haveOrig = true;
 		else
 		{
 			Matrix3M tm = getObjectTM(nodes[i].Node, tmCache);
-			origX = tm.m[3][0];
-			origY = tm.m[3][1];
+			rawOx = tm.m[3][0];
+			rawOy = tm.m[3][1];
 			haveOrig = true;
 		}
 		break;
@@ -1248,13 +1267,13 @@ static bool extractEmbeddedNeighborHints(CScene &scene, const std::string &fileB
 		for (size_t i = 0; i < nodes.size(); ++i)
 		{
 			if (nodes[i].Frozen) continue;
-			if (zoneNodeAuthoredFootprintOrigin(nodes[i].Node, tmCache, cellSize, origX, origY))
+			if (zoneNodeAuthoredFootprintRawMin(nodes[i].Node, tmCache, rawOx, rawOy))
 				haveOrig = true;
 			else
 			{
 				Matrix3M tm = getObjectTM(nodes[i].Node, tmCache);
-				origX = tm.m[3][0];
-				origY = tm.m[3][1];
+				rawOx = tm.m[3][0];
+				rawOy = tm.m[3][1];
 				haveOrig = true;
 			}
 			break;
@@ -1269,18 +1288,19 @@ static bool extractEmbeddedNeighborHints(CScene &scene, const std::string &fileB
 		std::string name = ucstring(nodes[i].Node->userName()).toUtf8();
 		if (name.empty()) continue;
 
-		float nx = 0.f, ny = 0.f;
+		float rawNx = 0.f, rawNy = 0.f;
 		int dx = 0, dy = 0;
-		if (zoneNodeAuthoredFootprintOrigin(nodes[i].Node, tmCache, cellSize, nx, ny))
+		if (zoneNodeAuthoredFootprintRawMin(nodes[i].Node, tmCache, rawNx, rawNy))
 		{
-			dx = (int)std::lround((double)(nx - origX) / (double)cellSize);
-			dy = (int)std::lround((double)(ny - origY) / (double)cellSize);
+			// M20b: delta-then-round (not floor-each-then-subtract)
+			dx = (int)std::lround((double)(rawNx - rawOx) / (double)cellSize);
+			dy = (int)std::lround((double)(rawNy - rawOy) / (double)cellSize);
 		}
 		else
 		{
 			Matrix3M tm = getObjectTM(nodes[i].Node, tmCache);
-			dx = (int)std::lround((double)(tm.m[3][0] - origX) / (double)cellSize);
-			dy = (int)std::lround((double)(tm.m[3][1] - origY) / (double)cellSize);
+			dx = (int)std::lround((double)(tm.m[3][0] - rawOx) / (double)cellSize);
+			dy = (int)std::lround((double)(tm.m[3][1] - rawOy) / (double)cellSize);
 		}
 		if (dx == 0 && dy == 0) continue;
 		out.push_back(SNeighborHint(dx, dy, name));
@@ -1508,8 +1528,41 @@ static void loadNeighborContextFiles(std::vector<SPaintZone> &zones, float cellS
 		ZPWS::SZoneEntry Zone;
 		int Dx, Dy;
 		bool Translate;
+		// M20b: floor-snapped origin of the named embedded copy in the primary (when present).
+		// Placement prefers this over home+dx so freestanding reconstructs the island layout
+		// that floor-only keys used (M19 weld quality) while recorded dx stay raw-distinct.
+		bool HaveEmbFloor;
+		float EmbFloorX, EmbFloorY;
+		SPending() : Dx(0), Dy(0), Translate(false), HaveEmbFloor(false), EmbFloorX(0.f), EmbFloorY(0.f) {}
 	};
 	std::vector<SPending> pending;
+
+	// name → floor origin from primary editable scenes (embedded copies)
+	struct SEmbFloor { float X, Y; };
+	std::map<std::string, SEmbFloor> embFloorByName;
+	SNodeTMCache embTmCache;
+	for (size_t ei = 0; ei < g_EditableFiles.size(); ++ei)
+	{
+		if (!g_EditableFiles[ei].Editable) continue;
+		PMAXLOAD::SLoadedMax *lm = g_EditableFiles[ei].Lm ? g_EditableFiles[ei].Lm : g_PrimaryLm;
+		if (!lm || !lm->Scene) continue;
+		std::vector<SZoneNode> nodes;
+		collectZoneNodes(*lm->Scene, nodes);
+		for (size_t i = 0; i < nodes.size(); ++i)
+		{
+			std::string name = ucstring(nodes[i].Node->userName()).toUtf8();
+			if (name.empty()) continue;
+			float fx = 0.f, fy = 0.f;
+			if (!zoneNodeAuthoredFootprintOrigin(nodes[i].Node, embTmCache, cellSize, fx, fy))
+				continue;
+			SEmbFloor ef; ef.X = fx; ef.Y = fy;
+			const std::string low = NLMISC::toLowerAscii(name);
+			embFloorByName[low] = ef;
+			size_t dash = low.find_last_of('-');
+			if (dash != std::string::npos && dash + 1 < low.size())
+				embFloorByName[low.substr(dash + 1)] = ef;
+		}
+	}
 
 	for (size_t ei = 0; ei < g_EditableFiles.size(); ++ei)
 	{
@@ -1541,6 +1594,22 @@ static void loadNeighborContextFiles(std::vector<SPaintZone> &zones, float cellS
 			// applying the unified rule when hints == authored origin deltas). Ecosystem
 			// always places via authored-origin-relative translation (M19).
 			p.Translate = (g_StartupWorld.Kind == ZPWS::Ecosystem);
+			const std::string hintLow = NLMISC::toLowerAscii(hints[hi].Basename);
+			std::map<std::string, SEmbFloor>::const_iterator it = embFloorByName.find(hintLow);
+			if (it == embFloorByName.end())
+			{
+				size_t dash = hintLow.find_last_of('-');
+				if (dash != std::string::npos)
+					it = embFloorByName.find(hintLow.substr(dash + 1));
+			}
+			if (it == embFloorByName.end())
+				it = embFloorByName.find(key);
+			if (it != embFloorByName.end())
+			{
+				p.HaveEmbFloor = true;
+				p.EmbFloorX = it->second.X;
+				p.EmbFloorY = it->second.Y;
+			}
 			(void)source;
 			(void)fw;
 			(void)fh;
@@ -1574,18 +1643,21 @@ static void loadNeighborContextFiles(std::vector<SPaintZone> &zones, float cellS
 		}
 		if (p.Translate && before < zones.size())
 		{
-			// M19 unified placement:
-			//   translation = intendedWorldPos(cellOffset) - authoredFootprintOrigin(neighbor)
-			//   intendedWorldPos = primary authored footprint origin + cellOffset * cellSize
-			// Authored origin = snapped geometry AABB min (computeFootprintRect), not an
-			// assumed (0,0). Converted bricks whose hints equal their authored deltas get
-			// ~zero translation and stay continuous; freestanding origin-authored bricks
-			// receive the full intended offset.
+			// M19/M20b placement:
+			//   translation = wantFloor - freestandingFloor
+			// Prefer the named embedded copy's floor origin when the primary still has it
+			// (exact island layout that floor-only keys used — M19 weld quality). Else
+			// intended = homeFloor + raw-distinct cellOffset * cellSize (appdata reopen).
 			float cOx = 0.f, cOy = 0.f, cSx = 0.f, cSy = 0.f;
 			int cw = 1, ch = 1;
 			computeFootprintRect(zones, before, zones.size(), cellSize, cOx, cOy, cSx, cSy, cw, ch);
-			const float wantX = homeOriginX + (float)p.Dx * cellSize;
-			const float wantY = homeOriginY + (float)p.Dy * cellSize;
+			float wantX = homeOriginX + (float)p.Dx * cellSize;
+			float wantY = homeOriginY + (float)p.Dy * cellSize;
+			if (p.HaveEmbFloor)
+			{
+				wantX = p.EmbFloorX;
+				wantY = p.EmbFloorY;
+			}
 			translateZonesXY(zones, before, zones.size(), wantX - cOx, wantY - cOy);
 		}
 		SContextFile cf;
