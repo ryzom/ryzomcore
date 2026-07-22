@@ -82,10 +82,10 @@
 <!-- * Buttons (layer1) * -->
 <!-- ******************** -->
 
-<group type="container" id="buttons" w="300" pop_min_w="300" pop_max_w="300" h="152" pop_min_h="152" pop_max_h="152"
+<group type="container" id="buttons" w="300" pop_min_w="300" pop_max_w="300" h="248" pop_min_h="248" pop_max_h="248"
 	title="Buttons" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
 	title_bar_open="false" open_button="false" right_button="true" lockable="false" openable="false"
-	opened="true" movable="true" active="true" x="272" y="494">
+	opened="true" movable="true" active="true" x="272" y="580">
 	<group id="header_closed" x="0" y="0" h="12" posref="TL TL"></group>
 	<group id="header_opened" x="0" y="0" w="0" h="16" posref="TL TL"></group>
 	<group id="content" x="0" y="0" posref="TL TL" w="0" h="0">
@@ -102,7 +102,15 @@
 			tx_normal="w_opacity_on.tga" tx_pushed="w_slot_on.tga" tx_over="w_slot_on.tga" color="255 255 255 255" col_pushed="255 255 255 255" col_over="255 255 255 0" />
 		<ctrl type="button" id="rad3" button_type="radio_button" posparent="rad2" posref="MR ML" x="8"
 			tx_normal="w_opacity_on.tga" tx_pushed="w_slot_on.tga" tx_over="w_slot_on.tga" color="255 255 255 255" col_pushed="255 255 255 255" col_over="255 255 255 0" />
-		<view type="text" id="l2" posparent="push1" posref="BL TL" x="0" y="-10" fontsize="14" shadow="true" global_color="false" color="255 255 255 200" hardtext="text buttons (w_text_button skin):" />
+		<!-- M21b: labeled checkbox rows (w_ slot/opacity pair; box or label toggles) -->
+		<view type="text" id="l_cb" posparent="push1" posref="BL TL" x="0" y="-10" fontsize="14" shadow="true" global_color="false" color="255 255 255 200" hardtext="checkboxes (labeled rows):" />
+		<instance template="checkbox_row" id="cb_on" posparent="l_cb" posref="BL TL" x="0" y="-4" w="260" pushed="true"
+			label="Checked option" onclick_box="" params_box=""
+			onclick_lbl="lua" params_lbl="local b=getUI('ui:sample:buttons:content:cb_on:box'); b.pushed = not b.pushed" />
+		<instance template="checkbox_row" id="cb_off" posparent="cb_on" posref="BL TL" x="0" y="-2" w="260" pushed="false"
+			label="Unchecked option" onclick_box="" params_box=""
+			onclick_lbl="lua" params_lbl="local b=getUI('ui:sample:buttons:content:cb_off:box'); b.pushed = not b.pushed" />
+		<view type="text" id="l2" posparent="cb_off" posref="BL TL" x="0" y="-8" fontsize="14" shadow="true" global_color="false" color="255 255 255 200" hardtext="text buttons (w_text_button skin):" />
 		<ctrl style="text_button_16" id="tb1" posparent="l2" posref="BL TL" x="0" y="-6" onclick_l="" params_l="" hardtext="Normal" />
 		<ctrl style="text_button_16" id="tb2" posparent="tb1" posref="MR ML" x="8" onclick_l="" params_l="" hardtext="Another" />
 		<view type="text" id="l3" posparent="tb1" posref="BL TL" x="0" y="-10" fontsize="14" shadow="true" global_color="false" color="255 255 255 200" hardtext="arrow + scale buttons:" />

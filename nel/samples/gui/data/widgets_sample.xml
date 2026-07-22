@@ -74,6 +74,36 @@
 	<group id="sep" posref="BL BL" w="4" h="4" x="-4"></group>
 </template>
 
+<!-- Labeled checkbox row (canonical reference for zone_painter zp_checkbox_row, M21b).
+     Idiom: square toggle_button `box` with the w_ help/browser pair (w_slot_on /
+     w_opacity_on). Transparent push_button `lbl` calls the same onclick so either
+     the square or the caption toggles. Caption is a non-interactive text view over
+     `lbl`. Sample instances pass a lua onclick that flips :box.pushed for both hits
+     (box self-toggles first as toggle_button, so label-only needs the flip; for the
+     box hit the lua re-flips — use onclick_box empty + onclick shared carefully).
+
+     Sample wiring: box has empty onclick (toggle_button self-manages pushed);
+     lbl uses lua to flip the sibling box so the caption is clickable too. -->
+<template name="checkbox_row" keep="true" id="" label="" onclick_box="" params_box=""
+	onclick_lbl="" params_lbl="" posparent="parent" posref="TL TL" x="0" y="0" pushed="false" w="200">
+	<group id="#id" posparent="#posparent" posref="#posref" x="#x" y="#y" w="#w" h="18">
+		<ctrl type="button" id="box" button_type="toggle_button" posref="ML ML" x="0" y="0"
+			tx_normal="w_slot_on.tga" tx_pushed="w_opacity_on.tga" tx_over="w_slot_on.tga"
+			color="255 255 255 255" col_pushed="255 255 255 255" col_over="255 255 255 0"
+			global_color_normal="false" global_color_pushed="false" global_color_over="false"
+			pushed="#pushed"
+			onclick_l="#onclick_box" params_l="#params_box" />
+		<ctrl type="button" id="lbl" button_type="push_button" posparent="box" posref="MR ML" x="2" y="0"
+			w="160" h="16" scale="true"
+			tx_normal="blank.tga" tx_pushed="blank.tga" tx_over="blank.tga"
+			color="0 0 0 0" col_pushed="0 0 0 0" col_over="255 255 255 20"
+			global_color_normal="false" global_color_pushed="false" global_color_over="false"
+			onclick_l="#onclick_lbl" params_l="#params_lbl" />
+		<view type="text" id="t" posparent="box" posref="MR ML" x="6" y="0" fontsize="12" shadow="true"
+			global_color="false" color="255 255 255 220" hardtext="#label" />
+	</group>
+</template>
+
 <!-- Base menu + the two menus the combo box machinery requires -->
 <group type="menu" id="base_menu" mouse_pos="true" exit_click_b="true" space="1" fontsize="16" shadow="true"
 	color="255 255 255 200" shadow_color="0 0 0 255" color_over="0 0 0 255" shadow_color_over="0 0 0 0"
