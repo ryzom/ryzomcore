@@ -216,7 +216,7 @@
 		     Session hub (M11a): btn_back_paint + live-state legend; multi-open hidden. -->
 		<view type="text" id="board_legend" posref="BL BL" x="12" y="36" fontsize="10" shadow="true"
 			global_color="false" color="180 190 200 200"
-			hardtext="L-click open · R-click select · fringe = empty" active="false" />
+			hardtext="L-click open · R-click select · fringe = edge-empty" active="false" />
 		<ctrl style="text_button_16" id="btn_back" posref="BL BL" x="12" y="12"
 			onclick_l="zp_zone_back" params_l="" hardtext="Back" />
 		<ctrl style="text_button_16" id="btn_open_sel" posparent="btn_back" posref="MR ML" x="8" y="0"

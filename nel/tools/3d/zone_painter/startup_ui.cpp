@@ -406,10 +406,10 @@ static void refreshBoardSelectionUI()
 	if (CViewText *t = findText("ui:zp:zone_browser:content:board_legend"))
 	{
 		if (n == 0)
-			t->setHardText("L-click open · R-click select · fringe = empty");
+			t->setHardText("L-click open · R-click select · fringe = edge-empty");
 		else
 			t->setHardText(NLMISC::toString(
-			    "L-click open · R-click select · fringe = empty  |  %u selected", n));
+			    "L-click open · R-click select · fringe = edge-empty  |  %u selected", n));
 	}
 }
 
@@ -570,9 +570,11 @@ static void clearBoard()
 }
 
 /**
- * Continent Screen B (M5a): minesweeper-style square cell board.
- * Cell set = used zones + empty 8-neighbor fringe (nothing beyond). Dual-axis scroll
- * when the board exceeds the host viewport (NLGUI group max_w/max_h + CCtrlScroll).
+ * Continent Screen B (M5a/M13a): minesweeper-style square cell board.
+ * Cell set = used zones + empty edge-adjacent (4-neighbor) fringe — no diagonals.
+ * Diagonal contact alone does not decide a ligo border type, so those cells suggested
+ * undecidable placements. Neighbor auto-load for open zones stays the 8-ring (weld).
+ * Dual-axis scroll when the board exceeds the host viewport.
  */
 static void populateContinentGrid(const ZPWS::SWorldEntry &world)
 {
@@ -614,24 +616,21 @@ static void populateContinentGrid(const ZPWS::SWorldEntry &world)
 		return;
 	}
 
-	// Fringe = empty 8-neighbors of at least one used cell
+	// Fringe = empty edge-adjacent (N/E/S/W) neighbors only — no diagonals (M13a)
+	static const int kEdgeDr[4] = { -1, 0, 1, 0 };
+	static const int kEdgeDc[4] = { 0, 1, 0, -1 };
 	std::set<std::pair<int, int> > fringe;
 	for (std::map<std::pair<int, int>, int>::const_iterator it = used.begin(); it != used.end(); ++it)
 	{
 		const int r = it->first.first;
 		const int c = it->first.second;
-		for (int dr = -1; dr <= 1; ++dr)
+		for (int k = 0; k < 4; ++k)
 		{
-			for (int dc = -1; dc <= 1; ++dc)
-			{
-				if (dr == 0 && dc == 0)
-					continue;
-				const int nr = r + dr;
-				const int nc = c + dc;
-				const std::pair<int, int> key(nr, nc);
-				if (used.find(key) == used.end())
-					fringe.insert(key);
-			}
+			const int nr = r + kEdgeDr[k];
+			const int nc = c + kEdgeDc[k];
+			const std::pair<int, int> key(nr, nc);
+			if (used.find(key) == used.end())
+				fringe.insert(key);
 		}
 	}
 
