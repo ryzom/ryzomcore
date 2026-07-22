@@ -374,8 +374,9 @@ static void refreshBoardSelectionUI()
 		// Session hub legend (M11a)
 		if (CViewText *t = findText("ui:zp:zone_browser:content:board_legend"))
 		{
+			// M11c: full legend — interaction + live-state fills (Explorer anatomy)
 			t->setHardText(
-			    "L-click closed=open · L-click open=actions · fill=edit · dim=RO · *=dirty · O board");
+			    "L-click closed=open · open=Close/Save/Toggle · fill=edit · dim=RO · *=dirty · O/BOARD");
 		}
 		if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(
 		        CWidgetManager::getInstance()->getElementFromId("ui:zp:zone_browser:content:btn_open_sel")))
