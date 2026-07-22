@@ -49,20 +49,22 @@
 // Scene assembly replicates the painter plugin: per RklPatch node evalNodePatch + object TM
 // at t=0 -> buildPatchInfo in authored space (NO symmetry/rotate — the painting scene shows
 // what the artist authored; zoneId = node collection index like the plugin's vectMesh index)
-// -> optional ecosystem self-instances (ui M4a: --instances / ?instances=NxM display clones
-// at whole-footprint offsets, same Node pointers so paint_core shares one carrier; ids from
-// 10000) -> cross-zone open-edge weld (the paint.cpp WELD_THRESOLD port, session-only, never
-// persisted) -> CZone::build -> CZoneCornerSmoother -> Landscape.addZone. Frozen nodes
-// (empty node chunk 0x0976) are boundary-reference display like the exporter's boundary
-// bricks: they participate in the landscape, the weld and the metaTile graph but are never
-// paint targets and their carrier blobs are never rewritten.
+// -> optional ecosystem self-instances (ui M4a/M12: --place dx,dy[,rot][,m]; --instances NxM
+// is a deprecated translation-only alias). Display clones at footprint-cell offsets with
+// optional rot/mirror about the primary AABB center; same Node pointers so paint_core shares
+// one carrier; ids from 10000. Per-zone Rotate/Symmetry feed transformDesc (plugin GetTile/
+// SetTile). -> cross-zone open-edge weld (paint.cpp WELD_THRESOLD port, session-only) ->
+// CZone::build -> CZoneCornerSmoother -> Landscape.addZone. Frozen nodes (0x0976) are
+// boundary-reference display: landscape + weld + metaTile graph, never paint targets, never
+// rewritten.
 //
-// ui M4c: self-instance weld creates self-adjacency in the metaTile graph (primary edge
-// stitches to the instance's opposite edge; instance tiles map to the same pristine slots as
-// the primary's opposite edge). Transition paint adjacent to that seam propagates across it
-// through the ordinary PropagateBorder recursion (visited is SPaintTile*, not carrier tile
-// identity). Verified on lacustre/material-fond?instances=2x1: recursion terminates, checkseams
-// stays 0 illegal on primary and instance; no paint_core gate required.
+// ui M4c / M12b: self-instance weld creates self-adjacency in the metaTile graph. Transition
+// paint adjacent to that seam propagates across it through ordinary PropagateBorder (visited
+// is SPaintTile*). Interior ops through an R-rotated instance are byte-identical to the
+// compensated primary op (tile/256/fill store rot (r+R)&3; color/displace identity on UV).
+// Cross-seam (M4c methodology from the primary) on lacustre/material-fond?place=1,0,R:
+// R0 16 writes / R1 11 / R2 11 / R3 16; checkseams 0 illegal on zones 0 and 10000; <1s.
+// Color closure across rotated seams: 2 slot writes. paint+undo through instance == null-edit.
 
 /*
  * Copyright (C) 2026  by authors

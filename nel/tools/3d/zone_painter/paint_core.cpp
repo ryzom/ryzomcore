@@ -460,8 +460,11 @@ static int zpGetOffset(int edge, int nU, int nV)
 	return 0;
 }
 
-// The cross-patch tile stitch (DoPaint lines ~3884-3923, symmetry dropped): link the tile run
-// along edge e of (zi,p) to the reversed run along edge ee of (zj,pp).
+// The cross-patch tile stitch (DoPaint lines ~3884-3923): link the tile run along edge e of
+// (zi,p) to the reversed run along edge ee of (zj,pp). Edge rot is purely topological from
+// bind edge indices (plugin formula). Per-zone display Rotate is handled by getTileIdx/
+// setTile transformDesc — not folded into metaTile.Rotate (doing so regressed R≠0
+// primary-side seam solves; M12b verification uses M4c methodology from the primary).
 void CPaintCore::stitchEdge(uint zi, uint p, uint e, uint zj, uint pp, uint ee, int dividEdge, int offsetEdge)
 {
 	static const int delta[4] = { ZP_MAX_TILE_IN_PATCH, 1, -ZP_MAX_TILE_IN_PATCH, -1 };
