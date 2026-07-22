@@ -9660,12 +9660,16 @@ args.addArg("", "instances", "NxM",
 		loadNeighborContextFiles(zones, cellSize, skip);
 	}
 
-	// M16c: --place-context "dx,dy:basename" (ecosystem / board) — load as RO at offset
-	for (size_t pci = 0; pci < g_PlaceContextSpecs.size(); ++pci)
+	// M16c: --place-context "dx,dy:basename" (ecosystem / board) — load as RO at offset.
+	// Failed specs are DROPPED (they would retry on every rebuild and show phantom cells).
+	for (size_t pci = g_PlaceContextSpecs.size(); pci-- > 0; )
 	{
 		std::string perr;
 		if (!loadOnePlaceContext(zones, cellSize, g_PlaceContextSpecs[pci], perr))
-			fprintf(stderr, "WARNING: --place-context: %s\n", perr.c_str());
+		{
+			fprintf(stderr, "WARNING: %s — dropping the placement\n", perr.c_str());
+			g_PlaceContextSpecs.erase(g_PlaceContextSpecs.begin() + (std::ptrdiff_t)pci);
+		}
 	}
 
 	uint welds = weldPaintZones(zones);
