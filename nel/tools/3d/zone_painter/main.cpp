@@ -1131,17 +1131,13 @@ static uint appendInstanceZones(std::vector<SPaintZone> &zones, size_t primaryCo
 
 /**
  * After bank load: transform display CPatchInfo tile elements on rotated/mirrored instances
- * so the initial landscape matches GetTile display space (plugin exportZone transform path).
- * Uses CPatchInfo::transform (symmetry + rotate + tile bank), which also remounts U under
- * symmetry. Geometry is already in place from cloneInstanceZone — only tile/color/bind
- * remounts from CPatchInfo::transform's symmetry branch apply here; rotation-only adjusts
- * tile orients / transitions / 256 cases without reshuffling control points again.
+ * so the initial landscape matches GetTile display space (plugin exportZone / CPatchInfo::transform
+ * tile loop). Geometry is already in place from cloneInstanceZone — only tile/color remounts
+ * apply here (control-point index swaps under symmetry are skipped; world XY was already mirrored).
  *
- * IMPORTANT: CPatchInfo::transform also swaps control-point indices under symmetry. Our
- * geometry was already mirrored in world space; re-swapping would double-apply topology.
- * For M12 we therefore only apply the tile-element half for rotation, and for mirror we
- * rely on paint_core's live transformDesc + the already-mirrored geometry (initial tiles
- * for mirrored instances are approximate until first paint refresh; M12c can tighten).
+ * M13c: complete the symmetry half — U remount (u' = OrderS-u-1), transformTile/transform256Case
+ * with symmetry=true, and tile-color S-flip — so a freshly placed mirrored instance matches
+ * painted-then-mirrored before any live setTile refresh.
  */
 static void applyInstanceDisplayTiles(std::vector<SPaintZone> &zones, NL3D::CTileBank *bank)
 {
@@ -1150,27 +1146,46 @@ static void applyInstanceDisplayTiles(std::vector<SPaintZone> &zones, NL3D::CTil
 	{
 		SPaintZone &pz = zones[zi];
 		if (pz.Rotate == 0 && !pz.Symmetry) continue;
-		// Rotation-only tile orient/transition remap (matches CPatchInfo::transform tile loop
-		// with symmetry=false). Mirror tile U remap deferred with live setTile path.
-		if (pz.Symmetry && pz.Rotate == 0) continue; // geometry already mirrored; tiles via paint path
 		const uint rotate = pz.Rotate & 3;
-		if (rotate == 0) continue;
+		const bool symmetry = pz.Symmetry;
 		for (size_t p = 0; p < pz.Patches.size(); ++p)
 		{
 			NL3D::CPatchInfo &pi = pz.Patches[p];
+			// Tile colors: S-flip under symmetry (CPatchInfo::transform color half)
+			if (symmetry && !pi.TileColors.empty() && pi.OrderS > 0)
+			{
+				const uint countU = (uint)pi.OrderS / 2 + 1;
+				const uint countV = (uint)pi.OrderT + 1;
+				for (uint v = 0; v < countV; ++v)
+				for (uint u = 0; u < countU; ++u)
+				{
+					const uint index0 = u + v * ((uint)pi.OrderS + 1);
+					const uint index1 = ((uint)pi.OrderS - u) + v * ((uint)pi.OrderS + 1);
+					if (index0 >= pi.TileColors.size() || index1 >= pi.TileColors.size()) continue;
+					if (index0 == index1) continue;
+					uint16 tmp = pi.TileColors[index0].Color565;
+					pi.TileColors[index0].Color565 = pi.TileColors[index1].Color565;
+					pi.TileColors[index1].Color565 = tmp;
+				}
+			}
+			// Tiles: U remount under symmetry + transformTile / transform256Case (plugin loop)
 			std::vector<NL3D::CTileElement> tiles = pi.Tiles;
 			for (int v = 0; v < pi.OrderT; ++v)
 			for (int u = 0; u < pi.OrderS; ++u)
 			{
+				const int uSymmetry = symmetry ? (pi.OrderS - u - 1) : u;
 				NL3D::CTileElement &element = pi.Tiles[u + v * pi.OrderS];
-				element = tiles[u + v * pi.OrderS];
+				element = tiles[uSymmetry + v * pi.OrderS];
 				for (int l = 0; l < 3; ++l)
 				{
 					if (element.Tile[l] == 0xffff) continue;
 					uint tile = element.Tile[l];
 					uint tileRotation = element.getTileOrient(l);
 					uint tileRotate = rotate;
-					bool tileSymmetry = false;
+					bool tileSymmetry = symmetry;
+					// goofy=false: zone Sym is built later in paint_core; initial display uses
+					// the non-goofy path (matches M12 rotation remount and live setTile when
+					// border state is Nothing).
 					if (!NL3D::CPatchInfo::getTileSymmetryRotate(*bank, tile, tileSymmetry, tileRotate))
 						continue;
 					if (!NL3D::CPatchInfo::transformTile(*bank, tile, tileRotation, tileSymmetry, (4 - tileRotate) & 3, false))
@@ -1186,8 +1201,8 @@ static void applyInstanceDisplayTiles(std::vector<SPaintZone> &zones, NL3D::CTil
 					if (is256)
 					{
 						uint tileRotate = rotate;
-						bool tileSymmetry = false;
-						uint tileRotation = tiles[u + v * pi.OrderS].getTileOrient(0);
+						bool tileSymmetry = symmetry;
+						uint tileRotation = tiles[uSymmetry + v * pi.OrderS].getTileOrient(0);
 						NL3D::CPatchInfo::getTileSymmetryRotate(*bank, element.Tile[0], tileSymmetry, tileRotate);
 						NL3D::CPatchInfo::transform256Case(*bank, uvOff, tileRotation, tileSymmetry, (4 - tileRotate) & 3, false);
 						element.setTile256Info(true, uvOff);
@@ -4297,11 +4312,13 @@ int main(int argc, char **argv)
             "ids address PAINTABLE zones only.");
 args.addArg("", "place", "dx,dy[,rot][,m]",
 	            "Ecosystem: place a self-instance of the open brick at footprint-cell (dx,dy) "
-	            "with optional rotation 0..3 (90° CCW steps) and mirror (m|1). Repeatable. "
-	            "Primary stays at origin rot 0. Display-level duplicates share one paint carrier; "
-	            "picks and paint ops inverse-map through the instance transform (plugin "
-	            "transformDesc assembly). Footprint step = geometry AABB ceil'd to --cellsize. "
-	            "Ecosystem-only. Also ?place=dx,dy,rot (use repeated --place on CLI).",
+	            "with optional rotation 0..3 (90° CCW steps) and mirror (m|1|true). Repeatable. "
+	            "Primary stays at origin rot 0 / no mirror. Geometry is rotated/mirrored about "
+	            "the primary AABB center; initial tile display remounts U under mirror and "
+	            "applies transformTile (M13c) so a fresh place matches painted-then-mirrored "
+	            "before any stroke. Display clones share one paint carrier; picks and paint "
+	            "ops inverse-map through transformDesc. Footprint step = geometry AABB ceil'd "
+	            "to --cellsize. Ecosystem-only. Also ?place=dx,dy,rot on --startup-auto.",
 	            false);
 args.addArg("", "instances", "NxM",
 	            "DEPRECATED alias (M12): expands to translation-only --place for each non-origin "

@@ -466,10 +466,17 @@ bool CPaintCore::tileSeamsLegal(SPaintTile *tile) const
 	return true;
 }
 
-bool CPaintCore::visitedSeamsLegal(const std::set<SPaintTile *> &visited) const
+bool CPaintCore::writtenSeamsLegal(const std::vector<SUndoTile> &backupStack) const
 {
-	for (std::set<SPaintTile *>::const_iterator it = visited.begin(); it != visited.end(); ++it)
-		if (!tileSeamsLegal(*it)) return false;
+	// Dedup (zoneIdx, tileId) — backup may list the same slot more than once.
+	std::set<std::pair<uint, sint32> > seen;
+	for (size_t i = 0; i < backupStack.size(); ++i)
+	{
+		const SUndoTile &b = backupStack[i];
+		if (!seen.insert(std::make_pair(b.Zone, b.TileId)).second) continue;
+		SPaintTile *t = const_cast<CPaintCore *>(this)->metaAt(b.Zone, b.TileId);
+		if (t && !tileSeamsLegal(t)) return false;
+	}
 	return true;
 }
 
@@ -1953,8 +1960,6 @@ bool CPaintCore::putATile(SPaintTile *pTile, int tileSet, int curRotation, bool 
 			// M13b residual gate: transition-at-pick must also leave legal seams
 			if (!tileSeamsLegal(pTile))
 			{
-				getTileIdx((uint)pTile->Zone, pTile->TileId, desc);
-				// already wrote; revert seed to pre-op backup
 				setTile((uint)pTile->Zone, pTile->TileId, backup, NULL, true);
 				return false;
 			}
@@ -1966,10 +1971,12 @@ bool CPaintCore::putATile(SPaintTile *pTile, int tileSet, int curRotation, bool 
 	}
 	else
 	{
-		// M13b residual gate: full put claimed success — refuse if any touched tile has an
+		// M13b residual gate: full put claimed success — refuse if any WRITTEN tile has an
 		// illegal seam (hard UV/rot cases the dual-graph walk still cannot close; primary
 		// and instance both hit them). Revert the stroke so no illegal state persists.
-		if (!visitedSeamsLegal(visited))
+		// Check backupStack only (not duals merely marked visited) so mirrored duals with
+		// transformDesc display-space noise do not false-positive the gate.
+		if (!writtenSeamsLegal(backupStack))
 		{
 			fprintf(stderr, "putATile: refuse write that would leave illegal seams (zone %u tileId %d)\n",
 			        (uint)pTile->Zone, (int)pTile->TileId);

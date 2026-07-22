@@ -554,7 +554,9 @@ private:
 	void markVisitedWithDuals(SPaintTile *tile, std::set<SPaintTile *> &visited) const;
 	// Local seam legality around a tile (GetBorderDesc corner TileSet identity, same as checkSeams).
 	bool tileSeamsLegal(SPaintTile *tile) const;
-	bool visitedSeamsLegal(const std::set<SPaintTile *> &visited) const;
+	// Only tiles actually written this put (backup stack), not duals merely marked visited —
+	// mirrored duals can look "illegal" under getTileIdx(sym) while authored space is fine.
+	bool writtenSeamsLegal(const std::vector<SUndoTile> &backupStack) const;
 	void buildMeta(std::string &err);
 	void stitchEdge(uint zi, uint p, uint e, uint zj, uint pp, uint ee, int dividEdge, int offsetEdge);
 	int getBindedEdge(uint zone, int nPatch, int nVertInPatch) const;
