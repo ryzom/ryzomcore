@@ -174,6 +174,14 @@ struct SSessionBoardBridge
 	bool (*scratchRemoveContext)(int cx, int cy, std::string &err);
 	/** Query context at cell; fills basename. */
 	bool (*scratchGetContext)(int cx, int cy, std::string &basename);
+	// M24a eco multi-editable: open files placed on the scratch board ("F:ox,oy:name" cells).
+	// close/save/toggle for these ride the continent per-file callbacks above (basename-addressed).
+	/** Open world brick as EDITABLE with footprint origin at (cx,cy); refuses overlap. */
+	bool (*scratchOpenEditable)(int cx, int cy, const std::string &basename, std::string &err);
+	/** Open-file block covering (cx,cy) → origin cell + basename + editable flag. */
+	bool (*scratchGetEditableAt)(int cx, int cy, int &ox, int &oy, std::string &basename, bool &editable);
+	/** Convert the RO context brick at (cx,cy) into an editable open file (same cell). */
+	bool (*scratchContextToEditable)(int cx, int cy, std::string &err);
 	/** Home brick display name. */
 	std::string ScratchHomeName;
 	/** Primary footprint size in fine cells (M14a multi-cell occupancy). */
@@ -192,6 +200,7 @@ struct SSessionBoardBridge
 		  scratchPlace(NULL), scratchRotate(NULL), scratchMirror(NULL), scratchRemove(NULL),
 		  scratchGetInstance(NULL), scratchGetInstanceOrigin(NULL),
 		  scratchPlaceContext(NULL), scratchRemoveContext(NULL), scratchGetContext(NULL),
+		  scratchOpenEditable(NULL), scratchGetEditableAt(NULL), scratchContextToEditable(NULL),
 		  FootprintCellsW(1), FootprintCellsH(1), FootprintMask(NULL)
 	{
 	}

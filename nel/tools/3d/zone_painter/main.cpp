@@ -276,7 +276,14 @@ struct SEditableFileInfo
 	std::vector<uint> ZoneIds;
 	/** M11a: when false the file is open as read-only context (no paint; like neighbor). */
 	bool Editable;
-	SEditableFileInfo() : Lm(NULL), Editable(true) {}
+	// M24a ecosystem board placement (non-primary files; primary stays the layout origin).
+	// CellX/CellY = board cell of the file's footprint origin (fine cells, primary-relative);
+	// footprint derived at rebuild for board occupancy/legality. Continents ignore these
+	// (absolute world space).
+	int CellX, CellY;
+	int CellsW, CellsH;
+	std::vector<bool> Mask;
+	SEditableFileInfo() : Lm(NULL), Editable(true), CellX(0), CellY(0), CellsW(1), CellsH(1) {}
 };
 static std::vector<SEditableFileInfo> g_EditableFiles;
 // M11a: primary stack scene pointer (set once after load; used by session rebuild)
@@ -1161,14 +1168,34 @@ static PIPELINE::MAX::CScene *editableScene(const SEditableFileInfo &efi);
 static void writeNeighborHintsIfBoardSession()
 {
 	if (!g_BoardSession) return;
-	std::vector<SNeighborHint> hints;
-	collectHintsFromLoadedContext(hints);
-	// Spec: record every loaded read-only neighbor file (g_ContextFiles).
+	std::vector<SNeighborHint> baseHints;
+	collectHintsFromLoadedContext(baseHints);
+	// Spec: record every loaded read-only neighbor file (g_ContextFiles). M24a: offsets are
+	// PER-FILE (relative to each editable's own board cell — zero for continents/primary,
+	// so pre-M24 payloads are unchanged), and eco saves also record the OTHER open files
+	// as hints: a zone reopens with the full working set it was painted against, loaded
+	// read-only. Continents skip that (the grid names already derive neighbors).
 	for (size_t i = 0; i < g_EditableFiles.size(); ++i)
 	{
 		if (!g_EditableFiles[i].Editable) continue;
 		PIPELINE::MAX::CScene *sc = editableScene(g_EditableFiles[i]);
 		if (!sc) continue;
+		const int selfX = g_EditableFiles[i].CellX;
+		const int selfY = g_EditableFiles[i].CellY;
+		std::vector<SNeighborHint> hints;
+		for (size_t h = 0; h < baseHints.size(); ++h)
+			hints.push_back(SNeighborHint(baseHints[h].Dx - selfX, baseHints[h].Dy - selfY,
+			                              baseHints[h].Basename));
+		if (g_StartupWorld.Kind == ZPWS::Ecosystem)
+		{
+			for (size_t j = 0; j < g_EditableFiles.size(); ++j)
+			{
+				if (j == i) continue;
+				hints.push_back(SNeighborHint(g_EditableFiles[j].CellX - selfX,
+				                              g_EditableFiles[j].CellY - selfY,
+				                              g_EditableFiles[j].Basename));
+			}
+		}
 		writeNeighborHintsToScene(*sc, g_EditableFiles[i].Basename, hints);
 	}
 }
@@ -1804,6 +1831,14 @@ struct SPlaceContextSpec
 	SPlaceContextSpec() : Dx(0), Dy(0), CellsW(1), CellsH(1) {}
 };
 static std::vector<SPlaceContextSpec> g_PlaceContextSpecs;
+// M24a: --open-editable "cx,cy:basename" specs (ecosystem startup; board Open editable's CLI form)
+struct SOpenEditableSpec
+{
+	int Cx, Cy;
+	std::string Basename;
+	SOpenEditableSpec() : Cx(0), Cy(0) {}
+};
+static std::vector<SOpenEditableSpec> g_OpenEditableSpecs;
 // Forward: M16c place-context load (defined with scratch board helpers)
 static bool loadOnePlaceContext(std::vector<SPaintZone> &zones, float cellSize,
                                 const SPlaceContextSpec &pc, std::string &err);
@@ -5114,6 +5149,7 @@ static bool zpScriptOpenZone(const std::string &basename, std::string &err)
 	if (!g_SessionOpsAvailable) { err = "openZone: board session only"; return false; }
 	return sessionOpenZone(basename, err);
 }
+// (sessionOpenZone itself rejects ecosystem sessions — eco opens need a board cell.)
 
 static bool zpScriptCloseZone(const std::string &basename, bool saveFirst, bool forceDiscard, std::string &err)
 {
@@ -5321,6 +5357,37 @@ static bool sessionSaveOneFile(SEditableFileInfo &efi, std::string &err)
  * Retains open SLoadedMax scenes; reloads nothing already open.
  * Returns weld count; fills err on hard failure.
  */
+/**
+ * M24a: derive + translate one eco non-primary editable's zones range to its board cell
+ * (authored-origin-relative, same rule as place-context); stores the footprint on the
+ * file entry for board occupancy. Requires g_FootprintOriginX/Y (primary) already derived.
+ */
+static void placeEcoEditableRange(std::vector<SPaintZone> &zones, SEditableFileInfo &efi,
+                                  size_t rb, size_t re, float cellSize, float snap)
+{
+	if (rb >= re) return;
+	// Footprint from the first eligible (non-frozen unless demoted) zone, like the
+	// place-context path; AABB rect fallback covers the rest.
+	size_t pick = rb;
+	for (size_t i = rb; i < re; ++i)
+	{
+		pick = i;
+		if (!zones[i].Frozen) break;
+	}
+	float ox = 0.f, oy = 0.f;
+	int cw = 1, ch = 1;
+	bool fromT = false;
+	std::vector<bool> mask;
+	std::string derr;
+	deriveZoneFootprintMask(zones[pick], cellSize, snap, mask, cw, ch, ox, oy, fromT, derr);
+	const float wantX = g_FootprintOriginX + (float)efi.CellX * cellSize;
+	const float wantY = g_FootprintOriginY + (float)efi.CellY * cellSize;
+	translateZonesXY(zones, rb, re, wantX - ox, wantY - oy);
+	efi.CellsW = cw;
+	efi.CellsH = ch;
+	efi.Mask = mask;
+}
+
 static bool rebuildWorkingSet(std::string &err, uint &outWelds)
 {
 	outWelds = 0;
@@ -5357,6 +5424,7 @@ static bool rebuildWorkingSet(std::string &err, uint &outWelds)
 	// Rebuild zones vector
 	std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
 	zones.clear();
+	std::vector<std::pair<size_t, size_t> > fileRanges; // zones-vector range per editable file
 	for (size_t ei = 0; ei < g_EditableFiles.size(); ++ei)
 	{
 		SEditableFileInfo &efi = g_EditableFiles[ei];
@@ -5378,6 +5446,7 @@ static bool rebuildWorkingSet(std::string &err, uint &outWelds)
 		efi.ZoneIds.clear();
 		for (size_t zi = before; zi < zones.size(); ++zi)
 			efi.ZoneIds.push_back(zones[zi].ZoneId);
+		fileRanges.push_back(std::make_pair(before, zones.size()));
 	}
 
 	// Refresh M17 primary footprint mask from rebuilt primary zones
@@ -5388,6 +5457,18 @@ static bool rebuildWorkingSet(std::string &err, uint &outWelds)
 		if (primaryOnly > 0)
 			derivePrimaryFootprint(zones, 0, primaryOnly, g_SessionCellSize,
 			                       g_SessionSnap > 0.f ? g_SessionSnap : 1.f);
+	}
+
+	// M24a: ecosystem non-primary open files place like context bricks — per-file footprint
+	// derive in authored space, then authored-origin-relative translation to their board
+	// cell. Save byte-guarantee unaffected: paint writes tile values only, geometry is a
+	// display/weld copy rebuilt from the scene on every rebuild.
+	if (g_StartupWorld.Kind == ZPWS::Ecosystem)
+	{
+		for (size_t ei = 1; ei < g_EditableFiles.size() && ei < fileRanges.size(); ++ei)
+			placeEcoEditableRange(zones, g_EditableFiles[ei],
+			                      fileRanges[ei].first, fileRanges[ei].second,
+			                      g_SessionCellSize, g_SessionSnap > 0.f ? g_SessionSnap : 1.f);
 	}
 
 	// Ecosystem scratch instances (M12c): re-append display clones after primary rebuild
@@ -5536,6 +5617,22 @@ static bool scratchMaskConflicts(int ox, int oy, uint rot, bool mirror, int skip
 			return true;
 		}
 	}
+	// M24a: non-primary open files (eco board placements)
+	for (size_t i = 1; i < g_EditableFiles.size(); ++i)
+	{
+		const SEditableFileInfo &ef = g_EditableFiles[i];
+		const int cw = ef.CellsW > 0 ? ef.CellsW : 1;
+		const int ch = ef.CellsH > 0 ? ef.CellsH : 1;
+		std::vector<bool> em = ef.Mask;
+		if (em.empty()) em.assign((size_t)cw * (size_t)ch, true);
+		if (masksCollide(hm, fw, fh, ox, oy, rot, mirror,
+		                 em, cw, ch, ef.CellX, ef.CellY, 0, false))
+		{
+			err = NLMISC::toString("mask overlaps open file '%s' at (%d,%d)",
+			                       ef.Basename.c_str(), ef.CellX, ef.CellY);
+			return true;
+		}
+	}
 	return false;
 }
 
@@ -5581,6 +5678,37 @@ static bool scratchFindContext(int cx, int cy, size_t &idx)
 	return false;
 }
 
+/** M24a: find the non-primary open file whose masked cells cover (cx,cy) (eco board). */
+static bool scratchFindEditableAt(int cx, int cy, size_t &idx)
+{
+	for (size_t i = 1; i < g_EditableFiles.size(); ++i)
+	{
+		const SEditableFileInfo &ef = g_EditableFiles[i];
+		const int cw = ef.CellsW > 0 ? ef.CellsW : 1;
+		const int ch = ef.CellsH > 0 ? ef.CellsH : 1;
+		if (maskCellOccupied(ef.Mask, cw, ch, ef.CellX, ef.CellY, 0, false, cx, cy))
+		{
+			idx = i;
+			return true;
+		}
+	}
+	return false;
+}
+
+/** M24a bridge info: open-file block covering (cx,cy) → origin + name + editable flag. */
+static bool scratchGetEditableAt(int cx, int cy, int &ox, int &oy, std::string &basename,
+                                 bool &editable)
+{
+	size_t idx = 0;
+	if (!scratchFindEditableAt(cx, cy, idx))
+		return false;
+	ox = g_EditableFiles[idx].CellX;
+	oy = g_EditableFiles[idx].CellY;
+	basename = g_EditableFiles[idx].Basename;
+	editable = g_EditableFiles[idx].Editable;
+	return true;
+}
+
 static bool scratchGetCellState(const std::string &basename, ZPUI::ESessionCellState &out)
 {
 	// Multi-cell: basenames H:cx,cy / I:ox,oy@cx,cy / E:cx,cy / C:cx,cy:basename (M16c)
@@ -5602,9 +5730,38 @@ static bool scratchGetCellState(const std::string &basename, ZPUI::ESessionCellS
 		out = ZPUI::CellScratchContext;
 		return true;
 	}
+	if (basename.size() >= 4 && basename[0] == 'F' && basename[1] == ':')
+	{
+		// M24a open-file cell F:ox,oy:name / F:ox,oy@cx,cy:name — state from the file entry
+		std::string rest = basename.substr(2);
+		std::string::size_type comma = rest.find(',');
+		int ox = 0, oy = 0;
+		if (comma != std::string::npos && NLMISC::fromString(rest.substr(0, comma), ox))
+		{
+			std::string tail = rest.substr(comma + 1);
+			std::string::size_type stop = tail.find_first_of("@:");
+			if (NLMISC::fromString(stop == std::string::npos ? tail : tail.substr(0, stop), oy))
+			{
+				size_t idx = 0;
+				if (scratchFindEditableAt(ox, oy, idx))
+				{
+					const SEditableFileInfo &ef = g_EditableFiles[idx];
+					if (!ef.Editable)
+						out = ZPUI::CellOpenReadOnly;
+					else
+						out = g_PaintCtx.Core && g_PaintCtx.Core->anyZoneDirty(ef.ZoneIds)
+						          ? ZPUI::CellDirtyEditable
+						          : ZPUI::CellOpenEditable;
+					return true;
+				}
+			}
+		}
+		out = ZPUI::CellOpenEditable;
+		return true;
+	}
 	if (basename.size() >= 4 && basename[0] == 'E' && basename[1] == ':')
 	{
-		// Empty unless a place-context occupies this cell
+		// Empty unless a place-context or open file occupies this cell
 		char sk = 0;
 		int cx = 0, cy = 0;
 		// parse E:cx,cy
@@ -5618,6 +5775,12 @@ static bool scratchGetCellState(const std::string &basename, ZPUI::ESessionCellS
 			if (scratchFindContext(cx, cy, idx))
 			{
 				out = ZPUI::CellScratchContext;
+				return true;
+			}
+			if (scratchFindEditableAt(cx, cy, idx))
+			{
+				out = g_EditableFiles[idx].Editable ? ZPUI::CellOpenEditable
+				                                    : ZPUI::CellOpenReadOnly;
 				return true;
 			}
 		}
@@ -5759,6 +5922,11 @@ static bool scratchPlaceContext(int cx, int cy, const std::string &basename, std
 		err = "cell already has context";
 		return false;
 	}
+	if (scratchFindEditableAt(cx, cy, idx))
+	{
+		err = "cell has an open file";
+		return false;
+	}
 	SPlaceContextSpec pc;
 	pc.Dx = cx;
 	pc.Dy = cy;
@@ -5823,6 +5991,22 @@ static bool scratchPlaceContext(int cx, int cy, const std::string &basename, std
 				return false;
 			}
 		}
+		for (size_t i = 1; i < g_EditableFiles.size(); ++i)
+		{
+			const SEditableFileInfo &ef = g_EditableFiles[i];
+			const int ew = ef.CellsW > 0 ? ef.CellsW : 1;
+			const int eh = ef.CellsH > 0 ? ef.CellsH : 1;
+			std::vector<bool> em = ef.Mask;
+			if (em.empty()) em.assign((size_t)ew * (size_t)eh, true);
+			if (masksCollide(cm, cw, ch, loaded.Dx, loaded.Dy, 0, false,
+			                 em, ew, eh, ef.CellX, ef.CellY, 0, false))
+			{
+				g_PlaceContextSpecs.pop_back();
+				scratchRebuild(err);
+				err = "context mask overlaps open file '" + ef.Basename + "'";
+				return false;
+			}
+		}
 	}
 	return true;
 }
@@ -5845,6 +6029,157 @@ static bool scratchGetContext(int cx, int cy, std::string &basename)
 	if (!scratchFindContext(cx, cy, idx))
 		return false;
 	basename = g_PlaceContextSpecs[idx].Basename;
+	return true;
+}
+
+/** M24a: does open file `idx`'s derived footprint collide with anything else on the board? */
+static bool scratchEditableConflicts(size_t idx, std::string &err)
+{
+	if (idx >= g_EditableFiles.size()) return false;
+	const SEditableFileInfo &ef = g_EditableFiles[idx];
+	const int cw = ef.CellsW > 0 ? ef.CellsW : 1;
+	const int ch = ef.CellsH > 0 ? ef.CellsH : 1;
+	std::vector<bool> em = ef.Mask;
+	if (em.empty()) em.assign((size_t)cw * (size_t)ch, true);
+	if (masksCollide(scratchHomeMask(), scratchFw(), scratchFh(), 0, 0, 0, false,
+	                 em, cw, ch, ef.CellX, ef.CellY, 0, false))
+	{
+		err = "footprint overlaps home";
+		return true;
+	}
+	for (size_t i = 0; i < g_Places.size(); ++i)
+	{
+		if (masksCollide(scratchHomeMask(), scratchFw(), scratchFh(),
+		                 g_Places[i].CellX, g_Places[i].CellY, g_Places[i].Rot, g_Places[i].Mirror,
+		                 em, cw, ch, ef.CellX, ef.CellY, 0, false))
+		{
+			err = "footprint overlaps an instance";
+			return true;
+		}
+	}
+	for (size_t i = 0; i < g_PlaceContextSpecs.size(); ++i)
+	{
+		const SPlaceContextSpec &pc = g_PlaceContextSpecs[i];
+		const int ow = pc.CellsW > 0 ? pc.CellsW : 1;
+		const int oh = pc.CellsH > 0 ? pc.CellsH : 1;
+		std::vector<bool> om = pc.Mask;
+		if (om.empty()) om.assign((size_t)ow * (size_t)oh, true);
+		if (masksCollide(em, cw, ch, ef.CellX, ef.CellY, 0, false,
+		                 om, ow, oh, pc.Dx, pc.Dy, 0, false))
+		{
+			err = "footprint overlaps context '" + pc.Basename + "'";
+			return true;
+		}
+	}
+	for (size_t i = 1; i < g_EditableFiles.size(); ++i)
+	{
+		if (i == idx) continue;
+		const SEditableFileInfo &of = g_EditableFiles[i];
+		const int ow = of.CellsW > 0 ? of.CellsW : 1;
+		const int oh = of.CellsH > 0 ? of.CellsH : 1;
+		std::vector<bool> om = of.Mask;
+		if (om.empty()) om.assign((size_t)ow * (size_t)oh, true);
+		if (masksCollide(em, cw, ch, ef.CellX, ef.CellY, 0, false,
+		                 om, ow, oh, of.CellX, of.CellY, 0, false))
+		{
+			err = "footprint overlaps open file '" + of.Basename + "'";
+			return true;
+		}
+	}
+	return false;
+}
+
+/**
+ * M24a: open a world brick as an EDITABLE file placed at board cell (cx,cy) — the eco
+ * counterpart of the continent sessionOpenZone. The footprint derives at rebuild; a
+ * post-rebuild collision check rolls the open back (auto-shift is a later milestone).
+ */
+static bool scratchOpenEditable(int cx, int cy, const std::string &basenameIn, std::string &err)
+{
+	if (scratchHomeOccupies(cx, cy)) { err = "cell is home"; return false; }
+	size_t idx = 0;
+	if (scratchFindPlace(cx, cy, idx)) { err = "cell has a self-instance"; return false; }
+	if (scratchFindContext(cx, cy, idx)) { err = "cell has context (remove it first)"; return false; }
+	if (scratchFindEditableAt(cx, cy, idx)) { err = "cell has an open file"; return false; }
+	std::string basename = basenameIn;
+	std::string::size_type dot = basename.rfind('.');
+	if (dot != std::string::npos && NLMISC::toLowerAscii(basename.substr(dot)) == ".max")
+		basename = basename.substr(0, dot);
+	ZPWS::SZoneEntry ze;
+	if (!resolveHintToZone(g_StartupWorld, basename, ze))
+	{
+		err = "unresolved brick: " + basename;
+		return false;
+	}
+	if (findEditableByBasename(ze.Basename))
+	{
+		err = "already open: " + ze.Basename;
+		return false;
+	}
+	PMAXLOAD::SLoadedMax *extra = new PMAXLOAD::SLoadedMax();
+	if (!PMAXLOAD::loadMaxFile(ze.MaxPath, *extra))
+	{
+		delete extra;
+		err = "cannot load " + ze.MaxPath;
+		return false;
+	}
+	SEditableFileInfo efi;
+	efi.Path = ze.MaxPath;
+	efi.Basename = ze.Basename;
+	efi.Lm = extra;
+	efi.Editable = true;
+	efi.CellX = cx;
+	efi.CellY = cy;
+	g_ExtraEditableScenes.push_back(extra);
+	g_EditableFiles.push_back(efi);
+	std::string rerr;
+	bool ok = scratchRebuild(rerr);
+	if (ok)
+	{
+		// Mask known only after rebuild — collision means the open does not fit here.
+		std::string cerr;
+		if (scratchEditableConflicts(g_EditableFiles.size() - 1, cerr))
+		{
+			ok = false;
+			rerr = cerr + NLMISC::toString(" at (%d,%d)", cx, cy);
+		}
+	}
+	if (!ok)
+	{
+		g_EditableFiles.pop_back();
+		g_ExtraEditableScenes.pop_back();
+		std::string err2;
+		uint w2 = 0;
+		rebuildWorkingSet(err2, w2);
+		freeLoadedMax(extra);
+		err = rerr;
+		return false;
+	}
+	printf("scratch open editable: '%s' @ (%d,%d) footprint %dx%d\n",
+	       ze.Basename.c_str(), cx, cy,
+	       g_EditableFiles.back().CellsW, g_EditableFiles.back().CellsH);
+	return true;
+}
+
+/** M24a: convert a placed RO context brick to an editable file at the same cell. */
+static bool scratchContextToEditable(int cx, int cy, std::string &err)
+{
+	size_t idx = 0;
+	if (!scratchFindContext(cx, cy, idx))
+	{
+		err = "no context at cell";
+		return false;
+	}
+	const SPlaceContextSpec pc = g_PlaceContextSpecs[idx];
+	g_PlaceContextSpecs.erase(g_PlaceContextSpecs.begin() + (std::ptrdiff_t)idx);
+	if (!scratchOpenEditable(pc.Dx, pc.Dy, pc.Basename, err))
+	{
+		// Restore the context placement on failure
+		g_PlaceContextSpecs.push_back(pc);
+		std::string err2;
+		scratchRebuild(err2);
+		return false;
+	}
 	return true;
 }
 
@@ -6009,6 +6344,12 @@ static bool sessionIsEditable(const std::string &basename)
 
 static bool sessionOpenZone(const std::string &basename, std::string &err)
 {
+	if (g_StartupWorld.Kind == ZPWS::Ecosystem)
+	{
+		// Eco opens carry a board cell (M24a) — this unplaced open would stack on home.
+		err = "ecosystem: open via the board cell (scratchOpenEditable)";
+		return false;
+	}
 	if (findEditableByBasename(basename))
 	{
 		err = "already open";
@@ -6725,6 +7066,18 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 				sessionBridge.scratchPlaceContext = scratchPlaceContext;
 				sessionBridge.scratchRemoveContext = scratchRemoveContext;
 				sessionBridge.scratchGetContext = scratchGetContext;
+				// M24a eco multi-editable: board placement of open files + the continent
+				// per-file ops (close/save/toggle are basename-addressed and generic).
+				sessionBridge.scratchOpenEditable = scratchOpenEditable;
+				sessionBridge.scratchGetEditableAt = scratchGetEditableAt;
+				sessionBridge.scratchContextToEditable = scratchContextToEditable;
+				g_SessionOpsAvailable = true;
+				sessionBridge.closeZone = sessionCloseZone;
+				sessionBridge.saveZone = sessionSaveZone;
+				sessionBridge.toggleEditable = sessionToggleEditable;
+				sessionBridge.isDirty = sessionIsDirty;
+				sessionBridge.isOpen = sessionIsOpen;
+				sessionBridge.isEditable = sessionIsEditable;
 				sessionBridge.ScratchHomeName = g_StartupZone.Basename.empty()
 					? g_StartupWorld.WorldName
 					: g_StartupZone.Basename;
@@ -7692,6 +8045,9 @@ int main(int argc, char **argv)
 	            "Ecosystem/board: load an existing world brick file as frozen read-only context "
 	            "at fine-cell offset (dx,dy) relative to the primary footprint origin. Repeatable. "
 	            "Headless equivalent of the scratch-board context placement (M16c).");
+	args.addArg("", "open-editable", "cx,cy:basename",
+	            "Ecosystem startup: open an additional world brick as EDITABLE with its footprint "
+	            "origin at board cell (cx,cy) (repeatable; the board Open editable's CLI form)");
 	args.addArg("", "dump-neighbor-hints", "file.max",
 	            "Headless: print the painter neighbor-hints appdata (and embedded fallback) for "
 	            "the eligible node of file.max; exit. Does not open the viewer.");
@@ -7783,6 +8139,32 @@ args.addArg("", "instances", "NxM",
 				base = base.substr(0, dot);
 			pc.Basename = base;
 			g_PlaceContextSpecs.push_back(pc);
+		}
+	}
+	if (args.haveLongArg("open-editable"))
+	{
+		const std::vector<std::string> &oes = args.getLongArg("open-editable");
+		for (size_t i = 0; i < oes.size(); ++i)
+		{
+			std::string::size_type colon = oes[i].find(':');
+			std::string coords = colon == std::string::npos ? std::string() : oes[i].substr(0, colon);
+			std::string base = colon == std::string::npos ? std::string() : oes[i].substr(colon + 1);
+			std::string::size_type comma = coords.find(',');
+			SOpenEditableSpec oe;
+			if (colon == std::string::npos || comma == std::string::npos
+			    || !NLMISC::fromString(coords.substr(0, comma), oe.Cx)
+			    || !NLMISC::fromString(coords.substr(comma + 1), oe.Cy)
+			    || base.empty())
+			{
+				fprintf(stderr, "ERROR: --open-editable expects cx,cy:basename, got '%s'\n",
+				        oes[i].c_str());
+				return 1;
+			}
+			std::string::size_type dot = base.rfind('.');
+			if (dot != std::string::npos && NLMISC::toLowerAscii(base.substr(dot)) == ".max")
+				base = base.substr(0, dot);
+			oe.Basename = base;
+			g_OpenEditableSpecs.push_back(oe);
 		}
 	}
 
@@ -8471,6 +8853,62 @@ args.addArg("", "instances", "NxM",
 	if (args.haveLongArg("check-ligozone") && instancePrimaryCount > 0)
 		compareFootprintToLigozone(args.getLongArg("check-ligozone")[0]);
 
+	// M24a: --open-editable "cx,cy:basename" — additional EDITABLE files placed on the eco
+	// board (the startup/E2E form of the board's Open editable action).
+	if (!g_OpenEditableSpecs.empty())
+	{
+		if (g_StartupWorld.Kind != ZPWS::Ecosystem)
+		{
+			fprintf(stderr, "ERROR: --open-editable is ecosystem-startup only "
+			                "(continents use multi-select zoneA+zoneB)\n");
+			return 1;
+		}
+		for (size_t oi = 0; oi < g_OpenEditableSpecs.size(); ++oi)
+		{
+			const SOpenEditableSpec &oe = g_OpenEditableSpecs[oi];
+			ZPWS::SZoneEntry ze;
+			if (!resolveHintToZone(g_StartupWorld, oe.Basename, ze))
+			{
+				fprintf(stderr, "ERROR: --open-editable: unresolved brick '%s'\n",
+				        oe.Basename.c_str());
+				return 1;
+			}
+			if (findEditableByBasename(ze.Basename))
+			{
+				fprintf(stderr, "ERROR: --open-editable: '%s' is already editable\n",
+				        ze.Basename.c_str());
+				return 1;
+			}
+			PMAXLOAD::SLoadedMax *extra = new PMAXLOAD::SLoadedMax();
+			if (!PMAXLOAD::loadMaxFile(ze.MaxPath, *extra))
+			{
+				delete extra;
+				fprintf(stderr, "ERROR: --open-editable: cannot load %s\n", ze.MaxPath.c_str());
+				return 1;
+			}
+			g_ExtraEditableScenes.push_back(extra);
+			const uint base = (uint)(g_EditableFiles.size() * 1000);
+			const size_t before = zones.size();
+			if (!buildPaintZones(*extra->Scene, zones, base, /*forceFrozen=*/false, ze.Basename))
+				fprintf(stderr, "WARNING: --open-editable: no paint zones in %s\n", ze.MaxPath.c_str());
+			SEditableFileInfo efi;
+			efi.Path = ze.MaxPath;
+			efi.Basename = ze.Basename;
+			efi.Lm = extra;
+			efi.Editable = true;
+			efi.CellX = oe.Cx;
+			efi.CellY = oe.Cy;
+			for (size_t zi = before; zi < zones.size(); ++zi)
+				efi.ZoneIds.push_back(zones[zi].ZoneId);
+			g_EditableFiles.push_back(efi);
+			placeEcoEditableRange(zones, g_EditableFiles.back(), before, zones.size(),
+			                      cellSize, snap);
+			printf("open-editable: '%s' @ (%d,%d) zoneIdBase=%u footprint %dx%d\n",
+			       ze.Basename.c_str(), oe.Cx, oe.Cy, base,
+			       g_EditableFiles.back().CellsW, g_EditableFiles.back().CellsH);
+		}
+	}
+
 	// Ecosystem self-instances (M4a/M12/M14a): display clones at --place offsets (rot/mirror).
 	// Same Node pointers → paint_core shares one pristine carrier; weld joins transformed edges.
 	// Multi-edit continent open rejects instances (already gated ecosystem-only).
@@ -8499,8 +8937,8 @@ args.addArg("", "instances", "NxM",
 	    && (g_BoardSession || g_StartupWorld.Kind == ZPWS::Continent))
 	{
 		std::vector<std::string> skip;
-		for (size_t i = 0; i < editables.size(); ++i)
-			skip.push_back(editables[i].Basename);
+		for (size_t i = 0; i < g_EditableFiles.size(); ++i)
+			skip.push_back(g_EditableFiles[i].Basename);
 		loadNeighborContextFiles(zones, cellSize, skip);
 	}
 
