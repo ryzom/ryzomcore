@@ -1570,11 +1570,12 @@ void CEditorUI::syncPanelFromBridge()
 	}
 
 	// Mode radios on TOOLBAR (M14c); panel radios removed
-	if (CCtrlBaseButton *btn = findButton("ui:zp:toolbar:content:mode_tile"))
+	// M15: buttons live under header_closed (gestionsets closed-bar idiom), not content
+	if (CCtrlBaseButton *btn = findButton("ui:zp:toolbar:header_closed:mode_tile"))
 		btn->setPushed(b->Mode == 0);
-	if (CCtrlBaseButton *btn = findButton("ui:zp:toolbar:content:mode_color"))
+	if (CCtrlBaseButton *btn = findButton("ui:zp:toolbar:header_closed:mode_color"))
 		btn->setPushed(b->Mode == 1);
-	if (CCtrlBaseButton *btn = findButton("ui:zp:toolbar:content:mode_displace"))
+	if (CCtrlBaseButton *btn = findButton("ui:zp:toolbar:header_closed:mode_displace"))
 		btn->setPushed(b->Mode == 2);
 
 	// ---- M10d: show only the section for the current paint mode ----
@@ -1664,7 +1665,7 @@ void CEditorUI::syncPanelFromBridge()
 
 	// Season face on TOOLBAR (M14c): shows current season; frozen when <2 seasons
 	if (CCtrlTextButton *btn = dynamic_cast<CCtrlTextButton *>(
-	        CWidgetManager::getInstance()->getElementFromId("ui:zp:toolbar:content:btn_season")))
+	        CWidgetManager::getInstance()->getElementFromId("ui:zp:toolbar:header_closed:btn_season")))
 	{
 		const char *lab = b->SeasonLabel[0] ? b->SeasonLabel : "auto";
 		// Uppercase face (SPRING / SUMMER / …)
@@ -1673,7 +1674,7 @@ void CEditorUI::syncPanelFromBridge()
 		btn->setFrozen(b->SeasonCount < 1);
 	}
 	// Toolbar SAVE frozen when save unavailable
-	if (CCtrlBaseButton *btn = findButton("ui:zp:toolbar:content:btn_save"))
+	if (CCtrlBaseButton *btn = findButton("ui:zp:toolbar:header_closed:btn_save"))
 		btn->setFrozen(!b->CanSave);
 
 	// Multi-file dirty indicator (M6b): "N files, M dirty"

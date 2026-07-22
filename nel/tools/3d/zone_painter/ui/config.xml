@@ -1,7 +1,9 @@
 <interface_config>
 
-<!-- Master group of the sample interface (showcase layout targets 1280x720) -->
-<root id="sample" x="0" y="0" w="1280" h="720" active="true" />
+<!-- Master group must match main.xml root id (ui:zp). A leftover "sample" root
+     created a second active master group; setTopWindow walks every active MG and
+     warned "window ui:zp:… do not exist in a priority list" for every window. -->
+<root id="zp" x="0" y="0" w="800" h="600" active="true" />
 
 <define id="case_normal" value="0" />
 <define id="case_lower" value="1" />

@@ -1871,8 +1871,25 @@ static void populateScratchBoard()
 	board->setH(boardH);
 	board->setMaxW(730);
 	board->setMaxH(330);
-	board->setOfsX(0);
-	board->setOfsY(0);
+
+	// M15: scroll so the home-block origin (0,0) and its label start in view.
+	// Board cells: x=(c-minC)*kCell, y=-((maxR-r)*kCell). Top-left of content is (0,0)
+	// local; positive ofs shifts content to reveal lower/right cells (palette idiom).
+	{
+		const sint32 kViewW = 730, kViewH = 330;
+		const sint32 originX = (0 - minC) * kCell;
+		const sint32 originY = -((maxR - 0) * kCell);
+		sint32 ofsX = originX - 4;
+		sint32 ofsY = -originY - 4;
+		const sint32 maxOfsX = boardW > kViewW ? (boardW - kViewW) : 0;
+		const sint32 maxOfsY = boardH > kViewH ? (boardH - kViewH) : 0;
+		if (ofsX < 0) ofsX = 0;
+		if (ofsY < 0) ofsY = 0;
+		if (ofsX > maxOfsX) ofsX = maxOfsX;
+		if (ofsY > maxOfsY) ofsY = maxOfsY;
+		board->setOfsX(ofsX);
+		board->setOfsY(ofsY);
+	}
 
 	for (std::map<std::pair<int, int>, int>::const_iterator it = used.begin(); it != used.end(); ++it)
 	{

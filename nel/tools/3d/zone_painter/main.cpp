@@ -4197,7 +4197,7 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 				if (smShot && smShot[0] && smShot[0] != '0')
 				{
 					NLGUI::CInterfaceElement *btn = NLGUI::CWidgetManager::getInstance()->getElementFromId(
-						"ui:zp:toolbar:content:btn_season");
+						"ui:zp:toolbar:header_closed:btn_season");
 					NLGUI::CCtrlBase *caller = dynamic_cast<NLGUI::CCtrlBase *>(btn);
 					zpSeasonMenuFill(NULL);
 					NLGUI::CWidgetManager::getInstance()->enableModalWindow(caller, "ui:zp:season_menu");
