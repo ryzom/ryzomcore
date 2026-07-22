@@ -84,12 +84,16 @@ struct SScriptHost
 	void (*pumpUI)();
 	/** True once the user requested cancel during a pumped script (ESC / Cancel). */
 	bool (*cancelRequested)();
+	/** Board-session working-set ops (ui M23c); NULL outside board sessions. */
+	bool (*openZone)(const std::string &basename, std::string &err);
+	bool (*closeZone)(const std::string &basename, bool saveFirst, bool forceDiscard, std::string &err);
 	/** Live viewer bridge for state get/set; NULL headless. */
 	ZPUI::SPaintUIBridge *bridge;
 
 	SScriptHost()
 		: execOp(NULL), zonesInfo(NULL), getZoneProp(NULL), saveTo(NULL), saveAll(NULL),
-		  screenshot(NULL), pumpUI(NULL), cancelRequested(NULL), bridge(NULL)
+		  screenshot(NULL), pumpUI(NULL), cancelRequested(NULL),
+		  openZone(NULL), closeZone(NULL), bridge(NULL)
 	{
 	}
 };

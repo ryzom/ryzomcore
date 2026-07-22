@@ -351,6 +351,28 @@ static int lScreenshot(CLuaState &ls) // painter.screenshot("out.tga")
 	return retOk(ls);
 }
 
+static int lOpenZone(CLuaState &ls) // painter.openZone("basename") — board session
+{
+	std::string base;
+	if (!argString(ls, 1, base)) return retErr(ls, "usage: openZone(\"basename\")");
+	if (!s_Host || !s_Host->openZone) return retErr(ls, "openZone: board session only");
+	std::string err;
+	if (!s_Host->openZone(base, err)) return retErr(ls, err);
+	return retOk(ls);
+}
+
+static int lCloseZone(CLuaState &ls) // painter.closeZone("basename"[,saveFirst[,forceDiscard]])
+{
+	std::string base;
+	if (!argString(ls, 1, base)) return retErr(ls, "usage: closeZone(\"basename\"[,saveFirst[,forceDiscard]])");
+	if (!s_Host || !s_Host->closeZone) return retErr(ls, "closeZone: board session only");
+	bool saveFirst = argBoolOpt(ls, 2, false);
+	bool forceDiscard = argBoolOpt(ls, 3, false);
+	std::string err;
+	if (!s_Host->closeZone(base, saveFirst, forceDiscard, err)) return retErr(ls, err);
+	return retOk(ls);
+}
+
 static int lPumpUI(CLuaState &ls) // painter.pumpUI() -> true, or false when cancel was requested
 {
 	if (s_Host && s_Host->pumpUI) s_Host->pumpUI();
@@ -493,6 +515,7 @@ static const char *kBootstrap =
 	"  setZoneProp = __zp_setZoneProp, getZoneProp = __zp_getZoneProp,\n"
 	"  zones = __zp_zones, save = __zp_save, saveAll = __zp_saveAll,\n"
 	"  screenshot = __zp_screenshot, pumpUI = __zp_pumpUI,\n"
+	"  openZone = __zp_openZone, closeZone = __zp_closeZone,\n"
 	"  setMode = __zp_setMode, getMode = __zp_getMode,\n"
 	"  setTileSet = __zp_setTileSet, getTileSet = __zp_getTileSet,\n"
 	"  setDisplaceIndex = __zp_setDisplaceIndex, setBrushColor = __zp_setBrushColor,\n"
@@ -532,6 +555,8 @@ bool ensureLua()
 	ls->registerFunc("__zp_save", lSave);
 	ls->registerFunc("__zp_saveAll", lSaveAll);
 	ls->registerFunc("__zp_screenshot", lScreenshot);
+	ls->registerFunc("__zp_openZone", lOpenZone);
+	ls->registerFunc("__zp_closeZone", lCloseZone);
 	ls->registerFunc("__zp_pumpUI", lPumpUI);
 	ls->registerFunc("__zp_setMode", lSetMode);
 	ls->registerFunc("__zp_getMode", lGetMode);

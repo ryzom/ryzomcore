@@ -4882,6 +4882,23 @@ static void (*g_ScriptPumpFn)() = NULL;
 static bool g_ScriptCancel = false;
 static bool zpScriptCancelRequested() { return g_ScriptCancel; }
 
+// Board-session working-set ops (defined later; NULL-checked via g_SessionActive)
+static bool sessionOpenZone(const std::string &basename, std::string &err);
+static bool sessionCloseZone(const std::string &basename, bool saveFirst, bool forceDiscard, std::string &err);
+static bool g_SessionOpsAvailable = false; // set while the board session bridge is live
+
+static bool zpScriptOpenZone(const std::string &basename, std::string &err)
+{
+	if (!g_SessionOpsAvailable) { err = "openZone: board session only"; return false; }
+	return sessionOpenZone(basename, err);
+}
+
+static bool zpScriptCloseZone(const std::string &basename, bool saveFirst, bool forceDiscard, std::string &err)
+{
+	if (!g_SessionOpsAvailable) { err = "closeZone: board session only"; return false; }
+	return sessionCloseZone(basename, saveFirst, forceDiscard, err);
+}
+
 static ZPSCRIPT::SScriptHost g_ScriptHost;
 
 /** (Re)install the painterscript host for the current capabilities. bridge may be NULL. */
@@ -4895,6 +4912,8 @@ static void zpInstallScriptHost(ZPUI::SPaintUIBridge *bridgePtr)
 	g_ScriptHost.screenshot = g_ScriptScreenshotFn;
 	g_ScriptHost.pumpUI = g_ScriptPumpFn;
 	g_ScriptHost.cancelRequested = zpScriptCancelRequested;
+	g_ScriptHost.openZone = zpScriptOpenZone;
+	g_ScriptHost.closeZone = zpScriptCloseZone;
 	g_ScriptHost.bridge = bridgePtr;
 	ZPSCRIPT::setHost(&g_ScriptHost);
 }
@@ -6422,6 +6441,7 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 			if (g_StartupWorld.Kind == ZPWS::Continent)
 			{
 				sessionBridge.getCellState = sessionGetCellState;
+				g_SessionOpsAvailable = true;
 				sessionBridge.openZone = sessionOpenZone;
 				sessionBridge.closeZone = sessionCloseZone;
 				sessionBridge.saveZone = sessionSaveZone;
