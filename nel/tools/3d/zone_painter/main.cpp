@@ -2846,15 +2846,17 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 				{
 					static const char *modeNames[3] = { "TILE", "COLOR", "DISPLACE" };
 					textContext.setColor(NLMISC::CRGBA(255, 255, 255));
-					// HUD matches the Painter panel: 1-based set index, (unnamed) for empty names
+					// HUD matches the Painter panel: 1-based set index; name from bridge
+					// (includes diffuse-stem fallback when smallbank set names are empty).
 					{
-						std::string tsName = core->tileSetName(paintListener.CurTileSet);
-						if (tsName.empty()) tsName = "(unnamed)";
-						const uint tsCount = core->tileSetCount();
+						const char *tsName = paintBridge.TileSetName[0]
+							? paintBridge.TileSetName : "(unnamed)";
+						const uint tsCount = paintBridge.TileSetCount
+							? paintBridge.TileSetCount : core->tileSetCount();
 						const int tsOneBased = tsCount ? (paintListener.CurTileSet + 1) : 0;
 						textContext.printfAt(0.01f, 0.98f, "[%s] TileSet %d/%u %s  %s  brush %u  group %u  undo %u%s",
 						                     modeNames[paintListener.Mode % 3],
-						                     tsOneBased, tsCount, tsName.c_str(),
+						                     tsOneBased, tsCount, tsName,
 						                     paintListener.Mode256 ? "256" : "128", core->brushSize(),
 						                     core->tileGroup(), core->undoDepth(),
 						                     core->lockBordersOn() ? "  LOCK" : "");
@@ -2959,23 +2961,30 @@ int main(int argc, char **argv)
 	                    "pattern after a final '-' (e.g. zonematerial-converted-193_ec) place on the minesweeper\n"
 	                    "board and resolve 8-ring neighbors; unparseable sets fall back to a flat list.\n"
 	                    "Legacy: zone_painter <input.max> --bank <bank> [...] behaves exactly as before.\n"
-	                    "Painter panel (NLGUI): mode Tile/Color/Disp, tile set ±, 256, brush size 0-2, group,\n"
-	                    "Color section (radius 2-32, hardness/opacity 0-255, color swatch, mask cycle, mask mode),\n"
+	                    "Painter panel (NLGUI): mode Tile/Color/Disp, tile set ±, 256, Tiles palette toggle, brush size 0-2,\n"
+	                    "group, Color section (radius 2-32, hardness/opacity 0-255, color swatch, mask cycle, mask mode),\n"
 	                    "Displace index 0-15, lock borders, undo/redo, fill, season Next (Y), multi-file dirty,\n"
 	                    "Save (interactive modal or --save). Keys and panel share one handler layer.\n"
+	                    "Tiles palette (ui M8): second movable window with one thumbnail cell per bank tileset\n"
+	                    "(64px preview from the first resolvable 128 diffuse, name + 1-based index). Click selects\n"
+	                    "through the same absolute handler as digit keys / right-click pick; season Next rebuilds\n"
+	                    "previews. Toggle with P (TogglePalette) or the panel Tiles button.\n"
 	                    "Config files (plugin keys.cfg port, NLMISC::CConfigFile syntax; one file may serve both):\n"
 	                    "  keys cfg (--keys-cfg, else ./zone_painter_keys.cfg): rebinds the plugin-era actions by name,\n"
 	                    "  values are NeL TKey codes (the plugin's keys.cfg Key* constant block parses verbatim).\n"
 	                    "  Honored: ModeTile ModeColor ModeDisplace SizeUp SizeDown ToggleTileSize GroupUp GroupDown\n"
 	                    "  Fill0 Fill1 Fill2 Fill3 HardnessUp HardnessDown OpacityUp OpacityDown SelectColorBrush\n"
-	                    "  ToggleColorBrushMode LockBorders ZoomIn ZoomOut (defaults: T C D + - B G V F F6 F7 F8\n"
-	                    "  Home End Insert Delete S Q L, zoom unbound). Accepted+ignored (no tool equivalent):\n"
-	                    "  Select Pick ToggleColor BackgroundColor ToggleArrows Zouille AutomaticLighting GetState ResetPatch.\n"
+	                    "  ToggleColorBrushMode LockBorders ZoomIn ZoomOut ToggleUI SeasonNext TogglePalette\n"
+	                    "  (defaults: T C D + - B G V F F6 F7 F8 Home End Insert Delete S Q L, F10, Y, P; zoom unbound).\n"
+	                    "  Accepted+ignored (no tool equivalent): Select Pick ToggleColor BackgroundColor ToggleArrows\n"
+	                    "  Zouille AutomaticLighting GetState ResetPatch.\n"
 	                    "  vars cfg (--vars-cfg, else ./zone_painter_vars.cfg): LightDirection {x,y,z}, LightDiffuse {r,g,b},\n"
 	                    "  LightAmbiant {r,g,b}, LightMultiply, ZoomSpeed (the plugin LoadVarCfg set).\n"
 	                    "  ToggleUI (default F10: show/hide the in-engine NLGUI panel).\n"
 	                    "  SeasonNext (default Y: cycle landscape season textures among variants that exist for\n"
-	                    "  the open bank — spring/summer/autumn/winter; paint indices/colors/displace untouched).\n"
+	                    "  the open bank — spring/summer/autumn/winter; paint indices/colors/displace untouched;\n"
+	                    "  tileset palette previews re-resolve to the new season).\n"
+	                    "  TogglePalette (default P: show/hide the Tiles thumbnail palette).\n"
 	                    "Fixed viewer keys: PgUp/PgDn + 0-9 tile set, [ ] displace index, Ctrl+Z/Ctrl+E undo/redo,\n"
 	                    "F12 screenshot, ESC quit.");
 	// Optional first positional: .max (legacy) or folder (startup seed). Absent => startup flow.

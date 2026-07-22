@@ -725,13 +725,13 @@ void rebuildTilesetPalette(NL3D::CTileBank *bank, const std::string &bankPath,
 		// Short label: "1 name" (1-based index for the artist)
 		char title[160];
 		snprintf(title, sizeof(title), "%d %s", (int)(i + 1), setName.c_str());
-		// Truncate very long names so the 96px cell stays readable
-		if (strlen(title) > 18)
+		// Truncate very long names so the 96px cell stays readable (keep index prefix)
+		if (strlen(title) > 16)
 		{
+			title[13] = '.';
+			title[14] = '.';
 			title[15] = '.';
-			title[16] = '.';
-			title[17] = '.';
-			title[18] = 0;
+			title[16] = 0;
 		}
 
 		std::string thumbTex;
@@ -1229,6 +1229,12 @@ void CEditorUI::syncPanelFromBridge()
 
 	// Tiles palette selection highlight (ui M8) — stays in sync with keys/panel/pick
 	syncPaletteHighlight(b->CurTileSet, b->TileSetCount);
+	// Track close-via-X: container may deactivate without going through togglePalette
+	{
+		CInterfaceElement *el = CWidgetManager::getInstance()->getElementFromId(kPaletteWinId);
+		if (el)
+			s_PaletteVisible = el->getActive();
+	}
 	if (CCtrlBaseButton *btn = findButton("ui:zp:painter:content:btn_palette"))
 		btn->setPushed(s_PaletteVisible);
 }
