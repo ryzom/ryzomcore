@@ -35,6 +35,9 @@
 			global_color="false" color="230 232 235 255" hardtext="#title" />
 		<view type="text" id="sub" posparent="name" posref="BL TL" x="0" y="-1" fontsize="10" shadow="true"
 			global_color="false" color="170 180 190 200" hardtext="#subtitle" line_maxw="490" />
+		<!-- Hairline listview separator (M25p9 — same idiom as zp_folder_row). -->
+		<view type="bitmap" id="sep" posref="BL BL" x="0" y="0" w="500" h="1" scale="true"
+			texture="blank.tga" global_color="false" color="255 255 255 35" />
 	</group>
 </template>
 
@@ -60,6 +63,9 @@
 			onclick_l="zp_select_zone" params_l="#idx" />
 		<view type="text" id="name" posparent="btn" posref="ML ML" x="8" y="0" fontsize="12" shadow="true"
 			global_color="false" color="230 232 235 255" hardtext="#title" />
+		<!-- Hairline listview separator (M25p9 — same idiom as zp_folder_row). -->
+		<view type="bitmap" id="sep" posref="BL BL" x="0" y="0" w="560" h="1" scale="true"
+			texture="blank.tga" global_color="false" color="255 255 255 35" />
 	</group>
 </template>
 
@@ -151,16 +157,19 @@
 	</group>
 </template>
 
-<!-- Folder browser row (M2c/M25p7): a plain listbox row, not a button. Every row used to be
-     a full bordered pill button (text_button_16_name) stacked in a column — technically a
-     list, but it read as a wall of separate buttons rather than a file listing (user: "the
-     actual folder list is still a janky panel of buttons"). Real Win98 listboxes have no
-     border at rest; the row is flat text and only the classic blue selection bar appears on
-     hover/click. `hit` is a transparent full-row button (blank.tga, invisible at rest) purely
-     for the click target and that highlight; `name`/`tag` are plain text on top. -->
+<!-- Folder browser row (M2c/M25p9): a real listview row, not a button and not a bare bullet
+     list either. Was a full bordered pill button per row (M2c) — "a wall of separate buttons".
+     Went fully flat/borderless next (M25p7) to fix that, but flat text alone reads as a
+     Word-document bullet list, not an obviously-clickable listview (user: "should be obvious
+     its clickable... really consider Win95 beveled panels"). Landed in between per user
+     direction: folders don't need the Friends-list-style per-row bevel/gradient, just a thin
+     hairline separator between items (`sep`) — same idea as a classic Explorer/listview grid
+     line — plus the existing hover/press highlight for click affordance. `hit` is a
+     transparent full-row button (blank.tga, invisible at rest) for the click target and that
+     highlight; `name`/`tag` are plain text on top. -->
 <template name="zp_folder_row" keep="true" id="" title="" path="" tag="">
-	<group id="#id" w="500" h="18">
-		<ctrl type="button" id="hit" button_type="push_button" posref="TL TL" x="0" y="0" w="500" h="18" scale="true"
+	<group id="#id" w="500" h="19">
+		<ctrl type="button" id="hit" button_type="push_button" posref="TL TL" x="0" y="-1" w="500" h="18" scale="true"
 			tx_normal="blank.tga" tx_pushed="blank.tga" tx_over="blank.tga"
 			color="0 0 0 0" col_pushed="70 120 190 100" col_over="70 120 190 55"
 			global_color_normal="false" global_color_pushed="false" global_color_over="false"
@@ -169,6 +178,9 @@
 			global_color="false" color="230 232 235 255" hardtext="#title" />
 		<view type="text" id="tag" posparent="name" posref="MR ML" x="10" y="0" fontsize="10" shadow="true"
 			global_color="false" color="255 200 120 220" hardtext="#tag" />
+		<!-- Hairline listview separator (Explorer grid-line idiom, not a per-row bevel). -->
+		<view type="bitmap" id="sep" posref="BL BL" x="0" y="0" w="500" h="1" scale="true"
+			texture="blank.tga" global_color="false" color="255 255 255 35" />
 	</group>
 </template>
 
