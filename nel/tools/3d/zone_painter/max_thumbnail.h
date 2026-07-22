@@ -162,17 +162,18 @@ bool ensureTilesetPreview(const std::string &bankPath, int setIndex,
 std::string displacePreviewCacheDir();
 
 /**
- * Cache path: thumbcache/displace/<bankhash>_m<mapIdx>_<srcmtime>_g1.tga
+ * Cache path: thumbcache/displace/<bankhash>_m<mapIdx>_<srcmtime>_g2.tga
  * Keyed by bank + global displacement-map index + source mtime + preview-gen version
- * (_g1 = min..max + sqrt gamma; bump suffix when the tone-map changes).
+ * (_g2 = min..max + sqrt gamma, 32-bit RGBA TGA; bump suffix when tone-map/layout changes).
  * Maps are season-invariant.
  */
 std::string cachedDisplacePreviewPath(const std::string &bankPath, int mapIndex, uint32 sourceMtime);
 
 /**
- * Ensure a 64x64 grayscale preview for one bank displacement map.
+ * Ensure a 64x64 RGBA preview for one bank displacement map.
  * Loads sourcePath, stretches luminance min..max to 0..1, applies sqrt gamma lift,
- * point-upsamples to sidePx, writes TGA cache. Returns true and sets outTgaPath on success.
+ * point-upsamples to sidePx, writes 32-bit RGBA TGA cache (same container as tileset
+ * previews). Returns true and sets outTgaPath on success.
  */
 bool ensureDisplacePreview(const std::string &bankPath, int mapIndex,
                            const std::string &sourcePath, std::string &outTgaPath,

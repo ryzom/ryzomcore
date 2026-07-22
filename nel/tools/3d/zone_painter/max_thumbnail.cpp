@@ -666,9 +666,11 @@ std::string cachedDisplacePreviewPath(const std::string &bankPath, int mapIndex,
 	while (!abs.empty() && (abs[abs.size() - 1] == '/' || abs[abs.size() - 1] == '\\'))
 		abs.resize(abs.size() - 1);
 	uint32 h = hashPath(abs);
-	// _g1 suffix: M10a tone map (min..max + sqrt). Bump when preview math changes.
+	// _g2 suffix: M10c — same tone map as _g1, but cache key bumped so writers always
+	// re-emit after the CPath-index fix (see rebuildTilesetPalette). Previews are
+	// true 32-bit RGBA (type-2 TGA); bump again if tone-map or pixel layout changes.
 	return displacePreviewCacheDir() + "/"
-		+ NLMISC::toString("%08x_m%03d_%08x_g1.tga", h, mapIndex, sourceMtime);
+		+ NLMISC::toString("%08x_m%03d_%08x_g2.tga", h, mapIndex, sourceMtime);
 }
 
 bool ensureDisplacePreview(const std::string &bankPath, int mapIndex,
@@ -730,6 +732,10 @@ bool ensureDisplacePreview(const std::string &bankPath, int mapIndex,
 
 	// Point upsample + min..max stretch + sqrt gamma lift (M10a) so structure is
 	// readable at 64px — raw noise often clusters near black after linear stretch alone.
+	// Written as 32-bit RGBA (type-2 TGA), same path as tileset previews. ImageMagick
+	// may still label equal-channel content "GrayscaleAlpha"; that is content typing,
+	// not an 8-bit luminance container — NLGUI loads these via createTextureFile fine
+	// once CPath can resolve the basename (M10c re-indexes after write).
 	CBitmap out;
 	out.resize(sidePx, sidePx, CBitmap::RGBA);
 	CObjectVector<uint8> &dstPx = out.getPixels();
@@ -758,6 +764,9 @@ bool ensureDisplacePreview(const std::string &bankPath, int mapIndex,
 			dstPx[di + 3] = 255;
 		}
 	}
+	// Defensive: keep writer consistent with ensureTilesetPreview (RGBA before TGA).
+	if (out.getPixelFormat() != CBitmap::RGBA)
+		out.convertToType(CBitmap::RGBA);
 
 	displacePreviewCacheDir();
 	try

@@ -854,7 +854,10 @@ void rebuildTilesetPalette(NL3D::CTileBank *bank, const std::string &bankPath,
 	sint32 dispH = kPaletteCellH;
 	sint nSets = 0;
 
-	// Cache dirs on the NLGUI search path
+	// Cache dirs on the NLGUI search path. CPath::addSearchPath (non-alternative) only
+	// indexes files present *at call time* — previews written after that call are
+	// invisible to createTexture/lookup, so cells render empty. We re-index after each
+	// ensure* (CPath::addSearchFile) so cold-cache first paint still resolves thumbs.
 	std::string tsCacheDir = ZPTHUMB::tilesetPreviewCacheDir();
 	if (!tsCacheDir.empty())
 		CPath::addSearchPath(tsCacheDir, false, false);
@@ -903,6 +906,8 @@ void rebuildTilesetPalette(NL3D::CTileBank *bank, const std::string &bankPath,
 					if (ZPTHUMB::ensureTilesetPreview(bankPath, (int)i, seasonKey, source, cached, kPaletteThumb)
 					    && !cached.empty())
 					{
+						// Register newly written TGA so CPath::lookup finds it this frame.
+						CPath::addSearchFile(cached);
 						thumbTex = CFile::getFilenameWithoutExtension(cached) + ".tga";
 						++withPreview;
 					}
@@ -1011,6 +1016,10 @@ void rebuildTilesetPalette(NL3D::CTileBank *bank, const std::string &bankPath,
 				if (ZPTHUMB::ensureDisplacePreview(bankPath, mapId, source, cached, kPaletteThumb)
 				    && !cached.empty())
 				{
+					// Register newly written TGA so CPath::lookup finds it this frame.
+					// Without this, cold-cache first paint leaves displace cells empty
+					// (review M10c: previews on disk, UI wells blank).
+					CPath::addSearchFile(cached);
 					thumbTex = CFile::getFilenameWithoutExtension(cached) + ".tga";
 					++dispPreview;
 				}
