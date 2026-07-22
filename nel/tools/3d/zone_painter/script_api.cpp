@@ -218,6 +218,14 @@ static int lColorBrush(CLuaState &ls) // painter.colorBrush(zone,x,y,radius,"rrg
 		(uint)a[0], a[1], a[2], a[3], rgb.c_str(), (uint)hard, (uint)opac));
 }
 
+static int lTileStroke(CLuaState &ls) // painter.tileStroke(zone,patch,u,v,set) — mouse-path stroke (brush size applies)
+{
+	double a[5]; std::string err;
+	if (!argNumbers(ls, 5, a, "tileStroke(zone,patch,u,v,set)", err)) return retErr(ls, err);
+	return execOpRet(ls, toString("tstroke %u %u %u %u %u",
+		(uint)a[0], (uint)a[1], (uint)a[2], (uint)a[3], (uint)a[4]));
+}
+
 static int lPaintDisplace(CLuaState &ls) // painter.paintDisplace(zone,patch,u,v,index)
 {
 	double a[5]; std::string err;
@@ -477,6 +485,7 @@ static const char *kBootstrap =
 	"  paintTile = __zp_paintTile, rotateTile = __zp_rotateTile, clearTile = __zp_clearTile,\n"
 	"  fillTile = __zp_fillTile,\n"
 	"  paintColor = __zp_paintColor, fillColor = __zp_fillColor, colorBrush = __zp_colorBrush,\n"
+	"  tileStroke = __zp_tileStroke,\n"
 	"  paintDisplace = __zp_paintDisplace, fillDisplace = __zp_fillDisplace,\n"
 	"  setBrushSize = __zp_setBrushSize, setTileGroup = __zp_setTileGroup,\n"
 	"  setBrushMask = __zp_setBrushMask,\n"
@@ -507,6 +516,7 @@ bool ensureLua()
 	ls->registerFunc("__zp_paintColor", lPaintColor);
 	ls->registerFunc("__zp_fillColor", lFillColor);
 	ls->registerFunc("__zp_colorBrush", lColorBrush);
+	ls->registerFunc("__zp_tileStroke", lTileStroke);
 	ls->registerFunc("__zp_paintDisplace", lPaintDisplace);
 	ls->registerFunc("__zp_fillDisplace", lFillDisplace);
 	ls->registerFunc("__zp_setBrushSize", lSetBrushSize);

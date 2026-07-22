@@ -339,6 +339,10 @@
 		<!-- Season face: fixed width so SPRING/SUMMER/AUTUMN/WINTER don't reflow the strip -->
 		<ctrl style="zp_tb_btn" id="btn_season" posparent="sep3" posref="MR ML" x="4" y="0" w="80" h="26"
 			onclick_l="zp_season_menu" params_l="" hardtext="SPRING" />
+		<view type="bitmap" id="sep4" posparent="btn_season" posref="MR ML" x="4" y="0" w="1" h="18"
+			texture="blank.tga" global_color="false" color="120 120 120 255" />
+		<ctrl style="zp_tb_btn" id="btn_script" posparent="sep4" posref="MR ML" x="4" y="0" w="56" h="26"
+			onclick_l="zp_script_toggle" params_l="" hardtext="SCRIPT" />
 	</group>
 	<group id="header_opened" x="0" y="0" w="0" h="0" posref="TL TL" active="false" />
 </group>
@@ -620,6 +624,53 @@
 	</group>
 </group>
 <tree node="tiles_palette"></tree>
+
+<!-- painterscript window (ui M23b): recorder pane / multiline editor / output pane.
+     Max-macro-recorder layout: read-only REC log on top, editable script below, RUN. -->
+<group type="container" id="script_win" w="380" pop_min_w="300" pop_max_w="620" h="470" pop_min_h="300" pop_max_h="580"
+	title="Script" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
+	title_bar_open="false" open_button="false" right_button="true" lockable="false" openable="false"
+	opened="true" movable="true" active="false" x="180" y="560">
+	<group id="header_closed" x="0" y="0" h="12" posref="TL TL"></group>
+	<group id="header_opened" x="0" y="0" w="0" h="16" posref="TL TL"></group>
+	<group id="content" x="0" y="0" posref="TL TL" w="0" h="0">
+		<view type="text" id="lbl_rec" posref="TL TL" x="8" y="-4" fontsize="10" shadow="true"
+			global_color="false" color="255 220 140 255" hardtext="Recorder" />
+		<group type="frame" id="rec_frame" options="w_box_frame" posparent="lbl_rec" posref="BL TL" x="0" y="-2"
+			w="360" h="110" display="true">
+			<view type="text" id="rec_text" posref="TL TL" x="4" y="-4" w="348" fontsize="10" shadow="true"
+				multi_line="true" multi_line_space="0" global_color="false" color="200 255 200 255" hardtext="" />
+		</group>
+		<view type="text" id="lbl_ed" posparent="rec_frame" posref="BL TL" x="0" y="-6" fontsize="10" shadow="true"
+			global_color="false" color="255 220 140 255" hardtext="Script" />
+		<group type="frame" id="ed_frame" options="w_box_frame" posparent="lbl_ed" posref="BL TL" x="0" y="-2"
+			w="360" h="150" display="true">
+			<group type="edit_box" id="code" posref="TL TL" x="4" y="-4" w="348" h="140"
+				want_return="true" max_num_chars="16384" multi_line="true"
+				onenter="" params="" prompt="" enter_recover_focus="false" reset_focus_on_hide="true"
+				continuous_text_update="true" max_historic="0">
+				<view type="text" id="edit_text" posref="TL TL" x="0" y="0" w="344" fontsize="10" shadow="true"
+					multi_line="true" multi_line_space="0" global_color="false" color="255 255 255 255" hardtext="" />
+			</group>
+		</group>
+		<ctrl style="text_button_16" id="btn_run" posparent="ed_frame" posref="BL TL" x="0" y="-6"
+			onclick_l="zp_script_run" params_l="" hardtext="RUN" />
+		<ctrl style="text_button_16" id="btn_rec" posparent="btn_run" posref="MR ML" x="6" y="0"
+			onclick_l="zp_script_record" params_l="" hardtext="REC" />
+		<ctrl style="text_button_16" id="btn_copyrec" posparent="btn_rec" posref="MR ML" x="6" y="0"
+			onclick_l="zp_script_copyrec" params_l="" hardtext="REC>ED" />
+		<ctrl style="text_button_16" id="btn_clear" posparent="btn_copyrec" posref="MR ML" x="6" y="0"
+			onclick_l="zp_script_clear" params_l="" hardtext="CLEAR" />
+		<view type="text" id="lbl_out" posparent="btn_run" posref="BL TL" x="0" y="-6" fontsize="10" shadow="true"
+			global_color="false" color="255 220 140 255" hardtext="Output" />
+		<group type="frame" id="out_frame" options="w_box_frame" posparent="lbl_out" posref="BL TL" x="0" y="-2"
+			w="360" h="96" display="true">
+			<view type="text" id="out_text" posref="TL TL" x="4" y="-4" w="348" fontsize="10" shadow="true"
+				multi_line="true" multi_line_space="0" global_color="false" color="220 220 255 255" hardtext="" />
+		</group>
+	</group>
+</group>
+<tree node="script_win"></tree>
 
 <!-- ===================================================================== -->
 <!-- Brush color picker (ui M9b) — CCtrlColPick + sample palette texture   -->

@@ -3154,7 +3154,21 @@ static bool zpExecScriptOp(ZPPAINT::CPaintCore &core, const std::string &rawLine
 			if (tok.size() >= 7) NLMISC::fromString(tok[6], rot);
 			ok = core.opRawTile(zone, patch, u, v, tile, rot, err);
 		}
-		else if (tok[0] == "checkseams" && tok.size() >= 2)
+		else if (tok[0] == "tstroke" && tok.size() >= 6)
+	{
+		// tstroke <zone> <patch> <u> <v> <set> [rot-reserved] — the MOUSE tile-stroke path
+		// (brush-size recursion via opTileStroke), for recorder replay fidelity (ui M23b).
+		uint zone, patch, u, v; int ts;
+		NLMISC::fromString(tok[1], zone);
+		NLMISC::fromString(tok[2], patch);
+		NLMISC::fromString(tok[3], u);
+		NLMISC::fromString(tok[4], v);
+		NLMISC::fromString(tok[5], ts);
+		sint32 tileId = (sint32)(patch * ZP_NUM_TILE_SEL + v * ZP_MAX_TILE_IN_PATCH + u);
+		ok = core.opTileStroke(zone, tileId, ts, false, true, err);
+		core.endStroke();
+	}
+	else if (tok[0] == "checkseams" && tok.size() >= 2)
 		{
 			uint zone;
 			NLMISC::fromString(tok[1], zone);
@@ -3309,13 +3323,21 @@ public:
 			uint zone;
 			sint32 tile;
 			if (Core->pickTile(pos, dir, zone, tile, hit) && !Core->zoneFrozen(zone))
-				Core->opColorBrush(zone, tile, hit, BrushRadius, BrushColor, BrushHardness, BrushOpacity, err);
+			{
+				if (Core->opColorBrush(zone, tile, hit, BrushRadius, BrushColor, BrushHardness, BrushOpacity, err))
+					ZPSCRIPT::record(NLMISC::toString("painter.colorBrush(%u, %.3f, %.3f, %.3f, \"%02x%02x%02x\", %u, %u, %.3f)",
+						zone, hit.x, hit.y, BrushRadius, BrushColor.R, BrushColor.G, BrushColor.B,
+						(uint)BrushHardness, (uint)BrushOpacity, hit.z));
+			}
 		}
 		else if (Mode == ModeDisplace)
 		{
 			sint32 t = HoverTile;
-			Core->opDisplace(HoverZone, (uint)(t / ZP_NUM_TILE_SEL), (uint)(t % ZP_NUM_TILE_SEL % ZP_MAX_TILE_IN_PATCH),
-			                 (uint)(t % ZP_NUM_TILE_SEL / ZP_MAX_TILE_IN_PATCH), DisplaceIndex, err);
+			if (Core->opDisplace(HoverZone, (uint)(t / ZP_NUM_TILE_SEL), (uint)(t % ZP_NUM_TILE_SEL % ZP_MAX_TILE_IN_PATCH),
+			                     (uint)(t % ZP_NUM_TILE_SEL / ZP_MAX_TILE_IN_PATCH), DisplaceIndex, err))
+				ZPSCRIPT::record(NLMISC::toString("painter.paintDisplace(%u, %u, %u, %u, %u)",
+					HoverZone, (uint)(t / ZP_NUM_TILE_SEL), (uint)(t % ZP_NUM_TILE_SEL % ZP_MAX_TILE_IN_PATCH),
+					(uint)(t % ZP_NUM_TILE_SEL / ZP_MAX_TILE_IN_PATCH), (uint)DisplaceIndex));
 		}
 	}
 
@@ -3406,6 +3428,10 @@ public:
 						std::string err;
 						if (Core->opTileStroke(HoverZone, HoverTile, CurTileSet, Mode256, true, err))
 						{
+							ZPSCRIPT::record(NLMISC::toString("painter.tileStroke(%u, %u, %u, %u, %d)",
+								HoverZone, (uint)(HoverTile / ZP_NUM_TILE_SEL),
+								(uint)(HoverTile % ZP_NUM_TILE_SEL % ZP_MAX_TILE_IN_PATCH),
+								(uint)(HoverTile % ZP_NUM_TILE_SEL / ZP_MAX_TILE_IN_PATCH), CurTileSet));
 							Pressed = true;
 							StrokeZone = HoverZone;
 							StrokeTile = HoverTile;
@@ -3478,6 +3504,10 @@ public:
 						std::string err;
 						if (Core->opTileStroke(HoverZone, HoverTile, CurTileSet, Mode256, false, err))
 						{
+							ZPSCRIPT::record(NLMISC::toString("painter.tileStroke(%u, %u, %u, %u, %d)",
+								HoverZone, (uint)(HoverTile / ZP_NUM_TILE_SEL),
+								(uint)(HoverTile % ZP_NUM_TILE_SEL % ZP_MAX_TILE_IN_PATCH),
+								(uint)(HoverTile % ZP_NUM_TILE_SEL / ZP_MAX_TILE_IN_PATCH), CurTileSet));
 							StrokeZone = HoverZone;
 							StrokeTile = HoverTile;
 						}
@@ -3557,6 +3587,7 @@ static void zpSelectMode(int mode)
 	if (mode < 0) mode = 0;
 	if (mode > 3) mode = 3; // Tile / Color / Displace / Prop (M18a)
 	g_PaintCtx.Paint->Mode = mode;
+	ZPSCRIPT::record(NLMISC::toString("painter.setMode(%d)", mode));
 }
 
 // M18b prop handlers defined after zpWriteZoneProp (below).
@@ -4151,6 +4182,8 @@ static void zpPropRotateDelta(int d)
 	std::string err;
 	if (!zpWriteZoneProp(g_SelectedZoneId, "rotate", next, err))
 		g_PropStatusMsg = err;
+	else
+		ZPSCRIPT::record(NLMISC::toString("painter.setZoneProp(%u, \"rotate\", %d)", g_SelectedZoneId, next));
 }
 
 static void zpPropToggleSymmetry()
@@ -4163,6 +4196,8 @@ static void zpPropToggleSymmetry()
 	std::string err;
 	if (!zpWriteZoneProp(g_SelectedZoneId, "symmetry", p.Symmetry ? 0 : 1, err))
 		g_PropStatusMsg = err;
+	else
+		ZPSCRIPT::record(NLMISC::toString("painter.setZoneProp(%u, \"symmetry\", %d)", g_SelectedZoneId, p.Symmetry ? 0 : 1));
 }
 
 static void zpPropTogglePassable()
@@ -4175,6 +4210,8 @@ static void zpPropTogglePassable()
 	std::string err;
 	if (!zpWriteZoneProp(g_SelectedZoneId, "passable", p.Passable ? 0 : 1, err))
 		g_PropStatusMsg = err;
+	else
+		ZPSCRIPT::record(NLMISC::toString("painter.setZoneProp(%u, \"passable\", %d)", g_SelectedZoneId, p.Passable ? 0 : 1));
 }
 
 static void zpPropToggleUseBBox()
@@ -4261,6 +4298,7 @@ static void zpSelectTileSetAbs(int idx)
 	if (!count || idx < 0 || idx >= (int)count) return;
 	const int prev = g_PaintCtx.Paint->CurTileSet;
 	g_PaintCtx.Paint->CurTileSet = idx;
+	ZPSCRIPT::record(NLMISC::toString("painter.setTileSet(%d)", idx));
 	// Displace map files are per-tileset; refresh the palette section when the set changes (M9a).
 	if (prev != idx)
 		zpRebuildTilesetPalette();
@@ -4302,6 +4340,7 @@ static void zpGroupDelta(int d)
 	int g = (int)g_PaintCtx.Core->tileGroup() + d;
 	g = ((g % 13) + 13) % 13;
 	g_PaintCtx.Core->setTileGroup((uint)g);
+	ZPSCRIPT::record(NLMISC::toString("painter.setTileGroup(%d)", g));
 }
 
 /** Hardness ± (plugin ±0.2 on 0..1 → ±51 on 0..255). Keys Home/End + panel. */
@@ -4382,12 +4421,14 @@ static void zpUndo()
 {
 	if (!g_PaintCtx.Active || !g_PaintCtx.Core) return;
 	g_PaintCtx.Core->opUndo();
+	ZPSCRIPT::record("painter.undo()");
 }
 
 static void zpRedo()
 {
 	if (!g_PaintCtx.Active || !g_PaintCtx.Core) return;
 	g_PaintCtx.Core->opRedo();
+	ZPSCRIPT::record("painter.redo()");
 }
 
 static void zpFill(int rot)
@@ -6646,6 +6687,10 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 				const char *palShot = getenv("ZONE_PAINTER_PALETTE_SHOT");
 				if (palShot && palShot[0] && palShot[0] != '0')
 					ZPUI::setTilesetPaletteVisible(true);
+				// Dev-only: ZONE_PAINTER_SCRIPT_SHOT=1 opens the Script window (M23b)
+				const char *scShot = getenv("ZONE_PAINTER_SCRIPT_SHOT");
+				if (scShot && scShot[0] && scShot[0] != '0')
+					ZPUI::setScriptWindowVisible(true);
 				const char *palScroll = getenv("ZONE_PAINTER_PALETTE_SCROLL");
 				if (palScroll && (strcmp(palScroll, "disp") == 0 || strcmp(palScroll, "displace") == 0))
 					ZPUI::scrollPaletteToDisplaceSection();

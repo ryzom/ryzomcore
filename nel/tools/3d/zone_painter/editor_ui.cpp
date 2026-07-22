@@ -25,6 +25,7 @@
  */
 
 #include "editor_ui.h"
+#include "script_api.h"
 #include "max_thumbnail.h"
 
 #include <cstdio>
@@ -287,6 +288,89 @@ public:
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpTogglePalette, "zp_toggle_palette");
+
+// painterscript window (ui M23b)
+static const char *kScriptWinId = "ui:zp:script_win";
+
+class CAHZpScriptToggle : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		CInterfaceGroup *win = dynamic_cast<CInterfaceGroup *>(
+			CWidgetManager::getInstance()->getElementFromId(kScriptWinId));
+		if (win)
+		{
+			win->setActive(!win->getActive());
+			if (win->getActive())
+				CWidgetManager::getInstance()->setTopWindow(win);
+		}
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpScriptToggle, "zp_script_toggle");
+
+void setScriptWindowVisible(bool visible)
+{
+	CInterfaceGroup *win = dynamic_cast<CInterfaceGroup *>(
+		CWidgetManager::getInstance()->getElementFromId(kScriptWinId));
+	if (win)
+	{
+		win->setActive(visible);
+		if (visible)
+			CWidgetManager::getInstance()->setTopWindow(win);
+	}
+}
+
+class CAHZpScriptRun : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(
+			CWidgetManager::getInstance()->getElementFromId(
+				"ui:zp:script_win:content:ed_frame:code"));
+		if (!eb) return;
+		ZPSCRIPT::runString(eb->getInputString());
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpScriptRun, "zp_script_run");
+
+class CAHZpScriptRecord : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		ZPSCRIPT::setRecording(!ZPSCRIPT::isRecording());
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpScriptRecord, "zp_script_record");
+
+class CAHZpScriptCopyRec : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(
+			CWidgetManager::getInstance()->getElementFromId(
+				"ui:zp:script_win:content:ed_frame:code"));
+		if (!eb) return;
+		std::string cur = eb->getInputString();
+		if (!cur.empty() && cur[cur.size() - 1] != '\n') cur += "\n";
+		eb->setInputString(cur + ZPSCRIPT::recorderText());
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpScriptCopyRec, "zp_script_copyrec");
+
+class CAHZpScriptClear : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		ZPSCRIPT::clearOutput();
+		ZPSCRIPT::clearRecorder();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpScriptClear, "zp_script_clear");
 
 class CAHZpToggleBoard : public IActionHandler
 {
@@ -1597,6 +1681,30 @@ static CCtrlBaseButton *findButton(const char *id)
 
 void CEditorUI::syncPanelFromBridge()
 {
+	// painterscript window sync (ui M23b): cheap length-compare before setHardText
+	{
+		static size_t lastRec = (size_t)-1, lastOut = (size_t)-1;
+		const std::string &rec = ZPSCRIPT::recorderText();
+		const std::string &out = ZPSCRIPT::outputText();
+		if (rec.size() != lastRec)
+		{
+			lastRec = rec.size();
+			if (CViewText *t = dynamic_cast<CViewText *>(CWidgetManager::getInstance()->getElementFromId(
+					"ui:zp:script_win:content:rec_frame:rec_text")))
+				t->setHardText(rec);
+		}
+		if (out.size() != lastOut)
+		{
+			lastOut = out.size();
+			if (CViewText *t = dynamic_cast<CViewText *>(CWidgetManager::getInstance()->getElementFromId(
+					"ui:zp:script_win:content:out_frame:out_text")))
+				t->setHardText(out);
+		}
+		if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(CWidgetManager::getInstance()->getElementFromId(
+				"ui:zp:script_win:content:btn_rec")))
+			btn->setPushed(ZPSCRIPT::isRecording());
+	}
+
 	SPaintUIBridge *b = getPaintUIBridge();
 	if (!b || !b->HaveCore)
 		return;

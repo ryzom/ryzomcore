@@ -215,6 +215,8 @@ void rebuildTilesetPalette(NL3D::CTileBank *bank, const std::string &bankPath,
 
 /** Show/hide / toggle the Tiles palette window (ui M8). */
 void setTilesetPaletteVisible(bool visible);
+/** Show/hide the painterscript window (ui M23b; SCRIPT toolbar button / shot hook). */
+void setScriptWindowVisible(bool visible);
 void toggleTilesetPalette();
 bool isTilesetPaletteVisible();
 
