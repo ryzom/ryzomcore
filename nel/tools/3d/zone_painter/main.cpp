@@ -1506,13 +1506,16 @@ static void loadNeighborContextFiles(std::vector<SPaintZone> &zones, float cellS
 	}
 }
 
-// CLI --place-context specs (M16c); applied after primary load
+// CLI --place-context specs (M16c); applied after primary load + rebuild
 struct SPlaceContextSpec
 {
 	int Dx, Dy;
 	std::string Basename;
 };
 static std::vector<SPlaceContextSpec> g_PlaceContextSpecs;
+// Forward: M16c place-context load (defined with scratch board helpers)
+static bool loadOnePlaceContext(std::vector<SPaintZone> &zones, float cellSize,
+                                const SPlaceContextSpec &pc, std::string &err);
 
 // ---------------------------------------------------------------------------------------------
 // Ecosystem brick self-instances (ui M4a/M12): display-level duplicates at whole-footprint
@@ -3635,8 +3638,13 @@ static bool rebuildWorkingSet(std::string &err, uint &outWelds)
 		for (size_t i = 0; i < g_EditableFiles.size(); ++i)
 			skip.push_back(g_EditableFiles[i].Basename);
 		loadNeighborContextFiles(zones, g_SessionCellSize, skip);
-		// Re-apply place-context specs (M16c) after rebuild
-		// (loadNeighborContextFiles only reads hints; place-context re-applied at initial load)
+	}
+	// M16c: re-apply place-context specs (CLI + scratch UI) after hint load
+	for (size_t pci = 0; pci < g_PlaceContextSpecs.size(); ++pci)
+	{
+		std::string perr;
+		if (!loadOnePlaceContext(zones, g_SessionCellSize, g_PlaceContextSpecs[pci], perr))
+			fprintf(stderr, "WARNING: rebuild place-context: %s\n", perr.c_str());
 	}
 
 	outWelds = weldPaintZones(zones);
@@ -3749,9 +3757,24 @@ static bool scratchRebuild(std::string &err)
 	return true;
 }
 
+/** Find place-context index covering / at cell. */
+static bool scratchFindContext(int cx, int cy, size_t &idx)
+{
+	for (size_t i = 0; i < g_PlaceContextSpecs.size(); ++i)
+	{
+		// Context bricks claim a 1×1 cell at their place origin (footprint masks later)
+		if (g_PlaceContextSpecs[i].Dx == cx && g_PlaceContextSpecs[i].Dy == cy)
+		{
+			idx = i;
+			return true;
+		}
+	}
+	return false;
+}
+
 static bool scratchGetCellState(const std::string &basename, ZPUI::ESessionCellState &out)
 {
-	// Multi-cell: basenames H:cx,cy / I:ox,oy@cx,cy / E:cx,cy (also accept bare H / I:ox,oy)
+	// Multi-cell: basenames H:cx,cy / I:ox,oy@cx,cy / E:cx,cy / C:cx,cy:basename (M16c)
 	if (basename == "H" || basename == "HOME" || (basename.size() >= 2 && basename[0] == 'H' && basename[1] == ':'))
 	{
 		out = g_PaintCtx.Core && !g_EditableFiles.empty()
@@ -3765,12 +3788,162 @@ static bool scratchGetCellState(const std::string &basename, ZPUI::ESessionCellS
 		out = ZPUI::CellScratchInstance;
 		return true;
 	}
+	if (basename.size() >= 4 && basename[0] == 'C' && basename[1] == ':')
+	{
+		out = ZPUI::CellScratchContext;
+		return true;
+	}
 	if (basename.size() >= 4 && basename[0] == 'E' && basename[1] == ':')
 	{
+		// Empty unless a place-context occupies this cell
+		char sk = 0;
+		int cx = 0, cy = 0;
+		// parse E:cx,cy
+		std::string rest = basename.substr(2);
+		std::string::size_type comma = rest.find(',');
+		if (comma != std::string::npos
+		    && NLMISC::fromString(rest.substr(0, comma), cx)
+		    && NLMISC::fromString(rest.substr(comma + 1), cy))
+		{
+			size_t idx = 0;
+			if (scratchFindContext(cx, cy, idx))
+			{
+				out = ZPUI::CellScratchContext;
+				return true;
+			}
+		}
 		out = ZPUI::CellScratchEmpty;
 		return true;
 	}
 	return false;
+}
+
+/** Load one place-context brick into zones (shared by initial load + rebuild + UI place). */
+static bool loadOnePlaceContext(std::vector<SPaintZone> &zones, float cellSize,
+                                const SPlaceContextSpec &pc, std::string &err)
+{
+	if (g_StartupWorld.MaxDir.empty())
+	{
+		err = "no world";
+		return false;
+	}
+	ZPWS::SZoneEntry ze;
+	if (!resolveHintToZone(g_StartupWorld, pc.Basename, ze))
+	{
+		err = "unresolved brick: " + pc.Basename;
+		return false;
+	}
+	for (size_t i = 0; i < g_ContextFiles.size(); ++i)
+	{
+		if (NLMISC::toLowerAscii(g_ContextFiles[i].Basename)
+		    == NLMISC::toLowerAscii(ze.Basename)
+		    && g_ContextFiles[i].CellX == pc.Dx && g_ContextFiles[i].CellY == pc.Dy)
+			return true; // already loaded at this offset
+	}
+	if (findEditableByBasename(ze.Basename))
+	{
+		err = "basename is editable: " + ze.Basename;
+		return false;
+	}
+	PMAXLOAD::SLoadedMax *nlm = new PMAXLOAD::SLoadedMax();
+	if (!PMAXLOAD::loadMaxFile(ze.MaxPath, *nlm))
+	{
+		delete nlm;
+		err = "load failed: " + ze.MaxPath;
+		return false;
+	}
+	uint base = nextZoneIdBase(zones);
+	const uint minBase = (uint)((g_EditableFiles.size() + g_ContextFiles.size() + 1) * 1000);
+	if (base < minBase) base = minBase;
+	const size_t before = zones.size();
+	if (!buildPaintZones(*nlm->Scene, zones, base, /*forceFrozen=*/true, ze.Basename))
+	{
+		delete nlm;
+		err = "no zones in " + ze.Basename;
+		return false;
+	}
+	float homeOriginX = 0.f, homeOriginY = 0.f, stepX = 0.f, stepY = 0.f;
+	int fw = 1, fh = 1;
+	size_t primaryEnd = 0;
+	for (size_t i = 0; i < zones.size(); ++i)
+		if (zones[i].ZoneId < 1000) primaryEnd = i + 1;
+	if (primaryEnd > 0)
+		computeFootprintRect(zones, 0, primaryEnd, cellSize,
+		                     homeOriginX, homeOriginY, stepX, stepY, fw, fh);
+	float cOx = 0.f, cOy = 0.f, cSx = 0.f, cSy = 0.f;
+	int cw = 1, ch = 1;
+	computeFootprintRect(zones, before, zones.size(), cellSize, cOx, cOy, cSx, cSy, cw, ch);
+	const float wantX = homeOriginX + (float)pc.Dx * cellSize;
+	const float wantY = homeOriginY + (float)pc.Dy * cellSize;
+	translateZonesXY(zones, before, zones.size(), wantX - cOx, wantY - cOy);
+	SContextFile cf;
+	cf.Path = ze.MaxPath;
+	cf.Basename = ze.Basename;
+	cf.CellX = pc.Dx;
+	cf.CellY = pc.Dy;
+	cf.TranslateGeom = true;
+	cf.Lm = nlm;
+	g_ContextFiles.push_back(cf);
+	g_NeighborScenes.push_back(nlm);
+	printf("place-context: '%s' @ (%d,%d) FROZEN translated\n",
+	       cf.Basename.c_str(), cf.CellX, cf.CellY);
+	return true;
+}
+
+static bool scratchPlaceContext(int cx, int cy, const std::string &basename, std::string &err)
+{
+	if (scratchHomeOccupies(cx, cy))
+	{
+		err = "cannot place context on home";
+		return false;
+	}
+	size_t idx = 0;
+	if (scratchFindPlace(cx, cy, idx))
+	{
+		err = "cell has a self-instance";
+		return false;
+	}
+	if (scratchFindContext(cx, cy, idx))
+	{
+		err = "cell already has context";
+		return false;
+	}
+	SPlaceContextSpec pc;
+	pc.Dx = cx;
+	pc.Dy = cy;
+	pc.Basename = basename;
+	// strip .max
+	std::string::size_type dot = pc.Basename.rfind('.');
+	if (dot != std::string::npos && NLMISC::toLowerAscii(pc.Basename.substr(dot)) == ".max")
+		pc.Basename = pc.Basename.substr(0, dot);
+	g_PlaceContextSpecs.push_back(pc);
+	if (!scratchRebuild(err))
+	{
+		g_PlaceContextSpecs.pop_back();
+		return false;
+	}
+	return true;
+}
+
+static bool scratchRemoveContext(int cx, int cy, std::string &err)
+{
+	size_t idx = 0;
+	if (!scratchFindContext(cx, cy, idx))
+	{
+		err = "no context at cell";
+		return false;
+	}
+	g_PlaceContextSpecs.erase(g_PlaceContextSpecs.begin() + (std::ptrdiff_t)idx);
+	return scratchRebuild(err);
+}
+
+static bool scratchGetContext(int cx, int cy, std::string &basename)
+{
+	size_t idx = 0;
+	if (!scratchFindContext(cx, cy, idx))
+		return false;
+	basename = g_PlaceContextSpecs[idx].Basename;
+	return true;
 }
 
 static bool scratchPlace(int cx, int cy, std::string &err)
@@ -4527,6 +4700,9 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 				sessionBridge.scratchRemove = scratchRemove;
 				sessionBridge.scratchGetInstance = scratchGetInstance;
 				sessionBridge.scratchGetInstanceOrigin = scratchGetInstanceOrigin;
+				sessionBridge.scratchPlaceContext = scratchPlaceContext;
+				sessionBridge.scratchRemoveContext = scratchRemoveContext;
+				sessionBridge.scratchGetContext = scratchGetContext;
 				sessionBridge.ScratchHomeName = g_StartupZone.Basename.empty()
 					? g_StartupWorld.WorldName
 					: g_StartupZone.Basename;
@@ -4769,24 +4945,46 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 						ok = sessionSaveZone(base, err);
 					else if (op == "toggle" && !base.empty())
 						ok = sessionToggleEditable(base, false, true, err);
-					else if (op == "place" || op == "rotate" || op == "mirror" || op == "remove")
+					else if (op == "place" || op == "rotate" || op == "mirror" || op == "remove"
+					         || op == "place-context" || op == "remove-context")
 					{
-						int cx = 0, cy = 0;
-						std::string::size_type comma = base.find(',');
-						if (comma != std::string::npos
-						    && NLMISC::fromString(base.substr(0, comma), cx)
-						    && NLMISC::fromString(base.substr(comma + 1), cy))
+						// place:cx,cy | place-context:cx,cy:basename | remove-context:cx,cy
+						if (op == "place-context")
 						{
-							if (op == "place") ok = scratchPlace(cx, cy, err);
-							else if (op == "rotate") ok = scratchRotate(cx, cy, +1, err);
-							else if (op == "mirror") ok = scratchMirror(cx, cy, err);
-							else ok = scratchRemove(cx, cy, err);
+							// base = cx,cy:basename
+							std::string::size_type comma = base.find(',');
+							std::string::size_type colon2 = base.find(':', comma == std::string::npos ? 0 : comma);
+							int cx = 0, cy = 0;
+							if (comma != std::string::npos && colon2 != std::string::npos
+							    && NLMISC::fromString(base.substr(0, comma), cx)
+							    && NLMISC::fromString(base.substr(comma + 1, colon2 - comma - 1), cy))
+							{
+								std::string bname = base.substr(colon2 + 1);
+								ok = scratchPlaceContext(cx, cy, bname, err);
+							}
+							else
+								err = "expected cx,cy:basename";
 						}
 						else
-							err = "expected cx,cy";
+						{
+							int cx = 0, cy = 0;
+							std::string::size_type comma = base.find(',');
+							if (comma != std::string::npos
+							    && NLMISC::fromString(base.substr(0, comma), cx)
+							    && NLMISC::fromString(base.substr(comma + 1), cy))
+							{
+								if (op == "place") ok = scratchPlace(cx, cy, err);
+								else if (op == "rotate") ok = scratchRotate(cx, cy, +1, err);
+								else if (op == "mirror") ok = scratchMirror(cx, cy, err);
+								else if (op == "remove") ok = scratchRemove(cx, cy, err);
+								else if (op == "remove-context") ok = scratchRemoveContext(cx, cy, err);
+							}
+							else
+								err = "expected cx,cy";
+						}
 					}
 					else
-						err = "unknown BOARD_ACTION (open|close|save|toggle:base / place|rotate|mirror|remove:cx,cy)";
+						err = "unknown BOARD_ACTION (open|close|save|toggle:base / place|rotate|mirror|remove:cx,cy / place-context:cx,cy:base / remove-context:cx,cy)";
 					printf("board-action %s: %s%s%s\n", act.c_str(), ok ? "OK" : "FAIL",
 					       err.empty() ? "" : " ", err.c_str());
 					if (ok)
@@ -6072,70 +6270,9 @@ args.addArg("", "instances", "NxM",
 	// M16c: --place-context "dx,dy:basename" (ecosystem / board) — load as RO at offset
 	for (size_t pci = 0; pci < g_PlaceContextSpecs.size(); ++pci)
 	{
-		const SPlaceContextSpec &pc = g_PlaceContextSpecs[pci];
-		ZPWS::SZoneEntry ze;
-		if (g_StartupWorld.MaxDir.empty()
-		    || !resolveHintToZone(g_StartupWorld, pc.Basename, ze))
-		{
-			// Try as path under MaxDir even without full world list
-			fprintf(stderr, "WARNING: --place-context unresolved: %d,%d:%s\n",
-			        pc.Dx, pc.Dy, pc.Basename.c_str());
-			continue;
-		}
-		// Skip if already loaded as context or editable
-		bool already = false;
-		if (findEditableByBasename(ze.Basename)) already = true;
-		for (size_t i = 0; i < g_ContextFiles.size() && !already; ++i)
-			if (NLMISC::toLowerAscii(g_ContextFiles[i].Basename)
-			    == NLMISC::toLowerAscii(ze.Basename))
-				already = true;
-		if (already)
-		{
-			printf("place-context: '%s' already in working set (skip)\n", ze.Basename.c_str());
-			continue;
-		}
-		PMAXLOAD::SLoadedMax *nlm = new PMAXLOAD::SLoadedMax();
-		if (!PMAXLOAD::loadMaxFile(ze.MaxPath, *nlm))
-		{
-			fprintf(stderr, "WARNING: place-context load failed: %s\n", ze.MaxPath.c_str());
-			delete nlm;
-			continue;
-		}
-		uint base = nextZoneIdBase(zones);
-		const uint minBase = (uint)((g_EditableFiles.size() + g_ContextFiles.size() + 1) * 1000);
-		if (base < minBase) base = minBase;
-		const size_t before = zones.size();
-		if (!buildPaintZones(*nlm->Scene, zones, base, /*forceFrozen=*/true, ze.Basename))
-		{
-			delete nlm;
-			continue;
-		}
-		// Translate to placed cell (always for place-context)
-		float homeOriginX = 0.f, homeOriginY = 0.f, stepX = 0.f, stepY = 0.f;
-		int fw = 1, fh = 1;
-		size_t primaryEnd = 0;
-		for (size_t i = 0; i < zones.size(); ++i)
-			if (zones[i].ZoneId < 1000) primaryEnd = i + 1;
-		if (primaryEnd > 0)
-			computeFootprintRect(zones, 0, primaryEnd, cellSize,
-			                     homeOriginX, homeOriginY, stepX, stepY, fw, fh);
-		float cOx = 0.f, cOy = 0.f, cSx = 0.f, cSy = 0.f;
-		int cw = 1, ch = 1;
-		computeFootprintRect(zones, before, zones.size(), cellSize, cOx, cOy, cSx, cSy, cw, ch);
-		const float wantX = homeOriginX + (float)pc.Dx * cellSize;
-		const float wantY = homeOriginY + (float)pc.Dy * cellSize;
-		translateZonesXY(zones, before, zones.size(), wantX - cOx, wantY - cOy);
-		SContextFile cf;
-		cf.Path = ze.MaxPath;
-		cf.Basename = ze.Basename;
-		cf.CellX = pc.Dx;
-		cf.CellY = pc.Dy;
-		cf.TranslateGeom = true;
-		cf.Lm = nlm;
-		g_ContextFiles.push_back(cf);
-		g_NeighborScenes.push_back(nlm);
-		printf("place-context: '%s' @ (%d,%d) FROZEN translated\n",
-		       cf.Basename.c_str(), cf.CellX, cf.CellY);
+		std::string perr;
+		if (!loadOnePlaceContext(zones, cellSize, g_PlaceContextSpecs[pci], perr))
+			fprintf(stderr, "WARNING: --place-context: %s\n", perr.c_str());
 	}
 
 	uint welds = weldPaintZones(zones);

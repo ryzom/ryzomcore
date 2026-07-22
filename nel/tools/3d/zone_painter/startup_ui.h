@@ -107,10 +107,11 @@ enum ESessionCellState
 	CellOpenEditable,     ///< open as paint target (selection-fill tone)
 	CellOpenReadOnly,     ///< open as frozen context (dimmer tint)
 	CellDirtyEditable,    ///< open-editable with unsaved paint (fill + dirty marker)
-	// Ecosystem scratch (M12c):
+	// Ecosystem scratch (M12c/M16c):
 	CellScratchHome,      ///< open brick home cell (editable fill)
 	CellScratchInstance,  ///< placed instance (distinct tint; label carries R90/M glyphs)
-	CellScratchEmpty      ///< empty scratch well (quiet)
+	CellScratchEmpty,     ///< empty scratch well (quiet)
+	CellScratchContext    ///< read-only context brick at cell (M16c; dim RO tint + name)
 };
 
 /**
@@ -163,6 +164,13 @@ struct SSessionBoardBridge
 	bool (*scratchGetInstance)(int cx, int cy, uint &rot, bool &mirror);
 	/** Resolve any cell in a block to the place origin (ox,oy) + transform. */
 	bool (*scratchGetInstanceOrigin)(int cx, int cy, int &ox, int &oy, uint &rot, bool &mirror);
+	// M16c: read-only context brick placement on the ecosystem scratch board
+	/** Place existing world brick basename as RO context at fine cell (cx,cy). */
+	bool (*scratchPlaceContext)(int cx, int cy, const std::string &basename, std::string &err);
+	/** Remove RO context whose origin is at / covers (cx,cy). */
+	bool (*scratchRemoveContext)(int cx, int cy, std::string &err);
+	/** Query context at cell; fills basename. */
+	bool (*scratchGetContext)(int cx, int cy, std::string &basename);
 	/** Home brick display name. */
 	std::string ScratchHomeName;
 	/** Primary footprint size in fine cells (M14a multi-cell occupancy). */
@@ -174,6 +182,7 @@ struct SSessionBoardBridge
 		  saveZone(NULL), toggleEditable(NULL), isDirty(NULL), isOpen(NULL), isEditable(NULL),
 		  scratchPlace(NULL), scratchRotate(NULL), scratchMirror(NULL), scratchRemove(NULL),
 		  scratchGetInstance(NULL), scratchGetInstanceOrigin(NULL),
+		  scratchPlaceContext(NULL), scratchRemoveContext(NULL), scratchGetContext(NULL),
 		  FootprintCellsW(1), FootprintCellsH(1)
 	{
 	}

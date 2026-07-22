@@ -597,6 +597,10 @@ static void applySessionCellState(CInterfaceGroup *cell, const std::string &base
 	case CellScratchEmpty:
 		setBoardCellFillRGBA(cell, NLMISC::CRGBA(30, 32, 36, 120), NLMISC::CRGBA(40, 44, 50, 160));
 		break;
+	case CellScratchContext:
+		// Read-only context brick (M16c) — same dim RO tint as continent RO
+		setBoardCellFillRGBA(cell, kBoardCellReadOnly, kBoardCellReadOnlyHover);
+		break;
 	case CellClosed:
 	default:
 		setBoardCellFillRGBA(cell, kBoardCellSelNone, kBoardCellSelHover);
@@ -646,6 +650,39 @@ static void applySessionCellState(CInterfaceGroup *cell, const std::string &base
 		}
 		else if (st == CellScratchEmpty)
 			t->setHardText("");
+		else if (st == CellScratchContext)
+		{
+			// Basename form C:cx,cy:brickname — label the brick (short)
+			std::string lab;
+			if (basename.size() >= 4 && basename[0] == 'C')
+			{
+				std::string::size_type lastColon = basename.rfind(':');
+				if (lastColon != std::string::npos && lastColon + 1 < basename.size())
+					lab = basename.substr(lastColon + 1);
+			}
+			if (lab.empty() && s_SessionBridge && s_SessionBridge->scratchGetContext)
+			{
+				char sk = 0;
+				int cx = 0, cy = 0;
+				if (parseScratchBasename(basename, sk, cx, cy) || true)
+				{
+					// try C: parse
+					if (basename.size() > 2 && basename[0] == 'C' && basename[1] == ':')
+					{
+						std::string rest = basename.substr(2);
+						std::string::size_type comma = rest.find(',');
+						std::string::size_type colon = rest.find(':', comma == std::string::npos ? 0 : comma);
+						if (comma != std::string::npos && colon != std::string::npos)
+						{
+							NLMISC::fromString(rest.substr(0, comma), cx);
+							NLMISC::fromString(rest.substr(comma + 1, colon - comma - 1), cy);
+						}
+					}
+					s_SessionBridge->scratchGetContext(cx, cy, lab);
+				}
+			}
+			setBoardCellLabel(t, lab.empty() ? std::string("ctx") : lab);
+		}
 		else if (st == CellDirtyEditable)
 			setBoardCellLabel(t, basename + " *");
 		else
@@ -1133,7 +1170,10 @@ static void applyWorldSelection(int idx)
 
 static void openCellActionPopup(const std::string &basename);
 static void openInstanceActionPopup(const std::string &basename);
+static void openEmptyCellPopup(const std::string &basename);
+static void openContextActionPopup(const std::string &basename);
 static void openCloseConfirmModal(const std::string &basename, const std::string &purpose);
+static void openContextBrickPicker(int cx, int cy);
 static void populateScratchBoard();
 
 /** L-click: startup = open immediately; session hub = continent open/popup or ecosystem scratch. */
@@ -1149,28 +1189,43 @@ static void applyZoneSelection(int idx)
 		s_Sess.SelectedZone = idx;
 		s_Sess.PendingActionBasename = base;
 
-		// Ecosystem scratch (M12c)
+		// Ecosystem scratch (M12c/M16c)
 		char sk = 0;
 		int cx = 0, cy = 0;
 		if (s_SessionBridge && s_SessionBridge->World
-		    && s_SessionBridge->World->Kind == ZPWS::Ecosystem
-		    && parseScratchBasename(base, sk, cx, cy))
+		    && s_SessionBridge->World->Kind == ZPWS::Ecosystem)
 		{
-			std::string err;
-			if (sk == 'H')
-				return; // home: no action
-			if (sk == 'E' && s_SessionBridge->scratchPlace)
+			// Context cell C:cx,cy:name
+			if (base.size() >= 4 && base[0] == 'C' && base[1] == ':')
 			{
-				if (!s_SessionBridge->scratchPlace(cx, cy, err))
-					fprintf(stderr, "scratch place (%d,%d): %s\n", cx, cy, err.c_str());
-				else
-					refreshSessionBoardStates();
+				openContextActionPopup(base);
 				return;
 			}
-			if (sk == 'I')
+			if (parseScratchBasename(base, sk, cx, cy))
 			{
-				openInstanceActionPopup(base);
-				return;
+				std::string err;
+				if (sk == 'H')
+					return; // home: no action
+				// Empty: popup Place instance / Place context (M16c)
+				if (sk == 'E')
+				{
+					// If a context occupies this empty-looking cell, open context popup
+					std::string cname;
+					if (s_SessionBridge->scratchGetContext
+					    && s_SessionBridge->scratchGetContext(cx, cy, cname))
+					{
+						s_Sess.PendingActionBasename = NLMISC::toString("C:%d,%d:%s", cx, cy, cname.c_str());
+						openContextActionPopup(s_Sess.PendingActionBasename);
+						return;
+					}
+					openEmptyCellPopup(base);
+					return;
+				}
+				if (sk == 'I')
+				{
+					openInstanceActionPopup(base);
+					return;
+				}
 			}
 		}
 
@@ -1841,7 +1896,15 @@ static void populateScratchBoard()
 					z.Basename = NLMISC::toString("I:%d,%d@%d,%d", ox, oy, cx, cy);
 			}
 			else
-				z.Basename = NLMISC::toString("E:%d,%d", cx, cy);
+			{
+				// M16c context brick at this cell?
+				std::string cname;
+				if (s_SessionBridge->scratchGetContext
+				    && s_SessionBridge->scratchGetContext(cx, cy, cname))
+					z.Basename = NLMISC::toString("C:%d,%d:%s", cx, cy, cname.c_str());
+				else
+					z.Basename = NLMISC::toString("E:%d,%d", cx, cy);
+			}
 		}
 		else if (s_SessionBridge && s_SessionBridge->scratchGetInstance)
 		{
@@ -1850,10 +1913,24 @@ static void populateScratchBoard()
 			if (s_SessionBridge->scratchGetInstance(cx, cy, rot, mir))
 				z.Basename = NLMISC::toString("I:%d,%d", cx, cy);
 			else
-				z.Basename = NLMISC::toString("E:%d,%d", cx, cy);
+			{
+				std::string cname;
+				if (s_SessionBridge->scratchGetContext
+				    && s_SessionBridge->scratchGetContext(cx, cy, cname))
+					z.Basename = NLMISC::toString("C:%d,%d:%s", cx, cy, cname.c_str());
+				else
+					z.Basename = NLMISC::toString("E:%d,%d", cx, cy);
+			}
 		}
 		else
-			z.Basename = NLMISC::toString("E:%d,%d", cx, cy);
+		{
+			std::string cname;
+			if (s_SessionBridge && s_SessionBridge->scratchGetContext
+			    && s_SessionBridge->scratchGetContext(cx, cy, cname))
+				z.Basename = NLMISC::toString("C:%d,%d:%s", cx, cy, cname.c_str());
+			else
+				z.Basename = NLMISC::toString("E:%d,%d", cx, cy);
+		}
 		used[std::make_pair(cy, cx)] = (int)s_Sess.Zones.size();
 		s_Sess.Zones.push_back(z);
 	}
@@ -2270,6 +2347,214 @@ public:
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpInstCancel, "zp_inst_cancel");
+
+// ---------------------------------------------------------------------------------------------
+// M16c empty-cell popup + context place/remove + brick picker
+
+static int s_ContextPickerCx = 0;
+static int s_ContextPickerCy = 0;
+static std::vector<std::string> s_ContextPickerNames;
+
+static void openEmptyCellPopup(const std::string &basename)
+{
+	s_Sess.PendingActionBasename = basename;
+	if (CViewText *t = findText("ui:zp:empty_cell_action:content:title"))
+		t->setHardText("Empty cell");
+	if (CViewText *t = findText("ui:zp:empty_cell_action:content:status"))
+		t->setHardText(basename);
+	CWidgetManager::getInstance()->enableModalWindow(NULL, "ui:zp:empty_cell_action");
+}
+
+static void openContextActionPopup(const std::string &basename)
+{
+	s_Sess.PendingActionBasename = basename;
+	std::string lab = basename;
+	if (basename.size() > 2 && basename[0] == 'C')
+	{
+		std::string::size_type last = basename.rfind(':');
+		if (last != std::string::npos)
+			lab = basename.substr(last + 1);
+	}
+	if (CViewText *t = findText("ui:zp:context_action:content:title"))
+		t->setHardText("Context (RO)");
+	if (CViewText *t = findText("ui:zp:context_action:content:status"))
+		t->setHardText(lab);
+	CWidgetManager::getInstance()->enableModalWindow(NULL, "ui:zp:context_action");
+}
+
+static void openContextBrickPicker(int cx, int cy)
+{
+	s_ContextPickerCx = cx;
+	s_ContextPickerCy = cy;
+	s_ContextPickerNames.clear();
+	// Screen B list idiom: fill a scroll list of world bricks
+	CInterfaceGroup *list = findGroup("ui:zp:context_picker:content:list");
+	if (list)
+	{
+		// Clear prior rows
+		const std::vector<CInterfaceGroup *> &groups = list->getGroups();
+		std::vector<CInterfaceGroup *> doomed;
+		for (size_t i = 0; i < groups.size(); ++i)
+			if (groups[i] && groups[i]->getId().find("row_") != std::string::npos)
+				doomed.push_back(groups[i]);
+		for (size_t i = 0; i < doomed.size(); ++i)
+			list->delGroup(doomed[i], true);
+	}
+	if (!s_SessionBridge || !s_SessionBridge->World)
+		return;
+	std::vector<ZPWS::SZoneEntry> zones;
+	ZPWS::listZones(*s_SessionBridge->World, zones);
+	sint32 y = 0;
+	for (size_t i = 0; i < zones.size(); ++i)
+	{
+		// Skip the open home brick
+		if (s_SessionBridge->ScratchHomeName == zones[i].Basename)
+			continue;
+		s_ContextPickerNames.push_back(zones[i].Basename);
+		if (!list) continue;
+		std::vector<std::pair<std::string, std::string> > p;
+		p.push_back(std::make_pair(std::string("id"), NLMISC::toString("row_%u", (uint)i)));
+		p.push_back(std::make_pair(std::string("title"), zones[i].Basename));
+		p.push_back(std::make_pair(std::string("idx"), NLMISC::toString("%u", (uint)(s_ContextPickerNames.size() - 1))));
+		p.push_back(std::make_pair(std::string("thumb"), std::string("")));
+		CInterfaceGroup *row = spawnUnder(list, "zp_zone_row", p, 0, y, 520, 36);
+		if (row)
+		{
+			// Rebind click to context picker select
+			if (CCtrlTextButton *btn = dynamic_cast<CCtrlTextButton *>(row->getCtrl("btn")))
+			{
+				btn->setActionOnLeftClick("zp_context_pick");
+				btn->setParamsOnLeftClick(NLMISC::toString("%u", (uint)(s_ContextPickerNames.size() - 1)));
+			}
+			y -= 38;
+		}
+	}
+	if (CViewText *t = findText("ui:zp:context_picker:content:title"))
+		t->setHardText(NLMISC::toString("Place context @ %d,%d", cx, cy));
+	CWidgetManager::getInstance()->enableModalWindow(NULL, "ui:zp:context_picker");
+}
+
+class CAHZpEmptyPlaceInstance : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		CWidgetManager::getInstance()->disableModalWindow();
+		char sk = 0;
+		int cx = 0, cy = 0;
+		if (!parseScratchBasename(s_Sess.PendingActionBasename, sk, cx, cy) || sk != 'E')
+			return;
+		if (!s_SessionBridge || !s_SessionBridge->scratchPlace) return;
+		std::string err;
+		if (!s_SessionBridge->scratchPlace(cx, cy, err))
+			fprintf(stderr, "scratch place (%d,%d): %s\n", cx, cy, err.c_str());
+		// Rebuild board cells (instance set changed)
+		if (s_SessionBridge->World && s_SessionBridge->World->Kind == ZPWS::Ecosystem)
+			populateScratchBoard();
+		refreshSessionBoardStates();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpEmptyPlaceInstance, "zp_empty_place_instance");
+
+class CAHZpEmptyPlaceContext : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		CWidgetManager::getInstance()->disableModalWindow();
+		char sk = 0;
+		int cx = 0, cy = 0;
+		if (!parseScratchBasename(s_Sess.PendingActionBasename, sk, cx, cy) || sk != 'E')
+			return;
+		openContextBrickPicker(cx, cy);
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpEmptyPlaceContext, "zp_empty_place_context");
+
+class CAHZpEmptyCancel : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		CWidgetManager::getInstance()->disableModalWindow();
+		s_Sess.PendingActionBasename.clear();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpEmptyCancel, "zp_empty_cancel");
+
+class CAHZpContextRemove : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		CWidgetManager::getInstance()->disableModalWindow();
+		const std::string &base = s_Sess.PendingActionBasename;
+		int cx = 0, cy = 0;
+		if (base.size() > 2 && base[0] == 'C' && base[1] == ':')
+		{
+			std::string rest = base.substr(2);
+			std::string::size_type comma = rest.find(',');
+			std::string::size_type colon = rest.find(':', comma == std::string::npos ? 0 : comma);
+			if (comma != std::string::npos && colon != std::string::npos)
+			{
+				NLMISC::fromString(rest.substr(0, comma), cx);
+				NLMISC::fromString(rest.substr(comma + 1, colon - comma - 1), cy);
+			}
+		}
+		if (!s_SessionBridge || !s_SessionBridge->scratchRemoveContext) return;
+		std::string err;
+		if (!s_SessionBridge->scratchRemoveContext(cx, cy, err))
+			fprintf(stderr, "scratch remove-context (%d,%d): %s\n", cx, cy, err.c_str());
+		if (s_SessionBridge->World && s_SessionBridge->World->Kind == ZPWS::Ecosystem)
+			populateScratchBoard();
+		refreshSessionBoardStates();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpContextRemove, "zp_context_remove");
+
+class CAHZpContextCancel : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		CWidgetManager::getInstance()->disableModalWindow();
+		s_Sess.PendingActionBasename.clear();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpContextCancel, "zp_context_cancel");
+
+class CAHZpContextPick : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params)
+	{
+		CWidgetManager::getInstance()->disableModalWindow();
+		uint idx = 0;
+		if (!NLMISC::fromString(params, idx) || idx >= s_ContextPickerNames.size())
+			return;
+		if (!s_SessionBridge || !s_SessionBridge->scratchPlaceContext) return;
+		std::string err;
+		if (!s_SessionBridge->scratchPlaceContext(s_ContextPickerCx, s_ContextPickerCy,
+		                                         s_ContextPickerNames[idx], err))
+			fprintf(stderr, "scratch place-context (%d,%d:%s): %s\n",
+			        s_ContextPickerCx, s_ContextPickerCy,
+			        s_ContextPickerNames[idx].c_str(), err.c_str());
+		if (s_SessionBridge->World && s_SessionBridge->World->Kind == ZPWS::Ecosystem)
+			populateScratchBoard();
+		refreshSessionBoardStates();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpContextPick, "zp_context_pick");
+
+class CAHZpContextPickerCancel : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		CWidgetManager::getInstance()->disableModalWindow();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpContextPickerCancel, "zp_context_picker_cancel");
 
 } // namespace ZPUI
 
