@@ -104,6 +104,11 @@ struct SPaintUIBridge
 	void (*toggleBoard)();
 	/** Set brush color RGB 0-255 (color picker / panel); same field as --color. */
 	void (*setBrushColor)(int r, int g, int b);
+	// M18b Prop mode: export-property steppers / toggles (selected zone)
+	void (*propRotateDelta)(int d);   // ±1 mod 4
+	void (*propToggleSymmetry)();
+	void (*propTogglePassable)();
+	void (*propToggleUseBBox)();
 
 	// State snapshot for panel sync (filled by runViewer each frame)
 	bool HaveCore;
@@ -140,6 +145,20 @@ struct SPaintUIBridge
 	char BrushMaskLabel[64];        // basename or "none"
 	bool BrushMaskMode;             // Q-key mask-mode toggle
 	uint DisplaceIndex;             // 0..15
+	// M18b Prop panel snapshot
+	bool PropHaveSelection;
+	uint PropZoneId;
+	char PropZoneName[128];
+	char PropFileBasename[128];
+	char PropFootprint[64];   // "WxH (source=template|aabb)"
+	bool PropFootprintFilled;
+	bool PropEditable;
+	bool PropDirty;
+	int PropRotate;           // 0..3
+	bool PropSymmetry;
+	bool PropPassable;
+	bool PropUseBBox;
+	char PropStatus[96];      // "read-only" / last edit
 
 	SPaintUIBridge()
 		: selectMode(NULL), selectTileSetDelta(NULL), selectTileSetAbs(NULL),
@@ -150,12 +169,17 @@ struct SPaintUIBridge
 		  colorRadiusDelta(NULL), hardnessDelta(NULL), opacityDelta(NULL),
 		  cycleBrushMask(NULL), toggleMaskMode(NULL), displaceIndexDelta(NULL),
 		  displaceIndexAbs(NULL), togglePalette(NULL), toggleBoard(NULL), setBrushColor(NULL),
+		  propRotateDelta(NULL), propToggleSymmetry(NULL), propTogglePassable(NULL),
+		  propToggleUseBBox(NULL),
 		  HaveCore(false), Mode(0), CurTileSet(0), TileSetCount(0), Mode256(false),
 		  BrushSize(0), TileGroup(0), LockBorders(false), UndoDepth(0), CanSave(false),
 		  InteractiveSave(false), InstanceCount(1), UpdateThumbnail(true), SeasonCount(0),
 		  EditableFileCount(1), DirtyFileCount(0),
 		  ColorRadius(8.f), ColorHardness(128), ColorOpacity(255),
-		  ColorR(255), ColorG(255), ColorB(255), BrushMaskMode(false), DisplaceIndex(0)
+		  ColorR(255), ColorG(255), ColorB(255), BrushMaskMode(false), DisplaceIndex(0),
+		  PropHaveSelection(false), PropZoneId(0), PropFootprintFilled(true),
+		  PropEditable(false), PropDirty(false), PropRotate(0), PropSymmetry(false),
+		  PropPassable(false), PropUseBBox(false)
 	{
 		TileSetName[0] = 0;
 		EditableBasename[0] = 0;
@@ -166,6 +190,10 @@ struct SPaintUIBridge
 		BrushMaskLabel[2] = 'n';
 		BrushMaskLabel[3] = 'e';
 		BrushMaskLabel[4] = 0;
+		PropZoneName[0] = 0;
+		PropFileBasename[0] = 0;
+		PropFootprint[0] = 0;
+		PropStatus[0] = 0;
 	}
 };
 

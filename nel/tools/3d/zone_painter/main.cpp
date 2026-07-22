@@ -2799,6 +2799,9 @@ static void buildPaintInputs(std::vector<SPaintZone> &zones, std::vector<ZPPAINT
 // Scripted paint mode: one op per line, same op layer as the mouse path (see the file header
 // for the command list). Any FAILed op fails the run (scripts are curated test inputs).
 
+// Forward: M18b prop write (defined with Prop helpers below).
+static bool zpWriteZoneProp(uint zoneId, const std::string &which, int value, std::string &err);
+
 static int runPaintScript(ZPPAINT::CPaintCore &core, const std::string &path)
 {
 	std::ifstream ifs(path.c_str());
@@ -2868,6 +2871,16 @@ static int runPaintScript(ZPPAINT::CPaintCore &core, const std::string &path)
 		}
 		else if (tok[0] == "undo") { ok = core.opUndo(); if (!ok) err = "undo stack empty"; }
 		else if (tok[0] == "redo") { ok = core.opRedo(); if (!ok) err = "redo stack empty"; }
+		else if (tok[0] == "prop" && tok.size() >= 4)
+		{
+			// prop <zone> <rotate|symmetry|passable|usebbox> <value>
+			// M18b write path (same handlers as the Prop panel). M18c adds undo records.
+			uint zone = 0;
+			int val = 0;
+			NLMISC::fromString(tok[1], zone);
+			NLMISC::fromString(tok[3], val);
+			ok = zpWriteZoneProp(zone, tok[2], val, err);
+		}
 		else if (tok[0] == "seed" && tok.size() >= 2)
 		{
 			uint s;
@@ -3393,14 +3406,22 @@ static void zpSelectMode(int mode)
 	g_PaintCtx.Paint->Mode = mode;
 }
 
+// M18b prop handlers defined after zpWriteZoneProp (below).
+static void zpPropRotateDelta(int d);
+static void zpPropToggleSymmetry();
+static void zpPropTogglePassable();
+static void zpPropToggleUseBBox();
+
 /** Prop-mode selectable: unfrozen primary (not instance / not RO context). */
 static bool zpZoneIsPropSelectable(uint zoneId)
 {
 	if (zoneId >= kInstanceZoneIdBase)
 		return false;
-	if (!g_PaintCtx.Core)
-		return false;
-	return !g_PaintCtx.Core->zoneFrozen(zoneId);
+	if (g_PaintCtx.Core)
+		return !g_PaintCtx.Core->zoneFrozen(zoneId);
+	// Headless: consult assembled zones via g_PaintCtx.Zones when set
+	const SPaintZone *pz = zpFindPaintZone(zoneId);
+	return pz && !pz->Frozen;
 }
 
 static void zpClearPropSelection()
@@ -3604,6 +3625,271 @@ static const SPaintZone *zpFindPaintZone(uint zoneId)
 		if ((*g_PaintCtx.Zones)[i].ZoneId == zoneId)
 			return &(*g_PaintCtx.Zones)[i];
 	return NULL;
+}
+
+static SPaintZone *zpFindPaintZoneMut(uint zoneId)
+{
+	if (!g_PaintCtx.Zones)
+		return NULL;
+	for (size_t i = 0; i < g_PaintCtx.Zones->size(); ++i)
+		if ((*g_PaintCtx.Zones)[i].ZoneId == zoneId)
+			return &(*g_PaintCtx.Zones)[i];
+	return NULL;
+}
+
+// ---------------------------------------------------------------------------------------------
+// M18b: zone export properties (same Max-shape script AppData as the exporters)
+
+/** BST_CHECKED / BST_UNCHECKED as used by nel_export_node_properties for LigoSymmetry. */
+enum { ZP_BST_UNCHECKED = 0, ZP_BST_CHECKED = 1 };
+
+static bool zpEraseScriptAppData(CNodeImpl *node, uint32 subId)
+{
+	if (!node)
+		return false;
+	STORAGE::CAppData *ad = node->appData();
+	if (!ad)
+		return false;
+	ad->erase(STORAGE::CAppData::ScriptClassId, STORAGE::CAppData::ScriptSuperClassId, subId);
+	return true;
+}
+
+static bool zpSetScriptAppDataStr(CNodeImpl *node, uint32 subId, const std::string &value)
+{
+	if (!node)
+		return false;
+	STORAGE::CAppData *ad = node->appData();
+	if (!ad)
+		return false;
+	return ad->setScriptString(subId, value);
+}
+
+struct SZoneProps
+{
+	int Rotate;       // 0..3
+	bool Symmetry;
+	bool Passable;    // presence of PASSABLE "1"
+	bool UseBoundingBox;
+	bool HasRotate, HasSymmetry, HasPassable, HasUseBB;
+	SZoneProps()
+		: Rotate(0), Symmetry(false), Passable(false), UseBoundingBox(false),
+		  HasRotate(false), HasSymmetry(false), HasPassable(false), HasUseBB(false)
+	{
+	}
+};
+
+static void zpReadZoneProps(CNodeImpl *node, SZoneProps &out)
+{
+	out = SZoneProps();
+	if (!node)
+		return;
+	std::string s;
+	if (APPDATA::getScriptAppData(node, NEL3D_APPDATA_ZONE_ROTATE, s))
+	{
+		out.HasRotate = true;
+		NLMISC::fromString(s, out.Rotate);
+		out.Rotate &= 3;
+	}
+	if (APPDATA::getScriptAppData(node, NEL3D_APPDATA_ZONE_SYMMETRY, s))
+	{
+		out.HasSymmetry = true;
+		int v = 0;
+		NLMISC::fromString(s, v);
+		out.Symmetry = (v != ZP_BST_UNCHECKED);
+	}
+	// PASSABLE: presence-style — entry exists (any value, Max writes "1") = true
+	if (APPDATA::getScriptAppData(node, NEL3D_APPDATA_LIGO_PASSABLE, s))
+	{
+		out.HasPassable = true;
+		out.Passable = true;
+	}
+	if (APPDATA::getScriptAppData(node, NEL3D_APPDATA_LIGO_USE_BOUNDINGBOX, s))
+	{
+		out.HasUseBB = true;
+		int v = 0;
+		NLMISC::fromString(s, v);
+		out.UseBoundingBox = (v != 0);
+	}
+}
+
+/**
+ * Write one export prop. Semantics match Max UIs:
+ *   rotate   → NEL3D_APPDATA_ZONE_ROTATE decimal "0".."3" (always present after write)
+ *   symmetry → NEL3D_APPDATA_ZONE_SYMMETRY "1"/"0" (BST_CHECKED/UNCHECKED)
+ *   passable → presence: set "1" when true, DELETE entry when false (ligoscape rollout)
+ *   usebbox  → "1" when true; DELETE when false (exporter getScriptAppDataInt default 0;
+ *              absent and "0" both read false — delete is the least-surprising clean write)
+ */
+static bool zpWriteZoneProp(uint zoneId, const std::string &which, int value, std::string &err)
+{
+	SPaintZone *pz = zpFindPaintZoneMut(zoneId);
+	if (!pz || !pz->Node)
+	{
+		err = "no zone/node";
+		return false;
+	}
+	if (!zpZoneIsPropSelectable(zoneId))
+	{
+		err = "read-only";
+		return false;
+	}
+	CNodeImpl *node = pz->Node;
+	if (which == "rotate")
+	{
+		const int r = value & 3;
+		if (!zpSetScriptAppDataStr(node, NEL3D_APPDATA_ZONE_ROTATE, NLMISC::toString("%d", r)))
+		{
+			err = "setScriptString rotate failed";
+			return false;
+		}
+	}
+	else if (which == "symmetry")
+	{
+		const int v = value ? ZP_BST_CHECKED : ZP_BST_UNCHECKED;
+		if (!zpSetScriptAppDataStr(node, NEL3D_APPDATA_ZONE_SYMMETRY, NLMISC::toString("%d", v)))
+		{
+			err = "setScriptString symmetry failed";
+			return false;
+		}
+	}
+	else if (which == "passable")
+	{
+		if (value)
+		{
+			if (!zpSetScriptAppDataStr(node, NEL3D_APPDATA_LIGO_PASSABLE, "1"))
+			{
+				err = "setScriptString passable failed";
+				return false;
+			}
+		}
+		else
+			zpEraseScriptAppData(node, NEL3D_APPDATA_LIGO_PASSABLE);
+	}
+	else if (which == "usebbox")
+	{
+		if (value)
+		{
+			if (!zpSetScriptAppDataStr(node, NEL3D_APPDATA_LIGO_USE_BOUNDINGBOX, "1"))
+			{
+				err = "setScriptString usebbox failed";
+				return false;
+			}
+		}
+		else
+			zpEraseScriptAppData(node, NEL3D_APPDATA_LIGO_USE_BOUNDINGBOX);
+		// Live footprint re-derive (primary zone only)
+		if (g_PaintCtx.Zones && !g_PaintCtx.Zones->empty()
+		    && (*g_PaintCtx.Zones)[0].ZoneId == zoneId)
+		{
+			derivePrimaryFootprint(*g_PaintCtx.Zones, 0, g_PaintCtx.Zones->size(),
+			                       g_SessionCellSize > 0.f ? g_SessionCellSize : 160.f,
+			                       g_SessionSnap > 0.f ? g_SessionSnap : 1.f);
+		}
+	}
+	else
+	{
+		err = "unknown prop " + which;
+		return false;
+	}
+	g_PropStatusMsg = which + "=" + NLMISC::toString("%d", value);
+	return true;
+}
+
+// M18b Prop panel handlers (shared with future paint-script prop ops)
+static void zpPropRotateDelta(int d)
+{
+	if (!g_HavePropSelection) return;
+	SZoneProps p;
+	const SPaintZone *pz = zpFindPaintZone(g_SelectedZoneId);
+	if (!pz) return;
+	zpReadZoneProps(pz->Node, p);
+	const int next = (p.Rotate + d) & 3;
+	std::string err;
+	if (!zpWriteZoneProp(g_SelectedZoneId, "rotate", next, err))
+		g_PropStatusMsg = err;
+}
+
+static void zpPropToggleSymmetry()
+{
+	if (!g_HavePropSelection) return;
+	const SPaintZone *pz = zpFindPaintZone(g_SelectedZoneId);
+	if (!pz) return;
+	SZoneProps p;
+	zpReadZoneProps(pz->Node, p);
+	std::string err;
+	if (!zpWriteZoneProp(g_SelectedZoneId, "symmetry", p.Symmetry ? 0 : 1, err))
+		g_PropStatusMsg = err;
+}
+
+static void zpPropTogglePassable()
+{
+	if (!g_HavePropSelection) return;
+	const SPaintZone *pz = zpFindPaintZone(g_SelectedZoneId);
+	if (!pz) return;
+	SZoneProps p;
+	zpReadZoneProps(pz->Node, p);
+	std::string err;
+	if (!zpWriteZoneProp(g_SelectedZoneId, "passable", p.Passable ? 0 : 1, err))
+		g_PropStatusMsg = err;
+}
+
+static void zpPropToggleUseBBox()
+{
+	if (!g_HavePropSelection) return;
+	const SPaintZone *pz = zpFindPaintZone(g_SelectedZoneId);
+	if (!pz) return;
+	SZoneProps p;
+	zpReadZoneProps(pz->Node, p);
+	std::string err;
+	if (!zpWriteZoneProp(g_SelectedZoneId, "usebbox", p.UseBoundingBox ? 0 : 1, err))
+		g_PropStatusMsg = err;
+}
+
+/** Basename of the editable file owning a zone id (panel readout). */
+static std::string zpZoneFileBasename(uint zoneId)
+{
+	for (size_t i = 0; i < g_EditableFiles.size(); ++i)
+	{
+		const SEditableFileInfo &efi = g_EditableFiles[i];
+		for (size_t z = 0; z < efi.ZoneIds.size(); ++z)
+			if (efi.ZoneIds[z] == zoneId)
+				return efi.Basename;
+	}
+	if (!g_StartupZone.Basename.empty())
+		return g_StartupZone.Basename;
+	return NLMISC::CFile::getFilenameWithoutExtension(g_InputPath);
+}
+
+/** Headless dump of the four export props per zone node (M18b verification hook). */
+static int dumpZoneProps(const std::string &path)
+{
+	NL3D::registerSerial3d();
+	PMAXLOAD::SLoadedMax lm;
+	if (!PMAXLOAD::loadMaxFile(path, lm) || !lm.Scene)
+	{
+		fprintf(stderr, "ERROR: dump-zone-props cannot load %s\n", path.c_str());
+		return 1;
+	}
+	std::vector<SZoneNode> nodes;
+	collectZoneNodes(*lm.Scene, nodes);
+	const std::string basen = NLMISC::CFile::getFilenameWithoutExtension(path);
+	std::vector<bool> eligible;
+	computeZoneEligibility(nodes, basen, eligible);
+	printf("zone-props dump '%s': %u node(s)\n", basen.c_str(), (uint)nodes.size());
+	for (size_t i = 0; i < nodes.size(); ++i)
+	{
+		const std::string name = ucstring(nodes[i].Node->userName()).toUtf8();
+		SZoneProps p;
+		zpReadZoneProps(nodes[i].Node, p);
+		const bool elig = i < eligible.size() && eligible[i];
+		printf("  zone '%s' frozen=%d eligible=%d  rotate=%d%s  symmetry=%d%s  passable=%d%s  usebbox=%d%s\n",
+		       name.c_str(), (int)nodes[i].Frozen, (int)elig,
+		       p.Rotate, p.HasRotate ? "" : "(default)",
+		       (int)p.Symmetry, p.HasSymmetry ? "" : "(default)",
+		       (int)p.Passable, p.HasPassable ? "" : "(absent)",
+		       (int)p.UseBoundingBox, p.HasUseBB ? "" : "(default)");
+	}
+	return 0;
 }
 
 static void zpRebuildTilesetPalette(); // fwd: tileset pick may refresh displace previews
@@ -5319,6 +5605,68 @@ static void zpFillBridgeState(ZPUI::SPaintUIBridge &bridge)
 		strncpy(bridge.BrushMaskLabel, lab.c_str(), sizeof(bridge.BrushMaskLabel) - 1);
 		bridge.BrushMaskLabel[sizeof(bridge.BrushMaskLabel) - 1] = 0;
 	}
+	// M18b Prop panel
+	bridge.PropHaveSelection = g_HavePropSelection;
+	bridge.PropZoneId = g_SelectedZoneId;
+	bridge.PropZoneName[0] = 0;
+	bridge.PropFileBasename[0] = 0;
+	bridge.PropFootprint[0] = 0;
+	bridge.PropStatus[0] = 0;
+	bridge.PropFootprintFilled = true;
+	bridge.PropEditable = false;
+	bridge.PropDirty = false;
+	bridge.PropRotate = 0;
+	bridge.PropSymmetry = false;
+	bridge.PropPassable = false;
+	bridge.PropUseBBox = false;
+	if (g_HavePropSelection)
+	{
+		const SPaintZone *pz = zpFindPaintZone(g_SelectedZoneId);
+		if (pz)
+		{
+			strncpy(bridge.PropZoneName, pz->Name.c_str(), sizeof(bridge.PropZoneName) - 1);
+			bridge.PropZoneName[sizeof(bridge.PropZoneName) - 1] = 0;
+			const std::string basen = zpZoneFileBasename(g_SelectedZoneId);
+			strncpy(bridge.PropFileBasename, basen.c_str(), sizeof(bridge.PropFileBasename) - 1);
+			bridge.PropFileBasename[sizeof(bridge.PropFileBasename) - 1] = 0;
+			bridge.PropEditable = zpZoneIsPropSelectable(g_SelectedZoneId);
+			bridge.PropDirty = g_PaintCtx.Core->isZoneDirty(g_SelectedZoneId);
+			SZoneProps props;
+			zpReadZoneProps(pz->Node, props);
+			bridge.PropRotate = props.Rotate;
+			bridge.PropSymmetry = props.Symmetry;
+			bridge.PropPassable = props.Passable;
+			bridge.PropUseBBox = props.UseBoundingBox;
+			// Footprint: primary uses g_Footprint*; others re-derive on the fly for display
+			int cw = g_FootprintCellsW, ch = g_FootprintCellsH;
+			bool fromT = g_FootprintFromTemplate;
+			bool filled = !maskHasHole(g_FootprintMask);
+			if (pz->ZoneId != 0 || g_FootprintMask.empty())
+			{
+				std::vector<bool> mask;
+				float ox = 0.f, oy = 0.f;
+				std::string e;
+				bool ft = false;
+				int w = 1, h = 1;
+				if (deriveZoneFootprintMask(*pz, g_SessionCellSize > 0.f ? g_SessionCellSize : 160.f,
+				                            g_SessionSnap > 0.f ? g_SessionSnap : 1.f,
+				                            mask, w, h, ox, oy, ft, e))
+				{
+					cw = w; ch = h; fromT = ft;
+					filled = !maskHasHole(mask);
+				}
+			}
+			snprintf(bridge.PropFootprint, sizeof(bridge.PropFootprint),
+			         "%dx%d (source=%s)%s", cw, ch, fromT ? "template" : "aabb",
+			         filled ? "" : " hole");
+			bridge.PropFootprintFilled = filled;
+		}
+	}
+	if (!g_PropStatusMsg.empty())
+	{
+		strncpy(bridge.PropStatus, g_PropStatusMsg.c_str(), sizeof(bridge.PropStatus) - 1);
+		bridge.PropStatus[sizeof(bridge.PropStatus) - 1] = 0;
+	}
 }
 
 // Shared viewer host: when externalDriver is non-NULL, runViewer uses it and does not
@@ -5523,6 +5871,10 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 		paintBridge.togglePalette = zpTogglePalette;
 		paintBridge.toggleBoard = zpToggleBoard;
 		paintBridge.setBrushColor = zpSetBrushColor;
+		paintBridge.propRotateDelta = zpPropRotateDelta;
+		paintBridge.propToggleSymmetry = zpPropToggleSymmetry;
+		paintBridge.propTogglePassable = zpPropTogglePassable;
+		paintBridge.propToggleUseBBox = zpPropToggleUseBBox;
 		ZPUI::setPaintUIBridge(&paintBridge);
 
 		// M11a/M12c session board bridge (continent working set / ecosystem scratch)
@@ -6458,6 +6810,9 @@ int main(int argc, char **argv)
 	args.addArg("", "dump-neighbor-hints", "file.max",
 	            "Headless: print the painter neighbor-hints appdata (and embedded fallback) for "
 	            "the eligible node of file.max; exit. Does not open the viewer.");
+	args.addArg("", "dump-zone-props", "file.max",
+	            "Headless: print Ligo Rotate / Symmetry / Passable / Use Bounding Box appdata "
+	            "for every zone node in file.max; exit (M18b verification hook).");
 	args.addArg("", "season", "sp|su|au|wi",
 	            "Initial landscape season texture preference (spring/summer/autumn/winter). "
 	            "Default: auto (first available postfix, historically spring). Only seasons that "
@@ -6575,6 +6930,12 @@ args.addArg("", "instances", "NxM",
 		for (size_t i = 0; i < hints.size(); ++i)
 			printf("  %d,%d:%s\n", hints[i].Dx, hints[i].Dy, hints[i].Basename.c_str());
 		return 0;
+	}
+
+	// Headless: dump zone export props (M18b)
+	if (args.haveLongArg("dump-zone-props"))
+	{
+		return dumpZoneProps(args.getLongArg("dump-zone-props")[0]);
 	}
 
 	// Season preference (M6a) before bank load so the first resolveBankTextures uses it
@@ -7402,6 +7763,11 @@ args.addArg("", "instances", "NxM",
 			if (f.open(path) && !blob.empty()) f.serialBuffer(nlVectorData(blob), (uint)blob.size());
 		}
 	}
+
+	// Expose zones + core to prop helpers for headless --paint-script prop ops (M18b).
+	// runViewer overwrites Active/Paint; headless keeps Core+Zones only.
+	g_PaintCtx.Core = &core;
+	g_PaintCtx.Zones = &zones;
 
 	int rc = 0;
 	if (viewerMode)

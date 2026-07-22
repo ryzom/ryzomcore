@@ -459,6 +459,36 @@
 					onclick_l="zp_brush" params_l="+1" hardtext="+" />
 			</group>
 
+			<!-- Prop section (ModeProp only, M18b): read-only info + export toggles -->
+			<group id="sec_prop" w="200" h="200" child_resize_h="false" active="false">
+				<view type="text" id="prop_name" posref="TL TL" x="0" y="-2" fontsize="11" shadow="true"
+					global_color="false" color="255 220 140 255" hardtext="(no selection)" />
+				<view type="text" id="prop_file" posparent="prop_name" posref="BL TL" x="0" y="-1" fontsize="9" shadow="true"
+					global_color="false" color="180 190 200 220" hardtext="" />
+				<view type="text" id="prop_fp" posparent="prop_file" posref="BL TL" x="0" y="-1" fontsize="9" shadow="true"
+					global_color="false" color="180 220 255 220" hardtext="" />
+				<view type="text" id="prop_meta" posparent="prop_fp" posref="BL TL" x="0" y="-1" fontsize="9" shadow="true"
+					global_color="false" color="200 200 210 200" hardtext="" />
+				<!-- Ligo Rotate 0-3 -->
+				<view type="text" id="lbl_rot" posparent="prop_meta" posref="BL TL" x="0" y="-6" fontsize="10" shadow="true"
+					global_color="false" color="255 255 255 180" hardtext="Ligo Rotate" />
+				<view type="text" id="prop_rot" posparent="lbl_rot" posref="MR ML" x="6" y="0" fontsize="11" shadow="true"
+					global_color="false" color="180 220 255 255" hardtext="0" />
+				<ctrl style="text_button_16" id="rot_down" posparent="lbl_rot" posref="BL TL" x="0" y="-2"
+					onclick_l="zp_prop_rotate" params_l="-1" hardtext="-" />
+				<ctrl style="text_button_16" id="rot_up" posparent="rot_down" posref="MR ML" x="4" y="0"
+					onclick_l="zp_prop_rotate" params_l="+1" hardtext="+" />
+				<!-- Toggles -->
+				<ctrl style="text_button_toggle" id="prop_sym" posparent="rot_down" posref="BL TL" x="0" y="-6"
+					onclick_l="zp_prop_symmetry" params_l="" hardtext="Ligo Symmetry" />
+				<ctrl style="text_button_toggle" id="prop_pass" posparent="prop_sym" posref="BL TL" x="0" y="-4"
+					onclick_l="zp_prop_passable" params_l="" hardtext="Passable" />
+				<ctrl style="text_button_toggle" id="prop_bbox" posparent="prop_pass" posref="BL TL" x="0" y="-4"
+					onclick_l="zp_prop_usebbox" params_l="" hardtext="Use Bounding Box" />
+				<view type="text" id="prop_status" posparent="prop_bbox" posref="BL TL" x="0" y="-4" fontsize="9" shadow="true"
+					global_color="false" color="255 200 120 220" hardtext="" />
+			</group>
+
 			<!-- Footer slim (M14c): lock + fill + hint (undo/save/board/mode live on toolbar) -->
 			<group id="sec_footer" w="200" h="72" child_resize_h="false">
 				<ctrl style="text_button_toggle" id="lock_borders" posref="TL TL" x="0" y="-2"

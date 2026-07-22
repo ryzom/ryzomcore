@@ -406,12 +406,19 @@ public:
 
 	// Dirty detection (ui M6b multi-file save): compare re-encoded pristine to OriginalBytes.
 	// Zone id is the landscape/session id (SPaintZoneInput::ZoneId). Frozen zones are never dirty.
+	// M18b: also ORs export-prop appdata drift (ROTATE/SYMMETRY/PASSABLE/USE_BOUNDINGBOX)
+	// against a per-zone snapshot taken at init and refreshed by markZonesSaved — appdata
+	// lives outside the carriers, so blob compare alone cannot see prop edits.
 	bool isZoneDirty(uint zoneId) const;
 	/** True when any unfrozen carrier of the listed zone ids differs from its load-time blob. */
 	bool anyZoneDirty(const std::vector<uint> &zoneIds) const;
 	/** After a successful per-file save: refresh OriginalBytes from the current pristine encode
-	 *	so subsequent dirty checks go false (write-target policy unchanged). */
+	 *	so subsequent dirty checks go false (write-target policy unchanged). Also re-snaps
+	 *	export-prop appdata (M18b). */
 	void markZonesSaved(const std::vector<uint> &zoneIds);
+	/** Re-snapshot export props for one zone after a live write (M18b footprint re-derive
+	 *	callers that already committed the value; optional — dirty also re-reads live). */
+	void snapZoneProps(uint zoneId);
 
 	/**
 	 * Working-set rebuild helpers (ui M11a session hub).
@@ -457,12 +464,22 @@ private:
 		SCarrier() : Rpo(NULL), SnapLeaf(NULL), Pristine(NULL), AnyUnfrozen(false) { }
 	};
 
+	// M18b: snapshot of the four Max-export props (script AppData, string payloads).
+	// Present=false means the entry is absent (passable delete-style; usebbox default 0).
+	struct SPropSnap
+	{
+		bool HasRotate, HasSymmetry, HasPassable, HasUseBB;
+		std::string Rotate, Symmetry, Passable, UseBB;
+		SPropSnap() : HasRotate(false), HasSymmetry(false), HasPassable(false), HasUseBB(false) { }
+	};
+
 	struct SZone
 	{
 		SPaintZoneInput In;
 		uint Carrier; // index into m_Carriers
 		NL3D::CZoneSymmetrisation Sym;
 		std::vector<SPaintTile> Meta; // numPatches * ZP_NUM_TILE_SEL
+		SPropSnap PropSnap; // M18b export-prop baseline for dirty
 	};
 
 	std::vector<SZone> m_Zones;
@@ -561,6 +578,9 @@ private:
 	void stitchEdge(uint zi, uint p, uint e, uint zj, uint pp, uint ee, int dividEdge, int offsetEdge);
 	int getBindedEdge(uint zone, int nPatch, int nVertInPatch) const;
 	void applyUndoList(const std::vector<SUndoTile> &list, bool useOld);
+	// M18b prop snapshot helpers
+	static void readPropSnap(PIPELINE::MAX::BUILTIN::CNodeImpl *node, SPropSnap &out);
+	bool propsDirty(uint zoneIdx) const;
 };
 
 } /* namespace ZPPAINT */

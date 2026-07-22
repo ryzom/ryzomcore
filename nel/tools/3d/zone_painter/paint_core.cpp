@@ -60,8 +60,11 @@
 #include "../pipeline_max/storage_value.h"
 #include "../pipeline_max/builtin/node_impl.h"
 #include "../pipeline_max/builtin/derived_object.h"
+#include "../pipeline_max/builtin/storage/app_data.h"
 #include "../pipeline_max/nelpatch/nelpatch.h"
 #include "../pipeline_max/nelpatch/rkl_patch_object.h"
+#include "../pipeline_max_export_common/appdata_util.h"
+#include "../pipeline_max_export_common/export_ids.h"
 
 using namespace PIPELINE::MAX;
 using namespace PIPELINE::MAX::BUILTIN;
@@ -381,7 +384,73 @@ bool CPaintCore::init(const std::vector<SPaintZoneInput> &zones, NL3D::CTileBank
 	}
 
 	buildMeta(err);
+	// M18b: snapshot export props so dirty tracks appdata edits outside the carriers.
+	for (size_t i = 0; i < m_Zones.size(); ++i)
+		readPropSnap(m_Zones[i].In.Node, m_Zones[i].PropSnap);
 	return true;
+}
+
+// ---------------------------------------------------------------------------------------------
+// M18b: export-prop appdata snapshot / dirty
+
+void CPaintCore::readPropSnap(CNodeImpl *node, SPropSnap &out)
+{
+	out = SPropSnap();
+	if (!node)
+		return;
+	std::string s;
+	if (APPDATA::getScriptAppData(node, NEL3D_APPDATA_ZONE_ROTATE, s))
+	{
+		out.HasRotate = true;
+		out.Rotate = s;
+	}
+	if (APPDATA::getScriptAppData(node, NEL3D_APPDATA_ZONE_SYMMETRY, s))
+	{
+		out.HasSymmetry = true;
+		out.Symmetry = s;
+	}
+	if (APPDATA::getScriptAppData(node, NEL3D_APPDATA_LIGO_PASSABLE, s))
+	{
+		out.HasPassable = true;
+		out.Passable = s;
+	}
+	if (APPDATA::getScriptAppData(node, NEL3D_APPDATA_LIGO_USE_BOUNDINGBOX, s))
+	{
+		out.HasUseBB = true;
+		out.UseBB = s;
+	}
+}
+
+bool CPaintCore::propsDirty(uint zoneIdx) const
+{
+	if (zoneIdx >= m_Zones.size())
+		return false;
+	const SZone &z = m_Zones[zoneIdx];
+	if (z.In.Frozen)
+		return false;
+	SPropSnap cur;
+	readPropSnap(z.In.Node, cur);
+	const SPropSnap &s = z.PropSnap;
+	if (cur.HasRotate != s.HasRotate || (cur.HasRotate && cur.Rotate != s.Rotate))
+		return true;
+	if (cur.HasSymmetry != s.HasSymmetry || (cur.HasSymmetry && cur.Symmetry != s.Symmetry))
+		return true;
+	if (cur.HasPassable != s.HasPassable || (cur.HasPassable && cur.Passable != s.Passable))
+		return true;
+	if (cur.HasUseBB != s.HasUseBB || (cur.HasUseBB && cur.UseBB != s.UseBB))
+		return true;
+	return false;
+}
+
+void CPaintCore::snapZoneProps(uint zoneId)
+{
+	for (size_t i = 0; i < m_Zones.size(); ++i)
+	{
+		if (m_Zones[i].In.ZoneId != zoneId)
+			continue;
+		readPropSnap(m_Zones[i].In.Node, m_Zones[i].PropSnap);
+		return;
+	}
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -3106,6 +3175,8 @@ bool CPaintCore::isZoneDirty(uint zoneId) const
 	{
 		if (m_Zones[i].In.ZoneId != zoneId)
 			continue;
+		if (propsDirty((uint)i))
+			return true;
 		const SCarrier &car = m_Carriers[m_Zones[i].Carrier];
 		if (!car.AnyUnfrozen)
 			return false;
@@ -3123,6 +3194,7 @@ bool CPaintCore::anyZoneDirty(const std::vector<uint> &zoneIds) const
 {
 	// Dedup by carrier so multi-instance zones of one file count once
 	std::set<uint> carriers;
+	std::set<uint> zoneIdxs;
 	for (size_t z = 0; z < zoneIds.size(); ++z)
 	{
 		for (size_t i = 0; i < m_Zones.size(); ++i)
@@ -3130,8 +3202,15 @@ bool CPaintCore::anyZoneDirty(const std::vector<uint> &zoneIds) const
 			if (m_Zones[i].In.ZoneId != zoneIds[z])
 				continue;
 			carriers.insert(m_Zones[i].Carrier);
+			zoneIdxs.insert((uint)i);
 			break;
 		}
+	}
+	// M18b: prop appdata outside carriers
+	for (std::set<uint>::const_iterator it = zoneIdxs.begin(); it != zoneIdxs.end(); ++it)
+	{
+		if (propsDirty(*it))
+			return true;
 	}
 	for (std::set<uint>::const_iterator it = carriers.begin(); it != carriers.end(); ++it)
 	{
@@ -3159,6 +3238,8 @@ void CPaintCore::markZonesSaved(const std::vector<uint> &zoneIds)
 			if (m_Zones[i].In.ZoneId != zoneIds[z])
 				continue;
 			carriers.insert(m_Zones[i].Carrier);
+			// M18b: re-baseline export props with the saved file
+			readPropSnap(m_Zones[i].In.Node, m_Zones[i].PropSnap);
 			break;
 		}
 	}

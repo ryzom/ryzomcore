@@ -197,6 +197,54 @@ public:
 };
 REGISTER_ACTION_HANDLER(CAHZpMode, "zp_mode");
 
+// M18b Prop panel handlers
+class CAHZpPropRotate : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params)
+	{
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (!b || !b->propRotateDelta) return;
+		int d = 0;
+		fromString(params, d);
+		b->propRotateDelta(d);
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPropRotate, "zp_prop_rotate");
+
+class CAHZpPropSymmetry : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->propToggleSymmetry) b->propToggleSymmetry();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPropSymmetry, "zp_prop_symmetry");
+
+class CAHZpPropPassable : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->propTogglePassable) b->propTogglePassable();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPropPassable, "zp_prop_passable");
+
+class CAHZpPropUseBBox : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->propToggleUseBBox) b->propToggleUseBBox();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPropUseBBox, "zp_prop_usebbox");
+
 class CAHZpTileSet : public IActionHandler
 {
 public:
@@ -1557,6 +1605,7 @@ void CEditorUI::syncPanelFromBridge()
 	static const char *kSecTile = "ui:zp:painter:content:body:sec_tile";
 	static const char *kSecColor = "ui:zp:painter:content:body:sec_color";
 	static const char *kSecDisp = "ui:zp:painter:content:body:sec_disp";
+	static const char *kSecProp = "ui:zp:painter:content:body:sec_prop";
 	static const char *kSecFooter = "ui:zp:painter:content:body:sec_footer";
 	static const char *kBody = "ui:zp:painter:content:body";
 	static const char *kPainterWin = "ui:zp:painter";
@@ -1583,7 +1632,7 @@ void CEditorUI::syncPanelFromBridge()
 	// ---- M10d/M18a: show only the section for the current paint mode ----
 	// Keys, radios, and terrain-pick side effects all funnel Mode through the bridge,
 	// so this runs for every path. Keyboard shortcuts keep working when widgets hide.
-	// ModeProp (3): no tile/color/disp section yet in M18a (M18b adds sec_prop).
+	// ModeProp (3): sec_prop (M18b).
 	const bool tileActive = (b->Mode == 0);
 	const bool colorActive = (b->Mode == 1);
 	const bool displaceActive = (b->Mode == 2);
@@ -1594,16 +1643,18 @@ void CEditorUI::syncPanelFromBridge()
 		g->setActive(colorActive);
 	if (CInterfaceGroup *g = findGroupEl(kSecDisp))
 		g->setActive(displaceActive);
+	if (CInterfaceGroup *g = findGroupEl(kSecProp))
+		g->setActive(propActive);
 	// Footer always on (list reflows when mode sections toggle).
 	if (CInterfaceGroup *g = findGroupEl(kSecFooter))
 		g->setActive(true);
 	// Force list reflow + resize the painter container to the active content height.
-	// M14c slim: header ~40 (instance+files+Tiles); sec tile 118 / color 148 / disp 80;
-	// prop (M18a placeholder) 0; footer 72; list space 4; chrome ~28.
+	// M14c slim: header ~40; sec tile 118 / color 148 / disp 80 / prop 200;
+	// footer 72; list space 4; chrome ~28.
 	if (CInterfaceGroup *body = findGroupEl(kBody))
 		body->invalidateCoords();
 	{
-		const sint32 secH = tileActive ? 118 : (colorActive ? 148 : (displaceActive ? 80 : (propActive ? 40 : 80)));
+		const sint32 secH = tileActive ? 118 : (colorActive ? 148 : (displaceActive ? 80 : (propActive ? 200 : 80)));
 		const sint32 wantH = 40 + secH + 4 + 72 + 28;
 		if (CInterfaceGroup *win = findGroupEl(kPainterWin))
 		{
@@ -1757,6 +1808,56 @@ void CEditorUI::syncPanelFromBridge()
 		char buf[32];
 		snprintf(buf, sizeof(buf), "%u", b->DisplaceIndex);
 		t->setHardText(buf);
+	}
+
+	// Prop section (M18b)
+	if (propActive)
+	{
+		if (CViewText *t = findText((std::string(kSecProp) + ":prop_name").c_str()))
+			t->setHardText(b->PropHaveSelection
+			                   ? (b->PropZoneName[0] ? b->PropZoneName : "(unnamed)")
+			                   : "(no selection)");
+		if (CViewText *t = findText((std::string(kSecProp) + ":prop_file").c_str()))
+			t->setHardText(b->PropHaveSelection ? b->PropFileBasename : "");
+		if (CViewText *t = findText((std::string(kSecProp) + ":prop_fp").c_str()))
+			t->setHardText(b->PropHaveSelection ? b->PropFootprint : "");
+		if (CViewText *t = findText((std::string(kSecProp) + ":prop_meta").c_str()))
+		{
+			char buf[96];
+			if (!b->PropHaveSelection)
+				buf[0] = 0;
+			else
+				snprintf(buf, sizeof(buf), "%s%s",
+				         b->PropEditable ? "editable" : "read-only",
+				         b->PropDirty ? "  dirty" : "");
+			t->setHardText(buf);
+		}
+		if (CViewText *t = findText((std::string(kSecProp) + ":prop_rot").c_str()))
+		{
+			char buf[16];
+			snprintf(buf, sizeof(buf), "%d", b->PropRotate);
+			t->setHardText(buf);
+		}
+		if (CCtrlBaseButton *btn = findButton((std::string(kSecProp) + ":prop_sym").c_str()))
+			btn->setPushed(b->PropSymmetry);
+		if (CCtrlBaseButton *btn = findButton((std::string(kSecProp) + ":prop_pass").c_str()))
+			btn->setPushed(b->PropPassable);
+		if (CCtrlBaseButton *btn = findButton((std::string(kSecProp) + ":prop_bbox").c_str()))
+			btn->setPushed(b->PropUseBBox);
+		if (CViewText *t = findText((std::string(kSecProp) + ":prop_status").c_str()))
+			t->setHardText(b->PropStatus);
+		// Freeze steppers when no selection
+		const bool fr = !b->PropHaveSelection || !b->PropEditable;
+		if (CCtrlBaseButton *btn = findButton((std::string(kSecProp) + ":rot_down").c_str()))
+			btn->setFrozen(fr);
+		if (CCtrlBaseButton *btn = findButton((std::string(kSecProp) + ":rot_up").c_str()))
+			btn->setFrozen(fr);
+		if (CCtrlBaseButton *btn = findButton((std::string(kSecProp) + ":prop_sym").c_str()))
+			btn->setFrozen(fr);
+		if (CCtrlBaseButton *btn = findButton((std::string(kSecProp) + ":prop_pass").c_str()))
+			btn->setFrozen(fr);
+		if (CCtrlBaseButton *btn = findButton((std::string(kSecProp) + ":prop_bbox").c_str()))
+			btn->setFrozen(fr);
 	}
 
 	// Tiles palette selection highlight (ui M8) — stays in sync with keys/panel/pick
