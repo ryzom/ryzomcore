@@ -189,6 +189,17 @@ struct SSessionBoardBridge
 	int (*scratchOpenFileCount)();
 	/** Instance source basename at cell (empty = home instance). */
 	bool (*scratchGetInstanceSource)(int cx, int cy, std::string &basename);
+	// M24c hint offers: the saved working set's per-cell suggestions surface in the board
+	// menus (empty cell: one-click open of the remembered neighbor) and sort the picker.
+	/** Saved-neighbor hint naming board cell (cx,cy), if any. */
+	bool (*scratchGetHintAt)(int cx, int cy, std::string &basename);
+	/** All hinted basenames for this session (picker priority). */
+	void (*scratchHintNames)(std::vector<std::string> &out);
+	// M24c: context brick transform (rotate/mirror about its footprint-block center;
+	// same convention as instances; persists in the neighbor hints)
+	bool (*scratchRotateContext)(int cx, int cy, int delta, std::string &err);
+	bool (*scratchMirrorContext)(int cx, int cy, std::string &err);
+	bool (*scratchGetContextTransform)(int cx, int cy, uint &rot, bool &mirror);
 	/** Home brick display name. */
 	std::string ScratchHomeName;
 	/** Primary footprint size in fine cells (M14a multi-cell occupancy). */
@@ -209,6 +220,8 @@ struct SSessionBoardBridge
 		  scratchPlaceContext(NULL), scratchRemoveContext(NULL), scratchGetContext(NULL),
 		  scratchOpenEditable(NULL), scratchGetEditableAt(NULL), scratchContextToEditable(NULL),
 		  scratchPlaceInstanceOf(NULL), scratchOpenFileCount(NULL), scratchGetInstanceSource(NULL),
+		  scratchGetHintAt(NULL), scratchHintNames(NULL),
+		  scratchRotateContext(NULL), scratchMirrorContext(NULL), scratchGetContextTransform(NULL),
 		  FootprintCellsW(1), FootprintCellsH(1), FootprintMask(NULL)
 	{
 	}

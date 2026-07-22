@@ -736,6 +736,26 @@ static void applySessionCellState(CInterfaceGroup *cell, const std::string &base
 					s_SessionBridge->scratchGetContext(cx, cy, lab);
 				}
 			}
+			// M24c: transform glyphs (same R90/M vocabulary as instances)
+			{
+				char csk = 0;
+				int ccx = 0, ccy = 0;
+				uint crot = 0;
+				bool cmir = false;
+				std::string rest = basename.size() > 2 ? basename.substr(2) : std::string();
+				std::string::size_type comma = rest.find(',');
+				std::string::size_type colon = rest.find(':', comma == std::string::npos ? 0 : comma);
+				if (comma != std::string::npos && colon != std::string::npos
+				    && NLMISC::fromString(rest.substr(0, comma), ccx)
+				    && NLMISC::fromString(rest.substr(comma + 1, colon - comma - 1), ccy)
+				    && s_SessionBridge && s_SessionBridge->scratchGetContextTransform
+				    && s_SessionBridge->scratchGetContextTransform(ccx, ccy, crot, cmir))
+				{
+					if (crot) lab += NLMISC::toString(" R%u", crot * 90);
+					if (cmir) lab += " M";
+				}
+				(void)csk;
+			}
 			setBoardCellLabel(t, lab.empty() ? std::string("ctx") : lab);
 		}
 		else if (st == CellDirtyEditable)
@@ -2512,6 +2532,29 @@ static void openEmptyCellPopup(const std::string &basename)
 		t->setHardText("Empty cell");
 	if (CViewText *t = findText("ui:zp:empty_cell_action:content:status"))
 		t->setHardText(basename);
+	// M24c: saved-neighbor hint for this cell → one-click open offers at the top
+	std::string hintName;
+	bool haveHint = false;
+	{
+		char sk = 0;
+		int cx = 0, cy = 0;
+		if (parseScratchBasename(basename, sk, cx, cy) && sk == 'E'
+		    && s_SessionBridge && s_SessionBridge->scratchGetHintAt)
+			haveHint = s_SessionBridge->scratchGetHintAt(cx, cy, hintName);
+	}
+	if (CCtrlTextButton *b = dynamic_cast<CCtrlTextButton *>(CWidgetManager::getInstance()
+	        ->getElementFromId("ui:zp:empty_cell_action:content:btn_hint_ro")))
+	{
+		b->setActive(haveHint);
+		if (haveHint) b->setHardText("Open '" + stripLigoFamilyPrefix(hintName) + "' (read-only)");
+	}
+	if (CCtrlTextButton *b = dynamic_cast<CCtrlTextButton *>(CWidgetManager::getInstance()
+	        ->getElementFromId("ui:zp:empty_cell_action:content:btn_hint_ed")))
+	{
+		b->setActive(haveHint);
+		if (haveHint) b->setHardText("Open '" + stripLigoFamilyPrefix(hintName) + "' editable");
+	}
+	s_Sess.StatusMsg = haveHint ? ("hint:" + hintName) : std::string();
 	CWidgetManager::getInstance()->enableModalWindow(NULL, "ui:zp:empty_cell_action");
 }
 
@@ -2581,7 +2624,29 @@ static void openContextBrickPicker(int cx, int cy, int mode)
 		}
 	}
 	else
+	{
 		ZPWS::listZones(*s_SessionBridge->World, zones);
+		// M24c: session-hinted bricks sort to the top (stable within both groups)
+		if (s_SessionBridge->scratchHintNames)
+		{
+			std::vector<std::string> hinted;
+			s_SessionBridge->scratchHintNames(hinted);
+			if (!hinted.empty())
+			{
+				std::vector<ZPWS::SZoneEntry> pri, rest;
+				for (size_t i = 0; i < zones.size(); ++i)
+				{
+					bool isHinted = false;
+					for (size_t h = 0; h < hinted.size() && !isHinted; ++h)
+						isHinted = NLMISC::toLowerAscii(hinted[h])
+						           == NLMISC::toLowerAscii(zones[i].Basename);
+					(isHinted ? pri : rest).push_back(zones[i]);
+				}
+				zones = pri;
+				zones.insert(zones.end(), rest.begin(), rest.end());
+			}
+		}
+	}
 	sint32 y = 0;
 	for (size_t i = 0; i < zones.size(); ++i)
 	{
@@ -2678,6 +2743,54 @@ public:
 };
 REGISTER_ACTION_HANDLER(CAHZpEmptyOpenEditable, "zp_empty_open_editable");
 
+// M24c: one-click open of the cell's saved-neighbor hint (read-only / editable)
+static void zpEmptyOpenHint(bool editable)
+{
+	CWidgetManager::getInstance()->disableModalWindow();
+	char sk = 0;
+	int cx = 0, cy = 0;
+	if (!parseScratchBasename(s_Sess.PendingActionBasename, sk, cx, cy) || sk != 'E')
+		return;
+	if (s_Sess.StatusMsg.size() <= 5 || s_Sess.StatusMsg.compare(0, 5, "hint:") != 0)
+		return;
+	const std::string name = s_Sess.StatusMsg.substr(5);
+	s_Sess.StatusMsg.clear();
+	if (!s_SessionBridge) return;
+	std::string err;
+	bool ok = false;
+	if (editable && s_SessionBridge->scratchOpenEditable)
+		ok = s_SessionBridge->scratchOpenEditable(cx, cy, name, err);
+	else if (!editable && s_SessionBridge->scratchPlaceContext)
+		ok = s_SessionBridge->scratchPlaceContext(cx, cy, name, err);
+	if (!ok)
+		fprintf(stderr, "hint open (%d,%d:%s): %s\n", cx, cy, name.c_str(), err.c_str());
+	if (s_SessionBridge->World && s_SessionBridge->World->Kind == ZPWS::Ecosystem)
+		populateScratchBoard();
+	refreshSessionBoardStates();
+}
+
+class CAHZpEmptyHintRo : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		zpEmptyOpenHint(false);
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpEmptyHintRo, "zp_empty_hint_ro");
+
+class CAHZpEmptyHintEd : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		zpEmptyOpenHint(true);
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpEmptyHintEd, "zp_empty_hint_ed");
+
 class CAHZpEmptyCancel : public IActionHandler
 {
 public:
@@ -2752,6 +2865,70 @@ public:
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpContextMakeEditable, "zp_context_make_editable");
+
+// M24c: context brick rotate/mirror (same block-center rules as instances)
+static void zpContextTransformAction(int rotDelta, bool mirror)
+{
+	CWidgetManager::getInstance()->disableModalWindow();
+	const std::string &base = s_Sess.PendingActionBasename;
+	int cx = 0, cy = 0;
+	if (base.size() > 2 && base[0] == 'C' && base[1] == ':')
+	{
+		std::string rest = base.substr(2);
+		std::string::size_type comma = rest.find(',');
+		std::string::size_type colon = rest.find(':', comma == std::string::npos ? 0 : comma);
+		if (comma != std::string::npos && colon != std::string::npos)
+		{
+			NLMISC::fromString(rest.substr(0, comma), cx);
+			NLMISC::fromString(rest.substr(comma + 1, colon - comma - 1), cy);
+		}
+	}
+	if (!s_SessionBridge) return;
+	std::string err;
+	bool ok = false;
+	if (mirror && s_SessionBridge->scratchMirrorContext)
+		ok = s_SessionBridge->scratchMirrorContext(cx, cy, err);
+	else if (!mirror && s_SessionBridge->scratchRotateContext)
+		ok = s_SessionBridge->scratchRotateContext(cx, cy, rotDelta, err);
+	if (!ok)
+		fprintf(stderr, "context transform (%d,%d): %s\n", cx, cy, err.c_str());
+	if (s_SessionBridge->World && s_SessionBridge->World->Kind == ZPWS::Ecosystem)
+		populateScratchBoard();
+	refreshSessionBoardStates();
+}
+
+class CAHZpContextRotCW : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		zpContextTransformAction(+1, false);
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpContextRotCW, "zp_context_rot_cw");
+
+class CAHZpContextRotCCW : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		zpContextTransformAction(-1, false);
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpContextRotCCW, "zp_context_rot_ccw");
+
+class CAHZpContextMirror : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		zpContextTransformAction(0, true);
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpContextMirror, "zp_context_mirror");
 
 class CAHZpContextCancel : public IActionHandler
 {

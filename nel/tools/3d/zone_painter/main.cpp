@@ -259,10 +259,22 @@ struct SContextFile
 	std::string Basename;
 	int CellX, CellY;
 	bool TranslateGeom; // ecosystem: shift geometry to cell; continent natural coords: false
+	uint Rot;           // M24c: placement transform (eco context bricks)
+	bool Mirror;
 	PMAXLOAD::SLoadedMax *Lm;
-	SContextFile() : CellX(0), CellY(0), TranslateGeom(false), Lm(NULL) {}
+	SContextFile() : CellX(0), CellY(0), TranslateGeom(false), Rot(0), Mirror(false), Lm(NULL) {}
 };
 static std::vector<SContextFile> g_ContextFiles;
+// M24c: session hint cells (board space, primary-relative) — every hint named by any open
+// editable, whether currently loaded as context or not. Board menus offer these per cell.
+struct SSessionHintCell
+{
+	int CellX, CellY;
+	std::string Basename;
+	SSessionHintCell() : CellX(0), CellY(0) {}
+	SSessionHintCell(int x, int y, const std::string &b) : CellX(x), CellY(y), Basename(b) {}
+};
+static std::vector<SSessionHintCell> g_SessionHintCells;
 // Legacy name used throughout; points at scenes inside g_ContextFiles
 static std::vector<PMAXLOAD::SLoadedMax *> g_NeighborScenes;
 // Extra editable .max scenes beyond the primary stack `lm` (M6b multi-open)
@@ -972,8 +984,13 @@ struct SNeighborHint
 {
 	int Dx, Dy;
 	std::string Basename;
-	SNeighborHint() : Dx(0), Dy(0) {}
-	SNeighborHint(int dx, int dy, const std::string &b) : Dx(dx), Dy(dy), Basename(b) {}
+	// M24c: optional placement transform (context rot/mirror survives reopen). Encoded as
+	// "dx,dy,r,m:name" ONLY when non-default, so default payloads stay byte-identical v1.
+	uint Rot;
+	bool Mirror;
+	SNeighborHint() : Dx(0), Dy(0), Rot(0), Mirror(false) {}
+	SNeighborHint(int dx, int dy, const std::string &b)
+		: Dx(dx), Dy(dy), Basename(b), Rot(0), Mirror(false) {}
 };
 
 /** Parse appdata payload; returns false if absent/empty/unknown version. */
@@ -1010,16 +1027,35 @@ static bool parseNeighborHintsString(const std::string &raw, std::vector<SNeighb
 		std::string coords = parts[i].substr(0, colon);
 		std::string base = parts[i].substr(colon + 1);
 		if (base.empty()) continue;
-		std::string::size_type comma = coords.find(',');
-		if (comma == std::string::npos) continue;
+		std::vector<std::string> cf;
+		{
+			std::string cur;
+			for (std::string::size_type ci = 0; ci <= coords.size(); ++ci)
+			{
+				char c = ci < coords.size() ? coords[ci] : ',';
+				if (c == ',') { cf.push_back(cur); cur.clear(); }
+				else cur += c;
+			}
+		}
+		if (cf.size() < 2) continue;
 		int dx = 0, dy = 0;
-		if (!NLMISC::fromString(coords.substr(0, comma), dx)) continue;
-		if (!NLMISC::fromString(coords.substr(comma + 1), dy)) continue;
+		if (!NLMISC::fromString(cf[0], dx)) continue;
+		if (!NLMISC::fromString(cf[1], dy)) continue;
+		SNeighborHint nh(dx, dy, base);
+		// M24c optional ",r,m" (context transform)
+		if (cf.size() >= 3 && !cf[2].empty())
+		{
+			uint r = 0;
+			if (NLMISC::fromString(cf[2], r)) nh.Rot = r & 3;
+		}
+		if (cf.size() >= 4 && !cf[3].empty())
+			nh.Mirror = cf[3] == "1" || NLMISC::toLowerAscii(cf[3]) == "m";
 		// Strip accidental .max
 		std::string::size_type dot = base.rfind('.');
 		if (dot != std::string::npos && NLMISC::toLowerAscii(base.substr(dot)) == ".max")
 			base = base.substr(0, dot);
-		out.push_back(SNeighborHint(dx, dy, base));
+		nh.Basename = base;
+		out.push_back(nh);
 	}
 	return !out.empty();
 }
@@ -1028,7 +1064,10 @@ static bool neighborHintLess(const SNeighborHint &a, const SNeighborHint &b)
 {
 	if (a.Dy != b.Dy) return a.Dy < b.Dy;
 	if (a.Dx != b.Dx) return a.Dx < b.Dx;
-	return NLMISC::toLowerAscii(a.Basename) < NLMISC::toLowerAscii(b.Basename);
+	const std::string al = NLMISC::toLowerAscii(a.Basename), bl = NLMISC::toLowerAscii(b.Basename);
+	if (al != bl) return al < bl;
+	if (a.Rot != b.Rot) return a.Rot < b.Rot;
+	return (int)a.Mirror < (int)b.Mirror;
 }
 
 /** Deterministic encode: sort by (dy, dx, basename) then emit v1|... */
@@ -1047,7 +1086,14 @@ static std::string encodeNeighborHintsString(std::vector<SNeighborHint> hints)
 	}
 	std::string s = "v1";
 	for (size_t i = 0; i < uniq.size(); ++i)
-		s += NLMISC::toString("|%d,%d:%s", uniq[i].Dx, uniq[i].Dy, uniq[i].Basename.c_str());
+	{
+		if (uniq[i].Rot != 0 || uniq[i].Mirror)
+			s += NLMISC::toString("|%d,%d,%u,%d:%s", uniq[i].Dx, uniq[i].Dy,
+			                      uniq[i].Rot & 3, uniq[i].Mirror ? 1 : 0,
+			                      uniq[i].Basename.c_str());
+		else
+			s += NLMISC::toString("|%d,%d:%s", uniq[i].Dx, uniq[i].Dy, uniq[i].Basename.c_str());
+	}
 	return s;
 }
 
@@ -1160,7 +1206,10 @@ static void collectHintsFromLoadedContext(std::vector<SNeighborHint> &out)
 	{
 		const SContextFile &cf = g_ContextFiles[i];
 		if (cf.Basename.empty()) continue;
-		out.push_back(SNeighborHint(cf.CellX, cf.CellY, cf.Basename));
+		SNeighborHint nh(cf.CellX, cf.CellY, cf.Basename);
+		nh.Rot = cf.Rot;
+		nh.Mirror = cf.Mirror;
+		out.push_back(nh);
 	}
 }
 
@@ -1187,8 +1236,12 @@ static void writeNeighborHintsIfBoardSession()
 		const int selfY = g_EditableFiles[i].CellY;
 		std::vector<SNeighborHint> hints;
 		for (size_t h = 0; h < baseHints.size(); ++h)
-			hints.push_back(SNeighborHint(baseHints[h].Dx - selfX, baseHints[h].Dy - selfY,
-			                              baseHints[h].Basename));
+		{
+			SNeighborHint nh = baseHints[h];
+			nh.Dx -= selfX;
+			nh.Dy -= selfY;
+			hints.push_back(nh);
+		}
 		if (g_StartupWorld.Kind == ZPWS::Ecosystem)
 		{
 			for (size_t j = 0; j < g_EditableFiles.size(); ++j)
@@ -1572,10 +1625,17 @@ static void clearContextFiles()
  * Continent without hints falls back to grid. Ecosystem needs appdata/embedded/place-context.
  * skipBasenames: already-open editables (not re-loaded as RO).
  */
+// Forward: M24c context placement transform (defined with the rebuild helpers)
+static void placeContextRange(std::vector<SPaintZone> &zones, size_t rb, size_t re,
+                              float cOx, float cOy, int cw, int ch,
+                              float boardOriginX, float boardOriginY, float cellSize,
+                              int dx, int dy, uint rot, bool mirror);
+
 static void loadNeighborContextFiles(std::vector<SPaintZone> &zones, float cellSize,
                                      const std::vector<std::string> &skipBasenames)
 {
 	clearContextFiles();
+	g_SessionHintCells.clear();
 	if (!g_LoadNeighbors) return;
 	if (g_StartupWorld.MaxDir.empty()) return;
 	if (!g_BoardSession && g_StartupWorld.Kind != ZPWS::Continent) return;
@@ -1614,12 +1674,16 @@ static void loadNeighborContextFiles(std::vector<SPaintZone> &zones, float cellS
 		ZPWS::SZoneEntry Zone;
 		int Dx, Dy;
 		bool Translate;
+		// M24c: hint-carried placement transform (context rot/mirror survives reopen)
+		uint Rot;
+		bool Mirror;
 		// M20b: floor-snapped origin of the named embedded copy in the primary (when present).
 		// Placement prefers this over home+dx so freestanding reconstructs the island layout
 		// that floor-only keys used (M19 weld quality) while recorded dx stay raw-distinct.
 		bool HaveEmbFloor;
 		float EmbFloorX, EmbFloorY;
-		SPending() : Dx(0), Dy(0), Translate(false), HaveEmbFloor(false), EmbFloorX(0.f), EmbFloorY(0.f) {}
+		SPending() : Dx(0), Dy(0), Translate(false), Rot(0), Mirror(false),
+		             HaveEmbFloor(false), EmbFloorX(0.f), EmbFloorY(0.f) {}
 	};
 	std::vector<SPending> pending;
 
@@ -1669,6 +1733,18 @@ static void loadNeighborContextFiles(std::vector<SPaintZone> &zones, float cellS
 			if (!resolveHintToZone(g_StartupWorld, hints[hi].Basename, ze))
 				continue;
 			const std::string key = NLMISC::toLowerAscii(ze.Basename);
+			// M24c: remember every resolved hint at its BOARD cell (rebased from the
+			// carrying file's placement) for the board's per-cell offers, deduped.
+			{
+				const int bx = g_EditableFiles[ei].CellX + hints[hi].Dx;
+				const int by = g_EditableFiles[ei].CellY + hints[hi].Dy;
+				bool dup = false;
+				for (size_t d = 0; d < g_SessionHintCells.size() && !dup; ++d)
+					dup = g_SessionHintCells[d].CellX == bx && g_SessionHintCells[d].CellY == by
+					      && NLMISC::toLowerAscii(g_SessionHintCells[d].Basename) == key;
+				if (!dup)
+					g_SessionHintCells.push_back(SSessionHintCell(bx, by, ze.Basename));
+			}
 			if (skip.count(key) || loaded.count(key))
 				continue;
 			loaded.insert(key);
@@ -1676,6 +1752,8 @@ static void loadNeighborContextFiles(std::vector<SPaintZone> &zones, float cellS
 			p.Zone = ze;
 			p.Dx = hints[hi].Dx;
 			p.Dy = hints[hi].Dy;
+			p.Rot = hints[hi].Rot;
+			p.Mirror = hints[hi].Mirror;
 			// Continent files sit in absolute world space (no translate — identical to
 			// applying the unified rule when hints == authored origin deltas). Ecosystem
 			// always places via authored-origin-relative translation (M19).
@@ -1796,17 +1874,25 @@ static void loadNeighborContextFiles(std::vector<SPaintZone> &zones, float cellS
 			// Prefer the named embedded copy's floor origin when the primary still has it
 			// (exact island layout that floor-only keys used — M19 weld quality). Else
 			// intended = homeFloor + raw-distinct cellOffset * cellSize (appdata reopen).
+			// M24c: hints carrying rot/mirror transform about the block pivot instead
+			// (embedded-floor preference is a rot0 concept and does not apply).
 			float cOx = 0.f, cOy = 0.f, cSx = 0.f, cSy = 0.f;
 			int cw = 1, ch = 1;
 			computeFootprintRect(zones, before, zones.size(), cellSize, cOx, cOy, cSx, cSy, cw, ch);
-			float wantX = homeOriginX + (float)p.Dx * cellSize;
-			float wantY = homeOriginY + (float)p.Dy * cellSize;
-			if (p.HaveEmbFloor)
+			if ((p.Rot & 3) != 0 || p.Mirror)
+				placeContextRange(zones, before, zones.size(), cOx, cOy, cw, ch,
+				                  homeOriginX, homeOriginY, cellSize, p.Dx, p.Dy, p.Rot, p.Mirror);
+			else
 			{
-				wantX = p.EmbFloorX;
-				wantY = p.EmbFloorY;
+				float wantX = homeOriginX + (float)p.Dx * cellSize;
+				float wantY = homeOriginY + (float)p.Dy * cellSize;
+				if (p.HaveEmbFloor)
+				{
+					wantX = p.EmbFloorX;
+					wantY = p.EmbFloorY;
+				}
+				translateZonesXY(zones, before, zones.size(), wantX - cOx, wantY - cOy);
 			}
-			translateZonesXY(zones, before, zones.size(), wantX - cOx, wantY - cOy);
 		}
 		SContextFile cf;
 		cf.Path = p.Zone.MaxPath;
@@ -1814,11 +1900,15 @@ static void loadNeighborContextFiles(std::vector<SPaintZone> &zones, float cellS
 		cf.CellX = p.Dx;
 		cf.CellY = p.Dy;
 		cf.TranslateGeom = p.Translate;
+		cf.Rot = p.Rot & 3;
+		cf.Mirror = p.Mirror;
 		cf.Lm = nlm;
 		g_ContextFiles.push_back(cf);
 		g_NeighborScenes.push_back(nlm);
-		printf("  context '%s' @ cell (%d,%d) zoneIdBase=%u FROZEN%s\n",
-		       cf.Basename.c_str(), cf.CellX, cf.CellY, base,
+		printf("  context '%s' @ cell (%d,%d)%s%s zoneIdBase=%u FROZEN%s\n",
+		       cf.Basename.c_str(), cf.CellX, cf.CellY,
+		       cf.Rot ? NLMISC::toString(" R%u", cf.Rot * 90).c_str() : "",
+		       cf.Mirror ? " M" : "", base,
 		       p.Translate ? " (translated)" : "");
 	}
 }
@@ -1831,7 +1921,11 @@ struct SPlaceContextSpec
 	// Multi-cell context footprint (M17); empty Mask → 1×1 at (Dx,Dy)
 	int CellsW, CellsH;
 	std::vector<bool> Mask;
-	SPlaceContextSpec() : Dx(0), Dy(0), CellsW(1), CellsH(1) {}
+	// M24c: display transform about the footprint-block center (instance convention:
+	// Dx,Dy = min-corner of the TRANSFORMED block)
+	uint Rot;
+	bool Mirror;
+	SPlaceContextSpec() : Dx(0), Dy(0), CellsW(1), CellsH(1), Rot(0), Mirror(false) {}
 };
 static std::vector<SPlaceContextSpec> g_PlaceContextSpecs;
 // M24a: --open-editable "cx,cy:basename" specs (ecosystem startup; board Open editable's CLI form)
@@ -5432,6 +5526,46 @@ static bool sessionSaveOneFile(SEditableFileInfo &efi, std::string &err)
  * Returns weld count; fills err on hard failure.
  */
 /**
+ * M24c: transform a loaded context range to board cell (dx,dy) with rot/mirror about the
+ * source footprint-block pivot (instance math). Rot0/no-mirror reduces to a pure translate
+ * whose result equals the historical translateZonesXY path. Zones get Rotate/Symmetry so
+ * applyInstanceDisplayTiles and the paint graph see the transform.
+ */
+static void placeContextRange(std::vector<SPaintZone> &zones, size_t rb, size_t re,
+                              float cOx, float cOy, int cw, int ch,
+                              float boardOriginX, float boardOriginY, float cellSize,
+                              int dx, int dy, uint rot, bool mirror)
+{
+	const float stepX = (float)(cw > 0 ? cw : 1) * cellSize;
+	const float stepY = (float)(ch > 0 ? ch : 1) * cellSize;
+	const float pivotX = cOx + stepX * 0.5f;
+	const float pivotY = cOy + stepY * 0.5f;
+	float tdx = 0.f, tdy = 0.f;
+	computePlaceTranslationFrom(cOx, cOy, stepX, stepY, pivotX, pivotY,
+	                            boardOriginX, boardOriginY, cellSize,
+	                            dx, dy, rot & 3, mirror, tdx, tdy);
+	for (size_t i = rb; i < re && i < zones.size(); ++i)
+	{
+		SPaintZone &pz = zones[i];
+		pz.Rotate = rot & 3;
+		pz.Symmetry = mirror;
+		for (size_t pp = 0; pp < pz.Patches.size(); ++pp)
+		{
+			NL3D::CPatchInfo &pi = pz.Patches[pp];
+			for (uint v = 0; v < 4; ++v)
+				transformInstanceXY(pi.Patch.Vertices[v].x, pi.Patch.Vertices[v].y,
+				                    pivotX, pivotY, tdx, tdy, rot & 3, mirror);
+			for (uint v = 0; v < 8; ++v)
+				transformInstanceXY(pi.Patch.Tangents[v].x, pi.Patch.Tangents[v].y,
+				                    pivotX, pivotY, tdx, tdy, rot & 3, mirror);
+			for (uint v = 0; v < 4; ++v)
+				transformInstanceXY(pi.Patch.Interiors[v].x, pi.Patch.Interiors[v].y,
+				                    pivotX, pivotY, tdx, tdy, rot & 3, mirror);
+		}
+	}
+}
+
+/**
  * M24a: derive + translate one eco non-primary editable's zones range to its board cell
  * (authored-origin-relative, same rule as place-context); stores the footprint on the
  * file entry for board occupancy. Requires g_FootprintOriginX/Y (primary) already derived.
@@ -5569,8 +5703,6 @@ static bool rebuildWorkingSet(std::string &err, uint &outWelds)
 		if (primaryOnly > 0)
 		{
 			appendInstanceZones(zones, primaryOnly, g_Places, g_SessionCellSize);
-			if (g_SessionBank)
-				applyInstanceDisplayTiles(zones, g_SessionBank);
 			g_InstanceCount = 1 + (uint)g_Places.size();
 		}
 	}
@@ -5589,6 +5721,11 @@ static bool rebuildWorkingSet(std::string &err, uint &outWelds)
 		if (!loadOnePlaceContext(zones, g_SessionCellSize, g_PlaceContextSpecs[pci], perr))
 			fprintf(stderr, "WARNING: rebuild place-context: %s\n", perr.c_str());
 	}
+
+	// One display-tile transform pass over the FULL assembly (instances + rotated context;
+	// untransformed zones skip, and a single call avoids double-applying, M24c).
+	if (g_SessionBank)
+		applyInstanceDisplayTiles(zones, g_SessionBank);
 
 	outWelds = weldPaintZones(zones);
 	printf("session rebuild: %u zones, %u welds, %u editable files, %u neighbor files\n",
@@ -5738,7 +5875,7 @@ static bool scratchMaskConflictsSrc(const std::vector<bool> &cmask, int cfw, int
 		std::vector<bool> cm = pc.Mask;
 		if (cm.empty()) cm.assign((size_t)cw * (size_t)ch, true);
 		if (masksCollide(cmask, cfw, cfh, ox, oy, rot, mirror,
-		                 cm, cw, ch, pc.Dx, pc.Dy, 0, false))
+		                 cm, cw, ch, pc.Dx, pc.Dy, pc.Rot, pc.Mirror))
 		{
 			err = NLMISC::toString("mask overlaps context '%s' at (%d,%d)",
 			                       pc.Basename.c_str(), pc.Dx, pc.Dy);
@@ -5806,7 +5943,7 @@ static bool scratchFindContext(int cx, int cy, size_t &idx)
 		const SPlaceContextSpec &pc = g_PlaceContextSpecs[i];
 		const int cw = pc.CellsW > 0 ? pc.CellsW : 1;
 		const int ch = pc.CellsH > 0 ? pc.CellsH : 1;
-		if (maskCellOccupied(pc.Mask, cw, ch, pc.Dx, pc.Dy, 0, false, cx, cy))
+		if (maskCellOccupied(pc.Mask, cw, ch, pc.Dx, pc.Dy, pc.Rot, pc.Mirror, cx, cy))
 		{
 			idx = i;
 			return true;
@@ -6006,10 +6143,18 @@ static bool loadOnePlaceContext(std::vector<SPaintZone> &zones, float cellSize,
 		computeFootprintRect(zones, before, zones.size(), cellSize, cOx, cOy, cSx, cSy, cw, ch);
 		cmask.assign((size_t)cw * (size_t)ch, true);
 	}
-	// M19 same rule as neighbor load: intended(cell) - authoredFootprintOrigin
-	const float wantX = homeOriginX + (float)pc.Dx * cellSize;
-	const float wantY = homeOriginY + (float)pc.Dy * cellSize;
-	translateZonesXY(zones, before, zones.size(), wantX - cOx, wantY - cOy);
+	// M19 same rule as neighbor load: intended(cell) - authoredFootprintOrigin.
+	// M24c: non-default rot/mirror transforms about the block pivot (instance math);
+	// the rot0 path keeps the historical pure translate byte-for-byte.
+	if ((pc.Rot & 3) == 0 && !pc.Mirror)
+	{
+		const float wantX = homeOriginX + (float)pc.Dx * cellSize;
+		const float wantY = homeOriginY + (float)pc.Dy * cellSize;
+		translateZonesXY(zones, before, zones.size(), wantX - cOx, wantY - cOy);
+	}
+	else
+		placeContextRange(zones, before, zones.size(), cOx, cOy, cw, ch,
+		                  homeOriginX, homeOriginY, cellSize, pc.Dx, pc.Dy, pc.Rot, pc.Mirror);
 
 	// Stash multi-cell mask on the matching place-context spec (if any)
 	for (size_t i = 0; i < g_PlaceContextSpecs.size(); ++i)
@@ -6031,13 +6176,17 @@ static bool loadOnePlaceContext(std::vector<SPaintZone> &zones, float cellSize,
 	cf.CellX = pc.Dx;
 	cf.CellY = pc.Dy;
 	cf.TranslateGeom = true;
+	cf.Rot = pc.Rot & 3;
+	cf.Mirror = pc.Mirror;
 	cf.Lm = nlm;
 	g_ContextFiles.push_back(cf);
 	g_NeighborScenes.push_back(nlm);
-	printf("place-context: '%s' @ (%d,%d) footprint %dx%d source=%s mask=%s FROZEN translated\n",
+	printf("place-context: '%s' @ (%d,%d) footprint %dx%d source=%s mask=%s%s%s FROZEN translated\n",
 	       cf.Basename.c_str(), cf.CellX, cf.CellY, cw, ch,
 	       fromT ? "template" : "aabb-square",
-	       maskToTFString(cmask, cw, ch).c_str());
+	       maskToTFString(cmask, cw, ch).c_str(),
+	       cf.Rot ? NLMISC::toString(" R%u", cf.Rot * 90).c_str() : "",
+	       cf.Mirror ? " M" : "");
 	return true;
 }
 
@@ -6092,7 +6241,7 @@ static bool scratchPlaceContext(int cx, int cy, const std::string &basename, std
 		if (cm.empty()) cm.assign((size_t)cw * (size_t)ch, true);
 		// Home collision
 		if (masksCollide(scratchHomeMask(), scratchFw(), scratchFh(), 0, 0, 0, false,
-		                 cm, cw, ch, loaded.Dx, loaded.Dy, 0, false))
+		                 cm, cw, ch, loaded.Dx, loaded.Dy, loaded.Rot, loaded.Mirror))
 		{
 			g_PlaceContextSpecs.pop_back();
 			scratchRebuild(err);
@@ -6106,8 +6255,8 @@ static bool scratchPlaceContext(int cx, int cy, const std::string &basename, std
 			const int oh = o.CellsH > 0 ? o.CellsH : 1;
 			std::vector<bool> om = o.Mask;
 			if (om.empty()) om.assign((size_t)ow * (size_t)oh, true);
-			if (masksCollide(cm, cw, ch, loaded.Dx, loaded.Dy, 0, false,
-			                 om, ow, oh, o.Dx, o.Dy, 0, false))
+			if (masksCollide(cm, cw, ch, loaded.Dx, loaded.Dy, loaded.Rot, loaded.Mirror,
+			                 om, ow, oh, o.Dx, o.Dy, o.Rot, o.Mirror))
 			{
 				g_PlaceContextSpecs.pop_back();
 				scratchRebuild(err);
@@ -6120,7 +6269,7 @@ static bool scratchPlaceContext(int cx, int cy, const std::string &basename, std
 			if (masksCollide(scratchHomeMask(), scratchFw(), scratchFh(),
 			                 g_Places[i].CellX, g_Places[i].CellY,
 			                 g_Places[i].Rot, g_Places[i].Mirror,
-			                 cm, cw, ch, loaded.Dx, loaded.Dy, 0, false))
+			                 cm, cw, ch, loaded.Dx, loaded.Dy, loaded.Rot, loaded.Mirror))
 			{
 				g_PlaceContextSpecs.pop_back();
 				scratchRebuild(err);
@@ -6135,7 +6284,7 @@ static bool scratchPlaceContext(int cx, int cy, const std::string &basename, std
 			const int eh = ef.CellsH > 0 ? ef.CellsH : 1;
 			std::vector<bool> em = ef.Mask;
 			if (em.empty()) em.assign((size_t)ew * (size_t)eh, true);
-			if (masksCollide(cm, cw, ch, loaded.Dx, loaded.Dy, 0, false,
+			if (masksCollide(cm, cw, ch, loaded.Dx, loaded.Dy, loaded.Rot, loaded.Mirror,
 			                 em, ew, eh, ef.CellX, ef.CellY, 0, false))
 			{
 				g_PlaceContextSpecs.pop_back();
@@ -6158,6 +6307,128 @@ static bool scratchRemoveContext(int cx, int cy, std::string &err)
 	}
 	g_PlaceContextSpecs.erase(g_PlaceContextSpecs.begin() + (std::ptrdiff_t)idx);
 	return scratchRebuild(err);
+}
+
+/** M24c: transform mask of a context spec for collision checks. */
+static void contextSpecMask(const SPlaceContextSpec &pc, std::vector<bool> &m, int &cw, int &ch)
+{
+	cw = pc.CellsW > 0 ? pc.CellsW : 1;
+	ch = pc.CellsH > 0 ? pc.CellsH : 1;
+	m = pc.Mask;
+	if (m.empty()) m.assign((size_t)cw * (size_t)ch, true);
+}
+
+/** M24c: does candidate context spec state (cell+transform) collide with the rest? */
+static bool contextCandidateConflicts(size_t idx, int nx, int ny, uint nrot, bool nmirror,
+                                      std::string &err)
+{
+	std::vector<bool> cm;
+	int cw = 1, ch = 1;
+	contextSpecMask(g_PlaceContextSpecs[idx], cm, cw, ch);
+	if (masksCollide(scratchHomeMask(), scratchFw(), scratchFh(), 0, 0, 0, false,
+	                 cm, cw, ch, nx, ny, nrot, nmirror))
+	{
+		err = "would overlap home";
+		return true;
+	}
+	for (size_t i = 0; i < g_Places.size(); ++i)
+	{
+		std::vector<bool> om;
+		int ow = 1, oh = 1;
+		instanceSourceFootprint(g_Places[i], om, ow, oh);
+		if (masksCollide(om, ow, oh, g_Places[i].CellX, g_Places[i].CellY,
+		                 g_Places[i].Rot, g_Places[i].Mirror,
+		                 cm, cw, ch, nx, ny, nrot, nmirror))
+		{
+			err = "would overlap an instance";
+			return true;
+		}
+	}
+	for (size_t i = 0; i < g_PlaceContextSpecs.size(); ++i)
+	{
+		if (i == idx) continue;
+		std::vector<bool> om;
+		int ow = 1, oh = 1;
+		contextSpecMask(g_PlaceContextSpecs[i], om, ow, oh);
+		if (masksCollide(cm, cw, ch, nx, ny, nrot, nmirror,
+		                 om, ow, oh, g_PlaceContextSpecs[i].Dx, g_PlaceContextSpecs[i].Dy,
+		                 g_PlaceContextSpecs[i].Rot, g_PlaceContextSpecs[i].Mirror))
+		{
+			err = "would overlap context '" + g_PlaceContextSpecs[i].Basename + "'";
+			return true;
+		}
+	}
+	for (size_t i = 1; i < g_EditableFiles.size(); ++i)
+	{
+		const SEditableFileInfo &ef = g_EditableFiles[i];
+		const int ow = ef.CellsW > 0 ? ef.CellsW : 1;
+		const int oh = ef.CellsH > 0 ? ef.CellsH : 1;
+		std::vector<bool> om = ef.Mask;
+		if (om.empty()) om.assign((size_t)ow * (size_t)oh, true);
+		if (masksCollide(cm, cw, ch, nx, ny, nrot, nmirror,
+		                 om, ow, oh, ef.CellX, ef.CellY, 0, false))
+		{
+			err = "would overlap open file '" + ef.Basename + "'";
+			return true;
+		}
+	}
+	return false;
+}
+
+/** M24c: rotate a placed context brick about its footprint-block center (instance rule). */
+static bool scratchRotateContext(int cx, int cy, int delta, std::string &err)
+{
+	size_t idx = 0;
+	if (!scratchFindContext(cx, cy, idx))
+	{
+		err = "no context at cell";
+		return false;
+	}
+	SPlaceContextSpec &pc = g_PlaceContextSpecs[idx];
+	const int fw = pc.CellsW > 0 ? pc.CellsW : 1;
+	const int fh = pc.CellsH > 0 ? pc.CellsH : 1;
+	int oldW = 0, oldH = 0;
+	footprintBlockSize(fw, fh, pc.Rot, pc.Mirror, oldW, oldH);
+	const double ctrX = (double)pc.Dx + 0.5 * (double)oldW;
+	const double ctrY = (double)pc.Dy + 0.5 * (double)oldH;
+	const uint newRot = (uint)((int)pc.Rot + delta) & 3;
+	int newW = 0, newH = 0;
+	footprintBlockSize(fw, fh, newRot, pc.Mirror, newW, newH);
+	const int newOx = (int)std::floor(ctrX - 0.5 * (double)newW + 1e-9);
+	const int newOy = (int)std::floor(ctrY - 0.5 * (double)newH + 1e-9);
+	if (contextCandidateConflicts(idx, newOx, newOy, newRot, pc.Mirror, err))
+		return false;
+	pc.Rot = newRot;
+	pc.Dx = newOx;
+	pc.Dy = newOy;
+	return scratchRebuild(err);
+}
+
+/** M24c: mirror a placed context brick (block AABB stays; mask occupancy rechecked). */
+static bool scratchMirrorContext(int cx, int cy, std::string &err)
+{
+	size_t idx = 0;
+	if (!scratchFindContext(cx, cy, idx))
+	{
+		err = "no context at cell";
+		return false;
+	}
+	SPlaceContextSpec &pc = g_PlaceContextSpecs[idx];
+	if (contextCandidateConflicts(idx, pc.Dx, pc.Dy, pc.Rot, !pc.Mirror, err))
+		return false;
+	pc.Mirror = !pc.Mirror;
+	return scratchRebuild(err);
+}
+
+/** M24c: context transform for board labels. */
+static bool scratchGetContextTransform(int cx, int cy, uint &rot, bool &mirror)
+{
+	size_t idx = 0;
+	if (!scratchFindContext(cx, cy, idx))
+		return false;
+	rot = g_PlaceContextSpecs[idx].Rot;
+	mirror = g_PlaceContextSpecs[idx].Mirror;
+	return true;
 }
 
 static bool scratchGetContext(int cx, int cy, std::string &basename)
@@ -6202,7 +6473,7 @@ static bool scratchEditableConflicts(size_t idx, std::string &err)
 		std::vector<bool> om = pc.Mask;
 		if (om.empty()) om.assign((size_t)ow * (size_t)oh, true);
 		if (masksCollide(em, cw, ch, ef.CellX, ef.CellY, 0, false,
-		                 om, ow, oh, pc.Dx, pc.Dy, 0, false))
+		                 om, ow, oh, pc.Dx, pc.Dy, pc.Rot, pc.Mirror))
 		{
 			err = "footprint overlaps context '" + pc.Basename + "'";
 			return true;
@@ -6403,6 +6674,33 @@ static bool scratchGetInstanceSource(int cx, int cy, std::string &basename)
 		return false;
 	basename = g_Places[idx].SourceBasename;
 	return true;
+}
+
+/** M24c: saved-neighbor hint naming board cell (cx,cy), if any (not currently loaded there). */
+static bool scratchGetHintAt(int cx, int cy, std::string &basename)
+{
+	for (size_t i = 0; i < g_SessionHintCells.size(); ++i)
+	{
+		if (g_SessionHintCells[i].CellX != cx || g_SessionHintCells[i].CellY != cy)
+			continue;
+		basename = g_SessionHintCells[i].Basename;
+		return true;
+	}
+	return false;
+}
+
+/** M24c: every hinted basename this session (picker priority sort). */
+static void scratchHintNames(std::vector<std::string> &out)
+{
+	out.clear();
+	for (size_t i = 0; i < g_SessionHintCells.size(); ++i)
+	{
+		bool dup = false;
+		for (size_t d = 0; d < out.size() && !dup; ++d)
+			dup = NLMISC::toLowerAscii(out[d]) == NLMISC::toLowerAscii(g_SessionHintCells[i].Basename);
+		if (!dup)
+			out.push_back(g_SessionHintCells[i].Basename);
+	}
 }
 
 /**
@@ -7288,6 +7586,13 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 				sessionBridge.scratchPlaceInstanceOf = scratchPlaceInstanceOf;
 				sessionBridge.scratchOpenFileCount = scratchOpenFileCount;
 				sessionBridge.scratchGetInstanceSource = scratchGetInstanceSource;
+				// M24c: per-cell saved-neighbor offers + picker priority
+				sessionBridge.scratchGetHintAt = scratchGetHintAt;
+				sessionBridge.scratchHintNames = scratchHintNames;
+				// M24c: context brick rotate/mirror
+				sessionBridge.scratchRotateContext = scratchRotateContext;
+				sessionBridge.scratchMirrorContext = scratchMirrorContext;
+				sessionBridge.scratchGetContextTransform = scratchGetContextTransform;
 				g_SessionOpsAvailable = true;
 				sessionBridge.closeZone = sessionCloseZone;
 				sessionBridge.saveZone = sessionSaveZone;
@@ -8339,16 +8644,40 @@ args.addArg("", "instances", "NxM",
 			}
 			std::string coords = pcs[i].substr(0, colon);
 			std::string base = pcs[i].substr(colon + 1);
-			std::string::size_type comma = coords.find(',');
+			std::vector<std::string> cfv;
+			{
+				std::string cur;
+				for (std::string::size_type ci = 0; ci <= coords.size(); ++ci)
+				{
+					char c = ci < coords.size() ? coords[ci] : ',';
+					if (c == ',') { cfv.push_back(cur); cur.clear(); }
+					else cur += c;
+				}
+			}
 			SPlaceContextSpec pc;
-			if (comma == std::string::npos
-			    || !NLMISC::fromString(coords.substr(0, comma), pc.Dx)
-			    || !NLMISC::fromString(coords.substr(comma + 1), pc.Dy)
+			if (cfv.size() < 2 || cfv.size() > 4
+			    || !NLMISC::fromString(cfv[0], pc.Dx)
+			    || !NLMISC::fromString(cfv[1], pc.Dy)
 			    || base.empty())
 			{
-				fprintf(stderr, "ERROR: --place-context expects dx,dy:basename, got '%s'\n",
+				fprintf(stderr, "ERROR: --place-context expects dx,dy[,rot][,m]:basename, got '%s'\n",
 				        pcs[i].c_str());
 				return 1;
+			}
+			if (cfv.size() >= 3 && !cfv[2].empty())
+			{
+				uint r = 0;
+				if (!NLMISC::fromString(cfv[2], r) || r > 3)
+				{
+					fprintf(stderr, "ERROR: --place-context rot must be 0..3, got '%s'\n", cfv[2].c_str());
+					return 1;
+				}
+				pc.Rot = r;
+			}
+			if (cfv.size() >= 4 && !cfv[3].empty())
+			{
+				std::string m = NLMISC::toLowerAscii(cfv[3]);
+				pc.Mirror = (m == "1" || m == "m" || m == "true");
 			}
 			// strip .max
 			std::string::size_type dot = base.rfind('.');
@@ -8412,7 +8741,13 @@ args.addArg("", "instances", "NxM",
 		printf("neighbor-hints dump '%s': source=%s count=%u\n", basen.c_str(), source.c_str(),
 		       (uint)hints.size());
 		for (size_t i = 0; i < hints.size(); ++i)
-			printf("  %d,%d:%s\n", hints[i].Dx, hints[i].Dy, hints[i].Basename.c_str());
+		{
+			if (hints[i].Rot != 0 || hints[i].Mirror)
+				printf("  %d,%d,%u,%d:%s\n", hints[i].Dx, hints[i].Dy,
+				       hints[i].Rot & 3, hints[i].Mirror ? 1 : 0, hints[i].Basename.c_str());
+			else
+				printf("  %d,%d:%s\n", hints[i].Dx, hints[i].Dy, hints[i].Basename.c_str());
+		}
 		return 0;
 	}
 
@@ -9235,8 +9570,10 @@ args.addArg("", "instances", "NxM",
 		return 1;
 	}
 
-	// Rotated instance display tiles (landscape initial state matches GetTile display space)
-	if (haveBank && !g_Places.empty())
+	// Rotated instance/context display tiles (landscape initial state matches GetTile
+	// display space). The function skips untransformed zones, so one unconditional call
+	// after full assembly covers instances AND rotated context bricks (M24c).
+	if (haveBank)
 		applyInstanceDisplayTiles(zones, &bank);
 
 	// Session rebuild params (M11a; used if the board mutates the working set mid-viewer)
