@@ -333,9 +333,10 @@
 </group>
 
 <!--
-  Painter control panel (M1c + M7a + M10d + M14c slim). Mode/season/undo/board/save
-  live on the top toolbar now. Panel keeps mode-specific sections, LOCK, FILL, TILES.
-  Container height is resized on mode change in syncPanelFromBridge (M10d/M14c).
+  Painter control panel (M1c + M7a + M10d + M14c slim + M20a paint-common).
+  Mode/season/undo/board/save live on the top toolbar. Panel: always-visible
+  file/dirty header + mode sections + paint-common (TILES/LOCK/FILL, hidden in Prop)
+  + hint footer. Container height resized on mode change in syncPanelFromBridge.
 -->
 <group type="container" id="painter" w="220" pop_min_w="200" pop_max_w="280" h="280" pop_min_h="160" pop_max_h="480"
 	title="Painter" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
@@ -355,21 +356,21 @@
 		<view type="bitmap" id="panel_bg" posref="TL TL" x="0" y="0" sizeref="wh" w="0" h="0"
 			texture="blank.png" scale="true" color="55 58 64 245" global_color="false" />
 
-		<!-- ==== Slim header (M14c): instance + files + TILES palette only ==== -->
+		<!-- ==== Slim header (M14c/M20a): instance + files only (always on) ==== -->
 		<view type="text" id="instance_info" posref="TL TL" x="10" y="-4" fontsize="10" shadow="true"
 			global_color="false" color="120 255 160 255" hardtext="" />
 		<view type="text" id="files_info" posparent="instance_info" posref="BL TL" x="0" y="-2" fontsize="10" shadow="true"
 			global_color="false" color="200 200 210 220" hardtext="1 file" />
-		<ctrl style="text_button_toggle" id="btn_palette" posparent="files_info" posref="BL TL" x="0" y="-4"
-			onclick_l="zp_toggle_palette" params_l="" hardtext="Tiles" />
 
 		<!--
-		  Mode-grouped body (M10d): CGroupList auto-stacks active children.
-		  Only one of sec_tile / sec_color / sec_disp is active at a time; sec_footer
-		  is always active. Toggling active reflows without posparent gaps.
+		  Mode-grouped body (M10d/M20a): CGroupList auto-stacks active children.
+		  One of sec_tile / sec_color / sec_disp / sec_prop is active; sec_paint
+		  (TILES + LOCK + FILL) is paint-common — active in Tile/Color/Displace,
+		  hidden in Prop; sec_footer (hint) always on. Paint-common sits after the
+		  mode section so Prop reflow drops only that block (M20a).
 		-->
-		<group type="list" id="body" posparent="btn_palette" posref="BL TL" x="0" y="-6" w="200"
-			space="4" maxelements="8" dynamic_display_size="true" addelt="B" align="L">
+		<group type="list" id="body" posparent="files_info" posref="BL TL" x="0" y="-6" w="200"
+			space="4" maxelements="10" dynamic_display_size="true" addelt="B" align="L">
 
 			<!-- Tile section (ModeTile only): tileset + 256 + brush size + group -->
 			<group id="sec_tile" w="200" h="118" child_resize_h="false">
@@ -499,9 +500,11 @@
 					global_color="false" color="255 200 120 220" hardtext="" />
 			</group>
 
-			<!-- Footer slim (M14c): lock + fill + hint (undo/save/board/mode live on toolbar) -->
-			<group id="sec_footer" w="200" h="72" child_resize_h="false">
-				<ctrl style="text_button_toggle" id="lock_borders" posref="TL TL" x="0" y="-2"
+			<!-- Paint-common (M20a): TILES + LOCK + FILL — hidden in Prop via setActive -->
+			<group id="sec_paint" w="200" h="64" child_resize_h="false">
+				<ctrl style="text_button_toggle" id="btn_palette" posref="TL TL" x="0" y="-2"
+					onclick_l="zp_toggle_palette" params_l="" hardtext="Tiles" />
+				<ctrl style="text_button_toggle" id="lock_borders" posparent="btn_palette" posref="BL TL" x="0" y="-6"
 					onclick_l="zp_lock_borders" params_l="" hardtext="Lock borders" />
 				<ctrl style="text_button_16" id="btn_fill0" posparent="lock_borders" posref="BL TL" x="0" y="-6"
 					onclick_l="zp_fill" params_l="0" hardtext="Fill" />
@@ -511,7 +514,11 @@
 					onclick_l="zp_fill" params_l="2" hardtext="F2" />
 				<ctrl style="text_button_16" id="btn_fill3" posparent="btn_fill2" posref="MR ML" x="4" y="0"
 					onclick_l="zp_fill" params_l="3" hardtext="F3" />
-				<view type="text" id="hint" posparent="btn_fill0" posref="BL TL" x="0" y="-6" fontsize="9" shadow="true"
+			</group>
+
+			<!-- Footer slim (M14c/M20a): hint only (paint tools live in sec_paint) -->
+			<group id="sec_footer" w="200" h="28" child_resize_h="false">
+				<view type="text" id="hint" posref="TL TL" x="0" y="-2" fontsize="9" shadow="true"
 					global_color="false" color="255 255 255 140" hardtext="T/C/D/R mode  O board  Y season  P tiles  F10  ESC" />
 			</group>
 

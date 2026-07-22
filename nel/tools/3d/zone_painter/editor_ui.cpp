@@ -756,7 +756,8 @@ void setTilesetPaletteVisible(bool visible)
 	setContainerActive(kPaletteWinId, visible);
 	// Panel toggle button face (if present)
 	if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(
-	        CWidgetManager::getInstance()->getElementFromId("ui:zp:painter:content:btn_palette"))) // common header
+	        CWidgetManager::getInstance()->getElementFromId(
+	            "ui:zp:painter:content:body:sec_paint:btn_palette"))) // paint-common (M20a)
 		btn->setPushed(visible);
 }
 
@@ -1600,8 +1601,10 @@ void CEditorUI::syncPanelFromBridge()
 	if (!b || !b->HaveCore)
 		return;
 
-	// Nested under content:body:sec_* (M10d mode-grouped list). Common header/footer
-	// stay at content: / content:body:sec_footer:. Toolbar holds mode/season/undo (M14c).
+	// Nested under content:body:sec_* (M10d mode-grouped list). Header file/dirty
+	// stays at content:; paint-common TILES/LOCK/FILL in sec_paint (M20a); hint in
+	// sec_footer. Toolbar holds mode/season/undo (M14c).
+	static const char *kSecPaint = "ui:zp:painter:content:body:sec_paint";
 	static const char *kSecTile = "ui:zp:painter:content:body:sec_tile";
 	static const char *kSecColor = "ui:zp:painter:content:body:sec_color";
 	static const char *kSecDisp = "ui:zp:painter:content:body:sec_disp";
@@ -1610,6 +1613,8 @@ void CEditorUI::syncPanelFromBridge()
 	static const char *kBody = "ui:zp:painter:content:body";
 	static const char *kPainterWin = "ui:zp:painter";
 	static const char *kToolbar = "ui:zp:toolbar";
+	// M20a palette path (btn moved into sec_paint)
+	static const char *kBtnPalette = "ui:zp:painter:content:body:sec_paint:btn_palette";
 
 	// Ensure toolbar is visible once the viewer panel is live
 	if (CInterfaceGroup *tb = findGroupEl(kToolbar))
@@ -1629,14 +1634,17 @@ void CEditorUI::syncPanelFromBridge()
 	if (CCtrlBaseButton *btn = findButton("ui:zp:toolbar:header_closed:mode_prop"))
 		btn->setPushed(b->Mode == 3);
 
-	// ---- M10d/M18a: show only the section for the current paint mode ----
+	// ---- M10d/M18a/M20a: mode sections + paint-common ----
 	// Keys, radios, and terrain-pick side effects all funnel Mode through the bridge,
 	// so this runs for every path. Keyboard shortcuts keep working when widgets hide.
-	// ModeProp (3): sec_prop (M18b).
+	// ModeProp (3): sec_prop only — TILES/LOCK/FILL are paint tools (hidden).
 	const bool tileActive = (b->Mode == 0);
 	const bool colorActive = (b->Mode == 1);
 	const bool displaceActive = (b->Mode == 2);
 	const bool propActive = (b->Mode == 3);
+	const bool paintCommonActive = !propActive; // Tile/Color/Displace
+	if (CInterfaceGroup *g = findGroupEl(kSecPaint))
+		g->setActive(paintCommonActive);
 	if (CInterfaceGroup *g = findGroupEl(kSecTile))
 		g->setActive(tileActive);
 	if (CInterfaceGroup *g = findGroupEl(kSecColor))
@@ -1645,12 +1653,44 @@ void CEditorUI::syncPanelFromBridge()
 		g->setActive(displaceActive);
 	if (CInterfaceGroup *g = findGroupEl(kSecProp))
 		g->setActive(propActive);
-	// Footer always on (list reflows when mode sections toggle).
+	// Footer (hint) always on (list reflows when mode / paint-common toggle).
 	if (CInterfaceGroup *g = findGroupEl(kSecFooter))
 		g->setActive(true);
+
+	// M20a: hide Tiles palette window while Prop is active; restore when leaving if
+	// it was open (paint palette is meaningless over property edit).
+	{
+		static bool s_PropPaletteGate = false;
+		static bool s_RestorePaletteAfterProp = false;
+		if (propActive)
+		{
+			if (!s_PropPaletteGate)
+			{
+				s_PropPaletteGate = true;
+				s_RestorePaletteAfterProp = s_PaletteVisible;
+				if (s_PaletteVisible)
+					setTilesetPaletteVisible(false);
+			}
+			else if (s_PaletteVisible)
+			{
+				// P key / stray open while still in Prop — keep suppressed
+				setTilesetPaletteVisible(false);
+			}
+		}
+		else if (s_PropPaletteGate)
+		{
+			s_PropPaletteGate = false;
+			if (s_RestorePaletteAfterProp)
+			{
+				s_RestorePaletteAfterProp = false;
+				setTilesetPaletteVisible(true);
+			}
+		}
+	}
+
 	// Force list reflow + resize the painter container to the active content height.
-	// M14c slim: header ~40; sec tile 118 / color 148 / disp 80 / prop 200;
-	// footer 72; list space 4; chrome ~28.
+	// M20a: header ~28 (file/dirty only); sec_paint 64 when paint mode; mode sec
+	// tile 118 / color 148 / disp 80 / prop 200; footer hint 28; list space 4; chrome ~36.
 	// M18d: never shrink below a chrome-safe floor — if wantH underestimates the real
 	// content, CGroupContainer blank height can go <=0 and the solid panel fill vanishes
 	// (text/buttons still draw). Floor keeps w_l0 chrome + panel_bg readable in all modes.
@@ -1658,7 +1698,9 @@ void CEditorUI::syncPanelFromBridge()
 		body->invalidateCoords();
 	{
 		const sint32 secH = tileActive ? 118 : (colorActive ? 148 : (displaceActive ? 80 : (propActive ? 200 : 80)));
-		const sint32 wantH = 40 + secH + 4 + 72 + 36; // +36 chrome (was 28; M18d safer)
+		const sint32 paintH = paintCommonActive ? 64 : 0;
+		const sint32 spaces = 4 + (paintCommonActive ? 4 : 0); // body space between active kids
+		const sint32 wantH = 28 + paintH + secH + 28 + spaces + 36;
 		if (CInterfaceGroup *win = findGroupEl(kPainterWin))
 		{
 			sint32 h = wantH;
@@ -1712,8 +1754,8 @@ void CEditorUI::syncPanelFromBridge()
 		t->setHardText(buf);
 	}
 
-	// Lock borders (footer)
-	if (CCtrlBaseButton *btn = findButton((std::string(kSecFooter) + ":lock_borders").c_str()))
+	// Lock borders (paint-common sec_paint, M20a)
+	if (CCtrlBaseButton *btn = findButton((std::string(kSecPaint) + ":lock_borders").c_str()))
 		btn->setPushed(b->LockBorders);
 
 	// Self-instance indicator (M4b)
@@ -1881,7 +1923,7 @@ void CEditorUI::syncPanelFromBridge()
 		if (el)
 			s_PaletteVisible = el->getActive();
 	}
-	if (CCtrlBaseButton *btn = findButton("ui:zp:painter:content:btn_palette"))
+	if (CCtrlBaseButton *btn = findButton(kBtnPalette))
 		btn->setPushed(s_PaletteVisible);
 	// Optional: auto-scroll palette toward Displace when that mode is active
 	emphasizeDisplaceSection(displaceActive);
