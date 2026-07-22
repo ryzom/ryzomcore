@@ -3719,6 +3719,7 @@ static void zpReadZoneProps(CNodeImpl *node, SZoneProps &out)
  *   passable → presence: set "1" when true, DELETE entry when false (ligoscape rollout)
  *   usebbox  → "1" when true; DELETE when false (exporter getScriptAppDataInt default 0;
  *              absent and "0" both read false — delete is the least-surprising clean write)
+ * When paint core is live, writes go through opProp so Ctrl+Z undoes them (M18c).
  */
 static bool zpWriteZoneProp(uint zoneId, const std::string &which, int value, std::string &err)
 {
@@ -3733,66 +3734,83 @@ static bool zpWriteZoneProp(uint zoneId, const std::string &which, int value, st
 		err = "read-only";
 		return false;
 	}
-	CNodeImpl *node = pz->Node;
+	uint32 appId = 0;
+	bool newHas = true;
+	std::string newVal;
 	if (which == "rotate")
 	{
-		const int r = value & 3;
-		if (!zpSetScriptAppDataStr(node, NEL3D_APPDATA_ZONE_ROTATE, NLMISC::toString("%d", r)))
-		{
-			err = "setScriptString rotate failed";
-			return false;
-		}
+		appId = NEL3D_APPDATA_ZONE_ROTATE;
+		newVal = NLMISC::toString("%d", value & 3);
 	}
 	else if (which == "symmetry")
 	{
-		const int v = value ? ZP_BST_CHECKED : ZP_BST_UNCHECKED;
-		if (!zpSetScriptAppDataStr(node, NEL3D_APPDATA_ZONE_SYMMETRY, NLMISC::toString("%d", v)))
-		{
-			err = "setScriptString symmetry failed";
-			return false;
-		}
+		appId = NEL3D_APPDATA_ZONE_SYMMETRY;
+		newVal = NLMISC::toString("%d", value ? ZP_BST_CHECKED : ZP_BST_UNCHECKED);
 	}
 	else if (which == "passable")
 	{
+		appId = NEL3D_APPDATA_LIGO_PASSABLE;
 		if (value)
-		{
-			if (!zpSetScriptAppDataStr(node, NEL3D_APPDATA_LIGO_PASSABLE, "1"))
-			{
-				err = "setScriptString passable failed";
-				return false;
-			}
-		}
+			newVal = "1";
 		else
-			zpEraseScriptAppData(node, NEL3D_APPDATA_LIGO_PASSABLE);
+			newHas = false;
 	}
 	else if (which == "usebbox")
 	{
+		appId = NEL3D_APPDATA_LIGO_USE_BOUNDINGBOX;
 		if (value)
-		{
-			if (!zpSetScriptAppDataStr(node, NEL3D_APPDATA_LIGO_USE_BOUNDINGBOX, "1"))
-			{
-				err = "setScriptString usebbox failed";
-				return false;
-			}
-		}
+			newVal = "1";
 		else
-			zpEraseScriptAppData(node, NEL3D_APPDATA_LIGO_USE_BOUNDINGBOX);
-		// Live footprint re-derive (primary zone only)
-		if (g_PaintCtx.Zones && !g_PaintCtx.Zones->empty()
-		    && (*g_PaintCtx.Zones)[0].ZoneId == zoneId)
-		{
-			derivePrimaryFootprint(*g_PaintCtx.Zones, 0, g_PaintCtx.Zones->size(),
-			                       g_SessionCellSize > 0.f ? g_SessionCellSize : 160.f,
-			                       g_SessionSnap > 0.f ? g_SessionSnap : 1.f);
-		}
+			newHas = false;
 	}
 	else
 	{
 		err = "unknown prop " + which;
 		return false;
 	}
+	if (g_PaintCtx.Core)
+	{
+		if (!g_PaintCtx.Core->opProp(zoneId, appId, newHas, newVal, err))
+			return false;
+	}
+	else
+	{
+		// No core (rare): direct write without undo
+		if (newHas)
+		{
+			if (!zpSetScriptAppDataStr(pz->Node, appId, newVal))
+			{
+				err = "setScriptString failed";
+				return false;
+			}
+		}
+		else
+			zpEraseScriptAppData(pz->Node, appId);
+	}
+	// Live footprint re-derive when usebbox changes (primary zone)
+	if (which == "usebbox" && g_PaintCtx.Zones && !g_PaintCtx.Zones->empty()
+	    && (*g_PaintCtx.Zones)[0].ZoneId == zoneId)
+	{
+		derivePrimaryFootprint(*g_PaintCtx.Zones, 0, g_PaintCtx.Zones->size(),
+		                       g_SessionCellSize > 0.f ? g_SessionCellSize : 160.f,
+		                       g_SessionSnap > 0.f ? g_SessionSnap : 1.f);
+	}
 	g_PropStatusMsg = which + "=" + NLMISC::toString("%d", value);
 	return true;
+}
+
+/** M18c: prop undo/redo re-derives footprint when USE_BOUNDINGBOX is restored. */
+static void zpOnPropChanged(uint zoneId, uint32 appDataId)
+{
+	if (appDataId != NEL3D_APPDATA_LIGO_USE_BOUNDINGBOX)
+		return;
+	if (!g_PaintCtx.Zones || g_PaintCtx.Zones->empty())
+		return;
+	if ((*g_PaintCtx.Zones)[0].ZoneId != zoneId)
+		return;
+	derivePrimaryFootprint(*g_PaintCtx.Zones, 0, g_PaintCtx.Zones->size(),
+	                       g_SessionCellSize > 0.f ? g_SessionCellSize : 160.f,
+	                       g_SessionSnap > 0.f ? g_SessionSnap : 1.f);
 }
 
 // M18b Prop panel handlers (shared with future paint-script prop ops)
@@ -7768,6 +7786,7 @@ args.addArg("", "instances", "NxM",
 	// runViewer overwrites Active/Paint; headless keeps Core+Zones only.
 	g_PaintCtx.Core = &core;
 	g_PaintCtx.Zones = &zones;
+	core.setPropChangedCallback(zpOnPropChanged);
 
 	int rc = 0;
 	if (viewerMode)

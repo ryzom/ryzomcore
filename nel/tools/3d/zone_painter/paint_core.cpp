@@ -110,6 +110,7 @@ CPaintCore::CPaintCore()
 	m_BrushMaskMode = false;
 	m_StoredIncludeMeshes = -1;
 	m_StoredPreloadTiles = -1;
+	m_PropChangedCb = NULL;
 }
 
 CPaintCore::~CPaintCore()
@@ -2231,13 +2232,39 @@ void CPaintCore::endStroke()
 		m_UndoStack.pop_front();
 }
 
+static void zpApplyPropRaw(CNodeImpl *node, uint32 appDataId, bool has, const std::string &value)
+{
+	if (!node)
+		return;
+	STORAGE::CAppData *ad = node->appData();
+	if (!ad)
+		return;
+	if (has)
+		ad->setScriptString(appDataId, value);
+	else
+		ad->erase(STORAGE::CAppData::ScriptClassId, STORAGE::CAppData::ScriptSuperClassId, appDataId);
+}
+
 void CPaintCore::applyUndoList(const std::vector<SUndoTile> &list, bool useOld)
 {
 	if (useOld)
 	{
 		for (int i = (int)list.size() - 1; i >= 0; --i)
 		{
-			if (list[i].Kind == 1)
+			if (list[i].Kind == 2)
+			{
+				// Prop: restore old raw presence/value
+				uint zi = (uint)-1;
+				for (size_t z = 0; z < m_Zones.size(); ++z)
+					if (m_Zones[z].In.ZoneId == list[i].Zone) { zi = (uint)z; break; }
+				if (zi != (uint)-1)
+				{
+					zpApplyPropRaw(m_Zones[zi].In.Node, list[i].AppDataId, list[i].OldHas, list[i].OldValue);
+					if (m_PropChangedCb)
+						m_PropChangedCb(list[i].Zone, list[i].AppDataId);
+				}
+			}
+			else if (list[i].Kind == 1)
 				setColorRaw(list[i].Zone, (uint)list[i].Patch, list[i].S, list[i].T, list[i].OldColor, false);
 			else
 				setTile(list[i].Zone, list[i].TileId, list[i].Old, NULL, false, true);
@@ -2247,13 +2274,71 @@ void CPaintCore::applyUndoList(const std::vector<SUndoTile> &list, bool useOld)
 	{
 		for (size_t i = 0; i < list.size(); ++i)
 		{
-			if (list[i].Kind == 1)
+			if (list[i].Kind == 2)
+			{
+				uint zi = (uint)-1;
+				for (size_t z = 0; z < m_Zones.size(); ++z)
+					if (m_Zones[z].In.ZoneId == list[i].Zone) { zi = (uint)z; break; }
+				if (zi != (uint)-1)
+				{
+					zpApplyPropRaw(m_Zones[zi].In.Node, list[i].AppDataId, list[i].NewHas, list[i].NewValue);
+					if (m_PropChangedCb)
+						m_PropChangedCb(list[i].Zone, list[i].AppDataId);
+				}
+			}
+			else if (list[i].Kind == 1)
 				setColorRaw(list[i].Zone, (uint)list[i].Patch, list[i].S, list[i].T, list[i].NewColor, false);
 			else
 				setTile(list[i].Zone, list[i].TileId, list[i].New, NULL, false, true);
 		}
 	}
 	applyChanges();
+}
+
+bool CPaintCore::opProp(uint zoneId, uint32 appDataId, bool newHas, const std::string &newValue,
+                        std::string &err)
+{
+	uint zi = (uint)-1;
+	for (size_t i = 0; i < m_Zones.size(); ++i)
+		if (m_Zones[i].In.ZoneId == zoneId) { zi = (uint)i; break; }
+	if (zi == (uint)-1)
+	{
+		err = "unknown zone";
+		return false;
+	}
+	SZone &z = m_Zones[zi];
+	if (z.In.Frozen)
+	{
+		err = "read-only";
+		return false;
+	}
+	CNodeImpl *node = z.In.Node;
+	if (!node)
+	{
+		err = "no node";
+		return false;
+	}
+	// Capture old raw
+	SUndoTile rec;
+	rec.Kind = 2;
+	rec.Zone = zoneId;
+	rec.AppDataId = appDataId;
+	std::string oldS;
+	rec.OldHas = APPDATA::getScriptAppData(node, appDataId, oldS);
+	if (rec.OldHas)
+		rec.OldValue = oldS;
+	rec.NewHas = newHas;
+	rec.NewValue = newValue;
+	// No-op if identical
+	if (rec.OldHas == rec.NewHas && (!rec.NewHas || rec.OldValue == rec.NewValue))
+		return true;
+	zpApplyPropRaw(node, appDataId, newHas, newValue);
+	m_CurStroke.clear();
+	m_CurStroke.push_back(rec);
+	endStroke();
+	if (m_PropChangedCb)
+		m_PropChangedCb(zoneId, appDataId);
+	return true;
 }
 
 bool CPaintCore::opUndo()

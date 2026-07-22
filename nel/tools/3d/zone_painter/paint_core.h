@@ -263,17 +263,26 @@ struct SPaintZoneInput
 	                    Rotate(0), Symmetry(false) { }
 };
 
-// Undo delta: one tile-record or color-vertex change (bounded LIFO of strokes).
+// Undo delta: one tile-record, color-vertex, or export-prop change (bounded LIFO of strokes).
+// Kind 2 (M18c): raw AppData restore so delete-vs-"0"/presence semantics reapply exactly.
 struct SUndoTile
 {
-	uint8 Kind; // 0 = tile record, 1 = color vertex
+	uint8 Kind; // 0 = tile record, 1 = color vertex, 2 = export prop appdata
 	uint Zone;
 	sint32 TileId; // tile kind
 	CTileDescP Old;
 	CTileDescP New;
 	sint32 Patch, S, T;         // color kind: grid slot
 	uint32 OldColor, NewColor;  // color kind: raw 0xAARRGGBB values
-	SUndoTile() : Kind(0), Zone(0), TileId(-1), Patch(-1), S(0), T(0), OldColor(0), NewColor(0) { }
+	// Kind 2:
+	uint32 AppDataId;
+	bool OldHas, NewHas;        // entry present?
+	std::string OldValue, NewValue; // string payload without trailing NUL
+	SUndoTile()
+		: Kind(0), Zone(0), TileId(-1), Patch(-1), S(0), T(0), OldColor(0), NewColor(0),
+		  AppDataId(0), OldHas(false), NewHas(false)
+	{
+	}
 };
 
 // One color-grid slot (zone index + patch + grid coordinates); closures of co-located slots
@@ -349,6 +358,18 @@ public:
 	bool opUndo();
 	bool opRedo();
 	void endStroke();
+	/**
+	 * M18c: write one export-prop AppData entry (or delete when newHas=false) and push a
+	 * single-entry undo stroke. Raw old/new restore delete-vs-value exactly. Shared by the
+	 * Prop panel and paint-script `prop` ops.
+	 */
+	bool opProp(uint zoneId, uint32 appDataId, bool newHas, const std::string &newValue,
+	            std::string &err);
+	/** Optional: after prop apply/undo/redo for USE_BOUNDINGBOX (main re-derives footprint). */
+	void setPropChangedCallback(void (*cb)(uint zoneId, uint32 appDataId))
+	{
+		m_PropChangedCb = cb;
+	}
 
 	// Tile brush size (0-2 -> the plugin's recursTile depths {0,4,8}; tile mouse strokes and
 	// the displace op) and tile group bias (0 = none, 1..12 = bank group).
@@ -511,6 +532,7 @@ private:
 	std::deque<std::vector<SUndoTile> > m_UndoStack;
 	std::deque<std::vector<SUndoTile> > m_RedoStack;
 	uint m_StrokeSets;
+	void (*m_PropChangedCb)(uint zoneId, uint32 appDataId);
 
 	// display mirror batch (CNelPatchChanger port; tiles + colors per (zoneId, patch))
 	typedef std::map<std::pair<int, int>, std::vector<NL3D::CTileElement> > TChangeMap;
