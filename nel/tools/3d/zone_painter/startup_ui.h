@@ -179,6 +179,12 @@ struct SSessionBoardBridge
 	/** Primary footprint size in fine cells (M14a multi-cell occupancy). */
 	int FootprintCellsW;
 	int FootprintCellsH;
+	/**
+	 * Optional exporter-identical occupancy mask over [0,W)×[0,H) (M17).
+	 * NULL / empty → treat every cell in the W×H rect as occupied (legacy AABB).
+	 * Row-major index = x + y * FootprintCellsW; true = claimed.
+	 */
+	const std::vector<bool> *FootprintMask;
 
 	SSessionBoardBridge()
 		: World(NULL), getCellState(NULL), openZone(NULL), closeZone(NULL),
@@ -186,7 +192,7 @@ struct SSessionBoardBridge
 		  scratchPlace(NULL), scratchRotate(NULL), scratchMirror(NULL), scratchRemove(NULL),
 		  scratchGetInstance(NULL), scratchGetInstanceOrigin(NULL),
 		  scratchPlaceContext(NULL), scratchRemoveContext(NULL), scratchGetContext(NULL),
-		  FootprintCellsW(1), FootprintCellsH(1)
+		  FootprintCellsW(1), FootprintCellsH(1), FootprintMask(NULL)
 	{
 	}
 };

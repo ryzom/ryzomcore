@@ -25,6 +25,7 @@ TARGET_LINK_LIBRARIES(zone_painter
 	NeL::misc
 	NeL::3d
 	NeL::gui
+	NeL::ligo
 )
 
 NL_DEFAULT_PROPS(zone_painter "NeL, Tools, 3D: Zone Painter")

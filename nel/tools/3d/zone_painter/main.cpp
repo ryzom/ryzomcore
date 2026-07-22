@@ -102,6 +102,7 @@
 #include <nel/misc/event_server.h>
 #include <nel/misc/events.h>
 #include <nel/misc/file.h>
+#include <nel/misc/i_xml.h>
 #include <nel/misc/mem_stream.h>
 #include <nel/misc/path.h>
 #include <nel/misc/time_nl.h>
@@ -125,6 +126,12 @@
 #include <nel/3d/zone.h>
 #include <nel/3d/zone_corner_smoother.h>
 #include <nel/3d/zone_symmetrisation.h>
+
+#include <nel/ligo/ligo_config.h>
+#include <nel/ligo/ligo_error.h>
+#include <nel/ligo/zone_template.h>
+#include <nel/ligo/zone_region.h>
+#include <nel/ligo/zone_bank.h>
 
 #include "../pipeline_max/storage_ole.h"
 #include "max_thumbnail.h"
@@ -301,9 +308,14 @@ struct SInstancePlace
 	SInstancePlace(int x, int y, uint r, bool m) : CellX(x), CellY(y), Rot(r), Mirror(m) { }
 };
 static std::vector<SInstancePlace> g_Places; // empty = primary only
-// Primary footprint in fine cells (set by appendInstanceZones / computeFootprintRect)
+// Primary footprint in fine cells (set by appendInstanceZones / computeFootprintRect / M17 mask)
 static int g_FootprintCellsW = 1;
 static int g_FootprintCellsH = 1;
+// Exporter-identical occupancy mask over [0,W)×[0,H) (M17). Empty → treat as filled rect.
+static std::vector<bool> g_FootprintMask;
+static float g_FootprintOriginX = 0.f; // world min-corner of cell (0,0) (AABB snap fallback)
+static float g_FootprintOriginY = 0.f;
+static bool g_FootprintFromTemplate = false; // true = CZoneTemplate::getMask; false = AABB square
 // Legacy NxN reporting (deprecated --instances / Screen B layout)
 static uint g_InstanceCols = 1;
 static uint g_InstanceRows = 1;
@@ -1409,10 +1421,12 @@ static void loadNeighborContextFiles(std::vector<SPaintZone> &zones, float cellS
 	if (g_StartupWorld.MaxDir.empty()) return;
 	if (!g_BoardSession && g_StartupWorld.Kind != ZPWS::Continent) return;
 
-	// Home footprint origin (for ecosystem translation): from primary zones already built
-	float homeOriginX = 0.f, homeOriginY = 0.f, stepX = 0.f, stepY = 0.f;
-	int fw = 1, fh = 1;
-	if (!zones.empty())
+	// Home footprint origin (for ecosystem translation): M17 globals when derived
+	float homeOriginX = g_FootprintOriginX, homeOriginY = g_FootprintOriginY;
+	float stepX = 0.f, stepY = 0.f;
+	int fw = g_FootprintCellsW > 0 ? g_FootprintCellsW : 1;
+	int fh = g_FootprintCellsH > 0 ? g_FootprintCellsH : 1;
+	if ((g_FootprintMask.empty() || g_FootprintCellsW < 1) && !zones.empty())
 	{
 		size_t primaryEnd = 0;
 		for (size_t i = 0; i < zones.size(); ++i)
@@ -1420,6 +1434,11 @@ static void loadNeighborContextFiles(std::vector<SPaintZone> &zones, float cellS
 		if (primaryEnd > 0)
 			computeFootprintRect(zones, 0, primaryEnd, cellSize,
 			                     homeOriginX, homeOriginY, stepX, stepY, fw, fh);
+	}
+	else
+	{
+		stepX = (float)fw * cellSize;
+		stepY = (float)fh * cellSize;
 	}
 	if (fw < 1) fw = 1;
 	if (fh < 1) fh = 1;
@@ -1527,11 +1546,15 @@ static void loadNeighborContextFiles(std::vector<SPaintZone> &zones, float cellS
 	}
 }
 
-// CLI --place-context specs (M16c); applied after primary load + rebuild
+// CLI --place-context specs (M16c/M17); applied after primary load + rebuild
 struct SPlaceContextSpec
 {
 	int Dx, Dy;
 	std::string Basename;
+	// Multi-cell context footprint (M17); empty Mask → 1×1 at (Dx,Dy)
+	int CellsW, CellsH;
+	std::vector<bool> Mask;
+	SPlaceContextSpec() : Dx(0), Dy(0), CellsW(1), CellsH(1) {}
 };
 static std::vector<SPlaceContextSpec> g_PlaceContextSpecs;
 // Forward: M16c place-context load (defined with scratch board helpers)
@@ -1548,9 +1571,8 @@ static bool loadOnePlaceContext(std::vector<SPaintZone> &zones, float cellSize,
 // pointer → same leaf/rpo key in paint_core). Per-zone Rotate/Symmetry feed paint_core's
 // transformDesc assembly so picks and paint ops compensate into primary-space storage.
 //
-// Footprint step: geometry AABB in X/Y of the primary zones, each axis rounded UP to the
-// nearest multiple of --cellsize. Mask-accurate / L-shaped footprints are a later refinement
-// (AABB rectangle only).
+// Footprint: exporter-identical occupancy mask + W×H (M17). Geometry AABB remains the
+// fallback when the zone template is unparseable / USE_BOUNDINGBOX is set.
 
 /** Parse "dx,dy[,rot][,m]" — cell offsets, rot 0..3, optional mirror (m|1|true). */
 static bool parsePlaceSpec(const std::string &s, SInstancePlace &out, std::string &err)
@@ -1713,12 +1735,389 @@ static void computeFootprintStep(const std::vector<SPaintZone> &zones, size_t pr
 	computeFootprintRect(zones, primaryBegin, primaryEnd, cellSize, ox, oy, stepX, stepY, cw, ch);
 }
 
+// ---------------------------------------------------------------------------------------------
+// M17 footprint masks — exporter-identical derivation
+// (pipeline_max_export_zone/main.cpp:175-234 buildZoneMask / buildSquareMask)
+//
+// Reuses NLLIGO::CZoneTemplate::build + getMask and the getSquareMask AABB fallback. The
+// exporter helpers are static locals in that TU; mirror them here (same inputs: open edges,
+// objectTM, symmetry, USE_BOUNDINGBOX appdata). No pipeline_max source edits; patch_eval.h
+// stays untouchable.
+
+/** Open-edge zone template mask (export buildZoneMask @ main.cpp:175). */
+static bool buildZoneMaskFromEval(const SEvalPatch &ep, const Matrix3M &objectTM, bool symmetry,
+                                  const NLLIGO::CLigoConfig &config,
+                                  std::vector<bool> &mask, uint &width, uint &height,
+                                  std::string &err)
+{
+	std::vector<NLMISC::CVector> vertices(ep.Pm.Verts.size());
+	for (size_t i = 0; i < ep.Pm.Verts.size(); ++i)
+	{
+		Point3M v = { ep.Pm.Verts[i].Pos[0], ep.Pm.Verts[i].Pos[1], ep.Pm.Verts[i].Pos[2] };
+		v = transformPoint(v, objectTM);
+		vertices[i].x = v.x;
+		vertices[i].y = v.y;
+		vertices[i].z = v.z;
+	}
+	std::vector<std::pair<uint, uint> > indexes;
+	for (size_t e = 0; e < ep.Pm.Edges.size(); ++e)
+	{
+		const SPmEdge &edge = ep.Pm.Edges[e];
+		if (edge.Patches.size() < 2)
+		{
+			if (symmetry)
+				indexes.push_back(std::pair<uint, uint>((uint)edge.V2, (uint)edge.V1));
+			else
+				indexes.push_back(std::pair<uint, uint>((uint)edge.V1, (uint)edge.V2));
+		}
+	}
+	NLLIGO::CZoneTemplate zoneTemplate;
+	NLLIGO::CLigoError errors;
+	if (!zoneTemplate.build(vertices, indexes, config, errors))
+	{
+		err = NLMISC::toString("zone template build failed (main error %d)", (int)errors.MainError);
+		return false;
+	}
+	zoneTemplate.getMask(mask, width, height);
+	return true;
+}
+
+/** getSquareMask replication (export buildSquareMask @ main.cpp:215): AABB, all cells true. */
+static void buildSquareMaskFromPatches(const std::vector<NL3D::CPatchInfo> &patchinfo,
+                                       float cellSize, std::vector<bool> &mask,
+                                       uint &width, uint &height)
+{
+	sint maxX = 1;
+	sint maxY = 1;
+	for (size_t i = 0; i < patchinfo.size(); ++i)
+	{
+		for (uint v = 0; v < 4; ++v)
+		{
+			sint positionX = (sint)((patchinfo[i].Patch.Vertices[v].x + cellSize / 2) / cellSize);
+			sint positionY = (sint)((patchinfo[i].Patch.Vertices[v].y + cellSize / 2) / cellSize);
+			if (positionX > maxX) maxX = positionX;
+			if (positionY > maxY) maxY = positionY;
+		}
+	}
+	width = (uint)maxX;
+	height = (uint)maxY;
+	if (width < 1) width = 1;
+	if (height < 1) height = 1;
+	mask.clear();
+	mask.resize(width * height, true);
+}
+
+static bool maskHasHole(const std::vector<bool> &mask)
+{
+	for (size_t i = 0; i < mask.size(); ++i)
+		if (!mask[i]) return true;
+	return false;
+}
+
+static std::string maskToTFString(const std::vector<bool> &mask, int w, int h)
+{
+	std::string s;
+	s.reserve((size_t)(w * h + h));
+	for (int y = 0; y < h; ++y)
+	{
+		if (y) s += '/';
+		for (int x = 0; x < w; ++x)
+			s += (x + y * w < (int)mask.size() && mask[(size_t)(x + y * w)]) ? 'T' : 'F';
+	}
+	return s;
+}
+
+/**
+ * Derive exporter-identical footprint for one zone.
+ * Honors NEL3D_APPDATA_LIGO_USE_BOUNDINGBOX; degenerate template → AABB + log.
+ */
+static bool deriveZoneFootprintMask(const SPaintZone &pz, float cellSize, float snap,
+                                    std::vector<bool> &mask, int &cellsW, int &cellsH,
+                                    float &originX, float &originY, bool &fromTemplate,
+                                    std::string &err)
+{
+	mask.clear();
+	cellsW = cellsH = 1;
+	originX = originY = 0.f;
+	fromTemplate = false;
+	if (cellSize <= 0.f) cellSize = 160.f;
+	if (snap <= 0.f) snap = 1.f;
+
+	// AABB origin always (geometry placement + board origin reference)
+	{
+		std::vector<SPaintZone> one;
+		one.push_back(pz);
+		float sx = 0.f, sy = 0.f;
+		int aw = 1, ah = 1;
+		computeFootprintRect(one, 0, 1, cellSize, originX, originY, sx, sy, aw, ah);
+	}
+
+	if (!pz.Node)
+	{
+		uint w = 0, h = 0;
+		buildSquareMaskFromPatches(pz.Patches, cellSize, mask, w, h);
+		cellsW = (int)w;
+		cellsH = (int)h;
+		err = "no node — square mask";
+		return true;
+	}
+
+	NLLIGO::CLigoConfig config;
+	config.CellSize = cellSize;
+	config.Snap = snap;
+	config.ZoneSnapShotRes = 128;
+
+	const bool useBB =
+		APPDATA::getScriptAppDataInt(pz.Node, NEL3D_APPDATA_LIGO_USE_BOUNDINGBOX, 0) != 0;
+	const bool symmetry =
+		APPDATA::getScriptAppDataInt(pz.Node, NEL3D_APPDATA_ZONE_SYMMETRY, 0) != 0;
+
+	SNodeTMCache tmCache;
+	Matrix3M objectTM = getObjectTM(pz.Node, tmCache);
+
+	uint w = 0, h = 0;
+	if (!useBB)
+	{
+		std::string terr;
+		if (buildZoneMaskFromEval(pz.Ep, objectTM, symmetry, config, mask, w, h, terr)
+		    && w >= 1 && h >= 1 && mask.size() == (size_t)w * (size_t)h)
+		{
+			cellsW = (int)w;
+			cellsH = (int)h;
+			fromTemplate = true;
+			return true;
+		}
+		if (terr.empty()) terr = "empty/degenerate mask";
+		err = terr;
+		printf("footprint: template mask failed for '%s' (%s) — AABB square fallback\n",
+		       pz.Name.c_str(), err.c_str());
+	}
+
+	buildSquareMaskFromPatches(pz.Patches, cellSize, mask, w, h);
+	cellsW = (int)w;
+	cellsH = (int)h;
+	fromTemplate = false;
+
+	// Align square-mask absolute indexing with snapped AABB when they disagree
+	{
+		float sx = 0.f, sy = 0.f, ox = 0.f, oy = 0.f;
+		int aw = 1, ah = 1;
+		std::vector<SPaintZone> one;
+		one.push_back(pz);
+		computeFootprintRect(one, 0, 1, cellSize, ox, oy, sx, sy, aw, ah);
+		if (aw > 0 && ah > 0 && (aw != cellsW || ah != cellsH)
+		    && (size_t)aw * (size_t)ah <= (size_t)cellsW * (size_t)cellsH)
+		{
+			cellsW = aw;
+			cellsH = ah;
+			mask.assign((size_t)cellsW * (size_t)cellsH, true);
+		}
+		originX = ox;
+		originY = oy;
+	}
+	return true;
+}
+
+static void unitCheckFootprintOccupancy(); // defined with rotFlip helpers below
+
+/**
+ * Derive primary footprint from the first eligible (non-frozen) zone in [begin,end).
+ * Fills g_Footprint* globals.
+ */
+static void derivePrimaryFootprint(const std::vector<SPaintZone> &zones, size_t begin, size_t end,
+                                   float cellSize, float snap)
+{
+	g_FootprintMask.clear();
+	g_FootprintCellsW = 1;
+	g_FootprintCellsH = 1;
+	g_FootprintOriginX = 0.f;
+	g_FootprintOriginY = 0.f;
+	g_FootprintFromTemplate = false;
+
+	size_t pick = end;
+	for (size_t i = begin; i < end && i < zones.size(); ++i)
+	{
+		if (!zones[i].Frozen) { pick = i; break; }
+	}
+	if (pick >= end || pick >= zones.size())
+	{
+		for (size_t i = begin; i < end && i < zones.size(); ++i) { pick = i; break; }
+	}
+	if (pick >= zones.size() || pick >= end)
+	{
+		float sx = 0.f, sy = 0.f;
+		computeFootprintRect(zones, begin, end, cellSize,
+		                     g_FootprintOriginX, g_FootprintOriginY, sx, sy,
+		                     g_FootprintCellsW, g_FootprintCellsH);
+		g_FootprintMask.assign((size_t)g_FootprintCellsW * (size_t)g_FootprintCellsH, true);
+		printf("footprint: %dx%d cells (AABB, no zone) origin (%.1f, %.1f) mask=filled\n",
+		       g_FootprintCellsW, g_FootprintCellsH, g_FootprintOriginX, g_FootprintOriginY);
+		return;
+	}
+
+	std::string err;
+	bool fromT = false;
+	int cw = 1, ch = 1;
+	float ox = 0.f, oy = 0.f;
+	std::vector<bool> mask;
+	deriveZoneFootprintMask(zones[pick], cellSize, snap, mask, cw, ch, ox, oy, fromT, err);
+	g_FootprintMask = mask;
+	g_FootprintCellsW = cw;
+	g_FootprintCellsH = ch;
+	g_FootprintOriginX = ox;
+	g_FootprintOriginY = oy;
+	g_FootprintFromTemplate = fromT;
+	if (g_FootprintMask.empty())
+		g_FootprintMask.assign((size_t)cw * (size_t)ch, true);
+
+	const bool hole = maskHasHole(g_FootprintMask);
+	const float sx = (float)cw * cellSize;
+	const float sy = (float)ch * cellSize;
+	printf("footprint: %dx%d cells  step (%.1f, %.1f)  origin (%.1f, %.1f)  pivot (%.1f, %.1f)  "
+	       "source=%s  filled=%s  mask=%s\n",
+	       cw, ch, sx, sy, ox, oy, ox + sx * 0.5f, oy + sy * 0.5f,
+	       fromT ? "template" : "aabb-square",
+	       hole ? "no" : "yes",
+	       maskToTFString(g_FootprintMask, cw, ch).c_str());
+
+	// One-shot unit checks (even without --place)
+	static bool s_UnitChecked = false;
+	if (!s_UnitChecked)
+	{
+		unitCheckFootprintOccupancy();
+		s_UnitChecked = true;
+	}
+}
+
+/**
+ * Cross-check derived mask against an existing .ligozone (test fixture only — never generated).
+ * Prints parity line: size/filled/mask bits.
+ */
+static bool compareFootprintToLigozone(const std::string &ligozonePath)
+{
+	if (ligozonePath.empty() || !NLMISC::CFile::fileExists(ligozonePath))
+	{
+		printf("footprint-ligozone: missing %s\n", ligozonePath.c_str());
+		return false;
+	}
+	NLLIGO::CZoneBankElement elm;
+	try
+	{
+		NLMISC::CIFile f;
+		if (!f.open(ligozonePath))
+		{
+			printf("footprint-ligozone: cannot open %s\n", ligozonePath.c_str());
+			return false;
+		}
+		NLMISC::CIXml xml;
+		xml.init(f);
+		elm.serial(xml);
+	}
+	catch (const std::exception &e)
+	{
+		printf("footprint-ligozone: parse failed %s: %s\n", ligozonePath.c_str(), e.what());
+		return false;
+	}
+	catch (...)
+	{
+		printf("footprint-ligozone: parse failed %s\n", ligozonePath.c_str());
+		return false;
+	}
+	elm.convertSize();
+	const int lw = (int)elm.getSizeX();
+	const int lh = (int)elm.getSizeY();
+	const std::vector<bool> &lm = elm.getMask();
+	const int dw = g_FootprintCellsW;
+	const int dh = g_FootprintCellsH;
+	const std::vector<bool> &dm = g_FootprintMask;
+	bool sizeOk = (lw == dw && lh == dh);
+	bool bitsOk = sizeOk && lm.size() == dm.size();
+	if (bitsOk)
+	{
+		for (size_t i = 0; i < lm.size(); ++i)
+			if (lm[i] != dm[i]) { bitsOk = false; break; }
+	}
+	const bool lHole = maskHasHole(lm);
+	const bool dHole = maskHasHole(dm);
+	printf("footprint-ligozone: %s  ref %dx%d filled=%s mask=%s  der %dx%d filled=%s mask=%s  "
+	       "size=%s bits=%s\n",
+	       NLMISC::CFile::getFilename(ligozonePath).c_str(),
+	       lw, lh, lHole ? "no" : "yes", maskToTFString(lm, lw, lh).c_str(),
+	       dw, dh, dHole ? "no" : "yes", maskToTFString(dm, dw, dh).c_str(),
+	       sizeOk ? "OK" : "DIFF", bitsOk ? "OK" : "DIFF");
+	return sizeOk && bitsOk;
+}
+
+/**
+ * SPiece::rotFlip convention (nel/src/ligo/zone_region.cpp:331): flip mirrors X, then rot
+ * 0..3. Transforms an occupancy mask in place; W/H swap on odd rotations.
+ */
+static void maskRotFlip(std::vector<bool> &mask, int &w, int &h, uint rot, bool flip)
+{
+	if (w < 1) w = 1;
+	if (h < 1) h = 1;
+	if (mask.size() != (size_t)w * (size_t)h)
+		mask.assign((size_t)w * (size_t)h, true);
+	NLLIGO::SPiece piece;
+	piece.w = w;
+	piece.h = h;
+	piece.Tab.resize((size_t)w * (size_t)h);
+	for (size_t i = 0; i < piece.Tab.size(); ++i)
+		piece.Tab[i] = mask[i] ? 1 : 0;
+	piece.rotFlip((uint8)(rot & 3), flip ? 1 : 0);
+	w = (int)piece.w;
+	h = (int)piece.h;
+	mask.resize((size_t)w * (size_t)h);
+	for (size_t i = 0; i < mask.size(); ++i)
+		mask[i] = piece.Tab[i] != 0;
+}
+
 /** Occupied block size after rot (mirror alone does not change the axis-aligned cell AABB). */
 static void footprintBlockSize(int cellsW, int cellsH, uint rot, bool /*mirror*/,
                                int &outW, int &outH)
 {
 	if (rot & 1) { outW = cellsH; outH = cellsW; }
 	else { outW = cellsW; outH = cellsH; }
+}
+
+/** Cell occupancy of a transformed mask placed with min-corner at (ox,oy). */
+static bool maskCellOccupied(const std::vector<bool> &mask, int w, int h,
+                             int ox, int oy, uint rot, bool mirror, int cx, int cy)
+{
+	std::vector<bool> m = mask;
+	int mw = w, mh = h;
+	if (m.empty()) m.assign((size_t)mw * (size_t)mh, true);
+	maskRotFlip(m, mw, mh, rot, mirror);
+	const int lx = cx - ox;
+	const int ly = cy - oy;
+	if (lx < 0 || ly < 0 || lx >= mw || ly >= mh) return false;
+	return m[(size_t)(lx + ly * mw)];
+}
+
+/** True if two placed masks share any true cell. */
+static bool masksCollide(const std::vector<bool> &a, int aw, int ah, int aox, int aoy,
+                         uint aRot, bool aMir,
+                         const std::vector<bool> &b, int bw, int bh, int box, int boy,
+                         uint bRot, bool bMir)
+{
+	std::vector<bool> ma = a, mb = b;
+	int maw = aw, mah = ah, mbw = bw, mbh = bh;
+	if (ma.empty()) ma.assign((size_t)maw * (size_t)mah, true);
+	if (mb.empty()) mb.assign((size_t)mbw * (size_t)mbh, true);
+	maskRotFlip(ma, maw, mah, aRot, aMir);
+	maskRotFlip(mb, mbw, mbh, bRot, bMir);
+	const int x0 = std::max(aox, box);
+	const int y0 = std::max(aoy, boy);
+	const int x1 = std::min(aox + maw, box + mbw);
+	const int y1 = std::min(aoy + mah, boy + mbh);
+	for (int y = y0; y < y1; ++y)
+	for (int x = x0; x < x1; ++x)
+	{
+		const int ai = (x - aox) + (y - aoy) * maw;
+		const int bi = (x - box) + (y - boy) * mbw;
+		if (ma[(size_t)ai] && mb[(size_t)bi]) return true;
+	}
+	return false;
 }
 
 /**
@@ -1762,7 +2161,7 @@ static void footprintBlockAfterTransform(int cellsW, int cellsH, uint rot, bool 
 	if (outH < 1) outH = 1;
 }
 
-/** Unit-check synthetic W≠H occupancy (no corpus brick is non-square multi-cell). */
+/** Unit-check W≠H block size + SPiece rotFlip mask + interlocking L legality. */
 static void unitCheckFootprintOccupancy()
 {
 	int odx = 0, ody = 0, ow = 0, oh = 0;
@@ -1776,11 +2175,34 @@ static void unitCheckFootprintOccupancy()
 	const bool ok88 = (ow == 8 && oh == 8 && odx == 0 && ody == 0);
 	footprintBlockAfterTransform(2, 1, 0, true, odx, ody, ow, oh);
 	const bool okM = (ow == 2 && oh == 1);
+
+	// Synthetic L 2×2 {T,T,F,T} (NeL example class) via SPiece::rotFlip
+	std::vector<bool> L;
+	L.push_back(true); L.push_back(true); L.push_back(false); L.push_back(true);
+	int lw = 2, lh = 2;
+	maskRotFlip(L, lw, lh, 0, false);
+	const bool okL0 = (lw == 2 && lh == 2 && L[0] && L[1] && !L[2] && L[3]);
+	std::vector<bool> Lr;
+	Lr.push_back(true); Lr.push_back(true); Lr.push_back(false); Lr.push_back(true);
+	int lrw = 2, lrh = 2;
+	maskRotFlip(Lr, lrw, lrh, 1, false);
+	const bool okLR = (lrw == 2 && lrh == 2);
+
+	std::vector<bool> L2;
+	L2.push_back(true); L2.push_back(true); L2.push_back(false); L2.push_back(true);
+	const bool collSame = masksCollide(L2, 2, 2, 0, 0, 0, false, L2, 2, 2, 0, 0, 0, false);
+	std::vector<bool> inv;
+	inv.push_back(false); inv.push_back(false); inv.push_back(true); inv.push_back(false);
+	const bool collInv = masksCollide(L2, 2, 2, 0, 0, 0, false, inv, 2, 2, 0, 0, 0, false);
+	const bool okInter = collSame && !collInv;
+
 	printf("footprint unit-check: 2×1 R1 → %dx%d originΔ (%d,%d) %s; 3×2 R1 → %dx%d %s; "
-	       "8×8 R1 origin-stable %s; 2×1 M size-stable %s\n",
+	       "8×8 R1 origin-stable %s; 2×1 M size-stable %s; "
+	       "L-mask R0 %s R1-size %s interlock %s\n",
 	       w21, h21, dx21, dy21, ok21 ? "OK" : "FAIL",
 	       w32, h32, ok32 ? "OK" : "FAIL",
-	       ok88 ? "OK" : "FAIL", okM ? "OK" : "FAIL");
+	       ok88 ? "OK" : "FAIL", okM ? "OK" : "FAIL",
+	       okL0 ? "OK" : "FAIL", okLR ? "OK" : "FAIL", okInter ? "OK" : "FAIL");
 }
 
 /** XY transform: mirror about Y (X flip, land/maxscript scale[-1,1,1]), then rot 0..3 CCW about pivot, then translate. */
@@ -1900,15 +2322,16 @@ static uint appendInstanceZones(std::vector<SPaintZone> &zones, size_t primaryCo
 	if (places.empty()) return 0;
 	if (primaryCount == 0 || zones.size() < primaryCount) return 0;
 
-	float originX = 0.f, originY = 0.f, stepX = 0.f, stepY = 0.f;
-	int cellsW = 1, cellsH = 1;
-	computeFootprintRect(zones, 0, primaryCount, cellSize, originX, originY, stepX, stepY, cellsW, cellsH);
-	g_FootprintCellsW = cellsW;
-	g_FootprintCellsH = cellsH;
+	// Prefer M17 derived mask footprint; refresh if empty
+	if (g_FootprintMask.empty() || g_FootprintCellsW < 1 || g_FootprintCellsH < 1)
+		derivePrimaryFootprint(zones, 0, primaryCount, cellSize, g_SessionSnap > 0.f ? g_SessionSnap : 1.f);
+	float originX = g_FootprintOriginX, originY = g_FootprintOriginY;
+	int cellsW = g_FootprintCellsW, cellsH = g_FootprintCellsH;
+	float stepX = (float)cellsW * cellSize, stepY = (float)cellsH * cellSize;
 	float pivotX = originX + stepX * 0.5f;
 	float pivotY = originY + stepY * 0.5f;
 
-	// One-shot synthetic W≠H occupancy math (corpus bricks are square multi-cell)
+	// One-shot synthetic W≠H + mask rotFlip/interlock unit checks
 	static bool s_UnitChecked = false;
 	if (!s_UnitChecked)
 	{
@@ -1949,8 +2372,10 @@ static uint appendInstanceZones(std::vector<SPaintZone> &zones, size_t primaryCo
 	       (uint)places.size(), cellsW, cellsH, stepX, stepY, originX, originY,
 	       pivotX, pivotY, (uint)primaryCount, appended, kInstanceZoneIdBase);
 	printf("  note: place dx,dy = min-corner of transformed block in fine cells; "
-	       "home occupies [0,%d)×[0,%d); mask-accurate L-shapes are later\n",
-	       cellsW, cellsH);
+	       "home claims masked cells of [0,%d)×[0,%d) (source=%s filled=%s)\n",
+	       cellsW, cellsH,
+	       g_FootprintFromTemplate ? "template" : "aabb-square",
+	       maskHasHole(g_FootprintMask) ? "no" : "yes");
 	// Pivot grid-alignment check for multi-cell square (material-bassin 8×8)
 	const float halfCell = cellSize * 0.5f;
 	const bool pivotOnHalf = (std::fabs(std::fmod((double)pivotX, (double)halfCell)) < 1e-3
@@ -3638,6 +4063,16 @@ static bool rebuildWorkingSet(std::string &err, uint &outWelds)
 			efi.ZoneIds.push_back(zones[zi].ZoneId);
 	}
 
+	// Refresh M17 primary footprint mask from rebuilt primary zones
+	{
+		size_t primaryOnly = 0;
+		for (size_t i = 0; i < zones.size(); ++i)
+			if (zones[i].ZoneId < 1000) ++primaryOnly;
+		if (primaryOnly > 0)
+			derivePrimaryFootprint(zones, 0, primaryOnly, g_SessionCellSize,
+			                       g_SessionSnap > 0.f ? g_SessionSnap : 1.f);
+	}
+
 	// Ecosystem scratch instances (M12c): re-append display clones after primary rebuild
 	if (!g_Places.empty() && g_StartupWorld.Kind == ZPWS::Ecosystem && !g_EditableFiles.empty())
 	{
@@ -3709,22 +4144,29 @@ static bool rebuildWorkingSet(std::string &err, uint &outWelds)
 static int scratchFw() { return g_FootprintCellsW > 0 ? g_FootprintCellsW : 1; }
 static int scratchFh() { return g_FootprintCellsH > 0 ? g_FootprintCellsH : 1; }
 
-/** True if cell (cx,cy) lies in the primary home footprint [0,fw)×[0,fh). */
+static const std::vector<bool> &scratchHomeMask()
+{
+	return g_FootprintMask;
+}
+
+/** True if cell (cx,cy) is a MASKED home cell (M17; falls back to full rect if mask empty). */
 static bool scratchHomeOccupies(int cx, int cy)
 {
 	const int fw = scratchFw(), fh = scratchFh();
-	return cx >= 0 && cy >= 0 && cx < fw && cy < fh;
+	if (cx < 0 || cy < 0 || cx >= fw || cy >= fh) return false;
+	const std::vector<bool> &m = scratchHomeMask();
+	if (m.empty() || (int)m.size() < fw * fh) return true;
+	return m[(size_t)(cx + cy * fw)];
 }
 
-/** True if place block (origin + transformed size) contains (cx,cy). */
+/** True if place's rotFlip-transformed mask claims (cx,cy). */
 static bool scratchPlaceOccupies(const SInstancePlace &pl, int cx, int cy)
 {
-	int bw = 0, bh = 0;
-	footprintBlockSize(scratchFw(), scratchFh(), pl.Rot, pl.Mirror, bw, bh);
-	return cx >= pl.CellX && cy >= pl.CellY && cx < pl.CellX + bw && cy < pl.CellY + bh;
+	return maskCellOccupied(scratchHomeMask(), scratchFw(), scratchFh(),
+	                        pl.CellX, pl.CellY, pl.Rot, pl.Mirror, cx, cy);
 }
 
-/** Find place whose occupied block contains (cx,cy). */
+/** Find place whose masked cells contain (cx,cy). */
 static bool scratchFindPlace(int cx, int cy, size_t &idx)
 {
 	for (size_t i = 0; i < g_Places.size(); ++i)
@@ -3738,34 +4180,61 @@ static bool scratchFindPlace(int cx, int cy, size_t &idx)
 	return false;
 }
 
-/** Axis-aligned block overlap (half-open intervals). */
-static bool scratchBlocksOverlap(int ax, int ay, int aw, int ah, int bx, int by, int bw, int bh)
-{
-	return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
-}
-
-/** True if a candidate block overlaps home or any place except skipIdx (-1 = none). */
-static bool scratchBlockConflicts(int ox, int oy, int bw, int bh, int skipIdx, std::string &err)
+/** True if candidate place mask collides with home or any place except skipIdx (-1 = none). */
+static bool scratchMaskConflicts(int ox, int oy, uint rot, bool mirror, int skipIdx, std::string &err)
 {
 	const int fw = scratchFw(), fh = scratchFh();
-	if (scratchBlocksOverlap(ox, oy, bw, bh, 0, 0, fw, fh))
+	const std::vector<bool> &hm = scratchHomeMask();
+	if (masksCollide(hm, fw, fh, 0, 0, 0, false,
+	                 hm, fw, fh, ox, oy, rot, mirror))
 	{
-		err = "block overlaps home footprint";
+		err = "mask overlaps home footprint";
 		return true;
 	}
 	for (size_t i = 0; i < g_Places.size(); ++i)
 	{
 		if ((int)i == skipIdx) continue;
-		int pw = 0, ph = 0;
-		footprintBlockSize(fw, fh, g_Places[i].Rot, g_Places[i].Mirror, pw, ph);
-		if (scratchBlocksOverlap(ox, oy, bw, bh, g_Places[i].CellX, g_Places[i].CellY, pw, ph))
+		if (masksCollide(hm, fw, fh, ox, oy, rot, mirror,
+		                 hm, fw, fh, g_Places[i].CellX, g_Places[i].CellY,
+		                 g_Places[i].Rot, g_Places[i].Mirror))
 		{
-			err = NLMISC::toString("block overlaps instance at (%d,%d)",
+			err = NLMISC::toString("mask overlaps instance at (%d,%d)",
 			                       g_Places[i].CellX, g_Places[i].CellY);
 			return true;
 		}
 	}
+	// Context bricks (multi-cell masks)
+	for (size_t i = 0; i < g_PlaceContextSpecs.size(); ++i)
+	{
+		const SPlaceContextSpec &pc = g_PlaceContextSpecs[i];
+		const int cw = pc.CellsW > 0 ? pc.CellsW : 1;
+		const int ch = pc.CellsH > 0 ? pc.CellsH : 1;
+		std::vector<bool> cm = pc.Mask;
+		if (cm.empty()) cm.assign((size_t)cw * (size_t)ch, true);
+		if (masksCollide(hm, fw, fh, ox, oy, rot, mirror,
+		                 cm, cw, ch, pc.Dx, pc.Dy, 0, false))
+		{
+			err = NLMISC::toString("mask overlaps context '%s' at (%d,%d)",
+			                       pc.Basename.c_str(), pc.Dx, pc.Dy);
+			return true;
+		}
+	}
 	return false;
+}
+
+/** Legacy rect-overlap helper (still used for quick block sizing checks). */
+static bool scratchBlocksOverlap(int ax, int ay, int aw, int ah, int bx, int by, int bw, int bh)
+{
+	return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
+}
+
+/** @deprecated M14 rect conflict — routes to mask conflict with rot0 of a filled rect. */
+static bool scratchBlockConflicts(int ox, int oy, int bw, int bh, int skipIdx, std::string &err)
+{
+	(void)bw; (void)bh;
+	// Assume candidate is home-sized at rot0/mirror0 (scratchPlace); callers that rotate
+	// use scratchMaskConflicts directly.
+	return scratchMaskConflicts(ox, oy, 0, false, skipIdx, err);
 }
 
 static bool scratchRebuild(std::string &err)
@@ -3778,13 +4247,15 @@ static bool scratchRebuild(std::string &err)
 	return true;
 }
 
-/** Find place-context index covering / at cell. */
+/** Find place-context index whose masked cells cover (cx,cy) (M17 multi-cell). */
 static bool scratchFindContext(int cx, int cy, size_t &idx)
 {
 	for (size_t i = 0; i < g_PlaceContextSpecs.size(); ++i)
 	{
-		// Context bricks claim a 1×1 cell at their place origin (footprint masks later)
-		if (g_PlaceContextSpecs[i].Dx == cx && g_PlaceContextSpecs[i].Dy == cy)
+		const SPlaceContextSpec &pc = g_PlaceContextSpecs[i];
+		const int cw = pc.CellsW > 0 ? pc.CellsW : 1;
+		const int ch = pc.CellsH > 0 ? pc.CellsH : 1;
+		if (maskCellOccupied(pc.Mask, cw, ch, pc.Dx, pc.Dy, 0, false, cx, cy))
 		{
 			idx = i;
 			return true;
@@ -3883,20 +4354,59 @@ static bool loadOnePlaceContext(std::vector<SPaintZone> &zones, float cellSize,
 		err = "no zones in " + ze.Basename;
 		return false;
 	}
-	float homeOriginX = 0.f, homeOriginY = 0.f, stepX = 0.f, stepY = 0.f;
-	int fw = 1, fh = 1;
-	size_t primaryEnd = 0;
-	for (size_t i = 0; i < zones.size(); ++i)
-		if (zones[i].ZoneId < 1000) primaryEnd = i + 1;
-	if (primaryEnd > 0)
-		computeFootprintRect(zones, 0, primaryEnd, cellSize,
-		                     homeOriginX, homeOriginY, stepX, stepY, fw, fh);
-	float cOx = 0.f, cOy = 0.f, cSx = 0.f, cSy = 0.f;
+	// Home footprint origin (prefer M17 globals when set)
+	float homeOriginX = g_FootprintOriginX, homeOriginY = g_FootprintOriginY;
+	if (g_FootprintCellsW < 1)
+	{
+		float stepX = 0.f, stepY = 0.f;
+		int fw = 1, fh = 1;
+		size_t primaryEnd = 0;
+		for (size_t i = 0; i < zones.size(); ++i)
+			if (zones[i].ZoneId < 1000) primaryEnd = i + 1;
+		if (primaryEnd > 0)
+			computeFootprintRect(zones, 0, primaryEnd, cellSize,
+			                     homeOriginX, homeOriginY, stepX, stepY, fw, fh);
+	}
+	// Context brick footprint (mask + origin) for snap + multi-cell occupancy
+	float cOx = 0.f, cOy = 0.f;
 	int cw = 1, ch = 1;
-	computeFootprintRect(zones, before, zones.size(), cellSize, cOx, cOy, cSx, cSy, cw, ch);
+	bool fromT = false;
+	std::vector<bool> cmask;
+	std::string derr;
+	// Prefer first non-frozen context zone (board authority skips ineligible)
+	size_t cPick = before;
+	for (size_t i = before; i < zones.size(); ++i)
+	{
+		if (!zones[i].Frozen) { cPick = i; break; }
+		cPick = i;
+	}
+	if (cPick < zones.size())
+		deriveZoneFootprintMask(zones[cPick], cellSize, g_SessionSnap > 0.f ? g_SessionSnap : 1.f,
+		                        cmask, cw, ch, cOx, cOy, fromT, derr);
+	else
+	{
+		float cSx = 0.f, cSy = 0.f;
+		computeFootprintRect(zones, before, zones.size(), cellSize, cOx, cOy, cSx, cSy, cw, ch);
+		cmask.assign((size_t)cw * (size_t)ch, true);
+	}
 	const float wantX = homeOriginX + (float)pc.Dx * cellSize;
 	const float wantY = homeOriginY + (float)pc.Dy * cellSize;
 	translateZonesXY(zones, before, zones.size(), wantX - cOx, wantY - cOy);
+
+	// Stash multi-cell mask on the matching place-context spec (if any)
+	for (size_t i = 0; i < g_PlaceContextSpecs.size(); ++i)
+	{
+		if (g_PlaceContextSpecs[i].Dx == pc.Dx && g_PlaceContextSpecs[i].Dy == pc.Dy
+		    && NLMISC::toLowerAscii(g_PlaceContextSpecs[i].Basename)
+		       == NLMISC::toLowerAscii(ze.Basename))
+		{
+			g_PlaceContextSpecs[i].CellsW = cw;
+			g_PlaceContextSpecs[i].CellsH = ch;
+			g_PlaceContextSpecs[i].Mask = cmask;
+			break;
+		}
+	}
+
 	SContextFile cf;
 	cf.Path = ze.MaxPath;
 	cf.Basename = ze.Basename;
@@ -3906,8 +4416,10 @@ static bool loadOnePlaceContext(std::vector<SPaintZone> &zones, float cellSize,
 	cf.Lm = nlm;
 	g_ContextFiles.push_back(cf);
 	g_NeighborScenes.push_back(nlm);
-	printf("place-context: '%s' @ (%d,%d) FROZEN translated\n",
-	       cf.Basename.c_str(), cf.CellX, cf.CellY);
+	printf("place-context: '%s' @ (%d,%d) footprint %dx%d source=%s mask=%s FROZEN translated\n",
+	       cf.Basename.c_str(), cf.CellX, cf.CellY, cw, ch,
+	       fromT ? "template" : "aabb-square",
+	       maskToTFString(cmask, cw, ch).c_str());
 	return true;
 }
 
@@ -3933,6 +4445,9 @@ static bool scratchPlaceContext(int cx, int cy, const std::string &basename, std
 	pc.Dx = cx;
 	pc.Dy = cy;
 	pc.Basename = basename;
+	pc.CellsW = 1;
+	pc.CellsH = 1;
+	pc.Mask.assign(1, true);
 	// strip .max
 	std::string::size_type dot = pc.Basename.rfind('.');
 	if (dot != std::string::npos && NLMISC::toLowerAscii(pc.Basename.substr(dot)) == ".max")
@@ -3942,6 +4457,54 @@ static bool scratchPlaceContext(int cx, int cy, const std::string &basename, std
 	{
 		g_PlaceContextSpecs.pop_back();
 		return false;
+	}
+	// After load, multi-cell mask is filled in loadOnePlaceContext — re-check collisions
+	// against the derived mask (1×1 provisional may have missed multi-cell overlap).
+	if (!g_PlaceContextSpecs.empty())
+	{
+		SPlaceContextSpec &loaded = g_PlaceContextSpecs.back();
+		const int cw = loaded.CellsW > 0 ? loaded.CellsW : 1;
+		const int ch = loaded.CellsH > 0 ? loaded.CellsH : 1;
+		std::vector<bool> cm = loaded.Mask;
+		if (cm.empty()) cm.assign((size_t)cw * (size_t)ch, true);
+		// Home collision
+		if (masksCollide(scratchHomeMask(), scratchFw(), scratchFh(), 0, 0, 0, false,
+		                 cm, cw, ch, loaded.Dx, loaded.Dy, 0, false))
+		{
+			g_PlaceContextSpecs.pop_back();
+			scratchRebuild(err);
+			err = "context mask overlaps home footprint";
+			return false;
+		}
+		for (size_t i = 0; i + 1 < g_PlaceContextSpecs.size(); ++i)
+		{
+			const SPlaceContextSpec &o = g_PlaceContextSpecs[i];
+			const int ow = o.CellsW > 0 ? o.CellsW : 1;
+			const int oh = o.CellsH > 0 ? o.CellsH : 1;
+			std::vector<bool> om = o.Mask;
+			if (om.empty()) om.assign((size_t)ow * (size_t)oh, true);
+			if (masksCollide(cm, cw, ch, loaded.Dx, loaded.Dy, 0, false,
+			                 om, ow, oh, o.Dx, o.Dy, 0, false))
+			{
+				g_PlaceContextSpecs.pop_back();
+				scratchRebuild(err);
+				err = "context mask overlaps another context";
+				return false;
+			}
+		}
+		for (size_t i = 0; i < g_Places.size(); ++i)
+		{
+			if (masksCollide(scratchHomeMask(), scratchFw(), scratchFh(),
+			                 g_Places[i].CellX, g_Places[i].CellY,
+			                 g_Places[i].Rot, g_Places[i].Mirror,
+			                 cm, cw, ch, loaded.Dx, loaded.Dy, 0, false))
+			{
+				g_PlaceContextSpecs.pop_back();
+				scratchRebuild(err);
+				err = "context mask overlaps instance";
+				return false;
+			}
+		}
 	}
 	return true;
 }
@@ -3980,9 +4543,8 @@ static bool scratchPlace(int cx, int cy, std::string &err)
 		err = "cell already occupied";
 		return false;
 	}
-	const int fw = scratchFw(), fh = scratchFh();
-	// Place origin at the clicked cell, rot 0 → occupies [cx,cx+fw)×[cy,cy+fh)
-	if (scratchBlockConflicts(cx, cy, fw, fh, -1, err))
+	// Place origin at the clicked cell, rot 0 — mask collision (not rect)
+	if (scratchMaskConflicts(cx, cy, 0, false, -1, err))
 		return false;
 	g_Places.push_back(SInstancePlace(cx, cy, 0, false));
 	g_InstanceCount = 1 + (uint)g_Places.size();
@@ -3990,9 +4552,9 @@ static bool scratchPlace(int cx, int cy, std::string &err)
 }
 
 /**
- * Rotate about the instance's footprint-block center (M14a): update Rot and recompute
+ * Rotate about the instance's footprint-block center (M14a/M17): update Rot and recompute
  * origin so it remains the min-corner of the transformed block; refuse if the new
- * block would overlap home or another instance.
+ * mask would collide with home or another instance.
  */
 static bool scratchRotate(int cx, int cy, int delta, std::string &err)
 {
@@ -4013,7 +4575,7 @@ static bool scratchRotate(int cx, int cy, int delta, std::string &err)
 	footprintBlockSize(fw, fh, newRot, pl.Mirror, newW, newH);
 	const int newOx = (int)std::floor(ctrX - 0.5 * (double)newW + 1e-9);
 	const int newOy = (int)std::floor(ctrY - 0.5 * (double)newH + 1e-9);
-	if (scratchBlockConflicts(newOx, newOy, newW, newH, (int)idx, err))
+	if (scratchMaskConflicts(newOx, newOy, newRot, pl.Mirror, (int)idx, err))
 		return false;
 	g_Places[idx].Rot = newRot;
 	g_Places[idx].CellX = newOx;
@@ -4729,6 +5291,7 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 					: g_StartupZone.Basename;
 				sessionBridge.FootprintCellsW = scratchFw();
 				sessionBridge.FootprintCellsH = scratchFh();
+				sessionBridge.FootprintMask = g_FootprintMask.empty() ? NULL : &g_FootprintMask;
 			}
 			ZPUI::setSessionBoardBridge(&sessionBridge);
 		}
@@ -5434,6 +5997,8 @@ int main(int argc, char **argv)
 	args.addArg("", "null-edit", "", "Headless: resolve carriers, write back untouched pristine blobs, save to --out");
 	args.addArg("", "verify-identical", "", "With --null-edit: byte-compare the output against the input");
 	args.addArg("", "dump-zones", "dir", "Headless: write every built display CZone and report counts");
+	args.addArg("", "check-ligozone", "file.ligozone",
+	            "After footprint derivation, compare mask/size to an existing .ligozone (test cross-check only)");
 	args.addArg("", "dump-rpo", "", "Dump every carrier's pristine tile records to stdout");
 	args.addArg("", "dump-bank-xref", "", "Dump the bank's tile -> (set, number, type) xref table to stdout");
 	args.addArg("", "dump-carrier-blob", "dir", "Write each zone's original carrier blob bytes to <dir>/zone<id>.blob");
@@ -6235,17 +6800,11 @@ args.addArg("", "instances", "NxM",
 		if (zones[i].ZoneId < 1000) ++primaryOnlyCount;
 	const size_t instancePrimaryCount = primaryOnlyCount;
 
-	// Always derive primary footprint cell counts (scratch board multi-cell occupancy, M14a)
+	// Always derive primary footprint (exporter-identical mask + W×H, M17)
 	if (instancePrimaryCount > 0)
-	{
-		float ox = 0.f, oy = 0.f, sx = 0.f, sy = 0.f;
-		int cw = 1, ch = 1;
-		computeFootprintRect(zones, 0, instancePrimaryCount, cellSize, ox, oy, sx, sy, cw, ch);
-		g_FootprintCellsW = cw;
-		g_FootprintCellsH = ch;
-		printf("footprint: %dx%d cells  step (%.1f, %.1f)  origin (%.1f, %.1f)  pivot (%.1f, %.1f)\n",
-		       cw, ch, sx, sy, ox, oy, ox + sx * 0.5f, oy + sy * 0.5f);
-	}
+		derivePrimaryFootprint(zones, 0, instancePrimaryCount, cellSize, snap);
+	if (args.haveLongArg("check-ligozone") && instancePrimaryCount > 0)
+		compareFootprintToLigozone(args.getLongArg("check-ligozone")[0]);
 
 	// Ecosystem self-instances (M4a/M12/M14a): display clones at --place offsets (rot/mirror).
 	// Same Node pointers → paint_core shares one pristine carrier; weld joins transformed edges.

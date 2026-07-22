@@ -1816,15 +1816,25 @@ void refreshSessionBoardStates()
 }
 
 /**
- * Ecosystem scratch board (M12c/M14a): fine-cell grid covering home + instances + margin.
+ * Ecosystem scratch board (M12c/M14a/M17): fine-cell grid covering home + instances + margin.
  *
- * Convention (M14a): each board cell is one --cellsize unit. Primary home occupies the
- * rectangle [0,fw)×[0,fh) (all cells tinted home; label on origin only). Each instance
- * claims its transformed block [ox,ox+bw)×[oy,oy+bh) (per-cell tint + label on origin).
- * Placement legality refuses overlapping blocks.
+ * Convention (M14a/M17): each board cell is one --cellsize unit. Primary home claims only
+ * MASKED cells of [0,fw)×[0,fh) (L-shapes/holes are first-class; unmasked cells are empty).
+ * Each instance claims its rotFlip-transformed mask cells. Placement legality refuses
+ * overlapping masked cells (interlocking L-shapes allowed).
  *
- * Basenames: H:cx,cy | I:ox,oy | E:cx,cy. Bridge owns the place list.
+ * Basenames: H:cx,cy | I:ox,oy | E:cx,cy | C:cx,cy:name. Bridge owns the place list.
  */
+static bool scratchHomeMaskOccupied(int cx, int cy, int fw, int fh)
+{
+	if (cx < 0 || cy < 0 || cx >= fw || cy >= fh) return false;
+	if (!s_SessionBridge || !s_SessionBridge->FootprintMask
+	    || s_SessionBridge->FootprintMask->empty()
+	    || (int)s_SessionBridge->FootprintMask->size() < fw * fh)
+		return true; // legacy: full rect when mask absent
+	return (*s_SessionBridge->FootprintMask)[(size_t)(cx + cy * fw)];
+}
+
 static void populateScratchBoard()
 {
 	const int kCell = 52;
@@ -1833,41 +1843,58 @@ static void populateScratchBoard()
 	const int fh = (s_SessionBridge && s_SessionBridge->FootprintCellsH > 0)
 	                   ? s_SessionBridge->FootprintCellsH : 1;
 
-	// Bounds: home + every instance block + at least 1 cell of empty margin (cap extent)
-	int minC = 0, maxC = fw - 1, minR = 0, maxR = fh - 1;
-	// Probe a generous window for instances (bridge lookup is O(places))
+	// Bounds from MASKED home cells + every instance/context-occupied cell + margin
+	int minC = 0, maxC = 0, minR = 0, maxR = 0;
+	bool anyHome = false;
+	for (int cy = 0; cy < fh; ++cy)
+	for (int cx = 0; cx < fw; ++cx)
+	{
+		if (!scratchHomeMaskOccupied(cx, cy, fw, fh)) continue;
+		if (!anyHome) { minC = maxC = cx; minR = maxR = cy; anyHome = true; }
+		else
+		{
+			if (cx < minC) minC = cx;
+			if (cx > maxC) maxC = cx;
+			if (cy < minR) minR = cy;
+			if (cy > maxR) maxR = cy;
+		}
+	}
+	if (!anyHome) { minC = 0; maxC = fw - 1; minR = 0; maxR = fh - 1; }
+
+	// Probe a generous window for instances/contexts (bridge lookup is O(places))
 	const int kProbe = 24;
 	for (int cy = -kProbe; cy <= kProbe + fh; ++cy)
 	for (int cx = -kProbe; cx <= kProbe + fw; ++cx)
 	{
+		bool occ = false;
 		if (s_SessionBridge && s_SessionBridge->scratchGetInstanceOrigin)
 		{
 			int ox = 0, oy = 0;
 			uint rot = 0;
 			bool mir = false;
 			if (s_SessionBridge->scratchGetInstanceOrigin(cx, cy, ox, oy, rot, mir))
-			{
-				// Expand by this cell
-				if (cx < minC) minC = cx;
-				if (cx > maxC) maxC = cx;
-				if (cy < minR) minR = cy;
-				if (cy > maxR) maxR = cy;
-			}
+				occ = true;
 		}
 		else if (s_SessionBridge && s_SessionBridge->scratchGetInstance)
 		{
 			uint rot = 0;
 			bool mir = false;
 			if (s_SessionBridge->scratchGetInstance(cx, cy, rot, mir))
-			{
-				if (cx < minC) minC = cx;
-				if (cx > maxC) maxC = cx;
-				if (cy < minR) minR = cy;
-				if (cy > maxR) maxR = cy;
-			}
+				occ = true;
 		}
+		if (!occ && s_SessionBridge && s_SessionBridge->scratchGetContext)
+		{
+			std::string cname;
+			if (s_SessionBridge->scratchGetContext(cx, cy, cname))
+				occ = true;
+		}
+		if (!occ) continue;
+		if (cx < minC) minC = cx;
+		if (cx > maxC) maxC = cx;
+		if (cy < minR) minR = cy;
+		if (cy > maxR) maxR = cy;
 	}
-	// Margin of empty wells around occupied
+	// Margin of empty wells around occupied (edge-adjacent fringe of the silhouette)
 	minC -= 1; maxC += 1; minR -= 1; maxR += 1;
 	// Keep a usable minimum for 1×1 bricks (roughly the old 7×7)
 	if (maxC - minC < 6) { const int mid = (minC + maxC) / 2; minC = mid - 3; maxC = mid + 3; }
@@ -1880,8 +1907,8 @@ static void populateScratchBoard()
 	for (int cx = minC; cx <= maxC; ++cx)
 	{
 		ZPWS::SZoneEntry z;
-		// Home multi-cell block
-		if (cx >= 0 && cy >= 0 && cx < fw && cy < fh)
+		// Home multi-cell block — only MASKED cells (M17)
+		if (scratchHomeMaskOccupied(cx, cy, fw, fh))
 			z.Basename = NLMISC::toString("H:%d,%d", cx, cy);
 		else if (s_SessionBridge && s_SessionBridge->scratchGetInstanceOrigin)
 		{
