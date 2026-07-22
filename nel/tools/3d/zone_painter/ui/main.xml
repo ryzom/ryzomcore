@@ -109,8 +109,12 @@
 			<view type="bitmap" id="thumb" posref="MM MM" w="36" h="20" scale="true"
 				texture="#thumb" global_color="false" active="false" />
 		</group>
-		<view type="text" id="t" posref="BM BM" x="0" y="4" fontsize="10" shadow="true"
-			global_color="false" color="255 255 255 255" hardtext="#title" />
+		<!-- M14b: multi-line wrap (2–3 lines); ellipsis via multi_max_line when exhausted.
+		     Board labels strip family prefixes in code (list rows keep full names). -->
+		<view type="text" id="t" posref="BM BM" x="0" y="2" w="50" fontsize="9" shadow="true"
+			global_color="false" color="255 255 255 255" hardtext="#title"
+			multi_line="true" line_maxw="48" multi_line_space="0" multi_max_line="3"
+			multi_line_maxw_only="true" />
 	</group>
 </template>
 

@@ -453,14 +453,20 @@ static void setBoardCellSelFill(CInterfaceGroup *cell, bool selected)
 
 /**
  * Parse scratch basenames (M12c/M14a):
- *   "H" | "H:cx,cy"  home cell (multi-cell home stamps H:x,y)
- *   "I:ox,oy"        instance (ox,oy = block origin; any cell in the block uses the origin id)
- *   "E:cx,cy"        empty
+ *   "H" | "H:cx,cy"           home cell (multi-cell home stamps H:x,y)
+ *   "I:ox,oy"                 instance ORIGIN cell (label lives here)
+ *   "I:ox,oy@cx,cy"           non-origin cell of an instance block (tint only)
+ *   "E:cx,cy"                 empty
+ *
+ * For I: forms, (cx,cy) out-params are the actual board cell (from @ tail when present,
+ * else the origin). Use isInstanceOrigin to know if the label should show.
  */
-static bool parseScratchBasename(const std::string &base, char &kind, int &cx, int &cy)
+static bool parseScratchBasename(const std::string &base, char &kind, int &cx, int &cy,
+                                 bool *isInstanceOrigin = NULL)
 {
 	kind = 0;
 	cx = cy = 0;
+	if (isInstanceOrigin) *isInstanceOrigin = false;
 	if (base == "H" || base == "HOME")
 	{
 		kind = 'H';
@@ -477,9 +483,9 @@ static bool parseScratchBasename(const std::string &base, char &kind, int &cx, i
 			return false;
 		return true;
 	}
-	if (base.size() >= 4 && (base[0] == 'I' || base[0] == 'E') && base[1] == ':')
+	if (base.size() >= 4 && base[0] == 'E' && base[1] == ':')
 	{
-		kind = base[0];
+		kind = 'E';
 		std::string rest = base.substr(2);
 		std::string::size_type comma = rest.find(',');
 		if (comma == std::string::npos) return false;
@@ -488,10 +494,85 @@ static bool parseScratchBasename(const std::string &base, char &kind, int &cx, i
 			return false;
 		return true;
 	}
+	if (base.size() >= 4 && base[0] == 'I' && base[1] == ':')
+	{
+		kind = 'I';
+		std::string rest = base.substr(2);
+		// Optional @cx,cy for non-origin cells of a multi-cell block
+		std::string::size_type at = rest.find('@');
+		std::string originPart = at == std::string::npos ? rest : rest.substr(0, at);
+		std::string::size_type comma = originPart.find(',');
+		if (comma == std::string::npos) return false;
+		int ox = 0, oy = 0;
+		if (!NLMISC::fromString(originPart.substr(0, comma), ox)
+		    || !NLMISC::fromString(originPart.substr(comma + 1), oy))
+			return false;
+		if (at == std::string::npos)
+		{
+			cx = ox; cy = oy;
+			if (isInstanceOrigin) *isInstanceOrigin = true;
+		}
+		else
+		{
+			std::string cellPart = rest.substr(at + 1);
+			std::string::size_type c2 = cellPart.find(',');
+			if (c2 == std::string::npos) return false;
+			if (!NLMISC::fromString(cellPart.substr(0, c2), cx)
+			    || !NLMISC::fromString(cellPart.substr(c2 + 1), cy))
+				return false;
+			if (isInstanceOrigin) *isInstanceOrigin = false;
+		}
+		return true;
+	}
 	return false;
 }
 
-/** Apply M11a/M12c live state fill + label (dirty * / R90 / M glyphs). */
+/**
+ * M14b: strip redundant ligo family prefixes so board stamps lead with the distinctive part
+ * (material-bassin → bassin, zonematerial-converted-200_dz → converted-200_dz).
+ * Browser LIST rows keep the full name (they have width).
+ */
+static std::string stripLigoFamilyPrefix(const std::string &name)
+{
+	static const char *kPrefixes[] = {
+		"zonetransition-",
+		"zonematerial-",
+		"zonespecial-",
+		"transition-",
+		"material-",
+		NULL
+	};
+	for (int i = 0; kPrefixes[i]; ++i)
+	{
+		const size_t n = strlen(kPrefixes[i]);
+		if (name.size() > n && NLMISC::toLowerAscii(name.substr(0, n)) == kPrefixes[i])
+			return name.substr(n);
+	}
+	return name;
+}
+
+/** Configure board cell text for multi-line wrap (2–3 lines, ellipsis via multi_max_line). */
+static void configureBoardLabel(CViewText *t)
+{
+	if (!t) return;
+	t->setMultiLine(true);
+	t->setMultiLineMaxWOnly(true);
+	t->setLineMaxW(48, true);
+	t->setMultiLineSpace(0);
+	t->setMultiMaxLine(3);
+	t->setOverflowText("…");
+	t->setFontSize(9);
+}
+
+/** Apply board label text with prefix strip + multi-line wrap (M14b). */
+static void setBoardCellLabel(CViewText *t, const std::string &raw)
+{
+	if (!t) return;
+	configureBoardLabel(t);
+	t->setHardText(stripLigoFamilyPrefix(raw));
+}
+
+/** Apply M11a/M12c/M14a/M14b live state fill + label (dirty * / R90 / M glyphs; prefix strip). */
 static void applySessionCellState(CInterfaceGroup *cell, const std::string &basename,
                                   ESessionCellState st)
 {
@@ -536,42 +617,48 @@ static void applySessionCellState(CInterfaceGroup *cell, const std::string &base
 				std::string home = s_SessionBridge && !s_SessionBridge->ScratchHomeName.empty()
 				                   ? s_SessionBridge->ScratchHomeName
 				                   : std::string("HOME");
-				// Truncate long brick names for the stamp (M14b will wrap + strip prefix)
-				if (home.size() > 10) home = home.substr(0, 9) + "…";
-				t->setHardText(home);
+				// M14b: strip family prefix + multi-line wrap (no hard truncate)
+				setBoardCellLabel(t, home);
 			}
 		}
-		else if (st == CellScratchInstance && parseScratchBasename(basename, sk, cx, cy))
+		else if (st == CellScratchInstance)
 		{
-			// Label only on the block origin cell; other cells of the block are tint-only
-			int ox = cx, oy = cy;
-			uint rot = 0;
-			bool mir = false;
-			if (s_SessionBridge && s_SessionBridge->scratchGetInstanceOrigin)
-				s_SessionBridge->scratchGetInstanceOrigin(cx, cy, ox, oy, rot, mir);
-			else if (s_SessionBridge && s_SessionBridge->scratchGetInstance)
-				s_SessionBridge->scratchGetInstance(cx, cy, rot, mir);
-			if (cx != ox || cy != oy)
+			// Label only on the block origin cell (basename "I:ox,oy"); non-origin
+			// cells use "I:ox,oy@cx,cy" and stay tint-only (M14a).
+			bool isOrigin = false;
+			if (!parseScratchBasename(basename, sk, cx, cy, &isOrigin) || !isOrigin)
 				t->setHardText("");
 			else
 			{
+				int ox = cx, oy = cy;
+				uint rot = 0;
+				bool mir = false;
+				if (s_SessionBridge && s_SessionBridge->scratchGetInstanceOrigin)
+					s_SessionBridge->scratchGetInstanceOrigin(cx, cy, ox, oy, rot, mir);
+				else if (s_SessionBridge && s_SessionBridge->scratchGetInstance)
+					s_SessionBridge->scratchGetInstance(cx, cy, rot, mir);
 				std::string lab = NLMISC::toString("%d,%d", ox, oy);
 				if (rot) lab += NLMISC::toString(" R%u", rot * 90);
 				if (mir) lab += " M";
+				configureBoardLabel(t);
 				t->setHardText(lab);
 			}
 		}
 		else if (st == CellScratchEmpty)
 			t->setHardText("");
 		else if (st == CellDirtyEditable)
-			t->setHardText(basename + " *");
+			setBoardCellLabel(t, basename + " *");
 		else
 		{
 			int r = 0, c = 0;
 			if (ZPWS::parseContinentZoneName(basename, r, c))
+			{
+				// Short grid form is already distinctive; still run through multi-line setup
+				configureBoardLabel(t);
 				t->setHardText(ZPWS::continentZoneName(r, c));
+			}
 			else
-				t->setHardText(basename);
+				setBoardCellLabel(t, basename);
 		}
 	}
 }
@@ -722,11 +809,11 @@ static void populateContinentGrid(const ZPWS::SWorldEntry &world)
 		snprintf(idbuf, sizeof(idbuf), "gc%d_%d", r, c);
 		snprintf(idxbuf, sizeof(idxbuf), "%d", zi);
 		p.push_back(std::make_pair(std::string("id"), std::string(idbuf)));
-		// Cell title: short grid form (4_AC / 193_EC) so prefixed converted names fit the stamp
+		// Cell title: short grid form (4_AC / 193_EC); else strip ligo family prefix (M14b)
 		{
 			std::string title = ZPWS::continentZoneName(r, c);
 			if (title.empty())
-				title = z.Basename;
+				title = stripLigoFamilyPrefix(z.Basename);
 			p.push_back(std::make_pair(std::string("title"), title));
 		}
 		p.push_back(std::make_pair(std::string("idx"), std::string(idxbuf)));
@@ -1618,10 +1705,13 @@ static void openInstanceActionPopup(const std::string &basename)
 	uint rot = 0;
 	bool mir = false;
 	parseScratchBasename(basename, sk, cx, cy);
-	if (s_SessionBridge && s_SessionBridge->scratchGetInstance)
+	int ox = cx, oy = cy;
+	if (s_SessionBridge && s_SessionBridge->scratchGetInstanceOrigin)
+		s_SessionBridge->scratchGetInstanceOrigin(cx, cy, ox, oy, rot, mir);
+	else if (s_SessionBridge && s_SessionBridge->scratchGetInstance)
 		s_SessionBridge->scratchGetInstance(cx, cy, rot, mir);
 	if (CViewText *t = findText("ui:zp:instance_action:content:title"))
-		t->setHardText(NLMISC::toString("Instance %d,%d", cx, cy));
+		t->setHardText(NLMISC::toString("Instance %d,%d", ox, oy));
 	if (CViewText *t = findText("ui:zp:instance_action:content:status"))
 	{
 		std::string st = NLMISC::toString("rot %u°", rot * 90);
@@ -1743,7 +1833,13 @@ static void populateScratchBoard()
 			uint rot = 0;
 			bool mir = false;
 			if (s_SessionBridge->scratchGetInstanceOrigin(cx, cy, ox, oy, rot, mir))
-				z.Basename = NLMISC::toString("I:%d,%d", ox, oy);
+			{
+				// Origin cell gets "I:ox,oy" (label); other block cells get "@cx,cy" (tint only)
+				if (cx == ox && cy == oy)
+					z.Basename = NLMISC::toString("I:%d,%d", ox, oy);
+				else
+					z.Basename = NLMISC::toString("I:%d,%d@%d,%d", ox, oy, cx, cy);
+			}
 			else
 				z.Basename = NLMISC::toString("E:%d,%d", cx, cy);
 		}
@@ -2058,11 +2154,25 @@ public:
 };
 REGISTER_ACTION_HANDLER(CAHZpCloseConfirmCancel, "zp_close_confirm_cancel");
 
-// Ecosystem scratch instance popup (M12c)
+// Ecosystem scratch instance popup (M12c/M14a) — any cell in a block resolves via bridge
 static bool scratchParsePending(int &cx, int &cy)
 {
 	char sk = 0;
-	return parseScratchBasename(s_Sess.PendingActionBasename, sk, cx, cy) && sk == 'I';
+	if (!parseScratchBasename(s_Sess.PendingActionBasename, sk, cx, cy) || sk != 'I')
+		return false;
+	// Prefer origin so rotate/mirror operate on the block consistently
+	if (s_SessionBridge && s_SessionBridge->scratchGetInstanceOrigin)
+	{
+		int ox = cx, oy = cy;
+		uint rot = 0;
+		bool mir = false;
+		if (s_SessionBridge->scratchGetInstanceOrigin(cx, cy, ox, oy, rot, mir))
+		{
+			cx = ox;
+			cy = oy;
+		}
+	}
+	return true;
 }
 
 class CAHZpInstRotCW : public IActionHandler
