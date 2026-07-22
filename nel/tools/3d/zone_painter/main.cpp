@@ -8284,11 +8284,14 @@ args.addArg("", "instances", "NxM",
 	std::string bankPath = args.haveLongArg("bank") ? args.getLongArg("bank")[0] : g_BankPath;
 	g_BankPath = bankPath;
 	bool bankRecursive = args.haveLongArg("bank-recursive") || g_ForceBankRecursive;
-	// Default cell size: 100 (historical tool default) on the legacy path; 160 on ecosystem
-	// startup (Ryzom ligo cell). Instance footprint steps round the geometry AABB up to this
-	// value — a wrong cellsize leaves a gap and zero welds across self-instance seams.
+	// Default cell size: 100 (historical tool default) on the legacy path; 160 on world
+	// startup — both ecosystem bricks and continent zones sit on the Ryzom ligo cell.
+	// Instance footprint steps round the geometry AABB up to this value — a wrong cellsize
+	// leaves a gap and zero welds across self-instance seams, and breaks the template-mask
+	// snap (continents at the old 100 default always fell back to AABB square footprints).
 	float cellSize = 100.f;
-	if (g_StartupWorld.Kind == ZPWS::Ecosystem && !g_StartupWorld.WorldName.empty())
+	if ((g_StartupWorld.Kind == ZPWS::Ecosystem || g_StartupWorld.Kind == ZPWS::Continent)
+	    && !g_StartupWorld.WorldName.empty())
 		cellSize = 160.f;
 	float snap = 1.f;
 	if (args.haveLongArg("cellsize")) NLMISC::fromString(args.getLongArg("cellsize")[0], cellSize);
