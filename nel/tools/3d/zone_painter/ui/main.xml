@@ -212,7 +212,8 @@
 				target="ui:zp:zone_browser:content:board_host:board" />
 		</group>
 
-		<!-- Legend + multi-open (M6b/M6c). Back stays content-anchored for list and board modes. -->
+		<!-- Legend + multi-open (M6b/M6c). Back stays content-anchored for list and board modes.
+		     Session hub (M11a): btn_back_paint + live-state legend; multi-open hidden. -->
 		<view type="text" id="board_legend" posref="BL BL" x="12" y="36" fontsize="10" shadow="true"
 			global_color="false" color="180 190 200 200"
 			hardtext="L-click open · R-click select · fringe = empty" active="false" />
@@ -220,6 +221,9 @@
 			onclick_l="zp_zone_back" params_l="" hardtext="Back" />
 		<ctrl style="text_button_16" id="btn_open_sel" posparent="btn_back" posref="MR ML" x="8" y="0"
 			onclick_l="zp_open_selection" params_l="" hardtext="Open selection" active="false" />
+		<!-- M11a session hub: return to painting without tearing the viewer session. -->
+		<ctrl style="text_button_16" id="btn_back_paint" posref="BL BL" x="12" y="12"
+			onclick_l="zp_back_to_paint" params_l="" hardtext="BACK TO PAINTING" active="false" />
 	</group>
 </group>
 <tree node="zone_browser"></tree>
@@ -402,8 +406,8 @@
 					onclick_l="zp_brush" params_l="+1" hardtext="+" />
 			</group>
 
-			<!-- Footer common: lock / undo / fill / save (always visible, last list child) -->
-			<group id="sec_footer" w="200" h="110" child_resize_h="false">
+			<!-- Footer common: lock / undo / fill / save / board (always visible, last list child) -->
+			<group id="sec_footer" w="200" h="120" child_resize_h="false">
 				<ctrl style="text_button_toggle" id="lock_borders" posref="TL TL" x="0" y="-2"
 					onclick_l="zp_lock_borders" params_l="" hardtext="Lock borders" />
 				<ctrl style="text_button_16" id="btn_undo" posparent="lock_borders" posref="BL TL" x="0" y="-6"
@@ -422,8 +426,11 @@
 					onclick_l="zp_fill" params_l="3" hardtext="F3" />
 				<ctrl style="text_button_16" id="btn_save" posparent="btn_fill0" posref="BL TL" x="0" y="-8"
 					onclick_l="zp_save" params_l="" hardtext="Save" />
+				<!-- M11a: session board hub (continent; O / ToggleBoard). -->
+				<ctrl style="text_button_16" id="btn_board" posparent="btn_save" posref="MR ML" x="8" y="0"
+					onclick_l="zp_toggle_board" params_l="" hardtext="BOARD" />
 				<view type="text" id="hint" posparent="btn_save" posref="BL TL" x="0" y="-6" fontsize="9" shadow="true"
-					global_color="false" color="255 255 255 140" hardtext="P tiles  Y season  F10  ESC" />
+					global_color="false" color="255 255 255 140" hardtext="P tiles  O board  Y season  F10  ESC" />
 			</group>
 
 		</group>
@@ -539,6 +546,46 @@
 			onclick_l="zp_save_copy" params_l="" hardtext="Save copy" />
 		<ctrl style="text_button_16" id="btn_cancel" posparent="btn_copy" posref="MR ML" x="8" y="0"
 			onclick_l="zp_save_cancel" params_l="" hardtext="Cancel" />
+	</group>
+</group>
+
+<!-- ===================================================================== -->
+<!-- Cell action popup (M11a session board — L-click on open cell)         -->
+<!-- ===================================================================== -->
+<group type="modal" id="cell_action" exit_click_out="true" w="280" h="160" options="skin_modal"
+	mouse_pos="false" posref="MM MM" x="0" y="0" active="false">
+	<group id="content" x="0" y="0" posref="TL TL" sizeref="wh" w="0" h="0">
+		<view type="text" id="title" posref="TM TM" x="0" y="-12" color="255 255 255 255" fontsize="13"
+			shadow="true" global_color="false" hardtext="Zone" />
+		<view type="text" id="status" posparent="title" posref="BM TM" x="0" y="-4" color="200 210 220 220"
+			fontsize="10" shadow="true" global_color="false" hardtext="" />
+		<ctrl style="text_button_16" id="btn_close" posref="TM TM" x="0" y="-48"
+			onclick_l="zp_cell_close" params_l="" hardtext="Close" />
+		<ctrl style="text_button_16" id="btn_save" posparent="btn_close" posref="BL TL" x="0" y="-6"
+			onclick_l="zp_cell_save" params_l="" hardtext="Save" />
+		<ctrl style="text_button_16" id="btn_toggle" posparent="btn_save" posref="BL TL" x="0" y="-6"
+			onclick_l="zp_cell_toggle" params_l="" hardtext="Make read-only" />
+		<ctrl style="text_button_16" id="btn_cancel" posparent="btn_toggle" posref="BL TL" x="0" y="-10"
+			onclick_l="zp_cell_action_cancel" params_l="" hardtext="Cancel" />
+	</group>
+</group>
+
+<!-- ===================================================================== -->
+<!-- Close dirty confirm (M11a) — Save first / Close without saving / Cancel -->
+<!-- ===================================================================== -->
+<group type="modal" id="close_confirm" exit_click_out="false" w="360" h="140" options="skin_modal"
+	mouse_pos="false" posref="MM MM" x="0" y="0" active="false">
+	<group id="content" x="0" y="0" posref="TL TL" sizeref="wh" w="0" h="0">
+		<view type="text" id="title" posref="TM TM" x="0" y="-14" color="255 255 255 255" fontsize="14"
+			shadow="true" global_color="false" hardtext="Close dirty zone?" />
+		<view type="text" id="status" posparent="title" posref="BM TM" x="0" y="-6" color="255 200 120 220"
+			fontsize="11" shadow="true" global_color="false" hardtext="" />
+		<ctrl style="text_button_16" id="btn_save" posref="BL BL" x="16" y="16"
+			onclick_l="zp_close_confirm_save" params_l="" hardtext="Save first" />
+		<ctrl style="text_button_16" id="btn_discard" posparent="btn_save" posref="MR ML" x="8" y="0"
+			onclick_l="zp_close_confirm_discard" params_l="" hardtext="Close without saving" />
+		<ctrl style="text_button_16" id="btn_cancel" posparent="btn_discard" posref="MR ML" x="8" y="0"
+			onclick_l="zp_close_confirm_cancel" params_l="" hardtext="Cancel" />
 	</group>
 </group>
 

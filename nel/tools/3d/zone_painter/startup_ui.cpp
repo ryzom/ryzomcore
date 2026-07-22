@@ -95,15 +95,21 @@ struct SStartupSession
 	std::string StatusMsg;
 	/** Ecosystem open layout (M4b): "1x1" default; options 2x1/1x2/2x2/3x3. */
 	std::string InstanceLayout;
+	/** M11a: true while zone_browser is the in-session board over the live viewer. */
+	bool SessionMode;
+	/** Basename pending close-confirm / cell-action popup. */
+	std::string PendingActionBasename;
 	SStartupSession()
 		: Active(false), Quit(false), OpenZone(false), FolderBrowserEnabled(false),
 		  Screen(ScreenNone), Worlds(NULL), SelectedWorld(-1), SelectedZone(-1),
-		  InstanceLayout("1x1")
+		  InstanceLayout("1x1"), SessionMode(false)
 	{
 	}
 };
 
 static SStartupSession s_Sess;
+static SSessionBoardBridge *s_SessionBridge = NULL;
+static bool s_SessionBoardVisible = false;
 
 static CInterfaceGroup *findGroup(const char *id)
 {
@@ -341,18 +347,41 @@ static void setZoneBrowserMode(bool continentBoard)
 	if (CInterfaceElement *el = CWidgetManager::getInstance()->getElementFromId(
 	        "ui:zp:zone_browser:content:board_host"))
 		el->setActive(continentBoard);
-	// Multi-select chrome is continent-board only (M6b/M6c)
+	// Multi-select chrome is continent-board only (M6b/M6c); hidden in session hub (M11a)
 	if (CInterfaceElement *el = CWidgetManager::getInstance()->getElementFromId(
 	        "ui:zp:zone_browser:content:board_legend"))
 		el->setActive(continentBoard);
 	if (CInterfaceElement *el = CWidgetManager::getInstance()->getElementFromId(
 	        "ui:zp:zone_browser:content:btn_open_sel"))
-		el->setActive(continentBoard);
+		el->setActive(continentBoard && !s_Sess.SessionMode);
+	// Session hub chrome
+	if (CInterfaceElement *el = CWidgetManager::getInstance()->getElementFromId(
+	        "ui:zp:zone_browser:content:btn_back_paint"))
+		el->setActive(s_Sess.SessionMode && continentBoard);
+	if (CCtrlTextButton *btn = dynamic_cast<CCtrlTextButton *>(
+	        CWidgetManager::getInstance()->getElementFromId("ui:zp:zone_browser:content:btn_back")))
+	{
+		// Startup: Back to world list. Session: hide (use BACK TO PAINTING).
+		btn->setActive(!s_Sess.SessionMode);
+	}
 }
 
 /** Update Open-selection button label/frozen + optional status (M6b). */
 static void refreshBoardSelectionUI()
 {
+	if (s_Sess.SessionMode)
+	{
+		// Session hub legend (M11a)
+		if (CViewText *t = findText("ui:zp:zone_browser:content:board_legend"))
+		{
+			t->setHardText(
+			    "L-click closed=open · L-click open=actions · fill=edit · dim=RO · *=dirty · O board");
+		}
+		if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(
+		        CWidgetManager::getInstance()->getElementFromId("ui:zp:zone_browser:content:btn_open_sel")))
+			btn->setActive(false);
+		return;
+	}
 	const uint n = (uint)s_Sess.PendingSelect.size();
 	if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(
 	        CWidgetManager::getInstance()->getElementFromId("ui:zp:zone_browser:content:btn_open_sel")))
@@ -378,24 +407,79 @@ static void refreshBoardSelectionUI()
 }
 
 /**
- * Explorer-style board multi-select fill (M10e).
+ * Explorer-style board multi-select fill (M10e) + session live-state fills (M11a).
  * Same tone as palette cells: NeL CGroupTree col_select default (255 128 128 128).
  * Applied as blank.tga button face color (not setPushed brick chrome).
+ *
+ * Session states (M11a):
+ *   closed         — transparent fill (default used-cell look)
+ *   open-editable  — selection-fill (255 128 128 128)
+ *   open-read-only — dimmer cool tint (80 100 140 110)
+ *   dirty          — editable fill + '*' on the label
  */
 static const CRGBA kBoardCellSelFill(255, 128, 128, 128);
 static const CRGBA kBoardCellSelHover(255, 128, 128, 64);
 static const CRGBA kBoardCellSelNone(0, 0, 0, 0);
+static const CRGBA kBoardCellReadOnly(80, 100, 140, 110);
+static const CRGBA kBoardCellReadOnlyHover(80, 100, 140, 80);
+static const CRGBA kBoardCellDirty(255, 160, 80, 150);
+static const CRGBA kBoardCellDirtyHover(255, 160, 80, 90);
 
-static void setBoardCellSelFill(CInterfaceGroup *cell, bool selected)
+static void setBoardCellFillRGBA(CInterfaceGroup *cell, const CRGBA &c, const CRGBA &hover)
 {
 	if (!cell)
 		return;
 	if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(cell->getCtrl("btn")))
 	{
-		const CRGBA c = selected ? kBoardCellSelFill : kBoardCellSelNone;
 		btn->setColor(c);
 		btn->setColorPushed(c);
-		btn->setColorOver(selected ? kBoardCellSelFill : kBoardCellSelHover);
+		btn->setColorOver(hover);
+	}
+}
+
+static void setBoardCellSelFill(CInterfaceGroup *cell, bool selected)
+{
+	setBoardCellFillRGBA(cell,
+	                     selected ? kBoardCellSelFill : kBoardCellSelNone,
+	                     selected ? kBoardCellSelFill : kBoardCellSelHover);
+}
+
+/** Apply M11a live state fill + dirty marker on the cell title. */
+static void applySessionCellState(CInterfaceGroup *cell, const std::string &basename,
+                                  ESessionCellState st)
+{
+	if (!cell)
+		return;
+	switch (st)
+	{
+	case CellOpenEditable:
+		setBoardCellFillRGBA(cell, kBoardCellSelFill, kBoardCellSelFill);
+		break;
+	case CellOpenReadOnly:
+		setBoardCellFillRGBA(cell, kBoardCellReadOnly, kBoardCellReadOnlyHover);
+		break;
+	case CellDirtyEditable:
+		setBoardCellFillRGBA(cell, kBoardCellDirty, kBoardCellDirtyHover);
+		break;
+	case CellClosed:
+	default:
+		setBoardCellFillRGBA(cell, kBoardCellSelNone, kBoardCellSelHover);
+		break;
+	}
+	// Dirty marker: '*' suffix on label (keep base name for closed/open clean)
+	if (CViewText *t = dynamic_cast<CViewText *>(cell->getView("t")))
+	{
+		if (st == CellDirtyEditable)
+			t->setHardText(basename + " *");
+		else
+		{
+			// Short grid form if available
+			int r = 0, c = 0;
+			if (ZPWS::parseContinentZoneName(basename, r, c))
+				t->setHardText(ZPWS::continentZoneName(r, c));
+			else
+				t->setHardText(basename);
+		}
 	}
 }
 
@@ -409,15 +493,9 @@ static void setBoardCellSelected(int zoneIdx, bool selected)
 	if (!ZPWS::parseContinentZoneName(s_Sess.Zones[zoneIdx].Basename, r, c))
 		return;
 	char idbuf[96];
-	snprintf(idbuf, sizeof(idbuf), "ui:zp:zone_browser:content:board_host:board:gc%d_%d:btn", r, c);
-	if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(
-	        CWidgetManager::getInstance()->getElementFromId(idbuf)))
-	{
-		const CRGBA c = selected ? kBoardCellSelFill : kBoardCellSelNone;
-		btn->setColor(c);
-		btn->setColorPushed(c);
-		btn->setColorOver(selected ? kBoardCellSelFill : kBoardCellSelHover);
-	}
+	snprintf(idbuf, sizeof(idbuf), "ui:zp:zone_browser:content:board_host:board:gc%d_%d", r, c);
+	if (CInterfaceGroup *cell = findGroup(idbuf))
+		setBoardCellSelFill(cell, selected);
 }
 
 static void clearBoard()
@@ -585,8 +663,15 @@ static void populateContinentGrid(const ZPWS::SWorldEntry &world)
 				btn->setW(kCell);
 				btn->setH(kCell);
 			}
-			// Restore multi-select flat fill (M6b / M10e Explorer-style)
-			setBoardCellSelFill(cell, s_Sess.PendingSelect.count(zi) != 0);
+			// Session board (M11a): live open/dirty state. Startup multi-select fill otherwise.
+			if (s_Sess.SessionMode && s_SessionBridge && s_SessionBridge->getCellState)
+			{
+				ESessionCellState st = CellClosed;
+				s_SessionBridge->getCellState(z.Basename, st);
+				applySessionCellState(cell, z.Basename, st);
+			}
+			else
+				setBoardCellSelFill(cell, s_Sess.PendingSelect.count(zi) != 0);
 		}
 	}
 
@@ -888,11 +973,41 @@ static void applyWorldSelection(int idx)
 	showScreen(ScreenZone);
 }
 
-/** L-click: open immediately (single zone, current behavior). */
+static void openCellActionPopup(const std::string &basename);
+static void openCloseConfirmModal(const std::string &basename, const std::string &purpose);
+
+/** L-click: startup = open immediately; session hub = open closed / popup for open. */
 static void applyZoneSelection(int idx)
 {
 	if (idx < 0 || idx >= (int)s_Sess.Zones.size())
 		return;
+
+	// M11a session board: closed → open; open → action popup
+	if (s_Sess.SessionMode)
+	{
+		const std::string &base = s_Sess.Zones[idx].Basename;
+		s_Sess.SelectedZone = idx;
+		s_Sess.PendingActionBasename = base;
+		if (s_SessionBridge && s_SessionBridge->isOpen && s_SessionBridge->isOpen(base))
+		{
+			openCellActionPopup(base);
+			return;
+		}
+		if (s_SessionBridge && s_SessionBridge->openZone)
+		{
+			std::string err;
+			if (!s_SessionBridge->openZone(base, err))
+			{
+				fprintf(stderr, "session board open '%s': %s\n", base.c_str(), err.c_str());
+				if (CViewText *t = findText("ui:zp:zone_browser:content:world_sub"))
+					t->setHardText(err.empty() ? "open failed" : err);
+			}
+			else
+				refreshSessionBoardStates();
+		}
+		return;
+	}
+
 	s_Sess.SelectedZone = idx;
 	s_Sess.PendingSelect.clear();
 	s_Sess.PendingSelect.insert(idx); // for EditableZones fill
@@ -951,6 +1066,8 @@ public:
 	virtual void execute(CCtrlBase *pCaller, const std::string &params)
 	{
 		if (!s_Sess.Active) return;
+		// Session hub: R-click unused (L-click handles open/actions)
+		if (s_Sess.SessionMode) return;
 		int idx = -1;
 		fromString(params, idx);
 		if (idx < 0 || idx >= (int)s_Sess.Zones.size())
@@ -1009,6 +1126,12 @@ class CAHZpZoneBack : public IActionHandler
 public:
 	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
 	{
+		if (s_Sess.SessionMode)
+		{
+			// Session hub: treat as back-to-painting
+			setSessionBoardVisible(false);
+			return;
+		}
 		if (!s_Sess.Active) return;
 		s_Sess.SelectedWorld = -1;
 		s_Sess.Zones.clear();
@@ -1016,6 +1139,16 @@ public:
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpZoneBack, "zp_zone_back");
+
+class CAHZpBackToPaint : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		setSessionBoardVisible(false);
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpBackToPaint, "zp_back_to_paint");
 
 static void populateFolderList();
 static void showScreen(EScreen screen);
@@ -1308,6 +1441,326 @@ EStartupResult runStartupFlow(UDriver *driver,
 	s_Sess.Worlds = NULL;
 	return result;
 }
+
+// ---------------------------------------------------------------------------------------------
+// Session board hub (M11a)
+
+void setSessionBoardBridge(SSessionBoardBridge *bridge)
+{
+	s_SessionBridge = bridge;
+}
+
+SSessionBoardBridge *getSessionBoardBridge()
+{
+	return s_SessionBridge;
+}
+
+static void openCellActionPopup(const std::string &basename)
+{
+	s_Sess.PendingActionBasename = basename;
+	// Enable/disable buttons based on state
+	const bool dirty = s_SessionBridge && s_SessionBridge->isDirty
+		&& s_SessionBridge->isDirty(basename);
+	const bool editable = s_SessionBridge && s_SessionBridge->isEditable
+		&& s_SessionBridge->isEditable(basename);
+	if (CViewText *t = findText("ui:zp:cell_action:content:title"))
+		t->setHardText(basename + (dirty ? " *" : ""));
+	if (CViewText *t = findText("ui:zp:cell_action:content:status"))
+	{
+		if (editable && dirty)
+			t->setHardText("open-editable, dirty");
+		else if (editable)
+			t->setHardText("open-editable");
+		else
+			t->setHardText("open read-only");
+	}
+	if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(
+	        CWidgetManager::getInstance()->getElementFromId("ui:zp:cell_action:content:btn_save")))
+		btn->setFrozen(!dirty || !editable);
+	if (CCtrlTextButton *btn = dynamic_cast<CCtrlTextButton *>(
+	        CWidgetManager::getInstance()->getElementFromId("ui:zp:cell_action:content:btn_toggle")))
+		btn->setHardText(editable ? "Make read-only" : "Make editable");
+	CWidgetManager::getInstance()->enableModalWindow(NULL, "ui:zp:cell_action");
+}
+
+static void openCloseConfirmModal(const std::string &basename, const std::string &purpose)
+{
+	s_Sess.PendingActionBasename = basename;
+	if (CViewText *t = findText("ui:zp:close_confirm:content:title"))
+		t->setHardText(purpose.empty() ? "Close dirty zone?" : purpose);
+	if (CViewText *t = findText("ui:zp:close_confirm:content:status"))
+		t->setHardText(basename + " has unsaved paint changes");
+	CWidgetManager::getInstance()->enableModalWindow(NULL, "ui:zp:close_confirm");
+}
+
+void forceShowCloseConfirmForShot(const std::string &basename)
+{
+	std::string b = basename;
+	if (b.empty() && !s_Sess.Zones.empty())
+		b = s_Sess.Zones[0].Basename;
+	if (b.empty())
+		b = "zone";
+	openCloseConfirmModal(b, "Close dirty zone?");
+}
+
+void forceShowCellActionForShot(const std::string &basename)
+{
+	std::string b = basename;
+	if (b.empty() && !s_Sess.Zones.empty())
+		b = s_Sess.Zones[0].Basename;
+	if (b.empty())
+		b = "zone";
+	openCellActionPopup(b);
+}
+
+void refreshSessionBoardStates()
+{
+	if (!s_SessionBoardVisible || !s_Sess.SessionMode)
+		return;
+	if (!s_SessionBridge || !s_SessionBridge->getCellState)
+		return;
+	for (size_t i = 0; i < s_Sess.Zones.size(); ++i)
+	{
+		int r = 0, c = 0;
+		if (!ZPWS::parseContinentZoneName(s_Sess.Zones[i].Basename, r, c))
+			continue;
+		char idbuf[96];
+		snprintf(idbuf, sizeof(idbuf), "ui:zp:zone_browser:content:board_host:board:gc%d_%d", r, c);
+		if (CInterfaceGroup *cell = findGroup(idbuf))
+		{
+			ESessionCellState st = CellClosed;
+			s_SessionBridge->getCellState(s_Sess.Zones[i].Basename, st);
+			applySessionCellState(cell, s_Sess.Zones[i].Basename, st);
+		}
+	}
+	refreshBoardSelectionUI();
+}
+
+void setSessionBoardVisible(bool visible)
+{
+	if (!s_SessionBridge || !s_SessionBridge->World)
+	{
+		// No continent session bridge: no-op
+		if (visible)
+			fprintf(stderr, "session board: no continent bridge (ecosystems use single-file flow)\n");
+		s_SessionBoardVisible = false;
+		return;
+	}
+	if (s_SessionBridge->World->Kind != ZPWS::Continent)
+	{
+		if (visible)
+			fprintf(stderr, "session board: continent worlds only this milestone\n");
+		s_SessionBoardVisible = false;
+		return;
+	}
+
+	s_SessionBoardVisible = visible;
+	s_Sess.SessionMode = visible;
+	if (visible)
+	{
+		// Populate board for the session world (reuses Screen B chrome)
+		s_Sess.Active = true; // allow board AHs while viewer runs
+		s_Sess.Worlds = NULL; // not used in session mode
+		s_Sess.SelectedWorld = 0;
+		// Fake a one-world list via Zones from the bridge world
+		ZPWS::listZones(*s_SessionBridge->World, s_Sess.Zones);
+		if (CViewText *t = findText("ui:zp:zone_browser:content:world_title"))
+			t->setHardText(s_SessionBridge->World->WorldName + "  (session board)");
+		if (CViewText *t = findText("ui:zp:zone_browser:content:world_sub"))
+			t->setHardText("working set — O / BACK TO PAINTING returns");
+		setLayoutSelectorVisible(false);
+		populateContinentGrid(*s_SessionBridge->World);
+		// Show zone_browser; keep painter visible underneath
+		if (CInterfaceElement *el = CWidgetManager::getInstance()->getElementFromId("ui:zp:zone_browser"))
+			el->setActive(true);
+		if (CGroupContainer *gc = dynamic_cast<CGroupContainer *>(
+		        CWidgetManager::getInstance()->getElementFromId("ui:zp:zone_browser")))
+			gc->setActive(true);
+		refreshSessionBoardStates();
+		refreshBoardSelectionUI();
+		printf("session board: open (%u zones)\n", (uint)s_Sess.Zones.size());
+	}
+	else
+	{
+		if (CInterfaceElement *el = CWidgetManager::getInstance()->getElementFromId("ui:zp:zone_browser"))
+			el->setActive(false);
+		// Leave modal if any
+		CWidgetManager::getInstance()->disableModalWindow();
+		s_Sess.SessionMode = false;
+		// Keep s_Sess.Active false so startup AHs do not fire mid-viewer except via SessionMode checks
+		s_Sess.Active = false;
+		s_Sess.PendingActionBasename.clear();
+		printf("session board: closed (back to painting)\n");
+	}
+}
+
+void toggleSessionBoard()
+{
+	setSessionBoardVisible(!s_SessionBoardVisible);
+}
+
+bool isSessionBoardVisible()
+{
+	return s_SessionBoardVisible;
+}
+
+// Cell-action popup handlers
+class CAHZpCellClose : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		CWidgetManager::getInstance()->disableModalWindow();
+		const std::string base = s_Sess.PendingActionBasename;
+		if (base.empty() || !s_SessionBridge || !s_SessionBridge->closeZone)
+			return;
+		const bool dirty = s_SessionBridge->isDirty && s_SessionBridge->isDirty(base);
+		const bool editable = s_SessionBridge->isEditable && s_SessionBridge->isEditable(base);
+		if (dirty && editable)
+		{
+			openCloseConfirmModal(base, "Close dirty zone?");
+			return;
+		}
+		std::string err;
+		if (!s_SessionBridge->closeZone(base, false, false, err))
+			fprintf(stderr, "session board close '%s': %s\n", base.c_str(), err.c_str());
+		refreshSessionBoardStates();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpCellClose, "zp_cell_close");
+
+class CAHZpCellSave : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		CWidgetManager::getInstance()->disableModalWindow();
+		const std::string base = s_Sess.PendingActionBasename;
+		if (base.empty() || !s_SessionBridge || !s_SessionBridge->saveZone)
+			return;
+		std::string err;
+		if (!s_SessionBridge->saveZone(base, err))
+			fprintf(stderr, "session board save '%s': %s\n", base.c_str(), err.c_str());
+		else
+			printf("session board: saved '%s'\n", base.c_str());
+		refreshSessionBoardStates();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpCellSave, "zp_cell_save");
+
+class CAHZpCellToggle : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		CWidgetManager::getInstance()->disableModalWindow();
+		const std::string base = s_Sess.PendingActionBasename;
+		if (base.empty() || !s_SessionBridge || !s_SessionBridge->toggleEditable)
+			return;
+		const bool dirty = s_SessionBridge->isDirty && s_SessionBridge->isDirty(base);
+		const bool editable = s_SessionBridge->isEditable && s_SessionBridge->isEditable(base);
+		if (editable && dirty)
+		{
+			// Confirm: save first or discard before demoting to RO
+			s_Sess.PendingActionBasename = base;
+			if (CViewText *t = findText("ui:zp:close_confirm:content:title"))
+				t->setHardText("Make read-only?");
+			if (CViewText *t = findText("ui:zp:close_confirm:content:status"))
+				t->setHardText(base + " is dirty — save before making read-only?");
+			// Reuse close_confirm; btn labels still say Save first / Close without saving
+			// "Close without saving" path demotes without save via forceDiscard
+			CWidgetManager::getInstance()->enableModalWindow(NULL, "ui:zp:close_confirm");
+			// Tag purpose via status prefix
+			s_Sess.StatusMsg = "toggle_ro";
+			return;
+		}
+		std::string err;
+		if (!s_SessionBridge->toggleEditable(base, false, false, err))
+			fprintf(stderr, "session board toggle '%s': %s\n", base.c_str(), err.c_str());
+		refreshSessionBoardStates();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpCellToggle, "zp_cell_toggle");
+
+class CAHZpCellActionCancel : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		CWidgetManager::getInstance()->disableModalWindow();
+		s_Sess.PendingActionBasename.clear();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpCellActionCancel, "zp_cell_action_cancel");
+
+// Close-confirm: Save first / Close without saving / Cancel
+class CAHZpCloseConfirmSave : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		CWidgetManager::getInstance()->disableModalWindow();
+		const std::string base = s_Sess.PendingActionBasename;
+		if (base.empty() || !s_SessionBridge)
+			return;
+		const bool isToggle = (s_Sess.StatusMsg == "toggle_ro");
+		s_Sess.StatusMsg.clear();
+		std::string err;
+		if (isToggle)
+		{
+			if (s_SessionBridge->toggleEditable
+			    && !s_SessionBridge->toggleEditable(base, /*saveFirst=*/true, false, err))
+				fprintf(stderr, "session board toggle(save) '%s': %s\n", base.c_str(), err.c_str());
+		}
+		else if (s_SessionBridge->closeZone
+		         && !s_SessionBridge->closeZone(base, /*saveFirst=*/true, false, err))
+		{
+			fprintf(stderr, "session board close(save) '%s': %s\n", base.c_str(), err.c_str());
+		}
+		refreshSessionBoardStates();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpCloseConfirmSave, "zp_close_confirm_save");
+
+class CAHZpCloseConfirmDiscard : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		CWidgetManager::getInstance()->disableModalWindow();
+		const std::string base = s_Sess.PendingActionBasename;
+		if (base.empty() || !s_SessionBridge)
+			return;
+		const bool isToggle = (s_Sess.StatusMsg == "toggle_ro");
+		s_Sess.StatusMsg.clear();
+		std::string err;
+		if (isToggle)
+		{
+			if (s_SessionBridge->toggleEditable
+			    && !s_SessionBridge->toggleEditable(base, false, /*forceDiscard=*/true, err))
+				fprintf(stderr, "session board toggle(discard) '%s': %s\n", base.c_str(), err.c_str());
+		}
+		else if (s_SessionBridge->closeZone
+		         && !s_SessionBridge->closeZone(base, false, /*forceDiscard=*/true, err))
+		{
+			fprintf(stderr, "session board close(discard) '%s': %s\n", base.c_str(), err.c_str());
+		}
+		refreshSessionBoardStates();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpCloseConfirmDiscard, "zp_close_confirm_discard");
+
+class CAHZpCloseConfirmCancel : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		CWidgetManager::getInstance()->disableModalWindow();
+		s_Sess.StatusMsg.clear();
+		s_Sess.PendingActionBasename.clear();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpCloseConfirmCancel, "zp_close_confirm_cancel");
 
 } // namespace ZPUI
 

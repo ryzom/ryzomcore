@@ -216,10 +216,24 @@ static void zpHarvestPainterFlags(CNodeImpl *node, sint &includeMeshes, sint &pr
 bool CPaintCore::init(const std::vector<SPaintZoneInput> &zones, NL3D::CTileBank *bank,
                       float cellSize, float snap, bool lockBorders, std::string &err)
 {
+	// Re-init safe (M11a working-set rebuild): free prior pristine copies + clear undo.
+	// Undo history is intentionally discarded on any working-set change.
+	for (size_t i = 0; i < m_Carriers.size(); ++i)
+		delete m_Carriers[i].Pristine;
+	m_Carriers.clear();
+	m_Zones.clear();
+	m_CurStroke.clear();
+	m_UndoStack.clear();
+	m_RedoStack.clear();
+	m_Changes.clear();
+	m_ColorChanges.clear();
+	m_Landscape = NULL; // caller re-attaches after landscape reassembly
 	m_Bank = bank;
 	m_LockBorders = lockBorders;
-	m_Zones.clear();
-	m_Carriers.clear();
+	m_StrokeRotation = 0;
+	m_StrokeOldTile = -1;
+	m_StrokeOldZone = -1;
+	m_StrokeSets = 0;
 
 	std::map<const void *, uint> carrierIndex; // keyed by leaf ptr or rpo ptr (shared objects)
 	for (size_t i = 0; i < zones.size(); ++i)
@@ -3012,6 +3026,65 @@ void CPaintCore::markZonesSaved(const std::vector<uint> &zoneIds)
 		else
 			encodeRpoChunk(*car.Pristine, car.OriginalBytes);
 	}
+}
+
+void CPaintCore::stashOriginalBytes(std::map<const void *, std::vector<uint8> > &out) const
+{
+	out.clear();
+	for (size_t c = 0; c < m_Carriers.size(); ++c)
+	{
+		const SCarrier &car = m_Carriers[c];
+		const void *key = car.SnapLeaf ? (const void *)car.SnapLeaf : (const void *)car.Rpo;
+		if (!key)
+			continue;
+		out[key] = car.OriginalBytes;
+	}
+}
+
+void CPaintCore::restoreOriginalBytes(const std::map<const void *, std::vector<uint8> > &in)
+{
+	for (size_t c = 0; c < m_Carriers.size(); ++c)
+	{
+		SCarrier &car = m_Carriers[c];
+		const void *key = car.SnapLeaf ? (const void *)car.SnapLeaf : (const void *)car.Rpo;
+		if (!key)
+			continue;
+		std::map<const void *, std::vector<uint8> >::const_iterator it = in.find(key);
+		if (it != in.end())
+			car.OriginalBytes = it->second;
+	}
+}
+
+void CPaintCore::revertZones(const std::vector<uint> &zoneIds)
+{
+	std::set<uint> carriers;
+	for (size_t z = 0; z < zoneIds.size(); ++z)
+	{
+		for (size_t i = 0; i < m_Zones.size(); ++i)
+		{
+			if (m_Zones[i].In.ZoneId != zoneIds[z])
+				continue;
+			carriers.insert(m_Zones[i].Carrier);
+			break;
+		}
+	}
+	for (std::set<uint>::const_iterator it = carriers.begin(); it != carriers.end(); ++it)
+	{
+		SCarrier &car = m_Carriers[*it];
+		if (!car.AnyUnfrozen || !car.Pristine)
+			continue;
+		std::string err;
+		bool ok = false;
+		if (car.SnapLeaf)
+			ok = decodeRPatchMesh(nlVectorData(car.OriginalBytes), car.OriginalBytes.size(),
+			                      *car.Pristine, err);
+		else
+			ok = decodeRpoChunk(nlVectorData(car.OriginalBytes), car.OriginalBytes.size(),
+			                    *car.Pristine, err);
+		if (!ok)
+			fprintf(stderr, "WARNING: revertZones: re-decode failed: %s\n", err.c_str());
+	}
+	// Landscape mirror is rebuilt on working-set change; no per-tile apply needed here.
 }
 
 void CPaintCore::dumpRpo(FILE *out) const

@@ -402,6 +402,21 @@ public:
 	 *	so subsequent dirty checks go false (write-target policy unchanged). */
 	void markZonesSaved(const std::vector<uint> &zoneIds);
 
+	/**
+	 * Working-set rebuild helpers (ui M11a session hub).
+	 *
+	 * Before re-init after open/close: call writeBack() so carrier blobs hold the current paint
+	 * state, then stashOriginalBytes(). After init() on the retained Node stacks (same SLoadedMax
+	 * scenes, do not reload files), restoreOriginalBytes() so dirty detection still compares
+	 * against the ORIGINAL load-time bytes rather than the just-re-decoded paint state.
+	 * Undo is always cleared by init() on any working-set change (session semantics).
+	 * Key = SnapLeaf* or Rpo* (same pointer keying as carrier sharing).
+	 */
+	void stashOriginalBytes(std::map<const void *, std::vector<uint8> > &out) const;
+	void restoreOriginalBytes(const std::map<const void *, std::vector<uint8> > &in);
+	/** Discard paint on listed zones: restore pristine from OriginalBytes (close without saving). */
+	void revertZones(const std::vector<uint> &zoneIds);
+
 	// Carrier tile-record dump (the mechanical verification surface).
 	void dumpRpo(FILE *out) const;
 	// Bank xref dump: tile -> (tileSet, number, type) for every bank tile.

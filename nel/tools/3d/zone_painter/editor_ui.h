@@ -96,6 +96,8 @@ struct SPaintUIBridge
 	void (*displaceIndexAbs)(int idx);
 	/** Show/hide the Tiles palette window (ui M8; key TogglePalette / panel button). */
 	void (*togglePalette)();
+	/** Show/hide the session board hub (ui M11a; key ToggleBoard / panel BOARD). Continent only. */
+	void (*toggleBoard)();
 	/** Set brush color RGB 0-255 (color picker / panel); same field as --color. */
 	void (*setBrushColor)(int r, int g, int b);
 
@@ -142,7 +144,7 @@ struct SPaintUIBridge
 		  undo(NULL), redo(NULL), fill(NULL), save(NULL), saveTo(NULL), saveOverwrite(NULL),
 		  seasonNext(NULL), colorRadiusDelta(NULL), hardnessDelta(NULL), opacityDelta(NULL),
 		  cycleBrushMask(NULL), toggleMaskMode(NULL), displaceIndexDelta(NULL),
-		  displaceIndexAbs(NULL), togglePalette(NULL), setBrushColor(NULL),
+		  displaceIndexAbs(NULL), togglePalette(NULL), toggleBoard(NULL), setBrushColor(NULL),
 		  HaveCore(false), Mode(0), CurTileSet(0), TileSetCount(0), Mode256(false),
 		  BrushSize(0), TileGroup(0), LockBorders(false), UndoDepth(0), CanSave(false),
 		  InteractiveSave(false), InstanceCount(1), UpdateThumbnail(true), SeasonCount(0),

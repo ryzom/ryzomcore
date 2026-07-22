@@ -95,6 +95,70 @@ bool startupSelectWorldZone(const std::vector<ZPWS::SWorldEntry> &worlds,
 void startupHideAllScreens();
 void startupShowPainter(bool show);
 
+// ---------------------------------------------------------------------------------------------
+// Session board hub (ui M11a) — continent grid over the live viewer (session intact).
+// Ecosystems keep the single-file flow this milestone; only continents use the session board.
+
+/** Per-cell live state for the session board (Explorer-style fill variants). */
+enum ESessionCellState
+{
+	CellClosed = 0,       ///< not in working set (default used-cell look)
+	CellOpenEditable,     ///< open as paint target (selection-fill tone)
+	CellOpenReadOnly,     ///< open as frozen context (dimmer tint)
+	CellDirtyEditable     ///< open-editable with unsaved paint (fill + dirty marker)
+};
+
+/**
+ * Bridge for mid-session board actions. main.cpp fills callbacks; startup_ui drives the
+ * board window. Interaction idiom (documented in --help / legend):
+ *   L-click CLOSED used cell → open editable (+ auto RO ring)
+ *   L-click OPEN cell        → action popup: Close / Save / Toggle editable↔RO / Cancel
+ *   ToggleBoard key / BACK TO PAINTING → hide board, return to painting
+ */
+struct SSessionBoardBridge
+{
+	const ZPWS::SWorldEntry *World; // current continent world (non-null while session board usable)
+	/** Return live state for a zone basename; false if unknown. */
+	bool (*getCellState)(const std::string &basename, ESessionCellState &out);
+	/** Open a closed zone as editable (rebuilds assembly). */
+	bool (*openZone)(const std::string &basename, std::string &err);
+	/** Close an open zone. If dirty editable and forceDiscard is false, UI shows confirm first. */
+	bool (*closeZone)(const std::string &basename, bool saveFirst, bool forceDiscard, std::string &err);
+	/** Save one dirty editable (same per-file path as save-all). */
+	bool (*saveZone)(const std::string &basename, std::string &err);
+	/** Toggle editable↔read-only. Dirty editable→RO requires saveFirst or forceDiscard. */
+	bool (*toggleEditable)(const std::string &basename, bool saveFirst, bool forceDiscard, std::string &err);
+	/** True when basename is currently dirty (editable only). */
+	bool (*isDirty)(const std::string &basename);
+	/** True when basename is open in the working set (editable or RO). */
+	bool (*isOpen)(const std::string &basename);
+	/** True when basename is open as editable (not RO neighbor). */
+	bool (*isEditable)(const std::string &basename);
+
+	SSessionBoardBridge()
+		: World(NULL), getCellState(NULL), openZone(NULL), closeZone(NULL),
+		  saveZone(NULL), toggleEditable(NULL), isDirty(NULL), isOpen(NULL), isEditable(NULL)
+	{
+	}
+};
+
+void setSessionBoardBridge(SSessionBoardBridge *bridge);
+SSessionBoardBridge *getSessionBoardBridge();
+
+/** Show/hide the session board over the live viewer (continent only). */
+void setSessionBoardVisible(bool visible);
+void toggleSessionBoard();
+bool isSessionBoardVisible();
+
+/** Rebuild cell fills/markers from the bridge (call after open/close/save/paint). */
+void refreshSessionBoardStates();
+
+/** Dev/test: open the close-confirm modal for one screenshot frame. */
+void forceShowCloseConfirmForShot(const std::string &basename = std::string());
+
+/** Dev/test: open the cell-action popup for one screenshot frame. */
+void forceShowCellActionForShot(const std::string &basename = std::string());
+
 } // namespace ZPUI
 
 #endif // ZONE_PAINTER_STARTUP_UI_H

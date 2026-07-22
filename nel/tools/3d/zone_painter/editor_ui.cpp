@@ -239,6 +239,18 @@ public:
 };
 REGISTER_ACTION_HANDLER(CAHZpTogglePalette, "zp_toggle_palette");
 
+class CAHZpToggleBoard : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->toggleBoard)
+			b->toggleBoard();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpToggleBoard, "zp_toggle_board");
+
 class CAHZpToggle256 : public IActionHandler
 {
 public:
@@ -1540,14 +1552,14 @@ void CEditorUI::syncPanelFromBridge()
 	if (CInterfaceGroup *g = findGroupEl(kSecFooter))
 		g->setActive(true);
 	// Force list reflow + resize the painter container to the active content height.
-	// Section heights (XML): tile 92, color 148, disp 56; footer 110; list space 4;
-	// common header ~72; container chrome ~28 → total ≈ 72+sec+4+110+28.
+	// Section heights (XML): tile 118, color 148, disp 80; footer 120; list space 4;
+	// common header ~72; container chrome ~28 → total ≈ 72+sec+4+120+28.
 	if (CInterfaceGroup *body = findGroupEl(kBody))
 		body->invalidateCoords();
 	{
 		// Section heights must match ui/main.xml sec_* h attributes.
 		const sint32 secH = tileActive ? 118 : (colorActive ? 148 : 80);
-		const sint32 wantH = 72 + secH + 4 + 110 + 28; // header + sec + gap + footer + chrome
+		const sint32 wantH = 72 + secH + 4 + 120 + 28; // header + sec + gap + footer + chrome
 		if (CInterfaceGroup *win = findGroupEl(kPainterWin))
 		{
 			// Clamp to pop_min/max band declared in XML (220..520)

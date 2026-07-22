@@ -127,6 +127,7 @@
 #include "max_thumbnail.h"
 
 #include <algorithm>
+#include <cctype>
 #include <cmath>
 #include <cstdio>
 #include <cstring>
@@ -237,9 +238,21 @@ struct SEditableFileInfo
 	std::string Basename;
 	PMAXLOAD::SLoadedMax *Lm; // NULL = primary stack lm
 	std::vector<uint> ZoneIds;
-	SEditableFileInfo() : Lm(NULL) {}
+	/** M11a: when false the file is open as read-only context (no paint; like neighbor). */
+	bool Editable;
+	SEditableFileInfo() : Lm(NULL), Editable(true) {}
 };
 static std::vector<SEditableFileInfo> g_EditableFiles;
+// M11a: primary stack scene pointer (set once after load; used by session rebuild)
+static PMAXLOAD::SLoadedMax *g_PrimaryLm = NULL;
+// M11b: when true, every non-forceFrozen zone is a paint target (today's open-everything).
+// Default false = exporter-faithful eligibility.
+static bool g_AllZones = false;
+// Session rebuild live pointers (valid only while runViewer runs)
+static float g_SessionCellSize = 160.f;
+static float g_SessionSnap = 1.f;
+static bool g_SessionLockBorders = false;
+static NL3D::CTileBank *g_SessionBank = NULL;
 // Ecosystem self-instances (ui M4a): layout grid Cols x Rows (1x1 = off). Primary zones sit
 // at the layout origin; remaining cells are display-level duplicates sharing the same Node
 // pointers (paint_core carrier keying) with geometry translated by whole-footprint steps.
@@ -302,6 +315,7 @@ enum TPainterKey
 	ZPK_ToggleUI,
 	ZPK_SeasonNext, // ui M6a: cycle landscape season textures
 	ZPK_TogglePalette, // ui M8: show/hide tileset thumbnail palette
+	ZPK_ToggleBoard, // ui M11a: session board hub over live viewer
 	ZPK_KeyCounter
 };
 
@@ -341,6 +355,7 @@ static const char *kPainterKeysName[ZPK_KeyCounter] =
 	"ToggleUI",
 	"SeasonNext",
 	"TogglePalette",
+	"ToggleBoard",
 };
 
 // Tool defaults: the pre-cfg hardcoded viewer keys stay on their keys (T/C/D, +/-, B, G, F);
@@ -380,6 +395,7 @@ static uint g_PainterKeys[ZPK_KeyCounter] =
 	NLMISC::KeyF10,       // ToggleUI (NLGUI panel visibility)
 	NLMISC::KeyY,         // SeasonNext (ui M6a; free key — cycle season textures)
 	NLMISC::KeyP,         // TogglePalette (ui M8; free key — tileset thumbnail palette)
+	NLMISC::KeyO,         // ToggleBoard (ui M11a; free key — session board hub)
 };
 
 // paint_ui.cpp light/zoom variable defaults (LoadVarCfg overrides; identical to the previous
@@ -571,20 +587,189 @@ struct SPaintZone
 	SEvalPatch Ep; // evaluated topology, kept for the paint core's metaTile graph (P3b)
 };
 
+// Exporter-faithful zone eligibility (M11b).
+//
+// Mirrors pipeline_max_export_zone + ligo/zone maxscript selection:
+//   - collectZoneNodes skips [NELLIGO] debug markers (shared patch_eval rule).
+//   - zonematerial- / zonespecial-: ligo selectAllPatch = all non-frozen (0x0976);
+//     export requires exactly one. If multiple non-frozen, prefer node name matching the
+//     cell token (case-insensitive); otherwise first non-frozen is eligible, rest RO.
+//   - zonetransition-: all non-frozen (transition scheme grid classification at export).
+//   - otherwise (direct ExportRykolZone / continent .max): first RklPatch that is not
+//     DONOTEXPORT and has a findID-parseable name (exportDirectZone loop); rest RO.
+//
+// File-frozen (0x0976) always remain frozen. --all-zones restores pre-M11b behavior:
+// every non-forceFrozen zone is eligible (only 0x0976 / neighbor forceFrozen stay RO).
+// Eligibility only affects paint targets; writeBack still covers every unfrozen carrier
+// of editable files; null-edit round-trips the whole file.
+//
+// Returns a same-length bool vector: true = eligible paint target when not forceFrozen.
+static void computeZoneEligibility(const std::vector<SZoneNode> &nodes,
+                                   const std::string &fileBasename,
+                                   std::vector<bool> &eligible)
+{
+	eligible.assign(nodes.size(), false);
+	if (nodes.empty())
+		return;
+	if (g_AllZones)
+	{
+		for (size_t i = 0; i < nodes.size(); ++i)
+			eligible[i] = !nodes[i].Frozen; // still respect 0x0976 under --all-zones? 
+		// Today open-everything = non-0x0976 only. Match that.
+		return;
+	}
+
+	// Tokenize basename on '-'
+	std::vector<std::string> tokens;
+	{
+		std::string::size_type pos = 0;
+		const std::string &s = fileBasename;
+		while (pos <= s.size())
+		{
+			std::string::size_type dash = s.find('-', pos);
+			if (dash == std::string::npos) { tokens.push_back(s.substr(pos)); break; }
+			tokens.push_back(s.substr(pos, dash - pos));
+			pos = dash + 1;
+		}
+	}
+	const std::string t0 = tokens.empty() ? std::string() : NLMISC::toLowerAscii(tokens[0]);
+
+	// Gather non-frozen indices
+	std::vector<size_t> nonFrozen;
+	for (size_t i = 0; i < nodes.size(); ++i)
+		if (!nodes[i].Frozen)
+			nonFrozen.push_back(i);
+
+	if (t0 == "zonematerial" || t0 == "zonespecial")
+	{
+		// Ligo single-brick: one non-frozen. Prefer name match to cell token.
+		std::string cell;
+		if (t0 == "zonematerial" && tokens.size() >= 3)
+			cell = tokens.back(); // e.g. 200_dz
+		else if (t0 == "zonespecial" && tokens.size() >= 2)
+			cell = tokens[1];
+		int match = -1;
+		if (!cell.empty())
+		{
+			const std::string cellL = NLMISC::toLowerAscii(cell);
+			for (size_t k = 0; k < nonFrozen.size(); ++k)
+			{
+				std::string n = NLMISC::toLowerAscii(
+					ucstring(nodes[nonFrozen[k]].Node->userName()).toUtf8());
+				if (n == cellL || n.find(cellL) != std::string::npos)
+				{
+					match = (int)nonFrozen[k];
+					break;
+				}
+			}
+		}
+		if (match >= 0)
+			eligible[(size_t)match] = true;
+		else if (!nonFrozen.empty())
+			eligible[nonFrozen[0]] = true;
+		for (size_t k = 0; k < nonFrozen.size(); ++k)
+			if (!eligible[nonFrozen[k]])
+				printf("eligibility: '%s' node '%s' non-export → read-only context\n",
+				       fileBasename.c_str(),
+				       ucstring(nodes[nonFrozen[k]].Node->userName()).toUtf8().c_str());
+		return;
+	}
+	if (t0 == "zonetransition")
+	{
+		// All non-frozen (exporter classifies on transition grid)
+		for (size_t k = 0; k < nonFrozen.size(); ++k)
+			eligible[nonFrozen[k]] = true;
+		return;
+	}
+
+	// Direct zone process (ExportRykolZone): first non-DONOTEXPORT with findID-able name.
+	// findID lives in export_zone; replicate the name parse (NUM_AB...).
+	for (size_t i = 0; i < nodes.size(); ++i)
+	{
+		if (nodes[i].Frozen)
+			continue;
+		// DONOTEXPORT appdata
+		{
+			// local reader — appdata on node
+			std::string s;
+			// getScriptAppDataInt is in export tools; use APPDATA via patch_eval's scene only.
+			// DONOTEXPORT rare on zone sources; skip if we cannot read (treat as exportable).
+		}
+		std::string name = ucstring(nodes[i].Node->userName()).toUtf8();
+		// findID: parts[0]=num, parts[1]=two letters
+		std::vector<std::string> parts;
+		std::string::size_type pos = 0;
+		while (pos <= name.size())
+		{
+			std::string::size_type us = name.find('_', pos);
+			if (us == std::string::npos) { parts.push_back(name.substr(pos)); break; }
+			parts.push_back(name.substr(pos, us - pos));
+			pos = us + 1;
+		}
+		bool idOk = false;
+		if (parts.size() >= 2 && parts[1].size() >= 2)
+		{
+			char l1 = parts[1][0], l2 = parts[1][1];
+			if (l1 >= 'A' && l1 <= 'Z' && l2 >= 'A' && l2 <= 'Z')
+			{
+				int num = 0;
+				if (sscanf(parts[0].c_str(), "%d", &num) == 1)
+					idOk = true;
+			}
+			// also accept lowercase letters
+			if (!idOk && parts[1].size() >= 2)
+			{
+				char l1 = (char)toupper(parts[1][0]), l2 = (char)toupper(parts[1][1]);
+				if (l1 >= 'A' && l1 <= 'Z' && l2 >= 'A' && l2 <= 'Z')
+				{
+					int num = 0;
+					if (sscanf(parts[0].c_str(), "%d", &num) == 1)
+						idOk = true;
+				}
+			}
+		}
+		if (idOk)
+		{
+			eligible[i] = true;
+			// Only the FIRST (export writes one .zone and exits)
+			for (size_t j = i + 1; j < nodes.size(); ++j)
+			{
+				if (nodes[j].Frozen) continue;
+				printf("eligibility: '%s' node '%s' not first exportable → read-only context\n",
+				       fileBasename.c_str(),
+				       ucstring(nodes[j].Node->userName()).toUtf8().c_str());
+			}
+			return;
+		}
+	}
+	// Fallback: first non-frozen (ligo-like) when no findID match
+	if (!nonFrozen.empty())
+		eligible[nonFrozen[0]] = true;
+}
+
 /**
  * Append paint zones from one Max scene.
  * zoneIdOffset: first zone id for this file (must not collide with existing zones).
  * forceFrozen: true for continent neighbor files (same semantics as 0x0976 boundary
  *   reference zones: landscape + weld + metaTile graph, never paint targets, carriers
  *   never rewritten because AnyUnfrozen stays false).
+ * fileBasename: used for exporter-faithful eligibility (M11b); empty = treat as --all-zones
+ *   for this file only when forceFrozen (neighbors ignore eligibility).
  */
 static bool buildPaintZones(CScene &scene, std::vector<SPaintZone> &zones,
-                            uint zoneIdOffset, bool forceFrozen)
+                            uint zoneIdOffset, bool forceFrozen,
+                            const std::string &fileBasename = std::string())
 {
 	std::vector<SZoneNode> nodes;
 	collectZoneNodes(scene, nodes);
+	std::vector<bool> eligible;
+	if (forceFrozen)
+		eligible.assign(nodes.size(), false); // neighbors: all RO
+	else
+		computeZoneEligibility(nodes, fileBasename, eligible);
 	SNodeTMCache tmCache;
 	bool any = false;
+	uint nEligible = 0, nRo = 0;
 	for (size_t i = 0; i < nodes.size(); ++i)
 	{
 		CNodeImpl *node = nodes[i].Node;
@@ -600,8 +785,10 @@ static bool buildPaintZones(CScene &scene, std::vector<SPaintZone> &zones,
 		Matrix3M objectTM = getObjectTM(node, tmCache);
 		SPaintZone pz;
 		pz.Node = node;
-		// Neighbor files have no 0x0976 marker; forceFrozen marks them read-only context.
-		pz.Frozen = forceFrozen || nodes[i].Frozen;
+		// Neighbor files / non-eligible / 0x0976 → read-only context (still displayed).
+		const bool fileFrozen = nodes[i].Frozen;
+		const bool ineligible = !forceFrozen && (i >= eligible.size() || !eligible[i]);
+		pz.Frozen = forceFrozen || fileFrozen || ineligible;
 		pz.Name = name;
 		pz.ZoneId = zoneIdOffset + (uint)i;
 		if (!buildPatchInfo(ep, objectTM, (int)pz.ZoneId, pz.Patches, err))
@@ -612,10 +799,14 @@ static bool buildPaintZones(CScene &scene, std::vector<SPaintZone> &zones,
 		pz.Ep = ep;
 		zones.push_back(pz);
 		any = true;
+		if (pz.Frozen) ++nRo; else ++nEligible;
 		if (g_verbose)
 			printf("zone %u '%s'%s: %u patches\n", pz.ZoneId, pz.Name.c_str(),
 			       pz.Frozen ? " FROZEN" : "", (uint)pz.Patches.size());
 	}
+	if (!forceFrozen && any)
+		printf("eligibility '%s': %u editable, %u read-only context (all-zones=%s)\n",
+		       fileBasename.c_str(), nEligible, nRo, g_AllZones ? "on" : "off");
 	return any;
 }
 
@@ -940,6 +1131,27 @@ static int dumpZones(std::vector<SPaintZone> &zones, uint welds, const std::stri
 		totalBound += bound;
 		totalCross += cross;
 		totalBorderVerts += (uint)pz.BorderVertices.size();
+	}
+	// M11b: name list for eligibility verification (editable vs read-only context)
+	{
+		std::string editNames, roNames;
+		uint nEdit = 0, nRo = 0;
+		for (size_t i = 0; i < zones.size(); ++i)
+		{
+			const SPaintZone &pz = zones[i];
+			if (pz.Frozen)
+			{
+				if (nRo++) roNames += ", ";
+				roNames += pz.Name;
+			}
+			else
+			{
+				if (nEdit++) editNames += ", ";
+				editNames += pz.Name;
+			}
+		}
+		printf("eligibility names: editable(%u)=[%s] read-only(%u)=[%s] all-zones=%s\n",
+		       nEdit, editNames.c_str(), nRo, roNames.c_str(), g_AllZones ? "on" : "off");
 	}
 	printf("OK dump-zones: %u zones, %u patches, %u bound edges (%u cross-zone), %u welds, %u border verts\n",
 	       (uint)zones.size(), totalPatches, totalBound, totalCross, welds, totalBorderVerts);
@@ -2219,6 +2431,481 @@ static void zpTogglePalette()
 	ZPUI::toggleTilesetPalette();
 }
 
+static void zpToggleBoard()
+{
+	ZPUI::toggleSessionBoard();
+}
+
+// ---------------------------------------------------------------------------------------------
+// Session working-set rebuild (M11a) — open/close/toggle mid-viewer.
+//
+// Sequence: writeBack retained paint → stash OriginalBytes → rebuild zones vector from kept
+// SLoadedMax scenes (no reload of already-open files) → weld → core.init → restore
+// OriginalBytes → reattach landscape (removeZone all + addZone). Undo is cleared by init().
+// Closing frees the SLoadedMax ONLY after confirm flow resolves.
+
+static SEditableFileInfo *findEditableByBasename(const std::string &basename)
+{
+	for (size_t i = 0; i < g_EditableFiles.size(); ++i)
+	{
+		if (NLMISC::toLowerAscii(g_EditableFiles[i].Basename)
+		    == NLMISC::toLowerAscii(basename))
+			return &g_EditableFiles[i];
+	}
+	return NULL;
+}
+
+static const ZPWS::SZoneEntry *findWorldZone(const std::string &basename)
+{
+	if (g_StartupWorld.MaxDir.empty())
+		return NULL;
+	static std::vector<ZPWS::SZoneEntry> s_listed;
+	static std::string s_listedDir;
+	if (s_listedDir != g_StartupWorld.MaxDir)
+	{
+		ZPWS::listZones(g_StartupWorld, s_listed);
+		s_listedDir = g_StartupWorld.MaxDir;
+	}
+	for (size_t i = 0; i < s_listed.size(); ++i)
+	{
+		if (NLMISC::toLowerAscii(s_listed[i].Basename)
+		    == NLMISC::toLowerAscii(basename))
+			return &s_listed[i];
+	}
+	return NULL;
+}
+
+/** Save one editable file in place (writeBack already done by caller optional). */
+static bool sessionSaveOneFile(SEditableFileInfo &efi, std::string &err)
+{
+	if (!g_PaintCtx.Core)
+	{
+		err = "no paint core";
+		return false;
+	}
+	if (!g_PaintCtx.Core->anyZoneDirty(efi.ZoneIds))
+	{
+		err = "not dirty";
+		return true; // no-op success
+	}
+	std::string wbErr;
+	if (!g_PaintCtx.Core->writeBack(wbErr))
+	{
+		err = "write-back: " + wbErr;
+		return false;
+	}
+	PIPELINE::MAX::CScene *scene = editableScene(efi);
+	if (!scene)
+	{
+		err = "no scene";
+		return false;
+	}
+	if (!saveOneOverwrite(efi.Path, *scene, /*doThumb=*/false))
+	{
+		err = "overwrite failed";
+		return false;
+	}
+	g_PaintCtx.Core->markZonesSaved(efi.ZoneIds);
+	return true;
+}
+
+/**
+ * Rebuild the painting landscape from current g_EditableFiles (+ continent ring).
+ * Retains open SLoadedMax scenes; reloads nothing already open.
+ * Returns weld count; fills err on hard failure.
+ */
+static bool rebuildWorkingSet(std::string &err, uint &outWelds)
+{
+	outWelds = 0;
+	if (!g_PaintCtx.Active || !g_PaintCtx.Core || !g_PaintCtx.Zones || !g_PaintCtx.Land
+	    || !g_SessionBank)
+	{
+		err = "session rebuild: viewer not live";
+		return false;
+	}
+	// Preserve dirty OriginalBytes across re-init
+	std::string wbErr;
+	if (!g_PaintCtx.Core->writeBack(wbErr))
+	{
+		err = "write-back before rebuild: " + wbErr;
+		return false;
+	}
+	std::map<const void *, std::vector<uint8> > originals;
+	g_PaintCtx.Core->stashOriginalBytes(originals);
+
+	// Snapshot previous zone ids for landscape remove
+	std::vector<uint> oldIds;
+	for (size_t i = 0; i < g_PaintCtx.Zones->size(); ++i)
+		oldIds.push_back((*g_PaintCtx.Zones)[i].ZoneId);
+
+	// Drop neighbor scenes (will re-load ring); keep editable scenes
+	for (size_t i = 0; i < g_NeighborScenes.size(); ++i)
+		delete g_NeighborScenes[i];
+	g_NeighborScenes.clear();
+
+	// Rebuild zones vector
+	std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
+	zones.clear();
+	for (size_t ei = 0; ei < g_EditableFiles.size(); ++ei)
+	{
+		SEditableFileInfo &efi = g_EditableFiles[ei];
+		PMAXLOAD::SLoadedMax *sceneLm = efi.Lm ? efi.Lm : g_PrimaryLm;
+		if (!sceneLm || !sceneLm->Scene)
+		{
+			err = "missing scene for " + efi.Basename;
+			return false;
+		}
+		const uint base = (uint)(ei * 1000);
+		const size_t before = zones.size();
+		// When demoted to RO (Editable=false), forceFrozen=true for all zones in file
+		const bool forceRo = !efi.Editable;
+		bool ok = buildPaintZones(*sceneLm->Scene, zones, base, forceRo, efi.Basename);
+		if (!ok)
+		{
+			fprintf(stderr, "WARNING: rebuild: no zones in %s\n", efi.Path.c_str());
+		}
+		efi.ZoneIds.clear();
+		for (size_t zi = before; zi < zones.size(); ++zi)
+			efi.ZoneIds.push_back(zones[zi].ZoneId);
+	}
+
+	// Continent union 8-ring of EDITABLE files only
+	if (g_LoadNeighbors && g_StartupWorld.Kind == ZPWS::Continent)
+	{
+		std::vector<ZPWS::SZoneEntry> centers;
+		for (size_t i = 0; i < g_EditableFiles.size(); ++i)
+		{
+			if (!g_EditableFiles[i].Editable)
+				continue;
+			ZPWS::SZoneEntry z;
+			z.MaxPath = g_EditableFiles[i].Path;
+			z.Basename = g_EditableFiles[i].Basename;
+			centers.push_back(z);
+		}
+		std::vector<ZPWS::SZoneEntry> neigh;
+		if (!centers.empty())
+			ZPWS::listContinentNeighborUnion(g_StartupWorld, centers, neigh);
+		// Exclude basenames already open as editable files
+		for (size_t ni = 0; ni < neigh.size(); ++ni)
+		{
+			if (findEditableByBasename(neigh[ni].Basename))
+				continue;
+			PMAXLOAD::SLoadedMax *nlm = new PMAXLOAD::SLoadedMax();
+			if (!PMAXLOAD::loadMaxFile(neigh[ni].MaxPath, *nlm))
+			{
+				fprintf(stderr, "WARNING: neighbor load failed: %s\n", neigh[ni].MaxPath.c_str());
+				delete nlm;
+				continue;
+			}
+			uint base = nextZoneIdBase(zones);
+			const uint minBase = (uint)((g_EditableFiles.size() + g_NeighborScenes.size() + 1) * 1000);
+			if (base < minBase)
+				base = minBase;
+			if (!buildPaintZones(*nlm->Scene, zones, base, /*forceFrozen=*/true, neigh[ni].Basename))
+			{
+				delete nlm;
+				continue;
+			}
+			g_NeighborScenes.push_back(nlm);
+		}
+	}
+
+	outWelds = weldPaintZones(zones);
+	printf("session rebuild: %u zones, %u welds, %u editable files, %u neighbor files\n",
+	       (uint)zones.size(), outWelds, (uint)g_EditableFiles.size(),
+	       (uint)g_NeighborScenes.size());
+
+	// Landscape: remove old, add new
+	for (size_t i = 0; i < oldIds.size(); ++i)
+		g_PaintCtx.Land->Landscape.removeZone((uint16)oldIds[i]);
+	for (size_t i = 0; i < zones.size(); ++i)
+	{
+		NL3D::CZone zone;
+		buildDisplayZone(zones[i], zone);
+		if (!g_PaintCtx.Land->Landscape.addZone(zone))
+			fprintf(stderr, "WARNING: rebuild addZone failed for %u '%s'\n",
+			        zones[i].ZoneId, zones[i].Name.c_str());
+	}
+	g_PaintCtx.Land->Landscape.setRefineMode(true);
+
+	// Paint core re-init (clears undo)
+	std::vector<ZPPAINT::SPaintZoneInput> inputs;
+	buildPaintInputs(zones, inputs);
+	std::string initErr;
+	if (!g_PaintCtx.Core->init(inputs, g_SessionBank, g_SessionCellSize, g_SessionSnap,
+	                           g_SessionLockBorders, initErr))
+	{
+		err = "paint core re-init: " + initErr;
+		return false;
+	}
+	g_PaintCtx.Core->restoreOriginalBytes(originals);
+	g_PaintCtx.Core->attachLandscape(&g_PaintCtx.Land->Landscape);
+	printf("session rebuild: undo cleared; retained dirty flags restored (%u carriers stashed)\n",
+	       (uint)originals.size());
+	return true;
+}
+
+static bool sessionGetCellState(const std::string &basename, ZPUI::ESessionCellState &out)
+{
+	out = ZPUI::CellClosed;
+	SEditableFileInfo *efi = findEditableByBasename(basename);
+	if (efi)
+	{
+		if (!efi->Editable)
+			out = ZPUI::CellOpenReadOnly;
+		else if (g_PaintCtx.Core && g_PaintCtx.Core->anyZoneDirty(efi->ZoneIds))
+			out = ZPUI::CellDirtyEditable;
+		else
+			out = ZPUI::CellOpenEditable;
+		return true;
+	}
+	// Neighbor-only open? Neighbors are not listed by basename in g_EditableFiles;
+	// check live zones for force-frozen files matching basename (name match on zone).
+	if (g_PaintCtx.Zones)
+	{
+		for (size_t i = 0; i < g_PaintCtx.Zones->size(); ++i)
+		{
+			// Neighbor zones use node names, not file basenames — check file via open set only.
+			(void)i;
+		}
+	}
+	// Track open neighbors by comparing against neighbor load list path basenames
+	// (re-list is heavy; mark closed if not in editables — ring is auto, not board-shown as open RO
+	// unless we also opened the file as RO via toggle). For board, neighbors of open editables
+	// show as open-RO when their FILE is in the ring:
+	if (g_StartupWorld.Kind == ZPWS::Continent && !g_EditableFiles.empty())
+	{
+		std::vector<ZPWS::SZoneEntry> centers;
+		for (size_t i = 0; i < g_EditableFiles.size(); ++i)
+		{
+			if (!g_EditableFiles[i].Editable) continue;
+			ZPWS::SZoneEntry z;
+			z.Basename = g_EditableFiles[i].Basename;
+			z.MaxPath = g_EditableFiles[i].Path;
+			centers.push_back(z);
+		}
+		std::vector<ZPWS::SZoneEntry> neigh;
+		if (!centers.empty())
+			ZPWS::listContinentNeighborUnion(g_StartupWorld, centers, neigh);
+		for (size_t i = 0; i < neigh.size(); ++i)
+		{
+			if (NLMISC::toLowerAscii(neigh[i].Basename) == NLMISC::toLowerAscii(basename))
+			{
+				out = ZPUI::CellOpenReadOnly;
+				return true;
+			}
+		}
+	}
+	return true; // closed
+}
+
+static bool sessionIsDirty(const std::string &basename)
+{
+	SEditableFileInfo *efi = findEditableByBasename(basename);
+	if (!efi || !efi->Editable || !g_PaintCtx.Core) return false;
+	return g_PaintCtx.Core->anyZoneDirty(efi->ZoneIds);
+}
+
+static bool sessionIsOpen(const std::string &basename)
+{
+	ZPUI::ESessionCellState st = ZPUI::CellClosed;
+	sessionGetCellState(basename, st);
+	return st != ZPUI::CellClosed;
+}
+
+static bool sessionIsEditable(const std::string &basename)
+{
+	SEditableFileInfo *efi = findEditableByBasename(basename);
+	return efi && efi->Editable;
+}
+
+static bool sessionOpenZone(const std::string &basename, std::string &err)
+{
+	if (findEditableByBasename(basename))
+	{
+		err = "already open";
+		return false;
+	}
+	const ZPWS::SZoneEntry *ze = findWorldZone(basename);
+	if (!ze)
+	{
+		err = "zone not found in world: " + basename;
+		return false;
+	}
+	PMAXLOAD::SLoadedMax *extra = new PMAXLOAD::SLoadedMax();
+	if (!PMAXLOAD::loadMaxFile(ze->MaxPath, *extra))
+	{
+		delete extra;
+		err = "cannot load " + ze->MaxPath;
+		return false;
+	}
+	SEditableFileInfo efi;
+	efi.Path = ze->MaxPath;
+	efi.Basename = ze->Basename;
+	efi.Lm = extra;
+	efi.Editable = true;
+	g_ExtraEditableScenes.push_back(extra);
+	g_EditableFiles.push_back(efi);
+	uint welds = 0;
+	if (!rebuildWorkingSet(err, welds))
+	{
+		// rollback
+		g_EditableFiles.pop_back();
+		g_ExtraEditableScenes.pop_back();
+		delete extra;
+		return false;
+	}
+	printf("session open: '%s' editable; welds=%u\n", basename.c_str(), welds);
+	return true;
+}
+
+static bool sessionCloseZone(const std::string &basename, bool saveFirst, bool forceDiscard, std::string &err)
+{
+	SEditableFileInfo *efi = findEditableByBasename(basename);
+	// Closing a pure neighbor is a no-op (ring is automatic)
+	if (!efi)
+	{
+		err = "not an opened file: " + basename;
+		return false;
+	}
+	if (efi->Editable && g_PaintCtx.Core && g_PaintCtx.Core->anyZoneDirty(efi->ZoneIds))
+	{
+		if (saveFirst)
+		{
+			if (!sessionSaveOneFile(*efi, err))
+				return false;
+		}
+		else if (!forceDiscard)
+		{
+			err = "dirty (need save or discard)";
+			return false;
+		}
+		else
+		{
+			// Abandon paint on this file before rebuild writeBack encodes pristine→carrier
+			g_PaintCtx.Core->revertZones(efi->ZoneIds);
+		}
+	}
+	// Must keep at least one editable file
+	uint nEditable = 0;
+	for (size_t i = 0; i < g_EditableFiles.size(); ++i)
+		if (g_EditableFiles[i].Editable) ++nEditable;
+	if (efi->Editable && nEditable <= 1)
+	{
+		err = "cannot close the last editable zone";
+		return false;
+	}
+	// Remove from lists; free scene if heap-owned (extra). Primary stack lm stays alive
+	// until process exit but is dropped from the working set (not re-assembled).
+	PMAXLOAD::SLoadedMax *toFree = efi->Lm;
+	const bool wasPrimary = (toFree == NULL);
+	for (size_t i = 0; i < g_EditableFiles.size(); ++i)
+	{
+		if (&g_EditableFiles[i] == efi)
+		{
+			g_EditableFiles.erase(g_EditableFiles.begin() + (std::ptrdiff_t)i);
+			break;
+		}
+	}
+	if (toFree)
+	{
+		for (size_t i = 0; i < g_ExtraEditableScenes.size(); ++i)
+		{
+			if (g_ExtraEditableScenes[i] == toFree)
+			{
+				g_ExtraEditableScenes.erase(g_ExtraEditableScenes.begin() + (std::ptrdiff_t)i);
+				break;
+			}
+		}
+		delete toFree;
+	}
+	// Point g_PaintCtx.Scene at a remaining editable after primary close
+	if (wasPrimary && !g_EditableFiles.empty())
+	{
+		PIPELINE::MAX::CScene *sc = editableScene(g_EditableFiles[0]);
+		if (sc)
+			g_PaintCtx.Scene = sc;
+		g_PaintCtx.InputPath = g_EditableFiles[0].Path;
+	}
+	uint welds = 0;
+	if (!rebuildWorkingSet(err, welds))
+		return false;
+	printf("session close: '%s'; welds=%u\n", basename.c_str(), welds);
+	return true;
+}
+
+static bool sessionSaveZone(const std::string &basename, std::string &err)
+{
+	SEditableFileInfo *efi = findEditableByBasename(basename);
+	if (!efi)
+	{
+		err = "not open: " + basename;
+		return false;
+	}
+	if (!efi->Editable)
+	{
+		err = "read-only: " + basename;
+		return false;
+	}
+	return sessionSaveOneFile(*efi, err);
+}
+
+static bool sessionToggleEditable(const std::string &basename, bool saveFirst, bool forceDiscard,
+                                  std::string &err)
+{
+	SEditableFileInfo *efi = findEditableByBasename(basename);
+	if (!efi)
+	{
+		// Opening as RO then making editable: open first as editable
+		if (!sessionOpenZone(basename, err))
+			return false;
+		efi = findEditableByBasename(basename);
+		if (!efi) { err = "open failed"; return false; }
+		// already editable after open
+		return true;
+	}
+	if (efi->Editable)
+	{
+		// → read-only
+		if (g_PaintCtx.Core && g_PaintCtx.Core->anyZoneDirty(efi->ZoneIds))
+		{
+			if (saveFirst)
+			{
+				if (!sessionSaveOneFile(*efi, err))
+					return false;
+			}
+			else if (!forceDiscard)
+			{
+				err = "dirty (need save or discard)";
+				return false;
+			}
+			else
+				g_PaintCtx.Core->revertZones(efi->ZoneIds);
+		}
+		// Keep at least one editable
+		uint nEditable = 0;
+		for (size_t i = 0; i < g_EditableFiles.size(); ++i)
+			if (g_EditableFiles[i].Editable) ++nEditable;
+		if (nEditable <= 1)
+		{
+			err = "cannot demote the last editable zone";
+			return false;
+		}
+		efi->Editable = false;
+	}
+	else
+	{
+		// → editable (re-registers carriers as unfrozen)
+		efi->Editable = true;
+	}
+	uint welds = 0;
+	if (!rebuildWorkingSet(err, welds))
+		return false;
+	printf("session toggle: '%s' now %s; welds=%u\n",
+	       basename.c_str(), efi->Editable ? "editable" : "read-only", welds);
+	return true;
+}
+
 /** Cycle season preference + live-flush landscape tile textures (paint state untouched). */
 static void zpSeasonNext()
 {
@@ -2520,8 +3207,30 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 		paintBridge.displaceIndexDelta = zpDisplaceIndexDelta;
 		paintBridge.displaceIndexAbs = zpDisplaceIndexAbs;
 		paintBridge.togglePalette = zpTogglePalette;
+		paintBridge.toggleBoard = zpToggleBoard;
 		paintBridge.setBrushColor = zpSetBrushColor;
 		ZPUI::setPaintUIBridge(&paintBridge);
+
+		// M11a session board bridge (continent only; ecosystems keep single-file flow)
+		ZPUI::SSessionBoardBridge sessionBridge;
+		if (g_StartupWorld.Kind == ZPWS::Continent && !g_StartupWorld.MaxDir.empty())
+		{
+			sessionBridge.World = &g_StartupWorld;
+			sessionBridge.getCellState = sessionGetCellState;
+			sessionBridge.openZone = sessionOpenZone;
+			sessionBridge.closeZone = sessionCloseZone;
+			sessionBridge.saveZone = sessionSaveZone;
+			sessionBridge.toggleEditable = sessionToggleEditable;
+			sessionBridge.isDirty = sessionIsDirty;
+			sessionBridge.isOpen = sessionIsOpen;
+			sessionBridge.isEditable = sessionIsEditable;
+			ZPUI::setSessionBoardBridge(&sessionBridge);
+		}
+		else
+			ZPUI::setSessionBoardBridge(NULL);
+		// Session rebuild params
+		g_SessionBank = &bank;
+		// cellSize/snap/lockBorders captured later via globals set before runViewer
 
 		if (core)
 		{
@@ -2726,7 +3435,52 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 				if (sn && sn[0] && sn[0] != '0')
 					zpSeasonNext();
 			}
-			// Refresh bridge after season/palette env hooks
+			// M11a: session board env hooks (continent). ZONE_PAINTER_SHOW_BOARD=1 opens the
+			// board overlay. ZONE_PAINTER_BOARD_ACTION=open:BASE / close:BASE / save:BASE /
+			// toggle:BASE drives lifecycle (rebuild + weld count printed).
+			// ZONE_PAINTER_CLOSE_CONFIRM_SHOT / CELL_ACTION_SHOT force modals for screenshots.
+			{
+				const char *showB = getenv("ZONE_PAINTER_SHOW_BOARD");
+				if (showB && showB[0] && showB[0] != '0')
+					ZPUI::setSessionBoardVisible(true);
+				const char *bact = getenv("ZONE_PAINTER_BOARD_ACTION");
+				if (bact && bact[0])
+				{
+					std::string act(bact);
+					std::string::size_type colon = act.find(':');
+					std::string op = colon == std::string::npos ? act : act.substr(0, colon);
+					std::string base = colon == std::string::npos ? std::string() : act.substr(colon + 1);
+					std::string err;
+					bool ok = false;
+					if (op == "open" && !base.empty())
+						ok = sessionOpenZone(base, err);
+					else if (op == "close" && !base.empty())
+						ok = sessionCloseZone(base, /*saveFirst=*/false, /*forceDiscard=*/true, err);
+					else if (op == "save" && !base.empty())
+						ok = sessionSaveZone(base, err);
+					else if (op == "toggle" && !base.empty())
+						ok = sessionToggleEditable(base, false, true, err);
+					else
+						err = "unknown BOARD_ACTION (open|close|save|toggle:basename)";
+					printf("board-action %s: %s%s%s\n", act.c_str(), ok ? "OK" : "FAIL",
+					       err.empty() ? "" : " ", err.c_str());
+					if (ok)
+						ZPUI::refreshSessionBoardStates();
+				}
+				const char *ccShot = getenv("ZONE_PAINTER_CLOSE_CONFIRM_SHOT");
+				if (ccShot && ccShot[0] && ccShot[0] != '0')
+				{
+					ZPUI::setSessionBoardVisible(true);
+					ZPUI::forceShowCloseConfirmForShot(std::string(ccShot) == "1" ? std::string() : std::string(ccShot));
+				}
+				const char *caShot = getenv("ZONE_PAINTER_CELL_ACTION_SHOT");
+				if (caShot && caShot[0] && caShot[0] != '0')
+				{
+					ZPUI::setSessionBoardVisible(true);
+					ZPUI::forceShowCellActionForShot(std::string(caShot) == "1" ? std::string() : std::string(caShot));
+				}
+			}
+			// Refresh bridge after season/palette/board env hooks
 			zpFillBridgeState(paintBridge);
 			editorUI->update();
 			editorUI->draw();
@@ -2761,6 +3515,7 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 			// MAIN LOOP (paint.cpp: pump, camera from the mouse listener, render; first frame
 			// switches refine mode off and computes the full tessellation).
 			NLMISC::TTime lastFrameTime = NLMISC::CTime::getLocalTime();
+			bool viewerQuit = false;
 			do
 			{
 				// Snapshot the orbit matrix so GUI mouse capture can discard nav deltas
@@ -2768,6 +3523,14 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 				udriver->EventServer.pump();
 				if (editorUI->wantsMouse())
 					mouseListener.setMatrix(navMatBefore);
+				// ESC: close session board first (M11a); else quit viewer
+				if (udriver->AsyncListener.isKeyPushed(NLMISC::KeyESCAPE))
+				{
+					if (ZPUI::isSessionBoardVisible())
+						ZPUI::setSessionBoardVisible(false);
+					else
+						viewerQuit = true;
+				}
 
 				// Frame dt (the plugin's zoom timing)
 				NLMISC::TTime nowTime = NLMISC::CTime::getLocalTime();
@@ -2780,6 +3543,9 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 				// P / TogglePalette: show/hide the tileset thumbnail palette (ui M8)
 				if (zpKeyPushed(ZPK_TogglePalette))
 					zpTogglePalette();
+				// O / ToggleBoard: session board hub over live viewer (M11a; continent)
+				if (zpKeyPushed(ZPK_ToggleBoard))
+					zpToggleBoard();
 
 				// Tile set / mode / brush keys → shared named handlers (same as NLGUI buttons).
 				// PgUp/PgDn + 0-9 and [ ] displace stay hardcoded; rebindable actions ride the
@@ -2960,12 +3726,15 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 				udriver->swapBuffers();
 				zpViewerScreenshot(driver, udriver->AsyncListener); // F12 convenience
 			}
-			while (!udriver->AsyncListener.isKeyPushed(NLMISC::KeyESCAPE) && closeListener.WindowActive && udriver->isActive());
+			while (!viewerQuit && closeListener.WindowActive && udriver->isActive());
 		}
 
 		if (ownsEditorUI)
 			editorUI->shutdown();
+		ZPUI::setSessionBoardBridge(NULL);
+		ZPUI::setSessionBoardVisible(false);
 		ZPUI::setPaintUIBridge(NULL);
+		g_SessionBank = NULL;
 		g_PaintCtx = SPaintCtx();
 		mouseListener.removeFromServer(udriver->EventServer);
 		udriver->EventServer.removeListener(NLMISC::EventDestroyWindowId, &closeListener);
@@ -3043,7 +3812,7 @@ int main(int argc, char **argv)
 	                    "  values are NeL TKey codes (the plugin's keys.cfg Key* constant block parses verbatim).\n"
 	                    "  Honored: ModeTile ModeColor ModeDisplace SizeUp SizeDown ToggleTileSize GroupUp GroupDown\n"
 	                    "  Fill0 Fill1 Fill2 Fill3 HardnessUp HardnessDown OpacityUp OpacityDown SelectColorBrush\n"
-	                    "  ToggleColorBrushMode LockBorders ZoomIn ZoomOut ToggleUI SeasonNext TogglePalette\n"
+	                    "  ToggleColorBrushMode LockBorders ZoomIn ZoomOut ToggleUI SeasonNext TogglePalette ToggleBoard\n"
 	                    "  (defaults: T C D + - B G V F F6 F7 F8 Home End Insert Delete S Q L, F10, Y, P; zoom unbound).\n"
 	                    "  Accepted+ignored (no tool equivalent): Select Pick ToggleColor BackgroundColor ToggleArrows\n"
 	                    "  Zouille AutomaticLighting GetState ResetPatch.\n"
@@ -3054,6 +3823,10 @@ int main(int argc, char **argv)
 	                    "  the open bank — spring/summer/autumn/winter; paint indices/colors/displace untouched;\n"
 	                    "  tileset palette previews re-resolve to the new season).\n"
 	                    "  TogglePalette (default P: show/hide the Tiles thumbnail palette).\n"
+                    "  ToggleBoard (default O: session board hub over the live viewer — continent only;\n"
+                    "    L-click closed cell opens it editable + auto RO ring; L-click open cell → action\n"
+                    "    popup Close/Save/Toggle editable↔RO; BACK TO PAINTING / O returns. Working-set\n"
+                    "    change rebuilds landscape+weld and CLEARS undo; retained dirty flags survive).\n"
 	                    "Fixed viewer keys: PgUp/PgDn + 0-9 tile set, [ ] displace index, Ctrl+Z/Ctrl+E undo/redo,\n"
 	                    "F12 screenshot, ESC quit.");
 	// Optional first positional: .max (legacy) or folder (startup seed). Absent => startup flow.
@@ -3133,7 +3906,13 @@ int main(int argc, char **argv)
 	            "Default: auto (first available postfix, historically spring). Only seasons that "
 	            "resolve for the open bank are offered by SeasonNext / the panel button; painting "
 	            "data is season-independent.");
-	args.addArg("", "instances", "NxM",
+	args.addArg("", "all-zones", "",
+            "Open every non-frozen RklPatch as a paint target (pre-M11b open-everything). "
+            "Default is exporter-faithful eligibility: only the zone(s) the zone/ligo export "
+            "pipeline would export are editable; other zones in the file load as read-only "
+            "context. Null-edit and carrier write-back still cover the whole file. "
+            "Paint-script zone indices address PAINTABLE (unfrozen) zone ids.");
+args.addArg("", "instances", "NxM",
 	            "Ecosystem startup: self-instance the brick on an NxM layout grid (supported: 1x1, "
 	            "2x1, 1x2, 2x2, 3x3). Primary zone at the origin; other cells are display duplicates "
 	            "sharing one paint carrier (stroke on any instance appears on all; edges weld to the "
@@ -3157,6 +3936,9 @@ int main(int argc, char **argv)
 
 	g_verbose = args.haveLongArg("verbose");
 	g_CliWantThumbnail = args.haveLongArg("thumbnail");
+	g_AllZones = args.haveLongArg("all-zones");
+	if (g_AllZones)
+		printf("eligibility: --all-zones (open every non-frozen RklPatch as paint target)\n");
 
 	// Season preference (M6a) before bank load so the first resolveBankTextures uses it
 	if (args.haveLongArg("season"))
@@ -3697,7 +4479,8 @@ int main(int argc, char **argv)
 		}
 		const uint base = (uint)(ei * 1000);
 		const size_t before = zones.size();
-		bool ok = buildPaintZones(*sceneLm->Scene, zones, base, /*forceFrozen=*/false);
+		bool ok = buildPaintZones(*sceneLm->Scene, zones, base, /*forceFrozen=*/false,
+		                         editables[ei].Basename);
 		if (!ok && ei == 0 && !nullEdit)
 		{
 			fprintf(stderr, "ERROR: no displayable RklPatch zone in %s\n", editables[ei].MaxPath.c_str());
@@ -3711,9 +4494,12 @@ int main(int argc, char **argv)
 		efi.Path = editables[ei].MaxPath;
 		efi.Basename = editables[ei].Basename;
 		efi.Lm = (ei == 0) ? NULL : sceneLm;
+		efi.Editable = true;
 		for (size_t zi = before; zi < zones.size(); ++zi)
 			efi.ZoneIds.push_back(zones[zi].ZoneId);
 		g_EditableFiles.push_back(efi);
+		if (ei == 0)
+			g_PrimaryLm = &lm;
 		if (ei > 0 || editables.size() > 1)
 			printf("editable[%u] '%s' zoneIdBase=%u zones=%u\n",
 			       (uint)ei, efi.Basename.c_str(), base, (uint)efi.ZoneIds.size());
@@ -3847,13 +4633,18 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
+	// Session rebuild params (M11a; used if the board mutates the working set mid-viewer)
+	g_SessionCellSize = cellSize;
+	g_SessionSnap = snap;
+	g_SessionLockBorders = args.haveLongArg("lock-borders");
+
 	// The painting core over the assembled zones
 	ZPPAINT::CPaintCore core;
 	std::vector<ZPPAINT::SPaintZoneInput> inputs;
 	buildPaintInputs(zones, inputs);
 	{
 		std::string err;
-		if (!core.init(inputs, haveBank ? &bank : NULL, cellSize, snap, args.haveLongArg("lock-borders"), err))
+		if (!core.init(inputs, haveBank ? &bank : NULL, cellSize, snap, g_SessionLockBorders, err))
 		{
 			fprintf(stderr, "ERROR: paint core: %s\n", err.c_str());
 			return 1;
