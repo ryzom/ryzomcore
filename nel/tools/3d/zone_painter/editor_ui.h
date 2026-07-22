@@ -45,6 +45,7 @@
 namespace NL3D {
 class UDriver;
 class UTextContext;
+class CTileBank;
 }
 
 namespace NLGUI {
@@ -67,6 +68,8 @@ struct SPaintUIBridge
 	// Named handlers (same paths as the keyboard)
 	void (*selectMode)(int mode);       // 0=Tile 1=Color 2=Displace
 	void (*selectTileSetDelta)(int d);  // -1 / +1
+	/** Absolute tile-set select (palette cell / digit keys); shared path. */
+	void (*selectTileSetAbs)(int idx);
 	void (*toggleTileSize)();           // 128 <-> 256
 	void (*brushSizeDelta)(int d);      // -1 / +1 (0..2 for tile/disp)
 	void (*groupDelta)(int d);          // -1 / +1 (mod 13)
@@ -89,6 +92,8 @@ struct SPaintUIBridge
 	void (*cycleBrushMask)();         // none → mask1 → … → none (S key)
 	void (*toggleMaskMode)();         // Q key
 	void (*displaceIndexDelta)(int d); // ±1 mod 16 ([ ] keys)
+	/** Show/hide the Tiles palette window (ui M8; key TogglePalette / panel button). */
+	void (*togglePalette)();
 
 	// State snapshot for panel sync (filled by runViewer each frame)
 	bool HaveCore;
@@ -127,11 +132,13 @@ struct SPaintUIBridge
 	uint DisplaceIndex;             // 0..15
 
 	SPaintUIBridge()
-		: selectMode(NULL), selectTileSetDelta(NULL), toggleTileSize(NULL),
+		: selectMode(NULL), selectTileSetDelta(NULL), selectTileSetAbs(NULL),
+		  toggleTileSize(NULL),
 		  brushSizeDelta(NULL), groupDelta(NULL), toggleLockBorders(NULL),
 		  undo(NULL), redo(NULL), fill(NULL), save(NULL), saveTo(NULL), saveOverwrite(NULL),
 		  seasonNext(NULL), colorRadiusDelta(NULL), hardnessDelta(NULL), opacityDelta(NULL),
 		  cycleBrushMask(NULL), toggleMaskMode(NULL), displaceIndexDelta(NULL),
+		  togglePalette(NULL),
 		  HaveCore(false), Mode(0), CurTileSet(0), TileSetCount(0), Mode256(false),
 		  BrushSize(0), TileGroup(0), LockBorders(false), UndoDepth(0), CanSave(false),
 		  InteractiveSave(false), InstanceCount(1), UpdateThumbnail(true), SeasonCount(0),
@@ -156,6 +163,21 @@ void openSaveDialog();
 
 /** Dev/test: force the Save modal open for one screenshot frame (env/guard callers). */
 void forceShowSaveDialogForShot();
+
+/**
+ * Rebuild the Tiles palette grid from the loaded bank (ui M8).
+ * Picks the first resolvable 128 diffuse per set, caches a 64x64 TGA under
+ * thumbcache/tileset/ keyed by bank+set+season, and fills the scrollable grid.
+ * Call after bank load and after each season preference change.
+ * bank may be NULL (clears the grid). seasonKey tags the cache (e.g. "sp"/"auto").
+ */
+void rebuildTilesetPalette(NL3D::CTileBank *bank, const std::string &bankPath,
+                           const std::string &seasonKey);
+
+/** Show/hide / toggle the Tiles palette window (ui M8). */
+void setTilesetPaletteVisible(bool visible);
+void toggleTilesetPalette();
+bool isTilesetPaletteVisible();
 
 /** Install / clear the process-wide bridge (action handlers look it up). */
 void setPaintUIBridge(SPaintUIBridge *bridge);

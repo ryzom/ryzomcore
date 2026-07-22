@@ -301,6 +301,7 @@ enum TPainterKey
 	ZPK_ResetPatch,
 	ZPK_ToggleUI,
 	ZPK_SeasonNext, // ui M6a: cycle landscape season textures
+	ZPK_TogglePalette, // ui M8: show/hide tileset thumbnail palette
 	ZPK_KeyCounter
 };
 
@@ -339,6 +340,7 @@ static const char *kPainterKeysName[ZPK_KeyCounter] =
 	"ResetPatch",
 	"ToggleUI",
 	"SeasonNext",
+	"TogglePalette",
 };
 
 // Tool defaults: the pre-cfg hardcoded viewer keys stay on their keys (T/C/D, +/-, B, G, F);
@@ -377,6 +379,7 @@ static uint g_PainterKeys[ZPK_KeyCounter] =
 	0,                    // ResetPatch
 	NLMISC::KeyF10,       // ToggleUI (NLGUI panel visibility)
 	NLMISC::KeyY,         // SeasonNext (ui M6a; free key — cycle season textures)
+	NLMISC::KeyP,         // TogglePalette (ui M8; free key — tileset thumbnail palette)
 };
 
 // paint_ui.cpp light/zoom variable defaults (LoadVarCfg overrides; identical to the previous
@@ -2160,6 +2163,29 @@ static void zpSaveDirect()
 	zpSaveTo(g_PaintCtx.SavePath);
 }
 
+/** Season cache tag for tileset previews (preference code, or "auto"). */
+static std::string zpSeasonCacheKey()
+{
+	const std::string &pref = ZPCTX::seasonPreference();
+	return pref.empty() ? std::string("auto") : pref;
+}
+
+/** Rebuild the Tiles palette grid (ui M8); no-op without a bank. */
+static void zpRebuildTilesetPalette()
+{
+	if (!g_PaintCtx.Bank)
+	{
+		ZPUI::rebuildTilesetPalette(NULL, std::string(), zpSeasonCacheKey());
+		return;
+	}
+	ZPUI::rebuildTilesetPalette(g_PaintCtx.Bank, g_PaintCtx.BankPath, zpSeasonCacheKey());
+}
+
+static void zpTogglePalette()
+{
+	ZPUI::toggleTilesetPalette();
+}
+
 /** Cycle season preference + live-flush landscape tile textures (paint state untouched). */
 static void zpSeasonNext()
 {
@@ -2175,6 +2201,8 @@ static void zpSeasonNext()
 	// releaseTiles so CTextureFile re-looks up, optional preload flush.
 	ZPCTX::reloadLandscapeSeasonTextures(*g_PaintCtx.Bank, g_PaintCtx.BankPath,
 	                                     &g_PaintCtx.Land->Landscape, driver, g_PreloadTiles);
+	// Palette previews follow the season (ui M8): regenerate/invalidate cached thumbs.
+	zpRebuildTilesetPalette();
 }
 
 // Fill the UI bridge state snapshot (labels / button push state).
@@ -2187,6 +2215,30 @@ static void zpFillBridgeState(ZPUI::SPaintUIBridge &bridge)
 	bridge.CurTileSet = pl.CurTileSet;
 	bridge.TileSetCount = g_PaintCtx.Core->tileSetCount();
 	std::string name = g_PaintCtx.Core->tileSetName(pl.CurTileSet);
+	// smallbanks often store empty set names: derive from first 128 diffuse stem
+	// (y-plages-128-a-01.png → plages) so the panel matches the Tiles palette (ui M8).
+	if ((name.empty() || name == "<none>") && g_PaintCtx.Bank
+	    && pl.CurTileSet >= 0 && pl.CurTileSet < g_PaintCtx.Bank->getTileSetCount())
+	{
+		const NL3D::CTileSet *ts = g_PaintCtx.Bank->getTileSet(pl.CurTileSet);
+		if (ts)
+		{
+			for (sint t = 0; t < ts->getNumTile128() && (name.empty() || name == "<none>"); ++t)
+			{
+				const NL3D::CTile *pt = g_PaintCtx.Bank->getTile(ts->getTile128(t));
+				if (!pt) continue;
+				std::string fn = pt->getRelativeFileName(NL3D::CTile::diffuse);
+				if (fn.empty()) continue;
+				std::string base = NLMISC::CFile::getFilenameWithoutExtension(fn);
+				if (base.size() > 2 && base[1] == '-')
+					base = base.substr(2);
+				std::string::size_type p = base.find("-128");
+				if (p == std::string::npos) p = base.find("-256");
+				if (p != std::string::npos) base = base.substr(0, p);
+				if (!base.empty()) name = base;
+			}
+		}
+	}
 	strncpy(bridge.TileSetName, name.c_str(), sizeof(bridge.TileSetName) - 1);
 	bridge.TileSetName[sizeof(bridge.TileSetName) - 1] = 0;
 	bridge.Mode256 = pl.Mode256;
@@ -2415,6 +2467,7 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 		g_PaintCtx.AvailableSeasons = &g_AvailableSeasons;
 		paintBridge.selectMode = zpSelectMode;
 		paintBridge.selectTileSetDelta = zpSelectTileSetDelta;
+		paintBridge.selectTileSetAbs = zpSelectTileSetAbs;
 		paintBridge.toggleTileSize = zpToggleTileSize;
 		paintBridge.brushSizeDelta = zpBrushSizeDelta;
 		paintBridge.groupDelta = zpGroupDelta;
@@ -2432,6 +2485,7 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 		paintBridge.cycleBrushMask = zpCycleBrushMask;
 		paintBridge.toggleMaskMode = zpToggleMaskMode;
 		paintBridge.displaceIndexDelta = zpDisplaceIndexDelta;
+		paintBridge.togglePalette = zpTogglePalette;
 		ZPUI::setPaintUIBridge(&paintBridge);
 
 		if (core)
@@ -2454,6 +2508,8 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 			// Preload flush (plugin preloadTiles): all tile sets into the driver
 			if (g_PreloadTiles)
 				core->preloadTiles(driver);
+			// Tileset thumbnail palette (ui M8) — bank textures already resolved
+			zpRebuildTilesetPalette();
 		}
 
 		// Scene point lights (CPaintLight parity — unconditional in the plugin's myThread)
@@ -2536,7 +2592,7 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 			}
 			// Dev-only: ZONE_PAINTER_PANEL_ACTION_TEST drives a panel action-handler path once
 			// (proves panel → same shared handler as keys). Values: hardness+|hardness-|opacity+|
-			// opacity-|radius+|radius-|displace+|displace-|mask|maskmode
+			// opacity-|radius+|radius-|displace+|displace-|mask|maskmode|tileset:N|palette
 			{
 				const char *act = getenv("ZONE_PAINTER_PANEL_ACTION_TEST");
 				if (act && act[0] && core)
@@ -2546,6 +2602,7 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 					const uint opacBefore = paintListener.BrushOpacity;
 					const float radBefore = paintListener.BrushRadius;
 					const uint dispBefore = paintListener.DisplaceIndex;
+					const int tsBefore = paintListener.CurTileSet;
 					const bool maskModeBefore = core->brushMaskMode();
 					if (strcmp(act, "hardness+") == 0 && b && b->hardnessDelta) b->hardnessDelta(+51);
 					else if (strcmp(act, "hardness-") == 0 && b && b->hardnessDelta) b->hardnessDelta(-51);
@@ -2557,12 +2614,21 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 					else if (strcmp(act, "displace-") == 0 && b && b->displaceIndexDelta) b->displaceIndexDelta(-1);
 					else if (strcmp(act, "mask") == 0 && b && b->cycleBrushMask) b->cycleBrushMask();
 					else if (strcmp(act, "maskmode") == 0 && b && b->toggleMaskMode) b->toggleMaskMode();
+					else if (strncmp(act, "tileset:", 8) == 0 && b && b->selectTileSetAbs)
+					{
+						int idx = 0;
+						NLMISC::fromString(std::string(act + 8), idx);
+						b->selectTileSetAbs(idx);
+					}
+					else if (strcmp(act, "palette") == 0 && b && b->togglePalette)
+						b->togglePalette();
 					printf("panel-action-test %s: hardness %u->%u opacity %u->%u radius %.1f->%.1f "
-					       "displace %u->%u maskmode %d->%d mask='%s'\n",
+					       "displace %u->%u tileset %d->%d maskmode %d->%d mask='%s'\n",
 					       act, hardBefore, paintListener.BrushHardness,
 					       opacBefore, paintListener.BrushOpacity,
 					       radBefore, paintListener.BrushRadius,
 					       dispBefore, paintListener.DisplaceIndex,
+					       tsBefore, paintListener.CurTileSet,
 					       (int)maskModeBefore, (int)core->brushMaskMode(),
 					       core->brushMaskName().empty() ? "none" : core->brushMaskName().c_str());
 				}
@@ -2579,6 +2645,20 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 					ZPUI::forceShowSaveDialogForShot();
 				}
 			}
+			// Dev-only: ZONE_PAINTER_PALETTE_SHOT=1 opens the Tiles palette for the frame (M8).
+			{
+				const char *palShot = getenv("ZONE_PAINTER_PALETTE_SHOT");
+				if (palShot && palShot[0] && palShot[0] != '0')
+					ZPUI::setTilesetPaletteVisible(true);
+			}
+			// Dev-only: ZONE_PAINTER_SEASON_NEXT=1 cycles season once before capture (M8 season-follow).
+			{
+				const char *sn = getenv("ZONE_PAINTER_SEASON_NEXT");
+				if (sn && sn[0] && sn[0] != '0')
+					zpSeasonNext();
+			}
+			// Refresh bridge after season/palette env hooks
+			zpFillBridgeState(paintBridge);
 			editorUI->update();
 			editorUI->draw();
 			udriver->swapBuffers();
@@ -2628,6 +2708,9 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 				// F10 / ToggleUI: show/hide the NLGUI shell (keys still work either way)
 				if (zpKeyPushed(ZPK_ToggleUI))
 					editorUI->toggleVisible();
+				// P / TogglePalette: show/hide the tileset thumbnail palette (ui M8)
+				if (zpKeyPushed(ZPK_TogglePalette))
+					zpTogglePalette();
 
 				// Tile set / mode / brush keys → shared named handlers (same as NLGUI buttons).
 				// PgUp/PgDn + 0-9 and [ ] displace stay hardcoded; rebindable actions ride the

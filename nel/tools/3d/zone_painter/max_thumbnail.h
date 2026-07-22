@@ -131,6 +131,29 @@ bool buildSummaryInformationWithThumbnail(const std::string &maxPath,
  */
 void wrapDibAsVtCfProperty(const std::vector<uint8> &dib, std::vector<uint8> &outPropValue);
 
+// ---------------------------------------------------------------------------------------------
+// Tileset palette previews (ui M8): 64x64 TGA cache under thumbcache/tileset/
+
+/** Absolute tileset-preview cache directory (created on demand). */
+std::string tilesetPreviewCacheDir();
+
+/**
+ * Cache path for a tileset preview: thumbcache/tileset/<bankhash>_s<idx>_<season>_<srcmtime>.tga
+ * seasonKey is a short tag (e.g. "sp", "su", "auto"); empty becomes "auto".
+ */
+std::string cachedTilesetPreviewPath(const std::string &bankPath, int setIndex,
+                                    const std::string &seasonKey, uint32 sourceMtime);
+
+/**
+ * Ensure a 64x64 TGA preview exists for one tileset cell.
+ * Loads sourcePath (absolute, already CPath-resolved diffuse) via CBitmap, resamples to
+ * sidePx (default 64), writes the cache path. On hit (cache present) reuses without reload.
+ * Returns true and sets outTgaPath on success; false leaves outTgaPath empty.
+ */
+bool ensureTilesetPreview(const std::string &bankPath, int setIndex,
+                          const std::string &seasonKey, const std::string &sourcePath,
+                          std::string &outTgaPath, uint sidePx = 64);
+
 } // namespace ZPTHUMB
 
 #endif // ZONE_PAINTER_MAX_THUMBNAIL_H

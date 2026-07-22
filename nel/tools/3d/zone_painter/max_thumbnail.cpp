@@ -557,6 +557,96 @@ bool ensureCachedThumbnail(const std::string &maxPath, std::string &outTgaPath)
 }
 
 // ---------------------------------------------------------------------------------------------
+// Tileset palette previews (ui M8)
+
+std::string tilesetPreviewCacheDir()
+{
+	std::string dir = thumbCacheDir() + "/tileset";
+	if (!CFile::isDirectory(dir))
+		CFile::createDirectoryTree(dir);
+	return dir;
+}
+
+std::string cachedTilesetPreviewPath(const std::string &bankPath, int setIndex,
+                                     const std::string &seasonKey, uint32 sourceMtime)
+{
+	if (bankPath.empty() || setIndex < 0)
+		return std::string();
+	std::string abs = CPath::makePathAbsolute(bankPath, CPath::getCurrentPath(), false);
+	while (!abs.empty() && (abs[abs.size() - 1] == '/' || abs[abs.size() - 1] == '\\'))
+		abs.resize(abs.size() - 1);
+	uint32 h = hashPath(abs);
+	std::string season = seasonKey.empty() ? std::string("auto") : seasonKey;
+	// Sanitize season tag for filenames
+	for (size_t i = 0; i < season.size(); ++i)
+	{
+		char c = season[i];
+		if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_' || c == '-'))
+			season[i] = '_';
+	}
+	return tilesetPreviewCacheDir() + "/"
+		+ NLMISC::toString("%08x_s%03d_%s_%08x.tga", h, setIndex, season.c_str(), sourceMtime);
+}
+
+bool ensureTilesetPreview(const std::string &bankPath, int setIndex,
+                          const std::string &seasonKey, const std::string &sourcePath,
+                          std::string &outTgaPath, uint sidePx)
+{
+	outTgaPath.clear();
+	if (sourcePath.empty() || !CFile::fileExists(sourcePath))
+		return false;
+	if (sidePx == 0)
+		sidePx = 64;
+
+	uint32 mtime = CFile::getFileModificationDate(sourcePath);
+	std::string cache = cachedTilesetPreviewPath(bankPath, setIndex, seasonKey, mtime);
+	if (cache.empty())
+		return false;
+	if (CFile::fileExists(cache))
+	{
+		outTgaPath = cache;
+		return true;
+	}
+
+	// Load source (png/tga/dds — CBitmap handles all three). Never used as an image-view
+	// source for the agent; only written as a small cache TGA for NLGUI.
+	CBitmap bmp;
+	try
+	{
+		CIFile in;
+		if (!in.open(sourcePath))
+			return false;
+		bmp.load(in);
+	}
+	catch (...)
+	{
+		return false;
+	}
+	if (bmp.getWidth() == 0 || bmp.getHeight() == 0)
+		return false;
+	if (bmp.getPixelFormat() != CBitmap::RGBA)
+		bmp.convertToType(CBitmap::RGBA);
+	if (bmp.getWidth() != sidePx || bmp.getHeight() != sidePx)
+		bmp.resample(sidePx, sidePx);
+
+	tilesetPreviewCacheDir();
+	try
+	{
+		COFile of(cache);
+		if (!bmp.writeTGA(of, 32, false))
+			return false;
+	}
+	catch (...)
+	{
+		return false;
+	}
+	if (!CFile::fileExists(cache))
+		return false;
+	outTgaPath = cache;
+	return true;
+}
+
+// ---------------------------------------------------------------------------------------------
 // Encode / write helpers (M5c)
 
 bool encodeDib24(const CBitmap &bmpIn, std::vector<uint8> &outDib, uint maxDim)

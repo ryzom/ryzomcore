@@ -25,9 +25,12 @@
  */
 
 #include "editor_ui.h"
+#include "max_thumbnail.h"
 
 #include <cstdio>
 #include <cstring>
+#include <vector>
+#include <utility>
 
 #include <nel/misc/algo.h>
 #include <nel/misc/events.h>
@@ -35,6 +38,7 @@
 #include <nel/misc/i18n.h>
 #include <nel/misc/path.h>
 
+#include <nel/3d/tile_bank.h>
 #include <nel/3d/u_driver.h>
 #include <nel/3d/u_text_context.h>
 
@@ -42,6 +46,7 @@
 #include <nel/gui/ctrl_base_button.h>
 #include <nel/gui/ctrl_text_button.h>
 #include <nel/gui/event_listener.h>
+#include <nel/gui/group_container.h>
 #include <nel/gui/group_editbox.h>
 #include <nel/gui/interface_group.h>
 #include <nel/gui/interface_link.h>
@@ -203,6 +208,35 @@ public:
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpTileSet, "zp_tileset");
+
+/** Absolute tile-set select from the palette grid (ui M8) — same zpSelectTileSetAbs path. */
+class CAHZpTileSetAbs : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params)
+	{
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (!b || !b->selectTileSetAbs) return;
+		int idx = 0;
+		fromString(params, idx);
+		b->selectTileSetAbs(idx);
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpTileSetAbs, "zp_tileset_abs");
+
+class CAHZpTogglePalette : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->togglePalette)
+			b->togglePalette();
+		else
+			toggleTilesetPalette();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpTogglePalette, "zp_toggle_palette");
 
 class CAHZpToggle256 : public IActionHandler
 {
@@ -482,6 +516,293 @@ REGISTER_ACTION_HANDLER(CAHZpSaveThumbToggle, "zp_save_thumb_toggle");
 void forceShowSaveDialogForShot()
 {
 	openSaveDialog();
+}
+
+// ---------------------------------------------------------------------------------------------
+// Tileset palette (ui M8)
+
+static const sint32 kPaletteCellW = 96;
+static const sint32 kPaletteCellH = 92;
+static const sint32 kPaletteCols = 3;
+static const sint32 kPaletteThumb = 64;
+static const char *kPaletteGridId = "ui:zp:tiles_palette:content:grid_host:grid";
+static const char *kPaletteWinId = "ui:zp:tiles_palette";
+
+static int s_PaletteBuiltCount = 0;
+static int s_PaletteLastHighlight = -1;
+static bool s_PaletteVisible = false;
+
+static CInterfaceGroup *findGroupEl(const char *id)
+{
+	return dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId(id));
+}
+
+static void setContainerActive(const char *id, bool active)
+{
+	if (CGroupContainer *c = dynamic_cast<CGroupContainer *>(
+	        CWidgetManager::getInstance()->getElementFromId(id)))
+		c->setActive(active);
+	else if (CInterfaceGroup *g = findGroupEl(id))
+		g->setActive(active);
+}
+
+bool isTilesetPaletteVisible()
+{
+	return s_PaletteVisible;
+}
+
+void setTilesetPaletteVisible(bool visible)
+{
+	s_PaletteVisible = visible;
+	setContainerActive(kPaletteWinId, visible);
+	// Panel toggle button face (if present)
+	if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(
+	        CWidgetManager::getInstance()->getElementFromId("ui:zp:painter:content:btn_palette")))
+		btn->setPushed(visible);
+}
+
+void toggleTilesetPalette()
+{
+	setTilesetPaletteVisible(!s_PaletteVisible);
+}
+
+/** Spawn a palette cell under the grid (same idiom as the continent board). */
+static CInterfaceGroup *spawnPaletteCell(CInterfaceGroup *parent,
+                                         const std::vector<std::pair<std::string, std::string> > &params,
+                                         sint32 x, sint32 y)
+{
+	if (!parent)
+		return NULL;
+	IParser *parser = CWidgetManager::getInstance()->getParser();
+	CInterfaceGroup *g = NULL;
+	if (!params.empty())
+		g = parser->createGroupInstance("zp_tileset_cell", parent->getId(),
+		                                &params[0], (uint)params.size());
+	else
+		g = parser->createGroupInstance("zp_tileset_cell", parent->getId(),
+		                                (const std::pair<std::string, std::string> *)NULL, 0);
+	if (!g)
+		return NULL;
+	g->setParent(parent);
+	g->setParentPos(parent);
+	g->setPosRef(Hotspot_TL);
+	g->setParentPosRef(Hotspot_TL);
+	g->setX(x);
+	g->setY(y);
+	g->setW(kPaletteCellW);
+	g->setH(kPaletteCellH);
+	g->setActive(true);
+	parent->addGroup(g);
+	return g;
+}
+
+/**
+ * Resolve a representative 128 diffuse path for one tileset: first non-empty diffuse
+ * whose CPath lookup succeeds (after resolveBankTextures remaps).
+ * Also returns the bank-stored relative name (for fallback labelling) via *storedNameOut.
+ */
+static std::string firstResolvableDiffuse(NL3D::CTileBank *bank, int setIndex,
+                                          std::string *storedNameOut = NULL)
+{
+	if (storedNameOut)
+		storedNameOut->clear();
+	if (!bank || setIndex < 0 || setIndex >= bank->getTileSetCount())
+		return std::string();
+	const NL3D::CTileSet *ts = bank->getTileSet(setIndex);
+	if (!ts)
+		return std::string();
+	for (sint t = 0; t < ts->getNumTile128(); ++t)
+	{
+		const NL3D::CTile *pt = bank->getTile(ts->getTile128(t));
+		if (!pt)
+			continue;
+		std::string name = pt->getRelativeFileName(NL3D::CTile::diffuse);
+		if (name.empty())
+			continue;
+		for (size_t k = 0; k < name.size(); ++k)
+			if (name[k] == '\\') name[k] = '/';
+		// Prefer basename (bank stores may carry subdirs; resolveBankTextures remaps basenames)
+		std::string base = CFile::getFilename(name);
+		if (storedNameOut && storedNameOut->empty())
+			*storedNameOut = base;
+		std::string path = CPath::lookup(base, false, false);
+		if (path.empty())
+			path = CPath::lookup(name, false, false);
+		if (!path.empty())
+		{
+			if (storedNameOut)
+				*storedNameOut = base;
+			return path;
+		}
+	}
+	return std::string();
+}
+
+/**
+ * Friendly set label: bank getName() when present; else derive from diffuse stem
+ * (Ryzom tiles: y-plages-128-a-01.png → plages). smallbanks often store empty set names.
+ */
+static std::string tilesetDisplayName(NL3D::CTileBank *bank, int setIndex,
+                                      const std::string &storedDiffuse)
+{
+	if (bank && setIndex >= 0 && setIndex < bank->getTileSetCount())
+	{
+		const NL3D::CTileSet *ts = bank->getTileSet(setIndex);
+		if (ts && !ts->getName().empty())
+			return ts->getName();
+	}
+	if (storedDiffuse.empty())
+		return std::string();
+	std::string base = CFile::getFilenameWithoutExtension(storedDiffuse);
+	// strip leading type letter + '-' (y- / t- / …)
+	if (base.size() > 2 && base[1] == '-')
+		base = base.substr(2);
+	// strip -128… / -256… suffix
+	std::string::size_type p = base.find("-128");
+	if (p == std::string::npos)
+		p = base.find("-256");
+	if (p != std::string::npos)
+		base = base.substr(0, p);
+	return base;
+}
+
+void rebuildTilesetPalette(NL3D::CTileBank *bank, const std::string &bankPath,
+                           const std::string &seasonKey)
+{
+	CInterfaceGroup *grid = findGroupEl(kPaletteGridId);
+	if (!grid)
+	{
+		// UI not ready / soft-fail path
+		s_PaletteBuiltCount = 0;
+		s_PaletteLastHighlight = -1;
+		return;
+	}
+	grid->clearGroups();
+	s_PaletteBuiltCount = 0;
+	s_PaletteLastHighlight = -1;
+
+	if (!bank)
+	{
+		grid->setW(kPaletteCellW);
+		grid->setH(kPaletteCellH);
+		return;
+	}
+
+	const sint nSets = bank->getTileSetCount();
+	if (nSets <= 0)
+	{
+		grid->setW(kPaletteCellW);
+		grid->setH(kPaletteCellH);
+		return;
+	}
+
+	const int cols = kPaletteCols;
+	const int rows = (nSets + cols - 1) / cols;
+	grid->setW(cols * kPaletteCellW);
+	grid->setH(rows * kPaletteCellH);
+	grid->setOfsX(0);
+	grid->setOfsY(0);
+
+	// Ensure cache dir is on the NLGUI search path (once per rebuild is fine)
+	std::string cacheDir = ZPTHUMB::tilesetPreviewCacheDir();
+	if (!cacheDir.empty())
+		CPath::addSearchPath(cacheDir, false, false);
+
+	uint withPreview = 0;
+	uint nameOnly = 0;
+	for (sint i = 0; i < nSets; ++i)
+	{
+		const int col = i % cols;
+		const int row = i / cols;
+		const sint32 x = col * kPaletteCellW;
+		const sint32 y = -(row * kPaletteCellH);
+
+		std::string storedDiffuse;
+		std::string source = firstResolvableDiffuse(bank, (int)i, &storedDiffuse);
+		std::string setName = tilesetDisplayName(bank, (int)i, storedDiffuse);
+		if (setName.empty())
+			setName = "(unnamed)";
+		// Short label: "1 name" (1-based index for the artist)
+		char title[160];
+		snprintf(title, sizeof(title), "%d %s", (int)(i + 1), setName.c_str());
+		// Truncate very long names so the 96px cell stays readable
+		if (strlen(title) > 18)
+		{
+			title[15] = '.';
+			title[16] = '.';
+			title[17] = '.';
+			title[18] = 0;
+		}
+
+		std::string thumbTex;
+		if (!source.empty())
+		{
+			std::string cached;
+			if (ZPTHUMB::ensureTilesetPreview(bankPath, (int)i, seasonKey, source, cached, kPaletteThumb)
+			    && !cached.empty())
+			{
+				thumbTex = CFile::getFilenameWithoutExtension(cached) + ".tga";
+				++withPreview;
+			}
+		}
+		if (thumbTex.empty())
+			++nameOnly;
+
+		std::vector<std::pair<std::string, std::string> > p;
+		char idbuf[32], idxbuf[16];
+		snprintf(idbuf, sizeof(idbuf), "ts%03d", (int)i);
+		snprintf(idxbuf, sizeof(idxbuf), "%d", (int)i);
+		p.push_back(std::make_pair(std::string("id"), std::string(idbuf)));
+		p.push_back(std::make_pair(std::string("title"), std::string(title)));
+		p.push_back(std::make_pair(std::string("idx"), std::string(idxbuf)));
+		p.push_back(std::make_pair(std::string("thumb"),
+		                           thumbTex.empty() ? std::string("w_box_blank.tga") : thumbTex));
+
+		CInterfaceGroup *cell = spawnPaletteCell(grid, p, x, y);
+		if (cell)
+		{
+			if (CViewBitmap *thumb = dynamic_cast<CViewBitmap *>(cell->getView("thumb")))
+				thumb->setActive(!thumbTex.empty());
+		}
+	}
+	s_PaletteBuiltCount = (int)nSets;
+	printf("tiles palette: %d sets (%u previews, %u name-only) season=%s cache=%s\n",
+	       (int)nSets, withPreview, nameOnly,
+	       seasonKey.empty() ? "auto" : seasonKey.c_str(),
+	       cacheDir.c_str());
+}
+
+/** Highlight the current tileset cell (toggle_button pushed state). */
+static void syncPaletteHighlight(int curTileSet, uint tileSetCount)
+{
+	if (s_PaletteBuiltCount <= 0)
+		return;
+	if (s_PaletteLastHighlight == curTileSet)
+		return;
+	CInterfaceGroup *grid = findGroupEl(kPaletteGridId);
+	if (!grid)
+		return;
+	// Clear previous
+	if (s_PaletteLastHighlight >= 0 && s_PaletteLastHighlight < s_PaletteBuiltCount)
+	{
+		char idbuf[96];
+		snprintf(idbuf, sizeof(idbuf), "%s:ts%03d:btn", kPaletteGridId, s_PaletteLastHighlight);
+		if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(
+		        CWidgetManager::getInstance()->getElementFromId(idbuf)))
+			btn->setPushed(false);
+	}
+	if (tileSetCount && curTileSet >= 0 && curTileSet < (int)tileSetCount
+	    && curTileSet < s_PaletteBuiltCount)
+	{
+		char idbuf[96];
+		snprintf(idbuf, sizeof(idbuf), "%s:ts%03d:btn", kPaletteGridId, curTileSet);
+		if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(
+		        CWidgetManager::getInstance()->getElementFromId(idbuf)))
+			btn->setPushed(true);
+		s_PaletteLastHighlight = curTileSet;
+	}
+	else
+		s_PaletteLastHighlight = -1;
 }
 
 static void syncThumbWantFromModal(SPaintUIBridge *b)
@@ -905,6 +1226,11 @@ void CEditorUI::syncPanelFromBridge()
 		snprintf(buf, sizeof(buf), "%u", b->DisplaceIndex);
 		t->setHardText(buf);
 	}
+
+	// Tiles palette selection highlight (ui M8) — stays in sync with keys/panel/pick
+	syncPaletteHighlight(b->CurTileSet, b->TileSetCount);
+	if (CCtrlBaseButton *btn = findButton("ui:zp:painter:content:btn_palette"))
+		btn->setPushed(s_PaletteVisible);
 }
 
 void CEditorUI::update()
