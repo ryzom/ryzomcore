@@ -571,6 +571,29 @@
 </group>
 
 <!-- ===================================================================== -->
+<!-- Instance action popup (M12c ecosystem scratch — L-click on instance)  -->
+<!-- ===================================================================== -->
+<group type="modal" id="instance_action" exit_click_out="true" w="280" h="200" options="skin_modal"
+	mouse_pos="false" posref="MM MM" x="0" y="0" active="false">
+	<group id="content" x="0" y="0" posref="TL TL" sizeref="wh" w="0" h="0">
+		<view type="text" id="title" posref="TM TM" x="0" y="-12" color="255 255 255 255" fontsize="13"
+			shadow="true" global_color="false" hardtext="Instance" />
+		<view type="text" id="status" posparent="title" posref="BM TM" x="0" y="-4" color="160 220 220 220"
+			fontsize="10" shadow="true" global_color="false" hardtext="" />
+		<ctrl style="text_button_16" id="btn_cw" posref="TM TM" x="0" y="-44"
+			onclick_l="zp_inst_rot_cw" params_l="" hardtext="Rotate CW (R+90)" />
+		<ctrl style="text_button_16" id="btn_ccw" posparent="btn_cw" posref="BL TL" x="0" y="-6"
+			onclick_l="zp_inst_rot_ccw" params_l="" hardtext="Rotate CCW (R-90)" />
+		<ctrl style="text_button_16" id="btn_mirror" posparent="btn_ccw" posref="BL TL" x="0" y="-6"
+			onclick_l="zp_inst_mirror" params_l="" hardtext="Mirror (M)" />
+		<ctrl style="text_button_16" id="btn_remove" posparent="btn_mirror" posref="BL TL" x="0" y="-6"
+			onclick_l="zp_inst_remove" params_l="" hardtext="Remove" />
+		<ctrl style="text_button_16" id="btn_cancel" posparent="btn_remove" posref="BL TL" x="0" y="-10"
+			onclick_l="zp_inst_cancel" params_l="" hardtext="Cancel" />
+	</group>
+</group>
+
+<!-- ===================================================================== -->
 <!-- Close dirty confirm (M11a) — Save first / Close without saving / Cancel -->
 <!-- ===================================================================== -->
 <group type="modal" id="close_confirm" exit_click_out="false" w="360" h="140" options="skin_modal"

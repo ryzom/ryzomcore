@@ -2780,6 +2780,21 @@ static bool rebuildWorkingSet(std::string &err, uint &outWelds)
 			efi.ZoneIds.push_back(zones[zi].ZoneId);
 	}
 
+	// Ecosystem scratch instances (M12c): re-append display clones after primary rebuild
+	if (!g_Places.empty() && g_StartupWorld.Kind == ZPWS::Ecosystem && !g_EditableFiles.empty())
+	{
+		size_t primaryOnly = 0;
+		for (size_t i = 0; i < zones.size(); ++i)
+			if (zones[i].ZoneId < 1000) ++primaryOnly;
+		if (primaryOnly > 0)
+		{
+			appendInstanceZones(zones, primaryOnly, g_Places, g_SessionCellSize);
+			if (g_SessionBank)
+				applyInstanceDisplayTiles(zones, g_SessionBank);
+			g_InstanceCount = 1 + (uint)g_Places.size();
+		}
+	}
+
 	// Continent union 8-ring of EDITABLE files only
 	if (g_LoadNeighbors && g_StartupWorld.Kind == ZPWS::Continent)
 	{
@@ -2853,6 +2868,119 @@ static bool rebuildWorkingSet(std::string &err, uint &outWelds)
 	g_PaintCtx.Core->attachLandscape(&g_PaintCtx.Land->Landscape);
 	printf("session rebuild: undo cleared; retained dirty flags restored (%u carriers stashed)\n",
 	       (uint)originals.size());
+	return true;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Ecosystem scratch board callbacks (M12c)
+
+static bool scratchFindPlace(int cx, int cy, size_t &idx)
+{
+	for (size_t i = 0; i < g_Places.size(); ++i)
+	{
+		if (g_Places[i].CellX == cx && g_Places[i].CellY == cy)
+		{
+			idx = i;
+			return true;
+		}
+	}
+	return false;
+}
+
+static bool scratchRebuild(std::string &err)
+{
+	uint welds = 0;
+	if (!rebuildWorkingSet(err, welds))
+		return false;
+	printf("scratch rebuild: %u place(s), %u welds\n", (uint)g_Places.size(), welds);
+	return true;
+}
+
+static bool scratchGetCellState(const std::string &basename, ZPUI::ESessionCellState &out)
+{
+	if (basename == "H" || basename == "HOME")
+	{
+		out = g_PaintCtx.Core && !g_EditableFiles.empty()
+		          && g_PaintCtx.Core->anyZoneDirty(g_EditableFiles[0].ZoneIds)
+		      ? ZPUI::CellDirtyEditable
+		      : ZPUI::CellScratchHome;
+		return true;
+	}
+	if (basename.size() >= 4 && basename[0] == 'I' && basename[1] == ':')
+	{
+		out = ZPUI::CellScratchInstance;
+		return true;
+	}
+	if (basename.size() >= 4 && basename[0] == 'E' && basename[1] == ':')
+	{
+		out = ZPUI::CellScratchEmpty;
+		return true;
+	}
+	return false;
+}
+
+static bool scratchPlace(int cx, int cy, std::string &err)
+{
+	if (cx == 0 && cy == 0)
+	{
+		err = "cannot place on home cell";
+		return false;
+	}
+	size_t idx = 0;
+	if (scratchFindPlace(cx, cy, idx))
+	{
+		err = "cell already occupied";
+		return false;
+	}
+	g_Places.push_back(SInstancePlace(cx, cy, 0, false));
+	g_InstanceCount = 1 + (uint)g_Places.size();
+	return scratchRebuild(err);
+}
+
+static bool scratchRotate(int cx, int cy, int delta, std::string &err)
+{
+	size_t idx = 0;
+	if (!scratchFindPlace(cx, cy, idx))
+	{
+		err = "no instance at cell";
+		return false;
+	}
+	g_Places[idx].Rot = (uint)((int)g_Places[idx].Rot + delta) & 3;
+	return scratchRebuild(err);
+}
+
+static bool scratchMirror(int cx, int cy, std::string &err)
+{
+	size_t idx = 0;
+	if (!scratchFindPlace(cx, cy, idx))
+	{
+		err = "no instance at cell";
+		return false;
+	}
+	g_Places[idx].Mirror = !g_Places[idx].Mirror;
+	return scratchRebuild(err);
+}
+
+static bool scratchRemove(int cx, int cy, std::string &err)
+{
+	size_t idx = 0;
+	if (!scratchFindPlace(cx, cy, idx))
+	{
+		err = "no instance at cell";
+		return false;
+	}
+	g_Places.erase(g_Places.begin() + idx);
+	g_InstanceCount = 1 + (uint)g_Places.size();
+	return scratchRebuild(err);
+}
+
+static bool scratchGetInstance(int cx, int cy, uint &rot, bool &mirror)
+{
+	size_t idx = 0;
+	if (!scratchFindPlace(cx, cy, idx))
+		return false;
+	rot = g_Places[idx].Rot;
+	mirror = g_Places[idx].Mirror;
 	return true;
 }
 
@@ -3422,19 +3550,35 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 		paintBridge.setBrushColor = zpSetBrushColor;
 		ZPUI::setPaintUIBridge(&paintBridge);
 
-		// M11a session board bridge (continent only; ecosystems keep single-file flow)
+		// M11a/M12c session board bridge (continent working set / ecosystem scratch)
 		ZPUI::SSessionBoardBridge sessionBridge;
-		if (g_StartupWorld.Kind == ZPWS::Continent && !g_StartupWorld.MaxDir.empty())
+		if (!g_StartupWorld.MaxDir.empty()
+		    && (g_StartupWorld.Kind == ZPWS::Continent || g_StartupWorld.Kind == ZPWS::Ecosystem))
 		{
 			sessionBridge.World = &g_StartupWorld;
-			sessionBridge.getCellState = sessionGetCellState;
-			sessionBridge.openZone = sessionOpenZone;
-			sessionBridge.closeZone = sessionCloseZone;
-			sessionBridge.saveZone = sessionSaveZone;
-			sessionBridge.toggleEditable = sessionToggleEditable;
-			sessionBridge.isDirty = sessionIsDirty;
-			sessionBridge.isOpen = sessionIsOpen;
-			sessionBridge.isEditable = sessionIsEditable;
+			if (g_StartupWorld.Kind == ZPWS::Continent)
+			{
+				sessionBridge.getCellState = sessionGetCellState;
+				sessionBridge.openZone = sessionOpenZone;
+				sessionBridge.closeZone = sessionCloseZone;
+				sessionBridge.saveZone = sessionSaveZone;
+				sessionBridge.toggleEditable = sessionToggleEditable;
+				sessionBridge.isDirty = sessionIsDirty;
+				sessionBridge.isOpen = sessionIsOpen;
+				sessionBridge.isEditable = sessionIsEditable;
+			}
+			else
+			{
+				sessionBridge.getCellState = scratchGetCellState;
+				sessionBridge.scratchPlace = scratchPlace;
+				sessionBridge.scratchRotate = scratchRotate;
+				sessionBridge.scratchMirror = scratchMirror;
+				sessionBridge.scratchRemove = scratchRemove;
+				sessionBridge.scratchGetInstance = scratchGetInstance;
+				sessionBridge.ScratchHomeName = g_StartupZone.Basename.empty()
+					? g_StartupWorld.WorldName
+					: g_StartupZone.Basename;
+			}
 			ZPUI::setSessionBoardBridge(&sessionBridge);
 		}
 		else
@@ -3646,10 +3790,10 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 				if (sn && sn[0] && sn[0] != '0')
 					zpSeasonNext();
 			}
-			// M11a: session board env hooks (continent). ZONE_PAINTER_SHOW_BOARD=1 opens the
-			// board overlay. ZONE_PAINTER_BOARD_ACTION=open:BASE / close:BASE / save:BASE /
-			// toggle:BASE drives lifecycle (rebuild + weld count printed).
-			// ZONE_PAINTER_CLOSE_CONFIRM_SHOT / CELL_ACTION_SHOT force modals for screenshots.
+			// M11a/M12c: session board env hooks. ZONE_PAINTER_SHOW_BOARD=1 opens the board.
+			// Continent: BOARD_ACTION=open|close|save|toggle:BASE
+			// Ecosystem: BOARD_ACTION=place:cx,cy | rotate:cx,cy | mirror:cx,cy | remove:cx,cy
+			// CLOSE_CONFIRM_SHOT / CELL_ACTION_SHOT / INST_ACTION_SHOT force modals for screenshots.
 			{
 				const char *showB = getenv("ZONE_PAINTER_SHOW_BOARD");
 				if (showB && showB[0] && showB[0] != '0')
@@ -3671,8 +3815,24 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 						ok = sessionSaveZone(base, err);
 					else if (op == "toggle" && !base.empty())
 						ok = sessionToggleEditable(base, false, true, err);
+					else if (op == "place" || op == "rotate" || op == "mirror" || op == "remove")
+					{
+						int cx = 0, cy = 0;
+						std::string::size_type comma = base.find(',');
+						if (comma != std::string::npos
+						    && NLMISC::fromString(base.substr(0, comma), cx)
+						    && NLMISC::fromString(base.substr(comma + 1), cy))
+						{
+							if (op == "place") ok = scratchPlace(cx, cy, err);
+							else if (op == "rotate") ok = scratchRotate(cx, cy, +1, err);
+							else if (op == "mirror") ok = scratchMirror(cx, cy, err);
+							else ok = scratchRemove(cx, cy, err);
+						}
+						else
+							err = "expected cx,cy";
+					}
 					else
-						err = "unknown BOARD_ACTION (open|close|save|toggle:basename)";
+						err = "unknown BOARD_ACTION (open|close|save|toggle:base / place|rotate|mirror|remove:cx,cy)";
 					printf("board-action %s: %s%s%s\n", act.c_str(), ok ? "OK" : "FAIL",
 					       err.empty() ? "" : " ", err.c_str());
 					if (ok)
@@ -3689,6 +3849,13 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 				{
 					ZPUI::setSessionBoardVisible(true);
 					ZPUI::forceShowCellActionForShot(std::string(caShot) == "1" ? std::string() : std::string(caShot));
+				}
+				const char *iaShot = getenv("ZONE_PAINTER_INST_ACTION_SHOT");
+				if (iaShot && iaShot[0] && iaShot[0] != '0')
+				{
+					ZPUI::setSessionBoardVisible(true);
+					ZPUI::forceShowInstanceActionForShot(
+						std::string(iaShot) == "1" ? std::string("I:1,0") : std::string(iaShot));
 				}
 			}
 			// Refresh bridge after season/palette/board env hooks
@@ -3754,7 +3921,7 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 				// P / TogglePalette: show/hide the tileset thumbnail palette (ui M8)
 				if (zpKeyPushed(ZPK_TogglePalette))
 					zpTogglePalette();
-				// O / ToggleBoard: session board hub over live viewer (M11a; continent)
+				// O / ToggleBoard: continent working set / ecosystem scratch board
 				if (zpKeyPushed(ZPK_ToggleBoard))
 					zpToggleBoard();
 
@@ -4034,10 +4201,11 @@ int main(int argc, char **argv)
 	                    "  the open bank — spring/summer/autumn/winter; paint indices/colors/displace untouched;\n"
 	                    "  tileset palette previews re-resolve to the new season).\n"
 	                    "  TogglePalette (default P: show/hide the Tiles thumbnail palette).\n"
-                    "  ToggleBoard (default O: session board hub over the live viewer — continent only;\n"
-                    "    L-click closed cell opens it editable + auto RO ring; L-click open cell → action\n"
-                    "    popup Close/Save/Toggle editable↔RO; BACK TO PAINTING / O returns. Working-set\n"
-                    "    change rebuilds landscape+weld and CLEARS undo; retained dirty flags survive).\n"
+	                    "  ToggleBoard (default O: session board hub — continent working set, or ecosystem\n"
+	                    "    scratch board for brick instances: empty cell places an instance; instance cell\n"
+	                    "    popup Rotate CW/CCW / Mirror / Remove; home = open brick. Labels show R90/M.\n"
+	                    "    Continent: L-click closed=open, open=Close/Save/Toggle. BACK TO PAINTING / O\n"
+	                    "    returns. Working-set / place changes rebuild landscape+weld and CLEAR undo).\n"
 	                    "Fixed viewer keys: PgUp/PgDn + 0-9 tile set, [ ] displace index, Ctrl+Z/Ctrl+E undo/redo,\n"
 	                    "F12 screenshot, ESC quit.");
 	// Optional first positional: .max (legacy) or folder (startup seed). Absent => startup flow.

@@ -371,12 +371,18 @@ static void refreshBoardSelectionUI()
 {
 	if (s_Sess.SessionMode)
 	{
-		// Session hub legend (M11a)
+		// Session hub legend (M11a continent / M12c ecosystem scratch)
 		if (CViewText *t = findText("ui:zp:zone_browser:content:board_legend"))
 		{
-			// M11c: full legend — interaction + live-state fills (Explorer anatomy)
-			t->setHardText(
-			    "L-click closed=open · open=Close/Save/Toggle · fill=edit · dim=RO · *=dirty · O/BOARD");
+			const bool eco = s_SessionBridge && s_SessionBridge->World
+			                 && s_SessionBridge->World->Kind == ZPWS::Ecosystem;
+			if (eco)
+				t->setHardText(
+				    "Scratch: home=fill · empty=place instance · inst=R CW/CCW/Mirror/Remove · "
+				    "glyph R90/M · O/BOARD back");
+			else
+				t->setHardText(
+				    "L-click closed=open · open=Close/Save/Toggle · fill=edit · dim=RO · *=dirty · O/BOARD");
 		}
 		if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(
 		        CWidgetManager::getInstance()->getElementFromId("ui:zp:zone_browser:content:btn_open_sel")))
@@ -445,7 +451,31 @@ static void setBoardCellSelFill(CInterfaceGroup *cell, bool selected)
 	                     selected ? kBoardCellSelFill : kBoardCellSelHover);
 }
 
-/** Apply M11a live state fill + dirty marker on the cell title. */
+/** Parse scratch basenames: "H", "I:cx,cy", "E:cx,cy". */
+static bool parseScratchBasename(const std::string &base, char &kind, int &cx, int &cy)
+{
+	kind = 0;
+	cx = cy = 0;
+	if (base == "H" || base == "HOME")
+	{
+		kind = 'H';
+		return true;
+	}
+	if (base.size() >= 4 && (base[0] == 'I' || base[0] == 'E') && base[1] == ':')
+	{
+		kind = base[0];
+		std::string rest = base.substr(2);
+		std::string::size_type comma = rest.find(',');
+		if (comma == std::string::npos) return false;
+		if (!NLMISC::fromString(rest.substr(0, comma), cx)
+		    || !NLMISC::fromString(rest.substr(comma + 1), cy))
+			return false;
+		return true;
+	}
+	return false;
+}
+
+/** Apply M11a/M12c live state fill + label (dirty * / R90 / M glyphs). */
 static void applySessionCellState(CInterfaceGroup *cell, const std::string &basename,
                                   ESessionCellState st)
 {
@@ -454,6 +484,7 @@ static void applySessionCellState(CInterfaceGroup *cell, const std::string &base
 	switch (st)
 	{
 	case CellOpenEditable:
+	case CellScratchHome:
 		setBoardCellFillRGBA(cell, kBoardCellSelFill, kBoardCellSelFill);
 		break;
 	case CellOpenReadOnly:
@@ -462,19 +493,48 @@ static void applySessionCellState(CInterfaceGroup *cell, const std::string &base
 	case CellDirtyEditable:
 		setBoardCellFillRGBA(cell, kBoardCellDirty, kBoardCellDirtyHover);
 		break;
+	case CellScratchInstance:
+		// Distinct teal tint for instances
+		setBoardCellFillRGBA(cell, NLMISC::CRGBA(40, 90, 100, 200), NLMISC::CRGBA(50, 110, 120, 220));
+		break;
+	case CellScratchEmpty:
+		setBoardCellFillRGBA(cell, NLMISC::CRGBA(30, 32, 36, 120), NLMISC::CRGBA(40, 44, 50, 160));
+		break;
 	case CellClosed:
 	default:
 		setBoardCellFillRGBA(cell, kBoardCellSelNone, kBoardCellSelHover);
 		break;
 	}
-	// Dirty marker: '*' suffix on label (keep base name for closed/open clean)
 	if (CViewText *t = dynamic_cast<CViewText *>(cell->getView("t")))
 	{
-		if (st == CellDirtyEditable)
+		char sk = 0;
+		int cx = 0, cy = 0;
+		if (st == CellScratchHome)
+		{
+			std::string home = s_SessionBridge && !s_SessionBridge->ScratchHomeName.empty()
+			                   ? s_SessionBridge->ScratchHomeName
+			                   : std::string("HOME");
+			// Truncate long brick names for the stamp
+			if (home.size() > 10) home = home.substr(0, 9) + "…";
+			t->setHardText(home);
+		}
+		else if (st == CellScratchInstance && parseScratchBasename(basename, sk, cx, cy))
+		{
+			uint rot = 0;
+			bool mir = false;
+			if (s_SessionBridge && s_SessionBridge->scratchGetInstance)
+				s_SessionBridge->scratchGetInstance(cx, cy, rot, mir);
+			std::string lab = NLMISC::toString("%d,%d", cx, cy);
+			if (rot) lab += NLMISC::toString(" R%u", rot * 90);
+			if (mir) lab += " M";
+			t->setHardText(lab);
+		}
+		else if (st == CellScratchEmpty)
+			t->setHardText("");
+		else if (st == CellDirtyEditable)
 			t->setHardText(basename + " *");
 		else
 		{
-			// Short grid form if available
 			int r = 0, c = 0;
 			if (ZPWS::parseContinentZoneName(basename, r, c))
 				t->setHardText(ZPWS::continentZoneName(r, c));
@@ -725,8 +785,8 @@ static void populateContinentGrid(const ZPWS::SWorldEntry &world)
 	refreshBoardSelectionUI();
 }
 
-/** Show/hide ecosystem layout radios and push list below them when active. */
-static void setLayoutSelectorVisible(bool visible)
+/** NxN layout selector retired (M12) — always hide; list/board sit under world_sub. */
+static void setLayoutSelectorVisible(bool /*visible*/)
 {
 	static const char *ids[] = {
 		"ui:zp:zone_browser:content:layout_label",
@@ -740,36 +800,19 @@ static void setLayoutSelectorVisible(bool visible)
 	for (int i = 0; ids[i]; ++i)
 	{
 		if (CInterfaceElement *el = CWidgetManager::getInstance()->getElementFromId(ids[i]))
-			el->setActive(visible);
+			el->setActive(false);
 	}
-	// Drop the zone list / board under the layout row (or tight under world_sub on continents)
-	const sint32 y = visible ? -40 : -8;
 	if (CInterfaceElement *list = CWidgetManager::getInstance()->getElementFromId(
 	        "ui:zp:zone_browser:content:list_scroll"))
-		list->setY(y);
+		list->setY(-8);
 	if (CInterfaceElement *board = CWidgetManager::getInstance()->getElementFromId(
 	        "ui:zp:zone_browser:content:board_host"))
-		board->setY(y);
+		board->setY(-8);
 }
 
-/** Sync radio pushed state to s_Sess.InstanceLayout. */
 static void syncLayoutRadios()
 {
-	const char *layouts[] = { "1x1", "2x1", "1x2", "2x2", "3x3", NULL };
-	const char *ids[] = {
-		"ui:zp:zone_browser:content:layout_1x1",
-		"ui:zp:zone_browser:content:layout_2x1",
-		"ui:zp:zone_browser:content:layout_1x2",
-		"ui:zp:zone_browser:content:layout_2x2",
-		"ui:zp:zone_browser:content:layout_3x3",
-		NULL
-	};
-	for (int i = 0; layouts[i]; ++i)
-	{
-		if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(
-		        CWidgetManager::getInstance()->getElementFromId(ids[i])))
-			btn->setPushed(s_Sess.InstanceLayout == layouts[i]);
-	}
+	// no-op (NxN retired M12)
 }
 
 static void populateZoneList()
@@ -788,11 +831,7 @@ static void populateZoneList()
 	if (CViewText *t = findText("ui:zp:zone_browser:content:world_sub"))
 		t->setHardText(world.GraphicsRoot);
 
-	// Layout selector is ecosystem-only (self-instances). Continents hide it.
-	const bool eco = (world.Kind == ZPWS::Ecosystem);
-	setLayoutSelectorVisible(eco);
-	if (eco)
-		syncLayoutRadios();
+	setLayoutSelectorVisible(false);
 
 	ZPWS::listZones(world, s_Sess.Zones);
 
@@ -975,20 +1014,49 @@ static void applyWorldSelection(int idx)
 }
 
 static void openCellActionPopup(const std::string &basename);
+static void openInstanceActionPopup(const std::string &basename);
 static void openCloseConfirmModal(const std::string &basename, const std::string &purpose);
+static void populateScratchBoard();
 
-/** L-click: startup = open immediately; session hub = open closed / popup for open. */
+/** L-click: startup = open immediately; session hub = continent open/popup or ecosystem scratch. */
 static void applyZoneSelection(int idx)
 {
 	if (idx < 0 || idx >= (int)s_Sess.Zones.size())
 		return;
 
-	// M11a session board: closed → open; open → action popup
+	// M11a/M12c session board
 	if (s_Sess.SessionMode)
 	{
 		const std::string &base = s_Sess.Zones[idx].Basename;
 		s_Sess.SelectedZone = idx;
 		s_Sess.PendingActionBasename = base;
+
+		// Ecosystem scratch (M12c)
+		char sk = 0;
+		int cx = 0, cy = 0;
+		if (s_SessionBridge && s_SessionBridge->World
+		    && s_SessionBridge->World->Kind == ZPWS::Ecosystem
+		    && parseScratchBasename(base, sk, cx, cy))
+		{
+			std::string err;
+			if (sk == 'H')
+				return; // home: no action
+			if (sk == 'E' && s_SessionBridge->scratchPlace)
+			{
+				if (!s_SessionBridge->scratchPlace(cx, cy, err))
+					fprintf(stderr, "scratch place (%d,%d): %s\n", cx, cy, err.c_str());
+				else
+					refreshSessionBoardStates();
+				return;
+			}
+			if (sk == 'I')
+			{
+				openInstanceActionPopup(base);
+				return;
+			}
+		}
+
+		// Continent working-set
 		if (s_SessionBridge && s_SessionBridge->isOpen && s_SessionBridge->isOpen(base))
 		{
 			openCellActionPopup(base);
@@ -1422,11 +1490,8 @@ EStartupResult runStartupFlow(UDriver *driver,
 				}
 				else
 					selection.EditableZones.push_back(selection.Zone);
-				// Ecosystem layout for self-instances; continents always 1x1
-				if (selection.World.Kind == ZPWS::Ecosystem)
-					selection.InstanceLayout = s_Sess.InstanceLayout;
-				else
-					selection.InstanceLayout = "1x1";
+				// NxN layout retired (M12); open primary only — use BOARD/--place for instances
+				selection.InstanceLayout = "1x1";
 				result = StartupOpenZone;
 				break;
 			}
@@ -1514,12 +1579,48 @@ void forceShowCellActionForShot(const std::string &basename)
 	openCellActionPopup(b);
 }
 
+static void openInstanceActionPopup(const std::string &basename)
+{
+	s_Sess.PendingActionBasename = basename;
+	char sk = 0;
+	int cx = 0, cy = 0;
+	uint rot = 0;
+	bool mir = false;
+	parseScratchBasename(basename, sk, cx, cy);
+	if (s_SessionBridge && s_SessionBridge->scratchGetInstance)
+		s_SessionBridge->scratchGetInstance(cx, cy, rot, mir);
+	if (CViewText *t = findText("ui:zp:instance_action:content:title"))
+		t->setHardText(NLMISC::toString("Instance %d,%d", cx, cy));
+	if (CViewText *t = findText("ui:zp:instance_action:content:status"))
+	{
+		std::string st = NLMISC::toString("rot %u°", rot * 90);
+		if (mir) st += " · mirror";
+		t->setHardText(st);
+	}
+	CWidgetManager::getInstance()->enableModalWindow(NULL, "ui:zp:instance_action");
+}
+
+void forceShowInstanceActionForShot(const std::string &basename)
+{
+	std::string b = basename;
+	if (b.empty())
+		b = "I:1,0";
+	openInstanceActionPopup(b);
+}
+
 void refreshSessionBoardStates()
 {
 	if (!s_SessionBoardVisible || !s_Sess.SessionMode)
 		return;
 	if (!s_SessionBridge || !s_SessionBridge->getCellState)
 		return;
+	// Ecosystem scratch: instance set may change (E↔I); rebuild the grid
+	if (s_SessionBridge->World && s_SessionBridge->World->Kind == ZPWS::Ecosystem)
+	{
+		populateScratchBoard();
+		refreshBoardSelectionUI();
+		return;
+	}
 	for (size_t i = 0; i < s_Sess.Zones.size(); ++i)
 	{
 		int r = 0, c = 0;
@@ -1537,20 +1638,114 @@ void refreshSessionBoardStates()
 	refreshBoardSelectionUI();
 }
 
+/**
+ * Ecosystem scratch board (M12c): 7×7 cell grid centered on home (0,0).
+ * Basenames: H (home), I:cx,cy (instance), E:cx,cy (empty). Bridge owns place list.
+ */
+static void populateScratchBoard()
+{
+	const int kCell = 52;
+	const int kHalf = 3; // cells -3..3
+
+	// Build synthetic zone list for click indices
+	s_Sess.Zones.clear();
+	std::map<std::pair<int, int>, int> used; // (cy,cx) as row,col
+	for (int cy = -kHalf; cy <= kHalf; ++cy)
+	for (int cx = -kHalf; cx <= kHalf; ++cx)
+	{
+		ZPWS::SZoneEntry z;
+		if (cx == 0 && cy == 0)
+			z.Basename = "H";
+		else if (s_SessionBridge && s_SessionBridge->scratchGetInstance)
+		{
+			uint rot = 0;
+			bool mir = false;
+			if (s_SessionBridge->scratchGetInstance(cx, cy, rot, mir))
+				z.Basename = NLMISC::toString("I:%d,%d", cx, cy);
+			else
+				z.Basename = NLMISC::toString("E:%d,%d", cx, cy);
+		}
+		else
+			z.Basename = NLMISC::toString("E:%d,%d", cx, cy);
+		used[std::make_pair(cy, cx)] = (int)s_Sess.Zones.size();
+		s_Sess.Zones.push_back(z);
+	}
+
+	const int nRows = 2 * kHalf + 1;
+	const int nCols = 2 * kHalf + 1;
+	const int boardW = nCols * kCell;
+	const int boardH = nRows * kCell;
+	const int minR = -kHalf, maxR = kHalf, minC = -kHalf;
+
+	setZoneBrowserMode(true);
+	clearBoard();
+	CInterfaceGroup *board = findGroup("ui:zp:zone_browser:content:board_host:board");
+	if (!board) return;
+	board->setW(boardW);
+	board->setH(boardH);
+	board->setMaxW(730);
+	board->setMaxH(330);
+	board->setOfsX(0);
+	board->setOfsY(0);
+
+	for (std::map<std::pair<int, int>, int>::const_iterator it = used.begin(); it != used.end(); ++it)
+	{
+		const int r = it->first.first;  // cy
+		const int c = it->first.second; // cx
+		const int zi = it->second;
+		const ZPWS::SZoneEntry &z = s_Sess.Zones[zi];
+		const sint32 x = (c - minC) * kCell;
+		const sint32 y = -((maxR - r) * kCell);
+		std::vector<std::pair<std::string, std::string> > p;
+		char idbuf[48], idxbuf[32];
+		snprintf(idbuf, sizeof(idbuf), "gc%d_%d", r, c);
+		snprintf(idxbuf, sizeof(idxbuf), "%d", zi);
+		p.push_back(std::make_pair(std::string("id"), std::string(idbuf)));
+		p.push_back(std::make_pair(std::string("title"), z.Basename));
+		p.push_back(std::make_pair(std::string("idx"), std::string(idxbuf)));
+		p.push_back(std::make_pair(std::string("thumb"), std::string("w_box_blank.tga")));
+		CInterfaceGroup *cell = spawnUnder(board, "zp_board_cell", p, x, y, kCell, kCell);
+		if (!cell) continue;
+		if (CViewBitmap *thumb = dynamic_cast<CViewBitmap *>(cell->getView("thumb")))
+			thumb->setActive(false);
+		if (CInterfaceGroup *fr = cell->getGroup("thumb_frame"))
+			fr->setActive(false);
+		if (CCtrlButton *btn = dynamic_cast<CCtrlButton *>(cell->getCtrl("btn")))
+		{
+			btn->setScale(true);
+			btn->setW(kCell);
+			btn->setH(kCell);
+		}
+		ESessionCellState st = CellScratchEmpty;
+		if (s_SessionBridge && s_SessionBridge->getCellState)
+			s_SessionBridge->getCellState(z.Basename, st);
+		applySessionCellState(cell, z.Basename, st);
+	}
+
+	if (CCtrlScroll *sv = dynamic_cast<CCtrlScroll *>(
+	        CWidgetManager::getInstance()->getElementFromId("ui:zp:zone_browser:content:board_host:sv")))
+		sv->setTarget(board);
+	if (CCtrlScroll *sh = dynamic_cast<CCtrlScroll *>(
+	        CWidgetManager::getInstance()->getElementFromId("ui:zp:zone_browser:content:board_host:sh")))
+		sh->setTarget(board);
+	board->invalidateCoords();
+	if (CInterfaceGroup *host = findGroup("ui:zp:zone_browser:content:board_host"))
+		host->invalidateCoords();
+}
+
 void setSessionBoardVisible(bool visible)
 {
 	if (!s_SessionBridge || !s_SessionBridge->World)
 	{
-		// No continent session bridge: no-op
 		if (visible)
-			fprintf(stderr, "session board: no continent bridge (ecosystems use single-file flow)\n");
+			fprintf(stderr, "session board: no bridge (open a continent or ecosystem session first)\n");
 		s_SessionBoardVisible = false;
 		return;
 	}
-	if (s_SessionBridge->World->Kind != ZPWS::Continent)
+	const bool isCont = s_SessionBridge->World->Kind == ZPWS::Continent;
+	const bool isEco = s_SessionBridge->World->Kind == ZPWS::Ecosystem;
+	if (!isCont && !isEco)
 	{
-		if (visible)
-			fprintf(stderr, "session board: continent worlds only this milestone\n");
 		s_SessionBoardVisible = false;
 		return;
 	}
@@ -1559,19 +1754,30 @@ void setSessionBoardVisible(bool visible)
 	s_Sess.SessionMode = visible;
 	if (visible)
 	{
-		// Populate board for the session world (reuses Screen B chrome)
-		s_Sess.Active = true; // allow board AHs while viewer runs
-		s_Sess.Worlds = NULL; // not used in session mode
+		s_Sess.Active = true;
+		s_Sess.Worlds = NULL;
 		s_Sess.SelectedWorld = 0;
-		// Fake a one-world list via Zones from the bridge world
-		ZPWS::listZones(*s_SessionBridge->World, s_Sess.Zones);
-		if (CViewText *t = findText("ui:zp:zone_browser:content:world_title"))
-			t->setHardText(s_SessionBridge->World->WorldName + "  (session board)");
-		if (CViewText *t = findText("ui:zp:zone_browser:content:world_sub"))
-			t->setHardText("working set — O / BACK TO PAINTING returns");
 		setLayoutSelectorVisible(false);
-		populateContinentGrid(*s_SessionBridge->World);
-		// Show zone_browser; keep painter visible underneath
+		if (isCont)
+		{
+			ZPWS::listZones(*s_SessionBridge->World, s_Sess.Zones);
+			if (CViewText *t = findText("ui:zp:zone_browser:content:world_title"))
+				t->setHardText(s_SessionBridge->World->WorldName + "  (session board)");
+			if (CViewText *t = findText("ui:zp:zone_browser:content:world_sub"))
+				t->setHardText("working set — O / BACK TO PAINTING returns");
+			populateContinentGrid(*s_SessionBridge->World);
+		}
+		else
+		{
+			if (CViewText *t = findText("ui:zp:zone_browser:content:world_title"))
+				t->setHardText((s_SessionBridge->ScratchHomeName.empty()
+				                ? s_SessionBridge->World->WorldName
+				                : s_SessionBridge->ScratchHomeName)
+				               + "  (scratch board)");
+			if (CViewText *t = findText("ui:zp:zone_browser:content:world_sub"))
+				t->setHardText("place / rotate / mirror instances — O / BACK TO PAINTING");
+			populateScratchBoard();
+		}
 		if (CInterfaceElement *el = CWidgetManager::getInstance()->getElementFromId("ui:zp:zone_browser"))
 			el->setActive(true);
 		if (CGroupContainer *gc = dynamic_cast<CGroupContainer *>(
@@ -1579,16 +1785,15 @@ void setSessionBoardVisible(bool visible)
 			gc->setActive(true);
 		refreshSessionBoardStates();
 		refreshBoardSelectionUI();
-		printf("session board: open (%u zones)\n", (uint)s_Sess.Zones.size());
+		printf("session board: open (%u cells, %s)\n",
+		       (uint)s_Sess.Zones.size(), isEco ? "scratch" : "continent");
 	}
 	else
 	{
 		if (CInterfaceElement *el = CWidgetManager::getInstance()->getElementFromId("ui:zp:zone_browser"))
 			el->setActive(false);
-		// Leave modal if any
 		CWidgetManager::getInstance()->disableModalWindow();
 		s_Sess.SessionMode = false;
-		// Keep s_Sess.Active false so startup AHs do not fire mid-viewer except via SessionMode checks
 		s_Sess.Active = false;
 		s_Sess.PendingActionBasename.clear();
 		printf("session board: closed (back to painting)\n");
@@ -1762,6 +1967,92 @@ public:
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpCloseConfirmCancel, "zp_close_confirm_cancel");
+
+// Ecosystem scratch instance popup (M12c)
+static bool scratchParsePending(int &cx, int &cy)
+{
+	char sk = 0;
+	return parseScratchBasename(s_Sess.PendingActionBasename, sk, cx, cy) && sk == 'I';
+}
+
+class CAHZpInstRotCW : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		CWidgetManager::getInstance()->disableModalWindow();
+		int cx = 0, cy = 0;
+		if (!scratchParsePending(cx, cy) || !s_SessionBridge || !s_SessionBridge->scratchRotate)
+			return;
+		std::string err;
+		if (!s_SessionBridge->scratchRotate(cx, cy, +1, err))
+			fprintf(stderr, "scratch rotate CW (%d,%d): %s\n", cx, cy, err.c_str());
+		refreshSessionBoardStates();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpInstRotCW, "zp_inst_rot_cw");
+
+class CAHZpInstRotCCW : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		CWidgetManager::getInstance()->disableModalWindow();
+		int cx = 0, cy = 0;
+		if (!scratchParsePending(cx, cy) || !s_SessionBridge || !s_SessionBridge->scratchRotate)
+			return;
+		std::string err;
+		if (!s_SessionBridge->scratchRotate(cx, cy, -1, err))
+			fprintf(stderr, "scratch rotate CCW (%d,%d): %s\n", cx, cy, err.c_str());
+		refreshSessionBoardStates();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpInstRotCCW, "zp_inst_rot_ccw");
+
+class CAHZpInstMirror : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		CWidgetManager::getInstance()->disableModalWindow();
+		int cx = 0, cy = 0;
+		if (!scratchParsePending(cx, cy) || !s_SessionBridge || !s_SessionBridge->scratchMirror)
+			return;
+		std::string err;
+		if (!s_SessionBridge->scratchMirror(cx, cy, err))
+			fprintf(stderr, "scratch mirror (%d,%d): %s\n", cx, cy, err.c_str());
+		refreshSessionBoardStates();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpInstMirror, "zp_inst_mirror");
+
+class CAHZpInstRemove : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		CWidgetManager::getInstance()->disableModalWindow();
+		int cx = 0, cy = 0;
+		if (!scratchParsePending(cx, cy) || !s_SessionBridge || !s_SessionBridge->scratchRemove)
+			return;
+		std::string err;
+		if (!s_SessionBridge->scratchRemove(cx, cy, err))
+			fprintf(stderr, "scratch remove (%d,%d): %s\n", cx, cy, err.c_str());
+		refreshSessionBoardStates();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpInstRemove, "zp_inst_remove");
+
+class CAHZpInstCancel : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		CWidgetManager::getInstance()->disableModalWindow();
+		s_Sess.PendingActionBasename.clear();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpInstCancel, "zp_inst_cancel");
 
 } // namespace ZPUI
 

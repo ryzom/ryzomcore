@@ -60,7 +60,7 @@ struct SStartupSelection
 	ZPWS::SZoneEntry Zone; // first / primary (compat with single-open callers)
 	/** All editable zones for this open (M6b multi-select). Empty means {Zone} only. */
 	std::vector<ZPWS::SZoneEntry> EditableZones;
-	/** Ecosystem self-instance layout ("1x1".."3x3"); empty means 1x1. Continent ignores. */
+	/** @deprecated M12 — NxN open layout retired; always empty / "1x1". Prefer --place / scratch board. */
 	std::string InstanceLayout;
 };
 
@@ -96,8 +96,9 @@ void startupHideAllScreens();
 void startupShowPainter(bool show);
 
 // ---------------------------------------------------------------------------------------------
-// Session board hub (ui M11a) — continent grid over the live viewer (session intact).
-// Ecosystems keep the single-file flow this milestone; only continents use the session board.
+// Session board hub (ui M11a/M12c) — over the live viewer (session intact).
+// Continent: working-set open/close/save/toggle. Ecosystem: scratch board for brick instances
+// (home + place/rotate/mirror/remove). NxN Screen B layout selector retired (M12).
 
 /** Per-cell live state for the session board (Explorer-style fill variants). */
 enum ESessionCellState
@@ -105,22 +106,33 @@ enum ESessionCellState
 	CellClosed = 0,       ///< not in working set (default used-cell look)
 	CellOpenEditable,     ///< open as paint target (selection-fill tone)
 	CellOpenReadOnly,     ///< open as frozen context (dimmer tint)
-	CellDirtyEditable     ///< open-editable with unsaved paint (fill + dirty marker)
+	CellDirtyEditable,    ///< open-editable with unsaved paint (fill + dirty marker)
+	// Ecosystem scratch (M12c):
+	CellScratchHome,      ///< open brick home cell (editable fill)
+	CellScratchInstance,  ///< placed instance (distinct tint; label carries R90/M glyphs)
+	CellScratchEmpty      ///< empty scratch well (quiet)
 };
 
 /**
  * Bridge for mid-session board actions. main.cpp fills callbacks; startup_ui drives the
- * board window. Interaction idiom (documented in --help / legend):
+ * board window.
+ *
+ * Continent idiom:
  *   L-click CLOSED used cell → open editable (+ auto RO ring)
  *   L-click OPEN cell        → action popup: Close / Save / Toggle editable↔RO / Cancel
- *   ToggleBoard key / BACK TO PAINTING → hide board, return to painting
+ *
+ * Ecosystem scratch idiom (M12c):
+ *   L-click EMPTY cell     → place instance of the open brick (current placement rot/mirror)
+ *   L-click INSTANCE cell  → popup: Rotate CW / CCW / Mirror / Remove
+ *   L-click HOME           → no-op (primary stays)
+ *   ToggleBoard / BACK TO PAINTING → hide board
  */
 struct SSessionBoardBridge
 {
-	const ZPWS::SWorldEntry *World; // current continent world (non-null while session board usable)
+	const ZPWS::SWorldEntry *World; // non-null while session board usable
 	/** Return live state for a zone basename; false if unknown. */
 	bool (*getCellState)(const std::string &basename, ESessionCellState &out);
-	/** Open a closed zone as editable (rebuilds assembly). */
+	/** Open a closed zone as editable (rebuilds assembly). Continent only. */
 	bool (*openZone)(const std::string &basename, std::string &err);
 	/** Close an open zone. If dirty editable and forceDiscard is false, UI shows confirm first. */
 	bool (*closeZone)(const std::string &basename, bool saveFirst, bool forceDiscard, std::string &err);
@@ -135,9 +147,25 @@ struct SSessionBoardBridge
 	/** True when basename is open as editable (not RO neighbor). */
 	bool (*isEditable)(const std::string &basename);
 
+	// Ecosystem scratch board (M12c) — cell basenames "H" (home), "I:cx,cy", "E:cx,cy"
+	/** Place instance at empty cell (cx,cy). */
+	bool (*scratchPlace)(int cx, int cy, std::string &err);
+	/** Rotate instance CW (+1) or CCW (-1). */
+	bool (*scratchRotate)(int cx, int cy, int delta, std::string &err);
+	/** Toggle mirror on instance. */
+	bool (*scratchMirror)(int cx, int cy, std::string &err);
+	/** Remove instance at cell. */
+	bool (*scratchRemove)(int cx, int cy, std::string &err);
+	/** Query instance transform for label glyphs; false if not an instance cell. */
+	bool (*scratchGetInstance)(int cx, int cy, uint &rot, bool &mirror);
+	/** Home brick display name. */
+	std::string ScratchHomeName;
+
 	SSessionBoardBridge()
 		: World(NULL), getCellState(NULL), openZone(NULL), closeZone(NULL),
-		  saveZone(NULL), toggleEditable(NULL), isDirty(NULL), isOpen(NULL), isEditable(NULL)
+		  saveZone(NULL), toggleEditable(NULL), isDirty(NULL), isOpen(NULL), isEditable(NULL),
+		  scratchPlace(NULL), scratchRotate(NULL), scratchMirror(NULL), scratchRemove(NULL),
+		  scratchGetInstance(NULL)
 	{
 	}
 };
@@ -145,12 +173,12 @@ struct SSessionBoardBridge
 void setSessionBoardBridge(SSessionBoardBridge *bridge);
 SSessionBoardBridge *getSessionBoardBridge();
 
-/** Show/hide the session board over the live viewer (continent only). */
+/** Show/hide the session board over the live viewer (continent working set / ecosystem scratch). */
 void setSessionBoardVisible(bool visible);
 void toggleSessionBoard();
 bool isSessionBoardVisible();
 
-/** Rebuild cell fills/markers from the bridge (call after open/close/save/paint). */
+/** Rebuild cell fills/markers from the bridge (call after open/close/save/paint/place). */
 void refreshSessionBoardStates();
 
 /** Dev/test: open the close-confirm modal for one screenshot frame. */
@@ -158,6 +186,9 @@ void forceShowCloseConfirmForShot(const std::string &basename = std::string());
 
 /** Dev/test: open the cell-action popup for one screenshot frame. */
 void forceShowCellActionForShot(const std::string &basename = std::string());
+
+/** Dev/test: open the instance-action popup (ecosystem scratch) for one screenshot frame. */
+void forceShowInstanceActionForShot(const std::string &basename = std::string());
 
 } // namespace ZPUI
 
