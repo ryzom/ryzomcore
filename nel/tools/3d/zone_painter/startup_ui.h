@@ -182,6 +182,13 @@ struct SSessionBoardBridge
 	bool (*scratchGetEditableAt)(int cx, int cy, int &ox, int &oy, std::string &basename, bool &editable);
 	/** Convert the RO context brick at (cx,cy) into an editable open file (same cell). */
 	bool (*scratchContextToEditable)(int cx, int cy, std::string &err);
+	// M24b: instance ANY open brick (home or open editable) — clones share the source's
+	// carriers so painting the source repaints every instance live.
+	bool (*scratchPlaceInstanceOf)(int cx, int cy, const std::string &basename, std::string &err);
+	/** Open-brick count (home + editables); 1 = only home (skip the source picker). */
+	int (*scratchOpenFileCount)();
+	/** Instance source basename at cell (empty = home instance). */
+	bool (*scratchGetInstanceSource)(int cx, int cy, std::string &basename);
 	/** Home brick display name. */
 	std::string ScratchHomeName;
 	/** Primary footprint size in fine cells (M14a multi-cell occupancy). */
@@ -201,6 +208,7 @@ struct SSessionBoardBridge
 		  scratchGetInstance(NULL), scratchGetInstanceOrigin(NULL),
 		  scratchPlaceContext(NULL), scratchRemoveContext(NULL), scratchGetContext(NULL),
 		  scratchOpenEditable(NULL), scratchGetEditableAt(NULL), scratchContextToEditable(NULL),
+		  scratchPlaceInstanceOf(NULL), scratchOpenFileCount(NULL), scratchGetInstanceSource(NULL),
 		  FootprintCellsW(1), FootprintCellsH(1), FootprintMask(NULL)
 	{
 	}

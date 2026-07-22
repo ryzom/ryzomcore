@@ -314,6 +314,9 @@ struct SInstancePlace
 	int CellX, CellY; // origin cell of transformed footprint block (fine cells; see above)
 	uint Rot;         // 0..3 CCW (NEL3D_APPDATA_ZONE_ROTATE / CZoneRegion::Rot)
 	bool Mirror;      // Flip (NEL3D_APPDATA_ZONE_SYMMETRY / CZoneRegion::Flip)
+	// M24b: instance source — empty = primary/home brick; else an OPEN file's basename
+	// (basename-stable across working-set changes; orphaned places prune at rebuild).
+	std::string SourceBasename;
 	SInstancePlace() : CellX(0), CellY(0), Rot(0), Mirror(false) { }
 	SInstancePlace(int x, int y, uint r, bool m) : CellX(x), CellY(y), Rot(r), Mirror(m) { }
 };
@@ -1857,9 +1860,21 @@ static bool loadOnePlaceContext(std::vector<SPaintZone> &zones, float cellSize,
 // fallback when the zone template is unparseable / USE_BOUNDINGBOX is set.
 
 /** Parse "dx,dy[,rot][,m]" — cell offsets, rot 0..3, optional mirror (m|1|true). */
-static bool parsePlaceSpec(const std::string &s, SInstancePlace &out, std::string &err)
+static bool parsePlaceSpec(const std::string &sIn, SInstancePlace &out, std::string &err)
 {
 	out = SInstancePlace();
+	// M24b: optional ":basename" suffix — instance of an OPEN brick instead of home
+	std::string s = sIn;
+	std::string::size_type colon = s.find(':');
+	if (colon != std::string::npos)
+	{
+		out.SourceBasename = s.substr(colon + 1);
+		std::string::size_type dot = out.SourceBasename.rfind('.');
+		if (dot != std::string::npos
+		    && NLMISC::toLowerAscii(out.SourceBasename.substr(dot)) == ".max")
+			out.SourceBasename = out.SourceBasename.substr(0, dot);
+		s = s.substr(0, colon);
+	}
 	std::vector<std::string> parts;
 	{
 		std::string cur;
@@ -2526,12 +2541,14 @@ static void computePrimaryPivot(const std::vector<SPaintZone> &zones, size_t pri
  * World translation after rot/mirror about pivot so the transformed footprint's min-corner
  * lands at board cell (placeX, placeY) — primary footprint origin cell is (0,0).
  */
-static void computePlaceTranslation(float originX, float originY, float stepX, float stepY,
-                                    float pivotX, float pivotY, float cellSize,
-                                    int placeX, int placeY, uint rot, bool mirror,
-                                    float &outDx, float &outDy)
+static void computePlaceTranslationFrom(float originX, float originY, float stepX, float stepY,
+                                        float pivotX, float pivotY,
+                                        float boardOriginX, float boardOriginY, float cellSize,
+                                        int placeX, int placeY, uint rot, bool mirror,
+                                        float &outDx, float &outDy)
 {
-	// Transform the four corners of the primary footprint rect about the pivot
+	// Transform the four corners of the SOURCE footprint rect about its pivot; the desired
+	// min-corner is a BOARD cell (anchored at the primary footprint origin, M24b).
 	float xs[4] = { originX, originX + stepX, originX + stepX, originX };
 	float ys[4] = { originY, originY, originY + stepY, originY + stepY };
 	float tminX = 0.f, tminY = 0.f;
@@ -2546,10 +2563,20 @@ static void computePlaceTranslation(float originX, float originY, float stepX, f
 			if (y < tminY) tminY = y;
 		}
 	}
-	const float desiredX = originX + (float)placeX * cellSize;
-	const float desiredY = originY + (float)placeY * cellSize;
+	const float desiredX = boardOriginX + (float)placeX * cellSize;
+	const float desiredY = boardOriginY + (float)placeY * cellSize;
 	outDx = desiredX - tminX;
 	outDy = desiredY - tminY;
+}
+
+static void computePlaceTranslation(float originX, float originY, float stepX, float stepY,
+                                    float pivotX, float pivotY, float cellSize,
+                                    int placeX, int placeY, uint rot, bool mirror,
+                                    float &outDx, float &outDy)
+{
+	computePlaceTranslationFrom(originX, originY, stepX, stepY, pivotX, pivotY,
+	                            originX, originY, cellSize, placeX, placeY, rot, mirror,
+	                            outDx, outDy);
 }
 
 /**
@@ -2634,19 +2661,66 @@ static uint appendInstanceZones(std::vector<SPaintZone> &zones, size_t primaryCo
 	for (size_t pi = 0; pi < places.size(); ++pi)
 	{
 		const SInstancePlace &pl = places[pi];
-		float dx = 0.f, dy = 0.f;
-		computePlaceTranslation(originX, originY, stepX, stepY, pivotX, pivotY, cellSize,
-		                        pl.CellX, pl.CellY, pl.Rot & 3, pl.Mirror, dx, dy);
-		int bw = 0, bh = 0;
-		footprintBlockSize(cellsW, cellsH, pl.Rot, pl.Mirror, bw, bh);
-		for (size_t i = 0; i < primaryCount; ++i)
+		// M24b: per-place source — home (range [0,primaryCount), primary footprint) or an
+		// open editable file (its zone-id range + its derived footprint at its board cell).
+		size_t srcBegin = 0, srcEnd = primaryCount;
+		float srcOriginX = originX, srcOriginY = originY;
+		int srcCellsW = cellsW, srcCellsH = cellsH;
+		if (!pl.SourceBasename.empty())
 		{
-			zones.push_back(cloneInstanceZone(zones[i], nextId, dx, dy, pivotX, pivotY, pl));
+			bool found = false;
+			for (size_t ei = 1; ei < g_EditableFiles.size(); ++ei)
+			{
+				if (NLMISC::toLowerAscii(g_EditableFiles[ei].Basename)
+				    != NLMISC::toLowerAscii(pl.SourceBasename))
+					continue;
+				const uint baseId = (uint)(ei * 1000);
+				srcBegin = srcEnd = 0;
+				bool haveBegin = false;
+				for (size_t z = 0; z < zones.size(); ++z)
+				{
+					if (zones[z].ZoneId >= baseId && zones[z].ZoneId < baseId + 1000
+					    && zones[z].ZoneId < kInstanceZoneIdBase)
+					{
+						if (!haveBegin) { srcBegin = z; haveBegin = true; }
+						srcEnd = z + 1;
+					}
+				}
+				srcOriginX = g_FootprintOriginX + (float)g_EditableFiles[ei].CellX * cellSize;
+				srcOriginY = g_FootprintOriginY + (float)g_EditableFiles[ei].CellY * cellSize;
+				srcCellsW = g_EditableFiles[ei].CellsW > 0 ? g_EditableFiles[ei].CellsW : 1;
+				srcCellsH = g_EditableFiles[ei].CellsH > 0 ? g_EditableFiles[ei].CellsH : 1;
+				found = haveBegin;
+				break;
+			}
+			if (!found)
+			{
+				fprintf(stderr, "WARNING: instance source '%s' not open — place skipped\n",
+				        pl.SourceBasename.c_str());
+				continue;
+			}
+		}
+		const float srcStepX = (float)srcCellsW * cellSize;
+		const float srcStepY = (float)srcCellsH * cellSize;
+		const float srcPivotX = srcOriginX + srcStepX * 0.5f;
+		const float srcPivotY = srcOriginY + srcStepY * 0.5f;
+		float dx = 0.f, dy = 0.f;
+		computePlaceTranslationFrom(srcOriginX, srcOriginY, srcStepX, srcStepY,
+		                            srcPivotX, srcPivotY, originX, originY, cellSize,
+		                            pl.CellX, pl.CellY, pl.Rot & 3, pl.Mirror, dx, dy);
+		int bw = 0, bh = 0;
+		footprintBlockSize(srcCellsW, srcCellsH, pl.Rot, pl.Mirror, bw, bh);
+		for (size_t i = srcBegin; i < srcEnd; ++i)
+		{
+			zones.push_back(cloneInstanceZone(zones[i], nextId, dx, dy, srcPivotX, srcPivotY, pl));
 			++nextId;
 			++appended;
 		}
-		printf("  place[%u] origin cell (%d,%d) rot %u%s  occupies %dx%d cells [%d,%d)×[%d,%d)\n",
-		       (uint)pi, pl.CellX, pl.CellY, pl.Rot, pl.Mirror ? " mirror" : "",
+		const std::string srcTag = pl.SourceBasename.empty()
+			? std::string() : (" '" + pl.SourceBasename + "'");
+		printf("  place[%u]%s origin cell (%d,%d) rot %u%s  occupies %dx%d cells [%d,%d)×[%d,%d)\n",
+		       (uint)pi, srcTag.c_str(),
+		       pl.CellX, pl.CellY, pl.Rot, pl.Mirror ? " mirror" : "",
 		       bw, bh, pl.CellX, pl.CellX + bw, pl.CellY, pl.CellY + bh);
 	}
 	printf("instances: %u place(s)  footprint %dx%d cells step (%.1f, %.1f)  origin (%.1f, %.1f)  "
@@ -5471,7 +5545,22 @@ static bool rebuildWorkingSet(std::string &err, uint &outWelds)
 			                      g_SessionCellSize, g_SessionSnap > 0.f ? g_SessionSnap : 1.f);
 	}
 
-	// Ecosystem scratch instances (M12c): re-append display clones after primary rebuild
+	// Ecosystem scratch instances (M12c): re-append display clones after primary rebuild.
+	// M24b: prune places whose source file is no longer open (closed mid-session).
+	if (!g_Places.empty() && g_StartupWorld.Kind == ZPWS::Ecosystem)
+	{
+		for (size_t i = g_Places.size(); i-- > 0; )
+		{
+			if (g_Places[i].SourceBasename.empty()) continue;
+			if (!findEditableByBasename(g_Places[i].SourceBasename))
+			{
+				fprintf(stderr, "WARNING: instance source '%s' closed — removing its place at (%d,%d)\n",
+				        g_Places[i].SourceBasename.c_str(), g_Places[i].CellX, g_Places[i].CellY);
+				g_Places.erase(g_Places.begin() + (std::ptrdiff_t)i);
+			}
+		}
+		g_InstanceCount = 1 + (uint)g_Places.size();
+	}
 	if (!g_Places.empty() && g_StartupWorld.Kind == ZPWS::Ecosystem && !g_EditableFiles.empty())
 	{
 		size_t primaryOnly = 0;
@@ -5557,11 +5646,42 @@ static bool scratchHomeOccupies(int cx, int cy)
 	return m[(size_t)(cx + cy * fw)];
 }
 
+/**
+ * M24b: an instance's source footprint (mask + dims): home when SourceBasename is empty,
+ * else the matching open file's derived footprint. Falls back to home when the source
+ * file is missing (pruned at the next rebuild).
+ */
+static void instanceSourceFootprint(const SInstancePlace &pl, std::vector<bool> &mask,
+                                    int &fw, int &fh)
+{
+	if (!pl.SourceBasename.empty())
+	{
+		for (size_t i = 1; i < g_EditableFiles.size(); ++i)
+		{
+			if (NLMISC::toLowerAscii(g_EditableFiles[i].Basename)
+			    == NLMISC::toLowerAscii(pl.SourceBasename))
+			{
+				fw = g_EditableFiles[i].CellsW > 0 ? g_EditableFiles[i].CellsW : 1;
+				fh = g_EditableFiles[i].CellsH > 0 ? g_EditableFiles[i].CellsH : 1;
+				mask = g_EditableFiles[i].Mask;
+				if (mask.empty()) mask.assign((size_t)fw * (size_t)fh, true);
+				return;
+			}
+		}
+	}
+	fw = scratchFw();
+	fh = scratchFh();
+	mask = scratchHomeMask();
+	if (mask.empty()) mask.assign((size_t)fw * (size_t)fh, true);
+}
+
 /** True if place's rotFlip-transformed mask claims (cx,cy). */
 static bool scratchPlaceOccupies(const SInstancePlace &pl, int cx, int cy)
 {
-	return maskCellOccupied(scratchHomeMask(), scratchFw(), scratchFh(),
-	                        pl.CellX, pl.CellY, pl.Rot, pl.Mirror, cx, cy);
+	std::vector<bool> sm;
+	int sfw = 1, sfh = 1;
+	instanceSourceFootprint(pl, sm, sfw, sfh);
+	return maskCellOccupied(sm, sfw, sfh, pl.CellX, pl.CellY, pl.Rot, pl.Mirror, cx, cy);
 }
 
 /** Find place whose masked cells contain (cx,cy). */
@@ -5578,13 +5698,18 @@ static bool scratchFindPlace(int cx, int cy, size_t &idx)
 	return false;
 }
 
-/** True if candidate place mask collides with home or any place except skipIdx (-1 = none). */
-static bool scratchMaskConflicts(int ox, int oy, uint rot, bool mirror, int skipIdx, std::string &err)
+/**
+ * True if a candidate mask (M24b: any source's footprint) at (ox,oy) with rot/mirror
+ * collides with home or any place except skipIdx (-1 = none).
+ */
+static bool scratchMaskConflictsSrc(const std::vector<bool> &cmask, int cfw, int cfh,
+                                    int ox, int oy, uint rot, bool mirror,
+                                    int skipIdx, std::string &err)
 {
 	const int fw = scratchFw(), fh = scratchFh();
 	const std::vector<bool> &hm = scratchHomeMask();
 	if (masksCollide(hm, fw, fh, 0, 0, 0, false,
-	                 hm, fw, fh, ox, oy, rot, mirror))
+	                 cmask, cfw, cfh, ox, oy, rot, mirror))
 	{
 		err = "mask overlaps home footprint";
 		return true;
@@ -5592,8 +5717,11 @@ static bool scratchMaskConflicts(int ox, int oy, uint rot, bool mirror, int skip
 	for (size_t i = 0; i < g_Places.size(); ++i)
 	{
 		if ((int)i == skipIdx) continue;
-		if (masksCollide(hm, fw, fh, ox, oy, rot, mirror,
-		                 hm, fw, fh, g_Places[i].CellX, g_Places[i].CellY,
+		std::vector<bool> om;
+		int ofw = 1, ofh = 1;
+		instanceSourceFootprint(g_Places[i], om, ofw, ofh);
+		if (masksCollide(cmask, cfw, cfh, ox, oy, rot, mirror,
+		                 om, ofw, ofh, g_Places[i].CellX, g_Places[i].CellY,
 		                 g_Places[i].Rot, g_Places[i].Mirror))
 		{
 			err = NLMISC::toString("mask overlaps instance at (%d,%d)",
@@ -5609,7 +5737,7 @@ static bool scratchMaskConflicts(int ox, int oy, uint rot, bool mirror, int skip
 		const int ch = pc.CellsH > 0 ? pc.CellsH : 1;
 		std::vector<bool> cm = pc.Mask;
 		if (cm.empty()) cm.assign((size_t)cw * (size_t)ch, true);
-		if (masksCollide(hm, fw, fh, ox, oy, rot, mirror,
+		if (masksCollide(cmask, cfw, cfh, ox, oy, rot, mirror,
 		                 cm, cw, ch, pc.Dx, pc.Dy, 0, false))
 		{
 			err = NLMISC::toString("mask overlaps context '%s' at (%d,%d)",
@@ -5625,7 +5753,7 @@ static bool scratchMaskConflicts(int ox, int oy, uint rot, bool mirror, int skip
 		const int ch = ef.CellsH > 0 ? ef.CellsH : 1;
 		std::vector<bool> em = ef.Mask;
 		if (em.empty()) em.assign((size_t)cw * (size_t)ch, true);
-		if (masksCollide(hm, fw, fh, ox, oy, rot, mirror,
+		if (masksCollide(cmask, cfw, cfh, ox, oy, rot, mirror,
 		                 em, cw, ch, ef.CellX, ef.CellY, 0, false))
 		{
 			err = NLMISC::toString("mask overlaps open file '%s' at (%d,%d)",
@@ -5634,6 +5762,15 @@ static bool scratchMaskConflicts(int ox, int oy, uint rot, bool mirror, int skip
 		}
 	}
 	return false;
+}
+
+/** Home-shaped candidate wrapper (legacy callers; M24b sources use ...Src directly). */
+static bool scratchMaskConflicts(int ox, int oy, uint rot, bool mirror, int skipIdx, std::string &err)
+{
+	std::vector<bool> hm = scratchHomeMask();
+	const int fw = scratchFw(), fh = scratchFh();
+	if (hm.empty()) hm.assign((size_t)fw * (size_t)fh, true);
+	return scratchMaskConflictsSrc(hm, fw, fh, ox, oy, rot, mirror, skipIdx, err);
 }
 
 /** Legacy rect-overlap helper (still used for quick block sizing checks). */
@@ -6205,6 +6342,70 @@ static bool scratchPlace(int cx, int cy, std::string &err)
 }
 
 /**
+ * M24b: place an instance of ANY open brick (home or an open editable file) at (cx,cy).
+ * Display clones share the source file's carriers (pointer keying), so painting the
+ * source repaints every instance live, exactly like home self-instances.
+ */
+static bool scratchPlaceInstanceOf(int cx, int cy, const std::string &basenameIn, std::string &err)
+{
+	if (scratchHomeOccupies(cx, cy)) { err = "cannot place on home footprint"; return false; }
+	size_t idx = 0;
+	if (scratchFindPlace(cx, cy, idx)) { err = "cell already occupied"; return false; }
+	if (scratchFindContext(cx, cy, idx)) { err = "cell has context"; return false; }
+	if (scratchFindEditableAt(cx, cy, idx)) { err = "cell has an open file"; return false; }
+	std::string basename = basenameIn;
+	std::string::size_type dot = basename.rfind('.');
+	if (dot != std::string::npos && NLMISC::toLowerAscii(basename.substr(dot)) == ".max")
+		basename = basename.substr(0, dot);
+	SInstancePlace pl(cx, cy, 0, false);
+	const std::string homeName = g_EditableFiles.empty() ? std::string()
+	                                                     : g_EditableFiles[0].Basename;
+	if (NLMISC::toLowerAscii(basename) != NLMISC::toLowerAscii(homeName))
+	{
+		bool found = false;
+		for (size_t i = 1; i < g_EditableFiles.size(); ++i)
+		{
+			if (NLMISC::toLowerAscii(g_EditableFiles[i].Basename)
+			    == NLMISC::toLowerAscii(basename))
+			{
+				pl.SourceBasename = g_EditableFiles[i].Basename;
+				found = true;
+				break;
+			}
+		}
+		if (!found)
+		{
+			err = "instance source must be an OPEN brick: " + basename;
+			return false;
+		}
+	}
+	std::vector<bool> sm;
+	int fw = 1, fh = 1;
+	instanceSourceFootprint(pl, sm, fw, fh);
+	if (scratchMaskConflictsSrc(sm, fw, fh, cx, cy, 0, false, -1, err))
+		return false;
+	g_Places.push_back(pl);
+	g_InstanceCount = 1 + (uint)g_Places.size();
+	return scratchRebuild(err);
+}
+
+/** M24b: open-brick count (home + editables) for the instance-source picker gate. */
+static int scratchOpenFileCount()
+{
+	return (int)g_EditableFiles.size();
+}
+
+/** M24b: instance label parts for the board (source short name when not home). */
+static bool scratchGetInstanceSource(int cx, int cy, std::string &basename)
+{
+	size_t idx = 0;
+	if (!scratchFindPlace(cx, cy, idx))
+		return false;
+	basename = g_Places[idx].SourceBasename;
+	return true;
+}
+
+/**
  * Rotate about the instance's footprint-block center (M14a/M17): update Rot and recompute
  * origin so it remains the min-corner of the transformed block; refuse if the new
  * mask would collide with home or another instance.
@@ -6218,7 +6419,9 @@ static bool scratchRotate(int cx, int cy, int delta, std::string &err)
 		return false;
 	}
 	SInstancePlace pl = g_Places[idx];
-	const int fw = scratchFw(), fh = scratchFh();
+	std::vector<bool> sm;
+	int fw = 1, fh = 1;
+	instanceSourceFootprint(pl, sm, fw, fh);
 	int oldW = 0, oldH = 0;
 	footprintBlockSize(fw, fh, pl.Rot, pl.Mirror, oldW, oldH);
 	const double ctrX = (double)pl.CellX + 0.5 * (double)oldW;
@@ -6228,7 +6431,7 @@ static bool scratchRotate(int cx, int cy, int delta, std::string &err)
 	footprintBlockSize(fw, fh, newRot, pl.Mirror, newW, newH);
 	const int newOx = (int)std::floor(ctrX - 0.5 * (double)newW + 1e-9);
 	const int newOy = (int)std::floor(ctrY - 0.5 * (double)newH + 1e-9);
-	if (scratchMaskConflicts(newOx, newOy, newRot, pl.Mirror, (int)idx, err))
+	if (scratchMaskConflictsSrc(sm, fw, fh, newOx, newOy, newRot, pl.Mirror, (int)idx, err))
 		return false;
 	g_Places[idx].Rot = newRot;
 	g_Places[idx].CellX = newOx;
@@ -6244,7 +6447,17 @@ static bool scratchMirror(int cx, int cy, std::string &err)
 		err = "no instance at cell";
 		return false;
 	}
-	// Mirror alone keeps the axis-aligned cell AABB; only the geometry flips.
+	// Mirror alone keeps the axis-aligned cell AABB; only the geometry flips —
+	// but an asymmetric MASK still changes occupancy, so recheck collisions (M24b).
+	{
+		SInstancePlace pl = g_Places[idx];
+		std::vector<bool> sm;
+		int fw = 1, fh = 1;
+		instanceSourceFootprint(pl, sm, fw, fh);
+		if (scratchMaskConflictsSrc(sm, fw, fh, pl.CellX, pl.CellY, pl.Rot, !pl.Mirror,
+		                            (int)idx, err))
+			return false;
+	}
 	g_Places[idx].Mirror = !g_Places[idx].Mirror;
 	return scratchRebuild(err);
 }
@@ -7071,6 +7284,10 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 				sessionBridge.scratchOpenEditable = scratchOpenEditable;
 				sessionBridge.scratchGetEditableAt = scratchGetEditableAt;
 				sessionBridge.scratchContextToEditable = scratchContextToEditable;
+				// M24b: instance any open brick
+				sessionBridge.scratchPlaceInstanceOf = scratchPlaceInstanceOf;
+				sessionBridge.scratchOpenFileCount = scratchOpenFileCount;
+				sessionBridge.scratchGetInstanceSource = scratchGetInstanceSource;
 				g_SessionOpsAvailable = true;
 				sessionBridge.closeZone = sessionCloseZone;
 				sessionBridge.saveZone = sessionSaveZone;

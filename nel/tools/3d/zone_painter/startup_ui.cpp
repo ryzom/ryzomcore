@@ -688,7 +688,15 @@ static void applySessionCellState(CInterfaceGroup *cell, const std::string &base
 					s_SessionBridge->scratchGetInstanceOrigin(cx, cy, ox, oy, rot, mir);
 				else if (s_SessionBridge && s_SessionBridge->scratchGetInstance)
 					s_SessionBridge->scratchGetInstance(cx, cy, rot, mir);
-				std::string lab = NLMISC::toString("%d,%d", ox, oy);
+				std::string lab;
+				// M24b: non-home sources lead with the brick's short name
+				if (s_SessionBridge && s_SessionBridge->scratchGetInstanceSource)
+				{
+					std::string srcName;
+					if (s_SessionBridge->scratchGetInstanceSource(ox, oy, srcName) && !srcName.empty())
+						lab = stripLigoFamilyPrefix(srcName) + " ";
+				}
+				lab += NLMISC::toString("%d,%d", ox, oy);
 				if (rot) lab += NLMISC::toString(" R%u", rot * 90);
 				if (mir) lab += " M";
 				configureBoardLabel(t);
@@ -1221,7 +1229,7 @@ static void openInstanceActionPopup(const std::string &basename);
 static void openEmptyCellPopup(const std::string &basename);
 static void openContextActionPopup(const std::string &basename);
 static void openCloseConfirmModal(const std::string &basename, const std::string &purpose);
-static void openContextBrickPicker(int cx, int cy, bool editable);
+static void openContextBrickPicker(int cx, int cy, int mode);
 static void populateScratchBoard();
 
 /** L-click: startup = open immediately; session hub = continent open/popup or ecosystem scratch. */
@@ -2491,7 +2499,8 @@ REGISTER_ACTION_HANDLER(CAHZpInstCancel, "zp_inst_cancel");
 // ---------------------------------------------------------------------------------------------
 // M16c empty-cell popup + context place/remove + brick picker
 
-static bool s_ContextPickerEditable = false; // M24a: picker opens as EDITABLE instead of RO context
+// M24a/M24b picker mode: 0 = RO context, 1 = editable open, 2 = instance of an OPEN brick
+static int s_ContextPickerMode = 0;
 static int s_ContextPickerCx = 0;
 static int s_ContextPickerCy = 0;
 static std::vector<std::string> s_ContextPickerNames;
@@ -2523,9 +2532,9 @@ static void openContextActionPopup(const std::string &basename)
 	CWidgetManager::getInstance()->enableModalWindow(NULL, "ui:zp:context_action");
 }
 
-static void openContextBrickPicker(int cx, int cy, bool editable)
+static void openContextBrickPicker(int cx, int cy, int mode)
 {
-	s_ContextPickerEditable = editable;
+	s_ContextPickerMode = mode;
 	s_ContextPickerCx = cx;
 	s_ContextPickerCy = cy;
 	s_ContextPickerNames.clear();
@@ -2545,12 +2554,39 @@ static void openContextBrickPicker(int cx, int cy, bool editable)
 	if (!s_SessionBridge || !s_SessionBridge->World)
 		return;
 	std::vector<ZPWS::SZoneEntry> zones;
-	ZPWS::listZones(*s_SessionBridge->World, zones);
+	if (s_ContextPickerMode == 2)
+	{
+		// M24b instance sources: the OPEN bricks (home first, then open files by cell probe)
+		ZPWS::SZoneEntry home;
+		home.Basename = s_SessionBridge->ScratchHomeName;
+		zones.push_back(home);
+		if (s_SessionBridge->scratchGetEditableAt)
+		{
+			std::set<std::string> seen;
+			const int kProbe = 24;
+			for (int py = -kProbe; py <= kProbe; ++py)
+			for (int px = -kProbe; px <= kProbe; ++px)
+			{
+				int fox = 0, foy = 0;
+				std::string fname;
+				bool fedit = true;
+				if (s_SessionBridge->scratchGetEditableAt(px, py, fox, foy, fname, fedit)
+				    && seen.insert(fname).second)
+				{
+					ZPWS::SZoneEntry fe;
+					fe.Basename = fname;
+					zones.push_back(fe);
+				}
+			}
+		}
+	}
+	else
+		ZPWS::listZones(*s_SessionBridge->World, zones);
 	sint32 y = 0;
 	for (size_t i = 0; i < zones.size(); ++i)
 	{
-		// Skip the open home brick
-		if (s_SessionBridge->ScratchHomeName == zones[i].Basename)
+		// Skip the open home brick (instance mode keeps it — home is a valid source)
+		if (s_ContextPickerMode != 2 && s_SessionBridge->ScratchHomeName == zones[i].Basename)
 			continue;
 		s_ContextPickerNames.push_back(zones[i].Basename);
 		if (!list) continue;
@@ -2572,7 +2608,9 @@ static void openContextBrickPicker(int cx, int cy, bool editable)
 		}
 	}
 	if (CViewText *t = findText("ui:zp:context_picker:content:title"))
-		t->setHardText(NLMISC::toString(editable ? "Open editable @ %d,%d" : "Place context @ %d,%d",
+		t->setHardText(NLMISC::toString(s_ContextPickerMode == 2 ? "Place instance @ %d,%d"
+		                                : (s_ContextPickerMode == 1 ? "Open editable @ %d,%d"
+		                                                            : "Place context @ %d,%d"),
 		                                cx, cy));
 	CWidgetManager::getInstance()->enableModalWindow(NULL, "ui:zp:context_picker");
 }
@@ -2589,6 +2627,13 @@ public:
 		if (!parseScratchBasename(s_Sess.PendingActionBasename, sk, cx, cy) || sk != 'E')
 			return;
 		if (!s_SessionBridge || !s_SessionBridge->scratchPlace) return;
+		// M24b: with more than one open brick, pick the instance source first
+		if (s_SessionBridge->scratchPlaceInstanceOf && s_SessionBridge->scratchOpenFileCount
+		    && s_SessionBridge->scratchOpenFileCount() > 1)
+		{
+			openContextBrickPicker(cx, cy, /*mode=*/2);
+			return;
+		}
 		std::string err;
 		if (!s_SessionBridge->scratchPlace(cx, cy, err))
 			fprintf(stderr, "scratch place (%d,%d): %s\n", cx, cy, err.c_str());
@@ -2611,7 +2656,7 @@ public:
 		int cx = 0, cy = 0;
 		if (!parseScratchBasename(s_Sess.PendingActionBasename, sk, cx, cy) || sk != 'E')
 			return;
-		openContextBrickPicker(cx, cy, /*editable=*/false);
+		openContextBrickPicker(cx, cy, /*mode=*/0);
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpEmptyPlaceContext, "zp_empty_place_context");
@@ -2628,7 +2673,7 @@ public:
 		int cx = 0, cy = 0;
 		if (!parseScratchBasename(s_Sess.PendingActionBasename, sk, cx, cy) || sk != 'E')
 			return;
-		openContextBrickPicker(cx, cy, /*editable=*/true);
+		openContextBrickPicker(cx, cy, /*mode=*/1);
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpEmptyOpenEditable, "zp_empty_open_editable");
@@ -2731,7 +2776,16 @@ public:
 		if (!NLMISC::fromString(params, idx) || idx >= s_ContextPickerNames.size())
 			return;
 		std::string err;
-		if (s_ContextPickerEditable)
+		if (s_ContextPickerMode == 2)
+		{
+			if (!s_SessionBridge || !s_SessionBridge->scratchPlaceInstanceOf) return;
+			if (!s_SessionBridge->scratchPlaceInstanceOf(s_ContextPickerCx, s_ContextPickerCy,
+			                                             s_ContextPickerNames[idx], err))
+				fprintf(stderr, "scratch place-instance (%d,%d:%s): %s\n",
+				        s_ContextPickerCx, s_ContextPickerCy,
+				        s_ContextPickerNames[idx].c_str(), err.c_str());
+		}
+		else if (s_ContextPickerMode == 1)
 		{
 			if (!s_SessionBridge || !s_SessionBridge->scratchOpenEditable) return;
 			if (!s_SessionBridge->scratchOpenEditable(s_ContextPickerCx, s_ContextPickerCy,
