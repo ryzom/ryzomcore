@@ -2867,10 +2867,10 @@ static void openContextBrickPicker(int cx, int cy, int mode)
 	}
 	for (size_t i = 0; i < zones.size(); ++i)
 	{
-		// Skip ALREADY-OPEN files in the open-as-context/editable modes (M28: uniform —
-		// any open file, not just the first-opened one; instance mode keeps them all,
-		// open files are the valid instance sources)
-		if (s_ContextPickerMode != 2 && s_SessionBridge->isOpen
+		// Context mode skips ALREADY-OPEN files (they cannot load again as RO context);
+		// open-editable mode lists them — picking an open zone places a shared-paint
+		// INSTANCE at the cell (M28b), and instance mode lists the open sources anyway.
+		if (s_ContextPickerMode == 0 && s_SessionBridge->isOpen
 		    && s_SessionBridge->isOpen(zones[i].Basename))
 			continue;
 		s_ContextPickerNames.push_back(zones[i].Basename);

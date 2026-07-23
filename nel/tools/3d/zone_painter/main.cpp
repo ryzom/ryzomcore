@@ -6337,6 +6337,59 @@ static bool scratchMaskConflictsSrc(const std::vector<bool> &cmask, int cfw, int
 	return false;
 }
 
+/** Candidate order for duplicate-instance placement: ring (max-norm), then Manhattan
+ *  within the ring so axis-aligned offsets come before the corner diagonals. */
+struct SDupCandLess
+{
+	bool operator()(const std::pair<int, int> &a, const std::pair<int, int> &b) const
+	{
+		const int ra = std::max(std::abs(a.first), std::abs(a.second));
+		const int rb = std::max(std::abs(b.first), std::abs(b.second));
+		if (ra != rb) return ra < rb;
+		return std::abs(a.first) + std::abs(a.second) < std::abs(b.first) + std::abs(b.second);
+	}
+};
+
+/** M28b: register an instance of an OPEN file at (or ring-spiraled near) (cx,cy) —
+ *  duplicate selector opens resolve to shared-paint instances, never a second load of
+ *  the same file (two carrier sets would diverge and fight over one save path).
+ *  Pre-rebuild registration only: callers rebuild (or the initial assembly appends). */
+static bool placeDupInstanceNear(const std::string &srcName, int cx, int cy)
+{
+	SInstancePlace pl(cx, cy, 0, false);
+	pl.SourceBasename = srcName;
+	std::vector<bool> sm;
+	int fw = 1, fh = 1;
+	instanceSourceFootprint(pl, sm, fw, fh);
+	std::string tmp;
+	// Ring order, axis-aligned offsets first within each ring — a duplicate of a WxH
+	// block lands side-by-side (e.g. (W,0)) instead of at the ring's corner diagonal.
+	std::vector<std::pair<int, int> > cand;
+	for (int r = 0; r <= 12; ++r)
+	for (int dy = -r; dy <= r; ++dy)
+	for (int dx = -r; dx <= r; ++dx)
+		if (std::max(std::abs(dx), std::abs(dy)) == r)
+			cand.push_back(std::make_pair(dx, dy));
+	std::stable_sort(cand.begin(), cand.end(), SDupCandLess());
+	for (size_t i = 0; i < cand.size(); ++i)
+	{
+		const int dx = cand[i].first, dy = cand[i].second;
+		if (!scratchMaskConflictsSrc(sm, fw, fh, cx + dx, cy + dy, 0, false, -1, tmp))
+		{
+			pl.CellX = cx + dx;
+			pl.CellY = cy + dy;
+			g_Places.push_back(pl);
+			g_InstanceCount = 1 + (uint)g_Places.size();
+			printf("duplicate open '%s' -> shared-paint instance @ (%d,%d)\n",
+			       srcName.c_str(), pl.CellX, pl.CellY);
+			return true;
+		}
+	}
+	fprintf(stderr, "WARNING: duplicate open '%s': no free cell within r=12 — dropped\n",
+	        srcName.c_str());
+	return false;
+}
+
 /** First-opened-file-shaped candidate wrapper (legacy callers). */
 static bool scratchMaskConflicts(int ox, int oy, uint rot, bool mirror, int skipIdx, std::string &err)
 {
@@ -7051,8 +7104,11 @@ static bool scratchOpenEditable(int cx, int cy, const std::string &basenameIn, s
 	}
 	if (findEditableByBasename(ze.Basename))
 	{
-		err = "already open: " + ze.Basename;
-		return false;
+		// M28b: the file is one on disk — opening it again is an INSTANCE placement
+		// (shared paint backing), never a second independent load.
+		printf("'%s' already open — placing a shared-paint instance @ (%d,%d)\n",
+		       ze.Basename.c_str(), cx, cy);
+		return scratchPlaceInstanceOf(cx, cy, ze.Basename, err);
 	}
 	PMAXLOAD::SLoadedMax *extra = new PMAXLOAD::SLoadedMax();
 	if (!PMAXLOAD::loadMaxFile(ze.MaxPath, *extra))
@@ -10021,8 +10077,26 @@ args.addArg("", "instances", "NxM",
 	g_ExtraEditableScenes.clear();
 
 	// --- Editable files (unfrozen write targets) ---
+	// M28b: a zone selected TWICE is one file on disk — it must never load twice (two
+	// independent carrier sets would diverge and then fight over the same save path).
+	// Duplicates become shared-paint INSTANCES on ecosystems (placed after footprints
+	// derive below) and dedupe with a warning on continents (grid-anchored, no places).
+	std::vector<std::string> dupInstanceNames;
 	for (size_t ei = 0; ei < editables.size(); ++ei)
 	{
+		if (ei > 0 && findEditableByBasename(editables[ei].Basename))
+		{
+			if (g_StartupWorld.Kind == ZPWS::Ecosystem)
+			{
+				dupInstanceNames.push_back(editables[ei].Basename);
+				printf("editable '%s' selected again — will place a shared-paint instance\n",
+				       editables[ei].Basename.c_str());
+			}
+			else
+				fprintf(stderr, "WARNING: '%s' selected twice — duplicate ignored "
+				        "(continent zones are grid-anchored)\n", editables[ei].Basename.c_str());
+			continue;
+		}
 		PMAXLOAD::SLoadedMax *sceneLm = NULL;
 		if (ei == 0)
 		{
@@ -10040,7 +10114,9 @@ args.addArg("", "instances", "NxM",
 			g_ExtraEditableScenes.push_back(extra);
 			sceneLm = extra;
 		}
-		const uint base = (uint)(ei * 1000);
+		// Base by FILE-LIST index (skipped duplicates must not leave id-base holes —
+		// the uniform machinery maps g_EditableFiles index*1000 to the zone-id base)
+		const uint base = (uint)(g_EditableFiles.size() * 1000);
 		const size_t before = zones.size();
 		bool ok = buildPaintZones(*sceneLm->Scene, zones, base, /*forceFrozen=*/false,
 		                         editables[ei].Basename);
@@ -10065,7 +10141,8 @@ args.addArg("", "instances", "NxM",
 			g_PrimaryLm = &lm;
 		if (ei > 0 || editables.size() > 1)
 			printf("editable[%u] '%s' zoneIdBase=%u zones=%u\n",
-			       (uint)ei, efi.Basename.c_str(), base, (uint)efi.ZoneIds.size());
+			       (uint)(g_EditableFiles.size() - 1), efi.Basename.c_str(), base,
+			       (uint)efi.ZoneIds.size());
 	}
 	const size_t primaryZoneCount = g_EditableFiles.empty() ? 0 : g_EditableFiles[0].ZoneIds.size();
 	// primaryZoneCount for instances = zones from first file only (before instances append)
@@ -10099,6 +10176,10 @@ args.addArg("", "instances", "NxM",
 		for (size_t i = 0; i < g_Places.size(); ++i)
 			if (g_Places[i].SourceBasename.empty())
 				g_Places[i].SourceBasename = g_EditableFiles[0].Basename;
+		// M28b: duplicate startup selections become shared-paint instances, ring-placed
+		// from the source block's origin (footprint fields are live from here on).
+		for (size_t i = 0; i < dupInstanceNames.size(); ++i)
+			placeDupInstanceNear(dupInstanceNames[i], 0, 0);
 	}
 
 	// M24a: --open-editable "cx,cy:basename" — additional EDITABLE files placed on the eco
@@ -10129,9 +10210,9 @@ args.addArg("", "instances", "NxM",
 			}
 			if (findEditableByBasename(ze.Basename))
 			{
-				fprintf(stderr, "ERROR: --open-editable: '%s' is already editable\n",
-				        ze.Basename.c_str());
-				return 1;
+				// M28b: duplicate open = shared-paint instance at the requested cell
+				placeDupInstanceNear(ze.Basename, oe.Cx, oe.Cy);
+				continue;
 			}
 			PMAXLOAD::SLoadedMax *extra = new PMAXLOAD::SLoadedMax();
 			if (!PMAXLOAD::loadMaxFile(ze.MaxPath, *extra))
@@ -10208,11 +10289,8 @@ args.addArg("", "instances", "NxM",
 			fprintf(stderr, "ERROR: --place / --instances is ecosystem-only (not available on continents)\n");
 			return 1;
 		}
-		if (editables.size() > 1)
-		{
-			fprintf(stderr, "ERROR: --place / --instances is single-brick only (not multi-select)\n");
-			return 1;
-		}
+		// (M28b: the old single-brick-only guard is gone — sources resolve by name over
+		// every open file, exactly like the mid-session rebuild path since M24b.)
 		appendInstanceZones(zones, instancePrimaryCount, g_Places, cellSize);
 		g_InstanceCount = 1 + (uint)g_Places.size();
 	}
