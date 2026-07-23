@@ -708,17 +708,23 @@ struct SPaintZone
 
 // Exporter-faithful zone eligibility (M11b).
 //
+// Design: ONE editable paint zone per .max for normal authoring (material / special /
+// continent brick). Extra RklPatches in the file (embedded neighbor copies, scratch
+// leftovers, [NELLIGO] markers) are display/context only — never simultaneous paint
+// targets. That matches the export product (one .zone per protocol brick) and is why
+// board footprint also derives from that single eligible zone.
+//
 // Mirrors pipeline_max_export_zone + ligo/zone maxscript selection:
 //   - collectZoneNodes skips [NELLIGO] debug markers (shared patch_eval rule).
-//   - zonematerial- / zonespecial-: ligo selectAllPatch = all non-frozen (0x0976);
-//     export requires exactly one. If multiple non-frozen, prefer node name matching the
-//     cell token (case-insensitive); otherwise first non-frozen is eligible, rest RO.
-//   - zonetransition-: all non-frozen (transition scheme grid classification at export).
+//   - zonematerial- / zonespecial-: export requires exactly one. If multiple non-frozen,
+//     prefer node name matching the cell token (case-insensitive); otherwise first
+//     non-frozen is eligible, rest RO.
+//   - zonetransition-: exception — all non-frozen (9-slot transition scheme at export).
 //   - otherwise (direct ExportRykolZone / continent .max): first RklPatch that is not
 //     DONOTEXPORT and has a findID-parseable name (exportDirectZone loop); rest RO.
 //
-// File-frozen (0x0976) always remain frozen. --all-zones restores pre-M11b behavior:
-// every non-forceFrozen zone is eligible (only 0x0976 / neighbor forceFrozen stay RO).
+// File-frozen (0x0976) always remain frozen. --all-zones is an escape hatch only
+// (pre-M11b open-everything); not the authoring default.
 // Eligibility only affects paint targets; writeBack still covers every unfrozen carrier
 // of editable files; null-edit round-trips the whole file.
 //
@@ -2425,10 +2431,9 @@ static bool deriveZoneFootprintMask(const SPaintZone &pz, float cellSize, float 
 static void unitCheckFootprintOccupancy(); // defined with rotFlip helpers below
 
 /**
- * Derive primary footprint for board occupancy from the eligible paint zone in
- * [begin,end) — first non-frozen, matching M11b / the ligo export product model
- * (one .zone + one .ligozone per brick protocol; zonematerial/zonespecial pick a
- * single eligible RklPatch). Mask algorithm is exporter-identical
+ * Derive primary footprint for board occupancy from the file's single editable
+ * paint zone (M11b by design: one editable zone per normal .max). First non-frozen
+ * in [begin,end) under eligibility. Mask algorithm is exporter-identical
  * (deriveZoneFootprintMask); .ligozone is never read here.
  * Fills g_Footprint* globals.
  */
@@ -6284,10 +6289,9 @@ static void placeContextRange(std::vector<SPaintZone> &zones, size_t rb, size_t 
  * (authored-origin-relative, same rule as place-context); stores the footprint on the
  * file entry for board occupancy. Requires the session board anchor already captured.
  *
- * Footprint = exporter-identical mask of the file's eligible paint zone (first
- * non-frozen in range) — the same single-brick product model as ligo export
- * (one .ligozone per protocol brick). Not a "union all zones" pass: that would
- * diverge from export and is not how material/special bricks are authored.
+ * Footprint = exporter-identical mask of the file's single editable paint zone
+ * (M11b by design: one editable zone per normal .max; first non-frozen in range).
+ * Not a "union all zones" pass — extra patches are context/embeds, not co-targets.
  * All-frozen (RO-demoted) files: pick the FIRST of the range — walking to LAST
  * would grab an embedded display copy and shift occupancy on toggle.
  */
@@ -9975,14 +9979,14 @@ int main(int argc, char **argv)
 	            "resolve for the open bank are offered by SeasonNext / the panel button; painting "
 	            "data is season-independent.");
 	args.addArg("", "all-zones", "",
-            "Open every non-frozen (non-0x0976) RklPatch as a paint target — pre-M11b "
-            "open-everything. Default is exporter-faithful eligibility (M11b), mirroring "
-            "pipeline_max_export_zone + nel_ligo_export.ms / zone_export.ms: "
-            "zonematerial-/zonespecial- → single non-frozen RklPatch (name-match cell token "
-            "when multiple); zonetransition- → all non-frozen; else ExportRykolZone first "
-            "findID-able node. Other zones load as read-only context display. [NELLIGO] "
-            "markers skipped. Null-edit / write-back still whole-file; paint-script zone "
-            "ids address PAINTABLE zones only.");
+            "Escape hatch: open every non-frozen (non-0x0976) RklPatch as a paint target "
+            "(pre-M11b open-everything). Default is by design ONE editable zone per .max "
+            "(exporter-faithful M11b): zonematerial-/zonespecial- → single non-frozen "
+            "RklPatch (name-match cell token when multiple); zonetransition- → all "
+            "non-frozen (9-slot scheme exception); else ExportRykolZone first findID-able "
+            "node. Other zones load as read-only context. [NELLIGO] markers skipped. "
+            "Null-edit / write-back still whole-file; paint-script zone ids address "
+            "PAINTABLE zones only.");
 args.addArg("", "place", "dx,dy[,rot][,m]",
 	            "Ecosystem: place a self-instance whose TRANSFORMED footprint block has min-corner "
 	            "at fine cell (dx,dy) relative to the primary footprint origin (0,0). Optional "
