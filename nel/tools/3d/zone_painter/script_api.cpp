@@ -457,13 +457,68 @@ static int lScreenshot(CLuaState &ls) // painter.screenshot("out.tga")
 	return retOk(ls);
 }
 
-static int lOpenZone(CLuaState &ls) // painter.openZone("basename") — board session
+static int lOpenZone(CLuaState &ls) // painter.openZone("basename"[,cx,cy]) — board session
 {
 	std::string base;
-	if (!argString(ls, 1, base)) return retErr(ls, "usage: openZone(\"basename\")");
-	if (!s_Host || !s_Host->openZone) return retErr(ls, "openZone: board session only");
+	if (!argString(ls, 1, base)) return retErr(ls, "usage: openZone(\"basename\"[,cx,cy])");
 	std::string err;
+	// M31: the 3-arg form opens at an eco board cell (scratchOpenEditable); the 1-arg
+	// form stays the continent open (eco sessions refuse it — they need a cell).
+	double cx = 0, cy = 0;
+	if (ls.getTop() >= 2)
+	{
+		if (!argNumber(ls, 2, cx) || !argNumber(ls, 3, cy))
+			return retErr(ls, "usage: openZone(\"basename\"[,cx,cy])");
+		if (!s_Host || !s_Host->openZoneAt) return retErr(ls, "openZone(cx,cy): board session only");
+		if (!s_Host->openZoneAt(base, (int)cx, (int)cy, err)) return retErr(ls, err);
+		return retOk(ls);
+	}
+	if (!s_Host || !s_Host->openZone) return retErr(ls, "openZone: board session only");
 	if (!s_Host->openZone(base, err)) return retErr(ls, err);
+	return retOk(ls);
+}
+
+static int lPlaceInstance(CLuaState &ls) // painter.placeInstance(cx,cy[,"basename"]) — eco board
+{
+	double a[2];
+	std::string err;
+	if (!argNumbers(ls, 2, a, "placeInstance(cx,cy[,\"basename\"])", err)) return retErr(ls, err);
+	std::string base;
+	argString(ls, 3, base); // optional; empty = the assembly-pinned first-file source
+	if (!s_Host || !s_Host->placeInstance) return retErr(ls, "placeInstance: board session only");
+	if (!s_Host->placeInstance((int)a[0], (int)a[1], base, err)) return retErr(ls, err);
+	return retOk(ls);
+}
+
+static int lRemoveInstance(CLuaState &ls) // painter.removeInstance(cx,cy) — eco board
+{
+	double a[2];
+	std::string err;
+	if (!argNumbers(ls, 2, a, "removeInstance(cx,cy)", err)) return retErr(ls, err);
+	if (!s_Host || !s_Host->removeInstance) return retErr(ls, "removeInstance: board session only");
+	if (!s_Host->removeInstance((int)a[0], (int)a[1], err)) return retErr(ls, err);
+	return retOk(ls);
+}
+
+static int lRotateInstance(CLuaState &ls) // painter.rotateInstance(cx,cy[,delta=1]) — eco board
+{
+	double a[2];
+	std::string err;
+	if (!argNumbers(ls, 2, a, "rotateInstance(cx,cy[,delta])", err)) return retErr(ls, err);
+	double delta = 1;
+	argNumber(ls, 3, delta);
+	if (!s_Host || !s_Host->rotateInstance) return retErr(ls, "rotateInstance: board session only");
+	if (!s_Host->rotateInstance((int)a[0], (int)a[1], (int)delta, err)) return retErr(ls, err);
+	return retOk(ls);
+}
+
+static int lMirrorInstance(CLuaState &ls) // painter.mirrorInstance(cx,cy) — eco board
+{
+	double a[2];
+	std::string err;
+	if (!argNumbers(ls, 2, a, "mirrorInstance(cx,cy)", err)) return retErr(ls, err);
+	if (!s_Host || !s_Host->mirrorInstance) return retErr(ls, "mirrorInstance: board session only");
+	if (!s_Host->mirrorInstance((int)a[0], (int)a[1], err)) return retErr(ls, err);
 	return retOk(ls);
 }
 
@@ -667,6 +722,8 @@ static const char *kBootstrap =
 	"  zones = __zp_zones, save = __zp_save, saveAll = __zp_saveAll,\n"
 	"  screenshot = __zp_screenshot, pumpUI = __zp_pumpUI,\n"
 	"  openZone = __zp_openZone, closeZone = __zp_closeZone,\n"
+	"  placeInstance = __zp_placeInstance, removeInstance = __zp_removeInstance,\n"
+	"  rotateInstance = __zp_rotateInstance, mirrorInstance = __zp_mirrorInstance,\n"
 	"  setMode = __zp_setMode, getMode = __zp_getMode,\n"
 	"  setTileSet = __zp_setTileSet, getTileSet = __zp_getTileSet,\n"
 	"  setDisplaceIndex = __zp_setDisplaceIndex, setBrushColor = __zp_setBrushColor,\n"
@@ -715,6 +772,10 @@ bool ensureLua()
 	ls->registerFunc("__zp_screenshot", lScreenshot);
 	ls->registerFunc("__zp_openZone", lOpenZone);
 	ls->registerFunc("__zp_closeZone", lCloseZone);
+	ls->registerFunc("__zp_placeInstance", lPlaceInstance);
+	ls->registerFunc("__zp_removeInstance", lRemoveInstance);
+	ls->registerFunc("__zp_rotateInstance", lRotateInstance);
+	ls->registerFunc("__zp_mirrorInstance", lMirrorInstance);
 	ls->registerFunc("__zp_pumpUI", lPumpUI);
 	ls->registerFunc("__zp_setMode", lSetMode);
 	ls->registerFunc("__zp_getMode", lGetMode);

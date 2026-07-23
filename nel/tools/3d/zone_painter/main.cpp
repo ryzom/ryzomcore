@@ -1231,9 +1231,14 @@ static void collectHintsFromLoadedContext(std::vector<SNeighborHint> &out)
 static PIPELINE::MAX::CScene *editableScene(const SEditableFileInfo &efi);
 
 /** Board-session only: stamp neighbor hints onto every editable scene before save. */
+// M31: hint stamping is separable from board authority — byte-pure session saves
+// (--no-hint-stamp) and synthesized direct-file sessions (never stamp arbitrary
+// pipeline files' appdata) keep the board WITHOUT the save-side Scene mutation.
+static bool g_HintStampEnabled = true;
+
 static void writeNeighborHintsIfBoardSession()
 {
-	if (!g_BoardSession) return;
+	if (!g_BoardSession || !g_HintStampEnabled) return;
 	std::vector<SNeighborHint> baseHints;
 	collectHintsFromLoadedContext(baseHints);
 	// Spec: record every loaded read-only neighbor file (g_ContextFiles). M24a: offsets are
@@ -4124,6 +4129,9 @@ static std::vector<std::string> g_AvailableSeasons;
 static SPaintCtx g_PaintCtx;
 // CLI --thumbnail: set before save so zpSaveTo / headless save path pick it up
 static bool g_CliWantThumbnail = false;
+// CLI --no-thumbnail (M31): hard kill-switch for SI writes on EVERY save path,
+// interactive included — byte gates need saves whose SI stream is provably untouched.
+static bool g_NoThumbnailWrites = false;
 // Captured top-down thumb (survives runViewer teardown for post-viewer --save)
 static NLMISC::CBitmap g_CapturedThumb;
 static bool g_HaveCapturedThumb = false;
@@ -5270,6 +5278,8 @@ static bool prepareThumbnailOverride(const std::string &srcMax, std::vector<uint
 {
 	haveOverride = false;
 	siOut.clear();
+	if (g_NoThumbnailWrites)
+		return true; // --no-thumbnail: byte-pure saves, SI stream always untouched
 	if (!want)
 		return true; // not requested — OK, no override
 
@@ -5793,6 +5803,48 @@ static bool zpScriptOpenZone(const std::string &basename, std::string &err)
 }
 // (sessionOpenZone itself rejects ecosystem sessions — eco opens need a board cell.)
 
+// M31 eco board ops for painterscript (the scriptable scratch board). Forwards:
+static bool scratchOpenEditable(int cx, int cy, const std::string &basenameIn, std::string &err);
+static bool scratchPlace(int cx, int cy, std::string &err);
+static bool scratchPlaceInstanceOf(int cx, int cy, const std::string &basenameIn, std::string &err);
+static bool scratchRemove(int cx, int cy, std::string &err);
+static bool scratchRotate(int cx, int cy, int delta, std::string &err);
+static bool scratchMirror(int cx, int cy, std::string &err);
+
+static bool zpScriptEcoGate(const char *op, std::string &err)
+{
+	if (!g_SessionOpsAvailable) { err = std::string(op) + ": board session only"; return false; }
+	if (g_StartupWorld.Kind != ZPWS::Ecosystem || g_StartupWorld.WorldName.empty())
+	{ err = std::string(op) + ": ecosystem board only"; return false; }
+	return true;
+}
+static bool zpScriptOpenZoneAt(const std::string &basename, int cx, int cy, std::string &err)
+{
+	if (!zpScriptEcoGate("openZone(cx,cy)", err)) return false;
+	return scratchOpenEditable(cx, cy, basename, err);
+}
+static bool zpScriptPlaceInstance(int cx, int cy, const std::string &basename, std::string &err)
+{
+	if (!zpScriptEcoGate("placeInstance", err)) return false;
+	return basename.empty() ? scratchPlace(cx, cy, err)
+	                        : scratchPlaceInstanceOf(cx, cy, basename, err);
+}
+static bool zpScriptRemoveInstance(int cx, int cy, std::string &err)
+{
+	if (!zpScriptEcoGate("removeInstance", err)) return false;
+	return scratchRemove(cx, cy, err);
+}
+static bool zpScriptRotateInstance(int cx, int cy, int delta, std::string &err)
+{
+	if (!zpScriptEcoGate("rotateInstance", err)) return false;
+	return scratchRotate(cx, cy, delta, err);
+}
+static bool zpScriptMirrorInstance(int cx, int cy, std::string &err)
+{
+	if (!zpScriptEcoGate("mirrorInstance", err)) return false;
+	return scratchMirror(cx, cy, err);
+}
+
 static bool zpScriptCloseZone(const std::string &basename, bool saveFirst, bool forceDiscard, std::string &err)
 {
 	if (!g_SessionOpsAvailable) { err = "closeZone: board session only"; return false; }
@@ -5818,6 +5870,11 @@ static void zpInstallScriptHost(ZPUI::SPaintUIBridge *bridgePtr)
 	g_ScriptHost.resetCancel = zpScriptResetCancel;
 	g_ScriptHost.openZone = zpScriptOpenZone;
 	g_ScriptHost.closeZone = zpScriptCloseZone;
+	g_ScriptHost.openZoneAt = zpScriptOpenZoneAt;
+	g_ScriptHost.placeInstance = zpScriptPlaceInstance;
+	g_ScriptHost.removeInstance = zpScriptRemoveInstance;
+	g_ScriptHost.rotateInstance = zpScriptRotateInstance;
+	g_ScriptHost.mirrorInstance = zpScriptMirrorInstance;
 	g_ScriptHost.bridge = bridgePtr;
 	ZPSCRIPT::setHost(&g_ScriptHost);
 }
@@ -9569,11 +9626,21 @@ args.addArg("", "instances", "NxM",
 	            "write it into SummaryInformation PIDSI_THUMBNAIL (requires a display — use "
 	            "xvfb-run for headless). Plain --save and --null-edit never touch the thumbnail. "
 	            "Interactive Save modal has an 'update thumbnail' checkbox (default on).");
+	args.addArg("", "no-thumbnail", "",
+	            "Never write SummaryInformation thumbnails, on ANY save path (interactive "
+	            "included; overrides --thumbnail and the modal checkbox). Byte gates use this "
+	            "so session saves keep the SI stream provably untouched.");
+	args.addArg("", "no-hint-stamp", "",
+	            "Board sessions: do not stamp the neighbor-hint appdata on save. Saves become "
+	            "byte-pure (== the null-edit output of the same file) at the cost of the "
+	            "layout-memory reopen chain.");
 	if (!args.parse(argc, argv))
 		return 1;
 
 	g_verbose = args.haveLongArg("verbose");
 	g_CliWantThumbnail = args.haveLongArg("thumbnail");
+	g_NoThumbnailWrites = args.haveLongArg("no-thumbnail");
+	g_HintStampEnabled = !args.haveLongArg("no-hint-stamp");
 	g_AllZones = args.haveLongArg("all-zones");
 	g_EmbeddedContext = args.haveLongArg("embedded-context");
 	if (g_AllZones)

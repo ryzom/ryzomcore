@@ -90,6 +90,14 @@ struct SScriptHost
 	/** Board-session working-set ops (ui M23c); NULL outside board sessions. */
 	bool (*openZone)(const std::string &basename, std::string &err);
 	bool (*closeZone)(const std::string &basename, bool saveFirst, bool forceDiscard, std::string &err);
+	/** M31 ecosystem board ops — the scriptable side of the scratch board, closing the
+	 *	close-is-scriptable-but-open-is-not asymmetry. NULL outside board sessions;
+	 *	the main-side wrappers additionally refuse continent sessions. */
+	bool (*openZoneAt)(const std::string &basename, int cx, int cy, std::string &err);
+	bool (*placeInstance)(int cx, int cy, const std::string &basename, std::string &err);
+	bool (*removeInstance)(int cx, int cy, std::string &err);
+	bool (*rotateInstance)(int cx, int cy, int delta, std::string &err);
+	bool (*mirrorInstance)(int cx, int cy, std::string &err);
 	/** Refresh the bridge's frame-synced snapshot fields NOW — they are filled by the
 	 *	main loop and go stale for the whole run of a script; getters (getMode/getTileSet)
 	 *	call this first so painter.setX(); assert(painter.getX()) holds. NULL headless. */
@@ -100,7 +108,9 @@ struct SScriptHost
 	SScriptHost()
 		: execOp(NULL), zonesInfo(NULL), getZoneProp(NULL), saveTo(NULL), saveAll(NULL),
 		  screenshot(NULL), pumpUI(NULL), cancelRequested(NULL), resetCancel(NULL),
-		  openZone(NULL), closeZone(NULL), refreshBridge(NULL), bridge(NULL)
+		  openZone(NULL), closeZone(NULL), openZoneAt(NULL), placeInstance(NULL),
+		  removeInstance(NULL), rotateInstance(NULL), mirrorInstance(NULL),
+		  refreshBridge(NULL), bridge(NULL)
 	{
 	}
 };
