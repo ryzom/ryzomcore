@@ -7548,15 +7548,15 @@ static bool sessionCloseZone(const std::string &basename, bool saveFirst, bool f
 		err = "cannot close the last editable zone";
 		return false;
 	}
-	// Remove from lists. The parsed scene (heap-owned extras) is deep-freed only AFTER
-	// the rebuild re-inits the core — until then the old core/carriers still point into
-	// it. Primary stack lm stays alive until process exit but is dropped from the
-	// working set (not re-assembled).
+	// Remove from lists. The parsed scene is deep-freed only AFTER the rebuild re-inits
+	// the core — until then the old core/carriers still point into it. M28c: every
+	// file's scene is heap-owned and registered uniformly (the first-opened included),
+	// so closing ANY file genuinely frees its memory.
 	SEditableFileInfo closedCopy = *efi; // rollback copy (efi invalidated by erase)
 	// The rebuild prunes instances sourced from the closed file early — snapshot for rollback
 	std::vector<SInstancePlace> placesCopy = g_Places;
 	PMAXLOAD::SLoadedMax *toFree = efi->Lm;
-	const bool wasPrimary = (toFree == NULL);
+	const bool sceneWasActive = toFree && g_PaintCtx.Scene == toFree->Scene;
 	for (size_t i = 0; i < g_EditableFiles.size(); ++i)
 	{
 		if (&g_EditableFiles[i] == efi)
@@ -7576,8 +7576,8 @@ static bool sessionCloseZone(const std::string &basename, bool saveFirst, bool f
 			}
 		}
 	}
-	// Point g_PaintCtx.Scene at a remaining editable after primary close
-	if (wasPrimary && !g_EditableFiles.empty())
+	// Repoint the active save context when the closed file's scene was it
+	if (sceneWasActive && !g_EditableFiles.empty())
 	{
 		PIPELINE::MAX::CScene *sc = editableScene(g_EditableFiles[0]);
 		if (sc)
@@ -7616,6 +7616,8 @@ static bool sessionCloseZone(const std::string &basename, bool saveFirst, bool f
 		rebuildWorkingSet(err2, w2);
 		return false;
 	}
+	if (toFree == g_PrimaryLm)
+		g_PrimaryLm = NULL; // fallback pointer must not dangle (legacy Lm-NULL files only)
 	freeLoadedMax(toFree);
 	printf("session close: '%s'; welds=%u\n", basename.c_str(), welds);
 	return true;
@@ -10059,8 +10061,21 @@ args.addArg("", "instances", "NxM",
 	// paint save path with zero ops).
 	// M6b: N editable files + M frozen union-ring neighbors. Zone-id bases stay sparse.
 	NL3D::registerSerial3d();
-	PMAXLOAD::SLoadedMax lm;
-	if (!PMAXLOAD::loadMaxFile(input, lm)) { fprintf(stderr, "ERROR: cannot load %s\n", input.c_str()); return 1; }
+	// M28c: the first-opened file's scene is HEAP-owned and registered with the other
+	// editables' — the board is just a board with zones, and closing ANY of them must
+	// actually free its scene. (It used to live in this stack frame: unfreeable, so a
+	// closed first file was merely dropped from the working set and leaked until exit.)
+	// The reference alias keeps the legacy single-file flows reading naturally; error
+	// paths before session teardown leak-at-exit exactly like the old stack object's
+	// unfreed members did.
+	PMAXLOAD::SLoadedMax *primaryLmHeap = new PMAXLOAD::SLoadedMax();
+	PMAXLOAD::SLoadedMax &lm = *primaryLmHeap;
+	if (!PMAXLOAD::loadMaxFile(input, lm))
+	{
+		fprintf(stderr, "ERROR: cannot load %s\n", input.c_str());
+		delete primaryLmHeap;
+		return 1;
+	}
 
 	// Editable list: multi-select set, or single primary from input path
 	std::vector<ZPWS::SZoneEntry> editables = g_StartupEditableZones;
@@ -10100,7 +10115,9 @@ args.addArg("", "instances", "NxM",
 		PMAXLOAD::SLoadedMax *sceneLm = NULL;
 		if (ei == 0)
 		{
-			sceneLm = &lm; // primary stack scene
+			// Uniform ownership (M28c): the first file registers exactly like the others
+			sceneLm = primaryLmHeap;
+			g_ExtraEditableScenes.push_back(primaryLmHeap);
 		}
 		else
 		{
@@ -10132,13 +10149,13 @@ args.addArg("", "instances", "NxM",
 		SEditableFileInfo efi;
 		efi.Path = editables[ei].MaxPath;
 		efi.Basename = editables[ei].Basename;
-		efi.Lm = (ei == 0) ? NULL : sceneLm;
+		efi.Lm = sceneLm; // M28c: every file owns its scene pointer, index 0 included
 		efi.Editable = true;
 		for (size_t zi = before; zi < zones.size(); ++zi)
 			efi.ZoneIds.push_back(zones[zi].ZoneId);
 		g_EditableFiles.push_back(efi);
 		if (ei == 0)
-			g_PrimaryLm = &lm;
+			g_PrimaryLm = primaryLmHeap;
 		if (ei > 0 || editables.size() > 1)
 			printf("editable[%u] '%s' zoneIdBase=%u zones=%u\n",
 			       (uint)(g_EditableFiles.size() - 1), efi.Basename.c_str(), base,
@@ -10705,8 +10722,11 @@ args.addArg("", "instances", "NxM",
 		g_PaintCtx = SPaintCtx();
 		g_PaintCtx.Active = true;
 		g_PaintCtx.Core = &core;
-		g_PaintCtx.Scene = lm.Scene;
-		g_PaintCtx.InputPath = input;
+		// M28c: the first-opened file may have been CLOSED (and freed) mid-session —
+		// use whichever file survives as the save context, like the close repoint does.
+		g_PaintCtx.Scene = g_EditableFiles.empty() ? lm.Scene
+		                                           : editableScene(g_EditableFiles[0]);
+		g_PaintCtx.InputPath = g_EditableFiles.empty() ? input : g_EditableFiles[0].Path;
 		g_PaintCtx.SavePath = savePath;
 		g_PaintCtx.WantThumbnail = g_CliWantThumbnail;
 		if (!zpSaveTo(savePath))
