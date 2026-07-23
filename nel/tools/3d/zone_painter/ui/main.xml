@@ -881,6 +881,7 @@
 	<separator />
 	<action id="close" name="Close" handler="zp_cell_close" params="" />
 	<action id="save" name="Save" handler="zp_cell_save" params="" />
+	<action id="saveas" name="Save as..." handler="zp_cell_save_as" params="" />
 	<action id="toggle" name="Make read-only" handler="zp_cell_toggle" params="" />
 </group>
 

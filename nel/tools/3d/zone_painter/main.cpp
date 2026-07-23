@@ -1779,8 +1779,9 @@ static void loadNeighborContextFiles(std::vector<SPaintZone> &zones, float cellS
 			p.Zone = ze;
 			// Hints are stored relative to the CARRYING file's board cell (M24a per-file
 			// stamping); placement and SContextFile::CellX live in board space — rebase
-			// exactly like the session-hint-cell offers above. Zero-delta for the primary
-			// and for continents (CellX/CellY stay 0 there).
+			// exactly like the session-hint-cell offers above. Zero-delta for continents
+			// (CellX/CellY stay 0 there); the eco primary rebases by its own cell like
+			// every other file (M27c movable home).
 			p.Dx = g_EditableFiles[ei].CellX + hints[hi].Dx;
 			p.Dy = g_EditableFiles[ei].CellY + hints[hi].Dy;
 			p.Rot = hints[hi].Rot;
@@ -2791,6 +2792,8 @@ static SPaintZone cloneInstanceZone(const SPaintZone &src, uint zoneId, float dx
  * Place (dx,dy) = min-corner cell of the transformed footprint block (M14a).
  * Returns number of zone entries appended. zone ids start at kInstanceZoneIdBase.
  */
+static void scratchHomeCellOrigin(int &hx, int &hy);
+
 static uint appendInstanceZones(std::vector<SPaintZone> &zones, size_t primaryCount,
                                 const std::vector<SInstancePlace> &places, float cellSize)
 {
@@ -2824,13 +2827,19 @@ static uint appendInstanceZones(std::vector<SPaintZone> &zones, size_t primaryCo
 	}
 
 	uint appended = 0;
+	// M27c: the home block can be moved on the board — its zones DISPLAY at its cell, so
+	// home-sourced clones must translate from the displayed origin, not the authored one
+	// (the board anchor originX/Y itself stays authored).
+	int homeCx = 0, homeCy = 0;
+	scratchHomeCellOrigin(homeCx, homeCy);
 	for (size_t pi = 0; pi < places.size(); ++pi)
 	{
 		const SInstancePlace &pl = places[pi];
 		// M24b: per-place source — home (range [0,primaryCount), primary footprint) or an
 		// open editable file (its zone-id range + its derived footprint at its board cell).
 		size_t srcBegin = 0, srcEnd = primaryCount;
-		float srcOriginX = originX, srcOriginY = originY;
+		float srcOriginX = originX + (float)homeCx * cellSize;
+		float srcOriginY = originY + (float)homeCy * cellSize;
 		int srcCellsW = cellsW, srcCellsH = cellsH;
 		// A CLI --place naming the PRIMARY brick is a home instance (scratchPlaceInstanceOf
 		// normalizes this to an empty source; the ei>=1 search below never matches index 0,
@@ -5438,6 +5447,87 @@ static bool zpSaveTo(const std::string &target)
 	return true;
 }
 
+static SEditableFileInfo *findEditableByBasename(const std::string &basename);
+
+/** M27b: overwrite ONE editable file in place (the board cell "Save as…" dialog's
+ *  Overwrite; same temp → .bak → rename as save-all, explicit thumbnail want). */
+static bool zpSaveFileOverwrite(const std::string &basename, bool wantThumb)
+{
+	g_LastSaveStatus.clear();
+	SEditableFileInfo *efi = findEditableByBasename(basename);
+	if (!efi || !g_PaintCtx.Core)
+	{
+		g_LastSaveStatus = "save: file not open: " + basename;
+		fprintf(stderr, "ERROR: %s\n", g_LastSaveStatus.c_str());
+		return false;
+	}
+	std::string err;
+	if (!g_PaintCtx.Core->writeBack(err))
+	{
+		g_LastSaveStatus = "write-back: " + err;
+		fprintf(stderr, "ERROR: %s\n", g_LastSaveStatus.c_str());
+		return false;
+	}
+	writeNeighborHintsIfBoardSession();
+	PIPELINE::MAX::CScene *scene = editableScene(*efi);
+	if (!scene || !saveOneOverwrite(efi->Path, *scene, wantThumb, &efi->ZoneIds))
+	{
+		g_LastSaveStatus = "overwrite failed -> " + efi->Path;
+		return false;
+	}
+	g_PaintCtx.Core->markZonesSaved(efi->ZoneIds);
+	g_LastSaveStatus = "OK overwrite -> " + efi->Path;
+	return true;
+}
+
+/** M27b: save ONE editable file as a copy. name: absolute, or relative to the FILE's
+ *  own directory (bricks of a world share it, but resolve per file regardless). */
+static bool zpSaveFileCopy(const std::string &basename, const std::string &name, bool wantThumb)
+{
+	g_LastSaveStatus.clear();
+	SEditableFileInfo *efi = findEditableByBasename(basename);
+	if (!efi || !g_PaintCtx.Core)
+	{
+		g_LastSaveStatus = "save: file not open: " + basename;
+		fprintf(stderr, "ERROR: %s\n", g_LastSaveStatus.c_str());
+		return false;
+	}
+	std::string target = name;
+	if (target.empty())
+	{
+		g_LastSaveStatus = "save: empty target name";
+		return false;
+	}
+	if (target[0] != '/')
+	{
+		std::string dir = NLMISC::CFile::getPath(efi->Path);
+		if (!dir.empty() && dir[dir.size() - 1] != '/' && dir[dir.size() - 1] != '\\')
+			dir += "/";
+		target = dir + target;
+	}
+	std::string err;
+	if (!g_PaintCtx.Core->writeBack(err))
+	{
+		g_LastSaveStatus = "write-back: " + err;
+		fprintf(stderr, "ERROR: %s\n", g_LastSaveStatus.c_str());
+		return false;
+	}
+	writeNeighborHintsIfBoardSession();
+	PIPELINE::MAX::CScene *scene = editableScene(*efi);
+	std::vector<uint8> siOverride;
+	bool haveSi = false;
+	prepareThumbnailOverride(efi->Path, siOverride, haveSi, wantThumb, &efi->ZoneIds);
+	if (!scene || saveWholeFile(efi->Path, target, *scene, false, haveSi ? &siOverride : NULL) != 0)
+	{
+		g_LastSaveStatus = "save failed -> " + target;
+		return false;
+	}
+	g_PaintCtx.Core->markZonesSaved(efi->ZoneIds);
+	g_LastSaveStatus = "OK save -> " + target;
+	printf("OK save (file copy) -> %s\n", target.c_str());
+	return true;
+}
+
 /**
  * In-place overwrite: for multi-select (M6b) this is save-all — each dirty editable file
  * gets temp → one-time .bak → rename. Single-file path unchanged.
@@ -5962,12 +6052,21 @@ static bool rebuildWorkingSet(std::string &err, uint &outWelds)
 	// derive in authored space, then authored-origin-relative translation to their board
 	// cell. Save byte-guarantee unaffected: paint writes tile values only, geometry is a
 	// display/weld copy rebuilt from the scene on every rebuild.
+	// M27c: the PRIMARY is a zone like any other — when its board cell is non-zero
+	// (moved home) it translates through the same path. The board anchor stays the
+	// primary's AUTHORED footprint origin (derivePrimaryFootprint above, pre-translate),
+	// so cell (0,0) always maps to the authored position and a zero-cell primary is a
+	// bit-exact no-op translate.
 	if (g_StartupWorld.Kind == ZPWS::Ecosystem)
 	{
-		for (size_t ei = 1; ei < g_EditableFiles.size() && ei < fileRanges.size(); ++ei)
+		for (size_t ei = 0; ei < g_EditableFiles.size() && ei < fileRanges.size(); ++ei)
+		{
+			if (ei == 0 && g_EditableFiles[0].CellX == 0 && g_EditableFiles[0].CellY == 0)
+				continue; // unmoved home: skip the no-op
 			placeEcoEditableRange(zones, g_EditableFiles[ei],
 			                      fileRanges[ei].first, fileRanges[ei].second,
 			                      g_SessionCellSize, g_SessionSnap > 0.f ? g_SessionSnap : 1.f);
+		}
 	}
 
 	// Ecosystem scratch instances (M12c): re-append display clones after primary rebuild.
@@ -6069,14 +6168,27 @@ static const std::vector<bool> &scratchHomeMask()
 	return g_FootprintMask;
 }
 
+/** M27c: the home block's board origin cell. The primary is a zone like any other and
+ *  can be MOVED on the board — its cell lives in g_EditableFiles[0].CellX/Y like every
+ *  other open file's (0,0 until moved; the board-cell → world anchor stays the primary's
+ *  AUTHORED footprint origin, so moving home never re-anchors other placements). */
+static void scratchHomeCellOrigin(int &hx, int &hy)
+{
+	hx = g_EditableFiles.empty() ? 0 : g_EditableFiles[0].CellX;
+	hy = g_EditableFiles.empty() ? 0 : g_EditableFiles[0].CellY;
+}
+
 /** True if cell (cx,cy) is a MASKED home cell (M17; falls back to full rect if mask empty). */
 static bool scratchHomeOccupies(int cx, int cy)
 {
+	int hx = 0, hy = 0;
+	scratchHomeCellOrigin(hx, hy);
+	const int lx = cx - hx, ly = cy - hy;
 	const int fw = scratchFw(), fh = scratchFh();
-	if (cx < 0 || cy < 0 || cx >= fw || cy >= fh) return false;
+	if (lx < 0 || ly < 0 || lx >= fw || ly >= fh) return false;
 	const std::vector<bool> &m = scratchHomeMask();
 	if (m.empty() || (int)m.size() < fw * fh) return true;
-	return m[(size_t)(cx + cy * fw)];
+	return m[(size_t)(lx + ly * fw)];
 }
 
 /**
@@ -6171,12 +6283,16 @@ static bool hintContextConflicts(const std::vector<bool> &cmask, int cfw, int cf
  */
 static bool scratchMaskConflictsSrc(const std::vector<bool> &cmask, int cfw, int cfh,
                                     int ox, int oy, uint rot, bool mirror,
-                                    int skipIdx, std::string &err)
+                                    int skipIdx, std::string &err,
+                                    bool skipHome = false)
 {
 	const int fw = scratchFw(), fh = scratchFh();
 	const std::vector<bool> &hm = scratchHomeMask();
-	if (masksCollide(hm, fw, fh, 0, 0, 0, false,
-	                 cmask, cfw, cfh, ox, oy, rot, mirror))
+	int hx = 0, hy = 0;
+	scratchHomeCellOrigin(hx, hy); // M27c: home can sit anywhere on the board
+	if (!skipHome
+	    && masksCollide(hm, fw, fh, hx, hy, 0, false,
+	                    cmask, cfw, cfh, ox, oy, rot, mirror))
 	{
 		err = "mask overlaps home footprint";
 		return true;
@@ -6669,7 +6785,9 @@ static bool contextCandidateConflicts(size_t idx, int nx, int ny, uint nrot, boo
 	std::vector<bool> cm;
 	int cw = 1, ch = 1;
 	contextSpecMask(g_PlaceContextSpecs[idx], cm, cw, ch);
-	if (masksCollide(scratchHomeMask(), scratchFw(), scratchFh(), 0, 0, 0, false,
+	int hcx = 0, hcy = 0;
+	scratchHomeCellOrigin(hcx, hcy); // M27c: movable home
+	if (masksCollide(scratchHomeMask(), scratchFw(), scratchFh(), hcx, hcy, 0, false,
 	                 cm, cw, ch, nx, ny, nrot, nmirror))
 	{
 		err = "would overlap home";
@@ -6788,14 +6906,43 @@ static bool scratchDragDrop(int fx, int fy, int tx, int ty, bool copy, std::stri
 	size_t idx = 0;
 	if (scratchHomeOccupies(fx, fy))
 	{
+		int hx = 0, hy = 0;
+		scratchHomeCellOrigin(hx, hy);
 		if (!copy)
 		{
-			err = "home is the layout origin (copy-drag places an instance)";
-			return false;
+			// M27c: home is a zone like any other — move the primary block by the drag
+			// delta. The board anchor (authored primary origin ↔ cell 0,0) stays put, so
+			// nothing else re-anchors; the primary's zones translate at rebuild exactly
+			// like every other open file's.
+			if (g_EditableFiles.empty())
+			{
+				err = "no primary file";
+				return false;
+			}
+			const int nhx = hx + dx, nhy = hy + dy;
+			std::vector<bool> hm = scratchHomeMask();
+			const int fw = scratchFw(), fh = scratchFh();
+			if (hm.empty()) hm.assign((size_t)fw * (size_t)fh, true);
+			if (scratchMaskConflictsSrc(hm, fw, fh, nhx, nhy, 0, false, -1, err,
+			                            /*skipHome=*/true))
+				return false;
+			const int ox = g_EditableFiles[0].CellX, oy = g_EditableFiles[0].CellY;
+			g_EditableFiles[0].CellX = nhx;
+			g_EditableFiles[0].CellY = nhy;
+			if (!scratchRebuild(err))
+			{
+				g_EditableFiles[0].CellX = ox;
+				g_EditableFiles[0].CellY = oy;
+				std::string rerr;
+				if (!scratchRebuild(rerr))
+					fprintf(stderr, "ERROR: home-move recovery rebuild failed: %s\n", rerr.c_str());
+				return false;
+			}
+			return true;
 		}
-		// Home origin is (0,0); like every other branch the copy's block origin shifts
-		// by the drag delta (NOT the raw drop cell — the grab cell may be interior).
-		return scratchPlace(dx, dy, err);
+		// Copy: place a home instance — block origin shifts by the drag delta from the
+		// home block's ORIGIN cell (NOT the raw drop cell — the grab cell may be interior).
+		return scratchPlace(hx + dx, hy + dy, err);
 	}
 	if (scratchFindPlace(fx, fy, idx))
 	{
@@ -6892,7 +7039,9 @@ static bool scratchEditableConflicts(size_t idx, std::string &err)
 	const int ch = ef.CellsH > 0 ? ef.CellsH : 1;
 	std::vector<bool> em = ef.Mask;
 	if (em.empty()) em.assign((size_t)cw * (size_t)ch, true);
-	if (masksCollide(scratchHomeMask(), scratchFw(), scratchFh(), 0, 0, 0, false,
+	int hcx = 0, hcy = 0;
+	scratchHomeCellOrigin(hcx, hcy); // M27c: movable home
+	if (masksCollide(scratchHomeMask(), scratchFw(), scratchFh(), hcx, hcy, 0, false,
 	                 em, cw, ch, ef.CellX, ef.CellY, 0, false))
 	{
 		err = "footprint overlaps home";
@@ -7729,6 +7878,7 @@ static void zpFillBridgeState(ZPUI::SPaintUIBridge &bridge)
 	// Interactive modal flow: always enabled. Legacy / --save: only with a save path.
 	bridge.CanSave = g_PaintCtx.InteractiveSave || !g_PaintCtx.SavePath.empty();
 	bridge.InteractiveSave = g_PaintCtx.InteractiveSave;
+	bridge.BoardSession = g_BoardSession;
 	bridge.InstanceCount = g_InstanceCount;
 	{
 		std::string base = NLMISC::CFile::getFilenameWithoutExtension(g_PaintCtx.InputPath);
@@ -8051,6 +8201,8 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 		paintBridge.save = zpSaveDirect;
 		paintBridge.saveTo = zpSaveTo;
 		paintBridge.saveOverwrite = zpSaveOverwrite;
+		paintBridge.saveFileOverwrite = zpSaveFileOverwrite;
+		paintBridge.saveFileCopy = zpSaveFileCopy;
 		paintBridge.seasonNext = zpSeasonNext;
 		paintBridge.seasonSelect = zpSeasonSelect;
 		paintBridge.seasonMenuFill = zpSeasonMenuFill;
@@ -8146,6 +8298,7 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 				sessionBridge.FootprintCellsW = scratchFw();
 				sessionBridge.FootprintCellsH = scratchFh();
 				sessionBridge.FootprintMask = g_FootprintMask.empty() ? NULL : &g_FootprintMask;
+				sessionBridge.scratchGetHomeCell = scratchHomeCellOrigin; // M27c movable home
 			}
 			ZPUI::setSessionBoardBridge(&sessionBridge);
 		}
@@ -8399,13 +8552,17 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 			// Sync panel labels before capture so the screenshot shows live state
 			zpFillBridgeState(paintBridge);
 			// Dev-only: ZONE_PAINTER_SAVE_MODAL_SHOT=1 opens the Save modal for one frame
-			// so interactive save UI can be verified headlessly (M3a).
+			// so interactive save UI can be verified headlessly (M3a). Any other value =
+			// a basename: opens the per-file "Save as…" form bound to that file (M27b).
 			{
 				const char *modalShot = getenv("ZONE_PAINTER_SAVE_MODAL_SHOT");
 				if (modalShot && modalShot[0] && modalShot[0] != '0'
 				    && g_PaintCtx.InteractiveSave)
 				{
-					ZPUI::forceShowSaveDialogForShot();
+					if (std::string(modalShot) == "1")
+						ZPUI::forceShowSaveDialogForShot();
+					else
+						ZPUI::openSaveDialogForFile(modalShot);
 				}
 			}
 			// Dev-only: ZONE_PAINTER_PALETTE_SHOT=1 opens the Tiles palette for the frame (M8/M9a).

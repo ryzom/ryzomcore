@@ -214,6 +214,9 @@ struct SSessionBoardBridge
 	bool (*scratchDragDrop)(int fromCx, int fromCy, int toCx, int toCy, bool copy, std::string &err);
 	/** Home brick display name. */
 	std::string ScratchHomeName;
+	/** M27c: the home block's board ORIGIN cell — the primary moves like any other file
+	 *	(0,0 until moved); board painting/labels must not assume the origin. */
+	void (*scratchGetHomeCell)(int &hx, int &hy);
 	/** Primary footprint size in fine cells (M14a multi-cell occupancy). */
 	int FootprintCellsW;
 	int FootprintCellsH;
@@ -234,7 +237,7 @@ struct SSessionBoardBridge
 		  scratchPlaceInstanceOf(NULL), scratchOpenFileCount(NULL), scratchGetInstanceSource(NULL),
 		  scratchGetHintAt(NULL), scratchHintNames(NULL),
 		  scratchRotateContext(NULL), scratchMirrorContext(NULL), scratchGetContextTransform(NULL),
-		  scratchDragDrop(NULL),
+		  scratchDragDrop(NULL), scratchGetHomeCell(NULL),
 		  FootprintCellsW(1), FootprintCellsH(1), FootprintMask(NULL)
 	{
 	}

@@ -769,9 +769,16 @@ public:
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		SPaintUIBridge *b = getPaintUIBridge();
 		if (!b || !b->CanSave) return;
-		// Interactive flow without --save: open the overwrite/copy modal.
-		// CLI --save (including startup-auto + --save): one-click direct save.
-		if (b->InteractiveSave)
+		// M27b: board sessions — toolbar SAVE is one-click save-all (each dirty file in
+		// place, one-time .bak, per-file thumbnails always). Per-file save-as with custom
+		// options lives on the board cells. Legacy interactive single-file keeps the
+		// modal (no board to reach save-as from); CLI --save keeps direct save.
+		if (b->InteractiveSave && b->BoardSession)
+		{
+			if (b->saveOverwrite)
+				b->saveOverwrite();
+		}
+		else if (b->InteractiveSave)
 			openSaveDialog();
 		else if (b->save)
 			b->save();
@@ -812,11 +819,29 @@ static void resetSaveCopyButtonLabel()
 		btn->setHardText("Save copy");
 }
 
+// M27b: which editable file the save dialog targets; empty = legacy whole-session form
+// (single-file interactive without a board). The board cell "Save as…" sets it.
+static std::string s_SaveDialogFile;
+
+static void openSaveDialogCommon(SPaintUIBridge *b, const std::string &prefillBase)
+{
+	resetSaveCopyButtonLabel();
+	std::string prefill = prefillBase + "_painted.max";
+	if (CGroupEditBox *eb = findEditBox("ui:zp:save_dialog:content:copy_frame:copy_name"))
+		eb->setInputString(prefill);
+	// M5c: thumbnail checkbox defaults on
+	b->UpdateThumbnail = true;
+	if (CCtrlBaseButton *tb = dynamic_cast<CCtrlBaseButton *>(
+	        CWidgetManager::getInstance()->getElementFromId("ui:zp:save_dialog:content:update_thumb:box")))
+		tb->setPushed(true);
+	CWidgetManager::getInstance()->enableModalWindow(NULL, "ui:zp:save_dialog");
+}
+
 void openSaveDialog()
 {
 	SPaintUIBridge *b = getPaintUIBridge();
 	if (!b) return;
-	resetSaveCopyButtonLabel();
+	s_SaveDialogFile.clear();
 	// Multi-file (M6b): Overwrite is save-all of dirty editables
 	if (b->EditableFileCount > 1)
 	{
@@ -832,16 +857,18 @@ void openSaveDialog()
 		if (CCtrlTextButton *btn = findTextButton("ui:zp:save_dialog:content:btn_overwrite"))
 			btn->setHardText("Overwrite");
 	}
-	// Prefill edit box with <basename>_painted.max
-	std::string prefill = std::string(b->EditableBasename) + "_painted.max";
-	if (CGroupEditBox *eb = findEditBox("ui:zp:save_dialog:content:copy_frame:copy_name"))
-		eb->setInputString(prefill);
-	// M5c: thumbnail checkbox defaults on
-	b->UpdateThumbnail = true;
-	if (CCtrlBaseButton *tb = dynamic_cast<CCtrlBaseButton *>(
-	        CWidgetManager::getInstance()->getElementFromId("ui:zp:save_dialog:content:update_thumb:box")))
-		tb->setPushed(true);
-	CWidgetManager::getInstance()->enableModalWindow(NULL, "ui:zp:save_dialog");
+	openSaveDialogCommon(b, std::string(b->EditableBasename));
+}
+
+void openSaveDialogForFile(const std::string &basename)
+{
+	SPaintUIBridge *b = getPaintUIBridge();
+	if (!b) return;
+	s_SaveDialogFile = basename;
+	setSaveModalStatus("Save '" + basename + "'");
+	if (CCtrlTextButton *btn = findTextButton("ui:zp:save_dialog:content:btn_overwrite"))
+		btn->setHardText("Overwrite");
+	openSaveDialogCommon(b, basename);
 }
 
 class CAHZpSaveThumbToggle : public IActionHandler
@@ -1514,10 +1541,17 @@ public:
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		SPaintUIBridge *b = getPaintUIBridge();
-		if (!b || !b->saveOverwrite) return;
+		if (!b) return;
 		syncThumbWantFromModal(b);
-		// Bridge UpdateThumbnail is read by main.cpp via g_PaintCtx.WantThumbnail before save
-		if (b->saveOverwrite())
+		// M27b: file-bound form (board "Save as…") overwrites that ONE file
+		bool ok;
+		if (!s_SaveDialogFile.empty() && b->saveFileOverwrite)
+			ok = b->saveFileOverwrite(s_SaveDialogFile, b->UpdateThumbnail);
+		else if (b->saveOverwrite)
+			ok = b->saveOverwrite();
+		else
+			return;
+		if (ok)
 		{
 			setSaveModalStatus("Saved (overwrite).");
 			CWidgetManager::getInstance()->disableModalWindow();
@@ -1536,7 +1570,8 @@ public:
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		SPaintUIBridge *b = getPaintUIBridge();
-		if (!b || !b->saveTo) return;
+		if (!b) return;
+		if (s_SaveDialogFile.empty() && !b->saveTo) return;
 
 		std::string name;
 		if (CGroupEditBox *eb = findEditBox("ui:zp:save_dialog:content:copy_frame:copy_name"))
@@ -1573,7 +1608,16 @@ public:
 			return;
 		}
 
-		if (b->saveTo(target))
+		syncThumbWantFromModal(b);
+		// M27b: file-bound form (board "Save as…") copies that ONE file, checkbox honored
+		bool ok;
+		if (!s_SaveDialogFile.empty() && b->saveFileCopy)
+			ok = b->saveFileCopy(s_SaveDialogFile,
+			                     (!name.empty() && name[0] == '/') ? target : name + (toLowerAscii(CFile::getExtension(name)).empty() ? ".max" : ""),
+			                     b->UpdateThumbnail);
+		else
+			ok = b->saveTo(target);
+		if (ok)
 		{
 			setSaveModalStatus("Saved copy.");
 			CWidgetManager::getInstance()->disableModalWindow();
@@ -1596,6 +1640,7 @@ public:
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		resetSaveCopyButtonLabel();
 		setSaveModalStatus("");
+		s_SaveDialogFile.clear(); // drop the per-file binding (M27b)
 		CWidgetManager::getInstance()->disableModalWindow();
 	}
 };

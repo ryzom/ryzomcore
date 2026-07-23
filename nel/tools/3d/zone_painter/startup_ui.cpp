@@ -666,9 +666,13 @@ static void applySessionCellState(CInterfaceGroup *cell, const std::string &base
 		}
 		else if (st == CellScratchHome)
 		{
-			// Multi-cell home (M14a): label only on origin cell (0,0); others stay tinted blank
+			// Multi-cell home (M14a): label only on the block's ORIGIN cell — the home's
+			// board cell since M27c (the primary moves like any other file).
 			parseScratchBasename(basename, sk, cx, cy);
-			if (cx != 0 || cy != 0)
+			int hhx = 0, hhy = 0;
+			if (s_SessionBridge && s_SessionBridge->scratchGetHomeCell)
+				s_SessionBridge->scratchGetHomeCell(hhx, hhy);
+			if (cx != hhx || cy != hhy)
 				t->setHardText("");
 			else
 			{
@@ -1924,6 +1928,9 @@ static void openCellActionPopup(const std::string &basename)
 	}
 	if (CViewTextMenu *line = findMenuLine("ui:zp:cell_action:save"))
 		line->setGrayed(!dirty || !editable);
+	// M27b: Save as… needs an editable file (clean files can still be copied elsewhere)
+	if (CViewTextMenu *line = findMenuLine("ui:zp:cell_action:saveas"))
+		line->setGrayed(!editable);
 	if (CViewTextMenu *line = findMenuLine("ui:zp:cell_action:toggle"))
 		line->setText(editable ? "Make read-only" : "Make editable");
 	CWidgetManager::getInstance()->enableModalWindow(NULL, "ui:zp:cell_action");
@@ -2046,14 +2053,26 @@ void refreshSessionBoardStates()
  *
  * Basenames: H:cx,cy | I:ox,oy | E:cx,cy | C:cx,cy:name. Bridge owns the place list.
  */
+/** M27c: home block origin cell via the bridge (the primary moves like any other file). */
+static void scratchHomeCell(int &hx, int &hy)
+{
+	hx = 0;
+	hy = 0;
+	if (s_SessionBridge && s_SessionBridge->scratchGetHomeCell)
+		s_SessionBridge->scratchGetHomeCell(hx, hy);
+}
+
 static bool scratchHomeMaskOccupied(int cx, int cy, int fw, int fh)
 {
-	if (cx < 0 || cy < 0 || cx >= fw || cy >= fh) return false;
+	int hx = 0, hy = 0;
+	scratchHomeCell(hx, hy);
+	const int lx = cx - hx, ly = cy - hy;
+	if (lx < 0 || ly < 0 || lx >= fw || ly >= fh) return false;
 	if (!s_SessionBridge || !s_SessionBridge->FootprintMask
 	    || s_SessionBridge->FootprintMask->empty()
 	    || (int)s_SessionBridge->FootprintMask->size() < fw * fh)
 		return true; // legacy: full rect when mask absent
-	return (*s_SessionBridge->FootprintMask)[(size_t)(cx + cy * fw)];
+	return (*s_SessionBridge->FootprintMask)[(size_t)(lx + ly * fw)];
 }
 
 /** Coded basename when (cx,cy) is OCCUPIED (home/open file/instance/context); else empty. */
@@ -2109,11 +2128,14 @@ static void populateScratchBoard()
 	const int fh = (s_SessionBridge && s_SessionBridge->FootprintCellsH > 0)
 	                   ? s_SessionBridge->FootprintCellsH : 1;
 
-	// Bounds from MASKED home cells + every instance/context-occupied cell + margin
+	// Bounds from MASKED home cells + every instance/context-occupied cell + margin.
+	// M27c: scan the home rect AT its board cell (the primary moves like any other file).
+	int homeHx = 0, homeHy = 0;
+	scratchHomeCell(homeHx, homeHy);
 	int minC = 0, maxC = 0, minR = 0, maxR = 0;
 	bool anyHome = false;
-	for (int cy = 0; cy < fh; ++cy)
-	for (int cx = 0; cx < fw; ++cx)
+	for (int cy = homeHy; cy < homeHy + fh; ++cy)
+	for (int cx = homeHx; cx < homeHx + fw; ++cx)
 	{
 		if (!scratchHomeMaskOccupied(cx, cy, fw, fh)) continue;
 		if (!anyHome) { minC = maxC = cx; minR = maxR = cy; anyHome = true; }
@@ -2125,7 +2147,7 @@ static void populateScratchBoard()
 			if (cy > maxR) maxR = cy;
 		}
 	}
-	if (!anyHome) { minC = 0; maxC = fw - 1; minR = 0; maxR = fh - 1; }
+	if (!anyHome) { minC = homeHx; maxC = homeHx + fw - 1; minR = homeHy; maxR = homeHy + fh - 1; }
 
 	// Probe a generous window for instances/contexts (bridge lookup is O(places))
 	const int kProbe = 24;
@@ -2442,11 +2464,10 @@ void setSessionBoardVisible(bool visible)
 		}
 		else
 		{
+			// M27c: the board is the WORLD's scratch layout, not the home brick's — with
+			// multiple editables a home-named title misread as "editing that one zone".
 			if (CViewText *t = findText("ui:zp:zone_browser:content:world_title"))
-				t->setHardText((s_SessionBridge->ScratchHomeName.empty()
-				                ? s_SessionBridge->World->WorldName
-				                : s_SessionBridge->ScratchHomeName)
-				               + "  (scratch board)");
+				t->setHardText(s_SessionBridge->World->WorldName + "  (scratch board)");
 			if (CViewText *t = findText("ui:zp:zone_browser:content:world_sub"))
 				t->setHardText("place / rotate / mirror instances — O / BACK TO PAINTING");
 			populateScratchBoard();
@@ -2538,6 +2559,23 @@ public:
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpCellSave, "zp_cell_save");
+
+// M27b: per-file save-as — open the save dialog bound to this cell's file (name,
+// overwrite/copy, thumbnail checkbox = the custom save options).
+class CAHZpCellSaveAs : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		CWidgetManager::getInstance()->disableModalWindow();
+		const std::string base = s_Sess.PendingActionBasename;
+		if (base.empty())
+			return;
+		openSaveDialogForFile(base);
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpCellSaveAs, "zp_cell_save_as");
 
 class CAHZpCellToggle : public IActionHandler
 {

@@ -80,8 +80,14 @@ struct SPaintUIBridge
 	void (*save)();                     // panel Save: modal (interactive) or direct (--save)
 	/** Write-back + whole-file save to an arbitrary path (modal "Save copy", test hook). */
 	bool (*saveTo)(const std::string &target);
-	/** In-place overwrite: temp → optional one-time .bak → rename (modal "Overwrite"). */
+	/** In-place overwrite: temp → optional one-time .bak → rename (modal "Overwrite").
+	 *  Multi-file this is save-all; M27b: the toolbar SAVE calls it directly. */
 	bool (*saveOverwrite)();
+	/** M27b per-file board saves (the cell "Save as…" dialog): overwrite ONE editable
+	 *  file in place, or save a copy under `name` (absolute, or relative to the FILE's
+	 *  own directory). wantThumb = the dialog's checkbox (custom save option). */
+	bool (*saveFileOverwrite)(const std::string &basename, bool wantThumb);
+	bool (*saveFileCopy)(const std::string &basename, const std::string &name, bool wantThumb);
 	/** Cycle landscape season textures (ui M6a); no-op when <2 seasons available. */
 	void (*seasonNext)();
 	/** Select a specific season code (sp|su|au|wi); same live-flush path as seasonNext (M14c). */
@@ -130,6 +136,8 @@ struct SPaintUIBridge
 	bool CanSave;
 	/** When true, Save opens the overwrite/copy modal (startup interactive, no --save). */
 	bool InteractiveSave;
+	/** True in board sessions (M27b: toolbar SAVE = one-click save-all there). */
+	bool BoardSession;
 	char EditableBasename[128]; // zone basename for default copy name
 	char InputDir[512];         // directory of the opened .max (copy targets)
 	/** Self-instance count (1 = off); panel shows INSTANCED xN when > 1 (ui M4b). */
@@ -171,6 +179,7 @@ struct SPaintUIBridge
 		  toggleTileSize(NULL),
 		  brushSizeDelta(NULL), groupDelta(NULL), toggleLockBorders(NULL),
 		  undo(NULL), redo(NULL), fill(NULL), save(NULL), saveTo(NULL), saveOverwrite(NULL),
+		  saveFileOverwrite(NULL), saveFileCopy(NULL),
 		  seasonNext(NULL), seasonSelect(NULL), seasonMenuFill(NULL),
 		  colorRadiusDelta(NULL), hardnessDelta(NULL), opacityDelta(NULL),
 		  cycleBrushMask(NULL), toggleMaskMode(NULL), displaceIndexDelta(NULL),
@@ -181,7 +190,7 @@ struct SPaintUIBridge
 		  setColorRadiusAbs(NULL),
 		  HaveCore(false), Mode(0), CurTileSet(0), TileSetCount(0), Mode256(false),
 		  BrushSize(0), TileGroup(0), LockBorders(false), UndoDepth(0), CanSave(false),
-		  InteractiveSave(false), InstanceCount(1), UpdateThumbnail(true), SeasonCount(0),
+		  InteractiveSave(false), BoardSession(false), InstanceCount(1), UpdateThumbnail(true), SeasonCount(0),
 		  EditableFileCount(1), DirtyFileCount(0),
 		  ColorRadius(8.f), ColorHardness(128), ColorOpacity(255),
 		  ColorR(255), ColorG(255), ColorB(255), BrushMaskMode(false), DisplaceIndex(0),
@@ -207,6 +216,8 @@ struct SPaintUIBridge
 
 /** Open the Save modal (Overwrite / Save copy / Cancel). Prefills copy name. */
 void openSaveDialog();
+/** M27b: open the save dialog bound to ONE editable file (board cell "Save as…"). */
+void openSaveDialogForFile(const std::string &basename);
 
 /** Dev/test: force the Save modal open for one screenshot frame (env/guard callers). */
 void forceShowSaveDialogForShot();
