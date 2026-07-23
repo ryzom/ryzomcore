@@ -6494,6 +6494,17 @@ static bool scratchRebuild(std::string &err)
 	return true;
 }
 
+/** After a FAILED scratchRebuild, once the caller rolled its board mutation back:
+ *  rebuild again so the session stays on live zones. A failed rebuild leaves the core
+ *  referencing the CLEARED zones vector — without recovery the next frame's hover walk
+ *  is a use-after-free (same rule as the open/close/toggle ops). */
+static void scratchRecoveryRebuild(const char *op)
+{
+	std::string rerr;
+	if (!scratchRebuild(rerr))
+		fprintf(stderr, "ERROR: %s: recovery rebuild failed: %s\n", op, rerr.c_str());
+}
+
 /** Find place-context index whose masked cells cover (cx,cy) (M17 multi-cell). */
 static bool scratchFindContext(int cx, int cy, size_t &idx)
 {
@@ -6866,8 +6877,15 @@ static bool scratchRemoveContext(int cx, int cy, std::string &err)
 		err = "no context at cell";
 		return false;
 	}
+	const SPlaceContextSpec removed = g_PlaceContextSpecs[idx];
 	g_PlaceContextSpecs.erase(g_PlaceContextSpecs.begin() + (std::ptrdiff_t)idx);
-	return scratchRebuild(err);
+	if (!scratchRebuild(err))
+	{
+		g_PlaceContextSpecs.insert(g_PlaceContextSpecs.begin() + (std::ptrdiff_t)idx, removed);
+		scratchRecoveryRebuild("remove-context");
+		return false;
+	}
+	return true;
 }
 
 /** M24c: transform mask of a context spec for collision checks. */
@@ -6951,8 +6969,16 @@ static bool scratchRotateContext(int cx, int cy, int delta, std::string &err)
 	const uint newRot = (uint)((int)pc.Rot + delta) & 3;
 	if (contextCandidateConflicts(idx, pc.Dx, pc.Dy, newRot, pc.Mirror, err))
 		return false;
+	const uint oldRot = pc.Rot;
 	pc.Rot = newRot;
-	return scratchRebuild(err);
+	if (!scratchRebuild(err))
+	{
+		if (idx < g_PlaceContextSpecs.size())
+			g_PlaceContextSpecs[idx].Rot = oldRot;
+		scratchRecoveryRebuild("rotate-context");
+		return false;
+	}
+	return true;
 }
 
 /** M24c: mirror a placed context brick (block AABB stays; mask occupancy rechecked). */
@@ -6968,7 +6994,14 @@ static bool scratchMirrorContext(int cx, int cy, std::string &err)
 	if (contextCandidateConflicts(idx, pc.Dx, pc.Dy, pc.Rot, !pc.Mirror, err))
 		return false;
 	pc.Mirror = !pc.Mirror;
-	return scratchRebuild(err);
+	if (!scratchRebuild(err))
+	{
+		if (idx < g_PlaceContextSpecs.size())
+			g_PlaceContextSpecs[idx].Mirror = !g_PlaceContextSpecs[idx].Mirror;
+		scratchRecoveryRebuild("mirror-context");
+		return false;
+	}
+	return true;
 }
 
 /** M24c: context transform for board labels. */
@@ -7016,13 +7049,30 @@ static bool scratchDragDrop(int fx, int fy, int tx, int ty, bool copy, std::stri
 			np.CellY = ny;
 			g_Places.push_back(np);
 			g_InstanceCount = 1 + (uint)g_Places.size();
-			return scratchRebuild(err);
+			if (!scratchRebuild(err))
+			{
+				g_Places.pop_back();
+				g_InstanceCount = 1 + (uint)g_Places.size();
+				scratchRecoveryRebuild("drag-copy instance");
+				return false;
+			}
+			return true;
 		}
 		if (scratchMaskConflictsSrc(sm, sfw, sfh, nx, ny, pl.Rot, pl.Mirror, (int)idx, err))
 			return false;
 		g_Places[idx].CellX = nx;
 		g_Places[idx].CellY = ny;
-		return scratchRebuild(err);
+		if (!scratchRebuild(err))
+		{
+			if (idx < g_Places.size())
+			{
+				g_Places[idx].CellX = pl.CellX;
+				g_Places[idx].CellY = pl.CellY;
+			}
+			scratchRecoveryRebuild("drag-move instance");
+			return false;
+		}
+		return true;
 	}
 	if (scratchFindContext(fx, fy, idx))
 	{
@@ -7041,7 +7091,13 @@ static bool scratchDragDrop(int fx, int fy, int tx, int ty, bool copy, std::stri
 				err = cerr;
 				return false;
 			}
-			return scratchRebuild(err);
+			if (!scratchRebuild(err))
+			{
+				g_PlaceContextSpecs.pop_back();
+				scratchRecoveryRebuild("drag-copy context");
+				return false;
+			}
+			return true;
 		}
 		std::string cerr;
 		if (contextCandidateConflicts(idx, nx, ny, g_PlaceContextSpecs[idx].Rot,
@@ -7050,9 +7106,20 @@ static bool scratchDragDrop(int fx, int fy, int tx, int ty, bool copy, std::stri
 			err = cerr;
 			return false;
 		}
+		const int odx = g_PlaceContextSpecs[idx].Dx, ody = g_PlaceContextSpecs[idx].Dy;
 		g_PlaceContextSpecs[idx].Dx = nx;
 		g_PlaceContextSpecs[idx].Dy = ny;
-		return scratchRebuild(err);
+		if (!scratchRebuild(err))
+		{
+			if (idx < g_PlaceContextSpecs.size())
+			{
+				g_PlaceContextSpecs[idx].Dx = odx;
+				g_PlaceContextSpecs[idx].Dy = ody;
+			}
+			scratchRecoveryRebuild("drag-move context");
+			return false;
+		}
+		return true;
 	}
 	if (scratchFindEditableAt(fx, fy, idx))
 	{
@@ -7071,7 +7138,19 @@ static bool scratchDragDrop(int fx, int fy, int tx, int ty, bool copy, std::stri
 			err = cerr;
 			return false;
 		}
-		return scratchRebuild(err);
+		if (!scratchRebuild(err))
+		{
+			// The M27c home-move branch had this recovery; the M28 uniform branch must
+			// too — a failed rebuild otherwise keeps the new cell with the session dead.
+			if (idx < g_EditableFiles.size())
+			{
+				g_EditableFiles[idx].CellX = ox;
+				g_EditableFiles[idx].CellY = oy;
+			}
+			scratchRecoveryRebuild("drag-move file");
+			return false;
+		}
+		return true;
 	}
 	err = "nothing to drag at cell";
 	return false;
@@ -7326,7 +7405,14 @@ static bool scratchPlaceInstanceOf(int cx, int cy, const std::string &basenameIn
 		return false;
 	g_Places.push_back(pl);
 	g_InstanceCount = 1 + (uint)g_Places.size();
-	return scratchRebuild(err);
+	if (!scratchRebuild(err))
+	{
+		g_Places.pop_back();
+		g_InstanceCount = 1 + (uint)g_Places.size();
+		scratchRecoveryRebuild("place-instance");
+		return false;
+	}
+	return true;
 }
 
 /** M24b: open-brick count (home + editables) for the instance-source picker gate. */
@@ -7410,7 +7496,14 @@ static bool scratchRotate(int cx, int cy, int delta, std::string &err)
 	if (scratchMaskConflictsSrc(sm, fw, fh, pl.CellX, pl.CellY, newRot, pl.Mirror, (int)idx, err))
 		return false;
 	g_Places[idx].Rot = newRot;
-	return scratchRebuild(err);
+	if (!scratchRebuild(err))
+	{
+		if (idx < g_Places.size())
+			g_Places[idx].Rot = pl.Rot;
+		scratchRecoveryRebuild("rotate instance");
+		return false;
+	}
+	return true;
 }
 
 static bool scratchMirror(int cx, int cy, std::string &err)
@@ -7433,7 +7526,14 @@ static bool scratchMirror(int cx, int cy, std::string &err)
 			return false;
 	}
 	g_Places[idx].Mirror = !g_Places[idx].Mirror;
-	return scratchRebuild(err);
+	if (!scratchRebuild(err))
+	{
+		if (idx < g_Places.size())
+			g_Places[idx].Mirror = !g_Places[idx].Mirror;
+		scratchRecoveryRebuild("mirror instance");
+		return false;
+	}
+	return true;
 }
 
 static bool scratchRemove(int cx, int cy, std::string &err)
@@ -7444,9 +7544,17 @@ static bool scratchRemove(int cx, int cy, std::string &err)
 		err = "no instance at cell";
 		return false;
 	}
+	const SInstancePlace removed = g_Places[idx];
 	g_Places.erase(g_Places.begin() + idx);
 	g_InstanceCount = 1 + (uint)g_Places.size();
-	return scratchRebuild(err);
+	if (!scratchRebuild(err))
+	{
+		g_Places.insert(g_Places.begin() + (std::ptrdiff_t)idx, removed);
+		g_InstanceCount = 1 + (uint)g_Places.size();
+		scratchRecoveryRebuild("remove instance");
+		return false;
+	}
+	return true;
 }
 
 static bool scratchGetInstance(int cx, int cy, uint &rot, bool &mirror)
@@ -7626,10 +7734,12 @@ static bool sessionCloseZone(const std::string &basename, bool saveFirst, bool f
 	std::vector<SInstancePlace> placesCopy = g_Places;
 	PMAXLOAD::SLoadedMax *toFree = efi->Lm;
 	const bool sceneWasActive = toFree && g_PaintCtx.Scene == toFree->Scene;
+	size_t closedIdx = 0; // original slot — rollback must restore ORDER (zone-id bases)
 	for (size_t i = 0; i < g_EditableFiles.size(); ++i)
 	{
 		if (&g_EditableFiles[i] == efi)
 		{
+			closedIdx = i;
 			g_EditableFiles.erase(g_EditableFiles.begin() + (std::ptrdiff_t)i);
 			break;
 		}
@@ -7674,10 +7784,21 @@ static bool sessionCloseZone(const std::string &basename, bool saveFirst, bool f
 	uint welds = 0;
 	if (!rebuildWorkingSet(err, welds))
 	{
-		// Best-effort rollback: restore the file and rebuild again so the session is
-		// not left half-torn (zones/landscape/core inconsistent with g_EditableFiles).
-		g_EditableFiles.push_back(closedCopy);
+		// Best-effort rollback: restore the file AT ITS ORIGINAL SLOT (a failed close
+		// must not permute file order — zone-id bases and the [0] save identity key on
+		// it), undo the save-context repoint, and rebuild again so the session is not
+		// left half-torn (zones/landscape/core inconsistent with g_EditableFiles).
+		g_EditableFiles.insert(
+		    g_EditableFiles.begin()
+		        + (std::ptrdiff_t)(closedIdx <= g_EditableFiles.size() ? closedIdx
+		                                                               : g_EditableFiles.size()),
+		    closedCopy);
 		if (toFree) g_ExtraEditableScenes.push_back(toFree);
+		if (sceneWasActive && toFree)
+		{
+			g_PaintCtx.Scene = toFree->Scene;
+			g_PaintCtx.InputPath = closedCopy.Path;
+		}
 		g_Places = placesCopy; // the failed rebuild already pruned this file's instances
 		if (addedCloseSpec) g_PlaceContextSpecs.pop_back();
 		std::string err2;
