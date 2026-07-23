@@ -2147,6 +2147,34 @@ static bool parseInstanceLayout(const std::string &s, uint &cols, uint &rows,
 	return true;
 }
 
+/** CLI --place specs → g_Places (clears layout state first). Shared by the workspace
+ *  startup branch and the M31b synthetic-session path — the direct .max open used to
+ *  drop placements with a "legacy path" warning even though it becomes a board session.
+ *  Returns false (with the error printed) on a bad spec. */
+static bool parseCliPlaces(NLMISC::CCmdArgs &args)
+{
+	g_Places.clear();
+	g_InstanceCols = 1;
+	g_InstanceRows = 1;
+	g_InstanceCount = 1;
+	if (args.haveLongArg("place"))
+	{
+		const std::vector<std::string> &pv = args.getLongArg("place");
+		for (size_t i = 0; i < pv.size(); ++i)
+		{
+			SInstancePlace pl;
+			std::string perr;
+			if (!parsePlaceSpec(pv[i], pl, perr))
+			{
+				fprintf(stderr, "ERROR: %s\n", perr.c_str());
+				return false;
+			}
+			g_Places.push_back(pl);
+		}
+	}
+	return true;
+}
+
 /**
  * Footprint rect (M14a): AABB of primary zones, origin snapped DOWN to the cell grid,
  * size ceil'd UP to whole cells. Empty primary => 1×1 cell at (0,0).
@@ -4940,7 +4968,9 @@ static void zpColorRadiusAbs(float m)
 	if (m > 32.f) m = 32.f;
 	if (g_PaintCtx.Paint->BrushRadius == m) return;
 	g_PaintCtx.Paint->BrushRadius = m;
-	ZPSCRIPT::record(NLMISC::toString("painter.setRadius(%.3f)", m));
+	// %.9g float-exact (matches the REC preamble and colorBrush lines) — %.3f quantized
+	// the replayed radius after ×1.5/÷1.5 stepping.
+	ZPSCRIPT::record(NLMISC::toString("painter.setRadius(%.9g)", m));
 }
 
 /** Color brush radius step (×1.5 / ÷1.5, clamp 2..32). Shared by SizeUp/Down in Color mode and panel. */
@@ -5155,33 +5185,44 @@ static bool captureTopDownThumbnail(NLMISC::CBitmap &out, const std::vector<uint
 	    || !g_PaintCtx.Zones || g_PaintCtx.Zones->empty())
 		return false;
 
-	// Frame the selected zones (a file's set), or every unfrozen zone.
+	// Frame the selected zones (a file's set), or every unfrozen zone. Two passes for
+	// the id-selected form: frozen members are skipped first (--embedded-context puts
+	// frozen embedded neighbor COPIES in a file's id range — framing them captured the
+	// whole neighborhood); an all-frozen set (an RO-demoted file) falls back to
+	// framing what it has.
 	NLMISC::CAABBox bbox;
 	bool init = false;
-	for (size_t i = 0; i < g_PaintCtx.Zones->size(); ++i)
+	for (int pass = 0; pass < 2 && !init; ++pass)
 	{
-		const SPaintZone &z = (*g_PaintCtx.Zones)[i];
-		if (zoneIds)
+		for (size_t i = 0; i < g_PaintCtx.Zones->size(); ++i)
 		{
-			bool in = false;
-			for (size_t k = 0; k < zoneIds->size() && !in; ++k)
-				in = (*zoneIds)[k] == z.ZoneId;
-			if (!in)
-				continue;
-		}
-		else if (z.Frozen)
-			continue;
-		for (size_t p = 0; p < z.Patches.size(); ++p)
-		{
-			const NL3D::CBezierPatch &bp = z.Patches[p].Patch;
-			for (uint v = 0; v < 4; ++v)
+			const SPaintZone &z = (*g_PaintCtx.Zones)[i];
+			if (zoneIds)
 			{
-				if (!init) { bbox.setCenter(bp.Vertices[v]); bbox.setHalfSize(NLMISC::CVector::Null); init = true; }
-				else bbox.extend(bp.Vertices[v]);
+				bool in = false;
+				for (size_t k = 0; k < zoneIds->size() && !in; ++k)
+					in = (*zoneIds)[k] == z.ZoneId;
+				if (!in)
+					continue;
+				if (pass == 0 && z.Frozen)
+					continue;
 			}
-			for (uint v = 0; v < 8; ++v) bbox.extend(bp.Tangents[v]);
-			for (uint v = 0; v < 4; ++v) bbox.extend(bp.Interiors[v]);
+			else if (z.Frozen)
+				continue;
+			for (size_t p = 0; p < z.Patches.size(); ++p)
+			{
+				const NL3D::CBezierPatch &bp = z.Patches[p].Patch;
+				for (uint v = 0; v < 4; ++v)
+				{
+					if (!init) { bbox.setCenter(bp.Vertices[v]); bbox.setHalfSize(NLMISC::CVector::Null); init = true; }
+					else bbox.extend(bp.Vertices[v]);
+				}
+				for (uint v = 0; v < 8; ++v) bbox.extend(bp.Tangents[v]);
+				for (uint v = 0; v < 4; ++v) bbox.extend(bp.Interiors[v]);
+			}
 		}
+		if (!zoneIds)
+			break; // the unfiltered form never frames frozen zones
 	}
 	if (!init)
 		return false;
@@ -5399,14 +5440,30 @@ static bool saveOneOverwrite(const std::string &orig, PIPELINE::MAX::CScene &sce
 	return true;
 }
 
-/** Open editable whose on-disk path equals `path` (standardized compare), else NULL.
+/** Absolute + standardized file path — the ONE identity form for path compares.
+ *  standardizePath alone does not absolutize, so a file opened by relative path
+ *  compared unequal to its own absolute path (dup-open false-refusals, copy-over-
+ *  open-file guard bypass). */
+static std::string absFilePath(const std::string &path)
+{
+	std::string p = NLMISC::CPath::standardizePath(
+		NLMISC::CPath::makePathAbsolute(path, NLMISC::CPath::getCurrentPath(), true), false);
+	// makePathAbsolute internally standardizes WITH a final slash (it is directory-
+	// oriented) and standardizePath(_, false) only declines to ADD one — strip it,
+	// this identity form is for files.
+	while (p.size() > 1 && p[p.size() - 1] == '/')
+		p.resize(p.size() - 1);
+	return p;
+}
+
+/** Open editable whose on-disk path equals `path` (absolute compare), else NULL.
  *  Copy-save targets must never silently land on an open file: the write would bypass
  *  the temp → .bak → rename discipline AND leave the in-memory scene stale vs disk. */
 static SEditableFileInfo *findEditableByPath(const std::string &path)
 {
-	const std::string t = NLMISC::CPath::standardizePath(path, false);
+	const std::string t = absFilePath(path);
 	for (size_t i = 0; i < g_EditableFiles.size(); ++i)
-		if (NLMISC::CPath::standardizePath(g_EditableFiles[i].Path, false) == t)
+		if (absFilePath(g_EditableFiles[i].Path) == t)
 			return &g_EditableFiles[i];
 	return NULL;
 }
@@ -5432,13 +5489,16 @@ static bool saveCopyAtomic(const std::string &src, const std::string &target,
 	}
 	if (!NLMISC::CFile::moveFile(target, tempPath))
 	{
-		if (!NLMISC::CFile::copyFile(target, tempPath, /*failIfExists=*/false)
-		    || !NLMISC::CFile::deleteFile(tempPath))
+		if (!NLMISC::CFile::copyFile(target, tempPath, /*failIfExists=*/false))
 		{
 			fprintf(stderr, "ERROR: save: rename/copy failed for %s (temp %s)\n",
 			        target.c_str(), tempPath.c_str());
 			return false;
 		}
+		// Copy landed the full bytes — a leftover temp (locked-file corner) must not
+		// turn a completed save into a reported failure.
+		if (!NLMISC::CFile::deleteFile(tempPath))
+			fprintf(stderr, "WARNING: save: temp file left behind: %s\n", tempPath.c_str());
 	}
 	if (NLMISC::CFile::fileExists(tempPath))
 		NLMISC::CFile::deleteFile(tempPath);
@@ -5693,6 +5753,8 @@ static bool zpSaveOverwrite()
 
 	// Multi: save each dirty file. Board sessions also rewrite clean editables when
 	// neighbor hints changed (always write editables after stamp — paint dirty OR board).
+	// DELIBERATE under --no-hint-stamp too: the M31 byte gates save a clean session and
+	// compare against null-edit output — skipping clean files would make them vacuous.
 	uint saved = 0, skipped = 0;
 	for (size_t i = 0; i < g_EditableFiles.size(); ++i)
 	{
@@ -6051,8 +6113,8 @@ static bool sessionSaveOneFile(SEditableFileInfo &efi, std::string &err)
 		err = "no scene";
 		return false;
 	}
-	// M27a: per-cell board saves refresh the file's own thumbnail too (offscreen RT,
-	// zero cost to the visible frame).
+	// M27a/M30: per-cell board saves refresh the file's own thumbnail too (renders the
+	// backbuffer between presented frames — never swapped, so nothing flickers).
 	if (!saveOneOverwrite(efi.Path, *scene, /*doThumb=*/true, &efi.ZoneIds))
 	{
 		err = "overwrite failed";
@@ -7322,8 +7384,7 @@ static bool scratchOpenEditable(int cx, int cy, const std::string &basenameIn, s
 	{
 		// Basename is the file-identity key — a DIFFERENT file with the same name must
 		// refuse, not silently become an instance of the other file (M30).
-		if (NLMISC::CPath::standardizePath(dup->Path, false)
-		    != NLMISC::CPath::standardizePath(ze.MaxPath, false))
+		if (absFilePath(dup->Path) != absFilePath(ze.MaxPath))
 		{
 			err = "another file with basename '" + ze.Basename + "' is already open ("
 			      + dup->Path + ")";
@@ -9850,7 +9911,10 @@ args.addArg("", "instances", "NxM",
 		std::string pos = args.getAdditionalArg("input")[0];
 		if (ZPWS::isMaxPath(pos))
 		{
-			input = pos;
+			// Absolutize once at parse: every downstream identity compare (dup-open
+			// refusal, copy-over-open-file guard, bound-dialog fileDir resolution)
+			// assumes registered paths are absolute — discovery-built paths are.
+			input = absFilePath(pos);
 		}
 		else if (NLMISC::CFile::isDirectory(pos))
 		{
@@ -9938,28 +10002,11 @@ args.addArg("", "instances", "NxM",
 		}
 
 		// Instance placements (ecosystem self-tile). CLI --place / --instances; also query on auto.
-		g_Places.clear();
-		g_InstanceCols = 1;
-		g_InstanceRows = 1;
-		g_InstanceCount = 1;
 		std::string instancesFromCli;
 		if (args.haveLongArg("instances"))
 			instancesFromCli = args.getLongArg("instances")[0];
-		if (args.haveLongArg("place"))
-		{
-			const std::vector<std::string> &pv = args.getLongArg("place");
-			for (size_t i = 0; i < pv.size(); ++i)
-			{
-				SInstancePlace pl;
-				std::string perr;
-				if (!parsePlaceSpec(pv[i], pl, perr))
-				{
-					fprintf(stderr, "ERROR: %s\n", perr.c_str());
-					return 1;
-				}
-				g_Places.push_back(pl);
-			}
-		}
+		if (!parseCliPlaces(args))
+			return 1;
 
 		if (args.haveLongArg("startup-auto"))
 		{
@@ -10221,22 +10268,10 @@ args.addArg("", "instances", "NxM",
 			if (n == "on" || n == "1" || n == "true" || n == "yes")
 				g_LoadNeighbors = true; // no-op without a continent world context
 		}
-		// Instances are ecosystem-startup only; warn and ignore on the legacy path
-		if (args.haveLongArg("instances") || args.haveLongArg("place"))
-		{
-			fprintf(stderr, "WARNING: --place / --instances is ignored on the legacy .max path "
-			                "(use --startup-auto \"eco/brick?place=1,0,1\" or the ecosystem UI)\n");
-		}
-		if (!g_PlaceContextSpecs.empty())
-		{
-			fprintf(stderr, "WARNING: --place-context is ignored on the legacy .max path "
-			                "(use --startup-auto with a board session)\n");
-			g_PlaceContextSpecs.clear();
-		}
-		g_Places.clear();
-		g_InstanceCols = 1;
-		g_InstanceRows = 1;
-		g_InstanceCount = 1;
+		// Placement flags are decided AFTER the synthetic-session check below — a
+		// direct interactive .max open becomes an eco board session (M31b) and takes
+		// --place/--place-context through the same startup assembly as a workspace
+		// session; only the genuinely headless legacy flows drop them.
 	}
 
 	// If still no input after startup handling, fail
@@ -10371,6 +10406,11 @@ args.addArg("", "instances", "NxM",
 			if (!parent.empty())
 				g_StartupWorld.WorldName = parent;
 		}
+		// A file at filesystem root has no dir basename — an empty WorldName would
+		// split the eco gates (board bridge activates on MaxDir, zpScriptEcoGate
+		// refuses on the empty name). Any non-empty label keeps them consistent.
+		if (g_StartupWorld.WorldName.empty())
+			g_StartupWorld.WorldName = dir;
 		g_StartupWorld.MaxDir = dir;
 		g_StartupWorld.BankPath = bankPath;
 		g_StartupWorld.BankOk = !bankPath.empty();
@@ -10379,18 +10419,63 @@ args.addArg("", "instances", "NxM",
 		g_BoardSession = true;
 		g_LoadNeighbors = true; // hint chain (appdata → embedded names → siblings)
 		g_HintStampEnabled = false;
+		// Session, not the legacy --save flow: the toolbar SAVE must be the same
+		// one-click save-all it is in workspace sessions (it was frozen here — the
+		// InteractiveSave latch only ran in the startupPath branch).
+		g_InteractiveSave = !args.haveLongArg("save");
+		// CLI placements ride the same session assembly as a workspace startup
+		// (--place-context and --open-editable already parse unconditionally above).
+		if (!parseCliPlaces(args))
+			return 1;
+		if (args.haveLongArg("instances") && g_Places.empty())
+		{
+			std::string ierr;
+			std::vector<SInstancePlace> layoutPlaces;
+			if (!parseInstanceLayout(args.getLongArg("instances")[0],
+			                         g_InstanceCols, g_InstanceRows, layoutPlaces, ierr))
+			{
+				fprintf(stderr, "ERROR: %s\n", ierr.c_str());
+				return 1;
+			}
+			if (!layoutPlaces.empty())
+			{
+				fprintf(stderr, "NOTE: --instances is deprecated; use --place "
+				                "(expanded %ux%u -> %u place(s))\n",
+				        g_InstanceCols, g_InstanceRows, (uint)layoutPlaces.size());
+				g_Places = layoutPlaces;
+			}
+		}
 		syntheticSession = true;
 		printf("direct open: synthesized session world '%s' (%s)\n",
 		       g_StartupWorld.WorldName.c_str(), dir.c_str());
 	}
 	(void)syntheticSession;
 
+	// Deferred placement-flag policy (see the legacy-path branch above): only the
+	// headless legacy flows ignore placements now.
+	if (!startupPath && !syntheticSession)
+	{
+		if (args.haveLongArg("instances") || args.haveLongArg("place"))
+			fprintf(stderr, "WARNING: --place / --instances is ignored on the headless "
+			                "legacy path (open interactively or use --startup-auto)\n");
+		if (!g_PlaceContextSpecs.empty())
+		{
+			fprintf(stderr, "WARNING: --place-context is ignored on the headless "
+			                "legacy path (open interactively or use --startup-auto)\n");
+			g_PlaceContextSpecs.clear();
+		}
+		g_Places.clear();
+		g_InstanceCols = 1;
+		g_InstanceRows = 1;
+		g_InstanceCount = 1;
+	}
+
 	if (nullEdit && !args.haveLongArg("out"))
 	{
 		fprintf(stderr, "ERROR: --null-edit refuses to save in place; give --out <output.max>\n");
 		return 1;
 	}
-	if (!savePath.empty() && savePath == input)
+	if (!savePath.empty() && absFilePath(savePath) == input)
 	{
 		fprintf(stderr, "ERROR: --save refuses to save in place\n");
 		return 1;
@@ -10414,6 +10499,24 @@ args.addArg("", "instances", "NxM",
 		fprintf(stderr, "ERROR: cannot load %s\n", input.c_str());
 		delete primaryLmHeap;
 		return 1;
+	}
+
+	// Synthetic sessions keep the legacy cellsize-100 default for plugin-era files —
+	// but neighbor-hint appdata is stamped ONLY by workspace board sessions, which run
+	// the ligo pitch (160). Replaying "dx,dy" hints at 100 would translate dx*100:
+	// a 160 m neighbor lands 60 m INTO the primary. If the file carries hints and the
+	// user gave no explicit --cellsize, adopt the stamping pitch.
+	if (syntheticSession && !args.haveLongArg("cellsize") && lm.Scene)
+	{
+		std::vector<SNeighborHint> pitchProbe;
+		if (readNeighborHintsFromScene(*lm.Scene, g_StartupZone.Basename, pitchProbe)
+		    && !pitchProbe.empty())
+		{
+			cellSize = 160.f;
+			g_SessionCellSize = 160.f;
+			printf("direct open: neighbor hints present -> cellsize 160 (ligo pitch; "
+			       "--cellsize overrides)\n");
+		}
 	}
 
 	// Editable list: multi-select set, or single primary from input path
@@ -10446,8 +10549,7 @@ args.addArg("", "instances", "NxM",
 				// Basenames are the file-identity key everywhere (instances, hints,
 				// saves) — a SECOND file with the same name is unsupportable, and
 				// silently instancing the OTHER file would be worse than refusing.
-				if (NLMISC::CPath::standardizePath(dup->Path, false)
-				    != NLMISC::CPath::standardizePath(editables[ei].MaxPath, false))
+				if (absFilePath(dup->Path) != absFilePath(editables[ei].MaxPath))
 				{
 					fprintf(stderr, "ERROR: two different files share the basename '%s':\n"
 					        "  %s\n  %s\n  (basenames are the session's file-identity key)\n",
@@ -10589,9 +10691,19 @@ args.addArg("", "instances", "NxM",
 			       (uint)ei, ne.Basename.c_str(), ne.CellX, ne.CellY, ne.CellsW, ne.CellsH);
 		}
 		// M28b: duplicate startup selections become shared-paint instances, ring-placed
-		// from the source block's origin (footprint fields are live from here on).
+		// from the source block's origin (footprint fields are live from here on) —
+		// the source's actual cell, not board origin: with M30 authored-origin
+		// placement a non-origin source's duplicate must hug the source, not file 0.
 		for (size_t i = 0; i < dupInstanceNames.size(); ++i)
-			placeDupInstanceNear(dupInstanceNames[i], 0, 0);
+		{
+			int scx = 0, scy = 0;
+			if (SEditableFileInfo *src = findEditableByBasename(dupInstanceNames[i]))
+			{
+				scx = src->CellX;
+				scy = src->CellY;
+			}
+			placeDupInstanceNear(dupInstanceNames[i], scx, scy);
+		}
 	}
 
 	// M24a: --open-editable "cx,cy:basename" — additional EDITABLE files placed on the eco
@@ -10624,8 +10736,7 @@ args.addArg("", "instances", "NxM",
 			{
 				// Basename is the file-identity key — refuse a DIFFERENT file with the
 				// same name (M30); a true duplicate open = shared-paint instance (M28b).
-				if (NLMISC::CPath::standardizePath(dup->Path, false)
-				    != NLMISC::CPath::standardizePath(ze.MaxPath, false))
+				if (absFilePath(dup->Path) != absFilePath(ze.MaxPath))
 				{
 					fprintf(stderr, "ERROR: --open-editable: another file with basename "
 					        "'%s' is already open (%s)\n", ze.Basename.c_str(),
