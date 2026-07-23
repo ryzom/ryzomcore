@@ -796,7 +796,9 @@ void CPaintCore::getTileRaw(uint zone, sint32 tileId, CTileDescP &desc) const
 	// high bits many corpus records carry — are kept verbatim: the original loader keeps them
 	// in memory and its save re-emits them, so a desc that flows GetTile -> setTile preserves
 	// them exactly like the plugin (fresh descs start at zero, also like the plugin).
-	desc.Num = t.Num;
+	// Clamp Num to the 3-layer desc capacity — corrupt/stale records can carry Num > 3
+	// and every layer walk indexes Mat[l] without a further guard.
+	desc.Num = (uint16)(t.Num > 3 ? 3 : t.Num);
 	desc.Flags = (uint16)((t.Flags & ~0x78) | ((t.Noise & 0xf) << 3));
 	for (int l = 0; l < 3; ++l)
 	{
@@ -819,10 +821,10 @@ void CPaintCore::setTileDesc(uint zone, sint32 tileId, const CTileDescP &desc)
 	// markers (rpo_data.h) that the 16-bit desc round trip cannot represent — writing them
 	// back zero-extended would drift bytes the edit never meant to touch. (The plugin's own
 	// 16-bit in-memory copy re-wrote them wholesale; the selective-write port can do better.)
-	t.Num = desc.Num;
+	t.Num = (uint16)(desc.Num > 3 ? 3 : desc.Num);
 	t.Flags = desc.Flags;
 	t.Noise = desc.getDisplace();
-	for (int l = 0; l < desc.Num && l < 3; ++l)
+	for (int l = 0; l < (int)t.Num && l < 3; ++l)
 	{
 		t.Layer[l].Tile = (sint32)desc.Mat[l].Tile;
 		t.Layer[l].Rotate = (sint32)(desc.Mat[l].Rotate & 3);
@@ -1844,6 +1846,13 @@ bool CPaintCore::putATile(SPaintTile *pTile, int tileSet, int curRotation, bool 
 	int nTile = selectTile((uint)tileSet, selectCycle, _256);
 	if (nTile == -1) return false;
 
+	// Stroke mark for abort: every write below uses undo=true, so m_CurStroke grows for
+	// this put only. On refuse (propagate fail / residual illegal seams / transition
+	// fallback abort) we restore pristine bytes via HaveRaw and truncate the stroke —
+	// the old setTile(..., Old, undo=true) rollback left desc-only restores (lossy on
+	// unused layers) AND phantom undo entries that endStroke then committed.
+	const size_t strokeMark = m_CurStroke.size();
+
 	if (_256)
 	{
 		CTileDescP desc;
@@ -1955,9 +1964,11 @@ bool CPaintCore::putATile(SPaintTile *pTile, int tileSet, int curRotation, bool 
 
 	if (!bContinue)
 	{
-		// Revert everything, then try a transition tile at the picked position
-		for (int back = (int)backupStack.size() - 1; back >= 0; --back)
-			setTile(backupStack[back].Zone, backupStack[back].TileId, backupStack[back].Old, NULL, true);
+		// Revert the attempted put (byte-exact, no stroke pollution), then try a
+		// transition tile at the picked position. Early returns below in the prep
+		// leave the stroke clean because the abort already ran.
+		abortStrokeTo(strokeMark);
+		backupStack.clear();
 
 		bool backup256 = backup.getCase() > 0;
 		if (!_256 && !backup256)
@@ -2107,7 +2118,7 @@ bool CPaintCore::putATile(SPaintTile *pTile, int tileSet, int curRotation, bool 
 			// M13b residual gate: transition-at-pick must also leave legal seams
 			if (!tileSeamsLegal(pTile))
 			{
-				setTile((uint)pTile->Zone, pTile->TileId, backup, NULL, true);
+				abortStrokeTo(strokeMark);
 				return false;
 			}
 		}
@@ -2127,8 +2138,7 @@ bool CPaintCore::putATile(SPaintTile *pTile, int tileSet, int curRotation, bool 
 		{
 			fprintf(stderr, "putATile: refuse write that would leave illegal seams (zone %u tileId %d)\n",
 			        (uint)pTile->Zone, (int)pTile->TileId);
-			for (int back = (int)backupStack.size() - 1; back >= 0; --back)
-				setTile(backupStack[back].Zone, backupStack[back].TileId, backupStack[back].Old, NULL, true);
+			abortStrokeTo(strokeMark);
 			return false;
 		}
 	}
@@ -2310,6 +2320,24 @@ void CPaintCore::endStroke()
 	m_RedoStack.clear();
 	while ((int)m_UndoStack.size() > ZP_MAX_UNDO)
 		m_UndoStack.pop_front();
+}
+
+void CPaintCore::abortStrokeTo(size_t mark)
+{
+	// Reverse of the tile entries pushed after `mark`: desc restore + raw pristine restore,
+	// NO undo push (would re-pollute the stroke) and no endStroke. applyChanges is the
+	// caller's job — putATile abort paths leave the batch for the outer op apply.
+	if (m_CurStroke.size() <= mark)
+		return;
+	for (int i = (int)m_CurStroke.size() - 1; i >= (int)mark; --i)
+	{
+		if (m_CurStroke[i].Kind != 0)
+			continue;
+		setTile(m_CurStroke[i].Zone, m_CurStroke[i].TileId, m_CurStroke[i].Old, NULL, false, true);
+		if (m_CurStroke[i].HaveRaw)
+			restoreRawTile(m_CurStroke[i], true);
+	}
+	m_CurStroke.resize(mark);
 }
 
 static void zpApplyPropRaw(CNodeImpl *node, uint32 appDataId, bool has, const std::string &value)

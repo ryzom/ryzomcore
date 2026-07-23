@@ -237,8 +237,10 @@ static int lPaintTile(CLuaState &ls) // painter.paintTile(zone,patch,u,v,set[,ro
 	if (!argNumbers(ls, 5, a, "paintTile(zone,patch,u,v,set[,rot[,big]])", err)) return retErr(ls, err);
 	double rot = 0; argNumber(ls, 6, rot);
 	bool big = argBoolOpt(ls, 7, false);
-	return execOpRet(ls, toString("%s %u %u %u %u %u %u", big ? "tile256" : "tile",
-		(uint)a[0], (uint)a[1], (uint)a[2], (uint)a[3], (uint)a[4], (uint)rot));
+	// set is signed: -1 is the clear sentinel (paint_core opTile); %u would turn it into
+	// UINT_MAX and fail the bank range check instead of clearing.
+	return execOpRet(ls, toString("%s %u %u %u %u %d %u", big ? "tile256" : "tile",
+		(uint)a[0], (uint)a[1], (uint)a[2], (uint)a[3], (int)a[4], (uint)rot));
 }
 
 static int lRotateTile(CLuaState &ls) // painter.rotateTile(zone,patch,u,v,rot)
@@ -264,8 +266,9 @@ static int lFillTile(CLuaState &ls) // painter.fillTile(zone,patch,set[,rot[,big
 	if (!argNumbers(ls, 3, a, "fillTile(zone,patch,set[,rot[,big]])", err)) return retErr(ls, err);
 	double rot = 0; argNumber(ls, 4, rot);
 	bool big = argBoolOpt(ls, 5, false);
-	return execOpRet(ls, toString("%s %u %u %u %u", big ? "fill256" : "fill",
-		(uint)a[0], (uint)a[1], (uint)a[2], (uint)rot));
+	// set is signed: -1 clears the patch (no alternate Lua fill-clear path).
+	return execOpRet(ls, toString("%s %u %u %d %u", big ? "fill256" : "fill",
+		(uint)a[0], (uint)a[1], (int)a[2], (uint)rot));
 }
 
 static int lPaintColor(CLuaState &ls) // painter.paintColor(zone,patch,u,v,"rrggbb"[,blend 0-256])
@@ -330,15 +333,16 @@ static int lTileStroke(CLuaState &ls) // painter.tileStroke(zone,patch,u,v,set[,
 	// cont (bool, 7th): stroke-aware form — first line of a drag passes false, moves pass
 	// true, and the commit comes from painter.endStroke(); without it each line is a
 	// self-contained stroke (legacy scripts keep their behavior).
+	// set is signed (-1 = clear sentinel).
 	if (ls.getTop() >= 7)
 	{
 		bool cont = argBoolOpt(ls, 7, false);
-		return execOpRet(ls, toString("tstroke %u %u %u %u %u %u %u",
-			(uint)a[0], (uint)a[1], (uint)a[2], (uint)a[3], (uint)a[4], big ? 1u : 0u,
+		return execOpRet(ls, toString("tstroke %u %u %u %u %d %u %u",
+			(uint)a[0], (uint)a[1], (uint)a[2], (uint)a[3], (int)a[4], big ? 1u : 0u,
 			cont ? 1u : 0u));
 	}
-	return execOpRet(ls, toString("tstroke %u %u %u %u %u %u",
-		(uint)a[0], (uint)a[1], (uint)a[2], (uint)a[3], (uint)a[4], big ? 1u : 0u));
+	return execOpRet(ls, toString("tstroke %u %u %u %u %d %u",
+		(uint)a[0], (uint)a[1], (uint)a[2], (uint)a[3], (int)a[4], big ? 1u : 0u));
 }
 
 static int lEndStroke(CLuaState &ls) // painter.endStroke() — commit the open stroke (mouse-up)

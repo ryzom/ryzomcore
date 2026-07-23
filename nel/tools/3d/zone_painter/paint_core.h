@@ -630,6 +630,10 @@ private:
 	void stitchEdge(uint zi, uint p, uint e, uint zj, uint pp, uint ee, int dividEdge, int offsetEdge);
 	int getBindedEdge(uint zone, int nPatch, int nVertInPatch) const;
 	void applyUndoList(const std::vector<SUndoTile> &list, bool useOld);
+	// Roll back m_CurStroke entries written after `mark` (desc + raw) without pushing
+	// further undo and without committing. Used by putATile abort paths so a refused
+	// paint leaves no stroke pollution and restores pristine bytes by construction.
+	void abortStrokeTo(size_t mark);
 	// M18b prop snapshot helpers
 	static void readPropSnap(PIPELINE::MAX::BUILTIN::CNodeImpl *node, SPropSnap &out);
 	bool propsDirty(uint zoneIdx) const;
