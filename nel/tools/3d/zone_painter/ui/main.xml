@@ -329,7 +329,7 @@
 <!-- ===================================================================== -->
 <!-- Screen C — folder browser (M2c; inactive until enabled)               -->
 <!-- ===================================================================== -->
-<group type="container" id="folder_browser" w="560" pop_min_w="480" pop_max_w="700" h="480" pop_min_h="340" pop_max_h="580"
+<group type="container" id="folder_browser" w="560" pop_min_w="480" pop_max_w="700" h="450" pop_min_h="310" pop_max_h="580"
 	title="zone_painter — browse for graphics" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
 	title_bar_open="false" open_button="false" right_button="true" lockable="false" openable="false"
 	opened="true" movable="true" active="false" x="120" y="520">
@@ -349,7 +349,7 @@
 		     same asset the Script window's code editor already uses correctly) instead of a flat
 		     w_box_blank fill with no border at all ("this isn't shitty flat web dev"). The frame
 		     draws its own blank-texture interior; the nested edit_box needs no bg of its own. -->
-		<group type="frame" id="goto_frame" options="w_box_frame" posparent="goto_lbl" posref="MR ML" x="6" y="5"
+		<group type="frame" id="goto_frame" options="w_box_frame" posparent="goto_lbl" posref="MR ML" x="6" y="0"
 			w="368" h="20" color="255 255 255 255" global_color="false" display="true">
 			<group type="edit_box" id="goto_path" posref="TL TL" x="4" y="-4" w="360" h="12"
 				prompt="" max_num_chars="500" entry_type="text"
