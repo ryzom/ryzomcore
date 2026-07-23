@@ -1946,13 +1946,13 @@ static void loadNeighborContextFiles(std::vector<SPaintZone> &zones, float cellS
 		cf.Mirror = p.Mirror;
 		if (p.Translate && before < zones.size())
 		{
-			// Derived footprint for board occupancy (M24 review: hint-loaded contexts were
-			// invisible to every collision check). Placement math above stays untouched.
-			// Pick the FIRST zone of the range: context zones are ALL force-frozen, so the
-			// old first-non-frozen scan never broke and silently landed on the LAST zone —
-			// an embedded neighbor copy in legacy --embedded-context mode. Under board
-			// authority only the eligible brick zone(s) survive, and first matches the
-			// derivePrimaryFootprint pick convention.
+			// Board occupancy mask (M24 review: hint-loaded contexts were invisible to
+			// every collision check). Placement math above stays untouched.
+			// FIRST of range: under board authority only the eligible brick zone(s)
+			// survive load; context rows are all force-frozen so a "first non-frozen"
+			// walk would never break and used to land on the LAST zone (embedded
+			// neighbor copy under --embedded-context). First-of-range matches the
+			// export brick / derivePrimaryFootprint product model.
 			size_t cPick = before;
 			float mOx = 0.f, mOy = 0.f;
 			bool fromT = false;
@@ -2330,7 +2330,9 @@ static std::string maskToTFString(const std::vector<bool> &mask, int w, int h)
 }
 
 /**
- * Derive exporter-identical footprint for one zone.
+ * Derive exporter-identical footprint for one zone (open-edge CZoneTemplate mask, or
+ * AABB square / USE_BOUNDINGBOX). This is the authoring source of truth — same inputs
+ * ligo export uses when writing a .ligozone; the painter does not read .ligozone.
  * Honors NEL3D_APPDATA_LIGO_USE_BOUNDINGBOX; degenerate template → AABB + log.
  */
 static bool deriveZoneFootprintMask(const SPaintZone &pz, float cellSize, float snap,
@@ -2423,7 +2425,11 @@ static bool deriveZoneFootprintMask(const SPaintZone &pz, float cellSize, float 
 static void unitCheckFootprintOccupancy(); // defined with rotFlip helpers below
 
 /**
- * Derive primary footprint from the first eligible (non-frozen) zone in [begin,end).
+ * Derive primary footprint for board occupancy from the eligible paint zone in
+ * [begin,end) — first non-frozen, matching M11b / the ligo export product model
+ * (one .zone + one .ligozone per brick protocol; zonematerial/zonespecial pick a
+ * single eligible RklPatch). Mask algorithm is exporter-identical
+ * (deriveZoneFootprintMask); .ligozone is never read here.
  * Fills g_Footprint* globals.
  */
 static void derivePrimaryFootprint(const std::vector<SPaintZone> &zones, size_t begin, size_t end,
@@ -2492,7 +2498,10 @@ static void derivePrimaryFootprint(const std::vector<SPaintZone> &zones, size_t 
 }
 
 /**
- * Cross-check derived mask against an existing .ligozone (test fixture only — never generated).
+ * Optional audit: compare the already-derived mask to a pre-existing .ligozone.
+ * Test/CI fixture only — authoring never requires or generates .ligozone (that is a
+ * ligo *export* build product). Source of truth for board occupancy is always the
+ * .max-derived mask above.
  * Prints parity line: size/filled/mask bits.
  */
 static bool compareFootprintToLigozone(const std::string &ligozonePath)
@@ -6271,19 +6280,21 @@ static void placeContextRange(std::vector<SPaintZone> &zones, size_t rb, size_t 
 }
 
 /**
- * M24a: derive + translate one eco non-primary editable's zones range to its board cell
+ * M24a: derive + translate one eco editable's zones range to its board cell
  * (authored-origin-relative, same rule as place-context); stores the footprint on the
- * file entry for board occupancy. Requires g_FootprintOriginX/Y (primary) already derived.
+ * file entry for board occupancy. Requires the session board anchor already captured.
+ *
+ * Footprint = exporter-identical mask of the file's eligible paint zone (first
+ * non-frozen in range) — the same single-brick product model as ligo export
+ * (one .ligozone per protocol brick). Not a "union all zones" pass: that would
+ * diverge from export and is not how material/special bricks are authored.
+ * All-frozen (RO-demoted) files: pick the FIRST of the range — walking to LAST
+ * would grab an embedded display copy and shift occupancy on toggle.
  */
 static void placeEcoEditableRange(std::vector<SPaintZone> &zones, SEditableFileInfo &efi,
                                   size_t rb, size_t re, float cellSize, float snap)
 {
 	if (rb >= re) return;
-	// Footprint from the first eligible (non-frozen unless demoted) zone, like the
-	// place-context path; AABB rect fallback covers the rest. All-frozen (RO-demoted
-	// file): the FIRST zone of the range — a scan that walks to the LAST would pick an
-	// embedded display copy and shift the file's occupancy on toggle (the same trap the
-	// hint-context footprint fix documented).
 	size_t pick = rb;
 	for (size_t i = rb; i < re; ++i)
 	{
@@ -6954,7 +6965,10 @@ static bool loadOnePlaceContext(std::vector<SPaintZone> &zones, float cellSize,
 	bool fromT = false;
 	std::vector<bool> cmask;
 	std::string derr;
-	// Prefer first non-frozen context zone (board authority skips ineligible)
+	// Eligible brick zone for this context file (same product model as export /
+	// derivePrimaryFootprint). Board authority already dropped ineligible embeds;
+	// force-frozen load means "first non-frozen" would never break — fall through
+	// keeps last-of-range as a legacy --embedded-context safety, not the preferred path.
 	size_t cPick = before;
 	for (size_t i = before; i < zones.size(); ++i)
 	{
@@ -9900,7 +9914,8 @@ int main(int argc, char **argv)
 	args.addArg("", "verify-identical", "", "With --null-edit: byte-compare the output against the input");
 	args.addArg("", "dump-zones", "dir", "Headless: write every built display CZone and report counts");
 	args.addArg("", "check-ligozone", "file.ligozone",
-	            "After footprint derivation, compare mask/size to an existing .ligozone (test cross-check only)");
+	            "Test/CI only: after .max-derived footprint, compare mask/size to an existing "
+	            ".ligozone export artifact. Authoring never requires .ligozone (build output).");
 	args.addArg("", "dump-rpo", "", "Dump every carrier's pristine tile records to stdout");
 	args.addArg("", "dump-bank-xref", "", "Dump the bank's tile -> (set, number, type) xref table to stdout");
 	args.addArg("", "dump-carrier-blob", "dir", "Write each zone's original carrier blob bytes to <dir>/zone<id>.blob");
