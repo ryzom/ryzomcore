@@ -100,9 +100,11 @@ class CPointerButtonListener : public NLMISC::IEventListener
 		{
 			CEventMouseDown &em = (CEventMouseDown &)event;
 			_DownButtons |= em.Button & (leftButton | middleButton | rightButton);
-			pointer->setPointerDown(em.Button == leftButton);
-			pointer->setPointerMiddleDown(em.Button == middleButton);
-			pointer->setPointerRightDown(em.Button == rightButton);
+			// Mask, not equality: Button carries OR'd modifier bits (ctrl/shift), so a
+			// modifier-held left press failed an == test and never registered pointer-down.
+			pointer->setPointerDown((em.Button & leftButton) != 0);
+			pointer->setPointerMiddleDown((em.Button & middleButton) != 0);
+			pointer->setPointerRightDown((em.Button & rightButton) != 0);
 			// M24d: arm a session-board drag from the cell under the pointer. Latch the
 			// copy modifier HERE — the X11 emitter posts bare buttons on mouse-up (only
 			// Windows carries modifiers there), so Ctrl/Shift must be read at down.
@@ -357,7 +359,10 @@ public:
 			CWidgetManager::getInstance()->getElementFromId(
 				"ui:zp:script_win:content:ed_frame:code"));
 		if (!eb) return;
-		ZPSCRIPT::runString(eb->getInputString());
+		// QUEUED, not run inline: this handler executes inside EventServer::pump, and a
+		// script calling painter.pumpUI() would re-enter the pump (nlassert in debug,
+		// event-list UAF in release). The viewer loop runs it right after the pump.
+		ZPSCRIPT::queueRunString(eb->getInputString());
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpScriptRun, "zp_script_run");
@@ -838,15 +843,25 @@ void openSaveDialog()
 class CAHZpSaveThumbToggle : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase *pCaller, const std::string & /* params */)
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		SPaintUIBridge *b = getPaintUIBridge();
 		if (!b) return;
-		// Toggle button reports new pushed state after click via getPushed
-		if (CCtrlBaseButton *tb = dynamic_cast<CCtrlBaseButton *>(
-		        CWidgetManager::getInstance()->getElementFromId("ui:zp:save_dialog:content:update_thumb:box")))
-			b->UpdateThumbnail = tb->getPushed();
+		CCtrlBaseButton *box = dynamic_cast<CCtrlBaseButton *>(
+			CWidgetManager::getInstance()->getElementFromId("ui:zp:save_dialog:content:update_thumb:box"));
+		// The zp_checkbox_row LABEL fires this same handler but does not flip the box's
+		// visual state — read-only handling made caption clicks dead (no per-frame sync
+		// writes this modal's box back like the bridge-backed rows get). Box click: the
+		// toggle already flipped, read it. Label click: flip state, write the box.
+		if (box && pCaller == box)
+			b->UpdateThumbnail = box->getPushed();
+		else
+		{
+			b->UpdateThumbnail = !b->UpdateThumbnail;
+			if (box)
+				box->setPushed(b->UpdateThumbnail);
+		}
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpSaveThumbToggle, "zp_save_thumb_toggle");
@@ -1748,24 +1763,23 @@ static CCtrlBaseButton *findButton(const char *id)
 
 void CEditorUI::syncPanelFromBridge()
 {
-	// painterscript window sync (ui M23b): cheap length-compare before setHardText
+	// painterscript window sync (ui M23b): generation counters, not text length — a
+	// same-length content change (CLEAR + same-length line in one frame) left stale text.
 	{
-		static size_t lastRec = (size_t)-1, lastOut = (size_t)-1;
-		const std::string &rec = ZPSCRIPT::recorderText();
-		const std::string &out = ZPSCRIPT::outputText();
-		if (rec.size() != lastRec)
+		static uint lastRec = (uint)-1, lastOut = (uint)-1;
+		if (ZPSCRIPT::recorderGeneration() != lastRec)
 		{
-			lastRec = rec.size();
+			lastRec = ZPSCRIPT::recorderGeneration();
 			if (CViewText *t = dynamic_cast<CViewText *>(CWidgetManager::getInstance()->getElementFromId(
 					"ui:zp:script_win:content:rec_frame:rec_text")))
-				t->setHardText(rec);
+				t->setHardText(ZPSCRIPT::recorderText());
 		}
-		if (out.size() != lastOut)
+		if (ZPSCRIPT::outputGeneration() != lastOut)
 		{
-			lastOut = out.size();
+			lastOut = ZPSCRIPT::outputGeneration();
 			if (CViewText *t = dynamic_cast<CViewText *>(CWidgetManager::getInstance()->getElementFromId(
 					"ui:zp:script_win:content:out_frame:out_text")))
-				t->setHardText(out);
+				t->setHardText(ZPSCRIPT::outputText());
 		}
 		if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(CWidgetManager::getInstance()->getElementFromId(
 				"ui:zp:script_win:content:btn_rec")))

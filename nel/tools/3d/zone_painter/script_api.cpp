@@ -37,6 +37,9 @@
 #include <nel/misc/common.h>
 #include <nel/misc/file.h>
 #include <nel/misc/path.h>
+#include <nel/misc/time_nl.h>
+
+#include <cstring>
 
 #include <nel/gui/lua_helper.h>
 #include <nel/gui/lua_manager.h>
@@ -61,18 +64,70 @@ static bool s_CancelReq = false; // Script-window CANCEL button (M23d); ESC ride
 static std::string s_Recorder;
 static std::string s_Output;
 static std::string s_LastError;
+// Mutation counters: the Script window's panes sync on these instead of text length —
+// a same-length content change (CLEAR + same-length line in one frame) left stale text.
+static uint s_RecorderGen = 0;
+static uint s_OutputGen = 0;
 
 void setHost(SScriptHost *host) { s_Host = host; }
 SScriptHost *getHost() { return s_Host; }
 bool isExecuting() { return s_Executing; }
 void requestCancel() { if (s_Executing) s_CancelReq = true; }
-void setRecording(bool on) { s_Recording = on; }
+void setRecording(bool on)
+{
+	const bool starting = on && !s_Recording;
+	s_Recording = on;
+	if (!starting)
+		return;
+	// REC preamble (replay fidelity): a recording started mid-session replays against a
+	// fresh process — a default RNG stream and default painter state — so tile-variant
+	// picks and stroke results diverged even when every action was captured. Reseed BOTH
+	// the live session and the recording with the same value, then snapshot the paint-
+	// relevant state as abs painter.* lines (states recorded on *change* only miss the
+	// starting values).
+	if (s_Host && s_Host->execOp)
+	{
+		uint seed = (uint)(NLMISC::CTime::getLocalTime() & 0x7fffffff);
+		if (!seed) seed = 1;
+		std::string err;
+		if (s_Host->execOp(NLMISC::toString("seed %u", seed), err))
+		{
+			s_Recorder += NLMISC::toString("painter.seed(%u)\n", seed);
+			++s_RecorderGen;
+		}
+	}
+	if (s_Host && s_Host->refreshBridge)
+		s_Host->refreshBridge();
+	ZPUI::SPaintUIBridge *b = s_Host ? s_Host->bridge : NULL;
+	if (b && b->HaveCore)
+	{
+		std::string pre;
+		pre += NLMISC::toString("painter.setMode(%d)\n", b->Mode);
+		pre += NLMISC::toString("painter.setTileSet(%d)\n", b->CurTileSet);
+		pre += NLMISC::toString("painter.set256(%s)\n", b->Mode256 ? "true" : "false");
+		pre += NLMISC::toString("painter.setBrushSize(%u)\n", b->BrushSize);
+		pre += NLMISC::toString("painter.setTileGroup(%u)\n", b->TileGroup);
+		pre += NLMISC::toString("painter.setLockBorders(%s)\n", b->LockBorders ? "true" : "false");
+		pre += NLMISC::toString("painter.setHardness(%u)\n", b->ColorHardness);
+		pre += NLMISC::toString("painter.setOpacity(%u)\n", b->ColorOpacity);
+		pre += NLMISC::toString("painter.setRadius(%.9g)\n", b->ColorRadius);
+		pre += NLMISC::toString("painter.setBrushColor(%u, %u, %u)\n", b->ColorR, b->ColorG, b->ColorB);
+		pre += NLMISC::toString("painter.setDisplaceIndex(%u)\n", b->DisplaceIndex);
+		if (strcmp(b->BrushMaskLabel, "none") != 0 && b->BrushMaskLabel[0])
+			pre += NLMISC::toString("painter.setBrushMask(\"%s\")\n", b->BrushMaskLabel);
+		pre += NLMISC::toString("painter.setMaskMode(%s)\n", b->BrushMaskMode ? "true" : "false");
+		s_Recorder += pre;
+		++s_RecorderGen;
+	}
+}
 bool isRecording() { return s_Recording; }
 const std::string &recorderText() { return s_Recorder; }
-void clearRecorder() { s_Recorder.clear(); }
+void clearRecorder() { s_Recorder.clear(); ++s_RecorderGen; }
 const std::string &outputText() { return s_Output; }
-void clearOutput() { s_Output.clear(); }
+void clearOutput() { s_Output.clear(); ++s_OutputGen; }
 const std::string &lastError() { return s_LastError; }
+uint recorderGeneration() { return s_RecorderGen; }
+uint outputGeneration() { return s_OutputGen; }
 
 void record(const std::string &luaCall)
 {
@@ -80,6 +135,7 @@ void record(const std::string &luaCall)
 		return;
 	s_Recorder += luaCall;
 	s_Recorder += "\n";
+	++s_RecorderGen;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -211,10 +267,12 @@ static int lFillColor(CLuaState &ls) // painter.fillColor(zone,patch,"rrggbb"[,b
 	return execOpRet(ls, toString("cfill %u %u %s", (uint)a[0], (uint)a[1], rgb.c_str()));
 }
 
-static int lColorBrush(CLuaState &ls) // painter.colorBrush(zone,x,y,radius,"rrggbb",hard,opac[,zWorld])
+static int lColorBrush(CLuaState &ls) // painter.colorBrush(zone,x,y,radius,"rrggbb",hard,opac[,zWorld[,cont]])
 {
+	// %.9g: float32 round-trips exactly — the recorder's old %.3f quantized the hit
+	// position, and distance-based blend weights made replays only approximate.
 	double a[4]; std::string err, rgb;
-	if (!argNumbers(ls, 4, a, "colorBrush(zone,x,y,radius,\"rrggbb\",hardness,opacity[,zWorld])", err))
+	if (!argNumbers(ls, 4, a, "colorBrush(zone,x,y,radius,\"rrggbb\",hardness,opacity[,zWorld[,cont]])", err))
 		return retErr(ls, err);
 	if (!argString(ls, 5, rgb)) return retErr(ls, "colorBrush: rgb string expected");
 	double hard, opac;
@@ -222,19 +280,44 @@ static int lColorBrush(CLuaState &ls) // painter.colorBrush(zone,x,y,radius,"rrg
 		return retErr(ls, "colorBrush: hardness/opacity expected");
 	double zw;
 	if (argNumber(ls, 8, zw))
-		return execOpRet(ls, toString("cbrush %u %.3f %.3f %.3f %s %u %u %.3f",
+	{
+		// cont (bool, 9th): stroke-aware form — commit comes from painter.endStroke()
+		if (ls.getTop() >= 9)
+		{
+			bool cont = argBoolOpt(ls, 9, false);
+			return execOpRet(ls, toString("cbrush %u %.9g %.9g %.9g %s %u %u %.9g %u",
+				(uint)a[0], a[1], a[2], a[3], rgb.c_str(), (uint)hard, (uint)opac, zw,
+				cont ? 1u : 0u));
+		}
+		return execOpRet(ls, toString("cbrush %u %.9g %.9g %.9g %s %u %u %.9g",
 			(uint)a[0], a[1], a[2], a[3], rgb.c_str(), (uint)hard, (uint)opac, zw));
-	return execOpRet(ls, toString("cbrush %u %.3f %.3f %.3f %s %u %u",
+	}
+	return execOpRet(ls, toString("cbrush %u %.9g %.9g %.9g %s %u %u",
 		(uint)a[0], a[1], a[2], a[3], rgb.c_str(), (uint)hard, (uint)opac));
 }
 
-static int lTileStroke(CLuaState &ls) // painter.tileStroke(zone,patch,u,v,set[,big]) — mouse-path stroke (brush size applies)
+static int lTileStroke(CLuaState &ls) // painter.tileStroke(zone,patch,u,v,set[,big[,cont]]) — mouse-path stroke (brush size applies)
 {
 	double a[5]; std::string err;
-	if (!argNumbers(ls, 5, a, "tileStroke(zone,patch,u,v,set[,big])", err)) return retErr(ls, err);
+	if (!argNumbers(ls, 5, a, "tileStroke(zone,patch,u,v,set[,big[,cont]])", err)) return retErr(ls, err);
 	bool big = argBoolOpt(ls, 6, false);
+	// cont (bool, 7th): stroke-aware form — first line of a drag passes false, moves pass
+	// true, and the commit comes from painter.endStroke(); without it each line is a
+	// self-contained stroke (legacy scripts keep their behavior).
+	if (ls.getTop() >= 7)
+	{
+		bool cont = argBoolOpt(ls, 7, false);
+		return execOpRet(ls, toString("tstroke %u %u %u %u %u %u %u",
+			(uint)a[0], (uint)a[1], (uint)a[2], (uint)a[3], (uint)a[4], big ? 1u : 0u,
+			cont ? 1u : 0u));
+	}
 	return execOpRet(ls, toString("tstroke %u %u %u %u %u %u",
 		(uint)a[0], (uint)a[1], (uint)a[2], (uint)a[3], (uint)a[4], big ? 1u : 0u));
+}
+
+static int lEndStroke(CLuaState &ls) // painter.endStroke() — commit the open stroke (mouse-up)
+{
+	return execOpRet(ls, "endstroke");
 }
 
 static int lPaintDisplace(CLuaState &ls) // painter.paintDisplace(zone,patch,u,v,index)
@@ -423,6 +506,8 @@ static int lGetMode(CLuaState &ls)
 {
 	ZPUI::SPaintUIBridge *b = bridge();
 	if (!b) return retErr(ls, "getMode: viewer only");
+	// Snapshot fields are frame-synced and STALE for the whole script run — refresh first
+	if (s_Host && s_Host->refreshBridge) s_Host->refreshBridge();
 	ls.push((double)b->Mode);
 	return 1;
 }
@@ -440,6 +525,8 @@ static int lGetTileSet(CLuaState &ls)
 {
 	ZPUI::SPaintUIBridge *b = bridge();
 	if (!b) return retErr(ls, "getTileSet: viewer only");
+	// Snapshot fields are frame-synced and STALE for the whole script run — refresh first
+	if (s_Host && s_Host->refreshBridge) s_Host->refreshBridge();
 	ls.push((double)b->CurTileSet);
 	return 1;
 }
@@ -553,6 +640,7 @@ static int lPrint(CLuaState &ls)
 	printf("%s\n", lineOut.c_str());
 	s_Output += lineOut;
 	s_Output += "\n";
+	++s_OutputGen;
 	// Keep the window buffer bounded (drop oldest lines past ~64 KB)
 	if (s_Output.size() > 65536)
 		s_Output.erase(0, s_Output.size() - 49152);
@@ -567,7 +655,7 @@ static const char *kBootstrap =
 	"  paintTile = __zp_paintTile, rotateTile = __zp_rotateTile, clearTile = __zp_clearTile,\n"
 	"  fillTile = __zp_fillTile,\n"
 	"  paintColor = __zp_paintColor, fillColor = __zp_fillColor, colorBrush = __zp_colorBrush,\n"
-	"  tileStroke = __zp_tileStroke,\n"
+	"  tileStroke = __zp_tileStroke, endStroke = __zp_endStroke,\n"
 	"  paintDisplace = __zp_paintDisplace, fillDisplace = __zp_fillDisplace,\n"
 	"  setBrushSize = __zp_setBrushSize, setTileGroup = __zp_setTileGroup,\n"
 	"  setBrushMask = __zp_setBrushMask,\n"
@@ -603,6 +691,7 @@ bool ensureLua()
 	ls->registerFunc("__zp_fillColor", lFillColor);
 	ls->registerFunc("__zp_colorBrush", lColorBrush);
 	ls->registerFunc("__zp_tileStroke", lTileStroke);
+	ls->registerFunc("__zp_endStroke", lEndStroke);
 	ls->registerFunc("__zp_paintDisplace", lPaintDisplace);
 	ls->registerFunc("__zp_fillDisplace", lFillDisplace);
 	ls->registerFunc("__zp_setBrushSize", lSetBrushSize);
@@ -676,6 +765,7 @@ static int runInternal(const std::string &code, const std::string &label)
 		if (s_LastError.empty()) s_LastError = "script error (see log)";
 		fprintf(stderr, "ERROR: painterscript %s: %s\n", label.c_str(), s_LastError.c_str());
 		s_Output += "ERROR: " + s_LastError + "\n";
+		++s_OutputGen;
 		return 1;
 	}
 	return 0;
@@ -700,6 +790,27 @@ int runFile(const std::string &path)
 int runString(const std::string &code)
 {
 	return runInternal(code, "chunk");
+}
+
+static std::string s_PendingRun;
+static bool s_HavePendingRun = false;
+
+void queueRunString(const std::string &code)
+{
+	if (s_Executing)
+		return; // UI is locked during pumped scripts; RUN is guarded, belt only
+	s_PendingRun = code;
+	s_HavePendingRun = true;
+}
+
+void processPendingRun()
+{
+	if (!s_HavePendingRun || s_Executing)
+		return;
+	std::string code;
+	code.swap(s_PendingRun);
+	s_HavePendingRun = false;
+	runInternal(code, "chunk");
 }
 
 } // namespace ZPSCRIPT

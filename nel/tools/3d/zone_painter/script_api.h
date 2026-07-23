@@ -90,13 +90,17 @@ struct SScriptHost
 	/** Board-session working-set ops (ui M23c); NULL outside board sessions. */
 	bool (*openZone)(const std::string &basename, std::string &err);
 	bool (*closeZone)(const std::string &basename, bool saveFirst, bool forceDiscard, std::string &err);
+	/** Refresh the bridge's frame-synced snapshot fields NOW — they are filled by the
+	 *	main loop and go stale for the whole run of a script; getters (getMode/getTileSet)
+	 *	call this first so painter.setX(); assert(painter.getX()) holds. NULL headless. */
+	void (*refreshBridge)();
 	/** Live viewer bridge for state get/set; NULL headless. */
 	ZPUI::SPaintUIBridge *bridge;
 
 	SScriptHost()
 		: execOp(NULL), zonesInfo(NULL), getZoneProp(NULL), saveTo(NULL), saveAll(NULL),
 		  screenshot(NULL), pumpUI(NULL), cancelRequested(NULL), resetCancel(NULL),
-		  openZone(NULL), closeZone(NULL), bridge(NULL)
+		  openZone(NULL), closeZone(NULL), refreshBridge(NULL), bridge(NULL)
 	{
 	}
 };
@@ -111,8 +115,16 @@ bool ensureLua();
 /** Run a script file. Returns 0 on success, 1 on load/runtime error (message on stderr
  *	and in lastError()). */
 int runFile(const std::string &path);
-/** Run a script string (the Script window's Run). */
+/** Run a script string immediately. NEVER call from inside an event dispatch (an action
+ *	handler runs inside EventServer::pump, and a script calling painter.pumpUI() would
+ *	re-enter the pump — nlassert in debug, iterator UAF in release); use queueRunString
+ *	from handlers instead. */
 int runString(const std::string &code);
+/** Defer a script chunk to the next processPendingRun() (the Script window's RUN — it
+ *	fires from inside the pump). */
+void queueRunString(const std::string &code);
+/** Run the queued chunk, if any. Called by the viewer main loop OUTSIDE the pump. */
+void processPendingRun();
 const std::string &lastError();
 
 /** True while a painter script is executing (recorder re-entrance guard). */
@@ -122,17 +134,24 @@ bool isExecuting();
  *	No-op when no script is executing. */
 void requestCancel();
 
-// Recorder (M23b window feeds from this; API available from M23a)
+// Recorder (M23b window feeds from this; API available from M23a).
+// setRecording(true) emits a replay-fidelity preamble: painter.seed(N) — also reseeding
+// the LIVE session so both share one RNG stream from that point — plus abs painter.*
+// snapshot lines of the paint-relevant state (change-only recording misses start values).
 void setRecording(bool on);
 bool isRecording();
 /** Append one runnable line if recording and not executing a script. */
 void record(const std::string &luaCall);
 const std::string &recorderText();
 void clearRecorder();
+/** Mutation counter for pane sync (length-compare missed same-length content changes). */
+uint recorderGeneration();
 
 /** print() redirection sink for the Script window (empty = stdout only). */
 const std::string &outputText();
 void clearOutput();
+/** Mutation counter for pane sync. */
+uint outputGeneration();
 
 } // namespace ZPSCRIPT
 

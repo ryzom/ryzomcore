@@ -3487,7 +3487,11 @@ static bool zpExecScriptOp(ZPPAINT::CPaintCore &core, const std::string &rawLine
 			if (ok)
 			{
 				ok = core.opColorBrush(hitZone, hitTile, hit, radius, col, hardness, opacity, err);
-				core.endStroke();
+				// cbrush ... <z> [cont] — with the cont token (stroke-aware recordings) the
+				// commit comes from a recorded `endstroke` line, preserving the live drag's
+				// one-undo-entry-per-drag granularity; legacy form commits per line.
+				if (tok.size() < 10)
+					core.endStroke();
 			}
 		}
 		else if ((tok[0] == "fill" || tok[0] == "fill256") && tok.size() >= 4)
@@ -3580,18 +3584,35 @@ static bool zpExecScriptOp(ZPPAINT::CPaintCore &core, const std::string &rawLine
 		}
 		else if (tok[0] == "tstroke" && tok.size() >= 6)
 	{
-		// tstroke <zone> <patch> <u> <v> <set> [big 0|1] — the MOUSE tile-stroke path
-		// (brush-size recursion via opTileStroke), for recorder replay fidelity (ui M23b;
-		// M23d adds the 256 flag so recorded 256-mode strokes replay identically).
-		uint zone, patch, u, v; int ts, big = 0;
+		// tstroke <zone> <patch> <u> <v> <set> [big 0|1] [cont 0|1] — the MOUSE tile-stroke
+		// path (brush-size recursion via opTileStroke), for recorder replay fidelity (M23b;
+		// M23d adds the 256 flag). WITHOUT the cont token (legacy form) each line is a
+		// self-contained stroke (first + commit). WITH it, the line joins an open stroke:
+		// first when cont==0, continuation when cont==1, and the commit comes from a
+		// recorded `endstroke` line — this preserves the live drag's calcRotPath rotation-
+		// following (first=false derives rotation from the previous tile) and its undo
+		// granularity (one entry per drag, not per tile), which the legacy per-line form
+		// could not replay byte-identically.
+		uint zone, patch, u, v; int ts, big = 0, cont = -1;
 		NLMISC::fromString(tok[1], zone);
 		NLMISC::fromString(tok[2], patch);
 		NLMISC::fromString(tok[3], u);
 		NLMISC::fromString(tok[4], v);
 		NLMISC::fromString(tok[5], ts);
 		if (tok.size() >= 7) NLMISC::fromString(tok[6], big);
+		if (tok.size() >= 8) NLMISC::fromString(tok[7], cont);
 		sint32 tileId = (sint32)(patch * ZP_NUM_TILE_SEL + v * ZP_MAX_TILE_IN_PATCH + u);
-		ok = core.opTileStroke(zone, tileId, ts, big != 0, true, err);
+		if (cont < 0)
+		{
+			ok = core.opTileStroke(zone, tileId, ts, big != 0, true, err);
+			core.endStroke();
+		}
+		else
+			ok = core.opTileStroke(zone, tileId, ts, big != 0, cont == 0, err);
+	}
+	else if (tok[0] == "endstroke")
+	{
+		// endstroke — commit the open stroke (mouse-up / stroke-aware recordings)
 		core.endStroke();
 	}
 	else if (tok[0] == "lockborders" && tok.size() >= 2)
@@ -3754,8 +3775,10 @@ public:
 
 	bool guiWantsMouse() const { return EditorUI && EditorUI->wantsMouse(); }
 
-	// One paint action at the current hover (shared by click and drag). Prop mode never paints.
-	void paintAtHover()
+	// One paint action at the current hover (shared by click and drag). Prop mode never
+	// paints. cont: continuation of an open stroke (recorded for stroke-aware replay;
+	// displace commits per-op and ignores it).
+	void paintAtHover(bool cont)
 	{
 		if (Mode == ModeProp)
 			return;
@@ -3768,10 +3791,13 @@ public:
 			sint32 tile;
 			if (Core->pickTile(pos, dir, zone, tile, hit) && !Core->zoneFrozen(zone))
 			{
+				// %.9g round-trips float32 exactly (the old %.3f quantized the hit, and the
+				// distance-based blend made replays only approximate); cont rides the
+				// stroke-aware form — painter.endStroke() is recorded at mouse-up.
 				if (Core->opColorBrush(zone, tile, hit, BrushRadius, BrushColor, BrushHardness, BrushOpacity, err))
-					ZPSCRIPT::record(NLMISC::toString("painter.colorBrush(%u, %.3f, %.3f, %.3f, \"%02x%02x%02x\", %u, %u, %.3f)",
+					ZPSCRIPT::record(NLMISC::toString("painter.colorBrush(%u, %.9g, %.9g, %.9g, \"%02x%02x%02x\", %u, %u, %.9g, %s)",
 						zone, hit.x, hit.y, BrushRadius, BrushColor.R, BrushColor.G, BrushColor.B,
-						(uint)BrushHardness, (uint)BrushOpacity, hit.z));
+						(uint)BrushHardness, (uint)BrushOpacity, hit.z, cont ? "true" : "false"));
 			}
 		}
 		else if (Mode == ModeDisplace)
@@ -3823,6 +3849,7 @@ public:
 					{
 						Pressed = false;
 						Core->endStroke();
+						ZPSCRIPT::record("painter.endStroke()");
 					}
 					// Shared handlers, not Core directly — the toolbar buttons go through
 					// these and they record for the painterscript recorder; the raw-Core
@@ -3840,6 +3867,7 @@ public:
 			{
 				Pressed = false;
 				Core->endStroke();
+				ZPSCRIPT::record("painter.endStroke()");
 			}
 			return;
 		}
@@ -3886,11 +3914,14 @@ public:
 						std::string err;
 						if (Core->opTileStroke(HoverZone, HoverTile, CurTileSet, Mode256, true, err))
 						{
-							ZPSCRIPT::record(NLMISC::toString("painter.tileStroke(%u, %u, %u, %u, %d%s)",
+							// Stroke-aware form (cont=false = stroke start): replay keeps the
+							// live drag's rotation-following and one-undo-entry granularity;
+							// painter.endStroke() is recorded at mouse-up.
+							ZPSCRIPT::record(NLMISC::toString("painter.tileStroke(%u, %u, %u, %u, %d, %s, false)",
 								HoverZone, (uint)(HoverTile / ZP_NUM_TILE_SEL),
 								(uint)(HoverTile % ZP_NUM_TILE_SEL % ZP_MAX_TILE_IN_PATCH),
 								(uint)(HoverTile % ZP_NUM_TILE_SEL / ZP_MAX_TILE_IN_PATCH), CurTileSet,
-								Mode256 ? ", true" : ""));
+								Mode256 ? "true" : "false"));
 							Pressed = true;
 							StrokeZone = HoverZone;
 							StrokeTile = HoverTile;
@@ -3898,7 +3929,7 @@ public:
 					}
 					else
 					{
-						paintAtHover();
+						paintAtHover(false);
 						Pressed = true;
 						StrokeZone = HoverZone;
 						StrokeTile = HoverTile;
@@ -3916,10 +3947,20 @@ public:
 				{
 					ZPPAINT::CTileDescP desc;
 					Core->getTile(HoverZone, HoverTile, desc);
+					// Eyedropper picks mutate live paint state — record as abs setters so
+					// replays end with the same state (the ops themselves embed their
+					// values, but manual continuation after a replay would diverge).
 					if (Mode == ModeTile)
 					{
 						if (!desc.isEmpty())
-							CurTileSet = Core->tileSetOfTile(desc.getLayer(0).Tile);
+						{
+							int ts = Core->tileSetOfTile(desc.getLayer(0).Tile);
+							if (ts >= 0 && ts != CurTileSet)
+							{
+								CurTileSet = ts;
+								ZPSCRIPT::record(NLMISC::toString("painter.setTileSet(%d)", ts));
+							}
+						}
 					}
 					else if (Mode == ModeColor)
 					{
@@ -3928,11 +3969,16 @@ public:
 						if (Core->getColor(HoverZone, (uint)(t / ZP_NUM_TILE_SEL),
 						                   (sint32)(t % ZP_NUM_TILE_SEL % ZP_MAX_TILE_IN_PATCH),
 						                   (sint32)(t % ZP_NUM_TILE_SEL / ZP_MAX_TILE_IN_PATCH), raw))
+						{
 							BrushColor = NLMISC::CRGBA((uint8)((raw >> 16) & 0xff), (uint8)((raw >> 8) & 0xff), (uint8)(raw & 0xff), 255);
+							ZPSCRIPT::record(NLMISC::toString("painter.setBrushColor(%d, %d, %d)",
+								(int)BrushColor.R, (int)BrushColor.G, (int)BrushColor.B));
+						}
 					}
 					else if (Mode == ModeDisplace)
 					{
 						DisplaceIndex = desc.getDisplace();
+						ZPSCRIPT::record(NLMISC::toString("painter.setDisplaceIndex(%d)", (int)DisplaceIndex));
 					}
 				}
 			}
@@ -3944,6 +3990,7 @@ public:
 			{
 				Pressed = false;
 				Core->endStroke();
+				ZPSCRIPT::record("painter.endStroke()");
 			}
 		}
 		else if (event == NLMISC::EventMouseMoveId)
@@ -3963,18 +4010,18 @@ public:
 						std::string err;
 						if (Core->opTileStroke(HoverZone, HoverTile, CurTileSet, Mode256, false, err))
 						{
-							ZPSCRIPT::record(NLMISC::toString("painter.tileStroke(%u, %u, %u, %u, %d%s)",
+							ZPSCRIPT::record(NLMISC::toString("painter.tileStroke(%u, %u, %u, %u, %d, %s, true)",
 								HoverZone, (uint)(HoverTile / ZP_NUM_TILE_SEL),
 								(uint)(HoverTile % ZP_NUM_TILE_SEL % ZP_MAX_TILE_IN_PATCH),
 								(uint)(HoverTile % ZP_NUM_TILE_SEL / ZP_MAX_TILE_IN_PATCH), CurTileSet,
-								Mode256 ? ", true" : ""));
+								Mode256 ? "true" : "false"));
 							StrokeZone = HoverZone;
 							StrokeTile = HoverTile;
 						}
 					}
 					else
 					{
-						paintAtHover();
+						paintAtHover(true);
 						StrokeZone = HoverZone;
 						StrokeTile = HoverTile;
 					}
@@ -4794,6 +4841,10 @@ static void zpSelectTileSetDelta(int d)
 	if (cur == g_PaintCtx.Paint->CurTileSet)
 		return;
 	g_PaintCtx.Paint->CurTileSet = cur;
+	// Record the RESULTING absolute set (recorder convention: abs painter.* lines) —
+	// the keyboard/panel delta path silently skipped recording while the palette's
+	// abs path recorded, leaving replayed sessions with the wrong live tile set.
+	ZPSCRIPT::record(NLMISC::toString("painter.setTileSet(%d)", cur));
 	// Displace map files are per-tileset (M9a).
 	zpRebuildTilesetPalette();
 }
@@ -5480,9 +5531,12 @@ static bool zpScriptCloseZone(const std::string &basename, bool saveFirst, bool 
 static ZPSCRIPT::SScriptHost g_ScriptHost;
 
 /** (Re)install the painterscript host for the current capabilities. bridge may be NULL. */
+static void zpScriptRefreshBridge();
+
 static void zpInstallScriptHost(ZPUI::SPaintUIBridge *bridgePtr)
 {
 	g_ScriptHost.execOp = zpScriptExecOp;
+	g_ScriptHost.refreshBridge = zpScriptRefreshBridge;
 	g_ScriptHost.zonesInfo = zpScriptZonesInfo;
 	g_ScriptHost.getZoneProp = zpScriptGetZoneProp;
 	g_ScriptHost.saveTo = zpSaveTo;
@@ -5525,6 +5579,8 @@ static void zpScriptPumpImpl()
 	if (g_PumpCtx.Nav) g_PumpCtx.Nav->setMatrix(navBefore); // discard nav during scripts
 	if (g_PumpCtx.Driver->AsyncListener.isKeyPushed(NLMISC::KeyESCAPE))
 		g_ScriptCancel = true;
+	// Refresh the bridge snapshot so panel sync (and script getters) see current state
+	zpScriptRefreshBridge();
 	g_PumpCtx.Driver->clearBuffers(NLMISC::CRGBA(90, 90, 90));
 	g_PumpCtx.Scene->render();
 	if (g_PumpCtx.Ui) { g_PumpCtx.Ui->update(); g_PumpCtx.Ui->draw(); }
@@ -7486,12 +7542,9 @@ static void zpSeasonSelect(const std::string &code)
 {
 	if (!g_PaintCtx.Active)
 		return;
-	if (!ZPCTX::setSeasonPreference(code))
-	{
-		fprintf(stderr, "season select: unknown code '%s'\n", code.c_str());
-		return;
-	}
-	// If available list is non-empty, require membership (or empty = auto)
+	// Availability FIRST: mutating the preference before this check desynced the toolbar
+	// label / Y-cycling / cache keys from the actual textures on the error path (only
+	// scripts hit it — the UI menu offers valid seasons only).
 	if (g_PaintCtx.AvailableSeasons && !g_PaintCtx.AvailableSeasons->empty() && !code.empty())
 	{
 		bool ok = false;
@@ -7502,6 +7555,11 @@ static void zpSeasonSelect(const std::string &code)
 			fprintf(stderr, "season select: '%s' not available for this bank\n", code.c_str());
 			return;
 		}
+	}
+	if (!ZPCTX::setSeasonPreference(code))
+	{
+		fprintf(stderr, "season select: unknown code '%s'\n", code.c_str());
+		return;
 	}
 	zpSeasonApplyFlush();
 }
@@ -7550,6 +7608,7 @@ static void zpSeasonMenuFill(void * /*unused*/)
 }
 
 // Fill the UI bridge state snapshot (labels / button push state).
+static void zpScriptRefreshBridge();
 static void zpFillBridgeState(ZPUI::SPaintUIBridge &bridge)
 {
 	bridge.HaveCore = g_PaintCtx.Active && g_PaintCtx.Core && g_PaintCtx.Paint;
@@ -7693,6 +7752,16 @@ static void zpFillBridgeState(ZPUI::SPaintUIBridge &bridge)
 		strncpy(bridge.PropStatus, g_PropStatusMsg.c_str(), sizeof(bridge.PropStatus) - 1);
 		bridge.PropStatus[sizeof(bridge.PropStatus) - 1] = 0;
 	}
+}
+
+/** Script-host hook: refresh the live bridge's frame-synced snapshot on demand — the
+ *  snapshot goes stale for the whole run of a script, and painterscript getters
+ *  (getMode/getTileSet) must see their own setters' effects. */
+static void zpScriptRefreshBridge()
+{
+	ZPSCRIPT::SScriptHost *h = ZPSCRIPT::getHost();
+	if (h && h->bridge)
+		zpFillBridgeState(*h->bridge);
 }
 
 // Shared viewer host: when externalDriver is non-NULL, runViewer uses it and does not
@@ -8543,6 +8612,9 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 				udriver->EventServer.pump();
 				if (editorUI->wantsMouse())
 					mouseListener.setMatrix(navMatBefore);
+				// Script-window RUN queues its chunk from inside the pump; execute it here,
+				// outside any event dispatch, so painter.pumpUI() can safely pump again.
+				ZPSCRIPT::processPendingRun();
 				// ESC: close session board first (M11a); else quit viewer
 				if (udriver->AsyncListener.isKeyPushed(NLMISC::KeyESCAPE))
 				{
