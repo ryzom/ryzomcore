@@ -150,6 +150,33 @@
 	</group>
 </template>
 
+<!-- Large-icon zone tile (M29: zone browser grid mode — the tileset-palette idiom at
+     zone scale). 64px thumb in a sunken well, name wrapped below, transparent full-tile
+     hit button with the standard hover/press tint. Spawned into zp_zone_grid_line rows
+     at col*W offsets (CGroupList stacks lines vertically; tiles place inside a line). -->
+<template name="zp_zone_tile" keep="true" id="" title="" idx="0" thumb="">
+	<group id="#id" w="178" h="106">
+		<ctrl type="button" id="btn" button_type="push_button" posref="TL TL" x="0" y="0" w="178" h="106" scale="true"
+			tx_normal="blank.tga" tx_pushed="blank.tga" tx_over="blank.tga"
+			color="0 0 0 0" col_pushed="70 120 190 100" col_over="70 120 190 55"
+			global_color_normal="false" global_color_pushed="false" global_color_over="false"
+			onclick_l="zp_select_zone" params_l="#idx" />
+		<group type="frame" id="thumb_frame" options="w_box_frame" posref="TM TM" x="0" y="-4" w="68" h="68"
+			color="255 255 255 255" global_color="false" display="true" active="false">
+			<view type="bitmap" id="thumb" posref="MM MM" w="64" h="64" scale="true"
+				texture="#thumb" global_color="false" color="255 255 255 255" active="false" />
+		</group>
+		<view type="text" id="name" posref="TM TM" x="0" y="-74" fontsize="10" shadow="true"
+			global_color="false" color="230 232 235 255" hardtext="#title"
+			multi_line="true" multi_max_line="2" line_maxw="170" />
+	</group>
+</template>
+
+<!-- One grid line of zone tiles (plain container; tiles spawn at absolute offsets). -->
+<template name="zp_zone_grid_line" keep="true" id="">
+	<group id="#id" w="712" h="106" />
+</template>
+
 <!-- Section divider row for scroll_text lists (world/zone browser group headers).
      Plain label + rule — not a frozen button dressed up as a header (M25 review nit). -->
 <template name="zp_list_header" keep="true" id="" title="">
@@ -270,6 +297,10 @@
 			global_color="false" color="180 220 255 255" hardtext="World" />
 		<view type="text" id="world_sub" posparent="world_title" posref="BL TL" x="0" y="-2" fontsize="10" shadow="true"
 			global_color="false" color="180 190 200 200" hardtext="" line_maxw="750" />
+		<!-- M29: zone list display mode — detail tiles vs large-thumbnail grid (the
+		     tileset-palette idiom). Ecosystem Screen B only; code toggles active. -->
+		<ctrl style="text_button_toggle" id="btn_view_large" posref="TR TR" x="-14" y="-10"
+			onclick_l="zp_zone_view_toggle" params_l="" hardtext="Large icons" active="false" />
 
 		<!-- Ecosystem open layout (self-instances, M4b). Hidden on continents (active toggled in code). -->
 		<view type="text" id="layout_label" posparent="world_sub" posref="BL TL" x="0" y="-6" fontsize="11" shadow="true"

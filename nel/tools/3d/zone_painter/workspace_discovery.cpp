@@ -659,6 +659,13 @@ bool loadStartupCfg(SStartupCfg &cfg)
 	catch (const EConfigFile &)
 	{
 	}
+	try
+	{
+		cfg.ZoneBrowserLarge = cf.getVar("ZoneBrowserLarge").asInt() != 0;
+	}
+	catch (const EConfigFile &)
+	{
+	}
 	return !cfg.LastGraphicsFolder.empty() || !cfg.LastWorld.empty() || !cfg.LastInstances.empty();
 }
 
@@ -676,6 +683,7 @@ void saveStartupCfg(const SStartupCfg &cfg)
 	fprintf(f, "LastWorld = \"%s\";\n", cfg.LastWorld.c_str());
 	if (!cfg.LastInstances.empty())
 		fprintf(f, "LastInstances = \"%s\";\n", cfg.LastInstances.c_str());
+	fprintf(f, "ZoneBrowserLarge = %d;\n", cfg.ZoneBrowserLarge ? 1 : 0);
 	fclose(f);
 }
 

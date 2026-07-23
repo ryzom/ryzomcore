@@ -1039,6 +1039,10 @@ static void syncLayoutRadios()
 	// no-op (NxN retired M12)
 }
 
+// M29: zone browser display mode — false = detail-tile list, true = large-thumbnail
+// grid (the tileset-palette idiom). Remembered in startup.cfg (ZoneBrowserLarge).
+static bool s_ZoneListLarge = false;
+
 static void populateZoneList()
 {
 	clearList("ui:zp:zone_browser:content:list_scroll:text_list");
@@ -1062,11 +1066,29 @@ static void populateZoneList()
 	// Continents: minesweeper-style board (M5a). Ecosystems keep the grouped list.
 	if (world.Kind == ZPWS::Continent)
 	{
+		if (CCtrlBaseButton *tog = dynamic_cast<CCtrlBaseButton *>(CWidgetManager::getInstance()
+		        ->getElementFromId("ui:zp:zone_browser:content:btn_view_large")))
+			tog->setActive(false);
 		populateContinentGrid(world);
 		return;
 	}
 
 	setZoneBrowserMode(false);
+	// M29: display-mode toggle lives on eco Screen B only
+	if (CCtrlBaseButton *tog = dynamic_cast<CCtrlBaseButton *>(CWidgetManager::getInstance()
+	        ->getElementFromId("ui:zp:zone_browser:content:btn_view_large")))
+	{
+		tog->setActive(true);
+		tog->setPushed(s_ZoneListLarge);
+	}
+
+	static const char *kList = "ui:zp:zone_browser:content:list_scroll:text_list";
+	// Grid geometry (large mode): tiles per line inside a plain line container that the
+	// CGroupList stacks vertically; tiles spawn at absolute column offsets.
+	const int kTileW = 178, kTileH = 106, kCols = 4;
+	CInterfaceGroup *gridLine = NULL;
+	int gridCol = 0;
+	uint gridLineCount = 0;
 
 	std::string lastGroup;
 	for (size_t i = 0; i < s_Sess.Zones.size(); ++i)
@@ -1078,22 +1100,53 @@ static void populateZoneList()
 			std::vector<std::pair<std::string, std::string> > hp;
 			hp.push_back(std::make_pair(std::string("id"), std::string("zg_") + lastGroup));
 			hp.push_back(std::make_pair(std::string("title"), lastGroup));
-			spawnRow("zp_list_header", "ui:zp:zone_browser:content:list_scroll:text_list", hp);
+			spawnRow("zp_list_header", kList, hp);
+			gridLine = NULL; // group headers break the grid line
+			gridCol = 0;
 		}
 
 		std::vector<std::pair<std::string, std::string> > p;
 		char idbuf[32];
 		snprintf(idbuf, sizeof(idbuf), "z%u", (uint)i);
 		p.push_back(std::make_pair(std::string("id"), std::string(idbuf)));
-		p.push_back(std::make_pair(std::string("title"), z.Basename));
 		char idxbuf[32];
 		snprintf(idxbuf, sizeof(idxbuf), "%d", (int)i);
 		p.push_back(std::make_pair(std::string("idx"), std::string(idxbuf)));
 		std::string thumbTex = thumbTextureName(z);
 		p.push_back(std::make_pair(std::string("thumb"), thumbTex.empty() ? std::string("w_box_blank.tga") : thumbTex));
-		if (CInterfaceGroup *row = spawnRow("zp_zone_row", "ui:zp:zone_browser:content:list_scroll:text_list", p))
+		const bool hasThumb = !thumbTex.empty();
+
+		if (s_ZoneListLarge)
 		{
-			const bool hasThumb = !thumbTex.empty();
+			// Large-icon grid tile (M29)
+			p.push_back(std::make_pair(std::string("title"), stripLigoFamilyPrefix(z.Basename)));
+			if (!gridLine || gridCol >= kCols)
+			{
+				std::vector<std::pair<std::string, std::string> > lp;
+				lp.push_back(std::make_pair(std::string("id"),
+				                            NLMISC::toString("zline%u", gridLineCount++)));
+				gridLine = spawnRow("zp_zone_grid_line", kList, lp);
+				if (gridLine)
+					gridLine->setH(kTileH);
+				gridCol = 0;
+			}
+			if (!gridLine)
+				continue;
+			if (CInterfaceGroup *tile = spawnUnder(gridLine, "zp_zone_tile", p,
+			                                       gridCol * kTileW, 0, kTileW, kTileH))
+			{
+				if (CViewBitmap *thumb = dynamic_cast<CViewBitmap *>(tile->getView("thumb")))
+					thumb->setActive(hasThumb);
+				if (CInterfaceGroup *fr = tile->getGroup("thumb_frame"))
+					fr->setActive(hasThumb);
+			}
+			++gridCol;
+			continue;
+		}
+
+		p.push_back(std::make_pair(std::string("title"), z.Basename));
+		if (CInterfaceGroup *row = spawnRow("zp_zone_row", kList, p))
+		{
 			if (CViewBitmap *thumb = dynamic_cast<CViewBitmap *>(row->getView("thumb")))
 				thumb->setActive(hasThumb);
 			// M10a: 9-slice well only when a real thumb is bound (no empty dark square)
@@ -1113,6 +1166,25 @@ static void populateZoneList()
 		}
 	}
 }
+
+/** M29: flip list/grid display mode, persist, repopulate. */
+class CAHZpZoneViewToggle : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		s_ZoneListLarge = !s_ZoneListLarge;
+		{
+			ZPWS::SStartupCfg cfg;
+			ZPWS::loadStartupCfg(cfg); // keep the other remembered fields
+			cfg.ZoneBrowserLarge = s_ZoneListLarge;
+			ZPWS::saveStartupCfg(cfg);
+		}
+		populateZoneList();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpZoneViewToggle, "zp_zone_view_toggle");
 
 /** Tag shown at the right of a folder row (M25p5): a cheap fingerprint (a handful of
  *  isDirectory/fileExists checks — the same call scanChildrenForWorkspaces already makes for
@@ -1670,13 +1742,17 @@ EStartupResult runStartupFlow(UDriver *driver,
 		s_Sess.FolderPath = ZPWS::normalizeDir(initialBrowsePath);
 	else
 		s_Sess.FolderPath = ZPWS::normalizeDir(CPath::getCurrentPath());
-	// Remembered open layout (ecosystem self-instances)
+	// Remembered open layout (ecosystem self-instances) + zone browser display mode (M29)
 	{
 		ZPWS::SStartupCfg cfg;
-		if (ZPWS::loadStartupCfg(cfg) && isSupportedInstanceLayout(cfg.LastInstances))
+		const bool haveCfg = ZPWS::loadStartupCfg(cfg);
+		if (haveCfg && isSupportedInstanceLayout(cfg.LastInstances))
 			s_Sess.InstanceLayout = cfg.LastInstances;
 		else
 			s_Sess.InstanceLayout = "1x1";
+		// loadStartupCfg's return means "has folder/world content" — the display-mode
+		// flag applies whenever the file parsed (ctor default covers the missing case).
+		s_ZoneListLarge = cfg.ZoneBrowserLarge;
 	}
 
 	// First screen: world list when non-empty; folder browser only when enabled + empty.
