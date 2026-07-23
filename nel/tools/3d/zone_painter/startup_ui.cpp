@@ -380,8 +380,8 @@ static void refreshBoardSelectionUI()
 			                 && s_SessionBridge->World->Kind == ZPWS::Ecosystem;
 			if (eco)
 				t->setHardText(
-				    "Scratch: home=block · empty=place (block origin) · inst=R CW/CCW/Mirror/Remove · "
-				    "glyph R90/M · O/BOARD back");
+				    "Scratch: file=Close/Save/Save as/Toggle · empty=place (block origin) · "
+				    "inst=R CW/CCW/Mirror/Remove · glyph R90/M · O/BOARD back");
 			else
 				t->setHardText(
 				    "L-click closed=open · open=Close/Save/Toggle · fill=edit · dim=RO · *=dirty · O/BOARD");
@@ -454,8 +454,7 @@ static void setBoardCellSelFill(CInterfaceGroup *cell, bool selected)
 }
 
 /**
- * Parse scratch basenames (M12c/M14a):
- *   "H" | "H:cx,cy"           home cell (multi-cell home stamps H:x,y)
+ * Parse scratch basenames (M12c/M14a; M28: no H tokens — open files are F: cells):
  *   "I:ox,oy"                 instance ORIGIN cell (label lives here)
  *   "I:ox,oy@cx,cy"           non-origin cell of an instance block (tint only)
  *   "E:cx,cy"                 empty
@@ -469,22 +468,7 @@ static bool parseScratchBasename(const std::string &base, char &kind, int &cx, i
 	kind = 0;
 	cx = cy = 0;
 	if (isInstanceOrigin) *isInstanceOrigin = false;
-	if (base == "H" || base == "HOME")
-	{
-		kind = 'H';
-		return true;
-	}
-	if (base.size() >= 2 && base[0] == 'H' && base[1] == ':')
-	{
-		kind = 'H';
-		std::string rest = base.substr(2);
-		std::string::size_type comma = rest.find(',');
-		if (comma == std::string::npos) return false;
-		if (!NLMISC::fromString(rest.substr(0, comma), cx)
-		    || !NLMISC::fromString(rest.substr(comma + 1), cy))
-			return false;
-		return true;
-	}
+	// (M28: no H tokens — the first-opened file is an F: open-file cell like any other)
 	if (base.size() >= 4 && (base[0] == 'E' || base[0] == 'L') && base[1] == ':')
 	{
 		kind = base[0];
@@ -614,7 +598,6 @@ static void applySessionCellState(CInterfaceGroup *cell, const std::string &base
 	switch (st)
 	{
 	case CellOpenEditable:
-	case CellScratchHome:
 		setBoardCellFillRGBA(cell, kBoardCellSelFill, kBoardCellSelFill);
 		break;
 	case CellOpenReadOnly:
@@ -664,25 +647,6 @@ static void applySessionCellState(CInterfaceGroup *cell, const std::string &base
 				setBoardCellLabel(t, lab);
 			}
 		}
-		else if (st == CellScratchHome)
-		{
-			// Multi-cell home (M14a): label only on the block's ORIGIN cell — the home's
-			// board cell since M27c (the primary moves like any other file).
-			parseScratchBasename(basename, sk, cx, cy);
-			int hhx = 0, hhy = 0;
-			if (s_SessionBridge && s_SessionBridge->scratchGetHomeCell)
-				s_SessionBridge->scratchGetHomeCell(hhx, hhy);
-			if (cx != hhx || cy != hhy)
-				t->setHardText("");
-			else
-			{
-				std::string home = s_SessionBridge && !s_SessionBridge->ScratchHomeName.empty()
-				                   ? s_SessionBridge->ScratchHomeName
-				                   : std::string("HOME");
-				// M14b: strip family prefix + multi-line wrap (no hard truncate)
-				setBoardCellLabel(t, home);
-			}
-		}
 		else if (st == CellScratchInstance)
 		{
 			// Label only on the block origin cell (basename "I:ox,oy"); non-origin
@@ -700,7 +664,7 @@ static void applySessionCellState(CInterfaceGroup *cell, const std::string &base
 				else if (s_SessionBridge && s_SessionBridge->scratchGetInstance)
 					s_SessionBridge->scratchGetInstance(cx, cy, rot, mir);
 				std::string lab;
-				// M24b: non-home sources lead with the brick's short name
+				// M24b: instance labels lead with the source brick's short name
 				if (s_SessionBridge && s_SessionBridge->scratchGetInstanceSource)
 				{
 					std::string srcName;
@@ -1340,8 +1304,6 @@ static void applyZoneSelection(int idx)
 			if (parseScratchBasename(base, sk, cx, cy))
 			{
 				std::string err;
-				if (sk == 'H')
-					return; // home: no action
 				if (sk == 'L')
 					return; // M24d locked cell: no menu (drag target only)
 				// Empty: popup Place instance / Place context (M16c)
@@ -2044,44 +2006,25 @@ void refreshSessionBoardStates()
 }
 
 /**
- * Ecosystem scratch board (M12c/M14a/M17): fine-cell grid covering home + instances + margin.
+ * Ecosystem scratch board (M12c/M14a/M17): fine-cell grid covering every open file +
+ * instances + contexts + margin.
  *
- * Convention (M14a/M17): each board cell is one --cellsize unit. Primary home claims only
- * MASKED cells of [0,fw)×[0,fh) (L-shapes/holes are first-class; unmasked cells are empty).
- * Each instance claims its rotFlip-transformed mask cells. Placement legality refuses
- * overlapping masked cells (interlocking L-shapes allowed).
+ * Convention (M14a/M17): each board cell is one --cellsize unit. Every open file — the
+ * first-opened included (M28) — claims only its MASKED cells at its board cell
+ * (L-shapes/holes are first-class; unmasked cells are empty). Each instance claims its
+ * rotFlip-transformed mask cells. Placement legality refuses overlapping masked cells
+ * (interlocking L-shapes allowed).
  *
- * Basenames: H:cx,cy | I:ox,oy | E:cx,cy | C:cx,cy:name. Bridge owns the place list.
+ * Basenames: F:ox,oy[:name] | I:ox,oy | E:cx,cy | C:cx,cy:name. Bridge owns the place
+ * list. (M28: no H: tokens — the first-opened file is an F: open-file cell.)
  */
-/** M27c: home block origin cell via the bridge (the primary moves like any other file). */
-static void scratchHomeCell(int &hx, int &hy)
-{
-	hx = 0;
-	hy = 0;
-	if (s_SessionBridge && s_SessionBridge->scratchGetHomeCell)
-		s_SessionBridge->scratchGetHomeCell(hx, hy);
-}
-
-static bool scratchHomeMaskOccupied(int cx, int cy, int fw, int fh)
-{
-	int hx = 0, hy = 0;
-	scratchHomeCell(hx, hy);
-	const int lx = cx - hx, ly = cy - hy;
-	if (lx < 0 || ly < 0 || lx >= fw || ly >= fh) return false;
-	if (!s_SessionBridge || !s_SessionBridge->FootprintMask
-	    || s_SessionBridge->FootprintMask->empty()
-	    || (int)s_SessionBridge->FootprintMask->size() < fw * fh)
-		return true; // legacy: full rect when mask absent
-	return (*s_SessionBridge->FootprintMask)[(size_t)(lx + ly * fw)];
-}
-
-/** Coded basename when (cx,cy) is OCCUPIED (home/open file/instance/context); else empty. */
+/** Coded basename when (cx,cy) is OCCUPIED (open file/instance/context); else empty. */
 static std::string scratchOccupiedCellName(int cx, int cy, int fw, int fh)
 {
-	// Home multi-cell block — only MASKED cells (M17)
-	if (scratchHomeMaskOccupied(cx, cy, fw, fh))
-		return NLMISC::toString("H:%d,%d", cx, cy);
-	// M24a open-file block (editable or demoted RO) placed on the board
+	(void)fw;
+	(void)fh;
+	// Open-file block (editable or demoted RO) placed on the board — M28: includes the
+	// first-opened file, which occupies through the same per-file mask fields.
 	int fox = 0, foy = 0;
 	std::string fname;
 	bool fedit = true;
@@ -2128,26 +2071,10 @@ static void populateScratchBoard()
 	const int fh = (s_SessionBridge && s_SessionBridge->FootprintCellsH > 0)
 	                   ? s_SessionBridge->FootprintCellsH : 1;
 
-	// Bounds from MASKED home cells + every instance/context-occupied cell + margin.
-	// M27c: scan the home rect AT its board cell (the primary moves like any other file).
-	int homeHx = 0, homeHy = 0;
-	scratchHomeCell(homeHx, homeHy);
-	int minC = 0, maxC = 0, minR = 0, maxR = 0;
-	bool anyHome = false;
-	for (int cy = homeHy; cy < homeHy + fh; ++cy)
-	for (int cx = homeHx; cx < homeHx + fw; ++cx)
-	{
-		if (!scratchHomeMaskOccupied(cx, cy, fw, fh)) continue;
-		if (!anyHome) { minC = maxC = cx; minR = maxR = cy; anyHome = true; }
-		else
-		{
-			if (cx < minC) minC = cx;
-			if (cx > maxC) maxC = cx;
-			if (cy < minR) minR = cy;
-			if (cy > maxR) maxR = cy;
-		}
-	}
-	if (!anyHome) { minC = homeHx; maxC = homeHx + fw - 1; minR = homeHy; maxR = homeHy + fh - 1; }
+	// Bounds: every occupied cell (open files incl. the first-opened, instances,
+	// contexts) found by the probe below + margin; a default window when nothing is
+	// occupied yet.
+	int minC = 0, maxC = fw - 1, minR = 0, maxR = fh - 1;
 
 	// Probe a generous window for instances/contexts (bridge lookup is O(places))
 	const int kProbe = 24;
@@ -2262,7 +2189,7 @@ static void populateScratchBoard()
 	board->setMaxW(730);
 	board->setMaxH(330);
 
-	// M15: scroll so the home-block origin (0,0) and its label start in view.
+	// M15: scroll so board cell (0,0) — where the first-opened file starts — is in view.
 	// Board cells: x=(c-minC)*kCell, y=-((maxR-r)*kCell). Top-left of content is (0,0)
 	// local; positive ofs shifts content to reveal lower/right cells (palette idiom).
 	{
@@ -2892,10 +2819,8 @@ static void openContextBrickPicker(int cx, int cy, int mode)
 	std::vector<ZPWS::SZoneEntry> zones;
 	if (s_ContextPickerMode == 2)
 	{
-		// M24b instance sources: the OPEN bricks (home first, then open files by cell probe)
-		ZPWS::SZoneEntry home;
-		home.Basename = s_SessionBridge->ScratchHomeName;
-		zones.push_back(home);
+		// M24b/M28 instance sources: every OPEN file by cell probe — the first-opened
+		// file occupies board cells like the rest, so the probe finds it uniformly.
 		if (s_SessionBridge->scratchGetEditableAt)
 		{
 			std::set<std::string> seen;
@@ -2942,8 +2867,11 @@ static void openContextBrickPicker(int cx, int cy, int mode)
 	}
 	for (size_t i = 0; i < zones.size(); ++i)
 	{
-		// Skip the open home brick (instance mode keeps it — home is a valid source)
-		if (s_ContextPickerMode != 2 && s_SessionBridge->ScratchHomeName == zones[i].Basename)
+		// Skip ALREADY-OPEN files in the open-as-context/editable modes (M28: uniform —
+		// any open file, not just the first-opened one; instance mode keeps them all,
+		// open files are the valid instance sources)
+		if (s_ContextPickerMode != 2 && s_SessionBridge->isOpen
+		    && s_SessionBridge->isOpen(zones[i].Basename))
 			continue;
 		s_ContextPickerNames.push_back(zones[i].Basename);
 		std::vector<std::pair<std::string, std::string> > p;

@@ -38,8 +38,9 @@ ZONE_PAINTER_BOARD_DRAG="1,1:1,6:copy" $XVFB "$ZP" "$WS" \
 	--startup-auto "lacustre/zonematerial-bassin-ilot_croix" \
 	--screenshot "$OUT/drag_home.tga" \
 	2>&1 | tee "$LOGDIR/m24e_drag_home.log" | grep -aE "board-drag|place\[" || true
-# Copy of the 4x4 home grabbed at (1,1), dropped at (1,6): origin = home(0,0)+delta(0,5)
-grep -aq "place\[0\] origin cell (0,5)" "$LOGDIR/m24e_drag_home.log"
+# Copy of the 4x4 first-opened file grabbed at (1,1), dropped at (1,6): origin =
+# file(0,0)+delta(0,5). M28: sources always print their basename (uniform per-file).
+grep -aq "place\[0\].* origin cell (0,5)" "$LOGDIR/m24e_drag_home.log"
 grep -aq "board-drag test (1,1)->(1,6) copy: OK" "$LOGDIR/m24e_drag_home.log"
 
 echo "===== M24e-3/4: sourced-instance collision + place-names-primary ====="

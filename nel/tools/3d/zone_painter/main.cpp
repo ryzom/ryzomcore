@@ -352,6 +352,8 @@ static std::vector<bool> g_FootprintMask;
 static float g_FootprintOriginX = 0.f; // world min-corner of cell (0,0) (AABB snap fallback)
 static float g_FootprintOriginY = 0.f;
 static bool g_FootprintFromTemplate = false; // true = CZoneTemplate::getMask; false = AABB square
+// Board frame accessor (M28: session-frozen anchor; defined with the scratch helpers)
+static void scratchBoardAnchor(float &ax, float &ay);
 // Legacy NxN reporting (deprecated --instances / Screen B layout)
 static uint g_InstanceCols = 1;
 static uint g_InstanceRows = 1;
@@ -1664,7 +1666,8 @@ static void loadNeighborContextFiles(std::vector<SPaintZone> &zones, float cellS
 	if (!g_BoardSession && g_StartupWorld.Kind != ZPWS::Continent) return;
 
 	// Home footprint origin (for ecosystem translation): M17 globals when derived
-	float homeOriginX = g_FootprintOriginX, homeOriginY = g_FootprintOriginY;
+	float homeOriginX = 0.f, homeOriginY = 0.f;
+	scratchBoardAnchor(homeOriginX, homeOriginY); // M28: session-frozen board frame
 	float stepX = 0.f, stepY = 0.f;
 	int fw = g_FootprintCellsW > 0 ? g_FootprintCellsW : 1;
 	int fh = g_FootprintCellsH > 0 ? g_FootprintCellsH : 1;
@@ -2792,7 +2795,13 @@ static SPaintZone cloneInstanceZone(const SPaintZone &src, uint zoneId, float dx
  * Place (dx,dy) = min-corner cell of the transformed footprint block (M14a).
  * Returns number of zone entries appended. zone ids start at kInstanceZoneIdBase.
  */
-static void scratchHomeCellOrigin(int &hx, int &hy);
+// M28: the eco board's coordinate frame — the world position of board cell (0,0).
+// Captured ONCE at session assembly from the authored footprint origin of the first
+// zone opened through the convenience loading route; that FIRST-OPENED role is the only
+// distinction that file has. The frame never re-derives, so moving or closing ANY open
+// file (including the first) cannot re-anchor the board.
+static float g_SessionAnchorX = 0.f, g_SessionAnchorY = 0.f;
+static bool g_SessionAnchorSet = false;
 
 static uint appendInstanceZones(std::vector<SPaintZone> &zones, size_t primaryCount,
                                 const std::vector<SInstancePlace> &places, float cellSize)
@@ -2803,7 +2812,8 @@ static uint appendInstanceZones(std::vector<SPaintZone> &zones, size_t primaryCo
 	// Prefer M17 derived mask footprint; refresh if empty
 	if (g_FootprintMask.empty() || g_FootprintCellsW < 1 || g_FootprintCellsH < 1)
 		derivePrimaryFootprint(zones, 0, primaryCount, cellSize, g_SessionSnap > 0.f ? g_SessionSnap : 1.f);
-	float originX = g_FootprintOriginX, originY = g_FootprintOriginY;
+	float originX = 0.f, originY = 0.f;
+	scratchBoardAnchor(originX, originY); // board mapping frame (M28: session-frozen)
 	int cellsW = g_FootprintCellsW, cellsH = g_FootprintCellsH;
 	float stepX = (float)cellsW * cellSize, stepY = (float)cellsH * cellSize;
 	float pivotX = originX + stepX * 0.5f;
@@ -2827,37 +2837,34 @@ static uint appendInstanceZones(std::vector<SPaintZone> &zones, size_t primaryCo
 	}
 
 	uint appended = 0;
-	// M27c: the home block can be moved on the board — its zones DISPLAY at its cell, so
-	// home-sourced clones must translate from the displayed origin, not the authored one
-	// (the board anchor originX/Y itself stays authored).
-	int homeCx = 0, homeCy = 0;
-	scratchHomeCellOrigin(homeCx, homeCy);
 	for (size_t pi = 0; pi < places.size(); ++pi)
 	{
 		const SInstancePlace &pl = places[pi];
-		// M24b: per-place source — home (range [0,primaryCount), primary footprint) or an
-		// open editable file (its zone-id range + its derived footprint at its board cell).
-		size_t srcBegin = 0, srcEnd = primaryCount;
-		float srcOriginX = originX + (float)homeCx * cellSize;
-		float srcOriginY = originY + (float)homeCy * cellSize;
+		// M28: the source resolves UNIFORMLY over every open file — the first-opened
+		// file is a source like any other (an empty SourceBasename is the legacy CLI
+		// spelling for it). Zone range by the file's id base (index*1000), origin at the
+		// file's DISPLAYED cell (board anchor + cell), footprint from its fields.
+		const std::string srcName = (pl.SourceBasename.empty() && !g_EditableFiles.empty())
+			? g_EditableFiles[0].Basename : pl.SourceBasename;
+		size_t srcBegin = 0, srcEnd = 0;
+		float srcOriginX = originX, srcOriginY = originY;
 		int srcCellsW = cellsW, srcCellsH = cellsH;
-		// A CLI --place naming the PRIMARY brick is a home instance (scratchPlaceInstanceOf
-		// normalizes this to an empty source; the ei>=1 search below never matches index 0,
-		// so without this the place is skipped every rebuild yet still claims board cells).
-		const bool srcIsHome = pl.SourceBasename.empty()
-			|| (!g_EditableFiles.empty()
-			    && NLMISC::toLowerAscii(pl.SourceBasename)
-			       == NLMISC::toLowerAscii(g_EditableFiles[0].Basename));
-		if (!srcIsHome)
+		bool found = false;
+		if (g_EditableFiles.empty())
 		{
-			bool found = false;
-			for (size_t ei = 1; ei < g_EditableFiles.size(); ++ei)
+			// Legacy direct-.max path (no file registry): the whole primary range
+			srcBegin = 0;
+			srcEnd = primaryCount;
+			found = srcEnd > 0;
+		}
+		else
+		{
+			for (size_t ei = 0; ei < g_EditableFiles.size(); ++ei)
 			{
 				if (NLMISC::toLowerAscii(g_EditableFiles[ei].Basename)
-				    != NLMISC::toLowerAscii(pl.SourceBasename))
+				    != NLMISC::toLowerAscii(srcName))
 					continue;
 				const uint baseId = (uint)(ei * 1000);
-				srcBegin = srcEnd = 0;
 				bool haveBegin = false;
 				for (size_t z = 0; z < zones.size(); ++z)
 				{
@@ -2868,19 +2875,19 @@ static uint appendInstanceZones(std::vector<SPaintZone> &zones, size_t primaryCo
 						srcEnd = z + 1;
 					}
 				}
-				srcOriginX = g_FootprintOriginX + (float)g_EditableFiles[ei].CellX * cellSize;
-				srcOriginY = g_FootprintOriginY + (float)g_EditableFiles[ei].CellY * cellSize;
-				srcCellsW = g_EditableFiles[ei].CellsW > 0 ? g_EditableFiles[ei].CellsW : 1;
-				srcCellsH = g_EditableFiles[ei].CellsH > 0 ? g_EditableFiles[ei].CellsH : 1;
+				srcOriginX = originX + (float)g_EditableFiles[ei].CellX * cellSize;
+				srcOriginY = originY + (float)g_EditableFiles[ei].CellY * cellSize;
+				if (g_EditableFiles[ei].CellsW > 0) srcCellsW = g_EditableFiles[ei].CellsW;
+				if (g_EditableFiles[ei].CellsH > 0) srcCellsH = g_EditableFiles[ei].CellsH;
 				found = haveBegin;
 				break;
 			}
-			if (!found)
-			{
-				fprintf(stderr, "WARNING: instance source '%s' not open — place skipped\n",
-				        pl.SourceBasename.c_str());
-				continue;
-			}
+		}
+		if (!found)
+		{
+			fprintf(stderr, "WARNING: instance source '%s' not open — place skipped\n",
+			        srcName.c_str());
+			continue;
 		}
 		const float srcStepX = (float)srcCellsW * cellSize;
 		const float srcStepY = (float)srcCellsH * cellSize;
@@ -2910,7 +2917,7 @@ static uint appendInstanceZones(std::vector<SPaintZone> &zones, size_t primaryCo
 	       (uint)places.size(), cellsW, cellsH, stepX, stepY, originX, originY,
 	       pivotX, pivotY, (uint)primaryCount, appended, kInstanceZoneIdBase);
 	printf("  note: place dx,dy = min-corner of transformed block in fine cells; "
-	       "home claims masked cells of [0,%d)×[0,%d) (source=%s filled=%s)\n",
+	       "first-opened file footprint %dx%d (source=%s filled=%s)\n",
 	       cellsW, cellsH,
 	       g_FootprintFromTemplate ? "template" : "aabb-square",
 	       maskHasHole(g_FootprintMask) ? "no" : "yes");
@@ -4693,8 +4700,10 @@ static bool zpWriteZoneProp(uint zoneId, const std::string &which, int value, st
 	}
 	// Live footprint re-derive when usebbox changes on the footprint-source zone — the
 	// FIRST NON-FROZEN zone, exactly the one derivePrimaryFootprint picks (zones[0] can be
-	// a frozen RO/embedded copy when scene order puts it first).
-	if (which == "usebbox" && g_PaintCtx.Zones && zpZoneIsFootprintSource(zoneId))
+	// a frozen RO/embedded copy when scene order puts it first). Board sessions skip the
+	// instant derive UNIFORMLY (M28): per-file masks refresh at the next rebuild for
+	// every open file alike, and an in-place derive would read translated geometry.
+	if (which == "usebbox" && !g_BoardSession && g_PaintCtx.Zones && zpZoneIsFootprintSource(zoneId))
 	{
 		derivePrimaryFootprint(*g_PaintCtx.Zones, 0, g_PaintCtx.Zones->size(),
 		                       g_SessionCellSize > 0.f ? g_SessionCellSize : 160.f,
@@ -4723,6 +4732,8 @@ static void zpOnPropChanged(uint zoneId, uint32 appDataId)
 {
 	if (appDataId != NEL3D_APPDATA_LIGO_USE_BOUNDINGBOX)
 		return;
+	if (g_BoardSession)
+		return; // M28: board sessions refresh per-file masks uniformly at the next rebuild
 	if (!g_PaintCtx.Zones || g_PaintCtx.Zones->empty())
 		return;
 	if (!zpZoneIsFootprintSource(zoneId))
@@ -5967,8 +5978,10 @@ static void placeEcoEditableRange(std::vector<SPaintZone> &zones, SEditableFileI
 	std::vector<bool> mask;
 	std::string derr;
 	deriveZoneFootprintMask(zones[pick], cellSize, snap, mask, cw, ch, ox, oy, fromT, derr);
-	const float wantX = g_FootprintOriginX + (float)efi.CellX * cellSize;
-	const float wantY = g_FootprintOriginY + (float)efi.CellY * cellSize;
+	float ax = 0.f, ay = 0.f;
+	scratchBoardAnchor(ax, ay); // M28: session-frozen frame, not the current file[0]
+	const float wantX = ax + (float)efi.CellX * cellSize;
+	const float wantY = ay + (float)efi.CellY * cellSize;
 	translateZonesXY(zones, rb, re, wantX - ox, wantY - oy);
 	efi.PlacedDX = wantX - ox;
 	efi.PlacedDY = wantY - oy;
@@ -6048,25 +6061,18 @@ static bool rebuildWorkingSet(std::string &err, uint &outWelds)
 			                       g_SessionSnap > 0.f ? g_SessionSnap : 1.f);
 	}
 
-	// M24a: ecosystem non-primary open files place like context bricks — per-file footprint
-	// derive in authored space, then authored-origin-relative translation to their board
-	// cell. Save byte-guarantee unaffected: paint writes tile values only, geometry is a
+	// M24a/M28: every eco open file — the first-opened included — places identically:
+	// per-file footprint derive in authored space, then session-anchor-relative
+	// translation to its board cell (an unmoved cell-0,0 file is a bit-exact no-op
+	// translate, since the anchor was captured from the first file's authored origin).
+	// Save byte-guarantee unaffected: paint writes tile values only, geometry is a
 	// display/weld copy rebuilt from the scene on every rebuild.
-	// M27c: the PRIMARY is a zone like any other — when its board cell is non-zero
-	// (moved home) it translates through the same path. The board anchor stays the
-	// primary's AUTHORED footprint origin (derivePrimaryFootprint above, pre-translate),
-	// so cell (0,0) always maps to the authored position and a zero-cell primary is a
-	// bit-exact no-op translate.
 	if (g_StartupWorld.Kind == ZPWS::Ecosystem)
 	{
 		for (size_t ei = 0; ei < g_EditableFiles.size() && ei < fileRanges.size(); ++ei)
-		{
-			if (ei == 0 && g_EditableFiles[0].CellX == 0 && g_EditableFiles[0].CellY == 0)
-				continue; // unmoved home: skip the no-op
 			placeEcoEditableRange(zones, g_EditableFiles[ei],
 			                      fileRanges[ei].first, fileRanges[ei].second,
 			                      g_SessionCellSize, g_SessionSnap > 0.f ? g_SessionSnap : 1.f);
-		}
 	}
 
 	// Ecosystem scratch instances (M12c): re-append display clones after primary rebuild.
@@ -6168,27 +6174,17 @@ static const std::vector<bool> &scratchHomeMask()
 	return g_FootprintMask;
 }
 
-/** M27c: the home block's board origin cell. The primary is a zone like any other and
- *  can be MOVED on the board — its cell lives in g_EditableFiles[0].CellX/Y like every
- *  other open file's (0,0 until moved; the board-cell → world anchor stays the primary's
- *  AUTHORED footprint origin, so moving home never re-anchors other placements). */
-static void scratchHomeCellOrigin(int &hx, int &hy)
+/** Board frame accessor definition (M28; declared with the footprint globals). */
+static void scratchBoardAnchor(float &ax, float &ay)
 {
-	hx = g_EditableFiles.empty() ? 0 : g_EditableFiles[0].CellX;
-	hy = g_EditableFiles.empty() ? 0 : g_EditableFiles[0].CellY;
-}
-
-/** True if cell (cx,cy) is a MASKED home cell (M17; falls back to full rect if mask empty). */
-static bool scratchHomeOccupies(int cx, int cy)
-{
-	int hx = 0, hy = 0;
-	scratchHomeCellOrigin(hx, hy);
-	const int lx = cx - hx, ly = cy - hy;
-	const int fw = scratchFw(), fh = scratchFh();
-	if (lx < 0 || ly < 0 || lx >= fw || ly >= fh) return false;
-	const std::vector<bool> &m = scratchHomeMask();
-	if (m.empty() || (int)m.size() < fw * fh) return true;
-	return m[(size_t)(lx + ly * fw)];
+	if (g_SessionAnchorSet)
+	{
+		ax = g_SessionAnchorX;
+		ay = g_SessionAnchorY;
+		return;
+	}
+	ax = g_FootprintOriginX;
+	ay = g_FootprintOriginY;
 }
 
 /**
@@ -6199,19 +6195,21 @@ static bool scratchHomeOccupies(int cx, int cy)
 static void instanceSourceFootprint(const SInstancePlace &pl, std::vector<bool> &mask,
                                     int &fw, int &fh)
 {
-	if (!pl.SourceBasename.empty())
+	// M28: sources resolve uniformly over EVERY open file (an empty SourceBasename is
+	// the legacy spelling for the first-opened one); the derived-globals fallback only
+	// covers the legacy direct-.max path with no file registry.
+	const std::string srcName = (pl.SourceBasename.empty() && !g_EditableFiles.empty())
+		? g_EditableFiles[0].Basename : pl.SourceBasename;
+	for (size_t i = 0; i < g_EditableFiles.size(); ++i)
 	{
-		for (size_t i = 1; i < g_EditableFiles.size(); ++i)
+		if (NLMISC::toLowerAscii(g_EditableFiles[i].Basename)
+		    == NLMISC::toLowerAscii(srcName))
 		{
-			if (NLMISC::toLowerAscii(g_EditableFiles[i].Basename)
-			    == NLMISC::toLowerAscii(pl.SourceBasename))
-			{
-				fw = g_EditableFiles[i].CellsW > 0 ? g_EditableFiles[i].CellsW : 1;
-				fh = g_EditableFiles[i].CellsH > 0 ? g_EditableFiles[i].CellsH : 1;
-				mask = g_EditableFiles[i].Mask;
-				if (mask.empty()) mask.assign((size_t)fw * (size_t)fh, true);
-				return;
-			}
+			fw = g_EditableFiles[i].CellsW > 0 ? g_EditableFiles[i].CellsW : 1;
+			fh = g_EditableFiles[i].CellsH > 0 ? g_EditableFiles[i].CellsH : 1;
+			mask = g_EditableFiles[i].Mask;
+			if (mask.empty()) mask.assign((size_t)fw * (size_t)fh, true);
+			return;
 		}
 	}
 	fw = scratchFw();
@@ -6283,20 +6281,10 @@ static bool hintContextConflicts(const std::vector<bool> &cmask, int cfw, int cf
  */
 static bool scratchMaskConflictsSrc(const std::vector<bool> &cmask, int cfw, int cfh,
                                     int ox, int oy, uint rot, bool mirror,
-                                    int skipIdx, std::string &err,
-                                    bool skipHome = false)
+                                    int skipIdx, std::string &err)
 {
-	const int fw = scratchFw(), fh = scratchFh();
-	const std::vector<bool> &hm = scratchHomeMask();
-	int hx = 0, hy = 0;
-	scratchHomeCellOrigin(hx, hy); // M27c: home can sit anywhere on the board
-	if (!skipHome
-	    && masksCollide(hm, fw, fh, hx, hy, 0, false,
-	                    cmask, cfw, cfh, ox, oy, rot, mirror))
-	{
-		err = "mask overlaps home footprint";
-		return true;
-	}
+	// M28: no separate home check — the first-opened file collides through the uniform
+	// open-files loop below like every other file.
 	for (size_t i = 0; i < g_Places.size(); ++i)
 	{
 		if ((int)i == skipIdx) continue;
@@ -6328,8 +6316,8 @@ static bool scratchMaskConflictsSrc(const std::vector<bool> &cmask, int cfw, int
 			return true;
 		}
 	}
-	// M24a: non-primary open files (eco board placements)
-	for (size_t i = 1; i < g_EditableFiles.size(); ++i)
+	// Open files — ALL of them, first-opened included (M28)
+	for (size_t i = 0; i < g_EditableFiles.size(); ++i)
 	{
 		const SEditableFileInfo &ef = g_EditableFiles[i];
 		const int cw = ef.CellsW > 0 ? ef.CellsW : 1;
@@ -6349,7 +6337,7 @@ static bool scratchMaskConflictsSrc(const std::vector<bool> &cmask, int cfw, int
 	return false;
 }
 
-/** Home-shaped candidate wrapper (legacy callers; M24b sources use ...Src directly). */
+/** First-opened-file-shaped candidate wrapper (legacy callers). */
 static bool scratchMaskConflicts(int ox, int oy, uint rot, bool mirror, int skipIdx, std::string &err)
 {
 	std::vector<bool> hm = scratchHomeMask();
@@ -6404,7 +6392,9 @@ static bool scratchFindContext(int cx, int cy, size_t &idx)
 /** M24a: find the non-primary open file whose masked cells cover (cx,cy) (eco board). */
 static bool scratchFindEditableAt(int cx, int cy, size_t &idx)
 {
-	for (size_t i = 1; i < g_EditableFiles.size(); ++i)
+	// M28: ALL open files, the first-opened included — it occupies board cells through
+	// the same per-file mask fields as everyone else.
+	for (size_t i = 0; i < g_EditableFiles.size(); ++i)
 	{
 		const SEditableFileInfo &ef = g_EditableFiles[i];
 		const int cw = ef.CellsW > 0 ? ef.CellsW : 1;
@@ -6434,15 +6424,8 @@ static bool scratchGetEditableAt(int cx, int cy, int &ox, int &oy, std::string &
 
 static bool scratchGetCellState(const std::string &basename, ZPUI::ESessionCellState &out)
 {
-	// Multi-cell: basenames H:cx,cy / I:ox,oy@cx,cy / E:cx,cy / C:cx,cy:basename (M16c)
-	if (basename == "H" || basename == "HOME" || (basename.size() >= 2 && basename[0] == 'H' && basename[1] == ':'))
-	{
-		out = g_PaintCtx.Core && !g_EditableFiles.empty()
-		          && g_PaintCtx.Core->anyZoneDirty(g_EditableFiles[0].ZoneIds)
-		      ? ZPUI::CellDirtyEditable
-		      : ZPUI::CellScratchHome;
-		return true;
-	}
+	// Multi-cell: basenames I:ox,oy@cx,cy / E:cx,cy / F:... / C:cx,cy:basename (M16c;
+	// M28: no H: tokens — the first-opened file is an F: open-file cell like any other)
 	if (basename.size() >= 4 && basename[0] == 'I' && basename[1] == ':')
 	{
 		out = ZPUI::CellScratchInstance;
@@ -6581,7 +6564,8 @@ static bool loadOnePlaceContext(std::vector<SPaintZone> &zones, float cellSize,
 		return false;
 	}
 	// Home footprint origin (prefer M17 globals when set)
-	float homeOriginX = g_FootprintOriginX, homeOriginY = g_FootprintOriginY;
+	float homeOriginX = 0.f, homeOriginY = 0.f;
+	scratchBoardAnchor(homeOriginX, homeOriginY); // M28: session-frozen board frame
 	if (g_FootprintCellsW < 1)
 	{
 		float stepX = 0.f, stepY = 0.f;
@@ -6670,11 +6654,6 @@ static bool contextCandidateConflicts(size_t idx, int nx, int ny, uint nrot, boo
 
 static bool scratchPlaceContext(int cx, int cy, const std::string &basename, std::string &err)
 {
-	if (scratchHomeOccupies(cx, cy))
-	{
-		err = "cannot place context on home";
-		return false;
-	}
 	size_t idx = 0;
 	if (scratchFindPlace(cx, cy, idx))
 	{
@@ -6785,14 +6764,7 @@ static bool contextCandidateConflicts(size_t idx, int nx, int ny, uint nrot, boo
 	std::vector<bool> cm;
 	int cw = 1, ch = 1;
 	contextSpecMask(g_PlaceContextSpecs[idx], cm, cw, ch);
-	int hcx = 0, hcy = 0;
-	scratchHomeCellOrigin(hcx, hcy); // M27c: movable home
-	if (masksCollide(scratchHomeMask(), scratchFw(), scratchFh(), hcx, hcy, 0, false,
-	                 cm, cw, ch, nx, ny, nrot, nmirror))
-	{
-		err = "would overlap home";
-		return true;
-	}
+	// M28: the first-opened file collides through the uniform open-files loop below.
 	for (size_t i = 0; i < g_Places.size(); ++i)
 	{
 		std::vector<bool> om;
@@ -6820,7 +6792,7 @@ static bool contextCandidateConflicts(size_t idx, int nx, int ny, uint nrot, boo
 			return true;
 		}
 	}
-	for (size_t i = 1; i < g_EditableFiles.size(); ++i)
+	for (size_t i = 0; i < g_EditableFiles.size(); ++i)
 	{
 		const SEditableFileInfo &ef = g_EditableFiles[i];
 		const int ow = ef.CellsW > 0 ? ef.CellsW : 1;
@@ -6904,46 +6876,8 @@ static bool scratchDragDrop(int fx, int fy, int tx, int ty, bool copy, std::stri
 	const int dx = tx - fx, dy = ty - fy;
 	if (dx == 0 && dy == 0) { err = "same cell"; return false; }
 	size_t idx = 0;
-	if (scratchHomeOccupies(fx, fy))
-	{
-		int hx = 0, hy = 0;
-		scratchHomeCellOrigin(hx, hy);
-		if (!copy)
-		{
-			// M27c: home is a zone like any other — move the primary block by the drag
-			// delta. The board anchor (authored primary origin ↔ cell 0,0) stays put, so
-			// nothing else re-anchors; the primary's zones translate at rebuild exactly
-			// like every other open file's.
-			if (g_EditableFiles.empty())
-			{
-				err = "no primary file";
-				return false;
-			}
-			const int nhx = hx + dx, nhy = hy + dy;
-			std::vector<bool> hm = scratchHomeMask();
-			const int fw = scratchFw(), fh = scratchFh();
-			if (hm.empty()) hm.assign((size_t)fw * (size_t)fh, true);
-			if (scratchMaskConflictsSrc(hm, fw, fh, nhx, nhy, 0, false, -1, err,
-			                            /*skipHome=*/true))
-				return false;
-			const int ox = g_EditableFiles[0].CellX, oy = g_EditableFiles[0].CellY;
-			g_EditableFiles[0].CellX = nhx;
-			g_EditableFiles[0].CellY = nhy;
-			if (!scratchRebuild(err))
-			{
-				g_EditableFiles[0].CellX = ox;
-				g_EditableFiles[0].CellY = oy;
-				std::string rerr;
-				if (!scratchRebuild(rerr))
-					fprintf(stderr, "ERROR: home-move recovery rebuild failed: %s\n", rerr.c_str());
-				return false;
-			}
-			return true;
-		}
-		// Copy: place a home instance — block origin shifts by the drag delta from the
-		// home block's ORIGIN cell (NOT the raw drop cell — the grab cell may be interior).
-		return scratchPlace(hx + dx, hy + dy, err);
-	}
+	// M28: no home branch — the first-opened file is found by scratchFindEditableAt like
+	// every other open file, and moves/copies through the uniform open-file branch below.
 	if (scratchFindPlace(fx, fy, idx))
 	{
 		SInstancePlace pl = g_Places[idx];
@@ -7039,14 +6973,7 @@ static bool scratchEditableConflicts(size_t idx, std::string &err)
 	const int ch = ef.CellsH > 0 ? ef.CellsH : 1;
 	std::vector<bool> em = ef.Mask;
 	if (em.empty()) em.assign((size_t)cw * (size_t)ch, true);
-	int hcx = 0, hcy = 0;
-	scratchHomeCellOrigin(hcx, hcy); // M27c: movable home
-	if (masksCollide(scratchHomeMask(), scratchFw(), scratchFh(), hcx, hcy, 0, false,
-	                 em, cw, ch, ef.CellX, ef.CellY, 0, false))
-	{
-		err = "footprint overlaps home";
-		return true;
-	}
+	// M28: the first-opened file collides through the uniform open-files loop below.
 	for (size_t i = 0; i < g_Places.size(); ++i)
 	{
 		std::vector<bool> om;
@@ -7074,7 +7001,7 @@ static bool scratchEditableConflicts(size_t idx, std::string &err)
 			return true;
 		}
 	}
-	for (size_t i = 1; i < g_EditableFiles.size(); ++i)
+	for (size_t i = 0; i < g_EditableFiles.size(); ++i)
 	{
 		if (i == idx) continue;
 		const SEditableFileInfo &of = g_EditableFiles[i];
@@ -7108,9 +7035,8 @@ static bool scratchOpenEditable(int cx, int cy, const std::string &basenameIn, s
 		err = "board editable limit reached (10 files; zone-id space)";
 		return false;
 	}
-	if (scratchHomeOccupies(cx, cy)) { err = "cell is home"; return false; }
 	size_t idx = 0;
-	if (scratchFindPlace(cx, cy, idx)) { err = "cell has a self-instance"; return false; }
+	if (scratchFindPlace(cx, cy, idx)) { err = "cell has an instance"; return false; }
 	if (scratchFindContext(cx, cy, idx)) { err = "cell has context (remove it first)"; return false; }
 	if (scratchFindEditableAt(cx, cy, idx)) { err = "cell has an open file"; return false; }
 	std::string basename = basenameIn;
@@ -7224,23 +7150,14 @@ static bool scratchContextToEditable(int cx, int cy, std::string &err)
 
 static bool scratchPlace(int cx, int cy, std::string &err)
 {
-	if (scratchHomeOccupies(cx, cy))
+	// M28: legacy spelling for "place an instance of the first-opened file" — one
+	// uniform path for every source.
+	if (g_EditableFiles.empty())
 	{
-		err = "cannot place on home footprint";
+		err = "no open file to instance";
 		return false;
 	}
-	size_t idx = 0;
-	if (scratchFindPlace(cx, cy, idx))
-	{
-		err = "cell already occupied";
-		return false;
-	}
-	// Place origin at the clicked cell, rot 0 — mask collision (not rect)
-	if (scratchMaskConflicts(cx, cy, 0, false, -1, err))
-		return false;
-	g_Places.push_back(SInstancePlace(cx, cy, 0, false));
-	g_InstanceCount = 1 + (uint)g_Places.size();
-	return scratchRebuild(err);
+	return scratchPlaceInstanceOf(cx, cy, g_EditableFiles[0].Basename, err);
 }
 
 /**
@@ -7250,7 +7167,6 @@ static bool scratchPlace(int cx, int cy, std::string &err)
  */
 static bool scratchPlaceInstanceOf(int cx, int cy, const std::string &basenameIn, std::string &err)
 {
-	if (scratchHomeOccupies(cx, cy)) { err = "cannot place on home footprint"; return false; }
 	size_t idx = 0;
 	if (scratchFindPlace(cx, cy, idx)) { err = "cell already occupied"; return false; }
 	if (scratchFindContext(cx, cy, idx)) { err = "cell has context"; return false; }
@@ -7259,27 +7175,24 @@ static bool scratchPlaceInstanceOf(int cx, int cy, const std::string &basenameIn
 	std::string::size_type dot = basename.rfind('.');
 	if (dot != std::string::npos && NLMISC::toLowerAscii(basename.substr(dot)) == ".max")
 		basename = basename.substr(0, dot);
+	// M28: every source resolves uniformly over the open files — the first-opened one
+	// is not special, and SourceBasename is always stored explicitly.
 	SInstancePlace pl(cx, cy, 0, false);
-	const std::string homeName = g_EditableFiles.empty() ? std::string()
-	                                                     : g_EditableFiles[0].Basename;
-	if (NLMISC::toLowerAscii(basename) != NLMISC::toLowerAscii(homeName))
+	bool found = false;
+	for (size_t i = 0; i < g_EditableFiles.size(); ++i)
 	{
-		bool found = false;
-		for (size_t i = 1; i < g_EditableFiles.size(); ++i)
+		if (NLMISC::toLowerAscii(g_EditableFiles[i].Basename)
+		    == NLMISC::toLowerAscii(basename))
 		{
-			if (NLMISC::toLowerAscii(g_EditableFiles[i].Basename)
-			    == NLMISC::toLowerAscii(basename))
-			{
-				pl.SourceBasename = g_EditableFiles[i].Basename;
-				found = true;
-				break;
-			}
+			pl.SourceBasename = g_EditableFiles[i].Basename;
+			found = true;
+			break;
 		}
-		if (!found)
-		{
-			err = "instance source must be an OPEN brick: " + basename;
-			return false;
-		}
+	}
+	if (!found)
+	{
+		err = "instance source must be an OPEN brick: " + basename;
+		return false;
 	}
 	std::vector<bool> sm;
 	int fw = 1, fh = 1;
@@ -7620,7 +7533,7 @@ static bool sessionCloseZone(const std::string &basename, bool saveFirst, bool f
 	// (drag/remove/occupancy) instead of resurrecting invisibly through the hint chain
 	// (which specs skip). Continent closes keep the grid-ring behavior.
 	bool addedCloseSpec = false;
-	if (g_StartupWorld.Kind == ZPWS::Ecosystem && !wasPrimary
+	if (g_StartupWorld.Kind == ZPWS::Ecosystem
 	    && !contextBasenameHasSpec(closedCopy.Basename))
 	{
 		SPlaceContextSpec pc;
@@ -8292,13 +8205,9 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 				sessionBridge.isDirty = sessionIsDirty;
 				sessionBridge.isOpen = sessionIsOpen;
 				sessionBridge.isEditable = sessionIsEditable;
-				sessionBridge.ScratchHomeName = g_StartupZone.Basename.empty()
-					? g_StartupWorld.WorldName
-					: g_StartupZone.Basename;
 				sessionBridge.FootprintCellsW = scratchFw();
 				sessionBridge.FootprintCellsH = scratchFh();
 				sessionBridge.FootprintMask = g_FootprintMask.empty() ? NULL : &g_FootprintMask;
-				sessionBridge.scratchGetHomeCell = scratchHomeCellOrigin; // M27c movable home
 			}
 			ZPUI::setSessionBoardBridge(&sessionBridge);
 		}
@@ -10171,6 +10080,26 @@ args.addArg("", "instances", "NxM",
 		derivePrimaryFootprint(zones, 0, instancePrimaryCount, cellSize, snap);
 	if (args.haveLongArg("check-ligozone") && instancePrimaryCount > 0)
 		compareFootprintToLigozone(args.getLongArg("check-ligozone")[0]);
+	// M28: freeze the board frame at the first-opened file's authored footprint origin
+	// and give that file the same per-file board fields as every other open file — from
+	// here on it has no special role in board math (movable, closable, instance source
+	// by name like any file).
+	if (g_StartupWorld.Kind == ZPWS::Ecosystem && !g_EditableFiles.empty()
+	    && instancePrimaryCount > 0)
+	{
+		g_SessionAnchorX = g_FootprintOriginX;
+		g_SessionAnchorY = g_FootprintOriginY;
+		g_SessionAnchorSet = true;
+		g_EditableFiles[0].CellsW = g_FootprintCellsW;
+		g_EditableFiles[0].CellsH = g_FootprintCellsH;
+		g_EditableFiles[0].Mask = g_FootprintMask;
+		// Pin legacy empty-source CLI --place entries to the CURRENT first file by name —
+		// an empty source resolving lazily would silently re-source to whichever file is
+		// first after a close (sources are per-name, uniform, never positional).
+		for (size_t i = 0; i < g_Places.size(); ++i)
+			if (g_Places[i].SourceBasename.empty())
+				g_Places[i].SourceBasename = g_EditableFiles[0].Basename;
+	}
 
 	// M24a: --open-editable "cx,cy:basename" — additional EDITABLE files placed on the eco
 	// board (the startup/E2E form of the board's Open editable action).

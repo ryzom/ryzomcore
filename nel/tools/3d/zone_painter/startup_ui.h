@@ -119,7 +119,6 @@ enum ESessionCellState
 	CellOpenReadOnly,     ///< open as frozen context (dimmer tint)
 	CellDirtyEditable,    ///< open-editable with unsaved paint (fill + dirty marker)
 	// Ecosystem scratch (M12c/M16c):
-	CellScratchHome,      ///< open brick home cell (editable fill)
 	CellScratchInstance,  ///< placed instance (distinct tint; label carries R90/M glyphs)
 	CellScratchEmpty,     ///< UNLOCKED empty well (edge-adjacent to occupied / hint-named)
 	CellScratchContext,   ///< read-only context brick at cell (M16c; dim RO tint + name)
@@ -134,10 +133,11 @@ enum ESessionCellState
  *   L-click CLOSED used cell → open editable (+ auto RO ring)
  *   L-click OPEN cell        → action popup: Close / Save / Toggle editable↔RO / Cancel
  *
- * Ecosystem scratch idiom (M12c):
- *   L-click EMPTY cell     → place instance of the open brick (current placement rot/mirror)
+ * Ecosystem scratch idiom (M12c; M28: every open file — the first-opened included — is
+ * an ordinary open-file cell: move/copy/close/save/toggle like any other):
+ *   L-click EMPTY cell     → place/open menu (instance, context, editable, hints)
  *   L-click INSTANCE cell  → popup: Rotate CW / CCW / Mirror / Remove
- *   L-click HOME           → no-op (primary stays)
+ *   L-click OPEN-FILE cell → popup: Close / Save / Save as… / Toggle editable↔RO
  *   ToggleBoard / BACK TO PAINTING → hide board
  */
 struct SSessionBoardBridge
@@ -161,10 +161,11 @@ struct SSessionBoardBridge
 	bool (*isEditable)(const std::string &basename);
 
 	// Ecosystem scratch board (M12c/M14a) — cell basenames:
-	//   "H:cx,cy" home cell of multi-cell footprint (also bare "H" for 1×1 origin)
+	//   "F:ox,oy[:name]" open-file block (M28: includes the first-opened file)
 	//   "I:ox,oy" instance origin (labels); non-origin block cells share state via lookup
 	//   "E:cx,cy" empty
-	/** Place instance with block origin at empty cell (cx,cy); refuses overlap. */
+	/** Place instance of the FIRST-OPENED file at empty cell (legacy spelling for
+	 *	scratchPlaceInstanceOf with that file's name); refuses overlap. */
 	bool (*scratchPlace)(int cx, int cy, std::string &err);
 	/** Rotate instance CW (+1) or CCW (-1) about its footprint-block center; updates origin. */
 	bool (*scratchRotate)(int cx, int cy, int delta, std::string &err);
@@ -212,12 +213,8 @@ struct SSessionBoardBridge
 	/** M24d: drag move/copy — shift the block whose cell is (fromCx,fromCy) by the drag
 	 *	delta; copy=true duplicates (Ctrl/Shift-drag; home copies as a home instance). */
 	bool (*scratchDragDrop)(int fromCx, int fromCy, int toCx, int toCy, bool copy, std::string &err);
-	/** Home brick display name. */
-	std::string ScratchHomeName;
-	/** M27c: the home block's board ORIGIN cell — the primary moves like any other file
-	 *	(0,0 until moved); board painting/labels must not assume the origin. */
-	void (*scratchGetHomeCell)(int &hx, int &hy);
-	/** Primary footprint size in fine cells (M14a multi-cell occupancy). */
+	/** First-opened file's footprint size in fine cells (legacy fallback; per-file
+	 *	occupancy rides SEditableFileInfo like every other open file since M28). */
 	int FootprintCellsW;
 	int FootprintCellsH;
 	/**
@@ -237,7 +234,7 @@ struct SSessionBoardBridge
 		  scratchPlaceInstanceOf(NULL), scratchOpenFileCount(NULL), scratchGetInstanceSource(NULL),
 		  scratchGetHintAt(NULL), scratchHintNames(NULL),
 		  scratchRotateContext(NULL), scratchMirrorContext(NULL), scratchGetContextTransform(NULL),
-		  scratchDragDrop(NULL), scratchGetHomeCell(NULL),
+		  scratchDragDrop(NULL),
 		  FootprintCellsW(1), FootprintCellsH(1), FootprintMask(NULL)
 	{
 	}

@@ -929,7 +929,7 @@
 	<action id="hint_ed" name="" handler="zp_empty_hint_ed" params="" />
 	<action id="editable" name="Open editable…" handler="zp_empty_open_editable" params="" />
 	<action id="context" name="Open read-only…" handler="zp_empty_place_context" params="" />
-	<action id="instance" name="Place self-instance" handler="zp_empty_place_instance" params="" />
+	<action id="instance" name="Place instance" handler="zp_empty_place_instance" params="" />
 </group>
 
 <!-- Context brick action popup (M16c) — Remove -->
