@@ -5100,12 +5100,19 @@ static void zpFill(int rot)
  *   - ortho frustum over the CELL-ALIGNED rect of the zones (not the raw bbox), so
  *     thumbnails of adjacent bricks tile edge-to-edge like the ligo zone bitmaps;
  *   - north-up: X right, Y up on screen, camera looking straight down -Z;
- *   - oversampled render (≈2x the 128 SI budget per cell, pow2-capped), downsampled by
- *     the SI encoder's aspect-preserving maxDim resample;
  *   - repeated renders so landscape refine converges on the jumped camera.
- * Offscreen: CTextureMem render target (the bloom/cloud_scape idiom) — the backbuffer
- * is never touched, so captures work per-file mid-save at any window size.
- * zoneIds: the file's zone ids; NULL = every unfrozen zone (legacy single-file path).
+ * Render target: the BACKBUFFER, used as scratch and never swapped — the next live
+ * frame clears and fully redraws before any swap, and headless save flows never swap
+ * at all. (A CTextureMem "render target" was tried first, but on the classic GL driver
+ * only CTextureOffscreen takes the FBO branch — CDriverGL::setRenderTarget on any
+ * other texture still rasterizes into the backbuffer and getBuffer reads the window
+ * rect, so the texture was a wasted per-save VRAM upload, not an offscreen surface.)
+ * Capture resolution is therefore the window size; the readback is resampled to the
+ * cell rect's aspect below and the SI encoder's 128px maxDim pass makes the final
+ * thumbnail, so any sane window comfortably oversamples the budget.
+ * zoneIds: the file's zone ids; NULL = every unfrozen zone (legacy single-file path —
+ * NOTE: unfrozen includes instance CLONES, so NULL over-frames once instances exist;
+ * per-file save paths must pass the file's ids).
  */
 static bool captureTopDownThumbnail(NLMISC::CBitmap &out, const std::vector<uint> *zoneIds = NULL)
 {
@@ -5159,32 +5166,13 @@ static bool captureTopDownThumbnail(NLMISC::CBitmap &out, const std::vector<uint
 	const float cy = minY + rectH * 0.5f;
 	const float zTop = bbox.getMax().z + std::max(bbox.getHalfSize().z * 2.f, 50.f);
 
-	// Oversampled pow2 render-target dims (≈256 px per cell, capped at 1024)
+	// Output budget: ≈256 px per cell, longest side capped at 1024 (the SI encoder's
+	// 128px maxDim pass makes the final thumb from this)
 	const uint kPerCell = 256;
-	uint texW = NLMISC::raiseToNextPowerOf2(std::min(1024u, kPerCell * (uint)cellsW));
-	uint texH = NLMISC::raiseToNextPowerOf2(std::min(1024u, kPerCell * (uint)cellsH));
-	texW = std::min(texW, 1024u);
-	texH = std::min(texH, 1024u);
 
 	NL3D::UDriver *udriver = g_PaintCtx.UDriver;
 	NL3D::UScene *uscene = g_PaintCtx.UScene;
 	NL3D::IDriver *driver = static_cast<NL3D::CDriverUser *>(udriver)->getDriver();
-
-	// Offscreen render target (cloud_scape/bloom idiom)
-	uint8 *texMem = new uint8[4 * texW * texH];
-	NLMISC::CSmartPtr<NL3D::ITexture> rt =
-		new NL3D::CTextureMem(texMem, 4 * texW * texH, true, false, texW, texH, NLMISC::CBitmap::RGBA);
-	rt->setWrapS(NL3D::ITexture::Clamp);
-	rt->setWrapT(NL3D::ITexture::Clamp);
-	rt->setFilterMode(NL3D::ITexture::Linear, NL3D::ITexture::LinearMipMapOff);
-	rt->setReleasable(false);
-	rt->setRenderTarget(true);
-	rt->generate();
-	if (!driver->setRenderTarget(rt))
-	{
-		fprintf(stderr, "WARNING: thumbnail: driver refused the render target\n");
-		return false;
-	}
 
 	NL3D::CCamera *camera = g_PaintCtx.Camera;
 	const NLMISC::CMatrix oldMat = camera->getMatrix();
@@ -5201,7 +5189,7 @@ static bool captureTopDownThumbnail(NLMISC::CBitmap &out, const std::vector<uint
 	                   0.1f, zTop - bbox.getMin().z + 100.f, /*perspective=*/false);
 
 	// Render with refine convergence (ligo renders repeatedly for the same reason);
-	// no swapBuffers anywhere — everything happens in the RT.
+	// no swapBuffers anywhere — the scribbled backbuffer is redrawn before any swap.
 	g_PaintCtx.Land->Landscape.setRefineMode(true);
 	udriver->clearBuffers(NLMISC::CRGBA(40, 40, 40));
 	uscene->render();
@@ -5214,8 +5202,7 @@ static bool captureTopDownThumbnail(NLMISC::CBitmap &out, const std::vector<uint
 	}
 
 	NLMISC::CBitmap full;
-	driver->getBuffer(full); // reads the bound render target
-	driver->setRenderTarget(NULL);
+	driver->getBuffer(full); // window-sized backbuffer readback
 
 	// Restore camera + live refine mode
 	camera->setMatrix(oldMat);
@@ -5271,8 +5258,12 @@ static bool prepareThumbnailOverride(const std::string &srcMax, std::vector<uint
 			g_HaveCapturedThumb = true;
 		}
 	}
-	else if (!zoneIds && g_HaveCapturedThumb)
+	else if (g_HaveCapturedThumb && (!zoneIds || g_EditableFiles.size() <= 1))
 	{
+		// Headless fallback (GL context gone post-viewer): the --screenshot pre-capture
+		// stash. Framing-safe for the NULL path and for single-file sessions (the stash
+		// is captured with the same first-file framing); multi-file per-id saves must
+		// not inherit a whole-scene stash, so they fail to "SI left unchanged" instead.
 		bmp = g_CapturedThumb;
 	}
 	else
@@ -5443,7 +5434,7 @@ static bool zpSaveTo(const std::string &target)
 	// passes NULL so the screenshot-mode pre-capture stash can stand in when the viewer
 	// is already gone (headless --screenshot + --save pairing).
 	prepareThumbnailOverride(srcForStreams, siOverride, haveSi, zpLegacyWantThumbnail(),
-	                         (srcFile && g_EditableFiles.size() > 1) ? &srcFile->ZoneIds : NULL);
+	                         srcFile ? &srcFile->ZoneIds : NULL);
 	int saveRc = saveWholeFile(srcForStreams, target, *scene, false,
 	                           haveSi ? &siOverride : NULL);
 	if (saveRc != 0)
@@ -5573,9 +5564,12 @@ static bool zpSaveOverwrite()
 		                                                  : g_EditableFiles[0].Path;
 		PIPELINE::MAX::CScene *scene = g_EditableFiles.empty() ? g_PaintCtx.Scene
 		                                                       : editableScene(g_EditableFiles[0]);
-		// NULL ids: single-file framing == whole unfrozen set, and the NULL path keeps
-		// the pre-capture stash fallback for headless save flows.
-		if (!saveOneOverwrite(orig, *scene, wantThumb, NULL))
+		// Per-file ids even here: NULL frames every unfrozen zone, which includes
+		// instance CLONES — a single open brick with placed instances embedded a
+		// whole-board thumbnail. The stash fallback for headless flows still applies
+		// (prepareThumbnailOverride allows it whenever the session is single-file).
+		if (!saveOneOverwrite(orig, *scene, wantThumb,
+		                      g_EditableFiles.empty() ? NULL : &g_EditableFiles[0].ZoneIds))
 		{
 			g_LastSaveStatus = "overwrite failed -> " + orig;
 			return false;
@@ -8796,10 +8790,13 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 				printf("OK screenshot: %ux%u -> %s\n", btm.getWidth(), btm.getHeight(), screenshotPath.c_str());
 			}
 			// Pre-capture top-down thumb while the landscape is live (for --save --thumbnail).
+			// First file's framing, matching the per-file save paths — NULL would fold
+			// instance clones (--place) into the stashed thumbnail.
 			if (g_CliWantThumbnail || g_PaintCtx.WantThumbnail)
 			{
 				NLMISC::CBitmap thumb;
-				if (captureTopDownThumbnail(thumb))
+				if (captureTopDownThumbnail(thumb,
+				        g_EditableFiles.empty() ? NULL : &g_EditableFiles[0].ZoneIds))
 				{
 					g_CapturedThumb.swap(thumb);
 					g_HaveCapturedThumb = true;
