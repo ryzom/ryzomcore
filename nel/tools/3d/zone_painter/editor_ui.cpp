@@ -790,6 +790,9 @@ REGISTER_ACTION_HANDLER(CAHZpSave, "zp_save");
 // Save modal (interactive flow only)
 
 static bool s_SaveCopyConfirm = false;
+// The resolved target the armed confirm applies to — retyping the name must re-arm,
+// or a confirm meant for file A silently overwrites file B.
+static std::string s_SaveCopyTarget;
 
 static CViewText *findTextEarly(const char *id)
 {
@@ -815,6 +818,7 @@ static void setSaveModalStatus(const std::string &msg)
 static void resetSaveCopyButtonLabel()
 {
 	s_SaveCopyConfirm = false;
+	s_SaveCopyTarget.clear();
 	if (CCtrlTextButton *btn = findTextButton("ui:zp:save_dialog:content:btn_copy"))
 		btn->setHardText("Save copy");
 }
@@ -829,11 +833,15 @@ static void openSaveDialogCommon(SPaintUIBridge *b, const std::string &prefillBa
 	std::string prefill = prefillBase + "_painted.max";
 	if (CGroupEditBox *eb = findEditBox("ui:zp:save_dialog:content:copy_frame:copy_name"))
 		eb->setInputString(prefill);
-	// M5c: thumbnail checkbox defaults on
-	b->UpdateThumbnail = true;
+	// M5c: thumbnail checkbox defaults on; --no-thumbnail hides the row entirely
+	// (the kill-switch drops every SI write, a live checked box would be a lie).
+	b->UpdateThumbnail = !b->ThumbnailsDisabled;
 	if (CCtrlBaseButton *tb = dynamic_cast<CCtrlBaseButton *>(
 	        CWidgetManager::getInstance()->getElementFromId("ui:zp:save_dialog:content:update_thumb:box")))
-		tb->setPushed(true);
+		tb->setPushed(b->UpdateThumbnail);
+	if (CInterfaceGroup *row = dynamic_cast<CInterfaceGroup *>(
+	        CWidgetManager::getInstance()->getElementFromId("ui:zp:save_dialog:content:update_thumb")))
+		row->setActive(!b->ThumbnailsDisabled);
 	CWidgetManager::getInstance()->enableModalWindow(NULL, "ui:zp:save_dialog");
 }
 
@@ -879,6 +887,7 @@ public:
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		SPaintUIBridge *b = getPaintUIBridge();
 		if (!b) return;
+		if (b->ThumbnailsDisabled) return; // row hidden; keep the forced-off state
 		CCtrlBaseButton *box = dynamic_cast<CCtrlBaseButton *>(
 			CWidgetManager::getInstance()->getElementFromId("ui:zp:save_dialog:content:update_thumb:box"));
 		// The zp_checkbox_row LABEL fires this same handler but does not flip the box's
@@ -1529,6 +1538,11 @@ static void emphasizeDisplaceSection(bool displaceActive)
 static void syncThumbWantFromModal(SPaintUIBridge *b)
 {
 	if (!b) return;
+	if (b->ThumbnailsDisabled)
+	{
+		b->UpdateThumbnail = false; // hidden row's stale pushed state must not resurrect it
+		return;
+	}
 	if (CCtrlBaseButton *tb = dynamic_cast<CCtrlBaseButton *>(
 	        CWidgetManager::getInstance()->getElementFromId("ui:zp:save_dialog:content:update_thumb:box")))
 		b->UpdateThumbnail = tb->getPushed();
@@ -1608,9 +1622,10 @@ public:
 		if (toLowerAscii(CFile::getExtension(target)).empty())
 			target += ".max";
 
-		if (CFile::fileExists(target) && !s_SaveCopyConfirm)
+		if (CFile::fileExists(target) && (!s_SaveCopyConfirm || target != s_SaveCopyTarget))
 		{
 			s_SaveCopyConfirm = true;
+			s_SaveCopyTarget = target;
 			if (CCtrlTextButton *btn = findTextButton("ui:zp:save_dialog:content:btn_copy"))
 				btn->setHardText("Confirm overwrite");
 			setSaveModalStatus("File exists — click again to overwrite.");

@@ -8122,6 +8122,7 @@ static void zpFillBridgeState(ZPUI::SPaintUIBridge &bridge)
 	bridge.CanSave = g_PaintCtx.InteractiveSave || !g_PaintCtx.SavePath.empty();
 	bridge.InteractiveSave = g_PaintCtx.InteractiveSave;
 	bridge.BoardSession = g_BoardSession;
+	bridge.ThumbnailsDisabled = g_NoThumbnailWrites;
 	bridge.InstanceCount = g_InstanceCount;
 	{
 		std::string base = NLMISC::CFile::getFilenameWithoutExtension(g_PaintCtx.InputPath);

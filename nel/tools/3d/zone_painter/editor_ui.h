@@ -148,6 +148,9 @@ struct SPaintUIBridge
 	uint InstanceCount;
 	/** M5c: modal "Update thumbnail" checkbox (default true for interactive save). */
 	bool UpdateThumbnail;
+	/** M31: --no-thumbnail hard kill-switch — the modal hides the checkbox row so the
+	 *  UI never claims a thumbnail write that prepareThumbnailOverride will drop. */
+	bool ThumbnailsDisabled;
 	/** Current season label for the panel ("spring" / "auto" / ...). */
 	char SeasonLabel[32];
 	/** Number of discovered season variants (0 = no seasonal tiles; button frozen). */
@@ -194,7 +197,8 @@ struct SPaintUIBridge
 		  setColorRadiusAbs(NULL),
 		  HaveCore(false), Mode(0), CurTileSet(0), TileSetCount(0), Mode256(false),
 		  BrushSize(0), TileGroup(0), LockBorders(false), UndoDepth(0), CanSave(false),
-		  InteractiveSave(false), BoardSession(false), InstanceCount(1), UpdateThumbnail(true), SeasonCount(0),
+		  InteractiveSave(false), BoardSession(false), InstanceCount(1), UpdateThumbnail(true),
+		  ThumbnailsDisabled(false), SeasonCount(0),
 		  EditableFileCount(1), DirtyFileCount(0),
 		  ColorRadius(8.f), ColorHardness(128), ColorOpacity(255),
 		  ColorR(255), ColorG(255), ColorB(255), BrushMaskMode(false), DisplaceIndex(0),
