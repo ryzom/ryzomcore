@@ -35,9 +35,10 @@
 			global_color="false" color="230 232 235 255" hardtext="#title" />
 		<view type="text" id="sub" posparent="name" posref="BL TL" x="0" y="-1" fontsize="10" shadow="true"
 			global_color="false" color="170 180 190 200" hardtext="#subtitle" line_maxw="490" />
-		<!-- Hairline listview separator (M25p9 — same idiom as zp_folder_row). -->
-		<view type="bitmap" id="sep" posref="BL BL" x="0" y="0" w="500" h="1" scale="true"
-			texture="blank.tga" global_color="false" color="255 255 255 35" />
+		<!-- M25 review: no hairline separator here (dropped the M25p9 one) — these are
+		     two-line tiles grouped under section headers (Ecosystems/Continents), same
+		     class as zp_zone_row's thumbnail tiles, not a single-line detail listview
+		     like zp_folder_row. -->
 	</group>
 </template>
 
@@ -48,10 +49,12 @@
      for missing thumbs) and re-anchors "btn"+"name" to the row's own left edge when there's
      no thumb (unchanged from before — see the C++ hasThumb tuck).
      M10e: no row-level multi-select concept — L-click opens immediately; leave as-is.
-     M25p9: NO hairline separator here unlike zp_folder_row/zp_world_row — with the thumbnail
-     icon this reads as a WinXP-style grouped tile view, not a detail listview, and grid lines
-     are the wrong idiom for a tile view (user direction). Hover/press tint stays as the
-     per-tile selection highlight, same as icon-view selection in that reference. -->
+     M25p9: NO hairline separator here unlike zp_folder_row — with the thumbnail icon this
+     reads as a WinXP-style grouped tile view, not a detail listview, and grid lines are the
+     wrong idiom for a tile view (user direction). Hover/press tint stays as the per-tile
+     selection highlight, same as icon-view selection in that reference. zp_world_row (below)
+     dropped its separator for the same reason (M25 review: multi-line tiles under grouped
+     headers, not single-line rows) — zp_folder_row is now the only template that keeps one. -->
 <template name="zp_zone_row" keep="true" id="" title="" idx="0" thumb="">
 	<group id="#id" w="560" h="36">
 		<!-- 9-slice inset (w_box_frame); inactive until a real thumb is bound. -->
