@@ -858,8 +858,11 @@
 <!-- ===================================================================== -->
 <!-- Cell action popup (M11a session board — L-click on open cell)         -->
 <!-- ===================================================================== -->
+<!-- Near-cursor context menu (mouse_pos, TL-anchored — same idiom as season_menu below),
+     not a centered dialog: this is a quick "what do you want to do with this cell"
+     picker triggered by a plain click, not a deliberate confirm (M25 review finding). -->
 <group type="modal" id="cell_action" exit_click_out="true" w="280" h="160" options="skin_modal"
-	mouse_pos="false" posref="MM MM" x="0" y="0" active="false">
+	mouse_pos="true" posref="TL TL" x="0" y="0" active="false">
 	<group id="content" x="0" y="0" posref="TL TL" sizeref="wh" w="0" h="0">
 		<view type="text" id="title" posref="TM TM" x="0" y="-12" color="255 255 255 255" fontsize="13"
 			shadow="true" global_color="false" hardtext="Zone" />
@@ -879,8 +882,9 @@
 <!-- ===================================================================== -->
 <!-- Instance action popup (M12c ecosystem scratch — L-click on instance)  -->
 <!-- ===================================================================== -->
+<!-- Near-cursor context menu (see cell_action above for rationale). -->
 <group type="modal" id="instance_action" exit_click_out="true" w="280" h="200" options="skin_modal"
-	mouse_pos="false" posref="MM MM" x="0" y="0" active="false">
+	mouse_pos="true" posref="TL TL" x="0" y="0" active="false">
 	<group id="content" x="0" y="0" posref="TL TL" sizeref="wh" w="0" h="0">
 		<view type="text" id="title" posref="TM TM" x="0" y="-12" color="255 255 255 255" fontsize="13"
 			shadow="true" global_color="false" hardtext="Instance" />
@@ -921,8 +925,9 @@
 <!-- ===================================================================== -->
 <!-- Empty-cell popup (M16c ecosystem scratch)                             -->
 <!-- ===================================================================== -->
+<!-- Near-cursor context menu (see cell_action above for rationale). -->
 <group type="modal" id="empty_cell_action" exit_click_out="true" w="320" h="250" options="skin_modal"
-	mouse_pos="false" posref="MM MM" x="0" y="0" active="false">
+	mouse_pos="true" posref="TL TL" x="0" y="0" active="false">
 	<group id="content" x="0" y="0" posref="TL TL" sizeref="wh" w="0" h="0">
 		<view type="text" id="title" posref="TM TM" x="0" y="-12" color="255 255 255 255" fontsize="13"
 			shadow="true" global_color="false" hardtext="Empty cell" />
@@ -952,8 +957,9 @@
 <!-- ===================================================================== -->
 <!-- Context brick action popup (M16c) — Remove                            -->
 <!-- ===================================================================== -->
+<!-- Near-cursor context menu (see cell_action above for rationale). -->
 <group type="modal" id="context_action" exit_click_out="true" w="280" h="250" options="skin_modal"
-	mouse_pos="false" posref="MM MM" x="0" y="0" active="false">
+	mouse_pos="true" posref="TL TL" x="0" y="0" active="false">
 	<group id="content" x="0" y="0" posref="TL TL" sizeref="wh" w="0" h="0">
 		<view type="text" id="title" posref="TM TM" x="0" y="-12" color="255 255 255 255" fontsize="13"
 			shadow="true" global_color="false" hardtext="Context (RO)" />
