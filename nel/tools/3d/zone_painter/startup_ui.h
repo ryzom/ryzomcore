@@ -103,6 +103,8 @@ void startupShowPainter(bool show);
  *	pointer (copyModifier = Ctrl/Shift held on release). No-ops when the board is hidden. */
 void sessionBoardDragBegin();
 void sessionBoardDragEnd(bool copyModifier);
+/** Clear a pending drag arm (focus loss: the matching up event never arrives). */
+void sessionBoardDragCancel();
 
 // ---------------------------------------------------------------------------------------------
 // Session board hub (ui M11a/M12c) — over the live viewer (session intact).
@@ -266,6 +268,9 @@ void forceShowEmptyCellForShot(const std::string &basename = std::string());
 
 /** Dev/test: open the context-brick action popup (ecosystem scratch) for one screenshot frame. */
 void forceShowContextActionForShot(const std::string &basename = std::string());
+
+/** Dev/test: open the context-brick PICKER (0=context 1=editable 2=instance source). */
+void forceShowContextPickerForShot(int mode = 0);
 
 } // namespace ZPUI
 

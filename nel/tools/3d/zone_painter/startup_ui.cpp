@@ -1929,8 +1929,15 @@ static void openCellActionPopup(const std::string &basename)
 	CWidgetManager::getInstance()->enableModalWindow(NULL, "ui:zp:cell_action");
 }
 
+// close_confirm purpose: false = close, true = demote-to-RO (the modal is reused for
+// both). A DEDICATED flag, not a StatusMsg tag — the old "toggle_ro" string latch
+// survived board close (ESC/O bypass the handlers), so a LATER close-confirm on another
+// cell silently ran toggleEditable instead of closeZone.
+static bool s_CloseConfirmToggle = false;
+
 static void openCloseConfirmModal(const std::string &basename, const std::string &purpose)
 {
+	s_CloseConfirmToggle = false;
 	s_Sess.PendingActionBasename = basename;
 	if (CViewText *t = findText("ui:zp:close_confirm:content:title"))
 		t->setHardText(purpose.empty() ? "Close dirty zone?" : purpose);
@@ -2344,6 +2351,12 @@ void sessionBoardDragBegin()
 	s_BoardDragArmed = false;
 	if (ZPSCRIPT::isExecuting())
 		return;
+	// No arming while a modal/menu is up: CGroupMenu forces ExitClickOut, and
+	// getCtrlsUnder still reports the board cells BENEATH the menu — so the click that
+	// dismisses a menu (or a press-slide-release across its lines) armed a drag between
+	// whatever cells happened to sit under the pointer, firing phantom moves/copies.
+	if (CWidgetManager::getInstance()->hasModal())
+		return;
 	if (!s_SessionBoardVisible || !s_SessionBridge || !s_SessionBridge->World
 	    || s_SessionBridge->World->Kind != ZPWS::Ecosystem
 	    || !s_SessionBridge->scratchDragDrop)
@@ -2352,12 +2365,22 @@ void sessionBoardDragBegin()
 		s_BoardDragArmed = true;
 }
 
+/** Focus loss mid-drag (alt-tab) never delivers the up event — a later stray up would
+ *  pair with the stale arm and fire a phantom drag from the pre-focus-loss cell. */
+void sessionBoardDragCancel()
+{
+	s_BoardDragArmed = false;
+}
+
 void sessionBoardDragEnd(bool copyModifier)
 {
 	if (!s_BoardDragArmed)
 		return;
 	s_BoardDragArmed = false;
 	if (ZPSCRIPT::isExecuting())
+		return;
+	// A modal opened between arm and release (or the drop lands on one) — ignore.
+	if (CWidgetManager::getInstance()->hasModal())
 		return;
 	if (!s_SessionBoardVisible || !s_SessionBridge || !s_SessionBridge->scratchDragDrop)
 		return;
@@ -2411,9 +2434,11 @@ void setSessionBoardVisible(bool visible)
 			ZPWS::listZones(*s_SessionBridge->World, s_Sess.Zones);
 			if (CViewText *t = findText("ui:zp:zone_browser:content:world_title"))
 				t->setHardText(s_SessionBridge->World->WorldName + "  (session board)");
+			populateContinentGrid(*s_SessionBridge->World);
+			// AFTER populateContinentGrid — it overwrites world_sub with the grid extent,
+			// so the session hint set before it never displayed (dead store).
 			if (CViewText *t = findText("ui:zp:zone_browser:content:world_sub"))
 				t->setHardText("working set — O / BACK TO PAINTING returns");
-			populateContinentGrid(*s_SessionBridge->World);
 		}
 		else
 		{
@@ -2444,6 +2469,7 @@ void setSessionBoardVisible(bool visible)
 		s_Sess.SessionMode = false;
 		s_Sess.Active = false;
 		s_Sess.PendingActionBasename.clear();
+		s_CloseConfirmToggle = false; // ESC/O close bypasses the modal handlers
 		printf("session board: closed (back to painting)\n");
 	}
 }
@@ -2536,8 +2562,7 @@ public:
 			// Reuse close_confirm; btn labels still say Save first / Close without saving
 			// "Close without saving" path demotes without save via forceDiscard
 			CWidgetManager::getInstance()->enableModalWindow(NULL, "ui:zp:close_confirm");
-			// Tag purpose via status prefix
-			s_Sess.StatusMsg = "toggle_ro";
+			s_CloseConfirmToggle = true;
 			return;
 		}
 		std::string err;
@@ -2571,8 +2596,8 @@ public:
 		const std::string base = s_Sess.PendingActionBasename;
 		if (base.empty() || !s_SessionBridge)
 			return;
-		const bool isToggle = (s_Sess.StatusMsg == "toggle_ro");
-		s_Sess.StatusMsg.clear();
+		const bool isToggle = s_CloseConfirmToggle;
+		s_CloseConfirmToggle = false;
 		std::string err;
 		if (isToggle)
 		{
@@ -2600,8 +2625,8 @@ public:
 		const std::string base = s_Sess.PendingActionBasename;
 		if (base.empty() || !s_SessionBridge)
 			return;
-		const bool isToggle = (s_Sess.StatusMsg == "toggle_ro");
-		s_Sess.StatusMsg.clear();
+		const bool isToggle = s_CloseConfirmToggle;
+		s_CloseConfirmToggle = false;
 		std::string err;
 		if (isToggle)
 		{
@@ -2626,7 +2651,7 @@ public:
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		CWidgetManager::getInstance()->disableModalWindow();
-		s_Sess.StatusMsg.clear();
+		s_CloseConfirmToggle = false;
 		s_Sess.PendingActionBasename.clear();
 	}
 };
@@ -2807,25 +2832,23 @@ void forceShowContextActionForShot(const std::string &basename)
 	openContextActionPopup(b);
 }
 
+void forceShowContextPickerForShot(int mode)
+{
+	// The picker had NO screenshot coverage before the M25 review — which is exactly how
+	// the M25p7 row-flatten silently broke every row's click binding.
+	openContextBrickPicker(1, 0, mode);
+}
+
 static void openContextBrickPicker(int cx, int cy, int mode)
 {
 	s_ContextPickerMode = mode;
 	s_ContextPickerCx = cx;
 	s_ContextPickerCy = cy;
 	s_ContextPickerNames.clear();
-	// Screen B list idiom: fill a scroll list of world bricks
-	CInterfaceGroup *list = findGroup("ui:zp:context_picker:content:list");
-	if (list)
-	{
-		// Clear prior rows
-		const std::vector<CInterfaceGroup *> &groups = list->getGroups();
-		std::vector<CInterfaceGroup *> doomed;
-		for (size_t i = 0; i < groups.size(); ++i)
-			if (groups[i] && groups[i]->getId().find("row_") != std::string::npos)
-				doomed.push_back(groups[i]);
-		for (size_t i = 0; i < doomed.size(); ++i)
-			list->delGroup(doomed[i], true);
-	}
+	// Screen B list idiom: rows in a scroll_text's text_list (M25 review: was a fixed
+	// 280px plain group with no scrollbar — every brick past ~7 was unreachable).
+	static const char *kPickerList = "ui:zp:context_picker:content:list_scroll:text_list";
+	clearList(kPickerList);
 	if (!s_SessionBridge || !s_SessionBridge->World)
 		return;
 	std::vector<ZPWS::SZoneEntry> zones;
@@ -2879,31 +2902,35 @@ static void openContextBrickPicker(int cx, int cy, int mode)
 			}
 		}
 	}
-	sint32 y = 0;
 	for (size_t i = 0; i < zones.size(); ++i)
 	{
 		// Skip the open home brick (instance mode keeps it — home is a valid source)
 		if (s_ContextPickerMode != 2 && s_SessionBridge->ScratchHomeName == zones[i].Basename)
 			continue;
 		s_ContextPickerNames.push_back(zones[i].Basename);
-		if (!list) continue;
 		std::vector<std::pair<std::string, std::string> > p;
 		p.push_back(std::make_pair(std::string("id"), NLMISC::toString("row_%u", (uint)i)));
 		p.push_back(std::make_pair(std::string("title"), zones[i].Basename));
 		p.push_back(std::make_pair(std::string("idx"), NLMISC::toString("%u", (uint)(s_ContextPickerNames.size() - 1))));
 		p.push_back(std::make_pair(std::string("thumb"), std::string("")));
-		CInterfaceGroup *row = spawnUnder(list, "zp_zone_row", p, 0, y, 520, 36);
+		CInterfaceGroup *row = spawnRow("zp_zone_row", kPickerList, p);
 		if (row)
 		{
-			// Rebind click to context picker select
-			if (CCtrlTextButton *btn = dynamic_cast<CCtrlTextButton *>(row->getCtrl("btn")))
+			// Rebind click to context picker select. CCtrlBaseButton, NOT CCtrlTextButton:
+			// M25p7 flattened zp_zone_row's btn to a plain <ctrl type="button"> (CCtrlButton),
+			// so the old CCtrlTextButton cast returned NULL and every picker row silently
+			// kept the template's zp_select_zone/#idx — clicks dispatched a cell action for
+			// an unrelated board cell instead of picking the brick.
+			if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(row->getCtrl("btn")))
 			{
 				btn->setActionOnLeftClick("zp_context_pick");
 				btn->setParamsOnLeftClick(NLMISC::toString("%u", (uint)(s_ContextPickerNames.size() - 1)));
 			}
-			y -= 38;
+			row->setH(36);
 		}
 	}
+	if (CGroupList *gl = findList(kPickerList))
+		gl->invalidateCoords();
 	if (CViewText *t = findText("ui:zp:context_picker:content:title"))
 		t->setHardText(NLMISC::toString(s_ContextPickerMode == 2 ? "Place instance @ %d,%d"
 		                                : (s_ContextPickerMode == 1 ? "Open editable @ %d,%d"

@@ -8488,6 +8488,14 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 					ZPUI::forceShowContextActionForShot(
 						std::string(ctxShot) == "1" ? std::string() : std::string(ctxShot));
 				}
+				const char *pickShot = getenv("ZONE_PAINTER_CTX_PICKER_SHOT");
+				if (pickShot && pickShot[0] && pickShot[0] != '0')
+				{
+					ZPUI::setSessionBoardVisible(true);
+					int pmode = 0;
+					NLMISC::fromString(pickShot, pmode);
+					ZPUI::forceShowContextPickerForShot(pmode == 1 || pmode == 2 ? pmode : 0);
+				}
 				// M14c: open season picker modal for one screenshot frame
 				const char *smShot = getenv("ZONE_PAINTER_SEASON_MENU_SHOT");
 				if (smShot && smShot[0] && smShot[0] != '0')

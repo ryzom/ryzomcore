@@ -138,6 +138,10 @@ class CPointerButtonListener : public NLMISC::IEventListener
 			pointer->setPointerDown(false);
 			pointer->setPointerMiddleDown(false);
 			pointer->setPointerRightDown(false);
+			// The board drag arm must reset with the button state — the up event that
+			// would pair with it never arrives after a focus loss (alt-tab mid-drag),
+			// and a later stray up would fire a phantom drag from the stale cell.
+			sessionBoardDragCancel();
 		}
 	}
 

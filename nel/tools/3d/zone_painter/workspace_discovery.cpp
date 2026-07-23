@@ -154,7 +154,8 @@ static int zoneGroupOrder(const std::string &g)
 	if (g == "material") return 0;
 	if (g == "transition") return 1;
 	if (g == "zonematerial") return 2;
-	return 3;
+	if (g == "zonespecial") return 3;
+	return 4;
 }
 
 static bool zoneEntryLess(const SZoneEntry &a, const SZoneEntry &b)
@@ -363,10 +364,16 @@ static std::string zoneGroupOf(const std::string &basename)
 {
 	if (basename.compare(0, 9, "material-") == 0)
 		return "material";
-	if (basename.compare(0, 11, "transition-") == 0)
+	// Stock ecosystems use BOTH spellings (jungle: transition-*; corpus-wide:
+	// zonetransition-*); missing the long forms dumped every real transition/special
+	// brick into "other" and misordered Screen B's sections.
+	if (basename.compare(0, 11, "transition-") == 0
+	    || basename.compare(0, 15, "zonetransition-") == 0)
 		return "transition";
 	if (basename.compare(0, 13, "zonematerial-") == 0)
 		return "zonematerial";
+	if (basename.compare(0, 12, "zonespecial-") == 0)
+		return "zonespecial";
 	return "other";
 }
 
