@@ -2801,6 +2801,9 @@ static SPaintZone cloneInstanceZone(const SPaintZone &src, uint zoneId, float dx
 // distinction that file has. The frame never re-derives, so moving or closing ANY open
 // file (including the first) cannot re-anchor the board.
 static float g_SessionAnchorX = 0.f, g_SessionAnchorY = 0.f;
+// M30: the file the no-source scratchPlace alias means — pinned at assembly like the
+// CLI empty-source --place pins; NEVER re-resolved positionally after a close.
+static std::string g_LegacyPlaceSourceName;
 static bool g_SessionAnchorSet = false;
 
 static uint appendInstanceZones(std::vector<SPaintZone> &zones, size_t primaryCount,
@@ -2828,7 +2831,28 @@ static uint appendInstanceZones(std::vector<SPaintZone> &zones, size_t primaryCo
 	}
 
 	uint nextId = kInstanceZoneIdBase;
-	const uint needIds = (uint)places.size() * (uint)primaryCount;
+	// Overflow guard on the SUM of each place's actual source zone count (file 0's
+	// count only stands in on the legacy no-registry path) — a big source instanced
+	// many times must fail here, not run nextId past uint16 mid-append.
+	uint needIds = 0;
+	for (size_t pi = 0; pi < places.size(); ++pi)
+	{
+		if (g_EditableFiles.empty())
+		{
+			needIds += (uint)primaryCount;
+			continue;
+		}
+		const std::string nm = places[pi].SourceBasename.empty()
+			? g_EditableFiles[0].Basename : places[pi].SourceBasename;
+		for (size_t ei = 0; ei < g_EditableFiles.size(); ++ei)
+		{
+			if (NLMISC::toLowerAscii(g_EditableFiles[ei].Basename) == NLMISC::toLowerAscii(nm))
+			{
+				needIds += (uint)g_EditableFiles[ei].ZoneIds.size();
+				break;
+			}
+		}
+	}
 	if (nextId + needIds >= 65535)
 	{
 		fprintf(stderr, "ERROR: instance zone id range would exceed uint16 (need %u ids from %u)\n",
@@ -6034,12 +6058,18 @@ static void placeEcoEditableRange(std::vector<SPaintZone> &zones, SEditableFileI
 {
 	if (rb >= re) return;
 	// Footprint from the first eligible (non-frozen unless demoted) zone, like the
-	// place-context path; AABB rect fallback covers the rest.
+	// place-context path; AABB rect fallback covers the rest. All-frozen (RO-demoted
+	// file): the FIRST zone of the range — a scan that walks to the LAST would pick an
+	// embedded display copy and shift the file's occupancy on toggle (the same trap the
+	// hint-context footprint fix documented).
 	size_t pick = rb;
 	for (size_t i = rb; i < re; ++i)
 	{
-		pick = i;
-		if (!zones[i].Frozen) break;
+		if (!zones[i].Frozen)
+		{
+			pick = i;
+			break;
+		}
 	}
 	float ox = 0.f, oy = 0.f;
 	int cw = 1, ch = 1;
@@ -7250,8 +7280,17 @@ static bool scratchOpenEditable(int cx, int cy, const std::string &basenameIn, s
 		err = "unresolved brick: " + basename;
 		return false;
 	}
-	if (findEditableByBasename(ze.Basename))
+	if (SEditableFileInfo *dup = findEditableByBasename(ze.Basename))
 	{
+		// Basename is the file-identity key — a DIFFERENT file with the same name must
+		// refuse, not silently become an instance of the other file (M30).
+		if (NLMISC::CPath::standardizePath(dup->Path, false)
+		    != NLMISC::CPath::standardizePath(ze.MaxPath, false))
+		{
+			err = "another file with basename '" + ze.Basename + "' is already open ("
+			      + dup->Path + ")";
+			return false;
+		}
 		// M28b: the file is one on disk — opening it again is an INSTANCE placement
 		// (shared paint backing), never a second independent load.
 		printf("'%s' already open — placing a shared-paint instance @ (%d,%d)\n",
@@ -7355,7 +7394,11 @@ static bool scratchContextToEditable(int cx, int cy, std::string &err)
 static bool scratchPlace(int cx, int cy, std::string &err)
 {
 	// M28: legacy spelling for "place an instance of the first-opened file" — one
-	// uniform path for every source.
+	// uniform path for every source. M30: "first-opened" is the ASSEMBLY-pinned name;
+	// after that file closes this fails loudly ("source must be an OPEN brick") instead
+	// of silently instancing whichever file is now index 0 (replayed scripts!).
+	if (!g_LegacyPlaceSourceName.empty())
+		return scratchPlaceInstanceOf(cx, cy, g_LegacyPlaceSourceName, err);
 	if (g_EditableFiles.empty())
 	{
 		err = "no open file to instance";
@@ -7648,6 +7691,15 @@ static bool sessionOpenZone(const std::string &basename, std::string &err)
 	if (findEditableByBasename(basename))
 	{
 		err = "already open";
+		return false;
+	}
+	// Same cap as the eco path (scratchOpenEditable): per-file zone-id base is
+	// index*1000 and file index 10 would alias the instance id space — an 11th
+	// continent file would get ids >= kInstanceZoneIdBase and Prop mode would
+	// misclassify its zones as instance clones.
+	if (g_EditableFiles.size() >= 10)
+	{
+		err = "board editable limit reached (10 files; zone-id space)";
 		return false;
 	}
 	const ZPWS::SZoneEntry *ze = findWorldZone(basename);
@@ -10294,20 +10346,44 @@ args.addArg("", "instances", "NxM",
 	// Duplicates become shared-paint INSTANCES on ecosystems (placed after footprints
 	// derive below) and dedupe with a warning on continents (grid-anchored, no places).
 	std::vector<std::string> dupInstanceNames;
+	std::vector<std::pair<size_t, size_t> > editableRanges; // per-registered-file zone range
 	for (size_t ei = 0; ei < editables.size(); ++ei)
 	{
-		if (ei > 0 && findEditableByBasename(editables[ei].Basename))
+		if (ei > 0)
 		{
-			if (g_StartupWorld.Kind == ZPWS::Ecosystem)
+			if (SEditableFileInfo *dup = findEditableByBasename(editables[ei].Basename))
 			{
-				dupInstanceNames.push_back(editables[ei].Basename);
-				printf("editable '%s' selected again — will place a shared-paint instance\n",
-				       editables[ei].Basename.c_str());
+				// Basenames are the file-identity key everywhere (instances, hints,
+				// saves) — a SECOND file with the same name is unsupportable, and
+				// silently instancing the OTHER file would be worse than refusing.
+				if (NLMISC::CPath::standardizePath(dup->Path, false)
+				    != NLMISC::CPath::standardizePath(editables[ei].MaxPath, false))
+				{
+					fprintf(stderr, "ERROR: two different files share the basename '%s':\n"
+					        "  %s\n  %s\n  (basenames are the session's file-identity key)\n",
+					        editables[ei].Basename.c_str(), dup->Path.c_str(),
+					        editables[ei].MaxPath.c_str());
+					return 1;
+				}
+				if (g_StartupWorld.Kind == ZPWS::Ecosystem)
+				{
+					dupInstanceNames.push_back(editables[ei].Basename);
+					printf("editable '%s' selected again — will place a shared-paint instance\n",
+					       editables[ei].Basename.c_str());
+				}
+				else
+					fprintf(stderr, "WARNING: '%s' selected twice — duplicate ignored "
+					        "(continent zones are grid-anchored)\n", editables[ei].Basename.c_str());
+				continue;
 			}
-			else
-				fprintf(stderr, "WARNING: '%s' selected twice — duplicate ignored "
-				        "(continent zones are grid-anchored)\n", editables[ei].Basename.c_str());
-			continue;
+		}
+		if (g_EditableFiles.size() >= 10)
+		{
+			// Same cap as every other open route: per-file zone-id base is index*1000,
+			// file index 10 would alias the instance id space (kInstanceZoneIdBase).
+			fprintf(stderr, "ERROR: startup selection exceeds the board editable limit "
+			                "(10 files; zone-id space)\n");
+			return 1;
 		}
 		PMAXLOAD::SLoadedMax *sceneLm = NULL;
 		if (ei == 0)
@@ -10351,6 +10427,7 @@ args.addArg("", "instances", "NxM",
 		for (size_t zi = before; zi < zones.size(); ++zi)
 			efi.ZoneIds.push_back(zones[zi].ZoneId);
 		g_EditableFiles.push_back(efi);
+		editableRanges.push_back(std::make_pair(before, zones.size()));
 		if (ei == 0)
 			g_PrimaryLm = primaryLmHeap;
 		if (ei > 0 || editables.size() > 1)
@@ -10390,6 +10467,39 @@ args.addArg("", "instances", "NxM",
 		for (size_t i = 0; i < g_Places.size(); ++i)
 			if (g_Places[i].SourceBasename.empty())
 				g_Places[i].SourceBasename = g_EditableFiles[0].Basename;
+		// The runtime no-source scratchPlace alias pins the same way (M30) — resolving
+		// g_EditableFiles[0] at CALL time would silently re-source a replayed script's
+		// places to whichever file is first after a close.
+		g_LegacyPlaceSourceName = g_EditableFiles[0].Basename;
+		// M30: non-first MULTI-SELECT files place like reopened files — board cell from
+		// the AUTHORED footprint origin relative to the session anchor, then the same
+		// per-file placement the rebuild uses (fills CellsW/H/Mask; the translate is a
+		// near-no-op for grid-authored bricks). They used to carry 1x1 phantom
+		// footprints until the first rebuild, which then stacked them at cell (0,0);
+		// conflicts (converted bricks authored at one spot) auto-shift in the post-
+		// context re-audit below like every other startup placement.
+		for (size_t ei = 1; ei < g_EditableFiles.size() && ei < editableRanges.size(); ++ei)
+		{
+			SEditableFileInfo &ne = g_EditableFiles[ei];
+			const size_t rb = editableRanges[ei].first, re = editableRanges[ei].second;
+			if (rb >= re)
+				continue;
+			size_t pick = rb;
+			for (size_t zi = rb; zi < re; ++zi)
+				if (!zones[zi].Frozen) { pick = zi; break; }
+			float ox = 0.f, oy = 0.f;
+			int cw = 1, ch = 1;
+			bool fromT = false;
+			std::vector<bool> mask;
+			std::string derr;
+			deriveZoneFootprintMask(zones[pick], cellSize, snap, mask, cw, ch, ox, oy,
+			                        fromT, derr);
+			ne.CellX = (int)std::lround((ox - g_SessionAnchorX) / cellSize);
+			ne.CellY = (int)std::lround((oy - g_SessionAnchorY) / cellSize);
+			placeEcoEditableRange(zones, ne, rb, re, cellSize, snap);
+			printf("editable[%u] '%s' @ cell (%d,%d) footprint %dx%d (authored origin)\n",
+			       (uint)ei, ne.Basename.c_str(), ne.CellX, ne.CellY, ne.CellsW, ne.CellsH);
+		}
 		// M28b: duplicate startup selections become shared-paint instances, ring-placed
 		// from the source block's origin (footprint fields are live from here on).
 		for (size_t i = 0; i < dupInstanceNames.size(); ++i)
@@ -10422,9 +10532,18 @@ args.addArg("", "instances", "NxM",
 				        oe.Basename.c_str());
 				return 1;
 			}
-			if (findEditableByBasename(ze.Basename))
+			if (SEditableFileInfo *dup = findEditableByBasename(ze.Basename))
 			{
-				// M28b: duplicate open = shared-paint instance at the requested cell
+				// Basename is the file-identity key — refuse a DIFFERENT file with the
+				// same name (M30); a true duplicate open = shared-paint instance (M28b).
+				if (NLMISC::CPath::standardizePath(dup->Path, false)
+				    != NLMISC::CPath::standardizePath(ze.MaxPath, false))
+				{
+					fprintf(stderr, "ERROR: --open-editable: another file with basename "
+					        "'%s' is already open (%s)\n", ze.Basename.c_str(),
+					        dup->Path.c_str());
+					return 1;
+				}
 				placeDupInstanceNear(ze.Basename, oe.Cx, oe.Cy);
 				continue;
 			}
@@ -10543,9 +10662,14 @@ args.addArg("", "instances", "NxM",
 	// M24 review: the --open-editable conflict pass above ran while --place-context specs
 	// still had provisional 1x1 masks (derived only inside loadOnePlaceContext). Re-audit
 	// with the real masks and auto-shift again if a multi-cell context claimed the cell.
+	// M28/M30: index 0 included — the first-opened file is an ordinary movable cell, so
+	// a context spec claiming ITS cells must shift it like any other file. REVERSE
+	// order: when two FILES overlap (bricks are authored at origin, so multi-select
+	// twins collide), the later-opened one yields; the first-opened file moves only
+	// when nothing else resolves its cell.
 	if (g_StartupWorld.Kind == ZPWS::Ecosystem)
 	{
-		for (size_t ei = 1; ei < g_EditableFiles.size(); ++ei)
+		for (size_t ei = g_EditableFiles.size(); ei-- > 0; )
 		{
 			std::string cerr;
 			if (!scratchEditableConflicts(ei, cerr))
@@ -10579,7 +10703,7 @@ args.addArg("", "instances", "NxM",
 					translateZonesXY(zones, zi, zi + 1, sdx, sdy);
 			ne.PlacedDX += sdx;
 			ne.PlacedDY += sdy;
-			fprintf(stderr, "open-editable: '%s' overlapped a loaded context at (%d,%d) — "
+			fprintf(stderr, "startup placement: '%s' overlapped at (%d,%d) — "
 			        "auto-shifted to (%d,%d)\n",
 			        ne.Basename.c_str(), bx, by, ne.CellX, ne.CellY);
 		}
