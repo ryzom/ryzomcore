@@ -658,6 +658,8 @@ static int runInternal(const std::string &code, const std::string &label)
 	CLuaState *ls = CLuaManager::getInstance().getLuaState();
 	s_LastError.clear();
 	s_CancelReq = false;
+	if (s_Host && s_Host->resetCancel)
+		s_Host->resetCancel(); // an earlier ESC cancel must not abort this fresh run
 	s_Executing = true;
 	bool ok = false;
 	try

@@ -84,6 +84,9 @@ struct SScriptHost
 	void (*pumpUI)();
 	/** True once the user requested cancel during a pumped script (ESC / Cancel). */
 	bool (*cancelRequested)();
+	/** Clear the host-side cancel latch — called at every script-run start (an ESC cancel
+	 *	must not poison every later pumped script of the session). */
+	void (*resetCancel)();
 	/** Board-session working-set ops (ui M23c); NULL outside board sessions. */
 	bool (*openZone)(const std::string &basename, std::string &err);
 	bool (*closeZone)(const std::string &basename, bool saveFirst, bool forceDiscard, std::string &err);
@@ -92,7 +95,7 @@ struct SScriptHost
 
 	SScriptHost()
 		: execOp(NULL), zonesInfo(NULL), getZoneProp(NULL), saveTo(NULL), saveAll(NULL),
-		  screenshot(NULL), pumpUI(NULL), cancelRequested(NULL),
+		  screenshot(NULL), pumpUI(NULL), cancelRequested(NULL), resetCancel(NULL),
 		  openZone(NULL), closeZone(NULL), bridge(NULL)
 	{
 	}

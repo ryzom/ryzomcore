@@ -802,13 +802,12 @@ static void computeZoneEligibility(const std::vector<SZoneNode> &nodes,
 	{
 		if (nodes[i].Frozen)
 			continue;
-		// DONOTEXPORT appdata
-		{
-			// local reader — appdata on node
-			std::string s;
-			// getScriptAppDataInt is in export tools; use APPDATA via patch_eval's scene only.
-			// DONOTEXPORT rare on zone sources; skip if we cannot read (treat as exportable).
-		}
+		// DONOTEXPORT appdata: the exporter refuses these nodes outright
+		// (nel_patch_converter/script.cpp export_zone_cf), so eligibility must too —
+		// otherwise a marked first node becomes the sole editable while the node the
+		// exporter actually exports is stuck read-only.
+		if (APPDATA::getScriptAppDataInt(nodes[i].Node, NEL3D_APPDATA_DONOTEXPORT, 0) != 0)
+			continue;
 		std::string name = ucstring(nodes[i].Node->userName()).toUtf8();
 		// findID: parts[0]=num, parts[1]=two letters
 		std::vector<std::string> parts;
@@ -1424,46 +1423,54 @@ static bool resolveHintToZone(const ZPWS::SWorldEntry &world, const std::string 
 		s_dir = world.MaxDir;
 	}
 	const std::string want = NLMISC::toLowerAscii(hintBase);
-	// 1) exact basename
-	for (size_t i = 0; i < s_listed.size(); ++i)
+	// Two passes: on a miss, re-list once and retry — a brick saved DURING the session
+	// (Save As into the world dir, then hinted/placed) is invisible to the first listing
+	// (same fix class as findWorldZone's re-list-on-miss).
+	for (int attempt = 0; attempt < 2; ++attempt)
 	{
-		if (NLMISC::toLowerAscii(s_listed[i].Basename) == want)
+		if (attempt == 1)
+			ZPWS::listZones(world, s_listed);
+		// 1) exact basename
+		for (size_t i = 0; i < s_listed.size(); ++i)
 		{
-			out = s_listed[i];
-			return true;
-		}
-	}
-	// 2) basename ends with -hint or _hint token (zonematerial-converted-199_dy vs 199_DY)
-	//    also ends-with the hint after a final dash
-	for (size_t i = 0; i < s_listed.size(); ++i)
-	{
-		const std::string b = NLMISC::toLowerAscii(s_listed[i].Basename);
-		if (b.size() >= want.size()
-		    && b.compare(b.size() - want.size(), want.size(), want) == 0)
-		{
-			// require boundary: start or non-alnum before match
-			if (b.size() == want.size()
-			    || b[b.size() - want.size() - 1] == '-'
-			    || b[b.size() - want.size() - 1] == '_')
+			if (NLMISC::toLowerAscii(s_listed[i].Basename) == want)
 			{
 				out = s_listed[i];
 				return true;
 			}
 		}
-	}
-	// 3) continent grid: parse hint as row_col and find by coords
-	{
-		int row = 0, col = 0;
-		if (ZPWS::parseContinentZoneName(hintBase, row, col))
+		// 2) basename ends with -hint or _hint token (zonematerial-converted-199_dy vs
+		//    199_DY) — also ends-with the hint after a final dash
+		for (size_t i = 0; i < s_listed.size(); ++i)
 		{
-			for (size_t i = 0; i < s_listed.size(); ++i)
+			const std::string b = NLMISC::toLowerAscii(s_listed[i].Basename);
+			if (b.size() >= want.size()
+			    && b.compare(b.size() - want.size(), want.size(), want) == 0)
 			{
-				int r = 0, c = 0;
-				if (ZPWS::parseContinentZoneName(s_listed[i].Basename, r, c)
-				    && r == row && c == col)
+				// require boundary: start or non-alnum before match
+				if (b.size() == want.size()
+				    || b[b.size() - want.size() - 1] == '-'
+				    || b[b.size() - want.size() - 1] == '_')
 				{
 					out = s_listed[i];
 					return true;
+				}
+			}
+		}
+		// 3) continent grid: parse hint as row_col and find by coords
+		{
+			int row = 0, col = 0;
+			if (ZPWS::parseContinentZoneName(hintBase, row, col))
+			{
+				for (size_t i = 0; i < s_listed.size(); ++i)
+				{
+					int r = 0, c = 0;
+					if (ZPWS::parseContinentZoneName(s_listed[i].Basename, r, c)
+					    && r == row && c == col)
+					{
+						out = s_listed[i];
+						return true;
+					}
 				}
 			}
 		}
@@ -1929,12 +1936,12 @@ static void loadNeighborContextFiles(std::vector<SPaintZone> &zones, float cellS
 		{
 			// Derived footprint for board occupancy (M24 review: hint-loaded contexts were
 			// invisible to every collision check). Placement math above stays untouched.
+			// Pick the FIRST zone of the range: context zones are ALL force-frozen, so the
+			// old first-non-frozen scan never broke and silently landed on the LAST zone —
+			// an embedded neighbor copy in legacy --embedded-context mode. Under board
+			// authority only the eligible brick zone(s) survive, and first matches the
+			// derivePrimaryFootprint pick convention.
 			size_t cPick = before;
-			for (size_t i = before; i < zones.size(); ++i)
-			{
-				cPick = i;
-				if (!zones[i].Frozen) break;
-			}
 			float mOx = 0.f, mOy = 0.f;
 			bool fromT = false;
 			std::string derr;
@@ -1967,6 +1974,31 @@ struct SPlaceContextSpec
 	SPlaceContextSpec() : Dx(0), Dy(0), CellsW(1), CellsH(1), Rot(0), Mirror(false) {}
 };
 static std::vector<SPlaceContextSpec> g_PlaceContextSpecs;
+
+/** Normalize every spec's Basename to the RESOLVED zone basename (M24 review follow-up):
+ *  resolveHintToZone accepts short/suffix names ("199_DY" → zonematerial-converted-199_dy)
+ *  but every later basename-keyed correlation — the loadOnePlaceContext mask stash-back,
+ *  the spec-vs-hint skip lists, contextBasenameHasSpec/hintContextConflicts — compares
+ *  against SContextFile.Basename, which stores the resolved name. An unresolved short
+ *  name kept the provisional 1x1 mask forever, made the brick self-collide on rotate/
+ *  drag, and let a saved hint reload a duplicate copy. Call before ANY skip-list build. */
+static void normalizePlaceContextSpecBasenames()
+{
+	if (g_StartupWorld.MaxDir.empty())
+		return;
+	for (size_t i = 0; i < g_PlaceContextSpecs.size(); ++i)
+	{
+		ZPWS::SZoneEntry ze;
+		if (resolveHintToZone(g_StartupWorld, g_PlaceContextSpecs[i].Basename, ze)
+		    && NLMISC::toLowerAscii(g_PlaceContextSpecs[i].Basename)
+		       != NLMISC::toLowerAscii(ze.Basename))
+		{
+			printf("place-context: spec '%s' resolved to '%s'\n",
+			       g_PlaceContextSpecs[i].Basename.c_str(), ze.Basename.c_str());
+			g_PlaceContextSpecs[i].Basename = ze.Basename;
+		}
+	}
+}
 // M24a: --open-editable "cx,cy:basename" specs (ecosystem startup; board Open editable's CLI form)
 struct SOpenEditableSpec
 {
@@ -3198,6 +3230,29 @@ static int saveWholeFile(const std::string &input, const std::string &output, CS
 			std::vector<uint8> b;
 			if (in.readStream(*n, b)) { present.push_back(*n); rawOrig.push_back(b); }
 		}
+		// Carry any root-level stream OUTSIDE the known .max set verbatim (review finding:
+		// they were silently dropped, and the per-stream verify could not see the loss).
+		// Appended AFTER the known list so the corpus files' data layout — which the
+		// whole-file byte gate depends on — is untouched when no unknown streams exist.
+		const std::vector<std::string> &allNames = in.streamNames();
+		for (size_t i = 0; i < allNames.size(); ++i)
+		{
+			bool known = false;
+			for (const char **n = kStreams; *n && !known; ++n)
+				known = allNames[i] == *n;
+			if (known)
+				continue;
+			std::vector<uint8> b;
+			if (in.readStream(allNames[i], b))
+			{
+				fprintf(stderr, "WARNING: unknown stream '%s' (%u bytes) carried verbatim "
+				        "(container layout may differ from the source)\n",
+				        (allNames[i][0] == '\05' ? allNames[i].substr(1) : allNames[i]).c_str(),
+				        (uint)b.size());
+				present.push_back(allNames[i]);
+				rawOrig.push_back(b);
+			}
+		}
 		haveClassId = in.getClassId(classId);
 	}
 
@@ -3298,6 +3353,7 @@ static void buildPaintInputs(std::vector<SPaintZone> &zones, std::vector<ZPPAINT
 
 // Forward: M18b prop write (defined with Prop helpers below).
 static bool zpWriteZoneProp(uint zoneId, const std::string &which, int value, std::string &err);
+static bool zpZoneIsFootprintSource(uint zoneId);
 
 // One canonical script op — the --paint-script vocabulary; painterscript (script_api,
 // ui M23) executes through the SAME function so Lua ops are byte-equivalent to file ops.
@@ -3662,6 +3718,9 @@ static const SPaintZone *zpFindPaintZone(uint zoneId);
 // paints through the shared op layer, right button picks the tile set under the cursor,
 // Ctrl+Z / Ctrl+E undo/redo. The edit3d navigation stays on the middle mouse.
 // ModeProp (M18a): left click selects editable zones instead of painting.
+static void zpUndo();
+static void zpRedo();
+
 class CPaintMouseListener : public NLMISC::IEventListener
 {
 public:
@@ -3755,8 +3814,22 @@ public:
 			NLMISC::CEventKeyDown *keyDown = (NLMISC::CEventKeyDown *)&event;
 			if (keyDown->FirstTime && (keyDown->Button & NLMISC::ctrlKeyButton))
 			{
-				if (keyDown->Key == NLMISC::KeyZ) Core->opUndo();
-				if (keyDown->Key == NLMISC::KeyE) Core->opRedo();
+				if (keyDown->Key == NLMISC::KeyZ || keyDown->Key == NLMISC::KeyE)
+				{
+					// Commit any open mouse stroke first: opUndo/opRedo don't guard
+					// m_CurStroke, and undoing beneath an open stroke corrupts the
+					// undo pairing (paint+undo would no longer restore pristine).
+					if (Pressed)
+					{
+						Pressed = false;
+						Core->endStroke();
+					}
+					// Shared handlers, not Core directly — the toolbar buttons go through
+					// these and they record for the painterscript recorder; the raw-Core
+					// keyboard path silently skipped recording.
+					if (keyDown->Key == NLMISC::KeyZ) zpUndo();
+					else zpRedo();
+				}
 			}
 			return;
 		}
@@ -4561,9 +4634,10 @@ static bool zpWriteZoneProp(uint zoneId, const std::string &which, int value, st
 		else
 			zpEraseScriptAppData(pz->Node, appId);
 	}
-	// Live footprint re-derive when usebbox changes (primary zone)
-	if (which == "usebbox" && g_PaintCtx.Zones && !g_PaintCtx.Zones->empty()
-	    && (*g_PaintCtx.Zones)[0].ZoneId == zoneId)
+	// Live footprint re-derive when usebbox changes on the footprint-source zone — the
+	// FIRST NON-FROZEN zone, exactly the one derivePrimaryFootprint picks (zones[0] can be
+	// a frozen RO/embedded copy when scene order puts it first).
+	if (which == "usebbox" && g_PaintCtx.Zones && zpZoneIsFootprintSource(zoneId))
 	{
 		derivePrimaryFootprint(*g_PaintCtx.Zones, 0, g_PaintCtx.Zones->size(),
 		                       g_SessionCellSize > 0.f ? g_SessionCellSize : 160.f,
@@ -4573,6 +4647,20 @@ static bool zpWriteZoneProp(uint zoneId, const std::string &which, int value, st
 	return true;
 }
 
+/** True when zoneId is the zone derivePrimaryFootprint picks (first non-frozen). */
+static bool zpZoneIsFootprintSource(uint zoneId)
+{
+	if (!g_PaintCtx.Zones)
+		return false;
+	const std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
+	for (size_t i = 0; i < zones.size(); ++i)
+	{
+		if (!zones[i].Frozen)
+			return zones[i].ZoneId == zoneId;
+	}
+	return false;
+}
+
 /** M18c: prop undo/redo re-derives footprint when USE_BOUNDINGBOX is restored. */
 static void zpOnPropChanged(uint zoneId, uint32 appDataId)
 {
@@ -4580,7 +4668,7 @@ static void zpOnPropChanged(uint zoneId, uint32 appDataId)
 		return;
 	if (!g_PaintCtx.Zones || g_PaintCtx.Zones->empty())
 		return;
-	if ((*g_PaintCtx.Zones)[0].ZoneId != zoneId)
+	if (!zpZoneIsFootprintSource(zoneId))
 		return;
 	derivePrimaryFootprint(*g_PaintCtx.Zones, 0, g_PaintCtx.Zones->size(),
 	                       g_SessionCellSize > 0.f ? g_SessionCellSize : 160.f,
@@ -5043,7 +5131,9 @@ static bool prepareThumbnailOverride(const std::string &srcMax, std::vector<uint
 	NLMISC::CBitmap bmp;
 	if (captureTopDownThumbnail(bmp))
 	{
-		g_CapturedThumb.swap(bmp);
+		// COPY into the stash (a swap here would hand the STALE stash — empty on the first
+		// interactive save — to the SI build below, embedding a blank/one-behind thumbnail).
+		g_CapturedThumb = bmp;
 		g_HaveCapturedThumb = true;
 	}
 	else if (g_HaveCapturedThumb)
@@ -5367,6 +5457,7 @@ static bool (*g_ScriptScreenshotFn)(const std::string &path, std::string &err) =
 static void (*g_ScriptPumpFn)() = NULL;
 static bool g_ScriptCancel = false;
 static bool zpScriptCancelRequested() { return g_ScriptCancel; }
+static void zpScriptResetCancel() { g_ScriptCancel = false; }
 
 // Board-session working-set ops (defined later; NULL-checked via g_SessionActive)
 static bool sessionOpenZone(const std::string &basename, std::string &err);
@@ -5399,6 +5490,7 @@ static void zpInstallScriptHost(ZPUI::SPaintUIBridge *bridgePtr)
 	g_ScriptHost.screenshot = g_ScriptScreenshotFn;
 	g_ScriptHost.pumpUI = g_ScriptPumpFn;
 	g_ScriptHost.cancelRequested = zpScriptCancelRequested;
+	g_ScriptHost.resetCancel = zpScriptResetCancel;
 	g_ScriptHost.openZone = zpScriptOpenZone;
 	g_ScriptHost.closeZone = zpScriptCloseZone;
 	g_ScriptHost.bridge = bridgePtr;
@@ -5446,9 +5538,12 @@ static bool zpScriptScreenshotImpl(const std::string &path, std::string &err)
 	g_PumpCtx.Driver->clearBuffers(NLMISC::CRGBA(90, 90, 90));
 	g_PumpCtx.Scene->render();
 	if (g_PumpCtx.Ui) { g_PumpCtx.Ui->update(); g_PumpCtx.Ui->draw(); }
-	g_PumpCtx.Driver->swapBuffers();
+	// Read the just-drawn backbuffer BEFORE swap (glReadPixels default = GL_BACK; after
+	// swap it holds the previous frame, or garbage on swap-exchange drivers) — same rule
+	// as the --screenshot path's M18e comment.
 	NLMISC::CBitmap btm;
 	static_cast<NL3D::CDriverUser *>(g_PumpCtx.Driver)->getDriver()->getBuffer(btm);
+	g_PumpCtx.Driver->swapBuffers();
 	NLMISC::COFile fs;
 	if (!fs.open(path)) { err = "cannot open " + path; return false; }
 	btm.writeTGA(fs, 24);
@@ -5772,6 +5867,7 @@ static bool rebuildWorkingSet(std::string &err, uint &outWelds)
 
 	// M16: neighbor/context via hint chain (appdata → embedded → continent grid)
 	{
+		normalizePlaceContextSpecBasenames(); // suffix-resolved specs must match by resolved name
 		std::vector<std::string> skip;
 		for (size_t i = 0; i < g_EditableFiles.size(); ++i)
 			skip.push_back(g_EditableFiles[i].Basename);
@@ -6361,6 +6457,11 @@ static bool scratchPlaceContext(int cx, int cy, const std::string &basename, std
 	if (!scratchRebuild(err))
 	{
 		g_PlaceContextSpecs.pop_back();
+		// Recovery rebuild: the failed one left the core referencing the cleared zones
+		// vector — rebuilding without the bad spec keeps the session live (UAF otherwise).
+		std::string rerr;
+		if (!scratchRebuild(rerr))
+			fprintf(stderr, "ERROR: place-context recovery rebuild failed: %s\n", rerr.c_str());
 		return false;
 	}
 	// After load, multi-cell mask is filled in loadOnePlaceContext — re-check collisions
@@ -6497,22 +6598,15 @@ static bool scratchRotateContext(int cx, int cy, int delta, std::string &err)
 		return false;
 	}
 	SPlaceContextSpec &pc = g_PlaceContextSpecs[idx];
-	const int fw = pc.CellsW > 0 ? pc.CellsW : 1;
-	const int fh = pc.CellsH > 0 ? pc.CellsH : 1;
-	int oldW = 0, oldH = 0;
-	footprintBlockSize(fw, fh, pc.Rot, pc.Mirror, oldW, oldH);
-	const double ctrX = (double)pc.Dx + 0.5 * (double)oldW;
-	const double ctrY = (double)pc.Dy + 0.5 * (double)oldH;
+	// Rotate anchored at the block's min corner (origin stays put, size transposes):
+	// the old floor(center − newSize/2) pivot drifted odd-parity blocks (2x1 etc.) by a
+	// half-cell-floored step per rotation — CW then CCW landed one cell off, and four CWs
+	// walked the block diagonally. Center-pivoting an odd-parity block on a whole-cell
+	// grid is unrepresentable; the min-corner anchor is exact and reversible.
 	const uint newRot = (uint)((int)pc.Rot + delta) & 3;
-	int newW = 0, newH = 0;
-	footprintBlockSize(fw, fh, newRot, pc.Mirror, newW, newH);
-	const int newOx = (int)std::floor(ctrX - 0.5 * (double)newW + 1e-9);
-	const int newOy = (int)std::floor(ctrY - 0.5 * (double)newH + 1e-9);
-	if (contextCandidateConflicts(idx, newOx, newOy, newRot, pc.Mirror, err))
+	if (contextCandidateConflicts(idx, pc.Dx, pc.Dy, newRot, pc.Mirror, err))
 		return false;
 	pc.Rot = newRot;
-	pc.Dx = newOx;
-	pc.Dy = newOy;
 	return scratchRebuild(err);
 }
 
@@ -6973,9 +7067,12 @@ static void scratchHintNames(std::vector<std::string> &out)
 }
 
 /**
- * Rotate about the instance's footprint-block center (M14a/M17): update Rot and recompute
- * origin so it remains the min-corner of the transformed block; refuse if the new
- * mask would collide with home or another instance.
+ * Rotate an instance anchored at its block's min corner (origin stays put, block size
+ * transposes); refuse if the new mask would collide with home or another instance.
+ * (Was: pivot about the block center with floor(center − newSize/2) — odd-parity blocks
+ * like 2x1 drifted a half-cell-floored step per rotation, so CW then CCW landed one cell
+ * off and four CWs walked the block diagonally. Center-pivoting an odd-parity block on a
+ * whole-cell grid is unrepresentable; the min-corner anchor is exact and reversible.)
  */
 static bool scratchRotate(int cx, int cy, int delta, std::string &err)
 {
@@ -6989,20 +7086,10 @@ static bool scratchRotate(int cx, int cy, int delta, std::string &err)
 	std::vector<bool> sm;
 	int fw = 1, fh = 1;
 	instanceSourceFootprint(pl, sm, fw, fh);
-	int oldW = 0, oldH = 0;
-	footprintBlockSize(fw, fh, pl.Rot, pl.Mirror, oldW, oldH);
-	const double ctrX = (double)pl.CellX + 0.5 * (double)oldW;
-	const double ctrY = (double)pl.CellY + 0.5 * (double)oldH;
 	const uint newRot = (uint)((int)pl.Rot + delta) & 3;
-	int newW = 0, newH = 0;
-	footprintBlockSize(fw, fh, newRot, pl.Mirror, newW, newH);
-	const int newOx = (int)std::floor(ctrX - 0.5 * (double)newW + 1e-9);
-	const int newOy = (int)std::floor(ctrY - 0.5 * (double)newH + 1e-9);
-	if (scratchMaskConflictsSrc(sm, fw, fh, newOx, newOy, newRot, pl.Mirror, (int)idx, err))
+	if (scratchMaskConflictsSrc(sm, fw, fh, pl.CellX, pl.CellY, newRot, pl.Mirror, (int)idx, err))
 		return false;
 	g_Places[idx].Rot = newRot;
-	g_Places[idx].CellX = newOx;
-	g_Places[idx].CellY = newOy;
 	return scratchRebuild(err);
 }
 
@@ -7347,11 +7434,23 @@ static bool sessionToggleEditable(const std::string &basename, bool saveFirst, b
 		// → editable (re-registers carriers as unfrozen)
 		efi->Editable = true;
 	}
+	const bool nowEditable = efi->Editable;
 	uint welds = 0;
 	if (!rebuildWorkingSet(err, welds))
+	{
+		// A failed rebuild leaves the core referencing the CLEARED zones vector — roll the
+		// toggle back and rebuild again so the session stays live (same recovery rule as
+		// open/close; without it the next frame's hover walk is a use-after-free).
+		efi = findEditableByBasename(basename);
+		if (efi) efi->Editable = !nowEditable;
+		std::string rerr;
+		uint rwelds = 0;
+		if (!rebuildWorkingSet(rerr, rwelds))
+			fprintf(stderr, "ERROR: toggle recovery rebuild failed: %s\n", rerr.c_str());
 		return false;
+	}
 	printf("session toggle: '%s' now %s; welds=%u\n",
-	       basename.c_str(), efi->Editable ? "editable" : "read-only", welds);
+	       basename.c_str(), nowEditable ? "editable" : "read-only", welds);
 	return true;
 }
 
@@ -8711,8 +8810,10 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 						                     paintListener.BrushColor, viewport);
 				}
 
+				// F12 capture BEFORE swap: getBuffer reads GL_BACK, which after swap holds the
+				// previous frame (or garbage on swap-exchange drivers) — M18e rule.
+				zpViewerScreenshot(driver, udriver->AsyncListener);
 				udriver->swapBuffers();
-				zpViewerScreenshot(driver, udriver->AsyncListener); // F12 convenience
 			}
 			while (!viewerQuit && closeListener.WindowActive && udriver->isActive());
 		}
@@ -9615,6 +9716,13 @@ args.addArg("", "instances", "NxM",
 	float snap = 1.f;
 	if (args.haveLongArg("cellsize")) NLMISC::fromString(args.getLongArg("cellsize")[0], cellSize);
 	if (args.haveLongArg("snap")) NLMISC::fromString(args.getLongArg("snap")[0], snap);
+	// Session params must be live BEFORE initial assembly: loadNeighborContextFiles /
+	// loadOnePlaceContext derive context footprint masks through g_SessionSnap — assigning
+	// only after assembly (the old placement) built the initial masks at snap=1 while every
+	// post-rebuild derivation used the real --snap, flipping template/AABB mask choices
+	// after the first board op.
+	g_SessionCellSize = cellSize;
+	g_SessionSnap = snap;
 	uint seed = 1;
 	if (args.haveLongArg("seed")) NLMISC::fromString(args.getLongArg("seed")[0], seed);
 	srand(seed);
@@ -9874,6 +9982,7 @@ args.addArg("", "instances", "NxM",
 	if (g_LoadNeighbors && !editables.empty()
 	    && (g_BoardSession || g_StartupWorld.Kind == ZPWS::Continent))
 	{
+		normalizePlaceContextSpecBasenames(); // suffix-resolved specs must match by resolved name
 		std::vector<std::string> skip;
 		for (size_t i = 0; i < g_EditableFiles.size(); ++i)
 			skip.push_back(g_EditableFiles[i].Basename);
@@ -9885,6 +9994,7 @@ args.addArg("", "instances", "NxM",
 
 	// M16c: --place-context "dx,dy:basename" (ecosystem / board) — load as RO at offset.
 	// Failed specs are DROPPED (they would retry on every rebuild and show phantom cells).
+	normalizePlaceContextSpecBasenames(); // idempotent; covers the no-neighbor-load path
 	for (size_t pci = g_PlaceContextSpecs.size(); pci-- > 0; )
 	{
 		std::string perr;
