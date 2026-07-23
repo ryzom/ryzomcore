@@ -100,6 +100,17 @@ struct SScriptHost
 	bool (*removeInstance)(int cx, int cy, std::string &err);
 	bool (*rotateInstance)(int cx, int cy, int delta, std::string &err);
 	bool (*mirrorInstance)(int cx, int cy, std::string &err);
+	/** M33 board-op completion (recorder parity): context specs, promote, cell drag,
+	 *	RO toggle, per-file save — every board mutation the UI offers is scriptable so
+	 *	recordings that span board changes replay. NULL outside board sessions. */
+	bool (*placeContext)(int cx, int cy, const std::string &basename, std::string &err);
+	bool (*removeContext)(int cx, int cy, std::string &err);
+	bool (*rotateContext)(int cx, int cy, int delta, std::string &err);
+	bool (*mirrorContext)(int cx, int cy, std::string &err);
+	bool (*makeEditable)(int cx, int cy, std::string &err);
+	bool (*dragCell)(int fx, int fy, int tx, int ty, bool copy, std::string &err);
+	bool (*toggleZone)(const std::string &basename, bool saveFirst, bool forceDiscard, std::string &err);
+	bool (*saveZone)(const std::string &basename, std::string &err);
 	/** Refresh the bridge's frame-synced snapshot fields NOW — they are filled by the
 	 *	main loop and go stale for the whole run of a script; getters (getMode/getTileSet)
 	 *	call this first so painter.setX(); assert(painter.getX()) holds. NULL headless. */
@@ -112,6 +123,9 @@ struct SScriptHost
 		  screenshot(NULL), pumpUI(NULL), cancelRequested(NULL), resetCancel(NULL),
 		  openZone(NULL), closeZone(NULL), openZoneAt(NULL), placeInstance(NULL),
 		  removeInstance(NULL), rotateInstance(NULL), mirrorInstance(NULL),
+		  placeContext(NULL), removeContext(NULL), rotateContext(NULL),
+		  mirrorContext(NULL), makeEditable(NULL), dragCell(NULL),
+		  toggleZone(NULL), saveZone(NULL),
 		  refreshBridge(NULL), bridge(NULL)
 	{
 	}

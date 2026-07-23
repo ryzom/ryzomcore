@@ -4182,6 +4182,23 @@ static std::string luaQuote(const std::string &s)
 	return r;
 }
 
+// M33: board-op recorder. Board ops NEST (openEditable→placeInstanceOf on dup opens,
+// contextToEditable→openEditable, dragDrop→place paths, toggle→open/save) — record at
+// the OUTERMOST op only, and only on success, so a recording replays each user action
+// exactly once. ZPSCRIPT::record() itself already no-ops during script execution
+// (replays must not re-record) and while REC is off.
+static int g_BoardOpDepth = 0;
+struct SBoardOpScope
+{
+	SBoardOpScope() { ++g_BoardOpDepth; }
+	~SBoardOpScope() { --g_BoardOpDepth; }
+};
+static void recordBoardOp(const std::string &line)
+{
+	if (g_BoardOpDepth == 1)
+		ZPSCRIPT::record(line);
+}
+
 static void zpSelectMode(int mode)
 {
 	if (!g_PaintCtx.Active || !g_PaintCtx.Paint) return;
@@ -5593,6 +5610,10 @@ static bool zpSaveTo(const std::string &target)
 	// fire. Only the Overwrite paths rebaseline (markZonesSaved).
 	g_LastSaveStatus = "OK save -> " + target;
 	printf("OK save (panel) -> %s\n", target.c_str());
+	{
+		SBoardOpScope boardOp;
+		recordBoardOp(NLMISC::toString("painter.save(%s)", luaQuote(target).c_str()));
+	}
 	return true;
 }
 
@@ -5634,6 +5655,13 @@ static bool zpSaveFileOverwrite(const std::string &basename, bool wantThumb)
 	}
 	g_PaintCtx.Core->markZonesSaved(efi->ZoneIds);
 	g_LastSaveStatus = "OK overwrite -> " + efi->Path;
+	// M33: the modal per-file Overwrite replays as painter.saveZone (the board-cell
+	// save; thumbnail preference is not carried — irrelevant under the byte gates'
+	// --no-thumbnail, and saveZone's always-thumb default matches interactive use).
+	{
+		SBoardOpScope boardOp;
+		recordBoardOp(NLMISC::toString("painter.saveZone(%s)", luaQuote(basename).c_str()));
+	}
 	return true;
 }
 
@@ -5705,7 +5733,16 @@ static std::string zpFileDir(const std::string &basename)
  * In-place overwrite: for multi-select (M6b) this is save-all — each dirty editable file
  * gets temp → one-time .bak → rename. Single-file path unchanged.
  */
+static bool zpSaveOverwriteImpl();
 static bool zpSaveOverwrite()
+{
+	SBoardOpScope boardOp;
+	const bool ok = zpSaveOverwriteImpl();
+	if (ok)
+		recordBoardOp("painter.saveAll()");
+	return ok;
+}
+static bool zpSaveOverwriteImpl()
 {
 	g_LastSaveStatus.clear();
 	if (!g_PaintCtx.Core || !g_PaintCtx.Scene)
@@ -5872,6 +5909,16 @@ static bool scratchPlaceInstanceOf(int cx, int cy, const std::string &basenameIn
 static bool scratchRemove(int cx, int cy, std::string &err);
 static bool scratchRotate(int cx, int cy, int delta, std::string &err);
 static bool scratchMirror(int cx, int cy, std::string &err);
+// M33 board-op completion forwards:
+static bool scratchPlaceContext(int cx, int cy, const std::string &basename, std::string &err);
+static bool scratchRemoveContext(int cx, int cy, std::string &err);
+static bool scratchRotateContext(int cx, int cy, int delta, std::string &err);
+static bool scratchMirrorContext(int cx, int cy, std::string &err);
+static bool scratchContextToEditable(int cx, int cy, std::string &err);
+static bool scratchDragDrop(int fx, int fy, int tx, int ty, bool copy, std::string &err);
+static bool sessionToggleEditable(const std::string &basename, bool saveFirst, bool forceDiscard,
+                                  std::string &err);
+static bool sessionSaveZone(const std::string &basename, std::string &err);
 
 static bool zpScriptEcoGate(const char *op, std::string &err)
 {
@@ -5913,6 +5960,50 @@ static bool zpScriptCloseZone(const std::string &basename, bool saveFirst, bool 
 	return sessionCloseZone(basename, saveFirst, forceDiscard, err);
 }
 
+// M33 board-op completion — same gating split as the UI: scratch ops are eco-board,
+// toggle/save are any board session.
+static bool zpScriptPlaceContext(int cx, int cy, const std::string &basename, std::string &err)
+{
+	if (!zpScriptEcoGate("placeContext", err)) return false;
+	return scratchPlaceContext(cx, cy, basename, err);
+}
+static bool zpScriptRemoveContext(int cx, int cy, std::string &err)
+{
+	if (!zpScriptEcoGate("removeContext", err)) return false;
+	return scratchRemoveContext(cx, cy, err);
+}
+static bool zpScriptRotateContext(int cx, int cy, int delta, std::string &err)
+{
+	if (!zpScriptEcoGate("rotateContext", err)) return false;
+	return scratchRotateContext(cx, cy, delta, err);
+}
+static bool zpScriptMirrorContext(int cx, int cy, std::string &err)
+{
+	if (!zpScriptEcoGate("mirrorContext", err)) return false;
+	return scratchMirrorContext(cx, cy, err);
+}
+static bool zpScriptMakeEditable(int cx, int cy, std::string &err)
+{
+	if (!zpScriptEcoGate("makeEditable", err)) return false;
+	return scratchContextToEditable(cx, cy, err);
+}
+static bool zpScriptDragCell(int fx, int fy, int tx, int ty, bool copy, std::string &err)
+{
+	if (!zpScriptEcoGate(copy ? "copyCell" : "moveCell", err)) return false;
+	return scratchDragDrop(fx, fy, tx, ty, copy, err);
+}
+static bool zpScriptToggleZone(const std::string &basename, bool saveFirst, bool forceDiscard,
+                               std::string &err)
+{
+	if (!g_SessionOpsAvailable) { err = "toggleZone: board session only"; return false; }
+	return sessionToggleEditable(basename, saveFirst, forceDiscard, err);
+}
+static bool zpScriptSaveZone(const std::string &basename, std::string &err)
+{
+	if (!g_SessionOpsAvailable) { err = "saveZone: board session only"; return false; }
+	return sessionSaveZone(basename, err);
+}
+
 static ZPSCRIPT::SScriptHost g_ScriptHost;
 
 /** (Re)install the painterscript host for the current capabilities. bridge may be NULL. */
@@ -5937,6 +6028,14 @@ static void zpInstallScriptHost(ZPUI::SPaintUIBridge *bridgePtr)
 	g_ScriptHost.removeInstance = zpScriptRemoveInstance;
 	g_ScriptHost.rotateInstance = zpScriptRotateInstance;
 	g_ScriptHost.mirrorInstance = zpScriptMirrorInstance;
+	g_ScriptHost.placeContext = zpScriptPlaceContext;
+	g_ScriptHost.removeContext = zpScriptRemoveContext;
+	g_ScriptHost.rotateContext = zpScriptRotateContext;
+	g_ScriptHost.mirrorContext = zpScriptMirrorContext;
+	g_ScriptHost.makeEditable = zpScriptMakeEditable;
+	g_ScriptHost.dragCell = zpScriptDragCell;
+	g_ScriptHost.toggleZone = zpScriptToggleZone;
+	g_ScriptHost.saveZone = zpScriptSaveZone;
 	g_ScriptHost.bridge = bridgePtr;
 	ZPSCRIPT::setHost(&g_ScriptHost);
 }
@@ -6915,7 +7014,16 @@ static bool loadOnePlaceContext(std::vector<SPaintZone> &zones, float cellSize,
 static bool contextCandidateConflicts(size_t idx, int nx, int ny, uint nrot, bool nmirror,
                                       std::string &err);
 
+static bool scratchPlaceContextImpl(int cx, int cy, const std::string &basename, std::string &err);
 static bool scratchPlaceContext(int cx, int cy, const std::string &basename, std::string &err)
+{
+	SBoardOpScope boardOp;
+	const bool ok = scratchPlaceContextImpl(cx, cy, basename, err);
+	if (ok)
+		recordBoardOp(NLMISC::toString("painter.placeContext(%d, %d, %s)", cx, cy, luaQuote(basename).c_str()));
+	return ok;
+}
+static bool scratchPlaceContextImpl(int cx, int cy, const std::string &basename, std::string &err)
 {
 	size_t idx = 0;
 	if (scratchFindPlace(cx, cy, idx))
@@ -6999,7 +7107,16 @@ static bool scratchPlaceContext(int cx, int cy, const std::string &basename, std
 	return true;
 }
 
+static bool scratchRemoveContextImpl(int cx, int cy, std::string &err);
 static bool scratchRemoveContext(int cx, int cy, std::string &err)
+{
+	SBoardOpScope boardOp;
+	const bool ok = scratchRemoveContextImpl(cx, cy, err);
+	if (ok)
+		recordBoardOp(NLMISC::toString("painter.removeContext(%d, %d)", cx, cy));
+	return ok;
+}
+static bool scratchRemoveContextImpl(int cx, int cy, std::string &err)
 {
 	size_t idx = 0;
 	if (!scratchFindContext(cx, cy, idx))
@@ -7082,7 +7199,16 @@ static bool contextCandidateConflicts(size_t idx, int nx, int ny, uint nrot, boo
 }
 
 /** M24c: rotate a placed context brick about its footprint-block center (instance rule). */
+static bool scratchRotateContextImpl(int cx, int cy, int delta, std::string &err);
 static bool scratchRotateContext(int cx, int cy, int delta, std::string &err)
+{
+	SBoardOpScope boardOp;
+	const bool ok = scratchRotateContextImpl(cx, cy, delta, err);
+	if (ok)
+		recordBoardOp(NLMISC::toString("painter.rotateContext(%d, %d, %d)", cx, cy, delta));
+	return ok;
+}
+static bool scratchRotateContextImpl(int cx, int cy, int delta, std::string &err)
 {
 	size_t idx = 0;
 	if (!scratchFindContext(cx, cy, idx))
@@ -7112,7 +7238,16 @@ static bool scratchRotateContext(int cx, int cy, int delta, std::string &err)
 }
 
 /** M24c: mirror a placed context brick (block AABB stays; mask occupancy rechecked). */
+static bool scratchMirrorContextImpl(int cx, int cy, std::string &err);
 static bool scratchMirrorContext(int cx, int cy, std::string &err)
+{
+	SBoardOpScope boardOp;
+	const bool ok = scratchMirrorContextImpl(cx, cy, err);
+	if (ok)
+		recordBoardOp(NLMISC::toString("painter.mirrorContext(%d, %d)", cx, cy));
+	return ok;
+}
+static bool scratchMirrorContextImpl(int cx, int cy, std::string &err)
 {
 	size_t idx = 0;
 	if (!scratchFindContext(cx, cy, idx))
@@ -7156,7 +7291,16 @@ static bool scratchEditableConflicts(size_t idx, std::string &err);
  * transform, context file, open file); copy duplicates (home → home instance, instance
  * → same-source instance, context → second placement, open file → instance of it).
  */
+static bool scratchDragDropImpl(int fx, int fy, int tx, int ty, bool copy, std::string &err);
 static bool scratchDragDrop(int fx, int fy, int tx, int ty, bool copy, std::string &err)
+{
+	SBoardOpScope boardOp;
+	const bool ok = scratchDragDropImpl(fx, fy, tx, ty, copy, err);
+	if (ok)
+		recordBoardOp(NLMISC::toString(copy ? "painter.copyCell(%d, %d, %d, %d)" : "painter.moveCell(%d, %d, %d, %d)", fx, fy, tx, ty));
+	return ok;
+}
+static bool scratchDragDropImpl(int fx, int fy, int tx, int ty, bool copy, std::string &err)
 {
 	const int dx = tx - fx, dy = ty - fy;
 	if (dx == 0 && dy == 0) { err = "same cell"; return false; }
@@ -7357,7 +7501,16 @@ static bool scratchEditableConflicts(size_t idx, std::string &err)
  * counterpart of the continent sessionOpenZone. The footprint derives at rebuild; a
  * post-rebuild collision check rolls the open back (auto-shift is a later milestone).
  */
+static bool scratchOpenEditableImpl(int cx, int cy, const std::string &basenameIn, std::string &err);
 static bool scratchOpenEditable(int cx, int cy, const std::string &basenameIn, std::string &err)
+{
+	SBoardOpScope boardOp;
+	const bool ok = scratchOpenEditableImpl(cx, cy, basenameIn, err);
+	if (ok)
+		recordBoardOp(NLMISC::toString("painter.openZone(%s, %d, %d)", luaQuote(basenameIn).c_str(), cx, cy));
+	return ok;
+}
+static bool scratchOpenEditableImpl(int cx, int cy, const std::string &basenameIn, std::string &err)
 {
 	// Per-file zone-id base is index*1000 and instance clone ids start at
 	// kInstanceZoneIdBase (10000): file index 10 would alias the instance id space.
@@ -7469,7 +7622,16 @@ static bool scratchOpenEditable(int cx, int cy, const std::string &basenameIn, s
 }
 
 /** M24a: convert a placed RO context brick to an editable file at the same cell. */
+static bool scratchContextToEditableImpl(int cx, int cy, std::string &err);
 static bool scratchContextToEditable(int cx, int cy, std::string &err)
+{
+	SBoardOpScope boardOp;
+	const bool ok = scratchContextToEditableImpl(cx, cy, err);
+	if (ok)
+		recordBoardOp(NLMISC::toString("painter.makeEditable(%d, %d)", cx, cy));
+	return ok;
+}
+static bool scratchContextToEditableImpl(int cx, int cy, std::string &err)
 {
 	size_t idx = 0;
 	if (!scratchFindContext(cx, cy, idx))
@@ -7511,7 +7673,16 @@ static bool scratchPlace(int cx, int cy, std::string &err)
  * Display clones share the source file's carriers (pointer keying), so painting the
  * source repaints every instance live, exactly like home self-instances.
  */
+static bool scratchPlaceInstanceOfImpl(int cx, int cy, const std::string &basenameIn, std::string &err);
 static bool scratchPlaceInstanceOf(int cx, int cy, const std::string &basenameIn, std::string &err)
+{
+	SBoardOpScope boardOp;
+	const bool ok = scratchPlaceInstanceOfImpl(cx, cy, basenameIn, err);
+	if (ok)
+		recordBoardOp(NLMISC::toString("painter.placeInstance(%d, %d, %s)", cx, cy, luaQuote(basenameIn).c_str()));
+	return ok;
+}
+static bool scratchPlaceInstanceOfImpl(int cx, int cy, const std::string &basenameIn, std::string &err)
 {
 	size_t idx = 0;
 	if (scratchFindPlace(cx, cy, idx)) { err = "cell already occupied"; return false; }
@@ -7622,7 +7793,16 @@ static void scratchHintNames(std::vector<std::string> &out)
  * off and four CWs walked the block diagonally. Center-pivoting an odd-parity block on a
  * whole-cell grid is unrepresentable; the min-corner anchor is exact and reversible.)
  */
+static bool scratchRotateImpl(int cx, int cy, int delta, std::string &err);
 static bool scratchRotate(int cx, int cy, int delta, std::string &err)
+{
+	SBoardOpScope boardOp;
+	const bool ok = scratchRotateImpl(cx, cy, delta, err);
+	if (ok)
+		recordBoardOp(NLMISC::toString("painter.rotateInstance(%d, %d, %d)", cx, cy, delta));
+	return ok;
+}
+static bool scratchRotateImpl(int cx, int cy, int delta, std::string &err)
 {
 	size_t idx = 0;
 	if (!scratchFindPlace(cx, cy, idx))
@@ -7648,7 +7828,16 @@ static bool scratchRotate(int cx, int cy, int delta, std::string &err)
 	return true;
 }
 
+static bool scratchMirrorImpl(int cx, int cy, std::string &err);
 static bool scratchMirror(int cx, int cy, std::string &err)
+{
+	SBoardOpScope boardOp;
+	const bool ok = scratchMirrorImpl(cx, cy, err);
+	if (ok)
+		recordBoardOp(NLMISC::toString("painter.mirrorInstance(%d, %d)", cx, cy));
+	return ok;
+}
+static bool scratchMirrorImpl(int cx, int cy, std::string &err)
 {
 	size_t idx = 0;
 	if (!scratchFindPlace(cx, cy, idx))
@@ -7678,7 +7867,16 @@ static bool scratchMirror(int cx, int cy, std::string &err)
 	return true;
 }
 
+static bool scratchRemoveImpl(int cx, int cy, std::string &err);
 static bool scratchRemove(int cx, int cy, std::string &err)
+{
+	SBoardOpScope boardOp;
+	const bool ok = scratchRemoveImpl(cx, cy, err);
+	if (ok)
+		recordBoardOp(NLMISC::toString("painter.removeInstance(%d, %d)", cx, cy));
+	return ok;
+}
+static bool scratchRemoveImpl(int cx, int cy, std::string &err)
 {
 	size_t idx = 0;
 	if (!scratchFindPlace(cx, cy, idx))
@@ -7771,7 +7969,16 @@ static bool sessionIsEditable(const std::string &basename)
 	return efi && efi->Editable;
 }
 
+static bool sessionOpenZoneImpl(const std::string &basename, std::string &err);
 static bool sessionOpenZone(const std::string &basename, std::string &err)
+{
+	SBoardOpScope boardOp;
+	const bool ok = sessionOpenZoneImpl(basename, err);
+	if (ok)
+		recordBoardOp(NLMISC::toString("painter.openZone(%s)", luaQuote(basename).c_str()));
+	return ok;
+}
+static bool sessionOpenZoneImpl(const std::string &basename, std::string &err)
 {
 	if (g_StartupWorld.Kind == ZPWS::Ecosystem)
 	{
@@ -7832,7 +8039,16 @@ static bool sessionOpenZone(const std::string &basename, std::string &err)
 	return true;
 }
 
+static bool sessionCloseZoneImpl(const std::string &basename, bool saveFirst, bool forceDiscard, std::string &err);
 static bool sessionCloseZone(const std::string &basename, bool saveFirst, bool forceDiscard, std::string &err)
+{
+	SBoardOpScope boardOp;
+	const bool ok = sessionCloseZoneImpl(basename, saveFirst, forceDiscard, err);
+	if (ok)
+		recordBoardOp(NLMISC::toString("painter.closeZone(%s, %s, %s)", luaQuote(basename).c_str(), saveFirst ? "true" : "false", forceDiscard ? "true" : "false"));
+	return ok;
+}
+static bool sessionCloseZoneImpl(const std::string &basename, bool saveFirst, bool forceDiscard, std::string &err)
 {
 	SEditableFileInfo *efi = findEditableByBasename(basename);
 	// Closing a pure neighbor is a no-op (ring is automatic)
@@ -7956,7 +8172,16 @@ static bool sessionCloseZone(const std::string &basename, bool saveFirst, bool f
 	return true;
 }
 
+static bool sessionSaveZoneImpl(const std::string &basename, std::string &err);
 static bool sessionSaveZone(const std::string &basename, std::string &err)
+{
+	SBoardOpScope boardOp;
+	const bool ok = sessionSaveZoneImpl(basename, err);
+	if (ok)
+		recordBoardOp(NLMISC::toString("painter.saveZone(%s)", luaQuote(basename).c_str()));
+	return ok;
+}
+static bool sessionSaveZoneImpl(const std::string &basename, std::string &err)
 {
 	SEditableFileInfo *efi = findEditableByBasename(basename);
 	if (!efi)
@@ -7972,8 +8197,22 @@ static bool sessionSaveZone(const std::string &basename, std::string &err)
 	return sessionSaveOneFile(*efi, err);
 }
 
+static bool sessionToggleEditableImpl(const std::string &basename, bool saveFirst,
+                                      bool forceDiscard, std::string &err);
 static bool sessionToggleEditable(const std::string &basename, bool saveFirst, bool forceDiscard,
                                   std::string &err)
+{
+	SBoardOpScope boardOp;
+	const bool ok = sessionToggleEditableImpl(basename, saveFirst, forceDiscard, err);
+	if (ok)
+		recordBoardOp(NLMISC::toString("painter.toggleZone(%s, %s, %s)",
+		                               luaQuote(basename).c_str(),
+		                               saveFirst ? "true" : "false",
+		                               forceDiscard ? "true" : "false"));
+	return ok;
+}
+static bool sessionToggleEditableImpl(const std::string &basename, bool saveFirst,
+                                      bool forceDiscard, std::string &err)
 {
 	SEditableFileInfo *efi = findEditableByBasename(basename);
 	if (!efi)
@@ -8843,14 +9082,6 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 					       paintListener.BrushColor.R, paintListener.BrushColor.G, paintListener.BrushColor.B);
 				}
 			}
-			// Dev-only: ZONE_PAINTER_DUMP_RECORDER=1 prints the recorder buffer after the
-			// panel-action test (recorder E2E: enable recording via --lua-script pre-pass,
-			// drive a handler, assert the recorded painter.* line).
-			{
-				const char *dumpRec = getenv("ZONE_PAINTER_DUMP_RECORDER");
-				if (dumpRec && dumpRec[0] && dumpRec[0] != '0')
-					printf("recorder dump:\n%s--- end recorder ---\n", ZPSCRIPT::recorderText().c_str());
-			}
 			// Sync panel labels before capture so the screenshot shows live state
 			zpFillBridgeState(paintBridge);
 			// Dev-only: ZONE_PAINTER_SAVE_MODAL_SHOT=1 opens the Save modal for one frame
@@ -8895,7 +9126,9 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 			}
 			// M11a/M12c: session board env hooks. ZONE_PAINTER_SHOW_BOARD=1 opens the board.
 			// Continent: BOARD_ACTION=open|close|save|toggle:BASE
-			// Ecosystem: BOARD_ACTION=place:cx,cy | rotate:cx,cy | mirror:cx,cy | remove:cx,cy
+			// Ecosystem: BOARD_ACTION=place|rotate|mirror|remove:cx,cy, plus the context ops
+			// (place-context:cx,cy:base, remove-/rotate-/mirror-context:cx,cy, make-editable:cx,cy).
+			// M33: ';'-separated action lists run in order.
 			// CLOSE_CONFIRM_SHOT / CELL_ACTION_SHOT / INST_ACTION_SHOT force modals for screenshots.
 			{
 				const char *showB = getenv("ZONE_PAINTER_SHOW_BOARD");
@@ -8932,7 +9165,21 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 			const char *bact = getenv("ZONE_PAINTER_BOARD_ACTION");
 				if (bact && bact[0])
 				{
-					std::string act(bact);
+				// M33: ';'-separated action list — the recorder E2E drives several board
+				// ops in one run. Single actions parse exactly as before.
+				std::vector<std::string> actList;
+				{
+					std::string all(bact), cur;
+					for (std::string::size_type ai = 0; ai <= all.size(); ++ai)
+					{
+						char c = ai < all.size() ? all[ai] : ';';
+						if (c == ';') { if (!cur.empty()) actList.push_back(cur); cur.clear(); }
+						else cur += c;
+					}
+				}
+				for (size_t actIdx = 0; actIdx < actList.size(); ++actIdx)
+				{
+					const std::string &act = actList[actIdx];
 					std::string::size_type colon = act.find(':');
 					std::string op = colon == std::string::npos ? act : act.substr(0, colon);
 					std::string base = colon == std::string::npos ? std::string() : act.substr(colon + 1);
@@ -8947,7 +9194,9 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 					else if (op == "toggle" && !base.empty())
 						ok = sessionToggleEditable(base, false, true, err);
 					else if (op == "place" || op == "rotate" || op == "mirror" || op == "remove"
-					         || op == "place-context" || op == "remove-context")
+					         || op == "place-context" || op == "remove-context"
+					         || op == "rotate-context" || op == "mirror-context"
+					         || op == "make-editable")
 					{
 						// place:cx,cy | place-context:cx,cy:basename | remove-context:cx,cy
 						if (op == "place-context")
@@ -8979,17 +9228,29 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 								else if (op == "mirror") ok = scratchMirror(cx, cy, err);
 								else if (op == "remove") ok = scratchRemove(cx, cy, err);
 								else if (op == "remove-context") ok = scratchRemoveContext(cx, cy, err);
+								else if (op == "rotate-context") ok = scratchRotateContext(cx, cy, +1, err);
+								else if (op == "mirror-context") ok = scratchMirrorContext(cx, cy, err);
+								else if (op == "make-editable") ok = scratchContextToEditable(cx, cy, err);
 							}
 							else
 								err = "expected cx,cy";
 						}
 					}
 					else
-						err = "unknown BOARD_ACTION (open|close|save|toggle:base / place|rotate|mirror|remove:cx,cy / place-context:cx,cy:base / remove-context:cx,cy)";
+						err = "unknown BOARD_ACTION (open|close|save|toggle:base / place|rotate|mirror|remove:cx,cy / place-context:cx,cy:base / remove-context|rotate-context|mirror-context|make-editable:cx,cy; ';'-separated list runs in order)";
 					printf("board-action %s: %s%s%s\n", act.c_str(), ok ? "OK" : "FAIL",
 					       err.empty() ? "" : " ", err.c_str());
 					if (ok)
 						ZPUI::refreshSessionBoardStates();
+				}
+				}
+				// Dev-only: ZONE_PAINTER_DUMP_RECORDER=1 prints the recorder buffer AFTER the
+				// panel/board env hooks ran (M33: board-op recording E2E extracts this dump
+				// and replays it — dumping before the board hooks missed their lines).
+				{
+					const char *dumpRec = getenv("ZONE_PAINTER_DUMP_RECORDER");
+					if (dumpRec && dumpRec[0] && dumpRec[0] != '0')
+						printf("recorder dump:\n%s--- end recorder ---\n", ZPSCRIPT::recorderText().c_str());
 				}
 				const char *ccShot = getenv("ZONE_PAINTER_CLOSE_CONFIRM_SHOT");
 				if (ccShot && ccShot[0] && ccShot[0] != '0')

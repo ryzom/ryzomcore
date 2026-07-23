@@ -560,6 +560,108 @@ static int lCloseZone(CLuaState &ls) // painter.closeZone("basename"[,saveFirst[
 	return retOk(ls);
 }
 
+// M33 board-op completion — context specs, promote, cell drag, RO toggle, per-file save.
+// Same host-wrapper idiom as the M31 instance ops; hosts gate eco/continent themselves.
+
+static int lPlaceContext(CLuaState &ls) // painter.placeContext(cx,cy,"basename") — eco board
+{
+	double a[2];
+	std::string err, base;
+	if (!argNumbers(ls, 2, a, "placeContext(cx,cy,\"basename\")", err)) return retErr(ls, err);
+	if (!argString(ls, 3, base) || base.empty())
+		return retErr(ls, "usage: placeContext(cx,cy,\"basename\")");
+	if (!s_Host || !s_Host->placeContext) return retErr(ls, "placeContext: board session only");
+	if (!s_Host->placeContext((int)a[0], (int)a[1], base, err)) return retErr(ls, err);
+	return retOk(ls);
+}
+
+static int lRemoveContext(CLuaState &ls) // painter.removeContext(cx,cy) — eco board
+{
+	double a[2];
+	std::string err;
+	if (!argNumbers(ls, 2, a, "removeContext(cx,cy)", err)) return retErr(ls, err);
+	if (!s_Host || !s_Host->removeContext) return retErr(ls, "removeContext: board session only");
+	if (!s_Host->removeContext((int)a[0], (int)a[1], err)) return retErr(ls, err);
+	return retOk(ls);
+}
+
+static int lRotateContext(CLuaState &ls) // painter.rotateContext(cx,cy[,delta=1]) — eco board
+{
+	double a[2];
+	std::string err;
+	if (!argNumbers(ls, 2, a, "rotateContext(cx,cy[,delta])", err)) return retErr(ls, err);
+	double delta = 1;
+	argNumber(ls, 3, delta);
+	if (!s_Host || !s_Host->rotateContext) return retErr(ls, "rotateContext: board session only");
+	if (!s_Host->rotateContext((int)a[0], (int)a[1], (int)delta, err)) return retErr(ls, err);
+	return retOk(ls);
+}
+
+static int lMirrorContext(CLuaState &ls) // painter.mirrorContext(cx,cy) — eco board
+{
+	double a[2];
+	std::string err;
+	if (!argNumbers(ls, 2, a, "mirrorContext(cx,cy)", err)) return retErr(ls, err);
+	if (!s_Host || !s_Host->mirrorContext) return retErr(ls, "mirrorContext: board session only");
+	if (!s_Host->mirrorContext((int)a[0], (int)a[1], err)) return retErr(ls, err);
+	return retOk(ls);
+}
+
+static int lMakeEditable(CLuaState &ls) // painter.makeEditable(cx,cy) — promote RO context
+{
+	double a[2];
+	std::string err;
+	if (!argNumbers(ls, 2, a, "makeEditable(cx,cy)", err)) return retErr(ls, err);
+	if (!s_Host || !s_Host->makeEditable) return retErr(ls, "makeEditable: board session only");
+	if (!s_Host->makeEditable((int)a[0], (int)a[1], err)) return retErr(ls, err);
+	return retOk(ls);
+}
+
+static int lMoveCell(CLuaState &ls) // painter.moveCell(fx,fy,tx,ty) — board drag move
+{
+	double a[4];
+	std::string err;
+	if (!argNumbers(ls, 4, a, "moveCell(fx,fy,tx,ty)", err)) return retErr(ls, err);
+	if (!s_Host || !s_Host->dragCell) return retErr(ls, "moveCell: board session only");
+	if (!s_Host->dragCell((int)a[0], (int)a[1], (int)a[2], (int)a[3], false, err))
+		return retErr(ls, err);
+	return retOk(ls);
+}
+
+static int lCopyCell(CLuaState &ls) // painter.copyCell(fx,fy,tx,ty) — board drag copy
+{
+	double a[4];
+	std::string err;
+	if (!argNumbers(ls, 4, a, "copyCell(fx,fy,tx,ty)", err)) return retErr(ls, err);
+	if (!s_Host || !s_Host->dragCell) return retErr(ls, "copyCell: board session only");
+	if (!s_Host->dragCell((int)a[0], (int)a[1], (int)a[2], (int)a[3], true, err))
+		return retErr(ls, err);
+	return retOk(ls);
+}
+
+static int lToggleZone(CLuaState &ls) // painter.toggleZone("basename"[,saveFirst[,forceDiscard]])
+{
+	std::string base;
+	if (!argString(ls, 1, base))
+		return retErr(ls, "usage: toggleZone(\"basename\"[,saveFirst[,forceDiscard]])");
+	if (!s_Host || !s_Host->toggleZone) return retErr(ls, "toggleZone: board session only");
+	bool saveFirst = argBoolOpt(ls, 2, false);
+	bool forceDiscard = argBoolOpt(ls, 3, false);
+	std::string err;
+	if (!s_Host->toggleZone(base, saveFirst, forceDiscard, err)) return retErr(ls, err);
+	return retOk(ls);
+}
+
+static int lSaveZone(CLuaState &ls) // painter.saveZone("basename") — per-file board save
+{
+	std::string base;
+	if (!argString(ls, 1, base)) return retErr(ls, "usage: saveZone(\"basename\")");
+	if (!s_Host || !s_Host->saveZone) return retErr(ls, "saveZone: board session only");
+	std::string err;
+	if (!s_Host->saveZone(base, err)) return retErr(ls, err);
+	return retOk(ls);
+}
+
 static int lPumpUI(CLuaState &ls) // painter.pumpUI() -> true, or false when cancel was requested
 {
 	if (s_Host && s_Host->pumpUI) s_Host->pumpUI();
@@ -750,6 +852,11 @@ static const char *kBootstrap =
 	"  openZone = __zp_openZone, closeZone = __zp_closeZone,\n"
 	"  placeInstance = __zp_placeInstance, removeInstance = __zp_removeInstance,\n"
 	"  rotateInstance = __zp_rotateInstance, mirrorInstance = __zp_mirrorInstance,\n"
+	"  placeContext = __zp_placeContext, removeContext = __zp_removeContext,\n"
+	"  rotateContext = __zp_rotateContext, mirrorContext = __zp_mirrorContext,\n"
+	"  makeEditable = __zp_makeEditable,\n"
+	"  moveCell = __zp_moveCell, copyCell = __zp_copyCell,\n"
+	"  toggleZone = __zp_toggleZone, saveZone = __zp_saveZone,\n"
 	"  setMode = __zp_setMode, getMode = __zp_getMode,\n"
 	"  setTileSet = __zp_setTileSet, getTileSet = __zp_getTileSet,\n"
 	"  setDisplaceIndex = __zp_setDisplaceIndex, setBrushColor = __zp_setBrushColor,\n"
@@ -802,6 +909,15 @@ bool ensureLua()
 	ls->registerFunc("__zp_removeInstance", lRemoveInstance);
 	ls->registerFunc("__zp_rotateInstance", lRotateInstance);
 	ls->registerFunc("__zp_mirrorInstance", lMirrorInstance);
+	ls->registerFunc("__zp_placeContext", lPlaceContext);
+	ls->registerFunc("__zp_removeContext", lRemoveContext);
+	ls->registerFunc("__zp_rotateContext", lRotateContext);
+	ls->registerFunc("__zp_mirrorContext", lMirrorContext);
+	ls->registerFunc("__zp_makeEditable", lMakeEditable);
+	ls->registerFunc("__zp_moveCell", lMoveCell);
+	ls->registerFunc("__zp_copyCell", lCopyCell);
+	ls->registerFunc("__zp_toggleZone", lToggleZone);
+	ls->registerFunc("__zp_saveZone", lSaveZone);
 	ls->registerFunc("__zp_pumpUI", lPumpUI);
 	ls->registerFunc("__zp_setMode", lSetMode);
 	ls->registerFunc("__zp_getMode", lGetMode);
