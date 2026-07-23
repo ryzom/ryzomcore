@@ -5363,6 +5363,52 @@ static bool saveOneOverwrite(const std::string &orig, PIPELINE::MAX::CScene &sce
 	return true;
 }
 
+/** Open editable whose on-disk path equals `path` (standardized compare), else NULL.
+ *  Copy-save targets must never silently land on an open file: the write would bypass
+ *  the temp → .bak → rename discipline AND leave the in-memory scene stale vs disk. */
+static SEditableFileInfo *findEditableByPath(const std::string &path)
+{
+	const std::string t = NLMISC::CPath::standardizePath(path, false);
+	for (size_t i = 0; i < g_EditableFiles.size(); ++i)
+		if (NLMISC::CPath::standardizePath(g_EditableFiles[i].Path, false) == t)
+			return &g_EditableFiles[i];
+	return NULL;
+}
+
+/** Copy-save write: temp in the target's directory, then rename over target — a
+ *  mid-write failure (disk full, crash) must not leave a destroyed target. The copy
+ *  path has no .bak (the confirm click is the overwrite consent), so atomicity is the
+ *  only protection an existing target gets. */
+static bool saveCopyAtomic(const std::string &src, const std::string &target,
+                           PIPELINE::MAX::CScene &scene, const std::vector<uint8> *si)
+{
+	std::string dir = NLMISC::CFile::getPath(target);
+	if (!dir.empty() && dir[dir.size() - 1] != '/' && dir[dir.size() - 1] != '\\')
+		dir += "/";
+	const std::string tempPath = dir + NLMISC::toString(".zone_painter_copy_%d_%s.tmp",
+	                                                    (int)ZP_GETPID(),
+	                                                    NLMISC::CFile::getFilename(target).c_str());
+	if (saveWholeFile(src, tempPath, scene, false, si) != 0)
+	{
+		if (NLMISC::CFile::fileExists(tempPath))
+			NLMISC::CFile::deleteFile(tempPath);
+		return false;
+	}
+	if (!NLMISC::CFile::moveFile(target, tempPath))
+	{
+		if (!NLMISC::CFile::copyFile(target, tempPath, /*failIfExists=*/false)
+		    || !NLMISC::CFile::deleteFile(tempPath))
+		{
+			fprintf(stderr, "ERROR: save: rename/copy failed for %s (temp %s)\n",
+			        target.c_str(), tempPath.c_str());
+			return false;
+		}
+	}
+	if (NLMISC::CFile::fileExists(tempPath))
+		NLMISC::CFile::deleteFile(tempPath);
+	return true;
+}
+
 /**
  * Write-back + whole-file save to `target`. Single save implementation for panel modal,
  * --save, and --panel-save-test. Non-Scene OLE streams are read from InputPath (the opened
@@ -5383,6 +5429,13 @@ static bool zpSaveTo(const std::string &target)
 	if (target.empty())
 	{
 		g_LastSaveStatus = "save: empty target path";
+		fprintf(stderr, "ERROR: %s\n", g_LastSaveStatus.c_str());
+		return false;
+	}
+	if (const SEditableFileInfo *open = findEditableByPath(target))
+	{
+		g_LastSaveStatus = "save: target is the open file '" + open->Basename
+		                   + "' — use Overwrite (temp + .bak), not a copy over it";
 		fprintf(stderr, "ERROR: %s\n", g_LastSaveStatus.c_str());
 		return false;
 	}
@@ -5430,20 +5483,18 @@ static bool zpSaveTo(const std::string &target)
 	PIPELINE::MAX::CScene *scene = srcFile ? editableScene(*srcFile) : g_PaintCtx.Scene;
 	std::vector<uint8> siOverride;
 	bool haveSi = false;
-	// Per-file framing only matters with multiple editables; the single-file/legacy path
-	// passes NULL so the screenshot-mode pre-capture stash can stand in when the viewer
-	// is already gone (headless --screenshot + --save pairing).
+	// Per-file framing (never fold instance clones in); the headless stash fallback
+	// inside prepareThumbnailOverride still applies to single-file sessions.
 	prepareThumbnailOverride(srcForStreams, siOverride, haveSi, zpLegacyWantThumbnail(),
 	                         srcFile ? &srcFile->ZoneIds : NULL);
-	int saveRc = saveWholeFile(srcForStreams, target, *scene, false,
-	                           haveSi ? &siOverride : NULL);
-	if (saveRc != 0)
+	if (!saveCopyAtomic(srcForStreams, target, *scene, haveSi ? &siOverride : NULL))
 	{
 		g_LastSaveStatus = "save failed -> " + target;
 		return false;
 	}
-	if (srcFile)
-		g_PaintCtx.Core->markZonesSaved(srcFile->ZoneIds);
+	// A COPY save deliberately keeps the file dirty: the file's OWN path did not
+	// receive the changes, so per-cell markers and close/quit confirms must still
+	// fire. Only the Overwrite paths rebaseline (markZonesSaved).
 	g_LastSaveStatus = "OK save -> " + target;
 	printf("OK save (panel) -> %s\n", target.c_str());
 	return true;
@@ -5460,6 +5511,14 @@ static bool zpSaveFileOverwrite(const std::string &basename, bool wantThumb)
 	if (!efi || !g_PaintCtx.Core)
 	{
 		g_LastSaveStatus = "save: file not open: " + basename;
+		fprintf(stderr, "ERROR: %s\n", g_LastSaveStatus.c_str());
+		return false;
+	}
+	if (!efi->Editable)
+	{
+		// Same guard as save-all and sessionSaveZone — a read-only (RO-toggled) file
+		// must never be written in place, even via a stale-bound dialog or dev hook.
+		g_LastSaveStatus = "save: read-only file: " + basename;
 		fprintf(stderr, "ERROR: %s\n", g_LastSaveStatus.c_str());
 		return false;
 	}
@@ -5507,6 +5566,13 @@ static bool zpSaveFileCopy(const std::string &basename, const std::string &name,
 			dir += "/";
 		target = dir + target;
 	}
+	if (const SEditableFileInfo *open = findEditableByPath(target))
+	{
+		g_LastSaveStatus = "save: target is the open file '" + open->Basename
+		                   + "' — use Overwrite (temp + .bak), not a copy over it";
+		fprintf(stderr, "ERROR: %s\n", g_LastSaveStatus.c_str());
+		return false;
+	}
 	std::string err;
 	if (!g_PaintCtx.Core->writeBack(err))
 	{
@@ -5519,15 +5585,24 @@ static bool zpSaveFileCopy(const std::string &basename, const std::string &name,
 	std::vector<uint8> siOverride;
 	bool haveSi = false;
 	prepareThumbnailOverride(efi->Path, siOverride, haveSi, wantThumb, &efi->ZoneIds);
-	if (!scene || saveWholeFile(efi->Path, target, *scene, false, haveSi ? &siOverride : NULL) != 0)
+	if (!scene || !saveCopyAtomic(efi->Path, target, *scene, haveSi ? &siOverride : NULL))
 	{
 		g_LastSaveStatus = "save failed -> " + target;
 		return false;
 	}
-	g_PaintCtx.Core->markZonesSaved(efi->ZoneIds);
+	// A COPY save keeps the file dirty — the file's own path did not receive the
+	// changes (see zpSaveTo); only Overwrite rebaselines.
 	g_LastSaveStatus = "OK save -> " + target;
 	printf("OK save (file copy) -> %s\n", target.c_str());
 	return true;
+}
+
+/** Bridge: directory of one open editable's .max ("" if unknown) — the bound save
+ *  dialog resolves relative copy names against this, matching zpSaveFileCopy. */
+static std::string zpFileDir(const std::string &basename)
+{
+	SEditableFileInfo *efi = findEditableByBasename(basename);
+	return efi ? NLMISC::CFile::getPath(efi->Path) : std::string();
 }
 
 /**
@@ -8168,6 +8243,7 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 		paintBridge.saveOverwrite = zpSaveOverwrite;
 		paintBridge.saveFileOverwrite = zpSaveFileOverwrite;
 		paintBridge.saveFileCopy = zpSaveFileCopy;
+		paintBridge.fileDir = zpFileDir;
 		paintBridge.seasonNext = zpSeasonNext;
 		paintBridge.seasonSelect = zpSeasonSelect;
 		paintBridge.seasonMenuFill = zpSeasonMenuFill;
@@ -10623,12 +10699,20 @@ args.addArg("", "instances", "NxM",
 		std::string base = NLMISC::CFile::getFilenameWithoutExtension(input);
 		std::string baseWithExt = NLMISC::CFile::getFilename(input);
 
-		// Install paint ctx so zpSaveTo / zpSaveOverwrite see the core + scene
+		// Install paint ctx so zpSaveTo / zpSaveOverwrite see the core + scene.
+		// M28c: a viewer session may have CLOSED (and freed) the first-opened file —
+		// prefer whichever file survives, like the post-viewer --save block does.
+		if (g_EditableFiles.empty() && !g_PrimaryLm)
+		{
+			fprintf(stderr, "ERROR: panel-save-test: every editable file was closed mid-session\n");
+			return 1;
+		}
 		g_PaintCtx = SPaintCtx();
 		g_PaintCtx.Active = true;
 		g_PaintCtx.Core = &core;
-		g_PaintCtx.Scene = lm.Scene;
-		g_PaintCtx.InputPath = input;
+		g_PaintCtx.Scene = g_EditableFiles.empty() ? lm.Scene
+		                                           : editableScene(g_EditableFiles[0]);
+		g_PaintCtx.InputPath = g_EditableFiles.empty() ? input : g_EditableFiles[0].Path;
 		g_PaintCtx.InteractiveSave = true;
 
 		if (panelSaveTest == "copy")
@@ -10668,22 +10752,24 @@ args.addArg("", "instances", "NxM",
 			}
 			else
 			{
-				// Operate on a COPY of the input in outDir — never the real source file
+				// Operate on a COPY of the save-context file in outDir — never the real
+				// source (the context is file 0's CURRENT path; == input unless closed)
+				const std::string copySrc = g_PaintCtx.InputPath;
 				std::string workCopy = outDir + baseWithExt;
 				if (NLMISC::CFile::getPath(NLMISC::CPath::makePathAbsolute(workCopy, outDir, true))
-				    == NLMISC::CFile::getPath(NLMISC::CPath::makePathAbsolute(input, NLMISC::CPath::getCurrentPath(), true))
-				    && NLMISC::CFile::getFilename(workCopy) == NLMISC::CFile::getFilename(input)
+				    == NLMISC::CFile::getPath(NLMISC::CPath::makePathAbsolute(copySrc, NLMISC::CPath::getCurrentPath(), true))
+				    && NLMISC::CFile::getFilename(workCopy) == NLMISC::CFile::getFilename(copySrc)
 				    && NLMISC::CPath::makePathAbsolute(workCopy, outDir, true)
-				       == NLMISC::CPath::makePathAbsolute(input, NLMISC::CPath::getCurrentPath(), true))
+				       == NLMISC::CPath::makePathAbsolute(copySrc, NLMISC::CPath::getCurrentPath(), true))
 				{
-					// Same path as input — refuse
+					// Same path as the source — refuse
 					fprintf(stderr, "ERROR: panel-save-test overwrite would touch the real input; give --out <dir/file> outside the source tree\n");
 					g_PaintCtx = SPaintCtx();
 					return 1;
 				}
 				if (NLMISC::CFile::fileExists(workCopy))
 					NLMISC::CFile::deleteFile(workCopy);
-				if (!NLMISC::CFile::copyFile(workCopy, input, false))
+				if (!NLMISC::CFile::copyFile(workCopy, copySrc, false))
 				{
 					fprintf(stderr, "ERROR: panel-save-test: cannot copy input to %s\n", workCopy.c_str());
 					g_PaintCtx = SPaintCtx();
@@ -10719,6 +10805,12 @@ args.addArg("", "instances", "NxM",
 	{
 		// Route through zpSaveTo so multi-file dirty policy (M6b) is enforced:
 		// --save is single-path and errors when more than one editable file is dirty.
+		if (g_EditableFiles.empty() && !g_PrimaryLm)
+		{
+			// M28c: a viewer session closed (and freed) every editable — lm is gone
+			fprintf(stderr, "ERROR: --save: every editable file was closed mid-session\n");
+			return 1;
+		}
 		g_PaintCtx = SPaintCtx();
 		g_PaintCtx.Active = true;
 		g_PaintCtx.Core = &core;

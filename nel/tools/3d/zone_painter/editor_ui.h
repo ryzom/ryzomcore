@@ -88,6 +88,10 @@ struct SPaintUIBridge
 	 *  own directory). wantThumb = the dialog's checkbox (custom save option). */
 	bool (*saveFileOverwrite)(const std::string &basename, bool wantThumb);
 	bool (*saveFileCopy)(const std::string &basename, const std::string &name, bool wantThumb);
+	/** Directory of one OPEN editable's .max, "" if unknown — the bound "Save as…"
+	 *  form's exists-check must resolve relative names against the SAME directory
+	 *  saveFileCopy does (the file's own), not InputDir (the first-opened file's). */
+	std::string (*fileDir)(const std::string &basename);
 	/** Cycle landscape season textures (ui M6a); no-op when <2 seasons available. */
 	void (*seasonNext)();
 	/** Select a specific season code (sp|su|au|wi); same live-flush path as seasonNext (M14c). */
@@ -179,7 +183,7 @@ struct SPaintUIBridge
 		  toggleTileSize(NULL),
 		  brushSizeDelta(NULL), groupDelta(NULL), toggleLockBorders(NULL),
 		  undo(NULL), redo(NULL), fill(NULL), save(NULL), saveTo(NULL), saveOverwrite(NULL),
-		  saveFileOverwrite(NULL), saveFileCopy(NULL),
+		  saveFileOverwrite(NULL), saveFileCopy(NULL), fileDir(NULL),
 		  seasonNext(NULL), seasonSelect(NULL), seasonMenuFill(NULL),
 		  colorRadiusDelta(NULL), hardnessDelta(NULL), opacityDelta(NULL),
 		  cycleBrushMask(NULL), toggleMaskMode(NULL), displaceIndexDelta(NULL),

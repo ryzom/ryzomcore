@@ -1554,6 +1554,7 @@ public:
 		if (ok)
 		{
 			setSaveModalStatus("Saved (overwrite).");
+			s_SaveDialogFile.clear(); // drop the per-file binding — a reopened dialog must rebind
 			CWidgetManager::getInstance()->disableModalWindow();
 			resetSaveCopyButtonLabel();
 		}
@@ -1585,13 +1586,21 @@ public:
 			setSaveModalStatus("Enter a file name.");
 			return;
 		}
-		// Absolute or relative to the opened .max directory
+		// Absolute, or relative to the saved FILE's own directory — for the bound form
+		// that is the bound file's dir (same base saveFileCopy resolves against; the
+		// exists-check below must agree with the actual write target), else InputDir.
 		std::string target;
 		if (!name.empty() && name[0] == '/')
 			target = name;
 		else
 		{
 			std::string dir = b->InputDir;
+			if (!s_SaveDialogFile.empty() && b->fileDir)
+			{
+				std::string d = b->fileDir(s_SaveDialogFile);
+				if (!d.empty())
+					dir = d;
+			}
 			if (!dir.empty() && dir[dir.size() - 1] != '/' && dir[dir.size() - 1] != '\\')
 				dir += "/";
 			target = dir + name;
@@ -1609,17 +1618,18 @@ public:
 		}
 
 		syncThumbWantFromModal(b);
-		// M27b: file-bound form (board "Save as…") copies that ONE file, checkbox honored
+		// M27b: file-bound form (board "Save as…") copies that ONE file, checkbox honored.
+		// Pass the RESOLVED absolute target — the exists-check above ran on it, so the
+		// write must hit the same path (a relative name re-resolved elsewhere may not).
 		bool ok;
 		if (!s_SaveDialogFile.empty() && b->saveFileCopy)
-			ok = b->saveFileCopy(s_SaveDialogFile,
-			                     (!name.empty() && name[0] == '/') ? target : name + (toLowerAscii(CFile::getExtension(name)).empty() ? ".max" : ""),
-			                     b->UpdateThumbnail);
+			ok = b->saveFileCopy(s_SaveDialogFile, target, b->UpdateThumbnail);
 		else
 			ok = b->saveTo(target);
 		if (ok)
 		{
 			setSaveModalStatus("Saved copy.");
+			s_SaveDialogFile.clear(); // drop the per-file binding — a reopened dialog must rebind
 			CWidgetManager::getInstance()->disableModalWindow();
 			resetSaveCopyButtonLabel();
 		}
