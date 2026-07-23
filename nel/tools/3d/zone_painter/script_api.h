@@ -76,7 +76,9 @@ struct SScriptHost
 	bool (*getZoneProp)(uint zoneId, const std::string &which, int &value, std::string &err);
 	/** Write-back + whole-file save to a target path (never in place). */
 	bool (*saveTo)(const std::string &target);
-	/** Interactive save-all path (per-file overwrite + .bak); NULL headless. */
+	/** Save-all path (per-file overwrite + .bak). Installed headless too — every open
+	 *	is a session now, so headless painter.saveAll() writes editables in place
+	 *	(m31-2 relies on this). */
 	bool (*saveAll)();
 	/** Capture the current frame to a .tga; NULL headless. */
 	bool (*screenshot)(const std::string &path, std::string &err);

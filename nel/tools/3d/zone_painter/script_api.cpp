@@ -71,6 +71,21 @@ static uint s_OutputGen = 0;
 
 void setHost(SScriptHost *host) { s_Host = host; }
 SScriptHost *getHost() { return s_Host; }
+
+/** Quote a string as a Lua literal (same rules as main.cpp's recorder-side luaQuote). */
+static std::string luaQuoteLocal(const std::string &s)
+{
+	std::string r = "\"";
+	for (size_t i = 0; i < s.size(); ++i)
+	{
+		char c = s[i];
+		if (c == '"' || c == '\\') { r += '\\'; r += c; }
+		else if (c == '\n') r += "\\n";
+		else r += c;
+	}
+	r += "\"";
+	return r;
+}
 bool isExecuting() { return s_Executing; }
 void requestCancel() { if (s_Executing) s_CancelReq = true; }
 void setRecording(bool on)
@@ -114,7 +129,8 @@ void setRecording(bool on)
 		pre += NLMISC::toString("painter.setBrushColor(%u, %u, %u)\n", b->ColorR, b->ColorG, b->ColorB);
 		pre += NLMISC::toString("painter.setDisplaceIndex(%u)\n", b->DisplaceIndex);
 		if (strcmp(b->BrushMaskLabel, "none") != 0 && b->BrushMaskLabel[0])
-			pre += NLMISC::toString("painter.setBrushMask(\"%s\")\n", b->BrushMaskLabel);
+			pre += NLMISC::toString("painter.setBrushMask(%s)\n",
+				luaQuoteLocal(b->BrushMaskLabel).c_str());
 		pre += NLMISC::toString("painter.setMaskMode(%s)\n", b->BrushMaskMode ? "true" : "false");
 		s_Recorder += pre;
 		++s_RecorderGen;
@@ -152,6 +168,16 @@ static bool argString(CLuaState &ls, int idx, std::string &out)
 {
 	if (ls.getTop() < idx || !ls.isString(idx)) return false;
 	ls.toString(idx, out);
+	return true;
+}
+
+/** String arg destined for an op line: op lines are space-tokenized, so embedded
+ *	whitespace would silently smuggle extra tokens (a "rrggbb blend" color string)
+ *	or truncate ("my mask.tga" loses its tail) — refuse instead. */
+static bool argToken(CLuaState &ls, int idx, std::string &out)
+{
+	if (!argString(ls, idx, out)) return false;
+	if (out.empty() || out.find_first_of(" \t\r\n") != std::string::npos) return false;
 	return true;
 }
 
@@ -246,7 +272,7 @@ static int lPaintColor(CLuaState &ls) // painter.paintColor(zone,patch,u,v,"rrgg
 {
 	double a[4]; std::string err, rgb;
 	if (!argNumbers(ls, 4, a, "paintColor(zone,patch,u,v,\"rrggbb\"[,blend])", err)) return retErr(ls, err);
-	if (!argString(ls, 5, rgb)) return retErr(ls, "usage: paintColor(zone,patch,u,v,\"rrggbb\"[,blend])");
+	if (!argToken(ls, 5, rgb)) return retErr(ls, "usage: paintColor(zone,patch,u,v,\"rrggbb\"[,blend])");
 	double blend;
 	if (argNumber(ls, 6, blend))
 		return execOpRet(ls, toString("color %u %u %u %u %s %u",
@@ -259,7 +285,7 @@ static int lFillColor(CLuaState &ls) // painter.fillColor(zone,patch,"rrggbb"[,b
 {
 	double a[2]; std::string err, rgb;
 	if (!argNumbers(ls, 2, a, "fillColor(zone,patch,\"rrggbb\"[,blend])", err)) return retErr(ls, err);
-	if (!argString(ls, 3, rgb)) return retErr(ls, "usage: fillColor(zone,patch,\"rrggbb\"[,blend])");
+	if (!argToken(ls, 3, rgb)) return retErr(ls, "usage: fillColor(zone,patch,\"rrggbb\"[,blend])");
 	double blend;
 	if (argNumber(ls, 4, blend))
 		return execOpRet(ls, toString("cfill %u %u %s %u",
@@ -274,7 +300,7 @@ static int lColorBrush(CLuaState &ls) // painter.colorBrush(zone,x,y,radius,"rrg
 	double a[4]; std::string err, rgb;
 	if (!argNumbers(ls, 4, a, "colorBrush(zone,x,y,radius,\"rrggbb\",hardness,opacity[,zWorld[,cont]])", err))
 		return retErr(ls, err);
-	if (!argString(ls, 5, rgb)) return retErr(ls, "colorBrush: rgb string expected");
+	if (!argToken(ls, 5, rgb)) return retErr(ls, "colorBrush: rgb string expected (no spaces)");
 	double hard, opac;
 	if (!argNumber(ls, 6, hard) || !argNumber(ls, 7, opac))
 		return retErr(ls, "colorBrush: hardness/opacity expected");
@@ -349,7 +375,7 @@ static int lSetTileGroup(CLuaState &ls) // painter.setTileGroup(0..12)
 
 static int lSetBrushMask(CLuaState &ls) // painter.setBrushMask("file.tga"|"none")
 {
-	std::string s; if (!argString(ls, 1, s)) return retErr(ls, "usage: setBrushMask(\"file.tga\"|\"none\")");
+	std::string s; if (!argToken(ls, 1, s)) return retErr(ls, "usage: setBrushMask(\"file.tga\"|\"none\") — no whitespace in the name");
 	return execOpRet(ls, "mask " + s);
 }
 

@@ -2434,6 +2434,12 @@ bool CPaintCore::opProp(uint zoneId, uint32 appDataId, bool newHas, const std::s
 
 bool CPaintCore::opUndo()
 {
+	// Commit (not discard) any in-flight stroke first — undoing beneath an open
+	// stroke corrupts the undo pairing: the stroke's pre-stroke "old" snapshots
+	// would commit later over the undone state, and the popped entry is lost when
+	// that commit clears the redo stack. The mouse path commits before calling
+	// here; scripted undo (zpExecScriptOp) reaches this directly.
+	endStroke();
 	if (m_UndoStack.empty()) return false;
 	std::vector<SUndoTile> list = m_UndoStack.back();
 	m_UndoStack.pop_back();
@@ -2444,6 +2450,10 @@ bool CPaintCore::opUndo()
 
 bool CPaintCore::opRedo()
 {
+	// Same commit-first rule as opUndo. Committing a live stroke clears the redo
+	// stack, so redo-under-open-stroke correctly reports "redo stack empty" —
+	// new paint invalidates redo, matching the interactive path.
+	endStroke();
 	if (m_RedoStack.empty()) return false;
 	std::vector<SUndoTile> list = m_RedoStack.back();
 	m_RedoStack.pop_back();
