@@ -356,6 +356,14 @@ static void setZoneBrowserMode(bool continentBoard)
 	if (CInterfaceElement *el = CWidgetManager::getInstance()->getElementFromId(
 	        "ui:zp:zone_browser:content:btn_open_sel"))
 		el->setActive(continentBoard && !s_Sess.SessionMode);
+	// M29 display-mode toggle: eco Screen B only — any board (continent or session hub)
+	// hides it; populateZoneList's eco branch is the sole activation site. Without this,
+	// the toggle stayed live over the session board and a click ran populateZoneList,
+	// which clears the board cells then early-returns on Worlds == NULL (empty hub).
+	if (continentBoard || s_Sess.SessionMode)
+		if (CInterfaceElement *el = CWidgetManager::getInstance()->getElementFromId(
+		        "ui:zp:zone_browser:content:btn_view_large"))
+			el->setActive(false);
 	// Session hub chrome
 	if (CInterfaceElement *el = CWidgetManager::getInstance()->getElementFromId(
 	        "ui:zp:zone_browser:content:btn_back_paint"))
@@ -1138,6 +1146,11 @@ static void populateZoneList()
 					flowSec->setW(-4);
 					if (CGroupList *gl = findList(kList))
 						flowSec->setParentSize(gl);
+					// Stale-build tripwire: with flow_group.cpp missing from the link
+					// (FILE(GLOB) + skipped reconfigure) the parser silently falls back
+					// to a plain interface_group and every tile stacks at slot 0,0.
+					if (flowSec->getClassName() != "CZPGroupFlow")
+						nlwarning("zone browser: zp_flow factory missing — grid will not wrap (stale build?)");
 				}
 			}
 			if (!flowSec)
@@ -1183,6 +1196,9 @@ public:
 	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		// Screen B only: in the session hub Worlds is NULL and populateZoneList would
+		// clear the board then early-return, wiping the working-set display.
+		if (s_Sess.SessionMode || !s_Sess.Worlds) return;
 		s_ZoneListLarge = !s_ZoneListLarge;
 		{
 			ZPWS::SStartupCfg cfg;

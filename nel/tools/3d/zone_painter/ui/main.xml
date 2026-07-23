@@ -152,8 +152,8 @@
 
 <!-- Large-icon zone tile (M29: zone browser grid mode — the tileset-palette idiom at
      zone scale). 64px thumb in a sunken well, name wrapped below, transparent full-tile
-     hit button with the standard hover/press tint. Spawned into zp_zone_grid_line rows
-     at col*W offsets (CGroupList stacks lines vertically; tiles place inside a line). -->
+     hit button with the standard hover/press tint. Spawned into zp_zone_flow_sec
+     sections at 0,0 (M29c) — the zp_flow group assigns wrap slots in updateCoords. -->
 <template name="zp_zone_tile" keep="true" id="" title="" idx="0" thumb="">
 	<group id="#id" w="178" h="106">
 		<ctrl type="button" id="btn" button_type="push_button" posref="TL TL" x="0" y="0" w="178" h="106" scale="true"
@@ -175,9 +175,11 @@
 <!-- One auto-wrapping SECTION of zone tiles (M29c): the custom zp_flow group reflows
      its children from its own width inside updateCoords — the Ryzom client inventory
      mechanism — so window resizes re-wrap with no repopulation and no width watch. -->
-<!-- sizeparent="parent" is LOAD-BEARING: CGroupList re-chains each child's pos parent
-     to the PREVIOUS element, and sizeref follows the pos parent — without it the flow
-     sizes to the header row above it, not the list. -->
+<!-- sizeparent="parent" here is a NO-OP (template parse runs before parenting, so it
+     resolves to NULL) — kept as documentation of intent only. The real fix is C++:
+     setParentSize(list) after spawn (startup_ui.cpp populateZoneList), because
+     CGroupList re-chains each child's pos parent to the PREVIOUS element and sizeref
+     follows the pos parent — the flow would size to the header row above it. -->
 <template name="zp_zone_flow_sec" keep="true" id="">
 	<group type="zp_flow" id="#id" tile_w="178" tile_h="106" sizeparent="parent" sizeref="w" w="-4" h="106" />
 </template>

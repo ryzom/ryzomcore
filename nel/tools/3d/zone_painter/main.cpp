@@ -9898,9 +9898,12 @@ args.addArg("", "instances", "NxM",
 		// Interactive save modal when no --save was given (with --save: one-click direct)
 		g_InteractiveSave = !args.haveLongArg("save");
 
-		// Remember successful world entry + last open layout (ecosystem self-instances)
+		// Remember successful world entry + last open layout (ecosystem self-instances).
+		// Load-merge-save: a fresh SStartupCfg would reset every field this site doesn't
+		// own (ZoneBrowserLarge went back to the detail list on every world entry).
 		{
 			ZPWS::SStartupCfg save;
+			ZPWS::loadStartupCfg(save);
 			save.LastGraphicsFolder = selection.World.GraphicsRoot;
 			save.LastWorld = selection.World.WorldName;
 			if (g_InstanceCols > 1 || g_InstanceRows > 1)
