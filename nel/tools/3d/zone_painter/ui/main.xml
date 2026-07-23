@@ -856,51 +856,40 @@
 </group>
 
 <!-- ===================================================================== -->
-<!-- Cell action popup (M11a session board — L-click on open cell)         -->
+<!-- Quick-action context menus (session board — plain L-click on a cell). -->
+<!-- Real NLGUI context menus (type="menu"/CGroupMenu — see nel_sample_gui -->
+<!-- widgets_sample.xml base_menu/sample_menu), NOT framed dialogs with    -->
+<!-- stacked push buttons: compact rows, hover highlight, auto-dismiss on  -->
+<!-- selection or click-away/ESC (CGroupMenu hardcodes ExitClickOut+       -->
+<!-- ExitKeyPushed — ../src/gui/group_menu.cpp). No visible Cancel row:    -->
+<!-- that's the whole point of a context menu, and nothing here depends   -->
+<!-- on Cancel's cleanup running (PendingActionBasename is overwritten by -->
+<!-- the next popup open regardless of how the previous one closed).      -->
 <!-- ===================================================================== -->
-<!-- Near-cursor context menu (mouse_pos, TL-anchored — same idiom as season_menu below),
-     not a centered dialog: this is a quick "what do you want to do with this cell"
-     picker triggered by a plain click, not a deliberate confirm (M25 review finding). -->
-<group type="modal" id="cell_action" exit_click_out="true" w="280" h="160" options="skin_modal"
-	mouse_pos="true" posref="TL TL" x="0" y="0" active="false">
-	<group id="content" x="0" y="0" posref="TL TL" sizeref="wh" w="0" h="0">
-		<view type="text" id="title" posref="TM TM" x="0" y="-12" color="255 255 255 255" fontsize="13"
-			shadow="true" global_color="false" hardtext="Zone" />
-		<view type="text" id="status" posparent="title" posref="BM TM" x="0" y="-4" color="200 210 220 220"
-			fontsize="10" shadow="true" global_color="false" hardtext="" />
-		<ctrl style="text_button_16" id="btn_close" posref="TM TM" x="0" y="-48"
-			onclick_l="zp_cell_close" params_l="" hardtext="Close" />
-		<ctrl style="text_button_16" id="btn_save" posparent="btn_close" posref="BL TL" x="0" y="-6"
-			onclick_l="zp_cell_save" params_l="" hardtext="Save" />
-		<ctrl style="text_button_16" id="btn_toggle" posparent="btn_save" posref="BL TL" x="0" y="-6"
-			onclick_l="zp_cell_toggle" params_l="" hardtext="Make read-only" />
-		<ctrl style="text_button_16" id="btn_cancel" posparent="btn_toggle" posref="BL TL" x="0" y="-10"
-			onclick_l="zp_cell_action_cancel" params_l="" hardtext="Cancel" />
-	</group>
+<group type="menu" id="zp_ctx_menu_base" mouse_pos="true" space="1" fontsize="12" shadow="true"
+	color="255 255 255 200" shadow_color="0 0 0 255" color_over="255 255 255 255" shadow_color_over="0 0 0 255"
+	color_grayed="200 210 220 150" shadow_color_grayed="0 0 0 200" highlight_over="70 120 190 150"
+	case_mode="%case_normal"></group>
+
+<!-- Cell action popup (M11a session board — L-click on open cell) -->
+<group type="menu" id="cell_action" extends="ui:zp:zp_ctx_menu_base">
+	<action id="hdr" name="Zone" grayed="true" handler="" params="" />
+	<action id="sub" name="" grayed="true" handler="" params="" />
+	<separator />
+	<action id="close" name="Close" handler="zp_cell_close" params="" />
+	<action id="save" name="Save" handler="zp_cell_save" params="" />
+	<action id="toggle" name="Make read-only" handler="zp_cell_toggle" params="" />
 </group>
 
-<!-- ===================================================================== -->
-<!-- Instance action popup (M12c ecosystem scratch — L-click on instance)  -->
-<!-- ===================================================================== -->
-<!-- Near-cursor context menu (see cell_action above for rationale). -->
-<group type="modal" id="instance_action" exit_click_out="true" w="280" h="200" options="skin_modal"
-	mouse_pos="true" posref="TL TL" x="0" y="0" active="false">
-	<group id="content" x="0" y="0" posref="TL TL" sizeref="wh" w="0" h="0">
-		<view type="text" id="title" posref="TM TM" x="0" y="-12" color="255 255 255 255" fontsize="13"
-			shadow="true" global_color="false" hardtext="Instance" />
-		<view type="text" id="status" posparent="title" posref="BM TM" x="0" y="-4" color="160 220 220 220"
-			fontsize="10" shadow="true" global_color="false" hardtext="" />
-		<ctrl style="text_button_16" id="btn_cw" posref="TM TM" x="0" y="-44"
-			onclick_l="zp_inst_rot_cw" params_l="" hardtext="Rotate CW (R+90)" />
-		<ctrl style="text_button_16" id="btn_ccw" posparent="btn_cw" posref="BL TL" x="0" y="-6"
-			onclick_l="zp_inst_rot_ccw" params_l="" hardtext="Rotate CCW (R-90)" />
-		<ctrl style="text_button_16" id="btn_mirror" posparent="btn_ccw" posref="BL TL" x="0" y="-6"
-			onclick_l="zp_inst_mirror" params_l="" hardtext="Mirror (M)" />
-		<ctrl style="text_button_16" id="btn_remove" posparent="btn_mirror" posref="BL TL" x="0" y="-6"
-			onclick_l="zp_inst_remove" params_l="" hardtext="Remove" />
-		<ctrl style="text_button_16" id="btn_cancel" posparent="btn_remove" posref="BL TL" x="0" y="-10"
-			onclick_l="zp_inst_cancel" params_l="" hardtext="Cancel" />
-	</group>
+<!-- Instance action popup (M12c ecosystem scratch — L-click on instance) -->
+<group type="menu" id="instance_action" extends="ui:zp:zp_ctx_menu_base">
+	<action id="hdr" name="Instance" grayed="true" handler="" params="" />
+	<action id="sub" name="" grayed="true" handler="" params="" />
+	<separator />
+	<action id="cw" name="Rotate CW (R+90)" handler="zp_inst_rot_cw" params="" />
+	<action id="ccw" name="Rotate CCW (R-90)" handler="zp_inst_rot_ccw" params="" />
+	<action id="mirror" name="Mirror (M)" handler="zp_inst_mirror" params="" />
+	<action id="remove" name="Remove" handler="zp_inst_remove" params="" />
 </group>
 
 <!-- ===================================================================== -->
@@ -922,62 +911,33 @@
 	</group>
 </group>
 
-<!-- ===================================================================== -->
-<!-- Empty-cell popup (M16c ecosystem scratch)                             -->
-<!-- ===================================================================== -->
-<!-- Near-cursor context menu (see cell_action above for rationale). -->
-<group type="modal" id="empty_cell_action" exit_click_out="true" w="320" h="250" options="skin_modal"
-	mouse_pos="true" posref="TL TL" x="0" y="0" active="false">
-	<group id="content" x="0" y="0" posref="TL TL" sizeref="wh" w="0" h="0">
-		<view type="text" id="title" posref="TM TM" x="0" y="-12" color="255 255 255 255" fontsize="13"
-			shadow="true" global_color="false" hardtext="Empty cell" />
-		<view type="text" id="status" posparent="title" posref="BM TM" x="0" y="-4" color="200 210 220 220"
-			fontsize="10" shadow="true" global_color="false" hardtext="" />
-		<!-- M24c saved-neighbor hint offers (activated + labeled per cell).
-		     All six rows anchor to "title" (not chained sibling-to-sibling) and are
-		     repositioned from C++ (openEmptyCellPopup) each time the popup opens, so
-		     hiding the hint rows when a cell has no saved hint (the common case)
-		     closes the gap instead of leaving two button-heights of dead space
-		     above "Open editable…" (M25 review finding). -->
-		<ctrl style="text_button_16" id="btn_hint_ro" posref="TM TM" x="0" y="-48" active="false"
-			onclick_l="zp_empty_hint_ro" params_l="" hardtext="Open hint (read-only)" />
-		<ctrl style="text_button_16" id="btn_hint_ed" posref="TM TM" x="0" y="-80" active="false"
-			onclick_l="zp_empty_hint_ed" params_l="" hardtext="Open hint editable" />
-		<ctrl style="text_button_16" id="btn_editable" posref="TM TM" x="0" y="-112"
-			onclick_l="zp_empty_open_editable" params_l="" hardtext="Open editable…" />
-		<ctrl style="text_button_16" id="btn_context" posref="TM TM" x="0" y="-144"
-			onclick_l="zp_empty_place_context" params_l="" hardtext="Open read-only…" />
-		<ctrl style="text_button_16" id="btn_instance" posref="TM TM" x="0" y="-176"
-			onclick_l="zp_empty_place_instance" params_l="" hardtext="Place self-instance" />
-		<ctrl style="text_button_16" id="btn_cancel" posref="TM TM" x="0" y="-212"
-			onclick_l="zp_empty_cancel" params_l="" hardtext="Cancel" />
-	</group>
+<!-- Empty-cell popup (M16c ecosystem scratch). The two hint rows start
+     grayed+blank (not "active=false" — <action> has no such XML attribute;
+     C++ toggles setActive on the CViewTextMenu directly) and the CGroupList
+     backing every menu reflows around inactive lines on its own, so the
+     manual per-row Y-repositioning the old framed-dialog version needed
+     (chained <ctrl> siblings don't collapse when hidden) is gone. -->
+<group type="menu" id="empty_cell_action" extends="ui:zp:zp_ctx_menu_base">
+	<action id="hdr" name="Empty cell" grayed="true" handler="" params="" />
+	<action id="sub" name="" grayed="true" handler="" params="" />
+	<separator />
+	<action id="hint_ro" name="" handler="zp_empty_hint_ro" params="" />
+	<action id="hint_ed" name="" handler="zp_empty_hint_ed" params="" />
+	<action id="editable" name="Open editable…" handler="zp_empty_open_editable" params="" />
+	<action id="context" name="Open read-only…" handler="zp_empty_place_context" params="" />
+	<action id="instance" name="Place self-instance" handler="zp_empty_place_instance" params="" />
 </group>
 
-<!-- ===================================================================== -->
-<!-- Context brick action popup (M16c) — Remove                            -->
-<!-- ===================================================================== -->
-<!-- Near-cursor context menu (see cell_action above for rationale). -->
-<group type="modal" id="context_action" exit_click_out="true" w="280" h="250" options="skin_modal"
-	mouse_pos="true" posref="TL TL" x="0" y="0" active="false">
-	<group id="content" x="0" y="0" posref="TL TL" sizeref="wh" w="0" h="0">
-		<view type="text" id="title" posref="TM TM" x="0" y="-12" color="255 255 255 255" fontsize="13"
-			shadow="true" global_color="false" hardtext="Context (RO)" />
-		<view type="text" id="status" posparent="title" posref="BM TM" x="0" y="-4" color="180 200 220 220"
-			fontsize="10" shadow="true" global_color="false" hardtext="" />
-		<ctrl style="text_button_16" id="btn_editable" posref="TM TM" x="0" y="-48"
-			onclick_l="zp_context_make_editable" params_l="" hardtext="Make editable" />
-		<ctrl style="text_button_16" id="btn_cw" posparent="btn_editable" posref="BL TL" x="0" y="-6"
-			onclick_l="zp_context_rot_cw" params_l="" hardtext="Rotate CW (R+90)" />
-		<ctrl style="text_button_16" id="btn_ccw" posparent="btn_cw" posref="BL TL" x="0" y="-6"
-			onclick_l="zp_context_rot_ccw" params_l="" hardtext="Rotate CCW (R-90)" />
-		<ctrl style="text_button_16" id="btn_mirror" posparent="btn_ccw" posref="BL TL" x="0" y="-6"
-			onclick_l="zp_context_mirror" params_l="" hardtext="Mirror (M)" />
-		<ctrl style="text_button_16" id="btn_remove" posparent="btn_mirror" posref="BL TL" x="0" y="-6"
-			onclick_l="zp_context_remove" params_l="" hardtext="Remove" />
-		<ctrl style="text_button_16" id="btn_cancel" posparent="btn_remove" posref="BL TL" x="0" y="-10"
-			onclick_l="zp_context_cancel" params_l="" hardtext="Cancel" />
-	</group>
+<!-- Context brick action popup (M16c) — Remove -->
+<group type="menu" id="context_action" extends="ui:zp:zp_ctx_menu_base">
+	<action id="hdr" name="Context (RO)" grayed="true" handler="" params="" />
+	<action id="sub" name="" grayed="true" handler="" params="" />
+	<separator />
+	<action id="editable" name="Make editable" handler="zp_context_make_editable" params="" />
+	<action id="cw" name="Rotate CW (R+90)" handler="zp_context_rot_cw" params="" />
+	<action id="ccw" name="Rotate CCW (R-90)" handler="zp_context_rot_ccw" params="" />
+	<action id="mirror" name="Mirror (M)" handler="zp_context_mirror" params="" />
+	<action id="remove" name="Remove" handler="zp_context_remove" params="" />
 </group>
 
 <!-- ===================================================================== -->

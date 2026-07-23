@@ -57,6 +57,7 @@
 #include <nel/gui/group_container.h>
 #include <nel/gui/group_editbox.h>
 #include <nel/gui/group_list.h>
+#include <nel/gui/group_menu.h>
 #include <nel/gui/interface_group.h>
 #include <nel/gui/interface_parser.h>
 #include <nel/gui/view_bitmap.h>
@@ -121,6 +122,13 @@ static CInterfaceGroup *findGroup(const char *id)
 static CViewText *findText(const char *id)
 {
 	return dynamic_cast<CViewText *>(CWidgetManager::getInstance()->getElementFromId(id));
+}
+
+/** A context-menu action line (CGroupMenu's <action> items — text + grayed state,
+ *  no separate "frozen button" concept; grayed lines are also unclickable). */
+static CViewTextMenu *findMenuLine(const char *id)
+{
+	return dynamic_cast<CViewTextMenu *>(CWidgetManager::getInstance()->getElementFromId(id));
 }
 
 static CGroupList *findList(const char *id)
@@ -1903,9 +1911,9 @@ static void openCellActionPopup(const std::string &basename)
 		&& s_SessionBridge->isDirty(basename);
 	const bool editable = s_SessionBridge && s_SessionBridge->isEditable
 		&& s_SessionBridge->isEditable(basename);
-	if (CViewText *t = findText("ui:zp:cell_action:content:title"))
+	if (CViewText *t = findText("ui:zp:cell_action:hdr"))
 		t->setHardText(basename + (dirty ? " *" : ""));
-	if (CViewText *t = findText("ui:zp:cell_action:content:status"))
+	if (CViewText *t = findText("ui:zp:cell_action:sub"))
 	{
 		if (editable && dirty)
 			t->setHardText("open-editable, dirty");
@@ -1914,12 +1922,10 @@ static void openCellActionPopup(const std::string &basename)
 		else
 			t->setHardText("open read-only");
 	}
-	if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(
-	        CWidgetManager::getInstance()->getElementFromId("ui:zp:cell_action:content:btn_save")))
-		btn->setFrozen(!dirty || !editable);
-	if (CCtrlTextButton *btn = dynamic_cast<CCtrlTextButton *>(
-	        CWidgetManager::getInstance()->getElementFromId("ui:zp:cell_action:content:btn_toggle")))
-		btn->setHardText(editable ? "Make read-only" : "Make editable");
+	if (CViewTextMenu *line = findMenuLine("ui:zp:cell_action:save"))
+		line->setGrayed(!dirty || !editable);
+	if (CViewTextMenu *line = findMenuLine("ui:zp:cell_action:toggle"))
+		line->setText(editable ? "Make read-only" : "Make editable");
 	CWidgetManager::getInstance()->enableModalWindow(NULL, "ui:zp:cell_action");
 }
 
@@ -1966,9 +1972,9 @@ static void openInstanceActionPopup(const std::string &basename)
 		s_SessionBridge->scratchGetInstanceOrigin(cx, cy, ox, oy, rot, mir);
 	else if (s_SessionBridge && s_SessionBridge->scratchGetInstance)
 		s_SessionBridge->scratchGetInstance(cx, cy, rot, mir);
-	if (CViewText *t = findText("ui:zp:instance_action:content:title"))
+	if (CViewText *t = findText("ui:zp:instance_action:hdr"))
 		t->setHardText(NLMISC::toString("Instance %d,%d", ox, oy));
-	if (CViewText *t = findText("ui:zp:instance_action:content:status"))
+	if (CViewText *t = findText("ui:zp:instance_action:sub"))
 	{
 		std::string st = NLMISC::toString("rot %u°", rot * 90);
 		if (mir) st += " · mirror";
@@ -2743,7 +2749,7 @@ static std::vector<std::string> s_ContextPickerNames;
 static void openEmptyCellPopup(const std::string &basename)
 {
 	s_Sess.PendingActionBasename = basename;
-	if (CViewText *t = findText("ui:zp:empty_cell_action:content:title"))
+	if (CViewText *t = findText("ui:zp:empty_cell_action:hdr"))
 		t->setHardText("Empty cell");
 	// M24c: saved-neighbor hint for this cell → one-click open offers at the top
 	std::string hintName;
@@ -2752,41 +2758,26 @@ static void openEmptyCellPopup(const std::string &basename)
 		char sk = 0;
 		int cx = 0, cy = 0;
 		const bool parsed = parseScratchBasename(basename, sk, cx, cy);
-		if (CViewText *t = findText("ui:zp:empty_cell_action:content:status"))
+		if (CViewText *t = findText("ui:zp:empty_cell_action:sub"))
 			t->setHardText(parsed ? NLMISC::toString("Cell %d,%d", cx, cy) : basename);
 		if (parsed && sk == 'E' && s_SessionBridge && s_SessionBridge->scratchGetHintAt)
 			haveHint = s_SessionBridge->scratchGetHintAt(cx, cy, hintName);
 	}
-	if (CCtrlTextButton *b = dynamic_cast<CCtrlTextButton *>(CWidgetManager::getInstance()
-	        ->getElementFromId("ui:zp:empty_cell_action:content:btn_hint_ro")))
+	// The two hint rows are plain menu lines (CGroupList backing the menu already
+	// reflows around inactive children — no manual Y-repositioning dance needed
+	// the way the old framed-dialog version required for its chained <ctrl> rows).
+	if (CViewTextMenu *line = findMenuLine("ui:zp:empty_cell_action:hint_ro"))
 	{
-		b->setActive(haveHint);
-		if (haveHint) b->setHardText("Open '" + stripLigoFamilyPrefix(hintName) + "' (read-only)");
+		line->setActive(haveHint);
+		if (haveHint) line->setText("Open '" + stripLigoFamilyPrefix(hintName) + "' (read-only)");
 	}
-	if (CCtrlTextButton *b = dynamic_cast<CCtrlTextButton *>(CWidgetManager::getInstance()
-	        ->getElementFromId("ui:zp:empty_cell_action:content:btn_hint_ed")))
+	if (CViewTextMenu *line = findMenuLine("ui:zp:empty_cell_action:hint_ed"))
 	{
-		b->setActive(haveHint);
-		if (haveHint) b->setHardText("Open '" + stripLigoFamilyPrefix(hintName) + "' editable");
+		line->setActive(haveHint);
+		if (haveHint) line->setText("Open '" + stripLigoFamilyPrefix(hintName) + "' editable");
 	}
-	// The XML lays out all six rows at fixed offsets from "title" (not chained
-	// sibling-to-sibling) so the two optional hint rows can be skipped without
-	// leaving a dead gap above "Open editable…" when this cell has no saved hint
-	// (the common case). Slide the remaining rows up to close the gap, and shrink
-	// the modal to match so there's no trailing dead space either.
-	static const char *kRowIds[4] = { "btn_editable", "btn_context", "btn_instance", "btn_cancel" };
-	static const sint32 kRowYWithHint[4] = { -112, -144, -176, -212 };
-	static const sint32 kRowYNoHint[4] = { -48, -80, -112, -148 };
-	const sint32 *rowY = haveHint ? kRowYWithHint : kRowYNoHint;
-	for (int i = 0; i < 4; ++i)
-	{
-		std::string id = std::string("ui:zp:empty_cell_action:content:") + kRowIds[i];
-		if (CInterfaceElement *el = CWidgetManager::getInstance()->getElementFromId(id))
-			el->setY(rowY[i]);
-	}
-	if (CInterfaceGroup *modal = dynamic_cast<CInterfaceGroup *>(
-	        CWidgetManager::getInstance()->getElementFromId("ui:zp:empty_cell_action")))
-		modal->setH(haveHint ? 250 : 186);
+	if (CInterfaceGroup *menu = findGroup("ui:zp:empty_cell_action"))
+		menu->invalidateCoords();
 	s_Sess.StatusMsg = haveHint ? ("hint:" + hintName) : std::string();
 	CWidgetManager::getInstance()->enableModalWindow(NULL, "ui:zp:empty_cell_action");
 }
@@ -2801,11 +2792,19 @@ static void openContextActionPopup(const std::string &basename)
 		if (last != std::string::npos)
 			lab = basename.substr(last + 1);
 	}
-	if (CViewText *t = findText("ui:zp:context_action:content:title"))
+	if (CViewText *t = findText("ui:zp:context_action:hdr"))
 		t->setHardText("Context (RO)");
-	if (CViewText *t = findText("ui:zp:context_action:content:status"))
+	if (CViewText *t = findText("ui:zp:context_action:sub"))
 		t->setHardText(lab);
 	CWidgetManager::getInstance()->enableModalWindow(NULL, "ui:zp:context_action");
+}
+
+void forceShowContextActionForShot(const std::string &basename)
+{
+	std::string b = basename;
+	if (b.empty())
+		b = "C:1,0:demo-context";
+	openContextActionPopup(b);
 }
 
 static void openContextBrickPicker(int cx, int cy, int mode)
