@@ -5683,7 +5683,9 @@ static bool zpSaveFileCopy(const std::string &basename, const std::string &name,
 		g_LastSaveStatus = "save: empty target name";
 		return false;
 	}
-	if (target[0] != '/')
+	// isAbsolutePath covers Windows drive-letter paths; a bare '/' check only works on Unix
+	// and re-prefixed C:/... under the file dir into a mangled relative path.
+	if (!NLMISC::CPath::isAbsolutePath(target))
 	{
 		std::string dir = NLMISC::CFile::getPath(efi->Path);
 		if (!dir.empty() && dir[dir.size() - 1] != '/' && dir[dir.size() - 1] != '\\')
@@ -6434,12 +6436,19 @@ static bool rebuildWorkingSet(std::string &err, uint &outWelds)
 			skip.push_back(g_PlaceContextSpecs[i].Basename);
 		loadNeighborContextFiles(zones, g_SessionCellSize, skip);
 	}
-	// M16c: re-apply place-context specs (CLI + scratch UI) after hint load
-	for (size_t pci = 0; pci < g_PlaceContextSpecs.size(); ++pci)
+	// M16c: re-apply place-context specs (CLI + scratch UI) after hint load.
+	// Failed specs are DROPPED — same rule as the initial assembly path. Keeping a
+	// soft-failed spec produced phantom C: board cells (provisional 1×1 occupancy, no
+	// RO geometry) that still collided and recorded as placeContext success.
+	for (size_t pci = g_PlaceContextSpecs.size(); pci-- > 0; )
 	{
 		std::string perr;
 		if (!loadOnePlaceContext(zones, g_SessionCellSize, g_PlaceContextSpecs[pci], perr))
-			fprintf(stderr, "WARNING: rebuild place-context: %s\n", perr.c_str());
+		{
+			fprintf(stderr, "WARNING: rebuild place-context: %s — dropping the placement\n",
+			        perr.c_str());
+			g_PlaceContextSpecs.erase(g_PlaceContextSpecs.begin() + (std::ptrdiff_t)pci);
+		}
 	}
 
 	// One display-tile transform pass over the FULL assembly (instances + rotated context;
@@ -7052,6 +7061,18 @@ static bool scratchPlaceContextImpl(int cx, int cy, const std::string &basename,
 	std::string::size_type dot = pc.Basename.rfind('.');
 	if (dot != std::string::npos && NLMISC::toLowerAscii(pc.Basename.substr(dot)) == ".max")
 		pc.Basename = pc.Basename.substr(0, dot);
+	// Refuse an already-open editable of the same basename — loadOnePlaceContext would
+	// fail mid-rebuild and (pre-fix) leave a phantom board cell that still "succeeded".
+	if (findEditableByBasename(pc.Basename))
+	{
+		err = "basename is editable: " + pc.Basename;
+		return false;
+	}
+	if (contextBasenameHasSpec(pc.Basename))
+	{
+		err = "context already placed: " + pc.Basename;
+		return false;
+	}
 	g_PlaceContextSpecs.push_back(pc);
 	if (!scratchRebuild(err))
 	{
@@ -7063,11 +7084,18 @@ static bool scratchPlaceContextImpl(int cx, int cy, const std::string &basename,
 			fprintf(stderr, "ERROR: place-context recovery rebuild failed: %s\n", rerr.c_str());
 		return false;
 	}
+	// Spec may have been dropped by rebuild if load failed for another reason.
+	if (g_PlaceContextSpecs.empty()
+	    || NLMISC::toLowerAscii(g_PlaceContextSpecs.back().Basename)
+	       != NLMISC::toLowerAscii(pc.Basename))
+	{
+		err = "place-context load failed: " + pc.Basename;
+		return false;
+	}
 	// After load, multi-cell mask is filled in loadOnePlaceContext — re-check collisions
 	// against the derived mask (1×1 provisional may have missed multi-cell overlap).
 	// M24d: a conflicting placement auto-shifts to the nearest fitting cell instead of
 	// rolling back (the brick still loads; the user drags it into place afterwards).
-	if (!g_PlaceContextSpecs.empty())
 	{
 		const size_t li = g_PlaceContextSpecs.size() - 1;
 		std::string cerr;
@@ -7075,6 +7103,7 @@ static bool scratchPlaceContextImpl(int cx, int cy, const std::string &basename,
 		                              g_PlaceContextSpecs[li].Rot, g_PlaceContextSpecs[li].Mirror,
 		                              cerr))
 		{
+			const int wantX = g_PlaceContextSpecs[li].Dx, wantY = g_PlaceContextSpecs[li].Dy;
 			bool placed = false;
 			for (int r = 1; r <= 12 && !placed; ++r)
 			for (int dy = -r; dy <= r && !placed; ++dy)
@@ -7082,26 +7111,35 @@ static bool scratchPlaceContextImpl(int cx, int cy, const std::string &basename,
 			{
 				if (std::max(std::abs(dx), std::abs(dy)) != r) continue;
 				std::string tmp;
-				if (!contextCandidateConflicts(li, cx + dx, cy + dy,
+				if (!contextCandidateConflicts(li, wantX + dx, wantY + dy,
 				                               g_PlaceContextSpecs[li].Rot,
 				                               g_PlaceContextSpecs[li].Mirror, tmp))
 				{
-					g_PlaceContextSpecs[li].Dx = cx + dx;
-					g_PlaceContextSpecs[li].Dy = cy + dy;
+					g_PlaceContextSpecs[li].Dx = wantX + dx;
+					g_PlaceContextSpecs[li].Dy = wantY + dy;
 					placed = true;
 				}
 			}
 			if (!placed)
 			{
 				g_PlaceContextSpecs.pop_back();
-				scratchRebuild(err);
+				if (!scratchRebuild(err))
+					scratchRecoveryRebuild("place-context no-fit");
 				err = cerr + " (no nearby fit)";
 				return false;
 			}
 			fprintf(stderr, "place-context: '%s' does not fit at (%d,%d) — auto-shifted to (%d,%d)\n",
-			        g_PlaceContextSpecs[li].Basename.c_str(), cx, cy,
+			        g_PlaceContextSpecs[li].Basename.c_str(), wantX, wantY,
 			        g_PlaceContextSpecs[li].Dx, g_PlaceContextSpecs[li].Dy);
-			return scratchRebuild(err);
+			if (!scratchRebuild(err))
+			{
+				// Second rebuild failed with the shifted cell — drop the spec and recover
+				// (same UAF class as every other board op).
+				g_PlaceContextSpecs.pop_back();
+				scratchRecoveryRebuild("place-context auto-shift");
+				return false;
+			}
+			return true;
 		}
 	}
 	return true;
@@ -7527,6 +7565,14 @@ static bool scratchOpenEditableImpl(int cx, int cy, const std::string &basenameI
 	std::string::size_type dot = basename.rfind('.');
 	if (dot != std::string::npos && NLMISC::toLowerAscii(basename.substr(dot)) == ".max")
 		basename = basename.substr(0, dot);
+	// A RO context SPEC of this basename must be promoted via makeEditable (which removes
+	// the spec first). Opening a second copy under the same basename would soft-fail the
+	// place-context reload of the first and leave a phantom board cell.
+	if (contextBasenameHasSpec(basename))
+	{
+		err = "basename is a placed context (use Make editable): " + basename;
+		return false;
+	}
 	ZPWS::SZoneEntry ze;
 	if (!resolveHintToZone(g_StartupWorld, basename, ze))
 	{
@@ -8057,6 +8103,16 @@ static bool sessionCloseZoneImpl(const std::string &basename, bool saveFirst, bo
 		err = "not an opened file: " + basename;
 		return false;
 	}
+	// Gate last-editable BEFORE any paint mutation — a refuse after forceDiscard
+	// used to leave the paint already gone while the file stayed open.
+	uint nEditable = 0;
+	for (size_t i = 0; i < g_EditableFiles.size(); ++i)
+		if (g_EditableFiles[i].Editable) ++nEditable;
+	if (efi->Editable && nEditable <= 1)
+	{
+		err = "cannot close the last editable zone";
+		return false;
+	}
 	if (efi->Editable && g_PaintCtx.Core && g_PaintCtx.Core->anyZoneDirty(efi->ZoneIds))
 	{
 		if (saveFirst)
@@ -8069,20 +8125,10 @@ static bool sessionCloseZoneImpl(const std::string &basename, bool saveFirst, bo
 			err = "dirty (need save or discard)";
 			return false;
 		}
-		else
-		{
-			// Abandon paint on this file before rebuild writeBack encodes pristine→carrier
-			g_PaintCtx.Core->revertZones(efi->ZoneIds);
-		}
-	}
-	// Must keep at least one editable file
-	uint nEditable = 0;
-	for (size_t i = 0; i < g_EditableFiles.size(); ++i)
-		if (g_EditableFiles[i].Editable) ++nEditable;
-	if (efi->Editable && nEditable <= 1)
-	{
-		err = "cannot close the last editable zone";
-		return false;
+		// forceDiscard: do NOT revertZones here. The file is about to leave the
+		// working set and its scene is freed on success (paint dies with the free).
+		// Reverting before a rebuild that can still fail permanently destroyed paint
+		// while rolling the file back open — silent data loss on the failure path.
 	}
 	// Remove from lists. The parsed scene is deep-freed only AFTER the rebuild re-inits
 	// the core — until then the old core/carriers still point into it. M28c: every
@@ -8227,6 +8273,15 @@ static bool sessionToggleEditableImpl(const std::string &basename, bool saveFirs
 	}
 	if (efi->Editable)
 	{
+		// Keep at least one editable — gate BEFORE any paint mutation (same class as close).
+		uint nEditable = 0;
+		for (size_t i = 0; i < g_EditableFiles.size(); ++i)
+			if (g_EditableFiles[i].Editable) ++nEditable;
+		if (nEditable <= 1)
+		{
+			err = "cannot demote the last editable zone";
+			return false;
+		}
 		// → read-only
 		if (g_PaintCtx.Core && g_PaintCtx.Core->anyZoneDirty(efi->ZoneIds))
 		{
@@ -8240,17 +8295,8 @@ static bool sessionToggleEditableImpl(const std::string &basename, bool saveFirs
 				err = "dirty (need save or discard)";
 				return false;
 			}
-			else
-				g_PaintCtx.Core->revertZones(efi->ZoneIds);
-		}
-		// Keep at least one editable
-		uint nEditable = 0;
-		for (size_t i = 0; i < g_EditableFiles.size(); ++i)
-			if (g_EditableFiles[i].Editable) ++nEditable;
-		if (nEditable <= 1)
-		{
-			err = "cannot demote the last editable zone";
-			return false;
+			// forceDiscard: do NOT revertZones — demotion rebuild force-freezes the file's
+			// zones; a failed rebuild rolls Editable back and must keep the paint.
 		}
 		efi->Editable = false;
 	}
@@ -11067,8 +11113,8 @@ args.addArg("", "instances", "NxM",
 				}
 			}
 			printf("open-editable: '%s' @ (%d,%d) zoneIdBase=%u footprint %dx%d\n",
-			       ze.Basename.c_str(), oe.Cx, oe.Cy, base,
-			       g_EditableFiles.back().CellsW, g_EditableFiles.back().CellsH);
+			       ze.Basename.c_str(), g_EditableFiles.back().CellX, g_EditableFiles.back().CellY,
+			       base, g_EditableFiles.back().CellsW, g_EditableFiles.back().CellsH);
 		}
 	}
 
