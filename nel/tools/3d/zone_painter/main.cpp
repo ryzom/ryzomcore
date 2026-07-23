@@ -283,33 +283,35 @@ struct SSessionHintCell
 static std::vector<SSessionHintCell> g_SessionHintCells;
 // Legacy name used throughout; points at scenes inside g_ContextFiles
 static std::vector<PMAXLOAD::SLoadedMax *> g_NeighborScenes;
-// Extra editable .max scenes beyond the primary stack `lm` (M6b multi-open)
+// Every editable file's heap-owned scene, the first-opened included (M28c) — close
+// frees through this registry; final teardown deletes what remains.
 static std::vector<PMAXLOAD::SLoadedMax *> g_ExtraEditableScenes;
 // Per-editable-file zone-id membership for dirty tracking / per-file save (M6b)
 struct SEditableFileInfo
 {
 	std::string Path;
 	std::string Basename;
-	PMAXLOAD::SLoadedMax *Lm; // NULL = primary stack lm
+	PMAXLOAD::SLoadedMax *Lm; // always set since M28c (every file owns its scene)
 	std::vector<uint> ZoneIds;
 	/** M11a: when false the file is open as read-only context (no paint; like neighbor). */
 	bool Editable;
-	// M24a ecosystem board placement (non-primary files; primary stays the layout origin).
-	// CellX/CellY = board cell of the file's footprint origin (fine cells, primary-relative);
-	// footprint derived at rebuild for board occupancy/legality. Continents ignore these
-	// (absolute world space).
+	// M24a/M28 ecosystem board placement — EVERY open file uniformly, index 0 included.
+	// CellX/CellY = board cell of the file's footprint origin (fine cells, relative to
+	// the session anchor); footprint derived at rebuild for board occupancy/legality.
+	// Continents ignore these (absolute world space).
 	int CellX, CellY;
 	int CellsW, CellsH;
 	std::vector<bool> Mask;
-	// World translation applied to this file's zones by placeEcoEditableRange (zero for the
-	// primary / continents). Authored-space data read from the SCENE (e.g. embedded-copy
-	// floor origins) must add this to land in world space.
+	// World translation applied to this file's zones by placeEcoEditableRange (zero for
+	// an unmoved first file / continents). Authored-space data read from the SCENE
+	// (e.g. embedded-copy floor origins) must add this to land in world space.
 	float PlacedDX, PlacedDY;
 	SEditableFileInfo() : Lm(NULL), Editable(true), CellX(0), CellY(0), CellsW(1), CellsH(1),
 	                      PlacedDX(0.f), PlacedDY(0.f) {}
 };
 static std::vector<SEditableFileInfo> g_EditableFiles;
-// M11a: primary stack scene pointer (set once after load; used by session rebuild)
+// M11a/M28c: the first-opened file's scene (heap-owned like every other, registered in
+// g_ExtraEditableScenes); NULLed when that file closes — legacy fallback reads only.
 static PMAXLOAD::SLoadedMax *g_PrimaryLm = NULL;
 // M11b: when true, every non-forceFrozen zone is a paint target (today's open-everything).
 // Default false = exporter-faithful eligibility.
@@ -6489,30 +6491,9 @@ static bool placeDupInstanceNear(const std::string &srcName, int cx, int cy)
 	return false;
 }
 
-/** First-opened-file-shaped candidate wrapper (legacy callers). */
-static bool scratchMaskConflicts(int ox, int oy, uint rot, bool mirror, int skipIdx, std::string &err)
-{
-	std::vector<bool> hm = scratchHomeMask();
-	const int fw = scratchFw(), fh = scratchFh();
-	if (hm.empty()) hm.assign((size_t)fw * (size_t)fh, true);
-	return scratchMaskConflictsSrc(hm, fw, fh, ox, oy, rot, mirror, skipIdx, err);
-}
-
-
-/** Legacy rect-overlap helper (still used for quick block sizing checks). */
-static bool scratchBlocksOverlap(int ax, int ay, int aw, int ah, int bx, int by, int bw, int bh)
-{
-	return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
-}
-
-/** @deprecated M14 rect conflict — routes to mask conflict with rot0 of a filled rect. */
-static bool scratchBlockConflicts(int ox, int oy, int bw, int bh, int skipIdx, std::string &err)
-{
-	(void)bw; (void)bh;
-	// Assume candidate is home-sized at rot0/mirror0 (scratchPlace); callers that rotate
-	// use scratchMaskConflicts directly.
-	return scratchMaskConflicts(ox, oy, 0, false, skipIdx, err);
-}
+// (M30: the pre-M28 "home-shaped candidate" conflict wrappers — scratchMaskConflicts,
+// scratchBlockConflicts, scratchBlocksOverlap — are gone; every caller passes the real
+// per-source footprint through scratchMaskConflictsSrc.)
 
 static bool scratchRebuild(std::string &err)
 {
@@ -7637,16 +7618,8 @@ static bool sessionGetCellState(const std::string &basename, ZPUI::ESessionCellS
 			out = ZPUI::CellOpenEditable;
 		return true;
 	}
-	// Neighbor-only open? Neighbors are not listed by basename in g_EditableFiles;
-	// check live zones for force-frozen files matching basename (name match on zone).
-	if (g_PaintCtx.Zones)
-	{
-		for (size_t i = 0; i < g_PaintCtx.Zones->size(); ++i)
-		{
-			// Neighbor zones use node names, not file basenames — check file via open set only.
-			(void)i;
-		}
-	}
+	// (Neighbor zones use node names, not file basenames — neighbors resolve through
+	// the open set and the loaded-context list below, never by zone-name scan.)
 	// Loaded RO context (hint chain / place-context / continent ring)
 	for (size_t i = 0; i < g_ContextFiles.size(); ++i)
 	{
@@ -9352,6 +9325,12 @@ static int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPA
 		ZPUI::setPaintUIBridge(NULL);
 		g_SessionBank = NULL;
 		g_PaintCtx = SPaintCtx();
+		// Script hooks referencing this frame's stack objects (driver, scene, bridge)
+		// must not survive the viewer — a post-viewer script/pump call through them
+		// would be a use-after-free (session ops are already board-session-gated).
+		g_SessionOpsAvailable = false;
+		g_PumpCtx = SScriptPumpCtx();
+		g_ScriptHost.bridge = NULL; // pointed at this frame's paintBridge
 		mouseListener.removeFromServer(udriver->EventServer);
 		udriver->EventServer.removeListener(NLMISC::EventDestroyWindowId, &closeListener);
 		udriver->EventServer.removeListener(NLMISC::EventCloseWindowId, &closeListener);
@@ -10435,9 +10414,7 @@ args.addArg("", "instances", "NxM",
 			       (uint)(g_EditableFiles.size() - 1), efi.Basename.c_str(), base,
 			       (uint)efi.ZoneIds.size());
 	}
-	const size_t primaryZoneCount = g_EditableFiles.empty() ? 0 : g_EditableFiles[0].ZoneIds.size();
-	// primaryZoneCount for instances = zones from first file only (before instances append)
-	// rebuild: count of zones from first file at base 0
+	// Count of zones from the first file at base 0 (before instances append)
 	size_t primaryOnlyCount = 0;
 	for (size_t i = 0; i < zones.size(); ++i)
 		if (zones[i].ZoneId < 1000) ++primaryOnlyCount;
