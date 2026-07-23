@@ -1042,11 +1042,26 @@ static void syncLayoutRadios()
 // M29: zone browser display mode — false = detail-tile list, true = large-thumbnail
 // grid (the tileset-palette idiom). Remembered in startup.cfg (ZoneBrowserLarge).
 static bool s_ZoneListLarge = false;
+// M29b: width the grid was last wrapped for (0 = list not showing the eco grid);
+// maybeRewrapZoneList() repopulates when the resizable browser changes it.
+static int s_ZoneListWrapW = 0;
+
+/** Usable grid width: the scroll viewport minus the text_list gutter (w="-24"). */
+static int zoneListAvailW()
+{
+	if (CInterfaceGroup *ls = findGroup("ui:zp:zone_browser:content:list_scroll"))
+	{
+		if (ls->getWReal() > 0)
+			return ls->getWReal() - 24;
+	}
+	return 726; // pre-first-layout estimate (declared 780 window minus margins/gutter)
+}
 
 static void populateZoneList()
 {
 	clearList("ui:zp:zone_browser:content:list_scroll:text_list");
 	clearBoard();
+	s_ZoneListWrapW = 0; // set again below only when the eco grid actually shows
 	s_Sess.PendingSelect.clear();
 	if (!s_Sess.Worlds || s_Sess.SelectedWorld < 0
 	    || s_Sess.SelectedWorld >= (int)s_Sess.Worlds->size())
@@ -1084,8 +1099,13 @@ static void populateZoneList()
 
 	static const char *kList = "ui:zp:zone_browser:content:list_scroll:text_list";
 	// Grid geometry (large mode): tiles per line inside a plain line container that the
-	// CGroupList stacks vertically; tiles spawn at absolute column offsets.
-	const int kTileW = 178, kTileH = 106, kCols = 4;
+	// CGroupList stacks vertically; tiles spawn at absolute column offsets. Columns
+	// AUTO-WRAP from the measured list width (M29b) — the browser is resizable and
+	// maybeRewrapZoneList() repopulates when the width changes.
+	const int kTileW = 178, kTileH = 106;
+	const int availW = zoneListAvailW();
+	const int kCols = std::max(1, availW / kTileW);
+	s_ZoneListWrapW = s_ZoneListLarge ? availW : 0;
 	CInterfaceGroup *gridLine = NULL;
 	int gridCol = 0;
 	uint gridLineCount = 0;
@@ -1127,7 +1147,10 @@ static void populateZoneList()
 				                            NLMISC::toString("zline%u", gridLineCount++)));
 				gridLine = spawnRow("zp_zone_grid_line", kList, lp);
 				if (gridLine)
+				{
 					gridLine->setH(kTileH);
+					gridLine->setW(kCols * kTileW);
+				}
 				gridCol = 0;
 			}
 			if (!gridLine)
@@ -1165,6 +1188,26 @@ static void populateZoneList()
 			}
 		}
 	}
+}
+
+/** M29b: repopulate the large-icon grid when the resizable browser's width changed
+ *  (auto-wrap). Called from the startup frame loop AFTER editorUI->update() so the
+ *  measured width is current. Hard-guarded so it can never stomp non-list content
+ *  (session boards reuse the same window with Worlds == NULL). */
+static void maybeRewrapZoneList()
+{
+	if (s_ZoneListWrapW <= 0 || !s_ZoneListLarge)
+		return;
+	if (!s_Sess.Active || s_Sess.SessionMode || !s_Sess.Worlds)
+		return;
+	if (s_Sess.SelectedWorld < 0 || s_Sess.SelectedWorld >= (int)s_Sess.Worlds->size()
+	    || (*s_Sess.Worlds)[s_Sess.SelectedWorld].Kind != ZPWS::Ecosystem)
+		return;
+	CInterfaceElement *win = CWidgetManager::getInstance()->getElementFromId("ui:zp:zone_browser");
+	if (!win || !win->getActive())
+		return;
+	if (zoneListAvailW() != s_ZoneListWrapW)
+		populateZoneList();
 }
 
 /** M29: flip list/grid display mode, persist, repopulate. */
@@ -1845,6 +1888,7 @@ EStartupResult runStartupFlow(UDriver *driver,
 		// Extra update passes so dynamically-spawned grid/list rows get real coords
 		driver->EventServer.pump();
 		editorUI->update();
+		maybeRewrapZoneList(); // M29b: first layout gives the REAL width — re-wrap the grid
 		editorUI->update();
 		editorUI->update();
 		driver->clearBuffers(CRGBA(40, 44, 52));
@@ -1887,6 +1931,7 @@ EStartupResult runStartupFlow(UDriver *driver,
 			s_Sess.Quit = true;
 
 		editorUI->update();
+		maybeRewrapZoneList(); // M29b: auto-wrap the grid when the browser was resized
 		driver->clearBuffers(CRGBA(40, 44, 52));
 		editorUI->draw();
 		driver->swapBuffers();

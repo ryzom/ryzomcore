@@ -316,11 +316,12 @@
 		<ctrl style="text_button_radio" id="layout_3x3" posparent="layout_2x2" posref="MR ML" x="4" y="0"
 			onclick_l="zp_set_instances" params_l="3x3" hardtext="3x3" active="false" />
 
-		<!-- M25p8: sunken 9-slice backdrop, see world_select's list_scroll for the rationale. -->
+		<!-- M25p8: sunken 9-slice backdrop, see world_select's list_scroll for the rationale.
+		     M29b: width tracks the (resizable) window so the large-icon grid auto-wraps. -->
 		<group type="frame" id="list_frame" options="w_box_frame" posparent="world_sub" posref="BL TL" x="0" y="-8"
-			w="750" h="350" color="255 255 255 255" global_color="false" display="true" />
+			sizeparent="parent" sizeref="w" w="-30" h="350" color="255 255 255 255" global_color="false" display="true" />
 		<!-- Ecosystem list: vertical scroll_text (unchanged). y: -8 under world_sub or below layout row. -->
-		<group type="scroll_text" id="list_scroll" posparent="world_sub" posref="BL TL" x="0" y="-8" w="750" h="350" min_height="180" max_height="400">
+		<group type="scroll_text" id="list_scroll" posparent="world_sub" posref="BL TL" x="0" y="-8" sizeparent="parent" sizeref="w" w="-30" h="350" min_height="180" max_height="400">
 			<group type="list" id="text_list" shadow="true" fontsize="12" color="255 255 255 255" space="1"
 				global_color="false" posref="TL TL" x="4" y="-4" sizeref="hw" w="-24" h="-8" maxelements="2000" />
 			<ctrl type="scroll" id="scroll_bar" align="T" posref="TR TR" x="-4" y="-4" w="8" sizeref="h" h="-8"
