@@ -10341,6 +10341,49 @@ args.addArg("", "instances", "NxM",
 		    || (scriptPath.empty() && luaScriptPath.empty()
 		        && !doDumpRpo && !doDumpXRef && dumpBlobDir.empty()));
 
+	// M31b: interactive direct-.max opens are SESSIONS — synthesize a single-file
+	// ecosystem world rooted at the file's directory, so there is ONE application path.
+	// Siblings in that directory become the world's zone list (board opens, instances,
+	// contexts, the picker — all live); the M16 hint chain loads REAL neighbor files
+	// when they exist (--embedded-context still forces the old stale-copy display).
+	// Synthetic sessions NEVER stamp hint appdata (a save must not mutate arbitrary
+	// pipeline files' Scene streams) and keep the legacy cellsize default (100,
+	// plugin-era files — g_SessionCellSize was already fixed above). Headless flows
+	// (null-edit, dumps, scripts without a display, panel-save-test) keep the minimal
+	// legacy chain: those are codec/paint-core gates, not editor sessions.
+	bool syntheticSession = false;
+	if (!startupPath && viewerMode)
+	{
+		std::string dir = NLMISC::CFile::getPath(input);
+		if (dir.empty()) dir = ".";
+		dir = ZPWS::normalizeDir(NLMISC::CPath::makePathAbsolute(dir, NLMISC::CPath::getCurrentPath(), true));
+		g_StartupWorld = ZPWS::SWorldEntry();
+		g_StartupWorld.Kind = ZPWS::Ecosystem;
+		g_StartupWorld.GraphicsRoot = dir;
+		g_StartupWorld.WorldName = ZPWS::dirBasename(dir);
+		// Ligo convention keeps zones under .../<eco>/max — name the world after the
+		// meaningful parent, not the literal "max" folder.
+		if (NLMISC::toLowerAscii(g_StartupWorld.WorldName) == "max")
+		{
+			// normalizeDir strips the trailing slash, so getPath(dir) is the parent
+			std::string parent = ZPWS::dirBasename(NLMISC::CFile::getPath(dir));
+			if (!parent.empty())
+				g_StartupWorld.WorldName = parent;
+		}
+		g_StartupWorld.MaxDir = dir;
+		g_StartupWorld.BankPath = bankPath;
+		g_StartupWorld.BankOk = !bankPath.empty();
+		g_StartupZone.MaxPath = input;
+		g_StartupZone.Basename = NLMISC::CFile::getFilenameWithoutExtension(input);
+		g_BoardSession = true;
+		g_LoadNeighbors = true; // hint chain (appdata → embedded names → siblings)
+		g_HintStampEnabled = false;
+		syntheticSession = true;
+		printf("direct open: synthesized session world '%s' (%s)\n",
+		       g_StartupWorld.WorldName.c_str(), dir.c_str());
+	}
+	(void)syntheticSession;
+
 	if (nullEdit && !args.haveLongArg("out"))
 	{
 		fprintf(stderr, "ERROR: --null-edit refuses to save in place; give --out <output.max>\n");
