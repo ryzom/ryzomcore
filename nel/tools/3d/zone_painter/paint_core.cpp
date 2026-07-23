@@ -239,6 +239,13 @@ bool CPaintCore::init(const std::vector<SPaintZoneInput> &zones, NL3D::CTileBank
 	m_StrokeOldTile = -1;
 	m_StrokeOldZone = -1;
 	m_StrokeSets = 0;
+	// Group lists are rebuilt below with push_back — clear or every re-init doubles them
+	// (and the group-cycle modulo drifts across working-set rebuilds).
+	m_GroupTile128.clear();
+	m_GroupTile256.clear();
+	// Stored painter flags are harvested first-win per working set, not per process.
+	m_StoredIncludeMeshes = -1;
+	m_StoredPreloadTiles = -1;
 
 	std::map<const void *, uint> carrierIndex; // keyed by leaf ptr or rpo ptr (shared objects)
 	for (size_t i = 0; i < zones.size(); ++i)
@@ -808,15 +815,58 @@ void CPaintCore::setTileDesc(uint zone, sint32 tileId, const CTileDescP &desc)
 	SRpoTile &t = up.Tiles[u + v * (1 << up.NbTilesU)];
 	// PRISTINE MUTATION: tile-record fields only; Reserved/OldA/OldB retention stays untouched.
 	// Flags written wholesale (case + displace + preserved high bits, see getTileRaw).
+	// Layers are written for USED slots only: unused on-disk layers carry -1/0x7fffffff-style
+	// markers (rpo_data.h) that the 16-bit desc round trip cannot represent — writing them
+	// back zero-extended would drift bytes the edit never meant to touch. (The plugin's own
+	// 16-bit in-memory copy re-wrote them wholesale; the selective-write port can do better.)
 	t.Num = desc.Num;
 	t.Flags = desc.Flags;
 	t.Noise = desc.getDisplace();
-	for (int l = 0; l < 3; ++l)
+	for (int l = 0; l < desc.Num && l < 3; ++l)
 	{
 		t.Layer[l].Tile = (sint32)desc.Mat[l].Tile;
 		t.Layer[l].Rotate = (sint32)(desc.Mat[l].Rotate & 3);
 	}
 	++m_StrokeSets;
+}
+
+PIPELINE::MAX::NELPATCH::SRpoTile *CPaintCore::pristineTileRecord(uint zone, sint32 tileId)
+{
+	int patch = tileId / ZP_NUM_TILE_SEL;
+	int tile = tileId % ZP_NUM_TILE_SEL;
+	int v = tile / ZP_MAX_TILE_IN_PATCH;
+	int u = tile % ZP_MAX_TILE_IN_PATCH;
+	SRpoPatch &up = pristineOf(zone)->Patches[patch];
+	return &up.Tiles[u + v * (1 << up.NbTilesU)];
+}
+
+void CPaintCore::captureRawTile(uint zone, sint32 tileId, uint16 &num, uint16 &flags,
+                                uint8 &noise, sint32 tile[3], sint32 rot[3])
+{
+	const SRpoTile *t = pristineTileRecord(zone, tileId);
+	num = t->Num;
+	flags = t->Flags;
+	noise = t->Noise;
+	for (int l = 0; l < 3; ++l)
+	{
+		tile[l] = t->Layer[l].Tile;
+		rot[l] = t->Layer[l].Rotate;
+	}
+}
+
+void CPaintCore::restoreRawTile(const SUndoTile &u, bool useOld)
+{
+	// Verbatim pristine-record restore AFTER the desc-based replay updated the live display:
+	// undo/redo lands on the exact on-disk bytes even where the desc round trip is lossy.
+	SRpoTile *t = pristineTileRecord(u.Zone, u.TileId);
+	t->Num = useOld ? u.OldRawNum : u.NewRawNum;
+	t->Flags = useOld ? u.OldRawFlags : u.NewRawFlags;
+	t->Noise = useOld ? u.OldRawNoise : u.NewRawNoise;
+	for (int l = 0; l < 3; ++l)
+	{
+		t->Layer[l].Tile = useOld ? u.OldRawTile[l] : u.NewRawTile[l];
+		t->Layer[l].Rotate = useOld ? u.OldRawRot[l] : u.NewRawRot[l];
+	}
 }
 
 // transformDesc port (plugin paint.cpp). Live under per-zone Symmetry/Rotate (M12 display
@@ -832,8 +882,12 @@ void CPaintCore::transformDesc(CTileDescP &desc, bool symmetry, uint rotate, uin
 	uint symTile = orderS(zone, patch) * v + u;
 	const NL3D::CZoneSymmetrisation &sym = m_Zones[zone].Sym;
 
-	if (desc.getCase() != 0)
+	if (desc.getCase() != 0
+	    && (uint)desc.getLayer(0).Tile < (uint)m_Bank->getTileCount())
 	{
+		// Stale sources ("Max 3 era zones") can carry tiles beyond the bank, and a bank
+		// tile can xref no set (tileSet -1, NeL warns on the same case in zone.cpp) —
+		// guard both before indexing, like every other consumer of these lookups.
 		uint8 case256 = (uint8)(desc.getCase() - 1);
 		uint tileRotate = rotate;
 		bool tileSymmetry = symmetry;
@@ -845,7 +899,8 @@ void CPaintCore::transformDesc(CTileDescP &desc, bool symmetry, uint rotate, uin
 		uint tileRotation = desc.getLayer(0).Rotate;
 		if (symmetry)
 		{
-			if (m_Bank->getTileSet(tileSet)->getOriented())
+			if (tileSet >= 0 && tileSet < m_Bank->getTileSetCount()
+			    && m_Bank->getTileSet(tileSet)->getOriented())
 			{
 				if (sym.getOrientedTileBorderState(patch, symTile) != NL3D::CZoneSymmetrisation::Nothing)
 					goofy = sym.getOrientedTileBorderState(patch, symTile) == NL3D::CZoneSymmetrisation::Goofy;
@@ -867,6 +922,8 @@ void CPaintCore::transformDesc(CTileDescP &desc, bool symmetry, uint rotate, uin
 	for (int l = 0; l < desc.getNumLayer(); ++l)
 	{
 		uint tile = desc.getLayer(l).Tile;
+		if (tile >= (uint)m_Bank->getTileCount())
+			continue; // stale out-of-bank tile: leave the layer untransformed (NeL skips too)
 		uint tileRotation = desc.getLayer(l).Rotate;
 		int tileSet, number;
 		NL3D::CTileBank::TTileType type;
@@ -876,7 +933,8 @@ void CPaintCore::transformDesc(CTileDescP &desc, bool symmetry, uint rotate, uin
 		bool goofy = false;
 		if (symmetry)
 		{
-			if (m_Bank->getTileSet(tileSet)->getOriented())
+			if (tileSet >= 0 && tileSet < m_Bank->getTileSetCount()
+			    && m_Bank->getTileSet(tileSet)->getOriented())
 			{
 				if (sym.getOrientedTileBorderState(patch, symTile) != NL3D::CZoneSymmetrisation::Nothing)
 					goofy = sym.getOrientedTileBorderState(patch, symTile) == NL3D::CZoneSymmetrisation::Goofy;
@@ -935,6 +993,13 @@ void CPaintCore::setTile(uint zone, sint32 tileId, const CTileDescP &desc,
 	}
 	if (!updateDisplace)
 		maxDesc.setDisplace(oldDesc.getDisplace());
+
+	// Raw pristine snapshot BEFORE the write (byte-exact undo, see SUndoTile::*Raw*)
+	uint16 oldRawNum = 0, oldRawFlags = 0;
+	uint8 oldRawNoise = 0;
+	sint32 oldRawTile[3], oldRawRot[3];
+	if (undo)
+		captureRawTile(zone, tileId, oldRawNum, oldRawFlags, oldRawNoise, oldRawTile, oldRawRot);
 
 	// Display → authored (plugin: transformInvDesc(sym, 4-rot))
 	const SPaintZoneInput &srcIn = m_Zones[zone].In;
@@ -1001,6 +1066,13 @@ void CPaintCore::setTile(uint zone, sint32 tileId, const CTileDescP &desc,
 		// with updateDisplace on — recording the raw caller desc would zero a preserved
 		// displace on undo+redo (state after redo must equal state after the op).
 		u.New = maxDesc;
+		u.HaveRaw = true;
+		u.OldRawNum = oldRawNum;
+		u.OldRawFlags = oldRawFlags;
+		u.OldRawNoise = oldRawNoise;
+		for (int l = 0; l < 3; ++l) { u.OldRawTile[l] = oldRawTile[l]; u.OldRawRot[l] = oldRawRot[l]; }
+		captureRawTile(zone, tileId, u.NewRawNum, u.NewRawFlags, u.NewRawNoise,
+		               u.NewRawTile, u.NewRawRot);
 		m_CurStroke.push_back(u);
 	}
 }
@@ -1105,7 +1177,8 @@ void CPaintCore::applyChanges()
 
 int CPaintCore::selectTile(uint tileSet, bool selectCycle, bool _256, uint group)
 {
-	if ((sint)tileSet >= m_Bank->getTileSetCount()) return -1;
+	// Negative sets other than the -1 clear sentinel (script input) must not index the bank.
+	if ((sint)tileSet < 0 || (sint)tileSet >= m_Bank->getTileSetCount()) return -1;
 	const NL3D::CTileSet *ts = m_Bank->getTileSet((sint)tileSet);
 	uint32 index = selectCycle ? m_TileCycle++ : (uint32)rand();
 	if (_256)
@@ -2149,7 +2222,8 @@ bool CPaintCore::opTile(uint zone, uint patch, uint u, uint v, int tileSet, int 
 	if (zi == (uint)-1) { err = "unknown zone id"; return false; }
 	if (patch >= m_Zones[zi].In.EvalRp->Patches.size()) { err = "patch out of range"; return false; }
 	if (u >= orderS(zi, patch) || v >= orderT(zi, patch)) { err = "tile out of range"; return false; }
-	if (tileSet >= m_Bank->getTileSetCount()) { err = "tile set out of range"; return false; }
+	// -1 is the clear sentinel; anything else negative would index the bank out of bounds
+	if (tileSet < -1 || tileSet >= m_Bank->getTileSetCount()) { err = "tile set out of range"; return false; }
 	SPaintTile *t = metaAt(zi, (sint32)(patch * ZP_NUM_TILE_SEL + v * ZP_MAX_TILE_IN_PATCH + u));
 	if (!t) { err = "tile not in grid"; return false; }
 	m_StrokeSets = 0;
@@ -2183,6 +2257,8 @@ bool CPaintCore::opClear(uint zone, uint patch, uint u, uint v, bool _256, std::
 bool CPaintCore::opTileStroke(uint zone, sint32 tileId, int tileSet, bool _256, bool first, std::string &err)
 {
 	if (!m_Bank) { err = "no tile bank loaded"; return false; }
+	// -1 is the clear sentinel; anything else negative would index the bank out of bounds
+	if (tileSet < -1 || tileSet >= m_Bank->getTileSetCount()) { err = "tile set out of range"; return false; }
 	uint zi = (uint)-1;
 	for (size_t i = 0; i < m_Zones.size(); ++i)
 		if (m_Zones[i].In.ZoneId == zone) { zi = (uint)i; break; }
@@ -2271,7 +2347,11 @@ void CPaintCore::applyUndoList(const std::vector<SUndoTile> &list, bool useOld)
 			else if (list[i].Kind == 1)
 				setColorRaw(list[i].Zone, (uint)list[i].Patch, list[i].S, list[i].T, list[i].OldColor, false);
 			else
+			{
 				setTile(list[i].Zone, list[i].TileId, list[i].Old, NULL, false, true);
+				if (list[i].HaveRaw)
+					restoreRawTile(list[i], true);
+			}
 		}
 	}
 	else
@@ -2293,7 +2373,11 @@ void CPaintCore::applyUndoList(const std::vector<SUndoTile> &list, bool useOld)
 			else if (list[i].Kind == 1)
 				setColorRaw(list[i].Zone, (uint)list[i].Patch, list[i].S, list[i].T, list[i].NewColor, false);
 			else
+			{
 				setTile(list[i].Zone, list[i].TileId, list[i].New, NULL, false, true);
+				if (list[i].HaveRaw)
+					restoreRawTile(list[i], false);
+			}
 		}
 	}
 	applyChanges();
@@ -2337,7 +2421,10 @@ bool CPaintCore::opProp(uint zoneId, uint32 appDataId, bool newHas, const std::s
 	if (rec.OldHas == rec.NewHas && (!rec.NewHas || rec.OldValue == rec.NewValue))
 		return true;
 	zpApplyPropRaw(node, appDataId, newHas, newValue);
-	m_CurStroke.clear();
+	// Commit (not discard) any in-flight paint stroke first — a Lua script can issue a
+	// prop op between stroke segments, and clearing would drop those undo records while
+	// their pristine mutations stay applied.
+	endStroke();
 	m_CurStroke.push_back(rec);
 	endStroke();
 	if (m_PropChangedCb)
@@ -2493,6 +2580,30 @@ void CPaintCore::vertexClosure(uint zoneIdx, SPaintTile *tile, int vertexId, std
 	(void)zoneIdx;
 }
 
+bool CPaintCore::colorVertexBorderLocked(uint zoneIdx, uint patch, sint32 s, sint32 t) const
+{
+	if (!m_LockBorders)
+		return false;
+	const sint32 os = (sint32)orderS(zoneIdx, patch), ot = (sint32)orderT(zoneIdx, patch);
+	if (s < 0 || s > os || t < 0 || t > ot)
+		return true; // out of range: refuse defensively
+	// Owner tile + the two sides adjacent to this corner (paint_vcolor.cpp:150-215):
+	// (s,t) interior -> tile (s,t) sides left(0)/top(3); right edge -> (s-1,t) right(2)/top(3);
+	// bottom edge -> (s,t-1) left(0)/bottom(1); corner -> (s-1,t-1) right(2)/bottom(1).
+	sint32 tu = s, tv = t;
+	int sideA = 0, sideB = 3;
+	if (s == os && t == ot) { tu = s - 1; tv = t - 1; sideA = 2; sideB = 1; }
+	else if (s == os) { tu = s - 1; sideA = 2; sideB = 3; }
+	else if (t == ot) { tv = t - 1; sideA = 0; sideB = 1; }
+	const SPaintTile &tile = m_Zones[zoneIdx].Meta[patch * ZP_NUM_TILE_SEL
+	                                              + tv * ZP_MAX_TILE_IN_PATCH + tu];
+	if (tile.TileId < 0)
+		return true; // dead meta cell: refuse (no side information)
+	const bool aLocked = (tile.Voisins[sideA] == NULL) || tile.Voisins[sideA]->Frozen;
+	const bool bLocked = (tile.Voisins[sideB] == NULL) || tile.Voisins[sideB]->Frozen;
+	return aLocked || bLocked;
+}
+
 bool CPaintCore::setVertexColorShared(const std::vector<SColorSlot> &slots, NLMISC::CRGBA color, uint blend)
 {
 	// Frozen zones' carriers are never rewritten: their slots drop out of the write set (the
@@ -2554,6 +2665,7 @@ bool CPaintCore::opColorVertex(uint zone, uint patch, sint32 s, sint32 t, NLMISC
 	if (s < os && t < ot) { tu = s; tv = t; }
 	SPaintTile *tile = &m_Zones[zi].Meta[patch * ZP_NUM_TILE_SEL + tv * ZP_MAX_TILE_IN_PATCH + tu];
 	if (tile->TileId < 0) { err = "tile not in grid"; return false; }
+	if (colorVertexBorderLocked(zi, patch, s, t)) { err = "locked border"; return false; }
 	int ds = (int)(s - tile->U), dt = (int)(t - tile->V);
 	int vid = (ds == 0 && dt == 0) ? 0 : (ds == 0 && dt == 1) ? 1 : (ds == 1 && dt == 1) ? 2 : 3;
 	std::vector<SColorSlot> slots;
@@ -2693,6 +2805,14 @@ bool CPaintCore::opColorBrush(uint zone, sint32 seedTileId, const NLMISC::CVecto
 		// visiting all four corners is equivalent under the closure dedup.
 		for (int vid = 0; vid < 4; ++vid)
 		{
+			// lockBorders: refuse open/frozen-border vertices like the plugin's paintAVertex
+			// (checked in the visited tile's own zone; owner-tile mapping in the helper).
+			{
+				const sint32 vs = (sint32)t->U + ((vid == 2 || vid == 3) ? 1 : 0);
+				const sint32 vt = (sint32)t->V + ((vid == 1 || vid == 2) ? 1 : 0);
+				if (colorVertexBorderLocked((uint)t->Zone, (uint)t->Patch, vs, vt))
+					continue;
+			}
 			std::vector<SColorSlot> slots;
 			vertexClosure(zi, t, vid, slots);
 			if (slots.empty()) continue;
@@ -2908,7 +3028,8 @@ bool CPaintCore::opFillTile(uint zone, uint patch, int tileSet, int rot, bool _2
 		if (m_Zones[i].In.ZoneId == zone) { zi = (uint)i; break; }
 	if (zi == (uint)-1) { err = "unknown zone id"; return false; }
 	if (patch >= m_Zones[zi].In.EvalRp->Patches.size()) { err = "patch out of range"; return false; }
-	if (tileSet >= m_Bank->getTileSetCount()) { err = "tile set out of range"; return false; }
+	// -1 is the clear sentinel; anything else negative would index the bank out of bounds
+	if (tileSet < -1 || tileSet >= m_Bank->getTileSetCount()) { err = "tile set out of range"; return false; }
 	m_StrokeSets = 0;
 	bool ok = fillTileImpl(zi, patch, tileSet, rot & 3, _256);
 	applyChanges();
@@ -3279,6 +3400,10 @@ bool CPaintCore::isZoneDirty(uint zoneId) const
 	{
 		if (m_Zones[i].In.ZoneId != zoneId)
 			continue;
+		// Contract: frozen zones are never dirty — a frozen instance sharing a painted
+		// unfrozen home's carrier must not report the carrier's dirt as its own.
+		if (m_Zones[i].In.Frozen)
+			return false;
 		if (propsDirty((uint)i))
 			return true;
 		const SCarrier &car = m_Carriers[m_Zones[i].Carrier];

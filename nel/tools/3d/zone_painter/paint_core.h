@@ -103,6 +103,7 @@ namespace NELPATCH {
 class CRklPatchObject;
 struct SRPatchMesh;
 struct SPatchMesh;
+struct SRpoTile;
 }
 }
 }
@@ -278,10 +279,27 @@ struct SUndoTile
 	uint32 AppDataId;
 	bool OldHas, NewHas;        // entry present?
 	std::string OldValue, NewValue; // string payload without trailing NUL
+	// Kind 0 only: raw pristine tile-record snapshots (authored space, exact on-disk values)
+	// captured around setTileDesc. Undo/redo restores these verbatim after the desc-based
+	// replay, so restoration is byte-exact even where the 16-bit desc round trip is lossy
+	// (unused-layer -1/0x7fffffff markers, non-canonical rotate/flag bits in stale sources).
+	bool HaveRaw;
+	uint16 OldRawNum, NewRawNum;
+	uint16 OldRawFlags, NewRawFlags;
+	uint8 OldRawNoise, NewRawNoise;
+	sint32 OldRawTile[3], NewRawTile[3];
+	sint32 OldRawRot[3], NewRawRot[3];
 	SUndoTile()
 		: Kind(0), Zone(0), TileId(-1), Patch(-1), S(0), T(0), OldColor(0), NewColor(0),
-		  AppDataId(0), OldHas(false), NewHas(false)
+		  AppDataId(0), OldHas(false), NewHas(false),
+		  HaveRaw(false), OldRawNum(0), NewRawNum(0), OldRawFlags(0), NewRawFlags(0),
+		  OldRawNoise(0), NewRawNoise(0)
 	{
+		for (int l = 0; l < 3; ++l)
+		{
+			OldRawTile[l] = NewRawTile[l] = 0;
+			OldRawRot[l] = NewRawRot[l] = 0;
+		}
 	}
 };
 
@@ -549,6 +567,11 @@ private:
 	void getTileIdx(uint zoneIdx, sint32 tileId, CTileDescP &desc) const;
 	void getTileRaw(uint zone, sint32 tileId, CTileDescP &desc) const; // no display transform
 	void setTileDesc(uint zone, sint32 tileId, const CTileDescP &desc); // pristine write
+	// Raw pristine tile-record access for the byte-exact undo snapshots (SUndoTile::*Raw*).
+	PIPELINE::MAX::NELPATCH::SRpoTile *pristineTileRecord(uint zone, sint32 tileId);
+	void captureRawTile(uint zone, sint32 tileId, uint16 &num, uint16 &flags, uint8 &noise,
+	                    sint32 tile[3], sint32 rot[3]);
+	void restoreRawTile(const SUndoTile &u, bool useOld);
 	void transformDesc(CTileDescP &desc, bool symmetry, uint rotate, uint zone, sint32 tileId) const;
 	void transformInvDesc(CTileDescP &desc, bool symmetry, uint rotate, uint zone, sint32 tileId) const;
 	void setTile(uint zone, sint32 tileId, const CTileDescP &desc,
@@ -564,8 +587,15 @@ private:
 	// co-location closure of a grid vertex across seams (getVertexInNeighbor port, transitive)
 	void vertexClosure(uint zoneIdx, SPaintTile *tile, int vertexId, std::vector<SColorSlot> &out);
 	// blend once, write the whole closure identically; false when the closure touches a frozen
-	// zone (or, under lockBorders, an open/frozen border)
+	// zone. lockBorders refusal happens at the callers (brush/vertex ops) via
+	// colorVertexBorderLocked — the plugin's fill wrote vertices with no lock checks at all,
+	// so opFillColor must stay exempt.
 	bool setVertexColorShared(const std::vector<SColorSlot> &slots, NLMISC::CRGBA color, uint blend);
+	// paint_vcolor.cpp port: under lockBorders a vertex adjacent to an OPEN (unbound) or
+	// frozen border refuses to paint. Decided from the vertex's owner tile exactly like the
+	// plugin: interior vertex = tile whose top-left corner it is (left/top sides); right/
+	// bottom patch-edge vertices = the edge tile's right/bottom sides.
+	bool colorVertexBorderLocked(uint zoneIdx, uint patch, sint32 s, sint32 t) const;
 	bool fillTileImpl(uint zoneIdx, uint patch, int tileSet, int rot, bool _256);
 	bool isLockedEx(SPaintTile *tile);
 	bool isLocked256(SPaintTile *tile);
