@@ -86,19 +86,6 @@ namespace ZPCTX {
 // GeomObject superclass (the plugin's isMesh gate started from geometry objects)
 static const TSClassId ZP_SCLASS_GEOMOBJECT = 0x10;
 
-static CSceneClass *unwrapObject(CNodeImpl *node)
-{
-	CSceneClass *obj = dynamic_cast<CSceneClass *>(node->getReference(1));
-	int guard = 8;
-	while (obj && guard-- > 0)
-	{
-		CDerivedObject *derived = dynamic_cast<CDerivedObject *>(obj);
-		if (!derived) break;
-		obj = derived->baseObject();
-	}
-	return obj;
-}
-
 static bool isDebugMarker(const std::string &name)
 {
 	return name.size() >= 9 && name.compare(0, 9, "[NELLIGO]") == 0;
@@ -625,8 +612,13 @@ void addContextMeshes(PMAXLOAD::SLoadedMax &lm, NL3D::CScene *scene, NL3D::CShap
 			NLMISC::CClassId ocid = obj->classDesc()->classId();
 			if (ocid == PMAX_EXPORT_IDS::CLASSID_PACS_BOX || ocid == PMAX_EXPORT_IDS::CLASSID_PACS_CYL
 				|| ocid == SCENELIB::CLASSID_TARGET) { ++stats.Filtered; ++stats.FilteredClass; continue; }
-			std::string accel = APPDATA::getScriptAppDataStr(node, NEL3D_APPDATA_ACCEL, "");
-			if (!accel.empty() && accel != "0" && accel != "32") { ++stats.Filtered; ++stats.FilteredAccel; continue; }
+			// Accel is a BITFIELD: accelerator type in bits 0-1, independent flags above
+			// (FATHER_VISIBLE=4, VISIBLE_FROM_FATHER=8, CLUSTERIZED=32, ...). The exporter's
+			// gate is (accel & 3) == 0 → ordinary renderable mesh (export_scene.cpp); a
+			// string-equality filter ("0"/"32" only) silently dropped renderable meshes
+			// carrying extra flags (36, 40, 4, 96...). Default 32 = clusterized mesh.
+			int accel = APPDATA::getScriptAppDataInt(node, NEL3D_APPDATA_ACCEL, NEL3D_APPDATA_ACCEL_DEFAULT);
+			if ((accel & 3) != 0) { ++stats.Filtered; ++stats.FilteredAccel; continue; }
 			if (APPDATA::getScriptAppDataStr(node, NEL3D_APPDATA_COLLISION, "") == "1") { ++stats.Filtered; ++stats.FilteredCollision; continue; }
 			if (APPDATA::getScriptAppDataStr(node, NEL3D_APPDATA_COLLISION_EXTERIOR, "") == "1") { ++stats.Filtered; ++stats.FilteredCollision; continue; }
 		}
@@ -758,8 +750,13 @@ static void decodeSceneLights(PMAXLOAD::SLoadedMax &lm, std::vector<SDecodedLigh
 	{
 		CNodeImpl *node = dynamic_cast<CNodeImpl *>(it->second);
 		if (!node) continue;
-		CSceneClass *obj = unwrapObject(node);
-		if (!obj || obj->classDesc()->superClassId() != 0x30) continue; // lights only
+		// XRef-RESOLVING walk, same as the mesh path above: an XRefObject wrapper reports
+		// superclass 0x60, so a wrapper-level 0x30 gate silently drops XRef'd lights.
+		CSceneClass *obj = SCENELIB::baseObjectOf(*node, NULL, NULL);
+		if (!obj) continue;
+		if (obj->classDesc()->classId().a() == 0x92aab38c)
+			continue; // unresolvable XRef (missing referenced file) — resolver already warned
+		if (obj->classDesc()->superClassId() != 0x30) continue; // lights only
 		SDecodedLight dl;
 		dl.Realtime = APPDATA::getScriptAppDataInt(node, NEL3D_APPDATA_EXPORT_REALTIME_LIGHT, 1) == 1;
 		if (!LMSCENE::convertLightmapLight(dl.L, *node, tmCache, nodeByHandle))

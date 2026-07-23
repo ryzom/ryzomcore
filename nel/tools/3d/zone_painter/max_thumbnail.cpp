@@ -201,6 +201,8 @@ static bool propValueSize(const std::vector<uint8> &stream, size_t absOff, uint3
 		uint32 cb = 0;
 		if (!readU32(stream, absOff + 4, cb))
 			return false;
+		if (cb > 0xFFFFFF00)
+			return false; // 8 + cb would wrap uint32 — structurally invalid claim
 		// type(4) + cbSize(4) + data(cb). Some Max files truncate the stream a few
 		// bytes short of the claimed cbSize; caller clamps to available section bytes.
 		sizeOut = 8 + cb;
@@ -261,12 +263,15 @@ static bool parsePropertySet(const std::vector<uint8> &stream, SPropSet &ps)
 			return false;
 		dirOff += 20;
 
-		if (sectOff + 8 > stream.size())
+		// All offset/size sums below in size_t: these are untrusted uint32 fields, and a
+		// 32-bit sum wraps past the check (e.g. secSize 0xFFFFFFD0 + sectOff 48 → 0), then
+		// the .assign() end iterator lands ~4 GB out of bounds.
+		if ((size_t)sectOff + 8 > stream.size())
 			return false;
 		uint32 secSize = 0, nprop = 0;
 		if (!readU32(stream, sectOff, secSize) || !readU32(stream, sectOff + 4, nprop))
 			return false;
-		if (secSize < 8 || sectOff + secSize > stream.size() || nprop > 256)
+		if (secSize < 8 || (size_t)sectOff + (size_t)secSize > stream.size() || nprop > 256)
 			return false;
 		sec.Size = secSize;
 		sec.Raw.assign(stream.begin() + sectOff, stream.begin() + sectOff + secSize);
@@ -279,8 +284,8 @@ static bool parsePropertySet(const std::vector<uint8> &stream, SPropSet &ps)
 			SPropEntry pe;
 			if (!readU32(stream, eoff, pe.Pid) || !readU32(stream, eoff + 4, pe.Offset))
 				return false;
-			size_t abs = sectOff + pe.Offset;
-			if (abs >= sectOff + secSize)
+			size_t abs = (size_t)sectOff + (size_t)pe.Offset;
+			if (abs >= (size_t)sectOff + (size_t)secSize)
 				return false;
 			// Bound this property by the next property offset (or section end).
 			uint32 nextRel = secSize;
@@ -518,6 +523,29 @@ bool extractThumbnailBitmap(const std::string &maxPath, CBitmap &out)
 	return decodeVtCfThumbnail(prop, out);
 }
 
+/** Write a cache .tga; on ANY failure delete the partial file — COFile creates it on
+ *  open, and the caches are keyed by source mtime, so a truncated file left behind
+ *  (disk full, kill) would be served forever as a permanently broken preview. */
+static bool writeCacheTGA(const std::string &cache, CBitmap &bmp)
+{
+	bool ok = false;
+	try
+	{
+		COFile of(cache);
+		ok = bmp.writeTGA(of, 32, false);
+	}
+	catch (...)
+	{
+		ok = false;
+	}
+	if (!ok)
+	{
+		CFile::deleteFile(cache);
+		return false;
+	}
+	return CFile::fileExists(cache);
+}
+
 bool ensureCachedThumbnail(const std::string &maxPath, std::string &outTgaPath)
 {
 	outTgaPath.clear();
@@ -541,17 +569,7 @@ bool ensureCachedThumbnail(const std::string &maxPath, std::string &outTgaPath)
 
 	// Ensure parent exists
 	thumbCacheDir();
-	try
-	{
-		COFile of(cache);
-		if (!bmp.writeTGA(of, 32, false))
-			return false;
-	}
-	catch (...)
-	{
-		return false;
-	}
-	if (!CFile::fileExists(cache))
+	if (!writeCacheTGA(cache, bmp))
 		return false;
 	outTgaPath = cache;
 	return true;
@@ -631,17 +649,7 @@ bool ensureTilesetPreview(const std::string &bankPath, int setIndex,
 		bmp.resample(sidePx, sidePx);
 
 	tilesetPreviewCacheDir();
-	try
-	{
-		COFile of(cache);
-		if (!bmp.writeTGA(of, 32, false))
-			return false;
-	}
-	catch (...)
-	{
-		return false;
-	}
-	if (!CFile::fileExists(cache))
+	if (!writeCacheTGA(cache, bmp))
 		return false;
 	outTgaPath = cache;
 	return true;
@@ -769,17 +777,7 @@ bool ensureDisplacePreview(const std::string &bankPath, int mapIndex,
 		out.convertToType(CBitmap::RGBA);
 
 	displacePreviewCacheDir();
-	try
-	{
-		COFile of(cache);
-		if (!out.writeTGA(of, 32, false))
-			return false;
-	}
-	catch (...)
-	{
-		return false;
-	}
-	if (!CFile::fileExists(cache))
+	if (!writeCacheTGA(cache, out))
 		return false;
 	outTgaPath = cache;
 	return true;
@@ -857,6 +855,12 @@ void wrapDibAsVtCfProperty(const std::vector<uint8> &dib, std::vector<uint8> &ou
 {
 	outPropValue.clear();
 	// VT_CF + cbSize + ulClipFmt(-1) + CF_DIB + dib
+	// cbSize is written SPEC-EXACT ([MS-OLEPS] CLIPDATA: ulClipFmt + data). Genuine Max
+	// streams claim a few bytes MORE than present (the parse clamp above tolerates it);
+	// whether Max's own reader compensates for its writer's convention is unverified —
+	// if a painter-written thumbnail ever renders truncated in Max's open dialog, match
+	// the observed Max claim (+8) here instead. Spec-exact is what every conformant
+	// reader (Explorer property handlers etc.) expects.
 	const uint32 pClipDataLen = 4 + (uint32)dib.size(); // cf dword + dib
 	const uint32 cbSize = 4 + pClipDataLen;             // ulClipFmt + pClipData
 	appendU32(outPropValue, kVtCf);
