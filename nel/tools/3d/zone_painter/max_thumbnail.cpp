@@ -1,6 +1,6 @@
 /**
  * \file max_thumbnail.cpp
- * \brief OLE SummaryInformation thumbnail R/W for zone_painter (ui M5)
+ * \brief OLE SummaryInformation thumbnail R/W for zone_painter
  * \author Jan Boon (Kaetemi)
  * \author Grok 4.5
  *
@@ -9,7 +9,7 @@
  */
 
 /*
- * Copyright (C) 2026  by authors
+ * Copyright (C) 2026 by authors
  *
  * This file is part of RYZOM CORE PIPELINE.
  * RYZOM CORE PIPELINE is free software: you can redistribute it
@@ -19,11 +19,11 @@
  *
  * RYZOM CORE PIPELINE is distributed in the hope that it will be
  * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public
- * License along with RYZOM CORE PIPELINE.  If not, see
+ * License along with RYZOM CORE PIPELINE. If not, see
  * <http://www.gnu.org/licenses/>.
  */
 
@@ -95,7 +95,7 @@ std::string cachedThumbPath(const std::string &maxPath)
 {
 	if (maxPath.empty())
 		return std::string();
-	// makePathAbsolute(..., true) may append a trailing slash which breaks stat() on files.
+	// makePathAbsolute(..., true) may append a trailing slash which breaks stat on files.
 	std::string abs = CPath::makePathAbsolute(maxPath, CPath::getCurrentPath(), /*addTrailingSlash=*/false);
 	while (!abs.empty() && (abs[abs.size() - 1] == '/' || abs[abs.size() - 1] == '\\'))
 		abs.resize(abs.size() - 1);
@@ -265,7 +265,7 @@ static bool parsePropertySet(const std::vector<uint8> &stream, SPropSet &ps)
 
 		// All offset/size sums below in size_t: these are untrusted uint32 fields, and a
 		// 32-bit sum wraps past the check (e.g. secSize 0xFFFFFFD0 + sectOff 48 → 0), then
-		// the .assign() end iterator lands ~4 GB out of bounds.
+		// the .assign end iterator lands ~4 GB out of bounds.
 		if ((size_t)sectOff + 8 > stream.size())
 			return false;
 		uint32 secSize = 0, nprop = 0;
@@ -523,9 +523,9 @@ bool extractThumbnailBitmap(const std::string &maxPath, CBitmap &out)
 	return decodeVtCfThumbnail(prop, out);
 }
 
-/** Write a cache .tga; on ANY failure delete the partial file — COFile creates it on
- *  open, and the caches are keyed by source mtime, so a truncated file left behind
- *  (disk full, kill) would be served forever as a permanently broken preview. */
+/** Write a cache.tga; on ANY failure delete the partial file — COFile creates it on
+ * open, and the caches are keyed by source mtime, so a truncated file left behind
+ * (disk full, kill) would be served forever as a permanently broken preview. */
 static bool writeCacheTGA(const std::string &cache, CBitmap &bmp)
 {
 	bool ok = false;
@@ -576,7 +576,7 @@ bool ensureCachedThumbnail(const std::string &maxPath, std::string &outTgaPath)
 }
 
 // ---------------------------------------------------------------------------------------------
-// Tileset palette previews (ui M8)
+// Tileset palette previews
 
 std::string tilesetPreviewCacheDir()
 {
@@ -656,7 +656,7 @@ bool ensureTilesetPreview(const std::string &bankPath, int setIndex,
 }
 
 // ---------------------------------------------------------------------------------------------
-// Displacement palette previews (ui M9a)
+// Displacement palette previews
 
 std::string displacePreviewCacheDir()
 {
@@ -674,7 +674,7 @@ std::string cachedDisplacePreviewPath(const std::string &bankPath, int mapIndex,
 	while (!abs.empty() && (abs[abs.size() - 1] == '/' || abs[abs.size() - 1] == '\\'))
 		abs.resize(abs.size() - 1);
 	uint32 h = hashPath(abs);
-	// _g2 suffix: M10c — same tone map as _g1, but cache key bumped so writers always
+	// _g2 suffix: same tone map as _g1, but cache key bumped so writers always
 	// re-emit after the CPath-index fix (see rebuildTilesetPalette). Previews are
 	// true 32-bit RGBA (type-2 TGA); bump again if tone-map or pixel layout changes.
 	return displacePreviewCacheDir() + "/"
@@ -738,12 +738,12 @@ bool ensureDisplacePreview(const std::string &bankPath, int mapIndex,
 	}
 	const int range = (int)maxL - (int)minL;
 
-	// Point upsample + min..max stretch + sqrt gamma lift (M10a) so structure is
+	// Point upsample + min..max stretch + sqrt gamma lift so structure is
 	// readable at 64px — raw noise often clusters near black after linear stretch alone.
 	// Written as 32-bit RGBA (type-2 TGA), same path as tileset previews. ImageMagick
 	// may still label equal-channel content "GrayscaleAlpha"; that is content typing,
 	// not an 8-bit luminance container — NLGUI loads these via createTextureFile fine
-	// once CPath can resolve the basename (M10c re-indexes after write).
+	// once CPath can resolve the basename (re-indexes after write).
 	CBitmap out;
 	out.resize(sidePx, sidePx, CBitmap::RGBA);
 	CObjectVector<uint8> &dstPx = out.getPixels();
@@ -784,7 +784,7 @@ bool ensureDisplacePreview(const std::string &bankPath, int mapIndex,
 }
 
 // ---------------------------------------------------------------------------------------------
-// Encode / write helpers (M5c)
+// Encode / write helpers
 
 bool encodeDib24(const CBitmap &bmpIn, std::vector<uint8> &outDib, uint maxDim)
 {
@@ -857,7 +857,7 @@ void wrapDibAsVtCfProperty(const std::vector<uint8> &dib, std::vector<uint8> &ou
 	// VT_CF + cbSize + ulClipFmt(-1) + CF_DIB + dib
 	// cbSize is written SPEC-EXACT ([MS-OLEPS] CLIPDATA: ulClipFmt + data). Genuine Max
 	// streams claim a few bytes MORE than present (the parse clamp above tolerates it);
-	// whether Max's own reader compensates for its writer's convention is unverified —
+	// whether Max's own reader compensates for its writer's convention is unverified
 	// if a painter-written thumbnail ever renders truncated in Max's open dialog, match
 	// the observed Max claim (+8) here instead. Spec-exact is what every conformant
 	// reader (Explorer property handlers etc.) expects.

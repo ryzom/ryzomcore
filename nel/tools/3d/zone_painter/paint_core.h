@@ -1,59 +1,38 @@
 /**
  * \file paint_core.h
- * \brief Tile painting core of the standalone zone painter (design doc §14-paint, P3b)
+ * \brief Tile painting core of the standalone zone painter
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
  *
- * Port of the in-Max painter's TILE path (plugin_max/nel_patch_paint paint.cpp) onto the typed
- * pipeline_max model: the EPM_PaintTile/metaTile adjacency graph, the tile put/transition
- * recursion (PutATile/PropagateBorder/RecursTile with the bank xref), 128/256 tiles, rotation,
- * frozen-zone locks, the CNelPatchChanger live-landscape mirror, a bounded undo, and the
- * carrier write-back that feeds the whole-file save.
+ * Port of the in-Max painter TILE path (plugin_max/nel_patch_paint) onto pipeline_max:
+ * metaTile adjacency, transition recursion, 128/256 tiles, rotation, frozen locks, live
+ * landscape mirror, bounded undo, and carrier write-back for whole-file save.
  *
- * PRISTINE-COPY DISCIPLINE (correctness-critical, see the P3b plan): per unique carrier blob
- * (the P2 write-target: topmost modifier slot whose 0x2512->0x1000 local data carries an
- * RFINALPATCH 0x4001, else the base RPO 0x08FD) ONE SRPatchMesh is decoded from the raw bytes
- * and kept as the authoritative paint state. Tile ops mutate ONLY the tile-record fields of
- * that pristine copy (SRpoTile Num/Flags/Noise/Layer[].Tile/Rotate); the evaluated
- * SEvalPatch (whose PatchMesh positions and rp.Verts bind caches the eval/refresh path may
- * rewrite) is used for topology/display only and is NEVER encoded back. An untouched pristine
- * copy re-encodes byte-identical (P1), so the paint save path is a proven no-op for a null
- * edit.
+ * PRISTINE-COPY DISCIPLINE: per unique carrier (topmost RFINALPATCH 0x4001 in a 0x2512->0x1000
+ * modifier slot, else base RPO 0x08FD) one SRPatchMesh is decoded and is the authoritative
+ * paint state. Ops mutate only tile-record fields (SRpoTile Num/Flags/Noise/Layer[]). The
+ * evaluated SEvalPatch is topology/display only and is never encoded back. An untouched
+ * pristine copy re-encodes byte-identical (null-edit).
  *
- * DISPLAY INSTANCES / SHARED BACKING (ui M4a/M12): carriers are keyed by the leaf or base RPO
- * POINTER. Multiple SPaintZoneInput entries that resolve to the same pointer (same Node stack
- * — e.g. ecosystem brick self-instances at world offsets / rotations) share ONE pristine
- * SRPatchMesh and one SCarrier::Zones membership list. setTile / setColorRaw fan the live-
- * landscape mirror to every zone in that list (with per-zone transformDesc for tile orients);
- * writeBack encodes the carrier once. Ops addressed at any instance zone id therefore mutate
- * the same paint state as the primary. Per-zone Symmetry/Rotate (plugin EPM_Mesh appdata,
- * land CZoneRegion Flip/Rot) assemble the transformDesc display space: GetTile uses
- * transformDesc(sym, 4-rot), SetTile uses transformInvDesc(sym, 4-rot) for the Max write and
- * remaps the landscape mirror through each shared zone's transform (plugin SetTile port).
- * Color display remaps S under symmetry only (plugin paint_vcolor). tileDesc mapping and
- * write-target policy are unchanged.
+ * DISPLAY INSTANCES / SHARED BACKING: carriers are keyed by leaf/base RPO pointer. Multiple
+ * SPaintZoneInput entries that share a pointer (ecosystem self-instances) share one pristine
+ * mesh; setTile/setColorRaw fan the live mirror to every zone in the carrier's list (per-zone
+ * transformDesc); writeBack encodes once. Per-zone Symmetry/Rotate assemble display space
+ * (GetTile transformDesc, SetTile transformInvDesc). Color remaps S under symmetry only.
  *
- * tileDesc <-> SRpoTile mapping (plugin nel_patch_lib/nel_patch_mesh.h <-> nelpatch/rpo_data.h,
- * the on-disk v9 record P1 encodes):
- *   _Num                 <-> SRpoTile.Num       used-layer count 0..3 (0 = empty tile)
- *   _Flags bits 0-2      <-> SRpoTile.Flags     tile case: 0 = 128x128, 1..4 = 256 quadrant+1
- *   _Flags bits 3-6      <-> SRpoTile.Flags     displace map index 0..15 ...
- *   (displace)           <-> SRpoTile.Noise     ... duplicated in the v9 noise byte; the
- *                            original loader's setDisplace(Noise) makes Noise authoritative on
- *                            read, so displace READS from Noise and writes keep both in sync
- *   _Flags bits 7-15     <-> SRpoTile.Flags     legacy/dead bits many corpus records carry;
- *                            the original loader keeps them in memory and re-saves them, so
- *                            descs preserve them verbatim through get -> set (fresh descs
- *                            start zeroed, exactly like the plugin's tileDesc())
- *   _MatIDTab[l].Tile    <-> SRpoTile.Layer[l].Tile    bank tile index (layer 0 = base 1111)
- *   _MatIDTab[l].Rotate  <-> SRpoTile.Layer[l].Rotate  0..3 CCW
- *   untouched on edit: Layer[l].Reserved, OldA/OldB (write-direction retention fields).
- * Grid order: SRpoPatch.Tiles is u + v*OrderS (OrderS = 1<<NbTilesU); Colors (P3c) is
- * u + v*(OrderS+1), 0x00RRGGBB.
+ * tileDesc <-> SRpoTile (nel_patch_mesh.h <-> rpo_data.h, on-disk v9):
+ *   _Num                <-> Num            used-layer count 0..3 (0 = empty)
+ *   _Flags bits 0-2     <-> Flags          case: 0 = 128, 1..4 = 256 quadrant+1
+ *   _Flags bits 3-6     <-> Flags/Noise    displace 0..15 (Noise authoritative on read;
+ *                                          writes keep Flags and Noise in sync)
+ *   _Flags bits 7-15    <-> Flags          dead bits; preserve verbatim for null-edit
+ *   Layer[l].Tile/Rotate                   bank index + 0..3 CCW (layer 0 = base)
+ *   untouched on edit: Layer[l].Reserved, OldA/OldB
+ * Grid: Tiles = u + v*OrderS; Colors = u + v*(OrderS+1), 0x00RRGGBB.
  */
 
 /*
- * Copyright (C) 2026  by authors
+ * Copyright (C) 2026 by authors
  *
  * This file is part of RYZOM CORE PIPELINE.
  * RYZOM CORE PIPELINE is free software: you can redistribute it
@@ -63,11 +42,11 @@
  *
  * RYZOM CORE PIPELINE is distributed in the hope that it will be
  * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public
- * License along with RYZOM CORE PIPELINE.  If not, see
+ * License along with RYZOM CORE PIPELINE. If not, see
  * <http://www.gnu.org/licenses/>.
  */
 
@@ -243,7 +222,7 @@ struct SPaintTile
 };
 
 // ---------------------------------------------------------------------------------------------
-// One paintable zone as the core sees it (built by the tool main from the P3a scene assembly).
+// One paintable zone as the core sees it (built by the tool main from the scene assembly).
 
 struct SPaintZoneInput
 {
@@ -257,7 +236,7 @@ struct SPaintZoneInput
 	// Display-space transform of this zone (plugin EPM_Mesh::Rotate/Symmetry from
 	// NEL3D_APPDATA_ZONE_ROTATE / _SYMMETRY; land placement CZoneRegion Rot/Flip).
 	// Primary authored bricks are (0, false). Rotated/mirrored self-instances set these
-	// so getTile/setTile assemble transformDesc (ui M12).
+	// so getTile/setTile assemble transformDesc.
 	uint Rotate;   // 0..3, 90° CCW steps
 	bool Symmetry; // mirror (Flip)
 	SPaintZoneInput() : Node(NULL), Frozen(false), ZoneId(0), Patches(NULL), Pm(NULL), EvalRp(NULL),
@@ -265,7 +244,7 @@ struct SPaintZoneInput
 };
 
 // Undo delta: one tile-record, color-vertex, or export-prop change (bounded LIFO of strokes).
-// Kind 2 (M18c): raw AppData restore so delete-vs-"0"/presence semantics reapply exactly.
+// Kind 2: raw AppData restore so delete-vs-"0"/presence semantics reapply exactly.
 struct SUndoTile
 {
 	uint8 Kind; // 0 = tile record, 1 = color vertex, 2 = export prop appdata
@@ -366,9 +345,9 @@ public:
 	bool opFillColor(uint zone, uint patch, NLMISC::CRGBA color, uint blend, std::string &err);
 	bool opFillDisplace(uint zone, uint patch, uint displace, std::string &err);
 	// Displace paint (PutADisplacetile port; explicit index 0-15, Noise kept in sync). The
-	// brush size applies exactly like the plugin's displace path (PutDisplace -> RecursTile in
-	// displace mode: recursion depths {0,4,8}, 128 grid, one PutADisplacetile per reached
-	// tile); brush 0 keeps the historical single-tile behavior.
+	// Brush size applies exactly like the plugin's displace path (PutDisplace -> RecursTile in
+	// Displace mode: recursion depths {0,4,8}, 128 grid, one PutADisplacetile per reached
+	// tile); brush 0 is single-tile.
 	bool opDisplace(uint zone, uint patch, uint u, uint v, uint displace, std::string &err);
 	// DEBUG op: write one raw single-layer record with NO transition solving (negative control
 	// for checkSeams and a low-level repair affordance; not a plugin op).
@@ -377,7 +356,7 @@ public:
 	bool opRedo();
 	void endStroke();
 	/**
-	 * M18c: write one export-prop AppData entry (or delete when newHas=false) and push a
+	 * write one export-prop AppData entry (or delete when newHas=false) and push a
 	 * single-entry undo stroke. Raw old/new restore delete-vs-value exactly. Shared by the
 	 * Prop panel and paint-script `prop` ops.
 	 */
@@ -400,7 +379,7 @@ public:
 	bool lockBordersOn() const { return m_LockBorders; }
 
 	// Color-brush bitmap mask (CPaintColor loadBrush/setBrushMode port). The mask file is any
-	// .tga (grayscale loads as luminance, converted to RGBA like the plugin); loading turns the
+	//.tga (grayscale loads as luminance, converted to RGBA like the plugin); loading turns the
 	// mask mode on. setBrushMaskMode only turns on when a mask is loaded (plugin semantics);
 	// returns the resulting mode.
 	bool loadBrushMask(const std::string &fileName, std::string &err);
@@ -443,9 +422,9 @@ public:
 	// zones are all frozen are skipped (never mutated either; ops enforce it per tile).
 	bool writeBack(std::string &err);
 
-	// Dirty detection (ui M6b multi-file save): compare re-encoded pristine to OriginalBytes.
+	// Dirty detection (multi-file save): compare re-encoded pristine to OriginalBytes.
 	// Zone id is the landscape/session id (SPaintZoneInput::ZoneId). Frozen zones are never dirty.
-	// M18b: also ORs export-prop appdata drift (ROTATE/SYMMETRY/PASSABLE/USE_BOUNDINGBOX)
+	// also ORs export-prop appdata drift (ROTATE/SYMMETRY/PASSABLE/USE_BOUNDINGBOX)
 	// against a per-zone snapshot taken at init and refreshed by markZonesSaved — appdata
 	// lives outside the carriers, so blob compare alone cannot see prop edits.
 	bool isZoneDirty(uint zoneId) const;
@@ -453,20 +432,20 @@ public:
 	bool anyZoneDirty(const std::vector<uint> &zoneIds) const;
 	/** After a successful per-file save: refresh OriginalBytes from the current pristine encode
 	 *	so subsequent dirty checks go false (write-target policy unchanged). Also re-snaps
-	 *	export-prop appdata (M18b). */
+	 *	export-prop appdata. */
 	void markZonesSaved(const std::vector<uint> &zoneIds);
-	/** Re-snapshot export props for one zone after a live write (M18b footprint re-derive
+	/** Re-snapshot export props for one zone after a live write ( footprint re-derive
 	 *	callers that already committed the value; optional — dirty also re-reads live). */
 	void snapZoneProps(uint zoneId);
 
 	/**
-	 * Working-set rebuild helpers (ui M11a session hub).
+	 * Working-set rebuild helpers (session hub).
 	 *
-	 * Before re-init after open/close: call writeBack() so carrier blobs hold the current paint
-	 * state, then stashOriginalBytes(). After init() on the retained Node stacks (same SLoadedMax
-	 * scenes, do not reload files), restoreOriginalBytes() so dirty detection still compares
+	 * Before re-init after open/close: call writeBack so carrier blobs hold the current paint
+	 * state, then stashOriginalBytes. After init on the retained Node stacks (same SLoadedMax
+	 * scenes, do not reload files), restoreOriginalBytes so dirty detection still compares
 	 * against the ORIGINAL load-time bytes rather than the just-re-decoded paint state.
-	 * Undo is always cleared by init() on any working-set change (session semantics).
+	 * Undo is always cleared by init on any working-set change (session semantics).
 	 * Key = SnapLeaf* or Rpo* (same pointer keying as carrier sharing).
 	 */
 	void stashOriginalBytes(std::map<const void *, std::vector<uint8> > &out) const;
@@ -474,7 +453,7 @@ public:
 	/** Discard paint on listed zones: restore pristine from OriginalBytes (close without saving). */
 	void revertZones(const std::vector<uint> &zoneIds);
 
-	// Carrier tile-record dump (the mechanical verification surface).
+	// Carrier tile-record dump (paint round-trip inspection).
 	void dumpRpo(FILE *out) const;
 	// Bank xref dump: tile -> (tileSet, number, type) for every bank tile.
 	void dumpBankXRef(FILE *out) const;
@@ -491,7 +470,7 @@ public:
 	uint strokeSetCount() const { return m_StrokeSets; } // SetTile count in the last op (debug)
 
 private:
-	// carrier: the P2 write-target of one node stack
+	// carrier: the write-target of one node stack
 	struct SCarrier
 	{
 		PIPELINE::MAX::NELPATCH::CRklPatchObject *Rpo; // base 0x08FD carrier (when SnapLeaf NULL)
@@ -503,7 +482,7 @@ private:
 		SCarrier() : Rpo(NULL), SnapLeaf(NULL), Pristine(NULL), AnyUnfrozen(false) { }
 	};
 
-	// M18b: snapshot of the four Max-export props (script AppData, string payloads).
+	// snapshot of the four Max-export props (script AppData, string payloads).
 	// Present=false means the entry is absent (passable delete-style; usebbox default 0).
 	struct SPropSnap
 	{
@@ -518,7 +497,7 @@ private:
 		uint Carrier; // index into m_Carriers
 		NL3D::CZoneSymmetrisation Sym;
 		std::vector<SPaintTile> Meta; // numPatches * ZP_NUM_TILE_SEL
-		SPropSnap PropSnap; // M18b export-prop baseline for dirty
+		SPropSnap PropSnap; // export-prop baseline for dirty
 	};
 
 	std::vector<SZone> m_Zones;
@@ -617,13 +596,13 @@ private:
 	uint8 calcRotPath(SPaintTile *from, SPaintTile *to, int depth, int rotate, int &dx, int &dy, int &cost);
 	SPaintTile *metaAt(uint zone, sint32 tileId);
 	// Self-instance duals: other zones sharing the same carrier+tileId (same pristine slot,
-	// distinct meta graphs). M13b — paint must visit/propagate through every dual or the
+	// distinct meta graphs). paint must visit/propagate through every dual or the
 	// instance-side seam graph is under-constrained relative to the primary-side path.
 	void collectDuals(SPaintTile *tile, std::vector<SPaintTile *> &out) const;
 	void markVisitedWithDuals(SPaintTile *tile, std::set<SPaintTile *> &visited) const;
 	// Local seam legality around a tile (GetBorderDesc corner TileSet identity, same as checkSeams).
 	bool tileSeamsLegal(SPaintTile *tile) const;
-	// Only tiles actually written this put (backup stack), not duals merely marked visited —
+	// Only tiles actually written this put (backup stack), not duals merely marked visited
 	// mirrored duals can look "illegal" under getTileIdx(sym) while authored space is fine.
 	bool writtenSeamsLegal(const std::vector<SUndoTile> &backupStack) const;
 	void buildMeta(std::string &err);
@@ -634,7 +613,7 @@ private:
 	// further undo and without committing. Used by putATile abort paths so a refused
 	// paint leaves no stroke pollution and restores pristine bytes by construction.
 	void abortStrokeTo(size_t mark);
-	// M18b prop snapshot helpers
+	// Prop snapshot helpers
 	static void readPropSnap(PIPELINE::MAX::BUILTIN::CNodeImpl *node, SPropSnap &out);
 	bool propsDirty(uint zoneIdx) const;
 };

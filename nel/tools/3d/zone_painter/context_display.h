@@ -1,6 +1,6 @@
 /**
  * \file context_display.h
- * \brief Include-meshes context display + scene lights for the zone painter (P3d)
+ * \brief Include-meshes context display + scene lights for the zone painter
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
  *
@@ -16,7 +16,7 @@
  */
 
 /*
- * Copyright (C) 2026  by authors
+ * Copyright (C) 2026 by authors
  *
  * This file is part of RYZOM CORE PIPELINE.
  * RYZOM CORE PIPELINE is free software: you can redistribute it
@@ -26,11 +26,11 @@
  *
  * RYZOM CORE PIPELINE is distributed in the hope that it will be
  * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public
- * License along with RYZOM CORE PIPELINE.  If not, see
+ * License along with RYZOM CORE PIPELINE. If not, see
  * <http://www.gnu.org/licenses/>.
  */
 
@@ -98,7 +98,7 @@ void resolveContextShapeTextures(const SContextStats &stats, uint &resolvedOut, 
  *	(ecosystems/<eco>/tiles/<base>_<season>.dds next to the smallbank, or the
  *	landscape/_texture_tiles/<eco>_<season> sources). Registers the bank's sibling tiles/ and
  *	diplace/ dirs plus a per-name CPath::remapFile to a season-postfixed variant (preferred
- *	season first when set via setSeasonPreference, else discovery order starting at _sp) —
+ *	season first when set via setSeasonPreference, else discovery order starting at _sp)
  *	the same fallback the context-mesh names use. Re-calling after a preference change
  *	re-applies remaps (live season toggle). */
 void resolveBankTextures(NL3D::CTileBank &bank, const std::string &bankPath,
@@ -111,10 +111,10 @@ void resolveNamesWithSeasons(const std::set<std::string> &names, const char *wha
                              uint &resolvedOut, uint &missingOut);
 
 // ---------------------------------------------------------------------------------------------
-// Season preference (ui M6a). Painting data is season-independent; only texture remaps change.
+// Season preference. Painting data is season-independent; only texture remaps change.
 
 /** Season codes: "sp" spring, "su" summer, "au" autumn, "wi" winter. Empty = auto (first
- *	available postfix, historically _sp). Invalid codes return false without changing state. */
+ *	available postfix, usually _sp). Invalid codes return false without changing state. */
 bool setSeasonPreference(const std::string &code);
 /** Current preference code ("sp"/"su"/"au"/"wi") or empty when auto/unset. */
 const std::string &seasonPreference();
@@ -123,8 +123,8 @@ std::string seasonPreferenceLabel();
 
 /**
  * Probe which season postfixes actually exist for a bank/workspace:
- *  - sibling converted tiles next to the bank (`../tiles/*_<season>.dds`)
- *  - source dirs `<dbroot>/landscape/_texture_tiles/<eco>_<season>/`
+ * - sibling converted tiles next to the bank (`../tiles/*_<season>.dds`)
+ * - source dirs `<dbroot>/landscape/_texture_tiles/<eco>_<season>/`
  * Only seasons with at least one resolvable file/dir are returned, in sp/su/au/wi order.
  * When none are found (e.g. snowballs unpostfixed tiles), the list is empty and the toggle
  * is a no-op.

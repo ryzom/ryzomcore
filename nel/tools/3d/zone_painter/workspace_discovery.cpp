@@ -1,12 +1,12 @@
 /**
  * \file workspace_discovery.cpp
- * \brief Graphics workspace fingerprint + discovery for zone_painter startup (ui M2)
+ * \brief Graphics workspace fingerprint + discovery for zone_painter startup
  * \author Jan Boon (Kaetemi)
  * \author Grok 4.5
  */
 
 /*
- * Copyright (C) 2026  by authors
+ * Copyright (C) 2026 by authors
  *
  * This file is part of RYZOM CORE PIPELINE.
  * RYZOM CORE PIPELINE is free software: you can redistribute it
@@ -16,11 +16,11 @@
  *
  * RYZOM CORE PIPELINE is distributed in the hope that it will be
  * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public
- * License along with RYZOM CORE PIPELINE.  If not, see
+ * License along with RYZOM CORE PIPELINE. If not, see
  * <http://www.gnu.org/licenses/>.
  */
 
@@ -60,7 +60,7 @@ std::string normalizeDir(const std::string &path)
 	return rstripSlash(abs);
 }
 
-/** Resolve symlinks so a graphics root and its real path do not list twice (M3c nit). */
+/** Resolve symlinks so a graphics root and its real path do not list twice (nit). */
 static std::string canonicalizeDir(const std::string &path)
 {
 	std::string n = normalizeDir(path);
@@ -205,7 +205,7 @@ void fingerprintWorkspace(const std::string &graphicsRoot, std::vector<SWorldEnt
 			w.BankPath = G + "/landscape/_texture_tiles/" + ecoName + "/" + ecoName + ".bank";
 			if (!CFile::fileExists(w.BankPath))
 			{
-				// also accept .smallbank beside the conventional name
+				// also accept.smallbank beside the conventional name
 				std::string small = G + "/landscape/_texture_tiles/" + ecoName + "/" + ecoName + ".smallbank";
 				if (CFile::fileExists(small))
 					w.BankPath = small;
@@ -284,7 +284,7 @@ static void collectFromSeed(const std::string &seed, std::vector<SWorldEntry> &o
 	// Only do this when the seed itself was not already a rich workspace root? Task says:
 	// "if it fingerprints as a workspace, use it; if it contains a .nel subdir, treat as
 	// NeL root and scan; otherwise scan its immediate subdirs."
-	// So when it fingerprints AND has no .nel, we still "use it" (done above). Scanning
+	// So when it fingerprints AND has no.nel, we still "use it" (done above). Scanning
 	// subdirs when it already fingerprinted can still find nested layouts; keep it for the
 	// "otherwise" branch only when self was empty.
 	if (self.empty())
@@ -482,7 +482,7 @@ bool selectAutoMulti(const std::vector<SWorldEntry> &worlds,
 	std::string wsName = ap.substr(0, slash);
 	std::string zonePart = ap.substr(slash + 1);
 
-	// Split zoneA+zoneB+zoneC (multi-select M6b); single name works too
+	// Split zoneA+zoneB+zoneC (multi-select ); single name works too
 	std::vector<std::string> zoneNames;
 	{
 		std::string::size_type start = 0;

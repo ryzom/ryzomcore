@@ -1,21 +1,21 @@
 /**
  * \file context_display.cpp
- * \brief See context_display.h (design doc §14-paint, P3d).
+ * \brief See context_display.h.
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
  */
 // Port map:
-//   paint.cpp myThread includeMeshes branch -> addContextMeshes + setupDriverLights +
-//     decodeSceneAmbient (the branch applied scene ambient + driver lights with the meshes)
-//   paint_light.cpp CPaintLight::build/setup -> setupPaintLights (unconditional in myThread)
-//   CExportNel::buildShape (viewport meshes)  -> the shape exporter's shared evaluation:
-//     evalNodeMesh + buildBaseMeshInterface/buildMeshInterface -> NL3D::CMesh (plain-mesh
-//     route; special shape classes warn and skip — they are context display, not export)
-//   CExportNel::buildLight (driver CLight)    -> LMSCENE::convertLightmapLight + the original
-//     driver conversion rules (mode map, color * multiplier, cutoff/exponent, attenuation)
+// paint.cpp myThread includeMeshes branch -> addContextMeshes + setupDriverLights +
+// decodeSceneAmbient (the branch applied scene ambient + driver lights with the meshes)
+// paint_light.cpp CPaintLight::build/setup -> setupPaintLights (unconditional in myThread)
+// CExportNel::buildShape (viewport meshes) -> the shape exporter's shared evaluation:
+// evalNodeMesh + buildBaseMeshInterface/buildMeshInterface -> NL3D::CMesh (plain-mesh
+// route; special shape classes warn and skip — they are context display, not export)
+// CExportNel::buildLight (driver CLight) -> LMSCENE::convertLightmapLight + the original
+// driver conversion rules (mode map, color * multiplier, cutoff/exponent, attenuation)
 
 /*
- * Copyright (C) 2026  by authors
+ * Copyright (C) 2026 by authors
  *
  * This file is part of RYZOM CORE PIPELINE.
  * RYZOM CORE PIPELINE is free software: you can redistribute it
@@ -25,11 +25,11 @@
  *
  * RYZOM CORE PIPELINE is distributed in the hope that it will be
  * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public
- * License along with RYZOM CORE PIPELINE.  If not, see
+ * License along with RYZOM CORE PIPELINE. If not, see
  * <http://www.gnu.org/licenses/>.
  */
 
@@ -107,7 +107,7 @@ static NLMISC::CMatrix toNelMatrix(const MAXMATH::Matrix3M &m)
 // Out-of-the-box texture resolution (see the header). The authored paths ride the ParamBlock2
 // storage: the PBBitmap value's trailing 0x0003 container carries { BitmapInfo blob, UTF-16
 // file path, UTF-16 device } (the same location the material decode's file-name read uses),
-// and scripted texmaps (multi-bitmap slots, water bumps, ...) keep authored paths in filename
+// and scripted texmaps (multi-bitmap slots, water bumps,...) keep authored paths in filename
 // STRING params. Both forms observed corpus-wide as absolute "R:\graphics\..." paths.
 
 static bool looksLikeAuthoredPath(const std::string &s)
@@ -159,8 +159,8 @@ uint registerContextTexturePaths(PMAXLOAD::SLoadedMax &lm, const std::string &in
 	resolvedOut = 0;
 	missingOut = 0;
 
-	// The game-facing texture set: shapes reference .tga names while the converted textures
-	// next to the ecosystem bank are .dds — register the extension remap BEFORE any search
+	// The game-facing texture set: shapes reference.tga names while the converted textures
+	// next to the ecosystem bank are.dds — register the extension remap BEFORE any search
 	// path so the .dds files also answer .tga lookups, and add the bank's sibling map dir
 	// (~/.../ecosystems/<eco>/map, the build_gamedata-converted set) when present.
 	ensureExtensionRemaps();
@@ -264,7 +264,7 @@ void resolveContextShapeTextures(const SContextStats &stats, uint &resolvedOut, 
 	resolveNamesWithSeasons(names, "context texture", resolvedOut, missingOut);
 }
 
-// Season preference (ui M6a). Empty = auto (try sp first, historical default).
+// Season preference. Empty = auto (try sp first, default).
 static std::string s_SeasonPref;
 
 static const char *kSeasonCodes[4] = { "sp", "su", "au", "wi" };
@@ -307,7 +307,7 @@ std::string seasonPreferenceLabel()
 	return s_SeasonPref;
 }
 
-/** Build try-order of season postfixes ("_sp", ...) with preferred first. */
+/** Build try-order of season postfixes ("_sp",...) with preferred first. */
 static void seasonTryOrder(std::string out[4], int &nOut)
 {
 	nOut = 0;
@@ -330,7 +330,7 @@ static void seasonTryOrder(std::string out[4], int &nOut)
 // Shared season-variant resolution. When a season preference is set and that postfix exists
 // on the path, remaps even if an unpostfixed (or previously remapped other-season) name already
 // resolves — so live toggles re-point CPath. Otherwise: as-is first, then first postfix that
-// hits (_sp historically first). Extension remaps serve .tga/.png -> .dds.
+// hits (_sp first). Extension remaps serve.tga/.png ->.dds.
 void resolveNamesWithSeasons(const std::set<std::string> &names, const char *what,
                              uint &resolvedOut, uint &missingOut)
 {
@@ -394,7 +394,7 @@ void discoverAvailableSeasons(const std::string &bankPath, std::vector<std::stri
 
 	// eco name from bank file (lacustre.smallbank -> lacustre)
 	std::string eco = NLMISC::CFile::getFilenameWithoutExtension(bankPath);
-	// Converted tiles next to the smallbank: ../tiles or sibling *_tiles under export tree
+	// Converted tiles next to the smallbank:../tiles or sibling *_tiles under export tree
 	std::string tilesDir = NLMISC::CFile::getPath(bankPath) + "../tiles";
 	// Also common: <bankdir> itself or bank path with _bank suffix replaced by _tiles
 	std::string bankDir = NLMISC::CFile::getPath(bankPath);
@@ -521,7 +521,7 @@ void resolveBankTextures(NL3D::CTileBank &bank, const std::string &bankPath,
 	missingOut = 0;
 	ensureExtensionRemaps();
 	// The build-converted sets sit next to the smallbank: tiles/ (seasonal tile + alpha-noise
-	// .dds) and diplace/ (displacement maps).
+	//.dds) and diplace/ (displacement maps).
 	if (!bankPath.empty())
 	{
 		std::string tilesDir = NLMISC::CFile::getPath(bankPath) + "../tiles";
@@ -585,7 +585,7 @@ void addContextMeshes(PMAXLOAD::SLoadedMax &lm, NL3D::CScene *scene, NL3D::CShap
 		if (isDebugMarker(name)) continue;
 		// XRef-RESOLVING object walk (SCENELIB::baseObjectOf, the same one the mesh eval uses):
 		// the buildings of village/town bricks are XRefObject nodes referencing construction
-		// .max files, and the XRefObject wrapper's registered superclass is 0x60 — a wrapper-
+		//.max files, and the XRefObject wrapper's registered superclass is 0x60 — a wrapper-
 		// level superclass test drops every one of them silently. Resolve first, then gate.
 		CSceneClass *obj = SCENELIB::baseObjectOf(*node, NULL, NULL);
 		if (!obj) continue;
@@ -604,7 +604,7 @@ void addContextMeshes(PMAXLOAD::SLoadedMax &lm, NL3D::CScene *scene, NL3D::CShap
 		// to render: collision meshes, accelerator cluster/portal volumes, PACS primitives and
 		// light/camera targets. The node HIDDEN flag is deliberately IGNORED, like the
 		// plugin's buildShape walk: village/town bricks are saved with the XRef'd buildings
-		// hidden (terrain-work viewport state), and the painting scene wants them as context —
+		// hidden (terrain-work viewport state), and the painting scene wants them as context
 		// measured corpus-side, hidden catches ONLY those (all meta-geometry carries the
 		// appdata/class marks). DONOTEXPORT likewise stays visible (export exclusion, not
 		// viewport invisibility).
@@ -613,7 +613,7 @@ void addContextMeshes(PMAXLOAD::SLoadedMax &lm, NL3D::CScene *scene, NL3D::CShap
 			if (ocid == PMAX_EXPORT_IDS::CLASSID_PACS_BOX || ocid == PMAX_EXPORT_IDS::CLASSID_PACS_CYL
 				|| ocid == SCENELIB::CLASSID_TARGET) { ++stats.Filtered; ++stats.FilteredClass; continue; }
 			// Accel is a BITFIELD: accelerator type in bits 0-1, independent flags above
-			// (FATHER_VISIBLE=4, VISIBLE_FROM_FATHER=8, CLUSTERIZED=32, ...). The exporter's
+			// (FATHER_VISIBLE=4, VISIBLE_FROM_FATHER=8, CLUSTERIZED=32,...). The exporter's
 			// gate is (accel & 3) == 0 → ordinary renderable mesh (export_scene.cpp); a
 			// string-equality filter ("0"/"32" only) silently dropped renderable meshes
 			// carrying extra flags (36, 40, 4, 96...). Default 32 = clusterized mesh.
@@ -628,7 +628,7 @@ void addContextMeshes(PMAXLOAD::SLoadedMax &lm, NL3D::CScene *scene, NL3D::CShap
 		MATBUILD::SMaxMeshBaseBuild maxBaseBuild;
 		NL3D::CMeshBase::CMeshBaseBuild buildBaseMesh;
 		MESHBUILD::buildBaseMeshInterface(buildBaseMesh, maxBaseBuild, *node, tmCache, localTM,
-		                                  /*exportLighting=*/false);
+		 /*exportLighting=*/false);
 		MESHEVAL::SEvalMesh evalMesh;
 		std::vector<std::string> warnings;
 		if (!MESHEVAL::evalNodeMesh(*node, evalMesh, &warnings))
@@ -642,7 +642,7 @@ void addContextMeshes(PMAXLOAD::SLoadedMax &lm, NL3D::CScene *scene, NL3D::CShap
 		}
 		NL3D::CMesh::CMeshBuild buildMesh;
 		MESHBUILD::buildMeshInterface(evalMesh, buildMesh, buildBaseMesh, maxBaseBuild, *node, tmCache,
-		                              /*skinned=*/false);
+		 /*skinned=*/false);
 		NL3D::CMesh *mesh = new NL3D::CMesh();
 		try
 		{

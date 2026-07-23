@@ -1,12 +1,12 @@
 /**
  * \file editor_ui.cpp
- * \brief In-engine NLGUI facade for the standalone zone painter (ui M1)
+ * \brief In-engine NLGUI facade for the standalone zone painter
  * \author Jan Boon (Kaetemi)
  * \author Grok 4.5
  */
 
 /*
- * Copyright (C) 2026  by authors
+ * Copyright (C) 2026 by authors
  *
  * This file is part of RYZOM CORE PIPELINE.
  * RYZOM CORE PIPELINE is free software: you can redistribute it
@@ -16,17 +16,17 @@
  *
  * RYZOM CORE PIPELINE is distributed in the hope that it will be
  * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public
- * License along with RYZOM CORE PIPELINE.  If not, see
+ * License along with RYZOM CORE PIPELINE. If not, see
  * <http://www.gnu.org/licenses/>.
  */
 
 #include "editor_ui.h"
 #include "script_api.h"
-#include "startup_ui.h" // M24d: session-board drag hooks (pointer listener feeds them)
+#include "startup_ui.h" // session-board drag hooks (pointer listener feeds them)
 #include "max_thumbnail.h"
 
 #include <cstdio>
@@ -105,7 +105,7 @@ class CPointerButtonListener : public NLMISC::IEventListener
 			pointer->setPointerDown((em.Button & leftButton) != 0);
 			pointer->setPointerMiddleDown((em.Button & middleButton) != 0);
 			pointer->setPointerRightDown((em.Button & rightButton) != 0);
-			// M24d: arm a session-board drag from the cell under the pointer. Latch the
+			// arm a session-board drag from the cell under the pointer. Latch the
 			// copy modifier HERE — the X11 emitter posts bare buttons on mouse-up (only
 			// Windows carries modifiers there), so Ctrl/Shift must be read at down.
 			// Call unconditionally: the hook itself disarms while a script executes
@@ -119,7 +119,7 @@ class CPointerButtonListener : public NLMISC::IEventListener
 		else if (event == EventMouseUpId)
 		{
 			CEventMouseUp &em = (CEventMouseUp &)event;
-			// M24d: drop before the button-state mirror clears (Ctrl/Shift = copy;
+			// drop before the button-state mirror clears (Ctrl/Shift = copy;
 			// down-latched modifier OR'd with the up event's for platforms that send it)
 			if (em.Button & leftButton)
 				sessionBoardDragEnd(_DragCopyMod
@@ -222,7 +222,7 @@ public:
 };
 REGISTER_ACTION_HANDLER(CAHZpMode, "zp_mode");
 
-// M18b Prop panel handlers
+// Prop panel handlers
 class CAHZpPropRotate : public IActionHandler
 {
 public:
@@ -289,7 +289,7 @@ public:
 };
 REGISTER_ACTION_HANDLER(CAHZpTileSet, "zp_tileset");
 
-/** Absolute tile-set select from the palette grid (ui M8) — same zpSelectTileSetAbs path. */
+/** Absolute tile-set select from the palette grid — same zpSelectTileSetAbs path. */
 class CAHZpTileSetAbs : public IActionHandler
 {
 public:
@@ -320,7 +320,7 @@ public:
 };
 REGISTER_ACTION_HANDLER(CAHZpTogglePalette, "zp_toggle_palette");
 
-// painterscript window (ui M23b)
+// Painterscript window
 static const char *kScriptWinId = "ui:zp:script_win";
 
 class CAHZpScriptToggle : public IActionHandler
@@ -364,7 +364,7 @@ public:
 				"ui:zp:script_win:content:ed_frame:code"));
 		if (!eb) return;
 		// QUEUED, not run inline: this handler executes inside EventServer::pump, and a
-		// script calling painter.pumpUI() would re-enter the pump (nlassert in debug,
+		// script calling painter.pumpUI would re-enter the pump (nlassert in debug,
 		// event-list UAF in release). The viewer loop runs it right after the pump.
 		ZPSCRIPT::queueRunString(eb->getInputString());
 	}
@@ -412,7 +412,7 @@ public:
 REGISTER_ACTION_HANDLER(CAHZpScriptClear, "zp_script_clear");
 
 // Deliberately NOT execution-guarded: this is the one control that must stay live while
-// a pumped script runs (M23d cancel button; ESC via the pump is the keyboard equivalent).
+// a pumped script runs (cancel button; ESC via the pump is the keyboard equivalent).
 class CAHZpScriptCancel : public IActionHandler
 {
 public:
@@ -542,7 +542,7 @@ public:
 };
 REGISTER_ACTION_HANDLER(CAHZpSeasonNext, "zp_season_next");
 
-/** M14c: open season picker modal listing available seasons (toolbar season button). */
+/** open season picker modal listing available seasons (toolbar season button). */
 class CAHZpSeasonMenu : public IActionHandler
 {
 public:
@@ -559,7 +559,7 @@ public:
 };
 REGISTER_ACTION_HANDLER(CAHZpSeasonMenu, "zp_season_menu");
 
-/** M14c: pick a specific season code from the menu (params = sp|su|au|wi). */
+/** pick a specific season code from the menu (params = sp|su|au|wi). */
 class CAHZpSeasonSelect : public IActionHandler
 {
 public:
@@ -576,7 +576,7 @@ public:
 };
 REGISTER_ACTION_HANDLER(CAHZpSeasonSelect, "zp_season_select");
 
-// Color / displace panel (M7a) — thin wrappers over bridge (same as keys)
+// Color / displace panel — thin wrappers over bridge (same as keys)
 
 class CAHZpColorRadius : public IActionHandler
 {
@@ -662,7 +662,7 @@ public:
 };
 REGISTER_ACTION_HANDLER(CAHZpDisplace, "zp_displace");
 
-/** Absolute displace index from the palette grid (ui M9a) — same path as [ ] keys. */
+/** Absolute displace index from the palette grid — same path as [ ] keys. */
 class CAHZpDisplaceAbs : public IActionHandler
 {
 public:
@@ -678,7 +678,7 @@ public:
 };
 REGISTER_ACTION_HANDLER(CAHZpDisplaceAbs, "zp_displace_abs");
 
-// Color picker (ui M9b)
+// Color picker
 
 static const char *kColorPickerWinId = "ui:zp:color_picker";
 static bool s_ColorPickerVisible = false;
@@ -769,8 +769,8 @@ public:
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		SPaintUIBridge *b = getPaintUIBridge();
 		if (!b || !b->CanSave) return;
-		// M27b: board sessions — toolbar SAVE is one-click save-all (each dirty file in
-		// place, one-time .bak, per-file thumbnails always). Per-file save-as with custom
+		// Board sessions — toolbar SAVE is one-click save-all (each dirty file in
+		// place, one-time.bak, per-file thumbnails always). Per-file save-as with custom
 		// options lives on the board cells. Legacy interactive single-file keeps the
 		// modal (no board to reach save-as from); CLI --save keeps direct save.
 		if (b->InteractiveSave && b->BoardSession)
@@ -823,7 +823,7 @@ static void resetSaveCopyButtonLabel()
 		btn->setHardText("Save copy");
 }
 
-// M27b: which editable file the save dialog targets; empty = legacy whole-session form
+// which editable file the save dialog targets; empty = legacy whole-session form
 // (single-file interactive without a board). The board cell "Save as…" sets it.
 static std::string s_SaveDialogFile;
 
@@ -837,7 +837,7 @@ static void openSaveDialogCommon(SPaintUIBridge *b, const std::string &prefillBa
 	std::string prefill = CFile::getFilenameWithoutExtension(prefillBase) + "_painted.max";
 	if (CGroupEditBox *eb = findEditBox("ui:zp:save_dialog:content:copy_frame:copy_name"))
 		eb->setInputString(prefill);
-	// M5c: thumbnail checkbox defaults on; --no-thumbnail hides the row entirely
+	// thumbnail checkbox defaults on; --no-thumbnail hides the row entirely
 	// (the kill-switch drops every SI write, a live checked box would be a lie).
 	b->UpdateThumbnail = !b->ThumbnailsDisabled;
 	if (CCtrlBaseButton *tb = dynamic_cast<CCtrlBaseButton *>(
@@ -854,7 +854,7 @@ void openSaveDialog()
 	SPaintUIBridge *b = getPaintUIBridge();
 	if (!b) return;
 	s_SaveDialogFile.clear();
-	// Multi-file (M6b): Overwrite is save-all of dirty editables
+	// Multi-file: Overwrite is save-all of dirty editables
 	if (b->EditableFileCount > 1)
 	{
 		setSaveModalStatus(NLMISC::toString(
@@ -916,7 +916,7 @@ void forceShowSaveDialogForShot()
 }
 
 // ---------------------------------------------------------------------------------------------
-// Tileset + Displace palette (ui M8 / M9a)
+// Tileset + Displace palette
 
 static const sint32 kPaletteCellW = 96;
 static const sint32 kPaletteCellH = 92;
@@ -961,7 +961,7 @@ void setTilesetPaletteVisible(bool visible)
 {
 	s_PaletteVisible = visible;
 	setContainerActive(kPaletteWinId, visible);
-	// Panel toggle button face (Tiles rollout, M22)
+	// Panel toggle button face (Tiles rollout, )
 	if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(
 	        CWidgetManager::getInstance()->getElementFromId(
 	            "ui:zp:roll_tiles:content:btn_palette")))
@@ -1045,14 +1045,14 @@ static std::string firstResolvableDiffuse(NL3D::CTileBank *bank, int setIndex,
 		// Prefer basename (bank stores may carry subdirs; resolveBankTextures remaps basenames)
 		std::string base = CFile::getFilename(name);
 		if (storedNameOut && storedNameOut->empty())
-			*storedNameOut = base;
+			* storedNameOut = base;
 		std::string path = CPath::lookup(base, false, false);
 		if (path.empty())
 			path = CPath::lookup(name, false, false);
 		if (!path.empty())
 		{
 			if (storedNameOut)
-				*storedNameOut = base;
+				* storedNameOut = base;
 			return path;
 		}
 	}
@@ -1060,7 +1060,7 @@ static std::string firstResolvableDiffuse(NL3D::CTileBank *bank, int setIndex,
 }
 
 /**
- * Friendly set label: bank getName() when present; else derive from diffuse stem
+ * Friendly set label: bank getName when present; else derive from diffuse stem
  * (Ryzom tiles: y-plages-128-a-01.png → plages). smallbanks often store empty set names.
  */
 static std::string tilesetDisplayName(NL3D::CTileBank *bank, int setIndex,
@@ -1117,7 +1117,7 @@ static std::string resolveDisplaceSource(NL3D::CTileBank *bank, int tileset, int
 		if (stored[k] == '\\') stored[k] = '/';
 	std::string base = CFile::getFilename(stored);
 	if (storedNameOut)
-		*storedNameOut = base;
+		* storedNameOut = base;
 	// Basename first (resolveBankTextures remaps + CPath search on tiles/displace dirs)
 	std::string path = CPath::lookup(base, false, false);
 	if (path.empty())
@@ -1319,7 +1319,7 @@ void rebuildTilesetPalette(NL3D::CTileBank *bank, const std::string &bankPath,
 				{
 					// Register newly written TGA so CPath::lookup finds it this frame.
 					// Without this, cold-cache first paint leaves displace cells empty
-					// (review M10c: previews on disk, UI wells blank).
+					// previews on disk, UI wells blank).
 					CPath::addSearchFile(cached);
 					thumbTex = CFile::getFilenameWithoutExtension(cached) + ".tga";
 					++dispPreview;
@@ -1413,7 +1413,7 @@ void rebuildTilesetPalette(NL3D::CTileBank *bank, const std::string &bankPath,
 }
 
 /**
- * Explorer-style cell selection fill (M10e).
+ * Explorer-style cell selection fill.
  * Color matches NeL CGroupTree default col_select (255 128 128 128) — the w_ skin's
  * list-row selection tone. Applied as a modulated blank.tga button face behind the
  * texture well + label (same mechanism as the color swatch; not setPushed brick chrome).
@@ -1447,7 +1447,7 @@ static void setCellSelFillByBtnPath(const char *btnPath, bool selected)
 	}
 }
 
-/** Highlight the current tileset cell (flat blank.tga fill via setColor, M10e). */
+/** Highlight the current tileset cell (flat blank.tga fill via setColor, ). */
 static void syncPaletteHighlight(int curTileSet, uint tileSetCount)
 {
 	if (s_PaletteBuiltCount <= 0)
@@ -1476,7 +1476,7 @@ static void syncPaletteHighlight(int curTileSet, uint tileSetCount)
 		s_PaletteLastHighlight = -1;
 }
 
-/** Highlight the current displace cell (flat blank.tga fill via setColor, M10e). */
+/** Highlight the current displace cell (flat blank.tga fill via setColor, ). */
 static void syncDisplaceHighlight(uint displaceIndex)
 {
 	if (s_DisplaceBuiltCount <= 0)
@@ -1504,7 +1504,7 @@ static void syncDisplaceHighlight(uint displaceIndex)
 
 /**
  * When Displace mode is active, gently scroll the palette so the Displace header
- * is visible (optional M9a nicety). Does not pin it to the top so Tilesets stay
+ * is visible (optional nicety). Does not pin it to the top so Tilesets stay
  * reachable; skips when ZONE_PAINTER_PALETTE_SHOT is set (headless shots want ofs 0
  * or an explicit displace focus via ZONE_PAINTER_SHOT_MODE alone is fine).
  */
@@ -1561,7 +1561,7 @@ public:
 		SPaintUIBridge *b = getPaintUIBridge();
 		if (!b) return;
 		syncThumbWantFromModal(b);
-		// M27b: file-bound form (board "Save as…") overwrites that ONE file
+		// file-bound form (board "Save as…") overwrites that ONE file
 		bool ok;
 		if (!s_SaveDialogFile.empty() && b->saveFileOverwrite)
 			ok = b->saveFileOverwrite(s_SaveDialogFile, b->UpdateThumbnail);
@@ -1650,7 +1650,7 @@ public:
 		}
 
 		syncThumbWantFromModal(b);
-		// M27b: file-bound form (board "Save as…") copies that ONE file, checkbox honored.
+		// file-bound form (board "Save as…") copies that ONE file, checkbox honored.
 		// Pass the RESOLVED absolute target — the exists-check above ran on it, so the
 		// write must hit the same path (a relative name re-resolved elsewhere may not).
 		bool ok;
@@ -1682,7 +1682,7 @@ public:
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		resetSaveCopyButtonLabel();
 		setSaveModalStatus("");
-		s_SaveDialogFile.clear(); // drop the per-file binding (M27b)
+		s_SaveDialogFile.clear(); // drop the per-file binding
 		CWidgetManager::getInstance()->disableModalWindow();
 	}
 };
@@ -1854,7 +1854,7 @@ static CCtrlBaseButton *findButton(const char *id)
 
 void CEditorUI::syncPanelFromBridge()
 {
-	// painterscript window sync (ui M23b): generation counters, not text length — a
+	// Painterscript window sync: generation counters, not text length — a
 	// same-length content change (CLEAR + same-length line in one frame) left stale text.
 	{
 		static uint lastRec = (uint)-1, lastOut = (uint)-1;
@@ -1881,9 +1881,9 @@ void CEditorUI::syncPanelFromBridge()
 	if (!b || !b->HaveCore)
 		return;
 
-	// M22: Max-style rollout containers under the painter tree list.
+	// Max-style rollout containers under the painter tree list.
 	// Paths are top-level ids (ui:zp:roll_*) — tree attach keeps short ids under root.
-	// Content widgets live at :content:<id>. Toolbar holds mode/season/undo (M14c).
+	// Content widgets live at :content:<id>. Toolbar holds mode/season/undo.
 	static const char *kRollSession = "ui:zp:roll_session";
 	static const char *kRollTiles = "ui:zp:roll_tiles";
 	static const char *kRollBrush = "ui:zp:roll_brush";
@@ -1908,8 +1908,8 @@ void CEditorUI::syncPanelFromBridge()
 			tb->setActive(true);
 	}
 
-	// Mode radios on TOOLBAR (M14c + M18a PROP); panel radios removed
-	// M15: buttons live under header_closed (gestionsets closed-bar idiom), not content
+	// Mode radios on TOOLBAR (PROP); panel radios removed
+	// buttons live under header_closed (gestionsets closed-bar idiom), not content
 	if (CCtrlBaseButton *btn = findButton("ui:zp:toolbar:header_closed:mode_tile"))
 		btn->setPushed(b->Mode == 0);
 	if (CCtrlBaseButton *btn = findButton("ui:zp:toolbar:header_closed:mode_color"))
@@ -1919,13 +1919,13 @@ void CEditorUI::syncPanelFromBridge()
 	if (CCtrlBaseButton *btn = findButton("ui:zp:toolbar:header_closed:mode_prop"))
 		btn->setPushed(b->Mode == 3);
 
-	// ---- M22: mode-gated rollout VISIBILITY (not collapse) ----
+	// ---- mode-gated rollout VISIBILITY (not collapse) ----
 	// Non-applicable rollouts are fully hidden. Open/collapsed is remembered per
 	// rollout across mode switches (setActive does not touch isOpen).
-	//   Tile → Session+Tiles+Brush+Fill
-	//   Color → Session+Brush+Fill
-	//   Displace → Session+Displace+Brush+Fill
-	//   Prop → Session+Properties
+	// Tile → Session+Tiles+Brush+Fill
+	// Color → Session+Brush+Fill
+	// Displace → Session+Displace+Brush+Fill
+	// Prop → Session+Properties
 	const bool tileActive = (b->Mode == 0);
 	const bool colorActive = (b->Mode == 1);
 	const bool displaceActive = (b->Mode == 2);
@@ -1989,7 +1989,7 @@ void CEditorUI::syncPanelFromBridge()
 		}
 	}
 
-	// M20a: hide Tiles palette window while Prop is active; restore when leaving if
+	// hide Tiles palette window while Prop is active; restore when leaving if
 	// it was open (paint palette is meaningless over property edit).
 	{
 		static bool s_PropPaletteGate = false;
@@ -2052,7 +2052,7 @@ void CEditorUI::syncPanelFromBridge()
 	if (CCtrlBaseButton *btn = findButton((std::string(kTilesC) + ":toggle_256").c_str()))
 		btn->setPushed(b->Mode256);
 
-	// Brush size — single readout in shared Brush rollout (M22)
+	// Brush size — single readout in shared Brush rollout
 	{
 		char buf[32];
 		snprintf(buf, sizeof(buf), "%u", b->BrushSize);
@@ -2070,7 +2070,7 @@ void CEditorUI::syncPanelFromBridge()
 	if (CCtrlBaseButton *btn = findButton((std::string(kFillC) + ":lock_borders:box").c_str()))
 		btn->setPushed(b->LockBorders);
 
-	// Self-instance indicator (M4b) — Session rollout
+	// Self-instance indicator — Session rollout
 	if (CViewText *t = findText((std::string(kSessionC) + ":instance_info").c_str()))
 	{
 		if (b->InstanceCount > 1)
@@ -2083,7 +2083,7 @@ void CEditorUI::syncPanelFromBridge()
 			t->setHardText("");
 	}
 
-	// Season face on TOOLBAR (M14c): shows current season; frozen when <2 seasons
+	// Season face on TOOLBAR: shows current season; frozen when <2 seasons
 	if (CCtrlTextButton *btn = dynamic_cast<CCtrlTextButton *>(
 	        CWidgetManager::getInstance()->getElementFromId("ui:zp:toolbar:header_closed:btn_season")))
 	{
@@ -2097,7 +2097,7 @@ void CEditorUI::syncPanelFromBridge()
 	if (CCtrlBaseButton *btn = findButton("ui:zp:toolbar:header_closed:btn_save"))
 		btn->setFrozen(!b->CanSave);
 
-	// Multi-file dirty indicator (M6b): "N files, M dirty" — Session rollout
+	// Multi-file dirty indicator: "N files, M dirty" — Session rollout
 	if (CViewText *t = findText((std::string(kSessionC) + ":files_info").c_str()))
 	{
 		char buf[64];
@@ -2133,7 +2133,7 @@ void CEditorUI::syncPanelFromBridge()
 		snprintf(buf, sizeof(buf), "%u", b->ColorOpacity);
 		t->setHardText(buf);
 	}
-	// Clickable color swatch (M9b): button face modulated to the brush color
+	// Clickable color swatch: button face modulated to the brush color
 	{
 		const NLMISC::CRGBA col((uint8)b->ColorR, (uint8)b->ColorG, (uint8)b->ColorB, 255);
 		if (CCtrlBaseButton *sw = dynamic_cast<CCtrlBaseButton *>(
@@ -2164,7 +2164,7 @@ void CEditorUI::syncPanelFromBridge()
 		const char *lab = b->BrushMaskLabel[0] ? b->BrushMaskLabel : "none";
 		btn->setHardText(lab);
 	}
-	// M21a: btn_mask_mode is a zp_checkbox_row; canonical box is :box
+	// btn_mask_mode is a zp_checkbox_row; canonical box is :box
 	if (CCtrlBaseButton *btn = findButton((std::string(kBrushC) + ":btn_mask_mode:box").c_str()))
 		btn->setPushed(b->BrushMaskMode);
 
@@ -2176,7 +2176,7 @@ void CEditorUI::syncPanelFromBridge()
 		t->setHardText(buf);
 	}
 
-	// Properties rollout (M18b / M22)
+	// Properties rollout
 	if (propActive)
 	{
 		if (CViewText *t = findText((std::string(kPropC) + ":prop_name").c_str()))
@@ -2204,7 +2204,7 @@ void CEditorUI::syncPanelFromBridge()
 			snprintf(buf, sizeof(buf), "%d", b->PropRotate);
 			t->setHardText(buf);
 		}
-		// M21a: prop_* are zp_checkbox_row groups; bridge drives :box (+ freeze :lbl)
+		// prop_* are zp_checkbox_row groups; bridge drives :box (+ freeze :lbl)
 		if (CCtrlBaseButton *btn = findButton((std::string(kPropC) + ":prop_sym:box").c_str()))
 			btn->setPushed(b->PropSymmetry);
 		if (CCtrlBaseButton *btn = findButton((std::string(kPropC) + ":prop_pass:box").c_str()))
@@ -2233,9 +2233,9 @@ void CEditorUI::syncPanelFromBridge()
 		}
 	}
 
-	// Tiles palette selection highlight (ui M8) — stays in sync with keys/panel/pick
+	// Tiles palette selection highlight — stays in sync with keys/panel/pick
 	syncPaletteHighlight(b->CurTileSet, b->TileSetCount);
-	// Displace palette highlight (ui M9a)
+	// Displace palette highlight
 	syncDisplaceHighlight(b->DisplaceIndex);
 	// Track close-via-X: container may deactivate without going through togglePalette
 	{

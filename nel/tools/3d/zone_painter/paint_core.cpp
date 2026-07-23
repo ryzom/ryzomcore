@@ -1,29 +1,29 @@
 /**
  * \file paint_core.cpp
- * \brief See paint_core.h (design doc §14-paint, P3b).
+ * \brief See paint_core.h.
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
  */
 // Port map (plugin_max/nel_patch_paint paint.cpp -> here):
-//   DoPaint metaTile build        -> buildMeta / stitchEdge (typed SPatchMesh/SRPatchMesh data;
-//                                    cross-zone links driven by the P3a weld's bind records)
-//   getBindedEdge                 -> getBindedEdge
-//   GetTile/SetTile               -> getTile/setTile (pristine carrier state + display mirror)
-//   transformDesc/transformInvDesc-> same names (plugin SetTile/GetTile: per-zone Symmetry/
-//                                    Rotate from EPM_Mesh; GetTile = transformDesc(sym,4-rot),
-//                                    SetTile Max write = transformInvDesc(sym,4-rot); landscape
-//                                    mirror remaps through each shared zone's transform)
-//   selectTile                    -> selectTile (group selection dropped, see header)
-//   GetBorderDesc/FindTransition/
-//   getLayer/PropagateBorder      -> same names (patch-subobject clips and TileTrick dropped)
-//   ClearATile/PutATile/RecursTile/
-//   PutTile/CalcRotPath           -> clearATile/putATile/recursTile/opTileStroke/calcRotPath
-//   CNelPatchChanger              -> changeTileArray/applyChanges
-//   CTileUndo                     -> the stroke stacks (bounded LIFO, redo kept)
-//   HitATile/CheckTri/intersect   -> pickTile/checkTri (display CBezierPatch::eval quads)
+// DoPaint metaTile build -> buildMeta / stitchEdge (typed SPatchMesh/SRPatchMesh data;
+// cross-zone links driven by the session weld's bind records)
+// getBindedEdge -> getBindedEdge
+// GetTile/SetTile -> getTile/setTile (pristine carrier state + display mirror)
+// transformDesc/transformInvDesc-> same names (plugin SetTile/GetTile: per-zone Symmetry/
+// Rotate from EPM_Mesh; GetTile = transformDesc(sym,4-rot),
+// SetTile Max write = transformInvDesc(sym,4-rot); landscape
+// mirror remaps through each shared zone's transform)
+// selectTile -> selectTile (group selection dropped, see header)
+// GetBorderDesc/FindTransition/
+// getLayer/PropagateBorder -> same names (patch-subobject clips and TileTrick dropped)
+// ClearATile/PutATile/RecursTile/
+// PutTile/CalcRotPath -> clearATile/putATile/recursTile/opTileStroke/calcRotPath
+// CNelPatchChanger -> changeTileArray/applyChanges
+// CTileUndo -> the stroke stacks (bounded LIFO, redo kept)
+// HitATile/CheckTri/intersect -> pickTile/checkTri (display CBezierPatch::eval quads)
 
 /*
- * Copyright (C) 2026  by authors
+ * Copyright (C) 2026 by authors
  *
  * This file is part of RYZOM CORE PIPELINE.
  * RYZOM CORE PIPELINE is free software: you can redistribute it
@@ -33,11 +33,11 @@
  *
  * RYZOM CORE PIPELINE is distributed in the hope that it will be
  * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public
- * License along with RYZOM CORE PIPELINE.  If not, see
+ * License along with RYZOM CORE PIPELINE. If not, see
  * <http://www.gnu.org/licenses/>.
  */
 
@@ -120,7 +120,7 @@ CPaintCore::~CPaintCore()
 }
 
 // ---------------------------------------------------------------------------------------------
-// Carrier resolution: the P2 write-target policy. Walk the node's derived chain top-first; the
+// Carrier resolution: the write-target policy. Walk the node's derived chain top-first; the
 // TOPMOST modifier slot whose 0x2512->0x1000 per-node local data carries an RFINALPATCH 0x4001
 // leaf is the carrier; without any such slot the base RPO 0x08FD is.
 
@@ -221,7 +221,7 @@ static void zpHarvestPainterFlags(CNodeImpl *node, sint &includeMeshes, sint &pr
 bool CPaintCore::init(const std::vector<SPaintZoneInput> &zones, NL3D::CTileBank *bank,
                       float cellSize, float snap, bool lockBorders, std::string &err)
 {
-	// Re-init safe (M11a working-set rebuild): free prior pristine copies + clear undo.
+	// Re-init safe (working-set rebuild): free prior pristine copies + clear undo.
 	// Undo history is intentionally discarded on any working-set change.
 	for (size_t i = 0; i < m_Carriers.size(); ++i)
 		delete m_Carriers[i].Pristine;
@@ -323,7 +323,7 @@ bool CPaintCore::init(const std::vector<SPaintZoneInput> &zones, NL3D::CTileBank
 		if (bank)
 		{
 			// The build must see the zone the way exportZone produced it: intra-zone binds only.
-			// The P3a weld added session-only cross-zone bind records whose Next[] indexes live
+			// The session weld added session-only cross-zone bind records whose Next[] indexes live
 			// in OTHER zones — getNeighborTile would follow them into foreign patch numbers.
 			// Tiles referencing beyond the bank (stale sources authored against a bigger bank,
 			// e.g. the Max 3 era zones) are blanked in this local copy: the symmetry state of
@@ -392,14 +392,14 @@ bool CPaintCore::init(const std::vector<SPaintZoneInput> &zones, NL3D::CTileBank
 	}
 
 	buildMeta(err);
-	// M18b: snapshot export props so dirty tracks appdata edits outside the carriers.
+	// snapshot export props so dirty tracks appdata edits outside the carriers.
 	for (size_t i = 0; i < m_Zones.size(); ++i)
 		readPropSnap(m_Zones[i].In.Node, m_Zones[i].PropSnap);
 	return true;
 }
 
 // ---------------------------------------------------------------------------------------------
-// M18b: export-prop appdata snapshot / dirty
+// export-prop appdata snapshot / dirty
 
 void CPaintCore::readPropSnap(CNodeImpl *node, SPropSnap &out)
 {
@@ -616,7 +616,7 @@ static int zpGetOffset(int edge, int nU, int nV)
 // (zi,p) to the reversed run along edge ee of (zj,pp). Edge rot is purely topological from
 // bind edge indices (plugin formula). Per-zone display Rotate is handled by getTileIdx/
 // setTile transformDesc — not folded into metaTile.Rotate (doing so regressed R≠0
-// primary-side seam solves; M12b verification uses M4c methodology from the primary).
+// Primary-side seam solves; verification uses methodology from the primary).
 void CPaintCore::stitchEdge(uint zi, uint p, uint e, uint zj, uint pp, uint ee, int dividEdge, int offsetEdge)
 {
 	static const int delta[4] = { ZP_MAX_TILE_IN_PATCH, 1, -ZP_MAX_TILE_IN_PATCH, -1 };
@@ -735,7 +735,7 @@ void CPaintCore::buildMeta(std::string &err)
 					}
 					else
 					{
-						// Welded cross-zone border: the P3a weld left a one/one bind record with
+						// Welded cross-zone border: the session weld left a one/one bind record with
 						// a foreign zone id on the display patchinfo.
 						const NL3D::CPatchInfo::CBindInfo &bi = (*z.In.Patches)[p].BindEdges[e];
 						if (bi.NPatchs == 1 && bi.ZoneId != z.In.ZoneId)
@@ -871,7 +871,7 @@ void CPaintCore::restoreRawTile(const SUndoTile &u, bool useOld)
 	}
 }
 
-// transformDesc port (plugin paint.cpp). Live under per-zone Symmetry/Rotate (M12 display
+// transformDesc port (plugin paint.cpp). Live under per-zone Symmetry/Rotate ( display
 // instances / land placement Flip/Rot). goofy states come from the per-zone CZoneSymmetrisation.
 void CPaintCore::transformDesc(CTileDescP &desc, bool symmetry, uint rotate, uint zone, sint32 tileId) const
 {
@@ -888,7 +888,7 @@ void CPaintCore::transformDesc(CTileDescP &desc, bool symmetry, uint rotate, uin
 	    && (uint)desc.getLayer(0).Tile < (uint)m_Bank->getTileCount())
 	{
 		// Stale sources ("Max 3 era zones") can carry tiles beyond the bank, and a bank
-		// tile can xref no set (tileSet -1, NeL warns on the same case in zone.cpp) —
+		// tile can xref no set (tileSet -1, NeL warns on the same case in zone.cpp)
 		// guard both before indexing, like every other consumer of these lookups.
 		uint8 case256 = (uint8)(desc.getCase() - 1);
 		uint tileRotate = rotate;
@@ -1064,9 +1064,9 @@ void CPaintCore::setTile(uint zone, sint32 tileId, const CTileDescP &desc,
 		u.TileId = tileId;
 		u.Old = oldDesc;
 		// Record what was APPLIED, not what was requested: with updateDisplace off the
-		// displace byte was forced back to oldDesc's value above, and redo replays New
+		// Displace byte was forced back to oldDesc's value above, and redo replays New
 		// with updateDisplace on — recording the raw caller desc would zero a preserved
-		// displace on undo+redo (state after redo must equal state after the op).
+		// Displace on undo+redo (state after redo must equal state after the op).
 		u.New = maxDesc;
 		u.HaveRaw = true;
 		u.OldRawNum = oldRawNum;
@@ -1301,7 +1301,7 @@ bool CPaintCore::propagateBorder(SPaintTile *tile, int curRotation, int curTileS
 	getTileIdx((uint)tile->Zone, tile->TileId, backup);
 	if (backup.isEmpty()) return true;
 
-	// M13b: mark dual meta tiles (shared carrier, same tileId) visited so the solver does not
+	// mark dual meta tiles (shared carrier, same tileId) visited so the solver does not
 	// re-enter the same pristine slot through the other zone's graph mid-propagation. Dual
 	// neighbor links are still walked at the end of this function.
 	markVisitedWithDuals(tile, visited);
@@ -1837,7 +1837,7 @@ bool CPaintCore::putATile(SPaintTile *pTile, int tileSet, int curRotation, bool 
 		if (!other || isLocked(other) || other->Frozen) return false;
 	}
 
-	// M13b: seed + duals share one pristine slot; mark all so dual graphs cannot re-seed it.
+	// seed + duals share one pristine slot; mark all so dual graphs cannot re-seed it.
 	markVisitedWithDuals(pTile, visited);
 
 	if (tileSet == -1)
@@ -1848,7 +1848,7 @@ bool CPaintCore::putATile(SPaintTile *pTile, int tileSet, int curRotation, bool 
 
 	// Stroke mark for abort: every write below uses undo=true, so m_CurStroke grows for
 	// this put only. On refuse (propagate fail / residual illegal seams / transition
-	// fallback abort) we restore pristine bytes via HaveRaw and truncate the stroke —
+	// fallback abort) we restore pristine bytes via HaveRaw and truncate the stroke
 	// the old setTile(..., Old, undo=true) rollback left desc-only restores (lossy on
 	// unused layers) AND phantom undo entries that endStroke then committed.
 	const size_t strokeMark = m_CurStroke.size();
@@ -1935,7 +1935,7 @@ bool CPaintCore::putATile(SPaintTile *pTile, int tileSet, int curRotation, bool 
 			}
 		}
 	}
-	// M13b: dual meta tiles (same carrier+tileId on another zone) own complementary
+	// dual meta tiles (same carrier+tileId on another zone) own complementary
 	// voisin graphs under self-instance welds. After the seed zone's neighbors, also
 	// propagate from each dual's unvisited neighbors. Interior duals are already marked
 	// visited via markVisitedWithDuals so this is a no-op away from the weld; near-seam
@@ -2115,7 +2115,7 @@ bool CPaintCore::putATile(SPaintTile *pTile, int tileSet, int curRotation, bool 
 			default: return false;
 			}
 			setTile((uint)pTile->Zone, pTile->TileId, desc, NULL, true);
-			// M13b residual gate: transition-at-pick must also leave legal seams
+			// residual gate: transition-at-pick must also leave legal seams
 			if (!tileSeamsLegal(pTile))
 			{
 				abortStrokeTo(strokeMark);
@@ -2129,7 +2129,7 @@ bool CPaintCore::putATile(SPaintTile *pTile, int tileSet, int curRotation, bool 
 	}
 	else
 	{
-		// M13b residual gate: full put claimed success — refuse if any WRITTEN tile has an
+		// residual gate: full put claimed success — refuse if any WRITTEN tile has an
 		// illegal seam (hard UV/rot cases the dual-graph walk still cannot close; primary
 		// and instance both hit them). Revert the stroke so no illegal state persists.
 		// Check backupStack only (not duals merely marked visited) so mirrored duals with
@@ -2479,7 +2479,7 @@ bool CPaintCore::opUndo()
 bool CPaintCore::opRedo()
 {
 	// Same commit-first rule as opUndo. Committing a live stroke clears the redo
-	// stack, so redo-under-open-stroke correctly reports "redo stack empty" —
+	// stack, so redo-under-open-stroke correctly reports "redo stack empty"
 	// new paint invalidates redo, matching the interactive path.
 	endStroke();
 	if (m_RedoStack.empty()) return false;
@@ -2716,7 +2716,7 @@ bool CPaintCore::opColorVertex(uint zone, uint patch, sint32 s, sint32 t, NLMISC
 	return ok;
 }
 
-// Color-brush bitmap mask (CPaintColor::loadBrush port): any .tga; grayscale files load as
+// Color-brush bitmap mask (CPaintColor::loadBrush port): any.tga; grayscale files load as
 // luminance (loadGrayscaleAsAlpha(false)), converted to RGBA — the sampling path reads RGB and
 // averages, exactly like the plugin. Loading turns the mask mode on (the plugin's
 // SelectColorBrush flow called setBrushMode(true) right after loadBrush).
@@ -3114,7 +3114,7 @@ bool CPaintCore::opFillColor(uint zone, uint patch, NLMISC::CRGBA color, uint bl
 // ---------------------------------------------------------------------------------------------
 // Displace painting (PutADisplacetile / fillDisplace ports; explicit index instead of the
 // plugin's DisplaceTile UI state). The displace bits and the v9 Noise byte stay in sync (the
-// P3b mapping); the live mirror shows the new noise through the tesselation refresh.
+// mapping); the live mirror shows the new noise through the tesselation refresh.
 
 void CPaintCore::displaceOne(SPaintTile *tile, uint displace)
 {
@@ -3163,7 +3163,7 @@ bool CPaintCore::opDisplace(uint zone, uint patch, uint u, uint v, uint displace
 	if (t->Frozen) { err = "tile frozen"; return false; }
 	m_StrokeSets = 0;
 	// The plugin's displace put rode the same brush recursion as the tile put (PutDisplace ->
-	// RecursTile depth brushValue[brushSize]); depth 0 == the historical single-tile behavior.
+	// RecursTile depth brushValue[brushSize]); depth 0 == single-tile.
 	std::set<SPaintTile *> alreadyRecursed;
 	recursDisplace(t, displace, ZP_BRUSH_VALUE[m_BrushSize], alreadyRecursed);
 	applyChanges();
@@ -3473,7 +3473,7 @@ bool CPaintCore::anyZoneDirty(const std::vector<uint> &zoneIds) const
 			break;
 		}
 	}
-	// M18b: prop appdata outside carriers
+	// prop appdata outside carriers
 	for (std::set<uint>::const_iterator it = zoneIdxs.begin(); it != zoneIdxs.end(); ++it)
 	{
 		if (propsDirty(*it))
@@ -3505,7 +3505,7 @@ void CPaintCore::markZonesSaved(const std::vector<uint> &zoneIds)
 			if (m_Zones[i].In.ZoneId != zoneIds[z])
 				continue;
 			carriers.insert(m_Zones[i].Carrier);
-			// M18b: re-baseline export props with the saved file
+			// re-baseline export props with the saved file
 			readPropSnap(m_Zones[i].In.Node, m_Zones[i].PropSnap);
 			break;
 		}
@@ -3572,10 +3572,10 @@ void CPaintCore::revertZones(const std::vector<uint> &zoneIds)
 		bool ok = false;
 		if (car.SnapLeaf)
 			ok = decodeRPatchMesh(nlVectorData(car.OriginalBytes), car.OriginalBytes.size(),
-			                      *car.Pristine, err);
+			 * car.Pristine, err);
 		else
 			ok = decodeRpoChunk(nlVectorData(car.OriginalBytes), car.OriginalBytes.size(),
-			                    *car.Pristine, err);
+			 * car.Pristine, err);
 		if (!ok)
 			fprintf(stderr, "WARNING: revertZones: re-decode failed: %s\n", err.c_str());
 	}
