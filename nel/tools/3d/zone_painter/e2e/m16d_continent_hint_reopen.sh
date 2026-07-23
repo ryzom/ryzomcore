@@ -24,24 +24,41 @@ ln -sfn "$SB/tilebank" "$WS/tilebank"
 # Empty paint-script: board session still rewrites to stamp neighbor hints
 : > "$LOGDIR/m16d_empty.script"
 
+# Run a zone_painter invocation: full log to file, key lines echoed, exit code ASSERTED
+# (the old tee|grep pipeline swallowed nonzero exits — a crash after the asserted
+# lines printed still passed).
+run_zp() { # $1 = log file, $2 = display grep pattern, rest = args
+	local log="$1" pat="$2"
+	shift 2
+	if ! "$ZP" "$@" > "$log" 2>&1; then
+		echo "FAIL: zone_painter exited nonzero (log: $log)"
+		tail -n 20 "$log"
+		exit 1
+	fi
+	grep -aE "$pat" "$log" || true
+}
+
 echo "===== CONT E2E: board open + save (stamp hints) ====="
-"$ZP" "$WS" --startup-auto "m16d_cont_ws/4_AD" \
+run_zp "$LOGDIR/m16d_cont_save.log" \
+	"startup-auto:|session open:|neighbor|context |weld:|neighbor-hints write|OK save|OK panel" \
+	"$WS" --startup-auto "m16d_cont_ws/4_AD" \
 	--paint-script "$LOGDIR/m16d_empty.script" \
-	--panel-save-test overwrite --out "$OUT/4_AD.max" \
-	2>&1 | tee "$LOGDIR/m16d_cont_save.log" | grep -E "startup-auto:|session open:|neighbor|context |weld:|neighbor-hints write|OK save|OK panel" || true
+	--panel-save-test overwrite --out "$OUT/4_AD.max"
 
 echo "===== CONT E2E: dump saved ====="
-"$ZP" --dump-neighbor-hints "$OUT/4_AD.max" 2>&1 | tee "$LOGDIR/m16d_cont_dump.log"
+run_zp "$LOGDIR/m16d_cont_dump.log" "." --dump-neighbor-hints "$OUT/4_AD.max"
 
 echo "===== CONT E2E: copy back + reopen ====="
 cp "$OUT/4_AD.max" "$WS/max/zones/4_AD.max"
-"$ZP" "$WS" --startup-auto "m16d_cont_ws/4_AD" --dump-zones "$LOGDIR/m16d_cont_reopen_zones" \
-	2>&1 | tee "$LOGDIR/m16d_cont_reopen.log" | grep -E "startup-auto:|session open:|neighbor|context |weld:|eligibility" || true
+run_zp "$LOGDIR/m16d_cont_reopen.log" \
+	"startup-auto:|session open:|neighbor|context |weld:|eligibility" \
+	"$WS" --startup-auto "m16d_cont_ws/4_AD" --dump-zones "$LOGDIR/m16d_cont_reopen_zones"
 
 echo "===== CONT E2E asserts ====="
 grep -q "neighbor-hints: source=appdata" "$LOGDIR/m16d_cont_reopen.log"
 grep -qE "neighbors: loading [1-9]" "$LOGDIR/m16d_cont_reopen.log"
-WELDS=$(grep -oE 'weld: [0-9]+' "$LOGDIR/m16d_cont_reopen.log" | head -1 | awk '{print $2}')
+# Anchor on the session weld summary line specifically (not any future "weld:" line)
+WELDS=$(grep -aoE 'weld: [0-9]+ cross-zone edges' "$LOGDIR/m16d_cont_reopen.log" | tail -1 | awk '{print $2}')
 test "${WELDS:-0}" -gt 0
 
 echo "PASS m16d continent hint reopen"

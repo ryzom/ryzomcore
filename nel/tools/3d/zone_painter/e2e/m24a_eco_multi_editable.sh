@@ -20,13 +20,27 @@ cp "$GFX/landscape/ligo/lacustre/max/material-fond.max" "$WS/landscape/ligo/lacu
 cp "$GFX/landscape/ligo/lacustre/max/material-peek.max" "$WS/landscape/ligo/lacustre/max/"
 ln -sfn "$GFX/landscape/_texture_tiles" "$WS/landscape/_texture_tiles"
 
+
+# Full log to file, key lines echoed, exit code ASSERTED (the old tee|grep pipeline
+# swallowed nonzero exits).
+run_zp() { # $1 = log file, $2 = display grep pattern, rest = args
+	local log="$1" pat="$2"
+	shift 2
+	if ! "$ZP" "$@" > "$log" 2>&1; then
+		echo "FAIL: zone_painter exited nonzero (log: $log)"
+		tail -n 20 "$log"
+		exit 1
+	fi
+	grep -aE "$pat" "$log" || true
+}
+
 echo "===== M24a: placement + empty-edit save-all (stamps per-file hints) ====="
 : > "$LOGDIR/m24a_empty.script"
-"$ZP" "$WS" --startup-auto "lacustre/material-fond" --open-editable "1,0:material-peek" \
+run_zp "$LOGDIR/m24a_save.log" \
+	"open-editable:|neighbor-hints write|OK save-all|OK panel" \
+	"$WS" --startup-auto "lacustre/material-fond" --open-editable "1,0:material-peek" \
 	--paint-script "$LOGDIR/m24a_empty.script" \
-	--panel-save-test overwrite --out "$OUT/unused.max" \
-	2>&1 | tee "$LOGDIR/m24a_save.log" \
-	| grep -E "open-editable:|neighbor-hints write|OK save-all|OK panel" || true
+	--panel-save-test overwrite --out "$OUT/unused.max"
 grep -q "open-editable: 'material-peek' @ (1,0)" "$LOGDIR/m24a_save.log"
 grep -q "neighbor-hints write 'material-fond': v1|1,0:material-peek" "$LOGDIR/m24a_save.log"
 grep -q "neighbor-hints write 'material-peek': v1|-1,0:material-fond" "$LOGDIR/m24a_save.log"
@@ -46,9 +60,8 @@ cmp "$OUT/fond_empty.max" "$WS/landscape/ligo/lacustre/max/material-fond.max"
 cmp "$OUT/peek_empty.max" "$WS/landscape/ligo/lacustre/max/material-peek.max"
 
 echo "===== M24a: reopen second brick — hint auto-loads the first as RO ====="
-"$ZP" "$WS" --startup-auto "lacustre/material-peek" \
-	--dump-zones "$OUT/reopen_zones" 2>&1 | tee "$LOGDIR/m24a_reopen.log" \
-	| grep -E "neighbor-hints:|context '|^zone" || true
+run_zp "$LOGDIR/m24a_reopen.log" "neighbor-hints:|context '|^zone" \
+	"$WS" --startup-auto "lacustre/material-peek" --dump-zones "$OUT/reopen_zones"
 grep -q "neighbor-hints: source=appdata raw=1 resolved=1" "$LOGDIR/m24a_reopen.log"
 grep -q "context 'material-fond' @ cell (-1,0)" "$LOGDIR/m24a_reopen.log"
 grep -qE "zone 2000 'QuadPatch01' FROZEN: .* bbox \(-160.0,0.0\)-\(0.0,160.0\)" "$LOGDIR/m24a_reopen.log"

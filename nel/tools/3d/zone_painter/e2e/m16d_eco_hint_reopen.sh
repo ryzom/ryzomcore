@@ -21,27 +21,42 @@ cp "$GFX/landscape/ligo/lacustre/max/material-bassin.max" "$WS/landscape/ligo/la
 ln -sfn "$GFX/landscape/_texture_tiles" "$WS/landscape/_texture_tiles"
 printf 'tile 0 0 0 0 1\nundo\n' > "$LOGDIR/m16d_paint.script"
 
+# Full log to file, key lines echoed, exit code ASSERTED (the old tee|grep pipeline
+# swallowed nonzero exits).
+run_zp() { # $1 = log file, $2 = display grep pattern, rest = args
+	local log="$1" pat="$2"
+	shift 2
+	if ! "$ZP" "$@" > "$log" 2>&1; then
+		echo "FAIL: zone_painter exited nonzero (log: $log)"
+		tail -n 20 "$log"
+		exit 1
+	fi
+	grep -aE "$pat" "$log" || true
+}
+
 echo "===== ECO E2E: place-context + paint + save ====="
-"$ZP" "$WS" --startup-auto "lacustre/material-fond" \
+run_zp "$LOGDIR/m16d_eco_save.log" \
+	"startup-auto:|session open:|neighbor|context |weld:|place-context|neighbor-hints write|OK save|OK panel" \
+	"$WS" --startup-auto "lacustre/material-fond" \
 	--place-context "1,0:material-bassin" \
 	--paint-script "$LOGDIR/m16d_paint.script" \
-	--panel-save-test overwrite --out "$OUT/material-fond.max" \
-	2>&1 | tee "$LOGDIR/m16d_eco_save.log" | grep -E "startup-auto:|session open:|neighbor|context |weld:|place-context|neighbor-hints write|OK save|OK panel" || true
+	--panel-save-test overwrite --out "$OUT/material-fond.max"
 
 echo "===== ECO E2E: dump saved ====="
-"$ZP" --dump-neighbor-hints "$OUT/material-fond.max" 2>&1 | tee "$LOGDIR/m16d_eco_dump.log"
+run_zp "$LOGDIR/m16d_eco_dump.log" "." --dump-neighbor-hints "$OUT/material-fond.max"
 
 echo "===== ECO E2E: copy back + reopen ====="
 cp "$OUT/material-fond.max" "$WS/landscape/ligo/lacustre/max/material-fond.max"
-"$ZP" "$WS" --startup-auto "lacustre/material-fond" --dump-zones "$LOGDIR/m16d_eco_reopen_zones" \
-	2>&1 | tee "$LOGDIR/m16d_eco_reopen.log" | grep -E "startup-auto:|session open:|neighbor|context |weld:|eligibility" || true
+run_zp "$LOGDIR/m16d_eco_reopen.log" \
+	"startup-auto:|session open:|neighbor|context |weld:|eligibility" \
+	"$WS" --startup-auto "lacustre/material-fond" --dump-zones "$LOGDIR/m16d_eco_reopen_zones"
 
 echo "===== ECO E2E asserts ====="
 grep -q "neighbor-hints: source=appdata" "$LOGDIR/m16d_eco_reopen.log"
 grep -q "context 'material-bassin' @ cell (1,0)" "$LOGDIR/m16d_eco_reopen.log"
 grep -q "neighbors: loading 1 context" "$LOGDIR/m16d_eco_reopen.log"
-# Elevated bind count vs solo (solo fond ≈ 80)
-BINDS=$(grep -oE 'binds: [0-9]+' "$LOGDIR/m16d_eco_reopen.log" | head -1 | awk '{print $2}')
+# Elevated bind count vs solo (solo fond ≈ 80), anchored on the session summary line
+BINDS=$(grep -aoE 'binds: [0-9]+ total' "$LOGDIR/m16d_eco_reopen.log" | tail -1 | awk '{print $2}')
 test "${BINDS:-0}" -gt 80
 
 echo "PASS m16d eco hint reopen"
