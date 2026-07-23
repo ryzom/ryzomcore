@@ -172,9 +172,14 @@
 	</group>
 </template>
 
-<!-- One grid line of zone tiles (plain container; tiles spawn at absolute offsets). -->
-<template name="zp_zone_grid_line" keep="true" id="">
-	<group id="#id" w="712" h="106" />
+<!-- One auto-wrapping SECTION of zone tiles (M29c): the custom zp_flow group reflows
+     its children from its own width inside updateCoords — the Ryzom client inventory
+     mechanism — so window resizes re-wrap with no repopulation and no width watch. -->
+<!-- sizeparent="parent" is LOAD-BEARING: CGroupList re-chains each child's pos parent
+     to the PREVIOUS element, and sizeref follows the pos parent — without it the flow
+     sizes to the header row above it, not the list. -->
+<template name="zp_zone_flow_sec" keep="true" id="">
+	<group type="zp_flow" id="#id" tile_w="178" tile_h="106" sizeparent="parent" sizeref="w" w="-4" h="106" />
 </template>
 
 <!-- Section divider row for scroll_text lists (world/zone browser group headers).
