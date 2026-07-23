@@ -1590,7 +1590,16 @@ public:
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		SPaintUIBridge *b = getPaintUIBridge();
 		if (!b) return;
-		if (s_SaveDialogFile.empty() && !b->saveTo) return;
+		// Bound form needs saveFileCopy; plain form needs saveTo — never fall through to a
+		// null (or the wrong) callback when only one side is wired.
+		if (!s_SaveDialogFile.empty())
+		{
+			if (!b->saveFileCopy) return;
+		}
+		else if (!b->saveTo)
+		{
+			return;
+		}
 
 		std::string name;
 		if (CGroupEditBox *eb = findEditBox("ui:zp:save_dialog:content:copy_frame:copy_name"))
@@ -1607,8 +1616,9 @@ public:
 		// Absolute, or relative to the saved FILE's own directory — for the bound form
 		// that is the bound file's dir (same base saveFileCopy resolves against; the
 		// exists-check below must agree with the actual write target), else InputDir.
+		// isAbsolutePath covers Windows drive-letter paths (a bare '/' check does not).
 		std::string target;
-		if (!name.empty() && name[0] == '/')
+		if (CPath::isAbsolutePath(name))
 			target = name;
 		else
 		{
@@ -1623,7 +1633,10 @@ public:
 				dir += "/";
 			target = dir + name;
 		}
-		if (toLowerAscii(CFile::getExtension(target)).empty())
+		// getExtension searches the full path for the last '.' — a directory component
+		// like "user.name" would look like an extension and skip appending ".max".
+		// Only the filename matters for the auto-extension rule.
+		if (toLowerAscii(CFile::getExtension(CFile::getFilename(target))).empty())
 			target += ".max";
 
 		if (CFile::fileExists(target) && (!s_SaveCopyConfirm || target != s_SaveCopyTarget))
@@ -1641,7 +1654,7 @@ public:
 		// Pass the RESOLVED absolute target — the exists-check above ran on it, so the
 		// write must hit the same path (a relative name re-resolved elsewhere may not).
 		bool ok;
-		if (!s_SaveDialogFile.empty() && b->saveFileCopy)
+		if (!s_SaveDialogFile.empty())
 			ok = b->saveFileCopy(s_SaveDialogFile, target, b->UpdateThumbnail);
 		else
 			ok = b->saveTo(target);

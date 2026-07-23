@@ -364,10 +364,11 @@ static void setZoneBrowserMode(bool continentBoard)
 		if (CInterfaceElement *el = CWidgetManager::getInstance()->getElementFromId(
 		        "ui:zp:zone_browser:content:btn_view_large"))
 			el->setActive(false);
-	// Session hub chrome
+	// Session hub chrome — BACK TO PAINTING stays available in session mode even when
+	// the continent board falls back to a flat list (unparseable zone names).
 	if (CInterfaceElement *el = CWidgetManager::getInstance()->getElementFromId(
 	        "ui:zp:zone_browser:content:btn_back_paint"))
-		el->setActive(s_Sess.SessionMode && continentBoard);
+		el->setActive(s_Sess.SessionMode);
 	if (CCtrlTextButton *btn = dynamic_cast<CCtrlTextButton *>(
 	        CWidgetManager::getInstance()->getElementFromId("ui:zp:zone_browser:content:btn_back")))
 	{
