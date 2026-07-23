@@ -830,7 +830,11 @@ static std::string s_SaveDialogFile;
 static void openSaveDialogCommon(SPaintUIBridge *b, const std::string &prefillBase)
 {
 	resetSaveCopyButtonLabel();
-	std::string prefill = prefillBase + "_painted.max";
+	// prefillBase may be a caller-provided basename that still carries its ".max"
+	// extension (e.g. the per-file board "Save as..." path passes the file-identity
+	// basename verbatim) or an already-stripped stem (EditableBasename). Strip either
+	// way so the suggested copy name is never "name.max_painted.max".
+	std::string prefill = CFile::getFilenameWithoutExtension(prefillBase) + "_painted.max";
 	if (CGroupEditBox *eb = findEditBox("ui:zp:save_dialog:content:copy_frame:copy_name"))
 		eb->setInputString(prefill);
 	// M5c: thumbnail checkbox defaults on; --no-thumbnail hides the row entirely
