@@ -118,6 +118,7 @@
 #include <nel/3d/scene.h>
 #include <nel/3d/scene_user.h>
 #include <nel/3d/text_context.h>
+#include <nel/3d/texture_mem.h>
 #include <nel/3d/tile_bank.h>
 #include <nel/3d/u_camera.h>
 #include <nel/3d/u_driver.h>
@@ -5072,122 +5073,185 @@ static void zpFill(int rot)
 }
 
 /**
- * Top-down orthographic capture of the PRIMARY zone only (instances/neighbors stay in
- * the landscape but the camera frames the primary bbox). Square crop, no GUI.
+ * Top-down orthographic capture of ONE file's zones into an OFFSCREEN render target
+ * (M27a). Conventions follow the ligo plugin's MakeSnapShot — the zone-imaging
+ * reference (nel/tools/3d/ligo/plugin_max/script.cpp; the ring pipeline's
+ * screenshot_islands tiles the backbuffer for the same north-up ortho look):
+ *   - ortho frustum over the CELL-ALIGNED rect of the zones (not the raw bbox), so
+ *     thumbnails of adjacent bricks tile edge-to-edge like the ligo zone bitmaps;
+ *   - north-up: X right, Y up on screen, camera looking straight down -Z;
+ *   - oversampled render (≈2x the 128 SI budget per cell, pow2-capped), downsampled by
+ *     the SI encoder's aspect-preserving maxDim resample;
+ *   - repeated renders so landscape refine converges on the jumped camera.
+ * Offscreen: CTextureMem render target (the bloom/cloud_scape idiom) — the backbuffer
+ * is never touched, so captures work per-file mid-save at any window size.
+ * zoneIds: the file's zone ids; NULL = every unfrozen zone (legacy single-file path).
  */
-static bool captureTopDownThumbnail(NLMISC::CBitmap &out)
+static bool captureTopDownThumbnail(NLMISC::CBitmap &out, const std::vector<uint> *zoneIds = NULL)
 {
 	out.reset();
 	if (!g_PaintCtx.UDriver || !g_PaintCtx.UScene || !g_PaintCtx.Land || !g_PaintCtx.Camera
 	    || !g_PaintCtx.Zones || g_PaintCtx.Zones->empty())
 		return false;
 
-	// Primary zone = index 0 (editable); build bbox from its patches only.
-	const SPaintZone &primary = (*g_PaintCtx.Zones)[0];
+	// Frame the selected zones (a file's set), or every unfrozen zone.
 	NLMISC::CAABBox bbox;
 	bool init = false;
-	for (size_t p = 0; p < primary.Patches.size(); ++p)
+	for (size_t i = 0; i < g_PaintCtx.Zones->size(); ++i)
 	{
-		const NL3D::CBezierPatch &bp = primary.Patches[p].Patch;
-		for (uint v = 0; v < 4; ++v)
+		const SPaintZone &z = (*g_PaintCtx.Zones)[i];
+		if (zoneIds)
 		{
-			if (!init) { bbox.setCenter(bp.Vertices[v]); bbox.setHalfSize(NLMISC::CVector::Null); init = true; }
-			else bbox.extend(bp.Vertices[v]);
+			bool in = false;
+			for (size_t k = 0; k < zoneIds->size() && !in; ++k)
+				in = (*zoneIds)[k] == z.ZoneId;
+			if (!in)
+				continue;
 		}
-		for (uint v = 0; v < 8; ++v) bbox.extend(bp.Tangents[v]);
-		for (uint v = 0; v < 4; ++v) bbox.extend(bp.Interiors[v]);
+		else if (z.Frozen)
+			continue;
+		for (size_t p = 0; p < z.Patches.size(); ++p)
+		{
+			const NL3D::CBezierPatch &bp = z.Patches[p].Patch;
+			for (uint v = 0; v < 4; ++v)
+			{
+				if (!init) { bbox.setCenter(bp.Vertices[v]); bbox.setHalfSize(NLMISC::CVector::Null); init = true; }
+				else bbox.extend(bp.Vertices[v]);
+			}
+			for (uint v = 0; v < 8; ++v) bbox.extend(bp.Tangents[v]);
+			for (uint v = 0; v < 4; ++v) bbox.extend(bp.Interiors[v]);
+		}
 	}
 	if (!init)
 		return false;
 
-	NLMISC::CVector center = bbox.getCenter();
-	// Square half-extent from XY footprint (Z is up)
-	const float hx = std::max(bbox.getHalfSize().x, 1.f);
-	const float hy = std::max(bbox.getHalfSize().y, 1.f);
-	const float half = std::max(hx, hy) * 1.05f;
+	// Cell-aligned region (ligo: posX = CellSize*xmin, width = CellSize*cells)
+	const float cs = g_SessionCellSize > 0.f ? g_SessionCellSize : 160.f;
+	const float minX = (float)std::floor(bbox.getMin().x / cs + 1e-4) * cs;
+	const float minY = (float)std::floor(bbox.getMin().y / cs + 1e-4) * cs;
+	const float maxX = (float)std::ceil(bbox.getMax().x / cs - 1e-4) * cs;
+	const float maxY = (float)std::ceil(bbox.getMax().y / cs - 1e-4) * cs;
+	const int cellsW = std::max(1, (int)std::lround((maxX - minX) / cs));
+	const int cellsH = std::max(1, (int)std::lround((maxY - minY) / cs));
+	const float rectW = (float)cellsW * cs;
+	const float rectH = (float)cellsH * cs;
+	const float cx = minX + rectW * 0.5f;
+	const float cy = minY + rectH * 0.5f;
 	const float zTop = bbox.getMax().z + std::max(bbox.getHalfSize().z * 2.f, 50.f);
 
-	NL3D::CCamera *camera = g_PaintCtx.Camera;
-	// Save camera
-	const NLMISC::CMatrix oldMat = camera->getMatrix();
-	const NL3D::CFrustum oldFrust = camera->getFrustum();
-
-	// Ortho top-down: look along -Z, Y north-ish
-	NLMISC::CMatrix camMat;
-	camMat.identity();
-	// I = +X, J = -Z (look down), K = +Y (up on screen = north if Y is north)
-	NLMISC::CVector I(1, 0, 0);
-	NLMISC::CVector J(0, 0, -1);
-	NLMISC::CVector K(0, 1, 0);
-	camMat.setRot(I, J, K, true);
-	camMat.setPos(NLMISC::CVector(center.x, center.y, zTop));
-	camera->setTransformMode(NL3D::ITransformable::DirectMatrix);
-	camera->setMatrix(camMat);
-	camera->setFrustum(-half, half, -half, half, 0.1f, zTop - bbox.getMin().z + 100.f, /*perspective=*/false);
+	// Oversampled pow2 render-target dims (≈256 px per cell, capped at 1024)
+	const uint kPerCell = 256;
+	uint texW = NLMISC::raiseToNextPowerOf2(std::min(1024u, kPerCell * (uint)cellsW));
+	uint texH = NLMISC::raiseToNextPowerOf2(std::min(1024u, kPerCell * (uint)cellsH));
+	texW = std::min(texW, 1024u);
+	texH = std::min(texH, 1024u);
 
 	NL3D::UDriver *udriver = g_PaintCtx.UDriver;
 	NL3D::UScene *uscene = g_PaintCtx.UScene;
 	NL3D::IDriver *driver = static_cast<NL3D::CDriverUser *>(udriver)->getDriver();
 
-	// Hide GUI for a clean thumb
-	const bool wasUi = false;
-	(void)wasUi;
-	ZPUI::CEditorUI *ed = NULL;
-	// Render two frames (refine)
+	// Offscreen render target (cloud_scape/bloom idiom)
+	uint8 *texMem = new uint8[4 * texW * texH];
+	NLMISC::CSmartPtr<NL3D::ITexture> rt =
+		new NL3D::CTextureMem(texMem, 4 * texW * texH, true, false, texW, texH, NLMISC::CBitmap::RGBA);
+	rt->setWrapS(NL3D::ITexture::Clamp);
+	rt->setWrapT(NL3D::ITexture::Clamp);
+	rt->setFilterMode(NL3D::ITexture::Linear, NL3D::ITexture::LinearMipMapOff);
+	rt->setReleasable(false);
+	rt->setRenderTarget(true);
+	rt->generate();
+	if (!driver->setRenderTarget(rt))
+	{
+		fprintf(stderr, "WARNING: thumbnail: driver refused the render target\n");
+		return false;
+	}
+
+	NL3D::CCamera *camera = g_PaintCtx.Camera;
+	const NLMISC::CMatrix oldMat = camera->getMatrix();
+	const NL3D::CFrustum oldFrust = camera->getFrustum();
+
+	// Ortho top-down, north-up (ligo: view.setRot(I, -K, J) — same basis)
+	NLMISC::CMatrix camMat;
+	camMat.identity();
+	camMat.setRot(NLMISC::CVector(1, 0, 0), NLMISC::CVector(0, 0, -1), NLMISC::CVector(0, 1, 0), true);
+	camMat.setPos(NLMISC::CVector(cx, cy, zTop));
+	camera->setTransformMode(NL3D::ITransformable::DirectMatrix);
+	camera->setMatrix(camMat);
+	camera->setFrustum(-rectW * 0.5f, rectW * 0.5f, -rectH * 0.5f, rectH * 0.5f,
+	                   0.1f, zTop - bbox.getMin().z + 100.f, /*perspective=*/false);
+
+	// Render with refine convergence (ligo renders repeatedly for the same reason);
+	// no swapBuffers anywhere — everything happens in the RT.
 	g_PaintCtx.Land->Landscape.setRefineMode(true);
 	udriver->clearBuffers(NLMISC::CRGBA(40, 40, 40));
 	uscene->render();
 	g_PaintCtx.Land->Landscape.setRefineMode(false);
 	g_PaintCtx.Land->Landscape.refineAll(camMat.getPos());
-	udriver->clearBuffers(NLMISC::CRGBA(40, 40, 40));
-	uscene->render();
-	udriver->swapBuffers();
+	for (int pass = 0; pass < 3; ++pass)
+	{
+		udriver->clearBuffers(NLMISC::CRGBA(40, 40, 40));
+		uscene->render();
+	}
 
 	NLMISC::CBitmap full;
-	driver->getBuffer(full);
-	// Restore camera
+	driver->getBuffer(full); // reads the bound render target
+	driver->setRenderTarget(NULL);
+
+	// Restore camera + live refine mode
 	camera->setMatrix(oldMat);
 	camera->setFrustum(oldFrust);
+	g_PaintCtx.Land->Landscape.setRefineMode(true);
 
 	if (full.getWidth() == 0 || full.getHeight() == 0)
 		return false;
-
-	// Center square crop
-	const uint fw = full.getWidth();
-	const uint fh = full.getHeight();
-	const uint side = std::min(fw, fh);
-	const uint x0 = (fw - side) / 2;
-	const uint y0 = (fh - side) / 2;
-	out.resize(side, side, NLMISC::CBitmap::RGBA, true);
 	if (full.getPixelFormat() != NLMISC::CBitmap::RGBA)
 		full.convertToType(NLMISC::CBitmap::RGBA);
-	out.blit(full, (sint)x0, (sint)y0, (sint)side, (sint)side, 0, 0);
+	// Undo the pow2 stretch: resample to the cell rect's true aspect at the oversampled
+	// budget; the SI encoder's maxDim pass makes the final thumb.
+	uint outW = kPerCell * (uint)cellsW, outH = kPerCell * (uint)cellsH;
+	const uint maxSide = std::max(outW, outH);
+	if (maxSide > 1024) { outW = outW * 1024 / maxSide; outH = outH * 1024 / maxSide; }
+	if (outW && outH && (outW != full.getWidth() || outH != full.getHeight()))
+		full.resample(outW, outH);
+	out = full;
 	return out.getWidth() > 0;
 }
 
-/** Build optional SI override when WantThumbnail is set; no override means leave SI alone. */
-static bool prepareThumbnailOverride(const std::string &srcMax, std::vector<uint8> &siOut, bool &haveOverride)
+/** Legacy want-decision for the single-file/CLI paths: --thumbnail or the modal checkbox.
+ *  Interactive board saves pass want=true explicitly (M27a: thumbnails always). */
+static bool zpLegacyWantThumbnail()
 {
-	haveOverride = false;
-	siOut.clear();
-	// Interactive modal: honor the "Update thumbnail" checkbox (default on).
 	if (g_PaintCtx.InteractiveSave)
 	{
 		if (ZPUI::SPaintUIBridge *b = ZPUI::getPaintUIBridge())
 			g_PaintCtx.WantThumbnail = b->UpdateThumbnail;
 	}
-	if (!g_PaintCtx.WantThumbnail && !g_CliWantThumbnail)
+	return g_PaintCtx.WantThumbnail || g_CliWantThumbnail;
+}
+
+/** Build optional SI override; no override means leave SI alone.
+ *  zoneIds: the saved FILE's zones — per-file framing (M27a); NULL = legacy primary. */
+static bool prepareThumbnailOverride(const std::string &srcMax, std::vector<uint8> &siOut,
+                                     bool &haveOverride, bool want,
+                                     const std::vector<uint> *zoneIds = NULL)
+{
+	haveOverride = false;
+	siOut.clear();
+	if (!want)
 		return true; // not requested — OK, no override
 
 	NLMISC::CBitmap bmp;
-	if (captureTopDownThumbnail(bmp))
+	if (captureTopDownThumbnail(bmp, zoneIds))
 	{
-		// COPY into the stash (a swap here would hand the STALE stash — empty on the first
-		// interactive save — to the SI build below, embedding a blank/one-behind thumbnail).
-		g_CapturedThumb = bmp;
-		g_HaveCapturedThumb = true;
+		if (!zoneIds)
+		{
+			// Legacy stash (screenshot-mode pre-capture pairing); COPY, not swap — a swap
+			// would hand the STALE stash to the SI build below.
+			g_CapturedThumb = bmp;
+			g_HaveCapturedThumb = true;
+		}
 	}
-	else if (g_HaveCapturedThumb)
+	else if (!zoneIds && g_HaveCapturedThumb)
 	{
 		bmp = g_CapturedThumb;
 	}
@@ -5204,7 +5268,8 @@ static bool prepareThumbnailOverride(const std::string &srcMax, std::vector<uint
 		return true;
 	}
 	haveOverride = true;
-	printf("OK thumbnail: %ux%u -> SummaryInformation\n", bmp.getWidth(), bmp.getHeight());
+	printf("OK thumbnail: %ux%u -> SummaryInformation (%s)\n", bmp.getWidth(), bmp.getHeight(),
+	       NLMISC::CFile::getFilenameWithoutExtension(srcMax).c_str());
 	return true;
 }
 
@@ -5231,7 +5296,8 @@ static uint countDirtyEditableFiles()
  * Atomic overwrite of one path: temp → optional one-time .bak → rename.
  * Caller has already writeBack'd. Uses `src` for non-Scene OLE streams and `scene` for Scene.
  */
-static bool saveOneOverwrite(const std::string &orig, PIPELINE::MAX::CScene &scene, bool doThumb)
+static bool saveOneOverwrite(const std::string &orig, PIPELINE::MAX::CScene &scene, bool doThumb,
+                             const std::vector<uint> *zoneIds = NULL)
 {
 	if (orig.empty() || !NLMISC::CFile::fileExists(orig))
 	{
@@ -5247,8 +5313,7 @@ static bool saveOneOverwrite(const std::string &orig, PIPELINE::MAX::CScene &sce
 
 	std::vector<uint8> siOverride;
 	bool haveSi = false;
-	if (doThumb)
-		prepareThumbnailOverride(orig, siOverride, haveSi);
+	prepareThumbnailOverride(orig, siOverride, haveSi, doThumb, zoneIds);
 	int saveRc = saveWholeFile(orig, tempPath, scene, false, haveSi ? &siOverride : NULL);
 	if (saveRc != 0 || !NLMISC::CFile::fileExists(tempPath))
 	{
@@ -5354,7 +5419,11 @@ static bool zpSaveTo(const std::string &target)
 	PIPELINE::MAX::CScene *scene = srcFile ? editableScene(*srcFile) : g_PaintCtx.Scene;
 	std::vector<uint8> siOverride;
 	bool haveSi = false;
-	prepareThumbnailOverride(srcForStreams, siOverride, haveSi);
+	// Per-file framing only matters with multiple editables; the single-file/legacy path
+	// passes NULL so the screenshot-mode pre-capture stash can stand in when the viewer
+	// is already gone (headless --screenshot + --save pairing).
+	prepareThumbnailOverride(srcForStreams, siOverride, haveSi, zpLegacyWantThumbnail(),
+	                         (srcFile && g_EditableFiles.size() > 1) ? &srcFile->ZoneIds : NULL);
 	int saveRc = saveWholeFile(srcForStreams, target, *scene, false,
 	                           haveSi ? &siOverride : NULL);
 	if (saveRc != 0)
@@ -5393,6 +5462,9 @@ static bool zpSaveOverwrite()
 	// M16b: board-session overwrite stamps neighbor-hints appdata
 	writeNeighborHintsIfBoardSession();
 
+	// M27a: interactive saves always refresh thumbnails; headless/CLI keeps the opt-in.
+	const bool wantThumb = g_PaintCtx.InteractiveSave ? true : zpLegacyWantThumbnail();
+
 	// Single-file legacy path when g_EditableFiles empty/one and only InputPath known
 	if (g_EditableFiles.size() <= 1)
 	{
@@ -5400,7 +5472,9 @@ static bool zpSaveOverwrite()
 		                                                  : g_EditableFiles[0].Path;
 		PIPELINE::MAX::CScene *scene = g_EditableFiles.empty() ? g_PaintCtx.Scene
 		                                                       : editableScene(g_EditableFiles[0]);
-		if (!saveOneOverwrite(orig, *scene, /*doThumb=*/true))
+		// NULL ids: single-file framing == whole unfrozen set, and the NULL path keeps
+		// the pre-capture stash fallback for headless save flows.
+		if (!saveOneOverwrite(orig, *scene, wantThumb, NULL))
 		{
 			g_LastSaveStatus = "overwrite failed -> " + orig;
 			return false;
@@ -5429,8 +5503,9 @@ static bool zpSaveOverwrite()
 			continue;
 		}
 		PIPELINE::MAX::CScene *scene = editableScene(efi);
-		// Thumbnail only for the primary file (first)
-		if (!saveOneOverwrite(efi.Path, *scene, /*doThumb=*/(i == 0)))
+		// M27a: EVERY saved file gets its own per-zone thumbnail (was primary-only —
+		// non-primary bricks edited on the board kept stale embedded thumbs forever).
+		if (!saveOneOverwrite(efi.Path, *scene, wantThumb, &efi.ZoneIds))
 		{
 			g_LastSaveStatus = "overwrite failed -> " + efi.Path;
 			return false;
@@ -5723,7 +5798,9 @@ static bool sessionSaveOneFile(SEditableFileInfo &efi, std::string &err)
 		err = "no scene";
 		return false;
 	}
-	if (!saveOneOverwrite(efi.Path, *scene, /*doThumb=*/false))
+	// M27a: per-cell board saves refresh the file's own thumbnail too (offscreen RT,
+	// zero cost to the visible frame).
+	if (!saveOneOverwrite(efi.Path, *scene, /*doThumb=*/true, &efi.ZoneIds))
 	{
 		err = "overwrite failed";
 		return false;
