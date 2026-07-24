@@ -305,23 +305,14 @@ void computeZoneEligibility(const std::vector<SZoneNode> &nodes,
 		bool idOk = false;
 		if (parts.size() >= 2 && parts[1].size() >= 2)
 		{
-			char l1 = parts[1][0], l2 = parts[1][1];
+			// findID accepts either case for the two-letter suffix.
+			char l1 = (char)toupper((unsigned char)parts[1][0]);
+			char l2 = (char)toupper((unsigned char)parts[1][1]);
 			if (l1 >= 'A' && l1 <= 'Z' && l2 >= 'A' && l2 <= 'Z')
 			{
 				int num = 0;
 				if (sscanf(parts[0].c_str(), "%d", &num) == 1)
 					idOk = true;
-			}
-			// also accept lowercase letters
-			if (!idOk && parts[1].size() >= 2)
-			{
-				char l1 = (char)toupper(parts[1][0]), l2 = (char)toupper(parts[1][1]);
-				if (l1 >= 'A' && l1 <= 'Z' && l2 >= 'A' && l2 <= 'Z')
-				{
-					int num = 0;
-					if (sscanf(parts[0].c_str(), "%d", &num) == 1)
-						idOk = true;
-				}
 			}
 		}
 		if (idOk)

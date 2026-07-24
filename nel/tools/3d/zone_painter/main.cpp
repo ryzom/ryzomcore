@@ -1550,6 +1550,12 @@ args.addArg("", "instances", "NxM",
 		fprintf(stderr, "ERROR: --null-edit refuses to save in place; give --out <output.max>\n");
 		return 1;
 	}
+	if (nullEdit && args.haveLongArg("out")
+	    && absFilePath(args.getLongArg("out")[0]) == input)
+	{
+		fprintf(stderr, "ERROR: --null-edit refuses to save in place (--out equals input)\n");
+		return 1;
+	}
 	if (!savePath.empty() && absFilePath(savePath) == input)
 	{
 		fprintf(stderr, "ERROR: --save refuses to save in place\n");
@@ -1789,12 +1795,6 @@ args.addArg("", "instances", "NxM",
 		for (size_t oi = 0; oi < g_OpenEditableSpecs.size(); ++oi)
 		{
 			const SOpenEditableSpec &oe = g_OpenEditableSpecs[oi];
-			if (g_EditableFiles.size() >= 10)
-			{
-				fprintf(stderr, "ERROR: --open-editable: board editable limit reached "
-				                "(10 files; zone-id space)\n");
-				return 1;
-			}
 			ZPWS::SZoneEntry ze;
 			if (!resolveHintToZone(g_StartupWorld, oe.Basename, ze))
 			{
@@ -1813,8 +1813,16 @@ args.addArg("", "instances", "NxM",
 					        dup->Path.c_str());
 					return 1;
 				}
+				// Dup opens become shared-paint instances - no new file slot consumed,
+				// so the 10-file cap does not apply here.
 				placeDupInstanceNear(ze.Basename, oe.Cx, oe.Cy);
 				continue;
+			}
+			if (g_EditableFiles.size() >= 10)
+			{
+				fprintf(stderr, "ERROR: --open-editable: board editable limit reached "
+				                "(10 files; zone-id space)\n");
+				return 1;
 			}
 			PMAXLOAD::SLoadedMax *extra = new PMAXLOAD::SLoadedMax();
 			if (!PMAXLOAD::loadMaxFile(ze.MaxPath, *extra))
@@ -2097,6 +2105,16 @@ args.addArg("", "instances", "NxM",
 	// Stored-flag defaults (RPO_INCLUDE_MESHES 0x4003 / RPO_PRELOAD_TILES 0x4010 from the
 	// first paint-bearing painter modifier); explicit CLI flags override either way.
 	if (args.haveLongArg("db")) DBPATH::setDefaultRoot(args.getLongArg("db")[0]);
+	if (args.haveLongArg("preload-tiles") && args.haveLongArg("no-preload-tiles"))
+	{
+		fprintf(stderr, "ERROR: --preload-tiles and --no-preload-tiles are mutually exclusive\n");
+		return 1;
+	}
+	if (args.haveLongArg("include-meshes") && args.haveLongArg("no-include-meshes"))
+	{
+		fprintf(stderr, "ERROR: --include-meshes and --no-include-meshes are mutually exclusive\n");
+		return 1;
+	}
 	g_PreloadTiles = core.storedPreloadTiles() == 1;
 	if (args.haveLongArg("preload-tiles")) g_PreloadTiles = true;
 	if (args.haveLongArg("no-preload-tiles")) g_PreloadTiles = false;

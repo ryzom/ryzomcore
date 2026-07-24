@@ -399,7 +399,24 @@ bool sessionCloseZoneImpl(const std::string &basename, bool saveFirst, bool forc
 			g_PaintCtx.InputPath = closedCopy.Path;
 		}
 		g_Places = placesCopy; // the failed rebuild already pruned this file's instances
-		if (addedCloseSpec) g_PlaceContextSpecs.pop_back();
+		// rebuildWorkingSet erases failed place-context specs mid-flight, so a plain
+		// pop_back() would drop whatever survived at the tail rather than our close-spec.
+		// Erase by content (basename+cell match, first hit).
+		if (addedCloseSpec)
+		{
+			const std::string lowClose = NLMISC::toLowerAscii(closedCopy.Basename);
+			for (size_t si = 0; si < g_PlaceContextSpecs.size(); ++si)
+			{
+				const SPlaceContextSpec &s = g_PlaceContextSpecs[si];
+				if (s.Dx == closedCopy.CellX && s.Dy == closedCopy.CellY
+				    && NLMISC::toLowerAscii(s.Basename) == lowClose)
+				{
+					g_PlaceContextSpecs.erase(g_PlaceContextSpecs.begin()
+					                          + (std::ptrdiff_t)si);
+					break;
+				}
+			}
+		}
 		std::string err2;
 		uint w2 = 0;
 		rebuildWorkingSet(err2, w2);

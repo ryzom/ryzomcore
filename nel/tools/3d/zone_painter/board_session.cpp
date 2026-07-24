@@ -654,8 +654,8 @@ bool rebuildWorkingSet(std::string &err, uint &outWelds)
 	for (size_t i = 0; i < g_PaintCtx.Zones->size(); ++i)
 		oldIds.push_back((*g_PaintCtx.Zones)[i].ZoneId);
 
-	// Drop neighbor/context scenes (will re-load via hint chain); keep editable scenes
-	clearContextFiles();
+	// Neighbor/context scenes are cleared as loadNeighborContextFiles's first act
+	// below, so no separate clear here (it would be a no-op).
 
 	// Rebuild zones vector
 	std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
@@ -1859,13 +1859,6 @@ bool scratchOpenEditable(int cx, int cy, const std::string &basenameIn, std::str
 }
 bool scratchOpenEditableImpl(int cx, int cy, const std::string &basenameIn, std::string &err)
 {
-	// Per-file zone-id base is index*1000 and instance clone ids start at
-	// kInstanceZoneIdBase (10000): file index 10 would alias the instance id space.
-	if (g_EditableFiles.size() >= 10)
-	{
-		err = "board editable limit reached (10 files; zone-id space)";
-		return false;
-	}
 	size_t idx = 0;
 	if (scratchFindPlace(cx, cy, idx)) { err = "cell has an instance"; return false; }
 	if (scratchFindContext(cx, cy, idx)) { err = "cell has context (remove it first)"; return false; }
@@ -1899,10 +1892,20 @@ bool scratchOpenEditableImpl(int cx, int cy, const std::string &basenameIn, std:
 			return false;
 		}
 		// the file is one on disk - opening it again is an INSTANCE placement
-		// (shared paint backing), never a second independent load.
+		// (shared paint backing), never a second independent load. No new file slot
+		// consumed, so the 10-file cap does not apply here.
 		printf("'%s' already open - placing a shared-paint instance @ (%d,%d)\n",
 		       ze.Basename.c_str(), cx, cy);
 		return scratchPlaceInstanceOf(cx, cy, ze.Basename, err);
+	}
+	// Per-file zone-id base is index*1000 and instance clone ids start at
+	// kInstanceZoneIdBase (10000): file index 10 would alias the instance id space.
+	// Checked AFTER dup detection so a re-open of an already-loaded file (which
+	// becomes a shared-paint instance) does not spuriously trip the cap.
+	if (g_EditableFiles.size() >= 10)
+	{
+		err = "board editable limit reached (10 files; zone-id space)";
+		return false;
 	}
 	PMAXLOAD::SLoadedMax *extra = new PMAXLOAD::SLoadedMax();
 	if (!PMAXLOAD::loadMaxFile(ze.MaxPath, *extra))

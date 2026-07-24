@@ -1271,7 +1271,6 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 				// this can stay after the GUI draw as it always was.
 				if (core && paintListener.Mode == CPaintMouseListener::ModeProp)
 				{
-					NLMISC::TTime t0 = NLMISC::CTime::getLocalTime();
 					if (g_HavePropSelection)
 					{
 						const SPaintZone *sel = zpFindPaintZone(g_SelectedZoneId);
@@ -1285,9 +1284,6 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 						if (hov)
 							zpDrawZoneOutline(driver, camera, viewport, *hov, NLMISC::CRGBA(255, 255, 0), false);
 					}
-					const NLMISC::TTime dt = NLMISC::CTime::getLocalTime() - t0;
-					printf("prop-outline: boundary-edge draw ~%u ms (hover+sel) on current working set\n",
-					       (uint)dt);
 				}
 				if (core && hudText)
 				{

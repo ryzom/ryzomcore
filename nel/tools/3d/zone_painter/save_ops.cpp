@@ -244,7 +244,10 @@ int saveWholeFile(const std::string &input, const std::string &output, CScene &s
 	}
 
 	// Rebuild the Scene stream from the typed graph and write the whole file.
-	std::string tempPath = NLMISC::toString("/tmp/zone_painter.%d.tmp", (int)ZP_GETPID());
+	// Temp path lives under the platform temp dir - CPath::getTemporaryDirectory
+	// returns a trailing-slash form on both POSIX and Windows.
+	std::string tempPath = NLMISC::CPath::getTemporaryDirectory()
+	                       + NLMISC::toString("zone_painter.%d.tmp", (int)ZP_GETPID());
 	std::vector<uint8> newScene;
 	try
 	{
