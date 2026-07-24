@@ -63,7 +63,10 @@ void CEmscriptenEventEmitter::init(const char *canvasSelector)
 
 	// Suppress the context menu so right-click reaches the application,
 	// disable browser touch gestures on the canvas, and capture the pointer
-	// during drags so mouseup outside the canvas is still delivered.
+	// during drags so mouseup outside the canvas is still delivered. Also
+	// install a document-level paste listener that buffers pasted text for
+	// the submitEvents drain (see below) so Ctrl+V/right-click-Paste land
+	// as CEventString events without needing an async clipboard read.
 	EM_ASM({
 		var el = document.querySelector(UTF8ToString($0));
 		if (el)
@@ -72,6 +75,16 @@ void CEmscriptenEventEmitter::init(const char *canvasSelector)
 			el.addEventListener('contextmenu', function(ev) { ev.preventDefault(); });
 			el.addEventListener('pointerdown', function(ev) {
 				try { el.setPointerCapture(ev.pointerId); } catch (e) { }
+			});
+		}
+		if (!window._nlPasteQueue)
+		{
+			window._nlPasteQueue = [];
+			document.addEventListener('paste', function(ev) {
+				var cd = ev.clipboardData || window.clipboardData;
+				if (!cd) return;
+				var s = cd.getData('text/plain') || cd.getData('text');
+				if (s) window._nlPasteQueue.push(s);
 			});
 		}
 	}, canvas);
@@ -110,6 +123,28 @@ void CEmscriptenEventEmitter::release()
 
 void CEmscriptenEventEmitter::submitEvents(CEventServer &server, bool /* allWindows */)
 {
+	// Drain any pasted text buffered by the document-level paste listener
+	// installed in init(). Each entry becomes a CEventString the same way
+	// XSelectionNotify feeds one on X11, so CGroupEditBox's existing
+	// handleEventString path inserts the text at the cursor.
+	while (true)
+	{
+		char *pasteText = (char *)EM_ASM_PTR({
+			if (window._nlPasteQueue && window._nlPasteQueue.length)
+			{
+				var s = window._nlPasteQueue.shift();
+				var len = lengthBytesUTF8(s) + 1;
+				var ptr = _malloc(len);
+				stringToUTF8(s, ptr, len);
+				return ptr;
+			}
+			return 0;
+		});
+		if (!pasteText) break;
+		server.postEvent(new CEventString(pasteText, this));
+		free(pasteText);
+	}
+
 	// The HTML5 callbacks fire between frames on the same thread; hand the
 	// buffered events over to the server (which takes ownership).
 	for (uint i = 0; i < _Events.size(); ++i)
