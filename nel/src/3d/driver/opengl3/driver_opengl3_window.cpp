@@ -2607,6 +2607,19 @@ void CDriverGL3::getWindowSize(uint32 &width, uint32 &height)
 			return;
 		}
 #endif
+#ifdef __EMSCRIPTEN__
+		// The canvas backing store is the authoritative size; the resize
+		// callback in CEmscriptenEventEmitter keeps it in sync with the
+		// browser viewport (CSS × devicePixelRatio). Sync _CurrentMode so
+		// other code paths that read it stay coherent.
+		int cw = 0, ch = 0;
+		emscripten_get_canvas_element_size(NL_EMSCRIPTEN_CANVAS, &cw, &ch);
+		if (cw > 0 && ch > 0)
+		{
+			_CurrentMode.Width = (uint16)cw;
+			_CurrentMode.Height = (uint16)ch;
+		}
+#endif
 		width = _CurrentMode.Width;
 		height = _CurrentMode.Height;
 	}

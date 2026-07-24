@@ -61,7 +61,9 @@ private:
 	static EM_BOOL keyCallback(int eventType, const EmscriptenKeyboardEvent *e, void *userData);
 	static EM_BOOL touchCallback(int eventType, const EmscriptenTouchEvent *e, void *userData);
 	static EM_BOOL focusCallback(int eventType, const EmscriptenFocusEvent *e, void *userData);
+	static EM_BOOL resizeCallback(int eventType, const EmscriptenUiEvent *e, void *userData);
 
+	void syncCanvasBackingSize();
 	void postEvent(CEvent *e);
 	bool normalizePos(long targetX, long targetY, float &fX, float &fY);
 

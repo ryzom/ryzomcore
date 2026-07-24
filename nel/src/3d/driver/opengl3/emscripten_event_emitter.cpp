@@ -60,6 +60,11 @@ void CEmscriptenEventEmitter::init(const char *canvasSelector)
 	emscripten_set_keyup_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, this, 0, keyCallback);
 	emscripten_set_focus_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, this, 0, focusCallback);
 	emscripten_set_blur_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, this, 0, focusCallback);
+	emscripten_set_resize_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, this, 0, resizeCallback);
+	// Initial sync so the backing store matches the current viewport before
+	// the first frame draws. Applies only when the canvas is styled to fill
+	// (CSS width/height); fixed-size canvases keep whatever they declared.
+	syncCanvasBackingSize();
 
 	// Suppress the context menu so right-click reaches the application,
 	// disable browser touch gestures on the canvas, and capture the pointer
@@ -110,6 +115,7 @@ void CEmscriptenEventEmitter::release()
 		emscripten_set_keyup_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, NULL, 0, NULL);
 		emscripten_set_focus_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, NULL, 0, NULL);
 		emscripten_set_blur_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, NULL, 0, NULL);
+		emscripten_set_resize_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, NULL, 0, NULL);
 		_Registered = false;
 	}
 
@@ -390,6 +396,35 @@ EM_BOOL CEmscriptenEventEmitter::focusCallback(int eventType, const EmscriptenFo
 	}
 
 	return EM_FALSE;
+}
+
+EM_BOOL CEmscriptenEventEmitter::resizeCallback(int /* eventType */, const EmscriptenUiEvent * /* e */, void *userData)
+{
+	CEmscriptenEventEmitter *emitter = (CEmscriptenEventEmitter *)userData;
+	emitter->syncCanvasBackingSize();
+	return EM_FALSE;
+}
+
+void CEmscriptenEventEmitter::syncCanvasBackingSize()
+{
+	// Match the canvas backing store to its CSS size × devicePixelRatio so
+	// the WebGL viewport renders at native resolution. When the canvas has
+	// an explicit CSS size (fixed-size sample), CSS size wins; when it's
+	// styled to fill (100vw/100vh), we track the viewport.
+	double cssW = 0.0, cssH = 0.0;
+	if (emscripten_get_element_css_size(_CanvasSelector.c_str(), &cssW, &cssH) != EMSCRIPTEN_RESULT_SUCCESS)
+		return;
+	if (cssW <= 0.0 || cssH <= 0.0)
+		return;
+	double dpr = emscripten_get_device_pixel_ratio();
+	if (dpr <= 0.0)
+		dpr = 1.0;
+	int bw = (int)(cssW * dpr + 0.5);
+	int bh = (int)(cssH * dpr + 0.5);
+	int cw = 0, ch = 0;
+	emscripten_get_canvas_element_size(_CanvasSelector.c_str(), &cw, &ch);
+	if (cw != bw || ch != bh)
+		emscripten_set_canvas_element_size(_CanvasSelector.c_str(), bw, bh);
 }
 
 } // NLMISC
