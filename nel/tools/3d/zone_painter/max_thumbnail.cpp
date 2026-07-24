@@ -628,8 +628,8 @@ bool ensureTilesetPreview(const std::string &bankPath, int setIndex,
 		return true;
 	}
 
-	// Load source (png/tga/dds; CBitmap handles all three). Never used as an image-view
-	// source for the agent; only written as a small cache TGA for NLGUI.
+	// Load source (png/tga/dds; CBitmap handles all three); written back as a small cache
+	// TGA that NLGUI can load without knowing the source format.
 	CBitmap bmp;
 	try
 	{
@@ -702,7 +702,7 @@ bool ensureDisplacePreview(const std::string &bankPath, int mapIndex,
 		return true;
 	}
 
-	// Load noise map (typically 32x32 grayscale). Never viewed by the agent as an image.
+	// Load noise map (typically 32x32 grayscale).
 	CBitmap bmp;
 	try
 	{
