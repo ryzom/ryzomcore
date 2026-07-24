@@ -52,23 +52,30 @@ SET(ZONE_PAINTER_EXTRA_TEXTURES
 	"${NL_GRAPHICS_DIR}/interfaces/v3_fullscreen/color_palette.png")
 SET(ZONE_PAINTER_EXTRAS_DIR "${CMAKE_CURRENT_BINARY_DIR}/extra_textures")
 
-ADD_CUSTOM_COMMAND(
-	OUTPUT "${ZONE_PAINTER_ASSETS_DIR}/zone_painter_atlas.png" "${ZONE_PAINTER_ASSETS_DIR}/zone_painter_atlas.txt"
-	       "${ZONE_PAINTER_ASSETS_DIR}/color_palette.png"
-	COMMAND ${CMAKE_COMMAND} -E make_directory "${ZONE_PAINTER_ASSETS_DIR}"
-	COMMAND ${CMAKE_COMMAND} -E make_directory "${ZONE_PAINTER_EXTRAS_DIR}"
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${ZONE_PAINTER_EXTRA_TEXTURES} "${ZONE_PAINTER_EXTRAS_DIR}"
-	# loose file for pixel access (CCtrlColPick / getTextureColor)
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${ZONE_PAINTER_EXTRA_TEXTURES} "${ZONE_PAINTER_ASSETS_DIR}"
-	COMMAND ${NL_BUILD_INTERFACE_TOOL} -k -f png "${ZONE_PAINTER_ASSETS_DIR}/zone_painter_atlas.png" "${NL_GRAPHICS_DIR}/interfaces/v3" "${ZONE_PAINTER_EXTRAS_DIR}"
-	DEPENDS ${NL_BUILD_INTERFACE_TOOL} ${ZONE_PAINTER_EXTRA_TEXTURES}
-	COMMENT "Packing zone_painter interface atlas from ${NL_GRAPHICS_DIR}/interfaces/v3 (+ color_palette)")
+# Only wire the atlas pack when the graphics tree is actually present. CI
+# configurations that don't stage ryzomcore_graphics still build the binary;
+# the atlas is only needed to actually launch the editor with a UI.
+IF(EXISTS "${NL_GRAPHICS_DIR}/interfaces/v3_fullscreen/color_palette.png")
+	ADD_CUSTOM_COMMAND(
+		OUTPUT "${ZONE_PAINTER_ASSETS_DIR}/zone_painter_atlas.png" "${ZONE_PAINTER_ASSETS_DIR}/zone_painter_atlas.txt"
+		       "${ZONE_PAINTER_ASSETS_DIR}/color_palette.png"
+		COMMAND ${CMAKE_COMMAND} -E make_directory "${ZONE_PAINTER_ASSETS_DIR}"
+		COMMAND ${CMAKE_COMMAND} -E make_directory "${ZONE_PAINTER_EXTRAS_DIR}"
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different ${ZONE_PAINTER_EXTRA_TEXTURES} "${ZONE_PAINTER_EXTRAS_DIR}"
+		# loose file for pixel access (CCtrlColPick / getTextureColor)
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different ${ZONE_PAINTER_EXTRA_TEXTURES} "${ZONE_PAINTER_ASSETS_DIR}"
+		COMMAND ${NL_BUILD_INTERFACE_TOOL} -k -f png "${ZONE_PAINTER_ASSETS_DIR}/zone_painter_atlas.png" "${NL_GRAPHICS_DIR}/interfaces/v3" "${ZONE_PAINTER_EXTRAS_DIR}"
+		DEPENDS ${NL_BUILD_INTERFACE_TOOL} ${ZONE_PAINTER_EXTRA_TEXTURES}
+		COMMENT "Packing zone_painter interface atlas from ${NL_GRAPHICS_DIR}/interfaces/v3 (+ color_palette)")
 
-ADD_CUSTOM_TARGET(zone_painter_assets DEPENDS
-	"${ZONE_PAINTER_ASSETS_DIR}/zone_painter_atlas.png"
-	"${ZONE_PAINTER_ASSETS_DIR}/zone_painter_atlas.txt"
-	"${ZONE_PAINTER_ASSETS_DIR}/color_palette.png")
-ADD_DEPENDENCIES(zone_painter zone_painter_assets)
+	ADD_CUSTOM_TARGET(zone_painter_assets DEPENDS
+		"${ZONE_PAINTER_ASSETS_DIR}/zone_painter_atlas.png"
+		"${ZONE_PAINTER_ASSETS_DIR}/zone_painter_atlas.txt"
+		"${ZONE_PAINTER_ASSETS_DIR}/color_palette.png")
+	ADD_DEPENDENCIES(zone_painter zone_painter_assets)
+ELSE()
+	MESSAGE(STATUS "zone_painter: NL_GRAPHICS_DIR (${NL_GRAPHICS_DIR}) not present; skipping atlas pack. The binary will build but has no UI textures at runtime.")
+ENDIF()
 
 TARGET_COMPILE_DEFINITIONS(zone_painter PRIVATE
 	"ZONE_PAINTER_UI_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/ui\""

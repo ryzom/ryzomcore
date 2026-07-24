@@ -33,21 +33,28 @@ SET(GUI_SAMPLE_EXTRA_TEXTURES
   "${NL_GRAPHICS_DIR}/interfaces/v3_fullscreen/color_palette.png")
 SET(GUI_SAMPLE_EXTRAS_DIR "${CMAKE_CURRENT_BINARY_DIR}/extra_textures")
 
-ADD_CUSTOM_COMMAND(
-  OUTPUT "${GUI_SAMPLE_ASSETS_DIR}/gui_sample_atlas.png" "${GUI_SAMPLE_ASSETS_DIR}/gui_sample_atlas.txt"
-  COMMAND ${CMAKE_COMMAND} -E make_directory "${GUI_SAMPLE_ASSETS_DIR}"
-  COMMAND ${CMAKE_COMMAND} -E make_directory "${GUI_SAMPLE_EXTRAS_DIR}"
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different ${GUI_SAMPLE_EXTRA_TEXTURES} "${GUI_SAMPLE_EXTRAS_DIR}"
-  # the color picker reads its palette as a loose file (it needs pixel access)
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different ${GUI_SAMPLE_EXTRA_TEXTURES} "${GUI_SAMPLE_ASSETS_DIR}"
-  COMMAND ${NL_BUILD_INTERFACE_TOOL} -k -f png "${GUI_SAMPLE_ASSETS_DIR}/gui_sample_atlas.png" "${NL_GRAPHICS_DIR}/interfaces/v3" "${GUI_SAMPLE_EXTRAS_DIR}"
-  DEPENDS ${NL_BUILD_INTERFACE_TOOL}
-  COMMENT "Packing GUI sample interface atlas from ${NL_GRAPHICS_DIR}/interfaces/v3 (+ staged extras)")
+# Only wire the atlas pack when the graphics tree is actually present.
+# Desktop CI configurations that don't stage ryzomcore_graphics still build
+# the binary; the atlas is only needed to actually launch the sample.
+IF(EXISTS "${NL_GRAPHICS_DIR}/interfaces/v3_fullscreen/color_palette.png")
+  ADD_CUSTOM_COMMAND(
+    OUTPUT "${GUI_SAMPLE_ASSETS_DIR}/gui_sample_atlas.png" "${GUI_SAMPLE_ASSETS_DIR}/gui_sample_atlas.txt"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${GUI_SAMPLE_ASSETS_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${GUI_SAMPLE_EXTRAS_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${GUI_SAMPLE_EXTRA_TEXTURES} "${GUI_SAMPLE_EXTRAS_DIR}"
+    # the color picker reads its palette as a loose file (it needs pixel access)
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${GUI_SAMPLE_EXTRA_TEXTURES} "${GUI_SAMPLE_ASSETS_DIR}"
+    COMMAND ${NL_BUILD_INTERFACE_TOOL} -k -f png "${GUI_SAMPLE_ASSETS_DIR}/gui_sample_atlas.png" "${NL_GRAPHICS_DIR}/interfaces/v3" "${GUI_SAMPLE_EXTRAS_DIR}"
+    DEPENDS ${NL_BUILD_INTERFACE_TOOL}
+    COMMENT "Packing GUI sample interface atlas from ${NL_GRAPHICS_DIR}/interfaces/v3 (+ staged extras)")
 
-ADD_CUSTOM_TARGET(nl_sample_gui_assets DEPENDS
-  "${GUI_SAMPLE_ASSETS_DIR}/gui_sample_atlas.png"
-  "${GUI_SAMPLE_ASSETS_DIR}/gui_sample_atlas.txt")
-ADD_DEPENDENCIES(nl_sample_gui nl_sample_gui_assets)
+  ADD_CUSTOM_TARGET(nl_sample_gui_assets DEPENDS
+    "${GUI_SAMPLE_ASSETS_DIR}/gui_sample_atlas.png"
+    "${GUI_SAMPLE_ASSETS_DIR}/gui_sample_atlas.txt")
+  ADD_DEPENDENCIES(nl_sample_gui nl_sample_gui_assets)
+ELSE()
+  MESSAGE(STATUS "nl_sample_gui: NL_GRAPHICS_DIR (${NL_GRAPHICS_DIR}) not present; skipping atlas pack. The binary will build but has no UI textures at runtime.")
+ENDIF()
 
 IF(EMSCRIPTEN)
   TARGET_COMPILE_DEFINITIONS(nl_sample_gui PRIVATE

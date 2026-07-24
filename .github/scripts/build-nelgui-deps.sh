@@ -99,6 +99,7 @@ if [ ! -f "$PREFIX/lib/libluabind09.a" ]; then
 		-DBUILD_SHARED_LIBS=OFF \
 		-DBoost_INCLUDE_DIR="$PREFIX/../boost-headers" \
 		-DLUA_INCLUDE_DIR="$PREFIX/include" \
+		-DLUA_LIBRARIES="$PREFIX/lib/liblua.a" \
 		-DLUA_LIBRARY="$PREFIX/lib/liblua.a"
 	emmake make -j"$(nproc)" install
 fi
