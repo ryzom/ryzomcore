@@ -41,6 +41,7 @@
 #include <nel/misc/file.h>
 #include <nel/misc/i18n.h>
 #include <nel/misc/path.h>
+#include <nel/misc/time_nl.h>
 
 #include <nel/3d/tile_bank.h>
 #include <nel/3d/u_driver.h>
@@ -2240,6 +2241,17 @@ void CEditorUI::update()
 		return;
 	syncPanelFromBridge();
 	CWidgetManager *wm = CWidgetManager::getInstance();
+	// NLGUI does not write its own frame clock; without this, frameDiffMs
+	// stays 0 and every time-driven behavior (caret blink, rollover fades,
+	// interface animations) stalls silently.
+	{
+		CWidgetManager::SInterfaceTimes times = wm->getInterfaceTimes();
+		sint64 nowMs = (sint64)NLMISC::CTime::getLocalTime();
+		times.lastFrameMs = times.thisFrameMs;
+		times.thisFrameMs = nowMs;
+		times.frameDiffMs = times.lastFrameMs ? (nowMs - times.lastFrameMs) : 0;
+		wm->updateInterfaceTimes(times);
+	}
 	wm->sendClockTickEvent();
 	wm->checkCoords();
 }

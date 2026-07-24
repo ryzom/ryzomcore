@@ -34,6 +34,7 @@
 #include <nel/misc/bitmap.h>
 #include <nel/misc/cmd_args.h>
 #include <nel/misc/common.h>
+#include <nel/misc/time_nl.h>
 #include <nel/misc/debug.h>
 #include <nel/misc/events.h>
 #include <nel/misc/file.h>
@@ -365,6 +366,18 @@ void renderOneFrame()
 	s_Driver->clearBuffers(CRGBA(90, 102, 116));
 
 	CWidgetManager *wm = CWidgetManager::getInstance();
+	// Feed the widget manager's frame clock. Nothing in NLGUI writes these
+	// itself, so any embedder that skips the call leaves frameDiffMs at 0
+	// and every time-driven behavior (edit-box caret blink, rollover fades,
+	// html timeouts, interface animations) silently stalls.
+	{
+		CWidgetManager::SInterfaceTimes times = wm->getInterfaceTimes();
+		sint64 nowMs = (sint64)NLMISC::CTime::getLocalTime();
+		times.lastFrameMs = times.thisFrameMs;
+		times.thisFrameMs = nowMs;
+		times.frameDiffMs = times.lastFrameMs ? (nowMs - times.lastFrameMs) : 0;
+		wm->updateInterfaceTimes(times);
+	}
 	wm->sendClockTickEvent();
 	wm->checkCoords();
 	wm->drawViews(NULL);
