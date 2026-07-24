@@ -114,6 +114,11 @@ namespace ZPPAINT {
 #define ZP_MAX_TILE_IN_PATCH 16
 #define ZP_NUM_TILE_SEL (ZP_MAX_TILE_IN_PATCH * ZP_MAX_TILE_IN_PATCH)
 
+// Paint-core tunables. Namespace-scope const has internal linkage (C++03).
+const int ZP_MAX_UNDO = 64;
+const int ZP_DEPTH_SEARCH_MAX = 10; // CalcRotPath BFS depth cap
+const int ZP_BRUSH_VALUE[3] = { 0, 4, 8 }; // brush size -> tile recursion depth
+
 // ---------------------------------------------------------------------------------------------
 // tileIndex / tileDesc (exact port of the plugin's bit semantics; see the mapping block above).
 

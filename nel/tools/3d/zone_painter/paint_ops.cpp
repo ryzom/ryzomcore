@@ -1,13 +1,13 @@
 /**
  * \file paint_ops.cpp
- * \brief CPaintCore paint algorithms and op-layer (split from paint_core.cpp).
+ * \brief CPaintCore paint algorithms and op-layer. See paint_core.h.
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
  * \author Grok 4.5
  *
- * Second half of the paint core: ClearATile/PutATile transition solver, tile/color/displace
- * op-layer methods, brush mask, undo/redo/prop, checkSeams, preloadTiles, pickTile,
- * writeBack, dirty tracking, dumps, and read-only accessors. See paint_core.h.
+ * ClearATile/PutATile transition solver, tile/color/displace op-layer methods, brush mask,
+ * undo/redo/prop, checkSeams, preloadTiles, pickTile, writeBack, dirty tracking, dumps,
+ * and read-only accessors.
  */
 
 /*
@@ -59,12 +59,6 @@ using namespace PIPELINE::MAX::BUILTIN;
 using namespace PIPELINE::MAX::NELPATCH;
 
 namespace ZPPAINT {
-
-// Shared paint-core constants (defined identically in paint_core.cpp; static const gives
-// internal linkage so both TUs safely carry their own copy).
-static const int ZP_MAX_UNDO = 64;
-static const int ZP_DEPTH_SEARCH_MAX = 10; // plugin DEPTH_SEARCH_MAX (CalcRotPath)
-static const int ZP_BRUSH_VALUE[3] = { 0, 4, 8 }; // plugin brushValue[BRUSH_COUNT] recursion depths
 
 // ---------------------------------------------------------------------------------------------
 // ClearATile / PutATile ports

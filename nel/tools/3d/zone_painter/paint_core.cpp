@@ -81,10 +81,6 @@ enum { ZP_BIND_25 = 0, ZP_BIND_75 = 1, ZP_BIND_50 = 2, ZP_BIND_SINGLE = 3 };
 static const NLMISC::CClassId ZP_CLASSID_NEL_EDIT_PATCH(0x4dd14a3c, 0x4ac23c0c);
 static const NLMISC::CClassId ZP_CLASSID_NEL_PATCH_PAINT(0x0c49560f, 0x3c3d68e7);
 
-static const int ZP_MAX_UNDO = 64;
-static const int ZP_DEPTH_SEARCH_MAX = 10; // plugin DEPTH_SEARCH_MAX (CalcRotPath)
-static const int ZP_BRUSH_VALUE[3] = { 0, 4, 8 }; // plugin brushValue[BRUSH_COUNT] recursion depths
-
 static bool g_WarnedInvalidTileSet = false;
 static void warnInvalidTileSet()
 {
