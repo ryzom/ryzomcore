@@ -1,6 +1,6 @@
 /**
  * \file startup_ui.h
- * \brief NeL-GUI startup screens for zone_painter (world select / zone browser) — ui M2
+ * \brief NeL-GUI startup screens for zone_painter (world select / zone browser)
  * \author Jan Boon (Kaetemi)
  * \author Grok 4.5
  *
@@ -49,7 +49,7 @@ class CEditorUI;
 enum EStartupResult
 {
 	StartupQuit = 0,         ///< ESC / window close
-	StartupOpenZone,         ///< user (or auto) picked a zone — fill selection
+	StartupOpenZone,         ///< user (or auto) picked a zone; fill selection
 	StartupScreenshotDone,   ///< --startup-screenshot wrote a frame
 	StartupError = -1
 };
@@ -58,9 +58,9 @@ struct SStartupSelection
 {
 	ZPWS::SWorldEntry World;
 	ZPWS::SZoneEntry Zone; // first / primary (compat with single-open callers)
-	/** All editable zones for this open (M6b multi-select). Empty means {Zone} only. */
+	/** All editable zones for this open (multi-select). Empty means {Zone} only. */
 	std::vector<ZPWS::SZoneEntry> EditableZones;
-	/** @deprecated M12 — NxN open layout retired; always empty / "1x1". Prefer --place / scratch board. */
+	/** Unused; always empty / "1x1". Prefer --place / scratch board. */
 	std::string InstanceLayout;
 };
 
@@ -73,7 +73,7 @@ struct SStartupSelection
  * screenshotWorld: with screenshotPath, pre-select this world (WorldName or GraphicsRoot
  *   basename) and show Screen B (continent grid / ecosystem list) instead of Screen A.
  *
- * folderBrowserEnabled: when true (M2c+), empty worlds open Screen C; Browse works.
+ * folderBrowserEnabled: when true, empty worlds open Screen C; Browse works.
  */
 EStartupResult runStartupFlow(NL3D::UDriver *driver,
                               CEditorUI *editorUI,
@@ -84,8 +84,8 @@ EStartupResult runStartupFlow(NL3D::UDriver *driver,
                               const std::string &initialBrowsePath = std::string(),
                               const std::string &screenshotWorld = std::string());
 
-/** Same selection path buttons use — for --startup-auto thin wrapper reuse.
- *	Supports multi: "world/zoneA+zoneB" fills EditableZones (M6b).
+/** Same selection path buttons use, for --startup-auto thin wrapper reuse.
+ *	Supports multi: "world/zoneA+zoneB" fills EditableZones.
  *	preferRoot: pass the CLI seed folder so a seed workspace wins over LastGraphicsFolder
  *	when both expose the same WorldName (see ZPWS::selectAutoMulti). */
 bool startupSelectWorldZone(const std::vector<ZPWS::SWorldEntry> &worlds,
@@ -98,7 +98,7 @@ bool startupSelectWorldZone(const std::vector<ZPWS::SWorldEntry> &worlds,
 void startupHideAllScreens();
 void startupShowPainter(bool show);
 
-/** M24d board drag: pointer listener feeds left-button transitions here (eco board only).
+/** Board drag: pointer listener feeds left-button transitions here (eco board only).
  *	Begin arms a drag from the cell under the pointer; end drops onto the cell under the
  *	pointer (copyModifier = Ctrl/Shift held on release). No-ops when the board is hidden. */
 void sessionBoardDragBegin();
@@ -107,9 +107,9 @@ void sessionBoardDragEnd(bool copyModifier);
 void sessionBoardDragCancel();
 
 // ---------------------------------------------------------------------------------------------
-// Session board hub (ui M11a/M12c) — over the live viewer (session intact).
+// Session board hub over the live viewer (session intact).
 // Continent: working-set open/close/save/toggle. Ecosystem: scratch board for brick instances
-// (home + place/rotate/mirror/remove). NxN Screen B layout selector retired (M12).
+// (place/rotate/mirror/remove + open-file cells).
 
 /** Per-cell live state for the session board (Explorer-style fill variants). */
 enum ESessionCellState
@@ -118,11 +118,11 @@ enum ESessionCellState
 	CellOpenEditable,     ///< open as paint target (selection-fill tone)
 	CellOpenReadOnly,     ///< open as frozen context (dimmer tint)
 	CellDirtyEditable,    ///< open-editable with unsaved paint (fill + dirty marker)
-	// Ecosystem scratch (M12c/M16c):
+	// Ecosystem scratch:
 	CellScratchInstance,  ///< placed instance (distinct tint; label carries R90/M glyphs)
 	CellScratchEmpty,     ///< UNLOCKED empty well (edge-adjacent to occupied / hint-named)
-	CellScratchContext,   ///< read-only context brick at cell (M16c; dim RO tint + name)
-	CellScratchLocked     ///< M24d: locked cell — dim, no open menu (drag target only)
+	CellScratchContext,   ///< read-only context brick at cell (dim RO tint + name)
+	CellScratchLocked     ///< locked cell: dim, no open menu (drag target only)
 };
 
 /**
@@ -133,8 +133,8 @@ enum ESessionCellState
  *   L-click CLOSED used cell → open editable (+ auto RO ring)
  *   L-click OPEN cell        → action popup: Close / Save / Toggle editable↔RO / Cancel
  *
- * Ecosystem scratch idiom (M12c; M28: every open file — the first-opened included — is
- * an ordinary open-file cell: move/copy/close/save/toggle like any other):
+ * Ecosystem scratch idiom (every open file, including the first-opened, is an ordinary
+ * open-file cell: move/copy/close/save/toggle like any other):
  *   L-click EMPTY cell     → place/open menu (instance, context, editable, hints)
  *   L-click INSTANCE cell  → popup: Rotate CW / CCW / Mirror / Remove
  *   L-click OPEN-FILE cell → popup: Close / Save / Save as… / Toggle editable↔RO
@@ -160,8 +160,8 @@ struct SSessionBoardBridge
 	/** True when basename is open as editable (not RO neighbor). */
 	bool (*isEditable)(const std::string &basename);
 
-	// Ecosystem scratch board (M12c/M14a) — cell basenames:
-	//   "F:ox,oy[:name]" open-file block (M28: includes the first-opened file)
+	// Ecosystem scratch board cell basenames:
+	//   "F:ox,oy[:name]" open-file block (includes the first-opened file)
 	//   "I:ox,oy" instance origin (labels); non-origin block cells share state via lookup
 	//   "E:cx,cy" empty
 	/** Place instance of the FIRST-OPENED file at empty cell (legacy spelling for
@@ -177,14 +177,14 @@ struct SSessionBoardBridge
 	bool (*scratchGetInstance)(int cx, int cy, uint &rot, bool &mirror);
 	/** Resolve any cell in a block to the place origin (ox,oy) + transform. */
 	bool (*scratchGetInstanceOrigin)(int cx, int cy, int &ox, int &oy, uint &rot, bool &mirror);
-	// M16c: read-only context brick placement on the ecosystem scratch board
+	// Read-only context brick placement on the ecosystem scratch board
 	/** Place existing world brick basename as RO context at fine cell (cx,cy). */
 	bool (*scratchPlaceContext)(int cx, int cy, const std::string &basename, std::string &err);
 	/** Remove RO context whose origin is at / covers (cx,cy). */
 	bool (*scratchRemoveContext)(int cx, int cy, std::string &err);
 	/** Query context at cell; fills basename. */
 	bool (*scratchGetContext)(int cx, int cy, std::string &basename);
-	// M24a eco multi-editable: open files placed on the scratch board ("F:ox,oy:name" cells).
+	// Eco multi-editable: open files placed on the scratch board ("F:ox,oy:name" cells).
 	// close/save/toggle for these ride the continent per-file callbacks above (basename-addressed).
 	/** Open world brick as EDITABLE with footprint origin at (cx,cy); refuses overlap. */
 	bool (*scratchOpenEditable)(int cx, int cy, const std::string &basename, std::string &err);
@@ -192,33 +192,33 @@ struct SSessionBoardBridge
 	bool (*scratchGetEditableAt)(int cx, int cy, int &ox, int &oy, std::string &basename, bool &editable);
 	/** Convert the RO context brick at (cx,cy) into an editable open file (same cell). */
 	bool (*scratchContextToEditable)(int cx, int cy, std::string &err);
-	// M24b: instance ANY open brick (home or open editable) — clones share the source's
+	// Instance ANY open brick (home or open editable); clones share the source's
 	// carriers so painting the source repaints every instance live.
 	bool (*scratchPlaceInstanceOf)(int cx, int cy, const std::string &basename, std::string &err);
 	/** Open-brick count (home + editables); 1 = only home (skip the source picker). */
 	int (*scratchOpenFileCount)();
 	/** Instance source basename at cell (empty = home instance). */
 	bool (*scratchGetInstanceSource)(int cx, int cy, std::string &basename);
-	// M24c hint offers: the saved working set's per-cell suggestions surface in the board
+	// Hint offers: the saved working set's per-cell suggestions surface in the board
 	// menus (empty cell: one-click open of the remembered neighbor) and sort the picker.
 	/** Saved-neighbor hint naming board cell (cx,cy), if any. */
 	bool (*scratchGetHintAt)(int cx, int cy, std::string &basename);
 	/** All hinted basenames for this session (picker priority). */
 	void (*scratchHintNames)(std::vector<std::string> &out);
-	// M24c: context brick transform (rotate/mirror about its footprint-block center;
+	// Context brick transform (rotate/mirror about its footprint-block center;
 	// same convention as instances; persists in the neighbor hints)
 	bool (*scratchRotateContext)(int cx, int cy, int delta, std::string &err);
 	bool (*scratchMirrorContext)(int cx, int cy, std::string &err);
 	bool (*scratchGetContextTransform)(int cx, int cy, uint &rot, bool &mirror);
-	/** M24d: drag move/copy — shift the block whose cell is (fromCx,fromCy) by the drag
+	/** Drag move/copy: shift the block whose cell is (fromCx,fromCy) by the drag
 	 *	delta; copy=true duplicates (Ctrl/Shift-drag; home copies as a home instance). */
 	bool (*scratchDragDrop)(int fromCx, int fromCy, int toCx, int toCy, bool copy, std::string &err);
 	/** First-opened file's footprint size in fine cells (legacy fallback; per-file
-	 *	occupancy rides SEditableFileInfo like every other open file since M28). */
+	 *	occupancy rides SEditableFileInfo like every other open file). */
 	int FootprintCellsW;
 	int FootprintCellsH;
 	/**
-	 * Optional exporter-identical occupancy mask over [0,W)×[0,H) (M17).
+	 * Optional exporter-identical occupancy mask over [0,W)×[0,H).
 	 * NULL / empty → treat every cell in the W×H rect as occupied (legacy AABB).
 	 * Row-major index = x + y * FootprintCellsW; true = claimed.
 	 */

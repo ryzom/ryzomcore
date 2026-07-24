@@ -1,6 +1,6 @@
 /**
  * \file max_thumbnail.cpp
- * \brief OLE SummaryInformation thumbnail R/W for zone_painter (ui M5)
+ * \brief OLE SummaryInformation thumbnail R/W for zone_painter
  * \author Jan Boon (Kaetemi)
  * \author Grok 4.5
  *
@@ -202,7 +202,7 @@ static bool propValueSize(const std::vector<uint8> &stream, size_t absOff, uint3
 		if (!readU32(stream, absOff + 4, cb))
 			return false;
 		if (cb > 0xFFFFFF00)
-			return false; // 8 + cb would wrap uint32 — structurally invalid claim
+			return false; // 8 + cb would wrap uint32; structurally invalid claim
 		// type(4) + cbSize(4) + data(cb). Some Max files truncate the stream a few
 		// bytes short of the claimed cbSize; caller clamps to available section bytes.
 		sizeOut = 8 + cb;
@@ -523,7 +523,7 @@ bool extractThumbnailBitmap(const std::string &maxPath, CBitmap &out)
 	return decodeVtCfThumbnail(prop, out);
 }
 
-/** Write a cache .tga; on ANY failure delete the partial file — COFile creates it on
+/** Write a cache .tga; on ANY failure delete the partial file. COFile creates it on
  *  open, and the caches are keyed by source mtime, so a truncated file left behind
  *  (disk full, kill) would be served forever as a permanently broken preview. */
 static bool writeCacheTGA(const std::string &cache, CBitmap &bmp)
@@ -576,7 +576,7 @@ bool ensureCachedThumbnail(const std::string &maxPath, std::string &outTgaPath)
 }
 
 // ---------------------------------------------------------------------------------------------
-// Tileset palette previews (ui M8)
+// Tileset palette previews
 
 std::string tilesetPreviewCacheDir()
 {
@@ -627,7 +627,7 @@ bool ensureTilesetPreview(const std::string &bankPath, int setIndex,
 		return true;
 	}
 
-	// Load source (png/tga/dds — CBitmap handles all three). Never used as an image-view
+	// Load source (png/tga/dds; CBitmap handles all three). Never used as an image-view
 	// source for the agent; only written as a small cache TGA for NLGUI.
 	CBitmap bmp;
 	try
@@ -656,7 +656,7 @@ bool ensureTilesetPreview(const std::string &bankPath, int setIndex,
 }
 
 // ---------------------------------------------------------------------------------------------
-// Displacement palette previews (ui M9a)
+// Displacement palette previews
 
 std::string displacePreviewCacheDir()
 {
@@ -674,7 +674,7 @@ std::string cachedDisplacePreviewPath(const std::string &bankPath, int mapIndex,
 	while (!abs.empty() && (abs[abs.size() - 1] == '/' || abs[abs.size() - 1] == '\\'))
 		abs.resize(abs.size() - 1);
 	uint32 h = hashPath(abs);
-	// _g2 suffix: M10c — same tone map as _g1, but cache key bumped so writers always
+	// _g2 suffix: same tone map as _g1, but cache key bumped so writers always
 	// re-emit after the CPath-index fix (see rebuildTilesetPalette). Previews are
 	// true 32-bit RGBA (type-2 TGA); bump again if tone-map or pixel layout changes.
 	return displacePreviewCacheDir() + "/"
@@ -738,12 +738,12 @@ bool ensureDisplacePreview(const std::string &bankPath, int mapIndex,
 	}
 	const int range = (int)maxL - (int)minL;
 
-	// Point upsample + min..max stretch + sqrt gamma lift (M10a) so structure is
-	// readable at 64px — raw noise often clusters near black after linear stretch alone.
+	// Point upsample + min..max stretch + sqrt gamma lift so structure is
+	// readable at 64px; raw noise often clusters near black after linear stretch alone.
 	// Written as 32-bit RGBA (type-2 TGA), same path as tileset previews. ImageMagick
 	// may still label equal-channel content "GrayscaleAlpha"; that is content typing,
-	// not an 8-bit luminance container — NLGUI loads these via createTextureFile fine
-	// once CPath can resolve the basename (M10c re-indexes after write).
+	// not an 8-bit luminance container. NLGUI loads these via createTextureFile fine
+	// once CPath can resolve the basename (re-indexes after write).
 	CBitmap out;
 	out.resize(sidePx, sidePx, CBitmap::RGBA);
 	CObjectVector<uint8> &dstPx = out.getPixels();
@@ -784,7 +784,7 @@ bool ensureDisplacePreview(const std::string &bankPath, int mapIndex,
 }
 
 // ---------------------------------------------------------------------------------------------
-// Encode / write helpers (M5c)
+// Encode / write helpers
 
 bool encodeDib24(const CBitmap &bmpIn, std::vector<uint8> &outDib, uint maxDim)
 {
@@ -857,7 +857,7 @@ void wrapDibAsVtCfProperty(const std::vector<uint8> &dib, std::vector<uint8> &ou
 	// VT_CF + cbSize + ulClipFmt(-1) + CF_DIB + dib
 	// cbSize is written SPEC-EXACT ([MS-OLEPS] CLIPDATA: ulClipFmt + data). Genuine Max
 	// streams claim a few bytes MORE than present (the parse clamp above tolerates it);
-	// whether Max's own reader compensates for its writer's convention is unverified —
+	// whether Max's own reader compensates for its writer's convention is unverified;
 	// if a painter-written thumbnail ever renders truncated in Max's open dialog, match
 	// the observed Max claim (+8) here instead. Spec-exact is what every conformant
 	// reader (Explorer property handlers etc.) expects.
@@ -921,7 +921,7 @@ bool rebuildSummaryInformationWithThumbnail(const std::vector<uint8> &inStream,
 			pe.Value.swap(prop);
 			sec.Props.push_back(pe);
 		}
-		// Ensure code page exists (PID 1) — many Max files have it
+		// Ensure code page exists (PID 1); many Max files have it
 		bool haveCp = false;
 		for (size_t p = 0; p < sec.Props.size(); ++p)
 			if (sec.Props[p].Pid == kPidCodePage)

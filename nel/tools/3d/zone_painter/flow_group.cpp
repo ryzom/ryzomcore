@@ -1,17 +1,17 @@
 /**
  * \file flow_group.cpp
- * \brief zp_flow — auto-wrapping fixed-size tile flow group (ui M29c)
+ * \brief zp_flow: auto-wrapping fixed-size tile flow group
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
  *
  * The Ryzom client inventory grid (interface_v3 dbgroup_list_sheet) is the reference
  * mechanism: the column count derives from the group's CURRENT width inside
- * updateCoords, and the EXISTING children reflow into grid slots — no repopulation and
+ * updateCoords, and the EXISTING children reflow into grid slots, with no repopulation and
  * no frame-loop width watch. A window resize invalidates coords and the next layout
  * pass re-wraps naturally. That widget lives in the client, not NLGUI, so this is the
  * minimal standalone equivalent for fixed-size tiles.
  *
- * XML: <group type="zp_flow" tile_w="178" tile_h="106" sizeref="w" w="0" ... /> —
+ * XML: <group type="zp_flow" tile_w="178" tile_h="106" sizeref="w" w="0" ... />
  * children (spawned TL-TL, e.g. via the board-cell spawnUnder idiom) are laid out in
  * add order, left→right then top→bottom; the group sets its own height to the row
  * count so a stacking CGroupList (scroll_text body) flows around it.
@@ -78,7 +78,7 @@ public:
 
 	virtual void updateCoords()
 	{
-		// Columns from the current width (last layout pass's real size when sizeref'd —
+		// Columns from the current width (last layout pass's real size when sizeref'd,
 		// same one-frame convergence as the client's inventory grid), then reflow the
 		// existing children into grid slots and size the group to the row count.
 		sint32 avail = getWReal();

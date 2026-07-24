@@ -1,6 +1,6 @@
 /**
  * \file workspace_discovery.cpp
- * \brief Graphics workspace fingerprint + discovery for zone_painter startup (ui M2)
+ * \brief Graphics workspace fingerprint + discovery for zone_painter startup
  * \author Jan Boon (Kaetemi)
  * \author Grok 4.5
  */
@@ -60,7 +60,7 @@ std::string normalizeDir(const std::string &path)
 	return rstripSlash(abs);
 }
 
-/** Resolve symlinks so a graphics root and its real path do not list twice (M3c nit). */
+/** Resolve symlinks so a graphics root and its real path do not list twice. */
 static std::string canonicalizeDir(const std::string &path)
 {
 	std::string n = normalizeDir(path);
@@ -238,7 +238,7 @@ void fingerprintWorkspace(const std::string &graphicsRoot, std::vector<SWorldEnt
 		w.TextureSearchPath = normalizeDir(tilebankDir);
 		w.BankPath = firstBankInDir(tilebankDir);
 		w.BankOk = !w.BankPath.empty();
-		// Require a bank to list the continent as a workspace (task: bank exists)
+		// Require a bank to list the continent as a workspace
 		if (w.BankOk)
 			out.push_back(w);
 	}
@@ -280,13 +280,9 @@ static void collectFromSeed(const std::string &seed, std::vector<SWorldEntry> &o
 		return;
 	}
 
-	// Otherwise also scan immediate subdirs (folder that groups several workspaces).
-	// Only do this when the seed itself was not already a rich workspace root? Task says:
-	// "if it fingerprints as a workspace, use it; if it contains a .nel subdir, treat as
-	// NeL root and scan; otherwise scan its immediate subdirs."
-	// So when it fingerprints AND has no .nel, we still "use it" (done above). Scanning
-	// subdirs when it already fingerprinted can still find nested layouts; keep it for the
-	// "otherwise" branch only when self was empty.
+	// When the seed is not itself a workspace and has no .nel, scan immediate subdirs
+	// (folder that groups several workspaces). If it already fingerprinted, skip the
+	// subdir scan so nested false positives are not pulled in.
 	if (self.empty())
 		scanChildrenForWorkspaces(S, out);
 }
@@ -364,9 +360,7 @@ static std::string zoneGroupOf(const std::string &basename)
 {
 	if (basename.compare(0, 9, "material-") == 0)
 		return "material";
-	// Stock ecosystems use BOTH spellings (jungle: transition-*; corpus-wide:
-	// zonetransition-*); missing the long forms dumped every real transition/special
-	// brick into "other" and misordered Screen B's sections.
+	// Accept both transition-* and zonetransition-* (stock ecosystems use both).
 	if (basename.compare(0, 11, "transition-") == 0
 	    || basename.compare(0, 15, "zonetransition-") == 0)
 		return "transition";
@@ -482,7 +476,7 @@ bool selectAutoMulti(const std::vector<SWorldEntry> &worlds,
 	std::string wsName = ap.substr(0, slash);
 	std::string zonePart = ap.substr(slash + 1);
 
-	// Split zoneA+zoneB+zoneC (multi-select M6b); single name works too
+	// Split zoneA+zoneB+zoneC (plus-separated multi-select); single name works too
 	std::vector<std::string> zoneNames;
 	{
 		std::string::size_type start = 0;

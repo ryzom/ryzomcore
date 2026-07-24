@@ -1,6 +1,6 @@
 /**
  * \file workspace_discovery.h
- * \brief Graphics workspace fingerprint + discovery for zone_painter startup (ui M2)
+ * \brief Graphics workspace fingerprint + discovery for zone_painter startup
  * \author Jan Boon (Kaetemi)
  * \author Grok 4.5
  *
@@ -82,7 +82,7 @@ struct SStartupCfg
 {
 	std::string LastGraphicsFolder;
 	std::string LastWorld;
-	/** Ecosystem open layout: "1x1" (default) / "2x1" / "1x2" / "2x2" / "3x3" (ui M4b). */
+	/** Ecosystem open layout: "1x1" (default) / "2x1" / "1x2" / "2x2" / "3x3". */
 	std::string LastInstances;
 	/** Zone browser display mode: large-thumbnail grid (true) vs detail-tile list. */
 	bool ZoneBrowserLarge;
@@ -122,15 +122,15 @@ std::string zoneThumbnailPath(const SWorldEntry &world, const std::string &maxBa
  * workspace-name matches WorldName or the GraphicsRoot directory basename.
  * zone-basename is without .max. On failure fills err and returns false.
  *
- * Multi-select (ui M6b): "workspace-name/zoneA+zoneB+zoneC" selects multiple zones
+ * Multi-select: "workspace-name/zoneA+zoneB+zoneC" selects multiple zones
  * (plus-separated). zoneOut is the first; zoneOuts receives all in order. Single-zone
  * paths still fill zoneOuts with one entry when the multi overload is used.
  *
  * preferRoot (optional): when several BankOk worlds share the same WorldName (typical:
  * CLI seed folder + LastGraphicsFolder both contribute lacustre/…), prefer the world
  * whose GraphicsRoot is preferRoot or sits under it. Without this, alphabetical
- * GraphicsRoot order silently picks the remembered graphics tree over a seed workspace
- * that holds the file the user just saved (M16d: session-open never saw neighbor hints).
+ * GraphicsRoot order can pick the remembered tree over the seed workspace that holds
+ * the file the user just saved.
  */
 bool selectAuto(const std::vector<SWorldEntry> &worlds,
                 const std::string &autoPath,
@@ -148,7 +148,7 @@ bool selectAutoMulti(const std::vector<SWorldEntry> &worlds,
 
 /**
  * Union of 8-ring neighbors of every zone in `centers`, excluding any basename already
- * in centers. Continent-only; empty for ecosystems. Used by multi-open assembly (M6b).
+ * in centers. Continent-only; empty for ecosystems. Used by multi-open assembly.
  */
 void listContinentNeighborUnion(const SWorldEntry &world,
                                 const std::vector<SZoneEntry> &centers,
@@ -176,7 +176,7 @@ bool isMaxPath(const std::string &path);
 //   col = (L1-'A')*26 + (L2-'A')  (two uppercase letters, A..Z).
 // Example: 3_AR -> row=3, col=(0)*26+17 = 17.
 //
-// Prefixed forms (ui M7b): any prefix ending in '-' is stripped before the match, so
+// Prefixed forms: any prefix ending in '-' is stripped before the match, so
 // "zonematerial-converted-193_ec" and "193_EC" both parse to row=193, col=EC.
 // Letters are case-insensitive. Neighbor lookup indexes MaxDir by parsed coords so
 // mixed bare/prefixed basenames share one board.

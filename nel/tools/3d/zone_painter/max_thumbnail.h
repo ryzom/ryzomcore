@@ -1,6 +1,6 @@
 /**
  * \file max_thumbnail.h
- * \brief OLE SummaryInformation thumbnail R/W for zone_painter browsers + save (ui M5)
+ * \brief OLE SummaryInformation thumbnail R/W for zone_painter browsers + save
  * \author Jan Boon (Kaetemi)
  * \author Grok 4.5
  *
@@ -66,7 +66,7 @@ bool extractThumbnailBitmap(const std::string &maxPath, NLMISC::CBitmap &out);
 
 /**
  * Extract raw CLIPDATA bytes of PIDSI_THUMBNAIL (after type/cbSize/ulClipFmt header
- * fields as stored — full property value starting at VT). Used by roundtrip tests.
+ * fields as stored; full property value starting at VT). Used by roundtrip tests.
  * Returns false if missing.
  */
 bool extractThumbnailProperty(const std::string &maxPath, std::vector<uint8> &outPropValue);
@@ -132,7 +132,7 @@ bool buildSummaryInformationWithThumbnail(const std::string &maxPath,
 void wrapDibAsVtCfProperty(const std::vector<uint8> &dib, std::vector<uint8> &outPropValue);
 
 // ---------------------------------------------------------------------------------------------
-// Tileset palette previews (ui M8): 64x64 TGA cache under thumbcache/tileset/
+// Tileset palette previews: 64x64 TGA cache under thumbcache/tileset/
 
 /** Absolute tileset-preview cache directory (created on demand). */
 std::string tilesetPreviewCacheDir();
@@ -155,8 +155,8 @@ bool ensureTilesetPreview(const std::string &bankPath, int setIndex,
                           std::string &outTgaPath, uint sidePx = 64);
 
 // ---------------------------------------------------------------------------------------------
-// Displacement palette previews (ui M9a/M10a): 64x64 TGA cache under thumbcache/displace/
-// Point-upsampled from 32x32 noise maps: min..max stretch + sqrt gamma lift (M10a).
+// Displacement palette previews: 64x64 TGA cache under thumbcache/displace/
+// Point-upsampled from 32x32 noise maps: min..max stretch + sqrt gamma lift.
 
 /** Absolute displace-preview cache directory (created on demand). */
 std::string displacePreviewCacheDir();

@@ -1,13 +1,13 @@
 /**
  * \file script_api.h
- * \brief painterscript — MaxScript-like Lua scripting over the paint op layer (ui M23)
+ * \brief painterscript: MaxScript-like Lua scripting over the paint op layer
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
  *
  * Include contract: NLMISC/std only in this header. The .cpp binds the embedded NLGUI
- * Lua state (CLuaManager) — no patch_eval.h, no SCENELIB, no NLGUI widget headers.
+ * Lua state (CLuaManager); no patch_eval.h, no SCENELIB, no NLGUI widget headers.
  *
- * Design (wiki drafts/zone_painter_ui_stories.md "Scripting — painterscript"): a
+ * Design (wiki drafts/zone_painter_ui_stories.md "Scripting - painterscript"): a
  * `painter` Lua namespace whose calls route through the SAME op layer as the keys, UI
  * and --paint-script (host.execOp formats/forwards canonical op lines; state setters
  * ride the SPaintUIBridge handlers when a viewer is live). Scripting is an additional
@@ -64,7 +64,7 @@ struct SZoneInfo
 /**
  * Host callbacks the tool wires before scripts run. Function pointers may be NULL when
  * a capability is absent in the current mode (e.g. screenshot/pump headless, bridge
- * outside the viewer) — the binding returns (nil, "not available") for those.
+ * outside the viewer); the binding returns (nil, "not available") for those.
  */
 struct SScriptHost
 {
@@ -76,9 +76,8 @@ struct SScriptHost
 	bool (*getZoneProp)(uint zoneId, const std::string &which, int &value, std::string &err);
 	/** Write-back + whole-file save to a target path (never in place). */
 	bool (*saveTo)(const std::string &target);
-	/** Save-all path (per-file overwrite + .bak). Installed headless too — every open
-	 *	is a session now, so headless painter.saveAll() writes editables in place
-	 *	(m31-2 relies on this). */
+	/** Save-all path (per-file overwrite + .bak). Installed headless too: every open
+	 *	is a session now, so headless painter.saveAll() writes editables in place. */
 	bool (*saveAll)();
 	/** Capture the current frame to a .tga; NULL headless. */
 	bool (*screenshot)(const std::string &path, std::string &err);
@@ -86,22 +85,21 @@ struct SScriptHost
 	void (*pumpUI)();
 	/** True once the user requested cancel during a pumped script (ESC / Cancel). */
 	bool (*cancelRequested)();
-	/** Clear the host-side cancel latch — called at every script-run start (an ESC cancel
+	/** Clear the host-side cancel latch; called at every script-run start (an ESC cancel
 	 *	must not poison every later pumped script of the session). */
 	void (*resetCancel)();
-	/** Board-session working-set ops (ui M23c); NULL outside board sessions. */
+	/** Board-session working-set ops; NULL outside board sessions. */
 	bool (*openZone)(const std::string &basename, std::string &err);
 	bool (*closeZone)(const std::string &basename, bool saveFirst, bool forceDiscard, std::string &err);
-	/** M31 ecosystem board ops — the scriptable side of the scratch board, closing the
-	 *	close-is-scriptable-but-open-is-not asymmetry. NULL outside board sessions;
-	 *	the main-side wrappers additionally refuse continent sessions. */
+	/** Ecosystem/scratch board ops. NULL outside board sessions; the main-side wrappers
+	 *	additionally refuse continent sessions. */
 	bool (*openZoneAt)(const std::string &basename, int cx, int cy, std::string &err);
 	bool (*placeInstance)(int cx, int cy, const std::string &basename, std::string &err);
 	bool (*removeInstance)(int cx, int cy, std::string &err);
 	bool (*rotateInstance)(int cx, int cy, int delta, std::string &err);
 	bool (*mirrorInstance)(int cx, int cy, std::string &err);
-	/** M33 board-op completion (recorder parity): context specs, promote, cell drag,
-	 *	RO toggle, per-file save — every board mutation the UI offers is scriptable so
+	/** Board-op completion for recorder parity: context specs, promote, cell drag,
+	 *	RO toggle, per-file save. Every board mutation the UI offers is scriptable so
 	 *	recordings that span board changes replay. NULL outside board sessions. */
 	bool (*placeContext)(int cx, int cy, const std::string &basename, std::string &err);
 	bool (*removeContext)(int cx, int cy, std::string &err);
@@ -111,8 +109,8 @@ struct SScriptHost
 	bool (*dragCell)(int fx, int fy, int tx, int ty, bool copy, std::string &err);
 	bool (*toggleZone)(const std::string &basename, bool saveFirst, bool forceDiscard, std::string &err);
 	bool (*saveZone)(const std::string &basename, std::string &err);
-	/** Refresh the bridge's frame-synced snapshot fields NOW — they are filled by the
-	 *	main loop and go stale for the whole run of a script; getters (getMode/getTileSet)
+	/** Refresh the bridge's frame-synced snapshot fields NOW; they are filled by the
+	 *	main loop and go stale for the whole run of a script. Getters (getMode/getTileSet)
 	 *	call this first so painter.setX(); assert(painter.getX()) holds. NULL headless. */
 	void (*refreshBridge)();
 	/** Live viewer bridge for state get/set; NULL headless. */
@@ -143,11 +141,11 @@ bool ensureLua();
 int runFile(const std::string &path);
 /** Run a script string immediately. NEVER call from inside an event dispatch (an action
  *	handler runs inside EventServer::pump, and a script calling painter.pumpUI() would
- *	re-enter the pump — nlassert in debug, iterator UAF in release); use queueRunString
+ *	re-enter the pump: nlassert in debug, iterator UAF in release); use queueRunString
  *	from handlers instead. */
 int runString(const std::string &code);
-/** Defer a script chunk to the next processPendingRun() (the Script window's RUN — it
- *	fires from inside the pump). */
+/** Defer a script chunk to the next processPendingRun() (the Script window's RUN fires
+ *	from inside the pump). */
 void queueRunString(const std::string &code);
 /** Run the queued chunk, if any. Called by the viewer main loop OUTSIDE the pump. */
 void processPendingRun();
@@ -160,10 +158,10 @@ bool isExecuting();
  *	No-op when no script is executing. */
 void requestCancel();
 
-// Recorder (M23b window feeds from this; API available from M23a).
-// setRecording(true) emits a replay-fidelity preamble: painter.seed(N) — also reseeding
-// the LIVE session so both share one RNG stream from that point — plus abs painter.*
-// snapshot lines of the paint-relevant state (change-only recording misses start values).
+// Recorder. setRecording(true) emits a replay-fidelity preamble: painter.seed(N), which
+// also reseeds the LIVE session so both share one RNG stream from that point, plus abs
+// painter.* snapshot lines of the paint-relevant state (change-only recording misses
+// start values).
 void setRecording(bool on);
 bool isRecording();
 /** Append one runnable line if recording and not executing a script. */

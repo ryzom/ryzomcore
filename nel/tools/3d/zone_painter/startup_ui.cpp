@@ -1,6 +1,6 @@
 /**
  * \file startup_ui.cpp
- * \brief NeL-GUI startup screens for zone_painter (world / zone / folder) — ui M2
+ * \brief NeL-GUI startup screens for zone_painter (world / zone / folder)
  * \author Jan Boon (Kaetemi)
  * \author Grok 4.5
  *
@@ -92,13 +92,13 @@ struct SStartupSession
 	std::vector<ZPWS::SZoneEntry> Zones;
 	int SelectedWorld; // index into *Worlds
 	int SelectedZone;  // index into Zones (single open; last L-clicked)
-	/** Pending multi-select (M6b): zone indices into Zones (used cells only). */
+	/** Pending multi-select: zone indices into Zones (used cells only). */
 	std::set<int> PendingSelect;
 	std::string FolderPath;
 	std::string StatusMsg;
-	/** Ecosystem open layout (M4b): "1x1" default; options 2x1/1x2/2x2/3x3. */
+	/** Unused ecosystem open layout field; kept at "1x1". */
 	std::string InstanceLayout;
-	/** M11a: true while zone_browser is the in-session board over the live viewer. */
+	/** True while zone_browser is the in-session board over the live viewer. */
 	bool SessionMode;
 	/** Basename pending close-confirm / cell-action popup. */
 	std::string PendingActionBasename;
@@ -124,7 +124,7 @@ static CViewText *findText(const char *id)
 	return dynamic_cast<CViewText *>(CWidgetManager::getInstance()->getElementFromId(id));
 }
 
-/** A context-menu action line (CGroupMenu's <action> items — text + grayed state,
+/** A context-menu action line (CGroupMenu's <action> items: text + grayed state,
  *  no separate "frozen button" concept; grayed lines are also unclickable). */
 static CViewTextMenu *findMenuLine(const char *id)
 {
@@ -279,7 +279,7 @@ static void populateWorldList()
 }
 
 /**
- * Resolve browser thumbnail texture name for a zone (M5b).
+ * Resolve browser thumbnail texture name for a zone.
  * Priority: embedded .max OLE thumb (cached tga) → zonebitmaps png → none (empty).
  * Adds the cache/png directory to the search path when needed.
  */
@@ -349,14 +349,14 @@ static void setZoneBrowserMode(bool continentBoard)
 	if (CInterfaceElement *el = CWidgetManager::getInstance()->getElementFromId(
 	        "ui:zp:zone_browser:content:board_host"))
 		el->setActive(continentBoard);
-	// Multi-select chrome is continent-board only (M6b/M6c); hidden in session hub (M11a)
+	// Multi-select chrome is continent-board only; hidden in session hub
 	if (CInterfaceElement *el = CWidgetManager::getInstance()->getElementFromId(
 	        "ui:zp:zone_browser:content:board_legend"))
 		el->setActive(continentBoard);
 	if (CInterfaceElement *el = CWidgetManager::getInstance()->getElementFromId(
 	        "ui:zp:zone_browser:content:btn_open_sel"))
 		el->setActive(continentBoard && !s_Sess.SessionMode);
-	// M29 display-mode toggle: eco Screen B only — any board (continent or session hub)
+	// Display-mode toggle: eco Screen B only. Any board (continent or session hub)
 	// hides it; populateZoneList's eco branch is the sole activation site. Without this,
 	// the toggle stayed live over the session board and a click ran populateZoneList,
 	// which clears the board cells then early-returns on Worlds == NULL (empty hub).
@@ -364,7 +364,7 @@ static void setZoneBrowserMode(bool continentBoard)
 		if (CInterfaceElement *el = CWidgetManager::getInstance()->getElementFromId(
 		        "ui:zp:zone_browser:content:btn_view_large"))
 			el->setActive(false);
-	// Session hub chrome — BACK TO PAINTING stays available in session mode even when
+	// Session hub chrome: BACK TO PAINTING stays available in session mode even when
 	// the continent board falls back to a flat list (unparseable zone names).
 	if (CInterfaceElement *el = CWidgetManager::getInstance()->getElementFromId(
 	        "ui:zp:zone_browser:content:btn_back_paint"))
@@ -377,12 +377,12 @@ static void setZoneBrowserMode(bool continentBoard)
 	}
 }
 
-/** Update Open-selection button label/frozen + optional status (M6b). */
+/** Update Open-selection button label/frozen + optional status. */
 static void refreshBoardSelectionUI()
 {
 	if (s_Sess.SessionMode)
 	{
-		// Session hub legend (M11a continent / M12c ecosystem scratch)
+		// Session hub legend (continent working set / ecosystem scratch)
 		if (CViewText *t = findText("ui:zp:zone_browser:content:board_legend"))
 		{
 			const bool eco = s_SessionBridge && s_SessionBridge->World
@@ -425,15 +425,15 @@ static void refreshBoardSelectionUI()
 }
 
 /**
- * Explorer-style board multi-select fill (M10e) + session live-state fills (M11a).
+ * Explorer-style board multi-select fill + session live-state fills.
  * Same tone as palette cells: NeL CGroupTree col_select default (255 128 128 128).
  * Applied as blank.tga button face color (not setPushed brick chrome).
  *
- * Session states (M11a):
- *   closed         — transparent fill (default used-cell look)
- *   open-editable  — selection-fill (255 128 128 128)
- *   open-read-only — dimmer cool tint (80 100 140 110)
- *   dirty          — editable fill + '*' on the label
+ * Session states:
+ *   closed: transparent fill (default used-cell look)
+ *   open-editable: selection-fill (255 128 128 128)
+ *   open-read-only: dimmer cool tint (80 100 140 110)
+ *   dirty: editable fill + '*' on the label
  */
 static const CRGBA kBoardCellSelFill(255, 128, 128, 128);
 static const CRGBA kBoardCellSelHover(255, 128, 128, 64);
@@ -463,10 +463,12 @@ static void setBoardCellSelFill(CInterfaceGroup *cell, bool selected)
 }
 
 /**
- * Parse scratch basenames (M12c/M14a; M28: no H tokens — open files are F: cells):
+ * Parse scratch basenames (open files are F: cells; no H: tokens):
  *   "I:ox,oy"                 instance ORIGIN cell (label lives here)
  *   "I:ox,oy@cx,cy"           non-origin cell of an instance block (tint only)
  *   "E:cx,cy"                 empty
+ *   "L:cx,cy"                 locked empty
+ *   "F:ox,oy:name" / "F:ox,oy@cx,cy:name"  open-file block
  *
  * For I: forms, (cx,cy) out-params are the actual board cell (from @ tail when present,
  * else the origin). Use isInstanceOrigin to know if the label should show.
@@ -477,7 +479,7 @@ static bool parseScratchBasename(const std::string &base, char &kind, int &cx, i
 	kind = 0;
 	cx = cy = 0;
 	if (isInstanceOrigin) *isInstanceOrigin = false;
-	// (M28: no H tokens — the first-opened file is an F: open-file cell like any other)
+	// First-opened file is an F: open-file cell like any other
 	if (base.size() >= 4 && (base[0] == 'E' || base[0] == 'L') && base[1] == ':')
 	{
 		kind = base[0];
@@ -521,7 +523,7 @@ static bool parseScratchBasename(const std::string &base, char &kind, int &cx, i
 	}
 	if (base.size() >= 4 && base[0] == 'F' && base[1] == ':')
 	{
-		// M24a open file: F:ox,oy:name (origin) / F:ox,oy@cx,cy:name (block cell).
+		// Open file: F:ox,oy:name (origin) / F:ox,oy@cx,cy:name (block cell).
 		// cx,cy return the ORIGIN cell (per-file ops are origin/basename addressed);
 		// isInstanceOrigin doubles as the origin-cell flag.
 		kind = 'F';
@@ -542,7 +544,7 @@ static bool parseScratchBasename(const std::string &base, char &kind, int &cx, i
 	return false;
 }
 
-/** M24a: brick basename from an F:ox,oy[:@cx,cy]:name coded cell (empty when not F:). */
+/** Brick basename from an F:ox,oy[:@cx,cy]:name coded cell (empty when not F:). */
 static std::string scratchEditableName(const std::string &base)
 {
 	if (base.size() < 4 || base[0] != 'F' || base[1] != ':')
@@ -554,7 +556,7 @@ static std::string scratchEditableName(const std::string &base)
 }
 
 /**
- * M14b: strip redundant ligo family prefixes so board stamps lead with the distinctive part
+ * Strip redundant ligo family prefixes so board stamps lead with the distinctive part
  * (material-bassin → bassin, zonematerial-converted-200_dz → converted-200_dz).
  * Browser LIST rows keep the full name (they have width).
  */
@@ -577,7 +579,7 @@ static std::string stripLigoFamilyPrefix(const std::string &name)
 	return name;
 }
 
-/** Configure board cell text for multi-line wrap (2–3 lines, ellipsis via multi_max_line). */
+/** Configure board cell text for multi-line wrap (2-3 lines, ellipsis via multi_max_line). */
 static void configureBoardLabel(CViewText *t)
 {
 	if (!t) return;
@@ -590,7 +592,7 @@ static void configureBoardLabel(CViewText *t)
 	t->setFontSize(9);
 }
 
-/** Apply board label text with prefix strip + multi-line wrap (M14b). */
+/** Apply board label text with prefix strip + multi-line wrap. */
 static void setBoardCellLabel(CViewText *t, const std::string &raw)
 {
 	if (!t) return;
@@ -598,7 +600,7 @@ static void setBoardCellLabel(CViewText *t, const std::string &raw)
 	t->setHardText(stripLigoFamilyPrefix(raw));
 }
 
-/** Apply M11a/M12c/M14a/M14b live state fill + label (dirty * / R90 / M glyphs; prefix strip). */
+/** Apply live state fill + label (dirty * / R90 / M glyphs; prefix strip). */
 static void applySessionCellState(CInterfaceGroup *cell, const std::string &basename,
                                   ESessionCellState st)
 {
@@ -620,16 +622,16 @@ static void applySessionCellState(CInterfaceGroup *cell, const std::string &base
 		setBoardCellFillRGBA(cell, NLMISC::CRGBA(40, 90, 100, 200), NLMISC::CRGBA(50, 110, 120, 220));
 		break;
 	case CellScratchEmpty:
-		// M24d: UNLOCKED slot (edge-adjacent to occupied, or hint-named) — clearly
+		// UNLOCKED slot (edge-adjacent to occupied, or hint-named): clearly
 		// lighter than the backdrop and the locked cells
 		setBoardCellFillRGBA(cell, NLMISC::CRGBA(96, 108, 122, 255), NLMISC::CRGBA(126, 140, 156, 255));
 		break;
 	case CellScratchLocked:
-		// M24d: locked cell — dim/inert (no open menu; still a drag-drop target)
+		// Locked cell: dim/inert (no open menu; still a drag-drop target)
 		setBoardCellFillRGBA(cell, NLMISC::CRGBA(46, 49, 54, 255), NLMISC::CRGBA(56, 60, 66, 255));
 		break;
 	case CellScratchContext:
-		// Read-only context brick (M16c) — same dim RO tint as continent RO
+		// Read-only context brick: same dim RO tint as continent RO
 		setBoardCellFillRGBA(cell, kBoardCellReadOnly, kBoardCellReadOnlyHover);
 		break;
 	case CellClosed:
@@ -643,7 +645,7 @@ static void applySessionCellState(CInterfaceGroup *cell, const std::string &base
 		int cx = 0, cy = 0;
 		if (basename.size() >= 4 && basename[0] == 'F' && basename[1] == ':')
 		{
-			// M24a open-file block: label only the origin cell with the brick name
+			// Open-file block: label only the origin cell with the brick name
 			bool isOrigin = false;
 			parseScratchBasename(basename, sk, cx, cy, &isOrigin);
 			if (!isOrigin)
@@ -659,7 +661,7 @@ static void applySessionCellState(CInterfaceGroup *cell, const std::string &base
 		else if (st == CellScratchInstance)
 		{
 			// Label only on the block origin cell (basename "I:ox,oy"); non-origin
-			// cells use "I:ox,oy@cx,cy" and stay tint-only (M14a).
+			// cells use "I:ox,oy@cx,cy" and stay tint-only.
 			bool isOrigin = false;
 			if (!parseScratchBasename(basename, sk, cx, cy, &isOrigin) || !isOrigin)
 				t->setHardText("");
@@ -673,7 +675,7 @@ static void applySessionCellState(CInterfaceGroup *cell, const std::string &base
 				else if (s_SessionBridge && s_SessionBridge->scratchGetInstance)
 					s_SessionBridge->scratchGetInstance(cx, cy, rot, mir);
 				std::string lab;
-				// M24b: instance labels lead with the source brick's short name
+				// Instance labels lead with the source brick's short name
 				if (s_SessionBridge && s_SessionBridge->scratchGetInstanceSource)
 				{
 					std::string srcName;
@@ -691,7 +693,7 @@ static void applySessionCellState(CInterfaceGroup *cell, const std::string &base
 			t->setHardText("");
 		else if (st == CellScratchEmpty)
 		{
-			// M24d: unlocked well named by a saved hint shows the neighbor's short name
+			// Unlocked well named by a saved hint shows the neighbor's short name
 			// (dim) so the remembered layout is visible before opening anything
 			std::string hintName;
 			int hx = 0, hy = 0;
@@ -710,7 +712,7 @@ static void applySessionCellState(CInterfaceGroup *cell, const std::string &base
 		}
 		else if (st == CellScratchContext)
 		{
-			// Basename form C:cx,cy:brickname — label the brick (short)
+			// Basename form C:cx,cy:brickname; label the brick (short)
 			std::string lab;
 			if (basename.size() >= 4 && basename[0] == 'C')
 			{
@@ -739,7 +741,7 @@ static void applySessionCellState(CInterfaceGroup *cell, const std::string &base
 					s_SessionBridge->scratchGetContext(cx, cy, lab);
 				}
 			}
-			// M24c: transform glyphs (same R90/M vocabulary as instances)
+			// Transform glyphs (same R90/M vocabulary as instances)
 			{
 				char csk = 0;
 				int ccx = 0, ccy = 0;
@@ -804,8 +806,8 @@ static void clearBoard()
 }
 
 /**
- * Continent Screen B (M5a/M13a): minesweeper-style square cell board.
- * Cell set = used zones + empty edge-adjacent (4-neighbor) fringe — no diagonals.
+ * Continent Screen B: minesweeper-style square cell board.
+ * Cell set = used zones + empty edge-adjacent (4-neighbor) fringe; no diagonals.
  * Diagonal contact alone does not decide a ligo border type, so those cells suggested
  * undecidable placements. Neighbor auto-load for open zones stays the 8-ring (weld).
  * Dual-axis scroll when the board exceeds the host viewport.
@@ -850,7 +852,7 @@ static void populateContinentGrid(const ZPWS::SWorldEntry &world)
 		return;
 	}
 
-	// Fringe = empty edge-adjacent (N/E/S/W) neighbors only — no diagonals (M13a)
+	// Fringe = empty edge-adjacent (N/E/S/W) neighbors only; no diagonals
 	static const int kEdgeDr[4] = { -1, 0, 1, 0 };
 	static const int kEdgeDc[4] = { 0, 1, 0, -1 };
 	std::set<std::pair<int, int> > fringe;
@@ -924,7 +926,7 @@ static void populateContinentGrid(const ZPWS::SWorldEntry &world)
 		snprintf(idbuf, sizeof(idbuf), "gc%d_%d", r, c);
 		snprintf(idxbuf, sizeof(idxbuf), "%d", zi);
 		p.push_back(std::make_pair(std::string("id"), std::string(idbuf)));
-		// Cell title: short grid form (4_AC / 193_EC); else strip ligo family prefix (M14b)
+		// Cell title: short grid form (4_AC / 193_EC); else strip ligo family prefix
 		{
 			std::string title = ZPWS::continentZoneName(r, c);
 			if (title.empty())
@@ -941,7 +943,7 @@ static void populateContinentGrid(const ZPWS::SWorldEntry &world)
 			const bool hasThumb = !thumbTex.empty();
 			if (CViewBitmap *thumb = dynamic_cast<CViewBitmap *>(cell->getView("thumb")))
 				thumb->setActive(hasThumb);
-			// M10a: activate 9-slice well only when a real thumb is bound
+			// Activate 9-slice well only when a real thumb is bound
 			if (CInterfaceGroup *fr = cell->getGroup("thumb_frame"))
 				fr->setActive(hasThumb);
 			// Force full-cell hit/fill size. blank.tga is 4×4; without scale, updateCoords
@@ -957,7 +959,7 @@ static void populateContinentGrid(const ZPWS::SWorldEntry &world)
 				btn->setW(kCell);
 				btn->setH(kCell);
 			}
-			// Session board (M11a): live open/dirty state. Startup multi-select fill otherwise.
+			// Session board: live open/dirty state. Startup multi-select fill otherwise.
 			if (s_Sess.SessionMode && s_SessionBridge && s_SessionBridge->getCellState)
 			{
 				ESessionCellState st = CellClosed;
@@ -1018,7 +1020,7 @@ static void populateContinentGrid(const ZPWS::SWorldEntry &world)
 	refreshBoardSelectionUI();
 }
 
-/** NxN layout selector retired (M12) — always hide; list/board sit under world_sub. */
+/** Unused layout selector chrome: always hide; list/board sit under world_sub. */
 static void setLayoutSelectorVisible(bool /*visible*/)
 {
 	static const char *ids[] = {
@@ -1045,10 +1047,10 @@ static void setLayoutSelectorVisible(bool /*visible*/)
 
 static void syncLayoutRadios()
 {
-	// no-op (NxN retired M12)
+	// no-op (layout selector unused)
 }
 
-// M29: zone browser display mode — false = detail-tile list, true = large-thumbnail
+// Zone browser display mode: false = detail-tile list, true = large-thumbnail
 // grid (the tileset-palette idiom). Remembered in startup.cfg (ZoneBrowserLarge).
 static bool s_ZoneListLarge = false;
 
@@ -1072,7 +1074,7 @@ static void populateZoneList()
 
 	ZPWS::listZones(world, s_Sess.Zones);
 
-	// Continents: minesweeper-style board (M5a). Ecosystems keep the grouped list.
+	// Continents: minesweeper-style board. Ecosystems keep the grouped list.
 	if (world.Kind == ZPWS::Continent)
 	{
 		if (CCtrlBaseButton *tog = dynamic_cast<CCtrlBaseButton *>(CWidgetManager::getInstance()
@@ -1083,7 +1085,7 @@ static void populateZoneList()
 	}
 
 	setZoneBrowserMode(false);
-	// M29: display-mode toggle lives on eco Screen B only
+	// Display-mode toggle lives on eco Screen B only
 	if (CCtrlBaseButton *tog = dynamic_cast<CCtrlBaseButton *>(CWidgetManager::getInstance()
 	        ->getElementFromId("ui:zp:zone_browser:content:btn_view_large")))
 	{
@@ -1092,7 +1094,7 @@ static void populateZoneList()
 	}
 
 	static const char *kList = "ui:zp:zone_browser:content:list_scroll:text_list";
-	// Large mode (M29c): one auto-wrapping zp_flow SECTION per zone group — the flow
+	// Large mode: one auto-wrapping zp_flow SECTION per zone group. The flow
 	// group reflows its tiles from its own width inside updateCoords (the Ryzom client
 	// inventory mechanism), so resizes re-wrap with no repopulation and no width watch.
 	const int kTileW = 178, kTileH = 106;
@@ -1126,7 +1128,7 @@ static void populateZoneList()
 
 		if (s_ZoneListLarge)
 		{
-			// Large-icon tile into the current section's flow (M29c); the flow assigns
+			// Large-icon tile into the current section's flow; the flow assigns
 			// the grid slot, positions here are placeholders.
 			p.push_back(std::make_pair(std::string("title"), stripLigoFamilyPrefix(z.Basename)));
 			if (!flowSec)
@@ -1138,11 +1140,11 @@ static void populateZoneList()
 				if (flowSec)
 				{
 					// spawnRow force-sets W on rows declaring <=0, but with sizeref="w"
-					// the stored W is an OFFSET from the size parent — restore it. And
+					// the stored W is an OFFSET from the size parent; restore it. And
 					// the size parent must be the LIST explicitly: CGroupList re-chains
 					// each child's pos parent to the PREVIOUS element and sizeref follows
 					// the pos parent, so without this the flow sizes to the header row
-					// above it (template sizeparent can't express it — the parent is
+					// above it (template sizeparent can't express it; the parent is
 					// NULL at template-parse time).
 					flowSec->setW(-4);
 					if (CGroupList *gl = findList(kList))
@@ -1151,7 +1153,7 @@ static void populateZoneList()
 					// (FILE(GLOB) + skipped reconfigure) the parser silently falls back
 					// to a plain interface_group and every tile stacks at slot 0,0.
 					if (flowSec->getClassName() != "CZPGroupFlow")
-						nlwarning("zone browser: zp_flow factory missing — grid will not wrap (stale build?)");
+						nlwarning("zone browser: zp_flow factory missing; grid will not wrap (stale build?)");
 				}
 			}
 			if (!flowSec)
@@ -1172,7 +1174,7 @@ static void populateZoneList()
 		{
 			if (CViewBitmap *thumb = dynamic_cast<CViewBitmap *>(row->getView("thumb")))
 				thumb->setActive(hasThumb);
-			// M10a: 9-slice well only when a real thumb is bound (no empty dark square)
+			// 9-slice well only when a real thumb is bound (no empty dark square)
 			if (CInterfaceGroup *fr = row->getGroup("thumb_frame"))
 				fr->setActive(hasThumb);
 			// When no thumb, tuck the open button to the left edge
@@ -1190,7 +1192,7 @@ static void populateZoneList()
 	}
 }
 
-/** M29: flip list/grid display mode, persist, repopulate. */
+/** Flip list/grid display mode, persist, repopulate. */
 class CAHZpZoneViewToggle : public IActionHandler
 {
 public:
@@ -1212,8 +1214,8 @@ public:
 };
 REGISTER_ACTION_HANDLER(CAHZpZoneViewToggle, "zp_zone_view_toggle");
 
-/** Tag shown at the right of a folder row (M25p5): a cheap fingerprint (a handful of
- *  isDirectory/fileExists checks — the same call scanChildrenForWorkspaces already makes for
+/** Tag shown at the right of a folder row: a cheap fingerprint (a handful of
+ *  isDirectory/fileExists checks, the same call scanChildrenForWorkspaces already makes for
  *  every candidate during startup discovery) so browsing shows which folders actually lead
  *  somewhere instead of it being a blind guess which subdir to open. */
 static std::string folderWorkspaceTag(const std::string &dirPath)
@@ -1247,7 +1249,7 @@ static void populateFolderList()
 		eb->setInputString(s_Sess.FolderPath);
 	setStatus("ui:zp:folder_browser:content:status", "");
 
-	// Up: fixed control instead of a ".." row buried in a scrolling list — same destination,
+	// Up: fixed control instead of a ".." row buried in a scrolling list; same destination,
 	// but always in the same place and disabled outright at the filesystem root.
 	{
 		std::string parent = ZPWS::normalizeDir(CFile::getPath(s_Sess.FolderPath));
@@ -1368,14 +1370,14 @@ static void applyZoneSelection(int idx)
 	if (idx < 0 || idx >= (int)s_Sess.Zones.size())
 		return;
 
-	// M11a/M12c session board
+	// Session board
 	if (s_Sess.SessionMode)
 	{
 		const std::string &base = s_Sess.Zones[idx].Basename;
 		s_Sess.SelectedZone = idx;
 		s_Sess.PendingActionBasename = base;
 
-		// Ecosystem scratch (M12c/M16c)
+		// Ecosystem scratch
 		char sk = 0;
 		int cx = 0, cy = 0;
 		if (s_SessionBridge && s_SessionBridge->World
@@ -1387,7 +1389,7 @@ static void applyZoneSelection(int idx)
 				openContextActionPopup(base);
 				return;
 			}
-			// M24a open-file cell F:...:name → the continent per-file popup, addressed
+			// Open-file cell F:...:name → the continent per-file popup, addressed
 			// by the real brick basename (close/save/toggle ride the same bridge ops).
 			if (base.size() >= 4 && base[0] == 'F' && base[1] == ':')
 			{
@@ -1403,8 +1405,8 @@ static void applyZoneSelection(int idx)
 			{
 				std::string err;
 				if (sk == 'L')
-					return; // M24d locked cell: no menu (drag target only)
-				// Empty: popup Place instance / Place context (M16c)
+					return; // locked cell: no menu (drag target only)
+				// Empty: popup Place instance / Place context
 				if (sk == 'E')
 				{
 					// If a context occupies this empty-looking cell, open context popup
@@ -1646,7 +1648,7 @@ public:
 };
 REGISTER_ACTION_HANDLER(CAHZpFolderEnter, "zp_folder_enter");
 
-/** M25p5: dedicated Up control (was a ".." row mixed into the scrolling list). */
+/** Dedicated Up control (not a ".." row mixed into the scrolling list). */
 class CAHZpFolderUp : public IActionHandler
 {
 public:
@@ -1663,7 +1665,7 @@ public:
 };
 REGISTER_ACTION_HANDLER(CAHZpFolderUp, "zp_folder_up");
 
-/** M25p5: address-bar-style direct path entry — type or paste any path, Go jumps to it.
+/** Address-bar-style direct path entry: type or paste any path, Go jumps to it.
  *  Complements the breadcrumb (ancestors only) with arbitrary destinations. */
 class CAHZpFolderGo : public IActionHandler
 {
@@ -1708,8 +1710,7 @@ public:
 			setStatus("ui:zp:folder_browser:content:status", "No workspaces found here");
 			return;
 		}
-		// Replace candidate set with the selection (keep any that were already known? Task:
-		// "goes to Screen A with the found workspaces")
+		// Replace candidate set with the found workspaces and return to Screen A
 		*s_Sess.Worlds = found;
 		setStatus("ui:zp:folder_browser:content:status", "");
 		showScreen(ScreenWorld);
@@ -1768,7 +1769,7 @@ EStartupResult runStartupFlow(UDriver *driver,
 		s_Sess.FolderPath = ZPWS::normalizeDir(initialBrowsePath);
 	else
 		s_Sess.FolderPath = ZPWS::normalizeDir(CPath::getCurrentPath());
-	// Remembered open layout (ecosystem self-instances) + zone browser display mode (M29)
+	// Remembered open layout (unused) + zone browser display mode
 	{
 		ZPWS::SStartupCfg cfg;
 		const bool haveCfg = ZPWS::loadStartupCfg(cfg);
@@ -1776,7 +1777,7 @@ EStartupResult runStartupFlow(UDriver *driver,
 			s_Sess.InstanceLayout = cfg.LastInstances;
 		else
 			s_Sess.InstanceLayout = "1x1";
-		// loadStartupCfg's return means "has folder/world content" — the display-mode
+		// loadStartupCfg's return means "has folder/world content"; the display-mode
 		// flag applies whenever the file parsed (ctor default covers the missing case).
 		s_ZoneListLarge = cfg.ZoneBrowserLarge;
 	}
@@ -1807,8 +1808,7 @@ EStartupResult runStartupFlow(UDriver *driver,
 			showScreen(ScreenZone);
 			openedScreenB = true;
 			printf("startup-screenshot: Screen B for world '%s'\n", worlds[wi].WorldName.c_str());
-			// Dev-only: ZONE_PAINTER_BOARD_SELECT pre-selects a used cell so M10e
-			// Explorer-style multi-select fill is visible in headless board shots.
+			// Dev/test: ZONE_PAINTER_BOARD_SELECT pre-selects a used cell for multi-select fill shots.
 			// "1"/"true"/"yes" => first zone (index 0). Numeric >=0 => that zone index.
 			if (worlds[wi].Kind == ZPWS::Continent && !s_Sess.Zones.empty())
 			{
@@ -1844,11 +1844,7 @@ EStartupResult runStartupFlow(UDriver *driver,
 		if (worlds.empty() && folderBrowserEnabled)
 		{
 			showScreen(ScreenFolder);
-			// Dev-only: ZONE_PAINTER_FOLDER_PATH re-navigates the folder browser to an
-			// arbitrary directory for headless shots — the real screen only ever auto-lands
-			// on a directory where nothing fingerprinted nearby (by construction, since that's
-			// what put it on this screen), so this is the only way to headlessly screenshot
-			// the list showing a row that fingerprints (the workspace tag, M25p5).
+			// Dev/test: ZONE_PAINTER_FOLDER_PATH re-navigates for headless shots of workspace tags.
 			if (!screenshotPath.empty())
 			{
 				const char *fp = getenv("ZONE_PAINTER_FOLDER_PATH");
@@ -1863,7 +1859,7 @@ EStartupResult runStartupFlow(UDriver *driver,
 			showScreen(ScreenWorld);
 	}
 
-	driver->setWindowTitle(ucstring("zone_painter — startup"));
+	driver->setWindowTitle(ucstring("zone_painter - startup"));
 
 	// One-frame screenshot of the selected screen
 	if (!screenshotPath.empty())
@@ -1924,7 +1920,7 @@ EStartupResult runStartupFlow(UDriver *driver,
 			{
 				selection.World = worlds[s_Sess.SelectedWorld];
 				selection.Zone = s_Sess.Zones[s_Sess.SelectedZone];
-				// Multi-select editable set (M6b); empty PendingSelect still has one via L-click path
+				// Multi-select editable set; empty PendingSelect still has one via L-click path
 				selection.EditableZones.clear();
 				if (!s_Sess.PendingSelect.empty())
 				{
@@ -1940,7 +1936,7 @@ EStartupResult runStartupFlow(UDriver *driver,
 				}
 				else
 					selection.EditableZones.push_back(selection.Zone);
-				// NxN layout retired (M12); open primary only — use BOARD/--place for instances
+				// Layout field unused; open primary only (use BOARD/--place for instances)
 				selection.InstanceLayout = "1x1";
 				result = StartupOpenZone;
 				break;
@@ -1959,7 +1955,7 @@ EStartupResult runStartupFlow(UDriver *driver,
 }
 
 // ---------------------------------------------------------------------------------------------
-// Session board hub (M11a)
+// Session board hub
 
 void setSessionBoardBridge(SSessionBoardBridge *bridge)
 {
@@ -1992,7 +1988,7 @@ static void openCellActionPopup(const std::string &basename)
 	}
 	if (CViewTextMenu *line = findMenuLine("ui:zp:cell_action:save"))
 		line->setGrayed(!dirty || !editable);
-	// M27b: Save as… needs an editable file (clean files can still be copied elsewhere)
+	// Save as… needs an editable file (clean files can still be copied elsewhere)
 	if (CViewTextMenu *line = findMenuLine("ui:zp:cell_action:saveas"))
 		line->setGrayed(!editable);
 	if (CViewTextMenu *line = findMenuLine("ui:zp:cell_action:toggle"))
@@ -2001,9 +1997,9 @@ static void openCellActionPopup(const std::string &basename)
 }
 
 // close_confirm purpose: false = close, true = demote-to-RO (the modal is reused for
-// both). A DEDICATED flag, not a StatusMsg tag — the old "toggle_ro" string latch
-// survived board close (ESC/O bypass the handlers), so a LATER close-confirm on another
-// cell silently ran toggleEditable instead of closeZone.
+// both). A dedicated flag, not a StatusMsg tag: a string latch would survive board close
+// (ESC/O bypass the handlers) and a later close-confirm on another cell would silently
+// run toggleEditable instead of closeZone.
 static bool s_CloseConfirmToggle = false;
 
 static void openCloseConfirmModal(const std::string &basename, const std::string &purpose)
@@ -2108,24 +2104,24 @@ void refreshSessionBoardStates()
 }
 
 /**
- * Ecosystem scratch board (M12c/M14a/M17): fine-cell grid covering every open file +
- * instances + contexts + margin.
+ * Ecosystem scratch board: fine-cell grid covering every open file + instances +
+ * contexts + margin.
  *
- * Convention (M14a/M17): each board cell is one --cellsize unit. Every open file — the
- * first-opened included (M28) — claims only its MASKED cells at its board cell
- * (L-shapes/holes are first-class; unmasked cells are empty). Each instance claims its
- * rotFlip-transformed mask cells. Placement legality refuses overlapping masked cells
- * (interlocking L-shapes allowed).
+ * Convention: each board cell is one --cellsize unit. Every open file (the first-opened
+ * included) claims only its MASKED cells at its board cell (L-shapes/holes are
+ * first-class; unmasked cells are empty). Each instance claims its rotFlip-transformed
+ * mask cells. Placement legality refuses overlapping masked cells (interlocking L-shapes
+ * allowed).
  *
- * Basenames: F:ox,oy[:name] | I:ox,oy | E:cx,cy | C:cx,cy:name. Bridge owns the place
- * list. (M28: no H: tokens — the first-opened file is an F: open-file cell.)
+ * Basenames: F:ox,oy[:name] | I:ox,oy | E:cx,cy | L:cx,cy | C:cx,cy:name.
+ * Bridge owns the place list. No H: tokens; the first-opened file is an F: open-file cell.
  */
 /** Coded basename when (cx,cy) is OCCUPIED (open file/instance/context); else empty. */
 static std::string scratchOccupiedCellName(int cx, int cy, int fw, int fh)
 {
 	(void)fw;
 	(void)fh;
-	// Open-file block (editable or demoted RO) placed on the board — M28: includes the
+	// Open-file block (editable or demoted RO) placed on the board; includes the
 	// first-opened file, which occupies through the same per-file mask fields.
 	int fox = 0, foy = 0;
 	std::string fname;
@@ -2157,7 +2153,7 @@ static std::string scratchOccupiedCellName(int cx, int cy, int fw, int fh)
 		if (s_SessionBridge->scratchGetInstance(cx, cy, rot, mir))
 			return NLMISC::toString("I:%d,%d", cx, cy);
 	}
-	// M16c context brick at this cell?
+	// Context brick at this cell?
 	std::string cname;
 	if (s_SessionBridge && s_SessionBridge->scratchGetContext
 	    && s_SessionBridge->scratchGetContext(cx, cy, cname))
@@ -2221,7 +2217,7 @@ static void populateScratchBoard()
 	}
 	// Margin of empty wells around occupied (edge-adjacent fringe of the silhouette)
 	minC -= 1; maxC += 1; minR -= 1; maxR += 1;
-	// Keep a usable minimum for 1×1 bricks (roughly the old 7×7)
+	// Keep a usable minimum for 1×1 bricks (roughly 7×7)
 	if (maxC - minC < 6) { const int mid = (minC + maxC) / 2; minC = mid - 3; maxC = mid + 3; }
 	if (maxR - minR < 6) { const int mid = (minR + maxR) / 2; minR = mid - 3; maxR = mid + 3; }
 
@@ -2237,11 +2233,11 @@ static void populateScratchBoard()
 		s_Sess.Zones.push_back(z);
 	}
 
-	// M24d unlock model (the user story: placing a block UNLOCKS its hor/ver neighbors):
-	// empty cells edge-adjacent to any occupied cell — or named by a saved-neighbor hint —
+	// Unlock model: placing a block unlocks its horizontal/vertical neighbors.
+	// Empty cells edge-adjacent to any occupied cell, or named by a saved-neighbor hint,
 	// are open wells ("E:"); every other empty cell renders LOCKED ("L:", dim, no menu,
 	// still a drag target). Diagonal contact alone does not unlock (ligo border rule).
-	// Occupancy snapshot FIRST — pass 2 rewrites empties to E:/L:, and testing rewritten
+	// Occupancy snapshot FIRST: pass 2 rewrites empties to E:/L:, and testing rewritten
 	// neighbors would cascade the unlock across the whole board.
 	std::set<std::pair<int, int> > occ;
 	for (int cy = minR; cy <= maxR; ++cy)
@@ -2291,7 +2287,7 @@ static void populateScratchBoard()
 	board->setMaxW(730);
 	board->setMaxH(330);
 
-	// M15: scroll so board cell (0,0) — where the first-opened file starts — is in view.
+	// Scroll so board cell (0,0), where the first-opened file starts, is in view.
 	// Board cells: x=(c-minC)*kCell, y=-((maxR-r)*kCell). Top-left of content is (0,0)
 	// local; positive ofs shifts content to reveal lower/right cells (palette idiom).
 	{
@@ -2338,8 +2334,8 @@ static void populateScratchBoard()
 		if (CCtrlButton *btn = dynamic_cast<CCtrlButton *>(cell->getCtrl("btn")))
 		{
 			btn->setScale(true);
-			// M24d board legibility: EMPTY/LOCKED wells render inset so the backdrop
-			// shows as grid lines; occupied blocks stay full-size contiguous.
+			// EMPTY/LOCKED wells render inset so the backdrop shows as grid lines;
+			// occupied blocks stay full-size contiguous.
 			const sint32 inset = (st == CellScratchEmpty || st == CellScratchLocked)
 			                         ? kCell - 6 : kCell;
 			btn->setW(inset);
@@ -2360,7 +2356,7 @@ static void populateScratchBoard()
 }
 
 // ---------------------------------------------------------------------------------------------
-// M24d board drag move/copy (drag = move, Ctrl/Shift-drag = copy — the file-manager idiom).
+// Board drag move/copy (drag = move, Ctrl/Shift-drag = copy; the file-manager idiom).
 // The pointer listener (editor_ui) feeds raw left-button transitions; cells resolve via the
 // NLGUI under-pointer stack, so no board geometry math and button clicks (down+up on the
 // SAME cell) stay untouched.
@@ -2397,15 +2393,15 @@ static bool boardCellUnderPointer(int &cx, int &cy)
 
 void sessionBoardDragBegin()
 {
-	// Disarm FIRST, executing or not — the caller invokes unconditionally so a pumped
-	// script can never leave a stale arm behind (M24 review).
+	// Disarm FIRST, executing or not: the caller invokes unconditionally so a pumped
+	// script can never leave a stale arm behind.
 	s_BoardDragArmed = false;
 	if (ZPSCRIPT::isExecuting())
 		return;
 	// No arming while a modal/menu is up: CGroupMenu forces ExitClickOut, and
-	// getCtrlsUnder still reports the board cells BENEATH the menu — so the click that
-	// dismisses a menu (or a press-slide-release across its lines) armed a drag between
-	// whatever cells happened to sit under the pointer, firing phantom moves/copies.
+	// getCtrlsUnder still reports the board cells BENEATH the menu, so the click that
+	// dismisses a menu (or a press-slide-release across its lines) would arm a drag
+	// between whatever cells sit under the pointer (phantom moves/copies).
 	if (CWidgetManager::getInstance()->hasModal())
 		return;
 	if (!s_SessionBoardVisible || !s_SessionBridge || !s_SessionBridge->World
@@ -2416,7 +2412,7 @@ void sessionBoardDragBegin()
 		s_BoardDragArmed = true;
 }
 
-/** Focus loss mid-drag (alt-tab) never delivers the up event — a later stray up would
+/** Focus loss mid-drag (alt-tab) never delivers the up event; a later stray up would
  *  pair with the stale arm and fire a phantom drag from the pre-focus-loss cell. */
 void sessionBoardDragCancel()
 {
@@ -2430,7 +2426,7 @@ void sessionBoardDragEnd(bool copyModifier)
 	s_BoardDragArmed = false;
 	if (ZPSCRIPT::isExecuting())
 		return;
-	// A modal opened between arm and release (or the drop lands on one) — ignore.
+	// A modal opened between arm and release (or the drop lands on one): ignore.
 	if (CWidgetManager::getInstance()->hasModal())
 		return;
 	if (!s_SessionBoardVisible || !s_SessionBridge || !s_SessionBridge->scratchDragDrop)
@@ -2439,7 +2435,7 @@ void sessionBoardDragEnd(bool copyModifier)
 	if (!boardCellUnderPointer(tx, ty))
 		return;
 	if (tx == s_BoardDragFromX && ty == s_BoardDragFromY)
-		return; // plain click — the cell button handles it
+		return; // plain click; the cell button handles it
 	std::string err;
 	if (!s_SessionBridge->scratchDragDrop(s_BoardDragFromX, s_BoardDragFromY, tx, ty,
 	                                      copyModifier, err))
@@ -2486,19 +2482,19 @@ void setSessionBoardVisible(bool visible)
 			if (CViewText *t = findText("ui:zp:zone_browser:content:world_title"))
 				t->setHardText(s_SessionBridge->World->WorldName + "  (session board)");
 			populateContinentGrid(*s_SessionBridge->World);
-			// AFTER populateContinentGrid — it overwrites world_sub with the grid extent,
-			// so the session hint set before it never displayed (dead store).
+			// AFTER populateContinentGrid: it overwrites world_sub with the grid extent,
+			// so a session hint set before it never displayed (dead store).
 			if (CViewText *t = findText("ui:zp:zone_browser:content:world_sub"))
-				t->setHardText("working set — O / BACK TO PAINTING returns");
+				t->setHardText("working set - O / BACK TO PAINTING returns");
 		}
 		else
 		{
-			// M27c: the board is the WORLD's scratch layout, not the home brick's — with
+			// The board is the WORLD's scratch layout, not the home brick's; with
 			// multiple editables a home-named title misread as "editing that one zone".
 			if (CViewText *t = findText("ui:zp:zone_browser:content:world_title"))
 				t->setHardText(s_SessionBridge->World->WorldName + "  (scratch board)");
 			if (CViewText *t = findText("ui:zp:zone_browser:content:world_sub"))
-				t->setHardText("place / rotate / mirror instances — O / BACK TO PAINTING");
+				t->setHardText("place / rotate / mirror instances - O / BACK TO PAINTING");
 			populateScratchBoard();
 		}
 		if (CInterfaceElement *el = CWidgetManager::getInstance()->getElementFromId("ui:zp:zone_browser"))
@@ -2535,7 +2531,7 @@ bool isSessionBoardVisible()
 }
 
 // Cell-action popup handlers
-/** M24a: per-file board ops change eco occupancy (blocks appear/disappear) — repopulate. */
+/** Per-file board ops change eco occupancy (blocks appear/disappear); repopulate. */
 void refreshBoardAfterSessionOp()
 {
 	if (s_SessionBridge && s_SessionBridge->World
@@ -2589,7 +2585,7 @@ public:
 };
 REGISTER_ACTION_HANDLER(CAHZpCellSave, "zp_cell_save");
 
-// M27b: per-file save-as — open the save dialog bound to this cell's file (name,
+// Per-file save-as: open the save dialog bound to this cell's file (name,
 // overwrite/copy, thumbnail checkbox = the custom save options).
 class CAHZpCellSaveAs : public IActionHandler
 {
@@ -2625,7 +2621,7 @@ public:
 			if (CViewText *t = findText("ui:zp:close_confirm:content:title"))
 				t->setHardText("Make read-only?");
 			if (CViewText *t = findText("ui:zp:close_confirm:content:status"))
-				t->setHardText(base + " is dirty — save before making read-only?");
+				t->setHardText(base + " is dirty - save before making read-only?");
 			// Reuse close_confirm; btn labels still say Save first / Close without saving
 			// "Close without saving" path demotes without save via forceDiscard
 			CWidgetManager::getInstance()->enableModalWindow(NULL, "ui:zp:close_confirm");
@@ -2724,7 +2720,7 @@ public:
 };
 REGISTER_ACTION_HANDLER(CAHZpCloseConfirmCancel, "zp_close_confirm_cancel");
 
-// Ecosystem scratch instance popup (M12c/M14a) — any cell in a block resolves via bridge
+// Ecosystem scratch instance popup; any cell in a block resolves via bridge
 static bool scratchParsePending(int &cx, int &cy)
 {
 	char sk = 0;
@@ -2758,7 +2754,7 @@ public:
 		std::string err;
 		if (!s_SessionBridge->scratchRotate(cx, cy, +1, err))
 			fprintf(stderr, "scratch rotate CW (%d,%d): %s\n", cx, cy, err.c_str());
-		refreshBoardAfterSessionOp(); // occupancy changed — repopulate, not just re-tint
+		refreshBoardAfterSessionOp(); // occupancy changed; repopulate, not just re-tint
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpInstRotCW, "zp_inst_rot_cw");
@@ -2776,7 +2772,7 @@ public:
 		std::string err;
 		if (!s_SessionBridge->scratchRotate(cx, cy, -1, err))
 			fprintf(stderr, "scratch rotate CCW (%d,%d): %s\n", cx, cy, err.c_str());
-		refreshBoardAfterSessionOp(); // occupancy changed — repopulate, not just re-tint
+		refreshBoardAfterSessionOp(); // occupancy changed; repopulate, not just re-tint
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpInstRotCCW, "zp_inst_rot_ccw");
@@ -2794,7 +2790,7 @@ public:
 		std::string err;
 		if (!s_SessionBridge->scratchMirror(cx, cy, err))
 			fprintf(stderr, "scratch mirror (%d,%d): %s\n", cx, cy, err.c_str());
-		refreshBoardAfterSessionOp(); // occupancy changed — repopulate, not just re-tint
+		refreshBoardAfterSessionOp(); // occupancy changed; repopulate, not just re-tint
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpInstMirror, "zp_inst_mirror");
@@ -2812,7 +2808,7 @@ public:
 		std::string err;
 		if (!s_SessionBridge->scratchRemove(cx, cy, err))
 			fprintf(stderr, "scratch remove (%d,%d): %s\n", cx, cy, err.c_str());
-		refreshBoardAfterSessionOp(); // occupancy changed — repopulate, not just re-tint
+		refreshBoardAfterSessionOp(); // occupancy changed; repopulate, not just re-tint
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpInstRemove, "zp_inst_remove");
@@ -2830,9 +2826,9 @@ public:
 REGISTER_ACTION_HANDLER(CAHZpInstCancel, "zp_inst_cancel");
 
 // ---------------------------------------------------------------------------------------------
-// M16c empty-cell popup + context place/remove + brick picker
+// Empty-cell popup + context place/remove + brick picker
 
-// M24a/M24b picker mode: 0 = RO context, 1 = editable open, 2 = instance of an OPEN brick
+// Picker mode: 0 = RO context, 1 = editable open, 2 = instance of an OPEN brick
 static int s_ContextPickerMode = 0;
 static int s_ContextPickerCx = 0;
 static int s_ContextPickerCy = 0;
@@ -2843,7 +2839,7 @@ static void openEmptyCellPopup(const std::string &basename)
 	s_Sess.PendingActionBasename = basename;
 	if (CViewText *t = findText("ui:zp:empty_cell_action:hdr"))
 		t->setHardText("Empty cell");
-	// M24c: saved-neighbor hint for this cell → one-click open offers at the top
+	// Saved-neighbor hint for this cell: one-click open offers at the top
 	std::string hintName;
 	bool haveHint = false;
 	{
@@ -2856,8 +2852,7 @@ static void openEmptyCellPopup(const std::string &basename)
 			haveHint = s_SessionBridge->scratchGetHintAt(cx, cy, hintName);
 	}
 	// The two hint rows are plain menu lines (CGroupList backing the menu already
-	// reflows around inactive children — no manual Y-repositioning dance needed
-	// the way the old framed-dialog version required for its chained <ctrl> rows).
+	// reflows around inactive children; no manual Y-repositioning needed).
 	if (CViewTextMenu *line = findMenuLine("ui:zp:empty_cell_action:hint_ro"))
 	{
 		line->setActive(haveHint);
@@ -2901,8 +2896,7 @@ void forceShowContextActionForShot(const std::string &basename)
 
 void forceShowContextPickerForShot(int mode)
 {
-	// The picker had NO screenshot coverage before the M25 review — which is exactly how
-	// the M25p7 row-flatten silently broke every row's click binding.
+	// Dev/test: open the context-brick picker for one screenshot frame.
 	openContextBrickPicker(1, 0, mode);
 }
 
@@ -2912,8 +2906,7 @@ static void openContextBrickPicker(int cx, int cy, int mode)
 	s_ContextPickerCx = cx;
 	s_ContextPickerCy = cy;
 	s_ContextPickerNames.clear();
-	// Screen B list idiom: rows in a scroll_text's text_list (M25 review: was a fixed
-	// 280px plain group with no scrollbar — every brick past ~7 was unreachable).
+	// Screen B list idiom: rows in a scroll_text's text_list (scrollable; not a fixed height box).
 	static const char *kPickerList = "ui:zp:context_picker:content:list_scroll:text_list";
 	clearList(kPickerList);
 	if (!s_SessionBridge || !s_SessionBridge->World)
@@ -2921,8 +2914,8 @@ static void openContextBrickPicker(int cx, int cy, int mode)
 	std::vector<ZPWS::SZoneEntry> zones;
 	if (s_ContextPickerMode == 2)
 	{
-		// M24b/M28 instance sources: every OPEN file by cell probe — the first-opened
-		// file occupies board cells like the rest, so the probe finds it uniformly.
+		// Instance sources: every OPEN file by cell probe. The first-opened file
+		// occupies board cells like the rest, so the probe finds it uniformly.
 		if (s_SessionBridge->scratchGetEditableAt)
 		{
 			std::set<std::string> seen;
@@ -2946,7 +2939,7 @@ static void openContextBrickPicker(int cx, int cy, int mode)
 	else
 	{
 		ZPWS::listZones(*s_SessionBridge->World, zones);
-		// M24c: session-hinted bricks sort to the top (stable within both groups)
+		// Session-hinted bricks sort to the top (stable within both groups)
 		if (s_SessionBridge->scratchHintNames)
 		{
 			std::vector<std::string> hinted;
@@ -2970,8 +2963,8 @@ static void openContextBrickPicker(int cx, int cy, int mode)
 	for (size_t i = 0; i < zones.size(); ++i)
 	{
 		// Context mode skips ALREADY-OPEN files (they cannot load again as RO context);
-		// open-editable mode lists them — picking an open zone places a shared-paint
-		// INSTANCE at the cell (M28b), and instance mode lists the open sources anyway.
+		// open-editable mode lists them (picking an open zone places a shared-paint
+		// INSTANCE at the cell), and instance mode lists the open sources anyway.
 		if (s_ContextPickerMode == 0 && s_SessionBridge->isOpen
 		    && s_SessionBridge->isOpen(zones[i].Basename))
 			continue;
@@ -2984,11 +2977,10 @@ static void openContextBrickPicker(int cx, int cy, int mode)
 		CInterfaceGroup *row = spawnRow("zp_zone_row", kPickerList, p);
 		if (row)
 		{
-			// Rebind click to context picker select. CCtrlBaseButton, NOT CCtrlTextButton:
-			// M25p7 flattened zp_zone_row's btn to a plain <ctrl type="button"> (CCtrlButton),
-			// so the old CCtrlTextButton cast returned NULL and every picker row silently
-			// kept the template's zp_select_zone/#idx — clicks dispatched a cell action for
-			// an unrelated board cell instead of picking the brick.
+			// Rebind click to context picker select. Use CCtrlBaseButton, not CCtrlTextButton:
+			// zp_zone_row's btn is a plain <ctrl type="button"> (CCtrlButton). A CCtrlTextButton
+			// cast returns NULL and the row keeps zp_select_zone/#idx, which would dispatch a
+			// board cell action instead of picking the brick.
 			if (CCtrlBaseButton *btn = dynamic_cast<CCtrlBaseButton *>(row->getCtrl("btn")))
 			{
 				btn->setActionOnLeftClick("zp_context_pick");
@@ -3019,7 +3011,7 @@ public:
 		if (!parseScratchBasename(s_Sess.PendingActionBasename, sk, cx, cy) || sk != 'E')
 			return;
 		if (!s_SessionBridge || !s_SessionBridge->scratchPlace) return;
-		// M24b: with more than one open brick, pick the instance source first
+		// With more than one open brick, pick the instance source first
 		if (s_SessionBridge->scratchPlaceInstanceOf && s_SessionBridge->scratchOpenFileCount
 		    && s_SessionBridge->scratchOpenFileCount() > 1)
 		{
@@ -3053,7 +3045,7 @@ public:
 };
 REGISTER_ACTION_HANDLER(CAHZpEmptyPlaceContext, "zp_empty_place_context");
 
-// M24a: empty cell → open a world brick as EDITABLE at this cell (multi-file eco editing)
+// Empty cell → open a world brick as EDITABLE at this cell (multi-file eco editing)
 class CAHZpEmptyOpenEditable : public IActionHandler
 {
 public:
@@ -3070,7 +3062,7 @@ public:
 };
 REGISTER_ACTION_HANDLER(CAHZpEmptyOpenEditable, "zp_empty_open_editable");
 
-// M24c: one-click open of the cell's saved-neighbor hint (read-only / editable)
+// One-click open of the cell's saved-neighbor hint (read-only / editable)
 static void zpEmptyOpenHint(bool editable)
 {
 	CWidgetManager::getInstance()->disableModalWindow();
@@ -3161,7 +3153,7 @@ public:
 };
 REGISTER_ACTION_HANDLER(CAHZpContextRemove, "zp_context_remove");
 
-// M24a: context brick → editable open file at the same cell
+// Context brick → editable open file at the same cell
 class CAHZpContextMakeEditable : public IActionHandler
 {
 public:
@@ -3193,7 +3185,7 @@ public:
 };
 REGISTER_ACTION_HANDLER(CAHZpContextMakeEditable, "zp_context_make_editable");
 
-// M24c: context brick rotate/mirror (same block-center rules as instances)
+// Context brick rotate/mirror (same block-center rules as instances)
 static void zpContextTransformAction(int rotDelta, bool mirror)
 {
 	CWidgetManager::getInstance()->disableModalWindow();

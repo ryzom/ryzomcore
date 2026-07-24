@@ -1,18 +1,16 @@
 /**
  * \file context_display.h
- * \brief Include-meshes context display + scene lights for the zone painter (P3d)
+ * \brief Include-meshes context display + scene lights for the zone painter
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
  *
- * The in-Max painter's "include meshes" option displayed the scene's non-zone meshes in the
- * painting viewport with the scene ambient and driver lights (paint.cpp myThread), and always
- * ran CPaintLight (point-light models feeding the scene lighting system). This TU ports both,
- * building shapes headlessly through the shape exporter's shared evaluation sources (the clod
- * reuse pattern: scene_lib/mesh_eval/material_build/mesh_build compiled in, no exporter source
- * modified) and decoding lights through the lightmapper's light decode (lm_scene_build).
+ * Ports the in-Max "include meshes" path (non-zone shapes in the paint viewport, scene ambient
+ * and driver lights) plus CPaintLight point-light models. Shapes build through the shape
+ * exporter's shared evaluation (scene_lib/mesh_eval/material_build/mesh_build); lights decode
+ * through lm_scene_build.
  *
- * Kept in its own TU: the SCENELIB headers and the painter's patch_eval.h implementation unit
- * each define their own node-TM helpers; they must not share a translation unit.
+ * Own TU: SCENELIB and the painter's patch_eval.h each define node-TM helpers and must not
+ * share a translation unit.
  */
 
 /*
@@ -73,7 +71,7 @@ struct SContextStats
 
 /** Out-of-the-box texture resolution for the context meshes: the built shapes carry BARE
  *	texture names (the export convention), but the materials' ParamBlock2 storage retains the
- *	AUTHORED absolute paths (the "R:\\graphics\\..." class) — in the PBBitmap trailing 0x0003
+ *	AUTHORED absolute paths (the "R:\\graphics\\..." class) in the PBBitmap trailing 0x0003
  *	containers (UTF-16 path child) and in filename string params. Every authored path is
  *	resolved through DBPATH (the same mapping the xref/ig machinery uses; the database root is
  *	derived from the input path with the ig/cmb convention when unset) and each resolved
@@ -85,7 +83,7 @@ uint registerContextTexturePaths(PMAXLOAD::SLoadedMax &lm, const std::string &in
                                  uint &resolvedOut, uint &missingOut);
 
 /** Second-stage texture resolution over the BUILT shapes' material texture names: names the
- *	registered directories cannot serve (the game-facing seasonal vegetation set — shapes
+ *	registered directories cannot serve (the game-facing seasonal vegetation set: shapes
  *	store `name.tga`, only `name_sp.dds` etc. exist, converted next to the ecosystem bank)
  *	are remapped per file to the first season variant found (spring first, the reference
  *	default). Fills resolved/missing counts over the unique texture names.
@@ -93,12 +91,12 @@ uint registerContextTexturePaths(PMAXLOAD::SLoadedMax &lm, const std::string &in
 void resolveContextShapeTextures(const SContextStats &stats, uint &resolvedOut, uint &missingOut);
 
 /** Out-of-the-box texture resolution for the LANDSCAPE side: the bank references unpostfixed
- *	authored names (tile diffuse/additive/alpha bitmaps, displacement maps — e.g.
+ *	authored names (tile diffuse/additive/alpha bitmaps, displacement maps, e.g.
  *	alpha_noiseb_00.png) while the workspace carries only season-postfixed converted files
  *	(ecosystems/<eco>/tiles/<base>_<season>.dds next to the smallbank, or the
  *	landscape/_texture_tiles/<eco>_<season> sources). Registers the bank's sibling tiles/ and
  *	diplace/ dirs plus a per-name CPath::remapFile to a season-postfixed variant (preferred
- *	season first when set via setSeasonPreference, else discovery order starting at _sp) —
+ *	season first when set via setSeasonPreference, else discovery order starting at _sp),
  *	the same fallback the context-mesh names use. Re-calling after a preference change
  *	re-applies remaps (live season toggle). */
 void resolveBankTextures(NL3D::CTileBank &bank, const std::string &bankPath,
@@ -111,7 +109,7 @@ void resolveNamesWithSeasons(const std::set<std::string> &names, const char *wha
                              uint &resolvedOut, uint &missingOut);
 
 // ---------------------------------------------------------------------------------------------
-// Season preference (ui M6a). Painting data is season-independent; only texture remaps change.
+// Season preference. Painting data is season-independent; only texture remaps change.
 
 /** Season codes: "sp" spring, "su" summer, "au" autumn, "wi" winter. Empty = auto (first
  *	available postfix, historically _sp). Invalid codes return false without changing state. */

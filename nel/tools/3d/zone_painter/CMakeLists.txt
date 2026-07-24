@@ -1,8 +1,8 @@
 FILE(GLOB SRCS *.cpp)
 FILE(GLOB HDRS *.h)
 
-# The include-meshes context display (P3d) shares the shape exporter's evaluation sources —
-# the clod reuse pattern (compile-in, no exporter source modified). lm_scene_build carries the
+# The include-meshes context display shares the shape exporter's evaluation sources
+# (compile-in clod reuse; no exporter source modified). lm_scene_build carries the
 # scene light decode the paint-light setup rides on.
 ADD_EXECUTABLE(zone_painter
 	${SRCS}

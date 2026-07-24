@@ -1,6 +1,6 @@
 /**
  * \file script_api.cpp
- * \brief painterscript — Lua binding over the paint op layer (ui M23)
+ * \brief painterscript: Lua binding over the paint op layer
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
  *
@@ -10,7 +10,7 @@
  * Binding style: wrapped functions (CLuaState&) registered as __zp_* globals, then a
  * bootstrap chunk builds the `painter` table (Ryzom client Lua conventions: camelCase,
  * namespaced table; MaxScript-familiar verbs). Every op returns either true or
- * (nil, "error string") — standard Lua error-return idiom, no exceptions across the
+ * (nil, "error string"): standard Lua error-return idiom, no exceptions across the
  * C boundary.
  */
 
@@ -60,11 +60,11 @@ static SScriptHost *s_Host = NULL;
 static bool s_Registered = false;
 static bool s_Executing = false;
 static bool s_Recording = false;
-static bool s_CancelReq = false; // Script-window CANCEL button (M23d); ESC rides the host
+static bool s_CancelReq = false; // Script-window CANCEL button; ESC rides the host
 static std::string s_Recorder;
 static std::string s_Output;
 static std::string s_LastError;
-// Mutation counters: the Script window's panes sync on these instead of text length —
+// Mutation counters: the Script window's panes sync on these instead of text length;
 // a same-length content change (CLEAR + same-length line in one frame) left stale text.
 static uint s_RecorderGen = 0;
 static uint s_OutputGen = 0;
@@ -95,7 +95,7 @@ void setRecording(bool on)
 	if (!starting)
 		return;
 	// REC preamble (replay fidelity): a recording started mid-session replays against a
-	// fresh process — a default RNG stream and default painter state — so tile-variant
+	// fresh process (default RNG stream and default painter state), so tile-variant
 	// picks and stroke results diverged even when every action was captured. Reseed BOTH
 	// the live session and the recording with the same value, then snapshot the paint-
 	// relevant state as abs painter.* lines (states recorded on *change* only miss the
@@ -173,7 +173,7 @@ static bool argString(CLuaState &ls, int idx, std::string &out)
 
 /** String arg destined for an op line: op lines are space-tokenized, so embedded
  *	whitespace would silently smuggle extra tokens (a "rrggbb blend" color string)
- *	or truncate ("my mask.tga" loses its tail) — refuse instead. */
+ *	or truncate ("my mask.tga" loses its tail); refuse instead. */
 static bool argToken(CLuaState &ls, int idx, std::string &out)
 {
 	if (!argString(ls, idx, out)) return false;
@@ -298,7 +298,7 @@ static int lFillColor(CLuaState &ls) // painter.fillColor(zone,patch,"rrggbb"[,b
 
 static int lColorBrush(CLuaState &ls) // painter.colorBrush(zone,x,y,radius,"rrggbb",hard,opac[,zWorld[,cont]])
 {
-	// %.9g: float32 round-trips exactly — the recorder's old %.3f quantized the hit
+	// %.9g: float32 round-trips exactly; the recorder's old %.3f quantized the hit
 	// position, and distance-based blend weights made replays only approximate.
 	double a[4]; std::string err, rgb;
 	if (!argNumbers(ls, 4, a, "colorBrush(zone,x,y,radius,\"rrggbb\",hardness,opacity[,zWorld[,cont]])", err))
@@ -310,7 +310,7 @@ static int lColorBrush(CLuaState &ls) // painter.colorBrush(zone,x,y,radius,"rrg
 	double zw;
 	if (argNumber(ls, 8, zw))
 	{
-		// cont (bool, 9th): stroke-aware form — commit comes from painter.endStroke()
+		// cont (bool, 9th): stroke-aware form; commit comes from painter.endStroke()
 		if (ls.getTop() >= 9)
 		{
 			bool cont = argBoolOpt(ls, 9, false);
@@ -325,12 +325,12 @@ static int lColorBrush(CLuaState &ls) // painter.colorBrush(zone,x,y,radius,"rrg
 		(uint)a[0], a[1], a[2], a[3], rgb.c_str(), (uint)hard, (uint)opac));
 }
 
-static int lTileStroke(CLuaState &ls) // painter.tileStroke(zone,patch,u,v,set[,big[,cont]]) — mouse-path stroke (brush size applies)
+static int lTileStroke(CLuaState &ls) // painter.tileStroke(zone,patch,u,v,set[,big[,cont]]); mouse-path stroke (brush size applies)
 {
 	double a[5]; std::string err;
 	if (!argNumbers(ls, 5, a, "tileStroke(zone,patch,u,v,set[,big[,cont]])", err)) return retErr(ls, err);
 	bool big = argBoolOpt(ls, 6, false);
-	// cont (bool, 7th): stroke-aware form — first line of a drag passes false, moves pass
+	// cont (bool, 7th): stroke-aware form; first line of a drag passes false, moves pass
 	// true, and the commit comes from painter.endStroke(); without it each line is a
 	// self-contained stroke (legacy scripts keep their behavior).
 	// set is signed (-1 = clear sentinel).
@@ -345,7 +345,7 @@ static int lTileStroke(CLuaState &ls) // painter.tileStroke(zone,patch,u,v,set[,
 		(uint)a[0], (uint)a[1], (uint)a[2], (uint)a[3], (int)a[4], big ? 1u : 0u));
 }
 
-static int lEndStroke(CLuaState &ls) // painter.endStroke() — commit the open stroke (mouse-up)
+static int lEndStroke(CLuaState &ls) // painter.endStroke(); commit the open stroke (mouse-up)
 {
 	return execOpRet(ls, "endstroke");
 }
@@ -379,17 +379,17 @@ static int lSetTileGroup(CLuaState &ls) // painter.setTileGroup(0..12)
 
 static int lSetBrushMask(CLuaState &ls) // painter.setBrushMask("file.tga"|"none")
 {
-	std::string s; if (!argToken(ls, 1, s)) return retErr(ls, "usage: setBrushMask(\"file.tga\"|\"none\") — no whitespace in the name");
+	std::string s; if (!argToken(ls, 1, s)) return retErr(ls, "usage: setBrushMask(\"file.tga\"|\"none\"); no whitespace in the name");
 	return execOpRet(ls, "mask " + s);
 }
 
-static int lSetLockBorders(CLuaState &ls) // painter.setLockBorders(bool) — core state, headless-capable
+static int lSetLockBorders(CLuaState &ls) // painter.setLockBorders(bool); core state, headless-capable
 {
 	bool on = argBoolOpt(ls, 1, true);
 	return execOpRet(ls, on ? "lockborders 1" : "lockborders 0");
 }
 
-static int lSetMaskMode(CLuaState &ls) // painter.setMaskMode(bool) — core state, headless-capable
+static int lSetMaskMode(CLuaState &ls) // painter.setMaskMode(bool); core state, headless-capable
 {
 	bool on = argBoolOpt(ls, 1, true);
 	return execOpRet(ls, on ? "maskmode 1" : "maskmode 0");
@@ -487,13 +487,13 @@ static int lScreenshot(CLuaState &ls) // painter.screenshot("out.tga")
 	return retOk(ls);
 }
 
-static int lOpenZone(CLuaState &ls) // painter.openZone("basename"[,cx,cy]) — board session
+static int lOpenZone(CLuaState &ls) // painter.openZone("basename"[,cx,cy]); board session
 {
 	std::string base;
 	if (!argString(ls, 1, base)) return retErr(ls, "usage: openZone(\"basename\"[,cx,cy])");
 	std::string err;
-	// M31: the 3-arg form opens at an eco board cell (scratchOpenEditable); the 1-arg
-	// form stays the continent open (eco sessions refuse it — they need a cell).
+	// 3-arg form opens at an eco board cell (scratchOpenEditable); 1-arg form is the
+	// continent open (eco sessions refuse it; they need a cell).
 	double cx = 0, cy = 0;
 	if (ls.getTop() >= 2)
 	{
@@ -508,7 +508,7 @@ static int lOpenZone(CLuaState &ls) // painter.openZone("basename"[,cx,cy]) — 
 	return retOk(ls);
 }
 
-static int lPlaceInstance(CLuaState &ls) // painter.placeInstance(cx,cy[,"basename"]) — eco board
+static int lPlaceInstance(CLuaState &ls) // painter.placeInstance(cx,cy[,"basename"]); eco board
 {
 	double a[2];
 	std::string err;
@@ -520,7 +520,7 @@ static int lPlaceInstance(CLuaState &ls) // painter.placeInstance(cx,cy[,"basena
 	return retOk(ls);
 }
 
-static int lRemoveInstance(CLuaState &ls) // painter.removeInstance(cx,cy) — eco board
+static int lRemoveInstance(CLuaState &ls) // painter.removeInstance(cx,cy); eco board
 {
 	double a[2];
 	std::string err;
@@ -530,7 +530,7 @@ static int lRemoveInstance(CLuaState &ls) // painter.removeInstance(cx,cy) — e
 	return retOk(ls);
 }
 
-static int lRotateInstance(CLuaState &ls) // painter.rotateInstance(cx,cy[,delta=1]) — eco board
+static int lRotateInstance(CLuaState &ls) // painter.rotateInstance(cx,cy[,delta=1]); eco board
 {
 	double a[2];
 	std::string err;
@@ -542,7 +542,7 @@ static int lRotateInstance(CLuaState &ls) // painter.rotateInstance(cx,cy[,delta
 	return retOk(ls);
 }
 
-static int lMirrorInstance(CLuaState &ls) // painter.mirrorInstance(cx,cy) — eco board
+static int lMirrorInstance(CLuaState &ls) // painter.mirrorInstance(cx,cy); eco board
 {
 	double a[2];
 	std::string err;
@@ -564,10 +564,10 @@ static int lCloseZone(CLuaState &ls) // painter.closeZone("basename"[,saveFirst[
 	return retOk(ls);
 }
 
-// M33 board-op completion — context specs, promote, cell drag, RO toggle, per-file save.
-// Same host-wrapper idiom as the M31 instance ops; hosts gate eco/continent themselves.
+// Board-op completion: context specs, promote, cell drag, RO toggle, per-file save.
+// Same host-wrapper idiom as the instance ops; hosts gate eco/continent themselves.
 
-static int lPlaceContext(CLuaState &ls) // painter.placeContext(cx,cy,"basename") — eco board
+static int lPlaceContext(CLuaState &ls) // painter.placeContext(cx,cy,"basename"); eco board
 {
 	double a[2];
 	std::string err, base;
@@ -579,7 +579,7 @@ static int lPlaceContext(CLuaState &ls) // painter.placeContext(cx,cy,"basename"
 	return retOk(ls);
 }
 
-static int lRemoveContext(CLuaState &ls) // painter.removeContext(cx,cy) — eco board
+static int lRemoveContext(CLuaState &ls) // painter.removeContext(cx,cy); eco board
 {
 	double a[2];
 	std::string err;
@@ -589,7 +589,7 @@ static int lRemoveContext(CLuaState &ls) // painter.removeContext(cx,cy) — eco
 	return retOk(ls);
 }
 
-static int lRotateContext(CLuaState &ls) // painter.rotateContext(cx,cy[,delta=1]) — eco board
+static int lRotateContext(CLuaState &ls) // painter.rotateContext(cx,cy[,delta=1]); eco board
 {
 	double a[2];
 	std::string err;
@@ -601,7 +601,7 @@ static int lRotateContext(CLuaState &ls) // painter.rotateContext(cx,cy[,delta=1
 	return retOk(ls);
 }
 
-static int lMirrorContext(CLuaState &ls) // painter.mirrorContext(cx,cy) — eco board
+static int lMirrorContext(CLuaState &ls) // painter.mirrorContext(cx,cy); eco board
 {
 	double a[2];
 	std::string err;
@@ -611,7 +611,7 @@ static int lMirrorContext(CLuaState &ls) // painter.mirrorContext(cx,cy) — eco
 	return retOk(ls);
 }
 
-static int lMakeEditable(CLuaState &ls) // painter.makeEditable(cx,cy) — promote RO context
+static int lMakeEditable(CLuaState &ls) // painter.makeEditable(cx,cy); promote RO context
 {
 	double a[2];
 	std::string err;
@@ -621,7 +621,7 @@ static int lMakeEditable(CLuaState &ls) // painter.makeEditable(cx,cy) — promo
 	return retOk(ls);
 }
 
-static int lMoveCell(CLuaState &ls) // painter.moveCell(fx,fy,tx,ty) — board drag move
+static int lMoveCell(CLuaState &ls) // painter.moveCell(fx,fy,tx,ty); board drag move
 {
 	double a[4];
 	std::string err;
@@ -632,7 +632,7 @@ static int lMoveCell(CLuaState &ls) // painter.moveCell(fx,fy,tx,ty) — board d
 	return retOk(ls);
 }
 
-static int lCopyCell(CLuaState &ls) // painter.copyCell(fx,fy,tx,ty) — board drag copy
+static int lCopyCell(CLuaState &ls) // painter.copyCell(fx,fy,tx,ty); board drag copy
 {
 	double a[4];
 	std::string err;
@@ -656,7 +656,7 @@ static int lToggleZone(CLuaState &ls) // painter.toggleZone("basename"[,saveFirs
 	return retOk(ls);
 }
 
-static int lSaveZone(CLuaState &ls) // painter.saveZone("basename") — per-file board save
+static int lSaveZone(CLuaState &ls) // painter.saveZone("basename"); per-file board save
 {
 	std::string base;
 	if (!argString(ls, 1, base)) return retErr(ls, "usage: saveZone(\"basename\")");
@@ -693,7 +693,7 @@ static int lGetMode(CLuaState &ls)
 {
 	ZPUI::SPaintUIBridge *b = bridge();
 	if (!b) return retErr(ls, "getMode: viewer only");
-	// Snapshot fields are frame-synced and STALE for the whole script run — refresh first
+	// Snapshot fields are frame-synced and STALE for the whole script run; refresh first
 	if (s_Host && s_Host->refreshBridge) s_Host->refreshBridge();
 	ls.push((double)b->Mode);
 	return 1;
@@ -712,7 +712,7 @@ static int lGetTileSet(CLuaState &ls)
 {
 	ZPUI::SPaintUIBridge *b = bridge();
 	if (!b) return retErr(ls, "getTileSet: viewer only");
-	// Snapshot fields are frame-synced and STALE for the whole script run — refresh first
+	// Snapshot fields are frame-synced and STALE for the whole script run; refresh first
 	if (s_Host && s_Host->refreshBridge) s_Host->refreshBridge();
 	ls.push((double)b->CurTileSet);
 	return 1;
@@ -747,7 +747,7 @@ static int lSetSeason(CLuaState &ls) // painter.setSeason("sp"|"su"|"au"|"wi")
 	return retOk(ls);
 }
 
-static int lSet256(CLuaState &ls) // painter.set256(bool) — 128/256 mouse-stroke mode
+static int lSet256(CLuaState &ls) // painter.set256(bool); 128/256 mouse-stroke mode
 {
 	bool on = argBoolOpt(ls, 1, true);
 	ZPUI::SPaintUIBridge *b = bridge();
@@ -784,7 +784,7 @@ static int lSetRadius(CLuaState &ls) // painter.setRadius(meters 2..32)
 }
 
 // ---------------------------------------------------------------------------------------------
-// Recorder API (window lands in M23b; the API is stable from M23a)
+// Recorder API
 
 static int lSetRecording(CLuaState &ls)
 {

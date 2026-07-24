@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # M31: byte-equivalence gates anchored on the SESSION path (the actual application),
 # not the legacy CLI. The codec corpus gates (--rpo-selftest / ctest #25) stay on the
-# minimal legacy chain by design — these gates prove the SAME guarantee holds through
+# minimal legacy chain by design - these gates prove the SAME guarantee holds through
 # session assembly, board translation, and the interactive save flow.
 #  1. Workspace-session no-op save (--no-hint-stamp --no-thumbnail) is BYTE-IDENTICAL
 #     to the legacy null-edit output of the same file (cross-path identity).

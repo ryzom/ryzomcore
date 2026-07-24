@@ -2,7 +2,7 @@
 # M33: board-op recorder fidelity. UI-path board ops (env hooks = the same shared op
 # functions the board menus call) recorded with REC on, the recording extracted and
 # replayed in a FRESH session, and the replayed save must be BYTE-IDENTICAL to the
-# recorded run's save. Hint stamping stays ON — the stamp encodes the board layout
+# recorded run's save. Hint stamping stays ON - the stamp encodes the board layout
 # (moved home cell, context placement), so layout drift between record and replay is
 # byte-visible in the saved file. Outputs under /tmp/zp_ui only. Needs xvfb-run.
 set -euo pipefail

@@ -33,7 +33,7 @@
 <variable entry="UI:VARIABLES:ALPHA_ROLLOVER_CONTENT" type="sint32" value="0" />
 <variable entry="UI:VARIABLES:USER_ALPHA" type="sint32" value="255" />
 
-<!-- Values driven by the showcase widgets -->
+<!-- Runtime values driven by color picker and related widgets -->
 <variable entry="UI:TEMP:SLIDERH" type="sint32" value="220" />
 <variable entry="UI:TEMP:SLIDERV" type="sint32" value="160" />
 <variable entry="UI:TEMP:COMBO" type="sint32" value="0" />

@@ -3,10 +3,10 @@
 <!-- Shared widget styles (legacy "w_" skin), mirrored from the GUI sample. -->
 
 <!-- CGroupMenu's <separator/> needs these two templates registered globally
-     (createGroupInstance("menu_separator", ...) — nel/src/gui/group_menu.cpp);
-     without them every context menu's separator silently fails to spawn (a
-     console warning, not a crash) and the menu just skips the gap. Copied
-     verbatim from nel_sample_gui's widgets_sample.xml. -->
+     (createGroupInstance("menu_separator", ...); nel/src/gui/group_menu.cpp).
+     Without them every context menu separator silently fails to spawn (console
+     warning, not a crash) and the menu skips the gap. Copied from
+     nel_sample_gui's widgets_sample.xml. -->
 <template name="menu_separator" keep="true">
 	<group id="sep_gr" posref="BL BL" sizeref="w" w="0" h="4">
 		<view type="bitmap" id="m" scale="true" w="0" h="0" sizeref="wh" texture="w_line_hor3.tga" />
@@ -23,7 +23,7 @@
 	text_y="0" fontsize="12" shadow="true" case_mode="%case_upper" wmargin="8"
 	text_color_normal="255 255 255 128" text_color_pushed="255 255 255 255" text_color_over="255 255 255 255" />
 
-<!-- List/grid rows: preserve filename casing (M3c nit; panel chrome keeps upper). -->
+<!-- List/grid rows: preserve filename casing (panel chrome keeps upper). -->
 <style style="text_button_16_name" type="text_button" button_type="push_button"
 	tx_normal="w_text_button_normal" tx_pushed="w_text_button_pushed" tx_over="w_text_button_over"
 	global_color_normal="false" global_color_over="false" global_color_pushed="false"
@@ -42,7 +42,7 @@
 	text_y="0" fontsize="12" shadow="true" case_mode="%case_upper" wmargin="8"
 	text_color_normal="255 255 255 128" text_color_pushed="255 255 255 255" text_color_over="255 255 255 255" />
 
-<!-- M14c/M15 top toolbar: compact square text-only buttons.
+<!-- Top toolbar: compact square text-only buttons.
      Pushed state uses full white + the skin's pushed face so mode radios read clearly. -->
 <style style="zp_tb_btn" type="text_button" button_type="push_button"
 	tx_normal="w_text_button_normal" tx_pushed="w_text_button_pushed" tx_over="w_text_button_over"

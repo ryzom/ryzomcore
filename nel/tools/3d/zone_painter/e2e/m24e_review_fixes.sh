@@ -34,7 +34,7 @@ ln -sfn "$GFX/landscape/_texture_tiles" "$WS/landscape/_texture_tiles"
 : > "$LOGDIR/m24e_empty.script"
 
 # Full log to file, key lines echoed, exit code ASSERTED (the old tee|grep pipeline
-# swallowed nonzero exits — a crash after the asserted lines printed still passed).
+# swallowed nonzero exits - a crash after the asserted lines printed still passed).
 # Extra env for the drag/board hooks rides via ZP_ENV (name=value pairs).
 run_zp() { # $1 = log file, $2 = display grep pattern, rest = args
 	local log="$1" pat="$2"
@@ -78,9 +78,9 @@ run_zp "$LOGDIR/m24e_prim_place.log" "place\[|instances:" \
 	"$WS" --startup-auto "lacustre/zonematerial-bassin-ilot_croix" \
 	--place "0,5:zonematerial-bassin-ilot_croix" \
 	--dump-zones "$LOGDIR/m24e_prim_zones"
-# Anchored: "+1 (ids from" — a bare "+1" also matched "+10".."+19"
+# Anchored: "+1 (ids from" - a bare "+1" also matched "+10".."+19"
 grep -aq "display zones +1 (ids from" "$LOGDIR/m24e_prim_place.log"
-! grep -aq "not open — place skipped" "$LOGDIR/m24e_prim_place.log"
+! grep -aq "not open: place skipped" "$LOGDIR/m24e_prim_place.log"
 
 echo "===== M24e-5: non-primary hint carrier rebases context placement ====="
 run_zp "$LOGDIR/m24e_peek_save.log" "neighbor-hints write|OK save" \

@@ -59,7 +59,7 @@ printf 'tile 0 0 1 1 1\ntile 1000 0 1 1 1\ndisplace 1000 1 2 2 3\nundo\nundo\nun
 cmp "$OUT/fond_empty.max" "$WS/landscape/ligo/lacustre/max/material-fond.max"
 cmp "$OUT/peek_empty.max" "$WS/landscape/ligo/lacustre/max/material-peek.max"
 
-echo "===== M24a: reopen second brick — hint auto-loads the first as RO ====="
+echo "===== M24a: reopen second brick - hint auto-loads the first as RO ====="
 run_zp "$LOGDIR/m24a_reopen.log" "neighbor-hints:|context '|^zone" \
 	"$WS" --startup-auto "lacustre/material-peek" --dump-zones "$OUT/reopen_zones"
 grep -q "neighbor-hints: source=appdata raw=1 resolved=1" "$LOGDIR/m24a_reopen.log"

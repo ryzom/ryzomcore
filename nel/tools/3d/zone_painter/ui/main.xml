@@ -22,8 +22,8 @@
 <!-- Startup row templates (filled at runtime via createGroupInstance)     -->
 <!-- ===================================================================== -->
 
-<!-- World row (M25p7: flat listbox, not a button — see zp_folder_row for the rationale).
-     primary hit row + path subtitle. idx is the worlds[] index. -->
+<!-- World row: flat listbox (not a bordered button); primary hit row + path subtitle.
+     idx is the worlds[] index. -->
 <template name="zp_world_row" keep="true" id="" title="" subtitle="" idx="0">
 	<group id="#id" w="500" h="34">
 		<ctrl type="button" id="btn" button_type="push_button" posref="TL TL" x="0" y="0" w="500" h="34" scale="true"
@@ -35,26 +35,16 @@
 			global_color="false" color="230 232 235 255" hardtext="#title" />
 		<view type="text" id="sub" posparent="name" posref="BL TL" x="0" y="-1" fontsize="10" shadow="true"
 			global_color="false" color="170 180 190 200" hardtext="#subtitle" line_maxw="490" />
-		<!-- M25 review: no hairline separator here (dropped the M25p9 one) — these are
-		     two-line tiles grouped under section headers (Ecosystems/Continents), same
-		     class as zp_zone_row's thumbnail tiles, not a single-line detail listview
-		     like zp_folder_row. -->
+		<!-- No hairline separator: two-line tiles under section headers, not a single-line
+		     detail listview like zp_folder_row. -->
 	</group>
 </template>
 
-<!-- Zone row (ecosystem list, M25p7: flat listbox): optional 32x32 thumb in a CGroupFrame
-     inset + a transparent hit row (was a bordered text button next to the thumb — same
-     wall-of-buttons issue as the folder browser, just partly hidden behind real thumbnail
-     art). Code activates thumb_frame+thumb only when a preview exists (no empty dark square
-     for missing thumbs) and re-anchors "btn"+"name" to the row's own left edge when there's
-     no thumb (unchanged from before — see the C++ hasThumb tuck).
-     M10e: no row-level multi-select concept — L-click opens immediately; leave as-is.
-     M25p9: NO hairline separator here unlike zp_folder_row — with the thumbnail icon this
-     reads as a WinXP-style grouped tile view, not a detail listview, and grid lines are the
-     wrong idiom for a tile view (user direction). Hover/press tint stays as the per-tile
-     selection highlight, same as icon-view selection in that reference. zp_world_row (below)
-     dropped its separator for the same reason (M25 review: multi-line tiles under grouped
-     headers, not single-line rows) — zp_folder_row is now the only template that keeps one. -->
+<!-- Zone row (ecosystem list): optional 32x32 thumb in a CGroupFrame inset + transparent hit row.
+     Code activates thumb_frame+thumb only when a preview exists (no empty square for missing thumbs)
+     and re-anchors btn+name to the row's left edge when there is no thumb (C++ hasThumb tuck).
+     L-click opens immediately; no row multi-select. No hairline separator (tile/icon view, not
+     detail listview; zp_folder_row is the only row template that keeps one). -->
 <template name="zp_zone_row" keep="true" id="" title="" idx="0" thumb="">
 	<group id="#id" w="560" h="36">
 		<!-- 9-slice inset (w_box_frame); inactive until a real thumb is bound. -->
@@ -73,9 +63,9 @@
 	</group>
 </template>
 
-<!-- Tileset palette cell (M8/M10e): Explorer-style — flat blank.tga selection fill + w_box well on texture only.
+<!-- Tileset palette cell: Explorer-style flat blank.tga selection fill + w_box well on texture only.
      L-click selects via zp_tileset_abs. Button is hit target + fill (color driven from C++; not slot brick).
-     Note: normal-state color attr is "color" (not col_normal) — see CCtrlBaseButton::parse. -->
+     Note: normal-state color attr is "color" (not col_normal); see CCtrlBaseButton::parse. -->
 <template name="zp_tileset_cell" keep="true" id="" title="" idx="0" thumb="">
 	<group id="#id" w="96" h="92">
 		<!-- Hit target + flat Explorer fill (transparent until C++ setColor; hover via col_over). -->
@@ -96,7 +86,7 @@
 	</group>
 </template>
 
-<!-- Displace palette cell (M9a/M10e): same Explorer-style anatomy; zp_displace_abs (0-15). -->
+<!-- Displace palette cell: same Explorer-style anatomy; zp_displace_abs (0-15). -->
 <template name="zp_displace_cell" keep="true" id="" title="" idx="0" thumb="">
 	<group id="#id" w="96" h="92">
 		<ctrl type="button" id="btn" button_type="push_button" posref="MM MM" x="0" y="0"
@@ -115,8 +105,8 @@
 	</group>
 </template>
 
-<!-- Continent board cell (M5a/M10e): Explorer-style fill on multi-select; well on thumb only.
-     R-click toggles multi-select (M6b); L-click opens. Fringe uses zp_board_empty (unchanged). -->
+<!-- Continent board cell: Explorer-style fill on multi-select; well on thumb only.
+     R-click toggles multi-select; L-click opens. Fringe uses zp_board_empty. -->
 <template name="zp_board_cell" keep="true" id="" title="" idx="0" thumb="">
 	<group id="#id" w="52" h="52">
 		<!-- Explicit 52x52 (not only sizeref) so headless board layout always gets a full-cell fill. -->
@@ -127,13 +117,13 @@
 			global_color_normal="false" global_color_pushed="false" global_color_over="false"
 			onclick_l="zp_select_zone" params_l="#idx"
 			onclick_r="zp_toggle_zone_select" params_r="#idx" />
-		<!-- Optional embedded/.png thumb well (M5b activates when a cache path exists). -->
+		<!-- Optional embedded/.png thumb well (code activates when a cache path exists). -->
 		<group type="frame" id="thumb_frame" options="w_box_frame" posref="TM TM" x="0" y="-3" w="44" h="28"
 			color="255 255 255 255" global_color="false" display="true" active="false">
 			<view type="bitmap" id="thumb" posref="MM MM" w="36" h="20" scale="true"
 				texture="#thumb" global_color="false" active="false" />
 		</group>
-		<!-- M14b: multi-line wrap (2–3 lines); ellipsis via multi_max_line when exhausted.
+		<!-- Multi-line wrap (2-3 lines); ellipsis via multi_max_line when exhausted.
 		     Board labels strip family prefixes in code (list rows keep full names). -->
 		<view type="text" id="t" posref="BM BM" x="0" y="2" w="50" fontsize="9" shadow="true"
 			global_color="false" color="255 255 255 255" hardtext="#title"
@@ -150,10 +140,9 @@
 	</group>
 </template>
 
-<!-- Large-icon zone tile (M29: zone browser grid mode — the tileset-palette idiom at
-     zone scale). 64px thumb in a sunken well, name wrapped below, transparent full-tile
-     hit button with the standard hover/press tint. Spawned into zp_zone_flow_sec
-     sections at 0,0 (M29c) — the zp_flow group assigns wrap slots in updateCoords. -->
+<!-- Large-icon zone tile (zone browser grid mode). 64px thumb in a sunken well, name wrapped
+     below, transparent full-tile hit button. Spawned into zp_zone_flow_sec sections at 0,0;
+     the zp_flow group assigns wrap slots in updateCoords. -->
 <template name="zp_zone_tile" keep="true" id="" title="" idx="0" thumb="">
 	<group id="#id" w="178" h="106">
 		<ctrl type="button" id="btn" button_type="push_button" posref="TL TL" x="0" y="0" w="178" h="106" scale="true"
@@ -172,20 +161,18 @@
 	</group>
 </template>
 
-<!-- One auto-wrapping SECTION of zone tiles (M29c): the custom zp_flow group reflows
-     its children from its own width inside updateCoords — the Ryzom client inventory
-     mechanism — so window resizes re-wrap with no repopulation and no width watch. -->
-<!-- sizeparent="parent" here is a NO-OP (template parse runs before parenting, so it
-     resolves to NULL) — kept as documentation of intent only. The real fix is C++:
-     setParentSize(list) after spawn (startup_ui.cpp populateZoneList), because
-     CGroupList re-chains each child's pos parent to the PREVIOUS element and sizeref
-     follows the pos parent — the flow would size to the header row above it. -->
+<!-- One auto-wrapping SECTION of zone tiles: zp_flow reflows children from its own width
+     inside updateCoords (client inventory mechanism), so resizes re-wrap without repopulation. -->
+<!-- sizeparent="parent" is a NO-OP here (template parse runs before parenting, resolves to NULL);
+     kept as intent only. Real fix is C++ setParentSize(list) after spawn (startup_ui.cpp
+     populateZoneList): CGroupList re-chains each child's pos parent to the PREVIOUS element
+     and sizeref follows the pos parent, so without it the flow would size to the header row. -->
 <template name="zp_zone_flow_sec" keep="true" id="">
 	<group type="zp_flow" id="#id" tile_w="178" tile_h="106" sizeparent="parent" sizeref="w" w="-4" h="106" />
 </template>
 
 <!-- Section divider row for scroll_text lists (world/zone browser group headers).
-     Plain label + rule — not a frozen button dressed up as a header (M25 review nit). -->
+     Plain label + rule, not a button dressed as a header. -->
 <template name="zp_list_header" keep="true" id="" title="">
 	<group id="#id" w="520" h="22">
 		<view type="text" id="t" posref="BL BL" x="2" y="2" fontsize="11" shadow="true"
@@ -195,16 +182,9 @@
 	</group>
 </template>
 
-<!-- Folder browser row (M2c/M25p9): a real listview row, not a button and not a bare bullet
-     list either. Was a full bordered pill button per row (M2c) — "a wall of separate buttons".
-     Went fully flat/borderless next (M25p7) to fix that, but flat text alone reads as a
-     Word-document bullet list, not an obviously-clickable listview (user: "should be obvious
-     its clickable... really consider Win95 beveled panels"). Landed in between per user
-     direction: folders don't need the Friends-list-style per-row bevel/gradient, just a thin
-     hairline separator between items (`sep`) — same idea as a classic Explorer/listview grid
-     line — plus the existing hover/press highlight for click affordance. `hit` is a
-     transparent full-row button (blank.tga, invisible at rest) for the click target and that
-     highlight; `name`/`tag` are plain text on top. -->
+<!-- Folder browser row: listview row with hairline separator (sep) between items plus
+     hover/press highlight for click affordance. hit is a transparent full-row button
+     (blank.tga, invisible at rest); name/tag are plain text on top. -->
 <template name="zp_folder_row" keep="true" id="" title="" path="" tag="">
 	<group id="#id" w="500" h="19">
 		<ctrl type="button" id="hit" button_type="push_button" posref="TL TL" x="0" y="-1" w="500" h="18" scale="true"
@@ -222,13 +202,11 @@
 	</group>
 </template>
 
-<!-- M21a: labeled checkbox row (w_ checkbox pair from help/browser + game_config tgcw_checkbox).
-     Idiom: square toggle_button `box` is the canonical control (bridge setPushed/setFrozen
-     target :box). Label is a second transparent push_button `lbl` that calls the SAME
-     onclick handler as the box — so clicking either the square or the text toggles.
-     A non-interactive text view sits on top of `lbl` for the sentence-case caption.
-     Bridge re-syncs box pushed-state after either hit (AH toggles the property; sync
-     writes the result back). Frozen grays the box (half-tone) and the label hit. -->
+<!-- Labeled checkbox row (w_ checkbox pair). Square toggle_button box is the canonical
+     control (bridge setPushed/setFrozen targets :box). Label is a transparent push_button
+     lbl with the same onclick as the box so either hit toggles. Non-interactive text view
+     sits on top of lbl for the caption. Bridge re-syncs box pushed-state after either hit
+     (AH toggles the property; sync writes the result back). Frozen grays box and label hit. -->
 <template name="zp_checkbox_row" keep="true" id="" label="" onclick="" params=""
 	posparent="parent" posref="TL TL" x="0" y="0" pushed="false" w="200">
 	<group id="#id" posparent="#posparent" posref="#posref" x="#x" y="#y" w="#w" h="18">
@@ -252,10 +230,10 @@
 </template>
 
 <!-- ===================================================================== -->
-<!-- Screen A — world select                                               -->
+<!-- Screen A: world select                                                -->
 <!-- ===================================================================== -->
 <group type="container" id="world_select" w="560" pop_min_w="480" pop_max_w="700" h="480" pop_min_h="360" pop_max_h="580"
-	title="zone_painter — choose world" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
+	title="zone_painter: choose world" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
 	title_bar_open="false" open_button="false" right_button="true" lockable="false" openable="false"
 	opened="true" movable="true" active="false" x="120" y="540">
 	<group id="header_closed" x="0" y="0" h="12" posref="TL TL"></group>
@@ -266,12 +244,9 @@
 		<view type="text" id="status" posparent="hint" posref="BL TL" x="0" y="-4" fontsize="11" shadow="true"
 			global_color="false" color="255 200 120 220" hardtext="" />
 
-		<!-- M25p8: sunken 9-slice backdrop (w_box_frame — same dark-top/left, light-bottom/right
-		     bevel the Script window's code editor already uses) so the list reads as an inset
-		     panel rather than rows of text floating on the bare window background ("this isn't
-		     shitty flat web dev"). A sibling behind list_scroll, not a wrapping parent, so
-		     scroll_text keeps its own min/max-height resize behavior untouched; sized to its
-		     nominal w/h, which happens to line up with text_list's existing x=4/y=-4 padding. -->
+		<!-- Sunken 9-slice backdrop (w_box_frame). Sibling behind list_scroll, not a wrapping
+		     parent, so scroll_text keeps its min/max-height resize behavior; sized to nominal
+		     w/h to line up with text_list's x=4/y=-4 padding. -->
 		<group type="frame" id="list_frame" options="w_box_frame" posparent="status" posref="BL TL" x="0" y="-8"
 			w="530" h="360" color="255 255 255 255" global_color="false" display="true" />
 		<!-- Scrollable stack of world rows (list id must be text_list for scroll_text) -->
@@ -291,10 +266,10 @@
 <tree node="world_select"></tree>
 
 <!-- ===================================================================== -->
-<!-- Screen B — zone browser (list for ecosystems; name-grid for continents) -->
+<!-- Screen B: zone browser (list for ecosystems; name-grid for continents) -->
 <!-- ===================================================================== -->
 <group type="container" id="zone_browser" w="780" pop_min_w="480" pop_max_w="790" h="500" pop_min_h="360" pop_max_h="580"
-	title="zone_painter — choose zone" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
+	title="zone_painter: choose zone" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
 	title_bar_open="false" open_button="false" right_button="true" lockable="false" openable="false"
 	opened="true" movable="true" active="false" x="10" y="550">
 	<group id="header_closed" x="0" y="0" h="12" posref="TL TL"></group>
@@ -304,12 +279,12 @@
 			global_color="false" color="180 220 255 255" hardtext="World" />
 		<view type="text" id="world_sub" posparent="world_title" posref="BL TL" x="0" y="-2" fontsize="10" shadow="true"
 			global_color="false" color="180 190 200 200" hardtext="" line_maxw="750" />
-		<!-- M29: zone list display mode — detail tiles vs large-thumbnail grid (the
-		     tileset-palette idiom). Ecosystem Screen B only; code toggles active. -->
+		<!-- Zone list display mode: detail tiles vs large-thumbnail grid.
+		     Ecosystem Screen B only; code toggles active. -->
 		<ctrl style="text_button_toggle" id="btn_view_large" posref="TR TR" x="-14" y="-10"
 			onclick_l="zp_zone_view_toggle" params_l="" hardtext="Large icons" active="false" />
 
-		<!-- Ecosystem open layout (self-instances, M4b). Hidden on continents (active toggled in code). -->
+		<!-- Ecosystem open layout (self-instances). Hidden on continents (active toggled in code). -->
 		<view type="text" id="layout_label" posparent="world_sub" posref="BL TL" x="0" y="-6" fontsize="11" shadow="true"
 			global_color="false" color="255 255 255 180" hardtext="Open layout (self-instances):" active="false" />
 		<ctrl style="text_button_radio" id="layout_1x1" posparent="layout_label" posref="BL TL" x="0" y="-2"
@@ -323,8 +298,8 @@
 		<ctrl style="text_button_radio" id="layout_3x3" posparent="layout_2x2" posref="MR ML" x="4" y="0"
 			onclick_l="zp_set_instances" params_l="3x3" hardtext="3x3" active="false" />
 
-		<!-- M25p8: sunken 9-slice backdrop, see world_select's list_scroll for the rationale.
-		     M29b: width tracks the (resizable) window so the large-icon grid auto-wraps. -->
+		<!-- Sunken 9-slice backdrop (same pattern as world_select). Width tracks the resizable
+		     window so the large-icon grid auto-wraps. -->
 		<group type="frame" id="list_frame" options="w_box_frame" posparent="world_sub" posref="BL TL" x="0" y="-8"
 			sizeparent="parent" sizeref="w" w="-30" h="350" color="255 255 255 255" global_color="false" display="true" />
 		<!-- Ecosystem list: vertical scroll_text (unchanged). y: -8 under world_sub or below layout row. -->
@@ -335,7 +310,7 @@
 				tx_topright="w_scroll_l0_t.tga" tx_middle="w_scroll_l0_m.tga" tx_bottomleft="w_scroll_l0_b.tga" />
 		</group>
 
-		<!-- Continent board (M5a): minesweeper-style cell stamps + dual-axis scroll (interface_notes pattern).
+		<!-- Continent board: cell stamps + dual-axis scroll.
 		     board.w/h = content size (set in code); max_w/max_h = viewport clip.
 		     Scroll targets use absolute ids (relative "board" fails while board_host starts inactive). -->
 		<group id="board_host" posparent="world_sub" posref="BL TL" x="0" y="-8" w="750" h="350" active="false">
@@ -349,8 +324,8 @@
 				target="ui:zp:zone_browser:content:board_host:board" />
 		</group>
 
-		<!-- Legend + multi-open (M6b/M6c). Back stays content-anchored for list and board modes.
-		     Session hub (M11a): btn_back_paint + live-state legend; multi-open hidden. -->
+		<!-- Legend + multi-open. Back stays content-anchored for list and board modes.
+		     Session hub: btn_back_paint + live-state legend; multi-open hidden. -->
 		<view type="text" id="board_legend" posref="BL BL" x="12" y="36" fontsize="10" shadow="true"
 			global_color="false" color="180 190 200 200"
 			hardtext="L-click open · R-click select · fringe = edge-empty" active="false" />
@@ -358,7 +333,7 @@
 			onclick_l="zp_zone_back" params_l="" hardtext="Back" />
 		<ctrl style="text_button_16" id="btn_open_sel" posparent="btn_back" posref="MR ML" x="8" y="0"
 			onclick_l="zp_open_selection" params_l="" hardtext="Open selection" active="false" />
-		<!-- M11a session hub: return to painting without tearing the viewer session. -->
+		<!-- Session hub: return to painting without tearing the viewer session. -->
 		<ctrl style="text_button_16" id="btn_back_paint" posref="BL BL" x="12" y="12"
 			onclick_l="zp_back_to_paint" params_l="" hardtext="BACK TO PAINTING" active="false" />
 	</group>
@@ -366,28 +341,20 @@
 <tree node="zone_browser"></tree>
 
 <!-- ===================================================================== -->
-<!-- Screen C — folder browser (M2c; inactive until enabled)               -->
+<!-- Screen C: folder browser (inactive until enabled)                     -->
 <!-- ===================================================================== -->
 <group type="container" id="folder_browser" w="560" pop_min_w="480" pop_max_w="700" h="450" pop_min_h="310" pop_max_h="580"
-	title="zone_painter — browse for graphics" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
+	title="zone_painter: browse for graphics" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
 	title_bar_open="false" open_button="false" right_button="true" lockable="false" openable="false"
 	opened="true" movable="true" active="false" x="120" y="520">
 	<group id="header_closed" x="0" y="0" h="12" posref="TL TL"></group>
 	<group id="header_opened" x="0" y="0" w="0" h="16" posref="TL TL"></group>
 	<group id="content" x="0" y="0" posref="TL TL" w="0" h="0">
-		<!-- M25p6: one sparse Win98 "Look in:" toolbar row — was a breadcrumb chip trail
-		     plus a separate Up button plus a separate path row (M25p5); user feedback was
-		     "less button party on a sheet, more Windows 98", so this drops the chip row
-		     entirely and folds Up into the same line as the path field, same idea as a
-		     classic Open-dialog "Look in:" combo + toolbar. Address-bar-style path field
-		     anyone can type/paste an arbitrary destination into; Up covers the one-level-back
-		     case with a single click, same as it always has. -->
+		<!-- Sparse Win98-style "Look in:" toolbar: path field + Go + Up on one row. -->
 		<view type="text" id="goto_lbl" posref="TL TL" x="12" y="-9" fontsize="11" shadow="true"
 			global_color="false" color="180 200 220 220" hardtext="Look in:" />
-		<!-- M25p8: proper sunken 9-slice bevel (w_box_frame — dark top/left, light bottom/right,
-		     same asset the Script window's code editor already uses correctly) instead of a flat
-		     w_box_blank fill with no border at all ("this isn't shitty flat web dev"). The frame
-		     draws its own blank-texture interior; the nested edit_box needs no bg of its own. -->
+		<!-- Sunken 9-slice bevel (w_box_frame). Frame draws its blank-texture interior;
+		     the nested edit_box needs no bg of its own. -->
 		<group type="frame" id="goto_frame" options="w_box_frame" posparent="goto_lbl" posref="MR ML" x="6" y="0"
 			w="368" h="20" color="255 255 255 255" global_color="false" display="true">
 			<group type="edit_box" id="goto_path" posref="TL TL" x="4" y="-4" w="360" h="12"
@@ -413,12 +380,11 @@
 		<view type="text" id="count" posparent="status" posref="BL TL" x="0" y="-2" fontsize="10" shadow="true"
 			global_color="false" color="180 190 200 200" hardtext="" />
 
-		<!-- M25p8: sunken 9-slice backdrop, see world_select's list_scroll for the rationale. -->
+		<!-- Sunken 9-slice backdrop (same pattern as world_select). -->
 		<group type="frame" id="list_frame" options="w_box_frame" posparent="count" posref="BL TL" x="0" y="-6"
 			w="530" h="300" color="255 255 255 255" global_color="false" display="true" />
 		<group type="scroll_text" id="list_scroll" posparent="count" posref="BL TL" x="0" y="-6" w="530" h="300" min_height="150" max_height="380">
-			<!-- space=0: a listbox is a continuous stack of flat rows, not spaced-out buttons
-			     (M25p7 — the hover/selection bar on each row is what separates them visually). -->
+			<!-- space=0: continuous stack of flat rows; hover/selection bar separates them. -->
 			<group type="list" id="text_list" shadow="true" fontsize="12" color="255 255 255 255" space="0"
 				global_color="false" posref="TL TL" x="4" y="-4" sizeref="hw" w="-24" h="-8" maxelements="500" />
 			<ctrl type="scroll" id="scroll_bar" align="T" posref="TR TR" x="-4" y="-4" w="8" sizeref="h" h="-8"
@@ -434,7 +400,7 @@
 <tree node="folder_browser"></tree>
 
 <!--
-  Top toolbar (M14c/M15): slim horizontal strip — 3ds-Max vibe.
+  Top toolbar: slim horizontal strip (3ds Max vibe).
   Client gestionsets idiom: opened=false, header_active=false, no content stack.
   Height is driven by header_closed only (opened=true stacked HeaderH+content and
   left a tall empty gray band above the buttons). Groups:
@@ -450,7 +416,7 @@
 		<!-- Left drag grip: slim w_box 9-slice, same height as buttons -->
 		<group type="frame" id="grip" options="w_box_frame" posref="ML ML" x="3" y="0" w="8" h="22"
 			color="200 200 210 220" global_color="false" display="true" />
-		<!-- BOARD SAVE — uniform 28h buttons, 2–3px gaps, zp_tb styles -->
+		<!-- BOARD SAVE: uniform 28h buttons, 2-3px gaps, zp_tb styles -->
 		<ctrl style="zp_tb_btn" id="btn_board" posparent="grip" posref="MR ML" x="4" y="0" w="44" h="26"
 			onclick_l="zp_toggle_board" params_l="" hardtext="BOARD" />
 		<ctrl style="zp_tb_btn" id="btn_save" posparent="btn_board" posref="MR ML" x="2" y="0" w="40" h="26"
@@ -490,7 +456,7 @@
 </group>
 <tree node="toolbar"></tree>
 
-<!-- Season picker modal (M14c): buttons filled/shown at open from discovered seasons. -->
+<!-- Season picker modal: buttons filled/shown at open from discovered seasons. -->
 <group type="modal" id="season_menu" exit_click_out="true" w="160" h="160" options="skin_modal"
 	mouse_pos="true" posref="TL TL" x="200" y="500" active="false">
 	<group id="content" x="0" y="0" posref="TL TL" sizeref="wh" w="0" h="0">
@@ -508,21 +474,21 @@
 </group>
 
 <!--
-  Painter control panel — Max-style rollout column (ui M22).
+  Painter control panel: Max-style rollout column.
   Idiom from samples/gui Contacts (parent container + <tree node> openable children)
   and the client contact list: collapsible layer-1 headers with arrows, parent list
   scrolls when open rollouts exceed pop_max_h; vertical resizer adjusts max height.
 
   Rollouts (tree children): Session, Tiles, Brush, Fill, Displace, Properties.
-  Mode gates VISIBILITY (setActive) — non-applicable rollouts are fully hidden, not
+  Mode gates VISIBILITY (setActive): non-applicable rollouts are fully hidden, not
   collapsed-but-present. Applicability:
-    Tile → Session+Tiles+Brush+Fill
-    Color → Session+Brush+Fill
-    Displace → Session+Displace+Brush+Fill
-    Prop → Session+Properties
+    Tile -> Session+Tiles+Brush+Fill
+    Color -> Session+Brush+Fill
+    Displace -> Session+Displace+Brush+Fill
+    Prop -> Session+Properties
   Within the visible set each rollout is user-collapsible; open state is remembered
   across mode switches (setActive does not touch isOpen). One shared Brush rollout
-  holds tile/displace brush size AND color radius/hardness/opacity/mask/swatch —
+  holds tile/displace brush size AND color radius/hardness/opacity/mask/swatch;
   avoids duplicating size in two sections. Control short-ids kept so editor_ui path
   prefixes only change to ui:zp:roll_*:content:*. Toolbar still owns mode/season/
   undo/board/save. ZONE_PAINTER_ROLLOUTS=all force-opens every rollout for shots.
@@ -588,7 +554,7 @@
 <!--
   Rollout: Brush (Tile/Color/Displace)
   Shared: tile/displace brush size + color radius/hardness/opacity + mask + swatch.
-  One rollout beats duplicating size in Tiles and Displace (M22).
+  One rollout beats duplicating size in Tiles and Displace.
 -->
 <group type="container" id="roll_brush" w="228" title="Brush" global_color="false"
 	header_color="UI:SAVE:WIN:COLORS:SAMPLE" opened="true" openable="true" movable="false"
@@ -641,7 +607,7 @@
 			onclick_l="zp_opacity" params_l="-51" hardtext="-" />
 		<ctrl style="text_button_16" id="opac_up" posparent="opac_down" posref="MR ML" x="4" y="0"
 			onclick_l="zp_opacity" params_l="+51" hardtext="+" />
-		<!-- Mask cycle (S key); mask mode (Q) checkbox row (M21a). -->
+		<!-- Mask cycle (S key); mask mode (Q) checkbox row. -->
 		<ctrl style="text_button_16" id="btn_mask" posparent="opac_down" posref="BL TL" x="0" y="-6"
 			onclick_l="zp_cycle_mask" params_l="" hardtext="none" />
 		<instance template="zp_checkbox_row" id="btn_mask_mode" posparent="btn_mask" posref="BL TL" x="0" y="-4"
@@ -734,7 +700,7 @@
 </tree>
 
 <!-- ===================================================================== -->
-<!-- Tileset + Displace palette (ui M8/M9a) — movable/closable; grids code -->
+<!-- Tileset + Displace palette: movable/closable; grids laid out in code  -->
 <!-- ===================================================================== -->
 <!-- Scroll body holds Tilesets grid then a "Displace" section (0-15 noise maps). -->
 <group type="container" id="tiles_palette" w="320" pop_min_w="220" pop_max_w="500" h="480" pop_min_h="200" pop_max_h="580"
@@ -769,7 +735,7 @@
 </group>
 <tree node="tiles_palette"></tree>
 
-<!-- painterscript window (ui M23b): recorder pane / multiline editor / output pane.
+<!-- painterscript window: recorder pane / multiline editor / output pane.
      Max-macro-recorder layout: read-only REC log on top, editable script below, RUN. -->
 <group type="container" id="script_win" w="380" pop_min_w="300" pop_max_w="620" h="470" pop_min_h="300" pop_max_h="580"
 	title="Script" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
@@ -819,7 +785,7 @@
 <tree node="script_win"></tree>
 
 <!-- ===================================================================== -->
-<!-- Brush color picker (ui M9b) — CCtrlColPick + sample palette texture   -->
+<!-- Brush color picker: CCtrlColPick + sample palette texture             -->
 <!-- ===================================================================== -->
 <group type="container" id="color_picker" w="300" pop_min_w="280" pop_max_w="320" h="160" pop_min_h="150" pop_max_h="200"
 	title="Brush color" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
@@ -834,7 +800,7 @@
 		<ctrl type="colpick" id="cp" posparent="l1" posref="BL TL" x="0" y="-6" texture="color_palette.tga"
 			dbcolr="UI:TEMP:COL:R" dbcolg="UI:TEMP:COL:G" dbcolb="UI:TEMP:COL:B" dbcola="UI:TEMP:COL:A"
 			onchange="zp_color_picked" onchange_params="" />
-		<!-- Preview swatch in a crisp 9-slice well (M10a); color via makeRGB link. -->
+		<!-- Preview swatch in a 9-slice well; color via makeRGB link. -->
 		<group type="frame" id="swatch_well" options="w_box_frame" posparent="cp" posref="BL TL" x="0" y="-8"
 			w="36" h="36" color="255 255 255 255" global_color="false" display="true" />
 		<view type="bitmap" id="swatch" posparent="swatch_well" posref="MM MM" texture="blank.tga"
@@ -857,7 +823,7 @@
 <link expr="makeRGB(@UI:TEMP:COL:R, @UI:TEMP:COL:G, @UI:TEMP:COL:B, 255)" target="ui:zp:color_picker:content:swatch:color" />
 
 <!-- ===================================================================== -->
-<!-- Save modal (interactive flow only; M3a)                               -->
+<!-- Save modal (interactive flow only)                                    -->
 <!-- ===================================================================== -->
 <!-- Minimal edit-box chrome (same bevel pieces as the GUI sample). -->
 <group type="modal" id="save_dialog" exit_click_out="false" w="360" h="170" options="skin_modal"
@@ -870,8 +836,7 @@
 
 		<view type="text" id="copy_lbl" posref="TL TL" x="16" y="-48" color="180 200 220 255" fontsize="11"
 			shadow="true" global_color="false" hardtext="Copy as:" />
-		<!-- Simple single-line edit box for the copy filename. M25p8: proper sunken 9-slice
-		     bevel (w_box_frame) instead of a flat w_box_blank fill with no border. -->
+		<!-- Single-line edit box for the copy filename; sunken w_box_frame bevel. -->
 		<group type="frame" id="copy_frame" options="w_box_frame" posparent="copy_lbl" posref="BL TL" x="0" y="-6"
 			w="320" h="22" color="255 255 255 255" global_color="false" display="true">
 			<group type="edit_box" id="copy_name" posref="TL TL" x="4" y="-5" w="312" h="13"
@@ -883,8 +848,7 @@
 			</group>
 		</group>
 
-		<!-- M5c: update OLE embedded thumbnail (default on). M25c: labeled checkbox (M21 idiom)
-		     for consistency with the panel's Mask mode / Lock borders / Prop rows. -->
+		<!-- Update OLE embedded thumbnail (default on); labeled checkbox like panel rows. -->
 		<instance template="zp_checkbox_row" id="update_thumb" posparent="copy_frame" posref="BL TL" x="0" y="-10"
 			label="Update thumbnail" onclick="zp_save_thumb_toggle" params="" pushed="true" />
 
@@ -898,22 +862,22 @@
 </group>
 
 <!-- ===================================================================== -->
-<!-- Quick-action context menus (session board — plain L-click on a cell). -->
-<!-- Real NLGUI context menus (type="menu"/CGroupMenu — see nel_sample_gui -->
+<!-- Quick-action context menus (session board: plain L-click on a cell).  -->
+<!-- Real NLGUI context menus (type="menu"/CGroupMenu; see nel_sample_gui  -->
 <!-- widgets_sample.xml base_menu/sample_menu), NOT framed dialogs with    -->
 <!-- stacked push buttons: compact rows, hover highlight, auto-dismiss on  -->
 <!-- selection or click-away/ESC (CGroupMenu hardcodes ExitClickOut+       -->
-<!-- ExitKeyPushed — ../src/gui/group_menu.cpp). No visible Cancel row:    -->
-<!-- that's the whole point of a context menu, and nothing here depends   -->
-<!-- on Cancel's cleanup running (PendingActionBasename is overwritten by -->
-<!-- the next popup open regardless of how the previous one closed).      -->
+<!-- ExitKeyPushed; ../src/gui/group_menu.cpp). No visible Cancel row;     -->
+<!-- nothing depends on Cancel cleanup (PendingActionBasename is           -->
+<!-- overwritten by the next popup open regardless of how the previous    -->
+<!-- one closed).                                                          -->
 <!-- ===================================================================== -->
 <group type="menu" id="zp_ctx_menu_base" mouse_pos="true" space="1" fontsize="12" shadow="true"
 	color="255 255 255 200" shadow_color="0 0 0 255" color_over="255 255 255 255" shadow_color_over="0 0 0 255"
 	color_grayed="200 210 220 150" shadow_color_grayed="0 0 0 200" highlight_over="70 120 190 150"
 	case_mode="%case_normal"></group>
 
-<!-- Cell action popup (M11a session board — L-click on open cell) -->
+<!-- Cell action popup (session board: L-click on open cell) -->
 <group type="menu" id="cell_action" extends="ui:zp:zp_ctx_menu_base">
 	<action id="hdr" name="Zone" grayed="true" handler="" params="" />
 	<action id="sub" name="" grayed="true" handler="" params="" />
@@ -924,7 +888,7 @@
 	<action id="toggle" name="Make read-only" handler="zp_cell_toggle" params="" />
 </group>
 
-<!-- Instance action popup (M12c ecosystem scratch — L-click on instance) -->
+<!-- Instance action popup (ecosystem scratch: L-click on instance) -->
 <group type="menu" id="instance_action" extends="ui:zp:zp_ctx_menu_base">
 	<action id="hdr" name="Instance" grayed="true" handler="" params="" />
 	<action id="sub" name="" grayed="true" handler="" params="" />
@@ -936,7 +900,7 @@
 </group>
 
 <!-- ===================================================================== -->
-<!-- Close dirty confirm (M11a) — Save first / Close without saving / Cancel -->
+<!-- Close dirty confirm: Save first / Close without saving / Cancel       -->
 <!-- ===================================================================== -->
 <group type="modal" id="close_confirm" exit_click_out="false" w="360" h="140" options="skin_modal"
 	mouse_pos="false" posref="MM MM" x="0" y="0" active="false">
@@ -954,12 +918,10 @@
 	</group>
 </group>
 
-<!-- Empty-cell popup (M16c ecosystem scratch). The two hint rows start
-     grayed+blank (not "active=false" — <action> has no such XML attribute;
-     C++ toggles setActive on the CViewTextMenu directly) and the CGroupList
-     backing every menu reflows around inactive lines on its own, so the
-     manual per-row Y-repositioning the old framed-dialog version needed
-     (chained <ctrl> siblings don't collapse when hidden) is gone. -->
+<!-- Empty-cell popup (ecosystem scratch). The two hint rows start grayed+blank
+     (not "active=false": <action> has no such XML attribute; C++ toggles setActive
+     on the CViewTextMenu directly). CGroupList reflows around inactive lines, so
+     no manual per-row Y-repositioning is needed. -->
 <group type="menu" id="empty_cell_action" extends="ui:zp:zp_ctx_menu_base">
 	<action id="hdr" name="Empty cell" grayed="true" handler="" params="" />
 	<action id="sub" name="" grayed="true" handler="" params="" />
@@ -971,7 +933,7 @@
 	<action id="instance" name="Place instance" handler="zp_empty_place_instance" params="" />
 </group>
 
-<!-- Context brick action popup (M16c) — Remove -->
+<!-- Context brick action popup -->
 <group type="menu" id="context_action" extends="ui:zp:zp_ctx_menu_base">
 	<action id="hdr" name="Context (RO)" grayed="true" handler="" params="" />
 	<action id="sub" name="" grayed="true" handler="" params="" />
@@ -984,16 +946,15 @@
 </group>
 
 <!-- ===================================================================== -->
-<!-- Context brick picker (M16c) — Screen B list idiom                     -->
+<!-- Context brick picker: Screen B list idiom                             -->
 <!-- ===================================================================== -->
 <group type="modal" id="context_picker" exit_click_out="true" w="560" h="360" options="skin_modal"
 	mouse_pos="false" posref="MM MM" x="0" y="0" active="false">
 	<group id="content" x="0" y="0" posref="TL TL" sizeref="wh" w="0" h="0">
 		<view type="text" id="title" posref="TM TM" x="0" y="-10" color="255 255 255 255" fontsize="13"
 			shadow="true" global_color="false" hardtext="Place context brick" />
-		<!-- M25 review: scroll_text, not a fixed clipping group — real ecosystems list
-		     hundreds of bricks and the old 280px plain group made every row past ~7
-		     unreachable (no scrollbar, children clipped). Same idiom as world_select. -->
+		<!-- scroll_text, not a fixed clipping group: ecosystems list hundreds of bricks
+		     and a plain clipping group made rows past ~7 unreachable. Same as world_select. -->
 		<group type="frame" id="list_frame" options="w_box_frame" posref="TM TM" x="0" y="-36"
 			w="540" h="280" color="255 255 255 255" global_color="false" display="true" />
 		<group type="scroll_text" id="list_scroll" posref="TM TM" x="0" y="-36" w="540" h="280" min_height="180" max_height="280">

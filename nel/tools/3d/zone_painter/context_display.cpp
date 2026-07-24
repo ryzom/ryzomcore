@@ -1,18 +1,16 @@
 /**
  * \file context_display.cpp
- * \brief See context_display.h (design doc §14-paint, P3d).
+ * \brief See context_display.h.
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
  */
 // Port map:
-//   paint.cpp myThread includeMeshes branch -> addContextMeshes + setupDriverLights +
-//     decodeSceneAmbient (the branch applied scene ambient + driver lights with the meshes)
-//   paint_light.cpp CPaintLight::build/setup -> setupPaintLights (unconditional in myThread)
-//   CExportNel::buildShape (viewport meshes)  -> the shape exporter's shared evaluation:
-//     evalNodeMesh + buildBaseMeshInterface/buildMeshInterface -> NL3D::CMesh (plain-mesh
-//     route; special shape classes warn and skip — they are context display, not export)
-//   CExportNel::buildLight (driver CLight)    -> LMSCENE::convertLightmapLight + the original
-//     driver conversion rules (mode map, color * multiplier, cutoff/exponent, attenuation)
+//   paint.cpp includeMeshes branch -> addContextMeshes + setupDriverLights + decodeSceneAmbient
+//   paint_light.cpp CPaintLight::build/setup -> setupPaintLights
+//   CExportNel::buildShape (viewport meshes) -> shape exporter evaluation (evalNodeMesh +
+//     buildBaseMeshInterface/buildMeshInterface -> NL3D::CMesh; special shapes warn and skip)
+//   CExportNel::buildLight (driver CLight) -> LMSCENE::convertLightmapLight + driver rules
+//     (mode map, color * multiplier, cutoff/exponent, attenuation)
 
 /*
  * Copyright (C) 2026  by authors
@@ -160,7 +158,7 @@ uint registerContextTexturePaths(PMAXLOAD::SLoadedMax &lm, const std::string &in
 	missingOut = 0;
 
 	// The game-facing texture set: shapes reference .tga names while the converted textures
-	// next to the ecosystem bank are .dds — register the extension remap BEFORE any search
+	// next to the ecosystem bank are .dds; register the extension remap BEFORE any search
 	// path so the .dds files also answer .tga lookups, and add the bank's sibling map dir
 	// (~/.../ecosystems/<eco>/map, the build_gamedata-converted set) when present.
 	ensureExtensionRemaps();
@@ -264,7 +262,7 @@ void resolveContextShapeTextures(const SContextStats &stats, uint &resolvedOut, 
 	resolveNamesWithSeasons(names, "context texture", resolvedOut, missingOut);
 }
 
-// Season preference (ui M6a). Empty = auto (try sp first, historical default).
+// Season preference. Empty = auto (try sp first, historical default).
 static std::string s_SeasonPref;
 
 static const char *kSeasonCodes[4] = { "sp", "su", "au", "wi" };
@@ -329,7 +327,7 @@ static void seasonTryOrder(std::string out[4], int &nOut)
 
 // Shared season-variant resolution. When a season preference is set and that postfix exists
 // on the path, remaps even if an unpostfixed (or previously remapped other-season) name already
-// resolves — so live toggles re-point CPath. Otherwise: as-is first, then first postfix that
+// resolves, so live toggles re-point CPath. Otherwise: as-is first, then first postfix that
 // hits (_sp historically first). Extension remaps serve .tga/.png -> .dds.
 void resolveNamesWithSeasons(const std::set<std::string> &names, const char *what,
                              uint &resolvedOut, uint &missingOut)
@@ -379,7 +377,7 @@ void resolveNamesWithSeasons(const std::set<std::string> &names, const char *wha
 		{
 			++missingOut;
 			// NULL what = quiet (the bank references its ecosystem's whole tile set; entries a
-			// given zone never loads are expected to be absent — the load path warns for real).
+			// given zone never loads are expected to be absent; the load path warns for real).
 			if (what)
 				fprintf(stderr, "WARNING: %s not found (any season): %s\n", what, it->c_str());
 		}
@@ -585,13 +583,13 @@ void addContextMeshes(PMAXLOAD::SLoadedMax &lm, NL3D::CScene *scene, NL3D::CShap
 		if (isDebugMarker(name)) continue;
 		// XRef-RESOLVING object walk (SCENELIB::baseObjectOf, the same one the mesh eval uses):
 		// the buildings of village/town bricks are XRefObject nodes referencing construction
-		// .max files, and the XRefObject wrapper's registered superclass is 0x60 — a wrapper-
+		// .max files, and the XRefObject wrapper's registered superclass is 0x60; a wrapper-
 		// level superclass test drops every one of them silently. Resolve first, then gate.
 		CSceneClass *obj = SCENELIB::baseObjectOf(*node, NULL, NULL);
 		if (!obj) continue;
 		if (obj->classDesc()->classId().a() == 0x92aab38c)
 		{
-			// Unresolvable XRef (missing referenced file) — the resolver already warned.
+			// Unresolvable XRef (missing referenced file); the resolver already warned.
 			++stats.Skipped;
 			continue;
 		}
@@ -600,11 +598,11 @@ void addContextMeshes(PMAXLOAD::SLoadedMax &lm, NL3D::CScene *scene, NL3D::CShap
 		if (obj->classDesc()->superClassId() != ZP_SCLASS_GEOMOBJECT) continue;
 		if (dynamic_cast<NELPATCH::CRklPatchObject *>(obj)) continue;
 
-		// Property-respecting display filters — the flags that mark meta-geometry never meant
+		// Property-respecting display filters: the flags that mark meta-geometry never meant
 		// to render: collision meshes, accelerator cluster/portal volumes, PACS primitives and
 		// light/camera targets. The node HIDDEN flag is deliberately IGNORED, like the
 		// plugin's buildShape walk: village/town bricks are saved with the XRef'd buildings
-		// hidden (terrain-work viewport state), and the painting scene wants them as context —
+		// hidden (terrain-work viewport state), and the painting scene wants them as context;
 		// measured corpus-side, hidden catches ONLY those (all meta-geometry carries the
 		// appdata/class marks). DONOTEXPORT likewise stays visible (export exclusion, not
 		// viewport invisibility).
@@ -695,7 +693,7 @@ bool decodeSceneAmbient(PMAXLOAD::SLoadedMax &lm, NLMISC::CRGBA &out)
 		CReferenceMaker *env = impl->getReference(4); // RenderEnvironment
 		if (!env) return false;
 		// The ambient color controller is the environment's first Point3 keyframer reference
-		// (reference 0 in the reference layout observed; scan the first few defensively — the
+		// (reference 0 in the reference layout observed; scan the first few defensively: the
 		// value must be a 12-byte float triple in [0,1]).
 		for (uint r = 0; r < 4; ++r)
 		{
@@ -721,8 +719,8 @@ bool decodeSceneAmbient(PMAXLOAD::SLoadedMax &lm, NLMISC::CRGBA &out)
 // ---------------------------------------------------------------------------------------------
 // Scene lights, decoded once through the lightmapper's storage decode. NB: the decode carries
 // the lightmap-export appdata filter (default checked); a light unchecked for lightmap but
-// checked for realtime would be missed — warned when detected, zero corpus hits expected
-// (both flags default checked).
+// checked for realtime would be missed (warned when detected, zero corpus hits expected;
+// both flags default checked).
 
 struct SDecodedLight
 {
@@ -755,14 +753,14 @@ static void decodeSceneLights(PMAXLOAD::SLoadedMax &lm, std::vector<SDecodedLigh
 		CSceneClass *obj = SCENELIB::baseObjectOf(*node, NULL, NULL);
 		if (!obj) continue;
 		if (obj->classDesc()->classId().a() == 0x92aab38c)
-			continue; // unresolvable XRef (missing referenced file) — resolver already warned
+			continue; // unresolvable XRef (missing referenced file); resolver already warned
 		if (obj->classDesc()->superClassId() != 0x30) continue; // lights only
 		SDecodedLight dl;
 		dl.Realtime = APPDATA::getScriptAppDataInt(node, NEL3D_APPDATA_EXPORT_REALTIME_LIGHT, 1) == 1;
 		if (!LMSCENE::convertLightmapLight(dl.L, *node, tmCache, nodeByHandle))
 		{
 			if (dl.Realtime)
-				fprintf(stderr, "WARNING: light '%s' undecodable (or lightmap-unchecked) — skipped for display\n",
+				fprintf(stderr, "WARNING: light '%s' undecodable (or lightmap-unchecked); skipped for display\n",
 				        SCENELIB::nodeName(*node).c_str());
 			continue;
 		}

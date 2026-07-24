@@ -25,7 +25,7 @@ ln -sfn "$SB/tilebank" "$WS/tilebank"
 : > "$LOGDIR/m16d_empty.script"
 
 # Run a zone_painter invocation: full log to file, key lines echoed, exit code ASSERTED
-# (the old tee|grep pipeline swallowed nonzero exits — a crash after the asserted
+# (the old tee|grep pipeline swallowed nonzero exits - a crash after the asserted
 # lines printed still passed).
 run_zp() { # $1 = log file, $2 = display grep pattern, rest = args
 	local log="$1" pat="$2"
