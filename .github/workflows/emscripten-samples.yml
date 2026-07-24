@@ -106,8 +106,10 @@ jobs:
         # Configure a separate host CMake tree and build just that target;
         # the emscripten configure below points NL_BUILD_INTERFACE_TOOL at
         # the resulting binary. Only build_interface itself is compiled,
-        # not the rest of nel/tools.
+        # not the rest of nel/tools. libpng/libjpeg are top-level find_package
+        # requirements for nelmisc's CBitmap paths.
         run: |
+          sudo apt-get install -y libpng-dev libjpeg-dev libxml2-dev
           mkdir -p build-host
           cd build-host
           cmake .. \
