@@ -93,14 +93,24 @@ if [ ! -f "$PREFIX/lib/libluabind09.a" ]; then
 	git clone --depth 32 https://github.com/ryzom/luabind.git luabind
 	cd luabind && git checkout "$LUABIND_REV" && cd ..
 	mkdir -p build-luabind && cd build-luabind
+	# luabind's CMakeLists calls find_package(Lua). Emscripten's toolchain
+	# forces CMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY, so CMake's stock FindLua
+	# rejects the cache path we hand it (it's outside the emsdk sysroot),
+	# find_library returns NOTFOUND, and the module reports missing
+	# LUA_LIBRARIES even though we set it explicitly. Patch the call out —
+	# LuaBind then consumes LUA_INCLUDE_DIR / LUA_LIBRARIES straight from
+	# our cache values.
+	sed -i 's|find_package(Lua)|set(LUA_FOUND TRUE)|' ../luabind/CMakeLists.txt
 	emcmake cmake ../luabind \
 		-DCMAKE_BUILD_TYPE=Release \
 		-DCMAKE_INSTALL_PREFIX="$PREFIX" \
 		-DBUILD_SHARED_LIBS=OFF \
 		-DBoost_INCLUDE_DIR="$PREFIX/../boost-headers" \
-		-DLUA_INCLUDE_DIR="$PREFIX/include" \
-		-DLUA_LIBRARIES="$PREFIX/lib/liblua.a" \
-		-DLUA_LIBRARY="$PREFIX/lib/liblua.a"
+		-DLUA_INCLUDE_DIR:PATH="$PREFIX/include" \
+		-DLUA_INCLUDE_DIRS:PATH="$PREFIX/include" \
+		-DLUA_LIBRARIES:FILEPATH="$PREFIX/lib/liblua.a" \
+		-DLUA_LIBRARY:FILEPATH="$PREFIX/lib/liblua.a" \
+		-DLUA_FOUND:BOOL=TRUE
 	emmake make -j"$(nproc)" install
 fi
 
