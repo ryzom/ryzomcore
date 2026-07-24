@@ -1,6 +1,6 @@
 /**
  * \file workspace_discovery.h
- * \brief Graphics workspace fingerprint + discovery for zone_painter startup
+ * \brief Graphics workspace fingerprint + discovery for zone_painter startup (ui M2)
  * \author Jan Boon (Kaetemi)
  * \author Grok 4.5
  *
@@ -8,15 +8,15 @@
  * pipeline_max headers. Safe for editor_ui / startup_ui TUs.
  *
  * Two workspace kinds (fixed model):
- * - Ecosystem (ligo): G/landscape/ligo/<eco>/max/*.max + bank at
- * G/landscape/_texture_tiles/<eco>/<eco>.bank (selectable only when bank exists).
- * - Continent (snowballs-style): G/max/zones/*.max + first G/tilebank/*.bank.
+ *  - Ecosystem (ligo): G/landscape/ligo/<eco>/max/*.max + bank at
+ *    G/landscape/_texture_tiles/<eco>/<eco>.bank (selectable only when bank exists).
+ *  - Continent (snowballs-style): G/max/zones/*.max + first G/tilebank/*.bank.
  *
- * Root detection priority is implemented by discoverWorkspaces.
+ * Root detection priority is implemented by discoverWorkspaces().
  */
 
 /*
- * Copyright (C) 2026 by authors
+ * Copyright (C) 2026  by authors
  *
  * This file is part of RYZOM CORE PIPELINE.
  * RYZOM CORE PIPELINE is free software: you can redistribute it
@@ -26,11 +26,11 @@
  *
  * RYZOM CORE PIPELINE is distributed in the hope that it will be
  * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public
- * License along with RYZOM CORE PIPELINE. If not, see
+ * License along with RYZOM CORE PIPELINE.  If not, see
  * <http://www.gnu.org/licenses/>.
  */
 
@@ -68,7 +68,7 @@ struct SWorldEntry
 	}
 };
 
-/** One.max zone/brick under a world. */
+/** One .max zone/brick under a world. */
 struct SZoneEntry
 {
 	std::string MaxPath;        ///< absolute .max path
@@ -82,7 +82,7 @@ struct SStartupCfg
 {
 	std::string LastGraphicsFolder;
 	std::string LastWorld;
-	/** Ecosystem open layout: "1x1" (default) / "2x1" / "1x2" / "2x2" / "3x3". */
+	/** Ecosystem open layout: "1x1" (default) / "2x1" / "1x2" / "2x2" / "3x3" (ui M4b). */
 	std::string LastInstances;
 	/** Zone browser display mode: large-thumbnail grid (true) vs detail-tile list. */
 	bool ZoneBrowserLarge;
@@ -102,9 +102,9 @@ void scanChildrenForWorkspaces(const std::string &root, std::vector<SWorldEntry>
 
 /**
  * Root detection:
- * 1. seedFolder (optional positional): workspace, or .nel root / plain root of subdirs
- * 2. walk up from cwd: fingerprint ancestor; stop after scanning a .nel parent
- * 3. rememberedFolder if still valid (added if not already present)
+ *  1. seedFolder (optional positional): workspace, or .nel root / plain root of subdirs
+ *  2. walk up from cwd: fingerprint ancestor; stop after scanning a .nel parent
+ *  3. rememberedFolder if still valid (added if not already present)
  * Deduplicates by (GraphicsRoot, WorldName). Does NOT create any .nel directory.
  */
 void discoverWorkspaces(const std::string &seedFolder,
@@ -120,9 +120,9 @@ std::string zoneThumbnailPath(const SWorldEntry &world, const std::string &maxBa
 /**
  * Resolve --startup-auto "workspace-name/zone-basename".
  * workspace-name matches WorldName or the GraphicsRoot directory basename.
- * zone-basename is without.max. On failure fills err and returns false.
+ * zone-basename is without .max. On failure fills err and returns false.
  *
- * Multi-select: "workspace-name/zoneA+zoneB+zoneC" selects multiple zones
+ * Multi-select (ui M6b): "workspace-name/zoneA+zoneB+zoneC" selects multiple zones
  * (plus-separated). zoneOut is the first; zoneOuts receives all in order. Single-zone
  * paths still fill zoneOuts with one entry when the multi overload is used.
  *
@@ -130,7 +130,7 @@ std::string zoneThumbnailPath(const SWorldEntry &world, const std::string &maxBa
  * CLI seed folder + LastGraphicsFolder both contribute lacustre/…), prefer the world
  * whose GraphicsRoot is preferRoot or sits under it. Without this, alphabetical
  * GraphicsRoot order silently picks the remembered graphics tree over a seed workspace
- * that holds the file the user just saved (session-open never saw neighbor hints).
+ * that holds the file the user just saved (M16d: session-open never saw neighbor hints).
  */
 bool selectAuto(const std::vector<SWorldEntry> &worlds,
                 const std::string &autoPath,
@@ -148,7 +148,7 @@ bool selectAutoMulti(const std::vector<SWorldEntry> &worlds,
 
 /**
  * Union of 8-ring neighbors of every zone in `centers`, excluding any basename already
- * in centers. Continent-only; empty for ecosystems. Used by multi-open assembly.
+ * in centers. Continent-only; empty for ecosystems. Used by multi-open assembly (M6b).
  */
 void listContinentNeighborUnion(const SWorldEntry &world,
                                 const std::vector<SZoneEntry> &centers,
@@ -172,11 +172,11 @@ bool isMaxPath(const std::string &path);
 //
 // Reference: nel/tools/3d/zone_lib/zone_utility.cpp getZoneNameByCoord / getZoneCoordByName,
 // and nel/tools/3d/tga_cut/tga_cut.cpp getZoneNameFromXY:
-// basename = "<row>_<L1><L2>" where row is a decimal Y index and
-// col = (L1-'A')*26 + (L2-'A') (two uppercase letters, A..Z).
+//   basename = "<row>_<L1><L2>" where row is a decimal Y index and
+//   col = (L1-'A')*26 + (L2-'A')  (two uppercase letters, A..Z).
 // Example: 3_AR -> row=3, col=(0)*26+17 = 17.
 //
-// Prefixed forms: any prefix ending in '-' is stripped before the match, so
+// Prefixed forms (ui M7b): any prefix ending in '-' is stripped before the match, so
 // "zonematerial-converted-193_ec" and "193_EC" both parse to row=193, col=EC.
 // Letters are case-insensitive. Neighbor lookup indexes MaxDir by parsed coords so
 // mixed bare/prefixed basenames share one board.
@@ -188,7 +188,7 @@ bool parseContinentZoneName(const std::string &basename, int &row, int &col);
 std::string continentZoneName(int row, int col);
 
 /**
- * List the 8-ring neighbor.max files of a continent zone that exist under world.MaxDir.
+ * List the 8-ring neighbor .max files of a continent zone that exist under world.MaxDir.
  * Does not include the center zone. Empty for ecosystems or unparseable names.
  */
 void listContinentNeighbors(const SWorldEntry &world, const SZoneEntry &zone,

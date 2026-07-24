@@ -1,10 +1,10 @@
 /**
  * \file script_api.h
- * \brief painterscript — MaxScript-like Lua scripting over the paint op layer
+ * \brief painterscript — MaxScript-like Lua scripting over the paint op layer (ui M23)
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
  *
- * Include contract: NLMISC/std only in this header. The.cpp binds the embedded NLGUI
+ * Include contract: NLMISC/std only in this header. The .cpp binds the embedded NLGUI
  * Lua state (CLuaManager) — no patch_eval.h, no SCENELIB, no NLGUI widget headers.
  *
  * Design (wiki drafts/zone_painter_ui_stories.md "Scripting — painterscript"): a
@@ -16,7 +16,7 @@
  */
 
 /*
- * Copyright (C) 2026 by authors
+ * Copyright (C) 2026  by authors
  *
  * This file is part of RYZOM CORE PIPELINE.
  * RYZOM CORE PIPELINE is free software: you can redistribute it
@@ -26,11 +26,11 @@
  *
  * RYZOM CORE PIPELINE is distributed in the hope that it will be
  * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public
- * License along with RYZOM CORE PIPELINE. If not, see
+ * License along with RYZOM CORE PIPELINE.  If not, see
  * <http://www.gnu.org/licenses/>.
  */
 
@@ -48,7 +48,7 @@ struct SPaintUIBridge;
 
 namespace ZPSCRIPT {
 
-/** painter.zones row. */
+/** painter.zones() row. */
 struct SZoneInfo
 {
 	uint Id;
@@ -70,15 +70,15 @@ struct SScriptHost
 {
 	/** Execute ONE canonical op line through the same executor as --paint-script. */
 	bool (*execOp)(const std::string &line, std::string &err);
-	/** Fill the zones rows for the current session. */
+	/** Fill the zones() rows for the current session. */
 	void (*zonesInfo)(std::vector<SZoneInfo> &out);
 	/** Read a zone export property (rotate|symmetry|passable|usebbox). */
 	bool (*getZoneProp)(uint zoneId, const std::string &which, int &value, std::string &err);
 	/** Write-back + whole-file save to a target path (never in place). */
 	bool (*saveTo)(const std::string &target);
-	/** Save-all path (per-file overwrite +.bak). Installed headless too — every open
-	 *	is a session now, so headless painter.saveAll writes editables in place
-	 *	*/
+	/** Save-all path (per-file overwrite + .bak). Installed headless too — every open
+	 *	is a session now, so headless painter.saveAll() writes editables in place
+	 *	(m31-2 relies on this). */
 	bool (*saveAll)();
 	/** Capture the current frame to a .tga; NULL headless. */
 	bool (*screenshot)(const std::string &path, std::string &err);
@@ -89,10 +89,10 @@ struct SScriptHost
 	/** Clear the host-side cancel latch — called at every script-run start (an ESC cancel
 	 *	must not poison every later pumped script of the session). */
 	void (*resetCancel)();
-	/** Board-session working-set ops; NULL outside board sessions. */
+	/** Board-session working-set ops (ui M23c); NULL outside board sessions. */
 	bool (*openZone)(const std::string &basename, std::string &err);
 	bool (*closeZone)(const std::string &basename, bool saveFirst, bool forceDiscard, std::string &err);
-	/** ecosystem board ops — the scriptable side of the scratch board, closing the
+	/** M31 ecosystem board ops — the scriptable side of the scratch board, closing the
 	 *	close-is-scriptable-but-open-is-not asymmetry. NULL outside board sessions;
 	 *	the main-side wrappers additionally refuse continent sessions. */
 	bool (*openZoneAt)(const std::string &basename, int cx, int cy, std::string &err);
@@ -100,7 +100,7 @@ struct SScriptHost
 	bool (*removeInstance)(int cx, int cy, std::string &err);
 	bool (*rotateInstance)(int cx, int cy, int delta, std::string &err);
 	bool (*mirrorInstance)(int cx, int cy, std::string &err);
-	/** board-op completion (recorder parity): context specs, promote, cell drag,
+	/** M33 board-op completion (recorder parity): context specs, promote, cell drag,
 	 *	RO toggle, per-file save — every board mutation the UI offers is scriptable so
 	 *	recordings that span board changes replay. NULL outside board sessions. */
 	bool (*placeContext)(int cx, int cy, const std::string &basename, std::string &err);
@@ -113,7 +113,7 @@ struct SScriptHost
 	bool (*saveZone)(const std::string &basename, std::string &err);
 	/** Refresh the bridge's frame-synced snapshot fields NOW — they are filled by the
 	 *	main loop and go stale for the whole run of a script; getters (getMode/getTileSet)
-	 *	call this first so painter.setX; assert(painter.getX) holds. NULL headless. */
+	 *	call this first so painter.setX(); assert(painter.getX()) holds. NULL headless. */
 	void (*refreshBridge)();
 	/** Live viewer bridge for state get/set; NULL headless. */
 	ZPUI::SPaintUIBridge *bridge;
@@ -139,14 +139,14 @@ SScriptHost *getHost();
 bool ensureLua();
 
 /** Run a script file. Returns 0 on success, 1 on load/runtime error (message on stderr
- *	and in lastError). */
+ *	and in lastError()). */
 int runFile(const std::string &path);
 /** Run a script string immediately. NEVER call from inside an event dispatch (an action
- *	handler runs inside EventServer::pump, and a script calling painter.pumpUI would
+ *	handler runs inside EventServer::pump, and a script calling painter.pumpUI() would
  *	re-enter the pump — nlassert in debug, iterator UAF in release); use queueRunString
  *	from handlers instead. */
 int runString(const std::string &code);
-/** Defer a script chunk to the next processPendingRun (the Script window's RUN — it
+/** Defer a script chunk to the next processPendingRun() (the Script window's RUN — it
  *	fires from inside the pump). */
 void queueRunString(const std::string &code);
 /** Run the queued chunk, if any. Called by the viewer main loop OUTSIDE the pump. */
@@ -156,11 +156,11 @@ const std::string &lastError();
 /** True while a painter script is executing (recorder re-entrance guard). */
 bool isExecuting();
 
-/** Cancel the executing script at its next pumpUI (Script-window CANCEL / ESC-equivalent).
+/** Cancel the executing script at its next pumpUI() (Script-window CANCEL / ESC-equivalent).
  *	No-op when no script is executing. */
 void requestCancel();
 
-// Recorder (window feeds from this; API ).
+// Recorder (M23b window feeds from this; API available from M23a).
 // setRecording(true) emits a replay-fidelity preamble: painter.seed(N) — also reseeding
 // the LIVE session so both share one RNG stream from that point — plus abs painter.*
 // snapshot lines of the paint-relevant state (change-only recording misses start values).
@@ -173,7 +173,7 @@ void clearRecorder();
 /** Mutation counter for pane sync (length-compare missed same-length content changes). */
 uint recorderGeneration();
 
-/** print redirection sink for the Script window (empty = stdout only). */
+/** print() redirection sink for the Script window (empty = stdout only). */
 const std::string &outputText();
 void clearOutput();
 /** Mutation counter for pane sync. */

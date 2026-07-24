@@ -1,6 +1,6 @@
 /**
  * \file script_api.cpp
- * \brief painterscript — Lua binding over the paint op layer
+ * \brief painterscript — Lua binding over the paint op layer (ui M23)
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
  *
@@ -15,7 +15,7 @@
  */
 
 /*
- * Copyright (C) 2026 by authors
+ * Copyright (C) 2026  by authors
  *
  * This file is part of RYZOM CORE PIPELINE.
  * RYZOM CORE PIPELINE is free software: you can redistribute it
@@ -25,11 +25,11 @@
  *
  * RYZOM CORE PIPELINE is distributed in the hope that it will be
  * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public
- * License along with RYZOM CORE PIPELINE. If not, see
+ * License along with RYZOM CORE PIPELINE.  If not, see
  * <http://www.gnu.org/licenses/>.
  */
 
@@ -60,11 +60,11 @@ static SScriptHost *s_Host = NULL;
 static bool s_Registered = false;
 static bool s_Executing = false;
 static bool s_Recording = false;
-static bool s_CancelReq = false; // Script-window CANCEL button; ESC rides the host
+static bool s_CancelReq = false; // Script-window CANCEL button (M23d); ESC rides the host
 static std::string s_Recorder;
 static std::string s_Output;
 static std::string s_LastError;
-// Mutation counters: the Script window's panes sync on these instead of text length
+// Mutation counters: the Script window's panes sync on these instead of text length —
 // a same-length content change (CLEAR + same-length line in one frame) left stale text.
 static uint s_RecorderGen = 0;
 static uint s_OutputGen = 0;
@@ -310,7 +310,7 @@ static int lColorBrush(CLuaState &ls) // painter.colorBrush(zone,x,y,radius,"rrg
 	double zw;
 	if (argNumber(ls, 8, zw))
 	{
-		// cont (bool, 9th): stroke-aware form — commit comes from painter.endStroke
+		// cont (bool, 9th): stroke-aware form — commit comes from painter.endStroke()
 		if (ls.getTop() >= 9)
 		{
 			bool cont = argBoolOpt(ls, 9, false);
@@ -331,7 +331,7 @@ static int lTileStroke(CLuaState &ls) // painter.tileStroke(zone,patch,u,v,set[,
 	if (!argNumbers(ls, 5, a, "tileStroke(zone,patch,u,v,set[,big[,cont]])", err)) return retErr(ls, err);
 	bool big = argBoolOpt(ls, 6, false);
 	// cont (bool, 7th): stroke-aware form — first line of a drag passes false, moves pass
-	// true, and the commit comes from painter.endStroke; without it each line is a
+	// true, and the commit comes from painter.endStroke(); without it each line is a
 	// self-contained stroke (legacy scripts keep their behavior).
 	// set is signed (-1 = clear sentinel).
 	if (ls.getTop() >= 7)
@@ -345,7 +345,7 @@ static int lTileStroke(CLuaState &ls) // painter.tileStroke(zone,patch,u,v,set[,
 		(uint)a[0], (uint)a[1], (uint)a[2], (uint)a[3], (int)a[4], big ? 1u : 0u));
 }
 
-static int lEndStroke(CLuaState &ls) // painter.endStroke — commit the open stroke (mouse-up)
+static int lEndStroke(CLuaState &ls) // painter.endStroke() — commit the open stroke (mouse-up)
 {
 	return execOpRet(ls, "endstroke");
 }
@@ -441,7 +441,7 @@ static int lGetZoneProp(CLuaState &ls) // painter.getZoneProp(zone,which) -> num
 // ---------------------------------------------------------------------------------------------
 // Session
 
-static int lZones(CLuaState &ls) // painter.zones -> { {id=,name=,file=,editable=,frozen=,dirty=}, ... }
+static int lZones(CLuaState &ls) // painter.zones() -> { {id=,name=,file=,editable=,frozen=,dirty=}, ... }
 {
 	if (!s_Host || !s_Host->zonesInfo) return retErr(ls, "painter: no active session");
 	std::vector<SZoneInfo> rows;
@@ -470,7 +470,7 @@ static int lSave(CLuaState &ls) // painter.save("out.max")
 	return retOk(ls);
 }
 
-static int lSaveAll(CLuaState &ls) // painter.saveAll
+static int lSaveAll(CLuaState &ls) // painter.saveAll()
 {
 	if (!s_Host || !s_Host->saveAll) return retErr(ls, "saveAll: not available in this mode");
 	if (!s_Host->saveAll()) return retErr(ls, "saveAll failed (see log)");
@@ -492,7 +492,7 @@ static int lOpenZone(CLuaState &ls) // painter.openZone("basename"[,cx,cy]) — 
 	std::string base;
 	if (!argString(ls, 1, base)) return retErr(ls, "usage: openZone(\"basename\"[,cx,cy])");
 	std::string err;
-	// the 3-arg form opens at an eco board cell (scratchOpenEditable); the 1-arg
+	// M31: the 3-arg form opens at an eco board cell (scratchOpenEditable); the 1-arg
 	// form stays the continent open (eco sessions refuse it — they need a cell).
 	double cx = 0, cy = 0;
 	if (ls.getTop() >= 2)
@@ -564,8 +564,8 @@ static int lCloseZone(CLuaState &ls) // painter.closeZone("basename"[,saveFirst[
 	return retOk(ls);
 }
 
-// board-op completion — context specs, promote, cell drag, RO toggle, per-file save.
-// Same host-wrapper idiom as the instance ops; hosts gate eco/continent themselves.
+// M33 board-op completion — context specs, promote, cell drag, RO toggle, per-file save.
+// Same host-wrapper idiom as the M31 instance ops; hosts gate eco/continent themselves.
 
 static int lPlaceContext(CLuaState &ls) // painter.placeContext(cx,cy,"basename") — eco board
 {
@@ -666,7 +666,7 @@ static int lSaveZone(CLuaState &ls) // painter.saveZone("basename") — per-file
 	return retOk(ls);
 }
 
-static int lPumpUI(CLuaState &ls) // painter.pumpUI -> true, or false when cancel was requested
+static int lPumpUI(CLuaState &ls) // painter.pumpUI() -> true, or false when cancel was requested
 {
 	if (s_Host && s_Host->pumpUI) s_Host->pumpUI();
 	bool cancelled = s_CancelReq
@@ -680,7 +680,7 @@ static int lPumpUI(CLuaState &ls) // painter.pumpUI -> true, or false when cance
 
 static ZPUI::SPaintUIBridge *bridge() { return s_Host ? s_Host->bridge : NULL; }
 
-static int lSetMode(CLuaState &ls) // painter.setMode(0..3) 0=tile 1=color 2=displace 3=prop
+static int lSetMode(CLuaState &ls) // painter.setMode(0..3)  0=tile 1=color 2=displace 3=prop
 {
 	double m; if (!argNumber(ls, 1, m)) return retErr(ls, "usage: setMode(0..3)");
 	ZPUI::SPaintUIBridge *b = bridge();
@@ -784,7 +784,7 @@ static int lSetRadius(CLuaState &ls) // painter.setRadius(meters 2..32)
 }
 
 // ---------------------------------------------------------------------------------------------
-// Recorder API (window; the API is stable )
+// Recorder API (window lands in M23b; the API is stable from M23a)
 
 static int lSetRecording(CLuaState &ls)
 {
@@ -810,7 +810,7 @@ static int lClearRecorder(CLuaState &ls)
 	return retOk(ls);
 }
 
-// print replacement: tee to stdout and the Script window output buffer
+// print() replacement: tee to stdout and the Script window output buffer
 static int lPrint(CLuaState &ls)
 {
 	std::string lineOut;

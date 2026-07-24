@@ -1,12 +1,12 @@
 /**
  * \file editor_ui.h
- * \brief In-engine NLGUI facade for the standalone zone painter
+ * \brief In-engine NLGUI facade for the standalone zone painter (ui M1)
  * \author Jan Boon (Kaetemi)
  * \author Grok 4.5
  *
  * Embeds NLGUI over the viewer's UDriver (the sample at nel/samples/gui is the
  * embedding contract). Owns atlas/parser init, per-frame update+draw, visibility
- * (F10 / ToggleUI), and wantsMouse so paint/orbit do not punch through windows.
+ * (F10 / ToggleUI), and wantsMouse() so paint/orbit do not punch through windows.
  *
  * Paint ops never live here: a SPaintUIBridge points at named handlers owned by
  * runViewer so keys and GUI buttons share one implementation.
@@ -16,7 +16,7 @@
  */
 
 /*
- * Copyright (C) 2026 by authors
+ * Copyright (C) 2026  by authors
  *
  * This file is part of RYZOM CORE PIPELINE.
  * RYZOM CORE PIPELINE is free software: you can redistribute it
@@ -26,11 +26,11 @@
  *
  * RYZOM CORE PIPELINE is distributed in the hope that it will be
  * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public
- * License along with RYZOM CORE PIPELINE. If not, see
+ * License along with RYZOM CORE PIPELINE.  If not, see
  * <http://www.gnu.org/licenses/>.
  */
 
@@ -80,25 +80,25 @@ struct SPaintUIBridge
 	void (*save)();                     // panel Save: modal (interactive) or direct (--save)
 	/** Write-back + whole-file save to an arbitrary path (modal "Save copy", test hook). */
 	bool (*saveTo)(const std::string &target);
-	/** In-place overwrite: temp → optional one-time.bak → rename (modal "Overwrite").
-	 * Multi-file this is save-all; the toolbar SAVE calls it directly. */
+	/** In-place overwrite: temp → optional one-time .bak → rename (modal "Overwrite").
+	 *  Multi-file this is save-all; M27b: the toolbar SAVE calls it directly. */
 	bool (*saveOverwrite)();
-	/** per-file board saves (the cell "Save as…" dialog): overwrite ONE editable
-	 * file in place, or save a copy under `name` (absolute, or relative to the FILE's
-	 * own directory). wantThumb = the dialog's checkbox (custom save option). */
+	/** M27b per-file board saves (the cell "Save as…" dialog): overwrite ONE editable
+	 *  file in place, or save a copy under `name` (absolute, or relative to the FILE's
+	 *  own directory). wantThumb = the dialog's checkbox (custom save option). */
 	bool (*saveFileOverwrite)(const std::string &basename, bool wantThumb);
 	bool (*saveFileCopy)(const std::string &basename, const std::string &name, bool wantThumb);
-	/** Directory of one OPEN editable's.max, "" if unknown — the bound "Save as…"
-	 * form's exists-check must resolve relative names against the SAME directory
-	 * saveFileCopy does (the file's own), not InputDir (the first-opened file's). */
+	/** Directory of one OPEN editable's .max, "" if unknown — the bound "Save as…"
+	 *  form's exists-check must resolve relative names against the SAME directory
+	 *  saveFileCopy does (the file's own), not InputDir (the first-opened file's). */
 	std::string (*fileDir)(const std::string &basename);
-	/** Cycle landscape season textures; no-op when <2 seasons available. */
+	/** Cycle landscape season textures (ui M6a); no-op when <2 seasons available. */
 	void (*seasonNext)();
-	/** Select a specific season code (sp|su|au|wi); same live-flush path as seasonNext. */
+	/** Select a specific season code (sp|su|au|wi); same live-flush path as seasonNext (M14c). */
 	void (*seasonSelect)(const std::string &code);
-	/** Fill a CGroupMenu with available seasons (toolbar menu). Menu is CGroupMenu*. */
+	/** Fill a CGroupMenu with available seasons (M14c toolbar menu). Menu is CGroupMenu*. */
 	void (*seasonMenuFill)(void *menu);
-	// Color / displace — same paths as keyboard Home/End/Ins/Del/S/Q/[ ]
+	// Color / displace (ui M7a) — same paths as keyboard Home/End/Ins/Del/S/Q/[ ]
 	/** Color brush radius ± (×1.5 / ÷1.5, clamp 2..32); panel always; keys via brushSizeDelta in Color mode. */
 	void (*colorRadiusDelta)(int d);
 	void (*hardnessDelta)(int d);     // ± step (keys use ±51 on 0..255)
@@ -108,18 +108,18 @@ struct SPaintUIBridge
 	void (*displaceIndexDelta)(int d); // ±1 mod 16 ([ ] keys)
 	/** Absolute displace index 0-15 (palette cell); shared path with [ ] / panel stepper. */
 	void (*displaceIndexAbs)(int idx);
-	/** Show/hide the Tiles palette window (key TogglePalette / panel button). */
+	/** Show/hide the Tiles palette window (ui M8; key TogglePalette / panel button). */
 	void (*togglePalette)();
-	/** Show/hide the session board hub (key ToggleBoard / panel BOARD). Continent only. */
+	/** Show/hide the session board hub (ui M11a; key ToggleBoard / panel BOARD). Continent only. */
 	void (*toggleBoard)();
 	/** Set brush color RGB 0-255 (color picker / panel); same field as --color. */
 	void (*setBrushColor)(int r, int g, int b);
-	// Prop mode: export-property steppers / toggles (selected zone)
+	// M18b Prop mode: export-property steppers / toggles (selected zone)
 	void (*propRotateDelta)(int d);   // ±1 mod 4
 	void (*propToggleSymmetry)();
 	void (*propTogglePassable)();
 	void (*propToggleUseBBox)();
-	// Painterscript absolute state setters (recorder-replay faithful; the frame-synced
+	// M23d painterscript absolute state setters (recorder-replay faithful; the frame-synced
 	// snapshot fields below are STALE mid-script, so scripts must not derive from them)
 	void (*setTileSize256)(bool on);
 	void (*setHardnessAbs)(int v);    // 0..255
@@ -140,25 +140,25 @@ struct SPaintUIBridge
 	bool CanSave;
 	/** When true, Save opens the overwrite/copy modal (startup interactive, no --save). */
 	bool InteractiveSave;
-	/** True in board sessions (toolbar SAVE = one-click save-all there). */
+	/** True in board sessions (M27b: toolbar SAVE = one-click save-all there). */
 	bool BoardSession;
 	char EditableBasename[128]; // zone basename for default copy name
 	char InputDir[512];         // directory of the opened .max (copy targets)
-	/** Self-instance count (1 = off); panel shows INSTANCED xN when > 1. */
+	/** Self-instance count (1 = off); panel shows INSTANCED xN when > 1 (ui M4b). */
 	uint InstanceCount;
-	/** modal "Update thumbnail" checkbox (default true for interactive save). */
+	/** M5c: modal "Update thumbnail" checkbox (default true for interactive save). */
 	bool UpdateThumbnail;
-	/** --no-thumbnail hard kill-switch — the modal hides the checkbox row so the
-	 * UI never claims a thumbnail write that prepareThumbnailOverride will drop. */
+	/** M31: --no-thumbnail hard kill-switch — the modal hides the checkbox row so the
+	 *  UI never claims a thumbnail write that prepareThumbnailOverride will drop. */
 	bool ThumbnailsDisabled;
-	/** Current season label for the panel ("spring" / "auto" /...). */
+	/** Current season label for the panel ("spring" / "auto" / ...). */
 	char SeasonLabel[32];
 	/** Number of discovered season variants (0 = no seasonal tiles; button frozen). */
 	uint SeasonCount;
-	/** Editable file count + dirty count (multi-session; 1/0 for single). */
+	/** Editable file count + dirty count (M6b multi-session; 1/0 for single). */
 	uint EditableFileCount;
 	uint DirtyFileCount;
-	// Color brush snapshot
+	// Color brush snapshot (M7a)
 	float ColorRadius;              // meters, 2..32
 	uint ColorHardness;             // 0..255
 	uint ColorOpacity;              // 0..255
@@ -166,7 +166,7 @@ struct SPaintUIBridge
 	char BrushMaskLabel[64];        // basename or "none"
 	bool BrushMaskMode;             // Q-key mask-mode toggle
 	uint DisplaceIndex;             // 0..15
-	// Prop panel snapshot
+	// M18b Prop panel snapshot
 	bool PropHaveSelection;
 	uint PropZoneId;
 	char PropZoneName[128];
@@ -224,14 +224,14 @@ struct SPaintUIBridge
 
 /** Open the Save modal (Overwrite / Save copy / Cancel). Prefills copy name. */
 void openSaveDialog();
-/** open the save dialog bound to ONE editable file (board cell "Save as…"). */
+/** M27b: open the save dialog bound to ONE editable file (board cell "Save as…"). */
 void openSaveDialogForFile(const std::string &basename);
 
-/** Dev/test: force the Save modal open for a screenshot frame (env/guard callers). */
+/** Dev/test: force the Save modal open for one screenshot frame (env/guard callers). */
 void forceShowSaveDialogForShot();
 
 /**
- * Rebuild the Tiles palette from the loaded bank.
+ * Rebuild the Tiles palette from the loaded bank (ui M8 + M9a).
  * Fills the tileset grid (64px diffuse previews under thumbcache/tileset/) and the
  * Displace section (indices 0-15, noise-map previews under thumbcache/displace/).
  * tilesetForDisplace selects which set's _DisplacementBitmap maps sub-index → file
@@ -240,21 +240,21 @@ void forceShowSaveDialogForShot();
 void rebuildTilesetPalette(NL3D::CTileBank *bank, const std::string &bankPath,
                            const std::string &seasonKey, int tilesetForDisplace = 0);
 
-/** Show/hide / toggle the Tiles palette window. */
+/** Show/hide / toggle the Tiles palette window (ui M8). */
 void setTilesetPaletteVisible(bool visible);
-/** Show/hide the painterscript window (SCRIPT toolbar button / shot hook). */
+/** Show/hide the painterscript window (ui M23b; SCRIPT toolbar button / shot hook). */
 void setScriptWindowVisible(bool visible);
 void toggleTilesetPalette();
 bool isTilesetPaletteVisible();
 
-/** Dev/test: scroll the palette body so the Displace section is in view. */
+/** Dev/test: scroll the palette body so the Displace section is in view (M9a shots). */
 void scrollPaletteToDisplaceSection();
 
-/** Show/hide the brush color picker window. */
+/** Show/hide the brush color picker window (ui M9b). */
 void setColorPickerVisible(bool visible);
 void toggleColorPicker();
 bool isColorPickerVisible();
-/** Dev/test: force the color picker open for a screenshot frame. */
+/** Dev/test: force the color picker open for one screenshot frame. */
 void forceShowColorPickerForShot();
 
 /** Install / clear the process-wide bridge (action handlers look it up). */
@@ -262,7 +262,7 @@ void setPaintUIBridge(SPaintUIBridge *bridge);
 SPaintUIBridge *getPaintUIBridge();
 
 /**
- * Viewer-side NLGUI shell. init is optional-fail: if the atlas or interface
+ * Viewer-side NLGUI shell. init() is optional-fail: if the atlas or interface
  * XML is missing the viewer continues with keyboard+HUD only.
  */
 class CEditorUI

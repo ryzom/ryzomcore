@@ -1,6 +1,6 @@
 /**
  * \file flow_group.cpp
- * \brief zp_flow — auto-wrapping fixed-size tile flow group
+ * \brief zp_flow — auto-wrapping fixed-size tile flow group (ui M29c)
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
  *
@@ -11,14 +11,14 @@
  * pass re-wraps naturally. That widget lives in the client, not NLGUI, so this is the
  * minimal standalone equivalent for fixed-size tiles.
  *
- * XML: <group type="zp_flow" tile_w="178" tile_h="106" sizeref="w" w="0"... />
+ * XML: <group type="zp_flow" tile_w="178" tile_h="106" sizeref="w" w="0" ... /> —
  * children (spawned TL-TL, e.g. via the board-cell spawnUnder idiom) are laid out in
  * add order, left→right then top→bottom; the group sets its own height to the row
  * count so a stacking CGroupList (scroll_text body) flows around it.
  */
 
 /*
- * Copyright (C) 2026 by authors
+ * Copyright (C) 2026  by authors
  *
  * This file is part of RYZOM CORE PIPELINE.
  * RYZOM CORE PIPELINE is free software: you can redistribute it
@@ -28,11 +28,11 @@
  *
  * RYZOM CORE PIPELINE is distributed in the hope that it will be
  * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public
- * License along with RYZOM CORE PIPELINE. If not, see
+ * License along with RYZOM CORE PIPELINE.  If not, see
  * <http://www.gnu.org/licenses/>.
  */
 
@@ -78,7 +78,7 @@ public:
 
 	virtual void updateCoords()
 	{
-		// Columns from the current width (last layout pass's real size when sizeref'd
+		// Columns from the current width (last layout pass's real size when sizeref'd —
 		// same one-frame convergence as the client's inventory grid), then reflow the
 		// existing children into grid slots and size the group to the row count.
 		sint32 avail = getWReal();

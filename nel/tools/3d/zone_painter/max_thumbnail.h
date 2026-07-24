@@ -1,11 +1,11 @@
 /**
  * \file max_thumbnail.h
- * \brief OLE SummaryInformation thumbnail R/W for zone_painter browsers + save
+ * \brief OLE SummaryInformation thumbnail R/W for zone_painter browsers + save (ui M5)
  * \author Jan Boon (Kaetemi)
  * \author Grok 4.5
  *
  * Public include contract: NLMISC only (path/file/bitmap types via strings). No
- * patch_eval, SCENELIB, NLGUI. The.cpp opens OLE via pipeline_max CStorageOleIn/Out
+ * patch_eval, SCENELIB, NLGUI. The .cpp opens OLE via pipeline_max CStorageOleIn/Out
  * read-only for extract; write rebuilds only the SummaryInformation stream.
  *
  * Cache layout: CPath::getApplicationDirectory("zone_painter") + "thumbcache/"
@@ -13,7 +13,7 @@
  */
 
 /*
- * Copyright (C) 2026 by authors
+ * Copyright (C) 2026  by authors
  *
  * This file is part of RYZOM CORE PIPELINE.
  * RYZOM CORE PIPELINE is free software: you can redistribute it
@@ -23,11 +23,11 @@
  *
  * RYZOM CORE PIPELINE is distributed in the hope that it will be
  * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public
- * License along with RYZOM CORE PIPELINE. If not, see
+ * License along with RYZOM CORE PIPELINE.  If not, see
  * <http://www.gnu.org/licenses/>.
  */
 
@@ -77,7 +77,7 @@ bool extractThumbnailProperty(const std::string &maxPath, std::vector<uint8> &ou
 bool readSummaryInformationStream(const std::string &maxPath, std::vector<uint8> &out);
 
 /**
- * Ensure a cached.tga exists for maxPath (extract on miss / stale mtime).
+ * Ensure a cached .tga exists for maxPath (extract on miss / stale mtime).
  * On success sets outTgaPath to the absolute cache path and returns true.
  * On failure (no thumb) outTgaPath is cleared and returns false.
  */
@@ -132,7 +132,7 @@ bool buildSummaryInformationWithThumbnail(const std::string &maxPath,
 void wrapDibAsVtCfProperty(const std::vector<uint8> &dib, std::vector<uint8> &outPropValue);
 
 // ---------------------------------------------------------------------------------------------
-// Tileset palette previews: 64x64 TGA cache under thumbcache/tileset/
+// Tileset palette previews (ui M8): 64x64 TGA cache under thumbcache/tileset/
 
 /** Absolute tileset-preview cache directory (created on demand). */
 std::string tilesetPreviewCacheDir();
@@ -155,8 +155,8 @@ bool ensureTilesetPreview(const std::string &bankPath, int setIndex,
                           std::string &outTgaPath, uint sidePx = 64);
 
 // ---------------------------------------------------------------------------------------------
-// Displacement palette previews: 64x64 TGA cache under thumbcache/displace/
-// Point-upsampled from 32x32 noise maps: min..max stretch + sqrt gamma lift.
+// Displacement palette previews (ui M9a/M10a): 64x64 TGA cache under thumbcache/displace/
+// Point-upsampled from 32x32 noise maps: min..max stretch + sqrt gamma lift (M10a).
 
 /** Absolute displace-preview cache directory (created on demand). */
 std::string displacePreviewCacheDir();
