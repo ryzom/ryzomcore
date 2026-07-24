@@ -1415,16 +1415,6 @@ static void applyZoneSelection(int idx)
 	s_Sess.OpenZone = true;
 }
 
-/** Commit PendingSelect (or single SelectedZone) into an open request. */
-static void applyOpenSelection()
-{
-	if (s_Sess.PendingSelect.empty())
-		return;
-	// Prefer lowest index as primary for title/compat
-	s_Sess.SelectedZone = *s_Sess.PendingSelect.begin();
-	s_Sess.OpenZone = true;
-}
-
 static bool isSupportedInstanceLayout(const std::string &s)
 {
 	return s == "1x1" || s == "2x1" || s == "1x2" || s == "2x2" || s == "3x3";
@@ -1506,7 +1496,9 @@ public:
 		if (!s_Sess.Active) return;
 		if (s_Sess.PendingSelect.empty())
 			return;
-		applyOpenSelection();
+		// Prefer lowest index as primary for title/compat
+		s_Sess.SelectedZone = *s_Sess.PendingSelect.begin();
+		s_Sess.OpenZone = true;
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpOpenSelection, "zp_open_selection");

@@ -288,7 +288,7 @@
 		<view type="text" id="layout_label" posparent="world_sub" posref="BL TL" x="0" y="-6" fontsize="11" shadow="true"
 			global_color="false" color="255 255 255 180" hardtext="Open layout (self-instances):" active="false" />
 		<ctrl style="text_button_radio" id="layout_1x1" posparent="layout_label" posref="BL TL" x="0" y="-2"
-			pushed="true" onclick_l="zp_set_instances" params_l="1x1" hardtext="1x1" active="false" />
+			onclick_l="zp_set_instances" params_l="1x1" hardtext="1x1" active="false" />
 		<ctrl style="text_button_radio" id="layout_2x1" posparent="layout_1x1" posref="MR ML" x="4" y="0"
 			onclick_l="zp_set_instances" params_l="2x1" hardtext="2x1" active="false" />
 		<ctrl style="text_button_radio" id="layout_1x2" posparent="layout_2x1" posref="MR ML" x="4" y="0"

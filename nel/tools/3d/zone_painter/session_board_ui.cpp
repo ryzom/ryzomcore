@@ -134,6 +134,11 @@ void openCellActionPopup(const std::string &basename)
 // run toggleEditable instead of closeZone.
 static bool s_CloseConfirmToggle = false;
 
+// Pending hint-name for the empty-cell popup's one-click hint rows. Dedicated slot for
+// the same reason as s_CloseConfirmToggle: piggy-backing on s_Sess.StatusMsg (which any
+// setStatus() writer touches) risked clobber-between-open-and-click.
+static std::string s_PendingHintName;
+
 static void openCloseConfirmModal(const std::string &basename, const std::string &purpose)
 {
 	s_CloseConfirmToggle = false;
@@ -631,9 +636,6 @@ void setSessionBoardVisible(bool visible)
 		}
 		if (CInterfaceElement *el = CWidgetManager::getInstance()->getElementFromId("ui:zp:zone_browser"))
 			el->setActive(true);
-		if (CGroupContainer *gc = dynamic_cast<CGroupContainer *>(
-		        CWidgetManager::getInstance()->getElementFromId("ui:zp:zone_browser")))
-			gc->setActive(true);
 		refreshSessionBoardStates();
 		refreshBoardSelectionUI();
 		printf("session board: open (%u cells, %s)\n",
@@ -648,12 +650,21 @@ void setSessionBoardVisible(bool visible)
 		s_Sess.Active = false;
 		s_Sess.PendingActionBasename.clear();
 		s_CloseConfirmToggle = false; // ESC/O close bypasses the modal handlers
+		s_PendingHintName.clear();
 		printf("session board: closed (back to painting)\n");
 	}
 }
 
 void toggleSessionBoard()
 {
+	// Refuse under any active modal - matches the drag-arm/end guard (line 537/562).
+	// Closing the board unconditionally disables the modal window, which would silently
+	// dismiss unrelated dialogs (save_dialog with a typed filename, close_confirm, the
+	// context picker) and drop user-entered state with no warning. Board's own menu
+	// popups (cell/context/empty/instance) are also modals; refusing here lets them
+	// auto-dismiss via ExitClickOut on their next click instead.
+	if (CWidgetManager::getInstance()->hasModal())
+		return;
 	setSessionBoardVisible(!s_SessionBoardVisible);
 }
 
@@ -767,18 +778,6 @@ public:
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpCellToggle, "zp_cell_toggle");
-
-class CAHZpCellActionCancel : public IActionHandler
-{
-public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
-	{
-		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
-		CWidgetManager::getInstance()->disableModalWindow();
-		s_Sess.PendingActionBasename.clear();
-	}
-};
-REGISTER_ACTION_HANDLER(CAHZpCellActionCancel, "zp_cell_action_cancel");
 
 // Close-confirm: Save first / Close without saving / Cancel
 class CAHZpCloseConfirmSave : public IActionHandler
@@ -945,18 +944,6 @@ public:
 };
 REGISTER_ACTION_HANDLER(CAHZpInstRemove, "zp_inst_remove");
 
-class CAHZpInstCancel : public IActionHandler
-{
-public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
-	{
-		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
-		CWidgetManager::getInstance()->disableModalWindow();
-		s_Sess.PendingActionBasename.clear();
-	}
-};
-REGISTER_ACTION_HANDLER(CAHZpInstCancel, "zp_inst_cancel");
-
 // ---------------------------------------------------------------------------------------------
 // Empty-cell popup + context place/remove + brick picker
 
@@ -997,7 +984,7 @@ void openEmptyCellPopup(const std::string &basename)
 	}
 	if (CInterfaceGroup *menu = findGroup("ui:zp:empty_cell_action"))
 		menu->invalidateCoords();
-	s_Sess.StatusMsg = haveHint ? ("hint:" + hintName) : std::string();
+	s_PendingHintName = haveHint ? hintName : std::string();
 	CWidgetManager::getInstance()->enableModalWindow(NULL, "ui:zp:empty_cell_action");
 }
 
@@ -1202,10 +1189,10 @@ static void zpEmptyOpenHint(bool editable)
 	int cx = 0, cy = 0;
 	if (!parseScratchBasename(s_Sess.PendingActionBasename, sk, cx, cy) || sk != 'E')
 		return;
-	if (s_Sess.StatusMsg.size() <= 5 || s_Sess.StatusMsg.compare(0, 5, "hint:") != 0)
+	if (s_PendingHintName.empty())
 		return;
-	const std::string name = s_Sess.StatusMsg.substr(5);
-	s_Sess.StatusMsg.clear();
+	const std::string name = s_PendingHintName;
+	s_PendingHintName.clear();
 	if (!s_SessionBridge) return;
 	std::string err;
 	bool ok = false;
@@ -1241,18 +1228,6 @@ public:
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpEmptyHintEd, "zp_empty_hint_ed");
-
-class CAHZpEmptyCancel : public IActionHandler
-{
-public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
-	{
-		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
-		CWidgetManager::getInstance()->disableModalWindow();
-		s_Sess.PendingActionBasename.clear();
-	}
-};
-REGISTER_ACTION_HANDLER(CAHZpEmptyCancel, "zp_empty_cancel");
 
 class CAHZpContextRemove : public IActionHandler
 {
@@ -1380,18 +1355,6 @@ public:
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpContextMirror, "zp_context_mirror");
-
-class CAHZpContextCancel : public IActionHandler
-{
-public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
-	{
-		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
-		CWidgetManager::getInstance()->disableModalWindow();
-		s_Sess.PendingActionBasename.clear();
-	}
-};
-REGISTER_ACTION_HANDLER(CAHZpContextCancel, "zp_context_cancel");
 
 class CAHZpContextPick : public IActionHandler
 {
