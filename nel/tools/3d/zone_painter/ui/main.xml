@@ -358,7 +358,7 @@
 		<group type="frame" id="goto_frame" options="w_box_frame" posparent="goto_lbl" posref="MR ML" x="6" y="0"
 			w="368" h="20" color="255 255 255 255" global_color="false" display="true">
 			<group type="edit_box" id="goto_path" posref="TL TL" x="4" y="-4" w="360" h="12"
-				prompt="" max_num_chars="500" entry_type="text"
+				prompt="" max_num_chars="500" entry_type="text" menu_r="ui:zp:editbox_menu"
 				enter_loose_focus="false" enter_recover_focus="true" reset_focus_on_hide="true"
 				want_return="false" clear_on_escape="false">
 				<view id="edit_text" type="text" x="0" y="1" posref="TL TL" multi_line="false"
@@ -756,7 +756,7 @@
 		<group type="frame" id="ed_frame" options="w_box_frame" posparent="lbl_ed" posref="BL TL" x="0" y="-2"
 			w="360" h="150" display="true">
 			<group type="edit_box" id="code" posref="TL TL" x="4" y="-4" w="348" h="140"
-				want_return="true" max_num_chars="16384" multi_line="true"
+				want_return="true" max_num_chars="16384" multi_line="true" menu_r="ui:zp:editbox_menu"
 				onenter="" params="" prompt="" enter_recover_focus="false" reset_focus_on_hide="true"
 				continuous_text_update="true" max_historic="0">
 				<view type="text" id="edit_text" posref="TL TL" x="0" y="0" w="344" fontsize="10" shadow="true"
@@ -840,7 +840,7 @@
 		<group type="frame" id="copy_frame" options="w_box_frame" posparent="copy_lbl" posref="BL TL" x="0" y="-6"
 			w="320" h="22" color="255 255 255 255" global_color="false" display="true">
 			<group type="edit_box" id="copy_name" posref="TL TL" x="4" y="-5" w="312" h="13"
-				prompt="" max_num_chars="200" entry_type="text"
+				prompt="" max_num_chars="200" entry_type="text" menu_r="ui:zp:editbox_menu"
 				enter_loose_focus="false" enter_recover_focus="true" reset_focus_on_hide="true"
 				want_return="false" clear_on_escape="false">
 				<view id="edit_text" type="text" x="0" y="1" posref="TL TL" multi_line="false"
@@ -876,6 +876,17 @@
 	color="255 255 255 200" shadow_color="0 0 0 255" color_over="255 255 255 255" shadow_color_over="0 0 0 255"
 	color_grayed="200 210 220 150" shadow_color_grayed="0 0 0 200" highlight_over="70 120 190 150"
 	case_mode="%case_normal"></group>
+
+<!-- Right-click menu for the raw edit_box widgets (goto_path, code, copy_name).
+     editbox_* action handlers ship with nelgui and operate on the edit box
+     that opened the menu (CGroupEditBox::getMenuFather). -->
+<group type="menu" id="editbox_menu" extends="ui:zp:zp_ctx_menu_base">
+	<action id="cut" name="Cut" handler="editbox_cut" params="" />
+	<action id="copy" name="Copy" handler="editbox_copy" params="" />
+	<action id="paste" name="Paste" handler="editbox_paste" params="" />
+	<separator />
+	<action id="select_all" name="Select all" handler="editbox_select_all" params="" />
+</group>
 
 <!-- Cell action popup (session board: L-click on open cell) -->
 <group type="menu" id="cell_action" extends="ui:zp:zp_ctx_menu_base">
