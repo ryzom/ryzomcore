@@ -48,12 +48,36 @@ jobs:
           version: ${{ env.EM_VERSION }}
           no-cache: true
 
-      - name: Checkout graphics assets (sparse)
+      - name: Cache graphics assets dump
+        uses: actions/cache@v6
+        with:
+          path: ${{ github.workspace }}/../ryzomcore_graphics_cache
+          key: ryzomcore_graphics-rev5
+
+      - name: Fetch graphics assets dump
+        # A `git clone` of ryzom/ryzomcore_graphics smudges LFS on checkout,
+        # which burns the org's LFS bandwidth on every CI run and hard-fails
+        # the moment the budget is exhausted. Instead pull the mirrored
+        # snapshot from cdn.ryzom.dev (no LFS involved) and unpack it to the
+        # path CMake resolves as NL_GRAPHICS_DIR. The cache above skips the
+        # ~2 GB download on repeat runs.
         run: |
-          git clone --filter=blob:none --sparse --depth=1 \
-            https://github.com/ryzom/ryzomcore_graphics.git ${{ github.workspace }}/../ryzomcore_graphics
-          cd ${{ github.workspace }}/../ryzomcore_graphics
-          git sparse-checkout set landscape/water
+          sudo apt-get install -y p7zip-full
+          ASSETS_URL="https://cdn.ryzom.dev/pub/assets/ryzomcore_graphics-rev5.7z"
+          DEST="${{ github.workspace }}/../ryzomcore_graphics"
+          CACHE_DIR="${{ github.workspace }}/../ryzomcore_graphics_cache"
+          mkdir -p "$CACHE_DIR"
+          if [ ! -f "$CACHE_DIR/ryzomcore_graphics-rev5.7z" ]; then
+            curl -L --fail --retry 3 -o "$CACHE_DIR/ryzomcore_graphics-rev5.7z" "$ASSETS_URL"
+          fi
+          mkdir -p "$DEST"
+          7z x -y -o"$DEST" "$CACHE_DIR/ryzomcore_graphics-rev5.7z" > /dev/null
+          # The archive root may or may not include a leading ryzomcore_graphics/;
+          # flatten if it does so NL_GRAPHICS_DIR points at the asset tree itself.
+          if [ -d "$DEST/ryzomcore_graphics" ] && [ ! -d "$DEST/interfaces" ]; then
+            mv "$DEST/ryzomcore_graphics"/* "$DEST/ryzomcore_graphics"/.[!.]* "$DEST/" 2>/dev/null || true
+            rmdir "$DEST/ryzomcore_graphics" 2>/dev/null || true
+          fi
 
       - name: Verify Emscripten
         run: emcc --version
