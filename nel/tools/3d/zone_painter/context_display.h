@@ -3,6 +3,7 @@
  * \brief Include-meshes context display + scene lights for the zone painter
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
+ * \author Grok 4.5
  *
  * Ports the in-Max "include meshes" path (non-zone shapes in the paint viewport, scene ambient
  * and driver lights) plus CPaintLight point-light models. Shapes build through the shape

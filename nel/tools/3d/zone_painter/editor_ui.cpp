@@ -2,6 +2,8 @@
  * \file editor_ui.cpp
  * \brief In-engine NLGUI facade for the standalone zone painter
  * \author Jan Boon (Kaetemi)
+ * \author Claude Fable 5
+ * \author Claude Sonnet 5
  * \author Grok 4.5
  */
 

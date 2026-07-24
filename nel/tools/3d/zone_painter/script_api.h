@@ -3,6 +3,7 @@
  * \brief painterscript: MaxScript-like Lua scripting over the paint op layer
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
+ * \author Grok 4.5
  *
  * Include contract: NLMISC/std only in this header. The .cpp binds the embedded NLGUI
  * Lua state (CLuaManager); no patch_eval.h, no SCENELIB, no NLGUI widget headers.

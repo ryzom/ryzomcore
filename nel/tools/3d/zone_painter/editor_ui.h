@@ -2,6 +2,7 @@
  * \file editor_ui.h
  * \brief In-engine NLGUI facade for the standalone zone painter
  * \author Jan Boon (Kaetemi)
+ * \author Claude Fable 5
  * \author Grok 4.5
  *
  * Embeds NLGUI over the viewer's UDriver (the sample at nel/samples/gui is the

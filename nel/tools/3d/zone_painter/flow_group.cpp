@@ -3,6 +3,7 @@
  * \brief zp_flow: auto-wrapping fixed-size tile flow group
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
+ * \author Grok 4.5
  *
  * The Ryzom client inventory grid (interface_v3 dbgroup_list_sheet) is the reference
  * mechanism: the column count derives from the group's CURRENT width inside

@@ -2,6 +2,7 @@
  * \file workspace_discovery.cpp
  * \brief Graphics workspace fingerprint + discovery for zone_painter startup
  * \author Jan Boon (Kaetemi)
+ * \author Claude Fable 5
  * \author Grok 4.5
  */
 

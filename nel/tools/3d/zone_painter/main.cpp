@@ -3,6 +3,8 @@
  * \brief Standalone zone painter: load .max, assemble landscape, paint, save
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
+ * \author Claude Sonnet 5
+ * \author Grok 4.5
  *
  * Load a .max through pipeline_max, assemble the painting landscape the way the in-Max
  * painter's NeL thread did (plugin_max/nel_patch_paint paint.cpp myThread), paint tiles

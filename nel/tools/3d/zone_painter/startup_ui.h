@@ -2,6 +2,8 @@
  * \file startup_ui.h
  * \brief NeL-GUI startup screens for zone_painter (world select / zone browser)
  * \author Jan Boon (Kaetemi)
+ * \author Claude Fable 5
+ * \author Claude Sonnet 5
  * \author Grok 4.5
  *
  * Include contract: NLMISC + NL3D UDriver + NLGUI + editor_ui.h + workspace_discovery.h.

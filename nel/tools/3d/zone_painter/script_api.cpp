@@ -3,6 +3,7 @@
  * \brief painterscript: Lua binding over the paint op layer
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
+ * \author Grok 4.5
  *
  * Own TU: NLGUI Lua (CLuaManager/CLuaState) + NLMISC only. Must NOT include
  * patch_eval.h / context_display.h / SCENELIB headers (main.cpp include contract).

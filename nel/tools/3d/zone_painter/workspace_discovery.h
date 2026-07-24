@@ -2,6 +2,7 @@
  * \file workspace_discovery.h
  * \brief Graphics workspace fingerprint + discovery for zone_painter startup
  * \author Jan Boon (Kaetemi)
+ * \author Claude Fable 5
  * \author Grok 4.5
  *
  * Include contract: NLMISC only (path/file/config). No patch_eval, SCENELIB, NLGUI, or

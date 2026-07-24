@@ -2,6 +2,7 @@
  * \file max_thumbnail.cpp
  * \brief OLE SummaryInformation thumbnail R/W for zone_painter
  * \author Jan Boon (Kaetemi)
+ * \author Claude Fable 5
  * \author Grok 4.5
  *
  * Parses MS-OLEPS property set streams (SummaryInformation) to extract/replace

@@ -3,6 +3,7 @@
  * \brief See paint_core.h.
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
+ * \author Grok 4.5
  */
 // Port map (plugin_max/nel_patch_paint paint.cpp -> here):
 //   DoPaint metaTile build        -> buildMeta / stitchEdge (typed SPatchMesh/SRPatchMesh data;

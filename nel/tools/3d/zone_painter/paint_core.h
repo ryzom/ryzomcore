@@ -3,6 +3,7 @@
  * \brief Tile painting core of the standalone zone painter.
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
+ * \author Grok 4.5
  *
  * Port of the in-Max painter's TILE path (plugin_max/nel_patch_paint paint.cpp) onto the typed
  * pipeline_max model: the EPM_PaintTile/metaTile adjacency graph, the tile put/transition

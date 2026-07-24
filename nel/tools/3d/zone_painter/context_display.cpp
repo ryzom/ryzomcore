@@ -3,6 +3,7 @@
  * \brief See context_display.h.
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
+ * \author Grok 4.5
  */
 // Port map:
 //   paint.cpp includeMeshes branch -> addContextMeshes + setupDriverLights + decodeSceneAmbient
