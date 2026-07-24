@@ -9,7 +9,7 @@
 <!-- * history (it freezes the buttons itself).            * -->
 <!-- ******************************************************* -->
 
-<group type="container" id="help" w="420" pop_min_w="420" pop_max_w="420" h="440" pop_min_h="440" pop_max_h="440"
+<group type="container" id="help" w="420" pop_min_w="320" pop_max_w="620" h="440" pop_min_h="240" pop_max_h="620"
 	title="Help (group_html)" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
 	title_bar_open="false" open_button="false" right_button="true" lockable="false" openable="false"
 	opened="true" movable="true" active="false" x="440" y="620">

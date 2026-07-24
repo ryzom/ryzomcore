@@ -12,7 +12,7 @@
 	<view type="text" id="#id" posparent="#posparent" posref="#posref" x="#x" y="#y" fontsize="12" shadow="true" global_color="false" color="255 255 255 255" hardtext="" />
 </template>
 
-<group type="container" id="console" w="700" pop_min_w="700" pop_max_w="700" h="176" pop_min_h="176" pop_max_h="176"
+<group type="container" id="console" w="700" pop_min_w="400" pop_max_w="900" h="176" pop_min_h="120" pop_max_h="360"
 	title="Lua console" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
 	title_bar_open="false" open_button="false" right_button="true" lockable="false" openable="false"
 	opened="true" movable="true" active="true" x="272" y="180">

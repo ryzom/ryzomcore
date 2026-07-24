@@ -23,7 +23,7 @@
 <!-- * Launcher window  * -->
 <!-- ******************** -->
 
-<group type="container" id="launcher" w="176" pop_min_w="176" pop_max_w="176" h="420" pop_min_h="420" pop_max_h="420"
+<group type="container" id="launcher" w="176" pop_min_w="160" pop_max_w="260" h="420" pop_min_h="300" pop_max_h="560"
 	title="Showcase" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
 	title_bar_open="false" open_button="false" right_button="false" lockable="false" openable="false"
 	opened="true" movable="true" active="true" x="8" y="712">
@@ -169,7 +169,7 @@
 <!-- * Edit boxes (layer0) * -->
 <!-- ********************** -->
 
-<group type="container" id="editors" w="400" pop_min_w="400" pop_max_w="400" h="298" pop_min_h="298" pop_max_h="298"
+<group type="container" id="editors" w="400" pop_min_w="320" pop_max_w="560" h="298" pop_min_h="200" pop_max_h="460"
 	title="Edit boxes and scroll text" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
 	title_bar_open="false" open_button="false" right_button="true" lockable="false" openable="false"
 	opened="true" movable="true" active="true" x="588" y="504">
@@ -195,7 +195,7 @@
 <!-- * List + tree (layer2) * -->
 <!-- *********************** -->
 
-<group type="container" id="lists" w="276" pop_min_w="276" pop_max_w="276" h="190" pop_min_h="190" pop_max_h="190"
+<group type="container" id="lists" w="276" pop_min_w="220" pop_max_w="400" h="190" pop_min_h="140" pop_max_h="360"
 	title="List and tree" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
 	title_bar_open="false" open_button="false" right_button="true" lockable="false" openable="false"
 	opened="true" movable="true" active="true" x="996" y="712">
