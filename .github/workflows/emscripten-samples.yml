@@ -82,10 +82,51 @@ jobs:
       - name: Verify Emscripten
         run: emcc --version
 
+      - name: Cache nelgui_deps (wasm prefix)
+        id: nelgui-deps-cache
+        uses: actions/cache@v6
+        with:
+          path: ${{ github.workspace }}/../nelgui_deps
+          key: nelgui_deps-em${{ env.EM_VERSION }}-${{ hashFiles('.github/scripts/build-nelgui-deps.sh') }}
+
+      - name: Build nelgui_deps (wasm prefix)
+        if: steps.nelgui-deps-cache.outputs.cache-hit != 'true'
+        # Builds lua5.1 + libxml2 + ryzom/luabind cross-compiled to wasm plus
+        # boost/openssl/curl headers + nel_wasm_stubs archived as libcurl.a/
+        # libssl.a/libcrypto.a. Cached above so this only runs when the
+        # script or emsdk version changes.
+        run: |
+          bash .github/scripts/build-nelgui-deps.sh \
+            ${{ github.workspace }}/../nelgui_deps/wasm \
+            ${{ github.workspace }}
+
+      - name: Build host build_interface
+        # nl_sample_gui packs its interface atlas at build time via
+        # build_interface, a native tool that can't run under emscripten.
+        # Configure a separate host CMake tree and build just that target;
+        # the emscripten configure below points NL_BUILD_INTERFACE_TOOL at
+        # the resulting binary. Only build_interface itself is compiled,
+        # not the rest of nel/tools.
+        run: |
+          mkdir -p build-host
+          cd build-host
+          cmake .. \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DWITH_NEL_TOOLS=ON \
+            -DWITH_NEL_SAMPLES=OFF -DWITH_NEL_TESTS=OFF \
+            -DWITH_3D=OFF -DWITH_GUI=OFF -DWITH_SOUND=OFF \
+            -DWITH_LOGIC=OFF -DWITH_PACS=OFF -DWITH_GEORGES=OFF \
+            -DWITH_LIGO=OFF -DWITH_NET=OFF -DWITH_WEB=OFF \
+            -DWITH_RYZOM=OFF -DWITH_RYZOM_CLIENT=OFF \
+            -DWITH_RYZOM_SERVER=OFF -DWITH_RYZOM_TOOLS=OFF \
+            -DWITH_NELNS=OFF -DWITH_SNOWBALLS=OFF
+          make -j$(nproc) build_interface
+
       - name: Configure CMake
         env:
           EM_FROZEN_CACHE: ""
         run: |
+          DEPS="${{ github.workspace }}/../nelgui_deps"
           mkdir -p build
           cd build
           emcmake cmake .. \
@@ -94,6 +135,7 @@ jobs:
             -DWITH_PCH=OFF \
             -DWITH_STATIC=ON \
             -DWITH_STATIC_DRIVERS=ON \
+            -DWITH_STATIC_LIBXML2=ON \
             -DWITH_DRIVER_OPENGL=OFF \
             -DWITH_DRIVER_OPENGLES=OFF \
             -DWITH_DRIVER_OPENGL3=OFF \
@@ -107,7 +149,8 @@ jobs:
             -DWITH_RYZOM_TOOLS=OFF \
             -DWITH_NELNS=OFF \
             -DWITH_SNOWBALLS=OFF \
-            -DWITH_GUI=OFF \
+            -DWITH_GUI=ON \
+            -DWITH_LUA51=ON \
             -DWITH_SOUND=OFF \
             -DWITH_LOGIC=OFF \
             -DWITH_PACS=OFF \
@@ -115,6 +158,18 @@ jobs:
             -DWITH_LIGO=OFF \
             -DWITH_NET=OFF \
             -DWITH_WEB=OFF \
+            -DNL_BUILD_INTERFACE_TOOL=${{ github.workspace }}/build-host/bin/build_interface \
+            -DLUA_INCLUDE_DIR=$DEPS/wasm/include \
+            -DLUA_LIBRARIES=$DEPS/wasm/lib/liblua.a \
+            -DLUABIND_INCLUDE_DIR=$DEPS/wasm/include \
+            -DLUABIND_LIBRARY_RELEASE=$DEPS/wasm/lib/libluabind09.a \
+            -DLibXml2_DIR=$DEPS/wasm/lib/cmake/libxml2-2.12.10 \
+            -DBoost_INCLUDE_DIR=$DEPS/boost-headers \
+            -DCURL_INCLUDE_DIR=$DEPS/wasm/include \
+            -DCURL_LIBRARY=$DEPS/wasm/lib/libcurl.a \
+            -DOPENSSL_INCLUDE_DIR=$DEPS/openssl-headers \
+            -DOPENSSL_SSL_LIBRARY=$DEPS/wasm/lib/libssl.a \
+            -DOPENSSL_CRYPTO_LIBRARY=$DEPS/wasm/lib/libcrypto.a \
             -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
 
       - name: Build samples
@@ -128,7 +183,8 @@ jobs:
             nl_sample_planar_reflection \
             nl_sample_ppl \
             nl_sample_water \
-            nl_sample_font
+            nl_sample_font \
+            nl_sample_gui
 
       - name: ccache stats
         if: always()
@@ -138,7 +194,7 @@ jobs:
         run: |
           mkdir -p pages
           # Copy built sample files
-          for sample in clip_plane nelvp planar_reflection ppl water font; do
+          for sample in clip_plane nelvp planar_reflection ppl water font gui; do
             cp build/bin/nl_sample_${sample}.js pages/
             cp build/bin/nl_sample_${sample}.wasm pages/
             # Copy any embedded data files
@@ -147,7 +203,7 @@ jobs:
             fi
           done
           # Generate per-sample HTML host pages
-          for sample in clip_plane nelvp planar_reflection ppl water font; do
+          for sample in clip_plane nelvp planar_reflection ppl water font gui; do
             title=$(echo "$sample" | sed 's/_/ /g; s/\b\(.\)/\u\1/g')
             cat > pages/nl_sample_${sample}.html << 'SAMPLEEOF'
           <!DOCTYPE html>
@@ -304,6 +360,16 @@ jobs:
           SAMPLEEOF
             # Append the title and sample-specific script tag (needs shell variable expansion)
             sed -i "s|<title>NeL Sample (WebGL 2.0)</title>|<title>NeL Sample - ${title} (WebGL 2.0)</title>|" pages/nl_sample_${sample}.html
+            # The GUI sample runs fullscreen at native devicePixelRatio; swap
+            # the fixed-size centered layout for a viewport-filling canvas.
+            if [ "$sample" = "gui" ]; then
+              sed -i \
+                -e 's|body {|body { overflow: hidden;|' \
+                -e 's|display: flex; justify-content: center; align-items: center;||' \
+                -e 's|width: 800px; height: 600px;|width: 100vw; height: 100vh;|' \
+                -e 's|<canvas id="canvas" width="800" height="600"|<canvas id="canvas"|' \
+                pages/nl_sample_${sample}.html
+            fi
             echo "  <script src=\"nl_sample_${sample}.js\"></script>" >> pages/nl_sample_${sample}.html
             echo "  </body>" >> pages/nl_sample_${sample}.html
             echo "  </html>" >> pages/nl_sample_${sample}.html
