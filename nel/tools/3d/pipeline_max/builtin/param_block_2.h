@@ -61,12 +61,12 @@ namespace BUILTIN {
  * u32 count then per-element flag+value.
  *
  * This class keeps the raw chunks authoritative (roundtrip is byte-exact by construction, the
- * design-doc §5/§12.2 discipline shared with CControlKeyFramerBase / CRklPatchObject): parse
- * decodes a typed model over the orphaned chunks WITHOUT moving them, build re-emits them
- * verbatim. On top of that it exposes typed read access to every parameter and an in-place
- * modify API (setFloat/setInt/setBool/setColor rewrite the owning record's payload bytes) —
- * the read+modify+save foundation for programmatic .max editing and the standalone NeL
- * material editor. See max_geometry_formats.md Part I and pipeline_max_design.md §10i/§12.5.
+ * overlay-codec discipline shared with CControlKeyFramerBase / CRklPatchObject): parse decodes
+ * a typed model over the orphaned chunks WITHOUT moving them, build re-emits them verbatim.
+ * On top of that it exposes typed read access to every parameter and an in-place modify API
+ * (setFloat/setInt/setBool/setColor rewrite the owning record's payload bytes), the
+ * read+modify+save foundation for programmatic .max editing and the standalone NeL material
+ * editor.
  */
 class CParamBlock2 : public CReferenceTarget
 {

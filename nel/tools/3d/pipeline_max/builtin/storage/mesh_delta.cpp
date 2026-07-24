@@ -41,13 +41,13 @@
 using namespace std;
 // using namespace NLMISC;
 
-// The 0x2512 LocalModData children (modern format, §L.5.1).
+// The 0x2512 LocalModData children (modern MDELTA format).
 #define PMB_MD_FLAGS_CHUNK_ID 0x2740
 #define PMB_MD_VSELSET_CHUNK_ID 0x2845
 #define PMB_MD_FSELSET_CHUNK_ID 0x2846
 #define PMB_MD_ESELSET_CHUNK_ID 0x2847
 #define PMB_MD_MDELTA_CHUNK_ID 0x4000
-// The 0x4000 MDELTA children (§L.2).
+// The 0x4000 MDELTA children (per-record delta chunks).
 #define PMB_MD_INPUT_VERTS_CHUNK_ID 0x0100
 #define PMB_MD_INPUT_FACES_CHUNK_ID 0x0110
 #define PMB_MD_CREATED_VERTS_CHUNK_ID 0x0130
@@ -274,18 +274,17 @@ bool CMeshDelta::decode(IStorageObject *localModData)
 		case PMB_MD_SEL_EDGES_CHUNK_ID:
 		case PMB_MD_SEL_UNKNOWN430_CHUNK_ID:
 			break; // recognized selection state, kept raw (ignored on evaluation)
-		// Recognized-but-untyped map-channel/UI sub-records, corpus-inventoried 2026-07-17
-		// (design-doc §10j-sept; kept raw, ignored on evaluation — the reference exporters
-		// never consumed them either). 0x0320/0x0324/0x0328 are 4-byte leaves on 4134/4379
+		// Recognized but untyped map-channel/UI sub-records; kept raw, ignored on evaluation.
+		// 0x0320/0x0324/0x0328 are 4-byte leaves on 4134/4379
 		// mod-apps (always the three together — per-map-channel counts/flags); the record
 		// tables are count-prefixed with corpus-uniform strides: 0x0230 (12 B, the created
-		// map-face shape — legacy TOPO_NTVFACES counterpart), 0x0334/0x0338 (12 B, Point3 —
-		// the created map/tex-vert shape, legacy TOPO_NTVERTS), 0x033b (20 B — the same
+		// map-face shape, legacy TOPO_NTVFACES counterpart), 0x0334/0x0338 (12 B, Point3;
+		// the created map/tex-vert shape, legacy TOPO_NTVERTS), 0x033b (20 B, the same
 		// faceIdx+applyMask+v[3] shape as 0x0210, legacy TOPO_TVFACEMAP counterpart), 0x0330
 		// (16 B); 0x0340 is a container holding one tiny 0x2700 bit array (8 B corpus-wide);
-		// 0x0120 (52 B) / 0x0200 (44 B) are single-instance; 0x0360 (5 instances) is not
+		// 0x0120 (52 B) and 0x0200 (44 B) are single-instance; 0x0360 (5 instances) is not
 		// count-prefixed at any common stride. Typing any of these waits for a consumer that
-		// needs them plus its own corpus proof (§12.2).
+		// needs them plus its own corpus proof.
 		case 0x0120:
 		case 0x0200:
 		case 0x0230:

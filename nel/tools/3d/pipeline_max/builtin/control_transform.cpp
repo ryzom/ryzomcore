@@ -42,8 +42,8 @@ namespace PIPELINE {
 namespace MAX {
 namespace BUILTIN {
 
-// Own chunk ids on the transform controllers (corpus-inventoried 2026-07-17, §10j-dix; all
-// claimed verbatim, semantics undecoded):
+// Own chunk ids on the transform controllers (corpus-established; all claimed verbatim,
+// semantics undecoded):
 // - 0x7230 (4 B) + 0x7231 (4 B): on every PRS and LookAt instance, in that order.
 // - 0x2535 (4 B): trailing, 5 PRS instances corpus-wide.
 // - 0x0100 (4 B) + 0x0201 (1 B): LookAt only, after 0x7230/0x7231.

@@ -72,10 +72,9 @@ namespace STORAGE {
 #define PBMS_GEOM_BUFFERS_POLY_A_VERTEX_CHUNK_ID 0x0100
 #define PBMS_GEOM_BUFFERS_POLY_A_EDGE_CHUNK_ID 0x010a
 #define PBMS_GEOM_BUFFERS_POLY_A_FACE_CHUNK_ID 0x011a
-// Map-channel chunk family, repeated per stored channel in file order (design doc §10j-neuf;
-// corpus-inventoried 2026-07-17: 68,520 × 0x0959 always 4 bytes, 68,521 × 0x2398 always 4 bytes
-// value 1, 68,521 × 0x2394/0x2396 all exactly count-prefixed at stride 12, EditableMesh only,
-// Max 3 through Max 2010).
+// Map-channel chunk family, repeated per stored channel in file order (corpus-established:
+// 0x0959 always 4 bytes, 0x2398 always 4 bytes value 1, 0x2394/0x2396 always exactly
+// count-prefixed at stride 12; EditableMesh only, stable from Max 3 through Max 2010).
 #define PMBS_GEOM_BUFFERS_MAP_CHANNEL_CHUNK_ID 0x0959
 #define PMBS_GEOM_BUFFERS_MAP_SUPPORT_CHUNK_ID 0x2398
 #define PMBS_GEOM_BUFFERS_MAP_VERTEX_CHUNK_ID 0x2394

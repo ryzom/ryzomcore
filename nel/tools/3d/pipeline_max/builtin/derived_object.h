@@ -49,39 +49,37 @@ namespace BUILTIN {
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
  *
- * The OSM Derived object — ClassId (0x29263a68, 0x405f22f5) — the wrapper that holds a node's
+ * The OSM Derived object, ClassId (0x29263a68, 0x405f22f5): the wrapper that holds a node's
  * modifier stack. Together with its WSM sibling (CWSMDerivedObject, (0x4ec13906, 0x5578130e))
  * it is one of the two scene classes that are NOT resolved through ClassDirectory3: their
  * container chunk ids are the fixed 0x2032/0x2033, hardcoded in
- * CSceneClassContainer::createChunkById (design-doc §6), which is also why their
- * classDesc()->superClassId() is 0x0 — the file stores no superclass for them.
+ * CSceneClassContainer::createChunkById, which is also why their classDesc()->superClassId()
+ * is 0x0: the file stores no superclass for them.
  *
- * Format (corpus-established over every wrapper in the corpus — 42,825 OSM + 1 WSM across 6,853
- * files, identical from Max 3 (snowballs) through Max 2010; no era fork):
+ * Format (corpus-established, identical from Max 3 through Max 2010; no era fork):
  *
  * - The reference array (0x2034 flat form on every corpus wrapper; no 0x2035, no empty slots)
- *   holds the MODIFIER references first — superclass 0x810 (object-space modifier) or 0x820
- *   (world-space modifier) — in stack order bottom-up, then the BASE OBJECT as the LAST
- *   reference: the object being wrapped. The base is usually a GeomObject/Shape, a nested
- *   OSM/WSM wrapper (deep chains exist: cococlaw LOD nests 20+), or an XRefObject, but 526
- *   corpus wrappers ("MO" class) wrap a Helper (classid (0x00875f34, 0), old Bone) or a Camera
- *   ((0x1001, 0)) — the base slot is NOT restricted by superclass. 259 wrappers carry a base
+ *   holds the MODIFIER references first (superclass 0x810 object-space modifier or 0x820
+ *   world-space modifier) in stack order bottom-up, then the BASE OBJECT as the LAST reference:
+ *   the object being wrapped. The base is usually a GeomObject/Shape, a nested OSM/WSM wrapper
+ *   (deep chains exist), or an XRefObject, but some corpus wrappers wrap a Helper (old Bone)
+ *   or a Camera: the base slot is NOT restricted by superclass. Wrappers can also carry a base
  *   and ZERO modifiers (ligo zone sources).
- * - The wrapper's own chunk stream, canonical order: 0x2034 refs, [0x2045, 0x2047 (0x204b on 3
- *   wrappers)] (claimed by CReferenceMaker), then one 0x2500 ModApp container PER MODIFIER
- *   REFERENCE — count parity is exact corpus-wide, the run is contiguous, i-th 0x2500 = i-th
- *   modifier reference (the SDK's per-node ModApp/LocalModData pairing) — then one EMPTY 0x2501
- *   leaf (always present, always last, semantics unknown).
+ * - The wrapper's own chunk stream, canonical order: 0x2034 refs, [0x2045, 0x2047 (or 0x204b)]
+ *   (claimed by CReferenceMaker), then one 0x2500 ModApp container PER MODIFIER REFERENCE
+ *   (count parity is exact corpus-wide, the run is contiguous, i-th 0x2500 = i-th modifier
+ *   reference; the SDK's per-node ModApp/LocalModData pairing), then one EMPTY 0x2501 leaf
+ *   (always present, always last, semantics unknown).
  * - ModApp 0x2500 container children, canonical order, each at most once: 0x2510 (optional,
- *   52 bytes: the mod-context TM — 4x3 float row-major + 4 bytes flags), 0x2511 (always,
+ *   52 bytes: the mod-context TM, 4x3 float row-major + 4 bytes flags), 0x2511 (always,
  *   24 bytes: the mod-context bounding box, 2 Point3), 0x2512 (optional: the modifier-specific
- *   LocalModData payload — a container on most, a raw LEAF on 2,722 corpus instances; STAYS RAW
- *   at this level, the payload formats are per-modifier: Edit Mesh MeshDelta 0x4000, Physique
- *   0x2504, Map Extender cache, NeL Edit Patch 0x1000, ...), 0x2513 (always, 4 bytes, unknown).
+ *   LocalModData payload; a container on most, a raw LEAF on some; STAYS RAW at this level,
+ *   the payload formats are per-modifier: Edit Mesh MeshDelta 0x4000, Physique 0x2504, Map
+ *   Extender cache, NeL Edit Patch 0x1000, ...), 0x2513 (always, 4 bytes, unknown).
  *
- * This class keeps the raw chunks authoritative (the CParamBlock/CShapeObject discipline,
- * design-doc §5/§10j/§12.2): parse decodes a typed slot model over the orphaned chunks WITHOUT
- * moving them, build re-emits them verbatim, so roundtrip is byte-exact by construction. On top
+ * This class keeps the raw chunks authoritative (the CParamBlock/CShapeObject overlay-codec
+ * discipline): parse decodes a typed slot model over the orphaned chunks WITHOUT moving them,
+ * build re-emits them verbatim, so roundtrip is byte-exact by construction. On top
  * of that it exposes the modifier slots (resolved modifier reference + paired 0x2500 ModApp),
  * the 0x2510 mod-context TM, the 0x2512 LocalModData payload object, and the base object.
  */

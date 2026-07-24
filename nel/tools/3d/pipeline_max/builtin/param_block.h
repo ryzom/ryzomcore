@@ -61,14 +61,14 @@ namespace BUILTIN {
  * 0x0102 rgba(12) / 0x0103 point3(12) / 0x0104 bool(4, int 0 or 1). An ANIMATED parameter
  * replaces its value leaf with an EMPTY marker at 0x0200 + the type code (0x0200 float /
  * 0x0201 int / 0x0202 rgba-point3 observed) and its controller occupies the block's reference
- * slots compactly, one per animated parameter of ANY kind, in entry order (§10k; the float
- * mapping is validated byte-exact by the waterfall material-anim gate, the mixed-kind ordering
- * by the animated-light blocks whose 0x0202 color at entry 0 resolves slot 0 to a Bezier
- * Point3 ahead of the float params' Bezier Float controllers).
+ * slots compactly, one per animated parameter of ANY kind, in entry order (the float mapping
+ * is validated byte-exact by the waterfall material-anim gate, the mixed-kind ordering by the
+ * animated-light blocks whose 0x0202 color at entry 0 resolves slot 0 to a Bezier Point3
+ * ahead of the float params' Bezier Float controllers).
  *
- * This class keeps the raw chunks authoritative (the CParamBlock2 discipline, design-doc
- * §5/§10j/§12.2): parse decodes a typed model over the orphaned chunks WITHOUT moving them,
- * build re-emits them verbatim, so roundtrip is byte-exact by construction. On top of that it
+ * This class keeps the raw chunks authoritative (the CParamBlock2 overlay-codec discipline):
+ * parse decodes a typed model over the orphaned chunks WITHOUT moving them, build re-emits
+ * them verbatim, so roundtrip is byte-exact by construction. On top of that it
  * exposes typed read access per declared index, controller resolution for animated params
  * (t=0 evaluation through the typed keyframers), and an in-place modify API (setFloat/setInt/
  * setPoint3 rewrite only the owning value leaf's bytes).

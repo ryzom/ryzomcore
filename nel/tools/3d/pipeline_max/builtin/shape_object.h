@@ -72,15 +72,15 @@ namespace BUILTIN {
  *   0x2000 (24 bytes).
  * - Spline3D container, in canonical order: 0x2900 uint32 numKnots, 0x2904 uint32 (0 corpus-
  *   wide, semantics unknown), 0x290a numKnots x 52-byte compact knot records, 0x290d uint32 =
- *   the CLOSED flag (0 open / 1 closed — NOT 0x2904; see design doc §10z-dix correction).
+ *   the CLOSED flag (0 open / 1 closed; the flag lives at 0x290d, not 0x2904).
  * - Compact knot record (52 bytes): ktype sint32 (KTYPE_AUTO=0/CORNER=1/BEZIER=2/
  *   BEZIER_CORNER=3), ltype sint32 (LTYPE_CURVE=0/LTYPE_LINE=1), du float, then three Point3:
  *   the KNOT POINT first (matches ShapeObject::InterpPiece3D endpoints), then the in and out
  *   handle vectors, then flags uint32 (0 corpus-wide).
  *
- * This class keeps the raw chunks authoritative (the CParamBlock/CParamBlock2 discipline,
- * design-doc §5/§10j/§12.2): parse decodes a typed model over the orphaned chunks WITHOUT
- * moving them, build re-emits them verbatim, so roundtrip is byte-exact by construction. On
+ * This class keeps the raw chunks authoritative (the CParamBlock/CParamBlock2 overlay-codec
+ * discipline): parse decodes a typed model over the orphaned chunks WITHOUT moving them,
+ * build re-emits them verbatim, so roundtrip is byte-exact by construction. On
  * top of that it exposes the decoded splines (per-Spline3D closed flag and knot records, in
  * document order across all BezierShapes) and the interpolation steps.
  */

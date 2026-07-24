@@ -52,13 +52,12 @@ namespace STORAGE {
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
  *
- * The Map Extender modifier's per-node LocalModData cache — the 0x2512 payload of a Map
+ * The Map Extender modifier's per-node LocalModData cache: the 0x2512 payload of a Map
  * Extender (ClassId (0x2ec82081, 0x045a6271), superclass 0x810, mapext198m3.dlm) modifier
  * slot on an OSM Derived wrapper (CDerivedObject::localModData(i)). The plugin object stores
  * no settings of its own (empty 0x39bf pair); the computed UVW map channel is saved flat in
- * this cache. Format per max_geometry_formats Part P / design-doc §10z-quatorze..seize,
- * corpus-validated 164/164 exporting instances (and replayed verbatim by the drop-in plugin
- * in live Max, 118/118):
+ * this cache. Format corpus-validated across every exporting instance and replayed verbatim
+ * by the drop-in plugin in live Max:
  *
  * - 0x2512 is a raw LEAF whose payload is still a chunk stream on nearly every corpus
  *   instance (the container bit is clear), and a genuine typed CONTAINER elsewhere — this
@@ -72,7 +71,7 @@ namespace STORAGE {
  *   0x03f8, the 0x03f9/0x03fa sub-containers, and 0x044c version stamp {3100, 198}.
  *
  * UVW values and face corners are stored as raw uint32 words (bit-exact rows, semantic float
- * views on top — the CBipedAnimTrack discipline, §10t), so re-encoding reproduces the stored
+ * views on top; the CBipedAnimTrack discipline), so re-encoding reproduces the stored
  * payloads verbatim.
  *
  * This is an OVERLAY CODEC, not a serialized storage class: the raw 0x2512 chunk (leaf bytes

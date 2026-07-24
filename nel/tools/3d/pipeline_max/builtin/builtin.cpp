@@ -220,8 +220,7 @@ typedef CSuperClassDescUnknown<CReferenceTarget, 0x00001160> CCustAttribSuperCla
 const CCustAttribSuperClassDesc CustAttribSuperClassDesc(&ReferenceTargetClassDesc, "CustAttribSuperClassUnknown");
 
 // 0x1190 - camera effect (e.g. "Depth of Field (mental ray)"), directly under ref target;
-// observed in the *_fp.max (first-person hand) corpus files, which crashed the exporter with an
-// unregistered-superclass nlerror before this entry was added.
+// occurs on *_fp.max (first-person hand) corpus files.
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x00001190> CCameraEffectSuperClassDesc;
 const CCameraEffectSuperClassDesc CameraEffectSuperClassDesc(&ReferenceTargetClassDesc, "CameraEffectSuperClassUnknown");
 

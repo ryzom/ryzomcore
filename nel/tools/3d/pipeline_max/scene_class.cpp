@@ -274,9 +274,10 @@ void CSceneClass::putChunk(uint16 id, IStorageObject *storageObject)
 	{
 		static_cast<CStorageContainer *>(storageObject)->build(VersionUnknown); // FIXME
 	}
-	// m_PutChunkInsert is an iterator into m_Chunks (set by build()), so insert into m_Chunks.
-	// Previously used m_OrphanedChunks.insert here — worked only because std::list splices the
-	// node into the iterator's owning list, but left both lists' sizes inconsistent (defect §11.2).
+	// m_PutChunkInsert is a m_Chunks iterator (set by build()); insert into m_Chunks so
+	// m_Chunks.size() stays consistent with the list's actual length (an insert into
+	// m_OrphanedChunks would splice through the iterator's list — same effect on this list,
+	// but leaves the orphan list's size counter wrong).
 	m_Chunks.insert(m_PutChunkInsert, TStorageObjectWithId(id, storageObject));
 }
 

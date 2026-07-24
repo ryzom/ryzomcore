@@ -48,13 +48,12 @@ namespace NELPATCH {
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
  * The Rykol Patch Object ("RklPatch", nelconvertpatch_r.dlm), ClassId (0x368c679f, 0x711c22ee),
- * superclass 0x10 (GeomObject) — the NeL landscape patch grid inside .max files. The original
+ * superclass 0x10 (GeomObject): the NeL landscape patch grid inside .max files. The original
  * RPO::Save writes chunk 0x08FD (uint32 rpoVersion + the RPatchMesh blob), then the Max
  * PatchMesh stream, then the cached Mesh stream, all as flat siblings (it deliberately skips
  * PatchObject::Save). This class claims those chunks head-first in file order and re-emits
- * them verbatim (raw bytes stay authoritative — no authoring direction yet), exposing typed
- * read access through the rpo_data.h decoders. See wiki drafts/max_geometry_formats.md Part A
- * and drafts/pipeline_max_design.md §10h.
+ * them verbatim (raw bytes stay authoritative; no authoring direction yet), exposing typed
+ * read access through the rpo_data.h decoders.
  */
 class CRklPatchObject : public BUILTIN::CPatchObject
 {

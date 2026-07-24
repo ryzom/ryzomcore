@@ -127,14 +127,14 @@ public:
 	//@{
 	/// The tri-mesh vertex array (chunk 0x0914, count-prefixed CVector[]).
 	const std::vector<NLMISC::CVector> *triVertices() const;
-	/// The tri-mesh face array (chunk 0x0912, count-prefixed CGeomTriIndexInfo[] — a,b,c indices
-	/// plus the two per-face dwords; note the field names alwaysOne/smoothingGroups are the 2012
-	/// labels — the corpus-validated meaning is smGroup at offset 12 and faceFlags (matID in the
-	/// high word) at offset 16, see pipeline_max_design.md §10i).
+	/// The tri-mesh face array (chunk 0x0912, count-prefixed CGeomTriIndexInfo[]): a,b,c indices
+	/// plus the two per-face dwords. The field names alwaysOne/smoothingGroups are historical
+	/// mislabels; the corpus-validated meaning is smGroup at offset 12 and faceFlags (matID in
+	/// the high word) at offset 16.
 	const std::vector<CGeomTriIndexInfo> *triFaces() const;
-	/// The poly-mesh vertex array (chunk 0x0100, count-prefixed CGeomPolyVertexInfo[]) — carries
-	/// the vertex position plus a per-vertex uint32 the format uses as an internal id (max_geometry_formats
-	/// Part C 0x0100). Used by the EditablePoly path in the shape exporter (design doc §10i M2).
+	/// The poly-mesh vertex array (chunk 0x0100, count-prefixed CGeomPolyVertexInfo[]): carries
+	/// the vertex position plus a per-vertex uint32 the format uses as an internal id. Used by
+	/// the EditablePoly path in the shape exporter.
 	const std::vector<CGeomPolyVertexInfo> *polyVertices() const;
 	/// The poly-mesh face array (chunk 0x011a, CGeomPolyFaceInfo[]) — variable-size records with
 	/// vertex list, optional matID / smoothing group / triangulation cuts. Use
@@ -144,14 +144,13 @@ public:
 
 	//! \name Typed map channels (tri mesh path)
 	//! The map-channel chunk family, repeated per stored channel IN FILE ORDER inside this
-	//! container (corpus-established, design doc §10j-neuf): 0x0959 uint32 channel index
-	//! (0 = vertex color, 1.. = UVW; 0..5 observed), 0x2398 uint32 support flag (1 on every
-	//! corpus instance), 0x2394 count-prefixed CVector map vertices, 0x2396 count-prefixed
-	//! CGeomTriIndex map-face corner triples (parallel to the 0x0912 mesh faces; count equality
-	//! holds corpus-wide). The family occurs on EditableMesh objects only — the EditablePoly
-	//! MNMesh channel storage is a different id set that stays raw. One Max 3 witness carries a
-	//! group with no leading 0x0959 (Channel stays -1); consumers drop it, matching the
-	//! historical raw read.
+	//! container (corpus-established): 0x0959 uint32 channel index (0 = vertex color, 1.. = UVW;
+	//! 0..5 observed), 0x2398 uint32 support flag (1 on every corpus instance), 0x2394 count-
+	//! prefixed CVector map vertices, 0x2396 count-prefixed CGeomTriIndex map-face corner
+	//! triples (parallel to the 0x0912 mesh faces; count equality holds corpus-wide). The
+	//! family occurs on EditableMesh objects only; the EditablePoly MNMesh channel storage is
+	//! a different id set that stays raw. One Max 3 witness carries a group with no leading
+	//! 0x0959 (Channel stays -1); consumers drop it, matching the historical raw read.
 	//@{
 	struct CMapChannelView
 	{

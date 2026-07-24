@@ -154,7 +154,7 @@ IStorageObject *CClassDataEntry::createChunkById(uint16 id, bool container)
 	}
 	switch (id)
 	{
-	case 0x2120: // ClassDataBody: Depends on the ClassDataHeader: TODO
+	case 0x2120: // ClassDataBody: TODO — decode body once ClassDataHeader has been parsed
 		return CStorageContainer::createChunkById(id, container);
 	}
 	return CStorageContainer::createChunkById(id, container);

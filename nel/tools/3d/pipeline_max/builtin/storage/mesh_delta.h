@@ -53,16 +53,15 @@ namespace STORAGE {
  *
  * The Edit Mesh modifier's per-node MeshDelta record — the 0x2512 LocalModData payload of an
  * Edit Mesh (ClassId (0x50, 0), superclass 0x810) modifier slot on an OSM Derived wrapper
- * (CDerivedObject::localModData(i)). Format per max_geometry_formats Part L / design-doc
- * §10w/§10x/§10z-ter/§10z-quinze, corpus-validated by the ig/cmb/shape exporters:
+ * (CDerivedObject::localModData(i)). Format corpus-validated by the ig/cmb/shape exporters:
  *
- * - 0x2512 is a CONTAINER whose children are the modern local-data chunks (§L.5.1): 0x2740
- *   instance flags (4 B, every instance), the optional named-selection-set lists
- *   0x2845/0x2847/0x2846 (containers; only 0x2846 observed, 12 instances), and the 0x4000
- *   MDELTA container that carries the geometry deltas. The legacy pre-MDELTA chunk set
- *   (§L.5.2: 0x2750/0x2755/0x2756/0x2760/0x2761/0x2765/0x3000) does not occur anywhere in
- *   the corpus (Max 3 snowballs included) and is NOT decoded here — such ids would surface
- *   through unknownLocalDataIds().
+ * - 0x2512 is a CONTAINER whose children are the modern local-data chunks: 0x2740 instance
+ *   flags (4 B, every instance), the optional named-selection-set lists 0x2845/0x2847/0x2846
+ *   (containers; only 0x2846 observed, 12 instances), and the 0x4000 MDELTA container that
+ *   carries the geometry deltas. The legacy pre-MDELTA chunk set
+ *   (0x2750/0x2755/0x2756/0x2760/0x2761/0x2765/0x3000) does not occur anywhere in the corpus
+ *   (Max 3 snowballs included) and is NOT decoded here; such ids would surface through
+ *   unknownLocalDataIds().
  * - 0x4000 children, each a count-prefixed record table (uint32 count + count x stride):
  *   0x0140 vertex moves (16 B: index + Point3 delta), 0x0130 created verts (16 B: srcTag +
  *   Point3 — srcTag == -1 fresh/absolute, else CLONE of input vert srcTag with Pos = offset
@@ -80,9 +79,9 @@ namespace STORAGE {
  *
  * CRITICAL FORMAT FACT: the 0x0210 records carry UNINITIALIZED WRITER BYTES in the v[i] words
  * of corners not covered by applyMask (corpus-witnessed). Every record field is therefore
- * stored as raw uint32 words — bit-exact rows with semantic accessors on top, the
- * CBipedAnimTrack discipline (§10t) — so re-encoding an unmodified record reproduces the
- * stored bytes verbatim, uninitialized corners included.
+ * stored as raw uint32 words: bit-exact rows with semantic accessors on top, the
+ * CBipedAnimTrack discipline. Re-encoding an unmodified record reproduces the stored bytes
+ * verbatim, uninitialized corners included.
  *
  * This is an OVERLAY CODEC, not a serialized storage class: the raw 0x2512 chunk tree remains
  * the serialization authority (nothing here touches createChunkById or the lifecycle), and
@@ -105,7 +104,7 @@ public:
 
 	//! One 0x0130 created-vertex record. SrcTag == 0xFFFFFFFF: fresh vertex, \a P is the
 	//! absolute object-space Point3. Otherwise: CLONE of input vertex SrcTag, \a P is the
-	//! offset from the source vertex's PRE-move position (§10z-quinze).
+	//! offset from the source vertex's PRE-move position (before its 0x0140 delta).
 	struct SCreatedVert
 	{
 		uint32 SrcTag;
@@ -140,7 +139,7 @@ public:
 	//! One 0x0220 per-face attribute-change record: update input face \a Index with the packed
 	//! \a Values word, gated by \a ApplyMask. Values: bits 0..2 edge visibility, bit 3 hidden,
 	//! bits 5..20 matID. ApplyMask: bits 0..2 apply per-edge, bit 3 apply hidden, bit 4 apply
-	//! matID (the legacy TOPO_ATTRIBS bits 28..31 split into a parallel word, §L.5.3).
+	//! matID (the legacy TOPO_ATTRIBS bits 28..31 split into a parallel word).
 	struct SFaceAttrib
 	{
 		uint32 Index;

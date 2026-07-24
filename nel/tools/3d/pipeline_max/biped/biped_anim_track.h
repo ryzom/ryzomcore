@@ -46,14 +46,14 @@ namespace BIPED {
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
  * One biped animation keytrack: a (data chunk, time chunk) pair on the Biped (0x9155) system
- * object. Storage decode per pipeline_max_design.md §10c:
+ * object. Storage layout:
  *
  *   data chunk = hdr dwords (count first) + count x recSize dwords
  *                (vertical: TWO banks, each its own count dword + count x recSize)
  *   time chunk = 7 hdr dwords (count first) + count x timeRecSize dwords
  *                (timeRecSize 10 normally, 26 on tail-style per-link TCB records; time record =
- *                 (ticks, index, p0..p4, easeTo, easeFrom in UI 0..50 at [5]/[6]... see §10c —
- *                 slots [7..9] are tension, BIAS, CONTINUITY in UI units, 25 = default))
+ *                 (ticks, index, p0..p4, easeTo, easeFrom in UI 0..50 at slots [5]/[6];
+ *                 slots [7..9] are tension, bias, continuity in UI units, 25 = default))
  *
  * The typed storage here is BIT-EXACT (uint32 rows, no float interpretation), so decode+encode
  * of an unmodified track reproduces the source bytes verbatim; record sizes are inferred from

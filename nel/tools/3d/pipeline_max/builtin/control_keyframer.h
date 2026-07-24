@@ -45,9 +45,8 @@ namespace MAX {
 namespace BUILTIN {
 
 /**
- * Key record layouts as stored in the .max key-table chunks (little-endian dwords, no
- * padding — verified corpus-wide that every table's byte size is an exact multiple of the
- * record size; see pipeline_max_design.md §"Animation controllers").
+ * Key record layouts as stored in the .max key-table chunks: little-endian dwords, no
+ * padding (corpus-verified: every table's byte size is an exact multiple of the record size).
  *
  * Common fields: Time is in Max ticks (4800/s, 160/frame); Flags is the Max key-flags dword
  * (Bezier: tangent types at bits 7..9 in / 10..12 out, BEZKEY_STEP = 2).
@@ -114,15 +113,12 @@ struct CStorageBezPoint3Key
 	float Extra[9];
 };
 
-/// Bezier Scale (0x2010, 0) — chunk 0x2528. Layout resolved 2026-07-09 against the fauna
-/// direct-reference anims (plante_carnivore family — the first corpus keys with nonzero
-/// tangents; the character corpus carries zero tangents throughout, which is why the old
-/// provisional layout put OutTan at [10..12] and read reference-matching zeros anyway):
-/// after S[3]+Q[4], four 7-float blocks at stride 7 — {InTan, OutTan, InLen, OutLen}, each
-/// block = vec3 data + 3 zero floats + a constant 1.0 tail. OutTan therefore sits at floats
-/// [14..16], not [10..12]; InLen carries -1 sentinels (default 1/3) on first keys. Verified
-/// byte-exact against ~/pipeline_export/common/fauna/anim_export (pr_mo_phytopsy_attack
-/// Box31/Box32 scale tracks).
+/// Bezier Scale (0x2010, 0), chunk 0x2528. Layout resolved against the fauna direct-reference
+/// anims (plante_carnivore family carries the first corpus keys with nonzero tangents;
+/// character corpus is zero-tangents throughout). After S[3]+Q[4], four 7-float blocks at
+/// stride 7 = {InTan, OutTan, InLen, OutLen}, each block = vec3 data + 3 zero floats + a
+/// constant 1.0 tail. OutTan sits at floats [14..16]; InLen carries -1 sentinels (default 1/3)
+/// on first keys.
 struct CStorageBezScaleKey
 {
 	sint32 Time;
@@ -279,9 +275,9 @@ PMB_DECLARE_CONTROL_KEYFRAMER(CControlFloatLinear, CStorageLinFloatKey)
 PMB_DECLARE_CONTROL_KEYFRAMER(CControlFloatBezier, CStorageBezFloatKey)
 PMB_DECLARE_CONTROL_KEYFRAMER(CControlPosBezier, CStorageBezPoint3Key)
 // Bezier Point3 (0x200A, CTRL_POINT3 0x9005) and Bezier Color (0x2011, CTRL_COLOR 0x9009)
-// share the Position Bezier key table layout (chunk 0x2526) — the color / light-group
-// anim path (§10k-bis). Same storage as CControlPosBezier; distinct class ids so the
-// ClassDirectory3 lookup instantiates the typed keyframer instead of a raw unknown.
+// share the Position Bezier key table layout (chunk 0x2526): the color / light-group anim
+// path. Same storage as CControlPosBezier; distinct class ids so the ClassDirectory3 lookup
+// instantiates the typed keyframer instead of a raw unknown.
 PMB_DECLARE_CONTROL_KEYFRAMER(CControlPoint3Bezier, CStorageBezPoint3Key)
 PMB_DECLARE_CONTROL_KEYFRAMER(CControlColorBezier, CStorageBezPoint3Key)
 PMB_DECLARE_CONTROL_KEYFRAMER(CControlScaleBezier, CStorageBezScaleKey)

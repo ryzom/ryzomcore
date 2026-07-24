@@ -57,8 +57,8 @@ const ucstring CWSMDerivedObject::DisplayName = ucstring("WSM Derived");
 const char *CWSMDerivedObject::InternalName = "WSMDerivedObject";
 const char *CWSMDerivedObject::InternalNameUnknown = "WSMDerivedObjectUnknown";
 const NLMISC::CClassId CWSMDerivedObject::ClassId = NLMISC::CClassId(0x4ec13906, 0x5578130e);
-// No superclass in the file — see CDerivedObject::SuperClassId. Literal to avoid the cross-TU
-// static-init-order dependency (design-doc §2b).
+// No superclass in the file; see CDerivedObject::SuperClassId. Literal to avoid the cross-TU
+// static-init-order dependency.
 const TSClassId CWSMDerivedObject::SuperClassId = 0x00000000;
 const CWSMDerivedObjectClassDesc WSMDerivedObjectClassDesc(&DllPluginDescBuiltin);
 

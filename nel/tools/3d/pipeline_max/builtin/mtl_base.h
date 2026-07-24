@@ -57,7 +57,7 @@ namespace BUILTIN {
  * reached through the reference wiring (see CParamBlock2, max_geometry_formats Part I).
  *
  * This class keeps the raw chunks authoritative (parse decodes the name over the orphaned
- * chunks WITHOUT moving them, build re-emits verbatim — byte-exact roundtrip, the §5/§12.2
+ * chunks WITHOUT moving them, build re-emits verbatim; byte-exact roundtrip, the overlay-codec
  * discipline). It gives a consumer (the exporter, a live material editor) a typed handle on
  * every material/texmap with its name, on top of the reference walk (sub-materials, textures)
  * and the typed CParamBlock2 parameters.

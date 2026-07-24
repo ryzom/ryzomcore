@@ -80,9 +80,9 @@ const ucstring CDerivedObject::DisplayName = ucstring("OSM Derived");
 const char *CDerivedObject::InternalName = "DerivedObject";
 const char *CDerivedObject::InternalNameUnknown = "DerivedObjectUnknown";
 const NLMISC::CClassId CDerivedObject::ClassId = NLMISC::CClassId(0x29263a68, 0x405f22f5);
-// The file stores NO superclass for the derived-object wrappers — they resolve through the
-// hardcoded chunk ids 0x2032/0x2033, not through ClassDirectory3 (design-doc §6). 0x0 mirrors
-// what every consumer has always observed through the unknown-class path.
+// The file stores NO superclass for the derived-object wrappers; they resolve through the
+// hardcoded chunk ids 0x2032/0x2033, not through ClassDirectory3. 0x0 mirrors what every
+// consumer has always observed through the unknown-class path.
 const TSClassId CDerivedObject::SuperClassId = 0x00000000;
 const CDerivedObjectClassDesc DerivedObjectClassDesc(&DllPluginDescBuiltin);
 

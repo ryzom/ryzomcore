@@ -54,10 +54,9 @@ namespace BUILTIN {
  * raw bytes stay authoritative (no authoring direction), so roundtrip is byte-exact by
  * construction.
  *
- * Corpus facts (2026-07-17, full-corpus inventory incl. Max 3 snowballs — design doc §10j-dix):
- * PRS carries 0x7230 (4 B) + 0x7231 (4 B) on every instance, 5 instances add a trailing 0x2535
- * (4 B); LookAt carries 0x7230 + 0x7231 then 0x0100 (4 B) + 0x0201 (1 B). Semantics of all of
- * these are unknown — they are claimed verbatim, not decoded.
+ * Corpus-established layout: PRS carries 0x7230 (4 B) + 0x7231 (4 B) on every instance,
+ * 5 instances add a trailing 0x2535 (4 B); LookAt carries 0x7230 + 0x7231 then 0x0100 (4 B)
+ * + 0x0201 (1 B). Semantics unknown; claimed verbatim, not decoded.
  */
 class CControlTransformBase : public CReferenceTarget
 {
@@ -76,10 +75,10 @@ public:
 	//! \name Sub-controller value at t=0
 	//! Resolve a reference slot to a typed keyframer and evaluate at tick 0
 	//! (CControlKeyFramerBase::{pos,rot,scale,float}ValueAt0 — key table bracketed at tick 0,
-	//! else the default-value chunk). Returns false when the slot is empty or its controller is
-	//! not a typed keyframer — the corpus-wide inventory (§10j-dix) established that NO
-	//! non-keyframer sub-controller carries a default-value chunk (0x2501/0x2503/0x2504/0x2505),
-	//! so there is deliberately no raw-chunk fallback here.
+	//! else the default-value chunk). Returns false when the slot is empty or its controller
+	//! is not a typed keyframer; no non-keyframer sub-controller carries a default-value chunk
+	//! (0x2501/0x2503/0x2504/0x2505) anywhere in the corpus, so there is deliberately no
+	//! raw-chunk fallback.
 	//@{
 	bool slotPosValueAt0(uint slot, float out[3]) const;
 	bool slotRotValueAt0(uint slot, float out[4]) const;
@@ -106,10 +105,10 @@ private:
  * \date 2026-07-17
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
- * "Position/Rotation/Scale" (0x2005, superclass 0x9008) — the default node TM controller.
+ * "Position/Rotation/Scale" (0x2005, superclass 0x9008), the default node TM controller.
  * Reference slots (corpus-wide: always 3): 0 = position, 1 = rotation, 2 = scale
  * sub-controller. Rotation controller values are stored in the INVERSE convention relative to
- * the node-TM rotation (see max_scene.h / design doc §10 "PRS-path defects") — that convention
+ * the node-TM rotation (see max_scene.h for the consumer-side compose); that convention
  * belongs to the consumer's math, not to this class.
  */
 class CControlPRS : public CControlTransformBase

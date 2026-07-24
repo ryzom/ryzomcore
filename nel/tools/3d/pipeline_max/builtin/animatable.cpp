@@ -79,7 +79,6 @@ void CAnimatable::parse(uint16 version, uint filter)
 		if (m_Unknown2140)
 		{
 			// nldebug("Found unknown 0x2140");
-			// TODO: Put std::cout code here
 		}
 		m_AppData = static_cast<STORAGE::CAppData *>(getChunk(PMBS_APP_DATA_CHUNK_ID));
 	}

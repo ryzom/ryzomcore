@@ -526,8 +526,8 @@ bool decodeVertMapper(const uint8 *data, size_t size, SPmVertMapper &out, std::s
 }
 
 // ---------------------------------------------------------------------------------------------
-// Chunk id inventories (established by the 1231-file ligo corpus survey, 2026-07-06; the
-// sub-chunk sets inside the element containers are uniform corpus-wide).
+// Chunk id inventories (corpus-established over the full ligo landscape corpus; sub-chunk
+// sets inside the element containers are uniform corpus-wide).
 
 const uint16 PatchMeshChunkIds[] = {
 	0x0bb8, 0x0bb9, 0x0bc2, 0x0bcc, 0x0bd1, 0x0bd2, 0x0bd6, 0x0be0, 0x0bea, 0x0bf4,

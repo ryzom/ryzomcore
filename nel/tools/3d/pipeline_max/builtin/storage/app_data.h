@@ -90,18 +90,6 @@ public:
 	/// Initialize a new instance of this chunk
 	void init();
 
-	// public // TODO: Simplify using templates and returning a specialized storage object, auto-converted to the requested type.
-	/*/// Gets a pointer to an appdata chunk buffer. Returns NULL if it does not exist. Size is returned in the size parameter.
-	const uint8 *read(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId, uint32 &size) const;
-	/// Locks a pointer to an appdata chunk buffer for writing to with specified capacity. May return NULL if this chunk is unparsable or no memory can be allocated.
-	uint8 *lock(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId, uint32 capacity);
-	/// Unlocks a pointer to an appdata chunk buffer, setting the final written size.
-	void unlock(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId, uint32 size);
-	/// Fills an appdata chunk buffer with specified data, which will be copied.
-	void fill(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId, uint8 *buffer, uint32 size);
-	/// Erases an appdata chunk.
-	void erase(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId);*/
-
 	// public
 	/// Gets an appdata chunk storage object, returns NULL if it does not exist
 	template <typename T>
@@ -115,8 +103,8 @@ public:
 	//! \name NeL export script AppData entries
 	//! Every `NEL3D_APPDATA_*` entry the NeL export scripts store is keyed
 	//! (ScriptClassId, ScriptSuperClassId, subId) with a null-terminated string payload
-	//! (booleans/enums as decimal-string text — see design doc §8 and
-	//! plugin_max/nel_mesh_lib/export_appdata.h).
+	//! (booleans/enums as decimal-string text — see plugin_max/nel_mesh_lib/export_appdata.h
+	//! for the key catalog).
 	//@{
 	/// The MAXSCRIPT utility key the NeL export script entries are stored under.
 	static const NLMISC::CClassId ScriptClassId;   // (0x04d64858, 0x16d1751d)

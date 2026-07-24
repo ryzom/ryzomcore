@@ -123,8 +123,8 @@ const ISceneClassDesc *CParamBlock::classDesc() const
 
 // Decode the parameter entries from the orphaned chunks WITHOUT moving them (the raw chunks
 // remain the serialization authority). Reference-slot counting is compact over the ANIMATED
-// entries only, in entry order — the corpus-validated mapping anim_build's StdUVGen controller
-// resolution established (§10k; the waterfall material-anim gate is byte-exact on it).
+// entries only, in entry order (the mapping anim_build's StdUVGen controller resolution
+// established; the waterfall material-anim gate is byte-exact on it).
 void CParamBlock::decodeModel()
 {
 	m_Params.clear();
