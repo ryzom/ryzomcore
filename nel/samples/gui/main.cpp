@@ -60,6 +60,7 @@
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
+#include <emscripten/html5.h>
 #endif
 
 #if defined(NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
@@ -378,6 +379,23 @@ void renderOneFrame()
 		times.frameDiffMs = times.lastFrameMs ? (nowMs - times.lastFrameMs) : 0;
 		wm->updateInterfaceTimes(times);
 	}
+#ifdef __EMSCRIPTEN__
+	// Track browser DPI hints — devicePixelRatio changes with OS scaling
+	// or a browser-zoom step, so keep NLGUI's interface scale in sync. The
+	// canvas backing store already runs at CSS × DPR (see emscripten event
+	// emitter); scaling the interface by the same factor keeps physical
+	// widget sizes constant and text crisp on HiDPI panels.
+	{
+		double dpr = emscripten_get_device_pixel_ratio();
+		if (dpr <= 0.0) dpr = 1.0;
+		static double s_lastDpr = 0.0;
+		if (dpr != s_lastDpr)
+		{
+			CViewRenderer::getInstance()->setInterfaceScale((float)dpr, 0, 0);
+			s_lastDpr = dpr;
+		}
+	}
+#endif
 	wm->sendClockTickEvent();
 	wm->checkCoords();
 	wm->drawViews(NULL);
