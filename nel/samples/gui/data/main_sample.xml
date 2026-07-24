@@ -414,7 +414,7 @@
 <!-- * header_closed.                                        * -->
 <!-- ********************************************************* -->
 
-<group type="container" id="rollout" w="252" pop_min_w="252" pop_max_w="252" h="300" pop_min_h="300" pop_max_h="300"
+<group type="container" id="rollout" w="252" pop_min_w="220" pop_max_w="360" h="300" pop_min_h="200" pop_max_h="520"
 	title="Contacts" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
 	title_bar_open="false" open_button="false" right_button="true" lockable="false" openable="false"
 	opened="true" movable="true" active="true" x="8" y="340">
