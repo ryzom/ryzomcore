@@ -501,6 +501,13 @@ int main(int argc, char **argv)
 	CLuaManager::getInstance().getLuaState()->registerFunc("getMousePos", luaGetMousePos);
 	CLuaManager::getInstance().getLuaState()->registerFunc("getMouseDown", luaGetMouseDown);
 
+#ifdef __EMSCRIPTEN__
+	// XML branches guarded by <if browser> render the "use Ctrl+V" hint
+	// instead of a live Paste item, since driver-level paste is async in
+	// the browser and can't fulfill the sync pasteTextFromClipboard call.
+	parser->addFeatureFlag("browser");
+#endif
+
 	// Parse the sample interface definition
 	std::vector<std::string> xmlFiles;
 	xmlFiles.push_back("config_sample.xml");

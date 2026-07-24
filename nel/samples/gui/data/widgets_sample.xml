@@ -121,11 +121,20 @@
 
 <!-- Right-click menu for edit boxes. The editbox_* handlers act on the edit
      box that opened the menu (CGroupEditBox::getMenuFather). Wired via
-     menu_r on the edit_box_widget template default. -->
+     menu_r on the edit_box_widget template default. Under the "browser"
+     feature flag (set by the emscripten build) Paste is replaced with a
+     grayed hint since navigator.clipboard.readText is async and cannot
+     drive the sync pasteTextFromClipboard call; Ctrl+V still works via
+     the document paste-event bridge in CEmscriptenEventEmitter. -->
 <group type="menu" id="editbox_menu" extends="ui:sample:base_menu">
 	<action id="cut" name="Cut" handler="editbox_cut" params="" />
 	<action id="copy" name="Copy" handler="editbox_copy" params="" />
-	<action id="paste" name="Paste" handler="editbox_paste" params="" />
+	<if flags="!browser" />
+		<action id="paste" name="Paste" handler="editbox_paste" params="" />
+	<endif />
+	<if flags="browser" />
+		<action id="paste_hint" name="Paste — use Ctrl+V" handler="" params="" grayed="true" />
+	<endif />
 	<separator />
 	<action id="select_all" name="Select all" handler="editbox_select_all" params="" />
 </group>
