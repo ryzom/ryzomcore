@@ -303,6 +303,7 @@ namespace NLGUI
 		void makeTopWindow();
 		void handleEventChar(const NLGUI::CEventDescriptorKey &event);
 		void handleEventString(const NLGUI::CEventDescriptorKey &event);
+		bool handleEventKeyDown(const NLGUI::CEventDescriptorKey &event);
 		void setup();
 		void triggerOnChangeAH();
 		void appendStringFromClipboard(const std::string &str);
