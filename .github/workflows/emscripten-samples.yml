@@ -109,7 +109,7 @@ jobs:
         # not the rest of nel/tools. libpng/libjpeg are top-level find_package
         # requirements for nelmisc's CBitmap paths.
         run: |
-          sudo apt-get install -y libpng-dev libjpeg-dev libxml2-dev
+          sudo apt-get install -y libpng-dev libjpeg-dev libxml2-dev libcurl4-openssl-dev libgif-dev
           mkdir -p build-host
           cd build-host
           cmake .. \
