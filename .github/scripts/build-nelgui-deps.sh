@@ -27,7 +27,7 @@ OPENSSL_VER=3.0.13
 CURL_VER=8.5.0
 LUABIND_REV=0ae9bd6   # ryzom/luabind
 
-mkdir -p "$PREFIX/lib" "$PREFIX/include" "$PREFIX/../boost-headers" "$PREFIX/../openssl-headers"
+mkdir -p "$PREFIX/lib" "$PREFIX/include"
 
 echo "== emcc" && emcc --version | head -1
 
@@ -115,7 +115,7 @@ if [ ! -f "$PREFIX/lib/libluabind09.a" ]; then
 fi
 
 # ---- openssl 3 + curl HEADERS (real headers, stub archives) ----------------
-if [ ! -d "$PREFIX/../openssl-headers/openssl" ]; then
+if [ ! -f "$PREFIX/../openssl-headers/openssl/x509.h" ]; then
 	echo "== openssl $OPENSSL_VER (headers only)"
 	cd "$WORK"
 	curl -L --fail --retry 3 -O "https://www.openssl.org/source/openssl-${OPENSSL_VER}.tar.gz"
