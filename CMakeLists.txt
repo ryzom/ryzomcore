@@ -224,19 +224,33 @@ IF(EMSCRIPTEN)
     SET(LIBXML2_LIBRARIES "")
   ENDIF()
   # OpenSSL only when provided (stub or cross-built) via OPENSSL_* variables.
-  # Same emscripten find_library-mode-ONLY caveat as CURL below: publish the
-  # imported targets from the -D cache vars if find_package couldn't build them.
-  FIND_PACKAGE(OpenSSL QUIET)
-  IF(NOT TARGET OpenSSL::SSL AND OPENSSL_INCLUDE_DIR AND OPENSSL_SSL_LIBRARY)
+  # Same emscripten find_library-mode-ONLY caveat as CURL below: build the
+  # imported targets directly from the -D cache vars. Skipping find_package
+  # entirely — when it does run under the emscripten toolchain it can create
+  # the OpenSSL::SSL/Crypto targets with an empty or host-side INCLUDE_DIR
+  # (find_path is subject to the same ROOT_PATH restriction as find_library),
+  # and then our -D INCLUDE_DIR never reaches consumers of nelweb/nelmisc.
+  IF(OPENSSL_INCLUDE_DIR AND OPENSSL_SSL_LIBRARY AND NOT TARGET OpenSSL::SSL)
     ADD_LIBRARY(OpenSSL::SSL STATIC IMPORTED)
     SET_TARGET_PROPERTIES(OpenSSL::SSL PROPERTIES
       IMPORTED_LOCATION "${OPENSSL_SSL_LIBRARY}"
       INTERFACE_INCLUDE_DIRECTORIES "${OPENSSL_INCLUDE_DIR}")
   ENDIF()
-  IF(NOT TARGET OpenSSL::Crypto AND OPENSSL_INCLUDE_DIR AND OPENSSL_CRYPTO_LIBRARY)
+  IF(OPENSSL_INCLUDE_DIR AND OPENSSL_CRYPTO_LIBRARY AND NOT TARGET OpenSSL::Crypto)
     ADD_LIBRARY(OpenSSL::Crypto STATIC IMPORTED)
     SET_TARGET_PROPERTIES(OpenSSL::Crypto PROPERTIES
       IMPORTED_LOCATION "${OPENSSL_CRYPTO_LIBRARY}"
+      INTERFACE_INCLUDE_DIRECTORIES "${OPENSSL_INCLUDE_DIR}")
+  ENDIF()
+  # If someone else already published the imported target (find_package that
+  # ran earlier via a different path) but with an empty include dir, forcibly
+  # append ours so consumers still see the headers.
+  IF(TARGET OpenSSL::SSL AND OPENSSL_INCLUDE_DIR)
+    SET_PROPERTY(TARGET OpenSSL::SSL APPEND PROPERTY
+      INTERFACE_INCLUDE_DIRECTORIES "${OPENSSL_INCLUDE_DIR}")
+  ENDIF()
+  IF(TARGET OpenSSL::Crypto AND OPENSSL_INCLUDE_DIR)
+    SET_PROPERTY(TARGET OpenSSL::Crypto APPEND PROPERTY
       INTERFACE_INCLUDE_DIRECTORIES "${OPENSSL_INCLUDE_DIR}")
   ENDIF()
 ELSE()
@@ -392,6 +406,11 @@ IF(WITH_NEL)
         ADD_LIBRARY(CURL::libcurl STATIC IMPORTED)
         SET_TARGET_PROPERTIES(CURL::libcurl PROPERTIES
           IMPORTED_LOCATION "${CURL_LIBRARY}"
+          INTERFACE_INCLUDE_DIRECTORIES "${CURL_INCLUDE_DIR}")
+      ENDIF()
+      # Same "empty include dir on the imported target" defense as OpenSSL below.
+      IF(TARGET CURL::libcurl AND CURL_INCLUDE_DIR)
+        SET_PROPERTY(TARGET CURL::libcurl APPEND PROPERTY
           INTERFACE_INCLUDE_DIRECTORIES "${CURL_INCLUDE_DIR}")
       ENDIF()
     ELSE()
