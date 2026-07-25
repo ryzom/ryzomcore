@@ -770,7 +770,7 @@ static void selectEntities (const string &entityName, vector <CEntityId> &entiti
 struct __name##Class : public NLMISC::ICommand \
 { \
 __name##Class () : NLMISC::ICommand("variables",#__name, __help, "<entity> [<value>]") { Type = Variable; } \
-	virtual bool execute(const std::string &rawCommandString, const std::vector<std::string> &args, NLMISC::CLog &log, bool quiet, bool human) \
+	virtual bool execute(const std::string &rawCommandString, const std::vector<std::string> &args, NLMISC::CLog &log, bool quiet, bool human) NL_OVERRIDE \
 	{ \
 		if (args.size () != 1 && args.size () != 2) \
 			return false; \

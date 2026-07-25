@@ -36,7 +36,7 @@ public:
 	CStdinMonitorThread();
 
 	// main routine executed when the thread is started
-	void run();
+	void run() NL_OVERRIDE;
 
 	// interface for adding commands, retrieving commands and verifying whether there are commands waiting
 	void pushCommand(std::string nextCommand);
@@ -127,9 +127,9 @@ bool CStdinMonitorThread::commandWaiting() const
 class CStdinMonitorSingleton: public IServiceSingleton
 {
 public:
-	void init();
-	void serviceUpdate();
-	void release();
+	void init() NL_OVERRIDE;
+	void serviceUpdate() NL_OVERRIDE;
+	void release() NL_OVERRIDE;
 
 private:
 	CStdinMonitorThread* _StdinMonitorThreadInstance;

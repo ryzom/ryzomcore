@@ -52,28 +52,28 @@ public:
 	CServerPatchBridge();
 
 	// CModuleBase specialisation implementation
-	bool initModule(const TParsedCommandLine &initInfo);
-	void onModuleUp(IModuleProxy *module);
-	void onModuleDown(IModuleProxy *module);
+	bool initModule(const TParsedCommandLine &initInfo) NL_OVERRIDE;
+	void onModuleUp(IModuleProxy *module) NL_OVERRIDE;
+	void onModuleDown(IModuleProxy *module) NL_OVERRIDE;
 //	void onProcessModuleMessage(IModuleProxy *sender, const CMessage &msg);
-	void onModuleUpdate();
-	std::string buildModuleManifest() const;
+	void onModuleUpdate() NL_OVERRIDE;
+	std::string buildModuleManifest() const NL_OVERRIDE;
 
 	// prevent modules from misbehaving when they run on the same service together
-	bool isImmediateDispatchingSupported() const { return false; }
+	bool isImmediateDispatchingSupported() const NL_OVERRIDE { return false; }
 
 protected:
 	// specialisations of CFileRepositorySkel methods (overloading default CFileRepository behaviour)
-	void requestFileData(NLNET::IModuleProxy *sender, const NLMISC::CSString &fileName, uint32 startOffset, uint32 numBytes);
+	void requestFileData(NLNET::IModuleProxy *sender, const NLMISC::CSString &fileName, uint32 startOffset, uint32 numBytes) NL_OVERRIDE;
 
 	// specialisations of overloadable callback methods
-	void cbFileDownloadSuccess(const NLMISC::CSString& fileName,const NLMISC::CMemStream& data);
-	void cbRetryAfterFileDownloadFailure(const NLMISC::CSString& fileName);
-	void cbFileInfo(NLNET::IModuleProxy *sender, const TFileInfoVector &changes);
+	void cbFileDownloadSuccess(const NLMISC::CSString& fileName,const NLMISC::CMemStream& data) NL_OVERRIDE;
+	void cbRetryAfterFileDownloadFailure(const NLMISC::CSString& fileName) NL_OVERRIDE;
+	void cbFileInfo(NLNET::IModuleProxy *sender, const TFileInfoVector &changes) NL_OVERRIDE;
 
 	// specialisation of overloadable methods from CFileRepository
-	void getFileInfo(const NLMISC::CSString& fileSpec,TFileInfoVector& result,const NLNET::IModuleProxy *sender) const;
-	void onFileRepositoryModuleDown(NLNET::IModuleProxy *module);
+	void getFileInfo(const NLMISC::CSString& fileSpec,TFileInfoVector& result,const NLNET::IModuleProxy *sender) const NL_OVERRIDE;
+	void onFileRepositoryModuleDown(NLNET::IModuleProxy *module) NL_OVERRIDE;
 
 
 private:

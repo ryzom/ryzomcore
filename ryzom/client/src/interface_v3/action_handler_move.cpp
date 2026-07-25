@@ -56,7 +56,7 @@ extern bool					ShowInterface;
 // ------------------------------------------------------------------------------------------------
 class CAHChangeCompassMode : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		CompassMode = CompassMode ? 0:1;
 	}
@@ -66,7 +66,7 @@ REGISTER_ACTION_HANDLER (CAHChangeCompassMode, "change_compass_mode");
 // ------------------------------------------------------------------------------------------------
 class CAHSetPos : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		UserEntity->pacsPos(View.viewPos());
 		UserEntity->front(View.view());
@@ -80,7 +80,7 @@ REGISTER_ACTION_HANDLER (CAHSetPos, "set_pos");
 class CAHFrontSelection : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		if(!UserEntity)
 			return;
@@ -114,7 +114,7 @@ REGISTER_ACTION_HANDLER (CAHFrontSelection, "front_selection");
 class CAHMove : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		// Moving Break the Follow Mode
 		UserEntity->disableFollow();
@@ -162,7 +162,7 @@ REGISTER_ACTION_HANDLER (CAHBackward, "backward");
 class CAHToggleAutoWalk: public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 	}
 };
@@ -172,7 +172,7 @@ REGISTER_ACTION_HANDLER (CAHToggleAutoWalk, "toggle_auto_walk");
 // ------------------------------------------------------------------------------------------------
 class CAHToggleLight: public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		UserEntity->light();
 	}
@@ -182,7 +182,7 @@ REGISTER_ACTION_HANDLER (CAHToggleLight, "toggle_light");
 // ------------------------------------------------------------------------------------------------
 class CAHFreeMouse : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		InitMouseWithCursor (!IsMouseCursorHardware ());
 		ClientCfg.HardwareCursor = IsMouseCursorHardware();
@@ -221,7 +221,7 @@ REGISTER_ACTION_HANDLER (CAHFreeMouse, "free_mouse");
 // ------------------------------------------------------------------------------------------------
 class CAHToggleCamera : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		// Change the camera view
 		UserEntity->toggleCamera();
@@ -232,7 +232,7 @@ REGISTER_ACTION_HANDLER (CAHToggleCamera, "toggle_camera");
 // ------------------------------------------------------------------------------------------------
 class CAHTForceFP : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		// Change the camera view to first person
 		UserEntity->forceCameraFirstPerson();
@@ -249,7 +249,7 @@ public:
 		_Count = 0;
 	}
 
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		CActionsManager *pAM = &Actions;
 		// Key Up
@@ -277,7 +277,7 @@ REGISTER_ACTION_HANDLER (CAHToggleNames, "toggle_names");
 // ------------------------------------------------------------------------------------------------
 class CAHRearView : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		static bool PreviousShowInterface = true;
 
@@ -303,7 +303,7 @@ REGISTER_ACTION_HANDLER (CAHRearView, "rear_view");
 class CAHCameraUp : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 	}
 };
@@ -311,7 +311,7 @@ REGISTER_ACTION_HANDLER (CAHCameraUp, "camera_up");
 class CAHCameraDown : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 	}
 };
@@ -320,7 +320,7 @@ REGISTER_ACTION_HANDLER (CAHCameraDown, "camera_down");
 class CAHCameraTurnLeft : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 	}
 };
@@ -329,7 +329,7 @@ REGISTER_ACTION_HANDLER (CAHCameraTurnLeft, "camera_turn_left");
 class CAHCameraTurnRight : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 	}
 };
@@ -338,7 +338,7 @@ REGISTER_ACTION_HANDLER (CAHCameraTurnRight, "camera_turn_right");
 class CAHCameraTurnCenter : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		UserControls.resetSmoothCameraDeltaYaw();
 	}
@@ -350,7 +350,7 @@ REGISTER_ACTION_HANDLER (CAHCameraTurnCenter, "camera_turn_center");
 // Toggle Sit / Stand, but don't change speed
 class CAHToggleSitStand: public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		UserEntity->sit(!UserEntity->isSit());
 	}
@@ -360,7 +360,7 @@ REGISTER_ACTION_HANDLER (CAHToggleSitStand, "toggle_sit_stand");
 // Force sit, but don't change speed
 class CAHForceSit: public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		if(!UserEntity->isSit())
 		{
@@ -376,7 +376,7 @@ REGISTER_ACTION_HANDLER (CAHForceSit, "force_sit");
 // Force stand, but don't change speed
 class CAHForceStand: public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		if(UserEntity->isSit())
 			UserEntity->sit(false);
@@ -389,7 +389,7 @@ REGISTER_ACTION_HANDLER (CAHForceStand, "force_stand");
 // Toggle run/walk, but don't unsit
 class CAHToggleRunWalk : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		UserEntity->switchVelocity();
 	}
@@ -399,7 +399,7 @@ REGISTER_ACTION_HANDLER (CAHToggleRunWalk, "toggle_run_walk");
 // force walk mode, and leave sit() mode if any
 class CAHForceWalk : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		// swith velocity?
 		if(UserEntity->running())
@@ -419,7 +419,7 @@ REGISTER_ACTION_HANDLER (CAHForceWalk, "force_walk");
 // force run mode, and leave sit() mode if any
 class CAHForceRun : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		// swith velocity?
 		if(!UserEntity->running())
@@ -439,7 +439,7 @@ REGISTER_ACTION_HANDLER (CAHForceRun, "force_run");
 // ------------------------------------------------------------------------------------------------
 class CAHToggleDodgeParry : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		string msg;

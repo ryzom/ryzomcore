@@ -45,10 +45,10 @@ public:
 	// ctor
 	CBotChatPageDynamicMission();
 	// from CBotChatPage
-	virtual void begin();
-	virtual void end();
-	virtual void init();
-	virtual void update();
+	virtual void begin() NL_OVERRIDE;
+	virtual void end() NL_OVERRIDE;
+	virtual void init() NL_OVERRIDE;
+	virtual void update() NL_OVERRIDE;
 	/** Must be called by action handler when selection in combo box has changed.
 	  * This send a msg to the server and reset the description text id
 	  */

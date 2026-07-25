@@ -59,13 +59,13 @@ public:
 	  */
 	void setCloseTexture(const std::string &texture) { _CloseTexture = texture; }
 	// from IDeco
-	virtual void onAdd(CGroupMap &owner);
+	virtual void onAdd(CGroupMap &owner) NL_OVERRIDE;
 	// from IDeco
-	virtual void onRemove(CGroupMap &owner);
+	virtual void onRemove(CGroupMap &owner) NL_OVERRIDE;
 	// from IDeco
-	virtual void onUpdate(CGroupMap &owner);
+	virtual void onUpdate(CGroupMap &owner) NL_OVERRIDE;
 	// from IDeco
-	virtual void onPreRender(CGroupMap &owner);
+	virtual void onPreRender(CGroupMap &owner) NL_OVERRIDE;
 	//
 	void setTextureAndFit(const std::string &bitmapName);
 	//
@@ -87,15 +87,15 @@ private:
 	public:
 		CCtrlButtonEntity(CInstance &instance) : CCtrlButton(TCtorParam()), _Instance(instance) {}
 		// from IDisplayerUIHandle
-		virtual CInstance &getDisplayedInstance() { return _Instance; }
-		virtual bool		handleEvent (const NLGUI::CEventDescriptor &event);
+		virtual CInstance &getDisplayedInstance() NL_OVERRIDE { return _Instance; }
+		virtual bool		handleEvent (const NLGUI::CEventDescriptor &event) NL_OVERRIDE;
 	private:
 		CInstance			&_Instance;
 	protected:
-		virtual void		getContextHelp(std::string &help) const;
+		virtual void		getContextHelp(std::string &help) const NL_OVERRIDE;
 		bool				emptyContextHelp() const { return true; }
 		bool				wantInstantContextHelp() const { return true; }
-		virtual	bool		isCapturable() const { return false; }
+		virtual	bool		isCapturable() const NL_OVERRIDE { return false; }
 	};
 	//
 	CInstance			*_Instance;

@@ -121,7 +121,7 @@ public:
 	};
 
 	CShapeObject(CScene *scene);
-	virtual ~CShapeObject();
+	virtual ~CShapeObject() NL_OVERRIDE;
 
 	// class desc
 	static const ucstring DisplayName;
@@ -131,14 +131,14 @@ public:
 	static const TSClassId SuperClassId;
 
 	// inherited
-	virtual void parse(uint16 version, uint filter = 0);
-	virtual void clean();
-	virtual void build(uint16 version, uint filter = 0);
-	virtual void disown();
-	virtual void init();
-	virtual bool inherits(const NLMISC::CClassId classId) const;
-	virtual const ISceneClassDesc *classDesc() const;
-	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "", uint filter = 0) const;
+	virtual void parse(uint16 version, uint filter = 0) NL_OVERRIDE;
+	virtual void clean() NL_OVERRIDE;
+	virtual void build(uint16 version, uint filter = 0) NL_OVERRIDE;
+	virtual void disown() NL_OVERRIDE;
+	virtual void init() NL_OVERRIDE;
+	virtual bool inherits(const NLMISC::CClassId classId) const NL_OVERRIDE;
+	virtual const ISceneClassDesc *classDesc() const NL_OVERRIDE;
+	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "", uint filter = 0) const NL_OVERRIDE;
 
 	//! \name Typed read access (valid between parse and clean/disown)
 	//@{
@@ -165,7 +165,7 @@ public:
 
 protected:
 	// inherited
-	virtual IStorageObject *createChunkById(uint16 id, bool container);
+	virtual IStorageObject *createChunkById(uint16 id, bool container) NL_OVERRIDE;
 
 private:
 	void decodeShapeModel();

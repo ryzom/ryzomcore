@@ -157,7 +157,7 @@ extern CClientChatManager		ChatMngr;
 class CHandlerLUA : public IActionHandler
 {
 public:
-	void execute(CCtrlBase *pCaller,    const std::string &sParams)
+	void execute(CCtrlBase *pCaller,    const std::string &sParams) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 

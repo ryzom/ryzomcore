@@ -205,7 +205,7 @@ public:
 	/// ctor
 	CRegion() : _Continent(CONTINENT::UNKNOWN) { }
 	/// dtor
-	~CRegion();
+	~CRegion() NL_OVERRIDE;
 
 	/**
 	 * add a place in that region
@@ -284,7 +284,7 @@ public:
 	bool build(const NLLIGO::CPrimZone * zone);
 
 	/// dtor
-	~CContinent();
+	~CContinent() NL_OVERRIDE;
 
 	/**
 	 * add a region in that continent
@@ -325,7 +325,7 @@ public:
 	// default constructor
 	CZoneManager() 	: DepositSearchTime(50) {}
 
-	~CZoneManager();
+	~CZoneManager() NL_OVERRIDE;
 
 	/// init the manager
 	void init();
@@ -657,7 +657,7 @@ class CDepositCallback : public IBackupFileReceiveCallback
 public:
 	CDepositCallback() : processed(false)	{}
 	bool processed;
-	void				callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream)
+	void				callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream) NL_OVERRIDE
 	{
 		if (!processed)
 		{

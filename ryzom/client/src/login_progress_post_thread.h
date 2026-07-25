@@ -55,7 +55,7 @@ class CLoginProgressPostThread : public NLMISC::CSingleton<CLoginProgressPostThr
 {
 public:
 	CLoginProgressPostThread();
-	~CLoginProgressPostThread();
+	~CLoginProgressPostThread() NL_OVERRIDE;
 	void init(const std::string &startupHost,
 			  const std::string &startupPage);
 	// Init from a config file (Using the InstallStatsUrl variable)

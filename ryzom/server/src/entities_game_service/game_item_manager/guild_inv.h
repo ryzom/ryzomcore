@@ -50,13 +50,13 @@ class CFakeDataProvider : public IDataProvider
 {
 public:
 	/// Return true if there is a pending update to provide
-	virtual bool nonEmpty() const { return false; }
+	virtual bool nonEmpty() const NL_OVERRIDE { return false; }
 	
 	/// Push data modified since the last update. May be called event if nonEmpty().
-	virtual	void provideUpdate( NLMISC::CBitMemStream& stream ) {}
+	virtual	void provideUpdate( NLMISC::CBitMemStream& stream ) NL_OVERRIDE {}
 	
 	/// Push all non-empty data, then provide them as update
-	virtual void provideContents( NLMISC::CBitMemStream& stream ) {}
+	virtual void provideContents( NLMISC::CBitMemStream& stream ) NL_OVERRIDE {}
 };
 
 /** Guild inventory */
@@ -68,10 +68,10 @@ public:
 	CGuildInventory();
 
 	/// Return the max bulk
-	virtual uint32 getMaxBulk() const;
+	virtual uint32 getMaxBulk() const NL_OVERRIDE;
 
 	/// Return the max number of slots
-	virtual uint32 getMaxSlot() const;
+	virtual uint32 getMaxSlot() const NL_OVERRIDE;
 };
 
 /**
@@ -107,25 +107,25 @@ public:
 	uint8 getItemInfoVersion( uint32 slot ) { return _GuildInvUpdater.getItemInfoVersion( slot ); }
 
 	/// An item has changed (can be a removing)
-	virtual void onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags changeFlags);
+	virtual void onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags changeFlags) NL_OVERRIDE;
 
 	/// The inventory information has changed (like total bulk or weight)
-	virtual void onInventoryChanged(INVENTORIES::TInventoryChangeFlags changeFlags);
+	virtual void onInventoryChanged(INVENTORIES::TInventoryChangeFlags changeFlags) NL_OVERRIDE;
 
 	/// Callback from item when an item stack size change (update the weight and bulk of the inventory)
-	virtual void onItemStackSizeChanged(uint32 slot, uint32 previousStackSize);
+	virtual void onItemStackSizeChanged(uint32 slot, uint32 previousStackSize) NL_OVERRIDE;
 
 	/// Force an update of the information related to an item (in case of client operation canceled by the server, reset client information)
-	virtual void forceSlotUpdate(uint32 slot);
+	virtual void forceSlotUpdate(uint32 slot) NL_OVERRIDE;
 
 	/// Return true if there is a pending update to provide
-	virtual bool nonEmpty() const;
+	virtual bool nonEmpty() const NL_OVERRIDE;
 
 	/// Push data modified since the last update, for all online members
-	virtual	void provideUpdate( NLMISC::CBitMemStream& stream );
+	virtual	void provideUpdate( NLMISC::CBitMemStream& stream ) NL_OVERRIDE;
 
 	/// Push all non-empty data, for connecting members. Precondition: _GuildInvUpdater.empty() (provideUpdate() must have been called before)
-	virtual void provideContents( NLMISC::CBitMemStream& stream );
+	virtual void provideContents( NLMISC::CBitMemStream& stream ) NL_OVERRIDE;
 
 protected:
 

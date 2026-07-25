@@ -611,7 +611,7 @@ public:
 	 * apply the effects of the... effect
 	 * \return true if the effect must be removed
 	 */
-	virtual bool update(CTimerEvent * event, bool applyEffect);
+	virtual bool update(CTimerEvent * event, bool applyEffect) NL_OVERRIDE;
 
 	///
 	void endProspection( bool found=false )
@@ -1825,7 +1825,7 @@ public:
 	CBackgroundTask() : _Stopping(false), _Complete(false) {}
 
 	/// Destructor
-	virtual ~CBackgroundTask()
+	virtual ~CBackgroundTask() NL_OVERRIDE
 	{
 		if ( _Thread )
 		{
@@ -1869,7 +1869,7 @@ public:
 	bool	isComplete() const { return _Complete; }
 
 	///
-	virtual void run() = 0;
+	virtual void run() NL_OVERRIDE = 0;
 
 protected:
 
@@ -1903,7 +1903,7 @@ public:
 	uint	currentMap() const { return _CurrentMap; }
 
 	///
-	virtual void run();
+	virtual void run() NL_OVERRIDE;
 
 private:
 
@@ -1999,7 +1999,7 @@ public:
 	CCheckDepositContentTask() : _MustCreateMapOnProblem(false), _ResolutionForErroneousSmallDeposits(0.5f) {}
 
 	///
-	virtual void run();
+	virtual void run() NL_OVERRIDE;
 
 	float	_ResolutionForErroneousSmallDeposits;
 	bool	_MustCreateMapOnProblem;

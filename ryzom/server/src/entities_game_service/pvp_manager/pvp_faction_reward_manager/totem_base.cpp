@@ -320,7 +320,7 @@ struct TTotemFileCallback : public IBackupFileReceiveCallback
 	{
 	}
 
-	virtual void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream)
+	virtual void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream) NL_OVERRIDE
 	{
 		TotemBase->totemFileCallback(fileDescription, dataStream);
 	}

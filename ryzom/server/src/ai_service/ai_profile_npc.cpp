@@ -99,14 +99,14 @@ class CBotProfileFightNpc
 {
 public:
 	CBotProfileFightNpc(CProfileOwner* owner, CAIEntityPhysical* ennemy);
-	virtual ~CBotProfileFightNpc();
+	virtual ~CBotProfileFightNpc() NL_OVERRIDE;
 	
-	virtual std::string getOneLineInfoString() const { return "fight npc bot profile"; }
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE { return "fight npc bot profile"; }
 	
-	void noMoreTarget();
+	void noMoreTarget() NL_OVERRIDE;
 	
-	void eventBeginFight();
-	void eventTargetKilled();
+	void eventBeginFight() NL_OVERRIDE;
+	void eventTargetKilled() NL_OVERRIDE;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -119,14 +119,14 @@ class CBotProfileHealNpc
 {
 public:
 	CBotProfileHealNpc(CAIEntityPhysical* target, CProfileOwner* owner);
-	virtual ~CBotProfileHealNpc();
+	virtual ~CBotProfileHealNpc() NL_OVERRIDE;
 	
-	virtual std::string getOneLineInfoString() const { return "heal npc bot profile"; }
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE { return "heal npc bot profile"; }
 	
-	void noMoreTarget();
+	void noMoreTarget() NL_OVERRIDE;
 	
-	virtual void healerAdded(CAIEntityPhysical* entity);
-	virtual void healerRemoved(CAIEntityPhysical* entity);
+	virtual void healerAdded(CAIEntityPhysical* entity) NL_OVERRIDE;
+	virtual void healerRemoved(CAIEntityPhysical* entity) NL_OVERRIDE;
 	
 //	void eventBeginFight();
 //	void eventTargetKilled();
@@ -143,11 +143,11 @@ class CBotProfileReturnAfterFightNpc
 {
 public:
 	CBotProfileReturnAfterFightNpc(CSpawnBotNpc* owner);
-	~CBotProfileReturnAfterFightNpc();
-	virtual void beginProfile();
-	virtual void endProfile();
-	virtual void updateProfile(uint ticksSinceLastUpdate);
-	virtual std::string getOneLineInfoString() const;
+	~CBotProfileReturnAfterFightNpc() NL_OVERRIDE;
+	virtual void beginProfile() NL_OVERRIDE;
+	virtual void endProfile() NL_OVERRIDE;
+	virtual void updateProfile(uint ticksSinceLastUpdate) NL_OVERRIDE;
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE;
 	
 //	virtual NLMISC::CSmartPtr<CMovementMagnet> const& getMovementMagnet() const { return _MovementMagnet; }
 	
@@ -164,15 +164,15 @@ class CGrpProfileTribu : public CGrpProfileNormal
 {
 public:
 	CGrpProfileTribu(CProfileOwner *owner);
-	virtual ~CGrpProfileTribu();
+	virtual ~CGrpProfileTribu() NL_OVERRIDE;
 	
-	virtual void beginProfile();
-	virtual void endProfile();
-	virtual void updateProfile(uint ticksSinceLastUpdate);
+	virtual void beginProfile() NL_OVERRIDE;
+	virtual void endProfile() NL_OVERRIDE;
+	virtual void updateProfile(uint ticksSinceLastUpdate) NL_OVERRIDE;
 	
-	virtual std::string getOneLineInfoString() const;
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE;
 	
-	virtual TProfiles getAIProfileType() const { return ACTIVITY_TRIBU; }
+	virtual TProfiles getAIProfileType() const NL_OVERRIDE { return ACTIVITY_TRIBU; }
 	
 private:
 	CAIVector _CenterPos;
@@ -187,7 +187,7 @@ class CGrpProfileStandAtStartPoint
 {
 public:
 	CGrpProfileStandAtStartPoint(CProfileOwner* owner);
-	virtual ~CGrpProfileStandAtStartPoint();
+	virtual ~CGrpProfileStandAtStartPoint() NL_OVERRIDE;
 	
 	class CBotPositionner : public CRefCount
 	{
@@ -205,20 +205,20 @@ public:
 		bool			_BotAtDest;
 	};
 	
-	CPathCont* getPathCont(CBot const* bot);
+	CPathCont* getPathCont(CBot const* bot) NL_OVERRIDE;
 	
-	virtual void beginProfile();
-	void resumeProfile();
-	virtual void endProfile();
-	virtual void updateProfile(uint ticksSinceLastUpdate);
+	virtual void beginProfile() NL_OVERRIDE;
+	void resumeProfile() NL_OVERRIDE;
+	virtual void endProfile() NL_OVERRIDE;
+	virtual void updateProfile(uint ticksSinceLastUpdate) NL_OVERRIDE;
 	
-	void addBot(CBot* bot);
-	void removeBot(CBot* bot);
+	void addBot(CBot* bot) NL_OVERRIDE;
+	void removeBot(CBot* bot) NL_OVERRIDE;
 	
 	void setCurrentValidPos();
 	
-	virtual	TProfiles getAIProfileType() const { return MOVE_STAND_ON_VERTICES; }
-	virtual std::string getOneLineInfoString() const;
+	virtual	TProfiles getAIProfileType() const NL_OVERRIDE { return MOVE_STAND_ON_VERTICES; }
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE;
 	
 private:
 	typedef std::map<CBot const*, CSmartPtr<CBotPositionner> > TNpcBotPositionnerMap;

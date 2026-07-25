@@ -186,12 +186,12 @@ protected:
 	// GameShare infos on Sabrina.
 	class	CBrickContainer : public CSabrinaCom::IBrickContainer
 	{
-		virtual sint32		getSabrinaCost(NLMISC::CSheetId id) const;
-		virtual float		getSabrinaRelativeCost(NLMISC::CSheetId id) const;
-		virtual sint32		getNumParameters(NLMISC::CSheetId id) const;
-		virtual BRICK_FAMILIES::TBrickFamily	getBrickFamily(NLMISC::CSheetId id, uint& indexInFamily) const;
-		virtual BRICK_TYPE::EBrickType				getBrickType(NLMISC::CSheetId id) const;
-		virtual TOOL_TYPE::TCraftingToolType		getFaberPlanToolType(NLMISC::CSheetId id) const;
+		virtual sint32		getSabrinaCost(NLMISC::CSheetId id) const NL_OVERRIDE;
+		virtual float		getSabrinaRelativeCost(NLMISC::CSheetId id) const NL_OVERRIDE;
+		virtual sint32		getNumParameters(NLMISC::CSheetId id) const NL_OVERRIDE;
+		virtual BRICK_FAMILIES::TBrickFamily	getBrickFamily(NLMISC::CSheetId id, uint& indexInFamily) const NL_OVERRIDE;
+		virtual BRICK_TYPE::EBrickType				getBrickType(NLMISC::CSheetId id) const NL_OVERRIDE;
+		virtual TOOL_TYPE::TCraftingToolType		getFaberPlanToolType(NLMISC::CSheetId id) const NL_OVERRIDE;
 	};
 	CBrickContainer		_BrickContainer;
 	CSabrinaCom			_SabrinaCom;
@@ -209,7 +209,7 @@ protected:
 	{
 		CSBrickManager		*Owner;
 
-		virtual void update (NLMISC::ICDBNode *node);
+		virtual void update (NLMISC::ICDBNode *node) NL_OVERRIDE;
 	};
 	friend struct CBrickFamilyObs;
 	CBrickFamilyObs			_BrickFamilyObs;

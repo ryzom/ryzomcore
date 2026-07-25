@@ -216,7 +216,7 @@ public:
 	volatile bool done;
 
 public:
-	virtual void infoReceived();
+	virtual void infoReceived() NL_OVERRIDE;
 };
 
 

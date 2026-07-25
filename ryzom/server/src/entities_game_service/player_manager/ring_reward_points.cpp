@@ -133,7 +133,7 @@ class CRingRewardPointsImplTimerEvent: public CTimerEvent
 {
 public:
 	CRingRewardPointsImplTimerEvent(CRingRewardPointsImpl* parent);
-	void timerCallback(CTimer* owner);
+	void timerCallback(CTimer* owner) NL_OVERRIDE;
 private:
 	CRingRewardPointsImpl* _Parent;
 };

@@ -39,7 +39,7 @@ public:\
 		Factories.push_back(std::make_pair(_type_,this));\
 	};\
 protected:\
-	IFaberAction * build( const TDataSetRow & actorRowId, const std::vector< const CStaticBrick* >& bricks, CFaberPhrase * phrase )\
+	IFaberAction * build( const TDataSetRow & actorRowId, const std::vector< const CStaticBrick* >& bricks, CFaberPhrase * phrase ) NL_OVERRIDE\
 	{\
 		_class_ *inst = new _class_;\
 		if ( !inst->build( actorRowId, bricks, phrase  ) ){delete inst;return NULL;} \

@@ -72,8 +72,8 @@ private:
 	uint16						_Height;
 public:
 	// for CWaterMap
-	virtual void waterSurfaceAdded(const NLMISC::CPolygon2D &shape, const NLMISC::CMatrix &worldMatrix, bool splashEnabled, bool usesSceneWaterenvmap);
-	virtual void waterSurfaceRemoved(bool usesSceneWaterenvmap);
+	virtual void waterSurfaceAdded(const NLMISC::CPolygon2D &shape, const NLMISC::CMatrix &worldMatrix, bool splashEnabled, bool usesSceneWaterenvmap) NL_OVERRIDE;
+	virtual void waterSurfaceRemoved(bool usesSceneWaterenvmap) NL_OVERRIDE;
 };
 
 

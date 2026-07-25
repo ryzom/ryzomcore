@@ -864,7 +864,7 @@ void CPeopleList::openCloseChat(sint index, bool bOpen)
 //==================================================================
 class CHandlerContactEntry : public IActionHandler
 {
-	void execute (CCtrlBase *pCaller, const std::string &/* sParams */)
+	void execute (CCtrlBase *pCaller, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CGroupEditBox *pEB = dynamic_cast<CGroupEditBox*>(pCaller);
 		if (pEB == NULL) return;

@@ -105,7 +105,7 @@ public:
 
 private:
 
-	virtual std::string transformName (uint index, const std::string &instanceName, const std::string &shapeName);
+	virtual std::string transformName (uint index, const std::string &instanceName, const std::string &shapeName) NL_OVERRIDE;
 
 private:
 
@@ -124,17 +124,17 @@ class CIGDoorAddedCallback : public IIGObserver
 {
 private:
 	// An IG has been added
-	virtual void instanceGroupLoaded(NL3D::UInstanceGroup *ig)
+	virtual void instanceGroupLoaded(NL3D::UInstanceGroup *ig) NL_OVERRIDE
 	{
 		getDoorManager().loadedCallback (ig);
 	}
 	// An IG has been added
-	virtual void instanceGroupAdded(NL3D::UInstanceGroup *ig)
+	virtual void instanceGroupAdded(NL3D::UInstanceGroup *ig) NL_OVERRIDE
 	{
 		getDoorManager().addedCallback (ig);
 	}
 	// An IG will be removed
-	virtual void instanceGroupRemoved(NL3D::UInstanceGroup *ig)
+	virtual void instanceGroupRemoved(NL3D::UInstanceGroup *ig) NL_OVERRIDE
 	{
 		getDoorManager().removedCallback (ig);
 	}

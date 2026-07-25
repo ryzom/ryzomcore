@@ -65,7 +65,7 @@ public:
 public:
 	CPhrasePriceCB(CHugeListObs *owner) : Owner(owner) {}
 
-	virtual	void	onBrickLearned()
+	virtual	void	onBrickLearned() NL_OVERRIDE
 	{
 		// on any brick learned, must recompute all phrases (if done by client)
 		Owner->clientGenerateAllPhrases();

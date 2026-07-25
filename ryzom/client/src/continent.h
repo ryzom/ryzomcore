@@ -156,17 +156,17 @@ public:
 		Tx = NULL;
 	}
 
-	~CFogOfWar();
+	~CFogOfWar() NL_OVERRIDE;
 
 	void load(const std::string &contName);
 	void save(const std::string &contName);
 
 	// Implementation of IFogOfWar
-	virtual uint8 *getData();
-	virtual bool createData(sint16 w, sint16 h);
-	virtual void explored(sint16 mapPosX, sint16 mapPosY);
-	virtual sint16 getRealWidth();
-	virtual sint16 getRealHeight();
+	virtual uint8 *getData() NL_OVERRIDE;
+	virtual bool createData(sint16 w, sint16 h) NL_OVERRIDE;
+	virtual void explored(sint16 mapPosX, sint16 mapPosY) NL_OVERRIDE;
+	virtual sint16 getRealWidth() NL_OVERRIDE;
+	virtual sint16 getRealHeight() NL_OVERRIDE;
 };
 
 

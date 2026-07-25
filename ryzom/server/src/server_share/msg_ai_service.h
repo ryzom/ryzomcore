@@ -42,14 +42,14 @@ public:
 	std::vector< TDataSetRow > Character;
 	std::vector< TDataSetRow > Creature;
 
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CCreatureAskInformationMsg");
 
 		propertyCont ("Character", PropDataSetRow, Character);
 		propertyCont ("Creature", PropDataSetRow, Creature);
 	}
-	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) NL_OVERRIDE {}
 };
 
 //----------------------------------------------------------------------------
@@ -61,14 +61,14 @@ public:
 	uint32						Alias;
 	std::vector<std::string>	Content;
 
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CCAisActionMsg");
 		property ("Alias", PropUInt32, uint32(0xffffffff), Alias);
 		propertyCont ("Content", PropString, Content);
 	}
 
-	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) NL_OVERRIDE {}
 };
 
 //----------------------------------------------------------------------------
@@ -85,7 +85,7 @@ public:
 	/// Parameters for the user event
 	std::vector<std::string>	Params;
 
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CUserEventMsg");
 		property ("InstanceNumber", PropUInt32, std::numeric_limits<uint32>::max(), InstanceNumber);
@@ -94,7 +94,7 @@ public:
 		propertyCont ("Params", PropString, Params);
 	}
 
-	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) NL_OVERRIDE {}
 };
 
 //----------------------------------------------------------------------------
@@ -108,14 +108,14 @@ public:
 	/// The group alias of each bots in Bots vector.
 	std::vector<uint32>			GrpAlias;
 
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CFaunaBotDescription");
 		propertyCont ("Bots", PropDataSetRow, Bots);
 		propertyCont ("GrpAlias", PropUInt32, GrpAlias);
 	}
 
-	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) NL_OVERRIDE {}
 };
 
 //----------------------------------------------------------------------------
@@ -130,7 +130,7 @@ public:
 	/// The team Id of the escorter
 	uint16						TeamId;
 
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CSetEscortTeamId");
 		property ("InstanceNumber", PropUInt32, std::numeric_limits<uint32>::max(), InstanceNumber);
@@ -138,7 +138,7 @@ public:
 		property ("TeamId", PropUInt16, CTEAM::InvalidTeamId, TeamId);
 	}
 
-	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) NL_OVERRIDE {}
 };
 
 //----------------------------------------------------------------------------
@@ -219,7 +219,7 @@ public:
 	/// fames of the duties
 //	std::vector<std::string>	Fames;
 	
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CDutyDescription");
 		property ("DutyName", PropString,std::string(), DutyName);
@@ -227,7 +227,7 @@ public:
 		propertyCont ("Parameters", PropString, Parameters);
 	}
 	
-	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) NL_OVERRIDE {}
 };
 
 //----------------------------------------------------------------------------
@@ -293,13 +293,13 @@ public:
 	float			Heading;
 	
 	
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CSetBotHeadingMsg");
 		property ("BotRowId", PropDataSetRow, TDataSetRow() , BotRowId);
 		property ("Heading", PropFloat,0.0f,Heading);
 	}
-	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) NL_OVERRIDE {}
 };
 
 //----------------------------------------------------------------------------
@@ -311,13 +311,13 @@ public:
 	TDataSetRow		PlayerRowId;
 	TDataSetRow		TargetRowId;
 	
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CAITauntMsg");
 		property ("PlayerRowId", PropDataSetRow, TDataSetRow(), PlayerRowId);
 		property ("TargetRowId", PropDataSetRow, TDataSetRow(), TargetRowId);
 	}
-	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) NL_OVERRIDE {}
 };
 
 //----------------------------------------------------------------------------
@@ -330,13 +330,13 @@ public:
 	TDataSetRow		PlayerRowId;
 	TDataSetRow		CreatureRowId;
 	
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CAICalmCreatureMsg");
 		property ("PlayerRowId", PropDataSetRow, TDataSetRow(), PlayerRowId);
 		property ("CreatureRowId", PropDataSetRow, TDataSetRow(), CreatureRowId);
 	}
-	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) NL_OVERRIDE {}
 };
 
 //----------------------------------------------------------------------------
@@ -359,13 +359,13 @@ public:
 	TDataSetRow		PlayerRowId;
 	TDataSetRow		TargetRowId;
 	
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CAILostAggroMsg");
 		property ("PlayerRowId", PropDataSetRow, TDataSetRow(), PlayerRowId);
 		property ("TargetRowId", PropDataSetRow, TDataSetRow(), TargetRowId);
 	}
-	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) NL_OVERRIDE {}
 };
 
 //----------------------------------------------------------------------------
@@ -388,13 +388,13 @@ public:
 	TDataSetRow		PlayerRowId;
 	TDataSetRow		TargetRowId;
 	
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CAIGainAggroMsg");
 		property ("PlayerRowId", PropDataSetRow, TDataSetRow(), PlayerRowId);
 		property ("TargetRowId", PropDataSetRow, TDataSetRow(), TargetRowId);
 	}
-	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) NL_OVERRIDE {}
 };
 
 //----------------------------------------------------------------------------
@@ -405,12 +405,12 @@ class CAIPlayerRespawnMsg : public CMirrorTransportClass
 public:
 	TDataSetRow		PlayerRowId;
 	
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CAIPlayerRespawnMsg");
 		property ("PlayerRowId", PropDataSetRow, TDataSetRow(), PlayerRowId);
 	}
-	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) NL_OVERRIDE {}
 };
 
 //----------------------------------------------------------------------------
@@ -422,13 +422,13 @@ public:
 	TDataSetRow		EntityRowId;
 	TDataSetRow		AskerRowID;
 	
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CAIAskForInfosOnEntityMsg");
 		property ("EntityRowId", PropDataSetRow, TDataSetRow(), EntityRowId);
 		property ("AskerRowID", PropDataSetRow, TDataSetRow(), AskerRowID);
 	}
-	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) NL_OVERRIDE {}
 };
 
 //----------------------------------------------------------------------------
@@ -441,14 +441,14 @@ public:
 	TDataSetRow					AskerRowID;
 	std::vector<std::string>	Infos;
 	
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CAIInfosOnEntityMsg");
 		property ("EntityRowId", PropDataSetRow, TDataSetRow(), EntityRowId);
 		property ("AskerRowID", PropDataSetRow, TDataSetRow(), AskerRowID);
 		propertyCont ("Infos", PropString, Infos);
 	}
-	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) NL_OVERRIDE {}
 };
 
 //----------------------------------------------------------------------------
@@ -460,13 +460,13 @@ public:
 	TDataSetRow					EntityRowId;
 	bool						EnableAggro;
 	
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CEnableAggroOnPlayerMsg");
 		property ("EntityRowId", PropDataSetRow, TDataSetRow(), EntityRowId);
 		property ("EnableAggro", PropBool, true, EnableAggro);
 	}
-	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) NL_OVERRIDE {}
 };
 
 //----------------------------------------------------------------------------
@@ -477,12 +477,12 @@ class CReportAICollisionAvailableMsg : public CMirrorTransportClass
 public:
 	std::vector<std::string>	ContinentsCollision;
 	
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CReportAICollisionAvailableMsg");
 		propertyCont ("ContinentsCollision", PropString, ContinentsCollision);
 	}
-	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) NL_OVERRIDE {}
 };
 
 //----------------------------------------------------------------------------
@@ -494,13 +494,13 @@ public:
 	uint32			InstanceNumber;
 	std::string		InstanceContinent;
 	
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CReportStaticAIInstanceMsg");
 		property ("InstanceNumber", PropUInt32, uint32(0), InstanceNumber);
 		property ("InstanceContinent", PropString, std::string(), InstanceContinent);
 	}
-	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) NL_OVERRIDE {}
 };
 
 //----------------------------------------------------------------------------
@@ -513,14 +513,14 @@ public:
 	std::string		ActionName;
 	std::string		Url;
 	
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CCreatureSetUrlMsg");
 		propertyCont ("Entities", PropDataSetRow, Entities);
 		property ("ActionName", PropString, std::string(), ActionName);
 		property ("Url", PropString, std::string(), Url);
 	}
-	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) NL_OVERRIDE {}
 };
 
 //----------------------------------------------------------------------------
@@ -531,12 +531,12 @@ class CReportAIInstanceDespawnMsg : public CMirrorTransportClass
 public:
 	std::vector<uint32>			InstanceNumbers;
 	
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CReportAIInstanceDespawnMsg");
 		propertyCont ("InstanceNumbers", PropUInt32, InstanceNumbers);
 	}
-	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) NL_OVERRIDE {}
 };
 
 
@@ -550,12 +550,12 @@ class CWarnBadInstanceMsg : public CMirrorTransportClass
 public:
 	uint32			InstanceNumber;
 	
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CWarnBadInstanceMsg");
 		property ("InstanceNumber", PropUInt32, uint32(0), InstanceNumber);
 	}
-	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) NL_OVERRIDE {}
 };
 
 //----------------------------------------------------------------------------
@@ -568,14 +568,14 @@ public:
 	std::vector<uint8>			ActionFlags;
 	std::vector<bool>			Values;
 
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CChangeActionFlagMsg");
 		propertyCont ("Entities", PropDataSetRow, Entities);
 		propertyCont ("ActionFlags", PropUInt8, ActionFlags);
 		propertyVector ("Values", PropBool, Values);
 	}
-	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) NL_OVERRIDE {}
 
 	inline void push(TDataSetRow entity, uint8 flag, bool value)
 	{
@@ -593,13 +593,13 @@ class CCreatureCompleteHealMsg : public CMirrorTransportClass
 public:
 	std::vector<TDataSetRow>	Entities;
 	
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CCreatureCompleteHealMsg");
 		propertyCont ("Entities", PropDataSetRow, Entities);
 	}
 
-	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) NL_OVERRIDE {}
 };
 
 //----------------------------------------------------------------------------
@@ -612,7 +612,7 @@ public:
 	std::vector<uint32>         MaxHp;
 	std::vector<uint8>          SetFull;
 	
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CChangeCreatureMaxHPMsg");
 		propertyCont ("Entities", PropDataSetRow, Entities);
@@ -620,7 +620,7 @@ public:
 		propertyCont ("SetFull", PropUInt8, SetFull);
 	}
 	
-	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) NL_OVERRIDE {}
 };
 
 //----------------------------------------------------------------------------
@@ -632,14 +632,14 @@ public:
 	std::vector<TDataSetRow>	Entities;
 	std::vector<sint32>			DeltaHp;
 	
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CChangeCreatureHPMsg");
 		propertyCont ("Entities", PropDataSetRow, Entities);
 		propertyCont ("DeltaHp", PropSInt32, DeltaHp);
 	}
 	
-	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) NL_OVERRIDE {}
 };
 
 //----------------------------------------------------------------------------
@@ -651,13 +651,13 @@ public:
 	TDataSetRow		CreatureId;
 	uint8			NewMode;
 	
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CChangeCreatureModeMsg");
 		property ("CreatureId", PropDataSetRow, TDataSetRow(), CreatureId);
 		property ("NewMode", PropUInt8, (uint8)0, NewMode);	}
 	
-	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) NL_OVERRIDE {}
 };
 
 //----------------------------------------------------------------------------
@@ -668,12 +668,12 @@ class CCreatureDespawnMsg : public CMirrorTransportClass
 public:
 	std::vector<TDataSetRow>	Entities;
 	
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CCreatureDespawnMsg");
 		propertyCont ("Entities", PropDataSetRow, Entities);
 	}
-	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) NL_OVERRIDE {}
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -926,7 +926,7 @@ public:
 	uint32			MissionAlias;
 	uint32			DespawnTimeInTick;
 
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CAddHandledAIGroupMsg");
 		property ("PlayerRowId", PropDataSetRow, TDataSetRow(), PlayerRowId);
@@ -934,7 +934,7 @@ public:
 		property ("MissionAlias", PropUInt32, uint32(0xffffffff), MissionAlias);
 		property ("DespawnTimeInTick", PropUInt32, uint32(0), DespawnTimeInTick);
 	}
-	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) NL_OVERRIDE {}
 };
 
 //----------------------------------------------------------------------------
@@ -947,14 +947,14 @@ public:
 	uint32			GroupAlias;
 	uint32			MissionAlias;
 	
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CDelHandledAIGroupMsg");
 		property ("PlayerRowId", PropDataSetRow, TDataSetRow(), PlayerRowId);
 		property ("GroupAlias", PropUInt32, uint32(0xffffffff), GroupAlias);
 		property ("MissionAlias", PropUInt32, uint32(0xffffffff), MissionAlias);
 	}
-	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) NL_OVERRIDE {}
 };
 
 //----------------------------------------------------------------------------
@@ -967,14 +967,14 @@ public:
 	uint32			GroupAlias;
 	uint32			MissionAlias;
 	
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CHandledAIGroupSpawnedMsg");
 		property ("PlayerRowId", PropDataSetRow, TDataSetRow(), PlayerRowId);
 		property ("GroupAlias", PropUInt32, uint32(0xffffffff), GroupAlias);
 		property ("MissionAlias", PropUInt32, uint32(0xffffffff), MissionAlias);
 	}
-	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) NL_OVERRIDE {}
 };
 
 //----------------------------------------------------------------------------
@@ -987,14 +987,14 @@ public:
 	uint32			GroupAlias;
 	uint32			MissionAlias;
 	
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CHandledAIGroupDespawnedMsg");
 		property ("PlayerRowId", PropDataSetRow, TDataSetRow(), PlayerRowId);
 		property ("GroupAlias", PropUInt32, uint32(0xffffffff), GroupAlias);
 		property ("MissionAlias", PropUInt32, uint32(0xffffffff), MissionAlias);
 	}
-	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) NL_OVERRIDE {}
 };
 
 
@@ -1027,15 +1027,15 @@ public:
 	std::vector<uint32>				Quantities;
 	std::string						MissionText;	// utf8 string
 
-	uint32									getInstanceId() const { return InstanceId; }
-	uint32									getGroupAlias() const { return GroupAlias; }
-	TDataSetRow								getCharacterRowId() const { return CharacterRowId; }
-	TDataSetRow								getCreatureRowId() const { return CreatureRowId; }
-	const std::vector<NLMISC::CSheetId>&	getItems() const { return Items; }
-	const std::vector<uint32>&				getQuantities() const { return Quantities; }
-	const std::string&						getMissionText() const { return MissionText; }
+	uint32									getInstanceId() const NL_OVERRIDE { return InstanceId; }
+	uint32									getGroupAlias() const NL_OVERRIDE { return GroupAlias; }
+	TDataSetRow								getCharacterRowId() const NL_OVERRIDE { return CharacterRowId; }
+	TDataSetRow								getCreatureRowId() const NL_OVERRIDE { return CreatureRowId; }
+	const std::vector<NLMISC::CSheetId>&	getItems() const NL_OVERRIDE { return Items; }
+	const std::vector<uint32>&				getQuantities() const NL_OVERRIDE { return Quantities; }
+	const std::string&						getMissionText() const NL_OVERRIDE { return MissionText; }
 
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CGiveItemRequestMsg");
 		property ("InstanceId", PropUInt32, uint32(0xffffffff), InstanceId);
@@ -1046,7 +1046,7 @@ public:
 		propertyCont ("Quantities", PropUInt32, Quantities);
 		property ("MissionText", PropString, std::string(), MissionText);
 	}
-	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) NL_OVERRIDE {}
 };
 
 //----------------------------------------------------------------------------
@@ -1063,15 +1063,15 @@ public:
 	std::vector<uint32>				Quantities;
 	std::string						MissionText;	// utf8 string
 
-	uint32									getInstanceId() const { return InstanceId; }
-	uint32									getGroupAlias() const { return GroupAlias; }
-	TDataSetRow								getCharacterRowId() const { return CharacterRowId; }
-	TDataSetRow								getCreatureRowId() const { return CreatureRowId; }
-	const std::vector<NLMISC::CSheetId>&	getItems() const { return Items; }
-	const std::vector<uint32>&				getQuantities() const { return Quantities; }
-	const std::string&						getMissionText() const { return MissionText; }
+	uint32									getInstanceId() const NL_OVERRIDE { return InstanceId; }
+	uint32									getGroupAlias() const NL_OVERRIDE { return GroupAlias; }
+	TDataSetRow								getCharacterRowId() const NL_OVERRIDE { return CharacterRowId; }
+	TDataSetRow								getCreatureRowId() const NL_OVERRIDE { return CreatureRowId; }
+	const std::vector<NLMISC::CSheetId>&	getItems() const NL_OVERRIDE { return Items; }
+	const std::vector<uint32>&				getQuantities() const NL_OVERRIDE { return Quantities; }
+	const std::string&						getMissionText() const NL_OVERRIDE { return MissionText; }
 
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CReceiveItemRequestMsg");
 		property ("InstanceId", PropUInt32, uint32(0xffffffff), InstanceId);
@@ -1082,7 +1082,7 @@ public:
 		propertyCont ("Quantities", PropUInt32, Quantities);
 		property ("MissionText", PropString, std::string(), MissionText);
 	}
-	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) NL_OVERRIDE {}
 };
 
 
@@ -1121,7 +1121,7 @@ public:
 	/// Parameters for the user event
 	std::vector<std::string>	Params;
 
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CQueryEgs");
 		property ("InstanceId", PropUInt32, uint32(0xffffffff), InstanceId);
@@ -1130,7 +1130,7 @@ public:
 		propertyCont ("Params", PropString, Params);
 	}
 
-	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) NL_OVERRIDE {}
 	
 	TFunEnum getFunEnum(const std::string& funName) const;
 	

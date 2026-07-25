@@ -308,18 +308,18 @@ protected:
 class CRefInventory : public CInventoryBase
 {
 public:
-	virtual void deleteItem(uint32 slot);
-	virtual CGameItemPtr removeItem(uint32 slot, uint32 quantity = INVENTORIES::REMOVE_MAX_STACK_QUANTITY, TInventoryOpResult * res = NULL);
+	virtual void deleteItem(uint32 slot) NL_OVERRIDE;
+	virtual CGameItemPtr removeItem(uint32 slot, uint32 quantity = INVENTORIES::REMOVE_MAX_STACK_QUANTITY, TInventoryOpResult * res = NULL) NL_OVERRIDE;
 	/// Empty the inventory, unreferencing all items, but not destroying them
-	virtual void clearInventory();
+	virtual void clearInventory() NL_OVERRIDE;
 
-	virtual CInventoryPtr	getInventoryCopy() const;
+	virtual CInventoryPtr	getInventoryCopy() const NL_OVERRIDE;
 
-	virtual bool isRefInventory() const { return true; }
+	virtual bool isRefInventory() const NL_OVERRIDE { return true; }
 
 protected:
 	/// Insert item implementation
-	virtual TInventoryOpResult doInsertItem(CGameItemPtr &item, uint32 slot, bool autoStack, bool ignoreWeightAndBulk);
+	virtual TInventoryOpResult doInsertItem(CGameItemPtr &item, uint32 slot, bool autoStack, bool ignoreWeightAndBulk) NL_OVERRIDE;
 };
 
 /**
@@ -397,22 +397,22 @@ public:
 	CCharacter *getCharacter();
 
 	// info version mechanism
-	virtual void onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags changeFlags);
+	virtual void onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags changeFlags) NL_OVERRIDE;
 
 	/** Callback from item when an item stack size change
 	 *	This callback is used to update the weight and bulk
 	 *	of the inventory
 	 */
-	virtual void onItemStackSizeChanged(uint32 slot, uint32 previousStackSize);
+	virtual void onItemStackSizeChanged(uint32 slot, uint32 previousStackSize) NL_OVERRIDE;
 
 	/** Force an update of the information related to an item 
 	 *	In case of client operation canceled by the server, this method is
 	 *	use to reset the client information to normal.
 	 */
-	virtual void forceSlotUpdate(uint32 slot);
+	virtual void forceSlotUpdate(uint32 slot) NL_OVERRIDE;
 
 	/// update prerequisit state of item
-	virtual void updateItemPrerequisit(uint32 slot);
+	virtual void updateItemPrerequisit(uint32 slot) NL_OVERRIDE;
 
 protected:
 	/** Update the given client slot with item infos.

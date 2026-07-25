@@ -116,9 +116,9 @@ public:
 public:
 	///@name IStaticCreatures overloads
 	//@{
-	virtual uint32	getFaction() const { return _Faction; }
-	virtual bool	getFameByKillValid() const { return _FameByKillValid; }
-	virtual sint32	getFameByKill() const { return _FameByKill; }
+	virtual uint32	getFaction() const NL_OVERRIDE { return _Faction; }
+	virtual bool	getFameByKillValid() const NL_OVERRIDE { return _FameByKillValid; }
+	virtual sint32	getFameByKill() const NL_OVERRIDE { return _FameByKill; }
 	//@}
 
 	///@name Setters
@@ -167,7 +167,7 @@ public:
 	CCreature();
 
 	/// Destructor
-	virtual ~CCreature();
+	virtual ~CCreature() NL_OVERRIDE;
 private:
 
 public:
@@ -196,13 +196,13 @@ public:
 	 * \param forceUpdate if true, set mode without check gameplay rules (for EGS use only)
 	 * \param disengage true to call phrase manager disengage, false otherwise
 	 */
-	virtual void setMode( MBEHAV::EMode mode, bool forceUpdate = false, bool disengage = true);
+	virtual void setMode( MBEHAV::EMode mode, bool forceUpdate = false, bool disengage = true) NL_OVERRIDE;
 
 	/**
 	 * set the mode with position or orientation information
 	 * \param mode the new mode (with position or orientation)
 	 */
-	virtual void setMode( MBEHAV::TMode mode )
+	virtual void setMode( MBEHAV::TMode mode ) NL_OVERRIDE
 	{
 		nlwarning("setting mode %s for a creature !!! Forbidden", mode.toString().c_str());
 #ifdef NL_DEBUG
@@ -211,7 +211,7 @@ public:
 	}
 
 	/// entity is dead
-	virtual void deathOccurs();
+	virtual void deathOccurs() NL_OVERRIDE;
 
 	/// set looter entity
 	virtual bool setLooter( const NLMISC::CEntityId& entity, bool forceUpdate = false );
@@ -319,10 +319,10 @@ public:
 	 * apply the effect of the armor/shield on damage. Update the armor items if necessary
 	 * \return the remaining damages
 	 */
-	virtual sint32 applyDamageOnArmor( DMGTYPE::EDamageType dmgType, sint32 damage, SLOT_EQUIPMENT::TSlotEquipment forcedSlot);
+	virtual sint32 applyDamageOnArmor( DMGTYPE::EDamageType dmgType, sint32 damage, SLOT_EQUIPMENT::TSlotEquipment forcedSlot) NL_OVERRIDE;
 
 	/// Return the damage using current armor, done by an explosion (e.g. forage source explosion)
-	virtual float getActualDamageFromExplosionWithArmor( float dmg ) const;
+	virtual float getActualDamageFromExplosionWithArmor( float dmg ) const NL_OVERRIDE;
 
 	inline const std::vector< std::pair< std::string , std::string > > & getContextTexts() { return _ContextTexts; }
 
@@ -357,7 +357,7 @@ public:
 	}
 
 	// tp wanted for an entity
-	void tpWanted( sint32 x, sint32 y, sint32 z , bool useHeading = false, float heading = 0.0f , uint8 continent = 0xFF, sint32 cell = 0);
+	void tpWanted( sint32 x, sint32 y, sint32 z , bool useHeading = false, float heading = 0.0f , uint8 continent = 0xFF, sint32 cell = 0) NL_OVERRIDE;
 
 	/// request a despawn after a number of game cycles
 	void requestDespawn(NLMISC::TGameCycle waitCycles = 0);
@@ -380,18 +380,18 @@ public:
 	void enableLootRights(uint16 teamId);
 
 	/// get the resist value associated to effect type
-	uint32 getMagicResistance(EFFECT_FAMILIES::TEffectFamily effectFamily);
+	uint32 getMagicResistance(EFFECT_FAMILIES::TEffectFamily effectFamily) NL_OVERRIDE;
 
 	/// get the resist value associated to damage type
-	uint32 getMagicResistance(DMGTYPE::EDamageType dmgType);
+	uint32 getMagicResistance(DMGTYPE::EDamageType dmgType) NL_OVERRIDE;
 
 	/// get creature resist modifiers
 	const CCreatureResistModifiers	&getResistModifiers() const { return _ResistModifiers; }
 
 	/// inc creature resist modifier
-	virtual void incResistModifier(EFFECT_FAMILIES::TEffectFamily effectFamily, float factor);
+	virtual void incResistModifier(EFFECT_FAMILIES::TEffectFamily effectFamily, float factor) NL_OVERRIDE;
 	/// inc creature resist modifier
-	virtual void incResistModifier(DMGTYPE::EDamageType dmgType, float factor);
+	virtual void incResistModifier(DMGTYPE::EDamageType dmgType, float factor) NL_OVERRIDE;
 
 	/// return the guild building linked to this bot
 	const CBuildingPhysicalGuild * getGuildBuilding() const { return _GuildBuilding; }
@@ -434,7 +434,7 @@ public:
 	const std::vector<uint16> & getGuildCharges() { return _GuildCharges; }
 
 	/// get creature static form
-	const CStaticCreatures* getForm() const { return _Form; }
+	const CStaticCreatures* getForm() const NL_OVERRIDE { return _Form; }
 
 	/// get trade special price factor
 	bool getSpecialPlayerSellPriceFactor ( const NLMISC::CSheetId & sheet, float & factor ) const
@@ -538,7 +538,7 @@ protected:
 	 * kill entity (when it's hit points reach 0)
 	 * \param killerRowId if valid, the TDataSetRow of the entity which has killed the current entity
 	 */
-	virtual void kill(TDataSetRow killerRowId = TDataSetRow());
+	virtual void kill(TDataSetRow killerRowId = TDataSetRow()) NL_OVERRIDE;
 
 private :
 	void fillLootInventory( NLMISC::CSheetId& lootTable, const CStaticItem * bagForm, bool& haveLoot );

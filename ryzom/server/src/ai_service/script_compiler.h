@@ -81,10 +81,10 @@ class CCodeTokenNode : public CCodeNode
 {
 public:
 	CCodeTokenNode(const std::string &type, const std::string &name, NLMISC::CSmartPtr<CCodeNode> firstChildNode);
-	virtual ~CCodeTokenNode() { }
+	virtual ~CCodeTokenNode() NL_OVERRIDE { }
 	
-	void dump(size_t indent=0);
-	virtual std::string getFullName() const;
+	void dump(size_t indent=0) NL_OVERRIDE;
+	virtual std::string getFullName() const NL_OVERRIDE;
 };
 
 //////////////////////////////////////////////////////////////////////////////

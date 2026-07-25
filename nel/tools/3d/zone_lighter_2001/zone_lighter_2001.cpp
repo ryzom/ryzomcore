@@ -220,7 +220,7 @@ public:
 	}
 
 	// Run method
-	void run()
+	void run() NL_OVERRIDE
 	{
 		_ZoneLighter->processCalc (_Process, _FirstPatch, _LastPatch, *_Description);
 		_ZoneLighter->_ProcessExited++;

@@ -238,7 +238,7 @@ class CSendRunnable : public IRunnable
 public:
 	CSendRunnable() : m_StopThread(false), m_SendBuffer(false) {}
 
-	virtual void run()
+	virtual void run() NL_OVERRIDE
 	{
 		for (;;)
 		{

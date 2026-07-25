@@ -171,7 +171,7 @@ void CBotChatPageMission::acceptMission()
 // handler for bot chat mission
 class CAHSelectMission : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &/* params */)
+	virtual void execute (CCtrlBase *pCaller, const string &/* params */) NL_OVERRIDE
 	{
 		CDBCtrlSheet *sheet = dynamic_cast<CDBCtrlSheet *>(pCaller);
 		if (sheet) BotChatPageAll->ChooseMission->selectMission(sheet);
@@ -182,7 +182,7 @@ REGISTER_ACTION_HANDLER(CAHSelectMission, "select_mission");
 // the player has accepted a mission and now select it
 class CAHAcceptMission : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* params */) NL_OVERRIDE
 	{
 		BotChatPageAll->ChooseMission->acceptMission();
 	}

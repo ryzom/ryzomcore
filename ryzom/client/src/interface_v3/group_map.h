@@ -130,19 +130,19 @@ public:
 
 public:
 	CGroupMap(const TCtorParam &param);
-	virtual ~CGroupMap();
+	virtual ~CGroupMap() NL_OVERRIDE;
 	// Add a decoration to the map. The map will call the 'onAdd' method. When this object is destroyed, it will call the 'onRemove' method
 	void addDeco(IDeco *deco);
 	// Remove a decoration from the map. This will also call the 'onRemove' method. It is up to the owner to delete it.
 	void removeDeco(IDeco *deco);
 
-	virtual void setActive (bool state);
-	virtual void updateCoords();
-	virtual	void checkCoords();
-	virtual void draw ();
-	virtual bool handleEvent (const NLGUI::CEventDescriptor &event);
-	virtual bool parse(xmlNodePtr cur, CInterfaceGroup * parentGroup);
-	virtual bool getCtrlsUnder (sint32 x, sint32 y, sint32 clipX, sint32 clipY, sint32 clipW, sint32 clipH, std::vector<CCtrlBase*> &vICL);
+	virtual void setActive (bool state) NL_OVERRIDE;
+	virtual void updateCoords() NL_OVERRIDE;
+	virtual	void checkCoords() NL_OVERRIDE;
+	virtual void draw () NL_OVERRIDE;
+	virtual bool handleEvent (const NLGUI::CEventDescriptor &event) NL_OVERRIDE;
+	virtual bool parse(xmlNodePtr cur, CInterfaceGroup * parentGroup) NL_OVERRIDE;
+	virtual bool getCtrlsUnder (sint32 x, sint32 y, sint32 clipX, sint32 clipY, sint32 clipW, sint32 clipH, std::vector<CCtrlBase*> &vICL) NL_OVERRIDE;
 
 	// Name of the map as filled in the ryzom.world file
 	void setMap(const std::string &mapName);
@@ -244,9 +244,9 @@ public:
 
 
 	// From CInterfaceElement : scale and offset must persist between virtual desktops
-	virtual bool wantSerialConfig() const { return true; }
+	virtual bool wantSerialConfig() const NL_OVERRIDE { return true; }
 	// From CInterfaceElement
-	virtual void serialConfig(NLMISC::IStream &f);
+	virtual void serialConfig(NLMISC::IStream &f) NL_OVERRIDE;
 
 
 	// Server set all valid respawn points
@@ -274,9 +274,9 @@ private:
 		{
 		public:
 			CPolyButton();
-			virtual bool handleEvent (const NLGUI::CEventDescriptor &event);
-			virtual void updateCoords();
-			virtual void draw () {}
+			virtual bool handleEvent (const NLGUI::CEventDescriptor &event) NL_OVERRIDE;
+			virtual void updateCoords() NL_OVERRIDE;
+			virtual void draw () NL_OVERRIDE {}
 			void drawPolyButton();
 			bool build(const NLLIGO::CPrimZone &concavePoly, CGroupMap *pMap, const std::string &sID);
 			bool contains(const NLMISC::CVector2f &pos);
@@ -299,12 +299,12 @@ private:
 				bool					   HandleEvents;
 				bool					   SearchMatch;
 			public:
-				virtual bool handleEvent (const NLGUI::CEventDescriptor& event)
+				virtual bool handleEvent (const NLGUI::CEventDescriptor& event) NL_OVERRIDE
 				{
 					if (!HandleEvents) return false;
 					return CCtrlButton::handleEvent(event);
 				}
-				virtual	bool		isCapturable() const
+				virtual	bool		isCapturable() const NL_OVERRIDE
 				{
 					return HandleEvents;
 				}

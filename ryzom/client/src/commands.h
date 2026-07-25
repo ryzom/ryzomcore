@@ -49,7 +49,7 @@ public:
 	void addMode (const std::string &action, uint numArg, bool infiniteAgr, const std::vector<std::string> &keywords);
 
 	// From ICommand
-	virtual bool execute(const std::string &rawCommandString, const std::vector<std::string> &args, NLMISC::CLog &log, bool quiet, bool human);
+	virtual bool execute(const std::string &rawCommandString, const std::vector<std::string> &args, NLMISC::CLog &log, bool quiet, bool human) NL_OVERRIDE;
 
 	// Create a command
 	static void createCommand (const char *name, const char *action, const char *params);

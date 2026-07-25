@@ -62,15 +62,15 @@ class CControlTransformBase : public CReferenceTarget
 {
 public:
 	CControlTransformBase(CScene *scene);
-	virtual ~CControlTransformBase();
+	virtual ~CControlTransformBase() NL_OVERRIDE;
 
 	// inherited
-	virtual void parse(uint16 version, uint filter = 0);
-	virtual void clean();
-	virtual void build(uint16 version, uint filter = 0);
-	virtual void disown();
-	virtual void init();
-	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "", uint filter = 0) const;
+	virtual void parse(uint16 version, uint filter = 0) NL_OVERRIDE;
+	virtual void clean() NL_OVERRIDE;
+	virtual void build(uint16 version, uint filter = 0) NL_OVERRIDE;
+	virtual void disown() NL_OVERRIDE;
+	virtual void init() NL_OVERRIDE;
+	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "", uint filter = 0) const NL_OVERRIDE;
 
 	//! \name Sub-controller value at t=0
 	//! Resolve a reference slot to a typed keyframer and evaluate at tick 0
@@ -92,7 +92,7 @@ protected:
 	virtual bool isKnownChunkId(uint16 id) const = 0;
 
 	// inherited
-	virtual IStorageObject *createChunkById(uint16 id, bool container);
+	virtual IStorageObject *createChunkById(uint16 id, bool container) NL_OVERRIDE;
 
 private:
 	/// Chunks claimed off the orphan list head, in original file order; re-emitted verbatim.
@@ -115,7 +115,7 @@ class CControlPRS : public CControlTransformBase
 {
 public:
 	CControlPRS(CScene *scene);
-	virtual ~CControlPRS();
+	virtual ~CControlPRS() NL_OVERRIDE;
 
 	// class desc
 	static const ucstring DisplayName;
@@ -124,8 +124,8 @@ public:
 	static const TSClassId SuperClassId;
 
 	// inherited
-	virtual bool inherits(const NLMISC::CClassId classId) const;
-	virtual const ISceneClassDesc *classDesc() const;
+	virtual bool inherits(const NLMISC::CClassId classId) const NL_OVERRIDE;
+	virtual const ISceneClassDesc *classDesc() const NL_OVERRIDE;
 
 	//! \name Sub-controller slots (refs 0/1/2)
 	//@{
@@ -142,7 +142,7 @@ public:
 	//@}
 
 protected:
-	virtual bool isKnownChunkId(uint16 id) const;
+	virtual bool isKnownChunkId(uint16 id) const NL_OVERRIDE;
 
 }; /* class CControlPRS */
 
@@ -163,7 +163,7 @@ class CControlLookAt : public CControlTransformBase
 {
 public:
 	CControlLookAt(CScene *scene);
-	virtual ~CControlLookAt();
+	virtual ~CControlLookAt() NL_OVERRIDE;
 
 	// class desc
 	static const ucstring DisplayName;
@@ -172,8 +172,8 @@ public:
 	static const TSClassId SuperClassId;
 
 	// inherited
-	virtual bool inherits(const NLMISC::CClassId classId) const;
-	virtual const ISceneClassDesc *classDesc() const;
+	virtual bool inherits(const NLMISC::CClassId classId) const NL_OVERRIDE;
+	virtual const ISceneClassDesc *classDesc() const NL_OVERRIDE;
 
 	//! \name Sub-controller slots (refs 0/1/2/3)
 	//@{
@@ -192,7 +192,7 @@ public:
 	//@}
 
 protected:
-	virtual bool isKnownChunkId(uint16 id) const;
+	virtual bool isKnownChunkId(uint16 id) const NL_OVERRIDE;
 
 }; /* class CControlLookAt */
 

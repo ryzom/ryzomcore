@@ -64,7 +64,7 @@ using namespace AITYPES;
 
 class CCharacterBotChatBeginEndReceiver: public CCharacterBotChatBeginEnd
 {
-	virtual void callback (const std::string &name, NLNET::TServiceId id)
+	virtual void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE
 	{
 		// make sure bot chat start vector size is even
 		if (BotChatStart.size()&1)
@@ -99,7 +99,7 @@ class CCharacterBotChatBeginEndReceiver: public CCharacterBotChatBeginEnd
 
 class CCharacterDynChatBeginEndReceiver: public CCharacterDynChatBeginEnd
 {
-	virtual void callback (const std::string &name, NLNET::TServiceId id)
+	virtual void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE
 	{
 		// report to the npcs
 		for ( uint i=0; i!=DynChatStart.size(); ++i )
@@ -239,7 +239,7 @@ public:
 	CTaskRingGoLive1(uint32 aiInstance, bool isBase)
 		:_AiInstance(aiInstance), _IsBase(isBase){}
 
-	virtual void doOperation()
+	virtual void doOperation() NL_OVERRIDE
 	{
 		nldebug("Tick %u CTaskRingGoLive1 (Despawn) %u %u", getTime(), _AiInstance, _IsBase);
 			std::string actFilename = toString("r2.%04d.act.primitive", _AiInstance);
@@ -270,7 +270,7 @@ public:
 	CTaskRingGoLive2(TSessionId sessionId, uint32 aiInstance, bool isBase)
 		:_SessionId(sessionId), _AiInstance(aiInstance), _IsBase(isBase){}
 
-	virtual void doOperation()
+	virtual void doOperation() NL_OVERRIDE
 	{
 			
 		nldebug("Tick %u, CTaskRingGoLive2 (Spawn) session %u instance %u %u", getTime(), _SessionId.asInt(), _AiInstance, _IsBase);
@@ -362,7 +362,7 @@ public:
 	CTaskR2StopLive(uint32 aiInstance, bool isBase)
 		:_AiInstance(aiInstance), _IsBase(isBase){}
 
-	virtual void doOperation()
+	virtual void doOperation() NL_OVERRIDE
 	{
 		ICommand::execute(toString("createDynamicAIInstance %d", _AiInstance), *InfoLog);
 
@@ -411,7 +411,7 @@ public:
 	CTaskR2StartInstance(uint32 aiInstance)
 		:_AiInstance(aiInstance){}
 
-	virtual void doOperation()
+	virtual void doOperation() NL_OVERRIDE
 	{
 		// destroy the instance before exist
 		CAIS::instance().destroyAIInstance(_AiInstance, false);
@@ -578,7 +578,7 @@ void CMsgAIOpenMgrs::callback (const std::string &serviceName, uint8 sid)
 class CAITauntImp : public CAITauntMsg
 {
 public:
-	void	callback (const std::string &name, NLNET::TServiceId id);
+	void	callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 protected:
 private:
 };
@@ -586,14 +586,14 @@ private:
 class	CAIPlayerRespawnMsgImp : public CAIPlayerRespawnMsg
 {
 public:
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 class	CAIAskForInfosOnEntityImp
 		:public	CAIAskForInfosOnEntityMsg
 {
 public:
-	void callback (const std::string &name, NLNET::TServiceId id);
+	void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 
@@ -601,27 +601,27 @@ class CEnableAggroOnPlayerImp
 	:public	CEnableAggroOnPlayerMsg
 {
 public:
-	void callback (const std::string &name, NLNET::TServiceId id);
+	void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 class CSetBotHeadingImp : public CSetBotHeadingMsg
 {
 public:
-	void callback(const std::string &name, NLNET::TServiceId id);
+	void callback(const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 class CChangeActionFlagMsgImp
 :public	CChangeActionFlagMsg
 {
 public:
-	void callback (const std::string &name, NLNET::TServiceId id);
+	void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 class CChangeCreatureModeMsgImp
 :public	CChangeCreatureModeMsg
 {
 public:
-	void callback (const std::string &name, NLNET::TServiceId id);
+	void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 //-------------------------------------------------------------------------

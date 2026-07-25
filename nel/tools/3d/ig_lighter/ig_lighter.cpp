@@ -88,7 +88,7 @@ public:
 
 protected:
 	// Progress bar
-	virtual void progress (const char *message, float progress)
+	virtual void progress (const char *message, float progress) NL_OVERRIDE
 	{
 		displayProgress(message, progress);
 	}

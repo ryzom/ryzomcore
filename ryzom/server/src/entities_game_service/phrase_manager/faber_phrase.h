@@ -37,40 +37,40 @@ public:
 	CFaberPhrase();
 
 	/// dtor
-	virtual ~CFaberPhrase() { _Mps.clear(); _MpsFormula.clear(); if(_FaberAction) delete _FaberAction; }
+	virtual ~CFaberPhrase() NL_OVERRIDE { _Mps.clear(); _MpsFormula.clear(); if(_FaberAction) delete _FaberAction; }
 
 	/// \name Override methods from CSPhrase
 	//@{
-	virtual bool build( const TDataSetRow & actorRowId, const std::vector< const CStaticBrick* >& bricks, bool buildToExecute = true );
+	virtual bool build( const TDataSetRow & actorRowId, const std::vector< const CStaticBrick* >& bricks, bool buildToExecute = true ) NL_OVERRIDE;
 
 	/**
 	 * evaluate phrase
 	 * \return true if eval has been made without errors
 	 */
-	virtual bool evaluate();
+	virtual bool evaluate() NL_OVERRIDE;
 	
 	/**
 	 * validate phrase
 	 * \return true if phrase is valide
 	 */
-	virtual bool validate();
-	virtual bool update();
-	virtual void execute();
-	virtual bool launch();
-	virtual void apply();
+	virtual bool validate() NL_OVERRIDE;
+	virtual bool update() NL_OVERRIDE;
+	virtual void execute() NL_OVERRIDE;
+	virtual bool launch() NL_OVERRIDE;
+	virtual void apply() NL_OVERRIDE;
 	//@}
 	
 	
 	/**
 	 * called at the end of the latency time
 	 */
-	virtual void end();
+	virtual void end() NL_OVERRIDE;
 	//@}
 
 	/**
 	 * called when the action is interupted
 	 */
-	virtual void stop();
+	virtual void stop() NL_OVERRIDE;
 	//@}
 
 	///\unused basic methods from CSPhrase
@@ -78,7 +78,7 @@ public:
 	virtual void setPrimaryItem( CGameItemPtr itemPtr ){}
 	virtual void setSecondaryItem( CGameItemPtr itemPtr ){}
 	virtual void addConsumableItem( CGameItemPtr itemPtr ){}
-	virtual void setPrimaryTarget( const TDataSetRow& ) {}
+	virtual void setPrimaryTarget( const TDataSetRow& ) NL_OVERRIDE {}
 	//@}
 
 	// Craft methodes

@@ -51,7 +51,7 @@ public:
 	TDataSetRow			TargetRowId;
 	NLMISC::CSheetId	PhraseId;
 
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CEGSExecutePhraseMsg");
 		property ("actorRowId", PropDataSetRow, TDataSetRow(), ActorRowId);
@@ -59,7 +59,7 @@ public:
 		property ("phrase", PropSheetId, NLMISC::CSheetId::Unknown, PhraseId);
 	}
 
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 /**
@@ -89,7 +89,7 @@ public:
 	float				DamageCoef;
 	float				DamageSpeedCoef;
 
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CEGSExecuteAiActionMsg");
 		property ("actorRowId", PropDataSetRow, TDataSetRow(), ActorRowId);
@@ -99,7 +99,7 @@ public:
 		property ("damageSpeedCoef", PropFloat, 1.f, DamageSpeedCoef);
 	}
 
-	virtual void callback (const std::string &name, NLNET::TServiceId id) {}
+	virtual void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE {}
 };
 
 
@@ -122,7 +122,7 @@ public:
 	CEGSExecuteMsg() : Cyclic(false), Index(0xff)
 	{}
 
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CEGSExecuteMsg");
 		property ("actorRowId", PropDataSetRow, TDataSetRow(), ActorRowId);
@@ -132,7 +132,7 @@ public:
 		property ("index", PropUInt8, (uint8)0xff, Index);
 	}
 
-	virtual void callback (const std::string &name, NLNET::TServiceId id) {}
+	virtual void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE {}
 };
 
 
@@ -206,7 +206,7 @@ public:
 		ActionType.clear();		
 	}
 
-	virtual void description()
+	virtual void description() NL_OVERRIDE
 	{
 		className		("CBSAIEventReportMsg");
 		propertyCont	("Originator",		PropDataSetRow,	Originator		);
@@ -218,7 +218,7 @@ public:
 		propertyCont	("ActionType",		PropUInt8,	ActionType		);
 	}
 
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 /**
@@ -240,14 +240,14 @@ public:
 	{
 	}
 
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CBSAIDeathReport");
 		propertyCont ("Bots", PropDataSetRow, Bots);
 		propertyCont ("Killers", PropDataSetRow, Killers);
 		propertyVector ("Zombies", PropBool, Zombies);
 	}
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 #endif // RY_MSG_BRICK_SERVICE_H

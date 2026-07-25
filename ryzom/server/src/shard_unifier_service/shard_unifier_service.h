@@ -26,13 +26,13 @@ extern NLMISC::CVariable<uint32>	TotalConcurentUser;
 class CShardUnifier : public NLNET::IService
 {
 
-	void init();
+	void init() NL_OVERRIDE;
 
-	bool update();
+	bool update() NL_OVERRIDE;
 
-	void release();
+	void release() NL_OVERRIDE;
 
-	std::string		getServiceStatusString() const
+	std::string		getServiceStatusString() const NL_OVERRIDE
 	{
 		// add the TotalConcurentPlayer counter to the status string
 		NLMISC::CSString ret;

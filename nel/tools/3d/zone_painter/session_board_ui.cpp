@@ -686,7 +686,7 @@ void refreshBoardAfterSessionOp()
 class CAHZpCellClose : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		CWidgetManager::getInstance()->disableModalWindow();
@@ -711,7 +711,7 @@ REGISTER_ACTION_HANDLER(CAHZpCellClose, "zp_cell_close");
 class CAHZpCellSave : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		CWidgetManager::getInstance()->disableModalWindow();
@@ -733,7 +733,7 @@ REGISTER_ACTION_HANDLER(CAHZpCellSave, "zp_cell_save");
 class CAHZpCellSaveAs : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		CWidgetManager::getInstance()->disableModalWindow();
@@ -748,7 +748,7 @@ REGISTER_ACTION_HANDLER(CAHZpCellSaveAs, "zp_cell_save_as");
 class CAHZpCellToggle : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		CWidgetManager::getInstance()->disableModalWindow();
@@ -783,7 +783,7 @@ REGISTER_ACTION_HANDLER(CAHZpCellToggle, "zp_cell_toggle");
 class CAHZpCloseConfirmSave : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		CWidgetManager::getInstance()->disableModalWindow();
@@ -812,7 +812,7 @@ REGISTER_ACTION_HANDLER(CAHZpCloseConfirmSave, "zp_close_confirm_save");
 class CAHZpCloseConfirmDiscard : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		CWidgetManager::getInstance()->disableModalWindow();
@@ -841,7 +841,7 @@ REGISTER_ACTION_HANDLER(CAHZpCloseConfirmDiscard, "zp_close_confirm_discard");
 class CAHZpCloseConfirmCancel : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		CWidgetManager::getInstance()->disableModalWindow();
@@ -875,7 +875,7 @@ static bool scratchParsePending(int &cx, int &cy)
 class CAHZpInstRotCW : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		CWidgetManager::getInstance()->disableModalWindow();
@@ -893,7 +893,7 @@ REGISTER_ACTION_HANDLER(CAHZpInstRotCW, "zp_inst_rot_cw");
 class CAHZpInstRotCCW : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		CWidgetManager::getInstance()->disableModalWindow();
@@ -911,7 +911,7 @@ REGISTER_ACTION_HANDLER(CAHZpInstRotCCW, "zp_inst_rot_ccw");
 class CAHZpInstMirror : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		CWidgetManager::getInstance()->disableModalWindow();
@@ -929,7 +929,7 @@ REGISTER_ACTION_HANDLER(CAHZpInstMirror, "zp_inst_mirror");
 class CAHZpInstRemove : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		CWidgetManager::getInstance()->disableModalWindow();
@@ -1121,7 +1121,7 @@ static void openContextBrickPicker(int cx, int cy, int mode)
 class CAHZpEmptyPlaceInstance : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		CWidgetManager::getInstance()->disableModalWindow();
@@ -1151,7 +1151,7 @@ REGISTER_ACTION_HANDLER(CAHZpEmptyPlaceInstance, "zp_empty_place_instance");
 class CAHZpEmptyPlaceContext : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		CWidgetManager::getInstance()->disableModalWindow();
@@ -1168,7 +1168,7 @@ REGISTER_ACTION_HANDLER(CAHZpEmptyPlaceContext, "zp_empty_place_context");
 class CAHZpEmptyOpenEditable : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		CWidgetManager::getInstance()->disableModalWindow();
@@ -1210,7 +1210,7 @@ static void zpEmptyOpenHint(bool editable)
 class CAHZpEmptyHintRo : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		zpEmptyOpenHint(false);
@@ -1221,7 +1221,7 @@ REGISTER_ACTION_HANDLER(CAHZpEmptyHintRo, "zp_empty_hint_ro");
 class CAHZpEmptyHintEd : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		zpEmptyOpenHint(true);
@@ -1232,7 +1232,7 @@ REGISTER_ACTION_HANDLER(CAHZpEmptyHintEd, "zp_empty_hint_ed");
 class CAHZpContextRemove : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		CWidgetManager::getInstance()->disableModalWindow();
@@ -1264,7 +1264,7 @@ REGISTER_ACTION_HANDLER(CAHZpContextRemove, "zp_context_remove");
 class CAHZpContextMakeEditable : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		CWidgetManager::getInstance()->disableModalWindow();
@@ -1326,7 +1326,7 @@ static void zpContextTransformAction(int rotDelta, bool mirror)
 class CAHZpContextRotCW : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		zpContextTransformAction(+1, false);
@@ -1337,7 +1337,7 @@ REGISTER_ACTION_HANDLER(CAHZpContextRotCW, "zp_context_rot_cw");
 class CAHZpContextRotCCW : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		zpContextTransformAction(-1, false);
@@ -1348,7 +1348,7 @@ REGISTER_ACTION_HANDLER(CAHZpContextRotCCW, "zp_context_rot_ccw");
 class CAHZpContextMirror : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		zpContextTransformAction(0, true);
@@ -1359,7 +1359,7 @@ REGISTER_ACTION_HANDLER(CAHZpContextMirror, "zp_context_mirror");
 class CAHZpContextPick : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		CWidgetManager::getInstance()->disableModalWindow();
@@ -1404,7 +1404,7 @@ REGISTER_ACTION_HANDLER(CAHZpContextPick, "zp_context_pick");
 class CAHZpContextPickerCancel : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		CWidgetManager::getInstance()->disableModalWindow();

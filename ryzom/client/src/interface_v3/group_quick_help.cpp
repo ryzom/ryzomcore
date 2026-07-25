@@ -415,7 +415,7 @@ bool CGroupQuickHelp::evalExpression (const std::string &condition)
  */
 class CHandlerSubmitQuickHelp : public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		CInterfaceElement *element = CWidgetManager::getInstance()->getElementFromId("ui:interface:quick_help:content:html");
 		if (element)
@@ -449,7 +449,7 @@ REGISTER_ACTION_HANDLER( CHandlerSubmitQuickHelp, "submit_quick_help");
  */
 class CHandlerRunQuickHelp : public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 

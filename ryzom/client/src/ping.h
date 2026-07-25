@@ -42,7 +42,7 @@ public:
 	// Constructor.
 	CPing() {_Ping = 0; _RdyToPing = true;}
 	// Destructor.
-	~CPing() {;}
+	~CPing() NL_OVERRIDE {;}
 
 	// Add an observer on the database for the ping.
 	void init();
@@ -51,7 +51,7 @@ public:
 	void release();
 
 	// Method called when the ping message is back.
-	virtual void update(NLMISC::ICDBNode* node);
+	virtual void update(NLMISC::ICDBNode* node) NL_OVERRIDE;
 
 	// return the ping in ms.
 	uint32 getValue() {return _Ping;}

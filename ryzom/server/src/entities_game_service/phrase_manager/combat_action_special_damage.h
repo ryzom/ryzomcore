@@ -50,10 +50,10 @@ public:
 	}
 
 	/// validate the combat action
-	virtual bool validate(CCombatPhrase *phrase, std::string &errorCode) { return true; }
+	virtual bool validate(CCombatPhrase *phrase, std::string &errorCode) NL_OVERRIDE { return true; }
 
 	/// apply combat action effects
-	virtual void apply(CCombatPhrase *phrase);
+	virtual void apply(CCombatPhrase *phrase) NL_OVERRIDE;
 
 private:
 	/// apply combat action effects on target

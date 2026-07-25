@@ -24,7 +24,7 @@ class CR2LigoConfig : public NLLIGO::CLigoConfig
 public:
 	enum TScenarioType {Base, Act, Event};
 public:
-	virtual uint32 getFileStaticAliasMapping(const std::string &fileName) const;
+	virtual uint32 getFileStaticAliasMapping(const std::string &fileName) const NL_OVERRIDE;
 
 	uint32 getStaticAliasMapping(uint32 aiInstance, TScenarioType type) const;
 

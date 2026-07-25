@@ -39,9 +39,9 @@ public:
 	~CMeshCameraColManager();
 
 private:
-	virtual void instanceGroupLoaded(NL3D::UInstanceGroup *ig);
-	virtual void instanceGroupAdded(NL3D::UInstanceGroup *ig);
-	virtual void instanceGroupRemoved(NL3D::UInstanceGroup *ig);
+	virtual void instanceGroupLoaded(NL3D::UInstanceGroup *ig) NL_OVERRIDE;
+	virtual void instanceGroupAdded(NL3D::UInstanceGroup *ig) NL_OVERRIDE;
+	virtual void instanceGroupRemoved(NL3D::UInstanceGroup *ig) NL_OVERRIDE;
 
 	// A collection of collision mesh
 	class CMeshGroup

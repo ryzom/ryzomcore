@@ -43,7 +43,7 @@ public:
 	inline bool					nullable() const {return _Nullable;}
 
 	/// The overridden version that is usable from ICDBStructNode
-	virtual EPropType			getType() const		{return _Type;}
+	virtual EPropType			getType() const NL_OVERRIDE		{return _Type;}
 
 
 	/// Set the property Type.
@@ -58,41 +58,41 @@ public:
 	 *	Build the structure of the database from a file
 	 * \param f is the stream
 	 */
-	void init( xmlNode *node, NLMISC::IProgressCallback &progressCallBack );
+	void init( xmlNode *node, NLMISC::IProgressCallback &progressCallBack ) NL_OVERRIDE;
 
 	/**
 	 * Get a node
 	 * \param ids is the list of property index
 	 * \param idx is the property index of the current node(updated by the method)
 	 */
-	ICDBStructNode * getNode( std::vector<uint16>& ids, uint idx );
+	ICDBStructNode * getNode( std::vector<uint16>& ids, uint idx ) NL_OVERRIDE;
 
 	/**
 	 * Get a node
 	 * \param idx is the node index
 	 */
-	ICDBStructNode * getNode( uint16 idx );
+	ICDBStructNode * getNode( uint16 idx ) NL_OVERRIDE;
 
 	/**
 	 * Get a node . Create it if it does not exist yet
 	 * \param id : the CTextId identifying the node
 	 */
-	ICDBStructNode * getNode( const CTextId& id, bool bCreate=true ) ;
+	ICDBStructNode * getNode( const CTextId& id, bool bCreate=true ) NL_OVERRIDE ;
 
 	/**
 	 * Get a node index
 	 * \param node is a pointer to the node
 	 */
-	bool getNodeIndex( ICDBStructNode* node , uint& index) const
+	bool getNodeIndex( ICDBStructNode* node , uint& index) const NL_OVERRIDE
 	{
 		return false;
 	}
 
 	// the parent node for a branch (NULL by default)
-	void setParent(CCDBStructNodeBranch* parent) { _Parent=parent; }
+	void setParent(CCDBStructNodeBranch* parent) NL_OVERRIDE { _Parent=parent; }
 
 	// Get the node parent
-	virtual CCDBStructNodeBranch* getParent()
+	virtual CCDBStructNodeBranch* getParent() NL_OVERRIDE
 	{
 		return _Parent;
 	}
@@ -101,7 +101,7 @@ public:
 	const CCDBStructNodeBranch *getParent() const	{ return _Parent; }
 
 	// get the node name
-	const std::string * getName()
+	const std::string * getName() NL_OVERRIDE
 	{
 		if (_Parent == NULL) return NULL;
 		for (uint16 i = 0; i < _Parent->getNbNodes() ;i++)
@@ -114,7 +114,7 @@ public:
 	 * Browse the tree, building the text id, and for each leaf encountered, call the callback
 	 * passing the argument provided, the index and the text id.
 	 */
-	void			foreachLeafCall( void (*callback)(void*,TCDBDataIndex,CTextId*), CTextId& id, void *arg )
+	void			foreachLeafCall( void (*callback)(void*,TCDBDataIndex,CTextId*), CTextId& id, void *arg ) NL_OVERRIDE
 	{
 		callback( arg, _DataIndex, &id );
 	}
@@ -123,7 +123,7 @@ public:
 	 * Browse the tree, and for each leaf encountered, call the callback
 	 * passing the argument provided and the leaf, and post-incrementing the counter
 	 */
-	void			foreachLeafCall( void (*callback)(void*,CCDBStructNodeLeaf*,uint&), uint& counter, void *arg )
+	void			foreachLeafCall( void (*callback)(void*,CCDBStructNodeLeaf*,uint&), uint& counter, void *arg ) NL_OVERRIDE
 	{
 		callback( arg, this, counter );
 		++counter;
@@ -132,7 +132,7 @@ public:
 	/**
 	 * Return the first leaf found, and set the number of indirections in siblingLevel
 	 */
-	const CCDBStructNodeLeaf *findFirstLeaf( uint& siblingLevel ) const
+	const CCDBStructNodeLeaf *findFirstLeaf( uint& siblingLevel ) const NL_OVERRIDE
 	{
 		return this;
 	}
@@ -140,7 +140,7 @@ public:
 	/**
 	 * Return the data index corresponding to a text id (from the root)
 	 */
-	TCDBDataIndex	findDataIndex( ICDBStructNode::CTextId& id ) const
+	TCDBDataIndex	findDataIndex( ICDBStructNode::CTextId& id ) const NL_OVERRIDE
 	{
 #ifdef NL_DEBUG
 		nlassert( id.getCurrentIndex() == id.size() ); // assert that there are no lines left in the textid
@@ -152,7 +152,7 @@ public:
 	 * Set the data index into the leaves. The passed index is incremented for each leaf leaf or atomic branch.
 	 * The "returned" value of index is the number of indices set.
 	 */
-	void			initDataIndex( TCDBDataIndex& index )
+	void			initDataIndex( TCDBDataIndex& index ) NL_OVERRIDE
 	{
 		_DataIndex = index;
 		checkIfNotMaxIndex();
@@ -162,14 +162,14 @@ public:
 	/**
 	 * For each different index (leaf of atomic branch), call the callback. Sets the id in leaves.
 	 */
-	void			initIdAndCallForEachIndex( CBinId& id, void (*callback)(ICDBStructNode*, void*), void *arg )
+	void			initIdAndCallForEachIndex( CBinId& id, void (*callback)(ICDBStructNode*, void*), void *arg ) NL_OVERRIDE
 	{
 		callback( this, arg );
 		_LeafId = id;
 	}
 
 	/// Move the siblings that match the bank name to the destination tree
-	void			moveBranchesToBank( CCDBStructNodeBranch *destRoot, TCDBBank bank );
+	void			moveBranchesToBank( CCDBStructNodeBranch *destRoot, TCDBBank bank ) NL_OVERRIDE;
 
 	/// Return the binary leaf id
 	const CBinId&	binLeafId() const { return _LeafId; }

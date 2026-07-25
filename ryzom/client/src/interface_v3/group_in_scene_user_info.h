@@ -39,7 +39,7 @@ public:
 	DECLARE_UI_CLASS(CGroupInSceneUserInfo)
 	// Constructor
 	CGroupInSceneUserInfo(const TCtorParam &param);
-	~CGroupInSceneUserInfo();
+	~CGroupInSceneUserInfo() NL_OVERRIDE;
 
 	// Build the bar
 	// You must rebuild if guild or title change
@@ -60,7 +60,7 @@ public:
 	bool	needGuildSymbolId() const {return _NeedGuildSymbolId;}
 	bool	isLeftGroupActive() const {return _IsLeftGroupActive;}
 
-	virtual void serial(NLMISC::IStream &f);
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 protected:
 

@@ -12,7 +12,7 @@ public:
 	class CTimerTestTimerEvent:public CTimerEvent
 	{
 	public:
-		void timerCallback(CTimer* owner)
+		void timerCallback(CTimer* owner) NL_OVERRIDE
 		{
 			nlinfo("tick!");
 			// repeat every 20 ticks
@@ -20,7 +20,7 @@ public:
 		}
 	};
 
-	void init()
+	void init() NL_OVERRIDE
 	{
 		_Timer.setRemaining(20,new CTimerTestTimerEvent);
 	}

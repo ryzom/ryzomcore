@@ -1003,7 +1003,7 @@ CInterfaceDDX *CDDXManager::getFromParent(const std::string &ddxParentName)
 class CHandlerDDXUpdate : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		CDDXManager *pDM = CDDXManager::getInstance();
 		CInterfaceDDX *pDDX = pDM->get(sParams);
@@ -1019,7 +1019,7 @@ REGISTER_ACTION_HANDLER( CHandlerDDXUpdate, "ddx_update");
 class CHandlerDDXInit : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		CDDXManager *pDM = CDDXManager::getInstance();
 		CInterfaceDDX *pDDX = pDM->get(sParams);
@@ -1035,7 +1035,7 @@ REGISTER_ACTION_HANDLER( CHandlerDDXInit, "ddx_init");
 class CHandlerDDXCancel : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		CDDXManager *pDM = CDDXManager::getInstance();
 		CInterfaceDDX *pDDX = pDM->get(sParams);
@@ -1050,7 +1050,7 @@ REGISTER_ACTION_HANDLER( CHandlerDDXCancel, "ddx_cancel");
 class CHandlerDDXScroll : public IActionHandler
 {
 public:
-	void execute (CCtrlBase *pCaller, const std::string &sParams)
+	void execute (CCtrlBase *pCaller, const std::string &sParams) NL_OVERRIDE
 	{
 		CDDXManager *pDM = CDDXManager::getInstance();
 		CInterfaceDDX *pDDX = pDM->get(sParams);
@@ -1065,7 +1065,7 @@ REGISTER_ACTION_HANDLER( CHandlerDDXScroll, "ddx_scroll");
 class CHandlerDDXScrollEnd : public IActionHandler
 {
 public:
-	void execute (CCtrlBase *pCaller, const std::string &sParams)
+	void execute (CCtrlBase *pCaller, const std::string &sParams) NL_OVERRIDE
 	{
 		CDDXManager *pDM = CDDXManager::getInstance();
 		CInterfaceDDX *pDDX = pDM->get(sParams);
@@ -1081,7 +1081,7 @@ REGISTER_ACTION_HANDLER( CHandlerDDXScrollEnd, "ddx_scroll_end");
 class CHandlerDDXColor : public IActionHandler
 {
 public:
-	void execute (CCtrlBase *pCaller, const std::string &/* sParams */)
+	void execute (CCtrlBase *pCaller, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CDDXManager *pDM = CDDXManager::getInstance();
 		if (pCaller == NULL) return;
@@ -1111,7 +1111,7 @@ REGISTER_ACTION_HANDLER( CHandlerDDXColor , "ddx_color");
 class CHandlerDDXBoolButton : public IActionHandler
 {
 public:
-	void execute (CCtrlBase *pCaller, const std::string &/* sParams */)
+	void execute (CCtrlBase *pCaller, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CDDXManager *pDM = CDDXManager::getInstance();
 		if (pCaller == NULL) return;

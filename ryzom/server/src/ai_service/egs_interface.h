@@ -42,27 +42,27 @@ public:
 
 class CAddHandledAIGroupImp : public CAddHandledAIGroupMsg
 {
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 class CDelHandledAIGroupImp : public CDelHandledAIGroupMsg
 {
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 class CCreatureDespawnImp : public CCreatureDespawnMsg
 {
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 class CUserEventMsgImp : public CUserEventMsg
 {	
-	void callback (const std::string &name, NLNET::TServiceId id);
+	void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 class CSetEscortTeamIdImp : public CSetEscortTeamId
 {
-	void callback (const std::string &name, NLNET::TServiceId id);
+	void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 

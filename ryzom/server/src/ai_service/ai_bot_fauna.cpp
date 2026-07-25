@@ -105,9 +105,9 @@ class CBotProfileGoAway
 public:
 	CBotProfileGoAway(CProfileOwner* owner, RYAI_MAP_CRUNCH::TAStarFlag denyFlags, float speed = 0.f, CAIFaunaActivityBaseSpawnProfile* lastProfile = NULL);
 	
-	virtual void beginProfile();
+	virtual void beginProfile() NL_OVERRIDE;
 	
-	virtual void endProfile() { }
+	virtual void endProfile() NL_OVERRIDE { }
 	
 	// Speed is in the range [0;1]
 	void setSpeed(float speed) { _Speed = speed; }
@@ -118,11 +118,11 @@ public:
 	
 	CAIFaunaActivityBaseSpawnProfile* lastProfile()	const { return _LastProfile; }
 	
-	virtual void updateProfile(uint ticksSinceLastUpdate);
+	virtual void updateProfile(uint ticksSinceLastUpdate) NL_OVERRIDE;
 	
-	virtual std::string getOneLineInfoString() const { return std::string("go_away profile"); }
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE { return std::string("go_away profile"); }
 	
-	virtual	TProfiles getAIProfileType () const { return BOT_GO_AWAY; }
+	virtual	TProfiles getAIProfileType () const NL_OVERRIDE { return BOT_GO_AWAY; }
 	
 public:
 	RYAI_MAP_CRUNCH::CDirection		_LastDir;
@@ -146,7 +146,7 @@ class CBotProfileGoAwayFactory
 : public IAIProfileFactory
 {
 public:
-	NLMISC::CSmartPtr<IAIProfile> createAIProfile(CProfileOwner* owner);
+	NLMISC::CSmartPtr<IAIProfile> createAIProfile(CProfileOwner* owner) NL_OVERRIDE;
 };
 
 CBotProfileGoAwayFactory BotProfileGoAway;

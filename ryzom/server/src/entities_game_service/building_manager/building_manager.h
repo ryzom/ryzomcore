@@ -239,7 +239,7 @@ public:
 	CTriggerRequestTimoutEvent( const TDataSetRow & userRow )
 		:_UserRow( userRow ){}
 	
-	void timerCallback(CTimer* owner)
+	void timerCallback(CTimer* owner) NL_OVERRIDE
 	{
 		H_AUTO(CTriggerRequestTimoutEvent);
 

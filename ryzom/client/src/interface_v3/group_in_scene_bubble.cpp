@@ -1296,7 +1296,7 @@ void CGroupInSceneBubbleManager::CDynBubble::skip()
 
 class CAHDynChatClickOption : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &Params)
+	virtual void execute (CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
 	{
 		if (pCaller == NULL) return;
 		// Get the bot UID
@@ -1510,7 +1510,7 @@ void CGroupInSceneBubble::displayNextAndSkip(bool show)
 
 class CHandlerBubbleNext : public IActionHandler
 {
-	void execute (CCtrlBase *pCaller, const std::string &/* sParams */)
+	void execute (CCtrlBase *pCaller, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		// Find the bubble containing the caller
 		if (pCaller == NULL) return;
@@ -1544,7 +1544,7 @@ REGISTER_ACTION_HANDLER( CHandlerBubbleNext, "bubble_next");
 
 class CHandlerBubbleSkip : public IActionHandler
 {
-	void execute (CCtrlBase *pCaller, const std::string &/* sParams */)
+	void execute (CCtrlBase *pCaller, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		// Find the bubble containing the caller
 		if (pCaller == NULL) return;
@@ -1578,7 +1578,7 @@ REGISTER_ACTION_HANDLER( CHandlerBubbleSkip, "bubble_skip");
 
 class CHandlerCharacterBubble : public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		uint entityId;
@@ -1602,7 +1602,7 @@ REGISTER_ACTION_HANDLER( CHandlerCharacterBubble, "character_bubble");
 
 class CHandlerSkillPopup : public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		// User Skill Up
 		UserEntity->skillUp();
@@ -1628,7 +1628,7 @@ REGISTER_ACTION_HANDLER( CHandlerSkillPopup, "skill_popup");
 
 class CHandlerMessagePopup : public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		string text0 = getParam (sParams, "text0");
@@ -1650,7 +1650,7 @@ REGISTER_ACTION_HANDLER( CHandlerMessagePopup, "message_popup");
 
 class CHandlerContextHelp : public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
@@ -1669,7 +1669,7 @@ REGISTER_ACTION_HANDLER( CHandlerContextHelp, "context_help");
 
 class CHandlerContextHelpHTML : public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		contextHelp (sParams);
 	}
@@ -1680,7 +1680,7 @@ REGISTER_ACTION_HANDLER( CHandlerContextHelpHTML, "context_help_html");
 
 class CHandlerContextHelpIgnore : public IActionHandler
 {
-	void execute (CCtrlBase *pCaller, const std::string &/* sParams */)
+	void execute (CCtrlBase *pCaller, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		if (pCaller)
 		{

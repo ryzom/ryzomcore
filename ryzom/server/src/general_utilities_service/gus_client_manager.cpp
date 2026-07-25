@@ -49,30 +49,30 @@ namespace GUS
 		CClientManagerImplementation();
 
 		// Mirror callback overload
-		void mirrorIsReady(CGusMirror *mirrorModule);
-		void entityAdded(CGusMirror *mirrorModule, CMirroredDataSet *dataSet, const TDataSetRow &entityIndex);
-		void entityRemoved(CGusMirror *mirrorModule, CMirroredDataSet *dataSet, const TDataSetRow &entityIndex, const NLMISC::CEntityId *entityId);
-		void propertyChanged(CGusMirror *mirrorModule, CMirroredDataSet *dataSet, const TDataSetRow &entityIndex, TPropertyIndex propIndex);
+		void mirrorIsReady(CGusMirror *mirrorModule) NL_OVERRIDE;
+		void entityAdded(CGusMirror *mirrorModule, CMirroredDataSet *dataSet, const TDataSetRow &entityIndex) NL_OVERRIDE;
+		void entityRemoved(CGusMirror *mirrorModule, CMirroredDataSet *dataSet, const TDataSetRow &entityIndex, const NLMISC::CEntityId *entityId) NL_OVERRIDE;
+		void propertyChanged(CGusMirror *mirrorModule, CMirroredDataSet *dataSet, const TDataSetRow &entityIndex, TPropertyIndex propIndex) NL_OVERRIDE;
 
 	public:
 		// virtual dtor
-		virtual ~CClientManagerImplementation();
+		virtual ~CClientManagerImplementation() NL_OVERRIDE;
 
 		// get singleton instance
 		static CClientManagerImplementation* getInstance();
 
 		// Specialisation of CServiceSingleton
-		void init();
+		void init() NL_OVERRIDE;
 
 	public:
 		// CClientManager API
-		void setConnectionCallback(TConnectionHandlerPtr callback);
-		const NLMISC::CSString& getCharacterName(TClientId clientId) const;
-		const NLMISC::CEntityId& getEntityId(TClientId clientId) const;
+		void setConnectionCallback(TConnectionHandlerPtr callback) NL_OVERRIDE;
+		const NLMISC::CSString& getCharacterName(TClientId clientId) const NL_OVERRIDE;
+		const NLMISC::CEntityId& getEntityId(TClientId clientId) const NL_OVERRIDE;
 
-		TClientId getClientId(const NLMISC::CSString&) const;
-		TClientId getClientId(const CCharacterId& id) const;
-		TClientId getClientIdFromAccount(uint32 accountId) const;
+		TClientId getClientId(const NLMISC::CSString&) const NL_OVERRIDE;
+		TClientId getClientId(const CCharacterId& id) const NL_OVERRIDE;
+		TClientId getClientIdFromAccount(uint32 accountId) const NL_OVERRIDE;
 
 		static void		cbRecvString( CMessage& msgin, const string &serviceName, NLNET::TServiceId serviceId );
 

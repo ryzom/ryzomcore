@@ -40,7 +40,7 @@ public:
 	CExchangeView();
 
 	/// dtor
-	virtual ~CExchangeView();
+	virtual ~CExchangeView() NL_OVERRIDE;
 
 	/// clear exchange view
 	void clearExchangeView();
@@ -52,10 +52,10 @@ public:
 	CExchangeView * getInterlocutorView() { return _InterlocutorView; }
 
 	/// the following events are ignored
-	virtual void onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags changeFlags) {}
-	virtual void onInventoryChanged(INVENTORIES::TInventoryChangeFlags changeFlags) {}
-	virtual void onItemStackSizeChanged(uint32 slot, uint32 previousStackSize) {}
-	virtual void forceSlotUpdate(uint32 slot) {}
+	virtual void onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags changeFlags) NL_OVERRIDE {}
+	virtual void onInventoryChanged(INVENTORIES::TInventoryChangeFlags changeFlags) NL_OVERRIDE {}
+	virtual void onItemStackSizeChanged(uint32 slot, uint32 previousStackSize) NL_OVERRIDE {}
+	virtual void forceSlotUpdate(uint32 slot) NL_OVERRIDE {}
 
 	/// put an item in exchange
 	bool putItemInExchange(uint32 bagSlot, uint32 exchangeSlot, uint32 quantity);

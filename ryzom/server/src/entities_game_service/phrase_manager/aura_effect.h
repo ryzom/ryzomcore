@@ -58,10 +58,10 @@ public:
 	/**
 	 * apply the effects of the... effect
 	 */
-	virtual bool update(CTimerEvent * event, bool applyEffect);
+	virtual bool update(CTimerEvent * event, bool applyEffect) NL_OVERRIDE;
 
 	/// callback called when the effect is actually removed
-	virtual void removed();
+	virtual void removed() NL_OVERRIDE;
 
 	inline POWERS::TPowerType powerType() const { return _PowerType; }
 	inline EFFECT_FAMILIES::TEffectFamily createdEffectFamily() const { return _CreatedEffectFamily; }
@@ -124,10 +124,10 @@ public:
 	/**
 	 * apply the effects of the... effect
 	 */
-	virtual bool update(CTimerEvent * event, bool applyEffect) { return false; }
+	virtual bool update(CTimerEvent * event, bool applyEffect) NL_OVERRIDE { return false; }
 
 	/// callback called when the effect is actually removed
-	virtual void removed();
+	virtual void removed() NL_OVERRIDE;
 
 	/// add lifetime to this aura (add enough to keep it till next RootAuraEffect update)
 	void addLifeTime();
@@ -226,7 +226,7 @@ public:
 	};
 
 	/// buildEffect method
-	CAuraBaseEffect * buildEffect( const CAuraRootEffect &rootEffect, TDataSetRow targetRowId )
+	CAuraBaseEffect * buildEffect( const CAuraRootEffect &rootEffect, TDataSetRow targetRowId ) NL_OVERRIDE
 	{
 		T *instance = new T(rootEffect, targetRowId);
 		if (!instance)

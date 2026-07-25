@@ -109,10 +109,10 @@ public:
 	CFEReceiveTask( uint16 firstAcceptablePort, uint16 lastAcceptablePort, uint32 msgsize );
 
 	/// Destructor
-	~CFEReceiveTask();
+	~CFEReceiveTask() NL_OVERRIDE;
 
 	/// Run
-	virtual void	run();
+	virtual void	run() NL_OVERRIDE;
 
 	/// Set new write queue (thread-safe because mutexed)
 	NLMISC::CBufFIFO *swapWriteQueue(NLMISC::CBufFIFO *writeQueue);

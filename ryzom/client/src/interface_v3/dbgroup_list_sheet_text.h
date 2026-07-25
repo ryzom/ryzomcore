@@ -56,31 +56,31 @@ public:
 
 	/// Constructor
 	CDBGroupListSheetText(const TCtorParam &param);
-	virtual	~CDBGroupListSheetText();	// AJM: make base class destructors virtual to avoid memory leaks!
+	virtual	~CDBGroupListSheetText() NL_OVERRIDE;	// AJM: make base class destructors virtual to avoid memory leaks!
 
-	virtual uint getNbSheet() const { return (uint)_SheetChildren.size(); }
+	virtual uint getNbSheet() const NL_OVERRIDE { return (uint)_SheetChildren.size(); }
 
 	/// CInterfaceGroup Interface
-	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
-	virtual void updateCoords ();
-	virtual void checkCoords ();
-	virtual void draw ();
-	virtual void clearViews ();
-	virtual bool handleEvent (const NLGUI::CEventDescriptor &eventDesc);
+	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup) NL_OVERRIDE;
+	virtual void updateCoords () NL_OVERRIDE;
+	virtual void checkCoords () NL_OVERRIDE;
+	virtual void draw () NL_OVERRIDE;
+	virtual void clearViews () NL_OVERRIDE;
+	virtual bool handleEvent (const NLGUI::CEventDescriptor &eventDesc) NL_OVERRIDE;
 
 	/// \name IListSheetBase implementation
 	// @{
 	// Get the index of a sheet inserted in this list. Returns -1 if it is not an index of that list
-	virtual	sint			getIndexOf(const CDBCtrlSheet *sheet) const;
+	virtual	sint			getIndexOf(const CDBCtrlSheet *sheet) const NL_OVERRIDE;
 
 	// get a sheet by its index
-	virtual	CDBCtrlSheet	*getSheet(uint index) const;
+	virtual	CDBCtrlSheet	*getSheet(uint index) const NL_OVERRIDE;
 	// Get the number of active elements
-	virtual	sint32			getNbElt () const;
+	virtual	sint32			getNbElt () const NL_OVERRIDE;
 	// Get the scroll bar
-	virtual	CCtrlScroll		*getScrollBar() const { return	_ScrollBar; }
+	virtual	CCtrlScroll		*getScrollBar() const NL_OVERRIDE { return	_ScrollBar; }
 	// get Db Branch name
-	virtual const std::string &getDbBranchName() const {return _DbBranchName;}
+	virtual const std::string &getDbBranchName() const NL_OVERRIDE {return _DbBranchName;}
 	// @}
 
 	// unselect any pushed button
@@ -219,7 +219,7 @@ protected:
 	{
 	public:
 		CDBGroupListSheetText	*Owner;
-		virtual void update(NLMISC::ICDBNode* /* node */)	{Owner->_BranchModified= true;}
+		virtual void update(NLMISC::ICDBNode* /* node */) NL_OVERRIDE	{Owner->_BranchModified= true;}
 	};
 	friend class CDBObs;
 	CDBObs						_DbBranchObs;

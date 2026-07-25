@@ -54,7 +54,7 @@ public:
 		sendRawMessage(bms);
 	}
 
-	~CFEClientRoute()
+	~CFEClientRoute() NL_OVERRIDE
 	{
 		// warn the server that the transport is closed
 		CBitMemStream bms;
@@ -64,7 +64,7 @@ public:
 	}
 
 
-	void sendMessage(const CMessage &message) const
+	void sendMessage(const CMessage &message) const NL_OVERRIDE
 	{
 		// wrap the message in a transport message
 		CBitMemStream wrapper;
@@ -150,7 +150,7 @@ public:
 #endif
 	}
 
-	~CGatewayFEClientTransport()
+	~CGatewayFEClientTransport() NL_OVERRIDE
 	{
 #if !defined(RZ_CLIENT_DRONE)
 		if (OpenTransport() == this)
@@ -164,22 +164,22 @@ public:
 #endif
 	}
 
-	const std::string &getClassName() const
+	const std::string &getClassName() const NL_OVERRIDE
 	{
 		static string className(FE_CLIENT_CLASS_NAME);
 		return className;
 	}
 
-	virtual void update()
+	virtual void update() NL_OVERRIDE
 	{
 	}
 
-	virtual uint32 getRouteCount() const
+	virtual uint32 getRouteCount() const NL_OVERRIDE
 	{
 		return _Route != NULL ? 1 : 0;
 	}
 
-	void dump(NLMISC::CLog &log) const
+	void dump(NLMISC::CLog &log) const NL_OVERRIDE
 	{
 		IModuleManager &mm = IModuleManager::getInstance();
 		log.displayNL("  Frontend service transport, client part");
@@ -216,13 +216,13 @@ public:
 		}
 	}
 
-	void onCommand(const CMessage &/* command */)
+	void onCommand(const CMessage &/* command */) NL_OVERRIDE
 	{
 		// nothing done for now
 		throw EInvalidCommand();
 	}
 	/// The gateway send a textual command to the transport
-	bool onCommand(const TParsedCommandLine &command)
+	bool onCommand(const TParsedCommandLine &command) NL_OVERRIDE
 	{
 		if (command.SubParams.size() < 1)
 			throw  EInvalidCommand();

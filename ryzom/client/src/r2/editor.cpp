@@ -185,20 +185,20 @@ class CDynamicMapClientEventForwarder : public CDynamicMapClient
 {
 public:
 	CDynamicMapClientEventForwarder(const std::string &eid, NLNET::IModuleSocket * clientGateway, lua_State *luaState);
-	virtual void nodeErased(const std::string& instanceId, const std::string& attrName, sint32 position);
-	virtual void nodeSet(const std::string& instanceId, const std::string& attrName, CObject* value);
+	virtual void nodeErased(const std::string& instanceId, const std::string& attrName, sint32 position) NL_OVERRIDE;
+	virtual void nodeSet(const std::string& instanceId, const std::string& attrName, CObject* value) NL_OVERRIDE;
 	virtual void nodeInserted(const std::string& instanceId, const std::string& attrName, sint32 position,
-							  const std::string& key, CObject* value);
+							  const std::string& key, CObject* value) NL_OVERRIDE;
 	virtual void nodeMoved(const std::string& instanceId, const std::string& attrName, sint32 position,
-							const std::string& destInstanceId, const std::string& destAttrName, sint32 destPosition);
-	virtual void scenarioUpdated(CObject* highLevel, bool willTP, uint32 initialActIndex);
+							const std::string& destInstanceId, const std::string& destAttrName, sint32 destPosition) NL_OVERRIDE;
+	virtual void scenarioUpdated(CObject* highLevel, bool willTP, uint32 initialActIndex) NL_OVERRIDE;
 
-	virtual void onAnimationModeConnected(const CClientMessageAdventureUserConnection& connected);
-	virtual void onEditionModeConnected( uint32 userSlotId, uint32 adventureId, CObject* highLevel, const std::string& versionName, bool willTP, uint32 initialActIndex);
-	virtual void onEditionModeDisconnected();
-	virtual void onResetEditionMode();
-	virtual void onTestModeConnected();
-	virtual void onTestModeDisconnected(TSessionId sessionId, uint32 lasAct, TScenarioSessionType sessionType);
+	virtual void onAnimationModeConnected(const CClientMessageAdventureUserConnection& connected) NL_OVERRIDE;
+	virtual void onEditionModeConnected( uint32 userSlotId, uint32 adventureId, CObject* highLevel, const std::string& versionName, bool willTP, uint32 initialActIndex) NL_OVERRIDE;
+	virtual void onEditionModeDisconnected() NL_OVERRIDE;
+	virtual void onResetEditionMode() NL_OVERRIDE;
+	virtual void onTestModeConnected() NL_OVERRIDE;
+	virtual void onTestModeDisconnected(TSessionId sessionId, uint32 lasAct, TScenarioSessionType sessionType) NL_OVERRIDE;
 };
 
 
@@ -1896,16 +1896,16 @@ class CInstanceObserverLua : public CEditor::IInstanceObserver
 {
 public:
 	CInstanceObserverLua(CLuaObject &receiver);
-	~CInstanceObserverLua();
+	~CInstanceObserverLua() NL_OVERRIDE;
 	CLuaObject &getReceiver() { return _Receiver; }
 	// from IInstanceObserver
-	virtual void onInstanceCreated(CInstance &instance);
-	virtual void onInstanceErased(CInstance &instance);
-	virtual void onInstancePreHrcMove(CInstance &instance);
-	virtual void onInstancePostHrcMove(CInstance &instance);
-	virtual void onPreHrcMove(CInstance &instance);
-	virtual void onPostHrcMove(CInstance &instance);
-	virtual void onAttrModified(CInstance &instance, const std::string &attrName, sint32 attrIndex);
+	virtual void onInstanceCreated(CInstance &instance) NL_OVERRIDE;
+	virtual void onInstanceErased(CInstance &instance) NL_OVERRIDE;
+	virtual void onInstancePreHrcMove(CInstance &instance) NL_OVERRIDE;
+	virtual void onInstancePostHrcMove(CInstance &instance) NL_OVERRIDE;
+	virtual void onPreHrcMove(CInstance &instance) NL_OVERRIDE;
+	virtual void onPostHrcMove(CInstance &instance) NL_OVERRIDE;
+	virtual void onAttrModified(CInstance &instance, const std::string &attrName, sint32 attrIndex) NL_OVERRIDE;
 private:
 	CLuaObject _Receiver; // table that will receive the notifications
 	static uint _Count;
@@ -3774,7 +3774,7 @@ void CEditor::setCurrentAct(CInstance *act)
 	//
 	struct CPreActChangedVisitor : public IInstanceVisitor
 	{
-		virtual void visit(CInstance &inst)
+		virtual void visit(CInstance &inst) NL_OVERRIDE
 		{
 			inst.onPreActChanged();
 		}
@@ -3783,7 +3783,7 @@ void CEditor::setCurrentAct(CInstance *act)
 	_ScenarioInstance->visit(preActChangedVisitor);
 	struct CActChangedVisitor : public IInstanceVisitor
 	{
-		virtual void visit(CInstance &inst)
+		virtual void visit(CInstance &inst) NL_OVERRIDE
 		{
 			inst.onActChanged();
 		}
@@ -5170,7 +5170,7 @@ void CEditor::onErase(CObject *root, bool &foundInBase, std::string &nameInParen
 		{
 		public:
 			CEraseNotification(CInstance &instance) : Instance(instance) {}
-			virtual void doAction(IInstanceObserver &obs)
+			virtual void doAction(IInstanceObserver &obs) NL_OVERRIDE
 			{
 				obs.onInstanceErased(Instance);
 			}
@@ -5424,7 +5424,7 @@ void CEditor::notifyInstanceObserversOfCreation(CInstance &inst)
 	{
 	public:
 		CCreationNotification(CInstance &instance) : Instance(instance) {}
-		virtual void doAction(IInstanceObserver &obs)
+		virtual void doAction(IInstanceObserver &obs) NL_OVERRIDE
 		{
 			obs.onInstanceCreated(Instance);
 		}
@@ -5441,7 +5441,7 @@ void CEditor::onPostCreate(const CObject *obj)
 	CHECK_EDITOR
 	struct CPostCreateVisitor : public IObjectVisitor
 	{
-		virtual void visit(CObjectTable &obj)
+		virtual void visit(CObjectTable &obj) NL_OVERRIDE
 		{
 			// if table has a "InstanceId" field there is a matching editor object
 			CInstance *inst = getEditor().getInstanceFromObject(&obj);
@@ -5640,7 +5640,7 @@ void CEditor::onAttrModified(CInstance &parentInstance, const std::string &attrN
 	public:
 		CAttrModifiedNotification(CInstance &instance, const std::string &key, sint32 indexInArray)
 			: Instance(instance), Key(key), IndexInArray(indexInArray)  {}
-		virtual void doAction(IInstanceObserver &obs)
+		virtual void doAction(IInstanceObserver &obs) NL_OVERRIDE
 		{
 			obs.onAttrModified(Instance, Key, IndexInArray);
 		}
@@ -5989,7 +5989,7 @@ void CEditor::nodeMoved(const std::string& instanceId, const std::string& attrNa
 		{
 		public:
 			CPreHrcMoveNotification(CInstance &instance) : Instance(instance) {}
-			virtual void doAction(IInstanceObserver &obs)
+			virtual void doAction(IInstanceObserver &obs) NL_OVERRIDE
 			{
 				obs.onPreHrcMove(Instance);
 			}
@@ -6015,7 +6015,7 @@ void CEditor::nodeMoved(const std::string& instanceId, const std::string& attrNa
 		{
 		public:
 			CPostHrcMoveNotification(CInstance &instance) : Instance(instance) {}
-			virtual void doAction(IInstanceObserver &obs)
+			virtual void doAction(IInstanceObserver &obs) NL_OVERRIDE
 			{
 				obs.onPostHrcMove(Instance);
 			}
@@ -6055,13 +6055,13 @@ struct CSortSelectableObject
 class CSelectableUser : public ISelectableObject
 {
 public:
-	virtual bool			isSelectable() const { return true; }
-	virtual bool			getLastClip() const { return UserEntity->getLastClip(); }
-	virtual NLMISC::CAABBox getSelectBox() const
+	virtual bool			isSelectable() const NL_OVERRIDE { return true; }
+	virtual bool			getLastClip() const NL_OVERRIDE { return UserEntity->getLastClip(); }
+	virtual NLMISC::CAABBox getSelectBox() const NL_OVERRIDE
 	{
 		return UserEntity->localSelectBox();
 	}
-	virtual const NLMISC::CMatrix &getInvertedMatrix() const
+	virtual const NLMISC::CMatrix &getInvertedMatrix() const NL_OVERRIDE
 	{
 		static CMatrix invertedMatrix;
 		invertedMatrix = UserEntity->dirMatrix();
@@ -6069,12 +6069,12 @@ public:
 		invertedMatrix.invert();
 		return invertedMatrix;
 	}
-	virtual float			preciseIntersectionTest(const NLMISC::CVector &worldRayStart, const NLMISC::CVector &worldRayDir) const
+	virtual float			preciseIntersectionTest(const NLMISC::CVector &worldRayStart, const NLMISC::CVector &worldRayDir) const NL_OVERRIDE
 	{
 		if (!UserEntity) return FLT_MAX;
 		return CEditor::preciseEntityIntersectionTest(*UserEntity, worldRayStart, worldRayDir);
 	}
-	virtual CInstance		*getInstanceInEditor() const { return NULL; }
+	virtual CInstance		*getInstanceInEditor() const NL_OVERRIDE { return NULL; }
 };
 
 // ***************************************************************
@@ -6667,7 +6667,7 @@ void CEditor::checkMissingCollisions()
 // move
 class CAHEdContextMenu : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		getEditor().displayContextMenu();
 	}
@@ -6758,7 +6758,7 @@ void CEditor::onContinentChanged()
 	{
 		struct CContinentChangedVisitor : public IInstanceVisitor
 		{
-			virtual void visit(CInstance &inst)
+			virtual void visit(CInstance &inst) NL_OVERRIDE
 			{
 				inst.onContinentChanged();
 			}
@@ -7053,7 +7053,7 @@ void CEditor::unregisterInstanceDispName(CInstance *inst)
 //
 class CAHCreateEntity : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &sParams)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		CHECK_EDITOR
 		if (getEditor().getMode() != CEditor::EditionMode)
@@ -7386,7 +7386,7 @@ void CEditor::setMaxVisibleEntityExceededFlag(bool on)
 // *********************************************************************************************************
 class CAHGoTest : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CHECK_EDITOR
 		ConnectionWanted = true;
@@ -7397,7 +7397,7 @@ REGISTER_ACTION_HANDLER(CAHGoTest, "r2ed_go_test");
 // *********************************************************************************************************
 class CAHStopTest : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CHECK_EDITOR
 		if (getEditor().getAccessMode() != CEditor::AccessEditor) return;
@@ -7409,7 +7409,7 @@ REGISTER_ACTION_HANDLER(CAHStopTest, "r2ed_stop_test");
 // *********************************************************************************************************
 class CAHOpenScenarioControl : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &sParams)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		CHECK_EDITOR
 
@@ -7439,7 +7439,7 @@ REGISTER_ACTION_HANDLER(CAHOpenScenarioControl, "open_scenario_control");
 // *********************************************************************************************************
 class CAHR2StopLive : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &sParams)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		CHECK_EDITOR
 
@@ -7479,7 +7479,7 @@ REGISTER_ACTION_HANDLER(CAHR2StopLive, "r2_stop_live");
 // *********************************************************************************************************
 class CAHInviteCharacter : public IActionHandler
 {
-	virtual void execute(CCtrlBase *pCaller, const std::string &/* sParams */)
+	virtual void execute(CCtrlBase *pCaller, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CHECK_EDITOR
 
@@ -7537,7 +7537,7 @@ REGISTER_ACTION_HANDLER(CAHInviteCharacter, "r2ed_invite_character");
 // *********************************************************************************************************
 class CAHTryGoTest : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CHECK_EDITOR
 		getEditor().callEnvMethod("tryGoTest", 0, 0);
@@ -7548,7 +7548,7 @@ REGISTER_ACTION_HANDLER(CAHTryGoTest, "r2ed_try_go_test");
 // *********************************************************************************************************
 class CAHCancelTool : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		if (!ClientCfg.R2EDEnabled || !getEditor().isInitialized()) return;
 		CHECK_EDITOR
@@ -7565,7 +7565,7 @@ REGISTER_ACTION_HANDLER(CAHCancelTool, "r2ed_cancel_tool");
 // *********************************************************************************************************
 class CAHAnimTestMode : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CHECK_EDITOR
 		if (getEditor().getAccessMode() == CEditor::AccessDM) return;
@@ -7577,7 +7577,7 @@ REGISTER_ACTION_HANDLER(CAHAnimTestMode, "r2ed_anim_test_mode");
 // *********************************************************************************************************
 class CAHAnimDMMode : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CHECK_EDITOR
 		getEditor().setMode(CEditor::DMMode);
@@ -7589,7 +7589,7 @@ REGISTER_ACTION_HANDLER(CAHAnimDMMode, "r2ed_anim_dm_mode");
 // *********************************************************************************************************
 class CAHR2ContextCommand : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &sParams)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		CHECK_EDITOR
 		// forward the call to lua
@@ -7611,7 +7611,7 @@ REGISTER_ACTION_HANDLER(CAHR2ContextCommand, "r2ed_context_command");
 // *********************************************************************************************************
 class CAHR2Teleport : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		if (!ClientCfg.R2EDEnabled) return;
 		if (R2::getEditor().getMode() != CEditor::EditionMode &&
@@ -7628,7 +7628,7 @@ REGISTER_ACTION_HANDLER(CAHR2Teleport, "r2ed_teleport");
 // *********************************************************************************************************
 class CAHR2Undo : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		// if an edit box currently has focus, then try undo on it first
 		CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>( CWidgetManager::getInstance()->getCaptureKeyboard());
@@ -7661,7 +7661,7 @@ REGISTER_ACTION_HANDLER(CAHR2Undo, "r2ed_undo");
 // *********************************************************************************************************
 class CAHR2Redo : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		// if an edit box currently has focus, then try redo on it first
 		CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(CWidgetManager::getInstance()->getCaptureKeyboard());
@@ -7695,7 +7695,7 @@ REGISTER_ACTION_HANDLER(CAHR2Redo, "r2ed_redo");
 // signal the server that a dm gift has begun, so that the server can take note of the target entity (the current target)
 class CAHR2DMGiftBegin : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CBitMemStream out;
 		if(GenericMsgHeaderMngr.pushNameToStream("DM_GIFT:BEGIN", out))
@@ -7712,7 +7712,7 @@ REGISTER_ACTION_HANDLER(CAHR2DMGiftBegin, "r2ed_dm_gift_begin");
 // signal the server that a dm gift has begun, so that the server can take note of the target entity (the current target)
 class CAHR2DMGiftValidate : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
 		CBitMemStream out;
@@ -7742,7 +7742,7 @@ REGISTER_ACTION_HANDLER(CAHR2DMGiftValidate, "r2ed_dm_gift_validate");
 // freeze / unfreeze bot objects
 class CAHR2FreezeUnfreezeBotObjects : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CLuaManager::getInstance().executeLuaScript("r2:freezeUnfreezeBotObjects()");
 	}

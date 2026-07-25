@@ -65,11 +65,11 @@ public:
 	//----------------------------------------------------------------------------
 	// inheritted virtual interface
 
-	virtual void openFile(const std::string &fileName);
-	virtual void closeFile(const std::string &fileName);
-	virtual void begin(uint32 contextAlias);
-	virtual void end(uint32 contextAlias);
-	virtual void execute(uint64 action,const std::vector <CAIActions::CArg> &args);
+	virtual void openFile(const std::string &fileName) NL_OVERRIDE;
+	virtual void closeFile(const std::string &fileName) NL_OVERRIDE;
+	virtual void begin(uint32 contextAlias) NL_OVERRIDE;
+	virtual void end(uint32 contextAlias) NL_OVERRIDE;
+	virtual void execute(uint64 action,const std::vector <CAIActions::CArg> &args) NL_OVERRIDE;
 
 	AI_SHARE::CAIActionsDataRecord& getDataRecord()  { return _DataRecord; }
 	

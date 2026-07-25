@@ -1172,7 +1172,7 @@ void	CClientChatManager::updateDynamicChatChannels(IChatDisplayer &chatDisplayer
 
 class CHandlerTell : public IActionHandler
 {
-	void execute (CCtrlBase *pCaller, const string &sParams)
+	void execute (CCtrlBase *pCaller, const string &sParams) NL_OVERRIDE
 	{
 		string receiver = getParam (sParams, "player");
 		string message;
@@ -1217,7 +1217,7 @@ REGISTER_ACTION_HANDLER( CHandlerTell, "tell");
 
 class CHandlerEnterTell : public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const string &sParams) NL_OVERRIDE
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
 		string receiver = getParam (sParams, "player");
@@ -1335,7 +1335,7 @@ void CClientChatManager::updateChatModeAndButton(uint mode, uint32 dynamicChanne
 
 class CHandlerTalk : public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const string &sParams) NL_OVERRIDE
 	{
 		// Param
 		uint mode;
@@ -1407,7 +1407,7 @@ REGISTER_ACTION_HANDLER( CHandlerTalk, "talk");
 
 class CHandlerEnterTalk : public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const string &sParams) NL_OVERRIDE
 	{
 		// Param
 		uint mode;
@@ -1434,7 +1434,7 @@ REGISTER_ACTION_HANDLER( CHandlerEnterTalk, "enter_talk");
 
 class CHandlerTalkMessage : public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const string &sParams) NL_OVERRIDE
 	{
 		// Param
 		string text = CI18N::get ("uiTalkMemMsg"+sParams);
@@ -1453,7 +1453,7 @@ REGISTER_ACTION_HANDLER( CHandlerTalkMessage, "talk_message");
 
 class CHandlerSwapChatMode : public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const string &sParams) NL_OVERRIDE
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 		bool	updateCapture= getParam(sParams, "update_capture")=="1";

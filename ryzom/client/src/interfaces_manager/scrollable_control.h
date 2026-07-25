@@ -59,7 +59,7 @@ public:
 	}
 
 	/// destructor
-	virtual ~CScrollableControl();
+	virtual ~CScrollableControl() NL_OVERRIDE;
 
 	/// scroll horizontaly by 'scroll' units in either direction (right if scroll >0 and left is scroll<0 for example) (implementation dependent)
 	virtual void scrollH(sint32 scroll) = 0;
@@ -77,10 +77,10 @@ public:
 	void autoHide( bool on );
 
 	/// manage left mouse button click
-	virtual void click(float x, float y, bool &taken);
+	virtual void click(float x, float y, bool &taken) NL_OVERRIDE;
 
 	/// manage right mouse button click
-	virtual void clickRight(float x, float y, bool &taken);
+	virtual void clickRight(float x, float y, bool &taken) NL_OVERRIDE;
 
 	/// get a pointer on the horizontal scroll bar
 	CScrollBar *getHScroll() { return _HScroll; }

@@ -44,7 +44,7 @@ public:
 	// ctor
 	CNPCEditor();
 	// dtor
-	~CNPCEditor();
+	~CNPCEditor() NL_OVERRIDE;
 
 	virtual void updateNPCView(uint slot);
 

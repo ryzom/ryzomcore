@@ -462,7 +462,7 @@ CObject::TSmartPtr CActionHistoric::CRequestBase::cloneObject(const CObject *src
 	CObject::TSmartPtr result = src->clone();
 	struct CDisableRefIDs : public IObjectVisitor
 	{
-		virtual void visit(CObjectRefId &obj)
+		virtual void visit(CObjectRefId &obj) NL_OVERRIDE
 		{
 			CObjectRefIdClient *refId = NLMISC::safe_cast<CObjectRefIdClient *>(&obj);
 			refId->enable(false); // disable events

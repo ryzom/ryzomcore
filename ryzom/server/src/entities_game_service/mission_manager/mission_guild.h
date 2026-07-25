@@ -34,21 +34,21 @@ public:
 
 	inline void setGuild( uint32 guildId );
 	/// override
-	void updateUsersJournalEntry();
+	void updateUsersJournalEntry() NL_OVERRIDE;
 	/// override
-	void clearUsersJournalEntry();
+	void clearUsersJournalEntry() NL_OVERRIDE;
 	/// override
-	void setupEscort(const std::vector<TAIAlias> & aliases);
+	void setupEscort(const std::vector<TAIAlias> & aliases) NL_OVERRIDE;
 	/// override
-	void getEntities(std::vector<TDataSetRow>& entities);
+	void getEntities(std::vector<TDataSetRow>& entities) NL_OVERRIDE;
 	/// override
-	void stopChildren();
+	void stopChildren() NL_OVERRIDE;
 	/// override
-	void onFailure(bool ignoreJumps,bool sendMessage = true);
+	void onFailure(bool ignoreJumps,bool sendMessage = true) NL_OVERRIDE;
 	/// force mission success
-	void forceSuccess();
+	void forceSuccess() NL_OVERRIDE;
 	/// return the mission main character ( user, group leader,...)
-	CCharacter* getMainEntity();
+	CCharacter* getMainEntity() NL_OVERRIDE;
 	/// during the execution of the mission does the compiler encounter a 'chain_mission' ?
 	bool isChained() { return _Chained; }
 	/// when executing a 'chain_mission' set this flag to let know that we have chained

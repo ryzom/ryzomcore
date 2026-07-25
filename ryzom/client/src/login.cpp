@@ -1380,7 +1380,7 @@ void onlogin(bool vanishScreen = true)
 
 class CAHOnLogin : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		//nlinfo("CAHOnLogin called");
 
@@ -1406,7 +1406,7 @@ REGISTER_ACTION_HANDLER (CAHOnLogin, "on_login");
 // ***************************************************************************
 class CAHOnGameConfiguration : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		nlinfo("CAHOnGameConfiguration called");
 
@@ -1433,7 +1433,7 @@ REGISTER_ACTION_HANDLER (CAHOnGameConfiguration, "on_game_configuration");
 // ***************************************************************************
 class CAHLoginQuit : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		nlinfo("CAHLoginQuit called");
 
@@ -1449,7 +1449,7 @@ REGISTER_ACTION_HANDLER (CAHLoginQuit, "login_quit");
 // ***************************************************************************
 class CAHLoginTab : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		nlinfo("CAHLoginTab called");
 
@@ -1495,7 +1495,7 @@ REGISTER_ACTION_HANDLER (CAHLoginTab, "login_tab");
 // ***************************************************************************
 class CAHShardSelect : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &/* Params */)
+	virtual void execute (CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
 	{
 		nlinfo("CAHShardSelect called");
 
@@ -1570,7 +1570,7 @@ void ConnectToShard()
 // ***************************************************************************
 class CAHLoginConnect : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		nlinfo("CAHLoginConnect called");
 
@@ -1619,7 +1619,7 @@ REGISTER_ACTION_HANDLER (CAHLoginConnect, "login_connect");
 // see if we have to continue patching or directly go ingame)
 class CAHLoginConnect2 : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		nlinfo("CAHLoginConnect2 called");
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
@@ -1727,7 +1727,7 @@ void initPatch()
 // Called after the check has been done. The page is full of optional categories that must be selected for patching
 class CAHLoginPatch : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		nlinfo("CAHLoginPatch called");
 
@@ -1785,7 +1785,7 @@ REGISTER_ACTION_HANDLER (CAHLoginPatch, "login_patch");
 // Called after the check has been done. The page is full of optional categories that must be selected for patching
 class CAHClosePatch : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		nlinfo("CAHClosePatch called");
 
@@ -1799,7 +1799,7 @@ REGISTER_ACTION_HANDLER (CAHClosePatch, "close_patch");
 // Called after pushing the read note at the opening of the modal window
 class CAHSetReleaseNote : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &sParams)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &sParams) NL_OVERRIDE
 	{
 		nlinfo("CAHSetReleaseNote called");
 
@@ -1848,7 +1848,7 @@ REGISTER_ACTION_HANDLER (CAHSetReleaseNote, "set_release_note");
 // Called after pushing the read note at the opening of the modal window
 class CAHReboot : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* sParams */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* sParams */) NL_OVERRIDE
 	{
 		nlinfo("CAHReboot called");
 
@@ -1891,7 +1891,7 @@ REGISTER_ACTION_HANDLER (CAHReboot, "reboot");
 // ***************************************************************************
 class CAHAcceptEula : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* sParams */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* sParams */) NL_OVERRIDE
 	{
 		//nlinfo("CAHAcceptEula called");
 		if(CFile::fileExists(getLogDirectory() + "show_eula"))
@@ -1920,7 +1920,7 @@ REGISTER_ACTION_HANDLER (CAHAcceptEula, "accept_eula");
 // ***************************************************************************
 class CAHOpenURL : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &sParams)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &sParams) NL_OVERRIDE
 	{
 		nlinfo("CAHOpenURL called");
 
@@ -2033,7 +2033,7 @@ sint CurrentPreset = -1;
 // ***************************************************************************
 class CAHInitResLod : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* sParams */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* sParams */) NL_OVERRIDE
 	{
 		//nlinfo("CAHInitResLod called");
 		if (Driver == NULL) return;
@@ -2149,7 +2149,7 @@ REGISTER_ACTION_HANDLER (CAHInitResLod, "init_res_lod");
 // ***************************************************************************
 class CAHMoreRes : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* sParams */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* sParams */) NL_OVERRIDE
 	{
 		nlinfo("CAHMoreRes called");
 		if (CurrentMode < ((sint)StringModeList.size()-1))
@@ -2165,7 +2165,7 @@ REGISTER_ACTION_HANDLER (CAHMoreRes, "more_res");
 // ***************************************************************************
 class CAHLessRes : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* sParams */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* sParams */) NL_OVERRIDE
 	{
 		nlinfo("CAHLessRes called");
 		if (CurrentMode > 0)
@@ -2181,7 +2181,7 @@ REGISTER_ACTION_HANDLER (CAHLessRes, "less_res");
 // ***************************************************************************
 class CAHMoreLod : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* sParams */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* sParams */) NL_OVERRIDE
 	{
 		nlinfo("CAHMoreLod called");
 		if (CurrentPreset < ((sint)StringPresetList.size()-1))
@@ -2197,7 +2197,7 @@ REGISTER_ACTION_HANDLER (CAHMoreLod, "more_lod");
 // ***************************************************************************
 class CAHLessLod : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* sParams */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* sParams */) NL_OVERRIDE
 	{
 		nlinfo("CAHMoreLod called");
 		if (CurrentPreset > 0)
@@ -2214,7 +2214,7 @@ REGISTER_ACTION_HANDLER (CAHLessLod, "less_lod");
 // TODO: remove resolution change from login screen
 class CAHUninitResLod : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* sParams */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* sParams */) NL_OVERRIDE
 	{
 		//nlinfo("CAHUninitResLod called");
 
@@ -2290,7 +2290,7 @@ void initDataScan()
 // Called after the check has been done. The page is full of optional categories that must be selected for patching
 class CAHOnScanDataStart : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		nlinfo("CAHOnScanDataStart called");
 
@@ -2304,7 +2304,7 @@ REGISTER_ACTION_HANDLER (CAHOnScanDataStart, "on_scan_data_start");
 // Called when the user cancel the scan
 class CAHOnScanDataClose : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		nlinfo("CAHOnScanDataClose called");
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
@@ -2521,7 +2521,7 @@ bool initCreateAccount()
 // Called when the user focus one of the edit boxes during the account creation
 class CAHCreateAccountRules : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		nlinfo("CAHCreateAccountRules called");
 
@@ -2561,7 +2561,7 @@ REGISTER_ACTION_HANDLER (CAHCreateAccountRules, "create_account_rules");
 // Called when the user choose the account creation
 class CAHOnCreateAccount : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		nlinfo("CAHOnCreateAccount called");
 
@@ -2574,7 +2574,7 @@ REGISTER_ACTION_HANDLER (CAHOnCreateAccount, "on_create_account");
 // Called when the user submit the account creation
 class CAHOnCreateAccountSubmit : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		nlinfo("CAHOnCreateAccountSubmit called");
 
@@ -2726,7 +2726,7 @@ REGISTER_ACTION_HANDLER (CAHOnCreateAccountSubmit, "on_create_account_submit");
 // Called when the user cancel the account creation
 class CAHOnCreateAccountClose : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		nlinfo("CAHOnCreateAccountClose called");
 
@@ -2738,7 +2738,7 @@ REGISTER_ACTION_HANDLER (CAHOnCreateAccountClose, "on_create_account_close");
 // ***************************************************************************
 class CAHCreateAccountLogin : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		nlinfo("CAHCreateAccountLogin called");
 
@@ -2765,7 +2765,7 @@ REGISTER_ACTION_HANDLER (CAHCreateAccountLogin, "create_account_login");
 // Called by html embeded lua script
 class CAHOnConnectToShard: public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		// warning : pCaller is null when event come from lua scrip embeded in HTML
 		Cookie = getParam(Params, "cookie");
@@ -2790,7 +2790,7 @@ REGISTER_ACTION_HANDLER (CAHOnConnectToShard, "on_connect_to_shard");
 // Called to return to login screen in case of error
 class CAHOnBackToLogin: public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		setLoginFinished( false );
 		loginOK = false;

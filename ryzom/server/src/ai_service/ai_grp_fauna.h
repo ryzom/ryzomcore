@@ -59,29 +59,29 @@ public:
 	
 	bool isSpawning();
 	
-	void update();
+	void update() NL_OVERRIDE;
 	
 	/// @name CFightOrganizer implementation
 	//@{
-	virtual void setFight(CSpawnBot* bot, CAIEntityPhysical* ennemy);
-	virtual void setHeal(CSpawnBot* bot, CAIEntityPhysical* target);
-	virtual void setNoFight(CSpawnBot* bot);
-	virtual void setFlee(CSpawnBot* bot, CAIVector& fleeVect);
-	virtual void setReturnAfterFight(CSpawnBot* bot);
+	virtual void setFight(CSpawnBot* bot, CAIEntityPhysical* ennemy) NL_OVERRIDE;
+	virtual void setHeal(CSpawnBot* bot, CAIEntityPhysical* target) NL_OVERRIDE;
+	virtual void setNoFight(CSpawnBot* bot) NL_OVERRIDE;
+	virtual void setFlee(CSpawnBot* bot, CAIVector& fleeVect) NL_OVERRIDE;
+	virtual void setReturnAfterFight(CSpawnBot* bot) NL_OVERRIDE;
 	//@}
 	
-	virtual void spawnBots();
-	virtual void despawnBots(bool immediately);
+	virtual void spawnBots() NL_OVERRIDE;
+	virtual void despawnBots(bool immediately) NL_OVERRIDE;
 	
 	//	overrides the init to avoid automatic bot spawn ..
-	void spawnBotOfGroup() { }
+	void spawnBotOfGroup() NL_OVERRIDE { }
 	
 	virtual void despawnGrp(); // critical code (despawn 'this' object).
 	
 	uint32 getLastUpdate() const { return _LastUpdate; }
 	
 	//	Update Rate feature.
-	int getUpdatePriority() const { return IsRingShard? (_UpdatePriority&7): _UpdatePriority; }
+	int getUpdatePriority() const NL_OVERRIDE { return IsRingShard? (_UpdatePriority&7): _UpdatePriority; }
 	//	overloading to recalc the priority update rate.
 	void recalcUpdatePriorityDeltaAndGroupPos();
 	
@@ -205,45 +205,45 @@ public:
 public:
 	CGrpFauna(CMgrFauna* mgr, CAIAliasDescriptionNode* aliasTree, RYAI_MAP_CRUNCH::TAStarFlag denyFlags);
 	
-	virtual ~CGrpFauna();
+	virtual ~CGrpFauna() NL_OVERRIDE;
 	
-	RYZOMID::TTypeId getRyzomType() { return RYZOMID::creature; }
+	RYZOMID::TTypeId getRyzomType() NL_OVERRIDE { return RYZOMID::creature; }
 	
-	CDynGrpBase* getGrpDynBase() { return this; }
+	CDynGrpBase* getGrpDynBase() NL_OVERRIDE { return this; }
 	
 	//////////////////////////////////////////////////////////////////////////	
 	// PersistentStateInstance
 	
-	CAliasTreeOwner* aliasTreeOwner() { return this; }
+	CAliasTreeOwner* aliasTreeOwner() NL_OVERRIDE { return this; }
 	
-	CAIS::CCounter& getSpawnCounter();
+	CAIS::CCounter& getSpawnCounter() NL_OVERRIDE;
 	
 	bool timeAllowSpawn(uint32 popVersion = 12345)	const;
 	
-	void stateChange(CAIState const* oldState, CAIState const* newState);
+	void stateChange(CAIState const* oldState, CAIState const* newState) NL_OVERRIDE;
 	
-	CGroup* getGroup() { return this; }
+	CGroup* getGroup() NL_OVERRIDE { return this; }
 	
 	//////////////////////////////////////////////////////////////////////////
 	
-	virtual void lastBotDespawned();
-	virtual void firstBotSpawned();
+	virtual void lastBotDespawned() NL_OVERRIDE;
+	virtual void firstBotSpawned() NL_OVERRIDE;
 	
 	// debugging stuff
-	CDebugHistory* getDebugHistory() { return this; }
+	CDebugHistory* getDebugHistory() NL_OVERRIDE { return this; }
 	
-	CPersistentStateInstance* getPersistentStateInstance() { return this; }
+	CPersistentStateInstance* getPersistentStateInstance() NL_OVERRIDE { return this; }
 	
-	virtual void setEvent(uint eventId);
-	virtual void serviceEvent (const CServiceEvent &info);
+	virtual void setEvent(uint eventId) NL_OVERRIDE;
+	virtual void serviceEvent (const CServiceEvent &info) NL_OVERRIDE;
 	
-	virtual std::string getFullName() const { return CGroup::getFullName(); }
-	virtual std::string getIndexString() const { return CGroup::getIndexString(); }
+	virtual std::string getFullName() const NL_OVERRIDE { return CGroup::getFullName(); }
+	virtual std::string getIndexString() const NL_OVERRIDE { return CGroup::getIndexString(); }
 	
-	IAliasCont* getAliasCont(AITYPES::TAIType type);
-	CAliasTreeOwner* createChild(IAliasCont* cont, CAIAliasDescriptionNode* aliasTree);
+	IAliasCont* getAliasCont(AITYPES::TAIType type) NL_OVERRIDE;
+	CAliasTreeOwner* createChild(IAliasCont* cont, CAIAliasDescriptionNode* aliasTree) NL_OVERRIDE;
 	
-	NLMISC::CSmartPtr<CSpawnGroup> createSpawnGroup();
+	NLMISC::CSmartPtr<CSpawnGroup> createSpawnGroup() NL_OVERRIDE;
 	
 	CSpawnGroupFauna* getSpawnObj() const { return NLMISC::type_cast<CSpawnGroupFauna*>(CGroup::getSpawnObj()); }
 	
@@ -252,9 +252,9 @@ public:
 	// This struct is used to manage dead creatures and their corresponding respawned creature.
 	
 	// inheritted virtual interface ------------------------------------
-	virtual bool spawn();
+	virtual bool spawn() NL_OVERRIDE;
 	bool spawnPop(uint popVersion);
-	virtual void despawnGrp();
+	virtual void despawnGrp() NL_OVERRIDE;
 	
 	// Methods for setting up static data ------------------------------
 	void setType(AITYPES::TFaunaType type);
@@ -289,12 +289,12 @@ public:
 	static const CCycleDef cycles[];
 	static const uint32 nbCycle;
 	
-	void setAutoSpawn(bool autoSpawn) { CGroup::setAutoSpawn(autoSpawn); if (!isAutoSpawn()) _CurrentCycle=std::numeric_limits<uint32>::max(); }
+	void setAutoSpawn(bool autoSpawn) NL_OVERRIDE { CGroup::setAutoSpawn(autoSpawn); if (!isAutoSpawn()) _CurrentCycle=std::numeric_limits<uint32>::max(); }
 	
 	/// @name CChild implementation
 	//@{
-	virtual std::string	getOneLineInfoString() const;
-	virtual std::vector<std::string> getMultiLineInfoString() const;
+	virtual std::string	getOneLineInfoString() const NL_OVERRIDE;
+	virtual std::vector<std::string> getMultiLineInfoString() const NL_OVERRIDE;
 	//@}
 	
 	/** Find next valid place with the wanted flags.

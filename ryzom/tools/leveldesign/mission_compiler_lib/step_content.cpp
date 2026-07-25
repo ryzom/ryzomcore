@@ -113,18 +113,18 @@ class CActionJumpTo : public IStepContent
 {
 	string	_JumpTo;
 
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		IStepContent::init(md, prim);
 		_JumpTo = md.getProperty(prim, "target", true, false);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		if (!_JumpTo.empty())
 			return "jump : "+_JumpTo+NL;
@@ -132,7 +132,7 @@ public:
 			return string();
 	}
 
-	void fillJump(CMissionData &md, std::set<TJumpInfo> &jumpPoints)
+	void fillJump(CMissionData &md, std::set<TJumpInfo> &jumpPoints) NL_OVERRIDE
 	{
 		IStepContent::fillJump(md, jumpPoints);
 		jumpPoints.insert(TJumpInfo(_JumpTo, "", false));
@@ -148,12 +148,12 @@ class CActionRecvMoney : public IStepContent
 	string	_Amount;
 	bool	_Guild;
 	
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		IStepContent::init(md, prim);
 		_Amount = md.getProperty(prim, "amount", true, false);
@@ -167,7 +167,7 @@ public:
 		}
 	}
 	
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		if (!_Amount.empty())
 		{
@@ -191,18 +191,18 @@ class CActionRecvChargePoint : public IStepContent
 {
 	string	_Amount;
 
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		IStepContent::init(md, prim);
 		_Amount = md.getProperty(prim, "charge_points", true, false);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		if (!_Amount.empty())
 		{
@@ -224,18 +224,18 @@ class CActionGiveOutpostControl : public IStepContent
 {
 	string	_OutpostName;
 
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		IStepContent::init(md, prim);
 		_OutpostName = md.getProperty(prim, "outpost_name", true, false);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		if (!_OutpostName.empty())
 		{
@@ -260,12 +260,12 @@ protected:
 	string	_GiverName;
 	bool	_Guild;
 private:
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		IStepContent::init(md, prim);
 		_MissionName = md.getProperty(prim, "mission_name", true, false);
@@ -284,7 +284,7 @@ public:
 		}
 	}
 	
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 		if (!_MissionName.empty())
@@ -305,7 +305,7 @@ class CActionChainMission : public CActionSpawnMission
 {
 public:
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		
 		if (!_MissionName.empty())
@@ -327,18 +327,18 @@ class CActionEncycloUnlock : public IStepContent
 {
 	string	_AlbumThema;
 
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		IStepContent::init(md, prim);
 		_AlbumThema = md.getProperty(prim, "album_thema", true, false);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		if (!_AlbumThema.empty())
 			return "encyclo_unlock : " + _AlbumThema + NL;
@@ -357,19 +357,19 @@ protected:
 	string	_Group;
 	string	_DespawnTimer;
 private:
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		IStepContent::init(md, prim);
 		_Group = md.getProperty(prim, "group", true, false);
 		_DespawnTimer = md.getProperty(prim, "despawn_timer", true, false);
 	}
 	
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		if (!_Group.empty())
 		{
@@ -393,18 +393,18 @@ protected:
 	string	_Group;
 
 private:
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		IStepContent::init(md, prim);
 		_Group = md.getProperty(prim, "group", true, false);
 	}
 	
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		if (!_Group.empty())
 			return "handle_release : " + _Group + NL;
@@ -421,18 +421,18 @@ class CActionSetEventFaction : public IStepContent
 {
 	string	_EventFaction;
 
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		IStepContent::init(md, prim);
 		_EventFaction = md.getProperty(prim, "event_faction", true, false);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		if (!_EventFaction.empty())
 			return "set_event_faction : " + _EventFaction + NL;
@@ -451,12 +451,12 @@ class CActionSetRespawnPoints : public IStepContent
 	vector<string>	_RespawnPoints;
 	bool			_HideOthers;
 
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		IStepContent::init(md, prim);
 		_Continent = md.getProperty(prim, "continent", true, false);
@@ -475,7 +475,7 @@ public:
 		_HideOthers = NLMISC::toBool(s);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 
@@ -507,12 +507,12 @@ class CActionRecvFactionPoint : public IStepContent
 	string	_Faction;
 	string	_Point;
 
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		IStepContent::init(md, prim);
 
@@ -520,7 +520,7 @@ public:
 		_Point = md.getProperty(prim, "point", true, false);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		if (!_Faction.empty() && !_Point.empty())
 			return string("recv_faction_point : ")+_Faction+" "+_Point+NL;
@@ -537,19 +537,19 @@ class CActionSDBSet : public IStepContent
 	string	_SDBPath;
 	string	_SDBValue;
 
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		IStepContent::init(md, prim);
 		_SDBPath = md.getProperty(prim, "sdb_path", true, false);
 		_SDBValue = md.getProperty(prim, "sdb_value", true, false);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 
@@ -570,19 +570,19 @@ class CActionSDBAdd : public IStepContent
 	string	_SDBPath;
 	string	_SDBValue;
 
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		IStepContent::init(md, prim);
 		_SDBPath = md.getProperty(prim, "sdb_path", true, false);
 		_SDBValue = md.getProperty(prim, "sdb_value", true, false);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 
@@ -603,19 +603,19 @@ class CActionSDBPlayerAdd : public IStepContent
 	string	_SDBPath;
 	string	_SDBValue;
 
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		IStepContent::init(md, prim);
 		_SDBPath = md.getProperty(prim, "sdb_path", true, false);
 		_SDBValue = md.getProperty(prim, "sdb_value", true, false);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 
@@ -635,18 +635,18 @@ class CActionSDBSetPvPPath : public IStepContent
 {
 	string	_SDBPath;
 
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		IStepContent::init(md, prim);
 		_SDBPath = md.getProperty(prim, "sdb_path", true, false);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 
@@ -664,17 +664,17 @@ REGISTER_STEP_CONTENT(CActionSDBSetPvPPath, "sdb_set_pvp_path");
 // ---------------------------------------------------------------------------
 class CActionSDBClearPvPPath : public IStepContent
 {
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		IStepContent::init(md, prim);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret = "sdb_clear_pvp_path" + NL;
 		return ret;
@@ -691,12 +691,12 @@ class CActionRecvFame : public IStepContent
 	string	_Fame;
 	bool	_Guild;
 
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		IStepContent::init(md, prim);
 
@@ -712,7 +712,7 @@ public:
 		}
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		if (!_Faction.empty() && !_Fame.empty())
 		{
@@ -745,12 +745,12 @@ class CActionRecvItem : public IStepContent
 	bool				_Group;
 	bool				_Guild;
 
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		_BotGiver =md.getProperty(prim, "npc_name", true, false);
 		vector<string> vs;
@@ -802,7 +802,7 @@ public:
 		IStepContent::init(md, prim);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 		for (uint i=0; i<_Items.size(); ++i)
@@ -834,12 +834,12 @@ class CActionRecvNamedItem : public IStepContent
 	bool				_Group;
 	bool				_Guild;
 	
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		vector<string> vs;
 		vs = md.getPropertyArray(prim, "item/quantity", true, false);
@@ -880,7 +880,7 @@ public:
 		IStepContent::init(md, prim);
 	}
 	
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 		for (uint i=0; i<_Items.size(); ++i)
@@ -915,12 +915,12 @@ class CActionDestroyItem : public IStepContent
 	vector<CItemDesc>	_Items;
 	bool				_Guild;
 	
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		// get the bot who destroys the item
 		_BotDestroyer =md.getProperty(prim, "npc_name", true, false);
@@ -970,7 +970,7 @@ public:
 		IStepContent::init(md, prim);
 	}
 	
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 		for (uint i=0; i<_Items.size(); ++i)
@@ -1001,13 +1001,13 @@ class CActionRecvXp : public IStepContent
 	string			_Skill;
 	sint32			_Value;
 	
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
 
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		IStepContent::init(md, prim);
 		_Skill = md.getProperty(prim, "skill", true, false);
@@ -1019,7 +1019,7 @@ public:
 		}
 	}
 	
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		if (!_Skill.empty())
 			return toString("recv_xp : %s %d", _Skill.c_str(), _Value) + NL;
@@ -1036,12 +1036,12 @@ class CActionLearnAction : public IStepContent
 	vector<string>		_Actions;
 	bool				_Group;
 
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		_BotGiver = md.getProperty(prim, "npc_name", true, false);
 		vector<string> vs;
@@ -1060,7 +1060,7 @@ public:
 		IStepContent::init(md, prim);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 
@@ -1093,12 +1093,12 @@ class CActionLearnBrick : public IStepContent
 	vector<string>		_Bricks;
 	bool				_Group;
 
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		_BotGiver = md.getProperty(prim, "npc_name", true, false);
 		vector<string> vs;
@@ -1117,7 +1117,7 @@ public:
 		IStepContent::init(md, prim);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 
@@ -1151,12 +1151,12 @@ class CActionUnlearnBrick : public IStepContent
 	vector<string>		_Bricks;
 	bool				_Group;
 
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		_BotGiver = md.getProperty(prim, "npc_name", true, false);
 		vector<string> vs;
@@ -1175,7 +1175,7 @@ public:
 		IStepContent::init(md, prim);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 
@@ -1211,12 +1211,12 @@ protected:
 	CPhrase				_Phrase;
 	string				_ChatMode;
 
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		IStepContent::init(md, prim);
 
@@ -1230,7 +1230,7 @@ public:
 		_ChatMode = md.getProperty(prim, "chat_type", true, false);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 
@@ -1238,7 +1238,7 @@ public:
 		return ret;
 	}
 
-	string genPhrase()
+	string genPhrase() NL_OVERRIDE
 	{
 		return _Phrase.genPhrase();
 	}
@@ -1251,12 +1251,12 @@ class CActionBotEmote : public IStepContent
 	string				_BotName;
 	string				_Emote;
 
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		IStepContent::init(md, prim);
 
@@ -1264,7 +1264,7 @@ public:
 		_Emote = md.getProperty(prim, "emote", true, false);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 
@@ -1280,12 +1280,12 @@ class CActionAIEvent : public IStepContent
 	string				_GroupName;
 	string				_EventNumber;
 
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		IStepContent::init(md, prim);
 
@@ -1293,7 +1293,7 @@ public:
 		_EventNumber = md.getProperty(prim, "event_number", true, false);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 
@@ -1309,12 +1309,12 @@ class CActionSetTeleport : public CActionBotChat
 	string				_WorldPosition;
 	bool				_Once;
 	
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		CActionBotChat::init(md, prim);
 
@@ -1324,7 +1324,7 @@ public:
 		_Once = NLMISC::toBool(s);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 
@@ -1343,19 +1343,19 @@ class CActionTeleport : public IStepContent
 {
 	string				_WorldPosition;
 	
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		IStepContent::init(md, prim);
 
 		_WorldPosition = md.getProperty(prim, "world_position", true, false);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 
@@ -1371,19 +1371,19 @@ class CActionSetCult : public IStepContent
 {
 	string				_Cult;
 	
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		IStepContent::init(md, prim);
 
 		_Cult = md.getProperty(prim, "cult", true, false);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 
@@ -1399,19 +1399,19 @@ class CActionSetCiv : public IStepContent
 {
 	string				_Civ;
 	
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		IStepContent::init(md, prim);
 
 		_Civ = md.getProperty(prim, "civ", true, false);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 
@@ -1427,19 +1427,19 @@ class CActionSetGuildCult : public IStepContent
 {
 	string				_Cult;
 	
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		IStepContent::init(md, prim);
 
 		_Cult = md.getProperty(prim, "cult", true, false);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 
@@ -1455,19 +1455,19 @@ class CActionSetGuildCiv : public IStepContent
 {
 	string				_Civ;
 	
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		IStepContent::init(md, prim);
 
 		_Civ = md.getProperty(prim, "civ", true, false);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 
@@ -1484,12 +1484,12 @@ class CActionAddCompass : public IStepContent
 	string				_NpcName;
 	string				_PlaceName;
 
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		IStepContent::init(md, prim);
 
@@ -1497,7 +1497,7 @@ public:
 		_PlaceName = md.getProperty(prim, "place_to_add", true, false);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 
@@ -1516,12 +1516,12 @@ class CActionRemoveCompass : public IStepContent
 	string				_NpcName;
 	string				_PlaceName;
 
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		IStepContent::init(md, prim);
 
@@ -1529,7 +1529,7 @@ public:
 		_PlaceName = md.getProperty(prim, "place_to_remove", true, false);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 
@@ -1546,17 +1546,17 @@ REGISTER_STEP_CONTENT(CActionRemoveCompass, "remove_compass");
 class CActionFail : public IStepContent
 {
 
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		IStepContent::init(md, prim);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		return string("fail")+NL;
 	}
@@ -1569,18 +1569,18 @@ class CActionFailIfSDB : public IStepContent
 
 	string _Condition;
 
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		IStepContent::init(md, prim);
 		_Condition = md.getProperty(prim, "condition", true, false);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		return string("fail_if_sdb : ")+_Condition+NL;
 	}
@@ -1593,18 +1593,18 @@ class CActionFailMissionCat : public IStepContent
 
 	string _MissionCategory;
 
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		IStepContent::init(md, prim);
 		_MissionCategory = md.getProperty(prim, "category", true, false);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		return string("fail_mission_cat : ")+_MissionCategory+NL;
 	}
@@ -1616,12 +1616,12 @@ class CActionSystemMsg : public IStepContent
 {
 	CPhrase		_Message;
 
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		IStepContent::init(md, prim);
 
@@ -1630,7 +1630,7 @@ public:
 		_Message.initPhrase(md, prim, vs);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 
@@ -1638,7 +1638,7 @@ public:
 		return ret;
 	}
 
-	string genPhrase()
+	string genPhrase() NL_OVERRIDE
 	{
 		return _Message.genPhrase();
 	}
@@ -1651,12 +1651,12 @@ class CActionPopupMsg : public IStepContent
 	CPhrase		_Title;
 	CPhrase		_Message;
 	
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		IStepContent::init(md, prim);
 		
@@ -1667,7 +1667,7 @@ public:
 		_Message.initPhrase(md, prim, vsm);
 	}
 	
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 		
@@ -1675,7 +1675,7 @@ public:
 		return ret;
 	}
 	
-	string genPhrase()
+	string genPhrase() NL_OVERRIDE
 	{
 		return _Title.genPhrase() + _Message.genPhrase();
 	}
@@ -1686,17 +1686,17 @@ REGISTER_STEP_CONTENT(CActionPopupMsg, "popup_msg");
 class CActionDeclareWar : public IStepContent
 {
 
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		IStepContent::init(md, prim);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		return string("declare_war")+NL;
 	}
@@ -1714,12 +1714,12 @@ class CActionSetConstrains : public IStepContent
 	string	_OutsidePlaceDelay;
 	vector<string>	_Wears;
 
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		IStepContent::init(md, prim);
 
@@ -1732,7 +1732,7 @@ public:
 		_Wears = md.getPropertyArray(prim, "wear", true, false);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 
@@ -1787,12 +1787,12 @@ class CActionSetDesc : public IStepContent
 {
 	CPhrase		_Description;
 
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		IStepContent::init(md, prim);
 
@@ -1801,7 +1801,7 @@ public:
 		_Description.initPhrase(md, prim, vs);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 
@@ -1809,7 +1809,7 @@ public:
 		return ret;
 	}
 
-	string genPhrase()
+	string genPhrase() NL_OVERRIDE
 	{
 		return _Description.genPhrase();
 	}
@@ -1931,7 +1931,7 @@ class CContentKill : public CContentObjective
 	TCompilerVarName			_Place;
 
 
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		if (!_KillFaunas.empty())
 		{
@@ -2025,7 +2025,7 @@ class CContentKill : public CContentObjective
 		}
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		vector<string> vs;
 		vs = md.getPropertyArray(prim, "fauna/quantity", false, false);
@@ -2190,7 +2190,7 @@ public:
 
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 		ret = CContentObjective::genCode(md);
@@ -2289,7 +2289,7 @@ class CContentTalkTo : public CContentObjective
 	TCompilerVarName		_BotName;
 	CPhrase		_Phrase;
 
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 		predef.resize(1);
@@ -2297,7 +2297,7 @@ class CContentTalkTo : public CContentObjective
 		predef[0][0] = _BotName;
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 
 
@@ -2323,7 +2323,7 @@ public:
 		CContentObjective::init(md, prim);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 		ret = CContentObjective::genCode(md);
@@ -2339,7 +2339,7 @@ public:
 		return ret;
 	}
 
-	string genPhrase()
+	string genPhrase() NL_OVERRIDE
 	{
 		string ret;
 		ret = CContentObjective::genPhrase();
@@ -2355,7 +2355,7 @@ class CContentCast : public CContentObjective
 	vector<TCompilerVarName>	_Actions;
 	TCompilerVarName			_Place;
 
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	
 	{
 		numEntry = (uint32)_Actions.size();
@@ -2380,7 +2380,7 @@ class CContentCast : public CContentObjective
 		}
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		_Actions=TCompilerVarName::getPropertyArrayWithTextStaticDefaultName("action", STRING_MANAGER::sphrase, md, prim, "action");
 		_Place.init("p",  STRING_MANAGER::place, md, prim, "place");
@@ -2390,7 +2390,7 @@ public:
 		CContentObjective::init(md, prim);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 		ret = CContentObjective::genCode(md);
@@ -2428,7 +2428,7 @@ class CContentForage : public CContentObjective
 {
 	vector<TForageInfo>	_Mps;
 
-	virtual void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	virtual void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = (uint32)_Mps.size();
 		predef.resize(numEntry);
@@ -2444,7 +2444,7 @@ class CContentForage : public CContentObjective
 		}
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		vector<string> vs;
 		vs = md.getPropertyArray(prim, "item/quantity/quality", true, false);
@@ -2470,7 +2470,7 @@ public:
 		CContentObjective::init(md, prim);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 		ret = CContentObjective::genCode(md);
@@ -2511,7 +2511,7 @@ class CContentLoot : public CContentObjective
 	TLootMode			_Mode;
 	vector<TLootInfo>	_Items;
 
-	virtual void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	virtual void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		if (_Mode == lm_item)
 		{
@@ -2547,7 +2547,7 @@ class CContentLoot : public CContentObjective
 	}
 
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		_Mode = lm_unknown;
 		vector<string> vs;
@@ -2592,7 +2592,7 @@ public:
 		CContentObjective::init(md, prim);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 		ret = CContentObjective::genCode(md);
@@ -2631,7 +2631,7 @@ class CContentCraft : public CContentObjective
 	vector<TCraftInfo>	_Items;
 
 
-	virtual void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	virtual void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = (uint32)_Items.size();
 		predef.resize(numEntry);
@@ -2647,7 +2647,7 @@ class CContentCraft : public CContentObjective
 		}
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		vector<string> vs;
 		vs = md.getPropertyArray(prim, "item/quantity/quality", true, false);
@@ -2672,7 +2672,7 @@ public:
 		CContentObjective::init(md, prim);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 		ret = CContentObjective::genCode(md);
@@ -2701,7 +2701,7 @@ class CContentTarget : public CContentObjective
 	vector<TCompilerVarName>	_Faunas;
 	vector<TCompilerVarName>	_Races;
 	TCompilerVarName _Place;
-	virtual void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	virtual void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		// phrase 0 - 1 parameter
 		// phrase 1 - 2 parameters
@@ -2759,7 +2759,7 @@ class CContentTarget : public CContentObjective
 	}
 
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		_Npcs = TCompilerVarName::getPropertyArrayWithText("npc", STRING_MANAGER::bot, md, prim, "npcs_to_target");			
 		_Faunas = TCompilerVarName::getPropertyArrayWithText("fauna", STRING_MANAGER::creature_model, md, prim, "faunas_to_target" );						
@@ -2779,7 +2779,7 @@ public:
 		CContentObjective::init(md, prim);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 		ret = CContentObjective::genCode(md);
@@ -2838,7 +2838,7 @@ class CContentSell : public CContentObjective
 	vector<TSellInfo>	_Items;
 	TCompilerVarName				_Npc;
 
-	virtual void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	virtual void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = (uint32)_Items.size();
 		predef.resize(numEntry);
@@ -2859,7 +2859,7 @@ class CContentSell : public CContentObjective
 		}
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		vector<string> vs;
 		vs = md.getPropertyArray(prim, "item/quantity/quality", true, false);
@@ -2886,7 +2886,7 @@ public:
 		CContentObjective::init(md, prim);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 		ret = CContentObjective::genCode(md);
@@ -2925,7 +2925,7 @@ class CContentBuy : public CContentObjective
 	TCompilerVarName				_Npc;
 
 
-	virtual void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	virtual void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = (uint32)_Items.size();
 		predef.resize(numEntry);
@@ -2942,7 +2942,7 @@ class CContentBuy : public CContentObjective
 		}	
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		vector<string> vs;
 		vs = md.getPropertyArray(prim, "item/quantity/quality", true, false);
@@ -2969,7 +2969,7 @@ public:
 		CContentObjective::init(md, prim);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 		ret = CContentObjective::genCode(md);
@@ -3009,7 +3009,7 @@ class CContentGive : public CContentObjective
 	TCompilerVarName	_Npc;
 	bool				_QualSpec;
 
-	virtual void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	virtual void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = (uint32)_Items.size();
 		predef.resize(numEntry);
@@ -3040,7 +3040,7 @@ class CContentGive : public CContentObjective
 		}
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		vector<string> vs;
 		vs = md.getPropertyArray(prim, "item/quantity/quality", true, false);
@@ -3083,7 +3083,7 @@ public:
 		CContentObjective::init(md, prim);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 		ret = CContentObjective::genCode(md);
@@ -3113,7 +3113,7 @@ class CContentGiveMoney : public CContentObjective
 	TCompilerVarName _Amount;
 	TCompilerVarName _Npc;	
 
-	virtual void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	virtual void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 		predef.resize(1);
@@ -3124,14 +3124,14 @@ class CContentGiveMoney : public CContentObjective
 		
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		_Amount.init("amount", STRING_MANAGER::integer, md, prim, "amount");
 		_Npc.init("npc", STRING_MANAGER::bot, md, prim, "npc_name");
 		CContentObjective::init(md, prim);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 		ret = CContentObjective::genCode(md);
@@ -3152,7 +3152,7 @@ class CContentVisit : public CContentObjective
 	TCompilerVarName			_PlaceVar;
 	vector<TCompilerVarName>	_Items;
 
-	virtual void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	virtual void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 		predef.resize(1);
@@ -3164,7 +3164,7 @@ class CContentVisit : public CContentObjective
 		
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		
 		_Place.init("place", STRING_MANAGER::place, md, prim, "place");
@@ -3173,7 +3173,7 @@ public:
 		CContentObjective::init(md, prim);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 		ret = CContentObjective::genCode(md);
@@ -3204,12 +3204,12 @@ class CContentEscort : public CContentObjective
 	string			_GroupName;
 	bool			_SaveAll;
 
-	virtual void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	virtual void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
-	void init (CMissionData &md, IPrimitive *prim)
+	void init (CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		_GroupName = md.getProperty(prim, "group_to_escort", true, false);
 		string s = md.getProperty(prim, "save_all", true, false);
@@ -3218,7 +3218,7 @@ public:
 		CContentObjective::init(md, prim);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 		ret = CContentObjective::genCode(md);
@@ -3246,7 +3246,7 @@ class CContentSkill: public CContentObjective
 {
 	vector<TSkillInfo>	_Skills;
 
-	virtual void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	virtual void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = (uint32)_Skills.size();
 		predef.resize(numEntry);
@@ -3263,7 +3263,7 @@ class CContentSkill: public CContentObjective
 		}
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		vector<string>	vs;
 		vs = md.getPropertyArray(prim, "skill_name/level", true, false);
@@ -3288,7 +3288,7 @@ public:
 		CContentObjective::init(md, prim);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 		ret = CContentObjective::genCode(md);
@@ -3314,7 +3314,7 @@ class CContentMission: public CContentObjective
 {
 	vector<string>	_Missions;
 
-	virtual void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	virtual void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
@@ -3322,7 +3322,7 @@ class CContentMission: public CContentObjective
 public:
 	CContentMission(): _Prim(0) {}
 
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		_Missions = md.getPropertyArray(prim, "mission_names", true, false);
 		_Prim = prim;
@@ -3330,7 +3330,7 @@ public:
 		CContentObjective::init(md, prim);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 		ret = CContentObjective::genCode(md);
@@ -3366,20 +3366,20 @@ class CContentWaitAIMsg : public CContentObjective
 {
 	vector<string>	_MsgContent;
 
-	virtual void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	virtual void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		_MsgContent = md.getPropertyArray(prim, "msg_content", true, false);
 
 		CContentObjective::init(md, prim);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 		ret = CContentObjective::genCode(md);
@@ -3413,13 +3413,13 @@ class CContentQueueStart : public CContentObjective
 	vector<string>	_AIInstances;
 	vector<string>	_GroupsToSpawn;
 
-	virtual void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	virtual void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 	
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		_StepName = md.getProperty(prim, "step_name", true, true);
 		_QueueName = md.getProperty(prim, "queue_name", true, false);
@@ -3436,7 +3436,7 @@ public:
 		CContentObjective::init(md, prim);
 	}
 	
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		uint32 i;
 		string ret;
@@ -3495,12 +3495,12 @@ class CActionQueueEnd : public IStepContent
 	vector<string>	_AIInstances;
 	vector<string>	_GroupsToSpawn;
 	
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		IStepContent::init(md, prim);
 		_ActionName = md.getProperty(prim, "action_name", true, true);
@@ -3547,7 +3547,7 @@ public:
 		
 	}
 	
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		uint32 i;
 		string ret;
@@ -3589,20 +3589,20 @@ class CContentRingScenario: public CContentObjective
 {
 	string		_ScenarioTag;
 
-	virtual void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	virtual void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 	}
 
 public:
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		_ScenarioTag = md.getProperty(prim, "scenario_tag", true, false);
 
 		CContentObjective::init(md, prim);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 		ret = CContentObjective::genCode(md);

@@ -35,20 +35,20 @@ class CPVPDuel : public IPVPInterface
 {
 public:
 	/// return pvp relation between the two players
-	PVP_RELATION::TPVPRelation getPVPRelation( CCharacter * actor, CEntityBase * target, bool curative = false ) const;
+	PVP_RELATION::TPVPRelation getPVPRelation( CCharacter * actor, CEntityBase * target, bool curative = false ) const NL_OVERRIDE;
 	
 	///\name PVP MODE FEATURES DEPENDANTS
 	//@{
 	/// return true if actor can use gived teleport point
-	bool isTPValid( CCharacter* actor, CGameItemPtr TeleportTicket ) const;
+	bool isTPValid( CCharacter* actor, CGameItemPtr TeleportTicket ) const NL_OVERRIDE;
 	/// return true is respawn point is valid (use the same continent than character)
-	bool isRespawnValid( CCharacter* actor, CCharacterRespawnPoints::TRespawnPoint respawnPoint ) const { return true; }
+	bool isRespawnValid( CCharacter* actor, CCharacterRespawnPoints::TRespawnPoint respawnPoint ) const NL_OVERRIDE { return true; }
 	/// final blower killer in pvp faction
-	void finalBlowerKillerInPvPFaction( CCharacter * killer, PVP_CLAN::TPVPClan finalBlowerFaction, CCharacter * victimChar ) const {}
+	void finalBlowerKillerInPvPFaction( CCharacter * killer, PVP_CLAN::TPVPClan finalBlowerFaction, CCharacter * victimChar ) const NL_OVERRIDE {}
 	/// killer in PvP faction
-	void characterKillerInPvPFaction( CCharacter * character, PVP_CLAN::TPVPClan winnerFaction, sint32 factionPoint ) const {}
+	void characterKillerInPvPFaction( CCharacter * character, PVP_CLAN::TPVPClan winnerFaction, sint32 factionPoint ) const NL_OVERRIDE {}
 	/// killed character in PvP faction
-	void characterKilledInPvPFaction( CCharacter * character, PVP_CLAN::TPVPClan looserFaction, sint32 factionPoint ) const {}
+	void characterKilledInPvPFaction( CCharacter * character, PVP_CLAN::TPVPClan looserFaction, sint32 factionPoint ) const NL_OVERRIDE {}
 	//@}
 
 };

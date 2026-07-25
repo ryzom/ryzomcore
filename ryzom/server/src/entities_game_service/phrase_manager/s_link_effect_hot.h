@@ -44,7 +44,7 @@ public:
 	/**
 	 * apply the effects of the... effect
 	 */
-	virtual bool update(CTimerEvent * event, bool applyEffect);
+	virtual bool update(CTimerEvent * event, bool applyEffect) NL_OVERRIDE;
 
 protected:
 	void applyOnScore( CEntityBase * caster, CEntityBase * target,SCORES::TScores scoreType, sint32& value );

@@ -41,8 +41,8 @@ struct SContinentCfg : public IEasyCFG
 	
 	SContinentCfg ();
 
-	bool load (const std::string &filename);
-	bool save (const std::string &filename);
+	bool load (const std::string &filename) NL_OVERRIDE;
+	bool save (const std::string &filename) NL_OVERRIDE;
 	
 };
 

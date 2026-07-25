@@ -231,7 +231,7 @@ void getAllComboAction(uint8 nAM, CGroupList *pList, const map<string, CComboAct
 class	CHandlerKeysOpen: public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		// Initialisation of category combo box
 		CInterfaceManager	*pIM = CInterfaceManager::getInstance();
@@ -297,7 +297,7 @@ REGISTER_ACTION_HANDLER( CHandlerKeysOpen, "keys_open");
 class	CHandlerKeysNew: public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
 		pMCM->NewKey->CurrentEditCmdNb = -1;
@@ -310,7 +310,7 @@ REGISTER_ACTION_HANDLER( CHandlerKeysNew, "keys_new");
 class	CHandlerKeysAssign: public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase *pCaller, const string &/* Params */)
+	virtual void execute(CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
@@ -338,7 +338,7 @@ REGISTER_ACTION_HANDLER( CHandlerKeysAssign, "keys_assign");
 class	CHandlerKeysEdit: public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase *pCaller, const string &/* Params */)
+	virtual void execute(CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
 	{
 		CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
 
@@ -366,7 +366,7 @@ REGISTER_ACTION_HANDLER( CHandlerKeysEdit, "keys_edit");
 class	CHandlerKeysDelete: public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase *pCaller, const string &/* Params */)
+	virtual void execute(CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
 	{
 		CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
 		if (pCaller == NULL) return;
@@ -1170,7 +1170,7 @@ void CModalContainerEditCmd::onChangeAction()
 class	CHandlerEditCmdOpen: public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute(CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
 
@@ -1209,7 +1209,7 @@ REGISTER_ACTION_HANDLER( CHandlerEditCmdOpen, "editcmd_open");
 class	CHandlerEditCmdChangeCategory : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute(CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
 		if (Params == "editcmd")
@@ -1225,7 +1225,7 @@ REGISTER_ACTION_HANDLER( CHandlerEditCmdChangeCategory, "editcmd_change_category
 class	CHandlerEditCmdChangeAction : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute(CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
 		if (Params == "editcmd")
@@ -1241,7 +1241,7 @@ REGISTER_ACTION_HANDLER( CHandlerEditCmdChangeAction, "editcmd_change_action");
 class	CHandlerEditCmdChangeFirstParam: public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute(CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
 		if (Params == "editcmd")
@@ -1257,7 +1257,7 @@ REGISTER_ACTION_HANDLER( CHandlerEditCmdChangeFirstParam, "editcmd_change_first_
 class	CHandlerEditCmdChangeSecondParam: public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute(CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
 		if (Params == "editcmd")
@@ -1273,7 +1273,7 @@ REGISTER_ACTION_HANDLER( CHandlerEditCmdChangeSecondParam, "editcmd_change_secon
 class	CHandlerEditCmdDefineKey: public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase *pCaller, const string &Params)
+	virtual void execute(CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
 	{
 		//checkCurrentCommandValidity();
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
@@ -1289,7 +1289,7 @@ REGISTER_ACTION_HANDLER( CHandlerEditCmdDefineKey, "editcmd_cmd_def_key");
 class	CHandlerEditCmdOK: public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase *pCaller, const string &Params)
+	virtual void execute(CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
@@ -1329,7 +1329,7 @@ REGISTER_ACTION_HANDLER( CHandlerEditCmdOK, "editcmd_ok");
 class	CHandlerAssignKey: public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();

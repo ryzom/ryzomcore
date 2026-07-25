@@ -47,7 +47,7 @@ typedef NLMISC::CSmartPtr<IMsgCL> TMsgCL;
 class CMsgCLText: public IMsgCL
 {
 public:
-	const char* getName() const { return "CL_LOG"; }
+	const char* getName() const NL_OVERRIDE { return "CL_LOG"; }
 
 	CMsgCLText()
 	{
@@ -66,7 +66,7 @@ public:
 		_Txt= txt;
 	}
 
-	void serial(NLMISC::IStream& stream)
+	void serial(NLMISC::IStream& stream) NL_OVERRIDE
 	{
 		stream.serial(_Lang);
 		stream.serial(_Speaker);
@@ -92,7 +92,7 @@ typedef NLMISC::CSmartPtr<CMsgCLText> TMsgCLLog;
 class CMsgCLWinner: public IMsgCL
 {
 public:
-	const char* getName() const { return "CL_WINNER"; }
+	const char* getName() const NL_OVERRIDE { return "CL_WINNER"; }
 
 	CMsgCLWinner()
 	{
@@ -108,7 +108,7 @@ public:
 		_Winner= winner;
 	}
 
-	void serial(NLMISC::IStream& stream)
+	void serial(NLMISC::IStream& stream) NL_OVERRIDE
 	{
 		stream.serial(_Winner);
 	}
@@ -128,7 +128,7 @@ typedef NLMISC::CSmartPtr<CMsgCLWinner> TMsgCLWinner;
 class CMsgCLEnd: public IMsgCL
 {
 public:
-	const char* getName() const { return "CL_END"; }
+	const char* getName() const NL_OVERRIDE { return "CL_END"; }
 
 	CMsgCLEnd()
 	{
@@ -139,7 +139,7 @@ public:
 		msgBody->serial(*this);
 	}
 
-	void serial(NLMISC::IStream& stream)
+	void serial(NLMISC::IStream& stream) NL_OVERRIDE
 	{
 	}
 

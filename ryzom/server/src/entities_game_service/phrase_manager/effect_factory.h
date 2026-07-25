@@ -102,7 +102,7 @@ public:
 	};
 
 	/// buildEffect method
-	CSTimedEffect * buildEffect()
+	CSTimedEffect * buildEffect() NL_OVERRIDE
 	{
 		T *instance = new T;
 		if (!instance)

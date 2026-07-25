@@ -446,7 +446,7 @@ bool CEncyclopediaManager::isStringWaiting()
 // ***************************************************************************
 class CAHEncyClickAlbum : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		nlinfo("ency_click_album called");
 
@@ -460,7 +460,7 @@ REGISTER_ACTION_HANDLER( CAHEncyClickAlbum, "ency_click_album" );
 // ***************************************************************************
 class CAHEncyClickThema : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		nlinfo("ency_click_thema called");
 

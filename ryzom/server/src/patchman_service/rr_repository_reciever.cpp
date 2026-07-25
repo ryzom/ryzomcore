@@ -58,12 +58,12 @@ class CRepositoryReceiver:
 {
 public:
 	// CModuleBase specialisation implementation
-	bool initModule(const TParsedCommandLine &initInfo);
-	void onModuleUp(IModuleProxy *module);
-	void onModuleDown(IModuleProxy *module);
-	void onProcessModuleMessage(IModuleProxy *sender, const CMessage &msg);
-	void onModuleUpdate();
-	std::string buildModuleManifest() const;
+	bool initModule(const TParsedCommandLine &initInfo) NL_OVERRIDE;
+	void onModuleUp(IModuleProxy *module) NL_OVERRIDE;
+	void onModuleDown(IModuleProxy *module) NL_OVERRIDE;
+	void onProcessModuleMessage(IModuleProxy *sender, const CMessage &msg) NL_OVERRIDE;
+	void onModuleUpdate() NL_OVERRIDE;
+	std::string buildModuleManifest() const NL_OVERRIDE;
 
 	static const std::string &getHelperString()
 	{
@@ -71,7 +71,7 @@ public:
 		return help;
 	}
 
-	virtual bool isImmediateDispatchingSupported() const { return false; }
+	virtual bool isImmediateDispatchingSupported() const NL_OVERRIDE { return false; }
 
 public:
 	// remaining public interface

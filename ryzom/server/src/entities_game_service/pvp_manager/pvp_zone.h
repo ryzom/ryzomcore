@@ -78,7 +78,7 @@ public:
 
 public:
 	/// dtor
-	virtual ~IPVPZone();
+	virtual ~IPVPZone() NL_OVERRIDE;
 
 	/// is the zone active?
 	bool isActive() const { return _Active; }
@@ -165,14 +165,14 @@ private:
 class CPVPFreeZone : public IPVPZone
 {
 public:
-	PVP_MODE::TPVPMode getPVPMode() const { return PVP_MODE::PvpZoneFree; }
-	void addPlayer(CCharacter * user);
+	PVP_MODE::TPVPMode getPVPMode() const NL_OVERRIDE { return PVP_MODE::PvpZoneFree; }
+	void addPlayer(CCharacter * user) NL_OVERRIDE;
 
 	/// return pvp relation between the two players
-	PVP_RELATION::TPVPRelation getPVPRelation( CCharacter * user, CEntityBase * target ) const;
+	PVP_RELATION::TPVPRelation getPVPRelation( CCharacter * user, CEntityBase * target ) const NL_OVERRIDE;
 
 private:
-	bool leavePVP(CCharacter * user, IPVP::TEndType type);
+	bool leavePVP(CCharacter * user, IPVP::TEndType type) NL_OVERRIDE;
 
 	/*
 	/// Return true for players in the pvp zone, false for anyone else (including non-players) ('attackable' will be used instead)
@@ -198,9 +198,9 @@ public:
 	/// ctor
 	CPVPVersusZone(PVP_CLAN::TPVPClan clan1, PVP_CLAN::TPVPClan clan2, bool giveFP);
 
-	PVP_MODE::TPVPMode getPVPMode() const { return PVP_MODE::PvpZoneFaction; }
-	void setActive(bool active);
-	void addPlayer(CCharacter * user);
+	PVP_MODE::TPVPMode getPVPMode() const NL_OVERRIDE { return PVP_MODE::PvpZoneFaction; }
+	void setActive(bool active) NL_OVERRIDE;
+	void addPlayer(CCharacter * user) NL_OVERRIDE;
 
 	void giveFactionPoints(bool giveFP);
 	bool giveFactionPoints() const { return _GiveFactionPoints; }
@@ -210,12 +210,12 @@ public:
 	// return pvp clan of a character
 	PVP_CLAN::TPVPClan getCharacterClan( const NLMISC::CEntityId& character ) const;
 
-	void dumpZone(NLMISC::CLog * log, bool dumpUsers = true) const;
+	void dumpZone(NLMISC::CLog * log, bool dumpUsers = true) const NL_OVERRIDE;
 
 	static PVP_CLAN::TPVPClan getPlayerClan(CCharacter * user, PVP_CLAN::TPVPClan clan1, PVP_CLAN::TPVPClan clan2 );
 
 	/// return pvp relation between the two players
-	PVP_RELATION::TPVPRelation getPVPRelation( CCharacter * user, CEntityBase * target ) const;
+	PVP_RELATION::TPVPRelation getPVPRelation( CCharacter * user, CEntityBase * target ) const NL_OVERRIDE;
 	
 private:
 
@@ -227,9 +227,9 @@ private:
 
 	void setPlayerClanInMirror(CCharacter * user, PVP_CLAN::TPVPClan clan) const;
 
-	bool leavePVP(CCharacter * user, IPVP::TEndType type);
+	bool leavePVP(CCharacter * user, IPVP::TEndType type) NL_OVERRIDE;
 
-	void userHurtsTarget(CCharacter * user, CCharacter * target);
+	void userHurtsTarget(CCharacter * user, CCharacter * target) NL_OVERRIDE;
 
 	/*
 	/// Return false for players according to the rules, and for non-players ('attackable' will be used instead)
@@ -264,14 +264,14 @@ private:
 class CPVPGuildZone : public IPVPZone
 {
 public:
-	PVP_MODE::TPVPMode getPVPMode() const { return PVP_MODE::PvpZoneGuild; }
-	void addPlayer(CCharacter * user);
+	PVP_MODE::TPVPMode getPVPMode() const NL_OVERRIDE { return PVP_MODE::PvpZoneGuild; }
+	void addPlayer(CCharacter * user) NL_OVERRIDE;
 
 	/// return pvp relation between the two players
-	PVP_RELATION::TPVPRelation getPVPRelation( CCharacter * user, CEntityBase * target ) const;
+	PVP_RELATION::TPVPRelation getPVPRelation( CCharacter * user, CEntityBase * target ) const NL_OVERRIDE;
 	
 private:
-	bool leavePVP(CCharacter * user, IPVP::TEndType type);
+	bool leavePVP(CCharacter * user, IPVP::TEndType type) NL_OVERRIDE;
 
 	/*
 	/// Return true for players in the pvp zone (everyone for training purpose), false for anyone else (including non-players) ('attackable' will be used instead)
@@ -301,7 +301,7 @@ public:
 	 * Precondition: kill not null.
 	 * For outpost zones, it's true whether the killer is a player character or a bot.
 	 */
-	virtual bool hasDeathPenaltyFactorForVictimsOf( CEntityBase *killer ) const;
+	virtual bool hasDeathPenaltyFactorForVictimsOf( CEntityBase *killer ) const NL_OVERRIDE;
 };
 
 #endif // RY_PVP_ZONE

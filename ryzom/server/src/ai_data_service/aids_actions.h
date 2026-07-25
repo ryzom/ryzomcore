@@ -48,14 +48,14 @@ public:
 	//----------------------------------------------------------------------------
 	// inheritted virtual interface
 
-	virtual void openFile(const std::string &fileName);
-	virtual void closeFile(const std::string &fileName);
+	virtual void openFile(const std::string &fileName) NL_OVERRIDE;
+	virtual void closeFile(const std::string &fileName) NL_OVERRIDE;
 	virtual void begin(const std::string &contextName);
 	virtual void end(const std::string &contextName);
-	virtual void execute(uint64 action,const std::vector <CAIActions::CArg> &args);
+	virtual void execute(uint64 action,const std::vector <CAIActions::CArg> &args) NL_OVERRIDE;
 
-	virtual void	begin(uint32 context)	{}
-	virtual void	end(uint32 context)	{}
+	virtual void	begin(uint32 context) NL_OVERRIDE	{}
+	virtual void	end(uint32 context) NL_OVERRIDE	{}
 
 	//----------------------------------------------------------------------------
 	// public singleton data
@@ -66,7 +66,7 @@ private:
 	//----------------------------------------------------------------------------
 	// This is a singleton class so make constructor private
 	CAIDSActions() {}
-	~CAIDSActions() {}
+	~CAIDSActions() NL_OVERRIDE {}
 
 	//----------------------------------------------------------------------------
 	// the singleton class instance

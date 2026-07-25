@@ -401,10 +401,10 @@ public:
 	std::string getEffect4() const { return ClientSheetsStrings.get(IdEffect4); }
 
 	/// Build the sheet from an external script.
-	virtual void build(const NLGEORGES::UFormElm &item);
+	virtual void build(const NLGEORGES::UFormElm &item) NL_OVERRIDE;
 
 	/// Serialize character sheet into binary data file.
-	virtual void serial(NLMISC::IStream &f);
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 	/// true if the item can put in the slot e
 	bool		hasSlot(SLOTTYPE::TSlotType e) const {return (SlotBF&(SINT64_CONSTANT(1)<<e))!=0;}

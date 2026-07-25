@@ -70,7 +70,7 @@ void refreshMissionHelp(CSheetHelpSetup &setup, const CPrerequisitInfos &infos);
 
 class CPetAnimalItemInfoWaiter : public IItemInfoWaiter
 {
-	void infoReceived()
+	void infoReceived() NL_OVERRIDE
 	{
 		//ItemSheet
 		//ItemSlotId
@@ -140,15 +140,15 @@ private:
 		CCtrlBaseButtonPtr	KeepButton;
 	public:
 		CInfoWindow() : CtrlSheet(NULL) {KeepMode= false;}
-		virtual void	infoReceived();
-		virtual void	missionInfoReceived(const CPrerequisitInfos &infos);
+		virtual void	infoReceived() NL_OVERRIDE;
+		virtual void	missionInfoReceived(const CPrerequisitInfos &infos) NL_OVERRIDE;
 	};
 
 	// update the brick help window when weight of hands has changed
 	class CFittedWeaponWeightObserver : public NLMISC::ICDBNode::IPropertyObserver
 	{
 	public:
-		virtual void update(NLMISC::ICDBNode* node);
+		virtual void update(NLMISC::ICDBNode* node) NL_OVERRIDE;
 	};
 
 

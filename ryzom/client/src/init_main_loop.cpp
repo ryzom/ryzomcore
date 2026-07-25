@@ -300,7 +300,7 @@ struct CStatThread : public NLMISC::IRunnable
 #endif
 	}
 
-	void run()
+	void run() NL_OVERRIDE
 	{
 		//nlinfo("run CStatThread");
 		bool connected = false;

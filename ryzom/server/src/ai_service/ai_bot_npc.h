@@ -51,9 +51,9 @@ public:
 
 	void updateChat(CAIState const* state);
 	
-	virtual void processEvent(CCombatInterface::CEvent const& event);
+	virtual void processEvent(CCombatInterface::CEvent const& event) NL_OVERRIDE;
 	
-	CAIEntityPhysical& getPhysical() { return *this; }
+	CAIEntityPhysical& getPhysical() NL_OVERRIDE { return *this; }
 	
 	/// @name Chat parameter management 
 	//@{
@@ -70,19 +70,19 @@ public:
 	uint getNbActiveDynChats() { return _NbCurrentDynChats; }
 	
 	/// Dispatching message to EGS to describe chat possibilities
-	void sendInfoToEGS() const;
+	void sendInfoToEGS() const NL_OVERRIDE;
 	
-	virtual std::vector<std::string> getMultiLineInfoString() const;
+	virtual std::vector<std::string> getMultiLineInfoString() const NL_OVERRIDE;
 	
 	CBotNpc& getPersistent() const;
 	
-	virtual RYZOMID::TTypeId getRyzomType() const { return RYZOMID::npc; }
+	virtual RYZOMID::TTypeId getRyzomType() const NL_OVERRIDE { return RYZOMID::npc; }
 	
-	virtual	bool isBotAttackable() const;
+	virtual	bool isBotAttackable() const NL_OVERRIDE;
 	
-	virtual void propagateAggro() const;
+	virtual void propagateAggro() const NL_OVERRIDE;
 	
-	float getReturnDistCheck() const;
+	float getReturnDistCheck() const NL_OVERRIDE;
 
 	void setPlayerController(CBotPlayer* player);
 
@@ -138,21 +138,21 @@ public:
 	
 	///@name ICreature overloads
 	//@{
-	virtual uint8 ColorHead() const { return _ColorHead; }
-	virtual uint8 ColorArms() const { return _ColorArms; }
-	virtual uint8 ColorHands() const { return _ColorHands; }
-	virtual uint8 ColorBody() const { return _ColorBody; }
-	virtual uint8 ColorLegs() const { return _ColorLegs; }
-	virtual uint8 ColorFeets() const { return _ColorFeets; }
+	virtual uint8 ColorHead() const NL_OVERRIDE { return _ColorHead; }
+	virtual uint8 ColorArms() const NL_OVERRIDE { return _ColorArms; }
+	virtual uint8 ColorHands() const NL_OVERRIDE { return _ColorHands; }
+	virtual uint8 ColorBody() const NL_OVERRIDE { return _ColorBody; }
+	virtual uint8 ColorLegs() const NL_OVERRIDE { return _ColorLegs; }
+	virtual uint8 ColorFeets() const NL_OVERRIDE { return _ColorFeets; }
 	
-	virtual NLMISC::CSheetId const& LeftItem() const
+	virtual NLMISC::CSheetId const& LeftItem() const NL_OVERRIDE
 	{
 		if (_LeftItem!=NLMISC::CSheetId::Unknown)
 			return _LeftItem;
 		else
 			return this->CCreatureProxy::LeftItem();
 	}
-	virtual NLMISC::CSheetId const& RightItem() const
+	virtual NLMISC::CSheetId const& RightItem() const NL_OVERRIDE
 	{
 		if (_RightItem!=NLMISC::CSheetId::Unknown)
 			return _RightItem;
@@ -216,28 +216,28 @@ public:
 public:
 	CBotNpc(CGroup* owner, CAIAliasDescriptionNode* alias = NULL);
 	CBotNpc(CGroup* owner, uint32 alias, std::string const& name);
-	virtual ~CBotNpc();
+	virtual ~CBotNpc() NL_OVERRIDE;
 	
 	void init();
 	
-	RYZOMID::TTypeId getRyzomType() const { return RYZOMID::npc; }
+	RYZOMID::TTypeId getRyzomType() const NL_OVERRIDE { return RYZOMID::npc; }
 	
 	CSpawnBotNpc* getSpawn();
 	CSpawnBotNpc const* getSpawn() const;
 	
-	CAIS::CCounter& getSpawnCounter();
+	CAIS::CCounter& getSpawnCounter() NL_OVERRIDE;
 	
 	void calcSpawnPos(RYAI_MAP_CRUNCH::CWorldMap const& worldMap);
 	
-	void getSpawnPos(CAIVector& triedPos, RYAI_MAP_CRUNCH::CWorldPosition& pos, RYAI_MAP_CRUNCH::CWorldMap const& worldMap, CAngle& spawnTheta);
+	void getSpawnPos(CAIVector& triedPos, RYAI_MAP_CRUNCH::CWorldPosition& pos, RYAI_MAP_CRUNCH::CWorldMap const& worldMap, CAngle& spawnTheta) NL_OVERRIDE;
 	
-	CSpawnBot* getSpawnBot(TDataSetRow const& row, NLMISC::CEntityId const& id, float radius);
+	CSpawnBot* getSpawnBot(TDataSetRow const& row, NLMISC::CEntityId const& id, float radius) NL_OVERRIDE;
 	
 	// spawn & despawn --------------------------------------------------
-	virtual bool spawn();
-	virtual void despawnBot();
+	virtual bool spawn() NL_OVERRIDE;
+	virtual void despawnBot() NL_OVERRIDE;
 	
-	bool reSpawn(bool sendMessage = true);
+	bool reSpawn(bool sendMessage = true) NL_OVERRIDE;
 	
 	//------------------------------------------------------------
 	// accessing the parent mgr, group, etc 
@@ -292,25 +292,25 @@ public:
 	void fillDescriptionMsg(RYMSG::TGenNpcDescMsg& msg) const;
 	
 	
-	virtual std::string	getOneLineInfoString() const { return std::string("NPC bot '") + getName() + "'"; }
+	virtual std::string	getOneLineInfoString() const NL_OVERRIDE { return std::string("NPC bot '") + getName() + "'"; }
 	
-	virtual AISHEETS::ICreatureCPtr getSheet() const { return _Sheet.getPtr(); }
+	virtual AISHEETS::ICreatureCPtr getSheet() const NL_OVERRIDE { return _Sheet.getPtr(); }
 
-	virtual void setSheet(AISHEETS::ICreatureCPtr const& sheet);
+	virtual void setSheet(AISHEETS::ICreatureCPtr const& sheet) NL_OVERRIDE;
 
-	virtual bool isSheetValid() const
+	virtual bool isSheetValid() const NL_OVERRIDE
 	{
 		return _Sheet!=NULL && _Sheet->isValid();
 	}
 	
 	void setOutpostSide(OUTPOSTENUMS::TPVPSide side) { _OutpostSide = side; }
 	
-	virtual bool getFaunaBotUseBotName() const;
+	virtual bool getFaunaBotUseBotName() const NL_OVERRIDE;
 	
 protected:
-	virtual void sheetChanged();
+	virtual void sheetChanged() NL_OVERRIDE;
 	bool finalizeSpawnNpc();
-	virtual void initAdditionalMirrorValues();
+	virtual void initAdditionalMirrorValues() NL_OVERRIDE;
 		
 protected:
 	// stuff supplied by CAIBot ------------------

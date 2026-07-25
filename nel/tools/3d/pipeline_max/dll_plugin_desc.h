@@ -76,8 +76,8 @@ public:
 class CDllPluginDescBuiltin : public IDllPluginDescInternal
 {
 public:
-	virtual const ucchar *displayName() const;
-	virtual const ucchar *internalName() const;
+	virtual const ucchar *displayName() const NL_OVERRIDE;
+	virtual const ucchar *internalName() const NL_OVERRIDE;
 }; /* class CDllPluginDescBuiltin */
 
 extern const CDllPluginDescBuiltin DllPluginDescBuiltin;
@@ -91,8 +91,8 @@ extern const CDllPluginDescBuiltin DllPluginDescBuiltin;
 class CDllPluginDescScript : public IDllPluginDescInternal
 {
 public:
-	virtual const ucchar *displayName() const;
-	virtual const ucchar *internalName() const;
+	virtual const ucchar *displayName() const NL_OVERRIDE;
+	virtual const ucchar *internalName() const NL_OVERRIDE;
 }; /* class CDllPluginDescScript */
 
 extern const CDllPluginDescScript DllPluginDescScript;

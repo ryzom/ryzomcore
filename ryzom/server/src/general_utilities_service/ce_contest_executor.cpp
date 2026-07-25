@@ -109,37 +109,37 @@ private:
 
 public:
 	// GUS::IModule methods
-	bool initialiseModule(const NLMISC::CSString& rawArgs);
-	void release();
-	void tickUpdate(NLMISC::TGameCycle tickNumber);
-	void moduleUp(GUSNET::CRemoteModuleViaConnection* remoteModule);
-	void moduleDown(GUSNET::CRemoteModuleViaConnection* remoteModule);
-	void receiveModuleMessage(GUSNET::CModuleMessage& msg);
-	NLMISC::CSString getState() const;
-	NLMISC::CSString getName() const;
-	NLMISC::CSString getParameters() const;
-	void displayModule() const;
+	bool initialiseModule(const NLMISC::CSString& rawArgs) NL_OVERRIDE;
+	void release() NL_OVERRIDE;
+	void tickUpdate(NLMISC::TGameCycle tickNumber) NL_OVERRIDE;
+	void moduleUp(GUSNET::CRemoteModuleViaConnection* remoteModule) NL_OVERRIDE;
+	void moduleDown(GUSNET::CRemoteModuleViaConnection* remoteModule) NL_OVERRIDE;
+	void receiveModuleMessage(GUSNET::CModuleMessage& msg) NL_OVERRIDE;
+	NLMISC::CSString getState() const NL_OVERRIDE;
+	NLMISC::CSString getName() const NL_OVERRIDE;
+	NLMISC::CSString getParameters() const NL_OVERRIDE;
+	void displayModule() const NL_OVERRIDE;
 
 	// IChatCallback
-	void receiveMessage(GUS::TClientId clientId,const ucstring& txt);
-	void clientReadyInChannel(CChatChannel *chatChannel, GUS::TClientId clientId) ;
-	bool isClientAllowedInChatChannel(GUS::TClientId clientId, CChatChannel *chatChannel);
+	void receiveMessage(GUS::TClientId clientId,const ucstring& txt) NL_OVERRIDE;
+	void clientReadyInChannel(CChatChannel *chatChannel, GUS::TClientId clientId) NL_OVERRIDE ;
+	bool isClientAllowedInChatChannel(GUS::TClientId clientId, CChatChannel *chatChannel) NL_OVERRIDE;
 
 
 public:
 	// CContestExecutor methods
-	void beginContest(uint32 ctrlModuleId, const NLMISC::CSString& name);
-	void setTitle(const NLMISC::CSString& txt);
-	void addText(const NLMISC::CSString& speakerName,const NLMISC::CSString& txt);
-	void addAnswer(const NLMISC::CSString& answer);
-	void submitAnswer(TClientId clientId,const NLMISC::CSString& characterName,const ucstring& answer);
-	void acknowledgeWinners(const vector<CSString>& winners);
-	void endContest();
-	void display();
+	void beginContest(uint32 ctrlModuleId, const NLMISC::CSString& name) NL_OVERRIDE;
+	void setTitle(const NLMISC::CSString& txt) NL_OVERRIDE;
+	void addText(const NLMISC::CSString& speakerName,const NLMISC::CSString& txt) NL_OVERRIDE;
+	void addAnswer(const NLMISC::CSString& answer) NL_OVERRIDE;
+	void submitAnswer(TClientId clientId,const NLMISC::CSString& characterName,const ucstring& answer) NL_OVERRIDE;
+	void acknowledgeWinners(const vector<CSString>& winners) NL_OVERRIDE;
+	void endContest() NL_OVERRIDE;
+	void display() NL_OVERRIDE;
 
 	// deal with system messages
 	void initChatTexts();
-	bool readChatTextFile(const NLMISC::CSString& fileName);
+	bool readChatTextFile(const NLMISC::CSString& fileName) NL_OVERRIDE;
 	const ucstring& getChatText(const CSString& msgName);
 
 	// send a log message to the loggers
@@ -600,7 +600,7 @@ void CContestExecutorImplementation::endContest()
 class CCEChatCallback: public IChatCallback
 {
 public:
-	void receiveMessage(TClientId clientId,const ucstring& txt);
+	void receiveMessage(TClientId clientId,const ucstring& txt) NL_OVERRIDE;
 };
 
 void CCEChatCallback::receiveMessage(TClientId clientId,const ucstring& txt)

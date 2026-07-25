@@ -62,7 +62,7 @@ public:
 		}		
 	}
 
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CAddEffectsMessage");
 
@@ -71,7 +71,7 @@ public:
 		propertyCont ("EffectIds", PropUInt32, EffectIds);
 		propertyCont ("Families", PropUInt16, Families);
 	}
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 
 public:
 	std::vector< TDataSetRow >		Creators;
@@ -93,7 +93,7 @@ public:
 	/// Constructor
 	CRemoveEffectsMessage() {}
 
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CRemoveEffectsMessage");
 
@@ -123,7 +123,7 @@ public:
 		}		
 	}
 
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 
 public:
 	std::vector< TDataSetRow >	Entities;

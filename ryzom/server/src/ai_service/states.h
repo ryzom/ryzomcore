@@ -49,7 +49,7 @@ public:
 	, CAliasChild<CStateMachine>(const_cast<CStateMachine*>(container), alias, name)
 	{}
 	
-	virtual ~CAIState()
+	virtual ~CAIState() NL_OVERRIDE
 	{}
 
 	std::string	getIndexString	()	const;
@@ -68,9 +68,9 @@ public:
 		return	_Chats;
 	}
 	
-	IAliasCont*			getAliasCont		(AITYPES::TAIType	type);
-	CAliasTreeOwner*	createChild			(IAliasCont	*cont,	CAIAliasDescriptionNode	*aliasTree);
-	void				updateDependencies	(const	CAIAliasDescriptionNode	&aliasTree, CAliasTreeOwner *aliasTreeOwner);
+	IAliasCont*			getAliasCont		(AITYPES::TAIType	type) NL_OVERRIDE;
+	CAliasTreeOwner*	createChild			(IAliasCont	*cont,	CAIAliasDescriptionNode	*aliasTree) NL_OVERRIDE;
+	void				updateDependencies	(const	CAIAliasDescriptionNode	&aliasTree, CAliasTreeOwner *aliasTreeOwner) NL_OVERRIDE;
 
 protected:
 	CAliasCont<CAIStateProfile>	_Profiles;
@@ -80,7 +80,7 @@ protected:
 class CAIStatePunctual: public CAIState  
 {
 public:
-	virtual	bool	isPositional	()	const
+	virtual	bool	isPositional	()	const NL_OVERRIDE
 	{
 		return false;
 	}
@@ -123,7 +123,7 @@ public:
 	
 	bool	contains	(const	CAIVector	&pos)	const;
 
-	bool	calcRandomPos(CAIPos &pos)	const;	
+	bool	calcRandomPos(CAIPos &pos)	const NL_OVERRIDE;	
 	
 protected:
 private:
@@ -150,7 +150,7 @@ public:
 	{
 	}
 	
-	virtual	bool	isPositional	()	const
+	virtual	bool	isPositional	()	const NL_OVERRIDE
 	{
 		return true;
 	}

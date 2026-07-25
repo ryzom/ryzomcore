@@ -44,9 +44,9 @@ public:
 	/// Build the fx from an external script.
 	void buildWithPrefix(const NLGEORGES::UFormElm &item, const std::string &prefix = "");
 	// from CEntitySheet
-	void build(const NLGEORGES::UFormElm &item);
+	void build(const NLGEORGES::UFormElm &item) NL_OVERRIDE;
 	/// Serialize sheet into binary data file.
-	void serial(NLMISC::IStream &f);
+	void serial(NLMISC::IStream &f) NL_OVERRIDE;
 };
 
 

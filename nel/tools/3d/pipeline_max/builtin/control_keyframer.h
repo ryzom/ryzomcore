@@ -191,15 +191,15 @@ class CControlKeyFramerBase : public CReferenceTarget
 {
 public:
 	CControlKeyFramerBase(CScene *scene, uint16 defaultChunkId, uint16 keyChunkId, uint keySize);
-	virtual ~CControlKeyFramerBase();
+	virtual ~CControlKeyFramerBase() NL_OVERRIDE;
 
 	// inherited
-	virtual void parse(uint16 version, uint filter = 0);
-	virtual void clean();
-	virtual void build(uint16 version, uint filter = 0);
-	virtual void disown();
-	virtual void init();
-	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "", uint filter = 0) const;
+	virtual void parse(uint16 version, uint filter = 0) NL_OVERRIDE;
+	virtual void clean() NL_OVERRIDE;
+	virtual void build(uint16 version, uint filter = 0) NL_OVERRIDE;
+	virtual void disown() NL_OVERRIDE;
+	virtual void init() NL_OVERRIDE;
+	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "", uint filter = 0) const NL_OVERRIDE;
 
 	// read access
 	/// Number of keys in the key table (0 when absent or when the table size is not an exact
@@ -231,7 +231,7 @@ public:
 
 protected:
 	// inherited
-	virtual IStorageObject *createChunkById(uint16 id, bool container);
+	virtual IStorageObject *createChunkById(uint16 id, bool container) NL_OVERRIDE;
 
 private:
 	bool isKnownChunkId(uint16 id) const;
@@ -256,13 +256,13 @@ private:
 	{                                                                                             \
 	public:                                                                                       \
 		className(CScene *scene);                                                                 \
-		virtual ~className();                                                                     \
+		virtual ~className() NL_OVERRIDE;                                                         \
 		static const ucstring DisplayName;                                                        \
 		static const char *InternalName;                                                          \
 		static const NLMISC::CClassId ClassId;                                                    \
 		static const TSClassId SuperClassId;                                                      \
-		virtual bool inherits(const NLMISC::CClassId classId) const;                              \
-		virtual const ISceneClassDesc *classDesc() const;                                         \
+		virtual bool inherits(const NLMISC::CClassId classId) const NL_OVERRIDE;                  \
+		virtual const ISceneClassDesc *classDesc() const NL_OVERRIDE;                             \
 		inline const keyType *keys() const { return (const keyType *)keyData(); }                 \
 	};                                                                                            \
 	typedef CSceneClassDesc<className> className##ClassDesc;                                      \

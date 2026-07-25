@@ -214,15 +214,15 @@ public:
 public:
 
 	CDBCtrlSheet(const TCtorParam &param);
-	~CDBCtrlSheet();
+	~CDBCtrlSheet() NL_OVERRIDE;
 
-	virtual bool parse(xmlNodePtr cur, CInterfaceGroup * parentGroup);
+	virtual bool parse(xmlNodePtr cur, CInterfaceGroup * parentGroup) NL_OVERRIDE;
 
-	virtual void updateCoords();
-	virtual void draw();
+	virtual void updateCoords() NL_OVERRIDE;
+	virtual void draw() NL_OVERRIDE;
 	void drawSheet (sint32 scrX, sint32 scrY, bool draging, bool showSelectionBorder = true);
 
-	virtual bool handleEvent (const NLGUI::CEventDescriptor &event);
+	virtual bool handleEvent (const NLGUI::CEventDescriptor &event) NL_OVERRIDE;
 
 	void setActionOnLeftClick (const std::string &ActionHandlerName) { _AHOnLeftClick = CAHManager::getInstance()->getAH(ActionHandlerName, _AHLeftClickParams); }
 	void setActionOnRightClick (const std::string &ActionHandlerName) { _AHOnRightClick = CAHManager::getInstance()->getAH(ActionHandlerName, _AHRightClickParams); }
@@ -400,9 +400,9 @@ public:
 	NLMISC::CRGBA			getSheetColor() const {return _SheetColor;}
 
 	/// Special ContextHelp for ctrl sheet.
-	virtual void			getContextHelp(std::string &help) const;
+	virtual void			getContextHelp(std::string &help) const NL_OVERRIDE;
 
-	virtual void			getContextHelpToolTip(std::string &help) const;
+	virtual void			getContextHelpToolTip(std::string &help) const NL_OVERRIDE;
 
 
 	/** true if an item of another ctrlSheet can be dropped on this slot.
@@ -616,10 +616,10 @@ public:
 	// true if an item that respect Carac requirement. NB: still return true if not an item
 	bool	checkItemRequirement();
 
-	virtual void serial(NLMISC::IStream &f);
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 	// From CCtrlBase, for phrases, we use a special, enhanced tooltip window
-	virtual std::string getContextHelpWindowName() const;
+	virtual std::string getContextHelpWindowName() const NL_OVERRIDE;
 
 	// For auras, powers, etc. set the range of ticks during which regen occurs
 	void	setRegenTickRange(const CTickRange &tickRange);
@@ -939,7 +939,7 @@ struct CDBCtrlSheetPtrUserType : public CInterfaceExprUserType
   // ctor
   CDBCtrlSheetPtrUserType(CDBCtrlSheet *sheet = NULL) : Sheet(sheet) {}
   // from CInterfaceExprUserType
-  virtual CInterfaceExprUserType *clone() const { return new CDBCtrlSheetPtrUserType(*this); }
+  virtual CInterfaceExprUserType *clone() const NL_OVERRIDE { return new CDBCtrlSheetPtrUserType(*this); }
 };
 
 

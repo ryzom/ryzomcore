@@ -111,7 +111,7 @@ private:
 		CFileClassCallback(CAsyncPlayerLoad* load, uint charId) : Load(load), CharId(charId)	{}
 		uint								CharId;
 		NLMISC::CSmartPtr<CAsyncPlayerLoad>	Load;
-		void				callback(const CFileDescriptionContainer& fileList)
+		void				callback(const CFileDescriptionContainer& fileList) NL_OVERRIDE
 		{
 			if (Load)
 			{
@@ -142,7 +142,7 @@ private:
 		CFileCallback(CAsyncPlayerLoad* load, uint charId) : Load(load), CharId(charId)	{}
 		uint								CharId;
 		NLMISC::CSmartPtr<CAsyncPlayerLoad>	Load;
-		void				callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream)
+		void				callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream) NL_OVERRIDE
 		{
 			if (Load)
 			{

@@ -39,10 +39,10 @@ public:
 
 	// Constructor
 	CGroupHTMLQCM(const TCtorParam &param);
-	~CGroupHTMLQCM();
+	~CGroupHTMLQCM() NL_OVERRIDE;
 
 	// From CGroupHTML
-	virtual void addText (const char * buf, int len);
+	virtual void addText (const char * buf, int len) NL_OVERRIDE;
 
 private:
 

@@ -107,19 +107,19 @@ public:
 public:
 	CR2SessionBackupModule();
 	
-	~CR2SessionBackupModule();
+	~CR2SessionBackupModule() NL_OVERRIDE;
 
 	virtual void onServiceUp(const std::string &serviceName, uint16 serviceId);
 	
-	virtual void onModuleUp(NLNET::IModuleProxy *moduleProxy);
+	virtual void onModuleUp(NLNET::IModuleProxy *moduleProxy) NL_OVERRIDE;
 	
-	virtual void onModuleDown(NLNET::IModuleProxy *moduleProxy);
+	virtual void onModuleDown(NLNET::IModuleProxy *moduleProxy) NL_OVERRIDE;
 
-	virtual void onModuleUpdate();
+	virtual void onModuleUpdate() NL_OVERRIDE;
 	
-	virtual void registerDss(NLNET::IModuleProxy *moduleProxy, TShardId shardId);
+	virtual void registerDss(NLNET::IModuleProxy *moduleProxy, TShardId shardId) NL_OVERRIDE;
 
-	virtual bool onProcessModuleMessage(NLNET::IModuleProxy *senderModuleProxy, const NLNET::CMessage &message);
+	virtual bool onProcessModuleMessage(NLNET::IModuleProxy *senderModuleProxy, const NLNET::CMessage &message) NL_OVERRIDE;
 
 	//virtual void onModuleSecurityChange(NLNET::IModuleProxy *moduleProxy);
 
@@ -131,11 +131,11 @@ public:
 	
 	// From Su
 	// The DSS delete the session_*, the DBM remove entries from index
-	virtual void reportDeletedSessions(NLNET::IModuleProxy *moduleProxy, const std::vector<TSessionId>& sessionId);
+	virtual void reportDeletedSessions(NLNET::IModuleProxy *moduleProxy, const std::vector<TSessionId>& sessionId) NL_OVERRIDE;
 	// Same as reportSavedSessions but DSS remove local map
-	virtual void reportHibernatedSessions(NLNET::IModuleProxy *moduleProxy, const std::vector<TSessionId>& session);
+	virtual void reportHibernatedSessions(NLNET::IModuleProxy *moduleProxy, const std::vector<TSessionId>& session) NL_OVERRIDE;
 	// Update local index
-	virtual void reportSavedSessions(NLNET::IModuleProxy *moduleProxy, const std::vector< TR2SbmSessionInfo > &sessionInfos);
+	virtual void reportSavedSessions(NLNET::IModuleProxy *moduleProxy, const std::vector< TR2SbmSessionInfo > &sessionInfos) NL_OVERRIDE;
 
 	//implement private Callback CHibernatingSessionListCallback
 	void resetHibernatingSessionList(TSessionInfos&  sessions);
@@ -256,7 +256,7 @@ public:
 	COverrideRingAccessCallback(CR2SessionBackupModule* module) :_Module(module){}
 
 	// call back for bs file asynchronous read
-	void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream)
+	void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream) NL_OVERRIDE
 	{
 		nldebug("R2SBM: BSIcb COverrideRingAccessCallback::callback() for file: %s",fileDescription.FileName.c_str());
 		CR2SessionBackupModule::TOverrideRingAccess access;
@@ -425,7 +425,7 @@ public:
 	}
 
 	// call back for bs file asynchronous read
-	void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream)
+	void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream) NL_OVERRIDE
 	{
 		nldebug("R2SBM: BSIcb CHibernatingSessionListCallback::callback() for file: %s",fileDescription.FileName.c_str());
 		CR2SessionBackupModule::TSessionInfos sessions;
@@ -444,7 +444,7 @@ public:
 	CSaveSessionListCallback(CR2SessionBackupModule* module) :CHibernatingSessionListCallback(module){}
 
 	// call back for bs file asynchronous read
-	void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream)
+	void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream) NL_OVERRIDE
 	{	
 		nldebug("R2SBM: BSIcb CSaveSessionListCallback::callback() for file: %s",fileDescription.FileName.c_str());
 		CR2SessionBackupModule::TSessionInfos sessions;

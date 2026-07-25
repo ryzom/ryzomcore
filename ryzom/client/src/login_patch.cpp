@@ -106,7 +106,7 @@ struct EPatchDownloadException : public Exception
 {
 	EPatchDownloadException() : Exception( "Download Error" ) {}
 	EPatchDownloadException( const std::string& str ) : Exception( str ) {}
-	virtual ~EPatchDownloadException() throw(){}
+	virtual ~EPatchDownloadException() throw() NL_OVERRIDE{}
 };
 
 
@@ -2594,7 +2594,7 @@ public:
 									 CurrentFilePatched(0)
 	{
 	}
-	virtual void progress (float progressValue)
+	virtual void progress (float progressValue) NL_OVERRIDE
 	{
 		clamp(progressValue, 0.f, 1.f);
 		nlassert(PatchThread);

@@ -48,10 +48,10 @@ public:
 	/**
 	 * apply the effects of the... effect
 	 */
-	virtual bool update(CTimerEvent * event, bool applyEffect) { return false; }
+	virtual bool update(CTimerEvent * event, bool applyEffect) NL_OVERRIDE { return false; }
 
 	/// callback called when the effect is actually removed
-	virtual void removed();
+	virtual void removed() NL_OVERRIDE;
 
 	// set protections
 	inline void setNoShieldProtection(float factor, uint16 max) { _NoShieldFactor = factor; _NoShieldMaxProtection = max; }
@@ -84,7 +84,7 @@ public:
 	}
 
 	// for activate saved effect after character load
-	void activate();
+	void activate() NL_OVERRIDE;
 
 private:
 	/// granted protections 

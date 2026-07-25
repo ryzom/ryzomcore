@@ -140,7 +140,7 @@ Implementation of all mission instructions
 
 // HELPERS
 #define MISSION_ACTION_GETNEWPTR(_class_)\
-IMissionAction* getNewPtr()\
+IMissionAction* getNewPtr() NL_OVERRIDE\
 {\
 	_class_ * ptr = new _class_;\
 	*ptr = *this;\
@@ -285,7 +285,7 @@ static bool evaluateSDBExpr(const std::string &sdbExpr, double &res, bool ignore
 class CMissionActionText : public IMissionAction
 {
 protected:
-	bool buildAction( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if ( script.size() != 2 )
@@ -297,7 +297,7 @@ protected:
 		// keep first space for player name
 		return CMissionParser::parseParamText(line, script[1], _Text, _Params );
 	}
-	bool solveTextsParams( CMissionSpecificParsingData & missionData )
+	bool solveTextsParams( CMissionSpecificParsingData & missionData ) NL_OVERRIDE
 	{
 		return CMissionParser::solveTextsParams( _SourceLine, _Params, missionData );
 	}
@@ -312,7 +312,7 @@ protected:
 class CMissionActionSysMsg : public CMissionActionText
 {
 
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("system_msg");
 		std::vector<TDataSetRow> entities;
@@ -334,7 +334,7 @@ MISSION_REGISTER_ACTION(CMissionActionSysMsg, "system_msg");
 // ----------------------------------------------------------------------------
 class CMissionActionBotChat :public CMissionActionText
 {
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		bool ret = true;
@@ -359,7 +359,7 @@ class CMissionActionBotChat :public CMissionActionText
 		return CMissionParser::parseParamText(line, script[3], _Text, _Params );
 	}
 
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("bot_chat");
 		TAIAlias alias;
@@ -415,7 +415,7 @@ MISSION_REGISTER_ACTION(CMissionActionBotChat,"bot_chat");
 class CMissionActionPopupMsg : public CMissionActionText
 {
 protected:
-	bool buildAction( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if ( script.size() != 3 )
@@ -429,13 +429,13 @@ protected:
 			&& CMissionParser::parseParamText(line, script[2], _Text, _TextParams );
 	}
 
-	bool solveTextsParams( CMissionSpecificParsingData & missionData )
+	bool solveTextsParams( CMissionSpecificParsingData & missionData ) NL_OVERRIDE
 	{
 		return CMissionParser::solveTextsParams( _SourceLine, _TitleParams, missionData )
 			&& CMissionParser::solveTextsParams( _SourceLine, _TextParams, missionData );
 	}
 	
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("popup_msg");
 		std::vector<TDataSetRow> entities;
@@ -475,7 +475,7 @@ MISSION_REGISTER_ACTION(CMissionActionPopupMsg, "popup_msg");
 // ----------------------------------------------------------------------------
 class CMissionActionSetDesc : public IMissionAction
 {
-	bool buildAction( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if ( script.size() != 2 )
@@ -492,7 +492,7 @@ class CMissionActionSetDesc : public IMissionAction
 		return true;
 	}
 	
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("set_desc");
 		instance->overrideDesc( _DescIndex );
@@ -510,7 +510,7 @@ MISSION_REGISTER_ACTION(CMissionActionSetDesc,"set_desc");
 // ----------------------------------------------------------------------------
 class CMissionActionRecvItem : public IMissionAction
 {
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		bool ret = true;
@@ -591,7 +591,7 @@ class CMissionActionRecvItem : public IMissionAction
 		}
 		return ret;
 	}
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("recv_item");
 		TLogContext_Item_Mission	logContext(instance->getMainEntity()->getId());
@@ -889,7 +889,7 @@ MISSION_REGISTER_ACTION(CMissionActionRecvItem,"recv_item");
 // ----------------------------------------------------------------------------
 class CMissionActionRecvNamedItem : public IMissionAction
 {
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if ( script.size() != 2 && script.size() != 3 && script.size() != 4)
@@ -951,7 +951,7 @@ class CMissionActionRecvNamedItem : public IMissionAction
 		}
 		return true;
 	}
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("recv_named_item");
 		TLogContext_Item_Mission	logContext(instance->getMainEntity()->getId());
@@ -1229,7 +1229,7 @@ class CMissionActionDestroyItem :
  public IMissionAction,
  private CMissionBaseItemSelector
 {
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		// Parse the line
 		_SourceLine = line;
@@ -1265,7 +1265,7 @@ class CMissionActionDestroyItem :
 	}
 
 	// Execute the action
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("destroy_item");
 		TLogContext_Item_Mission	logContext(instance->getMainEntity()->getId());
@@ -1366,7 +1366,7 @@ class CMissionActionCondJumpIfItemInInv :
  private CMissionBaseItemSelector
 {
 public:
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if ( script.size() != 3)
@@ -1383,7 +1383,7 @@ public:
 		return ret;
 	}
 
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("if_item_in_inv");
 		
@@ -1423,7 +1423,7 @@ MISSION_REGISTER_ACTION(CMissionActionCondJumpIfItemInInv,"if_item_in_inv");
 // ----------------------------------------------------------------------------
 class CMissionActionLearnAction : public IMissionAction
 {
-	bool buildAction( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if ( script.size() < 2 && script.size() > 4)
@@ -1481,7 +1481,7 @@ class CMissionActionLearnAction : public IMissionAction
 		}
 		return true;
 	}
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("learn_action");
 		std::vector<TDataSetRow> entities;
@@ -1564,7 +1564,7 @@ MISSION_REGISTER_ACTION(CMissionActionLearnAction,"learn_action");
 // ----------------------------------------------------------------------------
 class CMissionActionLearnBrick : public IMissionAction
 {
-	bool buildAction( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if ( script.size() < 2 && script.size() > 4)
@@ -1622,7 +1622,7 @@ class CMissionActionLearnBrick : public IMissionAction
 		}
 		return true;
 	}
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("learn_brick");
 		std::vector<TDataSetRow> entities;
@@ -1709,7 +1709,7 @@ MISSION_REGISTER_ACTION(CMissionActionLearnBrick,"learn_brick");
 // ----------------------------------------------------------------------------
 class CMissionActionUnlearnBrick : public IMissionAction
 {
-	bool buildAction( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if ( script.size() < 2 && script.size() > 4)
@@ -1767,7 +1767,7 @@ class CMissionActionUnlearnBrick : public IMissionAction
 		}
 		return true;
 	}
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("unlearn_brick");
 		std::vector<TDataSetRow> entities;
@@ -1854,7 +1854,7 @@ MISSION_REGISTER_ACTION(CMissionActionUnlearnBrick,"unlearn_brick");
 // ----------------------------------------------------------------------------
 class CMissionActionRecvMoney : public IMissionAction
 {
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		bool ret = true;
 		_SourceLine = line;
@@ -1903,7 +1903,7 @@ class CMissionActionRecvMoney : public IMissionAction
 		return ret;
 	}
 
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("recv_money");
 		TLogContext_Item_Mission	logContext(instance->getMainEntity()->getId());
@@ -1977,7 +1977,7 @@ MISSION_REGISTER_ACTION(CMissionActionRecvMoney,"recv_money");
 // ----------------------------------------------------------------------------
 class CMissionActionRecvFame : public IMissionAction
 {
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if ( script.size() != 2 && script.size() != 3)
@@ -2020,7 +2020,7 @@ class CMissionActionRecvFame : public IMissionAction
 		return true;
 		
 	}
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("recv_fame");
 		std::vector<TDataSetRow> entities;
@@ -2087,7 +2087,7 @@ MISSION_REGISTER_ACTION(CMissionActionRecvFame,"recv_fame");
 // ----------------------------------------------------------------------------
 class CMissionActionRecvXp : public IMissionAction
 {
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if ( script.size() != 2 )
@@ -2121,7 +2121,7 @@ class CMissionActionRecvXp : public IMissionAction
 		}
 		return true;
 	}
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("recv_xp");
 
@@ -2161,7 +2161,7 @@ MISSION_REGISTER_ACTION(CMissionActionRecvXp,"recv_xp");
 // ----------------------------------------------------------------------------
 class CMissionActionRecvFactionPoint : public IMissionAction
 {
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if ( script.size() != 2 )
@@ -2192,7 +2192,7 @@ class CMissionActionRecvFactionPoint : public IMissionAction
 		return true;
 	}
 
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("recv_faction_point");
 		std::vector<TDataSetRow> entities;
@@ -2233,7 +2233,7 @@ MISSION_REGISTER_ACTION(CMissionActionRecvFactionPoint,"recv_faction_point");
 // ----------------------------------------------------------------------------
 class CMissionActionEmote : public IMissionAction
 {
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		bool ret = true;
@@ -2264,7 +2264,7 @@ class CMissionActionEmote : public IMissionAction
 		_Emote = (MBEHAV::EBehaviour)(emoteId + MBEHAV::EMOTE_BEGIN);
 		return ret;
 	}
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("bot_emot");
 		// get the bot
@@ -2367,7 +2367,7 @@ MISSION_REGISTER_ACTION(CMissionActionJump,"jump");
 // ----------------------------------------------------------------------------
 class CMissionActionCondJump : public CMissionActionJump
 {
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if ( script.size() != 3)
@@ -2386,7 +2386,7 @@ class CMissionActionCondJump : public CMissionActionJump
 		missionData.Jumps.push_back( Label );
 		return true;
 	}
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("if_mission_done");
 		// get the player
@@ -2434,7 +2434,7 @@ MISSION_REGISTER_ACTION(CMissionActionCondJump,"if_mission_done");
 // ----------------------------------------------------------------------------
 class CMissionActionCondJumpBrick : public CMissionActionJump
 {
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if ( script.size() != 3)
@@ -2468,7 +2468,7 @@ class CMissionActionCondJumpBrick : public CMissionActionJump
 		missionData.Jumps.push_back( Label );
 		return true;
 	}
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("if_bricks");
 		// get the player
@@ -2514,7 +2514,7 @@ MISSION_REGISTER_ACTION(CMissionActionCondJumpBrick,"if_bricks");
 // ----------------------------------------------------------------------------
 class CMissionActionCondJumpSkill : public CMissionActionJump
 {
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if ( script.size() != 3)
@@ -2566,7 +2566,7 @@ class CMissionActionCondJumpSkill : public CMissionActionJump
 		missionData.Jumps.push_back( Label );
 		return true;
 	}
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("if_skills");
 		// get the player
@@ -2616,7 +2616,7 @@ MISSION_REGISTER_ACTION(CMissionActionCondJumpSkill,"if_skills");
 // ----------------------------------------------------------------------------
 class CMissionActionEnd : public IMissionAction
 {
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if ( script.size() != 1)
@@ -2627,7 +2627,7 @@ class CMissionActionEnd : public IMissionAction
 		
 		return true;
 	}
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("end");
 		instance->setProcessingState(CMission::Complete);
@@ -2641,7 +2641,7 @@ MISSION_REGISTER_ACTION(CMissionActionEnd,"end");
 // ----------------------------------------------------------------------------
 class CMissionActionFail : public IMissionAction
 {
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if ( script.size() != 1)
@@ -2651,7 +2651,7 @@ class CMissionActionFail : public IMissionAction
 		}
 		return true;
 	}
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("fail");
 		instance->setProcessingState(CMission::Failed);
@@ -2667,7 +2667,7 @@ class CMissionActionFailIfSDB : public IMissionAction
 {
 	string _SDBExpr;
 
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if ( script.size() != 2)
@@ -2687,7 +2687,7 @@ class CMissionActionFailIfSDB : public IMissionAction
 
 		return true;
 	}
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("fail_if_sdb");
 		// get the player
@@ -2721,7 +2721,7 @@ class CMissionActionFailMissionCat : public IMissionAction
 {
 	string _MissionCategory;
 
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if (script.size() != 2)
@@ -2737,7 +2737,7 @@ class CMissionActionFailMissionCat : public IMissionAction
 		}
 		return true;
 	}
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("fail_mission_cat");
 		// get the player
@@ -2796,7 +2796,7 @@ MISSION_REGISTER_ACTION(CMissionActionFailMissionCat,"fail_mission_cat");
 // ----------------------------------------------------------------------------
 class CMissionActionCompassNpc : public IMissionAction
 {
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if ( script.size() != 2)
@@ -2808,7 +2808,7 @@ class CMissionActionCompassNpc : public IMissionAction
 			return false;
 		return true;
 	}
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("add_compass_npc");
 		TAIAlias alias;
@@ -2829,7 +2829,7 @@ MISSION_REGISTER_ACTION(CMissionActionCompassNpc,"add_compass_npc");
 // ----------------------------------------------------------------------------
 class CMissionActionCompassPlace : public IMissionAction
 {
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if ( script.size() != 2)
@@ -2847,7 +2847,7 @@ class CMissionActionCompassPlace : public IMissionAction
 		PlaceId = place->getId();
 		return true;
 	}
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("add_compass_place");
 		instance->addCompassTarget(PlaceId,false);
@@ -2862,7 +2862,7 @@ MISSION_REGISTER_ACTION(CMissionActionCompassPlace,"add_compass_place");
 // ----------------------------------------------------------------------------
 class CMissionActionRemoveCompassNpc : public IMissionAction
 {
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if ( script.size() != 2)
@@ -2874,7 +2874,7 @@ class CMissionActionRemoveCompassNpc : public IMissionAction
 			return false;
 		return true;
 	}
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("remove_compass_npc");
 		TAIAlias alias;
@@ -2895,7 +2895,7 @@ MISSION_REGISTER_ACTION(CMissionActionRemoveCompassNpc,"remove_compass_npc");
 // ----------------------------------------------------------------------------
 class CMissionActionRemoveCompassPlace : public IMissionAction
 {
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if ( script.size() != 2)
@@ -2913,7 +2913,7 @@ class CMissionActionRemoveCompassPlace : public IMissionAction
 		PlaceId = place->getId();
 		return true;
 	}
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("remove_compass_place");
 		instance->removeCompassPlace(PlaceId);
@@ -2929,7 +2929,7 @@ MISSION_REGISTER_ACTION(CMissionActionRemoveCompassPlace,"remove_compass_place")
 // ----------------------------------------------------------------------------
 class CMissionActionAIEvent : public IMissionAction
 {
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if ( script.size() != 2)
@@ -2967,7 +2967,7 @@ class CMissionActionAIEvent : public IMissionAction
 
 		return ret;
 	}
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("ai_event");
 		CUserEventMsg msg;
@@ -3004,7 +3004,7 @@ MISSION_REGISTER_ACTION(CMissionActionAIEvent,"ai_event");
 // ----------------------------------------------------------------------------
 class CMissionActionTimer : public IMissionAction
 {
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if ( script.size() != 2)
@@ -3015,7 +3015,7 @@ class CMissionActionTimer : public IMissionAction
 		NLMISC::fromString(script[1], Delay);
 		return true;
 	}
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("timer");
 		instance->setTimer(Delay);
@@ -3031,7 +3031,7 @@ MISSION_REGISTER_ACTION(CMissionActionTimer,"timer");
 // ----------------------------------------------------------------------------
 class CMissionActionDayPeriod : public IMissionAction
 {
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if ( script.size() != 2)
@@ -3096,7 +3096,7 @@ class CMissionActionDayPeriod : public IMissionAction
 		return true;
 	}
 
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("day_period");
 		instance->setHourLowerBound(LowerBound);
@@ -3115,7 +3115,7 @@ MISSION_REGISTER_ACTION(CMissionActionDayPeriod,"day_period");
 // ----------------------------------------------------------------------------
 class CMissionActionSeason : public IMissionAction
 {
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if ( script.size() != 2)
@@ -3138,7 +3138,7 @@ class CMissionActionSeason : public IMissionAction
 		return true;
 	}
 	
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("season");
 		instance->setSeason(Season);
@@ -3156,7 +3156,7 @@ MISSION_REGISTER_ACTION(CMissionActionSeason,"season");
 class CMissionActionRewardGroup : public IMissionAction
 {
 public:
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if ( script.size() != 1)
@@ -3167,7 +3167,7 @@ public:
 		return true;
 	}
 	
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("reward");
 		vector<TDataSetRow> entities;
@@ -3200,7 +3200,7 @@ public:
 		team->rewardSharing(reward);
 	}
 
-	virtual bool addReward(const std::vector<std::string>&  script,const std::vector< std::pair<std::string,CMissionItem> >& items,uint32 line)
+	virtual bool addReward(const std::vector<std::string>&  script,const std::vector< std::pair<std::string,CMissionItem> >& items,uint32 line) NL_OVERRIDE
 	{
 		if ( script.size() != 2 )
 		{
@@ -3366,7 +3366,7 @@ class CMissionActionTeleport : public IMissionAction
 {
 protected:
 	uint16 DestinationIdx;
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if ( script.size() != 2 )
@@ -3384,7 +3384,7 @@ protected:
 		return true;
 	}
 
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("teleport");
 		vector<TDataSetRow> entities;
@@ -3421,7 +3421,7 @@ protected:
 	sint32		X, Y, Z;
 	float		Heading;
 
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if ( script.size() < 3 )
@@ -3444,7 +3444,7 @@ protected:
 		return true;
 	}
 
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("teleport_x_y");
 		vector<TDataSetRow> entities;
@@ -3471,7 +3471,7 @@ class CMissionActionSetCult : public IMissionAction
 public:
 	PVP_CLAN::TPVPClan Cult;
 
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if ( script.size() != 2 )
@@ -3488,7 +3488,7 @@ public:
 		return true;
 	}
 
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("set_cult");
 
@@ -3517,7 +3517,7 @@ class CMissionActionSetCiv : public IMissionAction
 public:
 	PVP_CLAN::TPVPClan Civ;
 
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if ( script.size() != 2 )
@@ -3534,7 +3534,7 @@ public:
 		return true;
 	}
 
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("set_civ");
 
@@ -3561,7 +3561,7 @@ MISSION_REGISTER_ACTION(CMissionActionSetCiv,"set_civ");
 // ----------------------------------------------------------------------------
 class CMissionActionSetGuildCult : public CMissionActionSetCult
 {
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("set_guild_cult");
 
@@ -3598,7 +3598,7 @@ MISSION_REGISTER_ACTION(CMissionActionSetGuildCult,"set_guild_cult");
 // ----------------------------------------------------------------------------
 class CMissionActionSetGuildCiv : public CMissionActionSetCiv
 {
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("set_guild_civ");
 
@@ -3635,7 +3635,7 @@ MISSION_REGISTER_ACTION(CMissionActionSetGuildCiv,"set_guild_civ");
 // ----------------------------------------------------------------------------
 class CMissionActionRecvChargePoint : public IMissionAction
 {
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if ( script.size() != 2 )
@@ -3651,7 +3651,7 @@ class CMissionActionRecvChargePoint : public IMissionAction
 		}
 		return true;
 	}
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("recv_charge_point");
 		//		CMissionInstanceGuild * mission = dynamic_cast<CMissionInstanceGuild*>(instance);
@@ -3701,7 +3701,7 @@ MISSION_REGISTER_ACTION(CMissionActionRecvChargePoint,"recv_charge_point");
 class CMissionActionGiveOutpostControl : public IMissionAction
 {
 	string		_OutpostName;
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if( script.size() != 2)
@@ -3712,7 +3712,7 @@ class CMissionActionGiveOutpostControl : public IMissionAction
 		_OutpostName = CMissionParser::getNoBlankString( script[1] );
 		return true;
 	}
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("give_control");
 		/// todo charge
@@ -3763,7 +3763,7 @@ MISSION_REGISTER_ACTION(CMissionActionGiveOutpostControl,"give_control");
 class CMissionActionOutpostBuilding : public IMissionAction
 {
 	CSheetId SheetId;
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if( script.size() != 2 )
@@ -3780,7 +3780,7 @@ class CMissionActionOutpostBuilding : public IMissionAction
 		}
 		return true;
 	}
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("building");
 		/// todo charge
@@ -3810,7 +3810,7 @@ MISSION_REGISTER_ACTION(CMissionActionOutpostBuilding,"building");
 class CMissionActionDeclareWar : public IMissionAction
 {
 	CSheetId SheetId;
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if( script.size() != 1 )
@@ -3820,7 +3820,7 @@ class CMissionActionDeclareWar : public IMissionAction
 		}
 		return true;
 	}
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("declare_war");
 		/// todo charge
@@ -3850,7 +3850,7 @@ MISSION_REGISTER_ACTION(CMissionActionDeclareWar,"declare_war");
 class CMissionActionRecvGuildXp : public IMissionAction
 {
 	uint16 Amount;
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if( script.size() != 2 )
@@ -3861,7 +3861,7 @@ class CMissionActionRecvGuildXp : public IMissionAction
 		NLMISC::fromString(script[1], Amount);
 		return true;
 	}
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("recv_guild_xp");
 		/// todo charge
@@ -3891,7 +3891,7 @@ MISSION_REGISTER_ACTION(CMissionActionRecvGuildXp,"recv_guild_xp");
 // ----------------------------------------------------------------------------
 class CMissionActionInside : public IMissionAction
 {
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if( script.size() != 2 && script.size() != 3 )
@@ -3913,7 +3913,7 @@ class CMissionActionInside : public IMissionAction
 			Delay = 300;
 		return true;
 	}
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("inside");
 		CPlace * place = CZoneManager::getInstance().getPlaceFromId( Place ) ;
@@ -3933,7 +3933,7 @@ MISSION_REGISTER_ACTION(CMissionActionInside,"inside");
 // ----------------------------------------------------------------------------
 class CMissionActionOutside: public IMissionAction
 {
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if( script.size() != 2 && script.size() != 3 )
@@ -3955,7 +3955,7 @@ class CMissionActionOutside: public IMissionAction
 			Delay = 300;
 		return true;
 	}
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("outside");
 		CPlace * place = CZoneManager::getInstance().getPlaceFromId( Place ) ;
@@ -3976,7 +3976,7 @@ MISSION_REGISTER_ACTION(CMissionActionOutside,"outside");
 class CMissionActionCancelInside : public IMissionAction
 {
 	uint16 Amount;
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if( script.size() != 2 )
@@ -3994,7 +3994,7 @@ class CMissionActionCancelInside : public IMissionAction
 		Place = place->getId();
 		return true;
 	}
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("cancel_inside");
 		CPlace * place = CZoneManager::getInstance().getPlaceFromId( Place ) ;
@@ -4012,7 +4012,7 @@ MISSION_REGISTER_ACTION(CMissionActionCancelInside,"cancel_inside");
 class CMissionActionCancelOutside: public IMissionAction
 {
 	uint16 Amount;
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if( script.size() != 2 )
@@ -4030,7 +4030,7 @@ class CMissionActionCancelOutside: public IMissionAction
 		Place = place->getId();
 		return true;
 	}
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("cancel_outside");
 		CPlace * place = CZoneManager::getInstance().getPlaceFromId( Place ) ;
@@ -4055,7 +4055,7 @@ protected:
 
 protected:
 
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if ( script.size() != 3 && script.size() != 4)
@@ -4127,7 +4127,7 @@ protected:
 			+ " mainmiss:" + CPrimitivesParser::aliasToString(mainMission));
 	}
 
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		launchExt(instance, eventList, CAIAliasTranslator::Invalid);
 	}
@@ -4139,14 +4139,14 @@ MISSION_REGISTER_ACTION(CMissionActionSpawnMission,"spawn_mission");
 // ----------------------------------------------------------------------------
 class CMissionActionChainMission : public CMissionActionSpawnMission
 {
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		if ( !CMissionActionSpawnMission::buildAction( line, script, globalData, missionData ) )
 			return false;
 		return true;
 	}
 
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("chain_mission");
 
@@ -4181,7 +4181,7 @@ class CMissionActionEncycloUnlock : public IMissionAction
 	
 	bool buildAction (	uint32 line, const std::vector< std::string > & script, 
 						CMissionGlobalParsingData & globalData, 
-						CMissionSpecificParsingData & missionData	)
+						CMissionSpecificParsingData & missionData	) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if( script.size() != 2 )
@@ -4205,7 +4205,7 @@ class CMissionActionEncycloUnlock : public IMissionAction
 	}
 
 
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("encyclo_unlock");
 		vector<TDataSetRow> entities;
@@ -4233,14 +4233,14 @@ class CMissionActionGameEventSubscribe : public IMissionAction
 
 	bool buildAction (	uint32 line, const std::vector< std::string > & script, 
 		CMissionGlobalParsingData & globalData, 
-		CMissionSpecificParsingData & missionData	)
+		CMissionSpecificParsingData & missionData	) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		// For the moment there are no parameters
 		return true;
 	}
 
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("game_event_subscribe");
 		vector<TDataSetRow> entities;
@@ -4268,14 +4268,14 @@ class CMissionActionGameEventReset : public IMissionAction
 
 	bool buildAction (	uint32 line, const std::vector< std::string > & script, 
 		CMissionGlobalParsingData & globalData, 
-		CMissionSpecificParsingData & missionData	)
+		CMissionSpecificParsingData & missionData	) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		// For the moment there are no parameters
 		return true;
 	}
 
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("game_event_reset");
 		vector<TDataSetRow> entities;
@@ -4304,7 +4304,7 @@ class CMissionActionSetEventFaction : public IMissionAction
 
 	bool buildAction (	uint32 line, const std::vector< std::string > & script, 
 						CMissionGlobalParsingData & globalData, 
-						CMissionSpecificParsingData & missionData	)
+						CMissionSpecificParsingData & missionData	) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if( script.size() != 2 )
@@ -4316,7 +4316,7 @@ class CMissionActionSetEventFaction : public IMissionAction
 		return true;
 	}
 
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("set_event_faction");
 		vector<TDataSetRow> entities;
@@ -4347,7 +4347,7 @@ class CMissionActionSetRespawnPoints : public IMissionAction
 
 	bool buildAction (	uint32 line, const std::vector< std::string > & script, 
 		CMissionGlobalParsingData & globalData, 
-		CMissionSpecificParsingData & missionData	)
+		CMissionSpecificParsingData & missionData	) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if (script.size() < 3 || script.size() > 4)
@@ -4415,7 +4415,7 @@ class CMissionActionSetRespawnPoints : public IMissionAction
 		return true;
 	}
 
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("set_respawn_points");
 		vector<TDataSetRow> entities;
@@ -4446,7 +4446,7 @@ class CMissionActionSDBSet : public IMissionAction
 
 	bool buildAction (	uint32 line, const std::vector< std::string > & script, 
 		CMissionGlobalParsingData & globalData, 
-		CMissionSpecificParsingData & missionData	)
+		CMissionSpecificParsingData & missionData	) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if (script.size() != 3)
@@ -4463,7 +4463,7 @@ class CMissionActionSDBSet : public IMissionAction
 		return true;
 	}
 
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("sdb_set");
 		if (!CStatDB::getInstance()->valueSet(_SDBPath, _SDBValue))
@@ -4484,7 +4484,7 @@ class CMissionActionSDBAdd : public IMissionAction
 
 	bool buildAction (	uint32 line, const std::vector< std::string > & script, 
 		CMissionGlobalParsingData & globalData, 
-		CMissionSpecificParsingData & missionData	)
+		CMissionSpecificParsingData & missionData	) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if (script.size() != 3)
@@ -4501,7 +4501,7 @@ class CMissionActionSDBAdd : public IMissionAction
 		return true;
 	}
 
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("sdb_add");
 		if (!CStatDB::getInstance()->valueAdd(_SDBPath, _SDBDelta))
@@ -4522,7 +4522,7 @@ class CMissionActionSDBPlayerAdd : public IMissionAction
 
 	bool buildAction (	uint32 line, const std::vector< std::string > & script, 
 		CMissionGlobalParsingData & globalData, 
-		CMissionSpecificParsingData & missionData	)
+		CMissionSpecificParsingData & missionData	) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if (script.size() != 3)
@@ -4539,7 +4539,7 @@ class CMissionActionSDBPlayerAdd : public IMissionAction
 		return true;
 	}
 
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("sdb_player_add");
 		vector<TDataSetRow> entities;
@@ -4576,7 +4576,7 @@ class CMissionActionCondJumpSDB : public CMissionActionJump
 {
 	string _SDBExpr;
 
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if ( script.size() != 3)
@@ -4598,7 +4598,7 @@ class CMissionActionCondJumpSDB : public CMissionActionJump
 		missionData.Jumps.push_back( Label );
 		return true;
 	}
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("if_sdb");
 		// get the player
@@ -4630,7 +4630,7 @@ class CMissionActionCondJumpRace : public CMissionActionJump
 {
 	EGSPD::CPeople::TPeople _Race;
 
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if ( script.size() != 3)
@@ -4650,7 +4650,7 @@ class CMissionActionCondJumpRace : public CMissionActionJump
 		missionData.Jumps.push_back( Label );
 		return true;
 	}
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("if_race");
 		// get the player
@@ -4686,7 +4686,7 @@ class CMissionActionCondJumpCult : public CMissionActionJump
 public:
 	PVP_CLAN::TPVPClan _Cult;
 
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if ( script.size() != 3)
@@ -4706,7 +4706,7 @@ public:
 		missionData.Jumps.push_back( Label );
 		return true;
 	}
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("if_cult");
 		// get the player
@@ -4742,7 +4742,7 @@ class CMissionActionCondJumpCiv : public CMissionActionJump
 public:
 	PVP_CLAN::TPVPClan _Civ;
 
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if ( script.size() != 3)
@@ -4762,7 +4762,7 @@ public:
 		missionData.Jumps.push_back( Label );
 		return true;
 	}
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("if_civ");
 		// get the player
@@ -4797,7 +4797,7 @@ class CMissionActionCondJumpGuildCult : public CMissionActionJump
 {
 	PVP_CLAN::TPVPClan _Cult;
 
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if ( script.size() != 3)
@@ -4818,7 +4818,7 @@ class CMissionActionCondJumpGuildCult : public CMissionActionJump
 		return true;
 	}
 
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("if_guild_cult");
 		// get the player
@@ -4861,7 +4861,7 @@ class CMissionActionCondJumpGuildCiv : public CMissionActionJump
 {
 	PVP_CLAN::TPVPClan _Civ;
 
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if ( script.size() != 3)
@@ -4882,7 +4882,7 @@ class CMissionActionCondJumpGuildCiv : public CMissionActionJump
 		return true;
 	}
 
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("if_guild_civ");
 		// get the player
@@ -4928,7 +4928,7 @@ public:
 	uint32 factionIndex;
 	sint32 fameValue;
 
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if ( script.size() != 4)
@@ -4950,7 +4950,7 @@ public:
 		missionData.Jumps.push_back( Label );
 		return true;
 	}
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("if_guild_fame");
 		// get the player
@@ -4992,7 +4992,7 @@ MISSION_REGISTER_ACTION(CMissionActionCondJumpGuildFame,"if_guild_fame");
 class CMissionActionCondJumpNoTrial : public CMissionActionJump
 {
 public:
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if ( script.size() != 2)
@@ -5005,7 +5005,7 @@ public:
 		missionData.Jumps.push_back( Label );
 		return true;
 	}
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("if_no_trial");
 		// get the player
@@ -5045,7 +5045,7 @@ public:
 	vector<string> Items;
 	vector<sint16> ItemQty;
 
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if ( script.size() < 3 )
@@ -5081,7 +5081,7 @@ public:
 		return true;
 	}
 
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("if_room_in_inventory");
 		// get the player
@@ -5152,7 +5152,7 @@ class CMissionActionSDBSetPVPPath : public IMissionAction
 
 	bool buildAction (	uint32 line, const std::vector< std::string > & script, 
 		CMissionGlobalParsingData & globalData, 
-		CMissionSpecificParsingData & missionData	)
+		CMissionSpecificParsingData & missionData	) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if (script.size() != 2)
@@ -5167,7 +5167,7 @@ class CMissionActionSDBSetPVPPath : public IMissionAction
 		return true;
 	}
 
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("sdb_set_pvp_path");
 		vector<TDataSetRow> entities;
@@ -5195,7 +5195,7 @@ class CMissionActionSDBClearPVPPath : public IMissionAction
 {
 	bool buildAction (	uint32 line, const std::vector< std::string > & script, 
 		CMissionGlobalParsingData & globalData, 
-		CMissionSpecificParsingData & missionData	)
+		CMissionSpecificParsingData & missionData	) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if (script.size() != 1)
@@ -5207,7 +5207,7 @@ class CMissionActionSDBClearPVPPath : public IMissionAction
 		return true;
 	}
 
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("sdb_clear_pvp_path");
 		vector<TDataSetRow> entities;
@@ -5235,7 +5235,7 @@ class CMissionActionCondJumpFactionPoint : public CMissionActionJump
 {
 	string _FPExpr;
 
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if ( script.size() != 3)
@@ -5257,7 +5257,7 @@ class CMissionActionCondJumpFactionPoint : public CMissionActionJump
 		missionData.Jumps.push_back( Label );
 		return true;
 	}
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{
 		LOGMISSIONACTION("if_faction_point");
 		// get the player

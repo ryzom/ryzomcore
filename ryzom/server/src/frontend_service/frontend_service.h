@@ -91,13 +91,13 @@ public:
 	static CFrontEndService *instance() { return (CFrontEndService*)IService::getInstance(); }
 	
 	/// Initialization
-	virtual void	init();
+	virtual void	init() NL_OVERRIDE;
 
 	/// Release
-	virtual void	release();
+	virtual void	release() NL_OVERRIDE;
 
 	/// Update
-	virtual bool	update();
+	virtual bool	update() NL_OVERRIDE;
 
 	/// After mirror system is ready
 	void			postInit();
@@ -266,7 +266,7 @@ private:
 	/// Game cycle ratio
 	sint						_GCRatio;
 
-	virtual const std::string &getCommandHandlerName() const
+	virtual const std::string &getCommandHandlerName() const NL_OVERRIDE
 	{
 		static std::string name("fe");
 		return name;

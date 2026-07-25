@@ -54,10 +54,10 @@ public:
 	}
 
 	/// validate the power utilisation
-	virtual bool validate(std::string &errorCode);
+	virtual bool validate(std::string &errorCode) NL_OVERRIDE;
 
 	/// apply effects
-	virtual void apply();
+	virtual void apply() NL_OVERRIDE;
 
 protected:
 	/**

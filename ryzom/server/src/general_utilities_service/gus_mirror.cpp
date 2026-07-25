@@ -54,15 +54,15 @@ namespace GUS
 		CGusMirrorImp();
 
 	public:
-		void registerModuleCallback(IMirrorModuleCallback *mirrorCallback);
+		void registerModuleCallback(IMirrorModuleCallback *mirrorCallback) NL_OVERRIDE;
 
-		void unregisterModuleCallback(IMirrorModuleCallback *mirrorCallback);
+		void unregisterModuleCallback(IMirrorModuleCallback *mirrorCallback) NL_OVERRIDE;
 
-		CMirroredDataSet *getDataSet(const std::string &dataSetName);
+		CMirroredDataSet *getDataSet(const std::string &dataSetName) NL_OVERRIDE;
 
 		// Service singleton methods
-		void init();
-		void release();
+		void init() NL_OVERRIDE;
+		void release() NL_OVERRIDE;
 
 	private:
 		typedef vector<IMirrorModuleCallback* >	TMirrorModuleCallbackCont;

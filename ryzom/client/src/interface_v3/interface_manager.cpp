@@ -274,7 +274,7 @@ int CInterfaceManager::DebugTrackGroupsGetId( CInterfaceGroup *pIG )
 class CDesktopUpdater : public CWidgetManager::INewScreenSizeHandler
 {
 public:
-	void process( uint32 w, uint32 h )
+	void process( uint32 w, uint32 h ) NL_OVERRIDE
 	{
 		CInterfaceManager::getInstance()->updateDesktops( w, h );
 	}
@@ -283,7 +283,7 @@ public:
 class CDrawDraggedSheet : public CWidgetManager::IOnWidgetsDrawnHandler
 {
 public:
-	void process()
+	void process() NL_OVERRIDE
 	{
 		if ( CWidgetManager::getInstance()->getPointer()->show())
 		{
@@ -311,12 +311,12 @@ public:
 
 class CStringManagerTextProvider : public CViewTextID::IViewTextProvider
 {
-	bool getString( uint32 stringId, string &result )
+	bool getString( uint32 stringId, string &result ) NL_OVERRIDE
 	{
 		return STRING_MANAGER::CStringManagerClient::instance()->getString( stringId, result );
 	}
 
-	bool getDynString( uint32 dynStringId, string &result )
+	bool getDynString( uint32 dynStringId, string &result ) NL_OVERRIDE
 	{
 		return STRING_MANAGER::CStringManagerClient::instance()->getDynString( dynStringId, result );
 	}
@@ -325,7 +325,7 @@ class CStringManagerTextProvider : public CViewTextID::IViewTextProvider
 class CRyzomTextFormatter : public CViewTextFormated::IViewTextFormatter
 {
 public:
-	std::string formatString( const std::string &inputString, const std::string &paramString )
+	std::string formatString( const std::string &inputString, const std::string &paramString ) NL_OVERRIDE
 	{
 		std::string formatedResult;
 
@@ -1956,8 +1956,8 @@ public:
 	bool IsR2ED;
 	bool BadWindowFound; //
 	uint Desktop;
-	virtual void visit(CInterfaceElement *elem)	{ elem->onQuit(); }
-	virtual void visitGroup(CInterfaceGroup *group)
+	virtual void visit(CInterfaceElement *elem) NL_OVERRIDE	{ elem->onQuit(); }
+	virtual void visitGroup(CInterfaceGroup *group) NL_OVERRIDE
 	{
 		if (!IsR2ED) return;
 		if (Desktop != 0) return;
@@ -2315,7 +2315,7 @@ public:
 		this->reset = reset;
 	}
 
-	void visitGroup( CInterfaceGroup *group )
+	void visitGroup( CInterfaceGroup *group ) NL_OVERRIDE
 	{
 		const std::vector< CViewBase* > &vs = group->getViews();
 		for( std::vector< CViewBase* >::const_iterator itr = vs.begin(); itr != vs.end(); ++itr )
@@ -3151,7 +3151,7 @@ void CInterfaceManager::displayWebWindow(const string & name, const string & url
 // ***************************************************************************
 class CAHSaveUI : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &Params)
+	virtual void execute (CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
 	{
 		CInterfaceManager::getInstance()->saveKeys(true);
 		CInterfaceManager::getInstance()->saveConfig(true);

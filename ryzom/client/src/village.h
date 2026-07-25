@@ -69,7 +69,7 @@ public:
 		bool setupFromSheet(NL3D::UScene *scene, const CVillageSheet &sheet, CStreamableIG::TString2IG *loadedIGMap = NULL);
 
 		// dtor
-		~CVillage();
+		~CVillage() NL_OVERRIDE;
 	//@}
 
 	//\name From IStreamableEntity
@@ -78,13 +78,13 @@ public:
 		 * It it returns false, it means that the village is too far or that asynchronous loading suffice.
 		 * It it returns true, the next call to update will return only when the loading is completed.
 		 */
-		virtual bool		 needCompleteLoading(const NLMISC::CVector &pos) const;
+		virtual bool		 needCompleteLoading(const NLMISC::CVector &pos) const NL_OVERRIDE;
 		/** Test that village against the player position, and load / unload it (using synchronous or asynchronous loading)
 		  */
-		virtual void		 update(const NLMISC::CVector &pos);
+		virtual void		 update(const NLMISC::CVector &pos) NL_OVERRIDE;
 		// The same, but force synchronous loading
-		virtual void		 forceUpdate(const NLMISC::CVector &pos, NLMISC::IProgressCallback &progress);
-		virtual void		 forceUnload();
+		virtual void		 forceUpdate(const NLMISC::CVector &pos, NLMISC::IProgressCallback &progress) NL_OVERRIDE;
+		virtual void		 forceUnload() NL_OVERRIDE;
 	//@}
 
 	// The scene in which this object is inserted

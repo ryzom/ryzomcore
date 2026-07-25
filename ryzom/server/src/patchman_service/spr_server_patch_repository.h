@@ -47,24 +47,24 @@ namespace PATCHMAN
 		CServerPatchRepository();
 
 		// CModuleBase specialisation implementation
-		bool initModule(const NLNET::TParsedCommandLine &initInfo);
-		void onModuleUp(NLNET::IModuleProxy *module);
-		void onModuleDown(NLNET::IModuleProxy *module);
+		bool initModule(const NLNET::TParsedCommandLine &initInfo) NL_OVERRIDE;
+		void onModuleUp(NLNET::IModuleProxy *module) NL_OVERRIDE;
+		void onModuleDown(NLNET::IModuleProxy *module) NL_OVERRIDE;
 //		void onProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &msg);
-		void onModuleUpdate();
-		std::string buildModuleManifest() const;
+		void onModuleUpdate() NL_OVERRIDE;
+		std::string buildModuleManifest() const NL_OVERRIDE;
 		static const std::string &getHelperString();
 
 		// make sure module system doesn't misbehave when modules are on the same service
-		bool isImmediateDispatchingSupported() const { return false; }
+		bool isImmediateDispatchingSupported() const NL_OVERRIDE { return false; }
 
 	protected:
 		// IFileRequestValidator specialisation implementation
-		bool cbValidateDownloadRequest(const NLNET::IModuleProxy *sender,const std::string &fileName);
-		bool cbValidateFileInfoRequest(const NLNET::IModuleProxy *sender,const std::string &fileName);
+		bool cbValidateDownloadRequest(const NLNET::IModuleProxy *sender,const std::string &fileName) NL_OVERRIDE;
+		bool cbValidateFileInfoRequest(const NLNET::IModuleProxy *sender,const std::string &fileName) NL_OVERRIDE;
 
 		// IFileInfoUpdateListener specialisation implementation
-		void cbFileInfoRescanning(const NLMISC::CSString& fileName,uint32 fileSize);
+		void cbFileInfoRescanning(const NLMISC::CSString& fileName,uint32 fileSize) NL_OVERRIDE;
 
 	private:
 		// private data

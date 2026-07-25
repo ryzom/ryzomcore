@@ -179,7 +179,7 @@ protected:
 	virtual void forwardToEditor() {}
 
 	// Tha action handler
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		initPart ();
 		if (_GroupEdit)
@@ -197,7 +197,7 @@ protected:
 
 class CAHEditPreviousChar : public CAHEdit
 {
-	void actionPart ()
+	void actionPart () NL_OVERRIDE
 	{
 		if (_LooseSelection)
 		{
@@ -226,7 +226,7 @@ REGISTER_ACTION_HANDLER (CAHEditPreviousChar, "edit_previous_char");
 
 class CAHEditNextChar : public CAHEdit
 {
-	void actionPart ()
+	void actionPart () NL_OVERRIDE
 	{
 		if (_LooseSelection)
 		{
@@ -254,7 +254,7 @@ REGISTER_ACTION_HANDLER (CAHEditNextChar, "edit_next_char");
 
 class CAHEditPreviousWord : public CAHEdit
 {
-	void actionPart ()
+	void actionPart () NL_OVERRIDE
 	{
 		if (_GroupEdit->getCursorPos() > 0)
 		{
@@ -269,7 +269,7 @@ REGISTER_ACTION_HANDLER (CAHEditPreviousWord, "edit_previous_word");
 
 class CAHEditNextWord : public CAHEdit
 {
-	void actionPart ()
+	void actionPart () NL_OVERRIDE
 	{
 		if (_GroupEdit->getCursorPos() < (sint32) _GroupEdit->getInputStringRef().length())
 		{
@@ -284,7 +284,7 @@ REGISTER_ACTION_HANDLER (CAHEditNextWord, "edit_next_word");
 
 class CAHEditGotoLineBegin : public CAHEdit
 {
-	void actionPart ()
+	void actionPart () NL_OVERRIDE
 	{
 		// go to the start of line
 		if (_GroupEdit->getViewText())
@@ -304,7 +304,7 @@ REGISTER_ACTION_HANDLER (CAHEditGotoLineBegin, "edit_goto_line_begin");
 
 class CAHEditGotoLineEnd : public CAHEdit
 {
-	void actionPart ()
+	void actionPart () NL_OVERRIDE
 	{
 		// go to the end of line
 		if (_GroupEdit->getViewText())
@@ -335,7 +335,7 @@ REGISTER_ACTION_HANDLER (CAHEditGotoLineEnd, "edit_goto_line_end");
 
 class CAHEditGotoBlockBegin : public CAHEdit
 {
-	void actionPart ()
+	void actionPart () NL_OVERRIDE
 	{
 		_GroupEdit->setCursorPos(0);
 		_GroupEdit->setCursorAtPreviousLineEnd(false);
@@ -347,7 +347,7 @@ REGISTER_ACTION_HANDLER (CAHEditGotoBlockBegin, "edit_goto_block_begin");
 
 class CAHEditGotoBlockEnd : public CAHEdit
 {
-	void actionPart ()
+	void actionPart () NL_OVERRIDE
 	{
 		_GroupEdit->setCursorPos((sint32)_GroupEdit->getInputStringRef().length());
 		_GroupEdit->setCursorAtPreviousLineEnd(false);
@@ -359,7 +359,7 @@ REGISTER_ACTION_HANDLER (CAHEditGotoBlockEnd, "edit_goto_block_end");
 
 class CAHEditPreviousLine : public CAHEdit
 {
-	void actionPart ()
+	void actionPart () NL_OVERRIDE
 	{
 		if (_GroupEdit->getMaxHistoric() && (! _GroupEdit->getViewText()->getMultiLine()))
 		{
@@ -431,7 +431,7 @@ REGISTER_ACTION_HANDLER (CAHEditPreviousLine, "edit_previous_line");
 
 class CAHEditNextLine : public CAHEdit
 {
-	void actionPart ()
+	void actionPart () NL_OVERRIDE
 	{
 		if( (! _GroupEdit->getViewText()->getMultiLine()) && _GroupEdit->getMaxHistoric() && _GroupEdit->getCurrentHistoricIndex()>0)
 		{
@@ -498,11 +498,11 @@ REGISTER_ACTION_HANDLER (CAHEditNextLine, "edit_next_line");
 class CAHEditDeleteChar : public CAHEdit
 {
 protected:
-	void initPart ()
+	void initPart () NL_OVERRIDE
 	{
 		init();
 	}
-	void actionPart ()
+	void actionPart () NL_OVERRIDE
 	{
 		// if selection is activated and not same cursors pos, then cut the selection
 		if(CGroupEditBox::getCurrSelection() != NULL && _GroupEdit->getCursorPos() != CGroupEditBox::getSelectCursorPos())
@@ -543,11 +543,11 @@ REGISTER_ACTION_HANDLER (CAHEditDeleteChar, "edit_delete_char");
 
 class CAHEditSelectAll : public CAHEdit
 {
-	void initPart ()
+	void initPart () NL_OVERRIDE
 	{
 		init();
 	}
-	void actionPart ()
+	void actionPart () NL_OVERRIDE
 	{
 		_GroupEdit->setSelectionAll();
 	}
@@ -558,15 +558,15 @@ REGISTER_ACTION_HANDLER (CAHEditSelectAll, "edit_select_all");
 
 class CAHEditCopy : public CAHEdit
 {
-	void initPart ()
+	void initPart () NL_OVERRIDE
 	{
 		init();
 	}
-	void actionPart ()
+	void actionPart () NL_OVERRIDE
 	{
 		_GroupEdit->copy();
 	}
-	void forwardToEditor()
+	void forwardToEditor() NL_OVERRIDE
 	{
 		R2::getEditor().copy();
 	}
@@ -577,15 +577,15 @@ REGISTER_ACTION_HANDLER (CAHEditCopy, "edit_copy");
 
 class CAHEditPaste : public CAHEdit
 {
-	void initPart ()
+	void initPart () NL_OVERRIDE
 	{
 		init();
 	}
-	void actionPart ()
+	void actionPart () NL_OVERRIDE
 	{
 		_GroupEdit->paste();
 	}
-	void forwardToEditor()
+	void forwardToEditor() NL_OVERRIDE
 	{
 		R2::getEditor().paste();
 	}
@@ -596,11 +596,11 @@ REGISTER_ACTION_HANDLER (CAHEditPaste, "edit_paste");
 
 class CAHEditCut : public CAHEditDeleteChar
 {
-	void initPart ()
+	void initPart () NL_OVERRIDE
 	{
 		init();
 	}
-	void actionPart ()
+	void actionPart () NL_OVERRIDE
 	{
 		// if selection is activated and not same cursors pos, then cut the selection
 		if(CGroupEditBox::getCurrSelection() != NULL && _GroupEdit->getCursorPos() != CGroupEditBox::getSelectCursorPos())
@@ -619,11 +619,11 @@ REGISTER_ACTION_HANDLER (CAHEditCut, "edit_cut");
 
 class CAHEditExpand : public CAHEdit
 {
-	void initPart ()
+	void initPart () NL_OVERRIDE
 	{
 		init();
 	}
-	void actionPart ()
+	void actionPart () NL_OVERRIDE
 	{
 		_GroupEdit->expand();
 	}
@@ -633,11 +633,11 @@ REGISTER_ACTION_HANDLER (CAHEditExpand, "edit_expand");
 // ***************************************************************************
 class CAHEditExpandOrCycleTell : public CAHEdit
 {
-	void initPart ()
+	void initPart () NL_OVERRIDE
 	{
 		init();
 	}
-	void actionPart ()
+	void actionPart () NL_OVERRIDE
 	{
 		// If the line starts with '/tell ', do not try to expand
 		if (!NLMISC::startsWith(_GroupEdit->getInputString(), "/tell "))
@@ -671,11 +671,11 @@ REGISTER_ACTION_HANDLER (CAHEditExpandOrCycleTell, "edit_expand_or_cycle_tell");
 
 class CAHEditBack: public CAHEdit
 {
-	void initPart ()
+	void initPart () NL_OVERRIDE
 	{
 		init();
 	}
-	void actionPart ()
+	void actionPart () NL_OVERRIDE
 	{
 		_GroupEdit->back();
 	}
@@ -686,7 +686,7 @@ REGISTER_ACTION_HANDLER (CAHEditBack, "edit_back");
 
 class CAHEditSelectPreviousChar : public CAHEditPreviousChar
 {
-	void initPart ()
+	void initPart () NL_OVERRIDE
 	{
 		init();
 		handleSelection();
@@ -698,7 +698,7 @@ REGISTER_ACTION_HANDLER (CAHEditSelectPreviousChar, "edit_select_previous_char")
 
 class CAHEditSelectNextChar : public CAHEditNextChar
 {
-	void initPart ()
+	void initPart () NL_OVERRIDE
 	{
 		init();
 		handleSelection();
@@ -710,7 +710,7 @@ REGISTER_ACTION_HANDLER (CAHEditSelectNextChar, "edit_select_next_char");
 
 class CAHEditSelectPreviousWord : public CAHEditPreviousWord
 {
-	void initPart ()
+	void initPart () NL_OVERRIDE
 	{
 		init();
 		handleSelection();
@@ -722,7 +722,7 @@ REGISTER_ACTION_HANDLER (CAHEditSelectPreviousWord, "edit_select_previous_word")
 
 class CAHEditSelectNextWord : public CAHEditNextWord
 {
-	void initPart ()
+	void initPart () NL_OVERRIDE
 	{
 		init();
 		handleSelection();
@@ -734,7 +734,7 @@ REGISTER_ACTION_HANDLER (CAHEditSelectNextWord, "edit_select_next_word");
 
 class CAHEditSelectToLineBegin : public CAHEditGotoLineBegin
 {
-	void initPart ()
+	void initPart () NL_OVERRIDE
 	{
 		init();
 		handleSelection();
@@ -746,7 +746,7 @@ REGISTER_ACTION_HANDLER (CAHEditSelectToLineBegin, "edit_select_to_line_begin");
 
 class CAHEditSelectToLineEnd : public CAHEditGotoLineEnd
 {
-	void initPart ()
+	void initPart () NL_OVERRIDE
 	{
 		init();
 		handleSelection();
@@ -758,7 +758,7 @@ REGISTER_ACTION_HANDLER (CAHEditSelectToLineEnd, "edit_select_to_line_end");
 
 class CAHEditSelectToBlockBegin : public CAHEditGotoBlockBegin
 {
-	void initPart ()
+	void initPart () NL_OVERRIDE
 	{
 		init();
 		handleSelection();
@@ -770,7 +770,7 @@ REGISTER_ACTION_HANDLER (CAHEditSelectToBlockBegin, "edit_select_to_block_begin"
 
 class CAHEditSelectToBlockEnd : public CAHEditGotoBlockEnd
 {
-	void initPart ()
+	void initPart () NL_OVERRIDE
 	{
 		init();
 		handleSelection();

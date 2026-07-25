@@ -1163,7 +1163,7 @@ static void populateZoneList()
 class CAHZpZoneViewToggle : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		// Screen B only: in the session hub Worlds is NULL and populateZoneList would
@@ -1426,7 +1426,7 @@ static bool isSupportedInstanceLayout(const std::string &s)
 class CAHZpSelectWorld : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		if (!s_Sess.Active) return;
@@ -1441,7 +1441,7 @@ REGISTER_ACTION_HANDLER(CAHZpSelectWorld, "zp_select_world");
 class CAHZpSelectZone : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		if (!s_Sess.Active) return;
@@ -1456,7 +1456,7 @@ REGISTER_ACTION_HANDLER(CAHZpSelectZone, "zp_select_zone");
 class CAHZpToggleZoneSelect : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase *pCaller, const std::string &params)
+	virtual void execute(CCtrlBase *pCaller, const std::string &params) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		if (!s_Sess.Active) return;
@@ -1490,7 +1490,7 @@ REGISTER_ACTION_HANDLER(CAHZpToggleZoneSelect, "zp_toggle_zone_select");
 class CAHZpOpenSelection : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		if (!s_Sess.Active) return;
@@ -1506,7 +1506,7 @@ REGISTER_ACTION_HANDLER(CAHZpOpenSelection, "zp_open_selection");
 class CAHZpSetInstances : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		if (!s_Sess.Active) return;
@@ -1522,7 +1522,7 @@ REGISTER_ACTION_HANDLER(CAHZpSetInstances, "zp_set_instances");
 class CAHZpZoneBack : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		if (s_Sess.SessionMode)
@@ -1542,7 +1542,7 @@ REGISTER_ACTION_HANDLER(CAHZpZoneBack, "zp_zone_back");
 class CAHZpBackToPaint : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		setSessionBoardVisible(false);
@@ -1556,7 +1556,7 @@ static void showScreen(EScreen screen);
 class CAHZpBrowse : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		if (!s_Sess.Active) return;
@@ -1575,7 +1575,7 @@ REGISTER_ACTION_HANDLER(CAHZpBrowse, "zp_browse");
 class CAHZpStartupQuit : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		if (!s_Sess.Active) return;
@@ -1587,7 +1587,7 @@ REGISTER_ACTION_HANDLER(CAHZpStartupQuit, "zp_startup_quit");
 class CAHZpFolderEnter : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		if (!s_Sess.Active) return;
@@ -1603,7 +1603,7 @@ REGISTER_ACTION_HANDLER(CAHZpFolderEnter, "zp_folder_enter");
 class CAHZpFolderUp : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		if (!s_Sess.Active) return;
@@ -1621,7 +1621,7 @@ REGISTER_ACTION_HANDLER(CAHZpFolderUp, "zp_folder_up");
 class CAHZpFolderGo : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		if (!s_Sess.Active) return;
@@ -1649,7 +1649,7 @@ REGISTER_ACTION_HANDLER(CAHZpFolderGo, "zp_folder_go");
 class CAHZpFolderSelect : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		if (!s_Sess.Active || !s_Sess.Worlds) return;
@@ -1672,7 +1672,7 @@ REGISTER_ACTION_HANDLER(CAHZpFolderSelect, "zp_folder_select");
 class CAHZpFolderCancel : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		if (!s_Sess.Active) return;
@@ -1690,7 +1690,7 @@ class CStartupCloseListener : public IEventListener
 public:
 	bool Active;
 	CStartupCloseListener() : Active(true) {}
-	virtual void operator()(const CEvent &event)
+	virtual void operator()(const CEvent &event) NL_OVERRIDE
 	{
 		if (event == EventDestroyWindowId || event == EventCloseWindowId)
 			Active = false;

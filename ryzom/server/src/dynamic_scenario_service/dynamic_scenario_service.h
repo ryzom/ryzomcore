@@ -43,16 +43,16 @@ public:
 	//CDynamicScenarioService();
 	//~CDynamicScenarioService();
 	// Initialisation of service
-	void init ();
+	void init () NL_OVERRIDE;
 
 	// Update net processing 
-	bool update ();
+	bool update () NL_OVERRIDE;
 
 	// Update service processing
 	static void serviceUpdate();
 
 	// Release the service
-	void release ();
+	void release () NL_OVERRIDE;
 
 
 	static R2::CDynamicScenarioService & instance()  { return (CDynamicScenarioService&)*IService::getInstance(); }

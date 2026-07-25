@@ -54,7 +54,7 @@ protected:
 	};
 
 protected:
-	virtual bool addBrick( const CStaticBrick & brick, CMagicPhrase * phrase, bool &effectEnd, CBuildParameters &buildParams )
+	virtual bool addBrick( const CStaticBrick & brick, CMagicPhrase * phrase, bool &effectEnd, CBuildParameters &buildParams ) NL_OVERRIDE
 	{
 		for ( uint i=0 ; i<brick.Params.size() ; ++i)
 		{
@@ -144,7 +144,7 @@ protected:
 		return true;
 	}
 	
-	virtual bool validate(CMagicPhrase * phrase, std::string &errorCode)
+	virtual bool validate(CMagicPhrase * phrase, std::string &errorCode) NL_OVERRIDE
 	{
 		if ( _Modifier < 0 || _Multiplier < 1.0f )
 		{
@@ -169,7 +169,7 @@ protected:
 
 	virtual void launch( CMagicPhrase * phrase, sint deltaLevel, sint skillLevel, float successFactor, MBEHAV::CBehaviour & behav,
 						 const std::vector<float> &powerFactors, NLMISC::CBitSet & affectedTargets, const NLMISC::CBitSet & invulnerabilityOffensive,
-						 const NLMISC::CBitSet & invulnerabilityAll, bool isMad, NLMISC::CBitSet & resists, const TReportAction & actionReport )
+						 const NLMISC::CBitSet & invulnerabilityAll, bool isMad, NLMISC::CBitSet & resists, const TReportAction & actionReport ) NL_OVERRIDE
 	{
 		if ( successFactor <= 0.0f )
 			return;
@@ -305,7 +305,7 @@ protected:
 	virtual void apply( CMagicPhrase * phrase, sint deltaLevel, sint skillLevel, float successFactor, MBEHAV::CBehaviour & behav,
 						const std::vector<float> &powerFactors, NLMISC::CBitSet & affectedTargets, const NLMISC::CBitSet & invulnerabilityOffensive,
 						const NLMISC::CBitSet & invulnerabilityAll, bool isMad, NLMISC::CBitSet & resists, const TReportAction & actionReport,
-						sint32 vamp, float vampRatio, bool reportXp )
+						sint32 vamp, float vampRatio, bool reportXp ) NL_OVERRIDE
 	{
 		if (!phrase)
 			return;

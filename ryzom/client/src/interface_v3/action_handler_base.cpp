@@ -41,7 +41,7 @@ using namespace NLMISC;
 // ------------------------------------------------------------------------------------------------
 class CAHActiveMenu : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &Params)
+	virtual void execute (CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
 
@@ -112,7 +112,7 @@ REGISTER_ACTION_HANDLER (CAHActiveMenu, "active_menu");
 class CAHSetKeyboardFocus : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase *pCaller, const string &Params)
+	virtual void execute (CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		string target = getParam (Params, "target");
@@ -141,7 +141,7 @@ REGISTER_ACTION_HANDLER (CAHSetKeyboardFocus, "set_keyboard_focus");
 class CAHResetKeyboardFocus : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		CWidgetManager::getInstance()->resetCaptureKeyboard();
 	}
@@ -151,7 +151,7 @@ REGISTER_ACTION_HANDLER (CAHResetKeyboardFocus, "reset_keyboard_focus");
 // ------------------------------------------------------------------------------------------------
 class CAHSetEditBoxCommand : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		CGroupEditBox *menuEB = CGroupEditBox::getMenuFather();
 		if (menuEB) menuEB->setCommand(getParam(Params, "value"), nlstricmp(getParam(Params, "execute"), "true") ? true : false);
@@ -162,7 +162,7 @@ REGISTER_ACTION_HANDLER (CAHSetEditBoxCommand, "set_edit_box_command");
 // ------------------------------------------------------------------------------------------------
 class CAHSetServerString : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &Params)
+	virtual void execute (CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
 	{
 		string sValue = getParam(Params,"value");
 		string sTarget = getParam(Params,"target");
@@ -201,7 +201,7 @@ REGISTER_ACTION_HANDLER (CAHSetServerString, "set_server_string");
 // ------------------------------------------------------------------------------------------------
 class CAHSetServerID : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &Params)
+	virtual void execute (CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
 	{
 		string sValue = getParam(Params,"value");
 		string sTarget = getParam(Params,"target");
@@ -256,7 +256,7 @@ REGISTER_ACTION_HANDLER (CAHSetServerID, "set_server_id");
 // ------------------------------------------------------------------------------------------------
 class CAHResetCamera : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &Params)
+	virtual void execute (CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
 	{
 		string sTarget = getParam(Params,"target");
 
@@ -283,7 +283,7 @@ REGISTER_ACTION_HANDLER (CAHResetCamera, "reset_camera");
 // ------------------------------------------------------------------------------------------------
 class CAHSetVirtualDesktop : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		string sVDesk = getParam(Params,"vdesk");
 
@@ -302,7 +302,7 @@ REGISTER_ACTION_HANDLER (CAHSetVirtualDesktop, "set_virtual_desktop");
 // ------------------------------------------------------------------------------------------------
 class CAHResetVirtualDesktop : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		string sVDesk = getParam(Params,"vdesk");
 
@@ -321,7 +321,7 @@ REGISTER_ACTION_HANDLER (CAHResetVirtualDesktop, "reset_virtual_desktop");
 // ------------------------------------------------------------------------------------------------
 class CAHMilkoMenuResetInterface : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		string sParam("mode=");
@@ -336,7 +336,7 @@ REGISTER_ACTION_HANDLER (CAHMilkoMenuResetInterface, "milko_menu_reset_interface
 // ------------------------------------------------------------------------------------------------
 class CAHMilkoMenuDoResetInterface : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string& Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string& Params) NL_OVERRIDE
 	{
 		// get param
 		string mode = getParam(Params, "mode");
@@ -354,7 +354,7 @@ REGISTER_ACTION_HANDLER(CAHMilkoMenuDoResetInterface, "milko_menu_do_reset_inter
 // ------------------------------------------------------------------------------------------------
 class CAHResetInterface : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		uint32 i;
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
@@ -405,7 +405,7 @@ REGISTER_ACTION_HANDLER (CAHResetInterface, "reset_interface");
 // ------------------------------------------------------------------------------------------------
 class CAHConvertServerEntities : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		string sDstPath = getParam(Params, "dest");
 		if (sDstPath.empty()) return;

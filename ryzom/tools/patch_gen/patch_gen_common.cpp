@@ -131,8 +131,8 @@ public:
 	void updatePatchSizes(CBNPFileSet& packageIndex) const;
 
 	// specialisation of IVersionNumberGenerator
-	void grabVersionNumber();
-	uint32 getPackageVersionNumber();
+	void grabVersionNumber() NL_OVERRIDE;
+	uint32 getPackageVersionNumber() NL_OVERRIDE;
 
 private:
 	CBNPCategorySet	_Categories;

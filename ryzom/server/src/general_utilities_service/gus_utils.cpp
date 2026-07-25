@@ -134,7 +134,7 @@ namespace GUS
 	static class CRegisterGusUtilsMessageCallbacks: public IServiceSingleton
 	{
 	public:
-		void init()
+		void init() NL_OVERRIDE
 		{
 			TUnifiedCallbackItem cbArray[] = 
 			{

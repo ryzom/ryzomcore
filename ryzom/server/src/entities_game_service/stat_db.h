@@ -45,8 +45,8 @@ public:
 	bool popTableLeafPD(CStatDBTableLeafPD & tableLeafPD);
 
 private:
-	void visitValueLeaf(CStatDBValueLeaf * valueLeaf, const std::string & path);
-	void visitTableLeaf(CStatDBTableLeaf * tableLeaf, const std::string & path);
+	void visitValueLeaf(CStatDBValueLeaf * valueLeaf, const std::string & path) NL_OVERRIDE;
+	void visitTableLeaf(CStatDBTableLeaf * tableLeaf, const std::string & path) NL_OVERRIDE;
 
 	void clearLeaves()
 	{
@@ -73,8 +73,8 @@ public:
 	void loadLeaves(IStatDBNodePtr root, CStatDBAllLeavesMsg & allLeavesMsg);
 
 private:
-	void visitValueLeaf(CStatDBValueLeaf * valueLeaf, const std::string & path);
-	void visitTableLeaf(CStatDBTableLeaf * tableLeaf, const std::string & path);
+	void visitValueLeaf(CStatDBValueLeaf * valueLeaf, const std::string & path) NL_OVERRIDE;
+	void visitTableLeaf(CStatDBTableLeaf * tableLeaf, const std::string & path) NL_OVERRIDE;
 
 private:
 	CStatDBAllLeavesMsg * _AllLeavesMsg;
@@ -121,9 +121,9 @@ public:
 	void displayNode(IStatDBNodePtr node, const std::string & currentPath, NLMISC::CLog & log);
 
 private:
-	void visitBranch(CStatDBBranch * branch, const std::string & path);
-	void visitValueLeaf(CStatDBValueLeaf * valueLeaf, const std::string & path);
-	void visitTableLeaf(CStatDBTableLeaf * tableLeaf, const std::string & path);
+	void visitBranch(CStatDBBranch * branch, const std::string & path) NL_OVERRIDE;
+	void visitValueLeaf(CStatDBValueLeaf * valueLeaf, const std::string & path) NL_OVERRIDE;
+	void visitTableLeaf(CStatDBTableLeaf * tableLeaf, const std::string & path) NL_OVERRIDE;
 
 	void displayOneNode(IStatDBNodePtr node, const std::string & currentPath);
 

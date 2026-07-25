@@ -317,7 +317,7 @@ void CDisplayerVisual::updateWorldPosRecurse()
 	//H_AUTO(R2_CDisplayerVisual_updateWorldPosRecurse)
 	struct CWorldPosUpdater : public IInstanceVisitor
 	{
-		virtual void visit(CInstance &inst)
+		virtual void visit(CInstance &inst) NL_OVERRIDE
 		{
 			if (inst.getDisplayerVisual())
 			{

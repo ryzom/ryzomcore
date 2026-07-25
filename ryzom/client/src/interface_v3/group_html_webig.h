@@ -34,13 +34,13 @@ public:
 
 	// Constructor
 	CGroupHTMLAuth(const TCtorParam &param);
-	~CGroupHTMLAuth();
+	~CGroupHTMLAuth() NL_OVERRIDE;
 
 	// From CGroupHTML
-	virtual void addHTTPGetParams (std::string &url, bool trustedDomain);
-	virtual void addHTTPPostParams (SFormFields &formfields, bool trustedDomain);
+	virtual void addHTTPGetParams (std::string &url, bool trustedDomain) NL_OVERRIDE;
+	virtual void addHTTPPostParams (SFormFields &formfields, bool trustedDomain) NL_OVERRIDE;
 	virtual std::string	home() const NL_OVERRIDE;
-	virtual void handle ();
+	virtual void handle () NL_OVERRIDE;
 
 private:
 
@@ -56,13 +56,13 @@ public:
 
 	// Constructor
 	CGroupHTMLWebIG(const TCtorParam &param);
-	~CGroupHTMLWebIG();
+	~CGroupHTMLWebIG() NL_OVERRIDE;
 
 	/// From CGroupHTMLAuth
-	virtual void addHTTPGetParams (std::string &url, bool trustedDomain);
-	virtual void addHTTPPostParams (SFormFields &formfields, bool trustedDomain);
+	virtual void addHTTPGetParams (std::string &url, bool trustedDomain) NL_OVERRIDE;
+	virtual void addHTTPPostParams (SFormFields &formfields, bool trustedDomain) NL_OVERRIDE;
 	virtual std::string	home() const NL_OVERRIDE;
-	virtual void handle ();
+	virtual void handle () NL_OVERRIDE;
 
 private:
 

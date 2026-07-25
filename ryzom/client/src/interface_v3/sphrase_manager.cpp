@@ -2325,7 +2325,7 @@ void	CSPhraseManager::receiveAckExecuteFromServer(bool cyclic, uint counterValue
 class CHandlerPhraseCounterUpdate : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		CSPhraseManager		*pPM = CSPhraseManager::getInstance();
 
@@ -2376,7 +2376,7 @@ REGISTER_ACTION_HANDLER( CHandlerPhraseCounterUpdate, "phrase_counter_update");
 class CHandlerPhraseDebugClient : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		if(ClientCfg.Local)
 		{

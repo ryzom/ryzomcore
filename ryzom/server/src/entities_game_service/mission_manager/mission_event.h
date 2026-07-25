@@ -115,7 +115,7 @@ public:
 protected:
 	friend class CMissionEvent;
 	CMissionEventMissionDone(){}
-	bool buildFromScript( const std::vector< std::string > & script  ,NLMISC::CLog& log);
+	bool buildFromScript( const std::vector< std::string > & script  ,NLMISC::CLog& log) NL_OVERRIDE;
 };
 
 /// "tagged ring scenario" event
@@ -131,7 +131,7 @@ public:
 protected:
 	friend class CMissionEvent;
 	CMissionEventTaggedRingScenarioDone(){}
-	bool buildFromScript( const std::vector< std::string > & script  ,NLMISC::CLog& log);
+	bool buildFromScript( const std::vector< std::string > & script  ,NLMISC::CLog& log) NL_OVERRIDE;
 };
 
 /// "give item" event
@@ -146,7 +146,7 @@ public:
 	friend class CMissionEvent;
 protected:
 	
-	bool buildFromScript( const std::vector< std::string > & script  ,NLMISC::CLog& log);
+	bool buildFromScript( const std::vector< std::string > & script  ,NLMISC::CLog& log) NL_OVERRIDE;
 };
 
 /// "give money" event
@@ -159,7 +159,7 @@ public:
 protected:
 	friend class CMissionEvent;
 	CMissionEventGiveMoney(){}
-	bool buildFromScript( const std::vector< std::string > & script  ,NLMISC::CLog& log);
+	bool buildFromScript( const std::vector< std::string > & script  ,NLMISC::CLog& log) NL_OVERRIDE;
 };
 
 /// "enter zone" event (emitted when being in a zone and meeting the contraints, for instance hour constraints)
@@ -172,7 +172,7 @@ public:
 protected:
 	friend class CMissionEvent;
 	CMissionEventVisitPlace(){}
-	bool buildFromScript( const std::vector< std::string > & script  ,NLMISC::CLog& log);
+	bool buildFromScript( const std::vector< std::string > & script  ,NLMISC::CLog& log) NL_OVERRIDE;
 };
 
 /// "cast" event
@@ -185,7 +185,7 @@ public:
 protected:
 	friend class CMissionEvent;
 	CMissionEventCast(){}
-	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log);
+	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log) NL_OVERRIDE;
 };
 
 /// "Kill" event
@@ -197,7 +197,7 @@ public:
 protected:
 	friend class CMissionEvent;
 	CMissionEventKill(){}
-	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log);
+	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log) NL_OVERRIDE;
 	
 };
 
@@ -210,7 +210,7 @@ public:
 protected:
 	friend class CMissionEvent;
 	CMissionEventKillPlayer(){}
-	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log);
+	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log) NL_OVERRIDE;
 };
 
 /// "buy" event
@@ -226,7 +226,7 @@ public:
 protected:
 	friend class CMissionEvent;
 	CMissionEventBuyItem(){}
-	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log);
+	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log) NL_OVERRIDE;
 };
 
 /// "sell" event
@@ -242,7 +242,7 @@ public:
 protected:
 	friend class CMissionEvent;
 	CMissionEventSellItem(){}
-	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log);
+	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log) NL_OVERRIDE;
 };
 
 /// "forage" event
@@ -258,7 +258,7 @@ public:
 protected:
 	friend class CMissionEvent;
 	CMissionEventForage(){}
-	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log);
+	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log) NL_OVERRIDE;
 };
 
 /// "talk" event
@@ -269,7 +269,7 @@ public:
 		:CMissionEvent(Talk,TDataSetRow()){}
 protected:
 	friend class CMissionEvent;
-	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log );
+	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log ) NL_OVERRIDE;
 };
 
 /// "Skill Progress" event
@@ -284,7 +284,7 @@ public:
 protected:
 	friend class CMissionEvent;
 	CMissionEventSkillProgress(){}
-	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log);
+	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log) NL_OVERRIDE;
 };
 
 /// "target" event
@@ -296,7 +296,7 @@ public:
 protected:
 	friend class CMissionEvent;
 	CMissionEventTarget(){}
-	bool buildFromScript( const std::vector< std::string > & script,NLMISC::CLog& log );
+	bool buildFromScript( const std::vector< std::string > & script,NLMISC::CLog& log ) NL_OVERRIDE;
 };
 
 /// "craft" event
@@ -312,7 +312,7 @@ public:
 protected:
 	friend class CMissionEvent;
 	CMissionEventCraft(){}
-	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log);
+	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log) NL_OVERRIDE;
 };
 
 class CMissionEventEscort : public CMissionEvent
@@ -325,7 +325,7 @@ public:
 protected:
 	CMissionEventEscort(){}
 	friend class CMissionEvent;
-	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log);
+	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log) NL_OVERRIDE;
 };
 
 class CMissionEventAIMsg : public CMissionEvent
@@ -337,7 +337,7 @@ public:
 	
 protected:
 	friend class CMissionEvent;
-	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log);
+	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log) NL_OVERRIDE;
 };
 
 class CMissionEventLootItem : public CMissionEvent
@@ -352,7 +352,7 @@ public:
 protected:
 	friend class CMissionEvent;
 	CMissionEventLootItem(){}
-	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log);
+	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log) NL_OVERRIDE;
 };
 
 class CMissionEventLootRm : public CMissionEvent
@@ -367,7 +367,7 @@ public:
 protected:
 	friend class CMissionEvent;
 	CMissionEventLootRm(){}
-	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log);
+	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log) NL_OVERRIDE;
 };
 
 class CMissionEventKillGroup : public CMissionEvent
@@ -380,7 +380,7 @@ public:
 protected:
 	friend class CMissionEvent;
 	CMissionEventKillGroup(){}
-	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log);
+	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log) NL_OVERRIDE;
 };
 
 class CMissionEventEndDynChat : public CMissionEvent
@@ -390,7 +390,7 @@ public:
 		:CMissionEvent(EndDynChat,TDataSetRow()){}
 protected:
 	friend class CMissionEvent;
-	bool buildFromScript( const std::vector< std::string > & /* script */, NLMISC::CLog& /* log */){return false;}
+	bool buildFromScript( const std::vector< std::string > & /* script */, NLMISC::CLog& /* log */) NL_OVERRIDE{return false;}
 };
 
 class CMissionEventDebug : public CMissionEvent
@@ -400,7 +400,7 @@ public:
 		:CMissionEvent(Debug,TDataSetRow()){}
 protected:
 	friend class CMissionEvent;
-	bool buildFromScript( const std::vector< std::string > & /* script */, NLMISC::CLog& /* log */){return false;}
+	bool buildFromScript( const std::vector< std::string > & /* script */, NLMISC::CLog& /* log */) NL_OVERRIDE{return false;}
 };
 
 
@@ -412,7 +412,7 @@ public:
 	uint32 Points;
 protected:
 	friend class CMissionEvent;
-	bool buildFromScript( const std::vector< std::string > & /* script */, NLMISC::CLog& /* log */){return false;}
+	bool buildFromScript( const std::vector< std::string > & /* script */, NLMISC::CLog& /* log */) NL_OVERRIDE{return false;}
 };
 
 class CMissionEventOutpostGain : public CMissionEvent
@@ -422,7 +422,7 @@ public:
 		:CMissionEvent(OutpostGain,TDataSetRow()){}
 protected:
 	friend class CMissionEvent;
-	bool buildFromScript( const std::vector< std::string > & /* script */, NLMISC::CLog& /* log */){return false;}
+	bool buildFromScript( const std::vector< std::string > & /* script */, NLMISC::CLog& /* log */) NL_OVERRIDE{return false;}
 };
 
 
@@ -437,7 +437,7 @@ public:
 	bool Guild;
 protected:
 	friend class CMissionEvent;
-	bool buildFromScript( const std::vector< std::string > & /* script */, NLMISC::CLog& /* log */){return false;}
+	bool buildFromScript( const std::vector< std::string > & /* script */, NLMISC::CLog& /* log */) NL_OVERRIDE{return false;}
 };
 
 class CMissionEventQueueEntryOk: public CMissionEvent
@@ -447,7 +447,7 @@ public:
 		:CMissionEvent(QueueEntryOk, TDataSetRow()) {}
 protected:
 	friend class CMissionEvent;
-	bool buildFromScript( const std::vector< std::string > & /* script */, NLMISC::CLog& /* log */){return false;}
+	bool buildFromScript( const std::vector< std::string > & /* script */, NLMISC::CLog& /* log */) NL_OVERRIDE{return false;}
 };
 
 
@@ -458,7 +458,7 @@ public:
 		:CMissionEvent(QueueExit, TDataSetRow()) {}
 protected:
 	friend class CMissionEvent;
-	bool buildFromScript( const std::vector< std::string > & /* script */, NLMISC::CLog& /* log */){return false;}
+	bool buildFromScript( const std::vector< std::string > & /* script */, NLMISC::CLog& /* log */) NL_OVERRIDE{return false;}
 };
 
 class CMissionEventGroupSpawned : public CMissionEvent
@@ -471,7 +471,7 @@ public:
 protected:
 	friend class CMissionEvent;
 	CMissionEventGroupSpawned(){}
-	bool buildFromScript( const std::vector< std::string > & /* script */, NLMISC::CLog& /* log */){return false;}
+	bool buildFromScript( const std::vector< std::string > & /* script */, NLMISC::CLog& /* log */) NL_OVERRIDE{return false;}
 };
 
 class CMissionEventGroupDespawned : public CMissionEvent
@@ -484,7 +484,7 @@ public:
 protected:
 	friend class CMissionEvent;
 	CMissionEventGroupDespawned(){}
-	bool buildFromScript( const std::vector< std::string > & /* script */, NLMISC::CLog& /* log */){return false;}
+	bool buildFromScript( const std::vector< std::string > & /* script */, NLMISC::CLog& /* log */) NL_OVERRIDE{return false;}
 };
 
 #endif // RY_MISSION_EVENT_H

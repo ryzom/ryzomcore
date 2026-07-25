@@ -55,7 +55,7 @@ public:
 	}
 
 	/// apply effects
-	virtual void apply();
+	virtual void apply() NL_OVERRIDE;
 
 
 protected:

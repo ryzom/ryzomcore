@@ -33,9 +33,9 @@ public:
 	//@{
 	//@name Overloads from inventory base
 	/// Return the max bulk according to player capacity
-	uint32 getMaxWeight() const;
-	uint32 getMaxBulk() const;
-	uint32 getMaxSlot() const;
+	uint32 getMaxWeight() const NL_OVERRIDE;
+	uint32 getMaxBulk() const NL_OVERRIDE;
+	uint32 getMaxSlot() const NL_OVERRIDE;
 	
 	/// Update database of item representation
 //	virtual void onItemChanged(uint32 slot);
@@ -53,9 +53,9 @@ private:
 class CPetInvView : public CCharacterInvView
 {
 public:
-	virtual void onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags changeFlags);
+	virtual void onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags changeFlags) NL_OVERRIDE;
 	/// The inventory information has changed (like total bulk or weight)
-	virtual void onInventoryChanged(INVENTORIES::TInventoryChangeFlags changeFlags);
+	virtual void onInventoryChanged(INVENTORIES::TInventoryChangeFlags changeFlags) NL_OVERRIDE;
 };
 
 #endif

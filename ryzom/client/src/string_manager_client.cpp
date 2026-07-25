@@ -1122,25 +1122,25 @@ public:
 		text = prepareExcelSheet(diff);
 	}
 
-	void onEquivalent(uint /* addIndex */, uint refIndex, TWordsDiffContext &context)
+	void onEquivalent(uint /* addIndex */, uint refIndex, TWordsDiffContext &context) NL_OVERRIDE
 	{
 		context.Diff.push_back(context.Reference[refIndex]);
 	}
-	void onAdd(uint addIndex, uint /* refIndex */, TWordsDiffContext &context)
+	void onAdd(uint addIndex, uint /* refIndex */, TWordsDiffContext &context) NL_OVERRIDE
 	{
 		context.Diff.push_back(context.Addition[addIndex]);
 		nlinfo("Using newly sheet row %s", context.Diff.getData(context.Diff.size()-1, 1).toString().c_str());
 	}
-	void onRemove(uint /* addIndex */, uint /* refIndex */, TWordsDiffContext &/* context */)
+	void onRemove(uint /* addIndex */, uint /* refIndex */, TWordsDiffContext &/* context */) NL_OVERRIDE
 	{
 		// nothing to do because we don't insert bad value
 	}
-	void onChanged(uint addIndex, uint /* refIndex */, TWordsDiffContext &context)
+	void onChanged(uint addIndex, uint /* refIndex */, TWordsDiffContext &context) NL_OVERRIDE
 	{
 		context.Diff.push_back(context.Addition[addIndex]);
 		nlinfo("Using changed sheet row %s", context.Diff.getData(context.Diff.size()-1, 1).toString().c_str());
 	}
-	void onSwap(uint /* newIndex */, uint /* refIndex */, TWordsDiffContext &/* context */)
+	void onSwap(uint /* newIndex */, uint /* refIndex */, TWordsDiffContext &/* context */) NL_OVERRIDE
 	{
 		// don't swap.
 	}

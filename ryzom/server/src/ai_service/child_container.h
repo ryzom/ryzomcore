@@ -306,19 +306,19 @@ class CAliasCont
 public:
 	explicit CAliasCont();
 	
-	uint32 size() const { return (uint32)this->_Childs.size(); }
+	uint32 size() const NL_OVERRIDE { return (uint32)this->_Childs.size(); }
 	
 	uint32 getChildIndexByAlias(uint32 alias) const;
 	TChld* getChildByAlias(uint32 alias) const;
 	TChld* getChildByName(std::string const& name) const;
 	TChld* getFirstChild() const;
 	
-	CAliasTreeOwner* getAliasChildByAlias(uint32 alias) const;
-	CAliasTreeOwner* addAliasChild(CAliasTreeOwner* child);
-	CAliasTreeOwner* addAliasChild(CAliasTreeOwner* child, uint32 index);
+	CAliasTreeOwner* getAliasChildByAlias(uint32 alias) const NL_OVERRIDE;
+	CAliasTreeOwner* addAliasChild(CAliasTreeOwner* child) NL_OVERRIDE;
+	CAliasTreeOwner* addAliasChild(CAliasTreeOwner* child, uint32 index) NL_OVERRIDE;
 	
-	void removeChildByAlias(uint32 alias);
-	void removeChildByIndex(uint32 index);
+	void removeChildByAlias(uint32 alias) NL_OVERRIDE;
+	void removeChildByIndex(uint32 index) NL_OVERRIDE;
 };
 
 /****************************************************************************/

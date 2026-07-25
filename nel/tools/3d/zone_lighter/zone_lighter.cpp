@@ -77,7 +77,7 @@ const char *progressbar[BAR_LENGTH]=
 class CMyZoneLighter : public CZoneLighter
 {
 	// Progress bar
-	virtual void progress (const char *message, float progress)
+	virtual void progress (const char *message, float progress) NL_OVERRIDE
 	{
 		// Progress bar
 		char msg[512];

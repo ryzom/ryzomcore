@@ -48,7 +48,7 @@ public:
 		RamAllocation=ramAllocation;
 	}
 
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CMsgAIServiceUp");
 		property ("ProcessorAllocation", PropFloat, 1.0f, ProcessorAllocation);
@@ -56,7 +56,7 @@ public:
 		propertyCont ("ManagersRunning", PropUInt16, ManagersRunning);
 	}
 
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 
@@ -78,14 +78,14 @@ public:
 		MgrId=mgrId;
 	}
 
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CMsgAIManagerUp");
 		property ("MgrId", PropUInt16, uint16(0), MgrId);
 		property ("Name", PropString, std::string(), Name);
 	}
 
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 
@@ -111,13 +111,13 @@ public:
 		Message=std::string(msgStr);
 	}
 
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CMsgAIFeedback");
 		property ("Msg", PropString, std::string(), Message);
 	}
 
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 #endif

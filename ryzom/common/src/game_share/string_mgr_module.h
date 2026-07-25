@@ -95,27 +95,27 @@ namespace R2
 	public:
 		CStringManagerModule();
 
-		~CStringManagerModule();
+		~CStringManagerModule() NL_OVERRIDE;
 
 		void init(NLNET::IModuleSocket* clientGW,CDynamicMapService* server);
 
-		virtual void onServiceUp(const std::string &serviceName, NLNET::TServiceId serviceId) { }
+		virtual void onServiceUp(const std::string &serviceName, NLNET::TServiceId serviceId) NL_OVERRIDE { }
 
-		virtual void onServiceDown(const std::string &serviceName, NLNET::TServiceId serviceId) {}
+		virtual void onServiceDown(const std::string &serviceName, NLNET::TServiceId serviceId) NL_OVERRIDE {}
 
-		virtual void onModuleUpdate() {}
+		virtual void onModuleUpdate() NL_OVERRIDE {}
 
-		virtual void onApplicationExit();
+		virtual void onApplicationExit() NL_OVERRIDE;
 
-		virtual void onModuleUp(NLNET::IModuleProxy *moduleProxy);
+		virtual void onModuleUp(NLNET::IModuleProxy *moduleProxy) NL_OVERRIDE;
 
-		virtual void onModuleDown(NLNET::IModuleProxy *moduleProxy);
+		virtual void onModuleDown(NLNET::IModuleProxy *moduleProxy) NL_OVERRIDE;
 
-		virtual bool onProcessModuleMessage(NLNET::IModuleProxy *senderModuleProxy, const NLNET::CMessage &message);
+		virtual bool onProcessModuleMessage(NLNET::IModuleProxy *senderModuleProxy, const NLNET::CMessage &message) NL_OVERRIDE;
 
-		virtual void onModuleSecurityChange(NLNET::IModuleProxy *moduleProxy);
+		virtual void onModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) NL_OVERRIDE;
 
-		virtual void onModuleSocketEvent(NLNET::IModuleSocket *moduleSocket, TModuleSocketEvent eventType) {}
+		virtual void onModuleSocketEvent(NLNET::IModuleSocket *moduleSocket, TModuleSocketEvent eventType) NL_OVERRIDE {}
 
 		virtual void registerTableRequested(TSessionId sessionId,CObject* table);
 

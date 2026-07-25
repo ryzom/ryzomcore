@@ -40,7 +40,7 @@ public:
 	
 	// ctor/dtor
 	CR2MissionItem() {}
-	~CR2MissionItem();
+	~CR2MissionItem() NL_OVERRIDE;
 
 	// a new scenario send it's used items descriptions
 	void itemsDescriptionsForScenario(TScenarioId scenarioId, const std::vector<R2::TMissionItem> &missionItem);

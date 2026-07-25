@@ -30,11 +30,11 @@ namespace R2
 		CToolNewVertex();
 	protected:
 		// from CToolChoosePos
-		virtual bool isValidChoosePos(const NLMISC::CVector2f &pos) const;
-		virtual void commit(const NLMISC::CVector &createPosition, float createAngle);
-		virtual const char *getToolUIName() const;
+		virtual bool isValidChoosePos(const NLMISC::CVector2f &pos) const NL_OVERRIDE;
+		virtual void commit(const NLMISC::CVector &createPosition, float createAngle) NL_OVERRIDE;
+		virtual const char *getToolUIName() const NL_OVERRIDE;
 		// from CTool
-		virtual bool onDeleteCmd();
+		virtual bool onDeleteCmd() NL_OVERRIDE;
 	private:
 		mutable sint			_CurrEdge;
 		mutable NLMISC::CVector _CurrPos;

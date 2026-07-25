@@ -85,7 +85,7 @@ class	CAIInstance;
 class CWarnBadInstanceMsgImp : public CWarnBadInstanceMsg
 {
 public:
-	void callback(const std::string &name, NLNET::TServiceId id);
+	void callback(const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 
@@ -131,7 +131,7 @@ public:
 	// release the singleton before program exit
 	void release();
 
-	void	serviceEvent	(const	CServiceEvent	&info);
+	void	serviceEvent	(const	CServiceEvent	&info) NL_OVERRIDE;
 
 	// Management of deleted root alias
 	bool markTagForDelete(const std::string &filename);

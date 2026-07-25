@@ -36,14 +36,14 @@ class CContinuousAction : public CAction
 {
 public:
 	/// Returns true always (continuous action by essence)
-	bool			isContinuous() const { return true; }
+	bool			isContinuous() const NL_OVERRIDE { return true; }
 
 	/*virtual bool	isDelta() const = 0;
 	virtual bool	hasGaranty() const = 0;
 	virtual void	setGaranty(bool g=true) = 0;
 	virtual void	packDelta(const CAction::TValue &origin) = 0;
 	virtual void	unpackDelta(const CAction::TValue &origin) = 0;*/
-	virtual TValue	getValue() const = 0;
+	virtual TValue	getValue() const NL_OVERRIDE = 0;
 	//virtual TValue	getValue(const CAction::TValue &origin) const = 0;
 
 protected:

@@ -138,22 +138,22 @@ public:
 	CItemForSale();
 
 	// virtual destructor
-	virtual ~CItemForSale();
+	virtual ~CItemForSale() NL_OVERRIDE;
 
 	// sheet id
-	NLMISC::CSheetId getSheetId() const { return _ItemPtr->getSheetId(); }
-	void setSheetId( const NLMISC::CSheetId& ) {}
+	NLMISC::CSheetId getSheetId() const NL_OVERRIDE { return _ItemPtr->getSheetId(); }
+	void setSheetId( const NLMISC::CSheetId& ) NL_OVERRIDE {}
 	
 	// price
 //	uint32 getPrice() const { return _Price; }
 //	void setPrice( uint32 p ) { _Price = p; }
-	virtual const RYMSG::TPriceInfo &getPriceInfo() const {return _PriceInfo;};
-	virtual RYMSG::TPriceInfo &getPriceInfo() {return _PriceInfo;};
-	virtual void setPriceInfo(const RYMSG::TPriceInfo &priceInfo) {_PriceInfo=priceInfo;}
+	virtual const RYMSG::TPriceInfo &getPriceInfo() const NL_OVERRIDE {return _PriceInfo;};
+	virtual RYMSG::TPriceInfo &getPriceInfo() NL_OVERRIDE {return _PriceInfo;};
+	virtual void setPriceInfo(const RYMSG::TPriceInfo &priceInfo) NL_OVERRIDE {_PriceInfo=priceInfo;}
 	
 	// retire price
-	uint32 getRetirePrice() const { return _RetirePrice; }
-	void setRetirePrice( uint32 price ) { _RetirePrice = price; }
+	uint32 getRetirePrice() const NL_OVERRIDE { return _RetirePrice; }
+	void setRetirePrice( uint32 price ) NL_OVERRIDE { _RetirePrice = price; }
 
 	// Faction : No need for faction point and type for player item in shop
 	PVP_CLAN::TPVPClan getFactionType() const { return PVP_CLAN::None; }
@@ -162,32 +162,32 @@ public:
 	void setFactionPointPrice( uint32 FPPrice ) {}
 
 	// quality
-	uint32 getQuality() const { return 1; }
-	void setQuality( uint32 ) {}
+	uint32 getQuality() const NL_OVERRIDE { return 1; }
+	void setQuality( uint32 ) NL_OVERRIDE {}
 	
 	// level
-	uint32 getLevel() const { return _ItemPtr->quality(); }
-	void setLevel( uint32 ) {}
+	uint32 getLevel() const NL_OVERRIDE { return _ItemPtr->quality(); }
+	void setLevel( uint32 ) NL_OVERRIDE {}
 	
 	// item ptr
 	// warning: this item will be deleted by CItemForSale destructor
-	CGameItemPtr getItemPtr() const { return _ItemPtr; }
-	void setItemPtr( CGameItemPtr itemPtr ) { _ItemPtr = itemPtr; }
+	CGameItemPtr getItemPtr() const NL_OVERRIDE { return _ItemPtr; }
+	void setItemPtr( CGameItemPtr itemPtr ) NL_OVERRIDE { _ItemPtr = itemPtr; }
 	
 	// start sale cycle
-	NLMISC::TGameCycle getStartSaleCycle() const { return _StartSaleCycle; }
-	void setStartSaleCycle( NLMISC::TGameCycle cycle ) { _StartSaleCycle = cycle; }
+	NLMISC::TGameCycle getStartSaleCycle() const NL_OVERRIDE { return _StartSaleCycle; }
+	void setStartSaleCycle( NLMISC::TGameCycle cycle ) NL_OVERRIDE { _StartSaleCycle = cycle; }
 	
 	// owner id of item
-	NLMISC::CEntityId getOwner() const { return _Owner; }
-	void setOwner( const NLMISC::CEntityId& id ) { _Owner = id; }
+	NLMISC::CEntityId getOwner() const NL_OVERRIDE { return _Owner; }
+	void setOwner( const NLMISC::CEntityId& id ) NL_OVERRIDE { _Owner = id; }
 	
 	// continent where item are selled
-	CONTINENT::TContinent getContinent() const { return _Continent; }
-	void setContinent( CONTINENT::TContinent continent ) { _Continent = continent; }
+	CONTINENT::TContinent getContinent() const NL_OVERRIDE { return _Continent; }
+	void setContinent( CONTINENT::TContinent continent ) NL_OVERRIDE { _Continent = continent; }
 	
 	// set item for sale
-	void itemForSale( uint32 price, uint32 retirePrice, CGameItemPtr item, uint32 quantity, const NLMISC::CEntityId& id, CONTINENT::TContinent continent, uint32 identifier );
+	void itemForSale( uint32 price, uint32 retirePrice, CGameItemPtr item, uint32 quantity, const NLMISC::CEntityId& id, CONTINENT::TContinent continent, uint32 identifier ) NL_OVERRIDE;
 
 	// serial
 //	void serial(NLMISC::IStream &f);
@@ -196,32 +196,32 @@ public:
 //	const IItemTrade * operator = ( CItemForSale * i ) const { return (IItemTrade *) i; }
 	
 	// return true if item stay available
-	bool isAvailable( uint32 quantity ) const { return _Available && _Quantity >= quantity; }
+	bool isAvailable( uint32 quantity ) const NL_OVERRIDE { return _Available && _Quantity >= quantity; }
 	
 	// set item stay available/non available
-	void setAvailable( bool a );
+	void setAvailable( bool a ) NL_OVERRIDE;
 
 	// return game cycle left for item in store 
 //	NLMISC::TGameCycle getGameCycleLeft() const {	return (NLMISC::TGameCycle) ( (sint32) std::max( (sint32)0, (sint32)( ((sint32) MaxGameCycleSaleStore) - ( ( CTickEventHandler::getGameCycle() - _StartSaleCycle ) + _ItemPtr->getTotalSaleCycle() ) ) ) ); }
-	NLMISC::TGameCycle getGameCycleLeft() const;
+	NLMISC::TGameCycle getGameCycleLeft() const NL_OVERRIDE;
 	
 	// get quantity
-	uint32 getQuantity() const { return _Quantity; }
+	uint32 getQuantity() const NL_OVERRIDE { return _Quantity; }
 
 	// set quantity
-	uint32 addQuantity( uint32 q ) { _Quantity += q; return _Quantity; }
+	uint32 addQuantity( uint32 q ) NL_OVERRIDE { _Quantity += q; return _Quantity; }
 
 	// remove quantity
-	void removeQuantity( uint32 q ) { _Quantity -= std::min( _Quantity, q ); }
+	void removeQuantity( uint32 q ) NL_OVERRIDE { _Quantity -= std::min( _Quantity, q ); }
 
 	// get identifier
-	uint32 getIdentifier() const { return _Identifier; }
+	uint32 getIdentifier() const NL_OVERRIDE { return _Identifier; }
 	
 	// copy 
-	void copy( IItemTrade * itt );
+	void copy( IItemTrade * itt ) NL_OVERRIDE;
 
 	// For resale item: always allow same item in shopping list
-	virtual bool	allowSameItemInShopList() const {return true;}
+	virtual bool	allowSameItemInShopList() const NL_OVERRIDE {return true;}
 	
 private:
 	// setted price
@@ -257,22 +257,22 @@ public:
 	CTradeBase() { _ItemPtr = 0; /*_FactionType = PVP_CLAN::None; _FactionPointPrice = 0;*/ _AllowSameItemInShopList= false;}
 
 	// virtual destructor
-	virtual ~CTradeBase();
+	virtual ~CTradeBase() NL_OVERRIDE;
 
 	// sheet id
-	NLMISC::CSheetId getSheetId() const { return _Sheet; }
-	void setSheetId( const NLMISC::CSheetId& sheet ) { _Sheet = sheet; }
+	NLMISC::CSheetId getSheetId() const NL_OVERRIDE { return _Sheet; }
+	void setSheetId( const NLMISC::CSheetId& sheet ) NL_OVERRIDE { _Sheet = sheet; }
 
 	// price
 //	uint32 getPrice() const { return _Price; }
 //	void setPrice( uint32 price ) { _Price = price; }
-	virtual const RYMSG::TPriceInfo &getPriceInfo() const {return _PriceInfo;};
-	virtual RYMSG::TPriceInfo &getPriceInfo() {return _PriceInfo;};
-	virtual void setPriceInfo(const RYMSG::TPriceInfo &priceInfo) {_PriceInfo=priceInfo;}
+	virtual const RYMSG::TPriceInfo &getPriceInfo() const NL_OVERRIDE {return _PriceInfo;};
+	virtual RYMSG::TPriceInfo &getPriceInfo() NL_OVERRIDE {return _PriceInfo;};
+	virtual void setPriceInfo(const RYMSG::TPriceInfo &priceInfo) NL_OVERRIDE {_PriceInfo=priceInfo;}
 
 	// return retire price
-	uint32 getRetirePrice() const { return 0; }
-	void setRetirePrice( uint32 ) {}
+	uint32 getRetirePrice() const NL_OVERRIDE { return 0; }
+	void setRetirePrice( uint32 ) NL_OVERRIDE {}
 
 	// faction type
 //	virtual PVP_CLAN::TPVPClan getFactionType() const { return _FactionType; }
@@ -284,65 +284,65 @@ public:
 
 	// Special for named items: allow duplicate of items seen in the shopping list (even if same sheet/quality/level)
 	void			setAllowSameItemInShopList(bool s) {_AllowSameItemInShopList= s;}
-	virtual bool	allowSameItemInShopList() const {return _AllowSameItemInShopList;}
+	virtual bool	allowSameItemInShopList() const NL_OVERRIDE {return _AllowSameItemInShopList;}
 
 	// quality
-	uint32 getQuality() const { return _Quality; }
-	void setQuality( uint32 q ) { _Quality = q; }
+	uint32 getQuality() const NL_OVERRIDE { return _Quality; }
+	void setQuality( uint32 q ) NL_OVERRIDE { _Quality = q; }
 
 	// level
-	uint32 getLevel() const { return _Level; }
-	void setLevel( uint32 l ) { _Level = l; }
+	uint32 getLevel() const NL_OVERRIDE { return _Level; }
+	void setLevel( uint32 l ) NL_OVERRIDE { _Level = l; }
 
 	// item ptr
 	// warning: this item won't be deleted by CTradeBase destructor
-	CGameItemPtr getItemPtr() const { return _ItemPtr; }
-	void setItemPtr( CGameItemPtr itemPtr ) { _ItemPtr = itemPtr; }
+	CGameItemPtr getItemPtr() const NL_OVERRIDE { return _ItemPtr; }
+	void setItemPtr( CGameItemPtr itemPtr ) NL_OVERRIDE { _ItemPtr = itemPtr; }
 
 	// start sale cycle
-	NLMISC::TGameCycle getStartSaleCycle() const { return 0; }
-	void setStartSaleCycle( NLMISC::TGameCycle ) {}
+	NLMISC::TGameCycle getStartSaleCycle() const NL_OVERRIDE { return 0; }
+	void setStartSaleCycle( NLMISC::TGameCycle ) NL_OVERRIDE {}
 	
 	// owner of item
-	NLMISC::CEntityId getOwner() const { return NLMISC::CEntityId::Unknown; }
-	void setOwner( const NLMISC::CEntityId& ) {}
+	NLMISC::CEntityId getOwner() const NL_OVERRIDE { return NLMISC::CEntityId::Unknown; }
+	void setOwner( const NLMISC::CEntityId& ) NL_OVERRIDE {}
 	
 	// continent where item is selled
-	CONTINENT::TContinent getContinent() const { return CONTINENT::UNKNOWN; }
-	void setContinent( CONTINENT::TContinent ) {}
+	CONTINENT::TContinent getContinent() const NL_OVERRIDE { return CONTINENT::UNKNOWN; }
+	void setContinent( CONTINENT::TContinent ) NL_OVERRIDE {}
 	
 	// serial
 	void serial(NLMISC::IStream &f) {}
 
 	// set item for sale
-	void itemForSale( uint32 price, uint32 retirePrice, CGameItemPtr item, uint32 quantity, const NLMISC::CEntityId& id, CONTINENT::TContinent continent, uint32 identifier ) {}
+	void itemForSale( uint32 price, uint32 retirePrice, CGameItemPtr item, uint32 quantity, const NLMISC::CEntityId& id, CONTINENT::TContinent continent, uint32 identifier ) NL_OVERRIDE {}
 
 	// cast operator
 //	const IItemTrade * operator = ( CTradeBase * i ) const { return (IItemTrade *) i; }
 
 	// return true, static item stay always available
-	bool isAvailable( uint32 ) const { return true; }
+	bool isAvailable( uint32 ) const NL_OVERRIDE { return true; }
 
 	// set item stay available/non available
-	void setAvailable( bool ) {}
+	void setAvailable( bool ) NL_OVERRIDE {}
 
 	// return game cycle left for item in store 
-	NLMISC::TGameCycle getGameCycleLeft() const { return 0; }
+	NLMISC::TGameCycle getGameCycleLeft() const NL_OVERRIDE { return 0; }
 
 	// get quantity
-	uint32 getQuantity() const { return 1; }
+	uint32 getQuantity() const NL_OVERRIDE { return 1; }
 
 	// set quantity
-	uint32 addQuantity( uint32 ) { return 1; }
+	uint32 addQuantity( uint32 ) NL_OVERRIDE { return 1; }
 
 	// remove quantity
-	void removeQuantity( uint32 ) {}
+	void removeQuantity( uint32 ) NL_OVERRIDE {}
 	
 	// get identifier
-	uint32 getIdentifier() const { return 0; }
+	uint32 getIdentifier() const NL_OVERRIDE { return 0; }
 
 	// copy 
-	void copy( IItemTrade * itt );
+	void copy( IItemTrade * itt ) NL_OVERRIDE;
 
 private:
 	RYMSG::TPriceInfo	_PriceInfo;

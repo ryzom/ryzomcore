@@ -75,11 +75,11 @@ class CRoomInstanceCommon : public IRoomInstance
 	NL_INSTANCE_COUNTER_DECL(CRoomInstanceCommon);
 public:
 
-	virtual std::string getRoomDescription() const;
+	virtual std::string getRoomDescription() const NL_OVERRIDE;
 
 private:
-	virtual void removeUser( CCharacter* user );
-	virtual void addUser( CCharacter* user, CCharacter* owner );
+	virtual void removeUser( CCharacter* user ) NL_OVERRIDE;
+	virtual void addUser( CCharacter* user, CCharacter* owner ) NL_OVERRIDE;
 };
 
 /// a guild room
@@ -94,12 +94,12 @@ public:
 	}
 	EGSPD::TGuildId getGuildId(){ return _GuildId; }
 
-	virtual std::string getRoomDescription() const;
+	virtual std::string getRoomDescription() const NL_OVERRIDE;
 
 private:
-	virtual bool create( IBuildingPhysical * building, uint16 roomIdx, uint16 ownerIdx , sint32 cell);
-	virtual void removeUser( CCharacter* user );
-	virtual void addUser( CCharacter* user, CCharacter* owner );
+	virtual bool create( IBuildingPhysical * building, uint16 roomIdx, uint16 ownerIdx , sint32 cell) NL_OVERRIDE;
+	virtual void removeUser( CCharacter* user ) NL_OVERRIDE;
+	virtual void addUser( CCharacter* user, CCharacter* owner ) NL_OVERRIDE;
 
 	EGSPD::TGuildId	_GuildId;
 };
@@ -112,12 +112,12 @@ public:
 
 	inline const NLMISC::CEntityId & getPlayer()const;
 
-	virtual std::string getRoomDescription() const;
+	virtual std::string getRoomDescription() const NL_OVERRIDE;
 
 private:
-	virtual bool create( IBuildingPhysical * building, uint16 roomIdx, uint16 ownerIdx , sint32 cell);
-	virtual void removeUser( CCharacter* user );
-	virtual void addUser( CCharacter* user, CCharacter* owner );
+	virtual bool create( IBuildingPhysical * building, uint16 roomIdx, uint16 ownerIdx , sint32 cell) NL_OVERRIDE;
+	virtual void removeUser( CCharacter* user ) NL_OVERRIDE;
+	virtual void addUser( CCharacter* user, CCharacter* owner ) NL_OVERRIDE;
 	/// owner player
 	NLMISC::CEntityId				_Player;
 };

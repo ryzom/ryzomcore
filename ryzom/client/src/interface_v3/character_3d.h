@@ -140,7 +140,7 @@ class CCharacter3D : public CReflectableRefPtrTarget
 public:
 
 	CCharacter3D();
-	~CCharacter3D();
+	~CCharacter3D() NL_OVERRIDE;
 
 	bool init (NL3D::UScene *pScene);
 	void setup (const SCharacter3DSetup &newSetup);

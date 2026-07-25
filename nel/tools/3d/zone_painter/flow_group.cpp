@@ -62,7 +62,7 @@ public:
 	{
 	}
 
-	virtual bool parse(xmlNodePtr cur, NLGUI::CInterfaceGroup *parentGroup)
+	virtual bool parse(xmlNodePtr cur, NLGUI::CInterfaceGroup *parentGroup) NL_OVERRIDE
 	{
 		if (!NLGUI::CInterfaceGroup::parse(cur, parentGroup))
 			return false;
@@ -77,7 +77,7 @@ public:
 		return true;
 	}
 
-	virtual void updateCoords()
+	virtual void updateCoords() NL_OVERRIDE
 	{
 		// Columns from the current width (last layout pass's real size when sizeref'd,
 		// same one-frame convergence as the client's inventory grid), then reflow the

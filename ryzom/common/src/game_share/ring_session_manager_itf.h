@@ -5489,7 +5489,7 @@ namespace RSMGR
 			:	CRingSessionManagerWebItf(replacementAdaptor)
 		{}
 
-		virtual ~CSessionBrowserServerWebItf()
+		virtual ~CSessionBrowserServerWebItf() NL_OVERRIDE
 		{
 		}
 
@@ -6047,7 +6047,7 @@ namespace RSMGR
 		{}
 
 		/// Connect the interface client to the callback server at the specified address and port
-		virtual void connectItf(const NLNET::CInetHost &address)
+		virtual void connectItf(const NLNET::CInetHost &address) NL_OVERRIDE
 		{
 			NLNET::TCallbackItem *arrayPtr;
 			uint32 arraySize;
@@ -6074,7 +6074,7 @@ namespace RSMGR
 		/** Must be called evenly, update the network subclass to receive message
 		 *	and dispatch invokation returns.
 		 */
-		virtual void update()
+		virtual void update() NL_OVERRIDE
 		{
 			H_AUTO(CSessionBrowserServerWeb_update);
 

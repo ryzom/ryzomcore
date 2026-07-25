@@ -179,7 +179,7 @@ private:
 private:
 	void			  updatePeopleMenu(uint index);
 	// from CGroupContainer::IChildrenObs
-	virtual void childrenMoved(uint srcIndex, uint destIndex, CGroupContainer *children);
+	virtual void childrenMoved(uint srcIndex, uint destIndex, CGroupContainer *children) NL_OVERRIDE;
 
 	static bool sortExByContactId(const CPeople& a, const CPeople& b);
 	static bool sortExByName(const CPeople& a, const CPeople& b);

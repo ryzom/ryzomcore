@@ -52,15 +52,15 @@ class CDllEntry : public CStorageContainer
 public:
 	CDllEntry();
 	CDllEntry(const IDllPluginDescInternal *dllPluginDesc);
-	virtual ~CDllEntry();
+	virtual ~CDllEntry() NL_OVERRIDE;
 
 	// inherited
-	virtual std::string className() const;
-	virtual void toString(std::ostream &ostream, const std::string &pad = "") const;
-	virtual void parse(uint16 version, uint filter = 0);
-	virtual void clean();
-	virtual void build(uint16 version, uint filter = 0);
-	virtual void disown();
+	virtual std::string className() const NL_OVERRIDE;
+	virtual void toString(std::ostream &ostream, const std::string &pad = "") const NL_OVERRIDE;
+	virtual void parse(uint16 version, uint filter = 0) NL_OVERRIDE;
+	virtual void clean() NL_OVERRIDE;
+	virtual void build(uint16 version, uint filter = 0) NL_OVERRIDE;
+	virtual void disown() NL_OVERRIDE;
 
 	// read access
 	const ucstring &dllDescription() const { return m_DllDescription->Value; }
@@ -70,7 +70,7 @@ public:
 	void overrideDllFilename(const ucstring &dllFilename) { m_DllFilename->Value = dllFilename; }
 
 protected:
-	virtual IStorageObject *createChunkById(uint16 id, bool container);
+	virtual IStorageObject *createChunkById(uint16 id, bool container) NL_OVERRIDE;
 	CStorageValue<ucstring> *m_DllDescription;
 	CStorageValue<ucstring> *m_DllFilename;
 
@@ -93,15 +93,15 @@ class CDllDirectory : public CStorageContainer
 {
 public:
 	CDllDirectory();
-	virtual ~CDllDirectory();
+	virtual ~CDllDirectory() NL_OVERRIDE;
 
 	// inherited
-	virtual std::string className() const;
-	virtual void toString(std::ostream &ostream, const std::string &pad = "") const;
-	virtual void parse(uint16 version, uint filter = 0);
-	virtual void clean();
-	virtual void build(uint16 version, uint filter = 0);
-	virtual void disown();
+	virtual std::string className() const NL_OVERRIDE;
+	virtual void toString(std::ostream &ostream, const std::string &pad = "") const NL_OVERRIDE;
+	virtual void parse(uint16 version, uint filter = 0) NL_OVERRIDE;
+	virtual void clean() NL_OVERRIDE;
+	virtual void build(uint16 version, uint filter = 0) NL_OVERRIDE;
+	virtual void disown() NL_OVERRIDE;
 
 	// public
 	// Get a dll entry corresponding to a chunk index, pointers become invalid after reset
@@ -115,7 +115,7 @@ private:
 	void addInternalIndices();
 
 protected:
-	virtual IStorageObject *createChunkById(uint16 id, bool container);
+	virtual IStorageObject *createChunkById(uint16 id, bool container) NL_OVERRIDE;
 
 private:
 	TStorageObjectContainer m_ChunkCache;

@@ -978,7 +978,7 @@ void CGroupCompasMenu::setActive (bool state)
 // Called from a compass menu
 class CHandlerSetCompas : public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		std::string compassID = getParam(sParams, "compass");
 		std::string menuID = getParam(sParams, "menu");
@@ -1006,7 +1006,7 @@ REGISTER_ACTION_HANDLER( CHandlerSetCompas, "set_compas");
 // Called from a Team member menu
 class CHandlerSetTeamCompas : public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
@@ -1042,7 +1042,7 @@ REGISTER_ACTION_HANDLER( CHandlerSetTeamCompas, "set_team_compas");
 // ***************************************************************************
 class CHandlerSetCompassNorth : public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		std::string compassID = getParam(sParams, "compass");
 		CInterfaceManager *im = CInterfaceManager::getInstance();
@@ -1056,7 +1056,7 @@ REGISTER_ACTION_HANDLER( CHandlerSetCompassNorth, "set_compass_north");
 
 class CCompassDialogsStringCallback : public IStringWaitCallback
 {
-	virtual void onDynStringAvailable(uint /* stringId */, const std::string &value)
+	virtual void onDynStringAvailable(uint /* stringId */, const std::string &value) NL_OVERRIDE
 	{
 		uint size = (uint)CCompassDialogsManager::getInstance()._Entries.size();
 		for ( uint i = 0; i < size; i++)

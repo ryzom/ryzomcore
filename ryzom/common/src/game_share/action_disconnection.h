@@ -44,7 +44,7 @@ protected:
 	friend class CActionFactory;
 
 	/// This method intialises the action with a default state
-	virtual void reset()
+	virtual void reset() NL_OVERRIDE
 	{
 		AllowExceedingMaxSize = false;
 	}

@@ -30,10 +30,10 @@ public:
 	COutpostSquadSheet();
 
 	/// From CEntitySheet
-	virtual void build(const NLGEORGES::UFormElm &item);
+	virtual void build(const NLGEORGES::UFormElm &item) NL_OVERRIDE;
 
 	/// From CEntitySheet  : serialize sheet into binary data file.
-	virtual void serial(NLMISC::IStream &f);
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 };
 
 

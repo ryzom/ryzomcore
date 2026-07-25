@@ -3676,7 +3676,7 @@ void CGroupMap::updateClosestLandMarkMenu(const std::string &menu, const NLMISC:
 // remap caller with landmark using index/type and call popup menu or set compass target if no menu is set
 class CAHMapLandmarkByIndex : public IActionHandler
 {
-	virtual void execute (CCtrlBase* pCaller, const string &params )
+	virtual void execute (CCtrlBase* pCaller, const string &params ) NL_OVERRIDE
 	{
 		const std::string mapName = getParam(params, "map");
 		const std::string lmType = getParam(params, "type");
@@ -3703,7 +3703,7 @@ REGISTER_ACTION_HANDLER(CAHMapLandmarkByIndex, "map_landmark_by_index");
 // Set landmark filter
 class CAHLandMarkFilter : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &params )
+	virtual void execute (CCtrlBase * /* pCaller */, const string &params ) NL_OVERRIDE
 	{
 		string id = getParam(params, "map");
 
@@ -3729,7 +3729,7 @@ REGISTER_ACTION_HANDLER(CAHLandMarkFilter, "land_mark_filter");
 // Landmark selected from result list
 class CAHLandMarkResultSelected : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &params) NL_OVERRIDE
 	{
 		string id = getParam(params, "map");
 		CGroupMap* map = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId(id));
@@ -3748,7 +3748,7 @@ REGISTER_ACTION_HANDLER(CAHLandMarkResultSelected, "land_mark_result_selected");
 // A land mark button has been pushed
 class CAHLandMarkSelected : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &/* params */)
+	virtual void execute (CCtrlBase *pCaller, const string &/* params */) NL_OVERRIDE
 	{
 		CCtrlButton *button = dynamic_cast<CCtrlButton *>(pCaller);
 		if (!button) return;
@@ -3764,7 +3764,7 @@ REGISTER_ACTION_HANDLER(CAHLandMarkSelected, "land_mark_selected");
 // Remove a user landmark
 class CAHRemoveUserLandMark : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &/* params */)
+	virtual void execute (CCtrlBase *pCaller, const string &/* params */) NL_OVERRIDE
 	{
 		CCtrlButton *button = dynamic_cast<CCtrlButton *>(pCaller);
 		if (!button) return;
@@ -3782,7 +3782,7 @@ REGISTER_ACTION_HANDLER(CAHRemoveUserLandMark, "remove_user_landmark");
 // Rename a user land mark
 class CAHRenameUserLandMark : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &/* params */)
+	virtual void execute (CCtrlBase *pCaller, const string &/* params */) NL_OVERRIDE
 	{
 		LastSelectedLandMark = dynamic_cast<CCtrlButton *>(pCaller);
 		if (!LastSelectedLandMark) return;
@@ -3797,7 +3797,7 @@ REGISTER_ACTION_HANDLER(CAHRenameUserLandMark, "rename_user_landmark");
 // Validate user landmark name
 class CAHValidateUserLandMarkName : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* params */) NL_OVERRIDE
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
 		CInterfaceGroup *ig = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId(WIN_LANDMARK_NAME));
@@ -3857,7 +3857,7 @@ void createUserLandMark(CCtrlBase * /* pCaller */, const string &/* params */)
 // create a new landmark after giving its name
 class CAHCreateUserLandMark : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &params)
+	virtual void execute (CCtrlBase *pCaller, const string &params) NL_OVERRIDE
 	{
 		UseUserPositionForLandMark = false;
 		createUserLandMark(pCaller,params);
@@ -3868,7 +3868,7 @@ REGISTER_ACTION_HANDLER(CAHCreateUserLandMark, "create_user_landmark");
 // create a new landmark at user position after giving its name
 class CAHCreateUserLandMarkAtUserPos: public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &params)
+	virtual void execute (CCtrlBase *pCaller, const string &params) NL_OVERRIDE
 	{
 		UseUserPositionForLandMark = true;
 		createUserLandMark(pCaller,params);
@@ -3881,7 +3881,7 @@ REGISTER_ACTION_HANDLER(CAHCreateUserLandMarkAtUserPos, "create_user_landmark_at
 // zoom in the map
 class CAHMapZoomIn : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &params) NL_OVERRIDE
 	{
 		std::string map = getParam(params, "map");
 		CInterfaceManager *im = CInterfaceManager::getInstance();
@@ -3898,7 +3898,7 @@ REGISTER_ACTION_HANDLER(CAHMapZoomIn, "map_zoom_in");
 // zoom out the map
 class CAHMapZoomOut : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &params) NL_OVERRIDE
 	{
 		std::string map = getParam(params, "map");
 		CInterfaceManager *im = CInterfaceManager::getInstance();
@@ -3915,7 +3915,7 @@ REGISTER_ACTION_HANDLER(CAHMapZoomOut, "map_zoom_out");
 // center map on the player
 class CAHMapCenter : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &params) NL_OVERRIDE
 	{
 		std::string map = getParam(params, "map");
 		CInterfaceManager *im = CInterfaceManager::getInstance();
@@ -3930,7 +3930,7 @@ REGISTER_ACTION_HANDLER(CAHMapCenter, "map_center");
 // return to the parent map
 class CAHMapBack : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &params) NL_OVERRIDE
 	{
 		std::string map = getParam(params, "map");
 		CInterfaceManager *im = CInterfaceManager::getInstance();
@@ -3947,7 +3947,7 @@ REGISTER_ACTION_HANDLER(CAHMapBack, "map_back");
 // valid the respawn location selected
 class CAHRespawnMapValid : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &params) NL_OVERRIDE
 	{
 		std::string map = getParam(params, "map");
 		CInterfaceManager *im = CInterfaceManager::getInstance();
@@ -4000,7 +4000,7 @@ REGISTER_ACTION_HANDLER(CAHRespawnMapValid, "respawn_map_valid");
 // right click on the map
 class CAHWorldMapRightClick : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &params)
+	virtual void execute (CCtrlBase *pCaller, const string &params) NL_OVERRIDE
 	{
 		std::string map = getParam(params, "map");
 		std::string menu = getParam(params, "menu");
@@ -4028,7 +4028,7 @@ REGISTER_ACTION_HANDLER(CAHWorldMapRightClick, "world_map_right_click")
 // A land mark button has been pushed
 class CAHLandMarkTeleport : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &/* params */)
+	virtual void execute (CCtrlBase *pCaller, const string &/* params */) NL_OVERRIDE
 	{
 		CCtrlButton *button = dynamic_cast<CCtrlButton *>(pCaller);
 		if (!button) return;
@@ -4058,7 +4058,7 @@ REGISTER_ACTION_HANDLER(CAHLandMarkTeleport, "land_mark_teleport");
 // Teleport player to the given location
 class CAHMapTeleport : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* params */) NL_OVERRIDE
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
 		CGroupMap   *clickedMap = dynamic_cast<CGroupMap *>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
@@ -4079,7 +4079,7 @@ REGISTER_ACTION_HANDLER(CAHMapTeleport, "map_teleport");
 
 //=========================================================================================================
 // update LandMarks Colors
-class CUpdateLandMarksColor : public IActionHandler{public:	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+class CUpdateLandMarksColor : public IActionHandler{public:	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 

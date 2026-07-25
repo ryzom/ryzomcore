@@ -32,10 +32,10 @@
 class CServiceClass : public NLNET::IService
 {
 public :
-	void init();
-	bool update();
+	void init() NL_OVERRIDE;
+	bool update() NL_OVERRIDE;
 	static void tickUpdate();
-	void release();
+	void release() NL_OVERRIDE;
 };
 
 

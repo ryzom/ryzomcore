@@ -33,7 +33,7 @@ NLMISC::CVariable<uint32> DailyStartTime("scheduler", "DailyStartTime", "number 
 class CDailyTaskScheduler: public IServiceSingleton
 {
 public:
-	void serviceUpdate()
+	void serviceUpdate() NL_OVERRIDE
 	{
 		static uint32 jobsRemaining=0;
 

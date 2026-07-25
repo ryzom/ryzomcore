@@ -94,7 +94,7 @@ class CPointerButtonListener : public NLMISC::IEventListener
 {
 	uint _DownButtons;
 	bool _DragCopyMod;
-	virtual void operator()(const NLMISC::CEvent &event)
+	virtual void operator()(const NLMISC::CEvent &event) NL_OVERRIDE
 	{
 		CViewPointerBase *pointer = CWidgetManager::getInstance()->getPointer();
 		if (!pointer)
@@ -168,7 +168,7 @@ public:
 class CAHProc : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase *pCaller, const std::string &params)
+	virtual void execute(CCtrlBase *pCaller, const std::string &params) NL_OVERRIDE
 	{
 		std::vector<std::string> paramList;
 		splitString(params, "|", paramList);
@@ -182,7 +182,7 @@ REGISTER_ACTION_HANDLER(CAHProc, "proc");
 class CAHEnterModal : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase *pCaller, const std::string &params)
+	virtual void execute(CCtrlBase *pCaller, const std::string &params) NL_OVERRIDE
 	{
 		std::string group = getParam(params, "group");
 		CWidgetManager::getInstance()->enableModalWindow(pCaller, group);
@@ -193,7 +193,7 @@ REGISTER_ACTION_HANDLER(CAHEnterModal, "enter_modal");
 class CAHLeaveModal : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		CWidgetManager::getInstance()->disableModalWindow();
 	}
@@ -203,7 +203,7 @@ REGISTER_ACTION_HANDLER(CAHLeaveModal, "leave_modal");
 class CAHSubmitQuickHelp : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) {}
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE {}
 };
 REGISTER_ACTION_HANDLER(CAHSubmitQuickHelp, "submit_quick_help");
 
@@ -213,7 +213,7 @@ REGISTER_ACTION_HANDLER(CAHSubmitQuickHelp, "submit_quick_help");
 class CAHZpMode : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		SPaintUIBridge *b = getPaintUIBridge();
@@ -229,7 +229,7 @@ REGISTER_ACTION_HANDLER(CAHZpMode, "zp_mode");
 class CAHZpPropRotate : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		SPaintUIBridge *b = getPaintUIBridge();
@@ -244,7 +244,7 @@ REGISTER_ACTION_HANDLER(CAHZpPropRotate, "zp_prop_rotate");
 class CAHZpPropSymmetry : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		SPaintUIBridge *b = getPaintUIBridge();
@@ -256,7 +256,7 @@ REGISTER_ACTION_HANDLER(CAHZpPropSymmetry, "zp_prop_symmetry");
 class CAHZpPropPassable : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		SPaintUIBridge *b = getPaintUIBridge();
@@ -268,7 +268,7 @@ REGISTER_ACTION_HANDLER(CAHZpPropPassable, "zp_prop_passable");
 class CAHZpPropUseBBox : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		SPaintUIBridge *b = getPaintUIBridge();
@@ -280,7 +280,7 @@ REGISTER_ACTION_HANDLER(CAHZpPropUseBBox, "zp_prop_usebbox");
 class CAHZpTileSet : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		SPaintUIBridge *b = getPaintUIBridge();
@@ -296,7 +296,7 @@ REGISTER_ACTION_HANDLER(CAHZpTileSet, "zp_tileset");
 class CAHZpTileSetAbs : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		SPaintUIBridge *b = getPaintUIBridge();
@@ -311,7 +311,7 @@ REGISTER_ACTION_HANDLER(CAHZpTileSetAbs, "zp_tileset_abs");
 class CAHZpTogglePalette : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		SPaintUIBridge *b = getPaintUIBridge();
@@ -329,7 +329,7 @@ static const char *kScriptWinId = "ui:zp:script_win";
 class CAHZpScriptToggle : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		CInterfaceGroup *win = dynamic_cast<CInterfaceGroup *>(
@@ -359,7 +359,7 @@ void setScriptWindowVisible(bool visible)
 class CAHZpScriptRun : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(
@@ -377,7 +377,7 @@ REGISTER_ACTION_HANDLER(CAHZpScriptRun, "zp_script_run");
 class CAHZpScriptRecord : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		ZPSCRIPT::setRecording(!ZPSCRIPT::isRecording());
@@ -388,7 +388,7 @@ REGISTER_ACTION_HANDLER(CAHZpScriptRecord, "zp_script_record");
 class CAHZpScriptCopyRec : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(
@@ -405,7 +405,7 @@ REGISTER_ACTION_HANDLER(CAHZpScriptCopyRec, "zp_script_copyrec");
 class CAHZpScriptClear : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		ZPSCRIPT::clearOutput();
@@ -419,7 +419,7 @@ REGISTER_ACTION_HANDLER(CAHZpScriptClear, "zp_script_clear");
 class CAHZpScriptCancel : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		ZPSCRIPT::requestCancel();
 	}
@@ -429,7 +429,7 @@ REGISTER_ACTION_HANDLER(CAHZpScriptCancel, "zp_script_cancel");
 class CAHZpToggleBoard : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		SPaintUIBridge *b = getPaintUIBridge();
@@ -442,7 +442,7 @@ REGISTER_ACTION_HANDLER(CAHZpToggleBoard, "zp_toggle_board");
 class CAHZpToggle256 : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		SPaintUIBridge *b = getPaintUIBridge();
@@ -454,7 +454,7 @@ REGISTER_ACTION_HANDLER(CAHZpToggle256, "zp_toggle_256");
 class CAHZpBrush : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		SPaintUIBridge *b = getPaintUIBridge();
@@ -469,7 +469,7 @@ REGISTER_ACTION_HANDLER(CAHZpBrush, "zp_brush");
 class CAHZpGroup : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		SPaintUIBridge *b = getPaintUIBridge();
@@ -484,7 +484,7 @@ REGISTER_ACTION_HANDLER(CAHZpGroup, "zp_group");
 class CAHZpLockBorders : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		SPaintUIBridge *b = getPaintUIBridge();
@@ -496,7 +496,7 @@ REGISTER_ACTION_HANDLER(CAHZpLockBorders, "zp_lock_borders");
 class CAHZpUndo : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		SPaintUIBridge *b = getPaintUIBridge();
@@ -508,7 +508,7 @@ REGISTER_ACTION_HANDLER(CAHZpUndo, "zp_undo");
 class CAHZpRedo : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		SPaintUIBridge *b = getPaintUIBridge();
@@ -520,7 +520,7 @@ REGISTER_ACTION_HANDLER(CAHZpRedo, "zp_redo");
 class CAHZpFill : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		SPaintUIBridge *b = getPaintUIBridge();
@@ -535,7 +535,7 @@ REGISTER_ACTION_HANDLER(CAHZpFill, "zp_fill");
 class CAHZpSeasonNext : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		SPaintUIBridge *b = getPaintUIBridge();
@@ -549,7 +549,7 @@ REGISTER_ACTION_HANDLER(CAHZpSeasonNext, "zp_season_next");
 class CAHZpSeasonMenu : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase *pCaller, const std::string & /* params */)
+	virtual void execute(CCtrlBase *pCaller, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		SPaintUIBridge *b = getPaintUIBridge();
@@ -566,7 +566,7 @@ REGISTER_ACTION_HANDLER(CAHZpSeasonMenu, "zp_season_menu");
 class CAHZpSeasonSelect : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		CWidgetManager::getInstance()->disableModalWindow();
@@ -584,7 +584,7 @@ REGISTER_ACTION_HANDLER(CAHZpSeasonSelect, "zp_season_select");
 class CAHZpColorRadius : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		SPaintUIBridge *b = getPaintUIBridge();
@@ -599,7 +599,7 @@ REGISTER_ACTION_HANDLER(CAHZpColorRadius, "zp_color_radius");
 class CAHZpHardness : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		SPaintUIBridge *b = getPaintUIBridge();
@@ -614,7 +614,7 @@ REGISTER_ACTION_HANDLER(CAHZpHardness, "zp_hardness");
 class CAHZpOpacity : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		SPaintUIBridge *b = getPaintUIBridge();
@@ -629,7 +629,7 @@ REGISTER_ACTION_HANDLER(CAHZpOpacity, "zp_opacity");
 class CAHZpCycleMask : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		SPaintUIBridge *b = getPaintUIBridge();
@@ -641,7 +641,7 @@ REGISTER_ACTION_HANDLER(CAHZpCycleMask, "zp_cycle_mask");
 class CAHZpMaskMode : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		SPaintUIBridge *b = getPaintUIBridge();
@@ -653,7 +653,7 @@ REGISTER_ACTION_HANDLER(CAHZpMaskMode, "zp_mask_mode");
 class CAHZpDisplace : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		SPaintUIBridge *b = getPaintUIBridge();
@@ -669,7 +669,7 @@ REGISTER_ACTION_HANDLER(CAHZpDisplace, "zp_displace");
 class CAHZpDisplaceAbs : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		SPaintUIBridge *b = getPaintUIBridge();
@@ -732,7 +732,7 @@ void forceShowColorPickerForShot()
 class CAHZpOpenColorPicker : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		toggleColorPicker();
@@ -743,7 +743,7 @@ REGISTER_ACTION_HANDLER(CAHZpOpenColorPicker, "zp_open_color_picker");
 class CAHZpColorPicked : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		SPaintUIBridge *b = getPaintUIBridge();
@@ -766,7 +766,7 @@ REGISTER_ACTION_HANDLER(CAHZpColorPicked, "zp_color_picked");
 class CAHZpSave : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		SPaintUIBridge *b = getPaintUIBridge();
@@ -888,7 +888,7 @@ void openSaveDialogForFile(const std::string &basename)
 class CAHZpSaveThumbToggle : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase *pCaller, const std::string & /* params */)
+	virtual void execute(CCtrlBase *pCaller, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		SPaintUIBridge *b = getPaintUIBridge();
@@ -1552,7 +1552,7 @@ static void syncThumbWantFromModal(SPaintUIBridge *b)
 class CAHZpSaveOverwrite : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		SPaintUIBridge *b = getPaintUIBridge();
@@ -1582,7 +1582,7 @@ REGISTER_ACTION_HANDLER(CAHZpSaveOverwrite, "zp_save_overwrite");
 class CAHZpSaveCopy : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		SPaintUIBridge *b = getPaintUIBridge();
@@ -1673,7 +1673,7 @@ REGISTER_ACTION_HANDLER(CAHZpSaveCopy, "zp_save_copy");
 class CAHZpSaveCancel : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		resetSaveCopyButtonLabel();

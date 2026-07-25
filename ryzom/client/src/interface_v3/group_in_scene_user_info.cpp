@@ -826,7 +826,7 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 
 class CHandlerResetCharacterInScene : public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		bool	pvpOnly= nlstricmp(sParams,"pvponly")==0;
 		// Reset all entities

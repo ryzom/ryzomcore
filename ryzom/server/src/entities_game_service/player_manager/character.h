@@ -535,7 +535,7 @@ public:
 	/**
 	 * Destructor
 	 */
-	~CCharacter();
+	~CCharacter() NL_OVERRIDE;
 
 	/**
 	 * Init PD Struct
@@ -554,8 +554,8 @@ public:
 	void setId( const NLMISC::CEntityId& id );
 
 	/** Character interface forwarder */
-	const NLMISC::CEntityId& getCharId() const;
-	const NLMISC::CEntityId& getId() const;
+	const NLMISC::CEntityId& getCharId() const NL_OVERRIDE;
+	const NLMISC::CEntityId& getId() const NL_OVERRIDE;
 
 	/** Fill the TCharInfo struct used to send info to SU
 	 */
@@ -573,7 +573,7 @@ public:
 	uint32 getStartupInstance();
 
 	/** Set the name of the character */
-	void setName(const ucstring &name);
+	void setName(const ucstring &name) NL_OVERRIDE;
 
 	/***
 	 * Set character Title
@@ -591,13 +591,13 @@ public:
 	 * \param forceUpdate if true, set mode without check gameplay rules (for EGS use only)
 	 * \param disengage true to call phrase manager disengage, false otherwise
 	 */
-	virtual void setMode( MBEHAV::EMode mode, bool forceUpdate = false, bool disengage = true);
+	virtual void setMode( MBEHAV::EMode mode, bool forceUpdate = false, bool disengage = true) NL_OVERRIDE;
 
 	/**
 	 * set the mode with position or orientation information
 	 * \param mode the new mode (with position or orientation)
 	 */
-	virtual void setMode( MBEHAV::TMode mode );
+	virtual void setMode( MBEHAV::TMode mode ) NL_OVERRIDE;
 
 	/**
 	 * Add the properties to the emiter
@@ -655,7 +655,7 @@ public:
 	 * Get the enter flag 
 	 * \return true if the player entered the game, false if he left
 	 */
-	bool getEnterFlag() const;
+	bool getEnterFlag() const NL_OVERRIDE;
 
 	/**
 	 * wrapper to CEntityBase
@@ -663,7 +663,7 @@ public:
 //	CEntityState& getState();
 //	const CEntityState& getState() const;
 	void setState( const COfflineEntityState& es );
-	bool isDead() const;
+	bool isDead() const NL_OVERRIDE;
 	
 	/**
 	 * Serial: reading off-mirror, writing from mirror
@@ -698,7 +698,7 @@ public:
 	 * set the current target 
 	 * \param target the new target
 	 */
-	virtual void setTarget( const NLMISC::CEntityId& targetId, bool sendMessage = true );
+	virtual void setTarget( const NLMISC::CEntityId& targetId, bool sendMessage = true ) NL_OVERRIDE;
 
 	/**
 	 * set target bot-chat programm
@@ -723,9 +723,9 @@ public:
 	void removeTargetingChar( const TDataSetRow & row );
 
 	/// update target chars target
-	void updateTargetingChars();
+	void updateTargetingChars() NL_OVERRIDE;
 
-	CRingRewardPoints &getRingRewardPoints();
+	CRingRewardPoints &getRingRewardPoints() NL_OVERRIDE;
 
 	/// update the target properties
 	void updateTarget();
@@ -765,9 +765,9 @@ public:
 	void setVisualPropertyForEquipment( uint16 slot, const CStaticItem* srcForm, uint16 quality, uint8 color );
 
 	// tp wanted, check if tp is regular and send a server tp command
-	void tpWanted( sint32 x, sint32 y, sint32 z , bool useHeading = false, float heading = 0.0f , uint8 continent = 0xFF, sint32 cell = 0);
+	void tpWanted( sint32 x, sint32 y, sint32 z , bool useHeading = false, float heading = 0.0f , uint8 continent = 0xFF, sint32 cell = 0) NL_OVERRIDE;
 
-	void teleportCharacter( sint32 x, sint32 y);
+	void teleportCharacter( sint32 x, sint32 y) NL_OVERRIDE;
 
 	// teleport character with or without his mount, check if tp is regular and send a server tp command
 	void teleportCharacter( sint32 x, sint32 y, sint32 z, bool teleportWithMount, bool useHeading = false, float heading = 0.0f, uint8 continent = 0xFF, sint32 cell = 0, uint8 season = 0xff, const  R2::TR2TpInfos& tpInfos= R2::TR2TpInfos());
@@ -1065,7 +1065,7 @@ public:
 	 * \return UnknownValue if the value is not known, ValueError is the value evaluation failed or NoError 
 	 * if it has been parsed.
 	 */
-	virtual TReturnState evalValue (const char *value, double &result, uint32 userData);
+	virtual TReturnState evalValue (const char *value, double &result, uint32 userData) NL_OVERRIDE;
 
 	/// Add a pact
 	void addPact( uint8 PactNature, uint8 PactType );
@@ -1147,47 +1147,47 @@ public:
 	static void sendDynamicMessageToChatGroup(const NLMISC::CEntityId &eid, const std::string &msgName, CChatGroup::TGroupType type, const TVectorParamCheck & params = TVectorParamCheck() );
 
 	// send a bit field message to client
-	void sendMessageToClient( uint32 userId, NLNET::CMessage& msgout );
+	void sendMessageToClient( uint32 userId, NLNET::CMessage& msgout ) NL_OVERRIDE;
 	
 	// send the USER_CHAR message to the client (after a character is selected)
-	void sendUserChar( uint32 userId, uint8 scenarioSeason, const R2::TUserRole& userRole );
+	void sendUserChar( uint32 userId, uint8 scenarioSeason, const R2::TUserRole& userRole ) NL_OVERRIDE;
 
 	// Return the home mainland session id for a character
-	TSessionId getHomeMainlandSessionId() const;
+	TSessionId getHomeMainlandSessionId() const NL_OVERRIDE;
 
 	// Set the home mainland session id
-	virtual void setHomeMainlandSessionId(TSessionId homeSessionId);
+	virtual void setHomeMainlandSessionId(TSessionId homeSessionId) NL_OVERRIDE;
 
 	// Store the current active animation session returned by SU after char synchronisation.
-	virtual void setActiveAnimSessionId(TSessionId activeAnimSessionId);
+	virtual void setActiveAnimSessionId(TSessionId activeAnimSessionId) NL_OVERRIDE;
 	// read the current active animation session returned by SU after char synchronisation.
-	virtual TSessionId getActiveAnimSessionId();
+	virtual TSessionId getActiveAnimSessionId() NL_OVERRIDE;
 
 	// check if the character is a newbie by checking the base of the position stack
-	virtual bool isNewbie() const;
+	virtual bool isNewbie() const NL_OVERRIDE;
 
 	// See in character_interface.h
-	void applyTopOfPositionStack();
+	void applyTopOfPositionStack() NL_OVERRIDE;
 
 	// See in character_interface.h
-	void applyAndPushNewPosition( const CFarPosition& farPos );
+	void applyAndPushNewPosition( const CFarPosition& farPos ) NL_OVERRIDE;
 
 	// See in character_interface.h
-	void applyEditorPosition( const CFarPosition& farPos );
+	void applyEditorPosition( const CFarPosition& farPos ) NL_OVERRIDE;
 
 	// See in character_interface.h
-	void pushCurrentPosition();
+	void pushCurrentPosition() NL_OVERRIDE;
 
 	// See in character_interface.h
-	void popAndApplyPosition();
+	void popAndApplyPosition() NL_OVERRIDE;
 	// See in character_interface.h
-	void leavePreviousSession(TSessionId previousSesionId);
+	void leavePreviousSession(TSessionId previousSesionId) NL_OVERRIDE;
 
 	/// See in character_interface.h
-	void requestFarTP( TSessionId destSessionId, bool allowRetToMainlandIfFails=true, bool sendViaUid=false );
+	void requestFarTP( TSessionId destSessionId, bool allowRetToMainlandIfFails=true, bool sendViaUid=false ) NL_OVERRIDE;
 
 	// See in character_interface.h
-	void returnToPreviousSession( uint32 userId, sint32 charIndex, TSessionId rejectedSessionId );
+	void returnToPreviousSession( uint32 userId, sint32 charIndex, TSessionId rejectedSessionId ) NL_OVERRIDE;
 
 	/// spend money
 	void spendMoney( const uint64 & price );
@@ -1313,10 +1313,10 @@ public:
 	uint32 getTotalEarnedSP() const;
 
 	/// set the current action (fills the appropriate portion of the database)
-	virtual void setCurrentAction(CLIENT_ACTION_TYPE::TClientActionType actionType,NLMISC::TGameCycle actionEndCycle );
+	virtual void setCurrentAction(CLIENT_ACTION_TYPE::TClientActionType actionType,NLMISC::TGameCycle actionEndCycle ) NL_OVERRIDE;
 
 	/// clear current action: action barre on client is no more displayed
-	virtual void clearCurrentAction( );
+	virtual void clearCurrentAction( ) NL_OVERRIDE;
 
 	void setSaveDate(uint32 nTimeStamp);
 	uint32 getSaveDate();
@@ -1514,7 +1514,7 @@ public:
 	uint8 interfaceCounter() const;
 
 	/// Register character name in IOS
-	void registerName(const ucstring &newName = std::string());
+	void registerName(const ucstring &newName = std::string()) NL_OVERRIDE;
 
 	/// Mount a mount
 	void mount( TDataSetRow PetRowId );
@@ -1741,7 +1741,7 @@ public:
 	void setSP(double d, EGSPD::CSPType::TSPType type );
 
 	// dodge or parry as defense
-	virtual void dodgeAsDefense( bool b);
+	virtual void dodgeAsDefense( bool b) NL_OVERRIDE;
 	bool dodgeAsDefense() const;
 
 	// used to modify defense success chance
@@ -1767,7 +1767,7 @@ public:
 	sint32 forageSuccessModifier( ECOSYSTEM::EECosystem eco) const;
 
 	/// set the protected slot
-	virtual void protectedSlot( SLOT_EQUIPMENT::TSlotEquipment slot);
+	virtual void protectedSlot( SLOT_EQUIPMENT::TSlotEquipment slot) NL_OVERRIDE;
 	SLOT_EQUIPMENT::TSlotEquipment protectedSlot() const;
 
 	// set the next allowed action date
@@ -1776,7 +1776,7 @@ public:
 	NLMISC::TGameCycle dateOfNextAllowedAction();
 
 	/// player choose a re-spawn for his death character
-	void respawn( uint16 index );
+	void respawn( uint16 index ) NL_OVERRIDE;
 
 	/// apply respawn malus
 	void applyRespawnEffects();
@@ -1841,27 +1841,27 @@ public:
 	void updateBrickFlagsDBEntry();
 
 	// add a link cast by this player
-	virtual void addLink( CSLinkEffect * effect);
+	virtual void addLink( CSLinkEffect * effect) NL_OVERRIDE;
 
 	// remove a link cast by this player
-	virtual void removeLink( CSLinkEffect * effect, float factorOnSurvivalTime);
+	virtual void removeLink( CSLinkEffect * effect, float factorOnSurvivalTime) NL_OVERRIDE;
 
 	// stop all links (a broken link last a few more seconds before being deleted)
-	virtual void stopAllLinks(float factorOnSurvivalTime = 1.0f);
+	virtual void stopAllLinks(float factorOnSurvivalTime = 1.0f) NL_OVERRIDE;
 
 	/**
 	 * apply the effect of the armor/shield on damage. Update the armor items if necessary
 	 * \return the remaining damages
 	 */
-	virtual sint32 applyDamageOnArmor( DMGTYPE::EDamageType dmgType, sint32 damage, SLOT_EQUIPMENT::TSlotEquipment forcedSlot);
+	virtual sint32 applyDamageOnArmor( DMGTYPE::EDamageType dmgType, sint32 damage, SLOT_EQUIPMENT::TSlotEquipment forcedSlot) NL_OVERRIDE;
 
 	/**
 	 * return the malus on spell casting due to armor
 	 */
-	float getArmorCastingMalus();
+	float getArmorCastingMalus() NL_OVERRIDE;
 
 	/// Return the damage using current armor, done by an explosion (e.g. forage source explosion)
-	virtual float getActualDamageFromExplosionWithArmor( float dmg ) const;
+	virtual float getActualDamageFromExplosionWithArmor( float dmg ) const NL_OVERRIDE;
 
 	/// send temp inventory close impulsion to client
 	void sendCloseTempInventoryImpulsion(bool onlyIfEmpty = false);
@@ -1890,13 +1890,13 @@ public:
 	sint32 adversaryParryModifier();
 
 	// add an effect to this entity
-	virtual bool addSabrinaEffect( CSEffect *effect );
+	virtual bool addSabrinaEffect( CSEffect *effect ) NL_OVERRIDE;
 	
 	/**
 	 * remove an effect on this entity. The effect is not deleted nor stopped, if you
 	 * want to force the effect to stop, use CSEffect::stopEffect() method
 	 */
-	virtual bool removeSabrinaEffect( CSEffect *effect, bool activateSleepingEffect = true );
+	virtual bool removeSabrinaEffect( CSEffect *effect, bool activateSleepingEffect = true ) NL_OVERRIDE;
 
 	/** 
 	 * add a bonus effect and write it in DB
@@ -1930,16 +1930,16 @@ public:
 	const CGearLatency & getGearLatency();
 
 	/// return true if the player can use an action
-	virtual bool canEntityUseAction(CBypassCheckFlags bypassCheckFlags = CBypassCheckFlags::NoFlags, bool sendMessage = true) const;
+	virtual bool canEntityUseAction(CBypassCheckFlags bypassCheckFlags = CBypassCheckFlags::NoFlags, bool sendMessage = true) const NL_OVERRIDE;
 
 	/// can entity defend ? (dodge/parry) returns true if entity can defend itself
-	virtual bool canEntityDefend();
+	virtual bool canEntityDefend() NL_OVERRIDE;
 
 	/// get the resist value associated to effect type
-	uint32 getMagicResistance(EFFECT_FAMILIES::TEffectFamily effectFamily);
+	uint32 getMagicResistance(EFFECT_FAMILIES::TEffectFamily effectFamily) NL_OVERRIDE;
 	
 	/// get the resist value associated to damage type
-	uint32 getMagicResistance(DMGTYPE::EDamageType dmgType);
+	uint32 getMagicResistance(DMGTYPE::EDamageType dmgType) NL_OVERRIDE;
 
 	/// get last X pos in DB (for teammates)
 	sint32 getLastPosXInDB() const;
@@ -2010,7 +2010,7 @@ public:
 		void clearFriendOfList();
 
 		/// set player status in contact list
-		void setContactOnlineStatus( const NLMISC::CEntityId &id, bool online );
+		void setContactOnlineStatus( const NLMISC::CEntityId &id, bool online ) NL_OVERRIDE;
 
 		/// get num friend
 		uint	getNumFriends() const;
@@ -2034,7 +2034,7 @@ public:
 		void online(bool onlineStatus);
 
 		/// player last connection date (from SU, exactly like on mysql db)
-		void setLastConnectionDate(uint32 date);
+		void setLastConnectionDate(uint32 date) NL_OVERRIDE;
 
 		/// player is permanently erased, unreferenced it from all contact lists
 		void destroyCharacter();
@@ -2120,7 +2120,7 @@ public:
 	 * \param deltaValue the delta value applied on hp
 	 * \return bool true if the entity died from the changement
 	 */
-	virtual bool changeCurrentHp(sint32 deltaValue, TDataSetRow responsibleEntity = TDataSetRow());
+	virtual bool changeCurrentHp(sint32 deltaValue, TDataSetRow responsibleEntity = TDataSetRow()) NL_OVERRIDE;
 
 	// aggroable mode
 	void setAggroable(bool aggroable, bool forceUpdate = false);
@@ -2280,7 +2280,7 @@ public:
 	
 	CCharacterGameEvent		&getGameEvent()	;
 
-	CCharacterRespawnPoints	&getRespawnPoints();
+	CCharacterRespawnPoints	&getRespawnPoints() NL_OVERRIDE;
 
 	const CCharacterRespawnPoints	&getRespawnPoints()	const;
 
@@ -2321,7 +2321,7 @@ public:
 	uint8 getNbNonNullClassificationTypesSkillMod() const;
 	
 	/// get specific skill modifier for given race
-	virtual sint32 getSkillModifierForRace(EGSPD::CPeople::TPeople people) const;
+	virtual sint32 getSkillModifierForRace(EGSPD::CPeople::TPeople people) const NL_OVERRIDE;
 
 	/// get currently consumed item if any
 	CGameItemPtr getConsumedItem() const;
@@ -2414,7 +2414,7 @@ public:
 	bool verifyClanAllegiance(PVP_CLAN::TPVPClan theClan, sint32 newFameValue);
 
 	/// set outpost alias
-	void setOutpostAlias( uint32 id );
+	void setOutpostAlias( uint32 id ) NL_OVERRIDE;
 	/// stores the time when player leaves outpost zone
 	void startOutpostLeavingTimer();
 	/// refresh the leaving timer if active
@@ -2592,7 +2592,7 @@ public:
 	void removeItemModifiers(const CGameItemPtr & item);
 
 	// return weight of equipped weapons
-	uint32	getWeightOfEquippedWeapon();
+	uint32	getWeightOfEquippedWeapon() NL_OVERRIDE;
 
 	// check compatibility with slot for equip an item
 	bool checkItemValidityWithSlot( const NLMISC::CSheetId& sheet, INVENTORIES::TInventory inv, uint16 slot );
@@ -2764,7 +2764,7 @@ protected:
 	friend class CCharacterVersionAdapter;
 	friend class CRingRewardPointsImpl;
 	
-	virtual void kill(TDataSetRow killerRowId = TDataSetRow());
+	virtual void kill(TDataSetRow killerRowId = TDataSetRow()) NL_OVERRIDE;
 	void setEntityRowId( const TDataSetRow& r );
 	void resetPvPFlag();
 
@@ -2813,7 +2813,7 @@ private:
 	void applyRegenAndClipCurrentValue();
 
 	/// character is dead
-	void deathOccurs( void );
+	void deathOccurs( void ) NL_OVERRIDE;
 
 	/// process items decay
 	void processItemsDecay();
@@ -2866,13 +2866,13 @@ private:
 	uint32 getCreatorNameId( const NLMISC::CEntityId &creatorId);
 
 	/// send init impulsion for friend and ignore lists
-	void sendContactListInit();
+	void sendContactListInit() NL_OVERRIDE;
 
 	/// Compute the 'visual' online state of a friend character
 	TCharConnectionState isFriendCharVisualyOnline(const NLMISC::CEntityId &friendId);
 
 	// From SU on char name change. sendContactListInit(), if must update
-	void syncContactListWithCharNameChanges(const std::vector<NLMISC::CEntityId> &charNameChanges);
+	void syncContactListWithCharNameChanges(const std::vector<NLMISC::CEntityId> &charNameChanges) NL_OVERRIDE;
 	
 	/// send a message to client to remove an entry in a contact list
 	void sendRemoveContactMessage(uint32 contactId, uint8 listNumber);
@@ -3021,17 +3021,17 @@ public:
 	// Editor position (mutable because of store() that pushes/pops _EntityState)
 	//mutable CFarPosition			EditorPosition;
 
-	void			setSessionUserRole( R2::TUserRole mode );
+	void			setSessionUserRole( R2::TUserRole mode ) NL_OVERRIDE;
 	R2::TUserRole	sessionUserRole() const;
 
 	/** If the session id is SessionLockPositionStack, the current position won't be saved.
 	 * It should be the case in ur_editor mode (see setSessionUserRole()).
 	 */
-	void			setSessionId( TSessionId sessionId );
+	void			setSessionId( TSessionId sessionId ) NL_OVERRIDE;
 	TSessionId		sessionId() const;
 
 	// Same as set SessionId but works event if current sessin is a edition session
-	void			setCurrentSessionId( TSessionId sessionId );
+	void			setCurrentSessionId( TSessionId sessionId ) NL_OVERRIDE;
 	TSessionId		currentSessionId() const;
 
 	// get the position stack
@@ -3825,7 +3825,7 @@ private:
 
 	
 public:
-	uint32 getLastDisconnectionDate();
+	uint32 getLastDisconnectionDate() NL_OVERRIDE;
 	bool hasMoved();
 
 private:

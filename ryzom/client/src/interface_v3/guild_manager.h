@@ -216,12 +216,12 @@ private:
 	class CDBObs : public NLMISC::ICDBNode::IPropertyObserver
 	{
 	public:
-		virtual void update(NLMISC::ICDBNode* node);
+		virtual void update(NLMISC::ICDBNode* node) NL_OVERRIDE;
 	};
 	class CDBObsMembers : public NLMISC::ICDBNode::IPropertyObserver
 	{
 	public:
-		virtual void update(NLMISC::ICDBNode* node);
+		virtual void update(NLMISC::ICDBNode* node) NL_OVERRIDE;
 	};
 
 	CDBObs			_DBObs;
@@ -294,10 +294,10 @@ public:
 		uint Index;
 		sint32 SecondSheetIdCache;
 
-		virtual void init(CDBGroupListSheetText *pFather, uint index);
-		virtual bool isInvalidated(CDBGroupListSheetText *pFather);
-		virtual void updateViewText(CDBGroupListSheetText * /* pFather */) { }
-		virtual bool isSheetValid(CDBGroupListSheetText *pFather);
+		virtual void init(CDBGroupListSheetText *pFather, uint index) NL_OVERRIDE;
+		virtual bool isInvalidated(CDBGroupListSheetText *pFather) NL_OVERRIDE;
+		virtual void updateViewText(CDBGroupListSheetText * /* pFather */) NL_OVERRIDE { }
+		virtual bool isSheetValid(CDBGroupListSheetText *pFather) NL_OVERRIDE;
 	};
 
 	CDBGroupListAscensor(const TCtorParam &param) : CDBGroupListSheetText(param)
@@ -305,7 +305,7 @@ public:
 		_CheckCoordAccelerated = false; // isInvalidated called each frame
 	}
 
-	virtual CSheetChild *createSheetChild() { return new CSheetChildAscensor; }
+	virtual CSheetChild *createSheetChild() NL_OVERRIDE { return new CSheetChildAscensor; }
 };
 
 

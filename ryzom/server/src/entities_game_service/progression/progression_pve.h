@@ -37,7 +37,7 @@ class CEntityBase;
 class CAILostAggroMsgImp : public CAILostAggroMsg
 {
 public:
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 

@@ -40,9 +40,9 @@ namespace EC
 		//-----------------------------------------------------------------------------
 		// IChannel Specialisation
 
-		virtual void cbAddUser(TChannelRank rank,const TCharacterId& id,GUS::TClientId clientId);
-		virtual void cbRemoveUser(TChannelRank rank,const TCharacterId& id,GUS::TClientId clientId);
-		virtual void cbChatText(TChannelRank rank,const TCharacterId& id,GUS::TClientId clientId,const NLMISC::CSString& txt);
+		virtual void cbAddUser(TChannelRank rank,const TCharacterId& id,GUS::TClientId clientId) NL_OVERRIDE;
+		virtual void cbRemoveUser(TChannelRank rank,const TCharacterId& id,GUS::TClientId clientId) NL_OVERRIDE;
+		virtual void cbChatText(TChannelRank rank,const TCharacterId& id,GUS::TClientId clientId,const NLMISC::CSString& txt) NL_OVERRIDE;
 
 
 	public:
