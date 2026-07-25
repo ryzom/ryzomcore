@@ -169,10 +169,10 @@ public:
 	TOcclusionType					OcclusionType;  // current type of occlusion
 	uint							VisibleCount;	// number of samples that passed the test
 	// From IOcclusionQuery
-	virtual void begin();
-	virtual void end();
-	virtual TOcclusionType getOcclusionType();
-	virtual uint getVisibleCount();
+	virtual void begin() NL_OVERRIDE;
+	virtual void end() NL_OVERRIDE;
+	virtual TOcclusionType getOcclusionType() NL_OVERRIDE;
+	virtual uint getVisibleCount() NL_OVERRIDE;
 };
 
 // ***************************************************************************
@@ -234,9 +234,9 @@ public:
 	// The gl id is auto created here.
 	CTextureDrvInfosGL3(IDriver *drv, ItTexDrvInfoPtrMap it, CDriverGL3 *drvGl, bool isRectangleTexture);
 	// The gl id is auto deleted here.
-	~CTextureDrvInfosGL3();
+	~CTextureDrvInfosGL3() NL_OVERRIDE;
 	// For Debug info. return the memory cost of this texture
-	virtual uint	getTextureMemoryUsed() const {return TextureMemory;}
+	virtual uint	getTextureMemoryUsed() const NL_OVERRIDE {return TextureMemory;}
 
 	bool					initFrameBufferObject(ITexture * tex);
 	bool					activeFrameBufferObject(ITexture * tex);
@@ -254,9 +254,9 @@ public:
 	CDriverGL3			*_DriverGL;
 
 	// From IVBDrvInfos
-	virtual ~CVBDrvInfosGL3();
-	virtual uint8	*lock (uint first, uint last, bool readOnly);
-	virtual void	unlock (uint first, uint last);
+	virtual ~CVBDrvInfosGL3() NL_OVERRIDE;
+	virtual uint8	*lock (uint first, uint last, bool readOnly) NL_OVERRIDE;
+	virtual void	unlock (uint first, uint last) NL_OVERRIDE;
 };
 
 // ***************************************************************************
@@ -432,7 +432,7 @@ public:
 		MaterialUBOTouched.resize(1);
 		MaterialUBO[0].nlLightMapScale = 1.0f;
 	}
-	~CMaterialDrvInfosGL3();
+	~CMaterialDrvInfosGL3() NL_OVERRIDE;
 };
 
 // ***************************************************************************
@@ -486,78 +486,78 @@ public:
 	enum					{ MaxLight = NL_OPENGL3_MAX_LIGHT };
 
 							CDriverGL3();
-	virtual					~CDriverGL3();
+	virtual					~CDriverGL3() NL_OVERRIDE;
 
-	virtual	bool			isLost() const { return false; } // there's no notion of 'lost device" in OpenGL
+	virtual	bool			isLost() const NL_OVERRIDE { return false; } // there's no notion of 'lost device" in OpenGL
 
-	virtual bool			init(uintptr_t windowIcon = 0, emptyProc exitFunc = 0);
+	virtual bool			init(uintptr_t windowIcon = 0, emptyProc exitFunc = 0) NL_OVERRIDE;
 
-	virtual void			disableHardwareVertexProgram() {}
-	virtual void			disableHardwarePixelProgram() {}
-	virtual void			disableHardwareVertexArrayAGP() {}
-	virtual void			disableHardwareTextureShader() {}
+	virtual void			disableHardwareVertexProgram() NL_OVERRIDE {}
+	virtual void			disableHardwarePixelProgram() NL_OVERRIDE {}
+	virtual void			disableHardwareVertexArrayAGP() NL_OVERRIDE {}
+	virtual void			disableHardwareTextureShader() NL_OVERRIDE {}
 	
-	virtual bool			setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable);
-	virtual bool			setMode(const GfxMode& mode);
-	virtual bool			getModes(std::vector<GfxMode> &modes);
-	virtual bool			getCurrentScreenMode(GfxMode &mode);
-	virtual void			beginDialogMode();
-	virtual void			endDialogMode();
+	virtual bool			setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable) NL_OVERRIDE;
+	virtual bool			setMode(const GfxMode& mode) NL_OVERRIDE;
+	virtual bool			getModes(std::vector<GfxMode> &modes) NL_OVERRIDE;
+	virtual bool			getCurrentScreenMode(GfxMode &mode) NL_OVERRIDE;
+	virtual void			beginDialogMode() NL_OVERRIDE;
+	virtual void			endDialogMode() NL_OVERRIDE;
 
 	/// Set title of the NeL window
-	virtual void			setWindowTitle(const ucstring &title);
+	virtual void			setWindowTitle(const ucstring &title) NL_OVERRIDE;
 
 	/// Set icon(s) of the NeL window
-	virtual void			setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps);
+	virtual void			setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps) NL_OVERRIDE;
 
 	/// Set position of the NeL window
-	virtual void			setWindowPos(sint32 x, sint32 y);
+	virtual void			setWindowPos(sint32 x, sint32 y) NL_OVERRIDE;
 
 	/// Show or hide the NeL window
-	virtual void			showWindow(bool show);
+	virtual void			showWindow(bool show) NL_OVERRIDE;
 
-	virtual nlWindow		getDisplay()
+	virtual nlWindow		getDisplay() NL_OVERRIDE
 	{
 		return _win;
 	}
 
-	virtual bool			copyTextToClipboard(const std::string &text);
-	virtual bool			pasteTextFromClipboard(std::string &text);
+	virtual bool			copyTextToClipboard(const std::string &text) NL_OVERRIDE;
+	virtual bool			pasteTextFromClipboard(std::string &text) NL_OVERRIDE;
 
-	uint32 getAvailableVertexAGPMemory () { return uint32(-1); };
-	uint32 getAvailableVertexVRAMMemory () { return uint32(-1); };
-	virtual sint			getTotalVideoMemory() const;
+	uint32 getAvailableVertexAGPMemory () NL_OVERRIDE { return uint32(-1); };
+	uint32 getAvailableVertexVRAMMemory () NL_OVERRIDE { return uint32(-1); };
+	virtual sint			getTotalVideoMemory() const NL_OVERRIDE;
 
-	virtual emptyProc		getWindowProc();
+	virtual emptyProc		getWindowProc() NL_OVERRIDE;
 
-	virtual bool			activate();
+	virtual bool			activate() NL_OVERRIDE;
 
-	virtual	uint			getNbTextureStages() const;
+	virtual	uint			getNbTextureStages() const NL_OVERRIDE;
 
-	virtual bool			isTextureExist(const ITexture&tex);
+	virtual bool			isTextureExist(const ITexture&tex) NL_OVERRIDE;
 
-	virtual NLMISC::IEventEmitter	*getEventEmitter() { return&_EventEmitter; };
+	virtual NLMISC::IEventEmitter	*getEventEmitter() NL_OVERRIDE { return&_EventEmitter; };
 
-	virtual bool			clear2D(CRGBA rgba);
+	virtual bool			clear2D(CRGBA rgba) NL_OVERRIDE;
 
-	virtual bool			clearZBuffer(float zval=1);
-	virtual bool			clearStencilBuffer(sint stencilval=0);
-	virtual void			setColorMask (bool bRed, bool bGreen, bool bBlue, bool bAlpha);
-	virtual void			setDepthRange(float znear, float zfar);
-	virtual	void			getDepthRange(float &znear, float &zfar) const;
+	virtual bool			clearZBuffer(float zval=1) NL_OVERRIDE;
+	virtual bool			clearStencilBuffer(sint stencilval=0) NL_OVERRIDE;
+	virtual void			setColorMask (bool bRed, bool bGreen, bool bBlue, bool bAlpha) NL_OVERRIDE;
+	virtual void			setDepthRange(float znear, float zfar) NL_OVERRIDE;
+	virtual	void			getDepthRange(float &znear, float &zfar) const NL_OVERRIDE;
 
-	virtual bool			setupTexture (ITexture& tex);
+	virtual bool			setupTexture (ITexture& tex) NL_OVERRIDE;
 
-	virtual bool			setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded, bool bMustRecreateSharedTexture= false);
-	virtual bool			uploadTexture (ITexture& tex, NLMISC::CRect& rect, uint8 nNumMipMap);
-	virtual bool			uploadTextureCube (ITexture& tex, NLMISC::CRect& rect, uint8 nNumMipMap, uint8 nNumFace);
+	virtual bool			setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded, bool bMustRecreateSharedTexture= false) NL_OVERRIDE;
+	virtual bool			uploadTexture (ITexture& tex, NLMISC::CRect& rect, uint8 nNumMipMap) NL_OVERRIDE;
+	virtual bool			uploadTextureCube (ITexture& tex, NLMISC::CRect& rect, uint8 nNumMipMap, uint8 nNumFace) NL_OVERRIDE;
 
-	virtual void			forceDXTCCompression(bool dxtcComp);
-	virtual void			setAnisotropicFilter(sint filter);
-	virtual uint			getAnisotropicFilter() const;
-	virtual uint			getAnisotropicFilterMaximum() const;
+	virtual void			forceDXTCCompression(bool dxtcComp) NL_OVERRIDE;
+	virtual void			setAnisotropicFilter(sint filter) NL_OVERRIDE;
+	virtual uint			getAnisotropicFilter() const NL_OVERRIDE;
+	virtual uint			getAnisotropicFilterMaximum() const NL_OVERRIDE;
 
-	virtual void			forceTextureResize(uint divisor);
+	virtual void			forceTextureResize(uint divisor) NL_OVERRIDE;
 
 	virtual void			forceNativeFragmentPrograms(bool nativeOnly);
 
@@ -568,7 +568,7 @@ public:
 	// void					setupUserTextureMatrix(uint numStages, CMaterial& mat);
 	// void					disableUserTextureMatrix();
 
-	virtual bool			setupMaterial(CMaterial& mat);
+	virtual bool			setupMaterial(CMaterial& mat) NL_OVERRIDE;
 	// void					generateShaderDesc(CShaderDesc &desc, CMaterial &mat);
 	bool					setupBuiltinPrograms();
 	bool					setupBuiltinVertexProgram(CVertexProgram *effectiveVP, CPixelProgram *effectivePP);
@@ -600,28 +600,28 @@ public:
 	void					setupMegaVPUniforms();
 	void					setupMegaPPUniforms();
 
-	virtual void			startSpecularBatch() { }
-	virtual void			endSpecularBatch() { }
+	virtual void			startSpecularBatch() NL_OVERRIDE { }
+	virtual void			endSpecularBatch() NL_OVERRIDE { }
 
-	virtual void			setFrustum(float left, float right, float bottom, float top, float znear, float zfar, bool perspective = true);
-	virtual	void			setFrustumMatrix(CMatrix &frust);
-	virtual	CMatrix			getFrustumMatrix();
-	virtual float			getClipSpaceZMin() const { return -1.f; }
-	virtual bool			cubemapZPositiveForward() const { return false; }
+	virtual void			setFrustum(float left, float right, float bottom, float top, float znear, float zfar, bool perspective = true) NL_OVERRIDE;
+	virtual	void			setFrustumMatrix(CMatrix &frust) NL_OVERRIDE;
+	virtual	CMatrix			getFrustumMatrix() NL_OVERRIDE;
+	virtual float			getClipSpaceZMin() const NL_OVERRIDE { return -1.f; }
+	virtual bool			cubemapZPositiveForward() const NL_OVERRIDE { return false; }
 
-	virtual void			enableClipPlane(uint index, bool enable);
-	virtual void			setClipPlane(uint index, const NLMISC::CPlane &plane);
-	virtual bool			needVertexProgramClipVariant() const;
+	virtual void			enableClipPlane(uint index, bool enable) NL_OVERRIDE;
+	virtual void			setClipPlane(uint index, const NLMISC::CPlane &plane) NL_OVERRIDE;
+	virtual bool			needVertexProgramClipVariant() const NL_OVERRIDE;
 
-	virtual void			setupViewMatrix(const CMatrix& mtx);
+	virtual void			setupViewMatrix(const CMatrix& mtx) NL_OVERRIDE;
 
-	virtual void			setupViewMatrixEx(const CMatrix& mtx, const CVector &cameraPos);
+	virtual void			setupViewMatrixEx(const CMatrix& mtx, const CVector &cameraPos) NL_OVERRIDE;
 
-	virtual void			setupModelMatrix(const CMatrix& mtx);
+	virtual void			setupModelMatrix(const CMatrix& mtx) NL_OVERRIDE;
 
-	virtual CMatrix			getViewMatrix() const;
+	virtual CMatrix			getViewMatrix() const NL_OVERRIDE;
 
-	virtual	void			forceNormalize(bool normalize)
+	virtual	void			forceNormalize(bool normalize) NL_OVERRIDE
 	{
 		_ForceNormalize = normalize;
 		if (m_VPBuiltinCurrent.Normalize != normalize)
@@ -631,243 +631,243 @@ public:
 		}
 	}
 
-	virtual	bool			isForceNormalize() const
+	virtual	bool			isForceNormalize() const NL_OVERRIDE
 	{
 		return _ForceNormalize;
 	}
 
-	virtual void			getNumPerStageConstant(uint &lightedMaterial, uint &unlightedMaterial) const;
+	virtual void			getNumPerStageConstant(uint &lightedMaterial, uint &unlightedMaterial) const NL_OVERRIDE;
 
-	virtual	bool			supportVertexBufferHard() const{ return true; };
+	virtual	bool			supportVertexBufferHard() const NL_OVERRIDE { return true; };
 
-	virtual bool			supportVolatileVertexBuffer() const;
+	virtual bool			supportVolatileVertexBuffer() const NL_OVERRIDE;
 
-	virtual	bool			supportCloudRenderSinglePass() const;
+	virtual	bool			supportCloudRenderSinglePass() const NL_OVERRIDE;
 
-	virtual bool			supportIndexOffset() const { return false; /* feature only supported in D3D for now */ }
+	virtual bool			supportIndexOffset() const NL_OVERRIDE { return false; /* feature only supported in D3D for now */ }
 
 
-	virtual	bool			slowUnlockVertexBufferHard() const;
+	virtual	bool			slowUnlockVertexBufferHard() const NL_OVERRIDE;
 
-	virtual	uint			getMaxVerticesByVertexBufferHard() const;
+	virtual	uint			getMaxVerticesByVertexBufferHard() const NL_OVERRIDE;
 
-	virtual	bool			initVertexBufferHard(uint agpMem, uint vramMem);
+	virtual	bool			initVertexBufferHard(uint agpMem, uint vramMem) NL_OVERRIDE;
 
-	virtual bool			activeVertexBuffer(CVertexBuffer& VB);
+	virtual bool			activeVertexBuffer(CVertexBuffer& VB) NL_OVERRIDE;
 
-	virtual bool			activeIndexBuffer(CIndexBuffer& IB);
+	virtual bool			activeIndexBuffer(CIndexBuffer& IB) NL_OVERRIDE;
 
-	virtual	void			mapTextureStageToUV(uint stage, uint uv);
+	virtual	void			mapTextureStageToUV(uint stage, uint uv) NL_OVERRIDE;
 
-	virtual bool			renderLines(CMaterial& mat, uint32 firstIndex, uint32 nlines);
-	virtual bool			renderTriangles(CMaterial& Mat, uint32 firstIndex, uint32 ntris);
-	virtual bool			renderSimpleTriangles(uint32 firstTri, uint32 ntris);
-	virtual bool			renderRawPoints(CMaterial& Mat, uint32 startIndex, uint32 numPoints);
-	virtual bool			renderRawLines(CMaterial& Mat, uint32 startIndex, uint32 numLines);
-	virtual bool			renderRawTriangles(CMaterial& Mat, uint32 startIndex, uint32 numTris);
-	virtual bool			renderRawQuads(CMaterial& Mat, uint32 startIndex, uint32 numQuads);
+	virtual bool			renderLines(CMaterial& mat, uint32 firstIndex, uint32 nlines) NL_OVERRIDE;
+	virtual bool			renderTriangles(CMaterial& Mat, uint32 firstIndex, uint32 ntris) NL_OVERRIDE;
+	virtual bool			renderSimpleTriangles(uint32 firstTri, uint32 ntris) NL_OVERRIDE;
+	virtual bool			renderRawPoints(CMaterial& Mat, uint32 startIndex, uint32 numPoints) NL_OVERRIDE;
+	virtual bool			renderRawLines(CMaterial& Mat, uint32 startIndex, uint32 numLines) NL_OVERRIDE;
+	virtual bool			renderRawTriangles(CMaterial& Mat, uint32 startIndex, uint32 numTris) NL_OVERRIDE;
+	virtual bool			renderRawQuads(CMaterial& Mat, uint32 startIndex, uint32 numQuads) NL_OVERRIDE;
 	//
-	virtual bool			renderLinesWithIndexOffset(CMaterial& /* mat */, uint32 /* firstIndex */, uint32 /* nlines */, uint /* indexOffset */) { nlassertex(0, (UNSUPPORTED_INDEX_OFFSET_MSG)); return false; }
-	virtual bool			renderTrianglesWithIndexOffset(CMaterial& /* mat */, uint32 /* firstIndex */, uint32 /* ntris */, uint /* indexOffset */) { nlassertex(0, (UNSUPPORTED_INDEX_OFFSET_MSG)); return false; }
-	virtual bool			renderSimpleTrianglesWithIndexOffset(uint32 /* firstIndex */, uint32 /* ntris */, uint /* indexOffset */) { nlassertex(0, (UNSUPPORTED_INDEX_OFFSET_MSG)); return false; }
+	virtual bool			renderLinesWithIndexOffset(CMaterial& /* mat */, uint32 /* firstIndex */, uint32 /* nlines */, uint /* indexOffset */) NL_OVERRIDE { nlassertex(0, (UNSUPPORTED_INDEX_OFFSET_MSG)); return false; }
+	virtual bool			renderTrianglesWithIndexOffset(CMaterial& /* mat */, uint32 /* firstIndex */, uint32 /* ntris */, uint /* indexOffset */) NL_OVERRIDE { nlassertex(0, (UNSUPPORTED_INDEX_OFFSET_MSG)); return false; }
+	virtual bool			renderSimpleTrianglesWithIndexOffset(uint32 /* firstIndex */, uint32 /* ntris */, uint /* indexOffset */) NL_OVERRIDE { nlassertex(0, (UNSUPPORTED_INDEX_OFFSET_MSG)); return false; }
 
-	virtual bool			swapBuffers();
+	virtual bool			swapBuffers() NL_OVERRIDE;
 
-	virtual bool			isFrameReady();
+	virtual bool			isFrameReady() NL_OVERRIDE;
 
-	virtual void			setSwapVBLInterval(uint interval);
+	virtual void			setSwapVBLInterval(uint interval) NL_OVERRIDE;
 
-	virtual uint			getSwapVBLInterval();
+	virtual uint			getSwapVBLInterval() NL_OVERRIDE;
 
-	virtual	void			profileRenderedPrimitives(CPrimitiveProfile &pIn, CPrimitiveProfile &pOut);
+	virtual	void			profileRenderedPrimitives(CPrimitiveProfile &pIn, CPrimitiveProfile &pOut) NL_OVERRIDE;
 
-	virtual	uint32			profileAllocatedTextureMemory();
+	virtual	uint32			profileAllocatedTextureMemory() NL_OVERRIDE;
 
-	virtual	uint32			profileSetupedMaterials() const;
+	virtual	uint32			profileSetupedMaterials() const NL_OVERRIDE;
 
-	virtual	uint32			profileSetupedModelMatrix() const;
+	virtual	uint32			profileSetupedModelMatrix() const NL_OVERRIDE;
 
-	void					enableUsedTextureMemorySum (bool enable);
+	void					enableUsedTextureMemorySum (bool enable) NL_OVERRIDE;
 
-	uint32					getUsedTextureMemory() const;
+	uint32					getUsedTextureMemory() const NL_OVERRIDE;
 
-	virtual	void			startProfileVBHardLock();
+	virtual	void			startProfileVBHardLock() NL_OVERRIDE;
 
-	virtual	void			endProfileVBHardLock(std::vector<std::string> &result);
+	virtual	void			endProfileVBHardLock(std::vector<std::string> &result) NL_OVERRIDE;
 
-	virtual	void			profileVBHardAllocation(std::vector<std::string> &result);
+	virtual	void			profileVBHardAllocation(std::vector<std::string> &result) NL_OVERRIDE;
 
-	virtual	void			startProfileIBLock();
+	virtual	void			startProfileIBLock() NL_OVERRIDE;
 
-	virtual	void			endProfileIBLock(std::vector<std::string> &result);
+	virtual	void			endProfileIBLock(std::vector<std::string> &result) NL_OVERRIDE;
 
-	virtual	void			profileIBAllocation(std::vector<std::string> &result);
+	virtual	void			profileIBAllocation(std::vector<std::string> &result) NL_OVERRIDE;
 
-	virtual bool			release();
+	virtual bool			release() NL_OVERRIDE;
 
-	virtual TMessageBoxId	systemMessageBox (const char* message, const char* title, TMessageBoxType type=okType, TMessageBoxIcon icon=noIcon);
+	virtual TMessageBoxId	systemMessageBox (const char* message, const char* title, TMessageBoxType type=okType, TMessageBoxIcon icon=noIcon) NL_OVERRIDE;
 
-	virtual void			setupScissor (const class CScissor& scissor);
+	virtual void			setupScissor (const class CScissor& scissor) NL_OVERRIDE;
 
-	virtual void			setupViewport (const class CViewport& viewport);
+	virtual void			setupViewport (const class CViewport& viewport) NL_OVERRIDE;
 
-	virtual	void			getViewport(CViewport &viewport);
+	virtual	void			getViewport(CViewport &viewport) NL_OVERRIDE;
 
 
-	virtual uint32			getImplementationVersion () const
+	virtual uint32			getImplementationVersion () const NL_OVERRIDE
 	{
 		return ReleaseVersion;
 	}
 
-	virtual const char*		getDriverInformation ()
+	virtual const char*		getDriverInformation () NL_OVERRIDE
 	{
 		return "Opengl 3.3 Core NeL Driver";
 	}
 
-	virtual const char*		getVideocardInformation ();
+	virtual const char*		getVideocardInformation () NL_OVERRIDE;
 
-	virtual bool			isActive ();
+	virtual bool			isActive () NL_OVERRIDE;
 
-	virtual uint8			getBitPerPixel ();
+	virtual uint8			getBitPerPixel () NL_OVERRIDE;
 
-	virtual void			showCursor (bool b);
+	virtual void			showCursor (bool b) NL_OVERRIDE;
 
 	// between 0.0 and 1.0
-	virtual void			setMousePos(float x, float y);
+	virtual void			setMousePos(float x, float y) NL_OVERRIDE;
 
-	virtual void			setCapture (bool b);
+	virtual void			setCapture (bool b) NL_OVERRIDE;
 
 	// see if system cursor is currently captured
-	virtual bool			isSystemCursorCaptured();
+	virtual bool			isSystemCursorCaptured() NL_OVERRIDE;
 
 	// Add a new cursor (name is case unsensitive)
-	virtual void			addCursor(const std::string &name, const NLMISC::CBitmap &bitmap);
+	virtual void			addCursor(const std::string &name, const NLMISC::CBitmap &bitmap) NL_OVERRIDE;
 
 	// Display a cursor from its name (case unsensitive)
-	virtual void			setCursor(const std::string &name, NLMISC::CRGBA col, uint8 rot, sint hotSpotX, sint hotSpotY, bool forceRebuild = false);
+	virtual void			setCursor(const std::string &name, NLMISC::CRGBA col, uint8 rot, sint hotSpotX, sint hotSpotY, bool forceRebuild = false) NL_OVERRIDE;
 
 	// Change default scale for all cursors
-	virtual void			setCursorScale(float scale);
+	virtual void			setCursorScale(float scale) NL_OVERRIDE;
 
-	virtual void			getWindowSize (uint32 &width, uint32 &height);
+	virtual void			getWindowSize (uint32 &width, uint32 &height) NL_OVERRIDE;
 
-	virtual void			getWindowPos (sint32 &x, sint32 &y);
+	virtual void			getWindowPos (sint32 &x, sint32 &y) NL_OVERRIDE;
 
-	virtual void			getBuffer (CBitmap &bitmap);
+	virtual void			getBuffer (CBitmap &bitmap) NL_OVERRIDE;
 
-	virtual void			getZBuffer (std::vector<float>  &zbuffer);
+	virtual void			getZBuffer (std::vector<float>  &zbuffer) NL_OVERRIDE;
 
-	virtual void			getBufferPart (CBitmap &bitmap, NLMISC::CRect &rect);
+	virtual void			getBufferPart (CBitmap &bitmap, NLMISC::CRect &rect) NL_OVERRIDE;
 
 	// copy the first texture in a second one of different dimensions
-	virtual bool			stretchRect(ITexture * srcText, NLMISC::CRect &srcRect, ITexture * destText, NLMISC::CRect &destRect);
+	virtual bool			stretchRect(ITexture * srcText, NLMISC::CRect &srcRect, ITexture * destText, NLMISC::CRect &destRect) NL_OVERRIDE;
 
 	// return true if driver support Bloom effect.
-	virtual	bool			supportBloomEffect() const;
+	virtual	bool			supportBloomEffect() const NL_OVERRIDE;
 
 	// return true if driver support non-power of two textures
-	virtual	bool			supportNonPowerOfTwoTextures() const;
+	virtual	bool			supportNonPowerOfTwoTextures() const NL_OVERRIDE;
 
 	virtual bool			activeFrameBufferObject(ITexture * tex);
 
-	virtual void			getZBufferPart (std::vector<float>  &zbuffer, NLMISC::CRect &rect);
+	virtual void			getZBufferPart (std::vector<float>  &zbuffer, NLMISC::CRect &rect) NL_OVERRIDE;
 
 	virtual bool			setRenderTarget (ITexture *tex, uint32 x, uint32 y, uint32 width, uint32 height,
-												uint32 mipmapLevel, uint32 cubeFace);
-	virtual ITexture*		getRenderTarget() const { return _RenderTargetFBO ? _RenderTargetFBO : _TextureTarget; }
+												uint32 mipmapLevel, uint32 cubeFace) NL_OVERRIDE;
+	virtual ITexture*		getRenderTarget() const NL_OVERRIDE { return _RenderTargetFBO ? _RenderTargetFBO : _TextureTarget; }
 
 	virtual bool			copyTargetToTexture (ITexture *tex, uint32 offsetx, uint32 offsety, uint32 x, uint32 y,
-													uint32 width, uint32 height, uint32 mipmapLevel);
+													uint32 width, uint32 height, uint32 mipmapLevel) NL_OVERRIDE;
 
-	virtual bool			textureCoordinateAlternativeMode() const { return false; };
+	virtual bool			textureCoordinateAlternativeMode() const NL_OVERRIDE { return false; };
 
-	virtual bool			getRenderTargetSize (uint32 &width, uint32 &height);
+	virtual bool			getRenderTargetSize (uint32 &width, uint32 &height) NL_OVERRIDE;
 
 
-	virtual bool			fillBuffer (CBitmap &bitmap);
+	virtual bool			fillBuffer (CBitmap &bitmap) NL_OVERRIDE;
 
-	virtual void			setPolygonMode (TPolygonMode mode);
+	virtual void			setPolygonMode (TPolygonMode mode) NL_OVERRIDE;
 
-	virtual uint			getMaxLight () const;
+	virtual uint			getMaxLight () const NL_OVERRIDE;
 
-	virtual void			setLight (uint8 num, const CLight& light);
+	virtual void			setLight (uint8 num, const CLight& light) NL_OVERRIDE;
 
 	virtual CLight			getLight (uint8 num);
 
-	virtual void			enableLight (uint8 num, bool enable=true);
+	virtual void			enableLight (uint8 num, bool enable=true) NL_OVERRIDE;
 
 	virtual bool			isLightEnabled (uint8 num);
 
-	virtual void			setPerPixelLightingLight(CRGBA diffuse, CRGBA specular, float shininess);
+	virtual void			setPerPixelLightingLight(CRGBA diffuse, CRGBA specular, float shininess) NL_OVERRIDE;
 
-	virtual void			setLightMapDynamicLight (bool enable, const CLight& light);
+	virtual void			setLightMapDynamicLight (bool enable, const CLight& light) NL_OVERRIDE;
 
-	virtual uint			getMaxLightTableSize() const;
-	virtual void			enableLightTableMode(bool enable);
-	virtual void			setLightTableSize(uint count);
-	virtual void			setLightTableEntry(uint index, const CLight &light);
+	virtual uint			getMaxLightTableSize() const NL_OVERRIDE;
+	virtual void			enableLightTableMode(bool enable) NL_OVERRIDE;
+	virtual void			setLightTableSize(uint count) NL_OVERRIDE;
+	virtual void			setLightTableEntry(uint index, const CLight &light) NL_OVERRIDE;
 	virtual void			setLights(
 		const sint16 *tableIndices,
 		const uint8 *factors,
 		uint numLights,
 		uint numPerPixelLights,
-		NLMISC::CRGBA ambient);
+		NLMISC::CRGBA ambient) NL_OVERRIDE;
 
-	virtual void			setAmbientColor (CRGBA color);
+	virtual void			setAmbientColor (CRGBA color) NL_OVERRIDE;
 
 	/// \name Fog support.
 	// @{
-	virtual	bool			fogEnabled();
-	virtual	void			enableFog(bool enable);
+	virtual	bool			fogEnabled() NL_OVERRIDE;
+	virtual	void			enableFog(bool enable) NL_OVERRIDE;
 	/// setup fog parameters. fog must enabled to see result. start and end are in [0,1] range.
-	virtual	void			setupFog(float start, float end, CRGBA color);
-	virtual	void			setupFogMode(TFogMode mode = FogLinear, float density = 1.f);
-	virtual	float			getFogStart() const;
-	virtual	float			getFogEnd() const;
-	virtual	CRGBA			getFogColor() const;
-	virtual	TFogMode		getFogMode() const;
-	virtual	float			getFogDensity() const;
+	virtual	void			setupFog(float start, float end, CRGBA color) NL_OVERRIDE;
+	virtual	void			setupFogMode(TFogMode mode = FogLinear, float density = 1.f) NL_OVERRIDE;
+	virtual	float			getFogStart() const NL_OVERRIDE;
+	virtual	float			getFogEnd() const NL_OVERRIDE;
+	virtual	CRGBA			getFogColor() const NL_OVERRIDE;
+	virtual	TFogMode		getFogMode() const NL_OVERRIDE;
+	virtual	float			getFogDensity() const NL_OVERRIDE;
 	// @}
 
 	/// \name texture addressing modes
 	// @{
-	virtual bool			supportTextureShaders() const{ return false; };
+	virtual bool			supportTextureShaders() const NL_OVERRIDE { return false; };
 
-	virtual bool			supportWaterShader() const{ return true; }
+	virtual bool			supportWaterShader() const NL_OVERRIDE { return true; }
 
-	virtual bool			supportTextureAddrMode(CMaterial::TTexAddressingMode mode) const{ return false; };
+	virtual bool			supportTextureAddrMode(CMaterial::TTexAddressingMode mode) const NL_OVERRIDE { return false; };
 
-	virtual void			setMatrix2DForTextureOffsetAddrMode(const uint stage, const float mat[4]);
+	virtual void			setMatrix2DForTextureOffsetAddrMode(const uint stage, const float mat[4]) NL_OVERRIDE;
 	// @}
 
 	/// \name EMBM support
 	// @{
-		virtual bool		supportEMBM() const;
-		virtual bool		isEMBMSupportedAtStage(uint stage) const;
-		virtual void		setEMBMMatrix(const uint stage, const float mat[4]);
+		virtual bool		supportEMBM() const NL_OVERRIDE;
+		virtual bool		isEMBMSupportedAtStage(uint stage) const NL_OVERRIDE;
+		virtual void		setEMBMMatrix(const uint stage, const float mat[4]) NL_OVERRIDE;
 	// @}
 
-	virtual bool			supportPerPixelLighting(bool specular) const;
-	virtual bool			supportWorldSpacePPL() const;
+	virtual bool			supportPerPixelLighting(bool specular) const NL_OVERRIDE;
+	virtual bool			supportWorldSpacePPL() const NL_OVERRIDE;
 
 
 	/// \name Misc
 	// @{
-	virtual	bool			supportBlendConstantColor() const;
-	virtual	void			setBlendConstantColor(NLMISC::CRGBA col);
-	virtual	NLMISC::CRGBA	getBlendConstantColor() const;
-	virtual bool			supportMonitorColorProperties () const;
-	virtual bool			setMonitorColorProperties (const CMonitorColorProperties &properties);
-	virtual	void			finish();
-	virtual	void			flush();
-	virtual	void			enablePolygonSmoothing(bool smooth);
-	virtual	bool			isPolygonSmoothingEnabled() const;
+	virtual	bool			supportBlendConstantColor() const NL_OVERRIDE;
+	virtual	void			setBlendConstantColor(NLMISC::CRGBA col) NL_OVERRIDE;
+	virtual	NLMISC::CRGBA	getBlendConstantColor() const NL_OVERRIDE;
+	virtual bool			supportMonitorColorProperties () const NL_OVERRIDE;
+	virtual bool			setMonitorColorProperties (const CMonitorColorProperties &properties) NL_OVERRIDE;
+	virtual	void			finish() NL_OVERRIDE;
+	virtual	void			flush() NL_OVERRIDE;
+	virtual	void			enablePolygonSmoothing(bool smooth) NL_OVERRIDE;
+	virtual	bool			isPolygonSmoothingEnabled() const NL_OVERRIDE;
 	// @}
 
 
-	virtual void			swapTextureHandle(ITexture &tex0, ITexture &tex1);
+	virtual void			swapTextureHandle(ITexture &tex0, ITexture &tex1) NL_OVERRIDE;
 
-	virtual	uintptr_t		getTextureHandle(const ITexture&tex);
+	virtual	uintptr_t		getTextureHandle(const ITexture&tex) NL_OVERRIDE;
 
 	/// \name Material multipass.
 	/**	NB: setupMaterial() must be called before thoses methods.
@@ -876,46 +876,46 @@ public:
 	 */
 	// @{
 	/// init multipass for _CurrentMaterial. return number of pass required to render this material.
-	virtual sint			beginMaterialMultiPass() { 	return beginMultiPass(); }
+	virtual sint			beginMaterialMultiPass() NL_OVERRIDE { 	return beginMultiPass(); }
 	/// active the ith pass of this material.
-	virtual void			setupMaterialPass(uint pass) { 	setupPass(pass); }
+	virtual void			setupMaterialPass(uint pass) NL_OVERRIDE { 	setupPass(pass); }
 	/// end multipass for this material.
-	virtual void			endMaterialMultiPass() { 	endMultiPass(); }
+	virtual void			endMaterialMultiPass() NL_OVERRIDE { 	endMultiPass(); }
 	// @}
 
 	/// Adaptor information
-	virtual uint			getNumAdapter() const;
-	virtual bool			getAdapter(uint adapter, CAdapter &desc) const;
-	virtual bool			setAdapter(uint adapter);
+	virtual uint			getNumAdapter() const NL_OVERRIDE;
+	virtual bool			getAdapter(uint adapter, CAdapter &desc) const NL_OVERRIDE;
+	virtual bool			setAdapter(uint adapter) NL_OVERRIDE;
 
-	virtual CVertexBuffer::TVertexColorType getVertexColorFormat() const;
+	virtual CVertexBuffer::TVertexColorType getVertexColorFormat() const NL_OVERRIDE;
 
 	// Bench
-	virtual void startBench (bool wantStandardDeviation = false, bool quick = false, bool reset = true);
-	virtual void endBench ();
-	virtual void displayBench (class NLMISC::CLog *log);
+	virtual void startBench (bool wantStandardDeviation = false, bool quick = false, bool reset = true) NL_OVERRIDE;
+	virtual void endBench () NL_OVERRIDE;
+	virtual void displayBench (class NLMISC::CLog *log) NL_OVERRIDE;
 
-	virtual bool			supportOcclusionQuery() const;
-	virtual IOcclusionQuery *createOcclusionQuery();
-	virtual void			deleteOcclusionQuery(IOcclusionQuery *oq);
+	virtual bool			supportOcclusionQuery() const NL_OVERRIDE;
+	virtual IOcclusionQuery *createOcclusionQuery() NL_OVERRIDE;
+	virtual void			deleteOcclusionQuery(IOcclusionQuery *oq) NL_OVERRIDE;
 
 	// Test whether this device supports the frame buffer object mecanism
 	virtual bool			supportTextureRectangle() const;
 	virtual bool			supportFrameBufferObject() const;
 	virtual bool			supportPackedDepthStencil() const;
 
-	virtual uint64			getSwapBufferCounter() const { return _SwapBufferCounter; }
-	virtual uint64			getSwapBufferInFlight() const { return _SwapBufferInFlight; }
-	virtual bool			isTripleBufferPipelined() const { return NL3D_GL3_FRAME_QUEUE_MAX > 0; }
+	virtual uint64			getSwapBufferCounter() const NL_OVERRIDE { return _SwapBufferCounter; }
+	virtual uint64			getSwapBufferInFlight() const NL_OVERRIDE { return _SwapBufferInFlight; }
+	virtual bool			isTripleBufferPipelined() const NL_OVERRIDE { return NL3D_GL3_FRAME_QUEUE_MAX > 0; }
 
-	virtual void			setCullMode(TCullMode cullMode);
-	virtual	TCullMode       getCullMode() const;
+	virtual void			setCullMode(TCullMode cullMode) NL_OVERRIDE;
+	virtual	TCullMode       getCullMode() const NL_OVERRIDE;
 
-	virtual void			enableStencilTest(bool enable);
-	virtual bool			isStencilTestEnabled() const;
-	virtual void			stencilFunc(TStencilFunc stencilFunc, int ref, uint mask);
-	virtual void			stencilOp(TStencilOp fail, TStencilOp zfail, TStencilOp zpass);
-	virtual void			stencilMask(uint mask);
+	virtual void			enableStencilTest(bool enable) NL_OVERRIDE;
+	virtual bool			isStencilTestEnabled() const NL_OVERRIDE;
+	virtual void			stencilFunc(TStencilFunc stencilFunc, int ref, uint mask) NL_OVERRIDE;
+	virtual void			stencilOp(TStencilOp fail, TStencilOp zfail, TStencilOp zpass) NL_OVERRIDE;
+	virtual void			stencilMask(uint mask) NL_OVERRIDE;
 
 	GfxMode						_CurrentMode;
 	sint32						_WindowX;
@@ -1342,7 +1342,7 @@ private:
 													 uint   cubeFace = 0
 													);
 	// is this texture a rectangle texture ?
-	virtual bool			isTextureRectangle(ITexture * tex) const;
+	virtual bool			isTextureRectangle(ITexture * tex) const NL_OVERRIDE;
 
 	/// \name Material multipass.
 	/**	NB: setupMaterial() must be called before thoses methods.
@@ -1484,73 +1484,73 @@ private:
 
 	bool			isVertexProgramSupported() const{ return true; }
 
-	bool			isVertexProgramEmulated() const{ return false; }
+	bool			isVertexProgramEmulated() const NL_OVERRIDE { return false; }
 
-	bool			supportBuiltinUBO() const { return true; }
+	bool			supportBuiltinUBO() const NL_OVERRIDE { return true; }
 
-	bool			supportVertexProgram(CVertexProgram::TProfile profile) const;
+	bool			supportVertexProgram(CVertexProgram::TProfile profile) const NL_OVERRIDE;
 
-	bool			compileVertexProgram(CVertexProgram *program);
+	bool			compileVertexProgram(CVertexProgram *program) NL_OVERRIDE;
 	bool			compileInsertVertexProgram(CVertexProgram *program);
 	bool			convertNelvpToGLSL(CVertexProgram *program, bool linked, bool clip);
 	CUniformBuffer	*getNelvpUB(TProgram program) const;
 	void			flushNelvpUserVP();
 
-	bool			activeVertexProgram(CVertexProgram *program);
+	bool			activeVertexProgram(CVertexProgram *program) NL_OVERRIDE;
 	bool			activeVertexProgram(CVertexProgram *program, bool driver);
 
-	bool			supportPixelProgram(CPixelProgram::TProfile profile) const;
+	bool			supportPixelProgram(CPixelProgram::TProfile profile) const NL_OVERRIDE;
 
-	bool			compilePixelProgram(CPixelProgram *program);
+	bool			compilePixelProgram(CPixelProgram *program) NL_OVERRIDE;
 
-	bool			activePixelProgram(CPixelProgram *program);
+	bool			activePixelProgram(CPixelProgram *program) NL_OVERRIDE;
 	bool			activePixelProgram(CPixelProgram *program, bool driver);
 
-	bool			supportGeometryProgram(CGeometryProgram::TProfile profile) const { return false; }
+	bool			supportGeometryProgram(CGeometryProgram::TProfile profile) const NL_OVERRIDE { return false; }
 
-	bool			compileGeometryProgram(CGeometryProgram *program) { return false; }
+	bool			compileGeometryProgram(CGeometryProgram *program) NL_OVERRIDE { return false; }
 
-	bool			activeGeometryProgram(CGeometryProgram *program) { return false; }
+	bool			activeGeometryProgram(CGeometryProgram *program) NL_OVERRIDE { return false; }
 
 	uint32			getProgramId(TProgram program) const;
 	IProgram*		getProgram(TProgram program) const;
 
 	int				getUniformLocation(TProgram program, const char *name);
-	void			setUniform1f(TProgram program, uint index, float f0);
-	void			setUniform2f(TProgram program, uint index, float f0, float f1);
-	void			setUniform3f(TProgram program, uint index, float f0, float f1, float f2);
-	void			setUniform4f(TProgram program, uint index, float f0, float f1, float f2, float f3);
-	void			setUniform1i(TProgram program, uint index, sint32 i0);
-	void			setUniform2i(TProgram program, uint index, sint32 i0, sint32 i1);
-	void			setUniform3i(TProgram program, uint index, sint32 i0, sint32 i1, sint32 i2);
-	void			setUniform4i(TProgram program, uint index, sint32 i0, sint32 i1, sint32 i2, sint32 i3);
-	void			setUniform1ui(TProgram program, uint index, uint32 ui0);
-	void			setUniform2ui(TProgram program, uint index, uint32 ui0, uint32 ui1);
-	void			setUniform3ui(TProgram program, uint index, uint32 ui0, uint32 ui1, uint32 ui2);
-	void			setUniform4ui(TProgram program, uint index, uint32 ui0, uint32 ui1, uint32 ui2, uint32 ui3);
-	void			setUniform3f(TProgram program, uint index, const NLMISC::CVector& v);
-	void			setUniform4f(TProgram program, uint index, const NLMISC::CVector& v, float f3);
-	void			setUniform4f(TProgram program, uint index, const NLMISC::CRGBAF& rgba);
+	void			setUniform1f(TProgram program, uint index, float f0) NL_OVERRIDE;
+	void			setUniform2f(TProgram program, uint index, float f0, float f1) NL_OVERRIDE;
+	void			setUniform3f(TProgram program, uint index, float f0, float f1, float f2) NL_OVERRIDE;
+	void			setUniform4f(TProgram program, uint index, float f0, float f1, float f2, float f3) NL_OVERRIDE;
+	void			setUniform1i(TProgram program, uint index, sint32 i0) NL_OVERRIDE;
+	void			setUniform2i(TProgram program, uint index, sint32 i0, sint32 i1) NL_OVERRIDE;
+	void			setUniform3i(TProgram program, uint index, sint32 i0, sint32 i1, sint32 i2) NL_OVERRIDE;
+	void			setUniform4i(TProgram program, uint index, sint32 i0, sint32 i1, sint32 i2, sint32 i3) NL_OVERRIDE;
+	void			setUniform1ui(TProgram program, uint index, uint32 ui0) NL_OVERRIDE;
+	void			setUniform2ui(TProgram program, uint index, uint32 ui0, uint32 ui1) NL_OVERRIDE;
+	void			setUniform3ui(TProgram program, uint index, uint32 ui0, uint32 ui1, uint32 ui2) NL_OVERRIDE;
+	void			setUniform4ui(TProgram program, uint index, uint32 ui0, uint32 ui1, uint32 ui2, uint32 ui3) NL_OVERRIDE;
+	void			setUniform3f(TProgram program, uint index, const NLMISC::CVector& v) NL_OVERRIDE;
+	void			setUniform4f(TProgram program, uint index, const NLMISC::CVector& v, float f3) NL_OVERRIDE;
+	void			setUniform4f(TProgram program, uint index, const NLMISC::CRGBAF& rgba) NL_OVERRIDE;
 	void			setUniform3x3f(TProgram program, uint index, const float *src);
-	void			setUniform4x4f(TProgram program, uint index, const NLMISC::CMatrix& m);
+	void			setUniform4x4f(TProgram program, uint index, const NLMISC::CMatrix& m) NL_OVERRIDE;
 	void			setUniform4x4f(TProgram program, uint index, const float *src);
-	void			setUniform4fv(TProgram program, uint index, size_t num, const float *src);
-	void			setUniform4iv(TProgram program, uint index, size_t num, const sint32 *src);
-	void			setUniform4uiv(TProgram program, uint index, size_t num, const uint32 *src);
+	void			setUniform4fv(TProgram program, uint index, size_t num, const float *src) NL_OVERRIDE;
+	void			setUniform4iv(TProgram program, uint index, size_t num, const sint32 *src) NL_OVERRIDE;
+	void			setUniform4uiv(TProgram program, uint index, size_t num, const uint32 *src) NL_OVERRIDE;
 
-	void			setUniformMatrix(TProgram program, uint index, TMatrix matrix, TTransform transform);
-	void			setUniformFog(TProgram program, uint index);
+	void			setUniformMatrix(TProgram program, uint index, TMatrix matrix, TTransform transform) NL_OVERRIDE;
+	void			setUniformFog(TProgram program, uint index) NL_OVERRIDE;
 
-	bool			isUniformProgramState() { return true; }
+	bool			isUniformProgramState() NL_OVERRIDE { return true; }
 
 	virtual bool	bindUniformBuffer(TUBBinding binding, CUniformBuffer *ub) NL_OVERRIDE;
 
 	// Double-sided vertex color is not supported. No engine code uses it; D3D never supported it either.
-	void			enableVertexProgramDoubleSidedColor(bool doubleSided) {}
-	bool		    supportVertexProgramDoubleSidedColor() const { return false; }
+	void			enableVertexProgramDoubleSidedColor(bool doubleSided) NL_OVERRIDE {}
+	bool		    supportVertexProgramDoubleSidedColor() const NL_OVERRIDE { return false; }
 
-	virtual	bool			supportMADOperator() const ;
-	virtual	bool			supportLargeUBOArrays() const ;
+	virtual	bool			supportMADOperator() const NL_OVERRIDE;
+	virtual	bool			supportLargeUBOArrays() const NL_OVERRIDE;
 
 
 	/// \fallback for material shaders
@@ -1755,8 +1755,8 @@ class CProgramDrvInfosGL3 : public IProgramDrvInfos
 {
 public:
 	CProgramDrvInfosGL3(CDriverGL3 *drv, ItGPUPrgDrvInfoPtrList it);
-	~CProgramDrvInfosGL3();
-	uint getUniformIndex(const char *name) const;
+	~CProgramDrvInfosGL3() NL_OVERRIDE;
+	uint getUniformIndex(const char *name) const NL_OVERRIDE;
 	GLuint getProgramId() const { return programId; }
 	void setProgramId(GLuint id) { programId = id; }
 
