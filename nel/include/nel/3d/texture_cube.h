@@ -63,29 +63,29 @@ public:
 	/**
 	 * sharing system.
 	 */
-	virtual bool			supportSharing() const {return true;}
-	virtual std::string		getShareName() const;
+	virtual bool			supportSharing() const NL_OVERRIDE {return true;}
+	virtual std::string		getShareName() const NL_OVERRIDE;
 
 
 	/**
 	 * Generate the texture, looking in CPath if necessary.
 	 */
-	void doGenerate(bool async = false);
+	void doGenerate(bool async = false) NL_OVERRIDE;
 
-	virtual void release();
+	virtual void release() NL_OVERRIDE;
 	/// Does this texture is a cube texture
-	virtual bool isTextureCube() const { return true; }
+	virtual bool isTextureCube() const NL_OVERRIDE { return true; }
 
 	/// Save the texture file name.
-	virtual void	serial(NLMISC::IStream &f);
+	virtual void	serial(NLMISC::IStream &f) NL_OVERRIDE;
 	NLMISC_DECLARE_CLASS(CTextureCube);
 
 	/// If the face support multiple texture (such has CTextureMultiFile), this allow to select the active set
-	virtual void selectTexture(uint index);
+	virtual void selectTexture(uint index) NL_OVERRIDE;
 	// from ITexture
-	virtual bool isSelectable() const;
+	virtual bool isSelectable() const NL_OVERRIDE;
 	// from ITexture
-	virtual ITexture		*buildNonSelectableVersion(uint index);
+	virtual ITexture		*buildNonSelectableVersion(uint index) NL_OVERRIDE;
 
 
 private:

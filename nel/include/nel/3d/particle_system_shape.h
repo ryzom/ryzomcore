@@ -73,24 +73,24 @@ public:
 	void buildFromPS(const NL3D::CParticleSystem &ps);
 
 	/// Dtor.
-	virtual ~CParticleSystemShape() {}
+	virtual ~CParticleSystemShape() NL_OVERRIDE {}
 
 	/** create a particle system instance
 	 * \param scene the scene used to createModel().
 	 * \return the specialized instance for this shape.
 	 */
-	virtual	CTransformShape		*createInstance(NL3D::CScene &scene);
+	virtual	CTransformShape		*createInstance(NL3D::CScene &scene) NL_OVERRIDE;
 
 	/// \name Inherited from IShape.
 	// @{
 	/** render() a particle system in a driver, with the specified TransformShape information.
 	 * CTransfromShape call this method in the render traversal.
 	 */
-	virtual void				render(NL3D::IDriver *drv, CTransformShape *trans, bool passOpaque);
+	virtual void				render(NL3D::IDriver *drv, CTransformShape *trans, bool passOpaque) NL_OVERRIDE;
 	// @}
 
 	/// serial the shape
-	virtual void	serial(NLMISC::IStream &f);
+	virtual void	serial(NLMISC::IStream &f) NL_OVERRIDE;
 	NLMISC_DECLARE_CLASS(CParticleSystemShape);
 
 
@@ -111,13 +111,13 @@ public:
 
 
 	/// Always return a unit bounding box, unless the system has a precomputed bbox.
-	virtual	void	getAABBox(NLMISC::CAABBox &bbox) const;
+	virtual	void	getAABBox(NLMISC::CAABBox &bbox) const NL_OVERRIDE;
 
 
 	/** this method is meaningless here : the traverseLoadBalancing() for particle system
 	  * compute the number of triangles from the Model, not the shape
 	  */
-	virtual float				getNumTriangles (float /* distance */) { return 0; }
+	virtual float				getNumTriangles (float /* distance */) NL_OVERRIDE { return 0; }
 
 
 	/// \name access default tracks.
@@ -150,7 +150,7 @@ public:
 	CParticleSystem *instanciatePS(CScene &scene, NLMISC::CContiguousBlockAllocator *blockAllocator = NULL);
 public:
 	/// inherited from ishape
-	virtual void				flushTextures (IDriver &driver, uint selectedTexture);
+	virtual void				flushTextures (IDriver &driver, uint selectedTexture) NL_OVERRIDE;
 protected:
 
 	/** A memory stream containing a particle system. Each system is instanciated from this prototype

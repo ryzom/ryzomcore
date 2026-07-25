@@ -430,8 +430,8 @@ class CVertexProgramWindTree : public CVertexProgramLighted
 public:
 	typedef CWindTreeVPIdx CIdx;
 	CVertexProgramWindTree(uint numPls, bool specular, bool normalize);
-	virtual ~CVertexProgramWindTree() { };
-	virtual void buildInfo();
+	virtual ~CVertexProgramWindTree() NL_OVERRIDE { };
+	virtual void buildInfo() NL_OVERRIDE;
 	const CIdx &idx() const { return m_Idx; }
 
 	bool PerMeshSetup;
@@ -448,8 +448,8 @@ class CVertexProgramWindTreeUBO : public CVertexProgram
 public:
 	typedef CWindTreeVPIdx CIdx;
 	CVertexProgramWindTreeUBO(bool clip);
-	virtual ~CVertexProgramWindTreeUBO() { };
-	virtual void buildInfo();
+	virtual ~CVertexProgramWindTreeUBO() NL_OVERRIDE { };
+	virtual void buildInfo() NL_OVERRIDE;
 	const CIdx &idx() const { return m_Idx; }
 
 private:

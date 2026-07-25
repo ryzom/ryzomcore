@@ -70,8 +70,8 @@ public:
 		uint DiffuseMapVector1;
 	};
 	CVertexProgramWaterVPNoWave(bool diffuse, bool planar = false, bool envCalc = false);
-	virtual ~CVertexProgramWaterVPNoWave() { }
-	virtual void buildInfo();
+	virtual ~CVertexProgramWaterVPNoWave() NL_OVERRIDE { }
+	virtual void buildInfo() NL_OVERRIDE;
 	inline const CIdx &idx() const { return m_Idx; }
 private:
 	CIdx m_Idx;
@@ -111,31 +111,31 @@ public:
 	CWaterShape();
 
 	/// dtor
-	~CWaterShape();
+	~CWaterShape() NL_OVERRIDE;
 
 
 	/// serial this shape
-	void serial(NLMISC::IStream &f);
+	void serial(NLMISC::IStream &f) NL_OVERRIDE;
 	//@}
 
 
 	/// inherited from IShape
-	virtual	CTransformShape		*createInstance(CScene &scene);
+	virtual	CTransformShape		*createInstance(CScene &scene) NL_OVERRIDE;
 
 	/// inherited from IShape
-	virtual bool				clip(const std::vector<CPlane>	&pyramid, const CMatrix &worldMatrix);
+	virtual bool				clip(const std::vector<CPlane>	&pyramid, const CMatrix &worldMatrix) NL_OVERRIDE;
 
 	/// inherited from IShape. Does nothing. A new traverseRender() was set for that
-	virtual void				render(IDriver * /* drv */, CTransformShape * /* trans */, bool /* opaquePass */) {}
+	virtual void				render(IDriver * /* drv */, CTransformShape * /* trans */, bool /* opaquePass */) NL_OVERRIDE {}
 
 	/// inherited from IShape
-	virtual	void				getAABBox(NLMISC::CAABBox &bbox) const { bbox = _BBox; }
+	virtual	void				getAABBox(NLMISC::CAABBox &bbox) const NL_OVERRIDE { bbox = _BBox; }
 
 	/// inherited from ishape
-	virtual float				getNumTriangles (float distance);
+	virtual float				getNumTriangles (float distance) NL_OVERRIDE;
 
 	/// inherited from ishape
-	virtual void				flushTextures (IDriver &driver, uint selectedTexture);
+	virtual void				flushTextures (IDriver &driver, uint selectedTexture) NL_OVERRIDE;
 
 
 	///\name Geometry setup
@@ -350,31 +350,31 @@ public:
 		CWaveMakerShape();
 
 		/// dtor
-		~CWaveMakerShape();
+		~CWaveMakerShape() NL_OVERRIDE;
 
 
 		/// serial this shape
-		void serial(NLMISC::IStream &f);
+		void serial(NLMISC::IStream &f) NL_OVERRIDE;
 	//@}
 
 
 	/// inherited from IShape
-	virtual	CTransformShape		*createInstance(CScene &scene);
+	virtual	CTransformShape		*createInstance(CScene &scene) NL_OVERRIDE;
 
 	/// inherited from IShape
-	virtual bool				clip(const std::vector<CPlane>	&pyramid, const CMatrix &worldMatrix);
+	virtual bool				clip(const std::vector<CPlane>	&pyramid, const CMatrix &worldMatrix) NL_OVERRIDE;
 
 	/// inherited from IShape. Does nothing. A new traverseRender() was set for that
-	virtual void				render(IDriver * /* drv */, CTransformShape * /* trans */, bool /* opaquePass */) {}
+	virtual void				render(IDriver * /* drv */, CTransformShape * /* trans */, bool /* opaquePass */) NL_OVERRIDE {}
 
 	/// inherited from IShape
-	virtual	void				getAABBox(NLMISC::CAABBox &bbox) const;
+	virtual	void				getAABBox(NLMISC::CAABBox &bbox) const NL_OVERRIDE;
 
 	/// inherited from ishape
-	virtual float				getNumTriangles (float /* distance */) { return 0.f; }
+	virtual float				getNumTriangles (float /* distance */) NL_OVERRIDE { return 0.f; }
 
 	/// inherited from ishape
-	virtual void				flushTextures (IDriver &/* driver */, uint /* selectedTexture */) {}
+	virtual void				flushTextures (IDriver &/* driver */, uint /* selectedTexture */) NL_OVERRIDE {}
 
 
 	/// set the period for this wave maker

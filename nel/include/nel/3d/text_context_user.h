@@ -59,35 +59,35 @@ public:
 		_TextContext.init(_Driver, fmg);
 		_TextContext.setFontGenerator(fontFileName, fontExFileName);
 	}
-	virtual ~CTextContextUser()
+	virtual ~CTextContextUser() NL_OVERRIDE
 	{
 	}
 
 
 	/// \name Text look.
 	// @{
-	void setColor(NLMISC::CRGBA color);
-	void setFontSize(uint32 fontSize);
-	uint32 getFontSize() const;
-	void setEmbolden(bool b);
-	bool getEmbolden() const;
-	void setOblique(bool b);
-	bool getOblique() const;
-	void setHotSpot(THotSpot hotSpot);
-	THotSpot getHotSpot() const;
-	void setScaleX(float scaleX);
-	void setScaleY(float scaleY);
-	float getScaleX() const;
-	float getScaleY() const;
-	void setShaded(bool b);
-	bool getShaded() const;
-	void setShadeOutline(bool b);
-	bool getShadeOutline() const;
-	void setShadeExtent(float x, float y);
-	void setShadeColor (NLMISC::CRGBA sc);
-	NLMISC::CRGBA getShadeColor () const;
-	void setKeep800x600Ratio(bool keep);
-	bool getKeep800x600Ratio() const;
+	void setColor(NLMISC::CRGBA color) NL_OVERRIDE;
+	void setFontSize(uint32 fontSize) NL_OVERRIDE;
+	uint32 getFontSize() const NL_OVERRIDE;
+	void setEmbolden(bool b) NL_OVERRIDE;
+	bool getEmbolden() const NL_OVERRIDE;
+	void setOblique(bool b) NL_OVERRIDE;
+	bool getOblique() const NL_OVERRIDE;
+	void setHotSpot(THotSpot hotSpot) NL_OVERRIDE;
+	THotSpot getHotSpot() const NL_OVERRIDE;
+	void setScaleX(float scaleX) NL_OVERRIDE;
+	void setScaleY(float scaleY) NL_OVERRIDE;
+	float getScaleX() const NL_OVERRIDE;
+	float getScaleY() const NL_OVERRIDE;
+	void setShaded(bool b) NL_OVERRIDE;
+	bool getShaded() const NL_OVERRIDE;
+	void setShadeOutline(bool b) NL_OVERRIDE;
+	bool getShadeOutline() const NL_OVERRIDE;
+	void setShadeExtent(float x, float y) NL_OVERRIDE;
+	void setShadeColor (NLMISC::CRGBA sc) NL_OVERRIDE;
+	NLMISC::CRGBA getShadeColor () const NL_OVERRIDE;
+	void setKeep800x600Ratio(bool keep) NL_OVERRIDE;
+	bool getKeep800x600Ratio() const NL_OVERRIDE;
 	// @}
 
 
@@ -96,37 +96,37 @@ public:
 	 *
 	 */
 	// @{
-	uint32 textPush(const char *format, ...)  ;
-	uint32 textPush(NLMISC::CUtfStringView sv)  ;
-	void setStringColor(uint32 i, CRGBA newCol);
-	void setStringSelection(uint32 i, uint32 selectStart, uint32 selectSize);
-	void resetStringSelection(uint32 i);
-	void erase(uint32 i)  ;
-	virtual	CStringInfo		getStringInfo (uint32 i);
-	virtual	CStringInfo		getStringInfo (NLMISC::CUtfStringView sv);
-	virtual	CStringInfo		getStringInfo (NLMISC::CUtfStringView sv, size_t len);
+	uint32 textPush(const char *format, ...) NL_OVERRIDE  ;
+	uint32 textPush(NLMISC::CUtfStringView sv) NL_OVERRIDE  ;
+	void setStringColor(uint32 i, CRGBA newCol) NL_OVERRIDE;
+	void setStringSelection(uint32 i, uint32 selectStart, uint32 selectSize) NL_OVERRIDE;
+	void resetStringSelection(uint32 i) NL_OVERRIDE;
+	void erase(uint32 i) NL_OVERRIDE  ;
+	virtual	CStringInfo		getStringInfo (uint32 i) NL_OVERRIDE;
+	virtual	CStringInfo		getStringInfo (NLMISC::CUtfStringView sv) NL_OVERRIDE;
+	virtual	CStringInfo		getStringInfo (NLMISC::CUtfStringView sv, size_t len) NL_OVERRIDE;
 
-	void clear()  ;
-	void printAt(float x, float y, uint32 i) ;
-	void printClipAt(URenderStringBuffer &renderBuffer, float x, float y, uint32 i, float xmin, float ymin, float xmax, float ymax) ;
-	void printClipAtUnProjected(URenderStringBuffer &renderBuffer, class NL3D::CFrustum &frustum, const NLMISC::CMatrix &scaleMatrix, float x, float y, float depth, uint32 i, float xmin, float ymin, float xmax, float ymax);
-	void printClipAtOld (float x, float y, uint32 i, float xmin, float ymin, float xmax, float ymax);
+	void clear() NL_OVERRIDE  ;
+	void printAt(float x, float y, uint32 i) NL_OVERRIDE ;
+	void printClipAt(URenderStringBuffer &renderBuffer, float x, float y, uint32 i, float xmin, float ymin, float xmax, float ymax) NL_OVERRIDE ;
+	void printClipAtUnProjected(URenderStringBuffer &renderBuffer, class NL3D::CFrustum &frustum, const NLMISC::CMatrix &scaleMatrix, float x, float y, float depth, uint32 i, float xmin, float ymin, float xmax, float ymax) NL_OVERRIDE;
+	void printClipAtOld (float x, float y, uint32 i, float xmin, float ymin, float xmax, float ymax) NL_OVERRIDE;
 
-	void printAt(float x, float y, NLMISC::CUtfStringView sv) ;
-	void printfAt(float x, float y, const char * format, ...) ;
+	void printAt(float x, float y, NLMISC::CUtfStringView sv) NL_OVERRIDE ;
+	void printfAt(float x, float y, const char * format, ...) NL_OVERRIDE ;
 
-	void render3D(const CMatrix &mat, NLMISC::CUtfStringView sv) ;
-	void render3D(const CMatrix &mat, const char *format, ...) ;
+	void render3D(const CMatrix &mat, NLMISC::CUtfStringView sv) NL_OVERRIDE ;
+	void render3D(const CMatrix &mat, const char *format, ...) NL_OVERRIDE ;
 
-	float getLastXBound() const ;
+	float getLastXBound() const NL_OVERRIDE ;
 	// @}
 
-	void			dumpCacheTexture (const char *filename);
+	void			dumpCacheTexture (const char *filename) NL_OVERRIDE;
 
-	virtual URenderStringBuffer		*createRenderBuffer();
-	virtual void					deleteRenderBuffer(URenderStringBuffer *buffer);
-	virtual void					flushRenderBuffer(URenderStringBuffer *buffer);
-	virtual void					flushRenderBufferUnProjected(URenderStringBuffer *buffer, bool zwrite);
+	virtual URenderStringBuffer		*createRenderBuffer() NL_OVERRIDE;
+	virtual void					deleteRenderBuffer(URenderStringBuffer *buffer) NL_OVERRIDE;
+	virtual void					flushRenderBuffer(URenderStringBuffer *buffer) NL_OVERRIDE;
+	virtual void					flushRenderBufferUnProjected(URenderStringBuffer *buffer, bool zwrite) NL_OVERRIDE;
 
 	CTextContext	&getTextContext() {return _TextContext;}
 
@@ -135,9 +135,9 @@ public:
 	 *
 	 */
 	// @{
-	virtual void setLetterColors(ULetterColors * letterColors, uint index);
-	virtual bool isSameLetterColors(ULetterColors * letterColors, uint index);
-	virtual ULetterColors * createLetterColors();
+	virtual void setLetterColors(ULetterColors * letterColors, uint index) NL_OVERRIDE;
+	virtual bool isSameLetterColors(ULetterColors * letterColors, uint index) NL_OVERRIDE;
+	virtual ULetterColors * createLetterColors() NL_OVERRIDE;
 	// @}
 };
 

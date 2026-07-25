@@ -36,7 +36,7 @@ public:
 		CDriverUser		   *Driver;
 		IWaterEnvMapRender *Rdr;
 		// From CWaterEnvMap
-		virtual void render(CTextureCube::TFace face, TGlobalAnimationTime time)
+		virtual void render(CTextureCube::TFace face, TGlobalAnimationTime time) NL_OVERRIDE
 		{
 			nlassert(Driver);
 			if (!Rdr) return;
@@ -45,15 +45,15 @@ public:
 	};
 	CWaterEnvMapInternal EnvMap;
 public:
-	virtual ~CWaterEnvMapUser() { }
-	virtual void				init(uint cubeMapSize, uint projection2DSize, TGlobalAnimationTime updateTime);
+	virtual ~CWaterEnvMapUser() NL_OVERRIDE { }
+	virtual void				init(uint cubeMapSize, uint projection2DSize, TGlobalAnimationTime updateTime) NL_OVERRIDE;
 	// Set an external renderer that will update the envmap used for water rendering. The renderer will be called during the update as needed
-	virtual	void			    setWaterEnvMapRenderCallback(IWaterEnvMapRender *rdr) { EnvMap.Rdr = rdr; }
-	virtual IWaterEnvMapRender *getWaterEnvMapRenderCallback() const { return EnvMap.Rdr; }
-	virtual void				invalidate();
-	virtual void				setAlpha(uint8 alpha) { EnvMap.setAlpha(alpha); }
-	virtual uint8				getAlpha() const { return EnvMap.getAlpha(); }
-	virtual CWaterEnvMap		*getWaterEnvMap() { return &EnvMap; }
+	virtual	void			    setWaterEnvMapRenderCallback(IWaterEnvMapRender *rdr) NL_OVERRIDE { EnvMap.Rdr = rdr; }
+	virtual IWaterEnvMapRender *getWaterEnvMapRenderCallback() const NL_OVERRIDE { return EnvMap.Rdr; }
+	virtual void				invalidate() NL_OVERRIDE;
+	virtual void				setAlpha(uint8 alpha) NL_OVERRIDE { EnvMap.setAlpha(alpha); }
+	virtual uint8				getAlpha() const NL_OVERRIDE { return EnvMap.getAlpha(); }
+	virtual CWaterEnvMap		*getWaterEnvMap() NL_OVERRIDE { return &EnvMap; }
 };
 
 

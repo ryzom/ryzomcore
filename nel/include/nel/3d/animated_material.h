@@ -221,16 +221,16 @@ public:
 	};
 
 	/// From IAnimatable
-	virtual IAnimatedValue* getValue (uint valueId);
+	virtual IAnimatedValue* getValue (uint valueId) NL_OVERRIDE;
 
 	/// From IAnimatable
-	virtual const char *getValueName (uint valueId) const;
+	virtual const char *getValueName (uint valueId) const NL_OVERRIDE;
 
 	/// From IAnimatable.
-	virtual ITrack* getDefaultTrack (uint valueId);
+	virtual ITrack* getDefaultTrack (uint valueId) NL_OVERRIDE;
 
 	/// From IAnimatable.
-	virtual	void	registerToChannelMixer(CChannelMixer *chanMixer, const std::string &prefix);
+	virtual	void	registerToChannelMixer(CChannelMixer *chanMixer, const std::string &prefix) NL_OVERRIDE;
 
 	// @}
 

@@ -299,7 +299,7 @@ public:
 	TKey Key;
 	bool FirstTime;
 
-	virtual	CEvent			*clone() const {return new CEventKeyDown(*this);}
+	virtual	CEvent			*clone() const NL_OVERRIDE {return new CEventKeyDown(*this);}
 };
 
 /**
@@ -314,7 +314,7 @@ public:
 	}
 	TKey Key;
 
-	virtual	CEvent			*clone() const {return new CEventKeyUp(*this);}
+	virtual	CEvent			*clone() const NL_OVERRIDE {return new CEventKeyUp(*this);}
 };
 
 /**
@@ -329,7 +329,7 @@ public:
 	}
 	u32char Char;
 
-	virtual	CEvent			*clone() const {return new CEventChar(*this);}
+	virtual	CEvent			*clone() const NL_OVERRIDE {return new CEventChar(*this);}
 	void					setRaw( bool raw ) { _Raw = raw; }
 	bool					isRaw() const { return _Raw; }
 
@@ -350,7 +350,7 @@ public:
 	}
 	std::string String;
 
-	virtual	CEvent			*clone() const {return new CEventString(*this);}
+	virtual	CEvent			*clone() const NL_OVERRIDE {return new CEventString(*this);}
 };
 
 /**
@@ -383,7 +383,7 @@ public:
 	CEventMouseDown (float x, float y, TMouseButton button, IEventEmitter* emitter) : CEventMouse (x, y, button, emitter, EventMouseDownId)
 	{}
 
-	virtual	CEvent			*clone() const {return new CEventMouseDown(*this);}
+	virtual	CEvent			*clone() const NL_OVERRIDE {return new CEventMouseDown(*this);}
 };
 
 
@@ -398,7 +398,7 @@ public:
 	CEventMouseUp (float x, float y, TMouseButton button, IEventEmitter* emitter) : CEventMouse (x, y, button, emitter, EventMouseUpId)
 	{}
 
-	virtual	CEvent			*clone() const {return new CEventMouseUp(*this);}
+	virtual	CEvent			*clone() const NL_OVERRIDE {return new CEventMouseUp(*this);}
 };
 
 
@@ -413,7 +413,7 @@ public:
 	CEventMouseMove (float x, float y, TMouseButton button, IEventEmitter* emitter) : CEventMouse (x, y, button, emitter, EventMouseMoveId)
 	{}
 
-	virtual	CEvent			*clone() const {return new CEventMouseMove(*this);}
+	virtual	CEvent			*clone() const NL_OVERRIDE {return new CEventMouseMove(*this);}
 };
 
 
@@ -428,7 +428,7 @@ public:
 	CEventMouseDblClk (float x, float y, TMouseButton button, IEventEmitter* emitter) : CEventMouse (x, y, button, emitter, EventMouseDblClkId)
 	{}
 
-	virtual	CEvent			*clone() const {return new CEventMouseDblClk(*this);}
+	virtual	CEvent			*clone() const NL_OVERRIDE {return new CEventMouseDblClk(*this);}
 };
 
 
@@ -448,7 +448,7 @@ public:
 		Direction=direction;
 	}
 
-	virtual	CEvent			*clone() const {return new CEventMouseWheel(*this);}
+	virtual	CEvent			*clone() const NL_OVERRIDE {return new CEventMouseWheel(*this);}
 };
 
 
@@ -472,7 +472,7 @@ public:
 		Activate = activate;
 	}
 
-	virtual	CEvent			*clone() const {return new CEventActivate(*this);}
+	virtual	CEvent			*clone() const NL_OVERRIDE {return new CEventActivate(*this);}
 };
 
 
@@ -496,7 +496,7 @@ public:
 		Get = get;
 	}
 
-	virtual	CEvent			*clone() const {return new CEventSetFocus(*this);}
+	virtual	CEvent			*clone() const NL_OVERRIDE {return new CEventSetFocus(*this);}
 };
 
 
@@ -510,7 +510,7 @@ public:
 	{
 	}
 
-	virtual	CEvent			*clone() const {return new CEventDestroyWindow(*this);}
+	virtual	CEvent			*clone() const NL_OVERRIDE {return new CEventDestroyWindow(*this);}
 };
 
 /**
@@ -523,7 +523,7 @@ public:
 	{
 	}
 
-	virtual	CEvent			*clone() const {return new CEventCloseWindow(*this);}
+	virtual	CEvent			*clone() const NL_OVERRIDE {return new CEventCloseWindow(*this);}
 };
 
 /**
@@ -538,7 +538,7 @@ public:
 	uint32	EventMessage;
 	uint32	WParam, LParam;
 
-	virtual CEvent			*clone() const {return new CEventIME(*this);}
+	virtual CEvent			*clone() const NL_OVERRIDE {return new CEventIME(*this);}
 };
 
 /**
@@ -562,7 +562,7 @@ public:
 		BitDepth = bitDepth;
 	}
 
-	virtual	CEvent			*clone() const {return new CEventDisplayChange(*this);}
+	virtual	CEvent			*clone() const NL_OVERRIDE {return new CEventDisplayChange(*this);}
 };
 
 

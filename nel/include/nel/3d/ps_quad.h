@@ -47,40 +47,40 @@ public:
 
 
 	/// return true if there are transparent faces in the object
-	virtual bool hasTransparentFaces(void);
+	virtual bool hasTransparentFaces(void) NL_OVERRIDE;
 
 	/// return true if there are Opaque faces in the object
-	virtual bool hasOpaqueFaces(void);
+	virtual bool hasOpaqueFaces(void) NL_OVERRIDE;
 
 	/// return the max number of faces needed for display. This is needed for LOD balancing
-	virtual uint32 getNumWantedTris() const;
+	virtual uint32 getNumWantedTris() const NL_OVERRIDE;
 
 	/// init the vertex buffers
 	static void initVertexBuffers();
 
 	// from CPSParticle
-	virtual bool supportGlobalColorLighting() const { return true; }
+	virtual bool supportGlobalColorLighting() const NL_OVERRIDE { return true; }
 
 	// from CPSParticle
-	virtual void setZBias(float value);
-	virtual float getZBias() const { return CPSMaterial::getZBias(); }
+	virtual void setZBias(float value) NL_OVERRIDE;
+	virtual float getZBias() const NL_OVERRIDE { return CPSMaterial::getZBias(); }
 
 	// from CPSLocatedBindable
-	virtual void enumTexs(std::vector<NLMISC::CSmartPtr<ITexture> > &dest, IDriver &drv);
+	virtual void enumTexs(std::vector<NLMISC::CSmartPtr<ITexture> > &dest, IDriver &drv) NL_OVERRIDE;
 
 
 protected:
 	// dtor
-	virtual ~CPSQuad();
+	virtual ~CPSQuad() NL_OVERRIDE;
 
 	/// initialisations
 	virtual void init(void);
 
 	/// update the material and the vb so that they match the color scheme. Inherited from CPSColoredParticle
-	virtual void updateMatAndVbForColor(void);
+	virtual void updateMatAndVbForColor(void) NL_OVERRIDE;
 
 	/// update the material and the vb so that they match the texture scheme.
-	virtual void updateMatAndVbForTexture(void);
+	virtual void updateMatAndVbForTexture(void) NL_OVERRIDE;
 
 	/** update material before rendering
 	  * This may also change the vb uv routing (if embm is used)
@@ -88,7 +88,7 @@ protected:
 	void updateMatBeforeRendering(IDriver *drv, CVertexBuffer &vb);
 
 	/// this is inlined to save cost of call by derived class
-	void newElement(const CPSEmitterInfo &info)
+	void newElement(const CPSEmitterInfo &info) NL_OVERRIDE
 	{
 		newColorElement(info);
 		newSizeElement(info);
@@ -96,17 +96,17 @@ protected:
 	}
 
 	/// this is inlined to save cost of call by derived class
-	void deleteElement(uint32 index)
+	void deleteElement(uint32 index) NL_OVERRIDE
 	{
 		deleteColorElement(index);
 		deleteSizeElement(index);
 		deleteTextureIndexElement(index);
 	}
 
-	void resize(uint32 capacity);
+	void resize(uint32 capacity) NL_OVERRIDE;
 
 	/// complete the bbox depending on the size of particles
-	virtual bool completeBBox(NLMISC::CAABBox &box) const;
+	virtual bool completeBBox(NLMISC::CAABBox &box) const NL_OVERRIDE;
 
 	/** calculate current color and texture coordinate before any rendering
 	 *  size can't be higher that quadBufSize ...
@@ -114,10 +114,10 @@ protected:
 	void updateVbColNUVForRender(CVertexBuffer &vb, uint32 startIndex, uint32 numQuad, uint32 srcStep, IDriver &drv);
 
 	/// DERIVERS MUST CALL this
-	void serial(NLMISC::IStream &f);
-	virtual CPSLocated *getColorOwner(void) { return _Owner; }
-	virtual CPSLocated *getSizeOwner(void) { return _Owner; }
-	virtual CPSLocated *getTextureIndexOwner(void) { return _Owner; }
+	void serial(NLMISC::IStream &f) NL_OVERRIDE;
+	virtual CPSLocated *getColorOwner(void) NL_OVERRIDE { return _Owner; }
+	virtual CPSLocated *getSizeOwner(void) NL_OVERRIDE { return _Owner; }
+	virtual CPSLocated *getTextureIndexOwner(void) NL_OVERRIDE { return _Owner; }
 
 	enum VBType
 	{
@@ -157,11 +157,11 @@ protected:
 
 
 	// from CPSTexturedParticle / CPSMultiTexturedParticle  : gives us the opportunity to update wrap mode for quad particles
-	virtual void		 setTexture(CSmartPtr<ITexture> tex);
-	virtual void		 setTextureGroup(NLMISC::CSmartPtr<CTextureGrouped> texGroup);
+	virtual void		 setTexture(CSmartPtr<ITexture> tex) NL_OVERRIDE;
+	virtual void		 setTextureGroup(NLMISC::CSmartPtr<CTextureGrouped> texGroup) NL_OVERRIDE;
 	virtual void		 setTexture2(ITexture *tex);
 	virtual void		 setTexture2Alternate(ITexture *tex);
-	virtual void		 updateTexWrapMode(IDriver &drv);
+	virtual void		 updateTexWrapMode(IDriver &drv) NL_OVERRIDE;
 
 
 public:

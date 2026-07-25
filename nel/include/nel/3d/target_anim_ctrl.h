@@ -74,10 +74,10 @@ public:
 public:
 	/// Constructor
 	CTargetAnimCtrl();
-	virtual ~CTargetAnimCtrl();
+	virtual ~CTargetAnimCtrl() NL_OVERRIDE;
 
 	/// Called at compute() time.
-	virtual	void		execute(CSkeletonModel *model, CBone *bone);
+	virtual	void		execute(CSkeletonModel *model, CBone *bone) NL_OVERRIDE;
 
 
 private:

@@ -670,11 +670,11 @@ public:
 		}
 		// TODO_VP_GLSL
 	}
-	virtual ~CVertexProgramVeget()
+	virtual ~CVertexProgramVeget() NL_OVERRIDE
 	{
 
 	}
-	virtual void buildInfo()
+	virtual void buildInfo() NL_OVERRIDE
 	{
 		m_Idx.ProgramConstants0 = getUniformIndex("programConstants0");
 		nlassert(m_Idx.ProgramConstants0 != std::numeric_limits<uint>::max());

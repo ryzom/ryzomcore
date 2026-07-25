@@ -49,11 +49,11 @@ public:
 	CMeshMultiLodInstance ();
 
 	/// Dstructor
-	~CMeshMultiLodInstance ();
+	~CMeshMultiLodInstance () NL_OVERRIDE;
 
 	/** Change MRM Distance setup. See CMeshBaseInstance::changeMRMDistanceSetup()
 	 */
-	virtual void		changeMRMDistanceSetup(float distanceFinest, float distanceMiddle, float distanceCoarsest);
+	virtual void		changeMRMDistanceSetup(float distanceFinest, float distanceMiddle, float distanceCoarsest) NL_OVERRIDE;
 
 
 	enum
@@ -79,7 +79,7 @@ public:
 	float            getCoarseMeshDist() const { return _CoarseMeshDistance; }
 
 	// From CTransformShape
-	virtual float				getNumTriangles (float distance);
+	virtual float				getNumTriangles (float distance) NL_OVERRIDE;
 
 	// called at instanciation
 	void			initRenderFilterType();
@@ -88,7 +88,7 @@ public:
 	// @{
 	/** Additionally to std loadBalancing, it compues Lod related states
 	 */
-	virtual void	traverseLoadBalancing();
+	virtual void	traverseLoadBalancing() NL_OVERRIDE;
 	// @}
 
 private:

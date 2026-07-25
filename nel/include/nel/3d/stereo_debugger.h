@@ -59,11 +59,11 @@ class CStereoDebugger : public IStereoDisplay
 {
 public:
 	CStereoDebugger();
-	virtual ~CStereoDebugger();
+	virtual ~CStereoDebugger() NL_OVERRIDE;
 
 
 	/// Sets driver and generates necessary render targets
-	virtual void setDriver(NL3D::UDriver *driver);
+	virtual void setDriver(NL3D::UDriver *driver) NL_OVERRIDE;
 	/*void releaseTextures();
 	void initTextures();
 	void setTextures();
@@ -72,60 +72,60 @@ public:
 	void recycleTextures();
 
 	/// Attach the driver to the display
-	virtual bool attachToDisplay();
+	virtual bool attachToDisplay() NL_OVERRIDE;
 	/// Detach the driver from the display
-	virtual void detachFromDisplay();
+	virtual void detachFromDisplay() NL_OVERRIDE;
 
 	/// Gets the required screen resolution for this device
-	virtual bool getScreenResolution(uint &width, uint &height);
+	virtual bool getScreenResolution(uint &width, uint &height) NL_OVERRIDE;
 	/// Set latest camera position etcetera
-	virtual void updateCamera(uint cid, const NL3D::UCamera *camera);
+	virtual void updateCamera(uint cid, const NL3D::UCamera *camera) NL_OVERRIDE;
 	/// Get the frustum to use for clipping
-	virtual void getClippingFrustum(uint cid, NL3D::UCamera *camera) const;
+	virtual void getClippingFrustum(uint cid, NL3D::UCamera *camera) const NL_OVERRIDE;
 	/// Get the original frustum of the camera
-	virtual void getOriginalFrustum(uint cid, NL3D::UCamera *camera) const;
+	virtual void getOriginalFrustum(uint cid, NL3D::UCamera *camera) const NL_OVERRIDE;
 
 	/// Is there a next pass
-	virtual bool nextPass();
+	virtual bool nextPass() NL_OVERRIDE;
 	/// Gets the current viewport
-	virtual const NL3D::CViewport &getCurrentViewport() const;
+	virtual const NL3D::CViewport &getCurrentViewport() const NL_OVERRIDE;
 	/// Gets the current camera frustum
-	virtual const NL3D::CFrustum &getCurrentFrustum(uint cid) const;
+	virtual const NL3D::CFrustum &getCurrentFrustum(uint cid) const NL_OVERRIDE;
 	/// Gets the current camera frustum
-	virtual void getCurrentFrustum(uint cid, NL3D::UCamera *camera) const;
+	virtual void getCurrentFrustum(uint cid, NL3D::UCamera *camera) const NL_OVERRIDE;
 	/// Gets the current camera matrix
-	virtual void getCurrentMatrix(uint cid, NL3D::UCamera *camera) const;
+	virtual void getCurrentMatrix(uint cid, NL3D::UCamera *camera) const NL_OVERRIDE;
 
 	/// At the start of a new render target
-	virtual bool wantClear();
+	virtual bool wantClear() NL_OVERRIDE;
 	/// Render scene reflections
-	virtual bool wantSceneReflections();
+	virtual bool wantSceneReflections() NL_OVERRIDE;
 	/// The 3D scene
-	virtual bool wantScene();
+	virtual bool wantScene() NL_OVERRIDE;
 	/// Scene post processing effects
-	virtual bool wantSceneEffects();
+	virtual bool wantSceneEffects() NL_OVERRIDE;
 	/// Interface within the 3D scene
-	virtual bool wantInterface3D();	
+	virtual bool wantInterface3D() NL_OVERRIDE;	
 	/// 2D Interface
-	virtual bool wantInterface2D();
+	virtual bool wantInterface2D() NL_OVERRIDE;
 
 	/// Is this the first 3D scene of the frame
-	virtual bool isSceneFirst();
+	virtual bool isSceneFirst() NL_OVERRIDE;
 
 	/// The current reflection pass index during a wantSceneReflections() stage
-	virtual uint getSceneReflectionPass() const;
+	virtual uint getSceneReflectionPass() const NL_OVERRIDE;
 
 	/// The view (eye) index of the current scene or reflections stage
-	virtual uint getSceneView() const;
+	virtual uint getSceneView() const NL_OVERRIDE;
 	/// Is this the last 3D scene of the frame
-	virtual bool isSceneLast();
+	virtual bool isSceneLast() NL_OVERRIDE;
 	/// Get the flare context for the current pass
-	virtual uint getFlareContext();
+	virtual uint getFlareContext() NL_OVERRIDE;
 
 	/// Returns true if a new render target was set, always fase if not using render targets
-	virtual bool beginRenderTarget();
+	virtual bool beginRenderTarget() NL_OVERRIDE;
 	/// Returns true if a render target was fully drawn, always false if not using render targets
-	virtual bool endRenderTarget();
+	virtual bool endRenderTarget() NL_OVERRIDE;
 
 
 	static void listDevices(std::vector<CStereoDeviceInfo> &devicesOut);

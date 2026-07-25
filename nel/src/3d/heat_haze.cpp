@@ -32,9 +32,9 @@ namespace NL3D
 
 	struct CSinWave : public CDeform2d::IPerturbUV
 	{
-		virtual ~CSinWave() {}
+		virtual ~CSinWave() NL_OVERRIDE {}
 		float Phase;
-		virtual void perturbUV(float x, float y, float &du, float &dv) const
+		virtual void perturbUV(float x, float y, float &du, float &dv) const NL_OVERRIDE
 		{
 			du = 0.01f * sinf(25.f * y + Phase);
 			dv = 0.05f * cosf(19.3f * x + Phase);

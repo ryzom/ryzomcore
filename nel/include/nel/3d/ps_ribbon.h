@@ -53,9 +53,9 @@ public:
 		 */
 		CPSRibbon();
 		/// dtor
-		~CPSRibbon();
+		~CPSRibbon() NL_OVERRIDE;
 		/// serialisation. Derivers must override this, and call their parent version
-		virtual void		serial(NLMISC::IStream &f);
+		virtual void		serial(NLMISC::IStream &f) NL_OVERRIDE;
 		//
 		NLMISC_DECLARE_CLASS(CPSRibbon);
 	///@}
@@ -66,7 +66,7 @@ public:
 			/** (de)activate color fading
 			* when its done, colors fades to black along the ribbon.
 			*/
-			virtual void setColorFading(bool onOff = true)
+			virtual void setColorFading(bool onOff = true) NL_OVERRIDE
 			{
 				_ColorFading = onOff;
 				touch();
@@ -74,7 +74,7 @@ public:
 
 			/** Test whether color fading is activated.
 			  */
-			virtual bool getColorFading(void) const
+			virtual bool getColorFading(void) const NL_OVERRIDE
 			{
 				return _ColorFading;
 			}
@@ -93,19 +93,19 @@ public:
 	///@}
 
 	/// inherited from CPSParticle
-	virtual void			step(TPSProcessPass pass);
+	virtual void			step(TPSProcessPass pass) NL_OVERRIDE;
 
 	/// return true if there are transparent faces in the object
-	virtual bool			hasTransparentFaces(void);
+	virtual bool			hasTransparentFaces(void) NL_OVERRIDE;
 
 	/// return true if there are Opaque faces in the object
-	virtual bool			hasOpaqueFaces(void);
+	virtual bool			hasOpaqueFaces(void) NL_OVERRIDE;
 
-	virtual uint32			getNumWantedTris() const;
+	virtual uint32			getNumWantedTris() const NL_OVERRIDE;
 
 
 	/// set a texture
-	void setTexture(NLMISC::CSmartPtr<ITexture> tex) { _Tex = tex; touch(); }
+	void setTexture(NLMISC::CSmartPtr<ITexture> tex) NL_OVERRIDE { _Tex = tex; touch(); }
 	/// Set texture factors.
 	void setTexFactor(float uFactor = 1.f, float vFactor = 1.f)
 	{
@@ -118,8 +118,8 @@ public:
 	// get the v-factor for texture mapping
 	float getVFactor(void) const { return _VFactor; }
 	/// get the texture used
-	ITexture *getTexture(void) { return _Tex; }
-	const ITexture *getTexture(void) const { return _Tex; }
+	ITexture *getTexture(void) NL_OVERRIDE { return _Tex; }
+	const ITexture *getTexture(void) const NL_OVERRIDE { return _Tex; }
 
 	/** set a new shape for the ribbon
 	  *  \param points A list of points that define the shape of the slice of the ribbon
@@ -171,17 +171,17 @@ public:
 	///@}
 
 	/// from CPSParticle : return true if there are lightable faces in the object
-	virtual bool hasLightableFaces() { 	return false; }
+	virtual bool hasLightableFaces() NL_OVERRIDE { 	return false; }
 
 	// from CPSParticle
-	virtual bool supportGlobalColorLighting() const { return true; }
+	virtual bool supportGlobalColorLighting() const NL_OVERRIDE { return true; }
 
 	// from CPSLocatedBindable
-	virtual void enumTexs(std::vector<NLMISC::CSmartPtr<ITexture> > &dest, IDriver &drv);
+	virtual void enumTexs(std::vector<NLMISC::CSmartPtr<ITexture> > &dest, IDriver &drv) NL_OVERRIDE;
 
 	// from CPSParticle
-	virtual void setZBias(float value) { CPSMaterial::setZBias(value); }
-	virtual float getZBias() const { return CPSMaterial::getZBias(); }
+	virtual void setZBias(float value) NL_OVERRIDE { CPSMaterial::setZBias(value); }
+	virtual float getZBias() const NL_OVERRIDE { return CPSMaterial::getZBias(); }
 
 protected:
 /// interface to derived classes
@@ -192,21 +192,21 @@ protected:
 	//std::vector<uint32>				_DyingRibbonsLifeLeft;
 
 	/// inherited from CPSLocatedBindable
-	virtual void					newElement(const CPSEmitterInfo &info) ;
+	virtual void					newElement(const CPSEmitterInfo &info) NL_OVERRIDE ;
 	/// inherited from CPSLocatedBindable
-	virtual void					deleteElement(uint32 index);
+	virtual void					deleteElement(uint32 index) NL_OVERRIDE;
 	/// inherited from CPSLocatedBindable
-	virtual void					resize(uint32 size);
+	virtual void					resize(uint32 size) NL_OVERRIDE;
 	/// From CPSSizedParticle
-	virtual CPSLocated				*getSizeOwner(void) { return _Owner; }
+	virtual CPSLocated				*getSizeOwner(void) NL_OVERRIDE { return _Owner; }
 	/// From CPSColoredParticle
-	virtual CPSLocated				*getColorOwner(void) { return _Owner; }
+	virtual CPSLocated				*getColorOwner(void) NL_OVERRIDE { return _Owner; }
 
 private:
 
 
 	/// update the material and the vb so that they match the color scheme. Inherited from CPSColoredParticle
-	virtual void					updateMatAndVbForColor(void);
+	virtual void					updateMatAndVbForColor(void) NL_OVERRIDE;
 
 	/// display a set of ribbons
 	void							displayRibbons(uint32 nbRibbons, uint32 srcStep);

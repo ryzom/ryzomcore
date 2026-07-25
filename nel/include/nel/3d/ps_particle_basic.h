@@ -51,18 +51,18 @@ public:
 	CPSParticle();
 
 	/// return this bindable type
-	uint32 getType(void) const { return PSParticle; }
+	uint32 getType(void) const NL_OVERRIDE { return PSParticle; }
 
 	/// return priority
-	virtual uint32 getPriority(void) const { return 1000; }
+	virtual uint32 getPriority(void) const NL_OVERRIDE { return 1000; }
 
 	/// return true if this located bindable derived class holds alive particles
-	virtual bool hasParticles(void) const { nlassert(_Owner); return _Owner->getSize() != 0; }
+	virtual bool hasParticles(void) const NL_OVERRIDE { nlassert(_Owner); return _Owner->getSize() != 0; }
 
 	/**
 	* process one pass for the particles. The default behaviour shows the particles
 	*/
-	virtual void step(TPSProcessPass pass)
+	virtual void step(TPSProcessPass pass) NL_OVERRIDE
 	{
 		if (
 			(pass == PSBlendRender && hasTransparentFaces())
@@ -107,7 +107,7 @@ public:
 	virtual uint32 getNumWantedTris() const = 0;
 
 	/// serialisation. Derivers must override this, and call their parent version
-	virtual void serial(NLMISC::IStream &f)
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE
 	{
 		/// version 3 : global color lighting
 		/// version 2 : auto-lod saved
@@ -131,7 +131,7 @@ public:
 	bool    isAutoLODDisabled() const { return _DisableAutoLOD; }
 
 	// Change z-bias of material. this must be redefined for all renderable particles
-	virtual void			setZBias(float value) = 0;
+	virtual void			setZBias(float value) NL_OVERRIDE = 0;
 	virtual float			getZBias() const = 0;
 
 protected:
@@ -151,18 +151,18 @@ protected:
 
 	/**	Generate a new element for this bindable. They are generated according to the properties of the class
 	 */
-	virtual void newElement(const CPSEmitterInfo &info) = 0;
+	virtual void newElement(const CPSEmitterInfo &info) NL_OVERRIDE = 0;
 
 	/** Delete an element given its index
 	 *  Attributes of the located that hold this bindable are still accessible for the index given
 	 *  index out of range -> nl_assert
 	 */
-	virtual void deleteElement(uint32 index) = 0;
+	virtual void deleteElement(uint32 index) NL_OVERRIDE = 0;
 
 	/** Resize the bindable attributes containers. Size is the max number of element to be contained. DERIVERS MUST CALL THEIR PARENT VERSION
 	 * should not be called directly. Call CPSLocated::resize instead
 	 */
-	virtual void resize(uint32 size) = 0;
+	virtual void resize(uint32 size) NL_OVERRIDE = 0;
 
 
 	/** System may have hand-tuned LOD, or auto LOD.

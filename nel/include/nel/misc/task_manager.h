@@ -56,10 +56,10 @@ public:
 	CTaskManager();
 
 	/// Destructor
-	~CTaskManager();
+	~CTaskManager() NL_OVERRIDE;
 
 	/// Manage TaskQueue
-	void run(void);
+	void run(void) NL_OVERRIDE;
 
 	/// Add a task to TaskManager and its priority
 	void addTask(IRunnable *, float priority=0);

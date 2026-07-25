@@ -60,45 +60,45 @@ protected:
 		_ShiftedTriangleCache= NULL;
 	}
 	/// Destructor
-	virtual ~CMeshMRMSkinnedInstance();
+	virtual ~CMeshMRMSkinnedInstance() NL_OVERRIDE;
 
 
 	/// \name Skinning Behavior.
 	// @{
 	/// I can be skinned if the mesh is.
-	virtual	bool	isSkinnable() const;
+	virtual	bool	isSkinnable() const NL_OVERRIDE;
 
 	/// Called when the skin is applied on the skeleton
-	virtual	void	setApplySkin(bool state);
+	virtual	void	setApplySkin(bool state) NL_OVERRIDE;
 
 	/// Called for lod character coloring.
-	virtual const std::vector<sint32>			*getSkinBoneUsage() const;
+	virtual const std::vector<sint32>			*getSkinBoneUsage() const NL_OVERRIDE;
 
 	/// Called for more precise clipping.
-	virtual const std::vector<NLMISC::CBSphere>	*getSkinBoneSphere() const;
+	virtual const std::vector<NLMISC::CBSphere>	*getSkinBoneSphere() const NL_OVERRIDE;
 
 	/// Implementation of the renderSkin
-	virtual void	renderSkin(float alphaMRM);
+	virtual void	renderSkin(float alphaMRM) NL_OVERRIDE;
 
 	// Implementation of SkinGrouping
-	virtual	bool			supportSkinGrouping() const;
-	virtual	sint			renderSkinGroupGeom(float alphaMRM, uint remainingVertices, uint8 *dest);
-	virtual	void			renderSkinGroupPrimitives(uint baseVertex, std::vector<CSkinSpecularRdrPass> &specularRdrPasses, uint skinIndex);
-	virtual	void			renderSkinGroupSpecularRdrPass(uint rdrPassId);
+	virtual	bool			supportSkinGrouping() const NL_OVERRIDE;
+	virtual	sint			renderSkinGroupGeom(float alphaMRM, uint remainingVertices, uint8 *dest) NL_OVERRIDE;
+	virtual	void			renderSkinGroupPrimitives(uint baseVertex, std::vector<CSkinSpecularRdrPass> &specularRdrPasses, uint skinIndex) NL_OVERRIDE;
+	virtual	void			renderSkinGroupSpecularRdrPass(uint rdrPassId) NL_OVERRIDE;
 
-	virtual	bool			supportGPUSkinning() const;
-	virtual	void			renderGPUSkin(float alphaMRM, CSkeletonModel *skeleton);
-	virtual	CVertexProgram	*getGPUSkinVP() const;
+	virtual	bool			supportGPUSkinning() const NL_OVERRIDE;
+	virtual	void			renderGPUSkin(float alphaMRM, CSkeletonModel *skeleton) NL_OVERRIDE;
+	virtual	CVertexProgram	*getGPUSkinVP() const NL_OVERRIDE;
 
-	virtual	bool			supportShadowSkinGrouping() const;
-	virtual	sint			renderShadowSkinGeom(uint remainingVertices, uint8 *vbDest);
-	virtual	void			renderShadowSkinPrimitives(CMaterial &castMat, IDriver *drv, uint baseVertex);
+	virtual	bool			supportShadowSkinGrouping() const NL_OVERRIDE;
+	virtual	sint			renderShadowSkinGeom(uint remainingVertices, uint8 *vbDest) NL_OVERRIDE;
+	virtual	void			renderShadowSkinPrimitives(CMaterial &castMat, IDriver *drv, uint baseVertex) NL_OVERRIDE;
 
-	virtual	bool			supportIntersectSkin() const;
-	virtual	bool			intersectSkin(const CMatrix &toRaySpace, float &dist2D, float &distZ, bool computeDist2D);
+	virtual	bool			supportIntersectSkin() const NL_OVERRIDE;
+	virtual	bool			intersectSkin(const CMatrix &toRaySpace, float &dist2D, float &distZ, bool computeDist2D) NL_OVERRIDE;
 
 	/// Called for edition purpose (slow call O(NVertex))
-	virtual bool			getSkinBoneBBox(NLMISC::CAABBox &bbox, uint boneId);
+	virtual bool			getSkinBoneBBox(NLMISC::CAABBox &bbox, uint boneId) NL_OVERRIDE;
 
 	// @}
 
@@ -108,9 +108,9 @@ protected:
 
 	/** Change MRM Distance setup. See CMeshBaseInstance::changeMRMDistanceSetup()
 	 */
-	virtual void		changeMRMDistanceSetup(float distanceFinest, float distanceMiddle, float distanceCoarsest);
+	virtual void		changeMRMDistanceSetup(float distanceFinest, float distanceMiddle, float distanceCoarsest) NL_OVERRIDE;
 
-	virtual	const	CMRMLevelDetail		*getMRMLevelDetail() const;
+	virtual	const	CMRMLevelDetail		*getMRMLevelDetail() const NL_OVERRIDE;
 
 	// @}
 

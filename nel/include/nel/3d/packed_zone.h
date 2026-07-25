@@ -100,8 +100,8 @@ public:
 	sint32					    ZoneX;
 	sint32					    ZoneY;
 public:
-	virtual ~CPackedZoneBase() {}
-	virtual void serial(NLMISC::IStream &f) = 0;
+	virtual ~CPackedZoneBase() NL_OVERRIDE {}
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE = 0;
 	// TMP For debug : render position covered by a frustum
 	virtual void render(CVertexBuffer &vb, IDriver &drv, CMaterial &mat, CMaterial &wiredMaterial, const NLMISC::CMatrix &camMat, uint batchSize, const NLMISC::CVector localFrustCorners[8]) = 0;
 	// raytracing test
@@ -138,15 +138,15 @@ public:
 			   sint32	zoneX,
 			   sint32	zoneY
 			  );
-	void serial(NLMISC::IStream &f);
+	void serial(NLMISC::IStream &f) NL_OVERRIDE;
 	// TMP For debug : render porition covered by a frustum
-	void render(CVertexBuffer &vb, IDriver &drv, CMaterial &mat, CMaterial &wiredMaterial, const NLMISC::CMatrix &camMat, uint batchSize, const NLMISC::CVector localFrustCorners[8]);
+	void render(CVertexBuffer &vb, IDriver &drv, CMaterial &mat, CMaterial &wiredMaterial, const NLMISC::CMatrix &camMat, uint batchSize, const NLMISC::CVector localFrustCorners[8]) NL_OVERRIDE;
 	// try to build a 16 bit version of this packed zone to save some more place
 	NLMISC::CSmartPtr<CPackedZone16> buildPackedZone16();
 	// raytracing test
-	virtual bool raytrace(const NLMISC::CVector &start, const NLMISC::CVector &end, NLMISC::CVector &inter, std::vector<NLMISC::CTriangle> *testedTriangles = NULL, NLMISC::CVector *normal = NULL) const;
+	virtual bool raytrace(const NLMISC::CVector &start, const NLMISC::CVector &end, NLMISC::CVector &inter, std::vector<NLMISC::CTriangle> *testedTriangles = NULL, NLMISC::CVector *normal = NULL) const NL_OVERRIDE;
 	//
-	void appendSelection(const NLMISC::CPolygon2D &poly, std::vector<NLMISC::CTriangle> &selectedTriangles) const;
+	void appendSelection(const NLMISC::CPolygon2D &poly, std::vector<NLMISC::CTriangle> &selectedTriangles) const NL_OVERRIDE;
 private:
 	// for fast conversion
 	NLMISC::CVector			_Origin;
@@ -183,13 +183,13 @@ public:
 	NLMISC_DECLARE_CLASS(CPackedZone16)
 	CPackedZone16();
 	//
-	void serial(NLMISC::IStream &f);
+	void serial(NLMISC::IStream &f) NL_OVERRIDE;
 	// TMP For debug : render position covered by a frustum
-	void render(CVertexBuffer &vb, IDriver &drv, CMaterial &mat, CMaterial &wiredMaterial, const NLMISC::CMatrix &camMat, uint batchSize, const NLMISC::CVector localFrustCorners[8]);
+	void render(CVertexBuffer &vb, IDriver &drv, CMaterial &mat, CMaterial &wiredMaterial, const NLMISC::CMatrix &camMat, uint batchSize, const NLMISC::CVector localFrustCorners[8]) NL_OVERRIDE;
 		// raytracing test
-	virtual bool raytrace(const NLMISC::CVector &start, const NLMISC::CVector &end, NLMISC::CVector &inter, std::vector<NLMISC::CTriangle> *testedTriangles = NULL, NLMISC::CVector *normal = NULL) const;
+	virtual bool raytrace(const NLMISC::CVector &start, const NLMISC::CVector &end, NLMISC::CVector &inter, std::vector<NLMISC::CTriangle> *testedTriangles = NULL, NLMISC::CVector *normal = NULL) const NL_OVERRIDE;
 	//
-	void appendSelection(const NLMISC::CPolygon2D &poly, std::vector<NLMISC::CTriangle> &selectedTriangles) const;
+	void appendSelection(const NLMISC::CPolygon2D &poly, std::vector<NLMISC::CTriangle> &selectedTriangles) const NL_OVERRIDE;
 private:
 	// for fast conversion
 	NLMISC::CVector			_Origin;

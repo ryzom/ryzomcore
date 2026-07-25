@@ -47,20 +47,20 @@ public:
 	CPSForce();
 
 	/// return this bindable type
-	uint32				getType(void) const { return PSForce; }
+	uint32				getType(void) const NL_OVERRIDE { return PSForce; }
 
 
 	/// return priority for forces
 
-	virtual uint32		getPriority(void) const { return 4000; }
+	virtual uint32		getPriority(void) const NL_OVERRIDE { return 4000; }
 
 	/// Override of CPSLocatedBindable::doesProduceBBox. forces usually are not part of the bbox
-	virtual bool		doesProduceBBox(void) const { return false; }
+	virtual bool		doesProduceBBox(void) const NL_OVERRIDE { return false; }
 
 	/**
 	 * process one pass for the force
 	 */
-	virtual void		step(TPSProcessPass pass);
+	virtual void		step(TPSProcessPass pass) NL_OVERRIDE;
 
 
 	/// Compute the force on the targets. To be called inside the sim loop
@@ -70,16 +70,16 @@ public:
 	virtual void		show() = 0;
 
 	/// Serial the force definition. MUST be called by deriver during their serialisation
-	virtual void		serial(NLMISC::IStream &f);
+	virtual void		serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 	/// check whether this force is integrable over time. The default is false
 	virtual bool		isIntegrable(void) const { return false; }
 
 	/// inherited from   CPSLocatedBindableTarget, we use that to tell whether this force is integrable or not
-	virtual void		attachTarget(CPSLocated *ptr);
+	virtual void		attachTarget(CPSLocated *ptr) NL_OVERRIDE;
 
 	/// inherited from   CPSLocatedBindableTarget
-	void				releaseTargetRsc(CPSLocated *target);
+	void				releaseTargetRsc(CPSLocated *target) NL_OVERRIDE;
 
 
 	/** Integrate this force on the given located. If 'accumulate' is set to true, it just add the effect of this force on position
@@ -130,20 +130,20 @@ protected:
 	/** inherited from	 CPSLocatedBindable. When we deal with integrable forces,
 	  * they must be in the same basis than their target. If this change, we must notify the target of it.
 	  */
-	virtual void		 basisChanged(TPSMatrixMode systemBasis);
+	virtual void		 basisChanged(TPSMatrixMode systemBasis) NL_OVERRIDE;
 
-	virtual void newElement(const CPSEmitterInfo &info) = 0;
+	virtual void newElement(const CPSEmitterInfo &info) NL_OVERRIDE = 0;
 
 	/** Delete an element given its index
 	 *  Attributes of the located that hold this bindable are still accessible for of the index given
 	 *  index out of range -> nl_assert
 	 */
-	virtual void deleteElement(uint32 index) = 0;
+	virtual void deleteElement(uint32 index) NL_OVERRIDE = 0;
 
 	/** Resize the bindable attributes containers DERIVERS SHOULD CALL THEIR PARENT VERSION
 	 * should not be called directly. Call CPSLOcated::resize instead
 	 */
-	virtual void resize(uint32 size) = 0;
+	virtual void resize(uint32 size) NL_OVERRIDE = 0;
 };
 
 
@@ -209,13 +209,13 @@ protected:
 class CPSForceIntensityHelper : public CPSForce, public CPSForceIntensity
 {
 public:
-	void serial(NLMISC::IStream &f);
+	void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 protected:
-	virtual CPSLocated *getForceIntensityOwner(void) { return _Owner; }
-	virtual void newElement(const CPSEmitterInfo &info) { newForceIntensityElement(info); }
-	virtual void deleteElement(uint32 index) { deleteForceIntensityElement(index); }
-	virtual void resize(uint32 size) { resizeForceIntensity(size); }
+	virtual CPSLocated *getForceIntensityOwner(void) NL_OVERRIDE { return _Owner; }
+	virtual void newElement(const CPSEmitterInfo &info) NL_OVERRIDE { newForceIntensityElement(info); }
+	virtual void deleteElement(uint32 index) NL_OVERRIDE { deleteForceIntensityElement(index); }
+	virtual void resize(uint32 size) NL_OVERRIDE { resizeForceIntensity(size); }
 
 };
 
@@ -271,11 +271,11 @@ template <class T> class CIsotropicForceT : public CPSForce
 public:
 
 	/// Compute the force on the targets
-	virtual void computeForces(CPSLocated &target);
+	virtual void computeForces(CPSLocated &target) NL_OVERRIDE;
 
 
 	/// serialization
-	virtual void serial(NLMISC::IStream &f)
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE
 	{
 		f.serialVersion(1);
 		CPSForce::serial(f);
@@ -287,7 +287,7 @@ public:
 	 *  TODO later
 	 */
 
-	 void show()  {}
+	 void show() NL_OVERRIDE  {}
 
 
 	 /// setup the functor object. The default does nothing
@@ -301,9 +301,9 @@ protected:
 
 
 
-	virtual void newElement(const CPSEmitterInfo &/* info */) {}
-	virtual void deleteElement(uint32 /* index */) {}
-	virtual void resize(uint32 /* size */) {}
+	virtual void newElement(const CPSEmitterInfo &/* info */) NL_OVERRIDE {}
+	virtual void deleteElement(uint32 /* index */) NL_OVERRIDE {}
+	virtual void resize(uint32 /* size */) NL_OVERRIDE {}
 
 
 };
@@ -339,10 +339,10 @@ class CPSDirectionnalForce : public CPSForceIntensityHelper, public CPSDirection
 {
 	public:
 	/// Compute the force on the targets
-	virtual void computeForces(CPSLocated &target);
+	virtual void computeForces(CPSLocated &target) NL_OVERRIDE;
 
 	/// Show the force (edition mode)
-	virtual void show();
+	virtual void show() NL_OVERRIDE;
 
 
 
@@ -354,7 +354,7 @@ class CPSDirectionnalForce : public CPSForceIntensityHelper, public CPSDirection
 	}
 
 	/// serialization
-	virtual void serial(NLMISC::IStream &f);
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 
 	NLMISC_DECLARE_CLASS(CPSDirectionnalForce);
@@ -362,15 +362,15 @@ class CPSDirectionnalForce : public CPSForceIntensityHelper, public CPSDirection
 	///\name From CPSDirection
 	//@{
 		/// set the direction of the force
-		virtual void setDir(const NLMISC::CVector &dir) { _Dir = dir; }
+		virtual void setDir(const NLMISC::CVector &dir) NL_OVERRIDE { _Dir = dir; }
 		/// get the direction of the force
-		virtual NLMISC::CVector getDir(void) const  { return _Dir; }
+		virtual NLMISC::CVector getDir(void) const NL_OVERRIDE  { return _Dir; }
 		// Tells that a global vector value of the system can be used as a direction
-		virtual bool supportGlobalVectorValue() const { return true; }
+		virtual bool supportGlobalVectorValue() const NL_OVERRIDE { return true; }
 		/// Bind the direction to a global vaariable (e.g "WIND" ). The value can be changed in CParticleSystem::setGlobalVectorValue
-		virtual void				enableGlobalVectorValue(const std::string &name);
+		virtual void				enableGlobalVectorValue(const std::string &name) NL_OVERRIDE;
 		// See if the direction is bound to a global variable. Return an empty string if not
-		virtual std::string         getGlobalVectorValueName() const;
+		virtual std::string         getGlobalVectorValueName() const NL_OVERRIDE;
 	//@}
 protected:
 	NLMISC::CVector								_Dir;
@@ -383,10 +383,10 @@ class CPSGravity : public CPSForceIntensityHelper
 {
 public:
 	/// Compute the force on the targets
-	virtual void computeForces(CPSLocated &target);
+	virtual void computeForces(CPSLocated &target) NL_OVERRIDE;
 
 	/// Show the force (edition mode)
-	virtual void show();
+	virtual void show() NL_OVERRIDE;
 
 
 
@@ -397,30 +397,30 @@ public:
 	}
 
 	/// serialization
-	virtual void serial(NLMISC::IStream &f);
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 	NLMISC_DECLARE_CLASS(CPSGravity);
 
 
-	virtual bool		 isIntegrable(void) const;
+	virtual bool		 isIntegrable(void) const NL_OVERRIDE;
 
 	/// inherited from CPSForce
 	virtual void integrate(float date, CPSLocated *src, uint32 startIndex, uint32 numObjects, NLMISC::CVector *destPos = NULL, NLMISC::CVector *destSpeed = NULL,
 							bool accumulate = false,
 							uint posStride = sizeof(NLMISC::CVector), uint speedStride = sizeof(NLMISC::CVector)
-							) const;
+							) const NL_OVERRIDE;
 
 	virtual void integrateSingle(float startDate, float deltaT, uint numStep,
 								 const CPSLocated *src, uint32 indexInLocated,
 								 NLMISC::CVector *destPos,
 								 bool accumulate = false,
-								 uint posStride = sizeof(NLMISC::CVector)) const;
+								 uint posStride = sizeof(NLMISC::CVector)) const NL_OVERRIDE;
 
 protected:
 	/// inherited from CPSForceIntensityHelper
-	virtual void setIntensity(float value);
+	virtual void setIntensity(float value) NL_OVERRIDE;
 	/// inherited from CPSForceIntensityHelper
-	virtual void setIntensityScheme(CPSAttribMaker<float> *scheme);
+	virtual void setIntensityScheme(CPSAttribMaker<float> *scheme) NL_OVERRIDE;
 };
 
 
@@ -429,10 +429,10 @@ class CPSCentralGravity : public CPSForceIntensityHelper
 {
 public:
 	/// Compute the force on the targets
-	virtual void computeForces(CPSLocated &target);
+	virtual void computeForces(CPSLocated &target) NL_OVERRIDE;
 
 	/// Show the force (edition mode)
-	virtual void show();
+	virtual void show() NL_OVERRIDE;
 
 
 
@@ -443,7 +443,7 @@ public:
 	}
 
 	/// serialization
-	virtual void serial(NLMISC::IStream &f);
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 
 	NLMISC_DECLARE_CLASS(CPSCentralGravity);
@@ -464,14 +464,14 @@ public:
 
 
 	/// serialization
-	virtual void serial(NLMISC::IStream &f);
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 
 	/// Compute the force on the targets
-	virtual void computeForces(CPSLocated &target);
+	virtual void computeForces(CPSLocated &target) NL_OVERRIDE;
 
 	/// Show the force (edition mode)
-	virtual void show();
+	virtual void show() NL_OVERRIDE;
 
 
 	NLMISC_DECLARE_CLASS(CPSSpring);
@@ -531,7 +531,7 @@ public:
 	}
 
 	// inherited from CIsotropicForceT
-	virtual void setupFunctor(uint32 index)
+	virtual void setupFunctor(uint32 index) NL_OVERRIDE
 	{
 		_F.setK(_IntensityScheme ? _IntensityScheme->get(_Owner, index) : _K);
 	}
@@ -539,7 +539,7 @@ public:
 	NLMISC_DECLARE_CLASS(CPSFluidFriction)
 
 
-	virtual void serial(NLMISC::IStream &f)
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE
 	{
 		f.serialVersion(1);
 		CIsotropicForceT<CPSFluidFrictionFunctor>::serial(f);
@@ -552,10 +552,10 @@ public:
 
 
 protected:
-	virtual CPSLocated *getForceIntensityOwner(void) { return _Owner; }
-	virtual void newElement(const CPSEmitterInfo &info) { newForceIntensityElement(info); }
-	virtual void deleteElement(uint32 index) { deleteForceIntensityElement(index); }
-	virtual void resize(uint32 size) { resizeForceIntensity(size); }
+	virtual CPSLocated *getForceIntensityOwner(void) NL_OVERRIDE { return _Owner; }
+	virtual void newElement(const CPSEmitterInfo &info) NL_OVERRIDE { newForceIntensityElement(info); }
+	virtual void deleteElement(uint32 index) NL_OVERRIDE { deleteForceIntensityElement(index); }
+	virtual void resize(uint32 size) NL_OVERRIDE { resizeForceIntensity(size); }
 };
 
 
@@ -571,32 +571,32 @@ public:
 
 	NLMISC_DECLARE_CLASS(CPSBrownianForce)
 
-	virtual void serial(NLMISC::IStream &f);
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 	/// We provide a kind of integration on a predefined sequence
-	virtual bool		 isIntegrable(void) const;
+	virtual bool		 isIntegrable(void) const NL_OVERRIDE;
 
 	virtual void integrate(float date, CPSLocated *src, uint32 startIndex, uint32 numObjects, NLMISC::CVector *destPos = NULL, NLMISC::CVector *destSpeed = NULL,
 							bool accumulate = false,
 							uint posStride = sizeof(NLMISC::CVector), uint speedStride = sizeof(NLMISC::CVector)
-							) const;
+							) const NL_OVERRIDE;
 
 	virtual void integrateSingle(float startDate, float deltaT, uint numStep,
 								 const CPSLocated *src, uint32 indexInLocated,
 								 NLMISC::CVector *destPos,
 								 bool accumulate = false,
-								 uint posStride = sizeof(NLMISC::CVector)) const;
+								 uint posStride = sizeof(NLMISC::CVector)) const NL_OVERRIDE;
 
 	/// perform initialisations
 	static void initPrecalc();
 
-	void setIntensity(float value);
-	void setIntensityScheme(CPSAttribMaker<float> *scheme);
+	void setIntensity(float value) NL_OVERRIDE;
+	void setIntensityScheme(CPSAttribMaker<float> *scheme) NL_OVERRIDE;
 
 	/// Compute the force on the targets
-	virtual void computeForces(CPSLocated &target);
+	virtual void computeForces(CPSLocated &target) NL_OVERRIDE;
 
-	void show()  {}
+	void show() NL_OVERRIDE  {}
 
 
 	/** When used with parametric integration, this tells factor tells how fast the force acts on particle
@@ -606,10 +606,10 @@ public:
 	float   getParametricFactor() const { return _ParametricFactor; }
 
 protected:
-	virtual CPSLocated *getForceIntensityOwner(void) { return _Owner; }
-	virtual void newElement(const CPSEmitterInfo &info) { newForceIntensityElement(info); }
-	virtual void deleteElement(uint32 index) { deleteForceIntensityElement(index); }
-	virtual void resize(uint32 size) { resizeForceIntensity(size); }
+	virtual CPSLocated *getForceIntensityOwner(void) NL_OVERRIDE { return _Owner; }
+	virtual void newElement(const CPSEmitterInfo &info) NL_OVERRIDE { newForceIntensityElement(info); }
+	virtual void deleteElement(uint32 index) NL_OVERRIDE { deleteForceIntensityElement(index); }
+	virtual void resize(uint32 size) NL_OVERRIDE { resizeForceIntensity(size); }
 
 	float  _ParametricFactor; // tells how fast this force act on a particle when parametric motion is used
 	static NLMISC::CVector PrecomputedPos[]; // after the sequence we must be back to the start position
@@ -686,7 +686,7 @@ public:
 
 	NLMISC_DECLARE_CLASS(CPSTurbul)
 
-	virtual void serial(NLMISC::IStream &f)
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE
 	{
 		f.serialVersion(1);
 		CIsotropicForceT<CPSTurbulForceFunc>::serial(f);
@@ -698,16 +698,16 @@ public:
 	}
 
 	// inherited from CIsotropicForceT
-	virtual void setupFunctor(uint32 index)
+	virtual void setupFunctor(uint32 index) NL_OVERRIDE
 	{
 		_F._Intensity = (_IntensityScheme ? _IntensityScheme->get(_Owner, index) : _K);
 	}
 
 protected:
-	virtual CPSLocated *getForceIntensityOwner(void) { return _Owner; }
-	virtual void newElement(const CPSEmitterInfo &info) { newForceIntensityElement(info); }
-	virtual void deleteElement(uint32 index) { deleteForceIntensityElement(index); }
-	virtual void resize(uint32 size) { resizeForceIntensity(size); }
+	virtual CPSLocated *getForceIntensityOwner(void) NL_OVERRIDE { return _Owner; }
+	virtual void newElement(const CPSEmitterInfo &info) NL_OVERRIDE { newForceIntensityElement(info); }
+	virtual void deleteElement(uint32 index) NL_OVERRIDE { deleteForceIntensityElement(index); }
+	virtual void resize(uint32 size) NL_OVERRIDE { resizeForceIntensity(size); }
 };
 
 
@@ -722,10 +722,10 @@ class CPSCylindricVortex : public CPSForceIntensityHelper, public IPSMover
 {
 public:
 	/// Compute the force on the targets
-	virtual void computeForces(CPSLocated &target);
+	virtual void computeForces(CPSLocated &target) NL_OVERRIDE;
 
 	/// Show the force (edition mode)
-	virtual void show();
+	virtual void show() NL_OVERRIDE;
 
 
 	CPSCylindricVortex(float intensity = 1.f) : _RadialViscosity(.1f), _TangentialViscosity(.1f)
@@ -735,16 +735,16 @@ public:
 	}
 
 	// inherited from IPSMover
-	virtual bool supportUniformScaling(void) const { return true; }
-	virtual bool supportNonUniformScaling(void) const { return false; }
-	virtual void setScale(uint32 k, float scale) { _Radius[k] = scale; }
-	virtual NLMISC::CVector getScale(uint32 k) const { return NLMISC::CVector(_Radius[k], _Radius[k], _Radius[k]); }
-	virtual bool onlyStoreNormal(void) const { return true; }
-	virtual NLMISC::CVector getNormal(uint32 index) { return _Normal[index]; }
-	virtual void setNormal(uint32 index, NLMISC::CVector n) { _Normal[index] = n; }
+	virtual bool supportUniformScaling(void) const NL_OVERRIDE { return true; }
+	virtual bool supportNonUniformScaling(void) const NL_OVERRIDE { return false; }
+	virtual void setScale(uint32 k, float scale) NL_OVERRIDE { _Radius[k] = scale; }
+	virtual NLMISC::CVector getScale(uint32 k) const NL_OVERRIDE { return NLMISC::CVector(_Radius[k], _Radius[k], _Radius[k]); }
+	virtual bool onlyStoreNormal(void) const NL_OVERRIDE { return true; }
+	virtual NLMISC::CVector getNormal(uint32 index) NL_OVERRIDE { return _Normal[index]; }
+	virtual void setNormal(uint32 index, NLMISC::CVector n) NL_OVERRIDE { _Normal[index] = n; }
 
-	virtual void setMatrix(uint32 index, const NLMISC::CMatrix &m);
-	virtual NLMISC::CMatrix getMatrix(uint32 index) const;
+	virtual void setMatrix(uint32 index, const NLMISC::CMatrix &m) NL_OVERRIDE;
+	virtual NLMISC::CMatrix getMatrix(uint32 index) const NL_OVERRIDE;
 
 
 	void setRadialViscosity(float v) { _RadialViscosity = v; }
@@ -758,7 +758,7 @@ public:
 
 
 	// serialization
-	virtual void serial(NLMISC::IStream &f);
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 
 
@@ -767,7 +767,7 @@ public:
 protected:
 
 	/// inherited from CPSForceIntensity
-	virtual CPSLocated *getForceIntensityOwner(void) { return _Owner; }
+	virtual CPSLocated *getForceIntensityOwner(void) NL_OVERRIDE { return _Owner; }
 
 	// the normal of the vortex
 	CPSAttrib<NLMISC::CVector> _Normal;
@@ -780,9 +780,9 @@ protected:
 	// tangential viscosity : when set to 1, the tangential speed immediatly reach what it would be in a real vortex (w = 1 / r2)
 	float _TangentialViscosity;
 
-	virtual void newElement(const CPSEmitterInfo &info);
-	virtual void deleteElement(uint32 index);
-	virtual void resize(uint32 size);
+	virtual void newElement(const CPSEmitterInfo &info) NL_OVERRIDE;
+	virtual void deleteElement(uint32 index) NL_OVERRIDE;
+	virtual void resize(uint32 size) NL_OVERRIDE;
 
 };
 
@@ -799,9 +799,9 @@ class CPSMagneticForce : public CPSDirectionnalForce
 	{
 		if (CParticleSystem::getSerializeIdentifierFlag()) _Name = std::string("MagneticForce");
 	}
-	virtual void computeForces(CPSLocated &target);
+	virtual void computeForces(CPSLocated &target) NL_OVERRIDE;
 	/// serialization
-	virtual void serial(NLMISC::IStream &f);
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 	NLMISC_DECLARE_CLASS(CPSMagneticForce);
 };
 

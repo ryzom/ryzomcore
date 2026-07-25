@@ -85,21 +85,21 @@ namespace NLMISC{
 
 			CCDBDBBranchObserverHandle( ICDBNode::IPropertyObserver *observer, CCDBNodeBranch *owner, CCDBBranchObservingHandler *handler );
 
-			~CCDBDBBranchObserverHandle();
+			~CCDBDBBranchObserverHandle() NL_OVERRIDE;
 
-			ICDBNode* owner(){ return _owner; }
+			ICDBNode* owner() NL_OVERRIDE{ return _owner; }
 
-			ICDBNode::IPropertyObserver* observer(){ return _observer; }
+			ICDBNode::IPropertyObserver* observer() NL_OVERRIDE{ return _observer; }
 
-			bool observesLeaf( const std::string &leafName );
+			bool observesLeaf( const std::string &leafName ) NL_OVERRIDE;
 
-			bool inList( uint list );
+			bool inList( uint list ) NL_OVERRIDE;
 
-			void addToFlushableList();
+			void addToFlushableList() NL_OVERRIDE;
 
-			void removeFromFlushableList( uint list );
+			void removeFromFlushableList( uint list ) NL_OVERRIDE;
 
-			void removeFromFlushableList();
+			void removeFromFlushableList() NL_OVERRIDE;
 
 		private:
 

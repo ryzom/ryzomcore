@@ -98,17 +98,17 @@ public:
 	/** The traverse() method is called to update the worldPosition of the light, resetLightedModels(), and
 	 *	re-insert the light in the lightingManager.
 	 */
-	virtual void	traverseLight();
+	virtual void	traverseLight() NL_OVERRIDE;
 
 
 protected:
 	/// Constructor
 	CPointLightModel();
 	/// Destructor
-	virtual ~CPointLightModel();
+	virtual ~CPointLightModel() NL_OVERRIDE;
 
 	/// Implement the initModel method: link to the LightModelList.
-	virtual void	initModel();
+	virtual void	initModel() NL_OVERRIDE;
 
 
 // *********************

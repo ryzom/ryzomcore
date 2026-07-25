@@ -53,7 +53,7 @@ public:
 	/// ctor
 	CAnimation();
 	/// Destructor
-	virtual ~CAnimation ();
+	virtual ~CAnimation () NL_OVERRIDE;
 
 	/// \name Public interface.
 
@@ -118,11 +118,11 @@ public:
 	/// \name From UAnimation
 	// @{
 
-	virtual UTrack*		getTrackByName (const char* name);
-	virtual void		releaseTrack (UTrack* track);
-	virtual TAnimationTime	getBeginTime () const;
-	virtual TAnimationTime	getEndTime () const;
-	virtual	bool			allTrackLoop() const;
+	virtual UTrack*		getTrackByName (const char* name) NL_OVERRIDE;
+	virtual void		releaseTrack (UTrack* track) NL_OVERRIDE;
+	virtual TAnimationTime	getBeginTime () const NL_OVERRIDE;
+	virtual TAnimationTime	getEndTime () const NL_OVERRIDE;
+	virtual	bool			allTrackLoop() const NL_OVERRIDE;
 
 	// @}
 

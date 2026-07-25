@@ -78,7 +78,7 @@ namespace NLMISC {
 struct __category##_##__name##Class: public NLMISC::ICommand \
 { \
 	__category##_##__name##Class() : NLMISC::ICommand(#__category,#__name,__help,__args) { } \
-	virtual bool execute(const std::string &rawCommandString, const std::vector<std::string> &args, NLMISC::CLog &log, bool quiet, bool human); \
+	virtual bool execute(const std::string &rawCommandString, const std::vector<std::string> &args, NLMISC::CLog &log, bool quiet, bool human) NL_OVERRIDE; \
 }; \
 __category##_##__name##Class __category##_##__name##Instance; \
 bool __category##_##__name##Class::execute(const std::string &rawCommandString, const std::vector<std::string> &args, NLMISC::CLog &log, bool quiet, bool human)

@@ -66,7 +66,7 @@ public:
 		CPSAttribMakerBinOp(const CPSAttribMakerBinOp &other);
 
 		/// dtor
-		virtual ~CPSAttribMakerBinOp();
+		virtual ~CPSAttribMakerBinOp() NL_OVERRIDE;
 
 
 
@@ -74,8 +74,8 @@ public:
 
 	/// \name inherited from CPSAttribMaker
 	//@{
-		virtual T		get			  (const CPSEmitterInfo &infos);
-		virtual T		get			  (CPSLocated *loc, uint32 index);
+		virtual T		get			  (const CPSEmitterInfo &infos) NL_OVERRIDE;
+		virtual T		get			  (CPSLocated *loc, uint32 index) NL_OVERRIDE;
 		virtual void   *make		  (CPSLocated *loc,
 									   uint32 startIndex,
 									   void *tab,
@@ -84,7 +84,7 @@ public:
 									   bool allowNoCopy = false,
 									   uint32 srcStep = (1 << 16),
 									   bool	forceClampEntry = false
-									  ) const;
+									  ) const NL_OVERRIDE;
 
 		virtual void    make4		  (CPSLocated *loc,
 									   uint32 startIndex,
@@ -92,7 +92,7 @@ public:
 									   uint32 stride,
 									   uint32 numAttrib,
 									   uint32 srcStep = (1 << 16)
-									  ) const;
+									  ) const NL_OVERRIDE;
 
 		virtual void	makeN		  (CPSLocated *loc,
 									   uint32 startIndex,
@@ -101,12 +101,12 @@ public:
 									   uint32 numAttrib,
 									   uint32 nbReplicate,
 									   uint32 srcStep = (1 << 16)
-									  ) const;
+									  ) const NL_OVERRIDE;
 
-		virtual void    serial		  (NLMISC::IStream &f);
-		virtual void    deleteElement (uint32 index);
-		virtual void    newElement	  (const CPSEmitterInfo &info);
-		virtual void	resize		  (uint32 capacity, uint32 nbPresentElements);
+		virtual void    serial		  (NLMISC::IStream &f) NL_OVERRIDE;
+		virtual void    deleteElement (uint32 index) NL_OVERRIDE;
+		virtual void    newElement	  (const CPSEmitterInfo &info) NL_OVERRIDE;
+		virtual void	resize		  (uint32 capacity, uint32 nbPresentElements) NL_OVERRIDE;
 	//@}
 
 	/// \name Input argument of the operator
@@ -164,8 +164,8 @@ public:
 	//@}
 
 	// from CPSAttribMaker
-	virtual T getMinValue(void) const { return T() ; /* no mean by default */ }
-	virtual T getMaxValue(void) const { return T() ; /* no mean by default */ }
+	virtual T getMinValue(void) const NL_OVERRIDE { return T() ; /* no mean by default */ }
+	virtual T getMaxValue(void) const NL_OVERRIDE { return T() ; /* no mean by default */ }
 
 protected:
 	void   *makePrivate	(T *buf1,

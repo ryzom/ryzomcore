@@ -58,7 +58,7 @@ struct CPMainThread : public CPThread
 			throw EThread("cannot set main thread ptr in thread specific storage.");
 	}
 
-	~CPMainThread()
+	~CPMainThread() NL_OVERRIDE
 	{
 		// Don't pthread_detach the main thread handle — it was never pthread_create'd.
 		_State = ThreadStateNone;

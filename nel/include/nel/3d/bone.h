@@ -114,10 +114,10 @@ public:
 	/// \name Herited from ITransformable
 	// @{
 	/// retrieve the default track from skeleton shape.
-	virtual ITrack* getDefaultTrack (uint valueId);
+	virtual ITrack* getDefaultTrack (uint valueId) NL_OVERRIDE;
 
 	/// register the ITransformable channels as detailled channels.
-	virtual	void	registerToChannelMixer(CChannelMixer *chanMixer, const std::string &prefix);
+	virtual	void	registerToChannelMixer(CChannelMixer *chanMixer, const std::string &prefix) NL_OVERRIDE;
 	// @}
 
 

@@ -89,7 +89,7 @@ public:		// Basic Usage.
 	/// Object. NB: destructor close() the stream.
 	CIFile();
 	CIFile(const std::string &path, bool text=false);
-	~CIFile();
+	~CIFile() NL_OVERRIDE;
 
 	/// Open a file for reading. false if failed. close() if a file was opened.
 	bool	open (const std::string &path, bool text=false);
@@ -111,12 +111,12 @@ public:		// Advanced Usage.
 	/// flush the file.
 	void	flush();
 	/// Seek the file
-	bool	seek (sint32 offset, IStream::TSeekOrigin origin) const;
+	bool	seek (sint32 offset, IStream::TSeekOrigin origin) const NL_OVERRIDE;
 	/// Get the location of the file pointer
-	sint32	getPos () const;
+	sint32	getPos () const NL_OVERRIDE;
 
 	// Imp the Name of the stream as the name of the file.
-	virtual std::string		getStreamName() const;
+	virtual std::string		getStreamName() const NL_OVERRIDE;
 
 	// same function that in ifstream
 	// return a string separated by \n or eof, used to parsing text file
@@ -133,7 +133,7 @@ public:		// Advanced Usage.
 	// return true if there's nothing more to read (same as ifstream)
 	bool eof ();
 
-	virtual void serialBuffer(uint8 *buf, uint len);
+	virtual void serialBuffer(uint8 *buf, uint len) NL_OVERRIDE;
 
 	/// \name Statistics
 
@@ -156,9 +156,9 @@ public:		// Advanced Usage.
 	static void		clearDump ();
 
 protected:
-	virtual void		serialBit(bool &bit);
+	virtual void		serialBit(bool &bit) NL_OVERRIDE;
 
-	virtual uint		getDbgStreamSize() const;
+	virtual uint		getDbgStreamSize() const NL_OVERRIDE;
 
 
 private:
@@ -212,7 +212,7 @@ public:		// Basic Usage.
 	/// Object. NB: destructor close() the stream.
 	COFile();
 	COFile(const std::string &path, bool append=false, bool text=false, bool useTempFile=false);
-	~COFile();
+	~COFile() NL_OVERRIDE;
 
 	/** Open a file for writing. false if failed. close() if a file was opened.
 	*	If you open the file with the flag useTempFile, you MUST close explicitly the file
@@ -231,20 +231,20 @@ public:		// Advanced Usage.
 	/// flush the file.
 	void	flush();
 	/// Seek the file
-	bool	seek (sint32 offset, IStream::TSeekOrigin origin) const;
+	bool	seek (sint32 offset, IStream::TSeekOrigin origin) const NL_OVERRIDE;
 	/// Get the location of the file pointer
-	sint32	getPos () const;
+	sint32	getPos () const NL_OVERRIDE;
 
 	// Imp the Name of the stream as the name of the file.
-	virtual std::string		getStreamName() const;
+	virtual std::string		getStreamName() const NL_OVERRIDE;
 
 	// very useful to serialize string in text mode (without the size)
-	virtual void		serialBuffer(uint8 *buf, uint len);
+	virtual void		serialBuffer(uint8 *buf, uint len) NL_OVERRIDE;
 
 protected:
 	/// Internal close.
 	void	internalClose(bool success);
-	virtual void		serialBit(bool &bit);
+	virtual void		serialBit(bool &bit) NL_OVERRIDE;
 
 private:
 	FILE	*_F;

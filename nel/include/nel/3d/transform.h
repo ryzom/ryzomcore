@@ -248,11 +248,11 @@ public:
 	/// \name Derived from ITransformable.
 	// @{
 	/// Default Track Values are identity (pos,pivot= 0, scale= 1, rots=0).
-	virtual ITrack* getDefaultTrack (uint valueId);
+	virtual ITrack* getDefaultTrack (uint valueId) NL_OVERRIDE;
 	/** register transform channels (in global anim mode).
 	  * \see	setChannelMixerOwnerShip
 	  */
-	virtual void	registerToChannelMixer(CChannelMixer *chanMixer, const std::string &prefix);
+	virtual void	registerToChannelMixer(CChannelMixer *chanMixer, const std::string &prefix) NL_OVERRIDE;
 	// @}
 
 	/** This force gives this object ownership of the channel mixer it is registered to, so it will delete it when the dtor is called.
@@ -619,7 +619,7 @@ protected:
 	 */
 	CTransform();
 	/// Destructor
-	virtual ~CTransform();
+	virtual ~CTransform() NL_OVERRIDE;
 
 	/// special feature for CQuadGridClipManager. called at unfreezeHRC(). Used by CTransformShape.
 	virtual	void	unlinkFromQuadCluster() {}

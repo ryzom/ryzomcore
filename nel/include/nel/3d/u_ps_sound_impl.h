@@ -68,7 +68,7 @@ public:
 								const NLMISC::CVector &pos,
 								const NLMISC::CVector &velocity,
 								float pitch
-							  )
+							  ) NL_OVERRIDE
 	{
 		if (!_Source) return;
 		if (gain < 0) gain = 0;
@@ -81,47 +81,47 @@ public:
 	}
 
 	/// start to play the sound
-	virtual void play(void)
+	virtual void play(void) NL_OVERRIDE
 	{
 		if (!_Source) return;
 		_Source->play();
 	}
 
 
-	virtual bool isPlaying(void) const
+	virtual bool isPlaying(void) const NL_OVERRIDE
 	{
 		if (!_Source) return false;
 		return _Source->isPlaying();
 	}
 
 	/// stop the sound
-	virtual void stop(void)
+	virtual void stop(void) NL_OVERRIDE
 	{
 		if (!_Source) return;
 		_Source->stop();
 	}
 
 	// get pitch
-	virtual float getPitch() const
+	virtual float getPitch() const NL_OVERRIDE
 	{
 		if (!_Source) return 0.f;
 		return _Source->getPitch();
 	}
 
 	// set sound looping
-	virtual void setLooping(bool looping)
+	virtual void setLooping(bool looping) NL_OVERRIDE
 	{
 		if (_Source) _Source->setLooping(looping);
 	}
 
-	virtual bool isLooping() const
+	virtual bool isLooping() const NL_OVERRIDE
 	{
 			return _Source ? _Source->getLooping() : false;
 	}
 
 
 	/// release the sound source
-	virtual void release(void);
+	virtual void release(void) NL_OVERRIDE;
 
 protected:
 	friend inline void SpawnedSourceEndedCallback(NLSOUND::USource *source, void *userParam);
@@ -150,7 +150,7 @@ public:
 	{
 	}
 
-	virtual ~CPSSoundServImpl() {}
+	virtual ~CPSSoundServImpl() NL_OVERRIDE {}
 
 	/// init this particle system sound server, using the given audio mixer
 	void init(NLSOUND::UAudioMixer *audioMixer)
@@ -165,7 +165,7 @@ public:
 
 
 	/// inherited from IPSSoundServer
-	UPSSoundInstance *createSound(const NLMISC::TStringId &soundName, bool spawned = true)
+	UPSSoundInstance *createSound(const NLMISC::TStringId &soundName, bool spawned = true) NL_OVERRIDE
 	{
 		if (!_AudioMixer)
 			return NULL;

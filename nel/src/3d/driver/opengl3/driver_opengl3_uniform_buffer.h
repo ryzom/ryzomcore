@@ -51,7 +51,7 @@ class CUBDrvInfosGL3 : public IUBDrvInfos
 {
 public:
 	CUBDrvInfosGL3(IDriver *drv, ItUBDrvInfoPtrList it, CUniformBuffer *ub);
-	virtual ~CUBDrvInfosGL3();
+	virtual ~CUBDrvInfosGL3() NL_OVERRIDE;
 
 	GLuint getBufferId() const { return _BufferId; }
 	sint getCapacity() const { return _Capacity; }

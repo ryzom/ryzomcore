@@ -58,7 +58,7 @@ public:
 	/**
 	 * Destructor
 	 */
-	virtual ~CTextureMem()
+	virtual ~CTextureMem() NL_OVERRIDE
 	{
 		if (_Data && _Delete)
 			delete [] _Data;
@@ -133,16 +133,16 @@ public:
 	/**
 	 * Generate the texture
 	 */
-	void doGenerate(bool async = false);
+	void doGenerate(bool async = false) NL_OVERRIDE;
 
 	/// inherited from ITexture.
-	virtual bool			supportSharing() const
+	virtual bool			supportSharing() const NL_OVERRIDE
 	{
 		return !_ShareName.empty();
 	}
 
 	/// inherited from ITexture.
-	virtual std::string		getShareName() const
+	virtual std::string		getShareName() const NL_OVERRIDE
 	{
 		nlassert(!_ShareName.empty());
 		return _ShareName;
@@ -155,12 +155,12 @@ public:
 	}
 
 	/// texture file may allow the driver to degrade (default is true).
-	virtual bool	allowDegradation() const { return _AllowDegradation; }
+	virtual bool	allowDegradation() const NL_OVERRIDE { return _AllowDegradation; }
 	/// Change the degradation mode. NB: this does not touch() the ITexture...
 	void			setAllowDegradation(bool allow);
 
 	/// Todo: serialize a mem texture.
-	virtual void	serial(NLMISC::IStream &/* f */) {nlstop;}
+	virtual void	serial(NLMISC::IStream &/* f */) NL_OVERRIDE {nlstop;}
 	NLMISC_DECLARE_CLASS(CTextureMem);
 
 	/** This create a white square texture of 1x1

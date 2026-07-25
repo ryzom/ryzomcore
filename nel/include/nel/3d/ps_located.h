@@ -102,10 +102,10 @@ public:
 	CPSLocated();
 
 	/// dtor
-	virtual ~CPSLocated();
+	virtual ~CPSLocated() NL_OVERRIDE;
 
 	// from CParticleSystemProcess
-	virtual bool isLocated() const { NL_PS_FUNC(isLocated); return true; }
+	virtual bool isLocated() const NL_OVERRIDE { NL_PS_FUNC(isLocated); return true; }
 
 	/** attach a bindable object to this located, such as a force or a particle
 	  * a bindable must be attached only once (-> nlassert)
@@ -139,13 +139,13 @@ public:
 	  * Release any reference this located may have on the given process.
 	  * For example, this is used when detaching a located of a system.
 	  */
-	virtual	void			 releaseRefTo(const CParticleSystemProcess *other);
+	virtual	void			 releaseRefTo(const CParticleSystemProcess *other) NL_OVERRIDE;
 
 	/** From CParticleSystemProcess.
 	  * Release any reference this located may have to other process of the system
 	  * For example, this is used when detaching a process of a system.
 	  */
-	virtual void			 releaseAllRef();
+	virtual void			 releaseAllRef() NL_OVERRIDE;
 
 
 	/**
@@ -243,7 +243,7 @@ public:
 	*  \param aabbox a ref to the result box
 	*/
 
-	bool computeBBox(NLMISC::CAABBox &aabbox) const;
+	bool computeBBox(NLMISC::CAABBox &aabbox) const NL_OVERRIDE;
 
 
 
@@ -325,7 +325,7 @@ public:
 	/**
 	* process the system
 	*/
-	virtual void step(TPSProcessPass pass);
+	virtual void step(TPSProcessPass pass) NL_OVERRIDE;
 
 	// move and collides particles (with previously computed collisions)
 	void computeMotion();
@@ -356,7 +356,7 @@ public:
 	void resize(uint32 newSize);
 
 	/// serialization
-	void serial(NLMISC::IStream &f);
+	void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 	/// Shortcut to get an instance of the 3d driver
 	IDriver *getDriver() const;
@@ -453,10 +453,10 @@ public:
 
 
 	/// tells whether there are alive entities / particles in the system
-	virtual bool hasParticles() const;
+	virtual bool hasParticles() const NL_OVERRIDE;
 
 	/// tells whether there are alive emitters / particles in the system
-	virtual bool hasEmitters() const;
+	virtual bool hasEmitters() const NL_OVERRIDE;
 
 	/** Enable the to force LOD degradation. This will suppress instances immediately, (during the motion pass)  so that
 	  * there won't be more than maxNbInstance * dist / maxDist instances. This may not be desirable
@@ -475,10 +475,10 @@ public:
 	//void notifyMaxNumFacesChanged(void);
 
 	/// ask for the max number of faces the located wants (for LOD balancing)
-	virtual uint getNumWantedTris() const;
+	virtual uint getNumWantedTris() const NL_OVERRIDE;
 
 	// Inherited from CParticlesystemProcess. Change the coord system for thta system.
-	virtual void setMatrixMode(TPSMatrixMode matrixMode);
+	virtual void setMatrixMode(TPSMatrixMode matrixMode) NL_OVERRIDE;
 
 	/// Test whether this located support parametric motion
 	bool         supportParametricMotion(void) const;
@@ -489,10 +489,10 @@ public:
 	void		 enableParametricMotion(bool enable = true);
 
 	/// test whether parametric motion is enabled
-	bool		 isParametricMotionEnabled(void) const { return _ParametricMotion;}
+	bool		 isParametricMotionEnabled(void) const NL_OVERRIDE { return _ParametricMotion;}
 
 	/// inherited from CParticlesystemProcess perform parametric motion for this located to reach the given date
-	virtual void performParametricMotion(TAnimationTime date);
+	virtual void performParametricMotion(TAnimationTime date) NL_OVERRIDE;
 
 	/// make the particle older of the given amount. Should not be called directly, as it is called by the system during its step method
 	/// Dying particles are marked (removed in a later pass by called removeOldParticles)
@@ -542,13 +542,13 @@ public:
 	float				evalMaxDuration() const;
 
 	// from CParticleSystemProcess
-	 virtual uint	getUserMatrixUsageCount() const;
+	 virtual uint	getUserMatrixUsageCount() const NL_OVERRIDE;
 
 	 // from CParticleSystemProcess
-	 virtual void enumTexs(std::vector<NLMISC::CSmartPtr<ITexture> > &dest, IDriver &drv);
+	 virtual void enumTexs(std::vector<NLMISC::CSmartPtr<ITexture> > &dest, IDriver &drv) NL_OVERRIDE;
 
 	 // from CParticleSystemProcess
-	 virtual void setZBias(float value);
+	 virtual void setZBias(float value) NL_OVERRIDE;
 
 
 	// For debug only, check if particles life is in the range [0, 1]
@@ -556,7 +556,7 @@ public:
 
 
 	 // from CParticleSystemProcess
-	 virtual void onShow(bool shown);
+	 virtual void onShow(bool shown) NL_OVERRIDE;
 
 protected:
 
@@ -668,7 +668,7 @@ public:
 	 TPSAttribParametricInfo &getParametricInfos() { return _PInfo; }
 
 	 /// PRIVATE USE : called by the system when its date has been manually changed
-	 virtual void	systemDateChanged();
+	 virtual void	systemDateChanged() NL_OVERRIDE;
 
 	 // PRIVATE USE :reset collisions
 	void resetCollisions(uint numInstances);
@@ -730,14 +730,14 @@ public:
 		/// ctor
 		CPSLocatedBindable();
 		/// serialization
-		virtual void		serial(NLMISC::IStream &f);
+		virtual void		serial(NLMISC::IStream &f) NL_OVERRIDE;
 		/** this should be called before to delete any bindable inserted in a system, but this is done
 		  * by the system, so you should never need calling it. This has been introduced because calls in dtor are not polymorphic
 		  * to derived class (which are already destroyed anyway), and some infos are needed in some dtor. The default behaviour does nothing
 		  */
 		virtual void		finalize(void);
 		/// dtor
-		virtual ~CPSLocatedBindable();
+		virtual ~CPSLocatedBindable() NL_OVERRIDE;
 	//@}
 	/// Activate / Deactivate this object. When not active, the owning system won't try to call the 'step' method
 		void					setActive(bool active) { _Active = active; }
@@ -982,12 +982,12 @@ public:
 	  * Release any reference this obj may have on the given process.
 	  * For example, this is used when detaching a located of a system.
 	  */
-	virtual	void			 releaseRefTo(const CParticleSystemProcess *other);
+	virtual	void			 releaseRefTo(const CParticleSystemProcess *other) NL_OVERRIDE;
 	/** From CPSLocatedBindable
 	  * Release any reference this obj may have to other process of the system
 	  * For example, this is used when detaching a located bindable from a system.
 	  */
-	virtual void			 releaseAllRef();
+	virtual void			 releaseAllRef() NL_OVERRIDE;
 	/// return the number of targets
 	uint32				getNbTargets(void) const { return (uint32)_Targets.size(); }
 	/// Return a ptr on a target. Invalid range -> nlassert
@@ -1010,16 +1010,16 @@ public:
 	 */
 	virtual void		releaseTargetRsc(CPSLocated * /* target */) {}
 	/// Seralization, must be called by derivers
-	void				serial(NLMISC::IStream &f);
+	void				serial(NLMISC::IStream &f) NL_OVERRIDE;
 	/// Finalize this object : the default is to call releaseTargetRsc on targets
-	virtual void		finalize(void);
-	virtual				~CPSTargetLocatedBindable();
+	virtual void		finalize(void) NL_OVERRIDE;
+	virtual				~CPSTargetLocatedBindable() NL_OVERRIDE;
 protected:
 	friend class CPSLocated;
 	/** Inherited from CPSLocatedBindable. A target has been remove If not present -> assert
 	 * This also call releaseTargetRsc for clean up
 	 */
-	virtual void		notifyTargetRemoved(CPSLocated *ptr);
+	virtual void		notifyTargetRemoved(CPSLocated *ptr) NL_OVERRIDE;
 	typedef CPSVector<CPSLocated *>::V TTargetCont;
 	TTargetCont _Targets;
 

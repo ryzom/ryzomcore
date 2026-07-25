@@ -62,7 +62,7 @@ public:
 
 	/// Constructor
 	CQuadGridClipManager();
-	~CQuadGridClipManager();
+	~CQuadGridClipManager() NL_OVERRIDE;
 	/** Init the manager.
 	 *	\param clusterSize is the size of a cluster. eg: 160mx160m.
 	 *	\param maxDists eg (100, 500). Intervalls of distance for fast DistMax clip optimisation.
@@ -91,13 +91,13 @@ public:
 
 	/// \name CTransform traverse specialisation. Only clip is special
 	// @{
-	virtual void	traverseHrc() {}
-	virtual void	traverseClip();
-	virtual void	traverseAnimDetail() {}
-	virtual void	traverseLoadBalancing() {}
-	virtual void	traverseLight() {}
-	virtual void	traverseRender() {}
-	virtual	void	profileRender() {}
+	virtual void	traverseHrc() NL_OVERRIDE {}
+	virtual void	traverseClip() NL_OVERRIDE;
+	virtual void	traverseAnimDetail() NL_OVERRIDE {}
+	virtual void	traverseLoadBalancing() NL_OVERRIDE {}
+	virtual void	traverseLight() NL_OVERRIDE {}
+	virtual void	traverseRender() NL_OVERRIDE {}
+	virtual	void	profileRender() NL_OVERRIDE {}
 	// @}
 
 private:
