@@ -358,7 +358,7 @@ namespace NLGUI
 
 		void drawViews( NL3D::UCamera camera );
 
-		bool handleEvent( const CEventDescriptor &evnt );
+		bool handleEvent( const CEventDescriptor &evnt ) NL_OVERRIDE;
 
 		bool handleSystemEvent( const CEventDescriptor &evnt );
 
@@ -556,7 +556,7 @@ namespace NLGUI
 				
 	private:
 		CWidgetManager();
-		~CWidgetManager();
+		~CWidgetManager() NL_OVERRIDE;
 
 		IParser *_Parser;
 

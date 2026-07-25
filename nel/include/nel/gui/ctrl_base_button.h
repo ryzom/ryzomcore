@@ -44,12 +44,12 @@ namespace NLGUI
 		/// Constructor
 		CCtrlBaseButton(const TCtorParam &param);
 
-		std::string getProperty( const std::string &name ) const;
-		void setProperty( const std::string &name, const std::string &value );
-		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
+		std::string getProperty( const std::string &name ) const NL_OVERRIDE;
+		void setProperty( const std::string &name, const std::string &value ) NL_OVERRIDE;
+		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const NL_OVERRIDE;
 
-		virtual bool parse (xmlNodePtr cur,CInterfaceGroup * parentGroup);
-		virtual bool handleEvent (const NLGUI::CEventDescriptor& event);
+		virtual bool parse (xmlNodePtr cur,CInterfaceGroup * parentGroup) NL_OVERRIDE;
+		virtual bool handleEvent (const NLGUI::CEventDescriptor& event) NL_OVERRIDE;
 
 		/// \name Misc
 		// @{
@@ -92,8 +92,8 @@ namespace NLGUI
 		void setModulateGlobalColorPushed(bool state) {_ModulateGlobalColorPushed= state;}
 		void setModulateGlobalColorOver(bool state) {_ModulateGlobalColorOver= state;}
 
-		virtual sint32 getAlpha() const { return _ColorNormal.A; }
-		virtual void setAlpha (sint32 a) { _ColorOver.A = _ColorNormal.A = _ColorPushed.A = (uint8)a; }
+		virtual sint32 getAlpha() const NL_OVERRIDE { return _ColorNormal.A; }
+		virtual void setAlpha (sint32 a) NL_OVERRIDE { _ColorOver.A = _ColorNormal.A = _ColorPushed.A = (uint8)a; }
 
 		std::string getColorAsString() const
 		{	return	NLMISC::toString(_ColorNormal.R) + " " + NLMISC::toString(_ColorNormal.G) + " " +
@@ -273,7 +273,7 @@ namespace NLGUI
 
 		// call it at draw
 		void	updateOver(bool &lastOver);
-		virtual	void elementCaptured(CCtrlBase *capturedElement);
+		virtual	void elementCaptured(CCtrlBase *capturedElement) NL_OVERRIDE;
 	};
 
 }

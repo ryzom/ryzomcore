@@ -142,7 +142,7 @@ namespace NLGUI
 		ELuaBadCast() {}
 		ELuaBadCast(const std::string &reason) : ELuaError(reason) {}
 		// what(), plus append the Reason
-		virtual std::string luaWhat() const throw() {return NLMISC::toString("ELuaBadCast: %s", what());}
+		virtual std::string luaWhat() const throw() NL_OVERRIDE {return NLMISC::toString("ELuaBadCast: %s", what());}
 	};
 
 	// Error when trying to indexate an object that is not a table
@@ -152,7 +152,7 @@ namespace NLGUI
 		ELuaNotATable() {}
 		ELuaNotATable(const std::string &reason) : ELuaError(reason) {}
 		// what(), plus append the Reason
-		virtual std::string luaWhat() const throw() {return NLMISC::toString("ELuaNotATable: %s", what());}
+		virtual std::string luaWhat() const throw() NL_OVERRIDE {return NLMISC::toString("ELuaNotATable: %s", what());}
 	};
 
 

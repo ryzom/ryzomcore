@@ -46,10 +46,10 @@ namespace NLGUI
 		DECLARE_UI_CLASS( CViewPointer )
 		
 		CViewPointer( const TCtorParam &param );
-		virtual ~CViewPointer(){}
+		virtual ~CViewPointer() NL_OVERRIDE{}
 
-		bool parse (xmlNodePtr cur,CInterfaceGroup * parentGroup);
-		void draw();
+		bool parse (xmlNodePtr cur,CInterfaceGroup * parentGroup) NL_OVERRIDE;
+		void draw() NL_OVERRIDE;
 
 		// Set cursor mode
 		void setStringMode (bool stringCursor);

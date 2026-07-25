@@ -2125,7 +2125,7 @@ namespace NLGUI
 	// (tracked by _MenuFather in the right-click branch of handleEvent).
 	class CAHEditboxCopy : public IActionHandler
 	{
-		virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+		virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 		{
 			CGroupEditBox *eb = CGroupEditBox::getMenuFather();
 			if (eb) eb->copy();
@@ -2135,7 +2135,7 @@ namespace NLGUI
 
 	class CAHEditboxCut : public IActionHandler
 	{
-		virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+		virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 		{
 			CGroupEditBox *eb = CGroupEditBox::getMenuFather();
 			if (!eb) return;
@@ -2147,7 +2147,7 @@ namespace NLGUI
 
 	class CAHEditboxPaste : public IActionHandler
 	{
-		virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+		virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 		{
 			CGroupEditBox *eb = CGroupEditBox::getMenuFather();
 			if (eb) eb->paste();
@@ -2157,7 +2157,7 @@ namespace NLGUI
 
 	class CAHEditboxSelectAll : public IActionHandler
 	{
-		virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+		virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
 		{
 			CGroupEditBox *eb = CGroupEditBox::getMenuFather();
 			if (eb) eb->setSelectionAll();

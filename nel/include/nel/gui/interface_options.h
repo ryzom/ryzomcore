@@ -117,9 +117,9 @@ namespace NLGUI
 
 	public:
 		COptionsLayer( const TCtorParam &/* param */ );
-		~COptionsLayer();
-		xmlNodePtr serialize( xmlNodePtr parentNode, const std::string &name ) const;
-		virtual bool parse (xmlNodePtr cur);
+		~COptionsLayer() NL_OVERRIDE;
+		xmlNodePtr serialize( xmlNodePtr parentNode, const std::string &name ) const NL_OVERRIDE;
+		virtual bool parse (xmlNodePtr cur) NL_OVERRIDE;
 
 		// Container optimizer
 
@@ -181,8 +181,8 @@ namespace NLGUI
 	{
 	public:
 		COptionsContainerInsertion( const TCtorParam &/* param */ );
-		xmlNodePtr serialize( xmlNodePtr parentNode, const std::string &name ) const;
-		virtual bool parse (xmlNodePtr cur);
+		xmlNodePtr serialize( xmlNodePtr parentNode, const std::string &name ) const NL_OVERRIDE;
+		virtual bool parse (xmlNodePtr cur) NL_OVERRIDE;
 
 		sint32 TxId_R_Arrow;
 		sint32 TxId_L_Arrow;
@@ -196,8 +196,8 @@ namespace NLGUI
 	{
 	public:
 		COptionsContainerMove( const TCtorParam &/* param */ );
-		xmlNodePtr serialize( xmlNodePtr parentNode, const std::string &name ) const;
-		virtual bool parse (xmlNodePtr cur);
+		xmlNodePtr serialize( xmlNodePtr parentNode, const std::string &name ) const NL_OVERRIDE;
+		virtual bool parse (xmlNodePtr cur) NL_OVERRIDE;
 
 		sint32 TrackW;
 		sint32 TrackH;
@@ -217,8 +217,8 @@ namespace NLGUI
 	{
 	public:
 		COptionsList( const TCtorParam &/* param */ );
-		xmlNodePtr serialize( xmlNodePtr parentNode, const std::string &name ) const;
-		virtual bool parse (xmlNodePtr cur);
+		xmlNodePtr serialize( xmlNodePtr parentNode, const std::string &name ) const NL_OVERRIDE;
+		virtual bool parse (xmlNodePtr cur) NL_OVERRIDE;
 
 		uint	getNumParams() const {return _NumParams;}
 

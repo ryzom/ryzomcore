@@ -717,7 +717,7 @@ namespace NLGUI
 	class	CHandlerComboBoxSelectStart : public IActionHandler
 	{
 	public:
-		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */)
+		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */) NL_OVERRIDE
 		{
 			CDBGroupComboBox *pCB = dynamic_cast<CDBGroupComboBox*>(pCaller->getParent());
 			if (pCB == NULL) return;
@@ -783,7 +783,7 @@ namespace NLGUI
 	class	CHandlerComboBoxSelectEnd : public IActionHandler
 	{
 	public:
-		virtual void execute (CCtrlBase * /* pCaller */, const std::string &Params)
+		virtual void execute (CCtrlBase * /* pCaller */, const std::string &Params) NL_OVERRIDE
 		{
 			CDBGroupComboBox *pCB = dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 			if (pCB == NULL) return;

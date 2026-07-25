@@ -55,10 +55,10 @@ namespace NLGUI
         DECLARE_UI_CLASS( CCtrlResizer )
 
 		CCtrlResizer(const TCtorParam &param);
-		virtual void draw ();
-		virtual bool handleEvent (const NLGUI::CEventDescriptor &event);
+		virtual void draw () NL_OVERRIDE;
+		virtual bool handleEvent (const NLGUI::CEventDescriptor &event) NL_OVERRIDE;
 		// Add a big delta so when the user is over the Resizer, always take it whatever other controls under
-		virtual uint		getDeltaDepth() const { return 100; }
+		virtual uint		getDeltaDepth() const NL_OVERRIDE { return 100; }
 
 		// get real resizer pos : if parent has pop_min_w == pop_max_w, then horizontal resizer will be discarded
 		//                        if parent has pop_min_h == pop_max_h, then vertical resizer will be discarded
@@ -73,7 +73,7 @@ namespace NLGUI
 		sint32 HMin, HMax;
 
 		// from CCtrlBase
-		virtual bool		canChangeVirtualDesktop() const { return !_MouseDown; }
+		virtual bool		canChangeVirtualDesktop() const NL_OVERRIDE { return !_MouseDown; }
 
 	private:
 
@@ -106,16 +106,16 @@ namespace NLGUI
         DECLARE_UI_CLASS( CCtrlMover )
 
         CCtrlMover(const TCtorParam &param, bool canMove = true, bool canOpen = true );
-		~CCtrlMover();
-		virtual void draw ();
-		virtual bool handleEvent (const NLGUI::CEventDescriptor &event);
+		~CCtrlMover() NL_OVERRIDE;
+		virtual void draw () NL_OVERRIDE;
+		virtual bool handleEvent (const NLGUI::CEventDescriptor &event) NL_OVERRIDE;
 		bool canMove() { return _CanMove; }
 
 		bool isMoving() const {return _Moving;}
 		bool isMovingInParentList() const { return _MovingInParentList; }
 
 		// from CCtrlBase
-		virtual bool		canChangeVirtualDesktop() const { return !_Moving; }
+		virtual bool		canChangeVirtualDesktop() const NL_OVERRIDE { return !_Moving; }
 
 	private:
 		sint32				_MoveStartX, _MoveStartY;
@@ -171,30 +171,30 @@ namespace NLGUI
 	public:
         DECLARE_UI_CLASS( CGroupContainer )
 		CGroupContainer(const TCtorParam &param);
-		~CGroupContainer();
+		~CGroupContainer() NL_OVERRIDE;
 
-		std::string getProperty( const std::string &name ) const;
-		void setProperty( const std::string &name, const std::string &value );
-		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
-		xmlNodePtr serializeTreeData( xmlNodePtr parentNode ) const;
+		std::string getProperty( const std::string &name ) const NL_OVERRIDE;
+		void setProperty( const std::string &name, const std::string &value ) NL_OVERRIDE;
+		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const NL_OVERRIDE;
+		xmlNodePtr serializeTreeData( xmlNodePtr parentNode ) const NL_OVERRIDE;
 
-		virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
+		virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup) NL_OVERRIDE;
 
-		virtual void updateCoords ();
+		virtual void updateCoords () NL_OVERRIDE;
 
-		virtual void draw ();
+		virtual void draw () NL_OVERRIDE;
 
-		virtual void clearViews ();
+		virtual void clearViews () NL_OVERRIDE;
 
-		virtual bool handleEvent (const NLGUI::CEventDescriptor &eventDesc);
+		virtual bool handleEvent (const NLGUI::CEventDescriptor &eventDesc) NL_OVERRIDE;
 
-		virtual void launch ();
+		virtual void launch () NL_OVERRIDE;
 
-		virtual void setActive (bool state);
+		virtual void setActive (bool state) NL_OVERRIDE;
 
-		virtual bool getViewsUnder (sint32 x, sint32 y, sint32 clipX, sint32 clipY, sint32 clipW, sint32 clipH, std::vector<CViewBase*> &vVB); // Return true if x,y under the group
+		virtual bool getViewsUnder (sint32 x, sint32 y, sint32 clipX, sint32 clipY, sint32 clipW, sint32 clipH, std::vector<CViewBase*> &vVB) NL_OVERRIDE; // Return true if x,y under the group
 
-		virtual bool getCtrlsUnder (sint32 x, sint32 y, sint32 clipX, sint32 clipY, sint32 clipW, sint32 clipH, std::vector<CCtrlBase*> &vICL);
+		virtual bool getCtrlsUnder (sint32 x, sint32 y, sint32 clipX, sint32 clipY, sint32 clipW, sint32 clipH, std::vector<CCtrlBase*> &vICL) NL_OVERRIDE;
 
 		void open();
 
@@ -211,7 +211,7 @@ namespace NLGUI
 
 		// Before a container is detached from parent, it should be pop in
 		void detachContainer (CGroupContainer *pIC);
-		void removeAllContainers();
+		void removeAllContainers() NL_OVERRIDE;
 
 		void setOpen(bool opened)
 		{
@@ -227,10 +227,10 @@ namespace NLGUI
 		bool isOpen() const { return _Opened; }
 
 		// Force Open for container setActive and open()
-		virtual void forceOpen();
+		virtual void forceOpen() NL_OVERRIDE;
 
 		/// Set the title open and close
-		virtual bool isMovable() const {return _Movable;}
+		virtual bool isMovable() const NL_OVERRIDE {return _Movable;}
 		void setMovable(bool b);
 
 		void	setContent (CInterfaceGroup *pC);
@@ -247,7 +247,7 @@ namespace NLGUI
 		void			setHeaderColor (const std::string &ptr) { _HeaderColor.link(ptr.c_str()); }
 
 		// Get the header color draw. NB: depends if grayed, and if active.
-		NLMISC::CRGBA	getDrawnHeaderColor () const;
+		NLMISC::CRGBA	getDrawnHeaderColor () const NL_OVERRIDE;
 
 #ifdef RYZOM_LUA_UCSTRING
 		ucstring		getUCTitleOpened () const; // Compatibility
@@ -331,15 +331,15 @@ namespace NLGUI
 		CCtrlMover	   *getCtrlMover() const { return _Mover; }
 
 		// true if there is a mover and if the window is being moved
-		bool		   isMoving() const { return _Mover && _Mover->isMoving(); }
+		bool		   isMoving() const NL_OVERRIDE { return _Mover && _Mover->isMoving(); }
 
 		/** Force the container to blink (to tell the user that an event has happened).
 		  * This  uses the global color, so the container must use it
 		  * This state is automatically disabled if the container is opened
 		  * \param numBlinks 0 If the container should blink endlessly, the number of blink otherwise
 		  */
-		virtual void	enableBlink(uint numBlinks = 0);
-		virtual void    disableBlink();
+		virtual void	enableBlink(uint numBlinks = 0) NL_OVERRIDE;
+		virtual void    disableBlink() NL_OVERRIDE;
 		virtual bool	isBlinking() const { return _Blinking; }
 
 		CGroupList      *getList() const { return _List; }
@@ -399,7 +399,7 @@ namespace NLGUI
 		/// Locking of window (prevent it from being moved)
 		void	setLockable(bool lockable);
 		bool	isLockable() const { return _Lockable; }
-		void	setLocked(bool locked);
+		void	setLocked(bool locked) NL_OVERRIDE;
 
 		// to be called by the 'deactive check' handler
 		static  void validateCanDeactivate(bool validate) { _ValidateCanDeactivate = validate; }
@@ -427,7 +427,7 @@ namespace NLGUI
 
 		void setModalParentList (const std::string &name);
 		bool checkIfModal(const NLGUI::CEventDescriptor& event); // Return true if we can handle the event (and prevent from selecting a window)
-		bool isGrayed() const;
+		bool isGrayed() const NL_OVERRIDE;
 		bool blinkAllSons();
 
 		// true if the resizer is enabled.
@@ -448,9 +448,9 @@ namespace NLGUI
 
 
 		// backup the current position of this container
-		void				backupPosition();
+		void				backupPosition() NL_OVERRIDE;
 		// restore the current position of this container
-		void				restorePosition();
+		void				restorePosition() NL_OVERRIDE;
 		// get x for backup position
 		sint32				getBackupX() const { return _BackupX; }
 		sint32				getBackupY() const { return _BackupY; }
@@ -461,9 +461,9 @@ namespace NLGUI
 		// Test if position has been backuped (flag cleared by 'restorePosition()')
 		bool				isPositionBackuped() const { return _PositionBackuped; }
 		// check if the container has been moved, resized, or popuped by the user (and eventually clear that flag)
-		bool                getTouchFlag(bool clearFlag) const;
+		bool                getTouchFlag(bool clearFlag) const NL_OVERRIDE;
 		// from CInterfaceGroup
-		virtual void		restoreAllContainersBackupPosition() { restorePosition(); }
+		virtual void		restoreAllContainersBackupPosition() NL_OVERRIDE { restorePosition(); }
 
 		// when isModal() is true, the whole interface cannot switch desktop
 		bool				isModal() const { return _Modal; }

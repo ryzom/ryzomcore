@@ -48,7 +48,7 @@ namespace NLGUI
 		CGroupList(const TCtorParam &param);
 
 		// dtor
-		~CGroupList();
+		~CGroupList() NL_OVERRIDE;
 		/**
 		* add a child element to the group at the last position
 		* 'order' of the element is set to the last order + 1
@@ -114,9 +114,9 @@ namespace NLGUI
 			return &_Templ;
 		}
 
-		std::string getProperty( const std::string &name ) const;
-		void setProperty( const std::string &name, const std::string &value );
-		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
+		std::string getProperty( const std::string &name ) const NL_OVERRIDE;
+		void setProperty( const std::string &name, const std::string &value ) NL_OVERRIDE;
+		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const NL_OVERRIDE;
 
 		/**
 		 * parse the element and initalize it
@@ -124,24 +124,24 @@ namespace NLGUI
 		 * \param parentGroup : the parent group of this element
 		 * \return true if success
 		 */
-		virtual bool parse (xmlNodePtr cur, CInterfaceGroup * parentGroup);
+		virtual bool parse (xmlNodePtr cur, CInterfaceGroup * parentGroup) NL_OVERRIDE;
 		//virtual uint32 getMemory();
 		/**
 		 * init  or reset the children element coords. Orverloaded from CInterfaceGroup because we begin with the last inserted element here
 		 */
-		virtual void updateCoords();
+		virtual void updateCoords() NL_OVERRIDE;
 
-		virtual void draw();
+		virtual void draw() NL_OVERRIDE;
 
-		virtual bool handleEvent (const NLGUI::CEventDescriptor& eventDesc);
+		virtual bool handleEvent (const NLGUI::CEventDescriptor& eventDesc) NL_OVERRIDE;
 
-		virtual void clearViews();
-		virtual void clearControls();
-		virtual void clearGroups();
+		virtual void clearViews() NL_OVERRIDE;
+		virtual void clearControls() NL_OVERRIDE;
+		virtual void clearGroups() NL_OVERRIDE;
 
 		void setSpace (sint32 s) { _Space = s; }
 
-		virtual CInterfaceElement* getElement (const std::string &id)
+		virtual CInterfaceElement* getElement (const std::string &id) NL_OVERRIDE
 		{ return CInterfaceGroup::getElement (id); }
 
 		sint32 getNbElement() { return (sint32)_Elements.size(); }

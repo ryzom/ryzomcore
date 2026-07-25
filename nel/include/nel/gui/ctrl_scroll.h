@@ -42,28 +42,28 @@ namespace NLGUI
 	public:
 		DECLARE_UI_CLASS( CCtrlScroll )
 		CCtrlScroll(const TCtorParam &param);
-		~CCtrlScroll();
+		~CCtrlScroll() NL_OVERRIDE;
 
-		std::string getProperty( const std::string &name ) const;
-		void setProperty( const std::string &name, const std::string &value );
-		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
+		std::string getProperty( const std::string &name ) const NL_OVERRIDE;
+		void setProperty( const std::string &name, const std::string &value ) NL_OVERRIDE;
+		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const NL_OVERRIDE;
 
-		virtual bool parse(xmlNodePtr cur, CInterfaceGroup * parentGroup);
+		virtual bool parse(xmlNodePtr cur, CInterfaceGroup * parentGroup) NL_OVERRIDE;
 
-		virtual void updateCoords();
-		virtual void draw();
-		virtual bool handleEvent (const NLGUI::CEventDescriptor &event);
+		virtual void updateCoords() NL_OVERRIDE;
+		virtual void draw() NL_OVERRIDE;
+		virtual bool handleEvent (const NLGUI::CEventDescriptor &event) NL_OVERRIDE;
 
-		void	setTarget (CInterfaceGroup *pIG);
+		void	setTarget (CInterfaceGroup *pIG) NL_OVERRIDE;
 		// Return the delta value the track has moved
-		sint32	moveTrackX (sint32 dx);
-		sint32	moveTrackY (sint32 dy);
+		sint32	moveTrackX (sint32 dx) NL_OVERRIDE;
+		sint32	moveTrackY (sint32 dy) NL_OVERRIDE;
 
 		/** Move the Target Ofs with a Delta, and recompute TrackPos from this Ofs.
 		 *	Useful for finer controled group scrolling when the list is very big (with mouseWheel or scroll buttons)
 		 */
-		void	moveTargetX (sint32 dx);
-		void	moveTargetY (sint32 dy);
+		void	moveTargetX (sint32 dx) NL_OVERRIDE;
+		void	moveTargetY (sint32 dy) NL_OVERRIDE;
 
 		void	setAlign (sint32 nAlign) { _Aligned = nAlign; }
 		// invert the factor for target
@@ -195,7 +195,7 @@ namespace NLGUI
 		void	computeTargetOfsFromPos();
 
 		// from IPropertyObserver
-		virtual void update(NLMISC::ICDBNode *node);
+		virtual void update(NLMISC::ICDBNode *node) NL_OVERRIDE;
 
 		// step the value, and clamp it
 		void	normalizeValue(sint32 &value);

@@ -4322,7 +4322,7 @@ namespace NLGUI
 	class CICOpen : public IActionHandler
 	{
 	public:
-		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */)
+		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */) NL_OVERRIDE
 		{
 			CInterfaceGroup *pIG = pCaller->getParent();
 			if (pIG == NULL) return;
@@ -4337,7 +4337,7 @@ namespace NLGUI
 	class CICClose : public IActionHandler
 	{
 	public:
-		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */)
+		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */) NL_OVERRIDE
 		{
 			CInterfaceGroup *pIG = pCaller->getParent();
 			if (pIG == NULL) return;
@@ -4352,7 +4352,7 @@ namespace NLGUI
 	class CICDeactive : public IActionHandler
 	{
 	public:
-		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */)
+		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */) NL_OVERRIDE
 		{
 			CInterfaceGroup *pIG = pCaller->getParent();
 			if (pIG == NULL) return;
@@ -4385,7 +4385,7 @@ namespace NLGUI
 	class CICPopup : public IActionHandler
 	{
 	public:
-		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */)
+		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */) NL_OVERRIDE
 		{
 			CInterfaceGroup *pIG = pCaller->getParent();
 			if (pIG == NULL) return;
@@ -4406,7 +4406,7 @@ namespace NLGUI
 	class CICPopin : public IActionHandler
 	{
 	public:
-		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */)
+		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */) NL_OVERRIDE
 		{
 			CInterfaceGroup *pIG = pCaller->getParent();
 			if (pIG == NULL) return;
@@ -4430,7 +4430,7 @@ namespace NLGUI
 	// ***************************************************************************
 	class CICLock : public IActionHandler
 	{
-		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */)
+		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */) NL_OVERRIDE
 		{
 			CInterfaceGroup *pIG = pCaller->getParent();
 			if (pIG == NULL) return;
@@ -4444,7 +4444,7 @@ namespace NLGUI
 	// ***************************************************************************
 	class CICHelp : public IActionHandler
 	{
-		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */)
+		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */) NL_OVERRIDE
 		{
 			// get the container to get help
 			if(!pCaller)

@@ -67,8 +67,8 @@ namespace NLGUI
 		CViewBitmap * getCheckBox() const { return _CheckBox; }
 		bool getFormatted () const { return getMultiLine (); }
 
-		virtual sint32 getAlpha() const;
-		virtual void setAlpha (sint32 a);
+		virtual sint32 getAlpha() const NL_OVERRIDE;
+		virtual void setAlpha (sint32 a) NL_OVERRIDE;
 
 		REFLECT_EXPORT_START(CViewTextMenu, CViewText)
 			REFLECT_BOOL("grayed", getGrayed, setGrayed);
@@ -105,19 +105,19 @@ namespace NLGUI
         DECLARE_UI_CLASS( CGroupSubMenu )
 
 		CGroupSubMenu(const TCtorParam &param);
-		virtual ~CGroupSubMenu();
+		virtual ~CGroupSubMenu() NL_OVERRIDE;
 
-		virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parent=NULL);
+		virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parent=NULL) NL_OVERRIDE;
 
-		virtual void checkCoords();
+		virtual void checkCoords() NL_OVERRIDE;
 
-		virtual void updateCoords ();
+		virtual void updateCoords () NL_OVERRIDE;
 
-		virtual void draw ();
+		virtual void draw () NL_OVERRIDE;
 
-		virtual bool handleEvent (const NLGUI::CEventDescriptor &eventDesc);
+		virtual bool handleEvent (const NLGUI::CEventDescriptor &eventDesc) NL_OVERRIDE;
 
-		virtual CInterfaceElement* getElement (const std::string &id);
+		virtual CInterfaceElement* getElement (const std::string &id) NL_OVERRIDE;
 
 		// retrieve the index of a line from its id (-1 if not found)
 		sint getLineFromId(const std::string &id);
@@ -148,14 +148,14 @@ namespace NLGUI
 		void setRightClickHandler(uint lineIndex, const std::string &ah = "");
 		void setRightClickHandlerParam(uint lineIndex, const std::string &params = "");
 
-		void	openSubMenu (sint32 nb);
+		void	openSubMenu (sint32 nb) NL_OVERRIDE;
 
-		void	hideSubMenus ();
+		void	hideSubMenus () NL_OVERRIDE;
 
 		// reset all entries of the sub menu
 		void	reset();
 
-		virtual void setActive (bool state);
+		virtual void setActive (bool state) NL_OVERRIDE;
 
 		// Tell if the line is a separator or not
 		bool isSeparator (uint i) const;
@@ -318,27 +318,27 @@ namespace NLGUI
         DECLARE_UI_CLASS( CGroupMenu )
 
 		CGroupMenu(const TCtorParam &param);
-		virtual ~CGroupMenu();
+		virtual ~CGroupMenu() NL_OVERRIDE;
 
 		TCaseMode getCaseMode() { return _CaseMode; }
 
-		std::string getProperty( const std::string &name ) const;
-		void setProperty( const std::string &name, const std::string &value );
-		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
+		std::string getProperty( const std::string &name ) const NL_OVERRIDE;
+		void setProperty( const std::string &name, const std::string &value ) NL_OVERRIDE;
+		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const NL_OVERRIDE;
 
-		virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
+		virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup) NL_OVERRIDE;
 
-		virtual void draw ();
+		virtual void draw () NL_OVERRIDE;
 
 		void recurseDraw(CGroupSubMenu *pSubMenu);
 
-		virtual bool handleEvent (const NLGUI::CEventDescriptor &eventDesc);
+		virtual bool handleEvent (const NLGUI::CEventDescriptor &eventDesc) NL_OVERRIDE;
 
-		virtual CInterfaceElement* getElement (const std::string &id);
+		virtual CInterfaceElement* getElement (const std::string &id) NL_OVERRIDE;
 
-		virtual void setActive (bool state);
+		virtual void setActive (bool state) NL_OVERRIDE;
 
-		virtual bool isWindowUnder (sint32 x, sint32 y);
+		virtual bool isWindowUnder (sint32 x, sint32 y) NL_OVERRIDE;
 		
 		uint getNumLine() const;
 		void deleteLine(uint index);

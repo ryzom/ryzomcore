@@ -53,9 +53,9 @@ namespace NLGUI
 	public:
 		CInterfaceExprValue Value;
 	public:
-		virtual void eval(CInterfaceExprValue &result);
-		virtual void evalWithDepends(CInterfaceExprValue &result, std::vector<NLMISC::ICDBNode *> &nodes);
-		virtual void getDepends(std::vector<NLMISC::ICDBNode *> &nodes);
+		virtual void eval(CInterfaceExprValue &result) NL_OVERRIDE;
+		virtual void evalWithDepends(CInterfaceExprValue &result, std::vector<NLMISC::ICDBNode *> &nodes) NL_OVERRIDE;
+		virtual void getDepends(std::vector<NLMISC::ICDBNode *> &nodes) NL_OVERRIDE;
 	};
 
 	// *******************************************************************************************************
@@ -68,10 +68,10 @@ namespace NLGUI
 		// list of parameters
 		std::vector<CInterfaceExprNode *> Params;
 	public:
-		virtual void eval(CInterfaceExprValue &result);
-		virtual void evalWithDepends(CInterfaceExprValue &result, std::vector<NLMISC::ICDBNode *> &nodes);
-		virtual void getDepends(std::vector<NLMISC::ICDBNode *> &nodes);
-		virtual ~CInterfaceExprNodeValueFnCall();
+		virtual void eval(CInterfaceExprValue &result) NL_OVERRIDE;
+		virtual void evalWithDepends(CInterfaceExprValue &result, std::vector<NLMISC::ICDBNode *> &nodes) NL_OVERRIDE;
+		virtual void getDepends(std::vector<NLMISC::ICDBNode *> &nodes) NL_OVERRIDE;
+		virtual ~CInterfaceExprNodeValueFnCall() NL_OVERRIDE;
 	};
 
 	// *******************************************************************************************************
@@ -82,9 +82,9 @@ namespace NLGUI
 	public:
 		class NLMISC::CCDBNodeLeaf *Leaf;
 	public:
-		virtual void eval(CInterfaceExprValue &result);
-		virtual void evalWithDepends(CInterfaceExprValue &result, std::vector<NLMISC::ICDBNode *> &nodes);
-		virtual void getDepends(std::vector<NLMISC::ICDBNode *> &nodes);
+		virtual void eval(CInterfaceExprValue &result) NL_OVERRIDE;
+		virtual void evalWithDepends(CInterfaceExprValue &result, std::vector<NLMISC::ICDBNode *> &nodes) NL_OVERRIDE;
+		virtual void getDepends(std::vector<NLMISC::ICDBNode *> &nodes) NL_OVERRIDE;
 	};
 
 	// *******************************************************************************************************
@@ -95,9 +95,9 @@ namespace NLGUI
 	public:
 		class NLMISC::CCDBNodeBranch *Branch;
 	public:
-		virtual void eval(CInterfaceExprValue &result);
-		virtual void evalWithDepends(CInterfaceExprValue &result, std::vector<NLMISC::ICDBNode *> &nodes);
-		virtual void getDepends(std::vector<NLMISC::ICDBNode *> &nodes);
+		virtual void eval(CInterfaceExprValue &result) NL_OVERRIDE;
+		virtual void evalWithDepends(CInterfaceExprValue &result, std::vector<NLMISC::ICDBNode *> &nodes) NL_OVERRIDE;
+		virtual void getDepends(std::vector<NLMISC::ICDBNode *> &nodes) NL_OVERRIDE;
 	};
 
 	// *******************************************************************************************************
@@ -109,9 +109,9 @@ namespace NLGUI
 	public:
 		std::string Expr;
 	public:
-		virtual void eval(CInterfaceExprValue &result);
-		virtual void evalWithDepends(CInterfaceExprValue &result, std::vector<NLMISC::ICDBNode *> &nodes);
-		virtual void getDepends(std::vector<NLMISC::ICDBNode *> &nodes);
+		virtual void eval(CInterfaceExprValue &result) NL_OVERRIDE;
+		virtual void evalWithDepends(CInterfaceExprValue &result, std::vector<NLMISC::ICDBNode *> &nodes) NL_OVERRIDE;
+		virtual void getDepends(std::vector<NLMISC::ICDBNode *> &nodes) NL_OVERRIDE;
 	};
 
 
