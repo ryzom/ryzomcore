@@ -223,8 +223,22 @@ IF(EMSCRIPTEN)
     SET(LIBXML2_INCLUDE_DIR "")
     SET(LIBXML2_LIBRARIES "")
   ENDIF()
-  # OpenSSL only when provided (stub or cross-built) via OPENSSL_* variables
+  # OpenSSL only when provided (stub or cross-built) via OPENSSL_* variables.
+  # Same emscripten find_library-mode-ONLY caveat as CURL below: publish the
+  # imported targets from the -D cache vars if find_package couldn't build them.
   FIND_PACKAGE(OpenSSL QUIET)
+  IF(NOT TARGET OpenSSL::SSL AND OPENSSL_INCLUDE_DIR AND OPENSSL_SSL_LIBRARY)
+    ADD_LIBRARY(OpenSSL::SSL STATIC IMPORTED)
+    SET_TARGET_PROPERTIES(OpenSSL::SSL PROPERTIES
+      IMPORTED_LOCATION "${OPENSSL_SSL_LIBRARY}"
+      INTERFACE_INCLUDE_DIRECTORIES "${OPENSSL_INCLUDE_DIR}")
+  ENDIF()
+  IF(NOT TARGET OpenSSL::Crypto AND OPENSSL_INCLUDE_DIR AND OPENSSL_CRYPTO_LIBRARY)
+    ADD_LIBRARY(OpenSSL::Crypto STATIC IMPORTED)
+    SET_TARGET_PROPERTIES(OpenSSL::Crypto PROPERTIES
+      IMPORTED_LOCATION "${OPENSSL_CRYPTO_LIBRARY}"
+      INTERFACE_INCLUDE_DIRECTORIES "${OPENSSL_INCLUDE_DIR}")
+  ENDIF()
 ELSE()
   FIND_PACKAGE(ZLIB REQUIRED)
   FIND_PACKAGE(LibXml2 REQUIRED)
@@ -369,7 +383,17 @@ IF(WITH_NEL)
     IF(EMSCRIPTEN)
       # CURL only when a cross-built (or stub) curl is provided via
       # -DCURL_INCLUDE_DIR/-DCURL_LIBRARY; requests fail gracefully with a stub.
+      # find_package(CURL) can silently fail here because CMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY
+      # rejects any cache path outside the emsdk sysroot; when that happens,
+      # manually publish the imported target from the -D cache vars so
+      # nelweb/nelgui still see curl headers and stub archives.
       FIND_PACKAGE(CURL QUIET)
+      IF(NOT TARGET CURL::libcurl AND CURL_INCLUDE_DIR AND CURL_LIBRARY)
+        ADD_LIBRARY(CURL::libcurl STATIC IMPORTED)
+        SET_TARGET_PROPERTIES(CURL::libcurl PROPERTIES
+          IMPORTED_LOCATION "${CURL_LIBRARY}"
+          INTERFACE_INCLUDE_DIRECTORIES "${CURL_INCLUDE_DIR}")
+      ENDIF()
     ELSE()
     FIND_PACKAGE(CURL REQUIRED)
     ENDIF() # !EMSCRIPTEN
