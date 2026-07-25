@@ -40,10 +40,10 @@ public:
 	/// Constructor
 	CComplexSource	(CComplexSound *soundPattern=NULL, bool spawn=false, TSpawnEndCallback cb=0, void *cbUserParam = 0, NL3D::CCluster *cluster = 0, CGroupController *groupController = NULL);
 	/// Destructor
-	~CComplexSource	();
+	~CComplexSource	() NL_OVERRIDE;
 
 	/// Return the sound binded to the source (or NULL if there is no sound)
-	virtual TSoundId				getSound();
+	virtual TSoundId				getSound() NL_OVERRIDE;
 	/// Change the priority of the source
 //	virtual void					setPriority( TSoundPriority pr, bool redispatch=true );
 
@@ -54,15 +54,15 @@ public:
 	/// Return the looping state
 //	virtual bool					getLooping() const;
 	/// Play
-	virtual void					play();
+	virtual void					play() NL_OVERRIDE;
 	/// Stop playing
-	virtual void					stop();
+	virtual void					stop() NL_OVERRIDE;
 	/// Get playing state. Return false even if the source has stopped on its own.
-	virtual bool					isPlaying();
+	virtual bool					isPlaying() NL_OVERRIDE;
 	/// Tells this source not to call its callbacks when it ends. This is valid for spawned sources only.
 //	virtual	void					unregisterSpawnCallBack();
 	/// Returns the number of milliseconds the source has been playing
-	virtual uint32					getTime();
+	virtual uint32					getTime() NL_OVERRIDE;
 	//@}
 
 
@@ -72,15 +72,15 @@ public:
 	 * 3D mode -> 3D position
 	 * st mode -> x is the pan value (from left (-1) to right (1)), set y and z to 0
 	 */
-	virtual void					setPos( const NLMISC::CVector& pos );
+	virtual void					setPos( const NLMISC::CVector& pos ) NL_OVERRIDE;
 	/// Get the position vector (3D mode only)
 //	virtual void					getPos( NLMISC::CVector& pos ) const;
 	/// Set the velocity vector (3D mode only, ignored in stereo mode) (default: (0,0,0))
-	virtual void					setVelocity( const NLMISC::CVector& vel );
+	virtual void					setVelocity( const NLMISC::CVector& vel ) NL_OVERRIDE;
 	/// Get the velocity vector
 //	virtual void					getVelocity( NLMISC::CVector& vel ) const;
 	/// Set the direction vector (3D mode only, ignored in stereo mode) (default: (0,0,0) as non-directional)
-	virtual void					setDirection( const NLMISC::CVector& dir );
+	virtual void					setDirection( const NLMISC::CVector& dir ) NL_OVERRIDE;
 	/// Get the direction vector
 //	virtual void					getDirection( NLMISC::CVector& dir ) const;
 	/** Set the gain (volume value inside [0 , 1]). (default: 1)
@@ -89,13 +89,13 @@ public:
 	 * 1.0 -> no attenuation
 	 * values > 1 (amplification) not supported by most drivers
 	 */
-	virtual void					setGain( float gain );
+	virtual void					setGain( float gain ) NL_OVERRIDE;
 	/// Get the gain
 //	virtual float					getGain() const;
 	/** Set the gain amount (value inside [0, 1]) to map between 0 and the nominal gain
 	 * (which is getSource()->getGain()). Does nothing if getSource() is null.
 	 */
-	virtual void					setRelativeGain( float gain );
+	virtual void					setRelativeGain( float gain ) NL_OVERRIDE;
 	/// Return the relative gain (see setRelativeGain()), or the absolute gain if getSource() is null.
 //	virtual float					getRelativeGain() const;
 	/** Shift the frequency. 1.0f equals identity, each reduction of 50% equals a pitch shift
@@ -109,16 +109,16 @@ public:
 	/// Get the source relative mode
 //	virtual bool					getSourceRelativeMode() const;
 
-	void							checkup();
+	void							checkup() NL_OVERRIDE;
 
 private:
 
-	TSOURCE_TYPE getType() const {return SOURCE_COMPLEX;}
+	TSOURCE_TYPE getType() const NL_OVERRIDE {return SOURCE_COMPLEX;}
 
 	/// Mixer update implementation.
-	void onUpdate();
+	void onUpdate() NL_OVERRIDE;
 	/// Mixer event implementation.
-	void onEvent();
+	void onEvent() NL_OVERRIDE;
 	/// Do the dirty work of starting to play. Called by play and by setGain or setRelativeGain when the source is muted.
 	void playStuf();
 

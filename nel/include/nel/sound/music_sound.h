@@ -41,17 +41,17 @@ public:
 	/// Constructor
 	CMusicSound();
 	/// Destructor
-	virtual ~CMusicSound();
+	virtual ~CMusicSound() NL_OVERRIDE;
 
 	/// \name From CSound
 	//@{
 	/// Load the sound parameters from georges' form
-	virtual void		importForm(const std::string& filename, NLGEORGES::UFormElm& formRoot);
-	virtual TSOUND_TYPE getSoundType() {return SOUND_MUSIC;}
-	virtual uint32		getDuration();
-	virtual void		getSubSoundList(std::vector<std::pair<std::string, CSound*> > &subsounds) const;
-	virtual void		serial(NLMISC::IStream &s);
-	virtual float		getMaxDistance() const;
+	virtual void		importForm(const std::string& filename, NLGEORGES::UFormElm& formRoot) NL_OVERRIDE;
+	virtual TSOUND_TYPE getSoundType() NL_OVERRIDE {return SOUND_MUSIC;}
+	virtual uint32		getDuration() NL_OVERRIDE;
+	virtual void		getSubSoundList(std::vector<std::pair<std::string, CSound*> > &subsounds) const NL_OVERRIDE;
+	virtual void		serial(NLMISC::IStream &s) NL_OVERRIDE;
+	virtual float		getMaxDistance() const NL_OVERRIDE;
 	virtual bool		isDetailed() const;
 	//@}
 

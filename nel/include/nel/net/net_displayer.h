@@ -56,14 +56,14 @@ public:
 	bool connected () { return _Server->connected(); }
 
 	/// Destructor
-	virtual ~CNetDisplayer();
+	virtual ~CNetDisplayer() NL_OVERRIDE;
 
 protected:
 
 	/** Sends the string to the logging server
 	 * \warning If not connected, tries to connect to the logging server each call. It can slow down your program a lot.
 	 */
-	virtual void doDisplay ( const NLMISC::CLog::TDisplayInfo& args, const char *message);
+	virtual void doDisplay ( const NLMISC::CLog::TDisplayInfo& args, const char *message) NL_OVERRIDE;
 
 	 /// Find the server (using the NS) and connect
 	void findAndConnect();

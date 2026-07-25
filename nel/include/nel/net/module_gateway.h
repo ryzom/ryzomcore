@@ -279,10 +279,10 @@ namespace NLNET
 	protected:
 		/** Register the gateway in the module manager gateway registry
 		 */
-		virtual void registerGateway();
+		virtual void registerGateway() NL_OVERRIDE;
 		/** Unregister the gateway in the module manager gateway registry
 		 */
-		virtual void unregisterGateway();
+		virtual void unregisterGateway() NL_OVERRIDE;
 	};
 
 	/** Interface class for gateway transport.

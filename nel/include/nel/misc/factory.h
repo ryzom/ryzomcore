@@ -225,7 +225,7 @@ public:
 		IndirectFactoryClass::instance().registerClass(key, this);
 	}
 
-	BaseFactoryClass *getFactory()
+	BaseFactoryClass *getFactory() NL_OVERRIDE
 	{
 		return &_FactoryClass;
 	}

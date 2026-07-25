@@ -43,11 +43,11 @@ class CForm;
 class CFormLoader : public UFormLoader
 {
 public:
-	virtual ~CFormLoader();
+	virtual ~CFormLoader() NL_OVERRIDE;
 	// From UFormLoader
-	UForm		*loadForm (const std::string &filename);
-	UFormDfn	*loadFormDfn (const std::string &filename);
-	UType		*loadFormType (const std::string &filename);
+	UForm		*loadForm (const std::string &filename) NL_OVERRIDE;
+	UFormDfn	*loadFormDfn (const std::string &filename) NL_OVERRIDE;
+	UType		*loadFormType (const std::string &filename) NL_OVERRIDE;
 
 	// Load type and formDfn
 	CType		*loadType (const std::string &filename);

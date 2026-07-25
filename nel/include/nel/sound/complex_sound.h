@@ -48,7 +48,7 @@ public:
 	};
 
 	bool							isDetailed() const;
-	uint32							getDuration();
+	uint32							getDuration() NL_OVERRIDE;
 
 
 	TPATTERN_MODE					getPatternMode()							{ return _PatternMode;}
@@ -65,10 +65,10 @@ public:
 	CComplexSound();
 
 	/** Destructor */
-	virtual ~CComplexSound();
+	virtual ~CComplexSound() NL_OVERRIDE;
 
 	/// Load the sound parameters from georges' form
-	virtual void					importForm(const std::string& filename, NLGEORGES::UFormElm& formRoot);
+	virtual void					importForm(const std::string& filename, NLGEORGES::UFormElm& formRoot) NL_OVERRIDE;
 
 	/// \name Tempo
 	//@{
@@ -76,19 +76,19 @@ public:
 	virtual void					setTicksPerSecond(float ticks)				{ _TicksPerSeconds = ticks; }
 	//@}
 
-	TSOUND_TYPE						getSoundType() {return SOUND_COMPLEX;};
+	TSOUND_TYPE						getSoundType() NL_OVERRIDE {return SOUND_COMPLEX;};
 
-	void							getSubSoundList(std::vector<std::pair<std::string, CSound*> > &subsounds) const;
+	void							getSubSoundList(std::vector<std::pair<std::string, CSound*> > &subsounds) const NL_OVERRIDE;
 	bool							doFadeIn()								{ return _DoFadeIn; }
 	bool							doFadeOut()								{ return _DoFadeOut; }
 
-	void							serial(NLMISC::IStream &s);
+	void							serial(NLMISC::IStream &s) NL_OVERRIDE;
 
 
 private:
 
 	void							parseSequence(const std::string &str, std::vector<uint32> &seq, uint scale = 1);
-	virtual float					getMaxDistance() const;
+	virtual float					getMaxDistance() const NL_OVERRIDE;
 
 	TPATTERN_MODE					_PatternMode;
 	std::vector<NLMISC::TStringId>	_Sounds;

@@ -91,14 +91,14 @@ public:
 	/// Return the audio mixer object
 	static CAudioMixerUser *instance() { return getInstance(); }
 	/// Destructor
-	virtual ~CAudioMixerUser();
+	virtual ~CAudioMixerUser() NL_OVERRIDE;
 
 	//@{
 	/// @name IStringMapperProvider implementation
 	/// map a string
-	NLMISC::TStringId map(const std::string &str)			{ return NLMISC::CStringMapper::map(str);}
+	NLMISC::TStringId map(const std::string &str) NL_OVERRIDE			{ return NLMISC::CStringMapper::map(str);}
 	/// unmap a string
-	const std::string &unmap(const NLMISC::TStringId &stringId)		{ return NLMISC::CStringMapper::unmap(stringId);}
+	const std::string &unmap(const NLMISC::TStringId &stringId) NL_OVERRIDE		{ return NLMISC::CStringMapper::unmap(stringId);}
 	//@}
 
 
@@ -112,18 +112,18 @@ public:
 	 * 
 	 * Deprecated by initDriver/getDevices/initDevice.
 	 */
-	virtual void		init(uint maxTrack = 32, bool useEax = true, bool useADPCM = true, NLMISC::IProgressCallback *progressCallBack = NULL, bool autoLoadSample = false, TDriver driverType = DriverAuto, bool forceSoftware = false, bool manualRolloff = true);
+	virtual void		init(uint maxTrack = 32, bool useEax = true, bool useADPCM = true, NLMISC::IProgressCallback *progressCallBack = NULL, bool autoLoadSample = false, TDriver driverType = DriverAuto, bool forceSoftware = false, bool manualRolloff = true) NL_OVERRIDE;
 	
 	/// Initialize the NeL Sound Driver with given driverName.
-	virtual void		initDriver(const std::string &driverName);
+	virtual void		initDriver(const std::string &driverName) NL_OVERRIDE;
 	/// Get the available devices on the loaded driver.
-	virtual void		getDevices(std::vector<std::string> &devices);
+	virtual void		getDevices(std::vector<std::string> &devices) NL_OVERRIDE;
 	/// Initialize the selected device on the currently initialized driver. Leave deviceName empty to select the default device.
-	virtual void		initDevice(const std::string &deviceName, const CInitInfo &initInfo, NLMISC::IProgressCallback *progressCallback = NULL);
+	virtual void		initDevice(const std::string &deviceName, const CInitInfo &initInfo, NLMISC::IProgressCallback *progressCallback = NULL) NL_OVERRIDE;
 
 	
-	virtual void		initClusteredSound(NL3D::UScene *uscene, float minGain, float maxDistance, float portalInterpolate);
-	virtual void		initClusteredSound(NL3D::CScene *scene, float minGain, float maxDistance, float portalInterpolate);
+	virtual void		initClusteredSound(NL3D::UScene *uscene, float minGain, float maxDistance, float portalInterpolate) NL_OVERRIDE;
+	virtual void		initClusteredSound(NL3D::CScene *scene, float minGain, float maxDistance, float portalInterpolate) NL_OVERRIDE;
 
 	/** Set the priority channel reserve.
 	 *	Each priority channel can be assign a restrictive reserve value.
@@ -137,7 +137,7 @@ public:
 	 *	for the HighestPri source.
 	 *	By default, reserve are set for each channel to the number of available tracks.
 	 */
-	virtual void		setPriorityReserve(TSoundPriority priorityChannel, uint reserve);
+	virtual void		setPriorityReserve(TSoundPriority priorityChannel, uint reserve) NL_OVERRIDE;
 	/** Set the Low water mark.
 	 *	This value is use to mute sound source that try to play when there priority
 	 *	channel is full (see setPriorityReserve).
@@ -150,14 +150,14 @@ public:
 	 *	available tracks (witch is almos alwais the case). But this value will help
 	 *	the mixer make it's best.
 	 */
-	virtual void		setLowWaterMark(uint value);
+	virtual void		setLowWaterMark(uint value) NL_OVERRIDE;
 
-	virtual	void		changeMaxTrack(uint maxTrack);
+	virtual	void		changeMaxTrack(uint maxTrack) NL_OVERRIDE;
 
 	/// Resets the audio system (deletes all the sources, include envsounds)
-	virtual void				reset();
+	virtual void				reset() NL_OVERRIDE;
 	/// Disables or reenables the sound
-	virtual void				enable( bool b );
+	virtual void				enable( bool b ) NL_OVERRIDE;
 	/// Load environmental effects
 //	virtual void				loadEnvEffects( const char *filename );
 
@@ -167,13 +167,13 @@ public:
 	 * If you specify a non null notfoundfiles vector, it is filled with the names of missing files if any.
 	 * You can call this method several times, to load several sound banks.
 	 */
-	virtual uint32				loadSampleBank(bool async, const std::string &name, std::vector<std::string> *notfoundfiles=NULL );
+	virtual uint32				loadSampleBank(bool async, const std::string &name, std::vector<std::string> *notfoundfiles=NULL ) NL_OVERRIDE;
 	/** Unload buffers.
 	*/
-	virtual bool				unloadSampleBank( const std::string &name);
-	virtual void				reloadSampleBanks(bool async);
-	virtual uint32				getLoadedSampleSize();
-	virtual void				getLoadedSampleBankInfo(std::vector<std::pair<std::string, uint> > &result);
+	virtual bool				unloadSampleBank( const std::string &name) NL_OVERRIDE;
+	virtual void				reloadSampleBanks(bool async) NL_OVERRIDE;
+	virtual uint32				getLoadedSampleSize() NL_OVERRIDE;
+	virtual void				getLoadedSampleBankInfo(std::vector<std::pair<std::string, uint> > &result) NL_OVERRIDE;
 
 
 
@@ -184,11 +184,11 @@ public:
 	// Load environment sounds ; treeRoot can be null if you don't want an access to the envsounds
 //	virtual	void				loadEnvSounds( const char *filename, UEnvSound **treeRoot=NULL );
 	/// Get a TSoundId from a name (returns NULL if not found)
-	virtual TSoundId			getSoundId( const NLMISC::TStringId &name );
+	virtual TSoundId			getSoundId( const NLMISC::TStringId &name ) NL_OVERRIDE;
 
 	/// Gets the group controller for the given group tree path with separator '/', if it doesn't exist yet it will be created.
 	/// Examples: "music", "effects", "dialog", "music/background", "music/loading", "music/player", etcetera
-	virtual UGroupController *getGroupController(const std::string &path);
+	virtual UGroupController *getGroupController(const std::string &path) NL_OVERRIDE;
 
 	/** Add a logical sound source (returns NULL if name not found).
 	 * If spawn is true, the source will auto-delete after playing. If so, the return USource* pointer
@@ -196,9 +196,9 @@ public:
 	 * pass a callback function that will be called (if not NULL) just before deleting the spawned
 	 * source.
 	 */
-	virtual USource				*createSource( const NLMISC::TStringId &name, bool spawn=false, TSpawnEndCallback cb=NULL, void *cbUserParam = NULL, NL3D::CCluster *cluster = 0, CSoundContext *context = 0, UGroupController *groupController = NULL);
+	virtual USource				*createSource( const NLMISC::TStringId &name, bool spawn=false, TSpawnEndCallback cb=NULL, void *cbUserParam = NULL, NL3D::CCluster *cluster = 0, CSoundContext *context = 0, UGroupController *groupController = NULL) NL_OVERRIDE;
 	/// Add a logical sound source (by sound id). To remove a source, just delete it. See createSource(const char*)
-	virtual USource				*createSource( TSoundId id, bool spawn=false, TSpawnEndCallback cb=NULL, void *cbUserParam = NULL, NL3D::CCluster *cluster = 0, CSoundContext *context = 0, UGroupController *groupController = NULL);
+	virtual USource				*createSource( TSoundId id, bool spawn=false, TSpawnEndCallback cb=NULL, void *cbUserParam = NULL, NL3D::CCluster *cluster = 0, CSoundContext *context = 0, UGroupController *groupController = NULL) NL_OVERRIDE;
 	/// Add a source which was created by an EnvSound
 	void						addSource( CSourceCommon *source );
 	/** Delete a logical sound source. If you don't call it, the source will be auto-deleted
@@ -214,37 +214,37 @@ public:
 	/** Use this method to set the listener position instead of using getListener->setPos();
 	 * It's because we have to update the background sounds in this case.
 	 */
-	virtual void				setListenerPos (const NLMISC::CVector &pos);
+	virtual void				setListenerPos (const NLMISC::CVector &pos) NL_OVERRIDE;
 
 	/// Return the listener interface
-	virtual UListener			*getListener()	{ return &_Listener; }
+	virtual UListener			*getListener() NL_OVERRIDE	{ return &_Listener; }
 
 
 	/// Choose the environmental effect(s) corresponding to tag
-	virtual void				selectEnvEffects( const std::string &tag );
+	virtual void				selectEnvEffects( const std::string &tag ) NL_OVERRIDE;
 	/// Update audio mixer (call evenly)
-	virtual void				update();
+	virtual void				update() NL_OVERRIDE;
 
 
 	/// Return the names of the sounds (call this method after loadSounds())
-	virtual void				getSoundNames( std::vector<NLMISC::TStringId> &names ) const;
+	virtual void				getSoundNames( std::vector<NLMISC::TStringId> &names ) const NL_OVERRIDE;
 	/// Return the number of mixing tracks (voices)
-	virtual uint				getPolyphony() const { return (uint)_Tracks.size(); }
+	virtual uint				getPolyphony() const NL_OVERRIDE { return (uint)_Tracks.size(); }
 	/// Return the number of sources instance.
-	virtual uint				getSourcesInstanceCount() const { return (uint)_Sources.size(); }
+	virtual uint				getSourcesInstanceCount() const NL_OVERRIDE { return (uint)_Sources.size(); }
 	/// Return the number of playing sources (slow)
-	virtual uint				getPlayingSourcesCount() const;
+	virtual uint				getPlayingSourcesCount() const NL_OVERRIDE;
 	uint 						countPlayingSimpleSources() const; // debug
 	uint						countSimpleSources() const; // debug
 	/// Return the number of available tracks
-	virtual uint				getAvailableTracksCount() const;
+	virtual uint				getAvailableTracksCount() const NL_OVERRIDE;
 	/// Return the number of used tracks
-	virtual uint				getUsedTracksCount() const;
+	virtual uint				getUsedTracksCount() const NL_OVERRIDE;
 	/// Return the number muted playing source
-	virtual uint				getMutedPlayingSourcesCount() const		{ return _PlayingSourcesMuted; }
+	virtual uint				getMutedPlayingSourcesCount() const NL_OVERRIDE		{ return _PlayingSourcesMuted; }
 
 	/// Return a string showing the playing sources (slow)
-	virtual std::string			getSourcesStats() const;
+	virtual std::string			getSourcesStats() const NL_OVERRIDE;
 
 
 	/// Take a listener's move into account
@@ -263,28 +263,28 @@ public:
 	//static void					allowMissingWave( bool b )				{ CSound::allowMissingWave( b ); }
 
 	/// Set the global path to the sample banks
-	virtual void				setSamplePath(const std::string& path);
-	virtual void				setSamplePaths(const std::string &wavAssetPath, const std::string &bankBuildPath);
-	virtual void				setPackedSheetOption(const std::string &path, bool update);
+	virtual void				setSamplePath(const std::string& path) NL_OVERRIDE;
+	virtual void				setSamplePaths(const std::string &wavAssetPath, const std::string &bankBuildPath) NL_OVERRIDE;
+	virtual void				setPackedSheetOption(const std::string &path, bool update) NL_OVERRIDE;
 	std::string					&getPackedSheetPath()						{return _PackedSheetPath; }
 	bool						getPackedSheetUpdate()						{return _UpdatePackedSheet; }
 
 
 	CBackgroundSoundManager		*getBackgroundSoundManager()				{ return _BackgroundSoundManager; }
 	/// Write profiling information about the mixer to the output stream.
-	virtual void				writeProfile(std::string& out);
+	virtual void				writeProfile(std::string& out) NL_OVERRIDE;
 
-	virtual void				setBackgroundFlagName(uint flagIndex, const std::string &flagName);
-	virtual void				setBackgroundFlagShortName(uint flagIndex, const std::string &flagShortName);
-	virtual const std::string	&getBackgroundFlagName(uint flagIndex);
-	virtual const std::string	&getBackgroundFlagShortName(uint flagIndex);
+	virtual void				setBackgroundFlagName(uint flagIndex, const std::string &flagName) NL_OVERRIDE;
+	virtual void				setBackgroundFlagShortName(uint flagIndex, const std::string &flagShortName) NL_OVERRIDE;
+	virtual const std::string	&getBackgroundFlagName(uint flagIndex) NL_OVERRIDE;
+	virtual const std::string	&getBackgroundFlagShortName(uint flagIndex) NL_OVERRIDE;
 //	virtual void				loadBackgroundSoundFromRegion (const NLLIGO::CPrimRegion &region);
 //	virtual void				loadBackgroundEffectsFromRegion (const NLLIGO::CPrimRegion &region);
 //	virtual void				loadBackgroundSamplesFromRegion (const NLLIGO::CPrimRegion &region);
-	virtual void				loadBackgroundAudioFromPrimitives(const NLLIGO::IPrimitive &audioRoot);
-	virtual void				loadBackgroundSound (const std::string &continent, NLLIGO::CLigoConfig &config);
-	virtual void				playBackgroundSound ();
-	virtual void				stopBackgroundSound ();
+	virtual void				loadBackgroundAudioFromPrimitives(const NLLIGO::IPrimitive &audioRoot) NL_OVERRIDE;
+	virtual void				loadBackgroundSound (const std::string &continent, NLLIGO::CLigoConfig &config) NL_OVERRIDE;
+	virtual void				playBackgroundSound () NL_OVERRIDE;
+	virtual void				stopBackgroundSound () NL_OVERRIDE;
 
 	CClusteredSound				*getClusteredSound()	{ return _ClusteredSound; }
 
@@ -300,10 +300,10 @@ public:
 
 	void						bufferUnloaded(IBuffer *buffer);
 
-	void						setBackgroundFlags(const TBackgroundFlags &backgroundFlags);
-	void						setBackgroundFilterFades(const TBackgroundFilterFades &backgroundFilterFades);
-	const TBackgroundFlags		&getBackgroundFlags();
-	const TBackgroundFilterFades &getBackgroundFilterFades();
+	void						setBackgroundFlags(const TBackgroundFlags &backgroundFlags) NL_OVERRIDE;
+	void						setBackgroundFilterFades(const TBackgroundFilterFades &backgroundFilterFades) NL_OVERRIDE;
+	const TBackgroundFlags		&getBackgroundFlags() NL_OVERRIDE;
+	const TBackgroundFilterFades &getBackgroundFilterFades() NL_OVERRIDE;
 
 
 //	bool						setPlaying(CSimpleSource *source);
@@ -324,28 +324,28 @@ public:
 	void						incPlayingSourceMuted()	{ ++_PlayingSourcesMuted; };
 	void						decPlayingSourceMuted()	{ --_PlayingSourcesMuted; };
 
-	void		setUserVar(NLMISC::TStringId varName, float value);
-	float		getUserVar(NLMISC::TStringId varName);
+	void		setUserVar(NLMISC::TStringId varName, float value) NL_OVERRIDE;
+	float		getUserVar(NLMISC::TStringId varName) NL_OVERRIDE;
 
 	// music
-	virtual bool	playMusic(const std::string &fileName, uint xFadeTime= 0, bool async= true, bool loop=true);
-	virtual void	stopMusic(uint xFadeTime= 0);
-	virtual void	pauseMusic();
-	virtual void	resumeMusic();
-	virtual bool	isMusicEnded();
-	virtual void	setMusicVolume(float gain);
-	virtual float	getMusicLength();
-	virtual bool	getSongTitle(const std::string &filename, std::string &result, float &length);
-	virtual void	enableBackgroundMusic(bool enable);
-	virtual void	enableBackgroundMusicTimeConstraint(bool enable);
+	virtual bool	playMusic(const std::string &fileName, uint xFadeTime= 0, bool async= true, bool loop=true) NL_OVERRIDE;
+	virtual void	stopMusic(uint xFadeTime= 0) NL_OVERRIDE;
+	virtual void	pauseMusic() NL_OVERRIDE;
+	virtual void	resumeMusic() NL_OVERRIDE;
+	virtual bool	isMusicEnded() NL_OVERRIDE;
+	virtual void	setMusicVolume(float gain) NL_OVERRIDE;
+	virtual float	getMusicLength() NL_OVERRIDE;
+	virtual bool	getSongTitle(const std::string &filename, std::string &result, float &length) NL_OVERRIDE;
+	virtual void	enableBackgroundMusic(bool enable) NL_OVERRIDE;
+	virtual void	enableBackgroundMusicTimeConstraint(bool enable) NL_OVERRIDE;
 	CMusicSoundManager *getBackgroundMusicManager() const {return _BackgroundMusicManager;}
 	// Event music
-	virtual bool	playEventMusic(const std::string &fileName, uint xFadeTime= 0, bool async= true, bool loop=true);
-	virtual void	stopEventMusic(uint xFadeTime= 0);
-	virtual void	setEventMusicVolume(float gain);
-	virtual bool	isEventMusicEnded();
+	virtual bool	playEventMusic(const std::string &fileName, uint xFadeTime= 0, bool async= true, bool loop=true) NL_OVERRIDE;
+	virtual void	stopEventMusic(uint xFadeTime= 0) NL_OVERRIDE;
+	virtual void	setEventMusicVolume(float gain) NL_OVERRIDE;
+	virtual bool	isEventMusicEnded() NL_OVERRIDE;
 	/// Get audio/container extensions that are currently supported by nel or the used driver implementation.
-	virtual void getMusicExtensions(std::vector<std::string> &extensions);
+	virtual void getMusicExtensions(std::vector<std::string> &extensions) NL_OVERRIDE;
 
 	inline IReverbEffect *getReverbEffect() { return _ReverbEffect; }
 	inline bool useReverb() const { return m_EnableReverb; }
@@ -418,9 +418,9 @@ public:
 	void						removeUserControledSource(CSourceCommon *source, NLMISC::TStringId varName);
 
 
-	virtual void startDriverBench();
-	virtual void endDriverBench();
-	virtual void displayDriverBench(NLMISC::CLog *log);
+	virtual void startDriverBench() NL_OVERRIDE;
+	virtual void endDriverBench() NL_OVERRIDE;
+	virtual void displayDriverBench(NLMISC::CLog *log) NL_OVERRIDE;
 
 private:
 
@@ -475,7 +475,7 @@ protected:
 	/// Returns nb available tracks (or NULL)
 	void						getFreeTracks( uint nb, CTrack **tracks );
 	/// Fill a vector of position and mute flag for all playing sound source.
-	virtual void				getPlayingSoundsPos(bool virtualPos, std::vector<std::pair<bool, NLMISC::CVector> > &pos);
+	virtual void				getPlayingSoundsPos(bool virtualPos, std::vector<std::pair<bool, NLMISC::CVector> > &pos) NL_OVERRIDE;
 
 	typedef CHashMap<NLMISC::TStringId, CControledSources, NLMISC::CStringIdHashMapTraits>	TUserVarControlsContainer;
 	/// Container for all user controler and currently controled playing source

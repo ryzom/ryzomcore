@@ -334,7 +334,7 @@ public:
 		Form = form;
 	}
 
-	virtual CEvalNumExpr::TReturnState evalValue (const char *value, double &result, uint32 round)
+	virtual CEvalNumExpr::TReturnState evalValue (const char *value, double &result, uint32 round) NL_OVERRIDE
 	{
 		// If a form is available
 		if (Form)

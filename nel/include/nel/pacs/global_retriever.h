@@ -129,8 +129,8 @@ protected:
 			Position = position;
 		}
 
-		void	run();
-		void	getName (std::string &result) const;
+		void	run() NL_OVERRIDE;
+		void	getName (std::string &result) const NL_OVERRIDE;
 	};
 
 	std::list<CLrLoader>					_LrLoaderList;
@@ -170,7 +170,7 @@ public:
 	CGlobalRetriever(const CRetrieverBank *bank=NULL)
 		: _RetrieverBank(bank)
 	{ }
-	virtual ~CGlobalRetriever();
+	virtual ~CGlobalRetriever() NL_OVERRIDE;
 
 
 	/// Setup an empty global retriever
@@ -190,7 +190,7 @@ public:
 
 
 	/// Gets the BBox of the global retriever.
-	const NLMISC::CAABBox			&getBBox() const { return _BBox; }
+	const NLMISC::CAABBox			&getBBox() const NL_OVERRIDE { return _BBox; }
 
 
 	/// Gets the vector of retriever instances that compose the global retriever.
@@ -213,7 +213,7 @@ public:
 
 
 	/// Get the material at this position
-	uint32							getMaterial(const UGlobalPosition &pos) const
+	uint32							getMaterial(const UGlobalPosition &pos) const NL_OVERRIDE
 	{
 		if (pos.InstanceId < 0 || pos.InstanceId >= (sint)_Instances.size())
 			return 0xFFFFFFFF;
@@ -228,7 +228,7 @@ public:
 	}
 
 	/// Test if the position is an interior
-	bool							isInterior(const UGlobalPosition &pos) const
+	bool							isInterior(const UGlobalPosition &pos) const NL_OVERRIDE
 	{
 		if (pos.InstanceId < 0 || pos.InstanceId >= (sint)_Instances.size())
 			return false;
@@ -237,7 +237,7 @@ public:
 	}
 
 	/// Test if the position is in water
-	bool							isWaterPosition(const UGlobalPosition &pos, float &waterHeight) const
+	bool							isWaterPosition(const UGlobalPosition &pos, float &waterHeight) const NL_OVERRIDE
 	{
 		if (pos.InstanceId < 0 || pos.InstanceId >= (sint)_Instances.size())
 			return false;
@@ -261,16 +261,16 @@ public:
 	//@{
 
 	/// Retrieves the position of an estimated point in the global retriever.
-	UGlobalPosition					retrievePosition(const NLMISC::CVector &estimated) const;
+	UGlobalPosition					retrievePosition(const NLMISC::CVector &estimated) const NL_OVERRIDE;
 
 	/// Retrieves the position of an estimated point in the global retriever (double instead.)
-	UGlobalPosition					retrievePosition(const NLMISC::CVectorD &estimated) const;
+	UGlobalPosition					retrievePosition(const NLMISC::CVectorD &estimated) const NL_OVERRIDE;
 
 	/// Retrieves the position of an estimated point in the global retriever.
-	UGlobalPosition					retrievePosition(const NLMISC::CVector &estimated, float threshold) const;
+	UGlobalPosition					retrievePosition(const NLMISC::CVector &estimated, float threshold) const NL_OVERRIDE;
 
 	/// Retrieves the position of an estimated point in the global retriever (double instead.)
-	UGlobalPosition					retrievePosition(const NLMISC::CVectorD &estimated, double threshold) const;
+	UGlobalPosition					retrievePosition(const NLMISC::CVectorD &estimated, double threshold) const NL_OVERRIDE;
 
 
 
@@ -284,7 +284,7 @@ public:
 
 
 	/// Insure position inside surface
-	bool							insurePosition(UGlobalPosition &pos) const
+	bool							insurePosition(UGlobalPosition &pos) const NL_OVERRIDE
 	{
 		if (pos.InstanceId < 0 || pos.InstanceId >= (sint)_Instances.size())
 			return false;
@@ -294,7 +294,7 @@ public:
 	}
 
 	///
-	bool							testPosition(UGlobalPosition &pos) const
+	bool							testPosition(UGlobalPosition &pos) const NL_OVERRIDE
 	{
 		if (pos.InstanceId < 0 || pos.InstanceId >= (sint)_Instances.size())
 			return false;
@@ -309,13 +309,13 @@ public:
 	}
 
 	/// Return the retriever id from the string id
-	sint32							getIdentifier(const std::string &id) const;
+	sint32							getIdentifier(const std::string &id) const NL_OVERRIDE;
 
 	/// Get the identifier of the global position.
-	const std::string				&getIdentifier(const UGlobalPosition &position) const;
+	const std::string				&getIdentifier(const UGlobalPosition &position) const NL_OVERRIDE;
 
 	/// Get the LocalRetrieverId of the global position.
-	sint32							getLocalRetrieverId(const UGlobalPosition &position) const;
+	sint32							getLocalRetrieverId(const UGlobalPosition &position) const NL_OVERRIDE;
 
 	/**
 	  * Builds a instance of retriever, and link it on the ground (or wherever)
@@ -323,24 +323,24 @@ public:
 	  * \param a valid position where the retriever should be instanciated
 	  * \return false if failed
 	  */
-	bool							buildInstance(const std::string &id, const NLMISC::CVectorD &position, sint32 &instanceId);
+	bool							buildInstance(const std::string &id, const NLMISC::CVectorD &position, sint32 &instanceId) NL_OVERRIDE;
 
 	/**
 	  * Removes an instance of retriever (perform all unlinks necessary)
 	  */
-	void							removeInstance(sint32 instanceId);
+	void							removeInstance(sint32 instanceId) NL_OVERRIDE;
 
 	/// Snaps to interior ground.
 //	void							snapToInteriorGround(UGlobalPosition &position) const;
 
 	/// Converts a global position object into a 'human-readable' CVector.
-	NLMISC::CVector					getGlobalPosition(const UGlobalPosition &global) const;
+	NLMISC::CVector					getGlobalPosition(const UGlobalPosition &global) const NL_OVERRIDE;
 
 	/// Converts a global position object into a 'human-readable' CVector (double instead.)
-	NLMISC::CVectorD				getDoubleGlobalPosition(const UGlobalPosition &global) const;
+	NLMISC::CVectorD				getDoubleGlobalPosition(const UGlobalPosition &global) const NL_OVERRIDE;
 
 	/// Make a raytrace test. For the time, always return false.
-	bool							testRaytrace (const NLMISC::CVectorD &v0, const NLMISC::CVectorD &v1);
+	bool							testRaytrace (const NLMISC::CVectorD &v0, const NLMISC::CVectorD &v1) NL_OVERRIDE;
 
 	//@}
 
@@ -372,11 +372,11 @@ public:
 	void							check() const;
 
 	///
-	float							distanceToBorder(const UGlobalPosition &pos) const;
+	float							distanceToBorder(const UGlobalPosition &pos) const NL_OVERRIDE;
 	///
-	void							getBorders(const UGlobalPosition &pos, std::vector<std::pair<NLMISC::CLine, uint8> > &edges);
+	void							getBorders(const UGlobalPosition &pos, std::vector<std::pair<NLMISC::CLine, uint8> > &edges) NL_OVERRIDE;
 	///
-	void							getBorders(const NLMISC::CAABBox &sbox, std::vector<std::pair<NLMISC::CLine, uint8> > &edges);
+	void							getBorders(const NLMISC::CAABBox &sbox, std::vector<std::pair<NLMISC::CLine, uint8> > &edges) NL_OVERRIDE;
 
 	/// Serialises the global retriever.
 	void							serial(NLMISC::IStream &f);
@@ -386,9 +386,9 @@ public:
 	/// \name Dynamic loading part.
 	// @{
 
-	void							refreshLrAround(const NLMISC::CVector &position, float radius);
+	void							refreshLrAround(const NLMISC::CVector &position, float radius) NL_OVERRIDE;
 
-	void							refreshLrAroundNow(const NLMISC::CVector &position, float radius);
+	void							refreshLrAroundNow(const NLMISC::CVector &position, float radius) NL_OVERRIDE;
 
 	// ensure all load tasks end. called at dtor
 	void							waitEndOfAsyncLoading();
@@ -450,7 +450,7 @@ public:
 	/** return the mean height of the surface under pos..
 	 *
 	 */
-	float				getMeanHeight(const UGlobalPosition &pos) const;
+	float				getMeanHeight(const UGlobalPosition &pos) const NL_OVERRIDE;
 
 	/// Upadates the height of the given global position
 	void				updateHeight(UGlobalPosition &pos) const { pos.LocalPosition.Estimation.z = getMeanHeight(pos); }

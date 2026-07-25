@@ -138,18 +138,18 @@ class CContextSoundContainer : public IContextSoundContainer
 
 	typedef CHashMap<CContextMatcher<NbJoker, UseRandom, Shift>, CSound *, typename CContextMatcher<NbJoker, UseRandom, Shift>::CHash>	THashContextSound;
 
-	virtual void		init(uint *contextArgsIndex)
+	virtual void		init(uint *contextArgsIndex) NL_OVERRIDE
 	{
 		_MaxDist = 0;
 		NLMISC::CFastMem::memcpy(_ContextArgsIndex, contextArgsIndex, sizeof(uint) * NbJoker);
 	}
 
-	virtual float		getMaxDistance() const
+	virtual float		getMaxDistance() const NL_OVERRIDE
 	{
 		return _MaxDist;
 	}
 
-	virtual void		addSound(CSound *sound, const std::string &baseName)
+	virtual void		addSound(CSound *sound, const std::string &baseName) NL_OVERRIDE
 	{
 		const std::string &patternName = NLMISC::CStringMapper::unmap(sound->getName());
 		nlassert(patternName.size() >= baseName.size());
@@ -245,7 +245,7 @@ class CContextSoundContainer : public IContextSoundContainer
 		}
 	}
 
-	virtual CSound		*getSound(const CSoundContext &context, uint32 randomValue)
+	virtual CSound		*getSound(const CSoundContext &context, uint32 randomValue) NL_OVERRIDE
 	{
 		// create a key
 		uint32		args[JOKER_ARRAY_SIZE];
@@ -262,7 +262,7 @@ class CContextSoundContainer : public IContextSoundContainer
 			return 0;
 	}
 
-	void getSoundList(std::vector<std::pair<std::string, CSound*> > &subsounds) const
+	void getSoundList(std::vector<std::pair<std::string, CSound*> > &subsounds) const NL_OVERRIDE
 	{
 		typename THashContextSound::const_iterator first(_ContextSounds.begin()), last(_ContextSounds.end());
 		for (; first != last; ++first)
@@ -283,29 +283,29 @@ public:
 	/// Constructor
 	CContextSound();
 	/// Destructor
-	~CContextSound();
+	~CContextSound() NL_OVERRIDE;
 
 
-	TSOUND_TYPE			getSoundType()					{ return CSound::SOUND_CONTEXT; };
+	TSOUND_TYPE			getSoundType() NL_OVERRIDE					{ return CSound::SOUND_CONTEXT; };
 
 	/// Load the sound parameters from georges' form
-	virtual void		importForm(const std::string& filename, NLGEORGES::UFormElm& formRoot);
+	virtual void		importForm(const std::string& filename, NLGEORGES::UFormElm& formRoot) NL_OVERRIDE;
 
 	/// Return true if cone is meaningful
 	virtual bool		isDetailed() const;
 	/// Return the length of the sound in ms
-	virtual uint32		getDuration();
+	virtual uint32		getDuration() NL_OVERRIDE;
 	/// Used by the george sound plugin to check sound recursion (ie sound 'toto' use sound 'titi' witch also use sound 'toto' ...).
-	virtual void		getSubSoundList(std::vector<std::pair<std::string, CSound*> > &subsounds) const;
+	virtual void		getSubSoundList(std::vector<std::pair<std::string, CSound*> > &subsounds) const NL_OVERRIDE;
 
 
 	CSound				*getContextSound(CSoundContext &context);
 
 	void				init();
 
-	void				serial(NLMISC::IStream &s);
+	void				serial(NLMISC::IStream &s) NL_OVERRIDE;
 
-	float				getMaxDistance() const;
+	float				getMaxDistance() const NL_OVERRIDE;
 
 
 

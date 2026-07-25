@@ -48,46 +48,46 @@ public:
 	/// When groupController is NULL it will use the groupcontroller specified in the TSoundId. You should manually specify the groupController if this source is a child of another source, so that the parent source controller of the user-specified .sound file is the one that will be used.
 	CSourceCommon(TSoundId id, bool spawn, TSpawnEndCallback cb, void *cbUserParam, NL3D::CCluster *cluster, CGroupController *groupController);
 
-	~CSourceCommon();
+	~CSourceCommon() NL_OVERRIDE;
 
 
 	/// Get the type of the source.
 	virtual TSOURCE_TYPE	getType() const = 0;
 
-	void					setPriority( TSoundPriority pr);
+	void					setPriority( TSoundPriority pr) NL_OVERRIDE;
 	/// Return the priority
 	TSoundPriority			getPriority() const								{ return _Priority; }
-	void					setLooping( bool loop );
-	bool					getLooping() const;
-	void					play();
-	void					stop();
-	bool					isPlaying()									{ return _Playing; }
-	void					setPos( const NLMISC::CVector& pos ) ;
-	const NLMISC::CVector	&getPos() const;
-	void					setVelocity( const NLMISC::CVector& vel );
-	void					setDirection( const NLMISC::CVector& dir );
-	void					setGain( float gain );
-	void					setRelativeGain( float gain );
-	float					getRelativeGain() const;
+	void					setLooping( bool loop ) NL_OVERRIDE;
+	bool					getLooping() const NL_OVERRIDE;
+	void					play() NL_OVERRIDE;
+	void					stop() NL_OVERRIDE;
+	bool					isPlaying() NL_OVERRIDE									{ return _Playing; }
+	void					setPos( const NLMISC::CVector& pos ) NL_OVERRIDE ;
+	const NLMISC::CVector	&getPos() const NL_OVERRIDE;
+	void					setVelocity( const NLMISC::CVector& vel ) NL_OVERRIDE;
+	void					setDirection( const NLMISC::CVector& dir ) NL_OVERRIDE;
+	void					setGain( float gain ) NL_OVERRIDE;
+	void					setRelativeGain( float gain ) NL_OVERRIDE;
+	float					getRelativeGain() const NL_OVERRIDE;
 	/// Called whenever the gain is changed trough setGain, setRelativeGain or the group controller's gain settings change.
 	virtual void					updateFinalGain()							{ }
-	void					setSourceRelativeMode( bool mode );
+	void					setSourceRelativeMode( bool mode ) NL_OVERRIDE;
 	/// return the user param for the user callback
 	void							*getCallbackUserParam(void) const			{ return _CbUserParam; }
 	/// Tells this source not to call its callbacks when it ends. This is valid for spawned sources only.
-	virtual	void					unregisterSpawnCallBack()					{ _SpawnEndCb = NULL; }
+	virtual	void					unregisterSpawnCallBack() NL_OVERRIDE					{ _SpawnEndCb = NULL; }
 	/// Get the velocity vector
-	virtual void					getVelocity( NLMISC::CVector& vel ) const	{ vel = _Velocity; }
+	virtual void					getVelocity( NLMISC::CVector& vel ) const NL_OVERRIDE	{ vel = _Velocity; }
 	/// Get the direction vector
-	virtual void					getDirection( NLMISC::CVector& dir ) const	{ dir = _Direction; }
+	virtual void					getDirection( NLMISC::CVector& dir ) const NL_OVERRIDE	{ dir = _Direction; }
 	/// Get the gain
-	virtual float					getGain() const								{ return _Gain; }
+	virtual float					getGain() const NL_OVERRIDE								{ return _Gain; }
 	/// Get the final gain, including group controller changes. Use this when setting the physical source output gain.
 	inline float					getFinalGain() const						{ return _Gain * _GroupController->getFinalGain(); }
 	/// Get the pitch
-	virtual float					getPitch() const							{ return _Pitch; }
+	virtual float					getPitch() const NL_OVERRIDE							{ return _Pitch; }
 	/// Get the source relative mode
-	virtual bool					getSourceRelativeMode() const				{ return _RelativeMode; }
+	virtual bool					getSourceRelativeMode() const NL_OVERRIDE				{ return _RelativeMode; }
 	/// Set the position vector to return for a stereo source (default: NULL)
 	// void							set3DPositionVector( const NLMISC::CVector *pos )	{ _3DPosition = pos; }
 	/// Return the spawn state
@@ -95,9 +95,9 @@ public:
 	/** Shift the frequency. 1.0f equals identity, each reduction of 50% equals a pitch shift
 	 * of one octave. 0 is not a legal value.
 	 */
-	virtual void					setPitch( float pitch );
+	virtual void					setPitch( float pitch ) NL_OVERRIDE;
 
-	virtual uint32					getTime();
+	virtual uint32					getTime() NL_OVERRIDE;
 
 	NL3D::CCluster					*getCluster() const { return _Cluster; }
 
@@ -109,19 +109,19 @@ public:
 	/// \name Streaming source controls
 	//@{
 	/// Set the sample format. (channels = 1, 2, ...; bitsPerSample = 8, 16; frequency = samples per second, 44100, ...)
-	virtual void					setFormat(uint8 /* channels */, uint8 /* bitsPerSample */, uint32 /* frequency */) { nlassert(false); }
+	virtual void					setFormat(uint8 /* channels */, uint8 /* bitsPerSample */, uint32 /* frequency */) NL_OVERRIDE { nlassert(false); }
 	/// Return the sample format information.
-	virtual void					getFormat(uint8 &/* channels */, uint8 &/* bitsPerSample */, uint32 &/* frequency */) const { nlassert(false); }
+	virtual void					getFormat(uint8 &/* channels */, uint8 &/* bitsPerSample */, uint32 &/* frequency */) const NL_OVERRIDE { nlassert(false); }
 	/// Get a writable pointer to the buffer of specified size. Use capacity to specify the required bytes. Returns NULL when all the buffer space is already filled. Call setFormat() first.
-	virtual uint8					*lock(uint /* capacity */) { nlassert(false); return NULL; }
+	virtual uint8					*lock(uint /* capacity */) NL_OVERRIDE { nlassert(false); return NULL; }
 	/// Notify that you are done writing to the locked buffer, so it can be copied over to hardware if needed. Set size to the number of bytes actually written to the buffer. Returns true if ok.
-	virtual bool					unlock(uint /* size */) { nlassert(false); return false; }
+	virtual bool					unlock(uint /* size */) NL_OVERRIDE { nlassert(false); return false; }
 	/// Get the recommended buffer size to use with lock()/unlock()
-	virtual void					getRecommendedBufferSize(uint &/* samples */, uint &/* bytes */) const { nlassert(false); }
+	virtual void					getRecommendedBufferSize(uint &/* samples */, uint &/* bytes */) const NL_OVERRIDE { nlassert(false); }
 	/// Get the recommended sleep time based on the size of the last submitted buffer and the available buffer space
-	virtual uint32					getRecommendedSleepTime() const { nlassert(false); return 0; }
+	virtual uint32					getRecommendedSleepTime() const NL_OVERRIDE { nlassert(false); return 0; }
 	/// Return if there are still buffers available for playback.
-	virtual bool					hasFilledBuffersAvailable() const { nlassert(false); return false; }
+	virtual bool					hasFilledBuffersAvailable() const NL_OVERRIDE { nlassert(false); return false; }
 	//@}
 	
 protected:

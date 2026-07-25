@@ -64,7 +64,7 @@ public:
 	}
 
 	/// Destructor
-	virtual ~CMoveContainer ();
+	virtual ~CMoveContainer () NL_OVERRIDE;
 
 	/// Init the container without global retriever
 	void init (double xmin, double ymin, double xmax, double ymax, uint widthCellCount, uint heightCellCount, double primitiveMaxSize,
@@ -75,35 +75,35 @@ public:
 		uint8 numWorldImage, uint maxIteration, uint otSize);
 
 	/// Add a collisionable primitive in the container. Return the pointer on the primitive.
-	UMovePrimitive*				addCollisionablePrimitive (uint8 firstWorldImage, uint8 numWorldImage, const UMovePrimitive *copyFrom = NULL);
+	UMovePrimitive*				addCollisionablePrimitive (uint8 firstWorldImage, uint8 numWorldImage, const UMovePrimitive *copyFrom = NULL) NL_OVERRIDE;
 
 	/// Add a noncollisionable primitive in the container. Return the pointer on the primitive.
-	UMovePrimitive*				addNonCollisionablePrimitive (const UMovePrimitive *copyFrom = NULL);
+	UMovePrimitive*				addNonCollisionablePrimitive (const UMovePrimitive *copyFrom = NULL) NL_OVERRIDE;
 
 	/// Load a block of collisionable primitive
-	bool						loadCollisionablePrimitiveBlock (const char *filename, uint8 firstWorldImage, uint8 numWorldImage, std::vector<UMovePrimitive*> *primitives, float orientation, const NLMISC::CVector &position, bool dontSnapToGround = false);
+	bool						loadCollisionablePrimitiveBlock (const char *filename, uint8 firstWorldImage, uint8 numWorldImage, std::vector<UMovePrimitive*> *primitives, float orientation, const NLMISC::CVector &position, bool dontSnapToGround = false) NL_OVERRIDE;
 
 	/// Add a block of collsionnable primitives
-	void						addCollisionnablePrimitiveBlock(UPrimitiveBlock *pb, uint8 firstWorldImage, uint8 numWorldImage, std::vector<UMovePrimitive*> *primitives, float orientation, const NLMISC::CVector &position, bool dontSnapToGround = false, const NLMISC::CVector &scale = NLMISC::CVector(1.0f, 1.0f, 1.0f));
+	void						addCollisionnablePrimitiveBlock(UPrimitiveBlock *pb, uint8 firstWorldImage, uint8 numWorldImage, std::vector<UMovePrimitive*> *primitives, float orientation, const NLMISC::CVector &position, bool dontSnapToGround = false, const NLMISC::CVector &scale = NLMISC::CVector(1.0f, 1.0f, 1.0f)) NL_OVERRIDE;
 
 	/// Set world image as static world image.
-	void						setAsStatic (uint8 worldImage);
+	void						setAsStatic (uint8 worldImage) NL_OVERRIDE;
 
 	/// Duplicate world image
-	void						duplicateWorldImage (uint8 source, uint8 dest);
+	void						duplicateWorldImage (uint8 source, uint8 dest) NL_OVERRIDE;
 
 	/// Remove a primitive from the container.
-	void						removePrimitive (UMovePrimitive* primitive);
+	void						removePrimitive (UMovePrimitive* primitive) NL_OVERRIDE;
 
 	/// Evaluation of the collision system
-	void						evalCollision (double deltaTime, uint8 worldImage);
+	void						evalCollision (double deltaTime, uint8 worldImage) NL_OVERRIDE;
 
 	// Evaluation of collision for one non-collisionable primitive
-	bool						evalNCPrimitiveCollision (double deltaTime, UMovePrimitive *primitive, uint8 worldImage);
+	bool						evalNCPrimitiveCollision (double deltaTime, UMovePrimitive *primitive, uint8 worldImage) NL_OVERRIDE;
 
 	/// Make a move test
 	bool						testMove (UMovePrimitive* primitive, const NLMISC::CVectorD& speed, double deltaTime, uint8 worldImage,
-											NLMISC::CVectorD *contactNormal);
+											NLMISC::CVectorD *contactNormal) NL_OVERRIDE;
 
 	/// Allocate a move element
 	CMoveElement				*allocateMoveElement ();
@@ -118,13 +118,13 @@ public:
 	}
 
 	/// Get number of trigger information
-	uint						getNumTriggerInfo() const
+	uint						getNumTriggerInfo() const NL_OVERRIDE
 	{
 		return (uint)_Triggers.size();
 	}
 
 	/// Get the n-th trigger information
-	const UTriggerInfo			&getTriggerInfo (uint id) const
+	const UTriggerInfo			&getTriggerInfo (uint id) const NL_OVERRIDE
 	{
 		// check
 		nlassert (id<_Triggers.size());
@@ -133,7 +133,7 @@ public:
 	}
 
 	/// Get all the primitives in the container
-	virtual	void				getPrimitives(std::vector<const UMovePrimitive *> &dest) const;
+	virtual	void				getPrimitives(std::vector<const UMovePrimitive *> &dest) const NL_OVERRIDE;
 
 private:
 	/// Current test time

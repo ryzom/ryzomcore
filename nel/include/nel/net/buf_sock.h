@@ -365,7 +365,7 @@ protected:
 	}
 
 	/// Returns "SRV " (server)
-	virtual std::string			typeStr() const { return "SRV "; }
+	virtual std::string			typeStr() const NL_OVERRIDE { return "SRV "; }
 
 	/// Fill the sockid and the event type byte at the end of the buffer
 	void						fillSockIdAndEventType( TSockId sockId )
