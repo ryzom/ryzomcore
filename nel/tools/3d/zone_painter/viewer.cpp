@@ -156,6 +156,7 @@ using namespace MAXMATH;
 // Viewer / screenshot: the painting scene (paint.cpp myThread without the paint tools).
 
 #include "viewer_listener.h"
+#include "zp_nav.h"
 
 // The light setup lives in g_Light* above (paint_ui.cpp defaults, vars-cfg overridable).
 
@@ -472,6 +473,108 @@ void zpViewerScreenshot(NL3D::IDriver *driver, NLMISC::CEventListenerAsync &asyn
 }
 
 
+// ---------------------------------------------------------------------------------------------
+// Zoom Extents Selected
+
+/** Grow `box` over one zone's patch hull; returns false when the zone has no geometry. */
+static bool zpZoneBox(const SPaintZone &pz, NLMISC::CAABBox &box, bool &init)
+{
+	bool any = false;
+	for (size_t p = 0; p < pz.Patches.size(); ++p)
+	{
+		const NL3D::CBezierPatch &bp = pz.Patches[p].Patch;
+		for (uint v = 0; v < 4; ++v)
+		{
+			if (!init) { box.setCenter(bp.Vertices[v]); box.setHalfSize(NLMISC::CVector::Null); init = true; }
+			else box.extend(bp.Vertices[v]);
+			any = true;
+		}
+		for (uint v = 0; v < 8; ++v) box.extend(bp.Tangents[v]);
+		for (uint v = 0; v < 4; ++v) box.extend(bp.Interiors[v]);
+	}
+	return any;
+}
+
+/**
+ * What Z frames, in priority order:
+ *   1. the last edit (paint modes: "centre on what I just worked on")
+ *   2. the tile under the cursor - useful before anything has been painted
+ *   3. the Prop-mode zone selection
+ *   4. every editable zone (plain Zoom Extents)
+ *
+ * Note for feel-testing: in Prop mode a stale last-edit from before the mode switch still
+ * wins over the zone selection. If that reads wrong in practice, move case 3 to the front
+ * when the mode is ModeProp - it is a one-line reorder.
+ */
+static void zpFrameTarget(ZPNAV::CNavListener &nav, const CPaintMouseListener &paint,
+                          const std::vector<SPaintZone> &zones, ZPPAINT::CPaintCore *core)
+{
+	NLMISC::CAABBox box;
+
+	// 1. last edit (world point + the extent that edit covered)
+	if (core)
+	{
+		NLMISC::CVector pos;
+		float radius = 0.f;
+		if (core->lastEditPos(pos, radius))
+		{
+			box.setCenter(pos);
+			// A bare tile is a small target; a little margin keeps its neighbours in frame.
+			const float half = radius > 0.f ? radius * 2.f : 4.f;
+			box.setHalfSize(NLMISC::CVector(half, half, half));
+			nav.frameBox(box);
+			printf("view: framed last edit (%.1f, %.1f, %.1f)\n", pos.x, pos.y, pos.z);
+			return;
+		}
+	}
+
+	// 2. hovered tile
+	if (core && paint.HaveHover)
+	{
+		NLMISC::CVector c[4];
+		if (core->tileCorners(paint.HoverZone, paint.HoverTile, c) == 0)
+		{
+			box.setCenter(c[0]);
+			box.setHalfSize(NLMISC::CVector::Null);
+			for (int i = 1; i < 4; ++i) box.extend(c[i]);
+			nav.frameBox(box);
+			printf("view: framed hovered tile (zone %u)\n", paint.HoverZone);
+			return;
+		}
+	}
+
+	// 3. Prop-mode zone selection
+	if (g_HavePropSelection)
+	{
+		if (const SPaintZone *pz = zpFindPaintZone(g_SelectedZoneId))
+		{
+			bool init = false;
+			if (zpZoneBox(*pz, box, init) && init)
+			{
+				nav.frameBox(box);
+				printf("view: framed selected zone %u '%s'\n", pz->ZoneId, pz->Name.c_str());
+				return;
+			}
+		}
+	}
+
+	// 4. every editable zone; frozen context only when nothing is editable (same two-pass
+	//    rule the session's initial camera placement uses).
+	bool init = false;
+	for (int pass = 0; pass < 2 && !init; ++pass)
+	{
+		for (size_t i = 0; i < zones.size(); ++i)
+		{
+			if (pass == 0 && zones[i].Frozen) continue;
+			zpZoneBox(zones[i], box, init);
+		}
+	}
+	if (!init)
+		return;
+	nav.frameBox(box);
+	printf("view: framed all editable zones\n");
+}
+
 /**
  * Drop every global that points at runViewer's frame-local objects (the UI bridges, the
  * paint context, the script pump/host, the async listener, the session bank).
@@ -617,8 +720,8 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 		}
 		theLand->Landscape.setRefineMode(true);
 
-		// Camera looking at the bbox center from a sensible distance (the plugin inherited the
-		// Max viewport matrix; standalone starts from a canonical three-quarter view).
+		// Camera looking at the bbox center from a sensible distance (standalone starts from
+		// a canonical three-quarter view).
 		printf("view: framing bbox min=(%.1f,%.1f,%.1f) max=(%.1f,%.1f,%.1f) radius=%.1f\n",
 		       bbox.getMin().x, bbox.getMin().y, bbox.getMin().z,
 		       bbox.getMax().x, bbox.getMax().y, bbox.getMax().z, bbox.getRadius());
@@ -657,14 +760,14 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 		ZPUI::startupHideAllScreens();
 		ZPUI::startupShowPainter(true);
 
-		// Mouse listener: edit3d orbiting the landscape center (the plugin's hotspot was the
-		// selection center).
-		NL3D::CEvent3dMouseListener mouseListener;
+		// Navigation: middle-button set on the view-target model (see zp_nav.h).
+		// The left button is deliberately NOT bound here - it belongs to paint / select /
+		// transform, and Ctrl+Left / Alt+Left are reserved for selection add / subtract.
+		ZPNAV::CNavListener mouseListener;
 		mouseListener.setMatrix(camMat);
 		mouseListener.setFrustrum(camera->getFrustum());
 		mouseListener.setViewport(viewport);
-		mouseListener.setHotSpot(center);
-		mouseListener.setMouseMode(NL3D::CEvent3dMouseListener::edit3d);
+		mouseListener.setTarget(center);
 		mouseListener.addToServer(udriver->EventServer);
 
 		CWindowCloseListener closeListener;
@@ -812,7 +915,6 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 		{
 			core->attachLandscape(&theLand->Landscape);
 			paintListener.Core = core;
-			paintListener.Nav = &mouseListener;
 			paintListener.Camera = camera;
 			paintListener.EditorUI = editorUI;
 			paintListener.Viewport = viewport;
@@ -1200,6 +1302,14 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 						ZPUI::refreshSessionBoardStates();
 				}
 				}
+				// Dev-only: ZONE_PAINTER_ZOOM_EXTENTS=1 runs the Z (Zoom Extents Selected)
+				// fallback chain once before the capture, so the framing is gateable
+				// headlessly (the key itself only exists in the interactive loop).
+				{
+					const char *ze = getenv("ZONE_PAINTER_ZOOM_EXTENTS");
+					if (ze && ze[0] && ze[0] != '0')
+						zpFrameTarget(mouseListener, paintListener, zones, core);
+				}
 				// Dev-only: ZONE_PAINTER_DUMP_RECORDER=1 prints the recorder buffer AFTER the
 				// panel/board env hooks ran (board-op recording E2E extracts this dump
 				// and replays it - dumping before the board hooks missed their lines).
@@ -1452,8 +1562,27 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 						zpToggleMaskMode();
 					if (zpKeyPushed(ZPK_LockBorders))
 						zpToggleLockBorders();
-					if (zpKeyPushed(ZPK_SeasonNext))
+					// Shift+Y is the view-history redo, so plain-Y season cycling must not
+					// also fire on it (the key table has no modifier dimension).
+					const bool shiftHeld = udriver->AsyncListener.isKeyDown(NLMISC::KeySHIFT);
+					if (zpKeyPushed(ZPK_SeasonNext) && !shiftHeld)
 						zpSeasonNext();
+					// Z = Zoom Extents Selected; Shift+Z / Shift+Y = view history.
+					if (zpKeyPushed(ZPK_ZoomExtentsSel))
+					{
+						if (shiftHeld)
+						{
+							if (!mouseListener.viewUndo())
+								printf("view: nothing to step back to\n");
+						}
+						else
+							zpFrameTarget(mouseListener, paintListener, zones, core);
+					}
+					if (shiftHeld && udriver->AsyncListener.isKeyPushed(NLMISC::KeyY))
+					{
+						if (!mouseListener.viewRedo())
+							printf("view: nothing to step forward to\n");
+					}
 					if (!paintListener.Pressed && !editorUI->wantsMouse())
 						paintListener.updateHover();
 					else if (editorUI->wantsMouse())

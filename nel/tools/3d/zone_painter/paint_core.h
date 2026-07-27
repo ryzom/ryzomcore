@@ -431,6 +431,18 @@ public:
 	sint storedIncludeMeshes() const { return m_StoredIncludeMeshes; }
 	sint storedPreloadTiles() const { return m_StoredPreloadTiles; }
 
+	/**
+	 * Where the last edit landed, in world space, with the extent that edit covered
+	 * (tile radius for tile/displace ops, brush radius for the colour brush, patch extent
+	 * for fills). Feeds the viewer's Zoom-Extents-Selected fallback chain, which wants to
+	 * frame "what I just worked on" in paint modes.
+	 *
+	 * Recorded by the OP LAYER, not by setTile: a transition solve touches a spray of
+	 * neighbouring tiles and the interesting point is the one the artist aimed at. Cleared
+	 * by init() - a working-set rebuild invalidates the zone ids the point came from.
+	 */
+	bool lastEditPos(NLMISC::CVector &pos, float &radius) const;
+
 	// Mouse pick: world ray -> (zone, tileId). Uses the display bezier patches.
 	bool pickTile(const NLMISC::CVector &pos, const NLMISC::CVector &dir, uint &zone, sint32 &tileId,
 	              NLMISC::CVector &hit);
@@ -543,6 +555,10 @@ private:
 	std::string m_BrushMaskName;
 	sint m_StoredIncludeMeshes; // -1 unknown / 0 / 1 (RPO_INCLUDE_MESHES 0x4003)
 	sint m_StoredPreloadTiles;  // -1 unknown / 0 / 1 (RPO_PRELOAD_TILES 0x4010)
+	// last-edit marker (see lastEditPos)
+	bool m_HaveLastEdit;
+	NLMISC::CVector m_LastEditPos;
+	float m_LastEditRadius;
 
 	// Per-tileset group tile lists (paint_ui CBankCont port): set-local 128/256 indices whose
 	// bank tile carries the group flag and a diffuse name.
@@ -620,6 +636,10 @@ private:
 	                bool first, int rotation, bool _256);
 	uint8 calcRotPath(SPaintTile *from, SPaintTile *to, int depth, int rotate, int &dx, int &dy, int &cost);
 	SPaintTile *metaAt(uint zone, sint32 tileId);
+	// last-edit marker helpers (zone index based, like the rest of the private layer)
+	void noteEditAt(const NLMISC::CVector &pos, float radius);
+	void noteEditTile(uint zoneIdx, sint32 tileId);
+	void noteEditPatch(uint zoneIdx, uint patch);
 	// Self-instance duals: other zones sharing the same carrier+tileId (same pristine slot,
 	// distinct meta graphs). Paint must visit/propagate through every dual or the
 	// instance-side seam graph is under-constrained relative to the primary-side path.

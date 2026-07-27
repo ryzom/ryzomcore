@@ -59,9 +59,13 @@ namespace NL3D
 	class CCamera;
 	class UDriver;
 	class UScene;
-	class CEvent3dMouseListener;
 	class IDriver;
 	class CViewport;
+}
+
+namespace ZPNAV
+{
+	class CNavListener;
 }
 
 namespace PMAXLOAD
@@ -141,6 +145,7 @@ enum TPainterKey
 	ZPK_SeasonNext,
 	ZPK_TogglePalette,
 	ZPK_ToggleBoard,
+	ZPK_ZoomExtentsSel,
 	ZPK_KeyCounter
 };
 
@@ -300,7 +305,7 @@ struct SScriptPumpCtx
 	NL3D::UDriver *Driver;
 	NL3D::UScene *Scene;
 	ZPUI::CEditorUI *Ui;
-	NL3D::CEvent3dMouseListener *Nav;
+	ZPNAV::CNavListener *Nav;
 	NLMISC::TTime LastPump;
 	SScriptPumpCtx() : Driver(NULL), Scene(NULL), Ui(NULL), Nav(NULL), LastPump(0) { }
 };

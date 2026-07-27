@@ -60,7 +60,6 @@ public:
 	enum TPaintMode { ModeTile = 0, ModeColor, ModeDisplace, ModeProp };
 
 	ZPPAINT::CPaintCore *Core;
-	NL3D::CEvent3dMouseListener *Nav;
 	NL3D::CCamera *Camera; // unwrapped from UScene::getCam()
 	ZPUI::CEditorUI *EditorUI;
 	NL3D::CViewport Viewport;
@@ -79,7 +78,7 @@ public:
 	uint BrushHardness, BrushOpacity;
 	uint DisplaceIndex;
 
-	CPaintMouseListener() : Core(NULL), Nav(NULL), Camera(NULL), EditorUI(NULL), CurTileSet(0), Mode256(false), Pressed(false),
+	CPaintMouseListener() : Core(NULL), Camera(NULL), EditorUI(NULL), CurTileSet(0), Mode256(false), Pressed(false),
 		MouseX(0.5f), MouseY(0.5f), HaveHover(false), HoverZone(0), HoverTile(-1), StrokeZone(0), StrokeTile(-1),
 		Mode(ModeTile), BrushColor(255, 255, 255, 255), BrushRadius(8.f), BrushHardness(128), BrushOpacity(255),
 		DisplaceIndex(0) { }

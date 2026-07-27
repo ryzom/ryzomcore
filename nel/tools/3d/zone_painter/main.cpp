@@ -334,6 +334,7 @@ const char *kPainterKeysName[ZPK_KeyCounter] =
 	"SeasonNext",
 	"TogglePalette",
 	"ToggleBoard",
+	"ZoomExtentsSelected",
 };
 
 // Tool defaults: the pre-cfg hardcoded viewer keys stay on their keys (T/C/D, +/-, B, G, F);
@@ -375,6 +376,7 @@ uint g_PainterKeys[ZPK_KeyCounter] =
 	NLMISC::KeyY,         // SeasonNext (free key; cycle season textures)
 	NLMISC::KeyP,         // TogglePalette (free key; tileset thumbnail palette)
 	NLMISC::KeyO,         // ToggleBoard (free key; session board hub)
+	NLMISC::KeyZ,         // ZoomExtentsSelected (Shift+Z / Shift+Y step view history)
 };
 
 // paint_ui.cpp light/zoom variable defaults (LoadVarCfg overrides; identical to the previous
@@ -588,7 +590,7 @@ int main(int argc, char **argv)
 	                    "pattern after a final '-' (e.g. zonematerial-converted-193_ec) place on the minesweeper\n"
 	                    "board and resolve 8-ring neighbors; unparseable sets fall back to a flat list.\n"
 	                    "Legacy: zone_painter <input.max> --bank <bank> [...] behaves exactly as before.\n"
-	                    "Top toolbar (3ds-Max vibe): movable bar with left drag grip (client hands-bar idiom),\n"
+	                    "Top toolbar: movable bar with left drag grip (client hands-bar idiom),\n"
 	                    "square text buttons BOARD SAVE | UNDO REDO | TILE COLOR DISP PROP | <season face>. Season opens a\n"
 	                    "context menu of available seasons; mode buttons show pushed state. Keys T/C/D/R, O, Y, undo/redo\n"
 	                    "still work. Slim Painter panel: tile set ± / 256 / brush / group, Color section, Displace,\n"
@@ -604,7 +606,8 @@ int main(int argc, char **argv)
 	                    "  Honored: ModeTile ModeColor ModeDisplace ModeProp SizeUp SizeDown ToggleTileSize GroupUp GroupDown\n"
 	                    "  Fill0 Fill1 Fill2 Fill3 HardnessUp HardnessDown OpacityUp OpacityDown SelectColorBrush\n"
 	                    "  ToggleColorBrushMode LockBorders ZoomIn ZoomOut ToggleUI SeasonNext TogglePalette ToggleBoard\n"
-	                    "  (defaults: T C D R + - B G V F F6 F7 F8 Home End Insert Delete S Q L, F10, Y, P; zoom unbound).\n"
+	                    "  ZoomExtentsSelected\n"
+	                    "  (defaults: T C D R + - B G V F F6 F7 F8 Home End Insert Delete S Q L, F10, Y, P, Z; zoom unbound).\n"
 	                    "  ModeProp (default R): property-edit mode - hover thin zone outline, click selects thick;\n"
 	                    "  only editable (unfrozen primary) zones; RO/instance click reports read-only .\n"
 	                    "  Accepted+ignored (no tool equivalent): Select Pick ToggleColor BackgroundColor ToggleArrows\n"
@@ -621,6 +624,14 @@ int main(int argc, char **argv)
 	                    "    popup Rotate CW/CCW / Mirror / Remove; home = open brick. Labels show R90/M.\n"
 	                    "    Continent: L-click closed=open, open=Close/Save/Toggle. BACK TO PAINTING / O\n"
 	                    "    returns. Working-set / place changes rebuild landscape+weld and CLEAR undo).\n"
+	                    "Navigation (middle-button set; the LEFT button is never navigation, it\n"
+	                    "belongs to paint/select): MMB pan, Alt+MMB orbit, Ctrl+Alt+MMB dolly, Ctrl+MMB fast\n"
+	                    "pan, Shift+MMB axis-locked pan, wheel stepped zoom. Orbit/dolly/wheel all pivot on\n"
+	                    "the VIEW TARGET, which pans with the camera and is reset by Z - not on a point\n"
+	                    "frozen at session start.\n"
+	                    "  ZoomExtentsSelected (default Z): frames the last edit, else the hovered tile,\n"
+	                    "  else the Prop selection, else every editable zone. Shift+Z / Shift+Y step the\n"
+	                    "  view history.\n"
 	                    "Fixed viewer keys: PgUp/PgDn + 0-9 tile set, [ ] displace index, Ctrl+Z/Ctrl+E undo/redo,\n"
 	                    "F12 screenshot, ESC quit.");
 	// Optional first positional: .max (legacy) or folder (startup seed). Absent => startup flow.

@@ -538,6 +538,7 @@ bool CPaintCore::opTile(uint zone, uint patch, uint u, uint v, int tileSet, int 
 	SPaintTile *t = metaAt(zi, (sint32)(patch * ZP_NUM_TILE_SEL + v * ZP_MAX_TILE_IN_PATCH + u));
 	if (!t) { err = "tile not in grid"; return false; }
 	m_StrokeSets = 0;
+	noteEditTile(zi, t->TileId);
 	std::set<SPaintTile *> visited;
 	bool ok = putATile(t, tileSet, rot & 3, true, visited, _256);
 	applyChanges();
@@ -558,6 +559,7 @@ bool CPaintCore::opClear(uint zone, uint patch, uint u, uint v, bool _256, std::
 	SPaintTile *t = metaAt(zi, (sint32)(patch * ZP_NUM_TILE_SEL + v * ZP_MAX_TILE_IN_PATCH + u));
 	if (!t) { err = "tile not in grid"; return false; }
 	m_StrokeSets = 0;
+	noteEditTile(zi, t->TileId);
 	bool ok = clearATile(t, _256);
 	applyChanges();
 	endStroke();
@@ -603,6 +605,7 @@ bool CPaintCore::opTileStroke(uint zone, sint32 tileId, int tileSet, bool _256, 
 	}
 
 	m_StrokeSets = 0;
+	noteEditTile(zi, tileId);
 	std::set<SPaintTile *> alreadyRecursed;
 	// Brush size -> recursion depth, the plugin's PutTile call: brushValue[brushSize] with the
 	// same depth whether 128 or 256 (RecursTile steps -2 per 256 hop).
@@ -1010,6 +1013,7 @@ bool CPaintCore::opColorVertex(uint zone, uint patch, sint32 s, sint32 t, NLMISC
 	std::vector<SColorSlot> slots;
 	vertexClosure(zi, tile, vid, slots);
 	m_StrokeSets = 0;
+	noteEditTile(zi, tile->TileId);
 	bool ok = setVertexColorShared(slots, color, blend > 256 ? 256 : blend);
 	applyChanges();
 	endStroke();
@@ -1095,6 +1099,8 @@ bool CPaintCore::opColorBrush(uint zone, sint32 seedTileId, const NLMISC::CVecto
 	if (radius <= 0.f) { err = "bad radius"; return false; }
 	float hard = (float)(hardness > 255 ? 255 : hardness) / 255.f;
 	float opa = (float)(opacity > 255 ? 255 : opacity) / 255.f;
+	// The brush's own hit point and radius describe the edit better than any single tile.
+	noteEditAt(hit, radius);
 
 	// Brush-plane base vectors (CPaintColor::paint port). The plugin's topVector is the hit
 	// tile quad's normal ((p1-p0)^(p2-p0) over corners (u,v),(u,v+1),(u+1,v+1)); the seed tile
@@ -1370,6 +1376,7 @@ bool CPaintCore::opFillTile(uint zone, uint patch, int tileSet, int rot, bool _2
 	// -1 is the clear sentinel; anything else negative would index the bank out of bounds
 	if (tileSet < -1 || tileSet >= m_Bank->getTileSetCount()) { err = "tile set out of range"; return false; }
 	m_StrokeSets = 0;
+	noteEditPatch(zi, patch);
 	bool ok = fillTileImpl(zi, patch, tileSet, rot & 3, _256);
 	applyChanges();
 	endStroke();
@@ -1391,6 +1398,7 @@ bool CPaintCore::opFillColor(uint zone, uint patch, NLMISC::CRGBA color, uint bl
 	sint32 numU = (sint32)orderS(zi, patch) + 1;
 	sint32 numV = (sint32)orderT(zi, patch) + 1;
 	m_StrokeSets = 0;
+	noteEditPatch(zi, patch);
 	if (blend > 256) blend = 256;
 	for (sint32 t = 0; t < numV; ++t)
 	for (sint32 s = 0; s < numU; ++s)
@@ -1463,6 +1471,7 @@ bool CPaintCore::opDisplace(uint zone, uint patch, uint u, uint v, uint displace
 	if (!t) { err = "tile not in grid"; return false; }
 	if (t->Frozen) { err = "tile frozen"; return false; }
 	m_StrokeSets = 0;
+	noteEditTile(zi, t->TileId);
 	// The plugin's displace put rode the same brush recursion as the tile put (PutDisplace ->
 	// RecursTile depth brushValue[brushSize]); depth 0 == the historical single-tile behavior.
 	std::set<SPaintTile *> alreadyRecursed;
@@ -1485,6 +1494,7 @@ bool CPaintCore::opRawTile(uint zone, uint patch, uint u, uint v, int tile, int 
 	if (!t) { err = "tile not in grid"; return false; }
 	if (t->Frozen) { err = "tile frozen"; return false; }
 	m_StrokeSets = 0;
+	noteEditTile(zi, t->TileId);
 	CTileDescP desc;
 	desc.setTile(1, 0, 0, CTileIdx(tile, rot & 3), CTileIdx(), CTileIdx());
 	setTile(zi, t->TileId, desc, NULL, true);
@@ -1504,6 +1514,7 @@ bool CPaintCore::opFillDisplace(uint zone, uint patch, uint displace, std::strin
 	if (m_Zones[zi].In.Frozen) { err = "zone frozen"; return false; }
 	if (displace > 15) { err = "displace out of range"; return false; }
 	m_StrokeSets = 0;
+	noteEditPatch(zi, patch);
 	uint numU = orderS(zi, patch), numV = orderT(zi, patch);
 	for (uint v = 0; v < numV; ++v)
 	for (uint u = 0; u < numU; ++u)
@@ -1939,6 +1950,48 @@ bool CPaintCore::dumpCarrierBlob(uint zone, std::vector<uint8> &out) const
 		}
 	}
 	return false;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Last-edit marker (see paint_core.h). Set by the op layer at the point the artist AIMED at,
+// not at every tile a transition solve happens to rewrite.
+
+void CPaintCore::noteEditAt(const NLMISC::CVector &pos, float radius)
+{
+	m_HaveLastEdit = true;
+	m_LastEditPos = pos;
+	m_LastEditRadius = radius > 0.f ? radius : 0.f;
+}
+
+void CPaintCore::noteEditTile(uint zoneIdx, sint32 tileId)
+{
+	const SPaintTile *t = metaAt(zoneIdx, tileId);
+	if (!t) return;
+	noteEditAt(t->Center, t->Radius);
+}
+
+void CPaintCore::noteEditPatch(uint zoneIdx, uint patch)
+{
+	if (zoneIdx >= m_Zones.size()) return;
+	const std::vector<NL3D::CPatchInfo> *patches = m_Zones[zoneIdx].In.Patches;
+	if (!patches || patch >= patches->size()) return;
+	const NL3D::CBezierPatch &bp = (*patches)[patch].Patch;
+	const NLMISC::CVector center = bp.eval(0.5f, 0.5f);
+	float radius = 0.f;
+	for (uint v = 0; v < 4; ++v)
+	{
+		const float d = (bp.Vertices[v] - center).norm();
+		if (d > radius) radius = d;
+	}
+	noteEditAt(center, radius);
+}
+
+bool CPaintCore::lastEditPos(NLMISC::CVector &pos, float &radius) const
+{
+	if (!m_HaveLastEdit) return false;
+	pos = m_LastEditPos;
+	radius = m_LastEditRadius;
+	return true;
 }
 
 void CPaintCore::getTile(uint zone, sint32 tileId, CTileDescP &desc) const

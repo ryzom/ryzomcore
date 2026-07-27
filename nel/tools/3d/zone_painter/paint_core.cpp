@@ -108,6 +108,8 @@ CPaintCore::CPaintCore()
 	m_StoredIncludeMeshes = -1;
 	m_StoredPreloadTiles = -1;
 	m_PropChangedCb = NULL;
+	m_HaveLastEdit = false;
+	m_LastEditRadius = 0.f;
 }
 
 CPaintCore::~CPaintCore()
@@ -243,6 +245,9 @@ bool CPaintCore::init(const std::vector<SPaintZoneInput> &zones, NL3D::CTileBank
 	// Stored painter flags are harvested first-win per working set, not per process.
 	m_StoredIncludeMeshes = -1;
 	m_StoredPreloadTiles = -1;
+	// The marker names a world point derived from zone ids that are about to be reassigned.
+	m_HaveLastEdit = false;
+	m_LastEditRadius = 0.f;
 
 	std::map<const void *, uint> carrierIndex; // keyed by leaf ptr or rpo ptr (shared objects)
 	for (size_t i = 0; i < zones.size(); ++i)

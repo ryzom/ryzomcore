@@ -152,6 +152,8 @@ using namespace MAXMATH;
 #include "startup_ui.h"
 #include "script_api.h"
 
+#include "zp_nav.h"
+
 #include "zp_state.h"
 #include "viewer_listener.h"
 
