@@ -519,6 +519,14 @@ void recordBoardOp(const std::string &line)
 		ZPSCRIPT::record(line);
 }
 
+/** Current paint mode for the key table's mode scoping (see ZPKS_* in zp_state.h). */
+int zpCurrentPaintMode()
+{
+	if (!g_PaintCtx.Active || !g_PaintCtx.Paint)
+		return -1;
+	return g_PaintCtx.Paint->Mode;
+}
+
 void zpSelectMode(int mode)
 {
 	if (!g_PaintCtx.Active || !g_PaintCtx.Paint) return;

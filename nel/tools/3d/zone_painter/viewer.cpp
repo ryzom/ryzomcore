@@ -263,32 +263,6 @@ void CPaintMouseListener::operator()(const NLMISC::CEvent &event)
 {
 		if (!Core) return;
 		if (g_ScriptUiLock) return; // painterscript pump: input locked (ESC handled by the pump)
-		// Keyboard undo/redo always works; mouse is consumed when over the GUI.
-		if (event == NLMISC::EventKeyDownId)
-		{
-			NLMISC::CEventKeyDown *keyDown = (NLMISC::CEventKeyDown *)&event;
-			if (keyDown->FirstTime && (keyDown->Button & NLMISC::ctrlKeyButton))
-			{
-				if (keyDown->Key == NLMISC::KeyZ || keyDown->Key == NLMISC::KeyE)
-				{
-					// Commit any open mouse stroke first: opUndo/opRedo don't guard
-					// m_CurStroke, and undoing beneath an open stroke corrupts the
-					// undo pairing (paint+undo would no longer restore pristine).
-					if (Pressed)
-					{
-						Pressed = false;
-						Core->endStroke();
-						ZPSCRIPT::record("painter.endStroke()");
-					}
-					// Shared handlers, not Core directly; the toolbar buttons go through
-					// these and they record for the painterscript recorder; the raw-Core
-					// keyboard path silently skipped recording.
-					if (keyDown->Key == NLMISC::KeyZ) zpUndo();
-					else zpRedo();
-				}
-			}
-			return;
-		}
 		if (guiWantsMouse())
 		{
 			// Abort an in-progress stroke if the pointer enters a GUI window mid-drag
@@ -462,7 +436,8 @@ void CPaintMouseListener::operator()(const NLMISC::CEvent &event)
 // F12 screenshot convenience (CNELU::screenshot port; uses the unwrapped IDriver).
 void zpViewerScreenshot(NL3D::IDriver *driver, NLMISC::CEventListenerAsync &async)
 {
-	if (!async.isKeyPushed(NLMISC::KeyF12))
+	(void)async; // the binding is read through the key table (g_ViewerAsync)
+	if (!zpKeyPushed(ZPK_Screenshot))
 		return;
 	NLMISC::CBitmap btm;
 	driver->getBuffer(btm);
@@ -926,7 +901,6 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 			udriver->EventServer.addListener(NLMISC::EventMouseDownId, &paintListener);
 			udriver->EventServer.addListener(NLMISC::EventMouseUpId, &paintListener);
 			udriver->EventServer.addListener(NLMISC::EventMouseMoveId, &paintListener);
-			udriver->EventServer.addListener(NLMISC::EventKeyDownId, &paintListener);
 			// Preload flush (plugin preloadTiles): all tile sets into the driver
 			if (g_PreloadTiles)
 				core->preloadTiles(driver);
@@ -1510,19 +1484,25 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 					zpToggleBoard();
 
 				// Tile set / mode / brush keys → shared named handlers (same as NLGUI buttons).
-				// PgUp/PgDn + 0-9 and [ ] displace stay hardcoded; rebindable actions ride the
-				// key table (see kPainterKeysName / --keys-cfg).
-				if (core)
+				// Everything rides the key table now (see kPainterKeysName / --keys-cfg);
+				// only ESC stays hardcoded, as the universal cancel.
+				//
+				// The table is polled off the driver's async listener, which does not know
+				// about NLGUI focus - without this guard, typing "t" into the script window's
+				// edit box also switched paint mode.
+				const bool guiHasKeyboard =
+					NLGUI::CWidgetManager::getInstance()->isKeyboardCaptured();
+				if (core && !guiHasKeyboard)
 				{
 					uint count = core->tileSetCount();
 					if (count)
 					{
-						if (udriver->AsyncListener.isKeyPushed(NLMISC::KeyPRIOR))
+						if (zpKeyPushed(ZPK_TileSetPrev))
 							zpSelectTileSetDelta(-1);
-						if (udriver->AsyncListener.isKeyPushed(NLMISC::KeyNEXT))
+						if (zpKeyPushed(ZPK_TileSetNext))
 							zpSelectTileSetDelta(+1);
 						for (int k = 0; k <= 9; ++k)
-							if (udriver->AsyncListener.isKeyPushed((NLMISC::TKey)(NLMISC::Key0 + k)) && k < (int)count)
+							if (k < (int)count && zpKeyDigitPushed((uint)k))
 								zpSelectTileSetAbs(k);
 					}
 					if (zpKeyPushed(ZPK_ToggleTileSize))
@@ -1544,9 +1524,9 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 					if (zpKeyPushed(ZPK_GroupDown))
 						zpGroupDelta(-1);
 					// Displace / hardness / opacity / mask: shared handlers (keys + panel)
-					if (udriver->AsyncListener.isKeyPushed(NLMISC::KeyLBRACKET))
+					if (zpKeyPushed(ZPK_DisplacePrev))
 						zpDisplaceIndexDelta(-1);
-					if (udriver->AsyncListener.isKeyPushed(NLMISC::KeyRBRACKET))
+					if (zpKeyPushed(ZPK_DisplaceNext))
 						zpDisplaceIndexDelta(+1);
 					if (zpKeyPushed(ZPK_HardnessUp))
 						zpHardnessDelta(+51);
@@ -1562,26 +1542,31 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 						zpToggleMaskMode();
 					if (zpKeyPushed(ZPK_LockBorders))
 						zpToggleLockBorders();
-					// Shift+Y is the view-history redo, so plain-Y season cycling must not
-					// also fire on it (the key table has no modifier dimension).
-					const bool shiftHeld = udriver->AsyncListener.isKeyDown(NLMISC::KeySHIFT);
-					if (zpKeyPushed(ZPK_SeasonNext) && !shiftHeld)
+					if (zpKeyPushed(ZPK_SeasonNext))
 						zpSeasonNext();
-					// Z = Zoom Extents Selected; Shift+Z / Shift+Y = view history.
+		// Z = Zoom Extents Selected; Shift+Z / Shift+Y = view history.
+		// Plain Y still cycles the season: modifier matching is exact, so the
+		// Shift bindings and the bare ones cannot fire on each other.
 					if (zpKeyPushed(ZPK_ZoomExtentsSel))
+						zpFrameTarget(mouseListener, paintListener, zones, core);
+					if (zpKeyPushed(ZPK_ViewUndo) && !mouseListener.viewUndo())
+						printf("view: nothing to step back to\n");
+					if (zpKeyPushed(ZPK_ViewRedo) && !mouseListener.viewRedo())
+						printf("view: nothing to step forward to\n");
+					// Undo / redo. Commit an open mouse stroke first: opUndo/opRedo do not
+					// guard m_CurStroke, and undoing beneath an open stroke corrupts the
+					// pairing (paint+undo would no longer restore pristine). Goes through
+					// the shared handlers, not Core, so the recorder sees it.
+					if (zpKeyPushed(ZPK_Undo) || zpKeyPushed(ZPK_Redo) || zpKeyPushed(ZPK_Redo2))
 					{
-						if (shiftHeld)
+						if (paintListener.Pressed)
 						{
-							if (!mouseListener.viewUndo())
-								printf("view: nothing to step back to\n");
+							paintListener.Pressed = false;
+							core->endStroke();
+							ZPSCRIPT::record("painter.endStroke()");
 						}
-						else
-							zpFrameTarget(mouseListener, paintListener, zones, core);
-					}
-					if (shiftHeld && udriver->AsyncListener.isKeyPushed(NLMISC::KeyY))
-					{
-						if (!mouseListener.viewRedo())
-							printf("view: nothing to step forward to\n");
+						if (zpKeyPushed(ZPK_Undo)) zpUndo();
+						else zpRedo();
 					}
 					if (!paintListener.Pressed && !editorUI->wantsMouse())
 						paintListener.updateHover();
@@ -1791,7 +1776,6 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 			udriver->EventServer.removeListener(NLMISC::EventMouseDownId, &paintListener);
 			udriver->EventServer.removeListener(NLMISC::EventMouseUpId, &paintListener);
 			udriver->EventServer.removeListener(NLMISC::EventMouseMoveId, &paintListener);
-			udriver->EventServer.removeListener(NLMISC::EventKeyDownId, &paintListener);
 		}
 		// Drop the painting UScene; the shared driver (startup flow) keeps its display.
 		if (uscene)

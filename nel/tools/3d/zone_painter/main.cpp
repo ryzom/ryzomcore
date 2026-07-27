@@ -280,6 +280,13 @@ bool g_HavePropSelection = false;
 uint g_SelectedZoneId = 0;
 std::string g_PropStatusMsg; // click "read-only" / selection name (HUD + panel)
 
+// Three parallel tables indexed by TPainterKey; the sizes are left implicit and checked
+// below, so adding an action without extending all three is a compile error rather than a
+// silently zero-filled (and therefore dead, or unnamed) binding.
+typedef char zpCheckKeyNames[(sizeof(kPainterKeysName) / sizeof(kPainterKeysName[0])) == ZPK_KeyCounter ? 1 : -1];
+typedef char zpCheckKeyDefaults[(sizeof(g_PainterKeys) / sizeof(g_PainterKeys[0])) == ZPK_KeyCounter ? 1 : -1];
+typedef char zpCheckKeyModes[(sizeof(kPainterKeyModes) / sizeof(kPainterKeyModes[0])) == ZPK_KeyCounter ? 1 : -1];
+
 // ---------------------------------------------------------------------------------------------
 // keys.cfg / vars.cfg (plugin paint_ui.cpp LoadKeyCfg/LoadVarCfg port). The plugin read BOTH
 // variable sets from one keys.cfg next to the plugin dll (NLMISC::CConfigFile: the file itself
@@ -297,7 +304,7 @@ std::string g_PropStatusMsg; // click "read-only" / selection name (HUD + panel)
 
 
 // The plugin's cfg variable names (paint_ui.cpp PainterKeysName, order preserved)
-const char *kPainterKeysName[ZPK_KeyCounter] =
+const char *kPainterKeysName[] =
 {
 	"Select",
 	"Pick",
@@ -335,11 +342,22 @@ const char *kPainterKeysName[ZPK_KeyCounter] =
 	"TogglePalette",
 	"ToggleBoard",
 	"ZoomExtentsSelected",
+	"TileSetPrev",
+	"TileSetNext",
+	"TileSetDigits",
+	"DisplacePrev",
+	"DisplaceNext",
+	"Undo",
+	"Redo",
+	"Redo2",
+	"ViewUndo",
+	"ViewRedo",
+	"Screenshot",
 };
 
 // Tool defaults: the pre-cfg hardcoded viewer keys stay on their keys (T/C/D, +/-, B, G, F);
 // new actions land on free keys (documented in --help). 0 = unbound.
-uint g_PainterKeys[ZPK_KeyCounter] =
+uint g_PainterKeys[] =
 {
 	0,                    // Select (in-plugin paint-modifier action; no tool equivalent)
 	0,                    // Pick (the tool picks on right mouse, hardcoded)
@@ -376,7 +394,73 @@ uint g_PainterKeys[ZPK_KeyCounter] =
 	NLMISC::KeyY,         // SeasonNext (free key; cycle season textures)
 	NLMISC::KeyP,         // TogglePalette (free key; tileset thumbnail palette)
 	NLMISC::KeyO,         // ToggleBoard (free key; session board hub)
-	NLMISC::KeyZ,         // ZoomExtentsSelected (Shift+Z / Shift+Y step view history)
+	NLMISC::KeyZ,         // ZoomExtentsSelected
+	NLMISC::KeyPRIOR,     // TileSetPrev (PgUp)
+	NLMISC::KeyNEXT,      // TileSetNext (PgDn)
+	NLMISC::Key0,         // TileSetDigits: base of the 0-9 run
+	NLMISC::KeyLBRACKET,  // DisplacePrev
+	NLMISC::KeyRBRACKET,  // DisplaceNext
+	ZPK_BIND(NLMISC::KeyZ, ZPKM_CTRL), // Undo
+	ZPK_BIND(NLMISC::KeyY, ZPKM_CTRL), // Redo
+	ZPK_BIND(NLMISC::KeyE, ZPKM_CTRL), // Redo2 (what the tool shipped before)
+	ZPK_BIND(NLMISC::KeyZ, ZPKM_SHIFT), // ViewUndo
+	ZPK_BIND(NLMISC::KeyY, ZPKM_SHIFT), // ViewRedo
+	NLMISC::KeyF12,       // Screenshot
+};
+
+// Mode scope per action (see ZPKS_* in zp_state.h). Everything that only makes sense while
+// painting is ZPKS_PAINT so the patch-edit modes can reuse those keys; everything the artist
+// needs from any mode - navigation, undo, view, panels, the mode switches themselves - is
+// ZPKS_ANY. Identical behaviour today: no mode outside 0-3 exists yet.
+const uint8 kPainterKeyModes[] =
+{
+	ZPKS_PAINT, // Select
+	ZPKS_PAINT, // Pick
+	ZPKS_PAINT, // Fill0
+	ZPKS_PAINT, // Fill1
+	ZPKS_PAINT, // Fill2
+	ZPKS_PAINT, // Fill3
+	ZPKS_ANY,   // ModeTile      (mode switches must work FROM any mode)
+	ZPKS_ANY,   // ModeColor
+	ZPKS_ANY,   // ModeDisplace
+	ZPKS_ANY,   // ModeProp
+	ZPKS_PAINT, // ToggleColor
+	ZPKS_PAINT, // SizeUp
+	ZPKS_PAINT, // SizeDown
+	ZPKS_PAINT, // ToggleTileSize
+	ZPKS_PAINT, // GroupUp
+	ZPKS_PAINT, // GroupDown
+	ZPKS_PAINT, // BackgroundColor
+	ZPKS_PAINT, // ToggleArrows
+	ZPKS_PAINT, // HardnessUp
+	ZPKS_PAINT, // HardnessDown
+	ZPKS_PAINT, // OpacityUp
+	ZPKS_PAINT, // OpacityDown
+	ZPKS_PAINT, // Zouille
+	ZPKS_PAINT, // AutomaticLighting
+	ZPKS_PAINT, // SelectColorBrush
+	ZPKS_PAINT, // ToggleColorBrushMode
+	ZPKS_ANY,   // LockBorders   (a paint constraint, but harmless and useful to pre-set)
+	ZPKS_ANY,   // ZoomIn
+	ZPKS_ANY,   // ZoomOut
+	ZPKS_PAINT, // GetState
+	ZPKS_PAINT, // ResetPatch
+	ZPKS_ANY,   // ToggleUI
+	ZPKS_ANY,   // SeasonNext
+	ZPKS_ANY,   // TogglePalette
+	ZPKS_ANY,   // ToggleBoard
+	ZPKS_ANY,   // ZoomExtentsSelected
+	ZPKS_PAINT, // TileSetPrev   <- the digit row / PgUp-PgDn belong to the patch-edit
+	ZPKS_PAINT, // TileSetNext      modes' sub-object levels once those exist
+	ZPKS_PAINT, // TileSetDigits
+	ZPKS_PAINT, // DisplacePrev
+	ZPKS_PAINT, // DisplaceNext
+	ZPKS_ANY,   // Undo
+	ZPKS_ANY,   // Redo
+	ZPKS_ANY,   // Redo2
+	ZPKS_ANY,   // ViewUndo
+	ZPKS_ANY,   // ViewRedo
+	ZPKS_ANY,   // Screenshot
 };
 
 // paint_ui.cpp light/zoom variable defaults (LoadVarCfg overrides; identical to the previous
@@ -561,16 +645,62 @@ const uint kMainHeight = 600;
 SBoardOpScope::SBoardOpScope() { ++g_BoardOpDepth; }
 SBoardOpScope::~SBoardOpScope() { --g_BoardOpDepth; }
 
+/** Modifier bits currently held, in ZPKM_* terms. */
+static uint zpHeldMods()
+{
+	if (!g_ViewerAsync)
+		return 0;
+	uint m = 0;
+	if (g_ViewerAsync->isKeyDown(NLMISC::KeyCONTROL)) m |= ZPKM_CTRL;
+	if (g_ViewerAsync->isKeyDown(NLMISC::KeySHIFT)) m |= ZPKM_SHIFT;
+	if (g_ViewerAsync->isKeyDown(NLMISC::KeyMENU)) m |= ZPKM_ALT;
+	return m;
+}
+
+/** The action is live in the mode the painter is currently in (ZPKS_* scope mask). */
+static bool zpModeAllows(TPainterKey action)
+{
+	const uint8 scope = kPainterKeyModes[action];
+	if (scope == ZPKS_ANY)
+		return true;
+	const int mode = zpCurrentPaintMode();
+	if (mode < 0 || mode > 7)
+		return true; // headless / unknown: nothing is mode-restricted
+	return (scope & (1 << mode)) != 0;
+}
+
+/** Modifiers must match EXACTLY: an action bound to Z must not fire on Shift+Z. */
+static bool zpBindingMatches(TPainterKey action, uint &keyOut)
+{
+	const uint b = g_PainterKeys[action];
+	if (b == 0 || !g_ViewerAsync)
+		return false;
+	if (zpHeldMods() != ZPK_MODS(b))
+		return false;
+	if (!zpModeAllows(action))
+		return false;
+	keyOut = ZPK_KEY(b);
+	return true;
+}
+
 bool zpKeyPushed(TPainterKey action)
 {
-	uint k = g_PainterKeys[action];
-	return k != 0 && g_ViewerAsync && g_ViewerAsync->isKeyPushed((NLMISC::TKey)k);
+	uint k = 0;
+	return zpBindingMatches(action, k) && g_ViewerAsync->isKeyPushed((NLMISC::TKey)k);
 }
 
 bool zpKeyDown(TPainterKey action)
 {
-	uint k = g_PainterKeys[action];
-	return k != 0 && g_ViewerAsync && g_ViewerAsync->isKeyDown((NLMISC::TKey)k);
+	uint k = 0;
+	return zpBindingMatches(action, k) && g_ViewerAsync->isKeyDown((NLMISC::TKey)k);
+}
+
+bool zpKeyDigitPushed(uint digit)
+{
+	uint base = 0;
+	if (digit > 9 || !zpBindingMatches(ZPK_TileSetDigits, base))
+		return false;
+	return g_ViewerAsync->isKeyPushed((NLMISC::TKey)(base + digit));
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -601,8 +731,14 @@ int main(int argc, char **argv)
 	                    "through the same absolute handler as digit keys / right-click pick; season change rebuilds\n"
 	                    "previews. Toggle with P (TogglePalette) or the panel Tiles button.\n"
 	                    "Config files (plugin keys.cfg port, NLMISC::CConfigFile syntax; one file may serve both):\n"
-	                    "  keys cfg (--keys-cfg, else ./zone_painter_keys.cfg): rebinds the plugin-era actions by name,\n"
+	                    "  keys cfg (--keys-cfg, else ./zone_painter_keys.cfg): rebinds the actions by name,\n"
 	                    "  values are NeL TKey codes (the plugin's keys.cfg Key* constant block parses verbatim).\n"
+	                    "  A binding may carry modifiers: value = key + 65536*mods, mods = 1 Ctrl | 2 Shift | 4 Alt\n"
+	                    "  (so Ctrl+Z is 90+65536). Modifier matching is EXACT - an action on Z does not fire on\n"
+	                    "  Shift+Z. Actions are also MODE-SCOPED: the paint bindings (tile set, brush, fill,\n"
+	                    "  hardness/opacity, displace) are live in the paint modes only, so the digit row and the\n"
+	                    "  transform keys stay free for the patch-edit sub-object levels; navigation, undo, view,\n"
+	                    "  panels and the mode switches are live everywhere.\n"
 	                    "  Honored: ModeTile ModeColor ModeDisplace ModeProp SizeUp SizeDown ToggleTileSize GroupUp GroupDown\n"
 	                    "  Fill0 Fill1 Fill2 Fill3 HardnessUp HardnessDown OpacityUp OpacityDown SelectColorBrush\n"
 	                    "  ToggleColorBrushMode LockBorders ZoomIn ZoomOut ToggleUI SeasonNext TogglePalette ToggleBoard\n"
@@ -632,8 +768,10 @@ int main(int argc, char **argv)
 	                    "  ZoomExtentsSelected (default Z): frames the last edit, else the hovered tile,\n"
 	                    "  else the Prop selection, else every editable zone. Shift+Z / Shift+Y step the\n"
 	                    "  view history.\n"
-	                    "Fixed viewer keys: PgUp/PgDn + 0-9 tile set, [ ] displace index, Ctrl+Z/Ctrl+E undo/redo,\n"
-	                    "F12 screenshot, ESC quit.");
+	                    "  Also honored (were hardcoded, now rebindable + mode-scoped): TileSetPrev TileSetNext\n"
+	                    "  TileSetDigits (base of the 0-9 run) DisplacePrev DisplaceNext Undo Redo Redo2 ViewUndo\n"
+	                    "  ViewRedo Screenshot (defaults PgUp PgDn 0 [ ] Ctrl+Z Ctrl+Y Ctrl+E Shift+Z Shift+Y F12).\n"
+	                    "ESC is the only fixed key: closes the session board, else quits; also cancels a script.");
 	// Optional first positional: .max (legacy) or folder (startup seed). Absent => startup flow.
 	args.addAdditionalArg("input", "Input .max scene (legacy) or graphics/seed folder (startup); omit for discovery", true, false);
 	args.addArg("", "bank", "bank", "Tile bank (.smallbank/.bank); required for the legacy .max path (auto-derived in startup flow)");

@@ -106,7 +106,33 @@ namespace ZPSCRIPT
 }
 
 // ---------------------------------------------------------------------------------------------
-// TPainterKey enum (paint_ui.cpp PainterKeys port)
+// Key bindings.
+//
+// A binding is one uint: `TKey | (modifiers << 16)`. A plugin-era keys.cfg carries plain key
+// values, so it still parses verbatim (modifiers 0). Modifier matching is EXACT - Z and
+// Shift+Z are different bindings, which is what lets Z and Shift+Z mean different things
+// without the ad-hoc "and shift is not held" guards the viewer used to need. 0 = unbound.
+#define ZPKM_CTRL  0x0001
+#define ZPKM_SHIFT 0x0002
+#define ZPKM_ALT   0x0004
+#define ZPK_MODS(binding) (((binding) >> 16) & 0x7)
+#define ZPK_KEY(binding) ((binding) & 0xffff)
+#define ZPK_BIND(key, mods) ((uint)(key) | ((uint)(mods) << 16))
+
+// Mode scope. Each action names the paint modes it is live in; `kPainterKeyModes` holds the
+// mask. Bit N = CPaintMouseListener mode N (0 Tile, 1 Colour, 2 Displace, 3 Prop).
+//
+// This is the dimension the patch-edit sub-object levels need: `1`-`5` and `W`/`E`/`R` are
+// Selection-level and transform keys, and the painter already spends the digit row on
+// tile sets. Scoping the paint bindings to the PAINT modes lets both coexist - the digits
+// keep selecting tile sets while painting and are free to mean sub-object levels once the
+// patch-edit modes exist. Nothing changes today: no mode outside 0-3 exists yet, so
+// ZPKS_PAINT and ZPKS_ANY currently select the same set.
+#define ZPKS_PAINT 0x0f // Tile | Colour | Displace | Prop
+#define ZPKS_ANY 0xff   // also live in the future patch-edit modes
+
+// ---------------------------------------------------------------------------------------------
+// TPainterKey enum (paint_ui.cpp PainterKeys port, plus the tool's own actions)
 
 enum TPainterKey
 {
@@ -146,6 +172,19 @@ enum TPainterKey
 	ZPK_TogglePalette,
 	ZPK_ToggleBoard,
 	ZPK_ZoomExtentsSel,
+	// Actions that used to be hardcoded in the viewer loop. They live in the table so they
+	// can be rebound and, more to the point, so they can be MODE-SCOPED.
+	ZPK_TileSetPrev,
+	ZPK_TileSetNext,
+	ZPK_TileSetDigits, // base of the 0-9 run: digit k selects tile set k
+	ZPK_DisplacePrev,
+	ZPK_DisplaceNext,
+	ZPK_Undo,
+	ZPK_Redo,
+	ZPK_Redo2, // second redo binding; the tool shipped Ctrl+E before the usual Ctrl+Y
+	ZPK_ViewUndo,
+	ZPK_ViewRedo,
+	ZPK_Screenshot,
 	ZPK_KeyCounter
 };
 
@@ -372,6 +411,7 @@ extern std::string g_PropStatusMsg;
 
 extern const char *kPainterKeysName[ZPK_KeyCounter];
 extern uint g_PainterKeys[ZPK_KeyCounter];
+extern const uint8 kPainterKeyModes[ZPK_KeyCounter];
 
 extern NLMISC::CVector g_LightDirection;
 extern NLMISC::CRGBA g_LightDiffuse;
@@ -414,6 +454,8 @@ extern SScriptPumpCtx g_PumpCtx;
 // main.cpp
 bool zpKeyPushed(TPainterKey action);
 bool zpKeyDown(TPainterKey action);
+/** Digit k (0-9) of the ZPK_TileSetDigits run was pushed, mode scope honored. */
+bool zpKeyDigitPushed(uint digit);
 
 // scene_paint.cpp
 bool writeZoneV4(NL3D::CZone &zone, const std::string &path);
@@ -555,6 +597,8 @@ int saveWholeFile(const std::string &input, const std::string &output,
 std::vector<uint8> writeContainerToTemp(PIPELINE::MAX::CStorageContainer &ctr, const std::string &tempPath);
 
 // script_and_ui.cpp
+/** Current CPaintMouseListener mode, or -1 when no viewer session is live. */
+int zpCurrentPaintMode();
 std::string luaQuote(const std::string &s);
 void recordBoardOp(const std::string &line);
 void zpSelectMode(int mode);
