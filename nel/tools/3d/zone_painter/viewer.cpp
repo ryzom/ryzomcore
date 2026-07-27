@@ -472,6 +472,28 @@ void zpViewerScreenshot(NL3D::IDriver *driver, NLMISC::CEventListenerAsync &asyn
 }
 
 
+/**
+ * Drop every global that points at runViewer's frame-local objects (the UI bridges, the
+ * paint context, the script pump/host, the async listener, the session bank).
+ *
+ * Shared by the normal exit and BOTH catch blocks: the catch paths used to clear only the
+ * paint bridge + paint ctx, leaving the session-board bridge, the script pump context and
+ * g_ScriptHost.bridge pointing at destroyed stack objects while main() carried on into the
+ * post-viewer save/teardown path.
+ */
+static void zpDropViewerFrameState()
+{
+	ZPUI::setSessionBoardBridge(NULL);
+	ZPUI::setSessionBoardVisible(false);
+	ZPUI::setPaintUIBridge(NULL);
+	g_SessionBank = NULL;
+	g_PaintCtx = SPaintCtx();
+	g_SessionOpsAvailable = false;
+	g_PumpCtx = SScriptPumpCtx();
+	g_ScriptHost.bridge = NULL; // pointed at the frame's paintBridge
+	g_ViewerAsync = NULL;
+}
+
 // Shared viewer host: when externalDriver is non-NULL, runViewer uses it and does not
 // create/release the driver (startup flow owns one UDriver for screens + viewer). When
 // externalEditorUI is non-NULL it is reused (already init'd); otherwise a local CEditorUI
@@ -1630,17 +1652,7 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 
 		if (ownsEditorUI)
 			editorUI->shutdown();
-		ZPUI::setSessionBoardBridge(NULL);
-		ZPUI::setSessionBoardVisible(false);
-		ZPUI::setPaintUIBridge(NULL);
-		g_SessionBank = NULL;
-		g_PaintCtx = SPaintCtx();
-		// Script hooks referencing this frame's stack objects (driver, scene, bridge)
-		// must not survive the viewer - a post-viewer script/pump call through them
-		// would be a use-after-free (session ops are already board-session-gated).
-		g_SessionOpsAvailable = false;
-		g_PumpCtx = SScriptPumpCtx();
-		g_ScriptHost.bridge = NULL; // pointed at this frame's paintBridge
+		zpDropViewerFrameState();
 		mouseListener.removeFromServer(udriver->EventServer);
 		udriver->EventServer.removeListener(NLMISC::EventDestroyWindowId, &closeListener);
 		udriver->EventServer.removeListener(NLMISC::EventCloseWindowId, &closeListener);
@@ -1658,7 +1670,6 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 			udriver->deleteScene(uscene);
 			uscene = NULL;
 		}
-		g_ViewerAsync = NULL;
 		if (ownsDriver)
 		{
 			udriver->release();
@@ -1668,18 +1679,14 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 	}
 	catch (const NL3D::EDru &e)
 	{
-		ZPUI::setPaintUIBridge(NULL);
-		g_PaintCtx = SPaintCtx();
-		g_ViewerAsync = NULL;
+		zpDropViewerFrameState();
 		if (ownsDriver && udriver) { udriver->release(); delete udriver; }
 		fprintf(stderr, "ERROR: 3D driver: %s\n", e.what());
 		return 1;
 	}
 	catch (const NLMISC::Exception &e)
 	{
-		ZPUI::setPaintUIBridge(NULL);
-		g_PaintCtx = SPaintCtx();
-		g_ViewerAsync = NULL;
+		zpDropViewerFrameState();
 		if (ownsDriver && udriver) { udriver->release(); delete udriver; }
 		fprintf(stderr, "ERROR: %s\n", e.what());
 		return 1;

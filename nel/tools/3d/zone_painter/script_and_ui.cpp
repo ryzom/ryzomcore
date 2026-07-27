@@ -1825,6 +1825,63 @@ void zpSeasonMenuFill(void * /*unused*/)
 	}
 }
 
+/**
+ * Prop-panel footprint readout for a NON-primary zone, memoized.
+ *
+ * zpFillBridgeState runs every viewer frame, and deriveZoneFootprintMask is a full
+ * NLLIGO::CZoneTemplate build over the zone's open edges (plus a stderr/stdout line on
+ * the AABB-fallback path). Recomputing it per frame while a zone is merely SELECTED cost
+ * real time and spammed the console once per frame on any zone whose template mask does
+ * not build. The result only depends on the node's authored geometry (fixed for a Node
+ * within a working set; the pointer changes on rebuild) plus the two appdata flags the
+ * derivation reads and the session cell/snap - so key on exactly those.
+ */
+static void zpPropFootprintCached(const SPaintZone &pz, bool useBB, bool symmetry,
+                                  int &cellsW, int &cellsH, bool &fromTemplate, bool &filled)
+{
+	// s_HaveKey: the cached key is populated (suppresses the retry-every-frame the derive
+	// was doing). s_Ok: that derive produced a usable result.
+	static bool s_HaveKey = false;
+	static const PIPELINE::MAX::BUILTIN::CNodeImpl *s_Node = NULL;
+	static bool s_UseBB = false, s_Symmetry = false;
+	static float s_CellSize = 0.f, s_Snap = 0.f;
+	static bool s_Ok = false;
+	static int s_W = 1, s_H = 1;
+	static bool s_FromT = false, s_Filled = true;
+
+	const float cellSize = g_SessionCellSize > 0.f ? g_SessionCellSize : 160.f;
+	const float snap = g_SessionSnap > 0.f ? g_SessionSnap : 1.f;
+	if (!s_HaveKey || s_Node != pz.Node || s_UseBB != useBB || s_Symmetry != symmetry
+	    || s_CellSize != cellSize || s_Snap != snap)
+	{
+		s_HaveKey = true;
+		s_Node = pz.Node;
+		s_UseBB = useBB;
+		s_Symmetry = symmetry;
+		s_CellSize = cellSize;
+		s_Snap = snap;
+		std::vector<bool> mask;
+		float ox = 0.f, oy = 0.f;
+		std::string e;
+		int w = 1, h = 1;
+		bool ft = false;
+		s_Ok = deriveZoneFootprintMask(pz, cellSize, snap, mask, w, h, ox, oy, ft, e);
+		if (s_Ok)
+		{
+			s_W = w;
+			s_H = h;
+			s_FromT = ft;
+			s_Filled = !maskHasHole(mask);
+		}
+	}
+	if (!s_Ok)
+		return; // leave the caller's primary-footprint defaults
+	cellsW = s_W;
+	cellsH = s_H;
+	fromTemplate = s_FromT;
+	filled = s_Filled;
+}
+
 // Fill the UI bridge state snapshot (labels / button push state).
 void zpScriptRefreshBridge();
 void zpFillBridgeState(ZPUI::SPaintUIBridge &bridge)
@@ -1942,25 +1999,15 @@ void zpFillBridgeState(ZPUI::SPaintUIBridge &bridge)
 			bridge.PropSymmetry = props.Symmetry;
 			bridge.PropPassable = props.Passable;
 			bridge.PropUseBBox = props.UseBoundingBox;
-			// Footprint: primary uses g_Footprint*; others re-derive on the fly for display
+			// Footprint: primary uses g_Footprint*; others re-derive for display (memoized -
+			// this runs once per frame while a selection is live, and the derive is a full
+			// CZoneTemplate build that also logs on failure).
 			int cw = g_FootprintCellsW, ch = g_FootprintCellsH;
 			bool fromT = g_FootprintFromTemplate;
 			bool filled = !maskHasHole(g_FootprintMask);
 			if (pz->ZoneId != 0 || g_FootprintMask.empty())
-			{
-				std::vector<bool> mask;
-				float ox = 0.f, oy = 0.f;
-				std::string e;
-				bool ft = false;
-				int w = 1, h = 1;
-				if (deriveZoneFootprintMask(*pz, g_SessionCellSize > 0.f ? g_SessionCellSize : 160.f,
-				                            g_SessionSnap > 0.f ? g_SessionSnap : 1.f,
-				                            mask, w, h, ox, oy, ft, e))
-				{
-					cw = w; ch = h; fromT = ft;
-					filled = !maskHasHole(mask);
-				}
-			}
+				zpPropFootprintCached(*pz, props.UseBoundingBox, props.Symmetry,
+				                      cw, ch, fromT, filled);
 			snprintf(bridge.PropFootprint, sizeof(bridge.PropFootprint),
 			         "%dx%d (source=%s)%s", cw, ch, fromT ? "template" : "aabb",
 			         filled ? "" : " hole");

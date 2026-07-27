@@ -584,8 +584,7 @@ void sessionBoardDragEnd(bool copyModifier)
 			t->setHardText(err);
 		return;
 	}
-	populateScratchBoard();
-	refreshSessionBoardStates();
+	refreshBoardAfterSessionOp();
 }
 
 void setSessionBoardVisible(bool visible)
@@ -674,12 +673,15 @@ bool isSessionBoardVisible()
 }
 
 // Cell-action popup handlers
-/** Per-file board ops change eco occupancy (blocks appear/disappear); repopulate. */
+/**
+ * Post-board-op refresh: THE single entry every board op uses.
+ *
+ * refreshSessionBoardStates() already repopulates the eco scratch grid (occupancy can
+ * change on any op), so the sites that also called populateScratchBoard() themselves were
+ * spawning and destroying every board cell twice per op.
+ */
 void refreshBoardAfterSessionOp()
 {
-	if (s_SessionBridge && s_SessionBridge->World
-	    && s_SessionBridge->World->Kind == ZPWS::Ecosystem)
-		populateScratchBoard();
 	refreshSessionBoardStates();
 }
 
@@ -1140,10 +1142,7 @@ public:
 		std::string err;
 		if (!s_SessionBridge->scratchPlace(cx, cy, err))
 			fprintf(stderr, "scratch place (%d,%d): %s\n", cx, cy, err.c_str());
-		// Rebuild board cells (instance set changed)
-		if (s_SessionBridge->World && s_SessionBridge->World->Kind == ZPWS::Ecosystem)
-			populateScratchBoard();
-		refreshSessionBoardStates();
+		refreshBoardAfterSessionOp();
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpEmptyPlaceInstance, "zp_empty_place_instance");
@@ -1202,9 +1201,7 @@ static void zpEmptyOpenHint(bool editable)
 		ok = s_SessionBridge->scratchPlaceContext(cx, cy, name, err);
 	if (!ok)
 		fprintf(stderr, "hint open (%d,%d:%s): %s\n", cx, cy, name.c_str(), err.c_str());
-	if (s_SessionBridge->World && s_SessionBridge->World->Kind == ZPWS::Ecosystem)
-		populateScratchBoard();
-	refreshSessionBoardStates();
+	refreshBoardAfterSessionOp();
 }
 
 class CAHZpEmptyHintRo : public IActionHandler
@@ -1253,9 +1250,7 @@ public:
 		std::string err;
 		if (!s_SessionBridge->scratchRemoveContext(cx, cy, err))
 			fprintf(stderr, "scratch remove-context (%d,%d): %s\n", cx, cy, err.c_str());
-		if (s_SessionBridge->World && s_SessionBridge->World->Kind == ZPWS::Ecosystem)
-			populateScratchBoard();
-		refreshSessionBoardStates();
+		refreshBoardAfterSessionOp();
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpContextRemove, "zp_context_remove");
@@ -1285,9 +1280,7 @@ public:
 		std::string err;
 		if (!s_SessionBridge->scratchContextToEditable(cx, cy, err))
 			fprintf(stderr, "scratch context-to-editable (%d,%d): %s\n", cx, cy, err.c_str());
-		if (s_SessionBridge->World && s_SessionBridge->World->Kind == ZPWS::Ecosystem)
-			populateScratchBoard();
-		refreshSessionBoardStates();
+		refreshBoardAfterSessionOp();
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpContextMakeEditable, "zp_context_make_editable");
@@ -1318,9 +1311,7 @@ static void zpContextTransformAction(int rotDelta, bool mirror)
 		ok = s_SessionBridge->scratchRotateContext(cx, cy, rotDelta, err);
 	if (!ok)
 		fprintf(stderr, "context transform (%d,%d): %s\n", cx, cy, err.c_str());
-	if (s_SessionBridge->World && s_SessionBridge->World->Kind == ZPWS::Ecosystem)
-		populateScratchBoard();
-	refreshSessionBoardStates();
+	refreshBoardAfterSessionOp();
 }
 
 class CAHZpContextRotCW : public IActionHandler
@@ -1394,9 +1385,7 @@ public:
 				        s_ContextPickerCx, s_ContextPickerCy,
 				        s_ContextPickerNames[idx].c_str(), err.c_str());
 		}
-		if (s_SessionBridge->World && s_SessionBridge->World->Kind == ZPWS::Ecosystem)
-			populateScratchBoard();
-		refreshSessionBoardStates();
+		refreshBoardAfterSessionOp();
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpContextPick, "zp_context_pick");
