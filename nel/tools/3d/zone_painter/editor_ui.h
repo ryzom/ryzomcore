@@ -17,7 +17,7 @@
  */
 
 /*
- * Copyright (C) 2026  by authors
+ * Copyright (C) 2026 by authors
  *
  * This file is part of RYZOM CORE PIPELINE.
  * RYZOM CORE PIPELINE is free software: you can redistribute it
@@ -27,11 +27,11 @@
  *
  * RYZOM CORE PIPELINE is distributed in the hope that it will be
  * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public
- * License along with RYZOM CORE PIPELINE.  If not, see
+ * License along with RYZOM CORE PIPELINE. If not, see
  * <http://www.gnu.org/licenses/>.
  */
 
@@ -67,31 +67,32 @@ class CPointerButtonListener;
 struct SPaintUIBridge
 {
 	// Named handlers (same paths as the keyboard)
-	void (*selectMode)(int mode);       // 0=Tile 1=Color 2=Displace
-	void (*selectTileSetDelta)(int d);  // -1 / +1
+	void (*selectMode)(int mode); // 0=Tile 1=Color 2=Displace 3=Prop 4=Patch
+	void (*selectSubObject)(int level); // patch-edit sub-object, EP_* order
+	void (*selectTileSetDelta)(int d); // -1 / +1
 	/** Absolute tile-set select (palette cell / digit keys); shared path. */
 	void (*selectTileSetAbs)(int idx);
-	void (*toggleTileSize)();           // 128 <-> 256
-	void (*brushSizeDelta)(int d);      // -1 / +1 (0..2 for tile/disp)
-	void (*groupDelta)(int d);          // -1 / +1 (mod 13)
+	void (*toggleTileSize)(); // 128 <-> 256
+	void (*brushSizeDelta)(int d); // -1 / +1 (0..2 for tile/disp)
+	void (*groupDelta)(int d); // -1 / +1 (mod 13)
 	void (*toggleLockBorders)();
 	void (*undo)();
 	void (*redo)();
-	void (*fill)(int rot);              // 0..3
-	void (*save)();                     // panel Save: modal (interactive) or direct (--save)
+	void (*fill)(int rot); // 0..3
+	void (*save)(); // panel Save: modal (interactive) or direct (--save)
 	/** Write-back + whole-file save to an arbitrary path (modal "Save copy", test hook). */
 	bool (*saveTo)(const std::string &target);
 	/** In-place overwrite: temp → optional one-time .bak → rename (modal "Overwrite").
-	 *  Multi-file this is save-all; toolbar SAVE calls it directly in board sessions. */
+	 * Multi-file this is save-all; toolbar SAVE calls it directly in board sessions. */
 	bool (*saveOverwrite)();
 	/** Per-file board saves (cell "Save as…" dialog): overwrite ONE editable
-	 *  file in place, or save a copy under `name` (absolute, or relative to the FILE's
-	 *  own directory). wantThumb = the dialog's checkbox (custom save option). */
+	 * file in place, or save a copy under `name` (absolute, or relative to the FILE's
+	 * own directory). wantThumb = the dialog's checkbox (custom save option). */
 	bool (*saveFileOverwrite)(const std::string &basename, bool wantThumb);
 	bool (*saveFileCopy)(const std::string &basename, const std::string &name, bool wantThumb);
 	/** Directory of one OPEN editable's .max, "" if unknown. The bound "Save as…"
-	 *  form's exists-check must resolve relative names against the SAME directory
-	 *  saveFileCopy does (the file's own), not InputDir (the first-opened file's). */
+	 * form's exists-check must resolve relative names against the SAME directory
+	 * saveFileCopy does (the file's own), not InputDir (the first-opened file's). */
 	std::string (*fileDir)(const std::string &basename);
 	/** Cycle landscape season textures; no-op when <2 seasons available. */
 	void (*seasonNext)();
@@ -102,10 +103,10 @@ struct SPaintUIBridge
 	// Color / displace: same paths as keyboard Home/End/Ins/Del/S/Q/[ ]
 	/** Color brush radius ± (×1.5 / ÷1.5, clamp 2..32); panel always; keys via brushSizeDelta in Color mode. */
 	void (*colorRadiusDelta)(int d);
-	void (*hardnessDelta)(int d);     // ± step (keys use ±51 on 0..255)
+	void (*hardnessDelta)(int d); // ± step (keys use ±51 on 0..255)
 	void (*opacityDelta)(int d);
-	void (*cycleBrushMask)();         // none → mask1 → … → none (S key)
-	void (*toggleMaskMode)();         // Q key
+	void (*cycleBrushMask)(); // none → mask1 → … → none (S key)
+	void (*toggleMaskMode)(); // Q key
 	void (*displaceIndexDelta)(int d); // ±1 mod 16 ([ ] keys)
 	/** Absolute displace index 0-15 (palette cell); shared path with [ ] / panel stepper. */
 	void (*displaceIndexAbs)(int idx);
@@ -116,20 +117,21 @@ struct SPaintUIBridge
 	/** Set brush color RGB 0-255 (color picker / panel); same field as --color. */
 	void (*setBrushColor)(int r, int g, int b);
 	// Prop mode: export-property steppers / toggles (selected zone)
-	void (*propRotateDelta)(int d);   // ±1 mod 4
+	void (*propRotateDelta)(int d); // ±1 mod 4
 	void (*propToggleSymmetry)();
 	void (*propTogglePassable)();
 	void (*propToggleUseBBox)();
 	// Painterscript absolute state setters (recorder-replay faithful; the frame-synced
 	// snapshot fields below are STALE mid-script, so scripts must not derive from them)
 	void (*setTileSize256)(bool on);
-	void (*setHardnessAbs)(int v);    // 0..255
-	void (*setOpacityAbs)(int v);     // 0..255
+	void (*setHardnessAbs)(int v); // 0..255
+	void (*setOpacityAbs)(int v); // 0..255
 	void (*setColorRadiusAbs)(float m); // clamp 2..32
 
 	// State snapshot for panel sync (filled by runViewer each frame)
 	bool HaveCore;
 	int Mode;
+	int SubObj; // patch-edit sub-object level; meaningful only while Mode == Patch
 	int CurTileSet;
 	uint TileSetCount;
 	char TileSetName[128];
@@ -144,13 +146,13 @@ struct SPaintUIBridge
 	/** True in board sessions: toolbar SAVE is one-click save-all there. */
 	bool BoardSession;
 	char EditableBasename[128]; // zone basename for default copy name
-	char InputDir[512];         // directory of the opened .max (copy targets)
+	char InputDir[512]; // directory of the opened .max (copy targets)
 	/** Self-instance count (1 = off); panel shows INSTANCED xN when > 1. */
 	uint InstanceCount;
 	/** Modal "Update thumbnail" checkbox (default true for interactive save). */
 	bool UpdateThumbnail;
 	/** --no-thumbnail hard kill-switch: the modal hides the checkbox row so the
-	 *  UI never claims a thumbnail write that prepareThumbnailOverride will drop. */
+	 * UI never claims a thumbnail write that prepareThumbnailOverride will drop. */
 	bool ThumbnailsDisabled;
 	/** Current season label for the panel ("spring" / "auto" / ...). */
 	char SeasonLabel[32];
@@ -160,30 +162,30 @@ struct SPaintUIBridge
 	uint EditableFileCount;
 	uint DirtyFileCount;
 	// Color brush snapshot
-	float ColorRadius;              // meters, 2..32
-	uint ColorHardness;             // 0..255
-	uint ColorOpacity;              // 0..255
-	uint ColorR, ColorG, ColorB;    // swatch
-	char BrushMaskLabel[64];        // basename or "none"
-	bool BrushMaskMode;             // Q-key mask-mode toggle
-	uint DisplaceIndex;             // 0..15
+	float ColorRadius; // meters, 2..32
+	uint ColorHardness; // 0..255
+	uint ColorOpacity; // 0..255
+	uint ColorR, ColorG, ColorB; // swatch
+	char BrushMaskLabel[64]; // basename or "none"
+	bool BrushMaskMode; // Q-key mask-mode toggle
+	uint DisplaceIndex; // 0..15
 	// Prop panel snapshot
 	bool PropHaveSelection;
 	uint PropZoneId;
 	char PropZoneName[128];
 	char PropFileBasename[128];
-	char PropFootprint[64];   // "WxH (source=template|aabb)"
+	char PropFootprint[64]; // "WxH (source=template|aabb)"
 	bool PropFootprintFilled;
 	bool PropEditable;
 	bool PropDirty;
-	int PropRotate;           // 0..3
+	int PropRotate; // 0..3
 	bool PropSymmetry;
 	bool PropPassable;
 	bool PropUseBBox;
-	char PropStatus[96];      // "read-only" / last edit
+	char PropStatus[96]; // "read-only" / last edit
 
 	SPaintUIBridge()
-		: selectMode(NULL), selectTileSetDelta(NULL), selectTileSetAbs(NULL),
+		: selectMode(NULL), selectSubObject(NULL), selectTileSetDelta(NULL), selectTileSetAbs(NULL),
 		  toggleTileSize(NULL),
 		  brushSizeDelta(NULL), groupDelta(NULL), toggleLockBorders(NULL),
 		  undo(NULL), redo(NULL), fill(NULL), save(NULL), saveTo(NULL), saveOverwrite(NULL),

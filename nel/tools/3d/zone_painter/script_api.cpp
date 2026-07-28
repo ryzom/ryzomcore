@@ -16,7 +16,7 @@
  */
 
 /*
- * Copyright (C) 2026  by authors
+ * Copyright (C) 2026 by authors
  *
  * This file is part of RYZOM CORE PIPELINE.
  * RYZOM CORE PIPELINE is free software: you can redistribute it
@@ -26,11 +26,11 @@
  *
  * RYZOM CORE PIPELINE is distributed in the hope that it will be
  * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public
- * License along with RYZOM CORE PIPELINE.  If not, see
+ * License along with RYZOM CORE PIPELINE. If not, see
  * <http://www.gnu.org/licenses/>.
  */
 
@@ -119,6 +119,9 @@ void setRecording(bool on)
 	{
 		std::string pre;
 		pre += NLMISC::toString("painter.setMode(%d)\n", b->Mode);
+		// After setMode: entering patch mode resets the level to Object, so replaying the
+		// level first would lose it.
+		pre += NLMISC::toString("painter.setSubObject(%d)\n", b->SubObj);
 		pre += NLMISC::toString("painter.setTileSet(%d)\n", b->CurTileSet);
 		pre += NLMISC::toString("painter.set256(%s)\n", b->Mode256 ? "true" : "false");
 		pre += NLMISC::toString("painter.setBrushSize(%u)\n", b->BrushSize);
@@ -451,12 +454,12 @@ static int lZones(CLuaState &ls) // painter.zones() -> { {id=,name=,file=,editab
 	for (size_t i = 0; i < rows.size(); ++i)
 	{
 		ls.newTable();
-		ls.push(std::string("id"));       ls.push((double)rows[i].Id);   ls.setTable(-3);
-		ls.push(std::string("name"));     ls.push(rows[i].Name);         ls.setTable(-3);
-		ls.push(std::string("file"));     ls.push(rows[i].File);         ls.setTable(-3);
-		ls.push(std::string("editable")); ls.push(rows[i].Editable);     ls.setTable(-3);
-		ls.push(std::string("frozen"));   ls.push(rows[i].Frozen);       ls.setTable(-3);
-		ls.push(std::string("dirty"));    ls.push(rows[i].Dirty);        ls.setTable(-3);
+		ls.push(std::string("id")); ls.push((double)rows[i].Id); ls.setTable(-3);
+		ls.push(std::string("name")); ls.push(rows[i].Name); ls.setTable(-3);
+		ls.push(std::string("file")); ls.push(rows[i].File); ls.setTable(-3);
+		ls.push(std::string("editable")); ls.push(rows[i].Editable); ls.setTable(-3);
+		ls.push(std::string("frozen")); ls.push(rows[i].Frozen); ls.setTable(-3);
+		ls.push(std::string("dirty")); ls.push(rows[i].Dirty); ls.setTable(-3);
 		ls.rawSetI(-2, (int)(i + 1));
 	}
 	return 1;
@@ -681,13 +684,31 @@ static int lPumpUI(CLuaState &ls) // painter.pumpUI() -> true, or false when can
 
 static ZPUI::SPaintUIBridge *bridge() { return s_Host ? s_Host->bridge : NULL; }
 
-static int lSetMode(CLuaState &ls) // painter.setMode(0..3)  0=tile 1=color 2=displace 3=prop
+static int lSetMode(CLuaState &ls) // painter.setMode(0..4) tile/color/displace/prop/patch
 {
-	double m; if (!argNumber(ls, 1, m)) return retErr(ls, "usage: setMode(0..3)");
+	double m; if (!argNumber(ls, 1, m)) return retErr(ls, "usage: setMode(0..4)");
 	ZPUI::SPaintUIBridge *b = bridge();
 	if (!b || !b->selectMode) return retErr(ls, "setMode: viewer only");
 	b->selectMode((int)m);
 	return retOk(ls);
+}
+
+static int lSetSubObject(CLuaState &ls) // painter.setSubObject(0..4) EP_OBJECT..EP_TILE
+{
+	double m; if (!argNumber(ls, 1, m)) return retErr(ls, "usage: setSubObject(0..4)");
+	ZPUI::SPaintUIBridge *b = bridge();
+	if (!b || !b->selectSubObject) return retErr(ls, "setSubObject: viewer only");
+	b->selectSubObject((int)m);
+	return retOk(ls);
+}
+
+static int lGetSubObject(CLuaState &ls)
+{
+	ZPUI::SPaintUIBridge *b = bridge();
+	if (!b) return retErr(ls, "getSubObject: viewer only");
+	if (s_Host && s_Host->refreshBridge) s_Host->refreshBridge();
+	ls.push((double)b->SubObj);
+	return 1;
 }
 
 static int lGetMode(CLuaState &ls)
@@ -840,34 +861,35 @@ static int lPrint(CLuaState &ls)
 /** The painter table, built from the registered __zp_* globals (client-style camelCase). */
 static const char *kBootstrap =
 	"painter = {\n"
-	"  paintTile = __zp_paintTile, rotateTile = __zp_rotateTile, clearTile = __zp_clearTile,\n"
-	"  fillTile = __zp_fillTile,\n"
-	"  paintColor = __zp_paintColor, fillColor = __zp_fillColor, colorBrush = __zp_colorBrush,\n"
-	"  tileStroke = __zp_tileStroke, endStroke = __zp_endStroke,\n"
-	"  paintDisplace = __zp_paintDisplace, fillDisplace = __zp_fillDisplace,\n"
-	"  setBrushSize = __zp_setBrushSize, setTileGroup = __zp_setTileGroup,\n"
-	"  setBrushMask = __zp_setBrushMask,\n"
-	"  setLockBorders = __zp_setLockBorders, setMaskMode = __zp_setMaskMode,\n"
-	"  set256 = __zp_set256, setHardness = __zp_setHardness,\n"
-	"  setOpacity = __zp_setOpacity, setRadius = __zp_setRadius,\n"
-	"  undo = __zp_undo, redo = __zp_redo, seed = __zp_seed, checkSeams = __zp_checkSeams,\n"
-	"  setZoneProp = __zp_setZoneProp, getZoneProp = __zp_getZoneProp,\n"
-	"  zones = __zp_zones, save = __zp_save, saveAll = __zp_saveAll,\n"
-	"  screenshot = __zp_screenshot, pumpUI = __zp_pumpUI,\n"
-	"  openZone = __zp_openZone, closeZone = __zp_closeZone,\n"
-	"  placeInstance = __zp_placeInstance, removeInstance = __zp_removeInstance,\n"
-	"  rotateInstance = __zp_rotateInstance, mirrorInstance = __zp_mirrorInstance,\n"
-	"  placeContext = __zp_placeContext, removeContext = __zp_removeContext,\n"
-	"  rotateContext = __zp_rotateContext, mirrorContext = __zp_mirrorContext,\n"
-	"  makeEditable = __zp_makeEditable,\n"
-	"  moveCell = __zp_moveCell, copyCell = __zp_copyCell,\n"
-	"  toggleZone = __zp_toggleZone, saveZone = __zp_saveZone,\n"
-	"  setMode = __zp_setMode, getMode = __zp_getMode,\n"
-	"  setTileSet = __zp_setTileSet, getTileSet = __zp_getTileSet,\n"
-	"  setDisplaceIndex = __zp_setDisplaceIndex, setBrushColor = __zp_setBrushColor,\n"
-	"  setSeason = __zp_setSeason,\n"
-	"  setRecording = __zp_setRecording, isRecording = __zp_isRecording,\n"
-	"  recorderText = __zp_recorderText, clearRecorder = __zp_clearRecorder,\n"
+	" paintTile = __zp_paintTile, rotateTile = __zp_rotateTile, clearTile = __zp_clearTile,\n"
+	" fillTile = __zp_fillTile,\n"
+	" paintColor = __zp_paintColor, fillColor = __zp_fillColor, colorBrush = __zp_colorBrush,\n"
+	" tileStroke = __zp_tileStroke, endStroke = __zp_endStroke,\n"
+	" paintDisplace = __zp_paintDisplace, fillDisplace = __zp_fillDisplace,\n"
+	" setBrushSize = __zp_setBrushSize, setTileGroup = __zp_setTileGroup,\n"
+	" setBrushMask = __zp_setBrushMask,\n"
+	" setLockBorders = __zp_setLockBorders, setMaskMode = __zp_setMaskMode,\n"
+	" set256 = __zp_set256, setHardness = __zp_setHardness,\n"
+	" setOpacity = __zp_setOpacity, setRadius = __zp_setRadius,\n"
+	" undo = __zp_undo, redo = __zp_redo, seed = __zp_seed, checkSeams = __zp_checkSeams,\n"
+	" setZoneProp = __zp_setZoneProp, getZoneProp = __zp_getZoneProp,\n"
+	" zones = __zp_zones, save = __zp_save, saveAll = __zp_saveAll,\n"
+	" screenshot = __zp_screenshot, pumpUI = __zp_pumpUI,\n"
+	" openZone = __zp_openZone, closeZone = __zp_closeZone,\n"
+	" placeInstance = __zp_placeInstance, removeInstance = __zp_removeInstance,\n"
+	" rotateInstance = __zp_rotateInstance, mirrorInstance = __zp_mirrorInstance,\n"
+	" placeContext = __zp_placeContext, removeContext = __zp_removeContext,\n"
+	" rotateContext = __zp_rotateContext, mirrorContext = __zp_mirrorContext,\n"
+	" makeEditable = __zp_makeEditable,\n"
+	" moveCell = __zp_moveCell, copyCell = __zp_copyCell,\n"
+	" toggleZone = __zp_toggleZone, saveZone = __zp_saveZone,\n"
+	" setMode = __zp_setMode, getMode = __zp_getMode,\n"
+	" setSubObject = __zp_setSubObject, getSubObject = __zp_getSubObject,\n"
+	" setTileSet = __zp_setTileSet, getTileSet = __zp_getTileSet,\n"
+	" setDisplaceIndex = __zp_setDisplaceIndex, setBrushColor = __zp_setBrushColor,\n"
+	" setSeason = __zp_setSeason,\n"
+	" setRecording = __zp_setRecording, isRecording = __zp_isRecording,\n"
+	" recorderText = __zp_recorderText, clearRecorder = __zp_clearRecorder,\n"
 	"}\n"
 	"print = __zp_print\n";
 
@@ -925,6 +947,8 @@ bool ensureLua()
 	ls->registerFunc("__zp_saveZone", lSaveZone);
 	ls->registerFunc("__zp_pumpUI", lPumpUI);
 	ls->registerFunc("__zp_setMode", lSetMode);
+	ls->registerFunc("__zp_setSubObject", lSetSubObject);
+	ls->registerFunc("__zp_getSubObject", lGetSubObject);
 	ls->registerFunc("__zp_getMode", lGetMode);
 	ls->registerFunc("__zp_setTileSet", lSetTileSet);
 	ls->registerFunc("__zp_getTileSet", lGetTileSet);

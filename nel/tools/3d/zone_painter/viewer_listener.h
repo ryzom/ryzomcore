@@ -8,7 +8,7 @@
  */
 
 /*
- * Copyright (C) 2026  by authors
+ * Copyright (C) 2026 by authors
  *
  * This file is part of RYZOM CORE PIPELINE.
  * RYZOM CORE PIPELINE is free software: you can redistribute it
@@ -18,11 +18,11 @@
  *
  * RYZOM CORE PIPELINE is distributed in the hope that it will be
  * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public
- * License along with RYZOM CORE PIPELINE.  If not, see
+ * License along with RYZOM CORE PIPELINE. If not, see
  * <http://www.gnu.org/licenses/>.
  */
 
@@ -57,7 +57,17 @@ public:
 class CPaintMouseListener : public NLMISC::IEventListener
 {
 public:
-	enum TPaintMode { ModeTile = 0, ModeColor, ModeDisplace, ModeProp };
+	enum TPaintMode { ModeTile = 0, ModeColor, ModeDisplace, ModeProp, ModePatch };
+
+	/**
+	 * Sub-object level inside ModePatch. Values are the legacy plugin's EP_* (rpo.h) so the
+	 * level means the same thing here as in the file it came from.
+	 *
+	 * Deliberately NOT written back: SRPatchMesh carries a SelLevel field, but the pristine
+	 * copy is only ever mutated where an edit demands it, and merely looking at a zone in
+	 * vertex mode is not an edit. Writing it would dirty every file the artist opened.
+	 */
+	enum TSubObject { SubObject = 0, SubVertex, SubEdge, SubPatch, SubTile, SubCount };
 
 	ZPPAINT::CPaintCore *Core;
 	NL3D::CCamera *Camera; // unwrapped from UScene::getCam()
@@ -73,6 +83,7 @@ public:
 	uint StrokeZone;
 	sint32 StrokeTile;
 	int Mode;
+	int SubObj; // TSubObject; meaningful only while Mode == ModePatch
 	NLMISC::CRGBA BrushColor;
 	float BrushRadius;
 	uint BrushHardness, BrushOpacity;
@@ -80,7 +91,7 @@ public:
 
 	CPaintMouseListener() : Core(NULL), Camera(NULL), EditorUI(NULL), CurTileSet(0), Mode256(false), Pressed(false),
 		MouseX(0.5f), MouseY(0.5f), HaveHover(false), HoverZone(0), HoverTile(-1), StrokeZone(0), StrokeTile(-1),
-		Mode(ModeTile), BrushColor(255, 255, 255, 255), BrushRadius(8.f), BrushHardness(128), BrushOpacity(255),
+		Mode(ModeTile), SubObj(SubObject), BrushColor(255, 255, 255, 255), BrushRadius(8.f), BrushHardness(128), BrushOpacity(255),
 		DisplaceIndex(0) { }
 
 	bool guiWantsMouse() const;

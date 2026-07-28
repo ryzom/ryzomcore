@@ -8,7 +8,7 @@
  */
 
 /*
- * Copyright (C) 2026  by authors
+ * Copyright (C) 2026 by authors
  *
  * This file is part of RYZOM CORE PIPELINE.
  * RYZOM CORE PIPELINE is free software: you can redistribute it
@@ -18,11 +18,11 @@
  *
  * RYZOM CORE PIPELINE is distributed in the hope that it will be
  * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public
- * License along with RYZOM CORE PIPELINE.  If not, see
+ * License along with RYZOM CORE PIPELINE. If not, see
  * <http://www.gnu.org/licenses/>.
  */
 
@@ -47,7 +47,7 @@
 
 // Cross-module workspace + patch_eval + script_api types the extern decls reference.
 // (We include full defs when the definitions are cheap - forward-decls fail for
-//  nested types the shared structs embed.)
+// nested types the shared structs embed.)
 #include "workspace_discovery.h"
 #include "../pipeline_max_export_common/patch_eval.h"
 
@@ -108,9 +108,9 @@ namespace ZPSCRIPT
 // values, so it still parses verbatim (modifiers 0). Modifier matching is EXACT - Z and
 // Shift+Z are different bindings, which is what lets Z and Shift+Z mean different things
 // without the ad-hoc "and shift is not held" guards the viewer used to need. 0 = unbound.
-#define ZPKM_CTRL  0x0001
+#define ZPKM_CTRL 0x0001
 #define ZPKM_SHIFT 0x0002
-#define ZPKM_ALT   0x0004
+#define ZPKM_ALT 0x0004
 #define ZPK_MODS(binding) (((binding) >> 16) & 0x7)
 #define ZPK_KEY(binding) ((binding) & 0xffff)
 #define ZPK_BIND(key, mods) ((uint)(key) | ((uint)(mods) << 16))
@@ -125,7 +125,8 @@ namespace ZPSCRIPT
 // patch-edit modes exist. Nothing changes today: no mode outside 0-3 exists yet, so
 // ZPKS_PAINT and ZPKS_ANY currently select the same set.
 #define ZPKS_PAINT 0x0f // Tile | Colour | Displace | Prop
-#define ZPKS_ANY 0xff   // also live in the future patch-edit modes
+#define ZPKS_PATCH 0x10 // Patch edit (sub-object levels; the digit row means something else)
+#define ZPKS_ANY 0xff // live in every mode
 
 // ---------------------------------------------------------------------------------------------
 // TPainterKey enum (paint_ui.cpp PainterKeys port, plus the tool's own actions)
@@ -181,6 +182,11 @@ enum TPainterKey
 	ZPK_ViewUndo,
 	ZPK_ViewRedo,
 	ZPK_Screenshot,
+	// Patch edit. The mode switch is ZPKS_ANY like the other four; the sub-object digits are
+	// ZPKS_PATCH, which is the whole point of the scope mask - they share the digit row with
+	// tile-set selection and only one of the two is ever live.
+	ZPK_MModePatch,
+	ZPK_SubObjDigits, // base of the 1-5 run: digit k selects sub-object level k-1 (EP_*)
 	ZPK_KeyCounter
 };
 
@@ -593,6 +599,23 @@ int saveWholeFile(const std::string &input, const std::string &output,
 std::vector<uint8> writeContainerToTemp(PIPELINE::MAX::CStorageContainer &ctr, const std::string &tempPath);
 
 // script_and_ui.cpp
+/** Draw one zone's patch control cage (and, at vertex level, its corner markers). */
+void zpDrawPatchLattice(NL3D::IDriver *driver, NL3D::CCamera *camera,
+                        const SPaintZone &pz, int subObj);
+
+/** Cage for every editable zone; used by both the interactive and screenshot overlay passes. */
+void zpDrawPatchLatticeAll(NL3D::IDriver *driver, NL3D::CCamera *camera, int subObj);
+
+/** HUD label for a paint mode / sub-object level; "?" when out of range. */
+const char *zpModeName(int mode);
+const char *zpSubObjName(int level);
+
+/** Set the patch-edit sub-object level (EP_* order); no-op outside ModePatch. */
+void zpSelectSubObject(int level);
+
+/** Sub-object level digit k (1..5 -> EP_OBJECT..EP_TILE) was pushed this frame. */
+bool zpKeySubObjPushed(uint level);
+
 /** Current CPaintMouseListener mode, or -1 when no viewer session is live. */
 int zpCurrentPaintMode();
 std::string luaQuote(const std::string &s);

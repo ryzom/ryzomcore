@@ -14,7 +14,7 @@
  */
 
 /*
- * Copyright (C) 2026  by authors
+ * Copyright (C) 2026 by authors
  *
  * This file is part of RYZOM CORE PIPELINE.
  * RYZOM CORE PIPELINE is free software: you can redistribute it
@@ -24,11 +24,11 @@
  *
  * RYZOM CORE PIPELINE is distributed in the hope that it will be
  * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public
- * License along with RYZOM CORE PIPELINE.  If not, see
+ * License along with RYZOM CORE PIPELINE. If not, see
  * <http://www.gnu.org/licenses/>.
  */
 
@@ -548,40 +548,79 @@ int zpCurrentPaintMode()
  * name must land in the atlas .txt before setCursor can resolve it.
  *
  * HAVE (already packed from interfaces/v3, usable today):
- *   curs_default   select / no-op            curs_pick     eyedropper pick
- *   curs_rotate    rotate, and orbit drag    curs_scale    scale
- *   curs_pan       panning                   curs_can_pan  pan available
- *   curs_resize_*  container resizers (wired in NLGUI already, not a tool concern)
+ * curs_default select / no-op curs_pick eyedropper pick
+ * curs_rotate rotate, and orbit drag curs_scale scale
+ * curs_pan panning curs_can_pan pan available
+ * curs_resize_* container resizers (wired in NLGUI already, not a tool concern)
  *
  * NEED BITMAPS - paint modes (this switch):
- *   curs_zp_tile      Tile mode brush
- *   curs_zp_color     Colour mode brush
- *   curs_zp_displace  Displace mode brush
- *   (Prop mode uses curs_default: it is a selection mode.)
+ * curs_zp_tile Tile mode brush
+ * curs_zp_color Colour mode brush
+ * curs_zp_displace Displace mode brush
+ * (Prop mode uses curs_default: it is a selection mode.)
  *
  * NEED BITMAPS - patch-edit modes (same switch, once the sub-object levels exist):
- *   curs_zp_move      4-way move
- *   curs_zp_region    rubber-band region select
- *   curs_zp_bind      bind vertex to edge
- *   curs_zp_weld      weld
- *   curs_zp_attach    attach
- *   curs_zp_subdiv    subdivide / add patch
- *   (Rotate and Scale reuse curs_rotate / curs_scale. Turn-edge can reuse curs_rotate.)
+ * curs_zp_move 4-way move
+ * curs_zp_region rubber-band region select
+ * curs_zp_bind bind vertex to edge
+ * curs_zp_weld weld
+ * curs_zp_attach attach
+ * curs_zp_subdiv subdivide / add patch
+ * (Rotate and Scale reuse curs_rotate / curs_scale. Turn-edge can reuse curs_rotate.)
  *
  * NEED BITMAPS - navigation (see nel/src/3d/nav_mouse_listener.cpp):
- *   curs_zp_zoom      dolly / zoom drag
- *   (Pan and orbit reuse curs_pan / curs_rotate.)
+ * curs_zp_zoom dolly / zoom drag
+ * (Pan and orbit reuse curs_pan / curs_rotate.)
  */
 void zpSelectMode(int mode)
 {
 	if (!g_PaintCtx.Active || !g_PaintCtx.Paint) return;
 	if (mode < 0) mode = 0;
-	if (mode > 3) mode = 3; // Tile / Color / Displace / Prop
+	if (mode > CPaintMouseListener::ModePatch) mode = CPaintMouseListener::ModePatch;
 	g_PaintCtx.Paint->Mode = mode;
+	// Entering patch edit lands on Object level, the artist picks a sub-object
+	// level deliberately, and arriving already in vertex mode makes the first click surprising.
+	if (mode == CPaintMouseListener::ModePatch)
+		g_PaintCtx.Paint->SubObj = CPaintMouseListener::SubObject;
 	// TODO (cursors): set the mode's pointer shape here - one setCursor() per mode, back to
 	// "curs_default.tga" for Prop and for any mode whose art is still missing. See the
 	// manifest above for the names and where the bitmaps come from.
 	ZPSCRIPT::record(NLMISC::toString("painter.setMode(%d)", mode));
+}
+
+
+/**
+ * HUD labels. Both tables are indexed by the enum they name and bounds-checked here rather
+ * than at each call site - the previous pair of local `modeNames[4]` tables would have
+ * quietly relabelled patch mode as TILE.
+ */
+const char *zpModeName(int mode)
+{
+	static const char *kNames[CPaintMouseListener::ModePatch + 1] =
+		{ "TILE", "COLOR", "DISPLACE", "PROP", "PATCH" };
+	if (mode < 0 || mode > CPaintMouseListener::ModePatch)
+		return "?";
+	return kNames[mode];
+}
+
+const char *zpSubObjName(int level)
+{
+	static const char *kNames[CPaintMouseListener::SubCount] =
+		{ "OBJECT", "VERTEX", "EDGE", "PATCH", "TILE" };
+	if (level < 0 || level >= CPaintMouseListener::SubCount)
+		return "?";
+	return kNames[level];
+}
+
+/** Sub-object level inside patch-edit mode (EP_* order). No-op outside ModePatch. */
+void zpSelectSubObject(int level)
+{
+	if (!g_PaintCtx.Active || !g_PaintCtx.Paint) return;
+	if (g_PaintCtx.Paint->Mode != CPaintMouseListener::ModePatch) return;
+	if (level < 0) level = 0;
+	if (level >= CPaintMouseListener::SubCount) level = CPaintMouseListener::SubCount - 1;
+	g_PaintCtx.Paint->SubObj = level;
+	ZPSCRIPT::record(NLMISC::toString("painter.setSubObject(%d)", level));
 }
 
 
@@ -608,10 +647,10 @@ void zpClearPropSelection()
  * Zone outline - outer perimeter only, chained into closed loops.
  *
  * Edge set (authoritative adjacency, not a raw open-edge scan):
- *   - PatchMesh edge shared by two patches of THIS mesh → interior.
- *   - CPatchInfo::BindEdges with NPatchs!=0 and ZoneId==this zone → same-zone neighbor
- *     (shared edge, 1-1/1-2/1-4 binds via dividEdge/offsetEdge) → interior.
- *   - BindEdges NPatchs==0 or ZoneId!=this (cross-zone weld) → outer perimeter.
+ * - PatchMesh edge shared by two patches of THIS mesh → interior.
+ * - CPatchInfo::BindEdges with NPatchs!=0 and ZoneId==this zone → same-zone neighbor
+ * (shared edge, 1-1/1-2/1-4 binds via dividEdge/offsetEdge) → interior.
+ * - BindEdges NPatchs==0 or ZoneId!=this (cross-zone weld) → outer perimeter.
  * Earlier gated the BindEdges test on Rp vert Binded flags, so intra-zone bind seams that
  * are open in PatchMesh still drew as "boundary" (interior tangle / bowties).
  *
@@ -665,8 +704,8 @@ bool zpIsZoneOuterBoundaryEdge(const SPaintZone &pz, size_t p, uint e)
 		}
 	}
 	// 2) BindEdges (session-welded): same-zone neighbor (any NPatchs) → interior.
-	//    Cross-zone welds (ZoneId != this) stay outer for THIS zone's silhouette.
-	//    NPatchs==0 is a true open / outer edge.
+	// Cross-zone welds (ZoneId != this) stay outer for THIS zone's silhouette.
+	// NPatchs==0 is a true open / outer edge.
 	const NL3D::CPatchInfo::CBindInfo &bi = pz.Patches[p].BindEdges[e];
 	if (bi.NPatchs != 0 && bi.ZoneId == (uint16)pz.ZoneId)
 		return false;
@@ -865,6 +904,122 @@ void zpCollectZoneBoundaryPolylines(const SPaintZone &pz, uint segsPerEdge,
  * No depth test - occluded segments overdraw (acceptable; geometry correctness first).
  * Thin = 1px; thick = multi-pass with small screen-space offsets.
  */
+/**
+ * Patch control cage - the control lattice.
+ *
+ * Drawn from the display CPatchInfo rather than from the evaluated SPatchMesh, because that
+ * data is already in world space and already carries an identity for the shared corners:
+ * BaseVertices[] is NeL's own per-zone vertex index, so a corner touched by four patches is
+ * one vertex here too. Nothing about the .max write target is needed to DRAW the cage, and
+ * keeping the two apart is what lets the display land before the write path exists.
+ *
+ * SCREEN SPACE, like zpDrawZoneOutline and for the same reason: overlays run after
+ * editorUI->draw(), which leaves the driver in NLGUI's 2D setup. World-space CDRU lines
+ * silently draw nothing there. Project through the camera by hand and emit 2D lines.
+ *
+ * Each edge of a quad patch is the Bezier chain V -> T -> T -> V, so the cage is those four
+ * chains; drawing them per patch double-draws shared edges, which costs a line and saves an
+ * adjacency walk.
+ */
+void zpDrawPatchLattice(NL3D::IDriver *driver, NL3D::CCamera *camera,
+                        const SPaintZone &pz, int subObj)
+{
+	if (!driver || !camera || pz.Patches.empty())
+		return;
+
+	static const NLMISC::CRGBA kCageColor(90, 190, 255, 255);
+	static const NLMISC::CRGBA kVertColor(255, 255, 255, 255);
+	// Lifted off the surface: the control points sit ON the landscape, and un-lifted lines
+	// disappear into the tessellation they describe. Same lift the zone outline uses.
+	static const float kLift = 0.4f;
+	// Vertex tick, in viewport units of HEIGHT. Screen-constant is what a point marker wants
+	// - unlike a manipulator, it carries no distance the artist has to read off it.
+	static const float kTick = 0.005f;
+
+	const NLMISC::CMatrix viewMat = camera->getMatrix().inverted();
+	const NL3D::CFrustum &fr = camera->getFrustum();
+	uint32 winW = 0, winH = 0;
+	driver->getWindowSize(winW, winH);
+	const float aspect = (winW && winH) ? (float)winH / (float)winW : 1.f;
+
+	struct SProj
+	{
+		static bool go(const NLMISC::CMatrix &vm, const NL3D::CFrustum &f,
+		               const NLMISC::CVector &world, float lift, NLMISC::CVector &out)
+		{
+			NLMISC::CVector w = world;
+			w.z += lift;
+			const NLMISC::CVector eye = vm * w;
+			if (eye.y <= f.Near * 0.5f)
+				return false; // behind or across the near plane: no meaningful projection
+			out = f.project(eye);
+			return true;
+		}
+	};
+
+	for (uint p = 0; p < pz.Patches.size(); ++p)
+	{
+		const NL3D::CBezierPatch &bp = pz.Patches[p].Patch;
+		for (uint e = 0; e < 4; ++e)
+		{
+			NLMISC::CVector chain[4];
+			bool ok[4];
+			ok[0] = SProj::go(viewMat, fr, bp.Vertices[e], kLift, chain[0]);
+			ok[1] = SProj::go(viewMat, fr, bp.Tangents[e * 2], kLift, chain[1]);
+			ok[2] = SProj::go(viewMat, fr, bp.Tangents[e * 2 + 1], kLift, chain[2]);
+			ok[3] = SProj::go(viewMat, fr, bp.Vertices[(e + 1) & 3], kLift, chain[3]);
+			for (uint k = 0; k + 1 < 4; ++k)
+				if (ok[k] && ok[k + 1])
+					NL3D::CDRU::drawLine(chain[k].x, chain[k].y,
+					                     chain[k + 1].x, chain[k + 1].y, *driver, kCageColor);
+		}
+	}
+
+	if (subObj != CPaintMouseListener::SubVertex)
+		return;
+
+	// Corner ticks, once per unique vertex. BaseVertices indexes the zone's own vertex table,
+	// so a corner reached from four patches marks once - which is also the identity selection
+	// will key on.
+	std::set<uint16> seen;
+	for (uint p = 0; p < pz.Patches.size(); ++p)
+	{
+		const NL3D::CPatchInfo &pi = pz.Patches[p];
+		for (uint c = 0; c < 4; ++c)
+		{
+			if (!seen.insert(pi.BaseVertices[c]).second)
+				continue;
+			NLMISC::CVector v;
+			if (!SProj::go(viewMat, fr, pi.Patch.Vertices[c], kLift, v))
+				continue;
+			// x scaled by the aspect so the tick is square on screen rather than stretched
+			// with the window, the same correction the sample gizmo needed for its pick radii.
+			NL3D::CDRU::drawLine(v.x - kTick * aspect, v.y, v.x + kTick * aspect, v.y, *driver, kVertColor);
+			NL3D::CDRU::drawLine(v.x, v.y - kTick, v.x, v.y + kTick, *driver, kVertColor);
+		}
+	}
+}
+
+/**
+ * Cage for every EDITABLE zone. In Max you are editing an object and its cage is simply up;
+ * a cage that follows the mouse is not something you can work on. Cost is bounded by the
+ * tool's one-editable-zone-per-max rule - frozen context zones are what make a working set
+ * large, and they are skipped.
+ *
+ * Lives here rather than at the call sites because there are TWO of them: the interactive
+ * loop and the --screenshot path each render their own overlay pass, and the prop outline is
+ * already duplicated across both.
+ */
+void zpDrawPatchLatticeAll(NL3D::IDriver *driver, NL3D::CCamera *camera, int subObj)
+{
+	if (!driver || !camera || !g_PaintCtx.Zones)
+		return;
+	const std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
+	for (uint z = 0; z < zones.size(); ++z)
+		if (!zones[z].Frozen && zones[z].ZoneId < kInstanceZoneIdBase)
+			zpDrawPatchLattice(driver, camera, zones[z], subObj);
+}
+
 void zpDrawZoneOutline(NL3D::IDriver *driver, NL3D::CCamera *camera,
                               const NL3D::CViewport &viewport,
                               const SPaintZone &pz, const NLMISC::CRGBA &col, bool thick)
@@ -1054,11 +1209,11 @@ void zpReadZoneProps(CNodeImpl *node, SZoneProps &out)
 
 /**
  * Write one export prop. Semantics match Max UIs:
- *   rotate   → NEL3D_APPDATA_ZONE_ROTATE decimal "0".."3" (always present after write)
- *   symmetry → NEL3D_APPDATA_ZONE_SYMMETRY "1"/"0" (BST_CHECKED/UNCHECKED)
- *   passable → presence: set "1" when true, DELETE entry when false (ligoscape rollout)
- *   usebbox  → "1" when true; DELETE when false (exporter getScriptAppDataInt default 0;
- *              absent and "0" both read false - delete is the least-surprising clean write)
+ * rotate → NEL3D_APPDATA_ZONE_ROTATE decimal "0".."3" (always present after write)
+ * symmetry → NEL3D_APPDATA_ZONE_SYMMETRY "1"/"0" (BST_CHECKED/UNCHECKED)
+ * passable → presence: set "1" when true, DELETE entry when false (ligoscape rollout)
+ * usebbox → "1" when true; DELETE when false (exporter getScriptAppDataInt default 0;
+ * absent and "0" both read false - delete is the least-surprising clean write)
  * When paint core is live, writes go through opProp so Ctrl+Z undoes them .
  */
 bool zpWriteZoneProp(uint zoneId, const std::string &which, int value, std::string &err)
@@ -1267,7 +1422,7 @@ int dumpZoneProps(const std::string &path)
 		SZoneProps p;
 		zpReadZoneProps(nodes[i].Node, p);
 		const bool elig = i < eligible.size() && eligible[i];
-		printf("  zone '%s' frozen=%d eligible=%d  rotate=%d%s  symmetry=%d%s  passable=%d%s  usebbox=%d%s\n",
+		printf(" zone '%s' frozen=%d eligible=%d rotate=%d%s symmetry=%d%s passable=%d%s usebbox=%d%s\n",
 		       name.c_str(), (int)nodes[i].Frozen, (int)elig,
 		       p.Rotate, p.HasRotate ? "" : "(default)",
 		       (int)p.Symmetry, p.HasSymmetry ? "" : "(default)",
@@ -1948,6 +2103,7 @@ void zpFillBridgeState(ZPUI::SPaintUIBridge &bridge)
 	if (!bridge.HaveCore) return;
 	CPaintMouseListener &pl = *g_PaintCtx.Paint;
 	bridge.Mode = pl.Mode;
+	bridge.SubObj = pl.SubObj;
 	bridge.CurTileSet = pl.CurTileSet;
 	bridge.TileSetCount = g_PaintCtx.Core->tileSetCount();
 	std::string name = g_PaintCtx.Core->tileSetName(pl.CurTileSet);
@@ -1996,7 +2152,7 @@ void zpFillBridgeState(ZPUI::SPaintUIBridge &bridge)
 		strncpy(bridge.InputDir, dir.c_str(), sizeof(bridge.InputDir) - 1);
 		bridge.InputDir[sizeof(bridge.InputDir) - 1] = 0;
 	}
-	// Season 
+	// Season
 	{
 		std::string lab = ZPCTX::seasonPreferenceLabel();
 		strncpy(bridge.SeasonLabel, lab.c_str(), sizeof(bridge.SeasonLabel) - 1);
@@ -2004,10 +2160,10 @@ void zpFillBridgeState(ZPUI::SPaintUIBridge &bridge)
 		bridge.SeasonCount = g_PaintCtx.AvailableSeasons
 			? (uint)g_PaintCtx.AvailableSeasons->size() : 0;
 	}
-	// Multi-file dirty 
+	// Multi-file dirty
 	bridge.EditableFileCount = g_EditableFiles.empty() ? 1u : (uint)g_EditableFiles.size();
 	bridge.DirtyFileCount = countDirtyEditableFiles();
-	// Color / displace 
+	// Color / displace
 	bridge.ColorRadius = pl.BrushRadius;
 	bridge.ColorHardness = pl.BrushHardness;
 	bridge.ColorOpacity = pl.BrushOpacity;
@@ -2080,8 +2236,8 @@ void zpFillBridgeState(ZPUI::SPaintUIBridge &bridge)
 }
 
 /** Script-host hook: refresh the live bridge's frame-synced snapshot on demand - the
- *  snapshot goes stale for the whole run of a script, and painterscript getters
- *  (getMode/getTileSet) must see their own setters' effects. */
+ * snapshot goes stale for the whole run of a script, and painterscript getters
+ * (getMode/getTileSet) must see their own setters' effects. */
 void zpScriptRefreshBridge()
 {
 	ZPSCRIPT::SScriptHost *h = ZPSCRIPT::getHost();
