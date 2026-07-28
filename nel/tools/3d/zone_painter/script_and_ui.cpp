@@ -932,9 +932,12 @@ void zpDrawPatchLattice(NL3D::IDriver *driver, NL3D::CCamera *camera,
 	// Lifted off the surface: the control points sit ON the landscape, and un-lifted lines
 	// disappear into the tessellation they describe. Same lift the zone outline uses.
 	static const float kLift = 0.4f;
-	// Vertex tick, in viewport units of HEIGHT. Screen-constant is what a point marker wants
-	// - unlike a manipulator, it carries no distance the artist has to read off it.
-	static const float kTick = 0.005f;
+	// Vertex marker half-size, in viewport units of HEIGHT. Screen-constant is what a point
+	// marker wants - unlike a manipulator it carries no distance to read off it - and a small
+	// solid square. Crosses were tried first and read as noise: at cage
+	// density their arms overlap the cage lines and each other, so the eye sees hatching
+	// rather than points.
+	static const float kVertHalf = 0.003f;
 
 	const NLMISC::CMatrix viewMat = camera->getMatrix().inverted();
 	const NL3D::CFrustum &fr = camera->getFrustum();
@@ -992,10 +995,12 @@ void zpDrawPatchLattice(NL3D::IDriver *driver, NL3D::CCamera *camera,
 			NLMISC::CVector v;
 			if (!SProj::go(viewMat, fr, pi.Patch.Vertices[c], kLift, v))
 				continue;
-			// x scaled by the aspect so the tick is square on screen rather than stretched
-			// with the window, the same correction the sample gizmo needed for its pick radii.
-			NL3D::CDRU::drawLine(v.x - kTick * aspect, v.y, v.x + kTick * aspect, v.y, *driver, kVertColor);
-			NL3D::CDRU::drawLine(v.x, v.y - kTick, v.x, v.y + kTick, *driver, kVertColor);
+			// x scaled by the aspect so the marker is square on screen rather than stretched
+			// with the window - normalized coordinates are per-axis. drawQuad's centre+radius
+			// overload cannot express that, hence the corner form.
+			NL3D::CDRU::drawQuad(v.x - kVertHalf * aspect, v.y - kVertHalf,
+			                     v.x + kVertHalf * aspect, v.y + kVertHalf,
+			                     *driver, kVertColor, NL3D::CViewport());
 		}
 	}
 }
