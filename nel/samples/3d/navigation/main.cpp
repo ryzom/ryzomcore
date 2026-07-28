@@ -1,5 +1,5 @@
 // NeL - MMORPG Framework <https://wiki.ryzom.dev/>
-// Copyright (C) 2026  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2026 Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -8,11 +8,11 @@
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Affero General Public License for more details.
 //
 // You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 //
 // Navigation + move gizmo sample
@@ -27,11 +27,11 @@
 // WebGL, which is the only practical way to try the last two.
 //
 // Input, by design (see nav_mouse_listener.h for why):
-//   left      pick a cube / drag a gizmo handle - never navigation
-//   middle    pan;  Alt+middle orbit;  Ctrl+Alt+middle dolly
-//   Ctrl+mid  fast pan;  Shift+mid  axis-locked pan
-//   wheel     stepped zoom
-//   Z         frame the selection (or everything, when nothing is selected)
+// left pick a cube / drag a gizmo handle - never navigation
+// middle pan; Alt+middle orbit; Ctrl+Alt+middle dolly
+// Ctrl+mid fast pan; Shift+mid axis-locked pan
+// wheel stepped zoom
+// Z frame the selection (or everything, when nothing is selected)
 //
 
 #include <nel/misc/types_nl.h>
@@ -52,6 +52,7 @@
 #include <nel/3d/u_material.h>
 #include <nel/3d/viewport.h>
 
+#include <algorithm>
 #include <vector>
 
 #ifdef __EMSCRIPTEN__
@@ -120,7 +121,9 @@ static const uint8 kCapShade = 110;
 
 // Constant on-screen size: the gizmo should not shrink as the camera pulls back, or it
 // stops being clickable exactly when you most need it.
-static const float kGizmoPixels = 150.f;
+// World size of the gizmo's axes. The cubes are 1 unit, so this reads as a manipulator
+// sized to its object rather than to the window.
+static const float kGizmoWorldSize = 1.3f;
 
 // The screen-space handle has no geometry of its own: it is the empty middle of the gizmo,
 // and it announces itself by lighting all three plane handles instead of adding a fourth
@@ -195,7 +198,7 @@ UMaterial m_GizmoSolidMat; // shafts and cones: back faces culled
 
 	TGizmoHandle m_Hover;
 	TGizmoHandle m_Drag;
-	CVector m_DragGrab;   // world point the drag started from
+	CVector m_DragGrab; // world point the drag started from
 	CVector m_DragOrigin; // cube position when the drag started
 
 	float m_MouseX, m_MouseY;
@@ -346,21 +349,17 @@ static float uiScale()
 
 float CNavigationDemo::gizmoScale() const
 {
-	if (m_Selected < 0)
-		return 1.f;
-	uint32 w = 0, h = 0;
-	m_Driver->getWindowSize(w, h);
-	if (!h)
-		return 1.f;
-	// World size of one pixel at the gizmo's depth, from the frustum's vertical extent.
-	const CVector camPos = camWorld().getPos();
-	const float depth = (m_Cubes[m_Selected].Pos - camPos) * camWorld().getJ();
-	const float d = depth > m_Frustum.Near ? depth : m_Frustum.Near;
-	const float worldPerPixelAtNear = (m_Frustum.Top - m_Frustum.Bottom) / (float)h;
-	// kGizmoPixels is a physical size, so it has to be scaled by the device pixel ratio:
-	// the canvas backing store already runs at CSS x DPR, and without this the gizmo would
-	// shrink to a third of its size on a phone - same pixel count, three times the density.
-	return kGizmoPixels * uiScale() * worldPerPixelAtNear * d / m_Frustum.Near;
+	// The gizmo lives in world space: it recedes with the object it is attached to, exactly
+	// like the object does. Sizing it to a constant number of screen pixels instead - which
+	// is what this used to do, and the usual behaviour by default - means the gizmo grows relative
+	// to its object as the object moves away, so a drag along an axis reads as the object
+	// shrinking out from under a gizmo that stays put. Disorienting, and the wrong feedback
+	// for a manipulator whose whole job is to express a distance in the scene.
+	//
+	// Camera distance therefore does NOT enter into it. The only thing allowed to change the
+	// gizmo's apparent size is the UI scale, so a dense display gets a gizmo that stays
+	// comfortable to hit rather than one that merely gets sharper.
+	return kGizmoWorldSize * uiScale();
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -444,12 +443,31 @@ TGizmoHandle CNavigationDemo::pickGizmo(float x, float y) const
 	m_Driver->getWindowSize(vw, vh);
 	const float ar = (vw && vh) ? (float)vw / (float)vh : 1.f;
 
+	// Pick tolerances stay in screen space, because fingers and cursors are screen-space
+	// things - but a world-sized gizmo can project down to a few pixels when the camera is
+	// far away, and a fixed tolerance would then cover the whole thing and make every hit
+	// the centre handle. Cap each tolerance against the gizmo's own projected extent so the
+	// proportions hold at any distance; at normal working distances the caps never bind and
+	// the constants apply as-is.
+	float ex, ey;
+	float ext = 0.f;
+	for (int a = 0; a < 3; ++a)
+	{
+		if (!project(o + axisVec(a) * (kAxisLen * s), ex, ey))
+			continue;
+		const float d = segDist(ex * ar, ey, ox * ar, oy, ox * ar, oy);
+		if (d > ext)
+			ext = d;
+	}
+	const float screenR = std::min(kScreenPickRadius, 0.30f * ext);
+	const float axisR = std::min(kAxisPickRadius, 0.25f * ext);
+
 	// Centre first, then planes, then axes: smaller and more specific targets win, which
 	// is also the order Max resolves overlaps in. The centre is invisible - see
 	// kScreenPickRadius - so keep its target generous enough to find by feel. It is tested
 	// FIRST, ahead of the planes whose inner corners it sits on top of: the very middle of
 	// the gizmo means all axes at once, regardless of which plane's corner is under it.
-	if (segDist(x * ar, y, ox * ar, oy, ox * ar, oy) < kScreenPickRadius)
+	if (segDist(x * ar, y, ox * ar, oy, ox * ar, oy) < screenR)
 		return GizmoScreen;
 
 	static const int planeAxes[3][2] = { { 0, 1 }, { 1, 2 }, { 2, 0 } };
@@ -470,7 +488,7 @@ TGizmoHandle CNavigationDemo::pickGizmo(float x, float y) const
 	}
 
 	TGizmoHandle best = GizmoNone;
-	float bestDist = kAxisPickRadius;
+	float bestDist = axisR;
 	for (int a = 0; a < 3; ++a)
 	{
 		const CVector axis = axisVec(a);
