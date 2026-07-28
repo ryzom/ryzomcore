@@ -128,6 +128,8 @@ static const float kGizmoPixels = 150.f;
 // The screen-space handle has no geometry of its own: it is the empty middle of the gizmo,
 // and it announces itself by lighting all three plane handles instead of adding a fourth
 // shape to an already busy centre. This is its pick radius, in viewport-height fractions.
+// How far a left drag has to travel before it stops being a click and becomes a pan.
+static const float kPanSlop = 0.006f;
 static const float kScreenPickRadius = 0.018f;
 
 // Screen-space pick radius for the axis shafts, as a fraction of viewport height. Generous
@@ -203,6 +205,10 @@ UMaterial m_GizmoSolidMat; // shafts and cones: back faces culled
 	CVector m_DragGrab; // world point the drag started from
 	CVector m_DragOrigin; // cube position when the drag started
 
+	// One-finger / left-drag pan on empty space - see the mouse-down handler.
+	bool m_ViewPan;
+	bool m_PanMoved;
+	float m_PanX, m_PanY;
 	// Deferred gizmo fit - see updateGizmoFit.
 	float m_GizmoScale;
 	bool m_GizmoFitDirty;
@@ -217,6 +223,7 @@ UMaterial m_GizmoSolidMat; // shafts and cones: back faces culled
 
 CNavigationDemo::CNavigationDemo()
 	: m_Driver(NULL), m_Selected(-1), m_Hover(GizmoNone), m_Drag(GizmoNone),
+	  m_ViewPan(false), m_PanMoved(false), m_PanX(0.f), m_PanY(0.f),
 	  m_GizmoScale(1.f), m_GizmoFitDirty(true), m_FitSerial(0), m_FitW(0), m_FitH(0),
 	  m_MouseX(0.5f), m_MouseY(0.5f), m_LeftDown(false), m_CloseWindow(false)
 {
@@ -664,9 +671,31 @@ void CNavigationDemo::operator()(const CEvent &event)
 		m_MouseX = m->X;
 		m_MouseY = m->Y;
 		if (m_LeftDown && m_Drag != GizmoNone)
+		{
 			updateDrag(m_MouseX, m_MouseY);
+		}
+		else if (m_ViewPan)
+		{
+			if (!m_PanMoved)
+			{
+				const float dx = m_MouseX - m_PanX, dy = m_MouseY - m_PanY;
+				if (dx * dx + dy * dy > kPanSlop * kPanSlop)
+				{
+					m_PanMoved = true;
+					m_Nav.beginHostGesture();
+				}
+			}
+			if (m_PanMoved)
+			{
+				m_Nav.panBetween(m_PanX, m_PanY, m_MouseX, m_MouseY);
+				m_PanX = m_MouseX;
+				m_PanY = m_MouseY;
+			}
+		}
 		else if (!m_LeftDown)
+		{
 			m_Hover = pickGizmo(m_MouseX, m_MouseY);
+		}
 		return;
 	}
 	if (event == EventMouseDownId)
@@ -684,9 +713,23 @@ void CNavigationDemo::operator()(const CEvent &event)
 			beginDrag(h, m_MouseX, m_MouseY);
 			return;
 		}
-		m_Selected = pickCube(m_MouseX, m_MouseY);
-		m_GizmoFitDirty = true; // new object, new distance
+		const int cube = pickCube(m_MouseX, m_MouseY);
 		m_Hover = GizmoNone;
+		if (cube >= 0)
+		{
+			m_Selected = cube;
+			m_GizmoFitDirty = true; // new object, new distance
+			return;
+		}
+		// Empty space. On a touchscreen this is the one-finger pan, since two fingers are
+		// spoken for by orbit; on a laptop touchpad it is the only pan there is without a
+		// middle button. Deselecting is deferred to mouse-up so that a pan is not also a
+		// click - a real editor would want this gesture for rubber-band select instead, and
+		// would gate the two on a preference.
+		m_ViewPan = true;
+		m_PanMoved = false;
+		m_PanX = m_MouseX;
+		m_PanY = m_MouseY;
 		return;
 	}
 	if (event == EventMouseUpId)
@@ -696,6 +739,14 @@ void CNavigationDemo::operator()(const CEvent &event)
 			m_LeftDown = false;
 			m_Drag = GizmoNone;
 			m_GizmoFitDirty = true; // the object moved; re-fit now that the hands are off
+			if (m_ViewPan)
+			{
+				if (m_PanMoved)
+					m_Nav.endHostGesture();
+				else
+					m_Selected = -1; // it was a click after all
+				m_ViewPan = false;
+			}
 		}
 		return;
 	}
