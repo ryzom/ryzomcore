@@ -281,7 +281,7 @@ void CPaintMouseListener::operator()(const NLMISC::CEvent &event)
 			MouseY = mouse->Y;
 			// Patch edit intercepts BEFORE the exact-equality test below: that test is
 			// `Button == leftButton`, so Ctrl+left and Alt+left never reach it - which is
-			// exactly the pair Max's add/remove-from-selection needs. Patch mode also never
+			// exactly the pair add/remove-from-selection needs. Patch mode also never
 			// paints, so returning here is the whole of its mouse-down behaviour.
 			if (Mode == ModePatch)
 			{
@@ -1430,8 +1430,12 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 				else if (paintListener.Mode == CPaintMouseListener::ModePatch)
 				{
 					zpDrawPatchLatticeAll(driver, camera, paintListener.SubObj);
-					// Gizmo after the cage so it is never overdrawn by it.
-					if (paintListener.SubObj == CPaintMouseListener::SubVertex)
+					// Gizmo after the cage so it is never overdrawn by it. Every level that
+					// MOVES something gets one - edge and patch selections are projected onto
+					// the same vertex set, so the gizmo is already correct for them.
+					if (paintListener.SubObj == CPaintMouseListener::SubVertex
+					    || paintListener.SubObj == CPaintMouseListener::SubEdge
+					    || paintListener.SubObj == CPaintMouseListener::SubPatch)
 						zpDrawPatchGizmo(driver, camera, paintListener.MouseX, paintListener.MouseY,
 						                 mouseListener.isNavigating(), mouseListener.viewSerial());
 				}
@@ -1442,7 +1446,7 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 					textContext.setColor(NLMISC::CRGBA(255, 255, 255));
 					if (paintListener.Mode == CPaintMouseListener::ModePatch)
 					{
-						textContext.printfAt(0.01f, 0.98f, "[PATCH:%s] sel %u  undo %u",
+						textContext.printfAt(0.01f, 0.98f, "[PATCH:%s] sel %u undo %u",
 						                     zpSubObjName(paintListener.SubObj),
 						                     zpPatchVertSelCount(), core->undoDepth());
 						// Same slot Prop mode uses for its status line. Without this the
@@ -1735,8 +1739,12 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 				else if (paintListener.Mode == CPaintMouseListener::ModePatch)
 				{
 					zpDrawPatchLatticeAll(driver, camera, paintListener.SubObj);
-					// Gizmo after the cage so it is never overdrawn by it.
-					if (paintListener.SubObj == CPaintMouseListener::SubVertex)
+					// Gizmo after the cage so it is never overdrawn by it. Every level that
+					// MOVES something gets one - edge and patch selections are projected onto
+					// the same vertex set, so the gizmo is already correct for them.
+					if (paintListener.SubObj == CPaintMouseListener::SubVertex
+					    || paintListener.SubObj == CPaintMouseListener::SubEdge
+					    || paintListener.SubObj == CPaintMouseListener::SubPatch)
 						zpDrawPatchGizmo(driver, camera, paintListener.MouseX, paintListener.MouseY,
 						                 mouseListener.isNavigating(), mouseListener.viewSerial());
 				}
@@ -1769,7 +1777,7 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 						const char *mname = zpModeName(mi);
 						if (paintListener.Mode == CPaintMouseListener::ModePatch)
 						{
-textContext.printfAt(0.01f, 0.98f, "[PATCH:%s] sel %u  undo %u  %s",
+textContext.printfAt(0.01f, 0.98f, "[PATCH:%s] sel %u undo %u %s",
                      zpSubObjName(paintListener.SubObj),
                      zpPatchVertSelCount(), core->undoDepth(),
 							                     paintBridge.SeasonLabel[0] ? paintBridge.SeasonLabel : "auto");

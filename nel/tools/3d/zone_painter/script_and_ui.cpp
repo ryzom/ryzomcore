@@ -624,7 +624,13 @@ void zpSelectSubObject(int level)
 	if (level < 0) level = 0;
 	if (level >= CPaintMouseListener::SubCount) level = CPaintMouseListener::SubCount - 1;
 	if (level != g_PaintCtx.Paint->SubObj)
-		g_PatchVertSel.clear(); // a vertex selection means nothing at edge or patch level
+	{
+		// A selection made at one level means nothing at another, and carrying it over would
+		// leave a gizmo sitting on things the new level cannot address.
+		g_PatchVertSel.clear();
+		g_PatchEdgeSel.clear();
+		g_PatchFaceSel.clear();
+	}
 	g_PaintCtx.Paint->SubObj = level;
 	ZPSCRIPT::record(NLMISC::toString("painter.setSubObject(%d)", level));
 }
@@ -933,6 +939,9 @@ static NLMISC::CVector s_DragAxis;
 // close you have to be, and making the artist hit 6 pixels exactly is not a feature.
 static const float kPatchVertHalf = 0.003f;
 static const float kPatchVertPick = 0.012f;
+// Edges are long targets, so a tighter radius than a vertex still leaves them easy to hit and
+// stops an edge stealing a click meant for the corner sitting on it.
+static const float kPatchEdgePick = 0.008f;
 
 /** Project a world point (lifted) to screen. False when it is behind or across the near plane. */
 static bool zpProjectLifted(const NLMISC::CMatrix &vm, const NL3D::CFrustum &f,
@@ -1051,26 +1060,46 @@ static const NLMISC::CRGBA kVertBoundColor(0, 0, 0, 255);
 	const float halfPx = floorf(kPatchVertHalf * (float)winH + 0.5f) < 1.f
 		? 1.f : floorf(kPatchVertHalf * (float)winH + 0.5f);
 
-	for (uint p = 0; p < pz.Patches.size(); ++p)
+	// TWO passes over the cage: everything plain, then everything selected.
+	//
+	// Not a nicety. Each patch draws all four of its own edges, so an edge between two patches
+	// is drawn twice, and with a single pass the neighbour drawn later paints over the
+	// highlight - a selected patch came out with two red edges and two blue ones depending on
+	// where it sat in the patch order.
+	for (uint pass = 0; pass < 2; ++pass)
 	{
-		const NL3D::CBezierPatch &bp = pz.Patches[p].Patch;
-		const NL3D::CPatchInfo &cpi = pz.Patches[p];
-		for (uint e = 0; e < 4; ++e)
+		const bool selPass = pass != 0;
+		for (uint p = 0; p < pz.Patches.size(); ++p)
 		{
-			// Tangent 2e is attached to vertex e, tangent 2e+1 to vertex (e+1)&3, so each
-			// handle rides the corner it belongs to and the cage deforms instead of tearing.
-			const NLMISC::CVector offA = zpVertOffset(pz, cpi.BaseVertices[e]);
-			const NLMISC::CVector offB = zpVertOffset(pz, cpi.BaseVertices[(e + 1) & 3]);
-			NLMISC::CVector chain[4];
-			bool ok[4];
-			ok[0] = zpProjectLifted(viewMat, fr, bp.Vertices[e] + offA, kPatchLift, chain[0]);
-			ok[1] = zpProjectLifted(viewMat, fr, bp.Tangents[e * 2] + offA, kPatchLift, chain[1]);
-			ok[2] = zpProjectLifted(viewMat, fr, bp.Tangents[e * 2 + 1] + offB, kPatchLift, chain[2]);
-			ok[3] = zpProjectLifted(viewMat, fr, bp.Vertices[(e + 1) & 3] + offB, kPatchLift, chain[3]);
-			for (uint k = 0; k + 1 < 4; ++k)
-				if (ok[k] && ok[k + 1])
-					NL3D::CDRU::drawLine(chain[k].x, chain[k].y,
-					                     chain[k + 1].x, chain[k + 1].y, *driver, kCageColor);
+			const NL3D::CBezierPatch &bp = pz.Patches[p].Patch;
+			const NL3D::CPatchInfo &cpi = pz.Patches[p];
+			// At patch level the whole cell lights up, so its four chains count as selected
+			// whichever way each of them is reached.
+			const bool faceSel = subObj == CPaintMouseListener::SubPatch
+				&& g_PatchFaceSel.count(TPatchFaceId(pz.ZoneId, p)) != 0;
+			for (uint e = 0; e < 4; ++e)
+			{
+				const bool edgeSel = subObj == CPaintMouseListener::SubEdge
+					&& g_PatchEdgeSel.count(SPatchEdgeId(pz.ZoneId, cpi.BaseVertices[e],
+					                                     cpi.BaseVertices[(e + 1) & 3])) != 0;
+				if ((faceSel || edgeSel) != selPass)
+					continue;
+				// Tangent 2e is attached to vertex e, tangent 2e+1 to vertex (e+1)&3, so each
+				// handle rides the corner it belongs to and the cage deforms instead of tearing.
+				const NLMISC::CVector offA = zpVertOffset(pz, cpi.BaseVertices[e]);
+				const NLMISC::CVector offB = zpVertOffset(pz, cpi.BaseVertices[(e + 1) & 3]);
+				const NLMISC::CRGBA &col = selPass ? kVertSelColor : kCageColor;
+				NLMISC::CVector chain[4];
+				bool ok[4];
+				ok[0] = zpProjectLifted(viewMat, fr, bp.Vertices[e] + offA, kPatchLift, chain[0]);
+				ok[1] = zpProjectLifted(viewMat, fr, bp.Tangents[e * 2] + offA, kPatchLift, chain[1]);
+				ok[2] = zpProjectLifted(viewMat, fr, bp.Tangents[e * 2 + 1] + offB, kPatchLift, chain[2]);
+				ok[3] = zpProjectLifted(viewMat, fr, bp.Vertices[(e + 1) & 3] + offB, kPatchLift, chain[3]);
+				for (uint k = 0; k + 1 < 4; ++k)
+					if (ok[k] && ok[k + 1])
+						NL3D::CDRU::drawLine(chain[k].x, chain[k].y,
+						                     chain[k + 1].x, chain[k + 1].y, *driver, col);
+			}
 		}
 	}
 
@@ -1854,7 +1883,7 @@ uint zpApplyPatchMove(const NLMISC::CVector &worldDelta, std::string &msg)
 		const MAXMATH::Point3M o1 = MAXMATH::transformPoint(wd, inv);
 		const float od[3] = { o1.x - o0.x, o1.y - o0.y, o1.z - o0.z };
 
-		// Bound vertices are derived from a target edge; Max recomputes them on load, so a
+		// Bound vertices are derived from a target edge; they are recomputed on load, so a
 		// written position could not survive the round trip. Filtered HERE rather than in the
 		// core op, which trusts its caller to have applied the policy.
 		std::vector<uint16> move;
@@ -1987,6 +2016,135 @@ bool zpPickPatchVertex(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, f
 					found = true;
 				}
 			}
+		}
+	}
+	return found;
+}
+
+/** Screen distance from a point to a segment, in units of viewport height. */
+static float zpSegDist(float px, float py, const NLMISC::CVector &a, const NLMISC::CVector &b,
+                       float aspect)
+{
+	const float ax = a.x * aspect, ay = a.y;
+	const float bx = b.x * aspect, by = b.y;
+	const float qx = px * aspect, qy = py;
+	const float ex = bx - ax, ey = by - ay;
+	const float len2 = ex * ex + ey * ey;
+	float t = 0.f;
+	if (len2 > 1e-12f)
+	{
+		t = ((qx - ax) * ex + (qy - ay) * ey) / len2;
+		if (t < 0.f) t = 0.f;
+		else if (t > 1.f) t = 1.f;
+	}
+	const float dx = qx - (ax + ex * t), dy = qy - (ay + ey * t);
+	return sqrtf(dx * dx + dy * dy);
+}
+
+/**
+ * Nearest cage edge to the pointer.
+ *
+ * Measured against the DRAWN chain (V -> T -> T -> V), not against the straight line between
+ * the corners: a patch edge with real tangents bows visibly away from that line, and picking
+ * what is drawn is the only version an artist can aim at.
+ */
+bool zpPickPatchEdge(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, float my,
+                     uint &zoneOut, uint16 &vertAOut, uint16 &vertBOut)
+{
+	if (!camera || !driver || !g_PaintCtx.Zones)
+		return false;
+	const NLMISC::CMatrix viewMat = camera->getMatrix().inverted();
+	const NL3D::CFrustum &fr = camera->getFrustum();
+	uint32 winW = 0, winH = 0;
+	driver->getWindowSize(winW, winH);
+	const float aspect = (winW && winH) ? (float)winW / (float)winH : 1.f;
+
+	const std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
+	float best = kPatchEdgePick;
+	bool found = false;
+	for (uint z = 0; z < zones.size(); ++z)
+	{
+		const SPaintZone &pz = zones[z];
+		if (!pz.Editable)
+			continue;
+		for (uint p = 0; p < pz.Patches.size(); ++p)
+		{
+			const NL3D::CPatchInfo &pi = pz.Patches[p];
+			const NL3D::CBezierPatch &bp = pi.Patch;
+			for (uint e = 0; e < 4; ++e)
+			{
+				NLMISC::CVector chain[4];
+				bool ok = true;
+				ok = ok && zpProjectLifted(viewMat, fr, bp.Vertices[e], kPatchLift, chain[0]);
+				ok = ok && zpProjectLifted(viewMat, fr, bp.Tangents[e * 2], kPatchLift, chain[1]);
+				ok = ok && zpProjectLifted(viewMat, fr, bp.Tangents[e * 2 + 1], kPatchLift, chain[2]);
+				ok = ok && zpProjectLifted(viewMat, fr, bp.Vertices[(e + 1) & 3], kPatchLift, chain[3]);
+				if (!ok)
+					continue;
+				for (uint k = 0; k + 1 < 4; ++k)
+				{
+					const float d = zpSegDist(mx, my, chain[k], chain[k + 1], aspect);
+					if (d >= best)
+						continue;
+					best = d;
+					zoneOut = pz.ZoneId;
+					vertAOut = pi.BaseVertices[e];
+					vertBOut = pi.BaseVertices[(e + 1) & 3];
+					found = true;
+				}
+			}
+		}
+	}
+	return found;
+}
+
+/**
+ * Patch under the pointer.
+ *
+ * Point-in-quad on the projected CORNERS, which is the cage quad rather than the tessellated
+ * surface - the artist is picking a cell of the lattice they can see. Ties go to the nearest,
+ * so a patch behind another does not steal the click.
+ */
+bool zpPickPatchFace(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, float my,
+                     uint &zoneOut, uint &patchOut)
+{
+	if (!camera || !driver || !g_PaintCtx.Zones)
+		return false;
+	const NLMISC::CMatrix viewMat = camera->getMatrix().inverted();
+	const NL3D::CFrustum &fr = camera->getFrustum();
+
+	const std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
+	bool found = false;
+	float bestDepth = 0.f;
+	const NLMISC::CVector eye = camera->getMatrix().getPos();
+	for (uint z = 0; z < zones.size(); ++z)
+	{
+		const SPaintZone &pz = zones[z];
+		if (!pz.Editable)
+			continue;
+		for (uint p = 0; p < pz.Patches.size(); ++p)
+		{
+			const NL3D::CBezierPatch &bp = pz.Patches[p].Patch;
+			float qx[4], qy[4];
+			bool ok = true;
+			for (uint c = 0; c < 4 && ok; ++c)
+			{
+				NLMISC::CVector v;
+				ok = zpProjectLifted(viewMat, fr, bp.Vertices[c], kPatchLift, v);
+				qx[c] = v.x;
+				qy[c] = v.y;
+			}
+			if (!ok || !zpQuadContains(mx, my, qx, qy))
+				continue;
+			NLMISC::CVector centre = bp.Vertices[0] + bp.Vertices[1] + bp.Vertices[2] + bp.Vertices[3];
+			centre *= 0.25f;
+			const float depth = (centre - eye).norm();
+			if (found && depth >= bestDepth)
+				continue;
+			bestDepth = depth;
+			zoneOut = pz.ZoneId;
+			patchOut = p;
+			found = true;
 		}
 	}
 	return found;
@@ -2135,9 +2293,122 @@ void zpPatchVertSelect(uint zoneId, uint vertIdx, int op)
 	ZPSCRIPT::record(NLMISC::toString("painter.selectPatchVertex(%u, %u, %d)", zoneId, vertIdx, op));
 }
 
+/**
+ * Project the current level's selection onto the vertex set the move machinery consumes.
+ *
+ * Edge and patch levels move VERTICES - edge move is its two corners, patch move is
+ * its four - so the whole gizmo/preview/weld/write chain works unchanged and only the thing
+ * being pointed at differs. The level's own set stays the authority and this is recomputed
+ * from scratch every time, which is what makes removing one edge of a pair that shared a
+ * corner leave that corner selected rather than dropping it.
+ */
+void zpRebuildVertSelFromSubObject()
+{
+	if (!g_PaintCtx.Paint)
+		return;
+	const int level = g_PaintCtx.Paint->SubObj;
+	if (level != CPaintMouseListener::SubEdge && level != CPaintMouseListener::SubPatch)
+		return;
+	g_PatchVertSel.clear();
+	std::set<TPatchVertId> want;
+	if (level == CPaintMouseListener::SubEdge)
+	{
+		for (std::set<SPatchEdgeId>::const_iterator it = g_PatchEdgeSel.begin();
+		     it != g_PatchEdgeSel.end(); ++it)
+		{
+			want.insert(TPatchVertId(it->Zone, it->A));
+			want.insert(TPatchVertId(it->Zone, it->B));
+		}
+	}
+	else
+	{
+		for (std::set<TPatchFaceId>::const_iterator it = g_PatchFaceSel.begin();
+		     it != g_PatchFaceSel.end(); ++it)
+		{
+			const SPaintZone *pz = zpFindPaintZone(it->first);
+			if (!pz || it->second >= pz->Patches.size())
+				continue;
+			for (uint c = 0; c < 4; ++c)
+				want.insert(TPatchVertId(it->first, pz->Patches[it->second].BaseVertices[c]));
+		}
+	}
+	// Same two rules the vertex level applies, for the same reasons: a welded seam is one
+	// point, and one object vertex reached through two nodes is one storage location.
+	for (std::set<TPatchVertId>::const_iterator it = want.begin(); it != want.end(); ++it)
+	{
+		std::set<TPatchVertId> group;
+		uint roSkipped = 0;
+		if (g_PatchWeldSelect)
+			zpWeldClosure(it->first, it->second, group, roSkipped);
+		else
+			group.insert(*it);
+		for (std::set<TPatchVertId>::const_iterator g = group.begin(); g != group.end(); ++g)
+		{
+			uint other = 0;
+			if (zpVertAliased(g->first, g->second, other))
+				continue;
+			g_PatchVertSel.insert(*g);
+		}
+	}
+	zpPatchGizmoInvalidate();
+}
+
+void zpPatchEdgeSelect(uint zoneId, uint vertA, uint vertB, int op)
+{
+	const SPatchEdgeId id(zoneId, (uint16)vertA, (uint16)vertB);
+	if (op == 0)
+		g_PatchEdgeSel.clear();
+	if (op == 2)
+		g_PatchEdgeSel.erase(id);
+	else
+		g_PatchEdgeSel.insert(id);
+	zpRebuildVertSelFromSubObject();
+	ZPSCRIPT::record(NLMISC::toString("painter.selectPatchEdge(%u, %u, %u, %d)",
+	                                  zoneId, vertA, vertB, op));
+}
+
+void zpPatchFaceSelect(uint zoneId, uint patchIdx, int op)
+{
+	const TPatchFaceId id(zoneId, patchIdx);
+	if (op == 0)
+		g_PatchFaceSel.clear();
+	if (op == 2)
+		g_PatchFaceSel.erase(id);
+	else
+		g_PatchFaceSel.insert(id);
+	zpRebuildVertSelFromSubObject();
+	ZPSCRIPT::record(NLMISC::toString("painter.selectPatchFace(%u, %u, %d)", zoneId, patchIdx, op));
+}
+
 uint zpPatchVertSelCount()
 {
 	return (uint)g_PatchVertSel.size();
+}
+
+uint zpPatchEdgeSelCount() { return (uint)g_PatchEdgeSel.size(); }
+uint zpPatchFaceSelCount() { return (uint)g_PatchFaceSel.size(); }
+
+bool zpPatchEdgeSelAt(uint index, uint &zoneOut, uint &aOut, uint &bOut)
+{
+	if (index >= g_PatchEdgeSel.size())
+		return false;
+	std::set<SPatchEdgeId>::const_iterator it = g_PatchEdgeSel.begin();
+	std::advance(it, index);
+	zoneOut = it->Zone;
+	aOut = it->A;
+	bOut = it->B;
+	return true;
+}
+
+bool zpPatchFaceSelAt(uint index, uint &zoneOut, uint &patchOut)
+{
+	if (index >= g_PatchFaceSel.size())
+		return false;
+	std::set<TPatchFaceId>::const_iterator it = g_PatchFaceSel.begin();
+	std::advance(it, index);
+	zoneOut = it->first;
+	patchOut = it->second;
+	return true;
 }
 
 bool zpPatchVertSelAt(uint index, uint &zoneOut, uint &vertOut)
@@ -2177,9 +2448,14 @@ bool zpPatchVertWorld(uint zoneId, uint vertIdx, float outPos[3])
 
 void zpPatchVertClear()
 {
-	if (g_PatchVertSel.empty())
+	// Every level's set: at edge or patch level the vertex set is a projection of one of the
+	// others, so clearing only the projection would leave the cage highlighted and the next
+	// rebuild would put it straight back.
+	if (g_PatchVertSel.empty() && g_PatchEdgeSel.empty() && g_PatchFaceSel.empty())
 		return;
 	g_PatchVertSel.clear();
+	g_PatchEdgeSel.clear();
+	g_PatchFaceSel.clear();
 	zpPatchGizmoInvalidate();
 	ZPSCRIPT::record("painter.clearPatchVertexSelection()");
 }
@@ -2188,8 +2464,58 @@ void zpPatchVertClear()
  * Selection modifiers: plain click replaces, Ctrl adds, Alt removes. A click that hits
  * nothing clears - the same object-selection feel Prop mode already has.
  */
+/**
+ * Scripted click at a normalized viewport position, with the session's own camera and driver.
+ *
+ * The picking is screen-space maths on projected geometry and is exactly the part a byte gate
+ * and a selection-by-index gate both miss: a script that calls selectPatchEdge proves the
+ * selection machinery, not that clicking on an edge finds that edge. `--screenshot` has no
+ * pointer, so without this the pick functions cannot be exercised headlessly at all.
+ */
+bool zpPatchClickAt(float x, float y, uint buttons)
+{
+	if (!g_PaintCtx.Camera || !g_PaintCtx.UDriver)
+		return false;
+	NL3D::IDriver *driver = static_cast<NL3D::CDriverUser *>(g_PaintCtx.UDriver)->getDriver();
+	if (!driver)
+		return false;
+	zpPatchVertexClick(g_PaintCtx.Camera, driver, x, y, buttons);
+	return true;
+}
+
 void zpPatchVertexClick(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, float my, uint buttons)
 {
+	int op = 0;
+	if (buttons & NLMISC::ctrlButton)
+		op = 1;
+	else if (buttons & NLMISC::altButton)
+		op = 2;
+	const int level = g_PaintCtx.Paint ? g_PaintCtx.Paint->SubObj : CPaintMouseListener::SubVertex;
+
+	if (level == CPaintMouseListener::SubEdge)
+	{
+		uint zone = 0;
+		uint16 a = 0, b = 0;
+		if (!zpPickPatchEdge(camera, driver, mx, my, zone, a, b))
+		{
+			zpPatchVertClear();
+			return;
+		}
+		zpPatchEdgeSelect(zone, a, b, op);
+		return;
+	}
+	if (level == CPaintMouseListener::SubPatch)
+	{
+		uint zone = 0, patch = 0;
+		if (!zpPickPatchFace(camera, driver, mx, my, zone, patch))
+		{
+			zpPatchVertClear();
+			return;
+		}
+		zpPatchFaceSelect(zone, patch, op);
+		return;
+	}
+
 	uint zone = 0;
 	uint16 vert = 0;
 	if (!zpPickPatchVertex(camera, driver, mx, my, zone, vert))
@@ -2197,11 +2523,6 @@ void zpPatchVertexClick(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, 
 		zpPatchVertClear();
 		return;
 	}
-	int op = 0;
-	if (buttons & NLMISC::ctrlButton)
-		op = 1;
-	else if (buttons & NLMISC::altButton)
-		op = 2;
 	zpPatchVertSelect(zone, vert, op);
 }
 

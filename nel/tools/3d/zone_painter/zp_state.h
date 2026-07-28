@@ -264,7 +264,7 @@ struct SNeighborHint
 };
 
 /**
- * One NODE: a placement of an object in the session, in Max's sense.
+ * One NODE: a placement of an object in the session, as a node.
  *
  * `Node` is the object handle - several SPaintZone entries may carry the same pointer, which
  * means they show the SAME storage from different places on the board. There is deliberately
@@ -306,7 +306,7 @@ struct SPaintZone
 	/// Object space -> DISPLAYED world space: ObjectTM followed by everything the session did
 	/// to put this zone where it is on the board (file placement, instance rot/mirror).
 	///
-	/// This is the node half of the Max node/object split. ObjectTM alone is the file's own
+	/// This is the node half of the node/object split. ObjectTM alone is the file's own
 	/// authored frame, which is the DISPLAY frame only for a file sitting at the board origin
 	/// with no transform. Anything that recomputes a display position from a stored object
 	/// position must use this, or a placed file's geometry lands one board cell away from
@@ -489,9 +489,55 @@ bool zpPatchVertSelAt(uint index, uint &zoneOut, uint &vertOut);
  */
 bool zpPatchVertWorld(uint zoneId, uint vertIdx, float outPos[3]);
 
+/**
+ * Edge identity: the corner PAIR, ordered, not (patch, edge).
+ *
+ * An edge between two patches is drawn twice and reached from either, but it is one edge - the
+ * same reason `BaseVertices` makes a corner touched by four patches one vertex. Keying on the
+ * pair dedupes it for free and makes "the two ends of the selected edge" the obvious thing.
+ */
+struct SPatchEdgeId
+{
+	uint Zone;
+	uint16 A, B; // A < B
+	SPatchEdgeId() : Zone(0), A(0), B(0) { }
+	SPatchEdgeId(uint z, uint16 a, uint16 b)
+	    : Zone(z), A(a < b ? a : b), B(a < b ? b : a) { }
+	bool operator<(const SPatchEdgeId &o) const
+	{
+		if (Zone != o.Zone) return Zone < o.Zone;
+		if (A != o.A) return A < o.A;
+		return B < o.B;
+	}
+};
+extern std::set<SPatchEdgeId> g_PatchEdgeSel;
+
+/** Patch (face) identity: (zone, patch index). Patches are not shared, so this is enough. */
+typedef std::pair<uint, uint> TPatchFaceId;
+extern std::set<TPatchFaceId> g_PatchFaceSel;
+
 /** Selection ops (recorded). Op: 0 replace, 1 add, 2 remove. */
 void zpPatchVertSelect(uint zoneId, uint vertIdx, int op);
+void zpPatchEdgeSelect(uint zoneId, uint vertA, uint vertB, int op);
+void zpPatchFaceSelect(uint zoneId, uint patchIdx, int op);
 void zpPatchVertClear();
+
+/**
+ * Edge and patch levels move VERTICES, so their selections are projected onto g_PatchVertSel
+ * and everything downstream - gizmo, preview, weld propagation, the write path - is untouched.
+ * The level's own set stays the authority, so removing one edge of a pair that shared a corner
+ * correctly leaves that corner selected.
+ */
+void zpRebuildVertSelFromSubObject();
+
+/** Picking at the edge and patch levels, mirroring zpPickPatchVertex. */
+bool zpPickPatchEdge(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, float my,
+                     uint &zoneOut, uint16 &vertAOut, uint16 &vertBOut);
+bool zpPickPatchFace(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, float my,
+                     uint &zoneOut, uint &patchOut);
+
+/** Scripted click, using the session's camera and driver (headless picking gate). */
+bool zpPatchClickAt(float x, float y, uint buttons);
 /** Nearest editable-zone vertex within the screen pick radius. False if nothing is close. */
 bool zpPickPatchVertex(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, float my,
                        uint &zoneOut, uint16 &vertOut);
