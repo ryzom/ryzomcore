@@ -690,6 +690,9 @@ zpSyncLandscapeWeld();
 	// re-entering it, which lands on Object) drops it rather than leaving a stale set to
 	// surprise the next move.
 	g_PatchVertSel.clear();
+	g_PatchEdgeSel.clear();
+	g_PatchFaceSel.clear();
+	g_PatchTanSel.clear();
 	// TODO (cursors): set the mode's pointer shape here - one setCursor() per mode, back to
 	// "curs_default.tga" for Prop and for any mode whose art is still missing. See the
 	// manifest above for the names and where the bitmaps come from.
@@ -734,6 +737,7 @@ void zpSelectSubObject(int level)
 		g_PatchVertSel.clear();
 		g_PatchEdgeSel.clear();
 		g_PatchFaceSel.clear();
+		g_PatchTanSel.clear();
 	}
 	g_PaintCtx.Paint->SubObj = level;
 	ZPSCRIPT::record(NLMISC::toString("painter.setSubObject(%d)", level));
@@ -1046,6 +1050,9 @@ static const float kPatchVertPick = 0.012f;
 // Edges are long targets, so a tighter radius than a vertex still leaves them easy to hit and
 // stops an edge stealing a click meant for the corner sitting on it.
 static const float kPatchEdgePick = 0.008f;
+// Handles are picked before corners and sit right next to them, so the radius is tighter still
+// - a generous one would swallow clicks meant for the corner.
+static const float kPatchTanPick = 0.007f;
 
 /** Project a world point (lifted) to screen. False when it is behind or across the near plane. */
 static bool zpProjectLifted(const NLMISC::CMatrix &vm, const NL3D::CFrustum &f,
@@ -1087,6 +1094,17 @@ static NLMISC::CVector zpXformDelta(const NLMISC::CVector &d, const MAXMATH::Mat
 }
 
 /**
+ * Are handles the thing being transformed right now?
+ *
+ * Handles are only visible while their corner is selected, so the corner selection has to
+ * SURVIVE picking a handle - drop it and the handle you just picked disappears. That leaves
+ * both sets non-empty at once, so one of them has to be the target, and it is the handles:
+ * clicking a handle is the artist saying "this one now". The corner selection stays as the
+ * context that shows them, and the vertex stays selected while you drag its handle.
+ */
+static bool zpHandleMode() { return !g_PatchTanSel.empty(); }
+
+/**
  * Preview offset for a corner. A BOUND vertex never takes one: its position is derived from
  * the target edge, so when the edge moves it follows on the next evaluation, and when the
  * edge does not move it does not move either. Offsetting it here would draw a lie.
@@ -1100,6 +1118,8 @@ static NLMISC::CVector zpVertOffset(const SPaintZone &pz, uint16 vi)
 {
 	if (vi < pz.Ep.Rp.Verts.size() && pz.Ep.Rp.Verts[vi].Binded)
 		return kNoOffset;
+	if (zpHandleMode())
+		return kNoOffset; // handles are the target; their corners hold still
 	// Selected through this very node: the drag delta is already in this node's space, so use
 	// it verbatim rather than round-tripping it through two matrices.
 	const NLMISC::CVector &own = zpPatchVertDragOffset(pz.ZoneId, vi);
@@ -1119,6 +1139,39 @@ static NLMISC::CVector zpVertOffset(const SPaintZone &pz, uint16 vi)
 		return zpXformDelta(od, pz.DisplayTM);
 	}
 	return kNoOffset;
+}
+
+/**
+ * Preview offset for a HANDLE.
+ *
+ * A handle whose corner is moving rides that corner - the same rule the write applies, so the
+ * preview and the commit cannot disagree about which of the two moved it. Only a handle whose
+ * corner is standing still takes its own drag.
+ */
+static NLMISC::CVector zpTanOffset(const SPaintZone &pz, uint16 vecIdx)
+{
+const uint16 owner = zpTangentOwner(pz, vecIdx);
+if (!zpHandleMode() && owner != (uint16)0xffff
+    && g_PatchVertSel.count(TPatchVertId(pz.ZoneId, owner)))
+return zpVertOffset(pz, owner);
+if (!s_Dragging || !g_PaintCtx.Zones)
+return kNoOffset;
+if (g_PatchTanSel.count(TPatchVertId(pz.ZoneId, vecIdx)))
+return s_DragDelta;
+// Selected through another node of the same object: the drag is in that node's displayed
+// space, so it comes back to object space through it and out again through this one.
+const std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
+for (uint z = 0; z < zones.size(); ++z)
+{
+const SPaintZone &other = zones[z];
+if (other.Node != pz.Node || other.ZoneId == pz.ZoneId)
+continue;
+if (!g_PatchTanSel.count(TPatchVertId(other.ZoneId, vecIdx)))
+continue;
+const NLMISC::CVector od = zpXformDelta(s_DragDelta, MAXMATH::inverseM3(other.DisplayTM));
+return zpXformDelta(od, pz.DisplayTM);
+}
+return kNoOffset;
 }
 
 /**
@@ -1153,6 +1206,7 @@ static const NLMISC::CRGBA kVertSelColor(255, 40, 40, 255); // selected red
 // not the bind type. (BIND_50 is the one that literally lands mid-edge, but singling it
 // out would leave the other three looking freely movable, which they are not.)
 static const NLMISC::CRGBA kVertBoundColor(0, 0, 0, 255);
+static const NLMISC::CRGBA kTanColor(80, 230, 120, 255); // handle green
 
 	const NLMISC::CMatrix viewMat = camera->getMatrix().inverted();
 	const NL3D::CFrustum &fr = camera->getFrustum();
@@ -1163,6 +1217,9 @@ static const NLMISC::CRGBA kVertBoundColor(0, 0, 0, 255);
 	// Integer pixel half-size, so the marker cannot land between two pixel counts.
 	const float halfPx = floorf(kPatchVertHalf * (float)winH + 0.5f) < 1.f
 		? 1.f : floorf(kPatchVertHalf * (float)winH + 0.5f);
+	// Handles read as subordinate to the corner they belong to, so they are drawn a pixel
+	// smaller - and never smaller than one pixel.
+	const float tanHalfPx = halfPx > 1.f ? halfPx - 1.f : 1.f;
 
 	// TWO passes over the cage: everything plain, then everything selected.
 	//
@@ -1188,16 +1245,25 @@ static const NLMISC::CRGBA kVertBoundColor(0, 0, 0, 255);
 					                                     cpi.BaseVertices[(e + 1) & 3])) != 0;
 				if ((faceSel || edgeSel) != selPass)
 					continue;
-				// Tangent 2e is attached to vertex e, tangent 2e+1 to vertex (e+1)&3, so each
-				// handle rides the corner it belongs to and the cage deforms instead of tearing.
+				// Tangent 2e is attached to vertex e, tangent 2e+1 to vertex (e+1)&3. The
+				// handles take zpTanOffset, which returns the corner's offset when they are
+				// riding it and their own when they are being dragged - so the cage bends
+				// under a handle drag and deforms rather than tearing under a corner drag.
 				const NLMISC::CVector offA = zpVertOffset(pz, cpi.BaseVertices[e]);
 				const NLMISC::CVector offB = zpVertOffset(pz, cpi.BaseVertices[(e + 1) & 3]);
+				NLMISC::CVector offTA = offA, offTB = offB;
+				if (p < pz.Ep.Pm.Patches.size())
+				{
+					const PIPELINE::MAX::NELPATCH::SPmPatch &pp = pz.Ep.Pm.Patches[p];
+					if (pp.Vec[e * 2] >= 0) offTA = zpTanOffset(pz, (uint16)pp.Vec[e * 2]);
+					if (pp.Vec[e * 2 + 1] >= 0) offTB = zpTanOffset(pz, (uint16)pp.Vec[e * 2 + 1]);
+				}
 				const NLMISC::CRGBA &col = selPass ? kVertSelColor : kCageColor;
 				NLMISC::CVector chain[4];
 				bool ok[4];
 				ok[0] = zpProjectLifted(viewMat, fr, bp.Vertices[e] + offA, kPatchLift, chain[0]);
-				ok[1] = zpProjectLifted(viewMat, fr, bp.Tangents[e * 2] + offA, kPatchLift, chain[1]);
-				ok[2] = zpProjectLifted(viewMat, fr, bp.Tangents[e * 2 + 1] + offB, kPatchLift, chain[2]);
+				ok[1] = zpProjectLifted(viewMat, fr, bp.Tangents[e * 2] + offTA, kPatchLift, chain[1]);
+				ok[2] = zpProjectLifted(viewMat, fr, bp.Tangents[e * 2 + 1] + offTB, kPatchLift, chain[2]);
 				ok[3] = zpProjectLifted(viewMat, fr, bp.Vertices[(e + 1) & 3] + offB, kPatchLift, chain[3]);
 				for (uint k = 0; k + 1 < 4; ++k)
 					if (ok[k] && ok[k + 1])
@@ -1252,6 +1318,44 @@ static const NLMISC::CRGBA kVertBoundColor(0, 0, 0, 255);
 			NL3D::CDRU::drawQuad((cx - halfPx) / (float)winW, (cy - halfPx) / (float)winH,
 			                     (cx + halfPx) / (float)winW, (cy + halfPx) / (float)winH,
 			                     *driver, vcol, NL3D::CViewport());
+		}
+	}
+
+	// Tangent handles, for SELECTED corners only. Max's rule, and the reason a dense cage does
+	// not become a field of dots: a zone has four handles per patch corner, so showing them all
+	// would bury the corners they belong to.
+	//
+	// A handle is drawn once per unique Vecs index. Two patches meeting along an edge name the
+	// same vec in their own slot, so without that it would be drawn - and picked - twice.
+	std::set<uint16> seenVec;
+	for (uint p = 0; p < pz.Patches.size() && p < pz.Ep.Pm.Patches.size(); ++p)
+	{
+		const NL3D::CPatchInfo &pi = pz.Patches[p];
+		const PIPELINE::MAX::NELPATCH::SPmPatch &pp = pz.Ep.Pm.Patches[p];
+		for (uint j = 0; j < 8; ++j)
+		{
+			const uint corner = (j & 1) ? (((j >> 1) + 1) & 3) : (j >> 1);
+			const uint16 owner = pi.BaseVertices[corner];
+			if (!g_PatchVertSel.count(TPatchVertId(pz.ZoneId, owner)))
+				continue;
+			if (pp.Vec[j] < 0)
+				continue;
+			const uint16 vi = (uint16)pp.Vec[j];
+			if (!seenVec.insert(vi).second)
+				continue;
+			NLMISC::CVector v;
+			if (!zpProjectLifted(viewMat, fr, pi.Patch.Tangents[j] + zpTanOffset(pz, vi),
+			                     kPatchLift, v))
+				continue;
+			const bool sel = g_PatchTanSel.count(TPatchVertId(pz.ZoneId, vi)) != 0;
+			// Green is Max's handle colour, and being a different hue from the corners is what
+			// lets the two be told apart where a handle sits almost on top of its corner.
+			const NLMISC::CRGBA &hcol = sel ? kVertSelColor : kTanColor;
+			const float hx = floorf(v.x * (float)winW + 0.5f);
+			const float hy = floorf(v.y * (float)winH + 0.5f);
+			NL3D::CDRU::drawQuad((hx - tanHalfPx) / (float)winW, (hy - tanHalfPx) / (float)winH,
+			                     (hx + tanHalfPx) / (float)winW, (hy + tanHalfPx) / (float)winH,
+			                     *driver, hcol, NL3D::CViewport());
 		}
 	}
 }
@@ -1324,24 +1428,37 @@ const NLMISC::CVector &zpPatchVertDragOffset(uint zoneId, uint16 vertIdx)
 
 bool zpPatchSelCentroid(NLMISC::CVector &out)
 {
-	if (g_PatchVertSel.empty() || !g_PaintCtx.Zones)
+	if ((g_PatchVertSel.empty() && g_PatchTanSel.empty()) || !g_PaintCtx.Zones)
 		return false;
 	const std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
 	NLMISC::CVector sum = NLMISC::CVector::Null;
 	uint n = 0;
-	std::set<TPatchVertId> hit;
+	std::set<TPatchVertId> hit, hitVec;
 	for (uint z = 0; z < zones.size(); ++z)
 	{
 		const SPaintZone &pz = zones[z];
 		for (uint p = 0; p < pz.Patches.size(); ++p)
 		{
 			const NL3D::CPatchInfo &pi = pz.Patches[p];
-			for (uint c = 0; c < 4; ++c)
+			for (uint c = 0; c < 4 && !zpHandleMode(); ++c)
 			{
 				const TPatchVertId id(pz.ZoneId, pi.BaseVertices[c]);
 				if (!g_PatchVertSel.count(id) || !hit.insert(id).second)
 					continue; // once per unique vertex, not once per patch touching it
 				sum += pi.Patch.Vertices[c];
+				++n;
+			}
+			if (g_PatchTanSel.empty() || p >= pz.Ep.Pm.Patches.size())
+				continue;
+			const PIPELINE::MAX::NELPATCH::SPmPatch &pp = pz.Ep.Pm.Patches[p];
+			for (uint j = 0; j < 8; ++j)
+			{
+				if (pp.Vec[j] < 0)
+					continue;
+				const TPatchVertId id(pz.ZoneId, (uint16)pp.Vec[j]);
+				if (!g_PatchTanSel.count(id) || !hitVec.insert(id).second)
+					continue; // and once per unique handle, for the same reason
+				sum += pi.Patch.Tangents[j];
 				++n;
 			}
 		}
@@ -1705,13 +1822,20 @@ bool zpPatchPushLive(bool preview)
 
 	// The selection, re-keyed from (node, vertex) onto (OBJECT, vertex) - the identity of the
 	// thing that actually moved. Built once rather than per patch corner.
-	std::set<std::pair<const void *, uint16> > objectSel;
+	std::set<std::pair<const void *, uint16> > objectSel, objectTanSel;
 	for (std::set<TPatchVertId>::const_iterator it = g_PatchVertSel.begin();
 	     it != g_PatchVertSel.end(); ++it)
 	{
 		const void *obj = zpZoneNode(it->first);
 		if (obj)
 			objectSel.insert(std::make_pair(obj, it->second));
+	}
+	for (std::set<TPatchVertId>::const_iterator it = g_PatchTanSel.begin();
+	     it != g_PatchTanSel.end(); ++it)
+	{
+		const void *obj = zpZoneNode(it->first);
+		if (obj)
+			objectTanSel.insert(std::make_pair(obj, it->second));
 	}
 
 	for (uint z = 0; z < zones.size(); ++z)
@@ -1737,6 +1861,14 @@ bool zpPatchPushLive(bool preview)
 				if (objectSel.count(std::make_pair((const void *)pz.Node, pi.BaseVertices[c])))
 					any = true;
 			}
+			// A handle can be selected without its corner, and moving it reshapes this patch,
+			// so handles count towards "something here moved" as much as the corners do.
+			if (!any && !objectTanSel.empty() && p < pz.Ep.Pm.Patches.size())
+				for (uint j = 0; j < 8 && !any; ++j)
+					if (pz.Ep.Pm.Patches[p].Vec[j] >= 0
+					    && objectTanSel.count(std::make_pair((const void *)pz.Node,
+					                                         (uint16)pz.Ep.Pm.Patches[p].Vec[j])))
+						any = true;
 			if (!any)
 				continue;
 
@@ -1744,10 +1876,16 @@ bool zpPatchPushLive(bool preview)
 			// riding their corner exactly as the preview draws them.
 			NL3D::CBezierPatch bp = pi.Patch;
 			for (uint c = 0; c < 4; ++c)
-			{
 				bp.Vertices[c] += off[c];
-				bp.Tangents[c * 2] += off[c];
-				bp.Tangents[((c + 3) & 3) * 2 + 1] += off[c];
+			for (uint j = 0; j < 8; ++j)
+			{
+				// Each handle takes zpTanOffset, which is the corner's offset while it rides
+				// and its own while it is dragged - so a handle drag reshapes the live surface
+				// exactly as the cage shows it.
+				if (preview && p < pz.Ep.Pm.Patches.size() && pz.Ep.Pm.Patches[p].Vec[j] >= 0)
+					bp.Tangents[j] += zpTanOffset(pz, (uint16)pz.Ep.Pm.Patches[p].Vec[j]);
+				else
+					bp.Tangents[j] += off[(j & 1) ? (((j >> 1) + 1) & 3) : (j >> 1)];
 			}
 
 			// CZone owns the packing rules and refuses out-of-range writes wholesale, so
@@ -1900,7 +2038,7 @@ bool zpPatchPushLive(bool preview)
  * as an absolute placement. That is what lets one routine serve all three write targets and
  * every node, however it is placed on the board.
  */
-void zpGeomVertChanged(uint zoneId, uint16 vertIdx, const float *objDelta)
+void zpGeomVertChanged(uint zoneId, uint16 elemIdx, int elem, const float *objDelta)
 {
 	if (!g_PaintCtx.Zones)
 		return;
@@ -1916,9 +2054,17 @@ void zpGeomVertChanged(uint zoneId, uint16 vertIdx, const float *objDelta)
 		SPaintZone &pz = zones[z];
 		if ((const void *)pz.Node != object)
 			continue;
-		if (vertIdx < pz.Ep.Pm.Verts.size())
+		if (elem == ZPPAINT::GeomVec)
+		{
+			if (elemIdx < pz.Ep.Pm.Vecs.size())
+				for (int k = 0; k < 3; ++k)
+					pz.Ep.Pm.Vecs[elemIdx].Pos[k] += objDelta[k];
+		}
+		else if (elemIdx < pz.Ep.Pm.Verts.size())
+		{
 			for (int k = 0; k < 3; ++k)
-				pz.Ep.Pm.Verts[vertIdx].Pos[k] += objDelta[k];
+				pz.Ep.Pm.Verts[elemIdx].Pos[k] += objDelta[k];
+		}
 		// Object delta -> displayed-world delta through the node's FULL transform: the
 		// difference of two transformed points, which drops the translation and so works for a
 		// rotated or mirrored node without a special case. DisplayTM, not ObjectTM - a placed
@@ -1931,9 +2077,24 @@ void zpGeomVertChanged(uint zoneId, uint16 vertIdx, const float *objDelta)
 		for (uint p = 0; p < pz.Patches.size(); ++p)
 		{
 			NL3D::CPatchInfo &pi = pz.Patches[p];
+			if (elem == ZPPAINT::GeomVec)
+			{
+				// Vecs carry BOTH tangents and interiors, and one index can be reached from
+				// several patch slots, so every slot that names it moves.
+				if (p >= pz.Ep.Pm.Patches.size())
+					continue;
+				const PIPELINE::MAX::NELPATCH::SPmPatch &pp = pz.Ep.Pm.Patches[p];
+				for (uint j = 0; j < 8; ++j)
+					if (pp.Vec[j] >= 0 && (uint16)pp.Vec[j] == elemIdx)
+						pi.Patch.Tangents[j] += shift;
+				for (uint j = 0; j < 4; ++j)
+					if (pp.Interior[j] >= 0 && (uint16)pp.Interior[j] == elemIdx)
+						pi.Patch.Interiors[j] += shift;
+				continue;
+			}
 			for (uint c = 0; c < 4; ++c)
 			{
-				if (pi.BaseVertices[c] != vertIdx)
+				if (pi.BaseVertices[c] != elemIdx)
 					continue;
 				// Tangents are stored as absolute points, so they take the same shift the
 				// corner took rather than being recomputed.
@@ -1951,7 +2112,7 @@ uint zpApplyPatchMove(const NLMISC::CVector &worldDelta, std::string &msg)
 	if (!g_PaintCtx.Zones || g_PatchVertSel.empty())
 		return 0;
 	std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
-	uint written = 0, skippedBound = 0;
+	uint written = 0, skippedBound = 0, skippedRiding = 0;
 	uint nBase = 0, nModPm = 0, nDelta = 0; // which write target each vertex resolved to
 	std::string firstErr;
 
@@ -1961,14 +2122,20 @@ uint zpApplyPatchMove(const NLMISC::CVector &worldDelta, std::string &msg)
 		if (!pz.Editable)
 			continue;
 
-		// Collect this zone's selected vertices once; a corner is reached from up to four
+		// Collect this zone's selected corners once; a corner is reached from up to four
 		// patches and must be written exactly once.
 		std::set<uint16> want;
-		for (uint p = 0; p < pz.Patches.size(); ++p)
+		for (uint p = 0; p < pz.Patches.size() && !zpHandleMode(); ++p)
 			for (uint c = 0; c < 4; ++c)
 				if (g_PatchVertSel.count(TPatchVertId(pz.ZoneId, pz.Patches[p].BaseVertices[c])))
 					want.insert(pz.Patches[p].BaseVertices[c]);
-		if (want.empty())
+		// ... and its selected handles, keyed on the Vecs index the same way.
+		std::set<uint16> wantVec;
+		for (std::set<TPatchVertId>::const_iterator it = g_PatchTanSel.begin();
+		     it != g_PatchTanSel.end(); ++it)
+			if (it->first == pz.ZoneId)
+				wantVec.insert(it->second);
+		if (want.empty() && wantVec.empty())
 			continue;
 
 		// Displayed-world delta -> object delta, through the FULL node transform: the drag is
@@ -1986,8 +2153,8 @@ uint zpApplyPatchMove(const NLMISC::CVector &worldDelta, std::string &msg)
 		// Bound vertices are derived from a target edge; they are recomputed on load, so a
 		// written position could not survive the round trip. Filtered HERE rather than in the
 		// core op, which trusts its caller to have applied the policy.
-		std::vector<uint16> move;
-		move.reserve(want.size());
+		std::vector<ZPPAINT::SGeomElemRef> move;
+		move.reserve(want.size() + wantVec.size());
 		for (std::set<uint16>::const_iterator it = want.begin(); it != want.end(); ++it)
 		{
 // Bound vertices are derived from a target edge; they are recomputed on load, so
@@ -1995,7 +2162,27 @@ uint zpApplyPatchMove(const NLMISC::CVector &worldDelta, std::string &msg)
 if (*it < pz.Ep.Rp.Verts.size() && pz.Ep.Rp.Verts[*it].Binded)
 				++skippedBound;
 			else
-				move.push_back(*it);
+				move.push_back(ZPPAINT::SGeomElemRef(*it, ZPPAINT::GeomVert));
+		}
+		// A handle whose corner is moving RIDES it - the corner's move already shifted it, so
+		// writing it here too would move it twice. Same rule as a bound vertex, and the same
+		// place: the core trusts its caller.
+		for (std::set<uint16>::const_iterator it = wantVec.begin(); it != wantVec.end(); ++it)
+		{
+			const uint16 owner = zpTangentOwner(pz, *it);
+			if (owner != (uint16)0xffff && want.count(owner))
+			{
+				++skippedRiding;
+				continue;
+			}
+			// A handle of a BOUND corner is derived along with it, for the same reason.
+			if (owner != (uint16)0xffff && owner < pz.Ep.Rp.Verts.size()
+			    && pz.Ep.Rp.Verts[owner].Binded)
+			{
+				++skippedBound;
+				continue;
+			}
+			move.push_back(ZPPAINT::SGeomElemRef(*it, ZPPAINT::GeomVec));
 		}
 		if (move.empty())
 			continue;
@@ -2006,7 +2193,7 @@ if (*it < pz.Ep.Rp.Verts.size() && pz.Ep.Rp.Verts[*it].Binded)
 		{
 			ZPPAINT::SGeomWriteTarget t;
 			std::string e;
-			if (!ZPPAINT::resolveGeomWriteTarget(pz.Node, move[i], t, e))
+			if (!ZPPAINT::resolveGeomWriteTarget(pz.Node, move[i].Idx, move[i].Elem, t, e))
 				continue;
 			if (t.Kind == ZPPAINT::SGeomWriteTarget::BasePatchMesh) ++nBase;
 			else if (t.Kind == ZPPAINT::SGeomWriteTarget::ModifierPatchMesh) ++nModPm;
@@ -2021,7 +2208,7 @@ if (*it < pz.Ep.Rp.Verts.size() && pz.Ep.Rp.Verts[*it].Binded)
 			if (firstErr.empty()) firstErr = "no paint core";
 			continue;
 		}
-		const uint n = g_PaintCtx.Core->opMovePatchVertices(pz.ZoneId, move, od, err);
+		const uint n = g_PaintCtx.Core->opMovePatchElems(pz.ZoneId, move, od, err);
 		if (!n && firstErr.empty() && !err.empty())
 			firstErr = err;
 		written += n;
@@ -2282,6 +2469,51 @@ static bool zpVertAliased(uint zoneId, uint vertIdx, uint &otherZone)
 	return false;
 }
 
+/**
+ * Drop selected handles whose corner is no longer selected.
+ *
+ * Handles are only drawn for selected corners, so one left behind by a corner deselect would
+ * still move on the next drag while being invisible. Selections you cannot see are traps.
+ */
+static void zpDropOrphanedTangents()
+{
+	if (g_PatchTanSel.empty() || !g_PaintCtx.Zones)
+		return;
+	const std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
+	std::set<TPatchVertId> keep;
+	for (std::set<TPatchVertId>::const_iterator it = g_PatchTanSel.begin();
+	     it != g_PatchTanSel.end(); ++it)
+	{
+		for (uint z = 0; z < zones.size(); ++z)
+		{
+			if (zones[z].ZoneId != it->first)
+				continue;
+			const uint16 owner = zpTangentOwner(zones[z], it->second);
+			if (owner != (uint16)0xffff && g_PatchVertSel.count(TPatchVertId(it->first, owner)))
+				keep.insert(*it);
+			break;
+		}
+	}
+	g_PatchTanSel.swap(keep);
+}
+
+uint16 zpTangentOwner(const SPaintZone &pz, uint16 vecIdx)
+{
+	for (size_t p = 0; p < pz.Ep.Pm.Patches.size() && p < pz.Patches.size(); ++p)
+	{
+		const PIPELINE::MAX::NELPATCH::SPmPatch &pp = pz.Ep.Pm.Patches[p];
+		for (uint j = 0; j < 8; ++j)
+		{
+			if (pp.Vec[j] < 0 || (uint16)pp.Vec[j] != vecIdx)
+				continue;
+			// Tangent 2e belongs to corner e, 2e+1 to corner (e+1)&3.
+			const uint corner = (j & 1) ? (((j >> 1) + 1) & 3) : (j >> 1);
+			return pz.Patches[p].BaseVertices[corner];
+		}
+	}
+	return (uint16)0xffff;
+}
+
 void zpPatchVertSelect(uint zoneId, uint vertIdx, int op)
 {
 	const TPatchVertId id((uint)zoneId, (uint16)vertIdx);
@@ -2306,11 +2538,21 @@ void zpPatchVertSelect(uint zoneId, uint vertIdx, int op)
 	// would also have made the same edit mean different things depending on which files
 	// happened to be open, which is not a property an authoring tool should have.
 	if (op == 0)
+	{
 		g_PatchVertSel.clear();
+		// Handles are shown for selected corners only, so a handle whose corner just left the
+		// selection is no longer visible - and a selection you cannot see is a trap.
+		g_PatchTanSel.clear();
+	}
 	if (op == 2)
+	{
 		g_PatchVertSel.erase(id);
+		zpDropOrphanedTangents();
+	}
 	else
+	{
 		g_PatchVertSel.insert(id);
+	}
 	zpPatchGizmoInvalidate(); // the centroid moved, so its depth did, so the fit is stale
 	ZPSCRIPT::record(NLMISC::toString("painter.selectPatchVertex(%u, %u, %d)", zoneId, vertIdx, op));
 }
@@ -2435,6 +2677,51 @@ bool zpPatchVertSelAt(uint index, uint &zoneOut, uint &vertOut)
 	return true;
 }
 
+/** Displayed world position of a handle: the first patch slot that uses this Vecs index. */
+bool zpPatchTangentWorld(uint zoneId, uint vecIdx, float outPos[3])
+{
+	const SPaintZone *pz = zpFindPaintZone(zoneId);
+	if (!pz)
+		return false;
+	for (size_t p = 0; p < pz->Ep.Pm.Patches.size() && p < pz->Patches.size(); ++p)
+		for (uint j = 0; j < 8; ++j)
+		{
+			if (pz->Ep.Pm.Patches[p].Vec[j] < 0
+			    || (uint16)pz->Ep.Pm.Patches[p].Vec[j] != (uint16)vecIdx)
+				continue;
+			const NLMISC::CVector &v = pz->Patches[p].Patch.Tangents[j];
+			outPos[0] = v.x; outPos[1] = v.y; outPos[2] = v.z;
+			return true;
+		}
+	return false;
+}
+
+void zpPatchTangentSelect(uint zoneId, uint vecIdx, int op)
+{
+	const TPatchVertId id((uint)zoneId, (uint16)vecIdx);
+	if (op == 0)
+		g_PatchTanSel.clear();
+	if (op == 2)
+		g_PatchTanSel.erase(id);
+	else
+		g_PatchTanSel.insert(id);
+	zpPatchGizmoInvalidate();
+	ZPSCRIPT::record(NLMISC::toString("painter.selectPatchTangent(%u, %u, %d)", zoneId, vecIdx, op));
+}
+
+uint zpPatchTangentSelCount() { return (uint)g_PatchTanSel.size(); }
+
+bool zpPatchTangentSelAt(uint index, uint &zoneOut, uint &vecOut)
+{
+	if (index >= g_PatchTanSel.size())
+		return false;
+	std::set<TPatchVertId>::const_iterator it = g_PatchTanSel.begin();
+	std::advance(it, index);
+	zoneOut = it->first;
+	vecOut = it->second;
+	return true;
+}
+
 bool zpPatchVertWorld(uint zoneId, uint vertIdx, float outPos[3])
 {
 	if (!g_PaintCtx.Zones)
@@ -2464,11 +2751,13 @@ void zpPatchVertClear()
 	// Every level's set: at edge or patch level the vertex set is a projection of one of the
 	// others, so clearing only the projection would leave the cage highlighted and the next
 	// rebuild would put it straight back.
-	if (g_PatchVertSel.empty() && g_PatchEdgeSel.empty() && g_PatchFaceSel.empty())
+	if (g_PatchVertSel.empty() && g_PatchEdgeSel.empty() && g_PatchFaceSel.empty()
+	    && g_PatchTanSel.empty())
 		return;
 	g_PatchVertSel.clear();
 	g_PatchEdgeSel.clear();
 	g_PatchFaceSel.clear();
+	g_PatchTanSel.clear();
 	zpPatchGizmoInvalidate();
 	ZPSCRIPT::record("painter.clearPatchVertexSelection()");
 }
@@ -2494,6 +2783,61 @@ bool zpPatchClickAt(float x, float y, uint buttons)
 		return false;
 	zpPatchVertexClick(g_PaintCtx.Camera, driver, x, y, buttons);
 	return true;
+}
+
+/**
+ * Nearest visible HANDLE to the pointer.
+ *
+ * Only handles of selected corners are drawn, and only drawn things can be picked - otherwise
+ * the artist would hit something invisible. Tighter radius than a corner, and tried FIRST by
+ * the caller: a handle sits close to its corner and would otherwise never win.
+ */
+bool zpPickPatchTangent(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, float my,
+                        uint &zoneOut, uint16 &vecOut)
+{
+	if (!camera || !driver || !g_PaintCtx.Zones || g_PatchVertSel.empty())
+		return false;
+	const NLMISC::CMatrix viewMat = camera->getMatrix().inverted();
+	const NL3D::CFrustum &fr = camera->getFrustum();
+	uint32 winW = 0, winH = 0;
+	driver->getWindowSize(winW, winH);
+	const float aspect = (winW && winH) ? (float)winW / (float)winH : 1.f;
+
+	const std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
+	float best = kPatchTanPick;
+	bool found = false;
+	for (uint z = 0; z < zones.size(); ++z)
+	{
+		const SPaintZone &pz = zones[z];
+		if (!pz.Editable)
+			continue;
+		std::set<uint16> seen;
+		for (uint p = 0; p < pz.Patches.size() && p < pz.Ep.Pm.Patches.size(); ++p)
+		{
+			const NL3D::CPatchInfo &pi = pz.Patches[p];
+			const PIPELINE::MAX::NELPATCH::SPmPatch &pp = pz.Ep.Pm.Patches[p];
+			for (uint j = 0; j < 8; ++j)
+			{
+				const uint corner = (j & 1) ? (((j >> 1) + 1) & 3) : (j >> 1);
+				if (!g_PatchVertSel.count(TPatchVertId(pz.ZoneId, pi.BaseVertices[corner])))
+					continue;
+				if (pp.Vec[j] < 0 || !seen.insert((uint16)pp.Vec[j]).second)
+					continue;
+				NLMISC::CVector v;
+				if (!zpProjectLifted(viewMat, fr, pi.Patch.Tangents[j], kPatchLift, v))
+					continue;
+				const float dx = (v.x - mx) * aspect, dy = v.y - my;
+				const float d = sqrtf(dx * dx + dy * dy);
+				if (d >= best)
+					continue;
+				best = d;
+				zoneOut = pz.ZoneId;
+				vecOut = (uint16)pp.Vec[j];
+				found = true;
+			}
+		}
+	}
+	return found;
 }
 
 void zpPatchVertexClick(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, float my, uint buttons)
@@ -2529,7 +2873,15 @@ void zpPatchVertexClick(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, 
 		return;
 	}
 
+	// Handles first: they are drawn on top of the cage and sit near their corner, so a
+	// corner-first order would make them unreachable wherever the two overlap.
 	uint zone = 0;
+	uint16 vec = 0;
+	if (zpPickPatchTangent(camera, driver, mx, my, zone, vec))
+	{
+		zpPatchTangentSelect(zone, vec, op);
+		return;
+	}
 	uint16 vert = 0;
 	if (!zpPickPatchVertex(camera, driver, mx, my, zone, vert))
 	{

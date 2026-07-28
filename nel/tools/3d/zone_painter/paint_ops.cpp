@@ -768,8 +768,8 @@ bool CPaintCore::opProp(uint zoneId, uint32 appDataId, bool newHas, const std::s
 	return true;
 }
 
-uint CPaintCore::opMovePatchVertices(uint zoneId, const std::vector<uint16> &verts,
-                                     const float *objDelta, std::string &err)
+uint CPaintCore::opMovePatchElems(uint zoneId, const std::vector<SGeomElemRef> &elems,
+                                  const float *objDelta, std::string &err)
 {
 	uint zi = (uint)-1;
 	for (size_t i = 0; i < m_Zones.size(); ++i)
@@ -780,12 +780,12 @@ uint CPaintCore::opMovePatchVertices(uint zoneId, const std::vector<uint16> &ver
 	if (!z.In.Node) { err = "no node"; return 0; }
 
 	std::vector<SUndoTile> recs;
-	recs.reserve(verts.size());
-	for (size_t i = 0; i < verts.size(); ++i)
+	recs.reserve(elems.size());
+	for (size_t i = 0; i < elems.size(); ++i)
 	{
 		SGeomWriteTarget t;
 		std::string e;
-		if (!resolveGeomWriteTarget(z.In.Node, verts[i], t, e))
+		if (!resolveGeomWriteTarget(z.In.Node, elems[i].Idx, elems[i].Elem, t, e))
 		{
 			if (err.empty()) err = e;
 			continue;
@@ -793,14 +793,15 @@ uint CPaintCore::opMovePatchVertices(uint zoneId, const std::vector<uint16> &ver
 		SUndoTile rec;
 		rec.Kind = 3;
 		rec.Zone = zoneId;
-		rec.VertIdx = verts[i];
+		rec.VertIdx = elems[i].Idx;
+		rec.ElemKind = (uint8)elems[i].Elem;
 		if (!geomTargetGet(t, rec.OldPos)) { if (err.empty()) err = "target read failed"; continue; }
 		for (int k = 0; k < 3; ++k)
 			rec.NewPos[k] = rec.OldPos[k] + objDelta[k];
 		if (!geomTargetSet(t, rec.NewPos)) { if (err.empty()) err = "target write failed"; continue; }
 		recs.push_back(rec);
 		if (m_GeomChangedCb)
-			m_GeomChangedCb(zoneId, rec.VertIdx, objDelta);
+			m_GeomChangedCb(zoneId, rec.VertIdx, (int)elems[i].Elem, objDelta);
 	}
 	if (recs.empty())
 		return 0;
@@ -826,7 +827,7 @@ void CPaintCore::applyGeomUndo(const SUndoTile &rec, bool useOld)
 		return;
 	SGeomWriteTarget t;
 	std::string e;
-	if (!resolveGeomWriteTarget(m_Zones[zi].In.Node, rec.VertIdx, t, e))
+	if (!resolveGeomWriteTarget(m_Zones[zi].In.Node, rec.VertIdx, (EGeomElem)rec.ElemKind, t, e))
 		return;
 	const float *pos = useOld ? rec.OldPos : rec.NewPos;
 	const float *from = useOld ? rec.NewPos : rec.OldPos;
@@ -839,7 +840,7 @@ void CPaintCore::applyGeomUndo(const SUndoTile &rec, bool useOld)
 		// the target holds - undo of a mapper delta and undo of a PatchMesh position are the
 		// same shift to the display.
 		const float d[3] = { pos[0] - from[0], pos[1] - from[1], pos[2] - from[2] };
-		m_GeomChangedCb(rec.Zone, rec.VertIdx, d);
+		m_GeomChangedCb(rec.Zone, rec.VertIdx, (int)rec.ElemKind, d);
 	}
 }
 

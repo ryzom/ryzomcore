@@ -151,11 +151,16 @@ static CStorageContainer *zpContainerChildAt(const CStorageContainer::TStorageOb
 	return NULL;
 }
 
-/** The 0x03E8 position payload of PatchMesh vertex `vertIdx` within a chunk list. */
-static bool zpVertPosRaw(const CStorageContainer::TStorageObjectContainer &chunks, uint vertIdx,
-                         CStorageRaw *&rawOut, CStorageContainer *&contOut)
+/**
+ * The 0x03E8 position payload of PatchMesh element `elemIdx` within a chunk list.
+ *
+ * Verts and Vecs are two streams of the same shape - an element container holding a 0x03E8
+ * position - so only the container id differs.
+ */
+static bool zpElemPosRaw(const CStorageContainer::TStorageObjectContainer &chunks, uint elemIdx,
+                         EGeomElem elem, CStorageRaw *&rawOut, CStorageContainer *&contOut)
 {
-	CStorageContainer *vc = zpContainerChildAt(chunks, 0x0BE0, vertIdx);
+	CStorageContainer *vc = zpContainerChildAt(chunks, elem == GeomVec ? 0x0BCC : 0x0BE0, elemIdx);
 	if (!vc) return false;
 	CStorageRaw *pos = zpRawChild(vc, 0x03E8);
 	if (!pos || pos->Value.size() < 12) return false;
@@ -164,7 +169,8 @@ static bool zpVertPosRaw(const CStorageContainer::TStorageObjectContainer &chunk
 	return true;
 }
 
-bool resolveGeomWriteTarget(CNodeImpl *node, uint vertIdx, SGeomWriteTarget &out, std::string &err)
+bool resolveGeomWriteTarget(CNodeImpl *node, uint elemIdx, EGeomElem elem,
+                            SGeomWriteTarget &out, std::string &err)
 {
 	out = SGeomWriteTarget();
 	CSceneClass *obj = node ? dynamic_cast<CSceneClass *>(node->getReference(1)) : NULL;
@@ -207,14 +213,20 @@ bool resolveGeomWriteTarget(CNodeImpl *node, uint vertIdx, SGeomWriteTarget &out
 				std::string e2;
 				if (decodeVertMapper(&mr->Value[0], mr->Value.size(), mv, e2))
 				{
-					for (size_t i = 0; i < mv.VertMap.size(); ++i)
+					// Payload layout: [int32 vertCount][vertCount x 32][int32 vecCount]
+					// [vecCount x 32]. So the vec half starts past the vert half AND its own
+					// count word - the second 4 is not padding.
+					const std::vector<PIPELINE::MAX::NELPATCH::SPmMapVert> &map =
+						(elem == GeomVec) ? mv.VecMap : mv.VertMap;
+					const size_t base = (elem == GeomVec) ? (8 + mv.VertMap.size() * 32) : 4;
+					for (size_t i = 0; i < map.size(); ++i)
 					{
-						if (mv.VertMap[i].Vert < 0 || (uint)mv.VertMap[i].Vert != vertIdx)
+						if (map[i].Vert < 0 || (uint)map[i].Vert != elemIdx)
 							continue;
 						// Flat 32-byte records: OriginalStored, Vert, Original[3], Delta[3].
 						out.Kind = SGeomWriteTarget::MapperDelta;
 						out.Raw = mr;
-						out.Offset = 4 + i * 32 + 20;
+						out.Offset = base + i * 32 + 20;
 						if (out.Offset + 12 > mr->Value.size()) { err = "mapper delta out of range"; return false; }
 						return true;
 					}
@@ -222,12 +234,13 @@ bool resolveGeomWriteTarget(CNodeImpl *node, uint vertIdx, SGeomWriteTarget &out
 			}
 		}
 		CStorageContainer *pm = zpContainerChild(topWrap, 0x1140);
-		if (pm && zpVertPosRaw(pm->chunks(), vertIdx, out.Raw, out.VertChunk))
+		if (pm && zpElemPosRaw(pm->chunks(), elemIdx, elem, out.Raw, out.VertChunk))
 		{
 			out.Kind = SGeomWriteTarget::ModifierPatchMesh;
 			return true;
 		}
-		err = "modifier 0x1140 without vertex " + NLMISC::toString(vertIdx);
+		err = NLMISC::toString("modifier 0x1140 without %s %u",
+		                       elem == GeomVec ? "vec" : "vertex", elemIdx);
 		return false;
 	}
 
@@ -244,9 +257,10 @@ bool resolveGeomWriteTarget(CNodeImpl *node, uint vertIdx, SGeomWriteTarget &out
 		base = derived->baseObject();
 	}
 	if (!rpo) { err = "no RklPatch base object"; return false; }
-	if (!zpVertPosRaw(rpo->chunks(), vertIdx, out.Raw, out.VertChunk))
+	if (!zpElemPosRaw(rpo->chunks(), elemIdx, elem, out.Raw, out.VertChunk))
 	{
-		err = "base PatchMesh without vertex " + NLMISC::toString(vertIdx);
+		err = NLMISC::toString("base PatchMesh without %s %u",
+		                       elem == GeomVec ? "vec" : "vertex", elemIdx);
 		return false;
 	}
 	out.Kind = SGeomWriteTarget::BasePatchMesh;

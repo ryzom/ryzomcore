@@ -311,22 +311,45 @@ struct SGeomWriteTarget
 	/// Raw chunk carrying the bytes, and the byte offset of the three floats within it.
 	PIPELINE::MAX::CStorageRaw *Raw;
 	size_t Offset;
-	/// Container form (0x03E8 position chunk of a vertex container), when the target is a
-	/// PatchMesh vertex rather than a mapper record.
+	/// Container form (0x03E8 position chunk of an element container), when the target is a
+	/// PatchMesh vertex or vec rather than a mapper record.
 	PIPELINE::MAX::CStorageContainer *VertChunk;
 	SGeomWriteTarget() : Kind(None), Raw(NULL), Offset(0), VertChunk(NULL) { }
 };
 
 /**
- * Resolve where a move of output vertex `vertIdx` must be written for `node`. See
+ * Which of the PatchMesh's two position tables an element lives in.
+ *
+ * A patch's corners index Verts and its tangent/interior handles index Vecs
+ * (SPmPatch::V[4] and Vec[8]/Interior[4]), and the two are addressed identically at every
+ * level below: their own element container in the PatchMesh stream, their own half of the
+ * vertex mapper. So the whole write policy is shared and only the table changes.
+ */
+enum EGeomElem
+{
+	GeomVert = 0, ///< PatchMesh Verts: container 0x0BE0, mapper VertMap
+	GeomVec       ///< PatchMesh Vecs (tangent and interior handles): 0x0BCC, mapper VecMap
+};
+
+/**
+ * Resolve where a move of output element `elemIdx` must be written for `node`. See
  * SGeomWriteTarget for the policy. Returns false with a message when the chain is malformed;
  * Kind == None means "nothing to write" rather than an error.
  */
-bool resolveGeomWriteTarget(PIPELINE::MAX::BUILTIN::CNodeImpl *node, uint vertIdx,
+bool resolveGeomWriteTarget(PIPELINE::MAX::BUILTIN::CNodeImpl *node, uint elemIdx, EGeomElem elem,
                             SGeomWriteTarget &out, std::string &err);
 /** Read / write the three floats a resolved target points at. */
 bool geomTargetGet(const SGeomWriteTarget &t, float *xyz);
 bool geomTargetSet(const SGeomWriteTarget &t, const float *xyz);
+
+/** One addressable position in a zone's PatchMesh: an index plus which table it indexes. */
+struct SGeomElemRef
+{
+	uint16 Idx;
+	EGeomElem Elem;
+	SGeomElemRef() : Idx(0), Elem(GeomVert) { }
+	SGeomElemRef(uint16 i, EGeomElem e) : Idx(i), Elem(e) { }
+};
 
 // Undo delta: one tile-record, color-vertex, or export-prop change (bounded LIFO of strokes).
 // Kind 2: raw AppData restore so delete-vs-"0"/presence semantics reapply exactly.
@@ -347,6 +370,7 @@ struct SUndoTile
 	// CStorageRaw pointer does not survive a working-set rebuild, and the policy (mapper
 	// delta vs stored position) is cheap to redo and must not drift from the forward path.
 	uint16 VertIdx;
+	uint8 ElemKind; // EGeomElem: which PatchMesh table VertIdx indexes
 	float OldPos[3], NewPos[3];
 	// Kind 0 only: raw pristine tile-record snapshots (authored space, exact on-disk values)
 	// captured around setTileDesc. Undo/redo restores these verbatim after the desc-based
@@ -360,7 +384,7 @@ struct SUndoTile
 	sint32 OldRawRot[3], NewRawRot[3];
 	SUndoTile()
 		: Kind(0), Zone(0), TileId(-1), Patch(-1), S(0), T(0), OldColor(0), NewColor(0),
-		  AppDataId(0), OldHas(false), NewHas(false), VertIdx(0),
+		  AppDataId(0), OldHas(false), NewHas(false), VertIdx(0), ElemKind(0),
 		  HaveRaw(false), OldRawNum(0), NewRawNum(0), OldRawFlags(0), NewRawFlags(0),
 		  OldRawNoise(0), NewRawNoise(0)
 	{
@@ -537,13 +561,13 @@ public:
 	 * encode. This flag is the geometry half of the dirty signal.
 	 */
 	/**
-	 * Move vertices of one zone by an OBJECT-space delta. The whole list lands as a single
-	 * undo step, because a selection move is one action to the artist however many vertices
-	 * it touched. Bound vertices must already be excluded by the caller - this layer trusts
-	 * the policy rather than re-deriving it.
+	 * Move elements of one zone by an OBJECT-space delta. The whole list lands as a single
+	 * undo step, because a selection move is one action to the artist however many elements
+	 * it touched. Bound vertices, and handles that ride a moving corner, must already be
+	 * excluded by the caller - this layer trusts the policy rather than re-deriving it.
 	 */
-	uint opMovePatchVertices(uint zoneId, const std::vector<uint16> &verts, const float *objDelta,
-	                         std::string &err);
+	uint opMovePatchElems(uint zoneId, const std::vector<SGeomElemRef> &elems,
+	                      const float *objDelta, std::string &err);
 	/**
 	 * Notified whenever a vertex position changes, forward or by undo/redo.
 	 *
@@ -554,7 +578,7 @@ public:
 	 * the same thing. The difference between two values of one target is well defined
 	 * whichever target it is, and it is also all a display update needs.
 	 */
-	void setGeomChangedCb(void (*cb)(uint zoneId, uint16 vertIdx, const float *objDelta))
+	void setGeomChangedCb(void (*cb)(uint zoneId, uint16 elemIdx, int elem, const float *objDelta))
 	{ m_GeomChangedCb = cb; }
 
 	void markGeomDirty(uint zoneId);
@@ -759,7 +783,7 @@ private:
 	bool propsDirty(uint zoneIdx) const;
 	void applyGeomUndo(const SUndoTile &rec, bool useOld);
 	std::set<uint> m_GeomDirty; // zone ids with an uncommitted geometry write
-	void (*m_GeomChangedCb)(uint zoneId, uint16 vertIdx, const float *objDelta);
+	void (*m_GeomChangedCb)(uint zoneId, uint16 elemIdx, int elem, const float *objDelta);
 };
 
 } /* namespace ZPPAINT */

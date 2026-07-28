@@ -476,6 +476,33 @@ extern uint g_SelectedZoneId;
 typedef std::pair<uint, uint16> TPatchVertId;
 extern std::set<TPatchVertId> g_PatchVertSel;
 
+/**
+ * Selected tangent handles, keyed (zone, PatchMesh Vecs index).
+ *
+ * The same shape as the vertex selection and for the same reason: SPmPatch::Vec[8] indexes
+ * Vecs exactly as V[4] indexes Verts, so a handle shared by two patches along a common edge is
+ * ONE handle, one marker, one selection entry. Handles are shown for selected corners only -
+ * Max's rule, and the reason a dense cage does not turn into a field of dots.
+ */
+extern std::set<TPatchVertId> g_PatchTanSel;
+
+/**
+ * The corner a handle belongs to, 0xffff if it is not a tangent of this zone (an interior
+ * handle, or an index the patch table does not use as a tangent).
+ *
+ * Derived from the patch table rather than read from SPmVec::Vert, which is absent on Max 3
+ * files: tangent 2e is attached to corner e and 2e+1 to corner (e+1)&3, the same convention
+ * the cage is drawn with.
+ */
+uint16 zpTangentOwner(const SPaintZone &pz, uint16 vecIdx);
+
+/** Selection ops for handles (recorded). Op: 0 replace, 1 add, 2 remove. */
+void zpPatchTangentSelect(uint zoneId, uint vecIdx, int op);
+uint zpPatchTangentSelCount();
+bool zpPatchTangentSelAt(uint index, uint &zoneOut, uint &vecOut);
+/** Displayed world position of a handle, for the gates. */
+bool zpPatchTangentWorld(uint zoneId, uint vecIdx, float outPos[3]);
+
 /** Index-based readback, so callers that cannot include this header still reach the set. */
 uint zpPatchVertSelCount();
 bool zpPatchVertSelAt(uint index, uint &zoneOut, uint &vertOut);
@@ -535,6 +562,8 @@ bool zpPickPatchEdge(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, flo
                      uint &zoneOut, uint16 &vertAOut, uint16 &vertBOut);
 bool zpPickPatchFace(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, float my,
                      uint &zoneOut, uint &patchOut);
+bool zpPickPatchTangent(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, float my,
+                        uint &zoneOut, uint16 &vecOut);
 
 /** Scripted click, using the session's camera and driver (headless picking gate). */
 bool zpPatchClickAt(float x, float y, uint buttons);
@@ -612,7 +641,7 @@ bool zpSyncLandscapeWeld();
 bool zpPatchPushLive(bool preview);
 
 /** Core geom-changed sink: keeps Ep.Pm and the display patchinfo in step with the .max. */
-void zpGeomVertChanged(uint zoneId, uint16 vertIdx, const float *objDelta);
+void zpGeomVertChanged(uint zoneId, uint16 elemIdx, int elem, const float *objDelta);
 
 /** Left-click in patch/vertex mode; `buttons` carries the modifier bits (Ctrl add, Alt remove). */
 void zpPatchVertexClick(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, float my, uint buttons);

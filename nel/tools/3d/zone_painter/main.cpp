@@ -292,6 +292,7 @@ int g_MaskCycle = 0;
 bool g_HavePropSelection = false;
 uint g_SelectedZoneId = 0;
 std::set<TPatchVertId> g_PatchVertSel;
+std::set<TPatchVertId> g_PatchTanSel;
 std::set<SPatchEdgeId> g_PatchEdgeSel;
 std::set<TPatchFaceId> g_PatchFaceSel;
 std::string g_PropStatusMsg; // click "read-only" / selection name (HUD + panel)
