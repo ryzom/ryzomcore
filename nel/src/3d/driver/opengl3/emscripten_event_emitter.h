@@ -71,6 +71,17 @@ private:
 	std::vector<CEvent *> _Events; // buffered events, flushed by submitEvents
 	uint _MouseButtons; // currently held buttons (left/middle/right mask)
 	sint32 _TouchId; // identifier of the touch acting as the mouse, -1 if none
+
+	// Multi-touch view gestures. One finger stays the mouse so the host's tools keep
+	// working; two or more become the middle-button drags and wheel steps the navigation
+	// listener already understands, so no listener knows a touchscreen exists.
+	uint _GestureFingers; // fingers the view gesture in flight is using, 0 if none
+	float _GestureX, _GestureY; // last centroid, viewport coords
+	float _GestureSpread; // last mean distance from the centroid, viewport units
+	float _PinchAccum; // pinch not yet spent as whole wheel steps
+	/// Rebuild the active-touch set and drive the gesture state machine.
+	void updateTouchGesture(int eventType, const EmscriptenTouchEvent *e);
+	void endTouchGesture();
 	bool _Registered;
 };
 

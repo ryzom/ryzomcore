@@ -19,6 +19,8 @@
 
 #include "emscripten_event_emitter.h"
 
+#include <cmath>
+
 #ifdef __EMSCRIPTEN__
 
 #include <emscripten.h>
@@ -31,6 +33,11 @@ namespace NLMISC {
 CEmscriptenEventEmitter::CEmscriptenEventEmitter()
     : _MouseButtons(0)
     , _TouchId(-1)
+    , _GestureFingers(0)
+    , _GestureX(0.f)
+    , _GestureY(0.f)
+    , _GestureSpread(0.f)
+    , _PinchAccum(0.f)
     , _Registered(false)
 {
 }
@@ -125,6 +132,8 @@ void CEmscriptenEventEmitter::release()
 
 	_MouseButtons = 0;
 	_TouchId = -1;
+	_GestureFingers = 0;
+	_PinchAccum = 0.f;
 }
 
 void CEmscriptenEventEmitter::submitEvents(CEventServer &server, bool /* allWindows */)
@@ -329,11 +338,138 @@ EM_BOOL CEmscriptenEventEmitter::keyCallback(int eventType, const EmscriptenKeyb
 	return EM_TRUE;
 }
 
+// Viewport distance that has to accumulate before a pinch spends one wheel step. Each step
+// is a fixed fraction of the distance to the view target, so this trades pinch sensitivity
+// against how coarse the zoom feels.
+static const float kPinchStepDist = 0.02f;
+
+// Button mask a view gesture presents itself as. Two fingers orbit and three pan, which is
+// the opposite way round from the desktop defaults on purpose: with one finger reserved for
+// the tool, orbit is the most-reached-for navigation and has to sit on the easier gesture.
+static uint gestureButtons(uint fingers)
+{
+	if (fingers >= 3)
+		return NLMISC::middleButton;
+	return (uint)(NLMISC::altButton | NLMISC::middleButton);
+}
+
+void CEmscriptenEventEmitter::endTouchGesture()
+{
+	if (!_GestureFingers)
+		return;
+	const uint mask = gestureButtons(_GestureFingers);
+	_MouseButtons &= ~(uint)NLMISC::middleButton;
+	postEvent(new CEventMouseUp(_GestureX, _GestureY, (TMouseButton)mask, this));
+	_GestureFingers = 0;
+	_PinchAccum = 0.f;
+}
+
+void CEmscriptenEventEmitter::updateTouchGesture(int eventType, const EmscriptenTouchEvent *e)
+{
+	// Active set. On a touchend the finished contacts are still listed, flagged isChanged,
+	// so they have to come out or a two-finger lift would read as a gesture still running.
+	const bool ending = (eventType == EMSCRIPTEN_EVENT_TOUCHEND
+	    || eventType == EMSCRIPTEN_EVENT_TOUCHCANCEL);
+	float px[8], py[8];
+	uint n = 0;
+	for (int i = 0; i < e->numTouches && n < 8; ++i)
+	{
+		if (ending && e->touches[i].isChanged)
+			continue;
+		float fX, fY;
+		if (!normalizePos(e->touches[i].targetX, e->touches[i].targetY, fX, fY))
+			continue;
+		px[n] = fX;
+		py[n] = fY;
+		++n;
+	}
+
+	if (n < 2)
+	{
+		endTouchGesture();
+		return;
+	}
+
+	float cx = 0.f, cy = 0.f;
+	for (uint i = 0; i < n; ++i)
+	{
+		cx += px[i];
+		cy += py[i];
+	}
+	cx /= (float)n;
+	cy /= (float)n;
+	float spread = 0.f;
+	for (uint i = 0; i < n; ++i)
+	{
+		const float dx = px[i] - cx, dy = py[i] - cy;
+		spread += sqrtf(dx * dx + dy * dy);
+	}
+	spread /= (float)n;
+
+	// Starting, or the finger count changed and the gesture means something else now. Either
+	// way the old drag has to be closed and a new one opened, and the baseline re-taken so
+	// the change of hand position is not delivered as motion.
+	if (_GestureFingers != n)
+	{
+		if (_GestureFingers)
+		{
+			endTouchGesture();
+		}
+		else if (_TouchId >= 0)
+		{
+			// A single-finger drag was in flight; release it before the extra fingers turn
+			// this into navigation, or the host is left holding a button down.
+			_TouchId = -1;
+			_MouseButtons &= ~(uint)NLMISC::leftButton;
+			postEvent(new CEventMouseUp(cx, cy, (TMouseButton)NLMISC::leftButton, this));
+		}
+		_GestureFingers = n;
+		_GestureX = cx;
+		_GestureY = cy;
+		_GestureSpread = spread;
+		_PinchAccum = 0.f;
+		_MouseButtons |= (uint)NLMISC::middleButton;
+		// Seeds the listener's drag origin: it decides the drag kind per move from the live
+		// button mask, but measures motion from the last position it saw.
+		postEvent(new CEventMouseDown(cx, cy, (TMouseButton)gestureButtons(n), this));
+		return;
+	}
+
+	// Pinch, spent in whole wheel steps. Runs alongside the drag rather than instead of it,
+	// which is what makes zooming and orbiting in one movement feel like one gesture.
+	if (_GestureSpread > 0.f)
+	{
+		_PinchAccum += (spread - _GestureSpread) / kPinchStepDist;
+		while (_PinchAccum >= 1.f)
+		{
+			postEvent(new CEventMouseWheel(cx, cy, (TMouseButton)0, true, this));
+			_PinchAccum -= 1.f;
+		}
+		while (_PinchAccum <= -1.f)
+		{
+			postEvent(new CEventMouseWheel(cx, cy, (TMouseButton)0, false, this));
+			_PinchAccum += 1.f;
+		}
+	}
+	_GestureSpread = spread;
+
+	if (cx != _GestureX || cy != _GestureY)
+	{
+		postEvent(new CEventMouseMove(cx, cy, (TMouseButton)gestureButtons(n), this));
+		_GestureX = cx;
+		_GestureY = cy;
+	}
+}
+
 EM_BOOL CEmscriptenEventEmitter::touchCallback(int eventType, const EmscriptenTouchEvent *e, void *userData)
 {
 	CEmscriptenEventEmitter *emitter = (CEmscriptenEventEmitter *)userData;
 
 	uint mods = modifierFlags(e->ctrlKey, e->shiftKey, e->altKey);
+
+	emitter->updateTouchGesture(eventType, e);
+	if (emitter->_GestureFingers)
+		return EM_FALSE; // two or more fingers: the view owns them, tools see nothing
 
 	// Map the first touch to the left mouse button
 	for (int i = 0; i < e->numTouches; ++i)
