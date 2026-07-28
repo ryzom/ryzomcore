@@ -115,6 +115,12 @@ awk -v x="$BX" 'BEGIN{ exit !(x >= 159.0) }' \
 	|| { echo "FAIL (multi): placed cage at x=$BX, expected it beyond the first file's cell"; FAIL=1; }
 check "material-peek placed at (1,0)" "$OUT/multi.log"
 
+# M35-3 and M35-4 are about the node/object rules, and vertex 5 happens to sit on the seam
+# these two nodes weld along - so weld propagation would grow both selections and make each
+# test measure two things at once. Turned off here and tested on its own in M35-6.
+echo "PatchWeldSelect = 0;" > "$OUT/noweld.cfg"
+NOWELD="--vars-cfg $OUT/noweld.cfg"
+
 echo "===== M35-3: two nodes on one object ====="
 # --place puts a SECOND NODE on material-fond's object. Nothing about it is a decoration: it
 # is editable, an edit through it reaches the object, and every node showing that object
@@ -150,7 +156,7 @@ painter.selectPatchVertex(10000, 6, 1)
 print("DIFF_VERTEX " .. painter.patchVertexSelectionCount())
 EOF
 ZONE_PAINTER_BOARD_ACTION="save:material-fond" $XVFB "$ZP" "$OUT/ws_node" \
-	--startup-auto "lacustre/material-fond?place=1,0,1" --no-hint-stamp --no-thumbnail \
+	--startup-auto "lacustre/material-fond?place=1,0,1" $NOWELD --no-hint-stamp --no-thumbnail \
 	--startup-lua "$OUT/node.lua" --screenshot /dev/null > "$OUT/node.log" 2>&1
 
 nodepos() { grep -a "^$1 " "$OUT/node.log" | head -1 | cut -d' ' -f2-; }
@@ -186,7 +192,7 @@ painter.selectPatchVertex(0, 5, 1)
 painter.movePatchSelection(0, -0.5, 0)
 EOF
 ZONE_PAINTER_BOARD_ACTION="save:material-fond" $XVFB "$ZP" "$OUT/ws_eq" \
-	--startup-auto "lacustre/material-fond?place=1,0,1" --no-hint-stamp --no-thumbnail \
+	--startup-auto "lacustre/material-fond?place=1,0,1" $NOWELD --no-hint-stamp --no-thumbnail \
 	--startup-lua "$OUT/eq.lua" --screenshot /dev/null > "$OUT/eq.log" 2>&1
 if cmp -s "$OUT/ws_eq/landscape/ligo/lacustre/max/material-fond.max" \
           "$OUT/ws_node/landscape/ligo/lacustre/max/material-fond.max"; then
@@ -255,6 +261,56 @@ if command -v convert >/dev/null 2>&1 && [[ -f "$OUT/range_before.tga" && -f "$O
 else
 	echo "SKIP: ImageMagick or the screenshots are missing, tile-survival not checked"
 fi
+
+echo "===== M35-6: a welded seam moves as one point ====="
+# Two nodes of material-fond side by side weld along the shared border: object vertex 5 (the
+# east edge) and object vertex 0 (the west edge) are drawn at the same place. They are separate
+# storage that happens to coincide, so moving one alone tears the surface - and, since both
+# sides get exported, leaves the files disagreeing about where their shared border is.
+#
+# Selecting either one selects both, at SELECTION time, so the markers and the gizmo show what
+# will move. The negative half runs the identical script with propagation off and asserts the
+# tear, which is what stops this passing for the wrong reason.
+seed "$OUT/ws_weld" material-fond
+cat > "$OUT/weld.lua" <<'EOF'
+painter.setMode(4)
+painter.setSubObject(1)
+local ax, ay, az = painter.patchVertexPos(0, 5)
+local bx, by, bz = painter.patchVertexPos(10000, 0)
+print(string.format("W_A_BEFORE %.3f %.3f %.3f", ax, ay, az))
+print(string.format("W_B_BEFORE %.3f %.3f %.3f", bx, by, bz))
+painter.clearPatchVertexSelection()
+painter.selectPatchVertex(0, 5, 0)
+print("W_SEL " .. painter.patchVertexSelectionCount())
+painter.movePatchSelection(0, 0, 2)
+local cx, cy, cz = painter.patchVertexPos(0, 5)
+local dx, dy, dz = painter.patchVertexPos(10000, 0)
+print(string.format("W_A_AFTER %.3f %.3f %.3f", cx, cy, cz))
+print(string.format("W_B_AFTER %.3f %.3f %.3f", dx, dy, dz))
+EOF
+$XVFB "$ZP" "$OUT/ws_weld" --startup-auto "lacustre/material-fond?place=1,0" \
+	--no-hint-stamp --no-thumbnail --startup-lua "$OUT/weld.lua" --screenshot /dev/null \
+	> "$OUT/weld.log" 2>&1
+seed "$OUT/ws_weld_off" material-fond
+$XVFB "$ZP" "$OUT/ws_weld_off" --startup-auto "lacustre/material-fond?place=1,0" $NOWELD \
+	--no-hint-stamp --no-thumbnail --startup-lua "$OUT/weld.lua" --screenshot /dev/null \
+	> "$OUT/weld_off.log" 2>&1
+
+wpos() { grep -a "^$2 " "$1" | head -1 | cut -d' ' -f2-; }
+grep -qa "^W_SEL 2$" "$OUT/weld.log" \
+	&& echo "OK: selecting one side of the seam selected both" \
+	|| { echo "FAIL: seam selection did not propagate (got $(grep -a '^W_SEL ' "$OUT/weld.log"))"; FAIL=1; }
+WA=$(wpos "$OUT/weld.log" W_A_AFTER); WB=$(wpos "$OUT/weld.log" W_B_AFTER)
+[[ "$WA" == "$WB" ]] \
+	&& echo "OK: both sides of the seam moved together to [$WA]" \
+	|| { echo "FAIL: the seam opened - [$WA] against [$WB]"; FAIL=1; }
+grep -qa "^W_SEL 1$" "$OUT/weld_off.log" \
+	&& echo "OK: PatchWeldSelect=0 selects only what was pointed at" \
+	|| { echo "FAIL: propagation ran with PatchWeldSelect=0"; FAIL=1; }
+OA=$(wpos "$OUT/weld_off.log" W_A_AFTER); OB=$(wpos "$OUT/weld_off.log" W_B_AFTER)
+[[ "$OA" != "$OB" ]] \
+	&& echo "OK: with propagation off the seam does open - the gate above means something" \
+	|| { echo "FAIL: the seam held with propagation off, so M35-6 proves nothing"; FAIL=1; }
 
 if [[ $FAIL -ne 0 ]]; then echo "M35 GATES FAILED"; exit 1; fi
 echo "ALL M35 GATES PASSED"

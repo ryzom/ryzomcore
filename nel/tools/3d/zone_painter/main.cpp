@@ -495,6 +495,15 @@ float g_ZoomSpeed = 300.f;
 // thing you are manipulating; release-only exists for working sets where the refresh cost
 // per mouse-move is felt.
 bool g_PatchLiveUpdate = true;
+// Patch-edit weld propagation: 1 = selecting a vertex on a welded seam also selects the
+// partners it was welded to, 0 = select only what was pointed at.
+//
+// On by default because a seam is one point of the surface, not two: moving one side alone
+// tears it, and the two .max files then disagree about where their shared border is. Doing it
+// at SELECTION time rather than at commit is deliberate - the markers, the gizmo centroid and
+// the live preview all follow the selection, so the artist sees exactly what will move before
+// moving it. Propagating at commit would show a tearing seam that healed on release.
+bool g_PatchWeldSelect = true;
 
 // LoadKeyCfg port: per-action lookup, absent/typed-wrong names silently keep the default (the
 // plugin's per-var try/catch). `required` = the path came from the CLI (missing file is fatal);
@@ -623,10 +632,20 @@ static bool loadVarsCfg(const std::string &path, bool required)
 	catch (const NLMISC::EConfigFile &)
 	{
 	}
+	try
+	{
+		NLMISC::CConfigFile::CVar &weldSel = cf.getVar("PatchWeldSelect");
+		g_PatchWeldSelect = weldSel.asInt() != 0;
+		++loaded;
+	}
+	catch (const NLMISC::EConfigFile &)
+	{
+	}
 	printf("vars cfg %s: %u variable(s) applied (light %u,%u,%u dir %.3f,%.3f,%.3f mul %.2f zoom %.1f)\n",
 	       path.c_str(), loaded, g_LightDiffuse.R, g_LightDiffuse.G, g_LightDiffuse.B,
 	       g_LightDirection.x, g_LightDirection.y, g_LightDirection.z, g_LightMultiply, g_ZoomSpeed);
 	printf("  PatchLiveUpdate %s\n", g_PatchLiveUpdate ? "per-frame" : "on release only");
+	printf("  PatchWeldSelect %s\n", g_PatchWeldSelect ? "seam partners follow" : "off");
 	return true;
 }
 

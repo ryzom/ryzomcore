@@ -2024,6 +2024,56 @@ static bool zpVertAliased(uint zoneId, uint vertIdx, uint &otherZone)
 	return false;
 }
 
+/**
+ * Every (node, vertex) that has to move with this one because the session weld made them the
+ * same point of the surface.
+ *
+ * A weld is not a hint: the two sides of a seam are one place, and the .max files on either
+ * side agree about it only for as long as they move together. Moving one alone tears the
+ * surface AND leaves two files disagreeing about their shared border, which the exporter has
+ * no way to reconcile.
+ *
+ * Transitive, because a corner where three or four zones meet is one point too, and reaching
+ * it from any of them must find all of them. Read-only nodes are counted and skipped: their
+ * files cannot be written, so the seam against context genuinely does open and the caller
+ * says so rather than pretending otherwise.
+ */
+static void zpWeldClosure(uint zoneId, uint16 vertIdx, std::set<TPatchVertId> &out,
+                          uint &roSkipped)
+{
+	std::vector<TPatchVertId> stack;
+	const TPatchVertId seed((uint)zoneId, vertIdx);
+	out.insert(seed);
+	stack.push_back(seed);
+	while (!stack.empty())
+	{
+		const TPatchVertId cur = stack.back();
+		stack.pop_back();
+		const SPaintZone *pz = zpFindPaintZone(cur.first);
+		if (!pz)
+			continue;
+		for (size_t i = 0; i < pz->BorderVertices.size(); ++i)
+		{
+			const NL3D::CBorderVertex &bv = pz->BorderVertices[i];
+			if (bv.CurrentVertex != cur.second)
+				continue;
+			const TPatchVertId nx((uint)bv.NeighborZoneId, bv.NeighborVertex);
+			if (out.count(nx))
+				continue;
+			const SPaintZone *nz = zpFindPaintZone(nx.first);
+			if (!nz)
+				continue;
+			if (!nz->Editable)
+			{
+				++roSkipped;
+				continue;
+			}
+			out.insert(nx);
+			stack.push_back(nx);
+		}
+	}
+}
+
 void zpPatchVertSelect(uint zoneId, uint vertIdx, int op)
 {
 	const TPatchVertId id((uint)zoneId, (uint16)vertIdx);
@@ -2042,20 +2092,46 @@ void zpPatchVertSelect(uint zoneId, uint vertIdx, int op)
 			}
 		}
 	}
-	if (op == 0)
-	{
-		g_PatchVertSel.clear();
-		g_PatchVertSel.insert(id);
-	}
-	else if (op == 1)
-	{
-		g_PatchVertSel.insert(id);
-	}
+	// Welded partners join the selection HERE rather than at the commit, so the markers, the
+	// gizmo centroid and the live preview all show what is actually going to move. Propagating
+	// at commit would draw a seam tearing open and then heal it on release.
+	std::set<TPatchVertId> group;
+	uint roSkipped = 0;
+	if (g_PatchWeldSelect)
+		zpWeldClosure(zoneId, (uint16)vertIdx, group, roSkipped);
 	else
+		group.insert(id);
+
+	if (op == 0)
+		g_PatchVertSel.clear();
+	uint aliasSkipped = 0;
+	for (std::set<TPatchVertId>::const_iterator it = group.begin(); it != group.end(); ++it)
 	{
-		g_PatchVertSel.erase(id);
+		if (op == 2)
+		{
+			g_PatchVertSel.erase(*it);
+			continue;
+		}
+		// A seam can pair one object vertex with ITSELF seen through two nodes - a brick
+		// welded to its own instance at a shared corner. That is one storage location, so it
+		// is selected once, exactly as the add path refuses.
+		uint other = 0;
+		if (zpVertAliased(it->first, it->second, other))
+		{
+			++aliasSkipped;
+			continue;
+		}
+		g_PatchVertSel.insert(*it);
 	}
+	if (op != 2 && group.size() > 1)
+		g_PropStatusMsg = NLMISC::toString("%u welded vertices selected",
+			(uint)group.size() - aliasSkipped);
+	if (roSkipped)
+		g_PropStatusMsg = NLMISC::toString(
+			"%u welded partner(s) are read-only context: that seam will open", roSkipped);
 	zpPatchGizmoInvalidate(); // the centroid moved, so its depth did, so the fit is stale
+	// The user's action, not its expansion: a replay re-derives the same weld group, and
+	// recording the members would pin a session's welds into a script that outlives them.
 	ZPSCRIPT::record(NLMISC::toString("painter.selectPatchVertex(%u, %u, %d)", zoneId, vertIdx, op));
 }
 
