@@ -108,10 +108,10 @@ enum TGizmoHandle
 static const float kAxisLen = 1.f;
 static const float kArrowLen = 0.22f;
 static const float kArrowWide = 0.075f;
-// Plane handles sit in the CORNER between their two axes - outer corner level with the
-// arrowheads - rather than floating near the origin, so the gizmo reads as a triangle of
-// axes with a corner you can grab, and the middle stays clear.
-static const float kPlaneOff = 0.5f;
+// Plane handles occupy the CORNER between their two axes, inner corner meeting the gizmo
+// origin. They are not pushed out along the axes: the middle of the gizmo is where all
+// three planes meet, and that meeting point is exactly what the screen handle means.
+static const float kPlaneOff = 0.f;
 static const float kPlaneSize = 0.28f;
 // Cone tessellation for the arrowheads, and how far the inner cap is darkened.
 static const int kConeSegments = 10;
@@ -181,7 +181,10 @@ private:
 
 	UDriver *m_Driver;
 	UMaterial m_Mat;
-	UMaterial m_GizmoMat; // depth-test off: the gizmo draws over the scene,
+// The gizmo draws over the scene: no depth test anywhere. What little
+// self-occlusion it needs comes from culling and draw order - see drawGizmo.
+UMaterial m_GizmoMat; // outline and plane handles: blended, both sides visible
+UMaterial m_GizmoSolidMat; // shafts and cones: back faces culled
 	CFrustum m_Frustum;
 	CViewport m_Viewport;
 	CNavMouseListener m_Nav;
@@ -227,7 +230,9 @@ CNavigationDemo::CNavigationDemo()
 	m_Mat.setDoubleSided(true);
 
 	// The gizmo sits at the object's centre, so with a depth test it would be buried inside
-	// the very thing it manipulates. Drawn over everything.
+// the very thing it manipulates. Drawn over everything. The selection
+// outline needs the same treatment for the same reason - it wraps a cube it must remain
+// visible through.
 	m_GizmoMat = m_Driver->createMaterial();
 	m_GizmoMat.initUnlit();
 	m_GizmoMat.setZWrite(false);
@@ -235,6 +240,15 @@ CNavigationDemo::CNavigationDemo()
 	m_GizmoMat.setDoubleSided(true);
 	m_GizmoMat.setBlend(true);
 	m_GizmoMat.setBlendFunc(UMaterial::srcalpha, UMaterial::invsrcalpha);
+
+	// Shafts and cones, same no-depth policy, but with back faces culled. That is the whole
+	// fix for a cone fighting itself: a cone is convex, so once its far wall and its cap are
+	// culled, exactly one surface covers each pixel and there is nothing left to order.
+	m_GizmoSolidMat = m_Driver->createMaterial();
+	m_GizmoSolidMat.initUnlit();
+	m_GizmoSolidMat.setZWrite(false);
+	m_GizmoSolidMat.setZFunc(UMaterial::always);
+	m_GizmoSolidMat.setDoubleSided(false);
 
 	m_Frustum.initPerspective(60.f * (float)Pi / 180.f, 4.f / 3.f, 0.1f, 1000.f);
 
@@ -290,6 +304,7 @@ CNavigationDemo::~CNavigationDemo()
 	m_Driver->EventServer.removeListener(EventKeyDownId, this);
 	m_Driver->deleteMaterial(m_Mat);
 	m_Driver->deleteMaterial(m_GizmoMat);
+	m_Driver->deleteMaterial(m_GizmoSolidMat);
 	m_Driver->release();
 	delete m_Driver;
 }
@@ -405,7 +420,9 @@ TGizmoHandle CNavigationDemo::pickGizmo(float x, float y) const
 
 	// Centre first, then planes, then axes: smaller and more specific targets win, which
 	// is also the order Max resolves overlaps in. The centre is invisible - see
-	// kScreenPickRadius - so keep its target generous enough to find by feel.
+	// kScreenPickRadius - so keep its target generous enough to find by feel. It is tested
+	// FIRST, ahead of the planes whose inner corners it sits on top of: the very middle of
+	// the gizmo means all axes at once, regardless of which plane's corner is under it.
 	if (segDist(x, y, ox, oy, ox, oy) < kScreenPickRadius)
 		return GizmoScreen;
 
@@ -684,7 +701,7 @@ void CNavigationDemo::drawArrow(const CVector &origin, const CVector &axis, CRGB
 	shaft.V0 = origin;
 	shaft.V1 = tip;
 	shaft.Color0 = shaft.Color1 = col;
-	m_Driver->drawLine(shaft, m_GizmoMat);
+	m_Driver->drawLine(shaft, m_GizmoSolidMat);
 
 
 	// Solid cone arrowhead. Built against the axis rather than against the view, so it
@@ -716,7 +733,7 @@ void CNavigationDemo::drawArrow(const CVector &origin, const CVector &axis, CRGB
 		side.V1 = rim[i];
 		side.V2 = rim[j];
 		side.Color0 = side.Color1 = side.Color2 = col;
-		m_Driver->drawTriangle(side, m_GizmoMat);
+		m_Driver->drawTriangle(side, m_GizmoSolidMat);
 
 		// Darker underside, so the cone reads as a solid with a lit side and a shaded
 		// cap rather than as a flat silhouette when seen from below.
@@ -725,8 +742,27 @@ void CNavigationDemo::drawArrow(const CVector &origin, const CVector &axis, CRGB
 		cap.V1 = rim[j];
 		cap.V2 = rim[i];
 		cap.Color0 = cap.Color1 = cap.Color2 = capCol;
-		m_Driver->drawTriangle(cap, m_GizmoMat);
+		m_Driver->drawTriangle(cap, m_GizmoSolidMat);
 	}
+}
+
+// Draw order for a three-piece set, farthest first. The gizmo's pieces are small, convex
+// and mostly disjoint, so a single key each is enough; the cases a per-piece key cannot
+// express (a shaft whose depth range straddles a cone's) are a few pixels at glancing
+// angles, and not worth a depth buffer to fix.
+static void depthOrder(const float key[3], int order[3])
+{
+	order[0] = 0;
+	order[1] = 1;
+	order[2] = 2;
+	for (int i = 0; i < 2; ++i)
+		for (int j = i + 1; j < 3; ++j)
+			if (key[order[j]] > key[order[i]])
+			{
+				const int t = order[i];
+				order[i] = order[j];
+				order[j] = t;
+			}
 }
 
 void CNavigationDemo::drawGizmo()
@@ -737,10 +773,27 @@ void CNavigationDemo::drawGizmo()
 	const float s = gizmoScale();
 	const TGizmoHandle hot = (m_Drag != GizmoNone) ? m_Drag : m_Hover;
 
-	// Plane handles first: they sit under the axes and should not overdraw them.
+	// View depth of each axis' far end and each plane's centre, for the painter order below.
+	const CVector camPos = camWorld().getPos();
+	const CVector fwd = camWorld().getJ();
+	float axisKey[3], planeKey[3];
 	static const int planeAxes[3][2] = { { 0, 1 }, { 1, 2 }, { 2, 0 } };
-	for (int p = 0; p < 3; ++p)
+	for (int i = 0; i < 3; ++i)
 	{
+		axisKey[i] = (o + axisVec(i) * (kAxisLen * s) - camPos) * fwd;
+		const CVector pc = axisVec(planeAxes[i][0]) + axisVec(planeAxes[i][1]);
+		planeKey[i] = (o + pc * (kPlaneOff * s + kPlaneSize * s * 0.5f) - camPos) * fwd;
+	}
+	int axisOrder[3], planeOrder[3];
+	depthOrder(axisKey, axisOrder);
+	depthOrder(planeKey, planeOrder);
+
+	// Plane handles first: they sit under the axes and should not overdraw them. Among
+	// themselves they are blended and meet at the origin, so back-to-front is the best
+	// available - they interpenetrate, which no ordering fully resolves.
+	for (int pi = 0; pi < 3; ++pi)
+	{
+		const int p = planeOrder[pi];
 		const CVector a = axisVec(planeAxes[p][0]);
 		const CVector b = axisVec(planeAxes[p][1]);
 		const CVector c0 = o + (a + b) * (kPlaneOff * s);
@@ -759,8 +812,10 @@ void CNavigationDemo::drawGizmo()
 		m_Driver->drawQuad(q, m_GizmoMat);
 	}
 
-	for (int a = 0; a < 3; ++a)
+	// Arrows back to front, so an arrow in front of another axis' shaft wins the overlap.
+	for (int ai = 0; ai < 3; ++ai)
 	{
+		const int a = axisOrder[ai];
 		drawArrow(o, axisVec(a) * (kAxisLen * s),
 		          (hot == GizmoAxisX + a) ? kHotColor : kAxisColor[a]);
 	}
