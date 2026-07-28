@@ -1542,7 +1542,7 @@ void zpPatchGizmoUpdateDrag(NL3D::CCamera *camera, const NL3D::CViewport &vp,
 		delta = s_DragAxis * (delta * s_DragAxis); // constrain to the axis
 	s_DragDelta = delta;
 	if (g_PatchLiveUpdate && !zpPatchPushLive(true))
-		g_PropStatusMsg = "patch move: outside the zone's packed range, needs a rebuild";
+		g_PropStatusMsg = "patch move: the live surface could not be updated";
 }
 
 /**
@@ -1567,7 +1567,8 @@ bool zpPatchPushLive(bool preview)
 	NL3D::CLandscape &land = g_PaintCtx.Land->Landscape;
 	std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
 	std::set<std::pair<uint, uint> > touched; // (zone id, patch) pushed this pass
-	bool inRange = true;
+	std::set<uint> outOfRange; // zones whose geometry no longer fits their packed range
+	bool ok = true;
 
 	// The selection, re-keyed from (node, vertex) onto (OBJECT, vertex) - the identity of the
 	// thing that actually moved. Built once rather than per patch corner.
@@ -1630,17 +1631,103 @@ bool zpPatchPushLive(bool preview)
 					        lz->getZoneBB().getCenter().z,
 					        lz->getZoneBB().getHalfSize().x, lz->getZoneBB().getHalfSize().y,
 					        lz->getZoneBB().getHalfSize().z);
-				inRange = false;
+				outOfRange.insert(pz.ZoneId);
 				continue;
 			}
 			touched.insert(std::make_pair(pz.ZoneId, p));
 		}
 	}
 
+	// A zone whose geometry no longer fits the bbox chosen at build() time cannot be written
+	// in place: PatchBias/PatchScale were derived from that bbox and pack() CLAMPS, so the
+	// vertex would silently stop moving partway. Rebuilding the zone recomputes both from the
+	// geometry as it now is, which is the only thing that makes the move representable.
+	//
+	// Commit only. During a drag the preview offsets live in a temporary cage while
+	// pz.Patches still holds the un-moved geometry, so a rebuild would faithfully rebuild the
+	// OLD shape - and pay for it every frame. The surface simply lags past the range boundary
+	// until the drag is released, which is when the commit rebuilds once.
+	std::set<std::pair<uint, uint> > refresh = touched;
+	if (!preview)
+	{
+		for (std::set<uint>::const_iterator it = outOfRange.begin(); it != outOfRange.end(); ++it)
+		{
+			const SPaintZone *pz = zpFindPaintZone(*it);
+			if (!pz)
+			{
+				ok = false;
+				continue;
+			}
+			// Collect the seam neighbours BEFORE the remove: removeZone unbinds them, so
+			// after the re-add their patches along the seam have to re-tessellate against
+			// geometry that moved. Reading them afterwards would find the binds already gone.
+			const NL3D::CZone *clz = land.getZone((sint)*it);
+			for (uint p = 0; clz && p < (uint)clz->getNumPatchs(); ++p)
+			{
+				const NL3D::CPatch *lp = clz->getPatch((sint)p);
+				if (!lp)
+					continue;
+				for (uint edge = 0; edge < 4; ++edge)
+				{
+					NL3D::CPatch::CBindInfo nb;
+					lp->getBindNeighbor(edge, nb);
+					if (!nb.Zone || (uint)nb.Zone->getZoneId() == *it)
+						continue;
+					for (uint i = 0; i < (uint)nb.NPatchs; ++i)
+						if (nb.Next[i])
+							refresh.insert(std::make_pair((uint)nb.Zone->getZoneId(),
+							                              (uint)nb.Next[i]->getPatchId()));
+				}
+			}
+			// The rebuilt zone's own patches are freshly compiled, so they are NOT added to
+			// the refresh set - and must not be, since the pointers this pass collected for
+			// that zone die with it.
+			for (std::set<std::pair<uint, uint> >::iterator r = refresh.begin(); r != refresh.end();)
+			{
+				if (r->first == *it) refresh.erase(r++);
+				else ++r;
+			}
+			for (std::set<std::pair<uint, uint> >::iterator t = touched.begin(); t != touched.end();)
+			{
+				if (t->first == *it) touched.erase(t++);
+				else ++t;
+			}
+			// Rebuild from what the LIVE zone knows, not from the display cage. pz.Patches
+			// carries the geometry but its tile records are the ones assembly loaded: every
+			// tile, colour and lumel painted since then lives in the landscape zone and the
+			// pristine carrier, and building from the cage would revert all of it on screen.
+			// So retrieve the live zone whole and replace only the Bezier.
+			NL3D::CZoneInfo zi;
+			NL3D::CZone *mlz = land.getZone((sint)*it);
+			if (!mlz)
+			{
+				ok = false;
+				continue;
+			}
+			mlz->retrieve(zi);
+			for (size_t p = 0; p < zi.Patchs.size() && p < pz->Patches.size(); ++p)
+				zi.Patchs[p].Patch = pz->Patches[p].Patch;
+			NL3D::CZone zone;
+			zone.build(zi);
+			NL3D::CZoneCornerSmoother cornerSmoother;
+			std::vector<NL3D::CZone *> emptyVector;
+			cornerSmoother.computeAllCornerSmoothFlags(&zone, emptyVector);
+			land.removeZone((uint16)*it);
+			if (!land.addZone(zone))
+			{
+				fprintf(stderr, "ERROR: zone %u could not be re-added after an out-of-range "
+				        "patch move; its surface is now missing\n", *it);
+				ok = false;
+				continue;
+			}
+			if (g_verbose)
+				printf("patch push: zone %u rebuilt (move left the packed range)\n", *it);
+		}
+	}
+
 	// Refresh the pushed patches and their bind neighbours, the same neighbour walk
 	// applyChanges does - a moved corner is shared, so the patch on the other side of the
 	// seam has to re-tessellate too or the surface cracks along it.
-	std::set<std::pair<uint, uint> > refresh = touched;
 	for (std::set<std::pair<uint, uint> >::const_iterator it = touched.begin(); it != touched.end(); ++it)
 	{
 		// const, so the public const getPatch overload is the one chosen - this walk only
@@ -1668,7 +1755,7 @@ bool zpPatchPushLive(bool preview)
 		if (lz)
 			lz->refreshTesselationGeometry((sint)it->second);
 	}
-	return inRange;
+	return ok;
 }
 
 /**
@@ -1817,7 +1904,7 @@ if (*it < pz.Ep.Rp.Verts.size() && pz.Ep.Rp.Verts[*it].Binded)
 	// Unconditional, whatever PatchLiveUpdate says - that option governs per-FRAME mirroring
 	// during a drag, not whether a committed edit reaches the surface at all.
 	if (written && !zpPatchPushLive(false))
-		msg = "patch move: outside the zone's packed range, surface needs a rebuild";
+		msg = "patch move: the live surface could not be updated";
 
 	if (!written)
 	{

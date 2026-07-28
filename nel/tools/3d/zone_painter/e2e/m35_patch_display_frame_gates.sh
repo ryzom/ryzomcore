@@ -195,5 +195,66 @@ else
 	echo "FAIL: the two nodes wrote different bytes for the same edit"; FAIL=1
 fi
 
+echo "===== M35-5: a move past the packed range rebuilds the zone and keeps its tiles ====="
+# Control points are 16-bit fixed point around a bias/scale derived from the bbox at build()
+# time, and pack() CLAMPS - so a move that leaves that range cannot be written in place, and
+# used to leave the surface silently stale while the .max got the edit.
+#
+# The rebuild has one trap worth a gate of its own: it must NOT rebuild from the display cage.
+# pz.Patches carries the geometry but its tile records are the ones assembly loaded, so
+# building from there would revert every tile painted since - correct geometry, reverted
+# terrain. The fill below is what makes that visible: a band of tile set 7 reads clearly
+# darker than the authored ground, and its mean brightness must survive the rebuild.
+seed "$OUT/ws_range" material-fond
+cat > "$OUT/range.lua" <<'EOF'
+painter.fillTile(0, 0, 7)
+painter.fillTile(0, 1, 7)
+painter.fillTile(0, 2, 7)
+painter.fillTile(0, 3, 7)
+painter.screenshot("SHOTDIR/range_before.tga")
+painter.setMode(4)
+painter.setSubObject(1)
+local bx, by, bz = painter.patchVertexPos(0, 5)
+print(string.format("R_BEFORE %.3f %.3f %.3f", bx, by, bz))
+-- 3 units past a corner that already sits at the edge of the zone's packed range.
+painter.clearPatchVertexSelection()
+painter.selectPatchVertex(0, 5, 1)
+painter.movePatchSelection(0, -3, 0)
+local ax, ay, az = painter.patchVertexPos(0, 5)
+print(string.format("R_AFTER %.3f %.3f %.3f", ax, ay, az))
+painter.screenshot("SHOTDIR/range_after.tga")
+EOF
+sed -i "s#SHOTDIR#$OUT#g" "$OUT/range.lua"
+$XVFB "$ZP" "$OUT/ws_range" --startup-auto "lacustre/material-fond" --no-hint-stamp \
+	--no-thumbnail --verbose --startup-lua "$OUT/range.lua" --screenshot /dev/null \
+	> "$OUT/range.log" 2>&1
+
+grep -qa "rebuilt (move left the packed range)" "$OUT/range.log" \
+	&& echo "OK: the out-of-range move rebuilt the zone" \
+	|| { echo "FAIL: no rebuild - either the move stayed in range or the rebuild is gone"; FAIL=1; }
+grep -qa "could not be updated" "$OUT/range.log" \
+	&& { echo "FAIL: the live surface was left stale"; FAIL=1; } || true
+RB=$(grep -a '^R_BEFORE ' "$OUT/range.log" | head -1 | cut -d' ' -f2-)
+RA=$(grep -a '^R_AFTER ' "$OUT/range.log" | head -1 | cut -d' ' -f2-)
+wantR=$(awk -v s="$RB" 'BEGIN{split(s,c," "); printf "%.3f %.3f %.3f", c[1], c[2]-3.0, c[3]}')
+[[ "$RA" == "$wantR" ]] \
+	&& echo "OK: the cage took the full move to [$RA]" \
+	|| { echo "FAIL: cage at [$RA], expected [$wantR]"; FAIL=1; }
+
+# Mean brightness of a crop inside the filled band and away from the moved corner. Measured
+# values: filled 0.147, authored ground 0.198 - so 0.01 is five times tighter than the gap a
+# reverted tile set would open, and the rebuild itself moves it by ~4e-6.
+if command -v convert >/dev/null 2>&1 && [[ -f "$OUT/range_before.tga" && -f "$OUT/range_after.tga" ]]; then
+	MB=$(convert "$OUT/range_before.tga" -crop 260x60+330+400 +repage -format "%[fx:mean]" info:)
+	MA=$(convert "$OUT/range_after.tga" -crop 260x60+330+400 +repage -format "%[fx:mean]" info:)
+	if awk -v a="$MA" -v b="$MB" 'BEGIN{ exit !((a-b < 0.01) && (b-a < 0.01)) }'; then
+		echo "OK: painted tiles survived the rebuild (band mean $MB -> $MA)"
+	else
+		echo "FAIL: the rebuild reverted the terrain (band mean $MB -> $MA)"; FAIL=1
+	fi
+else
+	echo "SKIP: ImageMagick or the screenshots are missing, tile-survival not checked"
+fi
+
 if [[ $FAIL -ne 0 ]]; then echo "M35 GATES FAILED"; exit 1; fi
 echo "ALL M35 GATES PASSED"
