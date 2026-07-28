@@ -78,7 +78,6 @@ private:
 	uint _GestureFingers; // fingers the view gesture in flight is using, 0 if none
 	float _GestureX, _GestureY; // last centroid, viewport coords
 	float _GestureSpread; // last mean distance from the centroid, viewport units
-	float _PinchAccum; // pinch not yet spent as whole wheel steps
 	/// Rebuild the active-touch set and drive the gesture state machine.
 	void updateTouchGesture(int eventType, const EmscriptenTouchEvent *e);
 	void endTouchGesture();

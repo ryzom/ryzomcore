@@ -37,7 +37,6 @@ CEmscriptenEventEmitter::CEmscriptenEventEmitter()
     , _GestureX(0.f)
     , _GestureY(0.f)
     , _GestureSpread(0.f)
-    , _PinchAccum(0.f)
     , _Registered(false)
 {
 }
@@ -133,7 +132,6 @@ void CEmscriptenEventEmitter::release()
 	_MouseButtons = 0;
 	_TouchId = -1;
 	_GestureFingers = 0;
-	_PinchAccum = 0.f;
 }
 
 void CEmscriptenEventEmitter::submitEvents(CEventServer &server, bool /* allWindows */)
@@ -338,10 +336,14 @@ EM_BOOL CEmscriptenEventEmitter::keyCallback(int eventType, const EmscriptenKeyb
 	return EM_TRUE;
 }
 
-// Viewport distance that has to accumulate before a pinch spends one wheel step. Each step
-// is a fixed fraction of the distance to the view target, so this trades pinch sensitivity
-// against how coarse the zoom feels.
-static const float kPinchStepDist = 0.02f;
+// Change in finger spread, as a log ratio, worth one wheel step. Measuring the RATIO rather
+// than the distance is what makes a pinch feel the same whether the fingers start 2cm or 8cm
+// apart, and it matches how the listener spends a step: a fixed fraction of the distance to
+// the view target, not a fixed number of world units. At 0.1 the two are the same 10%, so
+// the scene tracks the fingers.
+static const float kPinchLogStep = 0.1f;
+// Spread below which the ratio is too noisy to trust - fingers this close are a tap.
+static const float kPinchMinSpread = 0.004f;
 
 // Button mask a view gesture presents itself as. Two fingers orbit and three pan, which is
 // the opposite way round from the desktop defaults on purpose: with one finger reserved for
@@ -361,7 +363,6 @@ void CEmscriptenEventEmitter::endTouchGesture()
 	_MouseButtons &= ~(uint)NLMISC::middleButton;
 	postEvent(new CEventMouseUp(_GestureX, _GestureY, (TMouseButton)mask, this));
 	_GestureFingers = 0;
-	_PinchAccum = 0.f;
 }
 
 void CEmscriptenEventEmitter::updateTouchGesture(int eventType, const EmscriptenTouchEvent *e)
@@ -427,7 +428,6 @@ void CEmscriptenEventEmitter::updateTouchGesture(int eventType, const Emscripten
 		_GestureX = cx;
 		_GestureY = cy;
 		_GestureSpread = spread;
-		_PinchAccum = 0.f;
 		_MouseButtons |= (uint)NLMISC::middleButton;
 		// Seeds the listener's drag origin: it decides the drag kind per move from the live
 		// button mask, but measures motion from the last position it saw.
@@ -435,21 +435,17 @@ void CEmscriptenEventEmitter::updateTouchGesture(int eventType, const Emscripten
 		return;
 	}
 
-	// Pinch, spent in whole wheel steps. Runs alongside the drag rather than instead of it,
-	// which is what makes zooming and orbiting in one movement feel like one gesture.
-	if (_GestureSpread > 0.f)
+	// Pinch, reported as the fraction of a step it actually is rather than accumulated into
+	// whole ones - the fingers move continuously and the zoom should too. Runs alongside the
+	// drag rather than instead of it, which is what makes zooming and orbiting in one
+	// movement feel like one gesture.
+	if (_GestureSpread > kPinchMinSpread && spread > kPinchMinSpread)
 	{
-		_PinchAccum += (spread - _GestureSpread) / kPinchStepDist;
-		while (_PinchAccum >= 1.f)
-		{
-			postEvent(new CEventMouseWheel(cx, cy, (TMouseButton)0, true, this));
-			_PinchAccum -= 1.f;
-		}
-		while (_PinchAccum <= -1.f)
-		{
-			postEvent(new CEventMouseWheel(cx, cy, (TMouseButton)0, false, this));
-			_PinchAccum += 1.f;
-		}
+		const float steps = logf(spread / _GestureSpread) / kPinchLogStep;
+		if (steps > 0.f)
+			postEvent(new CEventMouseWheel(cx, cy, (TMouseButton)0, true, this, steps));
+		else if (steps < 0.f)
+			postEvent(new CEventMouseWheel(cx, cy, (TMouseButton)0, false, this, -steps));
 	}
 	_GestureSpread = spread;
 

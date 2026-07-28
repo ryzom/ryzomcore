@@ -304,7 +304,10 @@ void CNavMouseListener::operator()(const NLMISC::CEvent &event)
 		// pivots about.
 		const NLMISC::CEventMouseWheel *wheel = (const NLMISC::CEventMouseWheel *)&event;
 		const NLMISC::CVector direc = m_Target - m_Matrix.getPos();
-		m_Matrix.setPos(m_Matrix.getPos() + direc * (wheel->Direction ? kWheelStep : -kWheelStep));
+		// Steps is 1 for a mouse detent and fractional for continuous sources, so a pinch
+		// tracks the fingers instead of arriving in detent-sized jumps.
+		const float amount = kWheelStep * wheel->Steps;
+		m_Matrix.setPos(m_Matrix.getPos() + direc * (wheel->Direction ? amount : -amount));
 		reprojectDistanceFromCamera();
 		noteViewChanged();
 		return;
