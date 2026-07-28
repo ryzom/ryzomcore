@@ -566,6 +566,7 @@ void placeContextRange(std::vector<SPaintZone> &zones, size_t rb, size_t re,
 		SPaintZone &pz = zones[i];
 		pz.Rotate = rot & 3;
 		pz.Symmetry = mirror;
+		pz.DisplayTM = pz.DisplayTM * instanceDisplayTM(pivotX, pivotY, tdx, tdy, rot & 3, mirror);
 		for (size_t pp = 0; pp < pz.Patches.size(); ++pp)
 		{
 			NL3D::CPatchInfo &pi = pz.Patches[pp];

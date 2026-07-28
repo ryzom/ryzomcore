@@ -1,0 +1,119 @@
+#!/usr/bin/env bash
+# M35 patch display-frame gates: an edit has to come back to the CAGE in the right place.
+#
+# M34 proves the .max bytes. It cannot see the display, and the display is where two separate
+# frame bugs hid:
+#
+#  1. The write-target payload is not a position. A PatchMesh slot stores an absolute object
+#     position while a mapper record stores a DELTA from its own Original, so a display update
+#     that took the stored value literally put mapper-path vertices at roughly the node origin
+#     - a whole-zone jump, on a third of the corpus, with byte-perfect file output.
+#  2. ObjectTM is not the display frame. A file placed anywhere but the board origin is drawn
+#     through its placement, so recomputing a display position from ObjectTM alone dropped the
+#     placement and moved the vertex by exactly one board cell. On top of that the live
+#     landscape push then refused the patch as out of its packed range, so a multi-file session
+#     could not update the surface at all.
+#
+# Both are invisible to a byte gate and both are caught here by reading the vertex back with
+# painter.patchVertexPos, which returns the DISPLAYED world position - the same number the
+# marker is drawn at.
+#
+# Covered: all three write targets single-file, and a second EDITABLE file placed one cell
+# away, which is the case that only exists once a session holds more than one file.
+set -euo pipefail
+
+ZP="${ZONE_PAINTER:-}"
+if [[ -z "$ZP" || ! -x "$ZP" ]]; then ZP="/home/kaetemi/ryzomcore/build/nel-pipeline/bin/zone_painter"; fi
+GFX="${RYZOMCORE_GRAPHICS:-/home/kaetemi/ryzomcore_graphics}"
+OUT=/tmp/zp_ui/m35_out
+XVFB="xvfb-run -a"
+rm -rf "$OUT"; mkdir -p "$OUT"
+FAIL=0
+
+seed() { # $1 = workspace dir, rest = basenames
+	local ws="$1"; shift
+	rm -rf "$ws"; mkdir -p "$ws/landscape/ligo/lacustre/max"
+	for b in "$@"; do cp "$GFX/landscape/ligo/lacustre/max/$b.max" "$ws/landscape/ligo/lacustre/max/"; done
+	ln -sfn "$GFX/landscape/_texture_tiles" "$ws/landscape/_texture_tiles"
+}
+
+# The script is the same for every case; only the zone id changes. Vertex 5 is a free (unbound)
+# corner on all four test files - a bound vertex would legitimately refuse to move.
+mkscript() { # $1 = out path, $2 = zone id
+	cat > "$1" <<EOF
+painter.setMode(4)
+painter.setSubObject(1)
+local bx, by, bz = painter.patchVertexPos($2, 5)
+print(string.format("BEFORE %.3f %.3f %.3f", bx, by, bz))
+painter.clearPatchVertexSelection()
+painter.selectPatchVertex($2, 5, 1)
+painter.movePatchSelection(0, 0, 1.5)
+local ax, ay, az = painter.patchVertexPos($2, 5)
+print(string.format("AFTER %.3f %.3f %.3f", ax, ay, az))
+painter.undo()
+local ux, uy, uz = painter.patchVertexPos($2, 5)
+print(string.format("UNDONE %.3f %.3f %.3f", ux, uy, uz))
+EOF
+}
+
+# BEFORE + (0,0,1.5) == AFTER, and UNDONE == BEFORE. Exact equality is the right test: the move
+# is a float add on both sides, and the failures this gate exists for are off by 80 to 160
+# world units, not by an ulp.
+check() { # $1 = label, $2 = log
+	local log="$2" b a u
+	b=$(grep -a '^BEFORE ' "$log" | head -1 | cut -d' ' -f2-)
+	a=$(grep -a '^AFTER ' "$log" | head -1 | cut -d' ' -f2-)
+	u=$(grep -a '^UNDONE ' "$log" | head -1 | cut -d' ' -f2-)
+	if [[ -z "$b" || -z "$a" || -z "$u" ]]; then
+		echo "FAIL ($1): vertex readback missing (log: $log)"; FAIL=1; return
+	fi
+	local want
+	want=$(awk -v s="$b" 'BEGIN{split(s,c," "); printf "%.3f %.3f %.3f", c[1], c[2], c[3]+1.5}')
+	if [[ "$a" != "$want" ]]; then
+		echo "FAIL ($1): moved vertex at [$a], expected [$want] (was [$b])"; FAIL=1; return
+	fi
+	if [[ "$u" != "$b" ]]; then
+		echo "FAIL ($1): undo left the cage at [$u], expected [$b]"; FAIL=1; return
+	fi
+	# The live landscape push must ACCEPT the patch. It reports rather than writing a wrong
+	# surface, so a frame bug shows up here as a message and an unchanged surface.
+	if grep -qa "packed range" "$log"; then
+		echo "FAIL ($1): live surface push refused the patch"; FAIL=1; return
+	fi
+	echo "OK ($1): cage followed the edit at [$a], undo restored [$u]"
+}
+
+echo "===== M35-1: single file, all three write targets ====="
+for pair in "material-fond:modPM" "material-bassin:delta" "zonematerial-bassin-1:base"; do
+	B="${pair%%:*}"; WANT="${pair##*:}"
+	seed "$OUT/ws_$B" "$B"
+	mkscript "$OUT/$B.lua" 0
+	$XVFB "$ZP" "$OUT/ws_$B" --startup-auto "lacustre/$B" --no-hint-stamp --no-thumbnail \
+		--startup-lua "$OUT/$B.lua" --screenshot /dev/null > "$OUT/$B.log" 2>&1
+	# Assert the target too, so a policy regression that routed everything one way cannot
+	# pass this gate by accident.
+	if ! grep -qa "$WANT 1" "$OUT/$B.log"; then
+		echo "FAIL ($B): expected write target $WANT"; FAIL=1
+	fi
+	check "$B via $WANT" "$OUT/$B.log"
+done
+
+echo "===== M35-2: second editable file placed one board cell away ====="
+# material-peek at cell (1,0) gets zone ids from 1000 and is DRAWN 160 units along x from where
+# its own file authored it. Editing it through the frame it is drawn in is the whole case.
+seed "$OUT/ws_multi" material-fond material-peek
+mkscript "$OUT/multi.lua" 1000
+$XVFB "$ZP" "$OUT/ws_multi" --startup-auto "lacustre/material-fond" \
+	--open-editable "1,0:material-peek" --no-hint-stamp --no-thumbnail \
+	--startup-lua "$OUT/multi.lua" --screenshot /dev/null > "$OUT/multi.log" 2>&1
+grep -qa "open-editable: 'material-peek' @ (1,0)" "$OUT/multi.log" \
+	|| { echo "FAIL (multi): material-peek was not placed at (1,0)"; FAIL=1; }
+# The placed file's cage must sit in the board frame, not in its own authored frame: its x is
+# one cell (160) beyond the first file's, which occupies [0, 160].
+BX=$(grep -a '^BEFORE ' "$OUT/multi.log" | head -1 | cut -d' ' -f2)
+awk -v x="$BX" 'BEGIN{ exit !(x >= 159.0) }' \
+	|| { echo "FAIL (multi): placed cage at x=$BX, expected it beyond the first file's cell"; FAIL=1; }
+check "material-peek placed at (1,0)" "$OUT/multi.log"
+
+if [[ $FAIL -ne 0 ]]; then echo "M35 GATES FAILED"; exit 1; fi
+echo "ALL M35 GATES PASSED"

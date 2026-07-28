@@ -1552,6 +1552,16 @@ bool zpPatchPushLive(bool preview)
 			// a partial write is impossible and the tool needs no copy of PatchBias/Scale.
 			if (!lz->setPatchGeometry((sint)p, bp))
 			{
+				// Report which zone and which control point, so a real out-of-range move is
+				// distinguishable from a frame mismatch without a rebuild of the tool.
+				if (g_verbose)
+					fprintf(stderr, "patch push: zone %u patch %u outside packed range "
+					        "(zone bbox centre %.1f,%.1f,%.1f half %.1f,%.1f,%.1f)\n",
+					        pz.ZoneId, p,
+					        lz->getZoneBB().getCenter().x, lz->getZoneBB().getCenter().y,
+					        lz->getZoneBB().getCenter().z,
+					        lz->getZoneBB().getHalfSize().x, lz->getZoneBB().getHalfSize().y,
+					        lz->getZoneBB().getHalfSize().z);
 				inRange = false;
 				continue;
 			}
@@ -1599,7 +1609,14 @@ bool zpPatchPushLive(bool preview)
  * world position is re-derived rather than accumulated, which is what keeps repeated undos
  * from creeping.
  */
-void zpGeomVertChanged(uint zoneId, uint16 vertIdx, const float *objPos)
+/**
+ * A vertex moved in the .max: shift the display cage to match.
+ *
+ * The payload is an object-space DELTA (see setGeomChangedCb) and is applied as a shift, never
+ * as an absolute placement. That is what lets one routine serve all three write targets and
+ * every node, however it is placed on the board.
+ */
+void zpGeomVertChanged(uint zoneId, uint16 vertIdx, const float *objDelta)
 {
 	if (!g_PaintCtx.Zones)
 		return;
@@ -1611,10 +1628,16 @@ void zpGeomVertChanged(uint zoneId, uint16 vertIdx, const float *objPos)
 			continue;
 		if (vertIdx < pz.Ep.Pm.Verts.size())
 			for (int k = 0; k < 3; ++k)
-				pz.Ep.Pm.Verts[vertIdx].Pos[k] = objPos[k];
-		MAXMATH::Point3M op = { objPos[0], objPos[1], objPos[2] };
-		const MAXMATH::Point3M wp = MAXMATH::transformPoint(op, pz.ObjectTM);
-		const NLMISC::CVector world(wp.x, wp.y, wp.z);
+				pz.Ep.Pm.Verts[vertIdx].Pos[k] += objDelta[k];
+		// Object delta -> displayed-world delta through the node's FULL transform: the
+		// difference of two transformed points, which drops the translation and so works for a
+		// rotated or mirrored node without a special case. DisplayTM, not ObjectTM - a placed
+		// file's cage is drawn a board cell away from where the file authored it.
+		MAXMATH::Point3M zero = { 0.f, 0.f, 0.f };
+		MAXMATH::Point3M od = { objDelta[0], objDelta[1], objDelta[2] };
+		const MAXMATH::Point3M w0 = MAXMATH::transformPoint(zero, pz.DisplayTM);
+		const MAXMATH::Point3M w1 = MAXMATH::transformPoint(od, pz.DisplayTM);
+		const NLMISC::CVector shift(w1.x - w0.x, w1.y - w0.y, w1.z - w0.z);
 		for (uint p = 0; p < pz.Patches.size(); ++p)
 		{
 			NL3D::CPatchInfo &pi = pz.Patches[p];
@@ -1622,10 +1645,9 @@ void zpGeomVertChanged(uint zoneId, uint16 vertIdx, const float *objPos)
 			{
 				if (pi.BaseVertices[c] != vertIdx)
 					continue;
-				// Tangents are stored as absolute points, so they move by the same shift the
+				// Tangents are stored as absolute points, so they take the same shift the
 				// corner took rather than being recomputed.
-				const NLMISC::CVector shift = world - pi.Patch.Vertices[c];
-				pi.Patch.Vertices[c] = world;
+				pi.Patch.Vertices[c] += shift;
 				pi.Patch.Tangents[c * 2] += shift;
 				pi.Patch.Tangents[((c + 3) & 3) * 2 + 1] += shift;
 			}
@@ -1640,7 +1662,7 @@ uint zpApplyPatchMove(const NLMISC::CVector &worldDelta, std::string &msg)
 	if (!g_PaintCtx.Zones || g_PatchVertSel.empty())
 		return 0;
 	std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
-	uint written = 0, skippedBound = 0, refusedXform = 0;
+	uint written = 0, skippedBound = 0;
 	uint nBase = 0, nModPm = 0, nDelta = 0; // which write target each vertex resolved to
 	std::string firstErr;
 
@@ -1660,18 +1682,12 @@ uint zpApplyPatchMove(const NLMISC::CVector &worldDelta, std::string &msg)
 		if (want.empty())
 			continue;
 
-		// A rotated or mirrored zone's display space is not its object space, and getting the
-		// inverse subtly wrong writes plausible-looking garbage. Refuse rather than guess -
-		// authored primaries are (0, false), so this costs nothing today.
-		if (pz.Rotate != 0 || pz.Symmetry)
-		{
-			refusedXform += (uint)want.size();
-			continue;
-		}
-
-		// World delta -> object delta. Taking the difference of two transformed points drops
-		// the translation without needing the matrix internals.
-		const MAXMATH::Matrix3M inv = MAXMATH::inverseM3(pz.ObjectTM);
+		// Displayed-world delta -> object delta, through the FULL node transform: the drag is
+		// measured in the space the cage is drawn in, which is object space only for a node
+		// sitting at the board origin untransformed. Taking the difference of two transformed
+		// points drops the translation without needing the matrix internals, so a rotated or
+		// mirrored node needs no special case - its rotation is already in DisplayTM.
+		const MAXMATH::Matrix3M inv = MAXMATH::inverseM3(pz.DisplayTM);
 		MAXMATH::Point3M zero = { 0.f, 0.f, 0.f };
 		MAXMATH::Point3M wd = { worldDelta.x, worldDelta.y, worldDelta.z };
 		const MAXMATH::Point3M o0 = MAXMATH::transformPoint(zero, inv);
@@ -1722,13 +1738,6 @@ if (*it < pz.Ep.Rp.Verts.size() && pz.Ep.Rp.Verts[*it].Binded)
 		written += n;
 	}
 
-	// KNOWN DEFECT (multi-file working sets): for zones beyond the first file the control
-	// points handed to setPatchGeometry land far outside the target zone's packed range -
-	// observed at 69026 against a limit of 32767, i.e. ~170 world units from the centre of a
-	// zone whose radius is 81. A Bezier tangent cannot legitimately be there, so the display
-	// patchinfo and the landscape zone this looks up by id are not the same zone. The FILE
-	// write is unaffected and gated; only the live surface refresh is, and it reports rather
-	// than writing a wrong surface. Single-file sessions are unaffected.
 	// Push the committed positions into the live surface HERE rather than at the drag's
 	// release: a scripted move (painter.movePatchSelection) never goes through the drag path,
 	// and would otherwise write the file correctly while leaving the landscape stale.
@@ -1739,9 +1748,7 @@ if (*it < pz.Ep.Rp.Verts.size() && pz.Ep.Rp.Verts[*it].Binded)
 
 	if (!written)
 	{
-		if (refusedXform)
-			msg = "patch move: rotated/mirrored zone not supported yet";
-		else if (skippedBound)
+		if (skippedBound)
 			msg = "patch move: bound vertices follow their edge, nothing to write";
 		else if (!firstErr.empty())
 			msg = "patch move: " + firstErr;
@@ -1918,6 +1925,30 @@ bool zpPatchVertSelAt(uint index, uint &zoneOut, uint &vertOut)
 	zoneOut = it->first;
 	vertOut = it->second;
 	return true;
+}
+
+bool zpPatchVertWorld(uint zoneId, uint vertIdx, float outPos[3])
+{
+	if (!g_PaintCtx.Zones)
+		return false;
+	const std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
+	for (uint z = 0; z < zones.size(); ++z)
+	{
+		const SPaintZone &pz = zones[z];
+		if (pz.ZoneId != zoneId)
+			continue;
+		for (uint p = 0; p < pz.Patches.size(); ++p)
+			for (uint c = 0; c < 4; ++c)
+			{
+				if (pz.Patches[p].BaseVertices[c] != vertIdx)
+					continue;
+				const NLMISC::CVector &v = pz.Patches[p].Patch.Vertices[c];
+				outPos[0] = v.x; outPos[1] = v.y; outPos[2] = v.z;
+				return true;
+			}
+		return false;
+	}
+	return false;
 }
 
 void zpPatchVertClear()

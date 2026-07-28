@@ -544,8 +544,17 @@ public:
 	 */
 	uint opMovePatchVertices(uint zoneId, const std::vector<uint16> &verts, const float *objDelta,
 	                         std::string &err);
-	/** Notified whenever a vertex position changes, forward or by undo/redo. */
-	void setGeomChangedCb(void (*cb)(uint zoneId, uint16 vertIdx, const float *objPos))
+	/**
+	 * Notified whenever a vertex position changes, forward or by undo/redo.
+	 *
+	 * The payload is the OBJECT-SPACE DELTA the vertex just took, never an absolute position.
+	 * That is not a convenience: the three write targets do not store the same quantity. A
+	 * PatchMesh slot holds an absolute position while a mapper record holds a delta from its
+	 * own Original, so there is no single stored value the callback could hand over and mean
+	 * the same thing. The difference between two values of one target is well defined
+	 * whichever target it is, and it is also all a display update needs.
+	 */
+	void setGeomChangedCb(void (*cb)(uint zoneId, uint16 vertIdx, const float *objDelta))
 	{ m_GeomChangedCb = cb; }
 
 	void markGeomDirty(uint zoneId);
@@ -750,7 +759,7 @@ private:
 	bool propsDirty(uint zoneIdx) const;
 	void applyGeomUndo(const SUndoTile &rec, bool useOld);
 	std::set<uint> m_GeomDirty; // zone ids with an uncommitted geometry write
-	void (*m_GeomChangedCb)(uint zoneId, uint16 vertIdx, const float *objPos);
+	void (*m_GeomChangedCb)(uint zoneId, uint16 vertIdx, const float *objDelta);
 };
 
 } /* namespace ZPPAINT */

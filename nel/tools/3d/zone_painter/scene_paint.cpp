@@ -416,6 +416,8 @@ bool buildPaintZones(CScene &scene, std::vector<SPaintZone> &zones,
 		}
 		pz.Ep = ep;
 		pz.ObjectTM = objectTM;
+		// The node starts where the file authored it; placement composes onto this later.
+		pz.DisplayTM = objectTM;
 		zones.push_back(pz);
 		any = true;
 		if (pz.Frozen) ++nRo; else ++nEligible;
@@ -454,8 +456,13 @@ uint nextZoneIdBase(const std::vector<SPaintZone> &zones)
 void translateZonesXY(std::vector<SPaintZone> &zones, size_t begin, size_t end,
                              float dx, float dy)
 {
+	// Row-vector convention: a * b applies a then b, so the translation goes on the right.
+	MAXMATH::Matrix3M t = MAXMATH::Matrix3M::identity();
+	t.m[3][0] = dx;
+	t.m[3][1] = dy;
 	for (size_t i = begin; i < end && i < zones.size(); ++i)
 	{
+		zones[i].DisplayTM = zones[i].DisplayTM * t;
 		for (size_t p = 0; p < zones[i].Patches.size(); ++p)
 		{
 			NL3D::CPatchInfo &pi = zones[i].Patches[p];
@@ -543,6 +550,9 @@ SPaintZone cloneInstanceZone(const SPaintZone &src, uint zoneId, float dx, float
 	tag += ")";
 	pz.Name = src.Name + tag;
 	pz.BorderVertices.clear();
+	// The clone is a second NODE on the source's object, so it keeps ObjectTM and gains the
+	// placement on top of it.
+	pz.DisplayTM = src.DisplayTM * instanceDisplayTM(pivotX, pivotY, dx, dy, pz.Rotate, pz.Symmetry);
 	// Ep (topology) is a value copy (same binds/orders); Patches are world-space display.
 	for (size_t p = 0; p < pz.Patches.size(); ++p)
 	{

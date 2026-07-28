@@ -1439,6 +1439,33 @@ void transformInstanceXY(float &x, float &y, float pivotX, float pivotY,
 }
 
 /**
+ * The same placement as a matrix, for SPaintZone::DisplayTM.
+ *
+ * Derived by SAMPLING transformInstanceXY rather than restating its rotation table: the image
+ * of the origin is the translation row, and each basis vector's image minus that is a linear
+ * row. The two spellings then cannot drift apart, which matters because one moves the vertices
+ * and the other is used to map an edit back - a disagreement would show up as geometry that
+ * silently jumps by the placement offset.
+ */
+MAXMATH::Matrix3M instanceDisplayTM(float pivotX, float pivotY,
+                                    float dx, float dy, uint rot, bool mirror)
+{
+	float ox = 0.f, oy = 0.f;
+	transformInstanceXY(ox, oy, pivotX, pivotY, dx, dy, rot, mirror);
+	float xx = 1.f, xy = 0.f;
+	transformInstanceXY(xx, xy, pivotX, pivotY, dx, dy, rot, mirror);
+	float yx = 0.f, yy = 1.f;
+	transformInstanceXY(yx, yy, pivotX, pivotY, dx, dy, rot, mirror);
+	MAXMATH::Matrix3M m = MAXMATH::Matrix3M::identity();
+	// Z is untouched by the placement, exactly as transformInstanceXY leaves it alone.
+	m.m[0][0] = xx - ox; m.m[0][1] = xy - oy; m.m[0][2] = 0.f;
+	m.m[1][0] = yx - ox; m.m[1][1] = yy - oy; m.m[1][2] = 0.f;
+	m.m[2][0] = 0.f;     m.m[2][1] = 0.f;     m.m[2][2] = 1.f;
+	m.m[3][0] = ox;      m.m[3][1] = oy;      m.m[3][2] = 0.f;
+	return m;
+}
+
+/**
  * Pivot = footprint block center (origin snapped to cell grid + half step).
  * Matches AABB center for grid-aligned square footprints; for W≠H keeps rot/mirror
  * cell-grid faithful.

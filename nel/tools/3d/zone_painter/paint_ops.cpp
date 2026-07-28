@@ -800,7 +800,7 @@ uint CPaintCore::opMovePatchVertices(uint zoneId, const std::vector<uint16> &ver
 		if (!geomTargetSet(t, rec.NewPos)) { if (err.empty()) err = "target write failed"; continue; }
 		recs.push_back(rec);
 		if (m_GeomChangedCb)
-			m_GeomChangedCb(zoneId, rec.VertIdx, rec.NewPos);
+			m_GeomChangedCb(zoneId, rec.VertIdx, objDelta);
 	}
 	if (recs.empty())
 		return 0;
@@ -829,11 +829,18 @@ void CPaintCore::applyGeomUndo(const SUndoTile &rec, bool useOld)
 	if (!resolveGeomWriteTarget(m_Zones[zi].In.Node, rec.VertIdx, t, e))
 		return;
 	const float *pos = useOld ? rec.OldPos : rec.NewPos;
+	const float *from = useOld ? rec.NewPos : rec.OldPos;
 	if (!geomTargetSet(t, pos))
 		return;
 	markGeomDirty(rec.Zone);
 	if (m_GeomChangedCb)
-		m_GeomChangedCb(rec.Zone, rec.VertIdx, pos);
+	{
+		// The difference of the two stored values, which is the object-space delta whatever
+		// the target holds - undo of a mapper delta and undo of a PatchMesh position are the
+		// same shift to the display.
+		const float d[3] = { pos[0] - from[0], pos[1] - from[1], pos[2] - from[2] };
+		m_GeomChangedCb(rec.Zone, rec.VertIdx, d);
+	}
 }
 
 bool CPaintCore::opUndo()

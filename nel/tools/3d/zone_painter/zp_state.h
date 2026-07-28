@@ -266,9 +266,23 @@ struct SPaintZone
 	/// offsetTM * nodeTM, as buildPatchInfo used it. Kept so a world-space edit can be taken
 	/// back to the object space the .max actually stores.
 	MAXMATH::Matrix3M ObjectTM;
+	/// Object space -> DISPLAYED world space: ObjectTM followed by everything the session did
+	/// to put this zone where it is on the board (file placement, instance rot/mirror).
+	///
+	/// This is the node half of the Max node/object split. ObjectTM alone is the file's own
+	/// authored frame, which is the DISPLAY frame only for a file sitting at the board origin
+	/// with no transform. Anything that recomputes a display position from a stored object
+	/// position must use this, or a placed file's geometry lands one board cell away from
+	/// where it is drawn. Every routine that moves display geometry composes onto it, so the
+	/// matrix and the vertices can never disagree.
+	MAXMATH::Matrix3M DisplayTM;
 	uint Rotate;
 	bool Symmetry;
-	SPaintZone() : Node(NULL), Frozen(false), ZoneId(0), Rotate(0), Symmetry(false) { }
+	SPaintZone()
+	    : Node(NULL), Frozen(false), ZoneId(0), ObjectTM(MAXMATH::Matrix3M::identity()),
+	      DisplayTM(MAXMATH::Matrix3M::identity()), Rotate(0), Symmetry(false)
+	{
+	}
 };
 
 struct SPlaceContextSpec
@@ -428,6 +442,15 @@ extern std::set<TPatchVertId> g_PatchVertSel;
 uint zpPatchVertSelCount();
 bool zpPatchVertSelAt(uint index, uint &zoneOut, uint &vertOut);
 
+/**
+ * Displayed world position of one cage vertex - where the marker is actually drawn.
+ *
+ * Exists for the gates: it is the only quantity that shows whether an edit came back through
+ * the node's placement correctly. A move can write the right bytes to the .max and still put
+ * the display a board cell away, and nothing else observable distinguishes the two.
+ */
+bool zpPatchVertWorld(uint zoneId, uint vertIdx, float outPos[3]);
+
 /** Selection ops (recorded). Op: 0 replace, 1 add, 2 remove. */
 void zpPatchVertSelect(uint zoneId, uint vertIdx, int op);
 void zpPatchVertClear();
@@ -492,7 +515,7 @@ extern bool g_PatchLiveUpdate;
 bool zpPatchPushLive(bool preview);
 
 /** Core geom-changed sink: keeps Ep.Pm and the display patchinfo in step with the .max. */
-void zpGeomVertChanged(uint zoneId, uint16 vertIdx, const float *objPos);
+void zpGeomVertChanged(uint zoneId, uint16 vertIdx, const float *objDelta);
 
 /** Left-click in patch/vertex mode; `buttons` carries the modifier bits (Ctrl add, Alt remove). */
 void zpPatchVertexClick(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, float my, uint buttons);
@@ -647,6 +670,8 @@ void footprintBlockAfterTransform(int cellsW, int cellsH, uint rot, bool mirror,
 void unitCheckFootprintOccupancy();
 void transformInstanceXY(float &x, float &y, float pivotX, float pivotY,
                          float dx, float dy, uint rot, bool mirror);
+MAXMATH::Matrix3M instanceDisplayTM(float pivotX, float pivotY,
+                                    float dx, float dy, uint rot, bool mirror);
 void computePrimaryPivot(const std::vector<SPaintZone> &zones, size_t primaryBegin,
                          size_t primaryEnd, float cellSize, float &px, float &py);
 void computePlaceTranslationFrom(float originX, float originY, float stepX, float stepY,
