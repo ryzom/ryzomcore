@@ -582,6 +582,10 @@ void zpSelectMode(int mode)
 	// level deliberately, and arriving already in vertex mode makes the first click surprising.
 	if (mode == CPaintMouseListener::ModePatch)
 		g_PaintCtx.Paint->SubObj = CPaintMouseListener::SubObject;
+	// A sub-object selection belongs to the level it was made at, so leaving patch edit (or
+	// re-entering it, which lands on Object) drops it rather than leaving a stale set to
+	// surprise the next move.
+	g_PatchVertSel.clear();
 	// TODO (cursors): set the mode's pointer shape here - one setCursor() per mode, back to
 	// "curs_default.tga" for Prop and for any mode whose art is still missing. See the
 	// manifest above for the names and where the bitmaps come from.
@@ -619,6 +623,8 @@ void zpSelectSubObject(int level)
 	if (g_PaintCtx.Paint->Mode != CPaintMouseListener::ModePatch) return;
 	if (level < 0) level = 0;
 	if (level >= CPaintMouseListener::SubCount) level = CPaintMouseListener::SubCount - 1;
+	if (level != g_PaintCtx.Paint->SubObj)
+		g_PatchVertSel.clear(); // a vertex selection means nothing at edge or patch level
 	g_PaintCtx.Paint->SubObj = level;
 	ZPSCRIPT::record(NLMISC::toString("painter.setSubObject(%d)", level));
 }
@@ -904,6 +910,28 @@ void zpCollectZoneBoundaryPolylines(const SPaintZone &pz, uint segsPerEdge,
  * No depth test - occluded segments overdraw (acceptable; geometry correctness first).
  * Thin = 1px; thick = multi-pass with small screen-space offsets.
  */
+// Lift used by every patch overlay: the control points sit ON the landscape, and un-lifted
+// geometry disappears into the tessellation it describes. Same value the zone outline uses.
+static const float kPatchLift = 0.4f;
+// Vertex marker half-size and pick radius, in viewport units of HEIGHT. The pick target is
+// deliberately larger than the mark - the mark says where the vertex is, the radius says how
+// close you have to be, and making the artist hit 6 pixels exactly is not a feature.
+static const float kPatchVertHalf = 0.003f;
+static const float kPatchVertPick = 0.012f;
+
+/** Project a world point (lifted) to screen. False when it is behind or across the near plane. */
+static bool zpProjectLifted(const NLMISC::CMatrix &vm, const NL3D::CFrustum &f,
+                            const NLMISC::CVector &world, float lift, NLMISC::CVector &out)
+{
+	NLMISC::CVector w = world;
+	w.z += lift;
+	const NLMISC::CVector eye = vm * w;
+	if (eye.y <= f.Near * 0.5f)
+		return false;
+	out = f.project(eye);
+	return true;
+}
+
 /**
  * Patch control cage - the control lattice.
  *
@@ -929,36 +957,23 @@ void zpDrawPatchLattice(NL3D::IDriver *driver, NL3D::CCamera *camera,
 
 	static const NLMISC::CRGBA kCageColor(90, 190, 255, 255);
 	static const NLMISC::CRGBA kVertColor(255, 255, 255, 255);
-	// Lifted off the surface: the control points sit ON the landscape, and un-lifted lines
-	// disappear into the tessellation they describe. Same lift the zone outline uses.
-	static const float kLift = 0.4f;
-	// Vertex marker half-size, in viewport units of HEIGHT. Screen-constant is what a point
-	// marker wants - unlike a manipulator it carries no distance to read off it - and a small
-	// solid square. Crosses were tried first and read as noise: at cage
-	// density their arms overlap the cage lines and each other, so the eye sees hatching
-	// rather than points.
-	static const float kVertHalf = 0.003f;
+static const NLMISC::CRGBA kVertSelColor(255, 40, 40, 255); // selected red
+// Bound vertices: position DERIVED from a neighbouring patch's edge, not authored. All
+// four bind types qualify - RPatchMesh::UpdateBindingPos recomputes BIND_25/50/75 and
+// BIND_SINGLE alike by interpolating the target edge's Bezier - so the test is Binded,
+// not the bind type. (BIND_50 is the one that literally lands mid-edge, but singling it
+// out would leave the other three looking freely movable, which they are not.)
+static const NLMISC::CRGBA kVertBoundColor(0, 0, 0, 255);
 
 	const NLMISC::CMatrix viewMat = camera->getMatrix().inverted();
 	const NL3D::CFrustum &fr = camera->getFrustum();
 	uint32 winW = 0, winH = 0;
 	driver->getWindowSize(winW, winH);
-	const float aspect = (winW && winH) ? (float)winH / (float)winW : 1.f;
-
-	struct SProj
-	{
-		static bool go(const NLMISC::CMatrix &vm, const NL3D::CFrustum &f,
-		               const NLMISC::CVector &world, float lift, NLMISC::CVector &out)
-		{
-			NLMISC::CVector w = world;
-			w.z += lift;
-			const NLMISC::CVector eye = vm * w;
-			if (eye.y <= f.Near * 0.5f)
-				return false; // behind or across the near plane: no meaningful projection
-			out = f.project(eye);
-			return true;
-		}
-	};
+	if (!winW || !winH)
+		return;
+	// Integer pixel half-size, so the marker cannot land between two pixel counts.
+	const float halfPx = floorf(kPatchVertHalf * (float)winH + 0.5f) < 1.f
+		? 1.f : floorf(kPatchVertHalf * (float)winH + 0.5f);
 
 	for (uint p = 0; p < pz.Patches.size(); ++p)
 	{
@@ -967,10 +982,10 @@ void zpDrawPatchLattice(NL3D::IDriver *driver, NL3D::CCamera *camera,
 		{
 			NLMISC::CVector chain[4];
 			bool ok[4];
-			ok[0] = SProj::go(viewMat, fr, bp.Vertices[e], kLift, chain[0]);
-			ok[1] = SProj::go(viewMat, fr, bp.Tangents[e * 2], kLift, chain[1]);
-			ok[2] = SProj::go(viewMat, fr, bp.Tangents[e * 2 + 1], kLift, chain[2]);
-			ok[3] = SProj::go(viewMat, fr, bp.Vertices[(e + 1) & 3], kLift, chain[3]);
+			ok[0] = zpProjectLifted(viewMat, fr, bp.Vertices[e], kPatchLift, chain[0]);
+			ok[1] = zpProjectLifted(viewMat, fr, bp.Tangents[e * 2], kPatchLift, chain[1]);
+			ok[2] = zpProjectLifted(viewMat, fr, bp.Tangents[e * 2 + 1], kPatchLift, chain[2]);
+			ok[3] = zpProjectLifted(viewMat, fr, bp.Vertices[(e + 1) & 3], kPatchLift, chain[3]);
 			for (uint k = 0; k + 1 < 4; ++k)
 				if (ok[k] && ok[k + 1])
 					NL3D::CDRU::drawLine(chain[k].x, chain[k].y,
@@ -993,14 +1008,35 @@ void zpDrawPatchLattice(NL3D::IDriver *driver, NL3D::CCamera *camera,
 			if (!seen.insert(pi.BaseVertices[c]).second)
 				continue;
 			NLMISC::CVector v;
-			if (!SProj::go(viewMat, fr, pi.Patch.Vertices[c], kLift, v))
+			if (!zpProjectLifted(viewMat, fr, pi.Patch.Vertices[c], kPatchLift, v))
 				continue;
 			// x scaled by the aspect so the marker is square on screen rather than stretched
 			// with the window - normalized coordinates are per-axis. drawQuad's centre+radius
 			// overload cannot express that, hence the corner form.
-			NL3D::CDRU::drawQuad(v.x - kVertHalf * aspect, v.y - kVertHalf,
-			                     v.x + kVertHalf * aspect, v.y + kVertHalf,
-			                     *driver, kVertColor, NL3D::CViewport());
+			const uint16 vi = pi.BaseVertices[c];
+			const bool sel = g_PatchVertSel.count(TPatchVertId(pz.ZoneId, vi)) != 0;
+			// BaseVertices is the SPmPatch V[] index (patch_eval fills it straight from
+			// pPatch.V), and the RPO bind table is indexed the same way - so the record for
+			// this corner is simply Rp.Verts[vi]. Size-guarded because the two come from
+			// different chunks and a malformed file could disagree.
+			//
+			// TODO (patch move): a bound vertex must not accept a move. Max recomputes it
+			// from the target edge on load, so the edit would be silently undone - the write
+			// op has to refuse these rather than write a position that cannot survive.
+			const bool bound = vi < pz.Ep.Rp.Verts.size() && pz.Ep.Rp.Verts[vi].Binded != 0;
+			const NLMISC::CRGBA &vcol = sel ? kVertSelColor : (bound ? kVertBoundColor : kVertColor);
+
+			// Snap to the PIXEL GRID. Both the half-size and the centre are rounded to whole
+			// pixels, so the marker is the same size every frame and its edges land on pixel
+			// boundaries. Without this the square breathes between N and N+1 pixels as the
+			// camera moves, which reads as jitter across a field of hundreds of them.
+			// Working in pixels also makes the aspect correction unnecessary - one half-size
+			// in pixels is square by construction.
+			const float cx = floorf(v.x * (float)winW + 0.5f);
+			const float cy = floorf(v.y * (float)winH + 0.5f);
+			NL3D::CDRU::drawQuad((cx - halfPx) / (float)winW, (cy - halfPx) / (float)winH,
+			                     (cx + halfPx) / (float)winW, (cy + halfPx) / (float)winH,
+			                     *driver, vcol, NL3D::CViewport());
 		}
 	}
 }
@@ -1023,6 +1059,117 @@ void zpDrawPatchLatticeAll(NL3D::IDriver *driver, NL3D::CCamera *camera, int sub
 	for (uint z = 0; z < zones.size(); ++z)
 		if (!zones[z].Frozen && zones[z].ZoneId < kInstanceZoneIdBase)
 			zpDrawPatchLattice(driver, camera, zones[z], subObj);
+}
+
+bool zpPickPatchVertex(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, float my,
+                       uint &zoneOut, uint16 &vertOut)
+{
+	if (!camera || !driver || !g_PaintCtx.Zones)
+		return false;
+	const NLMISC::CMatrix viewMat = camera->getMatrix().inverted();
+	const NL3D::CFrustum &fr = camera->getFrustum();
+	uint32 winW = 0, winH = 0;
+	driver->getWindowSize(winW, winH);
+	// Distances measured in units of viewport HEIGHT, so x is scaled by the aspect first:
+	// normalized coordinates are per-axis and an uncorrected radius is an ellipse on screen.
+	const float aspect = (winW && winH) ? (float)winW / (float)winH : 1.f;
+
+	const std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
+	float best = kPatchVertPick;
+	bool found = false;
+	for (uint z = 0; z < zones.size(); ++z)
+	{
+		const SPaintZone &pz = zones[z];
+		if (pz.Frozen || pz.ZoneId >= kInstanceZoneIdBase)
+			continue; // frozen context is not editable, so it is not selectable either
+		std::set<uint16> seen;
+		for (uint p = 0; p < pz.Patches.size(); ++p)
+		{
+			const NL3D::CPatchInfo &pi = pz.Patches[p];
+			for (uint c = 0; c < 4; ++c)
+			{
+				if (!seen.insert(pi.BaseVertices[c]).second)
+					continue;
+				NLMISC::CVector v;
+				if (!zpProjectLifted(viewMat, fr, pi.Patch.Vertices[c], kPatchLift, v))
+					continue;
+				const float dx = (v.x - mx) * aspect, dy = v.y - my;
+				const float d = sqrtf(dx * dx + dy * dy);
+				if (d < best)
+				{
+					best = d;
+					zoneOut = pz.ZoneId;
+					vertOut = pi.BaseVertices[c];
+					found = true;
+				}
+			}
+		}
+	}
+	return found;
+}
+
+void zpPatchVertSelect(uint zoneId, uint vertIdx, int op)
+{
+	const TPatchVertId id((uint)zoneId, (uint16)vertIdx);
+	if (op == 0)
+	{
+		g_PatchVertSel.clear();
+		g_PatchVertSel.insert(id);
+	}
+	else if (op == 1)
+	{
+		g_PatchVertSel.insert(id);
+	}
+	else
+	{
+		g_PatchVertSel.erase(id);
+	}
+	ZPSCRIPT::record(NLMISC::toString("painter.selectPatchVertex(%u, %u, %d)", zoneId, vertIdx, op));
+}
+
+uint zpPatchVertSelCount()
+{
+	return (uint)g_PatchVertSel.size();
+}
+
+bool zpPatchVertSelAt(uint index, uint &zoneOut, uint &vertOut)
+{
+	if (index >= g_PatchVertSel.size())
+		return false;
+	std::set<TPatchVertId>::const_iterator it = g_PatchVertSel.begin();
+	std::advance(it, index);
+	zoneOut = it->first;
+	vertOut = it->second;
+	return true;
+}
+
+void zpPatchVertClear()
+{
+	if (g_PatchVertSel.empty())
+		return;
+	g_PatchVertSel.clear();
+	ZPSCRIPT::record("painter.clearPatchVertexSelection()");
+}
+
+/**
+ * Max's selection modifiers: plain click replaces, Ctrl adds, Alt removes. A click that hits
+ * nothing clears - the same object-selection feel Prop mode already has.
+ */
+void zpPatchVertexClick(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, float my, uint buttons)
+{
+	uint zone = 0;
+	uint16 vert = 0;
+	if (!zpPickPatchVertex(camera, driver, mx, my, zone, vert))
+	{
+		zpPatchVertClear();
+		return;
+	}
+	int op = 0;
+	if (buttons & NLMISC::ctrlButton)
+		op = 1;
+	else if (buttons & NLMISC::altButton)
+		op = 2;
+	zpPatchVertSelect(zone, vert, op);
 }
 
 void zpDrawZoneOutline(NL3D::IDriver *driver, NL3D::CCamera *camera,

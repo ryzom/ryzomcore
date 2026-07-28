@@ -279,6 +279,20 @@ void CPaintMouseListener::operator()(const NLMISC::CEvent &event)
 			NLMISC::CEventMouse *mouse = (NLMISC::CEventMouse *)&event;
 			MouseX = mouse->X;
 			MouseY = mouse->Y;
+			// Patch edit intercepts BEFORE the exact-equality test below: that test is
+			// `Button == leftButton`, so Ctrl+left and Alt+left never reach it - which is
+			// exactly the pair Max's add/remove-from-selection needs. Patch mode also never
+			// paints, so returning here is the whole of its mouse-down behaviour.
+			if (Mode == ModePatch)
+			{
+				if ((mouse->Button & NLMISC::leftButton) && SubObj == SubVertex)
+				{
+					NL3D::IDriver *drv = g_PaintCtx.UDriver
+						? static_cast<NL3D::CDriverUser *>(g_PaintCtx.UDriver)->getDriver() : NULL;
+					zpPatchVertexClick(Camera, drv, MouseX, MouseY, (uint)mouse->Button);
+				}
+				return;
+			}
 			if (mouse->Button == NLMISC::leftButton)
 			{
 				// Prop mode: click selects (or reports read-only); no paint stroke.

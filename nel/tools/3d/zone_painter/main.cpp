@@ -279,6 +279,7 @@ int g_MaskCycle = 0;
 // cleared on working-set rebuild (session open/close/place). Hover is transient.
 bool g_HavePropSelection = false;
 uint g_SelectedZoneId = 0;
+std::set<TPatchVertId> g_PatchVertSel;
 std::string g_PropStatusMsg; // click "read-only" / selection name (HUD + panel)
 
 // Three parallel tables indexed by TPainterKey; the sizes are left implicit and checked

@@ -409,6 +409,30 @@ extern int g_MaskCycle;
 
 extern bool g_HavePropSelection;
 extern uint g_SelectedZoneId;
+
+/**
+ * Patch-edit vertex selection, keyed by (zone id, CPatchInfo::BaseVertices index).
+ *
+ * That pair is the identity the cage already draws by: BaseVertices is NeL's own per-zone
+ * vertex table, so a corner shared by four patches is ONE entry here, and selecting it once
+ * selects the thing the artist actually pointed at. Mapping it onto a .max write target is a
+ * separate problem and deliberately not represented here.
+ */
+typedef std::pair<uint, uint16> TPatchVertId;
+extern std::set<TPatchVertId> g_PatchVertSel;
+
+/** Index-based readback, so callers that cannot include this header still reach the set. */
+uint zpPatchVertSelCount();
+bool zpPatchVertSelAt(uint index, uint &zoneOut, uint &vertOut);
+
+/** Selection ops (recorded). Op: 0 replace, 1 add, 2 remove. */
+void zpPatchVertSelect(uint zoneId, uint vertIdx, int op);
+void zpPatchVertClear();
+/** Nearest editable-zone vertex within the screen pick radius. False if nothing is close. */
+bool zpPickPatchVertex(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, float my,
+                       uint &zoneOut, uint16 &vertOut);
+/** Left-click in patch/vertex mode; `buttons` carries the modifier bits (Ctrl add, Alt remove). */
+void zpPatchVertexClick(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, float my, uint buttons);
 extern std::string g_PropStatusMsg;
 
 extern const char *kPainterKeysName[ZPK_KeyCounter];
