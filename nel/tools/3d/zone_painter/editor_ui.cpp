@@ -1796,6 +1796,14 @@ bool CEditorUI::init(UDriver *driver, const std::string &fontPathHint)
 	CWidgetManager::getInstance()->activateMasterGroup(MASTER_GROUP, true);
 	CInterfaceLink::updateAllLinks();
 
+	// Software cursor: CViewPointer draws the shape from the atlas as ordinary GUI
+	// geometry, so the resize / pick shapes look and behave the same on every platform -
+	// including WebGL, where the driver has no native cursor to hand a bitmap to. The
+	// system cursor is hidden so the two do not draw on top of each other; setVisible()
+	// and shutdown() put it back, or hiding the GUI would leave no cursor at all.
+	CViewPointer::setHWMouse(false);
+	_Driver->showCursor(false);
+
 	_GuiListener = new CEventListener();
 	_GuiListener->addToServer(&_Driver->EventServer);
 	_PointerButtons = new CPointerButtonListener();
@@ -1809,6 +1817,9 @@ bool CEditorUI::init(UDriver *driver, const std::string &fontPathHint)
 
 void CEditorUI::shutdown()
 {
+	// Hand the pointer back to the system before the GUI stops drawing one.
+	if (_Ready && _Driver)
+		_Driver->showCursor(true);
 	if (_GuiListener)
 	{
 		_GuiListener->removeFromServer();
@@ -2286,6 +2297,10 @@ void CEditorUI::setVisible(bool visible)
 		return;
 	_Visible = visible;
 	CWidgetManager::getInstance()->activateMasterGroup(MASTER_GROUP, _Visible);
+	// The software cursor is a GUI view: with the GUI hidden nothing draws it, so the
+	// system cursor has to come back or the viewport is left with no pointer at all.
+	if (_Driver)
+		_Driver->showCursor(!_Visible);
 }
 
 void CEditorUI::toggleVisible()

@@ -1,11 +1,20 @@
 <interface_config>
 
-<!-- Mouse pointer (textures come from the interface atlas) -->
+<!-- Mouse pointer (textures come from the interface atlas). Drawn in SOFTWARE (the app
+     calls setHWMouse(false) and hides the system cursor): the hardware path needs the
+     driver to own a native cursor, which Emscripten has no equivalent for, and drawing
+     from the atlas is identical on every platform. -->
 <group id="pointer_layer" posref="BL BL" x="0" y="0" sizeref="wh" w="0" h="0" active="true">
 	<view type="generic_pointer" id="pointer" posref="BL BL" x="0" y="0" w="32" h="32"
 		color="255 255 255 255"
 		tx_default="curs_default.tga"
 		tx_move_window="curs_default.tga"
+		tx_resize_BR_TL="curs_resize_br_tl.tga"
+		tx_resize_BL_TR="curs_resize_bl_tr.tga"
+		tx_resize_TB="curs_resize_tb.tga"
+		tx_resize_LR="curs_resize_lr.tga"
+		tx_rotate="curs_rotate.tga"
+		tx_scale="curs_scale.tga"
 		tx_colpick="curs_pick.tga"
 		tx_pan="curs_pan.tga"
 		tx_can_pan="curs_can_pan.tga" />

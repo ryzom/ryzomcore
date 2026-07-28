@@ -516,6 +516,14 @@ int main(int argc, char **argv)
 	CViewRenderer::hwCursors = &s_HwCursors;
 	CViewRenderer::getInstance()->init();
 
+	// Software cursor: CViewPointer draws the shape from the atlas as ordinary GUI
+	// geometry. The hardware path would hand the bitmap to the driver, which has no
+	// native cursor under Emscripten - software drawing is what makes the resize / pick
+	// shapes work identically in a native window and in the browser. The system (or
+	// browser) cursor is hidden so the two do not draw on top of each other.
+	CViewPointer::setHWMouse(false);
+	s_Driver->showCursor(false);
+
 	if (!CViewRenderer::getInstance()->loadTextures("gui_sample_atlas.png", "gui_sample_atlas.txt", false))
 	{
 		nlwarning("Unable to load the interface atlas (gui_sample_atlas.png/.txt)");
