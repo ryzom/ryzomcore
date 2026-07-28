@@ -431,6 +431,21 @@ void zpPatchVertClear();
 /** Nearest editable-zone vertex within the screen pick radius. False if nothing is close. */
 bool zpPickPatchVertex(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, float my,
                        uint &zoneOut, uint16 &vertOut);
+/** Centroid of the current vertex selection in world space. False when nothing is selected. */
+bool zpPatchSelCentroid(NLMISC::CVector &out);
+/**
+ * Move gizmo on the vertex selection. Screen-projected like every other patch overlay, but
+ * sized from a WORLD length that is only re-fitted between interactions - see the sample's
+ * fit-at-rest model. Not drawn while the view is moving.
+ */
+void zpDrawPatchGizmo(NL3D::IDriver *driver, NL3D::CCamera *camera,
+                      float mouseX, float mouseY, bool navigating, uint32 viewSerial);
+
+/** Hovered gizmo axis (0 X, 1 Y, 2 Z), -1 for none. Set by the last zpDrawPatchGizmo. */
+int zpPatchGizmoHover();
+/** Force the gizmo to re-take its screen fit; call whenever the selection centroid moves. */
+void zpPatchGizmoInvalidate();
+
 /** Left-click in patch/vertex mode; `buttons` carries the modifier bits (Ctrl add, Alt remove). */
 void zpPatchVertexClick(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, float my, uint buttons);
 extern std::string g_PropStatusMsg;

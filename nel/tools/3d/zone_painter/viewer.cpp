@@ -1413,6 +1413,10 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 				else if (paintListener.Mode == CPaintMouseListener::ModePatch)
 				{
 					zpDrawPatchLatticeAll(driver, camera, paintListener.SubObj);
+					// Gizmo after the cage so it is never overdrawn by it.
+					if (paintListener.SubObj == CPaintMouseListener::SubVertex)
+						zpDrawPatchGizmo(driver, camera, paintListener.MouseX, paintListener.MouseY,
+						                 mouseListener.isNavigating(), mouseListener.viewSerial());
 				}
 				if (core && hudText)
 				{
@@ -1709,6 +1713,10 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 				else if (paintListener.Mode == CPaintMouseListener::ModePatch)
 				{
 					zpDrawPatchLatticeAll(driver, camera, paintListener.SubObj);
+					// Gizmo after the cage so it is never overdrawn by it.
+					if (paintListener.SubObj == CPaintMouseListener::SubVertex)
+						zpDrawPatchGizmo(driver, camera, paintListener.MouseX, paintListener.MouseY,
+						                 mouseListener.isNavigating(), mouseListener.viewSerial());
 				}
 				else if (core && paintListener.HaveHover)
 				{

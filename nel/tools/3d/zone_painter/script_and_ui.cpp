@@ -1061,6 +1061,173 @@ void zpDrawPatchLatticeAll(NL3D::IDriver *driver, NL3D::CCamera *camera, int sub
 			zpDrawPatchLattice(driver, camera, zones[z], subObj);
 }
 
+bool zpPatchSelCentroid(NLMISC::CVector &out)
+{
+	if (g_PatchVertSel.empty() || !g_PaintCtx.Zones)
+		return false;
+	const std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
+	NLMISC::CVector sum = NLMISC::CVector::Null;
+	uint n = 0;
+	std::set<TPatchVertId> hit;
+	for (uint z = 0; z < zones.size(); ++z)
+	{
+		const SPaintZone &pz = zones[z];
+		for (uint p = 0; p < pz.Patches.size(); ++p)
+		{
+			const NL3D::CPatchInfo &pi = pz.Patches[p];
+			for (uint c = 0; c < 4; ++c)
+			{
+				const TPatchVertId id(pz.ZoneId, pi.BaseVertices[c]);
+				if (!g_PatchVertSel.count(id) || !hit.insert(id).second)
+					continue; // once per unique vertex, not once per patch touching it
+				sum += pi.Patch.Vertices[c];
+				++n;
+			}
+		}
+	}
+	if (!n)
+		return false;
+	out = sum / (float)n;
+	return true;
+}
+
+// Gizmo geometry, in pixels except the axis length which is world (see the fit below).
+static const float kGizmoPixels = 110.f;
+static const float kGizmoHeadPx = 11.f;
+static const float kGizmoHeadWidePx = 4.5f;
+static const float kGizmoPickPx = 7.f;
+
+// Fit-at-rest state: the gizmo holds a WORLD length, re-fitted only between interactions, so
+// it never resizes under a drag or a view move. Same model as the navigation sample, and the
+// reason it is not simply drawn at a constant pixel length.
+static float s_GizmoWorldLen = 1.f;
+static bool s_GizmoFitDirty = true;
+static uint32 s_GizmoFitSerial = 0xffffffffu;
+static uint32 s_GizmoFitW = 0, s_GizmoFitH = 0;
+static int s_GizmoHover = -1;
+
+int zpPatchGizmoHover() { return s_GizmoHover; }
+void zpPatchGizmoInvalidate() { s_GizmoFitDirty = true; }
+
+void zpDrawPatchGizmo(NL3D::IDriver *driver, NL3D::CCamera *camera,
+                      float mouseX, float mouseY, bool navigating, uint32 viewSerial)
+{
+	s_GizmoHover = -1;
+	if (!driver || !camera)
+		return;
+	NLMISC::CVector o;
+	if (!zpPatchSelCentroid(o))
+		return;
+	// Hidden while the view moves: the size it would be drawn at is stale by definition, and
+	// a re-fit mid-navigation lands as a visible jump.
+	if (navigating)
+	{
+		s_GizmoFitDirty = true;
+		return;
+	}
+
+	uint32 winW = 0, winH = 0;
+	driver->getWindowSize(winW, winH);
+	if (!winW || !winH)
+		return;
+	if (viewSerial != s_GizmoFitSerial || winW != s_GizmoFitW || winH != s_GizmoFitH)
+	{
+		s_GizmoFitSerial = viewSerial;
+		s_GizmoFitW = winW;
+		s_GizmoFitH = winH;
+		s_GizmoFitDirty = true;
+	}
+
+	const NLMISC::CMatrix camMat = camera->getMatrix();
+	const NL3D::CFrustum &fr = camera->getFrustum();
+	if (s_GizmoFitDirty)
+	{
+		// World length that projects to kGizmoPixels at the selection's depth.
+		const float depth = (o - camMat.getPos()) * camMat.getJ();
+		const float d = depth > fr.Near ? depth : fr.Near;
+		const float worldPerPixelAtNear = (fr.Top - fr.Bottom) / (float)winH;
+		s_GizmoWorldLen = kGizmoPixels * worldPerPixelAtNear * d / fr.Near;
+		if (s_GizmoWorldLen <= 0.f)
+			s_GizmoWorldLen = 1.f;
+		s_GizmoFitDirty = false;
+	}
+
+	const NLMISC::CMatrix viewMat = camMat.inverted();
+	NLMISC::CVector po;
+	if (!zpProjectLifted(viewMat, fr, o, kPatchLift, po))
+		return;
+	// Everything below is in PIXELS: the axis directions come out of the projection, so
+	// arrowheads and pick distances are the same size whatever the axis foreshortening.
+	const float ox = po.x * (float)winW, oy = po.y * (float)winH;
+
+	static const NLMISC::CRGBA kAxisCol[3] = {
+		NLMISC::CRGBA(255, 70, 70, 255), NLMISC::CRGBA(70, 230, 70, 255),
+		NLMISC::CRGBA(90, 140, 255, 255) };
+	static const NLMISC::CRGBA kHotCol(255, 220, 40, 255);
+
+	float tipX[3], tipY[3];
+	bool tipOk[3];
+	for (int a = 0; a < 3; ++a)
+	{
+		NLMISC::CVector axis = NLMISC::CVector::Null;
+		if (a == 0) axis.x = 1.f; else if (a == 1) axis.y = 1.f; else axis.z = 1.f;
+		NLMISC::CVector pt;
+		tipOk[a] = zpProjectLifted(viewMat, fr, o + axis * s_GizmoWorldLen, kPatchLift, pt);
+		tipX[a] = pt.x * (float)winW;
+		tipY[a] = pt.y * (float)winH;
+	}
+
+	// Hover: nearest axis within the pick radius, measured in pixels along the drawn segment.
+	float best = kGizmoPickPx;
+	for (int a = 0; a < 3; ++a)
+	{
+		if (!tipOk[a])
+			continue;
+		const float vx = tipX[a] - ox, vy = tipY[a] - oy;
+		const float len2 = vx * vx + vy * vy;
+		float t = 0.f;
+		if (len2 > 1e-6f)
+		{
+			t = ((mouseX * (float)winW - ox) * vx + (mouseY * (float)winH - oy) * vy) / len2;
+			t = t < 0.f ? 0.f : (t > 1.f ? 1.f : t);
+		}
+		const float dx = mouseX * (float)winW - (ox + vx * t);
+		const float dy = mouseY * (float)winH - (oy + vy * t);
+		const float d = sqrtf(dx * dx + dy * dy);
+		if (d < best)
+		{
+			best = d;
+			s_GizmoHover = a;
+		}
+	}
+
+	for (int a = 0; a < 3; ++a)
+	{
+		if (!tipOk[a])
+			continue;
+		const NLMISC::CRGBA col = (s_GizmoHover == a) ? kHotCol : kAxisCol[a];
+		float vx = tipX[a] - ox, vy = tipY[a] - oy;
+		const float len = sqrtf(vx * vx + vy * vy);
+		if (len < 1e-3f)
+			continue; // axis points straight at the camera: nothing meaningful to draw
+		vx /= len;
+		vy /= len;
+		// Shaft stops where the head begins, so the two do not overdraw each other.
+		const float shaftEndX = tipX[a] - vx * kGizmoHeadPx;
+		const float shaftEndY = tipY[a] - vy * kGizmoHeadPx;
+		NL3D::CDRU::drawLine(ox / winW, oy / winH, shaftEndX / winW, shaftEndY / winH,
+		                     *driver, col);
+		// Filled head: base corners are the shaft end pushed along the screen normal.
+		const float nx = -vy, ny = vx;
+		NL3D::CDRU::drawTriangle(tipX[a] / winW, tipY[a] / winH,
+		                         (shaftEndX + nx * kGizmoHeadWidePx) / winW,
+		                         (shaftEndY + ny * kGizmoHeadWidePx) / winH,
+		                         (shaftEndX - nx * kGizmoHeadWidePx) / winW,
+		                         (shaftEndY - ny * kGizmoHeadWidePx) / winH,
+		                         *driver, col, NL3D::CViewport());
+	}
+}
+
 bool zpPickPatchVertex(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, float my,
                        uint &zoneOut, uint16 &vertOut)
 {
@@ -1124,6 +1291,7 @@ void zpPatchVertSelect(uint zoneId, uint vertIdx, int op)
 	{
 		g_PatchVertSel.erase(id);
 	}
+	zpPatchGizmoInvalidate(); // the centroid moved, so its depth did, so the fit is stale
 	ZPSCRIPT::record(NLMISC::toString("painter.selectPatchVertex(%u, %u, %d)", zoneId, vertIdx, op));
 }
 
@@ -1148,6 +1316,7 @@ void zpPatchVertClear()
 	if (g_PatchVertSel.empty())
 		return;
 	g_PatchVertSel.clear();
+	zpPatchGizmoInvalidate();
 	ZPSCRIPT::record("painter.clearPatchVertexSelection()");
 }
 
