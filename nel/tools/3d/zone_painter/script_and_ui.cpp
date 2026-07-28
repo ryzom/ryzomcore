@@ -1020,7 +1020,7 @@ static const NLMISC::CRGBA kVertBoundColor(0, 0, 0, 255);
 			// this corner is simply Rp.Verts[vi]. Size-guarded because the two come from
 			// different chunks and a malformed file could disagree.
 			//
-			// TODO (patch move): a bound vertex must not accept a move. Max recomputes it
+			// TODO (patch move): a bound vertex must not accept a move. it is recomputed
 			// from the target edge on load, so the edit would be silently undone - the write
 			// op has to refuse these rather than write a position that cannot survive.
 			const bool bound = vi < pz.Ep.Rp.Verts.size() && pz.Ep.Rp.Verts[vi].Binded != 0;
@@ -1096,6 +1096,34 @@ static const float kGizmoPixels = 110.f;
 static const float kGizmoHeadPx = 11.f;
 static const float kGizmoHeadWidePx = 4.5f;
 static const float kGizmoPickPx = 7.f;
+// Plane handles occupy the CORNER between their two axes, inner corner ON the origin. The
+// middle of the gizmo is where all three meet, and that meeting point is what the screen
+// handle means - leaving it empty would be wrong, the centre is "all axes at once".
+static const float kGizmoPlaneFrac = 0.28f;
+static const float kGizmoScreenPickPx = 9.f;
+static const int kGizmoPlaneAxes[3][2] = { { 0, 1 }, { 1, 2 }, { 2, 0 } };
+
+/** Point in a convex quad, screen space. Same-sign cross products against each edge. */
+static bool zpQuadContains(float px, float py, const float *qx, const float *qy)
+{
+	int sign = 0;
+	for (int i = 0; i < 4; ++i)
+	{
+		const int j = (i + 1) & 3;
+		const float cross = (qx[j] - qx[i]) * (py - qy[i]) - (qy[j] - qy[i]) * (px - qx[i]);
+		if (cross > 0.f)
+		{
+			if (sign < 0) return false;
+			sign = 1;
+		}
+		else if (cross < 0.f)
+		{
+			if (sign > 0) return false;
+			sign = -1;
+		}
+	}
+	return true;
+}
 
 // Fit-at-rest state: the gizmo holds a WORLD length, re-fitted only between interactions, so
 // it never resizes under a drag or a view move. Same model as the navigation sample, and the
@@ -1112,7 +1140,7 @@ void zpPatchGizmoInvalidate() { s_GizmoFitDirty = true; }
 void zpDrawPatchGizmo(NL3D::IDriver *driver, NL3D::CCamera *camera,
                       float mouseX, float mouseY, bool navigating, uint32 viewSerial)
 {
-	s_GizmoHover = -1;
+	s_GizmoHover = ZPGIZ_NONE;
 	if (!driver || !camera)
 		return;
 	NLMISC::CVector o;
@@ -1165,21 +1193,80 @@ void zpDrawPatchGizmo(NL3D::IDriver *driver, NL3D::CCamera *camera,
 		NLMISC::CRGBA(90, 140, 255, 255) };
 	static const NLMISC::CRGBA kHotCol(255, 220, 40, 255);
 
+	NLMISC::CVector axisVec[3];
+	for (int a = 0; a < 3; ++a)
+	{
+		axisVec[a] = NLMISC::CVector::Null;
+		if (a == 0) axisVec[a].x = 1.f; else if (a == 1) axisVec[a].y = 1.f; else axisVec[a].z = 1.f;
+	}
+
 	float tipX[3], tipY[3];
 	bool tipOk[3];
 	for (int a = 0; a < 3; ++a)
 	{
-		NLMISC::CVector axis = NLMISC::CVector::Null;
-		if (a == 0) axis.x = 1.f; else if (a == 1) axis.y = 1.f; else axis.z = 1.f;
 		NLMISC::CVector pt;
-		tipOk[a] = zpProjectLifted(viewMat, fr, o + axis * s_GizmoWorldLen, kPatchLift, pt);
+		tipOk[a] = zpProjectLifted(viewMat, fr, o + axisVec[a] * s_GizmoWorldLen, kPatchLift, pt);
 		tipX[a] = pt.x * (float)winW;
 		tipY[a] = pt.y * (float)winH;
 	}
 
-	// Hover: nearest axis within the pick radius, measured in pixels along the drawn segment.
+	// Plane corners, projected. Inner corner is the origin itself, so index 0 of every quad
+	// is the gizmo centre.
+	const float planeLen = s_GizmoWorldLen * kGizmoPlaneFrac;
+	float planeX[3][4], planeY[3][4];
+	bool planeOk[3];
+	for (int q = 0; q < 3; ++q)
+	{
+		const NLMISC::CVector &a = axisVec[kGizmoPlaneAxes[q][0]];
+		const NLMISC::CVector &b = axisVec[kGizmoPlaneAxes[q][1]];
+		const NLMISC::CVector corner[4] = { o, o + a * planeLen, o + (a + b) * planeLen, o + b * planeLen };
+		planeOk[q] = true;
+		for (int k = 0; k < 4; ++k)
+		{
+			NLMISC::CVector pt;
+			if (!zpProjectLifted(viewMat, fr, corner[k], kPatchLift, pt))
+			{
+				planeOk[q] = false;
+				break;
+			}
+			planeX[q][k] = pt.x * (float)winW;
+			planeY[q][k] = pt.y * (float)winH;
+		}
+	}
+
+	const float mpx = mouseX * (float)winW, mpy = mouseY * (float)winH;
+
+	// Dev hook, same shape as ZONE_PAINTER_ZOOM_EXTENTS: force a handle hot so the hover
+	// states are reachable from a --screenshot run, where there is no pointer to place.
+	const char *forceHover = getenv("ZONE_PAINTER_GIZMO_HOVER");
+
+	// Centre first, then planes, then axes: smaller and more specific targets win, which is
+	// also the order Max resolves gizmo overlaps in. The centre is invisible, so its target
+	// is generous - and it is tested AHEAD of the plane corners it sits on top of, because
+	// the very middle means all axes at once whichever corner is under it.
+	{
+		const float dx = mpx - ox, dy = mpy - oy;
+		if (sqrtf(dx * dx + dy * dy) < kGizmoScreenPickPx)
+			s_GizmoHover = ZPGIZ_SCREEN;
+	}
+	if (s_GizmoHover == ZPGIZ_NONE)
+	{
+		for (int q = 0; q < 3; ++q)
+		{
+			if (planeOk[q] && zpQuadContains(mpx, mpy, planeX[q], planeY[q]))
+			{
+				s_GizmoHover = ZPGIZ_PLANE_XY + q;
+				break;
+			}
+		}
+	}
+
+	if (forceHover && *forceHover)
+		s_GizmoHover = atoi(forceHover);
+
+	// Nearest axis within the pick radius, measured in pixels along the drawn segment.
 	float best = kGizmoPickPx;
-	for (int a = 0; a < 3; ++a)
+	for (int a = 0; s_GizmoHover == ZPGIZ_NONE && a < 3; ++a)
 	{
 		if (!tipOk[a])
 			continue;
@@ -1197,15 +1284,41 @@ void zpDrawPatchGizmo(NL3D::IDriver *driver, NL3D::CCamera *camera,
 		if (d < best)
 		{
 			best = d;
-			s_GizmoHover = a;
+			s_GizmoHover = ZPGIZ_AXIS_X + a;
 		}
+	}
+
+	// Planes under the axes, so the axes stay legible where they cross.
+	for (int q = 0; q < 3; ++q)
+	{
+		if (!planeOk[q])
+			continue;
+		const bool hot = (s_GizmoHover == ZPGIZ_PLANE_XY + q) || (s_GizmoHover == ZPGIZ_SCREEN);
+		NLMISC::CRGBA c = hot ? kHotCol : kAxisCol[kGizmoPlaneAxes[q][0]];
+		c.A = hot ? 190 : 130;
+		NL3D::CDRU::drawTriangle(planeX[q][0] / winW, planeY[q][0] / winH,
+		                         planeX[q][1] / winW, planeY[q][1] / winH,
+		                         planeX[q][2] / winW, planeY[q][2] / winH,
+		                         *driver, c, NL3D::CViewport());
+		NL3D::CDRU::drawTriangle(planeX[q][0] / winW, planeY[q][0] / winH,
+		                         planeX[q][2] / winW, planeY[q][2] / winH,
+		                         planeX[q][3] / winW, planeY[q][3] / winH,
+		                         *driver, c, NL3D::CViewport());
+		// Outer edges solid. A translucent fill alone vanishes against bright terrain - the
+		// landscape here is not the sample's dark background - and the two outer edges are
+		// also how the handle is drawn: a corner bracket rather than a patch of colour.
+		NLMISC::CRGBA edge = hot ? kHotCol : kAxisCol[kGizmoPlaneAxes[q][0]];
+		NL3D::CDRU::drawLine(planeX[q][1] / winW, planeY[q][1] / winH,
+		                     planeX[q][2] / winW, planeY[q][2] / winH, *driver, edge);
+		NL3D::CDRU::drawLine(planeX[q][2] / winW, planeY[q][2] / winH,
+		                     planeX[q][3] / winW, planeY[q][3] / winH, *driver, edge);
 	}
 
 	for (int a = 0; a < 3; ++a)
 	{
 		if (!tipOk[a])
 			continue;
-		const NLMISC::CRGBA col = (s_GizmoHover == a) ? kHotCol : kAxisCol[a];
+		const NLMISC::CRGBA col = (s_GizmoHover == ZPGIZ_AXIS_X + a) ? kHotCol : kAxisCol[a];
 		float vx = tipX[a] - ox, vy = tipY[a] - oy;
 		const float len = sqrtf(vx * vx + vy * vy);
 		if (len < 1e-3f)
@@ -1321,7 +1434,7 @@ void zpPatchVertClear()
 }
 
 /**
- * Max's selection modifiers: plain click replaces, Ctrl adds, Alt removes. A click that hits
+ * Selection modifiers: plain click replaces, Ctrl adds, Alt removes. A click that hits
  * nothing clears - the same object-selection feel Prop mode already has.
  */
 void zpPatchVertexClick(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, float my, uint buttons)

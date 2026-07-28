@@ -441,7 +441,20 @@ bool zpPatchSelCentroid(NLMISC::CVector &out);
 void zpDrawPatchGizmo(NL3D::IDriver *driver, NL3D::CCamera *camera,
                       float mouseX, float mouseY, bool navigating, uint32 viewSerial);
 
-/** Hovered gizmo axis (0 X, 1 Y, 2 Z), -1 for none. Set by the last zpDrawPatchGizmo. */
+/**
+ * Gizmo handles. The screen handle owns no shape: it is the empty middle where the three
+ * plane corners meet, and hovering it lights all three - which reads as "the whole plane set
+ * is live", exactly what a view-parallel move is.
+ */
+enum TPatchGizmoHandle
+{
+	ZPGIZ_NONE = -1,
+	ZPGIZ_AXIS_X = 0, ZPGIZ_AXIS_Y, ZPGIZ_AXIS_Z,
+	ZPGIZ_SCREEN,
+	ZPGIZ_PLANE_XY, ZPGIZ_PLANE_YZ, ZPGIZ_PLANE_ZX
+};
+
+/** Hovered gizmo handle, ZPGIZ_NONE for none. Set by the last zpDrawPatchGizmo. */
 int zpPatchGizmoHover();
 /** Force the gizmo to re-take its screen fit; call whenever the selection centroid moves. */
 void zpPatchGizmoInvalidate();
