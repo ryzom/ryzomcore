@@ -77,14 +77,21 @@ namespace NLGUI
 
 	private:
 
-		/// Drawing helpers
-		virtual bool drawResizer(CCtrlBase* /* pCB */, NLMISC::CRGBA /* col */) { return false; }
-		virtual bool drawRotate(CCtrlBase* /* pCB */, NLMISC::CRGBA /* col */) { return false; }
-		virtual bool drawScale(CCtrlBase* /* pCB */, NLMISC::CRGBA /* col */) { return false; }
-		virtual bool drawColorPicker(CCtrlBase* /* pCB */, NLMISC::CRGBA /* col */) { return false; }
-		virtual bool drawLink(CCtrlBase* /* pCB */, NLMISC::CRGBA /* col */) { return false; }
-		virtual bool drawBrowse(CCtrlBase* /* pCB */, NLMISC::CRGBA /* col */) { return false; }
-		virtual bool drawPan(CCtrlBase* /* pCB */, NLMISC::CRGBA /* col */) { return false; }
+		/** Drawing helpers: pick the cursor shape for the widget under (or capturing) the
+		  * pointer. Those that key off a widget NLGUI itself defines - the container
+		  * resizers, the colour picker, paragraph links, the HTML group - are implemented
+		  * here, so any embedder using the stock `generic_pointer` gets resize and pick
+		  * cursors without subclassing. drawRotate / drawScale / drawPan stay stubs: they
+		  * key off widgets that live outside NLGUI (the client's 3D scene view and map),
+		  * so only a subclass can know about them.
+		  */
+		virtual bool drawResizer(CCtrlBase *pCB, NLMISC::CRGBA col);
+		virtual bool drawRotate(CCtrlBase * /* pCB */, NLMISC::CRGBA /* col */) { return false; }
+		virtual bool drawScale(CCtrlBase * /* pCB */, NLMISC::CRGBA /* col */) { return false; }
+		virtual bool drawColorPicker(CCtrlBase *pCB, NLMISC::CRGBA col);
+		virtual bool drawLink(CCtrlBase *pCB, NLMISC::CRGBA col);
+		virtual bool drawBrowse(CCtrlBase *pCB, NLMISC::CRGBA col);
+		virtual bool drawPan(CCtrlBase * /* pCB */, NLMISC::CRGBA /* col */) { return false; }
 		virtual bool drawCustom(CCtrlBase* pCB);
 
 	protected:

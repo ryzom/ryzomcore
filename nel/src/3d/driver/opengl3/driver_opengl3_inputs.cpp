@@ -31,6 +31,11 @@
 # endif // HAVE_XCURSOR
 #endif // defined(NL_OS_UNIX) && !defined(NL_OS_MAC) && !defined(__EMSCRIPTEN__)
 
+#ifdef __EMSCRIPTEN__
+# include <emscripten/emscripten.h>
+# include <emscripten/html5.h>
+#endif
+
 #include "nel/3d/u_driver.h"
 #include "nel/misc/file.h"
 
@@ -479,7 +484,19 @@ void CDriverGL3::showCursor(bool b)
 	if (error != kCGErrorSuccess)
 		nlerror("cannot show / hide cursor");
 
-#elif defined (NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
+#elif defined(__EMSCRIPTEN__)
+
+	// No hardware cursor here: the canvas cursor is CSS. Hiding it is what makes the GUI's
+	// own software cursor usable in a browser - otherwise the page arrow draws on top of it.
+	// (There is no emscripten_set_element_css_property in the html5 API, so reach for the
+	// element directly; NL_EMSCRIPTEN_CANVAS is a querySelector string.)
+	EM_ASM({
+		var el = document.querySelector(UTF8ToString($0));
+		if (el) el.style.cursor = UTF8ToString($1);
+	}, NL_EMSCRIPTEN_CANVAS, b ? "default" : "none");
+	_CurrName = b ? "" : "none";
+
+#elif defined (NL_OS_UNIX)
 
 	if (!b)
 	{

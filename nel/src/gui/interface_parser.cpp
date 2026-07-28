@@ -1321,12 +1321,18 @@ namespace NLGUI
 
 		view = NLMISC_GET_FACTORY(CViewBase, std::string).createObject(string((const char*)ptr), CViewBase::TCtorParam());
 
-		if ( !strcmp(ptr,"pointer"))
+		// Register whatever pointer class the XML asked for, by TYPE rather than by name.
+		// This used to test `type == "pointer"`, which is the name the Ryzom client
+		// registers its own subclass under - NLGUI's own "generic_pointer" therefore never
+		// got registered, and the fallback at the end of parseInterface replaced it with a
+		// default-constructed pointer carrying no textures at all. Every embedder that is
+		// not the client silently ended up with a cursor that could never draw.
+		if (CViewPointer *pointerView = dynamic_cast<CViewPointer *>(view))
 		{
 			if( editorMode )
 				savePointerSettings( cur );
 
-			CWidgetManager::getInstance()->setPointer( dynamic_cast<CViewPointer*>(view) );
+			CWidgetManager::getInstance()->setPointer( pointerView );
 		}
 
 		//nlinfo("view type %s mem : %d",ptr,view->getMemory());

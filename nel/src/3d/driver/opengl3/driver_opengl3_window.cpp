@@ -606,12 +606,8 @@ bool CDriverGL3::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool r
 
 #if defined(__EMSCRIPTEN__)
 
-	// Emscripten / WebGL 2.0 context creation
-	// Uses the default canvas element "#canvas" as per Emscripten convention.
-	// Define NL_EMSCRIPTEN_CANVAS to override (e.g. "#myCanvas").
-#ifndef NL_EMSCRIPTEN_CANVAS
-#define NL_EMSCRIPTEN_CANVAS "#canvas"
-#endif
+	// Emscripten / WebGL 2.0 context creation on NL_EMSCRIPTEN_CANVAS (driver_opengl3.h,
+	// "#canvas" by the Emscripten convention).
 	{
 		EmscriptenWebGLContextAttributes attrs;
 		emscripten_webgl_init_context_attributes(&attrs);

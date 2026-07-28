@@ -120,6 +120,11 @@ void displayGLError(GLenum error);
 // Emscripten doesn't need traditional window procedures
 typedef void* nlCursor;
 #define EmptyCursor (nlCursor)NULL
+// The canvas the driver owns. Shared by the window and input paths (the latter needs it to
+// drive the CSS cursor); override at build time to target a different element.
+#ifndef NL_EMSCRIPTEN_CANVAS
+#define NL_EMSCRIPTEN_CANVAS "#canvas"
+#endif
 #elif defined(NL_OS_WINDOWS)
 bool GlWndProc(CDriverGL3 *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 typedef HCURSOR nlCursor;
