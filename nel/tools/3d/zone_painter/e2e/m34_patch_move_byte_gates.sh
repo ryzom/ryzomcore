@@ -1,19 +1,22 @@
 #!/usr/bin/env bash
 # M34 patch-move byte gates: the Tier A geometry write, proven on BOTH write targets.
 #
-# 0. Legacy null-edit output is the baseline. As in M31 the source .max is NOT the
-# reference - the OLE container is rewritten on any save - so cross-path identity is
-# always measured against this file.
-# 1. Entering patch mode, picking a sub-object level and drawing the cage writes NOTHING:
-# a no-op save is byte-identical to the baseline.
-# 2. Moving one vertex changes exactly that vertex's bytes. Moving along Z by 1.5 alters a
-# single float, of which 2 bytes actually differ - so the expected delta is 2, and any
-# larger number means the write escaped its target.
-# 3. Both write targets are covered, which is the point of using two files:
-# material-fond - no mapper record for the vertex -> modifier PatchMesh (0x1140)
-# material-bassin - mapped vertex -> mapper Delta (0x1130)
-# The log line is asserted, so a policy regression that silently routed everything to
-# one target would fail here rather than pass by luck.
+#  0. Legacy null-edit output is the baseline. As in M31 the source .max is NOT the
+#     reference - the OLE container is rewritten on any save - so cross-path identity is
+#     always measured against this file.
+#  1. Entering patch mode, picking a sub-object level and drawing the cage writes NOTHING:
+#     a no-op save is byte-identical to the baseline.
+#  2. Moving one vertex changes exactly that vertex's bytes. Moving along Z by 1.5 alters a
+#     single float, of which 2 bytes actually differ - so the expected delta is 2, and any
+#     larger number means the write escaped its target.
+#  3. ALL THREE write targets are covered, which is the point of using three files:
+#       material-fond          - modifier stack, vertex unmapped -> modifier PatchMesh (0x1140)
+#       material-bassin        - modifier stack, vertex mapped   -> mapper Delta (0x1130)
+#       zonematerial-bassin-1  - NO modifier stack at all        -> base RklPatch PatchMesh
+#     The third is not an exotic shape: 26 of the 72 nodes in the 40-file survey have no edit
+#     patch modifier, so a bug on that path would hit roughly a third of the corpus.
+#     The log line is asserted, so a policy regression that silently routed everything to
+#     one target would fail here rather than pass by luck.
 set -euo pipefail
 
 ZP="${ZONE_PAINTER:-}"
@@ -55,7 +58,7 @@ run_session() { # $1 = ws, $2 = basename, $3 = lua, $4 = log
 		--no-hint-stamp --no-thumbnail --startup-lua "$3" --screenshot /dev/null > "$4" 2>&1
 }
 
-for pair in "material-fond:modPM" "material-bassin:delta"; do
+for pair in "material-fond:modPM" "material-bassin:delta" "zonematerial-bassin-1:base"; do
 	B="${pair%%:*}"; WANT="${pair##*:}"
 	SRC="$GFX/landscape/ligo/lacustre/max/$B.max"
 
@@ -81,6 +84,8 @@ for pair in "material-fond:modPM" "material-bassin:delta"; do
 			echo "FAIL: expected the modifier-PatchMesh target"; grep -a "movePatchSelection" "$OUT/$B.move.log"; exit 1; } ;;
 		delta) grep -aq "modPM 0, delta 1" "$OUT/$B.move.log" || {
 			echo "FAIL: expected the mapper-delta target"; grep -a "movePatchSelection" "$OUT/$B.move.log"; exit 1; } ;;
+		base)  grep -aq "base 1, modPM 0, delta 0" "$OUT/$B.move.log" || {
+			echo "FAIL: expected the base-PatchMesh target"; grep -a "movePatchSelection" "$OUT/$B.move.log"; exit 1; } ;;
 	esac
 	# cmp -l exits 1 when the files differ, which is the expected case here - brace it so
 	# pipefail does not turn a successful comparison into a script abort.
