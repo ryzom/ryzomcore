@@ -231,6 +231,15 @@ struct SEditableFileInfo
 	                      PlacedDX(0.f), PlacedDY(0.f) {}
 };
 
+/**
+ * Id allocator ONLY: session-added nodes take landscape ids from here, above the per-file
+ * bases (file index * 1000), which is what caps a session at ten open files.
+ *
+ * It says nothing about what a node IS. Editability is SPaintZone::Editable, object identity
+ * is the Node pointer, and whether a node came from the file is SPaintZone::InFile. Comparing
+ * a zone id against this to decide any of those is how the display frame and the write frame
+ * drifted apart in the first place; the ids are landscape ids and nothing more.
+ */
 static const uint kInstanceZoneIdBase = 10000;
 
 struct SInstancePlace
@@ -254,10 +263,38 @@ struct SNeighborHint
 		: Dx(dx), Dy(dy), Basename(b), Rot(0), Mirror(false) {}
 };
 
+/**
+ * One NODE: a placement of an object in the session, in Max's sense.
+ *
+ * `Node` is the object handle - several SPaintZone entries may carry the same pointer, which
+ * means they show the SAME storage from different places on the board. There is deliberately
+ * no "primary" among them: whichever one an artist points at is the one they are editing, and
+ * an edit made through any of them changes all of them. `ZoneId` is a landscape id and nothing
+ * more; it does not encode whether a node is editable or a copy.
+ */
 struct SPaintZone
 {
 	PIPELINE::MAX::BUILTIN::CNodeImpl *Node;
 	bool Frozen;
+	/**
+	 * The object may be written through this node.
+	 *
+	 * A property of the OBJECT - its file is open for editing and this node is not read-only
+	 * context - never a comparison against an id range. Every node of an editable object is
+	 * editable, which is what makes a second node of the same object a working viewpoint
+	 * rather than a decoration.
+	 */
+	bool Editable;
+	/**
+	 * This node exists in the .max on disk; nodes the session added do not.
+	 *
+	 * Provenance, not rank. A board placement of an already-open object is a node in every
+	 * sense - editable, selectable, and as good a viewpoint on the object as any other - but
+	 * it is not written back, because the OBJECT is written once and the file never held a
+	 * second node for it. This is the only remaining reason to tell nodes of one object
+	 * apart, and it is a fact about the file rather than about an id range.
+	 */
+	bool InFile;
 	std::string Name;
 	uint ZoneId;
 	std::vector<NL3D::CPatchInfo> Patches;
@@ -279,7 +316,8 @@ struct SPaintZone
 	uint Rotate;
 	bool Symmetry;
 	SPaintZone()
-	    : Node(NULL), Frozen(false), ZoneId(0), ObjectTM(MAXMATH::Matrix3M::identity()),
+	    : Node(NULL), Frozen(false), Editable(false), InFile(true), ZoneId(0),
+	      ObjectTM(MAXMATH::Matrix3M::identity()),
 	      DisplayTM(MAXMATH::Matrix3M::identity()), Rotate(0), Symmetry(false)
 	{
 	}

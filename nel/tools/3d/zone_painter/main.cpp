@@ -22,15 +22,27 @@
  * viewer - runViewer main loop + CPaintMouseListener bodies
  *
  * Scene-assembly rules (paint_core sees this shape): eligible RklPatches -> evalNodePatch +
- * object TM at t=0 -> buildPatchInfo in AUTHORED space. Optional ecosystem self-instances
- * (--place dx,dy[,rot][,m]) clone display zones about the footprint block center; place
- * (dx,dy) is the min-corner cell of the transformed block. Display clones share the source
- * carrier by Node pointer; ids from kInstanceZoneIdBase. Per-zone Rotate/Symmetry feed
- * transformDesc. Cross-zone open-edge weld (WELD_THRESOLD, session-only) -> CZone::build
- * -> CZoneCornerSmoother -> Landscape.addZone. Frozen (0x0976) nodes are display+weld only.
+ * object TM at t=0 -> buildPatchInfo in AUTHORED space. Cross-zone open-edge weld
+ * (WELD_THRESOLD, session-only) -> CZone::build -> CZoneCornerSmoother -> Landscape.addZone.
+ * Frozen (0x0976) nodes are display+weld only.
  *
- * Interior paint through an R-rotated instance is byte-identical to the compensated primary
- * op (tile/256/fill store rot (r+R)&3; color/displace identity on UV).
+ * NODES AND OBJECTS (Max's model, and the tool's). An SPaintZone is a NODE: an object plus a
+ * transform. Several nodes may carry the same Node pointer, which is the OBJECT - one storage,
+ * one paint carrier, one set of vertices. `--place dx,dy[,rot][,m]` adds nodes on an object
+ * already open (place (dx,dy) is the min-corner cell of the transformed footprint block, about
+ * the block centre); a board placement of an open file does the same thing.
+ *
+ * There is deliberately no "primary" node and no second-class "instance". Every node of an
+ * editable object is editable, an edit through any of them writes the one object, and every
+ * node showing it follows through its own transform. Three per-node facts, none of them an id
+ * comparison: Editable (may the object be written), InFile (does the .max hold this node - if
+ * not it is session-only and never saved), and DisplayTM (object -> where this node is drawn).
+ * Zone ids are landscape ids; session-added nodes take theirs from kInstanceZoneIdBase purely
+ * so they do not collide. Per-node Rotate/Symmetry additionally feed transformDesc for tiles.
+ *
+ * Interior paint through an R-rotated node is byte-identical to the compensated op on any
+ * other node of the object (tile/256/fill store rot (r+R)&3; color/displace identity on UV),
+ * and so is a patch-vertex move (m35).
  */
 
 /*

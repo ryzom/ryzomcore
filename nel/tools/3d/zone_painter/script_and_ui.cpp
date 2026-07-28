@@ -630,16 +630,23 @@ void zpSelectSubObject(int level)
 }
 
 
-/** Prop-mode selectable: unfrozen primary (not instance / not RO context). */
+/**
+ * Prop-mode selectable: any editable node, read-only context excluded.
+ *
+ * Zone properties are Max appdata on the NODE, and nodes showing one object share that
+ * pointer - so editing them through a second node of the object writes the same storage and
+ * is exactly as correct as editing them through the first. There is no display-copy case to
+ * exclude.
+ */
 bool zpZoneIsPropSelectable(uint zoneId)
 {
-	if (zoneId >= kInstanceZoneIdBase)
-		return false;
+	const SPaintZone *pz = zpFindPaintZone(zoneId);
+	if (pz)
+		return pz->Editable;
+	// Headless before assembly hands over the zone list: the core still knows read-only.
 	if (g_PaintCtx.Core)
 		return !g_PaintCtx.Core->zoneFrozen(zoneId);
-	// Headless: consult assembled zones via g_PaintCtx.Zones when set
-	const SPaintZone *pz = zpFindPaintZone(zoneId);
-	return pz && !pz->Frozen;
+	return false;
 }
 
 void zpClearPropSelection()
@@ -941,15 +948,64 @@ static bool zpProjectLifted(const NLMISC::CMatrix &vm, const NL3D::CFrustum &f,
 }
 
 /**
+ * The object this node shows. Several nodes may return the SAME pointer: that is what makes
+ * them nodes of one object rather than independent zones, and it is the identity every
+ * per-object rule keys on - selection aliasing, geometry fan-out, the shared paint carrier.
+ */
+static const void *zpZoneNode(uint zoneId)
+{
+	if (!g_PaintCtx.Zones)
+		return NULL;
+	const std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
+	for (uint z = 0; z < zones.size(); ++z)
+		if (zones[z].ZoneId == zoneId)
+			return (const void *)zones[z].Node;
+	return NULL;
+}
+
+/** Linear part only: the image of a delta, with the matrix's translation dropped. */
+static NLMISC::CVector zpXformDelta(const NLMISC::CVector &d, const MAXMATH::Matrix3M &m)
+{
+	MAXMATH::Point3M zero = { 0.f, 0.f, 0.f };
+	MAXMATH::Point3M p = { d.x, d.y, d.z };
+	const MAXMATH::Point3M w0 = MAXMATH::transformPoint(zero, m);
+	const MAXMATH::Point3M w1 = MAXMATH::transformPoint(p, m);
+	return NLMISC::CVector(w1.x - w0.x, w1.y - w0.y, w1.z - w0.z);
+}
+
+/**
  * Preview offset for a corner. A BOUND vertex never takes one: its position is derived from
  * the target edge, so when the edge moves it follows on the next evaluation, and when the
  * edge does not move it does not move either. Offsetting it here would draw a lie.
+ *
+ * A vertex selected through ANOTHER node of the same object still previews here, because the
+ * commit will move it: the drag is measured in the dragged node's displayed space, so it
+ * comes back to object space through that node and out again through this one. Dragging one
+ * node of an object and watching its siblings follow is the whole point of the model.
  */
-static const NLMISC::CVector &zpVertOffset(const SPaintZone &pz, uint16 vi)
+static NLMISC::CVector zpVertOffset(const SPaintZone &pz, uint16 vi)
 {
-if (vi < pz.Ep.Rp.Verts.size() && pz.Ep.Rp.Verts[vi].Binded)
-return kNoOffset;
-return zpPatchVertDragOffset(pz.ZoneId, vi);
+	if (vi < pz.Ep.Rp.Verts.size() && pz.Ep.Rp.Verts[vi].Binded)
+		return kNoOffset;
+	// Selected through this very node: the drag delta is already in this node's space, so use
+	// it verbatim rather than round-tripping it through two matrices.
+	const NLMISC::CVector &own = zpPatchVertDragOffset(pz.ZoneId, vi);
+	if (own != kNoOffset)
+		return own;
+	if (!s_Dragging || !g_PaintCtx.Zones)
+		return kNoOffset;
+	const std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
+	for (uint z = 0; z < zones.size(); ++z)
+	{
+		const SPaintZone &other = zones[z];
+		if (other.Node != pz.Node || other.ZoneId == pz.ZoneId)
+			continue;
+		if (!g_PatchVertSel.count(TPatchVertId(other.ZoneId, vi)))
+			continue;
+		const NLMISC::CVector od = zpXformDelta(s_DragDelta, MAXMATH::inverseM3(other.DisplayTM));
+		return zpXformDelta(od, pz.DisplayTM);
+	}
+	return kNoOffset;
 }
 
 /**
@@ -1099,7 +1155,7 @@ void zpDrawPatchLatticeAll(NL3D::IDriver *driver, NL3D::CCamera *camera, int sub
 	}
 	const std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
 	for (uint z = 0; z < zones.size(); ++z)
-		if (!zones[z].Frozen && zones[z].ZoneId < kInstanceZoneIdBase)
+		if (zones[z].Editable)
 			zpDrawPatchLattice(driver, camera, zones[z], subObj);
 }
 
@@ -1513,10 +1569,21 @@ bool zpPatchPushLive(bool preview)
 	std::set<std::pair<uint, uint> > touched; // (zone id, patch) pushed this pass
 	bool inRange = true;
 
+	// The selection, re-keyed from (node, vertex) onto (OBJECT, vertex) - the identity of the
+	// thing that actually moved. Built once rather than per patch corner.
+	std::set<std::pair<const void *, uint16> > objectSel;
+	for (std::set<TPatchVertId>::const_iterator it = g_PatchVertSel.begin();
+	     it != g_PatchVertSel.end(); ++it)
+	{
+		const void *obj = zpZoneNode(it->first);
+		if (obj)
+			objectSel.insert(std::make_pair(obj, it->second));
+	}
+
 	for (uint z = 0; z < zones.size(); ++z)
 	{
 		SPaintZone &pz = zones[z];
-		if (pz.Frozen || pz.ZoneId >= kInstanceZoneIdBase)
+		if (!pz.Editable)
 			continue;
 		NL3D::CZone *lz = land.getZone((sint)pz.ZoneId);
 		if (!lz)
@@ -1526,13 +1593,14 @@ bool zpPatchPushLive(bool preview)
 		{
 			const NL3D::CPatchInfo &pi = pz.Patches[p];
 			// Only patches with a selected corner: everything else is unchanged, and
-			// refreshing them would be pure cost.
+			// refreshing them would be pure cost. Selected through ANY node of this node's
+			// object, not just through this one - a sibling node's surface moved too.
 			NLMISC::CVector off[4];
 			bool any = false;
 			for (uint c = 0; c < 4; ++c)
 			{
 				off[c] = preview ? zpVertOffset(pz, pi.BaseVertices[c]) : kNoOffset;
-				if (g_PatchVertSel.count(TPatchVertId(pz.ZoneId, pi.BaseVertices[c])))
+				if (objectSel.count(std::make_pair((const void *)pz.Node, pi.BaseVertices[c])))
 					any = true;
 			}
 			if (!any)
@@ -1621,10 +1689,16 @@ void zpGeomVertChanged(uint zoneId, uint16 vertIdx, const float *objDelta)
 	if (!g_PaintCtx.Zones)
 		return;
 	std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
+	// The write landed in an OBJECT, so every node showing that object moved - not just the
+	// one the edit was addressed to. Sibling nodes would otherwise draw a cage over geometry
+	// that no longer matches, and the mismatch survives until the working set is rebuilt.
+	const void *object = zpZoneNode(zoneId);
+	if (!object)
+		return;
 	for (uint z = 0; z < zones.size(); ++z)
 	{
 		SPaintZone &pz = zones[z];
-		if (pz.ZoneId != zoneId)
+		if ((const void *)pz.Node != object)
 			continue;
 		if (vertIdx < pz.Ep.Pm.Verts.size())
 			for (int k = 0; k < 3; ++k)
@@ -1652,7 +1726,6 @@ void zpGeomVertChanged(uint zoneId, uint16 vertIdx, const float *objDelta)
 				pi.Patch.Tangents[((c + 3) & 3) * 2 + 1] += shift;
 			}
 		}
-		return;
 	}
 }
 
@@ -1669,7 +1742,7 @@ uint zpApplyPatchMove(const NLMISC::CVector &worldDelta, std::string &msg)
 	for (uint z = 0; z < zones.size(); ++z)
 	{
 		SPaintZone &pz = zones[z];
-		if (pz.Frozen || pz.ZoneId >= kInstanceZoneIdBase)
+		if (!pz.Editable)
 			continue;
 
 		// Collect this zone's selected vertices once; a corner is reached from up to four
@@ -1804,7 +1877,7 @@ bool zpPickPatchVertex(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, f
 	for (uint z = 0; z < zones.size(); ++z)
 	{
 		const SPaintZone &pz = zones[z];
-		if (pz.Frozen || pz.ZoneId >= kInstanceZoneIdBase)
+		if (!pz.Editable)
 			continue; // frozen context is not editable, so it is not selectable either
 		std::set<uint16> seen;
 		for (uint p = 0; p < pz.Patches.size(); ++p)
@@ -1830,18 +1903,6 @@ bool zpPickPatchVertex(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, f
 		}
 	}
 	return found;
-}
-
-/** The zone's underlying .max object. Instances SHARE this with their source. */
-static const void *zpZoneNode(uint zoneId)
-{
-	if (!g_PaintCtx.Zones)
-		return NULL;
-	const std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
-	for (uint z = 0; z < zones.size(); ++z)
-		if (zones[z].ZoneId == zoneId)
-			return (const void *)zones[z].Node;
-	return NULL;
 }
 
 /**

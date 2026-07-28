@@ -407,6 +407,7 @@ bool buildPaintZones(CScene &scene, std::vector<SPaintZone> &zones,
 		// Neighbor files / non-eligible / 0x0976 → read-only context (when displayed).
 		const bool ineligible = !forceFrozen && !isEligible;
 		pz.Frozen = forceFrozen || fileFrozen || ineligible;
+		pz.Editable = !pz.Frozen;
 		pz.Name = name;
 		pz.ZoneId = zoneIdOffset + (uint)i;
 		if (!buildPatchInfo(ep, objectTM, (int)pz.ZoneId, pz.Patches, err))
@@ -542,6 +543,9 @@ SPaintZone cloneInstanceZone(const SPaintZone &src, uint zoneId, float dx, float
 {
 	SPaintZone pz = src;
 	pz.ZoneId = zoneId;
+	// A node the SESSION added: it shows the source's object, but the file holds no node for
+	// it, so it is never written back.
+	pz.InFile = false;
 	pz.Rotate = place.Rot & 3;
 	pz.Symmetry = place.Mirror;
 	std::string tag = NLMISC::toString(" (inst %d,%d", place.CellX, place.CellY);
@@ -676,8 +680,8 @@ uint appendInstanceZones(std::vector<SPaintZone> &zones, size_t primaryCount,
 				bool haveBegin = false;
 				for (size_t z = 0; z < zones.size(); ++z)
 				{
-					if (zones[z].ZoneId >= baseId && zones[z].ZoneId < baseId + 1000
-					    && zones[z].ZoneId < kInstanceZoneIdBase)
+					if (zones[z].InFile && zones[z].ZoneId >= baseId
+					    && zones[z].ZoneId < baseId + 1000)
 					{
 						if (!haveBegin) { srcBegin = z; haveBegin = true; }
 						srcEnd = z + 1;

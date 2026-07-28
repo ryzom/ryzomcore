@@ -115,5 +115,85 @@ awk -v x="$BX" 'BEGIN{ exit !(x >= 159.0) }' \
 	|| { echo "FAIL (multi): placed cage at x=$BX, expected it beyond the first file's cell"; FAIL=1; }
 check "material-peek placed at (1,0)" "$OUT/multi.log"
 
+echo "===== M35-3: two nodes on one object ====="
+# --place puts a SECOND NODE on material-fond's object. Nothing about it is a decoration: it
+# is editable, an edit through it reaches the object, and every node showing that object
+# follows. Rot 1 (90 deg CCW) so the node transform has to actually do something.
+seed "$OUT/ws_node" material-fond
+cat > "$OUT/node.lua" <<'EOF'
+painter.setMode(4)
+painter.setSubObject(1)
+local px, py, pz = painter.patchVertexPos(0, 5)
+local ix, iy, iz = painter.patchVertexPos(10000, 5)
+print(string.format("A_BEFORE %.3f %.3f %.3f", px, py, pz))
+print(string.format("B_BEFORE %.3f %.3f %.3f", ix, iy, iz))
+-- Drag the SECOND node along world +x. Under a 90 deg rotation that is -y on the object,
+-- so the first node must move along -y by the same amount.
+painter.clearPatchVertexSelection()
+painter.selectPatchVertex(10000, 5, 1)
+painter.movePatchSelection(0.5, 0, 0)
+local ax, ay, az = painter.patchVertexPos(0, 5)
+local bx, by, bz = painter.patchVertexPos(10000, 5)
+print(string.format("A_AFTER %.3f %.3f %.3f", ax, ay, az))
+print(string.format("B_AFTER %.3f %.3f %.3f", bx, by, bz))
+-- One underlying vertex reached through two nodes is ONE thing: selecting it twice would
+-- apply the drag to a single storage location twice, with two disagreeing object deltas.
+painter.clearPatchVertexSelection()
+painter.selectPatchVertex(0, 5, 1)
+painter.selectPatchVertex(10000, 5, 1)
+print("SAME_VERTEX " .. painter.patchVertexSelectionCount())
+-- DIFFERENT vertices through different nodes share nothing, and authoring an edge from
+-- whichever node shows it best is the point of having them.
+painter.clearPatchVertexSelection()
+painter.selectPatchVertex(0, 5, 1)
+painter.selectPatchVertex(10000, 6, 1)
+print("DIFF_VERTEX " .. painter.patchVertexSelectionCount())
+EOF
+ZONE_PAINTER_BOARD_ACTION="save:material-fond" $XVFB "$ZP" "$OUT/ws_node" \
+	--startup-auto "lacustre/material-fond?place=1,0,1" --no-hint-stamp --no-thumbnail \
+	--startup-lua "$OUT/node.lua" --screenshot /dev/null > "$OUT/node.log" 2>&1
+
+nodepos() { grep -a "^$1 " "$OUT/node.log" | head -1 | cut -d' ' -f2-; }
+AB=$(nodepos A_BEFORE); AA=$(nodepos A_AFTER)
+BB=$(nodepos B_BEFORE); BA=$(nodepos B_AFTER)
+wantA=$(awk -v s="$AB" 'BEGIN{split(s,c," "); printf "%.3f %.3f %.3f", c[1], c[2]-0.5, c[3]}')
+wantB=$(awk -v s="$BB" 'BEGIN{split(s,c," "); printf "%.3f %.3f %.3f", c[1]+0.5, c[2], c[3]}')
+[[ "$BA" == "$wantB" ]] \
+	&& echo "OK (node B): the dragged node moved to [$BA]" \
+	|| { echo "FAIL (node B): [$BA], expected [$wantB]"; FAIL=1; }
+[[ "$AA" == "$wantA" ]] \
+	&& echo "OK (node A): the sibling node followed to [$AA] through its own transform" \
+	|| { echo "FAIL (node A): sibling at [$AA], expected [$wantA] - fan-out or transform"; FAIL=1; }
+grep -qa "^SAME_VERTEX 1$" "$OUT/node.log" \
+	&& echo "OK: one vertex through two nodes stays one selection" \
+	|| { echo "FAIL: the same vertex was selectable through both nodes"; FAIL=1; }
+grep -qa "^DIFF_VERTEX 2$" "$OUT/node.log" \
+	&& echo "OK: different vertices through different nodes both select" \
+	|| { echo "FAIL: different vertices through different nodes were refused"; FAIL=1; }
+grep -qa "packed range" "$OUT/node.log" \
+	&& { echo "FAIL (node): live surface push refused the patch"; FAIL=1; } || true
+
+echo "===== M35-4: the node used to reach the object does not change the bytes ====="
+# The same edit expressed in each node's own displayed space must write the same file. This is
+# the whole node/object claim in one comparison: if a node transform were wrong anywhere, the
+# two saves would differ.
+seed "$OUT/ws_eq" material-fond
+cat > "$OUT/eq.lua" <<'EOF'
+painter.setMode(4)
+painter.setSubObject(1)
+painter.clearPatchVertexSelection()
+painter.selectPatchVertex(0, 5, 1)
+painter.movePatchSelection(0, -0.5, 0)
+EOF
+ZONE_PAINTER_BOARD_ACTION="save:material-fond" $XVFB "$ZP" "$OUT/ws_eq" \
+	--startup-auto "lacustre/material-fond?place=1,0,1" --no-hint-stamp --no-thumbnail \
+	--startup-lua "$OUT/eq.lua" --screenshot /dev/null > "$OUT/eq.log" 2>&1
+if cmp -s "$OUT/ws_eq/landscape/ligo/lacustre/max/material-fond.max" \
+          "$OUT/ws_node/landscape/ligo/lacustre/max/material-fond.max"; then
+	echo "OK: edit through the rotated node is byte-identical to the same edit through the first"
+else
+	echo "FAIL: the two nodes wrote different bytes for the same edit"; FAIL=1
+fi
+
 if [[ $FAIL -ne 0 ]]; then echo "M35 GATES FAILED"; exit 1; fi
 echo "ALL M35 GATES PASSED"
