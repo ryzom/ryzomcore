@@ -913,6 +913,14 @@ void zpCollectZoneBoundaryPolylines(const SPaintZone &pz, uint segsPerEdge,
 // Lift used by every patch overlay: the control points sit ON the landscape, and un-lifted
 // geometry disappears into the tessellation it describes. Same value the zone outline uses.
 static const float kPatchLift = 0.4f;
+static const NLMISC::CVector kNoOffset(0.f, 0.f, 0.f);
+
+// Gizmo drag state; see the drag section below.
+static bool s_Dragging = false;
+static int s_DragHandle = ZPGIZ_NONE;
+static NLMISC::CVector s_DragPlaneN, s_DragPlaneP, s_DragStartHit, s_DragDelta;
+static NLMISC::CVector s_DragAxis;
+
 // Vertex marker half-size and pick radius, in viewport units of HEIGHT. The pick target is
 // deliberately larger than the mark - the mark says where the vertex is, the radius says how
 // close you have to be, and making the artist hit 6 pixels exactly is not a feature.
@@ -930,6 +938,18 @@ static bool zpProjectLifted(const NLMISC::CMatrix &vm, const NL3D::CFrustum &f,
 		return false;
 	out = f.project(eye);
 	return true;
+}
+
+/**
+ * Preview offset for a corner. A BOUND vertex never takes one: its position is derived from
+ * the target edge, so when the edge moves it follows on the next evaluation, and when the
+ * edge does not move it does not move either. Offsetting it here would draw a lie.
+ */
+static const NLMISC::CVector &zpVertOffset(const SPaintZone &pz, uint16 vi)
+{
+if (vi < pz.Ep.Rp.Verts.size() && pz.Ep.Rp.Verts[vi].Binded)
+return kNoOffset;
+return zpPatchVertDragOffset(pz.ZoneId, vi);
 }
 
 /**
@@ -978,14 +998,19 @@ static const NLMISC::CRGBA kVertBoundColor(0, 0, 0, 255);
 	for (uint p = 0; p < pz.Patches.size(); ++p)
 	{
 		const NL3D::CBezierPatch &bp = pz.Patches[p].Patch;
+		const NL3D::CPatchInfo &cpi = pz.Patches[p];
 		for (uint e = 0; e < 4; ++e)
 		{
+			// Tangent 2e is attached to vertex e, tangent 2e+1 to vertex (e+1)&3, so each
+			// handle rides the corner it belongs to and the cage deforms instead of tearing.
+			const NLMISC::CVector offA = zpVertOffset(pz, cpi.BaseVertices[e]);
+			const NLMISC::CVector offB = zpVertOffset(pz, cpi.BaseVertices[(e + 1) & 3]);
 			NLMISC::CVector chain[4];
 			bool ok[4];
-			ok[0] = zpProjectLifted(viewMat, fr, bp.Vertices[e], kPatchLift, chain[0]);
-			ok[1] = zpProjectLifted(viewMat, fr, bp.Tangents[e * 2], kPatchLift, chain[1]);
-			ok[2] = zpProjectLifted(viewMat, fr, bp.Tangents[e * 2 + 1], kPatchLift, chain[2]);
-			ok[3] = zpProjectLifted(viewMat, fr, bp.Vertices[(e + 1) & 3], kPatchLift, chain[3]);
+			ok[0] = zpProjectLifted(viewMat, fr, bp.Vertices[e] + offA, kPatchLift, chain[0]);
+			ok[1] = zpProjectLifted(viewMat, fr, bp.Tangents[e * 2] + offA, kPatchLift, chain[1]);
+			ok[2] = zpProjectLifted(viewMat, fr, bp.Tangents[e * 2 + 1] + offB, kPatchLift, chain[2]);
+			ok[3] = zpProjectLifted(viewMat, fr, bp.Vertices[(e + 1) & 3] + offB, kPatchLift, chain[3]);
 			for (uint k = 0; k + 1 < 4; ++k)
 				if (ok[k] && ok[k + 1])
 					NL3D::CDRU::drawLine(chain[k].x, chain[k].y,
@@ -1008,7 +1033,8 @@ static const NLMISC::CRGBA kVertBoundColor(0, 0, 0, 255);
 			if (!seen.insert(pi.BaseVertices[c]).second)
 				continue;
 			NLMISC::CVector v;
-			if (!zpProjectLifted(viewMat, fr, pi.Patch.Vertices[c], kPatchLift, v))
+			if (!zpProjectLifted(viewMat, fr, pi.Patch.Vertices[c] + zpVertOffset(pz, pi.BaseVertices[c]),
+			                     kPatchLift, v))
 				continue;
 			// x scaled by the aspect so the marker is square on screen rather than stretched
 			// with the window - normalized coordinates are per-axis. drawQuad's centre+radius
@@ -1055,10 +1081,56 @@ void zpDrawPatchLatticeAll(NL3D::IDriver *driver, NL3D::CCamera *camera, int sub
 {
 	if (!driver || !camera || !g_PaintCtx.Zones)
 		return;
+	// Dev hook, alongside ZONE_PAINTER_GIZMO_HOVER: "handle:x,y,z" forces a live drag so the
+	// preview can be seen and gated from a --screenshot run, which has no pointer to drag.
+	{
+		const char *dev = getenv("ZONE_PAINTER_GIZMO_DRAG");
+		if (dev && *dev)
+		{
+			int h = 0;
+			float dx = 0.f, dy = 0.f, dz = 0.f;
+			if (sscanf(dev, "%d:%f,%f,%f", &h, &dx, &dy, &dz) == 4)
+			{
+				s_Dragging = true;
+				s_DragHandle = h;
+				s_DragDelta = NLMISC::CVector(dx, dy, dz);
+			}
+		}
+	}
 	const std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
 	for (uint z = 0; z < zones.size(); ++z)
 		if (!zones[z].Frozen && zones[z].ZoneId < kInstanceZoneIdBase)
 			zpDrawPatchLattice(driver, camera, zones[z], subObj);
+}
+
+// ---------------------------------------------------------------------------------------------
+// Gizmo drag (preview only; see zp_state.h)
+
+
+bool zpPatchGizmoDragging() { return s_Dragging; }
+
+/** Ray/plane intersection. False when the ray runs parallel to the plane. */
+static bool zpRayPlane(const NLMISC::CVector &pos, const NLMISC::CVector &dir,
+                       const NLMISC::CVector &planeP, const NLMISC::CVector &planeN,
+                       NLMISC::CVector &hit)
+{
+	const float denom = dir * planeN;
+	if (fabsf(denom) < 1e-6f)
+		return false;
+	const float t = ((planeP - pos) * planeN) / denom;
+	if (t <= 0.f)
+		return false; // behind the eye
+	hit = pos + dir * t;
+	return true;
+}
+
+const NLMISC::CVector &zpPatchVertDragOffset(uint zoneId, uint16 vertIdx)
+{
+	if (!s_Dragging)
+		return kNoOffset;
+	if (!g_PatchVertSel.count(TPatchVertId(zoneId, vertIdx)))
+		return kNoOffset;
+	return s_DragDelta;
 }
 
 bool zpPatchSelCentroid(NLMISC::CVector &out)
@@ -1146,6 +1218,7 @@ void zpDrawPatchGizmo(NL3D::IDriver *driver, NL3D::CCamera *camera,
 	NLMISC::CVector o;
 	if (!zpPatchSelCentroid(o))
 		return;
+	o += s_DragDelta; // rides the drag, so the handle stays under the pointer
 	// Hidden while the view moves: the size it would be drawn at is stale by definition, and
 	// a re-fit mid-navigation lands as a visible jump.
 	if (navigating)
@@ -1263,6 +1336,8 @@ void zpDrawPatchGizmo(NL3D::IDriver *driver, NL3D::CCamera *camera,
 
 	if (forceHover && *forceHover)
 		s_GizmoHover = atoi(forceHover);
+	if (s_Dragging)
+		s_GizmoHover = s_DragHandle; // the handle you grabbed stays lit for the whole drag
 
 	// Nearest axis within the pick radius, measured in pixels along the drawn segment.
 	float best = kGizmoPickPx;
@@ -1339,6 +1414,92 @@ void zpDrawPatchGizmo(NL3D::IDriver *driver, NL3D::CCamera *camera,
 		                         (shaftEndY - ny * kGizmoHeadWidePx) / winH,
 		                         *driver, col, NL3D::CViewport());
 	}
+}
+
+bool zpPatchGizmoBeginDrag(int handle, NL3D::CCamera *camera, const NL3D::CViewport &vp,
+                           float mouseX, float mouseY)
+{
+	s_Dragging = false;
+	s_DragDelta = NLMISC::CVector::Null;
+	if (handle == ZPGIZ_NONE || !camera)
+		return false;
+	NLMISC::CVector o;
+	if (!zpPatchSelCentroid(o))
+		return false;
+
+	const NLMISC::CMatrix camMat = camera->getMatrix();
+	const NLMISC::CVector fwd = camMat.getJ();
+	NLMISC::CVector axisVec[3];
+	for (int a = 0; a < 3; ++a)
+	{
+		axisVec[a] = NLMISC::CVector::Null;
+		if (a == 0) axisVec[a].x = 1.f; else if (a == 1) axisVec[a].y = 1.f; else axisVec[a].z = 1.f;
+	}
+
+	s_DragAxis = NLMISC::CVector::Null;
+	if (handle >= ZPGIZ_AXIS_X && handle <= ZPGIZ_AXIS_Z)
+	{
+		// Resolve against the plane that CONTAINS the axis and faces the camera most
+		// squarely, then project onto the axis. The standard construction, and the one that
+		// stays stable when you look nearly down the axis.
+		s_DragAxis = axisVec[handle - ZPGIZ_AXIS_X];
+		NLMISC::CVector n = s_DragAxis ^ (fwd ^ s_DragAxis);
+		if (n.norm() < 1e-6f)
+			n = fwd; // axis points at the camera: fall back to the view plane
+		n.normalize();
+		s_DragPlaneN = n;
+	}
+	else if (handle >= ZPGIZ_PLANE_XY && handle <= ZPGIZ_PLANE_ZX)
+	{
+		// The plane's own normal is the axis it does not span.
+		const int q = handle - ZPGIZ_PLANE_XY;
+		s_DragPlaneN = axisVec[kGizmoPlaneAxes[q][0]] ^ axisVec[kGizmoPlaneAxes[q][1]];
+		s_DragPlaneN.normalize();
+	}
+	else // ZPGIZ_SCREEN: move parallel to the view plane
+	{
+		s_DragPlaneN = fwd;
+	}
+	s_DragPlaneP = o;
+
+	NLMISC::CVector pos, dir;
+	vp.getRayWithPoint(mouseX, mouseY, pos, dir, camMat, camera->getFrustum());
+	if (!zpRayPlane(pos, dir, s_DragPlaneP, s_DragPlaneN, s_DragStartHit))
+		return false;
+
+	s_Dragging = true;
+	s_DragHandle = handle;
+	return true;
+}
+
+void zpPatchGizmoUpdateDrag(NL3D::CCamera *camera, const NL3D::CViewport &vp,
+                            float mouseX, float mouseY)
+{
+	if (!s_Dragging || !camera)
+		return;
+	NLMISC::CVector pos, dir, hit;
+	vp.getRayWithPoint(mouseX, mouseY, pos, dir, camera->getMatrix(), camera->getFrustum());
+	if (!zpRayPlane(pos, dir, s_DragPlaneP, s_DragPlaneN, hit))
+		return; // grazing the plane: keep the last good delta rather than jumping
+	NLMISC::CVector delta = hit - s_DragStartHit;
+	if (s_DragHandle >= ZPGIZ_AXIS_X && s_DragHandle <= ZPGIZ_AXIS_Z)
+		delta = s_DragAxis * (delta * s_DragAxis); // constrain to the axis
+	s_DragDelta = delta;
+}
+
+void zpPatchGizmoEndDrag()
+{
+	if (!s_Dragging)
+		return;
+	const bool moved = s_DragDelta.norm() > 0.0001f;
+	s_Dragging = false;
+	s_DragHandle = ZPGIZ_NONE;
+	s_DragDelta = NLMISC::CVector::Null;
+	zpPatchGizmoInvalidate();
+	// Deliberately loud: the geometry write does not exist yet, so the preview is discarded
+	// on release. Saying nothing would let an artist believe an edit had been made.
+	if (moved)
+		g_PropStatusMsg = "patch move: preview only, not yet applied";
 }
 
 bool zpPickPatchVertex(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, float my,

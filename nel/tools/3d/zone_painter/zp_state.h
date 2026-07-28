@@ -459,6 +459,20 @@ int zpPatchGizmoHover();
 /** Force the gizmo to re-take its screen fit; call whenever the selection centroid moves. */
 void zpPatchGizmoInvalidate();
 
+/**
+ * Gizmo drag. The delta is a PREVIEW: the cage draws with it applied, nothing is written to
+ * the .max, and endDrag currently discards it - the write path does not exist yet, and a
+ * preview that silently failed to persist would be worse than one that says so.
+ */
+bool zpPatchGizmoBeginDrag(int handle, NL3D::CCamera *camera, const NL3D::CViewport &vp,
+                           float mouseX, float mouseY);
+void zpPatchGizmoUpdateDrag(NL3D::CCamera *camera, const NL3D::CViewport &vp,
+                            float mouseX, float mouseY);
+void zpPatchGizmoEndDrag();
+bool zpPatchGizmoDragging();
+/** Preview offset for one vertex: the live delta if it is selected and free, else zero. */
+const NLMISC::CVector &zpPatchVertDragOffset(uint zoneId, uint16 vertIdx);
+
 /** Left-click in patch/vertex mode; `buttons` carries the modifier bits (Ctrl add, Alt remove). */
 void zpPatchVertexClick(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, float my, uint buttons);
 extern std::string g_PropStatusMsg;

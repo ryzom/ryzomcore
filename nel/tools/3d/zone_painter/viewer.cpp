@@ -287,6 +287,10 @@ void CPaintMouseListener::operator()(const NLMISC::CEvent &event)
 			{
 				if ((mouse->Button & NLMISC::leftButton) && SubObj == SubVertex)
 				{
+					// A hot handle claims the click. Hover was resolved by the last frame's
+					// draw, which is the frame the artist was looking at when they pressed.
+					if (zpPatchGizmoBeginDrag(zpPatchGizmoHover(), Camera, Viewport, MouseX, MouseY))
+						return;
 					NL3D::IDriver *drv = g_PaintCtx.UDriver
 						? static_cast<NL3D::CDriverUser *>(g_PaintCtx.UDriver)->getDriver() : NULL;
 					zpPatchVertexClick(Camera, drv, MouseX, MouseY, (uint)mouse->Button);
@@ -407,6 +411,11 @@ void CPaintMouseListener::operator()(const NLMISC::CEvent &event)
 		else if (event == NLMISC::EventMouseUpId)
 		{
 			NLMISC::CEventMouse *mouse = (NLMISC::CEventMouse *)&event;
+			if (zpPatchGizmoDragging() && (mouse->Button & NLMISC::leftButton))
+			{
+				zpPatchGizmoEndDrag();
+				return;
+			}
 			if (mouse->Button == NLMISC::leftButton && Pressed)
 			{
 				Pressed = false;
@@ -417,6 +426,13 @@ void CPaintMouseListener::operator()(const NLMISC::CEvent &event)
 		else if (event == NLMISC::EventMouseMoveId)
 		{
 			NLMISC::CEventMouse *mouse = (NLMISC::CEventMouse *)&event;
+			if (zpPatchGizmoDragging())
+			{
+				MouseX = mouse->X;
+				MouseY = mouse->Y;
+				zpPatchGizmoUpdateDrag(Camera, Viewport, MouseX, MouseY);
+				return;
+			}
 			MouseX = mouse->X;
 			MouseY = mouse->Y;
 			if (Mode == ModeProp)
@@ -1425,8 +1441,13 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 					textContext.setColor(NLMISC::CRGBA(255, 255, 255));
 					if (paintListener.Mode == CPaintMouseListener::ModePatch)
 					{
-						textContext.printfAt(0.01f, 0.98f, "[PATCH:%s] undo %u",
-						                     zpSubObjName(paintListener.SubObj), core->undoDepth());
+						textContext.printfAt(0.01f, 0.98f, "[PATCH:%s] sel %u  undo %u",
+						                     zpSubObjName(paintListener.SubObj),
+						                     zpPatchVertSelCount(), core->undoDepth());
+						// Same slot Prop mode uses for its status line. Without this the
+						// "preview only" notice from a released drag would go nowhere.
+						if (!g_PropStatusMsg.empty())
+							textContext.printfAt(0.01f, 0.955f, "%s", g_PropStatusMsg.c_str());
 					}
 					else if (paintListener.Mode == CPaintMouseListener::ModeProp)
 					{
@@ -1747,9 +1768,12 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 						const char *mname = zpModeName(mi);
 						if (paintListener.Mode == CPaintMouseListener::ModePatch)
 						{
-							textContext.printfAt(0.01f, 0.98f, "[PATCH:%s] undo %u %s",
-							                     zpSubObjName(paintListener.SubObj), core->undoDepth(),
+textContext.printfAt(0.01f, 0.98f, "[PATCH:%s] sel %u  undo %u  %s",
+                     zpSubObjName(paintListener.SubObj),
+                     zpPatchVertSelCount(), core->undoDepth(),
 							                     paintBridge.SeasonLabel[0] ? paintBridge.SeasonLabel : "auto");
+							if (!g_PropStatusMsg.empty())
+								textContext.printfAt(0.01f, 0.955f, "%s", g_PropStatusMsg.c_str());
 						}
 						else if (paintListener.Mode == CPaintMouseListener::ModeProp)
 						{
