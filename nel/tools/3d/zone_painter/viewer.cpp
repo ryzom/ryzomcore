@@ -263,7 +263,12 @@ void CPaintMouseListener::operator()(const NLMISC::CEvent &event)
 {
 		if (!Core) return;
 		if (g_ScriptUiLock) return; // painterscript pump: input locked (ESC handled by the pump)
-		if (guiWantsMouse())
+		// A live gizmo drag CAPTURES the pointer. It can only start on the scene, so while it
+		// runs the GUI does not steal the move - and a release over a toolbar must still end
+		// the drag, or it stays armed and the next stray move continues it with the button up.
+		const bool gizmoCapture = zpPatchGizmoDragging()
+			&& (event == NLMISC::EventMouseMoveId || event == NLMISC::EventMouseUpId);
+		if (!gizmoCapture && guiWantsMouse())
 		{
 			// Abort an in-progress stroke if the pointer enters a GUI window mid-drag
 			if (Pressed && (event == NLMISC::EventMouseUpId || event == NLMISC::EventMouseMoveId))
@@ -285,7 +290,11 @@ void CPaintMouseListener::operator()(const NLMISC::CEvent &event)
 			// paints, so returning here is the whole of its mouse-down behaviour.
 			if (Mode == ModePatch)
 			{
-				if ((mouse->Button & NLMISC::leftButton) && SubObj == SubVertex)
+				// Every level that MOVES something takes the click - the same three levels the
+				// gizmo is drawn for. zpPatchVertexClick dispatches on the level itself, so the
+				// edge and patch picks are its concern, not this test's.
+				if ((mouse->Button & NLMISC::leftButton)
+				    && (SubObj == SubVertex || SubObj == SubEdge || SubObj == SubPatch))
 				{
 					// A hot handle claims the click. Hover was resolved by the last frame's
 					// draw, which is the frame the artist was looking at when they pressed.

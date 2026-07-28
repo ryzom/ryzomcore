@@ -1781,7 +1781,12 @@ void zpDrawPatchGizmo(NL3D::IDriver *driver, NL3D::CCamera *camera,
 	NLMISC::CVector o;
 	if (!zpTransformPivot(o))
 		return;
-	o += s_DragDelta; // rides the drag, so the handle stays under the pointer
+	// A MOVE rides the drag, so the handle stays under the pointer. Rotate and scale leave the
+	// gizmo where it is: the pivot is their anchor and does not move - s_DragDelta is set during
+	// a scale drag too (it is the raw plane-hit delta the factor is derived from), and adding it
+	// here slid the whole gizmo off the pivot while scaling.
+	if (s_DragXform.Kind == ZPXF_Move)
+		o += s_DragDelta;
 	// Hidden while the view moves: the size it would be drawn at is stale by definition, and
 	// a re-fit mid-navigation lands as a visible jump.
 	if (navigating)
@@ -2550,7 +2555,7 @@ uint zpApplyPatchRotate(int axis, float degrees, std::string &msg)
 }
 
 /** Rotate about an ARBITRARY axis - the form the gizmo records, since a screen ring is not
- *  one of the three world axes. */
+ * one of the three world axes. */
 uint zpApplyPatchRotateAxis(float ax, float ay, float az, float degrees, std::string &msg)
 {
 	SPatchXform xf;
@@ -3349,13 +3354,17 @@ void zpPatchVertexClick(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, 
 		op = 2;
 	const int level = g_PaintCtx.Paint ? g_PaintCtx.Paint->SubObj : CPaintMouseListener::SubVertex;
 
+	// Only a PLAIN click that hits nothing clears. A Ctrl or Alt click is an add or a remove -
+	// missing the target and losing the whole selection over it would punish exactly the artist
+	// who is building one up carefully, and Max keeps the selection on a modified miss too.
 	if (level == CPaintMouseListener::SubEdge)
 	{
 		uint zone = 0;
 		uint16 a = 0, b = 0;
 		if (!zpPickPatchEdge(camera, driver, mx, my, zone, a, b))
 		{
-			zpPatchVertClear();
+			if (op == 0)
+				zpPatchVertClear();
 			return;
 		}
 		zpPatchEdgeSelect(zone, a, b, op);
@@ -3366,7 +3375,8 @@ void zpPatchVertexClick(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, 
 		uint zone = 0, patch = 0;
 		if (!zpPickPatchFace(camera, driver, mx, my, zone, patch))
 		{
-			zpPatchVertClear();
+			if (op == 0)
+				zpPatchVertClear();
 			return;
 		}
 		zpPatchFaceSelect(zone, patch, op);
@@ -3385,7 +3395,8 @@ void zpPatchVertexClick(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, 
 	uint16 vert = 0;
 	if (!zpPickPatchVertex(camera, driver, mx, my, zone, vert))
 	{
-		zpPatchVertClear();
+		if (op == 0)
+			zpPatchVertClear();
 		return;
 	}
 	zpPatchVertSelect(zone, vert, op);
