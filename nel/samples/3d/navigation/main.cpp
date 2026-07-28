@@ -108,13 +108,23 @@ enum TGizmoHandle
 static const float kAxisLen = 1.f;
 static const float kArrowLen = 0.22f;
 static const float kArrowWide = 0.075f;
-static const float kPlaneOff = 0.38f; // inner corner of a plane handle
-static const float kPlaneSize = 0.26f;
-static const float kScreenBox = 0.13f;
+// Plane handles sit in the CORNER between their two axes - outer corner level with the
+// arrowheads - rather than floating near the origin, so the gizmo reads as a triangle of
+// axes with a corner you can grab, and the middle stays clear.
+static const float kPlaneOff = 0.5f;
+static const float kPlaneSize = 0.28f;
+// Cone tessellation for the arrowheads, and how far the inner cap is darkened.
+static const int kConeSegments = 10;
+static const uint8 kCapShade = 110;
 
 // Constant on-screen size: the gizmo should not shrink as the camera pulls back, or it
 // stops being clickable exactly when you most need it.
 static const float kGizmoPixels = 150.f;
+
+// The screen-space handle has no geometry of its own: it is the empty middle of the gizmo,
+// and it announces itself by lighting all three plane handles instead of adding a fourth
+// shape to an already busy centre. This is its pick radius, in viewport-height fractions.
+static const float kScreenPickRadius = 0.018f;
 
 // Screen-space pick radius for the axis shafts, as a fraction of viewport height. Generous
 // on purpose - this is the number to raise if the gizmo feels fiddly under a finger.
@@ -394,8 +404,9 @@ TGizmoHandle CNavigationDemo::pickGizmo(float x, float y) const
 		return GizmoNone;
 
 	// Centre first, then planes, then axes: smaller and more specific targets win, which
-	// is also the order Max resolves overlaps in.
-	if (segDist(x, y, ox, oy, ox, oy) < kAxisPickRadius * 1.2f)
+	// is also the order Max resolves overlaps in. The centre is invisible - see
+	// kScreenPickRadius - so keep its target generous enough to find by feel.
+	if (segDist(x, y, ox, oy, ox, oy) < kScreenPickRadius)
 		return GizmoScreen;
 
 	static const int planeAxes[3][2] = { { 0, 1 }, { 1, 2 }, { 2, 0 } };
@@ -675,8 +686,9 @@ void CNavigationDemo::drawArrow(const CVector &origin, const CVector &axis, CRGB
 	shaft.Color0 = shaft.Color1 = col;
 	m_Driver->drawLine(shaft, m_GizmoMat);
 
-	// Arrowhead as four lines back from the tip; cheap, and reads correctly from any angle
-	// because the spokes are built against the axis rather than against the view.
+
+	// Solid cone arrowhead. Built against the axis rather than against the view, so it
+	// reads the same from any angle, and capped so it stays solid when seen from behind.
 	CVector n = axis;
 	n.normalize();
 	CVector u = n ^ CVector::K;
@@ -685,15 +697,35 @@ void CNavigationDemo::drawArrow(const CVector &origin, const CVector &axis, CRGB
 	u.normalize();
 	const CVector v = n ^ u;
 	const float len = axis.norm();
+	const float r = kArrowWide * len;
 	const CVector base = tip - n * (kArrowLen * len);
-	for (int i = 0; i < 4; ++i)
+	const CRGBA capCol((uint8)(col.R * kCapShade / 255), (uint8)(col.G * kCapShade / 255),
+	                   (uint8)(col.B * kCapShade / 255), col.A);
+
+	CVector rim[kConeSegments];
+	for (int i = 0; i < kConeSegments; ++i)
 	{
-		const CVector off = (i & 1 ? u : v) * ((i & 2) ? -1.f : 1.f) * (kArrowWide * len);
-		CLineColor l;
-		l.V0 = tip;
-		l.V1 = base + off;
-		l.Color0 = l.Color1 = col;
-		m_Driver->drawLine(l, m_GizmoMat);
+		const float a = 2.f * (float)Pi * (float)i / (float)kConeSegments;
+		rim[i] = base + u * (cosf(a) * r) + v * (sinf(a) * r);
+	}
+	for (int i = 0; i < kConeSegments; ++i)
+	{
+		const int j = (i + 1) % kConeSegments;
+		CTriangleColor side;
+		side.V0 = tip;
+		side.V1 = rim[i];
+		side.V2 = rim[j];
+		side.Color0 = side.Color1 = side.Color2 = col;
+		m_Driver->drawTriangle(side, m_GizmoMat);
+
+		// Darker underside, so the cone reads as a solid with a lit side and a shaded
+		// cap rather than as a flat silhouette when seen from below.
+		CTriangleColor cap;
+		cap.V0 = base;
+		cap.V1 = rim[j];
+		cap.V2 = rim[i];
+		cap.Color0 = cap.Color1 = cap.Color2 = capCol;
+		m_Driver->drawTriangle(cap, m_GizmoMat);
 	}
 }
 
@@ -717,7 +749,10 @@ void CNavigationDemo::drawGizmo()
 		q.V1 = c0 + a * (kPlaneSize * s);
 		q.V2 = c0 + (a + b) * (kPlaneSize * s);
 		q.V3 = c0 + b * (kPlaneSize * s);
-		const bool isHot = (hot == GizmoPlaneXY + p);
+		// The screen handle owns no shape of its own: it lights ALL THREE planes, which
+		// reads as "the whole plane set is live" - which is exactly what a view-parallel
+		// move is.
+		const bool isHot = (hot == GizmoPlaneXY + p) || (hot == GizmoScreen);
 		CRGBA c = isHot ? kHotColor : kAxisColor[planeAxes[p][0]];
 		c.A = isHot ? 190 : 110;
 		q.Color0 = q.Color1 = q.Color2 = q.Color3 = c;
@@ -730,21 +765,6 @@ void CNavigationDemo::drawGizmo()
 		          (hot == GizmoAxisX + a) ? kHotColor : kAxisColor[a]);
 	}
 
-	// Screen handle: a camera-facing square at the origin, so it is always a clean target.
-	{
-		const CMatrix cam = camWorld();
-		const CVector u = cam.getI() * (kScreenBox * s);
-		const CVector v = cam.getK() * (kScreenBox * s);
-		CQuadColor q;
-		q.V0 = o - u - v;
-		q.V1 = o + u - v;
-		q.V2 = o + u + v;
-		q.V3 = o - u + v;
-		CRGBA c = (hot == GizmoScreen) ? kHotColor : CRGBA(210, 210, 210);
-		c.A = (hot == GizmoScreen) ? 220 : 140;
-		q.Color0 = q.Color1 = q.Color2 = q.Color3 = c;
-		m_Driver->drawQuad(q, m_GizmoMat);
-	}
 }
 
 void CNavigationDemo::renderOneFrame()
