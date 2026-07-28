@@ -56,7 +56,7 @@ static const size_t kViewHistoryMax = 32;
 
 CNavMouseListener::CNavMouseListener()
 	: m_TargetDist(1.f), m_OrbitPivot(PivotViewTarget), m_HaveSelectionPivot(false),
-	  m_X(0.f), m_Y(0.f), m_ViewSerial(0), m_Drag(DragNone), m_DragStartX(0.f), m_DragStartY(0.f),
+	  m_X(0.f), m_Y(0.f), m_HostGesture(false), m_ViewSerial(0), m_Drag(DragNone), m_DragStartX(0.f), m_DragStartY(0.f),
 	  m_ConstrainAxis(0)
 {
 	m_Matrix.identity();
@@ -214,6 +214,21 @@ void CNavMouseListener::dragPlaneDelta(float x0, float y0, float x1, float y1, N
 	m_Viewport.getRayWithPoint(x1, y1, pos, dir, localViewMatrix, m_Frustum);
 	const NLMISC::CVector p1 = plane.intersect(pos, pos + dir);
 	out = p0 - p1;
+}
+
+void CNavMouseListener::beginHostGesture()
+{
+	if (m_HostGesture)
+		return;
+	pushViewState();
+	m_HostGesture = true;
+}
+
+void CNavMouseListener::panBetween(float fromX, float fromY, float toX, float toY)
+{
+	NLMISC::CVector delta;
+	dragPlaneDelta(fromX, fromY, toX, toY, delta);
+	applyPan(delta);
 }
 
 void CNavMouseListener::applyPan(const NLMISC::CVector &delta)

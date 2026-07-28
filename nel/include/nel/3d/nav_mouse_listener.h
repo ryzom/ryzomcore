@@ -126,7 +126,19 @@ public:
  * the duration and re-fit them when it ends, so a screen-sized gizmo is never seen
  * resizing under a drag - which is why it reads as stable.
  */
-bool isNavigating() const { return m_Drag != DragNone; }
+bool isNavigating() const { return m_Drag != DragNone || m_HostGesture; }
+
+// --- host-driven gestures
+/**
+ * For hosts that own an input policy this listener cannot see - a one-finger drag that
+ * only counts as navigation because it started on empty space, a touchpad convention, an
+ * on-screen control. Bracket the gesture with begin/end so it snapshots the view for
+ * Shift+Z and reports through isNavigating() like any other drag, then feed it motion.
+ */
+void beginHostGesture();
+void endHostGesture() { m_HostGesture = false; }
+/** Pan so the world point under (fromX, fromY) ends up under (toX, toY). Viewport coords. */
+void panBetween(float fromX, float fromY, float toX, float toY);
 /**
  * Bumped whenever the camera moves, by any route: drag, wheel, framing, view undo/redo.
  * Hosts caching something derived from the view - a screen-constant gizmo scale, a LOD
@@ -191,6 +203,8 @@ private:
 
 	// drag state
 	float m_X, m_Y;             ///< last mouse position (viewport space)
+	/// True between beginHostGesture/endHostGesture; folds into isNavigating().
+	bool m_HostGesture;
 	/// Bumped by noteViewChanged() on every camera move; see viewSerial().
 	uint32 m_ViewSerial;
 	TDrag m_Drag;               ///< kind of the drag in flight
