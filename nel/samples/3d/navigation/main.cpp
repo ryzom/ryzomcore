@@ -56,6 +56,7 @@
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
+#include <emscripten/html5.h>
 #endif
 
 #ifdef NL_OS_WINDOWS
@@ -330,6 +331,19 @@ bool CNavigationDemo::project(const CVector &world, float &sx, float &sy) const
 	return true;
 }
 
+// Ratio between a physical (CSS) pixel and a backing-store pixel. Everything the driver
+// reports is in backing pixels, so any size meant to feel the same across devices has to
+// go through here.
+static float uiScale()
+{
+#ifdef __EMSCRIPTEN__
+	const double dpr = emscripten_get_device_pixel_ratio();
+	return dpr > 0.0 ? (float)dpr : 1.f;
+#else
+	return 1.f;
+#endif
+}
+
 float CNavigationDemo::gizmoScale() const
 {
 	if (m_Selected < 0)
@@ -343,7 +357,10 @@ float CNavigationDemo::gizmoScale() const
 	const float depth = (m_Cubes[m_Selected].Pos - camPos) * camWorld().getJ();
 	const float d = depth > m_Frustum.Near ? depth : m_Frustum.Near;
 	const float worldPerPixelAtNear = (m_Frustum.Top - m_Frustum.Bottom) / (float)h;
-	return kGizmoPixels * worldPerPixelAtNear * d / m_Frustum.Near;
+	// kGizmoPixels is a physical size, so it has to be scaled by the device pixel ratio:
+	// the canvas backing store already runs at CSS x DPR, and without this the gizmo would
+	// shrink to a third of its size on a phone - same pixel count, three times the density.
+	return kGizmoPixels * uiScale() * worldPerPixelAtNear * d / m_Frustum.Near;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -418,12 +435,21 @@ TGizmoHandle CNavigationDemo::pickGizmo(float x, float y) const
 	if (!project(o, ox, oy))
 		return GizmoNone;
 
+	// Pick distances are measured in units of viewport HEIGHT, so stretching x by the
+	// aspect ratio first. Normalized coordinates are per-axis, so an untouched radius is an
+	// ellipse on screen - barely noticeable on a 4:3 window, but on a portrait phone it
+	// becomes a tall slot a thumb keeps missing sideways. Containment tests below need no
+	// such correction: point-in-quad survives any affine squash.
+	uint32 vw = 0, vh = 0;
+	m_Driver->getWindowSize(vw, vh);
+	const float ar = (vw && vh) ? (float)vw / (float)vh : 1.f;
+
 	// Centre first, then planes, then axes: smaller and more specific targets win, which
 	// is also the order Max resolves overlaps in. The centre is invisible - see
 	// kScreenPickRadius - so keep its target generous enough to find by feel. It is tested
 	// FIRST, ahead of the planes whose inner corners it sits on top of: the very middle of
 	// the gizmo means all axes at once, regardless of which plane's corner is under it.
-	if (segDist(x, y, ox, oy, ox, oy) < kScreenPickRadius)
+	if (segDist(x * ar, y, ox * ar, oy, ox * ar, oy) < kScreenPickRadius)
 		return GizmoScreen;
 
 	static const int planeAxes[3][2] = { { 0, 1 }, { 1, 2 }, { 2, 0 } };
@@ -451,7 +477,7 @@ TGizmoHandle CNavigationDemo::pickGizmo(float x, float y) const
 		float tx, ty;
 		if (!project(o + axis * (kAxisLen * s), tx, ty))
 			continue;
-		const float d = segDist(x, y, ox, oy, tx, ty);
+		const float d = segDist(x * ar, y, ox * ar, oy, tx * ar, ty);
 		if (d < bestDist)
 		{
 			bestDist = d;
