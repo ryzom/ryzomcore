@@ -527,12 +527,60 @@ int zpCurrentPaintMode()
 	return g_PaintCtx.Paint->Mode;
 }
 
+/*
+ * TODO (cursors): THE cursor manifest. Mode-dependent pointer shapes are not wired yet -
+ * every mode currently shows the plain arrow, and mode is signalled only by the toolbar's
+ * pushed button and the --font HUD. That is tolerable while the left button does exactly
+ * one thing per mode; it stops being tolerable once the patch-edit sub-object levels and
+ * the Max transform modes land, because then the same click means select / move / rotate /
+ * scale / bind depending on state the artist cannot otherwise see.
+ *
+ * MECHANISM: custom shapes do NOT ride the pointer's XML tx_* slots (CViewPointer only
+ * defines a fixed set: default / move_window / resize_* / rotate / scale / colpick / pan /
+ * can_pan). They go through CViewPointer::setCursor("name.tga"), which overrides the
+ * DEFAULT shape - so a mode switch sets it and leaving the mode sets it back to
+ * "curs_default.tga". Anything the GUI itself claims (resizers, colour picker) still wins
+ * over it, which is the behaviour we want: chrome beats tool.
+ *
+ * WHERE THE ART GOES: shared shapes belong in ryzomcore_graphics/interfaces/v3 (packed into
+ * every tool's atlas); painter-only shapes go in ZONE_PAINTER_EXTRA_TEXTURES in the tool's
+ * CMakeLists, which stages them into the extras dir build_interface packs. Either way the
+ * name must land in the atlas .txt before setCursor can resolve it.
+ *
+ * HAVE (already packed from interfaces/v3, usable today):
+ *   curs_default   select / no-op            curs_pick     eyedropper pick
+ *   curs_rotate    rotate, and orbit drag    curs_scale    scale
+ *   curs_pan       panning                   curs_can_pan  pan available
+ *   curs_resize_*  container resizers (wired in NLGUI already, not a tool concern)
+ *
+ * NEED BITMAPS - paint modes (this switch):
+ *   curs_zp_tile      Tile mode brush
+ *   curs_zp_color     Colour mode brush
+ *   curs_zp_displace  Displace mode brush
+ *   (Prop mode uses curs_default: it is a selection mode.)
+ *
+ * NEED BITMAPS - patch-edit modes (same switch, once the sub-object levels exist):
+ *   curs_zp_move      4-way move
+ *   curs_zp_region    rubber-band region select
+ *   curs_zp_bind      bind vertex to edge
+ *   curs_zp_weld      weld
+ *   curs_zp_attach    attach
+ *   curs_zp_subdiv    subdivide / add patch
+ *   (Rotate and Scale reuse curs_rotate / curs_scale. Turn-edge can reuse curs_rotate.)
+ *
+ * NEED BITMAPS - navigation (see zp_nav.cpp):
+ *   curs_zp_zoom      dolly / zoom drag
+ *   (Pan and orbit reuse curs_pan / curs_rotate.)
+ */
 void zpSelectMode(int mode)
 {
 	if (!g_PaintCtx.Active || !g_PaintCtx.Paint) return;
 	if (mode < 0) mode = 0;
 	if (mode > 3) mode = 3; // Tile / Color / Displace / Prop
 	g_PaintCtx.Paint->Mode = mode;
+	// TODO (cursors): set the mode's pointer shape here - one setCursor() per mode, back to
+	// "curs_default.tga" for Prop and for any mode whose art is still missing. See the
+	// manifest above for the names and where the bitmaps come from.
 	ZPSCRIPT::record(NLMISC::toString("painter.setMode(%d)", mode));
 }
 

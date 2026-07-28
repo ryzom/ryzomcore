@@ -25,6 +25,10 @@
 		tx_colpick="curs_pick.tga"
 		tx_pan="curs_pan.tga"
 		tx_can_pan="curs_can_pan.tga" />
+	<!-- Only the shapes CViewPointer itself defines are declared here. Tool cursors (paint
+	     mode, patch-edit mode, navigation drag) are set at runtime by texture NAME through
+	     CViewPointer::setCursor and are not slots - see the manifest in script_and_ui.cpp
+	     above zpSelectMode for the list and for where the bitmaps come from. -->
 </group>
 
 <!-- ===================================================================== -->

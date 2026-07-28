@@ -343,6 +343,10 @@ void CPaintMouseListener::operator()(const NLMISC::CEvent &event)
 			{
 				// Pick under the cursor: tile mode = the base layer's set; color mode = the
 				// vertex color; displace mode = the tile's displace index. Prop: no pick.
+				// TODO (cursors): show curs_pick while the right button is held, and put the
+				// mode's own shape back on release - the eyedropper is the one paint action
+				// whose cursor art we already have. Manifest in script_and_ui.cpp above
+				// zpSelectMode; the matching release is in the EventMouseUpId branch.
 				if (Mode == ModeProp)
 					return;
 				updateHover();

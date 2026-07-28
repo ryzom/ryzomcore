@@ -330,6 +330,12 @@ void CNavListener::operator()(const NLMISC::CEvent &event)
 		m_ConstrainAxis = 0;
 	}
 
+	// TODO (cursors): swap the pointer shape for the drag in flight and restore it on
+	// release - Max shows the hand while panning, the orbit ring while orbiting, the
+	// magnifier while dollying. curs_pan and curs_rotate are already in the atlas; the
+	// dolly shape (curs_zp_zoom) still needs a bitmap. Manifest in script_and_ui.cpp above
+	// zpSelectMode. Restore belongs in the EventMouseUpId branch and in the DragNone path
+	// above, so a modifier released mid-drag does not strand the drag shape on screen.
 	switch (drag)
 	{
 	case DragPan:
