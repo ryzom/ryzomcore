@@ -120,7 +120,21 @@ public:
 	/** Selection centre for PivotSelection; `valid` false falls back to the view target. */
 	void setSelectionPivot(const NLMISC::CVector &worldPos, bool valid);
 
-	// --- view history (Shift+Z / Shift+Y)
+// --- interaction state, for hosts that key overlays off the view
+/**
+ * True while a middle-button view drag is in flight. Editors hide their manipulators for
+ * the duration and re-fit them when it ends, so a screen-sized gizmo is never seen
+ * resizing under a drag - which is why it reads as stable.
+ */
+bool isNavigating() const { return m_Drag != DragNone; }
+/**
+ * Bumped whenever the camera moves, by any route: drag, wheel, framing, view undo/redo.
+ * Hosts caching something derived from the view - a screen-constant gizmo scale, a LOD
+ * choice - compare serials instead of re-deriving every frame.
+ */
+uint32 viewSerial() const { return m_ViewSerial; }
+
+// --- view history (Shift+Z / Shift+Y)
 	/** Snapshot the current view; drag starts and frameBox do this for you. */
 	void pushViewState();
 	bool viewUndo();
@@ -157,6 +171,8 @@ private:
 	void applyOrbit(float dx, float dy);
 	/** Keep the target on the view axis after a rigid camera rotation. */
 	void reprojectTargetFromCamera();
+	/// Single choke point for "the camera moved" - every mutation of m_Matrix goes through it.
+	void noteViewChanged() { ++m_ViewSerial; }
 	/** Recompute the distance after the camera moved along the view axis (target fixed). */
 	void reprojectDistanceFromCamera();
 	void captureCurrent(SViewState &out) const;
@@ -175,6 +191,8 @@ private:
 
 	// drag state
 	float m_X, m_Y;             ///< last mouse position (viewport space)
+	/// Bumped by noteViewChanged() on every camera move; see viewSerial().
+	uint32 m_ViewSerial;
 	TDrag m_Drag;               ///< kind of the drag in flight
 	float m_DragStartX, m_DragStartY;
 	int m_ConstrainAxis;        ///< constrained pan: 0 = undecided, 1 = horizontal, 2 = vertical

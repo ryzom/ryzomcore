@@ -56,7 +56,7 @@ static const size_t kViewHistoryMax = 32;
 
 CNavMouseListener::CNavMouseListener()
 	: m_TargetDist(1.f), m_OrbitPivot(PivotViewTarget), m_HaveSelectionPivot(false),
-	  m_X(0.f), m_Y(0.f), m_Drag(DragNone), m_DragStartX(0.f), m_DragStartY(0.f),
+	  m_X(0.f), m_Y(0.f), m_ViewSerial(0), m_Drag(DragNone), m_DragStartX(0.f), m_DragStartY(0.f),
 	  m_ConstrainAxis(0)
 {
 	m_Matrix.identity();
@@ -125,6 +125,7 @@ void CNavMouseListener::frameBox(const NLMISC::CAABBox &box)
 	m_Matrix.setPos(center - m_Matrix.getJ() * dist);
 	m_Target = center;
 	m_TargetDist = dist > kMinTargetDist ? dist : kMinTargetDist;
+	noteViewChanged();
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -142,6 +143,7 @@ void CNavMouseListener::restore(const SViewState &in)
 	m_Matrix = in.Matrix;
 	m_Target = in.Target;
 	m_TargetDist = in.TargetDist;
+	noteViewChanged();
 }
 
 void CNavMouseListener::pushViewState()
@@ -219,6 +221,7 @@ void CNavMouseListener::applyPan(const NLMISC::CVector &delta)
 	// Camera translates, distance unchanged -> the target rides along.
 	m_Matrix.setPos(m_Matrix.getPos() + delta);
 	m_Target += delta;
+	noteViewChanged();
 }
 
 void CNavMouseListener::applyDolly(float amount)
@@ -230,6 +233,7 @@ void CNavMouseListener::applyDolly(float amount)
 	m_Matrix.setPos(m_Matrix.getPos() + direc * amount);
 	// Target stays put in world space; the distance is what shrinks.
 	reprojectDistanceFromCamera();
+	noteViewChanged();
 }
 
 void CNavMouseListener::applyOrbit(float dx, float dy)
@@ -272,6 +276,7 @@ void CNavMouseListener::applyOrbit(float dx, float dy)
 	// PivotViewTarget. Under PivotSelection the camera moved relative to the target, and
 	// re-deriving keeps the pair consistent (target back in front of the camera).
 	reprojectTargetFromCamera();
+	noteViewChanged();
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -286,6 +291,7 @@ void CNavMouseListener::operator()(const NLMISC::CEvent &event)
 		const NLMISC::CVector direc = m_Target - m_Matrix.getPos();
 		m_Matrix.setPos(m_Matrix.getPos() + direc * (wheel->Direction ? kWheelStep : -kWheelStep));
 		reprojectDistanceFromCamera();
+		noteViewChanged();
 		return;
 	}
 
