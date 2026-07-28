@@ -61,11 +61,7 @@ namespace NL3D
 	class UScene;
 	class IDriver;
 	class CViewport;
-}
-
-namespace ZPNAV
-{
-	class CNavListener;
+	class CNavMouseListener;
 }
 
 namespace PMAXLOAD
@@ -344,7 +340,7 @@ struct SScriptPumpCtx
 	NL3D::UDriver *Driver;
 	NL3D::UScene *Scene;
 	ZPUI::CEditorUI *Ui;
-	ZPNAV::CNavListener *Nav;
+	NL3D::CNavMouseListener *Nav;
 	NLMISC::TTime LastPump;
 	SScriptPumpCtx() : Driver(NULL), Scene(NULL), Ui(NULL), Nav(NULL), LastPump(0) { }
 };

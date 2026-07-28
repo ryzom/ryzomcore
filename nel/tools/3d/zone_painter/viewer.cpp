@@ -150,14 +150,14 @@ using namespace MAXMATH;
 #include "startup_ui.h"
 #include "script_api.h"
 
+#include <nel/3d/nav_mouse_listener.h>
+
 #include "zp_state.h"
 
 // ---------------------------------------------------------------------------------------------
 // Viewer / screenshot: the painting scene (paint.cpp myThread without the paint tools).
 
 #include "viewer_listener.h"
-#include "zp_nav.h"
-
 // The light setup lives in g_Light* above (paint_ui.cpp defaults, vars-cfg overridable).
 
 // kMainWidth / kMainHeight are defined in main.cpp (extern in zp_state.h).
@@ -485,7 +485,7 @@ static bool zpZoneBox(const SPaintZone &pz, NLMISC::CAABBox &box, bool &init)
  * wins over the zone selection. If that reads wrong in practice, move case 3 to the front
  * when the mode is ModeProp - it is a one-line reorder.
  */
-static void zpFrameTarget(ZPNAV::CNavListener &nav, const CPaintMouseListener &paint,
+static void zpFrameTarget(NL3D::CNavMouseListener &nav, const CPaintMouseListener &paint,
                           const std::vector<SPaintZone> &zones, ZPPAINT::CPaintCore *core)
 {
 	NLMISC::CAABBox box;
@@ -739,10 +739,10 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 		ZPUI::startupHideAllScreens();
 		ZPUI::startupShowPainter(true);
 
-		// Navigation: middle-button set on the view-target model (see zp_nav.h).
+		// Navigation: middle-button set on the view-target model (nel/3d/nav_mouse_listener.h).
 		// The left button is deliberately NOT bound here - it belongs to paint / select /
 		// transform, and Ctrl+Left / Alt+Left are reserved for selection add / subtract.
-		ZPNAV::CNavListener mouseListener;
+		NL3D::CNavMouseListener mouseListener;
 		mouseListener.setMatrix(camMat);
 		mouseListener.setFrustrum(camera->getFrustum());
 		mouseListener.setViewport(viewport);

@@ -1,10 +1,10 @@
 /**
- * \file zp_nav.h
+ * \file nav_mouse_listener.h
  * \brief Viewport navigation on the view-target model.
  * \author Jan Boon (Kaetemi)
  *
- * Replaces NL3D::CEvent3dMouseListener's `edit3d` mode for the painting viewport. Two
- * reasons it could not stay:
+ * A drop-in alternative to CEvent3dMouseListener's `edit3d` mode. Two reasons that mode
+ * could not be kept:
  *
  * 1. edit3d aliases navigation onto MODIFIED LEFT drags (Alt+Left orbit, Ctrl+Left pan,
  *    Shift+Left zoom, Ctrl+Shift+Left dolly). Those modifiers are needed for sub-object
@@ -58,17 +58,17 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ZONE_PAINTER_ZP_NAV_H
-#define ZONE_PAINTER_ZP_NAV_H
+#ifndef NL_NAV_MOUSE_LISTENER_H
+#define NL_NAV_MOUSE_LISTENER_H
 
-#include <nel/misc/types_nl.h>
-#include <nel/misc/aabbox.h>
-#include <nel/misc/event_listener.h>
-#include <nel/misc/matrix.h>
-#include <nel/misc/vector.h>
+#include "nel/misc/types_nl.h"
+#include "nel/misc/aabbox.h"
+#include "nel/misc/event_listener.h"
+#include "nel/misc/matrix.h"
+#include "nel/misc/vector.h"
 
-#include <nel/3d/frustum.h>
-#include <nel/3d/viewport.h>
+#include "nel/3d/frustum.h"
+#include "nel/3d/viewport.h"
 
 #include <deque>
 
@@ -76,7 +76,7 @@ namespace NLMISC {
 class CEventServer;
 }
 
-namespace ZPNAV {
+namespace NL3D {
 
 /// Where an orbit drag pivots.
 enum TOrbitPivot
@@ -87,19 +87,19 @@ enum TOrbitPivot
 	PivotSelection
 };
 
-class CNavListener : public NLMISC::IEventListener
+class CNavMouseListener : public NLMISC::IEventListener
 {
 public:
-	CNavListener();
-	virtual ~CNavListener() NL_OVERRIDE { }
+	CNavMouseListener();
+	virtual ~CNavMouseListener() NL_OVERRIDE { }
 
 	// --- host wiring (same shape as CEvent3dMouseListener; the viewer swap is mechanical)
 	void addToServer(NLMISC::CEventServer &server);
 	void removeFromServer(NLMISC::CEventServer &server);
 	const NLMISC::CMatrix &getViewMatrix() const { return m_Matrix; }
 	void setMatrix(const NLMISC::CMatrix &matrix) { m_Matrix = matrix; }
-	void setFrustrum(const NL3D::CFrustum &frustum) { m_Frustum = frustum; }
-	void setViewport(const NL3D::CViewport &viewport) { m_Viewport = viewport; }
+	void setFrustrum(const CFrustum &frustum) { m_Frustum = frustum; }
+	void setViewport(const CViewport &viewport) { m_Viewport = viewport; }
 
 	// --- view target (the orbit / dolly / wheel pivot)
 	/** Place the target at a world point; the distance re-derives from the current camera. */
@@ -163,8 +163,8 @@ private:
 	void restore(const SViewState &in);
 
 	NLMISC::CMatrix m_Matrix;
-	NL3D::CFrustum m_Frustum;
-	NL3D::CViewport m_Viewport;
+	CFrustum m_Frustum;
+	CViewport m_Viewport;
 
 	NLMISC::CVector m_Target;
 	float m_TargetDist;
@@ -182,10 +182,10 @@ private:
 	std::deque<SViewState> m_Undo;
 	std::deque<SViewState> m_Redo;
 
-}; /* class CNavListener */
+}; /* class CNavMouseListener */
 
-} /* namespace ZPNAV */
+} /* namespace NL3D */
 
-#endif /* ZONE_PAINTER_ZP_NAV_H */
+#endif /* NL_NAV_MOUSE_LISTENER_H */
 
 /* end of file */

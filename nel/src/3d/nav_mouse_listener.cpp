@@ -1,6 +1,6 @@
 /**
- * \file zp_nav.cpp
- * \brief See zp_nav.h.
+ * \file nav_mouse_listener.cpp
+ * \brief See nav_mouse_listener.h.
  * \author Jan Boon (Kaetemi)
  */
 
@@ -23,17 +23,17 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#include <nel/misc/types_nl.h>
-#include "zp_nav.h"
+#include "std3d.h"
+#include "nel/3d/nav_mouse_listener.h"
 
-#include <nel/misc/common.h>
-#include <nel/misc/event_server.h>
-#include <nel/misc/events.h>
-#include <nel/misc/plane.h>
+#include "nel/misc/common.h"
+#include "nel/misc/event_server.h"
+#include "nel/misc/events.h"
+#include "nel/misc/plane.h"
 
 #include <cmath>
 
-namespace ZPNAV {
+namespace NL3D {
 
 // Ctrl+MMB accelerated pan multiplier. Tunable by feel; the ratio that reads as
 // "clearly faster, still controllable" over a 160 m ligo cell.
@@ -54,7 +54,7 @@ static const float kMinFrameRadius = 2.f;
 
 static const size_t kViewHistoryMax = 32;
 
-CNavListener::CNavListener()
+CNavMouseListener::CNavMouseListener()
 	: m_TargetDist(1.f), m_OrbitPivot(PivotViewTarget), m_HaveSelectionPivot(false),
 	  m_X(0.f), m_Y(0.f), m_Drag(DragNone), m_DragStartX(0.f), m_DragStartY(0.f),
 	  m_ConstrainAxis(0)
@@ -64,7 +64,7 @@ CNavListener::CNavListener()
 	m_SelectionPivot = NLMISC::CVector::Null;
 }
 
-void CNavListener::addToServer(NLMISC::CEventServer &server)
+void CNavMouseListener::addToServer(NLMISC::CEventServer &server)
 {
 	server.addListener(NLMISC::EventMouseMoveId, this);
 	server.addListener(NLMISC::EventMouseDownId, this);
@@ -72,7 +72,7 @@ void CNavListener::addToServer(NLMISC::CEventServer &server)
 	server.addListener(NLMISC::EventMouseWheelId, this);
 }
 
-void CNavListener::removeFromServer(NLMISC::CEventServer &server)
+void CNavMouseListener::removeFromServer(NLMISC::CEventServer &server)
 {
 	server.removeListener(NLMISC::EventMouseMoveId, this);
 	server.removeListener(NLMISC::EventMouseDownId, this);
@@ -83,19 +83,19 @@ void CNavListener::removeFromServer(NLMISC::CEventServer &server)
 // ---------------------------------------------------------------------------------------------
 // View target
 
-void CNavListener::setTarget(const NLMISC::CVector &worldPos)
+void CNavMouseListener::setTarget(const NLMISC::CVector &worldPos)
 {
 	m_Target = worldPos;
 	reprojectDistanceFromCamera();
 }
 
-void CNavListener::setSelectionPivot(const NLMISC::CVector &worldPos, bool valid)
+void CNavMouseListener::setSelectionPivot(const NLMISC::CVector &worldPos, bool valid)
 {
 	m_SelectionPivot = worldPos;
 	m_HaveSelectionPivot = valid;
 }
 
-void CNavListener::reprojectDistanceFromCamera()
+void CNavMouseListener::reprojectDistanceFromCamera()
 {
 	// Distance along the view axis, not the raw euclidean one: after a dolly the target is
 	// still on the axis, and projecting keeps a numerically clean pair.
@@ -107,12 +107,12 @@ void CNavListener::reprojectDistanceFromCamera()
 		m_Target = m_Matrix.getPos() + m_Matrix.getJ() * kMinTargetDist;
 }
 
-void CNavListener::reprojectTargetFromCamera()
+void CNavMouseListener::reprojectTargetFromCamera()
 {
 	m_Target = m_Matrix.getPos() + m_Matrix.getJ() * m_TargetDist;
 }
 
-void CNavListener::frameBox(const NLMISC::CAABBox &box)
+void CNavMouseListener::frameBox(const NLMISC::CAABBox &box)
 {
 	pushViewState();
 	const NLMISC::CVector center = box.getCenter();
@@ -130,21 +130,21 @@ void CNavListener::frameBox(const NLMISC::CAABBox &box)
 // ---------------------------------------------------------------------------------------------
 // View history
 
-void CNavListener::captureCurrent(SViewState &out) const
+void CNavMouseListener::captureCurrent(SViewState &out) const
 {
 	out.Matrix = m_Matrix;
 	out.Target = m_Target;
 	out.TargetDist = m_TargetDist;
 }
 
-void CNavListener::restore(const SViewState &in)
+void CNavMouseListener::restore(const SViewState &in)
 {
 	m_Matrix = in.Matrix;
 	m_Target = in.Target;
 	m_TargetDist = in.TargetDist;
 }
 
-void CNavListener::pushViewState()
+void CNavMouseListener::pushViewState()
 {
 	SViewState s;
 	captureCurrent(s);
@@ -155,7 +155,7 @@ void CNavListener::pushViewState()
 	m_Redo.clear();
 }
 
-bool CNavListener::viewUndo()
+bool CNavMouseListener::viewUndo()
 {
 	if (m_Undo.empty())
 		return false;
@@ -167,7 +167,7 @@ bool CNavListener::viewUndo()
 	return true;
 }
 
-bool CNavListener::viewRedo()
+bool CNavMouseListener::viewRedo()
 {
 	if (m_Redo.empty())
 		return false;
@@ -183,7 +183,7 @@ bool CNavListener::viewRedo()
 // Drag classification: MIDDLE BUTTON ONLY. Every left/right combination resolves to DragNone
 // so the left button belongs entirely to select / paint / transform (see the header).
 
-CNavListener::TDrag CNavListener::classify(uint32 button)
+CNavMouseListener::TDrag CNavMouseListener::classify(uint32 button)
 {
 	if (button == NLMISC::middleButton) return DragPan;
 	if (button == (uint32)(NLMISC::ctrlButton | NLMISC::middleButton)) return DragPanFast;
@@ -196,7 +196,7 @@ CNavListener::TDrag CNavListener::classify(uint32 button)
 // ---------------------------------------------------------------------------------------------
 // Drag maths (edit3d port; see the header note on keeping the feel identical)
 
-void CNavListener::dragPlaneDelta(float x0, float y0, float x1, float y1, NLMISC::CVector &out) const
+void CNavMouseListener::dragPlaneDelta(float x0, float y0, float x1, float y1, NLMISC::CVector &out) const
 {
 	// Camera-facing plane through the target. Everything is computed target-local for the
 	// same precision reason edit3d does it: world coordinates on a ligo board are large.
@@ -214,14 +214,14 @@ void CNavListener::dragPlaneDelta(float x0, float y0, float x1, float y1, NLMISC
 	out = p0 - p1;
 }
 
-void CNavListener::applyPan(const NLMISC::CVector &delta)
+void CNavMouseListener::applyPan(const NLMISC::CVector &delta)
 {
 	// Camera translates, distance unchanged -> the target rides along.
 	m_Matrix.setPos(m_Matrix.getPos() + delta);
 	m_Target += delta;
 }
 
-void CNavListener::applyDolly(float amount)
+void CNavMouseListener::applyDolly(float amount)
 {
 	NLMISC::CVector direc = m_Target - m_Matrix.getPos();
 	if (direc.norm() < 0.0001f)
@@ -232,7 +232,7 @@ void CNavListener::applyDolly(float amount)
 	reprojectDistanceFromCamera();
 }
 
-void CNavListener::applyOrbit(float dx, float dy)
+void CNavMouseListener::applyOrbit(float dx, float dy)
 {
 	// Pivot: the maintained view target, or the selection centre when the caller asked
 	// for PivotSelection and gave us one.
@@ -276,7 +276,7 @@ void CNavListener::applyOrbit(float dx, float dy)
 
 // ---------------------------------------------------------------------------------------------
 
-void CNavListener::operator()(const NLMISC::CEvent &event)
+void CNavMouseListener::operator()(const NLMISC::CEvent &event)
 {
 	if (event == NLMISC::EventMouseWheelId)
 	{
@@ -385,6 +385,6 @@ void CNavListener::operator()(const NLMISC::CEvent &event)
 	m_Y = mouse->Y;
 }
 
-} /* namespace ZPNAV */
+} /* namespace NL3D */
 
 /* end of file */

@@ -152,7 +152,7 @@ using namespace MAXMATH;
 #include "startup_ui.h"
 #include "script_api.h"
 
-#include "zp_nav.h"
+#include <nel/3d/nav_mouse_listener.h>
 
 #include "zp_state.h"
 #include "viewer_listener.h"
@@ -568,7 +568,7 @@ int zpCurrentPaintMode()
  *   curs_zp_subdiv    subdivide / add patch
  *   (Rotate and Scale reuse curs_rotate / curs_scale. Turn-edge can reuse curs_rotate.)
  *
- * NEED BITMAPS - navigation (see zp_nav.cpp):
+ * NEED BITMAPS - navigation (see nel/src/3d/nav_mouse_listener.cpp):
  *   curs_zp_zoom      dolly / zoom drag
  *   (Pan and orbit reuse curs_pan / curs_rotate.)
  */
