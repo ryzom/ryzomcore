@@ -478,6 +478,11 @@ NLMISC::CRGBA g_LightDiffuse(255, 255, 255);
 NLMISC::CRGBA g_LightAmbiant(0, 0, 0);
 float g_LightMultiply = 1.f;
 float g_ZoomSpeed = 300.f;
+// Patch-edit live surface update: 1 = push the drag into the landscape every frame, 0 = only
+// on release. Per-frame is the default because the point of a manipulator is watching the
+// thing you are manipulating; release-only exists for working sets where the refresh cost
+// per mouse-move is felt.
+bool g_PatchLiveUpdate = true;
 
 // LoadKeyCfg port: per-action lookup, absent/typed-wrong names silently keep the default (the
 // plugin's per-var try/catch). `required` = the path came from the CLI (missing file is fatal);
@@ -597,9 +602,19 @@ static bool loadVarsCfg(const std::string &path, bool required)
 	catch (const NLMISC::EConfigFile &)
 	{
 	}
+	try
+	{
+		NLMISC::CConfigFile::CVar &liveUpd = cf.getVar("PatchLiveUpdate");
+		g_PatchLiveUpdate = liveUpd.asInt() != 0;
+		++loaded;
+	}
+	catch (const NLMISC::EConfigFile &)
+	{
+	}
 	printf("vars cfg %s: %u variable(s) applied (light %u,%u,%u dir %.3f,%.3f,%.3f mul %.2f zoom %.1f)\n",
 	       path.c_str(), loaded, g_LightDiffuse.R, g_LightDiffuse.G, g_LightDiffuse.B,
 	       g_LightDirection.x, g_LightDirection.y, g_LightDirection.z, g_LightMultiply, g_ZoomSpeed);
+	printf("  PatchLiveUpdate %s\n", g_PatchLiveUpdate ? "per-frame" : "on release only");
 	return true;
 }
 

@@ -505,6 +505,20 @@ public:
 	const CPatch	*getPatch(sint patch) const {nlassert(patch>=0 && patch<(sint)Patchs.size()); return &(Patchs[patch]);}
 
 	/**
+	 * Overwrite one patch's control points from a world-space Bezier, WITHOUT rebuilding the
+	 * zone. For editors: a rebuild would drop bind state and any undo the caller is keeping,
+	 * so this packs in place and leaves re-tessellation to refreshTesselationGeometry(), which
+	 * the caller can batch across a whole edit together with the bind neighbours.
+	 *
+	 * Returns false and writes NOTHING when a control point falls outside the range the zone
+	 * was compiled for. Control points are 16-bit fixed point around PatchBias/PatchScale, and
+	 * CVector3s::pack clamps silently - a clamped control point is a vertex that stops
+	 * following the editor with no explanation. Only a rebuild recomputes the bounds, so the
+	 * caller has to be told rather than quietly given a wrong surface.
+	 */
+	bool			setPatchGeometry(sint patch, const CBezierPatch &bezier);
+
+	/**
 	 * Get a read only patch connect pointer.
 	 *
 	 * \param patch the index of patch to get.

@@ -1485,6 +1485,112 @@ void zpPatchGizmoUpdateDrag(NL3D::CCamera *camera, const NL3D::CViewport &vp,
 	if (s_DragHandle >= ZPGIZ_AXIS_X && s_DragHandle <= ZPGIZ_AXIS_Z)
 		delta = s_DragAxis * (delta * s_DragAxis); // constrain to the axis
 	s_DragDelta = delta;
+	if (g_PatchLiveUpdate && !zpPatchPushLive(true))
+		g_PropStatusMsg = "patch move: outside the zone's packed range, needs a rebuild";
+}
+
+/**
+ * Push edited geometry into the LIVE landscape, mirroring what the paint path does for tiles.
+ *
+ * The landscape is not rebuilt. CZone::refreshTesselationGeometry re-derives every
+ * tessellation vertex from computeVertex, which evaluates the patch's Bezier - so writing the
+ * patch's control points and refreshing is enough, and it costs no undo (a rebuild clears it).
+ *
+ * The control points are CVector3s: 16-bit fixed point relative to the zone's PatchBias and
+ * PatchScale, where PatchScale = maxHalfSize / 32760. Two consequences the caller has to live
+ * with. Quantization is one LSB per PatchScale - a few millimetres on a normal zone - so the
+ * live surface sits on a slightly coarser lattice than the .max, which keeps full float
+ * precision. And pack() CLAMPS: a control point dragged outside the bbox computed at build()
+ * time would silently stop moving, so that case is detected and reported instead, because
+ * only a rebuild recomputes the bbox.
+ */
+bool zpPatchPushLive(bool preview)
+{
+	if (!g_PaintCtx.Zones || !g_PaintCtx.Land)
+		return true;
+	NL3D::CLandscape &land = g_PaintCtx.Land->Landscape;
+	std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
+	std::set<std::pair<uint, uint> > touched; // (zone id, patch) pushed this pass
+	bool inRange = true;
+
+	for (uint z = 0; z < zones.size(); ++z)
+	{
+		SPaintZone &pz = zones[z];
+		if (pz.Frozen || pz.ZoneId >= kInstanceZoneIdBase)
+			continue;
+		NL3D::CZone *lz = land.getZone((sint)pz.ZoneId);
+		if (!lz)
+			continue;
+
+		for (uint p = 0; p < pz.Patches.size() && p < (uint)lz->getNumPatchs(); ++p)
+		{
+			const NL3D::CPatchInfo &pi = pz.Patches[p];
+			// Only patches with a selected corner: everything else is unchanged, and
+			// refreshing them would be pure cost.
+			NLMISC::CVector off[4];
+			bool any = false;
+			for (uint c = 0; c < 4; ++c)
+			{
+				off[c] = preview ? zpVertOffset(pz, pi.BaseVertices[c]) : kNoOffset;
+				if (g_PatchVertSel.count(TPatchVertId(pz.ZoneId, pi.BaseVertices[c])))
+					any = true;
+			}
+			if (!any)
+				continue;
+
+			// Rebuild this patch's control cage with the corner offsets applied, tangents
+			// riding their corner exactly as the preview draws them.
+			NL3D::CBezierPatch bp = pi.Patch;
+			for (uint c = 0; c < 4; ++c)
+			{
+				bp.Vertices[c] += off[c];
+				bp.Tangents[c * 2] += off[c];
+				bp.Tangents[((c + 3) & 3) * 2 + 1] += off[c];
+			}
+
+			// CZone owns the packing rules and refuses out-of-range writes wholesale, so
+			// a partial write is impossible and the tool needs no copy of PatchBias/Scale.
+			if (!lz->setPatchGeometry((sint)p, bp))
+			{
+				inRange = false;
+				continue;
+			}
+			touched.insert(std::make_pair(pz.ZoneId, p));
+		}
+	}
+
+	// Refresh the pushed patches and their bind neighbours, the same neighbour walk
+	// applyChanges does - a moved corner is shared, so the patch on the other side of the
+	// seam has to re-tessellate too or the surface cracks along it.
+	std::set<std::pair<uint, uint> > refresh = touched;
+	for (std::set<std::pair<uint, uint> >::const_iterator it = touched.begin(); it != touched.end(); ++it)
+	{
+		// const, so the public const getPatch overload is the one chosen - this walk only
+		// reads bind info.
+		const NL3D::CZone *lz = land.getZone((sint)it->first);
+		if (!lz)
+			continue;
+		const NL3D::CPatch *lp = lz->getPatch((sint)it->second);
+		if (!lp)
+			continue;
+		for (uint edge = 0; edge < 4; ++edge)
+		{
+			NL3D::CPatch::CBindInfo nb;
+			lp->getBindNeighbor(edge, nb);
+			if (!nb.Zone)
+				continue;
+			for (uint i = 0; i < (uint)nb.NPatchs; ++i)
+				if (nb.Next[i])
+					refresh.insert(std::make_pair((uint)nb.Zone->getZoneId(), (uint)nb.Next[i]->getPatchId()));
+		}
+	}
+	for (std::set<std::pair<uint, uint> >::const_iterator it = refresh.begin(); it != refresh.end(); ++it)
+	{
+		NL3D::CZone *lz = land.getZone((sint)it->first);
+		if (lz)
+			lz->refreshTesselationGeometry((sint)it->second);
+	}
+	return inRange;
 }
 
 /**
@@ -1616,6 +1722,14 @@ if (*it < pz.Ep.Rp.Verts.size() && pz.Ep.Rp.Verts[*it].Binded)
 		written += n;
 	}
 
+	// Push the committed positions into the live surface HERE rather than at the drag's
+	// release: a scripted move (painter.movePatchSelection) never goes through the drag path,
+	// and would otherwise write the file correctly while leaving the landscape stale.
+	// Unconditional, whatever PatchLiveUpdate says - that option governs per-FRAME mirroring
+	// during a drag, not whether a committed edit reaches the surface at all.
+	if (written && !zpPatchPushLive(false))
+		msg = "patch move: outside the zone's packed range, surface needs a rebuild";
+
 	if (!written)
 	{
 		if (refusedXform)
@@ -1625,12 +1739,12 @@ if (*it < pz.Ep.Rp.Verts.size() && pz.Ep.Rp.Verts[*it].Binded)
 		else if (!firstErr.empty())
 			msg = "patch move: " + firstErr;
 	}
-	else if (skippedBound)
+	else if (skippedBound && msg.empty())
 	{
 		msg = NLMISC::toString("patch move: %u moved (base %u, modPM %u, delta %u), %u bound skipped",
 		                       written, nBase, nModPm, nDelta, skippedBound);
 	}
-	else
+	else if (msg.empty())
 	{
 		msg = NLMISC::toString("patch move: %u vertices (base %u, modPM %u, delta %u)",
 		                       written, nBase, nModPm, nDelta);

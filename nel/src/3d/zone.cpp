@@ -1320,6 +1320,42 @@ void			CZone::changePatchTextureAndColor (sint numPatch, const std::vector<CTile
 
 
 // ***************************************************************************
+bool			CZone::setPatchGeometry(sint patch, const CBezierPatch &bezier)
+{
+	nlassert(patch>=0 && patch<(sint)Patchs.size());
+
+	// Range check first, over every control point, so a partial write is impossible.
+	// 32760 matches computeBBScaleBias, which derives PatchScale from it.
+	const CVector	&bias= PatchBias;
+	const float		scale= PatchScale;
+	if(scale<=0.f)
+		return false;
+	const CVector	*all[3]= { bezier.Vertices, bezier.Tangents, bezier.Interiors };
+	const uint		counts[3]= { 4, 8, 4 };
+	for(uint g=0; g<3; g++)
+	{
+		for(uint i=0; i<counts[g]; i++)
+		{
+			const CVector	&v= all[g][i];
+			const float	x= (v.x-bias.x)/scale, y= (v.y-bias.y)/scale, z= (v.z-bias.z)/scale;
+			if(fabs(x)>=32760.f || fabs(y)>=32760.f || fabs(z)>=32760.f)
+				return false;
+		}
+	}
+
+	CPatch	&p= Patchs[patch];
+	uint	i;
+	for(i=0;i<4;i++)
+		p.Vertices[i].pack(bezier.Vertices[i], bias, scale);
+	for(i=0;i<8;i++)
+		p.Tangents[i].pack(bezier.Tangents[i], bias, scale);
+	for(i=0;i<4;i++)
+		p.Interiors[i].pack(bezier.Interiors[i], bias, scale);
+	return true;
+}
+
+
+// ***************************************************************************
 void			CZone::refreshTesselationGeometry(sint numPatch)
 {
 	nlassert(numPatch>=0);

@@ -481,6 +481,16 @@ const NLMISC::CVector &zpPatchVertDragOffset(uint zoneId, uint16 vertIdx);
  * of vertices written; `msg` explains a zero (or a partial). Skips bound vertices by policy.
  */
 uint zpApplyPatchMove(const NLMISC::CVector &worldDelta, std::string &msg);
+extern bool g_PatchLiveUpdate;
+/**
+ * Push the selection's CURRENT display positions into the live landscape and refresh the
+ * tessellation of every patch they touch, plus its bind neighbours - the same shape as the
+ * paint path's applyChanges. `preview` adds the in-flight drag delta; false pushes what is
+ * already committed. Returns false when a control point fell outside the zone's packed range,
+ * which only a rebuild can fix.
+ */
+bool zpPatchPushLive(bool preview);
+
 /** Core geom-changed sink: keeps Ep.Pm and the display patchinfo in step with the .max. */
 void zpGeomVertChanged(uint zoneId, uint16 vertIdx, const float *objPos);
 
