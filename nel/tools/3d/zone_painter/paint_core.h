@@ -95,6 +95,7 @@ class IDriver;
 namespace PIPELINE {
 namespace MAX {
 class CStorageRaw;
+class CStorageContainer;
 namespace BUILTIN {
 class CNodeImpl;
 }
@@ -267,6 +268,65 @@ struct SPaintZoneInput
 	SPaintZoneInput() : Node(NULL), Frozen(false), ZoneId(0), Patches(NULL), Pm(NULL), EvalRp(NULL),
 	                    Rotate(0), Symmetry(false) { }
 };
+
+/**
+ * GEOMETRY WRITE TARGET (patch-edit vertex move).
+ *
+ * Distinct from the tile carrier above, and it has to be: a tile record lives in the RPO
+ * (0x4001 / 0x08FD), while a vertex POSITION lives in the PatchMesh - and may not be the
+ * authoritative copy of itself.
+ *
+ * The evaluation chain is the base RklPatch PatchMesh, then a stack of NeL Edit Patch
+ * modifiers. Each modifier stores a final PatchMesh (0x1140) and, optionally, a vertex mapper
+ * (0x1130 -> 0x1000). The mapper is what makes this non-obvious: for every record whose
+ * Vert >= 0, evaluation OVERWRITES the stored final position with
+ *
+ *     out.Verts[record.Vert].Pos = input.Verts[recordIndex].Pos + record.Delta
+ *
+ * so for a mapped vertex the stored 0x1140 position is dead bytes. Writing it changes
+ * nothing. The delta is the live value.
+ *
+ * Hence, per output vertex of the TOPMOST edit-patch modifier (its output is what is
+ * displayed, so the policy is local to it - no recursion into the stack):
+ *
+ *   mapped   -> write Delta += move. Record layout is a flat 32-byte stride
+ *               (OriginalStored, Vert, Original[3], Delta[3]) so Delta sits at a computable
+ *               offset: 4 + i*32 + 20 for VertMap[i].
+ *   unmapped -> write the stored 0x1140 position += move.
+ *   no modifier stack at all -> write the base PatchMesh position += move.
+ *
+ * All three are 12-byte in-place overwrites of three floats - no chunk resizes, no re-encode,
+ * so an untouched file stays byte-identical. That is what makes this Tier A.
+ *
+ * Prevalence is why both mapper and non-mapper paths are mainline rather than one being an
+ * edge case. Survey over 40 lacustre ligo files / 72 zone nodes: 67 modifier slots, all 67
+ * carrying a 0x1140; 46 nodes with a mapper; 2752 mapped vertices. 26 nodes have no modifier
+ * at all and go straight to the base. Stacks can be deep - transition-fond-bassin has 16
+ * modifier slots, 3 of them with mappers.
+ */
+struct SGeomWriteTarget
+{
+	enum TKind { None = 0, BasePatchMesh, ModifierPatchMesh, MapperDelta };
+	TKind Kind;
+	/// Raw chunk carrying the bytes, and the byte offset of the three floats within it.
+	PIPELINE::MAX::CStorageRaw *Raw;
+	size_t Offset;
+	/// Container form (0x03E8 position chunk of a vertex container), when the target is a
+	/// PatchMesh vertex rather than a mapper record.
+	PIPELINE::MAX::CStorageContainer *VertChunk;
+	SGeomWriteTarget() : Kind(None), Raw(NULL), Offset(0), VertChunk(NULL) { }
+};
+
+/**
+ * Resolve where a move of output vertex `vertIdx` must be written for `node`. See
+ * SGeomWriteTarget for the policy. Returns false with a message when the chain is malformed;
+ * Kind == None means "nothing to write" rather than an error.
+ */
+bool resolveGeomWriteTarget(PIPELINE::MAX::BUILTIN::CNodeImpl *node, uint vertIdx,
+                            SGeomWriteTarget &out, std::string &err);
+/** Read / write the three floats a resolved target points at. */
+bool geomTargetGet(const SGeomWriteTarget &t, float *xyz);
+bool geomTargetSet(const SGeomWriteTarget &t, const float *xyz);
 
 // Undo delta: one tile-record, color-vertex, or export-prop change (bounded LIFO of strokes).
 // Kind 2: raw AppData restore so delete-vs-"0"/presence semantics reapply exactly.

@@ -137,6 +137,137 @@ static CStorageRaw *zpRawChild(const CStorageContainer *c, uint16 id)
 	return NULL;
 }
 
+/** Nth child container with the given id (the PatchMesh vertex list is a run of 0x0BE0). */
+static CStorageContainer *zpContainerChildAt(const CStorageContainer::TStorageObjectContainer &chunks,
+                                             uint16 id, uint index)
+{
+	for (CStorageContainer::TStorageObjectConstIt it = chunks.begin(); it != chunks.end(); ++it)
+	{
+		if (it->first != id) continue;
+		if (index) { --index; continue; }
+		return dynamic_cast<CStorageContainer *>(it->second);
+	}
+	return NULL;
+}
+
+/** The 0x03E8 position payload of PatchMesh vertex `vertIdx` within a chunk list. */
+static bool zpVertPosRaw(const CStorageContainer::TStorageObjectContainer &chunks, uint vertIdx,
+                         CStorageRaw *&rawOut, CStorageContainer *&contOut)
+{
+	CStorageContainer *vc = zpContainerChildAt(chunks, 0x0BE0, vertIdx);
+	if (!vc) return false;
+	CStorageRaw *pos = zpRawChild(vc, 0x03E8);
+	if (!pos || pos->Value.size() < 12) return false;
+	rawOut = pos;
+	contOut = vc;
+	return true;
+}
+
+bool resolveGeomWriteTarget(CNodeImpl *node, uint vertIdx, SGeomWriteTarget &out, std::string &err)
+{
+	out = SGeomWriteTarget();
+	CSceneClass *obj = node ? dynamic_cast<CSceneClass *>(node->getReference(1)) : NULL;
+	if (!obj) { err = "node without object"; return false; }
+
+	// Topmost edit-patch modifier slot: its output is what is displayed, so the whole policy
+	// is local to it and there is no need to walk further down the stack.
+	CStorageContainer *topWrap = NULL;
+	int guard = 8;
+	CSceneClass *walk = obj;
+	while (walk && guard-- > 0 && !topWrap)
+	{
+		CDerivedObject *derived = dynamic_cast<CDerivedObject *>(walk);
+		if (!derived) break;
+		for (uint m = 0; m < derived->modifierCount() && !topWrap; ++m)
+		{
+			CSceneClass *mod = derived->modifier(m);
+			if (!mod) continue;
+			NLMISC::CClassId mcid = mod->classDesc()->classId();
+			if (mcid != ZP_CLASSID_NEL_EDIT_PATCH && mcid != ZP_CLASSID_NEL_PATCH_PAINT) continue;
+			CStorageContainer *data = dynamic_cast<CStorageContainer *>(derived->localModData(m));
+			if (!data) continue;
+			CStorageContainer *wrap = zpContainerChild(data, 0x1000);
+			if (wrap && zpContainerChild(wrap, 0x1140)) topWrap = wrap;
+		}
+		walk = derived->baseObject();
+	}
+
+	if (topWrap)
+	{
+		// A mapper record for this OUTPUT vertex makes the stored 0x1140 position dead bytes:
+		// evaluation overwrites it with input + delta. The delta is then the only live value.
+		CStorageContainer *mc = zpContainerChild(topWrap, 0x1130);
+		if (mc)
+		{
+			CStorageRaw *mr = zpRawChild(mc, 0x1000);
+			if (mr && mr->Value.size() >= 8)
+			{
+				PIPELINE::MAX::NELPATCH::SPmVertMapper mv;
+				std::string e2;
+				if (decodeVertMapper(&mr->Value[0], mr->Value.size(), mv, e2))
+				{
+					for (size_t i = 0; i < mv.VertMap.size(); ++i)
+					{
+						if (mv.VertMap[i].Vert < 0 || (uint)mv.VertMap[i].Vert != vertIdx)
+							continue;
+						// Flat 32-byte records: OriginalStored, Vert, Original[3], Delta[3].
+						out.Kind = SGeomWriteTarget::MapperDelta;
+						out.Raw = mr;
+						out.Offset = 4 + i * 32 + 20;
+						if (out.Offset + 12 > mr->Value.size()) { err = "mapper delta out of range"; return false; }
+						return true;
+					}
+				}
+			}
+		}
+		CStorageContainer *pm = zpContainerChild(topWrap, 0x1140);
+		if (pm && zpVertPosRaw(pm->chunks(), vertIdx, out.Raw, out.VertChunk))
+		{
+			out.Kind = SGeomWriteTarget::ModifierPatchMesh;
+			return true;
+		}
+		err = "modifier 0x1140 without vertex " + NLMISC::toString(vertIdx);
+		return false;
+	}
+
+	// No modifier stack: the base RklPatch PatchMesh is authoritative.
+	CRklPatchObject *rpo = NULL;
+	CSceneClass *base = obj;
+	guard = 8;
+	while (base && guard-- > 0)
+	{
+		rpo = dynamic_cast<CRklPatchObject *>(base);
+		if (rpo) break;
+		CDerivedObject *derived = dynamic_cast<CDerivedObject *>(base);
+		if (!derived) break;
+		base = derived->baseObject();
+	}
+	if (!rpo) { err = "no RklPatch base object"; return false; }
+	if (!zpVertPosRaw(rpo->chunks(), vertIdx, out.Raw, out.VertChunk))
+	{
+		err = "base PatchMesh without vertex " + NLMISC::toString(vertIdx);
+		return false;
+	}
+	out.Kind = SGeomWriteTarget::BasePatchMesh;
+	return true;
+}
+
+bool geomTargetGet(const SGeomWriteTarget &t, float *xyz)
+{
+	if (t.Kind == SGeomWriteTarget::None || !t.Raw || t.Offset + 12 > t.Raw->Value.size())
+		return false;
+	memcpy(xyz, &t.Raw->Value[t.Offset], 12);
+	return true;
+}
+
+bool geomTargetSet(const SGeomWriteTarget &t, const float *xyz)
+{
+	if (t.Kind == SGeomWriteTarget::None || !t.Raw || t.Offset + 12 > t.Raw->Value.size())
+		return false;
+	memcpy(&t.Raw->Value[t.Offset], xyz, 12);
+	return true;
+}
+
 static bool zpResolveCarrier(CNodeImpl *node, CRklPatchObject *&rpo, CStorageRaw *&snapLeaf, std::string &err)
 {
 	rpo = NULL;
