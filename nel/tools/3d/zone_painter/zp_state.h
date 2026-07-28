@@ -589,7 +589,19 @@ const NLMISC::CVector &zpPatchVertDragOffset(uint zoneId, uint16 vertIdx);
  */
 uint zpApplyPatchMove(const NLMISC::CVector &worldDelta, std::string &msg);
 extern bool g_PatchLiveUpdate;
-extern bool g_PatchWeldSelect;
+/**
+ * Are the landscape zones currently built WELDED to each other?
+ *
+ * Tracks the paint mode: welded while painting, apart in patch edit. Read by
+ * buildDisplayZone, so every build path picks it up without being told.
+ */
+extern bool g_WeldedLandscape;
+
+/**
+ * Re-build every landscape zone for the current weld state. No-op when nothing changed.
+ * Returns false only if a zone could not be re-added.
+ */
+bool zpSyncLandscapeWeld();
 /**
  * Push the selection's CURRENT display positions into the live landscape and refresh the
  * tessellation of every patch they touch, plus its bind neighbours - the same shape as the

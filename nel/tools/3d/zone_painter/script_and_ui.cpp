@@ -572,13 +572,117 @@ int zpCurrentPaintMode()
  * curs_zp_zoom dolly / zoom drag
  * (Pan and orbit reuse curs_pan / curs_rotate.)
  */
+/**
+ * Turn a LIVE zone's retrieved info into the zone info to rebuild it from.
+ *
+ * Rebuilding a zone from the display cage alone reverts the terrain: `pz.Patches` carries the
+ * geometry, but its tile records are the ones assembly loaded, while every tile, colour and
+ * lumel painted since lives in the landscape zone. So the live zone is retrieved whole and
+ * only the parts that are actually changing are replaced - the Bezier from the cage (full
+ * float, and the authority on where the vertices are) and the bind/border data from the paint
+ * zone, filtered by the weld state.
+ *
+ * The bind data cannot come from the retrieve either: it reflects how the zone is built RIGHT
+ * NOW, so going from unwelded back to welded would find the cross-zone binds already gone.
+ * `pz` holds the welded truth throughout and is filtered on the way out.
+ */
+static void zpLiveZoneInfo(NL3D::CZone *lz, const SPaintZone &pz, NL3D::CZoneInfo &out)
+{
+	lz->retrieve(out);
+	for (size_t p = 0; p < out.Patchs.size() && p < pz.Patches.size(); ++p)
+	{
+		out.Patchs[p].Patch = pz.Patches[p].Patch;
+		for (uint e = 0; e < 4; ++e)
+		{
+			out.Patchs[p].BindEdges[e] = pz.Patches[p].BindEdges[e];
+			if (!g_WeldedLandscape && out.Patchs[p].BindEdges[e].NPatchs != 0
+			    && out.Patchs[p].BindEdges[e].ZoneId != (uint16)pz.ZoneId)
+				out.Patchs[p].BindEdges[e].NPatchs = 0;
+		}
+	}
+	out.BorderVertices = g_WeldedLandscape ? pz.BorderVertices
+	                                       : std::vector<NL3D::CBorderVertex>();
+}
+
+/**
+ * Rebuild every landscape zone so the weld state matches g_WeldedLandscape.
+ *
+ * Retrieve ALL first, then remove all, then add all. Retrieving after the removes would read
+ * deleted zones, and adding before every remove is done would bind against a zone that is
+ * about to go. The remove/add split is the same two-phase order rebuildWorkingSet uses.
+ *
+ * The paint core is NOT re-initialised. It holds no CZone pointers - every access goes through
+ * m_Landscape->getZone(id) - and its pristine carriers, dirty flags and undo stack are
+ * untouched by how the display is built. That is what makes flipping modes cheap enough to
+ * hang off a keypress rather than something the artist has to think about.
+ */
+bool zpSyncLandscapeWeld()
+{
+	if (!g_PaintCtx.Zones || !g_PaintCtx.Land)
+		return true;
+	NL3D::CLandscape &land = g_PaintCtx.Land->Landscape;
+	const std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
+	bool ok = true;
+
+	std::vector<NL3D::CZoneInfo> infos(zones.size());
+	std::vector<bool> have(zones.size(), false);
+	for (size_t i = 0; i < zones.size(); ++i)
+	{
+		NL3D::CZone *lz = land.getZone((sint)zones[i].ZoneId);
+		if (!lz)
+			continue;
+		zpLiveZoneInfo(lz, zones[i], infos[i]);
+		have[i] = true;
+	}
+	for (size_t i = 0; i < zones.size(); ++i)
+		if (have[i])
+			land.removeZone((uint16)zones[i].ZoneId);
+	for (size_t i = 0; i < zones.size(); ++i)
+	{
+		if (!have[i])
+			continue;
+		NL3D::CZone zone;
+		zone.build(infos[i]);
+		NL3D::CZoneCornerSmoother cornerSmoother;
+		std::vector<NL3D::CZone *> emptyVector;
+		cornerSmoother.computeAllCornerSmoothFlags(&zone, emptyVector);
+		if (!land.addZone(zone))
+		{
+			fprintf(stderr, "ERROR: weld rebuild: addZone failed for zone %u '%s'\n",
+			        zones[i].ZoneId, zones[i].Name.c_str());
+			ok = false;
+		}
+	}
+	land.setRefineMode(true);
+	if (g_verbose)
+		printf("landscape rebuilt %s\n", g_WeldedLandscape ? "welded" : "unwelded");
+	return ok;
+}
+
 void zpSelectMode(int mode)
 {
 	if (!g_PaintCtx.Active || !g_PaintCtx.Paint) return;
 	if (mode < 0) mode = 0;
 	if (mode > CPaintMouseListener::ModePatch) mode = CPaintMouseListener::ModePatch;
 	g_PaintCtx.Paint->Mode = mode;
-	// Entering patch edit lands on Object level, the artist picks a sub-object
+// Welds serve painting and actively hide patch edits (see buildDisplayZone), so the weld
+// state follows the mode. Only on a CHANGE - the rebuild is cheap but not free, and
+// re-selecting the mode you are already in should do nothing.
+{
+bool want = mode != CPaintMouseListener::ModePatch;
+// Dev hook, alongside ZONE_PAINTER_GIZMO_DRAG: pin the weld state so a gate can run the
+// SAME script both ways and assert the difference. Without a negative control "the seam
+// is visible" is a claim about a screenshot rather than about the build.
+const char *dev = getenv("ZONE_PAINTER_FORCE_WELD");
+if (dev && *dev)
+want = *dev != '0';
+if (want != g_WeldedLandscape)
+{
+g_WeldedLandscape = want;
+zpSyncLandscapeWeld();
+}
+}
+// Entering patch edit lands on Object level: the artist picks a sub-object
 	// level deliberately, and arriving already in vertex mode makes the first click surprising.
 	if (mode == CPaintMouseListener::ModePatch)
 		g_PaintCtx.Paint->SubObj = CPaintMouseListener::SubObject;
@@ -1721,11 +1825,9 @@ bool zpPatchPushLive(bool preview)
 				if (t->first == *it) touched.erase(t++);
 				else ++t;
 			}
-			// Rebuild from what the LIVE zone knows, not from the display cage. pz.Patches
-			// carries the geometry but its tile records are the ones assembly loaded: every
-			// tile, colour and lumel painted since then lives in the landscape zone and the
-			// pristine carrier, and building from the cage would revert all of it on screen.
-			// So retrieve the live zone whole and replace only the Bezier.
+			// Same construction the weld rebuild uses: keep everything the live zone
+			// accumulated, take the geometry from the cage. Building from the cage alone
+			// would fix the geometry and revert every painted tile.
 			NL3D::CZoneInfo zi;
 			NL3D::CZone *mlz = land.getZone((sint)*it);
 			if (!mlz)
@@ -1733,9 +1835,7 @@ bool zpPatchPushLive(bool preview)
 				ok = false;
 				continue;
 			}
-			mlz->retrieve(zi);
-			for (size_t p = 0; p < zi.Patchs.size() && p < pz->Patches.size(); ++p)
-				zi.Patchs[p].Patch = pz->Patches[p].Patch;
+			zpLiveZoneInfo(mlz, *pz, zi);
 			NL3D::CZone zone;
 			zone.build(zi);
 			NL3D::CZoneCornerSmoother cornerSmoother;
@@ -2182,56 +2282,6 @@ static bool zpVertAliased(uint zoneId, uint vertIdx, uint &otherZone)
 	return false;
 }
 
-/**
- * Every (node, vertex) that has to move with this one because the session weld made them the
- * same point of the surface.
- *
- * A weld is not a hint: the two sides of a seam are one place, and the .max files on either
- * side agree about it only for as long as they move together. Moving one alone tears the
- * surface AND leaves two files disagreeing about their shared border, which the exporter has
- * no way to reconcile.
- *
- * Transitive, because a corner where three or four zones meet is one point too, and reaching
- * it from any of them must find all of them. Read-only nodes are counted and skipped: their
- * files cannot be written, so the seam against context genuinely does open and the caller
- * says so rather than pretending otherwise.
- */
-static void zpWeldClosure(uint zoneId, uint16 vertIdx, std::set<TPatchVertId> &out,
-                          uint &roSkipped)
-{
-	std::vector<TPatchVertId> stack;
-	const TPatchVertId seed((uint)zoneId, vertIdx);
-	out.insert(seed);
-	stack.push_back(seed);
-	while (!stack.empty())
-	{
-		const TPatchVertId cur = stack.back();
-		stack.pop_back();
-		const SPaintZone *pz = zpFindPaintZone(cur.first);
-		if (!pz)
-			continue;
-		for (size_t i = 0; i < pz->BorderVertices.size(); ++i)
-		{
-			const NL3D::CBorderVertex &bv = pz->BorderVertices[i];
-			if (bv.CurrentVertex != cur.second)
-				continue;
-			const TPatchVertId nx((uint)bv.NeighborZoneId, bv.NeighborVertex);
-			if (out.count(nx))
-				continue;
-			const SPaintZone *nz = zpFindPaintZone(nx.first);
-			if (!nz)
-				continue;
-			if (!nz->Editable)
-			{
-				++roSkipped;
-				continue;
-			}
-			out.insert(nx);
-			stack.push_back(nx);
-		}
-	}
-}
-
 void zpPatchVertSelect(uint zoneId, uint vertIdx, int op)
 {
 	const TPatchVertId id((uint)zoneId, (uint16)vertIdx);
@@ -2250,46 +2300,18 @@ void zpPatchVertSelect(uint zoneId, uint vertIdx, int op)
 			}
 		}
 	}
-	// Welded partners join the selection HERE rather than at the commit, so the markers, the
-	// gizmo centroid and the live preview all show what is actually going to move. Propagating
-	// at commit would draw a seam tearing open and then heal it on release.
-	std::set<TPatchVertId> group;
-	uint roSkipped = 0;
-	if (g_PatchWeldSelect)
-		zpWeldClosure(zoneId, (uint16)vertIdx, group, roSkipped);
-	else
-		group.insert(id);
-
+	// A click selects what was clicked, and nothing else. Welded partners are NOT dragged in:
+	// in patch mode the landscape is built apart (see buildDisplayZone), so a seam is two
+	// vertices in two files and the artist can see it. Propagating across a session's welds
+	// would also have made the same edit mean different things depending on which files
+	// happened to be open, which is not a property an authoring tool should have.
 	if (op == 0)
 		g_PatchVertSel.clear();
-	uint aliasSkipped = 0;
-	for (std::set<TPatchVertId>::const_iterator it = group.begin(); it != group.end(); ++it)
-	{
-		if (op == 2)
-		{
-			g_PatchVertSel.erase(*it);
-			continue;
-		}
-		// A seam can pair one object vertex with ITSELF seen through two nodes - a brick
-		// welded to its own instance at a shared corner. That is one storage location, so it
-		// is selected once, exactly as the add path refuses.
-		uint other = 0;
-		if (zpVertAliased(it->first, it->second, other))
-		{
-			++aliasSkipped;
-			continue;
-		}
-		g_PatchVertSel.insert(*it);
-	}
-	if (op != 2 && group.size() > 1)
-		g_PropStatusMsg = NLMISC::toString("%u welded vertices selected",
-			(uint)group.size() - aliasSkipped);
-	if (roSkipped)
-		g_PropStatusMsg = NLMISC::toString(
-			"%u welded partner(s) are read-only context: that seam will open", roSkipped);
+	if (op == 2)
+		g_PatchVertSel.erase(id);
+	else
+		g_PatchVertSel.insert(id);
 	zpPatchGizmoInvalidate(); // the centroid moved, so its depth did, so the fit is stale
-	// The user's action, not its expansion: a replay re-derives the same weld group, and
-	// recording the members would pin a session's welds into a script that outlives them.
 	ZPSCRIPT::record(NLMISC::toString("painter.selectPatchVertex(%u, %u, %d)", zoneId, vertIdx, op));
 }
 
@@ -2297,7 +2319,7 @@ void zpPatchVertSelect(uint zoneId, uint vertIdx, int op)
  * Project the current level's selection onto the vertex set the move machinery consumes.
  *
  * Edge and patch levels move VERTICES - edge move is its two corners, patch move is
- * its four - so the whole gizmo/preview/weld/write chain works unchanged and only the thing
+ * its four - so the whole gizmo/preview/write chain works unchanged and only the thing
  * being pointed at differs. The level's own set stays the authority and this is recomputed
  * from scratch every time, which is what makes removing one edge of a pair that shared a
  * corner leave that corner selected rather than dropping it.
@@ -2332,23 +2354,14 @@ void zpRebuildVertSelFromSubObject()
 				want.insert(TPatchVertId(it->first, pz->Patches[it->second].BaseVertices[c]));
 		}
 	}
-	// Same two rules the vertex level applies, for the same reasons: a welded seam is one
-	// point, and one object vertex reached through two nodes is one storage location.
+	// Same rule the vertex level applies: one object vertex reached through two nodes is one
+	// storage location, so it goes in once.
 	for (std::set<TPatchVertId>::const_iterator it = want.begin(); it != want.end(); ++it)
 	{
-		std::set<TPatchVertId> group;
-		uint roSkipped = 0;
-		if (g_PatchWeldSelect)
-			zpWeldClosure(it->first, it->second, group, roSkipped);
-		else
-			group.insert(*it);
-		for (std::set<TPatchVertId>::const_iterator g = group.begin(); g != group.end(); ++g)
-		{
-			uint other = 0;
-			if (zpVertAliased(g->first, g->second, other))
-				continue;
-			g_PatchVertSel.insert(*g);
-		}
+		uint other = 0;
+		if (zpVertAliased(it->first, it->second, other))
+			continue;
+		g_PatchVertSel.insert(*it);
 	}
 	zpPatchGizmoInvalidate();
 }

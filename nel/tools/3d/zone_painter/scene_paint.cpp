@@ -916,7 +916,34 @@ uint weldPaintZones(std::vector<SPaintZone> &zones)
 // list, like the plugin did).
 void buildDisplayZone(const SPaintZone &pz, NL3D::CZone &zone)
 {
-	zone.build((uint16)pz.ZoneId, pz.Patches, pz.BorderVertices);
+	// Cross-zone welds are a PAINT relationship, not a fact about the geometry: weldPaintZones
+	// derives them at load by scanning for coincident edges, so tile transitions can propagate
+	// across a border and checkSeams can see one. Patch editing wants the opposite. CZone::
+	// compile does not merely bind welded zones, it ALIASES their corners -
+	// `BaseVertices[cur] = zone->getBaseVertex(vertto)` - so the two sides of a seam become one
+	// CTessVertex and an edit that breaks the seam is structurally invisible: there is only one
+	// vertex there, holding whichever position was written last. A surface that cannot show the
+	// edit being made is worse than a visible gap, so in patch mode the zones are built apart
+	// and the seam is left to show.
+	//
+	// Only CROSS-zone binds go; a zone's own patches stay bound to each other, or its interior
+	// would fall apart too. The paint-zone data is untouched either way - paint_core reads
+	// BindEdges straight from it - so switching modes is a landscape rebuild, not a reload.
+	if (g_WeldedLandscape)
+	{
+		zone.build((uint16)pz.ZoneId, pz.Patches, pz.BorderVertices);
+	}
+	else
+	{
+		std::vector<NL3D::CPatchInfo> patches = pz.Patches;
+		for (size_t p = 0; p < patches.size(); ++p)
+			for (uint e = 0; e < 4; ++e)
+				if (patches[p].BindEdges[e].NPatchs != 0
+				    && patches[p].BindEdges[e].ZoneId != (uint16)pz.ZoneId)
+					patches[p].BindEdges[e].NPatchs = 0;
+		const std::vector<NL3D::CBorderVertex> noBorder;
+		zone.build((uint16)pz.ZoneId, patches, noBorder);
+	}
 	NL3D::CZoneCornerSmoother cornerSmoother;
 	std::vector<NL3D::CZone *> emptyVector;
 	cornerSmoother.computeAllCornerSmoothFlags(&zone, emptyVector);
