@@ -1325,7 +1325,12 @@ bool			CZone::setPatchGeometry(sint patch, const CBezierPatch &bezier)
 	nlassert(patch>=0 && patch<(sint)Patchs.size());
 
 	// Range check first, over every control point, so a partial write is impossible.
-	// 32760 matches computeBBScaleBias, which derives PatchScale from it.
+	//
+	// The bound is what pack() can REPRESENT (sint16), not the 32760 computeBBScaleBias
+	// divides by. Those are different numbers and the difference is load-bearing: the bbox is
+	// sized from the patch VERTICES plus a noise margin, while tangents and interiors may lie
+	// outside that hull, so untouched corpus geometry legitimately sits between 32760 and
+	// 32767. Rejecting at 32760 refuses zones nobody has edited.
 	const CVector	&bias= PatchBias;
 	const float		scale= PatchScale;
 	if(scale<=0.f)
@@ -1338,7 +1343,7 @@ bool			CZone::setPatchGeometry(sint patch, const CBezierPatch &bezier)
 		{
 			const CVector	&v= all[g][i];
 			const float	x= (v.x-bias.x)/scale, y= (v.y-bias.y)/scale, z= (v.z-bias.z)/scale;
-			if(fabs(x)>=32760.f || fabs(y)>=32760.f || fabs(z)>=32760.f)
+			if(x<-32768.f || x>32767.f || y<-32768.f || y>32767.f || z<-32768.f || z>32767.f)
 				return false;
 		}
 	}

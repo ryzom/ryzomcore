@@ -1722,6 +1722,13 @@ if (*it < pz.Ep.Rp.Verts.size() && pz.Ep.Rp.Verts[*it].Binded)
 		written += n;
 	}
 
+	// KNOWN DEFECT (multi-file working sets): for zones beyond the first file the control
+	// points handed to setPatchGeometry land far outside the target zone's packed range -
+	// observed at 69026 against a limit of 32767, i.e. ~170 world units from the centre of a
+	// zone whose radius is 81. A Bezier tangent cannot legitimately be there, so the display
+	// patchinfo and the landscape zone this looks up by id are not the same zone. The FILE
+	// write is unaffected and gated; only the live surface refresh is, and it reports rather
+	// than writing a wrong surface. Single-file sessions are unaffected.
 	// Push the committed positions into the live surface HERE rather than at the drag's
 	// release: a scripted move (painter.movePatchSelection) never goes through the drag path,
 	// and would otherwise write the file correctly while leaving the landscape stale.
@@ -1818,9 +1825,68 @@ bool zpPickPatchVertex(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, f
 	return found;
 }
 
+/** The zone's underlying .max object. Instances SHARE this with their source. */
+static const void *zpZoneNode(uint zoneId)
+{
+	if (!g_PaintCtx.Zones)
+		return NULL;
+	const std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
+	for (uint z = 0; z < zones.size(); ++z)
+		if (zones[z].ZoneId == zoneId)
+			return (const void *)zones[z].Node;
+	return NULL;
+}
+
+/**
+ * Is this vertex already selected through a DIFFERENT zone backed by the same object?
+ *
+ * cloneInstanceZone copies the SPaintZone wholesale, so an instance shares its source's Node
+ * and therefore its storage: (node, vertex) is the identity of the thing being moved, while
+ * (zone, vertex) is only how it was pointed at. Selecting one underlying vertex through two
+ * instances would apply the drag to that single storage location twice - and because each
+ * instance carries its own display transform, the two object-space deltas would not even
+ * agree. There is no correct answer to give, so the selection is refused instead.
+ *
+ * DIFFERENT vertices of the same object through different instances share nothing and are
+ * explicitly allowed: authoring an edge from whichever instance shows it best is the point.
+ */
+static bool zpVertAliased(uint zoneId, uint vertIdx, uint &otherZone)
+{
+	const void *node = zpZoneNode(zoneId);
+	if (!node)
+		return false;
+	for (std::set<TPatchVertId>::const_iterator it = g_PatchVertSel.begin();
+	     it != g_PatchVertSel.end(); ++it)
+	{
+		if (it->first == zoneId || it->second != (uint16)vertIdx)
+			continue;
+		if (zpZoneNode(it->first) == node)
+		{
+			otherZone = it->first;
+			return true;
+		}
+	}
+	return false;
+}
+
 void zpPatchVertSelect(uint zoneId, uint vertIdx, int op)
 {
 	const TPatchVertId id((uint)zoneId, (uint16)vertIdx);
+	if (op != 2) // a removal can never create an alias
+	{
+		uint other = 0;
+		if (zpVertAliased(zoneId, vertIdx, other))
+		{
+			// Replace still clears first, so the alias only blocks an ADD; a plain click
+			// re-selecting through another instance is a legitimate change of viewpoint.
+			if (op == 1)
+			{
+				g_PropStatusMsg = NLMISC::toString(
+					"vertex %u already selected via zone %u (same object)", vertIdx, other);
+				return;
+			}
+		}
+	}
 	if (op == 0)
 	{
 		g_PatchVertSel.clear();
