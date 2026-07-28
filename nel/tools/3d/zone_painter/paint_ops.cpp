@@ -11,7 +11,7 @@
  */
 
 /*
- * Copyright (C) 2026  by authors
+ * Copyright (C) 2026 by authors
  *
  * This file is part of RYZOM CORE PIPELINE.
  * RYZOM CORE PIPELINE is free software: you can redistribute it
@@ -21,11 +21,11 @@
  *
  * RYZOM CORE PIPELINE is distributed in the hope that it will be
  * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public
- * License along with RYZOM CORE PIPELINE.  If not, see
+ * License along with RYZOM CORE PIPELINE. If not, see
  * <http://www.gnu.org/licenses/>.
  */
 
@@ -1744,6 +1744,16 @@ bool CPaintCore::writeBack(std::string &err)
 	return true;
 }
 
+void CPaintCore::markGeomDirty(uint zoneId)
+{
+	m_GeomDirty.insert(zoneId);
+}
+
+bool CPaintCore::geomDirty(uint zoneId) const
+{
+	return m_GeomDirty.count(zoneId) != 0;
+}
+
 bool CPaintCore::isZoneDirty(uint zoneId) const
 {
 	for (size_t i = 0; i < m_Zones.size(); ++i)
@@ -1755,6 +1765,8 @@ bool CPaintCore::isZoneDirty(uint zoneId) const
 		if (m_Zones[i].In.Frozen)
 			return false;
 		if (propsDirty((uint)i))
+			return true;
+		if (geomDirty(zoneId))
 			return true;
 		const SCarrier &car = m_Carriers[m_Zones[i].Carrier];
 		if (!car.AnyUnfrozen)
@@ -1809,6 +1821,10 @@ bool CPaintCore::anyZoneDirty(const std::vector<uint> &zoneIds) const
 
 void CPaintCore::markZonesSaved(const std::vector<uint> &zoneIds)
 {
+	// Geometry writes went straight into the chunk tree, so once the file is on disk they are
+	// committed - there is no re-encode baseline to refresh, only the flag to drop.
+	for (size_t z = 0; z < zoneIds.size(); ++z)
+		m_GeomDirty.erase(zoneIds[z]);
 	std::set<uint> carriers;
 	for (size_t z = 0; z < zoneIds.size(); ++z)
 	{
@@ -1913,7 +1929,7 @@ void CPaintCore::dumpRpo(FILE *out) const
 			for (int u = 0; u < os; ++u)
 			{
 				const SRpoTile &t = up.Tiles[u + v * os];
-				fprintf(out, "  tile %d %d: num=%u flags=0x%04x noise=%u l0=(%d,r%d) l1=(%d,r%d) l2=(%d,r%d)\n",
+				fprintf(out, " tile %d %d: num=%u flags=0x%04x noise=%u l0=(%d,r%d) l1=(%d,r%d) l2=(%d,r%d)\n",
 				        u, v, t.Num, t.Flags, t.Noise,
 				        t.Layer[0].Tile, t.Layer[0].Rotate,
 				        t.Layer[1].Tile, t.Layer[1].Rotate,
@@ -1921,7 +1937,7 @@ void CPaintCore::dumpRpo(FILE *out) const
 			}
 			for (int v = 0; v < ot + 1; ++v)
 			for (int u = 0; u < os + 1; ++u)
-				fprintf(out, "  color %d %d: 0x%08x\n", u, v, up.Colors[u + v * (os + 1)]);
+				fprintf(out, " color %d %d: 0x%08x\n", u, v, up.Colors[u + v * (os + 1)]);
 		}
 	}
 }

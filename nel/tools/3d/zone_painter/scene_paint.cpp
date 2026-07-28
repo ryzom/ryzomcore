@@ -13,7 +13,7 @@
  */
 
 /*
- * Copyright (C) 2026  by authors
+ * Copyright (C) 2026 by authors
  *
  * This file is part of RYZOM CORE PIPELINE.
  * RYZOM CORE PIPELINE is free software: you can redistribute it
@@ -23,11 +23,11 @@
  *
  * RYZOM CORE PIPELINE is distributed in the hope that it will be
  * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public
- * License along with RYZOM CORE PIPELINE.  If not, see
+ * License along with RYZOM CORE PIPELINE. If not, see
  * <http://www.gnu.org/licenses/>.
  */
 
@@ -187,13 +187,13 @@ bool writeZoneV4(NL3D::CZone &zone, const std::string &path)
 // board footprint also derives from that single eligible zone.
 //
 // Mirrors pipeline_max_export_zone + ligo/zone maxscript selection:
-//   - collectZoneNodes skips [NELLIGO] debug markers (shared patch_eval rule).
-//   - zonematerial- / zonespecial-: export requires exactly one. If multiple non-frozen,
-//     prefer node name matching the cell token (case-insensitive); otherwise first
-//     non-frozen is eligible, rest RO.
-//   - zonetransition-: exception: all non-frozen (9-slot transition scheme at export).
-//   - otherwise (direct ExportRykolZone / continent .max): first RklPatch that is not
-//     DONOTEXPORT and has a findID-parseable name (exportDirectZone loop); rest RO.
+// - collectZoneNodes skips [NELLIGO] debug markers (shared patch_eval rule).
+// - zonematerial- / zonespecial-: export requires exactly one. If multiple non-frozen,
+// prefer node name matching the cell token (case-insensitive); otherwise first
+// non-frozen is eligible, rest RO.
+// - zonetransition-: exception: all non-frozen (9-slot transition scheme at export).
+// - otherwise (direct ExportRykolZone / continent .max): first RklPatch that is not
+// DONOTEXPORT and has a findID-parseable name (exportDirectZone loop); rest RO.
 //
 // File-frozen (0x0976) always remain frozen. --all-zones is an escape hatch only
 // (open-everything); not the authoring default.
@@ -211,7 +211,7 @@ void computeZoneEligibility(const std::vector<SZoneNode> &nodes,
 	if (g_AllZones)
 	{
 		for (size_t i = 0; i < nodes.size(); ++i)
-			eligible[i] = !nodes[i].Frozen; // still respect 0x0976 under --all-zones? 
+			eligible[i] = !nodes[i].Frozen; // still respect 0x0976 under --all-zones?
 		// Today open-everything = non-0x0976 only. Match that.
 		return;
 	}
@@ -344,7 +344,7 @@ bool boardSkipEmbedded()
  * Append paint zones from one Max scene.
  * zoneIdOffset: first zone id for this file (must not collide with existing zones).
  * forceFrozen: true for neighbor/context files (landscape + weld + metaTile, never paint,
- *   carriers never rewritten because AnyUnfrozen stays false).
+ * carriers never rewritten because AnyUnfrozen stays false).
  * fileBasename: used for exporter-faithful eligibility.
  *
  * Board authority: when boardSkipEmbedded(), non-eligible and 0x0976 nodes are NOT
@@ -415,6 +415,7 @@ bool buildPaintZones(CScene &scene, std::vector<SPaintZone> &zones,
 			continue;
 		}
 		pz.Ep = ep;
+		pz.ObjectTM = objectTM;
 		zones.push_back(pz);
 		any = true;
 		if (pz.Frozen) ++nRo; else ++nEligible;
@@ -704,16 +705,16 @@ uint appendInstanceZones(std::vector<SPaintZone> &zones, size_t primaryCount,
 		}
 		const std::string srcTag = pl.SourceBasename.empty()
 			? std::string() : (" '" + pl.SourceBasename + "'");
-		printf("  place[%u]%s origin cell (%d,%d) rot %u%s  occupies %dx%d cells [%d,%d)×[%d,%d)\n",
+		printf(" place[%u]%s origin cell (%d,%d) rot %u%s occupies %dx%d cells [%d,%d)×[%d,%d)\n",
 		       (uint)pi, srcTag.c_str(),
 		       pl.CellX, pl.CellY, pl.Rot, pl.Mirror ? " mirror" : "",
 		       bw, bh, pl.CellX, pl.CellX + bw, pl.CellY, pl.CellY + bh);
 	}
-	printf("instances: %u place(s)  footprint %dx%d cells step (%.1f, %.1f)  origin (%.1f, %.1f)  "
-	       "pivot (%.1f, %.1f)  primary zones %u  display zones +%u (ids from %u)\n",
+	printf("instances: %u place(s) footprint %dx%d cells step (%.1f, %.1f) origin (%.1f, %.1f) "
+	       "pivot (%.1f, %.1f) primary zones %u display zones +%u (ids from %u)\n",
 	       (uint)places.size(), cellsW, cellsH, stepX, stepY, originX, originY,
 	       pivotX, pivotY, (uint)primaryCount, appended, kInstanceZoneIdBase);
-	printf("  note: place dx,dy = min-corner of transformed block in fine cells; "
+	printf(" note: place dx,dy = min-corner of transformed block in fine cells; "
 	       "first-opened file footprint %dx%d (source=%s filled=%s)\n",
 	       cellsW, cellsH,
 	       g_FootprintFromTemplate ? "template" : "aabb-square",
@@ -723,7 +724,7 @@ uint appendInstanceZones(std::vector<SPaintZone> &zones, size_t primaryCount,
 	const bool pivotOnHalf = (std::fabs(std::fmod((double)pivotX, (double)halfCell)) < 1e-3
 	                          || std::fabs(std::fmod((double)pivotX, (double)halfCell) - halfCell) < 1e-3);
 	(void)pivotOnHalf;
-	printf("  pivot grid: pivot (%.3f, %.3f) = origin + half-step (%.3f, %.3f)\n",
+	printf(" pivot grid: pivot (%.3f, %.3f) = origin + half-step (%.3f, %.3f)\n",
 	       pivotX, pivotY, stepX * 0.5f, stepY * 0.5f);
 	return appended;
 }

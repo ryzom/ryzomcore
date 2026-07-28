@@ -34,25 +34,25 @@
  *
  * tileDesc <-> SRpoTile mapping (plugin nel_patch_lib/nel_patch_mesh.h <-> nelpatch/rpo_data.h,
  * the on-disk v9 record):
- *   _Num                 <-> SRpoTile.Num       used-layer count 0..3 (0 = empty tile)
- *   _Flags bits 0-2      <-> SRpoTile.Flags     tile case: 0 = 128x128, 1..4 = 256 quadrant+1
- *   _Flags bits 3-6      <-> SRpoTile.Flags     displace map index 0..15 ...
- *   (displace)           <-> SRpoTile.Noise     ... duplicated in the v9 noise byte; the
- *                            original loader's setDisplace(Noise) makes Noise authoritative on
- *                            read, so displace READS from Noise and writes keep both in sync
- *   _Flags bits 7-15     <-> SRpoTile.Flags     legacy/dead bits many corpus records carry;
- *                            the original loader keeps them in memory and re-saves them, so
- *                            descs preserve them verbatim through get -> set (fresh descs
- *                            start zeroed, exactly like the plugin's tileDesc())
- *   _MatIDTab[l].Tile    <-> SRpoTile.Layer[l].Tile    bank tile index (layer 0 = base 1111)
- *   _MatIDTab[l].Rotate  <-> SRpoTile.Layer[l].Rotate  0..3 CCW
- *   untouched on edit: Layer[l].Reserved, OldA/OldB (write-direction retention fields).
+ * _Num <-> SRpoTile.Num used-layer count 0..3 (0 = empty tile)
+ * _Flags bits 0-2 <-> SRpoTile.Flags tile case: 0 = 128x128, 1..4 = 256 quadrant+1
+ * _Flags bits 3-6 <-> SRpoTile.Flags displace map index 0..15 ...
+ * (displace) <-> SRpoTile.Noise ... duplicated in the v9 noise byte; the
+ * original loader's setDisplace(Noise) makes Noise authoritative on
+ * read, so displace READS from Noise and writes keep both in sync
+ * _Flags bits 7-15 <-> SRpoTile.Flags legacy/dead bits many corpus records carry;
+ * the original loader keeps them in memory and re-saves them, so
+ * descs preserve them verbatim through get -> set (fresh descs
+ * start zeroed, exactly like the plugin's tileDesc())
+ * _MatIDTab[l].Tile <-> SRpoTile.Layer[l].Tile bank tile index (layer 0 = base 1111)
+ * _MatIDTab[l].Rotate <-> SRpoTile.Layer[l].Rotate 0..3 CCW
+ * untouched on edit: Layer[l].Reserved, OldA/OldB (write-direction retention fields).
  * Grid order: SRpoPatch.Tiles is u + v*OrderS (OrderS = 1<<NbTilesU); Colors is
  * u + v*(OrderS+1), 0x00RRGGBB.
  */
 
 /*
- * Copyright (C) 2026  by authors
+ * Copyright (C) 2026 by authors
  *
  * This file is part of RYZOM CORE PIPELINE.
  * RYZOM CORE PIPELINE is free software: you can redistribute it
@@ -62,11 +62,11 @@
  *
  * RYZOM CORE PIPELINE is distributed in the hope that it will be
  * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public
- * License along with RYZOM CORE PIPELINE.  If not, see
+ * License along with RYZOM CORE PIPELINE. If not, see
  * <http://www.gnu.org/licenses/>.
  */
 
@@ -196,14 +196,14 @@ struct SPaintTile
 {
 	sint32 Patch;
 	sint32 TileId; // patch*ZP_NUM_TILE_SEL + v*ZP_MAX_TILE_IN_PATCH + u
-	sint16 Zone;   // paint zone index (== landscape zone id)
+	sint16 Zone; // paint zone index (== landscape zone id)
 	uint8 U, V;
 	bool Frozen;
 	uint8 Locked; // per-edge bit: neighbor missing or frozen
 	SPaintTile *Voisins[4];
 	uint8 Rotate[4];
 	NLMISC::CVector Center; // world center of the tile quad (color brush range test)
-	float Radius;           // max corner distance from Center
+	float Radius; // max corner distance from Center
 
 	SPaintTile() : Patch(-1), TileId(-1), Zone(-1), U(0), V(0), Frozen(false), Locked(0), Radius(0.f)
 	{
@@ -256,14 +256,14 @@ struct SPaintZoneInput
 	bool Frozen;
 	uint ZoneId; // node collection index == landscape zone id
 	std::string Name;
-	const std::vector<NL3D::CPatchInfo> *Patches;       // display patchinfo, world space
-	const PIPELINE::MAX::NELPATCH::SPatchMesh *Pm;      // evaluated topology (edges, patch verts)
+	const std::vector<NL3D::CPatchInfo> *Patches; // display patchinfo, world space
+	const PIPELINE::MAX::NELPATCH::SPatchMesh *Pm; // evaluated topology (edges, patch verts)
 	const PIPELINE::MAX::NELPATCH::SRPatchMesh *EvalRp; // evaluated rp (binds, tile orders)
 	// Display-space transform of this zone (plugin EPM_Mesh::Rotate/Symmetry from
 	// NEL3D_APPDATA_ZONE_ROTATE / _SYMMETRY; land placement CZoneRegion Rot/Flip).
 	// Primary authored bricks are (0, false). Rotated/mirrored self-instances set these
 	// so getTile/setTile assemble transformDesc.
-	uint Rotate;   // 0..3, 90° CCW steps
+	uint Rotate; // 0..3, 90° CCW steps
 	bool Symmetry; // mirror (Flip)
 	SPaintZoneInput() : Node(NULL), Frozen(false), ZoneId(0), Patches(NULL), Pm(NULL), EvalRp(NULL),
 	                    Rotate(0), Symmetry(false) { }
@@ -281,7 +281,7 @@ struct SPaintZoneInput
  * (0x1130 -> 0x1000). The mapper is what makes this non-obvious: for every record whose
  * Vert >= 0, evaluation OVERWRITES the stored final position with
  *
- *     out.Verts[record.Vert].Pos = input.Verts[recordIndex].Pos + record.Delta
+ * out.Verts[record.Vert].Pos = input.Verts[recordIndex].Pos + record.Delta
  *
  * so for a mapped vertex the stored 0x1140 position is dead bytes. Writing it changes
  * nothing. The delta is the live value.
@@ -289,11 +289,11 @@ struct SPaintZoneInput
  * Hence, per output vertex of the TOPMOST edit-patch modifier (its output is what is
  * displayed, so the policy is local to it - no recursion into the stack):
  *
- *   mapped   -> write Delta += move. Record layout is a flat 32-byte stride
- *               (OriginalStored, Vert, Original[3], Delta[3]) so Delta sits at a computable
- *               offset: 4 + i*32 + 20 for VertMap[i].
- *   unmapped -> write the stored 0x1140 position += move.
- *   no modifier stack at all -> write the base PatchMesh position += move.
+ * mapped -> write Delta += move. Record layout is a flat 32-byte stride
+ * (OriginalStored, Vert, Original[3], Delta[3]) so Delta sits at a computable
+ * offset: 4 + i*32 + 20 for VertMap[i].
+ * unmapped -> write the stored 0x1140 position += move.
+ * no modifier stack at all -> write the base PatchMesh position += move.
  *
  * All three are 12-byte in-place overwrites of three floats - no chunk resizes, no re-encode,
  * so an untouched file stays byte-identical. That is what makes this Tier A.
@@ -337,11 +337,11 @@ struct SUndoTile
 	sint32 TileId; // tile kind
 	CTileDescP Old;
 	CTileDescP New;
-	sint32 Patch, S, T;         // color kind: grid slot
-	uint32 OldColor, NewColor;  // color kind: raw 0xAARRGGBB values
+	sint32 Patch, S, T; // color kind: grid slot
+	uint32 OldColor, NewColor; // color kind: raw 0xAARRGGBB values
 	// Kind 2:
 	uint32 AppDataId;
-	bool OldHas, NewHas;        // entry present?
+	bool OldHas, NewHas; // entry present?
 	std::string OldValue, NewValue; // string payload without trailing NUL
 	// Kind 0 only: raw pristine tile-record snapshots (authored space, exact on-disk values)
 	// captured around setTileDesc. Undo/redo restores these verbatim after the desc-based
@@ -524,6 +524,15 @@ public:
 	// Also ORs export-prop appdata drift (ROTATE/SYMMETRY/PASSABLE/USE_BOUNDINGBOX) against a
 	// per-zone snapshot taken at init and refreshed by markZonesSaved: appdata lives outside
 	// the carriers, so blob compare alone cannot see prop edits.
+	/**
+	 * Geometry edits are invisible to the blob compare below: it re-encodes the RPO pristine
+	 * copy, while a vertex move writes the PatchMesh (0x1140 / base 0x0BE0) or a mapper delta
+	 * (0x1130). Those chunks are mutated in place, so nothing about them shows up in an RPO
+	 * encode. This flag is the geometry half of the dirty signal.
+	 */
+	void markGeomDirty(uint zoneId);
+	bool geomDirty(uint zoneId) const;
+
 	bool isZoneDirty(uint zoneId) const;
 	/** True when any unfrozen carrier of the listed zone ids differs from its load-time blob. */
 	bool anyZoneDirty(const std::vector<uint> &zoneIds) const;
@@ -571,10 +580,10 @@ private:
 	struct SCarrier
 	{
 		PIPELINE::MAX::NELPATCH::CRklPatchObject *Rpo; // base 0x08FD carrier (when SnapLeaf NULL)
-		PIPELINE::MAX::CStorageRaw *SnapLeaf;          // topmost 0x4001 leaf, or NULL
+		PIPELINE::MAX::CStorageRaw *SnapLeaf; // topmost 0x4001 leaf, or NULL
 		PIPELINE::MAX::NELPATCH::SRPatchMesh *Pristine;
 		std::vector<uint8> OriginalBytes; // raw blob bytes as loaded (0x4001 payload or 0x08FD payload)
-		std::vector<uint> Zones;          // paint zones sharing this carrier
+		std::vector<uint> Zones; // paint zones sharing this carrier
 		bool AnyUnfrozen;
 		SCarrier() : Rpo(NULL), SnapLeaf(NULL), Pristine(NULL), AnyUnfrozen(false) { }
 	};
@@ -606,15 +615,15 @@ private:
 	int m_StrokeRotation; // plugin EPM_PaintMouseProc::Rotation
 	sint32 m_StrokeOldTile;
 	sint32 m_StrokeOldZone;
-	uint m_BrushSize;  // 0-2 (plugin brushSize)
-	uint m_TileGroup;  // 0 = none, 1..12 (plugin TileGroup)
+	uint m_BrushSize; // 0-2 (plugin brushSize)
+	uint m_TileGroup; // 0 = none, 1..12 (plugin TileGroup)
 	// color-brush mask state (CPaintColor _BrushBitmap/_bBrush port)
 	NLMISC::CBitmap m_BrushMask;
 	bool m_BrushMaskLoaded;
 	bool m_BrushMaskMode;
 	std::string m_BrushMaskName;
 	sint m_StoredIncludeMeshes; // -1 unknown / 0 / 1 (RPO_INCLUDE_MESHES 0x4003)
-	sint m_StoredPreloadTiles;  // -1 unknown / 0 / 1 (RPO_PRELOAD_TILES 0x4010)
+	sint m_StoredPreloadTiles; // -1 unknown / 0 / 1 (RPO_PRELOAD_TILES 0x4010)
 	// last-edit marker (see lastEditPos)
 	bool m_HaveLastEdit;
 	NLMISC::CVector m_LastEditPos;
@@ -721,6 +730,7 @@ private:
 	// Export-prop snapshot helpers (appdata outside carriers)
 	static void readPropSnap(PIPELINE::MAX::BUILTIN::CNodeImpl *node, SPropSnap &out);
 	bool propsDirty(uint zoneIdx) const;
+	std::set<uint> m_GeomDirty; // zone ids with an uncommitted geometry write
 };
 
 } /* namespace ZPPAINT */

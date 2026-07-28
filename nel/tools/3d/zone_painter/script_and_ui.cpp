@@ -1487,19 +1487,152 @@ void zpPatchGizmoUpdateDrag(NL3D::CCamera *camera, const NL3D::CViewport &vp,
 	s_DragDelta = delta;
 }
 
+uint zpApplyPatchMove(const NLMISC::CVector &worldDelta, std::string &msg)
+{
+	msg.clear();
+	if (!g_PaintCtx.Zones || g_PatchVertSel.empty())
+		return 0;
+	std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
+	uint written = 0, skippedBound = 0, refusedXform = 0;
+	uint nBase = 0, nModPm = 0, nDelta = 0; // which write target each vertex resolved to
+	std::string firstErr;
+
+	for (uint z = 0; z < zones.size(); ++z)
+	{
+		SPaintZone &pz = zones[z];
+		if (pz.Frozen || pz.ZoneId >= kInstanceZoneIdBase)
+			continue;
+
+		// Collect this zone's selected vertices once; a corner is reached from up to four
+		// patches and must be written exactly once.
+		std::set<uint16> want;
+		for (uint p = 0; p < pz.Patches.size(); ++p)
+			for (uint c = 0; c < 4; ++c)
+				if (g_PatchVertSel.count(TPatchVertId(pz.ZoneId, pz.Patches[p].BaseVertices[c])))
+					want.insert(pz.Patches[p].BaseVertices[c]);
+		if (want.empty())
+			continue;
+
+		// A rotated or mirrored zone's display space is not its object space, and getting the
+		// inverse subtly wrong writes plausible-looking garbage. Refuse rather than guess -
+		// authored primaries are (0, false), so this costs nothing today.
+		if (pz.Rotate != 0 || pz.Symmetry)
+		{
+			refusedXform += (uint)want.size();
+			continue;
+		}
+
+		// World delta -> object delta. Taking the difference of two transformed points drops
+		// the translation without needing the matrix internals.
+		const MAXMATH::Matrix3M inv = MAXMATH::inverseM3(pz.ObjectTM);
+		MAXMATH::Point3M zero = { 0.f, 0.f, 0.f };
+		MAXMATH::Point3M wd = { worldDelta.x, worldDelta.y, worldDelta.z };
+		const MAXMATH::Point3M o0 = MAXMATH::transformPoint(zero, inv);
+		const MAXMATH::Point3M o1 = MAXMATH::transformPoint(wd, inv);
+		const float od[3] = { o1.x - o0.x, o1.y - o0.y, o1.z - o0.z };
+
+		for (std::set<uint16>::const_iterator it = want.begin(); it != want.end(); ++it)
+		{
+			const uint16 vi = *it;
+			// Bound vertices are derived from a target edge; they are recomputed on load, so
+			// a written position could not survive the round trip.
+			if (vi < pz.Ep.Rp.Verts.size() && pz.Ep.Rp.Verts[vi].Binded)
+			{
+				++skippedBound;
+				continue;
+			}
+			ZPPAINT::SGeomWriteTarget t;
+			std::string err;
+			if (!ZPPAINT::resolveGeomWriteTarget(pz.Node, vi, t, err))
+			{
+				if (firstErr.empty()) firstErr = err;
+				continue;
+			}
+			float xyz[3];
+			if (!ZPPAINT::geomTargetGet(t, xyz))
+			{
+				if (firstErr.empty()) firstErr = "target read failed";
+				continue;
+			}
+			xyz[0] += od[0];
+			xyz[1] += od[1];
+			xyz[2] += od[2];
+			if (!ZPPAINT::geomTargetSet(t, xyz))
+			{
+				if (firstErr.empty()) firstErr = "target write failed";
+				continue;
+			}
+			// Keep the tool's own copies in step so the cage stays where it was dragged
+			// instead of snapping back to a stale evaluation.
+			if (vi < pz.Ep.Pm.Verts.size())
+			{
+				pz.Ep.Pm.Verts[vi].Pos[0] += od[0];
+				pz.Ep.Pm.Verts[vi].Pos[1] += od[1];
+				pz.Ep.Pm.Verts[vi].Pos[2] += od[2];
+			}
+			if (t.Kind == ZPPAINT::SGeomWriteTarget::BasePatchMesh) ++nBase;
+			else if (t.Kind == ZPPAINT::SGeomWriteTarget::ModifierPatchMesh) ++nModPm;
+			else ++nDelta;
+			++written;
+		}
+
+		// Display patchinfo: same offsets the preview drew, so release is visually a no-op.
+		for (uint p = 0; p < pz.Patches.size(); ++p)
+		{
+			NL3D::CPatchInfo &pi = pz.Patches[p];
+			for (uint c = 0; c < 4; ++c)
+			{
+				const uint16 vi = pi.BaseVertices[c];
+				if (!want.count(vi) || (vi < pz.Ep.Rp.Verts.size() && pz.Ep.Rp.Verts[vi].Binded))
+					continue;
+				pi.Patch.Vertices[c] += worldDelta;
+				pi.Patch.Tangents[c * 2] += worldDelta;
+				pi.Patch.Tangents[((c + 3) & 3) * 2 + 1] += worldDelta;
+			}
+		}
+		if (g_PaintCtx.Core && written)
+			g_PaintCtx.Core->markGeomDirty(pz.ZoneId);
+	}
+
+	if (!written)
+	{
+		if (refusedXform)
+			msg = "patch move: rotated/mirrored zone not supported yet";
+		else if (skippedBound)
+			msg = "patch move: bound vertices follow their edge, nothing to write";
+		else if (!firstErr.empty())
+			msg = "patch move: " + firstErr;
+	}
+	else if (skippedBound)
+	{
+		msg = NLMISC::toString("patch move: %u moved (base %u, modPM %u, delta %u), %u bound skipped",
+		                       written, nBase, nModPm, nDelta, skippedBound);
+	}
+	else
+	{
+		msg = NLMISC::toString("patch move: %u vertices (base %u, modPM %u, delta %u)",
+		                       written, nBase, nModPm, nDelta);
+	}
+	return written;
+}
+
 void zpPatchGizmoEndDrag()
 {
 	if (!s_Dragging)
 		return;
-	const bool moved = s_DragDelta.norm() > 0.0001f;
+	const NLMISC::CVector delta = s_DragDelta;
+	const bool moved = delta.norm() > 0.0001f;
 	s_Dragging = false;
 	s_DragHandle = ZPGIZ_NONE;
 	s_DragDelta = NLMISC::CVector::Null;
 	zpPatchGizmoInvalidate();
-	// Deliberately loud: the geometry write does not exist yet, so the preview is discarded
-	// on release. Saying nothing would let an artist believe an edit had been made.
-	if (moved)
-		g_PropStatusMsg = "patch move: preview only, not yet applied";
+	if (!moved)
+		return;
+	std::string msg;
+	zpApplyPatchMove(delta, msg);
+	g_PropStatusMsg = msg;
+	ZPSCRIPT::record(NLMISC::toString("painter.movePatchSelection(%.9g, %.9g, %.9g)",
+	                                  delta.x, delta.y, delta.z));
 }
 
 bool zpPickPatchVertex(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, float my,

@@ -263,6 +263,9 @@ struct SPaintZone
 	std::vector<NL3D::CPatchInfo> Patches;
 	std::vector<NL3D::CBorderVertex> BorderVertices;
 	SEvalPatch Ep;
+	/// offsetTM * nodeTM, as buildPatchInfo used it. Kept so a world-space edit can be taken
+	/// back to the object space the .max actually stores.
+	MAXMATH::Matrix3M ObjectTM;
 	uint Rotate;
 	bool Symmetry;
 	SPaintZone() : Node(NULL), Frozen(false), ZoneId(0), Rotate(0), Symmetry(false) { }
@@ -472,6 +475,12 @@ void zpPatchGizmoEndDrag();
 bool zpPatchGizmoDragging();
 /** Preview offset for one vertex: the live delta if it is selected and free, else zero. */
 const NLMISC::CVector &zpPatchVertDragOffset(uint zoneId, uint16 vertIdx);
+
+/**
+ * Commit a world-space move of the current vertex selection into the .max. Returns the number
+ * of vertices written; `msg` explains a zero (or a partial). Skips bound vertices by policy.
+ */
+uint zpApplyPatchMove(const NLMISC::CVector &worldDelta, std::string &msg);
 
 /** Left-click in patch/vertex mode; `buttons` carries the modifier bits (Ctrl add, Alt remove). */
 void zpPatchVertexClick(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, float my, uint buttons);
