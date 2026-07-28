@@ -1321,7 +1321,7 @@ static const NLMISC::CRGBA kTanColor(80, 230, 120, 255); // handle green
 		}
 	}
 
-	// Tangent handles, for SELECTED corners only. Max's rule, and the reason a dense cage does
+	// Tangent handles, for SELECTED corners only. The rule, and the reason a dense cage does
 	// not become a field of dots: a zone has four handles per patch corner, so showing them all
 	// would bury the corners they belong to.
 	//
@@ -1348,7 +1348,7 @@ static const NLMISC::CRGBA kTanColor(80, 230, 120, 255); // handle green
 			                     kPatchLift, v))
 				continue;
 			const bool sel = g_PatchTanSel.count(TPatchVertId(pz.ZoneId, vi)) != 0;
-			// Green is Max's handle colour, and being a different hue from the corners is what
+			// Green is handle colour, and being a different hue from the corners is what
 			// lets the two be told apart where a handle sits almost on top of its corner.
 			const NLMISC::CRGBA &hcol = sel ? kVertSelColor : kTanColor;
 			const float hx = floorf(v.x * (float)winW + 0.5f);
@@ -1515,6 +1515,141 @@ static int s_GizmoHover = -1;
 int zpPatchGizmoHover() { return s_GizmoHover; }
 void zpPatchGizmoInvalidate() { s_GizmoFitDirty = true; }
 
+// ---------------------------------------------------------------------------------------------
+// Pivot point (the pivot-point control). See TPivotMode in zp_state.h.
+
+// The "all objects" centre, held between interactions rather than recomputed per frame. That
+// is the whole point of the mode: a centre that moved WHILE you dragged would make a rotate
+// chase its own tail.
+static NLMISC::CVector s_AllObjCentre = NLMISC::CVector::Null;
+static bool s_AllObjValid = false;
+
+/** Centre of the display geometry of every editable node, or of just the ones in `only`. */
+static bool zpNodeCentre(const std::set<uint> *only, NLMISC::CVector &out)
+{
+	if (!g_PaintCtx.Zones)
+		return false;
+	const std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
+	NLMISC::CAABBox bb;
+	bool init = false;
+	for (uint z = 0; z < zones.size(); ++z)
+	{
+		const SPaintZone &pz = zones[z];
+		if (!pz.Editable)
+			continue;
+		if (only && !only->count(pz.ZoneId))
+			continue;
+		for (uint p = 0; p < pz.Patches.size(); ++p)
+			for (uint c = 0; c < 4; ++c)
+			{
+				// Bounding-box centre, not a vertex average: an average is pulled towards
+				// whichever part of the object happens to be finely tessellated, which is not
+				// what "the centre of this object" means to an artist.
+				if (!init) { bb.setCenter(pz.Patches[p].Patch.Vertices[c]); bb.setHalfSize(NLMISC::CVector::Null); init = true; }
+				else bb.extend(pz.Patches[p].Patch.Vertices[c]);
+			}
+	}
+	if (!init)
+		return false;
+	out = bb.getCenter();
+	return true;
+}
+
+void zpPivotNoteInteractionEnd()
+{
+	s_AllObjValid = false;
+}
+
+bool zpTransformPivot(NLMISC::CVector &out)
+{
+	switch (g_PivotMode)
+	{
+	case ZPPIV_World:
+		out = NLMISC::CVector::Null;
+		return true;
+	case ZPPIV_User:
+		if (!g_HaveUserPivot)
+			return false;
+		out = g_UserPivot;
+		return true;
+	case ZPPIV_AllObjects:
+		if (!s_AllObjValid)
+			s_AllObjValid = zpNodeCentre(NULL, s_AllObjCentre);
+		if (!s_AllObjValid)
+			return false;
+		out = s_AllObjCentre;
+		return true;
+	case ZPPIV_SelObjects:
+	{
+		// The nodes the selection lives in, not the selected sub-objects: rotating a corner
+		// about its own zone's centre is a different and useful thing from rotating it about
+		// the corner cloud.
+		std::set<uint> owners;
+		for (std::set<TPatchVertId>::const_iterator it = g_PatchVertSel.begin();
+		     it != g_PatchVertSel.end(); ++it)
+			owners.insert(it->first);
+		for (std::set<TPatchVertId>::const_iterator it = g_PatchTanSel.begin();
+		     it != g_PatchTanSel.end(); ++it)
+			owners.insert(it->first);
+		if (owners.empty())
+			return false;
+		return zpNodeCentre(&owners, out);
+	}
+	default:
+		break;
+	}
+	return zpPatchSelCentroid(out);
+}
+
+void zpSetPivotMode(int mode)
+{
+	if (mode < 0) mode = 0;
+	if (mode >= ZPPIV_Count) mode = ZPPIV_Count - 1;
+	if (mode == g_PivotMode)
+		return;
+	g_PivotMode = mode;
+	s_AllObjValid = false;
+	zpPatchGizmoInvalidate(); // the gizmo sits ON the pivot, so its depth just changed
+	ZPSCRIPT::record(NLMISC::toString("painter.setPivotMode(%d)", mode));
+}
+
+bool zpSetUserPivotToSelection()
+{
+	NLMISC::CVector c;
+	if (!zpPatchSelCentroid(c))
+	{
+		g_PropStatusMsg = "pivot: nothing selected";
+		return false;
+	}
+	g_UserPivot = c;
+	g_HaveUserPivot = true;
+	zpPatchGizmoInvalidate();
+	g_PropStatusMsg = NLMISC::toString("user pivot at %.2f, %.2f, %.2f", c.x, c.y, c.z);
+	ZPSCRIPT::record("painter.setUserPivotToSelection()");
+	return true;
+}
+
+/** Bridge form: the bridge's function pointers are all void-returning. */
+void zpUserPivotToSelection() { zpSetUserPivotToSelection(); }
+
+/** Flat form for the script TU, which cannot see NLMISC::CVector through this header set. */
+bool zpTransformPivotXYZ(float outPos[3])
+{
+	NLMISC::CVector p;
+	if (!zpTransformPivot(p))
+		return false;
+	outPos[0] = p.x; outPos[1] = p.y; outPos[2] = p.z;
+	return true;
+}
+
+const char *zpPivotModeName(int mode)
+{
+	static const char *kNames[ZPPIV_Count] = { "SEL", "WORLD", "ALL OBJ", "SEL OBJ", "USER" };
+	if (mode < 0 || mode >= ZPPIV_Count)
+		return "SEL";
+	return kNames[mode];
+}
+
 void zpDrawPatchGizmo(NL3D::IDriver *driver, NL3D::CCamera *camera,
                       float mouseX, float mouseY, bool navigating, uint32 viewSerial)
 {
@@ -1522,7 +1657,7 @@ void zpDrawPatchGizmo(NL3D::IDriver *driver, NL3D::CCamera *camera,
 	if (!driver || !camera)
 		return;
 	NLMISC::CVector o;
-	if (!zpPatchSelCentroid(o))
+	if (!zpTransformPivot(o))
 		return;
 	o += s_DragDelta; // rides the drag, so the handle stays under the pointer
 	// Hidden while the view moves: the size it would be drawn at is stale by definition, and
@@ -1730,7 +1865,7 @@ bool zpPatchGizmoBeginDrag(int handle, NL3D::CCamera *camera, const NL3D::CViewp
 	if (handle == ZPGIZ_NONE || !camera)
 		return false;
 	NLMISC::CVector o;
-	if (!zpPatchSelCentroid(o))
+	if (!zpTransformPivot(o))
 		return false;
 
 	const NLMISC::CMatrix camMat = camera->getMatrix();
@@ -2252,6 +2387,9 @@ void zpPatchGizmoEndDrag()
 	s_DragHandle = ZPGIZ_NONE;
 	s_DragDelta = NLMISC::CVector::Null;
 	zpPatchGizmoInvalidate();
+	// "Centre of all objects" is deliberately held DURING an interaction and re-fitted after
+	// it, so a rotate does not chase a centre the rotate itself is moving.
+	zpPivotNoteInteractionEnd();
 	if (!moved)
 		return;
 	std::string msg;
@@ -3975,6 +4113,9 @@ void zpFillBridgeState(ZPUI::SPaintUIBridge &bridge)
 	CPaintMouseListener &pl = *g_PaintCtx.Paint;
 	bridge.Mode = pl.Mode;
 	bridge.SubObj = pl.SubObj;
+	bridge.PivotMode = g_PivotMode;
+	bridge.PivotLabel[0] = 0;
+	strncpy(bridge.PivotLabel, zpPivotModeName(g_PivotMode), sizeof(bridge.PivotLabel) - 1);
 	bridge.CurTileSet = pl.CurTileSet;
 	bridge.TileSetCount = g_PaintCtx.Core->tileSetCount();
 	std::string name = g_PaintCtx.Core->tileSetName(pl.CurTileSet);

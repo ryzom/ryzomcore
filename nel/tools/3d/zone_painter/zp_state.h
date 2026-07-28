@@ -482,7 +482,7 @@ extern std::set<TPatchVertId> g_PatchVertSel;
  * The same shape as the vertex selection and for the same reason: SPmPatch::Vec[8] indexes
  * Vecs exactly as V[4] indexes Verts, so a handle shared by two patches along a common edge is
  * ONE handle, one marker, one selection entry. Handles are shown for selected corners only -
- * Max's rule, and the reason a dense cage does not turn into a field of dots.
+ * The rule, and the reason a dense cage does not turn into a field of dots.
  */
 extern std::set<TPatchVertId> g_PatchTanSel;
 
@@ -572,6 +572,41 @@ bool zpPickPatchVertex(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, f
                        uint &zoneOut, uint16 &vertOut);
 /** Centroid of the current vertex selection in world space. False when nothing is selected. */
 bool zpPatchSelCentroid(NLMISC::CVector &out);
+
+/**
+ * Where a transform is anchored - the pivot-point control.
+ *
+ * Irrelevant to a move (a translation is a translation wherever it is anchored) and decisive
+ * for rotate and scale, which is why the gizmo is drawn AT the pivot rather than at the
+ * selection: the artist has to be able to see what the next rotate will turn around before
+ * turning it.
+ */
+enum TPivotMode
+{
+	ZPPIV_Selection = 0, ///< centroid of the selected sub-objects
+	ZPPIV_World, ///< the world origin
+	ZPPIV_AllObjects, ///< centre of every editable node, re-fitted BETWEEN interactions
+	ZPPIV_SelObjects, ///< centre of the nodes that own the selection
+	ZPPIV_User, ///< a point the artist placed
+	ZPPIV_Count
+};
+extern int g_PivotMode;
+extern NLMISC::CVector g_UserPivot;
+extern bool g_HaveUserPivot;
+
+/** The pivot for the current mode. False when it cannot be formed (nothing selected, etc). */
+bool zpTransformPivot(NLMISC::CVector &out);
+/** Switch pivot mode (recorded); out of range is clamped. */
+void zpSetPivotMode(int mode);
+/** Put the user pivot at the current selection's centre (recorded). False if nothing selected. */
+bool zpSetUserPivotToSelection();
+void zpUserPivotToSelection();
+/** Open the scene context menu at the pointer (patch mode right click). */
+void zpOpenSceneMenu();
+/** Short label for the toolbar button and the HUD. */
+const char *zpPivotModeName(int mode);
+/** Re-fit the "all objects" centre. Called between interactions, never during one. */
+void zpPivotNoteInteractionEnd();
 /**
  * Move gizmo on the vertex selection. Screen-projected like every other patch overlay, but
  * sized from a WORLD length that is only re-fitted between interactions - see the sample's

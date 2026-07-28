@@ -8,7 +8,7 @@
  */
 
 /*
- * Copyright (C) 2026  by authors
+ * Copyright (C) 2026 by authors
  *
  * This file is part of RYZOM CORE PIPELINE.
  * RYZOM CORE PIPELINE is free software: you can redistribute it
@@ -18,11 +18,11 @@
  *
  * RYZOM CORE PIPELINE is distributed in the hope that it will be
  * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public
- * License along with RYZOM CORE PIPELINE.  If not, see
+ * License along with RYZOM CORE PIPELINE. If not, see
  * <http://www.gnu.org/licenses/>.
  */
 
@@ -561,6 +561,63 @@ public:
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpSeasonMenu, "zp_season_menu");
+
+/** Open the pivot-point picker (toolbar pivot button, and the scene context menu). */
+class CAHZpPivotMenu : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase *pCaller, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		CWidgetManager::getInstance()->enableModalWindow(pCaller, "ui:zp:pivot_menu");
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPivotMenu, "zp_pivot_menu");
+
+/** Choose a pivot mode (params = the TPivotMode ordinal). */
+class CAHZpPivotSelect : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return;
+		CWidgetManager::getInstance()->disableModalWindow();
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (!b || !b->selectPivotMode)
+			return;
+		b->selectPivotMode(atoi(params.c_str()));
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPivotSelect, "zp_pivot_select");
+
+/** Drop the user pivot at the selection's centre - the only way that mode's point is set. */
+class CAHZpPivotToSelection : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return;
+		CWidgetManager::getInstance()->disableModalWindow();
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (!b || !b->userPivotToSelection)
+			return;
+		b->userPivotToSelection();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPivotToSelection, "zp_pivot_to_selection");
+
+/** Open the scene context menu (right click on empty space in patch mode). */
+class CAHZpSceneMenu : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase *pCaller, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return;
+		CWidgetManager::getInstance()->enableModalWindow(pCaller, "ui:zp:scene_menu");
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpSceneMenu, "zp_scene_menu");
+
 
 /** Pick a specific season code from the menu (params = sp|su|au|wi). */
 class CAHZpSeasonSelect : public IActionHandler
@@ -1888,7 +1945,7 @@ void CEditorUI::syncPanelFromBridge()
 	if (!b || !b->HaveCore)
 		return;
 
-	// Max-style rollout containers under the painter tree list.
+	// rollout containers under the painter tree list.
 	// Paths are top-level ids (ui:zp:roll_*); tree attach keeps short ids under root.
 	// Content widgets live at :content:<id>. Toolbar holds mode/season/undo.
 	static const char *kRollSession = "ui:zp:roll_session";
@@ -1924,14 +1981,16 @@ void CEditorUI::syncPanelFromBridge()
 		btn->setPushed(b->Mode == 2);
 	if (CCtrlBaseButton *btn = findButton("ui:zp:toolbar:header_closed:mode_prop"))
 		btn->setPushed(b->Mode == 3);
+	if (CCtrlBaseButton *btn = findButton("ui:zp:toolbar:header_closed:mode_patch"))
+		btn->setPushed(b->Mode == 4);
 
 	// Mode-gated rollout VISIBILITY (not collapse).
 	// Non-applicable rollouts are fully hidden. Open/collapsed is remembered per
 	// rollout across mode switches (setActive does not touch isOpen).
-	//   Tile → Session+Tiles+Brush+Fill
-	//   Color → Session+Brush+Fill
-	//   Displace → Session+Displace+Brush+Fill
-	//   Prop → Session+Properties
+	// Tile → Session+Tiles+Brush+Fill
+	// Color → Session+Brush+Fill
+	// Displace → Session+Displace+Brush+Fill
+	// Prop → Session+Properties
 	const bool tileActive = (b->Mode == 0);
 	const bool colorActive = (b->Mode == 1);
 	const bool displaceActive = (b->Mode == 2);
@@ -2096,6 +2155,14 @@ void CEditorUI::syncPanelFromBridge()
 		btn->setHardText(up);
 		btn->setFrozen(b->SeasonCount < 1);
 	}
+	// Pivot face on TOOLBAR: only a transform has a pivot, so the button is shown with patch
+	// mode rather than sitting inert next to the paint tools.
+	if (CCtrlTextButton *btn = dynamic_cast<CCtrlTextButton *>(
+	        CWidgetManager::getInstance()->getElementFromId("ui:zp:toolbar:header_closed:btn_pivot")))
+	{
+		btn->setActive(b->Mode == 4);
+		btn->setHardText(b->PivotLabel[0] ? b->PivotLabel : "SEL");
+	}
 	if (CCtrlBaseButton *btn = findButton("ui:zp:toolbar:header_closed:btn_save"))
 		btn->setFrozen(!b->CanSave);
 
@@ -2193,7 +2260,7 @@ void CEditorUI::syncPanelFromBridge()
 			else
 				snprintf(buf, sizeof(buf), "%s%s",
 				         b->PropEditable ? "editable" : "read-only",
-				         b->PropDirty ? "  dirty" : "");
+				         b->PropDirty ? " dirty" : "");
 			t->setHardText(buf);
 		}
 		if (CViewText *t = findText((std::string(kPropC) + ":prop_rot").c_str()))
@@ -2309,5 +2376,20 @@ void CEditorUI::toggleVisible()
 }
 
 } // namespace ZPUI
+
+/**
+ * Open the scene context menu from the 3D view.
+ *
+ * Called by the viewer's right-click path rather than by an action handler: the click lands on
+ * the scene, which is not a widget, so there is no caller control to hang a handler on. The
+ * modal is opened with a NULL caller, which is what puts it at the pointer.
+ */
+void zpOpenSceneMenu()
+{
+	if (ZPSCRIPT::isExecuting())
+		return;
+	NLGUI::CWidgetManager::getInstance()->enableModalWindow(NULL, "ui:zp:scene_menu");
+}
+
 
 /* end of file */

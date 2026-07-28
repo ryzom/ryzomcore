@@ -100,6 +100,9 @@ struct SPaintUIBridge
 	void (*seasonSelect)(const std::string &code);
 	/** Fill a CGroupMenu with available seasons (toolbar menu). Menu is CGroupMenu*. */
 	void (*seasonMenuFill)(void *menu);
+	/** Pivot-point mode select, and "put the user pivot where the selection is". */
+	void (*selectPivotMode)(int mode);
+	void (*userPivotToSelection)();
 	// Color / displace: same paths as keyboard Home/End/Ins/Del/S/Q/[ ]
 	/** Color brush radius ± (×1.5 / ÷1.5, clamp 2..32); panel always; keys via brushSizeDelta in Color mode. */
 	void (*colorRadiusDelta)(int d);
@@ -132,6 +135,8 @@ struct SPaintUIBridge
 	bool HaveCore;
 	int Mode;
 	int SubObj; // patch-edit sub-object level; meaningful only while Mode == Patch
+	int PivotMode; // TPivotMode; what the transform gizmo is anchored on
+	char PivotLabel[16]; // short face for the toolbar button
 	int CurTileSet;
 	uint TileSetCount;
 	char TileSetName[128];

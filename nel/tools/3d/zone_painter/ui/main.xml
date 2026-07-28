@@ -32,7 +32,7 @@
 </group>
 
 <!-- ===================================================================== -->
-<!-- Startup row templates (filled at runtime via createGroupInstance)     -->
+<!-- Startup row templates (filled at runtime via createGroupInstance) -->
 <!-- ===================================================================== -->
 
 <!-- World row: flat listbox (not a bordered button); primary hit row + path subtitle.
@@ -243,7 +243,7 @@
 </template>
 
 <!-- ===================================================================== -->
-<!-- Screen A: world select                                                -->
+<!-- Screen A: world select -->
 <!-- ===================================================================== -->
 <group type="container" id="world_select" w="560" pop_min_w="480" pop_max_w="700" h="480" pop_min_h="360" pop_max_h="580"
 	title="zone_painter: choose world" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
@@ -354,7 +354,7 @@
 <tree node="zone_browser"></tree>
 
 <!-- ===================================================================== -->
-<!-- Screen C: folder browser (inactive until enabled)                     -->
+<!-- Screen C: folder browser (inactive until enabled) -->
 <!-- ===================================================================== -->
 <group type="container" id="folder_browser" w="560" pop_min_w="480" pop_max_w="700" h="450" pop_min_h="310" pop_max_h="580"
 	title="zone_painter: browse for graphics" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
@@ -413,7 +413,7 @@
 <tree node="folder_browser"></tree>
 
 <!--
-  Top toolbar: slim horizontal strip (3ds Max vibe).
+  Top toolbar: slim horizontal strip (slim strip).
   Client gestionsets idiom: opened=false, header_active=false, no content stack.
   Height is driven by header_closed only (opened=true stacked HeaderH+content and
   left a tall empty gray band above the buttons). Groups:
@@ -454,8 +454,10 @@
 			onclick_l="zp_mode" params_l="2" hardtext="DISP" />
 		<ctrl style="zp_tb_radio" id="mode_prop" posparent="mode_displace" posref="MR ML" x="2" y="0" w="40" h="26"
 			onclick_l="zp_mode" params_l="3" hardtext="PROP" />
+		<ctrl style="zp_tb_radio" id="mode_patch" posparent="mode_prop" posref="MR ML" x="2" y="0" w="46" h="26"
+			onclick_l="zp_mode" params_l="4" hardtext="PATCH" />
 		<!-- group separator -->
-		<view type="bitmap" id="sep3" posparent="mode_prop" posref="MR ML" x="4" y="0" w="1" h="18"
+		<view type="bitmap" id="sep3" posparent="mode_patch" posref="MR ML" x="4" y="0" w="1" h="18"
 			texture="blank.tga" scale="true" color="120 125 135 220" global_color="false" />
 		<!-- Season face: fixed width so SPRING/SUMMER/AUTUMN/WINTER don't reflow the strip -->
 		<ctrl style="zp_tb_btn" id="btn_season" posparent="sep3" posref="MR ML" x="4" y="0" w="80" h="26"
@@ -464,6 +466,12 @@
 			texture="blank.tga" scale="true" global_color="false" color="120 125 135 220" />
 		<ctrl style="zp_tb_btn" id="btn_script" posparent="sep4" posref="MR ML" x="4" y="0" w="56" h="26"
 			onclick_l="zp_script_toggle" params_l="" hardtext="SCRIPT" />
+		<view type="bitmap" id="sep5" posparent="btn_script" posref="MR ML" x="4" y="0" w="1" h="18"
+			texture="blank.tga" scale="true" global_color="false" color="120 125 135 220" />
+		<!-- Pivot face: fixed width so SEL/WORLD/ALL OBJ/SEL OBJ/USER do not reflow the strip.
+		     Only meaningful in patch mode, so it is shown and hidden with it. -->
+		<ctrl style="zp_tb_btn" id="btn_pivot" posparent="sep5" posref="MR ML" x="4" y="0" w="76" h="26"
+			onclick_l="zp_pivot_menu" params_l="" hardtext="SEL" active="false" />
 	</group>
 	<group id="header_opened" x="0" y="0" w="0" h="0" posref="TL TL" active="false" />
 </group>
@@ -486,8 +494,41 @@
 	</group>
 </group>
 
+<!-- Pivot-point picker modal: what a rotate or scale is anchored on (the pivot-point control).
+     The last entry is an ACTION rather than a mode - it drops the user pivot where the
+     selection is, which is the only way that mode's point ever gets set. -->
+<group type="modal" id="pivot_menu" exit_click_out="true" w="180" h="196" options="skin_modal"
+	mouse_pos="true" posref="TL TL" x="200" y="500" active="false">
+	<group id="content" x="0" y="0" posref="TL TL" sizeref="wh" w="0" h="0">
+		<view type="text" id="title" posref="TM TM" x="0" y="-10" color="255 220 140 255" fontsize="11"
+			shadow="true" global_color="false" hardtext="Pivot point" />
+		<ctrl style="text_button_16" id="p0" posparent="title" posref="BM TM" x="0" y="-8" w="150"
+			onclick_l="zp_pivot_select" params_l="0" hardtext="Selection center" />
+		<ctrl style="text_button_16" id="p1" posparent="p0" posref="BL TL" x="0" y="-4" w="150"
+			onclick_l="zp_pivot_select" params_l="1" hardtext="World center" />
+		<ctrl style="text_button_16" id="p2" posparent="p1" posref="BL TL" x="0" y="-4" w="150"
+			onclick_l="zp_pivot_select" params_l="2" hardtext="Center of all objects" />
+		<ctrl style="text_button_16" id="p3" posparent="p2" posref="BL TL" x="0" y="-4" w="150"
+			onclick_l="zp_pivot_select" params_l="3" hardtext="Center of sel. objects" />
+		<ctrl style="text_button_16" id="p4" posparent="p3" posref="BL TL" x="0" y="-4" w="150"
+			onclick_l="zp_pivot_select" params_l="4" hardtext="User pivot point" />
+		<ctrl style="text_button_16" id="pset" posparent="p4" posref="BL TL" x="0" y="-10" w="150"
+			onclick_l="zp_pivot_to_selection" params_l="" hardtext="Place at selection" />
+	</group>
+</group>
+
+<!-- Scene context menu (right click on empty space in patch mode). Kept to the one entry
+     that has nowhere else to live: the user pivot has no other way to be placed. -->
+<group type="modal" id="scene_menu" exit_click_out="true" w="170" h="46" options="skin_modal"
+	mouse_pos="true" posref="TL TL" x="200" y="500" active="false">
+	<group id="content" x="0" y="0" posref="TL TL" sizeref="wh" w="0" h="0">
+		<ctrl style="text_button_16" id="s_pivot" posref="TM TM" x="0" y="-10" w="150"
+			onclick_l="zp_pivot_to_selection" params_l="" hardtext="Pivot to selection" />
+	</group>
+</group>
+
 <!--
-  Painter control panel: Max-style rollout column.
+  Painter control panel: rollout column.
   Idiom from samples/gui Contacts (parent container + <tree node> openable children)
   and the client contact list: collapsible layer-1 headers with arrows, parent list
   scrolls when open rollouts exceed pop_max_h; vertical resizer adjusts max height.
@@ -530,7 +571,7 @@
 		<view type="text" id="files_info" posparent="instance_info" posref="BL TL" x="0" y="-2" fontsize="10" shadow="true"
 			global_color="false" color="200 200 210 220" hardtext="1 file" />
 		<view type="text" id="hint" posparent="files_info" posref="BL TL" x="0" y="-4" fontsize="9" shadow="true"
-			global_color="false" color="255 255 255 140" hardtext="T/C/D/R  O board  Y season  P tiles" />
+			global_color="false" color="255 255 255 140" hardtext="T/C/D/R O board Y season P tiles" />
 	</group>
 </group>
 
@@ -713,7 +754,7 @@
 </tree>
 
 <!-- ===================================================================== -->
-<!-- Tileset + Displace palette: movable/closable; grids laid out in code  -->
+<!-- Tileset + Displace palette: movable/closable; grids laid out in code -->
 <!-- ===================================================================== -->
 <!-- Scroll body holds Tilesets grid then a "Displace" section (0-15 noise maps). -->
 <group type="container" id="tiles_palette" w="320" pop_min_w="220" pop_max_w="500" h="480" pop_min_h="200" pop_max_h="580"
@@ -798,7 +839,7 @@
 <tree node="script_win"></tree>
 
 <!-- ===================================================================== -->
-<!-- Brush color picker: CCtrlColPick + sample palette texture             -->
+<!-- Brush color picker: CCtrlColPick + sample palette texture -->
 <!-- ===================================================================== -->
 <group type="container" id="color_picker" w="300" pop_min_w="280" pop_max_w="320" h="160" pop_min_h="150" pop_max_h="200"
 	title="Brush color" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
@@ -836,7 +877,7 @@
 <link expr="makeRGB(@UI:TEMP:COL:R, @UI:TEMP:COL:G, @UI:TEMP:COL:B, 255)" target="ui:zp:color_picker:content:swatch:color" />
 
 <!-- ===================================================================== -->
-<!-- Save modal (interactive flow only)                                    -->
+<!-- Save modal (interactive flow only) -->
 <!-- ===================================================================== -->
 <!-- Minimal edit-box chrome (same bevel pieces as the GUI sample). -->
 <group type="modal" id="save_dialog" exit_click_out="false" w="360" h="170" options="skin_modal"
@@ -875,15 +916,15 @@
 </group>
 
 <!-- ===================================================================== -->
-<!-- Quick-action context menus (session board: plain L-click on a cell).  -->
-<!-- Real NLGUI context menus (type="menu"/CGroupMenu; see nel_sample_gui  -->
-<!-- widgets_sample.xml base_menu/sample_menu), NOT framed dialogs with    -->
-<!-- stacked push buttons: compact rows, hover highlight, auto-dismiss on  -->
-<!-- selection or click-away/ESC (CGroupMenu hardcodes ExitClickOut+       -->
-<!-- ExitKeyPushed; ../src/gui/group_menu.cpp). No visible Cancel row;     -->
-<!-- nothing depends on Cancel cleanup (PendingActionBasename is           -->
-<!-- overwritten by the next popup open regardless of how the previous    -->
-<!-- one closed).                                                          -->
+<!-- Quick-action context menus (session board: plain L-click on a cell). -->
+<!-- Real NLGUI context menus (type="menu"/CGroupMenu; see nel_sample_gui -->
+<!-- widgets_sample.xml base_menu/sample_menu), NOT framed dialogs with -->
+<!-- stacked push buttons: compact rows, hover highlight, auto-dismiss on -->
+<!-- selection or click-away/ESC (CGroupMenu hardcodes ExitClickOut+ -->
+<!-- ExitKeyPushed; ../src/gui/group_menu.cpp). No visible Cancel row; -->
+<!-- nothing depends on Cancel cleanup (PendingActionBasename is -->
+<!-- overwritten by the next popup open regardless of how the previous -->
+<!-- one closed). -->
 <!-- ===================================================================== -->
 <group type="menu" id="zp_ctx_menu_base" mouse_pos="true" space="1" fontsize="12" shadow="true"
 	color="255 255 255 200" shadow_color="0 0 0 255" color_over="255 255 255 255" shadow_color_over="0 0 0 255"
@@ -924,7 +965,7 @@
 </group>
 
 <!-- ===================================================================== -->
-<!-- Close dirty confirm: Save first / Close without saving / Cancel       -->
+<!-- Close dirty confirm: Save first / Close without saving / Cancel -->
 <!-- ===================================================================== -->
 <group type="modal" id="close_confirm" exit_click_out="false" w="360" h="140" options="skin_modal"
 	mouse_pos="false" posref="MM MM" x="0" y="0" active="false">
@@ -970,7 +1011,7 @@
 </group>
 
 <!-- ===================================================================== -->
-<!-- Context brick picker: Screen B list idiom                             -->
+<!-- Context brick picker: Screen B list idiom -->
 <!-- ===================================================================== -->
 <group type="modal" id="context_picker" exit_click_out="true" w="560" h="360" options="skin_modal"
 	mouse_pos="false" posref="MM MM" x="0" y="0" active="false">

@@ -357,6 +357,13 @@ void CPaintMouseListener::operator()(const NLMISC::CEvent &event)
 					}
 				}
 			}
+			if (mouse->Button == NLMISC::rightButton && Mode == ModePatch)
+			{
+				// Scene context menu. Patch mode has no eyedropper to spend the right button
+				// on, and the user pivot has no other way to be placed.
+				zpOpenSceneMenu();
+				return;
+			}
 			if (mouse->Button == NLMISC::rightButton)
 			{
 				// Pick under the cursor: tile mode = the base layer's set; color mode = the
@@ -824,6 +831,8 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 		paintBridge.seasonNext = zpSeasonNext;
 		paintBridge.seasonSelect = zpSeasonSelect;
 		paintBridge.seasonMenuFill = zpSeasonMenuFill;
+		paintBridge.selectPivotMode = zpSetPivotMode;
+		paintBridge.userPivotToSelection = zpUserPivotToSelection;
 		paintBridge.colorRadiusDelta = zpColorRadiusDelta;
 		paintBridge.hardnessDelta = zpHardnessDelta;
 		paintBridge.opacityDelta = zpOpacityDelta;

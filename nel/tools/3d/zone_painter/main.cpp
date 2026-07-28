@@ -293,6 +293,9 @@ bool g_HavePropSelection = false;
 uint g_SelectedZoneId = 0;
 std::set<TPatchVertId> g_PatchVertSel;
 std::set<TPatchVertId> g_PatchTanSel;
+int g_PivotMode = ZPPIV_Selection;
+NLMISC::CVector g_UserPivot(0.f, 0.f, 0.f);
+bool g_HaveUserPivot = false;
 std::set<SPatchEdgeId> g_PatchEdgeSel;
 std::set<TPatchFaceId> g_PatchFaceSel;
 std::string g_PropStatusMsg; // click "read-only" / selection name (HUD + panel)
@@ -631,7 +634,7 @@ static bool loadVarsCfg(const std::string &path, bool required)
 	printf("vars cfg %s: %u variable(s) applied (light %u,%u,%u dir %.3f,%.3f,%.3f mul %.2f zoom %.1f)\n",
 	       path.c_str(), loaded, g_LightDiffuse.R, g_LightDiffuse.G, g_LightDiffuse.B,
 	       g_LightDirection.x, g_LightDirection.y, g_LightDirection.z, g_LightMultiply, g_ZoomSpeed);
-printf("  PatchLiveUpdate %s\n", g_PatchLiveUpdate ? "per-frame" : "on release only");
+printf(" PatchLiveUpdate %s\n", g_PatchLiveUpdate ? "per-frame" : "on release only");
 	return true;
 }
 
