@@ -30,6 +30,7 @@
 #include "rkl_patch_object.h"
 
 // STL includes
+#include <cstdlib>
 
 // NeL includes
 
@@ -152,6 +153,49 @@ void CRklPatchObject::toStringLocal(std::ostream &ostream, const std::string &pa
 	{
 		ostream << "\n" << pad << "PatchMesh: UNPARSED (" << err << ")";
 	}
+	// The claimed run, id(size) in file order. The element streams are decoded above; this
+	// line exists for the OTHER ids - the header/trailer chunks an encoder must regenerate or
+	// provably preserve, whose size behaviour against the element counts is the evidence.
+	// Small raws also print their bytes: the header/trailer singles are 4-8 byte values whose
+	// MEANING (a count, a mode, a flag) only shows by varying across the corpus.
+	ostream << "\n" << pad << "Claimed:" << std::hex;
+	for (TStorageObjectContainer::const_iterator it = m_Claimed.begin(), end = m_Claimed.end(); it != end; ++it)
+	{
+		const CStorageRaw *raw = dynamic_cast<const CStorageRaw *>(it->second);
+		ostream << " " << it->first << "(" << std::dec;
+		if (raw)
+		{
+			// Dev hook: PMAX_DUMP_CLAIMED_HEX=1 hex-dumps every claimed raw whole, for
+			// decoding the header/trailer chunks whose layout is still being established.
+			const char *full = getenv("PMAX_DUMP_CLAIMED_HEX");
+			ostream << (uint)raw->Value.size();
+			if (!raw->Value.empty() && (raw->Value.size() <= 24 || (full && *full && *full != '0')))
+			{
+				ostream << "=" << std::hex;
+				for (size_t b = 0; b < raw->Value.size(); ++b)
+				{
+					if (b) ostream << ".";
+					ostream << (uint)raw->Value[b];
+				}
+				ostream << std::dec;
+			}
+		}
+		else
+		{
+			// Containers: the summed sizes of their raw children (the selection bitarrays
+			// and caches are single-0x2700 wrappers, so this IS their payload size).
+			const CStorageContainer *cont = dynamic_cast<const CStorageContainer *>(it->second);
+			uint sum = 0;
+			if (cont)
+				for (TStorageObjectContainer::const_iterator c = cont->chunks().begin();
+				     c != cont->chunks().end(); ++c)
+					if (const CStorageRaw *cr = dynamic_cast<const CStorageRaw *>(c->second))
+						sum += (uint)cr->Value.size();
+			ostream << "C" << sum;
+		}
+		ostream << ")" << std::hex;
+	}
+	ostream << std::dec;
 }
 
 const CStorageRaw *CRklPatchObject::rpoChunk() const
