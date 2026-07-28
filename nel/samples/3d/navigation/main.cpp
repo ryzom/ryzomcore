@@ -121,9 +121,9 @@ static const uint8 kCapShade = 110;
 
 // Constant on-screen size: the gizmo should not shrink as the camera pulls back, or it
 // stops being clickable exactly when you most need it.
-// World size of the gizmo's axes. The cubes are 1 unit, so this reads as a manipulator
-// sized to its object rather than to the window.
-static const float kGizmoWorldSize = 1.3f;
+// Target on-screen height of the gizmo, in physical pixels. It is only ever APPLIED at rest
+// - see updateGizmoFit - so the gizmo holds a fixed world size throughout any interaction.
+static const float kGizmoPixels = 150.f;
 
 // The screen-space handle has no geometry of its own: it is the empty middle of the gizmo,
 // and it announces itself by lighting all three plane handles instead of adding a fourth
@@ -166,6 +166,8 @@ private:
 	void ray(float x, float y, CVector &pos, CVector &dir) const;
 	/** World units per gizmo unit, so the gizmo keeps a constant pixel size. */
 	float gizmoScale() const;
+	float fitGizmoScale() const;
+	void updateGizmoFit();
 
 	// --- picking
 	int pickCube(float x, float y) const;
@@ -201,6 +203,11 @@ UMaterial m_GizmoSolidMat; // shafts and cones: back faces culled
 	CVector m_DragGrab; // world point the drag started from
 	CVector m_DragOrigin; // cube position when the drag started
 
+	// Deferred gizmo fit - see updateGizmoFit.
+	float m_GizmoScale;
+	bool m_GizmoFitDirty;
+	uint32 m_FitSerial;
+	uint32 m_FitW, m_FitH;
 	float m_MouseX, m_MouseY;
 	bool m_LeftDown;
 	bool m_CloseWindow;
@@ -210,6 +217,7 @@ UMaterial m_GizmoSolidMat; // shafts and cones: back faces culled
 
 CNavigationDemo::CNavigationDemo()
 	: m_Driver(NULL), m_Selected(-1), m_Hover(GizmoNone), m_Drag(GizmoNone),
+	  m_GizmoScale(1.f), m_GizmoFitDirty(true), m_FitSerial(0), m_FitW(0), m_FitH(0),
 	  m_MouseX(0.5f), m_MouseY(0.5f), m_LeftDown(false), m_CloseWindow(false)
 {
 	// Emscripten has to be told which driver to take; the default resolution finds nothing
@@ -347,19 +355,69 @@ static float uiScale()
 #endif
 }
 
+// World size the gizmo would need RIGHT NOW to stand kGizmoPixels tall on screen. Only
+// updateGizmoFit calls this, and only when the user is between interactions.
+float CNavigationDemo::fitGizmoScale() const
+{
+	if (m_Selected < 0)
+		return m_GizmoScale;
+	uint32 w = 0, h = 0;
+	m_Driver->getWindowSize(w, h);
+	if (!h)
+		return m_GizmoScale;
+	// World size of one pixel at the gizmo's depth, from the frustum's vertical extent.
+	const CVector camPos = camWorld().getPos();
+	const float depth = (m_Cubes[m_Selected].Pos - camPos) * camWorld().getJ();
+	const float d = depth > m_Frustum.Near ? depth : m_Frustum.Near;
+	const float worldPerPixelAtNear = (m_Frustum.Top - m_Frustum.Bottom) / (float)h;
+	// kGizmoPixels is a physical size, so it goes through the device pixel ratio: the canvas
+	// backing store already runs at CSS x DPR, and a constant backing-pixel count would be a
+	// gizmo that shrinks as density rises - a third of its size on a phone.
+	return kGizmoPixels * uiScale() * worldPerPixelAtNear * d / m_Frustum.Near;
+}
+
+/*
+ * The chosen behaviour, which is neither of the two obvious options.
+ *
+ * A gizmo re-fitted every frame holds a constant screen size, but then it grows relative to
+ * its object as the object recedes - so dragging along an axis reads as the object shrinking
+ * out from under a manipulator that stays put. A gizmo of fixed world size never does that,
+ * but goes unusably small the moment you pull the camera back.
+ *
+ * So: fit to the screen, but only BETWEEN interactions. During a drag or a view move the
+ * world size is frozen, and the gizmo behaves like part of the scene. When the interaction
+ * ends it re-fits, once. And because a re-fit mid-navigation would be visible as a jump, the
+ * gizmo simply isn't drawn while the view is moving - it comes back correctly sized.
+ */
+void CNavigationDemo::updateGizmoFit()
+{
+	uint32 w = 0, h = 0;
+	m_Driver->getWindowSize(w, h);
+	if (w != m_FitW || h != m_FitH)
+	{
+		m_FitW = w;
+		m_FitH = h;
+		m_GizmoFitDirty = true;
+	}
+	const uint32 serial = m_Nav.viewSerial();
+	if (serial != m_FitSerial)
+	{
+		m_FitSerial = serial;
+		m_GizmoFitDirty = true;
+	}
+	if (!m_GizmoFitDirty)
+		return;
+	// Hold the stale scale until the user's hands are off: mid-drag is exactly when a resize
+	// would be felt.
+	if (m_Nav.isNavigating() || m_Drag != GizmoNone)
+		return;
+	m_GizmoScale = fitGizmoScale();
+	m_GizmoFitDirty = false;
+}
+
 float CNavigationDemo::gizmoScale() const
 {
-	// The gizmo lives in world space: it recedes with the object it is attached to, exactly
-	// like the object does. Sizing it to a constant number of screen pixels instead - which
-	// is what this used to do, and the usual behaviour by default - means the gizmo grows relative
-	// to its object as the object moves away, so a drag along an axis reads as the object
-	// shrinking out from under a gizmo that stays put. Disorienting, and the wrong feedback
-	// for a manipulator whose whole job is to express a distance in the scene.
-	//
-	// Camera distance therefore does NOT enter into it. The only thing allowed to change the
-	// gizmo's apparent size is the UI scale, so a dense display gets a gizmo that stays
-	// comfortable to hit rather than one that merely gets sharper.
-	return kGizmoWorldSize * uiScale();
+return m_GizmoScale;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -627,6 +685,7 @@ void CNavigationDemo::operator()(const CEvent &event)
 			return;
 		}
 		m_Selected = pickCube(m_MouseX, m_MouseY);
+		m_GizmoFitDirty = true; // new object, new distance
 		m_Hover = GizmoNone;
 		return;
 	}
@@ -636,6 +695,7 @@ void CNavigationDemo::operator()(const CEvent &event)
 		{
 			m_LeftDown = false;
 			m_Drag = GizmoNone;
+			m_GizmoFitDirty = true; // the object moved; re-fit now that the hands are off
 		}
 		return;
 	}
@@ -813,6 +873,10 @@ void CNavigationDemo::drawGizmo()
 {
 	if (m_Selected < 0)
 		return;
+	// Not drawn while the view is moving: the scale it would be drawn at is stale by
+	// definition, and hiding it is both cleaner and cheaper than showing a wrong size.
+	if (m_Nav.isNavigating())
+		return;
 	const CVector o = m_Cubes[m_Selected].Pos;
 	const float s = gizmoScale();
 	const TGizmoHandle hot = (m_Drag != GizmoNone) ? m_Drag : m_Hover;
@@ -880,6 +944,10 @@ void CNavigationDemo::renderOneFrame()
 	if (w && h)
 		m_Frustum.initPerspective(60.f * (float)Pi / 180.f, (float)w / (float)h, 0.1f, 1000.f);
 	m_Nav.setFrustrum(m_Frustum);
+
+	// After the frustum is current (fitGizmoScale reads it) and before anything picks or
+	// draws with the scale.
+	updateGizmoFit();
 
 	CMatrix view = camWorld();
 	view.invert();
