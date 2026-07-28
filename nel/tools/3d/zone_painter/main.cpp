@@ -294,6 +294,7 @@ uint g_SelectedZoneId = 0;
 std::set<TPatchVertId> g_PatchVertSel;
 std::set<TPatchVertId> g_PatchTanSel;
 int g_PivotMode = ZPPIV_Selection;
+int g_XformKind = ZPXF_Move;
 NLMISC::CVector g_UserPivot(0.f, 0.f, 0.f);
 bool g_HaveUserPivot = false;
 std::set<SPatchEdgeId> g_PatchEdgeSel;
@@ -375,61 +376,67 @@ const char *kPainterKeysName[] =
 	"Screenshot",
 	"ModePatch",
 	"SubObjectDigits",
+	"XformMove",
+	"XformRotate",
+	"XformScale",
 };
 
 // Tool defaults: the pre-cfg hardcoded viewer keys stay on their keys (T/C/D, +/-, B, G, F);
 // new actions land on free keys (documented in --help). 0 = unbound.
 uint g_PainterKeys[] =
 {
-	0, // Select (in-plugin paint-modifier action; no tool equivalent)
-	0, // Pick (the tool picks on right mouse, hardcoded)
-	NLMISC::KeyF, // Fill0 (the pre-cfg F fill, rotation 0)
-	NLMISC::KeyF6, // Fill1 (plugin default)
-	NLMISC::KeyF7, // Fill2 (plugin default)
-	NLMISC::KeyF8, // Fill3 (plugin default)
-	NLMISC::KeyT, // ModeTile
-	NLMISC::KeyC, // ModeColor
-	NLMISC::KeyD, // ModeDisplace
-	NLMISC::KeyR, // ModeProp (free key; T/C/D modes, O board, P palette, Y season)
-	0, // ToggleColor (single brush color in this tool)
-	NLMISC::KeyADD, // SizeUp
-	NLMISC::KeySUBTRACT, // SizeDown
-	NLMISC::KeyB, // ToggleTileSize
-	NLMISC::KeyG, // GroupUp
-	NLMISC::KeyV, // GroupDown (plugin default)
-	0, // BackgroundColor
-	0, // ToggleArrows
-	NLMISC::KeyHOME, // HardnessUp (plugin PgUp/PgDn select tile sets here)
-	NLMISC::KeyEND, // HardnessDown
-	NLMISC::KeyINSERT, // OpacityUp
-	NLMISC::KeyDELETE, // OpacityDown
-	0, // Zouille
-	0, // AutomaticLighting
-	NLMISC::KeyS, // SelectColorBrush (cycles the shipped mask set; plugin default key)
-	NLMISC::KeyQ, // ToggleColorBrushMode (plugin default)
-	NLMISC::KeyL, // LockBorders (plugin default)
-	0, // ZoomIn (bindable; plugin default Key1 selects a tile set here)
-	0, // ZoomOut
-	0, // GetState
-	0, // ResetPatch
-	NLMISC::KeyF10, // ToggleUI (NLGUI panel visibility)
-	NLMISC::KeyY, // SeasonNext (free key; cycle season textures)
-	NLMISC::KeyP, // TogglePalette (free key; tileset thumbnail palette)
-	NLMISC::KeyO, // ToggleBoard (free key; session board hub)
-	NLMISC::KeyZ, // ZoomExtentsSelected
-	NLMISC::KeyPRIOR, // TileSetPrev (PgUp)
-	NLMISC::KeyNEXT, // TileSetNext (PgDn)
-	NLMISC::Key0, // TileSetDigits: base of the 0-9 run
-	NLMISC::KeyLBRACKET, // DisplacePrev
-	NLMISC::KeyRBRACKET, // DisplaceNext
+	0,                    // Select (in-plugin paint-modifier action; no tool equivalent)
+	0,                    // Pick (the tool picks on right mouse, hardcoded)
+	NLMISC::KeyF,         // Fill0 (the pre-cfg F fill, rotation 0)
+	NLMISC::KeyF6,        // Fill1 (plugin default)
+	NLMISC::KeyF7,        // Fill2 (plugin default)
+	NLMISC::KeyF8,        // Fill3 (plugin default)
+	NLMISC::KeyT,         // ModeTile
+	NLMISC::KeyC,         // ModeColor
+	NLMISC::KeyD,         // ModeDisplace
+	NLMISC::KeyR,         // ModeProp (paint-scoped, so R is free to mean SCALE in patch mode)
+	0,                    // ToggleColor (single brush color in this tool)
+	NLMISC::KeyADD,       // SizeUp
+	NLMISC::KeySUBTRACT,  // SizeDown
+	NLMISC::KeyB,         // ToggleTileSize
+	NLMISC::KeyG,         // GroupUp
+	NLMISC::KeyV,         // GroupDown (plugin default)
+	0,                    // BackgroundColor
+	0,                    // ToggleArrows
+	NLMISC::KeyHOME,      // HardnessUp (plugin PgUp/PgDn select tile sets here)
+	NLMISC::KeyEND,       // HardnessDown
+	NLMISC::KeyINSERT,    // OpacityUp
+	NLMISC::KeyDELETE,    // OpacityDown
+	0,                    // Zouille
+	0,                    // AutomaticLighting
+	NLMISC::KeyS,         // SelectColorBrush (cycles the shipped mask set; plugin default key)
+	NLMISC::KeyQ,         // ToggleColorBrushMode (plugin default)
+	NLMISC::KeyL,         // LockBorders (plugin default)
+	0,                    // ZoomIn (bindable; plugin default Key1 selects a tile set here)
+	0,                    // ZoomOut
+	0,                    // GetState
+	0,                    // ResetPatch
+	NLMISC::KeyF10,       // ToggleUI (NLGUI panel visibility)
+	NLMISC::KeyY,         // SeasonNext (free key; cycle season textures)
+	NLMISC::KeyP,         // TogglePalette (free key; tileset thumbnail palette)
+	NLMISC::KeyO,         // ToggleBoard (free key; session board hub)
+	NLMISC::KeyZ,         // ZoomExtentsSelected (Max Z)
+	NLMISC::KeyPRIOR,     // TileSetPrev (PgUp)
+	NLMISC::KeyNEXT,      // TileSetNext (PgDn)
+	NLMISC::Key0,         // TileSetDigits: base of the 0-9 run
+	NLMISC::KeyLBRACKET,  // DisplacePrev
+	NLMISC::KeyRBRACKET,  // DisplaceNext
 	ZPK_BIND(NLMISC::KeyZ, ZPKM_CTRL), // Undo
 	ZPK_BIND(NLMISC::KeyY, ZPKM_CTRL), // Redo
 	ZPK_BIND(NLMISC::KeyE, ZPKM_CTRL), // Redo2 (what the tool shipped before)
 	ZPK_BIND(NLMISC::KeyZ, ZPKM_SHIFT), // ViewUndo
 	ZPK_BIND(NLMISC::KeyY, ZPKM_SHIFT), // ViewRedo
-	NLMISC::KeyF12, // Screenshot
-	NLMISC::KeyM, // ModePatch (free; T/C/D/R are the paint modes, M for the mesh)
-	NLMISC::Key1, // SubObjectDigits: base of the 1-5 run (sub-object keys)
+	NLMISC::KeyF12,       // Screenshot
+	NLMISC::KeyM,         // ModePatch (free; T/C/D/R are the paint modes, M for the mesh)
+	NLMISC::Key1,         // SubObjectDigits: base of the 1-5 run (sub-object keys)
+	NLMISC::KeyW,         // XformMove
+	NLMISC::KeyE,         // XformRotate
+	NLMISC::KeyR,         // XformScale  (free here because ModeProp is ZPKS_PAINT)
 };
 
 // Mode scope per action (see ZPKS_* in zp_state.h). Everything that only makes sense while
@@ -444,10 +451,10 @@ const uint8 kPainterKeyModes[] =
 	ZPKS_PAINT, // Fill1
 	ZPKS_PAINT, // Fill2
 	ZPKS_PAINT, // Fill3
-	ZPKS_ANY, // ModeTile (mode switches must work FROM any mode)
-	ZPKS_ANY, // ModeColor
-	ZPKS_ANY, // ModeDisplace
-	ZPKS_ANY, // ModeProp
+	ZPKS_ANY,   // ModeTile      (mode switches must work FROM any mode)
+	ZPKS_ANY,   // ModeColor
+	ZPKS_ANY,   // ModeDisplace
+	ZPKS_PAINT, // ModeProp      (R is SCALE in patch mode; reach Prop from a paint mode)
 	ZPKS_PAINT, // ToggleColor
 	ZPKS_PAINT, // SizeUp
 	ZPKS_PAINT, // SizeDown
@@ -487,6 +494,9 @@ const uint8 kPainterKeyModes[] =
 	ZPKS_ANY, // Screenshot
 	ZPKS_ANY, // ModePatch (a mode switch, so it must work FROM any mode)
 	ZPKS_PATCH, // SubObjectDigits <- shares the digit row with TileSetDigits above
+	ZPKS_PATCH, // XformMove
+	ZPKS_PATCH, // XformRotate
+	ZPKS_PATCH, // XformScale   <- R, which ModeProp holds in the paint modes
 };
 
 // paint_ui.cpp light/zoom variable defaults (LoadVarCfg overrides; identical to the previous

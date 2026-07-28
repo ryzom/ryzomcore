@@ -572,6 +572,10 @@ int zpCurrentPaintMode()
  * curs_zp_zoom dolly / zoom drag
  * (Pan and orbit reuse curs_pan / curs_rotate.)
  */
+// Per-zone counts from the last zpLiveZoneInfo, accumulated by the weld rebuild for its
+// report. Pixels cannot assert the unweld: see the comment in zpLiveZoneInfo.
+static uint s_WeldDroppedBinds = 0, s_WeldDroppedBorder = 0;
+
 /**
  * Turn a LIVE zone's retrieved info into the zone info to rebuild it from.
  *
@@ -602,6 +606,21 @@ static void zpLiveZoneInfo(NL3D::CZone *lz, const SPaintZone &pz, NL3D::CZoneInf
 	}
 	out.BorderVertices = g_WeldedLandscape ? pz.BorderVertices
 	                                       : std::vector<NL3D::CBorderVertex>();
+	// Counted so a gate can assert the unweld actually removed something. Pixels cannot say
+	// this: in the welded build the shared CTessVertex ends up holding whichever patch
+	// refreshed last, so how visible the alias is depends on refresh order rather than on
+	// whether the weld is there.
+	s_WeldDroppedBinds = 0;
+	s_WeldDroppedBorder = 0;
+	if (!g_WeldedLandscape)
+	{
+		for (size_t p = 0; p < pz.Patches.size(); ++p)
+			for (uint e = 0; e < 4; ++e)
+				if (pz.Patches[p].BindEdges[e].NPatchs != 0
+				    && pz.Patches[p].BindEdges[e].ZoneId != (uint16)pz.ZoneId)
+					++s_WeldDroppedBinds;
+		s_WeldDroppedBorder = (uint)pz.BorderVertices.size();
+	}
 }
 
 /**
@@ -626,12 +645,15 @@ bool zpSyncLandscapeWeld()
 
 	std::vector<NL3D::CZoneInfo> infos(zones.size());
 	std::vector<bool> have(zones.size(), false);
+	uint dropBinds = 0, dropBorder = 0;
 	for (size_t i = 0; i < zones.size(); ++i)
 	{
 		NL3D::CZone *lz = land.getZone((sint)zones[i].ZoneId);
 		if (!lz)
 			continue;
 		zpLiveZoneInfo(lz, zones[i], infos[i]);
+		dropBinds += s_WeldDroppedBinds;
+		dropBorder += s_WeldDroppedBorder;
 		have[i] = true;
 	}
 	for (size_t i = 0; i < zones.size(); ++i)
@@ -655,7 +677,8 @@ bool zpSyncLandscapeWeld()
 	}
 	land.setRefineMode(true);
 	if (g_verbose)
-		printf("landscape rebuilt %s\n", g_WeldedLandscape ? "welded" : "unwelded");
+		printf("landscape rebuilt %s (%u cross-zone binds dropped, %u border verts dropped)\n",
+		       g_WeldedLandscape ? "welded" : "unwelded", dropBinds, dropBorder);
 	return ok;
 }
 
@@ -1041,6 +1064,26 @@ static bool s_Dragging = false;
 static int s_DragHandle = ZPGIZ_NONE;
 static NLMISC::CVector s_DragPlaneN, s_DragPlaneP, s_DragStartHit, s_DragDelta;
 static NLMISC::CVector s_DragAxis;
+// The transform the current drag represents. Move keeps using s_DragDelta - a translation is
+// the same everywhere and needs no anchor - while rotate and scale fill this in, because their
+// preview offset differs per element and cannot be a single vector.
+static SPatchXform s_DragXform;
+static NLMISC::CVector s_DragStartVec; // rotate: the ring vector the drag started on
+
+/**
+ * The offset this drag gives a point at `p`. Null when nothing is being dragged.
+ *
+ * The reason the preview and the commit cannot disagree: both run the SAME transform, this one
+ * per displayed point and zpApplyPatchXform per written element.
+ */
+static NLMISC::CVector zpDragOffsetAt(const NLMISC::CVector &p)
+{
+	if (!s_Dragging)
+		return kNoOffset;
+	if (s_DragXform.Kind == ZPXF_Move)
+		return s_DragDelta;
+	return zpTransformPoint(s_DragXform, p) - p;
+}
 
 // Vertex marker half-size and pick radius, in viewport units of HEIGHT. The pick target is
 // deliberately larger than the mark - the mark says where the vertex is, the radius says how
@@ -1120,11 +1163,15 @@ static NLMISC::CVector zpVertOffset(const SPaintZone &pz, uint16 vi)
 		return kNoOffset;
 	if (zpHandleMode())
 		return kNoOffset; // handles are the target; their corners hold still
-	// Selected through this very node: the drag delta is already in this node's space, so use
-	// it verbatim rather than round-tripping it through two matrices.
-	const NLMISC::CVector &own = zpPatchVertDragOffset(pz.ZoneId, vi);
-	if (own != kNoOffset)
-		return own;
+	// Selected through this very node: the drag is already in this node's displayed space, so
+	// it applies directly.
+	if (s_Dragging && g_PatchVertSel.count(TPatchVertId(pz.ZoneId, vi)))
+	{
+		float wp[3];
+		if (zpPatchVertWorld(pz.ZoneId, vi, wp))
+			return zpDragOffsetAt(NLMISC::CVector(wp[0], wp[1], wp[2]));
+		return s_DragDelta;
+	}
 	if (!s_Dragging || !g_PaintCtx.Zones)
 		return kNoOffset;
 	const std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
@@ -1135,7 +1182,11 @@ static NLMISC::CVector zpVertOffset(const SPaintZone &pz, uint16 vi)
 			continue;
 		if (!g_PatchVertSel.count(TPatchVertId(other.ZoneId, vi)))
 			continue;
-		const NLMISC::CVector od = zpXformDelta(s_DragDelta, MAXMATH::inverseM3(other.DisplayTM));
+		float wp[3];
+		if (!zpPatchVertWorld(other.ZoneId, vi, wp))
+			continue;
+		const NLMISC::CVector d = zpDragOffsetAt(NLMISC::CVector(wp[0], wp[1], wp[2]));
+		const NLMISC::CVector od = zpXformDelta(d, MAXMATH::inverseM3(other.DisplayTM));
 		return zpXformDelta(od, pz.DisplayTM);
 	}
 	return kNoOffset;
@@ -1150,28 +1201,37 @@ static NLMISC::CVector zpVertOffset(const SPaintZone &pz, uint16 vi)
  */
 static NLMISC::CVector zpTanOffset(const SPaintZone &pz, uint16 vecIdx)
 {
-const uint16 owner = zpTangentOwner(pz, vecIdx);
-if (!zpHandleMode() && owner != (uint16)0xffff
-    && g_PatchVertSel.count(TPatchVertId(pz.ZoneId, owner)))
-return zpVertOffset(pz, owner);
-if (!s_Dragging || !g_PaintCtx.Zones)
-return kNoOffset;
-if (g_PatchTanSel.count(TPatchVertId(pz.ZoneId, vecIdx)))
-return s_DragDelta;
-// Selected through another node of the same object: the drag is in that node's displayed
-// space, so it comes back to object space through it and out again through this one.
-const std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
-for (uint z = 0; z < zones.size(); ++z)
-{
-const SPaintZone &other = zones[z];
-if (other.Node != pz.Node || other.ZoneId == pz.ZoneId)
-continue;
-if (!g_PatchTanSel.count(TPatchVertId(other.ZoneId, vecIdx)))
-continue;
-const NLMISC::CVector od = zpXformDelta(s_DragDelta, MAXMATH::inverseM3(other.DisplayTM));
-return zpXformDelta(od, pz.DisplayTM);
-}
-return kNoOffset;
+	const uint16 owner = zpTangentOwner(pz, vecIdx);
+	if (!zpHandleMode() && owner != (uint16)0xffff
+	    && g_PatchVertSel.count(TPatchVertId(pz.ZoneId, owner)))
+		return zpVertOffset(pz, owner);
+	if (!s_Dragging || !g_PaintCtx.Zones)
+		return kNoOffset;
+	if (g_PatchTanSel.count(TPatchVertId(pz.ZoneId, vecIdx)))
+	{
+		float wp[3];
+		if (zpPatchTangentWorld(pz.ZoneId, vecIdx, wp))
+			return zpDragOffsetAt(NLMISC::CVector(wp[0], wp[1], wp[2]));
+		return s_DragDelta;
+	}
+	// Selected through another node of the same object: the drag is in that node's displayed
+	// space, so it comes back to object space through it and out again through this one.
+	const std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
+	for (uint z = 0; z < zones.size(); ++z)
+	{
+		const SPaintZone &other = zones[z];
+		if (other.Node != pz.Node || other.ZoneId == pz.ZoneId)
+			continue;
+		if (!g_PatchTanSel.count(TPatchVertId(other.ZoneId, vecIdx)))
+			continue;
+		float wp[3];
+		if (!zpPatchTangentWorld(other.ZoneId, vecIdx, wp))
+			continue;
+		const NLMISC::CVector d = zpDragOffsetAt(NLMISC::CVector(wp[0], wp[1], wp[2]));
+		const NLMISC::CVector od = zpXformDelta(d, MAXMATH::inverseM3(other.DisplayTM));
+		return zpXformDelta(od, pz.DisplayTM);
+	}
+	return kNoOffset;
 }
 
 /**
@@ -1469,6 +1529,26 @@ bool zpPatchSelCentroid(NLMISC::CVector &out)
 	return true;
 }
 
+/** Screen distance from a point to a segment, in units of viewport height. */
+static float zpSegDist(float px, float py, const NLMISC::CVector &a, const NLMISC::CVector &b,
+                       float aspect)
+{
+	const float ax = a.x * aspect, ay = a.y;
+	const float bx = b.x * aspect, by = b.y;
+	const float qx = px * aspect, qy = py;
+	const float ex = bx - ax, ey = by - ay;
+	const float len2 = ex * ex + ey * ey;
+	float t = 0.f;
+	if (len2 > 1e-12f)
+	{
+		t = ((qx - ax) * ex + (qy - ay) * ey) / len2;
+		if (t < 0.f) t = 0.f;
+		else if (t > 1.f) t = 1.f;
+	}
+	const float dx = qx - (ax + ex * t), dy = qy - (ay + ey * t);
+	return sqrtf(dx * dx + dy * dy);
+}
+
 // Gizmo geometry, in pixels except the axis length which is world (see the fit below).
 static const float kGizmoPixels = 110.f;
 static const float kGizmoHeadPx = 11.f;
@@ -1479,6 +1559,10 @@ static const float kGizmoPickPx = 7.f;
 // handle means - leaving it empty would be wrong, the centre is "all axes at once".
 static const float kGizmoPlaneFrac = 0.28f;
 static const float kGizmoScreenPickPx = 9.f;
+// Rotate rings. Enough segments that the circle does not read as a polygon at gizmo size, and
+// a slightly larger screen ring so the four never sit on top of each other.
+static const int kGizmoRingSegs = 48;
+static const float kGizmoRingOuter = 1.18f;
 static const int kGizmoPlaneAxes[3][2] = { { 0, 1 }, { 1, 2 }, { 2, 0 } };
 
 /** Point in a convex quad, screen space. Same-sign cross products against each edge. */
@@ -1650,6 +1734,44 @@ const char *zpPivotModeName(int mode)
 	return kNames[mode];
 }
 
+NLMISC::CVector zpTransformPoint(const SPatchXform &xf, const NLMISC::CVector &p)
+{
+	const NLMISC::CVector r = p - xf.Pivot;
+	if (xf.Kind == ZPXF_Scale)
+		return xf.Pivot + NLMISC::CVector(r.x * xf.Scale.x, r.y * xf.Scale.y, r.z * xf.Scale.z);
+	if (xf.Kind != ZPXF_Rotate)
+		return p;
+	// Rodrigues, so the axis needs no basis built around it and any axis works - the screen
+	// ring is not one of the three world axes.
+	NLMISC::CVector a = xf.Axis;
+	const float n = a.norm();
+	if (n < 1e-8f)
+		return p;
+	a /= n;
+	const float c = cosf(xf.Angle), s2 = sinf(xf.Angle);
+	const NLMISC::CVector rot = r * c + (a ^ r) * s2 + a * ((a * r) * (1.f - c));
+	return xf.Pivot + rot;
+}
+
+void zpSetXformKind(int kind)
+{
+	if (kind < ZPXF_Move) kind = ZPXF_Move;
+	if (kind > ZPXF_Scale) kind = ZPXF_Scale;
+	if (kind == g_XformKind)
+		return;
+	g_XformKind = kind;
+	zpPatchGizmoInvalidate();
+	ZPSCRIPT::record(NLMISC::toString("painter.setXformKind(%d)", kind));
+}
+
+const char *zpXformKindName(int kind)
+{
+	static const char *kNames[3] = { "MOVE", "ROTATE", "SCALE" };
+	if (kind < 0 || kind > ZPXF_Scale)
+		return "MOVE";
+	return kNames[kind];
+}
+
 void zpDrawPatchGizmo(NL3D::IDriver *driver, NL3D::CCamera *camera,
                       float mouseX, float mouseY, bool navigating, uint32 viewSerial)
 {
@@ -1749,10 +1871,87 @@ void zpDrawPatchGizmo(NL3D::IDriver *driver, NL3D::CCamera *camera,
 	}
 
 	const float mpx = mouseX * (float)winW, mpy = mouseY * (float)winH;
+	const char *forceHoverEnv = getenv("ZONE_PAINTER_GIZMO_HOVER");
+
+	if (g_XformKind == ZPXF_Rotate)
+	{
+		// Rings, not arrows: an axis arrow says "along", a ring says "about", and a rotate
+		// gizmo that looked like a move gizmo would be read as one.
+		//
+		// Four rings - the three world axes plus a screen-aligned one for turning about the
+		// view direction, which is the only way to rotate about an axis pointing at you.
+		const NLMISC::CVector fwd = camMat.getJ();
+		NLMISC::CVector ringAxis[4] = { axisVec[0], axisVec[1], axisVec[2], fwd };
+		const int handleOf[4] = { ZPGIZ_AXIS_X, ZPGIZ_AXIS_Y, ZPGIZ_AXIS_Z, ZPGIZ_SCREEN };
+		float px[4][kGizmoRingSegs + 1], py[4][kGizmoRingSegs + 1];
+		bool ringOk[4];
+		for (int r = 0; r < 4; ++r)
+		{
+			// Any two vectors spanning the plane the ring lies in.
+			NLMISC::CVector n = ringAxis[r];
+			if (n.norm() < 1e-6f) { ringOk[r] = false; continue; }
+			n.normalize();
+			NLMISC::CVector u = n ^ NLMISC::CVector(0.f, 0.f, 1.f);
+			if (u.norm() < 1e-3f)
+				u = n ^ NLMISC::CVector(1.f, 0.f, 0.f);
+			u.normalize();
+			const NLMISC::CVector v = n ^ u;
+			// The screen ring sits slightly outside the others so the four never coincide.
+			const float rad = s_GizmoWorldLen * (r == 3 ? kGizmoRingOuter : 1.f);
+			ringOk[r] = true;
+			for (int k = 0; k <= kGizmoRingSegs; ++k)
+			{
+				const float t = (float)k * 2.f * (float)NLMISC::Pi / (float)kGizmoRingSegs;
+				NLMISC::CVector pt;
+				if (!zpProjectLifted(viewMat, fr, o + (u * cosf(t) + v * sinf(t)) * rad,
+				                     kPatchLift, pt))
+				{
+					ringOk[r] = false;
+					break;
+				}
+				px[r][k] = pt.x * (float)winW;
+				py[r][k] = pt.y * (float)winH;
+			}
+		}
+		// Nearest ring within the pick radius, measured against the drawn polyline.
+		float bestR = kGizmoPickPx;
+		for (int r = 0; r < 4; ++r)
+		{
+			if (!ringOk[r])
+				continue;
+			for (int k = 0; k < kGizmoRingSegs; ++k)
+			{
+				const NLMISC::CVector a(px[r][k], py[r][k], 0.f);
+				const NLMISC::CVector b(px[r][k + 1], py[r][k + 1], 0.f);
+				const float d = zpSegDist(mpx, mpy, a, b, 1.f);
+				if (d < bestR)
+				{
+					bestR = d;
+					s_GizmoHover = handleOf[r];
+				}
+			}
+		}
+		if (forceHoverEnv && *forceHoverEnv)
+			s_GizmoHover = atoi(forceHoverEnv);
+		if (s_Dragging)
+			s_GizmoHover = s_DragHandle;
+		static const NLMISC::CRGBA kScreenRing(200, 200, 200, 255);
+		for (int r = 0; r < 4; ++r)
+		{
+			if (!ringOk[r])
+				continue;
+			const NLMISC::CRGBA col = (s_GizmoHover == handleOf[r])
+				? kHotCol : (r == 3 ? kScreenRing : kAxisCol[r]);
+			for (int k = 0; k < kGizmoRingSegs; ++k)
+				NL3D::CDRU::drawLine(px[r][k] / winW, py[r][k] / winH,
+				                     px[r][k + 1] / winW, py[r][k + 1] / winH, *driver, col);
+		}
+		return;
+	}
 
 	// Dev hook, same shape as ZONE_PAINTER_ZOOM_EXTENTS: force a handle hot so the hover
 	// states are reachable from a --screenshot run, where there is no pointer to place.
-	const char *forceHover = getenv("ZONE_PAINTER_GIZMO_HOVER");
+	const char *forceHover = forceHoverEnv;
 
 	// Centre first, then planes, then axes: smaller and more specific targets win, which is
 	// also the order Max resolves gizmo overlaps in. The centre is invisible, so its target
@@ -1846,8 +2045,24 @@ void zpDrawPatchGizmo(NL3D::IDriver *driver, NL3D::CCamera *camera,
 		const float shaftEndY = tipY[a] - vy * kGizmoHeadPx;
 		NL3D::CDRU::drawLine(ox / winW, oy / winH, shaftEndX / winW, shaftEndY / winH,
 		                     *driver, col);
-		// Filled head: base corners are the shaft end pushed along the screen normal.
 		const float nx = -vy, ny = vx;
+		if (g_XformKind == ZPXF_Scale)
+		{
+			// A BOX, not an arrowhead. Scale has no direction the way a move does - it pushes
+			// out and pulls in along the same axis - and a shape that reads as an arrow would
+			// promise a translation.
+			const float h = kGizmoHeadWidePx;
+			const float c0x = shaftEndX + nx * h, c0y = shaftEndY + ny * h;
+			const float c1x = shaftEndX - nx * h, c1y = shaftEndY - ny * h;
+			const float c2x = tipX[a] - nx * h, c2y = tipY[a] - ny * h;
+			const float c3x = tipX[a] + nx * h, c3y = tipY[a] + ny * h;
+			NL3D::CDRU::drawTriangle(c0x / winW, c0y / winH, c1x / winW, c1y / winH,
+			                         c2x / winW, c2y / winH, *driver, col, NL3D::CViewport());
+			NL3D::CDRU::drawTriangle(c0x / winW, c0y / winH, c2x / winW, c2y / winH,
+			                         c3x / winW, c3y / winH, *driver, col, NL3D::CViewport());
+			continue;
+		}
+		// Filled head: base corners are the shaft end pushed along the screen normal.
 		NL3D::CDRU::drawTriangle(tipX[a] / winW, tipY[a] / winH,
 		                         (shaftEndX + nx * kGizmoHeadWidePx) / winW,
 		                         (shaftEndY + ny * kGizmoHeadWidePx) / winH,
@@ -1875,6 +2090,32 @@ bool zpPatchGizmoBeginDrag(int handle, NL3D::CCamera *camera, const NL3D::CViewp
 	{
 		axisVec[a] = NLMISC::CVector::Null;
 		if (a == 0) axisVec[a].x = 1.f; else if (a == 1) axisVec[a].y = 1.f; else axisVec[a].z = 1.f;
+	}
+
+	s_DragXform = SPatchXform();
+	s_DragXform.Pivot = o;
+	s_DragXform.Kind = (TXformKind)g_XformKind;
+	if (g_XformKind == ZPXF_Rotate)
+	{
+		// Rotate resolves against the RING'S OWN plane, not against a camera-facing one: the
+		// angle is only meaningful in the plane the ring lies in. The screen handle turns
+		// about the view direction, which is what a screen-aligned ring means.
+		s_DragAxis = (handle >= ZPGIZ_AXIS_X && handle <= ZPGIZ_AXIS_Z)
+			? axisVec[handle - ZPGIZ_AXIS_X] : fwd;
+		s_DragXform.Axis = s_DragAxis;
+		s_DragPlaneN = s_DragAxis;
+		s_DragPlaneP = o;
+		NLMISC::CVector pos, dir, hit;
+		vp.getRayWithPoint(mouseX, mouseY, pos, dir, camMat, camera->getFrustum());
+		if (!zpRayPlane(pos, dir, s_DragPlaneP, s_DragPlaneN, hit))
+			return false;
+		s_DragStartHit = hit;
+		s_DragStartVec = hit - o;
+		if (s_DragStartVec.norm() < 1e-5f)
+			return false; // grabbed the exact centre: no angle to measure from
+		s_Dragging = true;
+		s_DragHandle = handle;
+		return true;
 	}
 
 	s_DragAxis = NLMISC::CVector::Null;
@@ -1922,10 +2163,56 @@ void zpPatchGizmoUpdateDrag(NL3D::CCamera *camera, const NL3D::CViewport &vp,
 	vp.getRayWithPoint(mouseX, mouseY, pos, dir, camera->getMatrix(), camera->getFrustum());
 	if (!zpRayPlane(pos, dir, s_DragPlaneP, s_DragPlaneN, hit))
 		return; // grazing the plane: keep the last good delta rather than jumping
+	if (s_DragXform.Kind == ZPXF_Rotate)
+	{
+		// Signed angle between the start and current ring vectors, about the ring axis. The
+		// cross product supplies the sign, which atan2 of the two lengths alone would not.
+		const NLMISC::CVector v = hit - s_DragPlaneP;
+		if (v.norm() < 1e-5f)
+			return;
+		const NLMISC::CVector a = s_DragStartVec.normed(), b = v.normed();
+		const float c = a * b;
+		const float sgn = ((a ^ b) * s_DragAxis) < 0.f ? -1.f : 1.f;
+		s_DragXform.Angle = sgn * acosf(c < -1.f ? -1.f : (c > 1.f ? 1.f : c));
+		if (g_PatchLiveUpdate && !zpPatchPushLive(true))
+			g_PropStatusMsg = "patch transform: the live surface could not be updated";
+		return;
+	}
 	NLMISC::CVector delta = hit - s_DragStartHit;
 	if (s_DragHandle >= ZPGIZ_AXIS_X && s_DragHandle <= ZPGIZ_AXIS_Z)
 		delta = s_DragAxis * (delta * s_DragAxis); // constrain to the axis
 	s_DragDelta = delta;
+	if (s_DragXform.Kind == ZPXF_Scale)
+	{
+		// One gizmo length of drag doubles the size. Tying the factor to the gizmo rather than
+		// to world units keeps the feel the same at every zoom, since the gizmo is itself
+		// fitted to a pixel size.
+		const float len = s_GizmoWorldLen > 1e-6f ? s_GizmoWorldLen : 1.f;
+		float f[3] = { 1.f, 1.f, 1.f };
+		if (s_DragHandle >= ZPGIZ_AXIS_X && s_DragHandle <= ZPGIZ_AXIS_Z)
+		{
+			const int a = s_DragHandle - ZPGIZ_AXIS_X;
+			f[a] = 1.f + (delta * s_DragAxis) / len;
+		}
+		else if (s_DragHandle >= ZPGIZ_PLANE_XY && s_DragHandle <= ZPGIZ_PLANE_ZX)
+		{
+			const int q = s_DragHandle - ZPGIZ_PLANE_XY;
+			const float k = 1.f + delta.norm() * (delta * NLMISC::CVector(1.f, 1.f, 1.f) < 0.f ? -1.f : 1.f) / len;
+			f[kGizmoPlaneAxes[q][0]] = k;
+			f[kGizmoPlaneAxes[q][1]] = k;
+		}
+		else
+		{
+			// Screen handle: uniform. Distance from the start, signed by which way it went.
+			const float k = 1.f + delta.norm() * (delta * NLMISC::CVector(1.f, 1.f, 1.f) < 0.f ? -1.f : 1.f) / len;
+			f[0] = f[1] = f[2] = k;
+		}
+		// A factor through zero mirrors the selection and then keeps going; clamp so a scale
+		// can shrink to nothing but never turn the surface inside out mid-drag.
+		for (int i = 0; i < 3; ++i)
+			if (f[i] < 0.01f) f[i] = 0.01f;
+		s_DragXform.Scale = NLMISC::CVector(f[0], f[1], f[2]);
+	}
 	if (g_PatchLiveUpdate && !zpPatchPushLive(true))
 		g_PropStatusMsg = "patch move: the live surface could not be updated";
 }
@@ -2243,6 +2530,67 @@ void zpGeomVertChanged(uint zoneId, uint16 elemIdx, int elem, const float *objDe
 
 uint zpApplyPatchMove(const NLMISC::CVector &worldDelta, std::string &msg)
 {
+	SPatchXform xf;
+	return zpApplyPatchXform(xf, worldDelta, msg);
+}
+
+/** Rotate the selection about the current pivot. Axis 0/1/2 = X/Y/Z, angle in degrees. */
+uint zpApplyPatchRotate(int axis, float degrees, std::string &msg)
+{
+	SPatchXform xf;
+	xf.Kind = ZPXF_Rotate;
+	if (!zpTransformPivot(xf.Pivot))
+	{
+		msg = "rotate: no pivot";
+		return 0;
+	}
+	xf.Axis = NLMISC::CVector(axis == 0 ? 1.f : 0.f, axis == 1 ? 1.f : 0.f, axis == 2 ? 1.f : 0.f);
+	xf.Angle = degrees * (float)NLMISC::Pi / 180.f;
+	return zpApplyPatchXform(xf, NLMISC::CVector::Null, msg);
+}
+
+/** Rotate about an ARBITRARY axis - the form the gizmo records, since a screen ring is not
+ *  one of the three world axes. */
+uint zpApplyPatchRotateAxis(float ax, float ay, float az, float degrees, std::string &msg)
+{
+	SPatchXform xf;
+	xf.Kind = ZPXF_Rotate;
+	if (!zpTransformPivot(xf.Pivot))
+	{
+		msg = "rotate: no pivot";
+		return 0;
+	}
+	xf.Axis = NLMISC::CVector(ax, ay, az);
+	xf.Angle = degrees * (float)NLMISC::Pi / 180.f;
+	return zpApplyPatchXform(xf, NLMISC::CVector::Null, msg);
+}
+
+/** Scale the selection about the current pivot, per axis. */
+uint zpApplyPatchScale(float sx, float sy, float sz, std::string &msg)
+{
+	SPatchXform xf;
+	xf.Kind = ZPXF_Scale;
+	if (!zpTransformPivot(xf.Pivot))
+	{
+		msg = "scale: no pivot";
+		return 0;
+	}
+	xf.Scale = NLMISC::CVector(sx, sy, sz);
+	return zpApplyPatchXform(xf, NLMISC::CVector::Null, msg);
+}
+
+/**
+ * Apply a transform to the selection.
+ *
+ * One routine for move, rotate and scale because everything but the per-element world delta is
+ * shared: which elements are eligible, the ride and bound rules, the node-space conversion,
+ * the single undo stroke, the live push. A move hands every element the same delta; a rotate
+ * or scale derives each element's from where it sits relative to the pivot, which is why the
+ * core op takes a delta PER element.
+ */
+uint zpApplyPatchXform(const SPatchXform &xform, const NLMISC::CVector &worldDelta,
+                       std::string &msg)
+{
 	msg.clear();
 	if (!g_PaintCtx.Zones || g_PatchVertSel.empty())
 		return 0;
@@ -2275,15 +2623,10 @@ uint zpApplyPatchMove(const NLMISC::CVector &worldDelta, std::string &msg)
 
 		// Displayed-world delta -> object delta, through the FULL node transform: the drag is
 		// measured in the space the cage is drawn in, which is object space only for a node
-		// sitting at the board origin untransformed. Taking the difference of two transformed
-		// points drops the translation without needing the matrix internals, so a rotated or
-		// mirrored node needs no special case - its rotation is already in DisplayTM.
+		// sitting at the board origin untransformed. zpXformDelta takes the difference of two
+		// transformed points, which drops the translation, so a rotated or mirrored node needs
+		// no special case - its rotation is already in DisplayTM.
 		const MAXMATH::Matrix3M inv = MAXMATH::inverseM3(pz.DisplayTM);
-		MAXMATH::Point3M zero = { 0.f, 0.f, 0.f };
-		MAXMATH::Point3M wd = { worldDelta.x, worldDelta.y, worldDelta.z };
-		const MAXMATH::Point3M o0 = MAXMATH::transformPoint(zero, inv);
-		const MAXMATH::Point3M o1 = MAXMATH::transformPoint(wd, inv);
-		const float od[3] = { o1.x - o0.x, o1.y - o0.y, o1.z - o0.z };
 
 		// Bound vertices are derived from a target edge; they are recomputed on load, so a
 		// written position could not survive the round trip. Filtered HERE rather than in the
@@ -2343,7 +2686,30 @@ if (*it < pz.Ep.Rp.Verts.size() && pz.Ep.Rp.Verts[*it].Binded)
 			if (firstErr.empty()) firstErr = "no paint core";
 			continue;
 		}
-		const uint n = g_PaintCtx.Core->opMovePatchElems(pz.ZoneId, move, od, err);
+		// One world delta per element. A move gives every element the same one; a rotate or a
+		// scale gives each its own, derived from where it sits relative to the pivot.
+		std::vector<NLMISC::CVector> deltas;
+		deltas.reserve(move.size());
+		for (size_t i = 0; i < move.size(); ++i)
+		{
+			NLMISC::CVector wd = worldDelta;
+			if (xform.Kind != ZPXF_Move)
+			{
+				float wp[3];
+				const bool have = move[i].Elem == ZPPAINT::GeomVec
+					? zpPatchTangentWorld(pz.ZoneId, move[i].Idx, wp)
+					: zpPatchVertWorld(pz.ZoneId, move[i].Idx, wp);
+				if (!have)
+				{
+					deltas.push_back(NLMISC::CVector::Null);
+					continue;
+				}
+				wd = zpTransformPoint(xform, NLMISC::CVector(wp[0], wp[1], wp[2]))
+				     - NLMISC::CVector(wp[0], wp[1], wp[2]);
+			}
+			deltas.push_back(zpXformDelta(wd, inv));
+		}
+		const uint n = g_PaintCtx.Core->opMovePatchElems(pz.ZoneId, move, deltas, err);
 		if (!n && firstErr.empty() && !err.empty())
 			firstErr = err;
 		written += n;
@@ -2382,10 +2748,15 @@ void zpPatchGizmoEndDrag()
 	if (!s_Dragging)
 		return;
 	const NLMISC::CVector delta = s_DragDelta;
-	const bool moved = delta.norm() > 0.0001f;
+	const SPatchXform xf = s_DragXform;
+	const bool moved = xf.Kind == ZPXF_Move
+		? delta.norm() > 0.0001f
+		: (xf.Kind == ZPXF_Rotate ? fabsf(xf.Angle) > 1e-4f
+		                          : (xf.Scale - NLMISC::CVector(1.f, 1.f, 1.f)).norm() > 1e-4f);
 	s_Dragging = false;
 	s_DragHandle = ZPGIZ_NONE;
 	s_DragDelta = NLMISC::CVector::Null;
+	s_DragXform = SPatchXform();
 	zpPatchGizmoInvalidate();
 	// "Centre of all objects" is deliberately held DURING an interaction and re-fitted after
 	// it, so a rotate does not chase a centre the rotate itself is moving.
@@ -2393,10 +2764,21 @@ void zpPatchGizmoEndDrag()
 	if (!moved)
 		return;
 	std::string msg;
-	zpApplyPatchMove(delta, msg);
+	zpApplyPatchXform(xf, delta, msg);
 	g_PropStatusMsg = msg;
-	ZPSCRIPT::record(NLMISC::toString("painter.movePatchSelection(%.9g, %.9g, %.9g)",
-	                                  delta.x, delta.y, delta.z));
+	// Recorded as the op the artist performed, not as the drag that produced it - a replay
+	// re-derives the pivot from the mode, which is what makes the script survive a different
+	// pivot setting rather than baking one drag's anchor into it.
+	if (xf.Kind == ZPXF_Rotate)
+		ZPSCRIPT::record(NLMISC::toString("painter.rotatePatchSelectionAxis(%.9g, %.9g, %.9g, %.9g)",
+		                                  xf.Axis.x, xf.Axis.y, xf.Axis.z,
+		                                  xf.Angle * 180.f / (float)NLMISC::Pi));
+	else if (xf.Kind == ZPXF_Scale)
+		ZPSCRIPT::record(NLMISC::toString("painter.scalePatchSelection(%.9g, %.9g, %.9g)",
+		                                  xf.Scale.x, xf.Scale.y, xf.Scale.z));
+	else
+		ZPSCRIPT::record(NLMISC::toString("painter.movePatchSelection(%.9g, %.9g, %.9g)",
+		                                  delta.x, delta.y, delta.z));
 }
 
 bool zpPickPatchVertex(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, float my,
@@ -2444,26 +2826,6 @@ bool zpPickPatchVertex(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, f
 		}
 	}
 	return found;
-}
-
-/** Screen distance from a point to a segment, in units of viewport height. */
-static float zpSegDist(float px, float py, const NLMISC::CVector &a, const NLMISC::CVector &b,
-                       float aspect)
-{
-	const float ax = a.x * aspect, ay = a.y;
-	const float bx = b.x * aspect, by = b.y;
-	const float qx = px * aspect, qy = py;
-	const float ex = bx - ax, ey = by - ay;
-	const float len2 = ex * ex + ey * ey;
-	float t = 0.f;
-	if (len2 > 1e-12f)
-	{
-		t = ((qx - ax) * ex + (qy - ay) * ey) / len2;
-		if (t < 0.f) t = 0.f;
-		else if (t > 1.f) t = 1.f;
-	}
-	const float dx = qx - (ax + ex * t), dy = qy - (ay + ey * t);
-	return sqrtf(dx * dx + dy * dy);
 }
 
 /**

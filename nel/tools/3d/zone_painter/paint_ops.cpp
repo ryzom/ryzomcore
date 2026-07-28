@@ -769,7 +769,7 @@ bool CPaintCore::opProp(uint zoneId, uint32 appDataId, bool newHas, const std::s
 }
 
 uint CPaintCore::opMovePatchElems(uint zoneId, const std::vector<SGeomElemRef> &elems,
-                                  const float *objDelta, std::string &err)
+                                  const std::vector<NLMISC::CVector> &objDeltas, std::string &err)
 {
 	uint zi = (uint)-1;
 	for (size_t i = 0; i < m_Zones.size(); ++i)
@@ -779,10 +779,12 @@ uint CPaintCore::opMovePatchElems(uint zoneId, const std::vector<SGeomElemRef> &
 	if (z.In.Frozen) { err = "read-only"; return 0; }
 	if (!z.In.Node) { err = "no node"; return 0; }
 
+	if (objDeltas.size() != elems.size()) { err = "delta count mismatch"; return 0; }
 	std::vector<SUndoTile> recs;
 	recs.reserve(elems.size());
 	for (size_t i = 0; i < elems.size(); ++i)
 	{
+		const float objDelta[3] = { objDeltas[i].x, objDeltas[i].y, objDeltas[i].z };
 		SGeomWriteTarget t;
 		std::string e;
 		if (!resolveGeomWriteTarget(z.In.Node, elems[i].Idx, elems[i].Elem, t, e))

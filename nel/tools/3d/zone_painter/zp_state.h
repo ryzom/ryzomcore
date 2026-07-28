@@ -187,6 +187,11 @@ enum TPainterKey
 	// tile-set selection and only one of the two is ever live.
 	ZPK_MModePatch,
 	ZPK_SubObjDigits, // base of the 1-5 run: digit k selects sub-object level k-1 (EP_*)
+	// Max's transform keys. ZPKS_PATCH, which is what lets R mean SCALE here while it still
+	// means Prop mode in the paint modes - the same trick the digit row uses.
+	ZPK_XformMove,
+	ZPK_XformRotate,
+	ZPK_XformScale,
 	ZPK_KeyCounter
 };
 
@@ -572,6 +577,44 @@ bool zpPickPatchVertex(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, f
                        uint &zoneOut, uint16 &vertOut);
 /** Centroid of the current vertex selection in world space. False when nothing is selected. */
 bool zpPatchSelCentroid(NLMISC::CVector &out);
+
+/** What a transform gizmo is currently doing. W / E / R. */
+enum TXformKind
+{
+	ZPXF_Move = 0,
+	ZPXF_Rotate,
+	ZPXF_Scale
+};
+
+/**
+ * One transform, in DISPLAYED world space, anchored on the current pivot.
+ *
+ * A move is expressed as a delta rather than living here, because a translation is the same
+ * for every element and needs no anchor. Rotate and scale need both, so they carry theirs.
+ */
+struct SPatchXform
+{
+	TXformKind Kind;
+	NLMISC::CVector Pivot;
+	NLMISC::CVector Axis;  ///< rotate: the axis, normalised
+	float Angle;           ///< rotate: radians
+	NLMISC::CVector Scale; ///< scale: per-axis factors
+	SPatchXform() : Kind(ZPXF_Move), Pivot(NLMISC::CVector::Null), Axis(0.f, 0.f, 1.f),
+	                Angle(0.f), Scale(1.f, 1.f, 1.f) { }
+};
+
+/** Map one displayed-world point through a transform. */
+NLMISC::CVector zpTransformPoint(const SPatchXform &xf, const NLMISC::CVector &p);
+/** Apply a transform to the selection; worldDelta is used only for ZPXF_Move. */
+uint zpApplyPatchXform(const SPatchXform &xf, const NLMISC::CVector &worldDelta, std::string &msg);
+uint zpApplyPatchRotate(int axis, float degrees, std::string &msg);
+uint zpApplyPatchRotateAxis(float ax, float ay, float az, float degrees, std::string &msg);
+uint zpApplyPatchScale(float sx, float sy, float sz, std::string &msg);
+
+/** Current gizmo transform kind, and the switch (recorded). */
+extern int g_XformKind;
+void zpSetXformKind(int kind);
+const char *zpXformKindName(int kind);
 
 /**
  * Where a transform is anchored - the pivot-point control.

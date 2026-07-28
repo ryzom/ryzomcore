@@ -305,18 +305,18 @@ UB=$(grep -a '^U_B ' "$OUT/unweld_0.log" | head -1 | cut -d' ' -f2-)
 	&& echo "OK: the two sides of the seam are apart - [$UA] against [$UB]" \
 	|| { echo "FAIL: the seam did not open"; FAIL=1; }
 
-# And the RENDER differs, which is the whole point: the welded build drags the neighbour's
-# aliased corner up to the moved vertex, the unwelded one leaves it where its file says.
-if command -v compare >/dev/null 2>&1; then
-	D=$(compare -metric AE "$OUT/seam_1.tga" "$OUT/seam_0.tga" null: 2>&1 || true)
-	if awk -v d="$D" 'BEGIN{ exit !(d + 0 > 200) }'; then
-		echo "OK: welded and unwelded renders differ at the seam ($D pixels)"
-	else
-		echo "FAIL: the two builds rendered the same ($D pixels) - the unweld did nothing"; FAIL=1
-	fi
+# And the BUILD differs, which is the claim. Deliberately not a pixel comparison: in the
+# welded build the shared CTessVertex ends up holding whichever patch refreshed last, so how
+# visible the alias is depends on refresh order rather than on whether the weld is there. A
+# render assertion here passed and failed on that ordering rather than on the unweld, which is
+# a gate that agrees with you for the wrong reason. The counts are exact and deterministic.
+if grep -qa "landscape rebuilt unwelded (0 cross-zone binds dropped" "$OUT/unweld_0.log"; then
+	echo "FAIL: the unweld dropped no cross-zone binds - it did nothing"; FAIL=1
 else
-	echo "SKIP: ImageMagick missing, render difference not checked"
+	echo "OK: $(grep -a 'landscape rebuilt unwelded' "$OUT/unweld_0.log" | head -1)"
 fi
+grep -qa "border verts dropped" "$OUT/unweld_0.log" \
+	|| { echo "FAIL: the unweld report is missing"; FAIL=1; }
 
 # Switching modes rebuilds the landscape, and a rebuild that took its data from the display
 # cage would revert every painted tile - the trap M35-5 exists for, walked into a second time

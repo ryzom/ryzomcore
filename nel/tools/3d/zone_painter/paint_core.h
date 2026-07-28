@@ -561,13 +561,16 @@ public:
 	 * encode. This flag is the geometry half of the dirty signal.
 	 */
 	/**
-	 * Move elements of one zone by an OBJECT-space delta. The whole list lands as a single
-	 * undo step, because a selection move is one action to the artist however many elements
-	 * it touched. Bound vertices, and handles that ride a moving corner, must already be
-	 * excluded by the caller - this layer trusts the policy rather than re-deriving it.
+	 * Move elements of one zone by PER-ELEMENT object-space deltas.
+	 *
+	 * Per element rather than one shared delta because rotate and scale give every element its
+	 * own; a move simply passes the same value repeated. The whole list lands as a single undo
+	 * step, because a selection transform is one action to the artist however many elements it
+	 * touched. Bound vertices, and handles that ride a moving corner, must already be excluded
+	 * by the caller - this layer trusts the policy rather than re-deriving it.
 	 */
 	uint opMovePatchElems(uint zoneId, const std::vector<SGeomElemRef> &elems,
-	                      const float *objDelta, std::string &err);
+	                      const std::vector<NLMISC::CVector> &objDeltas, std::string &err);
 	/**
 	 * Notified whenever a vertex position changes, forward or by undo/redo.
 	 *

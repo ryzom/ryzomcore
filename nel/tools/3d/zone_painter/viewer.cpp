@@ -1589,6 +1589,14 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 					for (uint lv = 0; lv < CPaintMouseListener::SubCount; ++lv)
 						if (zpKeySubObjPushed(lv))
 							zpSelectSubObject((int)lv);
+					// W / E / R. R is ModeProp in the paint modes and SCALE here; the
+					// scope masks keep exactly one of the two live, same as the digit row.
+					if (zpKeyPushed(ZPK_XformMove))
+						zpSetXformKind(ZPXF_Move);
+					if (zpKeyPushed(ZPK_XformRotate))
+						zpSetXformKind(ZPXF_Rotate);
+					if (zpKeyPushed(ZPK_XformScale))
+						zpSetXformKind(ZPXF_Scale);
 					if (zpKeyPushed(ZPK_SizeUp))
 						zpBrushSizeDelta(+1);
 					if (zpKeyPushed(ZPK_SizeDown))
