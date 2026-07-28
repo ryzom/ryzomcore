@@ -187,7 +187,7 @@ enum TPainterKey
 	// tile-set selection and only one of the two is ever live.
 	ZPK_MModePatch,
 	ZPK_SubObjDigits, // base of the 1-5 run: digit k selects sub-object level k-1 (EP_*)
-	// Max's transform keys. ZPKS_PATCH, which is what lets R mean SCALE here while it still
+	// Transform keys. ZPKS_PATCH, which is what lets R mean SCALE here while it still
 	// means Prop mode in the paint modes - the same trick the digit row uses.
 	ZPK_XformMove,
 	ZPK_XformRotate,
@@ -596,8 +596,8 @@ struct SPatchXform
 {
 	TXformKind Kind;
 	NLMISC::CVector Pivot;
-	NLMISC::CVector Axis;  ///< rotate: the axis, normalised
-	float Angle;           ///< rotate: radians
+	NLMISC::CVector Axis; ///< rotate: the axis, normalised
+	float Angle; ///< rotate: radians
 	NLMISC::CVector Scale; ///< scale: per-axis factors
 	SPatchXform() : Kind(ZPXF_Move), Pivot(NLMISC::CVector::Null), Axis(0.f, 0.f, 1.f),
 	                Angle(0.f), Scale(1.f, 1.f, 1.f) { }
@@ -677,15 +677,18 @@ int zpPatchGizmoHover();
 void zpPatchGizmoInvalidate();
 
 /**
- * Gizmo drag. The delta is a PREVIEW: the cage draws with it applied, nothing is written to
- * the .max, and endDrag currently discards it - the write path does not exist yet, and a
- * preview that silently failed to persist would be worse than one that says so.
+ * Gizmo drag. While it runs the transform is a PREVIEW - offsets over an untouched cage -
+ * and endDrag is the commit: it applies the transform through zpApplyPatchXform, which
+ * writes the .max, records the op and pushes the live surface. cancelDrag abandons it -
+ * right-click-while-dragging (and ESC) - nothing written, the preview pushed back out
+ * of the live surface.
  */
 bool zpPatchGizmoBeginDrag(int handle, NL3D::CCamera *camera, const NL3D::CViewport &vp,
                            float mouseX, float mouseY);
 void zpPatchGizmoUpdateDrag(NL3D::CCamera *camera, const NL3D::CViewport &vp,
                             float mouseX, float mouseY);
 void zpPatchGizmoEndDrag();
+void zpPatchGizmoCancelDrag();
 bool zpPatchGizmoDragging();
 /** Preview offset for one vertex: the live delta if it is selected and free, else zero. */
 const NLMISC::CVector &zpPatchVertDragOffset(uint zoneId, uint16 vertIdx);

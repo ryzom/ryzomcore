@@ -14,7 +14,7 @@
  */
 
 /*
- * Copyright (C) 2026  by authors
+ * Copyright (C) 2026 by authors
  *
  * This file is part of RYZOM CORE PIPELINE.
  * RYZOM CORE PIPELINE is free software: you can redistribute it
@@ -24,11 +24,11 @@
  *
  * RYZOM CORE PIPELINE is distributed in the hope that it will be
  * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public
- * License along with RYZOM CORE PIPELINE.  If not, see
+ * License along with RYZOM CORE PIPELINE. If not, see
  * <http://www.gnu.org/licenses/>.
  */
 
@@ -1056,7 +1056,7 @@ uint zpApplyPatchRotate(int axis, float degrees, std::string &msg)
 }
 
 /** Rotate about an ARBITRARY axis - the form the gizmo records, since a screen ring is not
- *  one of the three world axes. */
+ * one of the three world axes. */
 uint zpApplyPatchRotateAxis(float ax, float ay, float az, float degrees, std::string &msg)
 {
 	SPatchXform xf;
@@ -1283,6 +1283,30 @@ void zpPatchGizmoEndDrag()
 	else
 		ZPSCRIPT::record(NLMISC::toString("painter.movePatchSelection(%.9g, %.9g, %.9g)",
 		                                  delta.x, delta.y, delta.z));
+}
+
+/**
+ * Abandon a live gizmo drag - right-click-while-dragging, and ESC.
+ *
+ * Nothing was committed: the drag is a preview, offsets drawn over an untouched cage, so
+ * cancelling is dropping the drag state. The one thing that HAS already changed is the live
+ * landscape - the per-frame live update pushed preview positions into the zone's control
+ * points - so the untouched cage is pushed back over it and the surface returns to where the
+ * file still says it is. No core op ran, so undo, dirty flags and the recorder see nothing.
+ */
+void zpPatchGizmoCancelDrag()
+{
+	if (!s_Dragging)
+		return;
+	s_Dragging = false;
+	s_DragHandle = ZPGIZ_NONE;
+	s_DragDelta = NLMISC::CVector::Null;
+	s_DragXform = SPatchXform();
+	zpPatchGizmoInvalidate();
+	zpPivotNoteInteractionEnd();
+	if (g_PatchLiveUpdate)
+		zpPatchPushLive(false);
+	g_PropStatusMsg = "transform cancelled";
 }
 
 /**

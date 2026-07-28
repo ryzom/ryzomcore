@@ -264,10 +264,12 @@ void CPaintMouseListener::operator()(const NLMISC::CEvent &event)
 		if (!Core) return;
 		if (g_ScriptUiLock) return; // painterscript pump: input locked (ESC handled by the pump)
 		// A live gizmo drag CAPTURES the pointer. It can only start on the scene, so while it
-		// runs the GUI does not steal the move - and a release over a toolbar must still end
-		// the drag, or it stays armed and the next stray move continues it with the button up.
+		// runs the GUI does not steal the move - a release over a toolbar must still end the
+		// drag, or it stays armed and the next stray move continues it with the button up, and
+		// the cancelling right click must reach the drag wherever the pointer happens to be.
 		const bool gizmoCapture = zpPatchGizmoDragging()
-			&& (event == NLMISC::EventMouseMoveId || event == NLMISC::EventMouseUpId);
+			&& (event == NLMISC::EventMouseMoveId || event == NLMISC::EventMouseUpId
+			    || event == NLMISC::EventMouseDownId);
 		if (!gizmoCapture && guiWantsMouse())
 		{
 			// Abort an in-progress stroke if the pointer enters a GUI window mid-drag
@@ -303,6 +305,18 @@ void CPaintMouseListener::operator()(const NLMISC::CEvent &event)
 					NL3D::IDriver *drv = g_PaintCtx.UDriver
 						? static_cast<NL3D::CDriverUser *>(g_PaintCtx.UDriver)->getDriver() : NULL;
 					zpPatchVertexClick(Camera, drv, MouseX, MouseY, (uint)mouse->Button);
+				}
+				if (mouse->Button & NLMISC::rightButton)
+				{
+					// Cancel: a right click during a transform drag abandons it and
+					// nothing is written. Otherwise the scene context menu - patch mode has
+					// no eyedropper to spend the right button on, and this is where the user
+					// pivot gets placed. This must live INSIDE the mode block: an earlier
+					// spelling sat below it, after the unconditional return, and was dead.
+					if (zpPatchGizmoDragging())
+						zpPatchGizmoCancelDrag();
+					else
+						zpOpenSceneMenu();
 				}
 				return;
 			}
@@ -365,13 +379,6 @@ void CPaintMouseListener::operator()(const NLMISC::CEvent &event)
 						StrokeTile = HoverTile;
 					}
 				}
-			}
-			if (mouse->Button == NLMISC::rightButton && Mode == ModePatch)
-			{
-				// Scene context menu. Patch mode has no eyedropper to spend the right button
-				// on, and the user pivot has no other way to be placed.
-				zpOpenSceneMenu();
-				return;
 			}
 			if (mouse->Button == NLMISC::rightButton)
 			{
@@ -1534,10 +1541,14 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 				// Script-window RUN queues its chunk from inside the pump; execute it here,
 				// outside any event dispatch, so painter.pumpUI() can safely pump again.
 				ZPSCRIPT::processPendingRun();
-				// ESC: close session board first ; else quit viewer
+				// ESC, the universal cancel, innermost first: abandon a live gizmo drag,
+				// else close the session board, else quit the viewer. Without the first
+				// step ESC mid-drag would quit the tool out from under the drag.
 				if (udriver->AsyncListener.isKeyPushed(NLMISC::KeyESCAPE))
 				{
-					if (ZPUI::isSessionBoardVisible())
+					if (zpPatchGizmoDragging())
+						zpPatchGizmoCancelDrag();
+					else if (ZPUI::isSessionBoardVisible())
 						ZPUI::setSessionBoardVisible(false);
 					else
 						viewerQuit = true;
