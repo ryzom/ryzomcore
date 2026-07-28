@@ -33,6 +33,15 @@ cat > "$OUT/none.lua" <<'EOF'
 painter.setMode(4)
 painter.setSubObject(1)
 EOF
+cat > "$OUT/undo.lua" <<'EOF'
+painter.setMode(4)
+painter.setSubObject(1)
+painter.clearPatchVertexSelection()
+painter.selectPatchVertex(0, 5, 1)
+painter.selectPatchVertex(0, 6, 1)
+painter.movePatchSelection(0, 0, 1.5)
+painter.undo()
+EOF
 cat > "$OUT/move.lua" <<'EOF'
 painter.setMode(4)
 painter.setSubObject(1)
@@ -78,6 +87,17 @@ for pair in "material-fond:modPM" "material-bassin:delta"; do
 	N=$( { cmp -l "$OUT/$B.null.max" "$OUT/ws_move_$B/landscape/ligo/lacustre/max/$B.max" || true; } | wc -l)
 	[[ "$N" -eq 2 ]] || { echo "FAIL: move touched $N bytes, expected 2"; exit 1; }
 	echo "OK move wrote 2 bytes via $WANT"
+
+	echo "===== M34-4 ($B): move two vertices, undo, back to the baseline ====="
+	seed "$OUT/ws_undo_$B" "$B"
+	run_session "$OUT/ws_undo_$B" "$B" "$OUT/undo.lua" "$OUT/$B.undo.log"
+	# One undo for a two-vertex move: a selection move is one action to the artist, so the
+	# whole list has to land as a single stroke.
+	grep -aq "movePatchSelection: 2 written" "$OUT/$B.undo.log" || {
+		echo "FAIL: expected 2 vertices written"; grep -a "movePatchSelection" "$OUT/$B.undo.log"; exit 1; }
+	U=$( { cmp -l "$OUT/$B.null.max" "$OUT/ws_undo_$B/landscape/ligo/lacustre/max/$B.max" || true; } | wc -l)
+	[[ "$U" -eq 0 ]] || { echo "FAIL: undo left $U bytes changed, expected 0"; exit 1; }
+	echo "OK undo restores the baseline byte for byte"
 done
 
 echo "ALL M34 GATES PASSED"

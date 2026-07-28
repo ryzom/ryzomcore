@@ -481,6 +481,8 @@ const NLMISC::CVector &zpPatchVertDragOffset(uint zoneId, uint16 vertIdx);
  * of vertices written; `msg` explains a zero (or a partial). Skips bound vertices by policy.
  */
 uint zpApplyPatchMove(const NLMISC::CVector &worldDelta, std::string &msg);
+/** Core geom-changed sink: keeps Ep.Pm and the display patchinfo in step with the .max. */
+void zpGeomVertChanged(uint zoneId, uint16 vertIdx, const float *objPos);
 
 /** Left-click in patch/vertex mode; `buttons` carries the modifier bits (Ctrl add, Alt remove). */
 void zpPatchVertexClick(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, float my, uint buttons);

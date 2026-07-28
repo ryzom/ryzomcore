@@ -108,6 +108,7 @@ CPaintCore::CPaintCore()
 	m_StoredIncludeMeshes = -1;
 	m_StoredPreloadTiles = -1;
 	m_PropChangedCb = NULL;
+	m_GeomChangedCb = NULL;
 	m_HaveLastEdit = false;
 	m_LastEditRadius = 0.f;
 }

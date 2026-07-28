@@ -790,11 +790,17 @@ int main(int argc, char **argv)
 	                    " TileSetDigits (base of the 0-9 run) DisplacePrev DisplaceNext Undo Redo Redo2 ViewUndo\n"
 	                    " ViewRedo Screenshot (defaults PgUp PgDn 0 [ ] Ctrl+Z Ctrl+Y Ctrl+E Shift+Z Shift+Y F12).\n"
 	                    "Patch edit (ModePatch, default M): shows the patch control cage for every editable\n"
-	                    " zone. SubObjectDigits (base of the 1-5 run, default 1) picks the sub-object level -\n"
-	                    " 1 Object, 2 Vertex, 3 Edge, 4 Patch, 5 Tile, the same order and meaning as the\n"
-	                    " in-Max modifier. The digit row is shared with TileSetDigits: only one of the two is\n"
-	                    " live, because each is scoped to the modes it belongs to. Entering the mode lands on\n"
-	                    " Object level, . Display only so far - nothing is editable yet.\n"
+                    "  zone. SubObjectDigits (base of the 1-5 run, default 1) picks the sub-object level -\n"
+                    "  1 Object, 2 Vertex, 3 Edge, 4 Patch, 5 Tile, the same order and meaning as the\n"
+                    "  legacy plugin modifier. The digit row is shared with TileSetDigits: only one of the two is\n"
+                    "  live, because each is scoped to the modes it belongs to. Entering the mode lands on\n"
+                    "  Object level. At Vertex level: click selects a vertex,\n"
+                    "  Ctrl adds, Alt removes, a click on nothing clears; the move gizmo appears on\n"
+                    "  the selection and dragging an axis / plane / its centre moves the selected\n"
+                    "  vertices. BOUND vertices (drawn black) are never moved - they are recomputed\n"
+                    "  from the edge they bind into, so a written position could not survive a\n"
+                    "  reload; they follow when that edge moves. Rotated or mirrored zones refuse\n"
+                    "  the move for now. Moves are undoable as one step per drag.\n"
 	                    "ESC is the only fixed key: closes the session board, else quits; also cancels a script.");
 	// Optional first positional: .max (legacy) or folder (startup seed). Absent => startup flow.
 	args.addAdditionalArg("input", "Input .max scene (legacy) or graphics/seed folder (startup); omit for discovery", true, false);

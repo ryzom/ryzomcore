@@ -663,7 +663,9 @@ void CPaintCore::applyUndoList(const std::vector<SUndoTile> &list, bool useOld)
 	{
 		for (int i = (int)list.size() - 1; i >= 0; --i)
 		{
-			if (list[i].Kind == 2)
+			if (list[i].Kind == 3)
+				applyGeomUndo(list[i], true);
+			else if (list[i].Kind == 2)
 			{
 				// Prop: restore old raw presence/value
 				uint zi = (uint)-1;
@@ -690,7 +692,9 @@ void CPaintCore::applyUndoList(const std::vector<SUndoTile> &list, bool useOld)
 	{
 		for (size_t i = 0; i < list.size(); ++i)
 		{
-			if (list[i].Kind == 2)
+			if (list[i].Kind == 3)
+				applyGeomUndo(list[i], false);
+			else if (list[i].Kind == 2)
 			{
 				uint zi = (uint)-1;
 				for (size_t z = 0; z < m_Zones.size(); ++z)
@@ -762,6 +766,74 @@ bool CPaintCore::opProp(uint zoneId, uint32 appDataId, bool newHas, const std::s
 	if (m_PropChangedCb)
 		m_PropChangedCb(zoneId, appDataId);
 	return true;
+}
+
+uint CPaintCore::opMovePatchVertices(uint zoneId, const std::vector<uint16> &verts,
+                                     const float *objDelta, std::string &err)
+{
+	uint zi = (uint)-1;
+	for (size_t i = 0; i < m_Zones.size(); ++i)
+		if (m_Zones[i].In.ZoneId == zoneId) { zi = (uint)i; break; }
+	if (zi == (uint)-1) { err = "unknown zone"; return 0; }
+	SZone &z = m_Zones[zi];
+	if (z.In.Frozen) { err = "read-only"; return 0; }
+	if (!z.In.Node) { err = "no node"; return 0; }
+
+	std::vector<SUndoTile> recs;
+	recs.reserve(verts.size());
+	for (size_t i = 0; i < verts.size(); ++i)
+	{
+		SGeomWriteTarget t;
+		std::string e;
+		if (!resolveGeomWriteTarget(z.In.Node, verts[i], t, e))
+		{
+			if (err.empty()) err = e;
+			continue;
+		}
+		SUndoTile rec;
+		rec.Kind = 3;
+		rec.Zone = zoneId;
+		rec.VertIdx = verts[i];
+		if (!geomTargetGet(t, rec.OldPos)) { if (err.empty()) err = "target read failed"; continue; }
+		for (int k = 0; k < 3; ++k)
+			rec.NewPos[k] = rec.OldPos[k] + objDelta[k];
+		if (!geomTargetSet(t, rec.NewPos)) { if (err.empty()) err = "target write failed"; continue; }
+		recs.push_back(rec);
+		if (m_GeomChangedCb)
+			m_GeomChangedCb(zoneId, rec.VertIdx, rec.NewPos);
+	}
+	if (recs.empty())
+		return 0;
+
+	// One stroke for the whole selection: an artist who dragged twelve vertices expects one
+	// Ctrl+Z, not twelve. Commit any in-flight paint stroke first for the same reason opProp
+	// does - a scripted move between stroke segments must not drop their records.
+	endStroke();
+	for (size_t i = 0; i < recs.size(); ++i)
+		m_CurStroke.push_back(recs[i]);
+	endStroke();
+	markGeomDirty(zoneId);
+	return (uint)recs.size();
+}
+
+/** Undo/redo of a Kind 3 record: re-resolve the target and put back the stored triple. */
+void CPaintCore::applyGeomUndo(const SUndoTile &rec, bool useOld)
+{
+	uint zi = (uint)-1;
+	for (size_t i = 0; i < m_Zones.size(); ++i)
+		if (m_Zones[i].In.ZoneId == rec.Zone) { zi = (uint)i; break; }
+	if (zi == (uint)-1 || !m_Zones[zi].In.Node)
+		return;
+	SGeomWriteTarget t;
+	std::string e;
+	if (!resolveGeomWriteTarget(m_Zones[zi].In.Node, rec.VertIdx, t, e))
+		return;
+	const float *pos = useOld ? rec.OldPos : rec.NewPos;
+	if (!geomTargetSet(t, pos))
+		return;
+	markGeomDirty(rec.Zone);
+	if (m_GeomChangedCb)
+		m_GeomChangedCb(rec.Zone, rec.VertIdx, pos);
 }
 
 bool CPaintCore::opUndo()

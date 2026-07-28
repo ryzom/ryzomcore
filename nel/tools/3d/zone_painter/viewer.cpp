@@ -805,6 +805,7 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 		g_PaintCtx.AvailableSeasons = &g_AvailableSeasons;
 		paintBridge.selectMode = zpSelectMode;
 		paintBridge.selectSubObject = zpSelectSubObject;
+		core->setGeomChangedCb(zpGeomVertChanged);
 		paintBridge.selectTileSetDelta = zpSelectTileSetDelta;
 		paintBridge.selectTileSetAbs = zpSelectTileSetAbs;
 		paintBridge.toggleTileSize = zpToggleTileSize;

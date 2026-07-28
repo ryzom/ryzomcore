@@ -332,7 +332,7 @@ bool geomTargetSet(const SGeomWriteTarget &t, const float *xyz);
 // Kind 2: raw AppData restore so delete-vs-"0"/presence semantics reapply exactly.
 struct SUndoTile
 {
-	uint8 Kind; // 0 = tile record, 1 = color vertex, 2 = export prop appdata
+	uint8 Kind; // 0 = tile record, 1 = color vertex, 2 = export prop appdata, 3 = vertex move
 	uint Zone;
 	sint32 TileId; // tile kind
 	CTileDescP Old;
@@ -343,6 +343,11 @@ struct SUndoTile
 	uint32 AppDataId;
 	bool OldHas, NewHas; // entry present?
 	std::string OldValue, NewValue; // string payload without trailing NUL
+	// Kind 3: geometry. The write target is RE-RESOLVED on undo rather than cached - a
+	// CStorageRaw pointer does not survive a working-set rebuild, and the policy (mapper
+	// delta vs stored position) is cheap to redo and must not drift from the forward path.
+	uint16 VertIdx;
+	float OldPos[3], NewPos[3];
 	// Kind 0 only: raw pristine tile-record snapshots (authored space, exact on-disk values)
 	// captured around setTileDesc. Undo/redo restores these verbatim after the desc-based
 	// replay, so restoration is byte-exact even where the 16-bit desc round trip is lossy
@@ -355,7 +360,7 @@ struct SUndoTile
 	sint32 OldRawRot[3], NewRawRot[3];
 	SUndoTile()
 		: Kind(0), Zone(0), TileId(-1), Patch(-1), S(0), T(0), OldColor(0), NewColor(0),
-		  AppDataId(0), OldHas(false), NewHas(false),
+		  AppDataId(0), OldHas(false), NewHas(false), VertIdx(0),
 		  HaveRaw(false), OldRawNum(0), NewRawNum(0), OldRawFlags(0), NewRawFlags(0),
 		  OldRawNoise(0), NewRawNoise(0)
 	{
@@ -363,6 +368,7 @@ struct SUndoTile
 		{
 			OldRawTile[l] = NewRawTile[l] = 0;
 			OldRawRot[l] = NewRawRot[l] = 0;
+			OldPos[l] = NewPos[l] = 0.f;
 		}
 	}
 };
@@ -530,6 +536,18 @@ public:
 	 * (0x1130). Those chunks are mutated in place, so nothing about them shows up in an RPO
 	 * encode. This flag is the geometry half of the dirty signal.
 	 */
+	/**
+	 * Move vertices of one zone by an OBJECT-space delta. The whole list lands as a single
+	 * undo step, because a selection move is one action to the artist however many vertices
+	 * it touched. Bound vertices must already be excluded by the caller - this layer trusts
+	 * the policy rather than re-deriving it.
+	 */
+	uint opMovePatchVertices(uint zoneId, const std::vector<uint16> &verts, const float *objDelta,
+	                         std::string &err);
+	/** Notified whenever a vertex position changes, forward or by undo/redo. */
+	void setGeomChangedCb(void (*cb)(uint zoneId, uint16 vertIdx, const float *objPos))
+	{ m_GeomChangedCb = cb; }
+
 	void markGeomDirty(uint zoneId);
 	bool geomDirty(uint zoneId) const;
 
@@ -730,7 +748,9 @@ private:
 	// Export-prop snapshot helpers (appdata outside carriers)
 	static void readPropSnap(PIPELINE::MAX::BUILTIN::CNodeImpl *node, SPropSnap &out);
 	bool propsDirty(uint zoneIdx) const;
+	void applyGeomUndo(const SUndoTile &rec, bool useOld);
 	std::set<uint> m_GeomDirty; // zone ids with an uncommitted geometry write
+	void (*m_GeomChangedCb)(uint zoneId, uint16 vertIdx, const float *objPos);
 };
 
 } /* namespace ZPPAINT */

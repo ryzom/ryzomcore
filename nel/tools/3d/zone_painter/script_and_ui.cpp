@@ -1487,6 +1487,47 @@ void zpPatchGizmoUpdateDrag(NL3D::CCamera *camera, const NL3D::CViewport &vp,
 	s_DragDelta = delta;
 }
 
+/**
+ * Core -> display. Every position change comes through here, forward or by undo/redo, so the
+ * cage cannot drift from what is actually stored. The object position is authoritative; the
+ * world position is re-derived rather than accumulated, which is what keeps repeated undos
+ * from creeping.
+ */
+void zpGeomVertChanged(uint zoneId, uint16 vertIdx, const float *objPos)
+{
+	if (!g_PaintCtx.Zones)
+		return;
+	std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
+	for (uint z = 0; z < zones.size(); ++z)
+	{
+		SPaintZone &pz = zones[z];
+		if (pz.ZoneId != zoneId)
+			continue;
+		if (vertIdx < pz.Ep.Pm.Verts.size())
+			for (int k = 0; k < 3; ++k)
+				pz.Ep.Pm.Verts[vertIdx].Pos[k] = objPos[k];
+		MAXMATH::Point3M op = { objPos[0], objPos[1], objPos[2] };
+		const MAXMATH::Point3M wp = MAXMATH::transformPoint(op, pz.ObjectTM);
+		const NLMISC::CVector world(wp.x, wp.y, wp.z);
+		for (uint p = 0; p < pz.Patches.size(); ++p)
+		{
+			NL3D::CPatchInfo &pi = pz.Patches[p];
+			for (uint c = 0; c < 4; ++c)
+			{
+				if (pi.BaseVertices[c] != vertIdx)
+					continue;
+				// Tangents are stored as absolute points, so they move by the same shift the
+				// corner took rather than being recomputed.
+				const NLMISC::CVector shift = world - pi.Patch.Vertices[c];
+				pi.Patch.Vertices[c] = world;
+				pi.Patch.Tangents[c * 2] += shift;
+				pi.Patch.Tangents[((c + 3) & 3) * 2 + 1] += shift;
+			}
+		}
+		return;
+	}
+}
+
 uint zpApplyPatchMove(const NLMISC::CVector &worldDelta, std::string &msg)
 {
 	msg.clear();
@@ -1531,67 +1572,48 @@ uint zpApplyPatchMove(const NLMISC::CVector &worldDelta, std::string &msg)
 		const MAXMATH::Point3M o1 = MAXMATH::transformPoint(wd, inv);
 		const float od[3] = { o1.x - o0.x, o1.y - o0.y, o1.z - o0.z };
 
+		// Bound vertices are derived from a target edge; Max recomputes them on load, so a
+		// written position could not survive the round trip. Filtered HERE rather than in the
+		// core op, which trusts its caller to have applied the policy.
+		std::vector<uint16> move;
+		move.reserve(want.size());
 		for (std::set<uint16>::const_iterator it = want.begin(); it != want.end(); ++it)
 		{
-			const uint16 vi = *it;
-			// Bound vertices are derived from a target edge; they are recomputed on load, so
-			// a written position could not survive the round trip.
-			if (vi < pz.Ep.Rp.Verts.size() && pz.Ep.Rp.Verts[vi].Binded)
-			{
+// Bound vertices are derived from a target edge; they are recomputed on load, so
+// a written position could not survive the round trip.
+if (*it < pz.Ep.Rp.Verts.size() && pz.Ep.Rp.Verts[*it].Binded)
 				++skippedBound;
-				continue;
-			}
+			else
+				move.push_back(*it);
+		}
+		if (move.empty())
+			continue;
+
+		// Count the targets before the write, for the gate's log line - the core op does not
+		// report them and does not need to.
+		for (size_t i = 0; i < move.size(); ++i)
+		{
 			ZPPAINT::SGeomWriteTarget t;
-			std::string err;
-			if (!ZPPAINT::resolveGeomWriteTarget(pz.Node, vi, t, err))
-			{
-				if (firstErr.empty()) firstErr = err;
+			std::string e;
+			if (!ZPPAINT::resolveGeomWriteTarget(pz.Node, move[i], t, e))
 				continue;
-			}
-			float xyz[3];
-			if (!ZPPAINT::geomTargetGet(t, xyz))
-			{
-				if (firstErr.empty()) firstErr = "target read failed";
-				continue;
-			}
-			xyz[0] += od[0];
-			xyz[1] += od[1];
-			xyz[2] += od[2];
-			if (!ZPPAINT::geomTargetSet(t, xyz))
-			{
-				if (firstErr.empty()) firstErr = "target write failed";
-				continue;
-			}
-			// Keep the tool's own copies in step so the cage stays where it was dragged
-			// instead of snapping back to a stale evaluation.
-			if (vi < pz.Ep.Pm.Verts.size())
-			{
-				pz.Ep.Pm.Verts[vi].Pos[0] += od[0];
-				pz.Ep.Pm.Verts[vi].Pos[1] += od[1];
-				pz.Ep.Pm.Verts[vi].Pos[2] += od[2];
-			}
 			if (t.Kind == ZPPAINT::SGeomWriteTarget::BasePatchMesh) ++nBase;
 			else if (t.Kind == ZPPAINT::SGeomWriteTarget::ModifierPatchMesh) ++nModPm;
 			else ++nDelta;
-			++written;
 		}
 
-		// Display patchinfo: same offsets the preview drew, so release is visually a no-op.
-		for (uint p = 0; p < pz.Patches.size(); ++p)
+		// The core owns the write, the undo record and the dirty flag; the display follows
+		// through the geom-changed callback, so undo and redo update the cage for free.
+		std::string err;
+		if (!g_PaintCtx.Core)
 		{
-			NL3D::CPatchInfo &pi = pz.Patches[p];
-			for (uint c = 0; c < 4; ++c)
-			{
-				const uint16 vi = pi.BaseVertices[c];
-				if (!want.count(vi) || (vi < pz.Ep.Rp.Verts.size() && pz.Ep.Rp.Verts[vi].Binded))
-					continue;
-				pi.Patch.Vertices[c] += worldDelta;
-				pi.Patch.Tangents[c * 2] += worldDelta;
-				pi.Patch.Tangents[((c + 3) & 3) * 2 + 1] += worldDelta;
-			}
+			if (firstErr.empty()) firstErr = "no paint core";
+			continue;
 		}
-		if (g_PaintCtx.Core && written)
-			g_PaintCtx.Core->markGeomDirty(pz.ZoneId);
+		const uint n = g_PaintCtx.Core->opMovePatchVertices(pz.ZoneId, move, od, err);
+		if (!n && firstErr.empty() && !err.empty())
+			firstErr = err;
+		written += n;
 	}
 
 	if (!written)
