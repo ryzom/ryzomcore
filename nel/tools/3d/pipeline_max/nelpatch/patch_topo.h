@@ -136,6 +136,49 @@ bool topoTurnPatches(SPatchMesh &pm, SRPatchMesh &rp,
 bool topoSubdividePatches(SPatchMesh &pm, SRPatchMesh &rp,
                           const std::set<uint> &patches, std::string &err);
 
+/**
+ * Weld the listed vertices: clusters within `threshold` (transitive, stored object-space
+ * positions) merge onto their lowest-index member, which KEEPS ITS OWN position - the
+ * target-weld shape. No position is written at all, so the op is mapper-safe by
+ * construction (a mapper-driven vertex's stored position is dead bytes; moving it would
+ * silently not show).
+ *
+ * When a merge makes two OPEN edges coincide (same endpoint pair), they fuse into one
+ * shared edge - the stitch that joins two sheets. The surviving (lower) edge keeps its
+ * tangent pair; patches of the dropped edge rewire their edge slot AND their tangent
+ * slots to the survivor's (orientation-aware), so both sides render the same curve and
+ * the seam closes exactly. Dropped cluster verts, fused-away edges and their tangent
+ * vecs sweep out with the delete-style compaction; the mapper's dropped outputs flip to
+ * -1, survivors remap.
+ *
+ * Refuses: reconstructed (Max 3) streams, hooks, bound cluster members (release binds
+ * first), merges that would put more than two patches on one edge, and merges that would
+ * degenerate a patch (two of its corners in one cluster). Returns with err "nothing
+ * within threshold" when no cluster has two members. `remap` reports the vertex map like
+ * the delete op (paint is per patch and does not move).
+ */
+bool topoWeldVerts(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
+                   const std::set<uint> &verts, float threshold,
+                   STopoRemap &remap, std::string &err);
+
+/**
+ * Grow one new quad patch from each listed OPEN edge (edge indices into pm.Edges; each
+ * must carry exactly one patch and no bind records). The new patch mirrors its owner
+ * across the edge: each far corner is the point reflection of the owner's opposite corner
+ * through the shared corner (2*Ve - Vopp), tangents mirrored the same way, so the seed
+ * continues the surface C1-ish - the artist moves the new corners where they belong and
+ * welds. The shared side reuses the open edge record (it gains its second patch); far and
+ * side edges, their tangents and four interiors are new. Ring winding opposes the owner
+ * across the shared edge, as any two neighbors' rings do.
+ *
+ * The new patch inherits the owner's SmGroup/Flags and tile ORDERS; its tiles start
+ * EMPTY and its colors white - fresh paintable surface, the legacy default state.
+ * Refuses: reconstructed streams, hooks, map-channel meshes, non-open edges, and edges
+ * with bind records targeting them.
+ */
+bool topoAddQuads(SPatchMesh &pm, SRPatchMesh &rp,
+                  const std::set<uint> &edges, std::string &err);
+
 } /* namespace NELPATCH */
 } /* namespace MAX */
 } /* namespace PIPELINE */

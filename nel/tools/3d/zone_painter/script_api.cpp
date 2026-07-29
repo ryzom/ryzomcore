@@ -93,7 +93,10 @@ bool zpPatchEdgeCornerPair(uint zoneId, uint patchIdx, uint edgeSlot, uint &aOut
 uint zpDeletePatchSelection();
 uint zpTurnPatchSelection(bool ccw);
 uint zpSubdividePatchSelection();
+uint zpWeldPatchSelection(float threshold);
+uint zpAddQuadPatchSelection();
 bool zpZonePatchCount(uint zoneId, uint &countOut);
+bool zpZoneVertCount(uint zoneId, uint &countOut);
 bool zpTileQuery(uint zoneId, uint patchIdx, uint u, uint v, int &tileOut, int &rotOut,
                  int &numOut);
 
@@ -1084,6 +1087,26 @@ static int lTurnPatchSelection(CLuaState &ls) // (ccw bool)
 	return 1;
 }
 
+static int lWeldPatchSelection(CLuaState &ls) // ([threshold])
+{
+	double th = 0.1;
+	argNumber(ls, 1, th);
+	const uint n = zpWeldPatchSelection((float)th);
+	printf("weldPatchSelection: %u merged\n", n);
+	fflush(stdout);
+	ls.push((double)n);
+	return 1;
+}
+
+static int lAddQuadPatchSelection(CLuaState &ls)
+{
+	const uint n = zpAddQuadPatchSelection();
+	printf("addQuadPatchSelection: %u added\n", n);
+	fflush(stdout);
+	ls.push((double)n);
+	return 1;
+}
+
 static int lRawTile(CLuaState &ls) // (zone, patch, u, v, tile [, rot]) raw record, no solver
 {
 	double z, pch, u, v, t, r = 0;
@@ -1112,6 +1135,18 @@ static int lPatchCount(CLuaState &ls) // (zone) -> displayed patch count
 	uint n;
 	if (!zpZonePatchCount((uint)z, n))
 		return retErr(ls, "patchCount: no such zone");
+	ls.push((double)n);
+	return 1;
+}
+
+static int lVertexCount(CLuaState &ls) // (zone)
+{
+	double z;
+	if (!argNumber(ls, 1, z))
+		return retErr(ls, "usage: vertexCount(zone)");
+	uint n;
+	if (!zpZoneVertCount((uint)z, n))
+		return retErr(ls, "vertexCount: no such zone");
 	ls.push((double)n);
 	return 1;
 }
@@ -1344,7 +1379,9 @@ static const char *kBootstrap =
 	"  turnPatchSelection = __zp_turnPatchSelection,\n"
 	"  subdividePatchSelection = __zp_subdividePatchSelection,\n"
 	"  rawTile = __zp_rawTile,\n"
-	"  patchCount = __zp_patchCount, tileAt = __zp_tileAt,\n"
+	"  weldPatchSelection = __zp_weldPatchSelection,\n"
+	"  addQuadPatchSelection = __zp_addQuadPatchSelection,\n"
+	"  patchCount = __zp_patchCount, tileAt = __zp_tileAt, vertexCount = __zp_vertexCount,\n"
 	"  setTileSet = __zp_setTileSet, getTileSet = __zp_getTileSet,\n"
 	"  setDisplaceIndex = __zp_setDisplaceIndex, setBrushColor = __zp_setBrushColor,\n"
 	"  setSeason = __zp_setSeason,\n"
@@ -1439,7 +1476,10 @@ bool ensureLua()
 	ls->registerFunc("__zp_turnPatchSelection", lTurnPatchSelection);
 	ls->registerFunc("__zp_subdividePatchSelection", lSubdividePatchSelection);
 	ls->registerFunc("__zp_rawTile", lRawTile);
+	ls->registerFunc("__zp_weldPatchSelection", lWeldPatchSelection);
+	ls->registerFunc("__zp_addQuadPatchSelection", lAddQuadPatchSelection);
 	ls->registerFunc("__zp_patchCount", lPatchCount);
+	ls->registerFunc("__zp_vertexCount", lVertexCount);
 	ls->registerFunc("__zp_tileAt", lTileAt);
 	ls->registerFunc("__zp_getSubObject", lGetSubObject);
 	ls->registerFunc("__zp_getMode", lGetMode);

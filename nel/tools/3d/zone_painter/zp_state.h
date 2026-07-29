@@ -761,8 +761,16 @@ void zpPatchTurnCwClicked();
 /** Subdivide selected quads 4-way; paint quadrants inherit; T-junction binds. Undoable. */
 uint zpSubdividePatchSelection();
 void zpPatchSubdivideClicked();
+/** Weld selected vertices (target-weld; coincident open edges fuse). Undoable. */
+uint zpWeldPatchSelection(float threshold);
+void zpPatchWeldClicked();
+/** Grow a quad from each selected open edge (legacy Add Quad). Undoable. */
+uint zpAddQuadPatchSelection();
+void zpPatchAddQuadClicked();
 /** Displayed patch count of a zone (script/gate read access). */
 bool zpZonePatchCount(uint zoneId, uint &countOut);
+/** Eval-mirror vertex count of a zone (script/gate read access). */
+bool zpZoneVertCount(uint zoneId, uint &countOut);
 /** Layer-0 tile of one grid tile (script/gate read access; display transform applied). */
 bool zpTileQuery(uint zoneId, uint patchIdx, uint u, uint v, int &tileOut, int &rotOut,
                  int &numOut);

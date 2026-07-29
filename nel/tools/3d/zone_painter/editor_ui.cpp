@@ -370,6 +370,30 @@ public:
 };
 REGISTER_ACTION_HANDLER(CAHZpPatchSubdivide, "zp_patch_subdivide");
 
+class CAHZpPatchWeld : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchWeld) b->patchWeld();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchWeld, "zp_patch_weld");
+
+class CAHZpPatchAddQuad : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchAddQuad) b->patchAddQuad();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchAddQuad, "zp_patch_add_quad");
+
 class CAHZpTileSet : public IActionHandler
 {
 public:
@@ -2396,6 +2420,8 @@ void CEditorUI::syncPanelFromBridge()
 			btn->setFrozen(b->SubObj != 1 || !b->PatchSelVerts);
 		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_unbind").c_str()))
 			btn->setFrozen(b->SubObj != 1 || !b->PatchSelVerts);
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_weld").c_str()))
+			btn->setFrozen(b->SubObj != 1 || b->PatchSelVerts < 2);
 		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_delete").c_str()))
 			btn->setFrozen(b->SubObj != 3 || !b->PatchSelFaces);
 		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_turn_ccw").c_str()))
@@ -2404,6 +2430,8 @@ void CEditorUI::syncPanelFromBridge()
 			btn->setFrozen(b->SubObj != 3 || !b->PatchSelFaces);
 		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_subdivide").c_str()))
 			btn->setFrozen(b->SubObj != 3 || !b->PatchSelFaces);
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_add_quad").c_str()))
+			btn->setFrozen(b->SubObj != 2 || !b->PatchSelEdges);
 		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":no_smooth:box").c_str()))
 		{
 			btn->setFrozen(b->SubObj != 2 || !b->PatchSelEdges);

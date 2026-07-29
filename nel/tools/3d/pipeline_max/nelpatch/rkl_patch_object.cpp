@@ -253,7 +253,43 @@ bool CRklPatchObject::setRPatch(const SRPatchMesh &in)
 
 bool CRklPatchObject::setPatchMesh(const SPatchMesh &in, std::string &err)
 {
-	return encodePatchMesh(in, m_Claimed, err);
+	if (!encodePatchMesh(in, m_Claimed, err))
+		return false;
+	// The claimed run ALIASES entries of the source chunk list (parse copies orphan
+	// pointers into m_Claimed; the source list keeps its own aliases until the save's
+	// clean/build cycle). A structural edit above - element containers inserted or erased
+	// as counts changed - only touched m_Claimed, which would leave the source list
+	// missing new containers (a later geometry write cannot find the vertex) or holding
+	// DANGLING pointers to erased ones. Rebuild the aliased run in place: drop every
+	// claimed-id entry (ids only, stale pointers are never dereferenced) and splice the
+	// current claimed run back at the same position.
+	// Only the CONTIGUOUS known-id run is the claimed alias region - the claim itself
+	// stops at the first unrecognized id, so any known-looking chunk after a gap was
+	// never claimed and must stay untouched.
+	TStorageObjectContainer &chunks = chunksMut();
+	TStorageObjectContainer::iterator insertPos = chunks.end();
+	bool haveIns = false;
+	for (TStorageObjectContainer::iterator it = chunks.begin(); it != chunks.end();)
+	{
+		if (isKnownChunkId(it->first))
+		{
+			// Track the position AFTER every erase: an iterator captured at the first
+			// erase would be invalidated when the run's later nodes (which it points
+			// into) are erased too.
+			it = chunks.erase(it);
+			insertPos = it;
+			haveIns = true;
+		}
+		else
+		{
+			if (haveIns)
+				break; // the run ended; later known-looking ids were never claimed
+			++it;
+		}
+	}
+	for (TStorageObjectContainer::iterator it = m_Claimed.begin(); it != m_Claimed.end(); ++it)
+		chunks.insert(insertPos, *it);
+	return true;
 }
 
 IStorageObject *CRklPatchObject::createChunkById(uint16 id, bool container)

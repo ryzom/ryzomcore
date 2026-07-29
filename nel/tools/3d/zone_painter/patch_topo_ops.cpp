@@ -258,33 +258,16 @@ typedef bool (*TTopoXform)(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mappe
  * re-derive from storage. Selections clear (indices may have died with the old topology)
  * and the pre/post snapshots land as a Kind 6 undo stroke after a successful rebuild.
  */
-static uint zpRunTopoOp(const char *opName, const char *recordLine, TTopoXform xf)
+static uint zpRunTopoOpImpl(const char *opName, const std::string &recordLine, TTopoXform xf,
+                            const std::map<const void *, std::set<uint> > &perObjectIn,
+                            std::map<const void *, uint> &objectZone)
 {
-	if (!g_PaintCtx.Core || !g_PaintCtx.Zones)
-		return 0;
-	if (g_PatchFaceSel.empty())
-	{
-		g_PropStatusMsg = std::string(opName) + ": no patches selected";
-		return 0;
-	}
-	// Group the selection per OBJECT: indices are object-level, and two zones of one object
-	// address the same storage.
-	std::map<const void *, std::set<uint> > perObject; // object -> patch indices
-	std::map<const void *, uint> objectZone; // object -> one zone id to report on
-	for (std::set<TPatchFaceId>::const_iterator it = g_PatchFaceSel.begin();
-	     it != g_PatchFaceSel.end(); ++it)
-	{
-		const SPaintZone *pz = zpFindPaintZone(it->first);
-		if (!pz || !pz->Editable)
-			continue;
-		if (it->second >= pz->Patches.size())
-			continue;
-		perObject[(const void *)pz->Node].insert(it->second);
-		objectZone[(const void *)pz->Node] = it->first;
-	}
+	const std::map<const void *, std::set<uint> > &perObject = perObjectIn;
 	if (perObject.empty())
 	{
-		g_PropStatusMsg = std::string(opName) + ": selection has no editable patches";
+		g_PropStatusMsg = std::string(opName) + ": selection has no editable elements";
+		printf("%s\n", g_PropStatusMsg.c_str());
+		fflush(stdout);
 		return 0;
 	}
 
@@ -354,6 +337,8 @@ static uint zpRunTopoOp(const char *opName, const char *recordLine, TTopoXform x
 		if (!xf(pm, rp, haveMapper ? &mapper : NULL, ot->second, err))
 		{
 			g_PropStatusMsg = std::string(opName) + ": " + err;
+			printf("%s\n", g_PropStatusMsg.c_str());
+			fflush(stdout);
 			delete snap;
 			continue;
 		}
@@ -425,8 +410,92 @@ static uint zpRunTopoOp(const char *opName, const char *recordLine, TTopoXform x
 	for (size_t i = 0; i < touchedZones.size(); ++i)
 		g_PaintCtx.Core->markGeomDirty(touchedZones[i]);
 	g_PropStatusMsg = NLMISC::toString(
-		"%s: %u patch%s", opName, deleted, deleted == 1 ? "" : "es");
+		"%s: %u element%s", opName, deleted, deleted == 1 ? "" : "s");
 	return deleted;
+}
+
+/** Face-selection front-end (delete / turn / subdivide). */
+static uint zpRunTopoOp(const char *opName, const std::string &recordLine, TTopoXform xf)
+{
+	if (!g_PaintCtx.Core || !g_PaintCtx.Zones)
+		return 0;
+	if (g_PatchFaceSel.empty())
+	{
+		g_PropStatusMsg = std::string(opName) + ": no patches selected";
+		return 0;
+	}
+	// Group the selection per OBJECT: indices are object-level, and two zones of one
+	// object address the same storage.
+	std::map<const void *, std::set<uint> > perObject;
+	std::map<const void *, uint> objectZone;
+	for (std::set<TPatchFaceId>::const_iterator it = g_PatchFaceSel.begin();
+	     it != g_PatchFaceSel.end(); ++it)
+	{
+		const SPaintZone *pz = zpFindPaintZone(it->first);
+		if (!pz || !pz->Editable)
+			continue;
+		if (it->second >= pz->Patches.size())
+			continue;
+		perObject[(const void *)pz->Node].insert(it->second);
+		objectZone[(const void *)pz->Node] = it->first;
+	}
+	return zpRunTopoOpImpl(opName, recordLine, xf, perObject, objectZone);
+}
+
+/** Edge-selection front-end (add quad): the selection's corner pairs resolve to pm edge
+ *  indices through each zone's eval mirror. */
+static uint zpRunTopoOpEdges(const char *opName, const std::string &recordLine, TTopoXform xf)
+{
+	if (!g_PaintCtx.Core || !g_PaintCtx.Zones)
+		return 0;
+	if (g_PatchEdgeSel.empty())
+	{
+		g_PropStatusMsg = std::string(opName) + ": no edges selected";
+		return 0;
+	}
+	std::map<const void *, std::set<uint> > perObject;
+	std::map<const void *, uint> objectZone;
+	for (std::set<SPatchEdgeId>::const_iterator it = g_PatchEdgeSel.begin();
+	     it != g_PatchEdgeSel.end(); ++it)
+	{
+		const SPaintZone *pz = zpFindPaintZone(it->Zone);
+		if (!pz || !pz->Editable)
+			continue;
+		const PIPELINE::MAX::NELPATCH::SPatchMesh &pm = pz->Ep.Pm;
+		for (size_t e = 0; e < pm.Edges.size(); ++e)
+			if ((pm.Edges[e].V1 == (sint32)it->A && pm.Edges[e].V2 == (sint32)it->B)
+			    || (pm.Edges[e].V1 == (sint32)it->B && pm.Edges[e].V2 == (sint32)it->A))
+			{
+				perObject[(const void *)pz->Node].insert((uint)e);
+				objectZone[(const void *)pz->Node] = it->Zone;
+				break;
+			}
+	}
+	return zpRunTopoOpImpl(opName, recordLine, xf, perObject, objectZone);
+}
+
+/** Vertex-selection front-end (weld). */
+static uint zpRunTopoOpVerts(const char *opName, const std::string &recordLine, TTopoXform xf)
+{
+	if (!g_PaintCtx.Core || !g_PaintCtx.Zones)
+		return 0;
+	if (g_PatchVertSel.empty())
+	{
+		g_PropStatusMsg = std::string(opName) + ": no vertices selected";
+		return 0;
+	}
+	std::map<const void *, std::set<uint> > perObject;
+	std::map<const void *, uint> objectZone;
+	for (std::set<TPatchVertId>::const_iterator it = g_PatchVertSel.begin();
+	     it != g_PatchVertSel.end(); ++it)
+	{
+		const SPaintZone *pz = zpFindPaintZone(it->first);
+		if (!pz || !pz->Editable)
+			continue;
+		perObject[(const void *)pz->Node].insert((uint)it->second);
+		objectZone[(const void *)pz->Node] = it->first;
+	}
+	return zpRunTopoOpImpl(opName, recordLine, xf, perObject, objectZone);
 }
 
 /** Adapter: delete (the remap is internal to the transform; callers observe via rebuild). */
@@ -455,6 +524,24 @@ static bool zpXformSubdivide(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper * /*
 	// The mapper needs NO rewrite for a pure addition: input-indexed record slots keep,
 	// surviving outputs keep their indices, added outputs stay unmapped.
 	return topoSubdividePatches(pm, rp, sel, err);
+}
+
+// Weld threshold handed to the adapter through a file-static: the shared runner's
+// transform signature is selection-only, and the threshold is op state like the brush
+// size, not selection data.
+static float s_WeldThreshold = 0.1f;
+static bool zpXformWeld(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
+                        const std::set<uint> &sel, std::string &err)
+{
+	STopoRemap remap;
+	return topoWeldVerts(pm, rp, mapper, sel, s_WeldThreshold, remap, err);
+}
+
+static bool zpXformAddQuad(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper * /* mapper */,
+                           const std::set<uint> &sel, std::string &err)
+{
+	// Pure addition: the mapper needs no rewrite (input slots keep, new outputs unmapped).
+	return topoAddQuads(pm, rp, sel, err);
 }
 
 /**
@@ -487,6 +574,29 @@ uint zpTurnPatchSelection(bool ccw)
 uint zpSubdividePatchSelection()
 {
 	return zpRunTopoOp("subdivide", "painter.subdividePatchSelection()", zpXformSubdivide);
+}
+
+/**
+ * Weld the selected vertices (target-weld: clusters within the threshold merge onto their
+ * lowest member, which keeps its position; coincident open edges fuse - the stitch).
+ * Vertex-level selection; the runner's face-selection guard is bypassed by feeding the
+ * vertex set through the same per-object grouping.
+ */
+uint zpWeldPatchSelection(float threshold)
+{
+	s_WeldThreshold = threshold > 0.f ? threshold : 0.1f;
+	return zpRunTopoOpVerts("weld", NLMISC::toString("painter.weldPatchSelection(%.9g)",
+	                                                 s_WeldThreshold), zpXformWeld);
+}
+
+/**
+ * Grow one new quad from each selected OPEN edge (the legacy Add Quad; edge level). The
+ * seed mirrors the owner across the edge; the artist moves the fresh corners into place
+ * and welds.
+ */
+uint zpAddQuadPatchSelection()
+{
+	return zpRunTopoOpEdges("add quad", "painter.addQuadPatchSelection()", zpXformAddQuad);
 }
 
 /**
@@ -524,6 +634,18 @@ void zpPatchDeleteClicked() { zpDeletePatchSelection(); }
 void zpPatchTurnCcwClicked() { zpTurnPatchSelection(true); }
 void zpPatchTurnCwClicked() { zpTurnPatchSelection(false); }
 void zpPatchSubdivideClicked() { zpSubdividePatchSelection(); }
+void zpPatchWeldClicked() { zpWeldPatchSelection(0.1f); } // legacy default threshold
+void zpPatchAddQuadClicked() { zpAddQuadPatchSelection(); }
+
+/** Script/gate read access: the eval-mirror vertex count of a zone. */
+bool zpZoneVertCount(uint zoneId, uint &countOut)
+{
+	const SPaintZone *pz = zpFindPaintZone(zoneId);
+	if (!pz)
+		return false;
+	countOut = (uint)pz->Ep.Pm.Verts.size();
+	return true;
+}
 
 /** Script/gate read access: the displayed patch count of a zone. */
 bool zpZonePatchCount(uint zoneId, uint &countOut)

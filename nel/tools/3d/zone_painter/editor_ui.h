@@ -133,6 +133,8 @@ struct SPaintUIBridge
 	void (*patchTurnCcw)();
 	void (*patchTurnCw)();
 	void (*patchSubdivide)();
+	void (*patchWeld)();
+	void (*patchAddQuad)();
 	// Painterscript absolute state setters (recorder-replay faithful; the frame-synced
 	// snapshot fields below are STALE mid-script, so scripts must not derive from them)
 	void (*setTileSize256)(bool on);
@@ -218,7 +220,7 @@ struct SPaintUIBridge
 		  propRotateDelta(NULL), propToggleSymmetry(NULL), propTogglePassable(NULL),
 		  propToggleUseBBox(NULL),
 		  patchBind(NULL), patchUnbind(NULL), patchNoSmooth(NULL), patchDelete(NULL),
-		  patchTurnCcw(NULL), patchTurnCw(NULL), patchSubdivide(NULL),
+		  patchTurnCcw(NULL), patchTurnCw(NULL), patchSubdivide(NULL), patchWeld(NULL), patchAddQuad(NULL),
 		  setTileSize256(NULL), setHardnessAbs(NULL), setOpacityAbs(NULL),
 		  setColorRadiusAbs(NULL),
 		  HaveCore(false), Mode(0), SubObj(0),

@@ -771,6 +771,8 @@
 			onclick_l="zp_patch_bind" params_l="" hardtext="Bind" />
 		<ctrl style="text_button_16" id="btn_unbind" posparent="btn_bind" posref="MR ML" x="4" y="0"
 			onclick_l="zp_patch_unbind" params_l="" hardtext="Unbind" />
+		<ctrl style="text_button_16" id="btn_weld" posparent="btn_unbind" posref="MR ML" x="8" y="0"
+			onclick_l="zp_patch_weld" params_l="" hardtext="Weld" />
 		<ctrl style="text_button_16" id="btn_delete" posparent="btn_unbind" posref="MR ML" x="8" y="0"
 			onclick_l="zp_patch_delete" params_l="" hardtext="Delete" />
 		<ctrl style="text_button_16" id="btn_turn_ccw" posparent="btn_bind" posref="BL TL" x="0" y="-4"
@@ -779,6 +781,8 @@
 			onclick_l="zp_patch_turn" params_l="cw" hardtext="Turn CW" />
 		<ctrl style="text_button_16" id="btn_subdivide" posparent="btn_turn_cw" posref="MR ML" x="8" y="0"
 			onclick_l="zp_patch_subdivide" params_l="" hardtext="Subdiv" />
+		<ctrl style="text_button_16" id="btn_add_quad" posparent="btn_subdivide" posref="MR ML" x="4" y="0"
+			onclick_l="zp_patch_add_quad" params_l="" hardtext="Add" />
 		<!-- Edge properties: No smooth (tri-state shown via the (mixed) tag) -->
 		<instance template="zp_checkbox_row" id="no_smooth" posparent="btn_turn_ccw" posref="BL TL" x="0" y="-8"
 			label="No smooth" onclick="zp_patch_nosmooth" params="" />
