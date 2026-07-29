@@ -91,6 +91,23 @@ struct STopoRemap
 bool topoDeletePatches(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
                        const std::set<uint> &delPatches, STopoRemap &remap, std::string &err);
 
+/**
+ * Turn the listed quad patches a quarter turn CCW (ccw=false applies the turn three times,
+ * the legacy rule). Element counts and identities never change - the patch's internal
+ * rings rotate (V/Interior/Edge by one, Vec by two), the tile grid transposes with its
+ * tessellation orders swapped and every layer rotated, the color grid follows, and bind
+ * records targeting a turned patch decrement their edge slot. Ports RPatchMesh::TurnPatch
+ * + the modifier-side ring rotation (both NeL-original).
+ *
+ * Two deliberate corrections over the legacy op, both keeping data attached to the same
+ * GEOMETRIC edge/corner it was authored on: the per-edge no-smooth flags rotate with the
+ * edge ring (legacy left them at their old slots, so a turn silently moved smoothing
+ * breaks to different edges), and the map-channel TVPatch entries rotate with their
+ * corner/handle/interior groups (legacy left the mapping misaligned on turned patches).
+ */
+bool topoTurnPatches(SPatchMesh &pm, SRPatchMesh &rp,
+                     const std::set<uint> &patches, bool ccw, std::string &err);
+
 } /* namespace NELPATCH */
 } /* namespace MAX */
 } /* namespace PIPELINE */

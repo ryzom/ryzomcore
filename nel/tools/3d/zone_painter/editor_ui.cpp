@@ -343,6 +343,21 @@ public:
 };
 REGISTER_ACTION_HANDLER(CAHZpPatchDelete, "zp_patch_delete");
 
+/** Turn the selected patches; params "ccw" / "cw". */
+class CAHZpPatchTurn : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (!b) return;
+		if (params == "cw") { if (b->patchTurnCw) b->patchTurnCw(); }
+		else { if (b->patchTurnCcw) b->patchTurnCcw(); }
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchTurn, "zp_patch_turn");
+
 class CAHZpTileSet : public IActionHandler
 {
 public:
@@ -2356,6 +2371,10 @@ void CEditorUI::syncPanelFromBridge()
 		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_unbind").c_str()))
 			btn->setFrozen(b->SubObj != 1 || !b->PatchSelVerts);
 		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_delete").c_str()))
+			btn->setFrozen(b->SubObj != 3 || !b->PatchSelFaces);
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_turn_ccw").c_str()))
+			btn->setFrozen(b->SubObj != 3 || !b->PatchSelFaces);
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_turn_cw").c_str()))
 			btn->setFrozen(b->SubObj != 3 || !b->PatchSelFaces);
 		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":no_smooth:box").c_str()))
 		{

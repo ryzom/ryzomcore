@@ -303,6 +303,109 @@ bool topoDeletePatches(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
 	return true;
 }
 
+namespace {
+
+/// One CCW quarter turn of a single quad patch (TurnPatch port; see the header note on the
+/// edge-flag and TVPatch corrections).
+void turnOnePatchCcw(SPatchMesh &pm, SRPatchMesh &rp, uint p)
+{
+	SPmPatch &pp = pm.Patches[p];
+	// Rings rotate: corners/interiors/edges by one, tangent pairs by two.
+	{
+		const SPmPatch old = pp;
+		for (int k = 0; k < 4; ++k)
+		{
+			pp.V[k] = old.V[(k + 1) & 3];
+			pp.Interior[k] = old.Interior[(k + 1) & 3];
+			pp.Edge[k] = old.Edge[(k + 1) & 3];
+		}
+		for (int k = 0; k < 8; ++k)
+			pp.Vec[k] = old.Vec[(k + 2) & 7];
+	}
+	// Map channel follows the same groups (correction; legacy left it misaligned).
+	if (pm.HasTvPatches && p < pm.TvPatches.size())
+	{
+		const SPmTvPatch old = pm.TvPatches[p];
+		SPmTvPatch &tv = pm.TvPatches[p];
+		for (int k = 0; k < 4; ++k)
+		{
+			tv.Tv[k] = old.Tv[(k + 1) & 3];
+			tv.Tv[12 + k] = old.Tv[12 + ((k + 1) & 3)];
+		}
+		for (int k = 0; k < 8; ++k)
+			tv.Tv[4 + k] = old.Tv[4 + ((k + 2) & 7)];
+	}
+	// The tile grid transposes with the tessellation orders swapped: the tile at (u, v)
+	// lands at (oldV-1-v, u) in the new (oldV x oldU) grid, every layer rotated one
+	// quarter CCW (TurnPatch's rotate(3) on the 0..3 CW-encoded field). Colors follow on
+	// the (+1) lattice. Edge flags rotate with the edge ring (correction).
+	SRpoPatch &up = rp.Patches[p];
+	{
+		const SRpoPatch old = up;
+		const sint32 oldU = 1 << old.NbTilesU;
+		const sint32 oldV = 1 << old.NbTilesV;
+		up.NbTilesU = old.NbTilesV;
+		up.NbTilesV = old.NbTilesU;
+		for (sint32 v = 0; v < oldV; ++v)
+			for (sint32 u = 0; u < oldU; ++u)
+			{
+				const sint32 newU = oldV - 1 - v;
+				const sint32 newV = u;
+				SRpoTile &t = up.Tiles[newU + newV * oldV];
+				t = old.Tiles[u + v * oldU];
+				for (int l = 0; l < 3; ++l)
+					t.Layer[l].Rotate = (t.Layer[l].Rotate + 3) & 3;
+			}
+		for (sint32 v = 0; v < oldV + 1; ++v)
+			for (sint32 u = 0; u < oldU + 1; ++u)
+			{
+				const sint32 newU = oldV - v;
+				const sint32 newV = u;
+				up.Colors[newU + newV * (oldV + 1)] = old.Colors[u + v * (oldU + 1)];
+			}
+		for (int k = 0; k < 4; ++k)
+			up.EdgeFlags[k] = old.EdgeFlags[(k + 1) & 3];
+	}
+}
+
+} /* anonymous namespace */
+
+bool topoTurnPatches(SPatchMesh &pm, SRPatchMesh &rp,
+                     const std::set<uint> &patches, bool ccw, std::string &err)
+{
+	if (pm.EdgesReconstructed)
+	{ err = "reconstructed (Max 3) edge table: topology cannot be written back"; return false; }
+	if (rp.Patches.size() != pm.Patches.size() || rp.Verts.size() != pm.Verts.size())
+	{ err = "PatchMesh/RPatchMesh size mismatch"; return false; }
+	if (patches.empty())
+	{ err = "nothing to turn"; return false; }
+	for (std::set<uint>::const_iterator it = patches.begin(); it != patches.end(); ++it)
+	{
+		if (*it >= pm.Patches.size()) { err = "patch index out of range"; return false; }
+		if (pm.Patches[*it].Type != 4) { err = "only quad patches can be turned"; return false; }
+		const SRpoPatch &up = rp.Patches[*it];
+		const size_t nt = ((size_t)1 << up.NbTilesU) * ((size_t)1 << up.NbTilesV);
+		const size_t nc = (((size_t)1 << up.NbTilesU) + 1) * (((size_t)1 << up.NbTilesV) + 1);
+		if (up.Tiles.size() != nt || up.Colors.size() != nc)
+		{ err = "tile/color table size mismatch"; return false; }
+	}
+	// CW is three CCW turns, the legacy rule - one code path, provably its own inverse.
+	const int turns = ccw ? 1 : 3;
+	for (int t = 0; t < turns; ++t)
+	{
+		for (std::set<uint>::const_iterator it = patches.begin(); it != patches.end(); ++it)
+			turnOnePatchCcw(pm, rp, *it);
+		// Bind records aimed at a turned patch follow the edge ring (TurnPatch port).
+		for (size_t v = 0; v < rp.Verts.size(); ++v)
+		{
+			SRpoVertexBind &b = rp.Verts[v];
+			if (b.Binded && patches.count((uint)b.Patch))
+				b.Edge = (b.Edge + 3) & 3;
+		}
+	}
+	return true;
+}
+
 } /* namespace NELPATCH */
 } /* namespace MAX */
 } /* namespace PIPELINE */

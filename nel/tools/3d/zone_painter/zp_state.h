@@ -751,9 +751,13 @@ void zpPatchBindClicked();
 void zpPatchUnbindClicked();
 
 // Topological ops (patch_topo_ops.cpp). Storage-rewriting; the working set rebuilds after.
-/** Delete the selected patches; paint travels with the survivors. Clears undo. */
+/** Delete the selected patches; paint travels with the survivors. Undoable (Kind 6). */
 uint zpDeletePatchSelection();
 void zpPatchDeleteClicked();
+/** Turn the selected quad patches a quarter turn (tile frame rotation). Undoable. */
+uint zpTurnPatchSelection(bool ccw);
+void zpPatchTurnCcwClicked();
+void zpPatchTurnCwClicked();
 /** Displayed patch count of a zone (script/gate read access). */
 bool zpZonePatchCount(uint zoneId, uint &countOut);
 /** Layer-0 tile of one grid tile (script/gate read access; display transform applied). */

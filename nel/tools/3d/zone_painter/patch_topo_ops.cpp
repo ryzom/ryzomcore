@@ -16,9 +16,10 @@
  * surviving patches through the transform's remap, so a painted zone keeps its paint
  * everywhere the surface survived - the thing the legacy editor destroyed.
  *
- * The working-set rebuild clears the undo stack (session semantics); a topological op is
- * currently NOT undoable and says so in its status line. Raw-snapshot undo is the recorded
- * next step in the plan.
+ * Topological ops are undoable through Kind 6 raw snapshots (patch_topo_snapshot.h): the
+ * pre/post structs land as one stroke after a successful rebuild, the rebuild preserves
+ * the stacks (keepUndo), and undo/redo re-encode the matching side then rebuild again -
+ * byte-exact by the codec identity.
  */
 
 /*
@@ -245,22 +246,25 @@ bool encodeTopoTarget(const STopoTarget &t, const SPatchMesh &pm, const SRPatchM
 
 // ---------------------------------------------------------------------------------------------
 
+/** One topology transform over the decoded target streams (delete, turn, ...). */
+typedef bool (*TTopoXform)(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
+                           const std::set<uint> &sel, std::string &err);
+
 /**
- * Delete the selected patches (patch sub-object level).
+ * Run one topological op over the patch selection (patch sub-object level).
  *
- * Per affected object: flush pending paint into the carrier, transform the target stream
- * (topoDeletePatches - the paint and bind records travel with their surviving elements),
+ * Per affected object: flush pending paint into the carrier, transform the target stream,
  * re-encode in place, then rebuild the working set once so display, core and landscape
- * re-derive from storage. Selections clear (their indices died with the old topology) and
- * the undo history clears with the rebuild - stated in the status line.
+ * re-derive from storage. Selections clear (indices may have died with the old topology)
+ * and the pre/post snapshots land as a Kind 6 undo stroke after a successful rebuild.
  */
-uint zpDeletePatchSelection()
+static uint zpRunTopoOp(const char *opName, const char *recordLine, TTopoXform xf)
 {
 	if (!g_PaintCtx.Core || !g_PaintCtx.Zones)
 		return 0;
 	if (g_PatchFaceSel.empty())
 	{
-		g_PropStatusMsg = "delete: no patches selected";
+		g_PropStatusMsg = std::string(opName) + ": no patches selected";
 		return 0;
 	}
 	// Group the selection per OBJECT: indices are object-level, and two zones of one object
@@ -280,7 +284,7 @@ uint zpDeletePatchSelection()
 	}
 	if (perObject.empty())
 	{
-		g_PropStatusMsg = "delete: selection has no editable patches";
+		g_PropStatusMsg = std::string(opName) + ": selection has no editable patches";
 		return 0;
 	}
 
@@ -291,7 +295,7 @@ uint zpDeletePatchSelection()
 	std::string err;
 	if (!g_PaintCtx.Core->writeBack(err))
 	{
-		g_PropStatusMsg = "delete: paint write-back failed: " + err;
+		g_PropStatusMsg = std::string(opName) + ": paint write-back failed: " + err;
 		return 0;
 	}
 
@@ -308,7 +312,7 @@ uint zpDeletePatchSelection()
 		STopoTarget target;
 		if (!resolveTopoTarget(pz->Node, target, err))
 		{
-			g_PropStatusMsg = "delete: " + err;
+			g_PropStatusMsg = std::string(opName) + ": " + err;
 			continue;
 		}
 		SPatchMesh pm;
@@ -317,12 +321,12 @@ uint zpDeletePatchSelection()
 		bool haveMapper = false;
 		if (!decodeTopoTarget(target, pm, rp, mapper, haveMapper, err))
 		{
-			g_PropStatusMsg = "delete: " + err;
+			g_PropStatusMsg = std::string(opName) + ": " + err;
 			continue;
 		}
 		if (pm.Patches.size() != pz->Patches.size())
 		{
-			g_PropStatusMsg = "delete: stored stream does not match the displayed topology";
+			g_PropStatusMsg = std::string(opName) + ": stored stream does not match the displayed topology";
 			continue;
 		}
 		// Undo payload: the decoded pre-op structs (post-writeBack, so the flushed paint is
@@ -335,19 +339,42 @@ uint zpDeletePatchSelection()
 		snap->HaveMapper = haveMapper && target.MapperRaw;
 		if (snap->HaveMapper)
 			snap->MapperOld = target.MapperRaw->Value;
-		STopoRemap remap;
-		if (!topoDeletePatches(pm, rp, haveMapper ? &mapper : NULL, ot->second, remap, err))
+		if (getenv("ZP_TOPO_DEBUG_GRID"))
 		{
-			g_PropStatusMsg = "delete: " + err;
+			const uint dp = *ot->second.begin();
+			if (dp < rp.Patches.size())
+			{
+				const SRpoPatch &up = rp.Patches[dp];
+				fprintf(stderr, "TOPO PRE p%u %dx%d:", dp, 1 << up.NbTilesU, 1 << up.NbTilesV);
+				for (size_t t = 0; t < up.Tiles.size(); ++t)
+					fprintf(stderr, " %d", up.Tiles[t].Layer[0].Tile);
+				fprintf(stderr, "\n");
+			}
+		}
+		if (!xf(pm, rp, haveMapper ? &mapper : NULL, ot->second, err))
+		{
+			g_PropStatusMsg = std::string(opName) + ": " + err;
 			delete snap;
 			continue;
+		}
+		if (getenv("ZP_TOPO_DEBUG_GRID"))
+		{
+			const uint dp = *ot->second.begin();
+			if (dp < rp.Patches.size())
+			{
+				const SRpoPatch &up = rp.Patches[dp];
+				fprintf(stderr, "TOPO POST p%u %dx%d:", dp, 1 << up.NbTilesU, 1 << up.NbTilesV);
+				for (size_t t = 0; t < up.Tiles.size(); ++t)
+					fprintf(stderr, " %d", up.Tiles[t].Layer[0].Tile);
+				fprintf(stderr, "\n");
+			}
 		}
 		if (!encodeTopoTarget(target, pm, rp, mapper, haveMapper, err))
 		{
 			// The struct transform succeeded but the write-back did not; the stream may be
 			// half-written. The rebuild below re-derives from storage either way, and the
 			// file on disk is untouched until an explicit save.
-			g_PropStatusMsg = "delete: " + err;
+			g_PropStatusMsg = std::string(opName) + ": " + err;
 			delete snap;
 			continue;
 		}
@@ -360,7 +387,7 @@ uint zpDeletePatchSelection()
 		touchedZones.push_back(zoneId);
 		// Unconditional: the target-stream choice is what the gates pin (m34 pins the
 		// geometry write target the same way).
-		printf("delete: zone %u, %u patches removed (%s target)\n", zoneId,
+		printf("%s: zone %u, %u patches (%s target)\n", opName, zoneId,
 		       (uint)ot->second.size(), target.Local ? "modifier" : "base");
 		fflush(stdout);
 	}
@@ -371,9 +398,9 @@ uint zpDeletePatchSelection()
 		return 0;
 	}
 
-	ZPSCRIPT::record("painter.deletePatchSelection()");
+	ZPSCRIPT::record(recordLine);
 
-	// Old indices died with the old topology; clear every sub-object selection directly
+	// Old indices may have died with the old topology; clear every sub-object selection directly
 	// (the recorded op line replays the whole delete, no per-set records needed).
 	g_PatchVertSel.clear();
 	g_PatchEdgeSel.clear();
@@ -384,7 +411,7 @@ uint zpDeletePatchSelection()
 	uint welds = 0;
 	if (!rebuildWorkingSet(err, welds, /* skipWriteBack= */ true, /* keepUndo= */ true))
 	{
-		g_PropStatusMsg = "delete: session rebuild failed: " + err;
+		g_PropStatusMsg = std::string(opName) + ": session rebuild failed: " + err;
 		for (size_t i = 0; i < snaps.size(); ++i)
 			delete snaps[i];
 		return deleted;
@@ -398,8 +425,50 @@ uint zpDeletePatchSelection()
 	for (size_t i = 0; i < touchedZones.size(); ++i)
 		g_PaintCtx.Core->markGeomDirty(touchedZones[i]);
 	g_PropStatusMsg = NLMISC::toString(
-		"delete: %u patch%s removed", deleted, deleted == 1 ? "" : "es");
+		"%s: %u patch%s", opName, deleted, deleted == 1 ? "" : "es");
 	return deleted;
+}
+
+/** Adapter: delete (the remap is internal to the transform; callers observe via rebuild). */
+static bool zpXformDelete(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
+                          const std::set<uint> &sel, std::string &err)
+{
+	STopoRemap remap;
+	return topoDeletePatches(pm, rp, mapper, sel, remap, err);
+}
+
+static bool zpXformTurnCcw(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper * /* mapper */,
+                           const std::set<uint> &sel, std::string &err)
+{
+	return topoTurnPatches(pm, rp, sel, true, err);
+}
+
+static bool zpXformTurnCw(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper * /* mapper */,
+                          const std::set<uint> &sel, std::string &err)
+{
+	return topoTurnPatches(pm, rp, sel, false, err);
+}
+
+/**
+ * Delete the selected patches. Paint and bind records travel with the survivors
+ * (topoDeletePatches); everything else is the shared topo-op skeleton.
+ */
+uint zpDeletePatchSelection()
+{
+	return zpRunTopoOp("delete", "painter.deletePatchSelection()", zpXformDelete);
+}
+
+/**
+ * Turn the selected quad patches a quarter turn (the legacy tile-frame rotation). The
+ * painted grid transposes with its layers rotated, so the painted appearance follows the
+ * frame; binds onto a turned patch follow the edge ring.
+ */
+uint zpTurnPatchSelection(bool ccw)
+{
+	return zpRunTopoOp(ccw ? "turn ccw" : "turn cw",
+	                   ccw ? "painter.turnPatchSelection(true)"
+	                       : "painter.turnPatchSelection(false)",
+	                   ccw ? zpXformTurnCcw : zpXformTurnCw);
 }
 
 /**
@@ -432,8 +501,10 @@ void zpTopoRestore(const ZPPAINT::STopoSnapshot &snap, bool useOld)
 		target.MapperRaw->Value = useOld ? snap.MapperOld : snap.MapperNew;
 }
 
-/** Bridge wrapper (void-returning function pointer). */
+/** Bridge wrappers (void-returning function pointers). */
 void zpPatchDeleteClicked() { zpDeletePatchSelection(); }
+void zpPatchTurnCcwClicked() { zpTurnPatchSelection(true); }
+void zpPatchTurnCwClicked() { zpTurnPatchSelection(false); }
 
 /** Script/gate read access: the displayed patch count of a zone. */
 bool zpZonePatchCount(uint zoneId, uint &countOut)
