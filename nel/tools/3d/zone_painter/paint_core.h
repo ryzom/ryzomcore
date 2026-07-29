@@ -14,11 +14,13 @@
  * PRISTINE-COPY DISCIPLINE (correctness-critical): per unique carrier blob (write-target:
  * topmost modifier slot whose 0x2512->0x1000 local data carries an RFINALPATCH 0x4001, else
  * the base RPO 0x08FD) ONE SRPatchMesh is decoded from the raw bytes and kept as the
- * authoritative paint state. Tile ops mutate ONLY the tile-record fields of that pristine
- * copy (SRpoTile Num/Flags/Noise/Layer[].Tile/Rotate); the evaluated mesh (PatchMesh positions
- * and rp.Verts bind caches the eval/refresh path may rewrite) is for topology/display only
- * and is NEVER encoded back. An untouched pristine copy re-encodes byte-identical, so the
- * paint save path is a no-op for a null edit.
+ * authoritative paint state. Ops mutate ONLY their own fields of that pristine copy: tile
+ * ops the tile-record fields (SRpoTile Num/Flags/Noise/Layer[].Tile/Rotate), bind ops the
+ * per-vertex bind records (opEditBinds), edge-flag ops the per-patch EdgeFlags
+ * (opSetEdgeFlags). The evaluated mesh (PatchMesh positions and rp.Verts bind caches the
+ * eval/refresh path may rewrite) is for topology/display only and is NEVER encoded back. An
+ * untouched pristine copy re-encodes byte-identical, so the paint save path is a no-op for
+ * a null edit.
  *
  * DISPLAY INSTANCES / SHARED BACKING: carriers are keyed by the leaf or base RPO POINTER.
  * Multiple SPaintZoneInput entries that resolve to the same pointer (same Node stack, e.g.
@@ -353,9 +355,13 @@ struct SGeomElemRef
 
 // Undo delta: one tile-record, color-vertex, or export-prop change (bounded LIFO of strokes).
 // Kind 2: raw AppData restore so delete-vs-"0"/presence semantics reapply exactly.
+// Kind 4: one vertex BIND record (whole on-disk record verbatim, so undo of an unbind puts
+// back the original bind caches byte for byte). Kind 5: one patch-edge FLAG word (reuses
+// Patch + S for the edge slot and OldColor/NewColor for the flag values).
 struct SUndoTile
 {
-	uint8 Kind; // 0 = tile record, 1 = color vertex, 2 = export prop appdata, 3 = vertex move
+	uint8 Kind; // 0 = tile record, 1 = color vertex, 2 = export prop appdata, 3 = vertex move,
+	            // 4 = vertex bind record, 5 = patch-edge flags
 	uint Zone;
 	sint32 TileId; // tile kind
 	CTileDescP Old;
@@ -382,6 +388,9 @@ struct SUndoTile
 	uint8 OldRawNoise, NewRawNoise;
 	sint32 OldRawTile[3], NewRawTile[3];
 	sint32 OldRawRot[3], NewRawRot[3];
+	// Kind 4: the full SRpoVertexBind, flattened in field order (Binded, Type, Edge, Patch,
+	// Before, Before2, After, After2, T, Type2, PrimVert). VertIdx names the vertex.
+	uint32 OldBind[11], NewBind[11];
 	SUndoTile()
 		: Kind(0), Zone(0), TileId(-1), Patch(-1), S(0), T(0), OldColor(0), NewColor(0),
 		  AppDataId(0), OldHas(false), NewHas(false), VertIdx(0), ElemKind(0),
@@ -394,7 +403,38 @@ struct SUndoTile
 			OldRawRot[l] = NewRawRot[l] = 0;
 			OldPos[l] = NewPos[l] = 0.f;
 		}
+		for (int l = 0; l < 11; ++l)
+			OldBind[l] = NewBind[l] = 0;
 	}
+};
+
+/**
+ * One vertex-bind edit for opEditBinds. Binded true = bind the vertex to `Edge` of target
+ * patch `Patch` with the given typeBind and bind-group primary; the rebuildable cache
+ * indices are written as -1 (the loader recomputes them, exactly as the legacy
+ * BindingVertex left them). Binded false = release the vertex: the record keeps its
+ * Type/Patch/Edge/PrimVert and only the flag and caches are cleared, matching the legacy
+ * UnBindingVertex. Group semantics (a BIND_25/50/75 trio releases together) are the
+ * CALLER's policy, like the bound-vertex move filter.
+ */
+struct SBindEdit
+{
+	uint16 Vert;
+	bool Binded;
+	uint32 Type;     // typeBind (0=BIND_25, 1=BIND_75, 2=BIND_50, 3=BIND_SINGLE)
+	uint32 Edge;     // target patch edge 0..3
+	uint32 Patch;    // target patch
+	uint32 PrimVert; // primary vertex of the bind group
+	SBindEdit() : Vert(0), Binded(false), Type(0), Edge(0), Patch(0), PrimVert(0) { }
+};
+
+/** One patch-edge flag write for opSetEdgeFlags (bit 0 = no-smooth). */
+struct SEdgeFlagEdit
+{
+	uint16 Patch;
+	uint8 EdgeSlot; // 0..3
+	uint32 NewFlags;
+	SEdgeFlagEdit() : Patch(0), EdgeSlot(0), NewFlags(0) { }
 };
 
 // One color-grid slot (zone index + patch + grid coordinates); closures of co-located slots
@@ -571,6 +611,31 @@ public:
 	 */
 	uint opMovePatchElems(uint zoneId, const std::vector<SGeomElemRef> &elems,
 	                      const std::vector<NLMISC::CVector> &objDeltas, std::string &err);
+	/**
+	 * Edit vertex-bind records in the pristine carrier, with an optional geometry snap in
+	 * the SAME undo stroke (a new bind writes the bound vertices onto their bindWhere
+	 * points; the caller computes the deltas because they come from the evaluated mesh,
+	 * which the core does not own). Returns the number of records changed. Bind state
+	 * lives in the carrier blob, so dirty detection sees it without markGeomDirty - but
+	 * the snap writes go through the Kind 3 geometry path and mark it themselves.
+	 */
+	uint opEditBinds(uint zoneId, const std::vector<SBindEdit> &binds,
+	                 const std::vector<SGeomElemRef> &snapElems,
+	                 const std::vector<NLMISC::CVector> &snapDeltas, std::string &err);
+	/** Write per-patch edge flag words (no-smooth bit) as one undo stroke. */
+	uint opSetEdgeFlags(uint zoneId, const std::vector<SEdgeFlagEdit> &writes, std::string &err);
+	/** Read a pristine bind record (the on-disk truth, not the eval copy). */
+	bool getVertBind(uint zoneId, uint16 vert, bool &binded, uint32 &type, uint32 &edge,
+	                 uint32 &patch, uint32 &primVert) const;
+	/** Read a pristine patch's four edge-flag words. */
+	bool getPatchEdgeFlags(uint zoneId, uint16 patch, uint32 outFlags[4]) const;
+	/**
+	 * Notified after bind records or edge flags change (forward op, undo or redo), once per
+	 * op with the zone id the op addressed. The display re-derives everything downstream
+	 * (eval mirror, BindEdges, smooth flags, landscape rebuild) for every node of the
+	 * zone's object - same fan-out contract as the geometry callback.
+	 */
+	void setRpStateChangedCb(void (*cb)(uint zoneId)) { m_RpStateChangedCb = cb; }
 	/**
 	 * Notified whenever a vertex position changes, forward or by undo/redo.
 	 *
@@ -785,8 +850,11 @@ private:
 	static void readPropSnap(PIPELINE::MAX::BUILTIN::CNodeImpl *node, SPropSnap &out);
 	bool propsDirty(uint zoneIdx) const;
 	void applyGeomUndo(const SUndoTile &rec, bool useOld);
+	void applyBindUndo(const SUndoTile &rec, bool useOld);
+	void applyEdgeFlagUndo(const SUndoTile &rec, bool useOld);
 	std::set<uint> m_GeomDirty; // zone ids with an uncommitted geometry write
 	void (*m_GeomChangedCb)(uint zoneId, uint16 elemIdx, int elem, const float *objDelta);
+	void (*m_RpStateChangedCb)(uint zoneId);
 };
 
 } /* namespace ZPPAINT */

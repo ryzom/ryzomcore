@@ -81,6 +81,15 @@ uint zpApplyPatchRotate(int axis, float degrees, std::string &msg);
 uint zpApplyPatchRotateAxis(float ax, float ay, float az, float degrees, std::string &msg);
 uint zpApplyPatchScale(float sx, float sy, float sz, std::string &msg);
 void zpSetXformKind(int kind);
+uint zpUnbindPatchSelection();
+uint zpBindPatchSelection();
+bool zpBindPatchVertexToEdge(uint zoneId, uint vertIdx, uint patchIdx, uint edgeSlot,
+                             std::string &msg);
+uint zpSetEdgeNoSmooth(bool noSmooth);
+int zpEdgeNoSmoothQuery(uint zoneId, uint vertA, uint vertB);
+bool zpVertexBindQuery(uint zoneId, uint vertIdx, int &bindedOut, int &typeOut,
+                       int &patchOut, int &edgeOut, int &primOut);
+bool zpPatchEdgeCornerPair(uint zoneId, uint patchIdx, uint edgeSlot, uint &aOut, uint &bOut);
 
 using namespace NLMISC;
 using namespace NLGUI;
@@ -978,6 +987,90 @@ static int lMovePatchSelection(CLuaState &ls) // (dx, dy, dz) world units
 	return retOk(ls);
 }
 
+static int lUnbindPatchSelection(CLuaState &ls)
+{
+	const uint n = zpUnbindPatchSelection();
+	printf("unbindPatchSelection: %u released\n", n);
+	fflush(stdout);
+	ls.push((double)n);
+	return 1;
+}
+
+static int lBindPatchSelection(CLuaState &ls)
+{
+	const uint n = zpBindPatchSelection();
+	printf("bindPatchSelection: %u bound\n", n);
+	fflush(stdout);
+	ls.push((double)n);
+	return 1;
+}
+
+static int lBindPatchVertex(CLuaState &ls) // (zone, vertIdx, patchIdx, edgeSlot)
+{
+	double z, v, p, e;
+	if (!argNumber(ls, 1, z) || !argNumber(ls, 2, v) || !argNumber(ls, 3, p) || !argNumber(ls, 4, e))
+		return retErr(ls, "usage: bindPatchVertex(zone, vertIndex, patchIndex, edgeSlot)");
+	std::string msg;
+	const bool ok = zpBindPatchVertexToEdge((uint)z, (uint)v, (uint)p, (uint)e, msg);
+	printf("bindPatchVertex: %s\n", msg.c_str());
+	fflush(stdout);
+	if (!ok)
+		return retErr(ls, msg);
+	return retOk(ls);
+}
+
+static int lSetEdgeNoSmooth(CLuaState &ls) // (noSmooth bool)
+{
+	if (ls.getTop() < 1 || !ls.isBoolean(1))
+		return retErr(ls, "usage: setEdgeNoSmooth(true|false)");
+	const uint n = zpSetEdgeNoSmooth(ls.toBoolean(1));
+	printf("setEdgeNoSmooth: %u flags written\n", n);
+	fflush(stdout);
+	ls.push((double)n);
+	return 1;
+}
+
+static int lEdgeNoSmooth(CLuaState &ls) // (zone, vertA, vertB) -> 0/1
+{
+	double z, a, b;
+	if (!argNumber(ls, 1, z) || !argNumber(ls, 2, a) || !argNumber(ls, 3, b))
+		return retErr(ls, "usage: edgeNoSmooth(zone, vertA, vertB)");
+	const int s = zpEdgeNoSmoothQuery((uint)z, (uint)a, (uint)b);
+	if (s < 0)
+		return retErr(ls, "edgeNoSmooth: no such edge");
+	ls.push((double)s);
+	return 1;
+}
+
+static int lVertexBindInfo(CLuaState &ls) // (zone, vertIdx) -> binded, type, patch, edge, prim
+{
+	double z, v;
+	if (!argNumber(ls, 1, z) || !argNumber(ls, 2, v))
+		return retErr(ls, "usage: vertexBindInfo(zone, vertIndex)");
+	int binded, type, patch, edge, prim;
+	if (!zpVertexBindQuery((uint)z, (uint)v, binded, type, patch, edge, prim))
+		return retErr(ls, "vertexBindInfo: no such zone/vertex");
+	ls.push((double)binded);
+	ls.push((double)type);
+	ls.push((double)patch);
+	ls.push((double)edge);
+	ls.push((double)prim);
+	return 5;
+}
+
+static int lPatchEdgeVerts(CLuaState &ls) // (zone, patchIdx, edgeSlot) -> vertA, vertB
+{
+	double z, p, e;
+	if (!argNumber(ls, 1, z) || !argNumber(ls, 2, p) || !argNumber(ls, 3, e))
+		return retErr(ls, "usage: patchEdgeVerts(zone, patchIndex, edgeSlot)");
+	uint a, b;
+	if (!zpPatchEdgeCornerPair((uint)z, (uint)p, (uint)e, a, b))
+		return retErr(ls, "patchEdgeVerts: no such edge");
+	ls.push((double)a);
+	ls.push((double)b);
+	return 2;
+}
+
 static int lGetMode(CLuaState &ls)
 {
 	ZPUI::SPaintUIBridge *b = bridge();
@@ -1128,53 +1221,58 @@ static int lPrint(CLuaState &ls)
 /** The painter table, built from the registered __zp_* globals (client-style camelCase). */
 static const char *kBootstrap =
 	"painter = {\n"
-	" paintTile = __zp_paintTile, rotateTile = __zp_rotateTile, clearTile = __zp_clearTile,\n"
-	" fillTile = __zp_fillTile,\n"
-	" paintColor = __zp_paintColor, fillColor = __zp_fillColor, colorBrush = __zp_colorBrush,\n"
-	" tileStroke = __zp_tileStroke, endStroke = __zp_endStroke,\n"
-	" paintDisplace = __zp_paintDisplace, fillDisplace = __zp_fillDisplace,\n"
-	" setBrushSize = __zp_setBrushSize, setTileGroup = __zp_setTileGroup,\n"
-	" setBrushMask = __zp_setBrushMask,\n"
-	" setLockBorders = __zp_setLockBorders, setMaskMode = __zp_setMaskMode,\n"
-	" set256 = __zp_set256, setHardness = __zp_setHardness,\n"
-	" setOpacity = __zp_setOpacity, setRadius = __zp_setRadius,\n"
-	" undo = __zp_undo, redo = __zp_redo, seed = __zp_seed, checkSeams = __zp_checkSeams,\n"
-	" setZoneProp = __zp_setZoneProp, getZoneProp = __zp_getZoneProp,\n"
-	" zones = __zp_zones, save = __zp_save, saveAll = __zp_saveAll,\n"
-	" screenshot = __zp_screenshot, pumpUI = __zp_pumpUI,\n"
-	" openZone = __zp_openZone, closeZone = __zp_closeZone,\n"
-	" placeInstance = __zp_placeInstance, removeInstance = __zp_removeInstance,\n"
-	" rotateInstance = __zp_rotateInstance, mirrorInstance = __zp_mirrorInstance,\n"
-	" placeContext = __zp_placeContext, removeContext = __zp_removeContext,\n"
-	" rotateContext = __zp_rotateContext, mirrorContext = __zp_mirrorContext,\n"
-	" makeEditable = __zp_makeEditable,\n"
-	" moveCell = __zp_moveCell, copyCell = __zp_copyCell,\n"
-	" toggleZone = __zp_toggleZone, saveZone = __zp_saveZone,\n"
-	" setMode = __zp_setMode, getMode = __zp_getMode,\n"
-	" setSubObject = __zp_setSubObject, getSubObject = __zp_getSubObject,\n"
-	" selectPatchVertex = __zp_selectPatchVertex,\n"
-	" clearPatchVertexSelection = __zp_clearPatchVertexSelection,\n"
-	" patchVertexSelectionCount = __zp_patchVertexSelectionCount,\n"
-	" movePatchSelection = __zp_movePatchSelection,\n"
-	" patchVertexPos = __zp_patchVertexPos,\n"
-	" selectPatchEdge = __zp_selectPatchEdge, selectPatchFace = __zp_selectPatchFace,\n"
-	" patchEdgeSelectionCount = __zp_patchEdgeSelectionCount,\n"
-	" patchFaceSelectionCount = __zp_patchFaceSelectionCount,\n"
-	" patchClick = __zp_patchClick,\n"
-	" selectPatchTangent = __zp_selectPatchTangent,\n"
-	" patchTangentSelectionCount = __zp_patchTangentSelectionCount,\n"
-	" patchTangentPos = __zp_patchTangentPos,\n"
-	" setPivotMode = __zp_setPivotMode, pivotPos = __zp_pivotPos,\n"
-	" setUserPivotToSelection = __zp_setUserPivotToSelection,\n"
-	" rotatePatchSelection = __zp_rotatePatchSelection,\n"
-	" rotatePatchSelectionAxis = __zp_rotatePatchSelectionAxis,\n"
-	" scalePatchSelection = __zp_scalePatchSelection,\n"
-	" setXformKind = __zp_setXformKind,\n"
-	" setTileSet = __zp_setTileSet, getTileSet = __zp_getTileSet,\n"
-	" setDisplaceIndex = __zp_setDisplaceIndex, setBrushColor = __zp_setBrushColor,\n"
-	" setSeason = __zp_setSeason,\n"
-	" setRecording = __zp_setRecording, isRecording = __zp_isRecording,\n"
-	" recorderText = __zp_recorderText, clearRecorder = __zp_clearRecorder,\n"
+	"  paintTile = __zp_paintTile, rotateTile = __zp_rotateTile, clearTile = __zp_clearTile,\n"
+	"  fillTile = __zp_fillTile,\n"
+	"  paintColor = __zp_paintColor, fillColor = __zp_fillColor, colorBrush = __zp_colorBrush,\n"
+	"  tileStroke = __zp_tileStroke, endStroke = __zp_endStroke,\n"
+	"  paintDisplace = __zp_paintDisplace, fillDisplace = __zp_fillDisplace,\n"
+	"  setBrushSize = __zp_setBrushSize, setTileGroup = __zp_setTileGroup,\n"
+	"  setBrushMask = __zp_setBrushMask,\n"
+	"  setLockBorders = __zp_setLockBorders, setMaskMode = __zp_setMaskMode,\n"
+	"  set256 = __zp_set256, setHardness = __zp_setHardness,\n"
+	"  setOpacity = __zp_setOpacity, setRadius = __zp_setRadius,\n"
+	"  undo = __zp_undo, redo = __zp_redo, seed = __zp_seed, checkSeams = __zp_checkSeams,\n"
+	"  setZoneProp = __zp_setZoneProp, getZoneProp = __zp_getZoneProp,\n"
+	"  zones = __zp_zones, save = __zp_save, saveAll = __zp_saveAll,\n"
+	"  screenshot = __zp_screenshot, pumpUI = __zp_pumpUI,\n"
+	"  openZone = __zp_openZone, closeZone = __zp_closeZone,\n"
+	"  placeInstance = __zp_placeInstance, removeInstance = __zp_removeInstance,\n"
+	"  rotateInstance = __zp_rotateInstance, mirrorInstance = __zp_mirrorInstance,\n"
+	"  placeContext = __zp_placeContext, removeContext = __zp_removeContext,\n"
+	"  rotateContext = __zp_rotateContext, mirrorContext = __zp_mirrorContext,\n"
+	"  makeEditable = __zp_makeEditable,\n"
+	"  moveCell = __zp_moveCell, copyCell = __zp_copyCell,\n"
+	"  toggleZone = __zp_toggleZone, saveZone = __zp_saveZone,\n"
+	"  setMode = __zp_setMode, getMode = __zp_getMode,\n"
+	"  setSubObject = __zp_setSubObject, getSubObject = __zp_getSubObject,\n"
+	"  selectPatchVertex = __zp_selectPatchVertex,\n"
+	"  clearPatchVertexSelection = __zp_clearPatchVertexSelection,\n"
+	"  patchVertexSelectionCount = __zp_patchVertexSelectionCount,\n"
+	"  movePatchSelection = __zp_movePatchSelection,\n"
+	"  patchVertexPos = __zp_patchVertexPos,\n"
+	"  selectPatchEdge = __zp_selectPatchEdge, selectPatchFace = __zp_selectPatchFace,\n"
+	"  patchEdgeSelectionCount = __zp_patchEdgeSelectionCount,\n"
+	"  patchFaceSelectionCount = __zp_patchFaceSelectionCount,\n"
+	"  patchClick = __zp_patchClick,\n"
+	"  selectPatchTangent = __zp_selectPatchTangent,\n"
+	"  patchTangentSelectionCount = __zp_patchTangentSelectionCount,\n"
+	"  patchTangentPos = __zp_patchTangentPos,\n"
+	"  setPivotMode = __zp_setPivotMode, pivotPos = __zp_pivotPos,\n"
+	"  setUserPivotToSelection = __zp_setUserPivotToSelection,\n"
+	"  rotatePatchSelection = __zp_rotatePatchSelection,\n"
+	"  rotatePatchSelectionAxis = __zp_rotatePatchSelectionAxis,\n"
+	"  scalePatchSelection = __zp_scalePatchSelection,\n"
+	"  setXformKind = __zp_setXformKind,\n"
+	"  unbindPatchSelection = __zp_unbindPatchSelection,\n"
+	"  bindPatchSelection = __zp_bindPatchSelection,\n"
+	"  bindPatchVertex = __zp_bindPatchVertex,\n"
+	"  setEdgeNoSmooth = __zp_setEdgeNoSmooth, edgeNoSmooth = __zp_edgeNoSmooth,\n"
+	"  vertexBindInfo = __zp_vertexBindInfo, patchEdgeVerts = __zp_patchEdgeVerts,\n"
+	"  setTileSet = __zp_setTileSet, getTileSet = __zp_getTileSet,\n"
+	"  setDisplaceIndex = __zp_setDisplaceIndex, setBrushColor = __zp_setBrushColor,\n"
+	"  setSeason = __zp_setSeason,\n"
+	"  setRecording = __zp_setRecording, isRecording = __zp_isRecording,\n"
+	"  recorderText = __zp_recorderText, clearRecorder = __zp_clearRecorder,\n"
 	"}\n"
 	"print = __zp_print\n";
 
@@ -1253,6 +1351,13 @@ bool ensureLua()
 	ls->registerFunc("__zp_clearPatchVertexSelection", lClearPatchVertexSelection);
 	ls->registerFunc("__zp_patchVertexSelectionCount", lPatchVertexSelectionCount);
 	ls->registerFunc("__zp_movePatchSelection", lMovePatchSelection);
+	ls->registerFunc("__zp_unbindPatchSelection", lUnbindPatchSelection);
+	ls->registerFunc("__zp_bindPatchSelection", lBindPatchSelection);
+	ls->registerFunc("__zp_bindPatchVertex", lBindPatchVertex);
+	ls->registerFunc("__zp_setEdgeNoSmooth", lSetEdgeNoSmooth);
+	ls->registerFunc("__zp_edgeNoSmooth", lEdgeNoSmooth);
+	ls->registerFunc("__zp_vertexBindInfo", lVertexBindInfo);
+	ls->registerFunc("__zp_patchEdgeVerts", lPatchEdgeVerts);
 	ls->registerFunc("__zp_getSubObject", lGetSubObject);
 	ls->registerFunc("__zp_getMode", lGetMode);
 	ls->registerFunc("__zp_setTileSet", lSetTileSet);

@@ -829,6 +829,10 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 		paintBridge.selectMode = zpSelectMode;
 		paintBridge.selectSubObject = zpSelectSubObject;
 		core->setGeomChangedCb(zpGeomVertChanged);
+		core->setRpStateChangedCb(zpRpStateChanged);
+		paintBridge.patchBind = zpPatchBindClicked;
+		paintBridge.patchUnbind = zpPatchUnbindClicked;
+		paintBridge.patchNoSmooth = zpPatchNoSmoothClicked;
 		paintBridge.selectTileSetDelta = zpSelectTileSetDelta;
 		paintBridge.selectTileSetAbs = zpSelectTileSetAbs;
 		paintBridge.toggleTileSize = zpToggleTileSize;

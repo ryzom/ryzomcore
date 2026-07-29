@@ -510,6 +510,8 @@ bool zpPatchTangentWorld(uint zoneId, uint vecIdx, float outPos[3]);
 
 /** Index-based readback, so callers that cannot include this header still reach the set. */
 uint zpPatchVertSelCount();
+uint zpPatchEdgeSelCount();
+uint zpPatchFaceSelCount();
 bool zpPatchVertSelAt(uint index, uint &zoneOut, uint &vertOut);
 
 /**
@@ -723,6 +725,30 @@ bool zpPatchPushLive(bool preview);
 
 /** Core geom-changed sink: keeps Ep.Pm and the display patchinfo in step with the .max. */
 void zpGeomVertChanged(uint zoneId, uint16 elemIdx, int elem, const float *objDelta);
+
+// Bind / edge-flag ops (patch_edit_ops.cpp). Panel buttons, hotkeys and painterscript all
+// come through these - the single op surface.
+/** Core rp-state sink: bind records or edge flags changed (forward, undo or redo). */
+void zpRpStateChanged(uint zoneId);
+/** Re-derive one zone's BindEdges + smooth-flag bits from its eval mirror, in place. */
+void zpRederiveBindEdges(SPaintZone &pz);
+/** Release the bound vertices of the selection, whole bind groups at a time. */
+uint zpUnbindPatchSelection();
+/** Bind each selected free vertex onto its nearest valid open edge. */
+uint zpBindPatchSelection();
+/** Bind one vertex onto edge `edgeSlot` of `patchIdx` (validated; snaps in-stroke). */
+bool zpBindPatchVertexToEdge(uint zoneId, uint vertIdx, uint patchIdx, uint edgeSlot,
+                             std::string &msg);
+/** Write the no-smooth bit on every patch side of every selected edge. */
+uint zpSetEdgeNoSmooth(bool noSmooth);
+/** Panel checkbox state over the edge selection: 0 none, 1 all, 2 mixed/none selected. */
+int zpEdgeNoSmoothTriState();
+/** One edge's flag by corner pair: 0 clear, 1 flagged, -1 unknown edge. */
+int zpEdgeNoSmoothQuery(uint zoneId, uint vertA, uint vertB);
+/** Panel click handlers (legacy tri-state cycle for the checkbox). */
+void zpPatchNoSmoothClicked();
+void zpPatchBindClicked();
+void zpPatchUnbindClicked();
 
 /** Left-click in patch/vertex mode; `buttons` carries the modifier bits (Ctrl add, Alt remove). */
 void zpPatchVertexClick(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, float my, uint buttons);

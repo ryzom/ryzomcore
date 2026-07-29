@@ -277,6 +277,60 @@ public:
 };
 REGISTER_ACTION_HANDLER(CAHZpPropUseBBox, "zp_prop_usebbox");
 
+// Patch rollout handlers
+/** Sub-object level button: toggle-off - clicking the pressed level returns to
+ *  Object level. The level itself comes from the button's params. */
+class CAHZpSubObject : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (!b || !b->selectSubObject) return;
+		int level = 0;
+		fromString(params, level);
+		b->selectSubObject(b->SubObj == level ? 0 : level);
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpSubObject, "zp_sub_object");
+
+class CAHZpPatchBind : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchBind) b->patchBind();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchBind, "zp_patch_bind");
+
+class CAHZpPatchUnbind : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchUnbind) b->patchUnbind();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchUnbind, "zp_patch_unbind");
+
+class CAHZpPatchNoSmooth : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchNoSmooth) b->patchNoSmooth();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchNoSmooth, "zp_patch_nosmooth");
+
 class CAHZpTileSet : public IActionHandler
 {
 public:
@@ -1954,6 +2008,8 @@ void CEditorUI::syncPanelFromBridge()
 	static const char *kRollFill = "ui:zp:roll_fill";
 	static const char *kRollDisplace = "ui:zp:roll_displace";
 	static const char *kRollProperties = "ui:zp:roll_properties";
+	static const char *kRollPatch = "ui:zp:roll_patch";
+	static const char *kPatchC = "ui:zp:roll_patch:content";
 	static const char *kSessionC = "ui:zp:roll_session:content";
 	static const char *kTilesC = "ui:zp:roll_tiles:content";
 	static const char *kBrushC = "ui:zp:roll_brush:content";
@@ -1987,14 +2043,16 @@ void CEditorUI::syncPanelFromBridge()
 	// Mode-gated rollout VISIBILITY (not collapse).
 	// Non-applicable rollouts are fully hidden. Open/collapsed is remembered per
 	// rollout across mode switches (setActive does not touch isOpen).
-	// Tile → Session+Tiles+Brush+Fill
-	// Color → Session+Brush+Fill
-	// Displace → Session+Displace+Brush+Fill
-	// Prop → Session+Properties
+	//   Tile → Session+Tiles+Brush+Fill
+	//   Color → Session+Brush+Fill
+	//   Displace → Session+Displace+Brush+Fill
+	//   Prop → Session+Properties
+	//   Patch → Session+Patch
 	const bool tileActive = (b->Mode == 0);
 	const bool colorActive = (b->Mode == 1);
 	const bool displaceActive = (b->Mode == 2);
 	const bool propActive = (b->Mode == 3);
+	const bool patchActive = (b->Mode == 4);
 	const bool brushActive = tileActive || colorActive || displaceActive;
 	const bool fillActive = brushActive; // paint-common fill tools
 	if (CInterfaceGroup *g = findGroupEl(kRollSession))
@@ -2009,6 +2067,8 @@ void CEditorUI::syncPanelFromBridge()
 		g->setActive(displaceActive);
 	if (CInterfaceGroup *g = findGroupEl(kRollProperties))
 		g->setActive(propActive);
+	if (CInterfaceGroup *g = findGroupEl(kRollPatch))
+		g->setActive(patchActive);
 
 	// ZONE_PAINTER_ROLLOUTS=all: force-open every rollout once (full-column shot).
 	// ZONE_PAINTER_ROLLOUTS=collapsed: close all except Session (header/arrow crop).
@@ -2020,7 +2080,8 @@ void CEditorUI::syncPanelFromBridge()
 		{
 			s_RolloutsEnvDone = true;
 			static const char *kAllRolls[] = {
-				kRollSession, kRollTiles, kRollBrush, kRollFill, kRollDisplace, kRollProperties
+				kRollSession, kRollTiles, kRollBrush, kRollFill, kRollDisplace, kRollProperties,
+				kRollPatch
 			};
 			const bool forceOpen = (strcmp(ra, "all") == 0 || strcmp(ra, "1") == 0);
 			const bool forceCollapse = (strcmp(ra, "collapsed") == 0 || strcmp(ra, "closed") == 0);
@@ -2240,6 +2301,60 @@ void CEditorUI::syncPanelFromBridge()
 		char buf[32];
 		snprintf(buf, sizeof(buf), "%u", b->DisplaceIndex);
 		t->setHardText(buf);
+	}
+
+	if (patchActive)
+	{
+		// Level buttons: pressed = current level (legacy toggle-off handled by the AH).
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":lvl_vert").c_str()))
+			btn->setPushed(b->SubObj == 1);
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":lvl_edge").c_str()))
+			btn->setPushed(b->SubObj == 2);
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":lvl_patch").c_str()))
+			btn->setPushed(b->SubObj == 3);
+		// Selection readout: the current level's count, singular/plural like the legacy line.
+		if (CViewText *t = findText((std::string(kPatchC) + ":sel_info").c_str()))
+		{
+			char buf[64];
+			if (b->SubObj == 1)
+			{
+				if (b->PatchSelTans)
+					snprintf(buf, sizeof(buf), "%u Handle%s (%u Vert%s) Selected",
+					         b->PatchSelTans, b->PatchSelTans == 1 ? "" : "s",
+					         b->PatchSelVerts, b->PatchSelVerts == 1 ? "ex" : "ices");
+				else if (b->PatchSelVerts)
+					snprintf(buf, sizeof(buf), "%u Vert%s Selected",
+					         b->PatchSelVerts, b->PatchSelVerts == 1 ? "ex" : "ices");
+				else
+					snprintf(buf, sizeof(buf), "No Vertex Selected");
+			}
+			else if (b->SubObj == 2)
+				snprintf(buf, sizeof(buf), b->PatchSelEdges == 1 ? "%u Edge Selected"
+				                                                 : "%u Edges Selected", b->PatchSelEdges);
+			else if (b->SubObj == 3)
+				snprintf(buf, sizeof(buf), b->PatchSelFaces == 1 ? "%u Patch Selected"
+				                                                 : "%u Patches Selected", b->PatchSelFaces);
+			else
+				snprintf(buf, sizeof(buf), "Object Level");
+			t->setHardText(buf);
+		}
+		// Bind/Unbind live at vertex level, No smooth at edge level.
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_bind").c_str()))
+			btn->setFrozen(b->SubObj != 1 || !b->PatchSelVerts);
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_unbind").c_str()))
+			btn->setFrozen(b->SubObj != 1 || !b->PatchSelVerts);
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":no_smooth:box").c_str()))
+		{
+			btn->setFrozen(b->SubObj != 2 || !b->PatchSelEdges);
+			btn->setPushed(b->PatchNoSmooth == 1);
+		}
+		if (CViewText *t = findText((std::string(kPatchC) + ":no_smooth_state").c_str()))
+			t->setHardText(b->SubObj == 2 && b->PatchSelEdges
+			                   ? (b->PatchNoSmooth == 2 ? "(mixed)" : "")
+			                   : "");
+		// Same live status line the HUD shows (op results land in g_PropStatusMsg).
+		if (CViewText *t = findText((std::string(kPatchC) + ":patch_status").c_str()))
+			t->setHardText(b->PropStatus);
 	}
 
 	if (propActive)

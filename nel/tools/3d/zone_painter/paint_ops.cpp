@@ -659,11 +659,22 @@ static void zpApplyPropRaw(CNodeImpl *node, uint32 appDataId, bool has, const st
 
 void CPaintCore::applyUndoList(const std::vector<SUndoTile> &list, bool useOld)
 {
+	// Bind/edge-flag restores fire ONE state-changed callback per zone AFTER the whole list
+	// replays: the callback re-derives BindEdges and rebuilds the landscape zone, and doing
+	// that per record would rebuild once per vertex of a released group.
+	std::set<uint> rpChangedZones;
+	for (size_t i = 0; i < list.size(); ++i)
+		if (list[i].Kind == 4 || list[i].Kind == 5)
+			rpChangedZones.insert(list[i].Zone);
 	if (useOld)
 	{
 		for (int i = (int)list.size() - 1; i >= 0; --i)
 		{
-			if (list[i].Kind == 3)
+			if (list[i].Kind == 5)
+				applyEdgeFlagUndo(list[i], true);
+			else if (list[i].Kind == 4)
+				applyBindUndo(list[i], true);
+			else if (list[i].Kind == 3)
 				applyGeomUndo(list[i], true);
 			else if (list[i].Kind == 2)
 			{
@@ -692,7 +703,11 @@ void CPaintCore::applyUndoList(const std::vector<SUndoTile> &list, bool useOld)
 	{
 		for (size_t i = 0; i < list.size(); ++i)
 		{
-			if (list[i].Kind == 3)
+			if (list[i].Kind == 5)
+				applyEdgeFlagUndo(list[i], false);
+			else if (list[i].Kind == 4)
+				applyBindUndo(list[i], false);
+			else if (list[i].Kind == 3)
 				applyGeomUndo(list[i], false);
 			else if (list[i].Kind == 2)
 			{
@@ -717,6 +732,10 @@ void CPaintCore::applyUndoList(const std::vector<SUndoTile> &list, bool useOld)
 		}
 	}
 	applyChanges();
+	if (m_RpStateChangedCb)
+		for (std::set<uint>::const_iterator it = rpChangedZones.begin();
+		     it != rpChangedZones.end(); ++it)
+			m_RpStateChangedCb(*it);
 }
 
 bool CPaintCore::opProp(uint zoneId, uint32 appDataId, bool newHas, const std::string &newValue,
@@ -844,6 +863,226 @@ void CPaintCore::applyGeomUndo(const SUndoTile &rec, bool useOld)
 		const float d[3] = { pos[0] - from[0], pos[1] - from[1], pos[2] - from[2] };
 		m_GeomChangedCb(rec.Zone, rec.VertIdx, (int)rec.ElemKind, d);
 	}
+}
+
+// SRpoVertexBind <-> the SUndoTile flat form, in field order. The whole record travels
+// through undo so a released bind's caches come back verbatim - that is what makes
+// unbind -> undo -> save byte-identical to the baseline.
+static void zpFlattenBind(const SRpoVertexBind &b, uint32 out[11])
+{
+	out[0] = b.Binded; out[1] = b.Type; out[2] = b.Edge; out[3] = b.Patch;
+	out[4] = b.Before; out[5] = b.Before2; out[6] = b.After; out[7] = b.After2;
+	out[8] = b.T; out[9] = b.Type2; out[10] = b.PrimVert;
+}
+
+static void zpUnflattenBind(const uint32 in[11], SRpoVertexBind &b)
+{
+	b.Binded = (uint8)in[0]; b.Type = in[1]; b.Edge = in[2]; b.Patch = in[3];
+	b.Before = in[4]; b.Before2 = in[5]; b.After = in[6]; b.After2 = in[7];
+	b.T = in[8]; b.Type2 = in[9]; b.PrimVert = in[10];
+}
+
+uint CPaintCore::opEditBinds(uint zoneId, const std::vector<SBindEdit> &binds,
+                             const std::vector<SGeomElemRef> &snapElems,
+                             const std::vector<NLMISC::CVector> &snapDeltas, std::string &err)
+{
+	uint zi = (uint)-1;
+	for (size_t i = 0; i < m_Zones.size(); ++i)
+		if (m_Zones[i].In.ZoneId == zoneId) { zi = (uint)i; break; }
+	if (zi == (uint)-1) { err = "unknown zone"; return 0; }
+	SZone &z = m_Zones[zi];
+	if (z.In.Frozen) { err = "read-only"; return 0; }
+	if (snapDeltas.size() != snapElems.size()) { err = "snap count mismatch"; return 0; }
+	SRPatchMesh *rp = pristineOf(zi);
+	if (!rp) { err = "no carrier"; return 0; }
+
+	std::vector<SUndoTile> recs;
+	recs.reserve(binds.size());
+	for (size_t i = 0; i < binds.size(); ++i)
+	{
+		const SBindEdit &e = binds[i];
+		if (e.Vert >= rp->Verts.size())
+		{
+			if (err.empty()) err = "bind vertex out of range";
+			continue;
+		}
+		SRpoVertexBind &b = rp->Verts[e.Vert];
+		SUndoTile rec;
+		rec.Kind = 4;
+		rec.Zone = zoneId;
+		rec.VertIdx = e.Vert;
+		zpFlattenBind(b, rec.OldBind);
+		if (e.Binded)
+		{
+			// Legacy BindingVertex: full target written, caches invalidated for the loader
+			// (and our own eval refresh) to rebuild.
+			b.Binded = 1;
+			b.Type = e.Type;
+			b.Type2 = e.Type;
+			b.Edge = e.Edge;
+			b.Patch = e.Patch;
+			b.PrimVert = e.PrimVert;
+			b.Before = b.Before2 = b.After = b.After2 = b.T = (uint32)-1;
+		}
+		else
+		{
+			// Legacy UnBindingVertex: flag and caches only; the dead target fields stay.
+			b.Binded = 0;
+			b.Before = b.Before2 = b.After = b.After2 = b.T = (uint32)-1;
+		}
+		zpFlattenBind(b, rec.NewBind);
+		bool same = true;
+		for (int k = 0; k < 11 && same; ++k)
+			same = rec.OldBind[k] == rec.NewBind[k];
+		if (same)
+			continue;
+		recs.push_back(rec);
+	}
+
+	// Geometry snap (new binds land their vertices on the bindWhere points) - same records
+	// the move op writes, deltas already object-space.
+	std::vector<SUndoTile> geomRecs;
+	geomRecs.reserve(snapElems.size());
+	for (size_t i = 0; i < snapElems.size(); ++i)
+	{
+		SGeomWriteTarget t;
+		std::string e;
+		if (!resolveGeomWriteTarget(z.In.Node, snapElems[i].Idx, snapElems[i].Elem, t, e))
+		{
+			if (err.empty()) err = e;
+			continue;
+		}
+		SUndoTile rec;
+		rec.Kind = 3;
+		rec.Zone = zoneId;
+		rec.VertIdx = snapElems[i].Idx;
+		rec.ElemKind = (uint8)snapElems[i].Elem;
+		if (!geomTargetGet(t, rec.OldPos)) { if (err.empty()) err = "target read failed"; continue; }
+		for (int k = 0; k < 3; ++k)
+			rec.NewPos[k] = rec.OldPos[k] + (k == 0 ? snapDeltas[i].x : (k == 1 ? snapDeltas[i].y : snapDeltas[i].z));
+		if (!geomTargetSet(t, rec.NewPos)) { if (err.empty()) err = "target write failed"; continue; }
+		geomRecs.push_back(rec);
+		const float d[3] = { snapDeltas[i].x, snapDeltas[i].y, snapDeltas[i].z };
+		if (m_GeomChangedCb)
+			m_GeomChangedCb(zoneId, rec.VertIdx, (int)snapElems[i].Elem, d);
+	}
+
+	if (recs.empty() && geomRecs.empty())
+		return 0;
+	// One stroke for the whole edit, bind records and snap together - an unbind or a bind is
+	// one action however many vertices the group held.
+	endStroke();
+	for (size_t i = 0; i < recs.size(); ++i)
+		m_CurStroke.push_back(recs[i]);
+	for (size_t i = 0; i < geomRecs.size(); ++i)
+		m_CurStroke.push_back(geomRecs[i]);
+	endStroke();
+	if (!geomRecs.empty())
+		markGeomDirty(zoneId);
+	if (!recs.empty() && m_RpStateChangedCb)
+		m_RpStateChangedCb(zoneId);
+	return (uint)recs.size();
+}
+
+uint CPaintCore::opSetEdgeFlags(uint zoneId, const std::vector<SEdgeFlagEdit> &writes, std::string &err)
+{
+	uint zi = (uint)-1;
+	for (size_t i = 0; i < m_Zones.size(); ++i)
+		if (m_Zones[i].In.ZoneId == zoneId) { zi = (uint)i; break; }
+	if (zi == (uint)-1) { err = "unknown zone"; return 0; }
+	if (m_Zones[zi].In.Frozen) { err = "read-only"; return 0; }
+	SRPatchMesh *rp = pristineOf(zi);
+	if (!rp) { err = "no carrier"; return 0; }
+
+	std::vector<SUndoTile> recs;
+	recs.reserve(writes.size());
+	for (size_t i = 0; i < writes.size(); ++i)
+	{
+		const SEdgeFlagEdit &w = writes[i];
+		if (w.Patch >= rp->Patches.size() || w.EdgeSlot >= 4)
+		{
+			if (err.empty()) err = "edge flag target out of range";
+			continue;
+		}
+		uint32 &flags = rp->Patches[w.Patch].EdgeFlags[w.EdgeSlot];
+		if (flags == w.NewFlags)
+			continue;
+		SUndoTile rec;
+		rec.Kind = 5;
+		rec.Zone = zoneId;
+		rec.Patch = (sint32)w.Patch;
+		rec.S = (sint32)w.EdgeSlot;
+		rec.OldColor = flags;
+		rec.NewColor = w.NewFlags;
+		flags = w.NewFlags;
+		recs.push_back(rec);
+	}
+	if (recs.empty())
+		return 0;
+	endStroke();
+	for (size_t i = 0; i < recs.size(); ++i)
+		m_CurStroke.push_back(recs[i]);
+	endStroke();
+	if (m_RpStateChangedCb)
+		m_RpStateChangedCb(zoneId);
+	return (uint)recs.size();
+}
+
+bool CPaintCore::getVertBind(uint zoneId, uint16 vert, bool &binded, uint32 &type, uint32 &edge,
+                             uint32 &patch, uint32 &primVert) const
+{
+	uint zi = (uint)-1;
+	for (size_t i = 0; i < m_Zones.size(); ++i)
+		if (m_Zones[i].In.ZoneId == zoneId) { zi = (uint)i; break; }
+	if (zi == (uint)-1) return false;
+	const SRPatchMesh *rp = pristineOf(zi);
+	if (!rp || vert >= rp->Verts.size()) return false;
+	const SRpoVertexBind &b = rp->Verts[vert];
+	binded = b.Binded != 0;
+	type = b.Type;
+	edge = b.Edge;
+	patch = b.Patch;
+	primVert = b.PrimVert;
+	return true;
+}
+
+bool CPaintCore::getPatchEdgeFlags(uint zoneId, uint16 patch, uint32 outFlags[4]) const
+{
+	uint zi = (uint)-1;
+	for (size_t i = 0; i < m_Zones.size(); ++i)
+		if (m_Zones[i].In.ZoneId == zoneId) { zi = (uint)i; break; }
+	if (zi == (uint)-1) return false;
+	const SRPatchMesh *rp = pristineOf(zi);
+	if (!rp || patch >= rp->Patches.size()) return false;
+	for (int e = 0; e < 4; ++e)
+		outFlags[e] = rp->Patches[patch].EdgeFlags[e];
+	return true;
+}
+
+/** Undo/redo of a Kind 4 record: put back the stored bind record verbatim. */
+void CPaintCore::applyBindUndo(const SUndoTile &rec, bool useOld)
+{
+	uint zi = (uint)-1;
+	for (size_t i = 0; i < m_Zones.size(); ++i)
+		if (m_Zones[i].In.ZoneId == rec.Zone) { zi = (uint)i; break; }
+	if (zi == (uint)-1) return;
+	SRPatchMesh *rp = pristineOf(zi);
+	if (!rp || rec.VertIdx >= rp->Verts.size()) return;
+	zpUnflattenBind(useOld ? rec.OldBind : rec.NewBind, rp->Verts[rec.VertIdx]);
+}
+
+/** Undo/redo of a Kind 5 record: put back the stored flag word. */
+void CPaintCore::applyEdgeFlagUndo(const SUndoTile &rec, bool useOld)
+{
+	uint zi = (uint)-1;
+	for (size_t i = 0; i < m_Zones.size(); ++i)
+		if (m_Zones[i].In.ZoneId == rec.Zone) { zi = (uint)i; break; }
+	if (zi == (uint)-1) return;
+	SRPatchMesh *rp = pristineOf(zi);
+	if (!rp || rec.Patch < 0 || (size_t)rec.Patch >= rp->Patches.size()
+	    || rec.S < 0 || rec.S >= 4)
+		return;
+	rp->Patches[rec.Patch].EdgeFlags[rec.S] = useOld ? rec.OldColor : rec.NewColor;
 }
 
 bool CPaintCore::opUndo()

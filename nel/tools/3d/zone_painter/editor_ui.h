@@ -124,6 +124,11 @@ struct SPaintUIBridge
 	void (*propToggleSymmetry)();
 	void (*propTogglePassable)();
 	void (*propToggleUseBBox)();
+	// Patch mode: bind / unbind / no-smooth (op surface lives in patch_edit_ops; the panel
+	// buttons, hotkeys and painterscript all alias these)
+	void (*patchBind)();
+	void (*patchUnbind)();
+	void (*patchNoSmooth)();
 	// Painterscript absolute state setters (recorder-replay faithful; the frame-synced
 	// snapshot fields below are STALE mid-script, so scripts must not derive from them)
 	void (*setTileSize256)(bool on);
@@ -135,8 +140,12 @@ struct SPaintUIBridge
 	bool HaveCore;
 	int Mode;
 	int SubObj; // patch-edit sub-object level; meaningful only while Mode == Patch
-	int PivotMode; // TPivotMode; what the transform gizmo is anchored on
-	char PivotLabel[16]; // short face for the toolbar button
+	// Patch panel snapshot: per-level selection counts and the edge no-smooth tri-state
+	// (0 none flagged, 1 all flagged, 2 mixed or nothing selected).
+	uint PatchSelVerts, PatchSelEdges, PatchSelFaces, PatchSelTans;
+	int PatchNoSmooth;
+	int PivotMode;          // TPivotMode; what the transform gizmo is anchored on
+	char PivotLabel[16];    // short face for the toolbar button
 	int CurTileSet;
 	uint TileSetCount;
 	char TileSetName[128];
@@ -201,9 +210,13 @@ struct SPaintUIBridge
 		  displaceIndexAbs(NULL), togglePalette(NULL), toggleBoard(NULL), setBrushColor(NULL),
 		  propRotateDelta(NULL), propToggleSymmetry(NULL), propTogglePassable(NULL),
 		  propToggleUseBBox(NULL),
+		  patchBind(NULL), patchUnbind(NULL), patchNoSmooth(NULL),
 		  setTileSize256(NULL), setHardnessAbs(NULL), setOpacityAbs(NULL),
 		  setColorRadiusAbs(NULL),
-		  HaveCore(false), Mode(0), CurTileSet(0), TileSetCount(0), Mode256(false),
+		  HaveCore(false), Mode(0), SubObj(0),
+		  PatchSelVerts(0), PatchSelEdges(0), PatchSelFaces(0), PatchSelTans(0),
+		  PatchNoSmooth(2),
+		  CurTileSet(0), TileSetCount(0), Mode256(false),
 		  BrushSize(0), TileGroup(0), LockBorders(false), UndoDepth(0), CanSave(false),
 		  InteractiveSave(false), BoardSession(false), InstanceCount(1), UpdateThumbnail(true),
 		  ThumbnailsDisabled(false), SeasonCount(0),

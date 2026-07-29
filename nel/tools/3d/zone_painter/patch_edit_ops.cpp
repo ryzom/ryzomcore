@@ -1618,6 +1618,888 @@ bool zpPatchVertWorld(uint zoneId, uint vertIdx, float outPos[3])
 	return false;
 }
 
+// ---------------------------------------------------------------------------------------------
+// Bind and edge-flag ops (the first Tier B milestone: pristine-blob writes only, no stream
+// encoder). The core owns the record writes and the undo stroke; this layer owns the policy -
+// group semantics, the CheckBind configuration test, the geometry snap - and everything
+// display: the eval mirror, BindEdges re-derivation, and the landscape rebuild.
+//
+// Bind semantics (BindingVertex / UnBindingVertex / UnbindRelatedVertex /
+// AddHook / CheckBind) follow nel_patch_lib/nel_patch_mesh.cpp.
+
+/** Is `vert` one of the four corners of pm patch `patchIdx`? */
+static bool zpVertexInPmPatch(const PIPELINE::MAX::NELPATCH::SPatchMesh &pm,
+                              sint32 vert, sint32 patchIdx)
+{
+	for (int i = 0; i < 4; ++i)
+		if (pm.Patches[patchIdx].V[i] == vert)
+			return true;
+	return false;
+}
+
+/** Per-vertex incident-edge lists (the CVertexNeighborhood shape). */
+static void zpBuildVertexNeighbors(const PIPELINE::MAX::NELPATCH::SPatchMesh &pm,
+                                   std::vector<std::vector<uint> > &nb)
+{
+	nb.assign(pm.Verts.size(), std::vector<uint>());
+	for (size_t e = 0; e < pm.Edges.size(); ++e)
+	{
+		if (pm.Edges[e].V1 >= 0 && (size_t)pm.Edges[e].V1 < pm.Verts.size())
+			nb[pm.Edges[e].V1].push_back((uint)e);
+		if (pm.Edges[e].V2 >= 0 && (size_t)pm.Edges[e].V2 < pm.Verts.size())
+			nb[pm.Edges[e].V2].push_back((uint)e);
+	}
+}
+
+/** The edge joining two vertices, or -1 (IsVerticesJoined). */
+static sint32 zpJoinedEdge(const PIPELINE::MAX::NELPATCH::SPatchMesh &pm,
+                           const std::vector<std::vector<uint> > &nb, sint32 a, sint32 b)
+{
+	if (a < 0 || (size_t)a >= nb.size())
+		return -1;
+	for (size_t n = 0; n < nb[a].size(); ++n)
+	{
+		const PIPELINE::MAX::NELPATCH::SPmEdge &e = pm.Edges[nb[a][n]];
+		if (e.V1 == b || e.V2 == b)
+			return (sint32)nb[a][n];
+	}
+	return -1;
+}
+
+/** Exactly one two-edge path a - mid - b, with the two edge indices (IsVerticesJoined2). */
+static bool zpJoined2(const PIPELINE::MAX::NELPATCH::SPatchMesh &pm,
+                      const std::vector<std::vector<uint> > &nb,
+                      sint32 a, sint32 b, sint32 &mid, sint32 &e0, sint32 &e1)
+{
+	if (zpJoinedEdge(pm, nb, a, b) != -1)
+		return false;
+	if (a < 0 || (size_t)a >= nb.size())
+		return false;
+	int count = 0;
+	for (size_t n = 0; n < nb[a].size(); ++n)
+	{
+		const PIPELINE::MAX::NELPATCH::SPmEdge &e = pm.Edges[nb[a][n]];
+		const sint32 next = (e.V1 == a) ? e.V2 : e.V1;
+		if (next == -1)
+			continue;
+		const sint32 second = zpJoinedEdge(pm, nb, next, b);
+		if (second != -1)
+		{
+			++count;
+			mid = next;
+			e0 = (sint32)nb[a][n];
+			e1 = second;
+		}
+	}
+	return count == 1;
+}
+
+/**
+ * CheckBind port (nel_patch_lib): can `vert` be bound onto pm edge `edgeIdx`?
+ *
+ * Returns 0 for the single configuration (vert joined to both ends of the target edge by
+ * open edges), 1 for the triple (a v0 - v25 - vert - v75 - v1 chain of four distinct open
+ * edges; v25/v75 returned), -1 when neither holds. The target edge must carry exactly one
+ * patch - a closed edge has nothing to bind onto - and none of the vertices being bound may
+ * belong to that patch.
+ */
+static int zpCheckBindConfig(const PIPELINE::MAX::NELPATCH::SPatchMesh &pm,
+                             const std::vector<std::vector<uint> > &nb,
+                             sint32 vert, sint32 edgeIdx, sint32 &v25, sint32 &v75)
+{
+	const PIPELINE::MAX::NELPATCH::SPmEdge &edge = pm.Edges[edgeIdx];
+	const sint32 v0 = edge.V1, v1 = edge.V2;
+	if (v0 == -1 || v1 == -1 || edge.Patches.size() != 1)
+		return -1;
+	const sint32 targetPatch = edge.Patches[0];
+	if (targetPatch < 0 || (size_t)targetPatch >= pm.Patches.size())
+		return -1;
+
+	// Single: vert joined to both ends directly.
+	const sint32 seg0 = zpJoinedEdge(pm, nb, v0, vert);
+	const sint32 seg1 = zpJoinedEdge(pm, nb, v1, vert);
+	if (seg0 != -1 && seg1 != -1)
+	{
+		if (pm.Edges[seg0].Patches.size() < 2 && pm.Edges[seg1].Patches.size() < 2
+		    && !zpVertexInPmPatch(pm, vert, targetPatch))
+			return 0;
+	}
+
+	// Triple: v0 - v25 - vert and v1 - v75 - vert, four distinct open edges.
+	sint32 e0 = -1, e1 = -1, e2 = -1, e3 = -1;
+	if (zpJoined2(pm, nb, v0, vert, v25, e0, e1) && zpJoined2(pm, nb, v1, vert, v75, e2, e3))
+	{
+		if (v25 != v75
+		    && e0 != e1 && e0 != e2 && e0 != e3 && e1 != e2 && e1 != e3 && e2 != e3
+		    && pm.Edges[e0].Patches.size() < 2 && pm.Edges[e1].Patches.size() < 2
+		    && pm.Edges[e2].Patches.size() < 2 && pm.Edges[e3].Patches.size() < 2
+		    && !zpVertexInPmPatch(pm, vert, targetPatch)
+		    && !zpVertexInPmPatch(pm, v25, targetPatch)
+		    && !zpVertexInPmPatch(pm, v75, targetPatch))
+			return 1;
+	}
+	return -1;
+}
+
+/**
+ * Re-derive one zone's BindEdges and smooth-flag bits from its (just-synced) eval mirror.
+ *
+ * The two passes are the ones buildPatchInfo runs (bind records first, then the one/one
+ * edges), rewritten IN PLACE so the patch geometry - which the incremental display path
+ * maintains and the display gates pin bit-for-bit - is never touched. Resetting first
+ * matters: an unbind must make the derived entries disappear, and the passes only add.
+ */
+void zpRederiveBindEdges(SPaintZone &pz)
+{
+	const PIPELINE::MAX::NELPATCH::SPatchMesh &pm = pz.Ep.Pm;
+	const PIPELINE::MAX::NELPATCH::SRPatchMesh &rpm = pz.Ep.Rp;
+	if (pz.Patches.size() != pm.Patches.size() || rpm.Patches.size() != pm.Patches.size())
+		return;
+
+	for (size_t i = 0; i < pz.Patches.size(); ++i)
+	{
+		NL3D::CPatchInfo &pi = pz.Patches[i];
+		for (int e = 0; e < 4; ++e)
+		{
+			pi.BindEdges[e] = NL3D::CPatchInfo::CBindInfo();
+			pi.BindEdges[e].ZoneId = (uint16)pz.ZoneId;
+		}
+		// Smooth flags: UI edge flag bit 0 = no-smooth.
+		pi.Flags &= ~0xf;
+		for (int e = 0; e < 4; ++e)
+			if (!(rpm.Patches[i].EdgeFlags[e] & 0x1))
+				pi.Flags |= (1 << e);
+	}
+
+	// Pass 1: bindings from the vertex records.
+	for (size_t isrcpatch = 0; isrcpatch < pm.Patches.size(); ++isrcpatch)
+	{
+		const PIPELINE::MAX::NELPATCH::SPmPatch &srcpatch = pm.Patches[isrcpatch];
+		for (int nv = 0; nv < 4; ++nv)
+		{
+			if (srcpatch.V[nv] < 0 || (size_t)srcpatch.V[nv] >= rpm.Verts.size())
+				continue;
+			const PIPELINE::MAX::NELPATCH::SRpoVertexBind &uiv = rpm.Verts[srcpatch.V[nv]];
+			if (!uiv.Binded)
+				continue;
+			const int idstpatch = (int)uiv.Patch;
+			const int idstedge = (int)uiv.Edge;
+			if (idstpatch < 0 || (size_t)idstpatch >= pm.Patches.size() || idstedge < 0 || idstedge >= 4)
+				continue;
+			int n = -1;
+			int icv = -1;
+			if (uiv.Type == BIND_SINGLE)
+			{
+				int orderdstvtx;
+				icv = getCommonVertex(pm, idstpatch, (int)isrcpatch, &orderdstvtx);
+				if (icv == -1)
+					continue;
+				n = (idstedge == orderdstvtx) ? 0 : 1;
+			}
+			else if (uiv.Type == BIND_25)
+			{
+				n = 1;
+				icv = getOtherBindedVertex(rpm, pm, (int)isrcpatch, idstpatch, nv);
+				if (icv == -1)
+				{
+					n = 0;
+					icv = getCommonVertex(pm, idstpatch, (int)isrcpatch);
+					if (icv == -1)
+						continue;
+				}
+			}
+			else if (uiv.Type == BIND_75)
+			{
+				n = 2;
+				icv = getOtherBindedVertex(rpm, pm, (int)isrcpatch, idstpatch, nv);
+				if (icv == -1)
+				{
+					n = 3;
+					icv = getCommonVertex(pm, idstpatch, (int)isrcpatch);
+					if (icv == -1)
+						continue;
+				}
+			}
+			if (n != -1)
+			{
+				const int isrcedge = getEdge(pm, srcpatch, srcpatch.V[nv], icv);
+				if (isrcedge == -1)
+					continue;
+				pz.Patches[idstpatch].BindEdges[idstedge].NPatchs++;
+				pz.Patches[idstpatch].BindEdges[idstedge].Edge[n] = (uint8)isrcedge;
+				pz.Patches[idstpatch].BindEdges[idstedge].Next[n] = (uint16)isrcpatch;
+				pz.Patches[isrcpatch].BindEdges[isrcedge].NPatchs = 5;
+				pz.Patches[isrcpatch].BindEdges[isrcedge].Edge[0] = (uint8)idstedge;
+				pz.Patches[isrcpatch].BindEdges[isrcedge].Next[0] = (uint16)idstpatch;
+			}
+		}
+	}
+
+	// Pass 2: one/one cases from the edge patch lists.
+	for (size_t i = 0; i < pm.Patches.size(); ++i)
+	{
+		const PIPELINE::MAX::NELPATCH::SPmPatch &pPatch = pm.Patches[i];
+		for (int e = 0; e < 4; ++e)
+		{
+			if (pPatch.Edge[e] < 0 || (size_t)pPatch.Edge[e] >= pm.Edges.size())
+				continue;
+			const PIPELINE::MAX::NELPATCH::SPmEdge &edge = pm.Edges[pPatch.Edge[e]];
+			if (edge.Patches.size() > 1)
+			{
+				sint32 other = (edge.Patches[1] != (sint32)i) ? edge.Patches[1] : edge.Patches[0];
+				if (other < 0 || (size_t)other >= pm.Patches.size())
+					continue;
+				const int ce = getCommonEdge(pm, pPatch.Edge[e], pm.Patches[other]);
+				if (ce == -1)
+					continue;
+				pz.Patches[i].BindEdges[e].NPatchs = 1;
+				pz.Patches[i].BindEdges[e].Next[0] = (uint16)other;
+				pz.Patches[i].BindEdges[e].Edge[0] = (uint8)ce;
+			}
+		}
+	}
+}
+
+/**
+ * Rebuild the listed landscape zones from their cages (bind structure or smooth flags
+ * changed - refreshTesselationGeometry cannot see either). Same construction as the
+ * out-of-range rebuild in zpPatchPushLive: keep everything the live zone accumulated, take
+ * geometry and binds from the paint zone, collect cross-zone bind neighbours BEFORE the
+ * removes and refresh them after the re-adds.
+ */
+static void zpRebuildLiveZones(const std::set<uint> &zoneIds)
+{
+	if (!g_PaintCtx.Zones || !g_PaintCtx.Land || zoneIds.empty())
+		return;
+	NL3D::CLandscape &land = g_PaintCtx.Land->Landscape;
+	std::set<std::pair<uint, uint> > refresh;
+	// Neighbours first: removeZone unbinds them, so reading them afterwards would find the
+	// binds already gone.
+	for (std::set<uint>::const_iterator it = zoneIds.begin(); it != zoneIds.end(); ++it)
+	{
+		const NL3D::CZone *clz = land.getZone((sint)*it);
+		for (uint p = 0; clz && p < (uint)clz->getNumPatchs(); ++p)
+		{
+			const NL3D::CPatch *lp = clz->getPatch((sint)p);
+			if (!lp)
+				continue;
+			for (uint edge = 0; edge < 4; ++edge)
+			{
+				NL3D::CPatch::CBindInfo nbi;
+				lp->getBindNeighbor(edge, nbi);
+				if (!nbi.Zone || zoneIds.count((uint)nbi.Zone->getZoneId()))
+					continue;
+				for (uint i = 0; i < (uint)nbi.NPatchs; ++i)
+					if (nbi.Next[i])
+						refresh.insert(std::make_pair((uint)nbi.Zone->getZoneId(),
+						                              (uint)nbi.Next[i]->getPatchId()));
+			}
+		}
+	}
+	for (std::set<uint>::const_iterator it = zoneIds.begin(); it != zoneIds.end(); ++it)
+	{
+		const SPaintZone *pz = zpFindPaintZone(*it);
+		NL3D::CZone *lz = land.getZone((sint)*it);
+		if (!pz || !lz)
+			continue;
+		NL3D::CZoneInfo zi;
+		zpLiveZoneInfo(lz, *pz, zi);
+		NL3D::CZone zone;
+		zone.build(zi);
+		NL3D::CZoneCornerSmoother cornerSmoother;
+		std::vector<NL3D::CZone *> emptyVector;
+		cornerSmoother.computeAllCornerSmoothFlags(&zone, emptyVector);
+		land.removeZone((uint16)*it);
+		if (!land.addZone(zone))
+			fprintf(stderr, "ERROR: zone %u could not be re-added after a bind/flag change; "
+			        "its surface is now missing\n", *it);
+	}
+	for (std::set<std::pair<uint, uint> >::const_iterator it = refresh.begin(); it != refresh.end(); ++it)
+	{
+		NL3D::CZone *lz = land.getZone((sint)it->first);
+		if (lz)
+			lz->refreshTesselationGeometry((sint)it->second);
+	}
+	land.setRefineMode(true);
+}
+
+/**
+ * Core -> display for bind records and edge flags, forward or by undo/redo.
+ *
+ * The write landed in a CARRIER, so every node showing that object follows - the same
+ * fan-out contract as zpGeomVertChanged. Per node: sync the eval mirror's authored bind
+ * fields and edge flags from the pristine (the drawing and the move filter read Ep.Rp),
+ * re-derive BindEdges + smooth flags into the display patchinfo, then rebuild the node's
+ * landscape zone - a bind is structure, which refreshTesselationGeometry cannot express.
+ */
+void zpRpStateChanged(uint zoneId)
+{
+	if (!g_PaintCtx.Zones || !g_PaintCtx.Core)
+		return;
+	std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
+	const void *object = zpZoneNode(zoneId);
+	if (!object)
+		return;
+	std::set<uint> rebuilt;
+	for (uint z = 0; z < zones.size(); ++z)
+	{
+		SPaintZone &pz = zones[z];
+		if ((const void *)pz.Node != object)
+			continue;
+		for (size_t v = 0; v < pz.Ep.Rp.Verts.size(); ++v)
+		{
+			bool binded;
+			uint32 type, edge, patch, prim;
+			if (!g_PaintCtx.Core->getVertBind(pz.ZoneId, (uint16)v, binded, type, edge, patch, prim))
+				break;
+			PIPELINE::MAX::NELPATCH::SRpoVertexBind &b = pz.Ep.Rp.Verts[v];
+			b.Binded = binded ? 1 : 0;
+			b.Type = type;
+			b.Type2 = type;
+			b.Edge = edge;
+			b.Patch = patch;
+			b.PrimVert = prim;
+		}
+		for (size_t p = 0; p < pz.Ep.Rp.Patches.size(); ++p)
+		{
+			uint32 flags[4];
+			if (!g_PaintCtx.Core->getPatchEdgeFlags(pz.ZoneId, (uint16)p, flags))
+				break;
+			for (int e = 0; e < 4; ++e)
+				pz.Ep.Rp.Patches[p].EdgeFlags[e] = flags[e];
+		}
+		zpRederiveBindEdges(pz);
+		rebuilt.insert(pz.ZoneId);
+	}
+	zpRebuildLiveZones(rebuilt);
+}
+
+/**
+ * Release the bound vertices of the current selection, whole groups at a time.
+ *
+ * Group semantics are the legacy UnbindRelatedVertex rule: every vertex bound to the same
+ * (patch, edge) target releases together. A BIND_25/50/75 trio references its BIND_50
+ * anchor through PrimVert, so releasing one of them alone would leave the siblings
+ * evaluating against a vertex that is no longer their anchor - there is no half-released
+ * state that means anything, which is why the group is the unit.
+ */
+uint zpUnbindPatchSelection()
+{
+	if (!g_PaintCtx.Core)
+		return 0;
+	// (zone -> vertex set), group-expanded from the selection.
+	std::map<uint, std::set<uint16> > want;
+	uint groups = 0;
+	for (std::set<TPatchVertId>::const_iterator it = g_PatchVertSel.begin();
+	     it != g_PatchVertSel.end(); ++it)
+	{
+		bool binded;
+		uint32 type, edge, patch, prim;
+		if (!g_PaintCtx.Core->getVertBind(it->first, it->second, binded, type, edge, patch, prim)
+		    || !binded)
+			continue;
+		if (want[it->first].count(it->second))
+			continue; // already collected via a sibling's group
+		const SPaintZone *pz = zpFindPaintZone(it->first);
+		if (!pz || !pz->Editable)
+			continue;
+		++groups;
+		for (size_t v = 0; v < pz->Ep.Rp.Verts.size(); ++v)
+		{
+			bool b2;
+			uint32 t2, e2, p2, pr2;
+			if (g_PaintCtx.Core->getVertBind(it->first, (uint16)v, b2, t2, e2, p2, pr2)
+			    && b2 && p2 == patch && e2 == edge)
+				want[it->first].insert((uint16)v);
+		}
+	}
+	uint written = 0;
+	for (std::map<uint, std::set<uint16> >::const_iterator zit = want.begin();
+	     zit != want.end(); ++zit)
+	{
+		std::vector<ZPPAINT::SBindEdit> edits;
+		for (std::set<uint16>::const_iterator v = zit->second.begin(); v != zit->second.end(); ++v)
+		{
+			ZPPAINT::SBindEdit e;
+			e.Vert = *v;
+			e.Binded = false;
+			edits.push_back(e);
+		}
+		std::string err;
+		written += g_PaintCtx.Core->opEditBinds(zit->first,
+			edits, std::vector<ZPPAINT::SGeomElemRef>(), std::vector<NLMISC::CVector>(), err);
+		if (!err.empty() && g_PropStatusMsg.empty())
+			g_PropStatusMsg = "unbind: " + err;
+	}
+	if (written)
+		g_PropStatusMsg = NLMISC::toString("unbind: %u vertices released (%u group%s)",
+		                                   written, groups, groups == 1 ? "" : "s");
+	else if (g_PropStatusMsg.empty())
+		g_PropStatusMsg = "unbind: no bound vertices in the selection";
+	ZPSCRIPT::record("painter.unbindPatchSelection()");
+	return written;
+}
+
+/**
+ * Bind `vertIdx` onto edge `edgeSlot` of patch `patchIdx` (the AddHook shape, both
+ * configurations). Validates with the CheckBind port, then snaps the bound vertices onto
+ * their bindWhere points: the bind refresh is re-run on a COPY of the eval mesh and every
+ * position it moved is written through the Tier A geometry path in the same undo stroke -
+ * the post-refresh stored state, so a file saved here and one resaved after load agree.
+ */
+bool zpBindPatchVertexToEdge(uint zoneId, uint vertIdx, uint patchIdx, uint edgeSlot,
+                             std::string &msg)
+{
+	if (!g_PaintCtx.Core)
+	{
+		msg = "bind: no session";
+		return false;
+	}
+	SPaintZone *pz = zpFindPaintZoneMut(zoneId);
+	if (!pz || !pz->Editable)
+	{
+		msg = "bind: zone is read-only";
+		return false;
+	}
+	const PIPELINE::MAX::NELPATCH::SPatchMesh &pm = pz->Ep.Pm;
+	if (patchIdx >= pm.Patches.size() || edgeSlot >= 4)
+	{
+		msg = "bind: target out of range";
+		return false;
+	}
+	const sint32 edgeIdx = pm.Patches[patchIdx].Edge[edgeSlot];
+	if (edgeIdx < 0 || (size_t)edgeIdx >= pm.Edges.size())
+	{
+		msg = "bind: target edge unresolved";
+		return false;
+	}
+	if (vertIdx >= pz->Ep.Rp.Verts.size())
+	{
+		msg = "bind: vertex out of range";
+		return false;
+	}
+	{
+		bool binded;
+		uint32 t, e, p, pr;
+		if (g_PaintCtx.Core->getVertBind(zoneId, (uint16)vertIdx, binded, t, e, p, pr) && binded)
+		{
+			msg = "bind: vertex is already bound (unbind first)";
+			return false;
+		}
+	}
+
+	std::vector<std::vector<uint> > nb;
+	zpBuildVertexNeighbors(pm, nb);
+	sint32 v25 = -1, v75 = -1;
+	const int config = zpCheckBindConfig(pm, nb, (sint32)vertIdx, edgeIdx, v25, v75);
+	if (config == -1)
+	{
+		msg = "bind: no valid configuration onto that edge";
+		return false;
+	}
+
+	std::vector<ZPPAINT::SBindEdit> edits;
+	{
+		ZPPAINT::SBindEdit e;
+		e.Edge = edgeSlot;
+		e.Patch = patchIdx;
+		e.Binded = true;
+		if (config == 0)
+		{
+			e.Vert = (uint16)vertIdx;
+			e.Type = BIND_SINGLE;
+			e.PrimVert = vertIdx;
+			edits.push_back(e);
+		}
+		else
+		{
+			e.PrimVert = vertIdx;
+			e.Vert = (uint16)v25;
+			e.Type = BIND_25;
+			edits.push_back(e);
+			e.Vert = (uint16)vertIdx;
+			e.Type = BIND_50;
+			edits.push_back(e);
+			e.Vert = (uint16)v75;
+			e.Type = BIND_75;
+			edits.push_back(e);
+		}
+	}
+
+	// Snap: run the bind refresh on a copy carrying the new records, then harvest what it
+	// moved as object-space deltas - RESTRICTED to the new bind's own closure. The refresh
+	// sweeps every bound vertex and every auto interior of the zone, and on this corpus it
+	// is NOT bit-for-bit idempotent (the stored data carries the reference exporter's exact
+	// x87 bits, which our rebuild reproduces only to within an ulp) - harvesting everything
+	// that differed would overwrite hundreds of Max-authored values per bind. The closure:
+	// the bound vertices, their rebuilt tangent caches, and the interiors of AUTO patches
+	// those corners and tangents feed. Everything else keeps its stored bytes.
+	std::vector<ZPPAINT::SGeomElemRef> snapElems;
+	std::vector<NLMISC::CVector> snapDeltas;
+	{
+		SEvalPatch copy = pz->Ep;
+		for (size_t i = 0; i < edits.size(); ++i)
+		{
+			PIPELINE::MAX::NELPATCH::SRpoVertexBind &b = copy.Rp.Verts[edits[i].Vert];
+			b.Binded = 1;
+			b.Type = edits[i].Type;
+			b.Type2 = edits[i].Type;
+			b.Edge = edits[i].Edge;
+			b.Patch = edits[i].Patch;
+			b.PrimVert = edits[i].PrimVert;
+			b.Before = b.Before2 = b.After = b.After2 = b.T = (uint32)-1;
+		}
+		std::string err;
+		if (!updateBindingInfo(copy, err) || !updateBindingPos(copy, err))
+		{
+			// The refresh sweeps every bound vertex; a pre-existing record it cannot
+			// classify aborts the snap but not the bind - the bound vertex was picked at
+			// the junction, so its position is already substantially right.
+			fprintf(stderr, "WARNING: bind snap skipped for zone %u: %s\n", zoneId, err.c_str());
+		}
+		else
+		{
+			std::set<uint16> movedVerts, movedVecs;
+			for (size_t i = 0; i < edits.size(); ++i)
+			{
+				movedVerts.insert(edits[i].Vert);
+				const PIPELINE::MAX::NELPATCH::SRpoVertexBind &b = copy.Rp.Verts[edits[i].Vert];
+				const uint32 caches[5] = { b.Before, b.Before2, b.After, b.After2, b.T };
+				for (int c = 0; c < 5; ++c)
+					if (caches[c] < copy.Pm.Vecs.size())
+						movedVecs.insert((uint16)caches[c]);
+			}
+			// Interiors fed by a moved corner or a moved tangent (computeInteriors rule:
+			// interior j = corner j + its outgoing and incoming tangents).
+			for (size_t p = 0; p < copy.Pm.Patches.size(); ++p)
+			{
+				const PIPELINE::MAX::NELPATCH::SPmPatch &pp = copy.Pm.Patches[p];
+				if (!(pp.Flags & PM_PATCH_AUTO))
+					continue;
+				for (int j = 0; j < 4; ++j)
+				{
+					if ((size_t)pp.Interior[j] >= copy.Pm.Vecs.size())
+						continue;
+					const bool touched =
+						(pp.V[j] >= 0 && movedVerts.count((uint16)pp.V[j]))
+						|| (pp.Vec[j * 2] >= 0 && movedVecs.count((uint16)pp.Vec[j * 2]))
+						|| (pp.Vec[(j * 2 + 7) & 7] >= 0 && movedVecs.count((uint16)pp.Vec[(j * 2 + 7) & 7]));
+					if (touched)
+						movedVecs.insert((uint16)pp.Interior[j]);
+				}
+			}
+			for (std::set<uint16>::const_iterator it = movedVerts.begin(); it != movedVerts.end(); ++it)
+			{
+				if (*it >= copy.Pm.Verts.size() || *it >= pz->Ep.Pm.Verts.size())
+					continue;
+				const float *a = copy.Pm.Verts[*it].Pos, *o = pz->Ep.Pm.Verts[*it].Pos;
+				if (a[0] != o[0] || a[1] != o[1] || a[2] != o[2])
+				{
+					snapElems.push_back(ZPPAINT::SGeomElemRef(*it, ZPPAINT::GeomVert));
+					snapDeltas.push_back(NLMISC::CVector(a[0] - o[0], a[1] - o[1], a[2] - o[2]));
+				}
+			}
+			for (std::set<uint16>::const_iterator it = movedVecs.begin(); it != movedVecs.end(); ++it)
+			{
+				if (*it >= copy.Pm.Vecs.size() || *it >= pz->Ep.Pm.Vecs.size())
+					continue;
+				const float *a = copy.Pm.Vecs[*it].Pos, *o = pz->Ep.Pm.Vecs[*it].Pos;
+				if (a[0] != o[0] || a[1] != o[1] || a[2] != o[2])
+				{
+					snapElems.push_back(ZPPAINT::SGeomElemRef(*it, ZPPAINT::GeomVec));
+					snapDeltas.push_back(NLMISC::CVector(a[0] - o[0], a[1] - o[1], a[2] - o[2]));
+				}
+			}
+		}
+	}
+
+	std::string err;
+	const uint n = g_PaintCtx.Core->opEditBinds(zoneId, edits, snapElems, snapDeltas, err);
+	if (!n)
+	{
+		msg = err.empty() ? "bind: nothing written" : ("bind: " + err);
+		return false;
+	}
+	msg = config == 0
+		? NLMISC::toString("bind: vertex %u -> patch %u edge %u (single, %u snapped)",
+		                   vertIdx, patchIdx, edgeSlot, (uint)snapElems.size())
+		: NLMISC::toString("bind: vertices %d/%u/%d -> patch %u edge %u (25/50/75, %u snapped)",
+		                   v25, vertIdx, v75, patchIdx, edgeSlot, (uint)snapElems.size());
+	ZPSCRIPT::record(NLMISC::toString("painter.bindPatchVertex(%u, %u, %u, %u)",
+	                                  zoneId, vertIdx, patchIdx, edgeSlot));
+	return true;
+}
+
+/** Squared distance from a point to the segment ab (target-edge disambiguation). */
+static float zpPointSegDist2(const NLMISC::CVector &p, const NLMISC::CVector &a,
+                             const NLMISC::CVector &b)
+{
+	const NLMISC::CVector ab = b - a;
+	const float len2 = ab * ab;
+	float t = len2 > 1e-12f ? ((p - a) * ab) / len2 : 0.f;
+	if (t < 0.f) t = 0.f;
+	if (t > 1.f) t = 1.f;
+	const NLMISC::CVector c = a + ab * t;
+	return (p - c) * (p - c);
+}
+
+/**
+ * Bind the selected free vertices, each onto the nearest open edge that accepts it.
+ *
+ * The selection names the vertex; the target edge is found by running the CheckBind test
+ * over every open edge and taking the geometrically nearest valid one - a bindable vertex
+ * sits ON its target edge (that is what a T-junction is), so the nearest-valid rule is the
+ * drag gesture's answer without the drag. A triple binds through its middle vertex; the
+ * companions are discovered by the configuration test, so selecting just the middle is
+ * enough, and companions that were also selected are skipped once bound.
+ */
+uint zpBindPatchSelection()
+{
+	if (!g_PaintCtx.Core)
+		return 0;
+	uint bound = 0;
+	std::string lastMsg;
+	for (std::set<TPatchVertId>::const_iterator it = g_PatchVertSel.begin();
+	     it != g_PatchVertSel.end(); ++it)
+	{
+		const SPaintZone *pz = zpFindPaintZone(it->first);
+		if (!pz || !pz->Editable)
+			continue;
+		{
+			bool binded;
+			uint32 t, e, p, pr;
+			if (g_PaintCtx.Core->getVertBind(it->first, it->second, binded, t, e, p, pr) && binded)
+				continue; // bound this pass as a companion, or was never free
+		}
+		const PIPELINE::MAX::NELPATCH::SPatchMesh &pm = pz->Ep.Pm;
+		if (it->second >= pm.Verts.size())
+			continue;
+		std::vector<std::vector<uint> > nb;
+		zpBuildVertexNeighbors(pm, nb);
+		const NLMISC::CVector vp(pm.Verts[it->second].Pos[0], pm.Verts[it->second].Pos[1],
+		                         pm.Verts[it->second].Pos[2]);
+		// Nearest open edge passing the configuration test.
+		float bestD2 = 0.f;
+		sint32 bestPatch = -1, bestSlot = -1;
+		for (size_t e = 0; e < pm.Edges.size(); ++e)
+		{
+			const PIPELINE::MAX::NELPATCH::SPmEdge &edge = pm.Edges[e];
+			if (edge.Patches.size() != 1 || edge.V1 < 0 || edge.V2 < 0)
+				continue;
+			sint32 v25, v75;
+			if (zpCheckBindConfig(pm, nb, (sint32)it->second, (sint32)e, v25, v75) == -1)
+				continue;
+			const sint32 tp = edge.Patches[0];
+			sint32 slot = -1;
+			for (int s = 0; s < 4; ++s)
+				if (pm.Patches[tp].Edge[s] == (sint32)e) { slot = s; break; }
+			if (slot == -1)
+				continue;
+			const NLMISC::CVector a(pm.Verts[edge.V1].Pos[0], pm.Verts[edge.V1].Pos[1],
+			                        pm.Verts[edge.V1].Pos[2]);
+			const NLMISC::CVector b(pm.Verts[edge.V2].Pos[0], pm.Verts[edge.V2].Pos[1],
+			                        pm.Verts[edge.V2].Pos[2]);
+			const float d2 = zpPointSegDist2(vp, a, b);
+			if (bestPatch == -1 || d2 < bestD2)
+			{
+				bestD2 = d2;
+				bestPatch = tp;
+				bestSlot = slot;
+			}
+		}
+		if (bestPatch == -1)
+		{
+			if (lastMsg.empty())
+				lastMsg = NLMISC::toString("bind: vertex %u has no valid target edge", it->second);
+			continue;
+		}
+		std::string msg;
+		if (zpBindPatchVertexToEdge(it->first, it->second, (uint)bestPatch, (uint)bestSlot, msg))
+			++bound;
+		lastMsg = msg;
+	}
+	if (!lastMsg.empty())
+		g_PropStatusMsg = lastMsg;
+	else if (!bound)
+		g_PropStatusMsg = "bind: no free vertex selected";
+	return bound;
+}
+
+/**
+ * No-smooth over the selected edges: legacy setSmoothFlags writes the flag on EVERY patch
+ * that carries the edge, so the seam has one state however it is reached.
+ */
+uint zpSetEdgeNoSmooth(bool noSmooth)
+{
+	if (!g_PaintCtx.Core)
+		return 0;
+	std::map<uint, std::vector<ZPPAINT::SEdgeFlagEdit> > writes;
+	for (std::set<SPatchEdgeId>::const_iterator it = g_PatchEdgeSel.begin();
+	     it != g_PatchEdgeSel.end(); ++it)
+	{
+		const SPaintZone *pz = zpFindPaintZone(it->Zone);
+		if (!pz || !pz->Editable)
+			continue;
+		const PIPELINE::MAX::NELPATCH::SPatchMesh &pm = pz->Ep.Pm;
+		// The selection keys edges on the corner pair; resolve to the pm edge.
+		sint32 edgeIdx = -1;
+		for (size_t e = 0; e < pm.Edges.size(); ++e)
+			if ((pm.Edges[e].V1 == (sint32)it->A && pm.Edges[e].V2 == (sint32)it->B)
+			    || (pm.Edges[e].V1 == (sint32)it->B && pm.Edges[e].V2 == (sint32)it->A))
+			{
+				edgeIdx = (sint32)e;
+				break;
+			}
+		if (edgeIdx == -1)
+			continue;
+		for (size_t pi = 0; pi < pm.Edges[edgeIdx].Patches.size(); ++pi)
+		{
+			const sint32 p = pm.Edges[edgeIdx].Patches[pi];
+			if (p < 0 || (size_t)p >= pm.Patches.size())
+				continue;
+			sint32 slot = -1;
+			for (int s = 0; s < 4; ++s)
+				if (pm.Patches[p].Edge[s] == edgeIdx) { slot = s; break; }
+			if (slot == -1)
+				continue;
+			uint32 flags[4];
+			if (!g_PaintCtx.Core->getPatchEdgeFlags(it->Zone, (uint16)p, flags))
+				continue;
+			ZPPAINT::SEdgeFlagEdit w;
+			w.Patch = (uint16)p;
+			w.EdgeSlot = (uint8)slot;
+			w.NewFlags = (flags[slot] & ~0x1u) | (noSmooth ? 0x1u : 0u);
+			writes[it->Zone].push_back(w);
+		}
+	}
+	uint written = 0;
+	for (std::map<uint, std::vector<ZPPAINT::SEdgeFlagEdit> >::const_iterator zit = writes.begin();
+	     zit != writes.end(); ++zit)
+	{
+		std::string err;
+		written += g_PaintCtx.Core->opSetEdgeFlags(zit->first, zit->second, err);
+		if (!err.empty())
+			g_PropStatusMsg = "no-smooth: " + err;
+	}
+	if (written)
+		g_PropStatusMsg = NLMISC::toString("no smooth %s: %u edge flag%s written",
+		                                   noSmooth ? "ON" : "OFF", written, written == 1 ? "" : "s");
+	else if (g_PropStatusMsg.empty())
+		g_PropStatusMsg = "no smooth: no selected edge changed";
+	ZPSCRIPT::record(NLMISC::toString("painter.setEdgeNoSmooth(%s)", noSmooth ? "true" : "false"));
+	return written;
+}
+
+/** Tri-state of one edge given as a corner pair: 0 none, 1 flagged, 2 out of range. An edge
+ *  counts as flagged when ANY adjacent patch carries the bit (legacy getSmoothFlags). */
+static int zpEdgeNoSmoothOne(uint zoneId, uint16 a, uint16 b)
+{
+	const SPaintZone *pz = zpFindPaintZone(zoneId);
+	if (!pz || !g_PaintCtx.Core)
+		return 2;
+	const PIPELINE::MAX::NELPATCH::SPatchMesh &pm = pz->Ep.Pm;
+	for (size_t e = 0; e < pm.Edges.size(); ++e)
+	{
+		if (!((pm.Edges[e].V1 == (sint32)a && pm.Edges[e].V2 == (sint32)b)
+		      || (pm.Edges[e].V1 == (sint32)b && pm.Edges[e].V2 == (sint32)a)))
+			continue;
+		for (size_t pi = 0; pi < pm.Edges[e].Patches.size(); ++pi)
+		{
+			const sint32 p = pm.Edges[e].Patches[pi];
+			if (p < 0 || (size_t)p >= pm.Patches.size())
+				continue;
+			sint32 slot = -1;
+			for (int s = 0; s < 4; ++s)
+				if (pm.Patches[p].Edge[s] == (sint32)e) { slot = s; break; }
+			if (slot == -1)
+				continue;
+			uint32 flags[4];
+			if (g_PaintCtx.Core->getPatchEdgeFlags(zoneId, (uint16)p, flags)
+			    && (flags[slot] & 0x1))
+				return 1;
+		}
+		return 0;
+	}
+	return 2;
+}
+
+/** Selection tri-state for the panel checkbox: 0 none, 1 all, 2 mixed / no selection. */
+int zpEdgeNoSmoothTriState()
+{
+	bool any = false, flagged = false, clear = false;
+	for (std::set<SPatchEdgeId>::const_iterator it = g_PatchEdgeSel.begin();
+	     it != g_PatchEdgeSel.end(); ++it)
+	{
+		const int s = zpEdgeNoSmoothOne(it->Zone, it->A, it->B);
+		if (s == 2)
+			continue;
+		any = true;
+		if (s == 1) flagged = true;
+		else clear = true;
+	}
+	if (!any)
+		return 2;
+	if (flagged && clear)
+		return 2;
+	return flagged ? 1 : 0;
+}
+
+/** Script/gate read access: the tri-state of ONE edge (0 clear, 1 flagged, -1 unknown). */
+int zpEdgeNoSmoothQuery(uint zoneId, uint vertA, uint vertB)
+{
+	const int s = zpEdgeNoSmoothOne(zoneId, (uint16)vertA, (uint16)vertB);
+	return s == 2 ? -1 : s;
+}
+
+/**
+ * The panel checkbox click. Legacy behaviour: an indeterminate (mixed) state clears first,
+ * otherwise the click inverts - so mixed -> all clear, clear -> all set, set -> all clear.
+ */
+void zpPatchNoSmoothClicked()
+{
+	const int state = zpEdgeNoSmoothTriState();
+	zpSetEdgeNoSmooth(state == 0);
+}
+
+/** Bridge wrappers (void-returning function pointers). */
+void zpPatchBindClicked() { zpBindPatchSelection(); }
+void zpPatchUnbindClicked() { zpUnbindPatchSelection(); }
+
+/** Script/gate read access to a pristine bind record (flat ints for the script TU). */
+bool zpVertexBindQuery(uint zoneId, uint vertIdx, int &bindedOut, int &typeOut,
+                       int &patchOut, int &edgeOut, int &primOut)
+{
+	if (!g_PaintCtx.Core)
+		return false;
+	bool binded;
+	uint32 type, edge, patch, prim;
+	if (!g_PaintCtx.Core->getVertBind(zoneId, (uint16)vertIdx, binded, type, edge, patch, prim))
+		return false;
+	bindedOut = binded ? 1 : 0;
+	typeOut = (int)type;
+	patchOut = (int)patch;
+	edgeOut = (int)edge;
+	primOut = (int)prim;
+	return true;
+}
+
+/** The corner pair of edge `edgeSlot` of `patchIdx` (lets a script name an edge the way the
+ *  edge selection does, from a bind record's target fields). */
+bool zpPatchEdgeCornerPair(uint zoneId, uint patchIdx, uint edgeSlot, uint &aOut, uint &bOut)
+{
+	const SPaintZone *pz = zpFindPaintZone(zoneId);
+	if (!pz || patchIdx >= pz->Ep.Pm.Patches.size() || edgeSlot >= 4)
+		return false;
+	const sint32 e = pz->Ep.Pm.Patches[patchIdx].Edge[edgeSlot];
+	if (e < 0 || (size_t)e >= pz->Ep.Pm.Edges.size())
+		return false;
+	if (pz->Ep.Pm.Edges[e].V1 < 0 || pz->Ep.Pm.Edges[e].V2 < 0)
+		return false;
+	aOut = (uint)pz->Ep.Pm.Edges[e].V1;
+	bOut = (uint)pz->Ep.Pm.Edges[e].V2;
+	return true;
+}
+
 void zpPatchVertClear()
 {
 	// Every level's set: at edge or patch level the vertex set is a projection of one of the

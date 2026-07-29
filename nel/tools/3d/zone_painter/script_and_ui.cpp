@@ -2036,6 +2036,12 @@ void zpFillBridgeState(ZPUI::SPaintUIBridge &bridge)
 	CPaintMouseListener &pl = *g_PaintCtx.Paint;
 	bridge.Mode = pl.Mode;
 	bridge.SubObj = pl.SubObj;
+	// Patch rollout snapshot (cheap counts; the tri-state walks the edge selection only)
+	bridge.PatchSelVerts = zpPatchVertSelCount();
+	bridge.PatchSelEdges = zpPatchEdgeSelCount();
+	bridge.PatchSelFaces = zpPatchFaceSelCount();
+	bridge.PatchSelTans = zpPatchTangentSelCount();
+	bridge.PatchNoSmooth = zpEdgeNoSmoothTriState();
 	bridge.PivotMode = g_PivotMode;
 	bridge.PivotLabel[0] = 0;
 	strncpy(bridge.PivotLabel, zpPivotModeName(g_PivotMode), sizeof(bridge.PivotLabel) - 1);
