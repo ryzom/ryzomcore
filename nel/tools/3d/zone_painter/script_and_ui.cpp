@@ -574,6 +574,10 @@ int zpCurrentPaintMode()
  * NEED BITMAPS - navigation (see nel/src/3d/nav_mouse_listener.cpp):
  *   curs_zp_zoom      dolly / zoom drag
  *   (Pan and orbit reuse curs_pan / curs_rotate.)
+ *
+ * The full art list with motif descriptions is the wiki's zone_painter_icon_manifest.md.
+ * nel_patch_paint cursor art may be converted; patch-edit cursors are redraw-only from
+ * the manifest's motif descriptions.
  */
 void zpSelectMode(int mode)
 {
