@@ -216,8 +216,8 @@ private:
 	// implementation of a singleton variable
 	static IAiWrapper*& _instance()
 	{
-		static IAiWrapper* inst= NULL;
-		if (inst==NULL)
+		static IAiWrapper* inst = nullptr;
+		if (inst == nullptr)
 			inst= new IAiWrapper;
 		return inst;
 	}

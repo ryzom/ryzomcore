@@ -62,7 +62,7 @@ namespace NL3D
 using NLMISC::lowbias32;
 
 uint32										CParticleSystem::NbParticlesDrawn = 0;
-UPSSoundServer *							CParticleSystem::_SoundServer = NULL;
+UPSSoundServer *							CParticleSystem::_SoundServer = nullptr;
 CParticleSystem::TGlobalValuesMap			CParticleSystem::_GlobalValuesMap;
 CParticleSystem::TGlobalVectorValuesMap		CParticleSystem::_GlobalVectorValuesMap;
 
@@ -94,7 +94,7 @@ static const float PS_MIN_TIMEOUT = 1.f; // the test that check if there are no 
 	bool CParticleSystem::_SerialIdentifiers = false;
 #endif
 bool CParticleSystem::_ForceDisplayBBox = false;
-CParticleSystemModel *CParticleSystem::OwnerModel = NULL;
+CParticleSystemModel *CParticleSystem::OwnerModel = nullptr;
 
 
 
@@ -111,18 +111,25 @@ const float PSDefaultMaxViewDist = 300.f;
 /*
  * Constructor
  */
-CParticleSystem::CParticleSystem() : _Driver(NULL),
-	_FontGenerator(NULL),
-	_FontManager(NULL),
-	_UserCoordSystemInfo(NULL),
+CParticleSystem::CParticleSystem() : _Driver(nullptr)
+    ,
+	_FontGenerator(nullptr)
+    ,
+	_FontManager(nullptr)
+    ,
+	_UserCoordSystemInfo(nullptr)
+    ,
 	_Date(0),
 	_LastUpdateDate(-1),
 	_LastAnimFrameId(0),
 	_LastRenderFrameId(0),
-	_CurrEditedElementLocated(NULL),
-	_CurrEditedElementLocatedBindable(NULL),
+	_CurrEditedElementLocated(nullptr)
+    ,
+	_CurrEditedElementLocatedBindable(nullptr)
+    ,
 	_CurrEditedElementIndex(0),
-	_Scene(NULL),
+	_Scene(nullptr)
+    ,
 	_NextAttribMakerId(0),
 	_TimeThreshold(0.15f),
 	_SystemDate(0.f),
@@ -138,10 +145,12 @@ CParticleSystem::CParticleSystem() : _Driver(NULL),
 	_DelayBeforeDieTest(-1.f),
 	_NumWantedTris(0),
 	_AnimType(AnimInCluster),
-	_UserParamGlobalValue(NULL),
+	_UserParamGlobalValue(nullptr)
+    ,
 	_BypassGlobalUserParam(0),
 	_PresetBehaviour(UserBehaviour),
-	_ColorAttenuationScheme(NULL),
+	_ColorAttenuationScheme(nullptr)
+    ,
 	_GlobalColor(NLMISC::CRGBA::White),
 	_GlobalColorLighted(NLMISC::CRGBA::White),
 	_LightingColor(NLMISC::CRGBA::White),
@@ -838,15 +847,15 @@ void CParticleSystem::serial(NLMISC::IStream &f)
 
 		f.serialContPolyPtr(_ProcessVect);
 
-		_FontGenerator = NULL;
-		_FontManager = NULL;
+		_FontGenerator = nullptr;
+		_FontManager = nullptr;
 		if (_UserParamGlobalValue)
 			delete _UserParamGlobalValue;
-		_UserParamGlobalValue = NULL;
+		_UserParamGlobalValue = nullptr;
 		_BypassGlobalUserParam = 0;
 		// see if some process need to access the user matrix
 		delete _UserCoordSystemInfo;
-		_UserCoordSystemInfo = NULL;
+		_UserCoordSystemInfo = nullptr;
 		for (TProcessVect::iterator it = _ProcessVect.begin(); it != _ProcessVect.end(); ++it)
 		{
 			addRefForUserSysCoordInfo((*it)->getUserMatrixUsageCount());
@@ -1104,7 +1113,7 @@ void CParticleSystem::remove(CParticleSystemProcess *ptr)
 	NL_PS_FUNC_MAIN(CParticleSystem_remove)
 	TProcessVect::iterator it = std::find(_ProcessVect.begin(), _ProcessVect.end(), ptr);
 	nlassert(it != _ProcessVect.end() );
-	ptr->setOwner(NULL);
+	ptr->setOwner(nullptr);
 	_ProcessVect.erase(it);
 	delete ptr;
 	systemDurationChanged();
@@ -1347,7 +1356,7 @@ CPSLocatedBindable *CParticleSystem::getLocatedBindableByExternID(uint32 id, uin
 	NL_PS_FUNC_MAIN(CParticleSystem_getLocatedBindableByExternID)
 	if (index >= _LBMap.count(id))
 	{
-		return NULL;
+		return nullptr;
 	}
 	TLBMap::const_iterator el = _LBMap.lower_bound(id);
 	uint left = index;
@@ -1362,7 +1371,7 @@ const CPSLocatedBindable *CParticleSystem::getLocatedBindableByExternID(uint32 i
 	NL_PS_FUNC_MAIN(CParticleSystem_getLocatedBindableByExternID)
 	if (index >= _LBMap.count(id))
 	{
-		return NULL;
+		return nullptr;
 	}
 	TLBMap::const_iterator el = _LBMap.lower_bound(id);
 	uint left = index;
@@ -1509,7 +1518,7 @@ CParticleSystemProcess *CParticleSystem::detach(uint index)
 	}
 	// erase from the vector
 	_ProcessVect.erase(_ProcessVect.begin() + index);
-	proc->setOwner(NULL);
+	proc->setOwner(nullptr);
 	//
 	systemDurationChanged();
 	// not part of this system any more
@@ -1601,14 +1610,14 @@ void CParticleSystem::bindGlobalValueToUserParam(const std::string &globalValueN
 	if (globalValueName.empty()) // disable a user param global value
 	{
 		if (!_UserParamGlobalValue) return;
-		_UserParamGlobalValue[userParamIndex] = NULL;
+		_UserParamGlobalValue[userParamIndex] = nullptr;
 		for(uint k = 0; k < MaxPSUserParam; ++k)
 		{
-			if (_UserParamGlobalValue[k] != NULL) return;
+			if (_UserParamGlobalValue[k] != nullptr) return;
 		}
 		// no more entry used
 		delete _UserParamGlobalValue;
-		_UserParamGlobalValue = NULL;
+		_UserParamGlobalValue = nullptr;
 	}
 	else // enable a user param global value
 	{
@@ -1616,7 +1625,7 @@ void CParticleSystem::bindGlobalValueToUserParam(const std::string &globalValueN
 		{
 			// no table has been allocated yet, so create one
 			_UserParamGlobalValue = new const TGlobalValuesMap::value_type *[MaxPSUserParam];
-			std::fill(_UserParamGlobalValue, _UserParamGlobalValue + MaxPSUserParam, (TGlobalValuesMap::value_type *) NULL);
+			std::fill(_UserParamGlobalValue, _UserParamGlobalValue + MaxPSUserParam, (TGlobalValuesMap::value_type *)nullptr);
 		}
 		// has the global value be created yet ?
 		TGlobalValuesMap::const_iterator it = _GlobalValuesMap.find(globalValueName);
@@ -1869,7 +1878,7 @@ float CParticleSystem::evalDuration() const
 						// continue if there's no loop
 						if (std::find(visitedEmitter.begin(), visitedEmitter.end(), emittedType) == visitedEmitter.end())
 						{
-							if (emittedType != NULL)
+							if (emittedType != nullptr)
 							{
 								emitterFound = true;
 								CToVisitEmitter tve;
@@ -2182,7 +2191,7 @@ void CParticleSystem::releaseRefForUserSysCoordInfo(uint numRefs)
 	if (_UserCoordSystemInfo->NumRef == 0)
 	{
 		delete _UserCoordSystemInfo;
-		_UserCoordSystemInfo = NULL;
+		_UserCoordSystemInfo = nullptr;
 	}
 }
 

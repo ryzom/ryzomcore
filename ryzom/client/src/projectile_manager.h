@@ -76,9 +76,12 @@ public:
 	bool							LetProjectileStickedOnTarget;
 	CAttachedFX::CTargeterInfo		TargeterInfo;
 public:
-	CProjectileBuild() : CastAspect(NULL),
-	                     ProjectileAspect(NULL),
-						 ImpactAspect(NULL),
+	CProjectileBuild() : CastAspect(nullptr)
+	    ,
+	                     ProjectileAspect(nullptr)
+	    ,
+						 ImpactAspect(nullptr)
+	    ,
 						 ForcePlayImpact(false)
 	{}
 };

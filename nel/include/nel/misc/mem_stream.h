@@ -349,7 +349,7 @@ public:
 		nlassert( isReading() );
 #endif
 		if ( msgsize == 0 )
-			return NULL;
+			return nullptr;
 
 		_Buffer.getBufferWrite().resize( msgsize );
 		_Buffer.Pos = 0;
@@ -587,7 +587,7 @@ inline uint32 atoihex( const char* ident )
 
 inline uint32 atoui( const char *ident)
 {
-	return (uint32) strtoul (ident, NULL, 10);
+	return (uint32) strtoul (ident, nullptr, 10);
 }
 
 static const char SEPARATOR = ' ';

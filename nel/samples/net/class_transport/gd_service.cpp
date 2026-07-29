@@ -119,7 +119,7 @@ struct CGDService : public IService
 	void init()
 	{
 		// callback when a new service comes
-		CUnifiedNetwork::getInstance()->setServiceUpCallback("*", cbUpService, NULL);
+		CUnifiedNetwork::getInstance()->setServiceUpCallback("*", cbUpService, nullptr);
 
 		// init the class transport system
 		CTransportClass::init ();

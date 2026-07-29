@@ -426,8 +426,8 @@ void megaVPGenerate(std::string &result, bool fogOrPpl, bool hwClip, bool tableU
 		for (int i = 0; i < NL_OPENGL3_MAX_LIGHT; ++i)
 		{
 			// Light index/factor accessor: packed from UBO or individual uniforms
-			const char *idxAccess = objectUBO ? s_LightIdxAccess[i] : NULL;
-			const char *facAccess = objectUBO ? s_LightFacAccess[i] : NULL;
+			const char *idxAccess = objectUBO ? s_LightIdxAccess[i] : nullptr;
+			const char *facAccess = objectUBO ? s_LightFacAccess[i] : nullptr;
 
 			if (objectUBO)
 				ss << "    if (" << i << " >= nlNumPerPixelLights) {" << std::endl;
@@ -544,7 +544,7 @@ void megaVPGenerate(std::string &result, bool fogOrPpl, bool hwClip, bool tableU
 	for (int i = 0; i < IDRV_MAT_MAXTEXTURES; ++i)
 	{
 		// TexGen mode accessor: packed from UBO or individual uniforms
-		const char *tgmAccess = objectUBO ? s_TexGenAccess[i] : NULL;
+		const char *tgmAccess = objectUBO ? s_TexGenAccess[i] : nullptr;
 
 		if (objectUBO)
 			ss << "  if (" << tgmAccess << " == " << TexGenObjectLinear << ")" << std::endl;

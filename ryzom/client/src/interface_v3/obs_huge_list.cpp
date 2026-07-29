@@ -82,7 +82,7 @@ CHugeListObs::CHugeListObs(ListType category) : _Init(false)
 	_CurrentSessionNb = 0;
 	_MType= MISSION_DESC::Mission;
 	_FirstPageNotUpdated= 0;
-	_PhrasePriceCB= NULL;
+	_PhrasePriceCB = nullptr;
 	_PhrasePriceUpdateAndMaybeClientFill= false;
 
 	// Client-Side phrase filling
@@ -90,8 +90,8 @@ CHugeListObs::CHugeListObs(ListType category) : _Init(false)
 	_PhraseClientFillNumPhrase= 0;
 	_PhraseClientFillFlags= 0;
 	_PhraseClientFillRace= 0;
-	_RoleMasterFlagDB= NULL;
-	_RoleMasterRaceDB= NULL;
+	_RoleMasterFlagDB = nullptr;
+	_RoleMasterRaceDB = nullptr;
 
 	_DownloadComplete = false;
 
@@ -109,7 +109,7 @@ CHugeListObs::~CHugeListObs()
 		CSBrickManager	*pBM= CSBrickManager::getInstance();
 		pBM->removeBrickLearnedCallback(_PhrasePriceCB);
 		delete _PhrasePriceCB;
-		_PhrasePriceCB= NULL;
+		_PhrasePriceCB = nullptr;
 	}
 }
 
@@ -120,7 +120,7 @@ void CHugeListObs::setListType(ListType listType)
 	_Category = listType;
 
 	// For phrase trading, append the callback that will update phrase prices according to brick knowns
-	if(_Category==Trading && _PhrasePriceCB==NULL)
+	if(_Category==Trading && _PhrasePriceCB == nullptr)
 	{
 		CSBrickManager	*pBM= CSBrickManager::getInstance();
 		_PhrasePriceCB= new CPhrasePriceCB(this);
@@ -183,13 +183,13 @@ bool CHugeListObs::init()
 				_Items[k].FactionType = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:FACTION_TYPE").c_str(), (int) k), false);
 				_Items[k].FactionPointPrice = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:PRICE").c_str(), (int) k), false);
 				_Items[k].SellerType = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:SELLER_TYPE").c_str(), (int) k), false);
-				if ((_Items[k].SlotType == NULL) || (_Items[k].Quality == NULL) || (_Items[k].SheetIDOrSkill == NULL) ||
-					(_Items[k].Price == NULL) || (_Items[k].Weight==NULL) || (_Items[k].InfoVersion==NULL) ||
-					(_Items[k].UserColor==NULL) || (_Items[k].NameId==NULL) || (_Items[k].Quantity==NULL) ||
-					(_Items[k].PriceRetire==NULL) || (_Items[k].SellerType==NULL) || (_Items[k].ResaleTimeLeft==NULL)  ||
-					(_Items[k].VendorNameId==NULL)  || (_Items[k].Enchant ==NULL) || (_Items[k].RMClassType == NULL) ||
-					(_Items[k].RMFaberStatType == NULL) || (_Items[k].PrerequisitValid == NULL) ||
-					(_Items[k].FactionType == NULL) || (_Items[k].FactionPointPrice == NULL)
+				if ((_Items[k].SlotType == nullptr) || (_Items[k].Quality == nullptr) || (_Items[k].SheetIDOrSkill == nullptr) ||
+					(_Items[k].Price == nullptr) || (_Items[k].Weight == nullptr) || (_Items[k].InfoVersion == nullptr) ||
+					(_Items[k].UserColor == nullptr) || (_Items[k].NameId == nullptr) || (_Items[k].Quantity == nullptr) ||
+					(_Items[k].PriceRetire == nullptr) || (_Items[k].SellerType == nullptr) || (_Items[k].ResaleTimeLeft == nullptr)  ||
+					(_Items[k].VendorNameId == nullptr)  || (_Items[k].Enchant == nullptr) || (_Items[k].RMClassType == nullptr) ||
+					(_Items[k].RMFaberStatType == nullptr) || (_Items[k].PrerequisitValid == nullptr) ||
+					(_Items[k].FactionType == nullptr) || (_Items[k].FactionPointPrice == nullptr)
 				   )
 					return false;
 			break;
@@ -207,18 +207,18 @@ bool CHugeListObs::init()
 				_Items[k].RMClassType = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:RM_CLASS_TYPE").c_str(), (int) k), false);
 				_Items[k].RMFaberStatType = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:RM_FABER_STAT_TYPE").c_str(), (int) k), false);
 				_Items[k].InfoVersion = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:INFO_VERSION").c_str(), (int) k), false);
-				if ((_Items[k].SlotType == NULL) || (_Items[k].Quality == NULL) || (_Items[k].SheetIDOrSkill == NULL) ||
-					(_Items[k].LogicTextID == NULL) || (_Items[k].DescTextID == NULL) ||
-					(_Items[k].Weight==NULL) || (_Items[k].InfoVersion==NULL) || (_Items[k].UserColor==NULL) ||
-					(_Items[k].Enchant ==NULL) || (_Items[k].RMClassType == NULL) || (_Items[k].RMFaberStatType == NULL) ||
-					(_Items[k].NameId==NULL)
+				if ((_Items[k].SlotType == nullptr) || (_Items[k].Quality == nullptr) || (_Items[k].SheetIDOrSkill == nullptr) ||
+					(_Items[k].LogicTextID == nullptr) || (_Items[k].DescTextID == nullptr) ||
+					(_Items[k].Weight == nullptr) || (_Items[k].InfoVersion == nullptr) || (_Items[k].UserColor == nullptr) ||
+					(_Items[k].Enchant == nullptr) || (_Items[k].RMClassType == nullptr) || (_Items[k].RMFaberStatType == nullptr) ||
+					(_Items[k].NameId == nullptr)
 				   )
 					return false;
 			break;
 			case Ascensor:
 				_Items[k].GuildIcon = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:ICON").c_str(), (int) k), false);
 				_Items[k].GuildName = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:NAME").c_str(), (int) k), false);
-				if ((_Items[k].GuildIcon == NULL) || (_Items[k].GuildName == NULL))
+				if ((_Items[k].GuildIcon == nullptr) || (_Items[k].GuildName == nullptr))
 					return false;
 			break;
 			case  Missions:
@@ -226,8 +226,8 @@ bool CHugeListObs::init()
 				_Items[k].MissionText = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:TEXT").c_str(), (int) k), false);
 				_Items[k].MissionIcon = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:ICON").c_str(), (int) k), false);
 				_Items[k].MissionPreReqState = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:PREREQ_STATE").c_str(), (int) k), false);
-				if ((_Items[k].MissionText == NULL) || (_Items[k].MissionIcon == NULL) ||
-					(_Items[k].MissionDetailText == NULL) || (_Items[k].MissionPreReqState == NULL))
+				if ((_Items[k].MissionText == nullptr) || (_Items[k].MissionIcon == nullptr) ||
+					(_Items[k].MissionDetailText == nullptr) || (_Items[k].MissionPreReqState == nullptr))
 					return false;
 			break;
 			default:
@@ -511,7 +511,7 @@ void CHugeListObs::updateUIItemPage(uint index)
 	TItemVect					 *items = &_ItemsPages;
 	CDBCtrlSheet::TSheetCategory *itemCategory = &_ItemCategory;
 	CDBGroupListSheetText		 *listSheet;
-	CCDBNodeLeaf				 *itemListCategoryLeaf = NULL;
+	CCDBNodeLeaf				 *itemListCategoryLeaf = nullptr;
 	switch (_Category)
 	{
 		case Trading:

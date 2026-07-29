@@ -27,7 +27,7 @@ void CShardNames::init(NLMISC::CConfigFile &configFile)
 {
 	// read the mainland session name table
 	CConfigFile::CVar *sessionNames = configFile.getVarPtr("HomeMainlandNames");
-	if (sessionNames == NULL)
+	if (sessionNames == nullptr)
 	{
 		nlwarning("No variable 'HomeMainlandNames', domain unified character names will not work correctly !");
 	}
@@ -54,7 +54,7 @@ void CShardNames::init(NLMISC::CConfigFile &configFile)
 	// read the var to append or not (). Use DontUseSU one for simplicity (but this is for server only...)
 	CConfigFile::CVar	*dontUseSU = configFile.getVarPtr("DontUseSU");
 	_AppendParenthesisWhenSessionNotFound= true;	// default
-	if(dontUseSU!=NULL)
+	if(dontUseSU != nullptr)
 	{
 		// do not append () if DontUseSU==1
 		_AppendParenthesisWhenSessionNotFound= dontUseSU->asInt()==0;

@@ -56,7 +56,7 @@ public:
 
 	const std::vector<uint32>		&getSoundSeq() const						{ return _SoundSeq;}
 	const std::vector<uint32>		&getDelaySeq() const						{ return _DelaySeq;}
-	NLMISC::TStringId				getSound(uint index) const					{ return !_Sounds.empty() ? _Sounds[index%_Sounds.size()]:0;}
+	NLMISC::TStringId				getSound(uint index) const					{ return !_Sounds.empty() ? _Sounds[index%_Sounds.size()]:nullptr;}
 	const std::vector<NLMISC::TStringId>	&getSounds() const					{ return _Sounds;}
 
 	uint32							getFadeLength() const						{ return _XFadeLength;}

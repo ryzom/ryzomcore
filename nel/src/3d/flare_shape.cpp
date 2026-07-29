@@ -53,7 +53,7 @@ CFlareShape::CFlareShape()  : _Color(NLMISC::CRGBA::White),
 	// init default pos
 	for (uint k = 0; k < MaxFlareNum; ++k)
 	{
-		_Tex [k]  = NULL;
+		_Tex [k]  = nullptr;
 		_Size[k]  = 1.f;
 		_Pos[k]   = k * (1.f / MaxFlareNum);
 	}
@@ -167,7 +167,7 @@ void				CFlareShape::flushTextures (IDriver &driver, uint selectedTexture)
 	// Flush each texture
 	for (uint tex=0; tex<MaxFlareNum; tex++)
 	{
-		if (_Tex[tex] != NULL)
+		if (_Tex[tex] != nullptr)
 		{
 			// Select the good texture
 			_Tex[tex]->selectTexture (selectedTexture);
@@ -183,7 +183,7 @@ void CFlareShape::setOcclusionTestMeshName(const std::string &shapeName)
 {
 	if (shapeName == _OcclusionTestMeshName) return;
 	_OcclusionTestMeshName = shapeName;
-	_OcclusionTestMesh = NULL;
+	_OcclusionTestMesh = nullptr;
 }
 
 
@@ -191,22 +191,22 @@ void CFlareShape::setOcclusionTestMeshName(const std::string &shapeName)
 CMesh *CFlareShape::getOcclusionTestMesh(CShapeBank &sb)
 {
 	if (_OcclusionTestMesh) return _OcclusionTestMesh;
-	if (_OcclusionMeshNotFound) return NULL;
-	if (_OcclusionTestMeshName.empty()) return NULL;
+	if (_OcclusionMeshNotFound) return nullptr;
+	if (_OcclusionTestMeshName.empty()) return nullptr;
 	if (sb.getPresentState(_OcclusionTestMeshName)!=CShapeBank::Present)
 	{
 		sb.load(_OcclusionTestMeshName);
 		if (sb.getPresentState(_OcclusionTestMeshName)!=CShapeBank::Present)
 		{
 			_OcclusionMeshNotFound = true;
-			return NULL;
+			return nullptr;
 		}
 	}
 	IShape *mesh = sb.addRef(_OcclusionTestMeshName);
 	if (!mesh)
 	{
 		_OcclusionMeshNotFound = true;
-		return NULL;
+		return nullptr;
 	}
 	_OcclusionTestMesh = dynamic_cast<CMesh *>(mesh);
 	if (!_OcclusionTestMesh)
@@ -214,7 +214,7 @@ CMesh *CFlareShape::getOcclusionTestMesh(CShapeBank &sb)
 		_OcclusionMeshNotFound = true;
 		nlwarning("%s is not a mesh. Mesh required for occlusion testing", _OcclusionTestMeshName.c_str());
 		sb.release(mesh);
-		return NULL;
+		return nullptr;
 	}
 	return _OcclusionTestMesh;
 }

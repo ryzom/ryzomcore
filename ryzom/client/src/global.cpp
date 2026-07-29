@@ -29,31 +29,31 @@ using namespace NLMISC;
 
 // ***************************************************************************
 // Data
-NLWEB::CHttpPackageProvider *HttpPackageProvider = NULL;
+NLWEB::CHttpPackageProvider *HttpPackageProvider = nullptr;
 
 // Main System
-NL3D::UDriver				*Driver = NULL;		// The main 3D Driver
-NL3D::IStereoDisplay		*StereoDisplay = NULL; // Stereo display
-NL3D::IStereoHMD			*StereoHMD = NULL;	// Head mount display
+NL3D::UDriver				*Driver = nullptr;		// The main 3D Driver
+NL3D::IStereoDisplay		*StereoDisplay = nullptr; // Stereo display
+NL3D::IStereoHMD			*StereoHMD = nullptr;	// Head mount display
 bool						StereoDisplayAttached = false; // Is stereo display handling the display mode
-CSoundManager				*SoundMngr = NULL;		// the sound manager
+CSoundManager				*SoundMngr = nullptr;		// the sound manager
 NL3D::UMaterial				GenericMat;	// Generic Material
-NL3D::UTextContext			*TextContext = NULL;	// Context for all the text in the client.
+NL3D::UTextContext			*TextContext = nullptr;	// Context for all the text in the client.
 
 // Effects
-NL3D::CFXAA					*FXAA = NULL;
+NL3D::CFXAA					*FXAA = nullptr;
 
 // Main 3D Objects
-NL3D::UScene						*Scene = NULL;
-NL3D::UScene						*SceneRoot = NULL;
-NL3D::UInstanceGroup				*BackgroundIG = NULL;
-NL3D::ULandscape					*Landscape = NULL;
-NL3D::UCloudScape				    *CloudScape = NULL;
+NL3D::UScene						*Scene = nullptr;
+NL3D::UScene						*SceneRoot = nullptr;
+NL3D::UInstanceGroup				*BackgroundIG = nullptr;
+NL3D::ULandscape					*Landscape = nullptr;
+NL3D::UCloudScape				    *CloudScape = nullptr;
 NL3D::UCamera						MainCam;
-NL3D::UVisualCollisionManager		*CollisionManager = NULL;
+NL3D::UVisualCollisionManager		*CollisionManager = nullptr;
 #ifdef USE_WATER_ENV_MAP
 	CWaterEnvMapRdr						WaterEnvMapRdr;
-	NL3D::UWaterEnvMap					*WaterEnvMap = NULL;
+	NL3D::UWaterEnvMap					*WaterEnvMap = nullptr;
 	uint								WaterEnvMapRefCount = 0;
 	NL3D::UCamera						WaterEnvMapSkyCam;
 	NL3D::UCamera						WaterEnvMapCanopyCam;
@@ -69,12 +69,12 @@ NLMISC::CMatrix				InvMainSceneViewMatrix;		// Matrix to transform from camera s
 
 // Misc
 bool						InitCloudScape = true; // tells that the cloud scape must be reinitialized
-CEntityAnimationManager		*EAM = NULL;
+CEntityAnimationManager		*EAM = nullptr;
 CProgress					ProgressBar;
 TBackground					LoadingBackground = StartBackground;
 string						LoadingBackgroundBG;
 string						LoadingMusic;
-CContinent					*LoadingContinent = NULL;
+CContinent					*LoadingContinent = nullptr;
 bool						ConnectionReadySent= false;
 bool						PermanentlyBanned = false;
 bool						IgnoreEntityDbUpdates = false;
@@ -88,10 +88,10 @@ string						RingMainURL;
 
 void resetTextContext (const char *font, bool resetInterfaceManager)
 {
-	if (TextContext != NULL)
+	if (TextContext != nullptr)
 		Driver->deleteTextContext(TextContext);
 	TextContext = Driver->createTextContext(NLMISC::startsWith(font, "ui") ? font : CPath::lookup(font));
-	if (TextContext != NULL)
+	if (TextContext != nullptr)
 		TextContext->setKeep800x600Ratio(false);
 	else
 		nlerror("Cannot create a TextContext with font %s.", font);

@@ -50,7 +50,7 @@ namespace NLGUI
 	// ***************************************************************************
 	void CViewText::setupDefault ()
 	{
-		_ParentElm = NULL;
+		_ParentElm = nullptr;
 
 		_CaseMode = CaseNormal;
 		_Underlined = false;
@@ -114,7 +114,7 @@ namespace NLGUI
 
 		_Localized = true;
 
-		_LetterColors = NULL;
+		_LetterColors = nullptr;
 		_Setuped= false;
 		_AutoClampOffset = 0;
 
@@ -790,8 +790,8 @@ namespace NLGUI
 	xmlNodePtr CViewText::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
 		xmlNodePtr node = CViewBase::serialize( parentNode, type );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "text" );
 
@@ -1059,7 +1059,7 @@ namespace NLGUI
 	// ***************************************************************************
 	void CViewText::checkCoords ()
 	{
-		if ((_MultiLine)&&(_Parent != NULL))
+		if ((_MultiLine)&&(_Parent != nullptr))
 		{
 			// If never setuped, and if text is not empty
 			if (_Lines.empty() && !_Text.empty())
@@ -1076,7 +1076,7 @@ namespace NLGUI
 				else
 				{
 					CCtrlBase *pCB = CWidgetManager::getInstance()->getCapturePointerLeft();
-					if (pCB != NULL)
+					if (pCB != nullptr)
 					{
 						if( pCB->isResizer() )
 						{
@@ -1185,7 +1185,7 @@ namespace NLGUI
 		rVR.getScreenOOSize (oow, ooh);
 
 		// *** Draw multiline
-		if ((_MultiLine)&&(_Parent != NULL))
+		if ((_MultiLine)&&(_Parent != nullptr))
 		{
 			if (_Lines.empty()) return;
 
@@ -1332,7 +1332,7 @@ namespace NLGUI
 			TextContext->setEmbolden (_Embolden);
 			TextContext->setOblique (_Oblique);
 
-			if(_LetterColors!=NULL && !TextContext->isSameLetterColors(_LetterColors, _Index))
+			if(_LetterColors != nullptr && !TextContext->isSameLetterColors(_LetterColors, _Index))
 			{
 				TextContext->setLetterColors(_LetterColors, _Index);
 			}
@@ -1381,7 +1381,7 @@ namespace NLGUI
 					CInterfaceGroup		*pIG = CWidgetManager::getInstance()->getWindowUnder(x,y);
 					CInterfaceElement	*pParent = this;
 					bool bFound = false;
-					while (pParent != NULL)
+					while (pParent != nullptr)
 					{
 						if (pParent == pIG)
 						{
@@ -2158,7 +2158,7 @@ namespace NLGUI
 		// default state
 		_SingleLineTextClamped= false;
 
-		if ((_MultiLine)&&(_Parent != NULL))
+		if ((_MultiLine)&&(_Parent != nullptr))
 		{
 			float nMaxWidth = getCurrentMultiLineMaxW();
 			_LastMultiLineMaxW = nMaxWidth;
@@ -2347,9 +2347,9 @@ namespace NLGUI
 			// If there's no parent, try the parent of the parent element.
 			// Since we will be under the same group
 			CInterfaceGroup *parent = _Parent;
-			if( parent == NULL )
+			if( parent == nullptr)
 			{
-				if( _ParentElm != NULL )
+				if( _ParentElm != nullptr)
 					parent = _ParentElm->getParent();
 			}
 

@@ -50,7 +50,7 @@ public:
 	static void *getResource (const std::string &key)
 	{
 		if (key.empty())
-			return NULL;
+			return nullptr;
 		else
 			return dynamic_cast<TPtr*>(getInterfaceResource(key));
 	}

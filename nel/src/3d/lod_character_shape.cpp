@@ -327,7 +327,7 @@ void	CLodCharacterShapeBuild::serial(NLMISC::IStream &f)
 const CLodCharacterShapeBuild::CPixelInfo	*CLodCharacterShapeBuild::getTextureInfoPtr()
 {
 	if(_TextureInfo.empty())
-		return NULL;
+		return nullptr;
 	else
 		return &_TextureInfo[0];
 }
@@ -613,7 +613,7 @@ const TLodCharacterIndexType	*CLodCharacterShape::getTriangleArray() const
 	if(_NumTriangles)
 		return &_TriangleIndices[0];
 	else
-		return NULL;
+		return nullptr;
 }
 
 // ***************************************************************************
@@ -624,7 +624,7 @@ const CLodCharacterShape::CVector3s	*CLodCharacterShape::getAnimKey(uint animId,
 	float	localTime;
 
 	if(animId>=_Anims.size())
-		return NULL;
+		return nullptr;
 
 	// get the anim.
 	const CAnim &anim= _Anims[animId];
@@ -653,7 +653,7 @@ const CLodCharacterShape::CVector3s	*CLodCharacterShape::getAnimKey(uint animId,
 const CUV		*CLodCharacterShape::getUVs() const
 {
 	if(_NumVertices==0)
-		return NULL;
+		return nullptr;
 
 	return &_UVs[0];
 }
@@ -662,7 +662,7 @@ const CUV		*CLodCharacterShape::getUVs() const
 const CVector	*CLodCharacterShape::getNormals() const
 {
 	if(_NumVertices==0)
-		return NULL;
+		return nullptr;
 
 	return &_Normals[0];
 }

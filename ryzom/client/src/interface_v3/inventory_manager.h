@@ -231,7 +231,7 @@ public:
 		enum TFrom { Slot, TextList, IconList, Nowhere };
 		void beginDrag(CDBCtrlSheet *pCS, TFrom eFromWhere);
 		void endDrag();
-		bool isDragging() { return DNDCurrentItem != NULL; }
+		bool isDragging() { return DNDCurrentItem != nullptr; }
 		// Is the dragged sheet comes from inventory list
 		bool isDraggingFromTextList() { return DNDFrom == TextList; }
 		bool isDraggingFromIconList() { return DNDFrom == IconList; }
@@ -571,7 +571,7 @@ struct SBagOptions
 	SBagOptions()
 	{
 		InvType = CInventoryManager::InvUnknown;
-		DbFilterArmor = DbFilterWeapon = DbFilterTool = DbFilterPet = DbFilterMP = DbFilterMissMP = DbFilterTP = NULL;
+		DbFilterArmor = DbFilterWeapon = DbFilterTool = DbFilterPet = DbFilterMP = DbFilterMissMP = DbFilterTP = nullptr;
 		LastDbFilterArmor = LastDbFilterWeapon = LastDbFilterTool = LastDbFilterPet = LastDbFilterMP = LastDbFilterMissMP = LastDbFilterTP = false;
 		SearchFilterChanged = false;
 		SearchQualityMin = 0;
@@ -587,43 +587,43 @@ struct SBagOptions
 
 	bool getFilterArmor() const
 	{
-		if (DbFilterArmor == NULL) return true;
+		if (DbFilterArmor == nullptr) return true;
 		return (DbFilterArmor->getValue8()!=0);
 	}
 
 	bool getFilterWeapon() const
 	{
-		if (DbFilterWeapon == NULL) return true;
+		if (DbFilterWeapon == nullptr) return true;
 		return (DbFilterWeapon->getValue8()!=0);
 	}
 
 	bool getFilterTool() const
 	{
-		if (DbFilterTool == NULL) return true;
+		if (DbFilterTool == nullptr) return true;
 		return (DbFilterTool->getValue8()!=0);
 	}
 
 	bool getFilterPet() const
 	{
-		if (DbFilterPet == NULL) return true;
+		if (DbFilterPet == nullptr) return true;
 		return (DbFilterPet->getValue8()!=0);
 	}
 
 	bool getFilterMP() const
 	{
-		if (DbFilterMP == NULL) return true;
+		if (DbFilterMP == nullptr) return true;
 		return (DbFilterMP->getValue8()!=0);
 	}
 
 	bool getFilterMissMP() const
 	{
-		if (DbFilterMissMP == NULL) return true;
+		if (DbFilterMissMP == nullptr) return true;
 		return (DbFilterMissMP->getValue8()!=0);
 	}
 
 	bool getFilterTP() const
 	{
-		if (DbFilterTP == NULL) return true;
+		if (DbFilterTP == nullptr) return true;
 		return (DbFilterTP->getValue8() != 0);
 	}
 

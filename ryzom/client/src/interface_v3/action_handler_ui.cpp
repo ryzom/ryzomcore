@@ -67,7 +67,7 @@ static bool isContainerAuthorized(CGroupContainer *pGC)
 	// no guild or not in guild hall.
 	if (shortId == "inv_guild")
 	{
-		if (NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GUILD:NAME") == 0
+		if (NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GUILD:NAME") == nullptr
 			|| !getInventory().isInventoryPresent(INVENTORIES::guild))
 		{
 			return false; // can't open it right now
@@ -94,7 +94,7 @@ class CAHUIOpen : public IActionHandler
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface", Params));
-		if (pGC == NULL)
+		if (pGC == nullptr)
 		{
 			nlwarning("%s is not a container", Params.c_str());
 			return;
@@ -116,7 +116,7 @@ class CAHUIClose : public IActionHandler
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface", Params));
-		if (pGC == NULL)
+		if (pGC == nullptr)
 		{
 			nlwarning("%s is not a container", Params.c_str());
 			return;
@@ -137,7 +137,7 @@ class CAHUIOpenClose : public IActionHandler
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface", Params));
-		if (pGC == NULL)
+		if (pGC == nullptr)
 		{
 			nlwarning("%s is not a container", Params.c_str());
 			return;
@@ -159,7 +159,7 @@ class CAHUIPopup : public IActionHandler
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface", Params));
-		if (pGC == NULL)
+		if (pGC == nullptr)
 		{
 			nlwarning("%s is not a container", Params.c_str());
 			return;
@@ -173,8 +173,8 @@ class CAHUIPopup : public IActionHandler
 		//
 		pGC->popup();
 		//
-		CWidgetManager::getInstance()->setCapturePointerLeft(NULL);
-		CWidgetManager::getInstance()->setCapturePointerRight(NULL);
+		CWidgetManager::getInstance()->setCapturePointerLeft(nullptr);
+		CWidgetManager::getInstance()->setCapturePointerRight(nullptr);
 	}
 };
 REGISTER_ACTION_HANDLER( CAHUIPopup, "popup" );
@@ -190,7 +190,7 @@ class CAHUIPopin : public IActionHandler
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface", Params));
-		if (pGC == NULL)
+		if (pGC == nullptr)
 		{
 			nlwarning("%s is not a container", Params.c_str());
 			return;
@@ -208,8 +208,8 @@ class CAHUIPopin : public IActionHandler
 		pGC->setPopupH(pGC->getH());
 		//
 		pGC->popin();
-		CWidgetManager::getInstance()->setCapturePointerLeft(NULL);
-		CWidgetManager::getInstance()->setCapturePointerRight(NULL);
+		CWidgetManager::getInstance()->setCapturePointerLeft(nullptr);
+		CWidgetManager::getInstance()->setCapturePointerRight(nullptr);
 	}
 };
 REGISTER_ACTION_HANDLER( CAHUIPopin, "popin" );
@@ -225,7 +225,7 @@ class CAHUIPopupPopin : public IActionHandler
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface", Params));
-		if (pGC == NULL)
+		if (pGC == nullptr)
 		{
 			nlwarning("%s is not a container", Params.c_str());
 			return;
@@ -237,9 +237,9 @@ class CAHUIPopupPopin : public IActionHandler
 		}
 		if (!isContainerAuthorized(pGC)) return;
 		if (pGC->isPopuped())
-			CAHManager::getInstance()->runActionHandler("popin", NULL, Params);
+			CAHManager::getInstance()->runActionHandler("popin", nullptr, Params);
 		else
-			CAHManager::getInstance()->runActionHandler("popup", NULL, Params);
+			CAHManager::getInstance()->runActionHandler("popup", nullptr, Params);
 	}
 };
 REGISTER_ACTION_HANDLER( CAHUIPopupPopin, "popup_popin" );
@@ -261,7 +261,7 @@ public:
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface", Params));
-		if (pGC == NULL)
+		if (pGC == nullptr)
 		{
 			nlwarning("%s is not a container", Params.c_str());
 			return;
@@ -312,7 +312,7 @@ public:
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface", Params));
-		if (pGC == NULL)
+		if (pGC == nullptr)
 		{
 			nlwarning("%s is not a container", Params.c_str());
 			return;
@@ -343,7 +343,7 @@ public:
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface", Params));
-		if (pGC == NULL)
+		if (pGC == nullptr)
 		{
 			nlwarning("%s is not a container", Params.c_str());
 			return;
@@ -377,7 +377,7 @@ class CAHUIShowHide : public IActionHandler
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface", Params));
-		if (pGC == NULL)
+		if (pGC == nullptr)
 		{
 			nlwarning("%s is not a container", Params.c_str());
 			return;
@@ -540,7 +540,7 @@ class CAHMountUnmount : public IActionHandler
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		if(pIM == NULL) return;
+		if(pIM == nullptr) return;
 		CEntityCL *selection = EntitiesMngr.entity(UserEntity->selection());
 
 		// If mode Combat (no talk, no give, no mount)
@@ -553,7 +553,7 @@ class CAHMountUnmount : public IActionHandler
 		else if(UserEntity->isRiding())
 		{
 			// We are currently mounted so unmount
-			CAHManager::getInstance()->runActionHandler("context_unseat",NULL);
+			CAHManager::getInstance()->runActionHandler("context_unseat", nullptr);
 		}
 		// Not in combat mode.
 		else
@@ -567,7 +567,7 @@ class CAHMountUnmount : public IActionHandler
 				if(distanceSquare <= MaxTalkingDistSquare)
 				{
 					// Ok lets mount
-					CAHManager::getInstance()->runActionHandler("context_mount",NULL);
+					CAHManager::getInstance()->runActionHandler("context_mount", nullptr);
 				}
 			}
 		}
@@ -585,7 +585,7 @@ class CAHExchange : public IActionHandler
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		if(pIM == NULL) return;
+		if(pIM == nullptr) return;
 		CEntityCL *selection = EntitiesMngr.entity(UserEntity->selection());
 
 		if(UserEntity->mode()==MBEHAV::COMBAT
@@ -598,7 +598,7 @@ class CAHExchange : public IActionHandler
 		{
 			if (selection && selection->properties().canExchangeItem())
 				if (!UserEntity->isBusy())
-					CAHManager::getInstance()->runActionHandler("context_exchange",NULL);
+					CAHManager::getInstance()->runActionHandler("context_exchange", nullptr);
 		}
 	}
 };
@@ -615,7 +615,7 @@ class CAHUISetTopWindow : public IActionHandler
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		string sWin = getParam(Params,"win");
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(sWin));
-		if (pGC != NULL && isContainerAuthorized(pGC)) CWidgetManager::getInstance()->setTopWindow(pGC);
+		if (pGC != nullptr && isContainerAuthorized(pGC)) CWidgetManager::getInstance()->setTopWindow(pGC);
 	}
 };
 REGISTER_ACTION_HANDLER( CAHUISetTopWindow, "set_top_window" );

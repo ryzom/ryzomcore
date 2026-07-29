@@ -42,10 +42,10 @@ const float		CNELU::DefLy=0.2f;
 const float		CNELU::DefLzNear=0.15f;
 const float		CNELU::DefLzFar=1000.0f;
 
-IDriver				*CNELU::Driver=NULL;
-CScene				*CNELU::Scene=NULL;
-CShapeBank			*CNELU::ShapeBank=NULL;
-CVertexStreamManager*CNELU::MeshSkinManager=NULL;
+IDriver				*CNELU::Driver = nullptr;
+CScene				*CNELU::Scene = nullptr;
+CShapeBank			*CNELU::ShapeBank = nullptr;
+CVertexStreamManager*CNELU::MeshSkinManager = nullptr;
 CRefPtr<CCamera>	CNELU::Camera;
 CEventServer		CNELU::EventServer;
 CEventListenerAsync	CNELU::AsyncListener;
@@ -58,7 +58,7 @@ bool			CNELU::initDriver (uint w, uint h, uint bpp, bool windowed, nlWindow syst
 
 	ShapeBank = new CShapeBank;
 
-	CNELU::Driver = NULL;
+	CNELU::Driver = nullptr;
 
 	// Init driver.
 #ifdef __EMSCRIPTEN__
@@ -111,7 +111,7 @@ void			CNELU::initScene(CViewport viewport)
 	// Register basic csene.
 	CScene::registerBasics();
 
-	if (CNELU::Scene == NULL)
+	if (CNELU::Scene == nullptr)
 		CNELU::Scene = new CScene(false);
 
 	// init default Roots.
@@ -150,7 +150,7 @@ void			CNELU::initEventServer()
 void			CNELU::releaseEventServer()
 {
 	CNELU::AsyncListener.removeFromServer(CNELU::EventServer);
-	if (CNELU::Driver != NULL)
+	if (CNELU::Driver != nullptr)
 	{
 		CNELU::EventServer.removeEmitter(CNELU::Driver->getEventEmitter());
 	}
@@ -160,10 +160,10 @@ void			CNELU::releaseEventServer()
 void			CNELU::releaseScene()
 {
 	// Release the camera.
-	CNELU::Camera= NULL;
+	CNELU::Camera = nullptr;
 
 	// "Release" the Scene.
-	CNELU::Scene->setDriver(NULL);
+	CNELU::Scene->setDriver(nullptr);
 	CNELU::Scene->release();
 }
 
@@ -174,16 +174,16 @@ void			CNELU::releaseDriver()
 		delete MeshSkinManager;
 
 	// "Release" the driver.
-	if (CNELU::Driver != NULL)
+	if (CNELU::Driver != nullptr)
 	{
 		CNELU::Driver->release();
 		delete CNELU::Driver;
-		CNELU::Driver = NULL;
+		CNELU::Driver = nullptr;
 	}
-	if( CNELU::ShapeBank != NULL )
+	if( CNELU::ShapeBank != nullptr)
 	{
 		delete CNELU::ShapeBank;
-		CNELU::ShapeBank = NULL;
+		CNELU::ShapeBank = nullptr;
 	}
 }
 

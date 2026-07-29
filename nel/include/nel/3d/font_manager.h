@@ -76,8 +76,8 @@ public:
 		_MemSize = 0;
 		_MaxMemory = 1000000;
 		_NbChar = 0;
-		_MatFont = NULL;
-		_TexFont = NULL;
+		_MatFont = nullptr;
+		_TexFont = nullptr;
 		_TexCacheNr = 0;
 	}
 

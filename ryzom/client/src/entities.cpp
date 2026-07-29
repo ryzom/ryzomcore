@@ -129,13 +129,13 @@ public :
 			uint32 target = leaf->getValue32();
 
 			// Scan all entities
-			CEntityCL *entity = NULL;
+			CEntityCL *entity = nullptr;
 			if (oldTarget)
 				entity = EntitiesMngr.getEntityByName(oldTarget);
 			if (entity)
 				entity->updateMissionTarget();
 
-			entity = NULL;
+			entity = nullptr;
 			if (target)
 				entity = EntitiesMngr.getEntityByName(target);
 			if (entity)
@@ -170,7 +170,7 @@ public :
 			{
 				CInterfaceManager *pIM = CInterfaceManager::getInstance();
 				CGroupCompas *pGC = dynamic_cast<CGroupCompas*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:compass"));
-				if (pGC == NULL)
+				if (pGC == nullptr)
 				{
 					nlwarning("Can't retrieve compass group");
 					return;
@@ -409,7 +409,7 @@ CEntityManager::CEntityManager()
 	_NbUser				= 0;
 	_NbPlayer			= 0;
 	_NbChar				= 0;
-	_LastEntityUnderPos= NULL;
+	_LastEntityUnderPos = nullptr;
 	_LastRemovedInstance = -1;
 }// CEntityManager //
 
@@ -434,7 +434,7 @@ void CEntityManager::initialize(uint nbMaxEntity)
 	// if
 	if(_NbMaxEntity)
 	{
-		_Entities.resize(_NbMaxEntity, 0);
+		_Entities.resize(_NbMaxEntity, nullptr);
 		_EntityGroundFXHandle.resize(_NbMaxEntity);
 	}
 
@@ -498,7 +498,7 @@ void CEntityManager::initialize(uint nbMaxEntity)
 //-----------------------------------------------
 void CEntityManager::release()
 {
-	_LastEntityUnderPos= NULL;
+	_LastEntityUnderPos = nullptr;
 
 	// Remove all entities.
 	for(uint i=0; i<_Entities.size(); ++i)
@@ -511,11 +511,11 @@ void CEntityManager::release()
 				_GroundFXManager.remove(_EntityGroundFXHandle[i]);
 			}
 			delete _Entities[i];
-			_Entities[i] = 0;
+			_Entities[i] = nullptr;
 		}
 	}
 
-	UserEntity = NULL;
+	UserEntity = nullptr;
 
 	// Clear the list.
 	_Entities.clear();
@@ -543,7 +543,7 @@ CShapeInstanceReference CEntityManager::createInstance(const string& shape, cons
 
 	if(!instance.empty())
 	{
-		UMovePrimitive *primitive = NULL;
+		UMovePrimitive *primitive = nullptr;
 
 		if (PACS && haveCollisions)
 		{
@@ -593,7 +593,7 @@ bool CEntityManager::deleteInstance(uint32 idx)
 	
 	if (!_ShapeInstances[idx].Deleted)
 	{
-		_ShapeInstances[idx].Primitive = NULL;
+		_ShapeInstances[idx].Primitive = nullptr;
 		_ShapeInstances[idx].Deleted = true;
 		_ShapeInstances[idx].LastDeleted = _LastRemovedInstance;
 		_LastRemovedInstance = idx;
@@ -1014,7 +1014,7 @@ bool CEntityManager::setupInstance(uint32 idx, const vector<string> &keys, const
 CShapeInstanceReference CEntityManager::getShapeInstanceUnderPos(float x, float y, sint32 &idx)
 {
 	CShapeInstanceReference selectedInstance(UInstance(), string(""), string(""));
-	_LastInstanceUnderPos= NULL;
+	_LastInstanceUnderPos = nullptr;
 	idx = -1;
 	
 	// If not initialised, return
@@ -1098,13 +1098,13 @@ CShapeInstanceReference CEntityManager::getShapeInstanceUnderPos(float x, float 
 CEntityCL *CEntityManager::create(uint slot, uint32 form, const TNewEntityInfo& newEntityInfo)
 {
 	// DEBUG
-	if(verboseVP(NULL, form))
+	if(verboseVP(nullptr, form))
 		nlinfo("(%05d,%03d) EM:create: slot '%u': %s", sint32(T1%100000), NetMngr.getCurrentServerTick(), slot, CSheetId(form).toString().c_str());
 	// Check parameter : slot.
 	if(slot >= _NbMaxEntity)
 	{
 		nlwarning("EM:create: Cannot create the entity, the slot '%u' is invalid.", slot);
-		return 0;
+		return nullptr;
 	}
 	else
 	{
@@ -1118,7 +1118,7 @@ CEntityCL *CEntityManager::create(uint slot, uint32 form, const TNewEntityInfo& 
 			}
 			// Store the alias (although there should not be one for the slot 0!)
 			_Entities[0]->npcAlias(newEntityInfo.Alias);
-			return 0;
+			return nullptr;
 		}
 	}
 
@@ -1133,25 +1133,25 @@ CEntityCL *CEntityManager::create(uint slot, uint32 form, const TNewEntityInfo& 
 			_GroundFXManager.remove(_EntityGroundFXHandle[slot]);
 		}
 		delete _Entities[slot];
-		_Entities[slot] = 0;
+		_Entities[slot] = nullptr;
 	}
 
 	// Check parameter : form.
 	CEntitySheet *entitySheet = SheetMngr.get((CSheetId)form);
-	if(entitySheet == 0)
+	if(entitySheet == nullptr)
 	{
 		nlwarning("EM:create: Attempt on create an entity with a bad form number %d (%s) for the slot '%d' trying to compute the default one.", form, ((CSheetId)form).toString().c_str(), slot);
 		CSheetId defaultEntity;
 		if(defaultEntity.buildSheetId(ClientCfg.DefaultEntity)==false)
 		{
 			nlwarning("EM:create: The default entity (%s) is not in the sheetid.bin.", ClientCfg.DefaultEntity.c_str());
-			return 0;
+			return nullptr;
 		}
 		entitySheet = SheetMngr.get(defaultEntity);
-		if(entitySheet == 0)
+		if(entitySheet == nullptr)
 		{
 			nlwarning("EM:create: The default entity (%s) is not in the sheet manager.", ClientCfg.DefaultEntity.c_str());
-			return 0;
+			return nullptr;
 		}
 	}
 
@@ -1232,7 +1232,7 @@ CEntityCL *CEntityManager::create(uint slot, uint32 form, const TNewEntityInfo& 
 			{
 				nlwarning("EM:%d: Cannot build the Entity -> REMOVE IT", slot);
 				delete _Entities[slot];
-				_Entities[slot] = 0;
+				_Entities[slot] = nullptr;
 			}
 			// The User
 			else
@@ -1257,7 +1257,7 @@ CEntityCL *CEntityManager::create(uint slot, uint32 form, const TNewEntityInfo& 
 bool CEntityManager::remove(uint slot, bool warning)
 {
 	// DEBUG
-	if(verboseVP(NULL))
+	if(verboseVP(nullptr))
 		nlinfo("EM:remove: slot '%u'.", slot);
 	// Check parameter : slot.
 	if(slot >= _NbMaxEntity)
@@ -1274,7 +1274,7 @@ bool CEntityManager::remove(uint slot, bool warning)
 	}
 
 	// Slot not allocated.
-	if(_Entities[slot] == 0)
+	if(_Entities[slot] == nullptr)
 	{
 		if(warning)
 		{
@@ -1287,7 +1287,7 @@ bool CEntityManager::remove(uint slot, bool warning)
 	for(uint i=0; i<_Entities.size(); ++i)
 	{
 		// This entity is not allocated.
-		if(_Entities[i] == 0)
+		if(_Entities[i] == nullptr)
 			continue;
 
 		// Inform about the slot of the entity that will be removed.
@@ -1295,7 +1295,7 @@ bool CEntityManager::remove(uint slot, bool warning)
 	}
 
 	// remove ground fx
-	if(_Entities[slot] != 0)
+	if(_Entities[slot] != nullptr)
 	{
 		if (_Entities[slot]->supportGroundFX())
 		{
@@ -1312,11 +1312,11 @@ bool CEntityManager::remove(uint slot, bool warning)
 
 	// previous UnderPos?
 	if(_LastEntityUnderPos==_Entities[slot])
-		_LastEntityUnderPos= NULL;
+		_LastEntityUnderPos = nullptr;
 
 	// Free the slot.
 	delete _Entities[slot];
-	_Entities[slot] = 0;
+	_Entities[slot] = nullptr;
 
 	// Done.
 	return true;
@@ -1333,7 +1333,7 @@ void CEntityManager::removeCollision()
 	for(uint i=0; i<nbEntities; ++i)
 	{
 		// Is the entity allocated.
-		if(_Entities[i] == 0)
+		if(_Entities[i] == nullptr)
 			continue;
 
 		// Remove the entity primitive.
@@ -1373,14 +1373,14 @@ CEntityCL *CEntityManager::entity(uint slot)
 {
 	// Return 0 if the slot is the INVALID_SLOT
 	if(slot==CLFECOMMON::INVALID_SLOT)
-		return 0;
+		return nullptr;
 	// Check parameter : slot.
 	if(slot >= _Entities.size())
 	{
 		nlwarning("EM:entity: slot '%u' is invalid.", slot);
 		if(ClientCfg.Check)
 			nlstop;
-		return 0;
+		return nullptr;
 	}
 	// Return the entity pointer.
 	return _Entities[slot];
@@ -1399,7 +1399,7 @@ bool CEntityManager::entitiesNearDoors(float openingDist, const CVector& posDoor
 	for(uint i=0; i<_NbMaxEntity; ++i)
 	{
 		// Is the entity allocated.
-		if(_Entities[i] == 0)
+		if(_Entities[i] == nullptr)
 			continue;
 
 		// Get a reference on the current entity.
@@ -1426,7 +1426,7 @@ void	CEntityManager::getEntityListForSelection(std::vector<CEntityCL*> &entities
 	for(uint i=firstEntity; i<_NbMaxEntity; ++i)
 	{
 		// Is the entity allocated and not user mount.
-		if(_Entities[i] == 0 || i==UserEntity->mount())
+		if(_Entities[i] == nullptr || i==UserEntity->mount())
 			continue;
 		// If entity unselectable, skip
 		if(!_Entities[i]->properties().selectable())
@@ -1476,11 +1476,11 @@ CEntityCL *CEntityManager::getEntityUnderPos(float x, float y, float distSelecti
 
 	// reset result
 	isPlayerUnderCursor= false;
-	_LastEntityUnderPos= NULL;
+	_LastEntityUnderPos = nullptr;
 
 	// If not initialised, return
 	if (_Entities.empty())
-		return NULL;
+		return nullptr;
 
 
 	// **** list of valid entities to test
@@ -1529,7 +1529,7 @@ CEntityCL *CEntityManager::getEntityUnderPos(float x, float y, float distSelecti
 
 	// if no intersected entities, quit
 	if(intersectedEntities.empty())
-		return NULL;
+		return nullptr;
 
 	// Compute startDistBox: nearest entity distance, but the user
 	float	startDistBox;
@@ -1539,7 +1539,7 @@ CEntityCL *CEntityManager::getEntityUnderPos(float x, float y, float distSelecti
 		isPlayerUnderCursor= true;
 		// if only player intersected, return NULL!
 		if(intersectedEntities.size()==1)
-			return NULL;
+			return nullptr;
 		// so take the second for startDistBox
 		startDistBox= intersectedEntities[1].Depth;
 	}
@@ -1551,7 +1551,7 @@ CEntityCL *CEntityManager::getEntityUnderPos(float x, float y, float distSelecti
 
 
 	// **** get best entity according to distance face-camera or box-ray if no face intersection
-	CEntityCL	*entitySelected= NULL;
+	CEntityCL	*entitySelected = nullptr;
 	float		bestDistBox= FLT_MAX;
 	float		bestDistZ= FLT_MAX;
 	for(i=0;i<intersectedEntities.size();i++)
@@ -1698,7 +1698,7 @@ CEntityCL *CEntityManager::getEntityInCamera(uint flags, float distSelection, CL
 
 	// If not initialised, return
 	if (_Entities.empty())
-		return NULL;
+		return nullptr;
 
 	// list of valid entities
 	static	vector<CEntityCL*>		validEntitiesTmp, validEntities;
@@ -1710,7 +1710,7 @@ CEntityCL *CEntityManager::getEntityInCamera(uint flags, float distSelection, CL
 	for (i=0 ; i<validEntitiesTmp.size() ; i++)
 	{
 		CCharacterCL *entity = dynamic_cast<CCharacterCL*>(validEntitiesTmp[i]);
-		if ((entity == NULL) || (entity && entity->isSelectableBySpace()))
+		if ((entity == nullptr) || (entity && entity->isSelectableBySpace()))
 			validEntities.push_back(entity);
 	}
 
@@ -1771,7 +1771,7 @@ CEntityCL *CEntityManager::getEntityInCamera(uint flags, float distSelection, CL
 
 	// No one in screen?
 	if(screenEntities.empty())
-		return NULL;
+		return nullptr;
 
 	// sort them increasingly
 	sort(screenEntities.begin(), screenEntities.end());
@@ -1808,7 +1808,7 @@ void CEntityManager::changeContinent()
 	for(uint i=0; i<_NbMaxEntity; ++i)
 	{
 		// Is the entity allocated.
-		if(_Entities[i] == 0)
+		if(_Entities[i] == nullptr)
 			continue;
 
 		// Compute the new primitive.
@@ -1839,7 +1839,7 @@ void CEntityManager::updatePreCamera()
 	{
 		// Is the entity allocated.
 		CEntityCL *entity = _Entities[i];
-		if(entity == 0)
+		if(entity == nullptr)
 			continue;
 		// Count Entities
 		++_EntitiesAllocated;
@@ -2057,7 +2057,7 @@ void CEntityManager::updatePostRender()
 void CEntityManager::updateVisualProperty(const NLMISC::TGameCycle &gameCycle, const uint &slot, const uint &prop, const NLMISC::TGameCycle &predictedInterval)
 {
 	// INFO : log some debug information about visual properties.
-	if(verboseVP(NULL))
+	if(verboseVP(nullptr))
 		nlinfo("EM:updateVP: received prop '%d' for the slot '%d'.", prop, slot);
 
 	// Check parameter : slot.
@@ -2068,10 +2068,10 @@ void CEntityManager::updateVisualProperty(const NLMISC::TGameCycle &gameCycle, c
 	}
 
 	// Entity still not allocated -> backup values received for the entity.
-	if(_Entities[slot] == 0)
+	if(_Entities[slot] == nullptr)
 	{
 		// INFO : log some debug information about visual properties.
-		if(verboseVP(NULL))
+		if(verboseVP(nullptr))
 			nlinfo("EM:updateVP: backup the property as long as the entity is not allocated.", prop, slot);
 
 		string propName = toString("SERVER:Entities:E%d:P%d", slot, prop);
@@ -2334,13 +2334,13 @@ CEntityCL *CEntityManager::getEntityByName (uint32 stringId) const
 					return _Entities[i];
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 //-----------------------------------------------
 CEntityCL *CEntityManager::getEntityByKeywords (const std::vector<string> &keywords, bool onlySelectable) const
 {
-	if (keywords.empty()) return NULL;
+	if (keywords.empty()) return nullptr;
 
 	std::vector<string> lcKeywords;
 	lcKeywords.resize(keywords.size());
@@ -2390,7 +2390,7 @@ CEntityCL *CEntityManager::getEntityByKeywords (const std::vector<string> &keywo
 	if (selectedEntityDist != FLT_MAX)
 		return _Entities[selectedEntityId];
 	else
-		return NULL;
+		return nullptr;
 }
 
 //-----------------------------------------------
@@ -2442,7 +2442,7 @@ CEntityCL *CEntityManager::getEntityByName (const string &name, bool caseSensiti
 	if (selectedEntityDist != FLT_MAX) // Entity found
 		return _Entities[selectedEntityId];
 	else
-		return NULL;
+		return nullptr;
 }
 
 //-----------------------------------------------
@@ -2460,7 +2460,7 @@ CEntityCL *CEntityManager::getEntityByCompressedIndex(TDataSetIndex compressedIn
 					return _Entities[i];
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 //-----------------------------------------------
 // getEntityBySheetName :
@@ -2480,7 +2480,7 @@ CEntityCL *CEntityManager::getEntityBySheetName (const std::string &sheet) const
 					return _Entities[i];
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 //-----------------------------------------------
 // managePACSTriggers :

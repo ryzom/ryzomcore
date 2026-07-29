@@ -89,5 +89,5 @@ const char *CBodyToBoneSheet::getBoneName(BODY::TBodyPart part, BODY::TSide side
 		case BODY::HFeet:   return ClientSheetsStrings.get(side == BODY::Left ? LeftFoot : RightFoot);
 		default: break;
 	}
-	return NULL;
+	return nullptr;
 }

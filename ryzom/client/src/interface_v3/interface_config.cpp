@@ -258,7 +258,7 @@ void CInterfaceConfig::SCont::setFrom (CGroupContainer *pGC)
 
 		ScrollPos = 0;
 		CCtrlScroll *pSB = dynamic_cast<CCtrlScroll*>(pGC->getCtrl("sb"));
-		if (pSB != NULL) ScrollPos = pSB->getTrackPos();
+		if (pSB != nullptr) ScrollPos = pSB->getTrackPos();
 	}
 	if (pGC->isPositionBackuped())
 	{
@@ -341,7 +341,7 @@ void CInterfaceConfig::SCont::setTo (CGroupContainer *pGC)
 		pGC->setMovable(Movable);
 
 		CCtrlScroll *pSB = dynamic_cast<CCtrlScroll*>(pGC->getCtrl("sb"));
-		if (pSB != NULL) pSB->setTrackPos(ScrollPos);
+		if (pSB != nullptr) pSB->setTrackPos(ScrollPos);
 		//
 		pGC->touch(TouchFlag);
 		//
@@ -533,7 +533,7 @@ void CInterfaceConfig::CDesktopImage::fromCurrentDesktop()
 		for (i = 0; i < rV.size(); ++i)
 		{
 			CGroupContainer		*pGC= dynamic_cast<CGroupContainer*>(rV[i]);
-			if ( pGC != NULL && pGC->isSavable() )
+			if ( pGC != nullptr && pGC->isSavable() )
 				nCount++;
 		}
 	}
@@ -549,7 +549,7 @@ void CInterfaceConfig::CDesktopImage::fromCurrentDesktop()
 		for (i = 0; i < rV.size(); ++i)
 		{
 			CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(rV[i]);
-			if ( pGC != NULL && pGC->isSavable() )
+			if ( pGC != nullptr && pGC->isSavable() )
 			{
 				GCImages[nCount2].setFrom(pGC);
 				nCount2++;
@@ -573,7 +573,7 @@ void CInterfaceConfig::CDesktopImage::fromCurrentDesktop()
 	if (topWindow)
 	{
 		CGroupContainer *pGC= dynamic_cast<CGroupContainer*>(topWindow);
-		if (pGC != NULL && pGC->isSavable())
+		if (pGC != nullptr && pGC->isSavable())
 			topWindowName = pGC->getId();
 	}
 	f.serial(topWindowName);
@@ -599,7 +599,7 @@ void CInterfaceConfig::CDesktopImage::toCurrentDesktop()
 	for(uint k = 0; k < GCImages.size(); ++k)
 	{
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(GCImages[k].Id));
-		if (pGC != NULL)
+		if (pGC != nullptr)
 			GCImages[k].setTo(pGC);
 	}
 	// serial extra data from the stream
@@ -710,7 +710,7 @@ void CInterfaceConfig::dataBaseToStream (NLMISC::IStream &f)
 	// Save branch of the database
 	SDBLeaf leafTmp;
 	CCDBNodeBranch *pDB = NLGUI::CDBManager::getInstance()->getDbBranch ("UI:SAVE");
-	if (pDB != NULL)
+	if (pDB != nullptr)
 	{
 		// Number of leaf to save
 		uint32 nbLeaves = pDB->countLeaves();
@@ -746,7 +746,7 @@ void CInterfaceConfig::streamToDataBase (NLMISC::IStream &f, uint32 uiDbSaveVers
 	// Load branch of the database
 	SDBLeaf leafTmp;
 	CCDBNodeBranch *pDB = NLGUI::CDBManager::getInstance()->getDbBranch ("UI:SAVE");
-	if (pDB != NULL)
+	if (pDB != nullptr)
 	{
 		// Number of leaf to save
 		uint32 nbLeaves = 0;
@@ -780,7 +780,7 @@ void CInterfaceConfig::streamToDataBase (NLMISC::IStream &f, uint32 uiDbSaveVers
 			if(wantRead)
 			{
 				CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(leafTmp.Name,false);
-				if (pNL != NULL)
+				if (pNL != nullptr)
 					leafTmp.setTo(pNL);
 			}
 		}

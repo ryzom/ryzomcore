@@ -36,13 +36,13 @@ namespace NLSOUND {
 
 /// Constructor
 CContextSound::CContextSound()
-:	_ContextSounds(0)
+:	_ContextSounds(nullptr)
 {
 }
 /// Destructor
 CContextSound::~CContextSound()
 {
-	if (_ContextSounds != 0)
+	if (_ContextSounds != nullptr)
 		delete _ContextSounds;
 }
 
@@ -86,10 +86,10 @@ bool		CContextSound::isDetailed() const
 
 float		CContextSound::getMaxDistance() const
 {
-	if (_ContextSounds == 0)
+	if (_ContextSounds == nullptr)
 	{
 		const_cast<CContextSound*>(this)->init();
-		if (_ContextSounds == 0)
+		if (_ContextSounds == nullptr)
 		{
 			// invalid state
 			return 0;
@@ -117,7 +117,7 @@ uint32		CContextSound::getDuration()
 /// Used by the george sound plugin to check sound recursion (ie sound 'toto' use sound 'titi' witch also use sound 'toto' ...).
 void		CContextSound::getSubSoundList(std::vector<std::pair<std::string, CSound*> > &subsounds) const
 {
-	if (_ContextSounds == 0)
+	if (_ContextSounds == nullptr)
 	{
 		const_cast<CContextSound*>(this)->init();
 	}
@@ -130,13 +130,13 @@ void		CContextSound::getSubSoundList(std::vector<std::pair<std::string, CSound*>
 
 CSound	*CContextSound::getContextSound(CSoundContext &context)
 {
-	if (_ContextSounds == 0)
+	if (_ContextSounds == nullptr)
 	{
 		// need to init the sound container.
 		init();
 
-		if (_ContextSounds == 0)
-			return 0;
+		if (_ContextSounds == nullptr)
+			return nullptr;
 	}
 
 	if (_Random > 1)
@@ -225,7 +225,7 @@ void CContextSound::init()
 		}
 	}
 
-	if (_ContextSounds != 0)
+	if (_ContextSounds != nullptr)
 		delete _ContextSounds;
 
 	// A little macro to make life easier (LM stand for Local Macro)

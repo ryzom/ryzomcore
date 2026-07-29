@@ -50,7 +50,7 @@ public:
 	void	send (const CMessage &buffer, TSockId hostid = InvalidSockId, bool log = true);
 
 	/// Force to send all data pending in the send queue. hostid must be InvalidSockId here. See comment in CCallbackNetBase.
-	bool	flush (TSockId hostid = InvalidSockId, uint *nbBytesRemaining=NULL);
+	bool	flush (TSockId hostid = InvalidSockId, uint *nbBytesRemaining = nullptr);
 
 	/** Updates the network (call this method evenly).
 	 * More info about timeout and mintime in the code of CCallbackNetBase::baseUpdate().
@@ -100,7 +100,7 @@ private:
 	bool	dataAvailable ();
 	virtual bool getDataAvailableFlagV() const { return dataAvailableFlag(); }
 
-	void	receive (CMessage &buffer, TSockId *hostid = NULL);
+	void	receive (CMessage &buffer, TSockId *hostid = nullptr);
 
 	// ---------------------------------------
 #ifdef USE_MESSAGE_RECORDER

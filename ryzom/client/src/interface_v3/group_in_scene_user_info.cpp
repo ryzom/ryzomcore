@@ -43,9 +43,9 @@ using namespace NLMISC;
 extern CEntityManager EntitiesMngr;
 
 uint CGroupInSceneUserInfo::_BatLength = 0;
-CCDBNodeLeaf *CGroupInSceneUserInfo::_Value = NULL;
-CCDBNodeLeaf *CGroupInSceneUserInfo::_ValueBegin = NULL;
-CCDBNodeLeaf *CGroupInSceneUserInfo::_ValueEnd = NULL;
+CCDBNodeLeaf *CGroupInSceneUserInfo::_Value = nullptr;
+CCDBNodeLeaf *CGroupInSceneUserInfo::_ValueBegin = nullptr;
+CCDBNodeLeaf *CGroupInSceneUserInfo::_ValueEnd = nullptr;
 NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> CGroupInSceneUserInfo::_GuildIconLeaf[256];
 
 // ***************************************************************************
@@ -117,18 +117,18 @@ CGroupInSceneUserInfo::CGroupInSceneUserInfo(const TCtorParam &param)
 		_ConfigSaveInsceneDB[3].setPrefix("UI:SAVE:INSCENE:SOURCE:");
 		_ConfigSaveInsceneDBInit = true;
 	}
-	_Name = NULL;
-	_Title = NULL;
-	_GuildName = NULL;
-	_TribeName = NULL;
-	_EventFaction = NULL;
-	_PermanentContent = NULL;
-	_Target = NULL;
-	_MissionTarget = NULL;
+	_Name = nullptr;
+	_Title = nullptr;
+	_GuildName = nullptr;
+	_TribeName = nullptr;
+	_EventFaction = nullptr;
+	_PermanentContent = nullptr;
+	_Target = nullptr;
+	_MissionTarget = nullptr;
 	uint i;
 	for (i=0; i<NumBars; i++)
-		_Bars[i] = NULL;
-	_Entity = NULL;
+		_Bars[i] = nullptr;
+	_Entity = nullptr;
 	_NeedGuildNameId= false;
 	_NeedGuildSymbolId= false;
 	_IsLeftGroupActive= false;
@@ -315,10 +315,10 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 	// get faction name
 	{
 		CCharacterCL *pChar = dynamic_cast<CCharacterCL*>(entity);
-		if (pChar != NULL)
+		if (pChar != nullptr)
 		{
 			const CCharacterSheet *pSheet = pChar->getSheet();
-			if (pSheet != NULL)
+			if (pSheet != nullptr)
 			{
 				string sFame = pSheet->getFame();
 				if (strnicmp(sFame.c_str(),"tribe_",6)==0)
@@ -364,7 +364,7 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 			uint i;
 			for (i=0; i<NumBars; i++)
 			{
-				info->_Bars[i] = NULL;
+				info->_Bars[i] = nullptr;
 				if (bars[i])
 				{
 					// Get the bar
@@ -467,7 +467,7 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 			{
 				CPlayerCL * pPlayer = dynamic_cast<CPlayerCL*>(entity);
 				CViewBitmap *bitmap;
-				if (pPlayer == NULL || (pPlayer != NULL && pPlayer->getPvpMode() & PVP_MODE::PvpFaction))
+				if (pPlayer == nullptr || (pPlayer != nullptr && pPlayer->getPvpMode() & PVP_MODE::PvpFaction))
 				{
 					bitmap = dynamic_cast<CViewBitmap*>(leftGroup->getView ("rp_logo_1"));
 					if (bitmap)
@@ -654,10 +654,10 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 				CViewBase * pvpDuelLogo = info->getView ("pvp_duel_logo");
 
 				CPlayerCL * pPlayer = dynamic_cast<CPlayerCL*>(entity);
-				if (pPlayer == NULL)
+				if (pPlayer == nullptr)
 					needPvPLogo = false;
 
-				if (pPlayer != NULL && needPvPLogo)
+				if (pPlayer != nullptr && needPvPLogo)
 				{
 					if (pvpFactionLogo) 
 					{
@@ -943,7 +943,7 @@ void CGroupInSceneUserInfo::updateDynamicData ()
 
 	// Set state fx
 	CPlayerCL *pPlayer = dynamic_cast<CPlayerCL*>(_Entity);
-	if (pPlayer != NULL)
+	if (pPlayer != nullptr)
 	{
 		if (pPlayer->isAFK())
 			pPlayer->setStateFx("sp_medit.ps");
@@ -963,7 +963,7 @@ void CGroupInSceneUserInfo::updateDynamicData ()
 		if (entityName.empty())
 			entityName = _Entity->getTitle();
 
-		if (pPlayer != NULL)
+		if (pPlayer != nullptr)
 			if (pPlayer->isAFK())
 				entityName += CI18N::get("uiAFK");
 		_Name->setText(entityName);
@@ -1226,7 +1226,7 @@ void CGroupInSceneUserInfo::updateDynamicData ()
 // ***************************************************************************
 CGroupInSceneUserInfo *CGroupInSceneUserInfo::newGroupInScene(const std::string &templateName, const std::string &id)
 {
-	CInterfaceGroup *groupInfo = NULL;
+	CInterfaceGroup *groupInfo = nullptr;
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	static volatile bool bypass = false;
 	if (R2::getEditor().getMode() == R2::CEditor::EditionMode && !bypass)
@@ -1253,7 +1253,7 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::newGroupInScene(const std::string 
 		std::vector<std::pair<std::string,std::string> > templateParams;
 		templateParams.push_back (std::pair<std::string,std::string>("id", id));
 		groupInfo = CWidgetManager::getInstance()->getParser()->createGroupInstance ( templateName,
-			"ui:interface", templateParams.empty()?NULL:&(templateParams[0]), (uint)templateParams.size());
+			"ui:interface", templateParams.empty() ? nullptr : &(templateParams[0]), (uint)templateParams.size());
 	}
 
 	CGroupInSceneUserInfo *info = dynamic_cast<CGroupInSceneUserInfo*>(groupInfo);

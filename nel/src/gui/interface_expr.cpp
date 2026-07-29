@@ -52,7 +52,7 @@ namespace NLGUI
 	LinkTrickster linkTrickster;
 
 	// Yoyo: Act like a singleton, else registerUserFct may crash.
-	CInterfaceExpr::TUserFctMap *CInterfaceExpr::_UserFct= NULL;
+	CInterfaceExpr::TUserFctMap *CInterfaceExpr::_UserFct = nullptr;
 
 	static const std::string ExprLuaId="lua:";
 
@@ -61,7 +61,7 @@ namespace NLGUI
 	void CInterfaceExpr::release()
 	{
 		delete _UserFct;
-		_UserFct = NULL;
+		_UserFct = nullptr;
 	}
 
 	//==================================================================
@@ -86,11 +86,11 @@ namespace NLGUI
 		{
 			std::string	tempStr;
 			formatLuaCall(expr, tempStr);
-			return evalExpr(tempStr.c_str(), result, nodes, noFctCalls) != NULL;
+			return evalExpr(tempStr.c_str(), result, nodes, noFctCalls) != nullptr;
 		}
 		else
 		{
-			return evalExpr(expr.c_str(), result, nodes, noFctCalls) != NULL;
+			return evalExpr(expr.c_str(), result, nodes, noFctCalls) != nullptr;
 		}
 	}
 
@@ -104,11 +104,11 @@ namespace NLGUI
 		{
 			std::string	tempStr;
 			formatLuaCall(expr, tempStr);
-			if (!buildExprTree(tempStr.c_str(), node)) return NULL;
+			if (!buildExprTree(tempStr.c_str(), node)) return nullptr;
 		}
 		else
 		{
-			if (!buildExprTree(expr.c_str(), node)) return NULL;
+			if (!buildExprTree(expr.c_str(), node)) return nullptr;
 		}
 
 		return node;
@@ -155,7 +155,7 @@ namespace NLGUI
 		if (!newExpr)
 		{
 			nlwarning("<CInterfaceExpr::evalExpr> : syntax error : %s", expr);
-			return NULL;
+			return nullptr;
 		}
 		return newExpr;
 	}
@@ -183,14 +183,14 @@ namespace NLGUI
 			if (!newExpr)
 			{
 				nlwarning("<CInterfaceExpr::buildExprTree> : syntax error : %s", expr);
-				return NULL;
+				return nullptr;
 			}
 			CInterfaceExprNodeValue *node = new CInterfaceExprNodeValue;
 			node->Value = value;
 			result = node;
 			return newExpr;
 		}
-		return NULL;
+		return nullptr;
 	}
 
 
@@ -207,7 +207,7 @@ namespace NLGUI
 		if (fctIt == _UserFct->end())
 		{
 			nlwarning("<CInterfaceExpr::evalFct> : Unknown function %s", fctName.c_str());
-			return NULL;
+			return nullptr;
 		}
 		nlassert(fctIt->second != NULL);
 		// eval list of arguments
@@ -216,7 +216,7 @@ namespace NLGUI
 		if (*expr != '(')
 		{
 			nlwarning("<CInterfaceExpr::evalFct> : '(' expected for function %s", fctName.c_str());
-			return NULL;
+			return nullptr;
 		}
 		++ expr;
 		expr = skipBlank(expr);
@@ -228,14 +228,14 @@ namespace NLGUI
 				// parse an argument
 				argList.push_back(CInterfaceExprValue());
 				expr = evalExpr(expr, argList.back(), nodes, noFctCalls);
-				if (expr == NULL) return NULL;
+				if (expr == nullptr) return nullptr;
 				expr = skipBlank(expr);
 				if (*expr == ')') break;
 				// if it isn't the end of the expression, then we should find a ',' before next argument
 				if (*expr != ',')
 				{
 					nlwarning("<CInterfaceExpr::evalFct> : ',' expected in function %s", fctName.c_str());
-					return NULL;
+					return nullptr;
 				}
 				++ expr;
 			}
@@ -250,7 +250,7 @@ namespace NLGUI
 		{
 			return expr;
 		}
-		return NULL;
+		return nullptr;
 	}
 
 	//==================================================================
@@ -266,7 +266,7 @@ namespace NLGUI
 		if (fctIt == _UserFct->end())
 		{
 			nlwarning("<CInterfaceExpr::buildFctNode> : Unknown function %s", fctName.c_str());
-			return NULL;
+			return nullptr;
 		}
 		nlassert(fctIt->second != NULL);
 		// List of parameters
@@ -274,7 +274,7 @@ namespace NLGUI
 		if (*expr != '(')
 		{
 			nlwarning("<CInterfaceExpr::buildFctNode> : '(' expected for function %s", fctName.c_str());
-			return NULL;
+			return nullptr;
 		}
 		++ expr;
 		expr = skipBlank(expr);
@@ -285,15 +285,15 @@ namespace NLGUI
 			{
 				expr = skipBlank(expr);
 				// parse an argument
-				CInterfaceExprNode *node = NULL;
+				CInterfaceExprNode *node = nullptr;
 				expr = buildExprTree(expr, node);
-				if (expr == NULL)
+				if (expr == nullptr)
 				{
 					for(uint k = 0; k < Params.size(); ++k)
 					{
 						delete Params[k];
 					}
-					return NULL;
+					return nullptr;
 				}
 				Params.push_back(node);
 				expr = skipBlank(expr);
@@ -306,7 +306,7 @@ namespace NLGUI
 						delete Params[k];
 					}
 					nlwarning("CInterfaceExpr::evalFct : ',' expected in function %s", fctName.c_str());
-					return NULL;
+					return nullptr;
 				}
 				++ expr;
 			}
@@ -324,7 +324,7 @@ namespace NLGUI
 	{
 		std::string dbEntry;
 		expr = unpackDBentry(expr, nodes, dbEntry);
-		if (!expr) return NULL;
+		if (!expr) return nullptr;
 		// TestYoyo
 		//nlassert(NLGUI::CDBManager::getInstance()->getDbProp(dbEntry, false) || CInterfaceManager::getInstance()->getDbBranch(dbEntry));
 		// get the db value
@@ -352,11 +352,11 @@ namespace NLGUI
 					nodes->push_back(nb);
 				}
 			}
-			if (!nb) return NULL;
+			if (!nb) return nullptr;
 			result.setInteger(0);
 			return expr;
 		}
-		return NULL;
+		return nullptr;
 	}
 
 	//==================================================================
@@ -365,8 +365,8 @@ namespace NLGUI
 		std::string dbEntry;
 		bool indirection;
 		const char *startChar = expr;
-		expr = unpackDBentry(expr, NULL, dbEntry, &indirection);
-		if (!expr) return NULL;
+		expr = unpackDBentry(expr, nullptr, dbEntry, &indirection);
+		if (!expr) return nullptr;
 		if (indirection)
 		{
 			// special node with no optimisation
@@ -400,7 +400,7 @@ namespace NLGUI
 					return expr;
 				}
 			}
-			return NULL;
+			return nullptr;
 		}
 	}
 
@@ -417,7 +417,7 @@ namespace NLGUI
 				++ expr;
 				std::string subEntry;
 				expr = unpackDBentry(expr, nodes, subEntry);
-				if (!expr) return NULL;
+				if (!expr) return nullptr;
 				// Read DB Index Offset.
 				sint32	indirectionOffset= 0;
 				if (*expr == '-' || *expr =='+' )
@@ -439,7 +439,7 @@ namespace NLGUI
 				if (*expr != ']')
 				{
 					nlwarning("CInterfaceExpr::unpackDBentry: ']' expected");
-					return NULL;
+					return nullptr;
 				}
 				++ expr;
 				// get the db value at sub entry
@@ -549,7 +549,7 @@ namespace NLGUI
 			case Boolean: return true;
 			case Integer: setBool(_IntegerValue != 0); return true;
 			case Double:  setBool(_DoubleValue != 0); return true;
-			case String:  return evalBoolean(_StringValue.c_str()) != NULL;
+			case String:  return evalBoolean(_StringValue.c_str()) != nullptr;
 			default: break;
 		}
 		return false;
@@ -659,7 +659,7 @@ namespace NLGUI
 			case '\'':
 				return evalString(expr);
 			default:
-				return NULL;
+				return nullptr;
 		}
 	}
 
@@ -686,7 +686,7 @@ namespace NLGUI
 			setBool(false);
 			return expr + 5;
 		}
-		return NULL;
+		return nullptr;
 	}
 
 	//==================================================================
@@ -714,7 +714,7 @@ namespace NLGUI
 			if (*expr == '.') hasPoint = true;
 			++ expr;
 		}
-		if (start == expr) return NULL;
+		if (start == expr) return nullptr;
 		if (!hasPoint)
 		{
 			sint64 value = 0;
@@ -739,7 +739,7 @@ namespace NLGUI
 			}
 			else
 			{
-				return NULL;
+				return nullptr;
 			}
 		}
 	}
@@ -748,7 +748,7 @@ namespace NLGUI
 	const char *CInterfaceExprValue::evalString(const char *expr)
 	{
 		expr = skipBlank(expr);
-		if (*expr != '\'') return NULL;
+		if (*expr != '\'') return nullptr;
 		++expr;
 		std::string str;
 		for (;;)
@@ -756,7 +756,7 @@ namespace NLGUI
 			if (*expr == '\0')
 			{
 				nlwarning("CInterfaceExprValue::evalString : end of buffer encountered in a string");
-				return NULL;
+				return nullptr;
 			}
 			else
 			if (*expr == '\'')
@@ -789,7 +789,7 @@ namespace NLGUI
 			else if (*expr == '\n' || *expr == '\r')
 			{
 				nlwarning("CInterfaceExprValue::evalString : line break encountered in a string");
-				return NULL;
+				return nullptr;
 			}
 			else
 			{
@@ -903,7 +903,7 @@ namespace NLGUI
 		if (_Type != UserType)
 		{
 			nlwarning("<CInterfaceExprValue::getUserType> bad type!");
-			return NULL;
+			return nullptr;
 		}
 		return _UserTypeValue;
 	}
@@ -928,13 +928,13 @@ namespace NLGUI
 				case String:   _StringValue  = other._StringValue;  break;
 				case RGBA:	   _RGBAValue    = other._RGBAValue;    break;
 				case UserType:
-					if (other._UserTypeValue != NULL)
+					if (other._UserTypeValue != nullptr)
 					{
 						_UserTypeValue = other._UserTypeValue->clone();
 					}
 					else
 					{
-						_UserTypeValue = NULL;
+						_UserTypeValue = nullptr;
 					}
 				break;
 				case NoType: break;

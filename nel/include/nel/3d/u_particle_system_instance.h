@@ -186,14 +186,14 @@ public:
 	/// Proxy interface
 
 	/// Constructors
-	UParticleSystemInstance() { _Object = NULL; }
+	UParticleSystemInstance() { _Object = nullptr; }
 	UParticleSystemInstance(class CParticleSystemModel *object) { _Object = (ITransformable*)object; };
 	/// Attach an object to this proxy
 	void			attach(class CParticleSystemModel *object) { _Object = (ITransformable*)object; }
 	/// Detach the object
-	void			detach() { _Object = NULL; }
+	void			detach() { _Object = nullptr; }
 	/// Return true if the proxy is empty() (not attached)
-	bool			empty() const {return _Object==NULL;}
+	bool			empty() const {return _Object == nullptr; }
 	/// For advanced usage, get the internal object ptr
 	class CParticleSystemModel	*getObjectPtr() const {return (CParticleSystemModel*)_Object;}
 };

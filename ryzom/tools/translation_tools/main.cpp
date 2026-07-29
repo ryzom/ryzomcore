@@ -3181,7 +3181,7 @@ int main(int argc, char *argv[])
 
 	// create the diff version.
 	char temp[16];
-	sprintf(temp, "%8.8X", (uint) ::time(NULL));
+	sprintf(temp, "%8.8X", (uint) ::time(nullptr));
 	diffVersion = temp;
 
 	if (strcmp(argv[1], "make_work") == 0)

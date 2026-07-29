@@ -53,16 +53,16 @@ namespace NLGUI
 	CGroupTree::SNode::SNode()
 	{
 		Opened = false;
-		Father = NULL;
+		Father = nullptr;
 		FontSize = -1;
 		YDecal = 0;
 		DisplayText = true;
-		Template = NULL;
+		Template = nullptr;
 		Show= true;
-		NodeAddedCallback = NULL;
+		NodeAddedCallback = nullptr;
 		Color = CRGBA::White;
-		ParentTree = NULL;
-		LastVisibleSon = NULL;
+		ParentTree = nullptr;
+		LastVisibleSon = nullptr;
 		// TestYoyo
 		//nlinfo("SNode(): %8x, c%d", this, SNodeCount++);
 	}
@@ -70,7 +70,7 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	void CGroupTree::SNode::updateLastVisibleSon()
 	{
-		LastVisibleSon = NULL;
+		LastVisibleSon = nullptr;
 		if (!Show || !Opened) return;
 		for (sint sonIndex = (sint)Children.size() - 1; sonIndex >= 0; -- sonIndex)
 		{
@@ -110,7 +110,7 @@ namespace NLGUI
 	void CGroupTree::SNode::setFather(SNode *father)
 	{
 		Father = father;
-		setParentTree(father ? father->ParentTree : NULL);
+		setParentTree(father ? father->ParentTree : nullptr);
 	}
 
 
@@ -130,7 +130,7 @@ namespace NLGUI
 			SNode *found = Children[k]->getNodeFromId(id);
 			if (found) return found;
 		}
-		return NULL;
+		return nullptr;
 	}
 
 
@@ -139,10 +139,10 @@ namespace NLGUI
 		if (ParentTree)
 		{
 			ParentTree->forceRebuild();
-			setParentTree(NULL);
+			setParentTree(nullptr);
 		}
 		//
-		if (Template != NULL)
+		if (Template != nullptr)
 		{
 			if (Template->getParent())
 			{
@@ -154,7 +154,7 @@ namespace NLGUI
 		if (Father)
 		{
 			Father->detachChild(this);
-			Father = NULL;
+			Father = nullptr;
 		}
 	}
 
@@ -239,7 +239,7 @@ namespace NLGUI
 		nlassert(pNode);
 		nlassert(isChild(pNode));
 		Children.erase(std::remove(Children.begin(),  Children.end(),  pNode),  Children.end());
-		pNode->setFather(NULL);
+		pNode->setFather(nullptr);
 	}
 
 	// ----------------------------------------------------------------------------
@@ -351,7 +351,7 @@ namespace NLGUI
 
 			xmlNodePtr child = cur->children;
 
-			while (child != NULL)
+			while (child != nullptr)
 			{
 				SNode *pNode = new SNode;
 				pNode->parse (child,   parentGroup);
@@ -382,10 +382,10 @@ namespace NLGUI
 		_MustRebuild = true;
 		_OverColor = CRGBA(255, 255, 255, 128);
 		_OverColorBack = CRGBA(64, 64, 64, 255);
-		_SelectedNode = NULL;
+		_SelectedNode = nullptr;
 		_SelectedLine = -1;
 		_SelectedColor = CRGBA(255, 128, 128, 128);
-		_RootNode = NULL;
+		_RootNode = nullptr;
 		_OverLine = -1;
 		_SelectAncestorOnClose= false;
 		_NavigateOneBranch= false;
@@ -411,7 +411,7 @@ namespace NLGUI
 	CGroupTree::~CGroupTree()
 	{
 		removeAll();
-		if (_RootNode != NULL) delete _RootNode;
+		if (_RootNode != nullptr) delete _RootNode;
 	}
 
 	std::string CGroupTree::getProperty( const std::string &name ) const
@@ -660,8 +660,8 @@ namespace NLGUI
 	xmlNodePtr CGroupTree::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
 		xmlNodePtr node = CInterfaceGroup::serialize( parentNode, type );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "tree" );
 		xmlSetProp( node, BAD_CAST "col_over", BAD_CAST toString( _OverColor ).c_str() );
@@ -841,7 +841,7 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	CGroupTree::SNode *CGroupTree::getNodeUnderMouse() const
 	{
-		if (_OverLine == -1) return NULL;
+		if (_OverLine == -1) return nullptr;
 		return _Lines[_OverLine].Node;
 	}
 
@@ -860,7 +860,7 @@ namespace NLGUI
 			bDisplayOver = false;
 		}
 		else
-		if (CWidgetManager::getInstance()->getModalWindow() == NULL)
+		if (CWidgetManager::getInstance()->getModalWindow() == nullptr)
 		{
 			sint32 x = CWidgetManager::getInstance()->getPointer()->getX();
 			sint32 y = CWidgetManager::getInstance()->getPointer()->getY();
@@ -868,7 +868,7 @@ namespace NLGUI
 			CInterfaceGroup	*pIG = CWidgetManager::getInstance()->getWindowUnder(x, y);
 			CInterfaceGroup	*pParent = this;
 			bool bFound = false;
-			while (pParent != NULL)
+			while (pParent != nullptr)
 			{
 				if (pParent == pIG)
 				{
@@ -912,16 +912,16 @@ namespace NLGUI
 			// Find the first container
 			CInterfaceGroup *pIG = _Parent;
 			CGroupContainerBase *pGC = dynamic_cast<CGroupContainerBase*>(pIG);
-			while (pIG != NULL)
+			while (pIG != nullptr)
 			{
 				pIG = pIG->getParent();
-				if (pIG == NULL) break;
-				if (dynamic_cast<CGroupContainerBase*>(pIG) != NULL)
+				if (pIG == nullptr) break;
+				if (dynamic_cast<CGroupContainerBase*>(pIG) != nullptr)
 					pGC = dynamic_cast<CGroupContainerBase*>(pIG);
 			}
 
 			// avoid if window grayed
-			if (pGC != NULL)
+			if (pGC != nullptr)
 			{
 				if (pGC->isGrayed())
 					bDisplayOver = false;
@@ -931,7 +931,7 @@ namespace NLGUI
 			if (bDisplayOver)
 			{
 				// !NULL if the text over must displayed across all windows
-				CViewText	*viewTextExtend= NULL;
+				CViewText	*viewTextExtend = nullptr;
 
 				// If the line is a simple Text line (not template)
 				if(_Lines[_OverLine].Node && _Lines[_OverLine].Node->DisplayText)
@@ -940,7 +940,7 @@ namespace NLGUI
 					viewTextExtend= safe_cast<CViewText*>(_Lines[_OverLine].TextOrTemplate);
 					// If this viewText is not too big,  no need
 					if(viewTextExtend->getXReal() + viewTextExtend->getWReal() <= (clipx+clipw) )
-						viewTextExtend= NULL;
+						viewTextExtend = nullptr;
 				}
 
 				// draw simple over
@@ -1173,7 +1173,7 @@ namespace NLGUI
 	void CGroupTree::unselect()
 	{
 		_SelectedLine = -1;
-		_SelectedNode = NULL;
+		_SelectedNode = nullptr;
 	}
 
 	// ----------------------------------------------------------------------------
@@ -1215,7 +1215,7 @@ namespace NLGUI
 		// Add the hierarchy bitmaps
 		addHierarchyBitmaps();
 		// Find if we can display selection
-		if (_SelectedNode != NULL)
+		if (_SelectedNode != nullptr)
 		{
 			_SelectedLine = -1;
 			for (uint i = 0; i < _Lines.size(); ++i)
@@ -1235,7 +1235,7 @@ namespace NLGUI
 	{
 		// reset selection
 		_SelectedLine= -1;
-		_SelectedNode= NULL;
+		_SelectedNode = nullptr;
 
 		CRefPtr<SNode> refPtrNewRoot = pNewRoot;
 		// clear old
@@ -1307,7 +1307,7 @@ namespace NLGUI
 			line.TextOrTemplate->setPosRef (Hotspot_BL);
 			line.TextOrTemplate->setParentPosRef (Hotspot_BL);
 			line.TextOrTemplate->setParent (this);
-			line.TextOrTemplate->setParentPos (NULL);
+			line.TextOrTemplate->setParentPos (nullptr);
 			line.TextOrTemplate->setX (getHrcIconXEnd(nDepth-1 + line.getNumAdditionnalBitmap()));
 			line.TextOrTemplate->setY ((sint32)_Lines.size());
 			line.TextOrTemplate->setModulateGlobalColor(this->getModulateGlobalColor());
@@ -1374,7 +1374,7 @@ namespace NLGUI
 		CViewBitmap *pVB = new CViewBitmap(TCtorParam());
 		pVB->setId(idPrefix+toString(_Lines.size())+"_"+toString(_Lines[line].Bmps.size()));
 		pVB->setParent (this);
-		pVB->setParentPos (NULL);
+		pVB->setParentPos (nullptr);
 		pVB->setModulateGlobalColor(this->getModulateGlobalColor());
 		pVB->setTexture(texture);
 		return pVB;
@@ -1565,13 +1565,13 @@ namespace NLGUI
 		}
 
 		// not found => NULL
-		return NULL;
+		return nullptr;
 	}
 
 	// ***************************************************************************
 	bool	CGroupTree::selectNodeById(const std::string &nodeId, bool triggerAH)
 	{
-		SNode		*selNode= NULL;
+		SNode		*selNode = nullptr;
 
 		// Avoid infinite recurs
 		if(_AvoidSelectNodeByIdIR)
@@ -1585,7 +1585,7 @@ namespace NLGUI
 		{
 			// Opens the hierarchy
 			SNode *pFather = selNode->Father;
-			while(pFather != NULL)
+			while(pFather != nullptr)
 			{
 				pFather->Opened = true;
 				pFather = pFather->Father;
@@ -1625,7 +1625,7 @@ namespace NLGUI
 		void execute (CCtrlBase * /* pCaller */,  const std::string &sParams)
 		{
 			CGroupTree *pTree = dynamic_cast<CGroupTree*>(CWidgetManager::getInstance()->getElementFromId(sParams));
-			if (pTree != NULL)
+			if (pTree != nullptr)
 				pTree->reset();
 		}
 	protected:
@@ -1673,7 +1673,7 @@ namespace NLGUI
 		CLuaIHM::checkArgCount(ls, "setRootNode", 1);
 		if (ls.isNil())
 		{
-			setRootNode(NULL);
+			setRootNode(nullptr);
 			return 0;
 		}
 		setRootNode(SNode::luaGetNodeOnStack(ls, "CGroupTree::setRootNode"));
@@ -1693,7 +1693,7 @@ namespace NLGUI
 	CGroupTree::SNode *CGroupTree::SNode::luaGetNodeOnStack(CLuaState &ls, const char * /* funcName */)
 	{
 		SNode *node = dynamic_cast<CGroupTree::SNode *>(CLuaIHM::getReflectableOnStack(ls, 1));
-		CLuaIHM::check(ls, node != NULL, "SNode expected");
+		CLuaIHM::check(ls, node != nullptr, "SNode expected");
 		return node;
 	}
 

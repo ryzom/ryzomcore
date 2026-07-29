@@ -232,7 +232,7 @@ class CInterface3DShape : public CInterfaceElement
 public:
 	CInterface3DShape()
 	{
-		_Instance = NULL;
+		_Instance = nullptr;
 		_Pos = NLMISC::CVector(0,0,0);
 		_Rot = NLMISC::CVector(0,0,0);
 	}
@@ -291,7 +291,7 @@ class CInterface3DIG : public CInterfaceElement
 public:
 	CInterface3DIG()
 	{
-		_IG = NULL;
+		_IG = nullptr;
 		_Pos = NLMISC::CVector(0,0,0);
 		_Rot = NLMISC::CVector(0,0,0);
 	}
@@ -434,7 +434,7 @@ public:
 		_Near = 1.0f;
 		_Far = 4.0f;
 		_Color = NLMISC::CRGBA(255,255,255);
-		_Light = NULL;
+		_Light = nullptr;
 	}
 
 	virtual ~CInterface3DLight();
@@ -496,7 +496,7 @@ public:
 	CInterface3DFX()
 	{
 		_Pos = NLMISC::CVector(0,0,0);
-		_FX = NULL;
+		_FX = nullptr;
 	}
 
 	virtual ~CInterface3DFX();

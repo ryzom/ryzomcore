@@ -50,7 +50,7 @@ namespace NLSOUND {
 class CStreamFileSource : public CStreamSource, private NLMISC::IRunnable
 {
 public:
-	CStreamFileSource(CStreamFileSound *streamFileSound = NULL, bool spawn = false, TSpawnEndCallback cb = 0, void *cbUserParam = 0, NL3D::CCluster *cluster = 0, CGroupController *groupController = NULL);
+	CStreamFileSource(CStreamFileSound *streamFileSound = nullptr, bool spawn = false, TSpawnEndCallback cb = nullptr, void *cbUserParam = nullptr, NL3D::CCluster *cluster = nullptr, CGroupController *groupController = nullptr);
 	virtual ~CStreamFileSource();
 
 	/// Return the source type

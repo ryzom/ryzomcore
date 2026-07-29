@@ -104,7 +104,7 @@ namespace TST_MOD_ITF
 			{
 				_LocalModule = proxy->getLocalModule();
 				nlassert(_LocalModule != NULL);
-				CTestModuleInterfaceSkel::TInterceptor *interceptor = NULL;
+				CTestModuleInterfaceSkel::TInterceptor *interceptor = nullptr;
 				interceptor = static_cast < NLNET::CModuleBase* >(_LocalModule.getPtr())->getInterceptor(interceptor);
 				nlassert(interceptor != NULL);
 
@@ -112,7 +112,7 @@ namespace TST_MOD_ITF
 				nlassert(_LocalModuleSkel != NULL);
 			}
 			else
-				_LocalModuleSkel = 0;
+				_LocalModuleSkel = nullptr;
 
 		}
 		virtual ~CTestModuleInterfaceProxy()

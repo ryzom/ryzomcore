@@ -274,9 +274,9 @@ static const float *sysChunkFloats(CSceneClass *sys, uint16 chunkId, size_t &cou
 {
 	countOut = 0;
 	IStorageObject *chunk = findChunkAnywhere(sys, chunkId);
-	if (!chunk) return NULL;
+	if (!chunk) return nullptr;
 	CStorageRaw *raw = dynamic_cast<CStorageRaw *>(chunk);
-	if (!raw || raw->Value.size() < 4) return NULL;
+	if (!raw || raw->Value.size() < 4) return nullptr;
 	countOut = raw->Value.size() / 4;
 	return reinterpret_cast<const float *>(nlVectorData(raw->Value));
 }
@@ -582,7 +582,7 @@ CBipedAnimEval::CBipedAnimEval(CSceneClass *rigSys, SBipedRig &rig,
 			if (!m_Nodes[i].IsCom && m_Nodes[i].HasIdLink && m_Nodes[i].Id < 32)
 				idSeen[m_Nodes[i].Id] = true;
 		}
-		const SBipKeyTrack *byId[32] = { NULL };
+		const SBipKeyTrack *byId[32] = { nullptr };
 		byId[0] = &m_Keys.ArmL; byId[1] = &m_Keys.ArmR;
 		byId[2] = &m_Keys.ArmL; byId[3] = &m_Keys.ArmR;   // fingers ride the arm tracks
 		byId[4] = &m_Keys.LegL; byId[5] = &m_Keys.LegR;
@@ -1324,7 +1324,7 @@ void CBipedAnimEval::applyIk(double t, std::map<INode *, SBipNodeState> &out)
 			// find the chain nodes
 			uint32 upperId = limb ? (side ? BID_LLEG : BID_RLEG) : (side ? BID_LARM : BID_RARM);
 			uint32 upLink = limb ? 0 : 1;
-			INode *nUp = NULL, *nMid = NULL, *nEnd = NULL;
+			INode *nUp = nullptr, *nMid = nullptr, *nEnd = nullptr;
 			int maxLegLink = m_Rig ? m_Rig->MaxLegLink : 2;
 			for (size_t i = 0; i < m_Nodes.size(); ++i)
 			{
@@ -1499,7 +1499,7 @@ void CBipedAnimEval::buildPivotSessions()
 		uint32 limbId = limb ? (side ? BID_LLEG : BID_RLEG) : (side ? BID_LARM : BID_RARM);
 		uint32 upLink = limb ? 0 : 1, midLink = limb ? 1 : 2, endLink = limb ? 2 : 3;
 		// chain nodes
-		INode *nUp = NULL, *nMid = NULL, *nEnd = NULL;
+		INode *nUp = nullptr, *nMid = nullptr, *nEnd = nullptr;
 		for (size_t i = 0; i < m_Nodes.size(); ++i)
 		{
 			if (!m_Nodes[i].HasIdLink || m_Nodes[i].Id != limbId) continue;
@@ -1526,7 +1526,7 @@ void CBipedAnimEval::buildPivotSessions()
 		if (n < 2) continue;
 
 		// FK state at key times (channels return the stored pose exactly at keys)
-		INode *comNode = NULL;
+		INode *comNode = nullptr;
 		for (size_t i = 0; i < m_Nodes.size() && !comNode; ++i)
 			if (m_Nodes[i].IsCom) comNode = m_Nodes[i].Node;
 		std::vector<QuatD> keyRot(n);
@@ -1829,8 +1829,8 @@ void CBipedAnimEval::applyPivotIk(double t, std::map<INode *, SBipNodeState> &ou
 	{
 		std::vector<SPivotSession> &sessions = m_PivotSessions[limb][side];
 		if (sessions.empty()) continue;
-		const SPivotSession *sess = NULL;
-		const SPivotInterval *iv = NULL;
+		const SPivotSession *sess = nullptr;
+		const SPivotInterval *iv = nullptr;
 		for (size_t si = 0; si < sessions.size() && !iv; ++si)
 			for (size_t ii = 0; ii < sessions[si].Intervals.size(); ++ii)
 			{
@@ -1845,7 +1845,7 @@ void CBipedAnimEval::applyPivotIk(double t, std::map<INode *, SBipNodeState> &ou
 		if (!iv) continue;
 		uint32 limbId = limb ? (side ? BID_LLEG : BID_RLEG) : (side ? BID_LARM : BID_RARM);
 		uint32 upLink = limb ? 0 : 1, midLink = limb ? 1 : 2, endLink = limb ? 2 : 3;
-		INode *nUp = NULL, *nMid = NULL, *nEnd = NULL;
+		INode *nUp = nullptr, *nMid = nullptr, *nEnd = nullptr;
 		for (size_t i = 0; i < m_Nodes.size(); ++i)
 		{
 			if (!m_Nodes[i].HasIdLink || m_Nodes[i].Id != limbId) continue;
@@ -1930,7 +1930,7 @@ void CBipedAnimEval::applyPivotIk(double t, std::map<INode *, SBipNodeState> &ou
 		T += iv->M0 * (1.0 - u) + iv->M1 * u;
 
 		NLMISC::CVectorD ankFk = stEnd.WorldPos;
-		static const bool s_ikDebug = getenv("PMB_BIPED_IK_DEBUG") != NULL;
+		static const bool s_ikDebug = getenv("PMB_BIPED_IK_DEBUG") != nullptr;
 		if (s_ikDebug)
 			fprintf(stderr, "IKDBG side=%d t=%g iv=[%d,%d] W=(%g,%g,%g) pLoc=(%g,%g,%g) T=(%g,%g,%g) ankFk=(%g,%g,%g) M0=(%g,%g,%g) M1=(%g,%g,%g)\n",
 			        side, t, iv->T0, iv->T1, W.x, W.y, W.z, sess->PLocal.x, sess->PLocal.y, sess->PLocal.z,

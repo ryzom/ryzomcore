@@ -136,8 +136,8 @@ private:
 	  * \param slotsId a vector that will be filled with couples (slotID, extensionID)
 	  * \return true if the filename is correct (must contain at least one slot)
 	  */
-	bool					parseTexName(const char *texName, std::string *texNameWithoutExtensions = NULL,
-										 TIntCoupleVect *slotsId = NULL) const;
+	bool					parseTexName(const char *texName, std::string *texNameWithoutExtensions = nullptr,
+										 TIntCoupleVect *slotsId = nullptr) const;
 	/** Change a texture name with the given parameters.
 	  * \return true if the name changed
 	  */

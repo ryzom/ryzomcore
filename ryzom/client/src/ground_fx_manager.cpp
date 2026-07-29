@@ -75,7 +75,7 @@ CGroundFXManager::CGroundFXManager() :
 					   _MaxNumCachedFX(10),
 					   _NumCachedFX(0),
 					   _NumInstances(0),
-					   _Scene(NULL)
+					   _Scene(nullptr)
 {
 	H_AUTO_USE(RZ_GroundFXManager)
 	// Construct
@@ -125,7 +125,7 @@ void CGroundFXManager::reset()
 	_NumFX = 0;
 	_NumCachedFX = 0;
 	_NumInstances = 0;
-	_Scene = NULL;
+	_Scene = nullptr;
 }
 
 // *****************************************************************************
@@ -649,8 +649,8 @@ void CGroundFXManager::update(const NLMISC::CVectorD &camPos)
 				_ActiveFXs.push_front(CGroundFX());
 				++ _NumFX;
 				CGroundFX &gfx = _ActiveFXs.front();
-				gfx.FX = NULL;
-				gfx.FXUnderWater = NULL;
+				gfx.FX = nullptr;
+				gfx.FXUnderWater = nullptr;
 				NL3D::UInstance fxInstance = _Scene->createInstance(fxName);
 				if (!fxInstance.empty())
 				{

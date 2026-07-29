@@ -370,7 +370,7 @@ void		CVisualCollisionMesh::receiveShadowMap(const NLMISC::CMatrix &instanceMatr
 		return;
 
 	// The VertexBuffer RefPtr has been released? quit
-	if(_VertexBuffer == NULL)
+	if(_VertexBuffer == nullptr)
 		return;
 
 

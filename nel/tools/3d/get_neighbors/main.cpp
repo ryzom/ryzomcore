@@ -22,7 +22,7 @@
 
 void	nameToXY(const char *str, int &x, int &y)
 {
-	if (strchr(str, '_') == NULL)
+	if (strchr(str, '_') == nullptr)
 	{
 		fprintf(stderr, "invalid zone name %s\n", str);
 		abort();

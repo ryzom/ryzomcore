@@ -58,8 +58,8 @@ namespace NLGUI
 	xmlNodePtr CViewTextIDFormated::serialize(xmlNodePtr parentNode, const char *type) const
 	{
 		xmlNodePtr node = CViewTextID::serialize(parentNode, type);
-		if (node == NULL)
-			return NULL;
+		if (node == nullptr)
+			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "text_id_formated" );
 		xmlSetProp( node, BAD_CAST "format", BAD_CAST getFormatString().c_str() );
@@ -93,7 +93,7 @@ namespace NLGUI
 			std::string result, formatedResult;
 			bool bValid;
 
-			if( CViewTextID::getTextProvider() == NULL )
+			if( CViewTextID::getTextProvider() == nullptr)
 			{
 				if(!_DBPath.empty())
 					result = _DBPath;

@@ -99,7 +99,7 @@ void			CFastPtrListBase::erase(CFastPtrListNode *node)
 	_Nodes.pop_back();
 
 	// reset erased node.
-	node->_Owner= NULL;
+	node->_Owner = nullptr;
 }
 
 

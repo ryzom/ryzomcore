@@ -50,7 +50,7 @@ namespace NLGUI
 	{
 		if( name == "value" )
 		{
-			if( _Number.getNodePtr() != NULL )
+			if( _Number.getNodePtr() != nullptr)
 				return _Number.getNodePtr()->getFullName();
 			else
 				return "";
@@ -114,12 +114,12 @@ namespace NLGUI
 	xmlNodePtr CDBViewDigit::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
 		xmlNodePtr node = CViewBase::serialize( parentNode, type );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "digit" );
 
-		if( _Number.getNodePtr() != NULL )
+		if( _Number.getNodePtr() != nullptr)
 			xmlSetProp( node, BAD_CAST "value", BAD_CAST _Number.getNodePtr()->getFullName().c_str() );
 		else
 			xmlSetProp( node, BAD_CAST "value", BAD_CAST "" );

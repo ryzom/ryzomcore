@@ -44,14 +44,14 @@ using namespace NLMISC;
 
 namespace R2
 {
-CScenarioEntryPoints	*CScenarioEntryPoints::_Instance = NULL;
+CScenarioEntryPoints	*CScenarioEntryPoints::_Instance = nullptr;
 
 CScenarioEntryPoints::CScenarioEntryPoints()
 {
 	_IsLoaded= false;
 	_CompleteIslandsLoaded = false;
 	_LastTestedCoords.set(FLT_MAX, FLT_MAX);
-	_LastFoundIsland = NULL;
+	_LastFoundIsland = nullptr;
 	init();
 }
 
@@ -87,7 +87,7 @@ void CScenarioEntryPoints::releaseInstance()
 {
 	if( _Instance )
 		delete _Instance;
-	_Instance = NULL;
+	_Instance = nullptr;
 }
 
 //-----------------------------------------------------------------------------
@@ -120,7 +120,7 @@ void CScenarioEntryPoints::setFiles(const std::string &completeIslandsFilename, 
 		_CompleteIslandsLoaded = false;
 		_EntryPoints.clear();
 		_IsLoaded = false;
-		_LastFoundIsland = NULL;
+		_LastFoundIsland = nullptr;
 	}
 }
 
@@ -159,7 +159,7 @@ CScenarioEntryPoints::CCompleteIsland * CScenarioEntryPoints::getIslandFromId(co
 			return &_CompleteIslands[i];
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 //-----------------------------------------------------------------------------
@@ -184,7 +184,7 @@ CScenarioEntryPoints::CShortEntryPoint * CScenarioEntryPoints::getEntryPointFrom
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 //-----------------------------------------------------------------------------
@@ -276,7 +276,7 @@ CScenarioEntryPoints::CCompleteIsland *CScenarioEntryPoints::getCompleteIslandFr
 				return _LastFoundIsland;
 			}
 		}
-		_LastFoundIsland = NULL;
+		_LastFoundIsland = nullptr;
 		return _LastFoundIsland;
 	}
 	else
@@ -330,7 +330,7 @@ void CScenarioEntryPoints::loadFromXMLFile()
 
 	// clear out the entry point vector before we begin
 	_CompleteIslands.clear();
-	_LastFoundIsland = NULL;
+	_LastFoundIsland = nullptr;
 
 	for (size_t i = 0; i < _CompleteIslandsFilenames.size(); ++i)
 	{
@@ -359,13 +359,13 @@ void CScenarioEntryPoints::loadFromXMLFile()
 			xmlNodePtr islands = input.getRootNode();
 			xmlNodePtr islandNode = input.getFirstChildNode(islands, "complete_island");
 
-			while (islandNode != 0)
+			while (islandNode != nullptr)
 			{
 				CCompleteIsland completeIsland;
 
 				// island name
 				const char *island = (const char *)xmlGetProp(islandNode, (xmlChar *)"island");
-				if (island == 0)
+				if (island == nullptr)
 				{
 					nlinfo("no 'island' tag in %s", _CompleteIslandsFilenames[i].c_str());
 					continue;
@@ -384,35 +384,35 @@ void CScenarioEntryPoints::loadFromXMLFile()
 
 				// continent
 				const char *continent = (const char *)xmlGetProp(islandNode, (xmlChar *)"continent");
-				if (continent == 0)
+				if (continent == nullptr)
 					nlinfo("no 'continent' tag in %s island", island);
 				else
 					completeIsland.Continent = CSString(continent);
 
 				// xmin
 				const char *xmin = (const char *)xmlGetProp(islandNode, (xmlChar *)"xmin");
-				if (xmin == 0)
+				if (xmin == nullptr)
 					nlinfo("no 'xmin' tag in %s island", island);
 				else
 					fromString(xmin, completeIsland.XMin);
 
 				// ymin
 				const char *ymin = (const char *)xmlGetProp(islandNode, (xmlChar *)"ymin");
-				if (ymin == 0)
+				if (ymin == nullptr)
 					nlinfo("no 'ymin' tag in %s island", island);
 				else
 					fromString(ymin, completeIsland.YMin);
 
 				// xmax
 				const char *xmax = (const char *)xmlGetProp(islandNode, (xmlChar *)"xmax");
-				if (xmax == 0)
+				if (xmax == nullptr)
 					nlinfo("no 'xmax' tag in %s island", island);
 				else
 					fromString(xmax, completeIsland.XMax);
 
 				// ymax
 				const char *ymax = (const char *)xmlGetProp(islandNode, (xmlChar *)"ymax");
-				if (ymax == 0)
+				if (ymax == nullptr)
 					nlinfo("no 'ymax' tag in %s island", island);
 				else
 					fromString(ymax, completeIsland.YMax);
@@ -446,11 +446,11 @@ void CScenarioEntryPoints::loadFromXMLFile()
 				// zones
 				xmlNodePtr zoneNode = input.getFirstChildNode(islandNode, "zone");
 
-				while (zoneNode != 0)
+				while (zoneNode != nullptr)
 				{
 					// island name
 					const char *zoneName = (const char *)xmlGetProp(zoneNode, (xmlChar *)"name");
-					if (zoneName == 0)
+					if (zoneName == nullptr)
 					{
 						nlinfo("no 'zone name' tag in %s", _CompleteIslandsFilenames[i].c_str());
 					}
@@ -474,7 +474,7 @@ void CScenarioEntryPoints::loadFromXMLFile()
 				{
 					completeIsland.EntryPoints = entryPoints;
 					_CompleteIslands.push_back(completeIsland);
-					_LastFoundIsland = NULL;
+					_LastFoundIsland = nullptr;
 				}
 
 				islandNode = input.getNextChildNode(islandNode, "complete_island");
@@ -533,7 +533,7 @@ void CScenarioEntryPoints::saveXMLFile(const TCompleteIslands & completeIslands,
 		xmlDocPtr xmlDoc = output.getDocument();
 
 		// Create the first node
-		xmlNodePtr root = xmlNewDocNode(xmlDoc, NULL, (const xmlChar*)"islands", NULL);
+		xmlNodePtr root = xmlNewDocNode(xmlDoc, nullptr, (const xmlChar*)"islands", nullptr);
 		xmlDocSetRootElement(xmlDoc, root);
 
 		std::map< std::string, xmlNodePtr > islandNodes;
@@ -543,7 +543,7 @@ void CScenarioEntryPoints::saveXMLFile(const TCompleteIslands & completeIslands,
 			// island already exists?
 			if(islandNodes.find(completeIslands[i].Island) == islandNodes.end())
 			{
-				xmlNodePtr islandNode = xmlNewChild(root, NULL, (const xmlChar*)"complete_island", NULL);
+				xmlNodePtr islandNode = xmlNewChild(root, nullptr, (const xmlChar*)"complete_island", nullptr);
 				xmlSetProp(islandNode, (const xmlChar*)"island", (const xmlChar*)completeIslands[i].Island.c_str());
 				//xmlSetProp(islandNode, (const xmlChar*)"package", (const xmlChar*)completeIslands[i].Package.c_str());
 				xmlSetProp(islandNode, (const xmlChar*)"continent", (const xmlChar*)completeIslands[i].Continent.c_str());
@@ -563,7 +563,7 @@ void CScenarioEntryPoints::saveXMLFile(const TCompleteIslands & completeIslands,
 				std::list<std::string>::const_iterator itZone;
 				for(itZone=completeIslands[i].Zones.begin(); itZone!=completeIslands[i].Zones.end(); itZone++)
 				{
-					xmlNodePtr zoneNode = xmlNewChild(islandNode, NULL, (const xmlChar*)"zone", NULL);
+					xmlNodePtr zoneNode = xmlNewChild(islandNode, nullptr, (const xmlChar*)"zone", nullptr);
 					xmlSetProp(zoneNode, (const xmlChar*)"name", (const xmlChar*)(*itZone).c_str());
 				}
 

@@ -91,7 +91,7 @@ public:
 	{
 		TValueMap::const_iterator	it = Values.find(name);
 		if (it == Values.end())
-			return (Parent == NULL ? false : Parent->exists(name));
+			return (Parent == nullptr ? false : Parent->exists(name));
 		return true;
 	}
 
@@ -120,7 +120,7 @@ public:
 		if (child.empty())
 			return this;
 
-		CTemplatizerEnv*	env = NULL;
+		CTemplatizerEnv*	env = nullptr;
 
 		if (child == ".")
 		{
@@ -128,7 +128,7 @@ public:
 		}
 		else if (child == "..")
 		{
-			env = (Parent != NULL ? Parent : this);
+			env = (Parent != nullptr ? Parent : this);
 		}
 		else if (child == "...")
 		{
@@ -167,7 +167,7 @@ public:
 		}
 		else if (child == "..")
 		{
-			CTemplatizerEnv*	env = (Parent != NULL ? Parent : this);
+			CTemplatizerEnv*	env = (Parent != nullptr ? Parent : this);
 			return (dotpos == std::string::npos) ? env : env->getSubEnv(name.substr(dotpos+1));
 		}
 		else if (child == "...")
@@ -184,7 +184,7 @@ public:
 			}
 			else
 			{
-				return Parent != NULL ? Parent->getEnv(name) : getSubEnv(name);
+				return Parent != nullptr ? Parent->getEnv(name) : getSubEnv(name);
 			}
 		}
 	}
@@ -236,7 +236,7 @@ public:
 	virtual CTemplatizerEnv*	getRootEnv()
 	{
 		CTemplatizerEnv*	root = this;
-		while (root->getParent() != NULL)
+		while (root->getParent() != nullptr)
 			root = root->getParent();
 
 		return root;
@@ -257,9 +257,9 @@ public:
 	/// Get Value Node
 	virtual ITemplatizerBloc*	getValueNode(const std::string& name)
 	{
-		ITemplatizerBloc*	node = NULL;
-		CTemplatizerEnv*	env = NULL;
-		return getValueNodeAndEnv(name, node, env) ? node : NULL;
+		ITemplatizerBloc*	node = nullptr;
+		CTemplatizerEnv*	env = nullptr;
+		return getValueNodeAndEnv(name, node, env) ? node : nullptr;
 	}
 
 	/// Get Value Node
@@ -270,27 +270,27 @@ public:
 		{
 			node = getNode(name);
 			env = this;
-			while (node == NULL && env != NULL)
+			while (node == nullptr && env != nullptr)
 			{
 				env = env->getParent();
-				if (env != NULL)
+				if (env != nullptr)
 					node = env->getNode(name);
 			}
 		}
 		else
 		{
 			env = getEnv(name.substr(0, pos));
-			if (env != NULL)
+			if (env != nullptr)
 				node = env->getNode(name.substr(pos+1));
 		}
 
-		return node != NULL && env != NULL;
+		return node != nullptr && env != nullptr;
 	}
 
 	virtual ITemplatizerBloc*	getNode(const std::string& name)
 	{
 		TValueMap::iterator	it = Values.find(name);
-		return it == Values.end() ? NULL : (*it).second;
+		return it == Values.end() ? nullptr : (*it).second;
 	}
 
 	virtual NLMISC::CEvalNumExpr::TReturnState	evalValue (const char *value, double &result, uint32 userData);
@@ -305,12 +305,13 @@ class CTemplatizerRefEnv : public CTemplatizerEnv
 public:
 
 	/// Constructor
-	CTemplatizerRefEnv(CTemplatizerEnv* ref) : CTemplatizerEnv(NULL), Reference(ref)	{ }
+	CTemplatizerRefEnv(CTemplatizerEnv* ref) : CTemplatizerEnv(nullptr)
+	    , Reference(ref)	{ }
 
 	/// Clear Env
 	virtual void		clear()
 	{
-		Reference = NULL;
+		Reference = nullptr;
 	}
 
 	/// Get value
@@ -431,7 +432,7 @@ public:
 	template<typename T>
 	void		set(const std::string& var, const T& value)
 	{
-		if (RootEnv == NULL)
+		if (RootEnv == nullptr)
 			return;
 
 		std::string::size_type pos = var.find_last_of(EnvSeparator);
@@ -460,9 +461,10 @@ class CTemplatizerParser
 {
 public:
 
-	CTemplatizerParser() : _Buffer(NULL), _Line(0), _Valid(false)	{ }
+	CTemplatizerParser() : _Buffer(nullptr)
+	    , _Line(0), _Valid(false)	{ }
 	CTemplatizerParser(const CTemplatizerParser& ptr) : _Buffer(ptr._Buffer), _Line(ptr._Line), _Valid(ptr._Valid)	{ }
-	CTemplatizerParser(const char*	buffer, uint linestart = 1) : _Buffer(buffer), _Line(linestart), _Valid(_Buffer != NULL)	{ }
+	CTemplatizerParser(const char*	buffer, uint linestart = 1) : _Buffer(buffer), _Line(linestart), _Valid(_Buffer != nullptr)	{ }
 
 	char	operator * () const			{ return *_Buffer; }
 	char	operator [] (int i) const	{ return _Buffer[i]; }
@@ -546,7 +548,7 @@ public:
 	/// Get Param list
 	virtual const char**	getDefParamList()
 	{
-		return NULL;
+		return nullptr;
 	}
 
 	/// Get Actual Bloc (not a reference)
@@ -618,12 +620,12 @@ public:
 	ITemplatizerBloc*	Reference;
 
 	/// Constructor
-	CTemplatizerReferenceBloc(ITemplatizerBloc* ref = NULL) : Reference(ref)	{}
+	CTemplatizerReferenceBloc(ITemplatizerBloc* ref = nullptr) : Reference(ref)	{}
 
 	/// Destructor
 	virtual ~CTemplatizerReferenceBloc()
 	{
-		Reference = NULL;
+		Reference = nullptr;
 	}
 
 	/// Evaluate node
@@ -632,7 +634,7 @@ public:
 		std::string			name = evalParam("name", env);
 		std::string			ref = evalParam("ref", env);
 		ITemplatizerBloc*	refnode = env->getValueNode(ref);
-		if (refnode != NULL)
+		if (refnode != nullptr)
 			env->setValueNode(name, new CTemplatizerReferenceBloc(refnode));
 		else
 			nlwarning("Failed to create reference on '%s', not found", name.c_str());
@@ -675,7 +677,7 @@ public:
 		std::string			ref = evalParam("ref", env);
 
 		CTemplatizerEnv*	refenv = env->getEnv(ref);
-		if (refenv != NULL)
+		if (refenv != nullptr)
 			env->setSubEnv(name, new CTemplatizerRefEnv(refenv));
 		else
 			nlwarning("Failed to create reference on env '%s', not found", name.c_str());
@@ -748,7 +750,7 @@ inline std::string	CTemplatizerEnv::get(const std::string& name)
 {
 	ITemplatizerBloc*	bloc = getValueNode(name);
 
-	return (bloc == NULL) ? std::string("") : bloc->getText(this);
+	return (bloc == nullptr) ? std::string("") : bloc->getText(this);
 }
 
 // eval num expr override
@@ -1010,7 +1012,7 @@ public:
 
 		FILE*	f;
 		f = NLMISC::nlfopen(filename, (clearfile == "true" ? "w" : "a"));
-		if (f != NULL)
+		if (f != nullptr)
 		{
 			fwrite(result.c_str(), 1, result.size(), f);
 			fclose(f);
@@ -1065,11 +1067,11 @@ public:
 		std::string	result = ITemplatizerBloc::eval(env);
 
 		ITemplatizerBloc*	bloc = env->getValueNode(var);
-		if (bloc == NULL)
+		if (bloc == nullptr)
 			return "";
 
 		CTemplatizerRawTextBloc*	text = dynamic_cast<CTemplatizerRawTextBloc*>(bloc->getActualBloc());
-		if (text == NULL)
+		if (text == nullptr)
 			return "";
 
 		text->Text += result;
@@ -1123,7 +1125,7 @@ public:
 	{
 		std::string	value = evalParam("cond", env);
 		double		result;
-		NLMISC::CEvalNumExpr::TReturnState	res = env->evalExpression(value.c_str(), result, NULL);
+		NLMISC::CEvalNumExpr::TReturnState	res = env->evalExpression(value.c_str(), result, nullptr);
 
 		if (res == NLMISC::CEvalNumExpr::NoError && result != 0.0)
 		{
@@ -1221,8 +1223,8 @@ public:
 
 	virtual std::string	eval(CTemplatizerEnv* env)
 	{
-		ITemplatizerBloc*	func = NULL;
-		CTemplatizerEnv*	fenv = NULL;
+		ITemplatizerBloc*	func = nullptr;
+		CTemplatizerEnv*	fenv = nullptr;
 		if (!env->getValueNodeAndEnv(Name, func, fenv))
 		{
 			nlwarning("Unknown user function '%s'", Name.c_str());
@@ -1249,7 +1251,7 @@ public:
 	/// Get Param list
 	virtual const char**	getDefParamList()
 	{
-		return NULL;
+		return nullptr;
 	}
 
 	/// Has A Internal Bloc of data
@@ -1299,14 +1301,14 @@ public:
 		std::string	name = evalParam("name", env);
 
 		ITemplatizerBloc*	bloc = env->getValueNode(classname);
-		if (bloc == NULL)
+		if (bloc == nullptr)
 		{
 			nlwarning("Unknown class '%s'", classname.c_str());
 			return "";
 		}
 
 		CTemplatizerClassBloc*	classbloc = dynamic_cast<CTemplatizerClassBloc*>(bloc->getActualBloc());
-		if (classbloc == NULL)
+		if (classbloc == nullptr)
 		{
 			nlwarning("object '%s' is not a class", classname.c_str());
 			return "";

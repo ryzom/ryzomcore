@@ -46,7 +46,7 @@ using namespace STRING_MANAGER;
 sint FAME_MIN_DBVALUE  = -100;
 sint FAME_MAX_DBVALUE  = 100;
 
-CSkillManager* CSkillManager::_Instance = NULL;
+CSkillManager* CSkillManager::_Instance = nullptr;
 
 extern CUserEntity	*UserEntity;
 
@@ -58,19 +58,19 @@ extern CUserEntity	*UserEntity;
 // ***************************************************************************
 CSkillManager::CSkillManager()
 {
-	_UnblockTitle = NULL;
-	_Tree= NULL;
+	_UnblockTitle = nullptr;
+	_Tree = nullptr;
 
 	for(uint i=0;i<SKILLS::NUM_SKILLS;i++)
 	{
-		_SkillValues[i]= NULL;
-		_SkillBaseValues[i]= NULL;
+		_SkillValues[i] = nullptr;
+		_SkillBaseValues[i] = nullptr;
 		_MaxChildBaseSkillValue[i] = 0;
 		_CacheSkillValues[i]= 0;
 		_CacheSkillBaseValues[i]= 0;
 	}
 
-	_TrackSkillChange= NULL;
+	_TrackSkillChange = nullptr;
 }
 
 // ***************************************************************************
@@ -88,12 +88,12 @@ void CSkillManager::initInGame()
 	{
 		CEntitySheet *pES = itSheet->second.EntitySheet;
 		CSkillsTreeSheet *pSTS = dynamic_cast<CSkillsTreeSheet*>(pES);
-		if (pSTS != NULL)
+		if (pSTS != nullptr)
 		{
 			_Tree = pSTS;
 		}
 		CUnblockTitlesSheet *pUTS = dynamic_cast<CUnblockTitlesSheet*>(pES);
-		if (pUTS != NULL)
+		if (pUTS != nullptr)
 		{
 			_UnblockTitle = pUTS;
 		}
@@ -168,20 +168,20 @@ void CSkillManager::initInGame()
 // ***************************************************************************
 void CSkillManager::uninitInGame()
 {
-	_UnblockTitle = NULL;
-	_Tree= NULL;
+	_UnblockTitle = nullptr;
+	_Tree = nullptr;
 
 	uint i;
 	for(i=0;i<SKILLS::NUM_SKILLS;i++)
 	{
-		_SkillValues[i]= NULL;
-		_SkillBaseValues[i]= NULL;
+		_SkillValues[i] = nullptr;
+		_SkillBaseValues[i] = nullptr;
 		_MaxChildBaseSkillValue[i] = 0;
 		_CacheSkillValues[i]= 0;
 		_CacheSkillBaseValues[i]= 0;
 	}
 
-	_TrackSkillChange= NULL;
+	_TrackSkillChange = nullptr;
 
 	contReset(_TitlesUnblocked);
 
@@ -589,7 +589,7 @@ void CSkillManager::checkTitleUnblocked(CHARACTER_TITLE::ECharacterTitle i, bool
 				string titleStr = CHARACTER_TITLE::toString((CHARACTER_TITLE::ECharacterTitle)i);
 				bool womenTitle = (UserEntity && UserEntity->getGender() == GSGENDER::female);
 				const char *newtitle(CStringManagerClient::getTitleLocalizedName(titleStr, womenTitle));
-				CAHManager::getInstance()->runActionHandler("message_popup", NULL, string("text1=") + newtitle + "|text0=" + CI18N::get("uiNewTitleBold"));
+				CAHManager::getInstance()->runActionHandler("message_popup", nullptr, string("text1=") + newtitle + "|text0=" + CI18N::get("uiNewTitleBold"));
 			}
 			else
 			{
@@ -614,7 +614,7 @@ void CSkillManager::checkTitleUnblocked(CHARACTER_TITLE::ECharacterTitle i, bool
 			}
 
 			// Update title combo box
-			CAHManager::getInstance()->runActionHandler("title_init_combobox", NULL);
+			CAHManager::getInstance()->runActionHandler("title_init_combobox", nullptr);
 		}
 	}
 }
@@ -1034,7 +1034,7 @@ void CSkillManager::blockTitleFromServer(CHARACTER_TITLE::ECharacterTitle ct)
 void CSkillManager::setPlayerTitle(const std::string &name)
 {
 	setCurrentTitle(CHARACTER_TITLE::toCharacterTitle(name));
-	CAHManager::getInstance()->runActionHandler("title_init_combobox", NULL);
+	CAHManager::getInstance()->runActionHandler("title_init_combobox", nullptr);
 }
 
 
@@ -1053,7 +1053,7 @@ public:
 	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CAHManager::getInstance()->runActionHandler("title_combobox_button", NULL);
+		CAHManager::getInstance()->runActionHandler("title_combobox_button", nullptr);
 
 		// Setup UI:TITLE from current title
 		CSkillManager *pSM = CSkillManager::getInstance();
@@ -1087,7 +1087,7 @@ public:
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CDBGroupComboBox *pCB = dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId(GROUP_TITLE_COMBO));
-		if (pCB != NULL)
+		if (pCB != nullptr)
 		{
 			pCB->resetTexts();
 			pSM->_UIUnblockedTitles.clear();
@@ -1119,7 +1119,7 @@ public:
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CDBGroupComboBox *pCB = dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId(GROUP_TITLE_COMBO));
-		if (pCB == NULL) return;
+		if (pCB == nullptr) return;
 		if ((pCB->getSelection() < 0) || (pCB->getSelection() >= (sint32)pSM->_UIUnblockedTitles.size())) return;
 
 		nNewTitle = (uint8)pSM->_UIUnblockedTitles[pCB->getSelection()];

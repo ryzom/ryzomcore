@@ -61,7 +61,7 @@ void CSoundBank::bufferUnloaded(const NLMISC::TStringId  &bufferName)
 		{
 			// remove the associated buffer.
 			CSimpleSound *ss = const_cast<CSimpleSound*>(*(first));
-			ss->setBuffer(NULL);
+			ss->setBuffer(nullptr);
 		}
 	}
 }
@@ -89,7 +89,7 @@ void CSoundBank::bufferLoaded(const NLMISC::TStringId &/* bufferName */, IBuffer
 
 void CSoundBank::registerBufferAssoc(CSimpleSound *sound, IBuffer *buffer)
 {
-	if (buffer != NULL)
+	if (buffer != nullptr)
 	{
 		const NLMISC::TStringId &bufferName = buffer->getName();
 		_BufferAssoc[bufferName].insert(sound);
@@ -98,7 +98,7 @@ void CSoundBank::registerBufferAssoc(CSimpleSound *sound, IBuffer *buffer)
 
 void CSoundBank::unregisterBufferAssoc(CSimpleSound *sound, IBuffer * buffer)
 {
-	if (buffer != NULL)
+	if (buffer != nullptr)
 	{
 		const TStringId &bufferName = buffer->getName();
 		TBufferAssocContainer::iterator it(_BufferAssoc.find(bufferName));
@@ -156,7 +156,7 @@ public:
 
 	/// Default constructor.
 	CSoundSerializer()
-		: Sound(0)
+		: Sound(nullptr)
 	{}
 
 	// load the values using the george sheet (called by GEORGE::loadForm)
@@ -207,7 +207,7 @@ public:
 				Sound = new CStreamFileSound();
 				break;
 			default:
-				Sound = 0;
+				Sound = nullptr;
 			}
 
 //			nlassert(_Sound != 0);
@@ -220,7 +220,7 @@ public:
 		}
 		else
 		{
-			if (Sound == 0)
+			if (Sound == nullptr)
 			{
 				// the sound doesn't exist
 				uint32 i = std::numeric_limits<uint32>::max();
@@ -246,7 +246,7 @@ public:
 	 */
 	void removed()
 	{
-		if (Sound != 0)
+		if (Sound != nullptr)
 		{
 			// we remove the sound from the bank and delete it.
 //			CSoundBank::instance()->removeSound(_Sound->getName());
@@ -276,7 +276,7 @@ void CSoundBank::load(const std::string &packedSheetDir, bool packedSheetUpdate)
 	std::map<std::string, CSoundSerializer>::iterator first(Container.begin()), last(Container.end());
 	for (; first != last; ++first)
 	{
-		if (first->second.Sound != 0)
+		if (first->second.Sound != nullptr)
 			addSound(first->second.Sound);
 	}
 
@@ -342,7 +342,7 @@ CSound*			CSoundBank::getSound(const NLMISC::TStringId &name)
 	TSoundTable::iterator iter = _Sounds.find(name);
 	if ( iter == _Sounds.end() )
 	{
-		return 0;
+		return nullptr;
 	}
 	else
 	{

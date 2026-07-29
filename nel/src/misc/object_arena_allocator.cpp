@@ -29,7 +29,7 @@ namespace NLMISC
 {
 
 
-CObjectArenaAllocator *CObjectArenaAllocator::_DefaultAllocator = NULL;
+CObjectArenaAllocator *CObjectArenaAllocator::_DefaultAllocator = nullptr;
 
 
 // *****************************************************************************************************************
@@ -38,7 +38,7 @@ CObjectArenaAllocator::CObjectArenaAllocator(uint maxAllocSize, uint granularity
 	nlassert(granularity > 0);
 	nlassert(maxAllocSize > 0);
 	_MaxAllocSize = granularity * ((maxAllocSize + (granularity - 1)) / granularity);
-	_ObjectSizeToAllocator.resize(_MaxAllocSize / granularity, NULL);
+	_ObjectSizeToAllocator.resize(_MaxAllocSize / granularity, nullptr);
 	_Granularity = granularity;
 	#ifdef NL_DEBUG
 		_AllocID = 0;

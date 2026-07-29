@@ -159,7 +159,7 @@ static std::vector<std::string> g_psSearchPaths;
 // (shared with pipeline_max_export_shape) — deduced from the input path or passed via --db;
 // --path-alias registers additional DBPATH::addAlias() roots for corpus content that doesn't
 // follow the "R:\graphics\..." / "R:\database\..." convention.
-static CSceneClassRegistry *g_registry = NULL;
+static CSceneClassRegistry *g_registry = nullptr;
 
 // ---------------------------------------------------------------------------------------------
 // AppData access. Script entries are keyed (MAXSCRIPT_UTILITY_CLASS_ID, 4128, subId) and hold
@@ -223,7 +223,7 @@ static CSceneClass *baseObjectOfObj(CSceneClass *obj, int depth)
 		// Derived object: modifiers (superclass 0x810/0x820) + the base object. Take the last
 		// reference that is not a modifier.
 		CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(obj);
-		CSceneClass *base = NULL;
+		CSceneClass *base = nullptr;
 		for (uint i = 0; rm && i < rm->nbReferences(); ++i)
 		{
 			CSceneClass *r = dynamic_cast<CSceneClass *>(rm->getReference(i));
@@ -253,7 +253,9 @@ struct SLoadedMax
 	CDllDirectory *Dll;
 	CClassDirectory3 *Cd;
 	CScene *Scene;
-	SLoadedMax() : Dll(NULL), Cd(NULL), Scene(NULL) { }
+	SLoadedMax() : Dll(nullptr)
+	    , Cd(nullptr)
+	    , Scene(nullptr) { }
 };
 
 static std::map<std::string, SLoadedMax> g_xrefScenes;
@@ -261,10 +263,10 @@ static std::map<std::string, SLoadedMax> g_xrefScenes;
 static SLoadedMax *loadMaxFileCached(const std::string &path)
 {
 	std::map<std::string, SLoadedMax>::iterator it = g_xrefScenes.find(path);
-	if (it != g_xrefScenes.end()) return it->second.Scene ? &it->second : NULL;
+	if (it != g_xrefScenes.end()) return it->second.Scene ? &it->second : nullptr;
 	SLoadedMax &lm = g_xrefScenes[path]; // inserted empty: failure is cached too
 	CStorageOleIn in;
-	if (!in.open(path)) { fprintf(stderr, "WARNING: xref: not an OLE compound file: %s\n", path.c_str()); return NULL; }
+	if (!in.open(path)) { fprintf(stderr, "WARNING: xref: not an OLE compound file: %s\n", path.c_str()); return nullptr; }
 	CDllDirectory *dll = new CDllDirectory();
 	CClassDirectory3 *cd = new CClassDirectory3(dll);
 	CScene *scene = new CScene(g_registry, dll, cd);
@@ -276,7 +278,7 @@ static SLoadedMax *loadMaxFileCached(const std::string &path)
 	{
 		fprintf(stderr, "WARNING: xref: missing streams in %s\n", path.c_str());
 		delete scene; delete cd; delete dll;
-		return NULL;
+		return nullptr;
 	}
 	lm.Dll = dll;
 	lm.Cd = cd;
@@ -306,10 +308,10 @@ static CSceneClass *resolveXRefObject(CSceneClass *xrefObj, int depth)
 	if (depth > 8)
 	{
 		fprintf(stderr, "WARNING: xref: recursion depth exceeded\n");
-		return NULL;
+		return nullptr;
 	}
 	// Find the 0x0170 record among the orphaned chunks.
-	CStorageContainer *rec = NULL;
+	CStorageContainer *rec = nullptr;
 	const CStorageContainer::TStorageObjectContainer &orphans = xrefObj->orphanedChunks();
 	for (CStorageContainer::TStorageObjectConstIt it = orphans.begin(); it != orphans.end(); ++it)
 	{
@@ -320,13 +322,13 @@ static CSceneClass *resolveXRefObject(CSceneClass *xrefObj, int depth)
 	if (!rec)
 	{
 		fprintf(stderr, "WARNING: xref: no 0x0170 record on XRefObject\n");
-		return NULL;
+		return nullptr;
 	}
 	std::string file, objName;
 	if (!xrefChildString(rec, 0x0100, file) || !xrefChildString(rec, 0x0110, objName))
 	{
 		fprintf(stderr, "WARNING: xref: incomplete 0x0170 record\n");
-		return NULL;
+		return nullptr;
 	}
 
 	// Authored path (R:\graphics\... or an explicit --path-alias prefix) -> on-disk path.
@@ -335,11 +337,11 @@ static CSceneClass *resolveXRefObject(CSceneClass *xrefObj, int depth)
 	{
 		fprintf(stderr, "WARNING: xref: cannot resolve '%s' under db root '%s'\n",
 		        file.c_str(), DBPATH::defaultRoot().c_str());
-		return NULL;
+		return nullptr;
 	}
 
 	SLoadedMax *lm = loadMaxFileCached(resolved);
-	if (!lm) return NULL;
+	if (!lm) return nullptr;
 
 	// Find the named node in the referenced scene.
 	CSceneClassContainer *ssc = lm->Scene->container();
@@ -352,7 +354,7 @@ static CSceneClass *resolveXRefObject(CSceneClass *xrefObj, int depth)
 		return baseObjectOfObj(dynamic_cast<CSceneClass *>(node->getReference(1)), depth + 1);
 	}
 	fprintf(stderr, "WARNING: xref: node '%s' not found in %s\n", objName.c_str(), resolved.c_str());
-	return NULL;
+	return nullptr;
 }
 
 // The category superclass the maxscript selection passes see (geometry/lights/helpers object
@@ -407,7 +409,7 @@ static bool getPB2StringParam(CSceneClass *obj, uint16 paramId, std::string &out
 {
 	CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(obj);
 	if (!rm) return false;
-	CReferenceMaker *pb2 = NULL;
+	CReferenceMaker *pb2 = nullptr;
 	for (uint i = 0; i < rm->nbReferences() && !pb2; ++i)
 	{
 		CReferenceMaker *r = dynamic_cast<CReferenceMaker *>(rm->getReference(i));
@@ -855,7 +857,7 @@ static bool convertMaxLight(NL3D::CPointLightNamed &plNamed, INode &node, SNodeT
 	{
 		CReferenceMaker *tm = dynamic_cast<CReferenceMaker *>(node.getReference(0));
 		CSceneClass *tmsc = dynamic_cast<CSceneClass *>(tm);
-		INode *target = NULL;
+		INode *target = nullptr;
 		if (tmsc && tmsc->classDesc()->classId() == CLASSID_LOOKAT_CTRL)
 			target = dynamic_cast<INode *>(tm->getReference(0));
 		if (target)
@@ -1156,7 +1158,7 @@ static bool extractObjectMesh(CSceneClass *obj, std::vector<NLMISC::CVector> &ve
 	if (cid == NLMISC::CClassId(0xe44f10b3, 0x00000000))
 	{
 		CGeomObject *geom = dynamic_cast<CGeomObject *>(obj);
-		STORAGE::CGeomBuffers *gb = geom ? geom->geomBuffers() : NULL;
+		STORAGE::CGeomBuffers *gb = geom ? geom->geomBuffers() : nullptr;
 		if (!gb)
 		{
 			fprintf(stderr, "WARNING: accelerator mesh '%s' without geom buffers\n", nodeName.c_str());
@@ -1250,7 +1252,7 @@ static bool psShapeBBoxVerts(INode &node, CSceneClass *obj, SNodeTMCache &tmCach
 	}
 	if (found.empty()) return false;
 
-	NL3D::CParticleSystemShape *pss = NULL;
+	NL3D::CParticleSystemShape *pss = nullptr;
 	try
 	{
 		NLMISC::CIFile f;
@@ -1429,7 +1431,7 @@ static bool nodeWorldMesh(INode &node, SNodeTMCache &tmCache, SMeshData &out)
 			}
 			if (cid != CLASSID_OSM_DERIVED && cid != CLASSID_WSM_DERIVED) break;
 			CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(obj);
-			CSceneClass *base = NULL;
+			CSceneClass *base = nullptr;
 			std::vector<CSceneClass *> mods;
 			for (uint i = 0; rm && i < rm->nbReferences(); ++i)
 			{
@@ -1455,7 +1457,7 @@ static bool nodeWorldMesh(INode &node, SNodeTMCache &tmCache, SMeshData &out)
 			for (uint m = 0; m < mods.size(); ++m)
 			{
 				NLMISC::CClassId mcid = mods[m]->classDesc()->classId();
-				CStorageContainer *app = m < modApps.size() ? modApps[m] : NULL;
+				CStorageContainer *app = m < modApps.size() ? modApps[m] : nullptr;
 				if (mcid == NLMISC::CClassId(0x00000050, 0x00000000)) // Edit Mesh
 				{
 					SModOp op;
@@ -1991,7 +1993,7 @@ static void buildTreeOrder(CSceneClassContainer *ssc, INode *root, std::map<INod
 	// DFS pre-order. Seed with root's children (and any NULL-parent orphans, defensive) in
 	// storage order — push in reverse so the top of the stack is the first child.
 	std::vector<INode *> stack;
-	INode *seeds[2] = { root, NULL };
+	INode *seeds[2] = { root, nullptr };
 	for (int s = 0; s < 2; ++s)
 	{
 		std::map<INode *, std::vector<INode *> >::iterator it = kids.find(seeds[s]);
@@ -2087,14 +2089,14 @@ static NL3D::CInstanceGroup *exportIgForName(CSceneClassContainer *ssc, SNodeTMC
 			// so we call it and then peel back one step: what we want is the OBJECT REFERENCE of
 			// the resolved source node, not its fully-unwrapped base — inline the same loader
 			// path resolveXRefObject uses and stop at `node->getReference(1)`.
-			CSceneClass *source = NULL;
+			CSceneClass *source = nullptr;
 			{
-				CStorageContainer *rec170 = NULL;
+				CStorageContainer *rec170 = nullptr;
 				const CStorageContainer::TStorageObjectContainer &orphans = directObj->orphanedChunks();
 				for (CStorageContainer::TStorageObjectConstIt oi = orphans.begin(); oi != orphans.end(); ++oi)
 					if (oi->first == 0x0170) { rec170 = dynamic_cast<CStorageContainer *>(oi->second); break; }
 				std::string srcFile, srcObj, srcOnDisk;
-				SLoadedMax *lm = NULL;
+				SLoadedMax *lm = nullptr;
 				if (rec170 &&
 				    xrefChildString(rec170, 0x0100, srcFile) &&
 				    xrefChildString(rec170, 0x0110, srcObj) &&
@@ -2127,7 +2129,7 @@ static NL3D::CInstanceGroup *exportIgForName(CSceneClassContainer *ssc, SNodeTMC
 				NLMISC::CClassId cid = unwrapped->classDesc()->classId();
 				if (cid != CLASSID_OSM_DERIVED && cid != CLASSID_WSM_DERIVED) break;
 				CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(unwrapped);
-				CSceneClass *base = NULL;
+				CSceneClass *base = nullptr;
 				for (uint i = 0; rm && i < rm->nbReferences(); ++i)
 				{
 					CSceneClass *r = dynamic_cast<CSceneClass *>(rm->getReference(i));
@@ -2183,7 +2185,7 @@ static NL3D::CInstanceGroup *exportIgForName(CSceneClassContainer *ssc, SNodeTMC
 		}
 	}
 
-	if (vectNode.empty()) return NULL;
+	if (vectNode.empty()) return nullptr;
 
 	if (transitionZone >= 0)
 	{
@@ -2300,8 +2302,8 @@ static int exportLigoIg(CSceneClassContainer *ssc, SNodeTMCache &tmCache, const 
 // ---------------------------------------------------------------------------------------------
 // Debug dump of the per-node classification.
 
-static const char *g_dumpObjName = NULL;
-static const char *g_dumpLightName = NULL;
+static const char *g_dumpObjName = nullptr;
+static const char *g_dumpLightName = nullptr;
 static void dumpLightNode(CNodeImpl *node);
 
 static void dumpNodes(CSceneClassContainer *ssc, SNodeTMCache &tmCache)
@@ -2831,7 +2833,7 @@ int main(int argc, char **argv)
 		return 1;
 	}
 	const char *maxFile = argv[argi];
-	const char *outDir = ligoMode ? ligoOutDir.c_str() : ((argc - argi >= 2) ? argv[argi + 1] : NULL);
+	const char *outDir = ligoMode ? ligoOutDir.c_str() : ((argc - argi >= 2) ? argv[argi + 1] : nullptr);
 
 	NL3D::registerSerial3d();
 

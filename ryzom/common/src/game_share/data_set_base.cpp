@@ -106,7 +106,7 @@ void		CDataSetBase::setPropertyPointer( std::string& propName, TPropertyIndex pr
 			{
 				_PropertyContainer.EntityIdArray.EntityIds[i] = CEntityId::Unknown;
 				_PropertyContainer.EntityIdArray.setOnline( i, false );
-				if ( ptCountsToSet != NULL )
+				if ( ptCountsToSet != nullptr)
 					_PropertyContainer.EntityIdArray.Counts[i] = (*ptCountsToSet)[i];
 				else
 					_PropertyContainer.EntityIdArray.Counts[i] = 1; // begins at 1, 0 is reserved for "no counter"
@@ -116,7 +116,7 @@ void		CDataSetBase::setPropertyPointer( std::string& propName, TPropertyIndex pr
 
 				_PropertyContainer.EntityIdArray.SpawnerServiceIds[i] = TServiceId8(0);
 			}
-			if ( ptCountsToSet != NULL )
+			if ( ptCountsToSet != nullptr)
 			{
 				delete ptCountsToSet;
 			}
@@ -164,7 +164,7 @@ void		CDataSetBase::setPropertyPointer( std::string& propName, TPropertyIndex pr
 
 					// Init the list of free cells
 					TSharedListRow *freeCellsFront = (TSharedListRow*)ptFreeCellsFront;
-					freeCellsFront = 0;
+					freeCellsFront = nullptr;
 
 					uint8 *cellPt = (uint8*)(_PropertyContainer.PropertyValueArrays[propIndex].ListCellContainer);
 					for ( TSharedListRow j=0; j!=NB_SHAREDLIST_CELLS-1 /*TEMP*/; ++j )
@@ -181,7 +181,7 @@ void		CDataSetBase::setPropertyPointer( std::string& propName, TPropertyIndex pr
 			}
 			else
 			{
-				_PropertyContainer.PropertyValueArrays[propIndex].ListCellContainer = NULL;
+				_PropertyContainer.PropertyValueArrays[propIndex].ListCellContainer = nullptr;
 
 				if ( initValues )
 				{
@@ -280,7 +280,7 @@ void		TDataSetSheet::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &for
 
 			for ( sint p=0; p!=NbProperties; ++p )
 			{
-				const UFormElm *property = NULL;
+				const UFormElm *property = nullptr;
 				if ( arrayProperties->getArrayNode( &property, p ) && property )
 				{
 					// Name of the property

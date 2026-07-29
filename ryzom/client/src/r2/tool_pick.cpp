@@ -97,11 +97,11 @@ void CToolPick::updateAfterRender()
 	getMousePos(mouseX,  mouseY);
 	if (!isInScreen(mouseX,  mouseY))
 	{
-		getEditor().setFocusedInstance(NULL);
+		getEditor().setFocusedInstance(nullptr);
 		setMouseCursor(_CursCannotPickPos);
 		return;
 	}
-	_CandidateInstance = NULL;
+	_CandidateInstance = nullptr;
 	CInstance *instanceUnder = checkInstanceUnderMouse();
 	bool ignoreInstanceUnder = false;
 	if(instanceUnder && !_IgnoreInstances.empty())
@@ -128,7 +128,7 @@ void CToolPick::updateAfterRender()
 			CVector inter;
 			_ValidPos = (ValidPacsPos == computeLandscapeRayIntersection(worldViewRay,  _Intersection));
 			setMouseCursor(_ValidPos ? _CursCanPickPos : _CursCannotPickPos);
-			getEditor().setFocusedInstance(NULL);
+			getEditor().setFocusedInstance(nullptr);
 		}
 		return;
 	}

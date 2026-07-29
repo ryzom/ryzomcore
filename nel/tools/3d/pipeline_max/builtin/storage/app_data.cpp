@@ -395,7 +395,9 @@ void CAppDataEntryKey::toString(std::ostream &ostream, const std::string &pad) c
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
-CAppDataEntry::CAppDataEntry() : m_Key(NULL), m_Raw(NULL), m_Value(NULL)
+CAppDataEntry::CAppDataEntry() : m_Key(nullptr)
+    , m_Raw(nullptr)
+    , m_Value(nullptr)
 {
 
 }
@@ -403,7 +405,7 @@ CAppDataEntry::CAppDataEntry() : m_Key(NULL), m_Raw(NULL), m_Value(NULL)
 CAppDataEntry::~CAppDataEntry()
 {
 	delete m_Value;
-	m_Value = NULL;
+	m_Value = nullptr;
 }
 
 std::string CAppDataEntry::className() const
@@ -477,10 +479,10 @@ void CAppDataEntry::disown()
 {
 	// CStorageContainer::disown();
 	if (m_Chunks.size() != 2) { nlerror("Not built"); return; } // Built chunks must match the parsed data
-	m_Key = NULL;
-	m_Raw = NULL;
+	m_Key = nullptr;
+	m_Raw = nullptr;
 	delete m_Value;
-	m_Value = NULL;
+	m_Value = nullptr;
 }
 
 void CAppDataEntry::init()

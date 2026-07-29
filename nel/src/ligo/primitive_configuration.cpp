@@ -119,7 +119,7 @@ bool	CPrimitiveConfigurations::belong (const IPrimitive &primitive) const
 			}
 
 			// Get the property
-			const std::vector<string> *array = NULL;
+			const std::vector<string> *array = nullptr;
 			if (primitive.getPropertyByName (pairs.first.c_str(), array) && array)
 			{
 				uint i;

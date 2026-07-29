@@ -59,7 +59,7 @@ CVegetableManager::CVegetableManager(uint maxVertexVbHardUnlit, uint maxVertexVb
 	_InstanceGroupMemory(NL3D_VEGETABLE_INSTANCE_GROUP_BLOCKSIZE),
 	_GlobalDensity(1.f),
 	_NumZSortBlendLayers(nbBlendLayers), _ZSortLayerDistMax(blendLayerDistMax),
-	_ZSortScene(NULL)
+	_ZSortScene(nullptr)
 {
 	uint	i;
 
@@ -100,15 +100,15 @@ CVegetableManager::CVegetableManager(uint maxVertexVbHardUnlit, uint maxVertexVb
 
 	// init to NULL _ZSortModelLayers.
 	_NumZSortBlendLayers= max(1U, _NumZSortBlendLayers);
-	_ZSortModelLayers.resize(_NumZSortBlendLayers, NULL);
-	_ZSortModelLayersUW.resize(_NumZSortBlendLayers, NULL);
+	_ZSortModelLayers.resize(_NumZSortBlendLayers, nullptr);
+	_ZSortModelLayersUW.resize(_NumZSortBlendLayers, nullptr);
 
 
 	// UL
 	_ULFrequency= 0;
 	_ULNVerticesToUpdate=0;
 	_ULNTotalVertices= 0;
-	_ULRootIg= NULL;
+	_ULRootIg = nullptr;
 	_ULCurrentIgRdrPass= 0;
 	_ULCurrentIgInstance= 0;
 	_ULPrecTime= 0;
@@ -120,8 +120,8 @@ CVegetableManager::CVegetableManager(uint maxVertexVbHardUnlit, uint maxVertexVb
 
 	for (uint k = 0; k < NL3D_VEGETABLE_NRDRPASS; ++k)
 	{
-		_VertexProgram[k][0] = NULL;
-		_VertexProgram[k][1] = NULL;
+		_VertexProgram[k][0] = nullptr;
+		_VertexProgram[k][1] = nullptr;
 	}
 }
 
@@ -132,8 +132,8 @@ CVegetableManager::~CVegetableManager()
 	// delete All VP
 	for(sint i=0; i <NL3D_VEGETABLE_NRDRPASS; i++)
 	{
-		_VertexProgram[i][0] = NULL; // smart ptr
-		_VertexProgram[i][1] = NULL;
+		_VertexProgram[i][0] = nullptr; // smart ptr
+		_VertexProgram[i][1] = nullptr;
 	}
 
 	// delete ZSort models.
@@ -143,12 +143,12 @@ CVegetableManager::~CVegetableManager()
 		for(uint i= 0; i<_NumZSortBlendLayers; i++)
 		{
 			_ZSortScene->deleteModel(_ZSortModelLayers[i]);
-			_ZSortModelLayers[i]= NULL;
+			_ZSortModelLayers[i] = nullptr;
 			_ZSortScene->deleteModel(_ZSortModelLayersUW[i]);
-			_ZSortModelLayersUW[i]= NULL;
+			_ZSortModelLayersUW[i] = nullptr;
 		}
 
-		_ZSortScene= NULL;
+		_ZSortScene = nullptr;
 	}
 }
 
@@ -842,7 +842,7 @@ void						CVegetableManager::deleteIg(CVegetableInstanceGroup *ig)
 		_ULRootIg= ig->_ULNext;
 		// if still the same, it means that the circular list is now empty
 		if(_ULRootIg == ig)
-			_ULRootIg= NULL;
+			_ULRootIg = nullptr;
 		// Reset UL instance info.
 		_ULCurrentIgRdrPass= 0;
 		_ULCurrentIgInstance= 0;
@@ -928,7 +928,7 @@ CVegetableShape				*CVegetableManager::getVegetableShape(const std::string &shap
 				_ShapeMap.erase (shape);
 
 				// Return NULL
-				ret = NULL;
+				ret = nullptr;
 			}
 		}
 		catch (const Exception &e)
@@ -940,7 +940,7 @@ CVegetableShape				*CVegetableManager::getVegetableShape(const std::string &shap
 			_ShapeMap.erase (shape);
 
 			// Return NULL
-			ret = NULL;
+			ret = nullptr;
 		}
 
 		return ret;
@@ -1639,7 +1639,7 @@ void			CVegetableManager::addInstance(CVegetableInstanceGroup *ig,
 		// and update the vegetable manager.
 		_ULNTotalVertices+= numNewVertices;
 		// link at the end of the circular list: link before the current root.
-		if(_ULRootIg==NULL)
+		if(_ULRootIg == nullptr)
 			_ULRootIg= ig;
 		else
 			ig->linkBeforeUL(_ULRootIg);
@@ -1876,7 +1876,7 @@ class	CSortVSB
 public:
 	CVegetableSortBlock			*Sb;
 
-	CSortVSB() : Sb(NULL) {}
+	CSortVSB() : Sb(nullptr) {}
 	CSortVSB(CVegetableSortBlock *sb) : Sb(sb) {}
 
 
@@ -1950,7 +1950,7 @@ void			CVegetableManager::render(const CVector &viewCenter, const CVector &front
 {
 	H_AUTO( NL3D_Vegetable_Render );
 
-	CVegetableClipBlock		*rootToRender= NULL;
+	CVegetableClipBlock		*rootToRender = nullptr;
 
 	// get normalized front vector.
 	CVector		frontVectorNormed= frontVector.normed();
@@ -1981,7 +1981,7 @@ void			CVegetableManager::render(const CVector &viewCenter, const CVector &front
 
 
 	// If no clip block visible, just skip!!
-	if(rootToRender==NULL)
+	if(rootToRender == nullptr)
 		return;
 
 
@@ -2083,7 +2083,7 @@ void			CVegetableManager::render(const CVector &viewCenter, const CVector &front
 	else
 	{
 		// reset stage0 (to skip it)
-		_VegetableMaterial.setTexture(0, NULL);
+		_VegetableMaterial.setTexture(0, nullptr);
 		// stage1 RGB is Diffuse * Texture
 		_VegetableMaterial.texEnvOpRGB(1, CMaterial::Modulate);
 		_VegetableMaterial.texEnvArg0RGB(1, CMaterial::Texture, CMaterial::SrcColor);
@@ -2369,8 +2369,8 @@ void			CVegetableManager::render(const CVector &viewCenter, const CVector &front
 	//--------------------
 
 	// disable VertexProgram.
-	driver->activeVertexProgram(NULL);
-	_ActiveVertexProgram = NULL;
+	driver->activeVertexProgram(nullptr);
+	_ActiveVertexProgram = nullptr;
 
 
 	// restore Fog.
@@ -2450,8 +2450,8 @@ uint		CVegetableManager::getNumVegetableFaceRendered() const
 void		CVegetableManager::exitRenderStateForBlendLayerModel(IDriver *driver)
 {
 	// disable VertexProgram.
-	driver->activeVertexProgram(NULL);
-	_ActiveVertexProgram = NULL;
+	driver->activeVertexProgram(nullptr);
+	_ActiveVertexProgram = nullptr;
 
 	// restore Fog.
 	driver->enableFog(_BkupFog);

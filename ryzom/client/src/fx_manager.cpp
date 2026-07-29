@@ -93,7 +93,7 @@ NL3D::UParticleSystemInstance CFXManager::instantFX(const std::string &fxName, f
 	H_AUTO_USE(RZ_FXManager)
 	// Check FX Name.
 	if(fxName.empty())
-		return 0;
+		return nullptr;
 
 	NL3D::UParticleSystemInstance fx;
 	fx.cast (Scene->createInstance(fxName));

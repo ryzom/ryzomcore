@@ -128,7 +128,7 @@ bool CCharScanScriptFile::applyToJob(CCharacterScanJob& job)
 	for (uint32 i=0;i<_Filters.size();++i)
 	{
 		ICharFilter* filter= CCharFilterFactory::getInstance()->build(_Filters[i]);
-		if (filter==NULL)
+		if (filter == nullptr)
 		{
 			nlwarning("Failed to build filter description from line: %s",_Filters[i].c_str());
 			result=false;
@@ -141,7 +141,7 @@ bool CCharScanScriptFile::applyToJob(CCharacterScanJob& job)
 	for (uint32 i=0;i<_InfoExtractors.size();++i)
 	{
 		ICharInfoExtractor* infoExtractor= CCharInfoExtractorFactory::getInstance()->build(_InfoExtractors[i]);
-		if (infoExtractor==NULL)
+		if (infoExtractor == nullptr)
 		{
 			nlwarning("Failed to build filter description from line: %s",_InfoExtractors[i].c_str());
 			result=false;
@@ -203,8 +203,8 @@ bool CCharScanScriptFile::addInputFiles(const std::string& rawArgs)
 
 CCharScanScriptCommandRegistry* CCharScanScriptCommandRegistry::getInstance()
 {
-	static CCharScanScriptCommandRegistry* ptr=NULL;
-	if (ptr==NULL)
+	static CCharScanScriptCommandRegistry* ptr = nullptr;
+	if (ptr == nullptr)
 		ptr= new CCharScanScriptCommandRegistry;
 	return ptr;
 }
@@ -280,7 +280,7 @@ CHAR_SCAN_SCRIPT_COMMAND(include,"<include_file_name>","Include another script f
 	if (args.size()!=1)
 		return false;
 
-	if (container==NULL)
+	if (container == nullptr)
 		return true;
 
 	return container->addScriptFile(args[0]);

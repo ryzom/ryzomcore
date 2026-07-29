@@ -116,7 +116,7 @@ static const SChunkView *findChunk(const std::vector<SChunkView> &chunks, uint16
 {
 	for (uint i = 0; i < chunks.size(); ++i)
 		if (chunks[i].Id == id) return &chunks[i];
-	return NULL;
+	return nullptr;
 }
 
 // Collect top-level children of 0x2512 whether it is a typed container or a raw leaf.
@@ -134,8 +134,8 @@ static bool load2512Children(CStorageContainer *modApp, std::vector<SChunkView> 
 	// Prefer a direct 0x2512 child of the 0x2500 app. Some call sites hand the OSM wrapper
 	// (with 0x2500 still nested) — fall through like PHYSIQUESKIN.
 	CStorageContainer *app = modApp;
-	CStorageContainer *c2512 = NULL;
-	CStorageRaw *raw2512 = NULL;
+	CStorageContainer *c2512 = nullptr;
+	CStorageRaw *raw2512 = nullptr;
 	for (CStorageContainer::TStorageObjectConstIt it = app->chunks().begin();
 	     it != app->chunks().end(); ++it)
 	{

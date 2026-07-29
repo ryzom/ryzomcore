@@ -74,8 +74,8 @@ CBackupServiceInterface& getGlobalBsi() { return CBackupInterfaceSingleton::getI
 
 CBackupInterfaceSingleton* CBackupInterfaceSingleton::getInstance()
 {
-	static CBackupInterfaceSingleton* instance=NULL;
-	if (instance==NULL)
+	static CBackupInterfaceSingleton* instance = nullptr;
+	if (instance == nullptr)
 		instance= new CBackupInterfaceSingleton;
 	return instance;
 }
@@ -84,7 +84,7 @@ CBackupInterfaceSingleton::CBackupInterfaceSingleton()
 {
 	_Counter=0;
 	_IsConnected=false;
-	_BackupServiceInterfaceImplementation=NULL;
+	_BackupServiceInterfaceImplementation = nullptr;
 }
 
 void CBackupInterfaceSingleton::init()
@@ -177,7 +177,7 @@ uint32 CBackupInterfaceSingleton::pushGenericAckCallback(NLMISC::CSmartPtr<IBack
 	}
 
 	// if we have no callback then just return the generated request Id...
-	if (callback==NULL)
+	if (callback == nullptr)
 		return requestId;
 
 	// store away the callback for later use...
@@ -226,7 +226,7 @@ NLMISC::CSmartPtr<IBackupGenericAckCallback>	CBackupInterfaceSingleton::popGener
 	// if there's no callback for this request then just return NULL
 	if (_GenericResponses.empty() || sint32(_GenericResponses.front().first-requestId)>0)
 	{
-		return NULL;
+		return nullptr;
 	}
 
 	// if we're here it means that the front entry in the generic responses container has the same request id as requestId
@@ -331,7 +331,7 @@ void CBackupInterfaceSingleton::setBSIImplementation(IBackupServiceInterfaceImpl
 		return;
 
 	// if we were previouslty connected then disconnect
-	if (_BackupServiceInterfaceImplementation!=NULL)
+	if (_BackupServiceInterfaceImplementation != nullptr)
 	{
 		_BackupServiceInterfaceImplementation->deactivate();
 		disconnect();
@@ -341,7 +341,7 @@ void CBackupInterfaceSingleton::setBSIImplementation(IBackupServiceInterfaceImpl
 	_BackupServiceInterfaceImplementation= bsii;
 
 	// if we're now non null then activate the new object
-	if (_BackupServiceInterfaceImplementation!=NULL)
+	if (_BackupServiceInterfaceImplementation != nullptr)
 	{
 		_BackupServiceInterfaceImplementation->activate();
 	}
@@ -395,7 +395,7 @@ IBackupServiceInterfaceImplementation::~IBackupServiceInterfaceImplementation()
 	if (CBackupInterfaceSingleton::getInstance()->getBSIImplementation()==this)
 	{
 		// then set the active BSI implmentation to NULL
-		CBackupInterfaceSingleton::getInstance()->setBSIImplementation(NULL);
+		CBackupInterfaceSingleton::getInstance()->setBSIImplementation(nullptr);
 	}
 }
 

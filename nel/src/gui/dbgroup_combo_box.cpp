@@ -58,8 +58,8 @@ namespace NLGUI
 	:	CInterfaceGroup(param)
 	{
 		_Setuped= false;
-		_ViewText= NULL;
-		_SelectButton= NULL;
+		_ViewText = nullptr;
+		_SelectButton = nullptr;
 		_LinkedToDB = true;
 		_NotLinkedToDBSelection = 0;
 		_CallingOnChangeActionHandler = false;
@@ -100,7 +100,7 @@ namespace NLGUI
 		else
 		if( name == "value" )
 		{
-			if( _Selection.getNodePtr() != NULL )
+			if( _Selection.getNodePtr() != nullptr)
 				return _Selection.getNodePtr()->getFullName();
 			else
 				return "";
@@ -131,13 +131,13 @@ namespace NLGUI
 	xmlNodePtr CDBGroupComboBox::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
 		xmlNodePtr node = CInterfaceGroup::serialize( parentNode, type );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 		
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "combo_box" );
 		xmlSetProp( node, BAD_CAST "linked_to_db", BAD_CAST toString( _LinkedToDB ).c_str() );
 
-		if( _Selection.getNodePtr() != NULL )
+		if( _Selection.getNodePtr() != nullptr)
 			xmlSetProp( node, BAD_CAST "value", BAD_CAST _Selection.getNodePtr()->getFullName().c_str() );
 		else
 			xmlSetProp( node, BAD_CAST "value", BAD_CAST "" );
@@ -720,7 +720,7 @@ namespace NLGUI
 		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */)
 		{
 			CDBGroupComboBox *pCB = dynamic_cast<CDBGroupComboBox*>(pCaller->getParent());
-			if (pCB == NULL) return;
+			if (pCB == nullptr) return;
 			// if no choice, return.
 			if( pCB->getNumTexts()==0 )
 				return;
@@ -786,7 +786,7 @@ namespace NLGUI
 		virtual void execute (CCtrlBase * /* pCaller */, const std::string &Params)
 		{
 			CDBGroupComboBox *pCB = dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
-			if (pCB == NULL) return;
+			if (pCB == nullptr) return;
 
 			// set the selection
 			sint32 selection;

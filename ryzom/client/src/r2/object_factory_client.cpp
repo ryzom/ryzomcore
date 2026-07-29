@@ -206,7 +206,7 @@ void CObjectRefIdClient::onAttrModified(CInstance &/* instance */, const std::st
 void CObjectRefIdClient::updateParentInstancePtr() const
 {
 	//H_AUTO(R2_CObjectRefIdClient_updateParentInstancePtr)
-	_ParentInstance = NULL;
+	_ParentInstance = nullptr;
 	CObject *currParent = this->getParent();
 	while (currParent)
 	{

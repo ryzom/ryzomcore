@@ -113,7 +113,7 @@ static bool isToBeExported(INode &node)
 	std::string name = nodeName(node);
 	if (name == "Bip01") return false;
 
-	CSceneClass *base = baseObjectOf(node, NULL, NULL);
+	CSceneClass *base = baseObjectOf(node, nullptr, nullptr);
 	if (!base) return false;
 
 	// Skip nel_ps
@@ -237,7 +237,7 @@ static int exportFile(const std::string &maxPath, const std::string &outDir, boo
 
 	CSceneClassContainer *ssc = lm.Scene->container();
 	SNodeTMCache tmCache;
-	tmCache.SceneRoot = NULL;
+	tmCache.SceneRoot = nullptr;
 
 	std::vector<INode *> allNodes;
 	for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)

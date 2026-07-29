@@ -52,14 +52,14 @@ void	CTransform::registerBasic()
 CTransform::CTransform()
 {
 	// important to reset for destructor to know if linked or not (CCluster !!)
-	_OwnerScene= NULL;
+	_OwnerScene = nullptr;
 
 	// Hrc/Graph hierarchy
-	_HrcParent= NULL;
-	_HrcParentUnfreeze= NULL;
+	_HrcParent = nullptr;
+	_HrcParentUnfreeze = nullptr;
 
-	_PrecModelToUpdate= NULL;
-	_NextModelToUpdate= NULL;
+	_PrecModelToUpdate = nullptr;
+	_NextModelToUpdate = nullptr;
 
 	_TransformDirty= true;
 
@@ -67,9 +67,9 @@ CTransform::CTransform()
 
 	_LastTransformableMatrixDate= 0;
 
-	_FatherSkeletonModel= NULL;
+	_FatherSkeletonModel = nullptr;
 
-	_ClusterSystem = NULL;
+	_ClusterSystem = nullptr;
 
 	_FreezeHRCState= FreezeHRCStateDisabled;
 
@@ -79,7 +79,7 @@ CTransform::CTransform()
 
 
 	// No logicInfo by default
-	_LogicInfo= NULL;
+	_LogicInfo = nullptr;
 
 	_ForceCLodSticked= false;
 
@@ -131,7 +131,7 @@ CTransform::CTransform()
 	_WorldDate=-1;
 	_Frozen = false;
 	_DontUnfreezeChildren = false;
-	_AncestorSkeletonModel= NULL;
+	_AncestorSkeletonModel = nullptr;
 	_ClipLinkedInSonsOfAncestorSkeletonModelGroup= false;
 
 	// **** Clip Init Traversal Computed Data.
@@ -143,7 +143,7 @@ CTransform::CTransform()
 	// none
 
 	// **** LoadBalancing Init Traversal Computed Data.
-	_LoadBalancingGroup= NULL;
+	_LoadBalancingGroup = nullptr;
 }
 
 
@@ -192,7 +192,7 @@ CTransform::~CTransform()
 		CClipTrav	&clipTrav= getOwnerScene()->getClipTrav();
 		nlassert(_IndexInVisibleList < (sint)clipTrav._CurrentNumVisibleModels );
 		// Mark NULL. NB: faster than a CRefPtr.
-		clipTrav._VisibleList[_IndexInVisibleList]= NULL;
+		clipTrav._VisibleList[_IndexInVisibleList] = nullptr;
 		_IndexInVisibleList= -1;
 	}
 
@@ -340,7 +340,7 @@ ITrack* CTransform::getDefaultTrack (uint valueId)
 	nlstop;
 	// Deriver note: else call BaseClass::getDefaultTrack(valueId);
 
-	return NULL;
+	return nullptr;
 
 }
 
@@ -629,11 +629,11 @@ void		CTransform::linkToUpdateList()
 		return;
 
 	// If the model is not already inserted.
-	if( ! (_PrecModelToUpdate!=NULL  ||  _OwnerScene->_UpdateModelList==this) )
+	if( ! (_PrecModelToUpdate != nullptr ||  _OwnerScene->_UpdateModelList==this) )
 	{
 		// insert it.
 		_NextModelToUpdate= _OwnerScene->_UpdateModelList;
-		_PrecModelToUpdate= NULL;
+		_PrecModelToUpdate = nullptr;
 		if(_NextModelToUpdate)
 			_NextModelToUpdate->_PrecModelToUpdate= this;
 		_OwnerScene->_UpdateModelList= this;
@@ -647,7 +647,7 @@ void		CTransform::unlinkFromUpdateList()
 		return;
 
 	// If the model is inserted.
-	if( _PrecModelToUpdate!=NULL  ||  _OwnerScene->_UpdateModelList==this )
+	if( _PrecModelToUpdate != nullptr ||  _OwnerScene->_UpdateModelList==this )
 	{
 		// update prec.
 		if(_PrecModelToUpdate)
@@ -660,8 +660,8 @@ void		CTransform::unlinkFromUpdateList()
 			_NextModelToUpdate->_PrecModelToUpdate= _PrecModelToUpdate;
 
 		// End.
-		_PrecModelToUpdate= NULL;
-		_NextModelToUpdate= NULL;
+		_PrecModelToUpdate = nullptr;
+		_NextModelToUpdate = nullptr;
 	}
 }
 
@@ -705,7 +705,7 @@ void	CTransform::updateWorld()
 		visFather= true;
 
 		// at the root of the hierarchy, we have no parent, hence no FatherSkeletonModel nor _AncestorSkeletonModel.
-		_AncestorSkeletonModel= NULL;
+		_AncestorSkeletonModel = nullptr;
 
 		// NB: Root is Frozen by essence :), so don't modify the frozen state here.
 	}
@@ -714,7 +714,7 @@ void	CTransform::updateWorld()
 	if(_LocalDate>_WorldDate || (_HrcParent && _HrcParent->_WorldDate>_WorldDate) )
 	{
 		// Must recompute the world matrix.  ONLY IF I AM NOT SKINNED/STICKED TO A SKELETON in the hierarchy!
-		if( _AncestorSkeletonModel==NULL )
+		if( _AncestorSkeletonModel == nullptr)
 		{
 			_WorldMatrix=  *pFatherWM * _LocalMatrix;
 			_WorldDate= getOwnerScene()->getHrcTrav().CurrentDate;
@@ -735,7 +735,7 @@ void	CTransform::updateWorld()
 		NB: not done if _AncestorSkeletonModel!=NULL. no need because  in this case,
 		result is driven by the _LightContribution of the _AncestorSkeletonModel.
 	*/
-	if( !_LightContribution.FrozenStaticLightSetup && _AncestorSkeletonModel==NULL )
+	if( !_LightContribution.FrozenStaticLightSetup && _AncestorSkeletonModel == nullptr)
 	{
 		// if the model is lightable reset lighting
 		if( isLightable() )
@@ -817,14 +817,14 @@ void	CTransform::traverseHrc()
 // ***************************************************************************
 void	CTransform::setClusterSystem(CInstanceGroup *pCS)
 {
-	if (pCS != NULL)
+	if (pCS != nullptr)
 	{
 		nlassert(!getStateFlag(ForceClipRoot)); // the transform must be linked to the root, and have not cluster system when this flag is set
 	}
 	// Special case for the "AutoClusterSystem" when pCS==-1
 	if(pCS==(CInstanceGroup*)-1)
 	{
-		_ClusterSystem = NULL;
+		_ClusterSystem = nullptr;
 		setStateFlag(ClusterSystemAuto, true);
 	}
 	else
@@ -864,7 +864,7 @@ void	CTransform::traverseClip()
 		// If linked to a SkeletonModel anywhere in the hierarchy, don't clip, and use skeleton model clip result.
 		// This works because we are sons of a special node which is not in the clip traversal, and
 		// which is traversed at end of the traversal.
-		if( _AncestorSkeletonModel!=NULL )
+		if( _AncestorSkeletonModel != nullptr)
 		{
 			_Visible= _AncestorSkeletonModel->isClipVisible();
 			// Special test: if we are sticked to a skeletonModel, and if we are still visible, maybe we don't have to
@@ -903,7 +903,7 @@ void	CTransform::traverseClip()
 		clipTrav.addVisibleModel(this);
 
 		// Has not an ancestor skeleton model?
-		if( _AncestorSkeletonModel==NULL )
+		if( _AncestorSkeletonModel == nullptr)
 		{
 			// If needed, insert the model in the lighted list.
 			// don't insert if has an ancestorSkeletonModel, because in this case, result is driven by
@@ -1092,7 +1092,7 @@ void		CTransform::resetLighting()
 	}
 	// empty the list.
 	if(startLight<NL3D_MAX_LIGHT_CONTRIBUTION)
-		_LightContribution.PointLight[startLight]= NULL;
+		_LightContribution.PointLight[startLight] = nullptr;
 
 
 	// the model needs to update his lighting.
@@ -1131,7 +1131,7 @@ void			CTransform::freezeStaticLightSetup(CPointLight *pointLight[NL3D_MAX_LIGHT
 	}
 	// End the list
 	if(i<NL3D_MAX_LIGHT_CONTRIBUTION)
-		_LightContribution.PointLight[i]= NULL;
+		_LightContribution.PointLight[i] = nullptr;
 }
 
 // ***************************************************************************
@@ -1144,9 +1144,9 @@ void			CTransform::unfreezeStaticLightSetup()
 	_LightContribution.FrozenStaticLightSetup= false;
 	_LightContribution.NumFrozenStaticLight= 0;
 	// End the list
-	_LightContribution.PointLight[0]= NULL;
+	_LightContribution.PointLight[0] = nullptr;
 	// No more FrozenAmbientLight
-	_LightContribution.FrozenAmbientLight= NULL;
+	_LightContribution.FrozenAmbientLight = nullptr;
 
 	// Don't need to update StaticLightSetup since no more exist.
 	setStateFlag(IsNeedUpdateFrozenStaticLightSetup, false);
@@ -1259,7 +1259,7 @@ void			CTransform::hrcLinkSon(CTransform *son)
 void			CTransform::hrcUnlink()
 {
 	// no-op if already NULL
-	if(_HrcParent==NULL)
+	if(_HrcParent == nullptr)
 		return;
 
 	// if ForceClipRoot flag is set, then the fx can't be linked elsewhere in the hierarchy
@@ -1269,8 +1269,8 @@ void			CTransform::hrcUnlink()
 	_HrcNode.unlink();
 
 	// unlink me from parent
-	_HrcParent= NULL;
-	_HrcParentUnfreeze= NULL;
+	_HrcParent = nullptr;
+	_HrcParentUnfreeze = nullptr;
 
 	// I should recompute my worldMatrix (well not useful since not linked, but still do it...)
 	_WorldDate= -1;
@@ -1466,7 +1466,7 @@ void CTransform::setForceClipRoot(bool forceClipRoot)
 		{
 			_OwnerScene->getRoot()->hrcLinkSon(this);
 		}
-		setClusterSystem(NULL);
+		setClusterSystem(nullptr);
 	}
 	setStateFlag(ForceClipRoot, forceClipRoot);
 }

@@ -47,14 +47,14 @@ using namespace NLMISC;
 
 namespace NLSOUND {
 
-IAudioDecoder::IAudioDecoder() : _InternalStream(NULL)
+IAudioDecoder::IAudioDecoder() : _InternalStream(nullptr)
 {
 	
 }
 
 IAudioDecoder::~IAudioDecoder()
 {
-	if (_InternalStream) { delete _InternalStream; _InternalStream = NULL; }
+	if (_InternalStream) { delete _InternalStream; _InternalStream = nullptr; }
 }
 
 IAudioDecoder *IAudioDecoder::createAudioDecoder(const std::string &filepath, bool async, bool loop)
@@ -79,7 +79,7 @@ IAudioDecoder *IAudioDecoder::createAudioDecoder(const std::string &type, NLMISC
 	if (!stream)
 	{
 		nlwarning("Stream is NULL");
-		return NULL;
+		return nullptr;
 	}
 #ifdef FFMPEG_ENABLED
 	try {
@@ -106,7 +106,7 @@ IAudioDecoder *IAudioDecoder::createAudioDecoder(const std::string &type, NLMISC
 	else
 	{
 		nlwarning("Music file type unknown: '%s'", type_lower.c_str());
-		return NULL;
+		return nullptr;
 	}
 #endif
 }

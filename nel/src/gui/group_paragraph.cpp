@@ -360,8 +360,8 @@ namespace NLGUI
 	xmlNodePtr CGroupParagraph::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
 		xmlNodePtr node = CInterfaceGroup::serialize( parentNode, type );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 
 		std::string addelt;
 		std::string align;
@@ -601,7 +601,7 @@ namespace NLGUI
 			CViewBase *pVB = _Elements[posChildToDel].Element;
 			if (posChildToDel == 0)
 			{
-				pVB->_ParentPos = NULL;
+				pVB->_ParentPos = nullptr;
 				// setHSGroup (pVB, _AddElt, _Align);
 				if ((_AddElt == Top) || (_AddElt == Bottom))
 					pVB->setY (0);
@@ -870,7 +870,7 @@ namespace NLGUI
 						{
 							// Create the control ?
 							CCtrlLink *ctrl = link.CtrlLink[j];
-							if (ctrl == NULL)
+							if (ctrl == nullptr)
 							{
 								// Control button
 								ctrl = new CCtrlLink(CViewBase::TCtorParam());
@@ -931,7 +931,7 @@ namespace NLGUI
 							if (link.CtrlLink[j])
 							{
 								delCtrl (link.CtrlLink[j]);
-								link.CtrlLink[j] = NULL;
+								link.CtrlLink[j] = nullptr;
 							}
 						}
 					}
@@ -947,16 +947,16 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	void CGroupParagraph::checkCoords ()
 	{
-		if (_Parent != NULL)
+		if (_Parent != nullptr)
 		{
 			sint parentWidth = std::min(_Parent->getMaxWReal(), _Parent->getWReal());
 			if (_LastW != (sint) parentWidth)
 			{
 				CCtrlBase *pCB = CWidgetManager::getInstance()->getCapturePointerLeft();
-				if (pCB != NULL)
+				if (pCB != nullptr)
 				{
 					CCtrlResizer *pCR = dynamic_cast<CCtrlResizer*>(pCB);
-					if (pCR != NULL)
+					if (pCR != nullptr)
 					{
 						// We are resizing !!!!
 					}
@@ -986,7 +986,7 @@ namespace NLGUI
 		{
 			CViewRenderer &rVR = *CViewRenderer::getInstance();
 
-			if (CWidgetManager::getInstance()->getModalWindow() == NULL)
+			if (CWidgetManager::getInstance()->getModalWindow() == nullptr)
 			{
 				sint32 x = CWidgetManager::getInstance()->getPointer()->getX();
 				sint32 y = CWidgetManager::getInstance()->getPointer()->getY();
@@ -994,7 +994,7 @@ namespace NLGUI
 				CInterfaceGroup	*pIG = CWidgetManager::getInstance()->getWindowUnder(x,y);
 				CInterfaceGroup	*pParent = this;
 				bool bFound = false;
-				while (pParent != NULL)
+				while (pParent != nullptr)
 				{
 					if (pParent == pIG)
 					{
@@ -1094,19 +1094,19 @@ namespace NLGUI
 	// predicate to remove a view from the list of element
 	struct CRemoveViewPred
 	{
-		bool operator()(const CGroupParagraph::CElementInfo &info) const { return dynamic_cast<CViewBase *>(info.Element) != NULL; }
+		bool operator()(const CGroupParagraph::CElementInfo &info) const { return dynamic_cast<CViewBase *>(info.Element) != nullptr; }
 	};
 
 	// predicate to remove a ctrl from the list of element
 	struct CRemoveCtrlPred
 	{
-		bool operator()(const CGroupParagraph::CElementInfo &info)  const { return dynamic_cast<CCtrlBase *>(info.Element) != NULL; }
+		bool operator()(const CGroupParagraph::CElementInfo &info)  const { return dynamic_cast<CCtrlBase *>(info.Element) != nullptr; }
 	};
 
 	// predicate to remove a group from the list of element
 	struct CRemoveGroupPred
 	{
-		bool operator()(const CGroupParagraph::CElementInfo &info)  const { return dynamic_cast<CInterfaceGroup *>(info.Element) != NULL; }
+		bool operator()(const CGroupParagraph::CElementInfo &info)  const { return dynamic_cast<CInterfaceGroup *>(info.Element) != nullptr; }
 	};
 
 
@@ -1189,7 +1189,7 @@ namespace NLGUI
 			return false;
 		}
 		child->_Parent = this;
-		child->_ParentPos = NULL;
+		child->_ParentPos = nullptr;
 		child->_Active = true;
 		child->_X = 0;
 		child->_Y = 0;
@@ -1273,19 +1273,19 @@ namespace NLGUI
 		// Add this element for drawing
 		{
 			CInterfaceGroup *pIG = dynamic_cast<CInterfaceGroup*>(child);
-			if (pIG != NULL)
+			if (pIG != nullptr)
 			{
 				addGroup (pIG, (sint) index);
 				return true;
 			}
 			CCtrlBase *pCB = dynamic_cast<CCtrlBase*>(child);
-			if (pCB != NULL)
+			if (pCB != nullptr)
 			{
 				addCtrl (pCB, (sint) index);
 				return true;
 			}
 			CViewBase *pVB = dynamic_cast<CViewBase*>(child);
-			if (pVB != NULL)
+			if (pVB != nullptr)
 			{
 				addView (pVB, (sint) index);
 				return true;
@@ -1406,9 +1406,9 @@ namespace NLGUI
 	CGroupParagraph::CLink::CLink (CViewLink *link)
 	{
 		Link = link;
-		CtrlLink[0] = NULL;
-		CtrlLink[1] = NULL;
-		CtrlLink[2] = NULL;
+		CtrlLink[0] = nullptr;
+		CtrlLink[1] = nullptr;
+		CtrlLink[2] = nullptr;
 	}
 
 	// ----------------------------------------------------------------------------
@@ -1476,7 +1476,7 @@ namespace NLGUI
 		CElementInfo &e = _Elements[ 0 ];
 		
 		CViewText *t = dynamic_cast< CViewText* >( e.Element );
-		if( t != NULL )
+		if( t != nullptr)
 		{
 			t->setText( _HardText );
 			return;
@@ -1484,7 +1484,7 @@ namespace NLGUI
 		else
 		{
 			CViewTextID *ti = dynamic_cast< CViewTextID* >( e.Element );
-			if( ti != NULL )
+			if( ti != nullptr)
 			{
 				ti->setTextId( _TextId );
 			}

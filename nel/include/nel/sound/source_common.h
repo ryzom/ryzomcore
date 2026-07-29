@@ -75,7 +75,7 @@ public:
 	/// return the user param for the user callback
 	void							*getCallbackUserParam(void) const			{ return _CbUserParam; }
 	/// Tells this source not to call its callbacks when it ends. This is valid for spawned sources only.
-	virtual	void					unregisterSpawnCallBack()					{ _SpawnEndCb = NULL; }
+	virtual	void					unregisterSpawnCallBack()					{ _SpawnEndCb = nullptr; }
 	/// Get the velocity vector
 	virtual void					getVelocity( NLMISC::CVector& vel ) const	{ vel = _Velocity; }
 	/// Get the direction vector
@@ -113,7 +113,7 @@ public:
 	/// Return the sample format information.
 	virtual void					getFormat(uint8 &/* channels */, uint8 &/* bitsPerSample */, uint32 &/* frequency */) const { nlassert(false); }
 	/// Get a writable pointer to the buffer of specified size. Use capacity to specify the required bytes. Returns NULL when all the buffer space is already filled. Call setFormat() first.
-	virtual uint8					*lock(uint /* capacity */) { nlassert(false); return NULL; }
+	virtual uint8					*lock(uint /* capacity */) { nlassert(false); return nullptr; }
 	/// Notify that you are done writing to the locked buffer, so it can be copied over to hardware if needed. Set size to the number of bytes actually written to the buffer. Returns true if ok.
 	virtual bool					unlock(uint /* size */) { nlassert(false); return false; }
 	/// Get the recommended buffer size to use with lock()/unlock()

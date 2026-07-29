@@ -244,7 +244,7 @@ void CRaceStatsSheet::buildGroundFXs(const NLGEORGES::UFormElm &item, const std:
 					for(uint i=0; i< groundFXArraySize; ++i)
 					{
 						const NLGEORGES::UFormElm *node;
-						if (elm->getArrayNode(&node, i) && node != NULL)
+						if (elm->getArrayNode(&node, i) && node != nullptr)
 						{
 							CGroundFXSheet gfs;
 							if (!gfs.build(*node))

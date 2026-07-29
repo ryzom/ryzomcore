@@ -177,7 +177,7 @@ public:
 	/// Create a sound buffer, destroy with delete
 	virtual	IBuffer *createBuffer() = 0;
 	/// Create a reverb effect
-	virtual IReverbEffect *createReverbEffect() { return NULL; }
+	virtual IReverbEffect *createReverbEffect() { return nullptr; }
 	/// Return the maximum number of sources that can created
 	virtual uint countMaxSources() = 0;
 	/// Return the maximum number of effects that can be created
@@ -197,7 +197,7 @@ public:
 	/// \name Stuff for drivers that have native music support
 	//@{
 	/// Create a native music channel, only supported by the FMod driver.
-	virtual IMusicChannel *createMusicChannel() { return NULL; }
+	virtual IMusicChannel *createMusicChannel() { return nullptr; }
 	/** Get music info. Returns false if the song is not found or the function is not implemented.
 	 *  \param filepath full path to file
 	 *  \param artist returns the song artist (empty if not available)

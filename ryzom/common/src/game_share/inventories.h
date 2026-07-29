@@ -365,7 +365,7 @@ namespace INVENTORIES
 
 		/// Serial from/to bit stream
 		template <class CInventoryCategoryTemplate>
-			void	serialAll( NLMISC::CBitMemStream& bms, const CInventoryCategoryTemplate * /* templ */ =0 )
+			void	serialAll( NLMISC::CBitMemStream& bms, const CInventoryCategoryTemplate * /* templ */ =nullptr )
 		{
 			bms.serial( _SlotIndex, CInventoryCategoryTemplate::SlotBitSize );
 
@@ -417,7 +417,7 @@ namespace INVENTORIES
 
 		/// Serial from/to bit stream
 		template <class CInventoryCategoryTemplate>
-			void	serialOneProp( NLMISC::CBitMemStream& bms, const CInventoryCategoryTemplate * /* templ */ =0 )
+			void	serialOneProp( NLMISC::CBitMemStream& bms, const CInventoryCategoryTemplate * /* templ */ =nullptr )
 		{
 			bms.serial( _SlotIndex, CInventoryCategoryTemplate::SlotBitSize );
 			bms.serial( _OneProp );

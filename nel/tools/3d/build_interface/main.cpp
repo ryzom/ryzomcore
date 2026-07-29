@@ -399,7 +399,7 @@ int main(int argc, char **argv)
 	AllMaps.resize( mapSize );
 	for(sint i = 0; i < mapSize; ++i )
 	{
-		NLMISC::CBitmap *pBtmp = NULL;
+		NLMISC::CBitmap *pBtmp = nullptr;
 
 		try
 		{
@@ -533,7 +533,7 @@ int main(int argc, char **argv)
 		fmtName = fmtName.substr(0, fmtName.rfind('.'));
 		fmtName += ".txt";
 		FILE *f = nlfopen(fmtName, "wb");
-		if (f != NULL)
+		if (f != nullptr)
 		{
 			for (sint i = 0; i < mapSize; ++i)
 			{
@@ -568,7 +568,7 @@ int main(int argc, char **argv)
 		fmtName += ".txt";
 		FILE *f = nlfopen(fmtName, "wb");
 
-		if (f == NULL)
+		if (f == nullptr)
 		{
 			outString(toString("ERROR: Unable to write UV file %s", fmtName.c_str()));
 			return -1;

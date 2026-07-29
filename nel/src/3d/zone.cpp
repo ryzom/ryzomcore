@@ -81,7 +81,7 @@ CZone::CZone()
 {
 	ZoneId= 0;
 	Compiled= false;
-	Landscape= NULL;
+	Landscape = nullptr;
 	ClipResult= ClipOut;
 }
 // ***************************************************************************
@@ -554,7 +554,7 @@ void			CZone::compile(CLandscape *landscape, TZoneMap &loadedZones)
 	// Else, create unbounded vertices.
 	for(i=0;i<(sint)BaseVertices.size();i++)
 	{
-		if(BaseVertices[i]==NULL)
+		if(BaseVertices[i] == nullptr)
 		{
 			BaseVertices[i]=  new CTessBaseVertex;
 		}
@@ -685,7 +685,7 @@ void			CZone::release(TZoneMap &loadedZones)
 
 	// End!!
 	Compiled= false;
-	Landscape= NULL;
+	Landscape = nullptr;
 	ClipResult= ClipOut;
 }
 
@@ -723,7 +723,7 @@ CPatch		*CZone::getZonePatch(TZoneMap &loadedZones, sint zoneId, sint patch)
 	return NULL;
 #endif
 	if(loadedZones.find(zoneId)==loadedZones.end())
-		return NULL;
+		return nullptr;
 	else
 		return (loadedZones[zoneId])->getPatch(patch);
 }
@@ -806,7 +806,7 @@ void		CZone::bindPatch(TZoneMap &loadedZones, CPatch &pa, CPatchConnect &pc, boo
 		TZoneMap::iterator	itZoneMap;
 		// If no neighbor, or if zone neighbor not loaded.
 		if( paBind.NPatchs==0 || (itZoneMap=loadedZones.find(pcBind.ZoneId)) == loadedZones.end() )
-			paBind.Zone= NULL;
+			paBind.Zone = nullptr;
 		else
 			paBind.Zone= itZoneMap->second;
 
@@ -1257,7 +1257,7 @@ void			CZone::resetRenderFarAndDeleteVBFV()
 // ***************************************************************************
 void			CZone::forceMergeAtTileLevel()
 {
-	CPatch		*pPatch=0;
+	CPatch		*pPatch=nullptr;
 
 	if (!Patchs.empty())
 		pPatch= &(*Patchs.begin());

@@ -1005,14 +1005,14 @@ bool isEditionCurrent();
 template <class T>
 T *createObjectFromClassName(const std::string &className)
 {
-	if (className.empty()) return NULL;
+	if (className.empty()) return nullptr;
 	try
 	{
 		NLMISC::IClassable *obj = NLMISC::CClassRegistry::create(className);
 		if (!obj)
 		{
 			nlwarning("Couldn't create object of class %s", className.c_str());
-			return NULL;
+			return nullptr;
 		}
 		T *inst = dynamic_cast<T *>(obj);
 		if (!inst)
@@ -1020,13 +1020,13 @@ T *createObjectFromClassName(const std::string &className)
 			nlwarning("<R2::createObjectFromClassName> class %s found in the registry, but does not match the expected class.",
 						obj->getClassName().c_str());
 			delete obj;
-			return NULL;
+			return nullptr;
 		}
 		return inst;
 	}
 	catch(const NLMISC::ERegistry &)
 	{
-		return NULL;
+		return nullptr;
 	}
 }
 

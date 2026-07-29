@@ -316,14 +316,14 @@ namespace NLNET
 
 		TSecurityData(const TCtorParam &params)
 			: DataTag(params.DataTag),
-			NextItem(NULL)
+			NextItem(nullptr)
 
 		{
 		}
 
 		virtual ~TSecurityData()
 		{
-			if (NextItem != NULL)
+			if (NextItem != nullptr)
 				delete NextItem;
 		}
 
@@ -738,10 +738,10 @@ namespace NLNET
 		 *	returned.
 		 */
 		template <class T>
-		T *getInterceptor(T *dummy, IModuleInterceptable *previous = NULL)
+		T *getInterceptor(T *dummy, IModuleInterceptable *previous = nullptr)
 		{
 			TInterceptors::iterator it(_ModuleInterceptors.begin());
-			if (previous != NULL)
+			if (previous != nullptr)
 			{
 				// advance up to next the previous
 				while (it != _ModuleInterceptors.end() && *it != previous)
@@ -755,7 +755,7 @@ namespace NLNET
 				IModuleInterceptable *mi = *it;
 				T *inter = dynamic_cast<T*>(mi);
 
-				if (inter != NULL)
+				if (inter != nullptr)
 				{
 					dummy = inter;
 					return inter;
@@ -765,7 +765,7 @@ namespace NLNET
 			}
 
 			dummy = NULL;
-			return NULL;
+			return nullptr;
 		}
 	protected:
 		// Init base module, init module name

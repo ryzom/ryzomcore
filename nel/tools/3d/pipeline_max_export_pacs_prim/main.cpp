@@ -118,14 +118,14 @@ float getZRot(const NLMISC::CVector &i)
 CSceneClass *findReferenceBySuperClass(CSceneClass *obj, TSClassId superClassId, CSceneClass *exclude)
 {
 	CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(obj);
-	if (!rm) return NULL;
+	if (!rm) return nullptr;
 	for (uint i = 0; i < rm->nbReferences(); ++i)
 	{
 		CSceneClass *r = dynamic_cast<CSceneClass *>(rm->getReference(i));
 		if (!r || r == exclude) continue;
 		if (r->classDesc()->superClassId() == superClassId) return r;
 	}
-	return NULL;
+	return nullptr;
 }
 
 // Decode one PACS primitive node. Returns false (logging why) on any missing piece — the
@@ -168,7 +168,7 @@ bool decodePrimitive(INode &node, MAXSCENE::SNodeTMCache &tmCache, NLPACS::CPrim
 	if (!ok) { err = "missing ParamBlock2 param(s)"; return false; }
 
 	// Delegate's own dimensions, via its old-style ParamBlock (reference 0 of the delegate).
-	CSceneClass *delegatePBlock = findReferenceBySuperClass(delegate, 0x00000008, NULL);
+	CSceneClass *delegatePBlock = findReferenceBySuperClass(delegate, 0x00000008, nullptr);
 	if (!delegatePBlock) { err = "delegate has no old ParamBlock"; return false; }
 	std::map<sint32, OLDPBLOCK::SParam> dims;
 	OLDPBLOCK::readOldParamBlock(delegatePBlock, dims);

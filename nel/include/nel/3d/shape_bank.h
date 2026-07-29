@@ -149,7 +149,7 @@ public:
 	 *  \param flushTextures if true, then textures are flushed in the driver drv
 	 */
 	void			preLoadShapes(const std::string &shapeCacheName,
-		const std::vector<std::string> &listFile, const std::string &wildCardNotLwr, NLMISC::IProgressCallback *progress = NULL, bool flushTextures = false, IDriver *drv = NULL);
+		const std::vector<std::string> &listFile, const std::string &wildCardNotLwr, NLMISC::IProgressCallback *progress = nullptr, bool flushTextures = false, IDriver *drv = nullptr);
 
 	/** Mark this shape name as needing a buildSystemGeometry() (typically used for selection)
 	 *	NB: this will take effect only for shapes on a subsequent add(), load() or loadAsync()
@@ -182,7 +182,7 @@ private:
 		{
 			State = AsyncLoad_Shape;
 			RefCnt = 0;
-			ShapePtr = NULL;
+			ShapePtr = nullptr;
 			UpTextProgress = 0;
 			UpTextMipMap = 0;
 			UpTextLine = 0;
@@ -216,7 +216,7 @@ private:
 		CShapeCache*	pShpCache;
 		std::string		sShpName;
 		bool			isAdded;
-		CShapeInfo() { isAdded = false; pShpCache = NULL; }
+		CShapeInfo() { isAdded = false; pShpCache = nullptr; }
 	};
 
 private:

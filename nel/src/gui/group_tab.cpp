@@ -100,8 +100,8 @@ namespace NLGUI
 	xmlNodePtr CGroupTab::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
 		xmlNodePtr node = CInterfaceGroup::serialize( parentNode, type );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "tab" );
 		xmlSetProp( node, BAD_CAST "hide_out_tabs", BAD_CAST toString( _HideOutTabs ).c_str() );
@@ -164,10 +164,10 @@ namespace NLGUI
 					break;
 
 				// find the associated group
-				CInterfaceGroup	*pGroup = NULL;
+				CInterfaceGroup	*pGroup = nullptr;
 				CInterfaceGroup	*pFather = this;
 
-				while ((pGroup == NULL) && (pFather != NULL))
+				while ((pGroup == nullptr) && (pFather != nullptr))
 				{
 					pGroup = pFather->getGroup(but->_AssociatedGroup);
 					pFather = pFather->getParent();
@@ -214,7 +214,7 @@ namespace NLGUI
 			updateCoords();
 
 			uint count=0;
-			CCtrlTabButton* lastTab=NULL;
+			CCtrlTabButton* lastTab = nullptr;
 			for(sint i=0;i<(sint)buttons.size();i++)
 			{
 				if(i==index)
@@ -271,7 +271,7 @@ namespace NLGUI
 
 			if(_Buttons.empty())
 			{
-				tabB->setParentPos(NULL);
+				tabB->setParentPos(nullptr);
 				tabB->setParentPosRef(Hotspot_TL);
 			}
 			else
@@ -352,7 +352,7 @@ namespace NLGUI
 		updateCoords();
 
 		uint count=0;
-		CCtrlTabButton* lastTab = NULL;
+		CCtrlTabButton* lastTab = nullptr;
 		for(sint i=0;i<(sint)buttons.size();i++)
 		{
 			if(i!=index)
@@ -439,7 +439,7 @@ namespace NLGUI
 		{
 			return _Buttons[index];
 		}
-		return NULL;
+		return nullptr;
 	}
 
 	// ***************************************************************************
@@ -449,7 +449,7 @@ namespace NLGUI
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
 		CCtrlTabButton* tab = getTabButton((uint) ls.toInteger(1));
-		if(tab != NULL)
+		if(tab != nullptr)
 		{
 			CLuaIHM::pushUIOnStack(ls, tab);
 			return 1;
@@ -678,7 +678,7 @@ namespace NLGUI
 				if (i==index)
 				{
 					_Buttons[i]->setBlink(false);
-					if (_Buttons[i]->_AHOnLeftClick2 != NULL)
+					if (_Buttons[i]->_AHOnLeftClick2 != nullptr)
 						// call like if press on it
 						_Buttons[i]->_AHOnLeftClick2->execute(_Buttons[i], _Buttons[i]->getParamsOnLeftClick());
 				}
@@ -737,7 +737,7 @@ namespace NLGUI
 	void	CGroupTab::selectDefaultIfCurrentHid()
 	{
 		if(_Selection>=0 && _Selection<(sint)_Buttons.size() &&
-			_Buttons[_Selection]!=NULL && _Buttons[_Selection]->getActive()==false)
+			_Buttons[_Selection] != nullptr && _Buttons[_Selection]->getActive()==false)
 		{
 			selectDefault(_Buttons[_Selection]);
 		}
@@ -768,7 +768,7 @@ namespace NLGUI
 		{
 			return _Groups[index];
 		}
-		return NULL;
+		return nullptr;
 	}
 
 	// ***************************************************************************
@@ -778,7 +778,7 @@ namespace NLGUI
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
 		CInterfaceGroup* group = getGroup((uint) ls.toInteger(1));
-		if(group != NULL)
+		if(group != nullptr)
 		{
 			CLuaIHM::pushUIOnStack(ls, group);
 			return 1;
@@ -791,7 +791,7 @@ namespace NLGUI
 	: CCtrlTextButton(param)
 	{
 		_DefaultX= 0;
-		_AHOnLeftClick2 = NULL;
+		_AHOnLeftClick2 = nullptr;
 		_BlinkDate = 0;
 		_Blinking = false;
 		_BlinkState = false;
@@ -818,8 +818,8 @@ namespace NLGUI
 	xmlNodePtr CCtrlTabButton::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
 		xmlNodePtr node = CCtrlTextButton::serialize( parentNode, type );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "tab" );
 		xmlNewProp( node, BAD_CAST "group", BAD_CAST _AssociatedGroup.c_str() );

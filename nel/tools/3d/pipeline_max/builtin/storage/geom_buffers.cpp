@@ -289,28 +289,28 @@ const std::vector<NLMISC::CVector> *CGeomBuffers::triVertices() const
 {
 	const CStorageArraySizePre<NLMISC::CVector> *a =
 		dynamic_cast<const CStorageArraySizePre<NLMISC::CVector> *>(findStorageObject(0x0914));
-	return a ? &a->Value : NULL;
+	return a ? &a->Value : nullptr;
 }
 
 const std::vector<CGeomTriIndexInfo> *CGeomBuffers::triFaces() const
 {
 	const CStorageArraySizePre<CGeomTriIndexInfo> *a =
 		dynamic_cast<const CStorageArraySizePre<CGeomTriIndexInfo> *>(findStorageObject(0x0912));
-	return a ? &a->Value : NULL;
+	return a ? &a->Value : nullptr;
 }
 
 const std::vector<CGeomPolyVertexInfo> *CGeomBuffers::polyVertices() const
 {
 	const CStorageArraySizePre<CGeomPolyVertexInfo> *a =
 		dynamic_cast<const CStorageArraySizePre<CGeomPolyVertexInfo> *>(findStorageObject(PBMS_GEOM_BUFFERS_POLY_A_VERTEX_CHUNK_ID));
-	return a ? &a->Value : NULL;
+	return a ? &a->Value : nullptr;
 }
 
 const std::vector<CGeomPolyFaceInfo> *CGeomBuffers::polyFaces() const
 {
 	const CStorageArrayDynSize<CGeomPolyFaceInfo> *a =
 		dynamic_cast<const CStorageArrayDynSize<CGeomPolyFaceInfo> *>(findStorageObject(PBMS_GEOM_BUFFERS_POLY_A_FACE_CHUNK_ID));
-	return a ? &a->Value : NULL;
+	return a ? &a->Value : nullptr;
 }
 
 IStorageObject *CGeomBuffers::createChunkById(uint16 id, bool container)

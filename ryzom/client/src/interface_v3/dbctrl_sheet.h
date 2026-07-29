@@ -937,7 +937,7 @@ struct CDBCtrlSheetPtrUserType : public CInterfaceExprUserType
 {
   CDBCtrlSheet *Sheet; // pointer to a sheet
   // ctor
-  CDBCtrlSheetPtrUserType(CDBCtrlSheet *sheet = NULL) : Sheet(sheet) {}
+  CDBCtrlSheetPtrUserType(CDBCtrlSheet *sheet = nullptr) : Sheet(sheet) {}
   // from CInterfaceExprUserType
   virtual CInterfaceExprUserType *clone() const { return new CDBCtrlSheetPtrUserType(*this); }
 };

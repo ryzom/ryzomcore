@@ -65,7 +65,7 @@ public:
 	bool Used;
 };
 
-CRenderTargetManager::CRenderTargetManager() : m_Driver(NULL)
+CRenderTargetManager::CRenderTargetManager() : m_Driver(nullptr)
 {
 	
 }
@@ -144,8 +144,8 @@ void CRenderTargetManager::cleanup()
 				// No longer in use
 				nldebug("3D: Release render target (%u x %u)", desc->Width, desc->Height);
 				delete desc->TextureUser;
-				desc->TextureUser = NULL;
-				desc->TextureInterface = NULL; // CSmartPtr
+				desc->TextureUser = nullptr;
+				desc->TextureInterface = nullptr; // CSmartPtr
 				m_RenderTargets.erase(m_RenderTargets.begin() + i);
 				delete desc;
 				--i;

@@ -92,7 +92,7 @@ static void collectSplines(CStorageContainer *cont, SShape &out)
 	if (!cont) return;
 
 	const CStorageContainer::TStorageObjectContainer &ch = cont->chunks();
-	CStorageRaw *rawKnots = NULL;
+	CStorageRaw *rawKnots = nullptr;
 	uint32 numKnots = 0;
 	uint32 closed = 0;
 	bool haveNum = false;

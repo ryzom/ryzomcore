@@ -62,7 +62,7 @@ public:
 	virtual bool	isUsed (const CForm *form) const;
 
 	// Get the form name of the element
-	virtual void	getFormName (std::string &result, const CFormElm *child=NULL) const = 0;
+	virtual void	getFormName (std::string &result, const CFormElm *child = nullptr) const = 0;
 
 	// From UFormElm
 	virtual bool	getNodeByName (const UFormElm **result, const std::string &name, TWhereIsNode *where, bool verbose, uint32 round=0) const;
@@ -126,7 +126,7 @@ public:
 	virtual bool	getValue (double &resultname, TEval evaluate) const;
 	virtual bool	getValue (bool &resultname, TEval evaluate) const;
 	virtual bool	getValue (NLMISC::CRGBA &resultname, TEval evaluate) const;
-	virtual UFormDfn	*getStructDfn () { return NULL; }
+	virtual UFormDfn	*getStructDfn () { return nullptr; }
 
 	// ** Convert functions
 
@@ -280,7 +280,7 @@ public:
 	public:
 		CFormElmStructElm ()
 		{
-			Element = NULL;
+			Element = nullptr;
 		}
 		~CFormElmStructElm()
 		{
@@ -402,7 +402,7 @@ public:
 	public:
 		CElement ()
 		{
-			Element = NULL;
+			Element = nullptr;
 		}
 		~CElement ()
 		{

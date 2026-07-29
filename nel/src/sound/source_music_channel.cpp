@@ -38,7 +38,8 @@ using namespace std;
 
 namespace NLSOUND {
 
-CSourceMusicChannel::CSourceMusicChannel() : m_Source(NULL), m_Gain(1.0f)
+CSourceMusicChannel::CSourceMusicChannel() : m_Source(nullptr)
+    , m_Gain(1.0f)
 {
 	
 }
@@ -47,7 +48,7 @@ CSourceMusicChannel::~CSourceMusicChannel()
 {
 	nlassert(!m_Source);
 	delete m_Source;
-	m_Source = NULL;
+	m_Source = nullptr;
 }
 
 bool CSourceMusicChannel::play(const std::string &filepath, bool async, bool loop)
@@ -59,7 +60,7 @@ bool CSourceMusicChannel::play(const std::string &filepath, bool async, bool loo
 
 	m_Sound.setMusicFilePath(filepath, async, loop);
 
-	m_Source = new CStreamFileSource(&m_Sound, false, NULL, NULL, NULL, NULL);
+	m_Source = new CStreamFileSource(&m_Sound, false, nullptr, nullptr, nullptr, nullptr);
 	m_Source->setSourceRelativeMode(true);
 	m_Source->setPos(NLMISC::CVector::Null);
 	m_Source->setRelativeGain(m_Gain);
@@ -80,7 +81,7 @@ void CSourceMusicChannel::reset()
 {
 	// forces the source to be deleted, happens when audio mixer is reset
 	delete m_Source;
-	m_Source = NULL;
+	m_Source = nullptr;
 }
 
 void CSourceMusicChannel::pause()
@@ -103,7 +104,7 @@ bool CSourceMusicChannel::isEnded()
 		{
 			// we can delete the source now without worrying about thread wait
 			delete m_Source;
-			m_Source = NULL;
+			m_Source = nullptr;
 			return true;
 		}
 		return false;

@@ -34,7 +34,7 @@ void CXMLAutoPtr::destroy()
 	if (_Value)
 	{
 		xmlFree(const_cast<char *>(_Value));
-		_Value = NULL;
+		_Value = nullptr;
 	}
 }
 

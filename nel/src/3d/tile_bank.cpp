@@ -336,7 +336,7 @@ void CTileBank::xchgTileset (sint firstTileSet, sint secondTileSet)
 void TroncFileName (char* sDest, const char* sSrc)
 {
 	const char* ptr=strrchr (sSrc, '\\');
-	if (ptr==NULL)
+	if (ptr == nullptr)
 		ptr=strrchr (sSrc, '/');
 	if (ptr)
 	{
@@ -447,7 +447,7 @@ CTileNoiseMap *CTileBank::getTileNoiseMap (uint tileNumber, uint tileSubNoise)
 	if (_DisplacementMap.empty())
 	{
 		// it happens when serial a tile bank with version < 4
-		return NULL;
+		return nullptr;
 	}
 
 	// Check tile number..
@@ -463,13 +463,13 @@ CTileNoiseMap *CTileBank::getTileNoiseMap (uint tileNumber, uint tileSubNoise)
 			//nlassert (_TileSetVector[tileSet]._DisplacementBitmap[tileSubNoise]<_DisplacementMap.size());
 
 			if (_TileSetVector[tileSet]._DisplacementBitmap[tileSubNoise]>=_DisplacementMap.size())
-				return NULL;
+				return nullptr;
 
 			// Return the tile noise map
 			CTileNoise &tileNoise=_DisplacementMap[_TileSetVector[tileSet]._DisplacementBitmap[tileSubNoise]];
 
 			// Not loaded ?
-			if (tileNoise._TileNoiseMap==NULL)
+			if (tileNoise._TileNoiseMap == nullptr)
 			{
 				// Load a bitmap
 				CTextureFile texture (getAbsPath()+tileNoise._FileName);
@@ -551,7 +551,7 @@ CTileNoiseMap *CTileBank::getTileNoiseMap (uint tileNumber, uint tileSubNoise)
 	}
 
 	if (_DisplacementMap.empty() || _DisplacementMap[0]._TileNoiseMap)
-		return NULL;
+		return nullptr;
 
 	// Checks
 	nlassert (_DisplacementMap[0]._TileNoiseMap);
@@ -1859,13 +1859,13 @@ void CTileSetTransition::serial(NLMISC::IStream &f)
 CTileNoise::CTileNoise ()
 {
 	// Not loaded
-	_TileNoiseMap=NULL;
+	_TileNoiseMap = nullptr;
 }
 // ***************************************************************************
 CTileNoise::CTileNoise (const CTileNoise &src)
 {
 	// Default ctor
-	_TileNoiseMap=NULL;
+	_TileNoiseMap = nullptr;
 
 	// Copy
 	*this=src;
@@ -1876,7 +1876,7 @@ CTileNoise::~CTileNoise ()
 	if (_TileNoiseMap)
 	{
 		delete _TileNoiseMap;
-		_TileNoiseMap=NULL;
+		_TileNoiseMap = nullptr;
 	}
 }
 // ***************************************************************************
@@ -1888,7 +1888,7 @@ CTileNoise& CTileNoise::operator= (const CTileNoise &src)
 	// Tile noise map ?
 	if (src._TileNoiseMap)
 	{
-		if (_TileNoiseMap==NULL)
+		if (_TileNoiseMap == nullptr)
 		{
 			// Allocate it
 			_TileNoiseMap=new CTileNoiseMap;
@@ -1903,7 +1903,7 @@ CTileNoise& CTileNoise::operator= (const CTileNoise &src)
 		if (_TileNoiseMap)
 		{
 			delete _TileNoiseMap;
-			_TileNoiseMap=NULL;
+			_TileNoiseMap = nullptr;
 		}
 	}
 	return *this;
@@ -1933,7 +1933,7 @@ void CTileNoise::reset()
 	if (_TileNoiseMap)
 	{
 		delete _TileNoiseMap;
-		_TileNoiseMap=NULL;
+		_TileNoiseMap = nullptr;
 	}
 
 	// Erase filename

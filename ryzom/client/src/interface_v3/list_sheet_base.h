@@ -72,13 +72,13 @@ public:
 	static IListSheetBase *getListContaining(CInterfaceElement *pIE)
 	{
 		CInterfaceGroup *pIG = pIE->getParent();
-		while (pIG != NULL)
+		while (pIG != nullptr)
 		{
 			IListSheetBase *pLSB = dynamic_cast<IListSheetBase*>(pIG);
-			if (pLSB != NULL) return pLSB;
+			if (pLSB != nullptr) return pLSB;
 			pIG = pIG->getParent();
 		}
-		return NULL;
+		return nullptr;
 	}
 
 protected:
@@ -101,7 +101,7 @@ protected:
 	// if sectionable, the deriver must implement those method
 	// min and maxSectionId are exclusive (ie the encoutered sectionId should not be of those values)
 	virtual	void				getCurrentBoundSectionId(sint &minSectionId, sint &maxSectionId) {minSectionId= 0;maxSectionId=0;}
-	virtual	CInterfaceGroup		*createSectionGroup(const std::string &/* igName */) {return NULL;}
+	virtual	CInterfaceGroup		*createSectionGroup(const std::string &/* igName */) { return nullptr; }
 	virtual	void				deleteSectionGroup(CInterfaceGroup	*) {}
 	virtual	void				setSectionGroupId(CInterfaceGroup	*, uint /* sectionId */) {}
 

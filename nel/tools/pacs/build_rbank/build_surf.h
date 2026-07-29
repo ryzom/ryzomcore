@@ -202,9 +202,9 @@ public:
 	CSurfElement()
 	{
 		ElemId = 0;
-		EdgeLinks[0] = NULL;
-		EdgeLinks[1] = NULL;
-		EdgeLinks[2] = NULL;
+		EdgeLinks[0] = nullptr;
+		EdgeLinks[1] = nullptr;
+		EdgeLinks[2] = nullptr;
 		EdgeFlag[0] = false;
 		EdgeFlag[1] = false;
 		EdgeFlag[2] = false;
@@ -238,11 +238,11 @@ public:
 		uint	i, j;
 		for (i=0; i<3; ++i)
 		{
-			if (EdgeLinks[i] != NULL)
+			if (EdgeLinks[i] != nullptr)
 				for (j=0; j<3; ++j)
 					if (EdgeLinks[i]->EdgeLinks[j] == this)
-						EdgeLinks[i]->EdgeLinks[j] = NULL;
-			EdgeLinks[i] = NULL;
+						EdgeLinks[i]->EdgeLinks[j] = nullptr;
+			EdgeLinks[i] = nullptr;
 		}
 
 	}
@@ -252,7 +252,7 @@ public:
 	 */
 	sint32	getZoneIdOnEdge(uint edge) const
 	{
-		return (EdgeLinks[edge] != NULL ? EdgeLinks[edge]->ZoneId : -1);
+		return (EdgeLinks[edge] != nullptr ? EdgeLinks[edge]->ZoneId : -1);
 	}
 
 	void	serial(NLMISC::IStream &f, std::vector<CSurfElement> &tessellation)
@@ -269,7 +269,7 @@ public:
 			for (i=0; i<3; ++i)
 			{
 				f.serial(s);
-				EdgeLinks[i] = (s >= 0 ? &tessellation[s] : NULL);
+				EdgeLinks[i] = (s >= 0 ? &tessellation[s] : nullptr);
 			}
 		}
 		else
@@ -278,7 +278,7 @@ public:
 			uint	i;
 			for (i=0; i<3; ++i)
 			{
-				s = (EdgeLinks[i] != NULL ? EdgeLinks[i]->ElemId : -1);
+				s = (EdgeLinks[i] != nullptr ? EdgeLinks[i]->ElemId : -1);
 				f.serial(s);
 			}
 		}
@@ -386,7 +386,8 @@ public:
 	 * Constructor.
 	 * Builds an empty surface.
 	 */
-	CComputableSurface() : SurfaceId(UnaffectedSurfaceId), BorderKeeper(NULL), ClusterHint(false)	{}
+	CComputableSurface() : SurfaceId(UnaffectedSurfaceId), BorderKeeper(nullptr)
+	    , ClusterHint(false)	{}
 
 	/**
 	 * Flood fills the surface elements to find iso-criteria surfaces.
@@ -432,7 +433,7 @@ public:
 
 			for (i=0; i<3; ++i)
 			{
-				if (pop->EdgeLinks[i] != NULL && pop->EdgeLinks[i]->SurfaceId == UnaffectedSurfaceId && cmp.equal(first, pop->EdgeLinks[i]))
+				if (pop->EdgeLinks[i] != nullptr && pop->EdgeLinks[i]->SurfaceId == UnaffectedSurfaceId && cmp.equal(first, pop->EdgeLinks[i]))
 				{
 					pop->EdgeLinks[i]->SurfaceId = SurfaceId;
 					stack.push_back(pop->EdgeLinks[i]);

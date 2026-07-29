@@ -90,7 +90,7 @@ public:
 
 	static CMacroCmdManager *getInstance()
 	{
-		if (_Instance == NULL)
+		if (_Instance == nullptr)
 			_Instance = new CMacroCmdManager;
 		return _Instance;
 	}

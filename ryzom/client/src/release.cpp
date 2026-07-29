@@ -178,34 +178,34 @@ static void releaseMainLoopScenes()
 		if (Landscape)
 		{
 			Scene->deleteLandscape (Landscape);
-			Landscape = NULL;
+			Landscape = nullptr;
 		}
 
 		// Release the collision manager
 		Scene->deleteVisualCollisionManager(CollisionManager);
-		CollisionManager = NULL;
+		CollisionManager = nullptr;
 
 		// release cloud scape
 		if (CloudScape)
 		{
 			Scene->deleteCloudScape(CloudScape);
-			CloudScape = NULL;
+			CloudScape = nullptr;
 		}
 
 		// remove the scene from the sound lib
-		if (SoundMngr != NULL)
-			SoundMngr->getMixer()->initClusteredSound((UScene*)NULL, 0.01f, 100.0f, 1.0f);
+		if (SoundMngr != nullptr)
+			SoundMngr->getMixer()->initClusteredSound((UScene*)nullptr, 0.01f, 100.0f, 1.0f);
 
 		// Stop any async loading. Actually all should have been stop before
 		CAsyncFileManager::terminate();
 
 		// Release the scene.
 		Driver->deleteScene(Scene);
-		Scene = NULL;
-		MainCam = NULL;
+		Scene = nullptr;
+		MainCam = nullptr;
 
 		// remove scene from bloom
-		CBloomEffect::getInstance().setScene(NULL);
+		CBloomEffect::getInstance().setScene(nullptr);
 	}
 
 	// Delete the scene with the Big Root
@@ -215,11 +215,11 @@ static void releaseMainLoopScenes()
 		{
 			BackgroundIG->removeFromScene (*SceneRoot);
 			SceneRoot->deleteInstanceGroup (BackgroundIG);
-			BackgroundIG = NULL;
+			BackgroundIG = nullptr;
 
 		}
 		Driver->deleteScene(SceneRoot);
-		SceneRoot = NULL;
+		SceneRoot = nullptr;
 	}
 }
 
@@ -274,9 +274,9 @@ void	releaseMainLoopReselect()
 	EditActions.releaseAllKeyNoRunning();
 	Actions.releaseAllKeyNoRunning();
 	CWidgetManager::getInstance()->getParser()->removeAllTemplates();
-	CWidgetManager::getInstance()->setCaptureKeyboard(NULL);
-	CWidgetManager::getInstance()->setCapturePointerLeft(NULL);
-	CWidgetManager::getInstance()->setCapturePointerRight(NULL);
+	CWidgetManager::getInstance()->setCaptureKeyboard(nullptr);
+	CWidgetManager::getInstance()->setCapturePointerLeft(nullptr);
+	CWidgetManager::getInstance()->setCapturePointerRight(nullptr);
 
 	// Yoyo: Don't release attack list manager, because I think it only owns static data (and 3D data created from Driver, not Scenes)
 	// Note that in initMainLoop(), CAttackListManager::getInstance().init() will do nothing (since already created and not released here)
@@ -309,7 +309,7 @@ void	releaseMainLoopReselect()
 	}
 
 	CEntityAnimationManager::delInstance();
-	EAM= NULL;
+	EAM = nullptr;
 
 	if (Driver)
 	{
@@ -360,7 +360,7 @@ void	releaseMainLoopReselect()
 	SabrinaPhraseBookLoaded = false;
 
 	// Unlink the net manager
-	NetMngr.setDataBase (NULL);
+	NetMngr.setDataBase (nullptr);
 
 	// reset the client database and clear all observers. must do this while we are disconnected!
 	// First remove the auto copy observers
@@ -436,7 +436,7 @@ void releaseMainLoop(bool closeConnection)
 
 	// Release the Entities Animation Manager
 	CEntityAnimationManager::delInstance();
-	EAM= NULL;
+	EAM = nullptr;
 
 	// Release the cursors
 	releaseContextualCursor();
@@ -462,7 +462,7 @@ void releaseMainLoop(bool closeConnection)
 	UDriver::purgeMemory();
 
 	// Unlink the net manager
-	NetMngr.setDataBase (NULL);
+	NetMngr.setDataBase (nullptr);
 
 	// Send a msg to server
 	if(!ClientCfg.Local)
@@ -511,7 +511,7 @@ void releaseOutGame()
 	if(SoundMngr)
 	{
 		delete SoundMngr;
-		SoundMngr = NULL;
+		SoundMngr = nullptr;
 	}
 
 	// Delete the driver.
@@ -525,14 +525,14 @@ void releaseOutGame()
 		{
 			// Release the scene.
 			Driver->deleteScene(Scene);
-			Scene = 0;
+			Scene = nullptr;
 		}
 
 		// Remove the Actions listener from the Events Server.
 		EventsListener.removeFromServer(CInputHandlerManager::getInstance()->FilteredEventServer);
 
 		// Release effects
-		delete FXAA; FXAA = NULL;
+		delete FXAA; FXAA = nullptr;
 		CBloomEffect::releaseInstance();
 
 		// Release Scene, textcontexts, materials, ...
@@ -540,7 +540,7 @@ void releaseOutGame()
 
 		// Delete the driver.
 		delete Driver;
-		Driver = 0;
+		Driver = nullptr;
 	}
 
 	ContinentMngr.reset();
@@ -561,8 +561,8 @@ void releaseStereoDisplayDevice()
 		if (Scene)
 			Scene->setViewport(NL3D::CViewport());
 		delete StereoDisplay;
-		StereoDisplay = NULL;
-		StereoHMD = NULL;
+		StereoDisplay = nullptr;
+		StereoHMD = nullptr;
 	}
 	IStereoDisplay::releaseAllLibraries();
 }
@@ -576,7 +576,7 @@ void release()
 		CLoginProgressPostThread::getInstance().step(CLoginStep(LoginStep_GameExit, "login_step_game_exit&play_time=" + toString((NLMISC::CTime::getLocalTime() - StartPlayTime) / 1000)));
 	}
 	
-	setCrashCallback(NULL);
+	setCrashCallback(nullptr);
 
 #ifdef RYZOM_BG_DOWNLOADER
 	CBGDownloaderAccess::getInstance().release();
@@ -610,12 +610,12 @@ void release()
 	if (SoundMngr)
 	{
 		delete SoundMngr;
-		SoundMngr = NULL;
+		SoundMngr = nullptr;
 	}
 
 	// Release the Entities Animation Manager
 	CEntityAnimationManager::delInstance();
-	EAM = NULL;
+	EAM = nullptr;
 
 	nldebug("VR [C]: VR Shutting down");
 	releaseStereoDisplayDevice();
@@ -626,12 +626,12 @@ void release()
 		// Release the prim
 		PrimFiles.release(*Driver);
 
-		if (TextContext != NULL)
+		if (TextContext != nullptr)
 			Driver->deleteTextContext(TextContext);
-		TextContext = NULL;
+		TextContext = nullptr;
 
 		// Release effects
-		delete FXAA; FXAA = NULL;
+		delete FXAA; FXAA = nullptr;
 		CBloomEffect::releaseInstance();
 
 		// Release texture
@@ -642,7 +642,7 @@ void release()
 
 		// Delete the driver.
 		delete Driver;
-		Driver = NULL;
+		Driver = nullptr;
 	}
 
 	NetMngr.getConnection().close();
@@ -686,7 +686,7 @@ void release()
 	NLMISC::CBigFile::releaseInstance();
 	NLMISC::CStreamedPackageManager::releaseInstance();
 	delete HttpPackageProvider;
-	HttpPackageProvider = NULL;
+	HttpPackageProvider = nullptr;
 	NL3D::CFastHLSModifier::releaseInstance();
 	CLandscapePolyDrawer::releaseInstance();
 	NL3D::CParticleSystemShape::releaseInstance();

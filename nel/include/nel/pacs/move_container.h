@@ -75,10 +75,10 @@ public:
 		uint8 numWorldImage, uint maxIteration, uint otSize);
 
 	/// Add a collisionable primitive in the container. Return the pointer on the primitive.
-	UMovePrimitive*				addCollisionablePrimitive (uint8 firstWorldImage, uint8 numWorldImage, const UMovePrimitive *copyFrom = NULL);
+	UMovePrimitive*				addCollisionablePrimitive (uint8 firstWorldImage, uint8 numWorldImage, const UMovePrimitive *copyFrom = nullptr);
 
 	/// Add a noncollisionable primitive in the container. Return the pointer on the primitive.
-	UMovePrimitive*				addNonCollisionablePrimitive (const UMovePrimitive *copyFrom = NULL);
+	UMovePrimitive*				addNonCollisionablePrimitive (const UMovePrimitive *copyFrom = nullptr);
 
 	/// Load a block of collisionable primitive
 	bool						loadCollisionablePrimitiveBlock (const char *filename, uint8 firstWorldImage, uint8 numWorldImage, std::vector<UMovePrimitive*> *primitives, float orientation, const NLMISC::CVector &position, bool dontSnapToGround = false);

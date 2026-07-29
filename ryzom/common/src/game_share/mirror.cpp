@@ -44,7 +44,7 @@ using namespace std;
 
 const string MirrorVersion = string("1.10-")+string(ListRowSizeString); // ADDED: Unidirectional Mode (don't wait for delta)
 
-CMirror *MirrorInstance = NULL;
+CMirror *MirrorInstance = nullptr;
 
 extern NLMISC::TTime TimeBeforeTickUpdate;
 
@@ -82,8 +82,8 @@ static std::string *mWatchStrings[]=
 };
 static CEntityAndPropName *WatchedPropValues[sizeof(mWatchStrings)/sizeof(mWatchStrings[0])]=
 {
-	NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL
+	nullptr, nullptr, nullptr, nullptr, nullptr,
+	nullptr, nullptr, nullptr, nullptr, nullptr
 };
 
 NLMISC_CATEGORISED_VARIABLE(mirror, string, MWATCH0, "watch string 0");
@@ -103,7 +103,7 @@ NLMISC_CATEGORISED_VARIABLE(mirror, string, MWATCH9, "watch string 9");
  */
 void cbMSUpDn( const string& /* serviceName */, TServiceId serviceId, void *upOrDn )
 {
-	MirrorInstance->detectLocalMS( serviceId, (bool)(upOrDn!=NULL) );
+	MirrorInstance->detectLocalMS( serviceId, (bool)(upOrDn != nullptr) );
 }
 
 
@@ -114,7 +114,7 @@ void cbAnyServiceUpDn( const string& serviceName, TServiceId serviceId, void *vE
 {
 	// here we have an integer value stored in the 'void*' vEventType and we need to convert back to an integer
 	// for this we use pointer arithmetic with char* pointers in order to avoid compiler warnings
-	MirrorInstance->processServiceEvent( serviceName, serviceId, (CMirror::TServiceEventType)((char*)vEventType-(char*)NULL) );
+	MirrorInstance->processServiceEvent( serviceName, serviceId, (CMirror::TServiceEventType)((char*)vEventType-(char*)nullptr) );
 }
 
 
@@ -517,7 +517,7 @@ void				CMirror::applyListOfOtherProperties( CMessage& msgin, uint nbProps, cons
 		if ( isd != _SDataSets.end() )
 		{
 			// Set pointers from smid if the property is not already subscribed
-			if ( GET_SDATASET(isd)._PropertyContainer.PropertyValueArrays[propIndex].Values == NULL )
+			if ( GET_SDATASET(isd)._PropertyContainer.PropertyValueArrays[propIndex].Values == nullptr)
 			{
 				void *segmentPt = _PropAllocator.accessOtherPropertySegment( smid );
 				string emptyPropName;
@@ -1064,7 +1064,7 @@ void cbAllMirrorsOnline( NLNET::CMessage& msgin, const std::string &/* serviceNa
  */
 void cbRecvServiceHasMirrorReadyBroadcast( NLNET::CMessage& msgin, const std::string &serviceName, TServiceId serviceId )
 {
-	cbServiceMirrorUpForSMIRUB( serviceName, serviceId, 0 );
+	cbServiceMirrorUpForSMIRUB( serviceName, serviceId, nullptr );
 
 	MirrorInstance->receiveServiceHasMirrorReady( serviceName, serviceId, msgin );
 }
@@ -1491,9 +1491,12 @@ void CMirror::changeValue( const NLMISC::CEntityId& entityId, const std::string&
  */
 CMirror::CMirror() :
 	_PendingEntityTypesRanges(0),
-	_ReadyL1Callback(NULL),
-	_NotificationCallback(NULL),
-	_UserSyncCallback(NULL),
+	_ReadyL1Callback(nullptr)
+    ,
+	_NotificationCallback(nullptr)
+    ,
+	_UserSyncCallback(nullptr)
+    ,
 	_MirrorAllReady(false),	
 	_MirrorGotReadyLevel1(false),
 	_MirrorGotReadyLevel2(false),
@@ -1867,7 +1870,7 @@ void CMirror::executeMirrorReady2CallbacksAndStartCommands()
 	for (uint i=0; i<posts.size(); ++i)
 	{
 		string varName = cmdRoot + posts[i];
-		if ((var = IService::getInstance()->ConfigFile.getVarPtr (varName)) != NULL)
+		if ((var = IService::getInstance()->ConfigFile.getVarPtr (varName)) != nullptr)
 		{
 			MIRROR_INFO( "MIRROR: Executing '%s'...", varName.c_str() );
 			for (uint i = 0; i < var->size(); i++)
@@ -1901,7 +1904,7 @@ void CMirror::executeMirrorReleaseCommands()
 	for (uint i=0; i<posts.size(); ++i)
 	{
 		string varName = cmdRoot + posts[i];
-		if ((var = IService::getInstance()->ConfigFile.getVarPtr (varName)) != NULL)
+		if ((var = IService::getInstance()->ConfigFile.getVarPtr (varName)) != nullptr)
 		{
 			MIRROR_INFO( "MIRROR: Executing '%s'...", varName.c_str() );
 			for (uint i = 0; i < var->size(); i++)
@@ -2160,7 +2163,7 @@ void	CMirror::updateMirrorAndReceiveMessages( CMessage& msgin )
 				it = timers.find(callbackName);
 				if(it == timers.end())
 				{
-					it = timers.insert(make_pair(callbackName, CHTimer(NULL))).first;
+					it = timers.insert(make_pair(callbackName, CHTimer(nullptr))).first;
 					(*it).second.setName((*it).first.c_str());
 				}
 			}
@@ -2325,15 +2328,15 @@ void	CMirror::init( std::vector<std::string>& dataSetsToLoad,
 
     // in both of the following lines we have an integer value which we want to pass in the 'void*' third parameter to SetService....Callback
     // for this we use pointer arithmetic with char* pointers in order to avoid compiler warnings
- 	CUnifiedNetwork::getInstance()->setServiceUpCallback( "*", cbAnyServiceUpDn, (void*)((char*)NULL+ETServiceUp) );
-	CUnifiedNetwork::getInstance()->setServiceDownCallback( "*", cbAnyServiceUpDn, (void*)((char*)NULL+ETServiceDn) );
+ 	CUnifiedNetwork::getInstance()->setServiceUpCallback( "*", cbAnyServiceUpDn, (void*)((char*)nullptr + ETServiceUp) );
+	CUnifiedNetwork::getInstance()->setServiceDownCallback( "*", cbAnyServiceUpDn, (void*)((char*)nullptr + ETServiceDn) );
 
 	// Init mirror callbacks
 	CUnifiedNetwork::getInstance()->addCallbackArray( MirrorCbArray, NB_MIRROR_CALLBACKS );
 
 	// Load the sheets of the datasets
 	// if the 'GeorgePaths' config file var exists then we try to perform a mini-scan for sheet files
-	if (IService::isServiceInitialized() && (IService::getInstance()->ConfigFile.getVarPtr(std::string("GeorgePaths"))!=NULL))
+	if (IService::isServiceInitialized() && (IService::getInstance()->ConfigFile.getVarPtr(std::string("GeorgePaths")) != nullptr))
 	{
 		loadForm("dataset", IService::getInstance()->WriteFilesDirectory.toString()+"datasets.packed_sheets", _SDataSetSheets, false, false);
 	}
@@ -2371,7 +2374,7 @@ void	CMirror::init( std::vector<std::string>& dataSetsToLoad,
 bool	CMirror::requestClosure()
 {
 	_ClosureRequested = true;
-	return (_TickReleaseFunc == NULL); // quit immediately if there is no tick release callback
+	return (_TickReleaseFunc == nullptr); // quit immediately if there is no tick release callback
 }
 
 
@@ -2649,7 +2652,7 @@ NLMISC_CATEGORISED_COMMAND(mirror, removeMirrorWatch, "Remove a particular watch
 	if ( WatchedPropValues[i] )
 	{
 		delete WatchedPropValues[i];
-		WatchedPropValues[i] = NULL;
+		WatchedPropValues[i] = nullptr;
 		mWatchStrings[i]->clear();
 		log.displayNL( "Watch %u removed", i );
 	}
@@ -2674,7 +2677,7 @@ NLMISC_CATEGORISED_COMMAND(mirror, displayMirrorProperties, "Display the propert
  */
 NLMISC_CATEGORISED_COMMAND(mirror, displayMirrorEntities, "Display all of part of the entities known in a dataset (255=all)", "[<dataset> [<sortByDataSetRow=0> [<onlyEntityType=255> [<onlyCreatorId=255> [<onlyDynamicId=255>]]]]]" )
 {
-	CMirroredDataSet *dataset = NULL;
+	CMirroredDataSet *dataset = nullptr;
 	bool sortByDataSetRow = false;
 	uint8 onlyEntityType = 0xFF;
 	uint8 onlyCreatorId = 0xFF;

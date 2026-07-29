@@ -114,11 +114,16 @@ enum TFilterMapping
 // constructor
 //-----------------------------------------------
 CSoundManager::CSoundManager(IProgressCallback * /* progressCallBack */)
-:	_AudioMixer(NULL),
-	_GroupControllerEffects(NULL),
-	_GroupControllerEffectsGame(NULL),
-	_EnvSoundRoot(NULL),
-	_Sources(NULL),
+:	_AudioMixer(nullptr)
+    ,
+	_GroupControllerEffects(nullptr)
+    ,
+	_GroupControllerEffectsGame(nullptr)
+    ,
+	_EnvSoundRoot(nullptr)
+    ,
+	_Sources(nullptr)
+    ,
 	_UserEntitySoundLevel(1.0f)
 {
 	_EnableBackgroundMusicAtTime= 0;
@@ -146,14 +151,14 @@ CSoundManager::~CSoundManager()
 	_AttachedSources.clear(); // attached sources already deleted (they are also in the _Sources map)
 
 	// detach the sound from the particule system
-	NL3D::UParticleSystemSound::setPSSound(NULL);
+	NL3D::UParticleSystemSound::setPSSound(nullptr);
 
-	_GroupControllerEffects = NULL;
-	_GroupControllerEffectsGame = NULL;
+	_GroupControllerEffects = nullptr;
+	_GroupControllerEffectsGame = nullptr;
 
 	// free the audio mixer (and delete all sources)
 	delete _AudioMixer;
-	_AudioMixer = NULL;
+	_AudioMixer = nullptr;
 
 	// release sound anim properly
 	releaseSoundAnim();
@@ -415,13 +420,13 @@ void CSoundManager::reset ()
 	if (!_AudioMixer)
 		return;
 
-	NL3D::UParticleSystemSound::setPSSound(NULL);
+	NL3D::UParticleSystemSound::setPSSound(nullptr);
 
-	_GroupControllerEffects = NULL;
-	_GroupControllerEffectsGame = NULL;
+	_GroupControllerEffects = nullptr;
+	_GroupControllerEffectsGame = nullptr;
 
 	delete _AudioMixer;
-	_AudioMixer = NULL;
+	_AudioMixer = nullptr;
 
 	// release sound anim properly
 	releaseSoundAnim();
@@ -438,7 +443,7 @@ void CSoundManager::reset ()
 //---------------------------------------------------
 void CSoundManager::init(IProgressCallback *progressCallBack)
 {
-	_EnvSoundRoot = NULL;
+	_EnvSoundRoot = nullptr;
 	_PlaySound = true;
 
 	_UserEntitySoundLevel = ClientCfg.UserEntitySoundLevel;
@@ -448,7 +453,7 @@ void CSoundManager::init(IProgressCallback *progressCallBack)
 //	try
 //	{
 		// reset particle sound
-		NL3D::UParticleSystemSound::setPSSound(NULL);
+		NL3D::UParticleSystemSound::setPSSound(nullptr);
 		/*
 		 * Create the audio mixer object and init it.
 		 * If the sound driver cannot be loaded, an exception is thrown.
@@ -640,7 +645,7 @@ CSoundManager::TSourceId CSoundManager::addSource(const NLMISC::TStringId &sound
 	USource *pSource = _AudioMixer->createSource(soundName);
 
 	// If the source is valid.
-	if(pSource == 0)
+	if(pSource == nullptr)
 	{
 		nlwarning("Sound '%s' not found !", CStringMapper::unmap(soundName).c_str());
 		return retValue;
@@ -686,10 +691,10 @@ bool CSoundManager::spawnSource(const NLMISC::TStringId &soundName, CSoundContex
 
 	// Create a source
 	// TODO : find the correct cluster
-	USource *pSource = _AudioMixer->createSource( soundName, true, NULL, NULL, NULL, &context);
+	USource *pSource = _AudioMixer->createSource( soundName, true, nullptr, nullptr, nullptr, &context);
 
 	// If the source is valid.
-	if(pSource == 0)
+	if(pSource == nullptr)
 	{
 		nlwarning("Sound '%s' not found !", soundName);
 		return false;
@@ -718,7 +723,7 @@ bool CSoundManager::spawnSource(const NLMISC::TStringId &soundName, const NLMISC
 	USource *pSource = _AudioMixer->createSource( soundName, true);
 
 	// If the source is valid.
-	if(pSource == 0)
+	if(pSource == nullptr)
 	{
 		nlwarning("Sound '%s' not found !", CStringMapper::unmap(soundName).c_str ());
 		return false;
@@ -1050,12 +1055,12 @@ void CSoundManager::loadProperties(const string &soundName, USource *source)
 			// Get a line (the line should not be more than _MAX_LINE_SIZE).
 			file.getline(tmpBuff, 260);
 			char *token = strtok(tmpBuff, delimiterBox);
-			while(token != NULL)
+			while(token != nullptr)
 			{
 				// Get the pitch.
 				if(strcmp(token, "Pitch:") == 0)
 				{
-					token = strtok(NULL, delimiterBox);
+					token = strtok(nullptr, delimiterBox);
 					if(token)
 					{
 						float pitch;
@@ -1067,7 +1072,7 @@ void CSoundManager::loadProperties(const string &soundName, USource *source)
 				// Get the Gain.
 				else if(strcmp(token, "Gain:") == 0)
 				{
-					token = strtok(NULL, delimiterBox);
+					token = strtok(nullptr, delimiterBox);
 					if(token)
 					{
 						float gain;
@@ -1078,7 +1083,7 @@ void CSoundManager::loadProperties(const string &soundName, USource *source)
 				}
 
 				// Next property.
-				token = strtok(NULL, delimiterBox);
+				token = strtok(nullptr, delimiterBox);
 			}
 		}
 		// Close the file.
@@ -1327,7 +1332,7 @@ void CSoundManager::update ()
 		CWeatherSetupSoundEnv("snow", WSESnow1),
 	};
 
-	const CWeatherSetupSoundEnv *weatherSetupSoundEnv = NULL;
+	const CWeatherSetupSoundEnv *weatherSetupSoundEnv = nullptr;
 	for(uint k = 0; k < sizeof(weatherSoundLUT) / sizeof(weatherSoundLUT[0]); ++k)
 	{
 		if (weatherSoundLUT[k].SetupName == weatherState.BestSetupName)

@@ -32,7 +32,7 @@ public:
 	CCloudScapeUser(CScene *scene);
 	virtual	~CCloudScapeUser();
 
-	virtual void init (SCloudScapeSetup *pCSS = NULL);
+	virtual void init (SCloudScapeSetup *pCSS = nullptr);
 
 	virtual void set (SCloudScapeSetup &css);
 

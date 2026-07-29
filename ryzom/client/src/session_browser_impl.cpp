@@ -55,7 +55,7 @@ CVariable<uint16> SBSPortOffset("client", "SBSPortOffset", "Offset of the SBS po
 // ****************************************************************************
 void CSessionBrowserImpl::init(CLuaState *ls)
 {
-	if (ls != NULL)
+	if (ls != nullptr)
 	{
 		nlassert(ls);
 		_Lua = ls;
@@ -229,9 +229,9 @@ int CSessionBrowserImpl::luaJoinRingSession(CLuaState &ls)
 	if(sessionBrowser._LastJoinSessionResult == 20)
 	{
 		CViewText* pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
-		if (pVT != NULL)
+		if (pVT != nullptr)
 			pVT->setText(CI18N::get("uiRingWarningFreeTrial"));
-		CAHManager::getInstance()->runActionHandler("enter_modal", NULL, "group=ui:interface:warning_free_trial");
+		CAHManager::getInstance()->runActionHandler("enter_modal", nullptr, "group=ui:interface:warning_free_trial");
 	}
 
 	return 0;
@@ -335,7 +335,7 @@ void CSessionBrowserImpl::on_joinSessionResult(NLNET::TSockId /* from */, uint32
 	if (result == 0)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CAHManager::getInstance()->runActionHandler("on_connect_to_shard", NULL, string("cookie=")+NetMngr.getLoginCookie().toString()+"|fsAddr="+shardAddr);
+		CAHManager::getInstance()->runActionHandler("on_connect_to_shard", nullptr, string("cookie=")+NetMngr.getLoginCookie().toString()+"|fsAddr="+shardAddr);
 	}
 }
 

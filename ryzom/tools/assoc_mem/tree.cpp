@@ -29,12 +29,12 @@
 
 CTree::CTree()
 {
-	_RootNode = NULL;
+	_RootNode = nullptr;
 }
 
 CTree::~CTree()
 {
-	if ( _RootNode != NULL )
+	if ( _RootNode != nullptr)
 		delete _RootNode;
 }
 
@@ -51,7 +51,7 @@ int CTree::getKey()
 
 bool CTree::getOutput(CRecord *input)
 {
-	if ( _RootNode != NULL )
+	if ( _RootNode != nullptr)
 		return _RootNode->propagRecord( input );
 	else
 		return false;

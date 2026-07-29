@@ -148,7 +148,7 @@ void CToolCreateEntity::commit(const NLMISC::CVector &createPosition, float crea
 		// prevent newly created ghost to be removed twice ...
 		removeGhostSlot();
 		// re set this tool to generate a new entity look
-		CAHManager::getInstance()->runActionHandler("r2ed_create_entity", NULL, "PaletteId=" + _PaletteId);
+		CAHManager::getInstance()->runActionHandler("r2ed_create_entity", nullptr, "PaletteId=" + _PaletteId);
 	}
 }
 
@@ -294,7 +294,7 @@ std::string CToolCreateEntity::cloneEntityIntoScenario(CEntityCL *clonee,
 			props->set("Sex", (double)vA.PropertySubData.Sex);
 
 			CVisualSlotManager * vsManager = CVisualSlotManager::getInstance();
-			NLMISC::CSheetId * sheetId = NULL;
+			NLMISC::CSheetId * sheetId = nullptr;
 
 			if(vA.PropertySubData.HatModel == 0)
 			{
@@ -410,7 +410,7 @@ std::string CToolCreateEntity::cloneEntityIntoScenario(CEntityCL *clonee,
 			props->set("ArmColor", (double)vA.PropertySubData.ArmColor);
 
 			CPlayerR2CL * player = (CPlayerR2CL*)dynamic_cast<CPlayerR2CL*>(clonee);
-			if(player != NULL)
+			if(player != nullptr)
 			{
 				std::string race, gender, sheetClient;
 				switch(player->people())
@@ -623,7 +623,7 @@ void CToolCreateEntity::updateAfterRender()
 		{
 			commitArray();
 			CTool::TSmartPtr hold(this);
-			CAHManager::getInstance()->runActionHandler("r2ed_create_entity", NULL, "PaletteId="+_PaletteId);
+			CAHManager::getInstance()->runActionHandler("r2ed_create_entity", nullptr, "PaletteId="+_PaletteId);
 			return;
 		}
 		break;
@@ -631,12 +631,12 @@ void CToolCreateEntity::updateAfterRender()
 		{
 			CTool::TSmartPtr hold(this);
 			cancel();
-			getEditor().setCurrentTool(NULL);
+			getEditor().setCurrentTool(nullptr);
 			return;
 		}
 		break;
 	}
-	updateArray(NULL);
+	updateArray(nullptr);
 }
 
 
@@ -831,7 +831,7 @@ class CAHR2EDToggleDrawArray : public IActionHandler
 			CToolCreateEntity *tce = dynamic_cast<CToolCreateEntity *>(getEditor().getCurrentTool());
 			if (tce)
 			{
-				CAHManager::getInstance()->runActionHandler("r2ed_create_entity", NULL, "PaletteId=" + tce->getPaletteId());
+				CAHManager::getInstance()->runActionHandler("r2ed_create_entity", nullptr, "PaletteId=" + tce->getPaletteId());
 			}
 		}
 	}

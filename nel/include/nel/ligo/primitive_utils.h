@@ -197,7 +197,7 @@ public:
 			}
 		}
 		// no more match
-		return NULL;
+		return nullptr;
 	}
 
 
@@ -325,7 +325,7 @@ IPrimitive *getPrimitiveChild(IPrimitive *parent, Pred &predicate)
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 /** Utility function to look for the first parent of a primitive node that
@@ -344,7 +344,7 @@ IPrimitive *getPrimitiveParent(IPrimitive *prim, Pred &predicate)
 		parent = parent->getParent();
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 /** Utility function that fill a primitive set with all the child nodes

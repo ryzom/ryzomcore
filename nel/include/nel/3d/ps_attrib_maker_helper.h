@@ -1416,7 +1416,7 @@ template <typename T> class CPSAttribMakerMemoryBase : public CPSAttribMaker<T>
 public:
 
 	/// ctor (note : we don't use the nbCycle field ...)
-	CPSAttribMakerMemoryBase() : CPSAttribMaker<T>(1.f), _Scheme(NULL)
+	CPSAttribMakerMemoryBase() : CPSAttribMaker<T>(1.f), _Scheme(nullptr)
 	{
 		this->_HasMemory = true;
 	}

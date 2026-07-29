@@ -71,7 +71,7 @@ namespace NLNET
 			{
 				NLMISC::INelContext::getInstance().releaseSingletonPointer("CModuleManager", _Instance);
 				delete _Instance;
-				_Instance = NULL;
+				_Instance = nullptr;
 			}
 		}
 
@@ -131,7 +131,7 @@ namespace NLNET
 
 		static bool		isInitialized()
 		{
-			return _Instance != NULL;
+			return _Instance != nullptr;
 		}
 
 		const std::string &getCommandHandlerName() const
@@ -171,7 +171,7 @@ namespace NLNET
 			// there should not be proxies or gateway lasting
 //			nlassert(_ModuleProxyInstances.getAToBMap().empty());
 
-			_Instance = NULL;
+			_Instance = nullptr;
 		}
 
 		virtual void applicationExit()
@@ -270,7 +270,7 @@ namespace NLNET
 			}
 			// Check that the lib is a pure module library
 			CNelModuleLibrary *modLib = dynamic_cast<CNelModuleLibrary *>(mli->LibraryHandler.getNelLibraryInterface());
-			if (modLib == NULL)
+			if (modLib == nullptr)
 			{
 				nlwarning("CModuleManager : the library '%s' is not a pure Nel Module library",
 					shortName.c_str());
@@ -376,7 +376,7 @@ namespace NLNET
 			if (it == _ModuleFactoryRegistry.end())
 			{
 				nlwarning("createModule : unknown module class '%s'", className.c_str());
-				return NULL;
+				return nullptr;
 			}
 
 			string moduleName = localName;
@@ -387,15 +387,15 @@ namespace NLNET
 				do
 				{
 					moduleName = className+toString(i++);
-				} while (_ModuleInstances.getB(moduleName) != NULL);
+				} while (_ModuleInstances.getB(moduleName) != nullptr);
 			}
 			else
 			{
 				// check that the module name is unique
-				if (_ModuleInstances.getB(moduleName) != NULL)
+				if (_ModuleInstances.getB(moduleName) != nullptr)
 				{
 					nlwarning("createModule : the name '%s' is already used by another module, can't instantiate the module", moduleName.c_str());
-					return NULL;
+					return nullptr;
 				}
 			}
 
@@ -403,18 +403,18 @@ namespace NLNET
 			// sanity check
 			nlassert(mf->getModuleClassName() == className);
 			CUniquePtr<IModule> module(mf->createModule());
-			if (module.get() == NULL)
+			if (module.get() == nullptr)
 			{
 				nlwarning("createModule : factory failed to create a module instance for class '%s'", className.c_str());
 
-				return NULL;
+				return nullptr;
 			}
 
 			CModuleBase *modBase = dynamic_cast<CModuleBase*>(module.get());
-			if (modBase == NULL)
+			if (modBase == nullptr)
 			{
 				nlwarning("Invalid module returned by factory for class '%s'", className.c_str());
-				return NULL;
+				return nullptr;
 			}
 
 			// init the module basic data
@@ -443,7 +443,7 @@ namespace NLNET
 					className.c_str());
 
 				deleteModule(module.release());
-				return NULL;
+				return nullptr;
 			}
 		}
 
@@ -480,7 +480,7 @@ namespace NLNET
 			TModuleInstances::TAToBMap::const_iterator it(_ModuleInstances.getAToBMap().find(moduleName));
 
 			if (it == _ModuleInstances.getAToBMap().end())
-				return NULL;
+				return nullptr;
 			else
 				return it->second;
 		}
@@ -495,7 +495,7 @@ namespace NLNET
 				TModulePtr module = first->second;
 
 				CModuleBase *modBase = dynamic_cast<CModuleBase *>(module.getPtr());
-				if (modBase != NULL)
+				if (modBase != nullptr)
 				{
 					// look for module task to run
 					while (!modBase->_ModuleTasks.empty())
@@ -533,7 +533,7 @@ namespace NLNET
 		{
 			TModuleSockets::iterator it(_ModuleSocketsRegistry.find(socketName));
 			if (it == _ModuleSocketsRegistry.end())
-				return NULL;
+				return nullptr;
 			else
 				return it->second;
 		}
@@ -568,7 +568,7 @@ namespace NLNET
 		{
 			TModuleGateways::iterator it(_ModuleGatewaysRegistry.find(gatewayName));
 			if (it == _ModuleGatewaysRegistry.end())
-				return NULL;
+				return nullptr;
 			else
 				return it->second;
 		}
@@ -601,8 +601,8 @@ namespace NLNET
 		{
 			const TModuleProxyPtr *pproxy = _ModuleProxyIds.getB(moduleProxyId);
 
-			if (pproxy == NULL)
-				return NULL;
+			if (pproxy == nullptr)
+				return nullptr;
 			else
 				return *pproxy;
 		}
@@ -692,7 +692,7 @@ namespace NLNET
 				return false;
 
 			TModulePtr const *module = _ModuleInstances.getB(args[0]);
-			if (module == NULL)
+			if (module == nullptr)
 			{
 				log.displayNL("Unknow module '%s'", args[0].c_str());
 				return false;
@@ -702,7 +702,7 @@ namespace NLNET
 
 			CRefPtr<IModule>	sanityCheck(*module);
 			deleteModule(*module);
-			if (sanityCheck != NULL)
+			if (sanityCheck != nullptr)
 			{
 				log.displayNL("Failed to delete the module instance !");
 				return false;
@@ -766,7 +766,7 @@ namespace NLNET
 			// create the module instance
 			IModule *module = createModule(moduleClass, moduleName, moduleArgs);
 
-			return module != NULL;
+			return module != nullptr;
 		}
 
 		NLMISC_CLASS_COMMAND_DECL(dump)
@@ -838,7 +838,7 @@ namespace NLNET
 				for (; first != last; ++first)
 				{
 					IModuleProxy *modProx = first->second;
-					if (modProx->getGatewayRoute() != NULL)
+					if (modProx->getGatewayRoute() != nullptr)
 					{
 						log.displayNL("    ID:%5u (Foreign ID : %u) : \tname = '%s' \tclass = '%s'",
 							modProx->getModuleProxyId(),

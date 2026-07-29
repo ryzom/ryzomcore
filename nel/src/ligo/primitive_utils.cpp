@@ -25,7 +25,7 @@ std::string buildPrimPath(const IPrimitive *prim)
 {
 	std::string path;
 
-	while (prim != NULL)
+	while (prim != nullptr)
 	{
 		std::string name;
 		prim->getPropertyByName("name", name);

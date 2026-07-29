@@ -31,17 +31,20 @@
 using namespace std;
 using namespace NLMISC;
 
-CChatTextManager* CChatTextManager::_Instance = NULL;
+CChatTextManager* CChatTextManager::_Instance = nullptr;
 
 // last selected chat from 'copy_chat_popup' action handler
 static std::string LastSelectedChat;
 
 //=================================================================================
 CChatTextManager::CChatTextManager() :
-	_TextFontSize(NULL),
-	_TextMultilineSpace(NULL),
-	_TextShadowed(NULL),
-	_ShowTimestamps(NULL)
+	_TextFontSize(nullptr)
+    ,
+	_TextMultilineSpace(nullptr)
+    ,
+	_TextShadowed(nullptr)
+    ,
+	_ShowTimestamps(nullptr)
 {
 }
 
@@ -49,13 +52,13 @@ CChatTextManager::CChatTextManager() :
 CChatTextManager::~CChatTextManager()
 {
 	delete _TextFontSize;
-	_TextFontSize = NULL;
+	_TextFontSize = nullptr;
 	delete _TextMultilineSpace;
-	_TextMultilineSpace = NULL;
+	_TextMultilineSpace = nullptr;
 	delete _TextShadowed;
-	_TextShadowed = NULL;
+	_TextShadowed = nullptr;
 	delete _ShowTimestamps;
-	_ShowTimestamps = NULL;
+	_ShowTimestamps = nullptr;
 }
 //=================================================================================
 uint CChatTextManager::getTextFontSize() const
@@ -109,9 +112,9 @@ bool CChatTextManager::showTimestamps() const
 static CInterfaceGroup *parseCommandTag(string &line)
 {
 	string::size_type start = line.find("/$$");
-	if (start == string::npos) return NULL;
+	if (start == string::npos) return nullptr;
 	string::size_type end = line.find("$$/", start + 3);
-	if (end == string::npos) return NULL;
+	if (end == string::npos) return nullptr;
 	std::string commandLine = line.substr(start + 3, end - start - 3);
 	line = line.substr(0, start) + line.substr(end +3);
 	vector<string> params;
@@ -119,7 +122,7 @@ static CInterfaceGroup *parseCommandTag(string &line)
 	if (params.size() != 4)
 	{
 		nlwarning("4 parameters wanted for command tag : template|caption|ah|ah_params");
-		return NULL;
+		return nullptr;
 	}
 	//
 	static int commandId = 0;
@@ -414,7 +417,7 @@ CViewBase *CChatTextManager::createMsgTextComplex(const string &msg, NLMISC::CRG
 
 	if (plaintext)
 	{
-		CViewBase *vt = createMsgTextSimple(msg, col, justified, NULL);
+		CViewBase *vt = createMsgTextSimple(msg, col, justified, nullptr);
 		vt->setId("text");
 		para->addChild(vt);
 
@@ -436,7 +439,7 @@ CViewBase *CChatTextManager::createMsgTextComplex(const string &msg, NLMISC::CRG
 		{
 			if (pos != i)
 			{
-				CViewBase *vt = createMsgTextSimple(msg.substr(pos, i - pos), col, justified, NULL);
+				CViewBase *vt = createMsgTextSimple(msg.substr(pos, i - pos), col, justified, nullptr);
 				para->addChild(vt);
 			}
 
@@ -500,7 +503,7 @@ CViewBase *CChatTextManager::createMsgTextComplex(const string &msg, NLMISC::CRG
 
 	if (pos < textSize)
 	{
-		CViewBase *vt = createMsgTextSimple(msg.substr(pos, textSize - pos), col, justified, NULL);
+		CViewBase *vt = createMsgTextSimple(msg.substr(pos, textSize - pos), col, justified, nullptr);
 		vt->setId("text");
 		para->addChild(vt);
 	}
@@ -521,16 +524,16 @@ void CChatTextManager::releaseInstance()
 {
 	if( _Instance )
 		delete _Instance;
-	_Instance = NULL;
+	_Instance = nullptr;
 }
 
 //=================================================================================
 void CChatTextManager::reset ()
 {
-	_TextFontSize = NULL;
-	_TextMultilineSpace = NULL;
-	_TextShadowed = NULL;
-	_ShowTimestamps = NULL;
+	_TextFontSize = nullptr;
+	_TextMultilineSpace = nullptr;
+	_TextShadowed = nullptr;
+	_ShowTimestamps = nullptr;
 }
 
 // ***************************************************************************
@@ -540,7 +543,7 @@ class	CHandlerCopyChatPopup: public IActionHandler
 public:
 	virtual void execute(CCtrlBase *pCaller, const string &params )
 	{
-		if (pCaller == NULL) return;
+		if (pCaller == nullptr) return;
 
 		LastSelectedChat = params;
 
@@ -559,12 +562,12 @@ class	CHandlerCopyChat: public IActionHandler
 public:
 	virtual void execute(CCtrlBase *pCaller, const string &params )
 	{
-		if (pCaller == NULL) return;
+		if (pCaller == nullptr) return;
 
 		CGroupParagraph *pGP = dynamic_cast<CGroupParagraph *>(pCaller);
 		if (pGP) pGP->disableTempOver();
 
-		CAHManager::getInstance()->runActionHandler("copy_to_clipboard", NULL, LastSelectedChat);
+		CAHManager::getInstance()->runActionHandler("copy_to_clipboard", nullptr, LastSelectedChat);
 		CWidgetManager::getInstance()->disableModalWindow();
 	}
 };

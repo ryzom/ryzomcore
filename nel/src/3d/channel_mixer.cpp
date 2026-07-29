@@ -39,11 +39,11 @@ namespace NL3D
 CChannelMixer::CChannelMixer()
 {
 	// No channel in the list
-	_FirstChannelGlobal=NULL;
-	_FirstChannelDetail=NULL;
+	_FirstChannelGlobal = nullptr;
+	_FirstChannelDetail = nullptr;
 
 	// No animation set
-	_AnimationSet=NULL;
+	_AnimationSet = nullptr;
 
 	// Mixer no dirty
 	_Dirt=false;
@@ -580,10 +580,10 @@ void CChannelMixer::resetSkeletonWeight (uint slot)
 	nlassert (slot<NumAnimationSlot);
 
 	// Something to change ?
-	if (_SlotArray[slot]._SkeletonWeight!=NULL)
+	if (_SlotArray[slot]._SkeletonWeight != nullptr)
 	{
 		// Set skeleton
-		_SlotArray[slot]._SkeletonWeight=NULL;
+		_SlotArray[slot]._SkeletonWeight = nullptr;
 		_SlotArray[slot]._InvertedSkeletonWeight=false;
 
 		// For each channels
@@ -766,8 +766,8 @@ void CChannelMixer::refreshList ()
 	}
 
 	// End of the list
-	*lastPointerGlobal=NULL;
-	*lastPointerDetail=NULL;
+	*lastPointerGlobal = nullptr;
+	*lastPointerDetail = nullptr;
 
 	// Must recompute the channels to animate.
 	_ListToEvalDirt= true;

@@ -43,9 +43,9 @@ static pthread_key_t threadSpecificKey;
 /* Special thread type representing the main thread. */
 struct CPMainThread : public CPThread
 {
-	CPMainThread() : CPThread(NULL, 0)
+	CPMainThread() : CPThread(nullptr, 0)
 	{
-		if(pthread_key_create(&threadSpecificKey, NULL) != 0)
+		if(pthread_key_create(&threadSpecificKey, nullptr) != 0)
 			throw EThread("cannot create thread specific storage key.");
 
 		if(pthread_setspecific(threadSpecificKey, this) != 0)
@@ -93,7 +93,7 @@ static void *ProxyFunc( void *arg )
 		throw EThread("cannot set thread ptr in thread specific storage.");
 
 	// Allow to terminate the thread without cancellation point
-	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, 0);
+	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, nullptr);
 
 	// Run the code of the thread
 	parent->Runnable->run();
@@ -111,7 +111,7 @@ static void *ProxyFunc( void *arg )
 
 	// Allow some clean
 //	pthread_exit(0);
-	return NULL;
+	return nullptr;
 }
 
 
@@ -168,7 +168,7 @@ void CPThread::start()
 		detach_old_thread = true;
 	}
 
-	if (pthread_create(&_ThreadHandle, _StackSize != 0 ? &tattr : NULL, ProxyFunc, this) != 0)
+	if (pthread_create(&_ThreadHandle, _StackSize != 0 ? &tattr : nullptr, ProxyFunc, this) != 0)
 	{
 		throw EThread("Cannot start new thread");
 	}
@@ -209,7 +209,7 @@ void CPThread::wait ()
 {
 	if (_State == ThreadStateRunning)
 	{
-		int error = pthread_join(_ThreadHandle, 0);
+		int error = pthread_join(_ThreadHandle, nullptr);
 		switch (error)
 		{
 		case 0:

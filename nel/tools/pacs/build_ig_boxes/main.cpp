@@ -173,7 +173,7 @@ int main(int argc, char **argv)
 						shape.serial(f);
 
 						CWaterShape	*wshape = dynamic_cast<CWaterShape *>(shape.getShapePointer());
-						if (wshape == NULL)
+						if (wshape == nullptr)
 						{
 							NonWaterShapes.insert(shapeName);
 							continue;

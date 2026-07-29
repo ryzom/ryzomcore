@@ -36,20 +36,20 @@ namespace NLMISC{
 
 	CCDBManager::~CCDBManager()
 	{
-		if( _Database != NULL )
+		if( _Database != nullptr)
 		{
 			_Database->clear();
 			delete _Database;
-			_Database = NULL;
+			_Database = nullptr;
 		}
 	}
 
 	CCDBNodeLeaf* CCDBManager::getDbLeaf( const std::string &name, bool create )
 	{
 		if( name.empty() )
-			return NULL;
+			return nullptr;
 
-		CCDBNodeLeaf *leaf = NULL;
+		CCDBNodeLeaf *leaf = nullptr;
 		leaf = dynamic_cast< CCDBNodeLeaf* >( _Database->getNode( ICDBNode::CTextId( name ), create ) );
 		return leaf;
 	}
@@ -57,9 +57,9 @@ namespace NLMISC{
 	CCDBNodeBranch* CCDBManager::getDbBranch( const std::string &name )
 	{
 		if( name.empty() )
-			return NULL;
+			return nullptr;
 		
-		CCDBNodeBranch	*branch = NULL;
+		CCDBNodeBranch	*branch = nullptr;
 		branch = dynamic_cast< CCDBNodeBranch* >( _Database->getNode( ICDBNode::CTextId( name ), false ) );
 		return branch;
 	}
@@ -76,14 +76,14 @@ namespace NLMISC{
 	void CCDBManager::addBranchObserver( const char *branchName, ICDBNode::IPropertyObserver *observer, const std::vector< std::string >& positiveLeafNameFilter )
 	{
 		CCDBNodeBranch *b = dynamic_cast< CCDBNodeBranch* >( _Database->getNode( ICDBNode::CTextId( std::string( branchName ) ), false ) );
-		if( b == NULL )
+		if( b == nullptr)
 			return;
 		branchObservingHandler.addBranchObserver( b, observer, positiveLeafNameFilter );
 	}
 	
 	void CCDBManager::addBranchObserver( CCDBNodeBranch *branch, ICDBNode::IPropertyObserver *observer, const std::vector< std::string >& positiveLeafNameFilter )
 	{
-		if( branch == NULL )
+		if( branch == nullptr)
 			return;
 		branchObservingHandler.addBranchObserver( branch, observer, positiveLeafNameFilter );
 	}
@@ -91,14 +91,14 @@ namespace NLMISC{
 	void CCDBManager::addBranchObserver( const char *branchName, const char *dbPathFromThisNode, ICDBNode::IPropertyObserver &observer, const char **positiveLeafNameFilter, uint positiveLeafNameFilterSize )
 	{
 		CCDBNodeBranch *b = dynamic_cast< CCDBNodeBranch* >( _Database->getNode( ICDBNode::CTextId( std::string( branchName ) ), false ) );
-		if( b == NULL )
+		if( b == nullptr)
 			return;
 		branchObservingHandler.addBranchObserver( b, dbPathFromThisNode, observer, positiveLeafNameFilter, positiveLeafNameFilterSize );
 	}
 	
 	void CCDBManager::addBranchObserver( CCDBNodeBranch *branch, const char *dbPathFromThisNode, ICDBNode::IPropertyObserver &observer, const char **positiveLeafNameFilter, uint positiveLeafNameFilterSize )
 	{
-		if( branch == NULL )
+		if( branch == nullptr)
 			return;
 		branchObservingHandler.addBranchObserver( branch, dbPathFromThisNode, observer, positiveLeafNameFilter, positiveLeafNameFilterSize );
 	}
@@ -106,14 +106,14 @@ namespace NLMISC{
 	void CCDBManager::removeBranchObserver( const char *branchName, ICDBNode::IPropertyObserver* observer )
 	{
 		CCDBNodeBranch *b = dynamic_cast< CCDBNodeBranch* >( _Database->getNode( ICDBNode::CTextId( std::string( branchName ) ), false ) );
-		if( b == NULL )
+		if( b == nullptr)
 			return;
 		branchObservingHandler.removeBranchObserver( b, observer );
 	}
 	
 	void CCDBManager::removeBranchObserver( CCDBNodeBranch *branch, ICDBNode::IPropertyObserver* observer )
 	{
-		if( branch == NULL )
+		if( branch == nullptr)
 			return;
 		branchObservingHandler.removeBranchObserver( branch, observer );
 	}
@@ -121,28 +121,28 @@ namespace NLMISC{
 	void CCDBManager::removeBranchObserver( const char *branchName, const char *dbPathFromThisNode, ICDBNode::IPropertyObserver &observer )
 	{
 		CCDBNodeBranch *b = dynamic_cast< CCDBNodeBranch* >( _Database->getNode( ICDBNode::CTextId( std::string( branchName ) ), false ) );
-		if( b == NULL )
+		if( b == nullptr)
 			return;
 		branchObservingHandler.removeBranchObserver( b, dbPathFromThisNode, observer );
 	}
 	
 	void CCDBManager::removeBranchObserver( CCDBNodeBranch *branch, const char *dbPathFromThisNode, ICDBNode::IPropertyObserver &observer )
 	{
-		if( branch == NULL )
+		if( branch == nullptr)
 			return;
 		branchObservingHandler.removeBranchObserver( branch, dbPathFromThisNode, observer );
 	}
 	
 	void CCDBManager::addFlushObserver( CCDBBranchObservingHandler::IBranchObserverCallFlushObserver *observer )
 	{
-		if( observer == NULL )
+		if( observer == nullptr)
 			return;
 		branchObservingHandler.addFlushObserver( observer );
 	}
 	
 	void CCDBManager::removeFlushObserver( CCDBBranchObservingHandler::IBranchObserverCallFlushObserver *observer )
 	{
-		if( observer == NULL )
+		if( observer == nullptr)
 			return;
 		branchObservingHandler.removeFlushObserver( observer );
 	}

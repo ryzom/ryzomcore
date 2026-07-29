@@ -46,13 +46,13 @@ namespace NL3D {
 // ***************************************************************************
 CMaterial* CFontManager::getFontMaterial()
 {
-	if (_TexFont == NULL)
+	if (_TexFont == nullptr)
 	{
 		_TexFont = new CTextureFont;
 		_TexCacheNr++;
 	}
 
-	if (_MatFont == NULL)
+	if (_MatFont == nullptr)
 	{
 		_MatFont= new CMaterial;
 		_MatFont->initUnlit();
@@ -159,7 +159,7 @@ void CFontManager::computeString (NLMISC::CUtfStringView sv,
 			k.Oblique = oblique;
 			// render letter
 			CTextureFont::SLetterInfo *pLI = pTexFont->getLetterInfo (k, true);
-			if(pLI != NULL)
+			if(pLI != nullptr)
 			{
 				if (pLI->glyph)
 				{
@@ -317,7 +317,7 @@ void CFontManager::computeStringInfo (	NLMISC::CUtfStringView sv,
 		k.Embolden = embolden;
 		k.Oblique = oblique;
 		pLI = pTexFont->getLetterInfo (k, false);
-		if(pLI != NULL)
+		if(pLI != nullptr)
 		{
 			if ((pLI->CharWidth > 0) && (pLI->CharHeight > 0))
 			{
@@ -362,7 +362,7 @@ string CFontManager::getCacheInformation() const
 void CFontManager::invalidate()
 {
 	if (_TexFont)
-		_TexFont = NULL;
+		_TexFont = nullptr;
 
 	_TexFont = new CTextureFont;
 	_TexCacheNr++;

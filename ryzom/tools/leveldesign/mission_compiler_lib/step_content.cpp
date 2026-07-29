@@ -38,7 +38,7 @@ IStepContent *IStepContent::createStepContent(CMissionData &md, NLLIGO::IPrimiti
 	prim->getPropertyByName("class", className);
 
 	IStepContentFactory *factory = CFactoryIndirect<IStepContentFactory, string>::instance().getFactory(className);
-	if (factory == NULL)
+	if (factory == nullptr)
 	{
 		string err = toString("Can't find factory for class '%s'", className.c_str());
 		throw EParseException(prim, err.c_str());
@@ -3320,7 +3320,7 @@ class CContentMission: public CContentObjective
 	}
 
 public:
-	CContentMission(): _Prim(0) {}
+	CContentMission(): _Prim(nullptr) {}
 
 	void init(CMissionData &md, IPrimitive *prim)
 	{
@@ -3510,7 +3510,7 @@ public:
 
 		// Search in the queue_start node
 		IPrimitive *primParent = prim;
-		while (primParent->getParent() != NULL)
+		while (primParent->getParent() != nullptr)
 		{
 			string className;
 			if (primParent->getPropertyByName("class", className))

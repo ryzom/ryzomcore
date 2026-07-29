@@ -164,7 +164,7 @@ CSkeletonModel::CSkeletonModel()
 
 	// ShadowMap
 	CTransform::setIsShadowMapCaster(true);
-	_ShadowMap= NULL;
+	_ShadowMap = nullptr;
 
 	// SpawnScript
 	_SSSWOPos= CVector::Null;
@@ -382,12 +382,12 @@ void		CSkeletonModel::updateBoneToCompute()
 			sint	fatherId= Bones[i].getFatherId();
 			// if a root bone...
 			if(fatherId==-1)
-				bc.Father= NULL;
+				bc.Father = nullptr;
 			else
 				bc.Father= &Bones[fatherId];
 			// MustInterpolate??
 			bc.MustInterpolate= false;
-			const CSkeletonShape::CLod	*lodNext= NULL;
+			const CSkeletonShape::CLod	*lodNext = nullptr;
 			// if a lod exist after current lod, and if lod interpolation enabled
 			if( _CurLod < skeShape->getNumLods()-1 && _LodInterpMultiplier>0 )
 			{
@@ -524,10 +524,10 @@ bool CSkeletonModel::forceComputeBone(uint boneId)
 			while (currBoneIndex != -1);
 			const CMatrix &modelWorldMatrix = it->Transform->getWorldMatrix();
 			// recompute bones
-			CBone *fatherBone = NULL;
+			CBone *fatherBone = nullptr;
 			while (numBones--)
 			{
-				OrderedBone[numBones]->compute(fatherBone, modelWorldMatrix, NULL);
+				OrderedBone[numBones]->compute(fatherBone, modelWorldMatrix, nullptr);
 				fatherBone = OrderedBone[numBones];
 			}
 			parentWorldMatrix = &(OrderedBone[0]->getWorldMatrix());
@@ -657,7 +657,7 @@ void		CSkeletonModel::detachSkeletonSon(CTransform *tr)
 	}
 
 	// advert transform it is no more sticked/skinned.
-	tr->_FatherSkeletonModel= NULL;
+	tr->_FatherSkeletonModel = nullptr;
 	tr->_ForceCLodSticked= false;
 
 	// link correctly Hrc / Clip / UpdateList...
@@ -781,7 +781,7 @@ void	CSkeletonModel::traverseAnimDetail()
 	//===============
 
 	float	lodBoneInterp;
-	const CSkeletonShape::CLod	*lodNext= NULL;
+	const CSkeletonShape::CLod	*lodNext = nullptr;
 	// if a lod exist after current lod, and if lod interpolation enabled
 	if( _CurLod < skeShape->getNumLods()-1 && _LodInterpMultiplier>0 && _IsEnableLOD)
 	{
@@ -792,7 +792,7 @@ void	CSkeletonModel::traverseAnimDetail()
 		NLMISC::clamp(lodBoneInterp, 0.f, 1.f);
 		// if still 1, keep cur matrix => disable interpolation
 		if(lodBoneInterp==1.f)
-			lodNext=NULL;
+			lodNext = nullptr;
 	}
 	// else, no interpolation
 	else
@@ -813,7 +813,7 @@ void	CSkeletonModel::traverseAnimDetail()
 	// must test / update the hierarchy of Bones.
 	// Since they are orderd in depth-first order, we are sure that parent are computed before sons.
 	uint							numBoneToCompute= (uint)_BoneToCompute.size();
-	CSkeletonModel::CBoneCompute	*pBoneCompute= numBoneToCompute? &_BoneToCompute[0] : NULL;
+	CSkeletonModel::CBoneCompute	*pBoneCompute= numBoneToCompute? &_BoneToCompute[0] : nullptr;
 	// traverse only bones which need to be computed
 	for(;numBoneToCompute>0;numBoneToCompute--, pBoneCompute++)
 	{
@@ -864,10 +864,10 @@ void		CSkeletonModel::computeAllBones(const CMatrix &modelWorldMatrix)
 		// if a root bone...
 		if(fatherId==-1)
 			// Compute root bone worldMatrix. Do not allow special AnimCtrl
-			Bones[i].compute( NULL, modelWorldMatrix, NULL);
+			Bones[i].compute(nullptr, modelWorldMatrix, nullptr);
 		else
 			// Compute bone worldMatrix. Do not allow special AnimCtrl
-			Bones[i].compute( &Bones[fatherId], modelWorldMatrix, NULL);
+			Bones[i].compute( &Bones[fatherId], modelWorldMatrix, nullptr);
 	}
 
 }
@@ -969,7 +969,7 @@ void		CSkeletonModel::computeLodTexture()
 
 					// if the material stage 0 is not textured, or has not a valid async id, build the bitmap with a color.
 					sint			asyncTextId= mbi->getAsyncTextureId(i,0);
-					const CBitmap	*coarseBitmap= NULL;
+					const CBitmap	*coarseBitmap = nullptr;
 					if(asyncTextId!=-1)
 					{
 						// get it from async manager
@@ -1028,7 +1028,7 @@ float		CSkeletonModel::computeDisplayLodCharacterPriority() const
 
 		// Get object position, test visibility;
 		// If has a skeleton ancestor, take his world position instead, because ours is invalid.
-		if( _AncestorSkeletonModel != NULL)
+		if( _AncestorSkeletonModel != nullptr)
 		{
 			// if the ancestore is clipped, quit
 			if( !_AncestorSkeletonModel->isClipVisible() )
@@ -1378,7 +1378,7 @@ void			CSkeletonModel::renderCLod()
 	const CLightContribution	*lightContrib;
 
 	// the std case is to take my model lightContribution
-	if(_AncestorSkeletonModel==NULL)
+	if(_AncestorSkeletonModel == nullptr)
 		lightContrib= &getSkeletonLightContribution();
 	// but if skinned/sticked (directly or not) to a skeleton, take its.
 	else
@@ -1480,7 +1480,7 @@ void			CSkeletonModel::renderSkins()
 		// Easier for skeleton: suppose lightable, no local attenuation
 
 		// the std case is to take my model lightContribution
-		if(_AncestorSkeletonModel==NULL)
+		if(_AncestorSkeletonModel == nullptr)
 			setupCurrentLightContribution(&_LightContribution, false);
 		// but if sticked (directly or not) to a skeleton, take its.
 		else
@@ -1554,7 +1554,7 @@ void			CSkeletonModel::renderSkinList(NLMISC::CObjectVector<CTransform*, false> 
 			drv->bindUniformBuffer(UBBindingSkeleton, boneUB);
 
 			// Render each GPU skin, switching VP as needed
-			CVertexProgram *activeVP = NULL;
+			CVertexProgram *activeVP = nullptr;
 			for (uint i = 0; i < gpuSkins.size(); i++)
 			{
 				CVertexProgram *vp = gpuSkins[i]->getGPUSkinVP();
@@ -1567,8 +1567,8 @@ void			CSkeletonModel::renderSkinList(NLMISC::CObjectVector<CTransform*, false> 
 			}
 
 			// Unbind bone UBO and deactivate the insert VP
-			drv->activeVertexProgram(NULL);
-			drv->bindUniformBuffer(UBBindingSkeleton, NULL);
+			drv->activeVertexProgram(nullptr);
+			drv->bindUniformBuffer(UBBindingSkeleton, nullptr);
 		}
 	}
 	else
@@ -1969,7 +1969,7 @@ void		CSkeletonModel::setBoneAnimCtrl(uint boneId, IAnimCtrl *ctrl)
 IAnimCtrl	*CSkeletonModel::getBoneAnimCtrl(uint boneId) const
 {
 	if(boneId>=Bones.size())
-		return NULL;
+		return nullptr;
 
 	return Bones[boneId]._AnimCtrl;
 }
@@ -2179,7 +2179,7 @@ void			CSkeletonModel::deleteShadowMap()
 	if(_ShadowMap)
 	{
 		delete _ShadowMap;
-		_ShadowMap= NULL;
+		_ShadowMap = nullptr;
 		getOwnerScene()->unregisterShadowCasterToList(this);
 	}
 }

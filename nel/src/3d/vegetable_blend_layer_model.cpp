@@ -45,7 +45,7 @@ void	CVegetableBlendLayerModel::registerBasic()
 // ***************************************************************************
 CVegetableBlendLayerModel::CVegetableBlendLayerModel()
 {
-	VegetableManager= NULL;
+	VegetableManager = nullptr;
 
 	// The model must always be renderer in transparency pass only.
 	setTransparency(true);

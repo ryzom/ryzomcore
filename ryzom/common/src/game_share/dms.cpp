@@ -72,7 +72,7 @@ extern	CVariable<uint32> TimeBeforeAutoCloseAnimationSessionWithNoPlayer;
 
 
 
-CDynamicMapService* CDynamicMapService::_Instance=0;
+CDynamicMapService* CDynamicMapService::_Instance=nullptr;
 
 CDynamicMapService::CDynamicMapService(	NLMISC::CConfigFile& confFile, NLNET::IModuleSocket * clientGateway)
 :_ConfigFile(confFile)
@@ -83,10 +83,10 @@ CDynamicMapService::CDynamicMapService(	NLMISC::CConfigFile& confFile, NLNET::IM
 	nlassert(!_Instance);
 	_Instance = this;
 
-	_AnimationModule = 0;
-	_EditionModule = 0;
-	_AdminModule = 0;
-	_StringMgrModule = 0;
+	_AnimationModule = nullptr;
+	_EditionModule = nullptr;
+	_AdminModule = nullptr;
+	_StringMgrModule = nullptr;
 
 	IModuleManager &mm = IModuleManager::getInstance();
 	{
@@ -122,14 +122,14 @@ CDynamicMapService::~CDynamicMapService()
 	IModuleManager &mm = IModuleManager::getInstance();
 //	_EditionModule->saveToDb();
 	mm.deleteModule(_EditionModule);
-	_EditionModule = 0;
+	_EditionModule = nullptr;
 	mm.deleteModule(_AnimationModule);
-	_AnimationModule = 0;
+	_AnimationModule = nullptr;
 	mm.deleteModule(_StringMgrModule);
-	_StringMgrModule = 0;
+	_StringMgrModule = nullptr;
 	mm.deleteModule(_AdminModule);
-	_AdminModule = 0;
-	_Instance = 0;
+	_AdminModule = nullptr;
+	_Instance = nullptr;
 }
 
 CDynamicMapService* CDynamicMapService::getInstance()
@@ -207,7 +207,7 @@ namespace R2
 			return true;
 		}
 
-		if (securityData != NULL)
+		if (securityData != nullptr)
 		{
 			const struct TClientInfo* clientInfo= static_cast<const struct TClientInfo *>(securityData); //safe_cast ???
 			//userId = clientInfo->UserId;

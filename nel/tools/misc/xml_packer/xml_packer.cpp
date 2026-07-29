@@ -285,12 +285,12 @@ int main(int argc, char *argv[])
 						char *result;
 						bool needFinalReturn = false;
 						result = fgets(buffer, MaxLineSize, subFp);
-						needFinalReturn = result != NULL ? buffer[strlen(buffer)-1] != '\n' : true;
-						while(result != 0)
+						needFinalReturn = result != nullptr ? buffer[strlen(buffer)-1] != '\n' : true;
+						while(result != nullptr)
 						{
 							fputs(buffer, fp);
 							result = fgets(buffer, MaxLineSize, subFp);
-							needFinalReturn = result != NULL ? buffer[strlen(buffer)-1] != '\n' : needFinalReturn;
+							needFinalReturn = result != nullptr ? buffer[strlen(buffer)-1] != '\n' : needFinalReturn;
 						}
 						if (needFinalReturn)
 						{
@@ -356,7 +356,7 @@ int main(int argc, char *argv[])
 
 				linecount++;
 
-				char *result = NULL;
+				char *result = nullptr;
 				do 
 				{
 					// read a file line
@@ -388,7 +388,7 @@ int main(int argc, char *argv[])
 					printf("Extracting file '%s'...\n", CFile::getFilename(subFileName).c_str());
 					// open the output file 
 					FILE *output = fopen (subFileName.c_str(), "wt");
-					if (output == NULL)
+					if (output == nullptr)
 					{
 						printf ("Error : can not open output file '%s' from pack file '%s'", subFileName.c_str(), filename.c_str());
 						exit(-1);
@@ -396,7 +396,7 @@ int main(int argc, char *argv[])
 					
 					result = fgets(buffer, MaxLineSize, fp);
 					linecount++;
-					while (result != NULL && strcmp(buffer, "	</nel:xml_file>\n") != 0)
+					while (result != nullptr && strcmp(buffer, "	</nel:xml_file>\n") != 0)
 					{
 						fputs(result, output);
 						// read next line
@@ -406,7 +406,7 @@ int main(int argc, char *argv[])
 					
 					fclose(output);
 					
-				} while(result != NULL);
+				} while(result != nullptr);
 				
 			}
 			break;

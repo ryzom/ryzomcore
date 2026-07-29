@@ -36,14 +36,14 @@ using namespace std;
 
 // ***************************************************************************
 
-CEncyclopediaManager *CEncyclopediaManager::_Instance = NULL;
+CEncyclopediaManager *CEncyclopediaManager::_Instance = nullptr;
 
 // ***************************************************************************
 void CEncyclopediaManager::releaseInstance()
 {
 	if( _Instance )
 		delete _Instance;
-	_Instance = NULL;
+	_Instance = nullptr;
 }
 
 // ***************************************************************************
@@ -134,7 +134,7 @@ void CEncyclopediaManager::updateAlbum(const CEncyMsgAlbum &a)
 {
 	// Search for album...
 	CEncyMsgAlbum *pA = getAlbum(a.Name);
-	if (pA == NULL)
+	if (pA == nullptr)
 	{
 		uint32 nBack = (uint32)_Albums.size();
 		_Albums.push_back(CEncyMsgAlbum());
@@ -154,7 +154,7 @@ void CEncyclopediaManager::updateThema(uint32 nAlbumName, const CEncyMsgThema &t
 	nlassert(pA != NULL);
 	CEncyMsgThema *pT = pA->getThema(t.Name);
 	// Thema not found add it !
-	if (pT == NULL)
+	if (pT == nullptr)
 	{
 		uint32 nBack = (uint32)pA->Themas.size();
 		pA->Themas.push_back(CEncyMsgThema());
@@ -167,7 +167,7 @@ void CEncyclopediaManager::updateThema(uint32 nAlbumName, const CEncyMsgThema &t
 			_ThemaNameSelected = t.Name;
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
 			CInterfaceElement *pContainer = dynamic_cast<CInterfaceElement*>(CWidgetManager::getInstance()->getElementFromId(CONT_ENCY));
-			if (pContainer != NULL)
+			if (pContainer != nullptr)
 				pContainer->setActive(true);
 		}
 	}
@@ -181,7 +181,7 @@ CEncyMsgAlbum *CEncyclopediaManager::getAlbum(uint32 nName)
 	for (uint32 i = 0; i < _Albums.size(); ++i)
 		if (_Albums[i].Name == nName)
 			return &_Albums[i];
-	return NULL;
+	return nullptr;
 }
 
 // ***************************************************************************
@@ -266,7 +266,7 @@ void CEncyclopediaManager::rebuildAlbumList()
 void CEncyclopediaManager::rebuildAlbumPage(uint32 albumName)
 {
 	uint32 i;
-	CEncyMsgAlbum *pAlbum = NULL;
+	CEncyMsgAlbum *pAlbum = nullptr;
 	// Select the right album
 	for (i = 0; i < _Albums.size(); ++i)
 	{
@@ -278,7 +278,7 @@ void CEncyclopediaManager::rebuildAlbumPage(uint32 albumName)
 		}
 	}
 
-	if (pAlbum == NULL)
+	if (pAlbum == nullptr)
 		return;
 
 	// Update the right page
@@ -301,7 +301,7 @@ void CEncyclopediaManager::rebuildAlbumPage(uint32 albumName)
 	// Setup brick reward
 	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:ENCY:ALBUMBRICK:SHEET")->setValue32(pAlbum->RewardBrick);
 	CViewText *pRBVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(PAGE_ENCY_ALBUM ":reward:desc"));
-	if (pRBVT != NULL)
+	if (pRBVT != nullptr)
 	{
 		STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
 		CUtfStringView desc(pSMC->getSBrickLocalizedDescription(CSheetId(pAlbum->RewardBrick)));
@@ -313,19 +313,19 @@ void CEncyclopediaManager::rebuildAlbumPage(uint32 albumName)
 void CEncyclopediaManager::rebuildThemaPage(uint32 themaName)
 {
 	uint32 i;
-	CEncyMsgThema *pThema = NULL;
+	CEncyMsgThema *pThema = nullptr;
 	// Select the right album
 	for (i = 0; i < _Albums.size(); ++i)
 	{
 		pThema = _Albums[i].getThema(themaName);
-		if (pThema != NULL)
+		if (pThema != nullptr)
 		{
 			_AlbumNameSelected = _Albums[i].Name;
 			break;
 		}
 	}
 
-	if (pThema == NULL)
+	if (pThema == nullptr)
 		return;
 
 	// Update the right page
@@ -356,7 +356,7 @@ void CEncyclopediaManager::rebuildThemaPage(uint32 themaName)
 	nlassert(pRBVT != NULL);
 	STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
 	CEntitySheet *pES = SheetMngr.get(CSheetId(pThema->RewardSheet));
-	if (pES != NULL)
+	if (pES != nullptr)
 	{
 		if (pES->type() == CEntitySheet::ITEM)
 		{

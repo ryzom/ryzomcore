@@ -70,7 +70,7 @@ const	std::string		PhraseMemoryMacroAction= "cast_macro";
 
 
 // ***************************************************************************
-CSPhraseManager		*CSPhraseManager::_Instance= NULL;
+CSPhraseManager		*CSPhraseManager::_Instance = nullptr;
 
 // ***************************************************************************
 SKILLS::ESkills		getRightHandItemSkill();
@@ -82,7 +82,7 @@ void CSPhraseManager::releaseInstance()
 	if( _Instance )
 	{
 		delete _Instance;
-		_Instance = NULL;
+		_Instance = nullptr;
 	}
 }
 
@@ -91,7 +91,7 @@ CSPhraseManager::CSPhraseManager()
 {
 	reset();
 	for(uint i=0;i<NumSuccessTable;i++)
-		_SuccessTableSheet[i]= NULL;
+		_SuccessTableSheet[i] = nullptr;
 	_RegenTickRangeTouched = true;
 }
 
@@ -115,15 +115,15 @@ void			CSPhraseManager::initInGame()
 	// Init Database values.
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	uint	i;
-	_BookDbLeaves.resize(PHRASE_MAX_BOOK_SLOT, NULL);
+	_BookDbLeaves.resize(PHRASE_MAX_BOOK_SLOT, nullptr);
 	for(i=0;i<PHRASE_MAX_BOOK_SLOT;i++)
 	{
 		CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(PHRASE_DB_BOOK + ":" + toString(i) + ":PHRASE");
 		node->setValue32(0);
 		_BookDbLeaves[i]= node;
 	}
-	_MemoryDbLeaves.resize(PHRASE_MAX_MEMORY_SLOT, NULL);
-	_MemoryAltDbLeaves.resize(PHRASE_MAX_MEMORY_SLOT, NULL);
+	_MemoryDbLeaves.resize(PHRASE_MAX_MEMORY_SLOT, nullptr);
+	_MemoryAltDbLeaves.resize(PHRASE_MAX_MEMORY_SLOT, nullptr);
 
 	for(i=0;i<PHRASE_MAX_MEMORY_SLOT;i++)
 	{
@@ -139,9 +139,9 @@ void			CSPhraseManager::initInGame()
 	nlctassert( NumProgressType == sizeof(PHRASE_DB_PROGRESSION)/sizeof(PHRASE_DB_PROGRESSION[0]) );
 	for(uint j=0;j<NumProgressType;j++)
 	{
-		_ProgressionDbSheets[j].resize(PHRASE_MAX_PROGRESSION_SLOT, NULL);
-		_ProgressionDbLocks[j].resize(PHRASE_MAX_PROGRESSION_SLOT, NULL);
-		_ProgressionDbLevels[j].resize(PHRASE_MAX_PROGRESSION_SLOT, NULL);
+		_ProgressionDbSheets[j].resize(PHRASE_MAX_PROGRESSION_SLOT, nullptr);
+		_ProgressionDbLocks[j].resize(PHRASE_MAX_PROGRESSION_SLOT, nullptr);
+		_ProgressionDbLevels[j].resize(PHRASE_MAX_PROGRESSION_SLOT, nullptr);
 	}
 	for(i=0;i<PHRASE_MAX_PROGRESSION_SLOT;i++)
 	{
@@ -172,8 +172,8 @@ void			CSPhraseManager::initInGame()
 		_NextExecuteIsCyclicLeaf= node;
 	}
 	// Init BotChat leaves
-	_BotChatPhraseSheetLeaves.resize(PHRASE_MAX_BOTCHAT_SLOT, NULL);
-	_BotChatPhrasePriceLeaves.resize(PHRASE_MAX_BOTCHAT_SLOT, NULL);
+	_BotChatPhraseSheetLeaves.resize(PHRASE_MAX_BOTCHAT_SLOT, nullptr);
+	_BotChatPhrasePriceLeaves.resize(PHRASE_MAX_BOTCHAT_SLOT, nullptr);
 	for(i=0;i<PHRASE_MAX_BOTCHAT_SLOT;i++)
 	{
 		CCDBNodeLeaf	*nodeSheet= NLGUI::CDBManager::getInstance()->getDbProp(PHRASE_DB_BOTCHAT+ ":" + toString(i) + ":SHEET");
@@ -930,8 +930,8 @@ void				CSPhraseManager::reset()
 	}
 	_MemoryDbLeaves.clear();
 	_MemoryAltDbLeaves.clear();
-	_NextExecuteLeaf= NULL;
-	_NextExecuteIsCyclicLeaf= NULL;
+	_NextExecuteLeaf = nullptr;
+	_NextExecuteIsCyclicLeaf = nullptr;
 
 	_EquipInvalidationEnd= 0;
 	_CurrentServerTick= 0;
@@ -946,7 +946,7 @@ void				CSPhraseManager::reset()
 	pBM->removeBrickLearnedCallback(&_ProgressionUpdate);
 	pSM->removeSkillChangeCallback(&_ProgressionUpdate);
 
-	_TotalMalusEquipLeaf = NULL;
+	_TotalMalusEquipLeaf = nullptr;
 }
 
 // ***************************************************************************
@@ -1023,7 +1023,7 @@ void CSPhraseManager::buildPhraseDesc(string &text, const CSPhraseCom &phrase, u
 	if(castable)
 	{
 		// **** Get the format from EnergyType
-		CSBrickSheet	*rootBrick= NULL;
+		CSBrickSheet	*rootBrick = nullptr;
 		if(phrase.Bricks.size())
 			rootBrick= pBM->getBrick(phrase.Bricks[0]);
 		if(rootBrick)
@@ -1154,7 +1154,7 @@ void CSPhraseManager::buildPhraseDesc(string &text, const CSPhraseCom &phrase, u
 			getPhraseFocusCost(phrase, totalActionMalus, enCost, enCostMalus);
 
 		sint32 successModifier = 0;
-		CCDBNodeLeaf * nodeSM = NULL;
+		CCDBNodeLeaf * nodeSM = nullptr;
 		if(rootBrick->isCombat())
 		{
 			// if phrase can be used with in melee and range we choose which one to display according to hand weapon family
@@ -1877,7 +1877,7 @@ void	CSPhraseManager::updateExecutionDisplay()
 	CInterfaceElement	*viewCycle= CWidgetManager::getInstance()->getElementFromId(PhraseMemoryViewCycleAction);
 	if(viewCycle)
 	{
-		CInterfaceElement	*ctrl= NULL;
+		CInterfaceElement	*ctrl = nullptr;
 		if(displayCycle)
 			ctrl= CWidgetManager::getInstance()->getElementFromId(PhraseMemoryViewSlotBase + toString(_CurrentExecuteSlotCycle));
 		if(displayCycle && ctrl)
@@ -1896,7 +1896,7 @@ void	CSPhraseManager::updateExecutionDisplay()
 	CInterfaceElement	*viewNext= CWidgetManager::getInstance()->getElementFromId(PhraseMemoryViewNextAction);
 	if(viewNext)
 	{
-		CInterfaceElement	*ctrl= NULL;
+		CInterfaceElement	*ctrl = nullptr;
 		if(displayNext)
 			ctrl= CWidgetManager::getInstance()->getElementFromId(PhraseMemoryViewSlotBase + toString(_CurrentExecuteSlotNext));
 		if(displayNext && ctrl)
@@ -2860,7 +2860,7 @@ void	CSPhraseManager::updateMemoryCtrlState(uint memorySlot, CDBCtrlSheet	*ctrl,
 	bool	newIsMacro= isMemorizedMacro(memoryLine, memorySlot);
 	sint32	macroId= getMemorizedMacro(memoryLine, memorySlot);
 	sint32	phraseId= getMemorizedPhrase(memoryLine, memorySlot);
-	CMemorySlot		*memSlot= NULL;
+	CMemorySlot		*memSlot = nullptr;
 	if(memoryLine<_Memories.size() && memorySlot<PHRASE_MAX_MEMORY_SLOT)
 		memSlot= &_Memories[memoryLine].Slot[memorySlot];
 
@@ -3101,7 +3101,7 @@ void	CSPhraseManager::updateAllMemoryCtrlRegenTickRange()
 CDBCtrlSheet	*CSPhraseManager::getMemorySlotCtrl(uint memorySlot)
 {
 	if(memorySlot>=PHRASE_MAX_MEMORY_SLOT)
-		return NULL;
+		return nullptr;
 
 	// Get the ctrl
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
@@ -3112,7 +3112,7 @@ CDBCtrlSheet	*CSPhraseManager::getMemorySlotCtrl(uint memorySlot)
 CDBCtrlSheet	*CSPhraseManager::getMemoryAltSlotCtrl(uint memorySlot)
 {
 	if(memorySlot>=PHRASE_MAX_MEMORY_SLOT)
-		return NULL;
+		return nullptr;
 
 	// Get the ctrl
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();

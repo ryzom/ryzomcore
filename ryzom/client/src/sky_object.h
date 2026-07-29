@@ -46,7 +46,7 @@ public:
 		NLMISC::CBitmap	*Map;			// color computed from a map depending on hour & weather (NULL if color is unseted)
 		TSkyColorMode	Mode;  // how the color is to be used
 	public:
-		CColorInfo() : Map(NULL) {}
+		CColorInfo() : Map(nullptr) {}
 		/** Init color map from its name. Eventually load the bitmap if itsn't found in the map
 		  * \param bitmapByName already build bitmap, sorted by their name
 		  * \param buildBitmap list of used bitmap (to be completed if required bitmap id not in "bitmapByName")
@@ -118,8 +118,10 @@ public:
 	bool				VisibleInEnvMap;
 public:
 	// ctor
-	CSkyObject() : Instance(NULL),
-				   PS(NULL),
+	CSkyObject() : Instance(nullptr)
+	    ,
+				   PS(nullptr)
+	    ,
 				   Active(false),
 				   VisibleInMainScene(true),
 				   VisibleInEnvMap(true)
@@ -129,14 +131,14 @@ public:
 		for(uint k = 0; k < SKY_MAX_NUM_STAGE; ++k)
 		{
 			LastConstantColor[k].set(0, 0, 0, 0);
-			OffsetUBitmap[k] = NULL;
-			OffsetVBitmap[k] = NULL;
+			OffsetUBitmap[k] = nullptr;
+			OffsetVBitmap[k] = nullptr;
 			TexPanner[k].set(0.f, 0.f);
 			OffsetFactor[k].set(1.f, 1.f);
 		}
 		for(uint k = 0; k < SKY_MAX_NUM_FX_USER_PARAMS; ++k)
 		{
-			FXUserParams[k] = NULL;
+			FXUserParams[k] = nullptr;
 		}
 	}
 	// dtor

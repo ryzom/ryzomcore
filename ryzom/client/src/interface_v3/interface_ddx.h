@@ -101,7 +101,7 @@ private:
 		{
 			ResultDecimal= 0;
 			RoundMode= false;
-			PresetDB= NULL;
+			PresetDB = nullptr;
 			RealTimeMode= RTModeFalse;
 		}
 		void DBToWidget();
@@ -138,7 +138,7 @@ private:
 		virtual void update(NLMISC::ICDBNode* node);
 		CInterfaceDDX		*Owner;
 
-		CPresetObs() : Owner(NULL) {}
+		CPresetObs() : Owner(nullptr) {}
 	};
 	CPresetObs					_PresetObs;
 	std::set<NLMISC::CCDBNodeLeaf*>		_PresetNodes;
@@ -157,7 +157,7 @@ public:
 
 	static CDDXManager *getInstance()
 	{
-		if (_Instance == NULL)
+		if (_Instance == nullptr)
 			_Instance = new CDDXManager;
 		return _Instance;
 	}

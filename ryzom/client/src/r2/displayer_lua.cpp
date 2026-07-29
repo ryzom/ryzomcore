@@ -67,7 +67,7 @@ bool CDisplayerLua::init(const CLuaObject &parameters)
 }
 
 // *********************************************************************************************************
-CDisplayerLua::CToLua::CToLua():_Displayer(NULL)
+CDisplayerLua::CToLua::CToLua():_Displayer(nullptr)
 {
 }
 
@@ -135,7 +135,7 @@ CLuaState *CDisplayerLua::CToLua::getLua()
 	if (!_LuaTable.isValid())
 	{
 		nlwarning("Warning: try to access to a corrupted table");
-		return 0;
+		return nullptr;
 	}
 	return _LuaTable.getLuaState();
 }

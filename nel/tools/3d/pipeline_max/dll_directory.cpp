@@ -144,7 +144,7 @@ void CDllDirectory::parse(uint16 version, uint filter)
 					throw EStorageParse(); // There were chunks inbetween
 				if (!parsedDllEntry)
 				{
-					m_ChunkCache.push_back(TStorageObjectWithId(id, NULL)); // Dummy entry to know the location
+					m_ChunkCache.push_back(TStorageObjectWithId(id, nullptr)); // Dummy entry to know the location
 					lastCached = id;
 					parsedDllEntry = true;
 				}
@@ -176,7 +176,7 @@ void CDllDirectory::clean()
 	// Clean chunks
 	for (TStorageObjectContainer::iterator it = m_ChunkCache.begin(), end = m_ChunkCache.end(); it != end; ++it)
 	{
-		if (it->second != NULL && it->second->isContainer())
+		if (it->second != nullptr && it->second->isContainer())
 		{
 			static_cast<CStorageContainer *>(it->second)->clean();
 		}
@@ -255,7 +255,7 @@ const CDllEntry *CDllDirectory::get(sint32 index) const
 		return m_Entries[index];
 	}
 	nlassert(false);
-	return NULL;
+	return nullptr;
 }
 
 // Parallel to CClassDirectory3
@@ -323,7 +323,8 @@ IStorageObject *CDllDirectory::createChunkById(uint16 id, bool container)
 // 	DllDescription: ...
 // 	DllFilename: ... }
 
-CDllEntry::CDllEntry() : m_DllDescription(NULL), m_DllFilename(NULL)
+CDllEntry::CDllEntry() : m_DllDescription(nullptr)
+    , m_DllFilename(nullptr)
 {
 
 }
@@ -391,8 +392,8 @@ void CDllEntry::build(uint16 version, uint filter)
 void CDllEntry::disown()
 {
 	// CStorageContainer::disown();
-	m_DllDescription = NULL;
-	m_DllFilename = NULL;
+	m_DllDescription = nullptr;
+	m_DllFilename = nullptr;
 	nlassert(m_ChunksOwnsPointers);
 }
 

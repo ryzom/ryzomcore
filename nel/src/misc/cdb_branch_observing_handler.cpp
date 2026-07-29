@@ -56,14 +56,14 @@ namespace NLMISC{
 				currentHandle = *itr;
 				++itr;
 				
-				if( currentHandle->observer() != NULL )
+				if( currentHandle->observer() != nullptr)
 					currentHandle->observer()->update( currentHandle->owner() );
 				
 				// Update might have removed it
-				if( currentHandle != NULL )
+				if( currentHandle != nullptr)
 					currentHandle->removeFromFlushableList( oldList );
 
-				currentHandle = NULL;
+				currentHandle = nullptr;
 				flushed = true;
 			}
 			triggerFlushObservers();
@@ -76,7 +76,7 @@ namespace NLMISC{
 	void CCDBBranchObservingHandler::reset()
 	{
 		currentList = 0;
-		currentHandle = NULL;
+		currentHandle = nullptr;
 
 		for( uint i = 0; i < MAX_OBS_LST; i++ )
 			flushableObservers[ i ].clear();
@@ -84,7 +84,7 @@ namespace NLMISC{
 
 	void CCDBBranchObservingHandler::addBranchObserver( CCDBNodeBranch *branch, ICDBNode::IPropertyObserver *observer, const std::vector< std::string >& positiveLeafNameFilter )
 	{
-		if( branch == NULL )
+		if( branch == nullptr)
 			return;
 
 		CCDBDBBranchObserverHandle *handle = new CCDBDBBranchObserverHandle( observer, branch, this );
@@ -93,7 +93,7 @@ namespace NLMISC{
 
 	void CCDBBranchObservingHandler::addBranchObserver( CCDBNodeBranch *branch, const char *dbPathFromThisNode, ICDBNode::IPropertyObserver &observer, const char **positiveLeafNameFilter, uint positiveLeafNameFilterSize )
 	{
-		if( branch == NULL )
+		if( branch == nullptr)
 			return;
 
 		CCDBDBBranchObserverHandle *handle = new CCDBDBBranchObserverHandle( &observer, branch, this );
@@ -149,7 +149,7 @@ namespace NLMISC{
 
 	CCDBBranchObservingHandler::CCDBDBBranchObserverHandle::~CCDBDBBranchObserverHandle()
 	{
-		_observer = NULL;
+		_observer = nullptr;
 	}
 
 	bool CCDBBranchObservingHandler::CCDBDBBranchObserverHandle::observesLeaf( const std::string &leafName )
@@ -196,7 +196,7 @@ namespace NLMISC{
 			return;
 
 		if( _handler->currentHandle == this )
-			_handler->currentHandle = NULL;
+			_handler->currentHandle = nullptr;
 
 		_handler->flushableObservers[ list ].erase( itr );
 		_inList[ list ] = false;

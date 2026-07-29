@@ -324,7 +324,7 @@ namespace NLGUI
 
 			SLine()
 			{
-				TextOrTemplate = NULL;
+				TextOrTemplate = nullptr;
 			}
 
 			~SLine()

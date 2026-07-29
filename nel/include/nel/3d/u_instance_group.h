@@ -128,8 +128,8 @@ public:
 	 * the shapes will be preloaded in this driver. If the pointer is NULL (default), textures
 	 * will ve loaded when the shape will be used.
 	 */
-	virtual void addToScene (class UScene& scene, UDriver *driver=NULL, uint selectedTexture=0)=0;
-	virtual void addToSceneAsync (class UScene& scene, UDriver *driver=NULL, uint selectedTexture=0)=0;
+	virtual void addToScene (class UScene& scene, UDriver *driver = nullptr, uint selectedTexture=0)=0;
+	virtual void addToSceneAsync (class UScene& scene, UDriver *driver = nullptr, uint selectedTexture=0)=0;
 	virtual void stopAddToSceneAsync ()=0;
 	virtual TState getAddToSceneState ()=0;
 

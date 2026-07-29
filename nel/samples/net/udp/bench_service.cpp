@@ -139,18 +139,18 @@ uint32				MaxUDPPacketSize = 1000;
 
 CBufFIFO			Queue1, Queue2;
 
-CBufFIFO			*CurrentReadQueue = NULL;
+CBufFIFO			*CurrentReadQueue = nullptr;
 
-TReceivedMessage	*CurrentInMsg = NULL;
+TReceivedMessage	*CurrentInMsg = nullptr;
 
-IThread				*ReceiveThread = NULL;
-CReceiveTask		*ReceiveTask = NULL;
+IThread				*ReceiveThread = nullptr;
+CReceiveTask		*ReceiveTask = nullptr;
 
 list<CClient>		Clients;	// contains all clients
 TClientMap			ClientMap;	// contains a quick access to the client using the udp address
 
 // TCP server for clients
-CCallbackServer		*CallbackServer = NULL;
+CCallbackServer		*CallbackServer = nullptr;
 
 //
 // Functions
@@ -281,11 +281,11 @@ void CClient::updatePong (sint64 pingTime, sint64 pongTime, uint32 pongNumber, u
 	string fn = StatPathName + ConnectionName + "_" + ha + "_" + getDate() + ".pong";
 	
 	FILE *fp = nlfopen (fn, "rt");
-	if (fp == NULL)
+	if (fp == nullptr)
 	{
 		// new file, add the header
 		FILE *fp = nlfopen (fn, "wt");
-		if (fp != NULL)
+		if (fp != nullptr)
 		{
 			fprintf (fp, "#%s\t%s\t%s\t%s\n", "PingTime", "PongTime", "Delta", "PingNumber");
 			fclose (fp);
@@ -297,7 +297,7 @@ void CClient::updatePong (sint64 pingTime, sint64 pongTime, uint32 pongNumber, u
 	}
 
 	fp = nlfopen (fn, "at");
-	if (fp == NULL)
+	if (fp == nullptr)
 	{
 		nlwarning ("Can't open pong file name '%s'", fn.c_str());
 	}
@@ -351,7 +351,7 @@ void CClient::updateFullStat ()
 			line += "MeanPongTime " + toString(FullMeanPongTime/FullNbPong) + " ";
 
 		FILE *fp = fopen (fn.c_str(), "at");
-		if (fp == NULL)
+		if (fp == nullptr)
 		{
 			nlwarning ("Can't open stat file name '%s'", fn.c_str());
 		}
@@ -380,11 +380,11 @@ void CClient::updateFullStat ()
 		string fn = StatPathName + ConnectionName + "_" + ha + "_" + getDate() + ".ping";
 		
 		FILE *fp = fopen (fn.c_str(), "rt");
-		if (fp == NULL)
+		if (fp == nullptr)
 		{
 			// new file, add the header
 			FILE *fp = fopen (fn.c_str(), "wt");
-			if (fp != NULL)
+			if (fp != nullptr)
 			{
 				fprintf (fp, "#%s\t%s\n", "NbPongRcv", "Delta");
 				fclose (fp);
@@ -396,7 +396,7 @@ void CClient::updateFullStat ()
 		}
 
 		fp = fopen (fn.c_str(), "at");
-		if (fp == NULL)
+		if (fp == nullptr)
 		{
 			nlwarning ("Can't open ping file name '%s'", fn.c_str());
 		}
@@ -446,7 +446,7 @@ void CClient::updateStat ()
 	line += "NbDuplicated " + toString(NbDuplicated) + " ";
 
 	FILE *fp = fopen (fn.c_str(), "at");
-	if (fp == NULL)
+	if (fp == nullptr)
 	{
 		nlwarning ("Can't open stat file name '%s'", fn.c_str());
 	}
@@ -533,7 +533,7 @@ void handleReceivedPong (CClient *client, sint64 pongTime)
 	if (mode == 0)
 	{
 		// init the UDP connection
-		if (client == NULL)
+		if (client == nullptr)
 		{
 			uint32 session = 0;
 			msgin.serial (session);
@@ -566,7 +566,7 @@ void handleReceivedPong (CClient *client, sint64 pongTime)
 	}
 	else if (mode == 1)
 	{
-		if (client == NULL)
+		if (client == nullptr)
 		{
 			nlwarning ("Received a UDP packet from an old client (hacker?)");
 			return;
@@ -665,7 +665,7 @@ public:
 		CallbackServer = new CCallbackServer;
 		CallbackServer->addCallbackArray (CallbackArray, sizeof(CallbackArray)/sizeof(CallbackArray[0]));
 		CallbackServer->init (TCPPort);
-		CallbackServer->setDisconnectionCallback (cbDisconnect, NULL);
+		CallbackServer->setDisconnectionCallback (cbDisconnect, nullptr);
 	}
 
 	bool update ()
@@ -714,7 +714,7 @@ public:
 					if ( CurrentInMsg->eventType() == TReceivedMessage::User )
 					{
 						// Handle message for a new client
-						handleReceivedPong( NULL, pongTime );
+						handleReceivedPong(nullptr, pongTime );
 					}
 					else
 					{
@@ -755,28 +755,28 @@ public:
 		ReceiveTask->DataSock->close();
 		ReceiveThread->wait();
 
-		if (ReceiveThread != NULL)
+		if (ReceiveThread != nullptr)
 		{
 			delete ReceiveThread;
-			ReceiveThread = NULL;
+			ReceiveThread = nullptr;
 		}
 	
-		if (ReceiveTask != NULL)
+		if (ReceiveTask != nullptr)
 		{
 			delete ReceiveTask;
-			ReceiveTask = NULL;
+			ReceiveTask = nullptr;
 		}
 
-		if (CurrentInMsg != NULL)
+		if (CurrentInMsg != nullptr)
 		{
 			delete CurrentInMsg;
-			CurrentInMsg = NULL;
+			CurrentInMsg = nullptr;
 		}
 
-		if (CallbackServer != NULL)
+		if (CallbackServer != nullptr)
 		{
 			delete CallbackServer;
-			CallbackServer = NULL;
+			CallbackServer = nullptr;
 		}
 
 	}

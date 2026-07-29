@@ -134,10 +134,10 @@ namespace R2
 extern bool SetMousePosFirstTime;
 
 extern EGSPD::CSeason::TSeason	ManualSeasonValue;
-UTextureFile			*LoadingBitmap = NULL;
-UTextureFile			*LoadingBitmapFull = NULL;
+UTextureFile			*LoadingBitmap = nullptr;
+UTextureFile			*LoadingBitmapFull = nullptr;
 UMaterial				LoadingMaterial;
-UMaterial				LoadingMaterialFull = NULL;
+UMaterial				LoadingMaterialFull = nullptr;
 std::string				LoadingBitmapFilename;
 uint64					StartInitTime = 0;
 uint64					StartPlayTime = 0;
@@ -583,7 +583,7 @@ void initMainLoop()
 		H_AUTO(InitRZSound)
 
 		// Initialize Sound System
-		if(NLSOUND::CSoundAnimManager::instance() == 0)
+		if(NLSOUND::CSoundAnimManager::instance() == nullptr)
 			nlwarning("initMainLoop : Sound System not Initialized.");
 
 		// During load of the game, fade completely out SFX, and leave outgame music
@@ -613,7 +613,7 @@ void initMainLoop()
 		nmsg = "Creating Scene ...";
 		ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
 		Scene = Driver->createScene(false);
-		if(Scene == 0)
+		if(Scene == nullptr)
 			nlerror("initMainLoop : Cannot create a Scene.");
 
 		// create effects
@@ -658,7 +658,7 @@ void initMainLoop()
 		Scene->setForceWaterEnvMap(ClientCfg.ForceWaterEnvMap);
 
 		// init the clustered sound system
-		if (SoundMngr != NULL)
+		if (SoundMngr != nullptr)
 			SoundMngr->getMixer()->initClusteredSound(Scene, 0.01f, 100.0f, 1.0f);
 
 		// Create the background scene
@@ -703,7 +703,7 @@ void initMainLoop()
 
 		// Create the collision manager (Continent has to do some init with it..)
 		CollisionManager = Scene->createVisualCollisionManager();
-		if(CollisionManager == 0)
+		if(CollisionManager == nullptr)
 			nlwarning("initMainLoop: createVisualCollisionManager had returned 0.");
 		// Set this collision manager the one the scene must use for Shadow Reception on Buildings
 		Scene->setVisualCollisionManagerForShadow(CollisionManager);
@@ -801,7 +801,7 @@ void initMainLoop()
 			nmsg = "Creating Landscape ...";
 			ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
 			Landscape = Scene->createLandscape();
-			if(Landscape == NULL)
+			if(Landscape == nullptr)
 				nlerror("initMainLoop : Cannot create a Landscape.");
 
 			if (!ClientCfg.Light)
@@ -1437,8 +1437,8 @@ void initMainLoop()
 			eb->setDefaultInputString(CI18N::get("uiDefaultChatInput"));
 	}
 	else
-		CWidgetManager::getInstance()->setCaptureKeyboard(NULL);
-	CWidgetManager::getInstance()->setCaptureKeyboard(NULL); // previous set editbox becomes '_OldCaptureKeyboard'
+		CWidgetManager::getInstance()->setCaptureKeyboard(nullptr);
+	CWidgetManager::getInstance()->setCaptureKeyboard(nullptr); // previous set editbox becomes '_OldCaptureKeyboard'
 
 	// Some init after connection ready sent
 	if(BotChatPageAll && (!ClientCfg.R2EDEnabled))
@@ -1500,16 +1500,16 @@ void destroyLoadingBitmap ()
 	{
 		// Destroy the Loading Background.
 		Driver->deleteTextureFile(LoadingBitmap);
-		LoadingBitmap = NULL;
+		LoadingBitmap = nullptr;
 		LoadingBitmapFilename.clear();
-		LoadingMaterial.setTexture (0, NULL);
+		LoadingMaterial.setTexture (0, nullptr);
 	}
 	if (LoadingBitmapFull && Driver)
 	{
 		// Destroy the Loading Background.
 		Driver->deleteTextureFile(LoadingBitmapFull);
-		LoadingBitmapFull = NULL;
-		LoadingMaterialFull.setTexture (0, NULL);
+		LoadingBitmapFull = nullptr;
+		LoadingMaterialFull.setTexture (0, nullptr);
 
 	}
 }
@@ -1616,7 +1616,7 @@ void loadBackgroundBitmap (TBackground background)
 
 void beginLoading (TBackground background)
 {
-	LoadingContinent = NULL;
+	LoadingContinent = nullptr;
 	if (!LoadingBackgroundBG.empty())
 	{
 		loadBackgroundBitmap(CustomBackground);

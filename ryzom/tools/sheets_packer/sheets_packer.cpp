@@ -60,14 +60,14 @@ int main(int argc, char **argv)
 
 	if (!args.parse(argc, argv)) return 1;
 
-	CFileDisplayer  *fd = NULL;
+	CFileDisplayer  *fd = nullptr;
 
 	/////////////////////////////////
 	// Initialize the application. //
 	try
 	{
 		// Add a displayer for Debug Infos, disable log.log.
-		createDebug(NULL, false);
+		createDebug(nullptr, false);
 
 		CLog::setProcessName("sheets_packer");
 
@@ -134,7 +134,7 @@ int main(int argc, char **argv)
 		AssertLog->removeDisplayer("SHEETS_PACKER.LOG");
 
 		if (fd) delete fd;
-		fd = NULL;
+		fd = nullptr;
 	}
 	catch(const EFatalError &) { return EXIT_FAILURE; /* nothing to do */ }
 	catch(const Exception &e)

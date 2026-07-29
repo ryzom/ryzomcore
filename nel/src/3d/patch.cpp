@@ -48,18 +48,18 @@ namespace NL3D
 
 // ***************************************************************************
 CBezierPatch	CPatch::CachePatch;
-const CPatch	*CPatch::LastPatch= NULL;
+const CPatch	*CPatch::LastPatch = nullptr;
 uint32			CPatch::_Version=7;
 
 
 // ***************************************************************************
 CPatch::CPatch()
 {
-	Zone= NULL;
+	Zone = nullptr;
 	OrderS=0;
 	OrderT=0;
-	Son0=NULL;
-	Son1=NULL;
+	Son0 = nullptr;
+	Son1 = nullptr;
 	TessBlockRefCount=0;
 	NumRenderableFaces= 0;
 
@@ -75,10 +75,10 @@ CPatch::CPatch()
 	Far1= -1;
 
 	// Default: not binded.
-	_BindZoneNeighbor[0]= NULL;
-	_BindZoneNeighbor[1]= NULL;
-	_BindZoneNeighbor[2]= NULL;
-	_BindZoneNeighbor[3]= NULL;
+	_BindZoneNeighbor[0] = nullptr;
+	_BindZoneNeighbor[1] = nullptr;
+	_BindZoneNeighbor[2] = nullptr;
+	_BindZoneNeighbor[3] = nullptr;
 	NoiseRotation= 0;
 	// No smooth by default.
 	_CornerSmoothFlag= 0;
@@ -90,18 +90,18 @@ CPatch::CPatch()
 	MasterBlock.resetClip();
 
 	// Init UL circular list to NULL (not compiled)
-	_ULNearPrec= NULL;
-	_ULNearNext= NULL;
+	_ULNearPrec = nullptr;
+	_ULNearNext = nullptr;
 
 	// Dynamic LightMap
-	_DLMContext= NULL;
+	_DLMContext = nullptr;
 	_DLMContextRefCount= 0;
 
 	// Render Passes
-	_PatchRdrPassFar0= NULL;
-	_NextRdrFar0= NULL;
-	_PatchRdrPassFar1= NULL;
-	_NextRdrFar1= NULL;
+	_PatchRdrPassFar0 = nullptr;
+	_NextRdrFar0 = nullptr;
+	_PatchRdrPassFar1 = nullptr;
+	_NextRdrFar1 = nullptr;
 }
 // ***************************************************************************
 CPatch::~CPatch()
@@ -143,8 +143,8 @@ void			CPatch::release()
 	// Flag the fact that this patch can't be rendered.
 	OrderS=0;
 	OrderT=0;
-	Son0=NULL;
-	Son1=NULL;
+	Son0 = nullptr;
+	Son1 = nullptr;
 	clearTessBlocks();
 	resetMasterBlock();
 	// Flag RenderClipped in Zone
@@ -156,22 +156,22 @@ void			CPatch::release()
 
 	// the pathc is uncompiled. must do it after clearTessBlocks(), because may use it
 	// for vegetable manager, and for updateLighting
-	Zone= NULL;
+	Zone = nullptr;
 
 	// uncompile: reset UpdateLighting circular list to NULL.
-	if(_ULNearPrec!= NULL)
+	if(_ULNearPrec != nullptr)
 	{
 		// verify the patch is correctly unlinked from any ciruclar list.
 		nlassert(_ULNearPrec==this && _ULNearNext==this);
 	}
-	_ULNearPrec= NULL;
-	_ULNearNext= NULL;
+	_ULNearPrec = nullptr;
+	_ULNearNext = nullptr;
 
 	// DynamciLightMap: release the _DLMContext if still exist.
 	if(_DLMContext)
 		delete _DLMContext;
 	// reset
-	_DLMContext= NULL;
+	_DLMContext = nullptr;
 	_DLMContextRefCount= 0;
 }
 
@@ -1007,7 +1007,7 @@ void			CPatch::removeTileMaterialFromRenderList(CTileMaterial *tm)
 
 	uint	numtb, numtm;
 	computeTbTm(numtb, numtm, tm->TileS, tm->TileT);
-	TessBlocks[numtb].RdrTileRoot[numtm]= NULL;
+	TessBlocks[numtb].RdrTileRoot[numtm] = nullptr;
 	TessBlocks[numtb].FaceTileMaterialRefCount--;
 	TessBlocks[numtb].TileMaterialRefCount--;
 	// The master block contains the whole patch TileMaterialRefCount
@@ -1075,12 +1075,12 @@ void			CPatch::removeFarVertexFromRenderList(CTessFarVertex *fv)
 	if(type==FVMasterBlock || type==FVTessBlockEdge)
 	{
 		MasterBlock.FarVertexList.remove(fv);
-		fv->OwnerBlock= NULL;
+		fv->OwnerBlock = nullptr;
 	}
 	else
 	{
 		TessBlocks[numtb].FarVertexList.remove(fv);
-		fv->OwnerBlock= NULL;
+		fv->OwnerBlock = nullptr;
 
 		// Destroy if necessary the TessBlocks.
 		decRefTessBlocks();
@@ -1109,7 +1109,7 @@ void			CPatch::removeNearVertexFromRenderList(CTileMaterial *tileMat, CTessNearV
 	uint	numtb, numtm;
 	computeTbTm(numtb, numtm, tileMat->TileS, tileMat->TileT);
 	TessBlocks[numtb].NearVertexList.remove(nv);
-	nv->OwnerBlock= NULL;
+	nv->OwnerBlock = nullptr;
 
 	// Destroy if necessary the TessBlocks.
 	decRefTessBlocks();
@@ -1213,8 +1213,8 @@ void			CPatch::makeRoots()
 		Son0->PVRight.setST(1, 0);
 	}
 	Son0->FBase= Son1;
-	Son0->FLeft= NULL;
-	Son0->FRight= NULL;
+	Son0->FLeft = nullptr;
+	Son0->FRight = nullptr;
 	// No tile info.
 	Son0->Size= ErrorSize/2;
 	Son0->computeSplitPoint();
@@ -1247,8 +1247,8 @@ void			CPatch::makeRoots()
 		Son1->PVRight.setST(0, 1);
 	}
 	Son1->FBase= Son0;
-	Son1->FLeft= NULL;
-	Son1->FRight= NULL;
+	Son1->FLeft = nullptr;
+	Son1->FRight = nullptr;
 	// No tile info.
 	Son1->Size= ErrorSize/2;
 	Son1->computeSplitPoint();
@@ -1564,13 +1564,13 @@ void			CPatch::resetRenderFar()
 	{
 		// free the render pass.
 		Zone->Landscape->freeFarRenderPass (this, _PatchRdrPassFar0, Far0);
-		_PatchRdrPassFar0= NULL;
+		_PatchRdrPassFar0 = nullptr;
 	}
 	if (_PatchRdrPassFar1)
 	{
 		// free the render pass.
 		Zone->Landscape->freeFarRenderPass (this, _PatchRdrPassFar1, Far1);
-		_PatchRdrPassFar1= NULL;
+		_PatchRdrPassFar1 = nullptr;
 	}
 
 	Far0= -1;
@@ -1745,10 +1745,10 @@ void			CPatch::unbind()
 
 
 	// unbind Noise.
-	_BindZoneNeighbor[0]= NULL;
-	_BindZoneNeighbor[1]= NULL;
-	_BindZoneNeighbor[2]= NULL;
-	_BindZoneNeighbor[3]= NULL;
+	_BindZoneNeighbor[0] = nullptr;
+	_BindZoneNeighbor[1] = nullptr;
+	_BindZoneNeighbor[2] = nullptr;
+	_BindZoneNeighbor[3] = nullptr;
 
 }
 
@@ -1790,7 +1790,7 @@ CTessVertex		*CPatch::getRootVertexForEdge(sint edge) const
 			case 1: return Son0->VBase;
 			case 2: return Son0->VLeft;
 			case 3: return Son1->VBase;
-			default: return NULL;
+			default: return nullptr;
 		}
 	}
 	else
@@ -1801,7 +1801,7 @@ CTessVertex		*CPatch::getRootVertexForEdge(sint edge) const
 			case 1: return Son0->VLeft;
 			case 2: return Son1->VBase;
 			case 3: return Son0->VRight;
-			default: return NULL;
+			default: return nullptr;
 		}
 	}
 }
@@ -2090,7 +2090,7 @@ CPatchRdrPass	*CPatch::getTileRenderPass(sint tileId, sint pass)
 		if(pass==NL3D_TILE_PASS_RGB0)
 			return Zone->Landscape->getTileRenderPass(0xFFFF, false);
 		// Else, this tile do not have such a pass (not a transition).
-		return NULL;
+		return nullptr;
 	}
 	else
 	{
@@ -2237,13 +2237,13 @@ void	CPatch::getBindNeighbor(uint edge, CBindInfo &neighborEdge) const
 {
 	nlassert(edge<4);
 
-	if(_BindZoneNeighbor[edge]!=NULL)
+	if(_BindZoneNeighbor[edge] != nullptr)
 	{
 		getZone()->buildBindInfo(PatchId, edge, _BindZoneNeighbor[edge], neighborEdge);
 	}
 	else
 	{
-		neighborEdge.Zone= NULL;
+		neighborEdge.Zone = nullptr;
 		neighborEdge.NPatchs= 0;
 		neighborEdge.MultipleBindNum= 0;
 	}
@@ -2306,7 +2306,7 @@ uint32	CPatch::countNumTriFar0() const
 {
 	uint32 numIndex = MasterBlock.Far0FaceVector ? *MasterBlock.Far0FaceVector : 0;
 	uint			nTessBlock= TessBlocks.size();
-	const CTessBlock		*pTessBlock= nTessBlock>0? &TessBlocks[0]: NULL;
+	const CTessBlock		*pTessBlock= nTessBlock>0? &TessBlocks[0] : nullptr;
 	for(; nTessBlock>0; pTessBlock++, nTessBlock--)
 	{
 		const CTessBlock		&tblock= *pTessBlock;
@@ -2324,7 +2324,7 @@ uint32	CPatch::countNumTriFar1() const
 {
 	uint32 numIndex = MasterBlock.Far1FaceVector ? *MasterBlock.Far1FaceVector : 0;
 	uint			nTessBlock= TessBlocks.size();
-	const CTessBlock		*pTessBlock= nTessBlock>0? &TessBlocks[0]: NULL;
+	const CTessBlock		*pTessBlock= nTessBlock>0? &TessBlocks[0] : nullptr;
 	for(; nTessBlock>0; pTessBlock++, nTessBlock--)
 	{
 		const CTessBlock		&tblock= *pTessBlock;

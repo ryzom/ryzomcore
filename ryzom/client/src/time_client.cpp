@@ -229,11 +229,11 @@ void ackPacketTimeBefore(uint8 ackPacketNumber)
 	LastPacketAck = ackPacketNumber;
 }// ackPacketTimeBefore //
 
-static	CInterfaceProperty	*InterfaceTime = NULL;
-static	CInterfaceProperty	*InterfaceServerTick = NULL;
-static	CInterfaceProperty	*InterfaceSmoothServerTick = NULL;
-static	CInterfaceProperty	*InterfaceDay = NULL;
-static	CInterfaceProperty	*InterfaceDayBeforeNextZCDistrib = NULL;
+static	CInterfaceProperty	*InterfaceTime = nullptr;
+static	CInterfaceProperty	*InterfaceServerTick = nullptr;
+static	CInterfaceProperty	*InterfaceSmoothServerTick = nullptr;
+static	CInterfaceProperty	*InterfaceDay = nullptr;
+static	CInterfaceProperty	*InterfaceDayBeforeNextZCDistrib = nullptr;
 
 //-----------------------------------------------
 // initClientTime
@@ -275,27 +275,27 @@ void releaseClientTime()
 	if (InterfaceTime)
 	{
 		delete InterfaceTime;
-		InterfaceTime = NULL;
+		InterfaceTime = nullptr;
 	}
 	if (InterfaceServerTick)
 	{
 		delete InterfaceServerTick;
-		InterfaceServerTick = NULL;
+		InterfaceServerTick = nullptr;
 	}
 	if (InterfaceSmoothServerTick)
 	{
 		delete InterfaceSmoothServerTick;
-		InterfaceSmoothServerTick = NULL;
+		InterfaceSmoothServerTick = nullptr;
 	}
 	if (InterfaceDay)
 	{
 		delete InterfaceDay;
-		InterfaceDay = NULL;
+		InterfaceDay = nullptr;
 	}
 	if (InterfaceDayBeforeNextZCDistrib)
 	{
 		delete InterfaceDayBeforeNextZCDistrib;
-		InterfaceDayBeforeNextZCDistrib = NULL;
+		InterfaceDayBeforeNextZCDistrib = nullptr;
 	}
 }
 

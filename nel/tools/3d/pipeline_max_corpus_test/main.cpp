@@ -217,7 +217,7 @@ static int modifySaveTest(CStorageOleIn &in, CSceneClassRegistry *reg, const std
 	// original-vs-rewritten comparison.
 	static const char *kStreams[] = {
 		"VideoPostQueue", "Config", "ClassData", "DllDirectory", "ClassDirectory3", "Scene",
-		"\05SummaryInformation", "\05DocumentSummaryInformation", NULL
+		"\05SummaryInformation", "\05DocumentSummaryInformation", nullptr
 	};
 	std::vector<std::string> present;
 	std::vector<std::vector<uint8> > rawOrig;
@@ -535,8 +535,8 @@ int main(int argc, char **argv)
 	bool doModifySave = false;
 	bool doMtlDump = false;
 	bool doUvgenDump = false;
-	const char *dumpScene = NULL;
-	const char *maxFile = NULL;
+	const char *dumpScene = nullptr;
+	const char *maxFile = nullptr;
 	// Accept flags in ANY position (the corpus drivers historically appended --parse after the
 	// file path — with a leading-flags-only parser that silently turned T2 into a no-op).
 	for (int i = 1; i < argc; ++i)

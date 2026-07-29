@@ -209,7 +209,7 @@ namespace NLNET
 							IModuleProxy *modProx = mm.getModuleProxy(first->second);
 
 							log.displayNL("      - Proxy '%s' : local proxy id %u => foreign module id %u",
-								modProx != NULL ? modProx->getModuleName().c_str() : "ERROR, invalid module",
+								modProx != nullptr ? modProx->getModuleName().c_str() : "ERROR, invalid module",
 								first->second,
 								first->first);
 						}
@@ -236,7 +236,7 @@ namespace NLNET
 
 				/// look for an optional sub network name
 				const TParsedCommandLine *netName = command.SubParams[0]->getParam("SubNet");
-				if (netName != NULL)
+				if (netName != nullptr)
 				{
 					subNetName = netName->ParamValue;
 				}

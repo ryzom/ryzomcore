@@ -38,7 +38,7 @@ namespace R2
 
 
 //====================================================================================
-CActionHistoric::CActionHistoric() : _Scenario(NULL, st_edit)
+CActionHistoric::CActionHistoric() : _Scenario(nullptr, st_edit)
 {
 	_NewActionIsPending = false;
 	_CurrActionIndex = -1;
@@ -75,7 +75,7 @@ void CActionHistoric::cancelAction()
 	{
 		_NewAction->rollback(_DMC, _Scenario);
 	}
-	_NewAction = NULL;
+	_NewAction = nullptr;
 	_NewActionIsPending = false;
 	_SubActionCount = 1;
 	_NewActionName.clear();
@@ -159,7 +159,7 @@ void CActionHistoric::endAction()
 	}
 	_NewAction->setCompleted();
 	_CurrActionIndex = -1;
-	_NewAction = NULL;
+	_NewAction = nullptr;
 	_NewActionIsPending = false;
 	// warn lua that a new action has been added
 	if (isUndoSupported())
@@ -198,9 +198,9 @@ void CActionHistoric::clear(CObject *newScenario)
 	}
 	_Actions.clear();
 	_CurrActionIndex = -1;
-	_NewAction = NULL;
+	_NewAction = nullptr;
 	_NewActionIsPending = false;
-	_Scenario.setHighLevel(newScenario ? CRequestBase::cloneObject(newScenario) : NULL);
+	_Scenario.setHighLevel(newScenario ? CRequestBase::cloneObject(newScenario) : nullptr);
 	// warn lua that all actions have been cleared
 	getEditor().callEnvMethod("onClearActionHistoric", 0, 0);
 }
@@ -268,7 +268,7 @@ const ucstring *CActionHistoric::getPreviousActionName() const
 {
 	//H_AUTO(R2_CActionHistoric_getPreviousActionName)
 	sint index = getPreviousActionIndex();
-	return index != -1 ? &_Actions[index]->getName() : NULL;
+	return index != -1 ? &_Actions[index]->getName() : nullptr;
 }
 
 //====================================================================================
@@ -276,7 +276,7 @@ const ucstring *CActionHistoric::getNextActionName() const
 {
 	//H_AUTO(R2_CActionHistoric_getNextActionName)
 	sint index = getNextActionIndex();
-	return index != -1 ? &_Actions[index]->getName() : NULL;
+	return index != -1 ? &_Actions[index]->getName() : nullptr;
 }
 
 //====================================================================================
@@ -487,7 +487,7 @@ CActionHistoric::CRequestSetNode::CRequestSetNode(const std::string &instanceId,
 void CActionHistoric::CRequestSetNode::redo(IDynamicMapClient *dmc, CScenario &scenario)
 {
 	//H_AUTO(R2_CRequestSetNode_redo)
-	_OldValue = NULL;
+	_OldValue = nullptr;
 	if (scenario.getHighLevel()) // undo allowed ?
 	{
 		CObject *old = scenario.find(_InstanceId, _AttrName);
@@ -529,7 +529,7 @@ void CActionHistoric::CRequestSetNode::undo(IDynamicMapClient *dmc, CScenario &s
 		dmc->doRequestSetNode(_InstanceId, _AttrName, _OldValue);
 	}
 
-	_OldValue = NULL;
+	_OldValue = nullptr;
 }
 //====================================================================================
 CActionHistoric::CRequestEraseNode::CRequestEraseNode(const std::string& instanceId, const std::string& attrName, sint32 position)
@@ -544,7 +544,7 @@ void CActionHistoric::CRequestEraseNode::redo(IDynamicMapClient *dmc, CScenario 
 {
 	//H_AUTO(R2_CRequestEraseNode_redo)
 	nlassert(dmc);
-	_OldValue = NULL;
+	_OldValue = nullptr;
 	if (scenario.getHighLevel()) // undo allowed ?
 	{
 		CObject *old = scenario.find(_InstanceId, _AttrName, _Position);
@@ -586,7 +586,7 @@ void CActionHistoric::CRequestEraseNode::undo(IDynamicMapClient *dmc, CScenario 
 	scenario.insertNode(_ParentInstanceId, _AttrNameInParent, _PositionInParent, "", cloneObject(_OldValue));
 	// send to network
 	dmc->doRequestInsertNode(_ParentInstanceId, _AttrNameInParent, _PositionInParent, "", _OldValue);
-	_OldValue = NULL;
+	_OldValue = nullptr;
 
 #ifdef RYZOM_LUA_UCSTRING
 	CLuaIHM::push(getEditor().getLua(), ucstring::makeFromUtf8(_InstanceId));

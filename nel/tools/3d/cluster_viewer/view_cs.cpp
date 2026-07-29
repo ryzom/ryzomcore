@@ -103,7 +103,7 @@ CInstanceGroup* LoadInstanceGroup(const char* sFilename)
 		{
 			// Cannot save the file
 			delete newIG;
-			return NULL;
+			return nullptr;
 		}
 	}
 	return newIG;
@@ -175,7 +175,7 @@ void LoadSceneScript (const char *ScriptName, CScene* pScene, vector<SDispCS> &D
 				father = pile.back();
 		
 			CInstanceGroup *ITemp = LoadInstanceGroup (nameIG);
-			if (ITemp != NULL)
+			if (ITemp != nullptr)
 			{
 				SDispCS dcsTemp;
 				for (sint32 i = 0; i < (1+nNbPlus); ++i)
@@ -252,7 +252,7 @@ int nltmain(int argc, NLMISC::tchar **argv)
 
 	CClipTrav *pClipTrav = &CNELU::Scene->getClipTrav();
 	dcsTemp.Name = "Root";
-	dcsTemp.pIG = NULL;
+	dcsTemp.pIG = nullptr;
 	DispCS.push_back (dcsTemp);
 
 	// Add all instance that create the scene
@@ -393,7 +393,7 @@ int nltmain(int argc, NLMISC::tchar **argv)
 			if (bAutoDetect)
 			{
 				bAutoDetect = false;
-				CNELU::Camera->setClusterSystem (NULL);
+				CNELU::Camera->setClusterSystem (nullptr);
 				nSelected = 0;
 			}
 			else

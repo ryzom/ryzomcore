@@ -36,8 +36,8 @@ using namespace NLMISC;
 
 CCharInfoExtractorFactory* CCharInfoExtractorFactory::getInstance()
 {
-	static CCharInfoExtractorFactory* ptr=NULL;
-	if (ptr==NULL)
+	static CCharInfoExtractorFactory* ptr = nullptr;
+	if (ptr == nullptr)
 		ptr=new CCharInfoExtractorFactory;
 	return ptr;
 }
@@ -100,5 +100,5 @@ ICharInfoExtractor* CCharInfoExtractorFactory::build(const NLMISC::CSString& cmd
 	}
 
 	nlwarning("Unknown info extractor '%s' in line: %s",cmd.c_str(),cmdLine.c_str());
-	return NULL;
+	return nullptr;
 }

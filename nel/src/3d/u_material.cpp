@@ -82,13 +82,13 @@ void UMaterial::setTexture(uint stage, UTexture* ptex)
 {
 	CMaterial *object = getObjectPtr();
 	CTextureUser	*text= dynamic_cast<CTextureUser*>(ptex);
-	if (text != NULL)
+	if (text != nullptr)
 	{
 		object->setTexture (stage, text->getITexture());
 	}
 	else
 	{
-		object->setTexture (stage, NULL);
+		object->setTexture (stage, nullptr);
 	}
 	// NB: _Material smartpoint to this ITexture. But this is correct because so does CTextureUser.
 }

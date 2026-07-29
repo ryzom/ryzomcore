@@ -599,11 +599,11 @@ class CPrimAlias : public IPrimitive
 	};
 	virtual const CPrimVector	*getPrimVector () const
 	{
-		return NULL;
+		return nullptr;
 	}
 	virtual CPrimVector			*getPrimVector ()
 	{
-		return NULL;
+		return nullptr;
 	}
 
 

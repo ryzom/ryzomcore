@@ -428,13 +428,13 @@ sint32	NLPACS::CLocalRetriever::addChain(const vector<CVector> &verts,
 	if (newId > 65535)
 		nlerror("in NLPACS::CLocalRetriever::addChain(): reached the maximum number of chains");
 
-	CRetrievableSurface	*leftSurface = (left>=0) ? &(_Surfaces[left]) : NULL;
-	CRetrievableSurface	*rightSurface = (right>=0) ? &(_Surfaces[right]) : NULL;
+	CRetrievableSurface	*leftSurface = (left>=0) ? &(_Surfaces[left]) : nullptr;
+	CRetrievableSurface	*rightSurface = (right>=0) ? &(_Surfaces[right]) : nullptr;
 
 	// adds the chain and the link to the surface links vector.
-	if (leftSurface != NULL)
+	if (leftSurface != nullptr)
 		leftSurface->_Chains.push_back(CRetrievableSurface::CSurfaceLink(newId, right));
-	if (rightSurface != NULL)
+	if (rightSurface != nullptr)
 		rightSurface->_Chains.push_back(CRetrievableSurface::CSurfaceLink(newId, left));
 
 	chain._StartTip = 0xffff;
@@ -1538,13 +1538,13 @@ float	NLPACS::CLocalRetriever::getHeight(const NLPACS::ULocalPosition &position)
 	}
 	else
 	{
-		if (_Surfaces[position.Surface].getQuadTree().getRoot() != NULL)
+		if (_Surfaces[position.Surface].getQuadTree().getRoot() != nullptr)
 		{
 			// find quad leaf.
 			const CQuadLeaf	*leaf = _Surfaces[position.Surface].getQuadTree().getLeaf(position.Estimation);
 
 			// if there is no acceptable leaf, just give up
-			if (leaf == NULL)
+			if (leaf == nullptr)
 			{
 				//nlinfo("COL: quadtree: don't find the quadLeaf!");
 				return position.Estimation.z;

@@ -115,7 +115,7 @@ bool CToolSelectRotate::isActionPossibleOn(const CInstance &instance) const
 	{
 		return false;
 	}
-	if (instance.getEntity() != NULL)
+	if (instance.getEntity() != nullptr)
 	{
 		return !instance.getClass()["NameToProp"]["Angle"].isNil();
 	}

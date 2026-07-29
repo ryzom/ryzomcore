@@ -73,7 +73,7 @@ IStorageObject *findChunkAnywhere(CSceneClass *sc, uint16 id)
 	// Also check m_Chunks (may still have entries pre-clean/build)
 	for (PIPELINE::MAX::CStorageContainer::TStorageObjectConstIt it = sc->chunks().begin(); it != sc->chunks().end(); ++it)
 		if (it->first == id) return it->second;
-	return NULL;
+	return nullptr;
 }
 
 bool readRawBytes(CSceneClass *sc, uint16 chunkId, void *dst, size_t nBytes)
@@ -129,7 +129,7 @@ bool readCtrlDefault(CSceneClass *sc, uint16 chunkId, void *dst, size_t nBytes)
 // CSceneClassContainer::createChunkById at load time, so this is O(1).
 bool isBipedBoneNode(INode *node)
 {
-	return dynamic_cast<CBipedDriven *>(node->getReference(0)) != NULL;
+	return dynamic_cast<CBipedDriven *>(node->getReference(0)) != nullptr;
 }
 
 // NeL export properties live as AppData entries on the node (see pipeline_max_design.md §8);
@@ -155,7 +155,7 @@ float getNodeScriptAppDataFloat(INode *node, uint32 subId, float def)
 		while (!s.empty() && (s[s.size() - 1] == '\0' || s[s.size() - 1] == '\n' || s[s.size() - 1] == '\r')) s.resize(s.size() - 1);
 		std::string::size_type comma = s.find(',');
 		if (comma != std::string::npos) s[comma] = '.';
-		char *end = NULL;
+		char *end = nullptr;
 		double v = strtod(s.c_str(), &end);
 		if (end == s.c_str()) return def;
 		return (float)v;
@@ -289,7 +289,8 @@ const NLMISC::CClassId CLASSID_BIPED_VHT_CTRL(0x00009156, 0x00000000);
 
 
 
-SBipedRig::SBipedRig() : Sys(NULL), HasCom(false), ComPos(NLMISC::CVector::Null), ComRot(NLMISC::CQuat::Identity),
+SBipedRig::SBipedRig() : Sys(nullptr)
+    , HasCom(false), ComPos(NLMISC::CVector::Null), ComRot(NLMISC::CQuat::Identity),
 		ComDisp(NLMISC::CVector::Null), BaseFramePos(NLMISC::CVector::Null), HaveBaseFramePos(false),
 		HeightCorrection(0.0f), HaveHeightCorrection(false),
 		MoveAllTrans(NLMISC::CVector::Null), HaveMoveAll(false), ComDispNonZero(false),
@@ -317,17 +318,17 @@ SBipedRig::SBipedRig() : Sys(NULL), HasCom(false), ComPos(NLMISC::CVector::Null)
 std::map<CSceneClass *, SBipedRig> g_bipedRigs;
 // The rig currently being decoded by getBipedLocal (set by walkNode before the call). This keeps
 // the joint-decode helpers below (bipedChunkFloats & co) signature-compatible.
-SBipedRig *g_rig = NULL;
+SBipedRig *g_rig = nullptr;
 
 // Fetch a raw float array from a chunk on the current rig's biped object (orphaned or m_Chunks).
 // Returns NULL if absent or too short. Optionally returns the total float count.
 const float *bipedChunkFloats(uint16 chunkId, size_t minFloats, size_t *countOut)
 {
-	if (!g_rig || !g_rig->Sys) return NULL;
+	if (!g_rig || !g_rig->Sys) return nullptr;
 	IStorageObject *chunk = findChunkAnywhere(g_rig->Sys, chunkId);
-	if (!chunk) return NULL;
+	if (!chunk) return nullptr;
 	CStorageRaw *raw = dynamic_cast<CStorageRaw *>(chunk);
-	if (!raw || raw->Value.size() < minFloats * 4) return NULL;
+	if (!raw || raw->Value.size() < minFloats * 4) return nullptr;
 	if (countOut) *countOut = raw->Value.size() / 4;
 	return reinterpret_cast<const float *>(nlVectorData(raw->Value));
 }
@@ -343,9 +344,9 @@ const float *bipedSideHalf(uint16 chunkId, bool leftSide, size_t minFloats, size
 {
 	size_t n = 0;
 	const float *f = bipedChunkFloats(chunkId, 2 * minFloats, &n);
-	if (!f) return NULL;
+	if (!f) return nullptr;
 	size_t half = n / 2;
-	if (half < minFloats) return NULL;
+	if (half < minFloats) return nullptr;
 	if (halfOut) *halfOut = half;
 	return leftSide ? (f + half) : f;
 }
@@ -591,7 +592,7 @@ void parseChainRecord(uint16 structId, uint16 angleId, SBipedChain &out)
 		}
 	}
 	size_t an = 0;
-	const float *a = angleId ? bipedChunkFloats(angleId, 1, &an) : NULL;
+	const float *a = angleId ? bipedChunkFloats(angleId, 1, &an) : nullptr;
 	if (a && an >= 1)
 	{
 		uint32 cnt = floatBitsAsUint(a[0]);
@@ -1240,7 +1241,7 @@ void getBipedLocal(INode *node, const NLMISC::CMatrix &parentWorld,
 		// position = last link's stored length.
 		NLMISC::CQuat nubRot(-0.70710678f, -0.70710678f, 0.0f, 0.0f);
 		worldRot = parentWorldRot * nubRot;
-		const SBipedChain *chain = (id == BID_TAILNUB) ? &rig.Tail : (id == BID_PONY1NUB) ? &rig.Pony1 : NULL;
+		const SBipedChain *chain = (id == BID_TAILNUB) ? &rig.Tail : (id == BID_PONY1NUB) ? &rig.Pony1 : nullptr;
 		if (chain && !chain->Lens.empty())
 		{
 			posOverride = NLMISC::CVector(chain->Lens.back(), 0.0f, 0.0f);
@@ -1347,11 +1348,11 @@ std::vector<INode *> orderedChildrenOf(INode *parent, CSceneClassContainer *ssc)
 CSceneClass *bipedSystemOfCtrl(CReferenceMaker *tmCtrl)
 {
 	CSceneClass *tmsc = dynamic_cast<CSceneClass *>(tmCtrl);
-	if (!tmsc) return NULL;
+	if (!tmsc) return nullptr;
 	NLMISC::CClassId cid = tmsc->classDesc()->classId();
-	if (cid != CBipedDriven::ClassId && cid != CLASSID_BIPED_VHT_CTRL) return NULL;
+	if (cid != CBipedDriven::ClassId && cid != CLASSID_BIPED_VHT_CTRL) return nullptr;
 	CSceneClass *sys = dynamic_cast<CSceneClass *>(tmCtrl->getReference(0));
-	if (!sys || sys->classDesc()->classId() != CLASSID_BIPED_SYS) return NULL;
+	if (!sys || sys->classDesc()->classId() != CLASSID_BIPED_SYS) return nullptr;
 	return sys;
 }
 

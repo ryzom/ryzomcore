@@ -552,8 +552,8 @@ void CTextureFar::rebuildPatch (const CVector2s texturePos, const CPatchIdent &p
 
 	// ** Fill the struct for the tile fill method for each layers
 	NL3D_CComputeTileFar TileFar;
-	TileFar.SrcDiffusePixels = NULL;
-	TileFar.SrcAdditivePixels = NULL;
+	TileFar.SrcDiffusePixels = nullptr;
+	TileFar.SrcAdditivePixels = nullptr;
 	TileFar.SrcDeltaX = 0;
 	TileFar.SrcDeltaY = 0;
 	TileFar.AsmMMX= false;
@@ -637,7 +637,7 @@ void CTextureFar::rebuildPatch (const CVector2s texturePos, const CPatchIdent &p
 					const CTileFarBank::CTileFar*	pTile=_Bank->getTile (tile);
 
 					// This pointer must not be null, else the farBank is not valid!
-					if (pTile==NULL)
+					if (pTile == nullptr)
 						nlwarning ("FarBank is not valid!");
 
 					// If the tile exist
@@ -651,7 +651,7 @@ void CTextureFar::rebuildPatch (const CVector2s texturePos, const CPatchIdent &p
 
 							// Source pointer
 							const CRGBA*	pSrcDiffusePixels=pTile->getPixels (CTileFarBank::diffuse, orderX);
-							const CRGBA*	pSrcAdditivePixels=NULL;
+							const CRGBA*	pSrcAdditivePixels = nullptr;
 
 							// Additive ?
 							if (pTile->isFill (CTileFarBank::additive))

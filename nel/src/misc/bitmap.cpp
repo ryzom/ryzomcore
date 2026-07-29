@@ -506,7 +506,7 @@ bool	CBitmap::isGrayscale() const
 	uint32 *data = (uint32*)_Data[0].getPtr();
 	uint32 *endData = (uint32*)((uint8*)data + size);
 
-	NLMISC::CRGBA *color = NULL;
+	NLMISC::CRGBA *color = nullptr;
 
 	// check if all alphas have the same value
 	while(data < endData)

@@ -52,8 +52,10 @@ CRGBA CForageSourceCL::SafeSourceColor(64, 192, 255);
  */
 CForageSourceCL::CForageSourceCL() :
 	CFxCL(),
-	_InSceneUserInterface( NULL ),
-	_IconFilename( NULL ),
+	_InSceneUserInterface(nullptr)
+    ,
+	_IconFilename(nullptr)
+    ,
 	_IsExtractionInProgress( false ),
 	_SafeSource( false ),
 	_KnowledgeLevel( 0 ),
@@ -120,7 +122,7 @@ bool CForageSourceCL::build( const CEntitySheet *sheet )
 		if(nodeRoot)
 		{
 			_DBEntry = dynamic_cast<CCDBNodeBranch *>(nodeRoot->getNode(_Slot));
-			if(_DBEntry == 0)
+			if(_DBEntry == nullptr)
 				pushDebugStr("Cannot get a pointer on the DB entry.");
 		}
 	}
@@ -191,7 +193,7 @@ void CForageSourceCL::releaseInSceneInterfaces()
 			delete _InSceneUserInterface;
 		}
 
-		_InSceneUserInterface = NULL;
+		_InSceneUserInterface = nullptr;
 	}
 }
 
@@ -506,7 +508,7 @@ void CForageSourceCL::updateVisualPropertyVisualFX(const NLMISC::TGameCycle &/* 
 		if ( (_KnowledgeLevel<=2) && (_ProspectorSlot != 255) )
 		{
 			CEntityCL *prospector = EntitiesMngr.entities()[_ProspectorSlot];
-			if (prospector != NULL)
+			if (prospector != nullptr)
 			{
 				string prospectorName = prospector->getDisplayName();
 				if ( ! prospectorName.empty() )
@@ -543,7 +545,7 @@ void CForageSourceCL::updateVisualPropertyName(const NLMISC::TGameCycle &/* game
 		if ( _ProspectorSlot != 255 )
 		{
 			CEntityCL *prospector = EntitiesMngr.entities()[_ProspectorSlot];
-			if (prospector != NULL)
+			if (prospector != nullptr)
 			{
 				std::string prospectorName = prospector->getDisplayName();
 				if ( ! prospectorName.empty() )
@@ -566,7 +568,7 @@ void CForageSourceCL::updateVisualPropertyTarget(const NLMISC::TGameCycle &/* ga
 	{
 		_ProspectorSlot = slot;
 		CEntityCL *prospector = EntitiesMngr.entities()[_ProspectorSlot]; // NULL if entity not received
-		if (prospector != NULL)
+		if (prospector != nullptr)
 		{
 			std::string prospectorName = prospector->getDisplayName();
 			if ( ! prospectorName.empty() )

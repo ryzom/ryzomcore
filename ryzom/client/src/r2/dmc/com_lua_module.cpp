@@ -240,7 +240,7 @@ void CComLuaModule::initLuaLib()
 
 
 
-		{0,0}
+		{nullptr,nullptr}
 
 	};
 	int initialStackSize = lua_gettop(_LuaState);
@@ -331,7 +331,7 @@ CComLuaModule* CComLuaModule::getInstance(lua_State* state)
 	{
 		return found->second;
 	}
-	return 0;
+	return nullptr;
 }
 
 
@@ -357,7 +357,7 @@ CObject::TSmartPtr CComLuaModule::translateFeatures(CObject* hlScenario, std::st
 	if (!hlScenario)
 	{
 		errorMsg = "<CComLuaModule::translateFeatures> called on NULL scenario";
-		return 0;
+		return nullptr;
 	}
 	lua_getglobal(_LuaState, "r2");
 	lua_pushstring(_LuaState, "doTranslateFeatures");
@@ -366,7 +366,7 @@ CObject::TSmartPtr CComLuaModule::translateFeatures(CObject* hlScenario, std::st
 	if ( lua_pcall(_LuaState, 1, 1, 0) !=0 )
 	{
 		errorMsg = NLMISC::toString( "error running function 'doTranslateFeatures': %s", lua_tostring(_LuaState, -1));
-		return 0;
+		return nullptr;
 	}
 	CObject::TSmartPtr ret = getObjectFromLua(_LuaState, -1);
 	return ret;
@@ -793,7 +793,7 @@ sint CComLuaModule::requestSetNode(lua_State* state, bool isGhost)
 	std::string attrName(lua_tostring(state, 2));
 	CObject::TSmartPtr value = getObjectFromLua(state, 3);
 
-	if (value == NULL)
+	if (value == nullptr)
 	{
 		nlwarning("requestSetNode : bad type for argument 3");
 		return 0;
@@ -1201,7 +1201,7 @@ CObject::TSmartPtr CComLuaModule::getObjectFromLua(lua_State* state, sint idx)
 				lua_pushstring(state, "Value"); // obj, "Value"
 
 				lua_gettable(state, -2); // obj, value
-				CObject *result = 0;
+				CObject *result = nullptr;
 				if ( lua_isstring (state, -1) )
 				{	const char* str = lua_tostring(state, -1);
 					if (str)
@@ -1300,10 +1300,10 @@ CObject::TSmartPtr CComLuaModule::getObjectFromLua(lua_State* state, sint idx)
 		default:
 			lua_pop(state, 1);
 			// other types such as functions are ignored
-			return NULL;
+			return nullptr;
 		break;
 	}
-	return 0;
+	return nullptr;
 }
 
 
@@ -1317,8 +1317,8 @@ CObject::TSmartPtr CComLuaModule::loadLocal(const std::string& filename, const C
 	}
 
 	//H_AUTO(R2_CComLuaModule_loadLocal)
-	if (filename.empty()){ return 0; }
-	CObject::TSmartPtr object = NULL;
+	if (filename.empty()){ return nullptr; }
+	CObject::TSmartPtr object = nullptr;
 #if defined(LUA_VERSION_NUM) && LUA_VERSION_NUM >= 501
 	if (luaL_dofile(_LuaState, filename.c_str()) == 0)
 #else
@@ -1385,7 +1385,7 @@ CObject::TSmartPtr CComLuaModule::loadFromBuffer(const std::string& data, const 
 		COFile testNico("test_nico.lua");
 		testNico.serialBuffer(const_cast<uint8 * >((const uint8 *) &data[0]), (uint)data.size());
 	}
-	CObject::TSmartPtr object = NULL;
+	CObject::TSmartPtr object = nullptr;
 	// TMP TMP
 	CLuaState &ls = getEditor().getLua();
 	try
@@ -1421,7 +1421,7 @@ CObject::TSmartPtr CComLuaModule::loadFromBuffer(const std::string& data, const 
 	if (!object)
 	{
 		nlwarning("Error while loading %s", filename.c_str());
-		return 0;
+		return nullptr;
 	}
 	return object;
 

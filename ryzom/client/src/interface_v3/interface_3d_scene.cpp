@@ -49,8 +49,8 @@ using namespace NLMISC;
 CInterface3DScene::CInterface3DScene(const TCtorParam &param)
 : CInterfaceGroup(param)
 {
-	_Scene = NULL;
-	_AutoAnimSet = NULL;
+	_Scene = nullptr;
+	_AutoAnimSet = nullptr;
 	_CurrentCS = 0;
 	_CurrentCamera = 0;
 	_MouseLDown = false;
@@ -83,10 +83,10 @@ CInterface3DScene::~CInterface3DScene()
 		delete _FXs[i];
 
 	NL3D::UDriver *Driver = CViewRenderer::getInstance()->getDriver();
-	if (_Scene != NULL)
+	if (_Scene != nullptr)
 		Driver->deleteScene (_Scene);
 
-	if (_AutoAnimSet != NULL)
+	if (_AutoAnimSet != nullptr)
 		Driver->deleteAnimationSet(_AutoAnimSet);
 }
 
@@ -163,13 +163,13 @@ bool CInterface3DScene::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 
 	// Check right now if this is a reference view
 	ptr = (char*) xmlGetProp( cur, (xmlChar*)"reference" );
-	_Ref3DScene = NULL;
+	_Ref3DScene = nullptr;
 	if (ptr)
 	{
 		CInterfaceElement *pIE = CWidgetManager::getInstance()->getElementFromId(this->getId(), ptr.str());
 		_Ref3DScene = dynamic_cast<CInterface3DScene*>(pIE);
 	}
-	if (_Ref3DScene != NULL)
+	if (_Ref3DScene != nullptr)
 	{
 		ptr = (char*) xmlGetProp( cur, (xmlChar*)"curcam" );
 		if (ptr) setCurrentCamera (ptr.str());
@@ -302,7 +302,7 @@ bool CInterface3DScene::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 
 			if (!animName.empty())
 			{
-				if (_AutoAnimSet == NULL)
+				if (_AutoAnimSet == nullptr)
 					_AutoAnimSet = CViewRenderer::getInstance()->getDriver()->createAnimationSet();
 				uint id = _AutoAnimSet->addAnimation (ptr, animName.c_str ());
 				if (id == UAnimationSet::NotFound)
@@ -320,7 +320,7 @@ bool CInterface3DScene::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	}
 
 	// if some auto_anim, found, compile and set auto_anim
-	if (_AutoAnimSet != NULL)
+	if (_AutoAnimSet != nullptr)
 	{
 		_AutoAnimSet->build ();
 		_Scene->setAutomaticAnimationSet (_AutoAnimSet);
@@ -367,7 +367,7 @@ void CInterface3DScene::checkCoords()
 	for (i = 0; i < _FXs.size(); ++i)
 		_FXs[i]->checkCoords();
 
-	if (_Scene != NULL)
+	if (_Scene != nullptr)
 		_Scene->animate (TimeInSec-FirstTimeInSec);
 }
 
@@ -384,7 +384,7 @@ void CInterface3DScene::draw ()
 
 	NL3D::UDriver *Driver = CViewRenderer::getInstance()->getDriver();
 
-	if ( Driver == NULL)
+	if ( Driver == nullptr)
 		return;
 
 	// No Op if screen minimized
@@ -395,7 +395,7 @@ void CInterface3DScene::draw ()
 
 	CInterface3DScene *pDisp = this;
 	// If this is a reference view
-	if (_Ref3DScene != NULL)
+	if (_Ref3DScene != nullptr)
 	{
 		pDisp = _Ref3DScene;
 		pDisp->setFlareContext(1);
@@ -406,7 +406,7 @@ void CInterface3DScene::draw ()
 	}
 
 	// This is not a reference view !
-	if (pDisp->_Scene == NULL)
+	if (pDisp->_Scene == nullptr)
 		return;
 
 	CInterface3DCamera *pI3DCam = pDisp->_Cameras[_CurrentCamera];
@@ -638,7 +638,7 @@ bool CInterface3DScene::handleEvent (const NLGUI::CEventDescriptor &event)
 // ----------------------------------------------------------------------------
 void CInterface3DScene::mouseLMove (sint32 dx, sint32 dy)
 {
-	const CInterface3DScene *pI3DS = (_Ref3DScene != NULL) ? _Ref3DScene : this;
+	const CInterface3DScene *pI3DS = (_Ref3DScene != nullptr) ? _Ref3DScene : this;
 	CInterface3DCamera *pI3DCam = pI3DS->_Cameras[_CurrentCamera];
 	float ang = pI3DCam->getRotY() + ((float)dy)*_RotYFactor;
 	clamp (ang, _RotYLimitMin, _RotYLimitMax);
@@ -651,7 +651,7 @@ void CInterface3DScene::mouseLMove (sint32 dx, sint32 dy)
 // ----------------------------------------------------------------------------
 void CInterface3DScene::mouseRMove (sint32 /* dx */, sint32 dy)
 {
-	const CInterface3DScene *pI3DS = (_Ref3DScene != NULL) ? _Ref3DScene : this;
+	const CInterface3DScene *pI3DS = (_Ref3DScene != nullptr) ? _Ref3DScene : this;
 	CInterface3DCamera *pI3DCam = pI3DS->_Cameras[_CurrentCamera];
 	float dist = pI3DCam->getDist() - ((float)dy)*_DistFactor;
 	clamp (dist, _DistLimitMin, _DistLimitMax);
@@ -665,7 +665,7 @@ CInterfaceElement* CInterface3DScene::getElement (const string &id)
 		return this;
 
 	string sTmp = id.substr(0, getId().size());
-	if (sTmp != getId()) return NULL;
+	if (sTmp != getId()) return nullptr;
 
 	uint i;
 
@@ -693,13 +693,13 @@ CInterfaceElement* CInterface3DScene::getElement (const string &id)
 		if (id == _FXs[i]->getId())
 			return _FXs[i];
 
-	return NULL;
+	return nullptr;
 }
 	
 // ----------------------------------------------------------------------------
 string CInterface3DScene::getCurrentCamera() const
 {
-	const CInterface3DScene *pI3DS = (_Ref3DScene != NULL) ? _Ref3DScene : this;
+	const CInterface3DScene *pI3DS = (_Ref3DScene != nullptr) ? _Ref3DScene : this;
 	string name = pI3DS->_Cameras[_CurrentCamera]->getId();
 	name = name.substr(name.rfind(':'));
 	return name;
@@ -709,10 +709,10 @@ string CInterface3DScene::getCurrentCamera() const
 void CInterface3DScene::setCurrentCamera (const string &name)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CInterface3DScene *pI3DS = (_Ref3DScene != NULL) ? _Ref3DScene : this;
+	CInterface3DScene *pI3DS = (_Ref3DScene != nullptr) ? _Ref3DScene : this;
 	CInterfaceElement *pIE = CWidgetManager::getInstance()->getElementFromId(pI3DS->getId(), name);
 	CInterface3DCamera *pI3DCam = dynamic_cast<CInterface3DCamera*>(pIE);
-	if (pI3DCam != NULL)
+	if (pI3DCam != nullptr)
 	{
 		uint i = 0;
 		for (i = 0; i < pI3DS->_Cameras.size(); ++i)
@@ -726,7 +726,7 @@ void CInterface3DScene::setCurrentCamera (const string &name)
 // ----------------------------------------------------------------------------
 string CInterface3DScene::getCurrentClusterSystem () const
 {
-	const CInterface3DScene *pI3DS = (_Ref3DScene != NULL) ? _Ref3DScene : this;
+	const CInterface3DScene *pI3DS = (_Ref3DScene != nullptr) ? _Ref3DScene : this;
 	string name = pI3DS->_IGs[_CurrentCS]->getId();
 	name = name.substr(name.rfind(':'));
 	return name;
@@ -736,10 +736,10 @@ string CInterface3DScene::getCurrentClusterSystem () const
 void CInterface3DScene::setCurrentClusterSystem(const string &sCSName)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CInterface3DScene *pI3DS = (_Ref3DScene != NULL) ? _Ref3DScene : this;
+	CInterface3DScene *pI3DS = (_Ref3DScene != nullptr) ? _Ref3DScene : this;
 	CInterfaceElement *pIE = CWidgetManager::getInstance()->getElementFromId(pI3DS->getId(), sCSName);
 	CInterface3DIG *pI3DIG = dynamic_cast<CInterface3DIG*>(pIE);
-	if (pI3DIG != NULL)
+	if (pI3DIG != nullptr)
 	{
 		uint i = 0;
 		for (i = 0; i < pI3DS->_IGs.size(); ++i)
@@ -755,20 +755,20 @@ void CInterface3DScene::remove(NL3D::UInstanceGroup *pIG)
 {
 	uint32 i;
 	for (i = 0; i < _Characters.size(); ++i)
-		_Characters[i]->setClusterSystem ((UInstanceGroup*)NULL);
+		_Characters[i]->setClusterSystem ((UInstanceGroup*)nullptr);
 	for (i = 0; i < _Shapes.size(); ++i)
-		_Shapes[i]->getShape().setClusterSystem ((UInstanceGroup*)NULL);
+		_Shapes[i]->getShape().setClusterSystem ((UInstanceGroup*)nullptr);
 	for (i = 0; i < _FXs.size(); ++i)
 		if (!_FXs[i]->getPS().empty())
-			_FXs[i]->getPS().setClusterSystem ((UInstanceGroup*)NULL);
+			_FXs[i]->getPS().setClusterSystem ((UInstanceGroup*)nullptr);
 
 	CInterface3DScene *pDisp = this;
-	if (_Ref3DScene != NULL)
+	if (_Ref3DScene != nullptr)
 		pDisp = _Ref3DScene;
-	if (pDisp->_Scene == NULL)
+	if (pDisp->_Scene == nullptr)
 		return;
 	NL3D::UCamera cam = pDisp->_Scene->getCam();
-	cam.setClusterSystem ((UInstanceGroup*)NULL);
+	cam.setClusterSystem ((UInstanceGroup*)nullptr);
 
 	pIG->removeFromScene(*_Scene);
 	_Scene->deleteInstanceGroup(pIG);
@@ -781,7 +781,7 @@ void CInterface3DScene::remove(NL3D::UInstanceGroup *pIG)
 // ----------------------------------------------------------------------------
 CInterface3DCharacter::CInterface3DCharacter()
 {
-	_Char3D = NULL;
+	_Char3D = nullptr;
 }
 
 // ----------------------------------------------------------------------------
@@ -833,10 +833,10 @@ void CInterface3DCharacter::checkCoords()
 			c3Ds.setupFromSERVERDataBase();
 		else if (_DBLink == "target")
 		{
-			if (UserEntity != NULL)
+			if (UserEntity != nullptr)
 			{
 				CEntityCL *selection = EntitiesMngr.entity(UserEntity->selection());
-				if (selection != NULL)
+				if (selection != nullptr)
 					c3Ds.setupFromSERVERDataBase(selection->slot());
 			}
 		}
@@ -881,14 +881,14 @@ int CInterface3DCharacter::luaEnableLOD(CLuaState &ls)
 // ----------------------------------------------------------------------------
 void CInterface3DCharacter::setClusterSystem (UInstanceGroup *pIG)
 {
-	if (_Char3D != NULL)
+	if (_Char3D != nullptr)
 		_Char3D->setClusterSystem (pIG);
 }
 
 // ----------------------------------------------------------------------------
 float CInterface3DCharacter::getPosX () const
 {
-	if (_Char3D == NULL) return 0.0;
+	if (_Char3D == nullptr) return 0.0;
 	float x, y ,z;
 	_Char3D->getPos (x, y, z);
 	return x;
@@ -897,7 +897,7 @@ float CInterface3DCharacter::getPosX () const
 // ----------------------------------------------------------------------------
 float CInterface3DCharacter::getPosY () const
 {
-	if (_Char3D == NULL) return 0.0;
+	if (_Char3D == nullptr) return 0.0;
 	float x, y ,z;
 	_Char3D->getPos (x, y, z);
 	return y;
@@ -906,7 +906,7 @@ float CInterface3DCharacter::getPosY () const
 // ----------------------------------------------------------------------------
 float CInterface3DCharacter::getPosZ () const
 {
-	if (_Char3D == NULL) return 0.0;
+	if (_Char3D == nullptr) return 0.0;
 	float x, y ,z;
 	_Char3D->getPos (x, y, z);
 	return z;
@@ -915,7 +915,7 @@ float CInterface3DCharacter::getPosZ () const
 // ----------------------------------------------------------------------------
 void CInterface3DCharacter::setPosX (float f)
 {
-	if (_Char3D == NULL) return;
+	if (_Char3D == nullptr) return;
 	float x, y ,z;
 	_Char3D->getPos(x, y, z);
 	x = f;
@@ -925,7 +925,7 @@ void CInterface3DCharacter::setPosX (float f)
 // ----------------------------------------------------------------------------
 void CInterface3DCharacter::setPosY (float f)
 {
-	if (_Char3D == NULL) return;
+	if (_Char3D == nullptr) return;
 	float x, y ,z;
 	_Char3D->getPos(x, y, z);
 	y = f;
@@ -935,7 +935,7 @@ void CInterface3DCharacter::setPosY (float f)
 // ----------------------------------------------------------------------------
 void CInterface3DCharacter::setPosZ (float f)
 {
-	if (_Char3D == NULL) return;
+	if (_Char3D == nullptr) return;
 	float x, y ,z;
 	_Char3D->getPos(x, y, z);
 	z = f;
@@ -945,7 +945,7 @@ void CInterface3DCharacter::setPosZ (float f)
 // ----------------------------------------------------------------------------
 float CInterface3DCharacter::getRotX () const
 {
-	if (_Char3D == NULL) return 0.0;
+	if (_Char3D == nullptr) return 0.0;
 	float x, y ,z;
 	_Char3D->getRotEuler(x, y, z);
 	return x / ((float)(NLMISC::Pi / 180));
@@ -954,7 +954,7 @@ float CInterface3DCharacter::getRotX () const
 // ----------------------------------------------------------------------------
 float CInterface3DCharacter::getRotY () const
 {
-	if (_Char3D == NULL) return 0.0;
+	if (_Char3D == nullptr) return 0.0;
 	float x, y ,z;
 	_Char3D->getRotEuler(x, y, z);
 	return y / ((float)(NLMISC::Pi / 180));
@@ -963,7 +963,7 @@ float CInterface3DCharacter::getRotY () const
 // ----------------------------------------------------------------------------
 float CInterface3DCharacter::getRotZ () const
 {
-	if (_Char3D == NULL) return 0.0;
+	if (_Char3D == nullptr) return 0.0;
 	float x, y ,z;
 	_Char3D->getRotEuler(x, y, z);
 	return z / ((float)(NLMISC::Pi / 180));
@@ -972,7 +972,7 @@ float CInterface3DCharacter::getRotZ () const
 // ----------------------------------------------------------------------------
 void CInterface3DCharacter::setRotX (float f)
 {
-	if (_Char3D == NULL) return;
+	if (_Char3D == nullptr) return;
 	float x, y ,z;
 	_Char3D->getRotEuler(x, y, z);
 	x = f * ((float)(NLMISC::Pi / 180));
@@ -982,7 +982,7 @@ void CInterface3DCharacter::setRotX (float f)
 // ----------------------------------------------------------------------------
 void CInterface3DCharacter::setRotY (float f)
 {
-	if (_Char3D == NULL) return;
+	if (_Char3D == nullptr) return;
 	float x, y ,z;
 	_Char3D->getRotEuler(x, y, z);
 	y = f * ((float)(NLMISC::Pi / 180));
@@ -992,7 +992,7 @@ void CInterface3DCharacter::setRotY (float f)
 // ----------------------------------------------------------------------------
 void CInterface3DCharacter::setRotZ (float f)
 {
-	if (_Char3D == NULL) return;
+	if (_Char3D == nullptr) return;
 	float x, y ,z;
 	_Char3D->getRotEuler(x, y, z);
 	z = f * ((float)(NLMISC::Pi / 180));
@@ -1002,7 +1002,7 @@ void CInterface3DCharacter::setRotZ (float f)
 // ----------------------------------------------------------------------------
 float CInterface3DCharacter::getHeadX () const
 {
-	if (_Char3D == NULL) return 0.0;
+	if (_Char3D == nullptr) return 0.0;
 	float x, y ,z;
 	_Char3D->getHeadPos (x, y, z);
 	return x;
@@ -1011,7 +1011,7 @@ float CInterface3DCharacter::getHeadX () const
 // ----------------------------------------------------------------------------
 float CInterface3DCharacter::getHeadY () const
 {
-	if (_Char3D == NULL) return 0.0;
+	if (_Char3D == nullptr) return 0.0;
 	float x, y ,z;
 	_Char3D->getHeadPos (x, y, z);
 	return y;
@@ -1020,7 +1020,7 @@ float CInterface3DCharacter::getHeadY () const
 // ----------------------------------------------------------------------------
 float CInterface3DCharacter::getHeadZ () const
 {
-	if (_Char3D == NULL) return 0.0;
+	if (_Char3D == nullptr) return 0.0;
 	float x, y ,z;
 	_Char3D->getHeadPos (x, y, z);
 	return z;
@@ -1073,7 +1073,7 @@ CInterface3DIG::~CInterface3DIG()
 	{
 		_IG->removeFromScene(*pI3DS->getScene());
 		pI3DS->getScene()->deleteInstanceGroup(_IG);
-		_IG = NULL;
+		_IG = nullptr;
 	}
 }
 
@@ -1093,7 +1093,7 @@ bool CInterface3DIG::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	if (ptr) _Name = toLowerAscii((const char*)ptr);
 
 	_IG = UInstanceGroup::createInstanceGroup(_Name);
-	if (_IG == NULL)
+	if (_IG == nullptr)
 		return true; // Create anyway
 	_IG->setPos (_Pos);
 	//_IG->setRot (_Rot);
@@ -1128,21 +1128,21 @@ float CInterface3DIG::getPosZ () const
 void CInterface3DIG::setPosX (float f)
 {
 	_Pos.x = f;
-	if (_IG != NULL) _IG->setPos(_Pos);
+	if (_IG != nullptr) _IG->setPos(_Pos);
 }
 
 // ----------------------------------------------------------------------------
 void CInterface3DIG::setPosY (float f)
 {
 	_Pos.y = f;
-	if (_IG != NULL) _IG->setPos(_Pos);
+	if (_IG != nullptr) _IG->setPos(_Pos);
 }
 
 // ----------------------------------------------------------------------------
 void CInterface3DIG::setPosZ (float f)
 {
 	_Pos.z = f;
-	if (_IG != NULL) _IG->setPos(_Pos);
+	if (_IG != nullptr) _IG->setPos(_Pos);
 }
 
 // ----------------------------------------------------------------------------
@@ -1211,15 +1211,15 @@ void CInterface3DIG::setName (const std::string &ht)
 		CInterface3DScene *pI3DS = dynamic_cast<CInterface3DScene*>(_Parent);
 		nlassert(pI3DS != NULL);
 
-		if (_IG != NULL)
+		if (_IG != nullptr)
 		{
 			pI3DS->remove(_IG);
-			_IG = NULL;
+			_IG = nullptr;
 		}
 
 		_Name = lwrname;
 		_IG = UInstanceGroup::createInstanceGroup(_Name);
-		if (_IG == NULL) return;
+		if (_IG == nullptr) return;
 		_IG->setPos (_Pos);
 		_IG->addToScene (*pI3DS->getScene(), CViewRenderer::getInstance()->getDriver() );
 		pI3DS->getScene()->setToGlobalInstanceGroup (_IG);
@@ -1671,7 +1671,7 @@ void CInterface3DFX::setStarted (bool b)
 		nlassert(pI3DS != NULL);
 		if (!_FX.empty())
 			pI3DS->getScene()->deleteInstance(_FX);
-		_FX = NULL;
+		_FX = nullptr;
 	}
 }
 

@@ -235,7 +235,7 @@ void CGroupInSceneBubbleManager::init ()
 		templateParams.push_back (std::pair<std::string,std::string>("id", id));
 
 		CInterfaceGroup *group = CWidgetManager::getInstance()->getParser()->createGroupInstance ("3dbulle_L",
-			"ui:interface", templateParams.empty()?NULL:&(templateParams[0]), (uint)templateParams.size());
+			"ui:interface", templateParams.empty() ? nullptr : &(templateParams[0]), (uint)templateParams.size());
 		if (group)
 		{
 			// Link to the interface
@@ -435,8 +435,8 @@ void CGroupInSceneBubbleManager::update ()
 				// Unlink from character
 				CEntityCL *pEntity = EntitiesMngr.getEntityByCompressedIndex(_DynBubbles[j].BotUID);
 				CCharacterCL *pChar = dynamic_cast<CCharacterCL*>(pEntity);
-				if (pChar != NULL)
-					pChar->setBubble(NULL);
+				if (pChar != nullptr)
+					pChar->setBubble(nullptr);
 
 				CWidgetManager::getInstance()->unMakeWindow(_DynBubbles[j].Bubble);
 				if (_DynBubbles[j].Bubble->getParent())
@@ -507,7 +507,7 @@ CGroupInSceneBubble *CGroupInSceneBubbleManager::newBubble (const string &text)
 			return bubble;
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 // ***************************************************************************
@@ -527,12 +527,12 @@ void CGroupInSceneBubbleManager::addSkillPopup (uint skillId, sint delta, uint t
 	templateParams.push_back (std::pair<std::string,std::string>("delta", toString(delta)));
 
 	CInterfaceGroup *group = CWidgetManager::getInstance()->getParser()->createGroupInstance ("skill_popup",
-		"ui:interface", templateParams.empty()?NULL:&(templateParams[0]), (uint)templateParams.size());
+		"ui:interface", templateParams.empty() ? nullptr : &(templateParams[0]), (uint)templateParams.size());
 	if (group)
 	{
 		// Skill name
 		CViewText *pViewSkillName = dynamic_cast<CViewText*>(group->getView("name"));
-		if (pViewSkillName != NULL)
+		if (pViewSkillName != nullptr)
 			pViewSkillName->setText (STRING_MANAGER::CStringManagerClient::getSkillLocalizedName((SKILLS::ESkills)skillId));
 
 		// Skill value
@@ -540,18 +540,18 @@ void CGroupInSceneBubbleManager::addSkillPopup (uint skillId, sint delta, uint t
 		if (skillLeaf)
 		{
 			pViewSkillName = dynamic_cast<CViewText*>(group->getView("lvl"));
-			if (pViewSkillName != NULL)
+			if (pViewSkillName != nullptr)
 				pViewSkillName->setText (toString(skillLeaf->getValue32()));
 		}
 
 		// Delta
 		pViewSkillName = dynamic_cast<CViewText*>(group->getView("delta"));
-		if (pViewSkillName != NULL)
+		if (pViewSkillName != nullptr)
 			pViewSkillName->setText (toString("%+d",delta));
 
 		// MaxValue
 		CViewText *pViewSkillMax = dynamic_cast<CViewText*>(group->getView("max"));
-		if (pViewSkillMax != NULL)
+		if (pViewSkillMax != nullptr)
 			pViewSkillMax->setText (toString(pSM->getMaxSkillValue((SKILLS::ESkills)skillId)));
 
 		// Link to the interface
@@ -592,12 +592,12 @@ void CGroupInSceneBubbleManager::addMessagePopup (const string &message, CRGBA c
 	templateParams.push_back (std::pair<std::string,std::string>("id", id));
 
 	CInterfaceGroup *group = CWidgetManager::getInstance()->getParser()->createGroupInstance ("message_popup",
-		"ui:interface", templateParams.empty()?NULL:&(templateParams[0]), (uint)templateParams.size());
+		"ui:interface", templateParams.empty() ? nullptr : &(templateParams[0]), (uint)templateParams.size());
 	if (group)
 	{
 		// Skill name
 		CViewText *pViewName = dynamic_cast<CViewText*>(group->getView("name"));
-		if (pViewName != NULL)
+		if (pViewName != nullptr)
 		{
 			pViewName->setText (message);
 			pViewName->setColor (color);
@@ -641,12 +641,12 @@ void CGroupInSceneBubbleManager::addMessagePopupCenter (const string &message, C
 	templateParams.push_back (std::pair<std::string,std::string>("id", id));
 
 	CInterfaceGroup *group = CWidgetManager::getInstance()->getParser()->createGroupInstance ("message_popup_center",
-		"ui:interface", templateParams.empty()?NULL:&(templateParams[0]), (uint)templateParams.size());
+		"ui:interface", templateParams.empty() ? nullptr : &(templateParams[0]), (uint)templateParams.size());
 	if (group)
 	{
 		// Skill name
 		CViewText *pViewName = dynamic_cast<CViewText*>(group->getView("name"));
-		if (pViewName != NULL)
+		if (pViewName != nullptr)
 		{
 			pViewName->setTextFormatTaged(message);
 			pViewName->setColor (color);
@@ -712,7 +712,7 @@ CGroupInSceneBubbleManager::CPopupContext *CGroupInSceneBubbleManager::buildCont
 	templateParams.push_back (std::pair<std::string,std::string>("id", id));
 
 	CInterfaceGroup *group = CWidgetManager::getInstance()->getParser()->createGroupInstance (templateName+v+h,
-		"ui:interface", templateParams.empty()?NULL:&(templateParams[0]), (uint)templateParams.size());
+		"ui:interface", templateParams.empty() ? nullptr : &(templateParams[0]), (uint)templateParams.size());
 	if (group)
 	{
 		// Target available ?
@@ -752,7 +752,7 @@ CGroupInSceneBubbleManager::CPopupContext *CGroupInSceneBubbleManager::buildCont
 		_BubblePopup.push_back(popup);
 		return &_BubblePopup.back();
 	}
-	return NULL;
+	return nullptr;
 }
 
 // ***************************************************************************
@@ -806,7 +806,7 @@ void CGroupInSceneBubbleManager::addContextHelpHTML (const string &url, const st
 		if (context)
 		{
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
-			CAHManager::getInstance()->runActionHandler("browse", NULL, "name="+context->Group->getId()+":header_opened:window:html|url="+url);
+			CAHManager::getInstance()->runActionHandler("browse", nullptr, "name="+context->Group->getId()+":header_opened:window:html|url="+url);
 
 			// Add the URL
 			context->Url = url;
@@ -840,7 +840,7 @@ void CGroupInSceneBubbleManager::chatOpen (uint32 nUID, const std::string &ucsTe
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
 	CCharacterCL *pChar = dynamic_cast<CCharacterCL*>(EntitiesMngr.getEntityByCompressedIndex(nUID));
-	if (pChar == NULL || nUID==CLFECOMMON::INVALID_CLIENT_DATASET_INDEX) return;
+	if (pChar == nullptr || nUID==CLFECOMMON::INVALID_CLIENT_DATASET_INDEX) return;
 	if (bubbleTimer == 0) bubbleTimer = CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionTimeoutBubbles).getValSInt32();
 
 	// Output the message in a bubble
@@ -857,7 +857,7 @@ void CGroupInSceneBubbleManager::chatOpen (uint32 nUID, const std::string &ucsTe
 	{
 		// Check that we can create the new bubble (if a dynamic bubble is already present do not replace it !
 		CGroupInSceneBubble *pCharBubble = pChar->getBubble();
-		if (pCharBubble != NULL)
+		if (pCharBubble != nullptr)
 			if (strnicmp(pCharBubble->getId().c_str(), "ui:interface:in_scene_dyn_bubble", 32) == 0)
 				return;
 
@@ -885,7 +885,7 @@ void CGroupInSceneBubbleManager::dynChatOpen (uint32 nBotUID, uint32 nBotName, c
 	CEntityCL *pEntity = EntitiesMngr.getEntityByCompressedIndex(nBotUID);
 	if (ClientCfg.Local) pEntity = EntitiesMngr.entity(1);
 	CCharacterCL *pChar = dynamic_cast<CCharacterCL*>(pEntity);
-	if (pChar == NULL)
+	if (pChar == nullptr)
 	{
 		nlwarning("character probably too far");
 		return;
@@ -901,19 +901,19 @@ void CGroupInSceneBubbleManager::dynChatOpen (uint32 nBotUID, uint32 nBotName, c
 	}
 
 	// If the bubble doesn't exist -> create
-	CGroupInSceneBubble *bubble = NULL;
+	CGroupInSceneBubble *bubble = nullptr;
 	string id;
 	if (pos == _DynBubbles.size())
 	{
 		uint32 i = 0;
-		while (getDynBubble(i) != NULL) i++;
+		while (getDynBubble(i) != nullptr) i++;
 		id = "in_scene_dyn_bubble_" + toString(i);
 		// Create the instance
 		std::vector<std::pair<std::string,std::string> > templateParams;
 		templateParams.push_back (std::pair<std::string,std::string>("id", id));
 
 		CInterfaceGroup *group = CWidgetManager::getInstance()->getParser()->createGroupInstance ("dyn_3dbulle_L", "ui:interface", templateParams);
-		if (group == NULL)
+		if (group == nullptr)
 		{
 			nlwarning("cannot create dyn_3dbulle_L");
 			return;
@@ -927,7 +927,7 @@ void CGroupInSceneBubbleManager::dynChatOpen (uint32 nBotUID, uint32 nBotName, c
 		group->setActive(false);
 
 		bubble = dynamic_cast<CGroupInSceneBubble*>(group);
-		if (bubble == NULL)
+		if (bubble == nullptr)
 		{
 			nlwarning("cannot cast to CGroupInSceneBubble");
 			return;
@@ -961,24 +961,24 @@ void CGroupInSceneBubbleManager::dynChatOpen (uint32 nBotUID, uint32 nBotName, c
 	for (j = 0; j < 8; ++j)
 	{
 		pVT = dynamic_cast<CViewTextID*>(bubble->getElement(id+"opt"+toString(j)));
-		if (pVT != NULL)
+		if (pVT != nullptr)
 		{
 			pVT->setActive(false);
 			pVT->setTextId(0);
 		}
 		pCL = dynamic_cast<CCtrlLink*>(bubble->getElement(id+"optb"+toString(j)));
-		if (pCL != NULL) pCL->setActive(false);
+		if (pCL != nullptr) pCL->setActive(false);
 	}
 
 	for (j = 0; j < (DynStrs.size() -1); ++j)
 	{
 		pVT = dynamic_cast<CViewTextID*>(bubble->getElement(id+"opt"+toString(j)));
-		if (pVT != NULL)
+		if (pVT != nullptr)
 		{
 			pVT->setActive(true);
 			pVT->setTextId(DynStrs[j+1]);
 			pCL = dynamic_cast<CCtrlLink*>(bubble->getElement(id+"optb"+toString(j)));
-			if (pCL != NULL) pCL->setActive(true);
+			if (pCL != nullptr) pCL->setActive(true);
 		}
 	}
 	_DynBubbles[pos].displayOptions(false);
@@ -999,7 +999,7 @@ void CGroupInSceneBubbleManager::webIgChatOpen (uint32 nBotUID, string text, con
 
 	CEntityCL *pEntity = EntitiesMngr.getEntityByCompressedIndex(nBotUID);
 	CCharacterCL *pChar = dynamic_cast<CCharacterCL*>(pEntity);
-	if (pChar == NULL)
+	if (pChar == nullptr)
 	{
 		nlwarning("character probably too far");
 		return;
@@ -1014,19 +1014,19 @@ void CGroupInSceneBubbleManager::webIgChatOpen (uint32 nBotUID, string text, con
 	}
 
 	// If the bubble doesn't exist -> create
-	CGroupInSceneBubble *bubble = NULL;
+	CGroupInSceneBubble *bubble = nullptr;
 	string id;
 	if (pos == _DynBubbles.size())
 	{
 		uint32 i = 0;
-		while (getDynBubble(i) != NULL) i++;
+		while (getDynBubble(i) != nullptr) i++;
 		id = "in_scene_webig_bubble_" + toString(nBotUID);
 		// Create the instance
 		std::vector<std::pair<std::string,std::string> > templateParams;
 		templateParams.push_back (std::pair<std::string,std::string>("id", id));
 
 		CInterfaceGroup *group = CWidgetManager::getInstance()->getParser()->createGroupInstance ("webig_3dbulle_L", "ui:interface", templateParams);
-		if (group == NULL)
+		if (group == nullptr)
 		{
 			nlwarning("cannot create webig_3dbulle_L");
 			return;
@@ -1040,7 +1040,7 @@ void CGroupInSceneBubbleManager::webIgChatOpen (uint32 nBotUID, string text, con
 		group->setActive(false);
 
 		bubble = dynamic_cast<CGroupInSceneBubble*>(group);
-		if (bubble == NULL)
+		if (bubble == nullptr)
 		{
 			nlwarning("cannot cast to CGroupInSceneBubble");
 			return;
@@ -1075,25 +1075,25 @@ void CGroupInSceneBubbleManager::webIgChatOpen (uint32 nBotUID, string text, con
 	for (j = 0; j < 8; ++j)
 	{
 		pVT = dynamic_cast<CViewText*>(bubble->getElement(id+"opt"+toString(j)));
-		if (pVT != NULL)
+		if (pVT != nullptr)
 		{
 			pVT->setActive(false);
 			pVT->setText(std::string());
 		}
 		pCL = dynamic_cast<CCtrlLink*>(bubble->getElement(id+"optb"+toString(j)));
-		if (pCL != NULL) pCL->setActive(false);
+		if (pCL != nullptr) pCL->setActive(false);
 	}
 
 	for (j = 0; j < strs.size(); ++j)
 	{
 		pVT = dynamic_cast<CViewText*>(bubble->getElement(id+"opt"+toString(j)));
-		if (pVT != NULL)
+		if (pVT != nullptr)
 		{
 			pVT->setActive(true);
 			string optionText = strs[j];
 			pVT->setText(optionText);
 			pCL = dynamic_cast<CCtrlLink*>(bubble->getElement(id+"optb"+toString(j)));
-			if (pCL != NULL)
+			if (pCL != nullptr)
 			{
 				pCL->setActionOnLeftClick("browse");
 				pCL->setParamsOnLeftClick("name=ui:interface:web_transactions:content:html|show=0|url="+links[j]);
@@ -1182,7 +1182,7 @@ CGroupInSceneBubbleManager::CDynBubble *CGroupInSceneBubbleManager::getDynBubble
 {
 	uint32 value;
 	for (uint32 i = 0; i < _DynBubbles.size(); ++i)
-		if (_DynBubbles[i].Bubble != NULL)
+		if (_DynBubbles[i].Bubble != nullptr)
 		{
 			string id = _DynBubbles[i].Bubble->getId();
 			id = id.substr(33, id.size());
@@ -1190,7 +1190,7 @@ CGroupInSceneBubbleManager::CDynBubble *CGroupInSceneBubbleManager::getDynBubble
 			if (value == nDynBubbleNb)
 				return &_DynBubbles[i];
 		}
-	return NULL;
+	return nullptr;
 }
 
 // ***************************************************************************
@@ -1198,7 +1198,7 @@ CGroupInSceneBubbleManager::CDynBubble *CGroupInSceneBubbleManager::getDynBubble
 void CGroupInSceneBubbleManager::dynChatNext (uint32 nBubbleNb)
 {
 	CDynBubble *pDB = getDynBubble(nBubbleNb);
-	if (pDB != NULL)
+	if (pDB != nullptr)
 		pDB->next();
 	else
 		nlwarning("cannot get dyn bubble %d", nBubbleNb);
@@ -1209,7 +1209,7 @@ void CGroupInSceneBubbleManager::dynChatNext (uint32 nBubbleNb)
 void CGroupInSceneBubbleManager::dynChatSkip (uint32 nBubbleNb)
 {
 	CDynBubble *pDB = getDynBubble(nBubbleNb);
-	if (pDB != NULL)
+	if (pDB != nullptr)
 		pDB->skip();
 	else
 		nlwarning("cannot get dyn bubble %d", nBubbleNb);
@@ -1219,7 +1219,7 @@ void CGroupInSceneBubbleManager::dynChatSkip (uint32 nBubbleNb)
 uint32 CGroupInSceneBubbleManager::dynChatGetBotUID (uint32 nBubbleNb)
 {
 	CDynBubble *pDB = getDynBubble(nBubbleNb);
-	if (pDB != NULL)
+	if (pDB != nullptr)
 		return pDB->BotUID;
 
 	nlwarning("cannot get dyn bubble %d", nBubbleNb);
@@ -1230,7 +1230,7 @@ uint32 CGroupInSceneBubbleManager::dynChatGetBotUID (uint32 nBubbleNb)
 uint32 CGroupInSceneBubbleManager::dynChatGetOptionStringId(uint32 nBubbleNb, uint option)
 {
 	CDynBubble *pDB = getDynBubble(nBubbleNb);
-	if (pDB == NULL) return 0;
+	if (pDB == nullptr) return 0;
 	return pDB->getOptionStringId(option);
 }
 
@@ -1246,13 +1246,13 @@ void CGroupInSceneBubbleManager::CDynBubble::displayOptions (bool bShow)
 	for (uint32 j = 0; j < 8; ++j)
 	{
 		pVT = dynamic_cast<CViewTextID*>(Bubble->getElement(id+"opt"+toString(j)));
-		if (pVT != NULL)
+		if (pVT != nullptr)
 		{
 			if (pVT->getTextId() != 0)
 			{
 				pVT->setActive(bShow);
 				pCL = dynamic_cast<CCtrlLink*>(Bubble->getElement(id+"optb"+toString(j)));
-				if (pCL != NULL) pCL->setActive(bShow);
+				if (pCL != nullptr) pCL->setActive(bShow);
 			}
 		}
 	}
@@ -1281,7 +1281,7 @@ void CGroupInSceneBubbleManager::CDynBubble::skip()
 	for (uint32 j = 0; j < 8; ++j)
 	{
 		pVT = dynamic_cast<CViewTextID*>(Bubble->getElement(id+"opt"+toString(j)));
-		if ((pVT != NULL) && (pVT->getTextId() != 0))
+		if ((pVT != nullptr) && (pVT->getTextId() != 0))
 			nNbOptions++;
 	}
 	// If only one option validate it
@@ -1298,7 +1298,7 @@ class CAHDynChatClickOption : public IActionHandler
 {
 	virtual void execute (CCtrlBase *pCaller, const string &Params)
 	{
-		if (pCaller == NULL) return;
+		if (pCaller == nullptr) return;
 		// Get the bot UID
 		string id = pCaller->getId();
 		id = id.substr(33, id.size());
@@ -1370,7 +1370,7 @@ NLMISC_REGISTER_OBJECT(CViewBase, CGroupInSceneBubble, std::string, "in_scene_bu
 CGroupInSceneBubble::CGroupInSceneBubble(const TCtorParam &param)
 :	CGroupInScene(param)
 {
-	_Character = NULL;
+	_Character = nullptr;
 	_CanBeShown = false;
 	_ZBias= ClientCfg.BubbleZBias;
 }
@@ -1417,8 +1417,8 @@ void CGroupInSceneBubble::link (CCharacterCL	*entity, uint duration)
 void CGroupInSceneBubble::unlink ()
 {
 	if (_Character)
-		_Character->setBubble (NULL);
-	_Character = NULL;
+		_Character->setBubble (nullptr);
+	_Character = nullptr;
 	setActive (false);
 }
 
@@ -1483,7 +1483,7 @@ void CGroupInSceneBubble::setRawText (const string &text)
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CInterfaceElement *pVTIE = CWidgetManager::getInstance()->getElementFromId(getId()+":header_opened:window:text");
 	CViewText *pVT= dynamic_cast<CViewText*>(pVTIE);
-	if (pVT != NULL)
+	if (pVT != nullptr)
 		pVT->setText(text);
 }
 
@@ -1493,11 +1493,11 @@ void CGroupInSceneBubble::displayNextAndSkip(bool show)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CInterfaceElement *pIE = CWidgetManager::getInstance()->getElementFromId(getId()+":header_opened:window:but_next");
-	if (pIE != NULL) pIE->setActive(show);
+	if (pIE != nullptr) pIE->setActive(show);
 	pIE = CWidgetManager::getInstance()->getElementFromId(getId()+":header_opened:window:but_skip");
-	if (pIE != NULL) pIE->setActive(show);
+	if (pIE != nullptr) pIE->setActive(show);
 	pIE = CWidgetManager::getInstance()->getElementFromId(getId()+":header_opened:window:text");
-	if (pIE != NULL)
+	if (pIE != nullptr)
 	{
 		if (show)
 			pIE->setY(-24);
@@ -1513,16 +1513,16 @@ class CHandlerBubbleNext : public IActionHandler
 	void execute (CCtrlBase *pCaller, const std::string &/* sParams */)
 	{
 		// Find the bubble containing the caller
-		if (pCaller == NULL) return;
+		if (pCaller == nullptr) return;
 		CInterfaceGroup *pParent = pCaller->getParent();
-		CGroupInSceneBubble *pBubble = NULL;
-		while (pParent != NULL)
+		CGroupInSceneBubble *pBubble = nullptr;
+		while (pParent != nullptr)
 		{
 			pBubble = dynamic_cast<CGroupInSceneBubble*>(pParent);
-			if (pBubble != NULL) break;
+			if (pBubble != nullptr) break;
 			pParent = pParent->getParent();
 		}
-		if (pBubble == NULL) return;
+		if (pBubble == nullptr) return;
 
 		// Check if its a dynamic bubble
 		if (strnicmp(pBubble->getId().c_str(), "ui:interface:in_scene_dyn_bubble", 32) == 0)
@@ -1547,16 +1547,16 @@ class CHandlerBubbleSkip : public IActionHandler
 	void execute (CCtrlBase *pCaller, const std::string &/* sParams */)
 	{
 		// Find the bubble containing the caller
-		if (pCaller == NULL) return;
+		if (pCaller == nullptr) return;
 		CInterfaceGroup *pParent = pCaller->getParent();
-		CGroupInSceneBubble *pBubble = NULL;
-		while (pParent != NULL)
+		CGroupInSceneBubble *pBubble = nullptr;
+		while (pParent != nullptr)
 		{
 			pBubble = dynamic_cast<CGroupInSceneBubble*>(pParent);
-			if (pBubble != NULL) break;
+			if (pBubble != nullptr) break;
 			pParent = pParent->getParent();
 		}
-		if (pBubble == NULL) return;
+		if (pBubble == nullptr) return;
 
 		// Check if its a dynamic bubble
 		if (strnicmp(pBubble->getId().c_str(), "ui:interface:in_scene_dyn_bubble", 32) == 0)

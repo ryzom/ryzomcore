@@ -170,7 +170,7 @@ void CProgress::internalProgress (float value)
 	value = getCropedValue (value);
 
 	// can't do anything if no driver
-	if (Driver == NULL)
+	if (Driver == nullptr)
 		return;
 
 	if (Driver->AsyncListener.isKeyPushed (KeyDOWN))
@@ -250,7 +250,7 @@ void CProgress::internalProgress (float value)
 			{
 				std::vector<string> res;
 				explode(ClientCfg.Logos[i], string(":"), res);
-				if(res.size()==9 && i<LogoBitmaps.size() && LogoBitmaps[i]!=NULL)
+				if(res.size()==9 && i<LogoBitmaps.size() && LogoBitmaps[i] != nullptr)
 				{
 					fromString(res[1], x);
 					fromString(res[2], y);
@@ -260,7 +260,7 @@ void CProgress::internalProgress (float value)
 				}
 			}
 
-			if (TextContext != NULL)
+			if (TextContext != nullptr)
 			{
 				// Init the Pen.
 				TextContext->setKeep800x600Ratio(false);

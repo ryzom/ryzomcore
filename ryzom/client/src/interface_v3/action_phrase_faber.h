@@ -231,7 +231,7 @@ private:
 	uint			getMaxQuantityChange(uint itemReqLine, uint mpSlot) const;
 	uint			getTotalQuantitySetuped(uint itemReqLine) const;
 
-	void			updateEmptySlot(uint itemReqLine, CInterfaceGroup *itemReqLineGroup=NULL);
+	void			updateEmptySlot(uint itemReqLine, CInterfaceGroup *itemReqLineGroup = nullptr);
 	void			updateQuantityView(uint itemReqLine);
 	void			updateValidButton();
 

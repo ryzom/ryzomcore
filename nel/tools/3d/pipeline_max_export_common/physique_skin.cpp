@@ -65,7 +65,7 @@ bool isSkinModifier(CSceneClass *mod)
 
 static CStorageContainer *findChildContainer(CStorageContainer *parent, uint16 id)
 {
-	if (!parent) return NULL;
+	if (!parent) return nullptr;
 	const CStorageContainer::TStorageObjectContainer &ch = parent->chunks();
 	for (CStorageContainer::TStorageObjectConstIt it = ch.begin(); it != ch.end(); ++it)
 	{
@@ -75,12 +75,12 @@ static CStorageContainer *findChildContainer(CStorageContainer *parent, uint16 i
 			if (c) return c;
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 static CStorageRaw *findChildRaw(CStorageContainer *parent, uint16 id)
 {
-	if (!parent) return NULL;
+	if (!parent) return nullptr;
 	const CStorageContainer::TStorageObjectContainer &ch = parent->chunks();
 	for (CStorageContainer::TStorageObjectConstIt it = ch.begin(); it != ch.end(); ++it)
 	{
@@ -90,7 +90,7 @@ static CStorageRaw *findChildRaw(CStorageContainer *parent, uint16 id)
 			if (r) return r;
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 // Resolve boneRef → INode via the modifier's reference table.
@@ -123,7 +123,7 @@ static INode *linkTreeRoot(CReferenceMaker *modRm)
 			return bn; // root-attach end is stored directly
 		return bn->parent(); // ref[0] NULL: root = parent of the first chain bone
 	}
-	return NULL;
+	return nullptr;
 }
 
 // Stored value 0 is link k = -1 — the ROOT-ATTACH segment, which has no start bone above it
@@ -135,14 +135,14 @@ static INode *linkTreeRoot(CReferenceMaker *modRm)
 // unresolved and falls through to the caller's root fallback.
 static INode *resolveBoneRef(CReferenceMaker *modRm, sint32 boneRef)
 {
-	if (!modRm) return NULL;
+	if (!modRm) return nullptr;
 	uint n = modRm->nbReferences();
 	sint32 k;
 	if (boneRef < 0)
 		k = ~boneRef; // one's complement (rigid link)
 	else
 		k = boneRef - 1; // 1-based (deformable cross-link); 0 → the root-attach link -1
-	if (k < -1 || (uint)(k + 1) >= n) return NULL;
+	if (k < -1 || (uint)(k + 1) >= n) return nullptr;
 	if (k == -1)
 		return linkTreeRoot(modRm); // root-attach link
 	CNodeImpl *endImpl = dynamic_cast<CNodeImpl *>(modRm->getReference((uint)(k + 1)));
@@ -305,7 +305,7 @@ bool decodePhysiqueWeights(CSceneClass *mod,
 
 INode *skeletonRootOf(INode *bone)
 {
-	if (!bone) return NULL;
+	if (!bone) return nullptr;
 	// CRootNode inherits INode but does NOT override parent() — INode::parent() nlerrors
 	// (biped_rig.cpp:1302 note). Only CNodeImpl has a real parent().
 	INode *n = bone;
@@ -372,14 +372,14 @@ bool applyPhysiqueSkinning(NL3D::CMesh::CMeshBuild &buildMesh,
                            std::string *err)
 {
 	// Locate the Physique modifier + its mod-app slot.
-	CSceneClass *physMod = NULL;
-	CStorageContainer *physApp = NULL;
+	CSceneClass *physMod = nullptr;
+	CStorageContainer *physApp = nullptr;
 	for (uint i = 0; i < mods.size(); ++i)
 	{
 		if (isPhysiqueModifier(mods[i]))
 		{
 			physMod = mods[i];
-			physApp = (i < modApps.size()) ? modApps[i] : NULL;
+			physApp = (i < modApps.size()) ? modApps[i] : nullptr;
 			break;
 		}
 	}
@@ -414,7 +414,7 @@ bool applyPhysiqueSkinning(NL3D::CMesh::CMeshBuild &buildMesh,
 	}
 
 	// Skeleton root from the first resolvable bone influence (same idea as getSkeletonRootBone).
-	INode *skelRoot = NULL;
+	INode *skelRoot = nullptr;
 	for (uint v = 0; v < vertWeights.size() && !skelRoot; ++v)
 	{
 		for (uint b = 0; b < vertWeights[v].size(); ++b)

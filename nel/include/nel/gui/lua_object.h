@@ -169,12 +169,12 @@ namespace NLGUI
 		  * \param maxDepth (0 for no limit)
 		  * \param alreadySeen pointer to lua tables that have already been displayed by the command (to avoid infinite recursion when a cycluic graph is encountered)
 		  */
-		std::string     toStringRecurse(uint depth = 0, uint maxDepth = 20, std::set<const void *> *alreadySeen = NULL) const;
+		std::string     toStringRecurse(uint depth = 0, uint maxDepth = 20, std::set<const void *> *alreadySeen = nullptr) const;
 
 		/** dump the value in the log (includes tables)
 		  * \param alreadySeen pointer to lua tables that have already been displayed by the command (to avoid infinite recursion when a cycluic graph is encountered)
 		  */
-		void		    dump(uint maxDepth = 20, std::set<const void *> *alreadySeen = NULL) const;
+		void		    dump(uint maxDepth = 20, std::set<const void *> *alreadySeen = nullptr) const;
 		// concatenate identifiers, adding a dot between them if necessary. If right is a number then brackets are added
 		static std::string concatId(const std::string &left, const std::string &right);
 		// If this object is a function, then call it and return true on success

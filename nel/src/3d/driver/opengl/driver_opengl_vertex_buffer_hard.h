@@ -168,7 +168,7 @@ private:
 	NLMISC::CHeapMemory		_HeapMemory;
 
 	/// true if allocated.
-	bool			allocated() const {return _VertexArrayPtr!=NULL;}
+	bool			allocated() const {return _VertexArrayPtr != nullptr; }
 	/// Allocate a small subset of the memory. NULL if not enough mem.
 	void			*allocateVB(uint32 size);
 

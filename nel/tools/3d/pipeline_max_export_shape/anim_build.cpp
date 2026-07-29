@@ -124,7 +124,7 @@ static uint addNodeTracks(NL3D::CAnimation &animation, INode &node)
 {
 	uint n = 0;
 	CReferenceMaker *transform = node.getReference(0);
-	CSceneClass *tmsc = transform ? dynamic_cast<CSceneClass *>(transform) : NULL;
+	CSceneClass *tmsc = transform ? dynamic_cast<CSceneClass *>(transform) : nullptr;
 	bool isPrs = tmsc && tmsc->classDesc()->classId() == CLASSID_PRS_CTRL;
 	bool isLookAt = tmsc && tmsc->classDesc()->classId() == CLASSID_LOOKAT_CTRL;
 	if (!isPrs && !isLookAt) return 0;
@@ -163,25 +163,25 @@ static const SUVCoord s_uvCoords[] = {
 
 static CSceneClass *findUVGen(CSceneClass *obj, int depth)
 {
-	if (!obj) return NULL;
+	if (!obj) return nullptr;
 	if (obj->classDesc()->superClassId() == 0x00000c20) return obj;
-	if (depth <= 0) return NULL;
+	if (depth <= 0) return nullptr;
 	CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(obj);
 	for (uint i = 0; rm && i < rm->nbReferences(); ++i)
 		if (CSceneClass *r = findUVGen(dynamic_cast<CSceneClass *>(rm->getReference(i)), depth - 1))
 			return r;
-	return NULL;
+	return nullptr;
 }
 
 static CControlKeyFramerBase *uvController(CSceneClass *texmap, int coord)
 {
 	CSceneClass *uvgen = findUVGen(texmap, 3);
 	CReferenceMaker *urm = dynamic_cast<CReferenceMaker *>(uvgen);
-	if (!urm || urm->nbReferences() == 0) return NULL;
+	if (!urm || urm->nbReferences() == 0) return nullptr;
 	CSceneClass *pblock = dynamic_cast<CSceneClass *>(urm->getReference(0));
 	CStorageContainer *pc = dynamic_cast<CStorageContainer *>(pblock);
 	CReferenceMaker *prm = dynamic_cast<CReferenceMaker *>(pblock);
-	if (!pc || !prm) return NULL;
+	if (!pc || !prm) return nullptr;
 
 	int refSlot = 0;
 	for (CStorageContainer::TStorageObjectConstIt it = pc->chunks().begin(); it != pc->chunks().end(); ++it)
@@ -207,7 +207,7 @@ static CControlKeyFramerBase *uvController(CSceneClass *texmap, int coord)
 			++refSlot;
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 static uint addTexTracks(NL3D::CAnimation &animation, CSceneClass *texmap, uint stage, const std::string &mtlName)
@@ -229,12 +229,12 @@ static uint addTexTracks(NL3D::CAnimation &animation, CSceneClass *texmap, uint 
 
 static CSceneClass *firstNelMaterial(CSceneClass *mtl)
 {
-	if (!mtl) return NULL;
+	if (!mtl) return nullptr;
 	if (mtl->classDesc()->classId() == CLASSID_NEL_MTL) return mtl;
 	if (CMultiMtl *mm = dynamic_cast<CMultiMtl *>(mtl))
 		for (uint s = 0; s < mm->numSubMaterials(); ++s)
 			if (CSceneClass *r = firstNelMaterial(mm->subMaterial(s))) return r;
-	return NULL;
+	return nullptr;
 }
 
 static uint addMtlTracks(NL3D::CAnimation &animation, CSceneClass *mtl, const std::string &parentName)
@@ -288,8 +288,8 @@ static bool nodeIsLight(INode &node)
 // whole node first).
 static CReferenceMaker *findColorController(CReferenceMaker *obj, int depth, std::set<CReferenceMaker *> &seen)
 {
-	if (!obj || depth < 0) return NULL;
-	if (!seen.insert(obj).second) return NULL;
+	if (!obj || depth < 0) return nullptr;
+	if (!seen.insert(obj).second) return nullptr;
 
 	if (CControlKeyFramerBase *kf = dynamic_cast<CControlKeyFramerBase *>(obj))
 	{
@@ -308,7 +308,7 @@ static CReferenceMaker *findColorController(CReferenceMaker *obj, int depth, std
 		if (CReferenceMaker *found = findColorController(r, depth - 1, seen))
 			return found;
 	}
-	return NULL;
+	return nullptr;
 }
 
 static std::string getAnimatedLightName(INode &node)
@@ -351,7 +351,7 @@ static uint addMorphTracks(NL3D::CAnimation &animation, INode &node)
 {
 	CReferenceMaker *obj = dynamic_cast<CReferenceMaker *>(node.getReference(1));
 	if (!obj || obj->classDesc()->classId() != CLASSID_OSM_DERIVED) return 0;
-	CReferenceMaker *morpher = NULL;
+	CReferenceMaker *morpher = nullptr;
 	for (uint i = 0; i < obj->nbReferences() && !morpher; ++i)
 	{
 		CReferenceMaker *mod = obj->getReference(i);

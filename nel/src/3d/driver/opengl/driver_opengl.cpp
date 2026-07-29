@@ -205,8 +205,8 @@ CDriverGL::CDriverGL()
 
 #elif defined (NL_OS_UNIX)
 
-	_dpy = 0;
-	_visual_info = NULL;
+	_dpy = nullptr;
+	_visual_info = nullptr;
 
 #	ifdef XF86VIDMODE
 	// zero the old screen mode
@@ -252,7 +252,7 @@ CDriverGL::CDriverGL()
 	_DecorationWidth = 0;
 	_DecorationHeight = 0;
 
-	_CurrentMaterial=NULL;
+	_CurrentMaterial = nullptr;
 	_Initialized = false;
 
 	_FogEnabled= false;
@@ -275,11 +275,11 @@ CDriverGL::CDriverGL()
 	_CurrentGlNormalize= false;
 	_ForceNormalize= false;
 
-	_AGPVertexArrayRange= NULL;
-	_VRAMVertexArrayRange= NULL;
-	_CurrentVertexArrayRange= NULL;
-	_CurrentVertexBufferHard= NULL;
-	_NVCurrentVARPtr= NULL;
+	_AGPVertexArrayRange = nullptr;
+	_VRAMVertexArrayRange = nullptr;
+	_CurrentVertexArrayRange = nullptr;
+	_CurrentVertexBufferHard = nullptr;
+	_NVCurrentVARPtr = nullptr;
 	_NVCurrentVARSize= 0;
 	_SupportVBHard= false;
 	_SlowUnlockVBHard= false;
@@ -350,7 +350,7 @@ CDriverGL::CDriverGL()
 
 	_WndActive = false;
 	//
-	_CurrentOcclusionQuery = NULL;
+	_CurrentOcclusionQuery = nullptr;
 	_SwapBufferCounter = 0;
 
 	_LightMapDynamicLightEnabled = false;
@@ -528,9 +528,9 @@ bool CDriverGL::setupDisplay()
 #endif
 
 	// Reset VertexArrayRange.
-	_CurrentVertexArrayRange= NULL;
-	_CurrentVertexBufferHard= NULL;
-	_NVCurrentVARPtr= NULL;
+	_CurrentVertexArrayRange = nullptr;
+	_CurrentVertexBufferHard = nullptr;
+	_NVCurrentVARPtr = nullptr;
 	_NVCurrentVARSize= 0;
 
 	if (_SupportVBHard)
@@ -547,8 +547,8 @@ bool CDriverGL::setupDisplay()
 			// delete containers
 			delete _AGPVertexArrayRange;
 			delete _VRAMVertexArrayRange;
-			_AGPVertexArrayRange= NULL;
-			_VRAMVertexArrayRange= NULL;
+			_AGPVertexArrayRange = nullptr;
+			_VRAMVertexArrayRange = nullptr;
 
 			// disable.
 			_SupportVBHard= false;
@@ -570,8 +570,8 @@ bool CDriverGL::setupDisplay()
 	for(uint stage=0;stage<inlGetNumTextStages(); stage++)
 	{
 		// init no texture.
-		_CurrentTexture[stage]= NULL;
-		_CurrentTextureInfoGL[stage]= NULL;
+		_CurrentTexture[stage] = nullptr;
+		_CurrentTextureInfoGL[stage] = nullptr;
 		// texture are disabled in DriverGLStates.forceDefaults().
 
 		// init default env.
@@ -852,8 +852,8 @@ bool CDriverGL::swapBuffers()
 	++ _SwapBufferCounter;
 	// Reset texture shaders
 	//resetTextureShaders();
-	activeVertexProgram(NULL);
-	activePixelProgram(NULL);
+	activeVertexProgram(nullptr);
+	activePixelProgram(nullptr);
 
 #ifndef USE_OPENGLES
 	/* Yoyo: must do this (GeForce bug ??) else weird results if end render with a VBHard.
@@ -952,8 +952,8 @@ bool CDriverGL::swapBuffers()
 	for(uint stage=0;stage<inlGetNumTextStages(); stage++)
 	{
 		// init no texture.
-		_CurrentTexture[stage]= NULL;
-		_CurrentTextureInfoGL[stage]= NULL;
+		_CurrentTexture[stage] = nullptr;
+		_CurrentTextureInfoGL[stage] = nullptr;
 		// texture are disabled in DriverGLStates.forceDefaults().
 
 		// init default env.
@@ -974,7 +974,7 @@ bool CDriverGL::swapBuffers()
 	}
 #endif
 
-	_CurrentMaterial= NULL;
+	_CurrentMaterial = nullptr;
 
 	// Reset the profiling counter.
 	_PrimitiveProfileIn.reset();
@@ -1032,8 +1032,8 @@ bool CDriverGL::release()
 	// delete containers
 	delete _AGPVertexArrayRange;
 	delete _VRAMVertexArrayRange;
-	_AGPVertexArrayRange= NULL;
-	_VRAMVertexArrayRange= NULL;
+	_AGPVertexArrayRange = nullptr;
+	_VRAMVertexArrayRange = nullptr;
 
 	// destroy window and associated ressources
 	destroyWindow();
@@ -1443,8 +1443,8 @@ void CDriverGL::copyFrameBufferToTexture(ITexture *tex,
 	}
 	// disable texturing.
 	_DriverGLStates.setTextureMode(CDriverGLStates::TextureDisabled);
-	_CurrentTexture[0] = NULL;
-	_CurrentTextureInfoGL[0] = NULL;
+	_CurrentTexture[0] = nullptr;
+	_CurrentTextureInfoGL[0] = nullptr;
 	//if (_RenderTargetFBO)
 	//	gltext->activeFrameBufferObject(tex);
 }
@@ -2898,7 +2898,7 @@ IOcclusionQuery *CDriverGL::createOcclusionQuery()
 		nglGenOcclusionQueriesNV(1, &id);
 	else
 		nglGenQueriesARB(1, &id);
-	if (id == 0) return NULL;
+	if (id == 0) return nullptr;
 	COcclusionQueryGL *oqgl = new COcclusionQueryGL;
 	oqgl->Driver = this;
 	oqgl->ID = id;
@@ -2921,7 +2921,7 @@ void CDriverGL::deleteOcclusionQuery(IOcclusionQuery *oq)
 	if (!oq) return;
 	COcclusionQueryGL *oqgl = NLMISC::safe_cast<COcclusionQueryGL *>(oq);
 	nlassert((CDriverGL *) oqgl->Driver == this); // should come from the same driver
-	oqgl->Driver = NULL;
+	oqgl->Driver = nullptr;
 	nlassert(oqgl->ID != 0);
 	GLuint id = oqgl->ID;
 	if (_Extensions.NVOcclusionQuery)
@@ -2931,7 +2931,7 @@ void CDriverGL::deleteOcclusionQuery(IOcclusionQuery *oq)
 	_OcclusionQueryList.erase(oqgl->Iterator);
 	if (oqgl == _CurrentOcclusionQuery)
 	{
-		_CurrentOcclusionQuery = NULL;
+		_CurrentOcclusionQuery = nullptr;
 	}
 	delete oqgl;
 #endif
@@ -2969,7 +2969,7 @@ void COcclusionQueryGL::end()
 		nglEndOcclusionQueryNV();
 	else
 		nglEndQueryARB(GL_SAMPLES_PASSED);
-	Driver->_CurrentOcclusionQuery = NULL;
+	Driver->_CurrentOcclusionQuery = nullptr;
 #endif
 }
 

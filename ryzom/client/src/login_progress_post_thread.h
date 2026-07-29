@@ -36,7 +36,7 @@ public:
 public:
 	// if async is not null the return of the sendMsg will be in *async then *AsyncSent will be passed to true;
 	// You add to check via pulling if data have been send (maximum time 1 second)
-	CLoginStep(uint step = 0, const std::string &postString = "", std::string* asyncRet = 0, bool* asyncSent=0)
+	CLoginStep(uint step = 0, const std::string &postString = "", std::string* asyncRet = nullptr, bool* asyncSent=nullptr)
 		: Step(step), PostString(postString), AsyncRet(asyncRet), AsyncSent(asyncSent) {}
 };
 

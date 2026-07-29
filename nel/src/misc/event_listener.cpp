@@ -30,7 +30,7 @@ namespace NLMISC {
 /*
  * Constructor
  */
-IEventListener::IEventListener() : _Hook(NULL)
+IEventListener::IEventListener() : _Hook(nullptr)
 {
 }
 

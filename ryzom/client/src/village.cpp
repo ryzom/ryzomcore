@@ -41,7 +41,7 @@ using namespace NLMISC;
 using namespace std;
 
 //===================================================================================
-CVillage::CVillage() : _Scene(NULL)
+CVillage::CVillage() : _Scene(nullptr)
 {
 	// Not an output
 	_IsOutpost = false;

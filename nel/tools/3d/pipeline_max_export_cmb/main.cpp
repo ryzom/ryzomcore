@@ -285,7 +285,7 @@ bool extractObjectMesh(INode &node, CSceneClass *rawObj, std::vector<NLMISC::CVe
 		NLMISC::CClassId cid = obj->classDesc()->classId();
 		if (cid != CLASSID_OSM_DERIVED && cid != CLASSID_WSM_DERIVED) break;
 		CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(obj);
-		CSceneClass *base = NULL;
+		CSceneClass *base = nullptr;
 		std::vector<CSceneClass *> mods;
 		for (uint i = 0; rm && i < rm->nbReferences(); ++i)
 		{
@@ -305,7 +305,7 @@ bool extractObjectMesh(INode &node, CSceneClass *rawObj, std::vector<NLMISC::CVe
 		for (uint m = 0; m < mods.size(); ++m)
 		{
 			NLMISC::CClassId mcid = mods[m]->classDesc()->classId();
-			CStorageContainer *app = m < modApps.size() ? modApps[m] : NULL;
+			CStorageContainer *app = m < modApps.size() ? modApps[m] : nullptr;
 			if (mcid == NLMISC::CClassId(0x00000050, 0x00000000)) // Edit Mesh
 			{
 				SModOp op;
@@ -434,7 +434,7 @@ bool extractObjectMesh(INode &node, CSceneClass *rawObj, std::vector<NLMISC::CVe
 		// nodes are frequently plain Boxes with an Edit Mesh modifier stack on top (§10g), so
 		// the modifier evaluation pass below still gets to run.
 		CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(obj);
-		CSceneClass *pblock = NULL;
+		CSceneClass *pblock = nullptr;
 		for (uint r = 0; rm && r < rm->nbReferences(); ++r)
 		{
 			CSceneClass *ref = dynamic_cast<CSceneClass *>(rm->getReference(r));

@@ -259,7 +259,7 @@ private:
 	};
 
 	CCamera			*getReflCamera();
-	const CView		*currentView() const { return _CurrentView < _Views.size() ? &_Views[_CurrentView] : NULL; }
+	const CView		*currentView() const { return _CurrentView < _Views.size() ? &_Views[_CurrentView] : nullptr; }
 	CView			&ensureCurrentView();
 
 	// Claim a tile of (w × h) in the current view's textures (fixed mode);

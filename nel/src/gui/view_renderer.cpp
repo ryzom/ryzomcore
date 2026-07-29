@@ -39,10 +39,10 @@ using namespace NL3D;
 namespace NLGUI
 {
 
-	CViewRenderer* CViewRenderer::instance            = NULL;
-	NL3D::UDriver* CViewRenderer::driver              = NULL;
-	NL3D::UTextContext* CViewRenderer::textcontext    = NULL;
-	std::set< std::string >* CViewRenderer::hwCursors = NULL;
+	CViewRenderer* CViewRenderer::instance            = nullptr;
+	NL3D::UDriver* CViewRenderer::driver              = nullptr;
+	NL3D::UTextContext* CViewRenderer::textcontext    = nullptr;
+	std::set< std::string >* CViewRenderer::hwCursors = nullptr;
 	float CViewRenderer::hwCursorScale                = 1.0f;
 	CViewRenderer::TFontsList CViewRenderer::fonts;
 
@@ -59,7 +59,7 @@ namespace NLGUI
 		for(uint i=0;i<VR_NUM_LAYER;i++)
 		{
 			delete _StringRBLayers[i];
-			_StringRBLayers[i]= NULL;
+			_StringRBLayers[i] = nullptr;
 			_EmptyLayer[i]= true;
 		}
 	}
@@ -67,7 +67,7 @@ namespace NLGUI
 
 	CViewRenderer* CViewRenderer::getInstance()
 	{
-		if( instance == NULL )
+		if( instance == nullptr)
 			instance = new CViewRenderer;
 		return instance;
 	}
@@ -206,10 +206,10 @@ namespace NLGUI
 		_CurrentZ = 10;
 		for(uint i=0;i<VR_NUM_LAYER;i++)
 		{
-			_StringRBLayers[i]= NULL;
+			_StringRBLayers[i] = nullptr;
 			_EmptyLayer[i]= true;
 		}
-		_BlankGlobalTexture  = NULL;
+		_BlankGlobalTexture  = nullptr;
 		_Bilinear = false;
 
 		updateInterfaceScale();
@@ -241,20 +241,20 @@ namespace NLGUI
 		_Material.setBlend (true);
 		_Material.setBlendFunc (NL3D::UMaterial::srcalpha, NL3D::UMaterial::invsrcalpha);
 		_Material.setColor(CRGBA::White);
-		_Material.setTexture(0, NULL);
-		_Material.setTexture(1, NULL);
-		_Material.setTexture(2, NULL);
-		_Material.setTexture(3, NULL);
+		_Material.setTexture(0, nullptr);
+		_Material.setTexture(1, nullptr);
+		_Material.setTexture(2, nullptr);
+		_Material.setTexture(3, nullptr);
 		_Material.setZBias(0);
 	}
 
 	void CViewRenderer::release()
 	{
-		if( instance != NULL )
+		if( instance != nullptr)
 		{
 			instance->reset();
 			delete instance;
-			instance = NULL;
+			instance = nullptr;
 		}
 	}
 
@@ -329,7 +329,7 @@ namespace NLGUI
 
 		NL3D::UTextContext *context;
 		context = driver->createTextContext(fontFile);
-		if (context == NULL)
+		if (context == nullptr)
 		{
 			nlwarning("Cannot create a TextContext with font '%s'.", font.c_str());
 			return false;
@@ -1100,7 +1100,7 @@ namespace NLGUI
 			gtTmp.FromGlobaleTexture = false;
 			gtTmp.DefaultWidth = gtTmp.Width = 0;
 			gtTmp.DefaultHeight = gtTmp.Height = 0;
-			gtTmp.Texture = NULL;
+			gtTmp.Texture = nullptr;
 			_GlobalTextures.push_back(gtTmp);
 			ite = _GlobalTextures.end();
 			ite--;
@@ -1149,7 +1149,7 @@ namespace NLGUI
 				gtTmp.FromGlobaleTexture = false;
 				gtTmp.DefaultWidth = gtTmp.Width = 0;
 				gtTmp.DefaultHeight = gtTmp.Height = 0;
-				gtTmp.Texture = NULL;
+				gtTmp.Texture = nullptr;
 				_GlobalTextures.push_back(gtTmp);
 
 				TGlobalTextureList::iterator ite = _GlobalTextures.end();
@@ -1375,7 +1375,7 @@ namespace NLGUI
 		{
 			return ite->Texture;
 		}
-		return NULL;
+		return nullptr;
 	}
 
 	/*
@@ -1426,7 +1426,7 @@ namespace NLGUI
 					// This one ?
 					if (&(*iteGT) == gt)
 					{
-						if (iteGT->Texture == NULL)
+						if (iteGT->Texture == nullptr)
 							return;
 						// Remove this global texture
 						UTextureFile *tf = dynamic_cast<NL3D::UTextureFile *>(iteGT->Texture);
@@ -1610,7 +1610,7 @@ namespace NLGUI
 			while (ite != _GlobalTextures.end())
 			{
 				// texture not loaded yet
-				if (ite->Texture == NULL)
+				if (ite->Texture == nullptr)
 				{
 					++ite;
 					continue;

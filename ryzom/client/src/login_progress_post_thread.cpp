@@ -282,8 +282,8 @@ public:
 CLoginProgressPostThread::CLoginProgressPostThread()
 {
 	// Construct
-	_Thread = NULL;
-	_Task = NULL;
+	_Thread = nullptr;
+	_Task = nullptr;
 }
 
 //===========================================================================================
@@ -320,8 +320,8 @@ void CLoginProgressPostThread::release()
 	if (_Thread && _Thread->isRunning()) _Thread->wait();
 	delete _Task;
 	delete _Thread;
-	_Task = NULL;
-	_Thread = NULL;
+	_Task = nullptr;
+	_Thread = nullptr;
 }
 
 //===========================================================================================

@@ -135,7 +135,7 @@ public:
 	 *	\param igSurfaceLightBuild if !NULL, light() will compute igOut.IGSurfaceLight, else it is just cleared.
 	 */
 	void light (const CInstanceGroup &igIn, CInstanceGroup &igOut, const CLightDesc &lightDesc, std::vector<CTriangle>& obstacles,
-		CLandscape *landscape= NULL, CIGSurfaceLightBuild *igSurfaceLightBuild= NULL);
+		CLandscape *landscape = nullptr, CIGSurfaceLightBuild *igSurfaceLightBuild = nullptr);
 
 
 	// Add triangles from a landscape

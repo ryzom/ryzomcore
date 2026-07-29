@@ -73,7 +73,7 @@ public:
 	  * \param chat optional chat box in the list
 	  * \return true if the list could be
 	  */
-	bool create(const CPeopleListDesc &desc, const CChatWindowDesc *chat = NULL);
+	bool create(const CPeopleListDesc &desc, const CChatWindowDesc *chat = nullptr);
 	// Get index from the name of a people, or -1 if not found
 	sint getIndexFromName(const std::string &name) const;
 	// Get index from the id of the container that represent the people
@@ -151,7 +151,9 @@ public:
 private:
 	struct CPeople
 	{
-		CPeople() : Container(NULL), Chat(NULL), Online(ccs_offline), Blocked(false), ContactId(0) {}
+		CPeople() : Container(nullptr)
+		    , Chat(nullptr)
+		    , Online(ccs_offline), Blocked(false), ContactId(0) {}
 		NLMISC::CRefPtr<CGroupContainer> Container; // todo : replace this with a CChatWindow one day, for consistency
 		NLMISC::CRefPtr<CGroupContainer> Chat;
 		uint							GlobalID;

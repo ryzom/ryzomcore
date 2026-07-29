@@ -565,7 +565,8 @@ private:
 public:
 
 	/// Constructor (public because invocated by template <class T> loadForm())
-	CMirroredDataSet() : _PropAllocator(NULL), _NumberOfUndeclaredEntities(0), _NumberOfCurrentCreatedEntities(0), _IsEntityNotificationEnabled(false) {}
+	CMirroredDataSet() : _PropAllocator(nullptr)
+	    , _NumberOfUndeclaredEntities(0), _NumberOfCurrentCreatedEntities(0), _IsEntityNotificationEnabled(false) {}
 
 	/// Tell a property has changed (public because of friend template limitation)
 	void				setChanged( const TDataSetRow& datasetRow, TPropertyIndex propIndex );

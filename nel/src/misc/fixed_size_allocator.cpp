@@ -32,7 +32,7 @@ namespace NLMISC
 // *****************************************************************************************************************
 CFixedSizeAllocator::CFixedSizeAllocator(uint numBytesPerBlock, uint numBlockPerChunk)
 {
-	_FreeSpace = NULL;
+	_FreeSpace = nullptr;
 	_NumChunks = 0;
 	nlassert(numBytesPerBlock > 1);
 	_NumBytesPerBlock = numBytesPerBlock;
@@ -41,7 +41,7 @@ CFixedSizeAllocator::CFixedSizeAllocator(uint numBytesPerBlock, uint numBlockPer
 	nlassert(_NumBytesPerBlock >= numBytesPerBlock);
 	_NumBlockPerChunk = std::max(numBlockPerChunk, (uint) 3);
 	_NumAlloc = 0;
-	_SpareMem = NULL;
+	_SpareMem = nullptr;
 }
 
 // *****************************************************************************************************************
@@ -108,7 +108,7 @@ uint CFixedSizeAllocator::CChunk::getBlockSizeWithOverhead() const
 CFixedSizeAllocator::CChunk::CChunk()
 {
 	NumFreeObjs = 0;
-	Allocator = NULL;
+	Allocator = nullptr;
 }
 
 // *****************************************************************************************************************
@@ -138,7 +138,7 @@ void CFixedSizeAllocator::CChunk::init(CFixedSizeAllocator *alloc)
 	if (Allocator->_SpareMem)
 	{
 		Mem = Allocator->_SpareMem;
-		Allocator->_SpareMem = NULL;
+		Allocator->_SpareMem = nullptr;
 	}
 	else
 	{

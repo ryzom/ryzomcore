@@ -272,7 +272,7 @@ void CPSTailDot::displayRibbons(uint32 nbRibbons, uint32 srcStep)
 	// Material setup //
 	////////////////////
 		CParticleSystem &ps = *(_Owner->getOwner());
-		bool useGlobalColor = ps.getColorAttenuationScheme() != NULL || ps.isUserColorUsed();
+		bool useGlobalColor = ps.getColorAttenuationScheme() != nullptr || ps.isUserColorUsed();
 		if (useGlobalColor != _GlobalColor)
 		{
 			_GlobalColor = useGlobalColor;
@@ -491,7 +491,7 @@ void	CPSTailDot::updateMaterial()
 			{
 				// the first stage is used to get fading * global color
 				// the second stage multiply the result by the diffuse colot
-				if (ptGradTexture == NULL) // have we got a gradient texture ?
+				if (ptGradTexture == nullptr) // have we got a gradient texture ?
 				{
 					ptGradTexture = CreateGradientTexture();
 				}
@@ -510,7 +510,7 @@ void	CPSTailDot::updateMaterial()
 		{
 			if (_ColorFading) // per ribbon color, fading
 			{
-				if (ptGradTexture == NULL) // have we got a gradient texture ?
+				if (ptGradTexture == nullptr) // have we got a gradient texture ?
 				{
 					ptGradTexture = CreateGradientTexture();
 				}

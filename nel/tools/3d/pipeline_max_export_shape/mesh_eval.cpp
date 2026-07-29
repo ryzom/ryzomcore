@@ -80,7 +80,7 @@ static bool readCountPrefixed(CStorageRaw *raw, uint stride, const void **data, 
 static bool extractEditableMesh(CSceneClass *obj, SEvalMesh &out, const std::string &name)
 {
 	CGeomObject *geom = dynamic_cast<CGeomObject *>(obj);
-	STORAGE::CGeomBuffers *gb = geom ? geom->geomBuffers() : NULL;
+	STORAGE::CGeomBuffers *gb = geom ? geom->geomBuffers() : nullptr;
 	if (!gb)
 	{
 		fprintf(stderr, "WARNING: mesh '%s' without geom buffers\n", name.c_str());
@@ -182,7 +182,7 @@ static bool extractEditableMesh(CSceneClass *obj, SEvalMesh &out, const std::str
 static bool extractEditablePoly(CSceneClass *obj, SEvalMesh &out, const std::string &name)
 {
 	CGeomObject *geom = dynamic_cast<CGeomObject *>(obj);
-	STORAGE::CGeomBuffers *gb = geom ? geom->geomBuffers() : NULL;
+	STORAGE::CGeomBuffers *gb = geom ? geom->geomBuffers() : nullptr;
 	if (!gb)
 	{
 		fprintf(stderr, "WARNING: poly '%s' without geom buffers\n", name.c_str());
@@ -506,7 +506,7 @@ static bool extractParametricPrimitive(CSceneClass *base, SEvalMesh &out, const 
 {
 	// Locate the primitive's ref-0 old-style ParamBlock (superclass 0x8).
 	CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(base);
-	CSceneClass *pblock = NULL;
+	CSceneClass *pblock = nullptr;
 	for (uint r = 0; rm && r < rm->nbReferences(); ++r)
 	{
 		CSceneClass *ref = dynamic_cast<CSceneClass *>(rm->getReference(r));
@@ -815,7 +815,7 @@ bool evalNodeMesh(INode &node, SEvalMesh &out, std::vector<std::string> *warning
 	for (uint i = (uint)mods.size(); i > 0; --i)
 	{
 		CSceneClass *mod = mods[i - 1];
-		CStorageContainer *app = (i - 1) < modApps.size() ? modApps[i - 1] : NULL;
+		CStorageContainer *app = (i - 1) < modApps.size() ? modApps[i - 1] : nullptr;
 		NLMISC::CClassId mcid = mod->classDesc()->classId();
 		if (mcid == NLMISC::CClassId(0x00000050, 0x00000000)) // Edit Mesh
 		{
@@ -857,7 +857,7 @@ bool evalNodeMesh(INode &node, SEvalMesh &out, std::vector<std::string> *warning
 				UVWMAP::SMeshView mv;
 				mv.Verts = reinterpret_cast<std::vector<MAXMATH::Point3M> *>(&out.Verts);
 				mv.FaceVerts = &faceVerts;
-				mv.FaceNormals = NULL;
+				mv.FaceNormals = nullptr;
 				mv.Maps = &chans;
 				int mapType = -1;
 				if (UVWMAP::applyUvwMap(mod, app, mv, typeMask, &mapType))

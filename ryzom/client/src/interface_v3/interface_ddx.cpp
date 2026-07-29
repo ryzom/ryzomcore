@@ -49,7 +49,7 @@ void CInterfaceDDX::CParam::DBToWidget()
 	{
 		CRGBA col = CRGBA::White;
 		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(Link,false);
-		if (pNL != NULL)
+		if (pNL != nullptr)
 		{
 			uint32 intCol = (uint32)pNL->getValue32();
 			col.R = (uint8) (intCol & 0xff);
@@ -58,7 +58,7 @@ void CInterfaceDDX::CParam::DBToWidget()
 			col.A = (uint8) ((intCol >> 24) & 0xff);
 		}
 		CCtrlBaseButton *pBut = dynamic_cast<CCtrlBaseButton*>(Elt.getPtr());
-		if (pBut != NULL)
+		if (pBut != nullptr)
 		{
 			pBut->setColor(col);
 			pBut->setColorPushed(col);
@@ -69,12 +69,12 @@ void CInterfaceDDX::CParam::DBToWidget()
 	{
 		bool bVal = 0;
 		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(Link,false);
-		if (pNL != NULL)
+		if (pNL != nullptr)
 		{
 			bVal = pNL->getValue32()==0?false:true;
 		}
 		CCtrlBaseButton *pBut = dynamic_cast<CCtrlBaseButton*>(Elt.getPtr());
-		if (pBut != NULL)
+		if (pBut != nullptr)
 		{
 			pBut->setPushed(bVal);
 		}
@@ -83,12 +83,12 @@ void CInterfaceDDX::CParam::DBToWidget()
 	{
 		sint32 nVal = 0;
 		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(Link,false);
-		if (pNL != NULL)
+		if (pNL != nullptr)
 		{
 			nVal = pNL->getValue32();
 		}
 		CCtrlScroll *pCS = dynamic_cast<CCtrlScroll*>(Elt.getPtr());
-		if (pCS != NULL)
+		if (pCS != nullptr)
 		{
 			pCS->setValue (nVal);
 			pCS->setMinMax (Min, Max);
@@ -107,7 +107,7 @@ void CInterfaceDDX::CParam::CFGToWidget()
 	{
 		bool bVal = ClientCfg.readBool(Link);
 		CCtrlBaseButton *pBut = dynamic_cast<CCtrlBaseButton*>(Elt.getPtr());
-		if (pBut != NULL)
+		if (pBut != nullptr)
 		{
 			pBut->setPushed(bVal);
 		}
@@ -119,7 +119,7 @@ void CInterfaceDDX::CParam::CFGToWidget()
 		sint32 nMax = ClientCfg.readInt(Link+"_max");
 		sint32 step = ClientCfg.readIntNoWarning(Link+"_step");
 		CCtrlScroll *pCS = dynamic_cast<CCtrlScroll*>(Elt.getPtr());
-		if (pCS != NULL)
+		if (pCS != nullptr)
 		{
 			pCS->setMinMax (nMin, nMax);
 			pCS->setStepValue(step);
@@ -136,7 +136,7 @@ void CInterfaceDDX::CParam::CFGToWidget()
 		sint32 nMax = (sint32)(10000*ClientCfg.readDouble(Link+"_max"));
 		sint32 step = (sint32)(10000*ClientCfg.readDoubleNoWarning(Link+"_step"));
 		CCtrlScroll *pCS = dynamic_cast<CCtrlScroll*>(Elt.getPtr());
-		if (pCS != NULL)
+		if (pCS != nullptr)
 		{
 			pCS->setMinMax (nMin, nMax);
 			pCS->setStepValue(step);
@@ -156,20 +156,20 @@ void CInterfaceDDX::CParam::WidgetToDB()
 	{
 		CRGBA col = CRGBA::White;
 		CCtrlBaseButton *pBut = dynamic_cast<CCtrlBaseButton*>(Elt.getPtr());
-		if (pBut != NULL)
+		if (pBut != nullptr)
 			col = pBut->getColor();
 		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(Link,false);
-		if (pNL != NULL)
+		if (pNL != nullptr)
 			pNL->setValue32(col.R+(col.G<<8)+(col.B<<16)+(col.A<<24));
 	}
 	else if (Widget == BoolButton)
 	{
 		bool bVal = false;
 		CCtrlBaseButton *pBut = dynamic_cast<CCtrlBaseButton*>(Elt.getPtr());
-		if (pBut != NULL)
+		if (pBut != nullptr)
 			bVal = pBut->getPushed();
 		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(Link,false);
-		if (pNL != NULL)
+		if (pNL != nullptr)
 		{
 			pNL->setValue32(bVal?1:0);
 		}
@@ -182,10 +182,10 @@ void CInterfaceDDX::CParam::WidgetToDB()
 	{
 		sint32 nVal = 0;
 		CCtrlScroll *pCS = dynamic_cast<CCtrlScroll*>(Elt.getPtr());
-		if (pCS != NULL)
+		if (pCS != nullptr)
 			nVal = pCS->getValue();
 		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(Link,false);
-		if (pNL != NULL)
+		if (pNL != nullptr)
 			pNL->setValue32(nVal);
 	}
 }
@@ -199,7 +199,7 @@ void CInterfaceDDX::CParam::WidgetToCFG()
 	{
 		bool bVal = false;
 		CCtrlBaseButton *pBut = dynamic_cast<CCtrlBaseButton*>(Elt.getPtr());
-		if (pBut != NULL)
+		if (pBut != nullptr)
 			bVal = pBut->getPushed();
 		ClientCfg.writeBool(Link, bVal);
 	}
@@ -207,7 +207,7 @@ void CInterfaceDDX::CParam::WidgetToCFG()
 	{
 		sint32 nVal = 0;
 		CCtrlScroll *pCS = dynamic_cast<CCtrlScroll*>(Elt.getPtr());
-		if (pCS != NULL)
+		if (pCS != nullptr)
 			nVal = pCS->getValue();
 		ClientCfg.writeInt(Link, nVal);
 	}
@@ -215,7 +215,7 @@ void CInterfaceDDX::CParam::WidgetToCFG()
 	{
 		sint32 nVal = 0;
 		CCtrlScroll *pCS = dynamic_cast<CCtrlScroll*>(Elt.getPtr());
-		if (pCS != NULL)
+		if (pCS != nullptr)
 			nVal = pCS->getValue();
 		double	rVal= nVal/10000.0;
 		tryRound(rVal);
@@ -230,7 +230,7 @@ void CInterfaceDDX::CParam::WidgetToResultView()
 	{
 		sint32 nVal = 0;
 		CCtrlScroll *pCS = dynamic_cast<CCtrlScroll*>(Elt.getPtr());
-		if (pCS != NULL)
+		if (pCS != nullptr)
 			nVal = pCS->getValue();
 		updateScrollView(nVal);
 	}
@@ -238,7 +238,7 @@ void CInterfaceDDX::CParam::WidgetToResultView()
 	{
 		sint32 nVal = 0;
 		CCtrlScroll *pCS = dynamic_cast<CCtrlScroll*>(Elt.getPtr());
-		if (pCS != NULL)
+		if (pCS != nullptr)
 			nVal = pCS->getValue();
 		double	rVal= nVal/10000.0;
 		tryRound(rVal);
@@ -255,7 +255,7 @@ void CInterfaceDDX::CParam::backupDB()
 	if (Widget == ColorButton)
 	{
 		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(Link,false);
-		if (pNL != NULL)
+		if (pNL != nullptr)
 		{
 			uint32 intCol = (uint32)pNL->getValue32();
 			RTBackupValue = intCol;
@@ -265,7 +265,7 @@ void CInterfaceDDX::CParam::backupDB()
 	{
 		sint32 nVal = 0;
 		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(Link,false);
-		if (pNL != NULL)
+		if (pNL != nullptr)
 		{
 			nVal = pNL->getValue32();
 		}
@@ -309,7 +309,7 @@ void CInterfaceDDX::CParam::restoreDB()
 	if (Widget == ColorButton)
 	{
 		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(Link,false);
-		if (pNL != NULL)
+		if (pNL != nullptr)
 			pNL->setValue32(RTBackupValue);
 	}
 	else if (Widget == ScrollBarFloat)
@@ -319,7 +319,7 @@ void CInterfaceDDX::CParam::restoreDB()
 	else if (Widget == ScrollBarInt)
 	{
 		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(Link,false);
-		if (pNL != NULL)
+		if (pNL != nullptr)
 			pNL->setValue32(RTBackupValue);
 	}
 }
@@ -387,7 +387,7 @@ void CInterfaceDDX::CParam::restoreCFGPreset(uint presetVal)
 		{
 			bool bVal = varPtr->asInt() != 0;
 			CCtrlBaseButton *pBut = dynamic_cast<CCtrlBaseButton*>(Elt.getPtr());
-			if (pBut != NULL)
+			if (pBut != nullptr)
 			{
 				pBut->setPushed(bVal);
 			}
@@ -401,7 +401,7 @@ void CInterfaceDDX::CParam::restoreCFGPreset(uint presetVal)
 		{
 			sint32 nVal = varPtr->asInt();
 			CCtrlScroll *pCS = dynamic_cast<CCtrlScroll*>(Elt.getPtr());
-			if (pCS != NULL)
+			if (pCS != nullptr)
 			{
 				pCS->setValue(nVal);
 			}
@@ -418,7 +418,7 @@ void CInterfaceDDX::CParam::restoreCFGPreset(uint presetVal)
 			tryRound(rVal);
 			sint32 nVal = (sint32)(10000*rVal);
 			CCtrlScroll *pCS = dynamic_cast<CCtrlScroll*>(Elt.getPtr());
-			if (pCS != NULL)
+			if (pCS != nullptr)
 			{
 				pCS->setValue (nVal);
 			}
@@ -503,7 +503,7 @@ uint32	CInterfaceDDX::CParam::getPresetPossibleBF()
 CInterfaceDDX::CInterfaceDDX()
 {
 	_PresetObs.Owner= this;
-	_ApplyButton= NULL;
+	_ApplyButton = nullptr;
 }
 
 // ***************************************************************************
@@ -541,7 +541,7 @@ bool CInterfaceDDX::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 
 			CXMLAutoPtr ptrUI((const char*)xmlGetProp (cur, (xmlChar*)"ui"));
 			p.Elt = _Parent->getId()+":"+string((const char*)ptrUI);
-			if (p.Elt == NULL) bOK = false;
+			if (p.Elt == nullptr) bOK = false;
 
 			CXMLAutoPtr ptrType((const char*)xmlGetProp (cur, (xmlChar*)"type"));
 			if (!ptrType) bOK = false;
@@ -934,7 +934,7 @@ void CInterfaceDDX::CPresetObs::update(ICDBNode* node)
 // ***************************************************************************
 
 // ***************************************************************************
-CDDXManager* CDDXManager::_Instance = NULL;
+CDDXManager* CDDXManager::_Instance = nullptr;
 
 // ***************************************************************************
 CDDXManager::CDDXManager()
@@ -946,7 +946,7 @@ void CDDXManager::releaseInstance()
 {
 	if( _Instance )
 		delete _Instance;
-	_Instance = NULL;
+	_Instance = nullptr;
 }
 
 // ***************************************************************************
@@ -980,7 +980,7 @@ CInterfaceDDX *CDDXManager::get(const std::string &ddxName)
 	{
 		return it->second;
 	}
-	return NULL;
+	return nullptr;
 }
 
 // ***************************************************************************
@@ -995,7 +995,7 @@ CInterfaceDDX *CDDXManager::getFromParent(const std::string &ddxParentName)
 			return it->second;
 		it++;
 	}
-	return NULL;
+	return nullptr;
 }
 
 // ***************************************************************************
@@ -1007,7 +1007,7 @@ public:
 	{
 		CDDXManager *pDM = CDDXManager::getInstance();
 		CInterfaceDDX *pDDX = pDM->get(sParams);
-		if (pDDX != NULL)
+		if (pDDX != nullptr)
 			pDDX->update();
 	}
 protected:
@@ -1023,7 +1023,7 @@ public:
 	{
 		CDDXManager *pDM = CDDXManager::getInstance();
 		CInterfaceDDX *pDDX = pDM->get(sParams);
-		if (pDDX != NULL)
+		if (pDDX != nullptr)
 			pDDX->init();
 	}
 protected:
@@ -1039,7 +1039,7 @@ public:
 	{
 		CDDXManager *pDM = CDDXManager::getInstance();
 		CInterfaceDDX *pDDX = pDM->get(sParams);
-		if (pDDX != NULL)
+		if (pDDX != nullptr)
 			pDDX->cancel();
 	}
 protected:
@@ -1054,7 +1054,7 @@ public:
 	{
 		CDDXManager *pDM = CDDXManager::getInstance();
 		CInterfaceDDX *pDDX = pDM->get(sParams);
-		if (pDDX != NULL)
+		if (pDDX != nullptr)
 			pDDX->updateRealtime(pCaller, false);
 	}
 protected:
@@ -1069,7 +1069,7 @@ public:
 	{
 		CDDXManager *pDM = CDDXManager::getInstance();
 		CInterfaceDDX *pDDX = pDM->get(sParams);
-		if (pDDX != NULL)
+		if (pDDX != nullptr)
 			pDDX->updateRealtime(pCaller, true);
 	}
 protected:
@@ -1084,21 +1084,21 @@ public:
 	void execute (CCtrlBase *pCaller, const std::string &/* sParams */)
 	{
 		CDDXManager *pDM = CDDXManager::getInstance();
-		if (pCaller == NULL) return;
+		if (pCaller == nullptr) return;
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CCtrlBase *pCB = CWidgetManager::getInstance()->getCtrlLaunchingModal();
 		// Search for a ddx in the parents
 		CInterfaceGroup *pIG = pCB->getParent();
 		bool found = false;
-		CInterfaceDDX *pDDX = NULL;
+		CInterfaceDDX *pDDX = nullptr;
 		while (!found)
 		{
 			pDDX = pDM->getFromParent(pIG->getId());
-			if (pDDX != NULL) found = true;
+			if (pDDX != nullptr) found = true;
 			else pIG = pIG->getParent();
-			if (pIG == NULL) return;
+			if (pIG == nullptr) return;
 		}
-		if (pDDX != NULL)
+		if (pDDX != nullptr)
 			pDDX->updateRealtime(pCB, false);
 	}
 protected:
@@ -1114,19 +1114,19 @@ public:
 	void execute (CCtrlBase *pCaller, const std::string &/* sParams */)
 	{
 		CDDXManager *pDM = CDDXManager::getInstance();
-		if (pCaller == NULL) return;
+		if (pCaller == nullptr) return;
 		// Search for a ddx in the parents
 		CInterfaceGroup *pIG = pCaller->getParent();
 		bool found = false;
-		CInterfaceDDX *pDDX = NULL;
+		CInterfaceDDX *pDDX = nullptr;
 		while (!found)
 		{
 			pDDX = pDM->getFromParent(pIG->getId());
-			if (pDDX != NULL) found = true;
+			if (pDDX != nullptr) found = true;
 			else pIG = pIG->getParent();
-			if (pIG == NULL) return;
+			if (pIG == nullptr) return;
 		}
-		if (pDDX != NULL)
+		if (pDDX != nullptr)
 			pDDX->updateRealtime(pCaller, false);
 	}
 protected:

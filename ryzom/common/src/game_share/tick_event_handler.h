@@ -84,7 +84,7 @@ public :
 	 * \param tockAtBeginOfTickUpdate indicates if we will send TOCK before calling updateFunc()
 	 * instead of after.
 	 */
-	static void init(void (*updateFunc)(), void (*syncFunc)() = NULL, bool tockAtBeginOfTickUpdate=false);
+	static void init(void (*updateFunc)(), void (*syncFunc)() = nullptr, bool tockAtBeginOfTickUpdate=false);
 
 	/**
 	 * Set a callback to call when receiving the first game cycle (call this method in your init())

@@ -132,7 +132,7 @@ public:
 	// generate this texture datas
 	virtual CBitmap			*generateDatas()
 	{
-		if (_Texture->isTextureCube()) return NULL;
+		if (_Texture->isTextureCube()) return nullptr;
 		_Texture->generate();
 		return _Texture;
 	}

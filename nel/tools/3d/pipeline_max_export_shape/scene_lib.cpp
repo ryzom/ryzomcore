@@ -102,7 +102,7 @@ const std::string &databaseRoot()
 
 CSceneClassRegistry *sceneRegistry()
 {
-	static CSceneClassRegistry *registry = NULL;
+	static CSceneClassRegistry *registry = nullptr;
 	if (!registry)
 	{
 		registry = new CSceneClassRegistry();
@@ -149,9 +149,9 @@ static std::map<std::string, SLoadedMax> g_loadedScenes;
 SLoadedMax *loadMaxFileCached(const std::string &path)
 {
 	std::map<std::string, SLoadedMax>::iterator it = g_loadedScenes.find(path);
-	if (it != g_loadedScenes.end()) return it->second.Scene ? &it->second : NULL;
+	if (it != g_loadedScenes.end()) return it->second.Scene ? &it->second : nullptr;
 	SLoadedMax &lm = g_loadedScenes[path]; // inserted empty: failure is cached too
-	if (!loadMaxFile(path, lm)) return NULL;
+	if (!loadMaxFile(path, lm)) return nullptr;
 	return &lm;
 }
 
@@ -210,13 +210,13 @@ float getScriptAppDataFloat(CSceneClass *sc, uint32 subId, float def)
 
 IStorageObject *findChunk(CSceneClass *sc, uint16 id)
 {
-	if (!sc) return NULL;
+	if (!sc) return nullptr;
 	IStorageObject *so = sc->findStorageObject(id);
 	if (so) return so;
 	const CStorageContainer::TStorageObjectContainer &orphans = sc->orphanedChunks();
 	for (CStorageContainer::TStorageObjectConstIt it = orphans.begin(); it != orphans.end(); ++it)
 		if (it->first == id) return it->second;
-	return NULL;
+	return nullptr;
 }
 
 CStorageRaw *findRawChunk(CSceneClass *sc, uint16 id)
@@ -336,17 +336,17 @@ void readObjectPB2Blocks(CSceneClass *obj, std::vector<SPB2Block> &out)
 
 const SPB2Param *findPB2Param(const std::vector<SPB2Block> &blocks, uint blockIndex, uint16 paramId)
 {
-	if (blockIndex >= blocks.size()) return NULL;
+	if (blockIndex >= blocks.size()) return nullptr;
 	std::map<uint16, SPB2Param>::const_iterator it = blocks[blockIndex].Params.find(paramId);
-	if (it == blocks[blockIndex].Params.end()) return NULL;
+	if (it == blocks[blockIndex].Params.end()) return nullptr;
 	return &it->second;
 }
 
 CSceneClass *pb2RefValue(const SPB2Block &block, const SPB2Param &param)
 {
-	if (!param.RefBacked || param.RefSlot < 0) return NULL;
+	if (!param.RefBacked || param.RefSlot < 0) return nullptr;
 	CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(block.Object);
-	if (!rm) return NULL;
+	if (!rm) return nullptr;
 	return dynamic_cast<CSceneClass *>(rm->getReference(param.RefSlot));
 }
 
@@ -417,9 +417,9 @@ static CSceneClass *resolveXRefObject(CSceneClass *xrefObj, int depth)
 	if (depth > 8)
 	{
 		fprintf(stderr, "WARNING: xref: recursion depth exceeded\n");
-		return NULL;
+		return nullptr;
 	}
-	CStorageContainer *rec = NULL;
+	CStorageContainer *rec = nullptr;
 	const CStorageContainer::TStorageObjectContainer &orphans = xrefObj->orphanedChunks();
 	for (CStorageContainer::TStorageObjectConstIt it = orphans.begin(); it != orphans.end(); ++it)
 	{
@@ -430,22 +430,22 @@ static CSceneClass *resolveXRefObject(CSceneClass *xrefObj, int depth)
 	if (!rec)
 	{
 		fprintf(stderr, "WARNING: xref: no 0x0170 record on XRefObject\n");
-		return NULL;
+		return nullptr;
 	}
 	std::string file, objName;
 	if (!xrefChildString(rec, 0x0100, file) || !xrefChildString(rec, 0x0110, objName))
 	{
 		fprintf(stderr, "WARNING: xref: incomplete 0x0170 record\n");
-		return NULL;
+		return nullptr;
 	}
 	std::string resolved;
 	if (!resolveDbPath(file, resolved))
 	{
 		fprintf(stderr, "WARNING: xref: cannot resolve '%s' under db root '%s'\n", file.c_str(), DBPATH::defaultRoot().c_str());
-		return NULL;
+		return nullptr;
 	}
 	SLoadedMax *lm = loadMaxFileCached(resolved);
-	if (!lm) return NULL;
+	if (!lm) return nullptr;
 	CSceneClassContainer *ssc = lm->Scene->container();
 	std::string wantLower = NLMISC::toLowerAscii(objName);
 	for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
@@ -453,10 +453,10 @@ static CSceneClass *resolveXRefObject(CSceneClass *xrefObj, int depth)
 		CNodeImpl *node = dynamic_cast<CNodeImpl *>(it->second);
 		if (!node) continue;
 		if (NLMISC::toLowerAscii(ucstring(node->userName()).toUtf8()) != wantLower) continue;
-		return baseObjectOf(dynamic_cast<CSceneClass *>(node->getReference(1)), NULL, NULL);
+		return baseObjectOf(dynamic_cast<CSceneClass *>(node->getReference(1)), nullptr, nullptr);
 	}
 	fprintf(stderr, "WARNING: xref: node '%s' not found in %s\n", objName.c_str(), resolved.c_str());
-	return NULL;
+	return nullptr;
 }
 
 CSceneClass *baseObjectOf(CSceneClass *obj, std::vector<CSceneClass *> *mods,
@@ -481,7 +481,7 @@ CSceneClass *baseObjectOf(CSceneClass *obj, std::vector<CSceneClass *> *mods,
 		}
 		if (cid != CLASSID_OSM_DERIVED && cid != CLASSID_WSM_DERIVED) break;
 		CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(obj);
-		CSceneClass *base = NULL;
+		CSceneClass *base = nullptr;
 		uint modCountBefore = mods ? (uint)mods->size() : 0;
 		for (uint i = 0; rm && i < rm->nbReferences(); ++i)
 		{
@@ -515,7 +515,7 @@ CSceneClass *baseObjectOf(CSceneClass *obj, std::vector<CSceneClass *> *mods,
 			// pad/truncate to the modifier count of THIS wrapper
 			uint nMods = mods ? (uint)mods->size() - modCountBefore : (uint)apps.size();
 			for (uint m = 0; m < nMods; ++m)
-				modApps->push_back(m < apps.size() ? apps[m] : NULL);
+				modApps->push_back(m < apps.size() ? apps[m] : nullptr);
 		}
 		if (!base) break;
 		obj = base;

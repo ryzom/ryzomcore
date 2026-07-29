@@ -105,19 +105,19 @@ bool ChDir(const char *path)
 void dir (const string &sFilter, vector<string> &sAllFiles, bool bFullPath)
 {
 	char sCurDir[MAX_PATH];
-	DIR* dp = NULL;
-	struct dirent *dirp= NULL;
+	DIR* dp = nullptr;
+	struct dirent *dirp = nullptr;
 
 	GetCWD ( MAX_PATH,sCurDir ) ;
 	sAllFiles.clear ();
-	if ( (dp = opendir( sCurDir )) == NULL)
+	if ( (dp = opendir( sCurDir )) == nullptr)
 	{
 		string sTmp = string("ERROR :  Can't open the dir : \"")+string(sCurDir)+string("\"") ;
 		outString ( sTmp ) ;
 		return ;
 	}
 
-	while ( (dirp = readdir(dp)) != NULL)
+	while ( (dirp = readdir(dp)) != nullptr)
 	{
 		std:string sFileName = std::string(dirp->d_name) ;
 		if (sFileName.substr((sFileName.length()-sFilter.length()),sFilter.length()).find(sFilter)!= std::string::npos )
@@ -475,11 +475,11 @@ int main(int nNbArg, char **ppArgs)
 			{
 				// Begin with stage 0
 				uint8 stage = 0;
-				while (rMat.getLightMap(stage) != NULL)
+				while (rMat.getLightMap(stage) != nullptr)
 				{
 					ITexture *pIT = rMat.getLightMap (stage);
 					CTextureFile *pTF = dynamic_cast<CTextureFile*>(pIT);
-					if (pTF != NULL)
+					if (pTF != nullptr)
 					{
 						string sTexName = NLMISC::toLowerAscii(pTF->getFileName());
 						if(pTF->getUploadFormat()==ITexture::Luminance)
@@ -780,19 +780,19 @@ int main(int nNbArg, char **ppArgs)
 						CMeshMRM *pMeshMRM = dynamic_cast<CMeshMRM*>(pMB);
 						CMeshMultiLod *pMeshML = dynamic_cast<CMeshMultiLod*>(pMB);
 
-						if (pMesh != NULL)
+						if (pMesh != nullptr)
 						{
 							VerticesNeedRemap.resize(1); // Only one meshgeom
 							vector<bool> &rVNR = VerticesNeedRemap[0];
 							rVNR.resize (pMesh->getMeshGeom().getVertexBuffer().getNumVertices(), false);
 						}
-						else if (pMeshMRM != NULL)
+						else if (pMeshMRM != nullptr)
 						{
 							VerticesNeedRemap.resize(1); // Only one meshmrmgeom
 							vector<bool> &rVNR = VerticesNeedRemap[0];
 							rVNR.resize (pMeshMRM->getMeshGeom().getVertexBuffer().getNumVertices(), false);
 						}
-						else if (pMeshML != NULL)
+						else if (pMeshML != nullptr)
 						{
 							sint32 nNumSlot = pMeshML->getNumSlotMesh();
 							VerticesNeedRemap.resize(nNumSlot);
@@ -800,7 +800,7 @@ int main(int nNbArg, char **ppArgs)
 							{
 								vector<bool> &rVNR = VerticesNeedRemap[m];
 								const CMeshGeom *pMG = dynamic_cast<const CMeshGeom*>(&pMeshML->getMeshGeom(m));
-								if (pMG != NULL)
+								if (pMG != nullptr)
 									rVNR.resize (pMG->getVertexBuffer().getNumVertices(), false);
 								else
 									rVNR.resize(0);
@@ -818,11 +818,11 @@ int main(int nNbArg, char **ppArgs)
 							{
 								// Begin with stage 0
 								uint8 stage = 0;
-								while (rMat.getLightMap(stage) != NULL)
+								while (rMat.getLightMap(stage) != nullptr)
 								{
 									ITexture *pIT = rMat.getLightMap (stage);
 									CTextureFile *pTF = dynamic_cast<CTextureFile*>(pIT);
-									if (pTF != NULL)
+									if (pTF != nullptr)
 									{
 										string sTexName = NLMISC::toLowerAscii(getBaseName(pTF->getFileName()));
 										string sTexNameMoved = NLMISC::toLowerAscii(getBaseName(AllLightmapNames[i]));
@@ -841,16 +841,16 @@ int main(int nNbArg, char **ppArgs)
 							// We have to remap the uvs of this mesh for this material
 							if (bMustRemapUV) // Flaggage of the vertices to remap
 							{
-								if (pMesh != NULL)
+								if (pMesh != nullptr)
 								{
 									// Flag all vertices linked to face with material m
 									FlagVertices (const_cast<CMeshGeom&>(pMesh->getMeshGeom()), m, VerticesNeedRemap[0]);
 								}
-								else if (pMeshMRM != NULL)
+								else if (pMeshMRM != nullptr)
 								{
 									FlagVerticesMRM (const_cast<CMeshMRMGeom&>(pMeshMRM->getMeshGeom()), m, VerticesNeedRemap[0]);
 								}
-								else if (pMeshML != NULL)
+								else if (pMeshML != nullptr)
 								{
 									sint32 nNumSlot = pMeshML->getNumSlotMesh();
 									for (n = 0; n < nNumSlot; ++n)
@@ -885,11 +885,11 @@ int main(int nNbArg, char **ppArgs)
 							{
 								// Begin with stage 0
 								uint8 stage = 0;
-								while (rMat.getLightMap(stage) != NULL)
+								while (rMat.getLightMap(stage) != nullptr)
 								{
 									ITexture *pIT = rMat.getLightMap (stage);
 									CTextureFile *pTF = dynamic_cast<CTextureFile*>(pIT);
-									if (pTF != NULL)
+									if (pTF != nullptr)
 									{
 										string sTexName = NLMISC::toLowerAscii(getBaseName(pTF->getFileName()));
 										string sTexNameMoved = NLMISC::toLowerAscii(getBaseName(AllLightmapNames[i]));
@@ -910,22 +910,22 @@ int main(int nNbArg, char **ppArgs)
 						for (m = 0; m < (sint32)VerticesNeedRemap.size(); ++m)
 						{
 							CVertexBuffer *pVB;							
-							if (pMesh != NULL)
+							if (pMesh != nullptr)
 							{
 								pVB = const_cast<CVertexBuffer*>(&pMesh->getMeshGeom().getVertexBuffer());
 							}
-							else if (pMeshMRM != NULL)
+							else if (pMeshMRM != nullptr)
 							{
 								pVB = const_cast<CVertexBuffer*>(&pMeshMRM->getMeshGeom().getVertexBuffer());
 							}
-							else if (pMeshML != NULL)
+							else if (pMeshML != nullptr)
 							{
 								const CMeshGeom *pMG = dynamic_cast<const CMeshGeom*>(&pMeshML->getMeshGeom(m));
 								pVB = const_cast<CVertexBuffer*>(&pMG->getVertexBuffer());
 							}
 							else
 							{
-								pVB = NULL;
+								pVB = nullptr;
 							}
 
 							// to avoid a possible crash

@@ -53,7 +53,7 @@ namespace NLGUI
 			_Grayed = false;
 			_Checked = false;
 			_Checkable = false;
-			_CheckBox = NULL;
+			_CheckBox = nullptr;
 			Over = false;
 		}
 
@@ -107,7 +107,7 @@ namespace NLGUI
 		CGroupSubMenu(const TCtorParam &param);
 		virtual ~CGroupSubMenu();
 
-		virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parent=NULL);
+		virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parent = nullptr);
 
 		virtual void checkCoords();
 
@@ -262,12 +262,12 @@ namespace NLGUI
 			sint32			TextDY;		// Y of the view text to set
 			SSubMenuEntry()
 			{
-				ViewText = NULL;
-				Separator = NULL;
-				CheckBox = NULL;
-				RightArrow = NULL;
-				UserGroupRight = NULL;
-				UserGroupLeft = NULL;
+				ViewText = nullptr;
+				Separator = nullptr;
+				CheckBox = nullptr;
+				RightArrow = nullptr;
+				UserGroupRight = nullptr;
+				UserGroupLeft = nullptr;
 				UserGroupRightOwnership = false;
 				Selectable = true;
 				HReal= 0;
@@ -298,7 +298,7 @@ namespace NLGUI
 		  * otherwise, no copy is made, but this menu entries are appended to the already created 'appendMenu' menu.
 		  * NB : user groups are not duplicated
 		  */
-		CGroupSubMenu *cloneMenu(CGroupSubMenu *appendToMenu, CGroupMenu *newFather, CInterfaceGroup *initGroup = NULL) const;
+		CGroupSubMenu *cloneMenu(CGroupSubMenu *appendToMenu, CGroupMenu *newFather, CInterfaceGroup *initGroup = nullptr) const;
 		void           initOptions(CInterfaceGroup *parent);
 		CViewBitmap    *createIcon(CInterfaceElement *parentPos, const std::string &texture);
 		CViewBitmap	   *createCheckBox(bool checked);

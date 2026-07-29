@@ -34,7 +34,7 @@ bool		UParticleSystemInstance::isSystemPresent(void) const
 {
 	if (!_Object) return false; // the system is not even valid
 	CParticleSystemModel *object = NLMISC::safe_cast<CParticleSystemModel *>(_Object);
-	return object->getPS() != NULL;
+	return object->getPS() != nullptr;
 }
 
 // ***************************************************************************

@@ -332,7 +332,7 @@ public:
 			for (i=0; i<Chains.size(); ++i)
 			{
 				const CChain	*chain = splitter.getChain(Chains[i]);
-				if (chain != NULL)
+				if (chain != nullptr)
 					chain->dump(Surface == chain->Left);
 			}
 		}
@@ -362,10 +362,11 @@ public:
 			sint8				Direction;
 			sint8				ChainDirection;
 
-			iterator(CSurfaceSplitter *splitter=NULL, CLoop *loop=NULL, bool forward=true) : pSplitter(splitter), pLoop(loop), Chain(0), pChain(NULL), ChainVertex(0), Direction(0), ChainDirection(0)
+			iterator(CSurfaceSplitter *splitter = nullptr, CLoop *loop = nullptr, bool forward=true) : pSplitter(splitter), pLoop(loop), Chain(0), pChain(nullptr)
+			    , ChainVertex(0), Direction(0), ChainDirection(0)
 			{
 				Direction = forward ? +1 : -1;
-				if (splitter == NULL || pLoop == NULL)
+				if (splitter == nullptr || pLoop == nullptr)
 					return;
 				Chain = (Direction>0 ? 0 : (sint)pLoop->Chains.size()-1);
 				resetChain();
@@ -426,10 +427,10 @@ public:
 			{
 				if (Chain < 0 || Chain == (sint)pLoop->Chains.size())
 				{
-					pSplitter = NULL;
-					pLoop = NULL;
+					pSplitter = nullptr;
+					pLoop = nullptr;
 					Chain = 0;
-					pChain = NULL;
+					pChain = nullptr;
 					ChainVertex = 0;
 					Direction = 0;
 					ChainDirection = 0;
@@ -504,28 +505,28 @@ public:
 	CSurface	*getSurface(const CSurfaceId &id)
 	{
 		TSurfaceMap::iterator	it = _Surfaces.find(id);
-		return (it == _Surfaces.end() ? NULL : &((*it).second));
+		return (it == _Surfaces.end() ? nullptr : &((*it).second));
 	}
 
 	///
 	CChain		*getChain(const CChainId &id)
 	{
 		TChainMap::iterator		it = _Chains.find(id);
-		return (it == _Chains.end() ? NULL : &((*it).second));
+		return (it == _Chains.end() ? nullptr : &((*it).second));
 	}
 
 	///
 	const CSurface	*getSurface(const CSurfaceId &id) const
 	{
 		TSurfaceMap::const_iterator	it = _Surfaces.find(id);
-		return (it == _Surfaces.end() ? NULL : &((*it).second));
+		return (it == _Surfaces.end() ? nullptr : &((*it).second));
 	}
 
 	///
 	const CChain	*getChain(const CChainId &id) const
 	{
 		TChainMap::const_iterator	it = _Chains.find(id);
-		return (it == _Chains.end() ? NULL : &((*it).second));
+		return (it == _Chains.end() ? nullptr : &((*it).second));
 	}
 
 

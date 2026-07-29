@@ -28,11 +28,11 @@
 namespace NL3D
 {
 
-CParticleSystemManager::TManagerList *CParticleSystemManager::ManagerList = NULL;
+CParticleSystemManager::TManagerList *CParticleSystemManager::ManagerList = nullptr;
 
 CParticleSystemManager::TManagerList     &CParticleSystemManager::getManagerList()
 {
-	if (ManagerList == NULL)
+	if (ManagerList == nullptr)
 	{
 		ManagerList = new TManagerList;
 	}
@@ -45,7 +45,7 @@ void CParticleSystemManager::release()
 {
 	if( ManagerList )
 		delete ManagerList;
-	ManagerList = NULL;
+	ManagerList = nullptr;
 }
 
 ///=========================================================

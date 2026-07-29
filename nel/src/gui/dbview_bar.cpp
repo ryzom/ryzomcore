@@ -55,7 +55,7 @@ namespace NLGUI
 	{
 		if( name == "value" )
 		{
-			if( _Value.getNodePtr() != NULL )
+			if( _Value.getNodePtr() != nullptr)
 				return _Value.getNodePtr()->getFullName();
 			else
 				return toString( _ValueInt );
@@ -63,7 +63,7 @@ namespace NLGUI
 		else
 		if( name == "range" )
 		{
-			if( _Range.getNodePtr() != NULL )
+			if( _Range.getNodePtr() != nullptr)
 				return _Range.getNodePtr()->getFullName();
 			else
 				return toString( _RangeInt );
@@ -71,7 +71,7 @@ namespace NLGUI
 		else
 		if( name == "reference" )
 		{
-			if( _Reference.getNodePtr() != NULL )
+			if( _Reference.getNodePtr() != nullptr)
 				return _Reference.getNodePtr()->getFullName();
 			else
 				return toString( _ReferenceInt );
@@ -183,22 +183,22 @@ namespace NLGUI
 	xmlNodePtr CDBViewBar::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
 		xmlNodePtr node = CViewBitmap::serialize( parentNode, type );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "bar" );
 
-		if( _Value.getNodePtr() != NULL )
+		if( _Value.getNodePtr() != nullptr)
 			xmlSetProp( node, BAD_CAST "value", BAD_CAST _Value.getNodePtr()->getFullName().c_str() );
 		else
 			xmlSetProp( node, BAD_CAST "value", BAD_CAST toString( _RangeInt ).c_str() );
 
-		if( _Range.getNodePtr() != NULL )
+		if( _Range.getNodePtr() != nullptr)
 			xmlSetProp( node, BAD_CAST "range", BAD_CAST _Range.getNodePtr()->getFullName().c_str() );
 		else
 			xmlSetProp( node, BAD_CAST "range", BAD_CAST toString( _RangeInt ).c_str() );
 
-		if( _Reference.getNodePtr() != NULL )
+		if( _Reference.getNodePtr() != nullptr)
 			xmlSetProp( node, BAD_CAST "reference", BAD_CAST _Reference.getNodePtr()->getFullName().c_str() );
 		else
 			xmlSetProp( node, BAD_CAST "reference", BAD_CAST toString( _ReferenceInt ).c_str() );
@@ -304,7 +304,7 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	void CDBViewBar::updateCoords ()
 	{
-		if (_ParentPos == NULL)
+		if (_ParentPos == nullptr)
 			_Slot.setParentPos (_Parent);
 		else
 			_Slot.setParentPos (_ParentPos);
@@ -370,41 +370,41 @@ namespace NLGUI
 	void CDBViewBar::setValueDbLink (const std::string &r)
 	{
 		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(r,false);
-		if (pNL != NULL) _Value.setNodePtr(pNL);
+		if (pNL != nullptr) _Value.setNodePtr(pNL);
 	}
 
 	// ----------------------------------------------------------------------------
 	void CDBViewBar::setRangeDbLink (const std::string &r)
 	{
 		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(r,false);
-		if (pNL != NULL) _Range.setNodePtr(pNL);
+		if (pNL != nullptr) _Range.setNodePtr(pNL);
 	}
 
 	// ----------------------------------------------------------------------------
 	void CDBViewBar::setReferenceDbLink (const std::string &r)
 	{
 		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(r,false);
-		if (pNL != NULL) _Reference.setNodePtr(pNL);
+		if (pNL != nullptr) _Reference.setNodePtr(pNL);
 	}
 
 	// ----------------------------------------------------------------------------
 	string CDBViewBar::getValueDbLink () const
 	{
-		if (_Value.getNodePtr() == NULL) return "";
+		if (_Value.getNodePtr() == nullptr) return "";
 		return _Value.getNodePtr()->getFullName();
 	}
 
 	// ----------------------------------------------------------------------------
 	string CDBViewBar::getRangeDbLink () const
 	{
-		if (_Range.getNodePtr() == NULL) return "";
+		if (_Range.getNodePtr() == nullptr) return "";
 		return _Range.getNodePtr()->getFullName();
 	}
 
 	// ----------------------------------------------------------------------------
 	string CDBViewBar::getReferenceDbLink () const
 	{
-		if (_Reference.getNodePtr() == NULL) return "";
+		if (_Reference.getNodePtr() == nullptr) return "";
 		return _Reference.getNodePtr()->getFullName();
 	}
 

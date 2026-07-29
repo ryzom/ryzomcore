@@ -185,7 +185,7 @@ static bool programHasNonUBOUniforms(GLuint programId)
 			GLenum type = GL_FLOAT;
 			GLint size = 0;
 			char name[256];
-			nglGetActiveUniform(programId, i, 256, NULL, &size, &type, name);
+			nglGetActiveUniform(programId, i, 256, nullptr, &size, &type, name);
 			if (!isSamplerUniformType(type))
 				return true;
 		}
@@ -202,13 +202,13 @@ bool CDriverGL3::compileProgram(IProgram *program, GLenum shaderType,
 	IProgram::TProfile linkedProfile, IProgram::TProfile ssoProfile,
 	const char *stageName)
 {
-	if (program->m_DrvInfo != NULL)
+	if (program->m_DrvInfo != nullptr)
 		return true;
 
 	if (program->m_CompileFailed)
 		return false;
 
-	IProgram::CSource *src = NULL;
+	IProgram::CSource *src = nullptr;
 	if (m_LinkedMegaShaders)
 	{
 		for (int i = 0; i < program->getSourceNb(); i++)
@@ -227,7 +227,7 @@ bool CDriverGL3::compileProgram(IProgram *program, GLenum shaderType,
 			{ src = s; break; }
 		}
 	}
-	if (src == NULL)
+	if (src == nullptr)
 	{
 		program->m_CompileFailed = true;
 		return false;
@@ -269,7 +269,7 @@ bool CDriverGL3::compileProgram(IProgram *program, GLenum shaderType,
 			program->m_CompileFailed = true;
 			return false;
 		}
-		nglShaderSource(shader, 1, &s, NULL);
+		nglShaderSource(shader, 1, &s, nullptr);
 		nglCompileShader(shader);
 
 		GLint compileOk;
@@ -277,7 +277,7 @@ bool CDriverGL3::compileProgram(IProgram *program, GLenum shaderType,
 		if (compileOk == 0)
 		{
 			char errorLog[1024];
-			nglGetShaderInfoLog(shader, 1024, NULL, errorLog);
+			nglGetShaderInfoLog(shader, 1024, nullptr, errorLog);
 			nlwarning("GL3: %s compile failed (pipeline stage): %s", stageName, errorLog);
 			std::vector<std::string> lines;
 			NLMISC::explode(std::string(s), std::string("\n"), lines);
@@ -309,7 +309,7 @@ bool CDriverGL3::compileProgram(IProgram *program, GLenum shaderType,
 			if (linkOk == 0)
 			{
 				char errorLog[1024];
-				nglGetProgramInfoLog(id, 1024, NULL, errorLog);
+				nglGetProgramInfoLog(id, 1024, nullptr, errorLog);
 				nlwarning("GL3: %s link failed (pipeline stage): %s", stageName, errorLog);
 				nglDeleteShader(shader);
 				nglDeleteProgram(id);
@@ -338,7 +338,7 @@ bool CDriverGL3::compileProgram(IProgram *program, GLenum shaderType,
 		if (ok == 0)
 		{
 			char errorLog[1024];
-			nglGetProgramInfoLog(id, 1024, NULL, errorLog);
+			nglGetProgramInfoLog(id, 1024, nullptr, errorLog);
 			nlwarning("GL3: %s compile failed: %s", stageName, errorLog);
 			std::vector<std::string> lines;
 			NLMISC::explode(std::string(s), std::string("\n"), lines);
@@ -392,7 +392,7 @@ bool CDriverGL3::compileProgram(IProgram *program, GLenum shaderType,
 		return false;
 	}
 
-	ItGPUPrgDrvInfoPtrList it = _GPUPrgDrvInfos.insert(_GPUPrgDrvInfos.end(), (NL3D::IProgramDrvInfos*)NULL);
+	ItGPUPrgDrvInfoPtrList it = _GPUPrgDrvInfos.insert(_GPUPrgDrvInfos.end(), (NL3D::IProgramDrvInfos*)nullptr);
 	CProgramDrvInfosGL3 *drvInfo = new CProgramDrvInfosGL3(this, it);
 	*it = drvInfo;
 	program->m_DrvInfo = drvInfo;
@@ -432,14 +432,14 @@ bool CDriverGL3::compileProgram(IProgram *program, GLenum shaderType,
 
 bool CDriverGL3::compileInsertVertexProgram(CVertexProgram *program)
 {
-	if (program->m_DrvInfo != NULL)
+	if (program->m_DrvInfo != nullptr)
 		return true;
 
 	if (program->m_CompileFailed)
 		return false;
 
 	// Find the glsl3vi source
-	IProgram::CSource *insertSrc = NULL;
+	IProgram::CSource *insertSrc = nullptr;
 	for (int i = 0; i < program->getSourceNb(); i++)
 	{
 		IProgram::CSource *s = program->getSource(i);
@@ -453,7 +453,7 @@ bool CDriverGL3::compileInsertVertexProgram(CVertexProgram *program)
 	}
 
 	// Create drvInfo for the insert program (no GL program of its own)
-	ItGPUPrgDrvInfoPtrList it = _GPUPrgDrvInfos.insert(_GPUPrgDrvInfos.end(), (NL3D::IProgramDrvInfos*)NULL);
+	ItGPUPrgDrvInfoPtrList it = _GPUPrgDrvInfos.insert(_GPUPrgDrvInfos.end(), (NL3D::IProgramDrvInfos*)nullptr);
 	CProgramDrvInfosGL3 *drvInfo = new CProgramDrvInfosGL3(this, it);
 	*it = drvInfo;
 	program->m_DrvInfo = drvInfo;
@@ -585,7 +585,7 @@ bool CDriverGL3::compileVertexProgram(CVertexProgram *program)
 			// through the shared GL binding point.
 			if (!m_PPClipPlanes)
 			{
-				IProgram::CSource *nelvpSrc = NULL;
+				IProgram::CSource *nelvpSrc = nullptr;
 				for (int i = 0; i < program->getSourceNb(); i++)
 				{
 					IProgram::CSource *s = program->getSource(i);
@@ -656,7 +656,7 @@ bool CDriverGL3::activeVertexProgram(CVertexProgram *program, bool driver)
 			if (drvInfo->isNelvpConverted && drvInfo->NelvpConstantUB)
 				m_NelvpActiveUB = drvInfo->NelvpConstantUB;
 			else
-				m_NelvpActiveUB = NULL;
+				m_NelvpActiveUB = nullptr;
 		}
 		return true;
 	}
@@ -667,30 +667,30 @@ bool CDriverGL3::activeVertexProgram(CVertexProgram *program, bool driver)
 		_DriverGLStates.forceUseProgram(0);
 		_DriverGLStates.forceBindProgramPipeline(ppoId);
 		m_PPOBound = true;
-		m_DriverShaderProgram = NULL;
+		m_DriverShaderProgram = nullptr;
 	}
 
 	// TODO: If !m_SupportSSO
 	// -> defer until actual setup; direct GL Uniforms not supported in that case, 
 	// or nelvp Uniforms go through the UBO staging area so not a problem
 
-	if (program == NULL)
+	if (program == nullptr)
 	{
 		nglUseProgramStages(ppoId, GL_VERTEX_SHADER_BIT, 0);
-		m_UserVertexProgram = NULL;
-		m_DriverVertexProgram = NULL;
-		m_NelvpActiveUB = NULL;
+		m_UserVertexProgram = nullptr;
+		m_DriverVertexProgram = nullptr;
+		m_NelvpActiveUB = nullptr;
 		return true;
 	}
 
 	IProgramDrvInfos *di = program->m_DrvInfo;
-	if (di == NULL)
+	if (di == nullptr)
 	{
 		if (!compileVertexProgram(program))
 		{
-			m_UserVertexProgram = NULL;
-			m_DriverVertexProgram = NULL;
-			m_NelvpActiveUB = NULL;
+			m_UserVertexProgram = nullptr;
+			m_DriverVertexProgram = nullptr;
+			m_NelvpActiveUB = nullptr;
 			return false;
 		}
 		di = program->m_DrvInfo;
@@ -709,7 +709,7 @@ bool CDriverGL3::activeVertexProgram(CVertexProgram *program, bool driver)
 	if (drvInfo->isNelvpConverted && drvInfo->NelvpConstantUB)
 		m_NelvpActiveUB = drvInfo->NelvpConstantUB;
 	else
-		m_NelvpActiveUB = NULL;
+		m_NelvpActiveUB = nullptr;
 
 	return true;
 }
@@ -747,14 +747,14 @@ bool CDriverGL3::activePixelProgram(CPixelProgram *program, bool driver)
 		_DriverGLStates.forceUseProgram(0);
 		_DriverGLStates.forceBindProgramPipeline(ppoId);
 		m_PPOBound = true;
-		m_DriverShaderProgram = NULL;
+		m_DriverShaderProgram = nullptr;
 	}
 
-	if (program == NULL)
+	if (program == nullptr)
 	{
 		nglUseProgramStages(ppoId, GL_FRAGMENT_SHADER_BIT, 0);
-		m_UserPixelProgram = NULL;
-		m_DriverPixelProgram = NULL;
+		m_UserPixelProgram = nullptr;
+		m_DriverPixelProgram = nullptr;
 		m_ProgramNoUniforms[PixelProgram] = false;
 		m_ProgramNoBuiltinUniforms[PixelProgram] = false;
 		m_ProgramOnlyUBOs[PixelProgram] = false;
@@ -766,12 +766,12 @@ bool CDriverGL3::activePixelProgram(CPixelProgram *program, bool driver)
 	}
 
 	IProgramDrvInfos *di = program->m_DrvInfo;
-	if (di == NULL)
+	if (di == nullptr)
 	{
 		if (!compilePixelProgram(program))
 		{
-			m_UserPixelProgram = NULL;
-			m_DriverPixelProgram = NULL;
+			m_UserPixelProgram = nullptr;
+			m_DriverPixelProgram = nullptr;
 			m_ProgramNoUniforms[PixelProgram] = false;
 			m_ProgramNoBuiltinUniforms[PixelProgram] = false;
 			m_ProgramOnlyUBOs[PixelProgram] = false;
@@ -808,7 +808,7 @@ uint32 CDriverGL3::getProgramId(TProgram program) const
 	if (m_DriverShaderProgram)
 	{
 		IProgramDrvInfos *di = m_DriverShaderProgram->m_DrvInfo;
-		if (di == NULL)
+		if (di == nullptr)
 			return 0;
 		CProgramDrvInfosGL3 *drvInfo = static_cast<CProgramDrvInfosGL3 *>(di);
 		return drvInfo->getProgramId();
@@ -821,20 +821,20 @@ uint32 CDriverGL3::getProgramId(TProgram program) const
 		if (m_DriverVertexProgram)
 			di = m_DriverVertexProgram->m_DrvInfo;
 		else
-			di = NULL;
+			di = nullptr;
 		break;
 	case IDriver::PixelProgram:
 		if (m_DriverPixelProgram)
 			di = m_DriverPixelProgram->m_DrvInfo;
 		else
-			di = NULL;
+			di = nullptr;
 		break;
 	default:
-		di = NULL;
+		di = nullptr;
 		break;
 	}
 
-	if (di == NULL)
+	if (di == nullptr)
 		return 0;
 
 	CProgramDrvInfosGL3 *drvInfo = static_cast<CProgramDrvInfosGL3 *>(di);
@@ -848,7 +848,7 @@ uint32 CDriverGL3::getProgramId(TProgram program) const
 CUniformBuffer *CDriverGL3::getNelvpUB(TProgram program) const
 {
 	if (program != VertexProgram)
-		return NULL;
+		return nullptr;
 	return m_NelvpActiveUB;
 }
 
@@ -888,7 +888,7 @@ IProgram* CDriverGL3::getProgram(TProgram program) const
 	// 	return m_DriverGeometryProgram;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 int CDriverGL3::getUniformLocation(TProgram program, const char *name)
@@ -1317,7 +1317,7 @@ bool CDriverGL3::setupBuiltinPrograms()
 	// Pure mega linked path (no user/material programs)
 	if (m_LinkedMegaShaders && m_UseMegaShaders && !effectiveVP && !effectivePP)
 	{
-		m_NelvpActiveUB = NULL;
+		m_NelvpActiveUB = nullptr;
 		return setupMegaLinkedPrograms()
 			&& setupUniforms();
 	}
@@ -1376,7 +1376,7 @@ bool CDriverGL3::setupBuiltinVertexProgram(CVertexProgram *effectiveVP, CPixelPr
 			m_VPSpecularOutput = true; // Inner mega VP always outputs specularColor
 			m_VPNormalOutput = false;
 			m_VPWorldSpacePositionOutput = false;
-			m_NelvpActiveUB = NULL;
+			m_NelvpActiveUB = nullptr;
 
 			// Determine PPL activation (same logic as setupMegaVertexProgram)
 			bool pplActive = false;
@@ -1458,7 +1458,7 @@ bool CDriverGL3::setupBuiltinVertexProgram(CVertexProgram *effectiveVP, CPixelPr
 		}
 
 		// Bind nelvp constant UBO if this is a converted nelvp program
-		m_NelvpActiveUB = NULL;
+		m_NelvpActiveUB = nullptr;
 		{
 			CProgramDrvInfosGL3 *di = static_cast<CProgramDrvInfosGL3 *>(
 				(IProgramDrvInfos *)effectiveVP->m_DrvInfo);
@@ -1485,7 +1485,7 @@ bool CDriverGL3::setupBuiltinVertexProgram(CVertexProgram *effectiveVP, CPixelPr
 		return true;
 	}
 
-	m_NelvpActiveUB = NULL;
+	m_NelvpActiveUB = nullptr;
 	if (m_UseMegaShaders) return setupMegaVertexProgram();
 
 	if (!m_SupportSSO) return false;
@@ -1658,9 +1658,9 @@ void CDriverGL3::setupUniforms(TProgram program)
 {
 	CMaterial &mat = *_CurrentMaterial;
 	IProgram *p = getProgram(program);
-	if (p == NULL) return;
+	if (p == nullptr) return;
 	IProgramDrvInfos *di = p->m_DrvInfo;
-	if (di == NULL) return;
+	if (di == nullptr) return;
 
 	CProgramDrvInfosGL3 *drvInfo = static_cast<CProgramDrvInfosGL3 *>(di);
 	GLuint progId = drvInfo->getProgramId();
@@ -2326,7 +2326,7 @@ void CDriverGL3::setupUniforms(TProgram program)
 void CDriverGL3::setupInitialUniforms(IProgram *program)
 {
 	IProgramDrvInfos *di = program->m_DrvInfo;
-	if (di != NULL)
+	if (di != nullptr)
 	{
 		CProgramDrvInfosGL3 *drvInfo = static_cast<CProgramDrvInfosGL3 *>(di);
 		GLuint id = drvInfo->getProgramId();
@@ -2402,7 +2402,7 @@ CShaderProgram *CDriverGL3::linkPrograms(
 	IProgram *ppProg, const CProgramFeatures &ppFeatures)
 {
 	if (!vpProg || !ppProg || !vpProg->m_DrvInfo || !ppProg->m_DrvInfo)
-		return NULL;
+		return nullptr;
 
 	CProgramDrvInfosGL3 *vpDrvInfo = static_cast<CProgramDrvInfosGL3 *>((IProgramDrvInfos *)vpProg->m_DrvInfo);
 	CProgramDrvInfosGL3 *ppDrvInfo = static_cast<CProgramDrvInfosGL3 *>((IProgramDrvInfos *)ppProg->m_DrvInfo);
@@ -2414,14 +2414,14 @@ CShaderProgram *CDriverGL3::linkPrograms(
 	if (count == 0 || vpShader == 0)
 	{
 		nlwarning("GL3: Failed to extract VP shader for linked program");
-		return NULL;
+		return nullptr;
 	}
 	count = 0;
 	nglGetAttachedShaders(ppDrvInfo->getProgramId(), 1, &count, &ppShader);
 	if (count == 0 || ppShader == 0)
 	{
 		nlwarning("GL3: Failed to extract PP shader for linked program");
-		return NULL;
+		return nullptr;
 	}
 
 	// Create combined linked program
@@ -2435,10 +2435,10 @@ CShaderProgram *CDriverGL3::linkPrograms(
 	if (linkOk == 0)
 	{
 		char errorLog[1024];
-		nglGetProgramInfoLog(linkedProg, 1024, NULL, errorLog);
+		nglGetProgramInfoLog(linkedProg, 1024, nullptr, errorLog);
 		nlwarning("GL3: Linked program link failed: %s", errorLog);
 		nglDeleteProgram(linkedProg);
-		return NULL;
+		return nullptr;
 	}
 
 	nldebug("GL3: Linked user program id=%u (VP=%s, PP=%s)",
@@ -2490,7 +2490,7 @@ CShaderProgram *CDriverGL3::linkPrograms(
 				ppProg->source()->UniformBufferFormats.end());
 		sp->addSource(src);
 
-		ItGPUPrgDrvInfoPtrList it = _GPUPrgDrvInfos.insert(_GPUPrgDrvInfos.end(), (NL3D::IProgramDrvInfos*)NULL);
+		ItGPUPrgDrvInfoPtrList it = _GPUPrgDrvInfos.insert(_GPUPrgDrvInfos.end(), (NL3D::IProgramDrvInfos*)nullptr);
 		CProgramDrvInfosGL3 *drv = new CProgramDrvInfosGL3(this, it);
 		*it = drv;
 		drv->setProgramId(linkedProg);
@@ -2639,7 +2639,7 @@ bool CDriverGL3::setupUserLinkedPrograms(CVertexProgram *vpProg, CPixelProgram *
 			vpStage = vpDi->NelvpClipVP;
 	}
 
-	CShaderProgram *sp = NULL;
+	CShaderProgram *sp = nullptr;
 
 	if (vpIsInsert && !ppProg)
 	{
@@ -2731,8 +2731,8 @@ bool CDriverGL3::setupUserLinkedPrograms(CVertexProgram *vpProg, CPixelProgram *
 
 	// Set shader program — getProgram/getProgramId will use this for both VP and PP
 	m_DriverShaderProgram = sp;
-	m_DriverVertexProgram = NULL;
-	m_DriverPixelProgram = NULL;
+	m_DriverVertexProgram = nullptr;
+	m_DriverPixelProgram = nullptr;
 
 	// Set UBO flags from VP features
 	m_ProgramNoUniforms[VertexProgram] = sp->VPFeatures.NoUniforms;
@@ -2753,7 +2753,7 @@ bool CDriverGL3::setupUserLinkedPrograms(CVertexProgram *vpProg, CPixelProgram *
 	m_ProgramUsesMaterialUBO[PixelProgram] = sp->PPFeatures.UsesMaterialUBO;
 
 	// Track nelvp UBO for the linked path
-	m_NelvpActiveUB = NULL;
+	m_NelvpActiveUB = nullptr;
 	if (vpProg && vpProg->m_DrvInfo)
 	{
 		CProgramDrvInfosGL3 *vpDi = static_cast<CProgramDrvInfosGL3 *>(
@@ -2912,8 +2912,8 @@ bool CDriverGL3::setupMegaLinkedPrograms()
 
 	// Set shader program — getProgram/getProgramId will use this for both VP and PP
 	m_DriverShaderProgram = sp;
-	m_DriverVertexProgram = NULL;
-	m_DriverPixelProgram = NULL;
+	m_DriverVertexProgram = nullptr;
+	m_DriverPixelProgram = nullptr;
 
 	// Linked shader programs are UBO-only
 	m_ProgramNoUniforms[VertexProgram] = false;

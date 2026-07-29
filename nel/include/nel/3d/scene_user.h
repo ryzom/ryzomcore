@@ -76,7 +76,8 @@ protected:
 		NLMISC::CQuat	Rot;
 		uint			SelectedTexture;
 		IAsyncLoadCallback *Callback;
-		CWaitingIG(UInstanceGroup **callerPtr, const NLMISC::CVector &pos, const NLMISC::CQuat &rot, uint selectedTexture, IAsyncLoadCallback *pCB)	: IGToLoad(NULL), CallerPtr(callerPtr), Pos(pos), Rot(rot), SelectedTexture(selectedTexture), Callback(pCB)
+		CWaitingIG(UInstanceGroup **callerPtr, const NLMISC::CVector &pos, const NLMISC::CQuat &rot, uint selectedTexture, IAsyncLoadCallback *pCB)	: IGToLoad(nullptr)
+		    , CallerPtr(callerPtr), Pos(pos), Rot(rot), SelectedTexture(selectedTexture), Callback(pCB)
 		{}
 	};
 	//
@@ -135,7 +136,7 @@ public:
 	virtual	void			deleteInstance(UInstance &inst);
 
 	virtual	void createInstanceGroupAndAddToSceneAsync (const std::string &instanceGroup, UInstanceGroup **pIG, const NLMISC::CVector &pos,
-														const NLMISC::CQuat &rot, uint selectedTexture, IAsyncLoadCallback *pCB = NULL);
+														const NLMISC::CQuat &rot, uint selectedTexture, IAsyncLoadCallback *pCB = nullptr);
 
 	virtual	void stopCreatingAndAddingIG(UInstanceGroup **pIG);
 	virtual void deleteInstanceGroup(UInstanceGroup *pIG);

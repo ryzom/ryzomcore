@@ -91,7 +91,7 @@ uint32 CComplexSound::getDuration()
 	for (; first != last; ++first)
 	{
 		CSound *sound = mixer->getSoundId(*first);
-		if (sound != NULL)
+		if (sound != nullptr)
 		{
 			durations.push_back(sint32(sound->getDuration()));
 		}
@@ -215,7 +215,7 @@ float CComplexSound::getMaxDistance() const
 		for (; first != last; ++first)
 		{
 			CSound *sound = mixer->getSoundId(*first);
-			if( sound != NULL)
+			if( sound != nullptr)
 			{
 				This->_MaxDist = max(_MaxDist, sound->getMaxDistance());
 			}
@@ -297,7 +297,7 @@ void	CComplexSound::importForm(const std::string& filename, NLGEORGES::UFormElm&
 	_Sounds.clear();
 	formRoot.getNodeByName(&psoundsArray, ".SoundType.SoundList");
 
-	if (psoundsArray != NULL)
+	if (psoundsArray != nullptr)
 	{
 		uint size;
 		psoundsArray->getArraySize(size);

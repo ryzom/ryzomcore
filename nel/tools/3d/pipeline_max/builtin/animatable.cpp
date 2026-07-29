@@ -46,7 +46,8 @@ namespace PIPELINE {
 namespace MAX {
 namespace BUILTIN {
 
-CAnimatable::CAnimatable(CScene *scene) : CSceneClass(scene), m_Unknown2140(NULL), m_AppData(NULL)
+CAnimatable::CAnimatable(CScene *scene) : CSceneClass(scene), m_Unknown2140(nullptr)
+    , m_AppData(nullptr)
 {
 
 }
@@ -56,9 +57,9 @@ CAnimatable::~CAnimatable()
 	if (!m_ChunksOwnsPointers)
 	{
 		delete m_Unknown2140;
-		m_Unknown2140 = NULL;
+		m_Unknown2140 = nullptr;
 		delete m_AppData;
-		m_AppData = NULL;
+		m_AppData = nullptr;
 	}
 }
 
@@ -104,7 +105,7 @@ void CAnimatable::build(uint16 version, uint filter)
 		{
 			// Discard appdata if it has no entries
 			delete m_AppData;
-			m_AppData = NULL;
+			m_AppData = nullptr;
 		}
 		else
 		{
@@ -115,8 +116,8 @@ void CAnimatable::build(uint16 version, uint filter)
 
 void CAnimatable::disown()
 {
-	m_Unknown2140 = NULL;
-	m_AppData = NULL;
+	m_Unknown2140 = nullptr;
+	m_AppData = nullptr;
 	CSceneClass::disown();
 }
 
@@ -148,7 +149,7 @@ void CAnimatable::toStringLocal(std::ostream &ostream, const std::string &pad, u
 
 STORAGE::CAppData *CAnimatable::appData()
 {
-	if (m_ChunksOwnsPointers) { nlerror("Not parsed"); return NULL; }
+	if (m_ChunksOwnsPointers) { nlerror("Not parsed"); return nullptr; }
 	if (!m_AppData)
 	{
 		m_AppData = new STORAGE::CAppData();

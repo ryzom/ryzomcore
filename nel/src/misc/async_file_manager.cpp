@@ -55,11 +55,11 @@ NLMISC_SAFE_SINGLETON_IMPL(CAsyncFileManager);
 
 void CAsyncFileManager::terminate ()
 {
-	if (_Instance != NULL)
+	if (_Instance != nullptr)
 	{
 		INelContext::getInstance().releaseSingletonPointer("CAsyncFileManager", _Instance);
 		delete _Instance;
-		_Instance = NULL;
+		_Instance = nullptr;
 	}
 }
 
@@ -179,7 +179,7 @@ void CAsyncFileManager::cancelSignal (bool *pSgn)
 	{
 		IRunnable *pR = it->Task;
 		CSignal *pS = dynamic_cast<CSignal*>(pR);
-		if (pS != NULL)
+		if (pS != nullptr)
 		{
 			if (pS->Sgn == pSgn)
 			{
@@ -208,7 +208,7 @@ CAsyncFileManager::CFileLoad::CFileLoad (const std::string& sFileName, uint8 **p
 void CAsyncFileManager::CFileLoad::run (void)
 {
 	FILE *f = nlfopen (_FileName, "rb");
-	if (f != NULL)
+	if (f != nullptr)
 	{
 		uint32 filesize=CFile::getFileSize (f);
 		uint8 *ptr = new uint8[filesize];
@@ -249,7 +249,7 @@ void CAsyncFileManager::CMultipleFileLoad::run (void)
 	for (uint32 i = 0; i < _FileNames.size(); ++i)
 	{
 		FILE *f = nlfopen (_FileNames[i], "rb");
-		if (f != NULL)
+		if (f != nullptr)
 		{
 			uint32 filesize=CFile::getFileSize (f);
 			uint8 *ptr = new uint8[filesize];

@@ -232,7 +232,8 @@ public:
 		NbJoinModes
 	};
 
-	CFarTP() : _Reason(NULL), _SessionIdToJoinFast(0), _InGameMode(false), _PreviousR2EdEnabled(false), _ReselectingChar(false), _IsServerHopEmbedded(false), _HookedForEditor(false), _DSSDown(false) /*, _SelfReconnecting(false)*/ {}
+	CFarTP() : _Reason(nullptr)
+	    , _SessionIdToJoinFast(0), _InGameMode(false), _PreviousR2EdEnabled(false), _ReselectingChar(false), _IsServerHopEmbedded(false), _HookedForEditor(false), _DSSDown(false) /*, _SelfReconnecting(false)*/ {}
 
 	// Get the address of a front-end service via http, then begin Far TP
 	bool requestFarTPToSession(TSessionId sessionId, uint8 charSlot, CFarTP::TJoinMode joinMode, bool bailOutIfSessionVanished);

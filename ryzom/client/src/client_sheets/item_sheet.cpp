@@ -221,7 +221,7 @@ void CItemSheet::build(const NLGEORGES::UFormElm &item)
 		debug("key '3d.never hide when equiped.");
 
 	// Load the different slot in wicth the item can be equipped.
-	const UFormElm *pElt = 0;
+	const UFormElm *pElt = nullptr;
 	// check uint32 is OK!
 	nlassert( SLOTTYPE::NB_SLOT_TYPE <= 32 );
 	SlotBF= 0;

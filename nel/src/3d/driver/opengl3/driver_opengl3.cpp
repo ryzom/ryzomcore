@@ -199,8 +199,8 @@ CDriverGL3::CDriverGL3()
 
 #elif defined (NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
 
-	_dpy = 0;
-	_visual_info = NULL;
+	_dpy = nullptr;
+	_visual_info = nullptr;
 
 #	ifdef XF86VIDMODE
 	// zero the old screen mode
@@ -252,7 +252,7 @@ CDriverGL3::CDriverGL3()
 	_DecorationWidth = 0;
 	_DecorationHeight = 0;
 
-	_CurrentMaterial=NULL;
+	_CurrentMaterial = nullptr;
 	_Initialized = false;
 
 	_FogEnabled= false;
@@ -265,7 +265,7 @@ CDriverGL3::CDriverGL3()
 	_CurrentFogColor[3]= 0;
 	_FogColorOverrideBlack = false;
 
-	_RenderTargetFBO = NULL;
+	_RenderTargetFBO = nullptr;
 
 	uint i;
 
@@ -274,7 +274,7 @@ CDriverGL3::CDriverGL3()
 	/*_AGPVertexArrayRange= NULL;
 	_VRAMVertexArrayRange= NULL;
 	_CurrentVertexArrayRange= NULL;*/
-	_CurrentVertexBufferGL= NULL;
+	_CurrentVertexBufferGL = nullptr;
 	/*_NVCurrentVARPtr= NULL;
 	_NVCurrentVARSize= 0;*/
 
@@ -311,11 +311,11 @@ CDriverGL3::CDriverGL3()
 
 	_WndActive = false;
 	//
-	_CurrentOcclusionQuery = NULL;
+	_CurrentOcclusionQuery = nullptr;
 	_SwapBufferCounter = 0;
 	_SwapBufferInFlight = 0;
 	for (size_t i = 0; i < NL3D_GL3_FRAME_QUEUE_MAX; ++i)
-		_SwapBufferSync[i] = 0;
+		_SwapBufferSync[i] = nullptr;
 	_PixelUploadPBO = 0;
 
 #ifdef USE_OPENGLES3
@@ -355,12 +355,12 @@ CDriverGL3::CDriverGL3()
 	_TextureTargetCubeFace = 0;
 	_TextureTargetUpload = false;
 
-	m_UserVertexProgram = NULL;
-	m_UserGeometryProgram = NULL;
-	m_UserPixelProgram = NULL;
-	m_DriverVertexProgram = NULL;
-	m_DriverGeometryProgram = NULL;
-	m_DriverPixelProgram = NULL;
+	m_UserVertexProgram = nullptr;
+	m_UserGeometryProgram = nullptr;
+	m_UserPixelProgram = nullptr;
+	m_DriverVertexProgram = nullptr;
+	m_DriverGeometryProgram = nullptr;
+	m_DriverPixelProgram = nullptr;
 
 	m_VPBuiltinTouched = true;
 	
@@ -398,13 +398,13 @@ CDriverGL3::CDriverGL3()
 	memset(m_ProgramUsesCameraUBO, 0, sizeof(m_ProgramUsesCameraUBO));
 	memset(m_ProgramUsesObjectUBO, 0, sizeof(m_ProgramUsesObjectUBO));
 	memset(m_ProgramUsesMaterialUBO, 0, sizeof(m_ProgramUsesMaterialUBO));
-	m_NelvpActiveUB = NULL;
+	m_NelvpActiveUB = nullptr;
 	_ObjectUBOId = 0;
 	_ObjectUBOCapacity = 0;
 	// _OverrideMaterialUBOId = 0; // Replaced by per-material UBO slots
 	for (sint i = 0; i < UBBindingCount; ++i)
 	{
-		_BoundUserUB[i] = NULL;
+		_BoundUserUB[i] = nullptr;
 		_UserUBBoundId[i] = 0;
 	}
 	memset(&_LightMapUBOOverride, 0, sizeof(_LightMapUBOOverride));
@@ -541,8 +541,8 @@ bool CDriverGL3::setupDisplay()
 	for (uint stage = 0; stage < IDRV_PROGRAM_MAXSAMPLERS; ++stage)
 	{
 		// init no texture.
-		_CurrentTexture[stage] = NULL;
-		_CurrentTextureInfoGL[stage] = NULL;
+		_CurrentTexture[stage] = nullptr;
+		_CurrentTextureInfoGL[stage] = nullptr;
 		// init no texture.
 	}
 	for (uint stage = 0; stage < IDRV_MAT_MAXTEXTURES; ++stage)
@@ -578,21 +578,21 @@ bool CDriverGL3::setupDisplay()
 	{
 		// NlLightTable: _MaxLightTableSize × NlLightInfo (96 bytes each)
 		_DriverGLStates.forceBindUniformBuffer(_LightTableUBOId);
-		nglBufferData(GL_UNIFORM_BUFFER, _MaxLightTableSize * sizeof(CLightTableUBOEntry), NULL, GL_STREAM_DRAW);
+		nglBufferData(GL_UNIFORM_BUFFER, _MaxLightTableSize * sizeof(CLightTableUBOEntry), nullptr, GL_STREAM_DRAW);
 		_LightTableUBOCapacity = _MaxLightTableSize;
 
 		// NlLightTable binding for lightmap dynamic UBO (1 entry)
 		_DriverGLStates.forceBindUniformBuffer(_LightMapDynUBOId);
-		nglBufferData(GL_UNIFORM_BUFFER, sizeof(CLightTableUBOEntry), NULL, GL_STREAM_DRAW);
+		nglBufferData(GL_UNIFORM_BUFFER, sizeof(CLightTableUBOEntry), nullptr, GL_STREAM_DRAW);
 
 		// NlCamera UBO
 		_DriverGLStates.forceBindUniformBuffer(_CameraUBOId);
-		nglBufferData(GL_UNIFORM_BUFFER, sizeof(CCameraUBOData), NULL, GL_STREAM_DRAW);
+		nglBufferData(GL_UNIFORM_BUFFER, sizeof(CCameraUBOData), nullptr, GL_STREAM_DRAW);
 		_CameraUBOCapacity = sizeof(CCameraUBOData);
 
 		// NlModel (object) UBO
 		_DriverGLStates.forceBindUniformBuffer(_ObjectUBOId);
-		nglBufferData(GL_UNIFORM_BUFFER, sizeof(CObjectUBOData), NULL, GL_STREAM_DRAW);
+		nglBufferData(GL_UNIFORM_BUFFER, sizeof(CObjectUBOData), nullptr, GL_STREAM_DRAW);
 
 		_DriverGLStates.forceBindUniformBuffer(0);
 	}
@@ -875,8 +875,8 @@ bool CDriverGL3::swapBuffers()
 	for (uint stage = 0; stage < IDRV_MAT_MAXTEXTURES; ++stage)
 	{
 		// init no texture.
-		_CurrentTexture[stage]= NULL;
-		_CurrentTextureInfoGL[stage]= NULL;
+		_CurrentTexture[stage] = nullptr;
+		_CurrentTextureInfoGL[stage] = nullptr;
 		// init no texture.
 		setTexGenModeVP(stage, TexGenDisabled);
 	}
@@ -886,7 +886,7 @@ bool CDriverGL3::swapBuffers()
 	// Same reasoning as textures :)
 	_DriverGLStates.forceDefaults();
 
-	_CurrentMaterial= NULL;
+	_CurrentMaterial = nullptr;
 
 	// Reset the profiling counter.
 	_PrimitiveProfileIn.reset();
@@ -920,12 +920,12 @@ bool CDriverGL3::swapBuffers()
 		if (_SwapBufferSync[syncJ]) // If there's a frame in flight
 		{
 			GLint status = 0;
-			nglGetSynciv(_SwapBufferSync[syncJ], GL_SYNC_STATUS, 1, NULL, &status);
+			nglGetSynciv(_SwapBufferSync[syncJ], GL_SYNC_STATUS, 1, nullptr, &status);
 			if (status == GL_SIGNALED)
 			{
 				// Frame is no longer in flight
 				nglDeleteSync(_SwapBufferSync[syncJ]);
-				_SwapBufferSync[syncJ] = 0;
+				_SwapBufferSync[syncJ] = nullptr;
 #if NL3D_GL3_FRAME_IN_FLIGHT_DEBUG
 				nldebug("Frame %u no longer in flight", (unsigned int)_SwapBufferInFlight);
 #endif
@@ -959,13 +959,13 @@ bool CDriverGL3::release()
 	// hide window
 	showWindow(false);
 
-	m_DriverVertexProgram = NULL;
-	m_DriverGeometryProgram = NULL;
-	m_DriverPixelProgram = NULL;
+	m_DriverVertexProgram = nullptr;
+	m_DriverGeometryProgram = nullptr;
+	m_DriverPixelProgram = nullptr;
 
-	m_UserVertexProgram = NULL;
-	m_UserGeometryProgram = NULL;
-	m_UserPixelProgram = NULL;
+	m_UserVertexProgram = nullptr;
+	m_UserGeometryProgram = nullptr;
+	m_UserPixelProgram = nullptr;
 
 	// Delete all cached programs
 	for (CHashSet<CVPBuiltin, CVPBuiltinHashTraits>::iterator it(m_VPBuiltinCache.begin()), end(m_VPBuiltinCache.end()); it != end; ++it)
@@ -1028,7 +1028,7 @@ bool CDriverGL3::release()
 		if (_SwapBufferSync[i])
 		{
 			nglDeleteSync(_SwapBufferSync[i]);
-			_SwapBufferSync[i] = 0;
+			_SwapBufferSync[i] = nullptr;
 		}
 	}
 
@@ -1309,8 +1309,8 @@ void CDriverGL3::copyFrameBufferToTexture(ITexture *tex,
 	}
 	// disable texturing.
 	// FIXME GL3 TEXTUREMODE _DriverGLStates.setTextureMode(CDriverGLStates3::TextureDisabled);
-	_CurrentTexture[0] = NULL;
-	_CurrentTextureInfoGL[0] = NULL;
+	_CurrentTexture[0] = nullptr;
+	_CurrentTextureInfoGL[0] = nullptr;
 	//if (_RenderTargetFBO)
 	//	gltext->activeFrameBufferObject(tex);
 }
@@ -1867,7 +1867,7 @@ IOcclusionQuery *CDriverGL3::createOcclusionQuery()
 
 	GLuint id;
 	nglGenQueries(1, &id);
-	if (id == 0) return NULL;
+	if (id == 0) return nullptr;
 	COcclusionQueryGL3 *oqgl = new COcclusionQueryGL3;
 	oqgl->Driver = this;
 	oqgl->ID = id;
@@ -1887,14 +1887,14 @@ void CDriverGL3::deleteOcclusionQuery(IOcclusionQuery *oq)
 	if (!oq) return;
 	COcclusionQueryGL3 *oqgl = NLMISC::safe_cast<COcclusionQueryGL3 *>(oq);
 	nlassert((CDriverGL3 *) oqgl->Driver == this); // should come from the same driver
-	oqgl->Driver = NULL;
+	oqgl->Driver = nullptr;
 	nlassert(oqgl->ID != 0);
 	GLuint id = oqgl->ID;
 	nglDeleteQueries(1, &id);
 	_OcclusionQueryList.erase(oqgl->Iterator);
 	if (oqgl == _CurrentOcclusionQuery)
 	{
-		_CurrentOcclusionQuery = NULL;
+		_CurrentOcclusionQuery = nullptr;
 	}
 	delete oqgl;
 
@@ -1933,7 +1933,7 @@ void COcclusionQueryGL3::end()
 	nlassert(Driver->_CurrentOcclusionQuery == this); // only one query at a time
 	nlassert(ID);
 	nglEndQuery(NL_GL3_OCCLUSION_QUERY_TARGET);
-	Driver->_CurrentOcclusionQuery = NULL;
+	Driver->_CurrentOcclusionQuery = nullptr;
 
 }
 

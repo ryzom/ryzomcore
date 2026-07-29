@@ -265,7 +265,7 @@ IStorageObject *CSceneClass::getChunk(uint16 id)
 		}
 	}
 	// nldebug("Chunk 0x%x not found, this is allowed, returning NULL", (uint32)id);
-	return NULL;
+	return nullptr;
 }
 
 void CSceneClass::putChunk(uint16 id, IStorageObject *storageObject)

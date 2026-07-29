@@ -59,7 +59,7 @@ public:
 	static void releaseInstance()
 	{
 		delete _Instance;
-		_Instance = NULL;
+		_Instance = nullptr;
 	}
 
 	/// Destructor

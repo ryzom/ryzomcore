@@ -77,10 +77,10 @@ public:
 	virtual	void	loadAllZonesAround(const CVector &pos, float radius, std::vector<std::string> &zonesAdded);
 	/// Delete old zones, or load new zones, around a position. new Zones are loaded async.
 	virtual	void	refreshZonesAround(const CVector &pos, float radius);
-	virtual	void	refreshZonesAround(const CVector &pos, float radius, std::string &zoneAdded, std::string &zoneRemoved, const std::vector<uint16> *validZoneIds = NULL);
+	virtual	void	refreshZonesAround(const CVector &pos, float radius, std::string &zoneAdded, std::string &zoneRemoved, const std::vector<uint16> *validZoneIds = nullptr);
 	/// Delete old zones, or load new zones, around a position, until it is finished. This is a blocking call.
 	virtual	void	refreshAllZonesAround(const CVector &pos, float radius, std::vector<std::string> &zonesAdded, std::vector<std::string> &zonesRemoved,
-		NLMISC::IProgressCallback &progress, const std::vector<uint16> *validZoneIds = NULL);
+		NLMISC::IProgressCallback &progress, const std::vector<uint16> *validZoneIds = nullptr);
 	virtual	void	getAllZoneLoaded(std::vector<std::string>	&zoneLoaded) const;
 	virtual void    invalidateAllTiles();
 	virtual void	removeAllZones();

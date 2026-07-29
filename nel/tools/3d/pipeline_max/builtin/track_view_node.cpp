@@ -51,7 +51,8 @@ namespace BUILTIN {
 #define PMB_TVNODE_IDENTIFIER_CHUNK_ID 0x0120
 #define PMB_TVNODE_ISNOTNODE_CHUNK_ID 0x0130
 
-CTrackViewNode::CTrackViewNode(CScene *scene) : CReferenceTarget(scene), m_Empty0140(NULL), m_Empty0150(NULL)
+CTrackViewNode::CTrackViewNode(CScene *scene) : CReferenceTarget(scene), m_Empty0140(nullptr)
+    , m_Empty0150(nullptr)
 {
 
 }
@@ -157,7 +158,7 @@ void CTrackViewNode::toStringLocal(std::ostream &ostream, const std::string &pad
 
 CReferenceMaker *CTrackViewNode::getReference(uint index) const
 {
-	if (m_Children.size() <= index) return NULL;
+	if (m_Children.size() <= index) return nullptr;
 	return m_Children[index].Reference;
 }
 

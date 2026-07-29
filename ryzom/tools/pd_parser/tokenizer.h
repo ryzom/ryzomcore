@@ -106,7 +106,7 @@ public:
 	class CToken
 	{
 	public:
-		CToken(uint start = 0, uint end = 0, TToken token = TokenUnknown, CTokenizer* tokenizer = NULL) : Tokenizer(tokenizer), Start(start), End(end), Token(token) 			{}
+		CToken(uint start = 0, uint end = 0, TToken token = TokenUnknown, CTokenizer* tokenizer = nullptr) : Tokenizer(tokenizer), Start(start), End(end), Token(token) 			{}
 		CToken(CTokenizer* tokenizer) : Tokenizer(tokenizer), Start(0), End(0), Token(TokenUnknown) 	{}
 
 		CTokenizer*	Tokenizer;
@@ -117,7 +117,8 @@ public:
 		std::string	get() const		{ return Tokenizer->get(*this); }
 	};
 
-	CTokenizer() : _Buffer(NULL), _Size(0), _CurrentToken(0)	{ }
+	CTokenizer() : _Buffer(nullptr)
+	    , _Size(0), _CurrentToken(0)	{ }
 
 	CTokenizer(const std::string &text)
 	{
@@ -365,9 +366,9 @@ public:
 	}
 
 	/// error at
-	void	error(const CToken& token, const char *errType = "syntax", const char *errMsg = NULL)
+	void	error(const CToken& token, const char *errType = "syntax", const char *errMsg = nullptr)
 	{
-		if (token.Tokenizer != this && token.Tokenizer != NULL)
+		if (token.Tokenizer != this && token.Tokenizer != nullptr)
 		{
 			token.Tokenizer->error(token, errType, errMsg);
 			return;
@@ -400,7 +401,7 @@ public:
 
 		NLMISC::createDebug ();
 
-		std::string	errorMsg = NLMISC::toString("PD_PARSE: file %s, %s error at line %d, column %d%s%s", _File.c_str(), errType, line, col, (errMsg != NULL ? ": " : ""), (errMsg != NULL ? errMsg : ""));
+		std::string	errorMsg = NLMISC::toString("PD_PARSE: file %s, %s error at line %d, column %d%s%s", _File.c_str(), errType, line, col, (errMsg != nullptr ? ": " : ""), (errMsg != nullptr ? errMsg : ""));
 
 		NLMISC::ErrorLog->displayRawNL("%s", errorMsg.c_str());
 		std::string	extr(_Buffer+lineStartAt, lineEndAt-lineStartAt);
@@ -460,7 +461,7 @@ private:
 		_Size = 0;
 		_TempToken.Start = 0;
 		_TempToken.End = 0;
-		_Buffer = NULL;
+		_Buffer = nullptr;
 		_Mark = 0;
 		_File.clear();
 	}

@@ -75,7 +75,10 @@ class CParseNode
 {
 public:
 
-	CParseNode() : Parent(NULL), FileNode(NULL), DbNode(NULL), Env(NULL)	{}
+	CParseNode() : Parent(nullptr)
+	    , FileNode(nullptr)
+	    , DbNode(nullptr)
+	    , Env(nullptr)	{}
 
 	virtual ~CParseNode()
 	{
@@ -125,7 +128,7 @@ public:
 		for (i=0; i<Nodes.size(); ++i)
 			if (Nodes[i]->Name == name)
 				return Nodes[i];
-		return NULL;
+		return nullptr;
 	}
 
 	///
@@ -321,8 +324,10 @@ class CTypeNode : public CParseNode
 {
 public:
 	CTypeNode() :
-		ToCppType(NULL), 
-		ToStorageType(NULL), 
+		ToCppType(nullptr)
+	    , 
+		ToStorageType(nullptr)
+	    , 
 		ExternFlag(false),
 		InternFlag(false),
 		Id(0) 
@@ -354,7 +359,7 @@ public:
 
 	std::string			storageToCpp()
 	{
-		if (ToCppType != NULL)
+		if (ToCppType != nullptr)
 			return "__pds_cnv_type_"+NLMISC::toString(Id)+"_s2c";
 		else
 			return "("+CppType+")";
@@ -362,7 +367,7 @@ public:
 
 	std::string			cppToStorage()
 	{
-		if (ToStorageType != NULL)
+		if (ToStorageType != nullptr)
 			return "__pds_cnv_type_"+NLMISC::toString(Id)+"_c2s";
 		else
 			return "("+StorageType+")";
@@ -552,7 +557,8 @@ public:
 		ParentIsHidden(false),
 		ForceReference(false),
 		PDSMapped(false),
-		MapClass(NULL),
+		MapClass(nullptr)
+	    ,
 		Columns(-1),
 		Id(0),
 		HasRowAccess(false),
@@ -772,16 +778,16 @@ public:
 	std::string		toUint64(std::string replVar = "");
 
 	//
-	void			generateContent(CCallContext *context = NULL);
+	void			generateContent(CCallContext *context = nullptr);
 
-	void			generateTypeContent(CCallContext *context = NULL);
-	void			generateClassContent(CCallContext *context = NULL);
+	void			generateTypeContent(CCallContext *context = nullptr);
+	void			generateClassContent(CCallContext *context = nullptr);
 	void			generateBackRefContent();
 	void			generateForwardRefContent();
-	void			generateArrayTypeContent(CCallContext *context = NULL);
-	void			generateArrayClassContent(CCallContext *context = NULL);
-	void			generateArrayRefContent(CCallContext *context = NULL);
-	void			generateSetContent(CCallContext *context = NULL);
+	void			generateArrayTypeContent(CCallContext *context = nullptr);
+	void			generateArrayClassContent(CCallContext *context = nullptr);
+	void			generateArrayRefContent(CCallContext *context = nullptr);
+	void			generateSetContent(CCallContext *context = nullptr);
 
 
 	void			generateArrayApplyCode();
@@ -1031,16 +1037,16 @@ public:
 	std::string				RootRow;
 	uint					Column;
 
-	CCallContext(CDeclarationNode* decl = NULL)
+	CCallContext(CDeclarationNode* decl = nullptr)
 	{
-		if (decl != NULL)
+		if (decl != nullptr)
 			Context.push_back(decl);
 	}
 
 	bool	hasRootEntityIdKey()
 	{
 		CDeclarationNode*	k = getRootCaller()->getClassKey();
-		if (k != NULL)
+		if (k != nullptr)
 		{
 			 return (getRootCaller()->getTypeNode(getRootCaller()->getKey()->Type)->CppType == "CEntityId");
 		}
@@ -1291,16 +1297,16 @@ public:
 
 inline CFileNode*	CParseNode::getFileNode()
 {
-	if (FileNode != NULL)
+	if (FileNode != nullptr)
 		return FileNode;
 
 	CParseNode*	node = this;
-	CFileNode*	fnode = NULL;
+	CFileNode*	fnode = nullptr;
 
-	while (node != NULL && (fnode = dynamic_cast<CFileNode*>(node)) == NULL)
+	while (node != nullptr && (fnode = dynamic_cast<CFileNode*>(node)) == nullptr)
 		node = node->Parent;
 
-	if (fnode == NULL)
+	if (fnode == nullptr)
 		error("Can't find file node", "internal");
 
 	FileNode = fnode;
@@ -1310,16 +1316,16 @@ inline CFileNode*	CParseNode::getFileNode()
 
 inline CDbNode*	CParseNode::getDbNode()
 {
-	if (DbNode != NULL)
+	if (DbNode != nullptr)
 		return DbNode;
 
 	CParseNode*	node = this;
-	CDbNode*	fnode = NULL;
+	CDbNode*	fnode = nullptr;
 
-	while (node != NULL && (fnode = dynamic_cast<CDbNode*>(node)) == NULL)
+	while (node != nullptr && (fnode = dynamic_cast<CDbNode*>(node)) == nullptr)
 		node = node->Parent;
 
-	if (fnode == NULL)
+	if (fnode == nullptr)
 		error("Can't find db node", "internal");
 
 	DbNode = fnode;
@@ -1355,13 +1361,13 @@ inline CTypeNode	*CParseNode::getTypeNode(const std::string &name, bool genError
 			return db->TypeNodes[i];
 	if (genError)
 		error("Can't find type '"+name+"'");
-	return NULL;
+	return nullptr;
 }
 
 inline CEnumNode	*CParseNode::getEnumNode(const std::string &name, bool genError)
 {
 	CEnumNode*	node = dynamic_cast<CEnumNode*>(getTypeNode(name, genError));
-	if (node == NULL && genError)
+	if (node == nullptr && genError)
 		error("Can't find enum '"+name+"'");
 	return node;
 }
@@ -1369,7 +1375,7 @@ inline CEnumNode	*CParseNode::getEnumNode(const std::string &name, bool genError
 inline CDimensionNode	*CParseNode::getDimensionNode(const std::string &name, bool genError)
 {
 	CDimensionNode*	node = dynamic_cast<CDimensionNode*>(getTypeNode(name, genError));
-	if (node == NULL && genError)
+	if (node == nullptr && genError)
 		error("Can't find dimension '"+name+"'");
 	return node;
 }
@@ -1377,7 +1383,7 @@ inline CDimensionNode	*CParseNode::getDimensionNode(const std::string &name, boo
 inline CIndexNode	*CParseNode::getIndexNode(const std::string &name, bool genError)
 {
 	CIndexNode*	node = dynamic_cast<CIndexNode*>(getTypeNode(name, genError));
-	if (node == NULL && genError)
+	if (node == nullptr && genError)
 		error("Can't find index type '"+name+"' (neither enum nor dimension)");
 	return node;
 }
@@ -1391,7 +1397,7 @@ inline CClassNode	*CParseNode::getClassNode(const std::string &name, bool genErr
 			return db->ClassNodes[i];
 	if (genError)
 		error("Can't find class '"+name+"'");
-	return NULL;
+	return nullptr;
 }
 
 inline bool			CDbNode::addTypeNode(const std::string &name, const std::string &displayName, const std::string &defaultValue)
@@ -1403,8 +1409,8 @@ inline bool			CDbNode::addTypeNode(const std::string &name, const std::string &d
 	node->CppType = name;
 	node->StorageType = name;
 
-	node->ToCppType = NULL;
-	node->ToStorageType = NULL;
+	node->ToCppType = nullptr;
+	node->ToStorageType = nullptr;
 
 	node->DefaultValue = defaultValue;
 
@@ -1421,7 +1427,7 @@ inline bool			CDbNode::addTypeNode(const std::string &name, const std::string &d
 inline CDeclarationNode*	CClassNode::getDeclarationNode(const std::string &name)
 {
 	CDeclarationNode	*node;
-	if ((node = dynamic_cast<CDeclarationNode*>(getNode(name))) == NULL)
+	if ((node = dynamic_cast<CDeclarationNode*>(getNode(name))) == nullptr)
 		error("declaration '"+name+"' not found");
 	return node;
 }
@@ -1430,7 +1436,7 @@ inline bool	CClassNode::useEntityId()
 {
 	 //return !ClassKey.empty() && getTypeNode(getKey()->Type)->CppType == "CEntityId";
 	CDeclarationNode*	k = getClassKey();
-	 return k!=NULL && getTypeNode(k->Type)->CppType == "CEntityId";
+	 return k != nullptr && getTypeNode(k->Type)->CppType == "CEntityId";
 }
 
 inline CDeclarationNode*	CClassNode::getClassKey()
@@ -1438,7 +1444,7 @@ inline CDeclarationNode*	CClassNode::getClassKey()
 	if (ClassKey.empty())
 	{
 		if (Inherited.empty())
-			return NULL;
+			return nullptr;
 		CClassNode*	p = getClassNode(Inherited);
 		return p->getClassKey();
 	}
@@ -1451,33 +1457,33 @@ inline CDeclarationNode*	CClassNode::getClassKey()
 
 inline CDeclarationNode*	CClassNode::getKey()
 {
-	CDeclarationNode*	key = NULL;
+	CDeclarationNode*	key = nullptr;
 	CClassNode*			classNode = this;
-	while (classNode != NULL)
+	while (classNode != nullptr)
 	{
 		key = dynamic_cast<CDeclarationNode*>(classNode->getNode(classNode->ClassKey));
-		if (key != NULL)
+		if (key != nullptr)
 			return key;
 		classNode = getClassNode(Inherited, false);
 	}
 	error("key declaration '"+ClassKey+"' not found");
-	return NULL;
+	return nullptr;
 	//return getDeclarationNode(ClassKey);
 }
 
 inline CDeclarationNode*	CClassNode::getDeclaration(const std::string& name)
 {
-	CDeclarationNode*	decl = NULL;
+	CDeclarationNode*	decl = nullptr;
 	CClassNode*			classNode = this;
-	while (classNode != NULL)
+	while (classNode != nullptr)
 	{
 		decl = dynamic_cast<CDeclarationNode*>(classNode->getNode(name));
-		if (decl != NULL)
+		if (decl != nullptr)
 			return decl;
 		classNode = getClassNode(classNode->Inherited, false);
 	}
 	error("declaration '"+name+"' not found");
-	return NULL;
+	return nullptr;
 }
 
 

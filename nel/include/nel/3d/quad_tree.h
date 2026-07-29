@@ -255,7 +255,7 @@ private:// Classes.
 		}
 		bool	isSelected()	// return true if Prev is not NULL!!!
 		{
-			return Prev!=NULL;
+			return Prev != nullptr;
 		}
 	};
 

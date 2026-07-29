@@ -153,9 +153,9 @@ CBotChatPageTrade::CBotChatPageTrade()
 	_QuantityCheck = 0;
 	_CurrItemIndex = 0;
 	_BuyOnly = false;
-	_CurrItemSheet = NULL;
+	_CurrItemSheet = nullptr;
 	_BuyMean = Money;
-	_FamePriceFactorLeaf = NULL;
+	_FamePriceFactorLeaf = nullptr;
 	_FilterBuyDlgMaxValue= 0;
 	_DownloadComplete = false;
 }
@@ -388,7 +388,7 @@ uint64 CBotChatPageTrade::getCurrItemPrice(bool mulByFame) const
 		{
 			// get the price from the sheet
 			const CItemSheet *pIS = _CurrItemSheet->asItemSheet();
-			if (pIS != NULL)
+			if (pIS != nullptr)
 			{
 				if (pIS->Family == ITEMFAMILY::GUILD_OPTION)
 					return pIS->GuildOption.MoneyCost;
@@ -398,7 +398,7 @@ uint64 CBotChatPageTrade::getCurrItemPrice(bool mulByFame) const
 		{
 			// This is perhaps an outpost building
 			const COutpostBuildingSheet *pOB = _CurrItemSheet->asOutpostBuildingSheet();
-			if (pOB != NULL)
+			if (pOB != nullptr)
 				return pOB->CostDapper;
 		}
 	}
@@ -435,7 +435,7 @@ uint64 CBotChatPageTrade::getCurrItemXP() const
 	{
 		// get the cp from the sheet
 		const CItemSheet *pIS = _CurrItemSheet->asItemSheet();
-		if (pIS != NULL)
+		if (pIS != nullptr)
 		{
 			if (pIS->Family == ITEMFAMILY::GUILD_OPTION)
 				return pIS->GuildOption.XPCost;
@@ -457,7 +457,7 @@ void	CBotChatPageTrade::getItemFactionTypePoints(CDBCtrlSheet *sheet, PVP_CLAN::
 	points= 0;
 
 	// Bad setup => abort
-	if ((_BuyMean != MoneyFactionPoints) ||	(sheet == NULL))
+	if ((_BuyMean != MoneyFactionPoints) ||	(sheet == nullptr))
 		return;
 
 	//CCDBNodeLeaf *currencyLeaf = dynamic_cast<CCDBNodeLeaf *>(sheet->getRootBranch()->getNode(ICDBNode::CTextId("CURRENCY"), false));
@@ -471,7 +471,7 @@ void	CBotChatPageTrade::getItemFactionTypePoints(CDBCtrlSheet *sheet, PVP_CLAN::
 	// bad DB => abort
 	CCDBNodeLeaf *ftLeaf = dynamic_cast<CCDBNodeLeaf *>(sheet->getRootBranch()->getNode(ICDBNode::CTextId("FACTION_TYPE"), false));
 	CCDBNodeLeaf *fppLeaf = dynamic_cast<CCDBNodeLeaf *>(sheet->getRootBranch()->getNode(ICDBNode::CTextId("PRICE"), false));
-	if (ftLeaf == NULL || fppLeaf == NULL)
+	if (ftLeaf == nullptr || fppLeaf == nullptr)
 		return;
 
 	// else copy
@@ -501,7 +501,7 @@ uint32 CBotChatPageTrade::getUserFactionPoints(PVP_CLAN::TPVPClan clan) const
 	uint32 nClan = clan - PVP_CLAN::BeginClans;
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CCDBNodeLeaf *pLeaf = NLGUI::CDBManager::getInstance()->getDbProp(toString("LOCAL:USER:FACTION_POINTS_%d:VALUE", nClan), false);
-	if (pLeaf == NULL)
+	if (pLeaf == nullptr)
 		return 0;
 
 	return pLeaf->getValue32();
@@ -716,7 +716,7 @@ void CBotChatPageTrade::updateTradeModal()
 							else if (_BuyMean == MoneyFactionPoints)
 							{
 								// Check if the player has enough faction point for the object selected
-								if ((confirmTradeGroup != NULL) && (cantTradeButton != NULL) && (cantTradeGroup != NULL))
+								if ((confirmTradeGroup != nullptr) && (cantTradeButton != nullptr) && (cantTradeGroup != nullptr))
 								{
 									if ((fpCost*quantity) > userFactionPoints)
 									{
@@ -1347,7 +1347,7 @@ void CBotChatPageTrade::cancelTrade()
 	_UsePriceRetire = false;
 	_CannotValidateBecauseRetireNotAvailable = false;
 	_QuantityCheck = 0;
-	_CurrItemSheet = NULL;
+	_CurrItemSheet = nullptr;
 	_CurrItemCheck.reset();
 }
 
@@ -1735,7 +1735,7 @@ void	CBotChatPageTrade::startChangeBuyFilterDialog(const std::string &dbext, con
 	setFocusOnEditBox(ig->getGroup("edit_min:eb"));
 
 	// go
-	CWidgetManager::getInstance()->enableModalWindow(NULL, ig);
+	CWidgetManager::getInstance()->enableModalWindow(nullptr, ig);
 }
 
 // ***************************************************************************
@@ -1823,7 +1823,7 @@ void		CBotChatPageTrade::startChangeBuyFilterMPDialog()
 	if(!ig)	return;
 
 	// go
-	CWidgetManager::getInstance()->enableModalWindow(NULL, ig);
+	CWidgetManager::getInstance()->enableModalWindow(nullptr, ig);
 }
 
 // ***************************************************************************
@@ -2019,7 +2019,7 @@ void		CBotChatPageTrade::startChangeBuyFilterClassDialog()
 	if(!ig)	return;
 
 	// go
-	CWidgetManager::getInstance()->enableModalWindow(NULL, ig);
+	CWidgetManager::getInstance()->enableModalWindow(nullptr, ig);
 }
 
 
@@ -2097,7 +2097,7 @@ void		CBotChatPageTrade::startChangeBuyFilterItemTypeDialog()
 	if(!ig)	return;
 
 	// go
-	CWidgetManager::getInstance()->enableModalWindow(NULL, ig);
+	CWidgetManager::getInstance()->enableModalWindow(nullptr, ig);
 }
 
 // ***************************************************************************
@@ -2136,7 +2136,7 @@ void		CBotChatPageTrade::startDestroyItemDialog()
 	// show the modal
 	CInterfaceGroup		*ig= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(WIN_BOT_CHAT_DESTROY_ITEM));
 	if(!ig)	return;
-	CWidgetManager::getInstance()->enableModalWindow(NULL, ig);
+	CWidgetManager::getInstance()->enableModalWindow(nullptr, ig);
 }
 
 // ***************************************************************************

@@ -235,7 +235,7 @@ namespace NLMISC
 			nlwarning("CXMLPack::getFile : Can't extract pack and filename from '%s', found %u part instead of 2 when spliting apart from '@@'",
 				sFileName.c_str(),
 				parts.size());
-			return NULL;
+			return nullptr;
 		}
 
 		TStringId packId = CStringMapper::map(parts[0]);
@@ -245,7 +245,7 @@ namespace NLMISC
 		if (packIt == _XMLPacks.end())
 		{
 			nlwarning("CXMLPack::getFile : Can't find xml pack file named '%s' to open '%s'", parts[0].c_str(), sFileName.c_str());
-			return NULL;
+			return nullptr;
 		}
 		TXMLPackInfo &packInfo = packIt->second;
 		TXMLPackInfo::TFileList::iterator fileIt = packInfo._XMLFiles.find(fileId);
@@ -253,7 +253,7 @@ namespace NLMISC
 		{
 			nlwarning("CXMLPack::getFile : Can't find xml file named '%s' in pack '%s'",
 				parts[1].c_str(), parts[0].c_str());
-			return NULL;
+			return nullptr;
 		}
 
 		// ok, we have found it !

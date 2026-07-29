@@ -53,12 +53,12 @@ using namespace NL3D;
 using namespace NLMISC;
 
 // Font demo state
-static CFontManager *s_FontManager = NULL;
-static CTextContext *s_TextContext = NULL;
-static CComputedString *s_CsRotation = NULL;
-static CComputedString *s_Cs3d = NULL;
-static CComputedString *s_CsUnicode = NULL;
-static CValueSmoother *s_SmoothFPS = NULL;
+static CFontManager *s_FontManager = nullptr;
+static CTextContext *s_TextContext = nullptr;
+static CComputedString *s_CsRotation = nullptr;
+static CComputedString *s_Cs3d = nullptr;
+static CComputedString *s_CsUnicode = nullptr;
+static CValueSmoother *s_SmoothFPS = nullptr;
 static float s_X = 0, s_Y = 0, s_Z = 0;
 static float s_Scale = 1.0f, s_Way = 0.05f;
 static float s_Angle = 0.0f;

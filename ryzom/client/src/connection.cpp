@@ -297,14 +297,14 @@ void	CSoundGlobalMenu::updateSound()
 		{
 			_MusicPlayed= _MusicWanted;
 			// play the music
-			if (SoundMngr != NULL)
+			if (SoundMngr != nullptr)
 				SoundMngr->playMusic(_MusicPlayed, 500, _MusicWantedAsync, true, true);
 		}
 	}
 
 
 	// **** update mngr
-	if (SoundMngr != NULL)
+	if (SoundMngr != nullptr)
 		SoundMngr->update();
 }
 
@@ -951,7 +951,7 @@ TInterfaceState globalMenu()
 	if (ClientCfg.SkipIntro)
 	{
 		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:SKIP_INTRO", false);
-		if (pNL != NULL)
+		if (pNL != nullptr)
 			pNL->setValue64(1);
 	}
 
@@ -1006,7 +1006,7 @@ TInterfaceState globalMenu()
 			{
 				// Display the firewall alert string
 				CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:outgame:connecting:title"));
-				if (pVT != NULL)
+				if (pVT != nullptr)
 					pVT->setTextLocalized("uiFirewallAlert", true);
 
 				// The mouse and fullscreen mode should be unlocked for the user to set the firewall permission
@@ -1040,7 +1040,7 @@ TInterfaceState globalMenu()
 
 		// Interface handling & displaying (processes clicks...)
 		pIM->updateFrameEvents();
-		pIM->updateFrameViews(NULL);
+		pIM->updateFrameViews(nullptr);
 		IngameDbMngr.flushObserverCalls();
 		NLGUI::CDBManager::getInstance()->flushObserverCalls();
 
@@ -1112,7 +1112,7 @@ TInterfaceState globalMenu()
 					if (charSelect == -1)
 					{
 						CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:SERVER_RECEIVED_CHARS", false);
-						if (pNL != NULL)
+						if (pNL != nullptr)
 						{
 							pNL->setValue64 (1); // Send impulse to interface observers
 							IngameDbMngr.flushObserverCalls();
@@ -1149,7 +1149,7 @@ TInterfaceState globalMenu()
 							}
 						}
 						// Auto-selection for fast launching (dev only)
-						CAHManager::getInstance()->runActionHandler("launch_game", NULL, toString("slot=%d|edit_mode=0", charSelect));
+						CAHManager::getInstance()->runActionHandler("launch_game", nullptr, toString("slot=%d|edit_mode=0", charSelect));
 
 						if (LoginCharsel == -1)
 							ClientCfg.SelectCharacter = charSelect;
@@ -1170,7 +1170,7 @@ TInterfaceState globalMenu()
 				{
 					CCDBNodeLeaf *pNL;
 					pNL = NLGUI::CDBManager::getInstance()->getDbProp(CharNameValidDBLink,false);
-					if (pNL != NULL)
+					if (pNL != nullptr)
 					{
 						if (CharNameValid)
 							pNL->setValue64(1);
@@ -1179,7 +1179,7 @@ TInterfaceState globalMenu()
 					}
 
 					pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:SERVER_RECEIVED_VALID", false);
-					if (pNL != NULL)
+					if (pNL != nullptr)
 					{
 						pNL->setValue64 (1); // Send impulse to interface observers
 						IngameDbMngr.flushObserverCalls();
@@ -1214,14 +1214,14 @@ TInterfaceState globalMenu()
 			{
 				// Display the connection failure screen
 				CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:CURRENT_SCREEN", false);
-				if (pNL != NULL)
+				if (pNL != nullptr)
 					pNL->setValue64 (nScreenServerCrashed);
 
 				if ( firewallTimeout )
 				{
 					// Display the firewall error string instead of the normal failure string
 					CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:outgame:crashing:title"));
-					if (pVT != NULL)
+					if (pVT != nullptr)
 					{
 						pVT->setMultiLine( true );
 						pVT->setTextLocalized(CI18N::get("uiFirewallFail")+".\n"+
@@ -1311,7 +1311,7 @@ public:
 			CCharacterSummary &rCS = CharacterSummaries[i];
 			CInterfaceElement *pIE = CWidgetManager::getInstance()->getElementFromId(sPath+":text"+NLMISC::toString(i));
 			CViewText *pVT = dynamic_cast<CViewText*>(pIE);
-			if (pVT == NULL) return;
+			if (pVT == nullptr) return;
 
 			if (rCS.Name.empty())
 				pVT->setTextLocalized("uiEmptySlot", true);
@@ -1322,7 +1322,7 @@ public:
 		for (; i < 5; ++i)
 		{
 			CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(sPath+":text"+NLMISC::toString(i)));
-			if (pVT == NULL) return;
+			if (pVT == nullptr) return;
 			pVT->setTextLocalized("uiEmptySlot", true);
 		}
 	}
@@ -1335,11 +1335,11 @@ void setTarget(CCtrlBase *ctrl, const string &targetName, std::string &value)
 	std::vector<CInterfaceLink::CTargetInfo> targets;
 	// find first enclosing group
 	CCtrlBase *currCtrl = ctrl;
-	CInterfaceGroup *ig = NULL;
+	CInterfaceGroup *ig = nullptr;
 	while (currCtrl)
 	{
 		ig = dynamic_cast<CInterfaceGroup *>(currCtrl);
-		if (ig != NULL) break;
+		if (ig != nullptr) break;
 		currCtrl = currCtrl->getParent();
 	}
 	if (ig)
@@ -1361,11 +1361,11 @@ void setTarget(CCtrlBase *ctrl, const string &targetName, uint32 value)
 	std::vector<CInterfaceLink::CTargetInfo> targets;
 	// find first enclosing group
 	CCtrlBase *currCtrl = ctrl;
-	CInterfaceGroup *ig = NULL;
+	CInterfaceGroup *ig = nullptr;
 	while (currCtrl)
 	{
 		ig = dynamic_cast<CInterfaceGroup *>(currCtrl);
-		if (ig != NULL) break;
+		if (ig != nullptr) break;
 		currCtrl = currCtrl->getParent();
 	}
 	if (ig)
@@ -1511,7 +1511,7 @@ public:
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CInterfaceElement *pIE = CWidgetManager::getInstance()->getElementFromId(pCaller->getId(), sDBLink);
 		CInterfaceGroup *pIG = dynamic_cast<CInterfaceGroup*>(pIE);
-		if (pIG == NULL) return;
+		if (pIG == nullptr) return;
 
 		const vector<CCtrlBase*> vCB = pIG->getControls();
 		for (uint i = 0; i < vCB.size(); ++i)
@@ -1608,7 +1608,7 @@ public:
 			if (wantsNewScenario)
 			{
 				CSessionBrowserImpl	&sb = CSessionBrowserImpl::getInstance();
-				sb.init(NULL);
+				sb.init(nullptr);
 				sb.closeEditSession(sb.getCharId());
 				sb.waitOneMessage(CSessionBrowserImpl::getMessageName("on_invokeResult"));
 			}
@@ -1680,7 +1680,7 @@ public:
 		string sFirstName = "NotSet";
 		string sSurName = "NotSet";
 		CGroupEditBox *pGEB = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(sEditBoxPath));
-		if (pGEB != NULL)
+		if (pGEB != nullptr)
 			sFirstName = pGEB->getInputString();
 		else
 			nlwarning ("can't get edit box name : %s",sEditBoxPath.c_str());
@@ -1724,7 +1724,7 @@ public:
 			CreateCharMsg.StartPoint = RYZOM_STARTING_POINT::borea;
 
 			CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp (sLocationPath, false);
-			if (pNL != NULL)
+			if (pNL != nullptr)
 				CreateCharMsg.StartPoint = (RYZOM_STARTING_POINT::TStartPoint)(pNL->getValue64());
 			else
 				nlwarning(("Can't read starting point from the database : " + sLocationPath).c_str());
@@ -1830,7 +1830,7 @@ string getTarget(CCtrlBase * /* ctrl */, const string &targetName)
 {
 	string sTmp = targetName;
 	std::vector<CInterfaceLink::CTargetInfo> targetsVector;
-	CInterfaceLink::splitLinkTargets(sTmp, NULL, targetsVector);
+	CInterfaceLink::splitLinkTargets(sTmp, nullptr, targetsVector);
 
 	CInterfaceLink::CTargetInfo &rTI = targetsVector[0];
 
@@ -1944,7 +1944,7 @@ public:
 #ifdef RYZOM_LUA_UCSTRING
 		string sName = getUCTarget(NULL,sTarget).toUtf8(); // TODO: UTF-8 Lua
 #else
-		string sName = getTarget(NULL, sTarget);
+		string sName = getTarget(nullptr, sTarget);
 #endif
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
@@ -2039,7 +2039,7 @@ public:
 	{
 		string sName = getParam(Params, "name");
 		TStringId id = CStringMapper::map(sName);
-		if (SoundMngr != NULL)
+		if (SoundMngr != nullptr)
 			SoundMngr->spawnSource(id,CVector(0,0,0));
 	}
 };
@@ -2142,13 +2142,13 @@ public:
 		//CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
 		CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_MAINLAND));
-		if (pList == NULL)
+		if (pList == nullptr)
 		{
 			nlwarning("element " GROUP_LIST_MAINLAND " not found probably bad outgame.xml");
 			return;
 		}
 
-		CInterfaceGroup *pPrevLine = NULL;
+		CInterfaceGroup *pPrevLine = nullptr;
 		for(uint i = 0; i < Mainlands.size(); i++)
 		{
 			vector< pair < string, string > > params;
@@ -2158,18 +2158,18 @@ public:
 				params.push_back(pair<string,string>("posref", "BL TL"));
 
 			CInterfaceGroup *pNewLine = CWidgetManager::getInstance()->getParser()->createGroupInstance("t_mainland", GROUP_LIST_MAINLAND, params);
-			if (pNewLine != NULL)
+			if (pNewLine != nullptr)
 			{
 				CViewBase *pVBon = pNewLine->getView("online");
 				CViewBase *pVBoff = pNewLine->getView("offline");
-				if ((pVBon != NULL) && (pVBoff != NULL))
+				if ((pVBon != nullptr) && (pVBoff != nullptr))
 				{
 					pVBon->setActive(Mainlands[i].Online);
 					pVBoff->setActive(!Mainlands[i].Online);
 				}
 
 				CViewText *pVT = dynamic_cast<CViewText*>(pNewLine->getView("name"));
-				if (pVT != NULL)
+				if (pVT != nullptr)
 				{
 					std::string str = Mainlands[i].Name.toUtf8() + " " + Mainlands[i].Description.toUtf8();
 					pVT->setTextLocalized(str, false);
@@ -2199,7 +2199,7 @@ public:
 			}
 
 			CCtrlButton *pCB = dynamic_cast<CCtrlButton*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_MAINLAND ":"+toString(Mainlands[defaultMainland].Id)+":but"));
-			if (pCB != NULL)
+			if (pCB != nullptr)
 			{
 				pCB->setPushed(true);
 				CAHManager::getInstance()->runActionHandler (pCB->getActionOnLeftClick(), pCB, pCB->getParamsOnLeftClick());
@@ -2235,17 +2235,17 @@ class CAHMainlandSelect : public IActionHandler
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
-		CCtrlButton *pCB = NULL;
+		CCtrlButton *pCB = nullptr;
 		// Unselect
 		if (MainlandSelected.asInt() != 0)
 		{
 			pCB = dynamic_cast<CCtrlButton*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_MAINLAND ":"+toString(MainlandSelected)+":but"));
-			if (pCB != NULL)
+			if (pCB != nullptr)
 				pCB->setPushed(false);
 		}
 
 		pCB = dynamic_cast<CCtrlButton*>(pCaller);
-		if (pCB != NULL)
+		if (pCB != nullptr)
 		{
 			string name = pCB->getId();
 			name = name.substr(0,name.rfind(':'));
@@ -2307,16 +2307,16 @@ public:
 	{
 		nlassert(List);
 		CInterfaceGroup *pNewLine = buildTemplate("t_keyset", toString(filename));
-		if (pNewLine != NULL)
+		if (pNewLine != nullptr)
 		{
 			CViewText *pVT = dynamic_cast<CViewText*>(pNewLine->getView("name"));
-			if (pVT != NULL)
+			if (pVT != nullptr)
 			{
 				pVT->setTextLocalized(name, false);
 			}
 
 			CCtrlBase *pBut = pNewLine->getCtrl("but");
-			if (pBut != NULL)
+			if (pBut != nullptr)
 			{
 				pBut->setDefaultContextHelp(tooltip);
 			}
@@ -2331,11 +2331,11 @@ public:
 		GameKeySet = "keys.xml";
 		RingEditorKeySet = "keys_r2ed.xml";
 		First = true;
-		PrevLine = NULL;
+		PrevLine = nullptr;
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
 		List = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_KEYSET));
-		if (List == NULL)
+		if (List == nullptr)
 		{
 			nlwarning("element " GROUP_LIST_KEYSET " not found probably bad outgame.xml");
 			return;
@@ -2439,7 +2439,7 @@ public:
 			if (gr)
 			{
 				CCtrlButton *pCB = dynamic_cast<CCtrlButton*>(gr->getCtrl("but"));
-				if (pCB != NULL)
+				if (pCB != nullptr)
 				{
 					pCB->setPushed(true);
 					CAHManager::getInstance()->runActionHandler (pCB->getActionOnLeftClick(), pCB, pCB->getParamsOnLeftClick());
@@ -2961,7 +2961,7 @@ class CAHLoadScenario : public IActionHandler
 		CInterfaceGroup* scenarioWnd = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:r2ed_scenario_control"));
 		if(!scenarioWnd) return;
 
-		CInterfaceElement *result = NULL;
+		CInterfaceElement *result = nullptr;
 
 		// load scenario
 		if(!R2::getEditor().isInitialized())
@@ -3248,7 +3248,7 @@ class CAHLoadScenario : public IActionHandler
 			if (FreeTrial && noob && (nevraxScenario != "1" || trialAllowed != "1"))
 			{
 				CViewText* pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
-				if (pVT != NULL)
+				if (pVT != nullptr)
 					pVT->setTextLocalized("uiRingWarningFreeTrial", true);
 				CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
 
@@ -3329,7 +3329,7 @@ class CAHLoadScenario : public IActionHandler
 						if(sessionBrowser._LastInvokeResult == 14)
 						{
 							CViewText* pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
-							if (pVT != NULL)
+							if (pVT != nullptr)
 								pVT->setTextLocalized("uiRingWarningFreeTrial", true);
 							CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
 						}
@@ -3358,7 +3358,7 @@ class CAHLoadScenario : public IActionHandler
 										if(sessionBrowser._LastInvokeResult == 14)
 										{
 											CViewText* pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
-											if (pVT != NULL)
+											if (pVT != nullptr)
 												pVT->setTextLocalized("uiRingWarningInviteFreeTrial", true);
 											CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
 										}
@@ -3452,7 +3452,7 @@ class CAHInitImportCharacter : public IActionHandler
 		CPath::getPathContent("save/", false, false, true, savedCharacters);
 
 		CInterfaceGroup *newLine;
-		CInterfaceGroup *prevLine = NULL;
+		CInterfaceGroup *prevLine = nullptr;
 
 		for (uint i = 0; i < savedCharacters.size(); ++i)
 		{
@@ -3615,7 +3615,7 @@ class CAHImportCharacter : public IActionHandler
 		if (!success)
 			CLuaManager::getInstance().executeLuaScript("outgame:procCharselNotifaction(2)");
 		else
-			CAHManager::getInstance()->runActionHandler("proc", NULL, "proc_charsel_create_new");
+			CAHManager::getInstance()->runActionHandler("proc", nullptr, "proc_charsel_create_new");
 	}
 };
 REGISTER_ACTION_HANDLER( CAHImportCharacter, "import_char" );

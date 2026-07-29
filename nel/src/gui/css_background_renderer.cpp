@@ -40,7 +40,8 @@ namespace NLGUI
 		m_BorderX(0), m_BorderY(0), m_BorderW(0), m_BorderH(0),
 		m_PaddingX(0), m_PaddingY(0), m_PaddingW(0), m_PaddingH(0),
 		m_ContentX(0), m_ContentY(0), m_ContentW(0), m_ContentH(0),
-		m_RootFontSize(16.f), m_FontSize(16.f), m_Viewport(NULL),
+		m_RootFontSize(16.f), m_FontSize(16.f), m_Viewport(nullptr)
+    ,
 		m_RenderLayer(0), m_ModulateGlobalColor(false), m_FillViewport(false),
 		m_Dirty(false)
 	{

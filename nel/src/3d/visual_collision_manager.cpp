@@ -50,7 +50,7 @@ CVisualCollisionManager::CVisualCollisionManager() :
 	_TileDescNodeAllocator(TileDescNodeAllocatorBlockSize),
 	_PatchQuadBlockAllocator(PatchQuadBlockAllocatorBlockSize)
 {
-	_Landscape= NULL;
+	_Landscape = nullptr;
 
 	// Default.
 	setSunContributionPower(0.5f, 0.5f);
@@ -67,7 +67,7 @@ CVisualCollisionManager::CVisualCollisionManager() :
 // ***************************************************************************
 CVisualCollisionManager::~CVisualCollisionManager()
 {
-	_Landscape= NULL;
+	_Landscape = nullptr;
 }
 
 

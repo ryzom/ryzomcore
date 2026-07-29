@@ -78,7 +78,7 @@ void executeScriptFile(const string &);
 /*
 	Some globals
 */
-FILE *Outf = NULL;
+FILE *Outf = nullptr;
 
 class CField
 {
@@ -180,10 +180,10 @@ void replaceTrueAndFalseTagToCsv(string &arg)
 */
 void setOutputFile(const CSString &filename)
 {
-	if (Outf!=NULL)
+	if (Outf != nullptr)
 		fclose(Outf);
 	Outf = nlfopen(filename.c_str(), "wt");
-	if (Outf == NULL)
+	if (Outf == nullptr)
 	{
 		fprintf(stderr, "Can't open output file '%s' ! aborting.", filename.c_str());
 		getchar();
@@ -341,7 +341,7 @@ void scanFiles(const CSString &filespec)
 		fprintf(Outf,"%s%s",SEPARATOR, fields[i]._name.c_str());
 	fprintf(Outf,"\n");
 
-	UFormLoader *formLoader = NULL;
+	UFormLoader *formLoader = nullptr;
 	NLMISC::TTime last = NLMISC::CTime::getLocalTime ();
 	NLMISC::TTime start = NLMISC::CTime::getLocalTime ();
 
@@ -365,7 +365,7 @@ void scanFiles(const CSString &filespec)
 		if (p.empty()) continue;
 
 		// create the georges loader if necessary
-		if (formLoader == NULL)
+		if (formLoader == nullptr)
 		{
 			WarningLog->addNegativeFilter("CFormLoader: Can't open the form file");
 			formLoader = UFormLoader::createLoader ();
@@ -382,7 +382,7 @@ void scanFiles(const CSString &filespec)
 			for	(uint i=0;i<fields.size();i++)
 			{
 				UFormElm::TWhereIsValue where;
-				UFormElm	*fieldForm=NULL;
+				UFormElm	*fieldForm = nullptr;
 				std::string	valueString;
 				
 				form->getRootNode ().getNodeByName(&fieldForm, fields[i]._name);
@@ -469,7 +469,7 @@ void scanFiles(const CSString &filespec)
 	}
 
 	// free the georges loader if necessary
-	if (formLoader != NULL)
+	if (formLoader != nullptr)
 	{
 		UFormLoader::releaseLoader (formLoader);
 		WarningLog->removeFilter ("CFormLoader: Can't open the form file");
@@ -695,7 +695,7 @@ void	convertCsvFile( const string &file, bool generate, const string& sheetType 
 
 	FILE *s = nlfopen(file, "r");
 	
-	if (s == NULL)
+	if (s == nullptr)
 	{
 		fprintf(stderr, "Can't find file %s to convert\n", file.c_str());
 		return;
@@ -907,7 +907,7 @@ void	convertCsvFile( const string &file, bool generate, const string& sheetType 
 				// Load template sheet
 				filename = toLowerAscii(filebase);
 				form = (CForm*)formLoader->loadForm( (string("_empty.") + sheetType).c_str() );
-				if (form == NULL)
+				if (form == nullptr)
 				{
 					nlerror( "Can't load sheet _empty.%s", sheetType.c_str() );
 				}
@@ -959,7 +959,7 @@ void	convertCsvFile( const string &file, bool generate, const string& sheetType 
 			dirbase.clear();
 			filename = (*it).second; // whole path
 			form = (CForm*)formLoader->loadForm( filename.c_str() );
-			if (form == NULL)
+			if (form == nullptr)
 			{
 				nlwarning( "Can't load sheet %s", filename.c_str() );
 				continue;
@@ -1027,7 +1027,7 @@ void	convertCsvFile( const string &file, bool generate, const string& sheetType 
 				continue;
 			}
 
-			const	UFormElm	*fieldForm=NULL;
+			const	UFormElm	*fieldForm = nullptr;
 						
 			if	(rootForm.getNodeByName(&fieldForm, var))
 			{
@@ -1108,10 +1108,10 @@ void	convertCsvFile( const string &file, bool generate, const string& sheetType 
 					if	(dfnForm->isAnArrayEntryByName(var))
 					{
 						if	(	!isNewSheet
-							&&	fieldForm!=NULL)
+							&&	fieldForm != nullptr)
 						{
 							uint arraySize;
-							const UFormElm *arrayNode = NULL;
+							const UFormElm *arrayNode = nullptr;
 							if (fieldForm->isArray() 
 								&& fieldForm->getArraySize(arraySize) && arraySize == memberVals.size())
 							{

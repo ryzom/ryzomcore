@@ -157,7 +157,7 @@ CViewerConfig			ViewerCfg;
 
 
 
-CLandscapeModel			*Landscape = NULL;
+CLandscapeModel			*Landscape = nullptr;
 CMoveListener			MoveListener;
 CMiniCol				CollisionManager;
 
@@ -752,7 +752,7 @@ void writeConfigFile(const char * configFileName)
 {
 	FILE * f = nlfopen(configFileName, "wt");
 
-	if(f==NULL)
+	if(f == nullptr)
 	{
 		nlerror("can't open file '%s'\n",configFileName);
 	}
@@ -809,7 +809,7 @@ void writeConfigFile(const char * configFileName)
 void initViewerConfig(const char * configFileName)
 {
 	FILE *f = nlfopen(configFileName, "rt");
-	if(f==NULL)
+	if(f == nullptr)
 	{
 		nlwarning("'%s' not found, default values used", configFileName);
 		writeConfigFile(configFileName);

@@ -42,7 +42,7 @@ namespace NLGUI
 		std::string getAHOnFocusParams(){ return _AHOnFocusParams; }
 
 		// disable any current selection
-		static void	disableSelection(){ _CurrSelection = NULL; }
+		static void	disableSelection(){ _CurrSelection = nullptr; }
 
 		// Get / set current selection
 		static CGroupEditBoxBase *getCurrSelection(){ return _CurrSelection; }

@@ -89,7 +89,8 @@ private:
 	FILE *m_DependLog;
 
 public:
-	inline CToolLogger() : m_ErrorLog(NULL), m_DependLog(NULL)
+	inline CToolLogger() : m_ErrorLog(nullptr)
+	    , m_DependLog(nullptr)
 	{
 
 	}
@@ -183,7 +184,7 @@ public:
 		{
 			fflush(m_ErrorLog);
 			fclose(m_ErrorLog);
-			m_ErrorLog = NULL;
+			m_ErrorLog = nullptr;
 		}
 	}
 
@@ -193,7 +194,7 @@ public:
 		{
 			fflush(m_DependLog);
 			fclose(m_DependLog);
-			m_DependLog = NULL;
+			m_DependLog = nullptr;
 		}
 	}
 

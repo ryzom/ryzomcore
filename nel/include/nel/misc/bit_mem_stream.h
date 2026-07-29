@@ -150,7 +150,8 @@ typedef std::vector< TBMSSerialInfo > TBMSSerialInfoList;
 struct TBMSDbgInfoData
 {
 	/// Constructor
-	TBMSDbgInfoData() : List(), CurrentBrowsedItem(0), NextSymbol(NULL), AddEventIsEnabled(true) {}
+	TBMSDbgInfoData() : List(), CurrentBrowsedItem(0), NextSymbol(nullptr)
+	    , AddEventIsEnabled(true) {}
 
 	/// Vector of serial items
 	TBMSSerialInfoList				List;
@@ -176,7 +177,7 @@ public:
 
 #ifdef NL_DEBUG
 	/// Constructor
-	CBMSDbgInfo() : _DbgData(NULL) { init(); }
+	CBMSDbgInfo() : _DbgData(nullptr) { init(); }
 #else
 	/// Constructor
 	CBMSDbgInfo() {}
@@ -184,7 +185,7 @@ public:
 
 #ifdef NL_DEBUG
 	/// Copy constructor
-	CBMSDbgInfo( const CBMSDbgInfo& src ) : _DbgData(NULL)
+	CBMSDbgInfo( const CBMSDbgInfo& src ) : _DbgData(nullptr)
 	{
 		init();
 		operator=( src );
@@ -201,7 +202,7 @@ public:
 	~CBMSDbgInfo()
 	{
 		delete _DbgData;
-		_DbgData = NULL;
+		_DbgData = nullptr;
 	}
 
 #endif
@@ -220,13 +221,13 @@ public:
 #ifdef NL_DEBUG
 		if ( ! _DbgData->AddEventIsEnabled )
 		{
-			_DbgData->NextSymbol = NULL;
+			_DbgData->NextSymbol = nullptr;
 			return;
 		}
 
 		TBMSSerialInfo serialItem( bitpos, size, type, _DbgData->NextSymbol );
 		_DbgData->List.push_back( serialItem );
-		_DbgData->NextSymbol = NULL;
+		_DbgData->NextSymbol = nullptr;
 #else
 		nlunreferenced(bitpos);
 		nlunreferenced(size);
@@ -240,7 +241,7 @@ public:
 #ifdef NL_DEBUG
 		if ( ! _DbgData->AddEventIsEnabled )
 		{
-			_DbgData->NextSymbol = NULL;
+			_DbgData->NextSymbol = nullptr;
 			return;
 		}
 
@@ -263,7 +264,7 @@ public:
 		{
 			nlwarning( "Missing reserve() corresponding to poke()" );
 		}
-		_DbgData->NextSymbol = NULL;
+		_DbgData->NextSymbol = nullptr;
 #else
 		nlunreferenced(bitpos);
 		nlunreferenced(size);
@@ -807,7 +808,7 @@ inline std::string CBMSDbgInfo::getEventLegendAtBitPos( CBitMemStream& bms, sint
 		TBMSSerialInfo& serialItem = _DbgData->List[eventId]; // works only with a vector!
 		return toString( "(%d) BitPos %3u Type %s BitSize %2u Value %s %s\n",
 					eventId, serialItem.BitPos, SerialTypeToCStr[serialItem.Type], serialItem.BitSize,
-					bms.getSerialItem( serialItem ).c_str(), (serialItem.Symbol!=NULL)?serialItem.Symbol:"" );
+					bms.getSerialItem( serialItem ).c_str(), (serialItem.Symbol != nullptr) ?serialItem.Symbol:"" );
 	}
 #else
 	nlunreferenced(bms);

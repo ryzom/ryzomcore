@@ -263,7 +263,7 @@ CCharacterCL::CCharacterCL()
 	_CharacterScalePos= 1.f;
 
 	// No sheet pointed.
-	_Sheet = 0;
+	_Sheet = nullptr;
 
 	// Unknown gender at the entity creation.
 	_Gender = GSGENDER::unknown;
@@ -271,17 +271,17 @@ CCharacterCL::CCharacterCL()
 	// The bone for the name is not known for the time
 	_NameBoneId = -1;
 	// No UTransform for the name needed if there is no name so not allocated for the time.
-	_NameTransform = 0;
+	_NameTransform = nullptr;
 	// default Clod apparition => force compute the bone
 	_NameCLodDeltaZ = NameCLodDeltaZNotComputed;
 
 	// There is no anim set for the time.
-	_CurrentAnimSet.resize(animTypeCount, 0);
+	_CurrentAnimSet.resize(animTypeCount, nullptr);
 
 	// Same as the animation at the beginning.
 	_RotationFactor = 1.f;
 
-	_CurrentState = 0;
+	_CurrentState = nullptr;
 
 
 	_RightFXActivated	= false;
@@ -329,15 +329,15 @@ CCharacterCL::CCharacterCL()
 	_EyesColor = 0;
 	// No Hair Index at the beginning.
 	_HairIndex = _BadHairIndex;
-	_ClothesSheet = 0;
+	_ClothesSheet = nullptr;
 
 	_NbLoopAnim = 0;
 	_MaxLoop = false;
 
 	setAlive();
 
-	_InSceneUserInterface = NULL;
-	_CurrentBubble = NULL;
+	_InSceneUserInterface = nullptr;
+	_CurrentBubble = nullptr;
 
 	// Initialize the head offset with a Null Vector.
 	_HeadOffset = CVector::Null;
@@ -349,7 +349,7 @@ CCharacterCL::CCharacterCL()
 
 
 
-	_CurrentAttack = NULL;
+	_CurrentAttack = nullptr;
 	_CurrentAttackID.Type = CAttackIDSheet::Unknown;
 
 	//_PelvisBoneId = -1;
@@ -395,11 +395,11 @@ CCharacterCL::~CCharacterCL()
 				_Skeleton.detachSkeletonSon(_NameTransform);
 			Scene->deleteTransform(_NameTransform);
 		}
-		_NameTransform = 0;
+		_NameTransform = nullptr;
 	}
 
 	// No more sheet pointed.
-	_Sheet = NULL;
+	_Sheet = nullptr;
 
 	// Release items (but not their mesh, because they are managed by _Instances)
 	for(uint k = 0; k < _Items.size(); ++k)
@@ -444,12 +444,12 @@ void CCharacterCL::removeAllAttachedFX()
 {
 	_AttachedFXListForCurrentAnim.clear();
 	_AttachedFXListToRemove.clear();
-	_StaticFX = NULL;
+	_StaticFX = nullptr;
 	for(uint k = 0; k < MaxNumAura; ++k)
 	{
-		_AuraFX[k] = NULL;
+		_AuraFX[k] = nullptr;
 	}
-	_LinkFX = NULL;
+	_LinkFX = nullptr;
 }
 
 
@@ -469,7 +469,7 @@ void CCharacterCL::releaseInSceneInterfaces()
 			delete _InSceneUserInterface;
 		}
 
-		_InSceneUserInterface = NULL;
+		_InSceneUserInterface = nullptr;
 	}
 }
 
@@ -757,7 +757,7 @@ void CCharacterCL::createPlayList()
 	if(_PlayList)
 	{
 		EAM->deletePlayList(_PlayList);
-		_PlayList = 0;
+		_PlayList = nullptr;
 	}
 
 	// Create the new animation playlist.
@@ -825,7 +825,7 @@ bool CCharacterCL::build(const CEntitySheet *sheet)	// virtual
 		if(nodeRoot)
 		{
 			_DBEntry = dynamic_cast<CCDBNodeBranch *>(nodeRoot->getNode(_Slot));
-			if(_DBEntry == 0)
+			if(_DBEntry == nullptr)
 				pushDebugStr("Cannot get a pointer on the DB entry.");
 		}
 	}
@@ -935,7 +935,7 @@ bool CCharacterCL::build(const CEntitySheet *sheet)	// virtual
 		// Compute the animation set (after weapons are set to choose the right animation set).
 		computeAnimSet();
 		// Check the animation set is correct.
-		if(_CurrentAnimSet[MOVE] == 0)
+		if(_CurrentAnimSet[MOVE] == nullptr)
 			pushDebugStr("Bad animation set");
 
 		// Set the animation to idle.
@@ -1034,7 +1034,7 @@ bool CCharacterCL::isUnknownRace() const
 CCharacterCL::TAtkHeight CCharacterCL::getAttackHeight(CEntityCL *target, BODY::TBodyPart localisation, BODY::TSide side) const
 {
 	// Check there is a target.
-	if(target == 0)
+	if(target == nullptr)
 		return CCharacterCL::AtkMiddle;
 	// Get the position for a bone.
 	float height;
@@ -1061,7 +1061,7 @@ bool CCharacterCL::getBoneHeight(BODY::TBodyPart localisation, BODY::TSide side,
 		return false;
 	// Get the Bone Name
 	const char *boneName = getBoneNameFromBodyPart(localisation, side);
-	if(boneName == 0)
+	if(boneName == nullptr)
 		return false;
 	// Get the Bone Id
 	sint boneId = _Skeleton.getBoneIdByName(std::string(boneName));
@@ -1158,18 +1158,18 @@ NLMISC::TGameCycle CCharacterCL::adjustPI(float x , float y, float /* z */, cons
 void CCharacterCL::updateVisualPropertyPos(const NLMISC::TGameCycle &gameCycle, const sint64 &prop, const NLMISC::TGameCycle &pI)
 {
 	// Check the DB entry (the warning is already done in the build method).
-	if(_DBEntry == 0)
+	if(_DBEntry == nullptr)
 		return;
 	// Get The property 'Y'.
 	CCDBNodeLeaf *nodeY	= dynamic_cast<CCDBNodeLeaf *>(_DBEntry->getNode(CLFECOMMON::PROPERTY_POSY));
-	if(nodeY == 0)
+	if(nodeY == nullptr)
 	{
 		nlwarning("CH::updtVPPos:%d: Cannot find the property 'PROPERTY_POSY(%d)'.", _Slot, CLFECOMMON::PROPERTY_POSY);
 		return;
 	}
 	// Get The property 'Z'.
 	CCDBNodeLeaf *nodeZ	= dynamic_cast<CCDBNodeLeaf *>(_DBEntry->getNode(CLFECOMMON::PROPERTY_POSZ));
-	if(nodeZ == 0)
+	if(nodeZ == nullptr)
 	{
 		nlwarning("CH::updtVPPos:%d: Cannot find the property 'PROPERTY_POSZ(%d)'.", _Slot, CLFECOMMON::PROPERTY_POSZ);
 		return;
@@ -1270,25 +1270,25 @@ void CCharacterCL::updateVisualPropertyMode(const NLMISC::TGameCycle &gameCycle,
 		// SET THE FIRST POSITION
 		//-----------------------
 		// Check the DB entry (the warning is already done in the build method).
-		if(_DBEntry == 0)
+		if(_DBEntry == nullptr)
 			return;
 		// Get The property 'PROPERTY_POSX'.
 		CCDBNodeLeaf *nodeX	= dynamic_cast<CCDBNodeLeaf *>(_DBEntry->getNode(CLFECOMMON::PROPERTY_POSX));
-		if(nodeX == 0)
+		if(nodeX == nullptr)
 		{
 			nlwarning("CH::updtVPMode:%d: Cannot find the property 'PROPERTY_POSX(%d)'.", _Slot, CLFECOMMON::PROPERTY_POSX);
 			return;
 		}
 		// Get The property 'PROPERTY_POSY'.
 		CCDBNodeLeaf *nodeY	= dynamic_cast<CCDBNodeLeaf *>(_DBEntry->getNode(CLFECOMMON::PROPERTY_POSY));
-		if(nodeY == 0)
+		if(nodeY == nullptr)
 		{
 			nlwarning("CH::updtVPMode:%d: Cannot find the property 'PROPERTY_POSY(%d)'.", _Slot, CLFECOMMON::PROPERTY_POSY);
 			return;
 		}
 		// Get The property 'PROPERTY_POSZ'.
 		CCDBNodeLeaf *nodeZ	= dynamic_cast<CCDBNodeLeaf *>(_DBEntry->getNode(CLFECOMMON::PROPERTY_POSZ));
-		if(nodeZ == 0)
+		if(nodeZ == nullptr)
 		{
 			nlwarning("CH::updtVPMode:%d: Cannot find the property 'PROPERTY_POSZ(%d)'.", _Slot, CLFECOMMON::PROPERTY_POSZ);
 			return;
@@ -1308,7 +1308,7 @@ void CCharacterCL::updateVisualPropertyMode(const NLMISC::TGameCycle &gameCycle,
 		//--------------------------
 		// Get The property 'PROPERTY_ORIENTATION'.
 		CCDBNodeLeaf *nodeOri = dynamic_cast<CCDBNodeLeaf *>(_DBEntry->getNode(CLFECOMMON::PROPERTY_ORIENTATION));
-		if(nodeOri == 0)
+		if(nodeOri == nullptr)
 		{
 			nlwarning("CH::updtVPMode:%d: Cannot find the property 'PROPERTY_ORIENTATION(%d)'.", _Slot, CLFECOMMON::PROPERTY_ORIENTATION);
 			return;
@@ -1352,7 +1352,7 @@ void CCharacterCL::updateVisualPropertyMode(const NLMISC::TGameCycle &gameCycle,
 		{
 			// Get The property 'PROPERTY_ORIENTATION'.
 			CCDBNodeLeaf *nodeOri = dynamic_cast<CCDBNodeLeaf *>(_DBEntry->getNode(CLFECOMMON::PROPERTY_ORIENTATION));
-			if(nodeOri == 0)
+			if(nodeOri == nullptr)
 			{
 				nlwarning("CH::updtVPMode:%d: Cannot find the property 'PROPERTY_ORIENTATION(%d)'.", _Slot, CLFECOMMON::PROPERTY_ORIENTATION);
 				return;
@@ -1365,25 +1365,25 @@ void CCharacterCL::updateVisualPropertyMode(const NLMISC::TGameCycle &gameCycle,
 			if(_TheoreticalMode != MBEHAV::MOUNT_NORMAL)
 			{
 				// Check the DB entry (the warning is already done in the build method).
-				if(_DBEntry == 0)
+				if(_DBEntry == nullptr)
 					return;
 				// Get The property 'PROPERTY_POSX'.
 				CCDBNodeLeaf *nodeX	= dynamic_cast<CCDBNodeLeaf *>(_DBEntry->getNode(CLFECOMMON::PROPERTY_POSX));
-				if(nodeX == 0)
+				if(nodeX == nullptr)
 				{
 					nlwarning("CH::updtVPMode:%d: Cannot find the property 'PROPERTY_POSX(%d)'.", _Slot, CLFECOMMON::PROPERTY_POSX);
 					return;
 				}
 				// Get The property 'PROPERTY_POSY'.
 				CCDBNodeLeaf *nodeY	= dynamic_cast<CCDBNodeLeaf *>(_DBEntry->getNode(CLFECOMMON::PROPERTY_POSY));
-				if(nodeY == 0)
+				if(nodeY == nullptr)
 				{
 					nlwarning("CH::updtVPMode:%d: Cannot find the property 'PROPERTY_POSY(%d)'.", _Slot, CLFECOMMON::PROPERTY_POSY);
 					return;
 				}
 				// Get The property 'PROPERTY_POSZ'.
 				CCDBNodeLeaf *nodeZ	= dynamic_cast<CCDBNodeLeaf *>(_DBEntry->getNode(CLFECOMMON::PROPERTY_POSZ));
-				if(nodeZ == 0)
+				if(nodeZ == nullptr)
 				{
 					nlwarning("CH::updtVPMode:%d: Cannot find the property 'PROPERTY_POSZ(%d)'.", _Slot, CLFECOMMON::PROPERTY_POSZ);
 					return;
@@ -2579,7 +2579,7 @@ ADD_METHOD(void CCharacterCL::setAnim(TAnimStateKey newKey, TAnimStateKey subKey
 
 	// CHECK
 	// If there is no animation set ->There is nothing we can do properly.
-	if(_CurrentAnimSet[MOVE] == 0)
+	if(_CurrentAnimSet[MOVE] == nullptr)
 		return;
 
 
@@ -2605,7 +2605,7 @@ ADD_METHOD(void CCharacterCL::setAnim(TAnimStateKey newKey, TAnimStateKey subKey
 KeyChosen:
 	// Get the state for the current animation.
 	const CAutomatonStateSheet *state = EAM->mState(_CurrentAutomaton, animState(MOVE));
-	if(state == 0)
+	if(state == nullptr)
 	{
 		nlwarning("CH:setAnim:%d: State '%s' not in the automaton '%s'.", _Slot, CAnimationStateSheet::getAnimationStateName(animState(MOVE)).c_str(), _CurrentAutomaton.c_str());
 		// No animation playing
@@ -2861,7 +2861,7 @@ KeyChosen:
 	// Compute the current animation state.
 	_CurrentState = EAM->mState(_CurrentAutomaton, animState(MOVE));
 	// If the state does not exist.
-	if(_CurrentState == 0)
+	if(_CurrentState == nullptr)
 	{
 		nlwarning("CH:setAnim:%d: State '%s' not in the automaton '%s'.", _Slot, CAnimationStateSheet::getAnimationStateName (animState(MOVE)).c_str(), _CurrentAutomaton.c_str());
 
@@ -2879,7 +2879,7 @@ KeyChosen:
 		// Get the right animation state and choose an animation.
 		{
 			// Get the animation state
-			const CAnimationState *animationState = 0;
+			const CAnimationState *animationState = nullptr;
 			if(animState(MOVE) == CAnimationStateSheet::Emote)
 			{
 				_SubStateKey = subKey;
@@ -3160,7 +3160,7 @@ KeyChosen:
 									attackStage = MAGICFX::SpellCastStageCount;
 								break;
 							}
-							const CAnimationFXSet *afs = NULL;
+							const CAnimationFXSet *afs = nullptr;
 							switch(attackStage)
 							{
 								case MAGICFX::CastBegin: afs = &_CurrentAttack->AttackBeginFX; break;
@@ -3463,7 +3463,7 @@ ADD_METHOD(void CCharacterCL::setAnimLOD(bool changed))
 //-----------------------------------------------
 ADD_METHOD(void CCharacterCL::updateAnimationState())
 	// If the current state is invalid -> return.
-	if(_CurrentState == 0)
+	if(_CurrentState == nullptr)
 		return;
 
 	// Get the Animation Length.
@@ -3601,7 +3601,7 @@ ADD_METHOD(double CCharacterCL::computeMotion(const double &oldMovingTimeOffset,
 	H_AUTO_USE ( RZ_Client_Entity_CL_Update_Pos_Compute_Motion )
 
 	// Check the state is valid.
-	if(_CurrentState == 0)
+	if(_CurrentState == nullptr)
 		return 0.0;
 
 	// Calculate movement for given animation segment.
@@ -3877,7 +3877,7 @@ void CCharacterCL::updateCurrentAttack()
 	else
 	{
 		// the behaviour does not generate an attack
-		_CurrentAttack = NULL;
+		_CurrentAttack = nullptr;
 		_CurrentAttackID.Type = CAttackIDSheet::Unknown;
 		return;
 	}
@@ -3996,7 +3996,7 @@ void CCharacterCL::performCurrentAttackEnd(const CBehaviourContext &bc, bool dir
 		else
 		if (!directOffensifSpell)
 		{
-			if ((_CurrentAttackID.Type != CAttackIDSheet::Range) && (_PlayList != NULL))
+			if ((_CurrentAttackID.Type != CAttackIDSheet::Range) && (_PlayList != nullptr))
 			{
 				// default
 				delay= 0.5f;
@@ -4094,7 +4094,7 @@ void CCharacterCL::performCurrentAttackEnd(const CBehaviourContext &bc, bool dir
 				if (createCurrentAttackEndPart(pb,
 					                           _CurrentAttack,
 											   *mainTarget,
-											   NULL,
+			            nullptr,
 											   mainStartDate,
 											   mainEndDate,
 											   true,
@@ -4147,7 +4147,7 @@ void CCharacterCL::performCurrentAttackEnd(const CBehaviourContext &bc, bool dir
 		{
 			double currDate = castStartTime;
 			CCharacterCL *currCaster = this;
-			const CFXStickMode *projectileStartPoint = NULL; // by default, start at caster hand
+			const CFXStickMode *projectileStartPoint = nullptr; // by default, start at caster hand
 			CFXStickMode currStickMode;
 			for(uint k = 0; k < bc.Targets.Targets.size(); ++k)
 			{
@@ -4232,7 +4232,7 @@ void CCharacterCL::performCurrentAttackEnd(const CBehaviourContext &bc, bool dir
 					if (createCurrentAttackEndPart(pb,
 						                           _CurrentAttack,
 												   *currTarget,
-												   NULL,
+				            nullptr,
 												   startDate,
 												   endDate,
 												   k != 0 ? !sheet.PlayImpactFXOnlyOnMainTarget : true,
@@ -4418,12 +4418,12 @@ bool CCharacterCL::createCurrentAttackEndPart(CProjectileBuild &destPB,
 	}
 	else
 	{
-		destPB.ProjectileAspect = NULL;
+		destPB.ProjectileAspect = nullptr;
 	}
 	// choose fx for impact
 	if (!playImpactFX)
 	{
-		destPB.ImpactAspect = NULL;
+		destPB.ImpactAspect = nullptr;
 	}
 	else
 	{
@@ -4433,7 +4433,7 @@ bool CCharacterCL::createCurrentAttackEndPart(CProjectileBuild &destPB,
 		}
 		else
 		{
-			destPB.ImpactAspect = NULL;
+			destPB.ImpactAspect = nullptr;
 		}
 	}
 
@@ -5215,7 +5215,7 @@ bool CCharacterCL::mode(MBEHAV::EMode m)
 	}
 	// Set the mode wanted.
 	_ModeWanted = m;
-	if(_CurrentState == 0)
+	if(_CurrentState == nullptr)
 		_Mode = _ModeWanted;
 	return true;
 }// mode //
@@ -5826,7 +5826,7 @@ ADD_METHOD(bool CCharacterCL::beginImpact(NL3D::UAnimation *anim, NL3D::TAnimati
 //-----------------------------------------------
 void CCharacterCL::animEventsProcessing(double startTime, double stopTime)
 {
-	if (_CurrentState == 0)
+	if (_CurrentState == nullptr)
 		return;
 
 	// \todo Vianney : temp le temps de savoir comment on joue les son pour le propre joueur
@@ -5868,7 +5868,7 @@ void CCharacterCL::animEventsProcessing(double startTime, double stopTime)
 				// Skel meshed
 				_Skeleton.getLastParentClusters(clusters);
 			}
-			CCluster *pcluster = 0;
+			CCluster *pcluster = nullptr;
 			// use the first cluster if at leat one available
 			if (!clusters.empty())
 				pcluster = clusters.front();
@@ -6011,7 +6011,7 @@ void CCharacterCL::updateAttachedFX()
 			{
 				if (TimeInSec >= _AuraFX[k]->TimeOutDate)
 				{
-					_AuraFX[k] = NULL;
+					_AuraFX[k] = nullptr;
 				}
 				else
 				{
@@ -6579,7 +6579,7 @@ ADD_METHOD(void CCharacterCL::updatePos(const TTime &currentTimeInMs, CEntityCL 
 			_BlendRemaining = 0;
 			_PlayList->setAnimation(ACTION, UPlayList::empty);
 			_PlayList->setWeight(ACTION, 0.0f);
-			if(runFactor() < 0.5 || (_CurrentAnimSet[MOVE_BLEND_OUT]==0))
+			if(runFactor() < 0.5 || (_CurrentAnimSet[MOVE_BLEND_OUT]==nullptr))
 			{
 				if(_CurrentAnimSet[MOVE])
 				{
@@ -6590,7 +6590,7 @@ ADD_METHOD(void CCharacterCL::updatePos(const TTime &currentTimeInMs, CEntityCL 
 				}
 				else
 				{
-					_CurrentAnimSet[ACTION] = 0;
+					_CurrentAnimSet[ACTION] = nullptr;
 					animState (ACTION, CAnimationStateSheet::UnknownState);
 					animIndex (ACTION, CAnimation::UnknownAnim);	// This also call "animId" and set it.
 					animOffset(ACTION, 0.0);
@@ -6695,7 +6695,7 @@ ADD_METHOD(void CCharacterCL::updatePos(const TTime &currentTimeInMs, CEntityCL 
 		double oldMovingTimeOffsetRun = animOffset(MOVE_BLEND_OUT);
 		// WARNING -> Unknown Animation Selected.
 		// Play the time step for the loop and truncate to End Anim if Time Step too big.
-		if((_CurrentState != 0) && (animIndex(MOVE) != CAnimation::UnknownAnim))
+		if((_CurrentState != nullptr) && (animIndex(MOVE) != CAnimation::UnknownAnim))
 			playToEndAnim(oldMovingTimeOffset, loopTimeStep);
 		/////////////////
 		// -- CHECK -- //
@@ -7217,7 +7217,7 @@ ADD_METHOD(void CCharacterCL::updateDisplay(CEntityCL *parent))
 			else
 			{
 				// If the animation is a rotation -> Do just a part of the animation.
-				if(parent==0 && _CurrentState && _CurrentState->Rotation && _RotationFactor!=-1.0)
+				if(parent==nullptr && _CurrentState && _CurrentState->Rotation && _RotationFactor!=-1.0)
 				{
 					// Get the Rotation at the beginning of the animation.
 					CQuat currentAnimRotStart;
@@ -7297,12 +7297,12 @@ ADD_METHOD(void CCharacterCL::updateDisplay(CEntityCL *parent))
 			// Rotation 180 degrees Matrix
 			CMatrix rot180;
 			rot180.identity();
-			if(parent == 0)
+			if(parent == nullptr)
 				rot180.rotateZ((float)Pi);
 
 			// Logical entity Matrix.
 			CMatrix current;
-			if(parent == 0)
+			if(parent == nullptr)
 				current = _DirMatrix;
 			else
 				current.identity();
@@ -7328,7 +7328,7 @@ ADD_METHOD(void CCharacterCL::updateDisplay(CEntityCL *parent))
 
 			// Compute the position for the instance.
 			CVectorD tmpPos;
-			if(parent == 0)
+			if(parent == nullptr)
 			{
 				tmpPos = pos();
 				tmpPos += currentAnimPos;
@@ -7373,12 +7373,12 @@ ADD_METHOD(void CCharacterCL::updateDisplay(CEntityCL *parent))
 			// Rotation 90 degrees Matrix
 			CMatrix rot90;
 			rot90.identity();
-			if(parent == 0)
+			if(parent == nullptr)
 				rot90.rotateZ((float)(Pi/2.0));
 
 			// Logical entity Matrix.
 			CMatrix current;
-			if(parent == 0)
+			if(parent == nullptr)
 				current = _DirMatrix;
 			//			else
 			//				current.identity();
@@ -7389,7 +7389,7 @@ ADD_METHOD(void CCharacterCL::updateDisplay(CEntityCL *parent))
 			if(!_Skeleton.empty())
 			{
 				_Skeleton.setRotQuat(current.getRot());
-				if(parent == 0)
+				if(parent == nullptr)
 					_Skeleton.setPos(pos());
 //				else
 //					_Skeleton.setPos(currentAnimPos);
@@ -7398,7 +7398,7 @@ ADD_METHOD(void CCharacterCL::updateDisplay(CEntityCL *parent))
 			else if(!_Instances.empty() && !_Instances[0].Current.empty())
 			{
 				_Instances[0].Current.setRotQuat(current.getRot());
-				if(parent == 0)
+				if(parent == nullptr)
 					_Instances[0].Current.setPos(pos());
 			}
 		}
@@ -7415,7 +7415,7 @@ ADD_METHOD(void CCharacterCL::updateDisplay(CEntityCL *parent))
 		{
 			// Logical entity Matrix.
 			CMatrix current;
-			if(parent == 0)
+			if(parent == nullptr)
 				current = _DirMatrix;
 
 			_Instances[0].Current.setRotQuat(current.getRot());
@@ -7489,7 +7489,7 @@ void CCharacterCL::updateHeadDirection(CEntityCL *target)
 	if(_TargetSlot!=CLFECOMMON::INVALID_SLOT && _TargetSlot!=_Slot)
 	{
 		// Is the target allocated.
-		if(target != 0)
+		if(target != nullptr)
 		{
 			// Do not orientate the head to the target if too far.
 			CVectorD vectDist = target->pos() - pos();
@@ -7526,7 +7526,7 @@ void CCharacterCL::updateHeadDirection(CEntityCL *target)
 void CCharacterCL::displayName()
 {
 	// There is no Context -> Cannot display a name.
-	if(TextContext == 0)
+	if(TextContext == nullptr)
 		return;
 
 	NLMISC::CVector namePos;
@@ -7614,7 +7614,7 @@ void CCharacterCL::drawName(const NLMISC::CMatrix &mat)	// virtual
 	// Name from Sheet
 	else
 	{
-		if(_Sheet != 0)
+		if(_Sheet != nullptr)
 		{
 			const char *name = STRING_MANAGER::CStringManagerClient::getCreatureLocalizedName(_Sheet->Id);
 			if (!FINAL_VERSION || !NLMISC::startsWith(name, "<NotExist:"))
@@ -8340,7 +8340,7 @@ uint32 CCharacterCL::createItemInstance(const CItemSheet &itemSheet, uint32 inst
 			idx = addColoredInstance(shape, bindBone, texture, instIdx, color);
 			SInstanceCL *pInst = idx2Inst(idx);
 			nlassert( (pInst == NULL) || (pInst != NULL && !pInst->Loading.empty()) );
-			if (pInst != NULL)
+			if (pInst != nullptr)
 				instance = pInst->Loading;
 			// Check the shape creation has been is well done.
 			if(!instance.empty())
@@ -8594,7 +8594,7 @@ void CCharacterCL::buildPlaylist()
 	if(_PlayList)
 	{
 		EAM->deletePlayList(_PlayList);
-		_PlayList = 0;
+		_PlayList = nullptr;
 	}
 	// Create the new animation playlist.
 	_PlayList = EAM->createPlayList();
@@ -8627,7 +8627,7 @@ void CCharacterCL::buildPlaylist()
 	_PlayList->setWrapMode		(ACTION, NL3D::UPlayList::Clamp);
 	// Compute the current animation state.
 	_CurrentState = EAM->mState(_CurrentAutomaton, animState(MOVE));
-	if(_CurrentState == 0)
+	if(_CurrentState == nullptr)
 	{
 		_PlayList->setAnimation(MOVE, NL3D::UPlayList::empty);
 		return;
@@ -8635,7 +8635,7 @@ void CCharacterCL::buildPlaylist()
 	// Get the right animation state and choose an animation.
 	{
 		// Get the animation state
-		const CAnimationState *animationState = 0;
+		const CAnimationState *animationState = nullptr;
 		if(animState(MOVE) == CAnimationStateSheet::Emote)
 			animationState = _CurrentAnimSet[MOVE]->getAnimationState(_SubStateKey);
 		else
@@ -8741,10 +8741,10 @@ void CCharacterCL::buildInSceneInterface ()
 
 void CCharacterCL::setBubble (CGroupInSceneBubble *bubble)
 {
-	if (_CurrentBubble != NULL)
+	if (_CurrentBubble != nullptr)
 	{
 		CGroupInSceneBubble	*old = _CurrentBubble;
-		_CurrentBubble = NULL;
+		_CurrentBubble = nullptr;
 		old->unlink();
 	}
 	nlassert (_CurrentBubble == NULL);
@@ -8879,13 +8879,13 @@ void CCharacterCL::animIndex(TAnimationType channel, CAnimation::TAnimId index)
 		CHECK(_CurrentAnimSet[channel] != NULL);
 		// Get the Pointer on the animation state, if Null, return empty
 		const CAnimationState *animStatePtr = _CurrentAnimSet[channel]->getAnimationState( (animState(channel)==CAnimationStateSheet::Emote)?_SubStateKey:animState(channel));
-		if(animStatePtr == 0)
+		if(animStatePtr == nullptr)
 			animId(channel, NL3D::UPlayList::empty);
 		else
 		{
 			// Get the Animation Pointer, if Null, return Empty
 			const CAnimation *anim = animStatePtr->getAnimation(animIndex(channel));
-			if(anim == 0)
+			if(anim == nullptr)
 				animId(channel, NL3D::UPlayList::empty);
 			// Return The Animation ID
 			else
@@ -9059,7 +9059,7 @@ void CCharacterCL::setAuraFX(uint index, const CAnimationFX *sheet)
 	// no-op if same aura
 	if (_AuraFX[index] && _AuraFX[index]->AniFX == sheet) return;
 
-	if (sheet == NULL)
+	if (sheet == nullptr)
 	{
 		std::list<CAttachedFX::CBuildInfo>::iterator itAttachedFxToStart = _AttachedFXListToStart.begin();
 		while(itAttachedFxToStart != _AttachedFXListToStart.end())
@@ -9084,7 +9084,7 @@ void CCharacterCL::setAuraFX(uint index, const CAnimationFX *sheet)
 				return;
 		}
 		// remove previous aura
-		_AuraFX[index] = NULL;
+		_AuraFX[index] = nullptr;
 		CAttachedFX::CBuildInfo bi;
 		bi.Sheet = sheet;
 		bi.TimeOut =  0.f;
@@ -9131,7 +9131,7 @@ void CCharacterCL::setLinkFX(const CAnimationFX *fx, const CAnimationFX *dispell
 			attachFX(fx);
 		}
 	}
-	_LinkFX = NULL;
+	_LinkFX = nullptr;
 	if (!fx) return;
 	CAttachedFX::TSmartPtr linkFX = new CAttachedFX;
 	CAttachedFX::CBuildInfo bi;
@@ -9217,24 +9217,24 @@ void CCharacterCL::applyVisualFX(sint64 prop)
 {
 	CVisualFX vfx;
 	vfx.unpack(prop);
-	const CAnimationFX *auraFX = NULL;
+	const CAnimationFX *auraFX = nullptr;
 	if (vfx.Aura != 0)
 	{
 		auraFX = CAttackListManager::getInstance().getAuras().getFX(vfx.Aura);
 	}
 	setAuraFX(0, auraFX);
-	const CAnimationFX *auraReceiptFX = NULL;
+	const CAnimationFX *auraReceiptFX = nullptr;
 	if (vfx.AuraReceipt)
 	{
 		auraReceiptFX = CAttackListManager::getInstance().getAuras().getFX(0);
 	}
 	setAuraFX(1, auraReceiptFX);
-	const CAnimationFX *linkFX = NULL;
+	const CAnimationFX *linkFX = nullptr;
 	if (vfx.Link != 0)
 	{
 		linkFX = CAttackListManager::getInstance().getLinks().getFX(vfx.Link);
 	}
-	const CAnimationFX *dispellFX = NULL;
+	const CAnimationFX *dispellFX = nullptr;
 	dispellFX = CAttackListManager::getInstance().getLinks().getFX(0);
 	setLinkFX(linkFX, dispellFX);
 }
@@ -9250,14 +9250,14 @@ const char *CCharacterCL::getBoneNameFromBodyPart(BODY::TBodyPart part, BODY::TS
 // *********************************************************************************************
 const CItemSheet *CCharacterCL::getRightHandItemSheet() const
 {
-	if (_RHandInstIdx == CEntityCL::BadIndex) return NULL;
+	if (_RHandInstIdx == CEntityCL::BadIndex) return nullptr;
 	return _Items[SLOTTYPE::RIGHT_HAND_SLOT].Sheet;
 }
 
 // *********************************************************************************************
 const CItemSheet *CCharacterCL::getLeftHandItemSheet() const
 {
-	if (_LHandInstIdx == CEntityCL::BadIndex) return NULL;
+	if (_LHandInstIdx == CEntityCL::BadIndex) return nullptr;
 	return _Items[SLOTTYPE::LEFT_HAND_SLOT].Sheet;
 }
 
@@ -9292,7 +9292,7 @@ void CCharacterCL::CWornItem::startAttackFX(NL3D::USkeleton skeleton, uint inten
 		std::string shapeName = fxSheet.getAttackFX();
 		if (!shapeName.empty())
 		{
-			const char *stickPoint = NULL;
+			const char *stickPoint = nullptr;
 			if(!skeleton.empty())
 			{
 				switch(visualSlot)
@@ -9411,7 +9411,7 @@ void CCharacterCL::CWornItem::enableAdvantageFX(NL3D::UInstance parent)
 			AdvantageFX.activateEmitters(false);
 		}
 		FXMngr.fx2remove(AdvantageFX);
-		AdvantageFX = NULL;
+		AdvantageFX = nullptr;
 	}
 	else
 	{
@@ -9469,7 +9469,7 @@ void CCharacterCL::CWornItem::setTrailSize(uint size)
 // ***********************************************************************************************************************
 const CAttack *CCharacterCL::getAttack(const CAttackIDSheet &id) const
 {
-	if (!_Sheet) return NULL;
+	if (!_Sheet) return nullptr;
 	return getAttack(id, _Sheet->AttackLists);
 }
 
@@ -9485,14 +9485,14 @@ const CAttack *CCharacterCL::getAttack(const CAttackIDSheet &id, const std::vect
 			if (attk) return attk;
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 
 // ***********************************************************************************************************************
 void CCharacterCL::initStaticFX()
 {
-	_StaticFX = NULL;
+	_StaticFX = nullptr;
 	if (ClientCfg.Light) return;
 	std::string staticFX = _Sheet->getStaticFX();
 	if (!staticFX.empty())
@@ -9504,14 +9504,14 @@ void CCharacterCL::initStaticFX()
 			{
 				CAnimationFXSheet *afs = NLMISC::safe_cast<CAnimationFXSheet *>(sheet);
 				_StaticFX = new CStaticFX;
-				_StaticFX->AF.init(afs, EAM ? EAM->getAnimationSet() : NULL);
+				_StaticFX->AF.init(afs, EAM ? EAM->getAnimationSet() : nullptr);
 				_StaticFX->FX = new CAttachedFX;
 				CAttachedFX::CBuildInfo bi;
 				bi.Sheet = &_StaticFX->AF;
 				_StaticFX->FX->create(*this, bi, CAttachedFX::CTargeterInfo());
 				if (_StaticFX->FX->FX.empty())
 				{
-					_StaticFX = NULL;
+					_StaticFX = nullptr;
 					return;
 				}
 

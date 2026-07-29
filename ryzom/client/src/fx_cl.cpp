@@ -46,7 +46,8 @@ extern UScene			*Scene;
 /*
  * Constructor
  */
-CFxCL::CFxCL() : CEntityCL(), _FXSheet(NULL), _BadBuild(false)
+CFxCL::CFxCL() : CEntityCL(), _FXSheet(nullptr)
+    , _BadBuild(false)
 {
 	init();
 }
@@ -91,7 +92,7 @@ bool CFxCL::build( const CEntitySheet *sheet )
 		if(nodeRoot)
 		{
 			_DBEntry = dynamic_cast<CCDBNodeBranch *>(nodeRoot->getNode(_Slot));
-			if(_DBEntry == 0)
+			if(_DBEntry == nullptr)
 				pushDebugStr("Cannot get a pointer on the DB entry.");
 		}
 	}
@@ -113,7 +114,7 @@ bool CFxCL::setFx( const std::string &fileName )
 	{
 		if ( Scene )
 			Scene->deleteInstance(_Instance);
-		_Instance = NULL;
+		_Instance = nullptr;
 	}
 
 	// Create the FX object and insert it into the scene
@@ -123,7 +124,7 @@ bool CFxCL::setFx( const std::string &fileName )
 	if (fxInst.empty())
 	{
 		Scene->deleteInstance( _Instance );
-		_Instance = NULL;
+		_Instance = nullptr;
 		nlwarning( "FX file '%s' not found.", fileName.c_str()) ;
 		return false;
 	}
@@ -139,18 +140,18 @@ void CFxCL::updateVisualPropertyPos(const NLMISC::TGameCycle &/* gameCycle */, c
 {
 	//_CrtCheckMemory();
 	// Check the DB entry (the warning is already done in the build method).
-	if(_DBEntry == 0)
+	if(_DBEntry == nullptr)
 		return;
 	// Get The property 'Y'.
 	CCDBNodeLeaf *nodeY	= dynamic_cast<CCDBNodeLeaf *>(_DBEntry->getNode(CLFECOMMON::PROPERTY_POSY));
-	if(nodeY == 0)
+	if(nodeY == nullptr)
 	{
 		nlwarning("ITM:updtVPPos:%d: Cannot find the property 'PROPERTY_POSY(%d)'.", _Slot, CLFECOMMON::PROPERTY_POSY);
 		return;
 	}
 	// Get The property 'Z'.
 	CCDBNodeLeaf *nodeZ	= dynamic_cast<CCDBNodeLeaf *>(_DBEntry->getNode(CLFECOMMON::PROPERTY_POSZ));
-	if(nodeZ == 0)
+	if(nodeZ == nullptr)
 	{
 		nlwarning("ITM:updtVPPos:%d: Cannot find the property 'PROPERTY_POSZ(%d)'.", _Slot, CLFECOMMON::PROPERTY_POSZ);
 		return;
@@ -275,5 +276,5 @@ CFxCL::~CFxCL()
 	FXMngr.fx2remove( fxInst );
 	// The fx manager now has ownership on the fx, so set the pointer to NULL,
 	// (otherwise it is delete in CentityCL dtor)
-	_Instance = NULL;
+	_Instance = nullptr;
 }

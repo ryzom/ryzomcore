@@ -525,7 +525,7 @@ public:
 	// @}
 
 	// Is this mesh Geom has a VertexProgram bound?
-	virtual bool	hasMeshVertexProgram() const {return _MeshVertexProgram!=NULL;}
+	virtual bool	hasMeshVertexProgram() const {return _MeshVertexProgram != nullptr; }
 
 	// get the Mesh VertexProgram
 	IMeshVertexProgram	*getMeshVertexProgram() const {return _MeshVertexProgram;}

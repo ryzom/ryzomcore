@@ -140,7 +140,9 @@ private:
 
 namespace NL3D {
 
-CFXAA::CFXAA(NL3D::UDriver *driver) : m_Driver(driver), m_VP(NULL), m_PP(NULL), m_Width(~0), m_Height(~0)
+CFXAA::CFXAA(NL3D::UDriver *driver) : m_Driver(driver), m_VP(nullptr)
+    , m_PP(nullptr)
+    , m_Width(~0), m_Height(~0)
 {
 	nldebug("3D: Create FXAA");
 
@@ -205,7 +207,7 @@ CFXAA::CFXAA(NL3D::UDriver *driver) : m_Driver(driver), m_VP(NULL), m_PP(NULL), 
 			nlwarning("3D: No supported pixel program for FXAA effect");
 
 			delete m_PP;
-			m_PP = NULL;
+			m_PP = nullptr;
 		}
 		else
 		{
@@ -253,9 +255,9 @@ CFXAA::CFXAA(NL3D::UDriver *driver) : m_Driver(driver), m_VP(NULL), m_PP(NULL), 
 			nlwarning("3D: No supported vertex program for FXAA effect");
 
 			delete m_VP;
-			m_VP = NULL;
+			m_VP = nullptr;
 			delete m_PP;
-			m_PP = NULL;
+			m_PP = nullptr;
 		}
 		else
 		{
@@ -323,11 +325,11 @@ CFXAA::~CFXAA()
 	}
 
 	delete m_VP;
-	m_VP = NULL;
+	m_VP = nullptr;
 	delete m_PP;
-	m_PP = NULL;
+	m_PP = nullptr;
 
-	m_Driver = NULL;
+	m_Driver = nullptr;
 }
 
 void CFXAA::applyEffect()
@@ -432,12 +434,12 @@ void CFXAA::applyEffect()
 	/*drv->activeVertexBuffer(m_VB);
 	drv->renderRawQuads(*m_Mat.getObjectPtr(), 0, 1);*/
 	m_Driver->drawQuad(m_QuadUV, m_Mat);
-	m_Mat.getObjectPtr()->setTexture(0, NULL);
+	m_Mat.getObjectPtr()->setTexture(0, nullptr);
 
 	// deactivate program
-	drv->activeVertexProgram(NULL);
-	drv->activePixelProgram(NULL);
-	if (ppUBO) drv->bindUniformBuffer(UBBindingPixelProgram, NULL);
+	drv->activeVertexProgram(nullptr);
+	drv->activePixelProgram(nullptr);
+	if (ppUBO) drv->bindUniformBuffer(UBBindingPixelProgram, nullptr);
 
 	// restore
 	m_Driver->enableFog(fogEnabled);

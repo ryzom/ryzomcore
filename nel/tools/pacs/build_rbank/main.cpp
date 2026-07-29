@@ -175,7 +175,7 @@ void	initMoulinette()
 
 		// Read paths
 		CConfigFile::CVar *cvPathes = cf.getVarPtr("Pathes");
-		for (i=0; cvPathes != NULL && i<cvPathes->size(); ++i)
+		for (i=0; cvPathes != nullptr && i<cvPathes->size(); ++i)
 			CPath::addSearchPath(cvPathes->asString(i));
 
 		ProcessAllPasses = getBool(cf, "ProcessAllPasses", false);
@@ -257,7 +257,7 @@ void	initMoulinette()
 		else
 		{
 			CConfigFile::CVar *cvZones = cf.getVarPtr("Zones");
-			for (i=0; cvZones != NULL && i<cvZones->size(); i++)
+			for (i=0; cvZones != nullptr && i<cvZones->size(); i++)
 				ZoneNames.push_back(cvZones->asString(i));
 		}
 	}

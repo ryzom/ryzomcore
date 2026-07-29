@@ -48,7 +48,7 @@ CStringMapper *CStringMapper::createLocalMapper()
 TStringId CStringMapper::localMap(const std::string &str)
 {
 	if (str.empty())
-		return NULL;
+		return nullptr;
 
 	CAutoFastMutex autoMutex(&m_Mutex);
 
@@ -68,7 +68,7 @@ TStringId CStringMapper::localMap(const std::string &str)
 TStringId CStringMapper::localMap(const char *str)
 {
 	if (!str[0])
-		return NULL;
+		return nullptr;
 
 	CAutoFastMutex autoMutex(&m_Mutex);
 
@@ -155,7 +155,7 @@ void CStaticStringMapper::memoryUncompress()
 		tempIdTable[(TSStringId) k] = _IdToStr[k];
 	}
 	delete [] _AllStrings;
-	_AllStrings = NULL;
+	_AllStrings = nullptr;
 	contReset(_IdToStr);
 	_TempStringTable.swap(tempStringTable);
 	_TempIdTable.swap(tempIdTable);
@@ -208,7 +208,7 @@ const char *CStaticStringMapper::get(TSStringId stringId)
 		if (it != _TempIdTable.end())
 			return it->second.c_str();
 		else
-			return NULL;
+			return nullptr;
 	}
 }
 
@@ -221,7 +221,7 @@ void CStaticStringMapper::clear()
 	contReset(_IdToStr);
 
 	_IdCounter = 0;
-	_AllStrings = NULL;
+	_AllStrings = nullptr;
 	_MemoryCompressed = false;
 	add("");
 }

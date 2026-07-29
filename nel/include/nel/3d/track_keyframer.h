@@ -131,8 +131,8 @@ public:
 	virtual const IAnimatedValue &eval (const TAnimationTime& inDate, CAnimatedValueBlock &avBlock)
 	{
 		float	date= inDate;
-		const CKeyT *previous=NULL;
-		const CKeyT *next=NULL;
+		const CKeyT *previous = nullptr;
+		const CKeyT *next = nullptr;
 		TAnimationTime datePrevious = 0;
 		TAnimationTime dateNext = 0;
 

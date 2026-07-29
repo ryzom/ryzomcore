@@ -58,8 +58,8 @@ static uint32 netToHost(uint32 src)
 // ---------------------------------------------------------------------------
 CXDPFileReader::CXDPFileReader()
 {
-	_GzFile = NULL;
-	_File = NULL;
+	_GzFile = nullptr;
+	_File = nullptr;
 	_Pos = 0;
 	_Optimize = false;
 	_OptimPage = 1024*1024; // 1 mo
@@ -76,13 +76,13 @@ CXDPFileReader::~CXDPFileReader()
 		}
 		else
 		{
-			if (_GzFile != NULL)
+			if (_GzFile != nullptr)
 				gzclose(_GzFile);
 		}
 	}
 	else
 	{
-		if (_File != NULL)
+		if (_File != nullptr)
 			fclose(_File);
 	}
 }
@@ -114,7 +114,7 @@ bool CXDPFileReader::init(const std::string &sFilename, sint32 nLowerBound, sint
 			return false;
 		}
 		_GzFile = gzdopen(fd, "rb");
-		if (_GzFile == NULL)
+		if (_GzFile == nullptr)
 		{
 			nlwarning("gzdopen failed");
 			return false;
@@ -140,14 +140,14 @@ bool CXDPFileReader::init(const std::string &sFilename, sint32 nLowerBound, sint
 				}
 			}
 			gzclose(_GzFile);
-			_GzFile = NULL;
+			_GzFile = nullptr;
 		}
 
 	}
 	else
 	{
 		_File = nlfopen(sFilename, "rb");
-		if (_File == NULL)
+		if (_File == nullptr)
 			return false;
 		fseek(_File, nLowerBound, SEEK_SET);
 	}
@@ -389,7 +389,7 @@ bool SXDeltaCtrl::read(CXDPFileReader &fr)
 
 	for (i = 0; i < Inst.size(); ++i)
 	{
-		SSourceInfo *pInfo = NULL;
+		SSourceInfo *pInfo = nullptr;
 		SInstruction *pInst = &Inst[i];
 
 		if (pInst->Index >= SourceInfo.size())
@@ -419,7 +419,7 @@ bool SXDeltaCtrl::read(CXDPFileReader &fr)
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
 
-CXDeltaPatch::ICallBack *CXDeltaPatch::_CallBack = NULL;
+CXDeltaPatch::ICallBack *CXDeltaPatch::_CallBack = nullptr;
 
 // ---------------------------------------------------------------------------
 bool CXDeltaPatch::load(const string &sFilename)
@@ -527,7 +527,7 @@ CXDeltaPatch::TApplyResult CXDeltaPatch::apply(const std::string &sFileToPatch, 
 		return ApplyResult_Error;
 	}
 
-	SXDeltaCtrl::SSourceInfo *pFromSource = NULL;
+	SXDeltaCtrl::SSourceInfo *pFromSource = nullptr;
 //	SXDeltaCtrl::SSourceInfo *pDataSource = NULL;
 
 	if (!_Ctrl.SourceInfo.empty())
@@ -564,19 +564,19 @@ CXDeltaPatch::TApplyResult CXDeltaPatch::apply(const std::string &sFileToPatch, 
 		return ApplyResult_Error;
 	}
 	FILE *outFILE = nlfopen(sFileOutput, "wb");
-	if (outFILE == NULL)
+	if (outFILE == nullptr)
 	{
 		errorMsg = toString("cant create %s", sFileOutput.c_str());
 		return ApplyResult_Error;
 	}
 
 	// Open the file to patch
-	FILE *ftpFILE = NULL;
+	FILE *ftpFILE = nullptr;
 	bool ftpPresent = false;
 	if (pFromSource)
 	{
 		ftpFILE = nlfopen(sFileToPatch, "rb");
-		if (ftpFILE == NULL)
+		if (ftpFILE == nullptr)
 		{
 			errorMsg = toString("expecting file %s", sFileToPatch.c_str());
 			fclose(outFILE);
@@ -707,7 +707,7 @@ CXDeltaPatch::TApplyResult CXDeltaPatch::apply(const std::string &sFileToPatch, 
 			if ((nSaveWritten-nLastSaveWritten) > nStep)
 			{
 				nLastSaveWritten = nSaveWritten;
-				if (_CallBack != NULL)
+				if (_CallBack != nullptr)
 					if (_Ctrl.ToLen > 0)
 						_CallBack->progress((float)nSaveWritten/(float)_Ctrl.ToLen);
 			}

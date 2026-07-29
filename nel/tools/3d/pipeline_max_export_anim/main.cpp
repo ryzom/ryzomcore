@@ -249,9 +249,9 @@ enum TNelValueType
 static NL3D::ITrack *buildATrack(CReferenceMaker *ctrl, TNelValueType type)
 {
 	CControlKeyFramerBase *kf = dynamic_cast<CControlKeyFramerBase *>(ctrl);
-	if (!kf) return NULL;
+	if (!kf) return nullptr;
 	uint numKeys = kf->keyCount();
-	if (!numKeys) return NULL;
+	if (!numKeys) return nullptr;
 
 	sint32 rangeStart = 0, rangeEnd = 0;
 	bool hasRange = kf->range(rangeStart, rangeEnd);
@@ -261,7 +261,7 @@ static NL3D::ITrack *buildATrack(CReferenceMaker *ctrl, TNelValueType type)
 	// Linear Position -> LinearVector (pos or scale request, like the reference)
 	if (CControlPosLinear *c = dynamic_cast<CControlPosLinear *>(kf))
 	{
-		if (type != typePos && type != typeScale) return NULL;
+		if (type != typePos && type != typeScale) return nullptr;
 		NL3D::CTrackKeyFramerLinearVector *track = new NL3D::CTrackKeyFramerLinearVector();
 		const CStorageLinPoint3Key *keys = c->keys();
 		for (uint i = 0; i < numKeys; ++i)
@@ -280,7 +280,7 @@ static NL3D::ITrack *buildATrack(CReferenceMaker *ctrl, TNelValueType type)
 	// Linear Rotation -> LinearQuat (w negated)
 	if (CControlRotLinear *c = dynamic_cast<CControlRotLinear *>(kf))
 	{
-		if (type != typeRotation) return NULL;
+		if (type != typeRotation) return nullptr;
 		NL3D::CTrackKeyFramerLinearQuat *track = new NL3D::CTrackKeyFramerLinearQuat();
 		const CStorageLinRotKey *keys = c->keys();
 		for (uint i = 0; i < numKeys; ++i)
@@ -299,7 +299,7 @@ static NL3D::ITrack *buildATrack(CReferenceMaker *ctrl, TNelValueType type)
 	// Linear Scale -> LinearVector via the scale-matrix diagonal
 	if (CControlScaleLinear *c = dynamic_cast<CControlScaleLinear *>(kf))
 	{
-		if (type != typePos && type != typeScale) return NULL;
+		if (type != typePos && type != typeScale) return nullptr;
 		NL3D::CTrackKeyFramerLinearVector *track = new NL3D::CTrackKeyFramerLinearVector();
 		const CStorageLinScaleKey *keys = c->keys();
 		for (uint i = 0; i < numKeys; ++i)
@@ -318,7 +318,7 @@ static NL3D::ITrack *buildATrack(CReferenceMaker *ctrl, TNelValueType type)
 	// Bezier Position -> BezierVector (tangents scaled to per-second)
 	if (CControlPosBezier *c = dynamic_cast<CControlPosBezier *>(kf))
 	{
-		if (type != typePos && type != typeScale) return NULL;
+		if (type != typePos && type != typeScale) return nullptr;
 		NL3D::CTrackKeyFramerBezierVector *track = new NL3D::CTrackKeyFramerBezierVector();
 		const CStorageBezPoint3Key *keys = c->keys();
 		for (uint i = 0; i < numKeys; ++i)
@@ -341,7 +341,7 @@ static NL3D::ITrack *buildATrack(CReferenceMaker *ctrl, TNelValueType type)
 	// reference IBezScaleKey conversion keeps them as-is)
 	if (CControlScaleBezier *c = dynamic_cast<CControlScaleBezier *>(kf))
 	{
-		if (type != typePos && type != typeScale) return NULL;
+		if (type != typePos && type != typeScale) return nullptr;
 		NL3D::CTrackKeyFramerBezierVector *track = new NL3D::CTrackKeyFramerBezierVector();
 		const CStorageBezScaleKey *keys = c->keys();
 		if (getenv("PMB_ANIM_DUMP_BEZSCALE"))
@@ -373,7 +373,7 @@ static NL3D::ITrack *buildATrack(CReferenceMaker *ctrl, TNelValueType type)
 	// Bezier Float -> BezierFloat (tangents unscaled, like the reference IBezFloatKey conversion)
 	if (CControlFloatBezier *c = dynamic_cast<CControlFloatBezier *>(kf))
 	{
-		if (type != typeFloat) return NULL;
+		if (type != typeFloat) return nullptr;
 		NL3D::CTrackKeyFramerBezierFloat *track = new NL3D::CTrackKeyFramerBezierFloat();
 		const CStorageBezFloatKey *keys = c->keys();
 		for (uint i = 0; i < numKeys; ++i)
@@ -395,7 +395,7 @@ static NL3D::ITrack *buildATrack(CReferenceMaker *ctrl, TNelValueType type)
 	// TCB Position -> TCBVector
 	if (CControlPosTCB *c = dynamic_cast<CControlPosTCB *>(kf))
 	{
-		if (type != typePos && type != typeScale) return NULL;
+		if (type != typePos && type != typeScale) return nullptr;
 		NL3D::CTrackKeyFramerTCBVector *track = new NL3D::CTrackKeyFramerTCBVector();
 		const CStorageTCBPoint3Key *keys = c->keys();
 		for (uint i = 0; i < numKeys; ++i)
@@ -419,7 +419,7 @@ static NL3D::ITrack *buildATrack(CReferenceMaker *ctrl, TNelValueType type)
 	// TCB Rotation -> TCBQuat (relative angle-axis, angle negated)
 	if (CControlRotTCB *c = dynamic_cast<CControlRotTCB *>(kf))
 	{
-		if (type != typeRotation) return NULL;
+		if (type != typeRotation) return nullptr;
 		NL3D::CTrackKeyFramerTCBQuat *track = new NL3D::CTrackKeyFramerTCBQuat();
 		const CStorageTCBRotKey *keys = c->keys();
 		if (getenv("PMB_ANIM_DUMP_TCBROT"))
@@ -496,7 +496,7 @@ static NL3D::ITrack *buildATrack(CReferenceMaker *ctrl, TNelValueType type)
 	// TCB Scale -> TCBVector via the scale-matrix diagonal
 	if (CControlScaleTCB *c = dynamic_cast<CControlScaleTCB *>(kf))
 	{
-		if (type != typePos && type != typeScale) return NULL;
+		if (type != typePos && type != typeScale) return nullptr;
 		NL3D::CTrackKeyFramerTCBVector *track = new NL3D::CTrackKeyFramerTCBVector();
 		const CStorageTCBScaleKey *keys = c->keys();
 		for (uint i = 0; i < numKeys; ++i)
@@ -521,7 +521,7 @@ static NL3D::ITrack *buildATrack(CReferenceMaker *ctrl, TNelValueType type)
 	// 2026-07-06: the nine typed keyframer classes cover every PRS/LookAt/morph-factor
 	// controller in the anim corpus — no Linear/TCB Float, Bezier Rotation/Point3 or list
 	// controllers appear in exportable roles.)
-	return NULL;
+	return nullptr;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -736,7 +736,7 @@ void CSSSBuild::compile(NL3D::CAnimation &dest, const std::string &baseName)
 	else
 	{
 		delete finalTrack;
-		finalTrack = NULL;
+		finalTrack = nullptr;
 	}
 
 	if (finalTrack)
@@ -833,7 +833,7 @@ static void addNodeTracks(NL3D::CAnimation &animation, INode &node, const std::s
                           CSSSBuild *ssBuilder)
 {
 	CReferenceMaker *transform = node.getReference(0);
-	CSceneClass *tmsc = transform ? dynamic_cast<CSceneClass *>(transform) : NULL;
+	CSceneClass *tmsc = transform ? dynamic_cast<CSceneClass *>(transform) : nullptr;
 	bool isPrs = tmsc && tmsc->classDesc()->classId() == CLASSID_PRS_CTRL;
 	bool isLookAt = tmsc && tmsc->classDesc()->classId() == CLASSID_LOOKAT_CTRL;
 
@@ -888,7 +888,7 @@ static void addMorphTracks(NL3D::CAnimation &animation, INode &node, const std::
 {
 	CReferenceMaker *obj = objectOfNode(node);
 	if (!obj || obj->classDesc()->classId() != CLASSID_OSM_DERIVED) return;
-	CReferenceMaker *morpher = NULL;
+	CReferenceMaker *morpher = nullptr;
 	for (uint i = 0; i < obj->nbReferences() && !morpher; ++i)
 	{
 		CReferenceMaker *mod = obj->getReference(i);
@@ -963,7 +963,7 @@ static void addParticleSystemTracks(NL3D::CAnimation &animation, INode &node, co
 	if (obj->classDesc()->classId().a() != CLASSID_PARTA_NEL_PS) return;
 
 	// Find the object's ParamBlock2 and parse its param records.
-	CReferenceMaker *pb2 = NULL;
+	CReferenceMaker *pb2 = nullptr;
 	for (uint i = 0; i < obj->nbReferences() && !pb2; ++i)
 	{
 		CReferenceMaker *r = obj->getReference(i);
@@ -1088,7 +1088,7 @@ static bool sampleBipedSubtree(INode &root, CSceneClassContainer *ssc, SBipedSam
 
 	// figure-time walk (fills g_bipedRigs and per-bone figure world transforms)
 	g_bipedRigs.clear();
-	g_rig = NULL;
+	g_rig = nullptr;
 	g_msBones.clear();
 	std::vector<Bone> bones;
 	std::set<std::string> nameSet;
@@ -1164,7 +1164,7 @@ static bool sampleBipedSubtree(INode &root, CSceneClassContainer *ssc, SBipedSam
 				std::map<INode *, size_t>::const_iterator bi = boneOf.find(node), pi = boneOf.find(parent);
 				if (bi != boneOf.end() && pi != boneOf.end())
 				{
-					const PMAX_RIG::SBipedRig *rig = NULL;
+					const PMAX_RIG::SBipedRig *rig = nullptr;
 					CSceneClass *sys = PMAX_RIG::bipedSystemOfCtrl(dynamic_cast<CReferenceMaker *>(node->getReference(0)));
 					if (sys)
 					{
@@ -1227,7 +1227,7 @@ static bool sampleBipedSubtree(INode &root, CSceneClassContainer *ssc, SBipedSam
 static NL3D::ITrack *buildSampledQuatTrack(const std::vector<sint32> &times, const std::vector<NLMISC::CQuat> &vals,
                                            sint32 rangeStart, sint32 rangeEnd)
 {
-	if (vals.empty()) return NULL;
+	if (vals.empty()) return nullptr;
 	NL3D::CTrackKeyFramerLinearQuat *track = new NL3D::CTrackKeyFramerLinearQuat();
 	NLMISC::CQuat prev;
 	for (size_t i = 0; i < times.size() && i < vals.size(); ++i)
@@ -1248,7 +1248,7 @@ static NL3D::ITrack *buildSampledQuatTrack(const std::vector<sint32> &times, con
 static NL3D::ITrack *buildSampledPosTrack(const std::vector<sint32> &times, const std::vector<NLMISC::CVector> &vals,
                                           sint32 rangeStart, sint32 rangeEnd)
 {
-	if (vals.empty()) return NULL;
+	if (vals.empty()) return nullptr;
 	NL3D::CTrackKeyFramerLinearVector *track = new NL3D::CTrackKeyFramerLinearVector();
 	for (size_t i = 0; i < times.size() && i < vals.size(); ++i)
 	{
@@ -1330,7 +1330,7 @@ static void addAnimation(NL3D::CAnimation &animation, INode &node, const std::st
 			addNodeTracks(animation, node, baseName, &ssBuilder);
 			std::vector<INode *> kids = orderedChildrenOf(&node, ssc);
 			for (std::vector<INode *>::iterator ci = kids.begin(); ci != kids.end(); ++ci)
-				{ INode *child = *ci; addBoneTracks(animation, *child, baseName, ssc, ssBuilder, NULL); }
+				{ INode *child = *ci; addBoneTracks(animation, *child, baseName, ssc, ssBuilder, nullptr); }
 		}
 	}
 	else
@@ -1343,7 +1343,7 @@ static void addAnimation(NL3D::CAnimation &animation, INode &node, const std::st
 		addMorphTracks(animation, node, baseName);
 		std::vector<INode *> kids = orderedChildrenOf(&node, ssc);
 		for (std::vector<INode *>::iterator ci = kids.begin(); ci != kids.end(); ++ci)
-			{ INode *child = *ci; addBoneTracks(animation, *child, baseName, ssc, ssBuilder, hasBiped ? &sampled : NULL); }
+			{ INode *child = *ci; addBoneTracks(animation, *child, baseName, ssc, ssBuilder, hasBiped ? &sampled : nullptr); }
 	}
 
 	// NoteTrack export (a string track used to create events)
@@ -1364,7 +1364,7 @@ static int dumpBipedSamples(INode &root, CSceneClassContainer *ssc, const char *
 {
 	using namespace PMAX_RIG;
 	g_bipedRigs.clear();
-	g_rig = NULL;
+	g_rig = nullptr;
 	g_msBones.clear();
 	std::vector<Bone> bones;
 	std::set<std::string> nameSet;
@@ -1534,7 +1534,7 @@ static int runDumpRig(const char *path, const char *outPath)
 			if (v.size() >= 4 && (v.size() % 4) == 0)
 			{
 				// PMB_DUMP_RIG_FULL: no float/int cap (keytrack record inspection)
-				static const bool s_full = getenv("PMB_DUMP_RIG_FULL") != NULL;
+				static const bool s_full = getenv("PMB_DUMP_RIG_FULL") != nullptr;
 				size_t nf = v.size() / 4;
 				size_t fCap = s_full ? nf : 32, iCap = s_full ? nf : 8;
 				const float *f = reinterpret_cast<const float *>(nlVectorData(v));
@@ -1581,11 +1581,11 @@ int main(int argc, char **argv)
 	if (argc >= 5 && std::string(argv[1]) == "--diff-rig")
 		return runDiffRig(argv[2], argv[3], argv[4]);
 	if (argc >= 3 && std::string(argv[1]) == "--dump-rig")
-		return runDumpRig(argv[2], argc >= 4 ? argv[3] : NULL);
+		return runDumpRig(argv[2], argc >= 4 ? argv[3] : nullptr);
 	if (argc >= 5 && std::string(argv[1]) == "--author-jump")
 		return BIPAUTHOR::runAuthorJump(argv[2], argv[3], argv[4]);
 
-	const char *dumpSamples = NULL;
+	const char *dumpSamples = nullptr;
 	double dumpMaxFrame = 60.0;
 	int argi = 1;
 	while (argi < argc && argv[argi][0] == '-' && argv[argi][1] == '-')
@@ -1634,7 +1634,7 @@ int main(int argc, char **argv)
 	std::vector<INode *> selection;
 	std::set<INode *> selected;
 	INode *rootNode = ssc->scene()->rootNode();
-	INode *bip01 = rootNode ? rootNode->find(ucstring("Bip01")) : NULL;
+	INode *bip01 = rootNode ? rootNode->find(ucstring("Bip01")) : nullptr;
 	// MaxScript $Bip01 finds the node anywhere in the scene, not only top-level — search the
 	// whole container if the root-level find missed.
 	if (!bip01)

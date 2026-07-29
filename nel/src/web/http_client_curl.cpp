@@ -79,7 +79,7 @@ bool CCurlHttpClient::connect(const std::string &/* server */)
 
 	initCurl();
 	_Curl = curl_easy_init();
-	if(_Curl == NULL)
+	if(_Curl == nullptr)
 	{
 		releaseCurl();
 		return false;
@@ -225,7 +225,7 @@ void CCurlHttpClient::disconnect()
 	if (_Curl)
 	{
 		curl_easy_cleanup(_Curl);
-		_Curl= NULL;
+		_Curl = nullptr;
 		releaseCurl();
 	}
 }

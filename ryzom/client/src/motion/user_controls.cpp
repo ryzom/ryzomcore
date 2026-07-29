@@ -74,7 +74,7 @@ H_AUTO_DECL ( RZ_Client_User_Controls_Update )
 // ----------------------------------------------------------------------------
 static bool isSwimming()
 {
-	if (UserEntity != NULL)
+	if (UserEntity != nullptr)
 		return (UserEntity->mode() == MBEHAV::SWIM || UserEntity->mode() == MBEHAV::MOUNT_SWIM);
 	else
 		return false;

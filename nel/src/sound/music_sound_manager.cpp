@@ -36,7 +36,7 @@ namespace NLSOUND {
 CMusicSoundManager::CMusicSoundManager()
 {
 	_Enabled= true;
-	_CurrentMusicPlaying= NULL;
+	_CurrentMusicPlaying = nullptr;
 	_PlayStartTime= INT_MIN;
 	_TimeConstraintEnabled= true;
 }
@@ -80,7 +80,7 @@ void		CMusicSoundManager::update()
 
 	// **** Search a music to replace the currently played one
 	CMusicSound		*bestSound= _CurrentMusicPlaying;
-	CMusicSource	*bestSource= NULL;
+	CMusicSource	*bestSource = nullptr;
 	std::set<CMusicSource*>::iterator	it= _Sources.begin();
 	// for all possibles music sources
 	for(;it!=_Sources.end();it++)
@@ -238,7 +238,7 @@ void	CMusicSoundManager::stopMusic(bool allowFade)
 		// Mark the last stop time
 		_CurrentMusicPlaying->LastStopTime= CTime::getLocalTime();
 		// no more music playing
-		_CurrentMusicPlaying= NULL;
+		_CurrentMusicPlaying = nullptr;
 	}
 }
 

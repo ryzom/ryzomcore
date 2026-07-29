@@ -58,7 +58,7 @@ namespace NLGUI
 		eventServer->removeListener( NLMISC::EventMouseWheelId,  this );
 		eventServer->removeListener( NLMISC::EventMouseDblClkId, this );
 
-		eventServer = NULL;
+		eventServer = nullptr;
 	}
 
 	void CEventListener::operator ()(const NLMISC::CEvent &evnt)

@@ -66,7 +66,7 @@ bool CHttpPackageProvider::getFile(std::string &filePath, const CHashKey &hash, 
 		nldebug("Download streamed package '%s' from '%s'", name.c_str(), downloadUrl.c_str());
 
 		FILE *fp = fopen(downloadPath.c_str(), "wb");
-		if (fp == NULL)
+		if (fp == nullptr)
 		{
 			nldebug("Unable to create file '%s' for '%s'", downloadPath.c_str(), name.c_str());
 			return false;

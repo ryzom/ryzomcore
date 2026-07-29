@@ -119,9 +119,9 @@ int main(int nNbArg, char **ppArgs)
 	audioMixer->setPackedSheetOption(exportDir, true);
 	
 	// this here does the magic, we actually don't need the driver but whatever
-	try { audioMixer->init(0, false, false, NULL, true, UAudioMixer::DriverOpenAl); } catch (...) { 
-	try { audioMixer->init(0, false, false, NULL, true, UAudioMixer::DriverXAudio2); } catch (...) { 
-	try { audioMixer->init(0, false, false, NULL, true, UAudioMixer::DriverFMod); } 
+	try { audioMixer->init(0, false, false, nullptr, true, UAudioMixer::DriverOpenAl); } catch (...) { 
+	try { audioMixer->init(0, false, false, nullptr, true, UAudioMixer::DriverXAudio2); } catch (...) { 
+	try { audioMixer->init(0, false, false, nullptr, true, UAudioMixer::DriverFMod); } 
 	catch (...) { return EXIT_FAILURE; } } }
 	
 	// and that's all folks

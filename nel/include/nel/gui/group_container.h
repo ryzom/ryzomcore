@@ -666,8 +666,8 @@ namespace NLGUI
 		// for use by CCtrlMover
 		// Tell that this group is moving in its parent list
 		void            setMovingInParentList(bool enable);
-		CGroupList     *getPreviousParentList() const { return _OldFatherContainer ? _OldFatherContainer->_List : NULL; }
-		CCtrlScroll    *getPreviousParentScrollBar() const { return _OldFatherContainer ? _OldFatherContainer->_ScrollBar : NULL; }
+		CGroupList     *getPreviousParentList() const { return _OldFatherContainer ? _OldFatherContainer->_List : nullptr; }
+		CCtrlScroll    *getPreviousParentScrollBar() const { return _OldFatherContainer ? _OldFatherContainer->_ScrollBar : nullptr; }
 		CGroupContainer *getPreviousContainer() const { return 	_OldFatherContainer; }
 		// set the 'hasMoved' flag
 		void			touch(bool touched = true) { _TouchFlag = touched; }

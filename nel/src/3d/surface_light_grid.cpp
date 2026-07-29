@@ -99,7 +99,8 @@ void		CSurfaceLightGrid::getStaticLightSetup(NLMISC::CRGBA sunAmbient, const CVe
 	nlassert(CSurfaceLightGrid::NumLightPerCorner==2);
 	nlassert(CLightInfluenceInterpolator::NumLightPerCorner==2);
 	// Get ref on array of PointLightNamed.
-	CPointLightNamed	*igPointLights= NULL;;
+	CPointLightNamed	*igPointLights = nullptr;
+	;
 	if( igsl._Owner->getPointLightList().size() >0 )
 	{
 		// const_cast, because will only change _IdInfluence, and
@@ -144,7 +145,7 @@ void		CSurfaceLightGrid::getStaticLightSetup(NLMISC::CRGBA sunAmbient, const CVe
 			for(; lid<CSurfaceLightGrid::NumLightPerCorner; lid++)
 			{
 				// set to NULL
-				corner.Lights[lid]= NULL;
+				corner.Lights[lid] = nullptr;
 			}
 
 			// BiLinear SunContribution.

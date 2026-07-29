@@ -169,7 +169,7 @@ const CStorageRaw *rawSub(const CStorageContainer *c, uint16 id)
 {
 	for (CStorageContainer::TStorageObjectConstIt it = c->chunks().begin(); it != c->chunks().end(); ++it)
 		if (it->first == id) return dynamic_cast<const CStorageRaw *>(it->second);
-	return NULL;
+	return nullptr;
 }
 
 bool readRawInts(const CStorageRaw *raw, sint32 *dst, size_t n, const char *what, std::string &err)

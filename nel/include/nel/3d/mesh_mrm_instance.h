@@ -56,8 +56,8 @@ protected:
 	/// Constructor
 	CMeshMRMInstance()
 	{
-		_RawSkinCache= NULL;
-		_ShiftedTriangleCache= NULL;
+		_RawSkinCache = nullptr;
+		_ShiftedTriangleCache = nullptr;
 	}
 	/// Destructor
 	virtual ~CMeshMRMInstance();

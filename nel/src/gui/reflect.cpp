@@ -28,7 +28,7 @@
 namespace NLGUI
 {
 	// Yoyo: Act like a singleton, else registerClass may crash.
-	CReflectSystem::TClassMap *CReflectSystem::_ClassMap= NULL;
+	CReflectSystem::TClassMap *CReflectSystem::_ClassMap = nullptr;
 
 	// hack to register the root class at startup
 	static const struct CRootReflectableClassRegister
@@ -46,7 +46,7 @@ namespace NLGUI
 	void CReflectSystem::release()
 	{
 		delete _ClassMap;
-		_ClassMap = NULL;
+		_ClassMap = nullptr;
 	}
 
 	//===================================================================================
@@ -68,7 +68,7 @@ namespace NLGUI
 		}
 		if (parentName.empty())
 		{
-			ci.ParentClass = NULL;
+			ci.ParentClass = nullptr;
 		}
 		else
 		{
@@ -90,7 +90,7 @@ namespace NLGUI
 		if (it == _ClassMap->end())
 		{
 			nlwarning("CReflectSystem::getProperty : Unkwown class : %s", className.c_str());
-			return NULL;
+			return nullptr;
 		}
 		const CClassInfo *ci = &it->second;
 		while (ci)
@@ -113,21 +113,21 @@ namespace NLGUI
 
 		if(dspWarning)
 			nlwarning("CReflectSystem::getProperty : %s is not a property of class : %s", propertyName.c_str(), className.c_str());
-		return NULL;
+		return nullptr;
 	}
 
 
 	//===================================================================================
 	const CClassInfo *CReflectable::getClassInfo()
 	{
-		if (!CReflectSystem::getClassMap()) return NULL;
+		if (!CReflectSystem::getClassMap()) return nullptr;
 		// TODO nico : a possible optimization would be to use the address of the static function
 		// 'getReflectedProperties' as a key into the CClassInfo map. This pointer uniquely identify
 		// classes that export properties
 		CReflectSystem::TClassMap::const_iterator it = CReflectSystem::getClassMap()->find(this->getReflectedClassName());
 		if (it == CReflectSystem::getClassMap()->end())
 		{
-			return NULL;
+			return nullptr;
 		}
 		return &(it->second);
 	}
@@ -195,7 +195,7 @@ namespace NLGUI
 		// slowly retrieve property, and store in cache
 		// NB nico : this could also be done at startup...
 		const CReflectedProperty *prop = CReflectSystem::getProperty(ci.ClassName, luaStringPtr, false);
-		if (!prop) return NULL;
+		if (!prop) return nullptr;
 		CLuaIndexedProperty lip;
 		lip.Id = CLuaString(luaStringPtr); // keep a ref on the lua string to ensure that its pointer always remains valid
 		lip.Prop = prop;

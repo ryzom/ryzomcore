@@ -39,7 +39,7 @@ CTaskManager::CTaskManager() : _RunningTask (""), _TaskQueue (""), _DoneTaskQueu
 {
 	_IsTaskRunning = false;
 	_ThreadRunning = true;
-	_ChangePriorityCallback = NULL;
+	_ChangePriorityCallback = nullptr;
 	CSynchronized<string>::CAccessor currentTask(&_RunningTask);
 	currentTask.value ().clear();
 	_Thread.reset(IThread::create(this));
@@ -64,7 +64,7 @@ CTaskManager::~CTaskManager()
 	// There should be no remaining Tasks
 	CSynchronized<std::list<CWaitingTask> >::CAccessor acces(&_TaskQueue);
 	nlassert(acces.value().empty());
-	_Thread.reset(NULL);
+	_Thread.reset(nullptr);
 }
 
 // Manage TaskQueue
@@ -78,7 +78,7 @@ void CTaskManager::run(void)
 			CSynchronized<list<CWaitingTask> >::CAccessor acces(&_TaskQueue);
 			if(acces.value().empty())
 			{
-				runnableTask = NULL;
+				runnableTask = nullptr;
 			}
 			else
 			{

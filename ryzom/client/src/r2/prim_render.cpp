@@ -250,7 +250,7 @@ CPrimRender::CPrimRender()
 	_Emissive = CRGBA::Black;
 	_NumEdges = 0;
 	_AddedToWorldMap = false;
-	_WorldMapPoly = NULL;
+	_WorldMapPoly = nullptr;
 	_InvWorldTextureWidth = 0.f;
 	_Active = true;
 }
@@ -710,7 +710,7 @@ void CPrimRender::onRemove(CGroupMap &owner)
 	if (_WorldMapPoly)
 	{
 		owner.delCtrl(_WorldMapPoly);
-		_WorldMapPoly = NULL;
+		_WorldMapPoly = nullptr;
 	}
 	_AddedToWorldMap = false;
 }
@@ -843,7 +843,7 @@ void CPrimRender::onUpdate(CGroupMap &worldMap)
 CViewBitmap *CPrimRender::getWorldMapVertexView(uint index) const
 {
 	//H_AUTO(R2_CPrimRender_getWorldMapVertexView)
-	if(index >= _WorldMapVertices.size()) return NULL;
+	if(index >= _WorldMapVertices.size()) return nullptr;
 	return _WorldMapVertices[index];
 }
 

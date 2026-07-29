@@ -194,8 +194,11 @@ public:
 						};
 public:
 	/// ctor
-	CHTimer() : _Name(NULL), _Parent(NULL), _IsRoot(false) {}
-	CHTimer(const char *name, bool isRoot = false) : _Name(name), _Parent(NULL), _IsRoot(isRoot) {}
+	CHTimer() : _Name(nullptr)
+	    , _Parent(nullptr)
+	    , _IsRoot(false) {}
+	CHTimer(const char *name, bool isRoot = false) : _Name(name), _Parent(nullptr)
+	    , _IsRoot(isRoot) {}
 	/// Starts a measuring session
 	void			before()
 	{
@@ -308,7 +311,7 @@ private:
 		uint64					SonsPreambule; // preamble time for the sons
 		CSimpleClock			Clock;         // a clock to do the measures at this node
 		// ctor
-	  CNode(CHTimer	*owner = NULL, CNode	*parent = NULL) : Parent(parent), Owner(owner)
+	  CNode(CHTimer	*owner = nullptr, CNode	*parent = nullptr) : Parent(parent), Owner(owner)
 		{
 			reset();
 		}

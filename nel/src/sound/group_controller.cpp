@@ -52,9 +52,9 @@ CGroupController::~CGroupController()
 	for (std::map<std::string, CGroupController *>::iterator it(m_Children.begin()), end(m_Children.end()); it != end; ++it)
 	{
 		delete it->second;
-		it->second = NULL;
+		it->second = nullptr;
 	}
-	m_Parent = NULL;
+	m_Parent = nullptr;
 }
 
 void CGroupController::addSource(CSourceCommon *source)

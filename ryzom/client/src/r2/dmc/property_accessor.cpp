@@ -85,10 +85,10 @@ const CObject *CPropertyAccessor::getPropertyValue(const CObject* componentParam
 	//H_AUTO(R2_CPropertyAccessor_getPropertyValue)
 	const CObject* component = componentParam;
 	nlassert(component);
-	const CObject* toRet = 0;
-	const CObject* base = 0;
-	const CObject* propClass = 0;
-	const CObject* baseElement = 0;
+	const CObject* toRet = nullptr;
+	const CObject* base = nullptr;
+	const CObject* propClass = nullptr;
+	const CObject* baseElement = nullptr;
 	toRet = component->getAttr(attrName);
 
 
@@ -108,7 +108,7 @@ const CObject *CPropertyAccessor::getPropertyValue(const CObject* componentParam
 			if (!baseElement)
 			{
 				nlwarning("Can't find base palette element : name = %s", strBase.c_str());
-				return NULL;
+				return nullptr;
 			}
 			toRet = baseElement->getAttr(attrName);
 		}
@@ -137,7 +137,7 @@ const CObject *CPropertyAccessor::getPropertyValue(const CObject* componentParam
 				if (!generator)
 				{
 					nlwarning("Can't find type : name = %s", str.c_str());
-					return NULL;
+					return nullptr;
 				}
 				toRet = generator->getDefaultValue(attrName);
 				if (!toRet)
@@ -195,7 +195,7 @@ void CPropertyAccessor::getPropertyList(CObject* component, std::list<std::strin
 		}
 		else
 		{
-			component = 0;
+			component = nullptr;
 		}
 	}
 }
@@ -227,7 +227,7 @@ void CPropertyAccessor::shadowValue(CObject *shadowedValue, CObject *localValue)
 CObject *CPropertyAccessor::getShadowingValue(CObject *shadowedValue)
 {
 	//H_AUTO(R2_CPropertyAccessor_getShadowingValue)
-	if (!shadowedValue) return NULL;
+	if (!shadowedValue) return nullptr;
 	purgeShadowedValues();
 	for(uint k = 0; k < _ShadowedValues.size(); ++k)
 	{
@@ -236,7 +236,7 @@ CObject *CPropertyAccessor::getShadowingValue(CObject *shadowedValue)
 			return _ShadowedValues[k].LocalValue;
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 
@@ -253,7 +253,7 @@ void CPropertyAccessor::commitValue(CObject *shadowedValue)
 
 			// copy local value to shadowed value
 			//_ShadowedValues[k].ShadowedValue->inPlaceCopy(*_ShadowedValues[k].LocalValue);
-			_ShadowedValues[k].ShadowedValue = NULL; // delete job done by purgeShadowedValues
+			_ShadowedValues[k].ShadowedValue = nullptr; // delete job done by purgeShadowedValues
 			break;
 		}
 	}
@@ -267,7 +267,7 @@ void CPropertyAccessor::rollbackValue(CObject *shadowedValue)
 	{
 		if (_ShadowedValues[k].ShadowedValue == shadowedValue)
 		{
-			_ShadowedValues[k].ShadowedValue = NULL; // delete job done by purgeShadowedValues
+			_ShadowedValues[k].ShadowedValue = nullptr; // delete job done by purgeShadowedValues
 			break;
 		}
 	}
@@ -277,7 +277,7 @@ void CPropertyAccessor::rollbackValue(CObject *shadowedValue)
 
 struct CDeadShadowedObjectReferenceTest
 {
-	bool operator()(const CPropertyAccessor::CShadowedValue &sw) const { return sw.ShadowedValue == NULL; }
+	bool operator()(const CPropertyAccessor::CShadowedValue &sw) const { return sw.ShadowedValue == nullptr; }
 };
 
 void CPropertyAccessor::purgeShadowedValues()
@@ -287,7 +287,7 @@ void CPropertyAccessor::purgeShadowedValues()
 	{
 		if (!_ShadowedValues[k].ShadowedValue)
 		{
-			_ShadowedValues[k].LocalValue = NULL;
+			_ShadowedValues[k].LocalValue = nullptr;
 		}
 	}
 	_ShadowedValues.erase(std::remove_if(_ShadowedValues.begin(), 	_ShadowedValues.end(), CDeadShadowedObjectReferenceTest()), _ShadowedValues.end());

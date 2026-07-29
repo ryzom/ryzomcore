@@ -55,13 +55,15 @@ struct SLoadedMax
 	CDllDirectory *Dll;
 	CClassDirectory3 *Cd;
 	CScene *Scene;
-	SLoadedMax() : Dll(NULL), Cd(NULL), Scene(NULL) { }
+	SLoadedMax() : Dll(nullptr)
+	    , Cd(nullptr)
+	    , Scene(nullptr) { }
 };
 
 // Only pointers to the loaded scenes; the SLoadedMax entries themselves live in a static map so a
 // failure ("Scene = NULL") is cached too (repeated resolveXRefObject on the same broken path
 // doesn't re-attempt the load).
-static CSceneClassRegistry *g_registry = NULL;
+static CSceneClassRegistry *g_registry = nullptr;
 static std::map<std::string, SLoadedMax> g_scenes;
 
 void configure(CSceneClassRegistry *registry)
@@ -86,10 +88,10 @@ void clearCache()
 static SLoadedMax *loadMaxFileCached(const std::string &path)
 {
 	std::map<std::string, SLoadedMax>::iterator it = g_scenes.find(path);
-	if (it != g_scenes.end()) return it->second.Scene ? &it->second : NULL;
+	if (it != g_scenes.end()) return it->second.Scene ? &it->second : nullptr;
 	SLoadedMax &lm = g_scenes[path]; // inserted empty; failure is cached too
 	CStorageOleIn in;
-	if (!in.open(path)) { fprintf(stderr, "WARNING: xref: not an OLE compound file: %s\n", path.c_str()); return NULL; }
+	if (!in.open(path)) { fprintf(stderr, "WARNING: xref: not an OLE compound file: %s\n", path.c_str()); return nullptr; }
 	CDllDirectory *dll = new CDllDirectory();
 	CClassDirectory3 *cd = new CClassDirectory3(dll);
 	CScene *scene = new CScene(g_registry, dll, cd);
@@ -101,7 +103,7 @@ static SLoadedMax *loadMaxFileCached(const std::string &path)
 	{
 		fprintf(stderr, "WARNING: xref: missing streams in %s\n", path.c_str());
 		delete scene; delete cd; delete dll;
-		return NULL;
+		return nullptr;
 	}
 	lm.Dll = dll;
 	lm.Cd = cd;
@@ -130,14 +132,14 @@ CSceneClass *resolveXRefObject(CSceneClass *xrefObj, int depth)
 	if (depth > 8)
 	{
 		fprintf(stderr, "WARNING: xref: recursion depth exceeded\n");
-		return NULL;
+		return nullptr;
 	}
 	if (!g_registry)
 	{
 		fprintf(stderr, "WARNING: xref: not configured (call XREFRESOLVE::configure at startup)\n");
-		return NULL;
+		return nullptr;
 	}
-	CStorageContainer *rec = NULL;
+	CStorageContainer *rec = nullptr;
 	const CStorageContainer::TStorageObjectContainer &orphans = xrefObj->orphanedChunks();
 	for (CStorageContainer::TStorageObjectConstIt it = orphans.begin(); it != orphans.end(); ++it)
 	{
@@ -145,22 +147,22 @@ CSceneClass *resolveXRefObject(CSceneClass *xrefObj, int depth)
 		rec = dynamic_cast<CStorageContainer *>(it->second);
 		break;
 	}
-	if (!rec) { fprintf(stderr, "WARNING: xref: no 0x0170 record on XRefObject\n"); return NULL; }
+	if (!rec) { fprintf(stderr, "WARNING: xref: no 0x0170 record on XRefObject\n"); return nullptr; }
 	std::string file, objName;
 	if (!xrefChildString(rec, 0x0100, file) || !xrefChildString(rec, 0x0110, objName))
 	{
 		fprintf(stderr, "WARNING: xref: incomplete 0x0170 record\n");
-		return NULL;
+		return nullptr;
 	}
 	std::string resolved;
 	if (!DBPATH::resolve(file, resolved))
 	{
 		fprintf(stderr, "WARNING: xref: cannot resolve '%s' under db root '%s'\n",
 		        file.c_str(), DBPATH::defaultRoot().c_str());
-		return NULL;
+		return nullptr;
 	}
 	SLoadedMax *lm = loadMaxFileCached(resolved);
-	if (!lm) return NULL;
+	if (!lm) return nullptr;
 	CSceneClassContainer *ssc = lm->Scene->container();
 	std::string wantLower = NLMISC::toLowerAscii(objName);
 	for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
@@ -171,7 +173,7 @@ CSceneClass *resolveXRefObject(CSceneClass *xrefObj, int depth)
 		return baseObjectOfObj(dynamic_cast<CSceneClass *>(node->getReference(1)), depth + 1);
 	}
 	fprintf(stderr, "WARNING: xref: node '%s' not found in %s\n", objName.c_str(), resolved.c_str());
-	return NULL;
+	return nullptr;
 }
 
 CSceneClass *baseObjectOfObj(CSceneClass *obj, int depth)
@@ -191,7 +193,7 @@ CSceneClass *baseObjectOfObj(CSceneClass *obj, int depth)
 		}
 		if (cid != CLASSID_OSM_DERIVED && cid != CLASSID_WSM_DERIVED) break;
 		CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(obj);
-		CSceneClass *base = NULL;
+		CSceneClass *base = nullptr;
 		for (uint i = 0; rm && i < rm->nbReferences(); ++i)
 		{
 			CSceneClass *r = dynamic_cast<CSceneClass *>(rm->getReference(i));

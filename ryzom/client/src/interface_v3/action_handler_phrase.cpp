@@ -93,7 +93,7 @@ public:
 	virtual void execute(CCtrlBase *pCaller, const string &/* Params */)
 	{
 		CDBCtrlSheet *pCSDst = dynamic_cast<CDBCtrlSheet*>(pCaller);
-		if (pCSDst == NULL || !pCSDst->isSPhraseId())
+		if (pCSDst == nullptr || !pCSDst->isSPhraseId())
 			return;
 
 		// get the phrase id.
@@ -350,7 +350,7 @@ public:
 
 		// get the selected brick
 		const CSBrickSheet		*brick= pCSSrc->asSBrickSheet();
-		if(brick==NULL)
+		if(brick == nullptr)
 			return;
 
 		// and validate the composition
@@ -388,7 +388,7 @@ REGISTER_ACTION_HANDLER( CHandlerPhraseValidateBrick, "phrase_validate_brick" );
 CHandlerPhraseValidateBrick::TType	CHandlerPhraseValidateBrick::BrickType;
 uint						CHandlerPhraseValidateBrick::Index;
 uint						CHandlerPhraseValidateBrick::ParamIndex;
-CDBGroupBuildPhrase			*CHandlerPhraseValidateBrick::BuildPhraseGroup= NULL;
+CDBGroupBuildPhrase			*CHandlerPhraseValidateBrick::BuildPhraseGroup = nullptr;
 
 
 // ***************************************************************************
@@ -541,7 +541,7 @@ public:
 		fillFaberPlanSelection(CDBGroupBuildPhrase::BrickSelectionDB, CDBGroupBuildPhrase::MaxSelection);
 
 		// setup the validation
-		CHandlerPhraseValidateBrick::BuildPhraseGroup= NULL;
+		CHandlerPhraseValidateBrick::BuildPhraseGroup = nullptr;
 		CHandlerPhraseValidateBrick::BrickType= CHandlerPhraseValidateBrick::FaberPlan;
 
 		// launch the modal
@@ -766,7 +766,7 @@ void CHandlerMemorizePhraseOrMacro::execute (CCtrlBase *pCaller, const string &P
 	// NB: THIS IS UGLY BUT WORKS BECAUSE Memory ctrls are first initialized as SPhrase (branchname init)
 
 	// type check
-	if (pCSDst == NULL) return;
+	if (pCSDst == nullptr) return;
 	// The dest must be a memory or a macro memory
 	if (!pCSDst->isSPhraseIdMemory() && !pCSDst->isMacroMemory())	return;
 	// get the memory line and memory index
@@ -814,7 +814,7 @@ void CHandlerMemorizePhraseOrMacro::execute (CCtrlBase *pCaller, const string &P
 		pCSSrc = dynamic_cast<CDBCtrlSheet*>(pElt);
 		
 		// type check
-		if (pCSSrc == NULL) return;
+		if (pCSSrc == nullptr) return;
 		// The src must be a phraseid, a phrasesheet, or a macro droped
 		if (!pCSSrc->isSPhraseId() && !pCSSrc->isSPhrase() && !pCSSrc->isMacro()) return;
 
@@ -983,7 +983,7 @@ public:
 		CSPhraseManager		*pPM = CSPhraseManager::getInstance();
 
 		CDBCtrlSheet *pCSDst = dynamic_cast<CDBCtrlSheet*>(pCaller);
-		if (pCSDst == NULL) return;
+		if (pCSDst == nullptr) return;
 		if (!pCSDst->isSPhraseIdMemory() && !pCSDst->isMacroMemory())
 			return;
 
@@ -1021,7 +1021,7 @@ public:
 	virtual void execute (CCtrlBase *pCaller, const string & Params)
 	{
 		CDBCtrlSheet *pCSDst = dynamic_cast<CDBCtrlSheet*>(pCaller);
-		if (pCSDst == NULL) return;
+		if (pCSDst == nullptr) return;
 		if (!pCSDst->isSPhraseIdMemory() && !pCSDst->isMacroMemory())
 			return;
 
@@ -1110,7 +1110,7 @@ public:
 		CSBrickManager		*pBM= CSBrickManager::getInstance();
 
 		CDBCtrlSheet *pCSDst = dynamic_cast<CDBCtrlSheet*>(pCaller);
-		if (pCSDst == NULL) return;
+		if (pCSDst == nullptr) return;
 		if (!pCSDst->isSPhraseIdMemory())
 			return;
 
@@ -1301,7 +1301,7 @@ public:
 		CInterfaceManager	*pIM = CInterfaceManager::getInstance();
 
 		CDBCtrlSheet *pCSDst = dynamic_cast<CDBCtrlSheet*>(pCaller);
-		if (pCSDst == NULL) return;
+		if (pCSDst == nullptr) return;
 		if (!pCSDst->isSPhraseIdMemory())
 			return;
 
@@ -1317,7 +1317,7 @@ public:
 		{
 			string	menu= pCSDst->getListMenuRightEmptySlot();
 			// opens only if no dragged sheet
-			if( !menu.empty() && CDBCtrlSheet::getDraggedSheet()==NULL )
+			if( !menu.empty() && CDBCtrlSheet::getDraggedSheet() == nullptr)
 			{
 				// opens the menu
 				CDBCtrlSheet::setCurrSelSheet(pCSDst);
@@ -1452,15 +1452,15 @@ public:
 		CSBrickManager *pBM = CSBrickManager::getInstance();
 		CInterfaceElement *pCristalizeMenuOption = CWidgetManager::getInstance()->getElementFromId(sCristalizePath);
 
-		if (pCristalizeMenuOption == NULL) return;
+		if (pCristalizeMenuOption == nullptr) return;
 		// The default is to not display the cristalize menu option
 		pCristalizeMenuOption->setActive(false);
-		if (pCaller == NULL) return;
+		if (pCaller == nullptr) return;
 
 		// Get the interface control sheet
 
 		CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
-		if (pCS == NULL) return;
+		if (pCS == nullptr) return;
 		if (!pCS->isSPhraseIdMemory()) return;
 
 		// If its a phrase id in memory then get the phrase
@@ -1472,7 +1472,7 @@ public:
 		// And if its a magic phrase display the cristalize menu option
 
 		CSBrickSheet *pBrick = pBM->getBrick(phrase.Bricks[0]);
-		if (pBrick != NULL)
+		if (pBrick != nullptr)
 		{
 			if (pBrick->isMagic())
 			{
@@ -1502,7 +1502,7 @@ public:
 		CSPhraseManager		*pPM = CSPhraseManager::getInstance();
 
 		CDBCtrlSheet *pCSDst = dynamic_cast<CDBCtrlSheet*>(pCaller);
-		if (pCSDst == NULL) return;
+		if (pCSDst == nullptr) return;
 		if (!pCSDst->isSPhraseIdMemory())
 			return;
 
@@ -1566,7 +1566,7 @@ public:
 	{
 		string expr = getParam (Params, "value");
 		CInterfaceExprValue value;
-		if (CInterfaceExpr::eval(expr, value, NULL))
+		if (CInterfaceExpr::eval(expr, value, nullptr))
 		{
 			if (!value.toInteger())
 			{
@@ -1591,7 +1591,7 @@ public:
 	{
 		string expr = getParam (Params, "value");
 		CInterfaceExprValue value;
-		if (CInterfaceExpr::eval(expr, value, NULL))
+		if (CInterfaceExpr::eval(expr, value, nullptr))
 		{
 			if (!value.toInteger())
 			{
@@ -1888,7 +1888,7 @@ public:
 		CMacroCmdManager	*pMM = CMacroCmdManager::getInstance();
 
 		CDBCtrlSheet *pCSDst = dynamic_cast<CDBCtrlSheet*>(pCaller);
-		if (pCSDst == NULL) return;
+		if (pCSDst == nullptr) return;
 		if (!pCSDst->isMacroMemory())
 			return;
 

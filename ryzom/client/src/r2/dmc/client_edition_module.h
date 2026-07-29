@@ -826,7 +826,7 @@ public:
 		\param cb The functor that is called when the file is loaded.(can be null)
 		\see CScenarioValidatorLoadSuccededCallback
 	*/
-	virtual bool addToLoadList( const std::string& filename, CScenarioValidatorLoadSuccededCallback* cb=0);
+	virtual bool addToLoadList( const std::string& filename, CScenarioValidatorLoadSuccededCallback* cb=nullptr);
 
 	/*! DSS message that indicates if the loading of the scenario was allowed or not by the server
 		\param md5 The md5 of the file that we wanted to load.
@@ -850,7 +850,7 @@ public:
 	virtual void addToUserComponentSaveList(const std::string& filename, const std::vector< std::pair < std::string, std::string> >& values, std::string &body);
 	virtual void saveUserComponentFileAccepted(NLNET::IModuleProxy *senderModuleProxy, const std::string& md5, const std::string& signature, bool ok);
 	virtual void loadUserComponentFileAccepted(NLNET::IModuleProxy *senderModuleProxy, const std::string& md5, bool ok);
-	virtual bool addToUserComponentLoadList( const std::string& filename, CUserComponentValidatorLoadSuccededCallback* cb=0);
+	virtual bool addToUserComponentLoadList( const std::string& filename, CUserComponentValidatorLoadSuccededCallback* cb=nullptr);
 	/*!
 	*/
 	void loadScenarioSucceded(const std::string& filename, const std::string& body, const CScenarioValidator::TValues& values);
@@ -1079,7 +1079,7 @@ public:
 
 	void setScenarioUpToDate(bool state) { _ScenarioUpToDate = state; }
 
-	bool isServerEditionModuleUp() const {return _ServerEditionProxy != NULL; }
+	bool isServerEditionModuleUp() const {return _ServerEditionProxy != nullptr; }
 	/////////////////////////////////////////////////////
 	//// Getter
 	/////////////////////////////////////////////////////

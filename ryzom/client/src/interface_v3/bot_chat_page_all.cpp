@@ -33,19 +33,19 @@
 #include "../global.h"
 
 
-CBotChatPageAll *BotChatPageAll = NULL;
+CBotChatPageAll *BotChatPageAll = nullptr;
 
 // *******************************************************************
 CBotChatPageAll::CBotChatPageAll()
 {
-	Trade			= NULL;
-	PlayerGift		= NULL;
-	ChooseMission	= NULL;
-	CreateGuild		= NULL;
-	News			= NULL;
-	MissionEnd		= NULL;
-	DynamicMission  = NULL;
-	RingSessions	= NULL;
+	Trade			= nullptr;
+	PlayerGift		= nullptr;
+	ChooseMission	= nullptr;
+	CreateGuild		= nullptr;
+	News			= nullptr;
+	MissionEnd		= nullptr;
+	DynamicMission  = nullptr;
+	RingSessions	= nullptr;
 }
 
 // *******************************************************************

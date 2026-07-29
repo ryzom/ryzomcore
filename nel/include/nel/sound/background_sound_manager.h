@@ -118,7 +118,7 @@ public:
 //	void		update ();
 
 	/// Return a patatoid. If isPath is not null, set it.
-	const std::vector<NLMISC::CVector> &getZone(uint32 zone, bool *isPath = 0);
+	const std::vector<NLMISC::CVector> &getZone(uint32 zone, bool *isPath = nullptr);
 
 	/// Return the position of the 3d source for a zone
 	NLMISC::CVector getZoneSourcePos(uint32 zone);

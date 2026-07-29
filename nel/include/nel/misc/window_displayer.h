@@ -45,7 +45,7 @@ public:
 	CWindowDisplayer (const char *displayerName = "") :
 	  IDisplayer(displayerName),
 		_Buffer("CWindowDisplayer::_Buffer"), _Labels("CWindowDisplayer::_Labels"), _CommandsToExecute("CWindowDisplayer::_CommandsToExecute"),
-		_Continue(true), _PosInHistory(0), _Init(false), _HistorySize(0), _ToolBarHeight(22), _InputEditHeight(25), _Thread(0), Log(0)
+		_Continue(true), _PosInHistory(0), _Init(false), _HistorySize(0), _ToolBarHeight(22), _InputEditHeight(25), _Thread(nullptr), Log(nullptr)
 	  { }
 
 	virtual ~CWindowDisplayer ();
@@ -79,7 +79,8 @@ protected:
 
 	struct CLabelEntry
 	{
-		CLabelEntry (const std::string &value) : Hwnd(NULL), Value(value), NeedUpdate(true) { }
+		CLabelEntry (const std::string &value) : Hwnd(nullptr)
+		    , Value(value), NeedUpdate(true) { }
 		void		*Hwnd;
 		std::string	 Value;
 		bool		 NeedUpdate;

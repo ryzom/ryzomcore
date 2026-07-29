@@ -78,7 +78,7 @@ namespace NLGUI
 		else
 		if( name == "dbcolr" )
 		{
-			if( _ColSelR.getNodePtr() != NULL )
+			if( _ColSelR.getNodePtr() != nullptr)
 				return _ColSelR.getNodePtr()->getFullName();
 			else
 				return "";
@@ -86,7 +86,7 @@ namespace NLGUI
 		else
 		if( name == "dbcolg" )
 		{
-			if( _ColSelG.getNodePtr() != NULL )
+			if( _ColSelG.getNodePtr() != nullptr)
 				return _ColSelG.getNodePtr()->getFullName();
 			else
 				return "";
@@ -94,7 +94,7 @@ namespace NLGUI
 		else
 		if( name == "dbcolb" )
 		{
-			if( _ColSelB.getNodePtr() != NULL )
+			if( _ColSelB.getNodePtr() != nullptr)
 				return _ColSelB.getNodePtr()->getFullName();
 			else
 				return "";
@@ -102,7 +102,7 @@ namespace NLGUI
 		else
 		if( name == "dbcola" )
 		{
-			if( _ColSelA.getNodePtr() != NULL )
+			if( _ColSelA.getNodePtr() != nullptr)
 				return _ColSelA.getNodePtr()->getFullName();
 			else
 				return "";
@@ -161,8 +161,8 @@ namespace NLGUI
 	xmlNodePtr CCtrlColPick::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
 		xmlNodePtr node = CCtrlBase::serialize( parentNode, type );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "colpick" );
 
@@ -174,25 +174,25 @@ namespace NLGUI
 
 		std::string s;
 		
-		if( _ColSelR.getNodePtr() != NULL )
+		if( _ColSelR.getNodePtr() != nullptr)
 			s = _ColSelR.getNodePtr()->getFullName();
 		else
 			s.clear();
 		xmlSetProp( node, BAD_CAST "dbcolr", BAD_CAST s.c_str() );
 
-		if( _ColSelG.getNodePtr() != NULL )
+		if( _ColSelG.getNodePtr() != nullptr)
 			s = _ColSelG.getNodePtr()->getFullName();
 		else
 			s.clear();
 		xmlSetProp( node, BAD_CAST "dbcolg", BAD_CAST s.c_str() );
 
-		if( _ColSelB.getNodePtr() != NULL )
+		if( _ColSelB.getNodePtr() != nullptr)
 			s = _ColSelB.getNodePtr()->getFullName();
 		else
 			s.clear();
 		xmlSetProp( node, BAD_CAST "dbcolb", BAD_CAST s.c_str() );
 
-		if( _ColSelA.getNodePtr() != NULL )
+		if( _ColSelA.getNodePtr() != nullptr)
 			s = _ColSelA.getNodePtr()->getFullName();
 		else
 			s.clear();
@@ -328,13 +328,13 @@ namespace NLGUI
 
 		_ColorSelect = getColor (x, y);
 
-		if (_ColSelR.getNodePtr() != NULL)
+		if (_ColSelR.getNodePtr() != nullptr)
 			_ColSelR.setSInt32(_ColorSelect.R);
-		if (_ColSelG.getNodePtr() != NULL)
+		if (_ColSelG.getNodePtr() != nullptr)
 			_ColSelG.setSInt32(_ColorSelect.G);
-		if (_ColSelB.getNodePtr() != NULL)
+		if (_ColSelB.getNodePtr() != nullptr)
 			_ColSelB.setSInt32(_ColorSelect.B);
-		if (_ColSelA.getNodePtr() != NULL)
+		if (_ColSelA.getNodePtr() != nullptr)
 			_ColSelA.setSInt32(_ColorSelect.A);
 
 		if (!_AHOnChange.empty())

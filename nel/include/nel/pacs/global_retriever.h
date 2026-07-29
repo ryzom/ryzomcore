@@ -167,7 +167,7 @@ public:
 	 * Constructor.
 	 * Creates a global retriever with given width, height and retriever bank.
 	 */
-	CGlobalRetriever(const CRetrieverBank *bank=NULL)
+	CGlobalRetriever(const CRetrieverBank *bank = nullptr)
 		: _RetrieverBank(bank)
 	{ }
 	virtual ~CGlobalRetriever();

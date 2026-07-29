@@ -35,7 +35,7 @@ public:
 	 *  \param radiusCut : indicate how much to subtract to the outter radius to get the inner radius
 	 *  \param  tex : the texture that must be applied to the shockwave
 	 */
-	CPSShockWave(uint nbSeg = 9, float radiusCut = 0.8f , CSmartPtr<ITexture> tex = NULL);
+	CPSShockWave(uint nbSeg = 9, float radiusCut = 0.8f , CSmartPtr<ITexture> tex = nullptr);
 
 	/** set a new number of seg (mus be >= 3 and <= 64)
 	 *  \see CPSShockWave()

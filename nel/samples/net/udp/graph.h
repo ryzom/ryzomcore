@@ -59,7 +59,7 @@ public:
 		: Name(name), X(x), Y(y), Width(width), Height(height), BackColor(backColor), MaxValue(maxValue), Peak(0.0f), Quantum(quantum),
 		CurrentQuantumStart(NLMISC::CTime::getLocalTime())
 	{
-		if (_Graphs == NULL)
+		if (_Graphs == nullptr)
 		{
 			_Graphs = new std::vector<CGraph*>;
 		}

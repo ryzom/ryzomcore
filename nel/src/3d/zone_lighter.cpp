@@ -490,7 +490,7 @@ void RenderTriangle (const CZoneLighter::CTriangle &triangle, const CZoneLighter
 		gradientTriangle.computeGradient (ooz[0], ooz[1], ooz[2], ozzGradient);
 
 		// Need uv ?
-		bool needUV = triangle.Texture != NULL;
+		bool needUV = triangle.Texture != nullptr;
 
 		// Compute the gradient for uv
 		CVector uGradient;
@@ -504,7 +504,7 @@ void RenderTriangle (const CZoneLighter::CTriangle &triangle, const CZoneLighter
 		// Texture information
 		uint width=0;
 		uint height=0;
-		const CObjectVector<uint8> *pixels = 0;
+		const CObjectVector<uint8> *pixels = nullptr;
 		if (needUV)
 		{
 			// Get pixels
@@ -1809,7 +1809,7 @@ void CZoneLighter::addTriangles (const CMeshBase &meshBase, const CMeshGeom &mes
 bool CZoneLighter::getTexture (const CMaterial &material, CBitmap *&result, bool &clampU, bool &clampV, uint8 &alphaTestThreshold, bool &doubleSided)
 {
 	// Texture information, not NULL only if texture is used for alpha test
-	result = NULL;
+	result = nullptr;
 	clampU = false;
 	clampV = false;
 
@@ -2878,12 +2878,12 @@ void CZoneLighter::addLightableShape(IShape *shape, const NLMISC::CMatrix& MT)
 bool CZoneLighter::isLightableShape(IShape &shape)
 {
 	/// for now, the only shape that we lit are water shapes
-	if (dynamic_cast<CWaterShape *>(&shape) != NULL)
+	if (dynamic_cast<CWaterShape *>(&shape) != nullptr)
 	{
 		// check that this water surface has a diffuse map that is a CTextureFile (we must be able to save it !)
 		CWaterShape *ws = static_cast<CWaterShape *>(&shape);
 		const ITexture *tex = ws->getColorMap();
-		if (dynamic_cast<const CTextureFile *>(tex) != NULL)
+		if (dynamic_cast<const CTextureFile *>(tex) != nullptr)
 		{
 			return ws->isLightMappingEnabled();
 		}
@@ -3560,7 +3560,7 @@ void			CZoneLighter::processZonePointLightRT(vector<CPointLightNamed> &listPoint
 				// Reset any empty slot to NULL.
 				for(; lightInfId<CTileLightInfluence::NumLightPerCorner; lightInfId++)
 				{
-					tli.Light[lightInfId]= NULL;
+					tli.Light[lightInfId] = nullptr;
 				}
 
 
@@ -3615,7 +3615,7 @@ void			CZoneLighter::processZonePointLightRT(vector<CPointLightNamed> &listPoint
 				{
 					CTileLightInfUnpack		&tliSrc= pfpl.TileLightInfluences[tliId];
 					CTileLightInfluence		&tliDst= pInfo.TileLightInfluences[tliId];
-					if(tliSrc.Light[lightId] == NULL)
+					if(tliSrc.Light[lightId] == nullptr)
 					{
 						// Mark as unused.
 						tliDst.Light[lightId]= 0xFF;

@@ -39,13 +39,13 @@ namespace NL3D
 void		CFarVertexBufferInfo::setupNullPointers()
 {
 	Accessor.unlock();
-	VertexCoordPointer= NULL;
-	TexCoordPointer0= NULL;
-	TexCoordPointer1= NULL;
-	ColorPointer= NULL;
-	GeomInfoPointer= NULL;
-	DeltaPosPointer= NULL;
-	AlphaInfoPointer= NULL;
+	VertexCoordPointer = nullptr;
+	TexCoordPointer0 = nullptr;
+	TexCoordPointer1 = nullptr;
+	ColorPointer = nullptr;
+	GeomInfoPointer = nullptr;
+	DeltaPosPointer = nullptr;
+	AlphaInfoPointer = nullptr;
 }
 
 
@@ -111,7 +111,7 @@ void		CFarVertexBufferInfo::setupVertexBuffer(CVertexBuffer &vb, bool forVertexP
 		else
 		{
 			ColorOff= 0;
-			ColorPointer= NULL;
+			ColorPointer = nullptr;
 		}
 	}
 
@@ -122,12 +122,12 @@ void		CFarVertexBufferInfo::setupVertexBuffer(CVertexBuffer &vb, bool forVertexP
 void		CNearVertexBufferInfo::setupNullPointers()
 {
 	Accessor.unlock();
-	VertexCoordPointer= NULL;
-	TexCoordPointer0= NULL;
-	TexCoordPointer1= NULL;
-	TexCoordPointer2= NULL;
-	GeomInfoPointer= NULL;
-	DeltaPosPointer= NULL;
+	VertexCoordPointer = nullptr;
+	TexCoordPointer0 = nullptr;
+	TexCoordPointer1 = nullptr;
+	TexCoordPointer2 = nullptr;
+	GeomInfoPointer = nullptr;
+	DeltaPosPointer = nullptr;
 }
 
 

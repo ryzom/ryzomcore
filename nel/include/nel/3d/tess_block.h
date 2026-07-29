@@ -140,7 +140,7 @@ public:
 
 
 	// append/remove to modify list. This is for FaceVector update durint refine(), addZone() ....
-	bool			isInModifyList() const {return _PrecToModify!=NULL;}
+	bool			isInModifyList() const {return _PrecToModify != nullptr; }
 	// append to modify list has the side effect od deleting ALL FaceVector.
 	void			appendToModifyListAndDeleteFaceVector(CTessBlock &root, CLandscapeFaceVectorManager &mgr);
 	void			removeFromModifyList();

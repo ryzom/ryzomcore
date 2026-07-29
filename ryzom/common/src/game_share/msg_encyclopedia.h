@@ -148,7 +148,7 @@ public:
 		for (uint32 i = 0; i < Themas.size(); ++i)
 			if (Themas[i].Name == nThemaName)
 				return &Themas[i];
-		return NULL;
+		return nullptr;
 	}
 
 };

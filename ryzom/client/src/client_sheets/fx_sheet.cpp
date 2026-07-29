@@ -55,7 +55,7 @@ void CFXSheet::build(const NLGEORGES::UFormElm &item)
 {
 
 	// Trail List
-	const UFormElm *elmt = 0;
+	const UFormElm *elmt = nullptr;
 	bool result = item.getNodeByName(&elmt, "Trail_List");
 	if(result)
 	{
@@ -95,7 +95,7 @@ void CFXSheet::build(const NLGEORGES::UFormElm &item)
 	}
 
 	// PS List
-	elmt = 0;
+	elmt = nullptr;
 	item.getNodeByName(&elmt, "PS_List");
 	if(elmt)
 	{

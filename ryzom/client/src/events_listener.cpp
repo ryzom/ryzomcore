@@ -158,7 +158,7 @@ void CEventsListener::operator()(const CEvent& event)
 	// Window close button pressed.
 	if(event == EventCloseWindowId)
 	{
-		CAHManager::getInstance()->runActionHandler("enter_modal", NULL, "group=ui:interface:quit_dialog");
+		CAHManager::getInstance()->runActionHandler("enter_modal", nullptr, "group=ui:interface:quit_dialog");
 	}
 	// Event from the Mouse (MOVE)
 	else if(event == EventMouseMoveId)

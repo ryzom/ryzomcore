@@ -59,7 +59,7 @@ CToolDrawPrim::CToolDrawPrim(TPrimType primType, CInstance *extending /*= NULL*/
 	_ValidPrim = true;
 	_DistinctLastPoint = true;
 	_ExtendedPrimitive = extending;
-	_Extending = (_ExtendedPrimitive != NULL);
+	_Extending = (_ExtendedPrimitive != nullptr);
 	_StartNumPoints = 0;
 	_InaccessibleParts = false;
 	_Commited = false;
@@ -500,7 +500,7 @@ void CToolDrawPrim::commit()
 	_Points.resize(_NumPoints);
 	if (_Points.empty()) return;
 	// send network command to create a new road
-	CObject *desc = NULL;
+	CObject *desc = nullptr;
 	if (!_Extending)
 	{
 		getDMC().newAction(NLMISC::CI18N::get(_PrimType == Road ? "uiR2EDCreateRouteAction" : "uiR2EDCreateZoneAction"));
@@ -517,7 +517,7 @@ void CToolDrawPrim::commit()
 	}
 	if (desc || _Extending)
 	{
-		CObject *points = NULL;
+		CObject *points = nullptr;
 		if (!_Extending)
 		{
 			std::string instanceId = getString(desc, "InstanceId");
@@ -627,7 +627,7 @@ void CToolDrawPrim::commit()
 		}
 	}
 	_Commited = true;
-	getEditor().setCurrentTool(NULL);	// set the default tool
+	getEditor().setCurrentTool(nullptr);	// set the default tool
 	return;
 }
 
@@ -674,7 +674,7 @@ bool CToolDrawPrim::onDeleteCmd()
 			getDMC().getActionHistoric().endAction();
 		}
 		// cancel the drawing
-		getEditor().setCurrentTool(NULL);
+		getEditor().setCurrentTool(nullptr);
 	}
 	else
 	{

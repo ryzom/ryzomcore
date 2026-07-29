@@ -95,15 +95,15 @@ namespace NLGUI
 
 	xmlNodePtr CInterfaceOptions::serialize( xmlNodePtr parentNode, const std::string &name ) const
 	{
-		if( parentNode == NULL )
-			return NULL;
+		if( parentNode == nullptr)
+			return nullptr;
 
 		if( name.empty() )
-			return NULL;
+			return nullptr;
 
-		xmlNodePtr node = xmlNewNode( NULL, BAD_CAST "options" );
-		if( node == NULL )
-			return NULL;
+		xmlNodePtr node = xmlNewNode(nullptr, BAD_CAST "options" );
+		if( node == nullptr)
+			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "name", BAD_CAST name.c_str() );
 		xmlAddChild( parentNode, node );
@@ -111,11 +111,11 @@ namespace NLGUI
 		std::map< std::string, CInterfaceOptionValue >::const_iterator itr;
 		for( itr = _ParamValue.begin(); itr != _ParamValue.end(); ++itr )
 		{
-			xmlNodePtr n = xmlNewNode( NULL, BAD_CAST "param" );
-			if( n == NULL )
+			xmlNodePtr n = xmlNewNode(nullptr, BAD_CAST "param" );
+			if( n == nullptr)
 			{
 				xmlFreeNode( node );
-				return NULL;
+				return nullptr;
 			}
 			
 			xmlSetProp( n, BAD_CAST "name", BAD_CAST itr->first.c_str() );
@@ -197,8 +197,8 @@ namespace NLGUI
 	xmlNodePtr COptionsLayer::serialize( xmlNodePtr parentNode, const std::string &name ) const
 	{
 		xmlNodePtr node = CInterfaceOptions::serialize( parentNode, name );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 		
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "layer" );
 
@@ -316,8 +316,8 @@ namespace NLGUI
 	xmlNodePtr COptionsContainerInsertion::serialize( xmlNodePtr parentNode, const std::string &name ) const
 	{
 		xmlNodePtr node = CInterfaceOptions::serialize( parentNode, name );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "container_insertion_opt" );
 
@@ -357,8 +357,8 @@ namespace NLGUI
 	xmlNodePtr COptionsContainerMove::serialize( xmlNodePtr parentNode, const std::string &name ) const
 	{
 		xmlNodePtr node = CInterfaceOptions::serialize( parentNode, name );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "container_move_opt" );
 
@@ -390,15 +390,15 @@ namespace NLGUI
 
 	xmlNodePtr COptionsList::serialize( xmlNodePtr parentNode, const std::string &name ) const
 	{
-		if( parentNode == NULL )
-			return NULL;
+		if( parentNode == nullptr)
+			return nullptr;
 
 		if( name.empty() )
-			return NULL;
+			return nullptr;
 
-		xmlNodePtr node = xmlNewNode( NULL, BAD_CAST "options" );
-		if( node == NULL )
-			return NULL;
+		xmlNodePtr node = xmlNewNode(nullptr, BAD_CAST "options" );
+		if( node == nullptr)
+			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "name", BAD_CAST name.c_str() );
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "list" );
@@ -407,11 +407,11 @@ namespace NLGUI
 		std::map< std::string, CInterfaceOptionValue >::const_iterator itr;
 		for( itr = _ParamValue.begin(); itr != _ParamValue.end(); ++itr )
 		{
-			xmlNodePtr n = xmlNewNode( NULL, BAD_CAST "param" );
-			if( n == NULL )
+			xmlNodePtr n = xmlNewNode(nullptr, BAD_CAST "param" );
+			if( n == nullptr)
 			{
 				xmlFreeNode( node );
-				return NULL;
+				return nullptr;
 			}
 			xmlSetProp( n, BAD_CAST "value", BAD_CAST itr->second.getValStr().c_str() );
 			xmlAddChild( node, n );

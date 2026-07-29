@@ -201,7 +201,7 @@ R2::CRtGrp* CRtAct::getRtGrpByName(const std::string& name) const
 			if (data == name) { return first->second; }
 		}
 	}
-	return 0;
+	return nullptr;
 }
 
 void CRtAct::addUserTrigger(const CRtUserTrigger& userTrigger)
@@ -621,7 +621,7 @@ public:
 
 	void setPrimPoint()
 	{
-		CObject* attr = 0;
+		CObject* attr = nullptr;
 		CPrimPoint* point = dynamic_cast<CPrimPoint*>(_Primitive);
 
 		nlassert(point);
@@ -684,7 +684,7 @@ void CAttributeToProperty::setAiStateName(const std::string& prefix)
 
 void CAttributeToProperty::setPrimPath()
 {
-	CObject* attr = 0;
+	CObject* attr = nullptr;
 	CPrimPath* points = dynamic_cast<CPrimPath*>(_Primitive);
 	nlassert(points);
 	CObject* pts = _Object->getAttr("Pts");
@@ -714,7 +714,7 @@ void CAttributeToProperty::setPrimPath()
 
 void CAttributeToProperty::setPrimZone()
 {
-	CObject* attr = 0;
+	CObject* attr = nullptr;
 	CPrimZone* points = dynamic_cast<CPrimZone*>(_Primitive);
 	nlassert(points);
 	CObject* pts = _Object->getAttr("Pts");
@@ -967,7 +967,7 @@ CServerAnimationModule::CServerAnimationModule() :
 {
 		CServerAnimationItfSkel::init(this);
 		CShareServerAnimationItfSkel::init(this);
-	_Server = 0;
+	_Server = nullptr;
 }
 
 CServerAnimationModule::~CServerAnimationModule()
@@ -986,7 +986,7 @@ IPrimitive* CServerAnimationModule::getAction(CObject* action, const std::string
 	if (!action)
 	{
 		nlwarning("Error while generating primitives in scenario '%u'",  scenarioId.asInt());
-		return 0;
+		return nullptr;
 	}
 	IPrimitive* pAction= dynamic_cast<IPrimitive *> (CClassRegistry::create ("CPrimNode"));
 	pAction->addPropertyByName("class", new CPropertyString("npc_event_handler_action"));
@@ -1047,7 +1047,7 @@ IPrimitive* CServerAnimationModule::getAction(CObject* action, const std::string
 		if (!action->isString("Action") )
 		{
 			nlwarning("Invalid rtData: no action found");
-			return 0;
+			return nullptr;
 		}
 		CSString caction(action->toString("Action"));
 		if (caction == "begin_state" || caction.left(14)=="trigger_event_" || caction == "facing")
@@ -1119,7 +1119,7 @@ IPrimitive* CServerAnimationModule::getAction(CObject* action, const std::string
 		if (!tmp)
 		{
 			nlwarning("Error in action %s nb: %u", action->toString("Name").c_str(), i);
-			return 0;
+			return nullptr;
 		}
 		pAction->insertChild(tmp);
 	}
@@ -1199,7 +1199,7 @@ void CServerAnimationModule::startTest(TSessionId sessionId, CPersistentDataReco
 		CCharacterControlItfProxy proxy(_CharacterControlProxy);
   		proxy.sendItemDescription(this,  sessionId, session->MissionItems);
 	}
-	if (_IOSRingProxy != NULL)
+	if (_IOSRingProxy != nullptr)
 	{
 		CIOSRingItfProxy proxy(_IOSRingProxy);
 		vector<TCharMappedInfo>	itemInfos;
@@ -1440,7 +1440,7 @@ bool CServerAnimationModule::translateActToPrimitive(CInstanceMap& components, C
 
 
 	// Content Manager
-	IPrimitive *npcManager = 0;
+	IPrimitive *npcManager = nullptr;
 
 	{
 		IPrimitive *npc_manager = dynamic_cast<IPrimitive *> (CClassRegistry::create ("CPrimZone"));
@@ -1458,7 +1458,7 @@ bool CServerAnimationModule::translateActToPrimitive(CInstanceMap& components, C
 		npcManager = npc_manager;
 	}
 
-	IPrimitive *zoneTriggerManager = 0;
+	IPrimitive *zoneTriggerManager = nullptr;
 	// Trigger Manager
 	{
 		IPrimitive *npc_manager = dynamic_cast<IPrimitive *> (CClassRegistry::create ("CPrimZone"));
@@ -1482,7 +1482,7 @@ bool CServerAnimationModule::translateActToPrimitive(CInstanceMap& components, C
 
 		std::string aiMovement = aiState->toString("AiMovement");
 
-		IPrimitive *state = 0;
+		IPrimitive *state = nullptr;
 
 		if (aiMovement == "follow_route")
 		{
@@ -1580,7 +1580,7 @@ bool CServerAnimationModule::translateActToPrimitive(CInstanceMap& components, C
 			npc_group->addPropertyByName("bot_vertical_pos", new CPropertyString("auto"));	// AJM
 			state->insertChild(npc_group);
 
-			IPrimitive *npc_group_parameters = 0;
+			IPrimitive *npc_group_parameters = nullptr;
 			{
 
 				npc_group_parameters = dynamic_cast<IPrimitive *> (CClassRegistry::create ("CPrimNode"));
@@ -2228,12 +2228,12 @@ void  CServerAnimationModule::onModuleDown(NLNET::IModuleProxy *senderModuleProx
 
 	if ( moduleName == "StringManagerModule")
 	{
-		_StringManagerProxy = NULL;
+		_StringManagerProxy = nullptr;
 		nlinfo("StringManagerModule disconnected!");
 	}
 	else if ( moduleName == "CharacterControl")
 	{
-		_CharacterControlProxy = NULL;
+		_CharacterControlProxy = nullptr;
 	}
 	else if ( moduleName == "ClientEditionModule") // a client has disconnected
 	{
@@ -2292,7 +2292,7 @@ void  CServerAnimationModule::onModuleDown(NLNET::IModuleProxy *senderModuleProx
 	}
 	else if (senderModuleProxy == _IOSRingProxy)
 	{
-		_IOSRingProxy = NULL;
+		_IOSRingProxy = nullptr;
 	}
 }
 
@@ -2396,17 +2396,17 @@ void CServerAnimationModule::askSetUserCharActPosition( NLNET::IModuleProxy * /*
 
 CAnimationSession* CServerAnimationModule::getSession(TSessionId sessionId) const
 {
-	if (sessionId.asInt() == 0) { return 0; }
+	if (sessionId.asInt() == 0) { return nullptr; }
 
 	TSessions::const_iterator session = _Sessions.find(sessionId);
 	if (session == _Sessions.end())
 	{
 		TSessionId remapped = _Server->getEditionModule()->getLinkedSessionId(sessionId);
-		if (remapped.asInt() == 0) { return 0; }
+		if (remapped.asInt() == 0) { return nullptr; }
 		session = _Sessions.find(remapped);
 	}
 
-	if (session == _Sessions.end()) { return 0; }
+	if (session == _Sessions.end()) { return nullptr; }
 
 	return session->second;
 }
@@ -2438,7 +2438,7 @@ TSessionId CServerAnimationModule::getSessionIdByCharId(TCharId charId) const
 CAnimationSession* CServerAnimationModule::getSessionByCharId(TCharId charId) const
 {
 	if (charId == 0)
-		return NULL;
+		return nullptr;
 	return getSession(getSessionIdByCharId(charId));
 }
 
@@ -2576,8 +2576,8 @@ void CServerAnimationModule::stopIncarn(const NLMISC::CEntityId &eid, const NLMI
 CRtNpc* CServerAnimationModule::getNpcByAlias(TSessionId sessionId, TAIAlias alias) const
 {
 	CAnimationSession* session = getSession(sessionId);
-	if (!session) { return 0; }
-	if (session->Acts.empty()) { return 0; }
+	if (!session) { return nullptr; }
+	if (session->Acts.empty()) { return nullptr; }
 
 
 
@@ -2600,7 +2600,7 @@ CRtNpc* CServerAnimationModule::getNpcByAlias(TSessionId sessionId, TAIAlias ali
 	}
 
 
-	return 0;
+	return nullptr;
 }
 
 
@@ -2959,7 +2959,7 @@ void CServerAnimationModule::updateAnimationProperties(NLNET::IModuleProxy *send
 
 	CMessage msg("NPC_APROP"); //Animation Properties
 
-	if (eid == NLMISC::CEntityId::Unknown || rtNpc == 0)
+	if (eid == NLMISC::CEntityId::Unknown || rtNpc == nullptr)
 	{
 		uint32 zero = 0;
 		msg.serial(zero);
@@ -3023,7 +3023,7 @@ void CServerAnimationModule::onCharTargetReceived( NLNET::IModuleProxy *senderMo
 
 	if (!alived || entityRowId == TDataSetRow() || alias == 0 ||  creatureId == CEntityId::Unknown )
 	{
-		updateAnimationProperties(* foundModule, CEntityId::Unknown, 0, 0);
+		updateAnimationProperties(* foundModule, CEntityId::Unknown, nullptr, nullptr);
 		return;
 	}
 
@@ -3097,7 +3097,7 @@ void CServerAnimationModule::onCharTargetReceived( NLNET::IModuleProxy *senderMo
 	uint32 SelectedNpcAct = 0;
 
 	CRtAct::TRtNpcs::const_iterator npcFound ( session->Acts[0]->RtNpcs.find(alias) );
-	CRtNpc * rtNpc = 0;
+	CRtNpc * rtNpc = nullptr;
 	std::string name;
 	if (npcFound == session->Acts[0]->RtNpcs.end())
 	{
@@ -3120,7 +3120,7 @@ void CServerAnimationModule::onCharTargetReceived( NLNET::IModuleProxy *senderMo
 
 	CRtAct::TRtGrps & rtGrps = session->Acts[ SelectedNpcAct ]->RtGrps;
 	CRtAct::TRtGrps::const_iterator grpFound =	rtGrps.find(rtNpc->GrpAlias);
-	CRtGrp *rtGrp = 0;
+	CRtGrp *rtGrp = nullptr;
 	if (grpFound != rtGrps.end())
 	{
 		rtGrp = grpFound->second.getPtr();
@@ -3402,7 +3402,7 @@ bool CServerAnimationModule::onProcessModuleMessage(IModuleProxy *senderModulePr
 				{
 					bool bFoundSession = false;
 					CAnimationSession *lastSession = _QueuedSessions.back();
-					CAnimationSession *animSession = NULL;
+					CAnimationSession *animSession = nullptr;
 					do
 					{
 						animSession = _QueuedSessions.front();
@@ -3670,7 +3670,7 @@ void CServerAnimationModule::scheduleStartSessionImpl(const CAnimationMessageAni
 IPrimitive* CServerAnimationModule::getEvent(CObject* event,CInstanceMap& components, const std::string& prefix,TSessionId scenarioId)
 {
 	//create the primitive event
-	IPrimitive* pEvent = 0;
+	IPrimitive* pEvent = nullptr;
 	pEvent = dynamic_cast<IPrimitive *> (CClassRegistry::create ("CPrimNode"));
 	pEvent->addPropertyByName("class", new CPropertyString("npc_event_handler"));
 	pEvent->addPropertyByName("ai_type", new CPropertyString("NPC_EVENT"));	// AJM
@@ -3715,14 +3715,14 @@ IPrimitive* CServerAnimationModule::getEvent(CObject* event,CInstanceMap& compon
 		if (!action)
 		{
 			nlwarning("Error while generating primitives in session '%u' in action '%s'", scenarioId.asInt(), id.c_str());
-			return 0;
+			return nullptr;
 		}
 		//create the primitive action
 		IPrimitive* pAction=getAction(action, prefix,scenarioId);
 		if (!pAction )
 		{
 			nlwarning("Error for '%u'th action '%s' in states '%s' with group '%s'", firstAction, event->toString("Name").c_str(), event->toString("StatesByName").c_str(), event->toString("GroupsByName").c_str());
-			return 0;
+			return nullptr;
 		}
 		//add the action to the event
 		father->insertChild(pAction);
@@ -3766,7 +3766,7 @@ void CServerAnimationModule::requestLoadTable(CAnimationSession* session)
 
 	//create the message to send the local string table to the
 	//string manager module
-	if((texts==NULL)||(texts->getAttr("Texts")->getSize()==0))
+	if((texts == nullptr) ||(texts->getAttr("Texts")->getSize()==0))
 	{
 		uint32 tmp=0;
 		msg.serial(tmp);
@@ -3798,7 +3798,7 @@ void CServerAnimationModule::requestUnloadTable(TSessionId sessionId)
 {
 	CMessage msg("unregisterTable");
 	msg.serial(sessionId);
-	if (_StringManagerProxy != 0)
+	if (_StringManagerProxy != nullptr)
 	{
 		_StringManagerProxy->sendModuleMessage(this,msg);
 	}
@@ -3808,7 +3808,7 @@ void CServerAnimationModule::requestReleaseChannels(TSessionId sessionId)
 {
 	CMessage msg("CLEAR_CHANNELS");
 	msg.serial(sessionId);
-	if (_StringManagerProxy != 0)
+	if (_StringManagerProxy != nullptr)
 	{
 		_StringManagerProxy->sendModuleMessage(this,msg);
 	}
@@ -4112,7 +4112,7 @@ void CServerAnimationModule::onBotDespawnNotification(NLMISC::CEntityId& creatur
 			const NLNET::TModuleProxyPtr* pClient = getEditionModule()->getClientProxyPtr(charId);
 			if (pClient)
 			{
-					updateAnimationProperties(*pClient, CEntityId::Unknown, 0, 0);
+					updateAnimationProperties(*pClient, CEntityId::Unknown, nullptr, nullptr);
 			}
 		}
 		_TargetedEntities.erase(itTarget);
@@ -4137,7 +4137,7 @@ void CServerAnimationModule::onBotDespawnNotification(NLMISC::CEntityId& creatur
 			const NLNET::TModuleProxyPtr* pClient = getEditionModule()->getClientProxyPtr(charId);
 			if (pClient)
 			{
-					updateAnimationProperties(*pClient, CEntityId::Unknown, 0, 0);
+					updateAnimationProperties(*pClient, CEntityId::Unknown, nullptr, nullptr);
 			}
 		}
 
@@ -4160,7 +4160,7 @@ void CServerAnimationModule::onBotDespawnNotification(NLMISC::CEntityId& creatur
 			const NLNET::TModuleProxyPtr* pClient = getEditionModule()->getClientProxyPtr(charId);
 			if (pClient)
 			{
-				updateAnimationProperties(*pClient, CEntityId::Unknown, 0, 0);
+				updateAnimationProperties(*pClient, CEntityId::Unknown, nullptr, nullptr);
 			}
 		}
 	}
@@ -4191,7 +4191,7 @@ void CServerAnimationModule::onStopNpcControlNotification(NLMISC::CEntityId& cre
 			const NLNET::TModuleProxyPtr* pClient = getEditionModule()->getClientProxyPtr(charId);
 			if (pClient)
 			{
-					updateAnimationProperties(*pClient, CEntityId::Unknown, 0, 0);
+					updateAnimationProperties(*pClient, CEntityId::Unknown, nullptr, nullptr);
 			}
 		}
 	}
@@ -4394,7 +4394,7 @@ NLNET::IModule* CServerAnimationModule::getModule() const { return const_cast<R2
 bool CServerAnimationModule::isSessionRunning(TSessionId sessionId) const
 {
 	CAnimationSession* session = getSession(sessionId);
-	return session != 0;
+	return session != nullptr;
 }
 
 uint32 CServerAnimationModule::getCurrentAct(TSessionId sessionId) const

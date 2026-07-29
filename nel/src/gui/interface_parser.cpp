@@ -105,7 +105,7 @@ namespace NLGUI
 		// load node name
 		std::string name;
 		f.serial(name);
-		xmlNodePtr node = xmlNewNode(NULL, (const xmlChar *) name.c_str());
+		xmlNodePtr node = xmlNewNode(nullptr, (const xmlChar *) name.c_str());
 		// slod properties
 		uint32 numProp;
 		f.serial(numProp);
@@ -135,7 +135,7 @@ namespace NLGUI
 		cacheUIParsing = false;
 		linkId = 0;
 		editorMode = false;
-		setupCallback = NULL;
+		setupCallback = nullptr;
 	}
 
 	CInterfaceParser::~CInterfaceParser()
@@ -146,7 +146,7 @@ namespace NLGUI
 		_LuaClassAssociation.clear();
 		_Templates.clear();
 		removeAllModules();
-		setupCallback = NULL;
+		setupCallback = nullptr;
 	}
 	/** Convert a string into a memstream
 	  */
@@ -271,7 +271,7 @@ namespace NLGUI
 				//nlwarning("Parsing interface file : %s", it->c_str());
 				nextFileName = *it;
 				CIXml nextRead;
-				xmlNodePtr cur = NULL;
+				xmlNodePtr cur = nullptr;
 				bool saveParseResult = false;
 				bool readFromUncompressedXML = true;
 				if( isFilename && cacheUIParsing )
@@ -390,7 +390,7 @@ namespace NLGUI
 
 		if( ok )
 		{
-			if( CWidgetManager::getInstance()->getPointer() == NULL )
+			if( CWidgetManager::getInstance()->getPointer() == nullptr)
 			{
 				CViewPointer *pointer = dynamic_cast< CViewPointer* >( NLMISC_GET_FACTORY(CViewBase, std::string).createObject( "generic_pointer", CViewBase::TCtorParam() ) );
 				CWidgetManager::getInstance()->setPointer( pointer );
@@ -406,8 +406,8 @@ namespace NLGUI
 	bool CInterfaceParser::parseXMLDocument(xmlNodePtr root, bool reload)
 	{
 
-		CWidgetManager::SMasterGroup *curRoot = NULL;
-		CInterfaceGroup *rootGroup = NULL;
+		CWidgetManager::SMasterGroup *curRoot = nullptr;
+		CInterfaceGroup *rootGroup = nullptr;
 		//parse templates
 		xmlNodePtr curNode = root->children;
 
@@ -450,10 +450,10 @@ namespace NLGUI
 						{
 							nlwarning("Replacing template %s with new version", (const char *) ptr);
 							xmlFreeNode(_Templates[k]);
-							_Templates[k] = NULL;
+							_Templates[k] = nullptr;
 						}
 					}
-					_Templates.erase(std::remove(_Templates.begin(), _Templates.end(), (xmlNodePtr) NULL), _Templates.end());
+					_Templates.erase(std::remove(_Templates.begin(), _Templates.end(), (xmlNodePtr) nullptr), _Templates.end());
 					_Templates.push_back(curNode);
 				}
 				else
@@ -481,7 +481,8 @@ namespace NLGUI
 			else
 			{
 				IParserModule *module = getModuleFor( (char*)( curNode->name ) );
-				if( module != NULL ){
+				if( module != nullptr)
+			    {
 					if( module->canParseInStage( IParserModule::Unresolved ) )
 						module->parse( curNode, rootGroup );
 				}
@@ -508,10 +509,10 @@ namespace NLGUI
 				if (ptr)
 				{
 					rootGroup = CWidgetManager::getInstance()->getMasterGroupFromId (string("ui:") + (const char*)ptr);
-					if (rootGroup == NULL)
+					if (rootGroup == nullptr)
 					{
 						rootGroup = (CInterfaceGroup*)(new CRootGroup(CViewBase::TCtorParam()));
-						rootGroup->parse (root, NULL);
+						rootGroup->parse (root, nullptr);
 						CWidgetManager::SMasterGroup mg;
 						mg.Group = rootGroup;
 						_MasterGroups.push_back (mg);
@@ -604,7 +605,7 @@ namespace NLGUI
 			else
 			{
 				IParserModule *module = getModuleFor( (char*)( root->name ) );
-				if( module != NULL )
+				if( module != nullptr)
 				{
 					if( module->canParseInStage( IParserModule::Resolved ) )
 						module->parse( root, rootGroup );
@@ -656,7 +657,7 @@ namespace NLGUI
 				// free the original node, whether we kept a copy or not
 				xmlUnlinkNode( _Templates[k] );
 				xmlFreeNode( _Templates[k] );
-				_Templates[k] = NULL;
+				_Templates[k] = nullptr;
 			}
 			// keep new list
 			_Templates.swap(keptTemplates);
@@ -676,7 +677,7 @@ namespace NLGUI
 			ptr = (char*)xmlGetProp( node, props->name);
 			nlassert(ptr);
 			//if it begins with a #, it is a reference in the instance attribute
-			if (strchr(ptr, '#') != NULL)
+			if (strchr(ptr, '#') != nullptr)
 			{
 				string LastProp = ptr.str();
 				string NewProp;
@@ -708,7 +709,7 @@ namespace NLGUI
 						{
 							CXMLAutoPtr ptr2((const char*)xmlGetProp( instance, (xmlChar*)"id"));
 							string sTmp;
-							if (ptr2.getDatas() != NULL)
+							if (ptr2.getDatas() != nullptr)
 								sTmp = string("cannot parse template node property: ") + ((const char *) ptr + 1) + string(" in instance : ") + string((const char*)ptr2);
 							else
 								sTmp = string("cannot parse template node property: ") + ((const char *) ptr + 1) + string(" in instance : NULL");
@@ -1109,13 +1110,13 @@ namespace NLGUI
 	bool CInterfaceParser::parseOptions (xmlNodePtr cur, CInterfaceGroup * /* parentGroup */)
 	{
 		// build the options from type
-		CInterfaceOptions *options = NULL;
+		CInterfaceOptions *options = nullptr;
 		CXMLAutoPtr ptr((const char*) xmlGetProp( cur, (xmlChar*)"type" ));
 		if (ptr)
 		{
 			options = NLMISC_GET_FACTORY( CInterfaceOptions, std::string ).createObject( std::string( (const char*)ptr ), CInterfaceOptions::TCtorParam() );
 
-			if( options == NULL )
+			if( options == nullptr)
 				options = new CInterfaceOptions( CInterfaceOptions::TCtorParam() );
 		}
 		else
@@ -1141,7 +1142,7 @@ namespace NLGUI
 		{
 			string optionsParentName = ptr.str();
 			CInterfaceOptions *io = wm->getOptions( optionsParentName );
-			if( io != NULL )
+			if( io != nullptr)
 				options->copyBasicMap( *io );
 		}
 
@@ -1168,7 +1169,7 @@ namespace NLGUI
 		if (ptr)
 		{
 			group = dynamic_cast<CInterfaceGroup*>( NLMISC_GET_FACTORY(CViewBase, std::string).createObject(string((const char*)ptr), CViewBase::TCtorParam()) );
-			if (group == NULL)
+			if (group == nullptr)
 			{
 				group = dynamic_cast<CInterfaceGroup*>(NLMISC_GET_FACTORY(CViewBase, std::string).createObject("interface_group", CViewBase::TCtorParam()));
 			}
@@ -1189,7 +1190,7 @@ namespace NLGUI
 		if (parentGroup)
 		{
 			CGroupList *pList = dynamic_cast<CGroupList*>(parentGroup);
-			if (parentGroup->getElement(group->getId()) != NULL)
+			if (parentGroup->getElement(group->getId()) != nullptr)
 			{
 				// Remove old groupe and replace
 				if (reload)
@@ -1206,7 +1207,7 @@ namespace NLGUI
 				}
 			}
 
-			if (pList != NULL)
+			if (pList != nullptr)
 				pList->addChild (group);
 			else
 				parentGroup->addGroup (group);
@@ -1253,7 +1254,7 @@ namespace NLGUI
 			else
 			{
 				IParserModule *module = getModuleFor( (char*)( cur->name ) );
-				if( module != NULL )
+				if( module != nullptr)
 				{
 					if( module->canParseInStage( IParserModule::GroupChildren ) )
 						ok = ok && module->parse( cur, parentGroup );
@@ -1269,7 +1270,7 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	bool CInterfaceParser::parseControl (xmlNodePtr cur, CInterfaceGroup * parentGroup, bool reload)
 	{
-		CCtrlBase* ctrl = NULL;
+		CCtrlBase* ctrl = nullptr;
 		CXMLAutoPtr ptr((const char*) xmlGetProp( cur, (xmlChar*)"type" ));
 		if (!ptr)
 		{
@@ -1287,7 +1288,7 @@ namespace NLGUI
 				delete ctrl;
 				return false;
 			}
-			if (parentGroup->getElement(ctrl->getId()) != NULL)
+			if (parentGroup->getElement(ctrl->getId()) != nullptr)
 			{
 				// Remove old groupe and replace
 				if (reload)
@@ -1310,7 +1311,7 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	bool CInterfaceParser::parseView(xmlNodePtr cur, CInterfaceGroup * parentGroup, bool reload)
 	{
-		CViewBase * view=NULL;
+		CViewBase * view = nullptr;
 		CXMLAutoPtr ptr((const char*) xmlGetProp( cur, (xmlChar*)"type" ));
 		if (!ptr)
 		{
@@ -1337,7 +1338,7 @@ namespace NLGUI
 				delete view;
 				return false;
 			}
-			if (parentGroup->getElement(view->getId()) != NULL)
+			if (parentGroup->getElement(view->getId()) != nullptr)
 			{
 				// Remove old groupe and replace
 				if ( reload )
@@ -1353,7 +1354,7 @@ namespace NLGUI
 
 			//add the view to the parent group
 			CGroupList *pList = dynamic_cast<CGroupList*>(parentGroup);
-			if (pList != NULL)
+			if (pList != nullptr)
 			{
 				pList->addChild (view);
 			}
@@ -1376,7 +1377,7 @@ namespace NLGUI
 
 		string stmp2 = toLowerAscii(string((const char*)ptr));
 
-		CInterfaceElement *pEltFound = NULL;
+		CInterfaceElement *pEltFound = nullptr;
 		std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
 		for (uint32 i = 0; i < _MasterGroups.size(); ++i)
 		{
@@ -1392,10 +1393,10 @@ namespace NLGUI
 					break;
 				}
 			}
-			if (pEltFound != NULL)
+			if (pEltFound != nullptr)
 				break;
 		}
-		if (pEltFound == NULL)
+		if (pEltFound == nullptr)
 		{
 			string stmp = string("element not found for tree : ") + string((const char*)ptr);
 			// todo hulud interface syntax error
@@ -1403,7 +1404,7 @@ namespace NLGUI
 			return false;
 		}
 		CGroupContainer *pIC = dynamic_cast<CGroupContainer*>(pEltFound);
-		if (pIC == NULL)
+		if (pIC == nullptr)
 		{
 			string stmp = string("not a container : ") + pEltFound->getId();
 			// todo hulud interface syntax error
@@ -1429,7 +1430,7 @@ namespace NLGUI
 		string stmp2 = toLowerAscii(string((const char*)ptr));
 
 		std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
-		CInterfaceElement *pEltFound = NULL;
+		CInterfaceElement *pEltFound = nullptr;
 		for (uint32 i = 0; i < _MasterGroups.size(); ++i)
 		{
 			CWidgetManager::SMasterGroup &rMG = _MasterGroups[i];
@@ -1443,10 +1444,10 @@ namespace NLGUI
 					break;
 				}
 			}
-			if (pEltFound != NULL)
+			if (pEltFound != nullptr)
 				break;
 		}
-		if (pEltFound == NULL)
+		if (pEltFound == nullptr)
 		{
 			string stmp = string("element not found for tree : ") + string((const char*)ptr);
 			// todo hulud interface syntax error
@@ -1454,7 +1455,7 @@ namespace NLGUI
 			return false;
 		}
 		CGroupContainer *pIC = dynamic_cast<CGroupContainer*>(pEltFound);
-		if (pIC == NULL)
+		if (pIC == nullptr)
 		{
 			string stmp = string("not a container : ") + pEltFound->getId();
 			// todo hulud interface syntax error
@@ -1522,7 +1523,7 @@ namespace NLGUI
 
 	void CInterfaceParser::savePointerSettings( xmlNodePtr node )
 	{
-		if( node == NULL )
+		if( node == nullptr)
 			return;
 
 		xmlAttrPtr prop = node->properties;
@@ -1530,7 +1531,7 @@ namespace NLGUI
 		std::string key;
 		std::string value;
 
-		while( prop != NULL )
+		while( prop != nullptr)
 		{
 			key   = std::string( reinterpret_cast< const char* >( prop->name ) );
 			value = std::string( reinterpret_cast< char* >( prop->children->content ) );
@@ -1543,7 +1544,7 @@ namespace NLGUI
 
 	void CInterfaceParser::saveKeySettings( xmlNodePtr node )
 	{
-		if( node == NULL )
+		if( node == nullptr)
 			return;
 
 		xmlAttrPtr prop = node->properties;
@@ -1556,7 +1557,7 @@ namespace NLGUI
 		std::string value;
 		std::map< std::string, std::string > propMap;
 
-		while( prop != NULL )
+		while( prop != nullptr)
 		{
 			key   = std::string( reinterpret_cast< const char* >( prop->name ) );
 			value = std::string( reinterpret_cast< char* >( prop->children->content ) );
@@ -1599,7 +1600,7 @@ namespace NLGUI
 		std::map< std::string, IParserModule* >::const_iterator itr =
 			moduleMap.find( name );
 		if( itr == moduleMap.end() )
-			return NULL;
+			return nullptr;
 		else
 			return itr->second;
 	}
@@ -1623,7 +1624,7 @@ namespace NLGUI
 		string stmp2 = toLowerAscii(string((const char*)ptr));
 
 		std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
-		CInterfaceElement *pEltFound = NULL;
+		CInterfaceElement *pEltFound = nullptr;
 		for (uint32 i = 0; i < _MasterGroups.size(); ++i)
 		{
 			CWidgetManager::SMasterGroup &rMG = _MasterGroups[i];
@@ -1638,11 +1639,11 @@ namespace NLGUI
 					break;
 				}
 			}
-			if (pEltFound != NULL)
+			if (pEltFound != nullptr)
 				break;
 		}
 
-		if (pEltFound == NULL)
+		if (pEltFound == nullptr)
 		{
 			string stmp = string("no group found for ") + string((const char*)ptr);
 			// todo hulud interface syntax error
@@ -1652,7 +1653,7 @@ namespace NLGUI
 
 		// the element must be a group
 		CInterfaceGroup *pIG = dynamic_cast<CInterfaceGroup*>(pEltFound);
-		if (pIG == NULL)
+		if (pIG == nullptr)
 		{
 			string stmp = string("not a group !") + pEltFound->getId();
 			// todo hulud interface syntax error
@@ -1671,7 +1672,7 @@ namespace NLGUI
 
 
 		CGroupContainer *pIC = dynamic_cast<CGroupContainer*>(pEltFound);
-		if (pIC != NULL)
+		if (pIC != nullptr)
 		{
 			cur = cur->children;
 			while (cur)
@@ -1691,7 +1692,7 @@ namespace NLGUI
 		CXMLAutoPtr ptr((const char*) xmlGetProp( cur, (xmlChar*)"node" ));
 		if (!ptr) return false;
 		std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
-		CInterfaceElement *pEltFound = NULL;
+		CInterfaceElement *pEltFound = nullptr;
 		for (uint32 i = 0; i < _MasterGroups.size(); ++i)
 		{
 			CWidgetManager::SMasterGroup &rMG = _MasterGroups[i];
@@ -1706,11 +1707,11 @@ namespace NLGUI
 					break;
 				}
 			}
-			if (pEltFound != NULL)
+			if (pEltFound != nullptr)
 				break;
 		}
 
-		if (pEltFound == NULL)
+		if (pEltFound == nullptr)
 		{
 			string stmp = string("no group found for ") + string((const char*)ptr);
 			// todo hulud interface syntax error
@@ -1720,7 +1721,7 @@ namespace NLGUI
 
 		// the element must be a group
 		CInterfaceGroup *pIG = dynamic_cast<CInterfaceGroup*>(pEltFound);
-		if (pIG == NULL)
+		if (pIG == nullptr)
 		{
 			string stmp = string("not a group !") + pEltFound->getId();
 			// todo hulud interface syntax error
@@ -1741,7 +1742,7 @@ namespace NLGUI
 		CWidgetManager::getInstance()->addWindowToMasterGroup(parentGroup->Group->getId(), pIG);
 
 		CGroupContainer *pIC = dynamic_cast<CGroupContainer*>(pEltFound);
-		if (pIC != NULL)
+		if (pIC != nullptr)
 		{
 			cur = cur->children;
 			while (cur)
@@ -1902,7 +1903,7 @@ namespace NLGUI
 
 	void CInterfaceParser::setupOptions()
 	{
-		if( setupCallback != NULL )
+		if( setupCallback != nullptr)
 			setupCallback->setupOptions();
 	}
 
@@ -1924,7 +1925,7 @@ namespace NLGUI
 			else
 				parentpos = CWidgetManager::getInstance()->getWindowFromId(EltName);
 
-			if (parentpos == NULL)
+			if (parentpos == nullptr)
 			{
 				// todo hulud interface syntax error
 				nlinfo(" the element %s was not found as %s position reference ", EltName.c_str(), pIEL->getId().c_str());
@@ -1956,7 +1957,7 @@ namespace NLGUI
 					parentsize = CWidgetManager::getInstance()->getWindowFromId(EltName);
 			}
 
-			if (parentsize == NULL)
+			if (parentsize == nullptr)
 			{
 				// todo hulud interface syntax error
 				nlinfo(" the element %s was not found as %s size reference ", EltName.c_str(), pIEL->getId().c_str());
@@ -1970,7 +1971,7 @@ namespace NLGUI
 		for (map<CInterfaceElement*,string>::const_iterator it3 = _ParentSizesMaxMap.begin(); it3 != _ParentSizesMaxMap.end(); it3++)
 		{
 			CInterfaceGroup *pIEL = dynamic_cast<CInterfaceGroup*>(it3->first);
-			if (pIEL == NULL) continue;
+			if (pIEL == nullptr) continue;
 			string EltName = it3->second;
 
 			CInterfaceGroup *parent = pIEL->getParent();
@@ -1989,7 +1990,7 @@ namespace NLGUI
 					parentsizemax = CWidgetManager::getInstance()->getWindowFromId(EltName);
 			}
 
-			if (parentsizemax == NULL)
+			if (parentsizemax == nullptr)
 			{
 				// todo hulud interface syntax error
 				nlinfo(" the element %s was not found as %s sizemax reference ", EltName.c_str(), pIEL->getId().c_str());
@@ -2574,7 +2575,7 @@ namespace NLGUI
 		// if I match...
 		CXMLAutoPtr prop((const char*) xmlGetProp( root, (xmlChar*)"node" ));
 		// not a valide tree node? abort.
-		if (!prop) return NULL;
+		if (!prop) return nullptr;
 		// match?
 		if ( !strcmp((const char*)prop, node ) )
 			return root;
@@ -2593,7 +2594,7 @@ namespace NLGUI
 		}
 
 		// not found
-		return NULL;
+		return nullptr;
 	}
 
 	//==================================================================
@@ -2646,12 +2647,12 @@ namespace NLGUI
 	CInterfaceGroup *CInterfaceParser::createGroupInstance(const std::string &templateName, const std::string &parentID, const std::pair<std::string,std::string> *templateParams, uint numParams, bool updateLinks /* = true */)
 	{
 		// create basic xml node that contains infos for the template
-		xmlNodePtr instance = xmlNewNode(NULL, (const xmlChar *) "instance");
+		xmlNodePtr instance = xmlNewNode(nullptr, (const xmlChar *) "instance");
 		if (!instance)
 		{
 			// todo hulud interface syntax error
 			nlwarning("<CInterfaceParser::createGroupInstance> Can't create xml node ");
-			return NULL;
+			return nullptr;
 		}
 		for(uint k = 0; k < numParams; ++k)
 		{
@@ -2663,7 +2664,7 @@ namespace NLGUI
 			// todo hulud interface syntax error
 			nlwarning("<CInterfaceParser::createGroupInstance> cannot create instance from template %s", templateName.c_str());
 			freeXMLNodeAndSibblings(instance);
-			return NULL;
+			return nullptr;
 		}
 
 		// result should contain a group
@@ -2693,24 +2694,24 @@ namespace NLGUI
 					localParentSizesMaxMap.swap(_ParentSizesMaxMap);
 					localLuaClassAssociation.swap(_LuaClassAssociation);
 					freeXMLNodeAndSibblings(instance);
-					return NULL;
+					return nullptr;
 				}
 				freeXMLNodeAndSibblings(instance);
 				CInterfaceGroup *group = dummyGroup.getGroup((uint) 0);
 				dummyGroup.delGroup(group, true);
-				group->setParent(NULL);
-				group->setParentPos(NULL);
+				group->setParent(nullptr);
+				group->setParentPos(nullptr);
 				initCoordsAndLuaScript();
 				localParentPositionsMap.swap(_ParentPositionsMap);
 				localParentSizesMap.swap(_ParentSizesMap);
 				localParentSizesMaxMap.swap(_ParentSizesMaxMap);
 				localLuaClassAssociation.swap(_LuaClassAssociation);
-				if ((group != NULL) && updateLinks)
+				if ((group != nullptr) && updateLinks)
 				{
 					group->updateAllLinks();
 				}
 				CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(group);
-				if (pGC != NULL)
+				if (pGC != nullptr)
 					pGC->setup();
 				return group;
 			}
@@ -2720,7 +2721,7 @@ namespace NLGUI
 		CXMLAutoPtr ptr(xmlGetProp(instance, (const xmlChar *) templateName.c_str()));
 		nlwarning("<CInterfaceParser::createGroupInstance> no group found in template %s", (const char*)ptr);
 		freeXMLNodeAndSibblings(instance);
-		return NULL;
+		return nullptr;
 	}
 
 	// ***************************************************************************
@@ -2729,12 +2730,12 @@ namespace NLGUI
 		std::string elementId;
 
 		// create basic xml node that contains infos for the template
-		xmlNodePtr instance = xmlNewNode(NULL, (const xmlChar *) "instance");
+		xmlNodePtr instance = xmlNewNode(nullptr, (const xmlChar *) "instance");
 		if (!instance)
 		{
 			// todo hulud interface syntax error
 			nlwarning("<CInterfaceParser::addUIElement> Can't create xml node ");
-			return NULL;
+			return nullptr;
 		}
 		for(uint k = 0; k < numParams; ++k)
 		{
@@ -2750,7 +2751,7 @@ namespace NLGUI
 			// todo hulud interface syntax error
 			nlwarning("<CInterfaceParser::addUIElement> cannot create instance from template %s", templateName.c_str());
 			freeXMLNodeAndSibblings(instance);
-			return NULL;
+			return nullptr;
 		}
 
 		CInterfaceElement	*pIE= CWidgetManager::getInstance()->getElementFromId(parentID);
@@ -2760,12 +2761,12 @@ namespace NLGUI
 		{
 			nlwarning("<CInterfaceParser::addUIElement> no parent group %s found ", parentID.c_str());
 			freeXMLNodeAndSibblings(instance);
-			return NULL;
+			return nullptr;
 		}
 
 		// result should contain a group
 		xmlNodePtr currNode = instance->next;
-		CInterfaceElement * newElement = NULL;
+		CInterfaceElement * newElement = nullptr;
 		while (currNode)
 		{
 			if (strcmp((const char *) currNode->name, "group") == 0 && currNode->type == XML_ELEMENT_NODE)
@@ -2773,7 +2774,7 @@ namespace NLGUI
 				if (!parseGroup(currNode, parentGroup, false))
 				{
 					freeXMLNodeAndSibblings(instance);
-					return NULL;
+					return nullptr;
 				}
 				freeXMLNodeAndSibblings(instance);
 				newElement = parentGroup->getGroup(elementId);
@@ -2784,14 +2785,14 @@ namespace NLGUI
 				if (!parseControl(currNode, parentGroup, false))
 				{
 					freeXMLNodeAndSibblings(instance);
-					return NULL;
+					return nullptr;
 				}
 				freeXMLNodeAndSibblings(instance);
 				newElement = parentGroup->getCtrl(elementId);
 				parentGroup->delCtrl((CCtrlBase*)newElement, true);
 			}
 
-			if(newElement != NULL)
+			if(newElement != nullptr)
 			{
 				initCoordsAndLuaScript();
 				if (updateLinks)
@@ -2807,7 +2808,7 @@ namespace NLGUI
 		CXMLAutoPtr ptr(xmlGetProp(instance, (const xmlChar *) templateName.c_str()));
 		nlwarning("<CInterfaceParser::addUIElement> no group found in template %s", (const char *)ptr);
 		freeXMLNodeAndSibblings(instance);
-		return NULL;
+		return nullptr;
 	}
 
 	// ***************************************************************************
@@ -2917,7 +2918,7 @@ namespace NLGUI
 		if( it == _AnimMap.end() )
 		{
 			nlwarning( "anim %s not found", name.c_str() );
-			return NULL;
+			return nullptr;
 		}
 		else
 			return it->second;
@@ -2927,7 +2928,7 @@ namespace NLGUI
 	{
 		TProcedureMap::iterator itr = _ProcedureMap.find( name );
 		if( itr == _ProcedureMap.end() )
-			return NULL;
+			return nullptr;
 
 		return &itr->second;
 	}
@@ -3264,18 +3265,18 @@ namespace NLGUI
 
 	bool CInterfaceParser::serializeVariables( xmlNodePtr parentNode ) const
 	{
-		if( parentNode == NULL )
+		if( parentNode == nullptr)
 			return false;
 
-		xmlNodePtr node = NULL;
+		xmlNodePtr node = nullptr;
 
 		std::map< std::string, VariableData >::const_iterator itr;
 		for( itr = variableCache.begin(); itr != variableCache.end(); ++itr )
 		{
 			const VariableData &data = itr->second;
 
-			node = xmlNewNode( NULL, BAD_CAST "variable" );
-			if( node == NULL )
+			node = xmlNewNode(nullptr, BAD_CAST "variable" );
+			if( node == nullptr)
 				return false;
 
 			xmlAddChild( parentNode, node );
@@ -3297,17 +3298,17 @@ namespace NLGUI
 
 	bool CInterfaceParser::serializeProcs( xmlNodePtr parentNode)  const
 	{
-		if( parentNode == NULL )
+		if( parentNode == nullptr)
 			return false;
 
-		xmlNodePtr procNode = NULL;
-		xmlNodePtr actionNode = NULL;
+		xmlNodePtr procNode = nullptr;
+		xmlNodePtr actionNode = nullptr;
 
 		TProcedureMap::const_iterator itr;
 		for( itr = _ProcedureMap.begin(); itr != _ProcedureMap.end(); ++itr )
 		{
-			procNode = xmlNewNode( NULL, BAD_CAST "proc" );
-			if( procNode == NULL )
+			procNode = xmlNewNode(nullptr, BAD_CAST "proc" );
+			if( procNode == nullptr)
 				return false;
 
 			xmlAddChild( parentNode, procNode );
@@ -3319,8 +3320,8 @@ namespace NLGUI
 			std::vector< CProcAction >::const_iterator itr2;
 			for( itr2 = proc.Actions.begin(); itr2 != proc.Actions.end(); ++itr2 )
 			{
-				actionNode = xmlNewNode( NULL, BAD_CAST "action" );
-				if( actionNode == NULL )
+				actionNode = xmlNewNode(nullptr, BAD_CAST "action" );
+				if( actionNode == nullptr)
 					return false;
 
 				xmlAddChild( procNode, actionNode );
@@ -3344,11 +3345,11 @@ namespace NLGUI
 
 	bool CInterfaceParser::serializePointerSettings( xmlNodePtr parentNode ) const
 	{
-		if( parentNode == NULL )
+		if( parentNode == nullptr)
 			return false;
 
-		xmlNodePtr node = xmlNewNode( NULL, BAD_CAST "view" );
-		if( node == NULL )
+		xmlNodePtr node = xmlNewNode(nullptr, BAD_CAST "view" );
+		if( node == nullptr)
 			return false;
 
 		xmlAddChild( parentNode, node );
@@ -3368,14 +3369,14 @@ namespace NLGUI
 
 	bool CInterfaceParser::serializeKeySettings( xmlNodePtr parentNode ) const
 	{
-		if( parentNode == NULL )
+		if( parentNode == nullptr)
 			return false;
 
 		std::map< std::string, std::map< std::string, std::string > >::const_iterator itr;
 		for( itr = keySettings.begin(); itr != keySettings.end(); ++itr )
 		{
-			xmlNodePtr node = xmlNewNode( NULL, BAD_CAST "key" );
-			if( node == NULL )
+			xmlNodePtr node = xmlNewNode(nullptr, BAD_CAST "key" );
+			if( node == nullptr)
 				return false;
 
 			xmlAddChild( parentNode, node );

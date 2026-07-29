@@ -60,7 +60,7 @@ public:
 	 */
 	static CInputHandlerManager* getInstance()
 	{
-		if (_Instance == NULL)
+		if (_Instance == nullptr)
 			_Instance = new CInputHandlerManager();
 		return _Instance;
 	}

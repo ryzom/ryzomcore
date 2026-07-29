@@ -80,14 +80,14 @@ public:
 	/// Proxy interface
 
 	/// Constructors
-	UShape() { _Object = NULL; }
+	UShape() { _Object = nullptr; }
 	UShape(class IShape *object) { _Object = object; }
 	/// Attach an object to this proxy
 	void			attach(class IShape *object) { _Object = object; }
 	/// Detach the object
-	void			detach() { _Object = NULL; }
+	void			detach() { _Object = nullptr; }
 	/// Return true if the proxy is empty() (not attached)
-	bool			empty() const {return _Object==NULL;}
+	bool			empty() const {return _Object == nullptr; }
 	/// For advanced usage, get the internal object ptr
 	class IShape	*getObjectPtr() const {return _Object;}
 

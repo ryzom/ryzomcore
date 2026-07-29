@@ -50,7 +50,7 @@ void CViewPointerRyzom::forceLinking()
 bool CViewPointerRyzom::drawResizer(CCtrlBase* pCB, CRGBA col)
 {
 	CCtrlResizer *pCR = dynamic_cast<CCtrlResizer*>(pCB);
-	if (pCR != NULL)
+	if (pCR != nullptr)
 	{
 		CGroupContainer *parent = dynamic_cast<CGroupContainer *>(pCR->getParent());
 		if (parent && !parent->isLocked())
@@ -89,7 +89,7 @@ bool CViewPointerRyzom::drawResizer(CCtrlBase* pCB, CRGBA col)
 bool CViewPointerRyzom::drawRotate (CCtrlBase* pCB, CRGBA col)
 {
 	CInterface3DScene *pI3DS = dynamic_cast<CInterface3DScene *>(pCB);
-	if (pI3DS != NULL)
+	if (pI3DS != nullptr)
 	{
 		drawCursor(_TxIdRotate, col, 0);
 		return true;
@@ -101,7 +101,7 @@ bool CViewPointerRyzom::drawRotate (CCtrlBase* pCB, CRGBA col)
 bool CViewPointerRyzom::drawScale (CCtrlBase* pCB, CRGBA col)
 {
 	CInterface3DScene *pI3DS = dynamic_cast<CInterface3DScene *>(pCB);
-	if (pI3DS != NULL)
+	if (pI3DS != nullptr)
 	{
 		drawCursor(_TxIdScale, col, 0);
 		return true;
@@ -113,7 +113,7 @@ bool CViewPointerRyzom::drawScale (CCtrlBase* pCB, CRGBA col)
 bool CViewPointerRyzom::drawColorPicker (CCtrlBase* pCB, CRGBA col)
 {
 	CCtrlColPick *pCCP = dynamic_cast<CCtrlColPick*>(pCB);
-	if (pCCP != NULL)
+	if (pCCP != nullptr)
 	{
 		drawCursor(_TxIdColPick, col, 0);
 		return true;
@@ -125,7 +125,7 @@ bool CViewPointerRyzom::drawColorPicker (CCtrlBase* pCB, CRGBA col)
 bool CViewPointerRyzom::drawLink (CCtrlBase* pCB, CRGBA col)
 {
 	CCtrlLink *pCCP = dynamic_cast<CCtrlLink*>(pCB);
-	if (pCCP != NULL)
+	if (pCCP != nullptr)
 	{
 		drawCursor(_TxIdColPick, col, 0);
 		return true;
@@ -137,7 +137,7 @@ bool CViewPointerRyzom::drawLink (CCtrlBase* pCB, CRGBA col)
 bool CViewPointerRyzom::drawBrowse (CCtrlBase* pCB, CRGBA col)
 {
 	CGroupHTML *pCGH = dynamic_cast<CGroupHTML *>(pCB);
-	if (pCGH != NULL)
+	if (pCGH != nullptr)
 	{
 		if (pCGH->isBrowsing())
 		{

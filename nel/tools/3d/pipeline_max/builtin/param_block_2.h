@@ -121,7 +121,8 @@ public:
 		uint PayloadOff;
 
 		SParam() : Id(0), Type(0), HasConstant(false), RefBacked(false), RefSlot(-1), IsTab(false),
-			I(0), Chunk(NULL), PayloadOff(0) { F[0] = F[1] = F[2] = F[3] = 0.0f; }
+			I(0), Chunk(nullptr)
+		    , PayloadOff(0) { F[0] = F[1] = F[2] = F[3] = 0.0f; }
 
 		inline uint16 baseType() const { return (uint16)(Type & 0x07ff); }
 		static bool typeIsRefKind(uint16 type);

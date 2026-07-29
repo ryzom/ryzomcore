@@ -269,7 +269,8 @@ class CProducedDocHtml
 public:
 
 	///
-	CProducedDocHtml() : _File(NULL), _Enabled(false) {}
+	CProducedDocHtml() : _File(nullptr)
+	    , _Enabled(false) {}
 
 	///
 	void	open( const std::string& filename, const std::string& title, bool enableFlag )

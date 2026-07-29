@@ -61,7 +61,7 @@ CVegetable::CVegetable()
 	// Appear at 0.
 	DistType= 0;
 
-	_Manager= NULL;
+	_Manager = nullptr;
 }
 
 

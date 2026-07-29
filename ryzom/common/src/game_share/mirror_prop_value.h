@@ -62,7 +62,7 @@ class CMirrorPropValueBase
 {
 public:
 	/// Default constructor
-	CMirrorPropValueBase() : _Pt(NULL) {}
+	CMirrorPropValueBase() : _Pt(nullptr) {}
 
 	/// Constructor in mirror
 	CMirrorPropValueBase( CMirroredDataSet& dataSet, const TDataSetRow& entityIndex, TPropertyIndex propIndex );
@@ -940,7 +940,7 @@ class CMirrorPropValueItem
 public:
 
 	/// Special constructor for evaluating values
-	CMirrorPropValueItem( const T& value ) : _ParentList(NULL) { _Pt = const_cast<T*>(&value); }
+	CMirrorPropValueItem( const T& value ) : _ParentList(nullptr) { _Pt = const_cast<T*>(&value); }
 
 	/// Constructor
 	CMirrorPropValueItem( CMirrorPropValueList<T,CPropLocationClass> *parentlist, T *pt ) : _ParentList(parentlist), _Pt(pt) {}
@@ -978,7 +978,7 @@ public:
   typedef CPropLocationUnpacked CPropLocationClass;
 
 	/// Special constructor for evaluating values
-	CMirrorPropValueItem( const uint64& value ) : _ParentList(NULL) { _Pt = const_cast<uint64*>(&value); }
+	CMirrorPropValueItem( const uint64& value ) : _ParentList(nullptr) { _Pt = const_cast<uint64*>(&value); }
 
 	/// Constructor
 	CMirrorPropValueItem( CMirrorPropValueList<NLMISC::CEntityId,CPropLocationClass> *parentlist, uint64 *pt ) : _ParentList(parentlist), _Pt(pt) {}
@@ -1021,7 +1021,8 @@ struct _CMirrorPropValueListIterator
 	bool							operator!=( const _CMirrorPropValueListIterator& other ) const	{ return (_Index != other._Index) || (_ParentList != other._ParentList); }
 	_CMirrorPropValueListIterator&	operator=( const _CMirrorPropValueListIterator& other )			{ _ParentList = other._ParentList; _Index = other._Index; return *this; }
 
-	_CMirrorPropValueListIterator()	: _ParentList(NULL), _Index(INVALID_SHAREDLIST_ROW) {}
+	_CMirrorPropValueListIterator()	: _ParentList(nullptr)
+	    , _Index(INVALID_SHAREDLIST_ROW) {}
 	CMirrorPropValueList<T,CPLC>	*_ParentList;
 	TSharedListRow					_Index;
 
@@ -1049,7 +1050,8 @@ struct _CCMirrorPropValueListIterator
 	bool							operator!=( const _CCMirrorPropValueListIterator& other ) const	{ return (_Index != other._Index) || (_ParentList != other._ParentList); }
 	_CCMirrorPropValueListIterator&	operator=( const _CCMirrorPropValueListIterator& other )		{ _ParentList = other._ParentList; _Index = other._Index; return *this; }
 
-	_CCMirrorPropValueListIterator() : _ParentList(NULL), _Index(INVALID_SHAREDLIST_ROW) {}
+	_CCMirrorPropValueListIterator() : _ParentList(nullptr)
+	    , _Index(INVALID_SHAREDLIST_ROW) {}
 	CMirrorPropValueList<T,CPLC>	*_ParentList;
 	TSharedListRow					_Index;
 
@@ -1210,7 +1212,9 @@ public:
 protected:
 
 	/// Default constructor
-	CMirrorPropValueList() : _Container(NULL), _PtFront(NULL), _PropLocation() {}
+	CMirrorPropValueList() : _Container(nullptr)
+	    , _PtFront(nullptr)
+	    , _PropLocation() {}
 
 	TSharedListRow		allocateNewCell();
 
@@ -1298,7 +1302,9 @@ public:
 protected:
 
 	/// Default constructor
-	CMirrorPropValueList() : _Container(NULL), _PtFront(NULL), _PropLocation() {}
+	CMirrorPropValueList() : _Container(nullptr)
+	    , _PtFront(nullptr)
+	    , _PropLocation() {}
 
 	TSharedListRow		allocateNewCell();
 

@@ -54,12 +54,12 @@ const NLMISC::CClassId CLASSID_LOOKAT_CTRL(0x00002006, 0x00000000);
 
 static CStorageRaw *findRawChunk(CSceneClass *sc, uint16 id)
 {
-	if (!sc) return NULL;
+	if (!sc) return nullptr;
 	for (CStorageContainer::TStorageObjectConstIt it = sc->orphanedChunks().begin(); it != sc->orphanedChunks().end(); ++it)
 		if (it->first == id) return dynamic_cast<CStorageRaw *>(it->second);
 	for (CStorageContainer::TStorageObjectConstIt it = sc->chunks().begin(); it != sc->chunks().end(); ++it)
 		if (it->first == id) return dynamic_cast<CStorageRaw *>(it->second);
-	return NULL;
+	return nullptr;
 }
 
 // Read a controller's default-value chunk: the typed keyframer's claimed default, else the raw

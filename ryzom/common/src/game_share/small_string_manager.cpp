@@ -107,7 +107,7 @@ CSmallStringManager::CSmallStringManager()
 
 CSmallStringManager::CSmallStringManager(CObject* textManager)
 {
-	if(textManager==NULL)
+	if(textManager == nullptr)
 	{
 		_MaxId = 0;
 		return;
@@ -215,7 +215,7 @@ void CStringTableManager::createTable(uint32 tableId)
 void CStringTableManager::setValue(uint32 tableId,const std::string& localId, const std::string& value)
 {
 	TLocalTable * localTable = getLocalTable(tableId);
-	if(localTable == NULL)
+	if(localTable == nullptr)
 	{
 		nlwarning("unknown scenario Id or no string table for this scenario! : %d",tableId);
 		return;
@@ -242,7 +242,7 @@ std::string CStringTableManager::getValue(uint32 tableId, const std::string& loc
 {
 	// Search the table
 	TLocalTable* localTable = getLocalTable(tableId);
-	if(localTable == NULL)
+	if(localTable == nullptr)
 	{
 		return localId;
 	}
@@ -264,7 +264,7 @@ CStringTableManager::TLocalTable* CStringTableManager::getLocalTable(uint32 tabl
 {
 	TLocalTables::const_iterator found = _LocalTables.find(tableId);
 	if(found != _LocalTables.end()) { return found->second; }
-	return NULL;
+	return nullptr;
 }
 
 

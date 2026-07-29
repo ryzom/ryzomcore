@@ -66,11 +66,11 @@ namespace NLGUI
 		// The pointer must be draw over ALL layers
 		_RenderLayer= VR_LAYER_MAX;
 		_Color = CRGBA(255,255,255,255);
-		_LastHightLight = NULL;
+		_LastHightLight = nullptr;
 		_StringMode = false;
 		_ForceStringMode = false;
-		_StringCursor = NULL;
-		_StringCursorHardware = NULL;
+		_StringCursor = nullptr;
+		_StringCursorHardware = nullptr;
 	}
 
 	void CViewPointer::forceLink()
@@ -185,19 +185,19 @@ namespace NLGUI
 		//col.A = (uint8)(((sint32)col.A*((sint32)pIM->getGlobalColor().A+1))>>8);
 		col.A = _Color.A;
 
-		if (_LastHightLight != NULL)
+		if (_LastHightLight != nullptr)
 		{
 			_LastHightLight->setHighLighted(false,0);
-			_LastHightLight = NULL;
+			_LastHightLight = nullptr;
 		}
 
-		if ( CWidgetManager::getInstance()->getCapturePointerLeft() != NULL && CWidgetManager::getInstance()->isMouseHandlingEnabled())
+		if ( CWidgetManager::getInstance()->getCapturePointerLeft() != nullptr && CWidgetManager::getInstance()->isMouseHandlingEnabled())
 		{
 			CCtrlMover *pCM = dynamic_cast<CCtrlMover*>( CWidgetManager::getInstance()->getCapturePointerLeft());
-			if ((pCM != NULL) && (pCM->canMove() == true))
+			if ((pCM != nullptr) && (pCM->canMove() == true))
 			{
 				CGroupContainer *pGC = dynamic_cast<CGroupContainer *>(pCM->getParent());
-				if (pGC != NULL && !pGC->isLocked())
+				if (pGC != nullptr && !pGC->isLocked())
 				{
 					pGC->setHighLighted(true, 255);
 					_LastHightLight = pGC;
@@ -231,7 +231,7 @@ namespace NLGUI
 
 		// Draw the captured cursor
 		CCtrlBase *pCB = CWidgetManager::getInstance()->getCapturePointerLeft();
-		if (pCB != NULL)
+		if (pCB != nullptr)
 		{
 			if (drawResizer(pCB,col)) return;
 			if (drawColorPicker(pCB,col)) return;
@@ -247,7 +247,7 @@ namespace NLGUI
 		for(uint i=0;i<vUP.size();i++)
 		{
 			CViewLink *vLink = dynamic_cast<CViewLink*>(vUP[i]);
-			if (vLink != NULL)
+			if (vLink != nullptr)
 			{
 				string tooltip;
 				uint8 rot;
@@ -279,7 +279,7 @@ namespace NLGUI
 
 		// Draw if capture right
 		pCB = CWidgetManager::getInstance()->getCapturePointerRight();
-		if (pCB != NULL)
+		if (pCB != nullptr)
 		{
 			// Is it a 3d scene ?
 			if (drawScale(pCB,col)) return;
@@ -333,13 +333,13 @@ namespace NLGUI
 				if (drawCustom(pCB)) return;
 
 				// test for move highlight
-				if (_LastHightLight == NULL)
+				if (_LastHightLight == nullptr)
 				{
 					CCtrlMover *pCM = dynamic_cast<CCtrlMover*>(pCB);
-					if ( (pCM != NULL) && (pCM->canMove() == true) )
+					if ( (pCM != nullptr) && (pCM->canMove() == true) )
 					{
 						CGroupContainer *pGC = dynamic_cast<CGroupContainer *>(pCM->getParent());
-						if (pGC != NULL && !pGC->isLocked())
+						if (pGC != nullptr && !pGC->isLocked())
 						{
 							if (CWidgetManager::getInstance()->getCapturePointerLeft() != pCM)
 								pGC->setHighLighted(true, 128);

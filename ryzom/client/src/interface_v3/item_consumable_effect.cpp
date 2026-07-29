@@ -30,8 +30,8 @@ using namespace NLMISC;
 CItemConsumableEffectHelper* CItemConsumableEffectHelper::getInstance()
 {
 	// Singleton
-	static CItemConsumableEffectHelper* instance = NULL;
-	if (instance == NULL)
+	static CItemConsumableEffectHelper* instance = nullptr;
+	if (instance == nullptr)
 		instance = new CItemConsumableEffectHelper;
 	return instance;
 }

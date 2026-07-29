@@ -312,7 +312,7 @@ void buildBaseMeshInterface(CMeshBase::CMeshBaseBuild &buildMesh, SMaxMeshBaseBu
 	// buildBaseMeshInterface pushes factor 0.0 + the target node's name per channel).
 	{
 		std::vector<CSceneClass *> mods;
-		baseObjectOf(node, &mods, NULL);
+		baseObjectOf(node, &mods, nullptr);
 		for (uint mi = 0; mi < mods.size(); ++mi)
 		{
 			if (mods[mi]->classDesc()->classId() != CLASSID_MORPHER) continue;
@@ -569,7 +569,7 @@ void buildMeshInterface(const SEvalMesh &mesh, CMesh::CMeshBuild &buildMesh,
 	buildMesh.InterfaceLinks.clear();
 
 	// Vertex program
-	buildMesh.MeshVertexProgram = NULL;
+	buildMesh.MeshVertexProgram = nullptr;
 	// TODO: CMeshVPWindTree from the VPWT appdata; per-pixel-lighting VP from material shaders.
 }
 

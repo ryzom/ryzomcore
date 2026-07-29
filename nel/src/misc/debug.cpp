@@ -118,7 +118,7 @@ CLog* CImposterLog::operator -> ()
 	{
 		return (NLMISC::INelContext::getInstance().*_Accessor)();
 	}
-	return NULL;
+	return nullptr;
 }
 
 CImposterLog::operator CLog*()
@@ -127,7 +127,7 @@ CImposterLog::operator CLog*()
 	{
 		return (NLMISC::INelContext::getInstance().*_Accessor)();
 	}
-	return NULL;
+	return nullptr;
 }
 
 CLog &CImposterLog::operator ()()
@@ -149,13 +149,13 @@ CImposterLog	AssertLog(&INelContext::getAssertLog);
 
 
 // ***************************************************************************
-CMemDisplayer *DefaultMemDisplayer = NULL;
-CMsgBoxDisplayer *DefaultMsgBoxDisplayer = NULL;
+CMemDisplayer *DefaultMemDisplayer = nullptr;
+CMsgBoxDisplayer *DefaultMsgBoxDisplayer = nullptr;
 
-static CStdDisplayer *sd = NULL;
-static CFileDisplayer *fd = NULL;
+static CStdDisplayer *sd = nullptr;
+static CFileDisplayer *fd = nullptr;
 
-static TCrashCallback CrashCallback = NULL;
+static TCrashCallback CrashCallback = nullptr;
 
 void setCrashCallback(TCrashCallback crashCallback)
 {
@@ -184,7 +184,7 @@ void nlFatalError (const char *format, ...)
 	char *str;
 	NLMISC_CONVERT_VARGS (str, format, 256/*NLMISC::MaxCStringSize*/);
 
-	INelContext::getInstance().setDebugNeedAssert( NLMISC::DefaultMsgBoxDisplayer == NULL );
+	INelContext::getInstance().setDebugNeedAssert( NLMISC::DefaultMsgBoxDisplayer == nullptr);
 
 	NLMISC::ErrorLog->displayNL (str);
 
@@ -203,7 +203,7 @@ void nlError (const char *format, ...)
 	char *str;
 	NLMISC_CONVERT_VARGS (str, format, 256/*NLMISC::MaxCStringSize*/);
 
-	INelContext::getInstance().setDebugNeedAssert( NLMISC::DefaultMsgBoxDisplayer == NULL );
+	INelContext::getInstance().setDebugNeedAssert( NLMISC::DefaultMsgBoxDisplayer == nullptr);
 
 	NLMISC::ErrorLog->displayNL (str);
 
@@ -1039,7 +1039,7 @@ void getCallStack(std::string &result, sint skipNFirst)
 #elif !defined(NL_OS_MAC) && !defined(__EMSCRIPTEN__)
 	const int MaxFrame = 64;
 	void *trace[MaxFrame];
-	char **messages = (char **)NULL;
+	char **messages = (char **)nullptr;
 	int i, trace_size = 0;
 	trace_size = backtrace(trace, MaxFrame);
 	messages = backtrace_symbols(trace, trace_size);
@@ -1122,7 +1122,7 @@ void getCallStackAndLog (string &result, sint skipNFirst)
 
 void changeLogDirectory(const std::string &dir)
 {
-	if (fd == NULL)return;
+	if (fd == nullptr) return;
 	LogPath = CPath::standardizePath(dir);
 	string p = LogPath + "log.log";
 	fd->setParam(p);
@@ -1139,19 +1139,19 @@ std::string getLogDirectory()
 // or there will be various issues when static destructors call nldebug etc...
 void destroyDebug()
 {
-	delete sd; sd = NULL;
-	delete DefaultMsgBoxDisplayer; DefaultMsgBoxDisplayer = NULL;
-	delete fd; fd = NULL;
-	delete DefaultMemDisplayer; DefaultMemDisplayer = NULL;
+	delete sd; sd = nullptr;
+	delete DefaultMsgBoxDisplayer; DefaultMsgBoxDisplayer = nullptr;
+	delete fd; fd = nullptr;
+	delete DefaultMemDisplayer; DefaultMemDisplayer = nullptr;
 	if (INelContext::isContextInitialised())
 	{
 		CLog *log;
 		INelContext &context = INelContext::getInstance();
-		log = context.getErrorLog(); context.setErrorLog(NULL); delete log; log = NULL;
-		log = context.getWarningLog(); context.setWarningLog(NULL); delete log; log = NULL;
-		log = context.getInfoLog(); context.setInfoLog(NULL); delete log; log = NULL;
-		log = context.getDebugLog(); context.setDebugLog(NULL); delete log; log = NULL;
-		log = context.getAssertLog(); context.setAssertLog(NULL); delete log; log = NULL;
+		log = context.getErrorLog(); context.setErrorLog(nullptr); delete log; log = nullptr;
+		log = context.getWarningLog(); context.setWarningLog(nullptr); delete log; log = nullptr;
+		log = context.getInfoLog(); context.setInfoLog(nullptr); delete log; log = nullptr;
+		log = context.getDebugLog(); context.setDebugLog(nullptr); delete log; log = nullptr;
+		log = context.getAssertLog(); context.setAssertLog(nullptr); delete log; log = nullptr;
 		INelContext::getInstance().setAlreadyCreateSharedAmongThreads(false);
 	}
 }
@@ -1216,7 +1216,7 @@ void createDebug (const char *logPath, bool logInFile, bool eraseLastLog)
 		if (logInFile)
 		{
 			string fn;
-			if (logPath != NULL)
+			if (logPath != nullptr)
 			{
 				LogPath = CPath::standardizePath(logPath);
 				fn += LogPath;
@@ -1266,7 +1266,7 @@ void beep( uint freq, uint duration )
 
 NLMISC_SAFE_SINGLETON_IMPL(CInstanceCounterManager);
 
-CInstanceCounterLocalManager *CInstanceCounterLocalManager::_Instance = NULL;
+CInstanceCounterLocalManager *CInstanceCounterLocalManager::_Instance = nullptr;
 
 TInstanceCounterData::TInstanceCounterData(const char *className)
 :	_InstanceCounter(0),
@@ -1521,7 +1521,7 @@ NLMISC_CATEGORISED_COMMAND(nel, displayMemlog, "displays the last N line of the 
 	else if (args.size() == 1) NLMISC::fromString(args[0], nbLines);
 	else return false;
 
-	if (DefaultMemDisplayer == NULL) return false;
+	if (DefaultMemDisplayer == nullptr) return false;
 
 	deque<string>::const_iterator it;
 

@@ -42,7 +42,7 @@ CLodCharacterInstance::~CLodCharacterInstance()
 const CUV		*CLodCharacterInstance::getUVs() const
 {
 	if(_UVs.empty())
-		return NULL;
+		return nullptr;
 
 	return &_UVs[0];
 }

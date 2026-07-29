@@ -85,7 +85,7 @@ void CCDBSynchronised::init( const string &fileName, NLMISC::IProgressCallback &
 			//Parse the parser output!!!
 			bankHandler.resetNodeBankMapping(); // in case the game is restarted from start
 			bankHandler.fillBankNames( CDBBankNames, INVALID_CDB_BANK + 1 );
-			if( _Database == NULL )
+			if( _Database == nullptr)
 				_Database = new CCDBNodeBranch( "SERVER" );
 			_Database->init( read.getRootNode (), progressCallBack, true, &bankHandler );
 		}
@@ -108,7 +108,7 @@ void CCDBSynchronised::read( const string &fileName )
 	int linecount=1;
 #endif
 
-	if (_Database == NULL)
+	if (_Database == nullptr)
 	{
 		throw CCDBSynchronised::EDBNotInit();
 	}
@@ -143,7 +143,7 @@ void CCDBSynchronised::read( const string &fileName )
 			fromString((const char*)token, value);
 
 			// property name
-			token = strtok(NULL," \n");
+			token = strtok(nullptr, " \n");
 
 			if (token)
 			{
@@ -171,7 +171,7 @@ void CCDBSynchronised::write( const string &fileName )
 {
 	bool res = false;
 
-	if (_Database != 0)
+	if (_Database != nullptr)
 	{
 		FILE * f = nlfopen(fileName, "w");
 		if (f)
@@ -199,7 +199,7 @@ void CCDBSynchronised::readDelta( NLMISC::TGameCycle gc, CBitMemStream& s, uint 
 {
 	nldebug("Update DB");
 
-	if( _Database == 0 )
+	if( _Database == nullptr )
 	{
 		nlwarning("<CCDBSynchronised::readDelta> the database has not been initialized");
 		return;
@@ -248,7 +248,7 @@ void CCDBSynchronised::readDelta( NLMISC::TGameCycle gc, CBitMemStream& s, uint 
 //-----------------------------------------------
 sint64 CCDBSynchronised::getProp( const string &name )
 {
-	if( _Database != 0 )
+	if( _Database != nullptr )
 	{
 		ICDBNode::CTextId txtId( name );
 		return _Database->getProp( txtId );
@@ -267,7 +267,7 @@ sint64 CCDBSynchronised::getProp( const string &name )
 //-----------------------------------------------
 bool CCDBSynchronised::setProp(const string &name, sint64 value)
 {
-	if(_Database == 0)
+	if(_Database == nullptr)
 	{
 		nlwarning("<CCDBSynchronised::setProp> the database has not been initialized");
 		return false;
@@ -322,7 +322,7 @@ void CCDBSynchronised::clear()
 	{
 		_Database->clear();
 		delete _Database;
-		_Database = NULL;
+		_Database = nullptr;
 	}
 
 	// clear CCDBNodeBranch static data

@@ -97,7 +97,7 @@ static CZone *LoadZone(uint16 xPos, uint16 yPos, std::string zoneExt)
 	::getZoneNameByCoord(xPos, yPos, zoneName);
 	CUniquePtr<CZone> zone(new CZone);
 	std::string lookedUpZoneName = CPath::lookup(zoneName + zoneExt, false, false, false);
-	if (lookedUpZoneName.empty()) return NULL;
+	if (lookedUpZoneName.empty()) return nullptr;
 	CIFile iF;
 	if (!iF.open(lookedUpZoneName))
 	{
@@ -186,7 +186,7 @@ static uint CheckZone(std::string middleZoneFile, float weldThreshold, float mid
 		{
 			std::string ext = CFile::getExtension(middleZoneFile);
 			zones[0].reset(::LoadZone(xPos, yPos, ext.empty() ? "" : "." + ext));
-			if (zones[0].get() == NULL)
+			if (zones[0].get() == nullptr)
 			{
 				nlwarning("Can't load zone  %s", middleZoneName.c_str());
 				return 0;
@@ -209,7 +209,7 @@ static uint CheckZone(std::string middleZoneFile, float weldThreshold, float mid
 		for (k = 0; k < 9; ++k)
 		{
 			::getZoneNameByCoord(xPos + posOffs[k][0], yPos + posOffs[k][1], zoneNames[k]);
-			if (zones[k].get() != NULL) zones[k]->retrieve(zoneInfos[k]);
+			if (zones[k].get() != nullptr) zones[k]->retrieve(zoneInfos[k]);
 		}
 
 		// fill the quad grid

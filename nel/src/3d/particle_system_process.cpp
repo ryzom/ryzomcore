@@ -63,7 +63,7 @@ void CParticleSystemProcess::setOwner(CParticleSystem *ps)
 {
 	NL_PS_FUNC(CParticleSystemProcess_setOwner)
 	if (ps == _Owner) return;
-	if (ps == NULL)
+	if (ps == nullptr)
 	{
 		releaseAllRef();
 	}

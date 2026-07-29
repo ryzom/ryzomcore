@@ -31,7 +31,7 @@ using namespace NLMISC;
 
 namespace NLGUI
 {
-	CHttpCache* CHttpCache::instance = NULL;
+	CHttpCache* CHttpCache::instance = nullptr;
 
 	CHttpCache* CHttpCache::getInstance()
 	{
@@ -46,7 +46,7 @@ namespace NLGUI
 	void CHttpCache::release()
 	{
 		delete instance;
-		instance = NULL;
+		instance = nullptr;
 	}
 
 	CHttpCache::CHttpCache()

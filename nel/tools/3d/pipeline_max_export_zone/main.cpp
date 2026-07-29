@@ -423,7 +423,7 @@ static CStorageContainer *containerChild(const CStorageContainer *c, uint16 id, 
 		if (skip) { --skip; continue; }
 		return dynamic_cast<CStorageContainer *>(it->second);
 	}
-	return NULL;
+	return nullptr;
 }
 
 static CStorageRaw *rawChildOf(const CStorageContainer *c, uint16 id)
@@ -433,7 +433,7 @@ static CStorageRaw *rawChildOf(const CStorageContainer *c, uint16 id)
 		if (it->first != id) continue;
 		return dynamic_cast<CStorageRaw *>(it->second);
 	}
-	return NULL;
+	return nullptr;
 }
 
 // The modifier per-node local data of derived-object modifier slot modIndex: the wrapper's
@@ -448,12 +448,12 @@ static CStorageContainer *editPatchLocalData(CSceneClass *derived, uint modIndex
 		if (it->first != 0x2500) continue;
 		if (slot++ != modIndex) continue;
 		CStorageContainer *slotC = dynamic_cast<CStorageContainer *>(it->second);
-		if (!slotC) return NULL;
+		if (!slotC) return nullptr;
 		CStorageContainer *data = containerChild(slotC, 0x2512);
-		if (!data) return NULL;
+		if (!data) return nullptr;
 		return containerChild(data, 0x1000);
 	}
-	return NULL;
+	return nullptr;
 }
 
 // Apply the NeL Edit Patch modifier local data over the current patch state.
@@ -582,7 +582,7 @@ static inline PtF ptAvg(const PtF &a, const PtF &b)
 
 // InterpCenter (nel_patch_mesh.cpp): bezier edge split at 0.5.
 static PtF interpCenter(const PtF &e1, const PtF &i1, const PtF &i2, const PtF &e2,
-                        PtF *v1 = NULL, PtF *v2 = NULL, PtF *v3 = NULL, PtF *v4 = NULL)
+                        PtF *v1 = nullptr, PtF *v2 = nullptr, PtF *v3 = nullptr, PtF *v4 = nullptr)
 {
 	PtF e1i1 = ptAvg(e1, i1);
 	PtF i1i2 = ptAvg(i1, i2);
@@ -830,7 +830,7 @@ static bool evalNodePatch(CNodeImpl *node, SEvalPatch &out, std::string &err)
 		if (cid != CLASSID_OSM_DERIVED && cid != CLASSID_WSM_DERIVED) break;
 		CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(obj);
 		if (!rm) { err = "derived object is not a reference maker"; return false; }
-		CSceneClass *base = NULL;
+		CSceneClass *base = nullptr;
 		uint modIndex = 0;
 		for (uint i = 0; i < rm->nbReferences(); ++i)
 		{
@@ -895,7 +895,7 @@ static int getCommonEdge(const SPatchMesh &pm, sint32 edge, const SPmPatch &patc
 	return -1;
 }
 
-static int getCommonVertex(const SPatchMesh &pm, int ipatch1, int ipatch2, int *pordervtx = NULL)
+static int getCommonVertex(const SPatchMesh &pm, int ipatch1, int ipatch2, int *pordervtx = nullptr)
 {
 	const SPmPatch &patch1 = pm.Patches[ipatch1];
 	const SPmPatch &patch2 = pm.Patches[ipatch2];
@@ -1387,7 +1387,7 @@ static bool nodeIsRklPatch(CNodeImpl *node)
 		if (cid == CLASSID_OSM_DERIVED || cid == CLASSID_WSM_DERIVED)
 		{
 			CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(obj);
-			CSceneClass *base = NULL;
+			CSceneClass *base = nullptr;
 			for (uint i = 0; rm && i < rm->nbReferences(); ++i)
 			{
 				CSceneClass *r = dynamic_cast<CSceneClass *>(rm->getReference(i));
@@ -1624,7 +1624,7 @@ static int exportLigoFile(const std::string &inputBase, CScene &scene, const NLL
 		// Nine bricks from the transition scheme grid.
 		int rc = 0;
 		// Classify the non-frozen patches on the grid.
-		CNodeImpl *transitionZone[9] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+		CNodeImpl *transitionZone[9] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 		for (size_t i = 0; i < nodes.size(); ++i)
 		{
 			if (nodes[i].Frozen) continue;

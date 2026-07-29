@@ -93,10 +93,10 @@ CTimedFXManager::CTimedFXManager()
 {
 	FPU_CHECKER
 	H_AUTO_USE(RZ_TimedFX)
-	_Scene = NULL,
+	_Scene = nullptr,
 	_DayLength = 24.f,
 	_InitDone = false;
-	_InstanciatedFXs = NULL;
+	_InstanciatedFXs = nullptr;
 	_CandidateFXListTouched = false;
 	_SortDistance = 0.f;
 	_MaxNumberOfFXInstances = 0;
@@ -155,7 +155,7 @@ void CTimedFXManager::reset()
 		{
 			remove(_FXGroups.begin());
 		}
-		_Scene = NULL;
+		_Scene = nullptr;
 		_CurrDate = CClientDate();
 		_InitDone = false;
 		_FXManager.reset();
@@ -190,7 +190,7 @@ CTimedFXManager::TFXGroupHandle CTimedFXManager::add(const std::vector<CTimedFX>
 		fi.SpawnPosition	= fxs[k].SpawnPosition;
 		fi.Scale			= fxs[k].Scale;
 		fi.Rot				= fxs[k].Rot;
-		fi.Instance         = NULL;
+		fi.Instance         = nullptr;
 #if !FINAL_VERSION
 			fi.FromIG = fxs[k].FromIG;
 		#endif
@@ -274,7 +274,7 @@ CTimedFXManager::TFXGroupHandle CTimedFXManager::add(const std::vector<CTimedFX>
 		{
 			if (!_Scene || !fi.FXSheet)
 			{
-				fi.Instance = NULL;
+				fi.Instance = nullptr;
 			}
 			else
 			{
@@ -408,7 +408,7 @@ void CTimedFXManager::update(const CClientDate &date, EGSPD::CSeason::TSeason /*
 		// activate current fx
 		if (!_Scene || !tsf.FX->FXSheet)
 		{
-			tsf.FX->Instance = NULL;
+			tsf.FX->Instance = nullptr;
 		}
 		else
 		{
@@ -506,8 +506,8 @@ void CTimedFXManager::CManagedFX::unlinkFromCandidateFXList()
 		{
 			_NextCandidateFX->_PrevCandidateFX = _PrevCandidateFX;
 		}
-		_NextCandidateFX = NULL;
-		_PrevCandidateFX = NULL;
+		_NextCandidateFX = nullptr;
+		_PrevCandidateFX = nullptr;
 	}
 }
 
@@ -523,8 +523,8 @@ void CTimedFXManager::CManagedFX::unlinkFromInstanciatedFXList()
 		{
 			_NextInstanciatedFX->_PrevInstanciatedFX = _PrevInstanciatedFX;
 		}
-		_NextInstanciatedFX = NULL;
-		_PrevInstanciatedFX = NULL;
+		_NextInstanciatedFX = nullptr;
+		_PrevInstanciatedFX = nullptr;
 	}
 }
 
@@ -560,7 +560,7 @@ void CTimedFXManager::CManagedFX::shutDown(NL3D::UScene *scene, CFXManager &fxMa
 				if (scene) scene->deleteInstance(Instance);
 			}
 		}
-		Instance = NULL;
+		Instance = nullptr;
 	}
 }
 
@@ -911,7 +911,7 @@ void CTimedFXManager::linkCandidateFX(TCandidateFXListSortedByDist &targetList, 
 	fx->unlinkFromCandidateFXList(); // unlink from previous list
 	rank = std::min(rank, (uint) (_CandidateFXListSortedByDist.size() - 1));
 	fx->_NextCandidateFX = targetList[rank];
-	if (targetList[rank] != NULL)
+	if (targetList[rank] != nullptr)
 	{
 		targetList[rank]->_PrevCandidateFX = &fx->_NextCandidateFX;
 	}
@@ -946,8 +946,8 @@ void CTimedFXManager::updateInstanciatedFXList()
 	// algo : we take at most '_MaxNumberOfFXInstances' from the start of the updated list of candidate fxs (they are roughly sorted by distance)
 	// these fx are inserted in new list of instanciated fxs. All fx that haven't been inserted (they remains in the previous list)
 	// are discarded. At the end the new list replaces the previous one
-	CManagedFX *toInstanciateListHead = NULL;
-	CManagedFX *alreadyInstanciatedListHead = NULL;
+	CManagedFX *toInstanciateListHead = nullptr;
+	CManagedFX *alreadyInstanciatedListHead = nullptr;
 	uint numInstances = 0;
 	uint numDistanceRanges = (uint)_CandidateFXListSortedByDist.size();
 	sint maxNumPossibleInstance = (sint) (_MaxNumberOfFXInstances - _FXManager.getNumFXtoRemove());
@@ -961,7 +961,7 @@ void CTimedFXManager::updateInstanciatedFXList()
 			{
 				nlassert(currCandidate->_PrevCandidateFX);
 				// if fx already instanciated, put in special list
-				if (currCandidate->_PrevInstanciatedFX != NULL)
+				if (currCandidate->_PrevInstanciatedFX != nullptr)
 				{
 					linkInstanciatedFX(alreadyInstanciatedListHead, currCandidate);
 				}
@@ -989,11 +989,11 @@ void CTimedFXManager::updateInstanciatedFXList()
 		tmp->shutDown(_Scene, _FXManager);
 
 		// fast unlink (all instance are removed from that list)
-		tmp->_PrevInstanciatedFX = NULL;
-		tmp->_NextInstanciatedFX = NULL;
+		tmp->_PrevInstanciatedFX = nullptr;
+		tmp->_NextInstanciatedFX = nullptr;
 	}
 	// create new instances
-	CManagedFX *prevFXToInstanciate = NULL;
+	CManagedFX *prevFXToInstanciate = nullptr;
 	CManagedFX *currFXToInstanciate = toInstanciateListHead;
 	if (maxNumPossibleInstance > 0)
 	{

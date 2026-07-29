@@ -67,7 +67,7 @@ struct CRequest
 // Variables
 //
 
-TRemoteClientCallback RemoteClientCallback = 0;
+TRemoteClientCallback RemoteClientCallback = nullptr;
 
 vector<CAlarm> Alarms;
 
@@ -461,8 +461,8 @@ void serviceGetView (uint32 rid, const string &rawvarpath, TAdminViewResult &ans
 	{
 		// there s an entity in the varpath, manage this case
 
-		TAdminViewVarNames *varNames=0;
-		TAdminViewValues *values=0;
+		TAdminViewVarNames *varNames=nullptr;
+		TAdminViewValues *values=nullptr;
 
 		// varpath.Destination		contains the entity number
 		// subvarpath.Destination	contains the command name
@@ -478,7 +478,7 @@ void serviceGetView (uint32 rid, const string &rawvarpath, TAdminViewResult &ans
 
 				if (isRemoteCommand(cmd))
 				{
-					if (async && RemoteClientCallback != 0)
+					if (async && RemoteClientCallback != nullptr)
 					{
 						// ok we have to send the request to another side, just send and wait
 						addRequestWaitingNb (rid);
@@ -613,8 +613,8 @@ void initAdmin (bool dontUseAES)
 {
 	if (!dontUseAES)
 	{
-		CUnifiedNetwork::getInstance()->setServiceUpCallback ("AES", cbAESConnection, NULL);
-		CUnifiedNetwork::getInstance()->setServiceDownCallback ("AES", cbAESDisconnection, NULL);
+		CUnifiedNetwork::getInstance()->setServiceUpCallback ("AES", cbAESConnection, nullptr);
+		CUnifiedNetwork::getInstance()->setServiceDownCallback ("AES", cbAESDisconnection, nullptr);
 		CUnifiedNetwork::getInstance()->addService ("AES", CInetHost("localhost:43997"));
 	}
 	CUnifiedNetwork::getInstance()->addCallbackArray (CallbackArray, sizeof(CallbackArray)/sizeof(CallbackArray[0]));

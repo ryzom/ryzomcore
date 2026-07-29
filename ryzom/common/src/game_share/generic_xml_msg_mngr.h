@@ -101,9 +101,9 @@ public:
 
 	public:
 		/// Check if node id is valid
-		bool	isValid() const		{ return _Node != NULL; }
+		bool	isValid() const		{ return _Node != nullptr; }
 		/// Check if node has a stream and is ready for further decoding/encoding
-		bool	hasStream() const	{ return _BitMemStream != NULL; }
+		bool	hasStream() const	{ return _BitMemStream != nullptr; }
 		/// Set stream (if not yet has), and return true if node id hadn't a stream yet
 		bool	setStream(NLMISC::CBitMemStream &stream)
 		{
@@ -198,7 +198,7 @@ public:
 	/**
 	 * display
 	 */
-	void	xmlDisplay()	{ if (_Root != NULL) _Root->xmlDisplay(); }
+	void	xmlDisplay()	{ if (_Root != nullptr) _Root->xmlDisplay(); }
 
 	/**
 	 * associate a callback to a message.
@@ -271,7 +271,7 @@ public:
 	 */
 	CNodeId		getNodeId(NLMISC::CBitMemStream &strm)
 	{
-		CNode	*node = _Root == NULL ? NULL : _Root->select(strm);
+		CNode	*node = _Root == nullptr ? nullptr : _Root->select(strm);
 		return CNodeId(node, &strm);
 	}
 
@@ -281,7 +281,7 @@ public:
 	 */
 	CNodeId		getNodeId(NLMISC::CBitMemStream &strm, std::string &name)
 	{
-		CNode	*node = _Root == NULL ? NULL : _Root->select(strm, name);
+		CNode	*node = _Root == nullptr ? nullptr : _Root->select(strm, name);
 		return CNodeId(node, &strm);
 	}
 
@@ -290,8 +290,8 @@ public:
 	 */
 	CNodeId		getNodeId(const std::string &name)
 	{
-		CNode	*node = _Root == NULL ? NULL : _Root->select(name.c_str());
-		return CNodeId(node, NULL);
+		CNode	*node = _Root == nullptr ? nullptr : _Root->select(name.c_str());
+		return CNodeId(node, nullptr);
 	}
 
 	/**
@@ -299,8 +299,8 @@ public:
 	 */
 	CNodeId		getNodeId(const std::string &name, NLMISC::CBitMemStream &strm)
 	{
-		CNode	*node = _Root == NULL ? NULL : _Root->select(name.c_str(), strm);
-		return CNodeId(node, NULL);
+		CNode	*node = _Root == nullptr ? nullptr : _Root->select(name.c_str(), strm);
+		return CNodeId(node, nullptr);
 	}
 
 	/**
@@ -387,14 +387,14 @@ protected:
 				if (it == node->NodesByName.end())
 				{
 					nlwarning("Couldn't select node '%s', not found in parent '%s'", nlsvc(NLMISC::CStringView(&name[subIdx], nameIdx - subIdx)), node->Name.c_str());
-					return NULL;
+					return nullptr;
 				}
 				node = (*it).second;
 				if (name[nameIdx] == '\0')
 					return node;
 				++nameIdx;
 			}
-			return NULL;
+			return nullptr;
 		}
 
 		/// select node using name, and write bits in stream
@@ -414,14 +414,14 @@ protected:
 				if (node->NbBits == 0)
 				{
 					nlwarning("Couldn't select node '%s', parent '%s' has no bit per child", nlsvc(NLMISC::CStringView(&name[subIdx], nameIdx - subIdx)), node->Name.c_str());
-					return 0;
+					return nullptr;
 				}
 
 				it = node->NodesByName.find(nlsvf(NLMISC::CStringView(&name[subIdx], nameIdx - subIdx)));
 				if (it == node->NodesByName.end())
 				{
 					nlwarning("Couldn't select node '%s', not found in parent '%s'", nlsvc(NLMISC::CStringView(&name[subIdx], nameIdx - subIdx)), node->Name.c_str());
-					return NULL;
+					return nullptr;
 				}
 
 				strm.serialAndLog2((*it).second->Value, node->NbBits);
@@ -431,7 +431,7 @@ protected:
 					return node;
 				++nameIdx;
 			}
-			return NULL;
+			return nullptr;
 		}
 
 		/// select node using bits stream
@@ -439,14 +439,14 @@ protected:
 		{
 			CNode	*node = this;
 
-			while (node != NULL && node->NbBits != 0)
+			while (node != nullptr && node->NbBits != 0)
 			{
 				uint32	index = 0;
 				strm.serialAndLog2(index, node->NbBits);
 				if (index >= node->Nodes.size())
 				{
 					nlwarning("Couldn't select node from stream, invalid index %d in parent '%s'", index, node->Name.c_str());
-					return NULL;
+					return nullptr;
 				}
 				node = node->Nodes[index];
 			}
@@ -462,14 +462,14 @@ protected:
 			str.resize(0);
 			bool	first = true;
 
-			while (node != NULL && node->NbBits != 0)
+			while (node != nullptr && node->NbBits != 0)
 			{
 				uint32	index = 0;
 				strm.serialAndLog2(index, node->NbBits);
 				if (index >= node->Nodes.size())
 				{
 					nlwarning("Couldn't select node from stream, invalid index %d in parent '%s'", index, node->Name.c_str());
-					return NULL;
+					return nullptr;
 				}
 				node = node->Nodes[index];
 

@@ -103,10 +103,10 @@ static CGenderInfo *getGenderInfo (EGSPD::CPeople::TPeople ePeople, bool bMale)
 	}
 	CRaceStatsSheet *pRSS = dynamic_cast<CRaceStatsSheet*>(SheetMngr.get (RSid));
 
-	if (pRSS == NULL)
+	if (pRSS == nullptr)
 	{
 		nlwarning ("cannot find sheet for people:%d male:%d", ePeople, bMale);
-		return NULL;
+		return nullptr;
 	}
 
 	// Choose default stuff is we are male or female
@@ -126,7 +126,7 @@ void SCharacter3DSetup::setupDefault (EGSPD::CPeople::TPeople eRace, bool bMale)
 	Male = bMale;
 
 	CGenderInfo *pGI = getGenderInfo(eRace, bMale);
-	if (pGI == NULL) return;
+	if (pGI == nullptr) return;
 
 	Skeleton = pGI->Skelfilename;
 
@@ -137,7 +137,7 @@ void SCharacter3DSetup::setupDefault (EGSPD::CPeople::TPeople eRace, bool bMale)
 		if (!ISstr.empty())
 		{
 			CItemSheet *pIS = dynamic_cast<CItemSheet*>(SheetMngr.get(CSheetId(ISstr)));
-			if (pIS != NULL)
+			if (pIS != nullptr)
 			{
 				sint32 cpIndex = convert_VisualSlot_To_Char3DPart ((SLOTTYPE::EVisualSlot)i);
 				if (cpIndex != Char3DPart_INVALID)
@@ -171,7 +171,7 @@ void SCharacter3DSetup::setupFromCharacterSummary (const CCharacterSummary &cs)
 	{
 //		TChar3DPart part = convert_VisualSlot_To_Char3DPart (SLOTTYPE::HEAD_SLOT);
 		CItemSheet *item = SheetMngr.getItem (SLOTTYPE::HEAD_SLOT, rPVA.HatModel);
-		if ((item != NULL) && ((item->Family == ITEMFAMILY::ARMOR) || (item->Family == ITEMFAMILY::SHIELD)))
+		if ((item != nullptr) && ((item->Family == ITEMFAMILY::ARMOR) || (item->Family == ITEMFAMILY::SHIELD)))
 			HideFace = true;
 		else
 			HideFace = false;
@@ -185,7 +185,7 @@ void SCharacter3DSetup::setupFromCharacterSummary (const CCharacterSummary &cs)
 	// armor gloves are not displayed if character has the 'weapon' magician gloves
 	{
 		CItemSheet *item = SheetMngr.getItem (SLOTTYPE::RIGHT_HAND_SLOT, rPVA.WeaponRightHand);
-		if( ! ((item != NULL)&&(item->ItemType == ITEM_TYPE::MAGICIAN_STAFF) ) )
+		if( ! ((item != nullptr) &&(item->ItemType == ITEM_TYPE::MAGICIAN_STAFF) ) )
 			setupFromCS_ModelCol (SLOTTYPE::HANDS_SLOT,			rPVB.HandsModel,		rPVB.HandsColor);
 	}
 	Tattoo = rPVC.Tattoo;
@@ -199,7 +199,7 @@ void SCharacter3DSetup::setupFromCharacterSummary (const CCharacterSummary &cs)
 
 	float MTmin, MTmax;
 	CGenderInfo *pGI = getGenderInfo (cs.People, (rPVA.Sex == 0));
-	if (pGI == NULL)
+	if (pGI == nullptr)
 		return;
 	MTmin = pGI->BlendShapeMin[0];
 	MTmax = pGI->BlendShapeMax[0];
@@ -347,9 +347,9 @@ void SCharacter3DSetup::setupCharacterSummaryFromSERVERDB (CCharacterSummary &cs
 		":P"+NLMISC::toString(CLFECOMMON::PROPERTY_VPC));
 
 	cs.People = EGSPD::CPeople::Fyros;
-	CPlayerCL *pp = NULL;
+	CPlayerCL *pp = nullptr;
 
-	if ((pp=dynamic_cast<CPlayerCL*>(EntitiesMngr.entity(entityID))) == NULL)
+	if ((pp=dynamic_cast<CPlayerCL*>(EntitiesMngr.entity(entityID))) == nullptr)
 	{
 		pp=(CPlayerCL*)dynamic_cast<CPlayerR2CL*>(EntitiesMngr.entity(entityID));
 	}
@@ -429,7 +429,7 @@ void SCharacter3DSetup::setupFromCS_ModelCol (SLOTTYPE::EVisualSlot s, sint32 mo
 	if (part == Char3DPart_INVALID) return;
 
 	CItemSheet *item = SheetMngr.getItem (s, model);
-	if (item != NULL)
+	if (item != nullptr)
 	{
 		// magician gloves are a weapon but displayed in hands slot(armor gloves)
 		if( (s == SLOTTYPE::RIGHT_HAND_SLOT) && (item->ItemType == ITEM_TYPE::MAGICIAN_STAFF) )
@@ -539,7 +539,7 @@ uint64 SCharacter3DSetup::getDB (const string &name)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(name);
-	if (pNL == NULL) return 0;
+	if (pNL == nullptr) return 0;
 	return pNL->getValue64();
 }
 
@@ -548,7 +548,7 @@ void SCharacter3DSetup::setDB (const string &name, uint64 val)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(name);
-	if (pNL == NULL) return;
+	if (pNL == nullptr) return;
 	pNL->setValue64(val);
 }
 
@@ -573,7 +573,7 @@ void DEBUG_DumpClothes()
 		for (uint it = 0; it < nNbItems; ++it)
 		{
 			CItemSheet *item = SheetMngr.getItem (vs, it);
-			if (item == NULL)
+			if (item == nullptr)
 			{
 				//nlinfo("  val:%d UNKNOWN",it);
 			}
@@ -606,12 +606,12 @@ void DEBUG_DumpClothes()
 
 CCharacter3D::CCharacter3D()
 {
-	_ClusterSystem = NULL;
-	_Scene = NULL;
-	_PlayListManager = NULL;
-	_AnimationSet = NULL;
-	_PlayList = NULL;
-	_FacePlayList = NULL;
+	_ClusterSystem = nullptr;
+	_Scene = nullptr;
+	_PlayListManager = nullptr;
+	_AnimationSet = nullptr;
+	_PlayList = nullptr;
+	_FacePlayList = nullptr;
 	// Clear the cache to make it work with 1st init
 	_CurrentSetup.Skeleton.clear();
 	_CurrentSetup.AnimPlayed = -1;
@@ -635,24 +635,24 @@ CCharacter3D::CCharacter3D()
 // ------------------------------------------------------------------------------------------------
 CCharacter3D::~CCharacter3D()
 {
-	if (_Scene == NULL) return;
+	if (_Scene == nullptr) return;
 
 	// Delete animations first
-	if (_PlayListManager != NULL)
+	if (_PlayListManager != nullptr)
 	{
-		if (_PlayList != NULL)
+		if (_PlayList != nullptr)
 		{
 			_PlayList->resetAllChannels();
 			_PlayListManager->deletePlayList(_PlayList);
 		}
-		if (_FacePlayList != NULL)
+		if (_FacePlayList != nullptr)
 		{
 			_FacePlayList->resetAllChannels();
 			_PlayListManager->deletePlayList(_FacePlayList);
 		}
 		_Scene->deletePlayListManager(_PlayListManager);
 	}
-	_AnimationSet= NULL;
+	_AnimationSet = nullptr;
 
 	// delete instances
 	for (uint32 i = 0; i < NB_CHARACTER3D_PARTS; ++i)
@@ -672,7 +672,7 @@ CCharacter3D::~CCharacter3D()
 	if(!_Skeleton.empty())
 		_Scene->deleteSkeleton(_Skeleton);
 
-	_Scene= NULL;
+	_Scene = nullptr;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -680,7 +680,7 @@ bool CCharacter3D::init (UScene *pScene)
 {
 //	DEBUG_DumpClothes();
 
-	if (_Scene != NULL) return true;
+	if (_Scene != nullptr) return true;
 	_Scene = pScene;
 
 	_PlayListManager = _Scene->createPlayListManager();
@@ -735,18 +735,18 @@ void CCharacter3D::resetAnimation (UAnimationSet *animSet)
 
 	_AnimationSet= animSet;
 
-	if (_PlayList == NULL)
+	if (_PlayList == nullptr)
 		_PlayList = _PlayListManager->createPlayList(_AnimationSet);
 	if (!_PlayList)
 	{
 		nlwarning ("CCharacter3D : couldn't create play list");
 		_Scene->deletePlayListManager (_PlayListManager);
-		_PlayListManager = NULL;
-		_AnimationSet = NULL;
+		_PlayListManager = nullptr;
+		_AnimationSet = nullptr;
 		return;
 	}
 
-	if (_FacePlayList == NULL)
+	if (_FacePlayList == nullptr)
 		_FacePlayList = _PlayListManager->createPlayList (_AnimationSet);
 	if (!_FacePlayList)
 	{
@@ -1016,7 +1016,7 @@ void CCharacter3D::setup (const SCharacter3DSetup &c3ds)
 // ------------------------------------------------------------------------------------------------
 void CCharacter3D::setAnim (uint animID)
 {
-	CCharacterCL * character = NULL;
+	CCharacterCL * character = nullptr;
 
 	if(!_CopyAnim)
 	{
@@ -1037,7 +1037,7 @@ void CCharacter3D::setAnim (uint animID)
 		CInstance * selectedInst = getEditor().getSelectedInstance();
 		if(!selectedInst) return;
 		CEntityCL * entity = selectedInst->getEntity();
-		if(!(entity && ((character=dynamic_cast<CCharacterCL*>(entity))!=NULL)))
+		if(!(entity && ((character=dynamic_cast<CCharacterCL*>(entity)) != nullptr)))
 			return;
 
 		animID = character->playList()->getAnimation(MOVE);
@@ -1134,10 +1134,10 @@ void CCharacter3D::animate (double globalTime)
 	if(animID==UAnimationSet::NotFound)
 		return;
 	UAnimation *pAnim = _AnimationSet->getAnimation (animID);
-	if (pAnim == NULL) return;
+	if (pAnim == nullptr) return;
 	UTrack *pTrack = pAnim->getTrackByName("pos");
 	CVector animPos;
-	if (pTrack == NULL) return;
+	if (pTrack == nullptr) return;
 
 	// Compute animation time (wrapped)
 	double wrappedTime=(globalTime-_PlayList->getTimeOrigin(0))*_PlayList->getSpeedFactor(0);
@@ -1235,8 +1235,8 @@ void CCharacter3D::setSkeleton (const string &filename)
 		if (_PlayList)
 			_PlayList->resetAllChannels();
 		_Scene->deleteSkeleton(_Skeleton);
-		_Skeleton = NULL;
-		_Root = NULL;
+		_Skeleton = nullptr;
+		_Root = nullptr;
 	}
 	if (!_Root.empty())
 		_Scene->deleteTransform(_Root);
@@ -1257,7 +1257,7 @@ void CCharacter3D::setSkeleton (const string &filename)
 // ------------------------------------------------------------------------------------------------
 void CCharacter3D::createInstance (TChar3DPart i, const SCharacter3DSetup::SCharacterPart &part)
 {
-	if (_Scene == NULL)
+	if (_Scene == nullptr)
 	{
 		nlwarning ("CCharacter3D::createInstance : no scene setup.");
 		return;

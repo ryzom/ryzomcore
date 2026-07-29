@@ -70,7 +70,7 @@ void CEntityFx::startFx( void )
 		instance.setPos( _Position );
 		instance.setRotQuat( _Rotation );
 
-		instance.setClusterSystem(NULL);
+		instance.setClusterSystem(nullptr);
 
 		_FxInstance.cast (instance);
 		if (_FxInstance.empty())
@@ -100,7 +100,7 @@ void CEntityFx::deleteInstance( void)
 	{
 		if(Scene)
 			Scene->deleteInstance( _FxInstance );
-		_FxInstance = NULL;
+		_FxInstance = nullptr;
 	}
 }
 

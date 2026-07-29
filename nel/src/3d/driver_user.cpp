@@ -132,7 +132,7 @@ CDriverUser::CDriverUser (uintptr_t windowIcon, TDriver driver, emptyProc exitFu
 
 	NL3D::init3d();
 
-	_Driver = NULL;
+	_Driver = nullptr;
 
 	// Create/Init Driver.
 #if defined(NL_OS_WINDOWS)
@@ -200,7 +200,7 @@ CDriverUser::CDriverUser (uintptr_t windowIcon, TDriver driver, emptyProc exitFu
 	_RenderTargetManager.m_Driver = this;
 	_ShapeBank._DriverUser = this;
 
-	_EffectRenderTarget = NULL;
+	_EffectRenderTarget = nullptr;
 
 	NL_SET_IB_NAME(_PBLine, "CDriverUser::_PBLine");
 	NL_SET_IB_NAME(_PBTri, "CDriverUser::_PBTri");
@@ -211,7 +211,7 @@ CDriverUser::~CDriverUser()
 	release();
 
 	delete _Driver;
-	_Driver= NULL;
+	_Driver = nullptr;
 }
 
 // ***************************************************************************
@@ -2002,7 +2002,7 @@ bool CDriverUser::stretchRect(UScene * scene, class UTexture & srcUText, NLMISC:
 		drawQuad(quad, _MatStretchText);
 		setMatrixMode3D(pCam);
 
-		_MatTextStretchInternal.setTexture(0, NULL);
+		_MatTextStretchInternal.setTexture(0, nullptr);
 		CTextureUser cu;
 		setRenderTarget(cu, 0, 0, 0, 0);
 	}
@@ -2015,7 +2015,7 @@ bool CDriverUser::setRenderTarget(class UTexture & uTex, uint32 x, uint32 y, uin
 {
 	ITexture * tex = (dynamic_cast<CTextureUser *>(&uTex))->getITexture();
 
-	if(tex!=NULL)
+	if(tex != nullptr)
 	{
 		CTextureUser cu;
 		setRenderTarget(cu);

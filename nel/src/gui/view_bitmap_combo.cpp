@@ -268,8 +268,8 @@ namespace NLGUI
 	xmlNodePtr CViewBitmapCombo::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
 		xmlNodePtr node = CViewBase::serialize( parentNode, type );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "bitmap_combo" );
 
@@ -383,7 +383,7 @@ namespace NLGUI
 	//=======================================================================================
 	const std::string *CViewBitmapCombo::getTex(const TStringArray &array,uint index)
 	{
-		if (array.empty()) return NULL;
+		if (array.empty()) return nullptr;
 		return &array[index % array.size()];
 	}
 

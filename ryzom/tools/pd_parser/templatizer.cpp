@@ -70,7 +70,7 @@ CTemplatizerParser		skipSpace(CTemplatizerParser t)
 
 const char*			skipSpace(const char* t)
 {
-	while (t != NULL && *t != '\0' && isspace(*t))
+	while (t != nullptr && *t != '\0' && isspace(*t))
 		++t;
 	return t;
 }
@@ -86,7 +86,7 @@ CTemplatizerParser	match(const char* keyword, CTemplatizerParser match)
 	return *keyword == '\0' ? match : CTemplatizerParser();
 }
 
-TTemplatizerToken	getToken(CTemplatizerParser& t, bool skipspc, std::string* value = NULL)
+TTemplatizerToken	getToken(CTemplatizerParser& t, bool skipspc, std::string* value = nullptr)
 {
 	if (skipspc)
 		t = skipSpace(t);
@@ -110,13 +110,13 @@ TTemplatizerToken	getToken(CTemplatizerParser& t, bool skipspc, std::string* val
 	{
 		TTemplatizerToken	retToken = Identifier;
 		
-		if (value != NULL)
+		if (value != nullptr)
 			value->clear();
 		do
 		{
 			while (isalpha(*t))
 			{
-				if (value != NULL)
+				if (value != nullptr)
 					*value += *t;
 				++t;
 			}
@@ -128,7 +128,7 @@ TTemplatizerToken	getToken(CTemplatizerParser& t, bool skipspc, std::string* val
 
 			retToken = ListIdentifier;
 
-			if (value != NULL)
+			if (value != nullptr)
 				*value += *t;
 			++t;
 		}
@@ -140,7 +140,7 @@ TTemplatizerToken	getToken(CTemplatizerParser& t, bool skipspc, std::string* val
 	return Unknown;
 }
 
-bool	popToken(CTemplatizerParser& t, TTemplatizerToken token, bool skipspc, std::string* value = NULL)
+bool	popToken(CTemplatizerParser& t, TTemplatizerToken token, bool skipspc, std::string* value = nullptr)
 {
 	CTemplatizerParser	save = t;
 	if (getToken(save, skipspc, value) == token)
@@ -152,7 +152,7 @@ bool	popToken(CTemplatizerParser& t, TTemplatizerToken token, bool skipspc, std:
 	return false;
 }
 
-bool	isNextToken(CTemplatizerParser t, TTemplatizerToken token, bool skipspc, std::string* value = NULL)
+bool	isNextToken(CTemplatizerParser t, TTemplatizerToken token, bool skipspc, std::string* value = nullptr)
 {
 	return getToken(t, skipspc, value) == token;
 }
@@ -248,8 +248,8 @@ ITemplatizerBloc::~ITemplatizerBloc()
  */
 CTemplatizer::CTemplatizer()
 {
-	RootBloc = NULL;
-	RootEnv = NULL;
+	RootBloc = nullptr;
+	RootEnv = nullptr;
 }
 
 
@@ -258,9 +258,9 @@ CTemplatizer::CTemplatizer()
  */
 CTemplatizer::~CTemplatizer()
 {
-	if (RootBloc != NULL)
+	if (RootBloc != nullptr)
 		delete RootBloc;
-	if (RootEnv != NULL)
+	if (RootEnv != nullptr)
 		delete RootEnv;
 }
 
@@ -274,9 +274,9 @@ bool	CTemplatizer::build(const char* text)
 {
 	CTemplatizerParser	parser(text);
 	RootBloc = ITemplatizerBloc::parseBloc(parser);
-	RootEnv = new CTemplatizerEnv(NULL);
+	RootEnv = new CTemplatizerEnv(nullptr);
 
-	return (RootBloc != NULL);
+	return (RootBloc != nullptr);
 }
 
 
@@ -285,7 +285,7 @@ bool	CTemplatizer::build(const char* text)
  */
 std::string	CTemplatizer::eval()
 {
-	if (RootBloc != NULL && RootEnv != NULL)
+	if (RootBloc != nullptr && RootEnv != nullptr)
 		return RootBloc->eval(RootEnv);
 	else
 		return "";
@@ -304,7 +304,7 @@ std::string	CTemplatizer::eval()
 ITemplatizerBloc*	ITemplatizerBloc::parseBloc(CTemplatizerParser& ptr)
 {
 	std::string			blocType;
-	ITemplatizerBloc*	bloc = NULL;
+	ITemplatizerBloc*	bloc = nullptr;
 
 	if (popToken(ptr, Identifier, true, &blocType) || popToken(ptr, ListIdentifier, true, &blocType))
 	{
@@ -330,10 +330,10 @@ ITemplatizerBloc*	ITemplatizerBloc::parseBloc(CTemplatizerParser& ptr)
 		else if (blocType == "breakpoint")			bloc = new CTemplatizerBreakpointBloc();
 		else										bloc = new CTemplatizerUserFunctionBloc(blocType);
 
-		if (bloc == NULL)
+		if (bloc == nullptr)
 		{
 			nlwarning("Templatizer: failed to decode bloc '%s' at line %d", blocType.c_str(), ptr.getLine());
-			return NULL;
+			return nullptr;
 		}
 
 		ptr = bloc->parseHeader(ptr);
@@ -342,7 +342,7 @@ ITemplatizerBloc*	ITemplatizerBloc::parseBloc(CTemplatizerParser& ptr)
 		{
 			nlwarning("Templatizer: failed to decode header of bloc '%s' at line %d", blocType.c_str(), ptr.getLine());
 			delete bloc;
-			return NULL;
+			return nullptr;
 		}
 
 		if (bloc->hasInternal())
@@ -351,7 +351,7 @@ ITemplatizerBloc*	ITemplatizerBloc::parseBloc(CTemplatizerParser& ptr)
 			{
 				nlwarning("Templatizer: failed to decode start of bloc '%s' at line %d", blocType.c_str(), ptr.getLine());
 				delete bloc;
-				return NULL;
+				return nullptr;
 			}
 
 			ptr = bloc->parseInternal(ptr);
@@ -360,14 +360,14 @@ ITemplatizerBloc*	ITemplatizerBloc::parseBloc(CTemplatizerParser& ptr)
 			{
 				nlwarning("Templatizer: failed to parse bloc '%s' at line %d", blocType.c_str(), ptr.getLine());
 				delete bloc;
-				return NULL;
+				return nullptr;
 			}
 
 			if (!popToken(ptr, BlocEnd, true))
 			{
 				nlwarning("Templatizer: failed to decode end of bloc '%s' at line %d", blocType.c_str(), ptr.getLine());
 				delete bloc;
-				return NULL;
+				return nullptr;
 			}
 		}
 	}
@@ -389,7 +389,7 @@ ITemplatizerBloc*	ITemplatizerBloc::parseBloc(CTemplatizerParser& ptr)
 	if (!ptr.isValid())
 	{
 		delete bloc;
-		return NULL;
+		return nullptr;
 	}
 
 	return bloc;
@@ -413,7 +413,7 @@ CTemplatizerParser	ITemplatizerBloc::parseHeader(CTemplatizerParser ptr)
 			std::string	paramName;
 			if (!popToken(ptr, Identifier, true, &paramName))
 			{
-				if (args == NULL || args[currentDefArg] == NULL)
+				if (args == nullptr || args[currentDefArg] == nullptr)
 				{
 					ptr.invalidate();
 					return ptr;
@@ -432,7 +432,7 @@ CTemplatizerParser	ITemplatizerBloc::parseHeader(CTemplatizerParser ptr)
 
 			ITemplatizerBloc*	bloc = parseBloc(ptr);
 
-			if (bloc == NULL)
+			if (bloc == nullptr)
 			{
 				ptr.invalidate();
 				return ptr;
@@ -461,15 +461,15 @@ CTemplatizerParser	ITemplatizerBloc::parseHeader(CTemplatizerParser ptr)
  */
 CTemplatizerParser	ITemplatizerBloc::parseInternal(CTemplatizerParser ptr)
 {
-	ITemplatizerBloc*	bloc = NULL;
+	ITemplatizerBloc*	bloc = nullptr;
 	do
 	{
 		bloc = parseBloc(ptr);
 
-		if (bloc != NULL)
+		if (bloc != nullptr)
 			Blocs.push_back(bloc);
 	}
-	while (bloc != NULL && *ptr != '\0' && !isBlocEnd(ptr));
+	while (bloc != nullptr && *ptr != '\0' && !isBlocEnd(ptr));
 
 	return ptr;
 }
@@ -540,7 +540,7 @@ CTemplatizerParser	CTemplatizerCommentBloc::parseInternal(CTemplatizerParser ptr
 	ptr = skipSpace(ptr);
 
 	if (!popToken(ptr, CommentStart, true))
-		return NULL;
+		return nullptr;
 
 	while (*ptr != '\0' && !isNextToken(ptr, CommentEnd, false))
 		++ptr;

@@ -92,7 +92,7 @@ CReceiveTask::~CReceiveTask()
 {
 	nlassert( DataSock != NULL );
 	delete DataSock;
-	DataSock = NULL;
+	DataSock = nullptr;
 
 }
 

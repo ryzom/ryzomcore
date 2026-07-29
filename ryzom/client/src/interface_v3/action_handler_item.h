@@ -25,7 +25,7 @@ private:
 	class	CItemEditionWindow : public IItemInfoWaiter
 	{
 		public:
-			~CItemEditionWindow() {	_CurrItemSheet = NULL;	}
+			~CItemEditionWindow() {	_CurrItemSheet = nullptr;	}
 			// start that page (display and setup ui)
 			void begin();
 			// end that page (hide and deactivate ui)
@@ -35,7 +35,7 @@ private:
 			void	validate();
 			void infoReceived();
 		public:
-			CItemEditionWindow() : _CurrItemSheet(NULL) {}
+			CItemEditionWindow() : _CurrItemSheet(nullptr) {}
 			// If the window is in Edition or Display mode
 			bool				IsInEditionMode;
 			// The window to modify

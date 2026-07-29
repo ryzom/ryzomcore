@@ -34,7 +34,7 @@ namespace NL3D
 {
 
 // ***************************************************************************
-CFastHLSModifier	*CFastHLSModifier::_Instance= NULL;
+CFastHLSModifier	*CFastHLSModifier::_Instance = nullptr;
 
 // ***************************************************************************
 void CFastHLSModifier::releaseInstance()
@@ -42,7 +42,7 @@ void CFastHLSModifier::releaseInstance()
 	if( _Instance )
 	{
 		delete _Instance;
-		_Instance = NULL;
+		_Instance = nullptr;
 	}
 }
 

@@ -49,8 +49,8 @@ class CStorageChunks;
 // Max-2010-matching x87 reference build). Null-safe like data(), so an empty vector yields NULL
 // rather than the undefined &v[0]. Kept as a plain helper (not the C++11 member) so the whole
 // library compiles under both the modern x64 toolchain and VS2008.
-template <typename T> inline T *nlVectorData(std::vector<T> &v) { return v.empty() ? (T *)0 : &v[0]; }
-template <typename T> inline const T *nlVectorData(const std::vector<T> &v) { return v.empty() ? (const T *)0 : &v[0]; }
+template <typename T> inline T *nlVectorData(std::vector<T> &v) { return v.empty() ? (T *)nullptr : &v[0]; }
+template <typename T> inline const T *nlVectorData(const std::vector<T> &v) { return v.empty() ? (const T *)nullptr : &v[0]; }
 
 struct EStorage : public NLMISC::Exception
 {

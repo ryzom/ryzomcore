@@ -198,7 +198,7 @@ public :
 	 *	Build the structure of the database from a file
 	 * \param f is the stream
 	 */
-	virtual void init( xmlNodePtr node, IProgressCallback &progressCallBack, bool mapBanks=false, CCDBBankHandler *bankHandler = NULL ) = 0;
+	virtual void init( xmlNodePtr node, IProgressCallback &progressCallBack, bool mapBanks=false, CCDBBankHandler *bankHandler = nullptr) = 0;
 
 	/**
 	 * Save a backup of the database
@@ -282,7 +282,7 @@ public :
 	/**
 	 * get the parent of a node
 	 */
-	virtual CCDBNodeBranch* getParent() { nlassertex(0,("getParent() not overloaded for given node type!")); return NULL; }
+	virtual CCDBNodeBranch* getParent() { nlassertex(0,("getParent() not overloaded for given node type!")); return nullptr; }
 
 	/**
 	 * get the name of this node
@@ -316,14 +316,14 @@ public :
 	/// Return the string id corresponding to the argument
 	static TStringId getStringId(const std::string& nodeName)
 	{
-		if (_DBSM == NULL) _DBSM = CStringMapper::createLocalMapper();
+		if (_DBSM == nullptr) _DBSM = CStringMapper::createLocalMapper();
 		return _DBSM->localMap(nodeName);
 	}
 
 	/// Return a pointer to the string corresponding to the argument
 	static const std::string *getStringFromId(TStringId nodeStringId)
 	{
-		if (_DBSM == NULL) _DBSM = CStringMapper::createLocalMapper();
+		if (_DBSM == nullptr) _DBSM = CStringMapper::createLocalMapper();
 		return &_DBSM->localUnmap(nodeStringId);
 	}
 
@@ -338,14 +338,14 @@ protected:
 	/// Constructor
 	ICDBNode() : _AtomicFlag(false)
 	{
-		if (_DBSM == NULL) _DBSM = CStringMapper::createLocalMapper();
+		if (_DBSM == nullptr) _DBSM = CStringMapper::createLocalMapper();
 		_Name = CStringMapper::emptyId();
 	}
 
 	/// Constructor
 	ICDBNode (const std::string &name) : _AtomicFlag(false)
 	{
-		if (_DBSM == NULL) _DBSM = CStringMapper::createLocalMapper();
+		if (_DBSM == nullptr) _DBSM = CStringMapper::createLocalMapper();
 		_Name = _DBSM->localMap(name);
 		//_NameDbg = name;
 	}

@@ -51,7 +51,7 @@ void CTimeDateSeasonManager::init( uint32 /* startDay */, float /* startTime */)
 void CTimeDateSeasonManager::packSheets(const std::string &writeDirectory)
 {
 	// if the 'GeorgePaths' config file var exists then we try to perform a mini-scan for sheet files
-	if (IService::isServiceInitialized() && (IService::getInstance()->ConfigFile.getVarPtr(std::string("GeorgePaths"))!=NULL))
+	if (IService::isServiceInitialized() && (IService::getInstance()->ConfigFile.getVarPtr(std::string("GeorgePaths")) != nullptr))
 	{
 		loadForm("light_cycle", writeDirectory + "light_cycles.packed_sheets", _StaticLightCyclesHours, false, false);
 	}

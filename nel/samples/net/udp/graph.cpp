@@ -51,7 +51,7 @@ using namespace std;
 // Variables
 //
 
-vector<CGraph*> *CGraph::_Graphs = NULL;
+vector<CGraph*> *CGraph::_Graphs = nullptr;
 
 bool CGraph::Display = true;
 bool CGraph::DisplayAverageValue = true;
@@ -206,7 +206,7 @@ void CGraph::render (NL3D::UDriver &driver, NL3D::UTextContext &tc)
 {
 	if (!Display) return;
 
-	if (_Graphs == NULL) return;
+	if (_Graphs == nullptr) return;
 
 	for (uint i = 0; i < _Graphs->size(); i++)
 	{

@@ -40,7 +40,7 @@ class CBackgroundSource : public CSourceCommon , public CAudioMixerUser::IMixerU
 {
 public:
 	/// Constructor
-	CBackgroundSource	(CBackgroundSound *backgroundSound=NULL, bool spawn=false, TSpawnEndCallback cb=0, void *cbUserParam = 0, NL3D::CCluster *cluster = 0, CGroupController *groupController = NULL);
+	CBackgroundSource	(CBackgroundSound *backgroundSound = nullptr, bool spawn=false, TSpawnEndCallback cb=nullptr, void *cbUserParam = nullptr, NL3D::CCluster *cluster = nullptr, CGroupController *groupController = nullptr);
 	/// Destructor
 	~CBackgroundSource	();
 

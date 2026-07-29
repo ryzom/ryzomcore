@@ -66,7 +66,7 @@ public:
 		  * \param loadedIGMap If not NULL, a map that will be filled with ig that are currently loaded
 		  * \return true if the build succeed
 		  */
-		bool setupFromSheet(NL3D::UScene *scene, const CVillageSheet &sheet, CStreamableIG::TString2IG *loadedIGMap = NULL);
+		bool setupFromSheet(NL3D::UScene *scene, const CVillageSheet &sheet, CStreamableIG::TString2IG *loadedIGMap = nullptr);
 
 		// dtor
 		~CVillage();

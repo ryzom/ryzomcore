@@ -53,7 +53,7 @@ CDBGroupBuildPhrase::CDBGroupBuildPhrase(const TCtorParam &param)
 :CInterfaceGroup(param)
 {
 	_GroupValid= false;
-	_ValidateButton= NULL;
+	_ValidateButton = nullptr;
 	_NumMandatories= 0;
 	_NumOptionals= 0;
 	_NumCredits= 0;
@@ -62,12 +62,12 @@ CDBGroupBuildPhrase::CDBGroupBuildPhrase(const TCtorParam &param)
 	_TextureIdSlotDisabled= 0;
 
 	// Name of the magic sentence
-	_UserSentenceName= NULL;
-	_SpellView= NULL;
+	_UserSentenceName = nullptr;
+	_SpellView = nullptr;
 
 	_NewSpellNumber= 0;
 
-	_TextPhraseDesc= NULL;
+	_TextPhraseDesc = nullptr;
 
 	nlctassert(MaxRootBrickTypeFilter>0);
 	for(uint i=0;i<MaxRootBrickTypeFilter;i++)
@@ -253,7 +253,7 @@ void		CDBGroupBuildPhrase::draw ()
 const CSBrickSheet	*CDBGroupBuildPhrase::getRootBrick()
 {
 	if(!_GroupValid)
-		return NULL;
+		return nullptr;
 
 	return _MainWords[0].Slot.Brick->asSBrickSheet();
 }
@@ -812,11 +812,12 @@ public:
 	std::vector<CParamTreeNode*>	Sons;
 
 public:
-	CParamTreeNode(CParamTreeNode *parent) : Brick(NULL), Valid(true), Parent(parent) {}
+	CParamTreeNode(CParamTreeNode *parent) : Brick(nullptr)
+	    , Valid(true), Parent(parent) {}
 	~CParamTreeNode()
 	{
-		Parent= NULL;
-		Brick=	NULL;
+		Parent = nullptr;
+		Brick = nullptr;
 		deleteSons();
 	}
 
@@ -969,7 +970,7 @@ void			CDBGroupBuildPhrase::updateParamHrc(uint index)
 
 
 	// **** From the current View setup of 'word', build the Parameter Hierarchy (in simple tree form)
-	CParamTreeNode		rootNode(NULL);
+	CParamTreeNode		rootNode(nullptr);
 	// NB: here rootNode represent the Main (ie mandatory, optional or credit) brick. Therefore, it is not a real parameter.
 	rootNode.Brick= word->Slot.Brick->asSBrickSheet();
 	rootNode.Valid= true;

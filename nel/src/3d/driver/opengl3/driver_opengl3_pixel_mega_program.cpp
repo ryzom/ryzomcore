@@ -464,8 +464,8 @@ void megaPPGenerate(std::string &result, bool fogOrPpl, bool cube, bool specular
 			// Table PPL: light data from nlLights[idx] UBO
 			for (int i = 0; i < NL_OPENGL3_MAX_LIGHT; ++i)
 			{
-				const char *idxAccess = objectUBO ? s_LightIdxAccess[i] : NULL;
-				const char *facAccess = objectUBO ? s_LightFacAccess[i] : NULL;
+				const char *idxAccess = objectUBO ? s_LightIdxAccess[i] : nullptr;
+				const char *facAccess = objectUBO ? s_LightFacAccess[i] : nullptr;
 
 				ss << "    if (" << i << " < nlNumPerPixelLights) {" << std::endl;
 				if (objectUBO)

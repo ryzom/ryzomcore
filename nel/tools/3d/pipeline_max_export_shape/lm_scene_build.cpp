@@ -258,7 +258,7 @@ bool convertLightmapLight(NL3D::CLightmapLight &out, INode &node, SCENELIB::SNod
 	{
 		CReferenceMaker *tm = dynamic_cast<CReferenceMaker *>(node.getReference(0));
 		CSceneClass *tmsc = dynamic_cast<CSceneClass *>(tm);
-		INode *target = NULL;
+		INode *target = nullptr;
 		if (tmsc && tmsc->classDesc()->classId() == CLASSID_LOOKAT_CTRL)
 			target = dynamic_cast<INode *>(tm->getReference(0));
 		if (target)

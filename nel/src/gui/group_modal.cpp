@@ -219,8 +219,8 @@ namespace NLGUI
 	xmlNodePtr CGroupModal::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
 		xmlNodePtr node = CGroupFrame::serialize( parentNode, type );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "modal" );
 		xmlSetProp( node, BAD_CAST "mouse_pos", BAD_CAST NLMISC::toString( SpawnOnMousePos ).c_str() );

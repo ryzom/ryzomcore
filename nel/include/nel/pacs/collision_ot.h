@@ -49,8 +49,8 @@ public:
 	/// Clear the element
 	void			clear ()
 	{
-		_Next=NULL;
-		_Previous=NULL;
+		_Next = nullptr;
+		_Previous = nullptr;
 	}
 
 	/// Link in the ot
@@ -73,8 +73,8 @@ public:
 			_Previous->_Next=_Next;
 		if (_Next)
 			_Next->_Previous=_Previous;
-		_Next=NULL;
-		_Previous=NULL;
+		_Next = nullptr;
+		_Previous = nullptr;
 	}
 
 	/// Return true if it an info collision else false;
@@ -422,7 +422,7 @@ public:
 
 	CMovePrimitive		*getOtherPrimitive (CMovePrimitive * /* primitive */) const
 	{
-		return NULL;
+		return nullptr;
 	}
 private:
 	// The first primitive

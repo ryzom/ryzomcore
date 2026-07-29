@@ -43,7 +43,7 @@ public:
 	void	send (const CMessage &buffer, TSockId hostid, bool log = true);
 
 	/// Force to send all data pending in the send queue. See comment in CCallbackNetBase.
-	bool	flush (TSockId destid, uint *nbBytesRemaining=NULL) { nlassert( destid != InvalidSockId ); return CBufServer::flush(destid, nbBytesRemaining); }
+	bool	flush (TSockId destid, uint *nbBytesRemaining = nullptr) { nlassert( destid != InvalidSockId ); return CBufServer::flush(destid, nbBytesRemaining); }
 
 	/** Updates the network (call this method evenly).
 	 * More info about timeout and mintime in the code of CCallbackNetBase::baseUpdate().
@@ -76,7 +76,7 @@ public:
 	virtual TSockId	getSockId (TSockId hostid = InvalidSockId);
 
 	uint64	getReceiveQueueSize () { return CBufServer::getReceiveQueueSize(); }
-	uint64	getSendQueueSize () { return CBufServer::getSendQueueSize(0); }
+	uint64	getSendQueueSize () { return CBufServer::getSendQueueSize(nullptr); }
 
 	void displayReceiveQueueStat (NLMISC::CLog *log = NLMISC::InfoLog) { CBufServer::displayReceiveQueueStat(log); }
 	void displaySendQueueStat (NLMISC::CLog *log = NLMISC::InfoLog, TSockId destid = InvalidSockId) { CBufServer::displaySendQueueStat(log, destid); }

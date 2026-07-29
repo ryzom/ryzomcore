@@ -82,7 +82,7 @@ CActionPhraseFaber::CActionPhraseFaber()
 		MAX_GUILDINV_ENTRIES + MAX_ROOMINV_ENTRIES;
 	_InventoryMirror.resize(size);
 	_InventoryObsSetup= false;
-	_ExecuteFromItemPlanBrick= NULL;
+	_ExecuteFromItemPlanBrick = nullptr;
 }
 
 
@@ -110,7 +110,7 @@ void		CActionPhraseFaber::launchFaberCastWindow(sint32 memoryLine, uint memoryIn
 	_ExecuteFromMemoryLine= memoryLine;
 	_ExecuteFromMemoryIndex= memoryIndex;
 	// no item plan setuped for now
-	_ExecuteFromItemPlanBrick= NULL;
+	_ExecuteFromItemPlanBrick = nullptr;
 
 
 	// get the family of item plan (for selection) from the rootBrick. It is stored in the Property0.
@@ -320,7 +320,7 @@ CItemImage		*CActionPhraseFaber::getInvMirrorItemImage(uint slotIndex, uint& inv
 			indexInInv = slotIndex;
 			return &image;
 		}
-		return NULL;
+		return nullptr;
 	}
 	slotIndex -= MAX_GUILDINV_ENTRIES;
 
@@ -336,10 +336,10 @@ CItemImage		*CActionPhraseFaber::getInvMirrorItemImage(uint slotIndex, uint& inv
 			indexInInv = slotIndex;
 			return &image;
 		}
-		return NULL;
+		return nullptr;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 
@@ -677,7 +677,7 @@ void		CActionPhraseFaber::startMpSelection(uint itemReqLine, uint mpSlot)
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
 	// get the ctrlSlot
-	CDBCtrlSheet		*ctrlSlot= NULL;
+	CDBCtrlSheet		*ctrlSlot = nullptr;
 	CInterfaceGroup		*itemReqLineGroup= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId( toString(FaberPhraseItemReqLine.c_str(), itemReqLine) ));
 	if(itemReqLineGroup)
 	{
@@ -1149,7 +1149,7 @@ void			CActionPhraseFaber::deleteMpSlot(uint itemReqLine, uint mpSlot)
 // ***************************************************************************
 
 
-static	CActionPhraseFaber	*ActionPhraseFaber = NULL;
+static	CActionPhraseFaber	*ActionPhraseFaber = nullptr;
 
 
 // ***************************************************************************
@@ -1173,7 +1173,7 @@ public:
 		// get mpSlot edited
 		uint	mpSlot= ctrl->getIndexInDB();
 
-		if (ActionPhraseFaber == NULL) ActionPhraseFaber = new CActionPhraseFaber;
+		if (ActionPhraseFaber == nullptr) ActionPhraseFaber = new CActionPhraseFaber;
 		ActionPhraseFaber->startMpSelection(itemReqLine, mpSlot);
 	}
 };
@@ -1197,7 +1197,7 @@ public:
 		// get the selected MP.
 		uint	selectMP= ctrl->getIndexInDB();
 
-		if (ActionPhraseFaber == NULL) ActionPhraseFaber = new CActionPhraseFaber;
+		if (ActionPhraseFaber == nullptr) ActionPhraseFaber = new CActionPhraseFaber;
 		ActionPhraseFaber->validateMpSelection(selectMP);
 	}
 };
@@ -1210,7 +1210,7 @@ class	CHandlerPhraseFaberValidate : public IActionHandler
 public:
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
-		if (ActionPhraseFaber == NULL) ActionPhraseFaber = new CActionPhraseFaber;
+		if (ActionPhraseFaber == nullptr) ActionPhraseFaber = new CActionPhraseFaber;
 		ActionPhraseFaber->validateExecution();
 	}
 };
@@ -1244,7 +1244,7 @@ class	CHandlerPhraseFaberSelectMpQuantity : public IActionHandler
 public:
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
-		if (ActionPhraseFaber == NULL) ActionPhraseFaber = new CActionPhraseFaber;
+		if (ActionPhraseFaber == nullptr) ActionPhraseFaber = new CActionPhraseFaber;
 		ActionPhraseFaber->validateMpSelectQuantity();
 	}
 };
@@ -1255,28 +1255,28 @@ REGISTER_ACTION_HANDLER( CHandlerPhraseFaberSelectMpQuantity, "phrase_faber_sele
 // ***************************************************************************
 void		launchFaberCastWindow(sint32 memoryLine, uint memoryIndex, CSBrickSheet *rootBrick)
 {
-	if (ActionPhraseFaber == NULL) ActionPhraseFaber = new CActionPhraseFaber;
+	if (ActionPhraseFaber == nullptr) ActionPhraseFaber = new CActionPhraseFaber;
 	ActionPhraseFaber->launchFaberCastWindow(memoryLine, memoryIndex, rootBrick);
 }
 
 // ***************************************************************************
 void		fillFaberPlanSelection(const std::string &brickDB, uint maxSelection)
 {
-	if (ActionPhraseFaber == NULL) ActionPhraseFaber = new CActionPhraseFaber;
+	if (ActionPhraseFaber == nullptr) ActionPhraseFaber = new CActionPhraseFaber;
 	ActionPhraseFaber->fillFaberPlanSelection(brickDB, maxSelection);
 }
 
 // ***************************************************************************
 void		validateFaberPlanSelection(CSBrickSheet *itemPlanBrick)
 {
-	if (ActionPhraseFaber == NULL) ActionPhraseFaber = new CActionPhraseFaber;
+	if (ActionPhraseFaber == nullptr) ActionPhraseFaber = new CActionPhraseFaber;
 	ActionPhraseFaber->validateFaberPlanSelection(itemPlanBrick);
 }
 
 // ***************************************************************************
 void		closeFaberCastWindow()
 {
-	if (ActionPhraseFaber == NULL) return;
+	if (ActionPhraseFaber == nullptr) return;
 	CGroupContainer	*window= dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(FaberPhraseWindow));
 	if(window && window->getActive())
 		window->setActive(false);
@@ -1289,7 +1289,7 @@ class	CHandlerPhraseFaberOnClose : public IActionHandler
 public:
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
-		if (ActionPhraseFaber == NULL) ActionPhraseFaber = new CActionPhraseFaber;
+		if (ActionPhraseFaber == nullptr) ActionPhraseFaber = new CActionPhraseFaber;
 		ActionPhraseFaber->onCloseFaberCastWindow();
 	}
 };
@@ -1361,7 +1361,7 @@ void		CActionPhraseFaber::onInventoryChange()
 	bool	displayChange= false;
 
 	// If the Faber Plan has not yet been selected, then must not check _InventoryMirror, since not initialized
-	if(_ExecuteFromItemPlanBrick==NULL)
+	if(_ExecuteFromItemPlanBrick == nullptr)
 		return;
 
 	// Run all the Bag
@@ -1509,14 +1509,14 @@ void		CActionPhraseFaber::onInventoryChange()
 // ***************************************************************************
 void	CActionPhraseFaber::CDBInventoryObs::update(ICDBNode * /* node */)
 {
-	if (ActionPhraseFaber == NULL) ActionPhraseFaber = new CActionPhraseFaber;
+	if (ActionPhraseFaber == nullptr) ActionPhraseFaber = new CActionPhraseFaber;
 	ActionPhraseFaber->onInventoryChange();
 }
 
 // ***************************************************************************
 void	CActionPhraseFaber::CDBAnimalObs::update(ICDBNode * /* node */)
 {
-	if (ActionPhraseFaber == NULL) ActionPhraseFaber = new CActionPhraseFaber;
+	if (ActionPhraseFaber == nullptr) ActionPhraseFaber = new CActionPhraseFaber;
 	ActionPhraseFaber->onInventoryChange();
 }
 
@@ -1865,9 +1865,9 @@ void	CActionPhraseFaber::updateItemResult()
 /* Handle change of skill -> recompute success rate */
 void CActionPhraseFaber::CSkillObserver::onSkillChange()
 {
-	if (ActionPhraseFaber == NULL) ActionPhraseFaber = new CActionPhraseFaber;
+	if (ActionPhraseFaber == nullptr) ActionPhraseFaber = new CActionPhraseFaber;
 	// Dont update if the plan has not yet been selected
-	if(ActionPhraseFaber->_ExecuteFromItemPlanBrick==NULL)
+	if(ActionPhraseFaber->_ExecuteFromItemPlanBrick == nullptr)
 		return;
 	ActionPhraseFaber->updateItemResult();
 }

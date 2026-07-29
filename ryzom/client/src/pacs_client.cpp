@@ -44,11 +44,11 @@ using namespace NLPACS;
 ////////////
 // GLOBAL //
 ////////////
-UMoveContainer		*PACS = 0;
-UGlobalRetriever	*GR = 0;
-URetrieverBank		*RB = 0;
+UMoveContainer		*PACS = nullptr;
+UGlobalRetriever	*GR = nullptr;
+URetrieverBank		*RB = nullptr;
 const float			LRRefeshRadius = 400.f;
-CIGCallback			*IGCallbacks = 0;
+CIGCallback			*IGCallbacks = nullptr;
 // World Images
 const uint8 staticWI  = 0;	//  Static World Image
 const uint8 dynamicWI = 1;	// Dynamic World Image
@@ -76,11 +76,11 @@ const uint16 UserDataEntity	= 3;
 void initPACS(const char* rbank, const char* gr, NLMISC::IProgressCallback &/* progress */)
 {
 	// Check old PACS is well released.
-	nlassertex(RB==0,   ("RB should be Null before the init."));
-	nlassertex(GR==0,   ("GR should be Null before the init."));
-	nlassertex(PACS==0, ("PACS should be Null before the init."));
+	nlassertex(RB==nullptr,   ("RB should be Null before the init."));
+	nlassertex(GR==nullptr,   ("GR should be Null before the init."));
+	nlassertex(PACS==nullptr, ("PACS should be Null before the init."));
 
-	if(rbank != 0 && gr != 0)
+	if(rbank != nullptr && gr != nullptr)
 	{
 		RB = NLPACS::URetrieverBank::createRetrieverBank(rbank, false);
 		GR = NLPACS::UGlobalRetriever::createGlobalRetriever(gr, RB);
@@ -99,7 +99,7 @@ void initPACS(const char* rbank, const char* gr, NLMISC::IProgressCallback &/* p
 	}
 
 	// Try to create a PACS with another method.
-	if(PACS == 0)
+	if(PACS == nullptr)
 		PACS = UMoveContainer::createMoveContainer(15000.0, -25000.0, 20000.0, -20000.0, 16, 16, RYZOM_ENTITY_SIZE_MAX, 2);
 
 	// Set the static world image.
@@ -119,19 +119,19 @@ void releasePACS ()
 	if (PACS)
 	{
 		UMoveContainer::deleteMoveContainer (PACS);
-		PACS = NULL;
+		PACS = nullptr;
 	}
 	// Global retriever presents ?
 	if (GR)
 	{
 		UGlobalRetriever::deleteGlobalRetriever (GR);
-		GR = NULL;
+		GR = nullptr;
 	}
 	// Retriever bank loader ?
 	if (RB)
 	{
 		URetrieverBank::deleteRetrieverBank (RB);
-		RB = NULL;
+		RB = nullptr;
 	}
 }// initPACS //
 
@@ -142,12 +142,12 @@ void releasePACS ()
 UInstanceGroup *getCluster(const UGlobalPosition &gp)
 {
 	// Cannot find the cluster if GR is Null.
-	if(GR==0)
-		return 0;
+	if(GR==nullptr)
+		return nullptr;
 
 	const string &strPos = GR->getIdentifier(gp);
 	if(strPos.empty())
-		return 0;
+		return nullptr;
 	// try to find the ig in the loaded ig map
 	std::map<std::string, UInstanceGroup *>::const_iterator igIt = IGLoaded.find(toLowerAscii(strPos));
 	if (igIt != IGLoaded.end())
@@ -171,7 +171,7 @@ UInstanceGroup *getCluster(const UGlobalPosition &gp)
 	else
 	{
 		nlwarning("getCluster : %s : unknown Identifier.", strPos.c_str());
-		return 0;
+		return nullptr;
 	}
 }// getCluster //
 
@@ -188,7 +188,7 @@ void initLandscapeIGCallbacks()
 void releaseLandscapeIGCallbacks()
 {
 	delete IGCallbacks;
-	IGCallbacks = NULL;
+	IGCallbacks = nullptr;
 }
 
 ///===================================================================================

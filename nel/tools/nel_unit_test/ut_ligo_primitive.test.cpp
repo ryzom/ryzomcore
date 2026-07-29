@@ -103,7 +103,7 @@ protected:
 		pa->addPropertyByName("name", new NLLIGO::CPropertyString("alias"));
 		p->insertChild(pa);
 
-		NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = NULL;
+		NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = nullptr;
 
 		// save the file
 		saveXmlPrimitiveFile(primDoc, _RefPrimFileName);
@@ -127,13 +127,13 @@ TEST_F(CUTLigoPrimitive, testAliasGenerator)
 
 			NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = &primDoc;
 			loadXmlPrimitiveFile(primDoc, _RefPrimFileName, _LigoConfig);
-			NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = NULL;
+			NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = nullptr;
 
 			lastGeneratedAlias = primDoc.getLastGeneratedAlias();
 
 			// get a copy of the primitive
-			NLLIGO::IPrimitive *prim = NULL;
-			NLLIGO::IPrimitive *primCopy = NULL;
+			NLLIGO::IPrimitive *prim = nullptr;
+			NLLIGO::IPrimitive *primCopy = nullptr;
 			ASSERT_TRUE(primDoc.RootNode->getChild(prim, 0));
 			if (prim)
 			{
@@ -147,7 +147,7 @@ TEST_F(CUTLigoPrimitive, testAliasGenerator)
 					// insert the copy
 					NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = &primDoc;
 					primDoc.RootNode->insertChild(primCopy);
-					NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = NULL;
+					NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = nullptr;
 				}
 			}
 
@@ -161,7 +161,7 @@ TEST_F(CUTLigoPrimitive, testAliasGenerator)
 
 			NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = &primDoc;
 			loadXmlPrimitiveFile(primDoc, _RefPrimFileName, _LigoConfig);
-			NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = NULL;
+			NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = nullptr;
 
 			ASSERT_EQ(lastGeneratedAlias, primDoc.getLastGeneratedAlias());
 		}

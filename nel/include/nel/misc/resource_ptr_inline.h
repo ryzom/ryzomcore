@@ -201,7 +201,7 @@ template <class TPtr, class TKey, class TResourceFinder> inline CResourcePtr<TPt
 	if (pinfo != &CRefCount::NullPtrInfo)
 	{
 		// Does the pointer has been deleted ?
-		if (Ptr == NULL)
+		if (Ptr == nullptr)
 		{
 			REF_TRACE("SmartCast TPtr*() has been deleted, get a new one");
 			// Try to get it

@@ -113,7 +113,7 @@ void CVertexBuffer::construct()
 	_VertexSize = 0;
 	_VertexColorFormat = TRGBA;
 	_LockCounter = 0;
-	_LockedBuffer = NULL;
+	_LockedBuffer = nullptr;
 	_BufferUsage = CpuReadWrite;
 	_Location = NotResident;
 	_ResidentSize = 0;
@@ -154,7 +154,7 @@ CVertexBuffer::CVertexBuffer(const CVertexBuffer &vb) : CRefCount()
 	_NbVerts = 0;
 	_VertexSize = 0;
 	_LockCounter = 0;
-	_LockedBuffer = NULL;
+	_LockedBuffer = nullptr;
 	_BufferUsage = CpuReadWrite;
 	_Location = NotResident;
 	_ResidentSize = 0;
@@ -179,7 +179,7 @@ CVertexBuffer::~CVertexBuffer()
 	 * ***********************************************/
 
 	if (DrvInfos)
-		DrvInfos->VertexBufferPtr = NULL;	// Tell the driver info to not restore memory when it will die
+		DrvInfos->VertexBufferPtr = nullptr;	// Tell the driver info to not restore memory when it will die
 
 	// Must kill the drv mirror of this VB.
 	DrvInfos.kill();
@@ -206,7 +206,7 @@ CVertexBuffer	&CVertexBuffer::operator=(const CVertexBuffer &vb)
 	_DirtyRanges.clear();
 	uint i;
 	_LockCounter = 0;
-	_LockedBuffer = NULL;
+	_LockedBuffer = nullptr;
 
 	// Arraies
 	for (uint value=0; value<NumValue; value++)
@@ -1057,8 +1057,8 @@ bool CVertexBuffer::setVertexColorFormat (TVertexColorType format)
 		if (_Flags & (PrimaryColorFlag|SecondaryColorFlag))
 		{
 			uint i;
-			uint32 *ptr0 = (_Flags&PrimaryColorFlag)?(uint32*)&(_NonResidentVertices[_Offset[PrimaryColor]]):NULL;
-			uint32 *ptr1 = (_Flags&SecondaryColorFlag)?(uint32*)&(_NonResidentVertices[_Offset[SecondaryColor]]):NULL;
+			uint32 *ptr0 = (_Flags&PrimaryColorFlag)?(uint32*)&(_NonResidentVertices[_Offset[PrimaryColor]]) : nullptr;
+			uint32 *ptr1 = (_Flags&SecondaryColorFlag)?(uint32*)&(_NonResidentVertices[_Offset[SecondaryColor]]) : nullptr;
 			for (i=0; i<_NbVerts; i++)
 			{
 				if (ptr0)
@@ -1186,7 +1186,7 @@ void CVertexBuffer::restoreNonResidentMemory()
 	_DirtyTracking = false;
 
 	if (DrvInfos)
-		DrvInfos->VertexBufferPtr = NULL;	// Tell the driver info to not restore memory when it will die
+		DrvInfos->VertexBufferPtr = nullptr;	// Tell the driver info to not restore memory when it will die
 
 	// Must kill the drv mirror of this VB.
 	DrvInfos.kill();
@@ -1245,7 +1245,7 @@ NLMISC::CVector* CVertexBufferReadWrite::getNormalCoordPointer(uint idx)
 
 	if ( !(_Parent->_Flags & CVertexBuffer::NormalFlag) )
 	{
-		return(NULL);
+		return (nullptr);
 	}
 	ptr=_Parent->_LockedBuffer;
 	ptr+=_Parent->_Offset[CVertexBuffer::Normal];
@@ -1262,7 +1262,7 @@ void* CVertexBufferReadWrite::getColorPointer(uint idx)
 
 	if ( !(_Parent->_Flags & CVertexBuffer::PrimaryColorFlag) )
 	{
-		return(NULL);
+		return (nullptr);
 	}
 	ptr=_Parent->_LockedBuffer;
 	ptr+=_Parent->_Offset[CVertexBuffer::PrimaryColor];
@@ -1279,7 +1279,7 @@ void* CVertexBufferReadWrite::getSpecularPointer(uint idx)
 
 	if ( !(_Parent->_Flags & CVertexBuffer::SecondaryColorFlag) )
 	{
-		return(NULL);
+		return (nullptr);
 	}
 	ptr=_Parent->_LockedBuffer;
 	ptr+=_Parent->_Offset[CVertexBuffer::SecondaryColor];
@@ -1296,7 +1296,7 @@ NLMISC::CUV* CVertexBufferReadWrite::getTexCoordPointer(uint idx, uint8 stage)
 
 	if ( !(_Parent->_Flags & (CVertexBuffer::TexCoord0Flag<<stage)) )
 	{
-		return(NULL);
+		return (nullptr);
 	}
 	ptr=_Parent->_LockedBuffer;
 	ptr+=_Parent->_Offset[CVertexBuffer::TexCoord0+stage];
@@ -1313,7 +1313,7 @@ float* CVertexBufferReadWrite::getWeightPointer(uint idx, uint8 wgt)
 
 	nlassert(wgt<CVertexBuffer::MaxWeight);
 	if( !(_Parent->_Flags & CVertexBuffer::WeightFlag))
-		return NULL;
+		return nullptr;
 
 	ptr=(uint8*)(&_Parent->_LockedBuffer[idx*_Parent->_VertexSize]);
 	ptr+=_Parent->_Offset[CVertexBuffer::Weight]+wgt*sizeof(float);
@@ -1330,7 +1330,7 @@ CPaletteSkin* CVertexBufferReadWrite::getPaletteSkinPointer(uint idx)
 
 	if ( (_Parent->_Flags & CVertexBuffer::PaletteSkinFlag) != CVertexBuffer::PaletteSkinFlag )
 	{
-		return(NULL);
+		return (nullptr);
 	}
 	ptr=_Parent->_LockedBuffer;
 	ptr+=_Parent->_Offset[CVertexBuffer::PaletteSkin];
@@ -1370,7 +1370,7 @@ const NLMISC::CVector* CVertexBufferRead::getNormalCoordPointer(uint idx) const
 
 	if ( !(_Parent->_Flags & CVertexBuffer::NormalFlag) )
 	{
-		return(NULL);
+		return (nullptr);
 	}
 	ptr=_Parent->_LockedBuffer;
 	ptr+=_Parent->_Offset[CVertexBuffer::Normal];
@@ -1387,7 +1387,7 @@ const void* CVertexBufferRead::getColorPointer(uint idx) const
 
 	if ( !(_Parent->_Flags & CVertexBuffer::PrimaryColorFlag) )
 	{
-		return(NULL);
+		return (nullptr);
 	}
 	ptr=_Parent->_LockedBuffer;
 	ptr+=_Parent->_Offset[CVertexBuffer::PrimaryColor];
@@ -1404,7 +1404,7 @@ const void* CVertexBufferRead::getSpecularPointer(uint idx) const
 
 	if ( !(_Parent->_Flags & CVertexBuffer::SecondaryColorFlag) )
 	{
-		return(NULL);
+		return (nullptr);
 	}
 	ptr=_Parent->_LockedBuffer;
 	ptr+=_Parent->_Offset[CVertexBuffer::SecondaryColor];
@@ -1421,7 +1421,7 @@ const NLMISC::CUV* CVertexBufferRead::getTexCoordPointer(uint idx, uint8 stage) 
 
 	if ( !(_Parent->_Flags & (CVertexBuffer::TexCoord0Flag<<stage)) )
 	{
-		return(NULL);
+		return (nullptr);
 	}
 	ptr=_Parent->_LockedBuffer;
 	ptr+=_Parent->_Offset[CVertexBuffer::TexCoord0+stage];
@@ -1438,7 +1438,7 @@ const float* CVertexBufferRead::getWeightPointer(uint idx, uint8 wgt) const
 
 	nlassert(wgt<CVertexBuffer::MaxWeight);
 	if( !(_Parent->_Flags & CVertexBuffer::WeightFlag))
-		return NULL;
+		return nullptr;
 
 	ptr=(uint8*)(&_Parent->_LockedBuffer[idx*_Parent->_VertexSize]);
 	ptr+=_Parent->_Offset[CVertexBuffer::Weight]+wgt*sizeof(float);
@@ -1455,7 +1455,7 @@ const CPaletteSkin* CVertexBufferRead::getPaletteSkinPointer(uint idx) const
 
 	if ( (_Parent->_Flags & CVertexBuffer::PaletteSkinFlag) != CVertexBuffer::PaletteSkinFlag )
 	{
-		return(NULL);
+		return (nullptr);
 	}
 	ptr=_Parent->_LockedBuffer;
 	ptr+=_Parent->_Offset[CVertexBuffer::PaletteSkin];

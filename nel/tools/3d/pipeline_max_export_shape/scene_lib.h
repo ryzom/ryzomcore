@@ -107,7 +107,9 @@ struct SLoadedMax
 	CDllDirectory *Dll;
 	CClassDirectory3 *Cd;
 	CScene *Scene;
-	SLoadedMax() : Dll(NULL), Cd(NULL), Scene(NULL) { }
+	SLoadedMax() : Dll(nullptr)
+	    , Cd(nullptr)
+	    , Scene(nullptr) { }
 };
 
 // One-time registry construction (builtin + update1 + epoly + biped + nelpatch classes).
@@ -267,10 +269,10 @@ CSceneClass *objectRefOf(INode &node);
 // Unwrap derived-object wrappers and XRefs down to the base object. When mods is non-NULL,
 // collects the modifier scene objects (outermost wrapper first, reference order within each
 // wrapper) and their per-node mod-app 0x2500 containers (parallel array, NULL when absent).
-CSceneClass *baseObjectOf(CSceneClass *obj, std::vector<CSceneClass *> *mods = NULL,
-                          std::vector<CStorageContainer *> *modApps = NULL);
-CSceneClass *baseObjectOf(INode &node, std::vector<CSceneClass *> *mods = NULL,
-                          std::vector<CStorageContainer *> *modApps = NULL);
+CSceneClass *baseObjectOf(CSceneClass *obj, std::vector<CSceneClass *> *mods = nullptr,
+                          std::vector<CStorageContainer *> *modApps = nullptr);
+CSceneClass *baseObjectOf(INode &node, std::vector<CSceneClass *> *mods = nullptr,
+                          std::vector<CStorageContainer *> *modApps = nullptr);
 
 // The material reference of a node (reference 3), NULL if none.
 CSceneClass *materialOf(INode &node);
