@@ -85,7 +85,7 @@ struct SStartupCfg
 	std::string LastWorld;
 	/** Ecosystem open layout: "1x1" (default) / "2x1" / "1x2" / "2x2" / "3x3". */
 	std::string LastInstances;
-	/** Zone browser display mode: large-thumbnail grid (true) vs detail-tile list. */
+	/** Zone browser display mode: large-thumbnail card grid (true) vs detail-row list. */
 	bool ZoneBrowserLarge;
 
 	SStartupCfg() : ZoneBrowserLarge(false) {}

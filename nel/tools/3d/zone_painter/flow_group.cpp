@@ -1,6 +1,6 @@
 /**
  * \file flow_group.cpp
- * \brief zp_flow: auto-wrapping fixed-size tile flow group
+ * \brief zp_flow: auto-wrapping fixed-size item flow group
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
  * \author Grok 4.5
@@ -10,9 +10,9 @@
  * updateCoords, and the EXISTING children reflow into grid slots, with no repopulation and
  * no frame-loop width watch. A window resize invalidates coords and the next layout
  * pass re-wraps naturally. That widget lives in the client, not NLGUI, so this is the
- * minimal standalone equivalent for fixed-size tiles.
+ * minimal standalone equivalent for fixed-size items.
  *
- * XML: <group type="zp_flow" tile_w="178" tile_h="106" sizeref="w" w="0" ... />
+ * XML: <group type="zp_flow" item_w="178" item_h="106" sizeref="w" w="0" ... />
  * children (spawned TL-TL, e.g. via the board-cell spawnUnder idiom) are laid out in
  * add order, left→right then top→bottom; the group sets its own height to the row
  * count so a stacking CGroupList (scroll_text body) flows around it.
@@ -58,7 +58,7 @@ public:
 	DECLARE_UI_CLASS(CZPGroupFlow)
 
 	CZPGroupFlow(const TCtorParam &param)
-		: NLGUI::CInterfaceGroup(param), _TileW(178), _TileH(106)
+		: NLGUI::CInterfaceGroup(param), _ItemW(178), _ItemH(106)
 	{
 	}
 
@@ -66,14 +66,14 @@ public:
 	{
 		if (!NLGUI::CInterfaceGroup::parse(cur, parentGroup))
 			return false;
-		CXMLAutoPtr prop((const char *)xmlGetProp(cur, (xmlChar *)"tile_w"));
+		CXMLAutoPtr prop((const char *)xmlGetProp(cur, (xmlChar *)"item_w"));
 		if (prop)
-			NLMISC::fromString((const char *)prop, _TileW);
-		prop = (char *)xmlGetProp(cur, (xmlChar *)"tile_h");
+			NLMISC::fromString((const char *)prop, _ItemW);
+		prop = (char *)xmlGetProp(cur, (xmlChar *)"item_h");
 		if (prop)
-			NLMISC::fromString((const char *)prop, _TileH);
-		if (_TileW < 1) _TileW = 1;
-		if (_TileH < 1) _TileH = 1;
+			NLMISC::fromString((const char *)prop, _ItemH);
+		if (_ItemW < 1) _ItemW = 1;
+		if (_ItemH < 1) _ItemH = 1;
 		return true;
 	}
 
@@ -85,25 +85,25 @@ public:
 		sint32 avail = getWReal();
 		if (avail <= 0 && getParent())
 			avail = getParent()->getWReal();
-		const sint32 cols = std::max((sint32)1, avail / _TileW);
+		const sint32 cols = std::max((sint32)1, avail / _ItemW);
 		sint32 i = 0;
 		const std::vector<NLGUI::CInterfaceGroup *> &kids = getGroups();
 		for (size_t k = 0; k < kids.size(); ++k)
 		{
 			if (!kids[k] || !kids[k]->getActive())
 				continue;
-			kids[k]->setX((i % cols) * _TileW);
-			kids[k]->setY(-((i / cols) * _TileH));
+			kids[k]->setX((i % cols) * _ItemW);
+			kids[k]->setY(-((i / cols) * _ItemH));
 			++i;
 		}
 		const sint32 rows = (i + cols - 1) / cols;
-		setH(std::max(rows, (sint32)1) * _TileH);
+		setH(std::max(rows, (sint32)1) * _ItemH);
 		NLGUI::CInterfaceGroup::updateCoords();
 	}
 
 private:
-	sint32 _TileW;
-	sint32 _TileH;
+	sint32 _ItemW;
+	sint32 _ItemH;
 };
 
 NLMISC_REGISTER_OBJECT(NLGUI::CViewBase, CZPGroupFlow, std::string, "zp_flow");

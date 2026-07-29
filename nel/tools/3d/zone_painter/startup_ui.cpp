@@ -6,7 +6,7 @@
  * \author Claude Sonnet 5
  * \author Grok 4.5
  *
- * World list, zone browser (ecosystem list / continent minesweeper board / eco large-tile
+ * World list, zone browser (ecosystem list / continent minesweeper board / eco card-grid
  * grid), folder browser, and the runStartupFlow pump. SStartupSession + NLGUI helpers
  * are shared with session_board_ui.cpp through startup_ui_internal.h.
  *
@@ -1017,7 +1017,7 @@ static void syncLayoutRadios()
 	// no-op (layout selector unused)
 }
 
-// Zone browser display mode: false = detail-tile list, true = large-thumbnail
+// Zone browser display mode: false = detail-row list, true = large-thumbnail
 // grid (the tileset-palette idiom). Remembered in startup.cfg (ZoneBrowserLarge).
 static bool s_ZoneListLarge = false;
 
@@ -1062,9 +1062,9 @@ static void populateZoneList()
 
 	static const char *kList = "ui:zp:zone_browser:content:list_scroll:text_list";
 	// Large mode: one auto-wrapping zp_flow SECTION per zone group. The flow
-	// group reflows its tiles from its own width inside updateCoords (the Ryzom client
+	// group reflows its items from its own width inside updateCoords (the Ryzom client
 	// inventory mechanism), so resizes re-wrap with no repopulation and no width watch.
-	const int kTileW = 178, kTileH = 106;
+	const int kCardW = 178, kCardH = 106;
 	CInterfaceGroup *flowSec = NULL;
 	uint flowSecCount = 0;
 
@@ -1095,7 +1095,7 @@ static void populateZoneList()
 
 		if (s_ZoneListLarge)
 		{
-			// Large-icon tile into the current section's flow; the flow assigns
+			// Large-icon card into the current section's flow; the flow assigns
 			// the grid slot, positions here are placeholders.
 			p.push_back(std::make_pair(std::string("title"), stripLigoFamilyPrefix(z.Basename)));
 			if (!flowSec)
@@ -1118,19 +1118,19 @@ static void populateZoneList()
 						flowSec->setParentSize(gl);
 					// Stale-build tripwire: with flow_group.cpp missing from the link
 					// (FILE(GLOB) + skipped reconfigure) the parser silently falls back
-					// to a plain interface_group and every tile stacks at slot 0,0.
+					// to a plain interface_group and every card stacks at slot 0,0.
 					if (flowSec->getClassName() != "CZPGroupFlow")
 						nlwarning("zone browser: zp_flow factory missing; grid will not wrap (stale build?)");
 				}
 			}
 			if (!flowSec)
 				continue;
-			if (CInterfaceGroup *tile = spawnUnder(flowSec, "zp_zone_tile", p,
-			                                       0, 0, kTileW, kTileH))
+			if (CInterfaceGroup *card = spawnUnder(flowSec, "zp_zone_card", p,
+			                                       0, 0, kCardW, kCardH))
 			{
-				if (CViewBitmap *thumb = dynamic_cast<CViewBitmap *>(tile->getView("thumb")))
+				if (CViewBitmap *thumb = dynamic_cast<CViewBitmap *>(card->getView("thumb")))
 					thumb->setActive(hasThumb);
-				if (CInterfaceGroup *fr = tile->getGroup("thumb_frame"))
+				if (CInterfaceGroup *fr = card->getGroup("thumb_frame"))
 					fr->setActive(hasThumb);
 			}
 			continue;

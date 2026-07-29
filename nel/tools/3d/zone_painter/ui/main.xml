@@ -153,10 +153,10 @@
 	</group>
 </template>
 
-<!-- Large-icon zone tile (zone browser grid mode). 64px thumb in a sunken well, name wrapped
-     below, transparent full-tile hit button. Spawned into zp_zone_flow_sec sections at 0,0;
+<!-- Large-icon zone card (zone browser grid mode). 64px thumb in a sunken well, name wrapped
+     below, transparent full-card hit button. Spawned into zp_zone_flow_sec sections at 0,0;
      the zp_flow group assigns wrap slots in updateCoords. -->
-<template name="zp_zone_tile" keep="true" id="" title="" idx="0" thumb="">
+<template name="zp_zone_card" keep="true" id="" title="" idx="0" thumb="">
 	<group id="#id" w="178" h="106">
 		<ctrl type="button" id="btn" button_type="push_button" posref="TL TL" x="0" y="0" w="178" h="106" scale="true"
 			tx_normal="blank.tga" tx_pushed="blank.tga" tx_over="blank.tga"
@@ -174,14 +174,14 @@
 	</group>
 </template>
 
-<!-- One auto-wrapping SECTION of zone tiles: zp_flow reflows children from its own width
+<!-- One auto-wrapping SECTION of zone cards: zp_flow reflows children from its own width
      inside updateCoords (client inventory mechanism), so resizes re-wrap without repopulation. -->
 <!-- sizeparent="parent" is a NO-OP here (template parse runs before parenting, resolves to NULL);
      kept as intent only. Real fix is C++ setParentSize(list) after spawn (startup_ui.cpp
      populateZoneList): CGroupList re-chains each child's pos parent to the PREVIOUS element
      and sizeref follows the pos parent, so without it the flow would size to the header row. -->
 <template name="zp_zone_flow_sec" keep="true" id="">
-	<group type="zp_flow" id="#id" tile_w="178" tile_h="106" sizeparent="parent" sizeref="w" w="-4" h="106" />
+	<group type="zp_flow" id="#id" item_w="178" item_h="106" sizeparent="parent" sizeref="w" w="-4" h="106" />
 </template>
 
 <!-- Section divider row for scroll_text lists (world/zone browser group headers).
