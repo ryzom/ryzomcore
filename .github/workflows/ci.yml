@@ -72,6 +72,16 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - uses: cpp-linter/cpp-linter-action@v2
+        id: linter
+        with:
+          style: 'file'
+          tidy-checks: '' # Use .clang-tidy config file.
+
+      - name: Fail fast?!
+        if: steps.linter.outputs.clang-tidy-checks-failed > 0
+        run: exit 1
+
       - uses: actions/cache@v6
         with:
           path: ~/.cache/ccache
