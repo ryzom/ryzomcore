@@ -125,10 +125,14 @@ bool topoAddQuads(SPatchMesh &pm, SRPatchMesh &rp,
 		// V[(slot+2)&3].
 		const sint32 Aopp = owner.V[(slot + 3) & 3];
 		const sint32 Bopp = owner.V[(slot + 2) & 3];
-		// Owner tangents pointing AWAY from the edge at A and B (mirrored for the sides):
-		// at A the incoming tangent of its previous edge, at B the outgoing of the next.
-		const sint32 AoppTan = owner.Vec[((slot + 3) & 3) * 2 + 1]; // arrives at A
-		const sint32 BoppTan = owner.Vec[((slot + 1) & 3) * 2];     // leaves B
+		// The owner's two side edges (slot+3: Aopp -> A, slot+1: B -> Bopp) point-reflect
+		// through their shared corner to seed the new patch's sides, so all four of their
+		// tangents participate: the pair near the shared corners and the pair near the
+		// opposite corners.
+		const sint32 AoppTan = owner.Vec[((slot + 3) & 3) * 2 + 1];   // arrives at A
+		const sint32 AoppLeave = owner.Vec[((slot + 3) & 3) * 2];     // leaves Aopp
+		const sint32 BoppTan = owner.Vec[((slot + 1) & 3) * 2];       // leaves B
+		const sint32 BoppArrive = owner.Vec[((slot + 1) & 3) * 2 + 1]; // arrives at Bopp
 
 		// New far corners: point reflection through the shared corners.
 		float posA2[3], posB2[3];
@@ -173,14 +177,15 @@ bool topoAddQuads(SPatchMesh &pm, SRPatchMesh &rp,
 		mkv.Tpl = &vecTpl;
 
 		float t1[3], t2[3];
-		// Side A -> nA.
+		// Side A -> nA: the point reflection through A of the owner's edge Aopp -> A
+		// (whose image runs A -> nA, since nA = 2A - Aopp), control for control.
 		reflectPt(pm.Verts[A].Pos, pm.Vecs[AoppTan].Pos, t1);           // leaves A
-		reflectPt(pm.Verts[nA].Pos, t1, t2);                            // arrives nA (symmetric seed)
+		reflectPt(pm.Verts[A].Pos, pm.Vecs[AoppLeave].Pos, t2);         // arrives nA
 		const sint32 sA12 = mkv.vec(t1, A);
 		const sint32 sA21 = mkv.vec(t2, nA);
-		// Side nB -> B.
+		// Side nB -> B: the point reflection through B of the owner's edge B -> Bopp.
 		reflectPt(pm.Verts[B].Pos, pm.Vecs[BoppTan].Pos, t1);           // arrives B (mirror of leave)
-		reflectPt(pm.Verts[nB].Pos, t1, t2);                            // leaves nB
+		reflectPt(pm.Verts[B].Pos, pm.Vecs[BoppArrive].Pos, t2);        // leaves nB
 		const sint32 sB12 = mkv.vec(t2, nB);
 		const sint32 sB21 = mkv.vec(t1, B);
 		// Far edge nA -> nB: translate the shared edge's tangents by the same offset

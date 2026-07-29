@@ -2500,6 +2500,20 @@ bool zpPatchEdgeCornerPair(uint zoneId, uint patchIdx, uint edgeSlot, uint &aOut
 	return true;
 }
 
+/** The vec index at ring slot 0..7 of a patch (lets a script name a tangent handle the
+ *  way patchTangentPos wants it, without knowing allocation order). */
+bool zpPatchVecIndex(uint zoneId, uint patchIdx, uint ringSlot, uint &vecOut)
+{
+	const SPaintZone *pz = zpFindPaintZone(zoneId);
+	if (!pz || patchIdx >= pz->Ep.Pm.Patches.size() || ringSlot >= 8)
+		return false;
+	const sint32 v = pz->Ep.Pm.Patches[patchIdx].Vec[ringSlot];
+	if (v < 0)
+		return false;
+	vecOut = (uint)v;
+	return true;
+}
+
 void zpPatchVertClear()
 {
 	// Every level's set: at edge or patch level the vertex set is a projection of one of the

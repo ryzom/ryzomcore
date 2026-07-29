@@ -210,6 +210,13 @@ bool topoWeldVerts(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
 			const sint32 s = ft->second;
 			SPmEdge &surv = pm.Edges[s];
 			SPmEdge &dead = pm.Edges[e];
+			// Only a coincidence the MERGE created fuses: a pair of edges that already
+			// shared their endpoints before the weld is pre-existing mesh state, not part
+			// of this op (welding an unrelated cluster must neither fuse nor refuse it).
+			const bool survTouched = vertTo[surv.V1] != surv.V1 || vertTo[surv.V2] != surv.V2;
+			const bool deadTouched = vertTo[dead.V1] != dead.V1 || vertTo[dead.V2] != dead.V2;
+			if (!survTouched && !deadTouched)
+				continue;
 			if (surv.Patches.size() + dead.Patches.size() > 2)
 			{ err = "weld would put more than two patches on one edge"; return false; }
 			edgeTo[e] = s;

@@ -773,7 +773,7 @@
 			onclick_l="zp_patch_unbind" params_l="" hardtext="Unbind" />
 		<ctrl style="text_button_16" id="btn_weld" posparent="btn_unbind" posref="MR ML" x="8" y="0"
 			onclick_l="zp_patch_weld" params_l="" hardtext="Weld" />
-		<ctrl style="text_button_16" id="btn_delete" posparent="btn_unbind" posref="MR ML" x="8" y="0"
+		<ctrl style="text_button_16" id="btn_delete" posparent="btn_weld" posref="MR ML" x="8" y="0"
 			onclick_l="zp_patch_delete" params_l="" hardtext="Delete" />
 		<ctrl style="text_button_16" id="btn_turn_ccw" posparent="btn_bind" posref="BL TL" x="0" y="-4"
 			onclick_l="zp_patch_turn" params_l="ccw" hardtext="Turn CCW" />

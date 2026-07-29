@@ -521,12 +521,21 @@ bool topoSubdividePatches(SPatchMesh &pm, SRPatchMesh &rp,
 					listAdd(ce.Patches, childIdx[q]);
 				}
 			}
-		// T-junction originals keep the neighbor only.
+		// T-junction originals keep the neighbor only - the edge record and its two
+		// tangent vecs (no child references them; the dead parent index must not stay,
+		// it now names child Q(0,0)).
 		for (int e = 0; e < 4; ++e)
 		{
 			const SEdgeSplit &sp = splits[par.Edge[e]];
-			if (sp.Bound && pm.Edges[par.Edge[e]].HasPatches)
+			if (!sp.Bound)
+				continue;
+			const SPmEdge &oe = pm.Edges[par.Edge[e]];
+			if (oe.HasPatches)
 				listRemove(pm.Edges[par.Edge[e]].Patches, (sint32)p);
+			if (oe.Vec12 >= 0 && pm.Vecs[oe.Vec12].HasPatches)
+				listRemove(pm.Vecs[oe.Vec12].Patches, (sint32)p);
+			if (oe.Vec21 >= 0 && pm.Vecs[oe.Vec21].HasPatches)
+				listRemove(pm.Vecs[oe.Vec21].Patches, (sint32)p);
 		}
 		// Corner verts: parent patch -> the corner's child; ring vec/edge lists follow.
 		for (int c = 0; c < 4; ++c)

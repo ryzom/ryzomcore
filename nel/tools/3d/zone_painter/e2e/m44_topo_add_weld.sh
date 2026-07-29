@@ -77,6 +77,20 @@ assert(painter.patchCount(0) == c0 + 1, "count")
 assert(painter.vertexCount(0) == v0 + 2, "verts")
 local t, r, n = painter.tileAt(0, c0, 0, 0)
 assert(n == 0, "new patch tiles not empty")
+-- Seed geometry: each side edge's far-end tangent stays on the owner side of its fresh
+-- corner (the arrival derivative points from the shared corner toward the fresh one; a
+-- reflection through the wrong point used to hook it past the corner).
+local function sideOk(shared, fresh, slot)
+  local sx, sy, sz = painter.patchVertexPos(0, shared)
+  local nx, ny, nz = painter.patchVertexPos(0, fresh)
+  local vi = painter.patchVecIndex(0, c0, slot)
+  local tx, ty, tz = painter.patchTangentPos(0, vi)
+  return (nx-tx)*(nx-sx) + (ny-ty)*(ny-sy) + (nz-tz)*(nz-sz) > 0
+end
+local a1, b1 = painter.patchEdgeVerts(0, c0, 1) -- A -> nA
+local a3, b3 = painter.patchEdgeVerts(0, c0, 3) -- nB -> B
+assert(sideOk(a1, b1, 3), "side A tangent hooks past the fresh corner")
+assert(sideOk(b3, a3, 6), "side B tangent hooks past the fresh corner")
 print("M44-1b OK count=" .. (c0 + 1))
 EOF
 seed "$OUT/ws1" "$B1B"

@@ -90,6 +90,7 @@ int zpEdgeNoSmoothQuery(uint zoneId, uint vertA, uint vertB);
 bool zpVertexBindQuery(uint zoneId, uint vertIdx, int &bindedOut, int &typeOut,
                        int &patchOut, int &edgeOut, int &primOut);
 bool zpPatchEdgeCornerPair(uint zoneId, uint patchIdx, uint edgeSlot, uint &aOut, uint &bOut);
+bool zpPatchVecIndex(uint zoneId, uint patchIdx, uint ringSlot, uint &vecOut);
 uint zpDeletePatchSelection();
 uint zpTurnPatchSelection(bool ccw);
 uint zpSubdividePatchSelection();
@@ -1178,6 +1179,18 @@ static int lPatchEdgeVerts(CLuaState &ls) // (zone, patchIdx, edgeSlot) -> vertA
 	return 2;
 }
 
+static int lPatchVecIndex(CLuaState &ls) // (zone, patchIdx, ringSlot 0..7) -> vec index
+{
+	double z, p, s;
+	if (!argNumber(ls, 1, z) || !argNumber(ls, 2, p) || !argNumber(ls, 3, s))
+		return retErr(ls, "usage: patchVecIndex(zone, patchIndex, ringSlot)");
+	uint v;
+	if (!zpPatchVecIndex((uint)z, (uint)p, (uint)s, v))
+		return retErr(ls, "patchVecIndex: no such slot");
+	ls.push((double)v);
+	return 1;
+}
+
 static int lGetMode(CLuaState &ls)
 {
 	ZPUI::SPaintUIBridge *b = bridge();
@@ -1375,6 +1388,7 @@ static const char *kBootstrap =
 	"  bindPatchVertex = __zp_bindPatchVertex,\n"
 	"  setEdgeNoSmooth = __zp_setEdgeNoSmooth, edgeNoSmooth = __zp_edgeNoSmooth,\n"
 	"  vertexBindInfo = __zp_vertexBindInfo, patchEdgeVerts = __zp_patchEdgeVerts,\n"
+	"  patchVecIndex = __zp_patchVecIndex,\n"
 	"  deletePatchSelection = __zp_deletePatchSelection,\n"
 	"  turnPatchSelection = __zp_turnPatchSelection,\n"
 	"  subdividePatchSelection = __zp_subdividePatchSelection,\n"
@@ -1472,6 +1486,7 @@ bool ensureLua()
 	ls->registerFunc("__zp_edgeNoSmooth", lEdgeNoSmooth);
 	ls->registerFunc("__zp_vertexBindInfo", lVertexBindInfo);
 	ls->registerFunc("__zp_patchEdgeVerts", lPatchEdgeVerts);
+	ls->registerFunc("__zp_patchVecIndex", lPatchVecIndex);
 	ls->registerFunc("__zp_deletePatchSelection", lDeletePatchSelection);
 	ls->registerFunc("__zp_turnPatchSelection", lTurnPatchSelection);
 	ls->registerFunc("__zp_subdividePatchSelection", lSubdividePatchSelection);
