@@ -2363,7 +2363,21 @@ void CEditorUI::syncPanelFromBridge()
 				                                                 : "%u Patches Selected", b->PatchSelFaces);
 			else
 				snprintf(buf, sizeof(buf), "Object Level");
-			t->setHardText(buf);
+			// One zone -> its name; several -> the count. A cross-file selection is easy
+			// to make by accident and otherwise invisible in the readout.
+			std::string line = buf;
+			const bool haveSel = (b->SubObj == 1 && (b->PatchSelVerts || b->PatchSelTans))
+				|| (b->SubObj == 2 && b->PatchSelEdges)
+				|| (b->SubObj == 3 && b->PatchSelFaces);
+			if (haveSel && b->PatchSelZones == 1 && b->PatchSelZoneName[0])
+				line += std::string(" - ") + b->PatchSelZoneName;
+			else if (haveSel && b->PatchSelZones > 1)
+			{
+				char zbuf[32];
+				snprintf(zbuf, sizeof(zbuf), " - %u zones", b->PatchSelZones);
+				line += zbuf;
+			}
+			t->setHardText(line);
 		}
 		// Bind/Unbind live at vertex level, Delete at patch level, No smooth at edge level.
 		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_bind").c_str()))

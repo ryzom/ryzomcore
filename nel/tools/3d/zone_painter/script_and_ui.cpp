@@ -2075,6 +2075,51 @@ void zpFillBridgeState(ZPUI::SPaintUIBridge &bridge)
 	bridge.PatchSelFaces = zpPatchFaceSelCount();
 	bridge.PatchSelTans = zpPatchTangentSelCount();
 	bridge.PatchNoSmooth = zpEdgeNoSmoothTriState();
+	// The zones the CURRENT level's selection lives in: one -> show its name in the
+	// readout, several -> show the count (a multi-file selection is easy to make and
+	// invisible without this).
+	{
+		std::set<uint> selZones;
+		if (pl.SubObj == CPaintMouseListener::SubEdge)
+		{
+			for (std::set<SPatchEdgeId>::const_iterator it = g_PatchEdgeSel.begin();
+			     it != g_PatchEdgeSel.end(); ++it)
+				selZones.insert(it->Zone);
+		}
+		else if (pl.SubObj == CPaintMouseListener::SubPatch)
+		{
+			for (std::set<TPatchFaceId>::const_iterator it = g_PatchFaceSel.begin();
+			     it != g_PatchFaceSel.end(); ++it)
+				selZones.insert(it->first);
+		}
+		else
+		{
+			for (std::set<TPatchVertId>::const_iterator it = g_PatchVertSel.begin();
+			     it != g_PatchVertSel.end(); ++it)
+				selZones.insert(it->first);
+			for (std::set<TPatchVertId>::const_iterator it = g_PatchTanSel.begin();
+			     it != g_PatchTanSel.end(); ++it)
+				selZones.insert(it->first);
+		}
+		bridge.PatchSelZones = (uint)selZones.size();
+		bridge.PatchSelZoneName[0] = 0;
+		if (selZones.size() == 1)
+		{
+			// The FILE basename, not the node name: ligo nodes are often generically
+			// named ("metazone") while the brick identity the artist thinks in is the
+			// file. Node name is the fallback for synthetic sessions.
+			std::string label = zpZoneFileBasename(*selZones.begin());
+			if (label.empty())
+			{
+				const SPaintZone *pz = zpFindPaintZone(*selZones.begin());
+				if (pz)
+					label = pz->Name;
+			}
+			strncpy(bridge.PatchSelZoneName, label.c_str(),
+			        sizeof(bridge.PatchSelZoneName) - 1);
+			bridge.PatchSelZoneName[sizeof(bridge.PatchSelZoneName) - 1] = 0;
+		}
+	}
 	bridge.PivotMode = g_PivotMode;
 	bridge.PivotLabel[0] = 0;
 	strncpy(bridge.PivotLabel, zpPivotModeName(g_PivotMode), sizeof(bridge.PivotLabel) - 1);

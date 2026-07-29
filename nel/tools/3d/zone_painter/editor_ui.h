@@ -147,8 +147,11 @@ struct SPaintUIBridge
 	// (0 none flagged, 1 all flagged, 2 mixed or nothing selected).
 	uint PatchSelVerts, PatchSelEdges, PatchSelFaces, PatchSelTans;
 	int PatchNoSmooth;
-	int PivotMode; // TPivotMode; what the transform gizmo is anchored on
-	char PivotLabel[16]; // short face for the toolbar button
+	// Where the current level's selection lives: one zone -> its name, several -> the count.
+	uint PatchSelZones;
+	char PatchSelZoneName[128];
+	int PivotMode;          // TPivotMode; what the transform gizmo is anchored on
+	char PivotLabel[16];    // short face for the toolbar button
 	int CurTileSet;
 	uint TileSetCount;
 	char TileSetName[128];
@@ -219,7 +222,7 @@ struct SPaintUIBridge
 		  setColorRadiusAbs(NULL),
 		  HaveCore(false), Mode(0), SubObj(0),
 		  PatchSelVerts(0), PatchSelEdges(0), PatchSelFaces(0), PatchSelTans(0),
-		  PatchNoSmooth(2),
+		  PatchNoSmooth(2), PatchSelZones(0),
 		  CurTileSet(0), TileSetCount(0), Mode256(false),
 		  BrushSize(0), TileGroup(0), LockBorders(false), UndoDepth(0), CanSave(false),
 		  InteractiveSave(false), BoardSession(false), InstanceCount(1), UpdateThumbnail(true),
@@ -232,6 +235,7 @@ struct SPaintUIBridge
 		  PropPassable(false), PropUseBBox(false)
 	{
 		TileSetName[0] = 0;
+		PatchSelZoneName[0] = 0;
 		EditableBasename[0] = 0;
 		InputDir[0] = 0;
 		SeasonLabel[0] = 0;
