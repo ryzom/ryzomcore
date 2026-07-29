@@ -8,7 +8,7 @@
  */
 
 /*
- * Copyright (C) 2026  by authors
+ * Copyright (C) 2026 by authors
  *
  * This file is part of RYZOM CORE PIPELINE.
  * RYZOM CORE PIPELINE is free software: you can redistribute it
@@ -18,11 +18,11 @@
  *
  * RYZOM CORE PIPELINE is distributed in the hope that it will be
  * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public
- * License along with RYZOM CORE PIPELINE.  If not, see
+ * License along with RYZOM CORE PIPELINE. If not, see
  * <http://www.gnu.org/licenses/>.
  */
 
@@ -902,6 +902,35 @@ bool decodeVertMapper(const uint8 *data, size_t size, SPmVertMapper &out, std::s
 		memcpy(m.Delta, p + 20, 12);
 	}
 	return true;
+}
+
+void encodeVertMapper(const SPmVertMapper &in, std::vector<uint8> &out)
+{
+	const size_t recSize = 32;
+	out.resize(8 + (in.VertMap.size() + in.VecMap.size()) * recSize);
+	uint8 *p = nlVectorData(out);
+	const sint32 vertCount = (sint32)in.VertMap.size();
+	memcpy(p, &vertCount, 4);
+	p += 4;
+	for (size_t i = 0; i < in.VertMap.size(); ++i, p += recSize)
+	{
+		const SPmMapVert &m = in.VertMap[i];
+		memcpy(p, &m.OriginalStored, 4);
+		memcpy(p + 4, &m.Vert, 4);
+		memcpy(p + 8, m.Original, 12);
+		memcpy(p + 20, m.Delta, 12);
+	}
+	const sint32 vecCount = (sint32)in.VecMap.size();
+	memcpy(p, &vecCount, 4);
+	p += 4;
+	for (size_t i = 0; i < in.VecMap.size(); ++i, p += recSize)
+	{
+		const SPmMapVert &m = in.VecMap[i];
+		memcpy(p, &m.OriginalStored, 4);
+		memcpy(p + 4, &m.Vert, 4);
+		memcpy(p + 8, m.Original, 12);
+		memcpy(p + 20, m.Delta, 12);
+	}
 }
 
 // ---------------------------------------------------------------------------------------------

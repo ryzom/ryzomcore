@@ -14,7 +14,7 @@
  */
 
 /*
- * Copyright (C) 2026  by authors
+ * Copyright (C) 2026 by authors
  *
  * This file is part of RYZOM CORE PIPELINE.
  * RYZOM CORE PIPELINE is free software: you can redistribute it
@@ -24,11 +24,11 @@
  *
  * RYZOM CORE PIPELINE is distributed in the hope that it will be
  * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public
- * License along with RYZOM CORE PIPELINE.  If not, see
+ * License along with RYZOM CORE PIPELINE. If not, see
  * <http://www.gnu.org/licenses/>.
  */
 
@@ -482,7 +482,7 @@ void loadNeighborContextFiles(std::vector<SPaintZone> &zones, float cellSize,
 		cf.Lm = nlm;
 		g_ContextFiles.push_back(cf);
 		g_NeighborScenes.push_back(nlm);
-		printf("  context '%s' @ cell (%d,%d)%s%s zoneIdBase=%u FROZEN%s\n",
+		printf(" context '%s' @ cell (%d,%d)%s%s zoneIdBase=%u FROZEN%s\n",
 		       cf.Basename.c_str(), cf.CellX, cf.CellY,
 		       cf.Rot ? NLMISC::toString(" R%u", cf.Rot * 90).c_str() : "",
 		       cf.Mirror ? " M" : "", base,
@@ -492,7 +492,7 @@ void loadNeighborContextFiles(std::vector<SPaintZone> &zones, float cellSize,
 
 
 // ---------------------------------------------------------------------------------------------
-// Session working-set rebuild  - open/close/toggle mid-viewer.
+// Session working-set rebuild - open/close/toggle mid-viewer.
 //
 // Sequence: writeBack retained paint → stash OriginalBytes → rebuild zones vector from kept
 // SLoadedMax scenes (no reload of already-open files) → weld → core.init → restore
@@ -625,7 +625,7 @@ void placeEcoEditableRange(std::vector<SPaintZone> &zones, SEditableFileInfo &ef
 	efi.Mask = mask;
 }
 
-bool rebuildWorkingSet(std::string &err, uint &outWelds)
+bool rebuildWorkingSet(std::string &err, uint &outWelds, bool skipWriteBack)
 {
 	outWelds = 0;
 	if (!g_PaintCtx.Active || !g_PaintCtx.Core || !g_PaintCtx.Zones || !g_PaintCtx.Land
@@ -637,17 +637,22 @@ bool rebuildWorkingSet(std::string &err, uint &outWelds)
 	// Live lock-borders survives re-init (the L-key/panel/script toggle only touches the
 	// core; without this capture every board op reverted it to the CLI startup value).
 	g_SessionLockBorders = g_PaintCtx.Core->lockBordersOn();
-	// Preserve dirty OriginalBytes across re-init
-	std::string wbErr;
-	if (!g_PaintCtx.Core->writeBack(wbErr))
+	// Preserve dirty OriginalBytes across re-init. A topological op flushes paint itself
+	// and then MUTATES the carrier bytes, so its rebuild must not write back: the core's
+	// pristine still holds the pre-op state and would clobber the transformed blob.
+	if (!skipWriteBack)
 	{
-		err = "write-back before rebuild: " + wbErr;
-		return false;
+		std::string wbErr;
+		if (!g_PaintCtx.Core->writeBack(wbErr))
+		{
+			err = "write-back before rebuild: " + wbErr;
+			return false;
+		}
 	}
 	std::map<const void *, std::vector<uint8> > originals;
 	g_PaintCtx.Core->stashOriginalBytes(originals);
 
-	// Prop selection is session-local to the zone id set  - clear on working-set change.
+	// Prop selection is session-local to the zone id set - clear on working-set change.
 	zpClearPropSelection();
 
 	// Snapshot previous zone ids for landscape remove
@@ -958,7 +963,7 @@ bool scratchMaskConflictsSrc(const std::vector<bool> &cmask, int cfw, int cfh,
 			return true;
 		}
 	}
-	// Open files - ALL of them, first-opened included 
+	// Open files - ALL of them, first-opened included
 	for (size_t i = 0; i < g_EditableFiles.size(); ++i)
 	{
 		const SEditableFileInfo &ef = g_EditableFiles[i];
@@ -980,7 +985,7 @@ bool scratchMaskConflictsSrc(const std::vector<bool> &cmask, int cfw, int cfh,
 }
 
 /** Candidate order for duplicate-instance placement: ring (max-norm), then Manhattan
- *  within the ring so axis-aligned offsets come before the corner diagonals. */
+ * within the ring so axis-aligned offsets come before the corner diagonals. */
 struct SDupCandLess
 {
 	bool operator()(const std::pair<int, int> &a, const std::pair<int, int> &b) const
@@ -993,9 +998,9 @@ struct SDupCandLess
 };
 
 /** register an instance of an OPEN file at (or ring-spiraled near) (cx,cy) -
- *  duplicate selector opens resolve to shared-paint instances, never a second load of
- *  the same file (two carrier sets would diverge and fight over one save path).
- *  Pre-rebuild registration only: callers rebuild (or the initial assembly appends). */
+ * duplicate selector opens resolve to shared-paint instances, never a second load of
+ * the same file (two carrier sets would diverge and fight over one save path).
+ * Pre-rebuild registration only: callers rebuild (or the initial assembly appends). */
 bool placeDupInstanceNear(const std::string &srcName, int cx, int cy)
 {
 	SInstancePlace pl(cx, cy, 0, false);
@@ -1047,9 +1052,9 @@ bool scratchRebuild(std::string &err)
 }
 
 /** After a FAILED scratchRebuild, once the caller rolled its board mutation back:
- *  rebuild again so the session stays on live zones. A failed rebuild leaves the core
- *  referencing the CLEARED zones vector - without recovery the next frame's hover walk
- *  is a use-after-free (same rule as the open/close/toggle ops). */
+ * rebuild again so the session stays on live zones. A failed rebuild leaves the core
+ * referencing the CLEARED zones vector - without recovery the next frame's hover walk
+ * is a use-after-free (same rule as the open/close/toggle ops). */
 void scratchRecoveryRebuild(const char *op)
 {
 	std::string rerr;

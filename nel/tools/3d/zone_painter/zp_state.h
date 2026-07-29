@@ -750,6 +750,16 @@ void zpPatchNoSmoothClicked();
 void zpPatchBindClicked();
 void zpPatchUnbindClicked();
 
+// Topological ops (patch_topo_ops.cpp). Storage-rewriting; the working set rebuilds after.
+/** Delete the selected patches; paint travels with the survivors. Clears undo. */
+uint zpDeletePatchSelection();
+void zpPatchDeleteClicked();
+/** Displayed patch count of a zone (script/gate read access). */
+bool zpZonePatchCount(uint zoneId, uint &countOut);
+/** Layer-0 tile of one grid tile (script/gate read access; display transform applied). */
+bool zpTileQuery(uint zoneId, uint patchIdx, uint u, uint v, int &tileOut, int &rotOut,
+                 int &numOut);
+
 /** Left-click in patch/vertex mode; `buttons` carries the modifier bits (Ctrl add, Alt remove). */
 void zpPatchVertexClick(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, float my, uint buttons);
 extern std::string g_PropStatusMsg;
@@ -1069,7 +1079,9 @@ void placeContextRange(std::vector<SPaintZone> &zones, size_t rb, size_t re,
                        int dx, int dy, uint rot, bool mirror);
 void placeEcoEditableRange(std::vector<SPaintZone> &zones, SEditableFileInfo &efi,
                            size_t rb, size_t re, float cellSize, float snap);
-bool rebuildWorkingSet(std::string &err, uint &outWelds);
+/** skipWriteBack: the caller already flushed paint AND mutated carrier bytes since - the
+ * rebuild's own write-back would re-encode the stale pristine over the mutation. */
+bool rebuildWorkingSet(std::string &err, uint &outWelds, bool skipWriteBack = false);
 SEditableFileInfo *findEditableByBasename(const std::string &basename);
 const ZPWS::SZoneEntry *findWorldZone(const std::string &basename);
 bool sessionSaveOneFile(SEditableFileInfo &efi, std::string &err);

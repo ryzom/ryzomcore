@@ -833,6 +833,7 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 		paintBridge.patchBind = zpPatchBindClicked;
 		paintBridge.patchUnbind = zpPatchUnbindClicked;
 		paintBridge.patchNoSmooth = zpPatchNoSmoothClicked;
+		paintBridge.patchDelete = zpPatchDeleteClicked;
 		paintBridge.selectTileSetDelta = zpSelectTileSetDelta;
 		paintBridge.selectTileSetAbs = zpSelectTileSetAbs;
 		paintBridge.toggleTileSize = zpToggleTileSize;

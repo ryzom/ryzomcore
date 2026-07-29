@@ -124,11 +124,12 @@ struct SPaintUIBridge
 	void (*propToggleSymmetry)();
 	void (*propTogglePassable)();
 	void (*propToggleUseBBox)();
-	// Patch mode: bind / unbind / no-smooth (op surface lives in patch_edit_ops; the panel
-	// buttons, hotkeys and painterscript all alias these)
+	// Patch mode: bind / unbind / no-smooth / delete (op surface lives in patch_edit_ops /
+	// patch_topo_ops; the panel buttons, hotkeys and painterscript all alias these)
 	void (*patchBind)();
 	void (*patchUnbind)();
 	void (*patchNoSmooth)();
+	void (*patchDelete)();
 	// Painterscript absolute state setters (recorder-replay faithful; the frame-synced
 	// snapshot fields below are STALE mid-script, so scripts must not derive from them)
 	void (*setTileSize256)(bool on);
@@ -144,8 +145,8 @@ struct SPaintUIBridge
 	// (0 none flagged, 1 all flagged, 2 mixed or nothing selected).
 	uint PatchSelVerts, PatchSelEdges, PatchSelFaces, PatchSelTans;
 	int PatchNoSmooth;
-	int PivotMode;          // TPivotMode; what the transform gizmo is anchored on
-	char PivotLabel[16];    // short face for the toolbar button
+	int PivotMode; // TPivotMode; what the transform gizmo is anchored on
+	char PivotLabel[16]; // short face for the toolbar button
 	int CurTileSet;
 	uint TileSetCount;
 	char TileSetName[128];
@@ -210,7 +211,7 @@ struct SPaintUIBridge
 		  displaceIndexAbs(NULL), togglePalette(NULL), toggleBoard(NULL), setBrushColor(NULL),
 		  propRotateDelta(NULL), propToggleSymmetry(NULL), propTogglePassable(NULL),
 		  propToggleUseBBox(NULL),
-		  patchBind(NULL), patchUnbind(NULL), patchNoSmooth(NULL),
+		  patchBind(NULL), patchUnbind(NULL), patchNoSmooth(NULL), patchDelete(NULL),
 		  setTileSize256(NULL), setHardnessAbs(NULL), setOpacityAbs(NULL),
 		  setColorRadiusAbs(NULL),
 		  HaveCore(false), Mode(0), SubObj(0),

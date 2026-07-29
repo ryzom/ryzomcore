@@ -764,13 +764,15 @@
 		<!-- Selection readout (legacy right-aligned line; left here to match the column) -->
 		<view type="text" id="sel_info" posparent="lvl_vert" posref="BL TL" x="0" y="-4" fontsize="9" shadow="true"
 			global_color="false" color="200 200 210 220" hardtext="Object Level" />
-		<!-- Topology/Subdivision block: Bind / Unbind (vertex level) -->
+		<!-- Topology block: Bind / Unbind (vertex level), Delete (patch level; clears undo) -->
 		<view type="text" id="lbl_topo" posparent="sel_info" posref="BL TL" x="0" y="-6" fontsize="10" shadow="true"
-			global_color="false" color="255 220 140 255" hardtext="Binding" />
+			global_color="false" color="255 220 140 255" hardtext="Topology" />
 		<ctrl style="text_button_16" id="btn_bind" posparent="lbl_topo" posref="BL TL" x="0" y="-2"
 			onclick_l="zp_patch_bind" params_l="" hardtext="Bind" />
 		<ctrl style="text_button_16" id="btn_unbind" posparent="btn_bind" posref="MR ML" x="4" y="0"
 			onclick_l="zp_patch_unbind" params_l="" hardtext="Unbind" />
+		<ctrl style="text_button_16" id="btn_delete" posparent="btn_unbind" posref="MR ML" x="8" y="0"
+			onclick_l="zp_patch_delete" params_l="" hardtext="Delete" />
 		<!-- Edge properties: No smooth (tri-state shown via the (mixed) tag) -->
 		<instance template="zp_checkbox_row" id="no_smooth" posparent="btn_bind" posref="BL TL" x="0" y="-8"
 			label="No smooth" onclick="zp_patch_nosmooth" params="" />

@@ -279,7 +279,7 @@ REGISTER_ACTION_HANDLER(CAHZpPropUseBBox, "zp_prop_usebbox");
 
 // Patch rollout handlers
 /** Sub-object level button: toggle-off - clicking the pressed level returns to
- *  Object level. The level itself comes from the button's params. */
+ * Object level. The level itself comes from the button's params. */
 class CAHZpSubObject : public IActionHandler
 {
 public:
@@ -330,6 +330,18 @@ public:
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpPatchNoSmooth, "zp_patch_nosmooth");
+
+class CAHZpPatchDelete : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchDelete) b->patchDelete();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchDelete, "zp_patch_delete");
 
 class CAHZpTileSet : public IActionHandler
 {
@@ -2043,11 +2055,11 @@ void CEditorUI::syncPanelFromBridge()
 	// Mode-gated rollout VISIBILITY (not collapse).
 	// Non-applicable rollouts are fully hidden. Open/collapsed is remembered per
 	// rollout across mode switches (setActive does not touch isOpen).
-	//   Tile → Session+Tiles+Brush+Fill
-	//   Color → Session+Brush+Fill
-	//   Displace → Session+Displace+Brush+Fill
-	//   Prop → Session+Properties
-	//   Patch → Session+Patch
+	// Tile → Session+Tiles+Brush+Fill
+	// Color → Session+Brush+Fill
+	// Displace → Session+Displace+Brush+Fill
+	// Prop → Session+Properties
+	// Patch → Session+Patch
 	const bool tileActive = (b->Mode == 0);
 	const bool colorActive = (b->Mode == 1);
 	const bool displaceActive = (b->Mode == 2);
@@ -2338,11 +2350,13 @@ void CEditorUI::syncPanelFromBridge()
 				snprintf(buf, sizeof(buf), "Object Level");
 			t->setHardText(buf);
 		}
-		// Bind/Unbind live at vertex level, No smooth at edge level.
+		// Bind/Unbind live at vertex level, Delete at patch level, No smooth at edge level.
 		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_bind").c_str()))
 			btn->setFrozen(b->SubObj != 1 || !b->PatchSelVerts);
 		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_unbind").c_str()))
 			btn->setFrozen(b->SubObj != 1 || !b->PatchSelVerts);
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_delete").c_str()))
+			btn->setFrozen(b->SubObj != 3 || !b->PatchSelFaces);
 		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":no_smooth:box").c_str()))
 		{
 			btn->setFrozen(b->SubObj != 2 || !b->PatchSelEdges);
