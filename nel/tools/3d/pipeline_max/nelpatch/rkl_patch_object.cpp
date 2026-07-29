@@ -184,14 +184,35 @@ void CRklPatchObject::toStringLocal(std::ostream &ostream, const std::string &pa
 		{
 			// Containers: the summed sizes of their raw children (the selection bitarrays
 			// and caches are single-0x2700 wrappers, so this IS their payload size).
+			// Dev hook: PMAX_DUMP_CLAIMED_TREE=1 prints the children instead - the id ORDER
+			// inside the element containers is what an encoder must reproduce.
 			const CStorageContainer *cont = dynamic_cast<const CStorageContainer *>(it->second);
-			uint sum = 0;
-			if (cont)
+			const char *tree = getenv("PMAX_DUMP_CLAIMED_TREE");
+			if (cont && tree && *tree && *tree != '0')
+			{
+				ostream << "C:" << std::hex;
 				for (TStorageObjectContainer::const_iterator c = cont->chunks().begin();
 				     c != cont->chunks().end(); ++c)
+				{
+					if (c != cont->chunks().begin()) ostream << ".";
+					ostream << c->first;
 					if (const CStorageRaw *cr = dynamic_cast<const CStorageRaw *>(c->second))
-						sum += (uint)cr->Value.size();
-			ostream << "C" << sum;
+						ostream << ":" << std::dec << (uint)cr->Value.size() << std::hex;
+					else
+						ostream << ":C";
+				}
+				ostream << std::dec;
+			}
+			else
+			{
+				uint sum = 0;
+				if (cont)
+					for (TStorageObjectContainer::const_iterator c = cont->chunks().begin();
+					     c != cont->chunks().end(); ++c)
+						if (const CStorageRaw *cr = dynamic_cast<const CStorageRaw *>(c->second))
+							sum += (uint)cr->Value.size();
+				ostream << "C" << sum;
+			}
 		}
 		ostream << ")" << std::hex;
 	}
@@ -228,6 +249,11 @@ bool CRklPatchObject::setRPatch(const SRPatchMesh &in)
 		return true;
 	}
 	return false;
+}
+
+bool CRklPatchObject::setPatchMesh(const SPatchMesh &in, std::string &err)
+{
+	return encodePatchMesh(in, m_Claimed, err);
 }
 
 IStorageObject *CRklPatchObject::createChunkById(uint16 id, bool container)

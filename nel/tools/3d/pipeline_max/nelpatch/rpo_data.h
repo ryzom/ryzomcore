@@ -133,8 +133,10 @@ void encodeRpoChunk(const SRPatchMesh &in, std::vector<uint8> &out);
 // 0x1140). Layouts established against the ligo corpus (uniform across all 8482 instances) and
 // cross-validated against the reference .zone exports.
 
-/// PatchMesh vertex (container 0x0BE0)
-/// Max 3: only Pos+Flags are stored; adjacency tables are absent and stay empty.
+/// PatchMesh vertex (container 0x0BE0; child order 0x03E8, 0x03FC, 0x0406, 0x0410, 0x041A)
+/// Max 3: only Pos+Flags are stored; adjacency tables are absent and stay empty. The Has*
+/// flags record chunk PRESENCE - an absent counted chunk and a present count-0 chunk decode
+/// to the same empty vector, and the encoder must tell them apart.
 struct SPmVert
 {
 	float Pos[3];                 // 0x03E8
@@ -142,9 +144,13 @@ struct SPmVert
 	std::vector<sint32> Vectors;  // 0x0406, count-prefixed (optional, Max 4+)
 	std::vector<sint32> Patches;  // 0x0410, count-prefixed (optional, Max 4+)
 	std::vector<sint32> Edges;    // 0x041A, count-prefixed (optional, Max 4+)
+	uint8 HasVectors, HasPatches, HasEdges;
+	SPmVert() : Flags(0), HasVectors(0), HasPatches(0), HasEdges(0)
+	{ Pos[0] = Pos[1] = Pos[2] = 0.f; }
 };
 
-/// PatchMesh vector — tangent or interior handle (container 0x0BCC)
+/// PatchMesh vector — tangent or interior handle (container 0x0BCC; child order 0x03E8,
+/// 0x03FC, 0x0410, 0x0406 — owner BEFORE patch list, unlike the vertex container)
 /// Max 3: only Pos+Flags; Vert defaults to -1, Patches empty.
 struct SPmVec
 {
@@ -152,18 +158,24 @@ struct SPmVec
 	sint32 Flags;                 // 0x03FC
 	sint32 Vert;                  // 0x0410, owner vertex (optional, Max 4+; -1 if absent)
 	std::vector<sint32> Patches;  // 0x0406, count-prefixed (optional, Max 4+)
+	uint8 HasVert, HasPatches;
+	SPmVec() : Flags(0), Vert(-1), HasVert(0), HasPatches(0)
+	{ Pos[0] = Pos[1] = Pos[2] = 0.f; }
 };
 
-/// PatchMesh edge (container 0x0BD2)
+/// PatchMesh edge (container 0x0BD2; child order 0x03E8, 0x03F2)
 /// Max 3: the entire edge stream is absent; decodePatchMesh reconstructs edges from patch
 /// V/Vec rings so consumers (exportZone bind pass) see a modern-shaped table.
 struct SPmEdge
 {
 	sint32 V1, Vec12, Vec21, V2;  // 0x03E8 (16 bytes)
 	std::vector<sint32> Patches;  // 0x03F2, count-prefixed (optional; rebuilt on Max 3)
+	uint8 HasPatches;
+	SPmEdge() : V1(-1), Vec12(-1), Vec21(-1), V2(-1), HasPatches(0) { }
 };
 
-/// PatchMesh patch (container 0x0BF4)
+/// PatchMesh patch (container 0x0BF4; child order 0x0424, 0x03E8, 0x03F2, 0x03FC, 0x0406,
+/// 0x0410, 0x041A, 0x042E)
 /// Max 3: Type (0x0424) and Edge (0x042E) are absent — Type defaults to NumVerts; Edge is
 /// filled by edge reconstruction.
 struct SPmPatch
@@ -176,20 +188,86 @@ struct SPmPatch
 	sint32 SmGroup;    // 0x0410
 	sint32 Flags;      // 0x041A
 	sint32 Edge[4];    // 0x042E (optional Max 4+; reconstructed on Max 3)
+	uint8 HasType, HasEdgeIdx;
+	SPmPatch() : Type(0), NumVerts(0), SmGroup(0), Flags(0), HasType(0), HasEdgeIdx(0)
+	{
+		for (int i = 0; i < 4; ++i) { V[i] = -1; Interior[i] = -1; Edge[i] = -1; }
+		for (int i = 0; i < 8; ++i) Vec[i] = -1;
+	}
 };
 
-/// The decoded PatchMesh (geometry/topology; header and trailer chunks are not interpreted)
+/// One sub-object selection BitArray (containers 0x0C26 verts / 0x0C30 patches / 0x0C3A
+/// edges, each wrapping a single 0x2700 raw: int32 count + dword-padded bit words). Count
+/// equals the matching element count on the whole corpus.
+struct SPmBitArray
+{
+	uint8 Present;
+	sint32 Count;
+	std::vector<uint32> Bits; // ceil(Count/32) little-endian dwords
+	SPmBitArray() : Present(0), Count(0) { }
+};
+
+/// One HookPoint record (raw 0x0D52 is an array of these; raw 0x0D48 holds the count).
+struct SPmHook
+{
+	sint32 I[13];
+	SPmHook() { for (int i = 0; i < 13; ++i) I[i] = -1; }
+};
+
+/// One map-channel TVPatch (raw 0x0C80: int32 header then 16 ints per patch).
+struct SPmTvPatch
+{
+	sint32 Tv[16];
+	SPmTvPatch() { for (int i = 0; i < 16; ++i) Tv[i] = -1; }
+};
+
+/// One map-channel texture vertex (raw 0x0C8A: int32 header, int32 count, count UVW points).
+struct SPmTvVert
+{
+	float Pos[3];
+	SPmTvVert() { Pos[0] = Pos[1] = Pos[2] = 0.f; }
+};
+
+/// The decoded PatchMesh. Geometry/topology plus every REGENERATE-class side table the
+/// encoder owns (selection BitArrays, hooks, map channel); header/trailer chunks are not
+/// interpreted and stay untouched in the chunk list.
 struct SPatchMesh
 {
 	std::vector<SPmVert> Verts;    // count chunk 0x0BD6
 	std::vector<SPmVec> Vecs;      // count chunk 0x0BC2
 	std::vector<SPmEdge> Edges;    // count chunk 0x0BD1
 	std::vector<SPmPatch> Patches; // count chunk 0x0BEA
+	/// True when the edge table (and patch Edge[]) was RECONSTRUCTED from patch rings (Max 3
+	/// stream). A reconstructed mesh must never be encoded - the data is derived, not read.
+	uint8 EdgesReconstructed;
+	SPmBitArray VertSel;   // 0x0C26
+	SPmBitArray PatchSel;  // 0x0C30
+	SPmBitArray EdgeSel;   // 0x0C3A
+	uint8 HasHookCount;    // 0x0D48 present
+	uint8 HasHookArray;    // 0x0D52 present (observed present-with-count-0)
+	std::vector<SPmHook> Hooks;
+	uint8 HasTvPatches;    // 0x0C80 present (the mapped/KeepMapping subset)
+	sint32 TvPatchHeader;  // leading int32 of 0x0C80
+	std::vector<SPmTvPatch> TvPatches; // one per patch
+	uint8 HasTvVerts;      // 0x0C8A present
+	sint32 TvVertHeader;   // leading int32 of 0x0C8A
+	std::vector<SPmTvVert> TvVerts; // UVW points (count from the second int32)
+	SPatchMesh() : EdgesReconstructed(0), HasHookCount(0), HasHookArray(0),
+		HasTvPatches(0), TvPatchHeader(0), HasTvVerts(0), TvVertHeader(0) { }
 };
 
 /// Decode a PatchMesh from a chunk list (the claimed/orphaned chunks of an RklPatch scene
 /// object, or the children of a 0x1140 modifier chunk). Unrelated ids in the list are ignored.
 bool decodePatchMesh(const CStorageContainer::TStorageObjectContainer &chunks, SPatchMesh &out, std::string &err);
+
+/// Encode a PatchMesh back into a chunk list IN PLACE: the four element streams (count
+/// chunks + element containers, added or erased as counts changed), the three selection
+/// BitArrays, the hook chunks and the map-channel arrays are regenerated from `pm`; every
+/// other chunk in the list is left untouched. Chunk objects are reused where possible so
+/// per-chunk header-width flags survive; decode -> encode is the byte identity on every
+/// well-formed Max 4+ stream. Fails (false + err) on a reconstructed (Max 3) mesh and on
+/// presence mismatches the caller did not resolve.
+bool encodePatchMesh(const SPatchMesh &pm, CStorageContainer::TStorageObjectContainer &chunks, std::string &err);
 
 // ---------------------------------------------------------------------------------------------
 // NeL Edit Patch modifier per-node vertex mapper (chunk 0x1130 -> child 0x1000; see wiki Part

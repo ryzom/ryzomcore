@@ -1867,6 +1867,146 @@ static int rpoModifySaveTest(const char *maxFile, CStorageOleIn &in, CSceneClass
 	return fails ? 1 : 0;
 }
 
+// The whole-file NULL-EDIT proof for the PatchMesh chunk-stream encoder (Tier B): parse the
+// .max, decode every PatchMesh in the file (the base stream of every RklPatch and the OUTPUT
+// copy under every NeL Edit Patch / NeL Patch Painter modifier's 0x1140), write each straight
+// back through encodePatchMesh IN PLACE (element streams, selection BitArrays, hooks, map
+// channel; every other chunk untouched), rebuild the Scene stream, write the whole .max back
+// and require EVERY stream byte-identical — decode -> encode must be the identity before any
+// topological op is allowed to exist. Max 3 streams (reconstructed edge tables) are counted
+// and skipped: their edge data is derived at decode and must never be written back.
+static int pmModifySaveTest(const char *maxFile, CStorageOleIn &in, CSceneClassRegistry *reg, const std::string &tempMax, bool verbose)
+{
+	static const char *kStreams[] = {
+		"VideoPostQueue", "Config", "ClassData", "DllDirectory", "ClassDirectory3", "Scene",
+		"\05SummaryInformation", "\05DocumentSummaryInformation", NULL
+	};
+	std::vector<std::string> present;
+	std::vector<std::vector<uint8> > rawOrig;
+	for (const char **n = kStreams; *n; ++n)
+	{
+		std::vector<uint8> b;
+		if (in.readStream(*n, b)) { present.push_back(*n); rawOrig.push_back(b); }
+	}
+	uint8 classId[16];
+	bool haveClassId = in.getClassId(classId);
+
+	CDllDirectory dll;
+	CClassDirectory3 cd(&dll);
+	CScene scene(reg, &dll, &cd);
+	{
+		std::vector<uint8> b;
+		if (!in.readStream("DllDirectory", b)) { std::cout << "SKIP pm-modify-save: no DllDirectory\n"; return 0; }
+		CStorageStream ss(b); try { dll.serial(ss); dll.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "dll: " << e.what() << "\n"; return 1; }
+	}
+	{
+		std::vector<uint8> b;
+		if (!in.readStream("ClassDirectory3", b)) { std::cout << "SKIP pm-modify-save: no ClassDirectory3\n"; return 0; }
+		CStorageStream ss(b); try { cd.serial(ss); cd.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "cd: " << e.what() << "\n"; return 1; }
+	}
+	{
+		std::vector<uint8> b;
+		if (!in.readStream("Scene", b)) { std::cout << "SKIP pm-modify-save: no Scene\n"; return 0; }
+		CStorageStream ss(b); try { scene.serial(ss); scene.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "scene: " << e.what() << "\n"; return 1; }
+	}
+
+	static const NLMISC::CClassId nelEditPatchClassId(0x4dd14a3c, 0x4ac23c0c);
+	static const NLMISC::CClassId nelPatchPaintClassId(0x0c49560f, 0x3c3d68e7);
+	uint nBase = 0, nMod = 0, nMax3 = 0, fails = 0;
+	CSceneClassContainer *ssc = scene.container();
+	for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
+	{
+		if (NELPATCH::CRklPatchObject *rpo = dynamic_cast<NELPATCH::CRklPatchObject *>(it->second))
+		{
+			NELPATCH::SPatchMesh pm;
+			std::string err;
+			if (!rpo->decodePatch(pm, err))
+			{ std::cerr << "  pm-modify-save DECODE FAIL base (" << maxFile << "): " << err << "\n"; ++fails; continue; }
+			if (pm.EdgesReconstructed) { ++nMax3; continue; }
+			if (!rpo->setPatchMesh(pm, err))
+			{ std::cerr << "  pm-modify-save ENCODE FAIL base (" << maxFile << "): " << err << "\n"; ++fails; continue; }
+			++nBase;
+			continue;
+		}
+		BUILTIN::CDerivedObject *d = dynamic_cast<BUILTIN::CDerivedObject *>(it->second);
+		if (!d) continue;
+		for (uint i = 0; i < d->modifierCount(); ++i)
+		{
+			CSceneClass *mod = d->modifier(i);
+			const NLMISC::CClassId modClass = mod ? mod->classDesc()->classId() : NLMISC::CClassId::Null;
+			if (modClass != nelEditPatchClassId && modClass != nelPatchPaintClassId)
+				continue;
+			CStorageContainer *data = dynamic_cast<CStorageContainer *>(d->localModData(i));
+			if (!data) continue;
+			CStorageContainer *wrap = NULL;
+			for (CStorageContainer::TStorageObjectConstIt jt = data->chunks().begin(); jt != data->chunks().end() && !wrap; ++jt)
+				if (jt->first == 0x1000) wrap = dynamic_cast<CStorageContainer *>(jt->second);
+			if (!wrap) continue;
+			CStorageContainer *fp = NULL;
+			for (CStorageContainer::TStorageObjectConstIt jt = wrap->chunks().begin(); jt != wrap->chunks().end() && !fp; ++jt)
+				if (jt->first == 0x1140) fp = dynamic_cast<CStorageContainer *>(jt->second);
+			if (!fp) continue;
+			NELPATCH::SPatchMesh pm;
+			std::string err;
+			if (!NELPATCH::decodePatchMesh(fp->chunks(), pm, err))
+			{ std::cerr << "  pm-modify-save DECODE FAIL 0x1140 (" << maxFile << "): " << err << "\n"; ++fails; continue; }
+			if (pm.EdgesReconstructed) { ++nMax3; continue; }
+			if (!NELPATCH::encodePatchMesh(pm, fp->chunksMut(), err))
+			{ std::cerr << "  pm-modify-save ENCODE FAIL 0x1140 (" << maxFile << "): " << err << "\n"; ++fails; continue; }
+			++nMod;
+			if (verbose)
+				std::cerr << "  pm 0x1140 " << pm.Verts.size() << "v/" << pm.Patches.size()
+				          << "p under " << modClass.toString() << "\n";
+		}
+	}
+	if (!nBase && !nMod && !nMax3 && !fails)
+	{
+		std::cout << "OK pm-modify-save: no-pm\n";
+		return 0;
+	}
+	if (!nBase && !nMod && !fails)
+	{
+		// Max 3 only: nothing encodable in the file; skip rather than prove nothing.
+		std::cout << "OK pm-modify-save: max3-only, " << nMax3 << " skipped\n";
+		return 0;
+	}
+
+	try { scene.clean(); scene.build(VersionUnknown); scene.disown(); }
+	catch (std::exception &e) { std::cerr << "scene build: " << e.what() << "\n"; return 1; }
+	std::vector<uint8> newScene;
+	try { newScene = writeContainerToTemp(scene, g_tempPath); }
+	catch (std::exception &e) { std::cerr << "scene write: " << e.what() << "\n"; return 1; }
+
+	{
+		CStorageOleOut out;
+		for (size_t i = 0; i < present.size(); ++i)
+		{
+			if (present[i] == "Scene") out.addStream("Scene", newScene);
+			else out.addStream(present[i], rawOrig[i]);
+		}
+		if (haveClassId) out.setClassId(classId);
+		if (!out.write(tempMax)) { std::cerr << "cannot create " << tempMax << "\n"; return 1; }
+	}
+
+	CStorageOleIn in2;
+	if (!in2.open(tempMax)) { std::cerr << "cannot reopen rewritten .max\n"; return 1; }
+	for (size_t i = 0; i < present.size(); ++i)
+	{
+		std::vector<uint8> b2;
+		in2.readStream(present[i], b2);
+		if (b2 != rawOrig[i])
+		{
+			std::cerr << "  pm-modify-save stream " << (present[i][0] == '\05' ? present[i].substr(1) : present[i])
+			          << " NOT byte-identical (" << rawOrig[i].size() << " -> " << b2.size() << " bytes, " << maxFile << ")\n";
+			++fails;
+		}
+	}
+
+	std::cout << (fails ? "FAIL" : "OK") << " pm-modify-save: " << nBase << " base, " << nMod
+	          << " mod, " << nMax3 << " max3-skip, " << fails << " fail\n";
+	return fails ? 1 : 0;
+}
+
 // Recursive reference-tree dump (used by --uvgen-dump).
 static void dumpRefTree(CSceneClass *obj, int depth, int maxDepth)
 {
@@ -1933,6 +2073,7 @@ int main(int argc, char **argv)
 	bool doAppDataSelfTest = false;
 	bool doRpoSelfTest = false;
 	bool doRpoModifySave = false;
+	bool doPmModifySave = false;
 	bool doModifySave = false;
 	bool doAppDataModifySave = false;
 	bool doMtlDump = false;
@@ -1957,6 +2098,7 @@ int main(int argc, char **argv)
 		else if (a == "--appdata-selftest") doAppDataSelfTest = true;
 		else if (a == "--rpo-selftest") doRpoSelfTest = true;
 		else if (a == "--rpo-modify-save-test") doRpoModifySave = true;
+		else if (a == "--pm-modify-save-test") doPmModifySave = true;
 		else if (a == "--modify-save-test") doModifySave = true;
 		else if (a == "--appdata-modify-save-test") doAppDataModifySave = true;
 		else if (a == "--mtl-dump") doMtlDump = true;
@@ -1972,7 +2114,7 @@ int main(int argc, char **argv)
 	}
 	if (!maxFile)
 	{
-		std::cerr << "usage: pipeline_max_corpus_test [--parse] [--verbose] [--pb2-selftest] [--oldpb-selftest] [--shape-selftest] [--derived-selftest] [--meshdelta-selftest] [--mapext-selftest] [--mapchannel-selftest] [--prs-selftest] [--appdata-selftest] [--rpo-selftest] [--rpo-modify-save-test] [--modify-save-test] [--appdata-modify-save-test] <input.max>\n";
+		std::cerr << "usage: pipeline_max_corpus_test [--parse] [--verbose] [--pb2-selftest] [--oldpb-selftest] [--shape-selftest] [--derived-selftest] [--meshdelta-selftest] [--mapext-selftest] [--mapchannel-selftest] [--prs-selftest] [--appdata-selftest] [--rpo-selftest] [--rpo-modify-save-test] [--pm-modify-save-test] [--modify-save-test] [--appdata-modify-save-test] <input.max>\n";
 		return 2;
 	}
 
@@ -2060,6 +2202,15 @@ int main(int argc, char **argv)
 	{
 		std::string tempMax = "/tmp/pipeline_max_rpo_modify_save." + NLMISC::toString((sint32)PMCT_GETPID()) + ".max";
 		int rc = rpoModifySaveTest(maxFile, in, &reg, tempMax, verbose);
+		remove(tempMax.c_str());
+		remove(g_tempPath.c_str());
+		return rc;
+	}
+
+	if (doPmModifySave)
+	{
+		std::string tempMax = "/tmp/pipeline_max_pm_modify_save." + NLMISC::toString((sint32)PMCT_GETPID()) + ".max";
+		int rc = pmModifySaveTest(maxFile, in, &reg, tempMax, verbose);
 		remove(tempMax.c_str());
 		remove(g_tempPath.c_str());
 		return rc;

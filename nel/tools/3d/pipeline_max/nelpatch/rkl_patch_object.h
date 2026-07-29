@@ -92,6 +92,10 @@ public:
 	/// Returns false when the object has no 0x08FD chunk. Decode-encode is byte-identity, so
 	/// writing back an unmodified decode leaves the file byte-exact.
 	bool setRPatch(const SRPatchMesh &in);
+	/// Rewrite the PatchMesh stream chunks in place from `in` (element streams, selection
+	/// BitArrays, hooks, map channel; every other claimed chunk untouched - the cached Mesh
+	/// stream stays verbatim by policy). Decode-encode is byte-identity on Max 4+ streams.
+	bool setPatchMesh(const SPatchMesh &in, std::string &err);
 
 protected:
 	// inherited

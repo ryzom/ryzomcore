@@ -163,6 +163,9 @@ public:
 public:
 	// read access
 	inline const TStorageObjectContainer &chunks() const { return m_Chunks; }
+	// write access (authoring direction: chunk-level editors like encodePatchMesh rewrite
+	// payloads and insert/erase elements in place; the container keeps ownership)
+	inline TStorageObjectContainer &chunksMut() { return m_Chunks; }
 	IStorageObject *findStorageObject(uint16 id, uint nb = 0) const; // find storage object with given id, nb count in case there are more
 	IStorageObject *findLastStorageObject(uint16 id) const;
 
