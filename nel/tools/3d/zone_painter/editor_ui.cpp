@@ -358,6 +358,18 @@ public:
 };
 REGISTER_ACTION_HANDLER(CAHZpPatchTurn, "zp_patch_turn");
 
+class CAHZpPatchSubdivide : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchSubdivide) b->patchSubdivide();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchSubdivide, "zp_patch_subdivide");
+
 class CAHZpTileSet : public IActionHandler
 {
 public:
@@ -2389,6 +2401,8 @@ void CEditorUI::syncPanelFromBridge()
 		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_turn_ccw").c_str()))
 			btn->setFrozen(b->SubObj != 3 || !b->PatchSelFaces);
 		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_turn_cw").c_str()))
+			btn->setFrozen(b->SubObj != 3 || !b->PatchSelFaces);
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_subdivide").c_str()))
 			btn->setFrozen(b->SubObj != 3 || !b->PatchSelFaces);
 		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":no_smooth:box").c_str()))
 		{

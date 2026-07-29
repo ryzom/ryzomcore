@@ -777,6 +777,8 @@
 			onclick_l="zp_patch_turn" params_l="ccw" hardtext="Turn CCW" />
 		<ctrl style="text_button_16" id="btn_turn_cw" posparent="btn_turn_ccw" posref="MR ML" x="4" y="0"
 			onclick_l="zp_patch_turn" params_l="cw" hardtext="Turn CW" />
+		<ctrl style="text_button_16" id="btn_subdivide" posparent="btn_turn_cw" posref="MR ML" x="8" y="0"
+			onclick_l="zp_patch_subdivide" params_l="" hardtext="Subdiv" />
 		<!-- Edge properties: No smooth (tri-state shown via the (mixed) tag) -->
 		<instance template="zp_checkbox_row" id="no_smooth" posparent="btn_turn_ccw" posref="BL TL" x="0" y="-8"
 			label="No smooth" onclick="zp_patch_nosmooth" params="" />

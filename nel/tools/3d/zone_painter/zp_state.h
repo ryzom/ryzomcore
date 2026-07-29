@@ -758,6 +758,9 @@ void zpPatchDeleteClicked();
 uint zpTurnPatchSelection(bool ccw);
 void zpPatchTurnCcwClicked();
 void zpPatchTurnCwClicked();
+/** Subdivide selected quads 4-way; paint quadrants inherit; T-junction binds. Undoable. */
+uint zpSubdividePatchSelection();
+void zpPatchSubdivideClicked();
 /** Displayed patch count of a zone (script/gate read access). */
 bool zpZonePatchCount(uint zoneId, uint &countOut);
 /** Layer-0 tile of one grid tile (script/gate read access; display transform applied). */

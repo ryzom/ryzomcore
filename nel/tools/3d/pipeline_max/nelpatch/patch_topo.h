@@ -108,6 +108,34 @@ bool topoDeletePatches(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
 bool topoTurnPatches(SPatchMesh &pm, SRPatchMesh &rp,
                      const std::set<uint> &patches, bool ccw, std::string &err);
 
+/**
+ * Subdivide the listed quad patches into four children each (patch_topo_subdiv.cpp).
+ *
+ * Geometry is the exact bicubic split: de Casteljau at 0.5 in both directions (long-double
+ * midpoint cascades, the house x87 style), so the surface is unchanged. Children keep the
+ * PARENT'S ring orientation - each child's ring starts at its sub-domain's origin corner -
+ * so the painted tile grid copies by plain quadrant translation, no rotation: child
+ * NbTiles are the parent's minus one, tiles and colors copy verbatim from their quadrant
+ * (the color midlines duplicate into both children), and outer edge flags follow their
+ * parent edge. This is the paint-inheritance headline: subdividing a painted patch keeps
+ * its painted appearance exactly.
+ *
+ * Edges: a split edge reuses its record for the first half (midpoint replaces V2) and its
+ * tangent slots for the outer controls, so vec owners never change; the inner half and the
+ * four centre cross edges are new records. An edge shared with an UNSELECTED patch is NOT
+ * split: the neighbor keeps the whole original edge, the children ride two new half edges,
+ * and the midpoint vertex binds BIND_SINGLE onto the neighbor's edge - the canonical NeL
+ * T-junction, exactly the shape the corpus authored (and the midpoint IS the bindWhere
+ * 0.5 point by construction, so the bind refresh moves nothing).
+ *
+ * Refuses: reconstructed (Max 3) streams, hook tables, map-channel meshes (TVPatch
+ * assignment for children needs a design pass), patches with a tile order of 1 (halving
+ * needs NbTiles >= 1 on both axes), patches whose corners are bound, and patches whose
+ * edges are bind targets (splitting a T-junction target breaks the junction).
+ */
+bool topoSubdividePatches(SPatchMesh &pm, SRPatchMesh &rp,
+                          const std::set<uint> &patches, std::string &err);
+
 } /* namespace NELPATCH */
 } /* namespace MAX */
 } /* namespace PIPELINE */

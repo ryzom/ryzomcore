@@ -92,6 +92,7 @@ bool zpVertexBindQuery(uint zoneId, uint vertIdx, int &bindedOut, int &typeOut,
 bool zpPatchEdgeCornerPair(uint zoneId, uint patchIdx, uint edgeSlot, uint &aOut, uint &bOut);
 uint zpDeletePatchSelection();
 uint zpTurnPatchSelection(bool ccw);
+uint zpSubdividePatchSelection();
 bool zpZonePatchCount(uint zoneId, uint &countOut);
 bool zpTileQuery(uint zoneId, uint patchIdx, uint u, uint v, int &tileOut, int &rotOut,
                  int &numOut);
@@ -1083,6 +1084,26 @@ static int lTurnPatchSelection(CLuaState &ls) // (ccw bool)
 	return 1;
 }
 
+static int lRawTile(CLuaState &ls) // (zone, patch, u, v, tile [, rot]) raw record, no solver
+{
+	double z, pch, u, v, t, r = 0;
+	if (!argNumber(ls, 1, z) || !argNumber(ls, 2, pch) || !argNumber(ls, 3, u)
+	    || !argNumber(ls, 4, v) || !argNumber(ls, 5, t))
+		return retErr(ls, "usage: rawTile(zone, patch, u, v, tile [, rot])");
+	argNumber(ls, 6, r);
+	return execOpRet(ls, toString("rawtile %u %u %u %u %d %u",
+		(uint)z, (uint)pch, (uint)u, (uint)v, (int)t, (uint)r));
+}
+
+static int lSubdividePatchSelection(CLuaState &ls)
+{
+	const uint n = zpSubdividePatchSelection();
+	printf("subdividePatchSelection: %u subdivided\n", n);
+	fflush(stdout);
+	ls.push((double)n);
+	return 1;
+}
+
 static int lPatchCount(CLuaState &ls) // (zone) -> displayed patch count
 {
 	double z;
@@ -1321,6 +1342,8 @@ static const char *kBootstrap =
 	"  vertexBindInfo = __zp_vertexBindInfo, patchEdgeVerts = __zp_patchEdgeVerts,\n"
 	"  deletePatchSelection = __zp_deletePatchSelection,\n"
 	"  turnPatchSelection = __zp_turnPatchSelection,\n"
+	"  subdividePatchSelection = __zp_subdividePatchSelection,\n"
+	"  rawTile = __zp_rawTile,\n"
 	"  patchCount = __zp_patchCount, tileAt = __zp_tileAt,\n"
 	"  setTileSet = __zp_setTileSet, getTileSet = __zp_getTileSet,\n"
 	"  setDisplaceIndex = __zp_setDisplaceIndex, setBrushColor = __zp_setBrushColor,\n"
@@ -1414,6 +1437,8 @@ bool ensureLua()
 	ls->registerFunc("__zp_patchEdgeVerts", lPatchEdgeVerts);
 	ls->registerFunc("__zp_deletePatchSelection", lDeletePatchSelection);
 	ls->registerFunc("__zp_turnPatchSelection", lTurnPatchSelection);
+	ls->registerFunc("__zp_subdividePatchSelection", lSubdividePatchSelection);
+	ls->registerFunc("__zp_rawTile", lRawTile);
 	ls->registerFunc("__zp_patchCount", lPatchCount);
 	ls->registerFunc("__zp_tileAt", lTileAt);
 	ls->registerFunc("__zp_getSubObject", lGetSubObject);

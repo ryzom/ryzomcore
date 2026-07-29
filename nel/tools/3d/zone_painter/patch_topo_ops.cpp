@@ -449,6 +449,14 @@ static bool zpXformTurnCw(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper * /* ma
 	return topoTurnPatches(pm, rp, sel, false, err);
 }
 
+static bool zpXformSubdivide(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper * /* mapper */,
+                             const std::set<uint> &sel, std::string &err)
+{
+	// The mapper needs NO rewrite for a pure addition: input-indexed record slots keep,
+	// surviving outputs keep their indices, added outputs stay unmapped.
+	return topoSubdividePatches(pm, rp, sel, err);
+}
+
 /**
  * Delete the selected patches. Paint and bind records travel with the survivors
  * (topoDeletePatches); everything else is the shared topo-op skeleton.
@@ -469,6 +477,16 @@ uint zpTurnPatchSelection(bool ccw)
 	                   ccw ? "painter.turnPatchSelection(true)"
 	                       : "painter.turnPatchSelection(false)",
 	                   ccw ? zpXformTurnCcw : zpXformTurnCw);
+}
+
+/**
+ * Subdivide the selected quad patches into four children each. Exact bicubic split, the
+ * painted quadrants inherit verbatim (halved tile orders), and midpoints on edges shared
+ * with unselected neighbors become canonical T-junction binds.
+ */
+uint zpSubdividePatchSelection()
+{
+	return zpRunTopoOp("subdivide", "painter.subdividePatchSelection()", zpXformSubdivide);
 }
 
 /**
@@ -505,6 +523,7 @@ void zpTopoRestore(const ZPPAINT::STopoSnapshot &snap, bool useOld)
 void zpPatchDeleteClicked() { zpDeletePatchSelection(); }
 void zpPatchTurnCcwClicked() { zpTurnPatchSelection(true); }
 void zpPatchTurnCwClicked() { zpTurnPatchSelection(false); }
+void zpPatchSubdivideClicked() { zpSubdividePatchSelection(); }
 
 /** Script/gate read access: the displayed patch count of a zone. */
 bool zpZonePatchCount(uint zoneId, uint &countOut)
