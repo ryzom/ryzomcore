@@ -31,6 +31,7 @@
 
 #include <nel/misc/types_nl.h>
 #include "paint_core.h"
+#include "patch_topo_snapshot.h"
 
 #include <nel/misc/file.h>
 #include <nel/misc/path.h>
@@ -670,7 +671,9 @@ void CPaintCore::applyUndoList(const std::vector<SUndoTile> &list, bool useOld)
 	{
 		for (int i = (int)list.size() - 1; i >= 0; --i)
 		{
-			if (list[i].Kind == 5)
+			if (list[i].Kind == 6)
+				applyTopoUndo(list[i], true);
+			else if (list[i].Kind == 5)
 				applyEdgeFlagUndo(list[i], true);
 			else if (list[i].Kind == 4)
 				applyBindUndo(list[i], true);
@@ -703,7 +706,9 @@ void CPaintCore::applyUndoList(const std::vector<SUndoTile> &list, bool useOld)
 	{
 		for (size_t i = 0; i < list.size(); ++i)
 		{
-			if (list[i].Kind == 5)
+			if (list[i].Kind == 6)
+				applyTopoUndo(list[i], false);
+			else if (list[i].Kind == 5)
 				applyEdgeFlagUndo(list[i], false);
 			else if (list[i].Kind == 4)
 				applyBindUndo(list[i], false);
@@ -1057,6 +1062,43 @@ bool CPaintCore::getPatchEdgeFlags(uint zoneId, uint16 patch, uint32 outFlags[4]
 	for (int e = 0; e < 4; ++e)
 		outFlags[e] = rp->Patches[patch].EdgeFlags[e];
 	return true;
+}
+
+/** Undo/redo of a Kind 6 record: hand the snapshot to the restore callback (which
+ *  re-encodes the matching side into storage) and flag the pending working-set rebuild -
+ *  replaying inside the core cannot rebuild the session that owns the core. */
+void CPaintCore::applyTopoUndo(const SUndoTile &rec, bool useOld)
+{
+	if (!m_TopoRestoreCb || rec.TileId < 0 || (size_t)rec.TileId >= m_TopoSnaps.size())
+		return;
+	m_TopoRestoreCb(*m_TopoSnaps[rec.TileId], useOld);
+	m_TopoRestorePending = true;
+	markGeomDirty(rec.Zone);
+}
+
+void CPaintCore::clearTopoSnaps()
+{
+	for (size_t i = 0; i < m_TopoSnaps.size(); ++i)
+		delete m_TopoSnaps[i];
+	m_TopoSnaps.clear();
+	m_TopoRestorePending = false;
+}
+
+void CPaintCore::opTopoStroke(const std::vector<STopoSnapshot *> &snaps)
+{
+	if (snaps.empty())
+		return;
+	endStroke();
+	for (size_t i = 0; i < snaps.size(); ++i)
+	{
+		SUndoTile rec;
+		rec.Kind = 6;
+		rec.Zone = snaps[i]->Zone;
+		rec.TileId = (sint32)m_TopoSnaps.size();
+		m_TopoSnaps.push_back(snaps[i]);
+		m_CurStroke.push_back(rec);
+	}
+	endStroke();
 }
 
 /** Undo/redo of a Kind 4 record: put back the stored bind record verbatim. */

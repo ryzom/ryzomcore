@@ -112,6 +112,8 @@ struct SRpoTile;
 
 namespace ZPPAINT {
 
+struct STopoSnapshot; // patch_topo_snapshot.h (kept out of this header: pipeline types)
+
 // Plugin grid constants (nel_patch_mesh.h): the metaTile grid is a fixed 16x16 per patch, only
 // OrderS x OrderT entries used; tile id = patch*NUM_TILE_SEL + v*MAX_TILE_IN_PATCH + u.
 #define ZP_MAX_TILE_IN_PATCH 16
@@ -357,11 +359,13 @@ struct SGeomElemRef
 // Kind 2: raw AppData restore so delete-vs-"0"/presence semantics reapply exactly.
 // Kind 4: one vertex BIND record (whole on-disk record verbatim, so undo of an unbind puts
 // back the original bind caches byte for byte). Kind 5: one patch-edge FLAG word (reuses
-// Patch + S for the edge slot and OldColor/NewColor for the flag values).
+// Patch + S for the edge slot and OldColor/NewColor for the flag values). Kind 6: one
+// TOPOLOGY snapshot (TileId = index into the core's snapshot registry; restore goes through
+// the topo-restore callback and the caller rebuilds the working set).
 struct SUndoTile
 {
 	uint8 Kind; // 0 = tile record, 1 = color vertex, 2 = export prop appdata, 3 = vertex move,
-	            // 4 = vertex bind record, 5 = patch-edge flags
+	            // 4 = vertex bind record, 5 = patch-edge flags, 6 = topology snapshot
 	uint Zone;
 	sint32 TileId; // tile kind
 	CTileDescP Old;
@@ -470,8 +474,14 @@ public:
 
 	// Resolve carriers, decode pristine blobs, build the metaTile graph and the per-zone
 	// CZoneSymmetrisation (rpo2nel forceBuildZoneSymmetry replication with cellSize/snap).
+	// keepUndo: preserve the undo/redo stacks across the re-init - the TOPOLOGY rebuild
+	// path only. Session working-set changes (open/close) must keep clearing them: their
+	// records reference zones that may no longer exist. A topology rebuild keeps the same
+	// zone set, and the Kind 6 record at the top of the stack restores the older records'
+	// index space before they replay.
 	bool init(const std::vector<SPaintZoneInput> &zones, NL3D::CTileBank *bank,
-	          float cellSize, float snap, bool lockBorders, std::string &err);
+	          float cellSize, float snap, bool lockBorders, std::string &err,
+	          bool keepUndo = false);
 
 	// Live display mirror (viewer only; NULL = headless).
 	void attachLandscape(NL3D::CLandscape *landscape) { m_Landscape = landscape; }
@@ -629,6 +639,19 @@ public:
 	                 uint32 &patch, uint32 &primVert) const;
 	/** Read a pristine patch's four edge-flag words. */
 	bool getPatchEdgeFlags(uint zoneId, uint16 patch, uint32 outFlags[4]) const;
+	/**
+	 * Push one TOPOLOGY stroke (Kind 6): raw pre/post snapshots of every stream the op
+	 * mutated, one record per snapshot. Takes ownership of the pointers (freed with the
+	 * core, or when a non-keepUndo init clears history). Undo/redo hand each snapshot to
+	 * the restore callback, which re-encodes the matching side into storage; the CALLER of
+	 * opUndo/opRedo then checks topoRestorePending() and rebuilds the working set - the
+	 * core cannot rebuild the session from inside its own undo replay.
+	 */
+	void opTopoStroke(const std::vector<STopoSnapshot *> &snaps);
+	void setTopoRestoreCb(void (*cb)(const STopoSnapshot &snap, bool useOld))
+	{ m_TopoRestoreCb = cb; }
+	bool topoRestorePending() const { return m_TopoRestorePending; }
+	void clearTopoRestorePending() { m_TopoRestorePending = false; }
 	/**
 	 * Notified after bind records or edge flags change (forward op, undo or redo), once per
 	 * op with the zone id the op addressed. The display re-derives everything downstream
@@ -852,9 +875,17 @@ private:
 	void applyGeomUndo(const SUndoTile &rec, bool useOld);
 	void applyBindUndo(const SUndoTile &rec, bool useOld);
 	void applyEdgeFlagUndo(const SUndoTile &rec, bool useOld);
+	void applyTopoUndo(const SUndoTile &rec, bool useOld);
 	std::set<uint> m_GeomDirty; // zone ids with an uncommitted geometry write
 	void (*m_GeomChangedCb)(uint zoneId, uint16 elemIdx, int elem, const float *objDelta);
 	void (*m_RpStateChangedCb)(uint zoneId);
+	// Topology snapshots (Kind 6 payloads). The registry owns them for the session: a
+	// bounded-undo eviction may strand one (freed with the registry), which is bounded
+	// and simpler than refcounting strokes across two deques.
+	std::vector<STopoSnapshot *> m_TopoSnaps;
+	void (*m_TopoRestoreCb)(const STopoSnapshot &snap, bool useOld);
+	bool m_TopoRestorePending;
+	void clearTopoSnaps();
 };
 
 } /* namespace ZPPAINT */

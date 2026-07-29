@@ -605,6 +605,34 @@ CStorageRaw *rawSubMut(CStorageContainer *c, uint16 id)
 	return NULL;
 }
 
+/// Stamp the header width of every unknown-width chunk under `obj` (recursively). New
+/// chunks have no read width of their own; without this the writer falls back to a 32-bit
+/// default inside a 64-bit stream and every later byte shifts. The width comes from a
+/// surviving sibling of the same run - element streams are width-uniform in practice.
+void applyChunkWidth(IStorageObject *obj, bool w64)
+{
+	if (!obj->wasRead64BitChunkKnown())
+		obj->setWas64BitChunk(w64);
+	if (CStorageContainer *c = dynamic_cast<CStorageContainer *>(obj))
+		for (CStorageContainer::TStorageObjectConstIt it = c->chunks().begin(); it != c->chunks().end(); ++it)
+			applyChunkWidth(it->second, w64);
+}
+
+/// The read header width of `obj`, or of its first known-width descendant.
+bool findChunkWidth(const IStorageObject *obj, bool &w64Out)
+{
+	if (obj->wasRead64BitChunkKnown())
+	{
+		w64Out = obj->wasRead64BitChunk();
+		return true;
+	}
+	if (const CStorageContainer *c = dynamic_cast<const CStorageContainer *>(obj))
+		for (CStorageContainer::TStorageObjectConstIt it = c->chunks().begin(); it != c->chunks().end(); ++it)
+			if (findChunkWidth(it->second, w64Out))
+				return true;
+	return false;
+}
+
 /// Rewrite one child raw of an element container: payload replaced when present, chunk
 /// APPENDED when `want` but absent, ERASED when !want but present. Order on append is the
 /// caller's responsibility (canonical child order = the order these helpers are called in,
@@ -632,6 +660,10 @@ bool putElemChild(CStorageContainer *c, uint16 id, bool want, const std::vector<
 		return true;
 	CStorageRaw *raw = new CStorageRaw();
 	raw->Value = payload;
+	// Appended into an EXISTING container: inherit a sibling child's header width.
+	bool w64;
+	if (findChunkWidth(c, w64))
+		raw->setWas64BitChunk(w64);
 	list.push_back(CStorageContainer::TStorageObjectWithId(id, raw));
 	return true;
 }
@@ -752,6 +784,13 @@ bool encodeElemStream(CStorageContainer::TStorageObjectContainer &chunks,
 	// Append new elements after the last kept one (or right after the count chunk).
 	if (i < elems.size())
 	{
+		// Fresh chunks inherit a surviving sibling's header width (or the count chunk's) -
+		// a new 32-bit-defaulted chunk inside a 64-bit stream would shift every later byte.
+		bool w64 = false, haveW = false;
+		for (size_t k = 0; k < found.size() && !haveW; ++k)
+			haveW = findChunkWidth(found[k]->second, w64);
+		if (!haveW && countIt != chunks.end())
+			haveW = findChunkWidth(countIt->second, w64);
 		TList::iterator insertAfter = i ? found[i - 1] : countIt;
 		TList::iterator insertPos = insertAfter;
 		++insertPos;
@@ -759,6 +798,8 @@ bool encodeElemStream(CStorageContainer::TStorageObjectContainer &chunks,
 		{
 			CStorageContainer *c = new CStorageContainer();
 			if (!writer(c, elems[i], err)) { delete c; return false; }
+			if (haveW)
+				applyChunkWidth(c, w64);
 			insertPos = chunks.insert(insertPos, CStorageContainer::TStorageObjectWithId(elemId, c));
 			++insertPos;
 		}

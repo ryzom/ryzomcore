@@ -235,8 +235,10 @@ bool zpExecScriptOp(ZPPAINT::CPaintCore &core, const std::string &rawLine,
 			NLMISC::fromString(tok[4], v);
 			ok = core.opClear(zone, patch, u, v, tok[0] == "clear256", err);
 		}
-		else if (tok[0] == "undo") { ok = core.opUndo(); if (!ok) err = "undo stack empty"; }
-		else if (tok[0] == "redo") { ok = core.opRedo(); if (!ok) err = "redo stack empty"; }
+		// Undo/redo may replay a TOPOLOGY record, which restores storage and needs the
+		// working-set rebuild the core cannot run itself - same handling as the U/I keys.
+		else if (tok[0] == "undo") { ok = core.opUndo(); if (!ok) err = "undo stack empty"; else zpHandleTopoRestorePending(); }
+		else if (tok[0] == "redo") { ok = core.opRedo(); if (!ok) err = "redo stack empty"; else zpHandleTopoRestorePending(); }
 		else if (tok[0] == "prop" && tok.size() >= 4)
 		{
 			// prop <zone> <rotate|symmetry|passable|usebbox> <value>
@@ -1568,10 +1570,40 @@ void zpToggleLockBorders()
 	ZPSCRIPT::record(on ? "painter.setLockBorders(true)" : "painter.setLockBorders(false)");
 }
 
+/**
+ * A replayed TOPOLOGY record (Kind 6) restored storage from inside the core, which cannot
+ * rebuild the session that owns it. Rebuild here, once per undo/redo, with the same two
+ * flags the op used: the pristine is stale relative to the restored storage (skip the
+ * write-back that would clobber it) and the stacks must survive the re-init.
+ *
+ * Every undo/redo surface funnels here: the U/I keys via zpUndo/zpRedo, the painterscript
+ * `undo`/`redo` op lines via the executor. Headless paint-script runs never set the flag
+ * (topological ops need a live session), so the guard is cheap there.
+ */
+void zpHandleTopoRestorePending()
+{
+	if (!g_PaintCtx.Core || !g_PaintCtx.Core->topoRestorePending())
+		return;
+	g_PaintCtx.Core->clearTopoRestorePending();
+	// Stale sub-object selections died with the restored topology.
+	g_PatchVertSel.clear();
+	g_PatchEdgeSel.clear();
+	g_PatchFaceSel.clear();
+	g_PatchTanSel.clear();
+	zpPatchGizmoInvalidate();
+	std::string err;
+	uint welds = 0;
+	if (!rebuildWorkingSet(err, welds, /* skipWriteBack= */ true, /* keepUndo= */ true))
+		g_PropStatusMsg = "undo: session rebuild failed: " + err;
+	else
+		g_PropStatusMsg = "topology restored";
+}
+
 void zpUndo()
 {
 	if (!g_PaintCtx.Active || !g_PaintCtx.Core) return;
 	g_PaintCtx.Core->opUndo();
+	zpHandleTopoRestorePending();
 	ZPSCRIPT::record("painter.undo()");
 }
 
@@ -1579,6 +1611,7 @@ void zpRedo()
 {
 	if (!g_PaintCtx.Active || !g_PaintCtx.Core) return;
 	g_PaintCtx.Core->opRedo();
+	zpHandleTopoRestorePending();
 	ZPSCRIPT::record("painter.redo()");
 }
 

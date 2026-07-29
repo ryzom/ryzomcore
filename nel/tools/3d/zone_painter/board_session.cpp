@@ -625,7 +625,7 @@ void placeEcoEditableRange(std::vector<SPaintZone> &zones, SEditableFileInfo &ef
 	efi.Mask = mask;
 }
 
-bool rebuildWorkingSet(std::string &err, uint &outWelds, bool skipWriteBack)
+bool rebuildWorkingSet(std::string &err, uint &outWelds, bool skipWriteBack, bool keepUndo)
 {
 	outWelds = 0;
 	if (!g_PaintCtx.Active || !g_PaintCtx.Core || !g_PaintCtx.Zones || !g_PaintCtx.Land
@@ -798,15 +798,15 @@ bool rebuildWorkingSet(std::string &err, uint &outWelds, bool skipWriteBack)
 	buildPaintInputs(zones, inputs);
 	std::string initErr;
 	if (!g_PaintCtx.Core->init(inputs, g_SessionBank, g_SessionCellSize, g_SessionSnap,
-	                           g_SessionLockBorders, initErr))
+	                           g_SessionLockBorders, initErr, keepUndo))
 	{
 		err = "paint core re-init: " + initErr;
 		return false;
 	}
 	g_PaintCtx.Core->restoreOriginalBytes(originals);
 	g_PaintCtx.Core->attachLandscape(&g_PaintCtx.Land->Landscape);
-	printf("session rebuild: undo cleared; retained dirty flags restored (%u carriers stashed)\n",
-	       (uint)originals.size());
+	printf("session rebuild: undo %s; retained dirty flags restored (%u carriers stashed)\n",
+	       keepUndo ? "kept (topology rebuild)" : "cleared", (uint)originals.size());
 	return true;
 }
 

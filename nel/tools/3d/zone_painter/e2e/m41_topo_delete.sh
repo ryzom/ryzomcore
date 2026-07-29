@@ -3,21 +3,25 @@
 # SURVIVAL as the acceptance bar (the headline goal: the legacy editor destroyed painted
 # tiles on any topological edit; ours must keep them wherever the surface survived).
 #
-# 1. BASE-stream target (zonematerial-bassin-1, no modifier stack): paint a tile on patch
-# 5, delete patch 0. The count drops by one and the SAME tile record reads back at
-# patch index 4 - the paint traveled with its surviving patch through the index shift -
-# both in-session (across the working-set rebuild) and after save + reopen.
-# 2. MODIFIER-stream target with a vertex mapper (material-bassin): delete the LAST patch.
-# The eval position of vertex 0 must not move by a single bit (the mapper's
-# input-indexed records survived the output remap), and the file reopens at the new
-# count - the whole eval chain (0x1140 + 0x1130 + 0x4001) parses the mutated streams.
-# 3. Bind interaction (zonematerial-bassin-ilot_croix): patch 229 is the bind TARGET of
-# two BIND_SINGLE records (vertices 445 and 496). Deleting it releases exactly those
-# two (94 -> 92 bound), persisted across reopen.
-# 4. A topological op clears the undo history (working-set rebuild semantics): undo after
-# delete is a no-op, the new topology stays.
-# 5. The saved topology-edited file passes the encoder's own whole-file identity proof
-# (--pm-modify-save-test): our output is well-formed input.
+#  1. BASE-stream target (zonematerial-bassin-1, no modifier stack): paint a tile on patch
+#     5, delete patch 0. The count drops by one and the SAME tile record reads back at
+#     patch index 4 - the paint traveled with its surviving patch through the index shift -
+#     both in-session (across the working-set rebuild) and after save + reopen.
+#  2. MODIFIER-stream target with a vertex mapper (material-bassin): delete the LAST patch.
+#     The eval position of vertex 0 must not move by a single bit (the mapper's
+#     input-indexed records survived the output remap), and the file reopens at the new
+#     count - the whole eval chain (0x1140 + 0x1130 + 0x4001) parses the mutated streams.
+#  3. Bind interaction (zonematerial-bassin-ilot_croix): patch 229 is the bind TARGET of
+#     two BIND_SINGLE records (vertices 445 and 496). Deleting it releases exactly those
+#     two (94 -> 92 bound), persisted across reopen.
+#  4. Refusals (empty selection, delete-everything) leave the topology alone.
+#  5. The saved topology-edited file passes the encoder's own whole-file identity proof
+#     (--pm-modify-save-test): our output is well-formed input.
+#  6. TOPOLOGY UNDO: delete -> undo -> redo -> undo replays through the Kind 6 raw
+#     snapshots and the working-set rebuild, and the final save is BYTE-IDENTICAL to the
+#     null-edit baseline - on the base-stream file and on the modifier+mapper file alike
+#     (fresh chunks inherit their siblings' 64-bit header width; a 32-bit default would
+#     shift every later byte).
 set -euo pipefail
 
 ZP="${ZONE_PAINTER:-}"
@@ -61,9 +65,13 @@ local t1, r1, n1 = painter.tileAt(0, 4, 1, 1)
 assert(t1 == t0 and r1 == r0 and n1 == n0,
        string.format("paint did not travel: %s/%s/%s vs %s/%s/%s",
                      tostring(t1), tostring(r1), tostring(n1), tostring(t0), tostring(r0), tostring(n0)))
--- Undo after a topological op is a no-op: the rebuild cleared the history.
+-- Topology undo restores through the Kind 6 snapshot, redo reapplies.
 painter.undo()
-assert(painter.patchCount(0) == c0 - 1, "undo resurrected the deleted patch")
+assert(painter.patchCount(0) == c0, "undo did not restore the deleted patch")
+local tu = painter.tileAt(0, 5, 1, 1)
+assert(tu == t0, "undo lost the painted tile at its old index")
+painter.redo()
+assert(painter.patchCount(0) == c0 - 1, "redo did not reapply the delete")
 print(string.format("M41-1 OK tile=%d count=%d", t0, c0 - 1))
 EOF
 seed "$OUT/ws1" zonematerial-bassin-1
@@ -171,5 +179,30 @@ for pair in "ws1:zonematerial-bassin-1" "ws2:material-bassin" "ws3:zonematerial-
 	grep -aq "^OK pm-modify-save" "$OUT/$W.pm.log" || { echo "FAIL: pm identity on edited $B"; exit 1; }
 done
 echo "OK edited files round-trip the encoder byte-identically"
+
+echo "===== M41-6: topology undo saves byte-identical to the baseline ====="
+cat > "$OUT/undo_cycle.lua" <<'EOF'
+painter.setMode(4)
+painter.setSubObject(3)
+local c0 = painter.patchCount(0)
+painter.selectPatchFace(0, 0, 1)
+assert(painter.deletePatchSelection() == 1)
+painter.undo()
+assert(painter.patchCount(0) == c0, "undo did not restore")
+painter.redo()
+assert(painter.patchCount(0) == c0 - 1, "redo did not reapply")
+painter.undo()
+assert(painter.patchCount(0) == c0, "second undo did not restore")
+print("M41-6 cycle OK")
+EOF
+for B6 in zonematerial-bassin-1 material-bassin; do
+	"$ZP" "$GFX/landscape/ligo/lacustre/max/$B6.max" --null-edit --out "$OUT/$B6.null.max" > "$OUT/$B6.null.log" 2>&1
+	seed "$OUT/ws6_$B6" "$B6"
+	run_session "$OUT/ws6_$B6" "$B6" "$OUT/undo_cycle.lua" "$OUT/g6_$B6.log"
+	grep -aq "M41-6 cycle OK" "$OUT/g6_$B6.log" || { echo "FAIL: undo cycle on $B6"; tail -8 "$OUT/g6_$B6.log"; exit 1; }
+	U=$( { cmp -l "$OUT/$B6.null.max" "$OUT/ws6_$B6/landscape/ligo/lacustre/max/$B6.max" || true; } | wc -l)
+	[[ "$U" -eq 0 ]] || { echo "FAIL: undo cycle on $B6 left $U bytes changed"; exit 1; }
+	echo "OK $B6 undo cycle byte-identical"
+done
 
 echo "ALL M41 GATES PASSED"

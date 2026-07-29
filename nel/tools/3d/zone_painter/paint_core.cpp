@@ -110,6 +110,8 @@ CPaintCore::CPaintCore()
 	m_PropChangedCb = NULL;
 	m_GeomChangedCb = NULL;
 	m_RpStateChangedCb = NULL;
+	m_TopoRestoreCb = NULL;
+	m_TopoRestorePending = false;
 	m_HaveLastEdit = false;
 	m_LastEditRadius = 0.f;
 }
@@ -118,6 +120,7 @@ CPaintCore::~CPaintCore()
 {
 	for (size_t i = 0; i < m_Carriers.size(); ++i)
 		delete m_Carriers[i].Pristine;
+	clearTopoSnaps();
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -365,17 +368,24 @@ static void zpHarvestPainterFlags(CNodeImpl *node, sint &includeMeshes, sint &pr
 // init
 
 bool CPaintCore::init(const std::vector<SPaintZoneInput> &zones, NL3D::CTileBank *bank,
-                      float cellSize, float snap, bool lockBorders, std::string &err)
+                      float cellSize, float snap, bool lockBorders, std::string &err,
+                      bool keepUndo)
 {
 	// Re-init safe (working-set rebuild): free prior pristine copies + clear undo.
-	// Undo history is intentionally discarded on any working-set change.
+	// Undo history is intentionally discarded on any working-set change; the TOPOLOGY
+	// rebuild passes keepUndo - same zone set, and its Kind 6 record restores the older
+	// records' index space before they replay (see paint_core.h).
 	for (size_t i = 0; i < m_Carriers.size(); ++i)
 		delete m_Carriers[i].Pristine;
 	m_Carriers.clear();
 	m_Zones.clear();
-	m_CurStroke.clear();
-	m_UndoStack.clear();
-	m_RedoStack.clear();
+	if (!keepUndo)
+	{
+		m_CurStroke.clear();
+		m_UndoStack.clear();
+		m_RedoStack.clear();
+		clearTopoSnaps();
+	}
 	m_Changes.clear();
 	m_ColorChanges.clear();
 	m_Landscape = NULL; // caller re-attaches after landscape reassembly

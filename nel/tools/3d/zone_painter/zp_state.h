@@ -759,6 +759,11 @@ bool zpZonePatchCount(uint zoneId, uint &countOut);
 /** Layer-0 tile of one grid tile (script/gate read access; display transform applied). */
 bool zpTileQuery(uint zoneId, uint patchIdx, uint u, uint v, int &tileOut, int &rotOut,
                  int &numOut);
+/** Kind 6 undo/redo sink: re-encode a topology snapshot's matching side into storage. */
+namespace ZPPAINT { struct STopoSnapshot; }
+void zpTopoRestore(const ZPPAINT::STopoSnapshot &snap, bool useOld);
+/** After any opUndo/opRedo: run the working-set rebuild a replayed topology record needs. */
+void zpHandleTopoRestorePending();
 
 /** Left-click in patch/vertex mode; `buttons` carries the modifier bits (Ctrl add, Alt remove). */
 void zpPatchVertexClick(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, float my, uint buttons);
@@ -1080,8 +1085,11 @@ void placeContextRange(std::vector<SPaintZone> &zones, size_t rb, size_t re,
 void placeEcoEditableRange(std::vector<SPaintZone> &zones, SEditableFileInfo &efi,
                            size_t rb, size_t re, float cellSize, float snap);
 /** skipWriteBack: the caller already flushed paint AND mutated carrier bytes since - the
- * rebuild's own write-back would re-encode the stale pristine over the mutation. */
-bool rebuildWorkingSet(std::string &err, uint &outWelds, bool skipWriteBack = false);
+ *  rebuild's own write-back would re-encode the stale pristine over the mutation.
+ *  keepUndo: preserve the paint core's undo/redo stacks (TOPOLOGY rebuild paths only -
+ *  same zone set; session open/close must keep clearing). */
+bool rebuildWorkingSet(std::string &err, uint &outWelds, bool skipWriteBack = false,
+                       bool keepUndo = false);
 SEditableFileInfo *findEditableByBasename(const std::string &basename);
 const ZPWS::SZoneEntry *findWorldZone(const std::string &basename);
 bool sessionSaveOneFile(SEditableFileInfo &efi, std::string &err);

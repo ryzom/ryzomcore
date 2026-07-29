@@ -142,6 +142,7 @@ using namespace MAXMATH;
 #include <nel/3d/nav_mouse_listener.h>
 
 #include "zp_state.h"
+#include "patch_topo_snapshot.h"
 
 // ---------------------------------------------------------------------------------------------
 
@@ -296,6 +297,7 @@ uint zpDeletePatchSelection()
 
 	uint deleted = 0;
 	std::vector<uint> touchedZones;
+	std::vector<ZPPAINT::STopoSnapshot *> snaps;
 	for (std::map<const void *, std::set<uint> >::const_iterator ot = perObject.begin();
 	     ot != perObject.end(); ++ot)
 	{
@@ -323,10 +325,21 @@ uint zpDeletePatchSelection()
 			g_PropStatusMsg = "delete: stored stream does not match the displayed topology";
 			continue;
 		}
+		// Undo payload: the decoded pre-op structs (post-writeBack, so the flushed paint is
+		// part of the restored state) and, below, the post-op structs. Restoring either
+		// side re-encodes it; decode -> encode identity makes the undo save byte-exact.
+		ZPPAINT::STopoSnapshot *snap = new ZPPAINT::STopoSnapshot();
+		snap->Zone = zoneId;
+		snap->PmOld = pm;
+		snap->RpOld = rp;
+		snap->HaveMapper = haveMapper && target.MapperRaw;
+		if (snap->HaveMapper)
+			snap->MapperOld = target.MapperRaw->Value;
 		STopoRemap remap;
 		if (!topoDeletePatches(pm, rp, haveMapper ? &mapper : NULL, ot->second, remap, err))
 		{
 			g_PropStatusMsg = "delete: " + err;
+			delete snap;
 			continue;
 		}
 		if (!encodeTopoTarget(target, pm, rp, mapper, haveMapper, err))
@@ -335,8 +348,14 @@ uint zpDeletePatchSelection()
 			// half-written. The rebuild below re-derives from storage either way, and the
 			// file on disk is untouched until an explicit save.
 			g_PropStatusMsg = "delete: " + err;
+			delete snap;
 			continue;
 		}
+		snap->PmNew = pm;
+		snap->RpNew = rp;
+		if (snap->HaveMapper)
+			snap->MapperNew = target.MapperRaw->Value;
+		snaps.push_back(snap);
 		deleted += (uint)ot->second.size();
 		touchedZones.push_back(zoneId);
 		// Unconditional: the target-stream choice is what the gates pin (m34 pins the
@@ -346,7 +365,11 @@ uint zpDeletePatchSelection()
 		fflush(stdout);
 	}
 	if (!deleted)
+	{
+		for (size_t i = 0; i < snaps.size(); ++i)
+			delete snaps[i];
 		return 0;
+	}
 
 	ZPSCRIPT::record("painter.deletePatchSelection()");
 
@@ -359,19 +382,54 @@ uint zpDeletePatchSelection()
 	zpPatchGizmoInvalidate();
 
 	uint welds = 0;
-	if (!rebuildWorkingSet(err, welds, /* skipWriteBack= */ true))
+	if (!rebuildWorkingSet(err, welds, /* skipWriteBack= */ true, /* keepUndo= */ true))
 	{
 		g_PropStatusMsg = "delete: session rebuild failed: " + err;
+		for (size_t i = 0; i < snaps.size(); ++i)
+			delete snaps[i];
 		return deleted;
 	}
+	// The undo stroke lands AFTER the rebuild (keepUndo preserved the stacks), so a
+	// failed rebuild never leaves a restorable record for a session in an unknown state.
+	g_PaintCtx.Core->opTopoStroke(snaps);
 	// The PatchMesh stream mutation is invisible to the carrier blob compare (same reason
 	// vertex moves are); the blob itself also changed, but mark the geometry flag so the
 	// dirty signal never depends on that coincidence.
 	for (size_t i = 0; i < touchedZones.size(); ++i)
 		g_PaintCtx.Core->markGeomDirty(touchedZones[i]);
 	g_PropStatusMsg = NLMISC::toString(
-		"delete: %u patch%s removed (undo history cleared)", deleted, deleted == 1 ? "" : "es");
+		"delete: %u patch%s removed", deleted, deleted == 1 ? "" : "es");
 	return deleted;
+}
+
+/**
+ * Undo/redo sink for Kind 6 records: re-encode the snapshot's matching side into the
+ * target stream. The working-set rebuild happens at the zpUndo/zpRedo level, once per
+ * replay, after the core's stroke replay returns - see topoRestorePending.
+ */
+void zpTopoRestore(const ZPPAINT::STopoSnapshot &snap, bool useOld)
+{
+	SPaintZone *pz = zpFindPaintZoneMut(snap.Zone);
+	if (!pz)
+		return;
+	STopoTarget target;
+	std::string err;
+	if (!resolveTopoTarget(pz->Node, target, err))
+	{
+		fprintf(stderr, "ERROR: topo restore: %s\n", err.c_str());
+		return;
+	}
+	// Restoring re-encodes the decoded structs; identity of the codec makes an undo save
+	// reproduce the pre-op bytes exactly. The mapper payload travels verbatim.
+	SPmVertMapper unusedMapper;
+	if (!encodeTopoTarget(target, useOld ? snap.PmOld : snap.PmNew,
+	                      useOld ? snap.RpOld : snap.RpNew, unusedMapper, false, err))
+	{
+		fprintf(stderr, "ERROR: topo restore encode: %s\n", err.c_str());
+		return;
+	}
+	if (snap.HaveMapper && target.MapperRaw)
+		target.MapperRaw->Value = useOld ? snap.MapperOld : snap.MapperNew;
 }
 
 /** Bridge wrapper (void-returning function pointer). */
