@@ -847,6 +847,11 @@
 			onclick_l="zp_patch_hide" params_l="" hardtext="Hide" />
 		<ctrl style="text_button_16" id="btn_unhide" posparent="btn_hide" posref="MR ML" x="4" y="0"
 			onclick_l="zp_patch_unhide" params_l="" hardtext="Unhide All" />
+		<!-- Propagate: the edge-level subdivide's strip walk (the split follows the strip
+		     until it loops or exits an open border). On the Hide row for space - the
+		     Subdiv row is full (clipped controls render invisible; a screenshot showed it). -->
+		<instance template="zp_checkbox_row" id="subdiv_prop" posparent="btn_unhide" posref="MR ML" x="10" y="0"
+			w="60" labelw="36" label="Prop" onclick="zp_patch_subdiv_prop" params="" />
 		<!-- Edge properties: No smooth (tri-state shown via the (mixed) tag) -->
 		<instance template="zp_checkbox_row" id="no_smooth" posparent="btn_hide" posref="BL TL" x="0" y="-8"
 			label="No smooth" onclick="zp_patch_nosmooth" params="" />

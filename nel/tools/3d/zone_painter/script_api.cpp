@@ -129,6 +129,8 @@ bool zpPatchCornerVert(uint zoneId, uint patchIdx, uint corner, uint &out);
 uint zpHideSelection();
 uint zpUnhideAll();
 bool zpPatchIsHidden(uint zoneId, uint patchIdx);
+uint zpSubdivideEdgeSelection();
+void zpSetSubdividePropagate(bool on);
 bool zpMoveDirTarget(int dir, uint &dstZoneOut);
 bool zpZonePatchCount(uint zoneId, uint &countOut);
 bool zpZoneVertCount(uint zoneId, uint &countOut);
@@ -1029,6 +1031,20 @@ static int lPatchVertFlags(CLuaState &ls) // (zone, vertIdx) -> the stored Flags
 	return 1;
 }
 
+static int lSubdivideEdgeSelection(CLuaState &ls)
+{
+	const uint n = zpSubdivideEdgeSelection();
+	printf("subdivideEdgeSelection: %u edges\n", n);
+	fflush(stdout);
+	return retOk(ls);
+}
+
+static int lSetSubdividePropagate(CLuaState &ls) // (on)
+{
+	zpSetSubdividePropagate(argBoolOpt(ls, 1, true));
+	return retOk(ls);
+}
+
 static int lHideSelection(CLuaState &ls) // hide the current level's selection
 {
 	const uint n = zpHideSelection();
@@ -1747,6 +1763,8 @@ static const char *kBootstrap =
 	"  patchCornerVert = __zp_patchCornerVert,\n"
 	"  hideSelection = __zp_hideSelection, unhideAll = __zp_unhideAll,\n"
 	"  patchHidden = __zp_patchHidden,\n"
+	"  subdivideEdgeSelection = __zp_subdivideEdgeSelection,\n"
+	"  setSubdividePropagate = __zp_setSubdividePropagate,\n"
 	"  rotatePatchSelection = __zp_rotatePatchSelection,\n"
 	"  rotatePatchSelectionAxis = __zp_rotatePatchSelectionAxis,\n"
 	"  scalePatchSelection = __zp_scalePatchSelection,\n"
@@ -1868,6 +1886,8 @@ bool ensureLua()
 	ls->registerFunc("__zp_hideSelection", lHideSelection);
 	ls->registerFunc("__zp_unhideAll", lUnhideAll);
 	ls->registerFunc("__zp_patchHidden", lPatchHidden);
+	ls->registerFunc("__zp_subdivideEdgeSelection", lSubdivideEdgeSelection);
+	ls->registerFunc("__zp_setSubdividePropagate", lSetSubdividePropagate);
 	ls->registerFunc("__zp_pivotPos", lPivotPos);
 	ls->registerFunc("__zp_rotatePatchSelection", lRotatePatchSelection);
 	ls->registerFunc("__zp_rotatePatchSelectionAxis", lRotatePatchSelectionAxis);

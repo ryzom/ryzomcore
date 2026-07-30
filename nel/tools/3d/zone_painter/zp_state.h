@@ -815,6 +815,12 @@ void zpPatchTurnCcwClicked();
 void zpPatchTurnCwClicked();
 /** Subdivide selected quads 4-way; paint quadrants inherit; T-junction binds. Undoable. */
 uint zpSubdividePatchSelection();
+/** Edge-level subdivide (mA4): 1->2 across each selected edge; Propagate walks the
+ *  strip. The Subdiv button serves both levels. Undoable. */
+uint zpSubdivideEdgeSelection();
+void zpSetSubdividePropagate(bool on);
+bool zpSubdividePropagate();
+void zpSubdivPropToggleClicked();
 void zpPatchSubdivideClicked();
 /** Weld selected vertices (target-weld; coincident open edges fuse). Undoable. */
 uint zpWeldPatchSelection(float threshold);

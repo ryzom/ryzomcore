@@ -142,6 +142,7 @@ using namespace MAXMATH;
 
 #include <nel/3d/nav_mouse_listener.h>
 
+#include "viewer_listener.h"
 #include "zp_state.h"
 #include "patch_topo_snapshot.h"
 
@@ -624,6 +625,16 @@ static bool zpXformSubdivide(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *map
 	return topoSubdividePatches(pm, rp, sel, err, mapper, evalPm);
 }
 
+// Edge-level subdivide (plan mA4): single-axis 1->2 splits driven by the edge selection,
+// with the optional strip walk. The propagate flag is op state like the weld threshold.
+static bool s_SubdivPropagate = false;
+static bool zpXformSubdivideEdges(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
+                                  const std::set<uint> &sel, std::string &err,
+                                  const SPatchMesh *evalPm)
+{
+	return topoSubdivideEdges(pm, rp, sel, s_SubdivPropagate, err, mapper, evalPm);
+}
+
 // Weld threshold handed to the adapter through a file-static: the shared runner's
 // transform signature is selection-only, and the threshold is op state like the brush
 // size, not selection data.
@@ -707,6 +718,32 @@ uint zpSubdividePatchSelection()
 {
 	return zpRunTopoOp("subdivide", "painter.subdividePatchSelection()", zpXformSubdivide);
 }
+
+/**
+ * Subdivide across the EDGE selection (edge level): each adjacent patch splits once,
+ * along the parameter crossing the selected edge - a 1->2 split; with Propagate the
+ * split walks the strip until it loops or exits an open border. Neighbors that do not
+ * split take the canonical T-junction bind.
+ */
+uint zpSubdivideEdgeSelection()
+{
+	return zpRunTopoOpEdges("subdivide", "painter.subdivideEdgeSelection()",
+	                        zpXformSubdivideEdges);
+}
+
+/** The Propagate checkbox (recorded as an absolute state op for replay fidelity). */
+void zpSetSubdividePropagate(bool on)
+{
+	if (on == s_SubdivPropagate)
+		return;
+	s_SubdivPropagate = on;
+	ZPSCRIPT::record(NLMISC::toString("painter.setSubdividePropagate(%s)",
+	                                  on ? "true" : "false"));
+}
+
+bool zpSubdividePropagate() { return s_SubdivPropagate; }
+
+void zpSubdivPropToggleClicked() { zpSetSubdividePropagate(!s_SubdivPropagate); }
 
 /**
  * Weld the selected vertices (target-weld: clusters within the threshold merge onto their
@@ -2130,7 +2167,15 @@ void zpWeldTargetToggleClicked()
 void zpPatchDeleteClicked() { zpDeletePatchSelection(); }
 void zpPatchTurnCcwClicked() { zpTurnPatchSelection(true); }
 void zpPatchTurnCwClicked() { zpTurnPatchSelection(false); }
-void zpPatchSubdivideClicked() { zpSubdividePatchSelection(); }
+/** The one Subdiv button serves both levels: patch selection -> 1->4, edge selection ->
+ *  the 1->2 split across each selected edge. */
+void zpPatchSubdivideClicked()
+{
+	if (g_PaintCtx.Paint && g_PaintCtx.Paint->SubObj == CPaintMouseListener::SubEdge)
+		zpSubdivideEdgeSelection();
+	else
+		zpSubdividePatchSelection();
+}
 void zpPatchWeldClicked() { zpWeldPatchSelection(0.1f); } // legacy default threshold
 void zpPatchAddQuadClicked() { zpAddQuadPatchSelection(); }
 

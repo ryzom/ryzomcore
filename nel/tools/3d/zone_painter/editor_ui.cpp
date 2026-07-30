@@ -978,6 +978,18 @@ public:
 REGISTER_ACTION_HANDLER(CAHZpMoveToZone, "zp_move_to_zone");
 
 
+class CAHZpPatchSubdivProp : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchSubdivPropToggle) b->patchSubdivPropToggle();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchSubdivProp, "zp_patch_subdiv_prop");
+
 class CAHZpPatchHide : public IActionHandler
 {
 public:
@@ -2734,8 +2746,15 @@ void CEditorUI::syncPanelFromBridge()
 			btn->setFrozen(b->SubObj != 3 || !b->PatchSelFaces);
 		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_turn_cw").c_str()))
 			btn->setFrozen(b->SubObj != 3 || !b->PatchSelFaces);
+		// Subdiv serves both levels: the patch selection 1->4 and the edge selection 1->2.
 		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_subdivide").c_str()))
-			btn->setFrozen(b->SubObj != 3 || !b->PatchSelFaces);
+			btn->setFrozen(!((b->SubObj == 3 && b->PatchSelFaces)
+			                 || (b->SubObj == 2 && b->PatchSelEdges)));
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":subdiv_prop:box").c_str()))
+		{
+			btn->setFrozen(b->SubObj != 2);
+			btn->setPushed(b->SubdivPropagate);
+		}
 		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_add_quad").c_str()))
 			btn->setFrozen(b->SubObj != 2 || !b->PatchSelEdges);
 		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_detach").c_str()))
