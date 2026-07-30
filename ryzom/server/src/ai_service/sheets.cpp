@@ -447,7 +447,8 @@ void AISHEETS::CCreature::readGeorges(NLMISC::CSmartPtr<NLGEORGES::UForm> const&
 	
 	item.getValueByName(_AssistDist,"Combat.AssistDist");
 	
-	item.getValueByName(_Scale, "3d data.Scale");
+	if (!item.getValueByName(_Scale, "3d data.Scale"))
+		_Scale = 1.f;
 	{
 		std::string faunaTypeStr;
 		item.getValueByName(faunaTypeStr, "Basics.type");
@@ -655,12 +656,13 @@ void AISHEETS::CCreature::readGeorges(NLMISC::CSmartPtr<NLGEORGES::UForm> const&
 
 void AISHEETS::CCreature::registerScriptComp(CFightScriptComp* scriptComp)
 {
+#ifndef NO_AI_COMP
 	_ScriptCompList.push_back(scriptComp);
-	
+
 	CFightSelectFilter* filter = dynamic_cast<CFightSelectFilter*>(scriptComp);
 	if (!filter)
 		return;
-	
+
 	std::string const& param = filter->getParam();
 	if (param=="ON_UPDATE")
 		_UpdateScriptList.push_back(scriptComp);
@@ -668,6 +670,7 @@ void AISHEETS::CCreature::registerScriptComp(CFightScriptComp* scriptComp)
 		_DeathScriptList.push_back(scriptComp);
 	if (param=="ON_BIRTH")
 		_BirthScriptList.push_back(scriptComp);
+#endif
 }
 
 

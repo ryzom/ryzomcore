@@ -20,6 +20,7 @@
 
 import os
 import sys
+import glob
 import json
 import math
 import time
@@ -31,6 +32,7 @@ class MonitorServices():
 
 	def __init__(self):
 		self.client = Client("localhost")
+		self.shard = sys.argv[1].lower()
 		self.ryzomAS = CAdminServiceWeb()
 		self.ryzomAsStatus = self.ryzomAS.connect("127.0.0.1", 46700)
 
@@ -51,6 +53,8 @@ class MonitorServices():
 
 		name = ""
 		server_open_status = ""
+		last_status = {}
+		first_error = True
 		while(True):
 			if time.time() - last_ras_update > 1:
 				updates += 1
@@ -59,12 +63,8 @@ class MonitorServices():
 					new_open_status = f.read().strip()
 					if server_open_status != new_open_status:
 						print("Server Open Status =", new_open_status)
+						self.client.set("Dag-MORS-Services", json.dumps([new_open_status]))
 					server_open_status = new_open_status
-
-				if not self.ryzomAsStatus:
-					print("RAS not connected")
-					self.client.set("Dag-MORS-Services", json.dumps([server_open_status]))
-					self.ryzomAsStatus = self.ryzomAS.connect("127.0.0.1", 46700)
 
 				if self.ryzomAsStatus:
 					try:
@@ -77,10 +77,20 @@ class MonitorServices():
 						continue
 
 					if not states:
-						print("NO STATES")
+						last_status = {}
+						self.ryzomAS.close()
 						self.ryzomAsStatus = False
+						for file in glob.glob(f"/tmp/ribs_status/shard.*"):
+							status = ""
+							with open(file) as f:
+								status = f.readlines()[0]
+							if status != "ERROR":
+								with open(file, "w") as f:
+									f.write(f"INFO\n❓")
 						time.sleep(1)
 						continue
+
+					first_error = True
 
 					services = [server_open_status]
 					for state in states:
@@ -121,14 +131,33 @@ class MonitorServices():
 						self.client.set(f"Dag-{name}-Infos", infos_out)
 						self.client.set(f"Dag-{name}-Status", status.encode("utf-8"))
 						self.client.set(f"Dag-{name}-LastUpdate", time.time())
+						if not name in last_status:
+							last_status[name] = ""
+						if status != last_status[name]:
+							print(f"write {name}")
+							with open(f"/tmp/ribs_status/shard.{name}", "w") as f:
+								f.write(f"INFO\n{status}")
+							last_status[name] = status
 					self.client.set("Dag-MORS-Services", json.dumps(services))
 					updates = 0
+				else:
+					last_status = {}
+					if first_error:
+						print("RAS not connected")
+						for file in glob.glob(f"/tmp/ribs_status/shard.*"):
+							status = ""
+							with open(file) as f:
+								status = f.readlines()[0]
+							if status != "ERROR":
+								with open(file, "w") as f:
+									f.write(f"INFO\n❓")
+						first_error = False
+					time.sleep(1)
+					self.ryzomAsStatus = self.ryzomAS.connect("127.0.0.1", 46700)
 				last_ras_update = time.time()
 			time.sleep(0.01)
 
 if __name__ == "__main__":
-	print("Start Monitoring Ryzom Services...")
+	print(f"Start Monitoring Ryzom Services for {sys.argv[1]}...")
 	service = MonitorServices()
 	service.run()
-
-
