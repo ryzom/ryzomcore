@@ -32,3 +32,13 @@ sheet did, the replacement's position/orientation are copied from the old entity
 other per-slot visual properties (equipment/colors, mode/alive state, contextual
 attackable/selectable bits, HP bars, target lists, guild, faction, pvp, mount/rider...)
 are re-applied from the per-slot CDB right after the swap.
+
+## 2026-07-30 — 🐛 Respect Turn sheet flag when facing target
+
+`CCharacterCL::applyBehaviour()` and `CCharacterCL::beginCast()` unconditionally called
+`dir()` to snap an entity's facing direction toward its combat/cast target, ignoring the
+sheet's `Properties.Turn` flag (`_CanTurn`) even though the neighbouring `front()` call
+already respected it. Since `dir()` (not `front()`) is what actually drives the rendered
+orientation for these entities, an entity with `Turn=false` (e.g. a static decoration)
+would still visibly snap to face the player as soon as it attacked or cast a spell. `dir()`
+is now only called in these two spots when `_CanTurn` is true.
