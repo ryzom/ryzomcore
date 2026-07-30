@@ -5,7 +5,12 @@
      driver to own a native cursor, which Emscripten has no equivalent for, and drawing
      from the atlas is identical on every platform. -->
 <group id="pointer_layer" posref="BL BL" x="0" y="0" sizeref="wh" w="0" h="0" active="true">
-	<view type="generic_pointer" id="pointer" posref="BL BL" x="0" y="0" w="32" h="32"
+	<!-- posref MM + the (1,-5) nudge is the client's cursor placement (login_config.xml):
+	     the v3 cursor bitmaps are padded so their hotspot sits at the CENTER of the 44x39
+	     frame (the arrow tip is at texel (20,15)); centering the view on the pointer puts
+	     the tip on the point, and keeps the rotating resize shapes centered too. A BL
+	     anchor draws the bitmap a half-frame up-right of where clicks land. -->
+	<view type="generic_pointer" id="pointer" posref="BL MM" x="1" y="-5" w="44" h="39"
 		color="255 255 255 255"
 		tx_default="curs_default.tga"
 		tx_move_window="curs_default.tga"
