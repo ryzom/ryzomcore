@@ -599,6 +599,265 @@ uint zpAddQuadPatchSelection()
 	return zpRunTopoOpEdges("add quad", "painter.addQuadPatchSelection()", zpXformAddQuad);
 }
 
+// ---------------------------------------------------------------------------------------------
+// Detach: split the selection off into a NEW BRICK FILE.
+//
+// In this tool one file carries one editable zone and the FILE is the brick identity, so
+// the legacy "detach as a new object" maps to "detach as a new file": the new brick is the
+// current file with the complement deleted, written through the atomic copy-save (source
+// OLE streams verbatim, Scene re-encoded); the source then loses the selection through the
+// normal delete flow. Both halves keep their paint by the delete transform's contract.
+//
+// The new file is NOT opened into the session - the zone set is unchanged, which is what
+// keeps the source-side delete UNDOABLE (Kind 6). Undo restores the source zone; the new
+// file stays on disk (it is a save, and saves are not undone). findWorldZone re-lists on
+// a miss, so the fresh brick is openable from the board immediately.
+
+namespace {
+
+/** Owning file of a zone: path + scene (primary session file when not in the list). */
+void zpZoneFilePathScene(uint zoneId, std::string &path, CScene *&scene)
+{
+	for (size_t i = 0; i < g_EditableFiles.size(); ++i)
+	{
+		const SEditableFileInfo &efi = g_EditableFiles[i];
+		for (size_t z = 0; z < efi.ZoneIds.size(); ++z)
+			if (efi.ZoneIds[z] == zoneId)
+			{
+				path = efi.Path;
+				scene = editableScene(efi);
+				return;
+			}
+	}
+	path = g_PaintCtx.InputPath;
+	scene = g_PaintCtx.Scene;
+}
+
+/** "name" sanitized to brick-filename characters, else empty. */
+std::string zpSanitizeBrickName(const std::string &name)
+{
+	const std::string low = NLMISC::toLowerAscii(name);
+	std::string out;
+	for (size_t i = 0; i < low.size(); ++i)
+	{
+		const char c = low[i];
+		if ((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '-' || c == '_')
+			out += c;
+	}
+	return out;
+}
+
+} /* anonymous namespace */
+
+/**
+ * Detach the selected patches into a new brick file next to the source (patch level, one
+ * zone at a time). `nameIn` empty = auto ("<source>-det", collision-bumped). Returns the
+ * detached patch count; the resolved file name lands in the status line.
+ */
+uint zpDetachPatchSelection(const std::string &nameIn)
+{
+	if (!g_PaintCtx.Core || !g_PaintCtx.Zones)
+		return 0;
+	if (g_PatchFaceSel.empty())
+	{
+		g_PropStatusMsg = "detach: no patches selected";
+		return 0;
+	}
+	// One object only: the op writes one source file and one new file.
+	const void *object = NULL;
+	uint zoneId = 0;
+	std::set<uint> sel;
+	for (std::set<TPatchFaceId>::const_iterator it = g_PatchFaceSel.begin();
+	     it != g_PatchFaceSel.end(); ++it)
+	{
+		const SPaintZone *pz = zpFindPaintZone(it->first);
+		if (!pz || !pz->Editable || it->second >= pz->Patches.size())
+			continue;
+		if (object && (const void *)pz->Node != object)
+		{
+			g_PropStatusMsg = "detach: select patches in one zone only";
+			printf("%s\n", g_PropStatusMsg.c_str());
+			fflush(stdout);
+			return 0;
+		}
+		object = (const void *)pz->Node;
+		zoneId = it->first;
+		sel.insert(it->second);
+	}
+	if (!object || sel.empty())
+	{
+		g_PropStatusMsg = "detach: selection has no editable elements";
+		return 0;
+	}
+	SPaintZone *pz = zpFindPaintZoneMut(zoneId);
+	if (!pz)
+		return 0;
+	if (sel.size() >= pz->Patches.size())
+	{
+		g_PropStatusMsg = "detach: selection is the whole zone (save a copy instead)";
+		printf("%s\n", g_PropStatusMsg.c_str());
+		fflush(stdout);
+		return 0;
+	}
+
+	// The owning file and its scene; the new brick lands in the same directory, which for
+	// board sessions is the world dir (openable from the board immediately).
+	std::string srcPath;
+	CScene *scene = NULL;
+	zpZoneFilePathScene(zoneId, srcPath, scene);
+	if (srcPath.empty() || !scene || !NLMISC::CFile::fileExists(srcPath))
+	{
+		g_PropStatusMsg = "detach: source file unresolved";
+		return 0;
+	}
+	const std::string dir = NLMISC::CFile::getPath(srcPath);
+	const std::string srcBase = NLMISC::CFile::getFilenameWithoutExtension(srcPath);
+	std::string name = zpSanitizeBrickName(nameIn);
+	if (name.empty())
+		name = srcBase + "-det";
+	std::string target = dir + name + ".max";
+	for (uint bump = 2; NLMISC::CFile::fileExists(target) || findEditableByPath(target); ++bump)
+	{
+		if (bump > 99)
+		{
+			g_PropStatusMsg = "detach: no free name near '" + name + "'";
+			return 0;
+		}
+		target = dir + name + NLMISC::toString("%u", bump) + ".max";
+	}
+
+	// Flush pending paint: both passes below read and rewrite the CARRIER BYTES.
+	std::string err;
+	if (!g_PaintCtx.Core->writeBack(err))
+	{
+		g_PropStatusMsg = "detach: paint write-back failed: " + err;
+		return 0;
+	}
+	STopoTarget targetStream;
+	if (!resolveTopoTarget(pz->Node, targetStream, err))
+	{
+		g_PropStatusMsg = "detach: " + err;
+		return 0;
+	}
+	SPatchMesh pmPre;
+	SRPatchMesh rpPre;
+	SPmVertMapper mapperPre;
+	bool haveMapper = false;
+	if (!decodeTopoTarget(targetStream, pmPre, rpPre, mapperPre, haveMapper, err))
+	{
+		g_PropStatusMsg = "detach: " + err;
+		return 0;
+	}
+	if (pmPre.Patches.size() != pz->Patches.size())
+	{
+		g_PropStatusMsg = "detach: stored stream does not match the displayed topology";
+		return 0;
+	}
+	std::vector<uint8> mapperRawPre;
+	if (haveMapper && targetStream.MapperRaw)
+		mapperRawPre = targetStream.MapperRaw->Value;
+
+	// --- Pass 1: the NEW file = complement deleted (the selection survives there).
+	std::set<uint> complement;
+	for (uint p = 0; p < (uint)pmPre.Patches.size(); ++p)
+		if (!sel.count(p))
+			complement.insert(p);
+	{
+		SPatchMesh pmNewFile = pmPre;
+		SRPatchMesh rpNewFile = rpPre;
+		SPmVertMapper mapperNewFile = mapperPre;
+		STopoRemap remap;
+		if (!topoDeletePatches(pmNewFile, rpNewFile, haveMapper ? &mapperNewFile : NULL,
+		                       complement, remap, err))
+		{
+			g_PropStatusMsg = "detach: " + err;
+			printf("%s\n", g_PropStatusMsg.c_str());
+			fflush(stdout);
+			return 0;
+		}
+		if (!encodeTopoTarget(targetStream, pmNewFile, rpNewFile, mapperNewFile, haveMapper, err))
+		{
+			g_PropStatusMsg = "detach: " + err;
+			return 0;
+		}
+		const bool saved = saveCopyAtomic(srcPath, target, *scene, NULL);
+		// Restore the pre-op streams before ANY error path: the carrier must never keep
+		// the complement-deleted state meant for the new file.
+		std::string rerr;
+		if (!encodeTopoTarget(targetStream, pmPre, rpPre, mapperPre, haveMapper, rerr))
+		{
+			fprintf(stderr, "ERROR: detach: pre-op restore failed: %s\n", rerr.c_str());
+			g_PropStatusMsg = "detach: pre-op restore failed: " + rerr;
+			return 0;
+		}
+		if (haveMapper && targetStream.MapperRaw)
+			targetStream.MapperRaw->Value = mapperRawPre;
+		if (!saved)
+		{
+			g_PropStatusMsg = "detach: could not write " + target;
+			printf("%s\n", g_PropStatusMsg.c_str());
+			fflush(stdout);
+			return 0;
+		}
+	}
+
+	// --- Pass 2: the SOURCE loses the selection - the normal delete flow, Kind 6 undoable
+	// (the zone set is unchanged; the new file is not opened).
+	ZPPAINT::STopoSnapshot *snap = new ZPPAINT::STopoSnapshot();
+	snap->Zone = zoneId;
+	snap->PmOld = pmPre;
+	snap->RpOld = rpPre;
+	snap->HaveMapper = haveMapper && targetStream.MapperRaw;
+	if (snap->HaveMapper)
+		snap->MapperOld = mapperRawPre;
+	{
+		SPatchMesh pmSrc = pmPre;
+		SRPatchMesh rpSrc = rpPre;
+		SPmVertMapper mapperSrc = mapperPre;
+		STopoRemap remap;
+		if (!topoDeletePatches(pmSrc, rpSrc, haveMapper ? &mapperSrc : NULL, sel, remap, err)
+		    || !encodeTopoTarget(targetStream, pmSrc, rpSrc, mapperSrc, haveMapper, err))
+		{
+			g_PropStatusMsg = "detach: " + err;
+			printf("%s\n", g_PropStatusMsg.c_str());
+			fflush(stdout);
+			delete snap;
+			return 0;
+		}
+		snap->PmNew = pmSrc;
+		snap->RpNew = rpSrc;
+		if (snap->HaveMapper)
+			snap->MapperNew = targetStream.MapperRaw->Value;
+	}
+	// The RESOLVED basename (collision bumps included) is what the recorder replays.
+	name = NLMISC::CFile::getFilenameWithoutExtension(target);
+	printf("detach: zone %u, %u patches -> %s (%s target)\n", zoneId, (uint)sel.size(),
+	       target.c_str(), targetStream.Local ? "modifier" : "base");
+	fflush(stdout);
+	ZPSCRIPT::record("painter.detachPatchSelection(\"" + name + "\")");
+	g_PatchVertSel.clear();
+	g_PatchEdgeSel.clear();
+	g_PatchFaceSel.clear();
+	g_PatchTanSel.clear();
+	zpPatchGizmoInvalidate();
+	uint welds = 0;
+	if (!rebuildWorkingSet(err, welds, /* skipWriteBack= */ true, /* keepUndo= */ true))
+	{
+		g_PropStatusMsg = "detach: session rebuild failed: " + err;
+		delete snap;
+		return (uint)sel.size();
+	}
+	std::vector<ZPPAINT::STopoSnapshot *> snaps(1, snap);
+	g_PaintCtx.Core->opTopoStroke(snaps);
+	g_PaintCtx.Core->markGeomDirty(zoneId);
+	g_PropStatusMsg = NLMISC::toString("detach: %u patch%s -> %s.max",
+	                                   (uint)sel.size(), sel.size() == 1 ? "" : "es", name.c_str());
+	return (uint)sel.size();
+}
+
+/** Bridge wrapper: panel Detach button (auto name). */
+void zpPatchDetachClicked() { zpDetachPatchSelection(std::string()); }
+
 /**
  * Undo/redo sink for Kind 6 records: re-encode the snapshot's matching side into the
  * target stream. The working-set rebuild happens at the zpUndo/zpRedo level, once per

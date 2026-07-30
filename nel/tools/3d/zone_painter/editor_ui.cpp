@@ -394,6 +394,18 @@ public:
 };
 REGISTER_ACTION_HANDLER(CAHZpPatchAddQuad, "zp_patch_add_quad");
 
+class CAHZpPatchDetach : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchDetach) b->patchDetach();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchDetach, "zp_patch_detach");
+
 class CAHZpTileSet : public IActionHandler
 {
 public:
@@ -2432,6 +2444,8 @@ void CEditorUI::syncPanelFromBridge()
 			btn->setFrozen(b->SubObj != 3 || !b->PatchSelFaces);
 		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_add_quad").c_str()))
 			btn->setFrozen(b->SubObj != 2 || !b->PatchSelEdges);
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_detach").c_str()))
+			btn->setFrozen(b->SubObj != 3 || !b->PatchSelFaces);
 		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":no_smooth:box").c_str()))
 		{
 			btn->setFrozen(b->SubObj != 2 || !b->PatchSelEdges);

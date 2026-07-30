@@ -767,6 +767,11 @@ void zpPatchWeldClicked();
 /** Grow a quad from each selected open edge (legacy Add Quad). Undoable. */
 uint zpAddQuadPatchSelection();
 void zpPatchAddQuadClicked();
+/** Detach the selection into a new brick file next to the source (one zone at a time;
+ *  empty name = auto-bumped "<source>-det"). Source-side delete is undoable; the new
+ *  file stays on disk. */
+uint zpDetachPatchSelection(const std::string &nameIn);
+void zpPatchDetachClicked();
 /** Displayed patch count of a zone (script/gate read access). */
 bool zpZonePatchCount(uint zoneId, uint &countOut);
 /** Eval-mirror vertex count of a zone (script/gate read access). */

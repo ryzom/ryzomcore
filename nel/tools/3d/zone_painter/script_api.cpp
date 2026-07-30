@@ -96,6 +96,7 @@ uint zpTurnPatchSelection(bool ccw);
 uint zpSubdividePatchSelection();
 uint zpWeldPatchSelection(float threshold);
 uint zpAddQuadPatchSelection();
+uint zpDetachPatchSelection(const std::string &nameIn);
 bool zpZonePatchCount(uint zoneId, uint &countOut);
 bool zpZoneVertCount(uint zoneId, uint &countOut);
 bool zpTileQuery(uint zoneId, uint patchIdx, uint u, uint v, int &tileOut, int &rotOut,
@@ -1108,6 +1109,17 @@ static int lAddQuadPatchSelection(CLuaState &ls)
 	return 1;
 }
 
+static int lDetachPatchSelection(CLuaState &ls) // ([name]) -> detached count
+{
+	std::string name;
+	argString(ls, 1, name); // optional; empty = auto "<source>-det"
+	const uint n = zpDetachPatchSelection(name);
+	printf("detachPatchSelection: %u detached\n", n);
+	fflush(stdout);
+	ls.push((double)n);
+	return 1;
+}
+
 static int lRawTile(CLuaState &ls) // (zone, patch, u, v, tile [, rot]) raw record, no solver
 {
 	double z, pch, u, v, t, r = 0;
@@ -1395,6 +1407,7 @@ static const char *kBootstrap =
 	"  rawTile = __zp_rawTile,\n"
 	"  weldPatchSelection = __zp_weldPatchSelection,\n"
 	"  addQuadPatchSelection = __zp_addQuadPatchSelection,\n"
+	"  detachPatchSelection = __zp_detachPatchSelection,\n"
 	"  patchCount = __zp_patchCount, tileAt = __zp_tileAt, vertexCount = __zp_vertexCount,\n"
 	"  setTileSet = __zp_setTileSet, getTileSet = __zp_getTileSet,\n"
 	"  setDisplaceIndex = __zp_setDisplaceIndex, setBrushColor = __zp_setBrushColor,\n"
@@ -1493,6 +1506,7 @@ bool ensureLua()
 	ls->registerFunc("__zp_rawTile", lRawTile);
 	ls->registerFunc("__zp_weldPatchSelection", lWeldPatchSelection);
 	ls->registerFunc("__zp_addQuadPatchSelection", lAddQuadPatchSelection);
+	ls->registerFunc("__zp_detachPatchSelection", lDetachPatchSelection);
 	ls->registerFunc("__zp_patchCount", lPatchCount);
 	ls->registerFunc("__zp_vertexCount", lVertexCount);
 	ls->registerFunc("__zp_tileAt", lTileAt);
