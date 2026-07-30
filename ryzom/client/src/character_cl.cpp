@@ -1234,8 +1234,10 @@ void CCharacterCL::updateVisualPropertyOrient(const NLMISC::TGameCycle &gameCycl
 	// if no skeleton we set the orientation
 	if(_Skeleton.empty())
 	{
-		// server forces the entity orientation even if it cannot turn
-		front(CVector((float)cos(_TheoreticalOrientation), (float)sin(_TheoreticalOrientation), 0.f), true, true, true);
+		// Respect the sheet's 'Turn' property: a skeleton-less entity
+		// (e.g. a static decoration) that cannot turn must not be forced
+		// to face the server-sent orientation on every update.
+		front(CVector((float)cos(_TheoreticalOrientation), (float)sin(_TheoreticalOrientation), 0.f), true, true, _CanTurn);
 		dir(front(), false, false);
 		if(_Primitive)
 			_Primitive->setOrientation(_TheoreticalOrientation, dynamicWI);
@@ -3700,7 +3702,8 @@ void CCharacterCL::beginCast(const MBEHAV::CBehaviour &behaviour)
 		dirToTarget.z = 0;
 		dirToTarget.normalize();
 		front( dirToTarget );
-		dir( dirToTarget );
+		if(_CanTurn)
+			dir( dirToTarget );
 	}
 
 	switch(behaviour.Behaviour)
@@ -4873,7 +4876,8 @@ void CCharacterCL::applyBehaviour(const CBehaviourContext &bc)	// virtual
 				frontYawBefore = frontYaw();
 				front( dirToTarget );
 			}
-			dir( dirToTarget );
+			if(_CanTurn)
+				dir( dirToTarget );
 		}
 
 		// Apply the state animation chosen before
