@@ -140,6 +140,7 @@ struct SPaintUIBridge
 	void (*moveToZoneDir)(int dir); // scene-menu compass, 0=N..7=NW
 	void (*weldTargetToggle)(); // arm/disarm the target-weld drag mode
 	void (*patchWeldThreshold)(float distance); // weld dialog OK
+	void (*patchExtrude)(float dz); // extrude dialog OK / shift-drag commit
 	void (*patchFilterVertsToggle)(); // Selection block: pick filter checkboxes
 	void (*patchFilterVecsToggle)();
 	void (*patchLockHandlesToggle)();
@@ -171,6 +172,7 @@ struct SPaintUIBridge
 	uint MoveDirMask;
 	bool WeldTargetArmed; // target-weld command mode (panel Target toggle pushed state)
 	float WeldThreshold;  // last-used weld distance (seeds the dialog)
+	float ExtrudeHeight;  // last-used extrude height (seeds the dialog)
 	bool FilterVerts, FilterVecs; // vertex-level pick filters (both off is impossible)
 	bool LockHandles;             // a handle move takes the corner's other handles along
 	bool ShowArrows;              // orientation arrows toggle state
@@ -245,7 +247,7 @@ struct SPaintUIBridge
 		  patchBind(NULL), patchUnbind(NULL), patchNoSmooth(NULL), patchDelete(NULL),
 		  patchTurnCcw(NULL), patchTurnCw(NULL), patchSubdivide(NULL), patchWeld(NULL), patchAddQuad(NULL),
 		  patchDetach(NULL), patchElement(NULL), moveToZoneDir(NULL), weldTargetToggle(NULL),
-		  patchWeldThreshold(NULL),
+		  patchWeldThreshold(NULL), patchExtrude(NULL),
 		  patchFilterVertsToggle(NULL), patchFilterVecsToggle(NULL), patchLockHandlesToggle(NULL),
 		  arrowsToggle(NULL),
 		  patchSmGroup(NULL), patchSmGroupClear(NULL), patchTessDelta(NULL), patchBalance(NULL),
@@ -254,7 +256,7 @@ struct SPaintUIBridge
 		  HaveCore(false), Mode(0), SubObj(0),
 		  PatchSelVerts(0), PatchSelEdges(0), PatchSelFaces(0), PatchSelTans(0),
 		  PatchNoSmooth(2), PatchSelZones(0), MoveDirMask(0), WeldTargetArmed(false),
-		  WeldThreshold(0.1f),
+		  WeldThreshold(0.1f), ExtrudeHeight(8.f),
 		  FilterVerts(true), FilterVecs(true), LockHandles(false),
 		  ShowArrows(false),
 		  SmGroupAll(0), SmGroupAny(0), TessU(0), TessV(0),

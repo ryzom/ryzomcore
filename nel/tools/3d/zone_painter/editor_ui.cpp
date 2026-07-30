@@ -523,6 +523,56 @@ public:
 };
 REGISTER_ACTION_HANDLER(CAHZpWeldCancel, "zp_weld_cancel");
 
+/** Panel Extrude button: pop the height dialog, seeded with the last-used height. */
+class CAHZpPatchExtrude : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return;
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (!b) return;
+		if (CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(
+		        CWidgetManager::getInstance()->getElementFromId(
+		            "ui:zp:extrude_dialog:content:dist_frame:dist")))
+			eb->setInputString(NLMISC::toString("%g", b->ExtrudeHeight));
+		CWidgetManager::getInstance()->enableModalWindow(NULL, "ui:zp:extrude_dialog");
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchExtrude, "zp_patch_extrude");
+
+/** Extrude dialog OK: parse the height and extrude the face selection by it. */
+class CAHZpExtrudeOk : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return;
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (!b || !b->patchExtrude) return;
+		float h = 0.f;
+		if (CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(
+		        CWidgetManager::getInstance()->getElementFromId(
+		            "ui:zp:extrude_dialog:content:dist_frame:dist")))
+			NLMISC::fromString(eb->getInputString(), h);
+		if (h == 0.f)
+			return; // an unparsable or zero height extrudes nothing; the dialog stays up
+		CWidgetManager::getInstance()->disableModalWindow();
+		b->patchExtrude(h);
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpExtrudeOk, "zp_extrude_ok");
+
+class CAHZpExtrudeCancel : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		CWidgetManager::getInstance()->disableModalWindow();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpExtrudeCancel, "zp_extrude_cancel");
+
 class CAHZpPatchAddQuad : public IActionHandler
 {
 public:
@@ -2650,6 +2700,8 @@ void CEditorUI::syncPanelFromBridge()
 		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_add_quad").c_str()))
 			btn->setFrozen(b->SubObj != 2 || !b->PatchSelEdges);
 		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_detach").c_str()))
+			btn->setFrozen(b->SubObj != 3 || !b->PatchSelFaces);
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_extrude").c_str()))
 			btn->setFrozen(b->SubObj != 3 || !b->PatchSelFaces);
 		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_element").c_str()))
 			btn->setFrozen(b->SubObj != 3 || !b->PatchSelFaces);

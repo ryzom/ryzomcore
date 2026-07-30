@@ -81,8 +81,13 @@ void dEffCopyVec(float *dst, const SPatchMesh &pm, const SPatchMesh *evalPm, sin
 
 bool topoDetachElements(SPatchMesh &pm, SRPatchMesh &rp,
                         const std::set<uint> &sel, std::string &err,
-                        const SPatchMesh *evalPm)
+                        const SPatchMesh *evalPm, STopoDetachBoundary *boundaryOut)
 {
+	if (boundaryOut)
+	{
+		boundaryOut->Verts.clear();
+		boundaryOut->Edges.clear();
+	}
 	if (pm.EdgesReconstructed)
 	{ err = "reconstructed (Max 3) edge table: topology cannot be written back"; return false; }
 	if (rp.Patches.size() != pm.Patches.size() || rp.Verts.size() != pm.Verts.size())
@@ -353,6 +358,14 @@ bool topoDetachElements(SPatchMesh &pm, SRPatchMesh &rp,
 	}
 
 	// --- Side tables sized to the new counts (new elements unselected).
+	if (boundaryOut)
+	{
+		for (std::map<sint32, sint32>::const_iterator it = dup.begin(); it != dup.end(); ++it)
+			boundaryOut->Verts.push_back(std::make_pair(it->first, it->second));
+		for (std::map<sint32, sint32>::const_iterator it = edgeSelCopy.begin();
+		     it != edgeSelCopy.end(); ++it)
+			boundaryOut->Edges.push_back(std::make_pair(it->first, it->second));
+	}
 	if (pm.VertSel.Present)
 	{
 		pm.VertSel.Count = (sint32)pm.Verts.size();

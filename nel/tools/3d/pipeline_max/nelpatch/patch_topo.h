@@ -55,6 +55,15 @@ namespace PIPELINE {
 namespace MAX {
 namespace NELPATCH {
 
+/** Boundary report of topoDetachElements: the split vertex pairs and the boundary edge
+ *  pairs (original kept by the complement side, copy carried by the selection). The
+ *  extrude op bridges walls between exactly these. */
+struct STopoDetachBoundary
+{
+	std::vector<std::pair<sint32, sint32> > Verts; ///< (original, duplicate)
+	std::vector<std::pair<sint32, sint32> > Edges; ///< (original, selection-side copy)
+};
+
 /** Old -> new element index maps of one topological transform; -1 = deleted. */
 struct STopoRemap
 {
@@ -225,7 +234,33 @@ bool topoAddQuads(SPatchMesh &pm, SRPatchMesh &rp,
  */
 bool topoDetachElements(SPatchMesh &pm, SRPatchMesh &rp,
                         const std::set<uint> &sel, std::string &err,
-                        const SPatchMesh *evalPm = NULL);
+                        const SPatchMesh *evalPm = NULL,
+                        STopoDetachBoundary *boundaryOut = NULL);
+
+/**
+ * Extrude the listed patches (patch_topo_extrude.cpp): the legacy Extrude, recomposed
+ * from the tool's own pieces. The selection's boundary splits exactly as
+ * topoDetachElements does it (duplicated ring, originals stay with the complement),
+ * WALLS bridge the two rings - one quad per shared boundary edge, vertical edges shared
+ * between adjacent walls, the bottom reusing the original edge record and the top the
+ * island's copy - and the island then translates by (dx, dy, dz).
+ *
+ * Wall tiling: the horizontal order matches the island patch's order along that edge
+ * (the tiles line up across the top seam), and the VERTICAL order comes from the
+ * extrude height at the standard 2 m/tile density, clamped to 1..4. Walls start with
+ * EMPTY tiles and white colors (fresh paintable surface, the add-quad rule).
+ *
+ * OPEN boundary edges (zone borders) rise WITHOUT a wall - a ligo border profile is a
+ * cross-file contract, and walling it would break the brick's edge. The translate is
+ * mapper-aware: a mapped element moves through its Delta (the Tier A rule), an unmapped
+ * one through its stored position; bound vertices are skipped (they are derived).
+ *
+ * Refuses: everything topoDetachElements refuses, map-channel meshes (walls would need
+ * TVPatch rows), and a near-zero extrude vector.
+ */
+bool topoExtrudePatches(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
+                        const std::set<uint> &sel, float dx, float dy, float dz,
+                        std::string &err, const SPatchMesh *evalPm = NULL);
 
 /**
  * Append `src`/`srcRp` onto `pm`/`rp` (patch_topo_attach.cpp) - the attach merge. Every

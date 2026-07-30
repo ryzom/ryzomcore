@@ -298,6 +298,12 @@ void CPaintMouseListener::operator()(const NLMISC::CEvent &event)
 				if ((mouse->Button & NLMISC::leftButton)
 				    && (SubObj == SubVertex || SubObj == SubEdge || SubObj == SubPatch))
 				{
+					// SHIFT-drag at patch level: EXTRUDE - the Z-constrained drag whose
+					// release builds the walls. Checked ahead of the gizmo so a handle
+					// under the pointer cannot steal the gesture.
+					if (SubObj == SubPatch && (mouse->Button & NLMISC::shiftButton)
+					    && zpPatchGizmoBeginExtrudeDrag(Camera, Viewport, MouseX, MouseY))
+						return;
 					// The armed target-weld mode claims a press that lands ON a vertex;
 					// anywhere else the press falls through to the normal paths, so arming
 					// only changes what a vertex press means.
@@ -876,6 +882,7 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 		paintBridge.moveToZoneDir = zpMoveToZoneDirClicked;
 		paintBridge.weldTargetToggle = zpWeldTargetToggleClicked;
 		paintBridge.patchWeldThreshold = zpPatchWeldThresholdClicked;
+		paintBridge.patchExtrude = zpPatchExtrudeClicked;
 		paintBridge.patchFilterVertsToggle = zpPatchFilterVertsClicked;
 		paintBridge.patchFilterVecsToggle = zpPatchFilterVecsClicked;
 		paintBridge.patchLockHandlesToggle = zpPatchLockHandlesClicked;

@@ -107,6 +107,7 @@ uint zpSubdividePatchSelection();
 uint zpWeldPatchSelection(float threshold);
 uint zpWeldVertexInto(uint zoneId, uint srcVert, uint dstVert);
 bool zpWeldDragAt(float x0, float y0, float x1, float y1);
+bool zpExtrudeDragAt(float x0, float y0, float x1, float y1);
 bool zpPatchVertScreen(uint zoneId, uint vertIdx, float &sxOut, float &syOut);
 bool zpPatchTangentScreen(uint zoneId, uint vecIdx, float &sxOut, float &syOut);
 uint zpAddQuadPatchSelection();
@@ -115,6 +116,7 @@ uint zpDetachToFile(const std::string &nameIn);
 uint zpExpandSelectionToElement();
 uint zpAttachZone(uint targetZone, uint srcZone, std::string &msg);
 uint zpMovePatchSelectionToZone(uint dstZone, std::string &msg);
+uint zpExtrudePatchSelection(float dz);
 uint zpSetSmoothGroup(uint bit, bool on);
 uint zpClearSmoothGroups();
 uint zpSetPatchTess(int u, int v);
@@ -1268,6 +1270,28 @@ static int lDetachToFile(CLuaState &ls) // ([name]) -> detached count (SHELVED, 
 	return 1;
 }
 
+static int lExtrudePatchSelection(CLuaState &ls) // (height) -> extruded count
+{
+	double h;
+	if (!argNumber(ls, 1, h))
+		return retErr(ls, "usage: extrudePatchSelection(height)");
+	const uint n = zpExtrudePatchSelection((float)h);
+	printf("extrudePatchSelection: %u extruded\n", n);
+	fflush(stdout);
+	ls.push((double)n);
+	return 1;
+}
+
+static int lExtrudeDragAt(CLuaState &ls) // (x0, y0, x1, y1) the shift-drag, scripted
+{
+	double x0, y0, x1, y1;
+	if (!argNumber(ls, 1, x0) || !argNumber(ls, 2, y0) || !argNumber(ls, 3, x1) || !argNumber(ls, 4, y1))
+		return retErr(ls, "usage: extrudeDragAt(x0, y0, x1, y1)");
+	if (!zpExtrudeDragAt((float)x0, (float)y0, (float)x1, (float)y1))
+		return retErr(ls, "extrudeDragAt: no face selection or no pivot");
+	return retOk(ls);
+}
+
 static int lExpandSelectionToElement(CLuaState &ls) // () -> patches added
 {
 	const uint n = zpExpandSelectionToElement();
@@ -1677,6 +1701,8 @@ static const char *kBootstrap =
 	"  tangentScreenPos = __zp_tangentScreenPos,\n"
 	"  addQuadPatchSelection = __zp_addQuadPatchSelection,\n"
 	"  detachPatchSelection = __zp_detachPatchSelection,\n"
+	"  extrudePatchSelection = __zp_extrudePatchSelection,\n"
+	"  extrudeDragAt = __zp_extrudeDragAt,\n"
 	"  detachToFile = __zp_detachToFile,\n"
 	"  expandSelectionToElement = __zp_expandSelectionToElement,\n"
 	"  attachZone = __zp_attachZone,\n"
@@ -1797,6 +1823,8 @@ bool ensureLua()
 	ls->registerFunc("__zp_tangentScreenPos", lTangentScreenPos);
 	ls->registerFunc("__zp_addQuadPatchSelection", lAddQuadPatchSelection);
 	ls->registerFunc("__zp_detachPatchSelection", lDetachPatchSelection);
+	ls->registerFunc("__zp_extrudePatchSelection", lExtrudePatchSelection);
+	ls->registerFunc("__zp_extrudeDragAt", lExtrudeDragAt);
 	ls->registerFunc("__zp_detachToFile", lDetachToFile);
 	ls->registerFunc("__zp_expandSelectionToElement", lExpandSelectionToElement);
 	ls->registerFunc("__zp_attachZone", lAttachZone);

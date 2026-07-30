@@ -270,6 +270,10 @@ bool zpSyncLandscapeWeld()
 
 // Gizmo drag state; see the drag section below.
 bool s_Dragging = false;
+// SHIFT-drag extrude: the drag is the ordinary Z-constrained gizmo drag - same preview,
+// same cancel paths - but the release commits an EXTRUDE of the drag's height instead of
+// a move (the walls appear at release; the preview shows the selection lifting).
+static bool s_ExtrudeDrag = false;
 int s_DragHandle = ZPGIZ_NONE;
 static NLMISC::CVector s_DragPlaneN, s_DragPlaneP, s_DragStartHit;
 NLMISC::CVector s_DragDelta;
@@ -593,10 +597,24 @@ const char *zpXformKindName(int kind)
 	return kNames[kind];
 }
 
+/** The shift-drag entry: a Z-axis drag flagged to commit extrude on release. */
+bool zpPatchGizmoBeginExtrudeDrag(NL3D::CCamera *camera, const NL3D::CViewport &vp,
+                                  float mouseX, float mouseY)
+{
+	if (g_PatchFaceSel.empty())
+		return false;
+	if (!zpPatchGizmoBeginDrag(ZPGIZ_AXIS_Z, camera, vp, mouseX, mouseY))
+		return false;
+	s_ExtrudeDrag = true;
+	g_PropStatusMsg = "extrude: drag vertically, release to build the walls";
+	return true;
+}
+
 bool zpPatchGizmoBeginDrag(int handle, NL3D::CCamera *camera, const NL3D::CViewport &vp,
                            float mouseX, float mouseY)
 {
 	s_Dragging = false;
+	s_ExtrudeDrag = false;
 	s_DragDelta = NLMISC::CVector::Null;
 	if (handle == ZPGIZ_NONE || !camera)
 		return false;
@@ -1325,6 +1343,8 @@ void zpPatchGizmoEndDrag()
 		return;
 	const NLMISC::CVector delta = s_DragDelta;
 	const SPatchXform xf = s_DragXform;
+	const bool extrude = s_ExtrudeDrag;
+	s_ExtrudeDrag = false;
 	const bool moved = xf.Kind == ZPXF_Move
 		? delta.norm() > 0.0001f
 		: (xf.Kind == ZPXF_Rotate ? fabsf(xf.Angle) > 1e-4f
@@ -1339,6 +1359,13 @@ void zpPatchGizmoEndDrag()
 	zpPivotNoteInteractionEnd();
 	if (!moved)
 		return;
+	if (extrude)
+	{
+		// The drag measured the height; the op does the rest (and records itself). The
+		// preview showed the selection lifting; the walls land with the commit.
+		zpExtrudePatchSelection(delta.z);
+		return;
+	}
 	std::string msg;
 	zpApplyPatchXform(xf, delta, msg);
 	g_PropStatusMsg = msg;
@@ -1371,6 +1398,7 @@ void zpPatchGizmoCancelDrag()
 	if (!s_Dragging)
 		return;
 	s_Dragging = false;
+	s_ExtrudeDrag = false;
 	s_DragHandle = ZPGIZ_NONE;
 	s_DragDelta = NLMISC::CVector::Null;
 	s_DragXform = SPatchXform();

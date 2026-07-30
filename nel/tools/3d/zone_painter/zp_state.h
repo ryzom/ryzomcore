@@ -804,6 +804,13 @@ void zpPatchWeldThresholdClicked(float distance);
  *  the drag-onto-a-vertex gesture's op. Undoable. */
 uint zpWeldVertexInto(uint zoneId, uint srcVert, uint dstVert);
 /** Surface Properties (patch level): smoothing groups and per-patch tessellation. */
+uint zpExtrudePatchSelection(float dz);
+float zpLastExtrudeHeight();
+void zpPatchExtrudeClicked(float dz);
+/** Begin a SHIFT-drag extrude at patch level: a Z-constrained gizmo drag whose release
+ *  commits an extrude of the drag's height instead of a move. */
+bool zpPatchGizmoBeginExtrudeDrag(NL3D::CCamera *camera, const NL3D::CViewport &vp,
+                                  float mouseX, float mouseY);
 uint zpSetSmoothGroup(uint bit, bool on);
 uint zpClearSmoothGroups();
 uint zpSetPatchTess(int u, int v);
@@ -825,6 +832,7 @@ void zpWeldDragCancel();
 void zpDrawWeldDrag(NL3D::IDriver *driver, NL3D::CCamera *camera);
 void zpWeldTargetToggleClicked();
 bool zpWeldDragAt(float x0, float y0, float x1, float y1);
+bool zpExtrudeDragAt(float x0, float y0, float x1, float y1);
 bool zpPatchVertScreen(uint zoneId, uint vertIdx, float &sxOut, float &syOut);
 bool zpPatchTangentScreen(uint zoneId, uint vecIdx, float &sxOut, float &syOut);
 /** Grow a quad from each selected open edge (legacy Add Quad). Undoable. */

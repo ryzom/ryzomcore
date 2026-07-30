@@ -1215,6 +1215,21 @@ bool zpPatchTangentScreen(uint zoneId, uint vecIdx, float &sxOut, float &syOut)
  * begin/finish handlers (same caveat as zpPatchClickAt - this proves the drag machinery,
  * not the event dispatch that feeds it).
  */
+/** Scripted SHIFT-drag extrude: press at (x0,y0), drag to (x1,y1), release - through the
+ *  REAL begin/update/end handlers (the zpWeldDragAt caveat applies: this proves the drag
+ *  machinery, not the event dispatch that feeds it). */
+bool zpExtrudeDragAt(float x0, float y0, float x1, float y1)
+{
+	if (!g_PaintCtx.Camera)
+		return false;
+	const NL3D::CViewport vp;
+	if (!zpPatchGizmoBeginExtrudeDrag(g_PaintCtx.Camera, vp, x0, y0))
+		return false;
+	zpPatchGizmoUpdateDrag(g_PaintCtx.Camera, vp, x1, y1);
+	zpPatchGizmoEndDrag();
+	return true;
+}
+
 bool zpWeldDragAt(float x0, float y0, float x1, float y1)
 {
 	if (!g_PaintCtx.Camera || !g_PaintCtx.UDriver)

@@ -655,6 +655,17 @@ static bool zpXformAddQuad(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper * /* m
 	return topoAddQuads(pm, rp, sel, err, evalPm);
 }
 
+// The extrude vector rides file-statics like the weld threshold (op state, not selection).
+static float s_ExtrudeDX = 0.f, s_ExtrudeDY = 0.f, s_ExtrudeDZ = 0.f;
+static float s_LastExtrude = 8.f;
+static bool zpXformExtrude(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
+                           const std::set<uint> &sel, std::string &err,
+                           const SPatchMesh *evalPm)
+{
+	return topoExtrudePatches(pm, rp, mapper, sel, s_ExtrudeDX, s_ExtrudeDY, s_ExtrudeDZ,
+	                          err, evalPm);
+}
+
 static bool zpXformDetachElement(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper * /* mapper */,
                                  const std::set<uint> &sel, std::string &err,
                                  const SPatchMesh *evalPm)
@@ -713,6 +724,35 @@ uint zpWeldPatchSelection(float threshold)
 
 /** The last-used weld distance (seeds the panel dialog). */
 float zpLastWeldThreshold() { return s_WeldThreshold; }
+
+/**
+ * Extrude the selected patches by `dz` along world Z (the terrain axis): the boundary
+ * splits, walls bridge the rings (horizontal tiling lines up with the top patch,
+ * vertical tiling from the height at 2 m/tile), the island rises. Open zone-border
+ * edges rise WITHOUT a wall - the ligo border profile is a cross-file contract. One
+ * Kind 6 stroke through the shared runner.
+ */
+uint zpExtrudePatchSelection(float dz)
+{
+	if (dz == 0.f)
+	{
+		g_PropStatusMsg = "extrude: zero height";
+		return 0;
+	}
+	s_ExtrudeDX = 0.f;
+	s_ExtrudeDY = 0.f;
+	s_ExtrudeDZ = dz;
+	s_LastExtrude = dz;
+	return zpRunTopoOp("extrude",
+	                   NLMISC::toString("painter.extrudePatchSelection(%.9g)", dz),
+	                   zpXformExtrude);
+}
+
+/** The last-used extrude height (seeds the panel dialog). */
+float zpLastExtrudeHeight() { return s_LastExtrude; }
+
+/** Extrude dialog OK / drag commit. */
+void zpPatchExtrudeClicked(float dz) { zpExtrudePatchSelection(dz); }
 
 /** Weld dialog OK. */
 void zpPatchWeldThresholdClicked(float distance) { zpWeldPatchSelection(distance); }
