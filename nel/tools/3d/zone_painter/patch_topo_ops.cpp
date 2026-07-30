@@ -242,6 +242,33 @@ bool encodeTopoTarget(const STopoTarget &t, const SPatchMesh &pm, const SRPatchM
 	return true;
 }
 
+/** The editable-file record owning a zone id, or NULL (synthetic/startup zones). */
+SEditableFileInfo *zpZoneEditableFile(uint zoneId)
+{
+	for (size_t i = 0; i < g_EditableFiles.size(); ++i)
+		for (size_t z = 0; z < g_EditableFiles[i].ZoneIds.size(); ++z)
+			if (g_EditableFiles[i].ZoneIds[z] == zoneId)
+				return &g_EditableFiles[i];
+	return NULL;
+}
+
+/** The editable-file record of an OBJECT, through its in-file editable zone (a topo op can
+ *  be addressed through a session-added instance, whose id no file record lists). Returns
+ *  the file zone's id in `fileZoneOut` so cell replays resolve the same file later. */
+SEditableFileInfo *zpObjectEditableFile(const void *node, uint &fileZoneOut)
+{
+	if (!g_PaintCtx.Zones)
+		return NULL;
+	const std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
+	for (size_t z = 0; z < zones.size(); ++z)
+		if ((const void *)zones[z].Node == node && zones[z].InFile && zones[z].Editable)
+		{
+			fileZoneOut = zones[z].ZoneId;
+			return zpZoneEditableFile(zones[z].ZoneId);
+		}
+	return NULL;
+}
+
 } /* anonymous namespace */
 
 // ---------------------------------------------------------------------------------------------
@@ -296,6 +323,8 @@ static uint zpRunTopoOpImpl(const char *opName, const std::string &recordLine, T
 		if (!resolveTopoTarget(pz->Node, target, err))
 		{
 			g_PropStatusMsg = std::string(opName) + ": " + err;
+			printf("%s\n", g_PropStatusMsg.c_str());
+			fflush(stdout);
 			continue;
 		}
 		SPatchMesh pm;
@@ -305,11 +334,15 @@ static uint zpRunTopoOpImpl(const char *opName, const std::string &recordLine, T
 		if (!decodeTopoTarget(target, pm, rp, mapper, haveMapper, err))
 		{
 			g_PropStatusMsg = std::string(opName) + ": " + err;
+			printf("%s\n", g_PropStatusMsg.c_str());
+			fflush(stdout);
 			continue;
 		}
 		if (pm.Patches.size() != pz->Patches.size())
 		{
 			g_PropStatusMsg = std::string(opName) + ": stored stream does not match the displayed topology";
+			printf("%s\n", g_PropStatusMsg.c_str());
+			fflush(stdout);
 			continue;
 		}
 		// Undo payload: the decoded pre-op structs (post-writeBack, so the flushed paint is
@@ -322,6 +355,24 @@ static uint zpRunTopoOpImpl(const char *opName, const std::string &recordLine, T
 		snap->HaveMapper = haveMapper && target.MapperRaw;
 		if (snap->HaveMapper)
 			snap->MapperOld = target.MapperRaw->Value;
+		// Anchor-cell fixup, the attach/move rule generalized: any topological op can move
+		// the authored footprint ORIGIN (delete the west row, grow a quad past the corner,
+		// weld a rim vertex away), and board placement re-derives from that origin on every
+		// rebuild - without the fixup the survivors slide to keep the new origin at the
+		// anchor cell. Captured before the encode, applied after it; the snapshot replays
+		// the delta both ways, through the file's own zone id.
+		uint fileZone = zoneId;
+		SEditableFileInfo *efi = zpZoneEditableFile(zoneId);
+		if (!efi)
+			efi = zpObjectEditableFile(ot->first, fileZone); // addressed through an instance
+		float oxPre = 0.f, oyPre = 0.f;
+		bool haveOrigin = false;
+		if (efi && g_SessionCellSize > 0.f)
+		{
+			SNodeTMCache tmCache;
+			haveOrigin = zoneNodeAuthoredFootprintOrigin(pz->Node, tmCache, g_SessionCellSize,
+			                                             oxPre, oyPre);
+		}
 		if (getenv("ZP_TOPO_DEBUG_GRID"))
 		{
 			const uint dp = *ot->second.begin();
@@ -356,10 +407,19 @@ static uint zpRunTopoOpImpl(const char *opName, const std::string &recordLine, T
 		}
 		if (!encodeTopoTarget(target, pm, rp, mapper, haveMapper, err))
 		{
-			// The struct transform succeeded but the write-back did not; the stream may be
-			// half-written. The rebuild below re-derives from storage either way, and the
-			// file on disk is untouched until an explicit save.
+			// The encoder mutates the chunk list stream by stream, so a failure can leave
+			// the carrier half-written while display and core still hold the pre-op state.
+			// Put the pre-op structs back through the same codec (the proven identity path)
+			// so the carrier never keeps a partial state a later save would write out.
+			std::string rerr;
+			SPmVertMapper unusedMapper;
+			if (!encodeTopoTarget(target, snap->PmOld, snap->RpOld, unusedMapper, false, rerr))
+				fprintf(stderr, "ERROR: %s: pre-op restore failed: %s\n", opName, rerr.c_str());
+			else if (snap->HaveMapper)
+				target.MapperRaw->Value = snap->MapperOld;
 			g_PropStatusMsg = std::string(opName) + ": " + err;
+			printf("%s\n", g_PropStatusMsg.c_str());
+			fflush(stdout);
 			delete snap;
 			continue;
 		}
@@ -367,6 +427,27 @@ static uint zpRunTopoOpImpl(const char *opName, const std::string &recordLine, T
 		snap->RpNew = rp;
 		if (snap->HaveMapper)
 			snap->MapperNew = target.MapperRaw->Value;
+		if (haveOrigin)
+		{
+			SNodeTMCache tmCache;
+			float oxPost = 0.f, oyPost = 0.f;
+			if (zoneNodeAuthoredFootprintOrigin(pz->Node, tmCache, g_SessionCellSize,
+			                                    oxPost, oyPost))
+			{
+				const int cdx = (int)floor((oxPost - oxPre) / g_SessionCellSize + 0.5);
+				const int cdy = (int)floor((oyPost - oyPre) / g_SessionCellSize + 0.5);
+				if (cdx || cdy)
+				{
+					// The restore resolves the file from the snapshot's zone, so the record
+					// carries the FILE zone (the op may have been addressed via an instance).
+					snap->Zone = fileZone;
+					snap->CellDX = cdx;
+					snap->CellDY = cdy;
+					efi->CellX += cdx;
+					efi->CellY += cdy;
+				}
+			}
+		}
 		snaps.push_back(snap);
 		deleted += (uint)ot->second.size();
 		touchedZones.push_back(zoneId);
@@ -422,6 +503,8 @@ static uint zpRunTopoOp(const char *opName, const std::string &recordLine, TTopo
 	if (g_PatchFaceSel.empty())
 	{
 		g_PropStatusMsg = std::string(opName) + ": no patches selected";
+		printf("%s\n", g_PropStatusMsg.c_str());
+		fflush(stdout);
 		return 0;
 	}
 	// Group the selection per OBJECT: indices are object-level, and two zones of one
@@ -451,6 +534,8 @@ static uint zpRunTopoOpEdges(const char *opName, const std::string &recordLine, 
 	if (g_PatchEdgeSel.empty())
 	{
 		g_PropStatusMsg = std::string(opName) + ": no edges selected";
+		printf("%s\n", g_PropStatusMsg.c_str());
+		fflush(stdout);
 		return 0;
 	}
 	std::map<const void *, std::set<uint> > perObject;
@@ -482,6 +567,8 @@ static uint zpRunTopoOpVerts(const char *opName, const std::string &recordLine, 
 	if (g_PatchVertSel.empty())
 	{
 		g_PropStatusMsg = std::string(opName) + ": no vertices selected";
+		printf("%s\n", g_PropStatusMsg.c_str());
+		fflush(stdout);
 		return 0;
 	}
 	std::map<const void *, std::set<uint> > perObject;
@@ -724,6 +811,8 @@ uint zpDetachToFile(const std::string &nameIn)
 	if (g_PatchFaceSel.empty())
 	{
 		g_PropStatusMsg = "detach: no patches selected";
+		printf("%s\n", g_PropStatusMsg.c_str());
+		fflush(stdout);
 		return 0;
 	}
 	// One object only: the op writes one source file and one new file.
@@ -750,6 +839,8 @@ uint zpDetachToFile(const std::string &nameIn)
 	if (!object || sel.empty())
 	{
 		g_PropStatusMsg = "detach: selection has no editable elements";
+		printf("%s\n", g_PropStatusMsg.c_str());
+		fflush(stdout);
 		return 0;
 	}
 	SPaintZone *pz = zpFindPaintZoneMut(zoneId);
@@ -866,6 +957,22 @@ uint zpDetachToFile(const std::string &nameIn)
 
 	// --- Pass 2: the SOURCE loses the selection - the normal delete flow, Kind 6 undoable
 	// (the zone set is unchanged; the new file is not opened).
+	// Same anchor-cell fixup as the shared runner: detaching the west half of a multi-cell
+	// zone moves the survivors' footprint origin, and without the cell shift the next
+	// rebuild slides them to keep the new origin at the anchor. Captured here, after pass
+	// 1's restore put the pre-op stream back.
+	uint fileZone = zoneId;
+	SEditableFileInfo *efi = zpZoneEditableFile(zoneId);
+	if (!efi)
+		efi = zpObjectEditableFile((const void *)pz->Node, fileZone);
+	float oxPre = 0.f, oyPre = 0.f;
+	bool haveOrigin = false;
+	if (efi && g_SessionCellSize > 0.f)
+	{
+		SNodeTMCache tmCache;
+		haveOrigin = zoneNodeAuthoredFootprintOrigin(pz->Node, tmCache, g_SessionCellSize,
+		                                             oxPre, oyPre);
+	}
 	ZPPAINT::STopoSnapshot *snap = new ZPPAINT::STopoSnapshot();
 	snap->Zone = zoneId;
 	snap->PmOld = pmPre;
@@ -891,6 +998,25 @@ uint zpDetachToFile(const std::string &nameIn)
 		snap->RpNew = rpSrc;
 		if (snap->HaveMapper)
 			snap->MapperNew = targetStream.MapperRaw->Value;
+	}
+	if (haveOrigin)
+	{
+		SNodeTMCache tmCache;
+		float oxPost = 0.f, oyPost = 0.f;
+		if (zoneNodeAuthoredFootprintOrigin(pz->Node, tmCache, g_SessionCellSize,
+		                                    oxPost, oyPost))
+		{
+			const int cdx = (int)floor((oxPost - oxPre) / g_SessionCellSize + 0.5);
+			const int cdy = (int)floor((oyPost - oyPre) / g_SessionCellSize + 0.5);
+			if (cdx || cdy)
+			{
+				snap->Zone = fileZone;
+				snap->CellDX = cdx;
+				snap->CellDY = cdy;
+				efi->CellX += cdx;
+				efi->CellY += cdy;
+			}
+		}
 	}
 	// The RESOLVED basename (collision bumps included) is what the recorder replays.
 	name = NLMISC::CFile::getFilenameWithoutExtension(target);
@@ -980,16 +1106,6 @@ bool zpRelObjectTM(const SPaintZone &target, const SPaintZone &src, double out[1
 	return true;
 }
 
-/** The editable-file record owning a zone id, or NULL (synthetic/startup zones). */
-SEditableFileInfo *zpZoneEditableFile(uint zoneId)
-{
-	for (size_t i = 0; i < g_EditableFiles.size(); ++i)
-		for (size_t z = 0; z < g_EditableFiles[i].ZoneIds.size(); ++z)
-			if (g_EditableFiles[i].ZoneIds[z] == zoneId)
-				return &g_EditableFiles[i];
-	return NULL;
-}
-
 } /* anonymous namespace */
 
 /**
@@ -1032,6 +1148,11 @@ uint zpAttachZone(uint targetZone, uint srcZone, std::string &msg)
 		return 0;
 	}
 	const std::string srcBase = srcFile->Basename;
+	// The close below re-bases every zone id (ids are file-index-derived), so the target must
+	// be re-found by its NODE - the one identity that survives the rebuild. The pre-close id
+	// could land on a different file entirely once the indices shift.
+	const void *tgtNode = (const void *)pzT->Node;
+	const uint recTarget = targetZone, recSrc = srcZone; // the ids the user issued, for the record line
 
 	double rel[12];
 	if (!zpRelObjectTM(*pzT, *pzS, rel, msg))
@@ -1116,13 +1237,26 @@ uint zpAttachZone(uint targetZone, uint srcZone, std::string &msg)
 	}
 	pzS = NULL; // died with the close's rebuild
 
-	// The real merge, on the post-close session state.
-	pzT = zpFindPaintZoneMut(targetZone);
+	// The real merge, on the post-close session state. Re-resolve by node, not by the stale
+	// id: the file's own (InFile) editable zone is unique per file, and everything below -
+	// snapshot, dirty flag, status - runs on the re-based id.
+	pzT = NULL;
+	{
+		std::vector<SPaintZone> &zonesAll = *g_PaintCtx.Zones;
+		for (size_t z = 0; z < zonesAll.size(); ++z)
+			if ((const void *)zonesAll[z].Node == tgtNode && zonesAll[z].InFile
+			    && zonesAll[z].Editable)
+			{
+				pzT = &zonesAll[z];
+				break;
+			}
+	}
 	if (!pzT)
 	{
 		msg = "attach: target zone lost across the source close";
 		return 0;
 	}
+	targetZone = pzT->ZoneId;
 	STopoTarget target;
 	if (!resolveTopoTarget(pzT->Node, target, err))
 	{
@@ -1190,7 +1324,9 @@ uint zpAttachZone(uint targetZone, uint srcZone, std::string &msg)
 	printf("attach: zone %u += %u patches from '%s' (%s target)\n", targetZone, appended,
 	       srcBase.c_str(), target.Local ? "modifier" : "base");
 	fflush(stdout);
-	ZPSCRIPT::record(NLMISC::toString("painter.attachZone(%u, %u)", targetZone, srcZone));
+	// Recorded with the ids the user issued: a replay runs from the same pre-op state, where
+	// those are the right names; the re-based id above is a post-op session detail.
+	ZPSCRIPT::record(NLMISC::toString("painter.attachZone(%u, %u)", recTarget, recSrc));
 	g_PatchVertSel.clear();
 	g_PatchEdgeSel.clear();
 	g_PatchFaceSel.clear();
@@ -1255,6 +1391,8 @@ uint zpMovePatchSelectionToZone(uint dstZone, std::string &msg)
 	if (!object || sel.empty())
 	{
 		msg = "move: no patches selected";
+		printf("%s\n", msg.c_str());
+		fflush(stdout);
 		return 0;
 	}
 	SPaintZone *pzS = zpFindPaintZoneMut(srcZone);
