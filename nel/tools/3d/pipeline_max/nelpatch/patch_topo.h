@@ -179,6 +179,24 @@ bool topoWeldVerts(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
 bool topoAddQuads(SPatchMesh &pm, SRPatchMesh &rp,
                   const std::set<uint> &edges, std::string &err);
 
+/**
+ * Append `src`/`srcRp` onto `pm`/`rp` (patch_topo_attach.cpp) - the attach merge. Every
+ * source element is copied with its cross references shifted by the target's element
+ * counts and its positions transformed through `relTM` (row-major 3x4, source object
+ * space -> target object space). Per-patch paint records travel verbatim - tiles are
+ * authored in the patch frame, which the reorientation does not touch - so attach keeps
+ * the source's painted appearance. Source bind records retarget through the offsets with
+ * their caches reset; the source's selection state does not travel, the target's
+ * selection BitArrays grow with the appended elements unselected. The target keeps its
+ * own RPatchMesh header fields (tile mode, trailer shape).
+ *
+ * Refuses: reconstructed (Max 3) streams and hook tables on either side, map-channel
+ * meshes on either side, parallel-size mismatches, and an empty source.
+ */
+bool topoAppendMesh(SPatchMesh &pm, SRPatchMesh &rp,
+                    const SPatchMesh &src, const SRPatchMesh &srcRp,
+                    const double relTM[12], std::string &err);
+
 } /* namespace NELPATCH */
 } /* namespace MAX */
 } /* namespace PIPELINE */

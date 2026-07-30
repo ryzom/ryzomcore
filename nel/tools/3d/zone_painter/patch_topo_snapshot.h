@@ -51,7 +51,11 @@ struct STopoSnapshot
 	PIPELINE::MAX::NELPATCH::SRPatchMesh RpOld, RpNew;
 	std::vector<uint8> MapperOld, MapperNew; ///< raw 0x1130 payloads, verbatim
 	bool HaveMapper;
-	STopoSnapshot() : Zone(0), HaveMapper(false) { }
+	/// Anchor-cell shift the op applied to the zone's owning file (attach: the merged
+	/// geometry moved the authored footprint origin). Restore re-applies the matching
+	/// direction so the placement math keeps the zone where the restored side had it.
+	int CellDX, CellDY;
+	STopoSnapshot() : Zone(0), HaveMapper(false), CellDX(0), CellDY(0) { }
 };
 
 } /* namespace ZPPAINT */

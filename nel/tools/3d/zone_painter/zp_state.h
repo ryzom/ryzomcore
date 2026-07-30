@@ -772,6 +772,9 @@ void zpPatchAddQuadClicked();
  *  file stays on disk. */
 uint zpDetachPatchSelection(const std::string &nameIn);
 void zpPatchDetachClicked();
+/** Merge zone srcZone into targetZone (source file saved and closed; the attach lands as
+ *  the fresh undo stack's first stroke - undo rolls the target back). */
+uint zpAttachZone(uint targetZone, uint srcZone, std::string &msg);
 /** Displayed patch count of a zone (script/gate read access). */
 bool zpZonePatchCount(uint zoneId, uint &countOut);
 /** Eval-mirror vertex count of a zone (script/gate read access). */

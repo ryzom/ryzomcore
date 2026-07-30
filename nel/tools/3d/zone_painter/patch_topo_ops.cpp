@@ -858,6 +858,297 @@ uint zpDetachPatchSelection(const std::string &nameIn)
 /** Bridge wrapper: panel Detach button (auto name). */
 void zpPatchDetachClicked() { zpDetachPatchSelection(std::string()); }
 
+// ---------------------------------------------------------------------------------------------
+// Attach: merge another open editable zone's patches into this one.
+//
+// The inverse of detach at the session level. The source zone's mesh is appended onto the
+// target's write-target stream, reoriented through the two DISPLAY transforms so every
+// patch keeps its place in the world; the source FILE is then saved and closed - its
+// on-disk brick is untouched by the merge, so nothing is lost if the artist changes their
+// mind. The close clears the undo history (a zone-set change, like any open/close); the
+// attach itself then lands as the fresh stack's first Kind 6 stroke, so undo rolls the
+// TARGET back to its pre-attach bytes while the closed source file simply stays closed.
+//
+// Positions come from the source's EVAL MIRROR (mapper-applied - a mapper-driven vertex's
+// stored position is dead bytes); paint and binds come from the source's freshly-flushed
+// STORED stream (the eval mirror's rp is a rebuild-time snapshot and would miss pending
+// paint). The two agree on topology by construction, guarded below anyway.
+
+namespace {
+
+/** Row-major 3x4 (column-vector) form of src-object-space -> target-object-space. */
+bool zpRelObjectTM(const SPaintZone &target, const SPaintZone &src, double out[12],
+                   std::string &err)
+{
+	using namespace MAXMATH;
+	if (getenv("ZP_ATTACH_DEBUG"))
+	{
+		for (int r = 0; r < 4; ++r)
+			fprintf(stderr, "ATTACH tgt[%d]=(%g %g %g) src[%d]=(%g %g %g)\n", r,
+			        target.DisplayTM.m[r][0], target.DisplayTM.m[r][1], target.DisplayTM.m[r][2],
+			        r, src.DisplayTM.m[r][0], src.DisplayTM.m[r][1], src.DisplayTM.m[r][2]);
+	}
+	// Bitwise-equal display frames attach verbatim: no float noise on any position.
+	if (memcmp(&target.DisplayTM, &src.DisplayTM, sizeof(Matrix3M)) == 0)
+	{
+		for (int i = 0; i < 12; ++i)
+			out[i] = 0.0;
+		out[0] = out[5] = out[10] = 1.0;
+		return true;
+	}
+	// Row-vector convention: world = obj * DisplayTM, so rel = src * inverse(target).
+	const Matrix3M rel = src.DisplayTM * inverseM3(target.DisplayTM);
+	const double det =
+		(double)rel.m[0][0] * ((double)rel.m[1][1] * rel.m[2][2] - (double)rel.m[1][2] * rel.m[2][1])
+		- (double)rel.m[0][1] * ((double)rel.m[1][0] * rel.m[2][2] - (double)rel.m[1][2] * rel.m[2][0])
+		+ (double)rel.m[0][2] * ((double)rel.m[1][0] * rel.m[2][1] - (double)rel.m[1][1] * rel.m[2][0]);
+	if (det < 0.0)
+	{
+		err = "mirrored placement (patch winding would flip)";
+		return false;
+	}
+	// Transpose into p' = M*p rows: out[4j+i] = rel.m[i][j], translation = rel.m[3][j].
+	for (int j = 0; j < 3; ++j)
+	{
+		for (int i = 0; i < 3; ++i)
+			out[4 * j + i] = (double)rel.m[i][j];
+		out[4 * j + 3] = (double)rel.m[3][j];
+	}
+	return true;
+}
+
+/** The editable-file record owning a zone id, or NULL (synthetic/startup zones). */
+SEditableFileInfo *zpZoneEditableFile(uint zoneId)
+{
+	for (size_t i = 0; i < g_EditableFiles.size(); ++i)
+		for (size_t z = 0; z < g_EditableFiles[i].ZoneIds.size(); ++z)
+			if (g_EditableFiles[i].ZoneIds[z] == zoneId)
+				return &g_EditableFiles[i];
+	return NULL;
+}
+
+} /* anonymous namespace */
+
+/**
+ * Merge zone `srcZone` into zone `targetZone` (both editable; the source must be an open
+ * editable FILE, which is saved and closed on success). Returns the appended patch count.
+ */
+uint zpAttachZone(uint targetZone, uint srcZone, std::string &msg)
+{
+	if (!g_PaintCtx.Core || !g_PaintCtx.Zones)
+	{
+		msg = "attach: no session";
+		return 0;
+	}
+	SPaintZone *pzT = zpFindPaintZoneMut(targetZone);
+	const SPaintZone *pzS = zpFindPaintZone(srcZone);
+	if (!pzT || !pzS)
+	{
+		msg = "attach: no such zone";
+		return 0;
+	}
+	if (!pzT->Editable || !pzS->Editable)
+	{
+		msg = "attach: both zones must be editable";
+		return 0;
+	}
+	if (pzT->Node == pzS->Node)
+	{
+		msg = "attach: source and target are the same object";
+		return 0;
+	}
+	SEditableFileInfo *srcFile = zpZoneEditableFile(srcZone);
+	if (!srcFile)
+	{
+		msg = "attach: source is not an open editable file (attach the other way around)";
+		return 0;
+	}
+	if (zpZoneEditableFile(targetZone) == srcFile)
+	{
+		msg = "attach: source and target live in the same file";
+		return 0;
+	}
+	const std::string srcBase = srcFile->Basename;
+
+	double rel[12];
+	if (!zpRelObjectTM(*pzT, *pzS, rel, msg))
+	{
+		msg = "attach: " + msg;
+		return 0;
+	}
+
+	// Flush pending paint NOW: the source capture below reads its stored stream, and the
+	// merged copy must carry everything unsaved.
+	std::string err;
+	if (!g_PaintCtx.Core->writeBack(err))
+	{
+		msg = "attach: paint write-back failed: " + err;
+		return 0;
+	}
+
+	// Source capture: stored stream for paint/binds/topology, eval-mirror positions.
+	SPatchMesh srcPm;
+	SRPatchMesh srcRp;
+	{
+		STopoTarget srcStream;
+		SPmVertMapper srcMapper;
+		bool srcHaveMapper = false;
+		if (!resolveTopoTarget(pzS->Node, srcStream, err)
+		    || !decodeTopoTarget(srcStream, srcPm, srcRp, srcMapper, srcHaveMapper, err))
+		{
+			msg = "attach: source: " + err;
+			return 0;
+		}
+		const PIPELINE::MAX::NELPATCH::SPatchMesh &ev = pzS->Ep.Pm;
+		if (srcPm.Verts.size() != ev.Verts.size() || srcPm.Vecs.size() != ev.Vecs.size()
+		    || srcPm.Patches.size() != pzS->Patches.size())
+		{
+			msg = "attach: source stream does not match its displayed topology";
+			return 0;
+		}
+		for (size_t i = 0; i < srcPm.Verts.size(); ++i)
+			memcpy(srcPm.Verts[i].Pos, ev.Verts[i].Pos, 12);
+		for (size_t i = 0; i < srcPm.Vecs.size(); ++i)
+			memcpy(srcPm.Vecs[i].Pos, ev.Vecs[i].Pos, 12);
+	}
+
+	// Pre-validate the merge on copies BEFORE closing anything: a refusal (map channel,
+	// hooks, Max 3 stream) must leave the session untouched.
+	{
+		STopoTarget tgtStream;
+		SPatchMesh tgtPm;
+		SRPatchMesh tgtRp;
+		SPmVertMapper tgtMapper;
+		bool tgtHaveMapper = false;
+		if (!resolveTopoTarget(pzT->Node, tgtStream, err)
+		    || !decodeTopoTarget(tgtStream, tgtPm, tgtRp, tgtMapper, tgtHaveMapper, err))
+		{
+			msg = "attach: " + err;
+			return 0;
+		}
+		if (tgtPm.Patches.size() != pzT->Patches.size())
+		{
+			msg = "attach: stored stream does not match the displayed topology";
+			return 0;
+		}
+		if (!topoAppendMesh(tgtPm, tgtRp, srcPm, srcRp, rel, err))
+		{
+			msg = "attach: " + err;
+			printf("%s\n", msg.c_str());
+			fflush(stdout);
+			return 0;
+		}
+	}
+
+	const uint appended = (uint)srcPm.Patches.size();
+
+	// Save and close the source file (nested board ops do not record - this op is the
+	// user action). The close's rebuild clears the undo stacks, the session open/close
+	// rule; the attach stroke below starts the fresh stack.
+	SBoardOpScope boardOp;
+	if (!sessionCloseZone(srcBase, /* saveFirst= */ true, /* forceDiscard= */ false, err))
+	{
+		msg = "attach: closing '" + srcBase + "' failed: " + err;
+		return 0;
+	}
+	pzS = NULL; // died with the close's rebuild
+
+	// The real merge, on the post-close session state.
+	pzT = zpFindPaintZoneMut(targetZone);
+	if (!pzT)
+	{
+		msg = "attach: target zone lost across the source close";
+		return 0;
+	}
+	STopoTarget target;
+	if (!resolveTopoTarget(pzT->Node, target, err))
+	{
+		msg = "attach: " + err;
+		return 0;
+	}
+	SPatchMesh pm;
+	SRPatchMesh rp;
+	SPmVertMapper mapper;
+	bool haveMapper = false;
+	if (!decodeTopoTarget(target, pm, rp, mapper, haveMapper, err))
+	{
+		msg = "attach: " + err;
+		return 0;
+	}
+	// The board placement re-derives from the file's authored footprint ORIGIN (snapped
+	// geometry min) on every rebuild; the merge can extend that corner, which would slide
+	// the whole zone to keep the new corner at the anchor cell. Capture the origin now and
+	// move the anchor CELL by the same whole-cell delta after the merge, so the zone stays
+	// put in the world and the footprint simply grows.
+	float oxPre = 0.f, oyPre = 0.f;
+	bool haveOrigin = false;
+	SEditableFileInfo *tgtFile = zpZoneEditableFile(targetZone);
+	if (tgtFile)
+	{
+		SNodeTMCache tmCache;
+		haveOrigin = zoneNodeAuthoredFootprintOrigin(pzT->Node, tmCache, g_SessionCellSize,
+		                                             oxPre, oyPre);
+	}
+	ZPPAINT::STopoSnapshot *snap = new ZPPAINT::STopoSnapshot();
+	snap->Zone = targetZone;
+	snap->PmOld = pm;
+	snap->RpOld = rp;
+	snap->HaveMapper = haveMapper && target.MapperRaw;
+	if (snap->HaveMapper)
+		snap->MapperOld = target.MapperRaw->Value;
+	// The appended outputs are unmapped; input-indexed mapper slots keep - no rewrite.
+	if (!topoAppendMesh(pm, rp, srcPm, srcRp, rel, err)
+	    || !encodeTopoTarget(target, pm, rp, mapper, haveMapper, err))
+	{
+		msg = "attach: " + err;
+		printf("%s\n", msg.c_str());
+		fflush(stdout);
+		delete snap;
+		return 0;
+	}
+	snap->PmNew = pm;
+	snap->RpNew = rp;
+	if (snap->HaveMapper)
+		snap->MapperNew = target.MapperRaw->Value;
+	if (haveOrigin)
+	{
+		float oxPost = 0.f, oyPost = 0.f;
+		SNodeTMCache tmCache;
+		if (zoneNodeAuthoredFootprintOrigin(pzT->Node, tmCache, g_SessionCellSize,
+		                                    oxPost, oyPost)
+		    && g_SessionCellSize > 0.f)
+		{
+			snap->CellDX = (int)floor((oxPost - oxPre) / g_SessionCellSize + 0.5);
+			snap->CellDY = (int)floor((oyPost - oyPre) / g_SessionCellSize + 0.5);
+			tgtFile->CellX += snap->CellDX;
+			tgtFile->CellY += snap->CellDY;
+		}
+	}
+	printf("attach: zone %u += %u patches from '%s' (%s target)\n", targetZone, appended,
+	       srcBase.c_str(), target.Local ? "modifier" : "base");
+	fflush(stdout);
+	ZPSCRIPT::record(NLMISC::toString("painter.attachZone(%u, %u)", targetZone, srcZone));
+	g_PatchVertSel.clear();
+	g_PatchEdgeSel.clear();
+	g_PatchFaceSel.clear();
+	g_PatchTanSel.clear();
+	zpPatchGizmoInvalidate();
+	uint welds = 0;
+	if (!rebuildWorkingSet(err, welds, /* skipWriteBack= */ true, /* keepUndo= */ true))
+	{
+		msg = "attach: session rebuild failed: " + err;
+		delete snap;
+		return appended;
+	}
+	std::vector<ZPPAINT::STopoSnapshot *> snaps(1, snap);
+	g_PaintCtx.Core->opTopoStroke(snaps);
+	g_PaintCtx.Core->markGeomDirty(targetZone);
+	msg = NLMISC::toString("attach: %u patch%s from '%s' (file saved and closed)",
+	                       appended, appended == 1 ? "" : "es", srcBase.c_str());
+	g_PropStatusMsg = msg;
+	return appended;
+}
+
 /**
  * Undo/redo sink for Kind 6 records: re-encode the snapshot's matching side into the
  * target stream. The working-set rebuild happens at the zpUndo/zpRedo level, once per
@@ -886,6 +1177,16 @@ void zpTopoRestore(const ZPPAINT::STopoSnapshot &snap, bool useOld)
 	}
 	if (snap.HaveMapper && target.MapperRaw)
 		target.MapperRaw->Value = useOld ? snap.MapperOld : snap.MapperNew;
+	// The op moved the owning file's anchor cell with the footprint origin (attach):
+	// restore the matching side so the rebuild's placement math keeps the zone put.
+	if (snap.CellDX || snap.CellDY)
+	{
+		if (SEditableFileInfo *f = zpZoneEditableFile(snap.Zone))
+		{
+			f->CellX += useOld ? -snap.CellDX : snap.CellDX;
+			f->CellY += useOld ? -snap.CellDY : snap.CellDY;
+		}
+	}
 }
 
 /** Bridge wrappers (void-returning function pointers). */

@@ -97,6 +97,7 @@ uint zpSubdividePatchSelection();
 uint zpWeldPatchSelection(float threshold);
 uint zpAddQuadPatchSelection();
 uint zpDetachPatchSelection(const std::string &nameIn);
+uint zpAttachZone(uint targetZone, uint srcZone, std::string &msg);
 bool zpZonePatchCount(uint zoneId, uint &countOut);
 bool zpZoneVertCount(uint zoneId, uint &countOut);
 bool zpTileQuery(uint zoneId, uint patchIdx, uint u, uint v, int &tileOut, int &rotOut,
@@ -1120,6 +1121,19 @@ static int lDetachPatchSelection(CLuaState &ls) // ([name]) -> detached count
 	return 1;
 }
 
+static int lAttachZone(CLuaState &ls) // (targetZone, srcZone) -> appended count
+{
+	double t, s;
+	if (!argNumber(ls, 1, t) || !argNumber(ls, 2, s))
+		return retErr(ls, "usage: attachZone(targetZone, srcZone)");
+	std::string msg;
+	const uint n = zpAttachZone((uint)t, (uint)s, msg);
+	printf("attachZone: %u appended%s%s\n", n, msg.empty() ? "" : " - ", msg.c_str());
+	fflush(stdout);
+	ls.push((double)n);
+	return 1;
+}
+
 static int lRawTile(CLuaState &ls) // (zone, patch, u, v, tile [, rot]) raw record, no solver
 {
 	double z, pch, u, v, t, r = 0;
@@ -1408,6 +1422,7 @@ static const char *kBootstrap =
 	"  weldPatchSelection = __zp_weldPatchSelection,\n"
 	"  addQuadPatchSelection = __zp_addQuadPatchSelection,\n"
 	"  detachPatchSelection = __zp_detachPatchSelection,\n"
+	"  attachZone = __zp_attachZone,\n"
 	"  patchCount = __zp_patchCount, tileAt = __zp_tileAt, vertexCount = __zp_vertexCount,\n"
 	"  setTileSet = __zp_setTileSet, getTileSet = __zp_getTileSet,\n"
 	"  setDisplaceIndex = __zp_setDisplaceIndex, setBrushColor = __zp_setBrushColor,\n"
@@ -1507,6 +1522,7 @@ bool ensureLua()
 	ls->registerFunc("__zp_weldPatchSelection", lWeldPatchSelection);
 	ls->registerFunc("__zp_addQuadPatchSelection", lAddQuadPatchSelection);
 	ls->registerFunc("__zp_detachPatchSelection", lDetachPatchSelection);
+	ls->registerFunc("__zp_attachZone", lAttachZone);
 	ls->registerFunc("__zp_patchCount", lPatchCount);
 	ls->registerFunc("__zp_vertexCount", lVertexCount);
 	ls->registerFunc("__zp_tileAt", lTileAt);
