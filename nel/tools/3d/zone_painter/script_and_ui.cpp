@@ -1720,6 +1720,75 @@ void zpFill(int rot)
 }
 
 
+/**
+ * Reset one zone's paint wholesale (plan mA8): default tiles, white colors, displace 0,
+ * one undo stroke. Scripts call it bare; the panel button confirms through the reset
+ * modal first (the save-dialog pattern).
+ */
+void zpResetZonePaint(uint zoneId)
+{
+	if (!g_PaintCtx.Core)
+		return;
+	std::string err;
+	if (g_PaintCtx.Core->opResetZone(zoneId, err))
+	{
+		ZPSCRIPT::record(NLMISC::toString("painter.resetZonePaint(%u)", zoneId));
+		g_PropStatusMsg = NLMISC::toString("reset paint: zone %u", zoneId);
+	}
+	else
+		g_PropStatusMsg = "reset paint: " + err;
+	printf("%s\n", g_PropStatusMsg.c_str());
+	fflush(stdout);
+}
+
+/**
+ * The panel button's target: the Prop-selected zone when one is set (and editable),
+ * else the session's ONLY editable object's zone. A multi-file session without a Prop
+ * selection refuses - wiping the wrong brick is not a mistake to design around.
+ */
+bool zpResetPaintTarget(uint &zoneOut, std::string &labelOut)
+{
+	if (!g_PaintCtx.Zones)
+		return false;
+	const std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
+	if (g_HavePropSelection)
+	{
+		for (uint z = 0; z < zones.size(); ++z)
+			if (zones[z].ZoneId == g_SelectedZoneId && zones[z].Editable)
+			{
+				zoneOut = zones[z].ZoneId;
+				labelOut = zpZoneFileBasename(zoneOut);
+				if (labelOut.empty())
+					labelOut = zones[z].Name;
+				return true;
+			}
+	}
+	const void *node = NULL;
+	sint32 pick = -1;
+	for (uint z = 0; z < zones.size(); ++z)
+	{
+		if (!zones[z].Editable || !zones[z].InFile)
+			continue;
+		if (node && zones[z].Node != node)
+		{
+			g_PropStatusMsg = "reset paint: several editable zones - select one in Prop mode";
+			return false;
+		}
+		if (!node)
+		{
+			node = zones[z].Node;
+			pick = (sint32)z;
+		}
+	}
+	if (pick < 0)
+		return false;
+	zoneOut = zones[pick].ZoneId;
+	labelOut = zpZoneFileBasename(zoneOut);
+	if (labelOut.empty())
+		labelOut = zones[pick].Name;
+	return true;
+}
+
 // ---------------------------------------------------------------------------------------------
 // painterscript host : the Lua binding's window into the op layer. All calls
 // route through the SAME functions the keys/UI/--paint-script use (single op layer).

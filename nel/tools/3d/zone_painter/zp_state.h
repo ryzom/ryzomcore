@@ -1148,6 +1148,10 @@ std::string luaQuote(const std::string &s);
 void recordBoardOp(const std::string &line);
 void zpSelectMode(int mode);
 void zpFill(int rot);
+/** Reset one zone's paint wholesale (mA8): default tiles, white colors, displace 0, ONE
+ *  undo stroke. Scripts bare; the panel confirms through the reset modal. */
+void zpResetZonePaint(uint zoneId);
+bool zpResetPaintTarget(uint &zoneOut, std::string &labelOut);
 void zpUndo();
 void zpRedo();
 void zpSelectTileSetDelta(int d);

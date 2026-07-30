@@ -152,6 +152,9 @@ struct SPaintUIBridge
 	void (*patchUnhideAll)();
 	void (*patchSubdivPropToggle)(); // edge-subdivide Propagate checkbox
 	void (*patchDetachCopyToggle)(); // Detach's Copy checkbox
+	/** Reset paint (mA8): target resolution for the confirm modal, then the bare op. */
+	bool (*resetPaintTarget)(uint &zoneOut, std::string &labelOut);
+	void (*resetPaint)(uint zoneId);
 	void (*patchSmGroup)(int bit);   // Surface Properties: 32-button grid (tri-state click)
 	void (*patchSmGroupClear)();     // Clear All
 	void (*patchTessDelta)(int axis, int d); // 0 = U, 1 = V; +-1 steps, absolute-set apply
@@ -264,7 +267,7 @@ struct SPaintUIBridge
 		  patchWeldThreshold(NULL), patchExtrude(NULL), patchExtrudeEx(NULL),
 		  patchVertCoplanar(NULL), patchInteriorMode(NULL),
 		  patchHide(NULL), patchUnhideAll(NULL), patchSubdivPropToggle(NULL),
-		  patchDetachCopyToggle(NULL),
+		  patchDetachCopyToggle(NULL), resetPaintTarget(NULL), resetPaint(NULL),
 		  patchFilterVertsToggle(NULL), patchFilterVecsToggle(NULL), patchLockHandlesToggle(NULL),
 		  arrowsToggle(NULL),
 		  patchSmGroup(NULL), patchSmGroupClear(NULL), patchTessDelta(NULL), patchBalance(NULL),

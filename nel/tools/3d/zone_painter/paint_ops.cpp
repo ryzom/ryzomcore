@@ -619,6 +619,7 @@ bool CPaintCore::opTileStroke(uint zone, sint32 tileId, int tileSet, bool _256, 
 
 void CPaintCore::endStroke()
 {
+	if (m_SuspendStroke) return; // opResetZone's sweep: one reset, one stroke
 	if (m_CurStroke.empty()) return;
 	m_UndoStack.push_back(m_CurStroke);
 	m_CurStroke.clear();
@@ -1726,6 +1727,62 @@ bool CPaintCore::fillTileImpl(uint zi, uint patch, int tileSet, int rot, bool _2
 		}
 	}
 	return true;
+}
+
+bool CPaintCore::opResetZone(uint zone, std::string &err)
+{
+	uint zi = (uint)-1;
+	for (size_t i = 0; i < m_Zones.size(); ++i)
+		if (m_Zones[i].In.ZoneId == zone) { zi = (uint)i; break; }
+	if (zi == (uint)-1) { err = "unknown zone id"; return false; }
+	if (m_Zones[zi].In.Frozen) { err = "zone frozen"; return false; }
+	const size_t nP = m_Zones[zi].In.EvalRp->Patches.size();
+	// The whole sweep is ONE stroke: the per-op endStroke is suspended, the single close
+	// below pushes everything as one undo record. A mid-sweep failure still closes what
+	// happened (undoable), with the error reported.
+	m_SuspendStroke = true;
+	bool ok = true;
+	for (uint p = 0; p < (uint)nP && ok; ++p)
+	{
+		ok = ok && opFillTile(zone, p, -1, 0, false, err);
+		ok = ok && opFillColor(zone, p, NLMISC::CRGBA(255, 255, 255, 255), 256, err);
+		ok = ok && opFillDisplace(zone, p, 0, err);
+	}
+	// The fill clear leaves the painter's DEAD BYTES behind (stale layer values under
+	// Num = 0 - the plugin's own convention; the reference exporter leaks stale bytes
+	// the same way). A RESET's whole point is a reproducible never-painted state, so
+	// the raw records normalize fully to the default; the raw pair rides the same
+	// stroke, and undo restores the stale bytes verbatim.
+	if (ok)
+		for (uint p = 0; p < (uint)nP; ++p)
+		{
+			const uint nu = orderS(zi, p), nv = orderT(zi, p);
+			for (uint v = 0; v < nv; ++v)
+				for (uint u = 0; u < nu; ++u)
+				{
+					const sint32 tileId =
+						(sint32)(p * ZP_NUM_TILE_SEL + v * ZP_MAX_TILE_IN_PATCH + u);
+					PIPELINE::MAX::NELPATCH::SRpoTile *rec = pristineTileRecord(zi, tileId);
+					if (!rec)
+						continue;
+					SUndoTile un;
+					un.Kind = 0;
+					un.Zone = zi;
+					un.TileId = tileId;
+					getTileIdx(zi, tileId, un.Old);
+					un.New = un.Old; // the DESC is unchanged: dead-byte normalize only
+					un.HaveRaw = true;
+					captureRawTile(zi, tileId, un.OldRawNum, un.OldRawFlags, un.OldRawNoise,
+					               un.OldRawTile, un.OldRawRot);
+					*rec = PIPELINE::MAX::NELPATCH::SRpoTile();
+					captureRawTile(zi, tileId, un.NewRawNum, un.NewRawFlags, un.NewRawNoise,
+					               un.NewRawTile, un.NewRawRot);
+					m_CurStroke.push_back(un);
+				}
+		}
+	m_SuspendStroke = false;
+	endStroke();
+	return ok;
 }
 
 bool CPaintCore::opFillTile(uint zone, uint patch, int tileSet, int rot, bool _256, std::string &err)

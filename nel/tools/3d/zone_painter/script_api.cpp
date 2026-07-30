@@ -133,6 +133,7 @@ bool zpPatchIsHidden(uint zoneId, uint patchIdx);
 uint zpSubdivideEdgeSelection();
 void zpSetSubdividePropagate(bool on);
 uint zpSetPatchAuto(bool on);
+void zpResetZonePaint(uint zoneId);
 bool zpPatchFlagsQuery(uint zoneId, uint patchIdx, sint32 &out);
 bool zpPatchInteriorIndexQuery(uint zoneId, uint patchIdx, uint slot, uint &out);
 bool zpMoveDirTarget(int dir, uint &dstZoneOut);
@@ -1035,6 +1036,15 @@ static int lPatchVertFlags(CLuaState &ls) // (zone, vertIdx) -> the stored Flags
 	return 1;
 }
 
+static int lResetZonePaint(CLuaState &ls) // (zone): default tiles, white colors, displace 0
+{
+	double z;
+	if (!argNumber(ls, 1, z))
+		return retErr(ls, "usage: resetZonePaint(zone)");
+	zpResetZonePaint((uint)z);
+	return retOk(ls);
+}
+
 static int lSetPatchAuto(CLuaState &ls) // (on) over the face selection; false = bake manual
 {
 	const uint n = zpSetPatchAuto(argBoolOpt(ls, 1, true));
@@ -1805,6 +1815,7 @@ static const char *kBootstrap =
 	"  subdivideEdgeSelection = __zp_subdivideEdgeSelection,\n"
 	"  setSubdividePropagate = __zp_setSubdividePropagate,\n"
 	"  setPatchAuto = __zp_setPatchAuto, patchFlags = __zp_patchFlags,\n"
+	"  resetZonePaint = __zp_resetZonePaint,\n"
 	"  patchInteriorIndex = __zp_patchInteriorIndex,\n"
 	"  rotatePatchSelection = __zp_rotatePatchSelection,\n"
 	"  rotatePatchSelectionAxis = __zp_rotatePatchSelectionAxis,\n"
@@ -1930,6 +1941,7 @@ bool ensureLua()
 	ls->registerFunc("__zp_subdivideEdgeSelection", lSubdivideEdgeSelection);
 	ls->registerFunc("__zp_setSubdividePropagate", lSetSubdividePropagate);
 	ls->registerFunc("__zp_setPatchAuto", lSetPatchAuto);
+	ls->registerFunc("__zp_resetZonePaint", lResetZonePaint);
 	ls->registerFunc("__zp_patchFlags", lPatchFlags);
 	ls->registerFunc("__zp_patchInteriorIndex", lPatchInteriorIndex);
 	ls->registerFunc("__zp_pivotPos", lPivotPos);

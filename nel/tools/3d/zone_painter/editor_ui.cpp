@@ -1016,6 +1016,55 @@ public:
 REGISTER_ACTION_HANDLER(CAHZpMoveToZone, "zp_move_to_zone");
 
 
+/** Reset paint (mA8): resolve the target zone, show it in the confirm modal, execute on
+ *  OK. The modal is the danger guard - scripts call the op bare. */
+static uint s_ResetPaintZone = 0;
+class CAHZpResetPaint : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return;
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (!b || !b->resetPaintTarget || !b->resetPaint) return;
+		std::string label;
+		uint zone = 0;
+		if (!b->resetPaintTarget(zone, label))
+			return; // ambiguous or nothing editable; the status line explains
+		s_ResetPaintZone = zone;
+		if (CViewText *t = dynamic_cast<CViewText *>(
+		        CWidgetManager::getInstance()->getElementFromId(
+		            "ui:zp:reset_dialog:content:zone")))
+			t->setHardText(label);
+		CWidgetManager::getInstance()->enableModalWindow(NULL, "ui:zp:reset_dialog");
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpResetPaint, "zp_reset_paint");
+
+class CAHZpResetOk : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return;
+		CWidgetManager::getInstance()->disableModalWindow();
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->resetPaint)
+			b->resetPaint(s_ResetPaintZone);
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpResetOk, "zp_reset_ok");
+
+class CAHZpResetCancel : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		CWidgetManager::getInstance()->disableModalWindow();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpResetCancel, "zp_reset_cancel");
+
 class CAHZpPatchDetachCopy : public IActionHandler
 {
 public:
