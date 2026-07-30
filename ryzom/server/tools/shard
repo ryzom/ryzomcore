@@ -130,7 +130,7 @@ cmd_status() {
 cmd_start() {
 	if [ -z "$1" ]; then
 		python3 "$SCRIPT_DIR/ryzom_shard.py" start
-		bash "$SHARD_PATH/tools/notify.sh" ShardStarting
+		bash "$SCRIPT_DIR/notify_state.sh" ShardStarting
 		return
 	fi
 	# Try service start first, fall back to process start
@@ -160,7 +160,7 @@ cmd_stop() {
 		done
 		rm -f /var/lib/schroot/session/atys-*
 
-		bash "$SHARD_PATH/tools/notify.sh" ShardStopped
+		bash "$SCRIPT_DIR/notify_state.sh" ShardStopped
 		return
 	fi
 	_require_name "$1"
