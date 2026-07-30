@@ -581,6 +581,74 @@ int zpCurrentPaintMode()
  * nel_patch_paint cursor art may be converted; patch-edit cursors are redraw-only from
  * the manifest's motif descriptions.
  */
+/**
+ * Orientation arrows - the legacy painter's ToggleArrows (paint.cpp), verbatim recipe:
+ * every bank tile gains an ADDITIVE arrow layer so each painted tile renders its frame
+ * orientation, rotation included; off restores the pristine bank. Every patch of every
+ * zone is then invalidated (changePatchTextureAndColor with NULLs) so the tiles reload.
+ * Patch mode additionally draws a thin per-patch frame arrow on the overlay
+ * (zpDrawPatchArrows) - the display that makes Turn CW/CCW visible at all.
+ */
+void zpSetShowArrows(bool on)
+{
+	if (on == g_ShowArrows)
+		return;
+	g_ShowArrows = on;
+	if (g_PaintCtx.Land && g_PaintCtx.Bank)
+	{
+		NL3D::CLandscape &land = g_PaintCtx.Land->Landscape;
+		if (on)
+		{
+			// The arrow tile lives at the _texture_tiles ROOT, which the bank resolve does
+			// not index - and a missing additive texture whitewashes the whole terrain
+			// (NeL's missing-texture fallback). Register it once, probing up from the bank.
+			static bool s_ArrowRegistered = false;
+			if (!s_ArrowRegistered)
+			{
+				std::string dir = NLMISC::CFile::getPath(g_PaintCtx.BankPath);
+				for (int up = 0; up < 4 && !s_ArrowRegistered; ++up)
+				{
+					const std::string cand = dir + "arrow.png";
+					if (NLMISC::CFile::fileExists(cand))
+					{
+						NLMISC::CPath::addSearchFile(cand);
+						s_ArrowRegistered = true;
+					}
+					dir += "../";
+				}
+				if (!s_ArrowRegistered)
+					fprintf(stderr, "WARNING: arrow.png not found near the bank; "
+					        "tile arrows will render white\n");
+			}
+			for (sint i = 0; i < land.TileBank.getTileCount(); ++i)
+			{
+				land.TileBank.getTile(i)->setFileName(NL3D::CTile::additive, "arrow.png");
+				land.releaseTiles((uint)i, 1);
+			}
+		}
+		else
+		{
+			land.TileBank = *g_PaintCtx.Bank;
+			for (sint i = 0; i < land.TileBank.getTileCount(); ++i)
+				land.releaseTiles((uint)i, 1);
+		}
+		if (g_PaintCtx.Zones)
+		{
+			const std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
+			for (uint z = 0; z < zones.size(); ++z)
+			{
+				NL3D::CZone *lz = land.getZone((sint)zones[z].ZoneId);
+				for (uint p = 0; lz && p < (uint)lz->getNumPatchs(); ++p)
+					lz->changePatchTextureAndColor((sint)p, NULL, NULL);
+			}
+		}
+	}
+	g_PropStatusMsg = on ? "orientation arrows ON" : "orientation arrows off";
+	ZPSCRIPT::record(NLMISC::toString("painter.setShowArrows(%s)", on ? "true" : "false"));
+}
+
+void zpToggleShowArrows() { zpSetShowArrows(!g_ShowArrows); }
+
 void zpSelectMode(int mode)
 {
 	if (!g_PaintCtx.Active || !g_PaintCtx.Paint) return;
@@ -2134,6 +2202,7 @@ void zpFillBridgeState(ZPUI::SPaintUIBridge &bridge)
 	bridge.FilterVerts = g_PatchFilterVerts;
 	bridge.FilterVecs = g_PatchFilterVecs;
 	bridge.LockHandles = g_PatchLockHandles;
+	bridge.ShowArrows = g_ShowArrows;
 	// Surface Properties snapshot: tri-state smoothing bits over the face selection and
 	// the steering patch's tile orders.
 	bridge.SmGroupAll = 0;

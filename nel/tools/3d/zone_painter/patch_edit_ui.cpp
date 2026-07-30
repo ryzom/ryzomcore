@@ -1131,6 +1131,64 @@ bool zpPatchVertScreen(uint zoneId, uint vertIdx, float &sxOut, float &syOut)
 	return true;
 }
 
+/**
+ * Per-patch frame arrows (g_ShowArrows, patch mode): a thin line arrow centred in each
+ * editable patch, drawn with the cage's line style, pointing along the tile frame's +v
+ * axis - ring edge 0's direction, the axis the tile rows ride (the empirically pinned
+ * m43 mapping: tile v runs along ring edge 0, u along edge 3). A Turn rotates the ring,
+ * so the arrow turns with it - which is the point: a turn moves no geometry, and without
+ * this display it is invisible. Bilinear over the ring corners (a display aid, not
+ * surface-exact), projected like every other overlay.
+ */
+void zpDrawPatchArrows(NL3D::IDriver *driver, NL3D::CCamera *camera)
+{
+	if (!g_ShowArrows || !driver || !camera || !g_PaintCtx.Zones)
+		return;
+	const std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
+	const NLMISC::CMatrix viewMat = camera->getMatrix().inverted();
+	const NL3D::CFrustum fr = camera->getFrustum();
+	uint32 winW = 0, winH = 0;
+	driver->getWindowSize(winW, winH);
+	if (!winW || !winH)
+		return;
+	const NLMISC::CRGBA col(255, 200, 60, 255);
+	for (uint z = 0; z < zones.size(); ++z)
+	{
+		const SPaintZone &pz = zones[z];
+		if (!pz.Editable)
+			continue;
+		for (uint p = 0; p < pz.Patches.size(); ++p)
+		{
+			const NLMISC::CVector *V = pz.Patches[p].Patch.Vertices;
+			// Bilinear frame point: u toward ring V3, v toward ring V1.
+			const float u = 0.5f;
+			NLMISC::CVector a = V[0] * ((1.f - u) * 0.70f) + V[1] * ((1.f - u) * 0.30f)
+				+ V[2] * (u * 0.30f) + V[3] * (u * 0.70f); // P(0.5, 0.30)
+			NLMISC::CVector b = V[0] * ((1.f - u) * 0.30f) + V[1] * ((1.f - u) * 0.70f)
+				+ V[2] * (u * 0.70f) + V[3] * (u * 0.30f); // P(0.5, 0.70)
+			NLMISC::CVector pa, pb;
+			if (!zpProjectLifted(viewMat, fr, a, kPatchLift, pa)
+			    || !zpProjectLifted(viewMat, fr, b, kPatchLift, pb))
+				continue;
+			NL3D::CDRU::drawLine(pa.x, pa.y, pb.x, pb.y, *driver, col, NL3D::CViewport());
+			// Screen-space head, pixel-sized like the marker/diamond overlays.
+			float dx = (pb.x - pa.x) * winW, dy = (pb.y - pa.y) * winH;
+			const float len = sqrtf(dx * dx + dy * dy);
+			if (len < 1e-3f)
+				continue;
+			dx /= len;
+			dy /= len;
+			const float hl = 8.f; // head length, px
+			const float p1x = pb.x - (dx * hl - dy * 4.f) / winW;
+			const float p1y = pb.y - (dy * hl + dx * 4.f) / winH;
+			const float p2x = pb.x - (dx * hl + dy * 4.f) / winW;
+			const float p2y = pb.y - (dy * hl - dx * 4.f) / winH;
+			NL3D::CDRU::drawLine(pb.x, pb.y, p1x, p1y, *driver, col, NL3D::CViewport());
+			NL3D::CDRU::drawLine(pb.x, pb.y, p2x, p2y, *driver, col, NL3D::CViewport());
+		}
+	}
+}
+
 /** Screen position of a tangent handle, the vertex form's sibling (gates aim picks at it). */
 bool zpPatchTangentScreen(uint zoneId, uint vecIdx, float &sxOut, float &syOut)
 {

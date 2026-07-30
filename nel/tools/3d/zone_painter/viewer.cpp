@@ -879,6 +879,7 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 		paintBridge.patchFilterVertsToggle = zpPatchFilterVertsClicked;
 		paintBridge.patchFilterVecsToggle = zpPatchFilterVecsClicked;
 		paintBridge.patchLockHandlesToggle = zpPatchLockHandlesClicked;
+		paintBridge.arrowsToggle = zpToggleShowArrows;
 		paintBridge.patchSmGroup = zpPatchSmGroupClicked;
 		paintBridge.patchSmGroupClear = zpPatchSmGroupClearClicked;
 		paintBridge.patchTessDelta = zpPatchTessDeltaClicked;
@@ -1509,6 +1510,8 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 				else if (paintListener.Mode == CPaintMouseListener::ModePatch)
 				{
 					zpDrawPatchLatticeAll(driver, camera, paintListener.SubObj);
+					// Frame arrows under the cage: the display that makes Turn visible.
+					zpDrawPatchArrows(driver, camera);
 					// Gizmo after the cage so it is never overdrawn by it. Every level that
 					// MOVES something gets one - edge and patch selections are projected onto
 					// the same vertex set, so the gizmo is already correct for them.
@@ -1680,6 +1683,9 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 						zpSetXformKind(ZPXF_Rotate);
 					if (zpKeyPushed(ZPK_XformScale))
 						zpSetXformKind(ZPXF_Scale);
+					// C in patch scope: the legacy painter's orientation arrows.
+					if (zpKeyPushed(ZPK_ToggleArrows))
+						zpToggleShowArrows();
 					if (zpKeyPushed(ZPK_SizeUp))
 						zpBrushSizeDelta(+1);
 					if (zpKeyPushed(ZPK_SizeDown))
@@ -1839,6 +1845,8 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 				else if (paintListener.Mode == CPaintMouseListener::ModePatch)
 				{
 					zpDrawPatchLatticeAll(driver, camera, paintListener.SubObj);
+					// Frame arrows under the cage: the display that makes Turn visible.
+					zpDrawPatchArrows(driver, camera);
 					// Gizmo after the cage so it is never overdrawn by it. Every level that
 					// MOVES something gets one - edge and patch selections are projected onto
 					// the same vertex set, so the gizmo is already correct for them.

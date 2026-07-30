@@ -81,6 +81,7 @@ bool zpUserPivotXYZ(float outPos[3]);
 void zpSetPatchFilterVerts(bool on);
 void zpSetPatchFilterVecs(bool on);
 void zpSetPatchLockHandles(bool on);
+void zpSetShowArrows(bool on);
 extern bool g_PatchFilterVerts;
 extern bool g_PatchFilterVecs;
 extern bool g_PatchLockHandles;
@@ -1043,6 +1044,12 @@ static int lSetLockHandles(CLuaState &ls) // (bool) a handle move takes the corn
 	return retOk(ls);
 }
 
+static int lSetShowArrows(CLuaState &ls) // (bool) orientation arrows (tiles + patch frames)
+{
+	zpSetShowArrows(argBoolOpt(ls, 1, true));
+	return retOk(ls);
+}
+
 static int lSetUserPivot(CLuaState &ls) // (x, y, z) absolute world point
 {
 	double x, y, z;
@@ -1645,6 +1652,7 @@ static const char *kBootstrap =
 	"  setFilterVertices = __zp_setFilterVertices,\n"
 	"  setFilterVectors = __zp_setFilterVectors,\n"
 	"  setLockHandles = __zp_setLockHandles,\n"
+	"  setShowArrows = __zp_setShowArrows,\n"
 	"  setSmoothGroup = __zp_setSmoothGroup, clearSmoothGroups = __zp_clearSmoothGroups,\n"
 	"  setPatchTess = __zp_setPatchTess, balanceTessSelection = __zp_balanceTessSelection,\n"
 	"  patchSmGroups = __zp_patchSmGroups, patchTess = __zp_patchTess,\n"
@@ -1754,6 +1762,7 @@ bool ensureLua()
 	ls->registerFunc("__zp_setFilterVertices", lSetFilterVertices);
 	ls->registerFunc("__zp_setFilterVectors", lSetFilterVectors);
 	ls->registerFunc("__zp_setLockHandles", lSetLockHandles);
+	ls->registerFunc("__zp_setShowArrows", lSetShowArrows);
 	ls->registerFunc("__zp_setSmoothGroup", lSetSmoothGroup);
 	ls->registerFunc("__zp_clearSmoothGroups", lClearSmoothGroups);
 	ls->registerFunc("__zp_setPatchTess", lSetPatchTess);

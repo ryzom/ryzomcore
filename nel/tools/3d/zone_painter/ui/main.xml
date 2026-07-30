@@ -803,7 +803,10 @@
 		<instance template="zp_checkbox_row" id="filter_vecs" posparent="filter_verts" posref="MR ML" x="10" y="0"
 			w="64" labelw="40" label="Vecs" onclick="zp_patch_filter_vecs" params="" />
 		<instance template="zp_checkbox_row" id="lock_handles" posparent="lbl_filter" posref="BL TL" x="0" y="-4"
-			label="Lock Handles" onclick="zp_patch_lock_handles" params="" />
+			w="110" labelw="86" label="Lock Handles" onclick="zp_patch_lock_handles" params="" />
+		<!-- Orientation arrows: the tile additive layer + the per-patch frame arrow (C). -->
+		<instance template="zp_checkbox_row" id="show_arrows" posparent="lock_handles" posref="MR ML" x="10" y="0"
+			w="72" labelw="48" label="Arrows" onclick="zp_patch_arrows" params="" />
 		<!-- Topology block: Bind / Unbind (vertex level), Delete (patch level; clears undo) -->
 		<view type="text" id="lbl_topo" posparent="lock_handles" posref="BL TL" x="0" y="-6" fontsize="10" shadow="true"
 			global_color="false" color="255 220 140 255" hardtext="Topology" />

@@ -143,6 +143,7 @@ struct SPaintUIBridge
 	void (*patchFilterVertsToggle)(); // Selection block: pick filter checkboxes
 	void (*patchFilterVecsToggle)();
 	void (*patchLockHandlesToggle)();
+	void (*arrowsToggle)();          // orientation arrows (tile additive layer + patch overlay)
 	void (*patchSmGroup)(int bit);   // Surface Properties: 32-button grid (tri-state click)
 	void (*patchSmGroupClear)();     // Clear All
 	void (*patchTessDelta)(int axis, int d); // 0 = U, 1 = V; +-1 steps, absolute-set apply
@@ -172,6 +173,7 @@ struct SPaintUIBridge
 	float WeldThreshold;  // last-used weld distance (seeds the dialog)
 	bool FilterVerts, FilterVecs; // vertex-level pick filters (both off is impossible)
 	bool LockHandles;             // a handle move takes the corner's other handles along
+	bool ShowArrows;              // orientation arrows toggle state
 	uint SmGroupAll, SmGroupAny;  // smoothing bits on ALL / on ANY selected patch
 	int TessU, TessV;             // first selected patch's tile orders (0 = no selection)
 	int PivotMode;          // TPivotMode; what the transform gizmo is anchored on
@@ -245,6 +247,7 @@ struct SPaintUIBridge
 		  patchDetach(NULL), patchElement(NULL), moveToZoneDir(NULL), weldTargetToggle(NULL),
 		  patchWeldThreshold(NULL),
 		  patchFilterVertsToggle(NULL), patchFilterVecsToggle(NULL), patchLockHandlesToggle(NULL),
+		  arrowsToggle(NULL),
 		  patchSmGroup(NULL), patchSmGroupClear(NULL), patchTessDelta(NULL), patchBalance(NULL),
 		  setTileSize256(NULL), setHardnessAbs(NULL), setOpacityAbs(NULL),
 		  setColorRadiusAbs(NULL),
@@ -253,6 +256,7 @@ struct SPaintUIBridge
 		  PatchNoSmooth(2), PatchSelZones(0), MoveDirMask(0), WeldTargetArmed(false),
 		  WeldThreshold(0.1f),
 		  FilterVerts(true), FilterVecs(true), LockHandles(false),
+		  ShowArrows(false),
 		  SmGroupAll(0), SmGroupAny(0), TessU(0), TessV(0),
 		  CurTileSet(0), TileSetCount(0), Mode256(false),
 		  BrushSize(0), TileGroup(0), LockBorders(false), UndoDepth(0), CanSave(false),

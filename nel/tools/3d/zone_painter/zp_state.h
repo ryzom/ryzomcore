@@ -508,6 +508,18 @@ void zpSetPatchLockHandles(bool on);
 void zpPatchFilterVertsClicked();
 void zpPatchFilterVecsClicked();
 void zpPatchLockHandlesClicked();
+
+/**
+ * Orientation arrows (the legacy painter's ToggleArrows, C in the painter): every bank
+ * tile gains an ADDITIVE arrow layer, so each painted tile shows its frame orientation -
+ * rotation included - and patch mode draws a per-patch frame arrow on the overlay. The
+ * display that makes Turn CW/CCW visible at all: a turn moves no geometry, only the
+ * frame the tiles ride.
+ */
+extern bool g_ShowArrows;
+void zpSetShowArrows(bool on);
+void zpToggleShowArrows();
+void zpDrawPatchArrows(NL3D::IDriver *driver, NL3D::CCamera *camera);
 /** Selected, or a Lock Handles companion of a selected handle on the same corner. */
 bool zpTanSelectedEffective(const SPaintZone &pz, uint16 vecIdx);
 

@@ -296,6 +296,7 @@ bool g_WeldTargetArmed = false;
 bool g_PatchFilterVerts = true;
 bool g_PatchFilterVecs = true;
 bool g_PatchLockHandles = false;
+bool g_ShowArrows = false;
 std::set<TPatchVertId> g_PatchTanSel;
 int g_PivotMode = ZPPIV_Selection;
 int g_XformKind = ZPXF_Move;
@@ -323,8 +324,9 @@ typedef char zpCheckKeyModes[(sizeof(kPainterKeyModes) / sizeof(kPainterKeyModes
 // Key actions keep the plugin's cfg NAMES (a plugin-era keys.cfg rebinds them unchanged);
 // values are NeL TKey codes (== the Windows VK codes the plugin used). Actions without a
 // standalone-tool equivalent are accepted and ignored (documented in --help): Select, Pick,
-// ToggleColor, BackgroundColor, ToggleArrows, Zouille, AutomaticLighting, GetState,
-// ResetPatch. ZoomIn/ZoomOut are implemented but default UNBOUND (0) because the plugin's
+// ToggleColor, BackgroundColor, Zouille, AutomaticLighting, GetState,
+// ResetPatch. ToggleArrows is implemented (patch-scoped C - the paint scope owns C for
+// ModeColor, the same digit-row trick). ZoomIn/ZoomOut are implemented but default UNBOUND (0) because the plugin's
 // default keys 1/2 select tile sets in this tool.
 
 
@@ -406,7 +408,7 @@ uint g_PainterKeys[] =
 	NLMISC::KeyG,         // GroupUp
 	NLMISC::KeyV,         // GroupDown (plugin default)
 	0,                    // BackgroundColor
-	0,                    // ToggleArrows
+	NLMISC::KeyC,         // ToggleArrows (legacy painter C; patch-scoped - C is ModeColor in paint)
 	NLMISC::KeyHOME,      // HardnessUp (plugin PgUp/PgDn select tile sets here)
 	NLMISC::KeyEND,       // HardnessDown
 	NLMISC::KeyINSERT,    // OpacityUp
@@ -466,7 +468,7 @@ const uint8 kPainterKeyModes[] =
 	ZPKS_PAINT, // GroupUp
 	ZPKS_PAINT, // GroupDown
 	ZPKS_PAINT, // BackgroundColor
-	ZPKS_PAINT, // ToggleArrows
+	ZPKS_PATCH, // ToggleArrows (paint scope owns C for ModeColor; the panel box covers paint modes)
 	ZPKS_PAINT, // HardnessUp
 	ZPKS_PAINT, // HardnessDown
 	ZPKS_PAINT, // OpacityUp
@@ -809,11 +811,11 @@ int main(int argc, char **argv)
 	                    " Honored: ModeTile ModeColor ModeDisplace ModeProp SizeUp SizeDown ToggleTileSize GroupUp GroupDown\n"
 	                    " Fill0 Fill1 Fill2 Fill3 HardnessUp HardnessDown OpacityUp OpacityDown SelectColorBrush\n"
 	                    " ToggleColorBrushMode LockBorders ZoomIn ZoomOut ToggleUI SeasonNext TogglePalette ToggleBoard\n"
-	                    " ZoomExtentsSelected\n"
+	                    " ZoomExtentsSelected ToggleArrows (patch mode; the legacy painter's orientation arrows)\n"
 	                    " (defaults: T C D R + - B G V F F6 F7 F8 Home End Insert Delete S Q L, F10, Y, P, Z; zoom unbound).\n"
 	                    " ModeProp (default R): property-edit mode - hover thin zone outline, click selects thick;\n"
 	                    " only editable (unfrozen primary) zones; RO/instance click reports read-only .\n"
-	                    " Accepted+ignored (no tool equivalent): Select Pick ToggleColor BackgroundColor ToggleArrows\n"
+	                    " Accepted+ignored (no tool equivalent): Select Pick ToggleColor BackgroundColor\n"
 	                    " Zouille AutomaticLighting GetState ResetPatch.\n"
 	                    " vars cfg (--vars-cfg, else ./zone_painter_vars.cfg): LightDirection {x,y,z}, LightDiffuse {r,g,b},\n"
 	                    " LightAmbiant {r,g,b}, LightMultiply, ZoomSpeed (the plugin LoadVarCfg set).\n"

@@ -368,6 +368,18 @@ public:
 };
 REGISTER_ACTION_HANDLER(CAHZpPatchLockHandles, "zp_patch_lock_handles");
 
+class CAHZpPatchArrows : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return;
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->arrowsToggle) b->arrowsToggle();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchArrows, "zp_patch_arrows");
+
 /** Surface Properties: one smoothing-group grid button; params = the bit "0".."31". */
 class CAHZpPatchSmGroup : public IActionHandler
 {
@@ -2612,6 +2624,9 @@ void CEditorUI::syncPanelFromBridge()
 			btn->setPushed(b->LockHandles);
 			btn->setFrozen(b->SubObj != 1);
 		}
+		// Orientation arrows: a display toggle, live at every level.
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":show_arrows:box").c_str()))
+			btn->setPushed(b->ShowArrows);
 		// Bind/Unbind live at vertex level, Delete at patch level, No smooth at edge level.
 		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_bind").c_str()))
 			btn->setFrozen(b->SubObj != 1 || !b->PatchSelVerts);
