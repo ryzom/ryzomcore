@@ -111,8 +111,8 @@ bool zpExtrudeDragAt(float x0, float y0, float x1, float y1);
 bool zpPatchVertScreen(uint zoneId, uint vertIdx, float &sxOut, float &syOut);
 bool zpPatchTangentScreen(uint zoneId, uint vecIdx, float &sxOut, float &syOut);
 uint zpAddQuadPatchSelection();
-uint zpDetachPatchSelection();
-uint zpDetachToFile(const std::string &nameIn);
+uint zpDetachPatchSelection(bool copy = false);
+uint zpDetachToFile(const std::string &nameIn, bool copy = false);
 uint zpExpandSelectionToElement();
 uint zpAttachZone(uint targetZone, uint srcZone, std::string &msg);
 uint zpMovePatchSelectionToZone(uint dstZone, std::string &msg);
@@ -1365,20 +1365,20 @@ static int lAddQuadPatchSelection(CLuaState &ls)
 	return 1;
 }
 
-static int lDetachPatchSelection(CLuaState &ls) // () -> detached count (element split)
+static int lDetachPatchSelection(CLuaState &ls) // ([copy]) -> count (split, or clone island)
 {
-	const uint n = zpDetachPatchSelection();
+	const uint n = zpDetachPatchSelection(argBoolOpt(ls, 1, false));
 	printf("detachPatchSelection: %u detached\n", n);
 	fflush(stdout);
 	ls.push((double)n);
 	return 1;
 }
 
-static int lDetachToFile(CLuaState &ls) // ([name]) -> detached count (SHELVED, script-only)
+static int lDetachToFile(CLuaState &ls) // ([name [, copy]]) -> count (SHELVED, script-only)
 {
 	std::string name;
 	argString(ls, 1, name); // optional; empty = auto "<source>-det"
-	const uint n = zpDetachToFile(name);
+	const uint n = zpDetachToFile(name, argBoolOpt(ls, 2, false));
 	printf("detachToFile: %u detached\n", n);
 	fflush(stdout);
 	ls.push((double)n);

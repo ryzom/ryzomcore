@@ -690,6 +690,15 @@ static bool zpXformDetachElement(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper 
 	return topoDetachElements(pm, rp, sel, err, evalPm);
 }
 
+static bool zpXformCopyElement(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper * /* mapper */,
+                               const std::set<uint> &sel, std::string &err,
+                               const SPatchMesh *evalPm)
+{
+	// The Copy variant (mA7): clone the selection as a coincident island; the original
+	// stays untouched. Pure addition, paint copies verbatim.
+	return topoCopyElements(pm, rp, sel, err, evalPm);
+}
+
 /**
  * Delete the selected patches. Paint and bind records travel with the survivors
  * (topoDeletePatches); everything else is the shared topo-op skeleton.
@@ -1399,10 +1408,20 @@ std::string zpSanitizeBrickName(const std::string &name)
  * nothing moves and the zone still exports as one node; grab the island afterwards with
  * the Element expand. Kaetemi's reframing of legacy detach for the brick world.
  */
-uint zpDetachPatchSelection()
+uint zpDetachPatchSelection(bool copy)
 {
+	if (copy)
+		return zpRunTopoOp("detach copy", "painter.detachPatchSelection(true)",
+		                   zpXformCopyElement);
 	return zpRunTopoOp("detach", "painter.detachPatchSelection()", zpXformDetachElement);
 }
+
+// The panel Detach button's Copy checkbox (session display state, like the weld
+// threshold seed - the recorder captures the resolved call, not the checkbox).
+static bool s_DetachCopy = false;
+void zpSetDetachCopy(bool on) { s_DetachCopy = on; }
+bool zpDetachCopy() { return s_DetachCopy; }
+void zpDetachCopyToggleClicked() { s_DetachCopy = !s_DetachCopy; }
 
 /**
  * Detach the selected patches into a NEW BRICK FILE next to the source (patch level, one
@@ -1410,7 +1429,7 @@ uint zpDetachPatchSelection()
  * story is designed; splitting a multi-cell zone is its use). `nameIn` empty = auto
  * ("<source>-det", collision-bumped). Returns the detached patch count.
  */
-uint zpDetachToFile(const std::string &nameIn)
+uint zpDetachToFile(const std::string &nameIn, bool copy)
 {
 	if (!g_PaintCtx.Core || !g_PaintCtx.Zones)
 		return 0;
@@ -1561,6 +1580,22 @@ uint zpDetachToFile(const std::string &nameIn)
 		}
 	}
 
+	// --- COPY mode (mA7): the new brick is written and the session changes NOTHING -
+	// no source delete, no snapshot, no rebuild. Deliberately not undoable: there is no
+	// session mutation at all, and a save is never undone anyway.
+	if (copy)
+	{
+		name = NLMISC::CFile::getFilenameWithoutExtension(target);
+		printf("detach copy: zone %u, %u patches -> %s (%s target)\n", zoneId,
+		       (uint)sel.size(), target.c_str(), targetStream.Local ? "modifier" : "base");
+		fflush(stdout);
+		ZPSCRIPT::record("painter.detachToFile(\"" + name + "\", true)");
+		g_PropStatusMsg = NLMISC::toString("detach copy: %u patch%s -> %s.max",
+		                                   (uint)sel.size(), sel.size() == 1 ? "" : "es",
+		                                   name.c_str());
+		return (uint)sel.size();
+	}
+
 	// --- Pass 2: the SOURCE loses the selection - the normal delete flow, Kind 6 undoable
 	// (the zone set is unchanged; the new file is not opened).
 	// Same anchor-cell fixup as the shared runner: detaching the west half of a multi-cell
@@ -1651,7 +1686,7 @@ uint zpDetachToFile(const std::string &nameIn)
 }
 
 /** Bridge wrapper: panel Detach button (auto name). */
-void zpPatchDetachClicked() { zpDetachPatchSelection(); }
+void zpPatchDetachClicked() { zpDetachPatchSelection(s_DetachCopy); }
 
 // ---------------------------------------------------------------------------------------------
 // Attach: merge another open editable zone's patches into this one.

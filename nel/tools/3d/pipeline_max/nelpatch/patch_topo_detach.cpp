@@ -379,6 +379,190 @@ bool topoDetachElements(SPatchMesh &pm, SRPatchMesh &rp,
 	return true;
 }
 
+bool topoCopyElements(SPatchMesh &pm, SRPatchMesh &rp,
+                      const std::set<uint> &sel, std::string &err,
+                      const SPatchMesh *evalPm)
+{
+	if (pm.EdgesReconstructed)
+	{ err = "reconstructed (Max 3) edge table: topology cannot be written back"; return false; }
+	if (rp.Patches.size() != pm.Patches.size() || rp.Verts.size() != pm.Verts.size())
+	{ err = "PatchMesh/RPatchMesh size mismatch"; return false; }
+	if (!pm.Hooks.empty())
+	{ err = "mesh carries hook records; hook remap is not implemented"; return false; }
+	if (pm.HasTvPatches)
+	{ err = "map-channel mesh: clone TVPatch assignment is not implemented"; return false; }
+	if (sel.empty())
+	{ err = "nothing to copy"; return false; }
+	for (std::set<uint>::const_iterator it = sel.begin(); it != sel.end(); ++it)
+		if (*it >= pm.Patches.size())
+		{ err = "patch index out of range"; return false; }
+
+	// --- Element maps: everything the selection's patches reference clones once.
+	// Positions copy from EVAL (a mapper-driven element's stored position is a stale
+	// cache and the clones are unmapped), so the coincident island truly coincides.
+	std::map<sint32, sint32> vMap, cMap, eMap; // vert / vec / edge -> clone
+	for (std::set<uint>::const_iterator it = sel.begin(); it != sel.end(); ++it)
+	{
+		const SPmPatch &pp = pm.Patches[*it];
+		for (int k = 0; k < 4; ++k)
+		{
+			if (pp.V[k] >= 0) vMap[pp.V[k]] = -1;
+			if (pp.Interior[k] >= 0) cMap[pp.Interior[k]] = -1;
+			if (pp.Edge[k] >= 0) eMap[pp.Edge[k]] = -1;
+		}
+		for (int k = 0; k < 8; ++k)
+			if (pp.Vec[k] >= 0)
+				cMap[pp.Vec[k]] = -1;
+	}
+	// Edge tangents of cloned edges clone too (they are the same vecs as the ring slots
+	// in a well-formed mesh, but the edge record is authoritative).
+	for (std::map<sint32, sint32>::const_iterator it = eMap.begin(); it != eMap.end(); ++it)
+	{
+		const SPmEdge &ed = pm.Edges[it->first];
+		if (ed.Vec12 >= 0) cMap[ed.Vec12] = -1;
+		if (ed.Vec21 >= 0) cMap[ed.Vec21] = -1;
+	}
+
+	// --- Clone verts (fresh unbound rp records; internal binds re-established below).
+	for (std::map<sint32, sint32>::iterator it = vMap.begin(); it != vMap.end(); ++it)
+	{
+		SPmVert v = pm.Verts[it->first];
+		v.Vectors.clear();
+		v.Patches.clear();
+		v.Edges.clear();
+		dEffCopyVert(v.Pos, pm, evalPm, it->first);
+		pm.Verts.push_back(v);
+		SRpoVertexBind b;
+		memset(&b, 0, sizeof(b));
+		b.Before = b.Before2 = b.After = b.After2 = b.T = (uint32)-1;
+		rp.Verts.push_back(b);
+		it->second = (sint32)pm.Verts.size() - 1;
+	}
+	// --- Clone vecs.
+	for (std::map<sint32, sint32>::iterator it = cMap.begin(); it != cMap.end(); ++it)
+	{
+		SPmVec v = pm.Vecs[it->first];
+		v.Patches.clear();
+		if (v.HasVert && v.Vert >= 0 && vMap.count(v.Vert))
+			v.Vert = vMap[v.Vert];
+		else if (v.HasVert && v.Vert >= 0)
+			v.Vert = -1; // owner outside the selection (should not happen for used vecs)
+		dEffCopyVec(v.Pos, pm, evalPm, it->first);
+		pm.Vecs.push_back(v);
+		it->second = (sint32)pm.Vecs.size() - 1;
+	}
+	// --- Clone edges (patch lists filled by the patch clones below).
+	for (std::map<sint32, sint32>::iterator it = eMap.begin(); it != eMap.end(); ++it)
+	{
+		SPmEdge e = pm.Edges[it->first];
+		e.Patches.clear();
+		if (e.V1 >= 0 && vMap.count(e.V1)) e.V1 = vMap[e.V1];
+		if (e.V2 >= 0 && vMap.count(e.V2)) e.V2 = vMap[e.V2];
+		if (e.Vec12 >= 0 && cMap.count(e.Vec12)) e.Vec12 = cMap[e.Vec12];
+		if (e.Vec21 >= 0 && cMap.count(e.Vec21)) e.Vec21 = cMap[e.Vec21];
+		pm.Edges.push_back(e);
+		it->second = (sint32)pm.Edges.size() - 1;
+	}
+	// --- Clone patches; the rp paint records copy VERBATIM (tiles, colors, edge flags).
+	std::map<sint32, sint32> pMap;
+	for (std::set<uint>::const_iterator it = sel.begin(); it != sel.end(); ++it)
+	{
+		SPmPatch pp = pm.Patches[*it];
+		for (int k = 0; k < 4; ++k)
+		{
+			if (pp.V[k] >= 0) pp.V[k] = vMap[pp.V[k]];
+			if (pp.Interior[k] >= 0) pp.Interior[k] = cMap[pp.Interior[k]];
+			if (pp.Edge[k] >= 0) pp.Edge[k] = eMap[pp.Edge[k]];
+		}
+		for (int k = 0; k < 8; ++k)
+			if (pp.Vec[k] >= 0)
+				pp.Vec[k] = cMap[pp.Vec[k]];
+		pm.Patches.push_back(pp);
+		rp.Patches.push_back(rp.Patches[*it]);
+		pMap[(sint32)*it] = (sint32)pm.Patches.size() - 1;
+	}
+	// --- Adjacency of the clones (originals untouched: nothing about them changed).
+	for (std::map<sint32, sint32>::const_iterator it = pMap.begin(); it != pMap.end(); ++it)
+	{
+		const SPmPatch &pp = pm.Patches[it->second];
+		for (int k = 0; k < 4; ++k)
+		{
+			if (pp.Edge[k] >= 0 && pm.Edges[pp.Edge[k]].HasPatches)
+				pm.Edges[pp.Edge[k]].Patches.push_back(it->second);
+			if (pp.V[k] >= 0 && pm.Verts[pp.V[k]].HasPatches)
+				pm.Verts[pp.V[k]].Patches.push_back(it->second);
+			if (pp.Interior[k] >= 0 && pm.Vecs[pp.Interior[k]].HasPatches)
+				pm.Vecs[pp.Interior[k]].Patches.push_back(it->second);
+		}
+		for (int k = 0; k < 8; ++k)
+			if (pp.Vec[k] >= 0 && pm.Vecs[pp.Vec[k]].HasPatches)
+			{
+				std::vector<sint32> &lst = pm.Vecs[pp.Vec[k]].Patches;
+				bool have = false;
+				for (size_t i = 0; i < lst.size(); ++i) have = have || lst[i] == it->second;
+				if (!have) lst.push_back(it->second);
+			}
+	}
+	for (std::map<sint32, sint32>::const_iterator it = eMap.begin(); it != eMap.end(); ++it)
+	{
+		const SPmEdge &ed = pm.Edges[it->second];
+		const sint32 ends[2] = { ed.V1, ed.V2 };
+		for (int s = 0; s < 2; ++s)
+			if (ends[s] >= 0 && pm.Verts[ends[s]].HasEdges)
+				pm.Verts[ends[s]].Edges.push_back(it->second);
+	}
+	for (std::map<sint32, sint32>::const_iterator it = cMap.begin(); it != cMap.end(); ++it)
+	{
+		const SPmVec &v = pm.Vecs[it->second];
+		if (v.HasVert && v.Vert >= 0 && pm.Verts[v.Vert].HasVectors)
+			pm.Verts[v.Vert].Vectors.push_back(it->second);
+	}
+	// --- Binds INTERNAL to the selection re-establish on the clone (anchor cloned AND
+	// target patch cloned); the rebuildable tangent caches remap where the vec cloned,
+	// else reset - the bind refresh re-derives them. Crossing binds drop on the copy
+	// (a second bind onto the same outside edge would double-bind it).
+	for (std::map<sint32, sint32>::const_iterator it = vMap.begin(); it != vMap.end(); ++it)
+	{
+		const SRpoVertexBind &src = rp.Verts[it->first];
+		if (!src.Binded)
+			continue;
+		std::map<sint32, sint32>::const_iterator tp = pMap.find((sint32)src.Patch);
+		if (tp == pMap.end())
+			continue;
+		SRpoVertexBind &dst = rp.Verts[it->second];
+		dst = src;
+		dst.Patch = (uint32)tp->second;
+		if (vMap.count((sint32)src.PrimVert))
+			dst.PrimVert = (uint32)vMap.find((sint32)src.PrimVert)->second;
+		const uint32 caches[5] = { src.Before, src.Before2, src.After, src.After2, src.T };
+		uint32 *out[5] = { &dst.Before, &dst.Before2, &dst.After, &dst.After2, &dst.T };
+		for (int c = 0; c < 5; ++c)
+		{
+			std::map<sint32, sint32>::const_iterator cm =
+				caches[c] != (uint32)-1 ? cMap.find((sint32)caches[c]) : cMap.end();
+			*out[c] = cm != cMap.end() ? (uint32)cm->second : (uint32)-1;
+		}
+	}
+
+	// --- Side tables sized to the new counts (clones unselected).
+	if (pm.VertSel.Present)
+	{
+		pm.VertSel.Count = (sint32)pm.Verts.size();
+		pm.VertSel.Bits.resize(((size_t)pm.VertSel.Count + 31) / 32, 0);
+	}
+	if (pm.PatchSel.Present)
+	{
+		pm.PatchSel.Count = (sint32)pm.Patches.size();
+		pm.PatchSel.Bits.resize(((size_t)pm.PatchSel.Count + 31) / 32, 0);
+	}
+	if (pm.EdgeSel.Present)
+	{
+		pm.EdgeSel.Count = (sint32)pm.Edges.size();
+		pm.EdgeSel.Bits.resize(((size_t)pm.EdgeSel.Count + 31) / 32, 0);
+	}
+	return true;
+}
+
 } /* namespace NELPATCH */
 } /* namespace MAX */
 } /* namespace PIPELINE */

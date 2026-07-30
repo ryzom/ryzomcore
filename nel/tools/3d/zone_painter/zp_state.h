@@ -890,12 +890,19 @@ bool zpPatchTangentScreen(uint zoneId, uint vecIdx, float &sxOut, float &syOut);
 uint zpAddQuadPatchSelection();
 void zpPatchAddQuadClicked();
 /** Detach the selection as its own ISLAND inside the same zone (detach-to-element:
- *  boundary splits, nothing moves, still one exported node). Undoable. */
-uint zpDetachPatchSelection();
+ *  boundary splits, nothing moves, still one exported node). Undoable. copy=true (mA7)
+ *  CLONES the selection as a coincident island instead - the original stays untouched,
+ *  paint copies verbatim. */
+uint zpDetachPatchSelection(bool copy = false);
 void zpPatchDetachClicked();
 /** SHELVED off the panel: detach the selection into a new brick file (script-only until
- *  fresh-zone-file creation is designed; empty name = auto-bumped "<source>-det"). */
-uint zpDetachToFile(const std::string &nameIn);
+ *  fresh-zone-file creation is designed; empty name = auto-bumped "<source>-det").
+ *  copy=true writes the brick and leaves the session untouched (not undoable by
+ *  design - nothing mutates). */
+uint zpDetachToFile(const std::string &nameIn, bool copy = false);
+void zpSetDetachCopy(bool on);
+bool zpDetachCopy();
+void zpDetachCopyToggleClicked();
 /** Expand the face selection to whole elements (shared-vertex connected components). */
 uint zpExpandSelectionToElement();
 void zpPatchElementClicked();

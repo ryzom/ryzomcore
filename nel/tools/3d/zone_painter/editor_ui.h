@@ -151,6 +151,7 @@ struct SPaintUIBridge
 	void (*patchHide)();             // hide the current level's selection (session-only)
 	void (*patchUnhideAll)();
 	void (*patchSubdivPropToggle)(); // edge-subdivide Propagate checkbox
+	void (*patchDetachCopyToggle)(); // Detach's Copy checkbox
 	void (*patchSmGroup)(int bit);   // Surface Properties: 32-button grid (tri-state click)
 	void (*patchSmGroupClear)();     // Clear All
 	void (*patchTessDelta)(int axis, int d); // 0 = U, 1 = V; +-1 steps, absolute-set apply
@@ -185,6 +186,7 @@ struct SPaintUIBridge
 	int PatchAuto;    // face selection's interior mode: 0 manual, 1 auto, 2 mixed/empty
 	uint HiddenCount; // session hide set size (freezes Unhide All at 0)
 	bool SubdivPropagate; // edge-subdivide strip walk toggle
+	bool DetachCopy;      // Detach clones instead of splitting
 	bool FilterVerts, FilterVecs; // vertex-level pick filters (both off is impossible)
 	bool LockHandles;             // a handle move takes the corner's other handles along
 	bool ShowArrows;              // orientation arrows toggle state
@@ -262,6 +264,7 @@ struct SPaintUIBridge
 		  patchWeldThreshold(NULL), patchExtrude(NULL), patchExtrudeEx(NULL),
 		  patchVertCoplanar(NULL), patchInteriorMode(NULL),
 		  patchHide(NULL), patchUnhideAll(NULL), patchSubdivPropToggle(NULL),
+		  patchDetachCopyToggle(NULL),
 		  patchFilterVertsToggle(NULL), patchFilterVecsToggle(NULL), patchLockHandlesToggle(NULL),
 		  arrowsToggle(NULL),
 		  patchSmGroup(NULL), patchSmGroupClear(NULL), patchTessDelta(NULL), patchBalance(NULL),
@@ -272,6 +275,7 @@ struct SPaintUIBridge
 		  PatchNoSmooth(2), PatchSelZones(0), MoveDirMask(0), WeldTargetArmed(false),
 		  WeldThreshold(0.1f), ExtrudeHeight(8.f), ExtrudeOutline(0.f), ExtrudeLocal(false),
 		  VertCoplanar(2), PatchAuto(2), HiddenCount(0), SubdivPropagate(false),
+		  DetachCopy(false),
 		  FilterVerts(true), FilterVecs(true), LockHandles(false),
 		  ShowArrows(false),
 		  SmGroupAll(0), SmGroupAny(0), TessU(0), TessV(0),

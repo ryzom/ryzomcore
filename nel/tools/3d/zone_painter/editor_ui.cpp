@@ -1016,6 +1016,18 @@ public:
 REGISTER_ACTION_HANDLER(CAHZpMoveToZone, "zp_move_to_zone");
 
 
+class CAHZpPatchDetachCopy : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchDetachCopyToggle) b->patchDetachCopyToggle();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchDetachCopy, "zp_patch_detach_copy");
+
 class CAHZpPatchSubdivProp : public IActionHandler
 {
 public:
@@ -2807,6 +2819,11 @@ void CEditorUI::syncPanelFromBridge()
 		{
 			btn->setFrozen(b->SubObj != 2);
 			btn->setPushed(b->SubdivPropagate);
+		}
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":detach_copy:box").c_str()))
+		{
+			btn->setFrozen(b->SubObj != 3);
+			btn->setPushed(b->DetachCopy);
 		}
 		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_add_quad").c_str()))
 			btn->setFrozen(b->SubObj != 2 || !b->PatchSelEdges);

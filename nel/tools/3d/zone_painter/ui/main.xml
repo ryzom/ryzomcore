@@ -794,7 +794,7 @@
 	active="true" resizer="false" lockable="false">
 	<group id="header_closed" x="0" y="0" h="14" posref="TL TL"></group>
 	<group id="header_opened" x="0" y="0" h="14" posref="TL TL"></group>
-	<group id="content" x="0" y="0" h="352" posref="TL TL">
+	<group id="content" x="0" y="0" h="374" posref="TL TL">
 		<!-- Level toolbar (text faces until the icon pass; toggle-off returns to Object) -->
 		<view type="text" id="lbl_level" posref="TL TL" x="6" y="-4" fontsize="10" shadow="true"
 			global_color="false" color="255 255 255 180" hardtext="Level" />
@@ -860,8 +860,12 @@
 		     Subdiv row is full (clipped controls render invisible; a screenshot showed it). -->
 		<instance template="zp_checkbox_row" id="subdiv_prop" posparent="btn_unhide" posref="MR ML" x="10" y="0"
 			w="60" labelw="36" label="Prop" onclick="zp_patch_subdiv_prop" params="" />
+		<!-- Detach's Copy checkbox (mA7): checked = Detach clones the selection as a
+		     coincident island, the original stays untouched. -->
+		<instance template="zp_checkbox_row" id="detach_copy" posparent="btn_hide" posref="BL TL" x="0" y="-4"
+			w="110" labelw="86" label="Detach Copy" onclick="zp_patch_detach_copy" params="" />
 		<!-- Edge properties: No smooth (tri-state shown via the (mixed) tag) -->
-		<instance template="zp_checkbox_row" id="no_smooth" posparent="btn_hide" posref="BL TL" x="0" y="-8"
+		<instance template="zp_checkbox_row" id="no_smooth" posparent="detach_copy" posref="BL TL" x="0" y="-8"
 			label="No smooth" onclick="zp_patch_nosmooth" params="" />
 		<view type="text" id="no_smooth_state" posparent="no_smooth" posref="MR ML" x="6" y="0" fontsize="9" shadow="true"
 			global_color="false" color="255 200 120 220" hardtext="" />

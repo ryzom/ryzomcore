@@ -268,6 +268,19 @@ bool topoDetachElements(SPatchMesh &pm, SRPatchMesh &rp,
                         STopoDetachBoundary *boundaryOut = NULL);
 
 /**
+ * Detach WITH COPY (plan mA7): clone the selection's patches and every element they
+ * reference as a COINCIDENT island appended to the same mesh - the original stays
+ * byte-untouched (nothing rewires, nothing renumbers). Positions copy from EVAL (the
+ * clones are unmapped; a stored mapper cache would shift the copy by the delta). The
+ * per-patch paint records copy verbatim. Binds INTERNAL to the selection re-establish
+ * on the clone with remapped targets and caches; binds crossing the boundary drop on
+ * the copy (a second record onto the same outside edge would double-bind it).
+ */
+bool topoCopyElements(SPatchMesh &pm, SRPatchMesh &rp,
+                      const std::set<uint> &sel, std::string &err,
+                      const SPatchMesh *evalPm = NULL);
+
+/**
  * Extrude the listed patches (patch_topo_extrude.cpp): the legacy Extrude, recomposed
  * from the tool's own pieces. The selection's boundary splits exactly as
  * topoDetachElements does it (duplicated ring, originals stay with the complement),

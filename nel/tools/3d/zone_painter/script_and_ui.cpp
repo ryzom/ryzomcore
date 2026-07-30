@@ -2206,6 +2206,7 @@ void zpFillBridgeState(ZPUI::SPaintUIBridge &bridge)
 	bridge.PatchAuto = zpPatchAutoTriState();
 	bridge.HiddenCount = (uint)g_PatchHidden.size();
 	bridge.SubdivPropagate = zpSubdividePropagate();
+	bridge.DetachCopy = zpDetachCopy();
 	bridge.FilterVerts = g_PatchFilterVerts;
 	bridge.FilterVecs = g_PatchFilterVecs;
 	bridge.LockHandles = g_PatchLockHandles;
