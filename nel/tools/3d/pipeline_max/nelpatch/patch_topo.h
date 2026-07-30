@@ -104,6 +104,13 @@ bool topoDeletePatches(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
  * edge ring (legacy left them at their old slots, so a turn silently moved smoothing
  * breaks to different edges), and the map-channel TVPatch entries rotate with their
  * corner/handle/interior groups (legacy left the mapping misaligned on turned patches).
+ *
+ * Seam wipe (2026-07-30): the rotated paint no longer transitions into the neighbors'
+ * along any SHARED edge (neighbor patch or bind junction), so those tile rows empty on
+ * the turned patch's own side. Fully open edges keep their tiles - an isolated patch's
+ * turn stays a true bijection (four turns = identity). The auto-fix alternative
+ * (recomputing transitions) would repaint the neighbor inside this op's undo stroke;
+ * the painter's own transition pass is the repaint tool.
  */
 bool topoTurnPatches(SPatchMesh &pm, SRPatchMesh &rp,
                      const std::set<uint> &patches, bool ccw, std::string &err);

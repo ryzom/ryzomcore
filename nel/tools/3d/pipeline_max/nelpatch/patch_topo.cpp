@@ -368,6 +368,58 @@ void turnOnePatchCcw(SPatchMesh &pm, SRPatchMesh &rp, uint p)
 	}
 }
 
+/// Post-turn seam wipe: a turn rotates the painted grid, so the tiles along any edge the
+/// patch SHARES - with a neighbor patch, or across a bind junction - no longer transition
+/// into the neighbor's paint. The invalid row empties on the TURNED patch's own side
+/// (2026-07-30 design call: the wipe is local and honest; an auto-fix would have to
+/// repaint the neighbor's transitions inside this op's undo stroke, and the painter's
+/// own transition pass is the repaint tool). Fully open edges keep their tiles, which is
+/// what keeps an isolated patch's turn a true bijection.
+void wipeTurnedSeams(SPatchMesh &pm, SRPatchMesh &rp, const std::set<uint> &patches)
+{
+	for (std::set<uint>::const_iterator it = patches.begin(); it != patches.end(); ++it)
+	{
+		const SPmPatch &pp = pm.Patches[*it];
+		SRpoPatch &up = rp.Patches[*it];
+		const sint32 S = 1 << up.NbTilesU, T = 1 << up.NbTilesV;
+		for (int e = 0; e < 4; ++e)
+		{
+			const sint32 ei = pp.Edge[e];
+			bool seam = false;
+			if (ei >= 0 && (size_t)ei < pm.Edges.size())
+			{
+				const SPmEdge &ed = pm.Edges[ei];
+				seam = ed.Patches.size() > 1;
+				// A bound endpoint marks the junction's neighborhood on the BOUND side;
+				// wiping the adjacent rows there is deliberately conservative.
+				if (!seam && ed.V1 >= 0 && (size_t)ed.V1 < rp.Verts.size()
+				    && rp.Verts[ed.V1].Binded)
+					seam = true;
+				if (!seam && ed.V2 >= 0 && (size_t)ed.V2 < rp.Verts.size()
+				    && rp.Verts[ed.V2].Binded)
+					seam = true;
+			}
+			// A bind TARGETING this very edge crosses it too.
+			for (size_t v = 0; v < rp.Verts.size() && !seam; ++v)
+				if (rp.Verts[v].Binded && rp.Verts[v].Patch == (uint32)*it
+				    && rp.Verts[v].Edge == (uint32)e)
+					seam = true;
+			if (!seam)
+				continue;
+			// Edge e's tile row in the ring frame (v along edge 0, u along edge 3):
+			// e0 = the u=0 column, e1 = v=T-1, e2 = u=S-1, e3 = v=0.
+			if (e == 0)
+				for (sint32 v = 0; v < T; ++v) up.Tiles[0 + v * S] = SRpoTile();
+			else if (e == 1)
+				for (sint32 u = 0; u < S; ++u) up.Tiles[u + (T - 1) * S] = SRpoTile();
+			else if (e == 2)
+				for (sint32 v = 0; v < T; ++v) up.Tiles[(S - 1) + v * S] = SRpoTile();
+			else
+				for (sint32 u = 0; u < S; ++u) up.Tiles[u + 0 * S] = SRpoTile();
+		}
+	}
+}
+
 } /* anonymous namespace */
 
 bool topoTurnPatches(SPatchMesh &pm, SRPatchMesh &rp,
@@ -403,6 +455,10 @@ bool topoTurnPatches(SPatchMesh &pm, SRPatchMesh &rp,
 				b.Edge = (b.Edge + 3) & 3;
 		}
 	}
+	// After all the turns: the rotated paint no longer transitions into the unrotated
+	// neighbors (nor into a differently-rotated one - each patch turns about its own
+	// frame), so the seam rows on the turned side empty.
+	wipeTurnedSeams(pm, rp, patches);
 	return true;
 }
 

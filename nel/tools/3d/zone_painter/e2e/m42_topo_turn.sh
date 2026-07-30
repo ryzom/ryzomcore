@@ -4,11 +4,14 @@
 #
 #  1. PAINT FOLLOWS THE FRAME: a painted tile at (u, v) of a 16x16 patch lands at
 #     (OrderT-1-v, u) after one CCW turn; CW turns it back; four CCW turns are the
-#     identity; and the whole seven-stroke undo chain (1 paint + 6 turns) saves
-#     byte-identical to the null-edit baseline.
-#  2. TURN IS A BIJECTION AT THE BYTE LEVEL: four CCW turns with NO undo save
-#     byte-identical to the baseline - grid, colors, edge flags and rings all return to
-#     their authored bytes through four applications of the transform.
+#     identity ON THE INTERIOR; the SEAM WIPE empties the shared-edge tile rows on the
+#     turned side (the rotated paint no longer transitions into the neighbors'); and the
+#     whole seven-stroke undo chain (1 paint + 6 turns) saves byte-identical to the
+#     null-edit baseline.
+#  2. TURN IS A BIJECTION AT THE BYTE LEVEL - on an ISOLATED patch: detach patch 5 to an
+#     element first (its edges become open copies, and fully open edges do not wipe),
+#     then four CCW turns save byte-identical to the detach-only session. Grid, colors,
+#     edge flags and rings all return through four applications of the transform.
 #  3. BINDS FOLLOW THE EDGE RING: vertex 445 of zonematerial-bassin-ilot_croix is bound
 #     onto patch 229 edge 0; a CCW turn of that patch moves the record to edge 3, CW
 #     brings it back, and the turned file round-trips the encoder (--pm-modify-save-test).
@@ -43,12 +46,23 @@ cat > "$OUT/turn.lua" <<'EOF'
 painter.setMode(0)
 painter.paintTile(0, 5, 0.2, 0.2, 2)
 local t0 = painter.tileAt(0, 5, 1, 1)
+-- A border tile on the authored paint, for the seam-wipe assertion (patch 5 is interior,
+-- so every edge is shared and every border row wipes).
+local b0 = painter.tileAt(0, 5, 7, 0)
+assert(b0 ~= -1, "fixture: border tile should be painted")
 painter.setMode(4)
 painter.setSubObject(3)
 painter.selectPatchFace(0, 5, 1)
 assert(painter.turnPatchSelection(true) == 1)
 -- patch 5 is 16x16: (u, v) lands at (OrderT-1-v, u) = (14, 1)
 assert(painter.tileAt(0, 5, 14, 1) == t0, "tile did not transpose")
+-- The seam wipe: patch 5's three SHARED edges wipe their rows; the fourth edge is the
+-- zone's open west border, and open edges keep their tiles. Post-turn the ring carried
+-- the open edge to slot 2 (the u=15 column), so that row is the KEPT one.
+assert(painter.tileAt(0, 5, 7, 0) == -1, "v=0 seam row not wiped")
+assert(painter.tileAt(0, 5, 7, 15) == -1, "v=15 seam row not wiped")
+assert(painter.tileAt(0, 5, 0, 7) == -1, "u=0 seam row not wiped")
+assert(painter.tileAt(0, 5, 15, 7) ~= -1, "the open edge's row should KEEP its tiles")
 painter.selectPatchFace(0, 5, 0)
 assert(painter.turnPatchSelection(false) == 1)
 assert(painter.tileAt(0, 5, 1, 1) == t0, "cw did not restore")
@@ -64,19 +78,34 @@ U=$( { cmp -l "$OUT/base.null.max" "$OUT/ws1/landscape/ligo/lacustre/max/$B.max"
 [[ "$U" -eq 0 ]] || { echo "FAIL: undo chain left $U bytes"; exit 1; }
 echo "OK paint follows the frame; undo chain byte-identical"
 
-echo "===== M42-2: four CCW turns save byte-identical (bijection proof) ====="
+echo "===== M42-2: four CCW turns on an ISOLATED patch save byte-identical ====="
+# Shared edges wipe, so the bijection is proven where the wipe cannot reach: detach
+# patch 5 to an element (open boundary copies), then four turns == the detach alone.
+cat > "$OUT/det.lua" <<'EOF'
+painter.setMode(4)
+painter.setSubObject(3)
+painter.selectPatchFace(0, 5, 1)
+assert(painter.detachPatchSelection() == 1)
+print("M42-2 DETACH OK")
+EOF
 cat > "$OUT/turn4.lua" <<'EOF'
 painter.setMode(4)
+painter.setSubObject(3)
+painter.selectPatchFace(0, 5, 1)
+assert(painter.detachPatchSelection() == 1)
 painter.setSubObject(3)
 for i = 1, 4 do painter.selectPatchFace(0, 5, 0); assert(painter.turnPatchSelection(true) == 1) end
 print("M42-2 OK")
 EOF
+seed "$OUT/ws2a" "$B"
+run_session "$OUT/ws2a" "$B" "$OUT/det.lua" "$OUT/g2a.log"
+grep -aq "M42-2 DETACH OK" "$OUT/g2a.log" || { echo "FAIL: detach-only script"; tail -6 "$OUT/g2a.log"; exit 1; }
 seed "$OUT/ws2" "$B"
 run_session "$OUT/ws2" "$B" "$OUT/turn4.lua" "$OUT/g2.log"
 grep -aq "M42-2 OK" "$OUT/g2.log" || { echo "FAIL: turn4 script"; tail -6 "$OUT/g2.log"; exit 1; }
-T=$( { cmp -l "$OUT/base.null.max" "$OUT/ws2/landscape/ligo/lacustre/max/$B.max" || true; } | wc -l)
-[[ "$T" -eq 0 ]] || { echo "FAIL: 4x turn left $T bytes"; exit 1; }
-echo "OK four turns are the byte identity"
+T=$( { cmp -l "$OUT/ws2a/landscape/ligo/lacustre/max/$B.max" "$OUT/ws2/landscape/ligo/lacustre/max/$B.max" || true; } | wc -l)
+[[ "$T" -eq 0 ]] || { echo "FAIL: 4x turn on the island left $T bytes"; exit 1; }
+echo "OK four turns are the byte identity on the open-edged island"
 
 echo "===== M42-3: binds follow the edge ring; turned file round-trips the encoder ====="
 B3=zonematerial-bassin-ilot_croix
@@ -111,13 +140,14 @@ echo "===== M42-4: modifier-stream target turns and persists ====="
 B4=material-bassin
 cat > "$OUT/modturn.lua" <<'EOF'
 painter.setMode(0)
-painter.paintTile(0, 3, 0.2, 0.2, 2)
-local t0 = painter.tileAt(0, 3, 0, 0)
+-- An INTERIOR marker: the seam wipe empties the border rows of a turned shared-edge
+-- patch, so the persistence probe must ride a tile the wipe cannot reach.
+painter.rawTile(0, 3, 1, 1, 102, 0)
 painter.setMode(4)
 painter.setSubObject(3)
 painter.selectPatchFace(0, 3, 1)
 assert(painter.turnPatchSelection(true) == 1)
-print("M42-4 t0=" .. tostring(t0))
+print("M42-4 t0=102")
 EOF
 seed "$OUT/ws4" "$B4"
 run_session "$OUT/ws4" "$B4" "$OUT/modturn.lua" "$OUT/g4.log"
@@ -126,14 +156,10 @@ T0=$(grep -a "M42-4 t0=" "$OUT/g4.log" | sed 's/.*t0=//')
 grep -aq "(modifier target)" "$OUT/g4.log" || { echo "FAIL: expected the modifier target"; exit 1; }
 # patch 3 of material-bassin: the (0,0) tile lands at (OrderT-1, 0); read the order first
 cat > "$OUT/modturn_v.lua" <<EOF
--- after one CCW turn, (0,0) landed at (newOrderS-1, 0); probe along the top row
-local found = false
-for u = 0, 15 do
-  local t = painter.tileAt(0, 3, u, 0)
-  if t == nil then break end
-  if u > 0 and painter.tileAt(0, 3, u + 1, 0) == nil and t == $T0 then found = true end
-end
-assert(found, "turned tile not at the top-right corner after reopen")
+-- after one CCW turn, (1,1) landed at ((1 << newOrderU) - 2, 1)
+local nu, nv = painter.patchTess(0, 3)
+local t = painter.tileAt(0, 3, (2 ^ nu) - 2, 1)
+assert(t == $T0, "turned tile not at the transposed spot after reopen: " .. tostring(t))
 print("M42-4 reopen OK")
 EOF
 $XVFB "$ZP" "$OUT/ws4" --startup-auto "lacustre/$B4" --no-hint-stamp --no-thumbnail \
