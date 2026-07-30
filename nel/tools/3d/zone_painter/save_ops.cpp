@@ -255,6 +255,14 @@ int saveWholeFile(const std::string &input, const std::string &output, CScene &s
 		scene.build(VersionUnknown);
 		scene.disown();
 		newScene = writeContainerToTemp(scene, tempPath);
+		// Put the LIVE scene back into its parsed state. The cycle above leaves it
+		// disowned (the as-serialized form a fresh load reads), which clears every
+		// parsed-side handle - the RklPatch claimed runs among them - so without this
+		// the session's next carrier write-back fails ("setRPatch failed"): editing
+		// after an in-session save was broken. Typed instances are created at serial
+		// time and survive the cycle; parse only re-expands their state, so live node
+		// and object pointers held by the session stay valid.
+		scene.parse(VersionUnknown);
 	}
 	catch (const std::exception &e)
 	{

@@ -115,4 +115,33 @@ Bmd=$(md5sum "$OUT/ws4b/landscape/ligo/lacustre/max/$B.max" | cut -d' ' -f1)
 [[ "$A" != "$REF" ]] || { echo "FAIL: painted save unexpectedly equals null-edit"; exit 1; }
 echo "OK paint-through-instance == paint-source (and both differ from no-op)"
 
+echo "===== M31-5: edit AFTER an in-session save == single-save equivalent ====="
+# The save cycle (clean/build/disown) must leave the live scene editable: paint, save,
+# paint again, save again - and the file equals painting both strokes before one save.
+seed_ws "$OUT/ws5a"
+seed_ws "$OUT/ws5b"
+cat > "$OUT/resave.lua" <<'EOF'
+assert(painter.paintTile(0, 0, 0.25, 0.25, 1))
+assert(painter.saveAll())
+assert(painter.paintTile(0, 0, 0.75, 0.75, 1))
+assert(painter.saveAll())
+print("resave OK")
+EOF
+cat > "$OUT/onesave.lua" <<'EOF'
+assert(painter.paintTile(0, 0, 0.25, 0.25, 1))
+assert(painter.paintTile(0, 0, 0.75, 0.75, 1))
+assert(painter.saveAll())
+print("onesave OK")
+EOF
+$XVFB "$ZP" "$OUT/ws5a" --startup-auto "lacustre/$B" --no-hint-stamp --no-thumbnail \
+	--lua-script "$OUT/resave.lua" --screenshot "$OUT/s5a.tga" > "$OUT/g5a.log" 2>&1
+grep -aq "resave OK" "$OUT/g5a.log" || { echo "FAIL: edit-after-save script (second save?)"; tail -4 "$OUT/g5a.log"; exit 1; }
+$XVFB "$ZP" "$OUT/ws5b" --startup-auto "lacustre/$B" --no-hint-stamp --no-thumbnail \
+	--lua-script "$OUT/onesave.lua" --screenshot "$OUT/s5b.tga" > "$OUT/g5b.log" 2>&1
+grep -aq "onesave OK" "$OUT/g5b.log" || { echo "FAIL: single-save script"; exit 1; }
+A=$(md5sum "$OUT/ws5a/landscape/ligo/lacustre/max/$B.max" | cut -d' ' -f1)
+Bmd=$(md5sum "$OUT/ws5b/landscape/ligo/lacustre/max/$B.max" | cut -d' ' -f1)
+[[ "$A" == "$Bmd" ]] || { echo "FAIL: save-edit-save != edit-edit-save ($A vs $Bmd)"; exit 1; }
+echo "OK the save leaves the scene editable (byte-equal to the single-save path)"
+
 echo "ALL M31 SESSION BYTE GATES PASSED"
