@@ -998,6 +998,90 @@ bool zpPatchTessQuery(uint zoneId, uint patchIdx, int &uOut, int &vOut)
 	return true;
 }
 
+// ---------------------------------------------------------------------------------------------
+// Vertex continuity type (the legacy Coplanar / Corner pair, vertex level).
+//
+// The type lives in bit 0 of the PatchMesh vertex Flags word (PVERT_COPLANAR; corner = 0)
+// - pinned empirically over the whole corpus with --pm-flags-probe before this op existed:
+// vertex Flags carries ONLY the values 0 and 1 (no hidden bits, unlike patches), and every
+// flagged vertex's attached tangent directions measure coplanar within 1e-6 while unflagged
+// vertices spread up to ~0.5 deviation. The toggle is a value op through the shared runner
+// (the SmGroup shape); the CONSTRAINT applies at handle-move time in zpApplyPatchXform and
+// the preview, not here - toggling moves no geometry.
+
+static bool s_CoplanarOn = false;
+static bool zpXformVertCoplanar(SPatchMesh &pm, SRPatchMesh & /* rp */,
+                                SPmVertMapper * /* mapper */, const std::set<uint> &sel,
+                                std::string &err, const SPatchMesh * /* evalPm */)
+{
+	bool changed = false;
+	for (std::set<uint>::const_iterator it = sel.begin(); it != sel.end(); ++it)
+	{
+		if (*it >= pm.Verts.size())
+		{
+			err = "vertex index out of range";
+			return false;
+		}
+		const sint32 f = pm.Verts[*it].Flags;
+		const sint32 nf = s_CoplanarOn ? (f | 1) : (f & ~1);
+		if (nf != f)
+		{
+			pm.Verts[*it].Flags = nf;
+			changed = true;
+		}
+	}
+	if (!changed)
+	{
+		err = s_CoplanarOn ? "selection is already coplanar" : "selection is already corner";
+		return false;
+	}
+	return true;
+}
+
+/** Set the vertex selection's continuity type (true = coplanar, false = corner). */
+uint zpSetVertexCoplanar(bool on)
+{
+	s_CoplanarOn = on;
+	return zpRunTopoOpVerts("vertex type",
+	                        NLMISC::toString("painter.setVertexCoplanar(%s)",
+	                                         on ? "true" : "false"),
+	                        zpXformVertCoplanar);
+}
+
+/** Tri-state over the vertex selection: 0 = all corner, 1 = all coplanar, 2 = mixed/empty. */
+int zpVertCoplanarTriState()
+{
+	bool any = false, all = true, seen = false;
+	for (std::set<TPatchVertId>::const_iterator it = g_PatchVertSel.begin();
+	     it != g_PatchVertSel.end(); ++it)
+	{
+		const SPaintZone *pz = zpFindPaintZone(it->first);
+		if (!pz || it->second >= pz->Ep.Pm.Verts.size())
+			continue;
+		seen = true;
+		const bool c = (pz->Ep.Pm.Verts[it->second].Flags & 1) != 0;
+		any = any || c;
+		all = all && c;
+	}
+	if (!seen)
+		return 2;
+	return all ? 1 : (any ? 2 : 0);
+}
+
+/** Scene-menu pair click (1 = coplanar, 0 = corner). */
+void zpPatchCoplanarClicked(int on) { zpSetVertexCoplanar(on != 0); }
+
+/** Script/gate read access: one vertex's stored Flags word (through the eval mirror,
+ *  whose flags mirror the stored stream). */
+bool zpPatchVertFlagsQuery(uint zoneId, uint vertIdx, sint32 &out)
+{
+	const SPaintZone *pz = zpFindPaintZone(zoneId);
+	if (!pz || vertIdx >= pz->Ep.Pm.Verts.size())
+		return false;
+	out = pz->Ep.Pm.Verts[vertIdx].Flags;
+	return true;
+}
+
 /** Panel grid click: the Max tri-state rule - a bit carried by ALL selected patches
  *  clears, anything else (off or mixed) sets. */
 void zpPatchSmGroupClicked(int bit)

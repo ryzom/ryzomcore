@@ -883,6 +883,7 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 		paintBridge.weldTargetToggle = zpWeldTargetToggleClicked;
 		paintBridge.patchWeldThreshold = zpPatchWeldThresholdClicked;
 		paintBridge.patchExtrude = zpPatchExtrudeClicked;
+		paintBridge.patchVertCoplanar = zpPatchCoplanarClicked;
 		paintBridge.patchFilterVertsToggle = zpPatchFilterVertsClicked;
 		paintBridge.patchFilterVecsToggle = zpPatchFilterVecsClicked;
 		paintBridge.patchLockHandlesToggle = zpPatchLockHandlesClicked;
@@ -1252,6 +1253,14 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 					else
 						ZPUI::openSaveDialogForFile(modalShot);
 				}
+			}
+			// Dev-only: ZONE_PAINTER_SCENE_MENU_SHOT=1 opens the scene context menu for the
+			// frame (the modal is otherwise reachable only from a real right click; clipped
+			// menu entries render invisible and only a screenshot can see them).
+			{
+				const char *smShot = getenv("ZONE_PAINTER_SCENE_MENU_SHOT");
+				if (smShot && smShot[0] && smShot[0] != '0')
+					zpOpenSceneMenu();
 			}
 			// Dev-only: ZONE_PAINTER_PALETTE_SHOT=1 opens the Tiles palette for the frame.
 			// ZONE_PAINTER_PALETTE_SCROLL=disp scrolls the body to the Displace section.

@@ -2200,6 +2200,7 @@ void zpFillBridgeState(ZPUI::SPaintUIBridge &bridge)
 	bridge.WeldTargetArmed = g_WeldTargetArmed;
 	bridge.WeldThreshold = zpLastWeldThreshold();
 	bridge.ExtrudeHeight = zpLastExtrudeHeight();
+	bridge.VertCoplanar = zpVertCoplanarTriState();
 	bridge.FilterVerts = g_PatchFilterVerts;
 	bridge.FilterVecs = g_PatchFilterVecs;
 	bridge.LockHandles = g_PatchLockHandles;

@@ -812,6 +812,13 @@ bool zpPatchGizmoBeginExtrudeDrag(NL3D::CCamera *camera, const NL3D::CViewport &
                                   float mouseX, float mouseY);
 uint zpSetSmoothGroup(uint bit, bool on);
 uint zpClearSmoothGroups();
+/** Vertex continuity type (PVERT_COPLANAR, vertex Flags bit 0 - corpus-pinned): value op
+ *  through the runner; the constraint applies at handle-move time. Undoable (Kind 6). */
+uint zpSetVertexCoplanar(bool on);
+/** Tri-state over the vertex selection: 0 = all corner, 1 = all coplanar, 2 = mixed/empty. */
+int zpVertCoplanarTriState();
+void zpPatchCoplanarClicked(int on);
+bool zpPatchVertFlagsQuery(uint zoneId, uint vertIdx, sint32 &out);
 uint zpSetPatchTess(int u, int v);
 uint zpBalanceTessSelection();
 bool zpPatchSmGroupsQuery(uint zoneId, uint patchIdx, uint32 &maskOut);

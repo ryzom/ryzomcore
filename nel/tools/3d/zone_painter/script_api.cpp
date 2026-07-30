@@ -123,6 +123,9 @@ uint zpSetPatchTess(int u, int v);
 uint zpBalanceTessSelection();
 bool zpPatchSmGroupsQuery(uint zoneId, uint patchIdx, uint32 &maskOut);
 bool zpPatchTessQuery(uint zoneId, uint patchIdx, int &uOut, int &vOut);
+uint zpSetVertexCoplanar(bool on);
+bool zpPatchVertFlagsQuery(uint zoneId, uint vertIdx, sint32 &out);
+bool zpPatchCornerVert(uint zoneId, uint patchIdx, uint corner, uint &out);
 bool zpMoveDirTarget(int dir, uint &dstZoneOut);
 bool zpZonePatchCount(uint zoneId, uint &countOut);
 bool zpZoneVertCount(uint zoneId, uint &countOut);
@@ -1003,6 +1006,38 @@ static int lBalanceTessSelection(CLuaState &ls) // () -> max order per axis over
 	return retOk(ls);
 }
 
+static int lSetVertexCoplanar(CLuaState &ls) // (on) over the vertex selection
+{
+	const uint n = zpSetVertexCoplanar(argBoolOpt(ls, 1, true));
+	printf("setVertexCoplanar: %u vertices\n", n);
+	fflush(stdout);
+	return retOk(ls);
+}
+
+static int lPatchVertFlags(CLuaState &ls) // (zone, vertIdx) -> the stored Flags word
+{
+	double z, v;
+	if (!argNumber(ls, 1, z) || !argNumber(ls, 2, v))
+		return retErr(ls, "usage: patchVertFlags(zone, vertIndex)");
+	sint32 f = 0;
+	if (!zpPatchVertFlagsQuery((uint)z, (uint)v, f))
+		return retErr(ls, "patchVertFlags: no such vertex");
+	ls.push((double)f);
+	return 1;
+}
+
+static int lPatchCornerVert(CLuaState &ls) // (zone, patchIdx, corner 0..3) -> vertex id
+{
+	double z, p, c;
+	if (!argNumber(ls, 1, z) || !argNumber(ls, 2, p) || !argNumber(ls, 3, c))
+		return retErr(ls, "usage: patchCornerVert(zone, patchIndex, corner)");
+	uint v = 0;
+	if (!zpPatchCornerVert((uint)z, (uint)p, (uint)c, v))
+		return retErr(ls, "patchCornerVert: no such corner");
+	ls.push((double)v);
+	return 1;
+}
+
 static int lPatchSmGroups(CLuaState &ls) // (zone, patch) -> mask
 {
 	double z, p;
@@ -1680,6 +1715,8 @@ static const char *kBootstrap =
 	"  setSmoothGroup = __zp_setSmoothGroup, clearSmoothGroups = __zp_clearSmoothGroups,\n"
 	"  setPatchTess = __zp_setPatchTess, balanceTessSelection = __zp_balanceTessSelection,\n"
 	"  patchSmGroups = __zp_patchSmGroups, patchTess = __zp_patchTess,\n"
+	"  setVertexCoplanar = __zp_setVertexCoplanar, patchVertFlags = __zp_patchVertFlags,\n"
+	"  patchCornerVert = __zp_patchCornerVert,\n"
 	"  rotatePatchSelection = __zp_rotatePatchSelection,\n"
 	"  rotatePatchSelectionAxis = __zp_rotatePatchSelectionAxis,\n"
 	"  scalePatchSelection = __zp_scalePatchSelection,\n"
@@ -1795,6 +1832,9 @@ bool ensureLua()
 	ls->registerFunc("__zp_balanceTessSelection", lBalanceTessSelection);
 	ls->registerFunc("__zp_patchSmGroups", lPatchSmGroups);
 	ls->registerFunc("__zp_patchTess", lPatchTess);
+	ls->registerFunc("__zp_setVertexCoplanar", lSetVertexCoplanar);
+	ls->registerFunc("__zp_patchVertFlags", lPatchVertFlags);
+	ls->registerFunc("__zp_patchCornerVert", lPatchCornerVert);
 	ls->registerFunc("__zp_pivotPos", lPivotPos);
 	ls->registerFunc("__zp_rotatePatchSelection", lRotatePatchSelection);
 	ls->registerFunc("__zp_rotatePatchSelectionAxis", lRotatePatchSelectionAxis);

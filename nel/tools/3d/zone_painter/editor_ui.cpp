@@ -978,6 +978,21 @@ public:
 REGISTER_ACTION_HANDLER(CAHZpMoveToZone, "zp_move_to_zone");
 
 
+/** Scene-menu vertex type pair: set the vertex selection Coplanar (1) or Corner (0). */
+class CAHZpVertexType : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return;
+		CWidgetManager::getInstance()->disableModalWindow();
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchVertCoplanar)
+			b->patchVertCoplanar(atoi(params.c_str()));
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpVertexType, "zp_vertex_type");
+
 /** Pick a specific season code from the menu (params = sp|su|au|wi). */
 class CAHZpSeasonSelect : public IActionHandler
 {
@@ -2714,6 +2729,21 @@ void CEditorUI::syncPanelFromBridge()
 				if (CCtrlBaseButton *btn = findButton(
 						(std::string("ui:zp:scene_menu:content:") + kMvIds[d]).c_str()))
 					btn->setFrozen(!(b->MoveDirMask & (1u << d)));
+		}
+		// Scene-menu vertex type pair: checked = the WHOLE selection carries that type
+		// (mixed shows neither); live at vertex level with a vertex selection.
+		{
+			const bool vtOff = b->SubObj != 1 || !b->PatchSelVerts;
+			if (CCtrlBaseButton *btn = findButton("ui:zp:scene_menu:content:vt_coplanar"))
+			{
+				btn->setFrozen(vtOff);
+				btn->setPushed(!vtOff && b->VertCoplanar == 1);
+			}
+			if (CCtrlBaseButton *btn = findButton("ui:zp:scene_menu:content:vt_corner"))
+			{
+				btn->setFrozen(vtOff);
+				btn->setPushed(!vtOff && b->VertCoplanar == 0);
+			}
 		}
 		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":no_smooth:box").c_str()))
 		{

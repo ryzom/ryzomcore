@@ -253,6 +253,41 @@ static bool zpCornerSelectedAnyNode(const SPaintZone &pz, uint16 vert)
 	return false;
 }
 
+/** The drag offset of an effectively-moving handle - selected through this node, or
+ *  through a sibling node of the same object (the drag then lives in that node's
+ *  displayed space and converts through object space). False when it is not moving. */
+static bool zpTanMovingOffset(const SPaintZone &pz, uint16 vecIdx, NLMISC::CVector &off)
+{
+	if (zpTanSelectedEffective(pz, vecIdx))
+	{
+		float wp[3];
+		if (zpPatchTangentWorld(pz.ZoneId, vecIdx, wp))
+			off = zpDragOffsetAt(NLMISC::CVector(wp[0], wp[1], wp[2]));
+		else
+			off = s_DragDelta;
+		return true;
+	}
+	if (!g_PaintCtx.Zones)
+		return false;
+	const std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
+	for (uint z = 0; z < zones.size(); ++z)
+	{
+		const SPaintZone &other = zones[z];
+		if (other.Node != pz.Node || other.ZoneId == pz.ZoneId)
+			continue;
+		if (!zpTanSelectedEffective(other, vecIdx))
+			continue;
+		float wp[3];
+		if (!zpPatchTangentWorld(other.ZoneId, vecIdx, wp))
+			continue;
+		const NLMISC::CVector d = zpDragOffsetAt(NLMISC::CVector(wp[0], wp[1], wp[2]));
+		const NLMISC::CVector od = zpXformDelta(d, MAXMATH::inverseM3(other.DisplayTM));
+		off = zpXformDelta(od, pz.DisplayTM);
+		return true;
+	}
+	return false;
+}
+
 /**
  * Preview offset for a HANDLE.
  *
@@ -308,30 +343,39 @@ NLMISC::CVector zpTanOffset(const SPaintZone &pz, uint16 vecIdx)
 	if (!s_Dragging || !g_PaintCtx.Zones)
 		return kNoOffset;
 	// EFFECTIVE membership: Lock Handles expands the selection over the owner group, and
-	// the same predicate drives the commit and the live push.
-	if (zpTanSelectedEffective(pz, vecIdx))
+	// the same predicate drives the commit and the live push - selected through this node
+	// or through a sibling node of the same object.
 	{
-		float wp[3];
-		if (zpPatchTangentWorld(pz.ZoneId, vecIdx, wp))
-			return zpDragOffsetAt(NLMISC::CVector(wp[0], wp[1], wp[2]));
-		return s_DragDelta;
+		NLMISC::CVector off;
+		if (zpTanMovingOffset(pz, vecIdx, off))
+			return off;
 	}
-	// Selected through another node of the same object: the drag is in that node's displayed
-	// space, so it comes back to object space through it and out again through this one.
-	const std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
-	for (uint z = 0; z < zones.size(); ++z)
+	// Coplanar continuity: an UNMOVING handle of a coplanar vertex follows the plane its
+	// moving siblings tilt - the commit writes exactly this through the same helper
+	// (zpCoplanarSiblingReaim), the parity discipline.
+	if (zpHandleMode() && owner != (uint16)0xffff && zpVertCoplanarConstrained(pz, owner))
 	{
-		const SPaintZone &other = zones[z];
-		if (other.Node != pz.Node || other.ZoneId == pz.ZoneId)
-			continue;
-		if (!zpTanSelectedEffective(other, vecIdx))
-			continue;
-		float wp[3];
-		if (!zpPatchTangentWorld(other.ZoneId, vecIdx, wp))
-			continue;
-		const NLMISC::CVector d = zpDragOffsetAt(NLMISC::CVector(wp[0], wp[1], wp[2]));
-		const NLMISC::CVector od = zpXformDelta(d, MAXMATH::inverseM3(other.DisplayTM));
-		return zpXformDelta(od, pz.DisplayTM);
+		std::vector<uint16> att;
+		zpVertexTangents(pz, owner, att);
+		std::vector<uint16> movedVecs;
+		std::vector<NLMISC::CVector> movedOffs;
+		for (size_t k = 0; k < att.size(); ++k)
+		{
+			if (att[k] == vecIdx)
+				continue;
+			NLMISC::CVector o;
+			if (zpTanMovingOffset(pz, att[k], o))
+			{
+				movedVecs.push_back(att[k]);
+				movedOffs.push_back(o);
+			}
+		}
+		if (!movedVecs.empty())
+		{
+			NLMISC::CVector off;
+			if (zpCoplanarSiblingReaim(pz, vecIdx, owner, movedVecs, movedOffs, off))
+				return off;
+		}
 	}
 	return kNoOffset;
 }

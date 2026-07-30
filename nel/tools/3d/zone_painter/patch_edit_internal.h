@@ -52,6 +52,19 @@ const void *zpZoneNode(uint zoneId);
 /** Linear part only: the image of a delta, with the matrix's translation dropped. */
 NLMISC::CVector zpXformDelta(const NLMISC::CVector &d, const MAXMATH::Matrix3M &m);
 
+// Coplanar continuity (PVERT_COPLANAR, vertex Flags bit 0): shared between the commit
+// (zpApplyPatchXform) and the drag preview (zpTanOffset) so the two cannot disagree.
+/** All tangent vec indices attached to `vert` (patch-table walk; interiors never attach). */
+void zpVertexTangents(const SPaintZone &pz, uint16 vert, std::vector<uint16> &out);
+/** Is this vertex coplanar-flagged and eligible (not bound)? */
+bool zpVertCoplanarConstrained(const SPaintZone &pz, uint16 vert);
+/** World offset re-aiming unmoving handle `sibVec` of `owner` onto the plane its moving
+ *  siblings tilt; false when degenerate or negligible (the sibling then stays). */
+bool zpCoplanarSiblingReaim(const SPaintZone &pz, uint16 sibVec, uint16 owner,
+                            const std::vector<uint16> &movedVecs,
+                            const std::vector<NLMISC::CVector> &movedOffsets,
+                            NLMISC::CVector &offsetOut);
+
 // ---------------------------------------------------------------------------------------------
 // Defined in patch_edit_ui.cpp
 
