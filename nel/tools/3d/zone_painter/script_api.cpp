@@ -76,6 +76,8 @@ bool zpPatchTangentSelAt(uint index, uint &zoneOut, uint &vecOut);
 bool zpPatchTangentWorld(uint zoneId, uint vecIdx, float outPos[3]);
 void zpSetPivotMode(int mode);
 bool zpSetUserPivotToSelection();
+void zpSetUserPivotXYZ(float x, float y, float z);
+bool zpUserPivotXYZ(float outPos[3]);
 bool zpTransformPivotXYZ(float outPos[3]);
 uint zpApplyPatchRotate(int axis, float degrees, std::string &msg);
 uint zpApplyPatchRotateAxis(float ax, float ay, float az, float degrees, std::string &msg);
@@ -230,6 +232,17 @@ void setRecording(bool on)
 					pre += NLMISC::toString("painter.selectPatchTangent(%u, %u, 1)\n", zid, vec);
 			}
 		}
+		// Pivot state: recorded on change only, so the STARTING values need the preamble -
+		// a recorded rotate/scale re-derives its pivot from the mode at replay, and without
+		// these lines a recording started on a non-default pivot replays around the wrong
+		// anchor. The point precedes the mode so USER mode never lands without its point.
+		{
+			float up[3];
+			if (zpUserPivotXYZ(up))
+				pre += NLMISC::toString("painter.setUserPivot(%.9g, %.9g, %.9g)\n",
+				                        up[0], up[1], up[2]);
+		}
+		pre += NLMISC::toString("painter.setPivotMode(%d)\n", b->PivotMode);
 		pre += NLMISC::toString("painter.setTileSet(%d)\n", b->CurTileSet);
 		pre += NLMISC::toString("painter.set256(%s)\n", b->Mode256 ? "true" : "false");
 		pre += NLMISC::toString("painter.setBrushSize(%u)\n", b->BrushSize);
@@ -928,6 +941,15 @@ static int lSetUserPivotToSelection(CLuaState &ls)
 	return retOk(ls);
 }
 
+static int lSetUserPivot(CLuaState &ls) // (x, y, z) absolute world point
+{
+	double x, y, z;
+	if (!argNumber(ls, 1, x) || !argNumber(ls, 2, y) || !argNumber(ls, 3, z))
+		return retErr(ls, "usage: setUserPivot(x, y, z)");
+	zpSetUserPivotXYZ((float)x, (float)y, (float)z);
+	return retOk(ls);
+}
+
 static int lPivotPos(CLuaState &ls) // -> x, y, z, or nil when the mode cannot form one
 {
 	float p[3];
@@ -1490,6 +1512,7 @@ static const char *kBootstrap =
 	"  patchTangentPos = __zp_patchTangentPos,\n"
 	"  setPivotMode = __zp_setPivotMode, pivotPos = __zp_pivotPos,\n"
 	"  setUserPivotToSelection = __zp_setUserPivotToSelection,\n"
+	"  setUserPivot = __zp_setUserPivot,\n"
 	"  rotatePatchSelection = __zp_rotatePatchSelection,\n"
 	"  rotatePatchSelectionAxis = __zp_rotatePatchSelectionAxis,\n"
 	"  scalePatchSelection = __zp_scalePatchSelection,\n"
@@ -1590,6 +1613,7 @@ bool ensureLua()
 	ls->registerFunc("__zp_patchTangentPos", lPatchTangentPos);
 	ls->registerFunc("__zp_setPivotMode", lSetPivotMode);
 	ls->registerFunc("__zp_setUserPivotToSelection", lSetUserPivotToSelection);
+	ls->registerFunc("__zp_setUserPivot", lSetUserPivot);
 	ls->registerFunc("__zp_pivotPos", lPivotPos);
 	ls->registerFunc("__zp_rotatePatchSelection", lRotatePatchSelection);
 	ls->registerFunc("__zp_rotatePatchSelectionAxis", lRotatePatchSelectionAxis);

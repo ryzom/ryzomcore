@@ -646,6 +646,10 @@ void zpSetPivotMode(int mode);
 /** Put the user pivot at the current selection's centre (recorded). False if nothing selected. */
 bool zpSetUserPivotToSelection();
 void zpUserPivotToSelection();
+/** Place the user pivot at an absolute point (recorded) - the recorder preamble's restore op. */
+void zpSetUserPivotXYZ(float x, float y, float z);
+/** The placed user pivot, if any (flat form for the script TU). */
+bool zpUserPivotXYZ(float outPos[3]);
 /** Open the scene context menu at the pointer (patch mode right click). */
 void zpOpenSceneMenu();
 /** Short label for the toolbar button and the HUD. */

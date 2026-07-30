@@ -513,6 +513,27 @@ bool zpSetUserPivotToSelection()
 /** Bridge form: the bridge's function pointers are all void-returning. */
 void zpUserPivotToSelection() { zpSetUserPivotToSelection(); }
 
+/** Place the user pivot at an ABSOLUTE point - the recorder preamble's restore op (the
+ *  selection form depends on what is selected at replay time; the point does not). */
+void zpSetUserPivotXYZ(float x, float y, float z)
+{
+	g_UserPivot = NLMISC::CVector(x, y, z);
+	g_HaveUserPivot = true;
+	zpPatchGizmoInvalidate();
+	ZPSCRIPT::record(NLMISC::toString("painter.setUserPivot(%.9g, %.9g, %.9g)", x, y, z));
+}
+
+/** The placed user pivot, if any (flat form for the script TU's preamble snapshot). */
+bool zpUserPivotXYZ(float outPos[3])
+{
+	if (!g_HaveUserPivot)
+		return false;
+	outPos[0] = g_UserPivot.x;
+	outPos[1] = g_UserPivot.y;
+	outPos[2] = g_UserPivot.z;
+	return true;
+}
+
 /** Flat form for the script TU, which cannot see NLMISC::CVector through this header set. */
 bool zpTransformPivotXYZ(float outPos[3])
 {
