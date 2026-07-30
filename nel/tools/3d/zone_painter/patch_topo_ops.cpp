@@ -668,13 +668,16 @@ static bool zpXformAddQuad(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper * /* m
 
 // The extrude vector rides file-statics like the weld threshold (op state, not selection).
 static float s_ExtrudeDX = 0.f, s_ExtrudeDY = 0.f, s_ExtrudeDZ = 0.f;
+static float s_ExtrudeOutline = 0.f;
 static float s_LastExtrude = 8.f;
+static float s_LastOutline = 0.f;
+static bool s_LastExtrudeLocal = false;
 static bool zpXformExtrude(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
                            const std::set<uint> &sel, std::string &err,
                            const SPatchMesh *evalPm)
 {
 	return topoExtrudePatches(pm, rp, mapper, sel, s_ExtrudeDX, s_ExtrudeDY, s_ExtrudeDZ,
-	                          err, evalPm);
+	                          err, evalPm, s_ExtrudeOutline);
 }
 
 static bool zpXformDetachElement(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper * /* mapper */,
@@ -769,27 +772,87 @@ float zpLastWeldThreshold() { return s_WeldThreshold; }
  * edges rise WITHOUT a wall - the ligo border profile is a cross-file contract. One
  * Kind 6 stroke through the shared runner.
  */
-uint zpExtrudePatchSelection(float dz)
+/**
+ * The full form (plan mA5/mA6): height along world Z or along the selection's own
+ * NORMAL (Group semantics - one selection, one area-weighted eval normal), plus the
+ * bevel outline. The legacy Bevel smoothing radios are deliberately skipped: walls are
+ * fresh paintable surface, and edge smoothing is the no-smooth flag's job.
+ */
+uint zpExtrudePatchSelectionEx(float h, float outline, bool localNormal)
 {
-	if (dz == 0.f)
+	if (h == 0.f)
 	{
 		g_PropStatusMsg = "extrude: zero height";
 		return 0;
 	}
-	s_ExtrudeDX = 0.f;
-	s_ExtrudeDY = 0.f;
+	float dx = 0.f, dy = 0.f, dz = h;
+	if (localNormal)
+	{
+		// Area-weighted average normal of the selected patches' EVAL surfaces, in object
+		// space (the eval mirror): the diagonal cross (V2-V0)x(V3-V1) is twice the area
+		// vector of a planar quad, so summing the raw crosses weights by area for free.
+		long double nx = 0, ny = 0, nz = 0;
+		for (std::set<TPatchFaceId>::const_iterator it = g_PatchFaceSel.begin();
+		     it != g_PatchFaceSel.end(); ++it)
+		{
+			const SPaintZone *pz = zpFindPaintZone(it->first);
+			if (!pz || it->second >= pz->Ep.Pm.Patches.size())
+				continue;
+			const PIPELINE::MAX::NELPATCH::SPmPatch &pp = pz->Ep.Pm.Patches[it->second];
+			const float *v0 = pz->Ep.Pm.Verts[pp.V[0]].Pos;
+			const float *v1 = pz->Ep.Pm.Verts[pp.V[1]].Pos;
+			const float *v2 = pz->Ep.Pm.Verts[pp.V[2]].Pos;
+			const float *v3 = pz->Ep.Pm.Verts[pp.V[3]].Pos;
+			const long double d1x = (long double)v2[0] - v0[0], d1y = (long double)v2[1] - v0[1],
+			                  d1z = (long double)v2[2] - v0[2];
+			const long double d2x = (long double)v3[0] - v1[0], d2y = (long double)v3[1] - v1[1],
+			                  d2z = (long double)v3[2] - v1[2];
+			nx += d1y * d2z - d1z * d2y;
+			ny += d1z * d2x - d1x * d2z;
+			nz += d1x * d2y - d1y * d2x;
+		}
+		const long double nl = sqrtl(nx * nx + ny * ny + nz * nz);
+		if (nl < 1e-9L)
+		{
+			g_PropStatusMsg = "extrude: selection has no usable normal";
+			printf("%s\n", g_PropStatusMsg.c_str());
+			fflush(stdout);
+			return 0;
+		}
+		dx = (float)(nx / nl * h);
+		dy = (float)(ny / nl * h);
+		dz = (float)(nz / nl * h);
+	}
+	s_ExtrudeDX = dx;
+	s_ExtrudeDY = dy;
 	s_ExtrudeDZ = dz;
-	s_LastExtrude = dz;
+	s_ExtrudeOutline = outline;
+	s_LastExtrude = h;
+	s_LastOutline = outline;
+	s_LastExtrudeLocal = localNormal;
 	return zpRunTopoOp("extrude",
-	                   NLMISC::toString("painter.extrudePatchSelection(%.9g)", dz),
+	                   NLMISC::toString("painter.extrudePatchSelection(%.9g, %.9g, %s)",
+	                                    h, outline, localNormal ? "true" : "false"),
 	                   zpXformExtrude);
 }
 
-/** The last-used extrude height (seeds the panel dialog). */
+/** Extrude by `dz` along world Z (the m54 form; the shift-drag commit's path). */
+uint zpExtrudePatchSelection(float dz)
+{
+	return zpExtrudePatchSelectionEx(dz, 0.f, false);
+}
+
+/** The last-used extrude dialog state (seeds the modal). */
 float zpLastExtrudeHeight() { return s_LastExtrude; }
+float zpLastExtrudeOutline() { return s_LastOutline; }
+bool zpLastExtrudeLocal() { return s_LastExtrudeLocal; }
 
 /** Extrude dialog OK / drag commit. */
 void zpPatchExtrudeClicked(float dz) { zpExtrudePatchSelection(dz); }
+void zpPatchExtrudeExClicked(float h, float outline, bool local)
+{
+	zpExtrudePatchSelectionEx(h, outline, local);
+}
 
 /** Weld dialog OK. */
 void zpPatchWeldThresholdClicked(float distance) { zpWeldPatchSelection(distance); }

@@ -832,8 +832,15 @@ void zpPatchWeldThresholdClicked(float distance);
 uint zpWeldVertexInto(uint zoneId, uint srcVert, uint dstVert);
 /** Surface Properties (patch level): smoothing groups and per-patch tessellation. */
 uint zpExtrudePatchSelection(float dz);
+/** Full extrude (mA5/mA6): height along Z or the selection's area-weighted eval normal
+ *  (Group semantics), plus the bevel outline (in/out along the boundary ring's outward
+ *  XY direction). Undoable. */
+uint zpExtrudePatchSelectionEx(float h, float outline, bool localNormal);
 float zpLastExtrudeHeight();
+float zpLastExtrudeOutline();
+bool zpLastExtrudeLocal();
 void zpPatchExtrudeClicked(float dz);
+void zpPatchExtrudeExClicked(float h, float outline, bool local);
 /** Begin a SHIFT-drag extrude at patch level: a Z-constrained gizmo drag whose release
  *  commits an extrude of the drag's height instead of a move. */
 bool zpPatchGizmoBeginExtrudeDrag(NL3D::CCamera *camera, const NL3D::CViewport &vp,

@@ -140,7 +140,8 @@ struct SPaintUIBridge
 	void (*moveToZoneDir)(int dir); // scene-menu compass, 0=N..7=NW
 	void (*weldTargetToggle)(); // arm/disarm the target-weld drag mode
 	void (*patchWeldThreshold)(float distance); // weld dialog OK
-	void (*patchExtrude)(float dz); // extrude dialog OK / shift-drag commit
+	void (*patchExtrude)(float dz); // shift-drag commit (Z-constrained)
+	void (*patchExtrudeEx)(float h, float outline, bool local); // extrude dialog OK
 	void (*patchFilterVertsToggle)(); // Selection block: pick filter checkboxes
 	void (*patchFilterVecsToggle)();
 	void (*patchLockHandlesToggle)();
@@ -177,6 +178,8 @@ struct SPaintUIBridge
 	bool WeldTargetArmed; // target-weld command mode (panel Target toggle pushed state)
 	float WeldThreshold;  // last-used weld distance (seeds the dialog)
 	float ExtrudeHeight;  // last-used extrude height (seeds the dialog)
+	float ExtrudeOutline; // last-used bevel outline (seeds the dialog)
+	bool ExtrudeLocal;    // last-used normal mode (seeds the radio pair)
 	int VertCoplanar; // vertex selection's continuity type: 0 corner, 1 coplanar, 2 mixed/empty
 	uint HiddenCount; // session hide set size (freezes Unhide All at 0)
 	bool SubdivPropagate; // edge-subdivide strip walk toggle
@@ -254,7 +257,8 @@ struct SPaintUIBridge
 		  patchBind(NULL), patchUnbind(NULL), patchNoSmooth(NULL), patchDelete(NULL),
 		  patchTurnCcw(NULL), patchTurnCw(NULL), patchSubdivide(NULL), patchWeld(NULL), patchAddQuad(NULL),
 		  patchDetach(NULL), patchElement(NULL), moveToZoneDir(NULL), weldTargetToggle(NULL),
-		  patchWeldThreshold(NULL), patchExtrude(NULL), patchVertCoplanar(NULL),
+		  patchWeldThreshold(NULL), patchExtrude(NULL), patchExtrudeEx(NULL),
+		  patchVertCoplanar(NULL),
 		  patchHide(NULL), patchUnhideAll(NULL), patchSubdivPropToggle(NULL),
 		  patchFilterVertsToggle(NULL), patchFilterVecsToggle(NULL), patchLockHandlesToggle(NULL),
 		  arrowsToggle(NULL),
@@ -264,7 +268,7 @@ struct SPaintUIBridge
 		  HaveCore(false), Mode(0), SubObj(0),
 		  PatchSelVerts(0), PatchSelEdges(0), PatchSelFaces(0), PatchSelTans(0),
 		  PatchNoSmooth(2), PatchSelZones(0), MoveDirMask(0), WeldTargetArmed(false),
-		  WeldThreshold(0.1f), ExtrudeHeight(8.f),
+		  WeldThreshold(0.1f), ExtrudeHeight(8.f), ExtrudeOutline(0.f), ExtrudeLocal(false),
 		  VertCoplanar(2), HiddenCount(0), SubdivPropagate(false),
 		  FilterVerts(true), FilterVecs(true), LockHandles(false),
 		  ShowArrows(false),

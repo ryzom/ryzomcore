@@ -523,7 +523,20 @@ public:
 };
 REGISTER_ACTION_HANDLER(CAHZpWeldCancel, "zp_weld_cancel");
 
-/** Panel Extrude button: pop the height dialog, seeded with the last-used height. */
+/** The Normal radio pair state (dialog-local; seeded from the bridge on open). */
+static void zpSetExtrudeNormalRadio(bool local)
+{
+	if (CCtrlBaseButton *bz = dynamic_cast<CCtrlBaseButton *>(
+	        CWidgetManager::getInstance()->getElementFromId(
+	            "ui:zp:extrude_dialog:content:norm_z")))
+		bz->setPushed(!local);
+	if (CCtrlBaseButton *bl = dynamic_cast<CCtrlBaseButton *>(
+	        CWidgetManager::getInstance()->getElementFromId(
+	            "ui:zp:extrude_dialog:content:norm_local")))
+		bl->setPushed(local);
+}
+
+/** Panel Extrude button: pop the dialog, seeded with the last-used height/outline/mode. */
 class CAHZpPatchExtrude : public IActionHandler
 {
 public:
@@ -536,12 +549,28 @@ public:
 		        CWidgetManager::getInstance()->getElementFromId(
 		            "ui:zp:extrude_dialog:content:dist_frame:dist")))
 			eb->setInputString(NLMISC::toString("%g", b->ExtrudeHeight));
+		if (CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(
+		        CWidgetManager::getInstance()->getElementFromId(
+		            "ui:zp:extrude_dialog:content:outl_frame:outl")))
+			eb->setInputString(NLMISC::toString("%g", b->ExtrudeOutline));
+		zpSetExtrudeNormalRadio(b->ExtrudeLocal);
 		CWidgetManager::getInstance()->enableModalWindow(NULL, "ui:zp:extrude_dialog");
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpPatchExtrude, "zp_patch_extrude");
 
-/** Extrude dialog OK: parse the height and extrude the face selection by it. */
+/** The Normal radio pair: exactly one pushed. */
+class CAHZpExtrudeNormal : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params) NL_OVERRIDE
+	{
+		zpSetExtrudeNormalRadio(atoi(params.c_str()) != 0);
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpExtrudeNormal, "zp_extrude_normal");
+
+/** Extrude dialog OK: parse height + outline + mode and extrude the face selection. */
 class CAHZpExtrudeOk : public IActionHandler
 {
 public:
@@ -549,16 +578,25 @@ public:
 	{
 		if (ZPSCRIPT::isExecuting()) return;
 		SPaintUIBridge *b = getPaintUIBridge();
-		if (!b || !b->patchExtrude) return;
-		float h = 0.f;
+		if (!b || !b->patchExtrudeEx) return;
+		float h = 0.f, outline = 0.f;
 		if (CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(
 		        CWidgetManager::getInstance()->getElementFromId(
 		            "ui:zp:extrude_dialog:content:dist_frame:dist")))
 			NLMISC::fromString(eb->getInputString(), h);
+		if (CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(
+		        CWidgetManager::getInstance()->getElementFromId(
+		            "ui:zp:extrude_dialog:content:outl_frame:outl")))
+			NLMISC::fromString(eb->getInputString(), outline);
+		bool local = false;
+		if (CCtrlBaseButton *bl = dynamic_cast<CCtrlBaseButton *>(
+		        CWidgetManager::getInstance()->getElementFromId(
+		            "ui:zp:extrude_dialog:content:norm_local")))
+			local = bl->getPushed();
 		if (h == 0.f)
 			return; // an unparsable or zero height extrudes nothing; the dialog stays up
 		CWidgetManager::getInstance()->disableModalWindow();
-		b->patchExtrude(h);
+		b->patchExtrudeEx(h, outline, local);
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpExtrudeOk, "zp_extrude_ok");

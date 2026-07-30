@@ -117,6 +117,7 @@ uint zpExpandSelectionToElement();
 uint zpAttachZone(uint targetZone, uint srcZone, std::string &msg);
 uint zpMovePatchSelectionToZone(uint dstZone, std::string &msg);
 uint zpExtrudePatchSelection(float dz);
+uint zpExtrudePatchSelectionEx(float h, float outline, bool localNormal);
 uint zpSetSmoothGroup(uint bit, bool on);
 uint zpClearSmoothGroups();
 uint zpSetPatchTess(int u, int v);
@@ -1349,12 +1350,15 @@ static int lDetachToFile(CLuaState &ls) // ([name]) -> detached count (SHELVED, 
 	return 1;
 }
 
-static int lExtrudePatchSelection(CLuaState &ls) // (height) -> extruded count
+static int lExtrudePatchSelection(CLuaState &ls) // (height [, outline [, local]]) -> count
 {
 	double h;
 	if (!argNumber(ls, 1, h))
-		return retErr(ls, "usage: extrudePatchSelection(height)");
-	const uint n = zpExtrudePatchSelection((float)h);
+		return retErr(ls, "usage: extrudePatchSelection(height [, outline [, local]])");
+	double outline = 0.0;
+	argNumber(ls, 2, outline); // optional
+	const bool local = argBoolOpt(ls, 3, false);
+	const uint n = zpExtrudePatchSelectionEx((float)h, (float)outline, local);
 	printf("extrudePatchSelection: %u extruded\n", n);
 	fflush(stdout);
 	ls.push((double)n);

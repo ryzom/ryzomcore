@@ -287,10 +287,20 @@ bool topoDetachElements(SPatchMesh &pm, SRPatchMesh &rp,
  *
  * Refuses: everything topoDetachElements refuses, map-channel meshes (walls would need
  * TVPatch rows), and a near-zero extrude vector.
+ *
+ * `outline` (the legacy Bevel's second stage, plan mA5): after the raise, the island's
+ * boundary ring moves in the XY plane along each vertex's OUTWARD direction (average of
+ * its adjacent boundary edges' XY normals, oriented away from the island) by `outline`
+ * metres - positive flares the top outward, negative tapers the classic cliff. Riding
+ * island tangents follow; interior island verts stay; the vertical wall tangents sit at
+ * the thirds of the OUTLINED vector so the wall sides lean smoothly. Wall-less open
+ * border edges are not outlined (they are not boundary walls), so a border-touching
+ * ring only outlines its walled portion.
  */
 bool topoExtrudePatches(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
                         const std::set<uint> &sel, float dx, float dy, float dz,
-                        std::string &err, const SPatchMesh *evalPm = NULL);
+                        std::string &err, const SPatchMesh *evalPm = NULL,
+                        float outline = 0.f);
 
 /**
  * Append `src`/`srcRp` onto `pm`/`rp` (patch_topo_attach.cpp) - the attach merge. Every

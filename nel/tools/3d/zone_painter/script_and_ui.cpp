@@ -2200,6 +2200,8 @@ void zpFillBridgeState(ZPUI::SPaintUIBridge &bridge)
 	bridge.WeldTargetArmed = g_WeldTargetArmed;
 	bridge.WeldThreshold = zpLastWeldThreshold();
 	bridge.ExtrudeHeight = zpLastExtrudeHeight();
+	bridge.ExtrudeOutline = zpLastExtrudeOutline();
+	bridge.ExtrudeLocal = zpLastExtrudeLocal();
 	bridge.VertCoplanar = zpVertCoplanarTriState();
 	bridge.HiddenCount = (uint)g_PatchHidden.size();
 	bridge.SubdivPropagate = zpSubdividePropagate();
