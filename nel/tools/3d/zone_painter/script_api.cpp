@@ -126,6 +126,9 @@ bool zpPatchTessQuery(uint zoneId, uint patchIdx, int &uOut, int &vOut);
 uint zpSetVertexCoplanar(bool on);
 bool zpPatchVertFlagsQuery(uint zoneId, uint vertIdx, sint32 &out);
 bool zpPatchCornerVert(uint zoneId, uint patchIdx, uint corner, uint &out);
+uint zpHideSelection();
+uint zpUnhideAll();
+bool zpPatchIsHidden(uint zoneId, uint patchIdx);
 bool zpMoveDirTarget(int dir, uint &dstZoneOut);
 bool zpZonePatchCount(uint zoneId, uint &countOut);
 bool zpZoneVertCount(uint zoneId, uint &countOut);
@@ -1026,6 +1029,31 @@ static int lPatchVertFlags(CLuaState &ls) // (zone, vertIdx) -> the stored Flags
 	return 1;
 }
 
+static int lHideSelection(CLuaState &ls) // hide the current level's selection
+{
+	const uint n = zpHideSelection();
+	printf("hideSelection: %u patches\n", n);
+	fflush(stdout);
+	return retOk(ls);
+}
+
+static int lUnhideAll(CLuaState &ls)
+{
+	const uint n = zpUnhideAll();
+	printf("unhideAll: %u patches\n", n);
+	fflush(stdout);
+	return retOk(ls);
+}
+
+static int lPatchHidden(CLuaState &ls) // (zone, patchIdx) -> bool
+{
+	double z, p;
+	if (!argNumber(ls, 1, z) || !argNumber(ls, 2, p))
+		return retErr(ls, "usage: patchHidden(zone, patchIndex)");
+	ls.push(zpPatchIsHidden((uint)z, (uint)p));
+	return 1;
+}
+
 static int lPatchCornerVert(CLuaState &ls) // (zone, patchIdx, corner 0..3) -> vertex id
 {
 	double z, p, c;
@@ -1717,6 +1745,8 @@ static const char *kBootstrap =
 	"  patchSmGroups = __zp_patchSmGroups, patchTess = __zp_patchTess,\n"
 	"  setVertexCoplanar = __zp_setVertexCoplanar, patchVertFlags = __zp_patchVertFlags,\n"
 	"  patchCornerVert = __zp_patchCornerVert,\n"
+	"  hideSelection = __zp_hideSelection, unhideAll = __zp_unhideAll,\n"
+	"  patchHidden = __zp_patchHidden,\n"
 	"  rotatePatchSelection = __zp_rotatePatchSelection,\n"
 	"  rotatePatchSelectionAxis = __zp_rotatePatchSelectionAxis,\n"
 	"  scalePatchSelection = __zp_scalePatchSelection,\n"
@@ -1835,6 +1865,9 @@ bool ensureLua()
 	ls->registerFunc("__zp_setVertexCoplanar", lSetVertexCoplanar);
 	ls->registerFunc("__zp_patchVertFlags", lPatchVertFlags);
 	ls->registerFunc("__zp_patchCornerVert", lPatchCornerVert);
+	ls->registerFunc("__zp_hideSelection", lHideSelection);
+	ls->registerFunc("__zp_unhideAll", lUnhideAll);
+	ls->registerFunc("__zp_patchHidden", lPatchHidden);
 	ls->registerFunc("__zp_pivotPos", lPivotPos);
 	ls->registerFunc("__zp_rotatePatchSelection", lRotatePatchSelection);
 	ls->registerFunc("__zp_rotatePatchSelectionAxis", lRotatePatchSelectionAxis);

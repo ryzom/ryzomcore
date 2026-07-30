@@ -581,6 +581,28 @@ extern std::set<SPatchEdgeId> g_PatchEdgeSel;
 typedef std::pair<uint, uint> TPatchFaceId;
 extern std::set<TPatchFaceId> g_PatchFaceSel;
 
+/**
+ * Session-only HIDE set, patch-keyed (the legacy Hide / Unhide All, plan mA3). A hidden
+ * patch drops from the cage, the pick paths and the overlay arrows; its elements refuse
+ * selection. The LANDSCAPE keeps rendering it - hiding is a cage/editing concept, not a
+ * rendering hole (deliberate divergence from the host, right for terrain). Session-only
+ * by the corpus probe's verdict: PATCH_HIDDEN (bit 1) appears on 4 patches corpus-wide,
+ * so the on-disk bit is preserved verbatim and never interpreted - no byte churn.
+ * Cleared by every working-set rebuild (topology ops, open/close: indices shift).
+ */
+extern std::set<TPatchFaceId> g_PatchHidden;
+bool zpPatchIsHidden(uint zoneId, uint patchIdx);
+/** A vertex is hidden iff it is used by at least one patch and ALL of them are hidden
+ *  (a rim vertex shared with a visible patch stays workable). */
+bool zpVertIsHidden(const SPaintZone &pz, uint16 vertIdx);
+/** Hide the patches the current level's selection touches (vertex/edge/patch levels);
+ *  the selection clears - hidden elements cannot stay selected. NOT undoable (display
+ *  state, like the weld view and the arrows). */
+uint zpHideSelection();
+uint zpUnhideAll();
+void zpPatchHideClicked();
+void zpPatchUnhideAllClicked();
+
 /** Selection ops (recorded). Op: 0 replace, 1 add, 2 remove. */
 void zpPatchVertSelect(uint zoneId, uint vertIdx, int op);
 void zpPatchEdgeSelect(uint zoneId, uint vertA, uint vertB, int op);

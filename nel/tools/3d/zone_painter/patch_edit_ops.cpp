@@ -1778,11 +1778,136 @@ uint16 zpTangentOwner(const SPaintZone &pz, uint16 vecIdx)
 	return (uint16)0xffff;
 }
 
+// ---------------------------------------------------------------------------------------------
+// Hide / Unhide All (plan mA3): session-only display state, patch-keyed. See zp_state.h
+// for the model (landscape keeps rendering; the corpus probe settled session-only).
+
+bool zpPatchIsHidden(uint zoneId, uint patchIdx)
+{
+	return g_PatchHidden.count(TPatchFaceId(zoneId, patchIdx)) != 0;
+}
+
+bool zpVertIsHidden(const SPaintZone &pz, uint16 vertIdx)
+{
+	bool used = false;
+	for (uint p = 0; p < pz.Patches.size(); ++p)
+		for (uint c = 0; c < 4; ++c)
+			if (pz.Patches[p].BaseVertices[c] == vertIdx)
+			{
+				used = true;
+				if (!zpPatchIsHidden(pz.ZoneId, p))
+					return false;
+			}
+	return used;
+}
+
+/** Every patch of `pz` drawing the corner pair (a, b) is hidden (and one exists). */
+static bool zpEdgeIsHidden(const SPaintZone &pz, uint16 a, uint16 b)
+{
+	bool used = false;
+	for (uint p = 0; p < pz.Patches.size(); ++p)
+	{
+		const NL3D::CPatchInfo &pi = pz.Patches[p];
+		for (uint e = 0; e < 4; ++e)
+		{
+			const uint16 va = pi.BaseVertices[e], vb = pi.BaseVertices[(e + 1) & 3];
+			if (!((va == a && vb == b) || (va == b && vb == a)))
+				continue;
+			used = true;
+			if (!zpPatchIsHidden(pz.ZoneId, p))
+				return false;
+		}
+	}
+	return used;
+}
+
+uint zpHideSelection()
+{
+	if (!g_PaintCtx.Zones || !g_PaintCtx.Paint)
+		return 0;
+	const int level = g_PaintCtx.Paint->SubObj;
+	std::set<TPatchFaceId> add;
+	const std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
+	for (uint z = 0; z < zones.size(); ++z)
+	{
+		const SPaintZone &pz = zones[z];
+		if (!pz.Editable)
+			continue;
+		for (uint p = 0; p < pz.Patches.size(); ++p)
+		{
+			const NL3D::CPatchInfo &pi = pz.Patches[p];
+			bool want = false;
+			if (level == CPaintMouseListener::SubPatch)
+				want = g_PatchFaceSel.count(TPatchFaceId(pz.ZoneId, p)) != 0;
+			else if (level == CPaintMouseListener::SubEdge)
+			{
+				for (uint e = 0; e < 4 && !want; ++e)
+					want = g_PatchEdgeSel.count(SPatchEdgeId(pz.ZoneId, pi.BaseVertices[e],
+					                                         pi.BaseVertices[(e + 1) & 3])) != 0;
+			}
+			else if (level == CPaintMouseListener::SubVertex)
+			{
+				for (uint c = 0; c < 4 && !want; ++c)
+					want = g_PatchVertSel.count(TPatchVertId(pz.ZoneId, pi.BaseVertices[c])) != 0;
+			}
+			if (want)
+				add.insert(TPatchFaceId(pz.ZoneId, p));
+		}
+	}
+	if (add.empty())
+	{
+		g_PropStatusMsg = "hide: nothing selected at this level";
+		printf("%s\n", g_PropStatusMsg.c_str());
+		fflush(stdout);
+		return 0;
+	}
+	g_PatchHidden.insert(add.begin(), add.end());
+	// Hidden elements cannot stay selected - a selection you cannot see is a trap (the
+	// orphaned-tangent rule, applied wholesale).
+	g_PatchVertSel.clear();
+	g_PatchEdgeSel.clear();
+	g_PatchFaceSel.clear();
+	g_PatchTanSel.clear();
+	zpPatchGizmoInvalidate();
+	ZPSCRIPT::record("painter.hideSelection()");
+	g_PropStatusMsg = NLMISC::toString("hide: %u patches (%u hidden total)",
+	                                   (uint)add.size(), (uint)g_PatchHidden.size());
+	printf("%s\n", g_PropStatusMsg.c_str());
+	fflush(stdout);
+	return (uint)add.size();
+}
+
+uint zpUnhideAll()
+{
+	const uint n = (uint)g_PatchHidden.size();
+	if (!n)
+	{
+		g_PropStatusMsg = "unhide: nothing hidden";
+		return 0;
+	}
+	g_PatchHidden.clear();
+	ZPSCRIPT::record("painter.unhideAll()");
+	g_PropStatusMsg = NLMISC::toString("unhide: %u patches restored", n);
+	printf("%s\n", g_PropStatusMsg.c_str());
+	fflush(stdout);
+	return n;
+}
+
+void zpPatchHideClicked() { zpHideSelection(); }
+void zpPatchUnhideAllClicked() { zpUnhideAll(); }
+
 void zpPatchVertSelect(uint zoneId, uint vertIdx, int op)
 {
 	const TPatchVertId id((uint)zoneId, (uint16)vertIdx);
 	if (op != 2) // a removal can never create an alias
 	{
+		// Hidden elements refuse selection (a hidden thing must not join a transform).
+		const SPaintZone *hpz = zpFindPaintZone(zoneId);
+		if (hpz && zpVertIsHidden(*hpz, (uint16)vertIdx))
+		{
+			g_PropStatusMsg = NLMISC::toString("vertex %u is hidden", vertIdx);
+			return;
+		}
 		uint other = 0;
 		if (zpVertAliased(zoneId, vertIdx, other))
 		{
@@ -1875,6 +2000,15 @@ void zpRebuildVertSelFromSubObject()
 void zpPatchEdgeSelect(uint zoneId, uint vertA, uint vertB, int op)
 {
 	const SPatchEdgeId id(zoneId, (uint16)vertA, (uint16)vertB);
+	if (op != 2)
+	{
+		const SPaintZone *hpz = zpFindPaintZone(zoneId);
+		if (hpz && zpEdgeIsHidden(*hpz, (uint16)vertA, (uint16)vertB))
+		{
+			g_PropStatusMsg = NLMISC::toString("edge %u-%u is hidden", vertA, vertB);
+			return;
+		}
+	}
 	if (op == 0)
 		g_PatchEdgeSel.clear();
 	if (op == 2)
@@ -1889,6 +2023,11 @@ void zpPatchEdgeSelect(uint zoneId, uint vertA, uint vertB, int op)
 void zpPatchFaceSelect(uint zoneId, uint patchIdx, int op)
 {
 	const TPatchFaceId id(zoneId, patchIdx);
+	if (op != 2 && zpPatchIsHidden(zoneId, patchIdx))
+	{
+		g_PropStatusMsg = NLMISC::toString("patch %u is hidden", patchIdx);
+		return;
+	}
 	if (op == 0)
 		g_PatchFaceSel.clear();
 	if (op == 2)
@@ -1963,6 +2102,20 @@ bool zpPatchTangentWorld(uint zoneId, uint vecIdx, float outPos[3])
 void zpPatchTangentSelect(uint zoneId, uint vecIdx, int op)
 {
 	const TPatchVertId id((uint)zoneId, (uint16)vecIdx);
+	if (op != 2)
+	{
+		// A handle of a fully-hidden owner refuses like the owner does.
+		const SPaintZone *hpz = zpFindPaintZone(zoneId);
+		if (hpz)
+		{
+			const uint16 owner = zpTangentOwner(*hpz, (uint16)vecIdx);
+			if (owner != (uint16)0xffff && zpVertIsHidden(*hpz, owner))
+			{
+				g_PropStatusMsg = NLMISC::toString("handle %u's vertex is hidden", vecIdx);
+				return;
+			}
+		}
+	}
 	if (op == 0)
 		g_PatchTanSel.clear();
 	if (op == 2)

@@ -978,6 +978,30 @@ public:
 REGISTER_ACTION_HANDLER(CAHZpMoveToZone, "zp_move_to_zone");
 
 
+class CAHZpPatchHide : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchHide) b->patchHide();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchHide, "zp_patch_hide");
+
+class CAHZpPatchUnhide : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchUnhideAll) b->patchUnhideAll();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchUnhide, "zp_patch_unhide");
+
 /** Scene-menu vertex type pair: set the vertex selection Coplanar (1) or Corner (0). */
 class CAHZpVertexType : public IActionHandler
 {
@@ -2720,6 +2744,17 @@ void CEditorUI::syncPanelFromBridge()
 			btn->setFrozen(b->SubObj != 3 || !b->PatchSelFaces);
 		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_element").c_str()))
 			btn->setFrozen(b->SubObj != 3 || !b->PatchSelFaces);
+		// Hide takes the current level's selection (vertex/edge/patch); Unhide All is live
+		// whenever anything is hidden, whatever the level.
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_hide").c_str()))
+		{
+			const bool haveSel = (b->SubObj == 1 && b->PatchSelVerts)
+				|| (b->SubObj == 2 && b->PatchSelEdges)
+				|| (b->SubObj == 3 && b->PatchSelFaces);
+			btn->setFrozen(!haveSel);
+		}
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_unhide").c_str()))
+			btn->setFrozen(!b->HiddenCount);
 		// Scene-menu compass: a direction is live when an editable board neighbor sits there
 		// (patch level with a face selection; the mask is empty otherwise).
 		{

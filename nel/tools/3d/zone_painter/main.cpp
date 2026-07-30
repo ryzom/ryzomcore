@@ -304,6 +304,7 @@ NLMISC::CVector g_UserPivot(0.f, 0.f, 0.f);
 bool g_HaveUserPivot = false;
 std::set<SPatchEdgeId> g_PatchEdgeSel;
 std::set<TPatchFaceId> g_PatchFaceSel;
+std::set<TPatchFaceId> g_PatchHidden;
 std::string g_PropStatusMsg; // click "read-only" / selection name (HUD + panel)
 
 // Three parallel tables indexed by TPainterKey; the sizes are left implicit and checked

@@ -414,6 +414,8 @@ static void zpCollectCageLines(const SPaintZone &pz, int subObj,
 	const NLMISC::CVector liftV(0.f, 0.f, kPatchLift);
 	for (uint p = 0; p < pz.Patches.size(); ++p)
 	{
+		if (zpPatchIsHidden(pz.ZoneId, p))
+			continue; // hidden: no cage (the landscape still renders the surface)
 		const NL3D::CBezierPatch &bp = pz.Patches[p].Patch;
 		const NL3D::CPatchInfo &cpi = pz.Patches[p];
 		// At patch level the whole cell lights up, so its four chains count as selected
@@ -494,6 +496,10 @@ void zpDrawPatchLattice(NL3D::IDriver *driver, NL3D::CCamera *camera,
 	std::set<uint16> seen;
 	for (uint p = 0; p < pz.Patches.size(); ++p)
 	{
+		// Hidden patches contribute no markers; a vertex shared with a visible patch is
+		// still reached through that one (the loop skips BEFORE the seen-set).
+		if (zpPatchIsHidden(pz.ZoneId, p))
+			continue;
 		const NL3D::CPatchInfo &pi = pz.Patches[p];
 		for (uint c = 0; c < 4; ++c)
 		{
@@ -542,6 +548,8 @@ void zpDrawPatchLattice(NL3D::IDriver *driver, NL3D::CCamera *camera,
 	std::set<uint16> seenVec;
 	for (uint p = 0; p < pz.Patches.size() && p < pz.Ep.Pm.Patches.size(); ++p)
 	{
+		if (zpPatchIsHidden(pz.ZoneId, p))
+			continue;
 		const NL3D::CPatchInfo &pi = pz.Patches[p];
 		const PIPELINE::MAX::NELPATCH::SPmPatch &pp = pz.Ep.Pm.Patches[p];
 		for (uint j = 0; j < 8; ++j)
@@ -1074,6 +1082,8 @@ bool zpPickPatchVertex(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, f
 		std::set<uint16> seen;
 		for (uint p = 0; p < pz.Patches.size(); ++p)
 		{
+			if (zpPatchIsHidden(pz.ZoneId, p))
+				continue; // what is not drawn cannot be picked
 			const NL3D::CPatchInfo &pi = pz.Patches[p];
 			for (uint c = 0; c < 4; ++c)
 			{
@@ -1125,6 +1135,8 @@ bool zpPickPatchEdge(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, flo
 			continue;
 		for (uint p = 0; p < pz.Patches.size(); ++p)
 		{
+			if (zpPatchIsHidden(pz.ZoneId, p))
+				continue;
 			const NL3D::CPatchInfo &pi = pz.Patches[p];
 			const NL3D::CBezierPatch &bp = pi.Patch;
 			for (uint e = 0; e < 4; ++e)
@@ -1180,6 +1192,8 @@ bool zpPickPatchFace(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, flo
 			continue;
 		for (uint p = 0; p < pz.Patches.size(); ++p)
 		{
+			if (zpPatchIsHidden(pz.ZoneId, p))
+				continue;
 			const NL3D::CBezierPatch &bp = pz.Patches[p].Patch;
 			float qx[4], qy[4];
 			bool ok = true;
@@ -1270,6 +1284,8 @@ static void zpCollectPatchArrows(std::vector<NLMISC::CLine> &out)
 			continue;
 		for (uint p = 0; p < pz.Patches.size(); ++p)
 		{
+			if (zpPatchIsHidden(pz.ZoneId, p))
+				continue;
 			const NLMISC::CVector *V = pz.Patches[p].Patch.Vertices;
 			// Bilinear frame point: u toward ring V3, v toward ring V1; base at v=0.70,
 			// tip at v=0.30 - the MINUS v the additive arrows agree with.
@@ -1377,6 +1393,8 @@ bool zpPickPatchTangent(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, 
 		std::set<uint16> seen;
 		for (uint p = 0; p < pz.Patches.size() && p < pz.Ep.Pm.Patches.size(); ++p)
 		{
+			if (zpPatchIsHidden(pz.ZoneId, p))
+				continue;
 			const NL3D::CPatchInfo &pi = pz.Patches[p];
 			const PIPELINE::MAX::NELPATCH::SPmPatch &pp = pz.Ep.Pm.Patches[p];
 			for (uint j = 0; j < 8; ++j)

@@ -146,6 +146,8 @@ struct SPaintUIBridge
 	void (*patchLockHandlesToggle)();
 	void (*arrowsToggle)();          // orientation arrows (tile additive layer + patch overlay)
 	void (*patchVertCoplanar)(int on); // scene-menu vertex type pair (1 coplanar, 0 corner)
+	void (*patchHide)();             // hide the current level's selection (session-only)
+	void (*patchUnhideAll)();
 	void (*patchSmGroup)(int bit);   // Surface Properties: 32-button grid (tri-state click)
 	void (*patchSmGroupClear)();     // Clear All
 	void (*patchTessDelta)(int axis, int d); // 0 = U, 1 = V; +-1 steps, absolute-set apply
@@ -175,6 +177,7 @@ struct SPaintUIBridge
 	float WeldThreshold;  // last-used weld distance (seeds the dialog)
 	float ExtrudeHeight;  // last-used extrude height (seeds the dialog)
 	int VertCoplanar; // vertex selection's continuity type: 0 corner, 1 coplanar, 2 mixed/empty
+	uint HiddenCount; // session hide set size (freezes Unhide All at 0)
 	bool FilterVerts, FilterVecs; // vertex-level pick filters (both off is impossible)
 	bool LockHandles;             // a handle move takes the corner's other handles along
 	bool ShowArrows;              // orientation arrows toggle state
@@ -250,6 +253,7 @@ struct SPaintUIBridge
 		  patchTurnCcw(NULL), patchTurnCw(NULL), patchSubdivide(NULL), patchWeld(NULL), patchAddQuad(NULL),
 		  patchDetach(NULL), patchElement(NULL), moveToZoneDir(NULL), weldTargetToggle(NULL),
 		  patchWeldThreshold(NULL), patchExtrude(NULL), patchVertCoplanar(NULL),
+		  patchHide(NULL), patchUnhideAll(NULL),
 		  patchFilterVertsToggle(NULL), patchFilterVecsToggle(NULL), patchLockHandlesToggle(NULL),
 		  arrowsToggle(NULL),
 		  patchSmGroup(NULL), patchSmGroupClear(NULL), patchTessDelta(NULL), patchBalance(NULL),
@@ -259,7 +263,7 @@ struct SPaintUIBridge
 		  PatchSelVerts(0), PatchSelEdges(0), PatchSelFaces(0), PatchSelTans(0),
 		  PatchNoSmooth(2), PatchSelZones(0), MoveDirMask(0), WeldTargetArmed(false),
 		  WeldThreshold(0.1f), ExtrudeHeight(8.f),
-		  VertCoplanar(2),
+		  VertCoplanar(2), HiddenCount(0),
 		  FilterVerts(true), FilterVecs(true), LockHandles(false),
 		  ShowArrows(false),
 		  SmGroupAll(0), SmGroupAny(0), TessU(0), TessV(0),

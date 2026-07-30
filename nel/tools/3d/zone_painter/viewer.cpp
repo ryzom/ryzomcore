@@ -884,6 +884,8 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 		paintBridge.patchWeldThreshold = zpPatchWeldThresholdClicked;
 		paintBridge.patchExtrude = zpPatchExtrudeClicked;
 		paintBridge.patchVertCoplanar = zpPatchCoplanarClicked;
+		paintBridge.patchHide = zpPatchHideClicked;
+		paintBridge.patchUnhideAll = zpPatchUnhideAllClicked;
 		paintBridge.patchFilterVertsToggle = zpPatchFilterVertsClicked;
 		paintBridge.patchFilterVecsToggle = zpPatchFilterVecsClicked;
 		paintBridge.patchLockHandlesToggle = zpPatchLockHandlesClicked;

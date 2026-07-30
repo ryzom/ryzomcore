@@ -786,7 +786,7 @@
 	active="true" resizer="false" lockable="false">
 	<group id="header_closed" x="0" y="0" h="14" posref="TL TL"></group>
 	<group id="header_opened" x="0" y="0" h="14" posref="TL TL"></group>
-	<group id="content" x="0" y="0" h="330" posref="TL TL">
+	<group id="content" x="0" y="0" h="352" posref="TL TL">
 		<!-- Level toolbar (text faces until the icon pass; toggle-off returns to Object) -->
 		<view type="text" id="lbl_level" posref="TL TL" x="6" y="-4" fontsize="10" shadow="true"
 			global_color="false" color="255 255 255 180" hardtext="Level" />
@@ -841,8 +841,14 @@
 			onclick_l="zp_patch_detach" params_l="" hardtext="Detach" />
 		<ctrl style="text_button_16" id="btn_extrude" posparent="btn_detach" posref="MR ML" x="4" y="0"
 			onclick_l="zp_patch_extrude" params_l="" hardtext="Extr" />
+		<!-- Hide / Unhide All (session display state: the cage and the picks skip hidden
+		     patches, the landscape keeps rendering them; cleared by topology rebuilds) -->
+		<ctrl style="text_button_16" id="btn_hide" posparent="btn_add_quad" posref="BL TL" x="0" y="-4"
+			onclick_l="zp_patch_hide" params_l="" hardtext="Hide" />
+		<ctrl style="text_button_16" id="btn_unhide" posparent="btn_hide" posref="MR ML" x="4" y="0"
+			onclick_l="zp_patch_unhide" params_l="" hardtext="Unhide All" />
 		<!-- Edge properties: No smooth (tri-state shown via the (mixed) tag) -->
-		<instance template="zp_checkbox_row" id="no_smooth" posparent="btn_add_quad" posref="BL TL" x="0" y="-8"
+		<instance template="zp_checkbox_row" id="no_smooth" posparent="btn_hide" posref="BL TL" x="0" y="-8"
 			label="No smooth" onclick="zp_patch_nosmooth" params="" />
 		<view type="text" id="no_smooth_state" posparent="no_smooth" posref="MR ML" x="6" y="0" fontsize="9" shadow="true"
 			global_color="false" color="255 200 120 220" hardtext="" />
