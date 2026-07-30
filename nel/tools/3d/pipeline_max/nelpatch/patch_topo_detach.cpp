@@ -58,8 +58,30 @@ void dUnbindRelated(SRPatchMesh &rp, size_t vert)
 
 } /* anonymous namespace */
 
+namespace {
+
+/// Effective (evaluated) position source for duplicates: a mapper-driven element's stored
+/// position is a stale cache, and a duplicate is UNMAPPED - copying the stored bytes would
+/// crack the invisible seam open by exactly the mapper delta. NULL evalPm = stored is live.
+void dEffCopyVert(float *dst, const SPatchMesh &pm, const SPatchMesh *evalPm, sint32 i)
+{
+	const float *src = (evalPm && i >= 0 && (size_t)i < evalPm->Verts.size())
+		? evalPm->Verts[i].Pos : pm.Verts[i].Pos;
+	dst[0] = src[0]; dst[1] = src[1]; dst[2] = src[2];
+}
+
+void dEffCopyVec(float *dst, const SPatchMesh &pm, const SPatchMesh *evalPm, sint32 i)
+{
+	const float *src = (evalPm && i >= 0 && (size_t)i < evalPm->Vecs.size())
+		? evalPm->Vecs[i].Pos : pm.Vecs[i].Pos;
+	dst[0] = src[0]; dst[1] = src[1]; dst[2] = src[2];
+}
+
+} /* anonymous namespace */
+
 bool topoDetachElements(SPatchMesh &pm, SRPatchMesh &rp,
-                        const std::set<uint> &sel, std::string &err)
+                        const std::set<uint> &sel, std::string &err,
+                        const SPatchMesh *evalPm)
 {
 	if (pm.EdgesReconstructed)
 	{ err = "reconstructed (Max 3) edge table: topology cannot be written back"; return false; }
@@ -126,6 +148,7 @@ bool topoDetachElements(SPatchMesh &pm, SRPatchMesh &rp,
 		v.Vectors.clear();
 		v.Patches.clear();
 		v.Edges.clear();
+		dEffCopyVert(v.Pos, pm, evalPm, it->first);
 		pm.Verts.push_back(v);
 		SRpoVertexBind b;
 		memset(&b, 0, sizeof(b));
@@ -190,6 +213,7 @@ bool topoDetachElements(SPatchMesh &pm, SRPatchMesh &rp,
 				SPmVec v = pm.Vecs[ne.Vec12];
 				v.Patches = ne.Patches;
 				if (v.HasVert) v.Vert = ne.V1;
+				dEffCopyVec(v.Pos, pm, evalPm, ne.Vec12);
 				pm.Vecs.push_back(v);
 				ne.Vec12 = (sint32)pm.Vecs.size() - 1;
 			}
@@ -198,6 +222,7 @@ bool topoDetachElements(SPatchMesh &pm, SRPatchMesh &rp,
 				SPmVec v = pm.Vecs[ne.Vec21];
 				v.Patches = ne.Patches;
 				if (v.HasVert) v.Vert = ne.V2;
+				dEffCopyVec(v.Pos, pm, evalPm, ne.Vec21);
 				pm.Vecs.push_back(v);
 				ne.Vec21 = (sint32)pm.Vecs.size() - 1;
 			}

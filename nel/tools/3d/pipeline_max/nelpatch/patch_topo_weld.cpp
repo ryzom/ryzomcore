@@ -120,7 +120,8 @@ static bool weldGuards(const SPatchMesh &pm, const SRPatchMesh &rp, std::string 
 
 bool topoWeldVerts(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
                    const std::set<uint> &verts, float threshold,
-                   STopoRemap &remap, std::string &err)
+                   STopoRemap &remap, std::string &err,
+                   const SPatchMesh *evalPm)
 {
 	if (!weldGuards(pm, rp, err))
 		return false;
@@ -153,7 +154,12 @@ bool topoWeldVerts(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
 	for (size_t i = 0; i < sel.size(); ++i)
 		for (size_t j = i + 1; j < sel.size(); ++j)
 		{
-			const float *a = pm.Verts[sel[i]].Pos, *b = pm.Verts[sel[j]].Pos;
+			// Effective positions: a mapper-driven vertex's stored position is a stale
+			// cache, and the artist welds what they SEE - the evaluated geometry.
+			const float *a = (evalPm && sel[i] < evalPm->Verts.size())
+				? evalPm->Verts[sel[i]].Pos : pm.Verts[sel[i]].Pos;
+			const float *b = (evalPm && sel[j] < evalPm->Verts.size())
+				? evalPm->Verts[sel[j]].Pos : pm.Verts[sel[j]].Pos;
 			const double dx = (double)a[0] - b[0], dy = (double)a[1] - b[1], dz = (double)a[2] - b[2];
 			if (dx * dx + dy * dy + dz * dz <= th2)
 			{
@@ -332,7 +338,15 @@ static bool weldApplyPlan(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper
 			remap.Edge[i] = (edgeTo[i] == (sint32)i) ? w++ : -1;
 		for (size_t i = 0; i < nE; ++i)
 			if (edgeTo[i] != (sint32)i)
-				remap.Edge[i] = remap.Edge[edgeTo[i]];
+			{
+				// Chase to the root: a later coincident edge can win the survivor swap
+				// after an earlier fusion, so an edgeTo entry may point at another DEAD
+				// edge - a single-pass read in index order would then land on -1.
+				sint32 r = edgeTo[i];
+				while (edgeTo[r] != r)
+					r = edgeTo[r];
+				remap.Edge[i] = remap.Edge[r];
+			}
 		for (size_t i = 0; i < pm.Patches.size(); ++i)
 			remap.Patch[i] = (sint32)i;
 	}

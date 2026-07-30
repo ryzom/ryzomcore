@@ -275,7 +275,8 @@ SEditableFileInfo *zpObjectEditableFile(const void *node, uint &fileZoneOut)
 
 /** One topology transform over the decoded target streams (delete, turn, ...). */
 typedef bool (*TTopoXform)(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
-                           const std::set<uint> &sel, std::string &err);
+                           const std::set<uint> &sel, std::string &err,
+                           const SPatchMesh *evalPm);
 
 /**
  * Run one topological op over the patch selection (patch sub-object level).
@@ -338,7 +339,12 @@ static uint zpRunTopoOpImpl(const char *opName, const std::string &recordLine, T
 			fflush(stdout);
 			continue;
 		}
-		if (pm.Patches.size() != pz->Patches.size())
+		// Full element-count match: the transforms read effective positions through the
+		// eval mirror, so the mirror must be parallel to the stored stream, not merely
+		// patch-count equal.
+		if (pm.Patches.size() != pz->Patches.size()
+		    || pm.Verts.size() != pz->Ep.Pm.Verts.size()
+		    || pm.Vecs.size() != pz->Ep.Pm.Vecs.size())
 		{
 			g_PropStatusMsg = std::string(opName) + ": stored stream does not match the displayed topology";
 			printf("%s\n", g_PropStatusMsg.c_str());
@@ -385,7 +391,7 @@ static uint zpRunTopoOpImpl(const char *opName, const std::string &recordLine, T
 				fprintf(stderr, "\n");
 			}
 		}
-		if (!xf(pm, rp, haveMapper ? &mapper : NULL, ot->second, err))
+		if (!xf(pm, rp, haveMapper ? &mapper : NULL, ot->second, err, &pz->Ep.Pm))
 		{
 			g_PropStatusMsg = std::string(opName) + ": " + err;
 			printf("%s\n", g_PropStatusMsg.c_str());
@@ -587,30 +593,35 @@ static uint zpRunTopoOpVerts(const char *opName, const std::string &recordLine, 
 
 /** Adapter: delete (the remap is internal to the transform; callers observe via rebuild). */
 static bool zpXformDelete(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
-                          const std::set<uint> &sel, std::string &err)
+                          const std::set<uint> &sel, std::string &err,
+                          const SPatchMesh * /* evalPm */)
 {
 	STopoRemap remap;
 	return topoDeletePatches(pm, rp, mapper, sel, remap, err);
 }
 
 static bool zpXformTurnCcw(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper * /* mapper */,
-                           const std::set<uint> &sel, std::string &err)
+                           const std::set<uint> &sel, std::string &err,
+                           const SPatchMesh * /* evalPm */)
 {
 	return topoTurnPatches(pm, rp, sel, true, err);
 }
 
 static bool zpXformTurnCw(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper * /* mapper */,
-                          const std::set<uint> &sel, std::string &err)
+                          const std::set<uint> &sel, std::string &err,
+                          const SPatchMesh * /* evalPm */)
 {
 	return topoTurnPatches(pm, rp, sel, false, err);
 }
 
-static bool zpXformSubdivide(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper * /* mapper */,
-                             const std::set<uint> &sel, std::string &err)
+static bool zpXformSubdivide(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
+                             const std::set<uint> &sel, std::string &err,
+                             const SPatchMesh *evalPm)
 {
-	// The mapper needs NO rewrite for a pure addition: input-indexed record slots keep,
-	// surviving outputs keep their indices, added outputs stay unmapped.
-	return topoSubdividePatches(pm, rp, sel, err);
+	// Structurally the mapper is a pure addition (input-indexed slots keep, added outputs
+	// stay unmapped), but the REUSED tangent/interior slots may be mapped outputs - the
+	// transform shifts their deltas and reads the split curves off the eval mirror.
+	return topoSubdividePatches(pm, rp, sel, err, mapper, evalPm);
 }
 
 // Weld threshold handed to the adapter through a file-static: the shared runner's
@@ -618,34 +629,40 @@ static bool zpXformSubdivide(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper * /*
 // size, not selection data.
 static float s_WeldThreshold = 0.1f;
 static bool zpXformWeld(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
-                        const std::set<uint> &sel, std::string &err)
+                        const std::set<uint> &sel, std::string &err,
+                        const SPatchMesh *evalPm)
 {
 	STopoRemap remap;
-	return topoWeldVerts(pm, rp, mapper, sel, s_WeldThreshold, remap, err);
+	return topoWeldVerts(pm, rp, mapper, sel, s_WeldThreshold, remap, err, evalPm);
 }
 
 // The directed weld's endpoints ride file-statics the same way (op state, not selection).
 static uint s_WeldIntoSrc = 0, s_WeldIntoDst = 0;
 static bool zpXformWeldInto(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
-                            const std::set<uint> & /* sel */, std::string &err)
+                            const std::set<uint> & /* sel */, std::string &err,
+                            const SPatchMesh * /* evalPm */)
 {
 	STopoRemap remap;
 	return topoWeldVertInto(pm, rp, mapper, s_WeldIntoSrc, s_WeldIntoDst, remap, err);
 }
 
 static bool zpXformAddQuad(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper * /* mapper */,
-                           const std::set<uint> &sel, std::string &err)
+                           const std::set<uint> &sel, std::string &err,
+                           const SPatchMesh *evalPm)
 {
-	// Pure addition: the mapper needs no rewrite (input slots keep, new outputs unmapped).
-	return topoAddQuads(pm, rp, sel, err);
+	// Pure addition: the mapper needs no rewrite (input slots keep, new outputs unmapped);
+	// the mirror seeds are computed off the eval mirror's positions.
+	return topoAddQuads(pm, rp, sel, err, evalPm);
 }
 
 static bool zpXformDetachElement(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper * /* mapper */,
-                                 const std::set<uint> &sel, std::string &err)
+                                 const std::set<uint> &sel, std::string &err,
+                                 const SPatchMesh *evalPm)
 {
 	// Pure addition again (duplicated boundary): input mapper slots keep, new outputs
-	// stay unmapped, nothing dies.
-	return topoDetachElements(pm, rp, sel, err);
+	// stay unmapped, nothing dies; the duplicates copy EVAL positions so a mapper-driven
+	// boundary stays an invisible seam.
+	return topoDetachElements(pm, rp, sel, err, evalPm);
 }
 
 /**

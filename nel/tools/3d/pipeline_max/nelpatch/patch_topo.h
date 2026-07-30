@@ -132,16 +132,24 @@ bool topoTurnPatches(SPatchMesh &pm, SRPatchMesh &rp,
  * assignment for children needs a design pass), patches with a tile order of 1 (halving
  * needs NbTiles >= 1 on both axes), patches whose corners are bound, and patches whose
  * edges are bind targets (splitting a T-junction target breaks the junction).
+ *
+ * Mapper meshes: a mapper-driven output's stored position is a CACHE - evaluation rebuilds
+ * it as input + Delta - so `evalPm` (the caller's evaluated mirror, parallel element
+ * tables) supplies the live positions the split is computed FROM, and a position write to
+ * a mapped output shifts its record's Delta so the value shows after evaluation. Without
+ * them (NULL) the stored positions are treated as live, which is only right for
+ * un-mapped streams.
  */
 bool topoSubdividePatches(SPatchMesh &pm, SRPatchMesh &rp,
-                          const std::set<uint> &patches, std::string &err);
+                          const std::set<uint> &patches, std::string &err,
+                          SPmVertMapper *mapper = NULL, const SPatchMesh *evalPm = NULL);
 
 /**
- * Weld the listed vertices: clusters within `threshold` (transitive, stored object-space
- * positions) merge onto their lowest-index member, which KEEPS ITS OWN position - the
- * target-weld shape. No position is written at all, so the op is mapper-safe by
- * construction (a mapper-driven vertex's stored position is dead bytes; moving it would
- * silently not show).
+ * Weld the listed vertices: clusters within `threshold` (transitive, measured on the
+ * EFFECTIVE object-space positions - `evalPm` when given, stored otherwise) merge onto
+ * their lowest-index member, which KEEPS ITS OWN position - the target-weld shape. No
+ * position is written at all, so the op is mapper-safe by construction (a mapper-driven
+ * vertex's stored position is dead bytes; moving it would silently not show).
  *
  * When a merge makes two OPEN edges coincide (same endpoint pair), they fuse into one
  * shared edge - the stitch that joins two sheets. The surviving (lower) edge keeps its
@@ -159,7 +167,8 @@ bool topoSubdividePatches(SPatchMesh &pm, SRPatchMesh &rp,
  */
 bool topoWeldVerts(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
                    const std::set<uint> &verts, float threshold,
-                   STopoRemap &remap, std::string &err);
+                   STopoRemap &remap, std::string &err,
+                   const SPatchMesh *evalPm = NULL);
 
 /**
  * Directed (target) weld: `srcVert` merges into `dstVert`, which keeps its position and
@@ -184,10 +193,12 @@ bool topoWeldVertInto(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
  * The new patch inherits the owner's SmGroup/Flags and tile ORDERS; its tiles start
  * EMPTY and its colors white - fresh paintable surface, the legacy default state.
  * Refuses: reconstructed streams, hooks, map-channel meshes, non-open edges, and edges
- * with bind records targeting them.
+ * with bind records targeting them. `evalPm` supplies the live positions the mirror
+ * seeds are computed from on mapper meshes (see topoSubdividePatches).
  */
 bool topoAddQuads(SPatchMesh &pm, SRPatchMesh &rp,
-                  const std::set<uint> &edges, std::string &err);
+                  const std::set<uint> &edges, std::string &err,
+                  const SPatchMesh *evalPm = NULL);
 
 /**
  * Detach the listed patches as their own ISLAND inside the same mesh
@@ -201,10 +212,13 @@ bool topoAddQuads(SPatchMesh &pm, SRPatchMesh &rp,
  * Map-channel meshes are fine: patch count and TVPatch rows do not change.
  *
  * Refuses: reconstructed (Max 3) streams, hooks, the whole-mesh selection, and a
- * selection that is already a separate element (no shared vertex).
+ * selection that is already a separate element (no shared vertex). `evalPm` supplies the
+ * positions the (unmapped) duplicates copy, so a mapper-driven boundary stays an
+ * invisible seam (see topoSubdividePatches).
  */
 bool topoDetachElements(SPatchMesh &pm, SRPatchMesh &rp,
-                        const std::set<uint> &sel, std::string &err);
+                        const std::set<uint> &sel, std::string &err,
+                        const SPatchMesh *evalPm = NULL);
 
 /**
  * Append `src`/`srcRp` onto `pm`/`rp` (patch_topo_attach.cpp) - the attach merge. Every

@@ -137,10 +137,58 @@ void growBits(SPmBitArray &sel, sint32 newCount)
 	sel.Bits.resize(newCount > 0 ? ((size_t)newCount + 31) / 32 : 0, 0);
 }
 
+/// One parent patch's 4x4 control grid, captured before any edge split mutates it.
+struct SParentGrid
+{
+	PtL P[4][4];
+};
+
+/// Effective (evaluated) position of a vert / vec: a mapper-driven output's stored
+/// position is a cache, so when the caller supplies its evaluated mirror, positions read
+/// from there. Freshly appended elements sit past the mirror's counts and are unmapped,
+/// so the fallthrough to the stored table is exact for them too.
+PtL effVert(const SPatchMesh &pm, const SPatchMesh *evalPm, sint32 i)
+{
+	if (evalPm && i >= 0 && (size_t)i < evalPm->Verts.size())
+		return ptOf(evalPm->Verts[i].Pos);
+	return ptOf(pm.Verts[i].Pos);
+}
+
+PtL effVec(const SPatchMesh &pm, const SPatchMesh *evalPm, sint32 i)
+{
+	if (evalPm && i >= 0 && (size_t)i < evalPm->Vecs.size())
+		return ptOf(evalPm->Vecs[i].Pos);
+	return ptOf(pm.Vecs[i].Pos);
+}
+
+/// Position write to a possibly MAPPED vec output: the stored bytes always take the value,
+/// and a mapped record's Delta shifts by (desired - current eval) so evaluation lands on
+/// the new position (within an ulp - the input mesh itself is not addressable here).
+void writeVecPos(SPatchMesh &pm, SPmVertMapper *mapper, const SPatchMesh *evalPm,
+                 sint32 idx, const PtL &pos)
+{
+	if (mapper)
+	{
+		for (size_t r = 0; r < mapper->VecMap.size(); ++r)
+		{
+			SPmMapVert &m = mapper->VecMap[r];
+			if (m.Vert != idx)
+				continue;
+			const PtL cur = effVec(pm, evalPm, idx);
+			m.Delta[0] = (float)((long double)m.Delta[0] + (pos.x - cur.x));
+			m.Delta[1] = (float)((long double)m.Delta[1] + (pos.y - cur.y));
+			m.Delta[2] = (float)((long double)m.Delta[2] + (pos.z - cur.z));
+			break;
+		}
+	}
+	ptTo(pm.Vecs[idx].Pos, pos);
+}
+
 } /* anonymous namespace */
 
 bool topoSubdividePatches(SPatchMesh &pm, SRPatchMesh &rp,
-                          const std::set<uint> &patches, std::string &err)
+                          const std::set<uint> &patches, std::string &err,
+                          SPmVertMapper *mapper, const SPatchMesh *evalPm)
 {
 	if (pm.EdgesReconstructed)
 	{ err = "reconstructed (Max 3) edge table: topology cannot be written back"; return false; }
@@ -177,6 +225,12 @@ bool topoSubdividePatches(SPatchMesh &pm, SRPatchMesh &rp,
 			if (pp.Edge[c] < 0 || (size_t)pp.Edge[c] >= pm.Edges.size())
 			{ err = "patch edge out of range"; return false; }
 		}
+		for (int k = 0; k < 8; ++k)
+			if (pp.Vec[k] < 0 || (size_t)pp.Vec[k] >= pm.Vecs.size())
+			{ err = "patch tangent slot out of range"; return false; }
+		for (int k = 0; k < 4; ++k)
+			if (pp.Interior[k] < 0 || (size_t)pp.Interior[k] >= pm.Vecs.size())
+			{ err = "patch interior slot out of range"; return false; }
 	}
 	// No bind record may target an edge slot of a selected patch: splitting a T-junction
 	// target would strand the bound vertices.
@@ -223,6 +277,20 @@ bool topoSubdividePatches(SPatchMesh &pm, SRPatchMesh &rp,
 			Pm->Vecs.push_back(v);
 			return (sint32)Pm->Vecs.size() - 1;
 		}
+		sint32 newInteriorVec(const PtL &pos)
+		{
+			// Authored interiors carry PVEC_INTERIOR (bit 0), no vertex attachment, and
+			// never appear in a vertex's Vectors list - the identity the detach ownership
+			// derivation and Max's own linkage machinery key on.
+			SPmVec v;
+			v.Flags = VecTpl->Flags | 1;
+			v.HasVert = VecTpl->HasVert;
+			v.HasPatches = VecTpl->HasPatches;
+			v.Vert = -1;
+			ptTo(v.Pos, pos);
+			Pm->Vecs.push_back(v);
+			return (sint32)Pm->Vecs.size() - 1;
+		}
 		sint32 newEdge(sint32 v1, sint32 vec12, sint32 vec21, sint32 v2)
 		{
 			SPmEdge e;
@@ -237,6 +305,35 @@ bool topoSubdividePatches(SPatchMesh &pm, SRPatchMesh &rp,
 	mk.VertTpl = &vertTpl;
 	mk.VecTpl = &vecTpl;
 	mk.EdgeTpl = &edgeTpl;
+
+	// --- Phase 0: capture every selected patch's control grid BEFORE any edge splits.
+	// Phase 1's plain split reuses the edge record and overwrites its two tangent vecs
+	// with the half-curve controls, so a grid built afterwards reads halved boundary
+	// tangents - exact on a uniform lattice (where the halved controls happen to agree)
+	// and wrong on any sculpted patch, corrupting the centre vertex, the cross-edge
+	// tangents and every child interior derived from it.
+	std::map<uint, SParentGrid> grids;
+	for (std::set<uint>::const_iterator it = patches.begin(); it != patches.end(); ++it)
+	{
+		const SPmPatch &pp = pm.Patches[*it];
+		SParentGrid &g = grids[*it];
+		g.P[0][0] = effVert(pm, evalPm, pp.V[0]);
+		g.P[0][3] = effVert(pm, evalPm, pp.V[1]);
+		g.P[3][3] = effVert(pm, evalPm, pp.V[2]);
+		g.P[3][0] = effVert(pm, evalPm, pp.V[3]);
+		g.P[0][1] = effVec(pm, evalPm, pp.Vec[0]);
+		g.P[0][2] = effVec(pm, evalPm, pp.Vec[1]);
+		g.P[1][3] = effVec(pm, evalPm, pp.Vec[2]);
+		g.P[2][3] = effVec(pm, evalPm, pp.Vec[3]);
+		g.P[3][2] = effVec(pm, evalPm, pp.Vec[4]);
+		g.P[3][1] = effVec(pm, evalPm, pp.Vec[5]);
+		g.P[2][0] = effVec(pm, evalPm, pp.Vec[6]);
+		g.P[1][0] = effVec(pm, evalPm, pp.Vec[7]);
+		g.P[1][1] = effVec(pm, evalPm, pp.Interior[0]);
+		g.P[1][2] = effVec(pm, evalPm, pp.Interior[1]);
+		g.P[2][2] = effVec(pm, evalPm, pp.Interior[2]);
+		g.P[2][1] = effVec(pm, evalPm, pp.Interior[3]);
+	}
 
 	// --- Phase 1: split every edge of the selection once, globally keyed by edge index.
 	std::map<sint32, SEdgeSplit> splits;
@@ -255,12 +352,13 @@ bool topoSubdividePatches(SPatchMesh &pm, SRPatchMesh &rp,
 			    || (size_t)ed.Vec12 >= pm.Vecs.size() || (size_t)ed.Vec21 >= pm.Vecs.size())
 			{ err = "edge record incomplete"; return false; }
 
-			// Split the edge's own cubic (record direction V1 -> V2).
+			// Split the edge's own cubic (record direction V1 -> V2), on the EVALUATED
+			// curve - the stored positions of mapped outputs are stale caches.
 			PtL c[4], le[4], ri[4];
-			c[0] = ptOf(pm.Verts[ed.V1].Pos);
-			c[1] = ptOf(pm.Vecs[ed.Vec12].Pos);
-			c[2] = ptOf(pm.Vecs[ed.Vec21].Pos);
-			c[3] = ptOf(pm.Verts[ed.V2].Pos);
+			c[0] = effVert(pm, evalPm, ed.V1);
+			c[1] = effVec(pm, evalPm, ed.Vec12);
+			c[2] = effVec(pm, evalPm, ed.Vec21);
+			c[3] = effVert(pm, evalPm, ed.V2);
 			splitCubic(c, le, ri);
 
 			SEdgeSplit sp;
@@ -304,11 +402,12 @@ bool topoSubdividePatches(SPatchMesh &pm, SRPatchMesh &rp,
 			{
 				// Plain split (open edge, or shared with another SELECTED patch): reuse the
 				// record for the first half and its tangent slots for the outer controls,
-				// so both vec owners stay what they were.
-				ptTo(pm.Vecs[ed.Vec12].Pos, le[1]);
+				// so both vec owners stay what they were. The reused slots may be MAPPED
+				// outputs, so the write goes through the delta-shifting form.
+				writeVecPos(pm, mapper, evalPm, ed.Vec12, le[1]);
 				const sint32 l2 = mk.newVec(le[2], sp.Mid);
 				const sint32 r1 = mk.newVec(ri[1], sp.Mid);
-				ptTo(pm.Vecs[ed.Vec21].Pos, ri[2]);
+				writeVecPos(pm, mapper, evalPm, ed.Vec21, ri[2]);
 				sp.Half[1] = mk.newEdge(sp.Mid, r1, ed.Vec21, ed.V2);
 				// Rewire the reused record (fresh reference, taken after all allocations).
 				SPmEdge &edm = pm.Edges[ei];
@@ -334,24 +433,9 @@ bool topoSubdividePatches(SPatchMesh &pm, SRPatchMesh &rp,
 		const SPmPatch par = pm.Patches[p]; // by value: the slot is rewritten below
 		const SRpoPatch upar = rp.Patches[p];
 
-		// Control grid P[b][a].
-		PtL P[4][4];
-		P[0][0] = ptOf(pm.Verts[par.V[0]].Pos);
-		P[0][3] = ptOf(pm.Verts[par.V[1]].Pos);
-		P[3][3] = ptOf(pm.Verts[par.V[2]].Pos);
-		P[3][0] = ptOf(pm.Verts[par.V[3]].Pos);
-		P[0][1] = ptOf(pm.Vecs[par.Vec[0]].Pos);
-		P[0][2] = ptOf(pm.Vecs[par.Vec[1]].Pos);
-		P[1][3] = ptOf(pm.Vecs[par.Vec[2]].Pos);
-		P[2][3] = ptOf(pm.Vecs[par.Vec[3]].Pos);
-		P[3][2] = ptOf(pm.Vecs[par.Vec[4]].Pos);
-		P[3][1] = ptOf(pm.Vecs[par.Vec[5]].Pos);
-		P[2][0] = ptOf(pm.Vecs[par.Vec[6]].Pos);
-		P[1][0] = ptOf(pm.Vecs[par.Vec[7]].Pos);
-		P[1][1] = ptOf(pm.Vecs[par.Interior[0]].Pos);
-		P[1][2] = ptOf(pm.Vecs[par.Interior[1]].Pos);
-		P[2][2] = ptOf(pm.Vecs[par.Interior[2]].Pos);
-		P[2][1] = ptOf(pm.Vecs[par.Interior[3]].Pos);
+		// Control grid P[b][a], captured in phase 0 - the element tables no longer hold
+		// the parent's curves (phase 1 halved the reused tangent records in place).
+		const PtL(&P)[4][4] = grids[p].P;
 
 		// Split rows at a = 0.5, then columns at b = 0.5 -> G[qa][qb] 4x4 child grids,
 		// child-local layout identical to the parent's (G[qa][qb][b'][a']).
@@ -456,20 +540,21 @@ bool topoSubdividePatches(SPatchMesh &pm, SRPatchMesh &rp,
 				ch.Interior[1] = par.Interior[1];
 				ch.Interior[2] = par.Interior[2];
 				ch.Interior[3] = par.Interior[3];
-				ptTo(pm.Vecs[ch.Interior[0]].Pos, g[1][1]);
-				ptTo(pm.Vecs[ch.Interior[1]].Pos, g[1][2]);
-				ptTo(pm.Vecs[ch.Interior[2]].Pos, g[2][2]);
-				ptTo(pm.Vecs[ch.Interior[3]].Pos, g[2][1]);
-				for (int k = 0; k < 4; ++k)
-					if (pm.Vecs[ch.Interior[k]].HasVert)
-						pm.Vecs[ch.Interior[k]].Vert = ch.V[k];
+				// Positions only: authored interiors have Vert = -1, and the reused records
+				// already carry the right identity - rewriting Vert to a corner gave them a
+				// tangent-shaped attachment no authored mesh has. Reused slots may be
+				// mapped, so the writes shift their deltas.
+				writeVecPos(pm, mapper, evalPm, ch.Interior[0], g[1][1]);
+				writeVecPos(pm, mapper, evalPm, ch.Interior[1], g[1][2]);
+				writeVecPos(pm, mapper, evalPm, ch.Interior[2], g[2][2]);
+				writeVecPos(pm, mapper, evalPm, ch.Interior[3], g[2][1]);
 			}
 			else
 			{
-				ch.Interior[0] = mk.newVec(g[1][1], ch.V[0]);
-				ch.Interior[1] = mk.newVec(g[1][2], ch.V[1]);
-				ch.Interior[2] = mk.newVec(g[2][2], ch.V[2]);
-				ch.Interior[3] = mk.newVec(g[2][1], ch.V[3]);
+				ch.Interior[0] = mk.newInteriorVec(g[1][1]);
+				ch.Interior[1] = mk.newInteriorVec(g[1][2]);
+				ch.Interior[2] = mk.newInteriorVec(g[2][2]);
+				ch.Interior[3] = mk.newInteriorVec(g[2][1]);
 			}
 		}
 
