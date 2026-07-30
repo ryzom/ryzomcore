@@ -56,6 +56,8 @@
 #include <nel/3d/camera.h>
 #include <nel/3d/driver_user.h>
 #include <nel/3d/dru.h>
+#include <nel/3d/material.h>
+#include <nel/misc/line.h>
 #include <nel/3d/event_mouse_listener.h>
 #include <nel/3d/font_manager.h>
 #include <nel/3d/landscape.h>
@@ -351,13 +353,66 @@ NLMISC::CVector zpTanOffset(const SPaintZone &pz, uint16 vecIdx)
  * chains; drawing them per patch double-draws shared edges, which costs a line and saves an
  * adjacency walk.
  */
+// Cage line colors, shared by the 3D wireframe pass.
+static const NLMISC::CRGBA kCageColor(90, 190, 255, 255);
+static const NLMISC::CRGBA kCageSelColor(255, 40, 40, 255);
+
+/**
+ * Collect one zone's cage chains as WORLD segments (lifted like every overlay), split
+ * into plain and selected batches - the split replaces the old two-pass 2D draw: a
+ * shared edge is emitted by both its patches, and drawing the selected batch AFTER the
+ * plain one is what keeps a neighbour from painting over the highlight.
+ */
+static void zpCollectCageLines(const SPaintZone &pz, int subObj,
+                               std::vector<NLMISC::CLine> &plain,
+                               std::vector<NLMISC::CLine> &selected)
+{
+	const NLMISC::CVector liftV(0.f, 0.f, kPatchLift);
+	for (uint p = 0; p < pz.Patches.size(); ++p)
+	{
+		const NL3D::CBezierPatch &bp = pz.Patches[p].Patch;
+		const NL3D::CPatchInfo &cpi = pz.Patches[p];
+		// At patch level the whole cell lights up, so its four chains count as selected
+		// whichever way each of them is reached.
+		const bool faceSel = subObj == CPaintMouseListener::SubPatch
+			&& g_PatchFaceSel.count(TPatchFaceId(pz.ZoneId, p)) != 0;
+		for (uint e = 0; e < 4; ++e)
+		{
+			const bool edgeSel = subObj == CPaintMouseListener::SubEdge
+				&& g_PatchEdgeSel.count(SPatchEdgeId(pz.ZoneId, cpi.BaseVertices[e],
+				                                     cpi.BaseVertices[(e + 1) & 3])) != 0;
+			// Tangent 2e is attached to vertex e, tangent 2e+1 to vertex (e+1)&3. The
+			// handles take zpTanOffset, which returns the corner's offset when they are
+			// riding it and their own when they are being dragged - so the cage bends
+			// under a handle drag and deforms rather than tearing under a corner drag.
+			const NLMISC::CVector offA = zpVertOffset(pz, cpi.BaseVertices[e]);
+			const NLMISC::CVector offB = zpVertOffset(pz, cpi.BaseVertices[(e + 1) & 3]);
+			NLMISC::CVector offTA = offA, offTB = offB;
+			if (p < pz.Ep.Pm.Patches.size())
+			{
+				const PIPELINE::MAX::NELPATCH::SPmPatch &pp = pz.Ep.Pm.Patches[p];
+				if (pp.Vec[e * 2] >= 0) offTA = zpTanOffset(pz, (uint16)pp.Vec[e * 2]);
+				if (pp.Vec[e * 2 + 1] >= 0) offTB = zpTanOffset(pz, (uint16)pp.Vec[e * 2 + 1]);
+			}
+			std::vector<NLMISC::CLine> &dst = (faceSel || edgeSel) ? selected : plain;
+			const NLMISC::CVector chain[4] = {
+				bp.Vertices[e] + offA + liftV,
+				bp.Tangents[e * 2] + offTA + liftV,
+				bp.Tangents[e * 2 + 1] + offTB + liftV,
+				bp.Vertices[(e + 1) & 3] + offB + liftV,
+			};
+			for (uint k = 0; k + 1 < 4; ++k)
+				dst.push_back(NLMISC::CLine(chain[k], chain[k + 1]));
+		}
+	}
+}
+
 void zpDrawPatchLattice(NL3D::IDriver *driver, NL3D::CCamera *camera,
                         const SPaintZone &pz, int subObj)
 {
 	if (!driver || !camera || pz.Patches.empty())
 		return;
 
-	static const NLMISC::CRGBA kCageColor(90, 190, 255, 255);
 	static const NLMISC::CRGBA kVertColor(255, 255, 255, 255);
 	static const NLMISC::CRGBA kVertSelColor(255, 40, 40, 255); // selected red
 	// Bound vertices: position DERIVED from a neighbouring patch's edge, not authored. All
@@ -381,57 +436,10 @@ void zpDrawPatchLattice(NL3D::IDriver *driver, NL3D::CCamera *camera,
 	// smaller - and never smaller than one pixel.
 	const float tanHalfPx = halfPx > 1.f ? halfPx - 1.f : 1.f;
 
-	// TWO passes over the cage: everything plain, then everything selected.
-	//
-	// Not a nicety. Each patch draws all four of its own edges, so an edge between two patches
-	// is drawn twice, and with a single pass the neighbour drawn later paints over the
-	// highlight - a selected patch came out with two red edges and two blue ones depending on
-	// where it sat in the patch order.
-	for (uint pass = 0; pass < 2; ++pass)
-	{
-		const bool selPass = pass != 0;
-		for (uint p = 0; p < pz.Patches.size(); ++p)
-		{
-			const NL3D::CBezierPatch &bp = pz.Patches[p].Patch;
-			const NL3D::CPatchInfo &cpi = pz.Patches[p];
-			// At patch level the whole cell lights up, so its four chains count as selected
-			// whichever way each of them is reached.
-			const bool faceSel = subObj == CPaintMouseListener::SubPatch
-				&& g_PatchFaceSel.count(TPatchFaceId(pz.ZoneId, p)) != 0;
-			for (uint e = 0; e < 4; ++e)
-			{
-				const bool edgeSel = subObj == CPaintMouseListener::SubEdge
-					&& g_PatchEdgeSel.count(SPatchEdgeId(pz.ZoneId, cpi.BaseVertices[e],
-					                                     cpi.BaseVertices[(e + 1) & 3])) != 0;
-				if ((faceSel || edgeSel) != selPass)
-					continue;
-				// Tangent 2e is attached to vertex e, tangent 2e+1 to vertex (e+1)&3. The
-				// handles take zpTanOffset, which returns the corner's offset when they are
-				// riding it and their own when they are being dragged - so the cage bends
-				// under a handle drag and deforms rather than tearing under a corner drag.
-				const NLMISC::CVector offA = zpVertOffset(pz, cpi.BaseVertices[e]);
-				const NLMISC::CVector offB = zpVertOffset(pz, cpi.BaseVertices[(e + 1) & 3]);
-				NLMISC::CVector offTA = offA, offTB = offB;
-				if (p < pz.Ep.Pm.Patches.size())
-				{
-					const PIPELINE::MAX::NELPATCH::SPmPatch &pp = pz.Ep.Pm.Patches[p];
-					if (pp.Vec[e * 2] >= 0) offTA = zpTanOffset(pz, (uint16)pp.Vec[e * 2]);
-					if (pp.Vec[e * 2 + 1] >= 0) offTB = zpTanOffset(pz, (uint16)pp.Vec[e * 2 + 1]);
-				}
-				const NLMISC::CRGBA &col = selPass ? kVertSelColor : kCageColor;
-				NLMISC::CVector chain[4];
-				bool ok[4];
-				ok[0] = zpProjectLifted(viewMat, fr, bp.Vertices[e] + offA, kPatchLift, chain[0]);
-				ok[1] = zpProjectLifted(viewMat, fr, bp.Tangents[e * 2] + offTA, kPatchLift, chain[1]);
-				ok[2] = zpProjectLifted(viewMat, fr, bp.Tangents[e * 2 + 1] + offTB, kPatchLift, chain[2]);
-				ok[3] = zpProjectLifted(viewMat, fr, bp.Vertices[(e + 1) & 3] + offB, kPatchLift, chain[3]);
-				for (uint k = 0; k + 1 < 4; ++k)
-					if (ok[k] && ok[k + 1])
-						NL3D::CDRU::drawLine(chain[k].x, chain[k].y,
-						                     chain[k + 1].x, chain[k + 1].y, *driver, col);
-			}
-		}
-	}
+	// The cage LINES live in the depth-tested pre-GUI pass now (zpDrawPatchWire3DAll):
+	// the wireframe is occluded by terrain in front of it, with an x-ray faint pass so
+	// hidden parts stay readable. Only the pixel-snapped markers and handles remain in
+	// this screen-space pass - the artist must always see the selection.
 
 	if (subObj != CPaintMouseListener::SubVertex)
 		return;
@@ -534,8 +542,31 @@ void zpDrawPatchLatticeAll(NL3D::IDriver *driver, NL3D::CCamera *camera, int sub
 {
 	if (!driver || !camera || !g_PaintCtx.Zones)
 		return;
-	// Dev hook, alongside ZONE_PAINTER_GIZMO_HOVER: "handle:x,y,z" forces a live drag so the
-	// preview can be seen and gated from a --screenshot run, which has no pointer to drag.
+	// (The GIZMO_DRAG dev pin moved to zpDrawPatchWire3DAll, which runs first.)
+	const std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
+	for (uint z = 0; z < zones.size(); ++z)
+		if (zones[z].Editable)
+			zpDrawPatchLattice(driver, camera, zones[z], subObj);
+}
+
+static void zpCollectPatchArrows(std::vector<NLMISC::CLine> &out); // defined below
+
+/**
+ * The depth-tested wireframe pass: cage lines and frame arrows, drawn in WORLD space
+ * BEFORE editorUI->draw() - the driver is still in 3D setup there, which is what the
+ * "overlays are 2D-only" invariant was actually about. Two passes per batch: an X-RAY
+ * faint pass with the depth test OFF (hidden parts stay readable behind the terrain),
+ * then the solid pass depth-tested with a Z-BIAS (the landscape's own decal convention,
+ * negative = toward the viewer) so visible lines sit on the surface without fighting
+ * it. Lines never write depth. The pixel-snapped markers, handles, gizmo and rubber
+ * lines stay in the screen-space pass on top - the artist must always see those.
+ */
+void zpDrawPatchWire3DAll(NL3D::IDriver *driver, NL3D::CCamera *camera, int subObj)
+{
+	if (!driver || !camera || !g_PaintCtx.Zones)
+		return;
+	// The GIZMO_DRAG dev pin lives HERE now: this pass runs first each frame, and the
+	// preview offsets both passes read must be pinned before either draws.
 	{
 		const char *dev = getenv("ZONE_PAINTER_GIZMO_DRAG");
 		if (dev && *dev)
@@ -550,10 +581,54 @@ void zpDrawPatchLatticeAll(NL3D::IDriver *driver, NL3D::CCamera *camera, int sub
 			}
 		}
 	}
+	static NL3D::CMaterial matFaint, matSolid;
+	static bool inited = false;
+	if (!inited)
+	{
+		inited = true;
+		matFaint.initUnlit();
+		matFaint.setBlend(true);
+		matFaint.setBlendFunc(NL3D::CMaterial::srcalpha, NL3D::CMaterial::invsrcalpha);
+		matFaint.setZFunc(NL3D::CMaterial::always);
+		matFaint.setZWrite(false);
+		matSolid.initUnlit();
+		matSolid.setZWrite(false);
+		matSolid.setZBias(-0.01f);
+	}
+
+	std::vector<NLMISC::CLine> plain, selected, arrows;
 	const std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
 	for (uint z = 0; z < zones.size(); ++z)
 		if (zones[z].Editable)
-			zpDrawPatchLattice(driver, camera, zones[z], subObj);
+			zpCollectCageLines(zones[z], subObj, plain, selected);
+	zpCollectPatchArrows(arrows);
+	if (plain.empty() && selected.empty() && arrows.empty())
+		return;
+
+	const NL3D::CFrustum &fr = camera->getFrustum();
+	driver->setFrustum(fr.Left, fr.Right, fr.Bottom, fr.Top, fr.Near, fr.Far, fr.Perspective);
+	driver->setupViewMatrix(camera->getMatrix().inverted());
+	driver->setupModelMatrix(NLMISC::CMatrix::Identity);
+
+	static const NLMISC::CRGBA kArrowColor(255, 200, 60, 255);
+	struct SBatch { const std::vector<NLMISC::CLine> *L; NLMISC::CRGBA C; };
+	const SBatch batches[3] = {
+		{ &plain, kCageColor }, { &arrows, kArrowColor }, { &selected, kCageSelColor },
+	};
+	for (int pass = 0; pass < 2; ++pass)
+	{
+		NL3D::CMaterial &mat = pass == 0 ? matFaint : matSolid;
+		for (int b = 0; b < 3; ++b)
+		{
+			if (batches[b].L->empty())
+				continue;
+			NLMISC::CRGBA c = batches[b].C;
+			if (pass == 0)
+				c.A = 60;
+			mat.setColor(c);
+			NL3D::CDRU::drawLinesUnlit(*batches[b].L, mat, *driver);
+		}
+	}
 }
 
 /** Screen distance from a point to a segment, in units of viewport height. */
@@ -1132,26 +1207,18 @@ bool zpPatchVertScreen(uint zoneId, uint vertIdx, float &sxOut, float &syOut)
 }
 
 /**
- * Per-patch frame arrows (g_ShowArrows, patch mode): a thin line arrow centred in each
- * editable patch, drawn with the cage's line style, pointing along the tile frame's +v
- * axis - ring edge 0's direction, the axis the tile rows ride (the empirically pinned
- * m43 mapping: tile v runs along ring edge 0, u along edge 3). A Turn rotates the ring,
- * so the arrow turns with it - which is the point: a turn moves no geometry, and without
- * this display it is invisible. Bilinear over the ring corners (a display aid, not
- * surface-exact), projected like every other overlay.
+ * Per-patch frame arrows (g_ShowArrows): a thin line arrow centred in each editable
+ * patch, pointing along MINUS v - the direction a rot-0 tile's ADDITIVE arrow renders
+ * (pinned empirically with a rot-0 fill legend against the ring axes). Collected as
+ * WORLD segments for the depth-tested wireframe pass; the head is sized from the arrow
+ * itself, so it scales with the patch rather than the screen.
  */
-void zpDrawPatchArrows(NL3D::IDriver *driver, NL3D::CCamera *camera)
+static void zpCollectPatchArrows(std::vector<NLMISC::CLine> &out)
 {
-	if (!g_ShowArrows || !driver || !camera || !g_PaintCtx.Zones)
+	if (!g_ShowArrows || !g_PaintCtx.Zones)
 		return;
 	const std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
-	const NLMISC::CMatrix viewMat = camera->getMatrix().inverted();
-	const NL3D::CFrustum fr = camera->getFrustum();
-	uint32 winW = 0, winH = 0;
-	driver->getWindowSize(winW, winH);
-	if (!winW || !winH)
-		return;
-	const NLMISC::CRGBA col(255, 200, 60, 255);
+	const NLMISC::CVector liftV(0.f, 0.f, kPatchLift);
 	for (uint z = 0; z < zones.size(); ++z)
 	{
 		const SPaintZone &pz = zones[z];
@@ -1160,38 +1227,31 @@ void zpDrawPatchArrows(NL3D::IDriver *driver, NL3D::CCamera *camera)
 		for (uint p = 0; p < pz.Patches.size(); ++p)
 		{
 			const NLMISC::CVector *V = pz.Patches[p].Patch.Vertices;
-			// Bilinear frame point: u toward ring V3, v toward ring V1. The arrow points
-			// along MINUS v - the direction a rot-0 tile's ADDITIVE arrow renders (pinned
-			// empirically with a rot-0 fill legend against the ring axes) - so the two
-			// layers of the toggle agree instead of contradicting each other per tile.
+			// Bilinear frame point: u toward ring V3, v toward ring V1; base at v=0.70,
+			// tip at v=0.30 - the MINUS v the additive arrows agree with.
 			const float u = 0.5f;
-			NLMISC::CVector a = V[0] * ((1.f - u) * 0.30f) + V[1] * ((1.f - u) * 0.70f)
-				+ V[2] * (u * 0.70f) + V[3] * (u * 0.30f); // P(0.5, 0.70)
-			NLMISC::CVector b = V[0] * ((1.f - u) * 0.70f) + V[1] * ((1.f - u) * 0.30f)
-				+ V[2] * (u * 0.30f) + V[3] * (u * 0.70f); // P(0.5, 0.30) - the tip
-			NLMISC::CVector pa, pb;
-			if (!zpProjectLifted(viewMat, fr, a, kPatchLift, pa)
-			    || !zpProjectLifted(viewMat, fr, b, kPatchLift, pb))
-				continue;
-			NL3D::CDRU::drawLine(pa.x, pa.y, pb.x, pb.y, *driver, col, NL3D::CViewport());
-			// Screen-space head, pixel-sized like the marker/diamond overlays.
-			float dx = (pb.x - pa.x) * winW, dy = (pb.y - pa.y) * winH;
-			const float len = sqrtf(dx * dx + dy * dy);
+			const NLMISC::CVector a = V[0] * ((1.f - u) * 0.30f) + V[1] * ((1.f - u) * 0.70f)
+				+ V[2] * (u * 0.70f) + V[3] * (u * 0.30f) + liftV; // P(0.5, 0.70)
+			const NLMISC::CVector b = V[0] * ((1.f - u) * 0.70f) + V[1] * ((1.f - u) * 0.30f)
+				+ V[2] * (u * 0.30f) + V[3] * (u * 0.70f) + liftV; // P(0.5, 0.30) - the tip
+			out.push_back(NLMISC::CLine(a, b));
+			NLMISC::CVector dir = b - a;
+			const float len = dir.norm();
 			if (len < 1e-3f)
 				continue;
-			dx /= len;
-			dy /= len;
-			const float hl = 8.f; // head length, px
-			const float p1x = pb.x - (dx * hl - dy * 4.f) / winW;
-			const float p1y = pb.y - (dy * hl + dx * 4.f) / winH;
-			const float p2x = pb.x - (dx * hl + dy * 4.f) / winW;
-			const float p2y = pb.y - (dy * hl - dx * 4.f) / winH;
-			NL3D::CDRU::drawLine(pb.x, pb.y, p1x, p1y, *driver, col, NL3D::CViewport());
-			NL3D::CDRU::drawLine(pb.x, pb.y, p2x, p2y, *driver, col, NL3D::CViewport());
+			dir /= len;
+			// A lateral in the patch plane: the u axis direction at the tip's altitude.
+			NLMISC::CVector lat = (V[3] + V[2]) * 0.5f - (V[0] + V[1]) * 0.5f;
+			const float ll = lat.norm();
+			if (ll < 1e-3f)
+				continue;
+			lat /= ll;
+			const NLMISC::CVector back = b - dir * (len * 0.18f);
+			out.push_back(NLMISC::CLine(b, back + lat * (len * 0.08f)));
+			out.push_back(NLMISC::CLine(b, back - lat * (len * 0.08f)));
 		}
 	}
 }
-
 /** Screen position of a tangent handle, the vertex form's sibling (gates aim picks at it). */
 bool zpPatchTangentScreen(uint zoneId, uint vecIdx, float &sxOut, float &syOut)
 {

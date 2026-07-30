@@ -519,7 +519,6 @@ void zpPatchLockHandlesClicked();
 extern bool g_ShowArrows;
 void zpSetShowArrows(bool on);
 void zpToggleShowArrows();
-void zpDrawPatchArrows(NL3D::IDriver *driver, NL3D::CCamera *camera);
 /** Selected, or a Lock Handles companion of a selected handle on the same corner. */
 bool zpTanSelectedEffective(const SPaintZone &pz, uint16 vecIdx);
 
@@ -1071,6 +1070,8 @@ void zpDrawPatchLattice(NL3D::IDriver *driver, NL3D::CCamera *camera,
 
 /** Cage for every editable zone; used by both the interactive and screenshot overlay passes. */
 void zpDrawPatchLatticeAll(NL3D::IDriver *driver, NL3D::CCamera *camera, int subObj);
+/** The depth-tested wireframe pass (cage + frame arrows), called BEFORE editorUI->draw(). */
+void zpDrawPatchWire3DAll(NL3D::IDriver *driver, NL3D::CCamera *camera, int subObj);
 
 /** HUD label for a paint mode / sub-object level; "?" when out of range. */
 const char *zpModeName(int mode);

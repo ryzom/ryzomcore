@@ -1492,6 +1492,11 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 				udriver->clearBuffers(NLMISC::CRGBA(90, 90, 90));
 				uscene->render();
 			}
+			// Depth-tested wireframe BEFORE the GUI pass: the driver is still in 3D
+			// setup here, so the cage and frame arrows get real occlusion (with the
+			// x-ray faint pass underneath). The screen-space overlays stay after.
+			if (paintListener.Mode == CPaintMouseListener::ModePatch)
+				zpDrawPatchWire3DAll(driver, camera, paintListener.SubObj);
 			editorUI->update();
 			editorUI->draw();
 			{
@@ -1517,8 +1522,6 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 				else if (paintListener.Mode == CPaintMouseListener::ModePatch)
 				{
 					zpDrawPatchLatticeAll(driver, camera, paintListener.SubObj);
-					// Frame arrows under the cage: the display that makes Turn visible.
-					zpDrawPatchArrows(driver, camera);
 					// Gizmo after the cage so it is never overdrawn by it. Every level that
 					// MOVES something gets one - edge and patch selections are projected onto
 					// the same vertex set, so the gizmo is already correct for them.
@@ -1813,6 +1816,9 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 				}
 
 				// NLGUI after landscape, BEFORE outlines/HUD (solid panel backdrop).
+				// Depth-tested wireframe BEFORE the GUI pass (see the interactive loop).
+				if (paintListener.Mode == CPaintMouseListener::ModePatch)
+					zpDrawPatchWire3DAll(driver, camera, paintListener.SubObj);
 				editorUI->update();
 				editorUI->draw();
 
@@ -1852,8 +1858,6 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 				else if (paintListener.Mode == CPaintMouseListener::ModePatch)
 				{
 					zpDrawPatchLatticeAll(driver, camera, paintListener.SubObj);
-					// Frame arrows under the cage: the display that makes Turn visible.
-					zpDrawPatchArrows(driver, camera);
 					// Gizmo after the cage so it is never overdrawn by it. Every level that
 					// MOVES something gets one - edge and patch selections are projected onto
 					// the same vertex set, so the gizmo is already correct for them.
