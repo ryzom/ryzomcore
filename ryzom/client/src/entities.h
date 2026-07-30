@@ -47,6 +47,7 @@
 #include "nel/3d/u_instance.h"
 // Std.
 #include <vector>
+#include <map>
 
 
 ///////////
@@ -208,6 +209,16 @@ private:
 	/// Reset Counters
 	void resetCounters() {_EntitiesAllocated = 0; _NbUser = 0; _NbPlayer = 0; _NbChar = 0;}
 
+	/// Allocate and build (skeleton, instances, equipment, ...) an entity for 'form' meant for 'slot', without installing it in _Entities[] nor registering it with the ground fx / bar / projectile managers.
+	CEntityCL *buildEntity(uint slot, uint32 form);
+	/// Finish installing 'newEntity' as the entity for 'slot' (slot/dataSetId/alias, backuped properties, ground fx registration). Shared by create() and the changeEntitySheet() swap.
+	void finalizeEntityInSlot(uint slot, CEntityCL *newEntity, const TNewEntityInfo& newEntityInfo);
+	/// Detach and destroy the entity currently in 'slot', WITHOUT calling slotRemoved() on other entities (used when swapping in a replacement for the same logical entity).
+	void destroyEntityInSlot(uint slot);
+
+	/// Entities being built off screen to replace the current occupant of a slot (see changeEntitySheet()).
+	std::map<uint, std::pair<CEntityCL*, TNewEntityInfo> > _PendingSheetReplacement;
+
 
 public:
 	NLMISC_DECLARE_CLASS(CEntityManager);
@@ -258,6 +269,19 @@ public:
 	 * \return CEntityCL * : pointer on the new entity.
 	 */
 	CEntityCL *create(uint slot, uint32 form, const TNewEntityInfo& newEntityInfo);
+
+	/**
+	 * Change the sheet (appearance only) of the entity already occupying 'slot',
+	 * without ever leaving the slot empty and without notifying other entities
+	 * that the slot was removed (so selection/target on this slot is preserved).
+	 * The replacement entity is built off screen first ("double buffering") and
+	 * only swapped in once ready, then the old entity is destroyed.
+	 * If the slot is not currently occupied, falls back to a normal create().
+	 */
+	void changeEntitySheet(uint slot, uint32 form, const TNewEntityInfo& newEntityInfo);
+
+	/// Perform any pending changeEntitySheet() swaps. Must be called once per frame.
+	void updatePendingSheetChanges();
 
 	/**
 	 * Delete an entity.
