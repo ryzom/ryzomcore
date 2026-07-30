@@ -140,6 +140,13 @@ struct SPaintUIBridge
 	void (*moveToZoneDir)(int dir); // scene-menu compass, 0=N..7=NW
 	void (*weldTargetToggle)(); // arm/disarm the target-weld drag mode
 	void (*patchWeldThreshold)(float distance); // weld dialog OK
+	void (*patchFilterVertsToggle)(); // Selection block: pick filter checkboxes
+	void (*patchFilterVecsToggle)();
+	void (*patchLockHandlesToggle)();
+	void (*patchSmGroup)(int bit);   // Surface Properties: 32-button grid (tri-state click)
+	void (*patchSmGroupClear)();     // Clear All
+	void (*patchTessDelta)(int axis, int d); // 0 = U, 1 = V; +-1 steps, absolute-set apply
+	void (*patchBalance)();          // even the selection's orders (max per axis)
 	// Painterscript absolute state setters (recorder-replay faithful; the frame-synced
 	// snapshot fields below are STALE mid-script, so scripts must not derive from them)
 	void (*setTileSize256)(bool on);
@@ -163,6 +170,10 @@ struct SPaintUIBridge
 	uint MoveDirMask;
 	bool WeldTargetArmed; // target-weld command mode (panel Target toggle pushed state)
 	float WeldThreshold;  // last-used weld distance (seeds the dialog)
+	bool FilterVerts, FilterVecs; // vertex-level pick filters (both off is impossible)
+	bool LockHandles;             // a handle move takes the corner's other handles along
+	uint SmGroupAll, SmGroupAny;  // smoothing bits on ALL / on ANY selected patch
+	int TessU, TessV;             // first selected patch's tile orders (0 = no selection)
 	int PivotMode;          // TPivotMode; what the transform gizmo is anchored on
 	char PivotLabel[16];    // short face for the toolbar button
 	int CurTileSet;
@@ -233,12 +244,16 @@ struct SPaintUIBridge
 		  patchTurnCcw(NULL), patchTurnCw(NULL), patchSubdivide(NULL), patchWeld(NULL), patchAddQuad(NULL),
 		  patchDetach(NULL), patchElement(NULL), moveToZoneDir(NULL), weldTargetToggle(NULL),
 		  patchWeldThreshold(NULL),
+		  patchFilterVertsToggle(NULL), patchFilterVecsToggle(NULL), patchLockHandlesToggle(NULL),
+		  patchSmGroup(NULL), patchSmGroupClear(NULL), patchTessDelta(NULL), patchBalance(NULL),
 		  setTileSize256(NULL), setHardnessAbs(NULL), setOpacityAbs(NULL),
 		  setColorRadiusAbs(NULL),
 		  HaveCore(false), Mode(0), SubObj(0),
 		  PatchSelVerts(0), PatchSelEdges(0), PatchSelFaces(0), PatchSelTans(0),
 		  PatchNoSmooth(2), PatchSelZones(0), MoveDirMask(0), WeldTargetArmed(false),
 		  WeldThreshold(0.1f),
+		  FilterVerts(true), FilterVecs(true), LockHandles(false),
+		  SmGroupAll(0), SmGroupAny(0), TessU(0), TessV(0),
 		  CurTileSet(0), TileSetCount(0), Mode256(false),
 		  BrushSize(0), TileGroup(0), LockBorders(false), UndoDepth(0), CanSave(false),
 		  InteractiveSave(false), BoardSession(false), InstanceCount(1), UpdateThumbnail(true),

@@ -780,6 +780,20 @@ bool zpPatchPushLive(bool preview)
 		if (obj)
 			objectTanSel.insert(std::make_pair(obj, it->second));
 	}
+	// Lock Handles: companions move too, so their patches must be pushed - same predicate
+	// as the preview and the commit.
+	if (g_PatchLockHandles && !g_PatchTanSel.empty())
+		for (uint z = 0; z < zones.size(); ++z)
+		{
+			const SPaintZone &pz = zones[z];
+			for (uint p = 0; p < pz.Patches.size() && p < pz.Ep.Pm.Patches.size(); ++p)
+				for (uint j = 0; j < 8; ++j)
+				{
+					const sint32 v = pz.Ep.Pm.Patches[p].Vec[j];
+					if (v >= 0 && zpTanSelectedEffective(pz, (uint16)v))
+						objectTanSel.insert(std::make_pair((const void *)pz.Node, (uint16)v));
+				}
+		}
 
 	for (uint z = 0; z < zones.size(); ++z)
 	{
@@ -1043,11 +1057,10 @@ void zpGeomVertChanged(uint zoneId, uint16 elemIdx, int elem, const float *objDe
 			{
 				if (pi.BaseVertices[c] != elemIdx)
 					continue;
-				// Tangents are stored as absolute points, so they take the same shift the
-				// corner took rather than being recomputed.
+				// The corner only: its handles are WRITTEN with it (the ride is part of the
+				// stream now), so each arrives as its own GeomVec callback - shifting them
+				// here too would move them twice.
 				pi.Patch.Vertices[c] += shift;
-				pi.Patch.Tangents[c * 2] += shift;
-				pi.Patch.Tangents[((c + 3) & 3) * 2 + 1] += shift;
 			}
 		}
 	}
@@ -1137,12 +1150,22 @@ uint zpApplyPatchXform(const SPatchXform &xform, const NLMISC::CVector &worldDel
 			for (uint c = 0; c < 4; ++c)
 				if (g_PatchVertSel.count(TPatchVertId(pz.ZoneId, pz.Patches[p].BaseVertices[c])))
 					want.insert(pz.Patches[p].BaseVertices[c]);
-		// ... and its selected handles, keyed on the Vecs index the same way.
+		// ... and its selected handles, keyed on the Vecs index the same way. Lock
+		// Handles expands over the owner group through the same predicate the preview
+		// uses, so the write and the drawn cage cannot disagree about what moves.
 		std::set<uint16> wantVec;
 		for (std::set<TPatchVertId>::const_iterator it = g_PatchTanSel.begin();
 		     it != g_PatchTanSel.end(); ++it)
 			if (it->first == pz.ZoneId)
 				wantVec.insert(it->second);
+		if (g_PatchLockHandles && !wantVec.empty())
+			for (uint p = 0; p < pz.Patches.size() && p < pz.Ep.Pm.Patches.size(); ++p)
+				for (uint j = 0; j < 8; ++j)
+				{
+					const sint32 v = pz.Ep.Pm.Patches[p].Vec[j];
+					if (v >= 0 && zpTanSelectedEffective(pz, (uint16)v))
+						wantVec.insert((uint16)v);
+				}
 		if (want.empty() && wantVec.empty())
 			continue;
 
@@ -1184,6 +1207,36 @@ uint zpApplyPatchXform(const SPatchXform &xform, const NLMISC::CVector &worldDel
 				continue;
 			}
 			move.push_back(ZPPAINT::SGeomElemRef(*it, ZPPAINT::GeomVec));
+		}
+		// A moving corner takes its handles with it IN THE FILE, not only in the preview:
+		// tangents are stored as absolute points, so a corner written alone saves a
+		// pinched surface the session never showed (caught by a save+reopen probe - the
+		// display rode the handles, the stream did not). Every vec slot owned by a moving
+		// corner joins the write; each takes its own per-element delta below, which is
+		// also what the host does to a handle under a rotate. Bound corners are excluded
+		// exactly as their own write is.
+		if (!want.empty())
+		{
+			std::set<uint16> ride;
+			for (uint p = 0; p < pz.Patches.size() && p < pz.Ep.Pm.Patches.size(); ++p)
+			{
+				const PIPELINE::MAX::NELPATCH::SPmPatch &pp = pz.Ep.Pm.Patches[p];
+				for (uint j = 0; j < 8; ++j)
+				{
+					if (pp.Vec[j] < 0)
+						continue;
+					const uint corner = (j & 1) ? (((j >> 1) + 1) & 3) : (j >> 1);
+					const uint16 ov = pz.Patches[p].BaseVertices[corner];
+					if (!want.count(ov))
+						continue;
+					if (ov < pz.Ep.Rp.Verts.size() && pz.Ep.Rp.Verts[ov].Binded)
+						continue;
+					ride.insert((uint16)pp.Vec[j]);
+				}
+			}
+			for (std::set<uint16>::const_iterator it = ride.begin(); it != ride.end(); ++it)
+				if (!wantVec.count(*it))
+					move.push_back(ZPPAINT::SGeomElemRef(*it, ZPPAINT::GeomVec));
 		}
 		if (move.empty())
 			continue;
@@ -1260,7 +1313,7 @@ uint zpApplyPatchXform(const SPatchXform &xform, const NLMISC::CVector &worldDel
 	}
 	else if (msg.empty())
 	{
-		msg = NLMISC::toString("patch move: %u vertices (base %u, modPM %u, delta %u)",
+		msg = NLMISC::toString("patch move: %u elements (base %u, modPM %u, delta %u)",
 		                       written, nBase, nModPm, nDelta);
 	}
 	return written;
@@ -1386,6 +1439,69 @@ static void zpDropOrphanedTangents()
 		}
 	}
 	g_PatchTanSel.swap(keep);
+}
+
+/**
+ * The vertex-level hit-test filters and Lock Handles (the Selection block of the legacy
+ * rollout). The filters gate PICKING only; the setters refuse to turn both off - a level
+ * where nothing can be picked is a trap, which is why the legacy panel freezes the other
+ * checkbox instead of letting it uncheck.
+ */
+void zpSetPatchFilterVerts(bool on)
+{
+	if (!on && !g_PatchFilterVecs)
+	{
+		g_PropStatusMsg = "filter: vertices and vectors cannot both be off";
+		return;
+	}
+	if (on == g_PatchFilterVerts)
+		return;
+	g_PatchFilterVerts = on;
+	ZPSCRIPT::record(NLMISC::toString("painter.setFilterVertices(%s)", on ? "true" : "false"));
+}
+
+void zpSetPatchFilterVecs(bool on)
+{
+	if (!on && !g_PatchFilterVerts)
+	{
+		g_PropStatusMsg = "filter: vertices and vectors cannot both be off";
+		return;
+	}
+	if (on == g_PatchFilterVecs)
+		return;
+	g_PatchFilterVecs = on;
+	ZPSCRIPT::record(NLMISC::toString("painter.setFilterVectors(%s)", on ? "true" : "false"));
+}
+
+void zpSetPatchLockHandles(bool on)
+{
+	if (on == g_PatchLockHandles)
+		return;
+	g_PatchLockHandles = on;
+	ZPSCRIPT::record(NLMISC::toString("painter.setLockHandles(%s)", on ? "true" : "false"));
+}
+
+/**
+ * Is this handle part of the EFFECTIVE tangent selection - selected itself, or (Lock
+ * Handles) a companion of a selected handle on the same corner? Every consumer of the
+ * tangent selection during a transform goes through this, so the preview, the live push
+ * and the commit expand identically.
+ */
+bool zpTanSelectedEffective(const SPaintZone &pz, uint16 vecIdx)
+{
+	if (g_PatchTanSel.count(TPatchVertId(pz.ZoneId, vecIdx)))
+		return true;
+	if (!g_PatchLockHandles || g_PatchTanSel.empty())
+		return false;
+	const uint16 owner = zpTangentOwner(pz, vecIdx);
+	if (owner == (uint16)0xffff)
+		return false;
+	for (std::set<TPatchVertId>::const_iterator it = g_PatchTanSel.begin();
+	     it != g_PatchTanSel.end(); ++it)
+		if (it->first == pz.ZoneId && it->second != vecIdx
+		    && zpTangentOwner(pz, it->second) == owner)
+			return true;
+	return false;
 }
 
 uint16 zpTangentOwner(const SPaintZone &pz, uint16 vecIdx)
@@ -2483,6 +2599,9 @@ void zpPatchNoSmoothClicked()
 /** Bridge wrappers (void-returning function pointers). */
 void zpPatchBindClicked() { zpBindPatchSelection(); }
 void zpPatchUnbindClicked() { zpUnbindPatchSelection(); }
+void zpPatchFilterVertsClicked() { zpSetPatchFilterVerts(!g_PatchFilterVerts); }
+void zpPatchFilterVecsClicked() { zpSetPatchFilterVecs(!g_PatchFilterVecs); }
+void zpPatchLockHandlesClicked() { zpSetPatchLockHandles(!g_PatchLockHandles); }
 
 /** Script/gate read access to a pristine bind record (flat ints for the script TU). */
 bool zpVertexBindQuery(uint zoneId, uint vertIdx, int &bindedOut, int &typeOut,
@@ -2595,6 +2714,22 @@ uint zpExpandSelectionToElement()
 }
 
 void zpPatchElementClicked() { zpExpandSelectionToElement(); }
+
+/** Displayed world position of interior control 0..3 of a patch. Interiors are vecs the
+ *  tangent accessor cannot reach (it searches the Vec[8] ring), and for AUTO patches the
+ *  displayed value is the derived one - which is exactly what the geometry gates need to
+ *  compute the surface from. */
+bool zpPatchInteriorWorld(uint zoneId, uint patchIdx, uint slot, float outPos[3])
+{
+	const SPaintZone *pz = zpFindPaintZone(zoneId);
+	if (!pz || patchIdx >= pz->Patches.size() || slot >= 4)
+		return false;
+	const NLMISC::CVector &v = pz->Patches[patchIdx].Patch.Interiors[slot];
+	outPos[0] = v.x;
+	outPos[1] = v.y;
+	outPos[2] = v.z;
+	return true;
+}
 
 /** The vec index at ring slot 0..7 of a patch (lets a script name a tangent handle the
  *  way patchTangentPos wants it, without knowing allocation order). */

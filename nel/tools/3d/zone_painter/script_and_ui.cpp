@@ -2131,6 +2131,38 @@ void zpFillBridgeState(ZPUI::SPaintUIBridge &bridge)
 	}
 	bridge.WeldTargetArmed = g_WeldTargetArmed;
 	bridge.WeldThreshold = zpLastWeldThreshold();
+	bridge.FilterVerts = g_PatchFilterVerts;
+	bridge.FilterVecs = g_PatchFilterVecs;
+	bridge.LockHandles = g_PatchLockHandles;
+	// Surface Properties snapshot: tri-state smoothing bits over the face selection and
+	// the steering patch's tile orders.
+	bridge.SmGroupAll = 0;
+	bridge.SmGroupAny = 0;
+	bridge.TessU = 0;
+	bridge.TessV = 0;
+	if (!g_PatchFaceSel.empty())
+	{
+		bool first = true;
+		uint32 allBits = 0, anyBits = 0;
+		for (std::set<TPatchFaceId>::const_iterator it = g_PatchFaceSel.begin();
+		     it != g_PatchFaceSel.end(); ++it)
+		{
+			uint32 mask = 0;
+			if (!zpPatchSmGroupsQuery(it->first, it->second, mask))
+				continue;
+			if (first) { allBits = mask; first = false; }
+			else allBits &= mask;
+			anyBits |= mask;
+		}
+		bridge.SmGroupAll = first ? 0 : allBits;
+		bridge.SmGroupAny = anyBits;
+		int u = 0, v = 0;
+		if (zpPatchTessQuery(g_PatchFaceSel.begin()->first, g_PatchFaceSel.begin()->second, u, v))
+		{
+			bridge.TessU = u;
+			bridge.TessV = v;
+		}
+	}
 	// Scene-menu compass availability (patch level with a face selection only).
 	bridge.MoveDirMask = 0;
 	if (pl.SubObj == CPaintMouseListener::SubPatch && !g_PatchFaceSel.empty())

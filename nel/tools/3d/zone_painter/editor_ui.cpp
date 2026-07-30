@@ -331,6 +331,97 @@ public:
 };
 REGISTER_ACTION_HANDLER(CAHZpPatchNoSmooth, "zp_patch_nosmooth");
 
+/** Selection-block checkboxes: pick filters and Lock Handles. */
+class CAHZpPatchFilterVerts : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return;
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchFilterVertsToggle) b->patchFilterVertsToggle();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchFilterVerts, "zp_patch_filter_verts");
+
+class CAHZpPatchFilterVecs : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return;
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchFilterVecsToggle) b->patchFilterVecsToggle();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchFilterVecs, "zp_patch_filter_vecs");
+
+class CAHZpPatchLockHandles : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return;
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchLockHandlesToggle) b->patchLockHandlesToggle();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchLockHandles, "zp_patch_lock_handles");
+
+/** Surface Properties: one smoothing-group grid button; params = the bit "0".."31". */
+class CAHZpPatchSmGroup : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return;
+		SPaintUIBridge *b = getPaintUIBridge();
+		int bit = 0;
+		NLMISC::fromString(params, bit);
+		if (b && b->patchSmGroup) b->patchSmGroup(bit);
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchSmGroup, "zp_patch_smgroup");
+
+class CAHZpPatchSmGroupClear : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return;
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchSmGroupClear) b->patchSmGroupClear();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchSmGroupClear, "zp_patch_smgroup_clear");
+
+/** Tess steppers; params = "u+", "u-", "v+", "v-". */
+class CAHZpPatchTess : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return;
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (!b || !b->patchTessDelta || params.size() < 2) return;
+		const int axis = params[0] == 'v' ? 1 : 0;
+		b->patchTessDelta(axis, params[1] == '-' ? -1 : 1);
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchTess, "zp_patch_tess");
+
+class CAHZpPatchBalance : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return;
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchBalance) b->patchBalance();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchBalance, "zp_patch_balance");
+
 class CAHZpPatchDelete : public IActionHandler
 {
 public:
@@ -2504,6 +2595,23 @@ void CEditorUI::syncPanelFromBridge()
 			}
 			t->setHardText(line);
 		}
+		// Selection block: the pick filters live at vertex level, and the two boxes obey
+		// the you-cannot-filter-both-away rule - unchecking one freezes the other.
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":filter_verts:box").c_str()))
+		{
+			btn->setPushed(b->FilterVerts);
+			btn->setFrozen(b->SubObj != 1 || !b->FilterVecs);
+		}
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":filter_vecs:box").c_str()))
+		{
+			btn->setPushed(b->FilterVecs);
+			btn->setFrozen(b->SubObj != 1 || !b->FilterVerts);
+		}
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":lock_handles:box").c_str()))
+		{
+			btn->setPushed(b->LockHandles);
+			btn->setFrozen(b->SubObj != 1);
+		}
 		// Bind/Unbind live at vertex level, Delete at patch level, No smooth at edge level.
 		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_bind").c_str()))
 			btn->setFrozen(b->SubObj != 1 || !b->PatchSelVerts);
@@ -2549,6 +2657,38 @@ void CEditorUI::syncPanelFromBridge()
 			t->setHardText(b->SubObj == 2 && b->PatchSelEdges
 			                   ? (b->PatchNoSmooth == 2 ? "(mixed)" : "")
 			                   : "");
+		// Surface Properties: grid pushed = bit on ALL selected patches; frozen outside
+		// patch level or without a face selection. A mixed bit shows unpushed - the click
+		// still resolves the tri-state (off or mixed sets, all clears).
+		{
+			const bool surfOff = b->SubObj != 3 || !b->PatchSelFaces;
+			for (int g = 0; g < 32; ++g)
+			{
+				char nm[160];
+				snprintf(nm, sizeof(nm), "%s:sg_%d", kPatchC, g);
+				if (CCtrlBaseButton *btn = findButton(nm))
+				{
+					btn->setPushed(((b->SmGroupAll >> g) & 1) != 0);
+					btn->setFrozen(surfOff);
+				}
+			}
+			if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_sg_clear").c_str()))
+				btn->setFrozen(surfOff || !b->SmGroupAny);
+			if (CViewText *t = findText((std::string(kPatchC) + ":tess_info").c_str()))
+			{
+				char buf[32];
+				if (b->TessU > 0)
+					snprintf(buf, sizeof(buf), "Tess %dx%d", 1 << b->TessU, 1 << b->TessV);
+				else
+					snprintf(buf, sizeof(buf), "Tess -");
+				t->setHardText(buf);
+			}
+			static const char *kSteppers[5] = { "tess_u_dn", "tess_u_up", "tess_v_dn",
+			                                    "tess_v_up", "btn_balance" };
+			for (int k = 0; k < 5; ++k)
+				if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":" + kSteppers[k]).c_str()))
+					btn->setFrozen(surfOff);
+		}
 		// Same live status line the HUD shows (op results land in g_PropStatusMsg).
 		if (CViewText *t = findText((std::string(kPatchC) + ":patch_status").c_str()))
 			t->setHardText(b->PropStatus);

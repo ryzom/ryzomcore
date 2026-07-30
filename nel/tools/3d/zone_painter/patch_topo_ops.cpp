@@ -755,6 +755,246 @@ uint zpWeldVertexInto(uint zoneId, uint srcVert, uint dstVert)
 }
 
 // ---------------------------------------------------------------------------------------------
+// Patch properties (the Surface Properties block): smoothing groups and per-patch
+// tessellation. Both are carrier-value edits riding the shared topo runner - the SmGroup
+// word lives in the PatchMesh stream, the tile orders and their arrays in the rp blob -
+// so they get the writeBack/encode/rebuild sequencing and Kind 6 undo for free.
+
+// Op state for the adapters (the runner's transform signature is selection-only).
+static uint32 s_SmGroupMask = 0;
+static int s_SmGroupOp = 0; // 0 = set mask bits, 1 = clear mask bits, 2 = assign whole word
+static sint32 s_TessU = 0, s_TessV = 0; // 1..4 per axis; 0 = keep that axis
+
+static bool zpXformSmGroup(SPatchMesh &pm, SRPatchMesh & /* rp */, SPmVertMapper * /* mapper */,
+                           const std::set<uint> &sel, std::string &err,
+                           const SPatchMesh * /* evalPm */)
+{
+	bool changed = false;
+	for (std::set<uint>::const_iterator it = sel.begin(); it != sel.end(); ++it)
+	{
+		if (*it >= pm.Patches.size())
+		{
+			err = "patch index out of range";
+			return false;
+		}
+		uint32 g = (uint32)pm.Patches[*it].SmGroup;
+		const uint32 before = g;
+		if (s_SmGroupOp == 0)
+			g |= s_SmGroupMask;
+		else if (s_SmGroupOp == 1)
+			g &= ~s_SmGroupMask;
+		else
+			g = s_SmGroupMask;
+		pm.Patches[*it].SmGroup = (sint32)g;
+		changed = changed || g != before;
+	}
+	if (!changed)
+	{
+		err = "selection already has that smoothing state";
+		return false;
+	}
+	return true;
+}
+
+/**
+ * Per-patch tessellation change: the legacy Init(bKeep) semantic - the tile grid resizes
+ * corner-anchored, the overlapping region keeps its tiles and colors verbatim, the grown
+ * remainder starts EMPTY tiles / white colors. (The legacy keep-copy also had an
+ * exponent/count slip in its own bounds; the semantic ported is the intended one.)
+ * Refuses patches touching binds: NeL derives bound-edge tessellation from the target
+ * patch's orders, so changing them under a junction would crack or misalign it.
+ */
+static bool zpXformTess(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper * /* mapper */,
+                        const std::set<uint> &sel, std::string &err,
+                        const SPatchMesh * /* evalPm */)
+{
+	for (std::set<uint>::const_iterator it = sel.begin(); it != sel.end(); ++it)
+	{
+		if (*it >= rp.Patches.size() || *it >= pm.Patches.size())
+		{
+			err = "patch index out of range";
+			return false;
+		}
+		const SPmPatch &pp = pm.Patches[*it];
+		for (int c = 0; c < 4; ++c)
+			if (pp.V[c] >= 0 && (size_t)pp.V[c] < rp.Verts.size() && rp.Verts[pp.V[c]].Binded)
+			{
+				err = "a corner of the selection is bound (unbind first)";
+				return false;
+			}
+	}
+	for (size_t v = 0; v < rp.Verts.size(); ++v)
+		if (rp.Verts[v].Binded && sel.count((uint)rp.Verts[v].Patch))
+		{
+			err = "a patch of the selection is a bind target (unbind first)";
+			return false;
+		}
+	bool changed = false;
+	for (std::set<uint>::const_iterator it = sel.begin(); it != sel.end(); ++it)
+	{
+		SRpoPatch &up = rp.Patches[*it];
+		const sint32 nu = s_TessU > 0 ? s_TessU : up.NbTilesU;
+		const sint32 nv = s_TessV > 0 ? s_TessV : up.NbTilesV;
+		if (nu < 1 || nu > 4 || nv < 1 || nv > 4)
+		{
+			err = "tessellation is 1..4 per axis";
+			return false;
+		}
+		if (nu == up.NbTilesU && nv == up.NbTilesV)
+			continue;
+		const sint32 oldU = 1 << up.NbTilesU, oldV = 1 << up.NbTilesV;
+		const sint32 newU = 1 << nu, newV = 1 << nv;
+		const std::vector<SRpoTile> oldTiles = up.Tiles;
+		const std::vector<uint32> oldColors = up.Colors;
+		if (oldTiles.size() != (size_t)oldU * oldV
+		    || oldColors.size() != (size_t)(oldU + 1) * (oldV + 1))
+		{
+			err = "tile/color table size mismatch";
+			return false;
+		}
+		up.NbTilesU = nu;
+		up.NbTilesV = nv;
+		up.Tiles.assign((size_t)newU * newV, SRpoTile());
+		up.Colors.assign((size_t)(newU + 1) * (newV + 1), 0x00ffffffu);
+		const sint32 mu = std::min(oldU, newU), mv = std::min(oldV, newV);
+		for (sint32 v = 0; v < mv; ++v)
+			for (sint32 u = 0; u < mu; ++u)
+				up.Tiles[u + v * newU] = oldTiles[u + v * oldU];
+		for (sint32 v = 0; v < mv + 1; ++v)
+			for (sint32 u = 0; u < mu + 1; ++u)
+				up.Colors[u + v * (newU + 1)] = oldColors[u + v * (oldU + 1)];
+		changed = true;
+	}
+	if (!changed)
+	{
+		err = "selection already at that tessellation";
+		return false;
+	}
+	return true;
+}
+
+/** Set or clear one smoothing-group bit over the face selection (the 32-button grid). */
+uint zpSetSmoothGroup(uint bit, bool on)
+{
+	if (bit >= 32)
+	{
+		g_PropStatusMsg = "smoothing group: bit out of range";
+		return 0;
+	}
+	s_SmGroupMask = 1u << bit;
+	s_SmGroupOp = on ? 0 : 1;
+	return zpRunTopoOp("smoothing group",
+	                   NLMISC::toString("painter.setSmoothGroup(%u, %s)", bit,
+	                                    on ? "true" : "false"),
+	                   zpXformSmGroup);
+}
+
+/** Clear every smoothing-group bit over the face selection (the panel Clear All). */
+uint zpClearSmoothGroups()
+{
+	s_SmGroupMask = 0;
+	s_SmGroupOp = 2;
+	return zpRunTopoOp("smoothing group", "painter.clearSmoothGroups()", zpXformSmGroup);
+}
+
+/** Set the face selection's tile orders; 0 keeps that axis. */
+uint zpSetPatchTess(int u, int v)
+{
+	s_TessU = u;
+	s_TessV = v;
+	return zpRunTopoOp("tessellation",
+	                   NLMISC::toString("painter.setPatchTess(%d, %d)", u, v), zpXformTess);
+}
+
+/**
+ * Balance: even the tessellation across the face selection, onto the MAX order per axis
+ * among the selected patches - growing keeps every painted tile (the corner-anchored
+ * copy), where the min would drop rows.
+ */
+uint zpBalanceTessSelection()
+{
+	if (!g_PaintCtx.Zones || g_PatchFaceSel.empty())
+	{
+		g_PropStatusMsg = "balance: no patches selected";
+		return 0;
+	}
+	sint32 mu = 0, mv = 0;
+	for (std::set<TPatchFaceId>::const_iterator it = g_PatchFaceSel.begin();
+	     it != g_PatchFaceSel.end(); ++it)
+	{
+		const SPaintZone *pz = zpFindPaintZone(it->first);
+		if (!pz || it->second >= pz->Ep.Rp.Patches.size())
+			continue;
+		mu = std::max(mu, pz->Ep.Rp.Patches[it->second].NbTilesU);
+		mv = std::max(mv, pz->Ep.Rp.Patches[it->second].NbTilesV);
+	}
+	if (mu < 1 || mv < 1)
+	{
+		g_PropStatusMsg = "balance: selection has no tile orders";
+		return 0;
+	}
+	s_TessU = mu;
+	s_TessV = mv;
+	return zpRunTopoOp("tessellation", "painter.balanceTessSelection()", zpXformTess);
+}
+
+/** Script/panel read access: the selection-facing per-patch properties. */
+bool zpPatchSmGroupsQuery(uint zoneId, uint patchIdx, uint32 &maskOut)
+{
+	const SPaintZone *pz = zpFindPaintZone(zoneId);
+	if (!pz || patchIdx >= pz->Ep.Pm.Patches.size())
+		return false;
+	maskOut = (uint32)pz->Ep.Pm.Patches[patchIdx].SmGroup;
+	return true;
+}
+
+bool zpPatchTessQuery(uint zoneId, uint patchIdx, int &uOut, int &vOut)
+{
+	const SPaintZone *pz = zpFindPaintZone(zoneId);
+	if (!pz || patchIdx >= pz->Ep.Rp.Patches.size())
+		return false;
+	uOut = (int)pz->Ep.Rp.Patches[patchIdx].NbTilesU;
+	vOut = (int)pz->Ep.Rp.Patches[patchIdx].NbTilesV;
+	return true;
+}
+
+/** Panel grid click: the Max tri-state rule - a bit carried by ALL selected patches
+ *  clears, anything else (off or mixed) sets. */
+void zpPatchSmGroupClicked(int bit)
+{
+	if (bit < 0 || bit >= 32 || g_PatchFaceSel.empty())
+		return;
+	bool all = true;
+	for (std::set<TPatchFaceId>::const_iterator it = g_PatchFaceSel.begin();
+	     it != g_PatchFaceSel.end() && all; ++it)
+	{
+		uint32 mask = 0;
+		if (!zpPatchSmGroupsQuery(it->first, it->second, mask) || !(mask & (1u << bit)))
+			all = false;
+	}
+	zpSetSmoothGroup((uint)bit, !all);
+}
+
+void zpPatchSmGroupClearClicked() { zpClearSmoothGroups(); }
+
+/** Panel tess stepper: the first selected patch's order steers; the whole selection
+ *  takes the stepped value on that axis (the legacy spinner's absolute-set shape). */
+void zpPatchTessDeltaClicked(int axis, int delta)
+{
+	if (g_PatchFaceSel.empty())
+		return;
+	int u = 0, v = 0;
+	if (!zpPatchTessQuery(g_PatchFaceSel.begin()->first, g_PatchFaceSel.begin()->second, u, v))
+		return;
+	int t = (axis == 0 ? u : v) + delta;
+	if (t < 1) t = 1;
+	if (t > 4) t = 4;
+	zpSetPatchTess(axis == 0 ? t : 0, axis == 0 ? 0 : t);
+}
+
+void zpPatchBalanceClicked() { zpBalanceTessSelection(); }
+
+// ---------------------------------------------------------------------------------------------
 // Detach: split the selection off into a NEW BRICK FILE.
 //
 // In this tool one file carries one editable zone and the FILE is the brick identity, so

@@ -6,9 +6,12 @@
 #     always measured against this file.
 #  1. Entering patch mode, picking a sub-object level and drawing the cage writes NOTHING:
 #     a no-op save is byte-identical to the baseline.
-#  2. Moving one vertex changes exactly that vertex's bytes. Moving along Z by 1.5 alters a
-#     single float, of which 2 bytes actually differ - so the expected delta is 2, and any
-#     larger number means the write escaped its target.
+#  2. Moving one vertex writes the vertex AND the tangent handles it owns - tangents are
+#     stored as absolute points, so a corner written alone would save a pinched surface the
+#     session never showed (the display rides the handles; the stream must too). Vertex 5
+#     owns two handles in every fixture, so the move writes 3 elements; each z was 0 and
+#     moves by 1.5, which alters 2 bytes per float - expected delta 6, and any larger
+#     number means a write escaped its target.
 #  3. ALL THREE write targets are covered, which is the point of using three files:
 #       material-fond          - modifier stack, vertex unmapped -> modifier PatchMesh (0x1140)
 #       material-bassin        - modifier stack, vertex mapped   -> mapper Delta (0x1130)
@@ -77,29 +80,29 @@ for pair in "material-fond:modPM" "material-bassin:delta" "zonematerial-bassin-1
 	echo "===== M34-2/3 ($B): one vertex moved, target $WANT ====="
 	seed "$OUT/ws_move_$B" "$B"
 	run_session "$OUT/ws_move_$B" "$B" "$OUT/move.lua" "$OUT/$B.move.log"
-	grep -aq "movePatchSelection: 1 written" "$OUT/$B.move.log" || {
-		echo "FAIL: move did not write 1 vertex"; grep -a "movePatchSelection" "$OUT/$B.move.log"; exit 1; }
+	grep -aq "movePatchSelection: 3 written" "$OUT/$B.move.log" || {
+		echo "FAIL: move did not write vertex + its 2 handles"; grep -a "movePatchSelection" "$OUT/$B.move.log"; exit 1; }
 	case "$WANT" in
-		modPM) grep -aq "modPM 1, delta 0" "$OUT/$B.move.log" || {
+		modPM) grep -aq "modPM 3, delta 0" "$OUT/$B.move.log" || {
 			echo "FAIL: expected the modifier-PatchMesh target"; grep -a "movePatchSelection" "$OUT/$B.move.log"; exit 1; } ;;
-		delta) grep -aq "modPM 0, delta 1" "$OUT/$B.move.log" || {
+		delta) grep -aq "modPM 0, delta 3" "$OUT/$B.move.log" || {
 			echo "FAIL: expected the mapper-delta target"; grep -a "movePatchSelection" "$OUT/$B.move.log"; exit 1; } ;;
-		base)  grep -aq "base 1, modPM 0, delta 0" "$OUT/$B.move.log" || {
+		base)  grep -aq "base 3, modPM 0, delta 0" "$OUT/$B.move.log" || {
 			echo "FAIL: expected the base-PatchMesh target"; grep -a "movePatchSelection" "$OUT/$B.move.log"; exit 1; } ;;
 	esac
 	# cmp -l exits 1 when the files differ, which is the expected case here - brace it so
 	# pipefail does not turn a successful comparison into a script abort.
 	N=$( { cmp -l "$OUT/$B.null.max" "$OUT/ws_move_$B/landscape/ligo/lacustre/max/$B.max" || true; } | wc -l)
-	[[ "$N" -eq 2 ]] || { echo "FAIL: move touched $N bytes, expected 2"; exit 1; }
-	echo "OK move wrote 2 bytes via $WANT"
+	[[ "$N" -eq 6 ]] || { echo "FAIL: move touched $N bytes, expected 6"; exit 1; }
+	echo "OK move wrote 6 bytes (vertex + 2 handles) via $WANT"
 
 	echo "===== M34-4 ($B): move two vertices, undo, back to the baseline ====="
 	seed "$OUT/ws_undo_$B" "$B"
 	run_session "$OUT/ws_undo_$B" "$B" "$OUT/undo.lua" "$OUT/$B.undo.log"
 	# One undo for a two-vertex move: a selection move is one action to the artist, so the
 	# whole list has to land as a single stroke.
-	grep -aq "movePatchSelection: 2 written" "$OUT/$B.undo.log" || {
-		echo "FAIL: expected 2 vertices written"; grep -a "movePatchSelection" "$OUT/$B.undo.log"; exit 1; }
+	grep -aq "movePatchSelection: 7 written" "$OUT/$B.undo.log" || {
+		echo "FAIL: expected 7 elements written (2 corners + 5 ridden handles)"; grep -a "movePatchSelection" "$OUT/$B.undo.log"; exit 1; }
 	U=$( { cmp -l "$OUT/$B.null.max" "$OUT/ws_undo_$B/landscape/ligo/lacustre/max/$B.max" || true; } | wc -l)
 	[[ "$U" -eq 0 ]] || { echo "FAIL: undo left $U bytes changed, expected 0"; exit 1; }
 	echo "OK undo restores the baseline byte for byte"

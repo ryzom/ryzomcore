@@ -78,9 +78,9 @@ want "pivot"          "160.00 16.00 -30.00"  "$(say PIVOT)"
 want "corner A"       "176.00 16.00 -30.00"  "$(say A_ROT)"
 want "corner B"       "144.00 16.00 -30.00"  "$(say B_ROT)"
 want "undo"           "$(say A0)"            "$(say A_UNDO)"
-grep -qa "rotatePatchSelection: 2 written" "$L" \
-	&& echo "OK: the rotate wrote both corners as one stroke" \
-	|| { echo "FAIL: the rotate did not write 2 corners"; FAIL=1; }
+grep -qa "rotatePatchSelection: 7 written" "$L" \
+	&& echo "OK: the rotate wrote both corners + their handles as one stroke" \
+	|| { echo "FAIL: the rotate did not write 7 elements"; FAIL=1; }
 
 echo "===== M39-2: scale about the same pivot ====="
 want "corner A" "160.00 -16.00 -30.00" "$(say A_SCL)"

@@ -92,7 +92,7 @@ for pair in "material-fond:modPM" "material-bassin:delta" "zonematerial-bassin-1
 		--startup-lua "$OUT/$B.lua" --screenshot /dev/null > "$OUT/$B.log" 2>&1
 	# Assert the target too, so a policy regression that routed everything one way cannot
 	# pass this gate by accident.
-	if ! grep -qa "$WANT 1" "$OUT/$B.log"; then
+	if ! grep -qa "$WANT 3" "$OUT/$B.log"; then
 		echo "FAIL ($B): expected write target $WANT"; FAIL=1
 	fi
 	check "$B via $WANT" "$OUT/$B.log"

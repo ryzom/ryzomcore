@@ -95,9 +95,9 @@ wb=$(awk -v s="$EB" 'BEGIN{split(s,c," "); printf "%.3f %.3f %.3f", c[1], c[2], 
 want "corner A moved" "$wa" "$(say E_A_AFTER)"
 want "corner B moved" "$wb" "$(say E_B_AFTER)"
 want "undo restored the edge" "$EA" "$(say E_A_UNDONE)"
-grep -qa "movePatchSelection: 2 written" "$L" \
-	&& echo "OK: the edge move wrote exactly 2 vertices" \
-	|| { echo "FAIL: the edge move did not write 2 vertices"; FAIL=1; }
+grep -qa "movePatchSelection: 7 written" "$L" \
+	&& echo "OK: the edge move wrote its 2 corners + their 5 handles" \
+	|| { echo "FAIL: the edge move did not write 7 elements"; FAIL=1; }
 
 echo "===== M36-2: the level's set is the authority, not the vertex projection ====="
 want "two edges sharing a corner" "2 3" "$(say E_TWO)"
@@ -106,9 +106,9 @@ want "dropping one keeps the shared corner" "1 2" "$(say E_ONE)"
 echo "===== M36-3: patch level moves its four corners ====="
 want "switching level clears the selection" "0 0" "$(say LEVEL_SWITCH)"
 want "face selection projects to 4 vertices" "1 4" "$(say F_SEL)"
-grep -qa "movePatchSelection: 4 written" "$L" \
-	&& echo "OK: the patch move wrote exactly 4 vertices" \
-	|| { echo "FAIL: the patch move did not write 4 vertices"; FAIL=1; }
+grep -qa "movePatchSelection: 16 written" "$L" \
+	&& echo "OK: the patch move wrote its 4 corners + their 12 handles" \
+	|| { echo "FAIL: the patch move did not write 16 elements"; FAIL=1; }
 
 echo "===== M36-4: picking ====="
 want "a click at patch level finds a face" "1 4" "$(say PICK_FACE)"

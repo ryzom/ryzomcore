@@ -492,6 +492,26 @@ extern std::set<TPatchVertId> g_PatchVertSel;
 extern std::set<TPatchVertId> g_PatchTanSel;
 
 /**
+ * Vertex-level hit-test filters (the legacy Filter Vertices / Vectors pair) and Lock
+ * Handles. The filters gate what a vertex-level click can pick - corner points, tangent
+ * handles - never what is drawn; both cannot be off at once (the setters refuse, and the
+ * panel freezes the other box). Lock Handles: a handle move takes the OTHER handles of
+ * the same corner along, each through its own per-element delta - the effective tangent
+ * selection expands over the owner group (zpTanSelectedEffective).
+ */
+extern bool g_PatchFilterVerts;
+extern bool g_PatchFilterVecs;
+extern bool g_PatchLockHandles;
+void zpSetPatchFilterVerts(bool on);
+void zpSetPatchFilterVecs(bool on);
+void zpSetPatchLockHandles(bool on);
+void zpPatchFilterVertsClicked();
+void zpPatchFilterVecsClicked();
+void zpPatchLockHandlesClicked();
+/** Selected, or a Lock Handles companion of a selected handle on the same corner. */
+bool zpTanSelectedEffective(const SPaintZone &pz, uint16 vecIdx);
+
+/**
  * The corner a handle belongs to, 0xffff if it is not a tangent of this zone (an interior
  * handle, or an index the patch table does not use as a tangent).
  *
@@ -771,6 +791,17 @@ void zpPatchWeldThresholdClicked(float distance);
 /** Directed weld: srcVert merges into dstVert (the target keeps position and identity) -
  *  the drag-onto-a-vertex gesture's op. Undoable. */
 uint zpWeldVertexInto(uint zoneId, uint srcVert, uint dstVert);
+/** Surface Properties (patch level): smoothing groups and per-patch tessellation. */
+uint zpSetSmoothGroup(uint bit, bool on);
+uint zpClearSmoothGroups();
+uint zpSetPatchTess(int u, int v);
+uint zpBalanceTessSelection();
+bool zpPatchSmGroupsQuery(uint zoneId, uint patchIdx, uint32 &maskOut);
+bool zpPatchTessQuery(uint zoneId, uint patchIdx, int &uOut, int &vOut);
+void zpPatchSmGroupClicked(int bit);
+void zpPatchSmGroupClearClicked();
+void zpPatchTessDeltaClicked(int axis, int delta);
+void zpPatchBalanceClicked();
 /** Target-weld command mode (vertex level): armed by the panel Target toggle; dragging a
  *  vertex onto another welds it INTO the target. Nothing moves during the drag. */
 extern bool g_WeldTargetArmed;
@@ -783,6 +814,7 @@ void zpDrawWeldDrag(NL3D::IDriver *driver, NL3D::CCamera *camera);
 void zpWeldTargetToggleClicked();
 bool zpWeldDragAt(float x0, float y0, float x1, float y1);
 bool zpPatchVertScreen(uint zoneId, uint vertIdx, float &sxOut, float &syOut);
+bool zpPatchTangentScreen(uint zoneId, uint vecIdx, float &sxOut, float &syOut);
 /** Grow a quad from each selected open edge (legacy Add Quad). Undoable. */
 uint zpAddQuadPatchSelection();
 void zpPatchAddQuadClicked();

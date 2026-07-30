@@ -158,9 +158,9 @@ L="$OUT/ride.log"
 RB=$(say R_T_BEFORE)
 wr=$(awk -v s="$RB" 'BEGIN{split(s,c," "); printf "%.3f %.3f %.3f", c[1], c[2], c[3]+3}')
 want "the handle rode its corner exactly once" "$wr" "$(say R_T_AFTER)"
-grep -qa "movePatchSelection: 1 written" "$L" \
-	&& echo "OK: only the corner was written - the handle rode rather than being written too" \
-	|| { echo "FAIL: the corner move wrote more than the corner"; FAIL=1; }
+grep -qa "movePatchSelection: 3 written" "$L" \
+	&& echo "OK: the corner move wrote the corner + its 2 handles (the ride is in the file)" \
+	|| { echo "FAIL: the corner move did not write corner + handles"; FAIL=1; }
 
 if [[ $FAIL -ne 0 ]]; then echo "M37 GATES FAILED"; exit 1; fi
 echo "ALL M37 GATES PASSED"

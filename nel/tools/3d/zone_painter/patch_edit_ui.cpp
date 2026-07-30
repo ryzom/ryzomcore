@@ -268,10 +268,46 @@ NLMISC::CVector zpTanOffset(const SPaintZone &pz, uint16 vecIdx)
 	    && pz.Ep.Rp.Verts[owner].Binded)
 		return kNoOffset;
 	if (!zpHandleMode() && owner != (uint16)0xffff && zpCornerSelectedAnyNode(pz, owner))
-		return zpVertOffset(pz, owner);
+	{
+		// The ride, at the HANDLE'S OWN position: the commit writes each ridden handle
+		// through the transform's image of the handle itself (a rotate turns handles about
+		// the pivot, not just their corner), so the preview must too. For a move the two
+		// are the same offset. Selected through this node, or through a sibling - in the
+		// sibling case the drag lives in that node's displayed space and converts through
+		// object space, exactly as zpVertOffset does for the corner.
+		if (!s_Dragging)
+			return kNoOffset;
+		if (g_PatchVertSel.count(TPatchVertId(pz.ZoneId, owner)))
+		{
+			float wp[3];
+			if (zpPatchTangentWorld(pz.ZoneId, vecIdx, wp))
+				return zpDragOffsetAt(NLMISC::CVector(wp[0], wp[1], wp[2]));
+			return s_DragDelta;
+		}
+		if (!g_PaintCtx.Zones)
+			return kNoOffset;
+		const std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
+		for (uint z = 0; z < zones.size(); ++z)
+		{
+			const SPaintZone &other = zones[z];
+			if (other.Node != pz.Node || other.ZoneId == pz.ZoneId)
+				continue;
+			if (!g_PatchVertSel.count(TPatchVertId(other.ZoneId, owner)))
+				continue;
+			float wp[3];
+			if (!zpPatchTangentWorld(other.ZoneId, vecIdx, wp))
+				continue;
+			const NLMISC::CVector d = zpDragOffsetAt(NLMISC::CVector(wp[0], wp[1], wp[2]));
+			const NLMISC::CVector od = zpXformDelta(d, MAXMATH::inverseM3(other.DisplayTM));
+			return zpXformDelta(od, pz.DisplayTM);
+		}
+		return kNoOffset;
+	}
 	if (!s_Dragging || !g_PaintCtx.Zones)
 		return kNoOffset;
-	if (g_PatchTanSel.count(TPatchVertId(pz.ZoneId, vecIdx)))
+	// EFFECTIVE membership: Lock Handles expands the selection over the owner group, and
+	// the same predicate drives the commit and the live push.
+	if (zpTanSelectedEffective(pz, vecIdx))
 	{
 		float wp[3];
 		if (zpPatchTangentWorld(pz.ZoneId, vecIdx, wp))
@@ -286,7 +322,7 @@ NLMISC::CVector zpTanOffset(const SPaintZone &pz, uint16 vecIdx)
 		const SPaintZone &other = zones[z];
 		if (other.Node != pz.Node || other.ZoneId == pz.ZoneId)
 			continue;
-		if (!g_PatchTanSel.count(TPatchVertId(other.ZoneId, vecIdx)))
+		if (!zpTanSelectedEffective(other, vecIdx))
 			continue;
 		float wp[3];
 		if (!zpPatchTangentWorld(other.ZoneId, vecIdx, wp))
@@ -1095,6 +1131,24 @@ bool zpPatchVertScreen(uint zoneId, uint vertIdx, float &sxOut, float &syOut)
 	return true;
 }
 
+/** Screen position of a tangent handle, the vertex form's sibling (gates aim picks at it). */
+bool zpPatchTangentScreen(uint zoneId, uint vecIdx, float &sxOut, float &syOut)
+{
+	if (!g_PaintCtx.Camera)
+		return false;
+	float w[3];
+	if (!zpPatchTangentWorld(zoneId, vecIdx, w))
+		return false;
+	const NLMISC::CMatrix viewMat = g_PaintCtx.Camera->getMatrix().inverted();
+	NLMISC::CVector p;
+	if (!zpProjectLifted(viewMat, g_PaintCtx.Camera->getFrustum(),
+	                     NLMISC::CVector(w[0], w[1], w[2]), kPatchLift, p))
+		return false;
+	sxOut = p.x;
+	syOut = p.y;
+	return true;
+}
+
 /**
  * Scripted target-weld drag: press at (x0,y0), release at (x1,y1), through the REAL
  * begin/finish handlers (same caveat as zpPatchClickAt - this proves the drag machinery,
@@ -1208,16 +1262,18 @@ void zpPatchVertexClick(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, 
 	}
 
 	// Handles first: they are drawn on top of the cage and sit near their corner, so a
-	// corner-first order would make them unreachable wherever the two overlap.
+	// corner-first order would make them unreachable wherever the two overlap. The
+	// Filter Vertices / Vectors pair gates what a click can PICK, never what is drawn;
+	// a filtered-out pick falls through, so a plain click still clears.
 	uint zone = 0;
 	uint16 vec = 0;
-	if (zpPickPatchTangent(camera, driver, mx, my, zone, vec))
+	if (g_PatchFilterVecs && zpPickPatchTangent(camera, driver, mx, my, zone, vec))
 	{
 		zpPatchTangentSelect(zone, vec, op);
 		return;
 	}
 	uint16 vert = 0;
-	if (!zpPickPatchVertex(camera, driver, mx, my, zone, vert))
+	if (!g_PatchFilterVerts || !zpPickPatchVertex(camera, driver, mx, my, zone, vert))
 	{
 		if (op == 0)
 			zpPatchVertClear();

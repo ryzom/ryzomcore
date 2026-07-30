@@ -78,6 +78,12 @@ void zpSetPivotMode(int mode);
 bool zpSetUserPivotToSelection();
 void zpSetUserPivotXYZ(float x, float y, float z);
 bool zpUserPivotXYZ(float outPos[3]);
+void zpSetPatchFilterVerts(bool on);
+void zpSetPatchFilterVecs(bool on);
+void zpSetPatchLockHandles(bool on);
+extern bool g_PatchFilterVerts;
+extern bool g_PatchFilterVecs;
+extern bool g_PatchLockHandles;
 bool zpTransformPivotXYZ(float outPos[3]);
 uint zpApplyPatchRotate(int axis, float degrees, std::string &msg);
 uint zpApplyPatchRotateAxis(float ax, float ay, float az, float degrees, std::string &msg);
@@ -93,6 +99,7 @@ bool zpVertexBindQuery(uint zoneId, uint vertIdx, int &bindedOut, int &typeOut,
                        int &patchOut, int &edgeOut, int &primOut);
 bool zpPatchEdgeCornerPair(uint zoneId, uint patchIdx, uint edgeSlot, uint &aOut, uint &bOut);
 bool zpPatchVecIndex(uint zoneId, uint patchIdx, uint ringSlot, uint &vecOut);
+bool zpPatchInteriorWorld(uint zoneId, uint patchIdx, uint slot, float outPos[3]);
 uint zpDeletePatchSelection();
 uint zpTurnPatchSelection(bool ccw);
 uint zpSubdividePatchSelection();
@@ -100,12 +107,19 @@ uint zpWeldPatchSelection(float threshold);
 uint zpWeldVertexInto(uint zoneId, uint srcVert, uint dstVert);
 bool zpWeldDragAt(float x0, float y0, float x1, float y1);
 bool zpPatchVertScreen(uint zoneId, uint vertIdx, float &sxOut, float &syOut);
+bool zpPatchTangentScreen(uint zoneId, uint vecIdx, float &sxOut, float &syOut);
 uint zpAddQuadPatchSelection();
 uint zpDetachPatchSelection();
 uint zpDetachToFile(const std::string &nameIn);
 uint zpExpandSelectionToElement();
 uint zpAttachZone(uint targetZone, uint srcZone, std::string &msg);
 uint zpMovePatchSelectionToZone(uint dstZone, std::string &msg);
+uint zpSetSmoothGroup(uint bit, bool on);
+uint zpClearSmoothGroups();
+uint zpSetPatchTess(int u, int v);
+uint zpBalanceTessSelection();
+bool zpPatchSmGroupsQuery(uint zoneId, uint patchIdx, uint32 &maskOut);
+bool zpPatchTessQuery(uint zoneId, uint patchIdx, int &uOut, int &vOut);
 bool zpMoveDirTarget(int dir, uint &dstZoneOut);
 bool zpZonePatchCount(uint zoneId, uint &countOut);
 bool zpZoneVertCount(uint zoneId, uint &countOut);
@@ -243,6 +257,13 @@ void setRecording(bool on)
 				                        up[0], up[1], up[2]);
 		}
 		pre += NLMISC::toString("painter.setPivotMode(%d)\n", b->PivotMode);
+		// Pick filters and Lock Handles: consumed by replayed clicks and handle moves.
+		pre += NLMISC::toString("painter.setFilterVertices(%s)\n",
+		                        g_PatchFilterVerts ? "true" : "false");
+		pre += NLMISC::toString("painter.setFilterVectors(%s)\n",
+		                        g_PatchFilterVecs ? "true" : "false");
+		pre += NLMISC::toString("painter.setLockHandles(%s)\n",
+		                        g_PatchLockHandles ? "true" : "false");
 		pre += NLMISC::toString("painter.setTileSet(%d)\n", b->CurTileSet);
 		pre += NLMISC::toString("painter.set256(%s)\n", b->Mode256 ? "true" : "false");
 		pre += NLMISC::toString("painter.setBrushSize(%u)\n", b->BrushSize);
@@ -941,6 +962,87 @@ static int lSetUserPivotToSelection(CLuaState &ls)
 	return retOk(ls);
 }
 
+static int lSetSmoothGroup(CLuaState &ls) // (bit 0..31, on) over the face selection
+{
+	double bit;
+	if (!argNumber(ls, 1, bit))
+		return retErr(ls, "usage: setSmoothGroup(bit, on)");
+	const uint n = zpSetSmoothGroup((uint)bit, argBoolOpt(ls, 2, true));
+	printf("setSmoothGroup: %u patches\n", n);
+	fflush(stdout);
+	return retOk(ls);
+}
+
+static int lClearSmoothGroups(CLuaState &ls) // () over the face selection
+{
+	const uint n = zpClearSmoothGroups();
+	printf("clearSmoothGroups: %u patches\n", n);
+	fflush(stdout);
+	return retOk(ls);
+}
+
+static int lSetPatchTess(CLuaState &ls) // (u, v) 1..4 per axis, 0 keeps that axis
+{
+	double u, v;
+	if (!argNumber(ls, 1, u) || !argNumber(ls, 2, v))
+		return retErr(ls, "usage: setPatchTess(u, v)");
+	const uint n = zpSetPatchTess((int)u, (int)v);
+	printf("setPatchTess: %u patches\n", n);
+	fflush(stdout);
+	return retOk(ls);
+}
+
+static int lBalanceTessSelection(CLuaState &ls) // () -> max order per axis over selection
+{
+	const uint n = zpBalanceTessSelection();
+	printf("balanceTessSelection: %u patches\n", n);
+	fflush(stdout);
+	return retOk(ls);
+}
+
+static int lPatchSmGroups(CLuaState &ls) // (zone, patch) -> mask
+{
+	double z, p;
+	if (!argNumber(ls, 1, z) || !argNumber(ls, 2, p))
+		return retErr(ls, "usage: patchSmGroups(zone, patchIndex)");
+	uint32 mask = 0;
+	if (!zpPatchSmGroupsQuery((uint)z, (uint)p, mask))
+		return retErr(ls, "patchSmGroups: no such patch");
+	ls.push((double)mask);
+	return 1;
+}
+
+static int lPatchTess(CLuaState &ls) // (zone, patch) -> u, v (log2 tile orders)
+{
+	double z, p;
+	if (!argNumber(ls, 1, z) || !argNumber(ls, 2, p))
+		return retErr(ls, "usage: patchTess(zone, patchIndex)");
+	int u = 0, v = 0;
+	if (!zpPatchTessQuery((uint)z, (uint)p, u, v))
+		return retErr(ls, "patchTess: no such patch");
+	ls.push((double)u);
+	ls.push((double)v);
+	return 2;
+}
+
+static int lSetFilterVertices(CLuaState &ls) // (bool) vertex-level pick: corner points
+{
+	zpSetPatchFilterVerts(argBoolOpt(ls, 1, true));
+	return retOk(ls);
+}
+
+static int lSetFilterVectors(CLuaState &ls) // (bool) vertex-level pick: tangent handles
+{
+	zpSetPatchFilterVecs(argBoolOpt(ls, 1, true));
+	return retOk(ls);
+}
+
+static int lSetLockHandles(CLuaState &ls) // (bool) a handle move takes the corner's others
+{
+	zpSetPatchLockHandles(argBoolOpt(ls, 1, true));
+	return retOk(ls);
+}
+
 static int lSetUserPivot(CLuaState &ls) // (x, y, z) absolute world point
 {
 	double x, y, z;
@@ -1194,6 +1296,19 @@ static int lVertexScreenPos(CLuaState &ls) // (zone, vert) -> sx, sy (the pick p
 	return 2;
 }
 
+static int lTangentScreenPos(CLuaState &ls) // (zone, vert) -> sx, sy (the pick projection)
+{
+	double z, v;
+	if (!argNumber(ls, 1, z) || !argNumber(ls, 2, v))
+		return retErr(ls, "usage: tangentScreenPos(zone, vecIndex)");
+	float sx = 0.f, sy = 0.f;
+	if (!zpPatchTangentScreen((uint)z, (uint)v, sx, sy))
+		return retErr(ls, "tangentScreenPos: not projectable");
+	ls.push((double)sx);
+	ls.push((double)sy);
+	return 2;
+}
+
 static int lWeldDragAt(CLuaState &ls) // (x0, y0, x1, y1) screen drag through the real handlers
 {
 	double a, b, c, d;
@@ -1322,6 +1437,20 @@ static int lPatchVecIndex(CLuaState &ls) // (zone, patchIdx, ringSlot 0..7) -> v
 		return retErr(ls, "patchVecIndex: no such slot");
 	ls.push((double)v);
 	return 1;
+}
+
+static int lPatchInteriorPos(CLuaState &ls) // (zone, patchIdx, slot 0..3) -> x, y, z
+{
+	double z, p, k;
+	if (!argNumber(ls, 1, z) || !argNumber(ls, 2, p) || !argNumber(ls, 3, k))
+		return retErr(ls, "usage: patchInteriorPos(zone, patchIndex, slot)");
+	float pos[3];
+	if (!zpPatchInteriorWorld((uint)z, (uint)p, (uint)k, pos))
+		return retErr(ls, "patchInteriorPos: no such slot");
+	ls.push((double)pos[0]);
+	ls.push((double)pos[1]);
+	ls.push((double)pos[2]);
+	return 3;
 }
 
 static int lGetMode(CLuaState &ls)
@@ -1513,6 +1642,12 @@ static const char *kBootstrap =
 	"  setPivotMode = __zp_setPivotMode, pivotPos = __zp_pivotPos,\n"
 	"  setUserPivotToSelection = __zp_setUserPivotToSelection,\n"
 	"  setUserPivot = __zp_setUserPivot,\n"
+	"  setFilterVertices = __zp_setFilterVertices,\n"
+	"  setFilterVectors = __zp_setFilterVectors,\n"
+	"  setLockHandles = __zp_setLockHandles,\n"
+	"  setSmoothGroup = __zp_setSmoothGroup, clearSmoothGroups = __zp_clearSmoothGroups,\n"
+	"  setPatchTess = __zp_setPatchTess, balanceTessSelection = __zp_balanceTessSelection,\n"
+	"  patchSmGroups = __zp_patchSmGroups, patchTess = __zp_patchTess,\n"
 	"  rotatePatchSelection = __zp_rotatePatchSelection,\n"
 	"  rotatePatchSelectionAxis = __zp_rotatePatchSelectionAxis,\n"
 	"  scalePatchSelection = __zp_scalePatchSelection,\n"
@@ -1523,6 +1658,7 @@ static const char *kBootstrap =
 	"  setEdgeNoSmooth = __zp_setEdgeNoSmooth, edgeNoSmooth = __zp_edgeNoSmooth,\n"
 	"  vertexBindInfo = __zp_vertexBindInfo, patchEdgeVerts = __zp_patchEdgeVerts,\n"
 	"  patchVecIndex = __zp_patchVecIndex,\n"
+	"  patchInteriorPos = __zp_patchInteriorPos,\n"
 	"  deletePatchSelection = __zp_deletePatchSelection,\n"
 	"  turnPatchSelection = __zp_turnPatchSelection,\n"
 	"  subdividePatchSelection = __zp_subdividePatchSelection,\n"
@@ -1530,6 +1666,7 @@ static const char *kBootstrap =
 	"  weldPatchSelection = __zp_weldPatchSelection,\n"
 	"  weldVertexInto = __zp_weldVertexInto, weldDragAt = __zp_weldDragAt,\n"
 	"  vertexScreenPos = __zp_vertexScreenPos,\n"
+	"  tangentScreenPos = __zp_tangentScreenPos,\n"
 	"  addQuadPatchSelection = __zp_addQuadPatchSelection,\n"
 	"  detachPatchSelection = __zp_detachPatchSelection,\n"
 	"  detachToFile = __zp_detachToFile,\n"
@@ -1614,6 +1751,15 @@ bool ensureLua()
 	ls->registerFunc("__zp_setPivotMode", lSetPivotMode);
 	ls->registerFunc("__zp_setUserPivotToSelection", lSetUserPivotToSelection);
 	ls->registerFunc("__zp_setUserPivot", lSetUserPivot);
+	ls->registerFunc("__zp_setFilterVertices", lSetFilterVertices);
+	ls->registerFunc("__zp_setFilterVectors", lSetFilterVectors);
+	ls->registerFunc("__zp_setLockHandles", lSetLockHandles);
+	ls->registerFunc("__zp_setSmoothGroup", lSetSmoothGroup);
+	ls->registerFunc("__zp_clearSmoothGroups", lClearSmoothGroups);
+	ls->registerFunc("__zp_setPatchTess", lSetPatchTess);
+	ls->registerFunc("__zp_balanceTessSelection", lBalanceTessSelection);
+	ls->registerFunc("__zp_patchSmGroups", lPatchSmGroups);
+	ls->registerFunc("__zp_patchTess", lPatchTess);
 	ls->registerFunc("__zp_pivotPos", lPivotPos);
 	ls->registerFunc("__zp_rotatePatchSelection", lRotatePatchSelection);
 	ls->registerFunc("__zp_rotatePatchSelectionAxis", lRotatePatchSelectionAxis);
@@ -1630,6 +1776,7 @@ bool ensureLua()
 	ls->registerFunc("__zp_vertexBindInfo", lVertexBindInfo);
 	ls->registerFunc("__zp_patchEdgeVerts", lPatchEdgeVerts);
 	ls->registerFunc("__zp_patchVecIndex", lPatchVecIndex);
+	ls->registerFunc("__zp_patchInteriorPos", lPatchInteriorPos);
 	ls->registerFunc("__zp_deletePatchSelection", lDeletePatchSelection);
 	ls->registerFunc("__zp_turnPatchSelection", lTurnPatchSelection);
 	ls->registerFunc("__zp_subdividePatchSelection", lSubdividePatchSelection);
@@ -1638,6 +1785,7 @@ bool ensureLua()
 	ls->registerFunc("__zp_weldVertexInto", lWeldVertexInto);
 	ls->registerFunc("__zp_weldDragAt", lWeldDragAt);
 	ls->registerFunc("__zp_vertexScreenPos", lVertexScreenPos);
+	ls->registerFunc("__zp_tangentScreenPos", lTangentScreenPos);
 	ls->registerFunc("__zp_addQuadPatchSelection", lAddQuadPatchSelection);
 	ls->registerFunc("__zp_detachPatchSelection", lDetachPatchSelection);
 	ls->registerFunc("__zp_detachToFile", lDetachToFile);
