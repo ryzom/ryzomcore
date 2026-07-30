@@ -1160,12 +1160,15 @@ void zpDrawPatchArrows(NL3D::IDriver *driver, NL3D::CCamera *camera)
 		for (uint p = 0; p < pz.Patches.size(); ++p)
 		{
 			const NLMISC::CVector *V = pz.Patches[p].Patch.Vertices;
-			// Bilinear frame point: u toward ring V3, v toward ring V1.
+			// Bilinear frame point: u toward ring V3, v toward ring V1. The arrow points
+			// along MINUS v - the direction a rot-0 tile's ADDITIVE arrow renders (pinned
+			// empirically with a rot-0 fill legend against the ring axes) - so the two
+			// layers of the toggle agree instead of contradicting each other per tile.
 			const float u = 0.5f;
-			NLMISC::CVector a = V[0] * ((1.f - u) * 0.70f) + V[1] * ((1.f - u) * 0.30f)
-				+ V[2] * (u * 0.30f) + V[3] * (u * 0.70f); // P(0.5, 0.30)
-			NLMISC::CVector b = V[0] * ((1.f - u) * 0.30f) + V[1] * ((1.f - u) * 0.70f)
+			NLMISC::CVector a = V[0] * ((1.f - u) * 0.30f) + V[1] * ((1.f - u) * 0.70f)
 				+ V[2] * (u * 0.70f) + V[3] * (u * 0.30f); // P(0.5, 0.70)
+			NLMISC::CVector b = V[0] * ((1.f - u) * 0.70f) + V[1] * ((1.f - u) * 0.30f)
+				+ V[2] * (u * 0.30f) + V[3] * (u * 0.70f); // P(0.5, 0.30) - the tip
 			NLMISC::CVector pa, pb;
 			if (!zpProjectLifted(viewMat, fr, a, kPatchLift, pa)
 			    || !zpProjectLifted(viewMat, fr, b, kPatchLift, pb))
