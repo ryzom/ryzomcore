@@ -147,6 +147,7 @@ struct SPaintUIBridge
 	void (*patchLockHandlesToggle)();
 	void (*arrowsToggle)();          // orientation arrows (tile additive layer + patch overlay)
 	void (*patchVertCoplanar)(int on); // scene-menu vertex type pair (1 coplanar, 0 corner)
+	void (*patchInteriorMode)(int on); // scene-menu interior pair (1 auto, 0 manual+bake)
 	void (*patchHide)();             // hide the current level's selection (session-only)
 	void (*patchUnhideAll)();
 	void (*patchSubdivPropToggle)(); // edge-subdivide Propagate checkbox
@@ -181,6 +182,7 @@ struct SPaintUIBridge
 	float ExtrudeOutline; // last-used bevel outline (seeds the dialog)
 	bool ExtrudeLocal;    // last-used normal mode (seeds the radio pair)
 	int VertCoplanar; // vertex selection's continuity type: 0 corner, 1 coplanar, 2 mixed/empty
+	int PatchAuto;    // face selection's interior mode: 0 manual, 1 auto, 2 mixed/empty
 	uint HiddenCount; // session hide set size (freezes Unhide All at 0)
 	bool SubdivPropagate; // edge-subdivide strip walk toggle
 	bool FilterVerts, FilterVecs; // vertex-level pick filters (both off is impossible)
@@ -258,7 +260,7 @@ struct SPaintUIBridge
 		  patchTurnCcw(NULL), patchTurnCw(NULL), patchSubdivide(NULL), patchWeld(NULL), patchAddQuad(NULL),
 		  patchDetach(NULL), patchElement(NULL), moveToZoneDir(NULL), weldTargetToggle(NULL),
 		  patchWeldThreshold(NULL), patchExtrude(NULL), patchExtrudeEx(NULL),
-		  patchVertCoplanar(NULL),
+		  patchVertCoplanar(NULL), patchInteriorMode(NULL),
 		  patchHide(NULL), patchUnhideAll(NULL), patchSubdivPropToggle(NULL),
 		  patchFilterVertsToggle(NULL), patchFilterVecsToggle(NULL), patchLockHandlesToggle(NULL),
 		  arrowsToggle(NULL),
@@ -269,7 +271,7 @@ struct SPaintUIBridge
 		  PatchSelVerts(0), PatchSelEdges(0), PatchSelFaces(0), PatchSelTans(0),
 		  PatchNoSmooth(2), PatchSelZones(0), MoveDirMask(0), WeldTargetArmed(false),
 		  WeldThreshold(0.1f), ExtrudeHeight(8.f), ExtrudeOutline(0.f), ExtrudeLocal(false),
-		  VertCoplanar(2), HiddenCount(0), SubdivPropagate(false),
+		  VertCoplanar(2), PatchAuto(2), HiddenCount(0), SubdivPropagate(false),
 		  FilterVerts(true), FilterVecs(true), LockHandles(false),
 		  ShowArrows(false),
 		  SmGroupAll(0), SmGroupAny(0), TessU(0), TessV(0),

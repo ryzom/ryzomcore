@@ -526,7 +526,7 @@
 <!-- Scene context menu (right click on empty space in patch mode). Kept to entries that
      have nowhere else to live: the user pivot placement, and the checked pairs the legacy
      kept in its own viewport right-click menu (vertex type). -->
-<group type="modal" id="scene_menu" exit_click_out="true" w="170" h="184" options="skin_modal"
+<group type="modal" id="scene_menu" exit_click_out="true" w="170" h="232" options="skin_modal"
 	mouse_pos="true" posref="TL TL" x="200" y="500" active="false">
 	<group id="content" x="0" y="0" posref="TL TL" sizeref="wh" w="0" h="0">
 		<ctrl style="text_button_16" id="s_pivot" posref="TM TM" x="0" y="-10" w="150"
@@ -539,9 +539,17 @@
 			onclick_l="zp_vertex_type" params_l="1" hardtext="Coplanar" />
 		<ctrl style="text_button_toggle" id="vt_corner" posparent="vt_coplanar" posref="MR ML" x="4" y="0" w="72"
 			onclick_l="zp_vertex_type" params_l="0" hardtext="Corner" />
+		<!-- Interior mode (patch level): PATCH_AUTO bit; Manual bakes the derived
+		     interiors into editable points -->
+		<view type="text" id="im_label" posparent="vt_coplanar" posref="BM TM" x="37" y="-6" fontsize="9"
+			shadow="true" global_color="false" color="255 220 140 255" hardtext="Interior" />
+		<ctrl style="text_button_toggle" id="im_auto" posparent="im_label" posref="BM TM" x="-37" y="-4" w="72"
+			onclick_l="zp_interior_mode" params_l="1" hardtext="Auto" />
+		<ctrl style="text_button_toggle" id="im_manual" posparent="im_auto" posref="MR ML" x="4" y="0" w="72"
+			onclick_l="zp_interior_mode" params_l="0" hardtext="Manual" />
 		<!-- Move to zone: compass of editable board neighbors (patch selection; no legacy
 		     equivalent - the session shows several brick files, the old plugin never did) -->
-		<view type="text" id="mv_label" posparent="vt_coplanar" posref="BM TM" x="37" y="-8" fontsize="9"
+		<view type="text" id="mv_label" posparent="im_auto" posref="BM TM" x="37" y="-8" fontsize="9"
 			shadow="true" global_color="false" color="255 220 140 255" hardtext="Move to zone" />
 		<ctrl style="text_button_16" id="mv_n" posparent="mv_label" posref="BM TM" x="0" y="-4" w="34"
 			onclick_l="zp_move_to_zone" params_l="0" hardtext="N" />

@@ -1171,6 +1171,131 @@ int zpVertCoplanarTriState()
 /** Scene-menu pair click (1 = coplanar, 0 = corner). */
 void zpPatchCoplanarClicked(int on) { zpSetVertexCoplanar(on != 0); }
 
+// ---------------------------------------------------------------------------------------------
+// Auto / Manual interior (the second context-menu pair, patch level; plan mA2).
+//
+// PATCH_AUTO = bit 0 of the patch Flags word (the probe: 645k auto, 1,073 authored
+// MANUAL patches across 47 converted desert files). Switching auto -> manual BAKES the
+// currently DERIVED interiors into the stored vecs - they become authored, and the four
+// interior controls become real, editable points; manual -> auto abandons the stored
+// values (evaluation re-derives them; the values stay in the file as dead bytes exactly
+// as the corpus leaves them).
+
+static bool s_PatchAutoOn = false;
+static bool zpXformPatchAuto(SPatchMesh &pm, SRPatchMesh & /* rp */, SPmVertMapper *mapper,
+                             const std::set<uint> &sel, std::string &err,
+                             const SPatchMesh *evalPm)
+{
+	bool changed = false;
+	for (std::set<uint>::const_iterator it = sel.begin(); it != sel.end(); ++it)
+	{
+		if (*it >= pm.Patches.size())
+		{
+			err = "patch index out of range";
+			return false;
+		}
+		SPmPatch &pp = pm.Patches[*it];
+		const bool isAuto = (pp.Flags & 1) != 0;
+		if (s_PatchAutoOn == isAuto)
+			continue;
+		if (!s_PatchAutoOn)
+		{
+			// auto -> manual: bake. The eval mirror's interior positions ARE the derived
+			// values (patch_eval recomputes auto interiors in place), so the bake copies
+			// them into the stored slots. A MAPPED interior takes the value through its
+			// Delta against the record's Original (eval = input + Delta once the auto
+			// recompute stops overwriting it).
+			for (int k = 0; k < 4; ++k)
+			{
+				const sint32 iv = pp.Interior[k];
+				if (iv < 0 || (size_t)iv >= pm.Vecs.size())
+					continue;
+				float pos[3];
+				if (evalPm && (size_t)iv < evalPm->Vecs.size())
+					memcpy(pos, evalPm->Vecs[iv].Pos, 12);
+				else
+					memcpy(pos, pm.Vecs[iv].Pos, 12);
+				if (mapper)
+				{
+					for (size_t r = 0; r < mapper->VecMap.size(); ++r)
+					{
+						SPmMapVert &m = mapper->VecMap[r];
+						if (m.Vert != iv)
+							continue;
+						for (int c = 0; c < 3; ++c)
+							m.Delta[c] = (float)((long double)pos[c] - m.Original[c]);
+						break;
+					}
+				}
+				memcpy(pm.Vecs[iv].Pos, pos, 12);
+			}
+		}
+		pp.Flags = s_PatchAutoOn ? (pp.Flags | 1) : (pp.Flags & ~1);
+		changed = true;
+	}
+	if (!changed)
+	{
+		err = s_PatchAutoOn ? "selection is already auto" : "selection is already manual";
+		return false;
+	}
+	return true;
+}
+
+/** Set the face selection's interior mode (true = auto, false = manual + bake). */
+uint zpSetPatchAuto(bool on)
+{
+	s_PatchAutoOn = on;
+	return zpRunTopoOp("interior mode",
+	                   NLMISC::toString("painter.setPatchAuto(%s)", on ? "true" : "false"),
+	                   zpXformPatchAuto);
+}
+
+/** Tri-state over the face selection: 0 = all manual, 1 = all auto, 2 = mixed/empty. */
+int zpPatchAutoTriState()
+{
+	bool any = false, all = true, seen = false;
+	for (std::set<TPatchFaceId>::const_iterator it = g_PatchFaceSel.begin();
+	     it != g_PatchFaceSel.end(); ++it)
+	{
+		const SPaintZone *pz = zpFindPaintZone(it->first);
+		if (!pz || it->second >= pz->Ep.Pm.Patches.size())
+			continue;
+		seen = true;
+		const bool a = (pz->Ep.Pm.Patches[it->second].Flags & 1) != 0;
+		any = any || a;
+		all = all && a;
+	}
+	if (!seen)
+		return 2;
+	return all ? 1 : (any ? 2 : 0);
+}
+
+/** Scene-menu pair click (1 = auto, 0 = manual). */
+void zpPatchAutoClicked(int on) { zpSetPatchAuto(on != 0); }
+
+/** Script/gate read access: one patch's stored Flags word. */
+bool zpPatchFlagsQuery(uint zoneId, uint patchIdx, sint32 &out)
+{
+	const SPaintZone *pz = zpFindPaintZone(zoneId);
+	if (!pz || patchIdx >= pz->Ep.Pm.Patches.size())
+		return false;
+	out = pz->Ep.Pm.Patches[patchIdx].Flags;
+	return true;
+}
+
+/** Interior vec INDEX of a patch corner slot (the selection handle for manual editing). */
+bool zpPatchInteriorIndexQuery(uint zoneId, uint patchIdx, uint slot, uint &out)
+{
+	const SPaintZone *pz = zpFindPaintZone(zoneId);
+	if (!pz || patchIdx >= pz->Ep.Pm.Patches.size() || slot >= 4)
+		return false;
+	const sint32 iv = pz->Ep.Pm.Patches[patchIdx].Interior[slot];
+	if (iv < 0)
+		return false;
+	out = (uint)iv;
+	return true;
+}
+
 /** Script/gate read access: one vertex's stored Flags word (through the eval mirror,
  *  whose flags mirror the stored stream). */
 bool zpPatchVertFlagsQuery(uint zoneId, uint vertIdx, sint32 &out)

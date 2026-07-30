@@ -468,6 +468,9 @@ void zpDrawPatchLattice(NL3D::IDriver *driver, NL3D::CCamera *camera,
 	// out would leave the other three looking freely movable, which they are not.)
 	static const NLMISC::CRGBA kVertBoundColor(0, 0, 0, 255);
 	static const NLMISC::CRGBA kTanColor(80, 230, 120, 255); // handle green
+	// MANUAL interiors are real editable points; violet keeps the
+	// green/white/black/red language clean.
+	static const NLMISC::CRGBA kIntColor(200, 120, 255, 255);
 
 	const NLMISC::CMatrix viewMat = camera->getMatrix().inverted();
 	const NL3D::CFrustum &fr = camera->getFrustum();
@@ -576,6 +579,34 @@ void zpDrawPatchLattice(NL3D::IDriver *driver, NL3D::CCamera *camera,
 			NL3D::CDRU::drawQuad((hx - tanHalfPx) / (float)winW, (hy - tanHalfPx) / (float)winH,
 			                     (hx + tanHalfPx) / (float)winW, (hy + tanHalfPx) / (float)winH,
 			                     *driver, hcol, NL3D::CViewport());
+		}
+		// MANUAL interiors (PATCH_AUTO clear), the mA2 editing surface: drawn for selected
+		// corners only, exactly the handle discipline - auto interiors are derived and
+		// never appear.
+		if (!(pz.Ep.Pm.Patches[p].Flags & 1))
+		{
+			const PIPELINE::MAX::NELPATCH::SPmPatch &pmp = pz.Ep.Pm.Patches[p];
+			for (uint j = 0; j < 4; ++j)
+			{
+				if (!g_PatchVertSel.count(TPatchVertId(pz.ZoneId, pi.BaseVertices[j])))
+					continue;
+				if (pmp.Interior[j] < 0)
+					continue;
+				const uint16 vi = (uint16)pmp.Interior[j];
+				if (!seenVec.insert(vi).second)
+					continue;
+				NLMISC::CVector v;
+				if (!zpProjectLifted(viewMat, fr, pi.Patch.Interiors[j] + zpTanOffset(pz, vi),
+				                     kPatchLift, v))
+					continue;
+				const bool sel = g_PatchTanSel.count(TPatchVertId(pz.ZoneId, vi)) != 0;
+				const NLMISC::CRGBA &icol = sel ? kVertSelColor : kIntColor;
+				const float hx = floorf(v.x * (float)winW + 0.5f);
+				const float hy = floorf(v.y * (float)winH + 0.5f);
+				NL3D::CDRU::drawQuad((hx - tanHalfPx) / (float)winW, (hy - tanHalfPx) / (float)winH,
+				                     (hx + tanHalfPx) / (float)winW, (hy + tanHalfPx) / (float)winH,
+				                     *driver, icol, NL3D::CViewport());
+			}
 		}
 	}
 }
@@ -1416,6 +1447,27 @@ bool zpPickPatchTangent(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, 
 				vecOut = (uint16)pp.Vec[j];
 				found = true;
 			}
+			// MANUAL interiors pick exactly like handles (auto ones are derived and are
+			// not offered - they are not drawn either).
+			if (!(pp.Flags & 1))
+				for (uint j = 0; j < 4; ++j)
+				{
+					if (!g_PatchVertSel.count(TPatchVertId(pz.ZoneId, pi.BaseVertices[j])))
+						continue;
+					if (pp.Interior[j] < 0 || !seen.insert((uint16)pp.Interior[j]).second)
+						continue;
+					NLMISC::CVector v;
+					if (!zpProjectLifted(viewMat, fr, pi.Patch.Interiors[j], kPatchLift, v))
+						continue;
+					const float dx = (v.x - mx) * aspect, dy = v.y - my;
+					const float d = sqrtf(dx * dx + dy * dy);
+					if (d >= best)
+						continue;
+					best = d;
+					zoneOut = pz.ZoneId;
+					vecOut = (uint16)pp.Interior[j];
+					found = true;
+				}
 		}
 	}
 	return found;

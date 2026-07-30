@@ -854,6 +854,16 @@ uint zpSetVertexCoplanar(bool on);
 int zpVertCoplanarTriState();
 void zpPatchCoplanarClicked(int on);
 bool zpPatchVertFlagsQuery(uint zoneId, uint vertIdx, sint32 &out);
+/** Auto/Manual interior (PATCH_AUTO, patch Flags bit 0; mA2): auto -> manual BAKES the
+ *  derived interiors (they become authored, editable points); manual -> auto abandons
+ *  them. Undoable (Kind 6). */
+uint zpSetPatchAuto(bool on);
+int zpPatchAutoTriState();
+void zpPatchAutoClicked(int on);
+bool zpPatchFlagsQuery(uint zoneId, uint patchIdx, sint32 &out);
+bool zpPatchInteriorIndexQuery(uint zoneId, uint patchIdx, uint slot, uint &out);
+/** Is this vec index an INTERIOR of an AUTO patch (derived - refuses selection)? */
+bool zpVecIsAutoInterior(const SPaintZone &pz, uint16 vecIdx);
 uint zpSetPatchTess(int u, int v);
 uint zpBalanceTessSelection();
 bool zpPatchSmGroupsQuery(uint zoneId, uint patchIdx, uint32 &maskOut);

@@ -2087,6 +2087,7 @@ bool zpPatchTangentWorld(uint zoneId, uint vecIdx, float outPos[3])
 	if (!pz)
 		return false;
 	for (size_t p = 0; p < pz->Ep.Pm.Patches.size() && p < pz->Patches.size(); ++p)
+	{
 		for (uint j = 0; j < 8; ++j)
 		{
 			if (pz->Ep.Pm.Patches[p].Vec[j] < 0
@@ -2096,6 +2097,32 @@ bool zpPatchTangentWorld(uint zoneId, uint vecIdx, float outPos[3])
 			outPos[0] = v.x; outPos[1] = v.y; outPos[2] = v.z;
 			return true;
 		}
+		// INTERIOR vecs resolve too (the manual-interior editing path): same index space,
+		// displayed at the patch's Interiors corner.
+		for (uint j = 0; j < 4; ++j)
+		{
+			if (pz->Ep.Pm.Patches[p].Interior[j] < 0
+			    || (uint16)pz->Ep.Pm.Patches[p].Interior[j] != (uint16)vecIdx)
+				continue;
+			const NLMISC::CVector &v = pz->Patches[p].Patch.Interiors[j];
+			outPos[0] = v.x; outPos[1] = v.y; outPos[2] = v.z;
+			return true;
+		}
+	}
+	return false;
+}
+
+/** Is this vec an INTERIOR of an AUTO patch? Derived at eval, so it must never join a
+ *  transform - the pick paths skip it and the scripted select refuses. */
+bool zpVecIsAutoInterior(const SPaintZone &pz, uint16 vecIdx)
+{
+	for (size_t p = 0; p < pz.Ep.Pm.Patches.size(); ++p)
+	{
+		const PIPELINE::MAX::NELPATCH::SPmPatch &pp = pz.Ep.Pm.Patches[p];
+		for (int j = 0; j < 4; ++j)
+			if (pp.Interior[j] >= 0 && (uint16)pp.Interior[j] == vecIdx)
+				return (pp.Flags & 1) != 0;
+	}
 	return false;
 }
 
@@ -2108,6 +2135,13 @@ void zpPatchTangentSelect(uint zoneId, uint vecIdx, int op)
 		const SPaintZone *hpz = zpFindPaintZone(zoneId);
 		if (hpz)
 		{
+			// An AUTO patch's interior is derived: not editable, not selectable.
+			if (zpVecIsAutoInterior(*hpz, (uint16)vecIdx))
+			{
+				g_PropStatusMsg = NLMISC::toString(
+					"vec %u is an auto interior (switch the patch to manual)", vecIdx);
+				return;
+			}
 			const uint16 owner = zpTangentOwner(*hpz, (uint16)vecIdx);
 			if (owner != (uint16)0xffff && zpVertIsHidden(*hpz, owner))
 			{

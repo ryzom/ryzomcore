@@ -1067,6 +1067,21 @@ public:
 };
 REGISTER_ACTION_HANDLER(CAHZpVertexType, "zp_vertex_type");
 
+/** Scene-menu interior mode pair: set the face selection Auto (1) or Manual (0). */
+class CAHZpInteriorMode : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return;
+		CWidgetManager::getInstance()->disableModalWindow();
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchInteriorMode)
+			b->patchInteriorMode(atoi(params.c_str()));
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpInteriorMode, "zp_interior_mode");
+
 /** Pick a specific season code from the menu (params = sp|su|au|wi). */
 class CAHZpSeasonSelect : public IActionHandler
 {
@@ -2835,6 +2850,20 @@ void CEditorUI::syncPanelFromBridge()
 			{
 				btn->setFrozen(vtOff);
 				btn->setPushed(!vtOff && b->VertCoplanar == 0);
+			}
+		}
+		// Scene-menu interior mode pair: same shape, patch level.
+		{
+			const bool imOff = b->SubObj != 3 || !b->PatchSelFaces;
+			if (CCtrlBaseButton *btn = findButton("ui:zp:scene_menu:content:im_auto"))
+			{
+				btn->setFrozen(imOff);
+				btn->setPushed(!imOff && b->PatchAuto == 1);
+			}
+			if (CCtrlBaseButton *btn = findButton("ui:zp:scene_menu:content:im_manual"))
+			{
+				btn->setFrozen(imOff);
+				btn->setPushed(!imOff && b->PatchAuto == 0);
 			}
 		}
 		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":no_smooth:box").c_str()))

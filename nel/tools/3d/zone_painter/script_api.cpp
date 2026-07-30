@@ -132,6 +132,9 @@ uint zpUnhideAll();
 bool zpPatchIsHidden(uint zoneId, uint patchIdx);
 uint zpSubdivideEdgeSelection();
 void zpSetSubdividePropagate(bool on);
+uint zpSetPatchAuto(bool on);
+bool zpPatchFlagsQuery(uint zoneId, uint patchIdx, sint32 &out);
+bool zpPatchInteriorIndexQuery(uint zoneId, uint patchIdx, uint slot, uint &out);
 bool zpMoveDirTarget(int dir, uint &dstZoneOut);
 bool zpZonePatchCount(uint zoneId, uint &countOut);
 bool zpZoneVertCount(uint zoneId, uint &countOut);
@@ -1032,6 +1035,38 @@ static int lPatchVertFlags(CLuaState &ls) // (zone, vertIdx) -> the stored Flags
 	return 1;
 }
 
+static int lSetPatchAuto(CLuaState &ls) // (on) over the face selection; false = bake manual
+{
+	const uint n = zpSetPatchAuto(argBoolOpt(ls, 1, true));
+	printf("setPatchAuto: %u patches\n", n);
+	fflush(stdout);
+	return retOk(ls);
+}
+
+static int lPatchFlags(CLuaState &ls) // (zone, patchIdx) -> the stored Flags word
+{
+	double z, p;
+	if (!argNumber(ls, 1, z) || !argNumber(ls, 2, p))
+		return retErr(ls, "usage: patchFlags(zone, patchIndex)");
+	sint32 f = 0;
+	if (!zpPatchFlagsQuery((uint)z, (uint)p, f))
+		return retErr(ls, "patchFlags: no such patch");
+	ls.push((double)f);
+	return 1;
+}
+
+static int lPatchInteriorIndex(CLuaState &ls) // (zone, patchIdx, slot 0..3) -> vec index
+{
+	double z, p, s;
+	if (!argNumber(ls, 1, z) || !argNumber(ls, 2, p) || !argNumber(ls, 3, s))
+		return retErr(ls, "usage: patchInteriorIndex(zone, patchIndex, slot)");
+	uint v = 0;
+	if (!zpPatchInteriorIndexQuery((uint)z, (uint)p, (uint)s, v))
+		return retErr(ls, "patchInteriorIndex: no such slot");
+	ls.push((double)v);
+	return 1;
+}
+
 static int lSubdivideEdgeSelection(CLuaState &ls)
 {
 	const uint n = zpSubdivideEdgeSelection();
@@ -1769,6 +1804,8 @@ static const char *kBootstrap =
 	"  patchHidden = __zp_patchHidden,\n"
 	"  subdivideEdgeSelection = __zp_subdivideEdgeSelection,\n"
 	"  setSubdividePropagate = __zp_setSubdividePropagate,\n"
+	"  setPatchAuto = __zp_setPatchAuto, patchFlags = __zp_patchFlags,\n"
+	"  patchInteriorIndex = __zp_patchInteriorIndex,\n"
 	"  rotatePatchSelection = __zp_rotatePatchSelection,\n"
 	"  rotatePatchSelectionAxis = __zp_rotatePatchSelectionAxis,\n"
 	"  scalePatchSelection = __zp_scalePatchSelection,\n"
@@ -1892,6 +1929,9 @@ bool ensureLua()
 	ls->registerFunc("__zp_patchHidden", lPatchHidden);
 	ls->registerFunc("__zp_subdivideEdgeSelection", lSubdivideEdgeSelection);
 	ls->registerFunc("__zp_setSubdividePropagate", lSetSubdividePropagate);
+	ls->registerFunc("__zp_setPatchAuto", lSetPatchAuto);
+	ls->registerFunc("__zp_patchFlags", lPatchFlags);
+	ls->registerFunc("__zp_patchInteriorIndex", lPatchInteriorIndex);
 	ls->registerFunc("__zp_pivotPos", lPivotPos);
 	ls->registerFunc("__zp_rotatePatchSelection", lRotatePatchSelection);
 	ls->registerFunc("__zp_rotatePatchSelectionAxis", lRotatePatchSelectionAxis);

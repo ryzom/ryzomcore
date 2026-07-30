@@ -2203,6 +2203,7 @@ void zpFillBridgeState(ZPUI::SPaintUIBridge &bridge)
 	bridge.ExtrudeOutline = zpLastExtrudeOutline();
 	bridge.ExtrudeLocal = zpLastExtrudeLocal();
 	bridge.VertCoplanar = zpVertCoplanarTriState();
+	bridge.PatchAuto = zpPatchAutoTriState();
 	bridge.HiddenCount = (uint)g_PatchHidden.size();
 	bridge.SubdivPropagate = zpSubdividePropagate();
 	bridge.FilterVerts = g_PatchFilterVerts;
