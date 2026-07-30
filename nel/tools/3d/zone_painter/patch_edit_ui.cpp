@@ -1053,6 +1053,46 @@ bool zpPatchClickAt(float x, float y, uint buttons)
 }
 
 /**
+ * Screen position of a vertex (the same projection the pick uses), for scripts that need
+ * to AIM the real pick paths - zpPatchClickAt and zpWeldDragAt land where this says.
+ */
+bool zpPatchVertScreen(uint zoneId, uint vertIdx, float &sxOut, float &syOut)
+{
+	if (!g_PaintCtx.Camera)
+		return false;
+	float w[3];
+	if (!zpPatchVertWorld(zoneId, (uint16)vertIdx, w))
+		return false;
+	const NLMISC::CMatrix viewMat = g_PaintCtx.Camera->getMatrix().inverted();
+	NLMISC::CVector p;
+	if (!zpProjectLifted(viewMat, g_PaintCtx.Camera->getFrustum(),
+	                     NLMISC::CVector(w[0], w[1], w[2]), kPatchLift, p))
+		return false;
+	sxOut = p.x;
+	syOut = p.y;
+	return true;
+}
+
+/**
+ * Scripted target-weld drag: press at (x0,y0), release at (x1,y1), through the REAL
+ * begin/finish handlers (same caveat as zpPatchClickAt - this proves the drag machinery,
+ * not the event dispatch that feeds it).
+ */
+bool zpWeldDragAt(float x0, float y0, float x1, float y1)
+{
+	if (!g_PaintCtx.Camera || !g_PaintCtx.UDriver)
+		return false;
+	NL3D::IDriver *driver = static_cast<NL3D::CDriverUser *>(g_PaintCtx.UDriver)->getDriver();
+	if (!driver)
+		return false;
+	if (!zpWeldDragBegin(g_PaintCtx.Camera, driver, x0, y0))
+		return false;
+	zpWeldDragUpdate(x1, y1);
+	zpWeldDragFinish(g_PaintCtx.Camera, driver, x1, y1);
+	return true;
+}
+
+/**
  * Nearest visible HANDLE to the pointer.
  *
  * Only handles of selected corners are drawn, and only drawn things can be picked - otherwise
@@ -1162,6 +1202,144 @@ void zpPatchVertexClick(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, 
 		return;
 	}
 	zpPatchVertSelect(zone, vert, op);
+}
+
+// ---------------------------------------------------------------------------------------------
+// Target-weld drag: the armed command mode. Dragging a vertex ONTO another welds the
+// dragged one INTO the target - the target keeps its position and identity, and NOTHING
+// moves during the drag: the gesture is a selection mechanism (source, then target), the
+// rubber line is its only visual. Arm with the panel Target toggle; right click or ESC
+// cancels a live drag and disarms; the mode stays armed across welds (legacy Target Weld).
+
+static bool s_WeldDragActive = false;
+static uint s_WeldSrcZone = 0;
+static uint16 s_WeldSrcVert = 0;
+static float s_WeldMx = 0.f, s_WeldMy = 0.f;
+
+bool zpWeldDragActive() { return s_WeldDragActive; }
+
+/** Try to begin the drag at the pointer: only a press ON a vertex starts it. */
+bool zpWeldDragBegin(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, float my)
+{
+	uint zone = 0;
+	uint16 vert = 0;
+	if (!zpPickPatchVertex(camera, driver, mx, my, zone, vert))
+		return false;
+	s_WeldDragActive = true;
+	s_WeldSrcZone = zone;
+	s_WeldSrcVert = vert;
+	s_WeldMx = mx;
+	s_WeldMy = my;
+	g_PropStatusMsg = NLMISC::toString("target weld: drag vertex %u onto its target", (uint)vert);
+	return true;
+}
+
+void zpWeldDragUpdate(float mx, float my)
+{
+	s_WeldMx = mx;
+	s_WeldMy = my;
+}
+
+/** Release: weld the source INTO the vertex under the pointer (same object only). */
+void zpWeldDragFinish(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, float my)
+{
+	if (!s_WeldDragActive)
+		return;
+	s_WeldDragActive = false;
+	uint zone = 0;
+	uint16 vert = 0;
+	if (!zpPickPatchVertex(camera, driver, mx, my, zone, vert))
+	{
+		g_PropStatusMsg = "target weld: released over nothing";
+		return;
+	}
+	if (zone != s_WeldSrcZone || vert == s_WeldSrcVert)
+	{
+		const SPaintZone *a = zpFindPaintZone(zone);
+		const SPaintZone *b = zpFindPaintZone(s_WeldSrcZone);
+		if (vert == s_WeldSrcVert && zone == s_WeldSrcZone)
+			g_PropStatusMsg = "target weld: released on the same vertex";
+		else if (a && b && a->Node == b->Node)
+			zone = s_WeldSrcZone; // another viewpoint on the same object: indices agree
+		else
+		{
+			g_PropStatusMsg = "target weld: target is in another zone";
+			return;
+		}
+		if (vert == s_WeldSrcVert)
+			return;
+	}
+	zpWeldVertexInto(s_WeldSrcZone, s_WeldSrcVert, vert);
+}
+
+void zpWeldDragCancel()
+{
+	if (!s_WeldDragActive)
+		return;
+	s_WeldDragActive = false;
+	g_PropStatusMsg = "target weld: cancelled";
+}
+
+/** The rubber line (2D pass, drawn with the other overlays; project by hand). */
+void zpDrawWeldDrag(NL3D::IDriver *driver, NL3D::CCamera *camera)
+{
+	// Dev hook for screenshots: ZONE_PAINTER_WELD_DRAG="zone,vert,mx,my" forces a live
+	// drag so the overlay can be seen without a pointer.
+	if (!s_WeldDragActive)
+	{
+		const char *dev = getenv("ZONE_PAINTER_WELD_DRAG");
+		if (dev)
+		{
+			uint z = 0, v = 0;
+			float mx = 0.f, my = 0.f;
+			if (sscanf(dev, "%u,%u,%f,%f", &z, &v, &mx, &my) == 4)
+			{
+				s_WeldDragActive = true;
+				s_WeldSrcZone = z;
+				s_WeldSrcVert = (uint16)v;
+				s_WeldMx = mx;
+				s_WeldMy = my;
+			}
+		}
+		if (!s_WeldDragActive)
+			return;
+	}
+	if (!driver || !camera)
+		return;
+	float src[3];
+	if (!zpPatchVertWorld(s_WeldSrcZone, s_WeldSrcVert, src))
+		return;
+	const NLMISC::CMatrix viewMat = camera->getMatrix().inverted();
+	NLMISC::CVector p;
+	if (!zpProjectLifted(viewMat, camera->getFrustum(),
+	                     NLMISC::CVector(src[0], src[1], src[2]), kPatchLift, p))
+		return;
+	const NLMISC::CRGBA col(255, 160, 60, 255);
+	NL3D::CDRU::drawLine(p.x, p.y, s_WeldMx, s_WeldMy, *driver, col, NL3D::CViewport());
+	// A small diamond on the candidate target under the pointer.
+	uint zone = 0;
+	uint16 vert = 0;
+	if (zpPickPatchVertex(camera, driver, s_WeldMx, s_WeldMy, zone, vert)
+	    && !(zone == s_WeldSrcZone && vert == s_WeldSrcVert))
+	{
+		float dst[3];
+		if (zpPatchVertWorld(zone, vert, dst))
+		{
+			NLMISC::CVector q;
+			if (zpProjectLifted(viewMat, camera->getFrustum(),
+			                    NLMISC::CVector(dst[0], dst[1], dst[2]), kPatchLift, q))
+			{
+				uint32 winW = 0, winH = 0;
+				driver->getWindowSize(winW, winH);
+				const float rx = winW ? 7.f / (float)winW : 0.01f;
+				const float ry = winH ? 7.f / (float)winH : 0.01f;
+				NL3D::CDRU::drawLine(q.x - rx, q.y, q.x, q.y + ry, *driver, col, NL3D::CViewport());
+				NL3D::CDRU::drawLine(q.x, q.y + ry, q.x + rx, q.y, *driver, col, NL3D::CViewport());
+				NL3D::CDRU::drawLine(q.x + rx, q.y, q.x, q.y - ry, *driver, col, NL3D::CViewport());
+				NL3D::CDRU::drawLine(q.x, q.y - ry, q.x - rx, q.y, *driver, col, NL3D::CViewport());
+			}
+		}
+	}
 }
 
 /* end of file */

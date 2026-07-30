@@ -162,6 +162,16 @@ bool topoWeldVerts(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
                    STopoRemap &remap, std::string &err);
 
 /**
+ * Directed (target) weld: `srcVert` merges into `dstVert`, which keeps its position and
+ * identity - the drag-onto-a-vertex gesture, no threshold, no clustering. Same machinery
+ * and refusals as topoWeldVerts otherwise; when the merge fuses two open edges, the edge
+ * whose endpoints did not move wins the seam curve (the target-weld rule, shared with the
+ * cluster weld).
+ */
+bool topoWeldVertInto(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
+                      uint srcVert, uint dstVert, STopoRemap &remap, std::string &err);
+
+/**
  * Grow one new quad patch from each listed OPEN edge (edge indices into pm.Edges; each
  * must carry exactly one patch and no bind records). The new patch mirrors its owner
  * across the edge: each far corner is the point reflection of the owner's opposite corner

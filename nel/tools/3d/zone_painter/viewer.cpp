@@ -267,7 +267,7 @@ void CPaintMouseListener::operator()(const NLMISC::CEvent &event)
 		// runs the GUI does not steal the move - a release over a toolbar must still end the
 		// drag, or it stays armed and the next stray move continues it with the button up, and
 		// the cancelling right click must reach the drag wherever the pointer happens to be.
-		const bool gizmoCapture = zpPatchGizmoDragging()
+		const bool gizmoCapture = (zpPatchGizmoDragging() || zpWeldDragActive())
 			&& (event == NLMISC::EventMouseMoveId || event == NLMISC::EventMouseUpId
 			    || event == NLMISC::EventMouseDownId);
 		if (!gizmoCapture && guiWantsMouse())
@@ -298,22 +298,33 @@ void CPaintMouseListener::operator()(const NLMISC::CEvent &event)
 				if ((mouse->Button & NLMISC::leftButton)
 				    && (SubObj == SubVertex || SubObj == SubEdge || SubObj == SubPatch))
 				{
+					// The armed target-weld mode claims a press that lands ON a vertex;
+					// anywhere else the press falls through to the normal paths, so arming
+					// only changes what a vertex press means.
+					NL3D::IDriver *drv = g_PaintCtx.UDriver
+						? static_cast<NL3D::CDriverUser *>(g_PaintCtx.UDriver)->getDriver() : NULL;
+					if (g_WeldTargetArmed && SubObj == SubVertex
+					    && zpWeldDragBegin(Camera, drv, MouseX, MouseY))
+						return;
 					// A hot handle claims the click. Hover was resolved by the last frame's
 					// draw, which is the frame the artist was looking at when they pressed.
 					if (zpPatchGizmoBeginDrag(zpPatchGizmoHover(), Camera, Viewport, MouseX, MouseY))
 						return;
-					NL3D::IDriver *drv = g_PaintCtx.UDriver
-						? static_cast<NL3D::CDriverUser *>(g_PaintCtx.UDriver)->getDriver() : NULL;
 					zpPatchVertexClick(Camera, drv, MouseX, MouseY, (uint)mouse->Button);
 				}
 				if (mouse->Button & NLMISC::rightButton)
 				{
-					// Cancel: a right click during a transform drag abandons it and
-					// nothing is written. Otherwise the scene context menu - patch mode has
-					// no eyedropper to spend the right button on, and this is where the user
-					// pivot gets placed. This must live INSIDE the mode block: an earlier
-					// spelling sat below it, after the unconditional return, and was dead.
-					if (zpPatchGizmoDragging())
+					// Cancel: a right click during a transform or weld drag abandons it and
+					// nothing is written; armed-but-idle target weld disarms. Otherwise the
+					// scene context menu - patch mode has no eyedropper to spend the right
+					// button on, and this is where the user pivot gets placed. This must
+					// live INSIDE the mode block: an earlier spelling sat below it, after
+					// the unconditional return, and was dead.
+					if (zpWeldDragActive())
+						zpWeldDragCancel();
+					else if (g_WeldTargetArmed)
+						zpWeldTargetToggleClicked();
+					else if (zpPatchGizmoDragging())
 						zpPatchGizmoCancelDrag();
 					else
 						zpOpenSceneMenu();
@@ -434,6 +445,13 @@ void CPaintMouseListener::operator()(const NLMISC::CEvent &event)
 		else if (event == NLMISC::EventMouseUpId)
 		{
 			NLMISC::CEventMouse *mouse = (NLMISC::CEventMouse *)&event;
+			if (zpWeldDragActive() && (mouse->Button & NLMISC::leftButton))
+			{
+				NL3D::IDriver *drv = g_PaintCtx.UDriver
+					? static_cast<NL3D::CDriverUser *>(g_PaintCtx.UDriver)->getDriver() : NULL;
+				zpWeldDragFinish(Camera, drv, mouse->X, mouse->Y);
+				return;
+			}
 			if (zpPatchGizmoDragging() && (mouse->Button & NLMISC::leftButton))
 			{
 				zpPatchGizmoEndDrag();
@@ -449,6 +467,13 @@ void CPaintMouseListener::operator()(const NLMISC::CEvent &event)
 		else if (event == NLMISC::EventMouseMoveId)
 		{
 			NLMISC::CEventMouse *mouse = (NLMISC::CEventMouse *)&event;
+			if (zpWeldDragActive())
+			{
+				MouseX = mouse->X;
+				MouseY = mouse->Y;
+				zpWeldDragUpdate(MouseX, MouseY);
+				return;
+			}
 			if (zpPatchGizmoDragging())
 			{
 				MouseX = mouse->X;
@@ -841,6 +866,9 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 		paintBridge.patchWeld = zpPatchWeldClicked;
 		paintBridge.patchAddQuad = zpPatchAddQuadClicked;
 		paintBridge.patchDetach = zpPatchDetachClicked;
+		paintBridge.moveToZoneDir = zpMoveToZoneDirClicked;
+		paintBridge.weldTargetToggle = zpWeldTargetToggleClicked;
+		paintBridge.patchWeldThreshold = zpPatchWeldThresholdClicked;
 		paintBridge.selectTileSetDelta = zpSelectTileSetDelta;
 		paintBridge.selectTileSetAbs = zpSelectTileSetAbs;
 		paintBridge.toggleTileSize = zpToggleTileSize;
@@ -1475,6 +1503,8 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 					    || paintListener.SubObj == CPaintMouseListener::SubPatch)
 						zpDrawPatchGizmo(driver, camera, paintListener.MouseX, paintListener.MouseY,
 						                 mouseListener.isNavigating(), mouseListener.viewSerial());
+					if (paintListener.SubObj == CPaintMouseListener::SubVertex)
+						zpDrawWeldDrag(driver, camera);
 				}
 				if (core && hudText)
 				{
@@ -1558,7 +1588,11 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 				// step ESC mid-drag would quit the tool out from under the drag.
 				if (udriver->AsyncListener.isKeyPushed(NLMISC::KeyESCAPE))
 				{
-					if (zpPatchGizmoDragging())
+					if (zpWeldDragActive())
+						zpWeldDragCancel();
+					else if (g_WeldTargetArmed)
+						zpWeldTargetToggleClicked();
+					else if (zpPatchGizmoDragging())
 						zpPatchGizmoCancelDrag();
 					else if (ZPUI::isSessionBoardVisible())
 						ZPUI::setSessionBoardVisible(false);
@@ -1796,6 +1830,8 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 					    || paintListener.SubObj == CPaintMouseListener::SubPatch)
 						zpDrawPatchGizmo(driver, camera, paintListener.MouseX, paintListener.MouseY,
 						                 mouseListener.isNavigating(), mouseListener.viewSerial());
+					if (paintListener.SubObj == CPaintMouseListener::SubVertex)
+						zpDrawWeldDrag(driver, camera);
 				}
 				else if (core && paintListener.HaveHover)
 				{

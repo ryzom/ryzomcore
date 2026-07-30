@@ -764,6 +764,23 @@ void zpPatchSubdivideClicked();
 /** Weld selected vertices (target-weld; coincident open edges fuse). Undoable. */
 uint zpWeldPatchSelection(float threshold);
 void zpPatchWeldClicked();
+float zpLastWeldThreshold();
+void zpPatchWeldThresholdClicked(float distance);
+/** Directed weld: srcVert merges into dstVert (the target keeps position and identity) -
+ *  the drag-onto-a-vertex gesture's op. Undoable. */
+uint zpWeldVertexInto(uint zoneId, uint srcVert, uint dstVert);
+/** Target-weld command mode (vertex level): armed by the panel Target toggle; dragging a
+ *  vertex onto another welds it INTO the target. Nothing moves during the drag. */
+extern bool g_WeldTargetArmed;
+bool zpWeldDragActive();
+bool zpWeldDragBegin(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, float my);
+void zpWeldDragUpdate(float mx, float my);
+void zpWeldDragFinish(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, float my);
+void zpWeldDragCancel();
+void zpDrawWeldDrag(NL3D::IDriver *driver, NL3D::CCamera *camera);
+void zpWeldTargetToggleClicked();
+bool zpWeldDragAt(float x0, float y0, float x1, float y1);
+bool zpPatchVertScreen(uint zoneId, uint vertIdx, float &sxOut, float &syOut);
 /** Grow a quad from each selected open edge (legacy Add Quad). Undoable. */
 uint zpAddQuadPatchSelection();
 void zpPatchAddQuadClicked();
@@ -775,6 +792,13 @@ void zpPatchDetachClicked();
 /** Merge zone srcZone into targetZone (source file saved and closed; the attach lands as
  *  the fresh undo stack's first stroke - undo rolls the target back). */
 uint zpAttachZone(uint targetZone, uint srcZone, std::string &msg);
+/** Move the selected patches into dstZone (cross-file transfer; both files stay open;
+ *  one two-snapshot Kind 6 stroke - fully undoable). */
+uint zpMovePatchSelectionToZone(uint dstZone, std::string &msg);
+/** The editable neighbor zone in compass direction 0..7 (N NE E SE S SW W NW) of the
+ *  selection's file, by board-cell adjacency. */
+bool zpMoveDirTarget(int dir, uint &dstZoneOut);
+void zpMoveToZoneDirClicked(int dir);
 /** Displayed patch count of a zone (script/gate read access). */
 bool zpZonePatchCount(uint zoneId, uint &countOut);
 /** Eval-mirror vertex count of a zone (script/gate read access). */

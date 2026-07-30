@@ -136,6 +136,9 @@ struct SPaintUIBridge
 	void (*patchWeld)();
 	void (*patchAddQuad)();
 	void (*patchDetach)();
+	void (*moveToZoneDir)(int dir); // scene-menu compass, 0=N..7=NW
+	void (*weldTargetToggle)(); // arm/disarm the target-weld drag mode
+	void (*patchWeldThreshold)(float distance); // weld dialog OK
 	// Painterscript absolute state setters (recorder-replay faithful; the frame-synced
 	// snapshot fields below are STALE mid-script, so scripts must not derive from them)
 	void (*setTileSize256)(bool on);
@@ -154,6 +157,11 @@ struct SPaintUIBridge
 	// Where the current level's selection lives: one zone -> its name, several -> the count.
 	uint PatchSelZones;
 	char PatchSelZoneName[128];
+	// Editable-neighbor availability per compass direction (bit 0=N .. bit 7=NW) for the
+	// scene menu's "Move to zone" block; patch level with a face selection only.
+	uint MoveDirMask;
+	bool WeldTargetArmed; // target-weld command mode (panel Target toggle pushed state)
+	float WeldThreshold;  // last-used weld distance (seeds the dialog)
 	int PivotMode;          // TPivotMode; what the transform gizmo is anchored on
 	char PivotLabel[16];    // short face for the toolbar button
 	int CurTileSet;
@@ -222,12 +230,14 @@ struct SPaintUIBridge
 		  propToggleUseBBox(NULL),
 		  patchBind(NULL), patchUnbind(NULL), patchNoSmooth(NULL), patchDelete(NULL),
 		  patchTurnCcw(NULL), patchTurnCw(NULL), patchSubdivide(NULL), patchWeld(NULL), patchAddQuad(NULL),
-		  patchDetach(NULL),
+		  patchDetach(NULL), moveToZoneDir(NULL), weldTargetToggle(NULL),
+		  patchWeldThreshold(NULL),
 		  setTileSize256(NULL), setHardnessAbs(NULL), setOpacityAbs(NULL),
 		  setColorRadiusAbs(NULL),
 		  HaveCore(false), Mode(0), SubObj(0),
 		  PatchSelVerts(0), PatchSelEdges(0), PatchSelFaces(0), PatchSelTans(0),
-		  PatchNoSmooth(2), PatchSelZones(0),
+		  PatchNoSmooth(2), PatchSelZones(0), MoveDirMask(0), WeldTargetArmed(false),
+		  WeldThreshold(0.1f),
 		  CurTileSet(0), TileSetCount(0), Mode256(false),
 		  BrushSize(0), TileGroup(0), LockBorders(false), UndoDepth(0), CanSave(false),
 		  InteractiveSave(false), BoardSession(false), InstanceCount(1), UpdateThumbnail(true),

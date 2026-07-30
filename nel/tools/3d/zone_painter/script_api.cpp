@@ -95,9 +95,14 @@ uint zpDeletePatchSelection();
 uint zpTurnPatchSelection(bool ccw);
 uint zpSubdividePatchSelection();
 uint zpWeldPatchSelection(float threshold);
+uint zpWeldVertexInto(uint zoneId, uint srcVert, uint dstVert);
+bool zpWeldDragAt(float x0, float y0, float x1, float y1);
+bool zpPatchVertScreen(uint zoneId, uint vertIdx, float &sxOut, float &syOut);
 uint zpAddQuadPatchSelection();
 uint zpDetachPatchSelection(const std::string &nameIn);
 uint zpAttachZone(uint targetZone, uint srcZone, std::string &msg);
+uint zpMovePatchSelectionToZone(uint dstZone, std::string &msg);
+bool zpMoveDirTarget(int dir, uint &dstZoneOut);
 bool zpZonePatchCount(uint zoneId, uint &countOut);
 bool zpZoneVertCount(uint zoneId, uint &countOut);
 bool zpTileQuery(uint zoneId, uint patchIdx, uint u, uint v, int &tileOut, int &rotOut,
@@ -1134,6 +1139,66 @@ static int lAttachZone(CLuaState &ls) // (targetZone, srcZone) -> appended count
 	return 1;
 }
 
+static int lVertexScreenPos(CLuaState &ls) // (zone, vert) -> sx, sy (the pick projection)
+{
+	double z, v;
+	if (!argNumber(ls, 1, z) || !argNumber(ls, 2, v))
+		return retErr(ls, "usage: vertexScreenPos(zone, vertIndex)");
+	float sx = 0.f, sy = 0.f;
+	if (!zpPatchVertScreen((uint)z, (uint)v, sx, sy))
+		return retErr(ls, "vertexScreenPos: not projectable");
+	ls.push((double)sx);
+	ls.push((double)sy);
+	return 2;
+}
+
+static int lWeldDragAt(CLuaState &ls) // (x0, y0, x1, y1) screen drag through the real handlers
+{
+	double a, b, c, d;
+	if (!argNumber(ls, 1, a) || !argNumber(ls, 2, b) || !argNumber(ls, 3, c) || !argNumber(ls, 4, d))
+		return retErr(ls, "usage: weldDragAt(x0, y0, x1, y1)");
+	if (!zpWeldDragAt((float)a, (float)b, (float)c, (float)d))
+		return retErr(ls, "weldDragAt: press missed every vertex");
+	return retOk(ls);
+}
+
+static int lWeldVertexInto(CLuaState &ls) // (zone, srcVert, dstVert) -> merged count
+{
+	double z, s, d;
+	if (!argNumber(ls, 1, z) || !argNumber(ls, 2, s) || !argNumber(ls, 3, d))
+		return retErr(ls, "usage: weldVertexInto(zone, srcVert, dstVert)");
+	const uint n = zpWeldVertexInto((uint)z, (uint)s, (uint)d);
+	printf("weldVertexInto: %u merged\n", n);
+	fflush(stdout);
+	ls.push((double)n);
+	return 1;
+}
+
+static int lMovePatchSelectionToZone(CLuaState &ls) // (dstZone) -> moved count
+{
+	double z;
+	if (!argNumber(ls, 1, z))
+		return retErr(ls, "usage: movePatchSelectionToZone(dstZone)");
+	std::string msg;
+	const uint n = zpMovePatchSelectionToZone((uint)z, msg);
+	printf("movePatchSelectionToZone: %u moved%s%s\n", n, msg.empty() ? "" : " - ", msg.c_str());
+	fflush(stdout);
+	ls.push((double)n);
+	return 1;
+}
+
+static int lMoveDirTarget(CLuaState &ls) // (dir 0=N..7=NW) -> neighbor zone id, or nil
+{
+	double d;
+	if (!argNumber(ls, 1, d))
+		return retErr(ls, "usage: moveDirTarget(dir 0..7)");
+	uint dst = 0;
+	if (!zpMoveDirTarget((int)d, dst))
+		return retErr(ls, "moveDirTarget: no editable neighbor that way");
+	ls.push((double)dst);
+	return 1;
+}
+
 static int lRawTile(CLuaState &ls) // (zone, patch, u, v, tile [, rot]) raw record, no solver
 {
 	double z, pch, u, v, t, r = 0;
@@ -1420,9 +1485,13 @@ static const char *kBootstrap =
 	"  subdividePatchSelection = __zp_subdividePatchSelection,\n"
 	"  rawTile = __zp_rawTile,\n"
 	"  weldPatchSelection = __zp_weldPatchSelection,\n"
+	"  weldVertexInto = __zp_weldVertexInto, weldDragAt = __zp_weldDragAt,\n"
+	"  vertexScreenPos = __zp_vertexScreenPos,\n"
 	"  addQuadPatchSelection = __zp_addQuadPatchSelection,\n"
 	"  detachPatchSelection = __zp_detachPatchSelection,\n"
 	"  attachZone = __zp_attachZone,\n"
+	"  movePatchSelectionToZone = __zp_movePatchSelectionToZone,\n"
+	"  moveDirTarget = __zp_moveDirTarget,\n"
 	"  patchCount = __zp_patchCount, tileAt = __zp_tileAt, vertexCount = __zp_vertexCount,\n"
 	"  setTileSet = __zp_setTileSet, getTileSet = __zp_getTileSet,\n"
 	"  setDisplaceIndex = __zp_setDisplaceIndex, setBrushColor = __zp_setBrushColor,\n"
@@ -1520,9 +1589,14 @@ bool ensureLua()
 	ls->registerFunc("__zp_subdividePatchSelection", lSubdividePatchSelection);
 	ls->registerFunc("__zp_rawTile", lRawTile);
 	ls->registerFunc("__zp_weldPatchSelection", lWeldPatchSelection);
+	ls->registerFunc("__zp_weldVertexInto", lWeldVertexInto);
+	ls->registerFunc("__zp_weldDragAt", lWeldDragAt);
+	ls->registerFunc("__zp_vertexScreenPos", lVertexScreenPos);
 	ls->registerFunc("__zp_addQuadPatchSelection", lAddQuadPatchSelection);
 	ls->registerFunc("__zp_detachPatchSelection", lDetachPatchSelection);
 	ls->registerFunc("__zp_attachZone", lAttachZone);
+	ls->registerFunc("__zp_movePatchSelectionToZone", lMovePatchSelectionToZone);
+	ls->registerFunc("__zp_moveDirTarget", lMoveDirTarget);
 	ls->registerFunc("__zp_patchCount", lPatchCount);
 	ls->registerFunc("__zp_vertexCount", lVertexCount);
 	ls->registerFunc("__zp_tileAt", lTileAt);

@@ -292,6 +292,7 @@ int g_MaskCycle = 0;
 bool g_HavePropSelection = false;
 uint g_SelectedZoneId = 0;
 std::set<TPatchVertId> g_PatchVertSel;
+bool g_WeldTargetArmed = false;
 std::set<TPatchVertId> g_PatchTanSel;
 int g_PivotMode = ZPPIV_Selection;
 int g_XformKind = ZPXF_Move;

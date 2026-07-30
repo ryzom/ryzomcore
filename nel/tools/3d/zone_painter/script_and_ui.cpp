@@ -2120,6 +2120,17 @@ void zpFillBridgeState(ZPUI::SPaintUIBridge &bridge)
 			bridge.PatchSelZoneName[sizeof(bridge.PatchSelZoneName) - 1] = 0;
 		}
 	}
+	bridge.WeldTargetArmed = g_WeldTargetArmed;
+	bridge.WeldThreshold = zpLastWeldThreshold();
+	// Scene-menu compass availability (patch level with a face selection only).
+	bridge.MoveDirMask = 0;
+	if (pl.SubObj == CPaintMouseListener::SubPatch && !g_PatchFaceSel.empty())
+		for (int d = 0; d < 8; ++d)
+		{
+			uint dst = 0;
+			if (zpMoveDirTarget(d, dst))
+				bridge.MoveDirMask |= (1u << d);
+		}
 	bridge.PivotMode = g_PivotMode;
 	bridge.PivotLabel[0] = 0;
 	strncpy(bridge.PivotLabel, zpPivotModeName(g_PivotMode), sizeof(bridge.PivotLabel) - 1);

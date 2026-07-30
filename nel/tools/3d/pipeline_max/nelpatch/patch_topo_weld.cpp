@@ -99,9 +99,15 @@ void wRemapBits(SPmBitArray &sel, const std::vector<sint32> &map, sint32 newCoun
 
 } /* anonymous namespace */
 
-bool topoWeldVerts(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
-                   const std::set<uint> &verts, float threshold,
-                   STopoRemap &remap, std::string &err)
+/// The merge machinery shared by the cluster weld and the directed (target) weld: apply a
+/// prebuilt vertex plan (vertTo[i] = surviving vertex, self for survivors), with the
+/// refusals that depend on the plan, the edge fusion, the compaction and the mapper
+/// rewrite. Forward-declared here, defined below topoWeldVerts.
+static bool weldApplyPlan(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
+                          std::vector<sint32> &vertTo, STopoRemap &remap, std::string &err);
+
+/// Structural guards shared by both weld entries.
+static bool weldGuards(const SPatchMesh &pm, const SRPatchMesh &rp, std::string &err)
 {
 	if (pm.EdgesReconstructed)
 	{ err = "reconstructed (Max 3) edge table: topology cannot be written back"; return false; }
@@ -109,12 +115,21 @@ bool topoWeldVerts(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
 	{ err = "PatchMesh/RPatchMesh size mismatch"; return false; }
 	if (!pm.Hooks.empty())
 	{ err = "mesh carries hook records; hook remap is not implemented"; return false; }
+	return true;
+}
+
+bool topoWeldVerts(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
+                   const std::set<uint> &verts, float threshold,
+                   STopoRemap &remap, std::string &err)
+{
+	if (!weldGuards(pm, rp, err))
+		return false;
 	if (verts.size() < 2)
 	{ err = "select at least two vertices"; return false; }
 	for (std::set<uint>::const_iterator it = verts.begin(); it != verts.end(); ++it)
 		if (*it >= pm.Verts.size()) { err = "vertex index out of range"; return false; }
 
-	const size_t nV = pm.Verts.size(), nVec = pm.Vecs.size(), nE = pm.Edges.size();
+	const size_t nV = pm.Verts.size();
 
 	// --- Cluster the selection: union-find, transitive within threshold.
 	std::vector<uint> sel(verts.begin(), verts.end());
@@ -164,16 +179,41 @@ bool topoWeldVerts(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
 	if (!merged)
 	{ err = "nothing within threshold"; return false; }
 
-	// --- Refusals against the merge plan. Every member of a MERGING cluster (its root
-	// included) must be unbound: the merged record is the survivor's, and a silently
-	// dropped or retargeted bind is a crack.
+	return weldApplyPlan(pm, rp, mapper, vertTo, remap, err);
+}
+
+bool topoWeldVertInto(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
+                      uint srcVert, uint dstVert, STopoRemap &remap, std::string &err)
+{
+	if (!weldGuards(pm, rp, err))
+		return false;
+	if (srcVert >= pm.Verts.size() || dstVert >= pm.Verts.size())
+	{ err = "vertex index out of range"; return false; }
+	if (srcVert == dstVert)
+	{ err = "a vertex cannot weld into itself"; return false; }
+	// The directed plan: src merges into dst, dst keeps its position and identity - no
+	// threshold, no clustering; the gesture names both ends.
+	std::vector<sint32> vertTo(pm.Verts.size());
+	for (size_t i = 0; i < vertTo.size(); ++i)
+		vertTo[i] = (sint32)i;
+	vertTo[srcVert] = (sint32)dstVert;
+	return weldApplyPlan(pm, rp, mapper, vertTo, remap, err);
+}
+
+static bool weldApplyPlan(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
+                          std::vector<sint32> &vertTo, STopoRemap &remap, std::string &err)
+{
+	const size_t nV = pm.Verts.size(), nVec = pm.Vecs.size(), nE = pm.Edges.size();
+
+	// --- Refusals against the merge plan. Every vertex of a MERGE (target included) must
+	// be unbound: the merged record is the survivor's, and a silently dropped or
+	// retargeted bind is a crack.
+	for (size_t i = 0; i < nV; ++i)
 	{
-		std::map<uint, uint> clusterSize;
-		for (size_t i = 0; i < sel.size(); ++i)
-			++clusterSize[find(sel[i])];
-		for (size_t i = 0; i < sel.size(); ++i)
-			if (clusterSize[find(sel[i])] >= 2 && rp.Verts[sel[i]].Binded)
-			{ err = "a welding vertex is bound (unbind first)"; return false; }
+		if (vertTo[i] == (sint32)i)
+			continue;
+		if (rp.Verts[i].Binded || rp.Verts[vertTo[i]].Binded)
+		{ err = "a welding vertex is bound (unbind first)"; return false; }
 	}
 	for (size_t p = 0; p < pm.Patches.size(); ++p)
 	{
@@ -207,19 +247,32 @@ bool topoWeldVerts(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
 				continue;
 			}
 			// Fusing pair: both must be open (one patch each), and the union has two.
-			const sint32 s = ft->second;
-			SPmEdge &surv = pm.Edges[s];
-			SPmEdge &dead = pm.Edges[e];
+			sint32 s = ft->second;
+			sint32 di = (sint32)e;
 			// Only a coincidence the MERGE created fuses: a pair of edges that already
 			// shared their endpoints before the weld is pre-existing mesh state, not part
 			// of this op (welding an unrelated cluster must neither fuse nor refuse it).
-			const bool survTouched = vertTo[surv.V1] != surv.V1 || vertTo[surv.V2] != surv.V2;
-			const bool deadTouched = vertTo[dead.V1] != dead.V1 || vertTo[dead.V2] != dead.V2;
-			if (!survTouched && !deadTouched)
-				continue;
+			// And the SURVIVOR is the side whose endpoints did not move - the target-weld
+			// rule: the stationary curve wins the seam (tie -> first by index, the
+			// established order).
+			{
+				const SPmEdge &e1 = pm.Edges[s];
+				const SPmEdge &e2 = pm.Edges[di];
+				const int m1 = (vertTo[e1.V1] != e1.V1 ? 1 : 0) + (vertTo[e1.V2] != e1.V2 ? 1 : 0);
+				const int m2 = (vertTo[e2.V1] != e2.V1 ? 1 : 0) + (vertTo[e2.V2] != e2.V2 ? 1 : 0);
+				if (m1 == 0 && m2 == 0)
+					continue;
+				if (m2 < m1)
+				{
+					const sint32 t = s; s = di; di = t;
+					ft->second = s;
+				}
+			}
+			SPmEdge &surv = pm.Edges[s];
+			SPmEdge &dead = pm.Edges[di];
 			if (surv.Patches.size() + dead.Patches.size() > 2)
 			{ err = "weld would put more than two patches on one edge"; return false; }
-			edgeTo[e] = s;
+			edgeTo[di] = s;
 			// The dropped edge's tangents sweep; its patch rewires to the survivor's
 			// tangents, orientation-aware, so both sides render one curve.
 			if (dead.Vec12 >= 0 && (size_t)dead.Vec12 < nVec) vecDead[dead.Vec12] = 1;
@@ -232,7 +285,7 @@ bool topoWeldVerts(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
 				SPmPatch &pp = pm.Patches[pi];
 				for (int slot = 0; slot < 4; ++slot)
 				{
-					if (pp.Edge[slot] != (sint32)e)
+					if (pp.Edge[slot] != di)
 						continue;
 					pp.Edge[slot] = s;
 					// Ring direction of this slot: V[slot] -> V[(slot+1)&3]; match against
@@ -411,6 +464,8 @@ bool topoWeldVerts(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
 	}
 	return true;
 }
+
+/* weldApplyPlan ends here (entered from topoWeldVerts and topoWeldVertInto above). */
 
 } /* namespace NELPATCH */
 } /* namespace MAX */

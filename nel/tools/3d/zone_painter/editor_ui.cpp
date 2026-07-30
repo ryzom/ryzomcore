@@ -370,6 +370,7 @@ public:
 };
 REGISTER_ACTION_HANDLER(CAHZpPatchSubdivide, "zp_patch_subdivide");
 
+/** Panel Weld button: pop the distance dialog, seeded with the last-used threshold. */
 class CAHZpPatchWeld : public IActionHandler
 {
 public:
@@ -377,10 +378,47 @@ public:
 	{
 		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
 		SPaintUIBridge *b = getPaintUIBridge();
-		if (b && b->patchWeld) b->patchWeld();
+		if (!b) return;
+		if (CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(
+		        CWidgetManager::getInstance()->getElementFromId(
+		            "ui:zp:weld_dialog:content:dist_frame:dist")))
+			eb->setInputString(NLMISC::toString("%g", b->WeldThreshold));
+		CWidgetManager::getInstance()->enableModalWindow(NULL, "ui:zp:weld_dialog");
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpPatchWeld, "zp_patch_weld");
+
+/** Weld dialog OK: parse the distance and weld the vertex selection at it. */
+class CAHZpWeldOk : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return;
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (!b || !b->patchWeldThreshold) return;
+		float t = 0.f;
+		if (CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(
+		        CWidgetManager::getInstance()->getElementFromId(
+		            "ui:zp:weld_dialog:content:dist_frame:dist")))
+			NLMISC::fromString(eb->getInputString(), t);
+		if (t <= 0.f)
+			return; // an unparsable or zero distance welds nothing; the dialog stays up
+		CWidgetManager::getInstance()->disableModalWindow();
+		b->patchWeldThreshold(t);
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpWeldOk, "zp_weld_ok");
+
+class CAHZpWeldCancel : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		CWidgetManager::getInstance()->disableModalWindow();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpWeldCancel, "zp_weld_cancel");
 
 class CAHZpPatchAddQuad : public IActionHandler
 {
@@ -746,6 +784,33 @@ public:
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpSceneMenu, "zp_scene_menu");
+
+class CAHZpPatchWeldTarget : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->weldTargetToggle) b->weldTargetToggle();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchWeldTarget, "zp_patch_weld_target");
+
+/** Scene-menu compass: move the patch selection to the neighbor zone (params = 0..7). */
+class CAHZpMoveToZone : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return;
+		CWidgetManager::getInstance()->disableModalWindow();
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->moveToZoneDir)
+			b->moveToZoneDir(atoi(params.c_str()));
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpMoveToZone, "zp_move_to_zone");
 
 
 /** Pick a specific season code from the menu (params = sp|su|au|wi). */
@@ -2434,6 +2499,11 @@ void CEditorUI::syncPanelFromBridge()
 			btn->setFrozen(b->SubObj != 1 || !b->PatchSelVerts);
 		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_weld").c_str()))
 			btn->setFrozen(b->SubObj != 1 || b->PatchSelVerts < 2);
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_weld_target").c_str()))
+		{
+			btn->setFrozen(b->SubObj != 1);
+			btn->setPushed(b->WeldTargetArmed);
+		}
 		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_delete").c_str()))
 			btn->setFrozen(b->SubObj != 3 || !b->PatchSelFaces);
 		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_turn_ccw").c_str()))
@@ -2446,6 +2516,16 @@ void CEditorUI::syncPanelFromBridge()
 			btn->setFrozen(b->SubObj != 2 || !b->PatchSelEdges);
 		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_detach").c_str()))
 			btn->setFrozen(b->SubObj != 3 || !b->PatchSelFaces);
+		// Scene-menu compass: a direction is live when an editable board neighbor sits there
+		// (patch level with a face selection; the mask is empty otherwise).
+		{
+			static const char *kMvIds[8] = { "mv_n", "mv_ne", "mv_e", "mv_se",
+			                                 "mv_s", "mv_sw", "mv_w", "mv_nw" };
+			for (int d = 0; d < 8; ++d)
+				if (CCtrlBaseButton *btn = findButton(
+						(std::string("ui:zp:scene_menu:content:") + kMvIds[d]).c_str()))
+					btn->setFrozen(!(b->MoveDirMask & (1u << d)));
+		}
 		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":no_smooth:box").c_str()))
 		{
 			btn->setFrozen(b->SubObj != 2 || !b->PatchSelEdges);

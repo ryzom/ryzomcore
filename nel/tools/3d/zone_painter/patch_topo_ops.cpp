@@ -537,6 +537,15 @@ static bool zpXformWeld(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
 	return topoWeldVerts(pm, rp, mapper, sel, s_WeldThreshold, remap, err);
 }
 
+// The directed weld's endpoints ride file-statics the same way (op state, not selection).
+static uint s_WeldIntoSrc = 0, s_WeldIntoDst = 0;
+static bool zpXformWeldInto(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
+                            const std::set<uint> & /* sel */, std::string &err)
+{
+	STopoRemap remap;
+	return topoWeldVertInto(pm, rp, mapper, s_WeldIntoSrc, s_WeldIntoDst, remap, err);
+}
+
 static bool zpXformAddQuad(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper * /* mapper */,
                            const std::set<uint> &sel, std::string &err)
 {
@@ -580,7 +589,8 @@ uint zpSubdividePatchSelection()
  * Weld the selected vertices (target-weld: clusters within the threshold merge onto their
  * lowest member, which keeps its position; coincident open edges fuse - the stitch).
  * Vertex-level selection; the runner's face-selection guard is bypassed by feeding the
- * vertex set through the same per-object grouping.
+ * vertex set through the same per-object grouping. The confirmed distance becomes the
+ * next dialog's seed.
  */
 uint zpWeldPatchSelection(float threshold)
 {
@@ -588,6 +598,12 @@ uint zpWeldPatchSelection(float threshold)
 	return zpRunTopoOpVerts("weld", NLMISC::toString("painter.weldPatchSelection(%.9g)",
 	                                                 s_WeldThreshold), zpXformWeld);
 }
+
+/** The last-used weld distance (seeds the panel dialog). */
+float zpLastWeldThreshold() { return s_WeldThreshold; }
+
+/** Weld dialog OK. */
+void zpPatchWeldThresholdClicked(float distance) { zpWeldPatchSelection(distance); }
 
 /**
  * Grow one new quad from each selected OPEN edge (the legacy Add Quad; edge level). The
@@ -597,6 +613,33 @@ uint zpWeldPatchSelection(float threshold)
 uint zpAddQuadPatchSelection()
 {
 	return zpRunTopoOpEdges("add quad", "painter.addQuadPatchSelection()", zpXformAddQuad);
+}
+
+/**
+ * Directed weld: `srcVert` merges into `dstVert` of the same zone object, the target
+ * keeping its position and identity - the drag-onto-a-vertex gesture's op. Rides the
+ * shared runner with a single-vertex per-object set; the endpoints travel by op state.
+ */
+uint zpWeldVertexInto(uint zoneId, uint srcVert, uint dstVert)
+{
+	if (!g_PaintCtx.Core || !g_PaintCtx.Zones)
+		return 0;
+	const SPaintZone *pz = zpFindPaintZone(zoneId);
+	if (!pz || !pz->Editable)
+	{
+		g_PropStatusMsg = "weld: zone is read-only";
+		return 0;
+	}
+	s_WeldIntoSrc = srcVert;
+	s_WeldIntoDst = dstVert;
+	std::map<const void *, std::set<uint> > perObject;
+	std::map<const void *, uint> objectZone;
+	perObject[(const void *)pz->Node].insert(srcVert);
+	objectZone[(const void *)pz->Node] = zoneId;
+	return zpRunTopoOpImpl("weld",
+	                       NLMISC::toString("painter.weldVertexInto(%u, %u, %u)",
+	                                        zoneId, srcVert, dstVert),
+	                       zpXformWeldInto, perObject, objectZone);
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -1149,6 +1192,350 @@ uint zpAttachZone(uint targetZone, uint srcZone, std::string &msg)
 	return appended;
 }
 
+// ---------------------------------------------------------------------------------------------
+// Move selection to a neighbor zone: the cross-file patch transfer. No legacy equivalent -
+// this op exists because the session shows several brick files at once, which the old
+// plugin never did. The selected patches leave their file and join the neighbor's:
+// sub-mesh extract (complement-delete on a copy), append into the destination reoriented
+// through the display transforms (the patches keep their place in the world), delete from
+// the source. All three passes are the proven transforms; BOTH files stay open, the zone
+// set is unchanged, so the whole transfer is ONE Kind 6 stroke with TWO snapshots -
+// fully undoable, paint travels, binds crossing the cut release.
+
+/**
+ * Move the selected patches (patch level, one source zone) into `dstZone`. Returns the
+ * moved patch count.
+ */
+uint zpMovePatchSelectionToZone(uint dstZone, std::string &msg)
+{
+	if (!g_PaintCtx.Core || !g_PaintCtx.Zones)
+	{
+		msg = "move: no session";
+		return 0;
+	}
+	// The selection: one object, like detach.
+	const void *object = NULL;
+	uint srcZone = 0;
+	std::set<uint> sel;
+	for (std::set<TPatchFaceId>::const_iterator it = g_PatchFaceSel.begin();
+	     it != g_PatchFaceSel.end(); ++it)
+	{
+		const SPaintZone *pz = zpFindPaintZone(it->first);
+		if (!pz || !pz->Editable || it->second >= pz->Patches.size())
+			continue;
+		if (object && (const void *)pz->Node != object)
+		{
+			msg = "move: select patches in one zone only";
+			return 0;
+		}
+		object = (const void *)pz->Node;
+		srcZone = it->first;
+		sel.insert(it->second);
+	}
+	if (!object || sel.empty())
+	{
+		msg = "move: no patches selected";
+		return 0;
+	}
+	SPaintZone *pzS = zpFindPaintZoneMut(srcZone);
+	SPaintZone *pzT = zpFindPaintZoneMut(dstZone);
+	if (!pzS || !pzT)
+	{
+		msg = "move: no such zone";
+		return 0;
+	}
+	if (!pzT->Editable)
+	{
+		msg = "move: destination is read-only";
+		return 0;
+	}
+	if (pzT->Node == pzS->Node)
+	{
+		msg = "move: source and destination are the same object";
+		return 0;
+	}
+	if (sel.size() >= pzS->Patches.size())
+	{
+		msg = "move: selection is the whole zone (attach the file instead)";
+		return 0;
+	}
+	double rel[12];
+	if (!zpRelObjectTM(*pzT, *pzS, rel, msg))
+	{
+		msg = "move: " + msg;
+		return 0;
+	}
+
+	std::string err;
+	if (!g_PaintCtx.Core->writeBack(err))
+	{
+		msg = "move: paint write-back failed: " + err;
+		return 0;
+	}
+
+	// Source streams (stored topology + paint, eval positions - the attach capture rule).
+	STopoTarget srcStream;
+	SPatchMesh srcPm;
+	SRPatchMesh srcRp;
+	SPmVertMapper srcMapper;
+	bool srcHaveMapper = false;
+	if (!resolveTopoTarget(pzS->Node, srcStream, err)
+	    || !decodeTopoTarget(srcStream, srcPm, srcRp, srcMapper, srcHaveMapper, err))
+	{
+		msg = "move: source: " + err;
+		return 0;
+	}
+	if (srcPm.Patches.size() != pzS->Patches.size()
+	    || srcPm.Verts.size() != pzS->Ep.Pm.Verts.size()
+	    || srcPm.Vecs.size() != pzS->Ep.Pm.Vecs.size())
+	{
+		msg = "move: source stream does not match the displayed topology";
+		return 0;
+	}
+	// Destination streams.
+	STopoTarget dstStream;
+	SPatchMesh dstPm;
+	SRPatchMesh dstRp;
+	SPmVertMapper dstMapper;
+	bool dstHaveMapper = false;
+	if (!resolveTopoTarget(pzT->Node, dstStream, err)
+	    || !decodeTopoTarget(dstStream, dstPm, dstRp, dstMapper, dstHaveMapper, err))
+	{
+		msg = "move: destination: " + err;
+		return 0;
+	}
+	if (dstPm.Patches.size() != pzT->Patches.size())
+	{
+		msg = "move: destination stream does not match the displayed topology";
+		return 0;
+	}
+
+	// Sub-mesh extract: eval positions onto a copy, then the complement deletes.
+	SPatchMesh subPm = srcPm;
+	SRPatchMesh subRp = srcRp;
+	{
+		for (size_t i = 0; i < subPm.Verts.size(); ++i)
+			memcpy(subPm.Verts[i].Pos, pzS->Ep.Pm.Verts[i].Pos, 12);
+		for (size_t i = 0; i < subPm.Vecs.size(); ++i)
+			memcpy(subPm.Vecs[i].Pos, pzS->Ep.Pm.Vecs[i].Pos, 12);
+		std::set<uint> complement;
+		for (uint p = 0; p < (uint)srcPm.Patches.size(); ++p)
+			if (!sel.count(p))
+				complement.insert(p);
+		STopoRemap remap;
+		if (!topoDeletePatches(subPm, subRp, NULL, complement, remap, err))
+		{
+			msg = "move: extract: " + err;
+			return 0;
+		}
+	}
+
+	// The two real passes, validated on copies first (all or nothing).
+	SPatchMesh srcPost = srcPm;
+	SRPatchMesh srcRpPost = srcRp;
+	SPmVertMapper srcMapperPost = srcMapper;
+	{
+		STopoRemap remap;
+		if (!topoDeletePatches(srcPost, srcRpPost, srcHaveMapper ? &srcMapperPost : NULL,
+		                       sel, remap, err))
+		{
+			msg = "move: " + err;
+			printf("%s\n", msg.c_str());
+			fflush(stdout);
+			return 0;
+		}
+	}
+	SPatchMesh dstPost = dstPm;
+	SRPatchMesh dstRpPost = dstRp;
+	if (!topoAppendMesh(dstPost, dstRpPost, subPm, subRp, rel, err))
+	{
+		msg = "move: " + err;
+		printf("%s\n", msg.c_str());
+		fflush(stdout);
+		return 0;
+	}
+
+	// Snapshots (PRE captured post-writeBack), then encode both files.
+	ZPPAINT::STopoSnapshot *snapSrc = new ZPPAINT::STopoSnapshot();
+	snapSrc->Zone = srcZone;
+	snapSrc->PmOld = srcPm;
+	snapSrc->RpOld = srcRp;
+	snapSrc->HaveMapper = srcHaveMapper && srcStream.MapperRaw;
+	if (snapSrc->HaveMapper)
+		snapSrc->MapperOld = srcStream.MapperRaw->Value;
+	ZPPAINT::STopoSnapshot *snapDst = new ZPPAINT::STopoSnapshot();
+	snapDst->Zone = dstZone;
+	snapDst->PmOld = dstPm;
+	snapDst->RpOld = dstRp;
+	snapDst->HaveMapper = dstHaveMapper && dstStream.MapperRaw;
+	if (snapDst->HaveMapper)
+		snapDst->MapperOld = dstStream.MapperRaw->Value;
+
+	// The anchor-cell rule, both sides: the transfer can move EITHER file's authored
+	// footprint origin (the destination grows, the source shrinks).
+	float srcOx = 0.f, srcOy = 0.f, dstOx = 0.f, dstOy = 0.f;
+	bool srcHaveOrigin = false, dstHaveOrigin = false;
+	SEditableFileInfo *srcFile = zpZoneEditableFile(srcZone);
+	SEditableFileInfo *dstFile = zpZoneEditableFile(dstZone);
+	{
+		SNodeTMCache tmCache;
+		if (srcFile)
+			srcHaveOrigin = zoneNodeAuthoredFootprintOrigin(pzS->Node, tmCache,
+			                                                g_SessionCellSize, srcOx, srcOy);
+		if (dstFile)
+			dstHaveOrigin = zoneNodeAuthoredFootprintOrigin(pzT->Node, tmCache,
+			                                                g_SessionCellSize, dstOx, dstOy);
+	}
+
+	if (!encodeTopoTarget(srcStream, srcPost, srcRpPost, srcMapperPost, srcHaveMapper, err))
+	{
+		msg = "move: source encode: " + err;
+		delete snapSrc;
+		delete snapDst;
+		return 0;
+	}
+	if (!encodeTopoTarget(dstStream, dstPost, dstRpPost, dstMapper, dstHaveMapper, err))
+	{
+		// Roll the source back so the transfer stays all-or-nothing.
+		std::string rerr;
+		if (!encodeTopoTarget(srcStream, srcPm, srcRp, srcMapper, srcHaveMapper, rerr))
+			fprintf(stderr, "ERROR: move: source rollback failed: %s\n", rerr.c_str());
+		else if (snapSrc->HaveMapper)
+			srcStream.MapperRaw->Value = snapSrc->MapperOld;
+		msg = "move: destination encode: " + err;
+		delete snapSrc;
+		delete snapDst;
+		return 0;
+	}
+	snapSrc->PmNew = srcPost;
+	snapSrc->RpNew = srcRpPost;
+	if (snapSrc->HaveMapper)
+		snapSrc->MapperNew = srcStream.MapperRaw->Value;
+	snapDst->PmNew = dstPost;
+	snapDst->RpNew = dstRpPost;
+	if (snapDst->HaveMapper)
+		snapDst->MapperNew = dstStream.MapperRaw->Value;
+	{
+		SNodeTMCache tmCache;
+		float ox2 = 0.f, oy2 = 0.f;
+		if (srcHaveOrigin && g_SessionCellSize > 0.f
+		    && zoneNodeAuthoredFootprintOrigin(pzS->Node, tmCache, g_SessionCellSize, ox2, oy2))
+		{
+			snapSrc->CellDX = (int)floor((ox2 - srcOx) / g_SessionCellSize + 0.5);
+			snapSrc->CellDY = (int)floor((oy2 - srcOy) / g_SessionCellSize + 0.5);
+			srcFile->CellX += snapSrc->CellDX;
+			srcFile->CellY += snapSrc->CellDY;
+		}
+		if (dstHaveOrigin && g_SessionCellSize > 0.f
+		    && zoneNodeAuthoredFootprintOrigin(pzT->Node, tmCache, g_SessionCellSize, ox2, oy2))
+		{
+			snapDst->CellDX = (int)floor((ox2 - dstOx) / g_SessionCellSize + 0.5);
+			snapDst->CellDY = (int)floor((oy2 - dstOy) / g_SessionCellSize + 0.5);
+			dstFile->CellX += snapDst->CellDX;
+			dstFile->CellY += snapDst->CellDY;
+		}
+	}
+
+	const uint moved = (uint)sel.size();
+	printf("move: %u patches, zone %u -> zone %u (%s -> %s target)\n", moved, srcZone,
+	       dstZone, srcStream.Local ? "modifier" : "base", dstStream.Local ? "modifier" : "base");
+	fflush(stdout);
+	ZPSCRIPT::record(NLMISC::toString("painter.movePatchSelectionToZone(%u)", dstZone));
+	g_PatchVertSel.clear();
+	g_PatchEdgeSel.clear();
+	g_PatchFaceSel.clear();
+	g_PatchTanSel.clear();
+	zpPatchGizmoInvalidate();
+	uint welds = 0;
+	if (!rebuildWorkingSet(err, welds, /* skipWriteBack= */ true, /* keepUndo= */ true))
+	{
+		msg = "move: session rebuild failed: " + err;
+		delete snapSrc;
+		delete snapDst;
+		return moved;
+	}
+	std::vector<ZPPAINT::STopoSnapshot *> snaps;
+	snaps.push_back(snapSrc);
+	snaps.push_back(snapDst);
+	g_PaintCtx.Core->opTopoStroke(snaps);
+	g_PaintCtx.Core->markGeomDirty(srcZone);
+	g_PaintCtx.Core->markGeomDirty(dstZone);
+	msg = NLMISC::toString("move: %u patch%s -> '%s'", moved, moved == 1 ? "" : "es",
+	                       zpZoneFileBasename(dstZone).c_str());
+	g_PropStatusMsg = msg;
+	return moved;
+}
+
+/**
+ * The editable file adjacent to the SELECTION's file in compass direction `dir`
+ * (0=N 1=NE 2=E 3=SE 4=S 5=SW 6=W 7=NW; board cells, +Y = north), and its zone.
+ * The candidates are the cells lining the source's footprint block on that side
+ * (the corner cell for diagonals).
+ */
+bool zpMoveDirTarget(int dir, uint &dstZoneOut)
+{
+	static const int kDx[8] = { 0, 1, 1, 1, 0, -1, -1, -1 };
+	static const int kDy[8] = { 1, 1, 0, -1, -1, -1, 0, 1 };
+	if (dir < 0 || dir > 7 || g_PatchFaceSel.empty())
+		return false;
+	const SEditableFileInfo *src = zpZoneEditableFile(g_PatchFaceSel.begin()->first);
+	if (!src)
+		return false;
+	std::vector<std::pair<int, int> > cand;
+	const int x0 = src->CellX, y0 = src->CellY;
+	const int w = src->CellsW > 0 ? src->CellsW : 1, h = src->CellsH > 0 ? src->CellsH : 1;
+	const int dx = kDx[dir], dy = kDy[dir];
+	if (dx != 0 && dy != 0)
+		cand.push_back(std::make_pair(dx > 0 ? x0 + w : x0 - 1, dy > 0 ? y0 + h : y0 - 1));
+	else if (dx != 0)
+		for (int y = y0; y < y0 + h; ++y)
+			cand.push_back(std::make_pair(dx > 0 ? x0 + w : x0 - 1, y));
+	else
+		for (int x = x0; x < x0 + w; ++x)
+			cand.push_back(std::make_pair(x, dy > 0 ? y0 + h : y0 - 1));
+	for (size_t f = 0; f < g_EditableFiles.size(); ++f)
+	{
+		const SEditableFileInfo &efi = g_EditableFiles[f];
+		if (&efi == src || !efi.Editable)
+			continue;
+		const int fw = efi.CellsW > 0 ? efi.CellsW : 1, fh = efi.CellsH > 0 ? efi.CellsH : 1;
+		for (size_t c = 0; c < cand.size(); ++c)
+		{
+			const int cx = cand[c].first, cy = cand[c].second;
+			if (cx < efi.CellX || cx >= efi.CellX + fw || cy < efi.CellY || cy >= efi.CellY + fh)
+				continue;
+			if ((int)efi.Mask.size() == fw * fh
+			    && !efi.Mask[(cy - efi.CellY) * fw + (cx - efi.CellX)])
+				continue;
+			// The file's editable zone.
+			for (size_t z = 0; z < efi.ZoneIds.size(); ++z)
+			{
+				const SPaintZone *pz = zpFindPaintZone(efi.ZoneIds[z]);
+				if (pz && pz->Editable)
+				{
+					dstZoneOut = efi.ZoneIds[z];
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+/** Bridge: the scene-menu compass click (dir 0..7). */
+void zpMoveToZoneDirClicked(int dir)
+{
+	uint dst = 0;
+	if (!zpMoveDirTarget(dir, dst))
+	{
+		g_PropStatusMsg = "move: no editable neighbor zone that way";
+		return;
+	}
+	std::string msg;
+	if (!zpMovePatchSelectionToZone(dst, msg))
+		g_PropStatusMsg = msg; // success sets the status line itself
+}
+
 /**
  * Undo/redo sink for Kind 6 records: re-encode the snapshot's matching side into the
  * target stream. The working-set rebuild happens at the zpUndo/zpRedo level, once per
@@ -1187,6 +1574,17 @@ void zpTopoRestore(const ZPPAINT::STopoSnapshot &snap, bool useOld)
 			f->CellY += useOld ? -snap.CellDY : snap.CellDY;
 		}
 	}
+}
+
+/** Panel Target toggle: arm/disarm the target-weld command mode. */
+void zpWeldTargetToggleClicked()
+{
+	g_WeldTargetArmed = !g_WeldTargetArmed;
+	if (!g_WeldTargetArmed)
+		zpWeldDragCancel();
+	g_PropStatusMsg = g_WeldTargetArmed
+		? "target weld armed: drag a vertex onto its target (right click leaves)"
+		: "target weld off";
 }
 
 /** Bridge wrappers (void-returning function pointers). */
