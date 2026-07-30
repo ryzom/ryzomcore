@@ -654,6 +654,8 @@ bool rebuildWorkingSet(std::string &err, uint &outWelds, bool skipWriteBack, boo
 
 	// Prop selection is session-local to the zone id set - clear on working-set change.
 	zpClearPropSelection();
+	// The held "centre of all objects" pivot describes geometry this rebuild may replace.
+	zpPivotNoteInteractionEnd();
 
 	// Snapshot previous zone ids for landscape remove
 	std::vector<uint> oldIds;

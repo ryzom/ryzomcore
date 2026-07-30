@@ -319,13 +319,16 @@ void CPaintMouseListener::operator()(const NLMISC::CEvent &event)
 					// scene context menu - patch mode has no eyedropper to spend the right
 					// button on, and this is where the user pivot gets placed. This must
 					// live INSIDE the mode block: an earlier spelling sat below it, after
-					// the unconditional return, and was dead.
+					// the unconditional return, and was dead. Live drags come BEFORE the
+					// disarm: arming only claims presses that land ON a vertex, so a gizmo
+					// drag can be live while armed - the cancel must reach the drag, not
+					// spend itself disarming an idle mode under it.
 					if (zpWeldDragActive())
 						zpWeldDragCancel();
-					else if (g_WeldTargetArmed)
-						zpWeldTargetToggleClicked();
 					else if (zpPatchGizmoDragging())
 						zpPatchGizmoCancelDrag();
+					else if (g_WeldTargetArmed)
+						zpWeldTargetToggleClicked();
 					else
 						zpOpenSceneMenu();
 				}
@@ -457,7 +460,10 @@ void CPaintMouseListener::operator()(const NLMISC::CEvent &event)
 				zpPatchGizmoEndDrag();
 				return;
 			}
-			if (mouse->Button == NLMISC::leftButton && Pressed)
+			// Mask test, not equality: NeL folds the modifier keys into Button, so a release
+			// with Ctrl or Shift held would fail an exact compare and leave the stroke open -
+			// the next press would then stack a second stroke onto it.
+			if ((mouse->Button & NLMISC::leftButton) && Pressed)
 			{
 				Pressed = false;
 				Core->endStroke();
@@ -1589,12 +1595,15 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 				// step ESC mid-drag would quit the tool out from under the drag.
 				if (udriver->AsyncListener.isKeyPushed(NLMISC::KeyESCAPE))
 				{
+					// Live drags before the idle disarm, same order as the right-click chain:
+					// a gizmo drag can be live while target weld is armed, and the cancel must
+					// reach the drag first.
 					if (zpWeldDragActive())
 						zpWeldDragCancel();
-					else if (g_WeldTargetArmed)
-						zpWeldTargetToggleClicked();
 					else if (zpPatchGizmoDragging())
 						zpPatchGizmoCancelDrag();
+					else if (g_WeldTargetArmed)
+						zpWeldTargetToggleClicked();
 					else if (ZPUI::isSessionBoardVisible())
 						ZPUI::setSessionBoardVisible(false);
 					else

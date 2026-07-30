@@ -692,8 +692,6 @@ void zpPatchGizmoUpdateDrag(NL3D::CCamera *camera, const NL3D::CViewport &vp,
 void zpPatchGizmoEndDrag();
 void zpPatchGizmoCancelDrag();
 bool zpPatchGizmoDragging();
-/** Preview offset for one vertex: the live delta if it is selected and free, else zero. */
-const NLMISC::CVector &zpPatchVertDragOffset(uint zoneId, uint16 vertIdx);
 
 /**
  * Commit a world-space move of the current vertex selection into the .max. Returns the number

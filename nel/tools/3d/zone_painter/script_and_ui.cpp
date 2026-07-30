@@ -586,6 +586,11 @@ void zpSelectMode(int mode)
 	if (!g_PaintCtx.Active || !g_PaintCtx.Paint) return;
 	if (mode < 0) mode = 0;
 	if (mode > CPaintMouseListener::ModePatch) mode = CPaintMouseListener::ModePatch;
+	// A live drag cannot survive its mode: the selection it targets is cleared below, yet the
+	// release would still commit (and record) the transform. The key table stays live during a
+	// drag, so this is reachable from the keyboard mid-drag. Both cancels are no-ops when idle.
+	zpPatchGizmoCancelDrag();
+	zpWeldDragCancel();
 	g_PaintCtx.Paint->Mode = mode;
 	// Welds serve painting and actively hide patch edits (see buildDisplayZone), so the weld
 	// state follows the mode. Only on a CHANGE - the rebuild is cheap but not free, and
@@ -654,6 +659,10 @@ void zpSelectSubObject(int level)
 	if (level >= CPaintMouseListener::SubCount) level = CPaintMouseListener::SubCount - 1;
 	if (level != g_PaintCtx.Paint->SubObj)
 	{
+		// Same rule as the mode switch: a drag in flight targets the outgoing level's
+		// selection, so it cannot survive the switch that clears it.
+		zpPatchGizmoCancelDrag();
+		zpWeldDragCancel();
 		// A selection made at one level means nothing at another, and carrying it over would
 		// leave a gizmo sitting on things the new level cannot address.
 		g_PatchVertSel.clear();

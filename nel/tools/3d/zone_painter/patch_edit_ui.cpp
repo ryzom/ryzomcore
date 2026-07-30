@@ -234,6 +234,23 @@ NLMISC::CVector zpVertOffset(const SPaintZone &pz, uint16 vi)
 	return kNoOffset;
 }
 
+/** Is this corner selected through ANY node of the object `pz` shows? The ride rule keys on
+ *  the OBJECT vertex: a corner dragged through a sibling node still carries its handles in
+ *  every node's cage, exactly as the commit will move them. */
+static bool zpCornerSelectedAnyNode(const SPaintZone &pz, uint16 vert)
+{
+	if (g_PatchVertSel.count(TPatchVertId(pz.ZoneId, vert)))
+		return true;
+	if (!g_PaintCtx.Zones)
+		return false;
+	const std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
+	for (uint z = 0; z < zones.size(); ++z)
+		if (zones[z].Node == pz.Node && zones[z].ZoneId != pz.ZoneId
+		    && g_PatchVertSel.count(TPatchVertId(zones[z].ZoneId, vert)))
+			return true;
+	return false;
+}
+
 /**
  * Preview offset for a HANDLE.
  *
@@ -244,8 +261,13 @@ NLMISC::CVector zpVertOffset(const SPaintZone &pz, uint16 vi)
 NLMISC::CVector zpTanOffset(const SPaintZone &pz, uint16 vecIdx)
 {
 	const uint16 owner = zpTangentOwner(pz, vecIdx);
-	if (!zpHandleMode() && owner != (uint16)0xffff
-	    && g_PatchVertSel.count(TPatchVertId(pz.ZoneId, owner)))
+	// A handle of a BOUND corner is derived along with it: the commit refuses to write it
+	// (the same rule the move's skippedBound filter applies), so previewing a motion here
+	// would draw a surface the release snaps back from.
+	if (owner != (uint16)0xffff && owner < pz.Ep.Rp.Verts.size()
+	    && pz.Ep.Rp.Verts[owner].Binded)
+		return kNoOffset;
+	if (!zpHandleMode() && owner != (uint16)0xffff && zpCornerSelectedAnyNode(pz, owner))
 		return zpVertOffset(pz, owner);
 	if (!s_Dragging || !g_PaintCtx.Zones)
 		return kNoOffset;
@@ -1240,6 +1262,27 @@ void zpWeldDragUpdate(float mx, float my)
 	s_WeldMy = my;
 }
 
+/** Would releasing over (zone, vert) weld? Shared by the release and the candidate diamond,
+ *  so the overlay never marks a target the release would refuse. Same OBJECT only (a pick
+ *  through a sibling node resolves to the same indices), and never the source vertex itself. */
+static bool zpWeldDragTargetOk(uint zone, uint16 vert)
+{
+	if (vert == s_WeldSrcVert)
+	{
+		// Same index through the same object is the same vertex; through another object it
+		// is a foreign zone and refused below anyway.
+		const SPaintZone *a = zpFindPaintZone(zone);
+		const SPaintZone *b = zpFindPaintZone(s_WeldSrcZone);
+		if (a && b && a->Node == b->Node)
+			return false;
+	}
+	if (zone == s_WeldSrcZone)
+		return true;
+	const SPaintZone *a = zpFindPaintZone(zone);
+	const SPaintZone *b = zpFindPaintZone(s_WeldSrcZone);
+	return a && b && a->Node == b->Node; // another viewpoint on the same object: indices agree
+}
+
 /** Release: weld the source INTO the vertex under the pointer (same object only). */
 void zpWeldDragFinish(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, float my)
 {
@@ -1253,21 +1296,14 @@ void zpWeldDragFinish(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, fl
 		g_PropStatusMsg = "target weld: released over nothing";
 		return;
 	}
-	if (zone != s_WeldSrcZone || vert == s_WeldSrcVert)
+	if (!zpWeldDragTargetOk(zone, vert))
 	{
 		const SPaintZone *a = zpFindPaintZone(zone);
 		const SPaintZone *b = zpFindPaintZone(s_WeldSrcZone);
-		if (vert == s_WeldSrcVert && zone == s_WeldSrcZone)
-			g_PropStatusMsg = "target weld: released on the same vertex";
-		else if (a && b && a->Node == b->Node)
-			zone = s_WeldSrcZone; // another viewpoint on the same object: indices agree
-		else
-		{
-			g_PropStatusMsg = "target weld: target is in another zone";
-			return;
-		}
-		if (vert == s_WeldSrcVert)
-			return;
+		g_PropStatusMsg = (a && b && a->Node == b->Node)
+			? "target weld: released on the same vertex"
+			: "target weld: target is in another zone";
+		return;
 	}
 	zpWeldVertexInto(s_WeldSrcZone, s_WeldSrcVert, vert);
 }
@@ -1316,11 +1352,12 @@ void zpDrawWeldDrag(NL3D::IDriver *driver, NL3D::CCamera *camera)
 		return;
 	const NLMISC::CRGBA col(255, 160, 60, 255);
 	NL3D::CDRU::drawLine(p.x, p.y, s_WeldMx, s_WeldMy, *driver, col, NL3D::CViewport());
-	// A small diamond on the candidate target under the pointer.
+	// A small diamond on the candidate target under the pointer - only where the release
+	// would actually weld, so the overlay never promises what the drop refuses.
 	uint zone = 0;
 	uint16 vert = 0;
 	if (zpPickPatchVertex(camera, driver, s_WeldMx, s_WeldMy, zone, vert)
-	    && !(zone == s_WeldSrcZone && vert == s_WeldSrcVert))
+	    && zpWeldDragTargetOk(zone, vert))
 	{
 		float dst[3];
 		if (zpPatchVertWorld(zone, vert, dst))

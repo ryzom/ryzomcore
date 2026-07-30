@@ -353,15 +353,6 @@ static bool zpRayPlane(const NLMISC::CVector &pos, const NLMISC::CVector &dir,
 	return true;
 }
 
-const NLMISC::CVector &zpPatchVertDragOffset(uint zoneId, uint16 vertIdx)
-{
-	if (!s_Dragging)
-		return kNoOffset;
-	if (!g_PatchVertSel.count(TPatchVertId(zoneId, vertIdx)))
-		return kNoOffset;
-	return s_DragDelta;
-}
-
 bool zpPatchSelCentroid(NLMISC::CVector &out)
 {
 	if ((g_PatchVertSel.empty() && g_PatchTanSel.empty()) || !g_PaintCtx.Zones)
@@ -565,6 +556,9 @@ void zpSetXformKind(int kind)
 	if (kind > ZPXF_Scale) kind = ZPXF_Scale;
 	if (kind == g_XformKind)
 		return;
+	// The key table stays live during a drag, so W/E/R can arrive mid-drag - and the drawn
+	// gizmo would follow the new kind while the drag math kept the old one. Cancel first.
+	zpPatchGizmoCancelDrag();
 	g_XformKind = kind;
 	zpPatchGizmoInvalidate();
 	ZPSCRIPT::record(NLMISC::toString("painter.setXformKind(%d)", kind));
@@ -970,6 +964,10 @@ void zpGeomVertChanged(uint zoneId, uint16 elemIdx, int elem, const float *objDe
 {
 	if (!g_PaintCtx.Zones)
 		return;
+	// Geometry moved, so the held "centre of all objects" no longer describes it. The cache
+	// exists to hold still DURING one interaction; a commit, an undo or a scripted transform
+	// ends that interaction as surely as a drag release does.
+	s_AllObjValid = false;
 	std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
 	// The write landed in an OBJECT, so every node showing that object moved - not just the
 	// one the edit was addressed to. Sibling nodes would otherwise draw a cage over geometry
