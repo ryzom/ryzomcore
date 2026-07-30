@@ -866,6 +866,7 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 		paintBridge.patchWeld = zpPatchWeldClicked;
 		paintBridge.patchAddQuad = zpPatchAddQuadClicked;
 		paintBridge.patchDetach = zpPatchDetachClicked;
+		paintBridge.patchElement = zpPatchElementClicked;
 		paintBridge.moveToZoneDir = zpMoveToZoneDirClicked;
 		paintBridge.weldTargetToggle = zpWeldTargetToggleClicked;
 		paintBridge.patchWeldThreshold = zpPatchWeldThresholdClicked;

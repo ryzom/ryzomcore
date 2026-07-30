@@ -2500,6 +2500,83 @@ bool zpPatchEdgeCornerPair(uint zoneId, uint patchIdx, uint edgeSlot, uint &aOut
 	return true;
 }
 
+/**
+ * Expand the face selection to whole ELEMENTS: the fully-connected patch components
+ * (shared-VERTEX connectivity - the same rule the detach-to-element boundary splits, so
+ * an island detached a moment ago is exactly one element). "Object" selection within a
+ * zone: one click on any patch of an island plus Element grabs the island.
+ */
+uint zpExpandSelectionToElement()
+{
+	if (!g_PaintCtx.Zones || g_PatchFaceSel.empty())
+	{
+		g_PropStatusMsg = "element: no patches selected";
+		return 0;
+	}
+	// Per zone in the selection: flood over shared vertices from the selected seeds.
+	std::set<uint> zones;
+	for (std::set<TPatchFaceId>::const_iterator it = g_PatchFaceSel.begin();
+	     it != g_PatchFaceSel.end(); ++it)
+		zones.insert(it->first);
+	uint added = 0;
+	for (std::set<uint>::const_iterator zit = zones.begin(); zit != zones.end(); ++zit)
+	{
+		const SPaintZone *pz = zpFindPaintZone(*zit);
+		if (!pz || !pz->Editable)
+			continue;
+		const PIPELINE::MAX::NELPATCH::SPatchMesh &pm = pz->Ep.Pm;
+		// vertex -> patches using it as a corner
+		std::map<sint32, std::vector<uint> > vertPatches;
+		for (uint p = 0; p < (uint)pm.Patches.size(); ++p)
+			for (int k = 0; k < 4; ++k)
+				if (pm.Patches[p].V[k] >= 0)
+					vertPatches[pm.Patches[p].V[k]].push_back(p);
+		std::vector<uint8> inSel(pm.Patches.size(), 0);
+		std::vector<uint> queue;
+		for (std::set<TPatchFaceId>::const_iterator it = g_PatchFaceSel.begin();
+		     it != g_PatchFaceSel.end(); ++it)
+			if (it->first == *zit && it->second < pm.Patches.size() && !inSel[it->second])
+			{
+				inSel[it->second] = 1;
+				queue.push_back(it->second);
+			}
+		while (!queue.empty())
+		{
+			const uint p = queue.back();
+			queue.pop_back();
+			for (int k = 0; k < 4; ++k)
+			{
+				const sint32 v = pm.Patches[p].V[k];
+				if (v < 0)
+					continue;
+				const std::vector<uint> &nb = vertPatches[v];
+				for (size_t i = 0; i < nb.size(); ++i)
+					if (!inSel[nb[i]])
+					{
+						inSel[nb[i]] = 1;
+						queue.push_back(nb[i]);
+					}
+			}
+		}
+		for (uint p = 0; p < (uint)inSel.size(); ++p)
+			if (inSel[p] && g_PatchFaceSel.insert(TPatchFaceId(*zit, (uint16)p)).second)
+				++added;
+	}
+	if (added)
+	{
+		zpRebuildVertSelFromSubObject();
+		zpPatchGizmoInvalidate();
+		g_PropStatusMsg = NLMISC::toString("element: %u patch%s joined the selection",
+		                                   added, added == 1 ? "" : "es");
+	}
+	else
+		g_PropStatusMsg = "element: selection already covers its elements";
+	ZPSCRIPT::record("painter.expandSelectionToElement()");
+	return added;
+}
+
+void zpPatchElementClicked() { zpExpandSelectionToElement(); }
+
 /** The vec index at ring slot 0..7 of a patch (lets a script name a tangent handle the
  *  way patchTangentPos wants it, without knowing allocation order). */
 bool zpPatchVecIndex(uint zoneId, uint patchIdx, uint ringSlot, uint &vecOut)

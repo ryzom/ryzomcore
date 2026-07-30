@@ -136,6 +136,7 @@ struct SPaintUIBridge
 	void (*patchWeld)();
 	void (*patchAddQuad)();
 	void (*patchDetach)();
+	void (*patchElement)(); // expand face selection to whole elements
 	void (*moveToZoneDir)(int dir); // scene-menu compass, 0=N..7=NW
 	void (*weldTargetToggle)(); // arm/disarm the target-weld drag mode
 	void (*patchWeldThreshold)(float distance); // weld dialog OK
@@ -230,7 +231,7 @@ struct SPaintUIBridge
 		  propToggleUseBBox(NULL),
 		  patchBind(NULL), patchUnbind(NULL), patchNoSmooth(NULL), patchDelete(NULL),
 		  patchTurnCcw(NULL), patchTurnCw(NULL), patchSubdivide(NULL), patchWeld(NULL), patchAddQuad(NULL),
-		  patchDetach(NULL), moveToZoneDir(NULL), weldTargetToggle(NULL),
+		  patchDetach(NULL), patchElement(NULL), moveToZoneDir(NULL), weldTargetToggle(NULL),
 		  patchWeldThreshold(NULL),
 		  setTileSize256(NULL), setHardnessAbs(NULL), setOpacityAbs(NULL),
 		  setColorRadiusAbs(NULL),

@@ -781,6 +781,10 @@
 			onclick_l="zp_sub_object" params_l="2" hardtext="EDGE" />
 		<ctrl style="text_button_toggle" id="lvl_patch" posparent="lvl_edge" posref="MR ML" x="4" y="0"
 			onclick_l="zp_sub_object" params_l="3" hardtext="PATCH" />
+		<!-- Element: expand the face selection to whole islands (a selection helper, not a
+		     level - the gap and non-toggle face keep it apart from the level toolbar). -->
+		<ctrl style="text_button_16" id="btn_element" posparent="lvl_patch" posref="MR ML" x="12" y="0"
+			onclick_l="zp_patch_element" params_l="" hardtext="Elem" />
 		<!-- Selection readout (legacy right-aligned line; left here to match the column) -->
 		<view type="text" id="sel_info" posparent="lvl_vert" posref="BL TL" x="0" y="-4" fontsize="9" shadow="true"
 			global_color="false" color="200 200 210 220" hardtext="Object Level" />

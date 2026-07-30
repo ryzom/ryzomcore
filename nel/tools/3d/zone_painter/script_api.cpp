@@ -99,7 +99,9 @@ uint zpWeldVertexInto(uint zoneId, uint srcVert, uint dstVert);
 bool zpWeldDragAt(float x0, float y0, float x1, float y1);
 bool zpPatchVertScreen(uint zoneId, uint vertIdx, float &sxOut, float &syOut);
 uint zpAddQuadPatchSelection();
-uint zpDetachPatchSelection(const std::string &nameIn);
+uint zpDetachPatchSelection();
+uint zpDetachToFile(const std::string &nameIn);
+uint zpExpandSelectionToElement();
 uint zpAttachZone(uint targetZone, uint srcZone, std::string &msg);
 uint zpMovePatchSelectionToZone(uint dstZone, std::string &msg);
 bool zpMoveDirTarget(int dir, uint &dstZoneOut);
@@ -1115,12 +1117,30 @@ static int lAddQuadPatchSelection(CLuaState &ls)
 	return 1;
 }
 
-static int lDetachPatchSelection(CLuaState &ls) // ([name]) -> detached count
+static int lDetachPatchSelection(CLuaState &ls) // () -> detached count (element split)
+{
+	const uint n = zpDetachPatchSelection();
+	printf("detachPatchSelection: %u detached\n", n);
+	fflush(stdout);
+	ls.push((double)n);
+	return 1;
+}
+
+static int lDetachToFile(CLuaState &ls) // ([name]) -> detached count (SHELVED, script-only)
 {
 	std::string name;
 	argString(ls, 1, name); // optional; empty = auto "<source>-det"
-	const uint n = zpDetachPatchSelection(name);
-	printf("detachPatchSelection: %u detached\n", n);
+	const uint n = zpDetachToFile(name);
+	printf("detachToFile: %u detached\n", n);
+	fflush(stdout);
+	ls.push((double)n);
+	return 1;
+}
+
+static int lExpandSelectionToElement(CLuaState &ls) // () -> patches added
+{
+	const uint n = zpExpandSelectionToElement();
+	printf("expandSelectionToElement: %u added\n", n);
 	fflush(stdout);
 	ls.push((double)n);
 	return 1;
@@ -1489,6 +1509,8 @@ static const char *kBootstrap =
 	"  vertexScreenPos = __zp_vertexScreenPos,\n"
 	"  addQuadPatchSelection = __zp_addQuadPatchSelection,\n"
 	"  detachPatchSelection = __zp_detachPatchSelection,\n"
+	"  detachToFile = __zp_detachToFile,\n"
+	"  expandSelectionToElement = __zp_expandSelectionToElement,\n"
 	"  attachZone = __zp_attachZone,\n"
 	"  movePatchSelectionToZone = __zp_movePatchSelectionToZone,\n"
 	"  moveDirTarget = __zp_moveDirTarget,\n"
@@ -1594,6 +1616,8 @@ bool ensureLua()
 	ls->registerFunc("__zp_vertexScreenPos", lVertexScreenPos);
 	ls->registerFunc("__zp_addQuadPatchSelection", lAddQuadPatchSelection);
 	ls->registerFunc("__zp_detachPatchSelection", lDetachPatchSelection);
+	ls->registerFunc("__zp_detachToFile", lDetachToFile);
+	ls->registerFunc("__zp_expandSelectionToElement", lExpandSelectionToElement);
 	ls->registerFunc("__zp_attachZone", lAttachZone);
 	ls->registerFunc("__zp_movePatchSelectionToZone", lMovePatchSelectionToZone);
 	ls->registerFunc("__zp_moveDirTarget", lMoveDirTarget);

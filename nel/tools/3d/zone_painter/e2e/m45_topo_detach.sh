@@ -50,11 +50,11 @@ painter.setMode(4)
 painter.setSubObject(3)
 painter.selectPatchFace(0, 5, 1)
 painter.selectPatchFace(0, 6, 1)
-assert(painter.detachPatchSelection("half") == 2, "detach failed")
+assert(painter.detachToFile("half") == 2, "detach failed")
 assert(painter.patchCount(0) == c0 - 2, "source count")
 -- second detach: same name must collision-bump
 painter.selectPatchFace(0, 3, 1)
-assert(painter.detachPatchSelection("half") == 1, "second detach failed")
+assert(painter.detachToFile("half") == 1, "second detach failed")
 assert(painter.patchCount(0) == c0 - 3, "source count 2")
 print("M45-1 OK count=" .. (c0 - 3))
 EOF
@@ -90,7 +90,7 @@ painter.setMode(4)
 painter.setSubObject(3)
 painter.selectPatchFace(0, 5, 1)
 painter.selectPatchFace(0, 6, 1)
-assert(painter.detachPatchSelection("cut") == 2)
+assert(painter.detachToFile("cut") == 2)
 print("M45-2a OK")
 EOF
 cat > "$OUT/del.lua" <<'EOF'
@@ -119,7 +119,7 @@ painter.setMode(4)
 painter.setSubObject(3)
 local c0 = painter.patchCount(0)
 painter.selectPatchFace(0, c0 - 1, 1)
-assert(painter.detachPatchSelection("undopart") == 1)
+assert(painter.detachToFile("undopart") == 1)
 painter.undo() -- the detach's source-side delete
 painter.undo() -- the marker
 assert(painter.patchCount(0) == c0, "undo count")
@@ -153,9 +153,9 @@ cat > "$OUT/refuse.lua" <<'EOF'
 painter.setMode(4)
 painter.setSubObject(3)
 local c0 = painter.patchCount(0)
-assert(painter.detachPatchSelection("nope") == 0, "empty selection detached")
+assert(painter.detachToFile("nope") == 0, "empty selection detached")
 for p = 0, c0 - 1 do painter.selectPatchFace(0, p, 1) end
-assert(painter.detachPatchSelection("nope") == 0, "whole zone detached")
+assert(painter.detachToFile("nope") == 0, "whole zone detached")
 assert(painter.patchCount(0) == c0)
 print("M45-4 OK")
 EOF

@@ -785,6 +785,18 @@ public:
 };
 REGISTER_ACTION_HANDLER(CAHZpSceneMenu, "zp_scene_menu");
 
+class CAHZpPatchElement : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchElement) b->patchElement();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchElement, "zp_patch_element");
+
 class CAHZpPatchWeldTarget : public IActionHandler
 {
 public:
@@ -2515,6 +2527,8 @@ void CEditorUI::syncPanelFromBridge()
 		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_add_quad").c_str()))
 			btn->setFrozen(b->SubObj != 2 || !b->PatchSelEdges);
 		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_detach").c_str()))
+			btn->setFrozen(b->SubObj != 3 || !b->PatchSelFaces);
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_element").c_str()))
 			btn->setFrozen(b->SubObj != 3 || !b->PatchSelFaces);
 		// Scene-menu compass: a direction is live when an editable board neighbor sits there
 		// (patch level with a face selection; the mask is empty otherwise).

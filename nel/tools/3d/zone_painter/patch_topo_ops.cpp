@@ -553,6 +553,14 @@ static bool zpXformAddQuad(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper * /* m
 	return topoAddQuads(pm, rp, sel, err);
 }
 
+static bool zpXformDetachElement(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper * /* mapper */,
+                                 const std::set<uint> &sel, std::string &err)
+{
+	// Pure addition again (duplicated boundary): input mapper slots keep, new outputs
+	// stay unmapped, nothing dies.
+	return topoDetachElements(pm, rp, sel, err);
+}
+
 /**
  * Delete the selected patches. Paint and bind records travel with the survivors
  * (topoDeletePatches); everything else is the shared topo-op skeleton.
@@ -693,11 +701,23 @@ std::string zpSanitizeBrickName(const std::string &name)
 } /* anonymous namespace */
 
 /**
- * Detach the selected patches into a new brick file next to the source (patch level, one
- * zone at a time). `nameIn` empty = auto ("<source>-det", collision-bumped). Returns the
- * detached patch count; the resolved file name lands in the status line.
+ * Detach the selection as its own ISLAND inside the same zone (detach-to-element; patch
+ * level). The boundary splits - duplicated shared vertices and edges, copied curves - so
+ * nothing moves and the zone still exports as one node; grab the island afterwards with
+ * the Element expand. Kaetemi's reframing of legacy detach for the brick world.
  */
-uint zpDetachPatchSelection(const std::string &nameIn)
+uint zpDetachPatchSelection()
+{
+	return zpRunTopoOp("detach", "painter.detachPatchSelection()", zpXformDetachElement);
+}
+
+/**
+ * Detach the selected patches into a NEW BRICK FILE next to the source (patch level, one
+ * zone at a time; SHELVED off the panel - script-only until the fresh-zone-file-creation
+ * story is designed; splitting a multi-cell zone is its use). `nameIn` empty = auto
+ * ("<source>-det", collision-bumped). Returns the detached patch count.
+ */
+uint zpDetachToFile(const std::string &nameIn)
 {
 	if (!g_PaintCtx.Core || !g_PaintCtx.Zones)
 		return 0;
@@ -877,7 +897,7 @@ uint zpDetachPatchSelection(const std::string &nameIn)
 	printf("detach: zone %u, %u patches -> %s (%s target)\n", zoneId, (uint)sel.size(),
 	       target.c_str(), targetStream.Local ? "modifier" : "base");
 	fflush(stdout);
-	ZPSCRIPT::record("painter.detachPatchSelection(\"" + name + "\")");
+	ZPSCRIPT::record("painter.detachToFile(\"" + name + "\")");
 	g_PatchVertSel.clear();
 	g_PatchEdgeSel.clear();
 	g_PatchFaceSel.clear();
@@ -899,7 +919,7 @@ uint zpDetachPatchSelection(const std::string &nameIn)
 }
 
 /** Bridge wrapper: panel Detach button (auto name). */
-void zpPatchDetachClicked() { zpDetachPatchSelection(std::string()); }
+void zpPatchDetachClicked() { zpDetachPatchSelection(); }
 
 // ---------------------------------------------------------------------------------------------
 // Attach: merge another open editable zone's patches into this one.

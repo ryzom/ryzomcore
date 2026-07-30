@@ -784,11 +784,16 @@ bool zpPatchVertScreen(uint zoneId, uint vertIdx, float &sxOut, float &syOut);
 /** Grow a quad from each selected open edge (legacy Add Quad). Undoable. */
 uint zpAddQuadPatchSelection();
 void zpPatchAddQuadClicked();
-/** Detach the selection into a new brick file next to the source (one zone at a time;
- *  empty name = auto-bumped "<source>-det"). Source-side delete is undoable; the new
- *  file stays on disk. */
-uint zpDetachPatchSelection(const std::string &nameIn);
+/** Detach the selection as its own ISLAND inside the same zone (detach-to-element:
+ *  boundary splits, nothing moves, still one exported node). Undoable. */
+uint zpDetachPatchSelection();
 void zpPatchDetachClicked();
+/** SHELVED off the panel: detach the selection into a new brick file (script-only until
+ *  fresh-zone-file creation is designed; empty name = auto-bumped "<source>-det"). */
+uint zpDetachToFile(const std::string &nameIn);
+/** Expand the face selection to whole elements (shared-vertex connected components). */
+uint zpExpandSelectionToElement();
+void zpPatchElementClicked();
 /** Merge zone srcZone into targetZone (source file saved and closed; the attach lands as
  *  the fresh undo stack's first stroke - undo rolls the target back). */
 uint zpAttachZone(uint targetZone, uint srcZone, std::string &msg);

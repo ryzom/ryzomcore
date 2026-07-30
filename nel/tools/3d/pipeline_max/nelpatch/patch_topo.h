@@ -190,6 +190,23 @@ bool topoAddQuads(SPatchMesh &pm, SRPatchMesh &rp,
                   const std::set<uint> &edges, std::string &err);
 
 /**
+ * Detach the listed patches as their own ISLAND inside the same mesh
+ * (patch_topo_detach.cpp) - detach-to-element. Every vertex and edge shared between the
+ * selection and the rest splits: the original keeps the complement side, the selection
+ * rides duplicates (same positions, copied tangent curves), so both sides render
+ * identically until one is edited - nothing moves, nothing dies, nothing renumbers, and
+ * the zone still exports as one node (the ligo brick export refuses multi-node files,
+ * which is why detach never creates a scene node here). Binds whose anchor and target
+ * end up on different sides release whole (the unbind group rule). Paint is untouched.
+ * Map-channel meshes are fine: patch count and TVPatch rows do not change.
+ *
+ * Refuses: reconstructed (Max 3) streams, hooks, the whole-mesh selection, and a
+ * selection that is already a separate element (no shared vertex).
+ */
+bool topoDetachElements(SPatchMesh &pm, SRPatchMesh &rp,
+                        const std::set<uint> &sel, std::string &err);
+
+/**
  * Append `src`/`srcRp` onto `pm`/`rp` (patch_topo_attach.cpp) - the attach merge. Every
  * source element is copied with its cross references shifted by the target's element
  * counts and its positions transformed through `relTM` (row-major 3x4, source object
