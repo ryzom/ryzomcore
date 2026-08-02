@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-08-02 — 🐛 Fix another MSVC operator< ambiguity in action_handler_help.cpp
+
+Same family of issue as the `CHARACTERISTICS` loop fix below: `for (skillNb = 0;
+skillNb < SKILLS::NUM_SKILLS; ++skillNb)` in `action_handler_help.cpp`
+(comparing `uint` against the `SKILLS::ESkills` enum) is ambiguous under MSVC
+19.20 (encountered bringing up the Windows/MSVC cross-build) but not GCC.
+Cast the loop bound to `uint` explicitly to remove the ambiguity.
+
+Commit: fix: resolve another MSVC-ambiguous operator< comparison (action_handler_help.cpp)
+
 ## 2026-08-02 — 🐛 Fix ambiguous operator< on MSVC in CINCarac serialization loops
 
 `CInCarac::serialBitMemStream()` (and its two neighbours) in `msg_client_server.h`

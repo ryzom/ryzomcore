@@ -796,7 +796,7 @@ class CHandlerOpenTitleHelp : public IActionHandler
 					for (uint j = 0; j < pTU->SkillsNeeded[i].size(); ++j)
 					{
 						uint skillNb;
-						for (skillNb = 0; skillNb < SKILLS::NUM_SKILLS; ++skillNb)
+						for (skillNb = 0; skillNb < (uint)SKILLS::NUM_SKILLS; ++skillNb)
 							if (pTU->SkillsNeeded[i][j] == SKILLS::toString((SKILLS::ESkills)skillNb))
 								break;
 
