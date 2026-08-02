@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-08-02 — 🐛 Fix the same MSVC ambiguity for !=, ==, <=, >, >= against NUM_* enum bounds too
+
+Follow-up to the `operator<`-only sweep below: the exact same MSVC
+ambiguity (against unrelated `operator!=`/`operator==` overloads reachable
+at that scope) also hits `!=`, `==`, `<=`, `>`, `>=` comparisons against the
+same `NUM_*` enum bounds, in both operand orders (`x != SKILLS::NUM_SKILLS`
+and `SKILLS::NUM_SKILLS == x`). Searched `ryzom/client`, `ryzom/common` and
+`nel` for every remaining comparison operator against any of the same
+7 enum bounds and cast the enum side explicitly, in both directions.
+
+Commit: fix: resolve remaining MSVC-ambiguous !=/==/<=/>/>= comparisons against NUM_* enum bounds
+
 ## 2026-08-02 — 🐛 Fix MSVC operator< ambiguity for every NUM_* enum-bound loop/comparison in the client
 
 Same family of issue as the two fixes below, but instead of patching one

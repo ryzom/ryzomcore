@@ -100,7 +100,7 @@ public:
 		}
 		void	reset()
 		{
-			nlctassert(SCORES::NUM_SCORES==4);
+			nlctassert((int)SCORES::NUM_SCORES==4);
 			Score[0]= Score[1]= Score[2]= Score[3]= 0;
 		}
 	};

@@ -800,7 +800,7 @@ class CHandlerOpenTitleHelp : public IActionHandler
 							if (pTU->SkillsNeeded[i][j] == SKILLS::toString((SKILLS::ESkills)skillNb))
 								break;
 
-						if (skillNb != SKILLS::NUM_SKILLS)
+						if (skillNb != (int)SKILLS::NUM_SKILLS)
 						{
 							sSkillsNeeded += CStringManagerClient::getSkillLocalizedName((SKILLS::ESkills)skillNb);
 							sSkillsNeeded += "  (" + toString(pTU->SkillsLevelNeeded[i][j]) + ")";
