@@ -549,7 +549,7 @@ void CItemSheet::build(const NLGEORGES::UFormElm &item)
 		Mp.ItemPartBF= 0;
 		MpItemParts.clear();
 		// check if ok for each
-		for(i=0;i<RM_FABER_TYPE::NUM_FABER_TYPE ;i++)
+		for(i=0;i< (int)RM_FABER_TYPE::NUM_FABER_TYPE ;i++)
 		{
 			uint32	durability= 0;
 			string	sheetEntry= RM_FABER_TYPE::faberTypeToSheetEntry((RM_FABER_TYPE::TRMFType)i);
@@ -846,7 +846,7 @@ bool	CItemSheet::canBuildSomeItemPart() const
 // ***************************************************************************
 bool	CItemSheet::canBuildItemPart(RM_FABER_TYPE::TRMFType e) const
 {
-	if(e<RM_FABER_TYPE::NUM_FABER_TYPE)
+	if(e< (int)RM_FABER_TYPE::NUM_FABER_TYPE)
 	{
 		if(Mp.ItemPartBF&(SINT64_CONSTANT(1)<<e))
 			return true;
@@ -859,7 +859,7 @@ bool	CItemSheet::canBuildItemPart(RM_FABER_TYPE::TRMFType e) const
 // ***************************************************************************
 bool	CItemSheet::canBuildItemPart(RM_FABER_TYPE::TRMFType e, ITEM_ORIGIN::EItemOrigin origin) const
 {
-	if(e<RM_FABER_TYPE::NUM_FABER_TYPE)
+	if(e< (int)RM_FABER_TYPE::NUM_FABER_TYPE)
 	{
 		if(Mp.ItemPartBF&(SINT64_CONSTANT(1)<<e))
 		{
@@ -988,7 +988,7 @@ bool	CItemSheet::canExchangeOrGive(bool botChatGift) const
 void	CItemSheet::getItemPartListAsText(std::string &ipList) const
 {
 	bool	all= true;
-	for(uint i=0;i<RM_FABER_TYPE::NUM_FABER_TYPE;i++)
+	for(uint i=0;i< (int)RM_FABER_TYPE::NUM_FABER_TYPE;i++)
 	{
 		RM_FABER_TYPE::TRMFType		faberType= RM_FABER_TYPE::TRMFType(i);
 

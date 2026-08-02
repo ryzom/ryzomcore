@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-08-02 — 🐛 Fix MSVC operator< ambiguity for every NUM_* enum-bound loop/comparison in the client
+
+Same family of issue as the two fixes below, but instead of patching one
+call site at a time as each one surfaced during the Windows/MSVC
+cross-build, searched `ryzom/client`, `ryzom/common` and `nel` for every
+remaining `< SOMENAMESPACE::NUM_*` comparison against an enum bound
+(`SKILLS::NUM_SKILLS`, `SCORES::NUM_SCORES`, `RM_FABER_TYPE::NUM_FABER_TYPE`,
+`CHARACTERISTICS::NUM_CHARACTERISTICS`, `MAGICFX::NUM_SPELL_POWER`,
+`JOBS::NUM_CAREER_DB_SLOTS`, `INVENTORIES::NUM_ALL_INVENTORY`) across 20
+files and cast the enum bound explicitly at each site — MSVC treats these
+as ambiguous against unrelated `operator<` overloads reachable at that
+scope (e.g. `CProjectileBuild`, `CClientDate`, `CSessionId`, ...), GCC
+doesn't. `ryzom/server` wasn't touched (not built for the Windows client
+target, so not hit here, but the same fix would apply if anyone brings it
+up under MSVC too).
+
+Commit: fix: resolve remaining MSVC-ambiguous operator< comparisons against NUM_* enum bounds
+
 ## 2026-08-02 — 🐛 Fix another MSVC operator< ambiguity in action_handler_help.cpp
 
 Same family of issue as the `CHARACTERISTICS` loop fix below: `for (skillNb = 0;

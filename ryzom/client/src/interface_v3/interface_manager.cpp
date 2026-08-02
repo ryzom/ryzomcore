@@ -542,7 +542,7 @@ CInterfaceManager::CInterfaceManager()
 	// 4Bits counter.
 	_LocalSyncActionCounterMask= 15;
 
-	for(uint i=0;i<CHARACTERISTICS::NUM_CHARACTERISTICS;i++)
+	for(uint i=0;i< (int)CHARACTERISTICS::NUM_CHARACTERISTICS;i++)
 	{
 		_CurrentPlayerCharac[i]= 0;
 	}
@@ -2213,7 +2213,7 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 
 	// Update Player characteristics (for Item carac requirement Redifying)
 	nlctassert(CHARACTERISTICS::NUM_CHARACTERISTICS==8);
-	for (uint i=0; i<CHARACTERISTICS::NUM_CHARACTERISTICS; ++i)
+	for (uint i=0; i< (int)CHARACTERISTICS::NUM_CHARACTERISTICS; ++i)
 	{
 		if (!_CurrentPlayerCharacLeaf[i])
 			_CurrentPlayerCharacLeaf[i] = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:CHARACTER_INFO:CHARACTERISTICS%d:VALUE", i), false);

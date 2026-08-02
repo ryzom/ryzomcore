@@ -192,7 +192,7 @@ private:
 
 		CBarDataUID()
 		{
-			for(uint i=0;i<SCORES::NUM_SCORES;i++)
+			for(uint i=0;i< (int)SCORES::NUM_SCORES;i++)
 				ScoreDate[i]= 0;
 		}
 		bool	noMoreEntry() const

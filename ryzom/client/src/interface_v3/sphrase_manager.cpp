@@ -3808,7 +3808,7 @@ void				CSPhraseManager::computePhraseProgression()
 	// **** Sort each phrase sheet by type/cost
 	// For all skills
 	std::vector<CPhraseSortEntry>	phraseSortEntry;
-	for(uint i=0;i<SKILLS::NUM_SKILLS;i++)
+	for(uint i=0;i< (sint)SKILLS::NUM_SKILLS;i++)
 	{
 		CPhraseProgression	&pprog= _ProgressionPhrases[i];
 		uint	j;

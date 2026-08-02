@@ -4616,7 +4616,7 @@ NLMISC_COMMAND(setAllSkillValue, "set all Skill and baseskill to the given value
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	uint	value;
 	fromString(args[0], value);
-	for(uint i=0;i<SKILLS::NUM_SKILLS;i++)
+	for(uint i=0;i< (sint)SKILLS::NUM_SKILLS;i++)
 	{
 		CCDBNodeLeaf	*node;
 		node= NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:CHARACTER_INFO:SKILLS:%d:BaseSKILL", i), false);

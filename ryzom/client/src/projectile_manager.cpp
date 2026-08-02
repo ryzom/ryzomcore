@@ -762,7 +762,7 @@ const CAnimationFX *CProjectileManager::getResistFX(uint level)
 
 	if (!init)
 	{
-		for(uint k = 0; k < MAGICFX::NUM_SPELL_POWER; ++k)
+		for(uint k = 0; k < (int)MAGICFX::NUM_SPELL_POWER; ++k)
 		{
 			impactResistFX[k].init(&impactResistSheet[k], NULL);
 		}
