@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-08-02 — 🐛 Fix ambiguous operator< on MSVC in CINCarac serialization loops
+
+`CInCarac::serialBitMemStream()` (and its two neighbours) in `msg_client_server.h`
+looped with `for (int i = 0; i < CHARACTERISTICS::NUM_CHARACTERISTICS; ++i)`. GCC
+resolves the `int < enum` comparison via the built-in `operator<` without issue, but
+MSVC (19.20, encountered while bringing up a Windows/MSVC cross-build) reports it as
+ambiguous against `operator<(const CSessionId&, uint32)` from `r2_basic_types.h`,
+since both a user-defined conversion path and the built-in enum-to-int promotion are
+considered equally viable candidates. Cast the loop bound to `int` explicitly to
+remove the ambiguity — behavior is unchanged on every compiler.
+
+Commit: fix: resolve MSVC-ambiguous operator< in CHARACTERISTICS loop bounds
+
 ## 2026-07-30 — 🐛 Stop despawning entity on client sheet change
 
 `CBot::setClientSheet()` (used by the `setClientSheet()` AI script command) used to call
