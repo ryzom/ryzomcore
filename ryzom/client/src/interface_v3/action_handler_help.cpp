@@ -1245,7 +1245,7 @@ static void setupSkillToTradeHelp(CSheetHelpSetup &setup)
 
 	// search all job that have minimum required level for that skill
 //	CInterfaceManager *im = CInterfaceManager::getInstance();
-//	for (uint career = 0; career < JOBS::NUM_CAREER_DB_SLOTS; ++career)
+//	for (uint career = 0; career < (int)JOBS::NUM_CAREER_DB_SLOTS; ++career)
 //	{
 //		for (uint job = 0; job < 8; ++job)
 //		{
@@ -2209,7 +2209,7 @@ static void	setupRawMaterialStats(CSheetHelpSetup &setup)
 			if( pCB )
 			{
 				pCB->resetTexts();
-				for(uint i=0;i<RM_FABER_TYPE::NUM_FABER_TYPE;i++)
+				for(uint i=0;i< (int)RM_FABER_TYPE::NUM_FABER_TYPE;i++)
 				{
 					RM_FABER_TYPE::TRMFType		faberType= RM_FABER_TYPE::TRMFType(i);
 
@@ -3781,7 +3781,7 @@ static	void	onMpChangeItemPart(CInterfaceGroup *wnd, uint32 itemSheetId, const s
 	// get the related FaberType
 	RM_FABER_TYPE::TRMFType		faberType= RM_FABER_TYPE::MPL;
 	uint	bitCount= 0;
-	for(i=0;i<RM_FABER_TYPE::NUM_FABER_TYPE;i++)
+	for(i=0;i< (int)RM_FABER_TYPE::NUM_FABER_TYPE;i++)
 	{
 		if(pIS->Mp.ItemPartBF & (uint64)(1 << i))
 		{

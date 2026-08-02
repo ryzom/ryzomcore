@@ -61,7 +61,7 @@ CSkillManager::CSkillManager()
 	_UnblockTitle = NULL;
 	_Tree= NULL;
 
-	for(uint i=0;i<SKILLS::NUM_SKILLS;i++)
+	for(uint i=0;i< (sint)SKILLS::NUM_SKILLS;i++)
 	{
 		_SkillValues[i]= NULL;
 		_SkillBaseValues[i]= NULL;
@@ -106,7 +106,7 @@ void CSkillManager::initInGame()
 	// **** Data error management
 	// For each skills
 	uint	i;
-	for (i = 0; i < SKILLS::NUM_SKILLS; ++i)
+	for (i = 0; i < (sint)SKILLS::NUM_SKILLS; ++i)
 	{
 		vector<SKILLS::ESkills>		&children= _Tree->SkillsTree[i].ChildSkills;
 		for (sint32 j = 0; j < (sint32)children.size(); ++j)
@@ -150,7 +150,7 @@ void CSkillManager::initInGame()
 	// **** Player State management
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	// get now the nodes on Skill values
-	for(i=0;i<SKILLS::NUM_SKILLS;i++)
+	for(i=0;i< (sint)SKILLS::NUM_SKILLS;i++)
 	{
 		_SkillValues[i]= NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:CHARACTER_INFO:SKILLS:%d:SKILL", i), false);
 		_SkillBaseValues[i]= NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:CHARACTER_INFO:SKILLS:%d:BaseSKILL", i), false);
@@ -172,7 +172,7 @@ void CSkillManager::uninitInGame()
 	_Tree= NULL;
 
 	uint i;
-	for(i=0;i<SKILLS::NUM_SKILLS;i++)
+	for(i=0;i< (sint)SKILLS::NUM_SKILLS;i++)
 	{
 		_SkillValues[i]= NULL;
 		_SkillBaseValues[i]= NULL;
@@ -461,7 +461,7 @@ void	CSkillManager::onSkillChange()
 {
 	// **** Check cache (don't call onSkillChange if just PROGRESS_BAR changed)
 	bool	someChange= false;
-	for(uint i=0;i<SKILLS::NUM_SKILLS;i++)
+	for(uint i=0;i< (sint)SKILLS::NUM_SKILLS;i++)
 	{
 		// SKILL
 		if(_SkillValues[i])

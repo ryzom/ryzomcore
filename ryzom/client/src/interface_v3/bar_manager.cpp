@@ -91,7 +91,7 @@ void	CBarManager::CBarDataEntry::resetDB()
 {
 	UIDIn= NULL;
 	PresentIn= NULL;
-	for(uint sc=0;sc<SCORES::NUM_SCORES;sc++)
+	for(uint sc=0;sc< (int)SCORES::NUM_SCORES;sc++)
 	{
 		ScoreIn[sc]= NULL;
 		ScoreOut[sc]= NULL;
@@ -140,7 +140,7 @@ void	CBarManager::CBarDataEntry::connectDB(const std::string &baseDBin, const st
 // ***************************************************************************
 void	CBarManager::CBarDataEntry::flushDBOut()
 {
-	for(uint sc=0;sc<SCORES::NUM_SCORES;sc++)
+	for(uint sc=0;sc< (int)SCORES::NUM_SCORES;sc++)
 	{
 		if(ScoreOut[sc])
 			ScoreOut[sc]->setValue8(BarInfo.Score[sc]);
@@ -150,7 +150,7 @@ void	CBarManager::CBarDataEntry::flushDBOut()
 // ***************************************************************************
 void	CBarManager::CBarDataEntry::modifyFromDBIn(CBarInfo &barInfo) const
 {
-	for(uint sc=0;sc<SCORES::NUM_SCORES;sc++)
+	for(uint sc=0;sc< (int)SCORES::NUM_SCORES;sc++)
 	{
 		if(ScoreIn[sc])
 			barInfo.Score[sc]= ScoreIn[sc]->getValue8();
@@ -428,7 +428,7 @@ void		CBarManager::updateBars(uint dataSetId, CBarInfo barInfo, TGameCycle serve
 
 	// fill bar info, with relevant values only
 	CBarDataUID		&barUid= it->second;
-	for(uint sc=0;sc<SCORES::NUM_SCORES;sc++)
+	for(uint sc=0;sc< (int)SCORES::NUM_SCORES;sc++)
 	{
 		// if the update affect this score, and if the modification date is more recent (or at least the same)
 		if( (scoreFlags&(1<<sc)) && serverTick>=barUid.ScoreDate[sc] )
@@ -475,7 +475,7 @@ void		CBarManager::updateEntryFromDBNoAddDel(TEntryType type, CBarDataEntry &bde
 		serverTick= bde.UIDIn->getLastChangeGC();
 	if(bde.PresentIn && bde.PresentIn->getLastChangeGC() > serverTick )
 		serverTick= bde.PresentIn->getLastChangeGC();
-	for(uint sc=0;sc<SCORES::NUM_SCORES;sc++)
+	for(uint sc=0;sc< (int)SCORES::NUM_SCORES;sc++)
 	{
 		if( bde.ScoreIn[sc] && bde.ScoreIn[sc]->getLastChangeGC() > serverTick )
 			serverTick= bde.ScoreIn[sc]->getLastChangeGC();
@@ -624,7 +624,7 @@ void	CBarManager::setupUserBarInfo(uint8 msgNumber, sint32 hp, sint32 sap, sint3
 		_UserScores[SCORES::focus].Score= focus;
 
 		// update actual database now.
-		for(uint i=0;i<SCORES::NUM_SCORES;i++)
+		for(uint i=0;i< (int)SCORES::NUM_SCORES;i++)
 		{
 			// Clamp To 0, since used only by entries that don't need negative values (for comma mode)
 			if(_UserScores[i].DBOutVal)	_UserScores[i].DBOutVal->setValue32(max((sint32)0,_UserScores[i].Score));
@@ -639,7 +639,7 @@ void	CBarManager::setupUserBarInfo(uint8 msgNumber, sint32 hp, sint32 sap, sint3
 void	CBarManager::updateUserBars()
 {
 	// for all scores
-	for(uint i=0;i<SCORES::NUM_SCORES;i++)
+	for(uint i=0;i< (int)SCORES::NUM_SCORES;i++)
 	{
 		CUserScore	&us= _UserScores[i];
 
@@ -677,7 +677,7 @@ void	CBarManager::updateUserBars()
 		if(it!=_UIDBars.end())
 		{
 			TGameCycle	serverTick= 0;
-			for(uint sc=0;sc<SCORES::NUM_SCORES;sc++)
+			for(uint sc=0;sc< (int)SCORES::NUM_SCORES;sc++)
 			{
 				if(it->second.ScoreDate[sc] > serverTick)
 					serverTick= it->second.ScoreDate[sc];
@@ -693,7 +693,7 @@ void	CBarManager::updateUserBars()
 // ***************************************************************************
 sint32 CBarManager::getUserScore(SCORES::TScores score)
 {
-	nlassert((uint) score < SCORES::NUM_SCORES);
+	nlassert((uint) score < (int)SCORES::NUM_SCORES);
 	nlassert(_UserScores[score].DBOutVal); // initInGame() not called ?
 	return _UserScores[score].DBOutVal->getValue32();
 }

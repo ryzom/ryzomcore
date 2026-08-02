@@ -307,7 +307,7 @@ namespace RM_FABER_STAT_TYPE
 		void	setStatLine(RM_FABER_TYPE::TRMFType ft, const uint8 vals[NumRMStatType])
 		{
 			nlassert(sizeof(uint8)==sizeof(bool));
-			nlassert(ft<RM_FABER_TYPE::NUM_FABER_TYPE);
+			nlassert(ft< (int)RM_FABER_TYPE::NUM_FABER_TYPE);
 			memcpy(StatRelevant + ft*NumRMStatType, vals, NumRMStatType*sizeof(bool));
 		}
 
