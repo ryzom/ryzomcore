@@ -7,7 +7,7 @@ include_once('../login/config.php');
 function planEditSession($charId, $domainId, $sessionType, $title, $desc)
 {
 	$domainInfo = getDomainInfo($domainId);
-	$addr = split(":", $domainInfo["session_manager_address"]);
+	$addr = explode(":", $domainInfo["session_manager_address"]);
 	$RSMHost = $addr[0];
 	$RSMPort = $addr[1];
 
@@ -74,7 +74,7 @@ function startSession($charId, $domainId, $sessionId)
 	global $SessionId, $DomainId, $SessionToolsResult;
 
 	$domainInfo = getDomainInfo($domainId);
-	$addr = split(":", $domainInfo["session_manager_address"]);
+	$addr = explode(":", $domainInfo["session_manager_address"]);
 	$RSMHost = $addr[0];
 	$RSMPort = $addr[1];
 
@@ -103,7 +103,7 @@ function inviteOwnerInSession($charId, $domainId, $sessionId)
 	$SessionToolsResult = false;
 
 	$domainInfo = getDomainInfo($domainId);
-	$addr = split(":", $domainInfo["session_manager_address"]);
+	$addr = explode(":", $domainInfo["session_manager_address"]);
 	$RSMHost = $addr[0];
 	$RSMPort = $addr[1];
 	
