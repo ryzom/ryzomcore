@@ -351,8 +351,11 @@
 
 							if ($restart_reboot_message != '')
 							{
+								// frame_quoted_arg strips quotes/newlines; still
+								// emit one quoted word so spaces cannot reframe
+								// the repeat/every AES arguments.
 								$restart_reboot_message = tool_main_frame_quoted_arg($restart_reboot_message, 512);
-								$service_command = "broadcast repeat=10 every=60 ". $restart_reboot_message;
+								$service_command = "broadcast repeat=10 every=60 \"". $restart_reboot_message ."\"";
 
 								nt_log("Domain '$AS_Name' : '$service_command' on ". $service_egs);
 								nt_common_add_debug("about to run command '$service_command' on '$service_egs' ...");
@@ -466,7 +469,7 @@
 								if ($restart_reboot_message != '')
 								{
 									$restart_reboot_message = tool_main_frame_quoted_arg($restart_reboot_message, 512);
-									$service_command = "broadcast ". $restart_reboot_message;
+									$service_command = "broadcast \"". $restart_reboot_message ."\"";
 
 									nt_log("Domain '$AS_Name' : '$service_command' on ". $service_egs);
 									nt_common_add_debug("about to run command '$service_command' on '$service_egs' ...");

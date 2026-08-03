@@ -324,6 +324,15 @@
 
 							case 'execute':
 
+								// Free-form AES execute is the same power as the
+								// main panel; require the same application right
+								// so tool_las alone is not a privilege escalation.
+								if (!tool_admin_applications_check('tool_main_execute'))
+								{
+									nt_common_add_debug('LAS free execute denied: missing tool_main_execute');
+									break;
+								}
+
 								if (isset($NELTOOL['POST_VARS']['service_command']))
 								{
 									$service_command = trim(stripslashes(html_entity_decode($NELTOOL['POST_VARS']['service_command'], ENT_QUOTES)));

@@ -407,6 +407,14 @@
 					$vars[$sline_parts[0]] = $sline_parts[1];
 				}
 
+				// AliasName is interpolated into onclick handlers in several
+				// templates; html-escape does not neutralize JS string breaks.
+				// Drop rows whose alias would not pass the service-alias validator.
+				if (!isset($vars['AliasName']) || !tool_main_valid_service_alias($vars['AliasName']))
+				{
+					continue;
+				}
+
 				// check is service is chain crashing
 				if (in_array('rt_chain_crashing', array_keys($vars['_flags_'])))
 				{
@@ -1040,6 +1048,16 @@
 
 		if (is_array($data) && ($data['lock_shard_id'] > 0))
 		{
+			// Keepalive or re-lock only when we already own it, or the
+			// previous hold has timed out. Otherwise any operator with the
+			// lock application could steal the lock and run start/stop/kill.
+			$holder = isset($data['lock_user_name']) ? $data['lock_user_name'] : '';
+			$expired = (LOCK_TIMEOUT > 0) && (intval($data['lock_update']) + LOCK_TIMEOUT < $now);
+			if ($holder !== '' && $holder !== $nel_user['user_name'] && !$expired)
+			{
+				if ($log) nt_common_add_debug("Shard lock refused: held by '". $holder ."'");
+				return;
+			}
 			if ($log) nt_log("Shard Lock (Domain: '". $AS_Name ."' - Shard: '". $AS_ShardName ."') by '". $nel_user['user_name'] ."'");
 			$sql = "UPDATE ". NELDB_LOCK_TABLE ." SET lock_user_name='". $db->sql_escape_string($nel_user['user_name']) ."',lock_update=". intval($now) ." WHERE lock_id=". intval($data['lock_id']);
 			$db->sql_query($sql);
@@ -1088,6 +1106,13 @@
 
 		if (is_array($lock_data))
 		{
+			$holder = isset($lock_data['lock_user_name']) ? $lock_data['lock_user_name'] : '';
+			$expired = (LOCK_TIMEOUT > 0) && (intval($lock_data['lock_update']) + LOCK_TIMEOUT < $now);
+			if ($holder !== '' && $holder !== $nel_user['user_name'] && !$expired)
+			{
+				if ($log) nt_common_add_debug("Domain lock refused: held by '". $holder ."'");
+				return;
+			}
 			$sql = "UPDATE ". NELDB_LOCK_TABLE ." SET lock_user_name='". $db->sql_escape_string($nel_user['user_name']) ."',lock_update=". intval($now) ." WHERE lock_id=". intval($lock_data['lock_id']);
 			$db->sql_query($sql);
 		}

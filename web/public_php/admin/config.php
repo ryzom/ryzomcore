@@ -77,6 +77,14 @@
     define('LOCK_TIMEOUT', 1800);
     define('BG_IMG', 'imgs/bg_live.png');
 
+	// Optional MFS forum proxy identity used by the guild locator. Leave the
+	// token empty to keep the legacy user_login=support path (host still
+	// comes from domain_mfs_web and must pass the hostname allowlist).
+	if (!defined('NELTOOL_MFS_USER_LOGIN'))
+		define('NELTOOL_MFS_USER_LOGIN', 'support');
+	if (!defined('NELTOOL_MFS_SERVICE_TOKEN'))
+		define('NELTOOL_MFS_SERVICE_TOKEN', '');
+
 	$nel_user_group_levels	= array(array(	'level_id'		=>	0,
 											'level_name'	=>	'Normal'),
 									array(	'level_id'		=>	10,
