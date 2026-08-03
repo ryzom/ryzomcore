@@ -132,7 +132,7 @@
 		echo "<td align=left>";
 		echo "<table cellpadding=0 cellspacing=2 border=0><tr align=left height=100%>";
 		echo "<td>".button($title)."</td>";
-		echo "<td>".button("<b>$admlogin</b>/<b>$group</b> on ".htmlspecialchars($HTTP_HOST.$_SERVER['PHP_SELF'], ENT_QUOTES).helpLink("Main"))."</td>";
+		echo "<td>".button("<b>".htmlspecialchars($admlogin, ENT_QUOTES)."</b>/<b>".htmlspecialchars($group, ENT_QUOTES)."</b> on ".htmlspecialchars($HTTP_HOST.$_SERVER['PHP_SELF'], ENT_QUOTES).helpLink("Main"))."</td>";
 		echo "</tr></table>";
 		echo "</td>\n";
 

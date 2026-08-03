@@ -25,7 +25,7 @@
 		
 		if ($presel_service)
 		{
-			$aliases = split('[/-]', $presel_service);
+			$aliases = preg_split('#[/-]#', $presel_service);
 			if (count($aliases) == 3)
 				$presel_service = $aliases[0];
 		}

@@ -399,7 +399,7 @@
 			echo "Please wait while result is being computed and click 'Refresh result' to display query result.<br>\n";
 			echo "<form method='post' action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."'>\n";
 			echo "<input type=submit name='refresh_result' value='Refresh result'>\n";
-			echo "<input type=hidden name='las_address' value='".$selectedLAS['address']."'>\n";
+			echo "<input type=hidden name='las_address' value='".htmlspecialchars($selectedLAS['address'], ENT_QUOTES)."'>\n";
 			echo "<input type=hidden name='query_id' value='".htmlspecialchars($query_id, ENT_QUOTES)."'>\n";
 			echo "<input type=hidden name='query' value='".htmlspecialchars($query, ENT_QUOTES)."'>\n";
 			echo "<input type='hidden' name='database' value='".htmlspecialchars($database, ENT_QUOTES)."'>\n";
@@ -534,7 +534,7 @@
 					
 					$d = str_repeat('-&nbsp;', $al[1]).$al[3];
 					
-					$d = ereg_replace('(\(0x[0-9a-fA-F]{10}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}\))', '<a onClick="return selectEId('."'".'\\1'."'".')">\\1</a>', $d);
+					$d = preg_replace('#(\(0x[0-9a-fA-F]{10}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}\))#', '<a onClick="return selectEId('."'".'\\1'."'".')">\\1</a>', $d);
 					//$d = ereg_replace('(\(0x[0-9a-fA-F]{10}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}\))', '<a onClick="return alert('."'".'tamere'."'".')">\\1</a>', $d);
 
 					echo "<td>$d</td>";
@@ -551,10 +551,11 @@
 		}
 		else
 		{
-			echo "<b>Failed to get query result</b>: '$result'<br>\n";
+			// the log service answer lands in the page
+			echo "<b>Failed to get query result</b>: '".htmlspecialchars($result, ENT_QUOTES)."'<br>\n";
 			echo "<form method='post' action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."'>\n";
 			echo "<input type=submit name='refresh_result' value='Refresh result'>\n";
-			echo "<input type=hidden name='las_address' value='".$selectedLAS['address']."'>\n";
+			echo "<input type=hidden name='las_address' value='".htmlspecialchars($selectedLAS['address'], ENT_QUOTES)."'>\n";
 			echo "<input type=hidden name='query_id' value='".htmlspecialchars($query_id, ENT_QUOTES)."'>\n";
 			echo "<input type=hidden name='query' value='".htmlspecialchars($query, ENT_QUOTES)."'>\n";
 			echo "<input type='hidden' name='database' value='".htmlspecialchars($database, ENT_QUOTES)."'>\n";

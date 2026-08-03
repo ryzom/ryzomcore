@@ -132,7 +132,8 @@
 
 		$regexp = '([\+-]?[0-9]+|[\+-]?[0-9]+\.[0-9]*|[\+-]?[0-9]+\.[0-9]*e[0-9]+) *(b|kb|mb|gb|h|mn|s|d|ms)?';
 
-		if (!eregi($regexp, strtolower($str), $regs))
+		// ereg/eregi were removed in php 7; same pattern, pcre syntax
+		if (!preg_match('#'.$regexp.'#i', strtolower($str), $regs))
 			return 0;
 
 		$num = (float)$regs[1];
@@ -720,7 +721,7 @@
 		
 		for ($i=0; $i<count($pnodes) || $i<count($fnodes); ++$i)
 		{
-			$aliases = split( '[/-]', $pnodes[$i] );
+			$aliases = preg_split( '#[/-]#', $pnodes[$i] );
 			if (count($aliases) == 3)
 			{
 				$pmatch =  $aliases[1];
@@ -799,7 +800,7 @@
 			//echo "addToSelectNode: nod=$nod nod_reg=$nod_reg nod_cut=$nod_cut<br>\n";
 
 			// if subnode matches selection, subnode is more restrictive and then flag subnode and keep subnode
-			if (eregi($sel_reg, $nod_cut))
+			if (preg_match('#'.str_replace('#', '\\#', $sel_reg).'#i', $nod_cut))
 			{
 				//echo "node $nod matches select $sel<br>\n";
 				if (addToSelectNode($subnode, $address, $step+1))
@@ -809,7 +810,7 @@
 				}
 			}
 			// if selection matches subnode, selection is more restrictive and then copy subnode as selection, flag new subnode and keep it
-			else if (eregi($nod_reg, $sel_cut))
+			else if (preg_match('#'.str_replace('#', '\\#', $nod_reg).'#i', $sel_cut))
 			{
 				//echo "selection $sel matches node $nod, adding node $sel<br>\n";
 				addNode($node[$sel], $subnode);
@@ -962,7 +963,7 @@
 			}
 			++$i;
 			if ($level != 0)
-				echo "Error on query '$query', badly formed (missing end bracket?)<br>\n";
+				echo "Error on query '".htmlspecialchars($query, ENT_QUOTES)."', badly formed (missing end bracket?)<br>\n";
 			$arr[] = $bloc;
 		}
 		return $arr;
@@ -979,7 +980,7 @@
 			--$i;
 		}
 		if ($level != 0)
-			echo "Error on query '$query', badly formed (missing end bracket?)<br>\n";
+			echo "Error on query '".htmlspecialchars($query, ENT_QUOTES)."', badly formed (missing end bracket?)<br>\n";
 
 		if ($i == -1)
 		{
@@ -1004,7 +1005,7 @@
 			++$i;
 		}
 		if ($level != 0)
-			echo "Error on query '$query', badly formed (missing end bracket?)<br>\n";
+			echo "Error on query '".htmlspecialchars($query, ENT_QUOTES)."', badly formed (missing end bracket?)<br>\n";
 
 		if ($i == strlen($query))
 		{
@@ -1165,7 +1166,7 @@
 		else
 		{
 			if ($bloc[strlen($bloc)-1]!=']')
-				echo "Error on bloc '$bloc', unexpected character after ']'<br>\n";
+				echo "Error on bloc '".htmlspecialchars($bloc, ENT_QUOTES)."', unexpected character after ']'<br>\n";
 
 			$i=1;
 			while ($i<strlen($bloc)-1)
@@ -1181,7 +1182,7 @@
 				}
 				++$i;
 				if ($level != 0)
-					echo "Error on bloc '$bloc', badly formed (missing end bracket?)<br>\n";
+					echo "Error on bloc '".htmlspecialchars($bloc, ENT_QUOTES)."', badly formed (missing end bracket?)<br>\n";
 				$arr[] = $alt;
 			}
 		}

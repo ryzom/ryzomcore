@@ -38,8 +38,8 @@
 
 	htmlProlog(htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES), "Help for '".htmlspecialchars($file, ENT_QUOTES)."/".htmlspecialchars($topic, ENT_QUOTES)."'", false);
 
-	$file = mysql_real_escape_string($file);
-	$topic = mysql_real_escape_string($topic);
+	$file = sqlescape($file);
+	$topic = sqlescape($topic);
 	// $file and $topic come from the url and are also written into
 	// this page, so keep escaped copies for that
 	$file_html = htmlspecialchars($file, ENT_QUOTES);
@@ -54,9 +54,9 @@
 		echo "References to other help pages are formatted like<br>&lt;a href='help.php?file=<i>file</i>&amp;topic=<i>topic</i>'&gt;<i>blahblah</i>&lt;/a&gt;<br>\n";
 		echo "where <i>file</i> referres to a valid php file (e.g. /index.php) and <i>topic</i> to a valid topic name. For common Help Notes, <i>file</i> should be set to 'common'.\n";
 		echo "You may also use curved brackets '{' and '}' to point to a link (e.g. 'info about {NeL}' will point to a common help note on 'NeL' topic.)<br>\n";
-		$result = mysql_query("SELECT help_body FROM help_topic WHERE file='$file' AND topic='$topic'");
+		$result = sqlquery("SELECT help_body FROM help_topic WHERE file='$file' AND topic='$topic'");
 		$help_body = "[Write your help note here]";
-		if ($result && ($arr=mysql_fetch_array($result)))
+		if ($result && ($arr=sqlfetch($result)))
 			$help_body = $arr["help_body"];
 		
 		echo "<center>\n";
@@ -74,15 +74,15 @@
 	}
 	else if ($update)
 	{
-		mysql_query("DELETE FROM help_topic WHERE file='$file' AND topic='$topic'");
-		$help_body_escaped = mysql_real_escape_string($help_body);
-		mysql_query("INSERT INTO help_topic SET file='$file', topic='$topic', help_body='$help_body_escaped'");
+		sqlquery("DELETE FROM help_topic WHERE file='$file' AND topic='$topic'");
+		$help_body_escaped = sqlescape($help_body);
+		sqlquery("INSERT INTO help_topic SET file='$file', topic='$topic', help_body='$help_body_escaped'");
 	}
 
 	if ($view)
 	{
-		$result = mysql_query("SELECT help_body FROM help_topic WHERE file='$file' AND topic='$topic'");
-		if ($result && ($body=mysql_fetch_array($result)))
+		$result = sqlquery("SELECT help_body FROM help_topic WHERE file='$file' AND topic='$topic'");
+		if ($result && ($body=sqlfetch($result)))
 		{
 			echo "<b>Help for '$file_html/$topic_html':</b><br>\n";
 			if ($canEditHelp)

@@ -203,6 +203,28 @@
 
 
 	/*
+	 * Per-session token for the state changing links this tool builds as
+	 * plain hrefs. The session cookie is SameSite=Lax, which keeps a cross
+	 * site *post* from carrying it, but a top level navigation still does --
+	 * and "delete this account" is one click on a GET url here.
+	 */
+	function nelnsCsrfToken()
+	{
+		if (empty($_SESSION['nelns_csrf']) || !is_string($_SESSION['nelns_csrf']))
+		{
+			$_SESSION['nelns_csrf'] = bin2hex(random_bytes(16));
+		}
+		return $_SESSION['nelns_csrf'];
+	}
+
+	function nelnsCsrfCheck($token)
+	{
+		return isset($_SESSION['nelns_csrf']) && is_string($_SESSION['nelns_csrf'])
+			&& $_SESSION['nelns_csrf'] !== ''
+			&& is_string($token) && hash_equals($_SESSION['nelns_csrf'], $token);
+	}
+
+	/*
 	 * Produce the value stored in user.password. New passwords get a random
 	 * per user salt; the old form was crypt($pass, "NL"), one fixed salt for
 	 * every account and only the first eight characters of the password.
@@ -267,8 +289,8 @@
 		}
 
 		addToLog("Validate login: '$admlogin'...");
-		$res = mysql_query("SELECT auth.password AS password, auth.uid AS uid, auth.useCookie AS useCookie, auth.gid AS gid, ugroup.login AS gname, auth.allowed_ip AS allowed_ip FROM user AS auth, user AS ugroup WHERE BINARY auth.login='".mysql_real_escape_string($admlogin)."' AND auth.gid=ugroup.uid");
-		if (!$res || !($arr=mysql_fetch_array($res)) || !($arr["uid"]) || !hash_equals((string)$arr["password"], (string)$admpassword))
+		$res = sqlquery("SELECT auth.password AS password, auth.uid AS uid, auth.useCookie AS useCookie, auth.gid AS gid, ugroup.login AS gname, auth.allowed_ip AS allowed_ip FROM user AS auth, user AS ugroup WHERE BINARY auth.login='".sqlescape($admlogin)."' AND auth.gid=ugroup.uid");
+		if (!$res || !($arr=sqlfetch($res)) || !($arr["uid"]) || !hash_equals((string)$arr["password"], (string)$admpassword))
 		{
 			addToLog("failed !!");
 			return false;
@@ -309,7 +331,7 @@
 	{
 		global	$HTTP_USER_AGENT, $REMOTE_ADDR, $userlogpath;
 
-		$result = sqlquery("SELECT login FROM user WHERE uid='".mysql_real_escape_string($uid)."'");
+		$result = sqlquery("SELECT login FROM user WHERE uid='".sqlescape($uid)."'");
 		if ($result && ($result=sqlfetch($result)))
 		{
 			$login = $result["login"];
@@ -334,7 +356,7 @@
 
 /*
 		$result = sqlquery("SELECT http_agent, remote_address, act FROM user_log WHERE uid='$uid' ORDER BY log_date DESC LIMIT 1");
-		if (!$result || !($arr=mysql_fetch_array($result)) || $arr["http_agent"]!=$HTTP_USER_AGENT || $arr["remote_address"]!=$REMOTE_ADDR || $arr["act"]!=$act)
+		if (!$result || !($arr=sqlfetch($result)) || $arr["http_agent"]!=$HTTP_USER_AGENT || $arr["remote_address"]!=$REMOTE_ADDR || $arr["act"]!=$act)
 		{
 			sqlquery("INSERT INTO user_log SET uid='$uid', http_agent='$HTTP_USER_AGENT', remote_address='$REMOTE_ADDR', log_date=NOW(), act='$act'");
 		}

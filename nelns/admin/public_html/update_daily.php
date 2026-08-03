@@ -31,14 +31,17 @@
 
 	//error_reporting(E_NOTICE);
 
-	// connect to database
+	// ext/mysql went away in php 7; same shape, mysqli underneath. Only the
+	// two helpers this script actually uses are kept -- the list/num/field
+	// name wrappers had no caller and had no mysqli equivalent worth guessing.
 	function connectToDatabase($dbhost, $dbname, $dblogin, $dbpasswd)
 	{
-		$connect_id;
-		if (!($connect_id = mysql_connect($dbhost, $dblogin, $dbpasswd)))
+		$connect_id = @mysqli_connect($dbhost, $dblogin, $dbpasswd);
+		if (!$connect_id)
 			die("Unable to connect to MySQL server '$dbhost'");
-		if (!mysql_select_db ($dbname, $connect_id))
+		if (!mysqli_select_db($connect_id, $dbname))
 			die("Unable to select MySQL database '$dbname'");
+		@mysqli_set_charset($connect_id, 'utf8mb4');
 		return array($connect_id, $dbname);
 	}
 
@@ -46,53 +49,43 @@
 	{
 		global	$queries;
 		// here log queries
-		mysql_select_db($id[1], $id[0]);
-		$res = mysql_query($query, $id[0]);
+		mysqli_select_db($id[0], $id[1]);
+		$res = @mysqli_query($id[0], $query);
 		$queries[] = "'$query' on db ".$id[1];
 		return $res;
 	}
 
 	function sqlfetch(&$result)
 	{
-		return mysql_fetch_array($result);
+		if (!($result instanceof mysqli_result))
+			return false;
+		$row = mysqli_fetch_array($result);
+		return ($row === null) ? false : $row;
 	}
-	
+
 	function sqlaffectedrows($id)
 	{
-		return mysql_affected_rows($id[0]);
+		return mysqli_affected_rows($id[0]);
 	}
-	
-	function sqllistfields($table, $id)
-	{
-		return mysql_list_fields($id[1], $table, $id[0]);
-	}
-	
+
 	function sqlnumrows($result)
 	{
-		return mysql_num_rows($result);
-	}
-	
-	function sqlnumfields($result)
-	{
-		return mysql_num_fields($result);
-	}
-	
-	function sqlfieldname($result, $i)
-	{
-		return mysql_field_name($result, $i);
+		if (!($result instanceof mysqli_result))
+			return 0;
+		return mysqli_num_rows($result);
 	}
 
 	function sqlerr($id)
 	{
-		return "error ".mysql_errno($id[0]).": ".mysql_error($id[0]);
+		return "error ".mysqli_errno($id[0]).": ".mysqli_error($id[0]);
 	}
-	
+
 	$dbname = "nel";
 
 	$id = connectToDatabase($dbhost, $dbname, $dblogin, $dbpassword);
 
 	$shardid = "61";
-	$query = "UPDATE shard SET Version='".mysql_real_escape_string($version)."' WHERE ShardId='$shardid'";
+	$query = "UPDATE shard SET Version='".mysqli_real_escape_string($id[0], $version)."' WHERE ShardId='$shardid'";
 	$result = sqldbquery($query, $id);
 
 	die ($result ? "[OK]" : "[FAILED]");

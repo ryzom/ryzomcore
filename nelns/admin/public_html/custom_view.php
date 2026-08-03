@@ -21,11 +21,23 @@
 
 	unset($error);
 
+	// removeView and removeRow are plain hrefs, and SameSite=Lax still sends
+	// the session cookie on a top level navigation; make the link carry a
+	// token so someone else's page cannot spend a click deleting a view.
+	$nelnsCsrf = nelnsCsrfToken();
+	$nelnsCsrfUrl = '&csrf='.rawurlencode($nelnsCsrf);
+	$nelnsCsrfOk = nelnsCsrfCheck(isset($csrf) ? $csrf : '');
+	if (!$nelnsCsrfOk)
+	{
+		unset($removeView);
+		unset($removeRow);
+	}
+
 	function reorderViews($uid)
 	{
 		$result = sqlquery("SELECT tid FROM view_table WHERE uid='".intval($uid)."' ORDER BY ordering");
 		$i = 0;
-		while ($result && $arr = mysql_fetch_array($result))
+		while ($result && $arr = sqlfetch($result))
 		{
 			sqlquery("UPDATE view_table SET ordering='$i' WHERE tid='".$arr["tid"]."'");
 			++$i;
@@ -35,15 +47,15 @@
 	function swapView($uid, $ordering, $offs)
 	{
 		$result1 = sqlquery("SELECT tid FROM view_table WHERE uid='".intval($uid)."' AND ordering='".intval($ordering)."'");
-		if (!$result1 || mysql_num_rows($result1) != 1)
+		if (!$result1 || sqlnumrows($result1) != 1)
 			return;
-		$result1 = mysql_fetch_array($result1);
+		$result1 = sqlfetch($result1);
 		$tid1 = $result1["tid"];
 
 		$result2 = sqlquery("SELECT tid FROM view_table WHERE uid='".intval($uid)."' AND ordering='".(intval($ordering)+intval($offs))."'");
-		if (!$result2 || mysql_num_rows($result2) != 1)
+		if (!$result2 || sqlnumrows($result2) != 1)
 			return;
-		$result2 = mysql_fetch_array($result2);
+		$result2 = sqlfetch($result2);
 		$tid2 = $result2["tid"];
 		
 		sqlquery("UPDATE view_table SET ordering='".(intval($ordering)+intval($offs))."' WHERE uid='".intval($uid)."' AND tid='$tid1'");
@@ -57,7 +69,7 @@
 		
 		$rows = array();
 
-		while ($result && $arr = mysql_fetch_array($result))
+		while ($result && $arr = sqlfetch($result))
 			$rows[] = array($arr['vid'], $arr['ordering']);
 
 		if (count($rows) > 0)
@@ -81,15 +93,15 @@
 	{
 /*
 		$result1 = sqlquery("SELECT vid FROM view_row WHERE tid='$tid' AND ordering='$ordering'");
-		if (!$result1 || mysql_num_rows($result1) != 1)
+		if (!$result1 || sqlnumrows($result1) != 1)
 			return;
-		$result1 = mysql_fetch_array($result1);
+		$result1 = sqlfetch($result1);
 		$vid1 = $result1["vid"];
 
 		$result2 = sqlquery("SELECT vid FROM view_row WHERE tid='$tid' AND ordering='".($ordering+$offs)."'");
-		if (!$result2 || mysql_num_rows($result2) != 1)
+		if (!$result2 || sqlnumrows($result2) != 1)
 			return;
-		$result2 = mysql_fetch_array($result2);
+		$result2 = sqlfetch($result2);
 		$vid2 = $result2["vid"];
 		
 		sqlquery("UPDATE view_row SET ordering='".($ordering+$offs)."' WHERE tid='$tid' AND vid='".($vid1)."'");
@@ -110,7 +122,7 @@
 	{
 		// create a table in view_table
 		$result = sqlquery("SELECT tid FROM view_table WHERE uid='".intval($uid)."' AND name='".sqlescape($viewname)."'");
-		if ($result && mysql_num_rows($result) != 0)
+		if ($result && sqlnumrows($result) != 0)
 		{
 			$error = $error."Couldn't create view '".htmlspecialchars($viewname, ENT_QUOTES)."', name already in use<br>\n";
 		}
@@ -122,7 +134,7 @@
 				$error = $error."Couldn't create view '".htmlspecialchars($viewname, ENT_QUOTES)."', mySQL request failed<br>\n";
 			}
 			$result = sqlquery("SELECT tid FROM view_table WHERE uid='".intval($uid)."' AND name='".sqlescape($viewname)."'");
-			$result = mysql_fetch_array($result);
+			$result = sqlfetch($result);
 			$tid = $result["tid"];
 
 			reorderViews(intval($uid));
@@ -158,7 +170,7 @@
 	else if (isset($removeView))
 	{
 		if (!($result = sqlquery("DELETE FROM view_table WHERE uid='".intval($uid)."' AND tid='".intval($removeView)."'"))
-			 || mysql_affected_rows() < 1)
+			 || sqlaffectedrows() < 1)
 		{
 			$error = $error."Couldn't remove view ".htmlspecialchars($removeView, ENT_QUOTES).", missing or user doesn't own it<br>\n";
 		}
@@ -204,13 +216,13 @@
 		if (hasAccessToVariable($addToView))
 		{
 			if (!($resultt = sqlquery("SELECT name FROM view_table WHERE uid='".intval($uid)."' AND tid='".intval($tid)."'"))
-						|| mysql_num_rows($resultt) != 1)
+						|| sqlnumrows($resultt) != 1)
 			{
 				$error = $error."Couldn't add variable ".htmlspecialchars($addToView, ENT_QUOTES)." to view ".htmlspecialchars($tid, ENT_QUOTES).", view is missing or user doesn't own it<br>\n";
 			}
 			else
 			{
-				$resultt = mysql_fetch_array($resultt);
+				$resultt = sqlfetch($resultt);
 				$result = sqlquery("INSERT INTO view_row SET tid='".intval($tid)."', vid='".intval($addToView)."', name='".sqlescape($variableData[$addToView]["name"])."', ordering='255'");
 				if (!$result)
 					$error = $error."Couldn't add variable ".htmlspecialchars($variableData[$addToView]["name"], ENT_QUOTES)." to view ".htmlspecialchars($resultt["name"], ENT_QUOTES).", query failed";
@@ -223,10 +235,10 @@
 	else if (isset($removeRow) && isset($tid))
 	{
 		$result = sqlquery("SELECT uid FROM view_table WHERE tid='".intval($tid)."' AND uid='".intval($uid)."'");
-		if ($result && mysql_num_rows($result)>0)
+		if ($result && sqlnumrows($result)>0)
 		{
 			if (!($result = sqlquery("DELETE FROM view_row WHERE tid='".intval($tid)."' AND ordering='".intval($removeRow)."'"))
-				 || mysql_affected_rows() < 1)
+				 || sqlaffectedrows() < 1)
 			{
 				$error = $error."Couldn't remove row ".htmlspecialchars($removeRow, ENT_QUOTES).", missing or user doesn't own it<br>\n";
 			}
@@ -240,14 +252,14 @@
 	else if (isset($moveRow) && isset($tid) && isset($offs))
 	{
 		$result = sqlquery("SELECT uid FROM view_table WHERE tid='".intval($tid)."' AND uid='".intval($uid)."'");
-		if ($result && mysql_num_rows($result)>0)
+		if ($result && sqlnumrows($result)>0)
 			swapRows(intval($tid), intval($moveRow), intval($offs));
 	}
 	// change a variable name
 	else if ($changeVarName && isset($vid) && isset($tid))
 	{
 		$result = sqlquery("SELECT uid FROM view_table WHERE tid='".intval($tid)."' AND uid='".intval($uid)."'");
-		if ($result && mysql_num_rows($result)>0)
+		if ($result && sqlnumrows($result)>0)
 		{
 			$result = sqlquery("UPDATE view_row SET name='".sqlescape($changeVarName)."' WHERE vid='".intval($vid)."' AND tid='".intval($tid)."'");
 		}
@@ -256,7 +268,7 @@
 	else if (isset($changeVarFilter) && isset($vid) && isset($tid))
 	{
 		$result = sqlquery("SELECT uid FROM view_table WHERE tid='".intval($tid)."' AND uid='".intval($uid)."'");
-		if ($result && mysql_num_rows($result)>0)
+		if ($result && sqlnumrows($result)>0)
 		{
 			$result = sqlquery("UPDATE view_row SET filter='".sqlescape($changeVarFilter)."' WHERE vid='".intval($vid)."' AND tid='".intval($tid)."'");
 		}
@@ -380,7 +392,7 @@
 			$self = htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES);
 			echo "<tr><td$color>".intval($arr["ordering"])."</td>";
 			echo 		"<td$color><input type=radio name=default_view value='$_tid' onClick='submit()'".($_tid==$default_view ? " checked" : "")."><a href='$self?tid=$_tid&sel_vgid=".intval($sel_vgid)."'>$_tname</a></td>".
-						"<td$color><a href='$self?removeView=$_tid&tid=".intval($tid)."&sel_vgid=".intval($sel_vgid)."' onClick=\"return confirm('You are about to delete a View')\">Delete</a> ".
+						"<td$color><a href='$self?removeView=$_tid$nelnsCsrfUrl&tid=".intval($tid)."&sel_vgid=".intval($sel_vgid)."' onClick=\"return confirm('You are about to delete a View')\">Delete</a> ".
 							 "<a href='$self?moveView=".intval($arr["ordering"])."&offs=+1&tid=".intval($tid)."&sel_vgid=".intval($sel_vgid)."'>-</a> ".
 							 "<a href='$self?moveView=".intval($arr["ordering"])."&offs=-1&tid=".intval($tid)."&sel_vgid=".intval($sel_vgid)."'>+</a> ".
 							 "<a href='$self?dupView=true&tid=$_tid&offs=-1&sel_vgid=".intval($sel_vgid)."'>Duplicate</a></td></tr>\n";
@@ -421,7 +433,7 @@
 	if (isset($tid))
 	{
 		$result = sqlquery("SELECT name, uid, filter, display, auto_display, refresh_rate FROM view_table WHERE (uid='".intval($uid)."' OR uid='".intval($gid)."') AND tid='".intval($tid)."'");
-		if (!$result || mysql_num_rows($result) == 0)
+		if (!$result || sqlnumrows($result) == 0)
 		{
 			echo "<br><b>Can't display table ".htmlspecialchars($tid, ENT_QUOTES)."</b><br>\n";
 		}
@@ -429,7 +441,7 @@
 		{
 			echo "<table cellpadding=0 cellspacing=0><tr valign=top><td>\n";
 
-			$result = mysql_fetch_array($result);
+			$result = sqlfetch($result);
 			$viewName = $result["name"];
 			$viewFilter = $result["filter"];
 			$viewDisplay = $result["display"];
@@ -468,7 +480,7 @@
 			unset($rows);
 
 			echo "<tr><th>Index</th><th><b>Variable</b></th><th>Path</th><th>Privilege</th><th>Filter</th><th>Graph</th><th>Commands</th></tr>\n";
-			while ($arr = mysql_fetch_array($result))
+			while ($arr = sqlfetch($result))
 			{
 				$vid = $arr["vid"];
 				
@@ -489,7 +501,7 @@
 								"<td>".htmlspecialchars($priv, ENT_QUOTES)."</td>".
 								"<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=".intval($sel_vgid)."&vid=".intval($vid)."&tid=".intval($tid)."'><td><input type=text name=changeVarFilter maxlength=64 size=16 value='".htmlspecialchars($arr["filter"], ENT_QUOTES)."'></td></form>".
 								"<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=".intval($sel_vgid)."&changeVidGraph=".intval($vid)."&tid=".intval($tid)."'><td><input type=checkBox name=graphState".($arr["graph"] != 0 ? " checked" : "")." onClick='submit()'></td></form>".
-								"<td><a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?removeRow=".intval($ordering)."&tid=".intval($tid)."&sel_vgid=".intval($sel_vgid)."' onClick=\"return confirm('You are about to delete a Variable from a View')\">Delete</a> ".
+								"<td><a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?removeRow=".intval($ordering)."$nelnsCsrfUrl&tid=".intval($tid)."&sel_vgid=".intval($sel_vgid)."' onClick=\"return confirm('You are about to delete a Variable from a View')\">Delete</a> ".
 									 "<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?moveRow=".intval($ordering)."&tid=".intval($tid)."&offs=+1&sel_vgid=".intval($sel_vgid)."'>-</a> ".
 									 "<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?moveRow=".intval($ordering)."&tid=".intval($tid)."&offs=-1&sel_vgid=".intval($sel_vgid)."'>+</a></td></tr>\n";
 				}
@@ -518,7 +530,7 @@
 			unset($rows);
 
 			echo "<tr><th>Index</th><th><b>Command</b></th><th colspan=2>Path</th><th colspan=2>Filter</th><th>Commands</th></tr>\n";
-			while ($arr = mysql_fetch_array($result))
+			while ($arr = sqlfetch($result))
 			{
 				$vid = $arr["vid"];
 				
@@ -537,7 +549,7 @@
 								"<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=".intval($sel_vgid)."&vid=".intval($vid)."&tid=".intval($tid)."'><td><input type=text name=changeVarName maxlength=128 size=16 value='".htmlspecialchars($arr["name"], ENT_QUOTES)."'></td></form>".
 								"<td colspan=2>".htmlspecialchars($arr["path"], ENT_QUOTES)."</td>".
 								"<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=".intval($sel_vgid)."&vid=".intval($vid)."&tid=".intval($tid)."'><td colspan=2><input type=text name=changeVarFilter maxlength=64 size=16 value='".htmlspecialchars($arr["filter"], ENT_QUOTES)."'></td></form>".
-								"<td><a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?removeRow=".intval($ordering)."&tid=".intval($tid)."&sel_vgid=".intval($sel_vgid)."' onClick=\"return confirm('You are about to delete a Variable from a View')\">Delete</a> ".
+								"<td><a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?removeRow=".intval($ordering)."$nelnsCsrfUrl&tid=".intval($tid)."&sel_vgid=".intval($sel_vgid)."' onClick=\"return confirm('You are about to delete a Variable from a View')\">Delete</a> ".
 									 "<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?moveRow=".intval($ordering)."&tid=".intval($tid)."&offs=+1&sel_vgid=".intval($sel_vgid)."'>-</a> ".
 									 "<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?moveRow=".intval($ordering)."&tid=".intval($tid)."&offs=-1&sel_vgid=".intval($sel_vgid)."'>+</a></td></tr>\n";
 				}
@@ -609,7 +621,7 @@
 				$prevvgid = "";
 				$prevvtype = "";
 	
-				while ($arr = mysql_fetch_array($result))
+				while ($arr = sqlfetch($result))
 				{
 					$vid = intval($arr["vid"]);
 					
