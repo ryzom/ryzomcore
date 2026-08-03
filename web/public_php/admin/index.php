@@ -1018,7 +1018,7 @@
 											}
 											else
 											{
-												$tpl->assign('tool_execute_command', 	htmlentities($service_command, ENT_QUOTES));
+												$tpl->assign('tool_execute_command', 	$service_command); // the template escapes it
 											}
 										}
 									}

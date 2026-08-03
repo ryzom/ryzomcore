@@ -267,7 +267,7 @@
 								if (isset($NELTOOL['POST_VARS']['service_text']) && !$file_name_error_msg && !$start_date_error_msg)
 								{
 									$service_text = trim(stripslashes(html_entity_decode($NELTOOL['POST_VARS']['service_text'], ENT_QUOTES)));
-									$tpl->assign('tool_form_service_text', htmlentities($service_text,ENT_QUOTES));
+									$tpl->assign('tool_form_service_text', $service_text); // the template escapes it
 
 									if ($service_text != '')
 									{
@@ -325,7 +325,7 @@
 											}
 											else
 											{
-												$tpl->assign('tool_execute_command', 	htmlentities($service_command, ENT_QUOTES));
+												$tpl->assign('tool_execute_command', 	$service_command); // the template escapes it
 											}
 										}
 									}

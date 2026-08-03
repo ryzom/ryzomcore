@@ -44,6 +44,17 @@
 	$tpl->clear_all_cache();
 	if (NELTOOL_DEBUG) $tpl->debugging = false;
 
+	// Escape every {$var} the templates print. None of them escaped anything
+	// themselves, so character names, guild names, service names and the text
+	// the shard sends back all landed in these pages as markup -- and these
+	// are the pages that restart services and move characters. The handful of
+	// values that are markup on purpose ask out with |smarty:nodefaults.
+	$tpl->default_modifiers = array('escape:"html"');
+	// A compiled template is only rebuilt when its source is newer than the
+	// compiled copy, and the setting above is not part of that comparison.
+	// Naming the compiled files after it gets everything rebuilt once.
+	$tpl->compile_id = 'esc';
+
 	if (defined('NELTOOL_NO_USER_NEEDED'))
 	{
 		// this is used for cron jobs that don't need authentifications when running

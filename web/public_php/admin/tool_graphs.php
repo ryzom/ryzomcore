@@ -188,7 +188,7 @@
 							exec($rrd_exec, $rrd_result, $rrd_code);
 
 							$file_description = str_replace(array('.rrd','.hrd','.'),
-															array('',    '',    '&nbsp;-&nbsp;'),
+															array('',    '',    ' - '),
 															$graph_item['rd_file']);
 
 							$time_string = '';
@@ -245,7 +245,7 @@
 							exec($rrd_exec, $rrd_result, $rrd_code);
 
 							$file_description = str_replace(array('.rrd','.hrd','.'),
-															array('',    '',    '&nbsp;-&nbsp;'),
+															array('',    '',    ' - '),
 															$graph_item['rd_file']);
 
 							$time_string = '';
@@ -343,7 +343,7 @@
 									}
 
 									$file_description = str_replace(array('.rrd','.hrd','.'),
-																	array('',    '',    '&nbsp;-&nbsp;'),
+																	array('',    '',    ' - '),
 																	$graph_item['rd_file']);
 
 									$time_string = '';

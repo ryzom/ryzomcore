@@ -65,7 +65,7 @@
 		{section name=note loop=$tool_note_list}
 		<tr class="{cycle values="row1,row0"}">
 			<td>{$tool_note_list[note].note_id}</td>
-			<td><a href="tool_notes.php?note_id={$tool_note_list[note].note_id}">{$tool_note_list[note].note_title}</a></td>
+			<td><a href="tool_notes.php?note_id={$tool_note_list[note].note_id}">{$tool_note_list[note].note_title|smarty:nodefaults}</a></td>
 			<td>{if $tool_note_list[note].note_mode  == 0}Text{else}Popup{/if}</td>
 			<td>{$tool_note_list[note].note_date|date_format:"%Y/%m/%d %H:%M:%S"}</td>
 			<td>{if $tool_note_list[note].note_active  == 1}Yes{else}No{/if}</td>
@@ -93,7 +93,7 @@
 {/if}
 		<tr>
 			<td align="right">Title :</td>
-			<td><input type="text" name="tool_form_note_title" value="{$tool_note_edit_data.note_title}" maxlength="64" size="100%"></td>
+			<td><input type="text" name="tool_form_note_title" value="{$tool_note_edit_data.note_title|smarty:nodefaults}" maxlength="64" size="100%"></td>
 		</tr>
 
 		<tr>
@@ -106,7 +106,7 @@
 
 		<tr id="note_mode_text" name="note_mode_text" {if $tool_note_edit_data.note_mode == 1}style="display: none;"{/if}>
 			<td align="right">Text :</td>
-			<td><textarea name="tool_form_note_data" rows="15">{$tool_note_edit_data.note_data}</textarea></td>
+			<td><textarea name="tool_form_note_data" rows="15">{$tool_note_edit_data.note_data|smarty:nodefaults}</textarea></td>
 		</tr>
 
 		<tr id="note_mode_popup_uri" name="note_mode_popup_uri" {if $tool_note_edit_data.note_mode == 0}style="display: none;"{/if}>

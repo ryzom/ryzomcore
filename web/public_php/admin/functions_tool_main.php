@@ -973,7 +973,8 @@
 		global $nel_user;
 		global $AS_Name, $AS_ShardName;
 
-		$annotation = htmlentities(trim($annotation), ENT_QUOTES);
+		// stored as typed; the template escapes it on the way out
+		$annotation = trim($annotation);
 
 		$data = tool_main_get_lock($domain_id, $shard_id);
 
