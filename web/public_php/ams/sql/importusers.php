@@ -7,10 +7,27 @@
     
     //require the pages that are being needed.
     require( '../../config.php' );
-    require( '../../../ams_lib/libinclude.php' );
-    ini_set( "display_errors", true );
+    require_once( $AMS_LIB . '/libinclude.php' );
+
+    // Log errors server-side; printing them here hands the caller the pdo
+    // message, which carries the connection details.
     error_reporting( E_ALL );
-    
+    ini_set( 'display_errors', '0' );
+    ini_set( 'log_errors', '1' );
+
+    // Meant to be run once when the ticket system is set up. Over http it
+    // walks the shard account table and writes to two databases, so anyone who
+    // could reach the url could make it run; require an admin session there,
+    // the same way the cron scripts do.
+    if (PHP_SAPI !== 'cli') {
+        session_start();
+        if (!isset($_SESSION['ticket_user']) || !Ticket_User::isAdmin(unserialize($_SESSION['ticket_user']))) {
+            header('HTTP/1.1 403 Forbidden');
+            echo 'Access denied';
+            return;
+        }
+    }
+
     //var used to access the DB;
     global $cfg;
     

@@ -192,8 +192,12 @@ class Mail_Handler{
                         $from = $group->getName()." <".$group->getGroupEmail().">";
                     }
                    
+                    // the group name and address are typed in the support
+                    // group form, so keep a newline in either of them from
+                    // starting a header of its own
+                    $from = str_replace(array("\r", "\n"), ' ', $from);
                     $headers = "From: $from\r\n" . "Message-ID: " . $message_id ;
-                   
+
                     if(mail($email['Recipient'], $email['Subject'], $email['Body'], $headers)) {       
                         $status = "DELIVERED";        
                         error_log("Emailed {$email['Recipient']}\n", 3, $MAIL_LOG_PATH);

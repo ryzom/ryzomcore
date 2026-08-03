@@ -204,6 +204,13 @@ class Users{
      */
      public static function validEmail( $email ){
           $isValid = true;
+          // The address is handed to mail() as the recipient, so a control
+          // character in it can start a header of the sender's choosing. The
+          // quoted form of the local part below accepts anything that is not
+          // a double quote, newlines included, so rule them out up front.
+          if ( !is_string( $email ) || preg_match( '/[\\x00-\\x1F\\x7F]/', $email ) ){
+               return false;
+          }
           $atIndex = strrpos( $email, "@" );
           if ( is_bool( $atIndex ) && !$atIndex ){
                $isValid = false;

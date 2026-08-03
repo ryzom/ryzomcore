@@ -19,6 +19,18 @@
 	include_once('mail_utils.php');
 	include_once('thread_utils.php');
 
+	// This is the hand test form for the mail and forum pages. The blocks
+	// below read their arguments as bare globals, which only ever worked with
+	// register_globals: importParam() is what turns a request into a global
+	// here, and it is never called for any of these names. Say so, so nobody
+	// wires them up to the request and hands every caller a rebuild and remove
+	// button for any user's mailbox and forum.
+	$enter_login = isset($enter_login) ? $enter_login : false;
+	$rebuild_mailbox = isset($rebuild_mailbox) ? $rebuild_mailbox : false;
+	$rebuild_forum = isset($rebuild_forum) ? $rebuild_forum : false;
+	$rebuild_thread = isset($rebuild_thread) ? $rebuild_thread : false;
+	$remove_thread = isset($remove_thread) ? $remove_thread : false;
+
 	if ($enter_login)
 	{
 		if ($login)
@@ -71,7 +83,7 @@
 	echo "<br><hr><br>\n";
 
 	echo "<table><form method=post action='form_post.php'>\n";
-	echo "<tr valign=top><td>Login</td><td><input type=text name='login' size=50 maxlength=255 value='$user_login'></td></tr>\n";
+	echo "<tr valign=top><td>Login</td><td><input type=text name='login' size=50 maxlength=255 value='".htmlspecialchars($user_login, ENT_QUOTES)."'></td></tr>\n";
 	echo "<tr valign=top><td></td><td><input type=submit name='enter_login' value='Enter'></td></tr>\n";
 	echo "</form></table>\n";
 
