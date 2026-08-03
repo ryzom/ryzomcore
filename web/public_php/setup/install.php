@@ -38,6 +38,23 @@ $shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 		printalert("danger", "No server roles selected");
 		$continue = false;
 	}
+
+	// Every password field on this form used to arrive pre-filled with
+	// "admin", so clicking through the wizard shipped an install whose setup
+	// page -- the gate on the installer and on every later upgrade -- and
+	// whose shard admin account both had a password everybody knows. The
+	// fields are empty now; refuse the old value and the empty one here too,
+	// since the browser is not the thing to trust with that.
+	$passwordFields = array('nelSetupPassword' => 'Setup Password');
+	if ($roleService)	$passwordFields['toolsAdminPassword'] = 'Admin Password (shard tools)';
+	if ($roleSupport)	$passwordFields['amsAdminPassword'] = 'Admin Password (AMS)';
+	foreach ($passwordFields as $field => $label) {
+		$value = isset($_POST[$field]) ? (string)$_POST[$field] : '';
+		if ($value === '' || strtolower($value) === 'admin' || strlen($value) < 8) {
+			printalert("danger", htmlentities($label) . " must be set, at least 8 characters, and not <em>admin</em>");
+			$continue = false;
+		}
+	}
     
 	if ($continue) {
 		try {
@@ -405,7 +422,7 @@ $shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 						<div class="form-group">
 							<label for="nelSetupPassword" class="col-sm-3 control-label">Setup Password</label>
 							<div class="col-sm-6">
-								<input type="password" class="form-control" id="nelSetupPassword" name="nelSetupPassword" value="admin">
+								<input type="password" class="form-control" id="nelSetupPassword" name="nelSetupPassword" value="" required autocomplete="new-password" placeholder="Required">
 							</div>
 						</div>
 					</div>
@@ -474,7 +491,7 @@ $shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 						<div class="form-group">
 							<label for="toolsAdminPassword" class="col-sm-3 control-label">Admin Password</label>
 							<div class="col-sm-6">
-								<input type="password" class="form-control" id="toolsAdminPassword" name="toolsAdminPassword" value="admin">
+								<input type="password" class="form-control" id="toolsAdminPassword" name="toolsAdminPassword" value="" required autocomplete="new-password" placeholder="Required">
 							</div>
 						</div>
 					</div>
@@ -505,7 +522,7 @@ $shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 						<div class="form-group">
 							<label for="amsAdminPassword" class="col-sm-3 control-label">Admin Password</label>
 							<div class="col-sm-6">
-								<input type="password" class="form-control" id="amsAdminPassword" name="amsAdminPassword" value="admin">
+								<input type="password" class="form-control" id="amsAdminPassword" name="amsAdminPassword" value="" required autocomplete="new-password" placeholder="Required">
 							</div>
 						</div>
 					</div>

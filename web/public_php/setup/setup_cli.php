@@ -21,9 +21,9 @@
  *   --domain-db=NAME          Ring domain database name (default: ring_dev or ring_HOSTNAME)
  *   --domain-name=NAME        Domain name (default: dev or HOSTNAME)
  *   --users-dir=PATH          Users directory for MFS (auto-detected)
- *   --setup-password=PASS     Setup password (default: admin)
+ *   --setup-password=PASS     Setup password (required unless --dev)
  *   --admin-user=USER         Shard admin username (default: admin)
- *   --admin-pass=PASS         Shard admin password (default: admin)
+ *   --admin-pass=PASS         Shard admin password (required unless --dev)
  *   --private-php=PATH        Private PHP directory (default: ../private_php/)
  *   --role-service            Enable service role (default: enabled)
  *   --role-domain             Enable domain role (default: enabled)
@@ -128,9 +128,9 @@ Install options:
   --domain-db=NAME          Ring domain database name
   --domain-name=NAME        Domain name
   --users-dir=PATH          Users directory for MFS
-  --setup-password=PASS     Setup password (default: admin)
+  --setup-password=PASS     Setup password (required unless --dev)
   --admin-user=USER         Shard admin username (default: admin)
-  --admin-pass=PASS         Shard admin password (default: admin)
+  --admin-pass=PASS         Shard admin password (required unless --dev)
   --private-php=PATH        Private PHP directory (default: ../private_php/)
   --no-role-service         Disable service role
   --no-role-support         Disable support role
@@ -181,6 +181,26 @@ function run_install($opts)
 	if (!$roleService && !$roleSupport && !$roleDomain) {
 		cli_err("No server roles enabled. At least one role must be active.");
 		exit(1);
+	}
+
+	// 'admin' as the setup password and as the shard admin password is fine
+	// for a throwaway --dev shard and is exactly what nobody should end up
+	// running in front of players: the setup password is the gate on the
+	// installer and upgrade pages, and the admin account drives services.
+	// Outside --dev, ask for them.
+	if (!$isDev) {
+		$weak = array();
+		if (!isset($opts['setup-password']) || $opts['setup-password'] === true || $opts['setup-password'] === 'admin')
+			$weak[] = '--setup-password';
+		if (!isset($opts['admin-pass']) || $opts['admin-pass'] === true || $opts['admin-pass'] === 'admin')
+			$weak[] = '--admin-pass';
+		if (!empty($weak)) {
+			cli_err("Refusing to install with the built-in password for: " . implode(', ', $weak));
+			cli_err("Pass a password of your own, or add --dev for a throwaway development shard.");
+			exit(1);
+		}
+	} else if ($setupPass === 'admin' || $adminPass === 'admin') {
+		cli_warn("Development install: setup and/or admin password left at 'admin'.");
 	}
 
 	// Check already installed
