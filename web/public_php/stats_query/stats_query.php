@@ -168,9 +168,9 @@
 		}
 
 
-		$str = str_replace("'", "", $str);
-		$str = str_replace( '"', "", $str);
-
+		// Strip-quotes was not enough (backslash, multibyte, etc.); escape
+		// the same way stats.php already does for the same table.
+		$str = mysqli_real_escape_string($link, $str);
 
 		$query= "INSERT INTO `log` ( `log` )"
 			. "VALUES ("

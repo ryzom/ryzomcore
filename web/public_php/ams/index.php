@@ -44,14 +44,9 @@ header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
 header("Pragma: no-cache");
 
-// Running Cron
-if ( isset( $_GET["cron"] ) ) {
-    if ( $_GET["cron"] == "true" ) {
-        Sync :: syncdata( false );
-         }
-    }
-
-// Always try to sync on page load, ie "lazy" cron
+// Always try to sync on page load, ie "lazy" cron. A ?cron=true shortcut used
+// to force a full sync for any anonymous caller; the dedicated cron scripts
+// under cron/ are the place for an on-demand run, and they check admin.
 Sync :: syncdata( false );
 
 /**

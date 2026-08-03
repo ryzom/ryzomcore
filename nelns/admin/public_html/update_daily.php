@@ -15,10 +15,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-	if ($REMOTE_ADDR != '195.68.21.194')
+	// Was $REMOTE_ADDR (a bare global), which is not set from the request on
+	// modern PHP — so the check either always failed closed, or, if something
+	// else filled the global, could be spoofed. Only the real peer address.
+	if (!isset($_SERVER['REMOTE_ADDR']) || $_SERVER['REMOTE_ADDR'] !== '195.68.21.194')
 		die();
 
-	if (!isset($version))
+	// $version used to arrive as a bare global; take it from the request and
+	// keep it to a short printable string before it hits the shard row.
+	$version = isset($_GET['version']) ? $_GET['version'] : (isset($_POST['version']) ? $_POST['version'] : null);
+	if (!is_string($version) || $version === '' || strlen($version) > 64 || !preg_match('/^[A-Za-z0-9._+-]+$/', $version))
 		die('NO VERSION SET');
 
 	include('../config.php');

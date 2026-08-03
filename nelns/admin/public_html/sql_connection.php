@@ -81,10 +81,14 @@
 		}
 	}
 	
-	if ($queries)
+	// sqlPopup() opens this script with ?queries=... so it can show the
+	// query text. Only accept it from the query string (not as a bare
+	// global — that path used to exist under register_globals), and escape
+	// it: the text is whatever the caller put in the url.
+	if (isset($_GET['queries']) && is_string($_GET['queries']))
 	{
 		echo "<textarea rows=15 cols=100 readOnly>";
-		echo "$queries";
+		echo htmlspecialchars($_GET['queries'], ENT_QUOTES);
 		echo "</textarea>\n";
 		die();
 	}
