@@ -28,12 +28,10 @@
 		
 		// read the ip and compare with client ip
 		$cookie = $_COOKIE["ryzomId"];
-		echo "Cookie is $cookie<BR>";
+		// the cookie is this user's credential: do not print it back out
 		sscanf($cookie, "%02X%02X%02X%02X", $b0, $b1, $b2, $b3);
 		$addr = $b0 + ($b1<<8) + ($b2<<16) + ($b3<<24);
-		printf("Addr is %X<BR>", $addr);
 		$addrStr = long2ip($addr);
-		echo "addrStr is $addrStr<br>";
 
 		if ($_SERVER["REMOTE_ADDR"] != $addrStr)
 		{
@@ -51,7 +49,7 @@
 
 		if (mysqli_num_rows($result) == 0)
 		{
-			echo "Can't find cookie $cookie in database<BR>";
+			echo "Can't find cookie in database<BR>";
 			return false;
 		}
 		
@@ -59,7 +57,7 @@
 		
 		if ($row["current_status"] != "cs_logged" && $row["current_status"] != "cs_online" )
 		{
-			echo "User $row[user_id] is not looged or online<BR>";
+			echo "User ".htmlspecialchars($row["user_id"], ENT_QUOTES)." is not looged or online<BR>";
 			return false;
 		}
 		

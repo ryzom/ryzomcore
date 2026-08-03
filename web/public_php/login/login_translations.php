@@ -307,8 +307,12 @@ function errorMsg($errNum=GENERIC_ERROR_NUM) // $mixedArgs
 // Helper for errorMsg()
 function appendToMsg(&$msg, $errNum, $str, &$args)
 {
+	global $DisplayDbg;
 	$msg .= "$str ($errNum)";
-	if (($errNum == GENERIC_ERROR_NUM) && !empty($args))
+	// The arguments of an undescribed error carry whatever the call site
+	// passed -- database host, user, the query, the mysql error. Only show
+	// them when debug output is enabled server side.
+	if (($errNum == GENERIC_ERROR_NUM) && !empty($args) && isset($DisplayDbg) && $DisplayDbg)
 	{
 		foreach ($args as $arg)
 		{

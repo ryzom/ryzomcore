@@ -12,13 +12,13 @@
 			
 			if ($resultCode != 0)
 			{
-				echo "<h1>Error ".$resultCode." : '".$resultString."' will trying to close the session ".$_POST["sessionId"]."</h1>";
+				echo "<h1>Error ".htmlspecialchars($resultCode, ENT_QUOTES)." : '".htmlspecialchars($resultString, ENT_QUOTES)."' will trying to close the session ".htmlspecialchars($_POST["sessionId"], ENT_QUOTES)."</h1>";
 				echo '<p><p><a href="web_start.php">Back to menu</a>';
 			}
 			else
 			{
 				// ok, the session is closed (or almost to close)
-				echo "<h1>Session ".$_POST["sessionId"]." is begin closed</h1>";
+				echo "<h1>Session ".htmlspecialchars($_POST["sessionId"], ENT_QUOTES)." is begin closed</h1>";
 				echo '<p><a href="web_start.php">Return to main</a> </p>';
 			}
 		}

@@ -12,7 +12,7 @@
 		die();
 	}
 	
-	echo "edit_session : user id = '$userId', char = '$charId', domain = '$domainId'<br>";
+	echo "edit_session : user id = '".htmlspecialchars($userId, ENT_QUOTES)."', char = '".htmlspecialchars($charId, ENT_QUOTES)."', domain = '".htmlspecialchars($domainId, ENT_QUOTES)."'<br>";
 	
 	$domainInfo = getDomainInfo($domainId);
 	
@@ -62,7 +62,7 @@
 		$row = mysqli_fetch_assoc($result);
 		$sessionId = $row['session_id'];
 		$state = $row['state'];
-		echo "Found your session: $sessionId ($state)<br>";
+		echo "Found your session: ".htmlspecialchars($sessionId, ENT_QUOTES)." (".htmlspecialchars($state, ENT_QUOTES).")<br>";
 		if ($state == "ss_planned")
 		{
 			// First, start the session

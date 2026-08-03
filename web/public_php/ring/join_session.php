@@ -14,7 +14,7 @@ class JoinSessionCb extends CRingSessionManagerWeb
 	{
 		if ($result != 0)
 		{
-			echo "<h1>Error ".$result." : '".$shardAddr."' while trying to join a session </h1>";
+			echo "<h1>Error ".htmlspecialchars($result, ENT_QUOTES)." : '".htmlspecialchars($shardAddr, ENT_QUOTES)."' while trying to join a session </h1>";
 			echo '<p><p><a href="web_start.php">Back to menu</a>';
 		}
 		else
@@ -65,7 +65,7 @@ function joinSessionFromId( $userId, $domainId, $destSessionId )
 	}
 	else
 	{
-		echo "Welcome user $userId<BR>";
+		echo "Welcome user ".htmlspecialchars($userId, ENT_QUOTES)."<BR>";
 		
 		$domainInfo = getDomainInfo($domainId);
 		$addr = split(":", $domainInfo["session_manager_address"]);
@@ -80,7 +80,7 @@ function joinSessionFromId( $userId, $domainId, $destSessionId )
 
 //		$charSlot = getCharSlot(); // if ingame (!=15), the RSM will check if this character has the right to connect to the specified session
 //		$charId = ($userId<<4) + $charSlot;
-		echo $charId." of user ".$userId." joigning session ".$destSessionId."<br>";
+		echo htmlspecialchars($charId, ENT_QUOTES)." of user ".htmlspecialchars($userId, ENT_QUOTES)." joigning session ".htmlspecialchars($destSessionId, ENT_QUOTES)."<br>";
 		$joinSession->joinSession($charId, $destSessionId, $domainInfo["domain_name"]);
 		
 		// wait the the return message

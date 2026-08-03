@@ -25,7 +25,13 @@ class Logger
 
 	function __construct()
 	{
-		$this->lf = fopen( 'log.txt', 'a' );
+		// This log holds whatever was posted to submit.php, and this
+		// directory is served: writing log.txt next to submit.php publishes
+		// it. Keep it under the private path instead.
+		global $PRIVATE_PHP_PATH;
+		$dir = ( isset( $PRIVATE_PHP_PATH ) && $PRIVATE_PHP_PATH != '' ) ? rtrim( $PRIVATE_PHP_PATH, '/' ) : sys_get_temp_dir();
+
+		$this->lf = fopen( $dir . '/crash_report.log', 'a' );
 		if( $this->lf === FALSE )
 			exit( 1 );
 	}

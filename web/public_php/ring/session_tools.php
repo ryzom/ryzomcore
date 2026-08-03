@@ -54,13 +54,13 @@ class ScheduleSessionCb extends CRingSessionManagerWeb
 		if ($result == 0)
 		{
 			$SessionToolsResult = true;
-			echo "Session $sessionId created for char $charId<br>";
+			echo "Session ".htmlspecialchars($sessionId, ENT_QUOTES)." created for char ".htmlspecialchars($charId, ENT_QUOTES)."<br>";
 			echo "<h2>Your session has been planned, thank you<h2><br>";
 		}
 		else
 		{
 			$SessionToolsResult = false;
-			echo "Failed to create a session for char $charId with error $resultString <br>";
+			echo "Failed to create a session for char ".htmlspecialchars($charId, ENT_QUOTES)." with error ".htmlspecialchars($resultString, ENT_QUOTES)." <br>";
 		}
 	}
 }
@@ -151,7 +151,7 @@ class StartSessionCb extends CRingSessionManagerWeb
 		if ($resultCode != 0)
 		{
 			$SessionToolsResult = false;
-			echo "<h1>Error ".$resultCode." : '".$resultString."' while trying to start the session ".$SessionId."</h1>";
+			echo "<h1>Error ".htmlspecialchars($resultCode, ENT_QUOTES)." : '".htmlspecialchars($resultString, ENT_QUOTES)."' while trying to start the session ".htmlspecialchars($SessionId, ENT_QUOTES)."</h1>";
 			echo '<p><p><a href="web_start.php">Back to menu</a>';
 		}
 		else
@@ -183,7 +183,7 @@ class InviteOwnerCb extends CRingSessionManagerWeb
 		{
 			$SessionToolsResult = false;
 			echo "<h1>Failed to invite you in the started session !</h1>";
-			echo "<h1>Error ".$resultCode." : '".$resultString."' while trying to join the session ".$SessionId."</h1>";
+			echo "<h1>Error ".htmlspecialchars($resultCode, ENT_QUOTES)." : '".htmlspecialchars($resultString, ENT_QUOTES)."' while trying to join the session ".htmlspecialchars($SessionId, ENT_QUOTES)."</h1>";
 		}
 		echo '<p><p><a href="web_start.php">Back to menu</a>';
 	}

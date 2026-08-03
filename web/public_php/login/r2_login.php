@@ -166,8 +166,13 @@
 	}
 
 	$submittedLang = isset($_GET['lg']) ? $_GET['lg'] : 'unknown';
-	if (isset($_GET['dbg']) && ($_GET['dbg'] == 1))
-		$DisplayDbg = true;
+	// The debug variant of the messages carries the database host, the
+	// database user, the failing query and the mysql error text. This
+	// endpoint is reachable by anyone, so the client does not get to ask
+	// for it: $LoginAllowDbg has to be turned on in the site config.
+	global $LoginAllowDbg;
+	$DisplayDbg = (isset($LoginAllowDbg) && $LoginAllowDbg)
+		&& isset($_GET['dbg']) && ($_GET['dbg'] == 1);
 
 	switch($_GET['cmd'])
 	{
@@ -347,7 +352,9 @@
 		{
 			$row = mysqli_fetch_assoc ($result);
 			$salt = get_salt($row["Password"]);
-			if (($cp && $row["Password"] == $password) || (!$cp && $row["Password"] == crypt($password, $salt)))
+			// compare without leaking where the two values stop matching
+			$stored = (string)$row["Password"];
+			if (($cp && hash_equals($stored, (string)$password)) || (!$cp && hash_equals($stored, (string)crypt($password, $salt))))
 			{
 				// Store the real login (with correct case)
 				$_GET['login'] = $row['Login'];

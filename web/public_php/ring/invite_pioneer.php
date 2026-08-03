@@ -14,11 +14,11 @@
 
 			if ($resultCode == 0)
 			{
-				echo "<h1>The character ".$_POST["charName"]." have been invited in session ".$_POST["sessionId"].".</h1>";
+				echo "<h1>The character ".htmlspecialchars($_POST["charName"], ENT_QUOTES)." have been invited in session ".htmlspecialchars($_POST["sessionId"], ENT_QUOTES).".</h1>";
 			}
 			else
 			{
-				echo "<h1>Failed to invite player ".$_POST["charName"]." in session ".$_POST["sessionId"]." : ".$resultString."</h1>";
+				echo "<h1>Failed to invite player ".htmlspecialchars($_POST["charName"], ENT_QUOTES)." in session ".htmlspecialchars($_POST["sessionId"], ENT_QUOTES)." : ".htmlspecialchars($resultString, ENT_QUOTES)."</h1>";
 			}	
 		}
 	}
@@ -32,7 +32,7 @@
 		die();
 	}
 
-	echo "Welcome user $userId<BR>";
+	echo "Welcome user ".htmlspecialchars($userId, ENT_QUOTES)."<BR>";
 	
 	$domainInfo = getDomainInfo($domainId);
 	$addr = split(":", $domainInfo["session_manager_address"]);
@@ -54,7 +54,7 @@
 
 		if (mysqli_num_rows($result) == 0)
 		{
-			echo "<h1>Can't find the character ".$_POST["charName"]."<h1>";
+			echo "<h1>Can't find the character ".htmlspecialchars($_POST["charName"], ENT_QUOTES)."<h1>";
 		}
 		else
 		{
@@ -84,12 +84,12 @@
 	{
 		// buid a form to gather info about the character to invite
 
-		echo "<h1>Invite a player in the session ".$_POST["sessionId"]."</h1>";
+		echo "<h1>Invite a player in the session ".htmlspecialchars($_POST["sessionId"], ENT_QUOTES)."</h1>";
 		echo "<form action='invite_pioneer.php' method='post'>Type in character name:<br>";
 		echo "<input type='text' name='charName' value=''>";
 		echo "<input type='submit' name='button' value='Invite'>";
-		echo "<input type='hidden' name='sessionId' value='".$_POST["sessionId"]."'>";
-		echo "<input type='hidden' name='mode' value='".$_POST["mode"]."'>";
+		echo "<input type='hidden' name='sessionId' value='".htmlspecialchars($_POST["sessionId"], ENT_QUOTES)."'>";
+		echo "<input type='hidden' name='mode' value='".htmlspecialchars($_POST["mode"], ENT_QUOTES)."'>";
 		echo "<input type='hidden' name='execute'>";
 		echo "</form> ";
 	}

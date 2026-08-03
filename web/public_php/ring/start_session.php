@@ -15,7 +15,7 @@
 	}
 	else
 	{
-		echo "Welcome user $userId<BR>";
+		echo "Welcome user ".htmlspecialchars($userId, ENT_QUOTES)."<BR>";
 		
 		startSession($charId, $domainId, $_POST["sessionId"]);
 //		inviteOwnerInSession($charId, $domainId, $_POST["sessionId"]);
