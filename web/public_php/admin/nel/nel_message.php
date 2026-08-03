@@ -222,7 +222,7 @@
 				debug('Connection timed out!');
 				return false;
 			}
-			$size = ord($val) << 16;
+			$size += ord($val) << 16; // += : an assignment here dropped the high byte
 			$val = fread ($this->ConSock, 1);
 			$info = stream_get_meta_data($this->ConSock);
 			if ($info['timed_out']) 
