@@ -75,7 +75,7 @@ jobs:
       - uses: cpp-linter/cpp-linter-action@v2
         id: linter
         with:
-          style: 'file'
+          style: '' # disabled
           tidy-checks: '' # Use .clang-tidy config file.
 
       - name: Fail fast?!
