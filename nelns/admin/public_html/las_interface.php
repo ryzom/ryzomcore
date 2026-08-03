@@ -124,11 +124,11 @@
 			if ($las_address == $las['address'])
 			{
 				$selectedLAS = $las;
-				echo "<option value='".$las['address']."' selected>".$las['shard']." ".$las['server']." ".$las['service']."\n";
+				echo "<option value='".htmlspecialchars($las['address'], ENT_QUOTES)."' selected>".htmlspecialchars($las['shard']." ".$las['server']." ".$las['service'], ENT_QUOTES)."\n";
 			}
 			else
 			{
-				echo "<option value='".$las['address']."'>".$las['shard']." ".$las['server']." ".$las['service']."\n";
+				echo "<option value='".htmlspecialchars($las['address'], ENT_QUOTES)."'>".htmlspecialchars($las['shard']." ".$las['server']." ".$las['service'], ENT_QUOTES)."\n";
 			}
 		}
 	}
@@ -354,9 +354,13 @@
 					$bg = (($i & 1) == 0 ? '#F8F8FF' : '#F0F0F8');
 					++$i;
 					echo "<tr bgcolor=$bg>";
+					// LAS returns these strings; escape before HTML.
+					$qa0 = isset($qa[0]) ? htmlspecialchars($qa[0], ENT_QUOTES) : '';
+					$qa2 = isset($qa[2]) ? htmlspecialchars($qa[2], ENT_QUOTES) : '';
+					$qa3 = isset($qa[3]) ? htmlspecialchars($qa[3], ENT_QUOTES) : '';
 					if ($qa[1] == 2)
 					{
-						echo "<td>".$qa[0]."</td>";
+						echo "<td>".$qa0."</td>";
 						$refstr = htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?refresh_result=1"
 							."&las_address=".rawurlencode($selectedLAS['address'])
 							."&query_id=".rawurlencode($qa[0])
@@ -366,19 +370,19 @@
 							."&start_date=".rawurlencode($start_date)
 							."&end_date=".rawurlencode($end_date);
 						echo "<td><a href='$refstr'>Display</a></td>";
-						echo "<td>".$qa[3]."</td>";
+						echo "<td>".$qa3."</td>";
 					}
 					else if ($qa[1] == 1)
 					{
-						echo "<td>".$qa[0]."</td>";
-						echo "<td>Processing ".$qa[2]."%</td>";
-						echo "<td>".$qa[3]."</td>";
+						echo "<td>".$qa0."</td>";
+						echo "<td>Processing ".$qa2."%</td>";
+						echo "<td>".$qa3."</td>";
 					}
 					else
 					{
-						echo "<td>".$qa[0]."</td>";
+						echo "<td>".$qa0."</td>";
 						echo "<td>Cancel</td>";
-						echo "<td>".$qa[3]."</td>";
+						echo "<td>".$qa3."</td>";
 					}
 					echo "</tr>\n";
 				}

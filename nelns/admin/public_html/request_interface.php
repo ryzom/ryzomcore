@@ -59,7 +59,7 @@
 				$val = ord($this->Buffer[$this->Pos++]);
 				$val += ord($this->Buffer[$this->Pos++])<<8;
 				$val += ord($this->Buffer[$this->Pos++])<<16;
-				$val += ord($this->Buffer[$this->Pos++])<<32;
+				$val += ord($this->Buffer[$this->Pos++])<<24;
 				//printf ("read uint32 '%d'<br>", $val);
 			}
 			else
@@ -121,7 +121,7 @@
 				$val = ord($this->Buffer[$this->Pos++]);
 				$val += ord($this->Buffer[$this->Pos++])<<8;
 				$val += ord($this->Buffer[$this->Pos++])<<16;
-				$val += ord($this->Buffer[$this->Pos++])<<32;
+				$val += ord($this->Buffer[$this->Pos++])<<24;
 				//printf ("read uint32 '%d'<br>", $val);
 			}
 			else
@@ -248,13 +248,15 @@
 	function waitMessage ($fp, &$msgin)
 	{
 		//echo "waiting a message";
+		// Big-endian length: accumulate each byte (assignment used to drop
+		// the high octet when the second fread overwrote $size).
 		$size = 0;
 		$val = fread ($fp, 1);
 		if (feof ($fp)) return false;
 		$size = ord($val) << 24;
 		$val = fread ($fp, 1);
 		if (feof ($fp)) return false;
-		$size = ord($val) << 16;
+		$size += ord($val) << 16;
 		$val = fread ($fp, 1);
 		if (feof ($fp)) return false;
 		$size += ord($val) << 8;

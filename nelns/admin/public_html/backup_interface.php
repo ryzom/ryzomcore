@@ -15,10 +15,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-	$publicAccess = true;
+	// Character backup pull/push talks to every BS. Restrict to root/nevrax
+	// the same way commands.php and las_interface do for free AES power.
+	$publicAccess = false;
 	include('authenticate.php');
 	include('request_interface.php');
-	
+
 	$error = '';
 
 	// $file arrives with the request and becomes one word of the backup

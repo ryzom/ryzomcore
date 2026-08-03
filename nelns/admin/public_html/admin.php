@@ -789,9 +789,11 @@
 			// $editLogin is a login read back out of the database, so it does
 			// not belong on a command line unquoted
 			exec("tail -n 40 ".escapeshellarg($logfilename), $resExec);
-			
-			echo join("\n", $resExec);
-			
+
+			// Log lines include User-Agent from logUser(); escape so a prior
+			// login with a hostile agent cannot break out of the textarea.
+			echo htmlspecialchars(join("\n", $resExec), ENT_QUOTES);
+
 			echo "</textarea><br>\n";
 		}
 		else

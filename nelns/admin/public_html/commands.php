@@ -70,10 +70,12 @@
 
 	$query = "SELECT shard, server, name FROM service";
 
+	// Always define $where so an empty filter set does not trip PHP 8.
+	$where = array();
 	if ($filter_shard != "")	$where[] = "shard like '%".sqlescape($filter_shard)."%'";
 	if ($filter_server != "")	$where[] = "server like '%".sqlescape($filter_server)."%'";
 	if ($filter_service != "")	$where[] = "name like '%".sqlescape($filter_service)."%'";
-	
+
 	if (count($where)>=1)
 		$query .= " WHERE ".join(" AND ", $where);
 

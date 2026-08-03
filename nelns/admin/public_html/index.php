@@ -260,25 +260,75 @@
 
 	if (isset($execServCommand) && isset($factPaths) && isset($execServParams) && isset($variableData[$execServCommand]))
 	{
-		// get command path
-		$cmd = $variableData[$execServCommand];
-		$path = $cmd["path"];
-		
-		$paths = expandQuery($factPaths);
-
-		for ($i=0; $i<count($paths); ++$i)
+		// Command must be one the user may use; factPaths is client-posted
+		// so re-apply shard_access before talking to the admin service.
+		if (!hasAccessToVariable($execServCommand))
 		{
-			$fpath = filterPathUsingAliases($paths[$i], $path);
-			if ($fpath != "")
-				$newPaths[] = $fpath;
+			$error = (isset($error) ? $error : "")."No access to that command<br>\n";
 		}
+		else
+		{
+			// get command path
+			$cmd = $variableData[$execServCommand];
+			$path = $cmd["path"];
 
-		$fullPath = factorizeQuery("[".join($newPaths, ",")."]");
+			$paths = expandQuery($factPaths);
+			$newPaths = array();
 
-		// filter selection with command
-		$fullCmd = $fullPath." ".$execServParams;
-		logUser($uid, "COMMAND=".$fullCmd);
-		$qstate = nel_query($fullPath." ".$execServParams, $cmdResult);
+			// Build the set of shards this account may touch
+			$allowedShards = array();
+			if ($admlogin == "root" || $IsNevrax)
+			{
+				$allowedShards = null; // unrestricted
+			}
+			else
+			{
+				foreach ($shardAccess as $sshard)
+					$allowedShards[$sshard["shard"]] = true;
+			}
+
+			for ($i=0; $i<count($paths); ++$i)
+			{
+				$fpath = filterPathUsingAliases($paths[$i], $path);
+				if ($fpath == "")
+					continue;
+				// path form is shard.server.service.var
+				$pathParts = explode(".", $fpath);
+				$shardName = isset($pathParts[0]) ? $pathParts[0] : "";
+				if ($allowedShards !== null
+					&& $shardName !== "*"
+					&& !isset($allowedShards[$shardName]))
+				{
+					continue;
+				}
+				if ($allowedShards !== null && $shardName === "*" && count($allowedShards) === 0)
+					continue;
+				// Expand * to each allowed shard so a restricted user cannot
+				// broadcast through a wildcard path.
+				if ($allowedShards !== null && $shardName === "*")
+				{
+					foreach (array_keys($allowedShards) as $as)
+					{
+						$pathParts[0] = $as;
+						$newPaths[] = implode(".", $pathParts);
+					}
+				}
+				else
+				{
+					$newPaths[] = $fpath;
+				}
+			}
+
+			if (count($newPaths) > 0)
+			{
+				$fullPath = factorizeQuery("[".join($newPaths, ",")."]");
+
+				// filter selection with command
+				$fullCmd = $fullPath." ".$execServParams;
+				logUser($uid, "COMMAND=".$fullCmd);
+				$qstate = nel_query($fullPath." ".$execServParams, $cmdResult);
+			}
+		}
 	}
 
 	unset($ownerTables);

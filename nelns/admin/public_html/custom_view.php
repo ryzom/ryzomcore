@@ -117,6 +117,14 @@
 	// -----------------------------
 	// page commands
 
+	// Every mutation that takes a tid must prove the caller owns that view.
+	// removeView / removeRow already did; the rest used to trust the client.
+	function userOwnsView($uid, $tid)
+	{
+		$result = sqlquery("SELECT tid FROM view_table WHERE tid='".intval($tid)."' AND uid='".intval($uid)."'");
+		return $result && sqlnumrows($result) > 0;
+	}
+
 	// create a view
 	if ($createview)
 	{
@@ -144,7 +152,10 @@
 	// duplicate a view
 	else if (isset($dupView) && isset($tid))
 	{
-		$result = sqlquery("SELECT * FROM view_table WHERE tid='".intval($tid)."'");
+		// Only own views (or shared group views the user can already see
+		// via the list query). Copy into the caller's uid, never mutate
+		// someone else's row without ownership.
+		$result = sqlquery("SELECT * FROM view_table WHERE tid='".intval($tid)."' AND (uid='".intval($uid)."' OR uid='".intval($gid)."')");
 		if ($result && ($arr = sqlfetch($result)))
 		{
 			// name/filter were escaped on write, but re-inserting the row
@@ -165,6 +176,10 @@
 
 			$tid = $ntid;
 		}
+		else
+		{
+			$error = $error."Couldn't duplicate view ".htmlspecialchars($tid, ENT_QUOTES).", missing or no access<br>\n";
+		}
 	}
 	// remove a view
 	else if (isset($removeView))
@@ -181,29 +196,44 @@
 		}
 	}
 	// change view name
-	else if (isset($chViewName))
+	else if (isset($chViewName) && isset($tid))
 	{
-		sqlquery("UPDATE view_table SET name='".sqlescape($chViewName)."' WHERE tid='".intval($tid)."'");
+		if (userOwnsView($uid, $tid))
+			sqlquery("UPDATE view_table SET name='".sqlescape($chViewName)."' WHERE tid='".intval($tid)."' AND uid='".intval($uid)."'");
+		else
+			$error = $error."Couldn't rename view, missing or user doesn't own it<br>\n";
 	}
 	// change view state
-	else if (isset($chViewFilter))
+	else if (isset($chViewFilter) && isset($tid))
 	{
-		sqlquery("UPDATE view_table SET filter='".sqlescape($chViewFilter)."' WHERE tid='".intval($tid)."'");
+		if (userOwnsView($uid, $tid))
+			sqlquery("UPDATE view_table SET filter='".sqlescape($chViewFilter)."' WHERE tid='".intval($tid)."' AND uid='".intval($uid)."'");
+		else
+			$error = $error."Couldn't change view filter, missing or user doesn't own it<br>\n";
 	}
 	// change view state
-	else if (isset($chViewDisplay))
+	else if (isset($chViewDisplay) && isset($tid))
 	{
-		sqlquery("UPDATE view_table SET display='".sqlescape($chViewDisplay)."' WHERE tid='".intval($tid)."'");
+		if (userOwnsView($uid, $tid))
+			sqlquery("UPDATE view_table SET display='".sqlescape($chViewDisplay)."' WHERE tid='".intval($tid)."' AND uid='".intval($uid)."'");
+		else
+			$error = $error."Couldn't change view display, missing or user doesn't own it<br>\n";
 	}
 	// change view state
-	else if (isset($chViewAutoDisplay))
+	else if (isset($chViewAutoDisplay) && isset($tid))
 	{
-		sqlquery("UPDATE view_table SET auto_display='".sqlescape($chViewAutoDisplay)."' WHERE tid='".intval($tid)."'");
+		if (userOwnsView($uid, $tid))
+			sqlquery("UPDATE view_table SET auto_display='".sqlescape($chViewAutoDisplay)."' WHERE tid='".intval($tid)."' AND uid='".intval($uid)."'");
+		else
+			$error = $error."Couldn't change view auto_display, missing or user doesn't own it<br>\n";
 	}
 	// change view state
-	else if (isset($chViewRefreshRate))
+	else if (isset($chViewRefreshRate) && isset($tid))
 	{
-		sqlquery("UPDATE view_table SET refresh_rate='".sqlescape($chViewRefreshRate)."' WHERE tid='".intval($tid)."'");
+		if (userOwnsView($uid, $tid))
+			sqlquery("UPDATE view_table SET refresh_rate='".sqlescape($chViewRefreshRate)."' WHERE tid='".intval($tid)."' AND uid='".intval($uid)."'");
+		else
+			$error = $error."Couldn't change view refresh_rate, missing or user doesn't own it<br>\n";
 	}
 	// swap a view
 	else if (isset($moveView) && isset($offs))
@@ -282,37 +312,59 @@
 	// change a command name
 	else if (isset($chViewCommandName) && isset($vcmd) && isset($tid))
 	{
-		sqlquery("UPDATE view_command SET name='".sqlescape($chViewCommandName)."' WHERE tid='".intval($tid)."' AND name='".sqlescape($vcmd)."'");
+		if (userOwnsView($uid, $tid))
+			sqlquery("UPDATE view_command SET name='".sqlescape($chViewCommandName)."' WHERE tid='".intval($tid)."' AND name='".sqlescape($vcmd)."'");
+		else
+			$error = $error."Couldn't change command name, missing or user doesn't own the view<br>\n";
 	}
 	else if (isset($chViewCommand) && isset($vcmd) && isset($tid))
 	{
-		sqlquery("UPDATE view_command SET command='".sqlescape($chViewCommand)."' WHERE tid='".intval($tid)."' AND name='".sqlescape($vcmd)."'");
+		if (userOwnsView($uid, $tid))
+			sqlquery("UPDATE view_command SET command='".sqlescape($chViewCommand)."' WHERE tid='".intval($tid)."' AND name='".sqlescape($vcmd)."'");
+		else
+			$error = $error."Couldn't change command, missing or user doesn't own the view<br>\n";
 	}
 	else if (isset($rmViewCommand) && isset($vcmd) && isset($tid))
 	{
-		sqlquery("DELETE FROM view_command WHERE tid='".intval($tid)."' AND name='".sqlescape($vcmd)."'");
+		if (userOwnsView($uid, $tid))
+			sqlquery("DELETE FROM view_command WHERE tid='".intval($tid)."' AND name='".sqlescape($vcmd)."'");
+		else
+			$error = $error."Couldn't remove command, missing or user doesn't own the view<br>\n";
 	}
 	else if (isset($createViewCommand) && isset($nViewCommand) && isset($nViewCommandName) && isset($tid))
 	{
-		sqlquery("INSERT INTO view_command SET tid='".intval($tid)."', name='".sqlescape($nViewCommandName)."', command='".sqlescape($nViewCommand)."'");
+		if (userOwnsView($uid, $tid))
+			sqlquery("INSERT INTO view_command SET tid='".intval($tid)."', name='".sqlescape($nViewCommandName)."', command='".sqlescape($nViewCommand)."'");
+		else
+			$error = $error."Couldn't create command, missing or user doesn't own the view<br>\n";
 	}
 	else if (isset($changeVidGraph) && isset($tid))
 	{
-		if (isset($graphState) && $graphState == "on")
+		if (userOwnsView($uid, $tid))
 		{
-			sqlquery("UPDATE view_row SET graph='1' WHERE tid='".intval($tid)."' AND vid='".intval($changeVidGraph)."'");
+			if (isset($graphState) && $graphState == "on")
+			{
+				sqlquery("UPDATE view_row SET graph='1' WHERE tid='".intval($tid)."' AND vid='".intval($changeVidGraph)."'");
+			}
+			else
+			{
+				sqlquery("UPDATE view_row SET graph='0' WHERE tid='".intval($tid)."' AND vid='".intval($changeVidGraph)."'");
+			}
 		}
 		else
-		{
-			sqlquery("UPDATE view_row SET graph='0' WHERE tid='".intval($tid)."' AND vid='".intval($changeVidGraph)."'");
-		}
+			$error = $error."Couldn't change graph flag, missing or user doesn't own the view<br>\n";
 	}
 
 	// give a view to another user
 	else if (isset($giveTo) && isset($tid))
 	{
-		sqlquery("UPDATE view_table SET uid='".intval($giveTo)."' WHERE tid='".intval($tid)."'");
-		unset($tid);
+		if (userOwnsView($uid, $tid))
+		{
+			sqlquery("UPDATE view_table SET uid='".intval($giveTo)."' WHERE tid='".intval($tid)."' AND uid='".intval($uid)."'");
+			unset($tid);
+		}
+		else
+			$error = $error."Couldn't reassign view, missing or user doesn't own it<br>\n";
 	}
 
 	// -----------------------------

@@ -131,7 +131,8 @@
 
 			if (!($uid = validateId($admlogin, $admpassword, $useCookie, $gid, $group)))
 			{
-				$error = "Invalid login '$admlogin'";
+				// Login is request-controlled; never reflect it raw into HTML.
+				$error = "Invalid login '".htmlspecialchars((string)$admlogin, ENT_QUOTES)."'";
 				print $error;
 				eraseCookies();
 				return 0;
@@ -295,9 +296,26 @@
 			addToLog("failed !!");
 			return false;
 		}
-		$allowed_ip = $arr["allowed_ip"];
-		if ($allowed_ip != "" && strstr($REMOTE_ADDR, $allowed_ip) == FALSE)
-			return false;
+		// allowed_ip is an optional restriction set by an admin. A substring
+		// match used to accept "1.2" against "11.22.x.x"; require a full IP
+		// equality or a dotted prefix that ends on an octet boundary.
+		$allowed_ip = trim((string)$arr["allowed_ip"]);
+		if ($allowed_ip !== "")
+		{
+			$remote = (string)$REMOTE_ADDR;
+			$ipOk = ($remote === $allowed_ip);
+			if (!$ipOk && preg_match('/^[0-9A-Fa-f:.]+$/', $allowed_ip))
+			{
+				// Prefix: "192.168.1" matches "192.168.1.10" but not "192.168.10.1"
+				if (strpos($remote, $allowed_ip) === 0)
+				{
+					$next = substr($remote, strlen($allowed_ip), 1);
+					$ipOk = ($next === '' || $next === '.' || $next === ':');
+				}
+			}
+			if (!$ipOk)
+				return false;
+		}
 
 		addToLog("success");
 		$useCookies = ($arr["useCookie"] == "yes");
