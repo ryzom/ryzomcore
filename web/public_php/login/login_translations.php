@@ -146,8 +146,12 @@ $ErrMsgs[4002]['dbg'] = 'joinSession error %1: %2 for userId %3';
 $ErrMsgs[4003]['dbg'] = 'joinSession error %1: %2 for userId %3';
 $ErrMsgs[4004]['dbg'] = 'joinSession error %1: %2 for userId %3';
 
+// For 4005/4010/4014 the %2 argument carries the reason the session
+// manager gives (including the operator-set shard MOTD, e.g. the
+// maintenance announcement), so append the dbg line to the player text.
 $ErrMsgs[4005]['dbg'] = '(joinSession error %1: %2 for userId %3)';
 $ErrMsgs[4005]['lnk'] = $msgGameServersClosed;
+$ErrMsgs[4005]['add'] = 'dbg';
 
 $ErrMsgs[4006]['dbg'] = 'joinSession error %1: %2 for userId %3';
 $ErrMsgs[4007]['dbg'] = 'joinSession error %1: %2 for userId %3';
@@ -156,6 +160,7 @@ $ErrMsgs[4009]['dbg'] = 'joinSession error %1: %2 for userId %3';
 
 $ErrMsgs[4010]['dbg'] = '(joinSession error %1: %2 for userId %3)';
 $ErrMsgs[4010]['lnk'] = $msgGameServersClosed;
+$ErrMsgs[4010]['add'] = 'dbg';
 
 $ErrMsgs[4011]['dbg'] = 'joinSession error %1: %2 for userId %3';
 $ErrMsgs[4012]['dbg'] = 'joinSession error %1: %2 for userId %3';
@@ -163,6 +168,7 @@ $ErrMsgs[4013]['dbg'] = 'joinSession error %1: %2 for userId %3';
 
 $ErrMsgs[4014]['dbg'] = '(joinSession error %1: %2 for userId %3)';
 $ErrMsgs[4014]['lnk'] = $msgGameServersClosed;
+$ErrMsgs[4014]['add'] = 'dbg';
 
 $ErrMsgs[4015]['dbg'] = 'joinSession error %1: %2 for userId %3';
 $ErrMsgs[4016]['dbg'] = 'joinSession error %1: %2 for userId %3';
