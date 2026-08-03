@@ -35,12 +35,33 @@
 		return $data;
 	}
 
+	/*
+	 * note_popup_uri is opened via openWindow() in a javascript string.
+	 * Only relative paths and http(s) are useful; reject javascript: and
+	 * data: schemes even though the template also escapes the value.
+	 */
+	function tool_notes_safe_popup_uri($uri)
+	{
+		$uri = trim((string)$uri);
+		if ($uri === '')
+			return '';
+		if (strlen($uri) > 255)
+			$uri = substr($uri, 0, 255);
+		if (preg_match('#^(https?://|/)#i', $uri))
+			return $uri;
+		// relative path without a scheme
+		if (!preg_match('#^[a-z][a-z0-9+.-]*:#i', $uri))
+			return $uri;
+		return '';
+	}
+
 	function tool_notes_add($user_id, $note_title, $note_data, $note_active, $note_global, $note_mode, $note_uri, $note_restriction)
 	{
 		global $db;
 
 		$note_title	= trim(stripslashes($note_title));
 		$note_data	= trim(stripslashes($note_data));
+		$note_uri	= tool_notes_safe_popup_uri($note_uri);
 
 		if ($note_title == '')	return "/!\ Error: note title is empty!";
 		//if ($note_data == '')	return "/!\ Error: note data is empty!";
@@ -96,6 +117,8 @@
 		if ($note_mode == 'text')	$note_mode = 0;
 		else						$note_mode = 1;
 
+		$note_uri = tool_notes_safe_popup_uri($note_uri);
+
 		$sql = "SELECT * FROM ". NELDB_NOTE_TABLE ." WHERE note_id=". intval($note_id) ." AND note_user_id=". intval($user_id);
 		if ($result = $db->sql_query($sql))
 		{
@@ -103,8 +126,10 @@
 			{
 //				$sql = "UPDATE ". NELDB_NOTE_TABLE ." SET note_title='". htmlentities($note_title, ENT_QUOTES) ."',note_data='". htmlentities($note_data, ENT_QUOTES) ."',note_date='". time() ."',note_active='". $note_active ."',note_global='". $note_global ."',note_mode=". $note_mode .",note_popup_uri='". $note_uri ."',note_popup_restriction='". $note_restriction ."'  WHERE note_id=". $note_id;
 				// same as in tool_notes_add(): htmlentities() is for the page,
-				// sql_escape_string() is what keeps the value inside the literal
-				$sql = "UPDATE ". NELDB_NOTE_TABLE ." SET note_title='". $db->sql_escape_string(htmlentities($note_title, ENT_QUOTES)) ."',note_data='". $db->sql_escape_string(htmlentities($note_data, ENT_QUOTES)) ."',note_date='". time() ."',note_active='". intval($note_active) ."',note_global='". intval($note_global) ."'  WHERE note_id=". intval($note_id);
+				// sql_escape_string() is what keeps the value inside the literal.
+				// popup_uri was never written on update; store the same safe
+				// shape as on create.
+				$sql = "UPDATE ". NELDB_NOTE_TABLE ." SET note_title='". $db->sql_escape_string(htmlentities($note_title, ENT_QUOTES)) ."',note_data='". $db->sql_escape_string(htmlentities($note_data, ENT_QUOTES)) ."',note_date='". time() ."',note_active='". intval($note_active) ."',note_global='". intval($note_global) ."',note_popup_uri='". $db->sql_escape_string($note_uri) ."',note_popup_restriction='". $db->sql_escape_string($note_restriction) ."'  WHERE note_id=". intval($note_id);
 				$db->sql_query($sql);
 			}
 			else
