@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-08-03 — 🐛 Fix MSVC operator== ambiguity for sint skillValue vs SKILLS:: constants
+
+Same family of issue, but this time against specific `SKILLS::` constants
+(`SF`/`SM`/`SC`/`SH`) rather than `NUM_SKILLS` — `sint skillValue ==
+SKILLS::SF` and friends, in `group_phrase_skill_filter.cpp` and
+`group_skills.cpp` (8 sites total). Cast the enum side explicitly at each.
+Left `itemSkill`/`compareSkill` comparisons against `SKILLS::` constants in
+`sphrase_manager.cpp` untouched — those variables are themselves
+`SKILLS::ESkills`, so same-enum-type comparisons, never ambiguous.
+
+Commit: 🐛 Fix operator== ambiguity for skillValue vs SKILLS constants
+
 ## 2026-08-03 — 🐛 Fix MSVC operator< ambiguity for ITEM_TYPE::UNDEFINED comparisons
 
 Same family of issue as the `NUM_*` enum-bound sweep below, this time for
