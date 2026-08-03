@@ -2914,7 +2914,9 @@ ERROR : parent/child relation support only 'map' or 'vector' cont specification 
 			}
 
 			$retMsg = parent::waitMessage();
-			if ($ret == false)
+			<!-- test the message that was just received, not the send result:
+			     a timeout returns false and reading MsgName off it is fatal -->
+			if ($retMsg == false)
 			{
 				// error during send
 				$this->invokeError("<xsl:value-of select="@name"/>", "Error in 'waitMessage'");
