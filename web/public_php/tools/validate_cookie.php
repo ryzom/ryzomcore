@@ -66,10 +66,17 @@
 			$ringDBName = $RingDBName;
 		}
 
+		// Distinct failure strings map cookie/IP/status state for an attacker.
+		// Say the same thing to the client; keep detail for the server log only.
+		$authFailed = function ($detail) {
+			error_log('validateCookie: ' . $detail);
+			echo "Authentication failed<BR>";
+			return false;
+		};
+
 		if (!isset($_COOKIE["ryzomId"]))
 		{
-			echo "Cookie not found<BR>";
-			return false;
+			return $authFailed('cookie missing');
 		}
 		
 		// The first cookie field is CInetAddress::hash32() of the address
@@ -80,16 +87,14 @@
 		$cookie = $_COOKIE["ryzomId"];
 		if (!preg_match('/^[0-9A-Fa-f]{8}\|/', $cookie))
 		{
-			echo "Malformed cookie<BR>";
-			return false;
+			return $authFailed('cookie malformed');
 		}
 		$cookieAddr = hexdec(substr($cookie, 0, 8));
 		$requestAddr = addressHash32($_SERVER["REMOTE_ADDR"]);
 
 		if ($requestAddr === false || $cookieAddr !== $requestAddr)
 		{
-			echo "Client ip don't match cookie<BR>";
-			return false;
+			return $authFailed('cookie address mismatch');
 		}
 
 		// check the cookie in the database		
@@ -102,16 +107,14 @@
 
 		if (mysqli_num_rows($result) == 0)
 		{
-			echo "Can't find cookie in database<BR>";
-			return false;
+			return $authFailed('cookie not in database');
 		}
 		
 		$row = mysqli_fetch_assoc($result);
 		
 		if ($row["current_status"] != "cs_logged" && $row["current_status"] != "cs_online" )
 		{
-			echo "User ".htmlspecialchars($row["user_id"], ENT_QUOTES)." is not looged or online<BR>";
-			return false;
+			return $authFailed('user status '.$row["current_status"].' for user '.$row["user_id"]);
 		}
 		
 		$userId = $row["user_id"];
@@ -136,5 +139,23 @@
 			$slot = 0; // temp dev: use 0 as the "ring character"
 
 		return $slot & 0xf;
+	}
+
+	/*
+	 * Front-end service addresses from the session manager land in the
+	 * client action-handler string and the login "1#..." protocol line.
+	 * Only host:port (or bare host) forms that cannot reframe those payloads.
+	 */
+	function validShardAddr($addr)
+	{
+		if (!is_string($addr) || $addr === '')
+			return false;
+		// IPv4 / hostname / limited IPv6-ish, optional :port; no spaces,
+		// quotes, pipes, hashes or control characters.
+		return (bool)preg_match('/^[A-Za-z0-9._:-]{1,128}$/', $addr)
+			&& strpos($addr, '|') === false
+			&& strpos($addr, '#') === false
+			&& strpos($addr, '"') === false
+			&& strpos($addr, "'") === false;
 	}
 

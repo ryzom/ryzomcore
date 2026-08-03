@@ -97,9 +97,14 @@ $ErrMsgs[2106]['lnk'] = $msgDBInMaintenance;
  */
 define('BASE_TECHNICAL_ERROR_NUM', 3000);
 
+// Player-facing text is required for every public code. Codes that only
+// had 'dbg' used to ship the debug string to every client (errorMsg falls
+// through to dbg when en/fr/de/lnk are missing), independent of DisplayDbg.
 $ErrMsgs[3001]['dbg'] = 'Failed to find a ring domain record for domainId: %1';
+$ErrMsgs[3001]['lnk'] = $msgLSInMaintenance;
 
 $ErrMsgs[3002]['dbg'] = 'Missing cmd';
+$ErrMsgs[3002]['lnk'] = $msgMisconfiguredClient;
 
 $ErrMsgs[3003]['dbg'] = 'No response from Shard Unifier';
 $ErrMsgs[3003]['lnk'] = $msgLSInMaintenance;
@@ -115,22 +120,31 @@ $ErrMsgs[3006]['lnk'] = $msgDBInMaintenance;
 
 $ErrMsgs[3007]['dbg'] = "Can't find domain: %1"; // ex 'x'
 $ErrMsgs[3007]['lnk'] = $msgMisconfiguredClient;
-$ErrMsgs[3007]['add'] = 'dbg';
+// Only append dbg when LoginAllowDbg / DisplayDbg is on (see r2_login.php).
 
 $ErrMsgs[3008]['dbg'] = "Login '%1' was created because it was not found in database"; // ex 50
+$ErrMsgs[3008]['en'] = "Account created, please log in again";
+$ErrMsgs[3008]['fr'] = "Compte créé, veuillez vous reconnecter";
+$ErrMsgs[3008]['de'] = "Account erstellt, bitte melde dich erneut an";
 
 $ErrMsgs[3009]['dbg'] = "Can't fetch login '%1' after insertion"; // ex 51
+$ErrMsgs[3009]['lnk'] = $msgDBInMaintenance;
 
 $ErrMsgs[3010]['dbg'] = "No permission found, but I need to accept Unknown user, so permission created, please RELOG";
+$ErrMsgs[3010]['en'] = "Account permissions updated, please log in again";
+$ErrMsgs[3010]['fr'] = "Permissions du compte mises à jour, veuillez vous reconnecter";
+$ErrMsgs[3010]['de'] = "Account-Rechte aktualisiert, bitte melde dich erneut an";
 
 $ErrMsgs[3011]['dbg'] = "(client application: %1 domain: %2)"; // ex 53
 $ErrMsgs[3011]['en'] = "Your account needs a proper subscription to connect";
 $ErrMsgs[3011]['fr'] = "Votre compte doit avoir un abonnement actif pour se connecter";
 $ErrMsgs[3011]['de'] = 'Du kannst dich nicht ohne abgeschlossenes Abonemment in deinen Account einloggen';
-$ErrMsgs[3011]['add'] = 'dbg';
 $ErrMsgs[3011]['log'] = false;
 
 $ErrMsgs[3012]['dbg'] = "No access privilege found for %1, but I need to accept Unknown user, so permission created, RELOG";
+$ErrMsgs[3012]['en'] = "Account permissions updated, please log in again";
+$ErrMsgs[3012]['fr'] = "Permissions du compte mises à jour, veuillez vous reconnecter";
+$ErrMsgs[3012]['de'] = "Account-Rechte aktualisiert, bitte melde dich erneut an";
 
 $ErrMsgs[3013]['dbg'] = "(client application: %1 domain: %2 reqPriv: %3)";
 $ErrMsgs[3013]['en'] = "You don't have sufficient privilege to connect now, please try later";
@@ -141,41 +155,63 @@ $ErrMsgs[3013]['log'] = false;
 // Translated Ring Session Manager (joinSession) error messages
 define('BASE_TRANSLATED_RSM_ERROR_NUM', 4000);
 
+// Generic join failure for codes that only used to ship the dbg line.
+$msgJoinSessionFailed['en'] = 'Unable to join the session, please try later';
+$msgJoinSessionFailed['fr'] = 'Impossible de rejoindre la session, merci de réessayer plus tard';
+$msgJoinSessionFailed['de'] = 'Beitritt zur Session fehlgeschlagen, bitte versuch es später nochmal';
+
 $ErrMsgs[4001]['dbg'] = 'joinSession error %1: %2 for userId %3';
+$ErrMsgs[4001]['lnk'] = $msgJoinSessionFailed;
 $ErrMsgs[4002]['dbg'] = 'joinSession error %1: %2 for userId %3';
+$ErrMsgs[4002]['lnk'] = $msgJoinSessionFailed;
 $ErrMsgs[4003]['dbg'] = 'joinSession error %1: %2 for userId %3';
+$ErrMsgs[4003]['lnk'] = $msgJoinSessionFailed;
 $ErrMsgs[4004]['dbg'] = 'joinSession error %1: %2 for userId %3';
+$ErrMsgs[4004]['lnk'] = $msgJoinSessionFailed;
 
 // For 4005/4010/4014 the %2 argument carries the reason the session
 // manager gives (including the operator-set shard MOTD, e.g. the
-// maintenance announcement), so append the dbg line to the player text.
+// maintenance announcement), so append the dbg line when DisplayDbg is on.
 $ErrMsgs[4005]['dbg'] = '(joinSession error %1: %2 for userId %3)';
 $ErrMsgs[4005]['lnk'] = $msgGameServersClosed;
 $ErrMsgs[4005]['add'] = 'dbg';
 
 $ErrMsgs[4006]['dbg'] = 'joinSession error %1: %2 for userId %3';
+$ErrMsgs[4006]['lnk'] = $msgJoinSessionFailed;
 $ErrMsgs[4007]['dbg'] = 'joinSession error %1: %2 for userId %3';
+$ErrMsgs[4007]['lnk'] = $msgJoinSessionFailed;
 $ErrMsgs[4008]['dbg'] = 'joinSession error %1: %2 for userId %3';
+$ErrMsgs[4008]['lnk'] = $msgJoinSessionFailed;
 $ErrMsgs[4009]['dbg'] = 'joinSession error %1: %2 for userId %3';
+$ErrMsgs[4009]['lnk'] = $msgJoinSessionFailed;
 
 $ErrMsgs[4010]['dbg'] = '(joinSession error %1: %2 for userId %3)';
 $ErrMsgs[4010]['lnk'] = $msgGameServersClosed;
 $ErrMsgs[4010]['add'] = 'dbg';
 
 $ErrMsgs[4011]['dbg'] = 'joinSession error %1: %2 for userId %3';
+$ErrMsgs[4011]['lnk'] = $msgJoinSessionFailed;
 $ErrMsgs[4012]['dbg'] = 'joinSession error %1: %2 for userId %3';
+$ErrMsgs[4012]['lnk'] = $msgJoinSessionFailed;
 $ErrMsgs[4013]['dbg'] = 'joinSession error %1: %2 for userId %3';
+$ErrMsgs[4013]['lnk'] = $msgJoinSessionFailed;
 
 $ErrMsgs[4014]['dbg'] = '(joinSession error %1: %2 for userId %3)';
 $ErrMsgs[4014]['lnk'] = $msgGameServersClosed;
 $ErrMsgs[4014]['add'] = 'dbg';
 
 $ErrMsgs[4015]['dbg'] = 'joinSession error %1: %2 for userId %3';
+$ErrMsgs[4015]['lnk'] = $msgJoinSessionFailed;
 $ErrMsgs[4016]['dbg'] = 'joinSession error %1: %2 for userId %3';
+$ErrMsgs[4016]['lnk'] = $msgJoinSessionFailed;
 $ErrMsgs[4017]['dbg'] = 'joinSession error %1: %2 for userId %3';
+$ErrMsgs[4017]['lnk'] = $msgJoinSessionFailed;
 $ErrMsgs[4018]['dbg'] = 'joinSession error %1: %2 for userId %3';
+$ErrMsgs[4018]['lnk'] = $msgJoinSessionFailed;
 $ErrMsgs[4019]['dbg'] = 'joinSession error %1: %2 for userId %3';
+$ErrMsgs[4019]['lnk'] = $msgJoinSessionFailed;
 $ErrMsgs[4020]['dbg'] = 'joinSession error %1: %2 for userId %3';
+$ErrMsgs[4020]['lnk'] = $msgJoinSessionFailed;
 
 
 $MsgLanguages = array('en');

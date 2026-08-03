@@ -54,14 +54,26 @@ $shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 	}    
 
 	// Validate basics. privatePhpDirectory is later opened as a path; keep
-	// it under the public php root (or an absolute path that realpath can
-	// resolve) and refuse anything that steps out via ".." components.
+	// it under the public php root or its immediate parent (the usual
+	// public_php / private_php sibling layout) and refuse anything else.
 	if ($continue) {
 		$privDirIn = isset($_POST["privatePhpDirectory"]) ? (string)$_POST["privatePhpDirectory"] : '';
 		$privDirResolved = ($privDirIn !== '') ? realpath($privDirIn) : false;
 		$publicRoot = realpath('.');
+		$parentRoot = ($publicRoot !== false) ? realpath($publicRoot . '/..') : false;
+		$privPrefixOk = false;
+		if ($privDirResolved !== false && $publicRoot !== false) {
+			$privWithSep = $privDirResolved . DIRECTORY_SEPARATOR;
+			$publicPrefix = rtrim($publicRoot, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+			$parentPrefix = ($parentRoot !== false)
+				? (rtrim($parentRoot, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR)
+				: null;
+			$privPrefixOk = (strpos($privWithSep, $publicPrefix) === 0)
+				|| ($parentPrefix !== null && strpos($privWithSep, $parentPrefix) === 0);
+		}
 		if ($privDirResolved === false || $publicRoot === false
 			|| !is_dir($privDirResolved)
+			|| !$privPrefixOk
 			|| !is_file($privDirResolved . '/setup/config/config.php')) {
 			printalert("danger", "Private PHP Directory not found (NOTE: This directory is relative to the root of the public PHP directory)");
 			$continue = false;
@@ -303,6 +315,18 @@ $shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 		} else {
 			printalert("danger", "Failed to flag installation success");
 			$continue = false;
+		}
+	}
+
+	// Successful install leaves the UI open unless the operator remembered
+	// to drop setup.disabled. Lock it automatically; delete the file to run
+	// upgrade.php again.
+	if ($continue) {
+		$lockPath = dirname(__DIR__) . '/setup.disabled';
+		if (@file_put_contents($lockPath, "Locked after install on " . date('c') . "\n") !== false) {
+			printalert("success", "Setup locked (<em>setup.disabled</em>). Remove that file to run the installer or upgrade again.");
+		} else {
+			printalert("warning", "Could not write <em>setup.disabled</em>; lock setup manually after go-live.");
 		}
 	}
 ?>

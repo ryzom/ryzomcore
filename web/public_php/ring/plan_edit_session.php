@@ -9,13 +9,13 @@
 		echo "Create session result :<br>";
 		if ($result == 1)
 		{
-			echo "Session $sessionId created for character $charId<br>";
+			echo "Session ".htmlspecialchars($sessionId, ENT_QUOTES)." created for character ".htmlspecialchars($charId, ENT_QUOTES)."<br>";
 			
 			echo "<h2>Your session have been planned, thank you<h2><br>";
 		}
 		else
 		{
-			echo "Failed to create a session for character $charId with error $resultString <br>";
+			echo "Failed to create a session for character ".htmlspecialchars($charId, ENT_QUOTES)." with error ".htmlspecialchars($resultString, ENT_QUOTES)." <br>";
 		}
 	}
 

@@ -20,7 +20,14 @@ class JoinSessionCb extends CRingSessionManagerWeb
 		else
 		{
 			// ok, we have the info to connect !
-			// generate the lua script
+			// generate the lua script — only after the RSM address is a
+			// single host:port token that cannot reframe the AH params.
+			if (!validShardAddr($shardAddr))
+			{
+				echo "<h1>Error: invalid shard address from session manager</h1>";
+				echo '<p><p><a href="web_start.php">Back to menu</a>';
+				return;
+			}
 			$cookie=convertCookieForActionHandler($_COOKIE["ryzomId"]);
 			$luaScript='runAH(nil, "on_connect_to_shard", "cookie='.$cookie.'|fsAddr='.$shardAddr.'")';
 			//echo 'luaScrip : '.$luaScript.'<br>';

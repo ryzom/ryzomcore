@@ -21,14 +21,26 @@ class JoinShardCb extends CRingSessionManagerWeb
 			$FSHostResultStr = "Error ".$result." : '".$shardAddr."' while trying to join a shard";
 			if ($FSHostLuaMode)
 			{
-				echo $FSHostResultStr;
+				echo htmlspecialchars($FSHostResultStr, ENT_QUOTES);
 				echo '<p><p><a href="web_start.php">Back to menu</a>';
 			}
 		}
 		else
 		{
 			// ok, we have the info to connect !
-			// generate the lua script
+			// generate the lua script — only with a framed host:port address
+			if (!validShardAddr($shardAddr))
+			{
+				global $FSHostLuaMode, $FSHostResult, $FSHostResultStr;
+				$FSHostResult = 0;
+				$FSHostResultStr = "Invalid shard address from session manager";
+				if ($FSHostLuaMode)
+				{
+					echo htmlspecialchars($FSHostResultStr, ENT_QUOTES);
+					echo '<p><p><a href="web_start.php">Back to menu</a>';
+				}
+				return;
+			}
 			$cookie=convertCookieForActionHandler($_COOKIE["ryzomId"]);
 			global $FSHostLuaMode, $FSHostResult, $FSHostResultStr;
 			$FSHostResult = 1;

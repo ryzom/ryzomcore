@@ -63,7 +63,8 @@ $cfg['mail']['default_groupname'] = 'Ryzom Core Support';
 // Username of the account
 $cfg['mail']['default_username'] = 'support@ryzomcore.org';
 // Password of the account
-$cfg['mail']['default_password'] = 'passw0rd';
+// Empty by default; set in config_user.php if support mail is enabled.
+$cfg['mail']['default_password'] = '';
 // The host, being used when a mail is sent from a support group: support_groups_name@host
 $cfg['mail']['host'] = "ryzomcore.org";
 
