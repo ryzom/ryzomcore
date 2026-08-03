@@ -8,8 +8,9 @@ add_library(NeL::gui ALIAS nelgui)
 set_target_properties(nelgui PROPERTIES EXPORT_NAME gui)
 
 TARGET_INCLUDE_DIRECTORIES(nelgui
-        PRIVATE
+        PUBLIC
         ${LUA_INCLUDE_DIR}
+        PRIVATE
         ${LUABIND_INCLUDE_DIR}
 )
 
