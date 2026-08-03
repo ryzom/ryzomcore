@@ -28,6 +28,12 @@ if (file_exists( '../config.php')) {
 
 <?php
 function printalert($type, $message) {
+	// Bootstrap alert class only; refuse anything else so a caller cannot
+	// open an attribute. Message is trusted to already contain intended
+	// htmlentities() fragments from the install steps.
+	$allowed = array('success', 'info', 'warning', 'danger');
+	if (!in_array($type, $allowed, true))
+		$type = 'info';
 	print '<div class="alert alert-' . $type . '" role="alert">';
 	print $message;
 	print '</div>';

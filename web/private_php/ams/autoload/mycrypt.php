@@ -45,8 +45,15 @@ class MyCrypt{
         if( count($e_arr) != 4 && count($e_arr) != 5 ) {
             Throw new Exception('Given data is missing crucial sections.');
         }
-        $this->config['enc_method'] = $e_arr[1];
-        $this->config['hash_method'] = $e_arr[2];
+        // The ciphertext used to name its own cipher/hash, which let a stored
+        // value ask for a weaker method if openssl still offered one. Always
+        // decrypt with the methods from config; the embedded names are only
+        // checked so we refuse blobs that were not written by us.
+        $blob_enc = $e_arr[1];
+        $blob_hash = $e_arr[2];
+        if ($blob_enc !== $this->config['enc_method'] || $blob_hash !== $this->config['hash_method']) {
+            Throw new Exception('Ciphertext methods do not match configuration.');
+        }
         self::check_methods($this->config['enc_method'], $this->config['hash_method']);
         if( count($e_arr) == 5 ) {
             // written by the current encrypt(): the iv travels with the data

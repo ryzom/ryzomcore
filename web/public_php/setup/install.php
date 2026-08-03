@@ -53,13 +53,23 @@ $shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
         }
 	}    
 
-	// Validate basics
+	// Validate basics. privatePhpDirectory is later opened as a path; keep
+	// it under the public php root (or an absolute path that realpath can
+	// resolve) and refuse anything that steps out via ".." components.
 	if ($continue) {
-		if (file_exists($_POST["privatePhpDirectory"])) {
-			printalert("success", "Private PHP Directory found");
-		} else {
+		$privDirIn = isset($_POST["privatePhpDirectory"]) ? (string)$_POST["privatePhpDirectory"] : '';
+		$privDirResolved = ($privDirIn !== '') ? realpath($privDirIn) : false;
+		$publicRoot = realpath('.');
+		if ($privDirResolved === false || $publicRoot === false
+			|| !is_dir($privDirResolved)
+			|| !is_file($privDirResolved . '/setup/config/config.php')) {
 			printalert("danger", "Private PHP Directory not found (NOTE: This directory is relative to the root of the public PHP directory)");
 			$continue = false;
+		} else {
+			// store the cleaned path so later file_get_contents cannot be
+			// pointed at a different tree than the one we just checked
+			$_POST["privatePhpDirectory"] = $privDirResolved;
+			printalert("success", "Private PHP Directory found");
 		}
 	}
 	if ($continue) {

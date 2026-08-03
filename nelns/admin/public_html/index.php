@@ -689,34 +689,51 @@
 
 					unset($result);
 
-					$rrdDEF = "DEF:val=$rrdpath:var:AVERAGE";
+					// Path and thresholds come from the variable table and land
+					// on an exec() command line. DEF: takes the path unquoted
+					// (rrdtool syntax), so refuse anything that is not a plain
+					// path character; quote the separate output filename args;
+					// keep order/bounds to known tokens / numbers.
+					if (!is_string($rrdpath) || $rrdpath === '' || preg_match('/[^A-Za-z0-9._\\/+-]/', $rrdpath))
+					{
+						echo "<tr><td>Skipping graph with unsafe rrd path</td></tr>\n";
+						continue;
+					}
+					$temp0_q = escapeshellarg($tempFilenameout_0);
+					$temp1_q = escapeshellarg($tempFilenameout_1);
+					$temp2_q = escapeshellarg($tempFilenameout_2);
+					$rrdord_safe = in_array($rrdord, array('LT','GT','LE','GE'), true) ? $rrdord : 'GT';
+					$rrdwarn_n = is_numeric($rrdwarn) ? $rrdwarn : -1;
+					$rrderr_n = is_numeric($rrderr) ? $rrderr : -1;
+
+					$rrdDEF = "DEF:val=".str_replace(":", "\\:", $rrdpath).":var:AVERAGE";
 					$rrdDraw = "";
 					
-					if ($rrdwarn != -1)
+					if ($rrdwarn_n != -1)
 					{
-						$rrdDEF .= " CDEF:warn=val,$rrdwarn,$rrdord,val,0,IF";
+						$rrdDEF .= " CDEF:warn=val,$rrdwarn_n,$rrdord_safe,val,0,IF";
 						$rrdDraw .= "AREA:warn#FFCC88 ";
 					}
 
-					if ($rrderr != -1)
+					if ($rrderr_n != -1)
 					{
-						$rrdDEF .= " CDEF:err=val,$rrderr,$rrdord,val,0,IF";
+						$rrdDEF .= " CDEF:err=val,$rrderr_n,$rrdord_safe,val,0,IF";
 						$rrdDraw .= "AREA:err#FF4422 ";
 					}
 
 					$rrdDraw .= "LINE2:val#0000FF";
 					
-					$execStr = "rrdtool graph $tempFilenameout_0 --start -1200 $rrdDEF $rrdDraw";
+					$execStr = "rrdtool graph $temp0_q --start -1200 $rrdDEF $rrdDraw";
 					//echo "exec(\"$execStr\")<br>\n";
 					exec($execStr, $result, $retcode1);
 //					echo "<tr><td><img src='$tempFilename_0'></td></tr>";
 
-					$execStr = "rrdtool graph $tempFilenameout_1 --start -10800 $rrdDEF $rrdDraw";
+					$execStr = "rrdtool graph $temp1_q --start -10800 $rrdDEF $rrdDraw";
 					//echo "exec(\"$execStr\")<br>\n";
 					exec($execStr, $result, $retcode2);
 //					echo "<tr><td><img src='$tempFilename_1'></td></tr>";
 
-					$execStr = "rrdtool graph $tempFilenameout_2 --start -86400 $rrdDEF $rrdDraw";
+					$execStr = "rrdtool graph $temp2_q --start -86400 $rrdDEF $rrdDraw";
 					//echo "exec(\"$execStr\")<br>\n";
 					exec($execStr, $result, $retcode3);
 //					echo "<tr><td><img src='$tempFilename_2'></td></tr>";

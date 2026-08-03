@@ -682,28 +682,46 @@
 				{
 					$shard_ws_su			= $_POST['ws_su'];
 					$shard_ws_shard_name	= $_POST['ws_shard_name'];
-					$shard_ws_shard_id		= $_POST['ws_shard_id'];
+					$shard_ws_shard_id		= (int)$_POST['ws_shard_id'];
 
-					$shard_ws_state			= $_POST['ws_state_'. $shard_ws_shard_name];
-					$shard_ws_motd			= $_POST['ws_motd_'. $shard_ws_shard_name];
+					$shard_ws_state			= isset($_POST['ws_state_'. $shard_ws_shard_name]) ? $_POST['ws_state_'. $shard_ws_shard_name] : '';
+					$shard_ws_motd			= isset($_POST['ws_motd_'. $shard_ws_shard_name]) ? $_POST['ws_motd_'. $shard_ws_shard_name] : '';
 
-					// coders don't know how to write it seems
-					// ace: now they know if ($shard_ws_state == 'close') $shard_ws_state = 'closed';
-
-					//nt_common_add_debug("request for ". $shard_ws_su ."/". $shard_ws_shard_name ." to set STATE:". $shard_ws_state ." (". $shard_ws_motd .")");
-
-					$service = $shard_ws_su;
-					$service_command = 'rsm.setWSState '. $shard_ws_shard_id .' '. strtoupper($shard_ws_state) .' "'. $shard_ws_motd .'"';
-					nt_common_add_debug("about to run command '$service_command' on '$service' ...");
-
-					$adminService->serviceCmd($service, $service_command);
-					if (!$adminService->waitCallback())
+					// These three pieces go straight into a service command.
+					// A quote or space in the MOTD, or a free-form state,
+					// would break out of the quoted argument list.
+					$allowed_ws_states = array('close', 'closed', 'dev', 'restricted', 'open');
+					if (!in_array($shard_ws_state, $allowed_ws_states, true))
 					{
-						nt_common_add_debug('Error while waiting for callback on service \''. $service .'\' for command : '. $service_command);
+						nt_common_add_debug('ws_update refused: invalid state');
 					}
+					else if (!is_string($shard_ws_su) || !preg_match('/^[A-Za-z0-9._:-]{1,64}$/', $shard_ws_su))
+					{
+						nt_common_add_debug('ws_update refused: invalid service name');
+					}
+					else
+					{
+						// coders don't know how to write it seems
+						// ace: now they know if ($shard_ws_state == 'close') $shard_ws_state = 'closed';
 
-					$tpl->clear_assign('tool_execute_result');
-					nt_sleep(VIEW_DELAY);
+						// strip anything that would leave the quoted MOTD argument
+						$shard_ws_motd = str_replace(array("\r", "\n", "\0", '"', '\\'), ' ', (string)$shard_ws_motd);
+						if (strlen($shard_ws_motd) > 512)
+							$shard_ws_motd = substr($shard_ws_motd, 0, 512);
+
+						$service = $shard_ws_su;
+						$service_command = 'rsm.setWSState '. $shard_ws_shard_id .' '. strtoupper($shard_ws_state) .' "'. $shard_ws_motd .'"';
+						nt_common_add_debug("about to run command '$service_command' on '$service' ...");
+
+						$adminService->serviceCmd($service, $service_command);
+						if (!$adminService->waitCallback())
+						{
+							nt_common_add_debug('Error while waiting for callback on service \''. $service .'\' for command : '. $service_command);
+						}
+
+						$tpl->clear_assign('tool_execute_result');
+						nt_sleep(VIEW_DELAY);
+					}
 				}
 				elseif (isset($_POST['services_update']))
 				{

@@ -196,6 +196,19 @@
 
 						$file_name_error_msg 	= null;
 						$start_date_error_msg	= null;
+						// Filename, dates and database id all go into an AES
+						// service command as separate words. Spaces or path
+						// separators in any of them reframe the argument list.
+						if (!is_string($service_search_file_name) || !preg_match('/^[A-Za-z0-9._-]{1,64}$/', $service_search_file_name))
+							$file_name_error_msg = "Filename must be a plain name (letters, digits, ._- only).";
+						if (!is_string($service_search_start_date) || !preg_match('/^\d{4}-\d{2}-\d{2}([ T]\d{2}:\d{2}(:\d{2})?)?$/', $service_search_start_date))
+							$start_date_error_msg = "Start date must look like YYYY-MM-DD.";
+						if ($service_search_end_date !== '' && (!is_string($service_search_end_date) || !preg_match('/^\d{4}-\d{2}-\d{2}([ T]\d{2}:\d{2}(:\d{2})?)?$/', $service_search_end_date)))
+							$start_date_error_msg = "End date must look like YYYY-MM-DD.";
+						if ($service_search_database !== '0' && $service_search_database !== '1' && $service_search_database !== 0 && $service_search_database !== 1)
+							$file_name_error_msg = "Invalid database selection.";
+						else
+							$service_search_database = (int)$service_search_database;
 
 						switch ($tool_services_las)
 						{
