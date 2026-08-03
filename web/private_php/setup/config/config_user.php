@@ -6,6 +6,9 @@
 // the generated public config: public_php/setup.disabled
 // (see web/public_php/setup/header.php).
 
+// Redirect legacy AMS to lightweight account management
+//$AMS_REDIRECT_TO_ACCOUNT = true;
+
 // IMAP connection string as explained above
 //$cfg['mail']['default_mailserver']= '{imap.gmail.com:993/imap/ssl}INBOX';
 // The email address that sends the email

@@ -127,6 +127,9 @@ $INGAME_LAYOUT = "basic";
 // Forces to load the ingame templates if set to true
 $FORCE_INGAME = false;
 
+// Redirect legacy AMS to lightweight account management
+$AMS_REDIRECT_TO_ACCOUNT = false;
+
 // File storage path (must be a publicly accessible url)
 $FILE_STORAGE_PATH = $PUBLIC_PHP_PATH . '/ams/files/';
 $FILE_WEB_PATH = $BASE_WEBPATH . 'files/';

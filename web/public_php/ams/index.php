@@ -28,6 +28,12 @@ if (!file_exists('../role_support')) {
 
 require( '../config.php' );
 
+if (!empty($AMS_REDIRECT_TO_ACCOUNT)) {
+	header("Cache-Control: max-age=1");
+	header('Location: ../account/', true, 302);
+	throw new SystemExit();
+}
+
 if ($NEL_SETUP_VERSION_CONFIGURED < $NEL_SETUP_VERSION) {
 	header("Cache-Control: max-age=1");
 	header('Location: ../setup?reason=upgrade&from=ams', true, 303);

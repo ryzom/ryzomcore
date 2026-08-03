@@ -140,32 +140,35 @@ $shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 
 	// Write config.php
 	if ($continue) {
-		$config = file_get_contents($_POST["privatePhpDirectory"] . "/setup/config/config.php");
+		require_once('config_generation.php');
+		$cwd = getcwd();
+		$config = generate_install_config(
+			$_POST["privatePhpDirectory"] . "/setup/config/config.php",
+			array(
+				// already resolved to an absolute path by the check above;
+				// joining it onto the cwd again resolved to nothing and wrote
+				// an empty private php path into the generated config
+				'privatePhpDirectory' => $_POST["privatePhpDirectory"],
+				'publicPhpDirectory'  => realpath($cwd),
+				'nelSqlHostname'      => $_POST["nelSqlHostname"],
+				'nelSqlPort'          => $_POST["nelSqlPort"],
+				'nelSqlUsername'      => $_POST["nelSqlUsername"],
+				'nelSqlPassword'      => $_POST["nelSqlPassword"],
+				'nelDatabase'         => $_POST["nelDatabase"],
+				'toolDatabase'        => $_POST["toolDatabase"],
+				'amsDatabase'         => $_POST["amsDatabase"],
+				'amsLibDatabase'      => $_POST["amsLibDatabase"],
+				'nelSetupPassword'    => $_POST["nelSetupPassword"],
+				'domainDatabase'      => $_POST["domainDatabase"],
+				'domainUsersDir'      => $_POST["domainUsersDir"],
+				'nelDomainName'       => $_POST["nelDomainName"],
+				'nelSetupVersion'     => $NEL_SETUP_VERSION,
+			)
+		);
 		if (!$config) {
 			printalert("danger", "Cannot read <em>config.php</em>");
 			$continue = false;
 		} else {
-			$cwd = getcwd();
-			$config = str_replace("%privatePhpDirectory%", addslashes(realpath($cwd . "/" . $_POST["privatePhpDirectory"])), $config);
-			$config = str_replace("%publicPhpDirectory%", addslashes(realpath($cwd)), $config);
-			$config = str_replace("%nelSqlHostname%", addslashes($_POST["nelSqlHostname"]), $config);
-			$config = str_replace("%nelSqlPort%", addslashes($_POST["nelSqlPort"]), $config);
-			$config = str_replace("%nelSqlUsername%", addslashes($_POST["nelSqlUsername"]), $config);
-			$config = str_replace("%nelSqlPassword%", addslashes($_POST["nelSqlPassword"]), $config);
-			$config = str_replace("%nelDatabase%", addslashes($_POST["nelDatabase"]), $config);
-			$config = str_replace("%toolDatabase%", addslashes($_POST["toolDatabase"]), $config);
-			$config = str_replace("%amsDatabase%", addslashes($_POST["amsDatabase"]), $config);
-			$config = str_replace("%amsLibDatabase%", addslashes($_POST["amsLibDatabase"]), $config);
-			$config = str_replace("%nelSetupPassword%", addslashes($_POST["nelSetupPassword"]), $config);
-			$config = str_replace("%domainDatabase%", addslashes($_POST["domainDatabase"]), $config);
-			$config = str_replace("%domainUsersDir%", addslashes($_POST["domainUsersDir"]), $config);
-			$config = str_replace("%nelDomainName%", addslashes($_POST["nelDomainName"]), $config);
-			$config = str_replace("%nelSetupVersion%", addslashes($NEL_SETUP_VERSION), $config);
-			$cryptKeyLength = 16;
-			$cryptKey = substr(str_replace(['+', '/', '='], '', base64_encode(random_bytes($cryptKeyLength * 2))), 0, $cryptKeyLength); 
-			$cryptKeyIMAP = substr(str_replace(['+', '/', '='], '', base64_encode(random_bytes($cryptKeyLength * 2))), 0, $cryptKeyLength); 
-			$config = str_replace("%cryptKey%", addslashes($cryptKey), $config);
-			$config = str_replace("%cryptKeyIMAP%", addslashes($cryptKeyIMAP), $config);
 			if (file_put_contents("config.php", $config)) {
 				printalert("success", "Generated <em>config.php</em>");
 			} else {
