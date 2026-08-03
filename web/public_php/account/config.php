@@ -209,6 +209,42 @@ function hasAnyPriv($privileges, $privList)
 }
 
 /**
+ * Simple per-session throttle for password attempts on this tool.
+ * Returns true when the caller should refuse the attempt.
+ */
+function accountLoginThrottled()
+{
+	$now = time();
+	$window = 300; // 5 minutes
+	$maxAttempts = 10;
+	if (!isset($_SESSION['account_login_failures']) || !is_array($_SESSION['account_login_failures'])) {
+		$_SESSION['account_login_failures'] = array();
+	}
+	// Drop attempts outside the window
+	$kept = array();
+	foreach ($_SESSION['account_login_failures'] as $ts) {
+		if (($now - (int)$ts) < $window) {
+			$kept[] = (int)$ts;
+		}
+	}
+	$_SESSION['account_login_failures'] = $kept;
+	return count($kept) >= $maxAttempts;
+}
+
+function accountLoginRecordFailure()
+{
+	if (!isset($_SESSION['account_login_failures']) || !is_array($_SESSION['account_login_failures'])) {
+		$_SESSION['account_login_failures'] = array();
+	}
+	$_SESSION['account_login_failures'][] = time();
+}
+
+function accountLoginClearFailures()
+{
+	unset($_SESSION['account_login_failures']);
+}
+
+/**
  * Reload Privilege (and identity fields) from the database into the session.
  * Privilege is otherwise sticky until re-login, so a demoted GM would keep
  * the admin UI for the life of the cookie.

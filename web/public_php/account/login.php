@@ -7,6 +7,8 @@ $pageTitle = 'Sign In';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_submit'])) {
 	if (!csrfValidate()) {
 		$error = 'Invalid form submission. Please try again.';
+	} elseif (accountLoginThrottled()) {
+		$error = 'Too many failed sign-in attempts. Please wait a few minutes and try again.';
 	} else {
 		$login = isset($_POST['login']) ? trim($_POST['login']) : '';
 		$password = isset($_POST['password']) ? $_POST['password'] : '';
@@ -21,6 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_submit'])) {
 				$user = $stmt->fetch();
 
 				if ($user && verifyPassword($password, $user['Password'])) {
+					accountLoginClearFailures();
 					session_regenerate_id(true);
 					$_SESSION['account_uid'] = (int)$user['UId'];
 					$_SESSION['account_login'] = $user['Login'];
@@ -28,6 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_submit'])) {
 					$_SESSION['account_privilege'] = isset($user['Privilege']) ? $user['Privilege'] : '';
 					redirect('home');
 				} else {
+					accountLoginRecordFailure();
 					$error = 'Invalid username or password.';
 				}
 			} catch (PDOException $e) {

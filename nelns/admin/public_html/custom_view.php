@@ -21,9 +21,9 @@
 
 	unset($error);
 
-	// removeView and removeRow are plain hrefs, and SameSite=Lax still sends
-	// the session cookie on a top level navigation; make the link carry a
-	// token so someone else's page cannot spend a click deleting a view.
+	// View mutations are plain hrefs; SameSite=Lax still sends the session
+	// cookie on top-level navigation, so every state-changing GET needs a
+	// token, not only removeView/removeRow.
 	$nelnsCsrf = nelnsCsrfToken();
 	$nelnsCsrfUrl = '&csrf='.rawurlencode($nelnsCsrf);
 	$nelnsCsrfOk = nelnsCsrfCheck(isset($csrf) ? $csrf : '');
@@ -31,6 +31,25 @@
 	{
 		unset($removeView);
 		unset($removeRow);
+		unset($dupView);
+		unset($createview);
+		unset($chViewName);
+		unset($chViewFilter);
+		unset($chViewDisplay);
+		unset($chViewAutoDisplay);
+		unset($chViewRefreshRate);
+		unset($moveView);
+		unset($addToView);
+		unset($moveRow);
+		unset($changeVarName);
+		unset($changeVarFilter);
+		unset($default_view);
+		unset($chViewCommandName);
+		unset($chViewCommand);
+		unset($rmViewCommand);
+		unset($createViewCommand);
+		unset($changeVidGraph);
+		unset($giveTo);
 	}
 
 	function reorderViews($uid)
