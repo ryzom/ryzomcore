@@ -578,25 +578,46 @@ namespace <xsl:value-of select="@name"/>
 	<!-- ######################################################### -->
 
 
+<!-- Compute the wire value of an enum item : an explicit value attribute
+	wins, otherwise continue counting from the nearest explicit value (or
+	the enum base) the way the C++ enum does. -->
+<xsl:template name="phpEnumItemValue">
+	<xsl:param name="item"/>
+	<xsl:choose>
+		<xsl:when test="$item/@value"><xsl:value-of select="$item/@value"/></xsl:when>
+		<xsl:when test="$item/preceding-sibling::item[@value]">
+			<xsl:variable name="explicit" select="$item/preceding-sibling::item[@value][1]"/>
+			<xsl:value-of select="$explicit/@value + count($item/preceding-sibling::item) - count($explicit/preceding-sibling::item)"/>
+		</xsl:when>
+		<xsl:when test="$item/../@base"><xsl:value-of select="$item/../@base + count($item/preceding-sibling::item)"/></xsl:when>
+		<xsl:otherwise><xsl:value-of select="count($item/preceding-sibling::item)"/></xsl:otherwise>
+	</xsl:choose>
+</xsl:template>
+
 <xsl:template match="enum" mode="php">
+<!-- The array key is the value the C++ enum serializes, so it has to
+	follow the value attributes from the interface definition ; a plain
+	running counter desyncs every enum that does not start at zero. The
+	invalid entry mirrors the C++ invalid_val (last item value + 2, one
+	past end_of_enum). -->
+<xsl:variable name="lastValue"><xsl:call-template name="phpEnumItemValue"><xsl:with-param name="item" select="item[last()]"/></xsl:call-template></xsl:variable>
 <xsl:text>&lt;?php
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
 
-	$arrayCounter = 0;
 </xsl:text>
 <xsl:for-each select="item">
-<xsl:text>	$</xsl:text><xsl:value-of select="//namespace/@name"/>_<xsl:value-of select="../@name"/>_EnumValues[$arrayCounter++] = "<xsl:value-of select="@name"/><xsl:text>";
+<xsl:text>	$</xsl:text><xsl:value-of select="//namespace/@name"/>_<xsl:value-of select="../@name"/>_EnumValues[<xsl:call-template name="phpEnumItemValue"><xsl:with-param name="item" select="."/></xsl:call-template>] = "<xsl:value-of select="@name"/><xsl:text>";
 </xsl:text></xsl:for-each>
-<xsl:text>	$</xsl:text><xsl:value-of select="//namespace/@name"/>_<xsl:value-of select="@name"/>_EnumValues[$arrayCounter] = "invalid";
-	$<xsl:value-of select="//namespace/@name"/>_<xsl:value-of select="@name"/>_InvalidValue = $arrayCounter;
+<xsl:text>	$</xsl:text><xsl:value-of select="//namespace/@name"/>_<xsl:value-of select="@name"/>_EnumValues[<xsl:value-of select="$lastValue + 2"/>] = "invalid";
+	$<xsl:value-of select="//namespace/@name"/>_<xsl:value-of select="@name"/>_InvalidValue = <xsl:value-of select="$lastValue + 2"/>;
 
 	class <xsl:value-of select="//namespace/@name"/>_<xsl:value-of select="@name"/>
 	{
 		var $Value;
 
-		function <xsl:value-of select="//namespace/@name"/>_<xsl:value-of select="@name"/>()
+		function __construct()
 		{
 			global $<xsl:value-of select="//namespace/@name"/>_<xsl:value-of select="@name"/>_InvalidValue;
 			$this->Value = $<xsl:value-of select="//namespace/@name"/>_<xsl:value-of select="@name"/>_InvalidValue;
