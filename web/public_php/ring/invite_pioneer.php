@@ -76,7 +76,9 @@
 			$mode = isset($_POST["mode"]) ? $_POST["mode"] : "";
 			if ($mode != "sps_edit_invited" && $mode != "sps_anim_invited")
 				$mode = "sps_edit_invited";
-			$invitePioneer->inviteCharacter((intval($userId)*16) + getCharSlot(), $sessionId, $row[0], $mode);
+			// mysqli_fetch_assoc() has no numeric keys: $row[0] was null and
+			// the session manager received no character to invite
+			$invitePioneer->inviteCharacter((intval($userId)*16) + getCharSlot(), $sessionId, $row['char_id'], $mode);
 			
 			echo "wait result...";
 			// wait the the return message

@@ -22,7 +22,7 @@
 
 	
 	// if the player ip is the dev ip then the sql error is explain
-	function die2($debug_str)
+	function die2($debug_str = '') // some callers pass nothing: keep the param optional
 	{
 		global $private_network;
 		if ( preg_match($private_network, getIp()) )
@@ -70,9 +70,10 @@
 			
 		if (mysqli_num_rows($result) != 1)
 		{
-			// unrecoverable error, we must giveup
-			$reason = "Can't find domain '".$domainName."' (error code x)";
-			$res = false;
+			// unrecoverable error, we must giveup (falling through here
+			// dereferenced the missing row and answered an empty url list)
+			echo "0:unknown domain";
+			die2("Can't find domain '".$domainName."' (error code x)");
 		}
 
 		$req = mysqli_fetch_array($result);

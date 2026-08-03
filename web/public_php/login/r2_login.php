@@ -117,7 +117,7 @@
 			$logPath = $pathInfo['dirname'].'/'.$LogRelativePath;
 			if (!is_dir($logPath))
 			{
-				$res = mkdir($LogPath, 0700);
+				$res = mkdir($logPath, 0700);
 				return $res ? $logPath : false;
 			}
 			return $logPath;

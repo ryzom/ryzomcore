@@ -16,10 +16,24 @@
 
 	function validateCookie(&$userId, &$domainId, &$charId)
 	{
-		$domainInfo = getDomainInfo($domainId);
-		
-		global $DBHost, $DBPort, $RingDBUserName, $RingDBPassword, $AcceptUnknownUser;
-		
+		global $DBHost, $DBPort, $RingDBUserName, $RingDBPassword, $RingDBName, $AcceptUnknownUser;
+
+		// Most callers do not know the domain yet and pass -1: the cookie row
+		// itself carries it (current_domain_id). The domain table has no row
+		// for -1 (domain_id is unsigned), so asking getDomainInfo() first
+		// killed the request before the cookie was even looked at. Only ask
+		// the domain table when the caller supplies a real id; otherwise the
+		// configured ring database is where the cookies of this web host live.
+		if (intval($domainId) >= 0)
+		{
+			$domainInfo = getDomainInfo($domainId);
+			$ringDBName = $domainInfo['ring_db_name'];
+		}
+		else
+		{
+			$ringDBName = $RingDBName;
+		}
+
 		if (!isset($_COOKIE["ryzomId"]))
 		{
 			echo "Cookie not found<BR>";
@@ -41,7 +55,7 @@
 
 		// check the cookie in the database		
 		$link = mysqli_connect($DBHost, $RingDBUserName, $RingDBPassword, NULL, $DBPort) or die ("Can't connect to database");
-		mysqli_select_db($link, $domainInfo['ring_db_name']) or die ("Can't access to the table");
+		mysqli_select_db($link, $ringDBName) or die ("Can't access to the table");
 
 		$cookie = mysqli_real_escape_string($link, $cookie);
 		$query = "SELECT user_id, current_status, current_domain_id FROM ring_users where cookie='$cookie'";
