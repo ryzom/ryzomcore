@@ -392,6 +392,17 @@ IF(WITH_NEL)
   ELSE()
     IF(WITH_GUI)
       FIND_PACKAGE(Luabind REQUIRED)
+      find_package(Lua)
+
+      if(Lua_FOUND AND NOT TARGET Lua::Lua)
+        add_library(Lua::Lua INTERFACE IMPORTED)
+        set_target_properties(
+                Lua::Lua
+                PROPERTIES
+                INTERFACE_INCLUDE_DIRECTORIES "${LUA_INCLUDE_DIR}"
+                INTERFACE_LINK_LIBRARIES "${LUA_LIBRARIES}"
+        )
+      endif()
     ENDIF()
 
     IF(EMSCRIPTEN)
