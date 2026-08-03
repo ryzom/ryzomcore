@@ -109,10 +109,22 @@
 		else
 		{
 			$row = mysqli_fetch_array ($result);
-			$salt = substr($row["Password"],0,2);
-			// compare without leaking where the two values stop matching
 			$stored = (string)$row["Password"];
-			if (($cp && hash_equals($stored, (string)$password)) || (!$cp && hash_equals($stored, (string)crypt($password, $salt))))
+			$password = (string)$password;
+			$salt = substr($stored, 0, 2);
+			// An account row with no password must never authenticate: with
+			// cp set the client sends the crypted password and the check is
+			// a plain comparison, so an empty column is matched by an empty
+			// password field. nel.user.Password is nullable, so such rows
+			// can exist. Two characters is also the least crypt() needs for
+			// its salt to mean anything.
+			if (strlen($stored) < 2 || $password === '')
+			{
+				$reason = "Bad password (error code 56)";
+				$res = false;
+			}
+			// compare without leaking where the two values stop matching
+			elseif (($cp && hash_equals($stored, $password)) || (!$cp && hash_equals($stored, (string)crypt($password, $salt))))
 			{
 				// check if the user can use this application
 
@@ -305,7 +317,11 @@
 		else
 		{
 			$res_array = mysqli_fetch_array($result);
-			$salt = substr($res_array['Password'], 0, 2);
+			$stored = (string)$res_array['Password'];
+			// An empty salt tells the caller which accounts carry no
+			// password; hand out a random one instead, the same answer an
+			// unknown login gets, and let checkUserValidity refuse.
+			$salt = strlen($stored) >= 2 ? substr($stored, 0, 2) : createSalt();
 		}
 
 		echo "1:".$salt;

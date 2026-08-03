@@ -23,6 +23,16 @@
 
     function get_salt($password)
     {
+        // Rows with no password reach this too (the column is nullable).
+        // Indexing an empty string is an error on php 8, and handing the
+        // client an empty salt tells it which accounts have no password;
+        // answer with a fixed one instead, exactly as an unknown login is
+        // answered, and let the comparison refuse the login.
+        $password = (string)$password;
+        if (strlen($password) < 2)
+        {
+            return 'AA';
+        }
         if ($password[0] == '$')
         {
             $salt = substr($password, 0, 19);
@@ -180,7 +190,11 @@
 	{
 		$logFile = new CWwwLog();
 		$logFile->logStr("PHP ERROR/$errno $errmsg ($filename:$linenum)");
-		$logFile->logStr("PHP CALLSTACK/" . print_r(debug_backtrace(), TRUE));
+		// IGNORE_ARGS, or the frame for checkUserValidity() writes the
+		// submitted password into the log -- the very thing logStr() scrubs
+		// out of the request uri. Any php notice raised during a login was
+		// enough to spill it.
+		$logFile->logStr("PHP CALLSTACK/" . print_r(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS), TRUE));
 		// Never die after an error
 	}
 
@@ -211,16 +225,24 @@
 	$DisplayDbg = (isset($LoginAllowDbg) && $LoginAllowDbg)
 		&& isset($_GET['dbg']) && ($_GET['dbg'] == 1);
 
+	// The three login fields are only ever read from here. A request that
+	// leaves one out used to reach mysqli_real_escape_string() and crypt()
+	// as null -- a deprecation on php 8.1 for every one of them, and one
+	// line per warning in the login log through err_callback().
+	$reqLogin		= isset($_GET['login']) && is_string($_GET['login']) ? $_GET['login'] : '';
+	$reqPassword	= isset($_GET['password']) && is_string($_GET['password']) ? $_GET['password'] : '';
+	$reqClientApp	= isset($_GET['clientApplication']) && is_string($_GET['clientApplication']) ? $_GET['clientApplication'] : '';
+
 	switch($_GET['cmd'])
 	{
 	case 'ask':
 		// client ask for a login salt
-		askSalt($_GET['login'], $submittedLang);
+		askSalt($reqLogin, $submittedLang);
 		die();
 	case 'login':
 		$domainId = -1;
 		// client sent is login info
-		if (!checkUserValidity($_GET['login'], $_GET['password'], $_GET['clientApplication'], $cp, $id, $reason, $priv, $extended, $domainId, $submittedLang))
+		if (!checkUserValidity($reqLogin, $reqPassword, $reqClientApp, $cp, $id, $reason, $priv, $extended, $domainId, $submittedLang))
 		{
 			echo '0:'.$reason;
 		}
@@ -396,10 +418,24 @@
 		else
 		{
 			$row = mysqli_fetch_assoc ($result);
-			$salt = get_salt($row["Password"]);
-			// compare without leaking where the two values stop matching
 			$stored = (string)$row["Password"];
-			if (($cp && hash_equals($stored, (string)$password)) || (!$cp && hash_equals($stored, (string)crypt($password, $salt))))
+			$password = (string)$password;
+			// An account row with no password must never authenticate. The
+			// client sends the already crypted password (cp is set on every
+			// build), so the check on that path is a plain comparison, and
+			// an empty column is matched by an empty password field. Rows
+			// like that exist: nel.user.Password is `varchar DEFAULT NULL`,
+			// so anything that inserts a user without one -- by hand, by an
+			// import, by a half finished registration -- leaves an account
+			// anyone can walk into by name alone. Two characters is also the
+			// minimum crypt() needs for its salt to mean anything.
+			if (strlen($stored) < 2 || $password === '')
+			{
+				$reason = errorMsg(2004, 'user');
+				$res = false;
+			}
+			// compare without leaking where the two values stop matching
+			elseif (($cp && hash_equals($stored, $password)) || (!$cp && hash_equals($stored, (string)crypt($password, get_salt($stored)))))
 			{
 				// Store the real login (with correct case)
 				$_GET['login'] = $row['Login'];
