@@ -2835,28 +2835,8 @@ endOfWelcomeUserResult:
 			// if the invited character is not the session owner
 			if (invitedCharId != ownerCharId)
 			{
-				// check that free trial account can't access non authorised scenarios
 				CNelUserPtr invitedNelUser = CNelUser::load(_NelDb, invitedCharId>>4, __FILE__, __LINE__);
 				BOMB_IF(invitedNelUser == NULL, "Failed to load nel user "<<(ownerCharId>>4), invokeResult(from, ownerCharId>>4, 8, "Can not load Nel user of invited character"); return);
-				CSessionLogPtr sessionLog = CSessionLog::load(_RingDb, sessionId, __FILE__, __LINE__);
-				if (sessionLog == NULL)
-				{
-					// the scenario is not started, can't accept invitation now
-					invokeResult(from, ownerCharId>>4, 13, "scenario not started, can't validate invitation now");
-					return;
-				}
-
-				CScenarioPtr scenario = CScenario::load(_RingDb, sessionLog->getScenarioId(), __FILE__, __LINE__);
-				BOMB_IF(invitedNelUser == NULL, "Failed to load scenario for id "<<sessionLog->getScenarioId()<<" for session "<<sessionId.asInt(), invokeResult(from, ownerCharId>>4, 8, "Can not load scenario associated with session log"); return);
-
-				if (invitedNelUser->getExtendedPrivilege().find(":TRIAL:") != string::npos
-					&& !scenario->getAllowFreeTrial())
-				{
-					// free trial are not allowed in this scenario
-					invokeResult(from, ownerCharId>>4, 14, "free trial character are not allowed in user scenario");
-					return;
-
-				}
 
 				// check that the character is not already participating
 				invitedCharacter->loadSessionParticipants(_RingDb, __FILE__, __LINE__);
@@ -2869,51 +2849,97 @@ endOfWelcomeUserResult:
 					}
 				}
 
-
 				if (session->getSessionType() == TSessionType::st_edit)
 				{
-					invokeResult(from, ownerCharId>>4, 7, "It is not allowed to invite someone else in edit session");
-					return;
-				}
-				else if (role != TSessionPartStatus::sps_play_invited)
-				{
-					invokeResult(from, ownerCharId>>4, 4, "Animator can't invite other animator (only session owner can)");
-					return;
-				}
-				else if (session->getOwnerId() != ownerCharId)
-				{
-					// the character that request the invitation is not the session owner,
-					// check that he is animator in the session/
-
-					BOMB_IF(!ownerChar->loadSessionParticipants(_RingDb, __FILE__, __LINE__), "Failed to load participation for host character "<<ownerCharId, invokeResult(from, ownerCharId>>4, 8, "Failed to load participation for host character"); return);
-
-					uint i=0;
-					for (; i<ownerChar->getSessionParticipants().size(); ++i)
+					// Co-editing: the session owner hands out editor
+					// invitations through the ring web pages. This used to be
+					// refused outright, which left no way to bring a second
+					// editor into an edit session from the web route.
+					if (session->getOwnerId() != ownerCharId)
 					{
-						CSessionParticipantPtr sp = ownerChar->getSessionParticipantsByIndex(i);
-
-						if (sp->getSessionId() == sessionId.asInt())
-						{
-							// we found it
-							if (sp->getStatus() != TSessionPartStatus::sps_anim_invited
-								&& sp->getStatus() != TSessionPartStatus::sps_animating)
-							{
-								// the host char is not animator in the session !
-								invokeResult(from, ownerCharId>>4, 11, "Invitation requester char is not animator in the session");
-								return;
-							}
-
-							// ok, stop the loop
-							break;
-						}
-					}
-
-					if (i == ownerChar->getSessionParticipants().size())
-					{
-						// no participation found !
-						invokeResult(from, ownerCharId>>4, 11, "Requester character is not invited in session");
+						invokeResult(from, ownerCharId>>4, 11, "Only the session owner can invite an editor in an edit session");
 						return;
 					}
+					if (role != TSessionPartStatus::sps_edit_invited)
+					{
+						invokeResult(from, ownerCharId>>4, 7, "Only editor invitations are allowed in an edit session");
+						return;
+					}
+				}
+				else if (role == TSessionPartStatus::sps_anim_invited)
+				{
+					// Co-animating: owner only, and before or after the
+					// scenario starts (there is no session log to check
+					// against until the DSS launches the scenario).
+					if (session->getOwnerId() != ownerCharId)
+					{
+						invokeResult(from, ownerCharId>>4, 4, "Animator can't invite other animator (only session owner can)");
+						return;
+					}
+				}
+				else if (role == TSessionPartStatus::sps_play_invited)
+				{
+					// check that free trial account can't access non authorised scenarios
+					CSessionLogPtr sessionLog = CSessionLog::load(_RingDb, sessionId, __FILE__, __LINE__);
+					if (sessionLog == NULL)
+					{
+						// the scenario is not started, can't accept invitation now
+						invokeResult(from, ownerCharId>>4, 13, "scenario not started, can't validate invitation now");
+						return;
+					}
+
+					CScenarioPtr scenario = CScenario::load(_RingDb, sessionLog->getScenarioId(), __FILE__, __LINE__);
+					BOMB_IF(scenario == NULL, "Failed to load scenario for id "<<sessionLog->getScenarioId()<<" for session "<<sessionId.asInt(), invokeResult(from, ownerCharId>>4, 8, "Can not load scenario associated with session log"); return);
+
+					if (invitedNelUser->getExtendedPrivilege().find(":TRIAL:") != string::npos
+						&& !scenario->getAllowFreeTrial())
+					{
+						// free trial are not allowed in this scenario
+						invokeResult(from, ownerCharId>>4, 14, "free trial character are not allowed in user scenario");
+						return;
+
+					}
+
+					if (session->getOwnerId() != ownerCharId)
+					{
+						// the character that request the invitation is not the session owner,
+						// check that he is animator in the session/
+
+						BOMB_IF(!ownerChar->loadSessionParticipants(_RingDb, __FILE__, __LINE__), "Failed to load participation for host character "<<ownerCharId, invokeResult(from, ownerCharId>>4, 8, "Failed to load participation for host character"); return);
+
+						uint i=0;
+						for (; i<ownerChar->getSessionParticipants().size(); ++i)
+						{
+							CSessionParticipantPtr sp = ownerChar->getSessionParticipantsByIndex(i);
+
+							if (sp->getSessionId() == sessionId.asInt())
+							{
+								// we found it
+								if (sp->getStatus() != TSessionPartStatus::sps_anim_invited
+									&& sp->getStatus() != TSessionPartStatus::sps_animating)
+								{
+									// the host char is not animator in the session !
+									invokeResult(from, ownerCharId>>4, 11, "Invitation requester char is not animator in the session");
+									return;
+								}
+
+								// ok, stop the loop
+								break;
+							}
+						}
+
+						if (i == ownerChar->getSessionParticipants().size())
+						{
+							// no participation found !
+							invokeResult(from, ownerCharId>>4, 11, "Requester character is not invited in session");
+							return;
+						}
+					}
+				}
+				else
+				{
+					invokeResult(from, ownerCharId>>4, 7, "Invalid invitation role for this session");
+					return;
 				}
 			}
 

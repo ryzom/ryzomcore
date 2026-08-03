@@ -77,7 +77,8 @@
 			// session, so at least keep the values to the shapes it expects
 			$sessionId = intval($_POST["sessionId"]);
 			$modeStr = isset($_POST["mode"]) ? $_POST["mode"] : "";
-			if ($modeStr != "sps_edit_invited" && $modeStr != "sps_anim_invited")
+			if ($modeStr != "sps_edit_invited" && $modeStr != "sps_anim_invited"
+				&& $modeStr != "sps_play_invited")
 				$modeStr = "sps_edit_invited";
 			// the role is an enum on the wire, a bare string has no toInt()
 			$mode = new RSMGR_TSessionPartStatus;
