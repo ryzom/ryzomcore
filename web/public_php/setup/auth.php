@@ -14,9 +14,9 @@ require_once('config.php');
 ?>
 			<div style="margin-left: auto; margin-right: auto; max-width: 512px;">
 
-<?php /*var_dump($_POST);*/ $showForm = true; if ($_POST) { ?>
+<?php $showForm = true; if ($_POST) { ?>
 
-<?php if ($_POST['nelSetupPassword'] == $NEL_SETUP_PASSWORD) { ?>
+<?php if (isset($_POST['nelSetupPassword']) && hash_equals((string)$NEL_SETUP_PASSWORD, (string)$_POST['nelSetupPassword'])) { ?>
 
 <?php
 

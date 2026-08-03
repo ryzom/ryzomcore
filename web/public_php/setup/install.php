@@ -24,10 +24,6 @@ $shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 
 <?php } else if ($_POST) { ?>
 
-			<div class="alert alert-info" role="alert">
-				<?php var_dump($_POST); ?>
-			</div>
-
 <?php
 
 	$roleService = isset($_POST["roleService"]) && $_POST["roleService"] == "on";

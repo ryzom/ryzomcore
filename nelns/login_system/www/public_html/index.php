@@ -11,7 +11,7 @@
 	{
 		$chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 			
-		return substr($chars, rand(0, strlen($chars)-1), 1).substr($chars, rand(0, strlen($chars)-1), 1);
+		return substr($chars, random_int(0, strlen($chars)-1), 1).substr($chars, random_int(0, strlen($chars)-1), 1);
 	}
 
 	// $reason contains the reason why the check failed or success
@@ -20,11 +20,11 @@
 	{
 		global $DBHost, $DBUserName, $DBPassword, $DBName, $AcceptUnknownUser;
 
-		$link = mysql_connect($DBHost, $DBUserName, $DBPassword) or die ("Can't connect to database host:$DBHost user:$DBUserName");
-		mysql_select_db ($DBName) or die ("Can't access to the table dbname:$DBName");
+		$link = mysql_connect($DBHost, $DBUserName, $DBPassword) or die ("Database unavailable");
+		mysql_select_db ($DBName) or die ("Database unavailable");
 		$login = mysql_real_escape_string($login);
 		$query = "SELECT * FROM user where Login='$login'";
-		$result = mysql_query ($query) or die ("Can't execute the query: ".$query);
+		$result = mysql_query ($query) or die ("Database error");
 
 		if (mysql_num_rows ($result) == 0)
 		{
@@ -39,11 +39,11 @@
 				// login doesn't exist, create it
 				$password = mysql_real_escape_string($password);
 				$query = "INSERT INTO user (Login, Password) VALUES ('$login', '$password')";
-				$result = mysql_query ($query) or die ("Can't execute the query: ".$query);
+				$result = mysql_query ($query) or die ("Database error");
 
 				// get the user to have his UId
 				$query = "SELECT * FROM user WHERE Login='$login'";
-				$result = mysql_query ($query) or die ("Can't execute the query: ".$query);
+				$result = mysql_query ($query) or die ("Database error");
 
 				if (mysql_num_rows ($result) == 1)
 				{
@@ -55,7 +55,7 @@
 
 					// add the default permission
 					$query = "INSERT INTO permission (UId,ClientApplication) VALUES ('$id', 'snowballs')";
-					$result = mysql_query ($query) or die ("Can't execute the query: ".$query);
+					$result = mysql_query ($query) or die ("Database error");
 
 					$res = true;
 				}
@@ -75,13 +75,15 @@
 		{
 			$row = mysql_fetch_array ($result);
 			$salt = substr($row["Password"],0,2);
-			if (($cp && $row["Password"] == $password) || (!$cp && $row["Password"] == crypt($password, $salt)))
+			// compare without leaking where the two values stop matching
+			$stored = (string)$row["Password"];
+			if (($cp && hash_equals($stored, (string)$password)) || (!$cp && hash_equals($stored, (string)crypt($password, $salt))))
 			{
 				// check if the user can use this application
 
 			$clientApplication = mysql_real_escape_string($clientApplication);
 				$query = "SELECT * FROM permission WHERE UId='".$row["UId"]."' AND ClientApplication='$clientApplication'";
-				$result = mysql_query ($query) or die ("Can't execute the query: ".$query);
+				$result = mysql_query ($query) or die ("Database error");
 				if (mysql_num_rows ($result) == 0)
 				{
 					// no permission
@@ -101,10 +103,10 @@
 							$reason =  $reason."was just disconnected. Now you can retry the identification (error code 54)";
 
 							$query = "update shard set NbPlayers=NbPlayers-1 where ShardId=".$row["ShardId"];
-							$result = mysql_query ($query) or die ("Can't execute the query: '$query' errno:".mysql_errno().": ".mysql_error());
+							$result = mysql_query ($query) or die ("Database error");
 
 							$query = "update user set ShardId=-1, State='Offline' where UId=".$row["UId"];
-							$result = mysql_query ($query) or die ("Can't execute the query: '$query' errno:".mysql_errno().": ".mysql_error());
+							$result = mysql_query ($query) or die ("Database error");
 						}
 						else
 						{
@@ -136,14 +138,14 @@
         global $PHP_SELF;
         global $DBHost, $DBUserName, $DBPassword, $DBName;
 
-        $link = mysql_connect($DBHost, $DBUserName, $DBPassword) or die ("0:Can't connect to database host:$DBHost user:$DBUserName");
-        mysql_select_db ($DBName) or die ("0:Can't access to the table dbname:$DBName");
+        $link = mysql_connect($DBHost, $DBUserName, $DBPassword) or die ("0:Database unavailable");
+        mysql_select_db ($DBName) or die ("0:Database unavailable");
 
         $id = mysql_real_escape_string($id);
         $clientApplication = mysql_real_escape_string($clientApplication);
         $shardId = mysql_real_escape_string($shardId);
         $query = "SELECT * FROM permission WHERE UId='".$id."' AND ClientApplication='".$clientApplication."' AND (ShardId='".$shardId."' OR ShardId='-1')";;
-        $result = mysql_query ($query) or die ("0:Can't execute the query: ".$query);
+        $result = mysql_query ($query) or die ("0:Database error");
 
         if (mysql_num_rows ($result) > 0)
         {
@@ -159,13 +161,13 @@
 		global $PHP_SELF;
 		global $DBHost, $DBUserName, $DBPassword, $DBName;
 
-		$link = mysql_connect($DBHost, $DBUserName, $DBPassword) or die ("0:Can't connect to database host:$DBHost user:$DBUserName");
-		mysql_select_db ($DBName) or die ("0:Can't access to the table dbname:$DBName");
+		$link = mysql_connect($DBHost, $DBUserName, $DBPassword) or die ("0:Database unavailable");
+		mysql_select_db ($DBName) or die ("0:Database unavailable");
 		
 		$id = mysql_real_escape_string($id);
 		$clientApplication = mysql_real_escape_string($clientApplication);
 		$query = "SELECT * FROM user WHERE UId='".$id."'";
-		$result = mysql_query ($query) or die ("0:Can't execute the query: ".$query);
+		$result = mysql_query ($query) or die ("0:Database error");
 
 		if ($result)
 			$uData = mysql_fetch_array($result);
@@ -178,7 +180,7 @@
 			$priv = '';
 
 		$query = "SELECT * FROM shard WHERE ClientApplication='".$clientApplication."'";
-		$result = mysql_query ($query) or die ("0:Can't execute the query: ".$query);
+		$result = mysql_query ($query) or die ("0:Database error");
 		
 		$nbs = 0;
 		$res = "";
@@ -188,7 +190,7 @@
 			while($row = mysql_fetch_array($result))
 			{
 				$query2 = "SELECT * FROM permission WHERE UId='".$id."' AND ClientApplication='".$clientApplication."' AND ShardId='".$row["ShardId"]."'";
-				$result2 = mysql_query ($query2) or die ("Can't execute the query: ".$query2);
+				$result2 = mysql_query ($query2) or die ("Database error");
 				
 				$online = $row["Online"];
 				$uOnline = 1;
@@ -238,12 +240,12 @@
 		global $PHP_SELF;
 		global $DBHost, $DBUserName, $DBPassword, $DBName, $AcceptUnknownUser;
 
-		$link = mysql_connect($DBHost, $DBUserName, $DBPassword) or die ("0:Can't connect to database host:$DBHost user:$DBUserName");
-		mysql_select_db ($DBName) or die ("0:Can't access to the table dbname:$DBName");
+		$link = mysql_connect($DBHost, $DBUserName, $DBPassword) or die ("0:Database unavailable");
+		mysql_select_db ($DBName) or die ("0:Database unavailable");
 
 		$login = mysql_real_escape_string($login);
 		$query = "SELECT Password FROM user WHERE Login='$login'";
-		$result = mysql_query ($query) or die ("0:Can't execute the query: ".$query);
+		$result = mysql_query ($query) or die ("0:Database error");
 
 		if (mysql_num_rows ($result) != 1)
 		{
