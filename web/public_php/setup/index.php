@@ -31,9 +31,11 @@ include('header.php');
 
 <?php } ?>
 
-					<!--<p>-->
+					<!-- status.php was never written; keep the button out of the
+					     panel until such a page exists
+					<p>
 						<a class="btn btn-default" style="width: 100%;" href="status.php"><span class="glyphicon glyphicon-info-sign"></span> Status</a>
-					<!--</p>-->
+					</p>-->
 
 				</div>
 			</div>

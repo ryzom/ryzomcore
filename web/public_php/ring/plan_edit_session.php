@@ -4,20 +4,10 @@
 	include_once('../tools/domain_info.php');
 	include('../login/config.php');
 
-	function scheduleSessionResult($charId, $sessionId, $result, $resultString)
-	{
-		echo "Create session result :<br>";
-		if ($result == 1)
-		{
-			echo "Session ".htmlspecialchars($sessionId, ENT_QUOTES)." created for character ".htmlspecialchars($charId, ENT_QUOTES)."<br>";
-			
-			echo "<h2>Your session have been planned, thank you<h2><br>";
-		}
-		else
-		{
-			echo "Failed to create a session for character ".htmlspecialchars($charId, ENT_QUOTES)." with error ".htmlspecialchars($resultString, ENT_QUOTES)." <br>";
-		}
-	}
+	// The schedule result callback lives on ScheduleSessionCb in
+	// session_tools.php; a bare function of the same name here was never
+	// called (this page only renders the form) and it tested the result
+	// code backwards, so it is gone.
 
 	///////////////////////////
 	// Main code
