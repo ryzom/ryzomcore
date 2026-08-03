@@ -309,11 +309,14 @@ function build_forum_page($forum)
 		{
 			$t = &$threads[$thread];
 
-			// replace in topic
+			// replace in topic -- the sender name and the counters come from
+			// what a player posted, so escape them like the subject
 			$subject = ucfirst(displayable_string($t[1]));
+			$sender = displayable_string($t[0]);
 
-			$inst_topic .= str_replace(array('%%SUBJECT%%',     '%%SENDER%%', '%%UCSENDER%%', '%%NUMPOSTS%%', '%%DATE%%', '%%FORUM%%', 			'%%UCFORUM%%',              '%%THREAD%%', '%%COLOR%%'),
-									   array(ucfirst($subject), $t[0],        ucfirst($t[0]), $t[3],          $t[2],      nameToURL($forum),	convert_forum_name($forum), $t[4],        $altern_color[$altern_index]),
+			// %%DATE%% is html this code generated itself, leave it alone
+			$inst_topic .= str_replace(array('%%SUBJECT%%',     '%%SENDER%%', '%%UCSENDER%%',   '%%NUMPOSTS%%',                      '%%DATE%%', '%%FORUM%%', 			'%%UCFORUM%%',              '%%THREAD%%',                        '%%COLOR%%'),
+									   array(ucfirst($subject), $sender,      ucfirst($sender), htmlspecialchars($t[3], ENT_QUOTES), $t[2],      nameToURL($forum),	convert_forum_name($forum), htmlspecialchars($t[4], ENT_QUOTES), $altern_color[$altern_index]),
 									   $forum_topic);
 
 			// step to next thread
@@ -398,10 +401,13 @@ function build_thread_page($forum, $thread, &$num_posts)
 		{
 			$p = &$posts[$post];
 
+			// the sender name comes from what a player posted, so escape it
+			// like the content; %%DATE%% is html this code generated itself
 			$content = nl2br(displayable_content($p[1]));
+			$sender = displayable_string($p[0]);
 
-			$inst_post .= str_replace(array('%%FORUM%%', 		'%%UCFORUM%%',              '%%SENDER%%', '%%UCSENDER%%', '%%DATE%%', '%%CONTENT%%', '%%POST%%', '%%COLOR%%'),
-									  array(nameToURL($forum),  convert_forum_name($forum), $p[0],        ucfirst($p[0]), $p[2],      $content,      $post,      $altern_color[$altern_index]),
+			$inst_post .= str_replace(array('%%FORUM%%', 		'%%UCFORUM%%',              '%%SENDER%%', '%%UCSENDER%%',   '%%DATE%%', '%%CONTENT%%', '%%POST%%', '%%COLOR%%'),
+									  array(nameToURL($forum),  convert_forum_name($forum), $sender,      ucfirst($sender), $p[2],      $content,      $post,      $altern_color[$altern_index]),
 									  $topic_post);
 
 			// step to next post

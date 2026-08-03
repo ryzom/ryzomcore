@@ -36,8 +36,13 @@
 
 	read_template('new_mail.html', $new_mail);
 
-	$instance = str_replace(array('%%FROM%%',  '%%UCFROM%%',         '%%TO%%', '%%UCTO%%',        '%%SUBJECT%%',                              '%%CONTENT%%'),
-							array($user_login, ucfirst($user_login), $mail_to, ucfirst($mail_to), ucfirst(displayable_string($mail_subject)), displayable_content($mail_content)),
+	// the sender and the recipient arrive with the request too, so they need
+	// the same escaping the subject and the content already get
+	$e_login = htmlspecialchars($user_login, ENT_QUOTES);
+	$e_to    = htmlspecialchars($mail_to, ENT_QUOTES);
+
+	$instance = str_replace(array('%%FROM%%', '%%UCFROM%%',      '%%TO%%', '%%UCTO%%',     '%%SUBJECT%%',                              '%%CONTENT%%'),
+							array($e_login,   ucfirst($e_login), $e_to,    ucfirst($e_to), ucfirst(displayable_string($mail_subject)), displayable_content($mail_content)),
 							$new_mail);
 
 	echo $instance;

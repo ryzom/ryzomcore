@@ -38,8 +38,15 @@
 
 	read_template('new_post.html', $new_post);
 
-	$instance = str_replace(array('%%SENDER%%', '%%UCSENDER%%', 		'%%FORUM_POST%%', 	'%%FORUM%%', 		'%%UCFORUM%%', 				'%%THREAD%%', '%%SUBJECT%%'), 
-							array($user_login,  ucfirst($user_login), 	$forum, 			nameToURL($forum),  convert_forum_name($forum), $thread,      $subject),
+	// everything below arrives with the request and is placed in the page, so
+	// it has to be escaped
+	$e_login   = htmlspecialchars($user_login, ENT_QUOTES);
+	$e_forum   = htmlspecialchars($forum, ENT_QUOTES);
+	$e_thread  = htmlspecialchars($thread, ENT_QUOTES);
+	$e_subject = htmlspecialchars($subject, ENT_QUOTES);
+
+	$instance = str_replace(array('%%SENDER%%', '%%UCSENDER%%', 	'%%FORUM_POST%%', 	'%%FORUM%%', 									'%%UCFORUM%%', 												'%%THREAD%%', '%%SUBJECT%%'),
+							array($e_login,     ucfirst($e_login), 	$e_forum, 			htmlspecialchars(nameToURL($forum), ENT_QUOTES),	htmlspecialchars(convert_forum_name($forum), ENT_QUOTES),	$e_thread,    $e_subject),
 							$new_post);
 
 	echo $instance;

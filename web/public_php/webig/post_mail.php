@@ -48,10 +48,15 @@
 	{
 		if ($mail_to == '' || !is_dir($to_dir = get_user_dir($mail_to, $shard)))
 		{
-			$mail_subject = "<i>uiMFUndelivrableMail</i> '$mail_subject'";
+			// the bounce message is built as html, so escape the parts that
+			// came in with the request before they are pasted into it
+			$safe_to = displayable_string($mail_to);
+			$safe_subject = displayable_string($mail_subject);
+			$safe_content = displayable_string($mail_content);
+			$mail_subject = "<i>uiMFUndelivrableMail</i> '$safe_subject'";
 			$mail_cleansubject = $mail_subject;
-			$mail_content = "<i>uiMFUndelivrableMailTo</i> '$mail_to'.\n<i>uiMFUndelivrableMailCheck</i><br>\n<br>\n<i>uiMFMailContent</i><br>\n$mail_content";
-			$mail_cleancontent = "<i>uiMFUndelivrableMailTo</i> '$mail_to'.\n<i>uiMFUndelivrableMailCheck</i>\n\n<i>uiMFMailContent</i>\n$mail_content";
+			$mail_content = "<i>uiMFUndelivrableMailTo</i> '$safe_to'.\n<i>uiMFUndelivrableMailCheck</i><br>\n<br>\n<i>uiMFMailContent</i><br>\n$safe_content";
+			$mail_cleancontent = "<i>uiMFUndelivrableMailTo</i> '$safe_to'.\n<i>uiMFUndelivrableMailCheck</i>\n\n<i>uiMFMailContent</i>\n$safe_content";
 			$mail_to = $mail_from;
 			$mail_from = '<i>uiMFMailServer</i>';
 		}

@@ -38,6 +38,10 @@
 	global $post_thread;
 	global $post_content;
 
+	// the thread index becomes part of the file name that is appended to
+	if (!isset($post_thread) || !safe_index_param($post_thread))
+		die("ERROR: Bad parameters");
+
 	check_character_belongs_to_guild($user_login, $post_to);
 
 	// check mail is valid

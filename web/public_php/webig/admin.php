@@ -68,6 +68,10 @@ global $mail;
 
 if ($mail)
 {
+	// $mail is appended to the mailbox path, so it may only name a file that
+	// lives directly in it
+	if (!safe_path_component($mail))
+		die("ERROR: Bad parameters");
 	$mdir = get_user_dir($mailbox, $shard);
 	readfile($mdir.$mail);
 	die();
@@ -85,6 +89,9 @@ global $thread;
 
 if ($thread)
 {
+	// $thread is appended to the forum path, same rule as $mail above
+	if (!safe_path_component($thread))
+		die("ERROR: Bad parameters");
 	display_thread_content($shard, $forum, $thread);
 	die();
 }

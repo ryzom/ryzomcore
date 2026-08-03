@@ -37,7 +37,9 @@
 	{
 		foreach ($_POST as $var => $value)
 		{
-			if (matchParam($var, "select_thread_", $thread))
+			// the thread index comes from the name of the posted field and
+			// ends up in the file names that get renamed
+			if (matchParam($var, "select_thread_", $thread) && safe_index_param($thread))
 			{
 				remove_thread($forum, $thread);
 			}

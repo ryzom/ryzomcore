@@ -31,7 +31,9 @@
 	$selected_mails = '';
 	foreach ($_POST as $var => $value)
 	{
-		if (matchParam($var, "select_mail_", $mail))
+		// the mail index comes from the name of the posted field, and it is
+		// echoed straight back into the confirmation form
+		if (matchParam($var, "select_mail_", $mail) && safe_index_param($mail))
 		{
 			$mails[] = $mail;
 			$selected_mails .= "<input type='hidden' name='select_mail_$mail' value='selected'>\n";
@@ -41,7 +43,7 @@
 	//
 
 	$instance = str_replace(array('%%MAIL%%', '%%SELECTED_MAILS%%'),
-							array($mails[0],  $selected_mails),
+							array(isset($mails[0]) ? $mails[0] : '',  $selected_mails),
 							$confirm_delete_mail);
 
 	echo $instance;

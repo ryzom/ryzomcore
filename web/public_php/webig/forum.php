@@ -31,6 +31,10 @@
 	global $forum;
 	global $page;
 
+	// $page becomes part of the file name below
+	if (isset($page) && $page != "" && !safe_index_param($page))
+		die("ERROR: Bad parameters");
+
 	check_character_belongs_to_guild($user_login, $forum);
 
 	$forum_dir = build_user_dir($forum, $shard);

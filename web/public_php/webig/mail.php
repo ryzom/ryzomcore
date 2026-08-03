@@ -24,6 +24,10 @@
 	importParam('msg');
 	global $msg;
 
+	// $msg becomes part of the file name below
+	if (!isset($msg) || !safe_index_param($msg))
+		die("ERROR: Bad parameters");
+
 	$user_dir = get_user_dir($user, $shard);
 	$fname = $user_dir."mail_$msg.html";
 	if (!is_dir($user_dir) || !file_exists($fname))

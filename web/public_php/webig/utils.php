@@ -230,6 +230,8 @@ function read_template($file, &$template)
 // -------------------------------------
 function redirect($url, $time=0)
 {
+	$url = htmlspecialchars($url, ENT_QUOTES);
+	$time = (int)$time;
 	echo "<html><head><title>Redirecting...</title>\n";
 	echo "<meta http-equiv='refresh' content='$time; URL=$url'>\n";
 	echo "</head>\n";
@@ -310,12 +312,38 @@ function nameToFile($name)
 	{
 		if ($name[$i] == ' ')
 			$r .= '_';
-		else if ($name[$i] == '%' || $name[$i] <= chr(32) || $name[$i] >= chr(127))
+		// '/', '\' and '.' would give the name a meaning to the file system,
+		// so they are escaped along with '%' and the non printable range
+		else if ($name[$i] == '%' || $name[$i] == '/' || $name[$i] == '\\' || $name[$i] == '.'
+			|| $name[$i] <= chr(32) || $name[$i] >= chr(127))
 			$r .= sprintf("%%%02x", ord($name[$i]));
 		else
 			$r .= $name[$i];
 	}
 	return $r;
+}
+
+// -------------------------------------
+// check a value that is about to become one component of a path
+// -------------------------------------
+function safe_path_component($value)
+{
+	if (!is_string($value) || $value === '')
+		return false;
+	if (strpbrk($value, "/\\\0") !== false)
+		return false;
+	if ($value === '.' || $value === '..')
+		return false;
+	return true;
+}
+
+// -------------------------------------
+// check a value that is about to become part of a file name, and that the
+// callers all treat as an index number
+// -------------------------------------
+function safe_index_param($value)
+{
+	return is_string($value) && preg_match('/^[0-9]{1,10}$/', $value);
 }
 
 function nameToURL($name)
@@ -368,10 +396,15 @@ function get_user_dir($user, $shard)
 {
 	if ($user == "" || $shard == "")
 		die("INTERNAL ERROR CODE 1");
-		
+
 	global	$USERS_DIR;
-	
+
 	$user = nameToFile($user);
+
+	// both halves come from the request; refuse anything that would step out
+	// of $USERS_DIR instead of building the path from it
+	if (!safe_path_component($user) || !safe_path_component($shard))
+		die("INTERNAL ERROR CODE 1");
 
 	return $USERS_DIR.'/'.strtolower($shard).'/'.substr(strtolower($user), 0, 2).'/'.strtolower($user).'/';
 }

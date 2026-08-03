@@ -136,10 +136,13 @@ function build_mail_page($user)
 		{
 			$m = &$mails[$mail];
 			
+			// the sender name comes from what a player sent, so escape it like
+			// the subject; %%DATE%% is html this code generated itself
 			$subject = ucfirst(displayable_string($m[1]));
+			$from = displayable_string($m[0]);
 
-			$inst_mail .= str_replace(array('%%FROM%%', '%%UCFROM%%',   '%%SUBJECT%%', '%%DATE%%', '%%USER%%', '%%MAIL%%', '%%COLOR%%'), 
-									  array($m[0],      ucfirst($m[0]), $subject,      $m[2],      $user,      $m[4],      $altern_color[$altern_index]),
+			$inst_mail .= str_replace(array('%%FROM%%', '%%UCFROM%%',   '%%SUBJECT%%', '%%DATE%%', '%%USER%%',                                    '%%MAIL%%',                          '%%COLOR%%'),
+									  array($from,      ucfirst($from), $subject,      $m[2],      htmlspecialchars($user, ENT_QUOTES), htmlspecialchars($m[4], ENT_QUOTES), $altern_color[$altern_index]),
 									  $mailbox_mail);
 
 			// step to next message

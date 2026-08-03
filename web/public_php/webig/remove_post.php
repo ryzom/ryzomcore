@@ -32,6 +32,10 @@
 	global $forum;
 	global $thread;
 
+	// the thread index becomes part of the index file that gets rewritten
+	if (!isset($thread) || !safe_index_param($thread))
+		die("ERROR: Bad parameters");
+
 	check_character_belongs_to_guild($user_login, $forum);
 	
 	/* if ($forum == $user_login) */
