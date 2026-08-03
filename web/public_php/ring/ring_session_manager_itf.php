@@ -897,9 +897,11 @@
 				$msg->serialEnum($levelFilter);
 				$msg->serialString($language);
 				$msg->serialEnum($orientation);
-				$msg->serialUint32($subscriptionClosed);
-				$msg->serialUint32($autoInvite);
-	
+				// bool serializes as one byte on the C++ side (serialBit),
+				// the generator's uint32 default desynced the message here
+				$msg->serialUInt8($subscriptionClosed);
+				$msg->serialUInt8($autoInvite);
+
 			return parent::sendMessage($msg);
 
 
@@ -955,11 +957,13 @@
 				$msg->serialEnum($guildFilter);
 				$msg->serialEnum($shardFilter);
 				$msg->serialEnum($levelFilter);
-				$msg->serialUint32($subscriptionClosed);
-				$msg->serialUint32($autoInvite);
+				// bool serializes as one byte on the C++ side (serialBit),
+				// the generator's uint32 default desynced the message here
+				$msg->serialUInt8($subscriptionClosed);
+				$msg->serialUInt8($autoInvite);
 				$msg->serialString($language);
 				$msg->serialEnum($orientation);
-	
+
 			return parent::sendMessage($msg);
 
 
@@ -1434,8 +1438,10 @@
 				
 			$levelFilter = new RSMGR_TLevelFilter;
 	$message->serialEnum($levelFilter);
-				$message->serialUint32($subscriptionClosed);
-				$message->serialUint32($autoInvite);
+				// bool serializes as one byte on the C++ side (serialBit),
+				// the generator's uint32 default desynced the message here
+				$message->serialUInt8($subscriptionClosed);
+				$message->serialUInt8($autoInvite);
 				$message->serialString($language);
 				
 			$orientation = new RSMGR_TSessionOrientation;
@@ -1467,8 +1473,10 @@
 				
 			$participantStatus = new RSMGR_TSessionPartStatus;
 	$message->serialEnum($participantStatus);
-				$message->serialUint32($securityCheckForFastDisconnection);
-				
+				// CSecurityCode is a uint16 on the wire (security_check.h),
+				// not the generator's uint32 default
+				$message->serialUInt16($securityCheckForFastDisconnection);
+
 			$this->joinSessionResultExt($userId, $sessionId, $result, $shardAddr, $participantStatus, $securityCheckForFastDisconnection);
 		}
 

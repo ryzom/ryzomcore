@@ -50,6 +50,23 @@
 			}
 		}
 
+		function serialUInt16 (&$val)
+		{
+			if ($this->isReading())
+			{
+				$val = ord($this->Buffer[$this->Pos++]);
+				$val += ord($this->Buffer[$this->Pos++])*256;
+				debug(sprintf ("read uint16 '%d'<br>\n", $val));
+			}
+			else
+			{
+				$this->Buffer .= chr($val & 0xFF);
+				$this->Buffer .= chr(($val>>8) & 0xFF);
+				$this->Pos += 2;
+				debug(sprintf ("write uint16 '%d' %d<br>\n", $val, $this->Pos));
+			}
+		}
+
 		function serialUInt32 (&$val)
 		{
 			if ($this->isReading())

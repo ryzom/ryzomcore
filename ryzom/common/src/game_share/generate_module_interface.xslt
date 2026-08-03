@@ -2880,6 +2880,15 @@ ERROR : parent/child relation support only 'map' or 'vector' cont specification 
 		<xsl:with-param name="serialName" select="'serialEnum'"/>
 	</xsl:call-template>
 </xsl:when>
+<!-- C++ serial(bool) reads/writes a single byte (serialBit), so the
+     uint32 default would desync any message with a bool in it -->
+<xsl:when test="@type='bool'">
+	<xsl:call-template name="makeWriteSerial">
+		<xsl:with-param name="msgName" select="'$msg'"/>
+		<xsl:with-param name="varName" select="@name"/>
+		<xsl:with-param name="serialName" select="'serialUInt8'"/>
+	</xsl:call-template>
+</xsl:when>
 <xsl:otherwise>
 	<xsl:call-template name="makeWriteSerial">
 		<xsl:with-param name="msgName" select="'$msg'"/>
@@ -2996,6 +3005,16 @@ ERROR : parent/child relation support only 'map' or 'vector' cont specification 
 		<xsl:with-param name="msgName" select="		'$message'"/>
 		<xsl:with-param name="varName" select="@name"/>
 		<xsl:with-param name="serialName" select="'serialEnum'"/>
+	</xsl:call-template>
+</xsl:when>
+<!-- C++ serial(bool) reads/writes a single byte (serialBit), so the
+     uint32 default would desync any message with a bool in it -->
+<xsl:when test="@type='bool'">
+	<xsl:call-template name="makeReadSerial">
+		<xsl:with-param name="paramNode" select="."/>
+		<xsl:with-param name="msgName" select="		'$message'"/>
+		<xsl:with-param name="varName" select="@name"/>
+		<xsl:with-param name="serialName" select="'serialUInt8'"/>
 	</xsl:call-template>
 </xsl:when>
 <xsl:otherwise>
