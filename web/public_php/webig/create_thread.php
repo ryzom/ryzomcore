@@ -74,9 +74,13 @@
 		// create thread file
 		create_thread($post_from, $post_to, $post_subject, $index);
 	
-		// add main post to thread
+		// add main post to thread -- through clean_content() like post.php,
+		// or a newline in the opening post splits its row in the index
 		if ($post_content != "")
+		{
+			$post_content = clean_content($post_content);
 			add_post($post_from, $post_to, $post_content, $index, $last_date);
+		}
 	
 		// rebuild thread page
 		build_thread_page($post_to, $index, $num_posts);

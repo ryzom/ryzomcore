@@ -46,6 +46,11 @@
 		build_forum_page($forum);
 	}
 
+	// a page number past the last page still has no file after the rebuild,
+	// and fopen(false)/fread(false) is fatal instead of a blank page
+	if (!file_exists($fname))
+		die("INTERNAL ERROR 10");
+
 	$f = fopen($fname, 'r');
 	echo fread($f, filesize($fname));
 	fclose($f);

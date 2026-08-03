@@ -65,6 +65,7 @@ function remove_thread($forum, $thread)
 
 	read_index($forum_dir.'forum.index', $header, $array);
 
+	$newarray = array(); // removing the only thread left this unset
 	for ($i=0; $i<count($array); ++$i)
 		if (trim($array[$i][4]) != trim($thread))
 			$newarray[] = $array[$i];
@@ -114,6 +115,7 @@ function remove_post($forum, $thread, $posts)
 
 	sort($posts);
 	$remove_post = 0;
+	$newarray = array(); // removing every post left this unset
 
 	for ($i=0; $i<count($array); ++$i)
 		if ($remove_post >= count($posts) || $i != $posts[$remove_post])
@@ -172,7 +174,7 @@ function build_forum_index($forum)
 	$browse_dir = opendir($forum_dir);
 	while ($browse_dir && ($browse_file = readdir($browse_dir)))
 	{
-		if (ereg("^thread_([0-9]*)\.index", $browse_file, $regs))
+		if (preg_match('/^thread_([0-9]*)\.index/', $browse_file, $regs)) // ereg went away with php 7
 		{
 			echo "added $browse_file to forum<br>\n";
 			$index = $regs[1];
@@ -209,7 +211,7 @@ function recover_thread($forum)
 	$browse_dir = opendir($forum_dir);
 	while ($browse_dir && ($browse_file = readdir($browse_dir)))
 	{
-		if (ereg("^_thread_([0-9]*)\.(index|html)", $browse_file))
+		if (preg_match('/^_thread_([0-9]*)\.(index|html)/', $browse_file)) // ereg went away with php 7
 		{
 			echo "recover file $browse_file<br>\n";
 			rename($forum_dir.'/'.$browse_file, $forum_dir.'/'.substr($browse_file, 1));

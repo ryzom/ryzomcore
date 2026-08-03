@@ -92,10 +92,13 @@ $UTILS_PHP = 1;
 // -------------------------------------
 function read_index($file, &$header, &$array)
 {
+	// always hand back an array: an index that exists but holds no rows
+	// (fresh mailbox, everything removed) left the caller's variable unset
+	$array = array();
+
 	if (!file_exists($file))
 	{
 		$header = '';
-		$array = array();
 		return;
 	}
 

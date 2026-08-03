@@ -48,6 +48,7 @@ function remove_mail($user, $mails)
 
 	sort($mails);
 	$remove_mail = 0;
+	$newarray = array(); // removing every mail left this unset
 
 	for ($i=0; $i<count($array); ++$i)
 		if ($remove_mail >= count($mails) || $array[$i][4] != $mails[$remove_mail])
