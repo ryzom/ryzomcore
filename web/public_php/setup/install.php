@@ -317,18 +317,6 @@ $shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 			$continue = false;
 		}
 	}
-
-	// Successful install leaves the UI open unless the operator remembered
-	// to drop setup.disabled. Lock it automatically; delete the file to run
-	// upgrade.php again.
-	if ($continue) {
-		$lockPath = dirname(__DIR__) . '/setup.disabled';
-		if (@file_put_contents($lockPath, "Locked after install on " . date('c') . "\n") !== false) {
-			printalert("success", "Setup locked (<em>setup.disabled</em>). Remove that file to run the installer or upgrade again.");
-		} else {
-			printalert("warning", "Could not write <em>setup.disabled</em>; lock setup manually after go-live.");
-		}
-	}
 ?>
 
 			<p>

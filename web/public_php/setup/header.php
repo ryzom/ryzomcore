@@ -14,12 +14,17 @@ if ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== '' && strtolower($_SERVER
 }
 
 // Operators can drop public_php/setup.disabled next to the generated
-// config.php to lock the installer and upgrade UI after go-live. The
-// setup password alone is not enough when the password is weak or shared.
+// config.php to lock the installer and upgrade UI after go-live. This is
+// opt-in only: after a normal install the setup password (auth.php) is the
+// gate, and upgrades must stay reachable without deleting a lock file.
+// The upgrade-pending 503 in public config.php only exempts setup scripts;
+// it does not clear setup.disabled — so auto-creating that file on install
+// would brick upgrade.php until someone removed it by hand.
 if (file_exists(dirname(__DIR__) . '/setup.disabled')) {
 	header('HTTP/1.1 403 Forbidden');
 	header('Content-Type: text/plain; charset=utf-8');
 	echo "Setup is disabled on this host.\n";
+	echo "Remove public_php/setup.disabled to run install or upgrade again.\n";
 	throw new SystemExit();
 }
 
