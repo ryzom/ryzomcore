@@ -16,6 +16,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+// Hand test form for mail/forum. Same stance as admin.php: closed so it
+// cannot be re-wired into a rebuild/remove surface for arbitrary users.
+die("Access denied");
+
 	include_once('mail_utils.php');
 	include_once('thread_utils.php');
 

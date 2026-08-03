@@ -33,16 +33,29 @@
 
 	check_character_belongs_to_guild($user_login, $forum);
 
-	/* if ($forum == $user_login) */
+	// Same rule as remove_post: membership is not enough to wipe another
+	// member's threads. The forum index stores the author in column 0.
+	global $shard;
+	$forum_dir = get_user_dir($forum, $shard);
+	read_index($forum_dir.'forum.index', $header, $threads);
+
+	foreach ($_POST as $var => $value)
 	{
-		foreach ($_POST as $var => $value)
+		// the thread index comes from the name of the posted field and
+		// ends up in the file names that get renamed
+		if (matchParam($var, "select_thread_", $thread) && safe_index_param($thread))
 		{
-			// the thread index comes from the name of the posted field and
-			// ends up in the file names that get renamed
-			if (matchParam($var, "select_thread_", $thread) && safe_index_param($thread))
+			$author = null;
+			for ($i = 0; $i < count($threads); ++$i)
 			{
-				remove_thread($forum, $thread);
+				if (isset($threads[$i][4]) && trim($threads[$i][4]) === trim($thread))
+				{
+					$author = isset($threads[$i][0]) ? trim($threads[$i][0]) : '';
+					break;
+				}
 			}
+			if ($author !== null && strcasecmp($author, $user_login) === 0)
+				remove_thread($forum, $thread);
 		}
 	}
 

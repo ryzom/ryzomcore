@@ -37,17 +37,29 @@
 		die("ERROR: Bad parameters");
 
 	check_character_belongs_to_guild($user_login, $forum);
-	
-	/* if ($forum == $user_login) */
+
+	// Membership alone used to be enough to delete anyone's posts in the
+	// guild forum. Only the author of a post may remove it.
+	$posts = array();
+	foreach ($_POST as $var => $value)
 	{
-		$posts = array();
+		if (matchParam($var, "select_post_", $post) && safe_index_param($post))
+			$posts[] = (int)$post;
+	}
 
-		foreach ($_POST as $var => $value)
-			if (matchParam($var, "select_post_", $post))
-				$posts[] = $post;
-
-		if (count($posts) > 0)
-			remove_post($forum, $thread, $posts);
+	if (count($posts) > 0)
+	{
+		global $shard;
+		$forum_dir = get_user_dir($forum, $shard);
+		read_index($forum_dir.'thread_'.$thread.'.index', $header, $array);
+		$allowed = array();
+		foreach ($posts as $pidx)
+		{
+			if (isset($array[$pidx][0]) && strcasecmp(trim($array[$pidx][0]), $user_login) === 0)
+				$allowed[] = $pidx;
+		}
+		if (count($allowed) > 0)
+			remove_post($forum, $thread, $allowed);
 	}
 
 	// redirect browser to new forum page

@@ -432,7 +432,9 @@ function build_user_dir($user, $shard)
 			$interm = substr($dir, 0, $p);
 			if (!is_dir($interm))
 			{
-				if (!mkdir($interm, 0777))
+				// 0777 made the mail/forum tree world-writable on multi-user
+				// hosts, so a neighbour process could plant a session file.
+				if (!mkdir($interm, 0750))
 					die("INTERNAL ERROR CODE 3");
 			}
 		}
