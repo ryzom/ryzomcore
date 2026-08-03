@@ -3322,10 +3322,16 @@ endOfWelcomeUserResult:
 				TWelcomeServiceInfo &wsi = it3->second;
 
 				// match the access priv with ws open state
-				if (!wsi.ShardInfo->getWSOnline() || (!_DontUsePerm && !checkAccessRight(userAccessPriv, wsi.ShardInfo->getRequiredState())))
+				if (!wsi.ShardInfo->getWSOnline())
 				{
-					// can't find a welcome service for this shard
-					joinSessionResult(from, charId >>4, sessionId, 14, string("Welcome service closed : ")+wsi.ShardInfo->getMOTD(), TSessionPartStatus::invalid_val);
+					// the shard reports itself as down
+					joinSessionResult(from, charId >>4, sessionId, 14, string("Shard is down : ")+wsi.ShardInfo->getMOTD(), TSessionPartStatus::invalid_val);
+					return;
+				}
+				if (!_DontUsePerm && !checkAccessRight(userAccessPriv, wsi.ShardInfo->getRequiredState()))
+				{
+					// the shard is up but restricted to another access level
+					joinSessionResult(from, charId >>4, sessionId, 14, toString("Shard is restricted to %s access : %s", wsi.ShardInfo->getRequiredState().toString().c_str(), wsi.ShardInfo->getMOTD().c_str()), TSessionPartStatus::invalid_val);
 					return;
 				}
 
@@ -3395,10 +3401,16 @@ endOfWelcomeUserResult:
 					if (wsi.FixedSessionId == sessionId) // found the mainland WS
 					{
 						// match the access priv with ws open state
-						if (!wsi.ShardInfo->getWSOnline() || !checkAccessRight(userAccessPriv, wsi.ShardInfo->getRequiredState()))
+						if (!wsi.ShardInfo->getWSOnline())
 						{
-							// can't find a welcome service for this shard
-							joinSessionResult(from, charId >>4, sessionId, 14, string("Welcome service closed : ")+wsi.ShardInfo->getMOTD(), TSessionPartStatus::invalid_val);
+							// the shard reports itself as down
+							joinSessionResult(from, charId >>4, sessionId, 14, string("Shard is down : ")+wsi.ShardInfo->getMOTD(), TSessionPartStatus::invalid_val);
+							return;
+						}
+						if (!checkAccessRight(userAccessPriv, wsi.ShardInfo->getRequiredState()))
+						{
+							// the shard is up but restricted to another access level
+							joinSessionResult(from, charId >>4, sessionId, 14, toString("Shard is restricted to %s access : %s", wsi.ShardInfo->getRequiredState().toString().c_str(), wsi.ShardInfo->getMOTD().c_str()), TSessionPartStatus::invalid_val);
 							return;
 						}
 
@@ -3482,6 +3494,10 @@ endOfWelcomeUserResult:
 			BOMB_IF (!loadUserAccessPrivileges(userId, userAccessPriv), "RSM:on_joinMainland : failed to load privileges for user "<<userId, joinSessionResult(from, userId, TSessionId(0), 12, "failed to request for access permission", TSessionPartStatus::invalid_val); return;);
 
 			multimap<uint32, TSessionId> mainlandShardsByAscLoad;
+			// remember why each candidate was rejected, so a failure can say
+			// whether the shard is down, closed or restricted instead of the
+			// ambiguous 'no shard available'
+			string rejectedDetail;
 			for ( TWelcomeServices::iterator itw=_WelcomeServices.begin(); itw!=_WelcomeServices.end(); ++itw )
 			{
 				TWelcomeServiceInfo &wsi = itw->second;
@@ -3494,7 +3510,19 @@ endOfWelcomeUserResult:
 						// this welcome is a candidate for connection
 
 						// check open state agains user access
-						if (wsi.ShardInfo->getWSOnline() && checkAccessRight(userAccessPriv, wsi.ShardInfo->getRequiredState()))
+						if (!wsi.ShardInfo->getWSOnline())
+						{
+							if (!rejectedDetail.empty())
+								rejectedDetail += "; ";
+							rejectedDetail += toString("shard %u is down (%s)", wsi.FixedSessionId.asInt(), wsi.ShardInfo->getMOTD().c_str());
+						}
+						else if (!checkAccessRight(userAccessPriv, wsi.ShardInfo->getRequiredState()))
+						{
+							if (!rejectedDetail.empty())
+								rejectedDetail += "; ";
+							rejectedDetail += toString("shard %u is restricted to %s access", wsi.FixedSessionId.asInt(), wsi.ShardInfo->getRequiredState().toString().c_str());
+						}
+						else
 						{
 							if ( ForceWelcomerShard.get() != 0 )
 							{
@@ -3514,12 +3542,23 @@ endOfWelcomeUserResult:
 					else
 					{
 						nlwarning( "Ignoring mainland session %u (not registered in db)", wsi.FixedSessionId.asInt() );
+						if (!rejectedDetail.empty())
+							rejectedDetail += "; ";
+						rejectedDetail += toString("shard %u is not registered as a mainland session in the database", wsi.FixedSessionId.asInt());
 					}
 				}
 			}
 			if (mainlandShardsByAscLoad.empty())
 			{
-				joinSessionResult(from, charId>>4, TSessionId(0), 10, "No mainland shard available", TSessionPartStatus::invalid_val);
+				// a welcome service that dies is erased from _WelcomeServices,
+				// so 'nothing connected' and 'nothing configured' both end up
+				// with an empty detail string
+				string reason = "No mainland shard available";
+				if (rejectedDetail.empty())
+					reason += " (no mainland welcome service is connected to the session manager)";
+				else
+					reason += " (" + rejectedDetail + ")";
+				joinSessionResult(from, charId>>4, TSessionId(0), 10, reason, TSessionPartStatus::invalid_val);
 				return;
 			}
 			_joinSessionCommon(from, charId, (*mainlandShardsByAscLoad.begin()).second, clientApplication, false);
