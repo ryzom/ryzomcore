@@ -21,7 +21,9 @@
 		var $InputStream;
 		var $Pos;
 
-		function CMemStream ()
+		// php 8 no longer treats a method named after the class as the
+		// constructor; without this rename Pos/InputStream started null
+		function __construct ()
 		{
 			$this->InputStream = false;
 			$this->Pos = 0;

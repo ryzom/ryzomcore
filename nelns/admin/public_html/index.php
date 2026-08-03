@@ -321,7 +321,8 @@
 
 			if (count($newPaths) > 0)
 			{
-				$fullPath = factorizeQuery("[".join($newPaths, ",")."]");
+				// join(array, glue) support is gone in php 8: glue first
+				$fullPath = factorizeQuery("[".join(",", $newPaths)."]");
 
 				// filter selection with command
 				$fullCmd = $fullPath." ".$execServParams;

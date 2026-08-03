@@ -331,16 +331,30 @@ function errorMsg($errNum=GENERIC_ERROR_NUM) // $mixedArgs
 		$logFile->logStr(/*$msg.*/$logExtMsg); // message is already logged by ob_callback_r2login() 
 	}
 	
-	// Send email if specified
+	// Send email if specified. The bundled htmlMimeMail library is php 4
+	// era (old-style constructors, smtp::connect / parseAddressList called
+	// statically) and throws Error on php 8: the alert mail is best effort,
+	// the error message to the player must survive it.
 	if (!empty($mailData) && (count($mailData) >= 3))
 	{
-		include_once('email/htmlMimeMail.php');
-		$mail = new htmlMimeMail();
-		$mail->setFrom('noreply@ryzom.com');
-		$mail->setSubject($mailData[1]);
-		$mail->setText('Application: '.$_GET['clientApplication'].' - Login: '.$_GET['login']."\n". // display as much info as possible
-			$mailData[2]);
-		$result = $mail->send(array($mailData[0]));
+		try
+		{
+			include_once('email/htmlMimeMail.php');
+			$mail = new htmlMimeMail();
+			$mail->setFrom('noreply@ryzom.com');
+			$mail->setSubject($mailData[1]);
+			$mail->setText('Application: '.$_GET['clientApplication'].' - Login: '.$_GET['login']."\n". // display as much info as possible
+				$mailData[2]);
+			$result = $mail->send(array($mailData[0]));
+		}
+		catch (Throwable $mailErr)
+		{
+			if (class_exists('CWwwLog'))
+			{
+				$logFile = new CWwwLog();
+				$logFile->logStr("MAIL FAILED/".$mailErr->getMessage());
+			}
+		}
 	}
 	
 	return $msg;
