@@ -120,7 +120,7 @@ void CSkillManager::initInGame()
 	}
 
 	// **** Min Skill Value mgt, also update max child skill value
-	for(i=0;i<NUM_SKILLS;++i)
+	for(i=0;i<(uint)NUM_SKILLS;++i)
 	{
 		_MinSkillValue[i]= getMaxSkillValue(getParent(SKILLS::ESkills(i)));
 	}
@@ -413,7 +413,7 @@ bool	CSkillManager::checkBaseSkillMetRequirement(SKILLS::ESkills eSkill, uint32 
 void	CSkillManager::computeMaxChildValues()
 {
 	// Update all MaxBaseSkill
-	for( uint i = 0 ; i < NUM_SKILLS ; ++i )
+	for( uint i = 0 ; i < (uint)NUM_SKILLS ; ++i )
 	{
 		const SKILLS::ESkills skill = SKILLS::ESkills(i);
 		const uint32 value = getBaseSkillValue(skill);
