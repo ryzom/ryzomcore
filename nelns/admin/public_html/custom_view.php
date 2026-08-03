@@ -350,7 +350,8 @@
 	echo "<br>\n";
 	echo "<table border=0><tr>\n";
 	echo "<td><b>Your default view:</b></td>\n";
-	echo "<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?tid=$tid&sel_vgid=$sel_vgid'><td>\n";
+	// both ids arrive with the request: keep them numeric like the form below
+	echo "<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?tid=".intval($tid)."&sel_vgid=".intval($sel_vgid)."'><td>\n";
 	echo "<select name='default_view' onChange='submit()'>\n";
 	$selected = false;
 	foreach ($availViews as $view)

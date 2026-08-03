@@ -288,7 +288,8 @@
 			$ownerTables[$arr["owner"]][] = $arr;
 	}
 
-	htmlProlog(htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES), "View Selection '$tname'", true);
+	// the view name is typed by tool users; it goes into <title> unescaped
+	htmlProlog(htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES), "View Selection '".htmlspecialchars($tname, ENT_QUOTES)."'", true);
 
 	if (isset($tname))
 		$current_tname = $tname;
@@ -374,7 +375,9 @@
 		echo "<b>Shard shortcuts</b><table><tr valign=top><td>\n";
 		$i = 1;
 		echo "<table>";
-		echo "<tr><td><a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?current_tid=$tid&form_refreshRate=$form_refreshRate&filter_shard=$link_shard&filter_server=&filter_service='><i>All</i></a></td></tr>";
+		// tid and the refresh rate arrive with the request: keep them numeric
+		// like the auto-refresh block above does
+		echo "<tr><td><a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?current_tid=".intval($tid)."&form_refreshRate=".intval($form_refreshRate)."&filter_shard=".htmlspecialchars(rawurlencode($link_shard), ENT_QUOTES)."&filter_server=&filter_service='><i>All</i></a></td></tr>";
 		foreach ($shards as $link_shard)
 		{
 			if ($i%5 == 0 && $i>0)
@@ -386,7 +389,7 @@
 				$alias = $link_shard;
 			else
 				$alias .= "($link_shard)";
-			echo "<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?current_tid=$tid&form_refreshRate=$form_refreshRate&filter_shard=$link_shard&filter_server=&filter_service='>$alias</a>";
+			echo "<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?current_tid=".intval($tid)."&form_refreshRate=".intval($form_refreshRate)."&filter_shard=".htmlspecialchars(rawurlencode($link_shard), ENT_QUOTES)."&filter_server=&filter_service='>".htmlspecialchars($alias, ENT_QUOTES)."</a>";
 			if ($selShards[$link_shard])
 				echo "</b>";
 			echo "</td></tr>";
@@ -497,7 +500,7 @@
 			$aft = ((float)$sec + (float)$usec);
 			$tm = (int)(($aft-$bef)*1000.0);
 
-			$queryResult = "Executed $executeQuery<br>$tm milliseconds computation time<br>\n";
+			$queryResult = "Executed ".htmlspecialchars($executeQuery, ENT_QUOTES)."<br>$tm milliseconds computation time<br>\n";
 		}
 	}
 	else if (isset($executeQuery))
@@ -512,7 +515,7 @@
 		$aft = ((float)$sec + (float)$usec);
 		$tm = (int)(($aft-$bef)*1000.0);
 
-		$queryResult = "Executed $executeQuery<br>$tm milliseconds computation time<br>\n";
+		$queryResult = "Executed ".htmlspecialchars($executeQuery, ENT_QUOTES)."<br>$tm milliseconds computation time<br>\n";
 	}
 
 	if ($updateResult)
