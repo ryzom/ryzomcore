@@ -16,10 +16,12 @@
 					{if isset($smarty.get.result) and $smarty.get.result eq "8"}<div class="alert alert-error"><p>{$up_install_success}</p></div>{/if}
 					<div class="panel-body">
 						<center><p>{$plugin_info}</p></center>
+						{if $permission >= 3}
 						<center>
 						<a href="index.php?page=install_plugin"><button class="btn btn-primary btn-large dropdown-toggle">Install New Plugin</button></a>
 						<a href="index.php?page=plugins_update"><button class="btn btn-primary btn-large dropdown-toggle">Check for updates</button></a>
 						</center>
+						{/if}
 						<table class="table table-striped table-bordered">
 						  <thead>
 							  <tr>
@@ -29,7 +31,7 @@
 								  <th width="350">{$plugin_description}</th>
 								  <th width="80">{$plugin_type}</th>
 								  <th>{$plugin_permission nofilter}</th>
-								  <th>{$plugin_actions}</th>
+								  {if $permission >= 3}<th>{$plugin_actions}</th>{/if}
 							  </tr>
 						  </thead>
 						  <tbody>
@@ -41,11 +43,13 @@
 								<td class="center">{$element.plugin_info->Description}</td>
 								<td class="center">{$element.plugin_type}</td>
 								<td class="center">{$element.plugin_permission}</td>
+								{if $permission >= 3}
 								<td>
                 {if ($element.plugin_status) eq "0"}
                 <a href="index.php?page=plugins&action=delete_plugin&id={$element.id}"><button class="btn btn-primary btn-large">Delete</button></a>
                 <a href="index.php?page=plugins&action=activate_plugin&id={$element.id}"><button class="btn btn-primary btn-large dropdown-toggle">Activate</button></a>{/if}
                 {if ($element.plugin_status) eq "1"}<a href="index.php?page=plugins&action=deactivate_plugin&id={$element.id}"><button class="btn btn-primary btn-large dropdown-toggle">Deactivate</button></a>{/if}</td>
+								{/if}
 							</tr>
 							{/foreach}
 

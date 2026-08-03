@@ -10,7 +10,8 @@
 function activate_plugin() {
 
     // only the staff that can reach the plugin page may act on plugins
-    if ( WebUsers :: isLoggedIn() && Ticket_User :: isMod( unserialize( $_SESSION['ticket_user'] ) ) ) {
+    // Enabling a plugin runs its hooks on every request; admin only.
+    if ( WebUsers :: isLoggedIn() && Ticket_User :: isAdmin( unserialize( $_SESSION['ticket_user'] ) ) ) {
 
         if ( isset( $_GET['id'] ) )
              {

@@ -54,9 +54,10 @@ function install_plugin() {
 
     $result = array();
 
-     // Installing a plugin puts new php code on the server, so this is staff
-    // only -- the same permission that guards the plugin page itself.
-    if ( WebUsers :: isLoggedIn() && Ticket_User :: isMod( unserialize( $_SESSION['ticket_user'] ) ) ) {
+     // Installing a plugin puts new php code on the server. Moderators could
+    // already open the plugin page, but upload/activate is an RCE surface, so
+    // only admins may install.
+    if ( WebUsers :: isLoggedIn() && Ticket_User :: isAdmin( unserialize( $_SESSION['ticket_user'] ) ) ) {
 
         // path of temporary folder for storing files
         $temp_path = "../../ams_lib/temp";
@@ -144,7 +145,7 @@ function install_plugin() {
                          $install_result['FileName'] = $target_path;
                          $install_result['Name'] = $result['PluginName'];
                          $install_result['Type'] = $result['Type'];
-                         if ( Ticket_User :: isMod( unserialize( $_SESSION['ticket_user'] ) ) )
+                         if ( Ticket_User :: isAdmin( unserialize( $_SESSION['ticket_user'] ) ) )
                              {
                             $install_result['Permission'] = 'admin';
                              }

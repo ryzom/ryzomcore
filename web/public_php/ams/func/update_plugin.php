@@ -11,7 +11,8 @@ function update_plugin() {
 
     // installing an update drops new code into the plugin directory, so this
     // is staff only -- the same permission that guards the plugin page
-    if ( WebUsers :: isLoggedIn() && Ticket_User :: isMod( unserialize( $_SESSION['ticket_user'] ) ) ) {
+    // Applying a plugin update replaces php on the server; admin only.
+    if ( WebUsers :: isLoggedIn() && Ticket_User :: isAdmin( unserialize( $_SESSION['ticket_user'] ) ) ) {
 
         if ( isset( $_GET['id'] ) )
              {

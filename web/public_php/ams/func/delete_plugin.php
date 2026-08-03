@@ -9,8 +9,9 @@
  */
 function delete_plugin() {
 
-    // only the staff that can reach the plugin page may act on plugins
-    if ( WebUsers :: isLoggedIn() && Ticket_User :: isMod( unserialize( $_SESSION['ticket_user'] ) ) ) {
+    // Deleting a plugin removes php from the server; admin only (same bar as
+    // install). Moderators can still list plugins from the page itself.
+    if ( WebUsers :: isLoggedIn() && Ticket_User :: isAdmin( unserialize( $_SESSION['ticket_user'] ) ) ) {
 
         if ( isset( $_GET['id'] ) )
              {

@@ -8,7 +8,8 @@
 
 function plugins_update()
  {
-    if ( Ticket_User :: isMod( unserialize( $_SESSION['ticket_user'] ) ) ) {
+    // Applying updates replaces php; only admins may open this page.
+    if ( Ticket_User :: isAdmin( unserialize( $_SESSION['ticket_user'] ) ) ) {
         $pagination = new Pagination( "SELECT * FROM plugins INNER JOIN updates ON plugins.Id=updates.PluginId", "lib", 5, "Plugincache" );
          $pageResult['plug'] = Gui_Elements :: make_table( $pagination -> getElements(), Array( "getId", "getPluginName", "getPluginInfo", "getUpdateInfo" ), Array( "id", "plugin_name", "plugin_info", "update_info" ) );
          $pageResult['links'] = $pagination -> getLinks( 5 );

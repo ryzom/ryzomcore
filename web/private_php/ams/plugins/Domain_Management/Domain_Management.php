@@ -86,7 +86,19 @@ function domain_management_hook_get_db()
         try {
 
             $dbs = new DBLayer( 'shard' );
-            $dbs->update("domain", Array( 'domain_name' => $_POST['domain_name'], 'status' => $_POST['status'], 'patch_version' => $_POST['patch_version'],'backup_patch_url' => $_POST['backup_patch_url'],'patch_urls' => $_POST['patch_urls'],'login_address' => $_POST['login_address'],'session_manager_address' => $_POST['session_manager_address'],'ring_db_name' => $_POST['ring_db_name'],'web_host' => $_POST['web_host'],'web_host_php' => $_POST['web_host_php'],'description' => $_POST['description'],),'`domain_id` = '.intval($_GET['edit_domain']));
+            $dbs->update("domain", Array(
+                'domain_name' => $_POST['domain_name'],
+                'status' => $_POST['status'],
+                'patch_version' => $_POST['patch_version'],
+                'backup_patch_url' => $_POST['backup_patch_url'],
+                'patch_urls' => $_POST['patch_urls'],
+                'login_address' => $_POST['login_address'],
+                'session_manager_address' => $_POST['session_manager_address'],
+                'ring_db_name' => $_POST['ring_db_name'],
+                'web_host' => $_POST['web_host'],
+                'web_host_php' => $_POST['web_host_php'],
+                'description' => $_POST['description'],
+            ), 'domain_id = :domain_id', array('domain_id' => (int)$_GET['edit_domain']));
 
             }
         catch ( Exception $e ) {
@@ -104,13 +116,14 @@ function domain_management_hook_get_db()
             $json = $statement->fetch();
             $json = json_decode($json['Value'],true);
             
-            $json[$_GET['edit_domain']]['1'] = $_POST['user'];
-            $json[$_GET['edit_domain']]['2'] = $_POST['moderator'];
-            $json[$_GET['edit_domain']]['3'] = $_POST['admin'];   
+            $domainKey = (int)$_GET['edit_domain'];
+            $json[$domainKey]['1'] = $_POST['user'];
+            $json[$domainKey]['2'] = $_POST['moderator'];
+            $json[$domainKey]['3'] = $_POST['admin'];   
             
             $update = json_encode($json);
 
-            $dbl->update("settings", Array( 'Value' => $update),"`Setting` = 'Domain_Auto_Add'");
+            $dbl->update("settings", Array( 'Value' => $update), "Setting = :Setting", array('Setting' => 'Domain_Auto_Add'));
 
             }
         catch ( Exception $e ) {
