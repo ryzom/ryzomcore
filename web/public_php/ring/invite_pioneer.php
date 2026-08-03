@@ -73,9 +73,12 @@
 			// session manager is the one that checks the caller owns the
 			// session, so at least keep the values to the shapes it expects
 			$sessionId = intval($_POST["sessionId"]);
-			$mode = isset($_POST["mode"]) ? $_POST["mode"] : "";
-			if ($mode != "sps_edit_invited" && $mode != "sps_anim_invited")
-				$mode = "sps_edit_invited";
+			$modeStr = isset($_POST["mode"]) ? $_POST["mode"] : "";
+			if ($modeStr != "sps_edit_invited" && $modeStr != "sps_anim_invited")
+				$modeStr = "sps_edit_invited";
+			// the role is an enum on the wire, a bare string has no toInt()
+			$mode = new RSMGR_TSessionPartStatus;
+			$mode->fromString($modeStr);
 			// mysqli_fetch_assoc() has no numeric keys: $row[0] was null and
 			// the session manager received no character to invite
 			$invitePioneer->inviteCharacter((intval($userId)*16) + getCharSlot(), $sessionId, $row['char_id'], $mode);

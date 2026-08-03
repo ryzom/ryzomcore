@@ -41,7 +41,7 @@
 		$cancelSessionCb = new CancelSessionCb;
 		$res = "";
 		$cancelSessionCb->connect($RSMHost, $RSMPort, $res);
-		$cancelSessionCb->cancelSession($charId, $_POST["sessionId"]);
+		$cancelSessionCb->cancelSession($charId, isset($_POST["sessionId"]) ? intval($_POST["sessionId"]) : 0);
 		
 		// wait the the return message
 		$cancelSessionCb->waitCallback();

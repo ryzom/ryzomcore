@@ -4,8 +4,36 @@ include_once('ring_session_manager_itf.php');
 include_once('../tools/domain_info.php');
 include_once('../login/config.php');
 
+// The generated enum classes carry the sequential values the C++ enums
+// use. Two message fields have no such class: R2::TSessionLevel starts
+// at 1 instead of 0 (r2_share_itf.h) and the filter parameters are
+// bitsets (CEnumBitset) where 0 means "no filter". This carries their
+// raw wire value through serialEnum.
+class CRawEnumValue
+{
+	var $Value;
+
+	function __construct($value)
+	{
+		$this->Value = $value;
+	}
+
+	function toString() { return (string)$this->Value; }
+	function toInt() { return $this->Value; }
+	function fromInt($intValue) { $this->Value = $intValue; }
+}
+
 function planEditSession($charId, $domainId, $sessionType, $title, $desc)
 {
+	// the session type arrives with the request: refuse anything that is
+	// not one of the two schedulable types before it goes on the wire
+	if ($sessionType != "st_edit" && $sessionType != "st_anim")
+	{
+		echo "Invalid session type<br>";
+		echo '<a href="web_start.php">Return to start menu</a>';
+		die();
+	}
+
 	$domainInfo = getDomainInfo($domainId);
 	$addr = explode(":", $domainInfo["session_manager_address"]);
 	$RSMHost = $addr[0];
@@ -21,20 +49,41 @@ function planEditSession($charId, $domainId, $sessionType, $title, $desc)
 		die();
 	}
 
+	$st = new RSMGR_TSessionType;
+	$st->fromString($sessionType);
+	// mirror the defaults the client uses when scheduling from the game
+	// (far_tp.cpp for st_edit, connection.cpp for st_anim)
+	$ruleType = new RSMGR_TRuleType;
+	$ruleType->fromString($sessionType == "st_edit" ? "rt_strict" : "rt_liberal");
+	$duration = new RSMGR_TEstimatedDuration;
+	$duration->fromString($sessionType == "st_edit" ? "et_long" : "et_medium");
+	$animMode = new RSMGR_TAnimMode;
+	$animMode->fromString("am_dm");
+	$orientation = new RSMGR_TSessionOrientation;
+	$orientation->fromString("so_other");
+
 	// send the create session message
 	$rsm->scheduleSession(
-		$charId, 
-		$sessionType,
-		$title, 
-		0,
-		$desc, 
-		"sl_a", 
-		"at_public", 
-		"rt_liberal", 
-		"et_short", 
-		0			// 0 inscription slots for edit session
+		$charId,
+		$st,
+		$title,
+		$desc,
+		new CRawEnumValue(1),	// R2::TSessionLevel sl_a
+		$ruleType,
+		$duration,
+		0,			// no inscription slots
+		$animMode,
+		new CRawEnumValue(0),	// race filter: empty bitset, no filtering
+		new CRawEnumValue(0),	// religion filter
+		new CRawEnumValue(0),	// guild filter
+		new CRawEnumValue(0),	// shard filter
+		new CRawEnumValue(0),	// level filter
+		"",			// language
+		$orientation,
+		0,			// subscription open
+		1			// auto invite, gives the session public access
 		);
-	
+
 	$rsm->waitCallback();
 	// the rest of the work is done in the callback
 }
@@ -78,15 +127,18 @@ function startSession($charId, $domainId, $sessionId)
 	$RSMHost = $addr[0];
 	$RSMPort = $addr[1];
 
+	// the session id arrives with the request on some call paths
+	$sessionId = intval($sessionId);
+
 	$SessionId = $sessionId;
 	$DomainId = $domainId;
-	
+
 	// ask to start the session
 	global $rsmProxy, $callbackClient, $rsmSkel;
 	$startSession = new StartSessionCb;
 	$res = "";
 	$startSession->connect($RSMHost, $RSMPort, $res);
-	echo "Starting session for character ".$charId." in session ".$sessionId."<br>";
+	echo "Starting session for character ".htmlspecialchars($charId, ENT_QUOTES)." in session ".$sessionId."<br>";
 	global $SessionId;
 	$SessionId = $sessionId;
 	$startSession->startSession($charId, $sessionId);
@@ -126,8 +178,10 @@ function inviteOwnerInSession($charId, $domainId, $sessionId)
 	}
 	$row = mysqli_fetch_row($result);
 	$session_type = $row[0];
-	$mode = ($session_type == "st_edit") ? "sps_edit_invited" : "sps_anim_invited";
-	echo "Inviting character ".$charId." of user ".$userId." in session ".$sessionId."<br>";
+	// the role is an enum on the wire, a bare string has no toInt()
+	$mode = new RSMGR_TSessionPartStatus;
+	$mode->fromString(($session_type == "st_edit") ? "sps_edit_invited" : "sps_anim_invited");
+	echo "Inviting character ".htmlspecialchars($charId, ENT_QUOTES)." of user ".htmlspecialchars($userId, ENT_QUOTES)." in session ".$sessionId."<br>";
 
 	$inviteOwner = new InviteOwnerCb;
 	$res = "";

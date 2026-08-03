@@ -42,7 +42,7 @@
 		$res = "";
 		$closeSession->connect($RSMHost, $RSMPort, $res);
 //		$rsmProxy = new CRingSessionManagerWebProxy;
-		$closeSession->closeSession($charId, $_POST["sessionId"]);
+		$closeSession->closeSession($charId, isset($_POST["sessionId"]) ? intval($_POST["sessionId"]) : 0);
 		
 		// wait the the return message
 //		$rsmSkel = new CRingSessionManagerWebSkel;

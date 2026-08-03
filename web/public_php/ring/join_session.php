@@ -66,7 +66,10 @@ function joinSessionFromId( $userId, $domainId, $destSessionId )
 	else
 	{
 		echo "Welcome user ".htmlspecialchars($userId, ENT_QUOTES)."<BR>";
-		
+
+		// the session id arrives with the request
+		$destSessionId = intval($destSessionId);
+
 		$domainInfo = getDomainInfo($domainId);
 		$addr = explode(":", $domainInfo["session_manager_address"]);
 		$RSMHost = $addr[0];
