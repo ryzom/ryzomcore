@@ -39,6 +39,10 @@
 		nt_auth_set_session_var('view_shard_id', $view_shard_id);
 	}
 
+	// same gate as index.php: only domains/shards on this user's list
+	if (!tool_main_check_user_domain($view_domain_id))	$view_domain_id = null;
+	if (!tool_main_check_user_shard($view_shard_id))	$view_shard_id	= null;
+
 	if (isset($NELTOOL['GET_VARS']['refdata']))
 	{
 		tool_main_apply_refdata_from_get($NELTOOL['GET_VARS']['refdata']);

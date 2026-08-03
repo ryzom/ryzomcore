@@ -1,6 +1,10 @@
 <?php
 
 // Add overrides for config.php into this file
+//
+// To lock the /setup/ web UI after install, create an empty file next to
+// the generated public config: public_php/setup.disabled
+// (see web/public_php/setup/header.php).
 
 // IMAP connection string as explained above
 //$cfg['mail']['default_mailserver']= '{imap.gmail.com:993/imap/ssl}INBOX';

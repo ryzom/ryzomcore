@@ -66,6 +66,9 @@
 		nt_auth_set_session_var('view_shard_id', $view_shard_id);
 	}
 
+	if (!tool_main_check_user_domain($view_domain_id))	$view_domain_id = null;
+	if (!tool_main_check_user_shard($view_shard_id))	$view_shard_id	= null;
+
 	// the frames end up on an rrdtool command line further down, so only ever
 	// keep one of the values we offer
 	if (isset($NELTOOL['GET_VARS']['highframe']))

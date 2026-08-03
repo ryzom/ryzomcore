@@ -13,6 +13,16 @@ if ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== '' && strtolower($_SERVER
 	ini_set('session.cookie_secure', '1');
 }
 
+// Operators can drop public_php/setup.disabled next to the generated
+// config.php to lock the installer and upgrade UI after go-live. The
+// setup password alone is not enough when the password is weak or shared.
+if (file_exists(dirname(__DIR__) . '/setup.disabled')) {
+	header('HTTP/1.1 403 Forbidden');
+	header('Content-Type: text/plain; charset=utf-8');
+	echo "Setup is disabled on this host.\n";
+	throw new SystemExit();
+}
+
 if (file_exists( '../config.php')) {
 	session_start();
 	if ((!isset($_SESSION['nelSetupAuthenticated'])) || $_SESSION['nelSetupAuthenticated'] != 1) {
