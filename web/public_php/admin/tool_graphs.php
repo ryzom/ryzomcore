@@ -22,6 +22,14 @@
 	}
 
 	$tool_menu_item = tool_graphs_menu_get_item_from_key($NELTOOL['GET_VARS']['toolmode']);
+
+	// the templates put this straight inside href="...", so only let through
+	// a mode that is actually one of ours
+	if ($tool_menu_item === null)
+	{
+		$NELTOOL['GET_VARS']['toolmode'] = 'ccu';
+		$tool_menu_item = tool_graphs_menu_get_item_from_key('ccu');
+	}
 	$tpl->assign('toolmode',	$NELTOOL['GET_VARS']['toolmode']);
 
 	$tpl->assign('tool_title',	'Graphs&nbsp;/&nbsp;'. $tool_menu_item['title']);
@@ -58,15 +66,17 @@
 		nt_auth_set_session_var('view_shard_id', $view_shard_id);
 	}
 
+	// the frames end up on an rrdtool command line further down, so only ever
+	// keep one of the values we offer
 	if (isset($NELTOOL['GET_VARS']['highframe']))
 	{
-		$view_time_highframe = $NELTOOL['GET_VARS']['highframe'];
+		$view_time_highframe = tool_graphs_time_frame_validate($NELTOOL['GET_VARS']['highframe'], $tool_hires_frames);
 		nt_auth_set_session_var('view_time_highframe', $view_time_highframe);
 	}
 
 	if (isset($NELTOOL['GET_VARS']['lowframe']))
 	{
-		$view_time_lowframe = $NELTOOL['GET_VARS']['lowframe'];
+		$view_time_lowframe = tool_graphs_time_frame_validate($NELTOOL['GET_VARS']['lowframe'], $tool_lowres_frames);
 		nt_auth_set_session_var('view_time_lowframe', $view_time_lowframe);
 	}
 
@@ -74,10 +84,19 @@
 	{
 		$view_time_highframe = tool_graphs_time_frame_get_default($tool_hires_frames);
 	}
+	else
+	{
+		// a session written before this check may still hold anything
+		$view_time_highframe = tool_graphs_time_frame_validate($view_time_highframe, $tool_hires_frames);
+	}
 
 	if ($view_time_lowframe == null)
 	{
 		$view_time_lowframe = tool_graphs_time_frame_get_default($tool_lowres_frames);
+	}
+	else
+	{
+		$view_time_lowframe = tool_graphs_time_frame_validate($view_time_lowframe, $tool_lowres_frames);
 	}
 
 

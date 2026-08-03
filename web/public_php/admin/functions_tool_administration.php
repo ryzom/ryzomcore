@@ -202,7 +202,7 @@
 			$sql  = "INSERT INTO ". NELDB_USER_TABLE;
 			$sql .= " (`user_name`,`user_password`,`user_group_id`,`user_created`,`user_active`)";
 			$sql .= " VALUES ";
-			$sql .= " ('". $db->sql_escape_string($user_name) ."','". md5($user_password) ."','". intval($user_group) ."','". time() ."','". intval($user_active) ."')";
+			$sql .= " ('". $db->sql_escape_string($user_name) ."','". $db->sql_escape_string(nt_auth_hash_password($user_password)) ."','". intval($user_group) ."','". time() ."','". intval($user_active) ."')";
 			$db->sql_query($sql);
 			return "";
 		}
@@ -256,7 +256,7 @@
 		}
 
 		$sql_ext = "";
-		if ($user_password != '')	$sql_ext = ",user_password='". md5($user_password) ."'";
+		if ($user_password != '')	$sql_ext = ",user_password='". $db->sql_escape_string(nt_auth_hash_password($user_password)) ."'";
 
 		$sql = "UPDATE ". NELDB_USER_TABLE ." SET user_name='". $db->sql_escape_string($user_name) ."',user_group_id='". intval($user_group) ."',user_active='". intval($user_active) ."'". $sql_ext ." WHERE user_id=". intval($user_id);
 		$db->sql_query($sql);

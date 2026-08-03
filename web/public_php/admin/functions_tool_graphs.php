@@ -78,6 +78,22 @@
 		}
 	}
 
+	/*
+	 * The selected time frame is appended to an rrdtool command line and to
+	 * the name of the file that command writes, so it must be one of the
+	 * values we offer and nothing else. Anything unknown falls back to the
+	 * default of the list.
+	 */
+	function tool_graphs_time_frame_validate($value, $list)
+	{
+		reset($list);
+		foreach($list as $frame)
+		{
+			if ((string)$frame['value'] === (string)$value) return $frame['value'];
+		}
+		return tool_graphs_time_frame_get_default($list);
+	}
+
 	function tool_graphs_menu_get_list()
 	{
 		global $tool_graph_menu;
