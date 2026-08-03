@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-08-03 — 🐛 Fix MSVC operator< ambiguity for ITEM_TYPE::UNDEFINED comparisons
+
+Same family of issue as the `NUM_*` enum-bound sweep below, this time for
+`ITEM_TYPE::TItemType` in `bot_chat_page_trade.cpp`: `index<ITEM_TYPE::
+UNDEFINED` (an `sint` compared against the enum bound) and a
+`nlctassert(ITEM_TYPE::UNDEFINED<=128)` static assertion. Cast the enum
+side explicitly at both sites.
+
+Commit: 🐛 Fix operator< ambiguity for ITEM_TYPE::UNDEFINED
+
 ## 2026-08-02 — 🐛 Fix the same MSVC ambiguity for !=, ==, <=, >, >= against NUM_* enum bounds too
 
 Follow-up to the `operator<`-only sweep below: the exact same MSVC
