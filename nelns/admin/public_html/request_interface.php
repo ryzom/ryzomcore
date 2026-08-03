@@ -274,7 +274,8 @@
 		while (($stillNotRead = $size-strlen($buffer)) > 0)
 		{
 			$buffer .= fread ($fp, $stillNotRead);
-			if (feof ($fp)) return false;
+			// only while incomplete: an exact read off a closed peer sets eof
+			if (strlen($buffer) < $size && feof ($fp)) return false;
 		}
 
 		$msgin = new CMemStream;

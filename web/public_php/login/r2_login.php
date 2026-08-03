@@ -186,8 +186,10 @@
 		return $buffer; // sent to output
 	}
 
-	// Callback called on error
-	function err_callback($errno, $errmsg, $filename, $linenum, $vars)
+	// Callback called on error. $vars must stay optional: php 8 calls the
+	// handler with four arguments, and a handler that demands five turns
+	// every warning (a refused login-service socket, say) into a fatal.
+	function err_callback($errno, $errmsg, $filename, $linenum, $vars = null)
 	{
 		$logFile = new CWwwLog();
 		$logFile->logStr("PHP ERROR/$errno $errmsg ($filename:$linenum)");

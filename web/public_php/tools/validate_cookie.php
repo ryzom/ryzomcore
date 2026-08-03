@@ -1,5 +1,7 @@
 <?php
-	include('../login/config.php');
+	// _once: login/config.php defines a function now, and every ring page
+	// reaches this file after something else already loaded that config
+	include_once('../login/config.php');
 
 	function convertCookieForActionHandler($cookie)
 	{

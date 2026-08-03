@@ -152,4 +152,56 @@ function configure_shard_dev($continue_r) {
 	return $continue;
 }
 
+// These lived in header.php, which is the HTML page shell: the CLI
+// installer includes this file without it and died on the undefined
+// function the first time a migration had to run.
+function update_database_structure($continue_r, $con, $file) {
+	$continue = $continue_r;
+	global $PRIVATE_PHP_PATH;
+	if ($continue) {
+		$sql = file_get_contents($PRIVATE_PHP_PATH . "/setup/sql/" . $file);
+		if (!$sql) {
+			printalert("danger", "Cannot read <em>" . htmlentities($file) . "</em>");
+			$continue = false;
+		} else {
+			printalert("info", "Running script <em>" . htmlentities($file) . "</em>");
+			if (mysqli_multi_query($con, $sql)) {
+				printalert("success", "Database structure updated using <em>" . htmlentities($file) . "</em>");
+				while (mysqli_more_results($con) && mysqli_next_result($con)) {
+					// no-op
+				}
+			} else {
+				printalert("danger", "Error updating database using <em>" . htmlentities($file) . "</em>: " . htmlentities(mysqli_error($con)));
+				$continue = false;
+			}
+		}
+	}
+	return $continue;
+}
+function update_database_configure($continue_r, $con, $file) {
+	$continue = $continue_r;
+	global $PRIVATE_PHP_PATH;
+	if ($continue) {
+		$sql = file_get_contents($PRIVATE_PHP_PATH . "/setup/sql/" . $file);
+		$sql = str_replace('%RC_HOSTNAME%', mysqli_real_escape_string($con, gethostname()), $sql);
+		$shardDevDir = str_replace('/www', '', str_replace('\\', '/', $_POST["domainUsersDir"]));
+		$sql = str_replace('%RC_SHARD_DEV%', mysqli_real_escape_string($con, $shardDevDir), $sql);
+		if (!$sql) {
+			printalert("danger", "Cannot read <em>" . htmlentities($file) . "</em>");
+			$continue = false;
+		} else {
+			if (mysqli_multi_query($con, $sql)) {
+				printalert("success", "Database updated using <em>" . htmlentities($file) . "</em>");
+				while (mysqli_more_results($con) && mysqli_next_result($con)) {
+					// no-op
+				}
+			} else {
+				printalert("danger", "Error updating database using <em>" . htmlentities($file) . "</em>: " . htmlentities(mysqli_error($con)));
+				$continue = false;
+			}
+		}
+	}
+	return $continue;
+}
+
 ?>

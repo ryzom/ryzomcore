@@ -2,7 +2,7 @@
 	include('../tools/validate_cookie.php');
 	include('ring_session_manager_itf.php');
 	include_once('../tools/domain_info.php');
-	include('../login/config.php');
+	include_once('../login/config.php');
 
 	// The schedule result callback lives on ScheduleSessionCb in
 	// session_tools.php; a bare function of the same name here was never

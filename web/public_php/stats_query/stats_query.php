@@ -215,7 +215,8 @@
 		}
 
 	}
-	function err_callback($errno, $errmsg, $filename, $linenum, $vars)
+	// $vars optional: php 8 calls error handlers with four arguments
+	function err_callback($errno, $errmsg, $filename, $linenum, $vars = null)
 	{
 		// Do not echo PHP errors to the client; they go to the log table.
 		debug("$filename $linenum $errmsg");

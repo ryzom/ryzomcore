@@ -289,8 +289,10 @@
 				}
 				// a closed peer makes fread() return '' without setting the
 				// timeout flag, and the loop would then spin until the script
-				// itself is killed
-				if (feof($this->ConSock))
+				// itself is killed. Only bail while the body is incomplete: a
+				// read that consumes exactly to the end of a closed stream
+				// raises eof too, and that reply is whole.
+				if (strlen($Buffer) < $size && feof($this->ConSock))
 				{
 					debug('Connection closed while reading!');
 					return false;

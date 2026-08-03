@@ -128,7 +128,8 @@
 		}
 	
 	}
-	function err_callback($errno, $errmsg, $filename, $linenum, $vars)
+	// $vars optional: php 8 calls error handlers with four arguments
+	function err_callback($errno, $errmsg, $filename, $linenum, $vars = null)
 	{
 		debug("$filename $linenum $errmsg");
 	}

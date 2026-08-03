@@ -141,6 +141,20 @@ USAGE;
 
 function run_install($opts)
 {
+	// The web installer requires config.php / setup/version.php /
+	// setup/database.php / admin/common.php at top level, so their
+	// top-level assignments become globals -- which is what the functions
+	// they define read back (connect_database: global $cfg, the migration
+	// loops: global $db_nel..., tool_admin_users_add: global $db). In here
+	// a bare require makes them locals: the connects got nulls and every
+	// migration loop silently ran zero times.
+	global $cfg, $NEL_SETUP_VERSION;
+	global $db_nel, $db_nel_tool, $db_nel_ams, $db_nel_ams_lib, $db_ring_domain;
+	global $db, $tpl;
+	// set at the top of this script; the config paths that config.php
+	// assigns are read back by the migration helpers (global $PRIVATE_PHP_PATH)
+	global $publicPhpDir, $PRIVATE_PHP_PATH, $PUBLIC_PHP_PATH, $USERS_DIR;
+
 	$isDev = isset($opts['dev']);
 
 	cli_info("Starting Ryzom Core installation" . ($isDev ? " (development mode)" : ""));
@@ -354,6 +368,11 @@ function run_install($opts)
 		$origDir = getcwd();
 		if (chdir('admin/')) {
 			try {
+				// setup/header.php sets this for the web installer: it tells
+				// the admin tool bootstrap to skip session auth (which would
+				// print the login page and start a session from the CLI)
+				global $NEL_SETUP_SESSION;
+				$NEL_SETUP_SESSION = true;
 				require_once('common.php');
 				require_once('functions_tool_administration.php');
 				$result = tool_admin_users_add($adminUser, $adminPass, '1', '1');
@@ -396,6 +415,13 @@ function run_install($opts)
 
 function run_upgrade()
 {
+	// Same scope story as run_install(): the required files' top-level
+	// assignments must land in the globals their functions read back.
+	global $cfg, $NEL_SETUP_VERSION, $NEL_SETUP_VERSION_CONFIGURED;
+	global $db_nel, $db_nel_tool, $db_nel_ams, $db_nel_ams_lib, $db_ring_domain;
+	global $PRIVATE_PHP_PATH, $PUBLIC_PHP_PATH, $NEL_SETUP_PASSWORD;
+	global $NEL_DOMAIN_NAME, $SUPPORT_GROUP_IMAP_CRYPTKEY, $USERS_DIR;
+
 	if (!file_exists('config.php')) {
 		cli_err("Not installed. Run 'install' first.");
 		exit(1);

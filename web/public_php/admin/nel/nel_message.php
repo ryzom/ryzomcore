@@ -262,7 +262,7 @@
 				// a closed peer makes fread() return '' without setting the
 				// timeout flag, and the loop would then spin until the script
 				// itself is killed
-				if (feof($this->ConSock))
+				if (strlen($Buffer) < $size && feof($this->ConSock))
 				{
 					debug('Connection closed while reading!');
 					return false;
