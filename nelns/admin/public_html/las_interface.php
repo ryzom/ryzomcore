@@ -40,7 +40,7 @@
 			unset($GLOBALS[$var]);
 	}
 
-	htmlProlog($_SERVER['PHP_SELF'], "Log Analysis");
+	htmlProlog(htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES), "Log Analysis");
 
 	// look for LAS
 	$las_query = "*.*.LAS.State";
@@ -105,7 +105,7 @@
 	echo "<br>";
 
 	echo "<table border=0>\n";
-	echo "<form method='post' action='".$_SERVER['PHP_SELF']."'>\n";
+	echo "<form method='post' action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."'>\n";
 
 	echo "<tr valign=top>\n";
 
@@ -311,7 +311,7 @@
 					if ($qa[1] == 2)
 					{
 						echo "<td>".$qa[0]."</td>";
-						$refstr = $_SERVER['PHP_SELF']."?refresh_result=1&las_address=".$selectedLAS['address']."&query_id=".$qa[0]."&query=".$qa[2]."&database=$database&string=$string&start_date=$start_date&end_date=$end_date";
+						$refstr = htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?refresh_result=1&las_address=".$selectedLAS['address']."&query_id=".$qa[0]."&query=".$qa[2]."&database=$database&string=$string&start_date=$start_date&end_date=$end_date";
 						echo "<td><a href='$refstr'>Display</a></td>";
 						echo "<td>".$qa[3]."</td>";
 					}
@@ -344,7 +344,7 @@
 		{
 			echo "<b>Query '$query' successfully executed ($result)</b><br>\n";
 			echo "Please wait while result is being computed and click 'Refresh result' to display query result.<br>\n";
-			echo "<form method='post' action='".$_SERVER['PHP_SELF']."'>\n";
+			echo "<form method='post' action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."'>\n";
 			echo "<input type=submit name='refresh_result' value='Refresh result'>\n";
 			echo "<input type=hidden name='las_address' value='".$selectedLAS['address']."'>\n";
 			echo "<input type=hidden name='query_id' value='$query_id'>\n";
@@ -374,7 +374,7 @@
 			
 			echo "<b>";
 
-			$refstr = $_SERVER['PHP_SELF']."?refresh_result=1&las_address=".$selectedLAS['address']."&query_id=$query_id&query=$query&database=$database&string=$string&start_date=$start_date&end_date=$end_date";
+			$refstr = htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?refresh_result=1&las_address=".$selectedLAS['address']."&query_id=$query_id&query=$query&database=$database&string=$string&start_date=$start_date&end_date=$end_date";
 			for ($i=0; $i<10; ++$i)
 				if ($GLOBALS["eid_$i"] != '')
 					$refstr .= "&eid_$i=".$GLOBALS["eid_$i"];
@@ -492,7 +492,7 @@
 		else
 		{
 			echo "<b>Failed to get query result</b>: '$result'<br>\n";
-			echo "<form method='post' action='".$_SERVER['PHP_SELF']."'>\n";
+			echo "<form method='post' action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."'>\n";
 			echo "<input type=submit name='refresh_result' value='Refresh result'>\n";
 			echo "<input type=hidden name='las_address' value='".$selectedLAS['address']."'>\n";
 			echo "<input type=hidden name='query_id' value='$query_id'>\n";

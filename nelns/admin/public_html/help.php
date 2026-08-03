@@ -24,7 +24,7 @@
 	$help_body = getVar('help_body');
 	$update = getVar('update');
 
-	htmlProlog($_SERVER['PHP_SELF'], "Help for '$file/$topic'", false);
+	htmlProlog(htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES), "Help for '".htmlspecialchars($file, ENT_QUOTES)."/".htmlspecialchars($topic, ENT_QUOTES)."'", false);
 
 	$result = defaultConnectToDatabase();
 	if ($result)
@@ -35,10 +35,16 @@
 	{
 		$file = mysql_real_escape_string($file);
 		$topic = mysql_real_escape_string($topic);
+		// $file and $topic come from the url and are also written into
+		// this page, so keep escaped copies for that
+		$file_html = htmlspecialchars($file, ENT_QUOTES);
+		$topic_html = htmlspecialchars($topic, ENT_QUOTES);
+		$file_url = rawurlencode($file);
+		$topic_url = rawurlencode($topic);
 		$view = true;
 		if ($edit)
 		{
-			echo "<p align=justify><b>Edit help</b> for <b>$file/$topic</b><br>\n";
+			echo "<p align=justify><b>Edit help</b> for <b>$file_html/$topic_html</b><br>\n";
 			echo "<i>Hints/Warning:</i> Text note is not processed, and will be display as is, meaning that all HTML tags <b>must</b> be valid.\n";
 			echo "References to other help pages are formatted like<br>&lt;a href='help.php?file=<i>file</i>&amp;topic=<i>topic</i>'&gt;<i>blahblah</i>&lt;/a&gt;<br>\n";
 			echo "where <i>file</i> referres to a valid php file (e.g. /index.php) and <i>topic</i> to a valid topic name. For common Help Notes, <i>file</i> should be set to 'common'.\n";
@@ -49,12 +55,12 @@
 				$help_body = $arr["help_body"];
 			
 			echo "<center>\n";
-			echo "<form method=post action='".$_SERVER['PHP_SELF']."'>\n";
+			echo "<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."'>\n";
 			echo "<textarea name=help_body rows=10 cols=70>$help_body</textarea><br>\n";
 			echo "<input type=submit name='update' value='Update'>\n";
 			echo "<input type=submit value='Cancel'>\n";
-			echo "<input type=hidden name=file value='$file'>\n";
-			echo "<input type=hidden name=topic value='$topic'>\n";
+			echo "<input type=hidden name=file value='$file_html'>\n";
+			echo "<input type=hidden name=topic value='$topic_html'>\n";
 			echo "</form>\n";
 			echo "</center>\n";
 			$view = false;
@@ -71,14 +77,14 @@
 			$result = mysql_query("SELECT help_body FROM help_topic WHERE file='$file' AND topic='$topic'");
 			if ($result && ($body=mysql_fetch_array($result)))
 			{
-				echo "<b>Help for '$file/$topic':</b><br>\n";
-				echo "<a href='".$_SERVER['PHP_SELF']."?edit=1&file=$file&topic=$topic'>Edit Help</a><br><hr>\n";
-				echo "<p align=justify>".ereg_replace("\x7b([^\x7d]+)\x7d", "<a href='".$_SERVER['PHP_SELF']."?file=common&topic=\\1'>\\1</a>", nl2br($body["help_body"]))."<br>\n";
+				echo "<b>Help for '$file_html/$topic_html':</b><br>\n";
+				echo "<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?edit=1&file=$file_url&topic=$topic_url'>Edit Help</a><br><hr>\n";
+				echo "<p align=justify>".ereg_replace("\x7b([^\x7d]+)\x7d", "<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?file=common&topic=\\1'>\\1</a>", nl2br($body["help_body"]))."<br>\n";
 			}
 			else
 			{
-				echo "<b>No help found for '$file/$topic'.</b><br>\n";
-				echo "If you want to create an <b>Help note</b> for this topic, <a href='".$_SERVER['PHP_SELF']."?edit=1&file=$file&topic=$topic'>click here</a>.\n";
+				echo "<b>No help found for '$file_html/$topic_html'.</b><br>\n";
+				echo "If you want to create an <b>Help note</b> for this topic, <a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?edit=1&file=$file_url&topic=$topic_url'>click here</a>.\n";
 			}
 		}
 	}

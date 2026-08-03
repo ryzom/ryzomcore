@@ -396,7 +396,7 @@
 						else if ($var == "entity")			$selects = "&filter_shard=$shard&filter_server=$server&filter_service=$service&filter_entity=$vval";
 						$vval .= ",Default".ucfirst(strtolower($var == "entity" ? "player" : $var)).(isset($current_tname) ? ",$current_tname" : "");
 
-						echo "<td bgcolor=$bgcolor2 nowrap>&nbsp;<a href='".$_SERVER['PHP_SELF']."?select_view=$vval$selects'>$val</a>".((($admlogin=="root" || $IsNevrax) && $var=="service") ? "&nbsp;<a href='commands.php?preselServ=$shard.$server.$serviceAlias'><font size=1>[cmd]</font></a>" : "")."</td>";
+						echo "<td bgcolor=$bgcolor2 nowrap>&nbsp;<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?select_view=$vval$selects'>$val</a>".((($admlogin=="root" || $IsNevrax) && $var=="service") ? "&nbsp;<a href='commands.php?preselServ=$shard.$server.$serviceAlias'><font size=1>[cmd]</font></a>" : "")."</td>";
 					}
 
 					$numprev = $j;
@@ -565,7 +565,7 @@
 							else if ($var == "entity")			$selects = "&filter_shard=$shard&filter_server=$server&filter_service=$service&filter_entity=$vval";
 							$vval .= ",Default".ucfirst(strtolower($var == "entity" ? "player" : $var)).(isset($current_tname) ? ",$current_tname" : "");
 
-							$line .= "<td bgcolor=$btcolor nowrap>&nbsp;<a href='".$_SERVER['PHP_SELF']."?select_view=$vval$selects'>$valdisp</a>".((($admlogin=="root" || $IsNevrax) && $var=="service") ? "&nbsp;<a href='commands.php?preselServ=$shard.$server.$serviceAlias'><font size=1>[cmd]</font></a>" : "")."&nbsp;</td>";
+							$line .= "<td bgcolor=$btcolor nowrap>&nbsp;<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?select_view=$vval$selects'>$valdisp</a>".((($admlogin=="root" || $IsNevrax) && $var=="service") ? "&nbsp;<a href='commands.php?preselServ=$shard.$server.$serviceAlias'><font size=1>[cmd]</font></a>" : "")."&nbsp;</td>";
 						}
 						else
 						{

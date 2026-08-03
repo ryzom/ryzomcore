@@ -124,7 +124,7 @@
 		$found = false;
 		foreach($tname as $tbname)
 		{
-			$result = sqlquery("SELECT tid, name FROM view_table WHERE uid='$uid' AND name='$tbname'");
+			$result = sqlquery("SELECT tid, name FROM view_table WHERE uid='".intval($uid)."' AND name='".sqlescape($tbname)."'");
 			if ($result && ($arr=sqlfetch($result)))
 			{
 				$tid = $arr["tid"];
@@ -133,7 +133,7 @@
 				break;
 			}
 
-			$result = sqlquery("SELECT tid, name FROM view_table WHERE uid='$gid' AND name='$tbname'");
+			$result = sqlquery("SELECT tid, name FROM view_table WHERE uid='".intval($gid)."' AND name='".sqlescape($tbname)."'");
 			if ($result && ($arr=sqlfetch($result)))
 			{
 				$tid = $arr["tid"];
@@ -151,7 +151,7 @@
 
 	if (!isset($tid))
 	{
-		$result = sqlquery("SELECT default_view FROM user, view_table WHERE user.uid='$uid' AND (view_table.uid='$uid' OR view_table.uid='$gid') AND view_table.tid=user.default_view");
+		$result = sqlquery("SELECT default_view FROM user, view_table WHERE user.uid='".intval($uid)."' AND (view_table.uid='".intval($uid)."' OR view_table.uid='".intval($gid)."') AND view_table.tid=user.default_view");
 		if ($result && ($arr=sqlfetch($result)))
 		{
 			$tid=$arr["default_view"];
@@ -161,7 +161,7 @@
 		
 		if (!isset($tid))
 		{
-			$result = sqlquery("SELECT tid, name FROM view_table WHERE uid='$uid' ORDER BY ordering LIMIT 1");
+			$result = sqlquery("SELECT tid, name FROM view_table WHERE uid='".intval($uid)."' ORDER BY ordering LIMIT 1");
 			if ($result && ($arr=sqlfetch($result)))
 			{
 				$tid = $arr["tid"];
@@ -169,7 +169,7 @@
 			}
 			else
 			{
-				$result = sqlquery("SELECT tid, name FROM view_table WHERE uid='$gid' ORDER BY ordering LIMIT 1");
+				$result = sqlquery("SELECT tid, name FROM view_table WHERE uid='".intval($gid)."' ORDER BY ordering LIMIT 1");
 				if ($result && ($arr=sqlfetch($result)))
 				{
 					$tid = $arr["tid"];
@@ -184,7 +184,7 @@
 	if (isset($tid))
 		$current_tid = $tid;
 		
-	$result = sqlquery("SELECT name, refresh_rate FROM view_table WHERE tid='$tid'");
+	$result = sqlquery("SELECT name, refresh_rate FROM view_table WHERE tid='".intval($tid)."'");
 	if ($result && ($result=sqlfetch($result)))
 	{
 		$tname = $result["name"];
@@ -280,7 +280,7 @@
 	unset($ownerTables);
 
 	// display available user and group views
-	$result = sqlquery("SELECT view.name AS name, view.tid AS tid, view.uid AS gid, user.login AS owner FROM view_table AS view, user WHERE view.uid=user.uid AND (view.uid='$uid' OR view.uid='$gid') ORDER BY gid, ordering");
+	$result = sqlquery("SELECT view.name AS name, view.tid AS tid, view.uid AS gid, user.login AS owner FROM view_table AS view, user WHERE view.uid=user.uid AND (view.uid='".intval($uid)."' OR view.uid='".intval($gid)."') ORDER BY gid, ordering");
 	if ($result)
 	{
 		$owner = "";
@@ -288,7 +288,7 @@
 			$ownerTables[$arr["owner"]][] = $arr;
 	}
 
-	htmlProlog($_SERVER['PHP_SELF'], "View Selection '$tname'", true);
+	htmlProlog(htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES), "View Selection '$tname'", true);
 
 	if (isset($tname))
 		$current_tname = $tname;
@@ -309,7 +309,7 @@
 	}
 
 	echo "<br>\n";
-	echo "<table width=100%><form method=post action='".$_SERVER['PHP_SELF']."' name='viewForm'><tr valign=top>\n";
+	echo "<table width=100%><form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."' name='viewForm'><tr valign=top>\n";
 
 	if (count($ownerTables)>0)
 	{
@@ -372,7 +372,7 @@
 		echo "<b>Shard shortcuts</b><table><tr valign=top><td>\n";
 		$i = 1;
 		echo "<table>";
-		echo "<tr><td><a href='".$_SERVER['PHP_SELF']."?current_tid=$tid&form_refreshRate=$form_refreshRate&filter_shard=$link_shard&filter_server=&filter_service='><i>All</i></a></td></tr>";
+		echo "<tr><td><a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?current_tid=$tid&form_refreshRate=$form_refreshRate&filter_shard=$link_shard&filter_server=&filter_service='><i>All</i></a></td></tr>";
 		foreach ($shards as $link_shard)
 		{
 			if ($i%5 == 0 && $i>0)
@@ -384,7 +384,7 @@
 				$alias = $link_shard;
 			else
 				$alias .= "($link_shard)";
-			echo "<a href='".$_SERVER['PHP_SELF']."?current_tid=$tid&form_refreshRate=$form_refreshRate&filter_shard=$link_shard&filter_server=&filter_service='>$alias</a>";
+			echo "<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?current_tid=$tid&form_refreshRate=$form_refreshRate&filter_shard=$link_shard&filter_server=&filter_service='>$alias</a>";
 			if ($selShards[$link_shard])
 				echo "</b>";
 			echo "</td></tr>";
@@ -538,7 +538,7 @@
 
 	if (isset($tid) && $tid != "")
 	{
-		$result = sqlquery("SELECT view_row.name AS name, variable.vid AS vid FROM view_row, variable WHERE tid='$tid' AND variable.command='command' AND view_row.vid=variable.vid ORDER BY ordering");
+		$result = sqlquery("SELECT view_row.name AS name, variable.vid AS vid FROM view_row, variable WHERE tid='".intval($tid)."' AND variable.command='command' AND view_row.vid=variable.vid ORDER BY ordering");
 		if ($result && sqlnumrows($result) > 0)
 		{
 			echo "<br><br><b>Service commands</b> <font size=1>The commands are sent to all services seen in the view above</font><br>\n";
@@ -599,7 +599,7 @@
 
 	if (isset($tid) && $tid != "" && count($listPath) > 0)
 	{
-		$result = sqlquery("SELECT view_row.name AS name, variable.vid, variable.path, warning_bound, error_bound, alarm_order FROM view_row, variable WHERE tid='$tid' AND variable.vid=view_row.vid AND graph!='0' ORDER BY name");
+		$result = sqlquery("SELECT view_row.name AS name, variable.vid, variable.path, warning_bound, error_bound, alarm_order FROM view_row, variable WHERE tid='".intval($tid)."' AND variable.vid=view_row.vid AND graph!='0' ORDER BY name");
 		
 		if ($result && sqlnumrows($result) > 0)
 		{

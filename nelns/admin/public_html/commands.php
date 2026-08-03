@@ -42,7 +42,7 @@
 		$filter_entity = "";
 	}
 
-	htmlProlog($_SERVER['PHP_SELF'], "Commands");
+	htmlProlog(htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES), "Commands");
 	
 	// input variables :
 	// - $preselServ : preselected service address
@@ -51,7 +51,7 @@
 
 	echo "Services commands<br>\n";
 
-	echo "<table border=1><form method=post action='".$_SERVER['PHP_SELF']."'>\n";
+	echo "<table border=1><form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."'>\n";
 	echo "<tr><th rowspan=2>&nbsp;Filters&nbsp;</th><th>shard</th><th>server</th><th>service</th><th>entity</th><td rowspan=2>&nbsp;<input type=submit name='display_view' value='Update\nfilters'>&nbsp;</td><td rowspan=2>&nbsp;<input type=submit name='reset_filters' value='Reset\nfilters'>&nbsp;</td></tr>\n";
 	echo "<tr>\n";
 	echo "<td><input type=text name=filter_shard value='$filter_shard' size=12 maxlength=256></td>\n";
@@ -102,11 +102,11 @@
 
 		if ($presel_shard == $shard && $presel_service != "" && strstr($service, $presel_service) != FALSE)
 		{
-			$dispServ = "<b><a href='".$_SERVER['PHP_SELF']."?preselServ=$addr'>$service</a></b>";
+			$dispServ = "<b><a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?preselServ=$addr'>$service</a></b>";
 			$dcolor = "bgcolor=#FF88AA";
 		}
 		else
-			$dispServ = "<a href='".$_SERVER['PHP_SELF']."?preselServ=$addr'>$service</a>";
+			$dispServ = "<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?preselServ=$addr'>$service</a>";
 
 		echo "<tr><td $dcolor>$dshard</td><td $dcolor>$dserver</td><td $dcolor>$dispServ</td></tr></a>\n";
 		$pshard = $shard;
@@ -119,7 +119,7 @@
 	echo "<td width=30>&nbsp;</td>\n";
 	
 	echo "<td>\n";
-	echo "<table border=0><form method=post action='".$_SERVER['PHP_SELF']."' name='cmdform'>\n";
+	echo "<table border=0><form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."' name='cmdform'>\n";
 	echo "<tr><th align=left>Service Path</th><th align=left>Command (exact service syntax)</th></tr>\n";
 	echo "<tr><td><input name=preselServ value='$preselServ' size=32 maxlength=256></td>\n";
 	echo "<td><input name=execCommand value='".stripslashes($execCommand)."' size=50 maxlength=20480></td>\n";

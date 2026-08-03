@@ -143,7 +143,7 @@
 			$result = sqlquery("SELECT * FROM view_row WHERE tid='".intval($tid)."'");
 			while ($result && ($arr=sqlfetch($result)))
 			{
-				sqlquery("INSERT INTO view_row SET tid='$ntid', vid='".$arr["vid"]."', name='".$arr["name"]."', ordering='".$arr["ordering"]."', filter='".$arr["filter"]."'");
+				sqlquery("INSERT INTO view_row SET tid='".intval($ntid)."', vid='".$arr["vid"]."', name='".$arr["name"]."', ordering='".$arr["ordering"]."', filter='".$arr["filter"]."'");
 			}
 			
 			reorderViews(intval($uid));
@@ -303,7 +303,7 @@
 	// -----------------------------
 	// page display
 
-	htmlProlog($_SERVER['PHP_SELF'], "Customize views");
+	htmlProlog(htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES), "Customize views");
 	
 	if ($error)
 	{
@@ -347,7 +347,7 @@
 	echo "<br>\n";
 	echo "<table border=0><tr>\n";
 	echo "<td><b>Your default view:</b></td>\n";
-	echo "<form method=post action='".$_SERVER['PHP_SELF']."?tid=$tid&sel_vgid=$sel_vgid'><td>\n";
+	echo "<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?tid=$tid&sel_vgid=$sel_vgid'><td>\n";
 	echo "<select name='default_view' onChange='submit()'>\n";
 	$selected = false;
 	foreach ($availViews as $view)
@@ -364,7 +364,7 @@
 	echo "<table><tr valign=top><td>\n";
 	echo "<b>Your current views: </b>".help("View")."<br><font size=0>(click name to view/edit table, click radio to select as default view)</font><br>\n";
 	echo "<table border=1>\n";
-	echo "<form method=post action='".$_SERVER['PHP_SELF']."?tid=$tid&sel_vgid=$sel_vgid'>";
+	echo "<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?tid=$tid&sel_vgid=$sel_vgid'>";
 	echo "<tr><th>Index</th><th>[Default] View</th><th>Commands</th></tr>\n";
 	if (isset($userViews) && count($userViews)>0)
 	{
@@ -374,15 +374,15 @@
 			$_tid = $arr["tid"];
 			$color = ($tid == $_tid ? " bgcolor=#eeeeee" : "");
 			echo "<tr><td$color>".$arr["ordering"]."</td>";
-			echo 		"<td$color><input type=radio name=default_view value='$_tid' onClick='submit()'".($_tid==$default_view ? " checked" : "")."><a href='".$_SERVER['PHP_SELF']."?tid=$_tid&sel_vgid=$sel_vgid'>$_tname</a></td>".
-						"<td$color><a href='".$_SERVER['PHP_SELF']."?removeView=$_tid&tid=$tid&sel_vgid=$sel_vgid' onClick=\"return confirm('You are about to delete a View')\">Delete</a> ".
-							 "<a href='".$_SERVER['PHP_SELF']."?moveView=".$arr["ordering"]."&offs=+1&tid=$tid&sel_vgid=$sel_vgid'>-</a> ".
-							 "<a href='".$_SERVER['PHP_SELF']."?moveView=".$arr["ordering"]."&offs=-1&tid=$tid&sel_vgid=$sel_vgid'>+</a> ".
-							 "<a href='".$_SERVER['PHP_SELF']."?dupView=true&tid=$_tid&offs=-1&sel_vgid=$sel_vgid'>Duplicate</a></td></tr>\n";
+			echo 		"<td$color><input type=radio name=default_view value='$_tid' onClick='submit()'".($_tid==$default_view ? " checked" : "")."><a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?tid=$_tid&sel_vgid=$sel_vgid'>$_tname</a></td>".
+						"<td$color><a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?removeView=$_tid&tid=$tid&sel_vgid=$sel_vgid' onClick=\"return confirm('You are about to delete a View')\">Delete</a> ".
+							 "<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?moveView=".$arr["ordering"]."&offs=+1&tid=$tid&sel_vgid=$sel_vgid'>-</a> ".
+							 "<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?moveView=".$arr["ordering"]."&offs=-1&tid=$tid&sel_vgid=$sel_vgid'>+</a> ".
+							 "<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?dupView=true&tid=$_tid&offs=-1&sel_vgid=$sel_vgid'>Duplicate</a></td></tr>\n";
 		}
 	}
 	echo "</form>\n";
-	echo "<tr><form method=post action='".basename($_SERVER['PHP_SELF'])."'><td></td>\n";
+	echo "<tr><form method=post action='".htmlspecialchars(basename($_SERVER['PHP_SELF']), ENT_QUOTES)."'><td></td>\n";
 	echo "<td><input type=text name=viewname maxlength=32 size=16></td>\n";
 	echo "<td><input type=submit name=createview value='Create new view'></td>\n";
 	echo "</form></tr>\n";
@@ -396,15 +396,15 @@
 		echo "<b>$group views: </b>".help("View")."<br><font size=0>(click name to view table, click radio to select as default view)</font><br>\n";
 		echo "<table border=1>\n";
 		echo "<tr><th>Index</th><th>[Default] View</th><th>Commands</th></tr>\n";
-		echo "<form method=post action='".$_SERVER['PHP_SELF']."?tid=$tid&sel_vgid=$sel_vgid'>\n";
+		echo "<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?tid=$tid&sel_vgid=$sel_vgid'>\n";
 		foreach ($groupViews as $arr)
 		{
 			$_tname = $arr["name"];
 			$_tid = $arr["tid"];
 			$color = ($tid == $_tid ? " bgcolor=#eeeeee" : "");
 			echo "<tr><td$color>".$arr["ordering"]."</td>".
-						"<td$color><input type=radio name=default_view value='$_tid' onClick='submit()'".($_tid==$default_view ? " checked" : "")."><a href='".$_SERVER['PHP_SELF']."?tid=$_tid&sel_vgid=$sel_vgid'>$_tname</a></td>".
-						"<td$color><a href='".$_SERVER['PHP_SELF']."?dupView=true&tid=$_tid&offs=-1&sel_vgid=$sel_vgid'>Duplicate</a></td></tr>\n";
+						"<td$color><input type=radio name=default_view value='$_tid' onClick='submit()'".($_tid==$default_view ? " checked" : "")."><a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?tid=$_tid&sel_vgid=$sel_vgid'>$_tname</a></td>".
+						"<td$color><a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?dupView=true&tid=$_tid&offs=-1&sel_vgid=$sel_vgid'>Duplicate</a></td></tr>\n";
 		}
 		echo "</form>\n";
 		echo "</table><br>\n";
@@ -434,7 +434,7 @@
 			$ownView = ($result["uid"] == $uid);
 
 			echo "<table border=1>\n";
-			echo "<tr><form method=post action='".$_SERVER['PHP_SELF']."?sel_vgid=$sel_vgid&tid=$tid'><td colspan=3><b>Content of ".($ownView ? "<input name=chViewName value='$viewName' size=32 maxlength=32>" : $viewName)."</b></td></form>";
+			echo "<tr><form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=$sel_vgid&tid=$tid'><td colspan=3><b>Content of ".($ownView ? "<input name=chViewName value='$viewName' size=32 maxlength=32>" : $viewName)."</b></td></form>";
 			if ($ownView && ($admlogin == "root" || $admlogin == $group || $IsNevrax))
 			{
 				echo "<form method=post action='".$_SERVER['PHP_SEL']."?sel_vgid=$sel_vgid&tid=$tid'><td colspan=4>Give view to <select name='giveTo' onChange='submit()'>";
@@ -478,14 +478,14 @@
 				{
 					echo "<tr>".
 								"<td>".$arr["ordering"]."</td>".
-								"<form method=post action='".$_SERVER['PHP_SELF']."?sel_vgid=$sel_vgid&vid=$vid&tid=$tid'><td><input type=text name=changeVarName maxlength=128 size=16 value='".$arr["name"]."'></td></form>".
+								"<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=$sel_vgid&vid=$vid&tid=$tid'><td><input type=text name=changeVarName maxlength=128 size=16 value='".$arr["name"]."'></td></form>".
 								"<td>".$arr["path"]."</td>".
 								"<td>$priv</td>".
-								"<form method=post action='".$_SERVER['PHP_SELF']."?sel_vgid=$sel_vgid&vid=$vid&tid=$tid'><td><input type=text name=changeVarFilter maxlength=64 size=16 value='".$arr["filter"]."'></td></form>".
-								"<form method=post action='".$_SERVER['PHP_SELF']."?sel_vgid=$sel_vgid&changeVidGraph=$vid&tid=$tid'><td><input type=checkBox name=graphState".($arr["graph"] != 0 ? " checked" : "")." onClick='submit()'></td></form>".
-								"<td><a href='".$_SERVER['PHP_SELF']."?removeRow=$ordering&tid=$tid&sel_vgid=$sel_vgid' onClick=\"return confirm('You are about to delete a Variable from a View')\">Delete</a> ".
-									 "<a href='".$_SERVER['PHP_SELF']."?moveRow=$ordering&tid=$tid&offs=+1&sel_vgid=$sel_vgid'>-</a> ".
-									 "<a href='".$_SERVER['PHP_SELF']."?moveRow=$ordering&tid=$tid&offs=-1&sel_vgid=$sel_vgid'>+</a></td></tr>\n";
+								"<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=$sel_vgid&vid=$vid&tid=$tid'><td><input type=text name=changeVarFilter maxlength=64 size=16 value='".$arr["filter"]."'></td></form>".
+								"<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=$sel_vgid&changeVidGraph=$vid&tid=$tid'><td><input type=checkBox name=graphState".($arr["graph"] != 0 ? " checked" : "")." onClick='submit()'></td></form>".
+								"<td><a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?removeRow=$ordering&tid=$tid&sel_vgid=$sel_vgid' onClick=\"return confirm('You are about to delete a Variable from a View')\">Delete</a> ".
+									 "<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?moveRow=$ordering&tid=$tid&offs=+1&sel_vgid=$sel_vgid'>-</a> ".
+									 "<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?moveRow=$ordering&tid=$tid&offs=-1&sel_vgid=$sel_vgid'>+</a></td></tr>\n";
 				}
 				else
 				{
@@ -528,12 +528,12 @@
 				{
 					echo "<tr>".
 								"<td>".$arr["ordering"]."</td>".
-								"<form method=post action='".$_SERVER['PHP_SELF']."?sel_vgid=$sel_vgid&vid=$vid&tid=$tid'><td><input type=text name=changeVarName maxlength=128 size=16 value='".$arr["name"]."'></td></form>".
+								"<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=$sel_vgid&vid=$vid&tid=$tid'><td><input type=text name=changeVarName maxlength=128 size=16 value='".$arr["name"]."'></td></form>".
 								"<td colspan=2>".$arr["path"]."</td>".
-								"<form method=post action='".$_SERVER['PHP_SELF']."?sel_vgid=$sel_vgid&vid=$vid&tid=$tid'><td colspan=2><input type=text name=changeVarFilter maxlength=64 size=16 value='".$arr["filter"]."'></td></form>".
-								"<td><a href='".$_SERVER['PHP_SELF']."?removeRow=$ordering&tid=$tid&sel_vgid=$sel_vgid' onClick=\"return confirm('You are about to delete a Variable from a View')\">Delete</a> ".
-									 "<a href='".$_SERVER['PHP_SELF']."?moveRow=$ordering&tid=$tid&offs=+1&sel_vgid=$sel_vgid'>-</a> ".
-									 "<a href='".$_SERVER['PHP_SELF']."?moveRow=$ordering&tid=$tid&offs=-1&sel_vgid=$sel_vgid'>+</a></td></tr>\n";
+								"<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=$sel_vgid&vid=$vid&tid=$tid'><td colspan=2><input type=text name=changeVarFilter maxlength=64 size=16 value='".$arr["filter"]."'></td></form>".
+								"<td><a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?removeRow=$ordering&tid=$tid&sel_vgid=$sel_vgid' onClick=\"return confirm('You are about to delete a Variable from a View')\">Delete</a> ".
+									 "<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?moveRow=$ordering&tid=$tid&offs=+1&sel_vgid=$sel_vgid'>-</a> ".
+									 "<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?moveRow=$ordering&tid=$tid&offs=-1&sel_vgid=$sel_vgid'>+</a></td></tr>\n";
 				}
 				else
 				{
@@ -554,16 +554,16 @@
 			if ($ownView)
 			{
 				echo "<table>\n";
-				echo "<form method=post action='".$_SERVER['PHP_SELF']."?sel_vgid=$sel_vgid&tid=$tid'><tr><th>Filter</th><td><input name=chViewFilter value='$viewFilter' size=64 maxlength=64></td></tr></form>";
-				echo "<form method=post action='".$_SERVER['PHP_SELF']."?sel_vgid=$sel_vgid&tid=$tid'><tr><th>Display type</th><td><select name=chViewDisplay onChange='submit()'>";
+				echo "<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=$sel_vgid&tid=$tid'><tr><th>Filter</th><td><input name=chViewFilter value='$viewFilter' size=64 maxlength=64></td></tr></form>";
+				echo "<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=$sel_vgid&tid=$tid'><tr><th>Display type</th><td><select name=chViewDisplay onChange='submit()'>";
 				echo "<option value='normal'".($viewDisplay=="normal" ? " selected" : "").">Normal display";
 				echo "<option value='condensed'".($viewDisplay=="condensed" ? " selected" : "").">Condensed display";
 				echo "</select></td></tr></form>\n";
-				echo "<form method=post action='".$_SERVER['PHP_SELF']."?sel_vgid=$sel_vgid&tid=$tid'><tr><th>Display automation</th><td><select name=chViewAutoDisplay onChange='submit()'>";
+				echo "<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=$sel_vgid&tid=$tid'><tr><th>Display automation</th><td><select name=chViewAutoDisplay onChange='submit()'>";
 				echo "<option value='auto'".($viewAutoDisplay=="auto" ? " selected" : "").">Automatic display";
 				echo "<option value='manual'".($viewAutoDisplay=="manual" ? " selected" : "").">Manual display";
 				echo "</select></td></tr></form>\n";
-				echo "<form method=post action='".$_SERVER['PHP_SELF']."?sel_vgid=$sel_vgid&tid=$tid'><tr><th>Refresh rate</th><td><input name=chViewRefreshRate value='$viewRefreshRate' size=5 maxlength=10> seconds</td></tr></form>\n";
+				echo "<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=$sel_vgid&tid=$tid'><tr><th>Refresh rate</th><td><input name=chViewRefreshRate value='$viewRefreshRate' size=5 maxlength=10> seconds</td></tr></form>\n";
 				echo "</table>\n";
 			}
 			else
@@ -584,7 +584,7 @@
 	
 				echo "<table border=1 cellspacing=1>\n";
 				echo "<tr><th>Variable</th>";
-				echo "<form method=post action='".$_SERVER['PHP_SELF']."?tid=$tid'><th><select name=sel_vgid onChange='submit()'>\n";
+				echo "<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?tid=$tid'><th><select name=sel_vgid onChange='submit()'>\n";
 				foreach ($vargroups as $vargroup => $vgid)
 					echo "<option value='$vgid'".($sel_vgid == $vgid ? " selected" : "").">$vargroup\n";
 				echo "<option value='-1'".(!isset($sel_vgid) || $sel_vgid=='-1' ? " selected" : "").">All Groups\n";
@@ -624,7 +624,7 @@
 					$prevvgid = $arr["vgid"];
 					$prevvtype = $arr["command"];
 	
-					echo "<tr><td><b><a href='".$_SERVER['PHP_SELF']."?addToView=$vid&tid=$tid&sel_vgid=$sel_vgid'>".$arr["name"]."</a></b></td>".
+					echo "<tr><td><b><a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?addToView=$vid&tid=$tid&sel_vgid=$sel_vgid'>".$arr["name"]."</a></b></td>".
 								"<td>".$arr["group_name"]."</td>".
 								"<td>".$arr["path"]."</td>".
 								"<td>".$arr["state"]."</td>".
@@ -641,7 +641,7 @@
 
 				echo "<br><br><b>View commands</b><br>\n";
 				echo "<table border=1><tr><th>Name</th><td align=center><b>Command</b> <font size=1>(with full parameter list)</font></td><th></th></tr>\n";
-				$result = sqlquery("SELECT name, command FROM view_command WHERE tid='$tid' ORDER BY name");
+				$result = sqlquery("SELECT name, command FROM view_command WHERE tid='".intval($tid)."' ORDER BY name");
 				while ($result && ($arr = sqlfetch($result)))
 				{
 					echo "<tr><form method=post action='$_SERVER['PHP_SELF']?tid=$tid&vcmd=".$arr["name"]."'><td><input name=chViewCommandName value='".$arr["name"]."' size=16 maxlength=32></td></form><form method=post action='$_SERVER['PHP_SELF']?tid=$tid&vcmd=".$arr["name"]."'><td><input name=chViewCommand value='".$arr["command"]."' size=32 maxlength=32></td></form><form method=post action='$_SERVER['PHP_SELF']?tid=$tid&vcmd=".$arr["name"]."'><td><input type=submit name=rmViewCommand value='Delete' onClick=\"return confirm('You are about to delete a Command')\"></td></form></tr>\n";

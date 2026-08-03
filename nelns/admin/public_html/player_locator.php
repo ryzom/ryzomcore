@@ -31,7 +31,7 @@
 		}
 	}
 
-	htmlProlog($_SERVER['PHP_SELF'], "Player Locator");
+	htmlProlog(htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES), "Player Locator");
 
 	echo "<script><!--\n";
 	echo "//----------------------------------\n";
@@ -85,7 +85,7 @@
 	echo "<br><br>\n";
 
 	echo "<table border=0><tr valign=top>\n";
-	echo "<form method=post action='".$_SERVER['PHP_SELF']."' name='cmdform'>\n";	
+	echo "<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."' name='cmdform'>\n";	
 	echo "<td>\n";
 
 	$result = sqlquery("SELECT DISTINCT shard FROM service ORDER BY shard");

@@ -30,11 +30,11 @@
 		$result = sqlquery("SELECT login FROM user WHERE uid='".intval($uuid)."'");
 		if ($result && mysql_num_rows($result) == 1)
 		{
-			htmlProlog($_SERVER['PHP_SELF'], "Administration");
+			htmlProlog(htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES), "Administration");
 			$arr = mysql_fetch_array($result);
 			echo "You are about to delete user ".$arr["login"]." ($uid)<br>\n";
 			echo "Are you sure ?<br>\n";
-			echo "<font size=+6><a href='".$_SERVER['PHP_SELF']."?confirmRmUid=$uuid'>YES</a> | <a href='".$_SERVER['PHP_SELF']."?editUsers=true'>NO</a>\n";
+			echo "<font size=+6><a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?confirmRmUid=$uuid'>YES</a> | <a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?editUsers=true'>NO</a>\n";
 			htmlEpilog();
 			die;
 		}
@@ -58,7 +58,7 @@
 	// force user password
 	else if (isset($forcePass))
 	{
-		sqlquery("UPDATE user SET password='".sqlescape(crypt($forcedPass, "NL"))."' WHERE uid='".intval($forcePass)."'");
+		sqlquery("UPDATE user SET password='".sqlescape(hashPassword($forcedPass))."' WHERE uid='".intval($forcePass)."'");
 	}
 	// update user variables
 	else if (isset($updVars) && isset($editUser))
@@ -106,7 +106,7 @@
 		}
 		else
 		{
-			$result = sqlquery("INSERT INTO user SET login='".sqlescape($nulogin)."', password='".sqlescape(crypt($nupassword, "NL"))."', gid='".sqlescape($nugroup)."', allowed_ip='".sqlescape($nuallowedIp)."'");
+			$result = sqlquery("INSERT INTO user SET login='".sqlescape($nulogin)."', password='".sqlescape(hashPassword($nupassword))."', gid='".sqlescape($nugroup)."', allowed_ip='".sqlescape($nuallowedIp)."'");
 			if (mysql_affected_rows() != 1)
 			{
 				$error .= "Can't create user '$nulogin', database request failed (already used login?)<br>\n";
@@ -510,12 +510,12 @@
 	// -----------------------------
 	// page display
 
-	htmlProlog($_SERVER['PHP_SELF'], "Administration");
-	subBar( array( 	"Users" => $_SERVER['PHP_SELF']."?editUsers=true",
-					"Variables" => $_SERVER['PHP_SELF']."?editVariables=true",
-					"Services" => $_SERVER['PHP_SELF']."?editServices=true",
-					"Servers" => $_SERVER['PHP_SELF']."?editServers=true",
-					"Shards" => $_SERVER['PHP_SELF']."?editShards=true" ));
+	htmlProlog(htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES), "Administration");
+	subBar( array( 	"Users" => htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?editUsers=true",
+					"Variables" => htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?editVariables=true",
+					"Services" => htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?editServices=true",
+					"Servers" => htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?editServers=true",
+					"Shards" => htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?editShards=true" ));
 
 	echo "Administration tools<br>\n";
 	
@@ -530,7 +530,7 @@
 	// ---------------------------------------------------------------------------------
 	if ($editUser)
 	{
-		$resURL = $_SERVER['PHP_SELF']."?editUser=$editUser&selGroup=$selGroup";
+		$resURL = htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?editUser=$editUser&selGroup=$selGroup";
 
 		$result = sqlquery("SELECT * FROM user WHERE uid='".intval($editUser)."'");
 		if ($result && ($arr=mysql_fetch_array($result)))
@@ -579,7 +579,7 @@
 			$usrVarRights = getUserVariableRights($editUser, $userGroup);
 
 			echo "<table border=1>\n";
-			echo "<tr><th>Variable</th><form method=post action='".$_SERVER['PHP_SELF']."?editUser=$editUser'><th>";
+			echo "<tr><th>Variable</th><form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?editUser=$editUser'><th>";
 			echo "<select name='selGroup' onChange='submit()'>";
 			$found = false;
 			foreach ($groups as $vgid => $group )
@@ -755,7 +755,9 @@
 			//$editLogin
 			$logfilename = $userlogpath."/".$editLogin.".log";
 			unset($resExec);
-			exec("tail -n 40 $logfilename", $resExec);
+			// $editLogin is a login read back out of the database, so it does
+			// not belong on a command line unquoted
+			exec("tail -n 40 ".escapeshellarg($logfilename), $resExec);
 			
 			echo join("\n", $resExec);
 			
@@ -786,7 +788,7 @@
 
 		echo "<table border=1>\n";
 		echo "<tr><th>Login</th><th>Uid</th>";
-		echo "<form method=post action='".$_SERVER['PHP_SELF']."'><th><select name=uViewGroups onChange='submit()'>";
+		echo "<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."'><th><select name=uViewGroups onChange='submit()'>";
 		echo  "<option value=''".((!isset($uViewGroups) || $uViewGroups=='') ? " selected" : "").">All Groups\n";
 		foreach($actualGroups as $cgname => $cgid)
 			echo  "<option value='$cgid'".($cgid==$uViewGroups ? " selected" : "").">$cgname\n";
@@ -807,23 +809,23 @@
 			$uallowedip = $arr["allowed_ip"];
 			$uuseCookie = ($arr["useCookie"] == "yes");
 			echo "<tr>".
-						"<td><a href='".$_SERVER['PHP_SELF']."?editUser=$uuid'>$ulogin</a></td>\n".
+						"<td><a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?editUser=$uuid'>$ulogin</a></td>\n".
 						"<td>$uuid</td>\n".
-						"<form method=post action='".$_SERVER['PHP_SELF']."'>".
+						"<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."'>".
 						"<input type=hidden name=updUid value='$uuid'><td><select name=chugroup onChange='submit()'>\n";
 			foreach($groupNames as $cgname => $cgid)
 				echo  "<option value='$cgid'".($cgid==$ugid ? " selected" : "").">$cgname\n";
 			echo     "</select></td></form>\n";
-			echo 		"<form method=post action='".$_SERVER['PHP_SELF']."'><input type=hidden name=updUid value='$uuid'><td><select name='chucookie' onChange='submit()'><option value='yes'".($uuseCookie ? " selected" : "").">Yes<option value='no'".($uuseCookie ? "" : " selected").">No</select></td></form>";
-			echo 		"<form method=post action='".$_SERVER['PHP_SELF']."'><input type=hidden name=forcePass value='$uuid'><td><input type=password name='forcedPass'></td></form>";
-			echo 		"<form method=post action='".$_SERVER['PHP_SELF']."'><input type=hidden name=allowIp value='$uuid'><td><input name='allowedIp' value='$uallowedip'></td></form>";
-			echo		"<td><a href='".$_SERVER['PHP_SELF']."?confirmRmUid=$uuid' onClick=\"return confirm('You are about to delete user $ulogin')\">Delete</a></td></tr>\n";
+			echo 		"<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."'><input type=hidden name=updUid value='$uuid'><td><select name='chucookie' onChange='submit()'><option value='yes'".($uuseCookie ? " selected" : "").">Yes<option value='no'".($uuseCookie ? "" : " selected").">No</select></td></form>";
+			echo 		"<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."'><input type=hidden name=forcePass value='$uuid'><td><input type=password name='forcedPass'></td></form>";
+			echo 		"<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."'><input type=hidden name=allowIp value='$uuid'><td><input name='allowedIp' value='$uallowedip'></td></form>";
+			echo		"<td><a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?confirmRmUid=$uuid' onClick=\"return confirm('You are about to delete user $ulogin')\">Delete</a></td></tr>\n";
 		}
 		echo "</table><br>\n";
 		
 		$result = sqlquery("SELECT login, uid FROM user");
 
-		echo "<table border=1><form method=post action='".$_SERVER['PHP_SELF']."'>\n";
+		echo "<table border=1><form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."'>\n";
 		echo "<tr><th colspan=2>Create a new user</th></tr>\n";
 		echo "<tr><td>Login</td><td><input name=nulogin maxlength=16 size=16 value='$nulogin'></td></tr>\n";
 		echo "<tr><td>Group</td><td><select name=nugroup>\n";
@@ -936,7 +938,7 @@
 				echo "<tr height=5><td colspan=12></td></tr>\n";
 			$lastGroup = $vgid;
 
-			echo "<tr><form method=post action='".$_SERVER['PHP_SELF']."?varGroup=$varGroup'><input type=hidden name=vid value='$vid'><input type=hidden name=chVar value='Update'>".
+			echo "<tr><form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?varGroup=$varGroup'><input type=hidden name=vid value='$vid'><input type=hidden name=chVar value='Update'>".
 						"<td><input name=chVarName maxlength=128 size=16 value='$name'></td>\n".
 						"<td>$vid</td>\n";
 			echo		"<td><select name=chVarGroup onChange='submit()'>";
@@ -950,13 +952,13 @@
 						"<td><select name=chVarOrder onChange='submit()'><option value='gt'".($alarm_order=="gt" ? " selected":"").">gt<option value='lt'".($alarm_order=="lt" ? " selected":"").">lt</select></td>".
 						"<td><input name=chVarGraphUpdate maxlength=8 size=4 value='$graph_update'></td>".
 						"<td align=center><input type=checkbox name=chVarType".($var_type == "variable" ? " checked" : "")." value='1'></td>".
-						"<td><input type=submit name=chVar value='Update'></td></form><form method=post action='".$_SERVER['PHP_SELF']."?varGroup=$varGroup'><td><input type=hidden name='vid' value='$vid'><input type=submit name=rmVar value='Delete' onClick=\"return confirm('You are about to delete a Variable')\"></td>".
+						"<td><input type=submit name=chVar value='Update'></td></form><form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?varGroup=$varGroup'><td><input type=hidden name='vid' value='$vid'><input type=submit name=rmVar value='Delete' onClick=\"return confirm('You are about to delete a Variable')\"></td>".
 					"</form></tr>\n";
 		}
 		echo "<tr height=10><td colspan=12></td></tr>\n";
 		if (!isset($nvpath))		$nvpath = "*.*.*.*[.*]";
 		if (!isset($nvstate))	$nvstate = "rd";
-		echo "<tr valign=top><form method=post action='".$_SERVER['PHP_SELF']."?editVariables=true&varGroup=$varGroup'><input type=hidden name=vid value='$vid'>".
+		echo "<tr valign=top><form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?editVariables=true&varGroup=$varGroup'><input type=hidden name=vid value='$vid'>".
 					"<td><input name=nvname maxlength=128 size=16 value='$nvname'></td>\n".
 					"<td></td>\n";
 		echo		"<td><select name=chVarGroup>";
@@ -992,7 +994,7 @@
 		echo "</td><td width=30>&nbsp;</td><td>\n";
 		
 		echo "<table>\n";
-		echo "<tr><td align=center colspan=2>View by variable group</td></tr><tr><form method=post action='".$_SERVER['PHP_SELF']."?editVariables=true'>\n";
+		echo "<tr><td align=center colspan=2>View by variable group</td></tr><tr><form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?editVariables=true'>\n";
 		echo "<td align=center colspan=2><select name=varGroup onChange='submit()'>\n";
 		echo "<option value='-1'".($varGroup=="-1" ? " selected":"").">All groups";
 		foreach ($groups as $vgid => $vgname)
@@ -1002,13 +1004,13 @@
 		echo "<tr><td colspan=2><hr></td></tr>\n";
 
 		echo "<tr>\n";
-		echo "<td align=center colspan=2>Create a variable group</td></tr><tr><form method=post action='".$_SERVER['PHP_SELF']."?varGroup=$varGroup&editVariables=true'>\n";
+		echo "<td align=center colspan=2>Create a variable group</td></tr><tr><form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?varGroup=$varGroup&editVariables=true'>\n";
 		echo "<td align=right><input name=createVarGroup size=16 maxlength=32></td><td><input type=submit value='Create'></td></form>\n";
 		echo "</tr>\n";
 
 		echo "<tr><td colspan=2><hr></td></tr>\n";
 
-		echo "<tr><td align=center colspan=2>Delete a variable group</td></tr><tr><form method=post action='".$_SERVER['PHP_SELF']."?varGroup=$varGroup&editVariables=true'>\n";
+		echo "<tr><td align=center colspan=2>Delete a variable group</td></tr><tr><form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?varGroup=$varGroup&editVariables=true'>\n";
 		echo "<td align=right><select name=rmVarGroup>\n";
 		foreach ($groups as $vgid => $vgname)
 			if ($vgid!=1)
@@ -1019,7 +1021,7 @@
 		echo "<tr><td colspan=2><hr></td></tr>\n";
 
 		echo "<tr>\n";
-		echo "<td align=center colspan=2>Export variables setup</td></tr><tr><form method=post action='".$_SERVER['PHP_SELF']."?varGroup=$varGroup&editVariables=true'>\n";
+		echo "<td align=center colspan=2>Export variables setup</td></tr><tr><form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?varGroup=$varGroup&editVariables=true'>\n";
 		echo "<td align=center colspan=2><input type=submit name='exportVarSetup' value='Export'></td></form>\n";
 		echo "</tr>\n";
 
@@ -1028,7 +1030,7 @@
 
 		echo "</td></tr></table>\n";
 		
-		echo "<form method='post' action='".$_SERVER['PHP_SELF']."?varGroup=$varGroup&editVariables=true'>\n";
+		echo "<form method='post' action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?varGroup=$varGroup&editVariables=true'>\n";
 		echo "<b>Import/Exported setup</b> (use this to export to another admin tool):<br>\n";
 		echo "<textarea rows=30 cols=160 name='importedVarSetup'>";
 		if ($exportVarSetup)
@@ -1063,12 +1065,12 @@
 		echo "<table border=1><tr><th>Name</th><th>Address</th><th>Command</th></tr>\n";
 		while ($result && ($arr=sqlfetch($result)))
 		{
-			echo "<tr><form action='".$_SERVER['PHP_SELF']."?editShards=true&fshard=$fshard' method=post><td><input name=newServerName value=\"".$arr["name"]."\" size=16 maxlength=32><input type=hidden name=updServerName value=\"".$arr["name"]."\"></td></form>";
-			echo "<form action='".$_SERVER['PHP_SELF']."?editShards=true&fshard=$fshard' method=post><td><input name=newServerIP value=\"".$arr["address"]."\" size=16 maxlength=32><input type=hidden name=updServerIP value=\"".$arr["name"]."\"></td></form>";
-			echo "<form action='".$_SERVER['PHP_SELF']."?editShards=true&fshard=$fshard' method=post><td><input type=submit name=rmServer value=\"Delete\"><input type=hidden name=serverName value=\"".$arr["name"]."\"></td></form></tr>\n";
+			echo "<tr><form action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?editShards=true&fshard=$fshard' method=post><td><input name=newServerName value=\"".$arr["name"]."\" size=16 maxlength=32><input type=hidden name=updServerName value=\"".$arr["name"]."\"></td></form>";
+			echo "<form action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?editShards=true&fshard=$fshard' method=post><td><input name=newServerIP value=\"".$arr["address"]."\" size=16 maxlength=32><input type=hidden name=updServerIP value=\"".$arr["name"]."\"></td></form>";
+			echo "<form action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?editShards=true&fshard=$fshard' method=post><td><input type=submit name=rmServer value=\"Delete\"><input type=hidden name=serverName value=\"".$arr["name"]."\"></td></form></tr>\n";
 			$servers[] = $arr["name"];
 		}
-		echo "<tr><form action='".$_SERVER['PHP_SELF']."?editShards=true&fshard=$fshard' method=post><td><input name=serverName size=16 maxlength=32></td><td><input name=serverIP size=16 maxlength=32></td><td><input type=submit name=createServer value=\"Create\"></td></form></tr>\n";
+		echo "<tr><form action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?editShards=true&fshard=$fshard' method=post><td><input name=serverName size=16 maxlength=32></td><td><input name=serverIP size=16 maxlength=32></td><td><input type=submit name=createServer value=\"Create\"></td></form></tr>\n";
 		echo "</table>\n";
 
 		echo "</td><td width=20>&nbsp;\n";
@@ -1081,7 +1083,7 @@
 		else
 			$result = sqlquery("SELECT * FROM service WHERE shard LIKE '%".sqlescape($fshard)."%' ORDER BY $serviceOrder");
 
-		echo "<table border=1><tr><form method=post action='".$_SERVER['PHP_SELF']."?editShards=true'><th>Shard ";
+		echo "<table border=1><tr><form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?editShards=true'><th>Shard ";
 		echo "<select name=fshard onChange='submit()'>";
 		echo "<option value=''".($fshard=="" ? " selected" : "").">No shard";
 		echo "<option value='*'".($fshard=="*" ? " selected" : "").">All shards";
@@ -1092,8 +1094,8 @@
 		echo "</th></form><th>Server</th><th>Service</th><th>Command</th></tr>\n";
 		while ($result && ($arr=sqlfetch($result)))
 		{
-			echo "<tr><form action='".$_SERVER['PHP_SELF']."?editShards=true&fshard=$fshard' method=post><td><input name=newShardName value='".$arr["shard"]."' size=24 maxlength=32><input type=hidden name=serviceId value='".$arr["service_id"]."'></td></form>\n";
-			echo "<form action='".$_SERVER['PHP_SELF']."?editShards=true&fshard=$fshard' method=post><input type=hidden name=serviceId value='".$arr["service_id"]."'><td>";
+			echo "<tr><form action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?editShards=true&fshard=$fshard' method=post><td><input name=newShardName value='".$arr["shard"]."' size=24 maxlength=32><input type=hidden name=serviceId value='".$arr["service_id"]."'></td></form>\n";
+			echo "<form action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?editShards=true&fshard=$fshard' method=post><input type=hidden name=serviceId value='".$arr["service_id"]."'><td>";
 			echo "<select name=newServerName onChange='submit()'>";
 			$foundServer = false;
 			foreach ($servers as $server)
@@ -1109,12 +1111,12 @@
 			if (!$foundServer)
 				echo "<option value='".$arr["server"]."' selected>".$arr["server"];
 			echo "</select>";
-			echo "</td></form><form action='".$_SERVER['PHP_SELF']."?editShards=true&fshard=$fshard' method=post><td><input name=newServiceName value='".$arr["name"]."' size=16 maxlength=32><input type=hidden name=serviceId value='".$arr["service_id"]."'></td></form>";
-			echo "<form method=post action='".$_SERVER['PHP_SELF']."?editShards=true&fshard=$fshard'><td><input type=submit name=rmService value='Delete'><input type=hidden name=serviceId value='".$arr["service_id"]."'></td></form>";
+			echo "</td></form><form action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?editShards=true&fshard=$fshard' method=post><td><input name=newServiceName value='".$arr["name"]."' size=16 maxlength=32><input type=hidden name=serviceId value='".$arr["service_id"]."'></td></form>";
+			echo "<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?editShards=true&fshard=$fshard'><td><input type=submit name=rmService value='Delete'><input type=hidden name=serviceId value='".$arr["service_id"]."'></td></form>";
 			echo "</tr>\n";
 		}
 
-		echo "<tr><form action='".$_SERVER['PHP_SELF']."?editShards=true&fshard=$fshard' method=post>";
+		echo "<tr><form action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?editShards=true&fshard=$fshard' method=post>";
 		echo "<td><input name=shardName size=24 maxlength=32></td>\n";
 		echo "<td><select name=serverName>";
 		foreach ($servers as $server)
@@ -1144,7 +1146,7 @@
 		}
 
 		echo "<table cellpadding=0 cellspacing=0><tr valign=top><td>\n";
-		echo "<form action='".$_SERVER['PHP_SELF']."?editServices=update' method=post>\n";
+		echo "<form action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?editServices=update' method=post>\n";
 		echo "<textarea rows=30 cols=300 style='font-family: Terminal, Courier; font-size: 10pt;' name='updateList'>\n";
 
 		$result = sqlquery("SELECT * FROM service ORDER BY shard, server, name");
@@ -1178,7 +1180,7 @@
 		}
 
 		echo "<table cellpadding=0 cellspacing=0><tr valign=top><td>\n";
-		echo "<form action='".$_SERVER['PHP_SELF']."?editServers=update' method=post>\n";
+		echo "<form action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?editServers=update' method=post>\n";
 		echo "<textarea rows=30 cols=300 style='font-family: Terminal, Courier; font-size: 10pt;' name='updateList'>\n";
 
 		echo str_pad('* SERVER NAME', 32)." * ADDRESS\n";

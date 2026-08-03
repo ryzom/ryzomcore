@@ -56,7 +56,7 @@
 
 	if ((!isset($publicAccess) || $publicAccess == false) && $admlogin != "root" && (!$allowNevrax || !$IsNevrax))
 	{
-		htmlProlog($_SERVER['PHP_SELF'], "Acces not granted");
+		htmlProlog(htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES), "Acces not granted");
 		echo "You are not allowed to go to this page.<br>\n";
 		echo "<a href='index.php'>Index page</a>\n";
 		htmlEpilog();

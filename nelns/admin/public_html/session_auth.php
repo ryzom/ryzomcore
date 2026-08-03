@@ -43,7 +43,7 @@
 			unset($admcookiepassword);
 			unset($uid);
 			
-			htmlProlog($_SERVER['PHP_SELF'], "Logout", false);
+			htmlProlog(htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES), "Logout", false);
 			
 			echo "<center>\n";
 			echo "You are not logged any more<br>\n";
@@ -66,22 +66,26 @@
 				return 0;
 			}
 
-			if (crypt($chOldPass, "NL") == $admpassword && $chNewPass == $chConfirmNewPass)
+			if (verifyPassword($chOldPass, $admpassword) && $chNewPass == $chConfirmNewPass)
 			{
-				sqlquery("UPDATE user SET password='".crypt($chNewPass, "NL")."' WHERE uid='".mysql_real_escape_string($uid)."'");
+				sqlquery("UPDATE user SET password='".sqlescape(hashPassword($chNewPass))."' WHERE uid='".intval($uid)."'");
 				$admpassword = $chNewPass;
-				
-				addToLog("Changed password to '$chNewPass':'".crypt($chNewPass, "NL")."'");
 
-				//session_unregister("sessionAuth"); 
+				// never write the password, in clear or hashed, to the admin
+				// log: htmlEpilog() prints that log back into the page
+				addToLog("Password changed");
+
+				//session_unregister("sessionAuth");
 				unset($_SESSION["sessionAuth"]);
 				session_destroy();
 			}
 
 		case "login":
-			$admpassword = crypt($admpassword, "NL");
+			// turn the submitted password into the stored form; everything
+			// downstream works with that, as it did before
+			$admpassword = lookupStoredPassword($admlogin, $admpassword);
 
-			addToLog("Login! -- admlogin='$admlogin', admpassword='$admpassword'");
+			addToLog("Login! -- admlogin='$admlogin'");
 
 			if (!($uid = validateId($admlogin, $admpassword, $useCookie, $gid, $group)))
 			{
@@ -153,20 +157,73 @@
 	}
 
 
+	/*
+	 * Produce the value stored in user.password. New passwords get a random
+	 * per user salt; the old form was crypt($pass, "NL"), one fixed salt for
+	 * every account and only the first eight characters of the password.
+	 */
+	function hashPassword($password)
+	{
+		return password_hash($password, PASSWORD_BCRYPT);
+	}
+
+	/*
+	 * Check a plain password against a stored value, accepting accounts that
+	 * still carry the old fixed salt form.
+	 */
+	function verifyPassword($password, $stored)
+	{
+		$stored = (string)$stored;
+
+		if ($stored === '') return false;
+
+		if (strncmp($stored, 'NL', 2) === 0 && strlen($stored) === 13)
+		{
+			return hash_equals($stored, crypt($password, "NL"));
+		}
+
+		return password_verify($password, $stored);
+	}
+
+	/*
+	 * Verify a submitted password and hand back the stored hash, which is
+	 * what the session and the cookies carry. Accounts still on the old fixed
+	 * salt form are moved over while we have the password in clear.
+	 * Returns an empty string when the password does not match.
+	 */
+	function lookupStoredPassword($admlogin, $password)
+	{
+		if (!preg_match('/^[a-zA-Z0-9]+$/', $admlogin)) return "";
+
+		$res = sqlquery("SELECT uid, password FROM user WHERE BINARY login='".sqlescape($admlogin)."'");
+		if (!$res || !($arr = sqlfetch($res))) return "";
+
+		if (!verifyPassword($password, $arr["password"])) return "";
+
+		if (strncmp($arr["password"], 'NL', 2) === 0 && strlen($arr["password"]) === 13)
+		{
+			$stored = hashPassword($password);
+			sqlquery("UPDATE user SET password='".sqlescape($stored)."' WHERE uid='".intval($arr["uid"])."'");
+			return $stored;
+		}
+
+		return $arr["password"];
+	}
+
 	// validate id
 	function validateId($admlogin, $admpassword, &$useCookies, &$gid, &$group)
 	{
 		global	$REMOTE_ADDR;
 
-		if (!ereg('^[a-zA-Z0-9]+$', $admlogin))
+		if (!preg_match('/^[a-zA-Z0-9]+$/', $admlogin))
 		{
 			//echo "DETECTED potential hacking login='$admlogin'<br>\n";
 			return false;
 		}
 
-		addToLog("Validate login: '$admlogin'/'$admpassword'...");
+		addToLog("Validate login: '$admlogin'...");
 		$res = mysql_query("SELECT auth.password AS password, auth.uid AS uid, auth.useCookie AS useCookie, auth.gid AS gid, ugroup.login AS gname, auth.allowed_ip AS allowed_ip FROM user AS auth, user AS ugroup WHERE BINARY auth.login='".mysql_real_escape_string($admlogin)."' AND auth.gid=ugroup.uid");
-		if (!$res || !($arr=mysql_fetch_array($res)) || !($arr["uid"]) || $admpassword != $arr["password"])
+		if (!$res || !($arr=mysql_fetch_array($res)) || !($arr["uid"]) || !hash_equals((string)$arr["password"], (string)$admpassword))
 		{
 			addToLog("failed !!");
 			return false;
@@ -190,7 +247,7 @@
 		setcookie("admcookielogin", $admlogin, time()+3600*24*15);
 		setcookie("admcookiepassword", $admpassword, time()+3600*24*15);
 */
-		addToLog("cookies set to admlogin=$admlogin admpassword=$admpassword");
+		addToLog("cookies set for admlogin=$admlogin");
 	}
 
 	// erase cookies
