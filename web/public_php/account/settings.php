@@ -8,6 +8,10 @@ $uid = $_SESSION['account_uid'];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 	if (!csrfValidate()) {
 		$error = 'Invalid form submission. Please try again.';
+	} elseif (isImpersonating()) {
+		// Viewing as another user is for looking, not for taking the account
+		// over: these two forms change the password and the email.
+		$error = 'Account changes are disabled while viewing as another user.';
 	} else {
 	$action = isset($_POST['settings_action']) ? $_POST['settings_action'] : '';
 

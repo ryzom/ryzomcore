@@ -61,9 +61,11 @@ ob_start();
 				<button type="submit" name="login_submit" class="btn btn-primary">Sign In</button>
 			</div>
 		</form>
+		<?php if (getSetting('registration_open', '1') !== '0'): ?>
 		<div class="auth-links">
 			Don't have an account? <a href="index.php?page=register">Create one</a>
 		</div>
+		<?php endif; ?>
 	</div>
 </div>
 <?php

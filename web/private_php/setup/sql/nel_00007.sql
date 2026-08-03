@@ -8,5 +8,6 @@ INSERT INTO `setting` (`setting`, `value`) VALUES
   ('admin_privileges', ':DEV:SGM:GM:'),
   ('settings_privilege', ':DEV:'),
   ('default_privileges', ''),
-  ('default_access_domains', 'ds_open')
+  ('default_access_domains', 'ds_open'),
+  ('registration_open', '1')
 ON DUPLICATE KEY UPDATE `setting` = `setting`;

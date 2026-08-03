@@ -2,6 +2,18 @@
 
 // Account Management Tool - Main Entry Point
 
+// Same stance as the admin tool and the setup pages: the session id is what
+// stands between a visitor and someone's account, so keep it away from page
+// script and off cross site posts, and ask for the secure flag only when this
+// request arrived over tls (a plain http install could never log in).
+ini_set('session.cookie_httponly', '1');
+ini_set('session.use_only_cookies', '1');
+ini_set('session.cookie_samesite', 'Lax');
+if ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== '' && strtolower($_SERVER['HTTPS']) !== 'off')
+	|| (isset($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443)) {
+	ini_set('session.cookie_secure', '1');
+}
+
 session_start();
 
 require_once('config.php');
@@ -33,6 +45,7 @@ if (!in_array($page, $valid_pages)) {
 
 // Handle logout
 if ($page === 'logout') {
+	$_SESSION = array(); // drop the impersonation state too, not just the id
 	session_destroy();
 	header('Location: index.php?page=login');
 	exit;

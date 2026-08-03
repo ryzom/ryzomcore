@@ -14,11 +14,31 @@ $success = '';
 // Handle session actions (close, invite, remove) -- process before loading data
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrfValidate()) {
 	$action = isset($_POST['session_action']) ? $_POST['session_action'] : '';
-	$domainRingDb = isset($_POST['ring_db_name']) ? $_POST['ring_db_name'] : '';
 	$sessionId = isset($_POST['session_id']) ? (int)$_POST['session_id'] : 0;
-	$rsmAddress = isset($_POST['rsm_address']) ? $_POST['rsm_address'] : '';
 
-	if ($action && $domainRingDb && $sessionId) {
+	// The database to act on and the service to talk to are read from the
+	// domain row, never from the request: posting them back meant the caller
+	// chose which database this connects to and which host:port the server
+	// opened a socket to. The join limits it to domains this user has a
+	// permission record for.
+	$domainId = isset($_POST['domain_id']) ? (int)$_POST['domain_id'] : 0;
+	$domainRingDb = '';
+	$rsmAddress = '';
+	if ($domainId > 0) {
+		try {
+			$stmt = getNelDatabase()->prepare('SELECT d.ring_db_name, d.session_manager_address FROM permission p JOIN domain d ON p.DomainId = d.domain_id WHERE p.UId = :uid AND d.domain_id = :did LIMIT 1');
+			$stmt->execute(array(':uid' => $uid, ':did' => $domainId));
+			$domainRow = $stmt->fetch();
+			if ($domainRow) {
+				$domainRingDb = (string)$domainRow['ring_db_name'];
+				$rsmAddress = (string)$domainRow['session_manager_address'];
+			}
+		} catch (PDOException $e) {
+			$actionError = 'Action failed. Please try again.';
+		}
+	}
+
+	if ($action && $domainRingDb && $sessionId && !$actionError) {
 		try {
 			$ringDb = getRingDatabase($domainRingDb);
 
@@ -316,8 +336,7 @@ ob_start();
 										<form method="post" action="index.php?page=sessions" style="display:inline; margin-left:auto;">
 											<?php echo csrfField(); ?>
 											<input type="hidden" name="session_action" value="close">
-											<input type="hidden" name="ring_db_name" value="<?php echo h($entry['domain']['ring_db_name']); ?>">
-											<input type="hidden" name="rsm_address" value="<?php echo h($entry['domain']['session_manager_address']); ?>">
+											<input type="hidden" name="domain_id" value="<?php echo (int)$entry['domain']['domain_id']; ?>">
 											<input type="hidden" name="session_id" value="<?php echo $sid; ?>">
 											<button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Close this session?');">Close</button>
 										</form>
@@ -356,8 +375,7 @@ ob_start();
 																<form method="post" action="index.php?page=sessions" style="display:inline;">
 																	<?php echo csrfField(); ?>
 																	<input type="hidden" name="session_action" value="remove">
-																	<input type="hidden" name="ring_db_name" value="<?php echo h($entry['domain']['ring_db_name']); ?>">
-																	<input type="hidden" name="rsm_address" value="<?php echo h($entry['domain']['session_manager_address']); ?>">
+																	<input type="hidden" name="domain_id" value="<?php echo (int)$entry['domain']['domain_id']; ?>">
 																	<input type="hidden" name="session_id" value="<?php echo $sid; ?>">
 																	<input type="hidden" name="remove_char_id" value="<?php echo (int)$part['char_id']; ?>">
 																	<button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Remove this participant?');" style="padding:0.1rem 0.4rem; font-size:0.75rem;">Remove</button>
@@ -376,8 +394,7 @@ ob_start();
 									<form method="post" action="index.php?page=sessions" class="form-inline" style="border-top:1px solid #2c3e50; padding-top:0.75rem;">
 										<?php echo csrfField(); ?>
 										<input type="hidden" name="session_action" value="invite">
-										<input type="hidden" name="ring_db_name" value="<?php echo h($entry['domain']['ring_db_name']); ?>">
-										<input type="hidden" name="rsm_address" value="<?php echo h($entry['domain']['session_manager_address']); ?>">
+										<input type="hidden" name="domain_id" value="<?php echo (int)$entry['domain']['domain_id']; ?>">
 										<input type="hidden" name="session_id" value="<?php echo $sid; ?>">
 										<div class="form-group">
 											<label>Invite by character name</label>

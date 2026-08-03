@@ -48,8 +48,8 @@ try {
 			$stmt = $db->prepare('SELECT Privilege FROM user WHERE UId = :uid');
 			$stmt->execute(array(':uid' => $targetUid));
 			$targetRow = $stmt->fetch();
-			if ($targetRow && !canEditUser($targetRow['Privilege'])) {
-				$error = 'You cannot edit a user with equal or higher privileges.';
+			if (!$targetRow || !canEditUser($targetRow['Privilege'])) {
+				$error = 'You cannot edit this user: unknown account, or equal or higher privileges.';
 				$editUid = $targetUid;
 			} else {
 			$newPrivilege = trim($_POST['privilege']);
@@ -89,8 +89,8 @@ try {
 			$stmt = $db->prepare('SELECT Privilege FROM user WHERE UId = :uid');
 			$stmt->execute(array(':uid' => $targetUid));
 			$targetRow = $stmt->fetch();
-			if ($targetRow && !canEditUser($targetRow['Privilege'])) {
-				$error = 'You cannot edit a user with equal or higher privileges.';
+			if (!$targetRow || !canEditUser($targetRow['Privilege'])) {
+				$error = 'You cannot edit this user: unknown account, or equal or higher privileges.';
 			} else {
 			$domainId = (int)$_POST['domain_id'];
 			$shardId = (int)$_POST['shard_id'];
@@ -120,8 +120,8 @@ try {
 			$stmt = $db->prepare('SELECT Privilege FROM user WHERE UId = :uid');
 			$stmt->execute(array(':uid' => $targetUid));
 			$targetRow = $stmt->fetch();
-			if ($targetRow && !canEditUser($targetRow['Privilege'])) {
-				$error = 'You cannot edit a user with equal or higher privileges.';
+			if (!$targetRow || !canEditUser($targetRow['Privilege'])) {
+				$error = 'You cannot edit this user: unknown account, or equal or higher privileges.';
 			} else {
 			$domainId = (int)$_POST['domain_id'];
 			$shardId = (int)$_POST['shard_id'];
@@ -159,7 +159,7 @@ try {
 		$users = $stmt->fetchAll();
 	}
 } catch (PDOException $e) {
-	$error = 'Database error: ' . $e->getMessage();
+	$error = 'Database error. Please try again later.'; // the mysql text quotes host, user and query
 }
 
 ob_start();

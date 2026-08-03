@@ -28,6 +28,11 @@ $allSettings = array(
 		'help' => 'Which domain statuses automatically grant access to new accounts. Comma-separated list of: ds_open, ds_dev, ds_restricted. Default: ds_open.',
 		'default' => 'ds_open',
 	),
+	'registration_open' => array(
+		'label' => 'Account Registration',
+		'help' => 'Set to 1 to let visitors create their own accounts, or 0 to close the registration page (accounts then come from the admin page or the database).',
+		'default' => '1',
+	),
 );
 
 try {
@@ -53,7 +58,7 @@ try {
 		$settings[$row['setting']] = $row['value'];
 	}
 } catch (PDOException $e) {
-	$error = 'Database error: ' . $e->getMessage();
+	$error = 'Database error. Please try again later.'; // the mysql text quotes host, user and query
 }
 
 ob_start();

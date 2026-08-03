@@ -156,6 +156,12 @@ function hashPassword($password)
  */
 function verifyPassword($password, $hash)
 {
+	$hash = (string)$hash;
+	// An account row with no password must never authenticate, and indexing
+	// an empty string is an error on php 8.
+	if (strlen($hash) < 2) {
+		return false;
+	}
 	if ($hash[0] === '$') {
 		// Modern crypt hash (SHA-256 or SHA-512)
 		$salt = substr($hash, 0, strrpos($hash, '$') + 1);
@@ -163,7 +169,9 @@ function verifyPassword($password, $hash)
 		// Legacy DES-based crypt
 		$salt = substr($hash, 0, 2);
 	}
-	return crypt($password, $salt) === $hash;
+	// Constant time, like the login service does: a plain comparison leaks
+	// where the two values stop matching.
+	return hash_equals($hash, (string)crypt($password, $salt));
 }
 
 /**

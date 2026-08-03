@@ -4,7 +4,13 @@
 
 $pageTitle = 'Create Account';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register_submit'])) {
+// Sites that hand out accounts by other means can close this page from the
+// dev settings; the login service has the same idea in $ALLOW_UNKNOWN.
+$registrationOpen = getSetting('registration_open', '1') !== '0';
+
+if (!$registrationOpen) {
+	$error = 'Account registration is closed on this server.';
+} elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register_submit'])) {
 	if (!csrfValidate()) {
 		$error = 'Invalid form submission. Please try again.';
 	} else {
@@ -64,11 +70,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register_submit'])) {
 						$domains = $db->query("SELECT domain_id, status FROM domain");
 						foreach ($domains as $domain) {
 							if (in_array($domain['status'], $accessStatuses)) {
+								// The login service turns the domain status into the
+								// access privilege it then looks for (ds_dev => DEV),
+								// so a row written as OPEN on a dev domain refuses
+								// the very account it was meant to admit. It is also
+								// a SET column: only its own members may be stored.
+								$accessPriv = strtoupper(substr((string)$domain['status'], 3));
+								if (!in_array($accessPriv, array('OPEN', 'DEV', 'RESTRICTED'), true)) {
+									continue;
+								}
 								$pstmt = $db->prepare('INSERT INTO permission (UId, DomainId, AccessPrivilege) VALUES (:uid, :did, :priv)');
 								$pstmt->execute(array(
 									':uid' => $uid,
 									':did' => (int)$domain['domain_id'],
-									':priv' => 'OPEN',
+									':priv' => $accessPriv,
 								));
 							}
 						}
@@ -98,6 +113,7 @@ ob_start();
 		<?php if ($error): ?>
 			<div class="alert alert-error"><?php echo h($error); ?></div>
 		<?php endif; ?>
+		<?php if ($registrationOpen): ?>
 		<form method="post" action="index.php?page=register">
 			<?php echo csrfField(); ?>
 			<div class="form-group">
@@ -122,6 +138,7 @@ ob_start();
 				<button type="submit" name="register_submit" class="btn btn-primary">Create Account</button>
 			</div>
 		</form>
+		<?php endif; ?>
 		<div class="auth-links">
 			Already have an account? <a href="index.php?page=login">Sign in</a>
 		</div>
