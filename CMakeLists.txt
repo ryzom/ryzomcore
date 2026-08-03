@@ -384,27 +384,10 @@ IF(WITH_NEL)
   IF(HUNTER_ENABLED)
     IF(WITH_GUI)
       HUNTER_ADD_PACKAGE(luabind)
-      FIND_PACKAGE(Luabind REQUIRED)
     ENDIF()
 
     HUNTER_ADD_PACKAGE(CURL)
-    FIND_PACKAGE(CURL CONFIG REQUIRED)
   ELSE()
-    IF(WITH_GUI)
-      FIND_PACKAGE(Luabind REQUIRED)
-      find_package(Lua)
-
-      if(Lua_FOUND AND NOT TARGET Lua::Lua)
-        add_library(Lua::Lua INTERFACE IMPORTED)
-        set_target_properties(
-                Lua::Lua
-                PROPERTIES
-                INTERFACE_INCLUDE_DIRECTORIES "${LUA_INCLUDE_DIR}"
-                INTERFACE_LINK_LIBRARIES "${LUA_LIBRARIES}"
-        )
-      endif()
-    ENDIF()
-
     IF(EMSCRIPTEN)
       # CURL only when a cross-built (or stub) curl is provided via
       # -DCURL_INCLUDE_DIR/-DCURL_LIBRARY; requests fail gracefully with a stub.
@@ -425,9 +408,24 @@ IF(WITH_NEL)
           INTERFACE_INCLUDE_DIRECTORIES "${CURL_INCLUDE_DIR}")
       ENDIF()
     ELSE()
-    FIND_PACKAGE(CURL REQUIRED)
+      FIND_PACKAGE(CURL REQUIRED)
     ENDIF() # !EMSCRIPTEN
   ENDIF() #hunter
+
+  IF(WITH_GUI)
+    find_package(Luabind REQUIRED)
+    find_package(Lua REQUIRED)
+
+    if(Lua_FOUND AND NOT TARGET Lua::Lua)
+      add_library(Lua::Lua INTERFACE IMPORTED)
+      set_target_properties(
+              Lua::Lua
+              PROPERTIES
+              INTERFACE_INCLUDE_DIRECTORIES "${LUA_INCLUDE_DIR}"
+              INTERFACE_LINK_LIBRARIES "${LUA_LIBRARIES}"
+      )
+    endif()
+  ENDIF()
 
   INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/nel/include)
   ADD_SUBDIRECTORY(nel)
