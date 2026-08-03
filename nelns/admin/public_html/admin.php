@@ -102,14 +102,14 @@
 		}
 		else if (strspn($nulogin, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789") == 0)
 		{
-			$error = $error."Login '$admlogin' contains other characters than alphabetic and digits<br>\n";
+			$error = $error."Login '".htmlspecialchars($admlogin, ENT_QUOTES)."' contains other characters than alphabetic and digits<br>\n";
 		}
 		else
 		{
 			$result = sqlquery("INSERT INTO user SET login='".sqlescape($nulogin)."', password='".sqlescape(hashPassword($nupassword))."', gid='".sqlescape($nugroup)."', allowed_ip='".sqlescape($nuallowedIp)."'");
 			if (mysql_affected_rows() != 1)
 			{
-				$error .= "Can't create user '$nulogin', database request failed (already used login?)<br>\n";
+				$error .= "Can't create user '".htmlspecialchars($nulogin, ENT_QUOTES)."', database request failed (already used login?)<br>\n";
 				unset($nupassword);
 				unset($nuconfirmpassword);
 			}
@@ -178,13 +178,13 @@
 		sqlquery("DELETE FROM variable WHERE vid='".intval($vid)."'");
 		if (mysql_affected_rows() != 1)
 		{
-			$error .= "Couldn't remove variable $vid/$chVarName, database request failed.<br>\n";
+			$error .= "Couldn't remove variable ".htmlspecialchars($vid, ENT_QUOTES)."/".htmlspecialchars($chVarName, ENT_QUOTES).", database request failed.<br>\n";
 		}
 		else
 		{
 			sqlquery("DELETE FROM user_variable WHERE vid='".intval($vid)."'");
 			sqlquery("DELETE FROM view_row WHERE vid='".intval($vid)."'");
-			$error .= "Removed effectively variable $vid/$chVarName/$chVarPath/$chVarState<br>\n";
+			$error .= "Removed effectively variable ".htmlspecialchars($vid, ENT_QUOTES)."/".htmlspecialchars($chVarName, ENT_QUOTES)."/".htmlspecialchars($chVarPath, ENT_QUOTES)."/".htmlspecialchars($chVarState, ENT_QUOTES)."<br>\n";
 		}
 	}
 	// create variable
@@ -194,13 +194,13 @@
 		$result = sqlquery("INSERT INTO variable SET name='".sqlescape($nvname)."', vgid='".sqlescape($chVarGroup)."', path='".sqlescape($nvpath)."', state='".sqlescape($nvstate)."', warning_bound='".sqlescape($nvwarning)."', error_bound='".sqlescape($nverror)."', alarm_order='".sqlescape($nvorder)."', graph_update='".sqlescape($nvgraphupdate)."', command=".(isset($nvvartype) ? "'variable'" : "'command'"));
 		if (mysql_affected_rows() != 1)
 		{
-			$error .= "Can't create variable '$nvname', database request failed (already used variable name?)<br>\n";
+			$error .= "Can't create variable '".htmlspecialchars($nvname, ENT_QUOTES)."', database request failed (already used variable name?)<br>\n";
 			unset($nvpath);
 			unset($nvstate);
 		}
 		else
 		{
-			$error .= "Effectively created variable '$nvname'<br>\n";
+			$error .= "Effectively created variable '".htmlspecialchars($nvname, ENT_QUOTES)."'<br>\n";
 			$result = sqlquery("SELECT vid FROM variable WHERE name='".sqlescape($nvname)."' AND vgid='".sqlescape($chVarGroup)."' AND path='".sqlescape($nvpath)."' AND state='".sqlescape($nvstate)."'");
 			if ($result && ($arr=sqlfetch($result)))
 			{
@@ -218,7 +218,7 @@
 					if ($priv == '')
 						continue;
 						
-					$error .= "Set right '$priv' to users of group '$id':";
+					$error .= "Set right '".htmlspecialchars($priv, ENT_QUOTES)."' to users of group '".htmlspecialchars($id, ENT_QUOTES)."':";
 
 					//$result = sqlquery("SELECT uid, login FROM user WHERE gid='$id'");
 					$query = "INSERT INTO user_variable VALUES ('".intval($id)."', '".intval($vid)."', '".sqlescape($priv)."')";
@@ -246,7 +246,7 @@
 		$result = sqlquery("UPDATE variable SET name='".sqlescape($chVarName)."', vgid='".sqlescape($chVarGroup)."', path='".sqlescape($chVarPath)."', state='".sqlescape($chVarState)."', warning_bound='".sqlescape($chVarWarning)."', error_bound='".sqlescape($chVarError)."', alarm_order='".sqlescape($chVarOrder)."', graph_update='".sqlescape($chVarGraphUpdate)."', command=".(isset($chVarType) ? "'variable'" : "'command'")." WHERE vid='".intval($vid)."'");
 		if (mysql_affected_rows() == -1)
 		{
-			$error .= "Can't update variable $vid properties, database query failed (name changed to already used?)<br>\n";
+			$error .= "Can't update variable ".htmlspecialchars($vid, ENT_QUOTES)." properties, database query failed (name changed to already used?)<br>\n";
 		}
 		else if ($chVarState == "rd")
 		{

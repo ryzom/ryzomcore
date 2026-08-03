@@ -3,6 +3,13 @@
 	error_reporting(E_ERROR | E_PARSE);
 	set_error_handler('err_callback');
 
+	// The answers here are the "1:..." / "0:..." lines the client parses, but
+	// several of them quote the login back ("Invalid account: %1"), and with
+	// the default html content type a browser renders that. Say what this is
+	// and stop the browser from guessing otherwise.
+	header('Content-Type: text/plain; charset=utf-8');
+	header('X-Content-Type-Options: nosniff');
+
 	// For error handling, buffer all output
 	ob_start('ob_callback_r2login');
 
