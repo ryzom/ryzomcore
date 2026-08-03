@@ -94,7 +94,7 @@
 				if ($fp = fopen($view_file_data['path'] . $view_file_data['name'], 'r'))
 				{
 					header("Content-type: text/plain");
-					header("Content-Disposition: attachment; filename=las_raw_". $view_file_data['name']);
+					header("Content-Disposition: attachment; filename=las_raw_". tool_las_safe_download_name($view_file_data['name']));
 					header("Pragma: no-cache");
 					header("Expires: 0");
 					fpassthru($fp);

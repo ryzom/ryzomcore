@@ -217,6 +217,18 @@
 		return $char_data;
 	}
 
+	/*
+	 * the name comes off a directory listing, so it is whatever is on disk;
+	 * keep it to something that can be a header value and a file name
+	 */
+	function tool_las_safe_download_name($fname)
+	{
+		$fname = preg_replace('/[^A-Za-z0-9._-]/', '_', (string)$fname);
+		if ($fname === '')	$fname = 'log';
+
+		return $fname;
+	}
+
 	function tool_las_fpassthru_replace($path, $fname, $search_eid_ary, $search_char_ary)
 	{
 		if ($fp = fopen($path . $fname, "r"))
@@ -224,7 +236,7 @@
 			stream_set_timeout($fp, 180);
 
 			header("Content-type: text/plain");
-			header("Content-Disposition: attachment; filename=las_parsed_". $fname);
+			header("Content-Disposition: attachment; filename=las_parsed_". tool_las_safe_download_name($fname));
 			header("Pragma: no-cache");
 			header("Expires: 0");
 

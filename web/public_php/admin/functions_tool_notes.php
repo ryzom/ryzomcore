@@ -1,15 +1,8 @@
 <?php
 
-	function js_html_entity_decode($string)
-	{
-	   // replace numeric entities
-	   $string = preg_replace('~&#x([0-9a-f]+);~ei', 'chr(hexdec("\\1"))', $string);
-	   $string = preg_replace('~&#([0-9]+);~e', 'chr(\\1)', $string);
-	   // replace literal entities
-	   $trans_tbl = get_html_translation_table(HTML_ENTITIES);
-	   $trans_tbl = array_flip($trans_tbl);
-	   return strtr($string, $trans_tbl);
-	}
+	// js_html_entity_decode() used to live here. Nothing called it, and it ran
+	// the matched text back through the interpreter with the preg_replace /e
+	// modifier, which php removed in 7.0. html_entity_decode() does the job.
 
 	function tool_notes_get_list($user_id, $active=null)
 	{
@@ -56,7 +49,12 @@
 		else						$note_mode = 1;
 
 		$sql  = "INSERT INTO ". NELDB_NOTE_TABLE ." (`note_user_id`,`note_title`,`note_data`,`note_date`,`note_active`,`note_global`,`note_mode`,`note_popup_uri`,`note_popup_restriction`) VALUES ";
-		$sql .= " ('". intval($user_id) ."','". htmlentities($note_title, ENT_QUOTES) ."','". htmlentities($note_data, ENT_QUOTES) ."','". time() ."',". intval($note_active) .",". intval($note_global) .",". intval($note_mode) .",'". $db->sql_escape_string($note_uri) ."','". $db->sql_escape_string($note_restriction) ."')";
+		// htmlentities() is what keeps the note readable when the templates
+		// print it, but it is not an sql escape: it leaves a backslash alone,
+		// and a title ending in one closes the literal and lets the note body
+		// continue the statement. Escape after encoding, like the two fields
+		// below already do.
+		$sql .= " ('". intval($user_id) ."','". $db->sql_escape_string(htmlentities($note_title, ENT_QUOTES)) ."','". $db->sql_escape_string(htmlentities($note_data, ENT_QUOTES)) ."','". time() ."',". intval($note_active) .",". intval($note_global) .",". intval($note_mode) .",'". $db->sql_escape_string($note_uri) ."','". $db->sql_escape_string($note_restriction) ."')";
 
 		$db->sql_query($sql);
 
@@ -104,7 +102,9 @@
 			if ($db->sql_numrows($result))
 			{
 //				$sql = "UPDATE ". NELDB_NOTE_TABLE ." SET note_title='". htmlentities($note_title, ENT_QUOTES) ."',note_data='". htmlentities($note_data, ENT_QUOTES) ."',note_date='". time() ."',note_active='". $note_active ."',note_global='". $note_global ."',note_mode=". $note_mode .",note_popup_uri='". $note_uri ."',note_popup_restriction='". $note_restriction ."'  WHERE note_id=". $note_id;
-				$sql = "UPDATE ". NELDB_NOTE_TABLE ." SET note_title='". htmlentities($note_title, ENT_QUOTES) ."',note_data='". htmlentities($note_data, ENT_QUOTES) ."',note_date='". time() ."',note_active='". intval($note_active) ."',note_global='". intval($note_global) ."'  WHERE note_id=". intval($note_id);
+				// same as in tool_notes_add(): htmlentities() is for the page,
+				// sql_escape_string() is what keeps the value inside the literal
+				$sql = "UPDATE ". NELDB_NOTE_TABLE ." SET note_title='". $db->sql_escape_string(htmlentities($note_title, ENT_QUOTES)) ."',note_data='". $db->sql_escape_string(htmlentities($note_data, ENT_QUOTES)) ."',note_date='". time() ."',note_active='". intval($note_active) ."',note_global='". intval($note_global) ."'  WHERE note_id=". intval($note_id);
 				$db->sql_query($sql);
 			}
 			else

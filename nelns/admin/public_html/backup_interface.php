@@ -20,8 +20,30 @@
 	include('request_interface.php');
 	
 	$error = '';
-	
-	if ($allowDownload && $download)
+
+	// $file arrives with the request and becomes one word of the backup
+	// service command below, so a space in it appends arguments of the
+	// caller's choosing; it also ends up in a Content-Disposition header and
+	// in the error messages this page prints. Keep it to a save file name.
+	if (!isset($file))
+		$file = '';
+	if (!is_string($file) || !preg_match('/^[A-Za-z0-9._-]{0,255}$/', $file))
+	{
+		$error = "<font color=#ff0000>ERROR:</font> file name must be a plain name (letters, digits, ._- only).";
+		$file = '';
+		$download = false;
+		$upload = false;
+	}
+
+	// same for the service address the upload is aimed at: it is the head of
+	// the command, and the form only ever offers the addresses listed below
+	if (!isset($shard_addr) || !is_string($shard_addr) || !preg_match('/^[A-Za-z0-9._-]{1,255}$/', $shard_addr))
+	{
+		$shard_addr = '';
+		$upload = false;
+	}
+
+	if ($allowDownload && $download && $file !== '')
 	{
 		// query file to BSs
 		$query = "*.*.BS.getFileBase64Content $file";
@@ -56,7 +78,7 @@
 				
 				if ($originalMD5 != '' && $originalMD5 != $decodedMD5)
 				{
-					$error = "<font color=#ff0000>ERROR:</font> failed to download file '$file', MD5 signature indicates file is corrupted.";
+					$error = "<font color=#ff0000>ERROR:</font> failed to download file '".htmlspecialchars($file, ENT_QUOTES)."', MD5 signature indicates file is corrupted.";
 				}
 				else
 				{
@@ -70,18 +92,25 @@
 		}
 		
 		if (!$error)
-			$error = "<font color=#ff0000>ERROR:</font> failed to download file '$file', file may not exist on any server.";
+			$error = "<font color=#ff0000>ERROR:</font> failed to download file '".htmlspecialchars($file, ENT_QUOTES)."', file may not exist on any server.";
 	}
 
-	if ($allowUpload && $upload)
+	if ($allowUpload && $upload && $file !== '' && $shard_addr !== '')
 	{
-		$f = fopen($upld_file, "rb");
-		if ($f)
+		// The form posts the content as a file, so read it from the upload
+		// itself. $upld_file used to be taken from the request globals, which
+		// meant a caller could name any path on the web server here and have
+		// its content shipped to the backup service instead.
+		if (isset($_FILES['upld_file']) && is_uploaded_file($_FILES['upld_file']['tmp_name']))
 		{
-			$content = base64_encode(fread($f, $upld_file_size));
+			$content = base64_encode(file_get_contents($_FILES['upld_file']['tmp_name']));
 			$query = $shard_addr.".putFileBase64Content $file $content";
 
 			$qstate = nel_query($query, $commandResult);
+		}
+		else
+		{
+			$error = "<font color=#ff0000>ERROR:</font> no file was uploaded.";
 		}
 	}
 
