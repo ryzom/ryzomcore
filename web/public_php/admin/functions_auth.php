@@ -200,4 +200,31 @@
 		unset($NELTOOL['SESSION_VARS'][$name]);
 	}
 
+	/*
+	 * Per-session CSRF token for state-changing links and forms. Grade
+	 * changes still go over GET (templates build the hrefs that way), so
+	 * SameSite=Lax alone does not stop a top-level forged link.
+	 */
+	function nt_csrf_token()
+	{
+		$token = nt_auth_get_session_var('nel_csrf');
+		if (!is_string($token) || $token === '')
+		{
+			try {
+				$token = bin2hex(random_bytes(16));
+			} catch (Exception $e) {
+				$token = bin2hex(openssl_random_pseudo_bytes(16));
+			}
+			nt_auth_set_session_var('nel_csrf', $token);
+		}
+		return $token;
+	}
+
+	function nt_csrf_check($token)
+	{
+		$expected = nt_auth_get_session_var('nel_csrf');
+		return is_string($expected) && $expected !== ''
+			&& is_string($token) && hash_equals($expected, $token);
+	}
+
 ?>

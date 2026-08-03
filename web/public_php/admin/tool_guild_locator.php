@@ -81,6 +81,8 @@
 	if (tool_admin_applications_check('tool_guild_locator_manage_members'))	$tpl->assign('restriction_tool_guild_locator_manage_members',true);
 	if (tool_admin_applications_check('tool_guild_locator_manage_forums'))	$tpl->assign('restriction_tool_guild_locator_manage_forums',true);
 
+	$tpl->assign('nel_csrf', nt_csrf_token());
+
 	if ($view_domain_id)
 	{
 		$tool_as_error = null;
@@ -237,15 +239,22 @@
 						case 'setleader':
 
 							// Grade changes are still GET links (templates build
-							// them that way); frame every id before it reaches AES.
+							// them that way); frame every id before it reaches AES,
+							// and require the session CSRF token so a forged link
+							// cannot promote someone when the operator is logged in.
 							if (($tool_services_gl == 'setleader') && tool_admin_applications_check('tool_guild_locator_manage_members'))
 							{
 								$service		= isset($NELTOOL['GET_VARS']['servicealias']) ? $NELTOOL['GET_VARS']['servicealias'] : '';
 								$guild_shard_id = isset($NELTOOL['GET_VARS']['guildshardid']) ? (int)$NELTOOL['GET_VARS']['guildshardid'] : 0;
 								$guild_id		= isset($NELTOOL['GET_VARS']['guildid']) ? (int)$NELTOOL['GET_VARS']['guildid'] : 0;
 								$member_eid		= isset($NELTOOL['GET_VARS']['eid']) ? $NELTOOL['GET_VARS']['eid'] : '';
+								$csrf			= isset($NELTOOL['GET_VARS']['csrf']) ? $NELTOOL['GET_VARS']['csrf'] : '';
 
-								if (tool_main_valid_service_alias($service)
+								if (!nt_csrf_check($csrf))
+								{
+									nt_common_add_debug('setleader refused: bad csrf token');
+								}
+								else if (tool_main_valid_service_alias($service)
 									&& $guild_shard_id > 0 && $guild_id > 0
 									&& tool_main_valid_entity_id($member_eid))
 								{
@@ -284,12 +293,17 @@
 								$guild_id		= isset($NELTOOL['GET_VARS']['guildid']) ? (int)$NELTOOL['GET_VARS']['guildid'] : 0;
 								$member_eid		= isset($NELTOOL['GET_VARS']['eid']) ? $NELTOOL['GET_VARS']['eid'] : '';
 								$member_grade	= isset($NELTOOL['GET_VARS']['grade']) ? $NELTOOL['GET_VARS']['grade'] : '';
+								$csrf			= isset($NELTOOL['GET_VARS']['csrf']) ? $NELTOOL['GET_VARS']['csrf'] : '';
 
 								$new_grade		= 'Member';
 								if		($member_grade == 'Officer')		$new_grade = 'Officer';
 								elseif	($member_grade == 'HighOfficer')	$new_grade = 'HighOfficer';
 
-								if (tool_main_valid_service_alias($service)
+								if (!nt_csrf_check($csrf))
+								{
+									nt_common_add_debug('promote refused: bad csrf token');
+								}
+								else if (tool_main_valid_service_alias($service)
 									&& $guild_shard_id > 0 && $guild_id > 0
 									&& tool_main_valid_entity_id($member_eid))
 								{
@@ -328,12 +342,17 @@
 								$guild_id		= isset($NELTOOL['GET_VARS']['guildid']) ? (int)$NELTOOL['GET_VARS']['guildid'] : 0;
 								$member_eid		= isset($NELTOOL['GET_VARS']['eid']) ? $NELTOOL['GET_VARS']['eid'] : '';
 								$member_grade	= isset($NELTOOL['GET_VARS']['grade']) ? $NELTOOL['GET_VARS']['grade'] : '';
+								$csrf			= isset($NELTOOL['GET_VARS']['csrf']) ? $NELTOOL['GET_VARS']['csrf'] : '';
 
 								$new_grade		= 'Member';
 								if 		($member_grade == 'Officer')	$new_grade = 'Officer';
 								elseif	($member_grade == 'Member')		$new_grade = 'Member';
 
-								if (tool_main_valid_service_alias($service)
+								if (!nt_csrf_check($csrf))
+								{
+									nt_common_add_debug('demote refused: bad csrf token');
+								}
+								else if (tool_main_valid_service_alias($service)
 									&& $guild_shard_id > 0 && $guild_id > 0
 									&& tool_main_valid_entity_id($member_eid))
 								{
