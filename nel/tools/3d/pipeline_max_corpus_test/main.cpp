@@ -419,7 +419,7 @@ static int modifySaveTest(CStorageOleIn &in, CSceneClassRegistry *reg, const std
 		else if (appDataMode)
 		{
 			BUILTIN::CAnimatable *anim = dynamic_cast<BUILTIN::CAnimatable *>(scene2.container()->getByStorageIndex((uint32)targetIndex));
-			BUILTIN::STORAGE::CAppData *ad = anim ? anim->existingAppData() : NULL;
+			BUILTIN::STORAGE::CAppData *ad = anim ? anim->existingAppData() : nullptr;
 			std::string back;
 			bool good = ad && ad->getScriptString(targetSubId, back) && back == newS;
 			if (!good)
@@ -874,7 +874,7 @@ static int meshDeltaSelfTest(const char *maxFile, CStorageOleIn &in, CSceneClass
 			// hypotheses corpus-wide without typing them).
 			{
 				CStorageContainer *c2512 = dynamic_cast<CStorageContainer *>(lmd);
-				CStorageContainer *c4000 = NULL;
+				CStorageContainer *c4000 = nullptr;
 				if (c2512)
 					for (CStorageContainer::TStorageObjectConstIt jt = c2512->chunks().begin(); jt != c2512->chunks().end() && !c4000; ++jt)
 						if (jt->first == 0x4000) c4000 = dynamic_cast<CStorageContainer *>(jt->second);
@@ -1696,11 +1696,11 @@ static int rpoSelfTest(const char *maxFile, CStorageOleIn &in, CSceneClassRegist
 			CStorageContainer *data = dynamic_cast<CStorageContainer *>(d->localModData(i));
 			if (!data) continue;
 			// local data wrapper 0x1000 -> RFINALPATCH 0x4001 raw leaf
-			CStorageContainer *wrap = NULL;
+			CStorageContainer *wrap = nullptr;
 			for (CStorageContainer::TStorageObjectConstIt jt = data->chunks().begin(); jt != data->chunks().end() && !wrap; ++jt)
 				if (jt->first == 0x1000) wrap = dynamic_cast<CStorageContainer *>(jt->second);
 			if (!wrap) continue;
-			CStorageRaw *rfp = NULL;
+			CStorageRaw *rfp = nullptr;
 			for (CStorageContainer::TStorageObjectConstIt jt = wrap->chunks().begin(); jt != wrap->chunks().end() && !rfp; ++jt)
 				if (jt->first == 0x4001) rfp = dynamic_cast<CStorageRaw *>(jt->second);
 			if (!rfp) continue;
@@ -1755,7 +1755,7 @@ static int rpoModifySaveTest(const char *maxFile, CStorageOleIn &in, CSceneClass
 {
 	static const char *kStreams[] = {
 		"VideoPostQueue", "Config", "ClassData", "DllDirectory", "ClassDirectory3", "Scene",
-		"\05SummaryInformation", "\05DocumentSummaryInformation", NULL
+		"\05SummaryInformation", "\05DocumentSummaryInformation", nullptr
 	};
 	std::vector<std::string> present;
 	std::vector<std::vector<uint8> > rawOrig;
@@ -1809,11 +1809,11 @@ static int rpoModifySaveTest(const char *maxFile, CStorageOleIn &in, CSceneClass
 		{
 			CStorageContainer *data = dynamic_cast<CStorageContainer *>(d->localModData(i));
 			if (!data) continue;
-			CStorageContainer *wrap = NULL;
+			CStorageContainer *wrap = nullptr;
 			for (CStorageContainer::TStorageObjectConstIt jt = data->chunks().begin(); jt != data->chunks().end() && !wrap; ++jt)
 				if (jt->first == 0x1000) wrap = dynamic_cast<CStorageContainer *>(jt->second);
 			if (!wrap) continue;
-			CStorageRaw *rfp = NULL;
+			CStorageRaw *rfp = nullptr;
 			for (CStorageContainer::TStorageObjectConstIt jt = wrap->chunks().begin(); jt != wrap->chunks().end() && !rfp; ++jt)
 				if (jt->first == 0x4001) rfp = dynamic_cast<CStorageRaw *>(jt->second);
 			if (!rfp) continue;
@@ -1879,7 +1879,7 @@ static int pmModifySaveTest(const char *maxFile, CStorageOleIn &in, CSceneClassR
 {
 	static const char *kStreams[] = {
 		"VideoPostQueue", "Config", "ClassData", "DllDirectory", "ClassDirectory3", "Scene",
-		"\05SummaryInformation", "\05DocumentSummaryInformation", NULL
+		"\05SummaryInformation", "\05DocumentSummaryInformation", nullptr
 	};
 	std::vector<std::string> present;
 	std::vector<std::vector<uint8> > rawOrig;
@@ -1938,11 +1938,11 @@ static int pmModifySaveTest(const char *maxFile, CStorageOleIn &in, CSceneClassR
 				continue;
 			CStorageContainer *data = dynamic_cast<CStorageContainer *>(d->localModData(i));
 			if (!data) continue;
-			CStorageContainer *wrap = NULL;
+			CStorageContainer *wrap = nullptr;
 			for (CStorageContainer::TStorageObjectConstIt jt = data->chunks().begin(); jt != data->chunks().end() && !wrap; ++jt)
 				if (jt->first == 0x1000) wrap = dynamic_cast<CStorageContainer *>(jt->second);
 			if (!wrap) continue;
-			CStorageContainer *fp = NULL;
+			CStorageContainer *fp = nullptr;
 			for (CStorageContainer::TStorageObjectConstIt jt = wrap->chunks().begin(); jt != wrap->chunks().end() && !fp; ++jt)
 				if (jt->first == 0x1140) fp = dynamic_cast<CStorageContainer *>(jt->second);
 			if (!fp) continue;

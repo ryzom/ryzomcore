@@ -1282,7 +1282,7 @@ static void buildAMaterial(CMaterial &material, SMaterialInfo &materialInfo, CSc
 		if (version > 0 && version < 14)
 		{
 			CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(mtl);
-			CSceneClass *delegate = NULL;
+			CSceneClass *delegate = nullptr;
 			if (rm && rm->nbReferences() > 0)
 				delegate = dynamic_cast<CSceneClass *>(rm->getReference(0));
 			if (delegate && (delegate->classDesc()->classId() == CLASSID_STDMAT

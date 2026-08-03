@@ -210,7 +210,7 @@ struct SContextFile
 	std::vector<bool> Mask;
 	PMAXLOAD::SLoadedMax *Lm;
 	SContextFile() : CellX(0), CellY(0), TranslateGeom(false), Rot(0), Mirror(false),
-	                 CellsW(1), CellsH(1), Lm(NULL) {}
+	                 CellsW(1), CellsH(1), Lm(nullptr) {}
 };
 
 struct SSessionHintCell
@@ -232,7 +232,8 @@ struct SEditableFileInfo
 	int CellsW, CellsH;
 	std::vector<bool> Mask;
 	float PlacedDX, PlacedDY;
-	SEditableFileInfo() : Lm(NULL), Editable(true), CellX(0), CellY(0), CellsW(1), CellsH(1),
+	SEditableFileInfo() : Lm(nullptr)
+	    , Editable(true), CellX(0), CellY(0), CellsW(1), CellsH(1),
 	                      PlacedDX(0.f), PlacedDY(0.f) {}
 };
 
@@ -321,7 +322,8 @@ struct SPaintZone
 	uint Rotate;
 	bool Symmetry;
 	SPaintZone()
-	    : Node(NULL), Frozen(false), Editable(false), InFile(true), ZoneId(0),
+	    : Node(nullptr)
+	    , Frozen(false), Editable(false), InFile(true), ZoneId(0),
 	      ObjectTM(MAXMATH::Matrix3M::identity()),
 	      DisplayTM(MAXMATH::Matrix3M::identity()), Rotate(0), Symmetry(false)
 	{
@@ -365,9 +367,18 @@ struct SPaintCtx
 	std::string BankPath;
 	std::vector<std::string> *AvailableSeasons;
 	SPaintCtx()
-		: Active(false), Core(NULL), Paint(NULL), Scene(NULL), InteractiveSave(false),
-		  WantThumbnail(false), UDriver(NULL), UScene(NULL), Land(NULL), Camera(NULL), Zones(NULL),
-		  Bank(NULL), AvailableSeasons(NULL)
+		: Active(false), Core(nullptr)
+	    , Paint(nullptr)
+	    , Scene(nullptr)
+	    , InteractiveSave(false),
+		  WantThumbnail(false), UDriver(nullptr)
+	    , UScene(nullptr)
+	    , Land(nullptr)
+	    , Camera(nullptr)
+	    , Zones(nullptr)
+	    ,
+		  Bank(nullptr)
+	    , AvailableSeasons(nullptr)
 	{
 	}
 };
@@ -408,7 +419,11 @@ struct SScriptPumpCtx
 	ZPUI::CEditorUI *Ui;
 	NL3D::CNavMouseListener *Nav;
 	NLMISC::TTime LastPump;
-	SScriptPumpCtx() : Driver(NULL), Scene(NULL), Ui(NULL), Nav(NULL), LastPump(0) { }
+	SScriptPumpCtx() : Driver(nullptr)
+	    , Scene(nullptr)
+	    , Ui(nullptr)
+	    , Nav(nullptr)
+	    , LastPump(0) { }
 };
 
 // ---------------------------------------------------------------------------------------------
@@ -957,9 +972,9 @@ bool neighborHintLess(const SNeighborHint &a, const SNeighborHint &b);
 std::string encodeNeighborHintsString(std::vector<SNeighborHint> hints);
 bool readNeighborHintsFromNode(PIPELINE::MAX::BUILTIN::CNodeImpl *node,
                                std::vector<SNeighborHint> &out,
-                               std::string *rawOut = NULL);
+                               std::string *rawOut = nullptr);
 bool readNeighborHintsFromScene(PIPELINE::MAX::CScene &scene, const std::string &fileBasename,
-                                std::vector<SNeighborHint> &out, std::string *rawOut = NULL);
+                                std::vector<SNeighborHint> &out, std::string *rawOut = nullptr);
 bool writeNeighborHintsToScene(PIPELINE::MAX::CScene &scene, const std::string &fileBasename,
                                const std::vector<SNeighborHint> &hints);
 void collectHintsFromLoadedContext(std::vector<SNeighborHint> &out);
@@ -1043,7 +1058,7 @@ std::string absFilePath(const std::string &path);
 SEditableFileInfo *findEditableByPath(const std::string &path);
 uint countDirtyEditableFiles();
 bool saveOneOverwrite(const std::string &orig, PIPELINE::MAX::CScene &scene, bool doThumb,
-                      const std::vector<uint> *zoneIds = NULL);
+                      const std::vector<uint> *zoneIds = nullptr);
 bool saveCopyAtomic(const std::string &src, const std::string &target,
                     PIPELINE::MAX::CScene &scene, const std::vector<uint8> *si);
 bool zpSaveTo(const std::string &target);
@@ -1053,14 +1068,14 @@ bool zpSaveFileOverwrite(const std::string &basename, bool wantThumb);
 bool zpSaveFileCopy(const std::string &basename, const std::string &name, bool wantThumb);
 std::string zpFileDir(const std::string &basename);
 void zpSaveDirect();
-bool captureTopDownThumbnail(NLMISC::CBitmap &out, const std::vector<uint> *zoneIds = NULL);
+bool captureTopDownThumbnail(NLMISC::CBitmap &out, const std::vector<uint> *zoneIds = nullptr);
 bool zpLegacyWantThumbnail();
 bool prepareThumbnailOverride(const std::string &srcMax, std::vector<uint8> &siOut,
                               bool &haveOverride, bool want,
-                              const std::vector<uint> *zoneIds = NULL);
+                              const std::vector<uint> *zoneIds = nullptr);
 int saveWholeFile(const std::string &input, const std::string &output,
                   PIPELINE::MAX::CScene &scene, bool verifyIdentical,
-                  const std::vector<uint8> *summaryOverride = NULL);
+                  const std::vector<uint8> *summaryOverride = nullptr);
 std::vector<uint8> writeContainerToTemp(PIPELINE::MAX::CStorageContainer &ctr, const std::string &tempPath);
 
 // script_and_ui.cpp
@@ -1133,8 +1148,8 @@ bool zpIsZoneOuterBoundaryEdge(const SPaintZone &pz, size_t p, uint e);
 void zpCollectZoneBoundaryPolylines(const SPaintZone &pz, uint segsPerEdge,
                                     std::vector<NLMISC::CVector> &outPts,
                                     std::vector<uint> &outSegCounts,
-                                    uint *outLoopCount = NULL,
-                                    uint *outEdgeCount = NULL);
+                                    uint *outLoopCount = nullptr,
+                                    uint *outEdgeCount = nullptr);
 void zpDrawZoneOutline(NL3D::IDriver *driver, NL3D::CCamera *camera,
                        const NL3D::CViewport &viewport,
                        const SPaintZone &pz, const NLMISC::CRGBA &col, bool thick);
@@ -1267,7 +1282,7 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
               PMAXLOAD::SLoadedMax &lm,
               const std::string &screenshotPath, const std::string &fontPath,
               const std::string &scriptPath, const std::string &savePath,
-              NL3D::UDriver *externalDriver = NULL,
-              ZPUI::CEditorUI *externalEditorUI = NULL);
+              NL3D::UDriver *externalDriver = nullptr,
+              ZPUI::CEditorUI *externalEditorUI = nullptr);
 
 #endif // ZONE_PAINTER_ZP_STATE_H

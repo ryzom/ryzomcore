@@ -82,14 +82,14 @@ static const STrackSpec *specByData(uint16 id)
 {
 	for (size_t i = 0; i < NSPECS; ++i)
 		if (SPECS[i].DataId == id) return &SPECS[i];
-	return NULL;
+	return nullptr;
 }
 
 static const STrackSpec *specByTime(uint16 id)
 {
 	for (size_t i = 0; i < NSPECS; ++i)
 		if (SPECS[i].TimeId == id) return &SPECS[i];
-	return NULL;
+	return nullptr;
 }
 
 // Locate the first data-track id (0x012c) that starts a contiguous track run.

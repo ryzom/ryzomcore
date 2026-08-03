@@ -327,7 +327,7 @@ bool writeNeighborHintsToScene(CScene &scene, const std::string &fileBasename,
 	collectZoneNodes(scene, nodes);
 	std::vector<bool> eligible;
 	computeZoneEligibility(nodes, fileBasename, eligible);
-	CNodeImpl *target = NULL;
+	CNodeImpl *target = nullptr;
 	for (size_t i = 0; i < nodes.size(); ++i)
 	{
 		if (i < eligible.size() && eligible[i] && !nodes[i].Frozen)

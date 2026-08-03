@@ -162,7 +162,11 @@ struct STopoTarget
 	CStorageContainer *PmChunk; ///< Local's 0x1140 (modifier target only)
 	CStorageRaw *RpRaw; ///< Local's 0x4001 (modifier target only)
 	CStorageRaw *MapperRaw; ///< Local's 0x1130 -> 0x1000 payload, or NULL
-	STopoTarget() : Rpo(NULL), Local(NULL), PmChunk(NULL), RpRaw(NULL), MapperRaw(NULL) { }
+	STopoTarget() : Rpo(nullptr)
+	    , Local(nullptr)
+	    , PmChunk(nullptr)
+	    , RpRaw(nullptr)
+	    , MapperRaw(nullptr) { }
 };
 
 bool resolveTopoTarget(CNodeImpl *node, STopoTarget &out, std::string &err)
@@ -249,7 +253,7 @@ SEditableFileInfo *zpZoneEditableFile(uint zoneId)
 		for (size_t z = 0; z < g_EditableFiles[i].ZoneIds.size(); ++z)
 			if (g_EditableFiles[i].ZoneIds[z] == zoneId)
 				return &g_EditableFiles[i];
-	return NULL;
+	return nullptr;
 }
 
 /** The editable-file record of an OBJECT, through its in-file editable zone (a topo op can
@@ -258,7 +262,7 @@ SEditableFileInfo *zpZoneEditableFile(uint zoneId)
 SEditableFileInfo *zpObjectEditableFile(const void *node, uint &fileZoneOut)
 {
 	if (!g_PaintCtx.Zones)
-		return NULL;
+		return nullptr;
 	const std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
 	for (size_t z = 0; z < zones.size(); ++z)
 		if ((const void *)zones[z].Node == node && zones[z].InFile && zones[z].Editable)
@@ -266,7 +270,7 @@ SEditableFileInfo *zpObjectEditableFile(const void *node, uint &fileZoneOut)
 			fileZoneOut = zones[z].ZoneId;
 			return zpZoneEditableFile(zones[z].ZoneId);
 		}
-	return NULL;
+	return nullptr;
 }
 
 } /* anonymous namespace */
@@ -391,7 +395,7 @@ static uint zpRunTopoOpImpl(const char *opName, const std::string &recordLine, T
 				fprintf(stderr, "\n");
 			}
 		}
-		if (!xf(pm, rp, haveMapper ? &mapper : NULL, ot->second, err, &pz->Ep.Pm))
+		if (!xf(pm, rp, haveMapper ? &mapper : nullptr, ot->second, err, &pz->Ep.Pm))
 		{
 			g_PropStatusMsg = std::string(opName) + ": " + err;
 			printf("%s\n", g_PropStatusMsg.c_str());
@@ -1113,7 +1117,7 @@ uint zpDetachToFile(const std::string &nameIn)
 		return 0;
 	}
 	// One object only: the op writes one source file and one new file.
-	const void *object = NULL;
+	const void *object = nullptr;
 	uint zoneId = 0;
 	std::set<uint> sel;
 	for (std::set<TPatchFaceId>::const_iterator it = g_PatchFaceSel.begin();
@@ -1154,7 +1158,7 @@ uint zpDetachToFile(const std::string &nameIn)
 	// The owning file and its scene; the new brick lands in the same directory, which for
 	// board sessions is the world dir (openable from the board immediately).
 	std::string srcPath;
-	CScene *scene = NULL;
+	CScene *scene = nullptr;
 	zpZoneFilePathScene(zoneId, srcPath, scene);
 	if (srcPath.empty() || !scene || !NLMISC::CFile::fileExists(srcPath))
 	{
@@ -1218,7 +1222,7 @@ uint zpDetachToFile(const std::string &nameIn)
 		SRPatchMesh rpNewFile = rpPre;
 		SPmVertMapper mapperNewFile = mapperPre;
 		STopoRemap remap;
-		if (!topoDeletePatches(pmNewFile, rpNewFile, haveMapper ? &mapperNewFile : NULL,
+		if (!topoDeletePatches(pmNewFile, rpNewFile, haveMapper ? &mapperNewFile : nullptr,
 		                       complement, remap, err))
 		{
 			g_PropStatusMsg = "detach: " + err;
@@ -1231,7 +1235,7 @@ uint zpDetachToFile(const std::string &nameIn)
 			g_PropStatusMsg = "detach: " + err;
 			return 0;
 		}
-		const bool saved = saveCopyAtomic(srcPath, target, *scene, NULL);
+		const bool saved = saveCopyAtomic(srcPath, target, *scene, nullptr);
 		// Restore the pre-op streams before ANY error path: the carrier must never keep
 		// the complement-deleted state meant for the new file.
 		std::string rerr;
@@ -1282,7 +1286,7 @@ uint zpDetachToFile(const std::string &nameIn)
 		SRPatchMesh rpSrc = rpPre;
 		SPmVertMapper mapperSrc = mapperPre;
 		STopoRemap remap;
-		if (!topoDeletePatches(pmSrc, rpSrc, haveMapper ? &mapperSrc : NULL, sel, remap, err)
+		if (!topoDeletePatches(pmSrc, rpSrc, haveMapper ? &mapperSrc : nullptr, sel, remap, err)
 		    || !encodeTopoTarget(targetStream, pmSrc, rpSrc, mapperSrc, haveMapper, err))
 		{
 			g_PropStatusMsg = "detach: " + err;
@@ -1532,12 +1536,12 @@ uint zpAttachZone(uint targetZone, uint srcZone, std::string &msg)
 		msg = "attach: closing '" + srcBase + "' failed: " + err;
 		return 0;
 	}
-	pzS = NULL; // died with the close's rebuild
+	pzS = nullptr; // died with the close's rebuild
 
 	// The real merge, on the post-close session state. Re-resolve by node, not by the stale
 	// id: the file's own (InFile) editable zone is unique per file, and everything below -
 	// snapshot, dirty flag, status - runs on the re-based id.
-	pzT = NULL;
+	pzT = nullptr;
 	{
 		std::vector<SPaintZone> &zonesAll = *g_PaintCtx.Zones;
 		for (size_t z = 0; z < zonesAll.size(); ++z)
@@ -1667,7 +1671,7 @@ uint zpMovePatchSelectionToZone(uint dstZone, std::string &msg)
 		return 0;
 	}
 	// The selection: one object, like detach.
-	const void *object = NULL;
+	const void *object = nullptr;
 	uint srcZone = 0;
 	std::set<uint> sel;
 	for (std::set<TPatchFaceId>::const_iterator it = g_PatchFaceSel.begin();
@@ -1778,7 +1782,7 @@ uint zpMovePatchSelectionToZone(uint dstZone, std::string &msg)
 			if (!sel.count(p))
 				complement.insert(p);
 		STopoRemap remap;
-		if (!topoDeletePatches(subPm, subRp, NULL, complement, remap, err))
+		if (!topoDeletePatches(subPm, subRp, nullptr, complement, remap, err))
 		{
 			msg = "move: extract: " + err;
 			return 0;
@@ -1791,7 +1795,7 @@ uint zpMovePatchSelectionToZone(uint dstZone, std::string &msg)
 	SPmVertMapper srcMapperPost = srcMapper;
 	{
 		STopoRemap remap;
-		if (!topoDeletePatches(srcPost, srcRpPost, srcHaveMapper ? &srcMapperPost : NULL,
+		if (!topoDeletePatches(srcPost, srcRpPost, srcHaveMapper ? &srcMapperPost : nullptr,
 		                       sel, remap, err))
 		{
 			msg = "move: " + err;

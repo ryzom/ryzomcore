@@ -507,13 +507,13 @@ SEditableFileInfo *findEditableByBasename(const std::string &basename)
 		    == NLMISC::toLowerAscii(basename))
 			return &g_EditableFiles[i];
 	}
-	return NULL;
+	return nullptr;
 }
 
 const ZPWS::SZoneEntry *findWorldZone(const std::string &basename)
 {
 	if (g_StartupWorld.MaxDir.empty())
-		return NULL;
+		return nullptr;
 	static std::vector<ZPWS::SZoneEntry> s_listed;
 	static std::string s_listedDir;
 	// Cached list, but a miss re-lists once: the board re-lists on every open, so a
@@ -533,7 +533,7 @@ const ZPWS::SZoneEntry *findWorldZone(const std::string &basename)
 				return &s_listed[i];
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 

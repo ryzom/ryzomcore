@@ -118,14 +118,39 @@ struct SScriptHost
 	ZPUI::SPaintUIBridge *bridge;
 
 	SScriptHost()
-		: execOp(NULL), zonesInfo(NULL), getZoneProp(NULL), saveTo(NULL), saveAll(NULL),
-		  screenshot(NULL), pumpUI(NULL), cancelRequested(NULL), resetCancel(NULL),
-		  openZone(NULL), closeZone(NULL), openZoneAt(NULL), placeInstance(NULL),
-		  removeInstance(NULL), rotateInstance(NULL), mirrorInstance(NULL),
-		  placeContext(NULL), removeContext(NULL), rotateContext(NULL),
-		  mirrorContext(NULL), makeEditable(NULL), dragCell(NULL),
-		  toggleZone(NULL), saveZone(NULL),
-		  refreshBridge(NULL), bridge(NULL)
+		: execOp(nullptr)
+	    , zonesInfo(nullptr)
+	    , getZoneProp(nullptr)
+	    , saveTo(nullptr)
+	    , saveAll(nullptr)
+	    ,
+		  screenshot(nullptr)
+	    , pumpUI(nullptr)
+	    , cancelRequested(nullptr)
+	    , resetCancel(nullptr)
+	    ,
+		  openZone(nullptr)
+	    , closeZone(nullptr)
+	    , openZoneAt(nullptr)
+	    , placeInstance(nullptr)
+	    ,
+		  removeInstance(nullptr)
+	    , rotateInstance(nullptr)
+	    , mirrorInstance(nullptr)
+	    ,
+		  placeContext(nullptr)
+	    , removeContext(nullptr)
+	    , rotateContext(nullptr)
+	    ,
+		  mirrorContext(nullptr)
+	    , makeEditable(nullptr)
+	    , dragCell(nullptr)
+	    ,
+		  toggleZone(nullptr)
+	    , saveZone(nullptr)
+	    ,
+		  refreshBridge(nullptr)
+	    , bridge(nullptr)
 	{
 	}
 };

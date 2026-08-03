@@ -567,7 +567,7 @@ int pmbExportSkelForGltf(PMAXLOAD::SLoadedMax &lm, std::vector<uint8> &out)
 	// flows (the writer, since the single-parse refactor) or loads its own (the standalone
 	// main, which does the same reset).
 	g_bipedRigs.clear();
-	g_rig = NULL;
+	g_rig = nullptr;
 	g_msBones.clear();
 
 	std::vector<Bone> bones;

@@ -82,7 +82,7 @@ namespace ZPUI {
 const char *CEditorUI::MASTER_GROUP = "ui:zp";
 
 // Process-wide bridge (runViewer installs; action handlers call through it)
-static SPaintUIBridge *s_Bridge = NULL;
+static SPaintUIBridge *s_Bridge = nullptr;
 
 void setPaintUIBridge(SPaintUIBridge *bridge) { s_Bridge = bridge; }
 SPaintUIBridge *getPaintUIBridge() { return s_Bridge; }
@@ -486,7 +486,7 @@ public:
 		        CWidgetManager::getInstance()->getElementFromId(
 		            "ui:zp:weld_dialog:content:dist_frame:dist")))
 			eb->setInputString(NLMISC::toString("%g", b->WeldThreshold));
-		CWidgetManager::getInstance()->enableModalWindow(NULL, "ui:zp:weld_dialog");
+		CWidgetManager::getInstance()->enableModalWindow(nullptr, "ui:zp:weld_dialog");
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpPatchWeld, "zp_patch_weld");
@@ -536,7 +536,7 @@ public:
 		        CWidgetManager::getInstance()->getElementFromId(
 		            "ui:zp:extrude_dialog:content:dist_frame:dist")))
 			eb->setInputString(NLMISC::toString("%g", b->ExtrudeHeight));
-		CWidgetManager::getInstance()->enableModalWindow(NULL, "ui:zp:extrude_dialog");
+		CWidgetManager::getInstance()->enableModalWindow(nullptr, "ui:zp:extrude_dialog");
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpPatchExtrude, "zp_patch_extrude");
@@ -876,7 +876,7 @@ public:
 		if (!b || b->SeasonCount < 1)
 			return;
 		if (b->seasonMenuFill)
-			b->seasonMenuFill(NULL); // bridge shows/hides s0..s3 buttons
+			b->seasonMenuFill(nullptr); // bridge shows/hides s0..s3 buttons
 		CWidgetManager::getInstance()->enableModalWindow(pCaller, "ui:zp:season_menu");
 	}
 };
@@ -1264,7 +1264,7 @@ static void openSaveDialogCommon(SPaintUIBridge *b, const std::string &prefillBa
 	if (CInterfaceGroup *row = dynamic_cast<CInterfaceGroup *>(
 	        CWidgetManager::getInstance()->getElementFromId("ui:zp:save_dialog:content:update_thumb")))
 		row->setActive(!b->ThumbnailsDisabled);
-	CWidgetManager::getInstance()->enableModalWindow(NULL, "ui:zp:save_dialog");
+	CWidgetManager::getInstance()->enableModalWindow(nullptr, "ui:zp:save_dialog");
 }
 
 void openSaveDialog()
@@ -1410,17 +1410,17 @@ static CInterfaceGroup *spawnPaletteCell(CInterfaceGroup *parent,
                                          sint32 x, sint32 y)
 {
 	if (!parent || !templateName)
-		return NULL;
+		return nullptr;
 	IParser *parser = CWidgetManager::getInstance()->getParser();
-	CInterfaceGroup *g = NULL;
+	CInterfaceGroup *g = nullptr;
 	if (!params.empty())
 		g = parser->createGroupInstance(templateName, parent->getId(),
 		                                &params[0], (uint)params.size());
 	else
 		g = parser->createGroupInstance(templateName, parent->getId(),
-		                                (const std::pair<std::string, std::string> *)NULL, 0);
+		                                (const std::pair<std::string, std::string> *)nullptr, 0);
 	if (!g)
-		return NULL;
+		return nullptr;
 	g->setParent(parent);
 	g->setParentPos(parent);
 	g->setPosRef(Hotspot_TL);
@@ -1440,7 +1440,7 @@ static CInterfaceGroup *spawnPaletteCell(CInterfaceGroup *parent,
  * Also returns the bank-stored relative name (for fallback labelling) via *storedNameOut.
  */
 static std::string firstResolvableDiffuse(NL3D::CTileBank *bank, int setIndex,
-                                          std::string *storedNameOut = NULL)
+                                          std::string *storedNameOut = nullptr)
 {
 	if (storedNameOut)
 		storedNameOut->clear();
@@ -1509,7 +1509,7 @@ static std::string tilesetDisplayName(NL3D::CTileBank *bank, int setIndex,
  * _DisplacementBitmap → bank.getDisplacementMap. Also returns bank-global map id.
  */
 static std::string resolveDisplaceSource(NL3D::CTileBank *bank, int tileset, int subIdx,
-                                         int *mapIdOut = NULL, std::string *storedNameOut = NULL)
+                                         int *mapIdOut = nullptr, std::string *storedNameOut = nullptr)
 {
 	if (mapIdOut) *mapIdOut = -1;
 	if (storedNameOut) storedNameOut->clear();
@@ -2103,8 +2103,11 @@ REGISTER_ACTION_HANDLER(CAHZpSaveCancel, "zp_save_cancel");
 // ---------------------------------------------------------------------------------------------
 
 CEditorUI::CEditorUI()
-	: _Ready(false), _Visible(true), _Driver(NULL), _TextContext(NULL),
-	  _GuiListener(NULL), _PointerButtons(NULL)
+	: _Ready(false), _Visible(true), _Driver(nullptr)
+    , _TextContext(nullptr)
+    ,
+	  _GuiListener(nullptr)
+    , _PointerButtons(nullptr)
 {
 }
 
@@ -2186,7 +2189,7 @@ bool CEditorUI::init(UDriver *driver, const std::string &fontPathHint)
 		        assetsDir.c_str());
 		CViewRenderer::release();
 		_Driver->deleteTextContext(_TextContext);
-		_TextContext = NULL;
+		_TextContext = nullptr;
 		return false;
 	}
 
@@ -2204,7 +2207,7 @@ bool CEditorUI::init(UDriver *driver, const std::string &fontPathHint)
 		CWidgetManager::getInstance()->getParser()->removeAll();
 		CViewRenderer::release();
 		_Driver->deleteTextContext(_TextContext);
-		_TextContext = NULL;
+		_TextContext = nullptr;
 		return false;
 	}
 
@@ -2240,13 +2243,13 @@ void CEditorUI::shutdown()
 	{
 		_GuiListener->removeFromServer();
 		delete _GuiListener;
-		_GuiListener = NULL;
+		_GuiListener = nullptr;
 	}
 	if (_PointerButtons && _Driver)
 	{
 		_PointerButtons->removeFromServer(_Driver->EventServer);
 		delete _PointerButtons;
-		_PointerButtons = NULL;
+		_PointerButtons = nullptr;
 	}
 	if (_Ready)
 	{
@@ -2257,9 +2260,9 @@ void CEditorUI::shutdown()
 	if (_TextContext && _Driver)
 	{
 		_Driver->deleteTextContext(_TextContext);
-		_TextContext = NULL;
+		_TextContext = nullptr;
 	}
-	_Driver = NULL;
+	_Driver = nullptr;
 	_Ready = false;
 	_Visible = false;
 	_HwCursors.clear();
@@ -2857,7 +2860,7 @@ void CEditorUI::draw()
 {
 	if (!_Ready || !_Visible)
 		return;
-	CWidgetManager::getInstance()->drawViews(NULL);
+	CWidgetManager::getInstance()->drawViews(nullptr);
 }
 
 bool CEditorUI::wantsMouse() const
@@ -2874,7 +2877,7 @@ bool CEditorUI::wantsMouse() const
 		return false;
 	sint32 x = 0, y = 0;
 	pointer->getPointerPos(x, y);
-	return wm->getWindowUnder(x, y) != NULL;
+	return wm->getWindowUnder(x, y) != nullptr;
 }
 
 void CEditorUI::setVisible(bool visible)
@@ -2907,7 +2910,7 @@ void zpOpenSceneMenu()
 {
 	if (ZPSCRIPT::isExecuting())
 		return;
-	NLGUI::CWidgetManager::getInstance()->enableModalWindow(NULL, "ui:zp:scene_menu");
+	NLGUI::CWidgetManager::getInstance()->enableModalWindow(nullptr, "ui:zp:scene_menu");
 }
 
 

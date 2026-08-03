@@ -51,7 +51,7 @@ std::string bytesToHex(const uint8 *data, size_t len)
 
 std::string bytesToHex(const std::vector<uint8> &bytes)
 {
-	return bytesToHex(bytes.empty() ? NULL : &bytes[0], bytes.size());
+	return bytesToHex(bytes.empty() ? nullptr : &bytes[0], bytes.size());
 }
 
 bool hexToBytes(const std::string &hex, std::vector<uint8> &out)

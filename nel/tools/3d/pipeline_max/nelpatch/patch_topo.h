@@ -158,7 +158,7 @@ bool topoTurnPatches(SPatchMesh &pm, SRPatchMesh &rp,
  */
 bool topoSubdividePatches(SPatchMesh &pm, SRPatchMesh &rp,
                           const std::set<uint> &patches, std::string &err,
-                          SPmVertMapper *mapper = NULL, const SPatchMesh *evalPm = NULL);
+                          SPmVertMapper *mapper = nullptr, const SPatchMesh *evalPm = nullptr);
 
 /**
  * Weld the listed vertices: clusters within `threshold` (transitive, measured on the
@@ -184,7 +184,7 @@ bool topoSubdividePatches(SPatchMesh &pm, SRPatchMesh &rp,
 bool topoWeldVerts(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
                    const std::set<uint> &verts, float threshold,
                    STopoRemap &remap, std::string &err,
-                   const SPatchMesh *evalPm = NULL);
+                   const SPatchMesh *evalPm = nullptr);
 
 /**
  * Directed (target) weld: `srcVert` merges into `dstVert`, which keeps its position and
@@ -214,7 +214,7 @@ bool topoWeldVertInto(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
  */
 bool topoAddQuads(SPatchMesh &pm, SRPatchMesh &rp,
                   const std::set<uint> &edges, std::string &err,
-                  const SPatchMesh *evalPm = NULL);
+                  const SPatchMesh *evalPm = nullptr);
 
 /**
  * Detach the listed patches as their own ISLAND inside the same mesh
@@ -234,8 +234,8 @@ bool topoAddQuads(SPatchMesh &pm, SRPatchMesh &rp,
  */
 bool topoDetachElements(SPatchMesh &pm, SRPatchMesh &rp,
                         const std::set<uint> &sel, std::string &err,
-                        const SPatchMesh *evalPm = NULL,
-                        STopoDetachBoundary *boundaryOut = NULL);
+                        const SPatchMesh *evalPm = nullptr,
+                        STopoDetachBoundary *boundaryOut = nullptr);
 
 /**
  * Extrude the listed patches (patch_topo_extrude.cpp): the legacy Extrude, recomposed
@@ -260,7 +260,7 @@ bool topoDetachElements(SPatchMesh &pm, SRPatchMesh &rp,
  */
 bool topoExtrudePatches(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
                         const std::set<uint> &sel, float dx, float dy, float dz,
-                        std::string &err, const SPatchMesh *evalPm = NULL);
+                        std::string &err, const SPatchMesh *evalPm = nullptr);
 
 /**
  * Append `src`/`srcRp` onto `pm`/`rp` (patch_topo_attach.cpp) - the attach merge. Every

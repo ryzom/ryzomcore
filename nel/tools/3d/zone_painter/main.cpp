@@ -249,7 +249,7 @@ std::vector<PMAXLOAD::SLoadedMax *> g_ExtraEditableScenes;
 std::vector<SEditableFileInfo> g_EditableFiles;
 // The first-opened file's scene (heap-owned like every other, registered in
 // g_ExtraEditableScenes); NULLed when that file closes. Legacy fallback reads only.
-PMAXLOAD::SLoadedMax *g_PrimaryLm = NULL;
+PMAXLOAD::SLoadedMax *g_PrimaryLm = nullptr;
 // When true, every non-forceFrozen zone is a paint target (open-everything mode).
 // Default false = exporter-faithful eligibility (one editable zone per normal .max).
 bool g_AllZones = false;
@@ -257,7 +257,7 @@ bool g_AllZones = false;
 float g_SessionCellSize = 160.f;
 float g_SessionSnap = 1.f;
 bool g_SessionLockBorders = false;
-NL3D::CTileBank *g_SessionBank = NULL;
+NL3D::CTileBank *g_SessionBank = nullptr;
 // Ecosystem self-instances: board-driven placements. Primary zones sit at the layout origin
 // (rot 0, no mirror); each --place adds a display-level duplicate sharing the same Node
 // pointers (paint_core carrier keying) with geometry transformed about the FOOTPRINT-block
@@ -656,7 +656,7 @@ printf(" PatchLiveUpdate %s\n", g_PatchLiveUpdate ? "per-frame" : "on release on
 
 // Bound-key test helpers (0 = unbound). g_ViewerAsync is the viewer's UDriver AsyncListener
 // (set for the duration of runViewer; headless modes never touch it).
-NLMISC::CEventListenerAsync *g_ViewerAsync = NULL;
+NLMISC::CEventListenerAsync *g_ViewerAsync = nullptr;
 // painterscript: --lua-script path; file-static so runViewer's pre-pass sees
 // it without widening the signature (mirrors scriptPath's flow).
 std::string g_LuaScriptPath;
@@ -689,8 +689,8 @@ std::vector<SPlaceContextSpec> g_PlaceContextSpecs;
 std::vector<SOpenEditableSpec> g_OpenEditableSpecs;
 
 // Script host state (installed by runViewer)
-bool (*g_ScriptScreenshotFn)(const std::string &path, std::string &err) = NULL;
-void (*g_ScriptPumpFn)() = NULL;
+bool (*g_ScriptScreenshotFn)(const std::string &path, std::string &err) = nullptr;
+void (*g_ScriptPumpFn)() = nullptr;
 bool g_ScriptCancel = false;
 bool g_SessionOpsAvailable = false;
 ZPSCRIPT::SScriptHost g_ScriptHost;
@@ -1260,8 +1260,8 @@ args.addArg("", "instances", "NxM",
 	// Shared UDriver + EditorUI for the startup screens and (optionally) the viewer.
 	// Owned here when the startup path opens a window; runViewer receives them and must
 	// not release them. Legacy .max path still lets runViewer create its own driver.
-	NL3D::UDriver *sharedDriver = NULL;
-	ZPUI::CEditorUI *sharedEditorUI = NULL;
+	NL3D::UDriver *sharedDriver = nullptr;
+	ZPUI::CEditorUI *sharedEditorUI = nullptr;
 	bool ownsSharedHost = false;
 
 	// ---- Startup flow: discover + auto / interactive screens ----
@@ -1431,7 +1431,7 @@ args.addArg("", "instances", "NxM",
 				if (NLMISC::CFile::fileExists(sysFont)) fontPathEarly = sysFont;
 			}
 			NL3D::CScene::registerBasics();
-			sharedDriver = NL3D::UDriver::createDriver(0, false, 0);
+			sharedDriver = NL3D::UDriver::createDriver(0, false, nullptr);
 			if (!sharedDriver)
 			{
 				fprintf(stderr, "ERROR: UDriver::createDriver failed (no 3D driver?)\n");
@@ -1885,7 +1885,7 @@ args.addArg("", "instances", "NxM",
 			                "(10 files; zone-id space)\n");
 			return 1;
 		}
-		PMAXLOAD::SLoadedMax *sceneLm = NULL;
+		PMAXLOAD::SLoadedMax *sceneLm = nullptr;
 		if (ei == 0)
 		{
 			// Uniform ownership : the first file registers exactly like the others
@@ -2301,7 +2301,7 @@ args.addArg("", "instances", "NxM",
 	buildPaintInputs(zones, inputs);
 	{
 		std::string err;
-		if (!core.init(inputs, haveBank ? &bank : NULL, cellSize, snap, g_SessionLockBorders, err))
+		if (!core.init(inputs, haveBank ? &bank : nullptr, cellSize, snap, g_SessionLockBorders, err))
 		{
 			fprintf(stderr, "ERROR: paint core: %s\n", err.c_str());
 			return 1;
@@ -2325,7 +2325,7 @@ args.addArg("", "instances", "NxM",
 	}
 	if (args.haveLongArg("color"))
 	{
-		uint32 rgb = (uint32)strtoul(args.getLongArg("color")[0].c_str(), NULL, 16);
+		uint32 rgb = (uint32)strtoul(args.getLongArg("color")[0].c_str(), nullptr, 16);
 		g_ViewerBrushColor = NLMISC::CRGBA((uint8)((rgb >> 16) & 0xff), (uint8)((rgb >> 8) & 0xff), (uint8)(rgb & 0xff), 255);
 	}
 	if (args.haveLongArg("radius")) NLMISC::fromString(args.getLongArg("radius")[0], g_ViewerBrushRadius);
@@ -2398,7 +2398,7 @@ args.addArg("", "instances", "NxM",
 			rc = runPaintScript(core, scriptPath);
 		if (rc == 0 && !luaScriptPath.empty())
 		{
-			zpInstallScriptHost(NULL);
+			zpInstallScriptHost(nullptr);
 			rc = ZPSCRIPT::runFile(luaScriptPath);
 		}
 	}
@@ -2410,13 +2410,13 @@ args.addArg("", "instances", "NxM",
 		{
 			sharedEditorUI->shutdown();
 			delete sharedEditorUI;
-			sharedEditorUI = NULL;
+			sharedEditorUI = nullptr;
 		}
 		if (sharedDriver)
 		{
 			sharedDriver->release();
 			delete sharedDriver;
-			sharedDriver = NULL;
+			sharedDriver = nullptr;
 		}
 	}
 

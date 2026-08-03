@@ -125,7 +125,7 @@ void pmbIgAddPsSearchPath(const std::string &path);
 // names (Ryzom per-node convention).
 int pmbExportAnimForGltf(const std::string &maxPath, PMAXLOAD::SLoadedMax &lm,
                          std::vector<uint8> &animOut,
-                         std::vector<std::string> *bareNodesOut = NULL);
+                         std::vector<std::string> *bareNodesOut = nullptr);
 
 // From ../pipeline_max_export_swt/main.cpp and ../pipeline_max_export_pacs_prim/main.cpp:
 // single-output whole-file flows — 1 = produced, 3 = nothing to export, -1 = error.
@@ -313,7 +313,7 @@ static SBaseCtx *baseCtxFor(INode *node, SNodeTMCache &tmCache, bool exportLight
 {
 	TBaseCtxCache::iterator it = cache.find(node);
 	if (it != cache.end())
-		return it->second.Ok ? &it->second : NULL;
+		return it->second.Ok ? &it->second : nullptr;
 	SBaseCtx &ctx = cache[node];
 	Matrix3M localTM = getLocalMatrix(*node, tmCache);
 	buildBaseMeshInterface(ctx.Bbm, ctx.MaxBB, *node, tmCache, localTM, exportLighting);
@@ -326,7 +326,7 @@ static SBaseCtx *baseCtxFor(INode *node, SNodeTMCache &tmCache, bool exportLight
 		if (mi < 0)
 		{
 			fprintf(stderr, "SKIP gltf '%s': %s\n", nodeName(*node).c_str(), err.c_str());
-			return NULL;
+			return nullptr;
 		}
 		ctx.GltfMats.push_back(mi);
 	}
@@ -345,7 +345,7 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 
 	CSceneClassContainer *ssc = lm.Scene->container();
 	SNodeTMCache tmCache;
-	tmCache.SceneRoot = NULL;
+	tmCache.SceneRoot = nullptr;
 
 	// Node collection (storage order — the same enumeration the direct exporters walk)
 	std::map<std::string, INode *> nodesByName;
@@ -465,10 +465,10 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 		// applies onto the mesh build below); the Max-4+ Skin modifier skips the whole node
 		// exactly like the direct route does. The direct multilod slave loop re-detects
 		// Physique ONLY — mirror that asymmetry.
-		const char *skipClass = NULL;
+		const char *skipClass = nullptr;
 		bool hasPhysique = false;
-		NL3D::IShape *specialShape = NULL;
-		const char *specialClass = NULL;
+		NL3D::IShape *specialShape = nullptr;
+		const char *specialClass = nullptr;
 		if (!isSlave && cid.a() == CLASSID_PARTA_NEL_WAVE_MAKER)
 			skipClass = "wavemaker";
 		else if (!isSlave && getScriptAppDataInt(n, NEL3D_APPDATA_USE_REMANENCE, 0))
@@ -687,7 +687,7 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 					}
 
 					sint meshIdx = b.addMesh(name, mb, ctx->GltfMats, &err,
-					                         bsList.empty() ? NULL : &bsList, &skinInterop);
+					                         bsList.empty() ? nullptr : &bsList, &skinInterop);
 					size_t bsCount = bsList.size();
 					for (uint bi = 0; bi < bsList.size(); ++bi)
 						delete bsList[bi];
@@ -930,7 +930,7 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 				for (size_t mi2 = 0; mi2 < morphNodes.size(); ++mi2)
 				{
 					const SMorphMeshNode &mn = morphNodes[mi2];
-					std::vector<NL3D::UTrack *> ftracks(mn.Names.size(), (NL3D::UTrack *)NULL);
+					std::vector<NL3D::UTrack *> ftracks(mn.Names.size(), (NL3D::UTrack *)nullptr);
 					float t0 = 0.0f, t1 = 0.0f;
 					bool any = false;
 					for (size_t k = 0; k < mn.Names.size(); ++k)

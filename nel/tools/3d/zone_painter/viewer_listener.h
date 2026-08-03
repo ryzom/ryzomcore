@@ -89,7 +89,10 @@ public:
 	uint BrushHardness, BrushOpacity;
 	uint DisplaceIndex;
 
-	CPaintMouseListener() : Core(NULL), Camera(NULL), EditorUI(NULL), CurTileSet(0), Mode256(false), Pressed(false),
+	CPaintMouseListener() : Core(nullptr)
+	    , Camera(nullptr)
+	    , EditorUI(nullptr)
+	    , CurTileSet(0), Mode256(false), Pressed(false),
 		MouseX(0.5f), MouseY(0.5f), HaveHover(false), HoverZone(0), HoverTile(-1), StrokeZone(0), StrokeTile(-1),
 		Mode(ModeTile), SubObj(SubObject), BrushColor(255, 255, 255, 255), BrushRadius(8.f), BrushHardness(128), BrushOpacity(255),
 		DisplaceIndex(0) { }

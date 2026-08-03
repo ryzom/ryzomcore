@@ -204,7 +204,7 @@ static ITexture *flatTextureFromExtras(const CJsonValue &extras, const std::stri
 		return tm;
 	}
 	if (err) *err = "unknown texture class '" + cls + "' at " + prefix;
-	return NULL;
+	return nullptr;
 }
 
 static bool textureToExtras(const ITexture *tex, CJsonValue &extras, const std::string &prefix,
@@ -248,7 +248,7 @@ static ITexture *textureFromExtras(const CJsonValue &extras, const std::string &
 {
 	std::string cls = extras.getString((prefix + "class").c_str(), "");
 	if (cls.empty())
-		return NULL;
+		return nullptr;
 	if (cls == "cube")
 	{
 		// Rebuild the source texture, then duplicate into the 6 faces in the same face order
@@ -256,7 +256,7 @@ static ITexture *textureFromExtras(const CJsonValue &extras, const std::string &
 		// negative_y — but since all faces are copies of one texture, order only matters for
 		// the serialPolyPtr id sequence, which follows the _Textures array order regardless).
 		ITexture *src = flatTextureFromExtras(extras, prefix + "cube_", err);
-		if (!src) return NULL;
+		if (!src) return nullptr;
 		textureBaseFromExtras(*src, extras, prefix + "cube_");
 		CTextureCube *cube = new CTextureCube;
 		for (uint i = 0; i < 6; ++i)
@@ -273,7 +273,7 @@ static ITexture *textureFromExtras(const CJsonValue &extras, const std::string &
 		return cube;
 	}
 	ITexture *tex = flatTextureFromExtras(extras, prefix, err);
-	if (!tex) return NULL;
+	if (!tex) return nullptr;
 	textureBaseFromExtras(*tex, extras, prefix);
 	return tex;
 }

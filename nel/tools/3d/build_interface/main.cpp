@@ -452,7 +452,7 @@ int main(int argc, char **argv)
 			if (keepGoing)
 			{
 				outString(toString("WARNING : skipping %s : %s", AllMapNames[i].c_str(), e.what()));
-				AllMaps[i] = NULL;
+				AllMaps[i] = nullptr;
 				continue;
 			}
 
@@ -464,7 +464,7 @@ int main(int argc, char **argv)
 	// Drop entries skipped by --keep-going
 	for (sint i = 0; i < mapSize; )
 	{
-		if (AllMaps[i] == NULL)
+		if (AllMaps[i] == nullptr)
 		{
 			AllMaps.erase(AllMaps.begin() + i);
 			AllMapNames.erase(AllMapNames.begin() + i);

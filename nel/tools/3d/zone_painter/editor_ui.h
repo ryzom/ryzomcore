@@ -233,26 +233,87 @@ struct SPaintUIBridge
 	char PropStatus[96]; // "read-only" / last edit
 
 	SPaintUIBridge()
-		: selectMode(NULL), selectSubObject(NULL), selectTileSetDelta(NULL), selectTileSetAbs(NULL),
-		  toggleTileSize(NULL),
-		  brushSizeDelta(NULL), groupDelta(NULL), toggleLockBorders(NULL),
-		  undo(NULL), redo(NULL), fill(NULL), save(NULL), saveTo(NULL), saveOverwrite(NULL),
-		  saveFileOverwrite(NULL), saveFileCopy(NULL), fileDir(NULL),
-		  seasonNext(NULL), seasonSelect(NULL), seasonMenuFill(NULL),
-		  colorRadiusDelta(NULL), hardnessDelta(NULL), opacityDelta(NULL),
-		  cycleBrushMask(NULL), toggleMaskMode(NULL), displaceIndexDelta(NULL),
-		  displaceIndexAbs(NULL), togglePalette(NULL), toggleBoard(NULL), setBrushColor(NULL),
-		  propRotateDelta(NULL), propToggleSymmetry(NULL), propTogglePassable(NULL),
-		  propToggleUseBBox(NULL),
-		  patchBind(NULL), patchUnbind(NULL), patchNoSmooth(NULL), patchDelete(NULL),
-		  patchTurnCcw(NULL), patchTurnCw(NULL), patchSubdivide(NULL), patchWeld(NULL), patchAddQuad(NULL),
-		  patchDetach(NULL), patchElement(NULL), moveToZoneDir(NULL), weldTargetToggle(NULL),
-		  patchWeldThreshold(NULL), patchExtrude(NULL),
-		  patchFilterVertsToggle(NULL), patchFilterVecsToggle(NULL), patchLockHandlesToggle(NULL),
-		  arrowsToggle(NULL),
-		  patchSmGroup(NULL), patchSmGroupClear(NULL), patchTessDelta(NULL), patchBalance(NULL),
-		  setTileSize256(NULL), setHardnessAbs(NULL), setOpacityAbs(NULL),
-		  setColorRadiusAbs(NULL),
+		: selectMode(nullptr)
+	    , selectSubObject(nullptr)
+	    , selectTileSetDelta(nullptr)
+	    , selectTileSetAbs(nullptr)
+	    ,
+		  toggleTileSize(nullptr)
+	    ,
+		  brushSizeDelta(nullptr)
+	    , groupDelta(nullptr)
+	    , toggleLockBorders(nullptr)
+	    ,
+		  undo(nullptr)
+	    , redo(nullptr)
+	    , fill(nullptr)
+	    , save(nullptr)
+	    , saveTo(nullptr)
+	    , saveOverwrite(nullptr)
+	    ,
+		  saveFileOverwrite(nullptr)
+	    , saveFileCopy(nullptr)
+	    , fileDir(nullptr)
+	    ,
+		  seasonNext(nullptr)
+	    , seasonSelect(nullptr)
+	    , seasonMenuFill(nullptr)
+	    ,
+		  colorRadiusDelta(nullptr)
+	    , hardnessDelta(nullptr)
+	    , opacityDelta(nullptr)
+	    ,
+		  cycleBrushMask(nullptr)
+	    , toggleMaskMode(nullptr)
+	    , displaceIndexDelta(nullptr)
+	    ,
+		  displaceIndexAbs(nullptr)
+	    , togglePalette(nullptr)
+	    , toggleBoard(nullptr)
+	    , setBrushColor(nullptr)
+	    ,
+		  propRotateDelta(nullptr)
+	    , propToggleSymmetry(nullptr)
+	    , propTogglePassable(nullptr)
+	    ,
+		  propToggleUseBBox(nullptr)
+	    ,
+		  patchBind(nullptr)
+	    , patchUnbind(nullptr)
+	    , patchNoSmooth(nullptr)
+	    , patchDelete(nullptr)
+	    ,
+		  patchTurnCcw(nullptr)
+	    , patchTurnCw(nullptr)
+	    , patchSubdivide(nullptr)
+	    , patchWeld(nullptr)
+	    , patchAddQuad(nullptr)
+	    ,
+		  patchDetach(nullptr)
+	    , patchElement(nullptr)
+	    , moveToZoneDir(nullptr)
+	    , weldTargetToggle(nullptr)
+	    ,
+		  patchWeldThreshold(nullptr)
+	    , patchExtrude(nullptr)
+	    ,
+		  patchFilterVertsToggle(nullptr)
+	    , patchFilterVecsToggle(nullptr)
+	    , patchLockHandlesToggle(nullptr)
+	    ,
+		  arrowsToggle(nullptr)
+	    ,
+		  patchSmGroup(nullptr)
+	    , patchSmGroupClear(nullptr)
+	    , patchTessDelta(nullptr)
+	    , patchBalance(nullptr)
+	    ,
+		  setTileSize256(nullptr)
+	    , setHardnessAbs(nullptr)
+	    , setOpacityAbs(nullptr)
+	    ,
+		  setColorRadiusAbs(nullptr)
+	    ,
 		  HaveCore(false), Mode(0), SubObj(0),
 		  PatchSelVerts(0), PatchSelEdges(0), PatchSelFaces(0), PatchSelTans(0),
 		  PatchNoSmooth(2), PatchSelZones(0), MoveDirMask(0), WeldTargetArmed(false),

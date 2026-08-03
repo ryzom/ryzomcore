@@ -192,7 +192,7 @@ int saveWholeFile(const std::string &input, const std::string &output, CScene &s
 	// The known .max stream set (same list as the corpus harness save tests).
 	static const char *kStreams[] = {
 		"VideoPostQueue", "Config", "ClassData", "DllDirectory", "ClassDirectory3", "Scene",
-		"\05SummaryInformation", "\05DocumentSummaryInformation", NULL
+		"\05SummaryInformation", "\05DocumentSummaryInformation", nullptr
 	};
 	std::vector<std::string> present;
 	std::vector<std::vector<uint8> > rawOrig;
@@ -559,7 +559,7 @@ bool saveOneOverwrite(const std::string &orig, PIPELINE::MAX::CScene &scene, boo
 	std::vector<uint8> siOverride;
 	bool haveSi = false;
 	prepareThumbnailOverride(orig, siOverride, haveSi, doThumb, zoneIds);
-	int saveRc = saveWholeFile(orig, tempPath, scene, false, haveSi ? &siOverride : NULL);
+	int saveRc = saveWholeFile(orig, tempPath, scene, false, haveSi ? &siOverride : nullptr);
 	if (saveRc != 0 || !NLMISC::CFile::fileExists(tempPath))
 	{
 		fprintf(stderr, "ERROR: overwrite: temp write failed for %s\n", orig.c_str());
@@ -622,7 +622,7 @@ SEditableFileInfo *findEditableByPath(const std::string &path)
 	for (size_t i = 0; i < g_EditableFiles.size(); ++i)
 		if (absFilePath(g_EditableFiles[i].Path) == t)
 			return &g_EditableFiles[i];
-	return NULL;
+	return nullptr;
 }
 
 /** Copy-save write: temp in the target's directory, then rename over target - a
@@ -715,7 +715,7 @@ bool zpSaveTo(const std::string &target)
 	// board-session saves stamp neighbor-hints appdata (legacy --save does not)
 	writeNeighborHintsIfBoardSession();
 	// Pick the (only) dirty file's scene when multi; else primary
-	const SEditableFileInfo *srcFile = NULL;
+	const SEditableFileInfo *srcFile = nullptr;
 	if (!g_EditableFiles.empty())
 	{
 		for (size_t i = 0; i < g_EditableFiles.size(); ++i)
@@ -739,8 +739,8 @@ bool zpSaveTo(const std::string &target)
 	// Per-file framing (never fold instance clones in); the headless stash fallback
 	// inside prepareThumbnailOverride still applies to single-file sessions.
 	prepareThumbnailOverride(srcForStreams, siOverride, haveSi, zpLegacyWantThumbnail(),
-	                         srcFile ? &srcFile->ZoneIds : NULL);
-	if (!saveCopyAtomic(srcForStreams, target, *scene, haveSi ? &siOverride : NULL))
+	                         srcFile ? &srcFile->ZoneIds : nullptr);
+	if (!saveCopyAtomic(srcForStreams, target, *scene, haveSi ? &siOverride : nullptr))
 	{
 		g_LastSaveStatus = "save failed -> " + target;
 		return false;
@@ -850,7 +850,7 @@ bool zpSaveFileCopy(const std::string &basename, const std::string &name, bool w
 	std::vector<uint8> siOverride;
 	bool haveSi = false;
 	prepareThumbnailOverride(efi->Path, siOverride, haveSi, wantThumb, &efi->ZoneIds);
-	if (!scene || !saveCopyAtomic(efi->Path, target, *scene, haveSi ? &siOverride : NULL))
+	if (!scene || !saveCopyAtomic(efi->Path, target, *scene, haveSi ? &siOverride : nullptr))
 	{
 		g_LastSaveStatus = "save failed -> " + target;
 		return false;
@@ -918,7 +918,7 @@ bool zpSaveOverwriteImpl()
 		// whole-board thumbnail. The stash fallback for headless flows still applies
 		// (prepareThumbnailOverride allows it whenever the session is single-file).
 		if (!saveOneOverwrite(orig, *scene, wantThumb,
-		                      g_EditableFiles.empty() ? NULL : &g_EditableFiles[0].ZoneIds))
+		                      g_EditableFiles.empty() ? nullptr : &g_EditableFiles[0].ZoneIds))
 		{
 			g_LastSaveStatus = "overwrite failed -> " + orig;
 			return false;

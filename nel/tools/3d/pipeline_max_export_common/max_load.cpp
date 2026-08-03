@@ -49,7 +49,7 @@ namespace PMAXLOAD {
 
 CSceneClassRegistry *sceneRegistry()
 {
-	static CSceneClassRegistry *registry = NULL;
+	static CSceneClassRegistry *registry = nullptr;
 	if (!registry)
 	{
 		registry = new CSceneClassRegistry();
@@ -96,9 +96,9 @@ static std::map<std::string, SLoadedMax> g_loadedScenes;
 SLoadedMax *loadMaxFileCached(const std::string &path)
 {
 	std::map<std::string, SLoadedMax>::iterator it = g_loadedScenes.find(path);
-	if (it != g_loadedScenes.end()) return it->second.Scene ? &it->second : NULL;
+	if (it != g_loadedScenes.end()) return it->second.Scene ? &it->second : nullptr;
 	SLoadedMax &lm = g_loadedScenes[path]; // inserted empty: failure is cached too
-	if (!loadMaxFile(path, lm)) return NULL;
+	if (!loadMaxFile(path, lm)) return nullptr;
 	return &lm;
 }
 
