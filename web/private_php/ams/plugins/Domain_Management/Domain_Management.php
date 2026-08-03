@@ -24,6 +24,16 @@ $domain_management_return_set = array();
 $var_set = array();
 
 /**
+ * True when the current request comes from a logged in admin. The hooks in
+ * this file are called for every request, so anything that writes has to ask.
+ */
+function domain_management_caller_is_admin()
+ {
+    if ( !isset( $_SESSION['ticket_user'] ) ) return false;
+     return Ticket_User :: isAdmin( unserialize( $_SESSION['ticket_user'] ) );
+     }
+
+/**
  * Display hook for Domain_Management plugin
  */
 function domain_management_hook_display()
@@ -67,7 +77,12 @@ function domain_management_hook_get_db()
  {
     global $domain_management_return_set;
 
-     if ( isset( $_GET['ModifyDomain'] ) && $_GET['ModifyDomain'] = '1' && isset($_POST['domain_name'])) {
+     // This hook runs on every page load, including for visitors who are not
+    // logged in, and it rewrites the domain row -- patch urls and login
+    // address included. Only an admin may do that. Note the comparisons
+    // below were assignments, so the flag was always considered set.
+    if ( domain_management_caller_is_admin()
+         && isset( $_GET['ModifyDomain'] ) && $_GET['ModifyDomain'] == '1' && isset($_POST['domain_name'])) {
         try {
 
             $dbs = new DBLayer( 'shard' );
@@ -79,7 +94,8 @@ function domain_management_hook_get_db()
              }
         }     
         
-        if ( isset( $_GET['ModifyPermission'] ) && $_GET['ModifyPermission'] = '1' && isset($_POST['user'])) {
+        if ( domain_management_caller_is_admin()
+             && isset( $_GET['ModifyPermission'] ) && $_GET['ModifyPermission'] == '1' && isset($_POST['user'])) {
         try {
         
             $dbl = new DBLayer("lib");
