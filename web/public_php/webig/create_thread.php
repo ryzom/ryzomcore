@@ -74,6 +74,11 @@
 		// create thread file
 		create_thread($post_from, $post_to, $post_subject, $index);
 	
+		// a thread opened without content skips add_post, which is what sets
+		// $last_date; update_forum_index would then blank the date column the
+		// forum index row was just written with
+		$last_date = displayable_date();
+
 		// add main post to thread -- through clean_content() like post.php,
 		// or a newline in the opening post splits its row in the index
 		if ($post_content != "")

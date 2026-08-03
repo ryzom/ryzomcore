@@ -88,7 +88,13 @@
 				else
 				{
 					global $JoinSessionResultCode, $JoinSessionResultMsg;
-					echo errorMsgBlock(BASE_TRANSLATED_RSM_ERROR_NUM + $JoinSessionResultCode, $JoinSessionResultCode, $JoinSessionResultMsg, $userId);
+					// the result globals are only set when the session manager
+					// answered; a timeout inside joinMainland leaves them unset
+					// and 4000+null used to render as a bare generic error
+					if (!isset($JoinSessionResultCode))
+						echo errorMsgBlock(3003);
+					else
+						echo errorMsgBlock(BASE_TRANSLATED_RSM_ERROR_NUM + $JoinSessionResultCode, $JoinSessionResultCode, $JoinSessionResultMsg, $userId);
 				}
 			}
 			else
