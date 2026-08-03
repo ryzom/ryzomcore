@@ -112,6 +112,9 @@ class Ticket{
     public static function create_Ticket( $title, $content, $category, $author, $real_author, $for_support_group = 0, $extra_info = 0) {
 
         //create the new ticket!
+        // the title is shown back without further escaping, and the mail
+        // handler hands us a subject line straight off an incoming email
+        $title = filter_var($title, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         $ticket = new Ticket();
         $values = array("Title" => $title, "Timestamp"=>0,  "Status"=> 1, "Queue"=> 0, "Ticket_Category" => $category, "Author" => $author, "Priority" => 0);
         $ticket->set($values);
@@ -245,7 +248,6 @@ class Ticket{
     public static function createReply($content, $author, $ticket_id, $hidden){
         //if not empty
         if(! ( Trim ( $content ) === '' )){
-            $content = filter_var($content, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
             $ticket = new Ticket();
             $ticket->load_With_TId($ticket_id);
             //if status is not closed

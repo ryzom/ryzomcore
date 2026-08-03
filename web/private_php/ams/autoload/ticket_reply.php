@@ -74,6 +74,10 @@ class Ticket_Reply{
     * @param $ticket_creator the ticket's starter his id.
     */
     public static function createReply($content, $author, $ticket_id , $hidden, $ticket_creator){
+        // Replies are shown back without further escaping. Do it here, where
+        // every path passes: the web form, the ingame client and the incoming
+        // mail handler.
+        $content = filter_var($content, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         $ticket_content = new Ticket_Content();
         $ticket_content->setContent($content);
         $ticket_content->create();
