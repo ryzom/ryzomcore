@@ -182,21 +182,26 @@
 				$now = date("Y-m-d H:i:s", time());
 				$server = db_str(getPost("server", ""));
 				$application = db_str(getPost("application", ""));
-				$version = db_str(getPost("version", ""));
+				$version = db_int(getPost("version", "0"));
 				$lang = db_str(getPost("lang",""));
-				$type = db_str(getPost("application", ""));
+				// the downloader sends type=install|repair; this used to read
+				// the application param again and the column got the app name
+				$type = db_str(getPost("type", ""));
 				$package = db_str(getPost("package", ""));
 				$protocol = db_str(getPost("protocol", ""));
-				$size_download = db_int(getPost("size_download", "0"));
-				$size_install = db_int(getPost("size_install", "0"));
+				// the downloader humanizes the sizes ("12.6MB") and the schema
+				// stores them as tinytext -- the viewer compares them as
+				// strings ('0.00B'), so escape, don't coerce to int
+				$size_download = db_str(getPost("size_download", "0"));
+				$size_install = db_str(getPost("size_install", "0"));
 				$user_id = db_int(getPost("user_id", "0"));
-				$previous_download = db_int(getPost("previous_download", "0"));
-		
-				
-				$query= "INSERT INTO `sessions` ( `session_id`, `user_id` , `server`, `application`, `ip` , `lang`, `type`, `package`, `protocol`, `size_download`, `size_install`, `start_download`, `stop_download`, `previous_download` )"
-				
+				$previous_download = db_str(getPost("previous_download", "0"));
+
+
+				$query= "INSERT INTO `sessions` ( `session_id`, `user_id` , `server`, `application`, `version`, `ip` , `lang`, `type`, `package`, `protocol`, `size_download`, `size_install`, `start_download`, `stop_download`, `previous_download` )"
+
 				. "VALUES ("
-				. "'$session_id', '$user_id' ,'$server', '$application', '$ip', '$lang', '$type', '$package', '$protocol', '$size_download', '$size_install', '$now', '$now', '$previous_download'"
+				. "'$session_id', '$user_id' ,'$server', '$application', '$version', '$ip', '$lang', '$type', '$package', '$protocol', '$size_download', '$size_install', '$now', '$now', '$previous_download'"
 				. ")";
 
 				$result = mysqli_query ($link, $query) or die2 (__FILE__. " " .__LINE__." Can't execute the query: ".$query);
@@ -374,7 +379,9 @@
 				$video_card = db_str(getPost("video_card", "Unknown"));
 				$driver_version = db_str(getPost("driver_version", "Unknown"));
 
-				$query = "INSERT INTO `install_users` SET `user_id` = '$user_id', `install_id`='$install_id', `os`='$os', `proc`='$proc', `memory`='$memory', `video_card`='$video_card', `driver_version`='$driver_version', `last_install`='".date('Y-m-d H:i:s', time()) . "', `first_install`=`last_install`";
+				// state has no implicit default on modern MySQL (tinytext NOT
+				// NULL): without it the whole insert is refused with 1364
+				$query = "INSERT INTO `install_users` SET `user_id` = '$user_id', `install_id`='$install_id', `os`='$os', `proc`='$proc', `memory`='$memory', `video_card`='$video_card', `driver_version`='$driver_version', `state`='', `last_install`='".date('Y-m-d H:i:s', time()) . "', `first_install`=`last_install`";
 
 								 
 				
