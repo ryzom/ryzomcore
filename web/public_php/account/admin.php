@@ -146,7 +146,9 @@ try {
 		}
 	}
 
-	// If editing a user, load their details
+	// If editing a user, load their details. Equal/higher rank accounts
+	// are listed as "Manage" disabled; also refuse the detail view so a
+	// lower-rank admin cannot read their email and privilege string.
 	if ($editUid > 0) {
 		$stmt = $db->prepare('SELECT UId, Login, Email, Privilege, GroupName, State, ExtendedPrivilege FROM user WHERE UId = :uid');
 		$stmt->execute(array(':uid' => $editUid));
@@ -154,9 +156,15 @@ try {
 
 		if ($editUser) {
 			$editCanManage = canEditUser($editUser['Privilege']);
-			$stmt = $db->prepare('SELECT perm.DomainId, perm.ShardId, perm.AccessPrivilege, d.domain_name FROM permission perm LEFT JOIN domain d ON perm.DomainId = d.domain_id WHERE perm.UId = :uid');
-			$stmt->execute(array(':uid' => $editUid));
-			$editPerms = $stmt->fetchAll();
+			if (!$editCanManage) {
+				$error = 'You cannot view this user: equal or higher privileges.';
+				$editUser = null;
+				$editUid = 0;
+			} else {
+				$stmt = $db->prepare('SELECT perm.DomainId, perm.ShardId, perm.AccessPrivilege, d.domain_name FROM permission perm LEFT JOIN domain d ON perm.DomainId = d.domain_id WHERE perm.UId = :uid');
+				$stmt->execute(array(':uid' => $editUid));
+				$editPerms = $stmt->fetchAll();
+			}
 		}
 	}
 

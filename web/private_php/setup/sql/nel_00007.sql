@@ -9,5 +9,5 @@ INSERT INTO `setting` (`setting`, `value`) VALUES
   ('settings_privilege', ':DEV:'),
   ('default_privileges', ''),
   ('default_access_domains', 'ds_open'),
-  ('registration_open', '1')
+  ('registration_open', '0')
 ON DUPLICATE KEY UPDATE `setting` = `setting`;

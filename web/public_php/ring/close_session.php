@@ -32,22 +32,27 @@
 	}
 	else
 	{
+		if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['sessionId']))
+		{
+			echo "Missing sessionId";
+			die();
+		}
 		$domainInfo = getDomainInfo($domainId);
 		$addr = explode(":", $domainInfo["session_manager_address"]);
 		$RSMHost = $addr[0];
 		$RSMPort = $addr[1];
-		
+
 		// ask to start the session
 		$closeSession = new CloseSessionCb;
 		$res = "";
 		$closeSession->connect($RSMHost, $RSMPort, $res);
 //		$rsmProxy = new CRingSessionManagerWebProxy;
-		$closeSession->closeSession($charId, isset($_POST["sessionId"]) ? intval($_POST["sessionId"]) : 0);
-		
+		$closeSession->closeSession($charId, intval($_POST["sessionId"]));
+
 		// wait the the return message
 //		$rsmSkel = new CRingSessionManagerWebSkel;
 		$closeSession->waitCallback();
-			
+
 		die();
 	}
 	

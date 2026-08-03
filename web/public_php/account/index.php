@@ -36,6 +36,17 @@ $public_pages = array('login', 'register');
 // Check authentication
 $logged_in = isset($_SESSION['account_uid']);
 
+// Privilege can change under a live session (demotion, promotion, ban).
+// Re-read it on every request so admin/dev gates stay honest.
+if ($logged_in) {
+	if (!refreshAccountSession()) {
+		$_SESSION = array();
+		session_destroy();
+		$logged_in = false;
+		$page = 'login';
+	}
+}
+
 if (!$logged_in && !in_array($page, $public_pages)) {
 	$page = 'login';
 }

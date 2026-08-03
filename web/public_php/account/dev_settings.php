@@ -30,8 +30,8 @@ $allSettings = array(
 	),
 	'registration_open' => array(
 		'label' => 'Account Registration',
-		'help' => 'Set to 1 to let visitors create their own accounts, or 0 to close the registration page (accounts then come from the admin page or the database).',
-		'default' => '1',
+		'help' => 'Set to 1 to let visitors create their own accounts, or 0 to close the registration page (accounts then come from the admin page or the database). Default is closed.',
+		'default' => '0',
 	),
 );
 

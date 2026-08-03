@@ -451,6 +451,8 @@ function connect_to_ring_db()
 {
 	global $DBHost, $DBPort, $RingDBUserName, $RingDBPassword, $RingDBName;
 	$ringDb = mysqli_connect($DBHost, $RingDBUserName, $RingDBPassword, NULL, $DBPort) or die("can't connect to ring db");
+	if (function_exists('nel_mysqli_set_charset'))
+		nel_mysqli_set_charset($ringDb);
 	mysqli_select_db($ringDb, $RingDBName) or die("can't select ring db");
 	return $ringDb;
 }

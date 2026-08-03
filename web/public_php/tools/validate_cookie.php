@@ -99,6 +99,8 @@
 
 		// check the cookie in the database		
 		$link = mysqli_connect($DBHost, $RingDBUserName, $RingDBPassword, NULL, $DBPort) or die ("Can't connect to database");
+		if (function_exists('nel_mysqli_set_charset'))
+			nel_mysqli_set_charset($link);
 		mysqli_select_db($link, $ringDBName) or die ("Can't access to the table");
 
 		$cookie = mysqli_real_escape_string($link, $cookie);

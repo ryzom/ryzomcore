@@ -25,8 +25,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 			if ($currentPass === '' || $newPass === '' || $confirmPass === '') {
 				$error = 'All password fields are required.';
-			} elseif (strlen($newPass) < 5) {
-				$error = 'New password must be at least 5 characters.';
+			} elseif (strlen($newPass) < 8) {
+				$error = 'New password must be at least 8 characters.';
 			} elseif ($newPass !== $confirmPass) {
 				$error = 'New passwords do not match.';
 			} else {

@@ -32,8 +32,15 @@
 	$link = NULL;
 	$page_name="stats_query.php";
 	$page_max = 50;
-	$dev_ip="192.168.1.169"; //ip WHERE sql error are displayed
-	$private_network = "/192\.168\.1\./i"; //ip WHERE the cmd=view function works
+	// Access gate: REMOTE_ADDR must match $StatsPrivateNetwork (from
+	// login/config.php / config_user.php), or the request must carry a
+	// matching $StatsQuerySecret. Default network is the historical
+	// 192.168.1.* allowlist — override it on real deployments.
+	global $StatsPrivateNetwork, $StatsQuerySecret;
+	$private_network = (isset($StatsPrivateNetwork) && $StatsPrivateNetwork !== '')
+		? $StatsPrivateNetwork
+		: '/^192\\.168\\.1\\./';
+	$stats_query_secret = isset($StatsQuerySecret) ? (string)$StatsQuerySecret : '';
 
 
 	function toHMS($time)
@@ -84,12 +91,33 @@
 	}
 
 
+	// Detailed SQL errors only for addresses that would also get the view.
+	function stats_query_authorized()
+	{
+		global $private_network, $stats_query_secret;
+		if ($stats_query_secret !== '')
+		{
+			$token = '';
+			if (isset($_GET['token']) && is_string($_GET['token']))
+				$token = $_GET['token'];
+			elseif (isset($_POST['token']) && is_string($_POST['token']))
+				$token = $_POST['token'];
+			elseif (isset($_SERVER['HTTP_X_STATS_TOKEN']) && is_string($_SERVER['HTTP_X_STATS_TOKEN']))
+				$token = $_SERVER['HTTP_X_STATS_TOKEN'];
+			if ($token !== '' && hash_equals($stats_query_secret, $token))
+				return true;
+		}
+		$ip = getIp();
+		if ($private_network !== '' && @preg_match($private_network, $ip))
+			return true;
+		return false;
+	}
+
 	// if the player ip is the dev ip then the sql error is explain
 	function die2($debug_str = "")
 	{
 		// the failing query and the mysql error text are only for us
-		global $private_network;
-		if ( preg_match($private_network, getIp()) )
+		if ( stats_query_authorized() )
 		{
 			die($debug_str);
 		}
@@ -162,6 +190,8 @@
 		if ($link == NULL)
 		{
 			$link = mysqli_connect($StatsDBHost, $StatsDBUserName, $StatsDBPassword, NULL, $DBPort) or die2 (__FILE__. " " .__LINE__." can't connect to database host:$StatsDBHost user:$StatsDBUserName");
+			if (function_exists('nel_mysqli_set_charset'))
+				nel_mysqli_set_charset($link);
 			$newConnection = 1;
 
 			mysqli_select_db ($link, $StatsDBName) or die2 (__FILE__. " " .__LINE__." can't access to the table dbname:$StatsDBName");
@@ -792,11 +822,13 @@
 		$ip = getIp();
 		$log = getenv("query_string");
 		$link = mysqli_connect($StatsDBHost, $StatsDBUserName, $StatsDBPassword, NULL, $DBPort) or die2 (__FILE__. " " .__LINE__." can't connect to database host:$StatsDBHost user:$StatsDBUserName");
+		if (function_exists('nel_mysqli_set_charset'))
+			nel_mysqli_set_charset($link);
 		mysqli_select_db ($link, $StatsDBName) or die2 (__FILE__. " " .__LINE__." can't access to the table dbname:$StatsDBName");
 
 
-		//verify passwd AND ip is private
-		if (!preg_match($private_network, getIp()))
+		// verify network allowlist and/or shared secret
+		if (!stats_query_authorized())
 			die("GENERIC_ERROR");
 		{
 			//xhtml header + style

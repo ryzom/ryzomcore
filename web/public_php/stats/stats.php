@@ -30,8 +30,11 @@
 	// global var
 	$link = NULL;
 	$page_max = 100;
-	$dev_ip="192.168.1.169"; //ip where sql error are displayed
-	$private_network = "/192\.168\.1\./i"; //ip where the cmd=log&msg=dump function works
+	// Detailed die2() output only for this network (from login/config.php).
+	global $StatsPrivateNetwork;
+	$private_network = (isset($StatsPrivateNetwork) && $StatsPrivateNetwork !== '')
+		? $StatsPrivateNetwork
+		: '/^192\\.168\\.1\\./';
 	$page_name = "stats.php";
 
 	
@@ -101,6 +104,8 @@
 		if ($link == NULL)
 		{
 			$link = mysqli_connect($StatsDBHost, $StatsDBUserName, $StatsDBPassword, NULL, $DBPort) or die2 (__FILE__. " " .__LINE__." Can't connect to database host:$StatsDBHost user:$StatsDBUserName");
+			if (function_exists('nel_mysqli_set_charset'))
+				nel_mysqli_set_charset($link);
 			$newConnection = 1;
 
 			mysqli_select_db ($link, $StatsDBName) or die2 (__FILE__. " " .__LINE__." Can't access to the table dbname:$StatsDBName");
@@ -147,6 +152,8 @@
 		$date = date('Y-m-d H:i:s', time());
 		$log = getenv("QUERY_STRING");
 		$link = mysqli_connect($StatsDBHost, $StatsDBUserName, $StatsDBPassword, NULL, $DBPort) or die2 (__FILE__. " " .__LINE__." Can't connect to database host:$StatsDBHost user:$StatsDBUserName");
+		if (function_exists('nel_mysqli_set_charset'))
+			nel_mysqli_set_charset($link);
 		mysqli_select_db ($link, $StatsDBName) or die2 (__FILE__. " " .__LINE__." Can't access to the table dbname:$StatsDBName");
 
 		// getIp() reads request headers, so this is caller supplied as well

@@ -45,16 +45,19 @@
 		global $DBHost, $DBPort, $RingDBUserName, $RingDBPassword;
 
 		$link = mysqli_connect($DBHost, $RingDBUserName, $RingDBPassword, NULL, $DBPort) or die ("Can't connect to database");
+		if (function_exists('nel_mysqli_set_charset'))
+			nel_mysqli_set_charset($link);
 		mysqli_select_db($link, $domainInfo['ring_db_name']) or die ("Can't access to the table");
-		
+
 		// extract the character that have the specified name
-		$charName = mysqli_real_escape_string($link, $_POST['charName']);
+		$postCharName = isset($_POST['charName']) ? $_POST['charName'] : '';
+		$charName = mysqli_real_escape_string($link, $postCharName);
 		$query = "select char_id, char_name from characters where char_name = '$charName'";
 		$result = mysqli_query($link, $query) or die ("Can't execute the query");
 
 		if (mysqli_num_rows($result) == 0)
 		{
-			echo "<h1>Can't find the character ".htmlspecialchars($_POST["charName"], ENT_QUOTES)."<h1>";
+			echo "<h1>Can't find the character ".htmlspecialchars($postCharName, ENT_QUOTES)."<h1>";
 		}
 		else
 		{
@@ -95,15 +98,23 @@
 	else
 	{
 		// buid a form to gather info about the character to invite
-
-		echo "<h1>Invite a player in the session ".htmlspecialchars($_POST["sessionId"], ENT_QUOTES)."</h1>";
-		echo "<form action='invite_pioneer.php' method='post'>Type in character name:<br>";
-		echo "<input type='text' name='charName' value=''>";
-		echo "<input type='submit' name='button' value='Invite'>";
-		echo "<input type='hidden' name='sessionId' value='".htmlspecialchars($_POST["sessionId"], ENT_QUOTES)."'>";
-		echo "<input type='hidden' name='mode' value='".htmlspecialchars($_POST["mode"], ENT_QUOTES)."'>";
-		echo "<input type='hidden' name='execute'>";
-		echo "</form> ";
+		$formSessionId = isset($_POST["sessionId"]) ? $_POST["sessionId"] : (isset($_GET["sessionId"]) ? $_GET["sessionId"] : '');
+		$formMode = isset($_POST["mode"]) ? $_POST["mode"] : (isset($_GET["mode"]) ? $_GET["mode"] : '');
+		if ($formSessionId === '')
+		{
+			echo "<h1>Missing sessionId</h1>";
+		}
+		else
+		{
+			echo "<h1>Invite a player in the session ".htmlspecialchars($formSessionId, ENT_QUOTES)."</h1>";
+			echo "<form action='invite_pioneer.php' method='post'>Type in character name:<br>";
+			echo "<input type='text' name='charName' value=''>";
+			echo "<input type='submit' name='button' value='Invite'>";
+			echo "<input type='hidden' name='sessionId' value='".htmlspecialchars($formSessionId, ENT_QUOTES)."'>";
+			echo "<input type='hidden' name='mode' value='".htmlspecialchars($formMode, ENT_QUOTES)."'>";
+			echo "<input type='hidden' name='execute'>";
+			echo "</form> ";
+		}
 	}
 
 	

@@ -41,4 +41,27 @@ $AutoCreateRingInfo = $CREATE_RING;
 if (!isset($LoginAllowDbg))
 	$LoginAllowDbg = false;
 
+// stats_query.php: optional shared secret (query param or header). When set,
+// a matching token grants access without relying on the private-network regex.
+if (!isset($StatsQuerySecret))
+	$StatsQuerySecret = isset($cfg['stats_query']['secret']) ? $cfg['stats_query']['secret'] : '';
+// stats_query.php / stats.php die2(): regex matched against REMOTE_ADDR.
+// Override in config_user.php for your LAN; default keeps the historical
+// 192.168.1.* allowlist used by the installer stats viewer.
+if (!isset($StatsPrivateNetwork))
+	$StatsPrivateNetwork = isset($cfg['stats_query']['private_network'])
+		? $cfg['stats_query']['private_network']
+		: '/^192\\.168\\.1\\./';
+
+/*
+ * Connect with utf8mb4 so mysqli_real_escape_string and multi-byte
+ * input agree. Call after every mysqli_connect in the login/ring stack.
+ */
+function nel_mysqli_set_charset($link)
+{
+	if ($link)
+		@mysqli_set_charset($link, 'utf8mb4');
+	return $link;
+}
+
 ?>

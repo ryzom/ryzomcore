@@ -32,17 +32,24 @@
 	}
 	else
 	{
+		// Cancel is a state change; refuse bare GET so a top-level navigation
+		// cannot trigger cancelSession(…, 0) with only the ryzomId cookie.
+		if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['sessionId']))
+		{
+			echo "Missing sessionId";
+			die();
+		}
 		$domainInfo = getDomainInfo($domainId);
 		$addr = explode(":", $domainInfo["session_manager_address"]);
 		$RSMHost = $addr[0];
 		$RSMPort = $addr[1];
-		
+
 		// ask to start the session
 		$cancelSessionCb = new CancelSessionCb;
 		$res = "";
 		$cancelSessionCb->connect($RSMHost, $RSMPort, $res);
-		$cancelSessionCb->cancelSession($charId, isset($_POST["sessionId"]) ? intval($_POST["sessionId"]) : 0);
-		
+		$cancelSessionCb->cancelSession($charId, intval($_POST["sessionId"]));
+
 		// wait the the return message
 		$cancelSessionCb->waitCallback();
 	}

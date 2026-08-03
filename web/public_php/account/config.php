@@ -209,6 +209,40 @@ function hasAnyPriv($privileges, $privList)
 }
 
 /**
+ * Reload Privilege (and identity fields) from the database into the session.
+ * Privilege is otherwise sticky until re-login, so a demoted GM would keep
+ * the admin UI for the life of the cookie.
+ *
+ * @return bool false if the account no longer exists
+ */
+function refreshAccountSession()
+{
+	if (empty($_SESSION['account_uid'])) {
+		return false;
+	}
+	try {
+		$db = getNelDatabase();
+		// When viewing as another user, refresh that account's privileges;
+		// the admin's own id lives in impersonate_admin_uid.
+		$uid = (int)$_SESSION['account_uid'];
+		$stmt = $db->prepare('SELECT UId, Login, Email, Privilege FROM user WHERE UId = :uid');
+		$stmt->execute(array(':uid' => $uid));
+		$user = $stmt->fetch();
+		if (!$user) {
+			return false;
+		}
+		$_SESSION['account_login'] = $user['Login'];
+		$_SESSION['account_email'] = $user['Email'];
+		$_SESSION['account_privilege'] = isset($user['Privilege']) ? $user['Privilege'] : '';
+		return true;
+	} catch (PDOException $e) {
+		// Keep the session values on a transient DB error; the page will
+		// still fail its own queries if the outage continues.
+		return true;
+	}
+}
+
+/**
  * Check if the current session user has admin privileges.
  * Uses the `admin_privileges` setting (default: :DEV:SGM:GM:).
  */

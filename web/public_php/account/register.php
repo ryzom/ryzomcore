@@ -6,7 +6,9 @@ $pageTitle = 'Create Account';
 
 // Sites that hand out accounts by other means can close this page from the
 // dev settings; the login service has the same idea in $ALLOW_UNKNOWN.
-$registrationOpen = getSetting('registration_open', '1') !== '0';
+// Default closed: an open public registration form on a freshly installed
+// shard is rarely what operators want.
+$registrationOpen = getSetting('registration_open', '0') !== '0';
 
 if (!$registrationOpen) {
 	$error = 'Account registration is closed on this server.';
@@ -28,8 +30,8 @@ if (!$registrationOpen) {
 		$error = 'Username may only contain letters, numbers, and underscores.';
 	} elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
 		$error = 'Please enter a valid email address.';
-	} elseif (strlen($password) < 5) {
-		$error = 'Password must be at least 5 characters.';
+	} elseif (strlen($password) < 8) {
+		$error = 'Password must be at least 8 characters.';
 	} elseif ($password !== $confirm) {
 		$error = 'Passwords do not match.';
 	} else {

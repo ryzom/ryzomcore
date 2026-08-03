@@ -166,6 +166,8 @@ function inviteOwnerInSession($charId, $domainId, $sessionId)
 	$DomainId = $domainId;
 
 	$link = mysqli_connect($DBHost, $RingDBUserName, $RingDBPassword, NULL, $DBPort) or die("Can't connect to ring database");
+	if (function_exists('nel_mysqli_set_charset'))
+		nel_mysqli_set_charset($link);
 	mysqli_select_db($link, $domainInfo['ring_db_name']) or die ("Can't access to the db");
 
 	$sessionId = (int) $sessionId;

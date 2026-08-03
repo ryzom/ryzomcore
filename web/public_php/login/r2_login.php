@@ -65,6 +65,7 @@
 				global $DBHost, $DBPort, $DBUserName, $DBPassword, $DBName, $AutoInsertInRing;
 
 				$link = mysqli_connect($DBHost, $DBUserName, $DBPassword, NULL, $DBPort) or die (errorMsgBlock(3004, 'main', $DBHost, $DBUserName));
+				nel_mysqli_set_charset($link);
 				mysqli_select_db ($link, $DBName) or die (errorMsgBlock(3005, 'main', $DBName, $DBHost, $DBUserName));
 				$domainId = intval($domainId);
 			$query = "SELECT * FROM domain WHERE domain_id=$domainId";
@@ -257,6 +258,7 @@
 			{
 				// check if the ring user exist, and create it if not
 				$ringDb = mysqli_connect($DBHost, $RingDBUserName, $RingDBPassword, NULL, $DBPort) or die(errorMsgBlock(3004, 'Ring', $DBHost, $RingDBUserName));
+				nel_mysqli_set_charset($ringDb);
 				mysqli_select_db ($ringDb, $domainInfo['ring_db_name']) or die(errorMsgBlock(3005, 'Ring', $domainInfo['ring_db_name'], $DBHost, $RingDBUserName));
 				$query = "SELECT user_id FROM ring_users where user_id = '".$id."'";
 				$result = mysqli_query ($ringDb, $query) or die(errorMsgBlock(3006, $query, 'Ring', $domainInfo['ring_db_name'], $DBHost, $RingDBUserName, mysqli_error($ringDb)));
@@ -338,6 +340,7 @@
 		setMsgLanguage($lang);
 
 		$link = mysqli_connect($DBHost, $DBUserName, $DBPassword, NULL, $DBPort) or die (errorMsgBlock(3004, 'main', $DBHost, $DBUserName));
+		nel_mysqli_set_charset($link);
 		mysqli_select_db ($link, $DBName) or die (errorMsgBlock(3005, 'main', $DBName, $DBHost, $DBUserName));
 
 		// we map the client application to the domain name
@@ -551,6 +554,7 @@
 		setMsgLanguage($lang);
 
 		$link = mysqli_connect($DBHost, $DBUserName, $DBPassword, NULL, $DBPort) or die (errorMsgBlock(3004, 'main', $DBHost, $DBUserName));
+		nel_mysqli_set_charset($link);
 		mysqli_select_db ($link, $DBName) or die (errorMsgBlock(3005, 'main', $DBName, $DBHost, $DBUserName));
 
 		$login = mysqli_real_escape_string($link, $login);
