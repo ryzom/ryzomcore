@@ -23,9 +23,11 @@ function login(){
 			$user = new WebUsers($_SESSION['id']);
 			$_SESSION['Language'] = $user->getLanguage();
 
+			// this is pasted onto the redirect target, so encode it
 			$GETString = "";
 			foreach($_GET as $key => $value){
-				$GETString = $GETString . $key . '=' . $value . "&";
+				if (!is_scalar($value)) continue;
+				$GETString = $GETString . rawurlencode($key) . '=' . rawurlencode($value) . "&";
 			}
 			if($GETString != ""){
 				$GETString = '?'.$GETString;

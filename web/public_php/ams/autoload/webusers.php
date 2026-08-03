@@ -80,6 +80,9 @@ class WebUsers extends Users{
           $dbw = new DBLayer("web");
           $statement = $dbw->select("ams_user", array('value' => $value),"Login=:value OR Email=:value");
           $row = $statement->fetch();
+          if (!$row || !isset($row['Password']) || $row['Password'] === ''){
+                return "fail";
+          }
           if ($row['Password'][0] == '$')
           {
               $salt = substr($row['Password'], 0, 19);
@@ -89,7 +92,8 @@ class WebUsers extends Users{
               $salt = substr($row['Password'], 0, 2);
           }
           $hashed_input_pass = crypt($password, $salt);
-          if($hashed_input_pass == $row['Password']){
+          // compare without leaking where the two values stop matching
+          if(hash_equals((string)$row['Password'], (string)$hashed_input_pass)){
                 return $row;
           }else{
                 return "fail";
