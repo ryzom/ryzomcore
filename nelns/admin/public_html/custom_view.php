@@ -451,7 +451,7 @@
 	echo "<table><tr valign=top><td>\n";
 	echo "<b>Your current views: </b>".help("View")."<br><font size=0>(click name to view/edit table, click radio to select as default view)</font><br>\n";
 	echo "<table border=1>\n";
-	echo "<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?tid=".intval($tid)."&sel_vgid=".intval($sel_vgid)."'>";
+	echo "<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?tid=".intval($tid)."&sel_vgid=".intval($sel_vgid)."$nelnsCsrfUrl'>";
 	echo "<tr><th>Index</th><th>[Default] View</th><th>Commands</th></tr>\n";
 	if (isset($userViews) && count($userViews)>0)
 	{
@@ -464,13 +464,13 @@
 			echo "<tr><td$color>".intval($arr["ordering"])."</td>";
 			echo 		"<td$color><input type=radio name=default_view value='$_tid' onClick='submit()'".($_tid==$default_view ? " checked" : "")."><a href='$self?tid=$_tid&sel_vgid=".intval($sel_vgid)."'>$_tname</a></td>".
 						"<td$color><a href='$self?removeView=$_tid$nelnsCsrfUrl&tid=".intval($tid)."&sel_vgid=".intval($sel_vgid)."' onClick=\"return confirm('You are about to delete a View')\">Delete</a> ".
-							 "<a href='$self?moveView=".intval($arr["ordering"])."&offs=+1&tid=".intval($tid)."&sel_vgid=".intval($sel_vgid)."'>-</a> ".
-							 "<a href='$self?moveView=".intval($arr["ordering"])."&offs=-1&tid=".intval($tid)."&sel_vgid=".intval($sel_vgid)."'>+</a> ".
-							 "<a href='$self?dupView=true&tid=$_tid&offs=-1&sel_vgid=".intval($sel_vgid)."'>Duplicate</a></td></tr>\n";
+							 "<a href='$self?moveView=".intval($arr["ordering"])."$nelnsCsrfUrl&offs=+1&tid=".intval($tid)."&sel_vgid=".intval($sel_vgid)."'>-</a> ".
+							 "<a href='$self?moveView=".intval($arr["ordering"])."$nelnsCsrfUrl&offs=-1&tid=".intval($tid)."&sel_vgid=".intval($sel_vgid)."'>+</a> ".
+							 "<a href='$self?dupView=true$nelnsCsrfUrl&tid=$_tid&offs=-1&sel_vgid=".intval($sel_vgid)."'>Duplicate</a></td></tr>\n";
 		}
 	}
 	echo "</form>\n";
-	echo "<tr><form method=post action='".htmlspecialchars(basename($_SERVER['PHP_SELF']), ENT_QUOTES)."'><td></td>\n";
+	echo "<tr><form method=post action='".htmlspecialchars(basename($_SERVER['PHP_SELF']), ENT_QUOTES)."?csrf=".rawurlencode($nelnsCsrf)."'><td></td>\n";
 	echo "<td><input type=text name=viewname maxlength=32 size=16></td>\n";
 	echo "<td><input type=submit name=createview value='Create new view'></td>\n";
 	echo "</form></tr>\n";
@@ -484,7 +484,7 @@
 		echo "<b>".htmlspecialchars($group, ENT_QUOTES)." views: </b>".help("View")."<br><font size=0>(click name to view table, click radio to select as default view)</font><br>\n";
 		echo "<table border=1>\n";
 		echo "<tr><th>Index</th><th>[Default] View</th><th>Commands</th></tr>\n";
-		echo "<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?tid=".intval($tid)."&sel_vgid=".intval($sel_vgid)."'>\n";
+		echo "<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?tid=".intval($tid)."&sel_vgid=".intval($sel_vgid)."$nelnsCsrfUrl'>\n";
 		foreach ($groupViews as $arr)
 		{
 			$_tname = $arr["name"];
@@ -492,7 +492,7 @@
 			$color = ($tid == $_tid ? " bgcolor=#eeeeee" : "");
 			echo "<tr><td$color>".intval($arr["ordering"])."</td>".
 						"<td$color><input type=radio name=default_view value='".intval($_tid)."' onClick='submit()'".($_tid==$default_view ? " checked" : "")."><a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?tid=".intval($_tid)."&sel_vgid=".intval($sel_vgid)."'>".htmlspecialchars($_tname, ENT_QUOTES)."</a></td>".
-						"<td$color><a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?dupView=true&tid=".intval($_tid)."&offs=-1&sel_vgid=".intval($sel_vgid)."'>Duplicate</a></td></tr>\n";
+						"<td$color><a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?dupView=true$nelnsCsrfUrl&tid=".intval($_tid)."&offs=-1&sel_vgid=".intval($sel_vgid)."'>Duplicate</a></td></tr>\n";
 		}
 		echo "</form>\n";
 		echo "</table><br>\n";
