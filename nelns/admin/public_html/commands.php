@@ -54,10 +54,10 @@
 	echo "<table border=1><form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."'>\n";
 	echo "<tr><th rowspan=2>&nbsp;Filters&nbsp;</th><th>shard</th><th>server</th><th>service</th><th>entity</th><td rowspan=2>&nbsp;<input type=submit name='display_view' value='Update\nfilters'>&nbsp;</td><td rowspan=2>&nbsp;<input type=submit name='reset_filters' value='Reset\nfilters'>&nbsp;</td></tr>\n";
 	echo "<tr>\n";
-	echo "<td><input type=text name=filter_shard value='$filter_shard' size=12 maxlength=256></td>\n";
-	echo "<td><input type=text name=filter_server value='$filter_server' size=12 maxlength=256></td>\n";
-	echo "<td><input type=text name=filter_service value='$filter_service' size=12 maxlength=256></td>\n";
-	echo "<td><input type=text name=filter_entity value='$filter_entity' size=28 maxlength=1024></td>\n";
+	echo "<td><input type=text name=filter_shard value='".htmlspecialchars($filter_shard, ENT_QUOTES)."' size=12 maxlength=256></td>\n";
+	echo "<td><input type=text name=filter_server value='".htmlspecialchars($filter_server, ENT_QUOTES)."' size=12 maxlength=256></td>\n";
+	echo "<td><input type=text name=filter_service value='".htmlspecialchars($filter_service, ENT_QUOTES)."' size=12 maxlength=256></td>\n";
+	echo "<td><input type=text name=filter_entity value='".htmlspecialchars($filter_entity, ENT_QUOTES)."' size=28 maxlength=1024></td>\n";
 	echo "</tr>\n";
 	echo "</form></table><br>\n";
 
@@ -121,8 +121,8 @@
 	echo "<td>\n";
 	echo "<table border=0><form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."' name='cmdform'>\n";
 	echo "<tr><th align=left>Service Path</th><th align=left>Command (exact service syntax)</th></tr>\n";
-	echo "<tr><td><input name=preselServ value='$preselServ' size=32 maxlength=256></td>\n";
-	echo "<td><input name=execCommand value='".stripslashes($execCommand)."' size=50 maxlength=20480></td>\n";
+	echo "<tr><td><input name=preselServ value='".htmlspecialchars($preselServ, ENT_QUOTES)."' size=32 maxlength=256></td>\n";
+	echo "<td><input name=execCommand value='".htmlspecialchars(stripslashes($execCommand), ENT_QUOTES)."' size=50 maxlength=20480></td>\n";
 	echo "<td><input type=submit value=Execute></td></tr>\n";
 	echo "</form></table>\n";
 

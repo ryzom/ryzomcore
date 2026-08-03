@@ -133,7 +133,7 @@
 		echo "<form method='post' action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."'>";
 		echo "<tr><td bgcolor=#DDDDEE>Download file</td><tr>";
 		echo "<td>";
-		echo "<input type=text name='file' size=40 maxlength=255 value='$file'/>";
+		echo "<input type=text name='file' size=40 maxlength=255 value='".htmlspecialchars($file, ENT_QUOTES)."'/>";
 		echo "<input type=submit name='download' value='Download'/>";
 		echo "</td>";
 		echo "</tr>";
@@ -154,10 +154,10 @@
 		foreach ($shards as $shard)
 		{
 			$addr = $shard['shard'].".".$shard['server'].".".$shard['service'];
-			echo "<option value='$addr'".($shard_addr == $addr ? " selected" : "").">$addr</option>";
+			echo "<option value='".htmlspecialchars($addr, ENT_QUOTES)."'".($shard_addr == $addr ? " selected" : "").">".htmlspecialchars($addr, ENT_QUOTES)."</option>";
 		}
 		echo "</select>\n";
-		echo "<input type=text name='file' size=40 maxlength=255 value='$file'/>";
+		echo "<input type=text name='file' size=40 maxlength=255 value='".htmlspecialchars($file, ENT_QUOTES)."'/>";
 		echo "<input type=submit name='upload' value='Upload'/>";
 		echo "</td>";
 		echo "</tr>";

@@ -21,9 +21,9 @@
 	function connectToDatabase($dbhost, $dbname, $dblogin, $dbpasswd)
 	{
 		if (!mysql_connect($dbhost, $dblogin, $dbpasswd))
-			return "Unable to connect to MySQL server (host='$dbhost' login='$dblogin')";
+			return "Unable to connect to MySQL server";
 		if (!mysql_select_db ($dbname))
-			return "Unable to select MySQL database '$dbname'";
+			return "Unable to select MySQL database";
 		return FALSE;
 	}
 	

@@ -170,10 +170,10 @@
 		echo "<table border=1>\n";
 		echo "<tr><th rowspan=2>&nbsp;Filters&nbsp;</th><th>shard</th><th>server</th><th>service</th><th>entity</th><td rowspan=2>&nbsp;<input type=submit name='display_view' value='Display\nView'>&nbsp;</td><td rowspan=2>&nbsp;<input type=submit name='reset_filters' value='Reset\nFilters'>&nbsp;</td></tr>\n";
 		echo "<tr>\n";
-		echo "<td><input type=text name=filter_shard value='$filter_shard' size=12 maxlength=256></td>\n";
-		echo "<td><input type=text name=filter_server value='$filter_server' size=12 maxlength=256></td>\n";
-		echo "<td><input type=text name=filter_service value='$filter_service' size=12 maxlength=256></td>\n";
-		echo "<td><input type=text name=filter_entity value='$filter_entity' size=28 maxlength=1024></td>\n";
+		echo "<td><input type=text name=filter_shard value='".htmlspecialchars($filter_shard, ENT_QUOTES)."' size=12 maxlength=256></td>\n";
+		echo "<td><input type=text name=filter_server value='".htmlspecialchars($filter_server, ENT_QUOTES)."' size=12 maxlength=256></td>\n";
+		echo "<td><input type=text name=filter_service value='".htmlspecialchars($filter_service, ENT_QUOTES)."' size=12 maxlength=256></td>\n";
+		echo "<td><input type=text name=filter_entity value='".htmlspecialchars($filter_entity, ENT_QUOTES)."' size=28 maxlength=1024></td>\n";
 		echo "</tr>\n";
 		echo "</table><br>\n";
 

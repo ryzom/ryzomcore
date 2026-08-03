@@ -367,8 +367,10 @@
 				{
 					if ($AcceptUnknownUser)
 					{
-						// add default permission
-						$query = "INSERT INTO permission (UId, DomainId, ShardId, AccessPrivilege) VALUES ('".$row["UId"]."', '$domainId', -1, '$domainStatus')";
+						// add default permission ($accessPriv is the domain
+						// status privilege computed above; $domainStatus was
+						// never set and would have written an empty privilege)
+						$query = "INSERT INTO permission (UId, DomainId, ShardId, AccessPrivilege) VALUES ('".$row["UId"]."', '$domainId', -1, '$accessPriv')";
 						$result = mysqli_query ($link, $query) or die (errorMsgBlock(3006, $query, 'main', $DBName, $DBHost, $DBUserName, mysqli_error($link)));
 
 						$reason = errorMsg(3010);
