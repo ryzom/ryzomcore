@@ -180,7 +180,7 @@
 {elseif $tool_hd_list[hd].hd_percent >= 75}{assign var="hdtrclass" value="row_orange_light"}
 {else}{assign var="hdtrclass" value="row0"}{/if}
 		<tr class="{$hdtrclass}">
-			<td align="left" ><a href="javascript:void(0);" onmouseover="return overlib('{$tool_hd_list[hd].summary|smarty:nodefaults}', OFFSETX, 40, OFFSETY, 10);" onmouseout="return nd();">{$tool_hd_list[hd].hd_server}</a></td>
+			<td align="left" ><a href="javascript:void(0);" onmouseover="return overlib('{$tool_hd_list[hd].summary|escape:'javascript'|escape:'html'|smarty:nodefaults}', OFFSETX, 40, OFFSETY, 10);" onmouseout="return nd();">{$tool_hd_list[hd].hd_server}</a></td>
 			<td align="right">{$tool_hd_list[hd].hd_percent}%</td>
 		</tr>
 {/section}

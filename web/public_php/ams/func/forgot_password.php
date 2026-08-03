@@ -20,10 +20,14 @@ function forgot_password(){
         // password hash and never expired on its own
         $hashed_key = WebUsers::createPasswordResetToken($target_id, $target_hashedPass);
 
-        if ( isset( $_COOKIE['Language'] ) ) {
+        // the cookie is client supplied and becomes part of the .ini path
+        // below, so only let a bare language code through, the same way
+        // Helpers::loadTranslations() does
+        global $DEFAULT_LANGUAGE;
+        if ( isset( $_COOKIE['Language'] ) && is_string( $_COOKIE['Language'] )
+             && preg_match( '/^[A-Za-z_-]{2,10}$/', $_COOKIE['Language'] ) ) {
             $lang = $_COOKIE['Language'];
         }else{
-            global $DEFAULT_LANGUAGE;
             $lang = $DEFAULT_LANGUAGE;
         }
 
