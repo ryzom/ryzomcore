@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-08-03 — 🐛 Fix MSVC operator< ambiguity for unqualified NUM_SKILLS in skill_manager.cpp
+
+`skill_manager.cpp` has `using namespace SKILLS;` at file scope, so its two
+`i < NUM_SKILLS` loop bounds use the unqualified name — the earlier sweeps
+only searched for the qualified `SKILLS::NUM_SKILLS` form and missed these.
+Cast both to `(uint)`.
+
+Commit: 🐛 Fix operator< ambiguity for unqualified NUM_SKILLS
+
 ## 2026-08-03 — 🐛 Fix MSVC operator== ambiguity for sint skillValue vs SKILLS:: constants
 
 Same family of issue, but this time against specific `SKILLS::` constants
