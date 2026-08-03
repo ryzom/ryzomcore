@@ -166,21 +166,32 @@
 
 		if (trim($host) == "") return "No MFS Web Host Configured for this domain!";
 
+		// Host comes from domain config; still refuse characters that would
+		// leave the authority part of the URL. Parameters must be encoded
+		// so guild/shard/thread cannot inject extra form fields.
+		$host = trim((string)$host);
+		if (!preg_match('/^[A-Za-z0-9._:-]+$/', $host))
+			return "Invalid MFS Web Host for this domain!";
+
 		$url = "http://". $host ."/admin.php";
 
-		$uri_params  = 'user_login=support';
-		$uri_params .= '&shard='. $shard;
-		$uri_params .= '&forum='. $guild;
+		$params = array(
+			'user_login' => 'support',
+			'shard' => (string)$shard,
+			'forum' => (string)$guild,
+		);
 
 		if ($thread !== null && $recover === null)
 		{
-			$uri_params .= '&thread='. $thread;
+			$params['thread'] = (string)$thread;
 		}
 		elseif ($recover !== null && $thread !== null)
 		{
-			$uri_params .= '&recover_thread='. $guild;
-			$uri_params .= '&recover_threadthread='. $thread;
+			$params['recover_thread'] = (string)$guild;
+			$params['recover_threadthread'] = (string)$thread;
 		}
+
+		$uri_params = http_build_query($params, '', '&');
 
 		nt_common_add_debug("curling '$url' with '$uri_params'");
 

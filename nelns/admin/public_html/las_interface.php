@@ -228,43 +228,89 @@
 	echo "<br>\n";
 
 
+	// Database name, dates and eids become bare words on the LAS wire;
+	// the free-text search is quoted. Refuse anything that would reframe
+	// the command (spaces, quotes, control characters).
+	$las_db_ok = is_string($database) && preg_match('/^[A-Za-z0-9_]{1,64}$/', $database);
+	$las_date_ok = function ($d) {
+		return $d === '' || (is_string($d) && preg_match('/^[0-9]{4}[-.\\/][0-9]{1,2}[-.\\/][0-9]{1,2}([ T][0-9:]+)?$/', $d));
+	};
+	$las_eid_ok = function ($e) {
+		return is_string($e) && preg_match('/^[A-Za-z0-9():._-]{1,64}$/', $e);
+	};
+
 	if ($build_eid_query || $build_display_query)
 	{
-		$eids = array();
-		for ($i=0; $i<10; ++$i)
-			if ($GLOBALS["eid_$i"] != '')
-				$eids[] = $GLOBALS["eid_$i"];
-
-		if (count($eids) == 0 || $build_display_query)
+		if (!$las_db_ok || !$las_date_ok($start_date) || !$las_date_ok($end_date))
 		{
-			$query = "displayLogs $database $start_date";
-			if ($end_date != '')
-				$query .= " $end_date";
-			$exec_query = true;
-		}
-		else if (count($eids) > 1)
-		{
-			$query = "searchEIds $database ".join(' ', $eids)." - $start_date";
-			if ($end_date != '')
-				$query .= " $end_date";
-			$exec_query = true;
+			echo "<b>Invalid database name or date for LAS query.</b><br>\n";
 		}
 		else
 		{
-			$query = "searchEId $database ".$eids[0]." $start_date";
-			if ($end_date != '')
-				$query .= " $end_date";
-			$exec_query = true;
+			$eids = array();
+			$eids_valid = true;
+			for ($i=0; $i<10; ++$i)
+			{
+				if (!isset($GLOBALS["eid_$i"]) || $GLOBALS["eid_$i"] == '')
+					continue;
+				if (!$las_eid_ok($GLOBALS["eid_$i"]))
+				{
+					$eids_valid = false;
+					break;
+				}
+				$eids[] = $GLOBALS["eid_$i"];
+			}
+
+			if (!$eids_valid)
+			{
+				echo "<b>Invalid entity id for LAS query.</b><br>\n";
+			}
+			else if (count($eids) == 0 || $build_display_query)
+			{
+				$query = "displayLogs $database $start_date";
+				if ($end_date != '')
+					$query .= " $end_date";
+				$exec_query = true;
+			}
+			else if (count($eids) > 1)
+			{
+				$query = "searchEIds $database ".join(' ', $eids)." - $start_date";
+				if ($end_date != '')
+					$query .= " $end_date";
+				$exec_query = true;
+			}
+			else
+			{
+				$query = "searchEId $database ".$eids[0]." $start_date";
+				if ($end_date != '')
+					$query .= " $end_date";
+				$exec_query = true;
+			}
 		}
 	}
 	else if ($build_string_query)
 	{
 		if ($string != '')
 		{
-			$query = "searchString $database \"$string\" $start_date";
-			if ($end_date != '')
-				$query .= " $end_date";
-			$exec_query = true;
+			if (!$las_db_ok || !$las_date_ok($start_date) || !$las_date_ok($end_date))
+			{
+				echo "<b>Invalid database name or date for LAS query.</b><br>\n";
+			}
+			else
+			{
+				// Keep the search inside the quoted argument.
+				$string_safe = str_replace(array("\r", "\n", "\0", '"', '\\'), ' ', (string)$string);
+				$string_safe = trim($string_safe);
+				if (strlen($string_safe) > 256)
+					$string_safe = substr($string_safe, 0, 256);
+				if ($string_safe !== '')
+				{
+					$query = "searchString $database \"$string_safe\" $start_date";
+					if ($end_date != '')
+						$query .= " $end_date";
+					$exec_query = true;
+				}
+			}
 		}
 	}
 
