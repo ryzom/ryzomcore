@@ -3,6 +3,13 @@
 	include_once('../config.php');
 	include_once('service_connection.php');
 
+	// The answers here are the "1:.." / "0:.." lines the client parses, and
+	// several of them quote the login and the client application back
+	// ("Unknown login %s"). With the default html content type a browser
+	// renders that, so say what this is and stop it guessing otherwise.
+	header('Content-Type: text/plain; charset=utf-8');
+	header('X-Content-Type-Options: nosniff');
+
 // ---------------------------------------------------------------------------------------- 
 // Functions
 // ---------------------------------------------------------------------------------------- 

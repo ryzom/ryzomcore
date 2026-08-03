@@ -254,9 +254,17 @@
 			{
 				$Buffer .= fread ($this->ConSock, $size - strlen($Buffer));
 				$info = stream_get_meta_data($this->ConSock);
-				if ($info['timed_out']) 
+				if ($info['timed_out'])
 				{
 					debug('Connection timed out!');
+					return false;
+				}
+				// a closed peer makes fread() return '' without setting the
+				// timeout flag, and the loop would then spin until the script
+				// itself is killed
+				if (feof($this->ConSock))
+				{
+					debug('Connection closed while reading!');
 					return false;
 				}
 			}

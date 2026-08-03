@@ -162,7 +162,7 @@
 {if $tool_note_list[note].note_mode == 0}
 			<td align="center"><a href="javascript:void(0);" onclick="return overlib('{$tool_note_list[note].note_data|smarty:nodefaults}', WIDTH, 250, STICKY, DRAGGABLE, CAPTION, '{$tool_note_list[note].note_title2|smarty:nodefaults}', CENTER, CLOSECLICK, ANCHOR, 'ol_anchor_right', ANCHORALIGN, 'LL', 'UR');" onmouseout="nd();">{$tool_note_list[note].note_title|smarty:nodefaults}</a></td>
 {elseif $tool_note_list[note].note_mode == 1}
-			<td align="center"><a href="javascript:openWindow('{$tool_note_list[note].note_popup_uri}','{$tool_note_list[note].note_title|smarty:nodefaults}');">{$tool_note_list[note].note_title|smarty:nodefaults}</a></td>
+			<td align="center"><a href="javascript:openWindow('{$tool_note_list[note].note_popup_uri|escape:'javascript'|escape:'html'|smarty:nodefaults}','{$tool_note_list[note].note_title2|smarty:nodefaults}');">{$tool_note_list[note].note_title|smarty:nodefaults}</a></td>
 {/if}
 		</tr>
 {/section}
