@@ -36,22 +36,15 @@
 
 	
 	
-	//get the ip of the viewer
+	// Peer address only. HTTP_CLIENT_IP / X-Forwarded-For are set by the
+	// caller, so trusting them would let anyone claim a private address and
+	// open the detailed error path (and, on stats_query, the whole view).
 	function getIp()
 	{
-		if (getenv("HTTP_CLIENT_IP"))
-		{
-			$ip = getenv("HTTP_CLIENT_IP");
-		}
-		elseif(getenv("HTTP_X_FORWARDED_FOR"))
-		{
-			$ip = getenv("HTTP_X_FORWARDED_FOR");
-		}
-		else
-		{
-			$ip = getenv("REMOTE_ADDR");
-		}
-		return $ip;
+		if (!empty($_SERVER['REMOTE_ADDR']))
+			return $_SERVER['REMOTE_ADDR'];
+		$ip = getenv("REMOTE_ADDR");
+		return ($ip !== false && $ip !== '') ? $ip : '';
 	}
 
 
