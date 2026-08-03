@@ -160,15 +160,20 @@
 
 							if (($tool_services_gl == 'update name') && tool_admin_applications_check('tool_guild_locator_manage_guild'))
 							{
-								$service		= $NELTOOL['POST_VARS']['servicealias'];
-								$guild_shard_id = $NELTOOL['POST_VARS']['guildshardid'];
-								$guild_id		= $NELTOOL['POST_VARS']['guildid'];
-								$new_guild_name = $NELTOOL['POST_VARS']['new_guild_name'];
+								$service		= isset($NELTOOL['POST_VARS']['servicealias']) ? $NELTOOL['POST_VARS']['servicealias'] : '';
+								$guild_shard_id = isset($NELTOOL['POST_VARS']['guildshardid']) ? (int)$NELTOOL['POST_VARS']['guildshardid'] : 0;
+								$guild_id		= isset($NELTOOL['POST_VARS']['guildid']) ? (int)$NELTOOL['POST_VARS']['guildid'] : 0;
+								$new_guild_name = isset($NELTOOL['POST_VARS']['new_guild_name']) ? $NELTOOL['POST_VARS']['new_guild_name'] : '';
 
 								$new_guild_name = trim($new_guild_name);
-								if (ereg("^[a-zA-Z0-9\ ]+$", $new_guild_name))
+								if (!tool_main_valid_service_alias($service) || $guild_shard_id <= 0 || $guild_id <= 0)
+								{
+									$tpl->assign('tool_guild_errors',	array('Invalid service or guild id.'));
+								}
+								else if (preg_match('/^[a-zA-Z0-9 ]+$/', $new_guild_name))
 								{
 									// this is a small hack that was done by daniel so i could use the renameGuild command without an EID
+									$new_guild_name = tool_main_frame_quoted_arg($new_guild_name, 64);
 									$service_command = 'renameGuild admin_tool '. $guild_shard_id .':'. $guild_id .' "'. $new_guild_name .'"';
 
 									nt_log("Domain '$AS_Name' : '$service_command' on ". $service);
@@ -200,14 +205,19 @@
 
 							if (($tool_services_gl == 'update description') && tool_admin_applications_check('tool_guild_locator_manage_guild'))
 							{
-								$service		= $NELTOOL['POST_VARS']['servicealias'];
-								$guild_shard_id = $NELTOOL['POST_VARS']['guildshardid'];
-								$guild_id		= $NELTOOL['POST_VARS']['guildid'];
-								$new_guild_desc	= $NELTOOL['POST_VARS']['new_guild_description'];
+								$service		= isset($NELTOOL['POST_VARS']['servicealias']) ? $NELTOOL['POST_VARS']['servicealias'] : '';
+								$guild_shard_id = isset($NELTOOL['POST_VARS']['guildshardid']) ? (int)$NELTOOL['POST_VARS']['guildshardid'] : 0;
+								$guild_id		= isset($NELTOOL['POST_VARS']['guildid']) ? (int)$NELTOOL['POST_VARS']['guildid'] : 0;
+								$new_guild_desc	= isset($NELTOOL['POST_VARS']['new_guild_description']) ? $NELTOOL['POST_VARS']['new_guild_description'] : '';
 
 								$new_guild_desc = trim($new_guild_desc);
-								if (ereg("^[a-zA-Z0-9\ ]+$", $new_guild_desc))
+								if (!tool_main_valid_service_alias($service) || $guild_shard_id <= 0 || $guild_id <= 0)
 								{
+									$tpl->assign('tool_guild_errors',	array('Invalid service or guild id.'));
+								}
+								else if (preg_match('/^[a-zA-Z0-9 ]+$/', $new_guild_desc))
+								{
+									$new_guild_desc = tool_main_frame_quoted_arg($new_guild_desc, 128);
 									$service_command = 'setGuildDescription '. $guild_shard_id .':'. $guild_id .' "'. $new_guild_desc .'"';
 
 									nt_log("Domain '$AS_Name' : '$service_command' on ". $service);
@@ -426,23 +436,34 @@
 											{
 												case 'viewthread':
 
-													$view_forum_threadid		= $NELTOOL['GET_VARS']['threadid'];
-													$view_forum_recoverable		= $NELTOOL['GET_VARS']['recoverable'];
+													$view_forum_threadid		= isset($NELTOOL['GET_VARS']['threadid']) ? (int)$NELTOOL['GET_VARS']['threadid'] : 0;
+													$view_forum_recoverable		= isset($NELTOOL['GET_VARS']['recoverable']) ? (int)$NELTOOL['GET_VARS']['recoverable'] : 0;
 
-													$thread_name = ($view_forum_recoverable == 1 ? '_':'') .'thread_'. $view_forum_threadid .'.index';
+													if ($view_forum_threadid > 0)
+													{
+														$thread_name = ($view_forum_recoverable == 1 ? '_':'') .'thread_'. $view_forum_threadid .'.index';
 
-													$view_thread_data_raw 		= tool_gl_view_forum($MFS_Web, $guild_shard_id, $guild_dump_data['guild_name'], $thread_name);
-													$view_thread_data			= tool_gl_parse_thread_view($view_thread_data_raw);
-													$tpl->assign('tool_guild_thread',	$view_thread_data);
+														$view_thread_data_raw 		= tool_gl_view_forum($MFS_Web, $guild_shard_id, $guild_dump_data['guild_name'], $thread_name);
+														$view_thread_data			= tool_gl_parse_thread_view($view_thread_data_raw);
+														$tpl->assign('tool_guild_thread',	$view_thread_data);
+													}
 
 													break;
 
 												case 'recoverthread':
 
-													$recover_forum_threadid		= $NELTOOL['GET_VARS']['threadid'];
+													// State change over GET: same CSRF bar as the grade links.
+													$csrf = isset($NELTOOL['GET_VARS']['csrf']) ? $NELTOOL['GET_VARS']['csrf'] : '';
+													$recover_forum_threadid = isset($NELTOOL['GET_VARS']['threadid']) ? (int)$NELTOOL['GET_VARS']['threadid'] : 0;
 
-													$thread_name = '_thread_'. $recover_forum_threadid .'.index';
-													tool_gl_view_forum($MFS_Web, $guild_shard_id, $guild_dump_data['guild_name'], $recover_forum_threadid, true);
+													if (!nt_csrf_check($csrf))
+													{
+														nt_common_add_debug('recoverthread refused: bad csrf token');
+													}
+													else if ($recover_forum_threadid > 0)
+													{
+														tool_gl_view_forum($MFS_Web, $guild_shard_id, $guild_dump_data['guild_name'], $recover_forum_threadid, true);
+													}
 
 													break;
 											}

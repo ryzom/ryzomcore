@@ -94,6 +94,35 @@
 		return tool_graphs_time_frame_get_default($list);
 	}
 
+	/*
+	 * Basenames from readdir() still land on an rrdtool command line and as
+	 * parts of the output path. Only plain graph file names are accepted.
+	 */
+	function tool_graphs_safe_rd_basename($name)
+	{
+		return is_string($name) && preg_match('/^[A-Za-z0-9._-]+$/', $name);
+	}
+
+	/*
+	 * Build an rrdtool graph invocation with shell-safe arguments. Time frame
+	 * is already allowlisted by tool_graphs_time_frame_validate().
+	 */
+	function tool_graphs_rrdtool_graph_cmd($rrd_path, $rrd_output, $start_seconds, $width = 0, $height = 0, $draw = 'LINE2:val#0000FF', $no_legend = false)
+	{
+		$cmd = NELTOOL_RRDTOOL
+			. ' graph ' . escapeshellarg($rrd_output);
+		if ($width > 0)
+			$cmd .= ' --width ' . (int)$width;
+		if ($height > 0)
+			$cmd .= ' --height ' . (int)$height;
+		$cmd .= ' --start -' . (int)$start_seconds
+			. ' ' . escapeshellarg('DEF:val=' . str_replace(':', '\\:', $rrd_path) . ':var:AVERAGE')
+			. ' ' . escapeshellarg($draw);
+		if ($no_legend)
+			$cmd .= ' --no-legend';
+		return $cmd;
+	}
+
 	function tool_graphs_menu_get_list()
 	{
 		global $tool_graph_menu;

@@ -472,12 +472,55 @@
 		return $data;
 	}
 
+	/*
+	 * Menu application_uri values are written into href and used for the
+	 * post-login redirect. Keep them relative to this site: no scheme
+	 * (javascript:, data:, http:), no protocol-relative //, no CR/LF.
+	 */
+	function tool_admin_safe_app_uri($uri)
+	{
+		$uri = trim(str_replace(array("\r", "\n", "\0"), '', (string)$uri));
+		if ($uri === '')
+			return '';
+		if (preg_match('#^[a-z][a-z0-9+.-]*:#i', $uri) || strpos($uri, '//') === 0)
+			return '';
+		if ($uri[0] === '/')
+			$uri = ltrim($uri, '/');
+		if ($uri === '' || !preg_match('#^[A-Za-z0-9._/?=&%+-]+$#', $uri))
+			return '';
+		if (strlen($uri) > 255)
+			$uri = substr($uri, 0, 255);
+		return $uri;
+	}
+
+	/*
+	 * Icon paths land in img src. Relative path only, no traversal.
+	 */
+	function tool_admin_safe_app_icon($icon)
+	{
+		$icon = trim(str_replace(array("\r", "\n", "\0"), '', (string)$icon));
+		if ($icon === '')
+			return '';
+		if (preg_match('#^[a-z][a-z0-9+.-]*:#i', $icon) || strpos($icon, '//') === 0)
+			return '';
+		if (strpos($icon, '..') !== false)
+			return '';
+		if (!preg_match('#^[A-Za-z0-9._/-]+$#', $icon))
+			return '';
+		if (strlen($icon) > 128)
+			$icon = substr($icon, 0, 128);
+		return $icon;
+	}
+
 	function tool_admin_applications_add($application_name, $application_uri, $application_restriction, $application_icon, $application_order, $application_visible)
 	{
 		global $db;
 
 		$application_name = trim($application_name);
 		if ($application_name == '')	return "/!\ Error: application name is empty!";
+
+		$application_uri = tool_admin_safe_app_uri($application_uri);
+		$application_icon = tool_admin_safe_app_icon($application_icon);
 
 		$application_exists = tool_admin_applications_name_exist($application_name);
 		if (!$application_exists)
@@ -532,6 +575,9 @@
 
 		$application_name = trim($application_name);
 		if ($application_name == "")	return "/!\ Error: application name is empty!";
+
+		$application_uri = tool_admin_safe_app_uri($application_uri);
+		$application_icon = tool_admin_safe_app_icon($application_icon);
 
 		$sql = "SELECT * FROM ". NELDB_APPLICATION_TABLE ." WHERE application_name='". $db->sql_escape_string($application_name) ."' AND application_id<>". intval($application_id);
 		if ($result = $db->sql_query($sql))

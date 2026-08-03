@@ -502,6 +502,28 @@
 	}
 
 	/*
+	 * Comma-separated service aliases for restart start/stop lists. Each
+	 * token must be a valid alias; empty input is allowed (returns empty
+	 * array). Invalid input returns null so the caller can refuse the action.
+	 */
+	function tool_main_valid_service_list($csv)
+	{
+		$csv = trim((string)$csv);
+		if ($csv === '')
+			return array();
+
+		$out = array();
+		foreach (explode(',', $csv) as $s)
+		{
+			$s = trim($s);
+			if ($s === '' || !tool_main_valid_service_alias($s))
+				return null;
+			$out[] = $s;
+		}
+		return $out;
+	}
+
+	/*
 	 * Entity ids on the wire are usually (0x…:aa:bb:cc); some dumps omit the
 	 * parentheses. Either way they must be a single command word — no space,
 	 * quote or newline that would frame a second argument.

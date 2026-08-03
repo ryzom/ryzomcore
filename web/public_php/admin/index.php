@@ -313,19 +313,31 @@
 				// we don't want more than 1 client executing the restart commands if they think they still have the lock
 				if (isset($tool_restart_info) && ($tool_restart_info['restart_sequence_user_name'] == $nel_user['user_name']) && tool_admin_applications_check('tool_main_easy_restart'))
 				{
-					$tool_seq_id			= $NELTOOL['POST_VARS']['restart_sequence_id'];
-					$tool_seq_step			= $NELTOOL['POST_VARS']['restart_sequence_step'];
+					// Service aliases and shard id ride into AES controlCmd /
+					// serviceCmd. The restart form posts them as hidden fields,
+					// so re-validate the same way the normal start/stop UI does.
+					$tool_seq_id			= isset($NELTOOL['POST_VARS']['restart_sequence_id']) ? (int)$NELTOOL['POST_VARS']['restart_sequence_id'] : 0;
+					$tool_seq_step			= isset($NELTOOL['POST_VARS']['restart_sequence_step']) ? (int)$NELTOOL['POST_VARS']['restart_sequence_step'] : 0;
 
-					$restart_shard_id 		= $NELTOOL['POST_VARS']['restart_shard_id'];
-					$service_su				= $NELTOOL['POST_VARS']['restart_su'];
-					$service_egs			= $NELTOOL['POST_VARS']['restart_egs'];
+					$restart_shard_id 		= isset($NELTOOL['POST_VARS']['restart_shard_id']) ? (int)$NELTOOL['POST_VARS']['restart_shard_id'] : 0;
+					$service_su				= isset($NELTOOL['POST_VARS']['restart_su']) ? $NELTOOL['POST_VARS']['restart_su'] : '';
+					$service_egs			= isset($NELTOOL['POST_VARS']['restart_egs']) ? $NELTOOL['POST_VARS']['restart_egs'] : '';
 
-					$restart_stop_services	= $NELTOOL['POST_VARS']['restart_stop_services'];
+					$restart_stop_services	= isset($NELTOOL['POST_VARS']['restart_stop_services']) ? $NELTOOL['POST_VARS']['restart_stop_services'] : '';
+					$restart_ws_state		= isset($NELTOOL['POST_VARS']['restart_ws_state']) ? $NELTOOL['POST_VARS']['restart_ws_state'] : '';
+					$restart_stop_list_ok	= tool_main_valid_service_list($restart_stop_services);
+					$restart_targets_ok		= tool_main_valid_service_alias($service_su)
+						&& tool_main_valid_service_alias($service_egs)
+						&& ($restart_shard_id > 0);
 
-					if (isset($NELTOOL['POST_VARS']['restart_check_ws']))
+					if (!$restart_targets_ok)
+					{
+						nt_common_add_debug('restart sequence refused: invalid su/egs alias or shard id');
+					}
+
+					if (isset($NELTOOL['POST_VARS']['restart_check_ws']) && $restart_targets_ok)
 					{
 						// we are starting the restart sequence
-						$restart_ws_state		= $NELTOOL['POST_VARS']['restart_ws_state'];
 
 						if ($restart_ws_state == 'open')
 						{
@@ -339,6 +351,7 @@
 
 							if ($restart_reboot_message != '')
 							{
+								$restart_reboot_message = tool_main_frame_quoted_arg($restart_reboot_message, 512);
 								$service_command = "broadcast repeat=10 every=60 ". $restart_reboot_message;
 
 								nt_log("Domain '$AS_Name' : '$service_command' on ". $service_egs);
@@ -394,7 +407,7 @@
 
 						// - resend the services to stop for the next step
 
-						$tpl->assign('tool_restart_stop_actions', $restart_stop_services);
+						$tpl->assign('tool_restart_stop_actions', is_array($restart_stop_list_ok) ? implode(',', $restart_stop_list_ok) : '');
 
 						// - move on to the next step
 
@@ -426,7 +439,7 @@
 							$tpl->assign('tool_restart_info', $tool_restart_info);
 						}
 					}
-					elseif (isset($NELTOOL['POST_VARS']['restart_giveup']))
+					elseif (isset($NELTOOL['POST_VARS']['restart_giveup']) && $restart_targets_ok)
 					{
 						// update klients events to giveup mode
 
@@ -438,7 +451,7 @@
 						nt_common_redirect('index.php');
 						exit();
 					}
-					elseif (isset($NELTOOL['POST_VARS']['restart_cancel']))
+					elseif (isset($NELTOOL['POST_VARS']['restart_cancel']) && $restart_targets_ok)
 					{
 						if ($restart_ws_state != 'open')
 						{
@@ -452,6 +465,7 @@
 
 								if ($restart_reboot_message != '')
 								{
+									$restart_reboot_message = tool_main_frame_quoted_arg($restart_reboot_message, 512);
 									$service_command = "broadcast ". $restart_reboot_message;
 
 									nt_log("Domain '$AS_Name' : '$service_command' on ". $service_egs);
@@ -497,9 +511,9 @@
 					{
 						// step 1, waited for the timer, lets shutdown the shard
 
-						$service_list = explode(',', $restart_stop_services);
+						$service_list = $restart_stop_list_ok;
 
-						if (sizeof($service_list))
+						if (is_array($service_list) && sizeof($service_list))
 						{
 							// comment out to prevent stopping services for testing purposes
 							nt_log("Domain '$AS_Name' : 'stopService' on ". implode(', ',array_values($service_list)));
@@ -514,6 +528,10 @@
 								}
 							}
 							nt_sleep(VIEW_DELAY);
+						}
+						else if ($restart_stop_list_ok === null)
+						{
+							nt_common_add_debug('restart wait_timer refused: invalid stop service list');
 						}
 
 						// - prepare next step (timer countdown to a few seconds)
@@ -537,17 +555,20 @@
 					elseif (isset($NELTOOL['POST_VARS']['restart_start_group']))
 					{
 						// step 4, start a group of services
-						$tool_seq_start_id 		= $NELTOOL['POST_VARS']['restart_start_group_id'];
-						$tool_seq_start_list	= $NELTOOL['POST_VARS']['restart_start_group_list'];
+						$tool_seq_start_id 		= isset($NELTOOL['POST_VARS']['restart_start_group_id']) ? (int)$NELTOOL['POST_VARS']['restart_start_group_id'] : 0;
+						$tool_seq_start_list	= isset($NELTOOL['POST_VARS']['restart_start_group_list']) ? $NELTOOL['POST_VARS']['restart_start_group_list'] : '';
+						$service_list = tool_main_valid_service_list($tool_seq_start_list);
 
-						if (isset($tool_restart_start_list))
+						if ($service_list === null)
+						{
+							nt_common_add_debug('restart start_group refused: invalid service list');
+						}
+						else if (isset($tool_restart_start_list))
 						{
 							foreach($tool_restart_start_list as $restart_start_group)
 							{
 								if ($restart_start_group['restart_group_id'] == $tool_seq_start_id)
 								{
-									$service_list = explode(',', $tool_seq_start_list);
-
 									if (sizeof($service_list))
 									{
 										nt_log("Domain '$AS_Name' : 'startService' on ". implode(', ',array_values($service_list)));
@@ -573,31 +594,31 @@
 					elseif (isset($NELTOOL['POST_VARS']['restart_stop_group']))
 					{
 						// step 3, stop a group of services
-						$tool_seq_stop_id 	= $NELTOOL['POST_VARS']['restart_stop_group_id'];
-						$tool_seq_stop_list	= $NELTOOL['POST_VARS']['restart_stop_group_list'];
+						$tool_seq_stop_id 	= isset($NELTOOL['POST_VARS']['restart_stop_group_id']) ? (int)$NELTOOL['POST_VARS']['restart_stop_group_id'] : 0;
+						$tool_seq_stop_list	= isset($NELTOOL['POST_VARS']['restart_stop_group_list']) ? $NELTOOL['POST_VARS']['restart_stop_group_list'] : '';
+						$service_list = tool_main_valid_service_list($tool_seq_stop_list);
 
-						if (isset($tool_restart_stop_list))
+						if ($service_list === null)
 						{
-							$service_list = explode(',', $tool_seq_stop_list);
-
-							if (sizeof($service_list))
+							nt_common_add_debug('restart stop_group refused: invalid service list');
+						}
+						else if (isset($tool_restart_stop_list) && sizeof($service_list))
+						{
+							nt_log("Domain '$AS_Name' : 'stopService' on ". implode(', ',array_values($service_list)));
+							reset($service_list);
+							foreach($service_list as $service)
 							{
-								nt_log("Domain '$AS_Name' : 'stopService' on ". implode(', ',array_values($service_list)));
-								reset($service_list);
-								foreach($service_list as $service)
+								nt_common_add_debug("about to run 'stopService' on '$service' ...");
+								$adminService->controlCmd($service, 'stopService');
+								if (!$adminService->waitCallback())
 								{
-									nt_common_add_debug("about to run 'stopService' on '$service' ...");
-									$adminService->controlCmd($service, 'stopService');
-									if (!$adminService->waitCallback())
-									{
-										nt_common_add_debug('Error while waiting for callback on service \''. $service .'\' for stopService');
-									}
+									nt_common_add_debug('Error while waiting for callback on service \''. $service .'\' for stopService');
 								}
-								nt_sleep(VIEW_DELAY);
 							}
+							nt_sleep(VIEW_DELAY);
 						}
 					}
-					elseif (isset($NELTOOL['POST_VARS']['restart_over']))
+					elseif (isset($NELTOOL['POST_VARS']['restart_over']) && $restart_targets_ok)
 					{
 						// this makes you go to the next step
 						if ($tool_seq_id == $tool_restart_info['restart_sequence_id'])

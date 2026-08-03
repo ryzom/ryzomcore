@@ -41,7 +41,11 @@
 	 */
     function nt_common_redirect($url)
     {
-        $url = trim($url);
+        $url = trim(str_replace(array("\r", "\n", "\0"), '', (string)$url));
+        // Only same-site relative targets: scheme URIs and protocol-relative
+        // ones would turn the post-login redirect into an open redirect.
+        if ($url === '' || preg_match('#^[a-z][a-z0-9+.-]*:#i', $url) || strpos($url, '//') === 0)
+            $url = 'index.php';
         if (substr($url,0,1) == '/')    $url = substr($url,1);
 
         $redirect = NELTOOL_SITEBASE . $url;

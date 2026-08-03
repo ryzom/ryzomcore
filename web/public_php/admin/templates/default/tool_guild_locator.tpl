@@ -520,7 +520,7 @@
 
 			<td align="center"><a href="?services_gl=dumpguild&servicealias={$tool_service}&guildshardid={$tool_guild_dump_data.shard_id}&guildid={$tool_guild_dump_data.guild_id}&subservices_gl=viewthread&threadid={$tool_guild_forums[line].thread}&recoverable={$tool_guild_forums[line].recover}#threadview">{$tool_guild_forums[line].file}</a></td>
 			<td align="center">{$tool_guild_forums[line].thread}</td>
-			<td align="center">{if $tool_guild_forums[line].recover == 1}<a href="?services_gl=dumpguild&servicealias={$tool_service}&guildshardid={$tool_guild_dump_data.shard_id}&guildid={$tool_guild_dump_data.guild_id}&subservices_gl=recoverthread&threadid={$tool_guild_forums[line].thread}&recoverable={$tool_guild_forums[line].recover}#forumview" onclick="if (confirm('Are you sure you want to RECOVER this thread ?')) return true; return false;">Recover</a>{/if}</td>
+			<td align="center">{if $tool_guild_forums[line].recover == 1}<a href="?services_gl=dumpguild&servicealias={$tool_service}&guildshardid={$tool_guild_dump_data.shard_id}&guildid={$tool_guild_dump_data.guild_id}&subservices_gl=recoverthread&threadid={$tool_guild_forums[line].thread}&recoverable={$tool_guild_forums[line].recover}&csrf={$nel_csrf}#forumview" onclick="if (confirm('Are you sure you want to RECOVER this thread ?')) return true; return false;">Recover</a>{/if}</td>
 		</tr>
 {/section}
 {/if}
