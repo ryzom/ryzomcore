@@ -102,13 +102,13 @@
 
 		if ($presel_shard == $shard && $presel_service != "" && strstr($service, $presel_service) != FALSE)
 		{
-			$dispServ = "<b><a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?preselServ=$addr'>$service</a></b>";
+			$dispServ = "<b><a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?preselServ=".htmlspecialchars(rawurlencode($addr), ENT_QUOTES)."'>".htmlspecialchars($service, ENT_QUOTES)."</a></b>";
 			$dcolor = "bgcolor=#FF88AA";
 		}
 		else
-			$dispServ = "<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?preselServ=$addr'>$service</a>";
+			$dispServ = "<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?preselServ=".htmlspecialchars(rawurlencode($addr), ENT_QUOTES)."'>".htmlspecialchars($service, ENT_QUOTES)."</a>";
 
-		echo "<tr><td $dcolor>$dshard</td><td $dcolor>$dserver</td><td $dcolor>$dispServ</td></tr></a>\n";
+		echo "<tr><td $dcolor>".htmlspecialchars($dshard, ENT_QUOTES)."</td><td $dcolor>".htmlspecialchars($dserver, ENT_QUOTES)."</td><td $dcolor>$dispServ</td></tr></a>\n";
 		$pshard = $shard;
 		$pserver = $server;
 	}
@@ -135,7 +135,9 @@
 
 	if ($commandResult)
 	{
-		echo "<textarea rows=60 cols=300 readOnly style='font-family: Terminal, Courier; font-size: 10pt;'>".stripslashes($commandResult)."</textarea>\n";
+		// the service answer carries whatever the shard had to say, player
+		// names included, and a "</textarea>" in it would close the box
+		echo "<textarea rows=60 cols=300 readOnly style='font-family: Terminal, Courier; font-size: 10pt;'>".htmlspecialchars(stripslashes($commandResult), ENT_QUOTES)."</textarea>\n";
 	}
 	
 	echo "</td>\n";

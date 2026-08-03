@@ -70,7 +70,7 @@
 		{
 			echo "<br><br><hr><ul>";
 			foreach ($sqlQueries as $query)
-				echo "<li>$query</li>\n";
+				echo "<li>".htmlspecialchars($query, ENT_QUOTES)."</li>\n";
 			echo "</ul>";
 /*
 			echo "<br><br><p align=right><textarea rows=15 cols=100 readOnly>";

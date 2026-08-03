@@ -78,24 +78,25 @@
 				echo "<hr>NeL shard queries\n";
 				echo "<ul>\n";
 				foreach ($nel_queries as $query)
-					echo "<li>$query</li>\n";
+					echo "<li>".htmlspecialchars($query, ENT_QUOTES)."</li>\n";
 				echo "</ul>\n";
 				
 			}
 
 			displayQueries();
 
+			// these are the request values verbatim, and they land in a page
 			echo "<hr><pre>HTTP_POST_VARS\n";
-			print_r($HTTP_POST_VARS);
+			echo htmlspecialchars(print_r($HTTP_POST_VARS, true), ENT_QUOTES);
 			echo "\nHTTP_GET_VAR\n";
-			print_r($HTTP_GET_VARS);
+			echo htmlspecialchars(print_r($HTTP_GET_VARS, true), ENT_QUOTES);
 			echo "</pre>\n";
 
 			if (is_array($adminLog))
 			{
 				echo "<hr>\n";
 				foreach ($adminLog as $log)
-					echo "$log<br>\n";
+					echo htmlspecialchars($log, ENT_QUOTES)."<br>\n";
 			}
 		}
 

@@ -349,7 +349,7 @@
 		
 		if ($success)
 		{
-			echo "<b>Query '$query' successfully executed ($result)</b><br>\n";
+			echo "<b>Query '".htmlspecialchars($query, ENT_QUOTES)."' successfully executed (".htmlspecialchars($result, ENT_QUOTES).")</b><br>\n";
 			echo "Please wait while result is being computed and click 'Refresh result' to display query result.<br>\n";
 			echo "<form method='post' action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."'>\n";
 			echo "<input type=submit name='refresh_result' value='Refresh result'>\n";
@@ -366,7 +366,7 @@
 		}
 		else
 		{
-			echo "<b>Query '$query' failed</b>: '$result'<br>\n";
+			echo "<b>Query '".htmlspecialchars($query, ENT_QUOTES)."' failed</b>: '".htmlspecialchars($result, ENT_QUOTES)."'<br>\n";
 		}
 	}
 	else if ($refresh_result && isset($query_id) && $selectedLAS['address'])
@@ -377,7 +377,7 @@
 		
 		if ($success)
 		{
-			echo "<b>Query '$query' result</b>:<br>\n";
+			echo "<b>Query '".htmlspecialchars($query, ENT_QUOTES)."' result</b>:<br>\n";
 			
 			echo "<b>";
 
