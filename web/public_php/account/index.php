@@ -2,6 +2,15 @@
 
 // Account Management Tool - Main Entry Point
 
+// Same guard as the ams entry point: this tool works on the login database
+// that the service role installs, so point an unconfigured host at setup
+// instead of answering every page with a database error.
+if (!file_exists('../role_service')) {
+	header('Cache-Control: max-age=1');
+	header('Location: ../setup?reason=no_role_service&from=account', true, 303);
+	exit;
+}
+
 // Same stance as the admin tool and the setup pages: the session id is what
 // stands between a visitor and someone's account, so keep it away from page
 // script and off cross site posts, and ask for the secure flag only when this

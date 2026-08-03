@@ -274,8 +274,12 @@ function run_install($opts)
 	$config = generate_install_config(
 		realpath($privatePhp) . '/setup/config/config.php',
 		array(
-			'privatePhpDirectory' => realpath($cwd . '/' . $privatePhp),
-			'publicPhpDirectory'  => realpath($cwd),
+			// $cwd was never set here: both paths resolved to nothing and the
+			// generated config got an empty private and public php path. We
+			// already changed into the public root above, so the private
+			// directory resolves against it.
+			'privatePhpDirectory' => realpath($privatePhp),
+			'publicPhpDirectory'  => $publicPhpDir,
 			'nelSqlHostname'      => $sqlHost,
 			'nelSqlPort'          => $sqlPort,
 			'nelSqlUsername'       => $sqlUser,
