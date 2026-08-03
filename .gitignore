@@ -294,4 +294,4 @@ server_open_status
 setup.ini
 ryzom/server/www/login/server_open_status
 
-.claude/settings.local.json
+.claude/
