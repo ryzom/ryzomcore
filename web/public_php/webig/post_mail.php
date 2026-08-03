@@ -58,7 +58,7 @@
 			$safe_subject = displayable_string($mail_subject);
 			$safe_content = displayable_string($mail_content);
 			$mail_subject = "<i>uiMFUndelivrableMail</i> '$safe_subject'";
-			$mail_cleansubject = $mail_subject;
+			$mail_cleansubject = clean_string($mail_subject);
 			$mail_content = "<i>uiMFUndelivrableMailTo</i> '$safe_to'.\n<i>uiMFUndelivrableMailCheck</i><br>\n<br>\n<i>uiMFMailContent</i><br>\n$safe_content";
 			$mail_cleancontent = "<i>uiMFUndelivrableMailTo</i> '$safe_to'.\n<i>uiMFUndelivrableMailCheck</i>\n\n<i>uiMFMailContent</i>\n$safe_content";
 			$mail_to = $mail_from;
@@ -66,8 +66,11 @@
 		}
 		else
 		{
-			$mail_cleansubject = $mail_subject;
-			$mail_subject = displayable_string(clean_string($mail_subject));
+			// the index file is %%-separated: the subject has to go through
+			// clean_string() like the thread index does, or a subject with %%
+			// in it shifts the mailbox columns
+			$mail_cleansubject = clean_string($mail_subject);
+			$mail_subject = displayable_string($mail_cleansubject);
 			$mail_cleancontent = displayable_content($mail_content);
 			$mail_content = displayable_string($mail_content);
 			$mail_from = displayable_string(clean_string($mail_from));

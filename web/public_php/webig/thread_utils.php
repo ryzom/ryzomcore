@@ -34,7 +34,9 @@ function add_thread_to_forum_index(&$from, &$to, &$subject, &$index)
 
 	$f = fopen($to_index, 'r+');
 	read_next_index($f, $index);
-	append_to_index($f, trim($from).'%%'.strtr(trim($subject), "\n", " ").' %%".displayable_date()."%%1%%'.$index);
+	// the date call was trapped inside the single-quoted string, so every
+	// topic row stored the literal text ".displayable_date()." as its date
+	append_to_index($f, trim($from).'%%'.strtr(trim($subject), "\n", " ").' %%'.displayable_date().'%%1%%'.$index);
 	update_next_index($f, $index+1);
 	fclose($f);
 }
