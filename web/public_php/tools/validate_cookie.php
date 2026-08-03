@@ -14,6 +14,38 @@
 		return $ret;
 	}
 
+	// NLMISC::lowbias32 (hash-prospector variant), 32-bit unsigned throughout
+	function lowbias32($x)
+	{
+		$x = ($x ^ ($x >> 16)) & 0xFFFFFFFF;
+		$x = ($x * 0x21f0aaad) & 0xFFFFFFFF;
+		$x = ($x ^ ($x >> 15)) & 0xFFFFFFFF;
+		$x = ($x * 0x735a2d97) & 0xFFFFFFFF;
+		$x = ($x ^ ($x >> 15)) & 0xFFFFFFFF;
+		return $x;
+	}
+
+	// CInetAddress(ipStr).hash32() as the login service computes it when it
+	// builds the cookie: the address stored as an IPv4-mapped IPv6 address,
+	// mixed 32 bits at a time (little endian) through lowbias32, then one
+	// final round folding in the port -- always 0 for a bare address string.
+	// Returns false when the address does not parse.
+	function addressHash32($ipStr)
+	{
+		$bin = @inet_pton((string)$ipStr);
+		if ($bin === false)
+			return false;
+		if (strlen($bin) == 4)
+			$bin = str_repeat("\x00", 10)."\xff\xff".$bin;
+		$h = 0;
+		for ($i = 0; $i < 16; $i += 4)
+		{
+			$chunk = ord($bin[$i]) | (ord($bin[$i+1]) << 8) | (ord($bin[$i+2]) << 16) | (ord($bin[$i+3]) << 24);
+			$h = lowbias32($h ^ $chunk);
+		}
+		return lowbias32($h); // ^ port, which is 0 here
+	}
+
 	function validateCookie(&$userId, &$domainId, &$charId)
 	{
 		global $DBHost, $DBPort, $RingDBUserName, $RingDBPassword, $RingDBName, $AcceptUnknownUser;
@@ -40,14 +72,21 @@
 			return false;
 		}
 		
-		// read the ip and compare with client ip
+		// The first cookie field is CInetAddress::hash32() of the address
+		// the login request came from (see CLoginService::on_login). It
+		// stopped being the raw IPv4 when the engine went dual-stack, so
+		// recompute the same hash from this request's address and compare
+		// hashes. The cookie is this user's credential: never print it.
 		$cookie = $_COOKIE["ryzomId"];
-		// the cookie is this user's credential: do not print it back out
-		sscanf($cookie, "%02X%02X%02X%02X", $b0, $b1, $b2, $b3);
-		$addr = $b0 + ($b1<<8) + ($b2<<16) + ($b3<<24);
-		$addrStr = long2ip($addr);
+		if (!preg_match('/^[0-9A-Fa-f]{8}\|/', $cookie))
+		{
+			echo "Malformed cookie<BR>";
+			return false;
+		}
+		$cookieAddr = hexdec(substr($cookie, 0, 8));
+		$requestAddr = addressHash32($_SERVER["REMOTE_ADDR"]);
 
-		if ($_SERVER["REMOTE_ADDR"] != $addrStr)
+		if ($requestAddr === false || $cookieAddr !== $requestAddr)
 		{
 			echo "Client ip don't match cookie<BR>";
 			return false;
