@@ -10,10 +10,11 @@
 		var $InputStream;
 		var $Pos;
 
-		function CMemStream ()
+		function __construct ()
 		{
 			$this->InputStream = false;
 			$this->Pos = 0;
+			$this->Buffer = "";
 		}
 
 		function setBuffer ($buffer)
@@ -54,7 +55,7 @@
 				$val = ord($this->Buffer[$this->Pos++]);
 				$val += ord($this->Buffer[$this->Pos++])<<8;
 				$val += ord($this->Buffer[$this->Pos++])<<16;
-				$val += ord($this->Buffer[$this->Pos++])<<32;
+				$val += ord($this->Buffer[$this->Pos++])<<24; // was <<32: dropped the high byte
 				//printf ("read uint32 '%d'<br>", $val);
 			}
 			else
@@ -144,7 +145,7 @@
 		$size = ord($val) << 24;
 		$val = fread ($fp, 1);
 		if (feof ($fp)) return false;
-		$size = ord($val) << 16;
+		$size += ord($val) << 16; // an assignment here dropped the high length byte
 		$val = fread ($fp, 1);
 		if (feof ($fp)) return false;
 		$size += ord($val) << 8;

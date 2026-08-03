@@ -27,13 +27,13 @@
 	{
 		global $DBHost, $DBUserName, $DBPassword, $DBName, $AcceptUnknownUser;
 
-		$link = mysql_connect($DBHost, $DBUserName, $DBPassword) or die ("Database unavailable");
-		mysql_select_db ($DBName) or die ("Database unavailable");
-		$login = mysql_real_escape_string($login);
+		$link = mysqli_connect($DBHost, $DBUserName, $DBPassword) or die ("Database unavailable");
+		mysqli_select_db ($link, $DBName) or die ("Database unavailable");
+		$login = mysqli_real_escape_string($link, $login);
 		$query = "SELECT * FROM user where Login='$login'";
-		$result = mysql_query ($query) or die ("Database error");
+		$result = mysqli_query ($link, $query) or die ("Database error");
 
-		if (mysql_num_rows ($result) == 0)
+		if (mysqli_num_rows ($result) == 0)
 		{
 			if ($AcceptUnknownUser)
 			{
@@ -44,25 +44,25 @@
 				}
 
 				// login doesn't exist, create it
-				$password = mysql_real_escape_string($password);
+				$password = mysqli_real_escape_string($link, $password);
 				$query = "INSERT INTO user (Login, Password) VALUES ('$login', '$password')";
-				$result = mysql_query ($query) or die ("Database error");
+				$result = mysqli_query ($link, $query) or die ("Database error");
 
 				// get the user to have his UId
 				$query = "SELECT * FROM user WHERE Login='$login'";
-				$result = mysql_query ($query) or die ("Database error");
+				$result = mysqli_query ($link, $query) or die ("Database error");
 
-				if (mysql_num_rows ($result) == 1)
+				if (mysqli_num_rows ($result) == 1)
 				{
 					$reason = "Login '".$login."' was created because it was not found in database (error code 50)";
-					$row = mysql_fetch_array ($result);
+					$row = mysqli_fetch_array ($result);
 					$id = $row["UId"];
 					$priv = $row["Privilege"];
 					$extended = $row["ExtendedPrivilege"];
 
 					// add the default permission
 					$query = "INSERT INTO permission (UId,ClientApplication) VALUES ('$id', 'snowballs')";
-					$result = mysql_query ($query) or die ("Database error");
+					$result = mysqli_query ($link, $query) or die ("Database error");
 
 					$res = true;
 				}
@@ -80,7 +80,7 @@
 		}
 		else
 		{
-			$row = mysql_fetch_array ($result);
+			$row = mysqli_fetch_array ($result);
 			$salt = substr($row["Password"],0,2);
 			// compare without leaking where the two values stop matching
 			$stored = (string)$row["Password"];
@@ -88,10 +88,10 @@
 			{
 				// check if the user can use this application
 
-			$clientApplication = mysql_real_escape_string($clientApplication);
+			$clientApplication = mysqli_real_escape_string($link, $clientApplication);
 				$query = "SELECT * FROM permission WHERE UId='".$row["UId"]."' AND ClientApplication='$clientApplication'";
-				$result = mysql_query ($query) or die ("Database error");
-				if (mysql_num_rows ($result) == 0)
+				$result = mysqli_query ($link, $query) or die ("Database error");
+				if (mysqli_num_rows ($result) == 0)
 				{
 					// no permission
 					$reason = "You can't use the client application '$clientApplication' (error code 53)";
@@ -110,10 +110,10 @@
 							$reason =  $reason."was just disconnected. Now you can retry the identification (error code 54)";
 
 							$query = "update shard set NbPlayers=NbPlayers-1 where ShardId=".$row["ShardId"];
-							$result = mysql_query ($query) or die ("Database error");
+							$result = mysqli_query ($link, $query) or die ("Database error");
 
 							$query = "update user set ShardId=-1, State='Offline' where UId=".$row["UId"];
-							$result = mysql_query ($query) or die ("Database error");
+							$result = mysqli_query ($link, $query) or die ("Database error");
 						}
 						else
 						{
@@ -136,7 +136,7 @@
 				$res = false;
 			}
 		}
-		mysql_close($link);
+		mysqli_close($link);
 		return $res;
 	}
 
@@ -145,21 +145,21 @@
         global $PHP_SELF;
         global $DBHost, $DBUserName, $DBPassword, $DBName;
 
-        $link = mysql_connect($DBHost, $DBUserName, $DBPassword) or die ("0:Database unavailable");
-        mysql_select_db ($DBName) or die ("0:Database unavailable");
+        $link = mysqli_connect($DBHost, $DBUserName, $DBPassword) or die ("0:Database unavailable");
+        mysqli_select_db ($link, $DBName) or die ("0:Database unavailable");
 
-        $id = mysql_real_escape_string($id);
-        $clientApplication = mysql_real_escape_string($clientApplication);
-        $shardId = mysql_real_escape_string($shardId);
+        $id = mysqli_real_escape_string($link, $id);
+        $clientApplication = mysqli_real_escape_string($link, $clientApplication);
+        $shardId = mysqli_real_escape_string($link, $shardId);
         $query = "SELECT * FROM permission WHERE UId='".$id."' AND ClientApplication='".$clientApplication."' AND (ShardId='".$shardId."' OR ShardId='-1')";;
-        $result = mysql_query ($query) or die ("0:Database error");
+        $result = mysqli_query ($link, $query) or die ("0:Database error");
 
-        if (mysql_num_rows ($result) > 0)
+        if (mysqli_num_rows ($result) > 0)
         {
-            mysql_close($link);
+            mysqli_close($link);
             return;
         }
-        mysql_close($link);
+        mysqli_close($link);
         die("0:Invalid shard access");
     }
 
@@ -168,16 +168,16 @@
 		global $PHP_SELF;
 		global $DBHost, $DBUserName, $DBPassword, $DBName;
 
-		$link = mysql_connect($DBHost, $DBUserName, $DBPassword) or die ("0:Database unavailable");
-		mysql_select_db ($DBName) or die ("0:Database unavailable");
-		
-		$id = mysql_real_escape_string($id);
-		$clientApplication = mysql_real_escape_string($clientApplication);
+		$link = mysqli_connect($DBHost, $DBUserName, $DBPassword) or die ("0:Database unavailable");
+		mysqli_select_db ($link, $DBName) or die ("0:Database unavailable");
+
+		$id = mysqli_real_escape_string($link, $id);
+		$clientApplication = mysqli_real_escape_string($link, $clientApplication);
 		$query = "SELECT * FROM user WHERE UId='".$id."'";
-		$result = mysql_query ($query) or die ("0:Database error");
+		$result = mysqli_query ($link, $query) or die ("0:Database error");
 
 		if ($result)
-			$uData = mysql_fetch_array($result);
+			$uData = mysqli_fetch_array($result);
 			
 		if (strstr($uData['Privilege'], ':DEV:'))
 			$priv = 'dev';
@@ -187,17 +187,17 @@
 			$priv = '';
 
 		$query = "SELECT * FROM shard WHERE ClientApplication='".$clientApplication."'";
-		$result = mysql_query ($query) or die ("0:Database error");
-		
+		$result = mysqli_query ($link, $query) or die ("0:Database error");
+
 		$nbs = 0;
 		$res = "";
-		if (mysql_num_rows ($result) > 0)
+		if (mysqli_num_rows ($result) > 0)
 		{
 			//echo "<h1>Please, select a shard:</h1>\n";
-			while($row = mysql_fetch_array($result))
+			while($row = mysqli_fetch_array($result))
 			{
 				$query2 = "SELECT * FROM permission WHERE UId='".$id."' AND ClientApplication='".$clientApplication."' AND ShardId='".$row["ShardId"]."'";
-				$result2 = mysql_query ($query2) or die ("Database error");
+				$result2 = mysqli_query ($link, $query2) or die ("Database error");
 				
 				$online = $row["Online"];
 				$uOnline = 1;
@@ -218,8 +218,11 @@
 						break;
 				}
 
-				// only display the shard if the user have the good application name AND access to this shard with the permission table
-				if (mysql_num_rows ($result2) > 0 && $row["ProgramName"] == $programName)
+				// only display the shard if the user has access to it in the
+				// permission table (a ProgramName filter used to sit here, but
+				// it compared against a variable that was never set, and no
+				// schema in this tree carries that column)
+				if (mysqli_num_rows ($result2) > 0)
 				{
 					$nbs++;
 					$res = $res.$row["Version"]."|";
@@ -238,7 +241,7 @@
 
 		echo "1:".$nbs."\n";
 		echo $res;
-		mysql_close($link);
+		mysqli_close($link);
 		return $res;
 	}
 
@@ -247,14 +250,14 @@
 		global $PHP_SELF;
 		global $DBHost, $DBUserName, $DBPassword, $DBName, $AcceptUnknownUser;
 
-		$link = mysql_connect($DBHost, $DBUserName, $DBPassword) or die ("0:Database unavailable");
-		mysql_select_db ($DBName) or die ("0:Database unavailable");
+		$link = mysqli_connect($DBHost, $DBUserName, $DBPassword) or die ("0:Database unavailable");
+		mysqli_select_db ($link, $DBName) or die ("0:Database unavailable");
 
-		$login = mysql_real_escape_string($login);
+		$login = mysqli_real_escape_string($link, $login);
 		$query = "SELECT Password FROM user WHERE Login='$login'";
-		$result = mysql_query ($query) or die ("0:Database error");
+		$result = mysqli_query ($link, $query) or die ("0:Database error");
 
-		if (mysql_num_rows ($result) != 1)
+		if (mysqli_num_rows ($result) != 1)
 		{
 			if ($AcceptUnknownUser)
 			{
@@ -267,40 +270,48 @@
 		}
 		else
 		{
-			$res_array = mysql_fetch_array($result);
+			$res_array = mysqli_fetch_array($result);
 			$salt = substr($res_array['Password'], 0, 2);
 		}
 
 		echo "1:".$salt;
-		mysql_close($link);
+		mysqli_close($link);
 	}
 
 // --------------------------------------------------------------------------------------
 // main 
 // --------------------------------------------------------------------------------------
 
-	if ($_GET["cmd"] == "ask")
+	// every request parameter is optional as far as PHP is concerned:
+	// default the missing ones instead of tripping undefined-index notices
+	$cmd = isset($_GET["cmd"]) ? $_GET["cmd"] : "";
+	$in_login = isset($_GET["login"]) ? $_GET["login"] : "";
+	$in_password = isset($_GET["password"]) ? $_GET["password"] : "";
+	$in_clientApplication = isset($_GET["clientApplication"]) ? $_GET["clientApplication"] : "";
+	$in_shardid = isset($_GET["shardid"]) ? $_GET["shardid"] : "";
+
+	if ($cmd == "ask")
 	{
-		askSalt($_GET["login"]);
+		askSalt($in_login);
 		die();
 	}
 
 	// check cp is set (force bool)
-	$cp = ($_GET["cp"] == "1");
+	$cp = (isset($_GET["cp"]) && $_GET["cp"] == "1");
 
-	if (!checkUserValidity($_GET["login"], $_GET["password"], $_GET["clientApplication"], $cp, $id, $reason, $priv, $extended))
+	if (!checkUserValidity($in_login, $in_password, $in_clientApplication, $cp, $id, $reason, $priv, $extended))
 	{
 		echo "0:".$reason;
 	}
 	else
 	{
-		if ($_GET["cmd"] == "login")
+		if ($cmd == "login")
 		{
-			checkShardAccess($id, $_GET["clientApplication"], $_GET["shardid"]);
+			checkShardAccess($id, $in_clientApplication, $in_shardid);
 
 			// user selected a shard, try to add the user to the shard
 
-			if (askClientConnection($_GET["shardid"], $id, $_GET["login"], $priv, $extended, $res, $patchURLS))
+			if (askClientConnection($in_shardid, $id, $in_login, $priv, $extended, $res, $patchURLS))
 			{
 				// access granted, send cookie and addr
 				echo "1:".$res;
@@ -333,7 +344,7 @@
 		else
 		{
 			// user logged, display the available shard
-			displayAvailableShards ($id, $_GET["clientApplication"], $cp);
+			displayAvailableShards ($id, $in_clientApplication, $cp);
 		}
 	}
 ?>
