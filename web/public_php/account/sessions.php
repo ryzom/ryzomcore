@@ -12,7 +12,12 @@ $error = '';
 $success = '';
 
 // Handle session actions (close, invite, remove) -- process before loading data
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrfValidate()) {
+// Viewing as another user is for looking, the same stance settings.php takes:
+// these three actions close someone's session, invite a character into it and
+// throw a participant out, all under their name.
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrfValidate() && isImpersonating()) {
+	$actionError = 'Session changes are disabled while viewing as another user.';
+} elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && csrfValidate()) {
 	$action = isset($_POST['session_action']) ? $_POST['session_action'] : '';
 	$sessionId = isset($_POST['session_id']) ? (int)$_POST['session_id'] : 0;
 

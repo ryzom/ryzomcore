@@ -94,6 +94,10 @@ if (!$registrationOpen) {
 					$_SESSION['account_uid'] = $uid;
 					$_SESSION['account_login'] = $login;
 					$_SESSION['account_email'] = $email;
+					// The session carries the privilege everything else gates
+					// on; leaving the key out is a session in a state no other
+					// entry point produces
+					$_SESSION['account_privilege'] = $defaultPriv;
 					redirect('home');
 				}
 			}
