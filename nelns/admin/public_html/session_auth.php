@@ -115,17 +115,16 @@
 
 			if (!isset($sessionAuth) || $sessionAuth["admlogin"] == "")
 			{
-				print "no sessionauth or admlogin is blank";
-				if (!isset($admcookielogin))
-				{
-					addToLog("cookie not set");
-					return false;
-				}
-				else
-				{
-					$admlogin = $admcookielogin;
-					$admpassword = $admcookiepassword;
-				}
+				// There used to be a fallback here that took the login and
+				// the password out of the admcookielogin/admcookiepassword
+				// cookies. What that password field holds is the stored hash,
+				// which validateId() compares straight against the column, so
+				// the cookie was the credential. setupCookies() has been
+				// commented out for as long as this file has existed, so
+				// nothing ever set those cookies -- only a caller supplying
+				// their own would have reached it. No session, no login.
+				addToLog("no session");
+				return false;
 			}
 			else
 			{

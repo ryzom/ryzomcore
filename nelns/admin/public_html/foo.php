@@ -15,11 +15,41 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+/*
+ * The pages of this tool read their parameters as plain globals, and this is
+ * where the request is turned into those globals. Copying every key straight
+ * into $GLOBALS also let the request set variables that are not parameters at
+ * all: $publicAccess, which is the only thing keeping non-root accounts out of
+ * the account administration page; $uid and $group, which are the identity the
+ * rest of the code trusts; and the whole of config.php, which only fills the
+ * settings in when NEL_TOOL_CONFIG_PHP is unset -- so a request carrying
+ * NEL_TOOL_CONFIG_PHP=1 alongside its own dbhost, dblogin and dbpassword would
+ * have pointed the tool at a database of the caller's choosing, and one
+ * carrying userlogpath would have chosen where the login log gets written.
+ *
+ * Names that are decided here, not sent here, are refused.
+ */
+$nelnsReservedGlobals = array(
+	// what config.php sets, and the flag that tells it it already ran
+	'NEL_TOOL_CONFIG_PHP', 'dbhost', 'dbname', 'dblogin', 'dbpassword',
+	'allowrootdebug', 'userlogpath', 'rrdrootpath', 'gifoutputpath',
+	'gifhttplocation', 'gifpersistence', 'ASHost', 'ASPort', 'enablelock',
+	'allowDownload', 'allowUpload',
+	// who the caller is, and what they are allowed to open
+	'publicAccess', 'allowNevrax', 'IsNevrax', 'sessionAuth',
+	'uid', 'gid', 'group', 'userData', 'usersData',
+	// the superglobals themselves
+	'GLOBALS', '_GET', '_POST', '_COOKIE', '_SESSION', '_SERVER', '_ENV',
+	'_FILES', '_REQUEST',
+	);
+
 foreach($HTTP_POST_VARS as $key => $value) {
+	if (in_array($key, $nelnsReservedGlobals, true)) continue;
 	$GLOBALS[$key] = $value;
 }
 
 foreach($HTTP_GET_VARS as $key => $value) {
+	if (in_array($key, $nelnsReservedGlobals, true)) continue;
 	$GLOBALS[$key] = $value;
 }
 

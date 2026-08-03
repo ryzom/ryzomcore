@@ -17,7 +17,14 @@
 
         session_start();
 	include('foo.php');
-        $publicAccess = true;
+        // admin.php, commands.php and las_interface.php set $publicAccess to
+        // false before including this file, and the check further down is what
+        // keeps everyone but root and the nevrax group out of them. Assigning
+        // true here unconditionally threw that away, so those pages -- account
+        // administration and running service commands -- were open to every
+        // account that could log in. Only supply the default.
+        if (!isset($publicAccess))
+                $publicAccess = true;
         // set cookies for filters
         if (isset($admfilter_shard) && !isset($filter_shard))                   $filter_shard = $admfilter_shard;
         else if (isset($filter_shard) && $filter_shard=="")                             setCookie("admfilter_shard");
