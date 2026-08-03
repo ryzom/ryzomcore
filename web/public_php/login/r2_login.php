@@ -352,6 +352,14 @@
 			if ($AcceptUnknownUser)
 			{
 				// login doesn't exist, create it
+				// FIXME: nel.user.Email is `UNIQUE NOT NULL DEFAULT ''`, so this
+				// insert succeeds exactly once per database: the second account
+				// created this way collides on the empty email. AMS always wrote
+				// a real address, which is why this never showed. Either give the
+				// row a unique placeholder here, or drop/relax EmailIndex, before
+				// relying on $AcceptUnknownUser for anything but a single dev
+				// account. The account tool (public_php/account) asks for a real
+				// email and is unaffected.
 				$password = mysqli_real_escape_string($link, $password);
 				$query = "INSERT INTO user (Login, Password) VALUES ('$login', '$password')";
 				$result = mysqli_query ($link, $query) or die (errorMsgBlock(3006, $query, 'main', $DBName, $DBHost, $DBUserName, mysqli_error($link)));

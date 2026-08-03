@@ -65,6 +65,11 @@
 				}
 
 				// login doesn't exist, create it
+				// FIXME: same trap as the ring login: nel.user.Email is
+				// `UNIQUE NOT NULL DEFAULT ''`, so only the first account ever
+				// created this way inserts; the next one collides on the empty
+				// email. Write a unique placeholder or relax EmailIndex before
+				// leaning on $AcceptUnknownUser beyond a single dev account.
 				$password = mysqli_real_escape_string($link, $password);
 				$query = "INSERT INTO user (Login, Password) VALUES ('$login', '$password')";
 				$result = mysqli_query ($link, $query) or die ("Database error");

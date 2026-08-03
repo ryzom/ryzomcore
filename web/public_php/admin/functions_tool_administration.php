@@ -1718,6 +1718,13 @@
 	}
 
 	//function tool_admin_domains_update_nel($domain_id, $domain_name, $domain_version, $domain_status)
+	// FIXME: status is the only nel.domain field this tool can touch. Creating a
+	// domain, or editing the fields the login and ring web paths actually read
+	// (login_address, session_manager_address, ring_db_name, web_host,
+	// patch_urls), still means writing the row by hand -- setup only does it for
+	// the dev shard, and install.php deliberately refuses the job. Same for
+	// nel.shard and the ring st_mainland session row. Whatever picks this up
+	// should own all three together; see public_php/account/admin.php.
 	function tool_admin_domains_update_nel($domain_id, $domain_name, $domain_status)
 	{
 		global $db;

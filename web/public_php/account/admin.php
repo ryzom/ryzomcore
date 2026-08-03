@@ -2,6 +2,19 @@
 
 // Account Management Tool - Admin Page
 // Requires :DEV:, :SGM:, or :GM: privilege
+//
+// FIXME: this page manages accounts, privileges and per-domain permissions,
+// but nothing here creates or wires a domain or a shard. Those rows are still
+// written by hand or by private_php/setup/sql/configure_shard_dev.sql:
+//   - nel.domain      login_address, session_manager_address, ring_db_name,
+//                     web_host, patch_urls (the admin tool can only flip
+//                     status, see functions_tool_administration.php)
+//   - nel.shard       the row join_shard.php lists, carrying FixedSessionId
+//   - ring sessions   one st_mainland row per shard, session_id =
+//                     FixedSessionId, or the session manager refuses the join
+//                     with "not registered as a mainland session"
+// The ring `shard` row is the exception: the shard unifier creates it itself
+// when a welcome service registers (nelns creates both shard and domain).
 
 $pageTitle = 'Admin';
 $uid = $_SESSION['account_uid'];
