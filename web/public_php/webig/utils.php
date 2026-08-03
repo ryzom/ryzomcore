@@ -513,13 +513,18 @@ else
 	$ufile = $udir.'session'; 
 	if (is_dir($udir) && file_exists($ufile)) 
 	{ 
-		$file = fopen($ufile, 'r'); 
-		if (!$file) 
-			die("ERROR: Not logged"); 
-		$server_cookie = trim(fgets($file, 1024)); 
-		if ($server_cookie != $session_cookie) 
-			die("ERROR: Authentication failed"); 
-	} 
+		$file = fopen($ufile, 'r');
+		if (!$file)
+			die("ERROR: Not logged");
+		$server_cookie = trim(fgets($file, 1024));
+		fclose($file);
+		// An empty session file used to authenticate a caller that sent no
+		// cookie at all, and '!=' compares two numeric looking strings as
+		// numbers; require both sides and compare them as strings.
+		if ($server_cookie === '' || !isset($session_cookie) || !is_string($session_cookie)
+			|| !hash_equals($server_cookie, $session_cookie))
+			die("ERROR: Authentication failed");
+	}
 	else 
 	{ 
 		die("ERROR: Not logged"); 

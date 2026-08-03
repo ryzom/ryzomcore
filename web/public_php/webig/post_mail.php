@@ -29,7 +29,6 @@
 	// $mail_content		content of the mail
 	//
 
-	importParam('mail_from');
 	importParam('mail_to');
 	importParam('mail_subject');
 	importParam('mail_content');
@@ -37,6 +36,11 @@
 	global $mail_to;
 	global $mail_subject;
 	global $mail_content;
+
+	// The sender is whoever the session cookie authenticated, not whatever
+	// name came in with the request -- mail_from used to be read from the
+	// query string, so a player could send in game mail as any character.
+	$mail_from = $user_login;
 
 	// check mail is valid
 	//if (!isset($mail_from) || $mail_from == "" || !isset($mail_to) || $mail_to == "" || !isset($mail_subject) || $mail_subject == "" || !isset($mail_content) || $mail_content == "" )

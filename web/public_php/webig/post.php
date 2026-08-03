@@ -29,7 +29,6 @@
 	// $post_content	content of the post
 	//
 
-	importParam('post_from');
 	importParam('post_to');
 	importParam('post_thread');
 	importParam('post_content');
@@ -43,6 +42,11 @@
 		die("ERROR: Bad parameters");
 
 	check_character_belongs_to_guild($user_login, $post_to);
+
+	// The author is whoever the session cookie authenticated, not whatever
+	// name came in with the request -- post_from used to be read from the
+	// query string, so a player could post under any character name.
+	$post_from = $user_login;
 
 	// check mail is valid
 	//if (!isset($post_from) || !isset($post_to) || !isset($post_thread) || !isset($post_content))

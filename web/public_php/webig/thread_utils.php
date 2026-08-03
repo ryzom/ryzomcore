@@ -315,8 +315,8 @@ function build_forum_page($forum)
 			$sender = displayable_string($t[0]);
 
 			// %%DATE%% is html this code generated itself, leave it alone
-			$inst_topic .= str_replace(array('%%SUBJECT%%',     '%%SENDER%%', '%%UCSENDER%%',   '%%NUMPOSTS%%',                      '%%DATE%%', '%%FORUM%%', 			'%%UCFORUM%%',              '%%THREAD%%',                        '%%COLOR%%'),
-									   array(ucfirst($subject), $sender,      ucfirst($sender), htmlspecialchars($t[3], ENT_QUOTES), $t[2],      nameToURL($forum),	convert_forum_name($forum), htmlspecialchars($t[4], ENT_QUOTES), $altern_color[$altern_index]),
+			$inst_topic .= str_replace(array('%%SUBJECT%%',     '%%SENDER%%', '%%UCSENDER%%',   '%%NUMPOSTS%%',                      '%%DATE%%', '%%FORUM%%', 									'%%UCFORUM%%',              								'%%THREAD%%',                        '%%COLOR%%'),
+									   array(ucfirst($subject), $sender,      ucfirst($sender), htmlspecialchars($t[3], ENT_QUOTES), $t[2],      htmlspecialchars(nameToURL($forum), ENT_QUOTES),	htmlspecialchars(convert_forum_name($forum), ENT_QUOTES),	htmlspecialchars($t[4], ENT_QUOTES), $altern_color[$altern_index]),
 									   $forum_topic);
 
 			// step to next thread
@@ -336,9 +336,10 @@ function build_forum_page($forum)
 		}
 		$link_next = (($page == $num_pages-1 || $num_pages <= 1) ? "forum.php?page=".$page : "forum.php?page=".($page+1));
 
-		// replace in forum
-		$inst_forum = str_replace(array('%%TOPICS%%', '%%FORUM_POST%%', '%%FORUM%%', 		'%%UCFORUM%%',              '%%PREVIOUS%%', '%%LINKS%%', '%%NEXT%%'),
-							   	  array($inst_topic,  $forum, 			nameToURL($forum),	convert_forum_name($forum), $link_previous, $links_str,  $link_next),
+		// replace in forum -- the forum is a guild name a player chose, so it
+		// gets escaped everywhere it lands in the page
+		$inst_forum = str_replace(array('%%TOPICS%%', '%%FORUM_POST%%', 						'%%FORUM%%', 									'%%UCFORUM%%',              								'%%PREVIOUS%%', '%%LINKS%%', '%%NEXT%%'),
+							   	  array($inst_topic,  htmlspecialchars($forum, ENT_QUOTES),	htmlspecialchars(nameToURL($forum), ENT_QUOTES),	htmlspecialchars(convert_forum_name($forum), ENT_QUOTES),	$link_previous, $links_str,  $link_next),
 							   	  $forum_main);
 
 		$pagename = $forum_dir.'forum'.($page==0 ? '' : '_'.$page).'.html';
@@ -365,6 +366,11 @@ function build_forum_page($forum)
 function build_thread_page($forum, $thread, &$num_posts)
 {
 	global $shard;
+
+	// the index names the files this writes and goes into the links in them
+	if (!safe_index_param((string)$thread))
+		die("ERROR: Bad parameters");
+
 	$thread_dir = get_user_dir($forum, $shard);
 	$thread_index = $thread_dir."thread_$thread.index";
 
@@ -373,7 +379,7 @@ function build_thread_page($forum, $thread, &$num_posts)
 
 	$header = explode('%%', $header);
 
-	$thread_subject = $header[1];
+	$thread_subject = isset($header[1]) ? $header[1] : '';
 
 	$num_posts = count($posts);
 	$num_per_page = 10;
@@ -406,8 +412,8 @@ function build_thread_page($forum, $thread, &$num_posts)
 			$content = nl2br(displayable_content($p[1]));
 			$sender = displayable_string($p[0]);
 
-			$inst_post .= str_replace(array('%%FORUM%%', 		'%%UCFORUM%%',              '%%SENDER%%', '%%UCSENDER%%',   '%%DATE%%', '%%CONTENT%%', '%%POST%%', '%%COLOR%%'),
-									  array(nameToURL($forum),  convert_forum_name($forum), $sender,      ucfirst($sender), $p[2],      $content,      $post,      $altern_color[$altern_index]),
+			$inst_post .= str_replace(array('%%FORUM%%', 										'%%UCFORUM%%',              								'%%SENDER%%', '%%UCSENDER%%',   '%%DATE%%', '%%CONTENT%%', '%%POST%%', '%%COLOR%%'),
+									  array(htmlspecialchars(nameToURL($forum), ENT_QUOTES),	htmlspecialchars(convert_forum_name($forum), ENT_QUOTES),	$sender,      ucfirst($sender), $p[2],      $content,      $post,      $altern_color[$altern_index]),
 									  $topic_post);
 
 			// step to next post
@@ -427,8 +433,12 @@ function build_thread_page($forum, $thread, &$num_posts)
 		}
 		$link_next = (($page == $num_pages-1 || $num_pages <= 1) ? "thread.php?thread=$thread&page=".$page : "thread.php?thread=$thread&page=".($page+1));
 
-		$inst_topic = str_replace(array('%%POSTS%%', '%%FORUM_POST%%', 	'%%FORUM%%', 		'%%UCFORUM%%', 				'%%THREAD%%', 	'%%PREVIOUS%%', '%%LINKS%%', '%%NEXT%%', '%%SUBJECT%%'),
-							   	  array($inst_post,  $forum, 			nameToURL($forum), 	convert_forum_name($forum), $thread, 		$link_previous, $links_str,  $link_next, ucfirst($thread_subject)),
+		// the subject is what a player typed when the thread was opened, and it
+		// went into the index unescaped, so escape it on the way back out
+		$safe_subject = ucfirst(displayable_string($thread_subject));
+
+		$inst_topic = str_replace(array('%%POSTS%%', '%%FORUM_POST%%', 						'%%FORUM%%', 									'%%UCFORUM%%', 												'%%THREAD%%', 									'%%PREVIOUS%%', '%%LINKS%%', '%%NEXT%%', '%%SUBJECT%%'),
+							   	  array($inst_post,  htmlspecialchars($forum, ENT_QUOTES),	htmlspecialchars(nameToURL($forum), ENT_QUOTES),	htmlspecialchars(convert_forum_name($forum), ENT_QUOTES),	htmlspecialchars($thread, ENT_QUOTES), 		$link_previous, $links_str,  $link_next, $safe_subject),
 							   	  $topic_main);
 
 		$pagename = $thread_dir."thread_$thread".($page==0 ? '' : '_'.$page).'.html';
