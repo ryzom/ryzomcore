@@ -445,8 +445,8 @@ include_once('../login/config.php');
 function connect_to_ring_db()
 {
 	global $DBHost, $DBPort, $RingDBUserName, $RingDBPassword, $RingDBName;
-	$ringDb = mysqli_connect($DBHost, $RingDBUserName, $RingDBPassword, NULL, $DBPort) or die("can't connect to ring db @'".$DBHost."' with user '".$RingDBUserName."'");
-	mysqli_select_db($ringDb, $RingDBName) or die("can't select ring db: '$RingDBName' Host=$DBHost User=$RingDBUserName (not enough privilege?)");
+	$ringDb = mysqli_connect($DBHost, $RingDBUserName, $RingDBPassword, NULL, $DBPort) or die("can't connect to ring db");
+	mysqli_select_db($ringDb, $RingDBName) or die("can't select ring db");
 	return $ringDb;
 }
 
@@ -463,18 +463,20 @@ function check_character_belongs_to_guild($charName, $guildName)
 	"SELECT guilds.guild_name FROM guilds
 	JOIN characters ON characters.guild_id=guilds.guild_id
 	WHERE char_name='$charName'")
-		or die("Can't query guild for $charName in DB");
+		or die("Can't query guild");
 	$row = mysqli_fetch_row($res);
 	if (!isset($row))
-		die("Guild not found for char $charName in DB");
+		die("Guild not found");
 	if ($row[0] != $guildName)
-		die("ACCESS DENIED: $charName is not a member of $guildName");
+		die("ACCESS DENIED");
 }
 
 $remote_addr = $_SERVER['REMOTE_ADDR'];
 
 // if ($remote_addr == "213.208.119.226" || $remote_addr == "38.117.236.132")
-if (true)
+// internal_check used to answer for any caller; leave it off
+// unless the site operator explicitly re-enables it below.
+if (false)
 {
 	importParam('internal_check');
 	global $internal_check;
@@ -520,7 +522,7 @@ else
 	} 
 	else 
 	{ 
-		die("ERROR: Directory not found: ".$udir); 
+		die("ERROR: Not logged"); 
 	} 
 } 
  

@@ -11,7 +11,7 @@
 
 		$domainId = (int)$domainId;
 		$query = "SELECT * FROM domain WHERE domain_id = $domainId";
-		$result = mysqli_query($link, $query) or die("query ($query) failed");
+		$result = mysqli_query($link, $query) or die("query failed");
 		
 		if (mysqli_num_rows($result) == 0)
 		{

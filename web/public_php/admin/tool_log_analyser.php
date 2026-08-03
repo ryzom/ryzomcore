@@ -80,7 +80,14 @@
 			$view_file_name = base64_decode($NELTOOL['GET_VARS']['fileview']);
 			$tpl->assign('tool_file_list',	$tool_las_file_list);
 
+			// only open a name that is already on the directory listing we
+			// built ourselves; anything else would follow a caller-chosen path
 			$view_file_data = tool_las_check_for_file($tool_las_file_list, $view_file_name);
+			if ($view_file_data === null)
+			{
+				nt_common_redirect('tool_log_analyser.php');
+				exit();
+			}
 
 			if (isset($NELTOOL['GET_VARS']['downloadraw']))
 			{

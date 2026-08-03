@@ -114,11 +114,11 @@ function inviteOwnerInSession($charId, $domainId, $sessionId)
 	$DomainId = $domainId;
 
 	$link = mysqli_connect($DBHost, $RingDBUserName, $RingDBPassword, NULL, $DBPort) or die("Can't connect to ring database");
-	mysqli_select_db($link, $domainInfo['ring_db_name']) or die ("Can't access to the db dbname:" . $domainInfo['ring_db_name']);
+	mysqli_select_db($link, $domainInfo['ring_db_name']) or die ("Can't access to the db");
 
 	$sessionId = (int) $sessionId;
 	$query = "select session_type from sessions where session_id=".$sessionId;
-	$result = mysqli_query($link, $query) or die ("Can't execute the query: ".$query);
+	$result = mysqli_query($link, $query) or die ("Can't execute the query");
 	if (mysqli_num_rows($result) != 1)
 	{
 		echo "Can't find 1 row for ring session ".$sessionId."<br>";

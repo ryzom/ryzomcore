@@ -40,12 +40,12 @@
 		}
 
 		// check the cookie in the database		
-		$link = mysqli_connect($DBHost, $RingDBUserName, $RingDBPassword, NULL, $DBPort) or die ("Can't connect to database host:$DBHost user:$RingDBUserName");
-		mysqli_select_db($link, $domainInfo['ring_db_name']) or die ("Can't access to the table dbname:" . $domainInfo['ring_db_name']);
+		$link = mysqli_connect($DBHost, $RingDBUserName, $RingDBPassword, NULL, $DBPort) or die ("Can't connect to database");
+		mysqli_select_db($link, $domainInfo['ring_db_name']) or die ("Can't access to the table");
 
 		$cookie = mysqli_real_escape_string($link, $cookie);
 		$query = "SELECT user_id, current_status, current_domain_id FROM ring_users where cookie='$cookie'";
-		$result = mysqli_query($link, $query) or die ("Can't execute the query: ".$query);
+		$result = mysqli_query($link, $query) or die ("Can't execute the query");
 
 		if (mysqli_num_rows($result) == 0)
 		{

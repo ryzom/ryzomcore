@@ -44,13 +44,13 @@
 		// lookup in the database to convert character name into
 		global $DBHost, $DBPort, $RingDBUserName, $RingDBPassword;
 
-		$link = mysqli_connect($DBHost, $RingDBUserName, $RingDBPassword, NULL, $DBPort) or die ("Can't connect to database host:$DBHost user:$RingDBUserName");
-		mysqli_select_db($link, $domainInfo['ring_db_name']) or die ("Can't access to the table dbname:" . $domainInfo['ring_db_name']);
+		$link = mysqli_connect($DBHost, $RingDBUserName, $RingDBPassword, NULL, $DBPort) or die ("Can't connect to database");
+		mysqli_select_db($link, $domainInfo['ring_db_name']) or die ("Can't access to the table");
 		
 		// extract the character that have the specified name
 		$charName = mysqli_real_escape_string($link, $_POST['charName']);
 		$query = "select char_id, char_name from characters where char_name = '$charName'";
-		$result = mysqli_query($link, $query) or die ("Can't execute the query: ".$query);
+		$result = mysqli_query($link, $query) or die ("Can't execute the query");
 
 		if (mysqli_num_rows($result) == 0)
 		{

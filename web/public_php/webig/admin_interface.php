@@ -16,6 +16,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+// This page used to proxy as user_login=support with no authentication of
+// its own. admin.php is currently hard-disabled, but keep this endpoint
+// closed as well so re-enabling the backend does not open it again.
+die("Access denied");
+
 $server = "localhost";
 $port = 80;
 
