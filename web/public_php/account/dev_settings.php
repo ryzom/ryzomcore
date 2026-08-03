@@ -41,21 +41,66 @@ try {
 	// Handle POST actions
 	if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrfValidate()) {
 		if (isset($_POST['save_settings'])) {
+			$rejected = array();
 			foreach ($allSettings as $key => $meta) {
-				if (isset($_POST['setting_' . $key])) {
-					$val = trim($_POST['setting_' . $key]);
-					setSetting($key, $val);
+				if (!isset($_POST['setting_' . $key])) {
+					continue;
 				}
+				$val = trim($_POST['setting_' . $key]);
+				if ($key === 'registration_open') {
+					if ($val !== '0' && $val !== '1') {
+						$rejected[] = $key;
+						continue;
+					}
+				} elseif ($key === 'admin_privileges' || $key === 'settings_privilege') {
+					if (!isValidPrivilegeSetting($val) || $val === '') {
+						// Empty would lock every account out of the page that
+						// can fix it; refuse blank staff gates.
+						$rejected[] = $key;
+						continue;
+					}
+				} elseif ($key === 'default_privileges') {
+					// Self-registration defaults: known codes only, no staff ranks.
+					$lowRisk = array_values(array_diff(knownPrivilegeCodes(), highRiskPrivilegeCodes()));
+					if ($val !== '' && !isValidPrivilegeSetting($val)) {
+						$rejected[] = $key;
+						continue;
+					}
+					$val = sanitizePrivilegeString($val, $lowRisk);
+				} elseif ($key === 'default_access_domains') {
+					$allowed = array('ds_open', 'ds_dev', 'ds_restricted', 'ds_close');
+					$parts = array();
+					foreach (array_map('trim', explode(',', $val)) as $st) {
+						if ($st !== '' && in_array($st, $allowed, true)) {
+							$parts[] = $st;
+						}
+					}
+					if ($val !== '' && empty($parts)) {
+						$rejected[] = $key;
+						continue;
+					}
+					$val = implode(',', $parts);
+				} elseif (strlen($val) > 255) {
+					$rejected[] = $key;
+					continue;
+				}
+				setSetting($key, $val);
 			}
-			$success = 'Settings saved.';
+			if (!empty($rejected)) {
+				$error = 'Some settings were not saved (invalid value): ' . implode(', ', $rejected) . '.';
+				if (count($rejected) < count($allSettings)) {
+					$success = 'Other settings saved.';
+				}
+			} else {
+				$success = 'Settings saved.';
+			}
 		}
 	}
 
-	// Load current settings
-	$stmt = $db->query('SELECT setting, value FROM setting');
-	$rows = $stmt->fetchAll();
-	foreach ($rows as $row) {
-		$settings[$row['setting']] = $row['value'];
+	// Load only the keys this page manages — the setting table is a free
+	// key/value store and must not dump arbitrary rows to every DEV session.
+	foreach (array_keys($allSettings) as $key) {
+		$settings[$key] = getSetting($key, $allSettings[$key]['default']);
 	}
 } catch (PDOException $e) {
 	$error = 'Database error. Please try again later.'; // the mysql text quotes host, user and query
@@ -95,27 +140,25 @@ ob_start();
 	</div>
 
 	<div class="card">
-		<h2>All Settings</h2>
-		<?php if (empty($settings)): ?>
-			<div class="empty-state"><p>No settings stored yet. Save above to initialize.</p></div>
-		<?php else: ?>
-			<table>
-				<thead>
-					<tr>
-						<th>Setting</th>
-						<th>Value</th>
-					</tr>
-				</thead>
-				<tbody>
-					<?php foreach ($settings as $k => $v): ?>
-					<tr>
-						<td style="color:#ecf0f1;"><code><?php echo h($k); ?></code></td>
-						<td><?php echo ($v !== '' && $v !== null) ? h($v) : '<span style="color:#8899a6;">(empty)</span>'; ?></td>
-					</tr>
-					<?php endforeach; ?>
-				</tbody>
-			</table>
-		<?php endif; ?>
+		<h2>Effective Values</h2>
+		<table>
+			<thead>
+				<tr>
+					<th>Setting</th>
+					<th>Value</th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php foreach ($allSettings as $k => $meta):
+					$v = isset($settings[$k]) ? $settings[$k] : $meta['default'];
+				?>
+				<tr>
+					<td style="color:#ecf0f1;"><code><?php echo h($k); ?></code></td>
+					<td><?php echo ($v !== '' && $v !== null) ? h($v) : '<span style="color:#8899a6;">(empty)</span>'; ?></td>
+				</tr>
+				<?php endforeach; ?>
+			</tbody>
+		</table>
 	</div>
 </div>
 <?php

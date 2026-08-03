@@ -17,7 +17,7 @@ try {
 
 	// For each domain, query the ring database for the user's characters
 	foreach ($userDomains as $domain) {
-		if (empty($domain['ring_db_name'])) {
+		if (empty($domain['ring_db_name']) || !isSafeDatabaseName($domain['ring_db_name'])) {
 			continue;
 		}
 		try {

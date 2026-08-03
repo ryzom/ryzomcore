@@ -37,6 +37,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrfValidate() && isImpersonating()
 			if ($domainRow) {
 				$domainRingDb = (string)$domainRow['ring_db_name'];
 				$rsmAddress = (string)$domainRow['session_manager_address'];
+				if (!isSafeDatabaseName($domainRingDb)) {
+					$domainRingDb = '';
+					$actionError = 'Domain ring database is not configured correctly.';
+				}
 			}
 		} catch (PDOException $e) {
 			$actionError = 'Action failed. Please try again.';
@@ -176,7 +180,7 @@ try {
 	$userDomains = $stmt->fetchAll();
 
 	foreach ($userDomains as $domain) {
-		if (empty($domain['ring_db_name'])) {
+		if (empty($domain['ring_db_name']) || !isSafeDatabaseName($domain['ring_db_name'])) {
 			continue;
 		}
 		try {

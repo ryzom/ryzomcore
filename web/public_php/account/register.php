@@ -15,6 +15,8 @@ if (!$registrationOpen) {
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register_submit'])) {
 	if (!csrfValidate()) {
 		$error = 'Invalid form submission. Please try again.';
+	} elseif (accountActionThrottled('register')) {
+		$error = 'Too many registration attempts. Please wait a few minutes and try again.';
 	} else {
 		$login = isset($_POST['login']) ? trim($_POST['login']) : '';
 		$email = isset($_POST['email']) ? trim($_POST['email']) : '';
@@ -28,13 +30,17 @@ if (!$registrationOpen) {
 		$error = 'Username must be between 3 and 64 characters.';
 	} elseif (!preg_match('/^[a-zA-Z0-9_]+$/', $login)) {
 		$error = 'Username may only contain letters, numbers, and underscores.';
-	} elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+	} elseif (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 255) {
 		$error = 'Please enter a valid email address.';
-	} elseif (strlen($password) < 8) {
-		$error = 'Password must be at least 8 characters.';
+	} elseif (!accountPasswordAcceptable($password)) {
+		$error = 'Password must be between ' . accountPasswordMinLength()
+			. ' and ' . accountPasswordMaxLength() . ' characters.';
 	} elseif ($password !== $confirm) {
 		$error = 'Passwords do not match.';
 	} else {
+		// Count this attempt before the uniqueness probes so enumeration
+		// still burns the rate limit.
+		accountActionRecordFailure('register');
 		try {
 			$db = getNelDatabase();
 
@@ -53,8 +59,13 @@ if (!$registrationOpen) {
 					// Create the user directly in the nel user table
 					$hashedPassword = hashPassword($password);
 
-					// Get default privileges from settings
-					$defaultPriv = getSetting('default_privileges', '');
+					// Default privileges for self-registration: known codes
+					// only, and never staff ranks (those come from admin).
+					$lowRisk = array_values(array_diff(knownPrivilegeCodes(), highRiskPrivilegeCodes()));
+					$defaultPriv = sanitizePrivilegeString(
+						getSetting('default_privileges', ''),
+						$lowRisk
+					);
 
 					$stmt = $db->prepare('INSERT INTO user (Login, Password, Email, Privilege) VALUES (:login, :pass, :email, :priv)');
 					$stmt->execute(array(
@@ -67,11 +78,17 @@ if (!$registrationOpen) {
 
 					// Create default permissions based on domain access setting
 					$accessSetting = getSetting('default_access_domains', 'ds_open');
-					$accessStatuses = array_filter(array_map('trim', explode(',', $accessSetting)), 'strlen');
+					$allowedStatuses = array('ds_open', 'ds_dev', 'ds_restricted', 'ds_close');
+					$accessStatuses = array();
+					foreach (array_map('trim', explode(',', $accessSetting)) as $st) {
+						if (in_array($st, $allowedStatuses, true)) {
+							$accessStatuses[] = $st;
+						}
+					}
 					if (!empty($accessStatuses)) {
 						$domains = $db->query("SELECT domain_id, status FROM domain");
 						foreach ($domains as $domain) {
-							if (in_array($domain['status'], $accessStatuses)) {
+							if (in_array($domain['status'], $accessStatuses, true)) {
 								// The login service turns the domain status into the
 								// access privilege it then looks for (ds_dev => DEV),
 								// so a row written as OPEN on a dev domain refuses
@@ -92,6 +109,7 @@ if (!$registrationOpen) {
 					}
 
 					// Log the user in immediately
+					accountActionClearFailures('register');
 					session_regenerate_id(true);
 					$_SESSION['account_uid'] = $uid;
 					$_SESSION['account_login'] = $login;

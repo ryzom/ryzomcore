@@ -23,10 +23,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 			$newPass = isset($_POST['new_password']) ? $_POST['new_password'] : '';
 			$confirmPass = isset($_POST['confirm_password']) ? $_POST['confirm_password'] : '';
 
-			if ($currentPass === '' || $newPass === '' || $confirmPass === '') {
+			if (accountActionThrottled('password')) {
+				$error = 'Too many password attempts. Please wait a few minutes and try again.';
+			} elseif ($currentPass === '' || $newPass === '' || $confirmPass === '') {
 				$error = 'All password fields are required.';
-			} elseif (strlen($newPass) < 8) {
-				$error = 'New password must be at least 8 characters.';
+			} elseif (!accountPasswordAcceptable($newPass)) {
+				$error = 'New password must be between ' . accountPasswordMinLength()
+					. ' and ' . accountPasswordMaxLength() . ' characters.';
 			} elseif ($newPass !== $confirmPass) {
 				$error = 'New passwords do not match.';
 			} else {
@@ -39,8 +42,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 					$hashedPassword = hashPassword($newPass);
 					$stmt = $db->prepare('UPDATE user SET Password = :pass WHERE UId = :uid');
 					$stmt->execute(array(':pass' => $hashedPassword, ':uid' => $uid));
+					accountActionClearFailures('password');
+					// Password change invalidates the prior session id so a
+					// stolen cookie cannot keep using the account after the
+					// owner rotates credentials.
+					session_regenerate_id(true);
 					$success = 'Password updated successfully.';
 				} else {
+					accountActionRecordFailure('password');
 					$error = 'Current password is incorrect.';
 				}
 			}
@@ -48,9 +57,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 			$newEmail = isset($_POST['new_email']) ? trim($_POST['new_email']) : '';
 			$password = isset($_POST['email_password']) ? $_POST['email_password'] : '';
 
-			if ($newEmail === '' || $password === '') {
+			if (accountActionThrottled('password')) {
+				$error = 'Too many password attempts. Please wait a few minutes and try again.';
+			} elseif ($newEmail === '' || $password === '') {
 				$error = 'Email and password are required.';
-			} elseif (!filter_var($newEmail, FILTER_VALIDATE_EMAIL)) {
+			} elseif (!filter_var($newEmail, FILTER_VALIDATE_EMAIL) || strlen($newEmail) > 255) {
 				$error = 'Please enter a valid email address.';
 			} else {
 				// Verify password
@@ -68,9 +79,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 						$stmt = $db->prepare('UPDATE user SET Email = :email WHERE UId = :uid');
 						$stmt->execute(array(':email' => $newEmail, ':uid' => $uid));
 						$_SESSION['account_email'] = $newEmail;
+						accountActionClearFailures('password');
 						$success = 'Email updated successfully.';
 					}
 				} else {
+					accountActionRecordFailure('password');
 					$error = 'Password is incorrect.';
 				}
 			}

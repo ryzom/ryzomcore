@@ -45,14 +45,21 @@ try {
 	if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrfValidate()) {
 		if (isset($_POST['impersonate'])) {
 			$targetUid = (int)$_POST['target_uid'];
-			$stmt = $db->prepare('SELECT UId, Login, Email, Privilege FROM user WHERE UId = :uid');
-			$stmt->execute(array(':uid' => $targetUid));
-			$targetUser = $stmt->fetch();
-			if ($targetUser && startImpersonation($targetUser)) {
-				header('Location: index.php?page=home');
-				exit;
+			if ($targetUid === (int)$uid) {
+				$error = 'You are already this user.';
 			} else {
-				$error = 'Cannot view as this user (equal or higher privileges).';
+				$stmt = $db->prepare('SELECT UId, Login, Email, Privilege FROM user WHERE UId = :uid');
+				$stmt->execute(array(':uid' => $targetUid));
+				$targetUser = $stmt->fetch();
+				if ($targetUser && startImpersonation($targetUser)) {
+					// Fresh session id after switching identity so the prior
+					// admin session cookie cannot be replayed as the target.
+					session_regenerate_id(true);
+					header('Location: index.php?page=home');
+					exit;
+				} else {
+					$error = 'Cannot view as this user (equal or higher privileges).';
+				}
 			}
 		}
 		if (isset($_POST['save_privileges'])) {
@@ -65,34 +72,39 @@ try {
 				$error = 'You cannot edit this user: unknown account, or equal or higher privileges.';
 				$editUid = $targetUid;
 			} else {
-			$newPrivilege = trim($_POST['privilege']);
-			// Validate: parse and keep only known privilege codes
-			$knownPrivs = array('DEV', 'SGM', 'GM', 'VG', 'SG', 'G', 'EM', 'EG', 'CM', 'OBSERVER', 'PR');
+			$newPrivilege = isset($_POST['privilege']) ? trim($_POST['privilege']) : '';
+			// Validate: known codes only, and never at or above the editor's rank
+			$validCodes = array();
+			$invalidCodes = array();
 			if ($newPrivilege !== '') {
-				$codes = parsePrivileges($newPrivilege);
-				$validCodes = array();
-				$invalidCodes = array();
-				foreach ($codes as $code) {
-					if (in_array(strtoupper($code), $knownPrivs)) {
-						// Hierarchy check: can't assign privileges at or above own rank
-						if (privRank(strtoupper($code)) >= $myRank) {
-							$invalidCodes[] = $code . ' (rank too high)';
-						} else {
-							$validCodes[] = strtoupper($code);
-						}
-					} else {
+				foreach (parsePrivileges($newPrivilege) as $code) {
+					$up = strtoupper($code);
+					if (!in_array($up, knownPrivilegeCodes(), true)) {
 						$invalidCodes[] = $code;
+					} elseif (privRank($up) >= $myRank) {
+						$invalidCodes[] = $code . ' (rank too high)';
+					} else {
+						if (!in_array($up, $validCodes, true)) {
+							$validCodes[] = $up;
+						}
 					}
 				}
 				if (!empty($invalidCodes)) {
 					$error = 'Codes not applied: ' . implode(', ', $invalidCodes);
 				}
-				$newPrivilege = !empty($validCodes) ? ':' . implode(':', $validCodes) . ':' : '';
 			}
-			$stmt = $db->prepare('UPDATE user SET Privilege = :priv WHERE UId = :uid');
-			$stmt->execute(array(':priv' => $newPrivilege, ':uid' => $targetUid));
-			$success = 'Privileges updated.' . ($error ? ' ' . $error : '');
-			$error = '';
+			// Refuse assigning privileges to yourself through the form by
+			// target_uid confusion (UI already doesn't offer it, but POST is
+			// free-form).
+			if ($targetUid === (int)$uid) {
+				$error = 'You cannot edit your own privileges here.';
+			} else {
+				$newPrivilege = !empty($validCodes) ? ':' . implode(':', $validCodes) . ':' : '';
+				$stmt = $db->prepare('UPDATE user SET Privilege = :priv WHERE UId = :uid');
+				$stmt->execute(array(':priv' => $newPrivilege, ':uid' => $targetUid));
+				$success = 'Privileges updated.' . ($error ? ' ' . $error : '');
+				$error = '';
+			}
 			$editUid = $targetUid;
 			}
 		}
@@ -107,23 +119,46 @@ try {
 			} else {
 			$domainId = (int)$_POST['domain_id'];
 			$shardId = (int)$_POST['shard_id'];
-			$accessPriv = trim($_POST['access_privilege']);
+			$accessPriv = isset($_POST['access_privilege']) ? trim($_POST['access_privilege']) : '';
 			$validAccess = array('OPEN', 'DEV', 'RESTRICTED');
-			if (!in_array($accessPriv, $validAccess)) {
+			if (!in_array($accessPriv, $validAccess, true)) {
 				$accessPriv = 'OPEN';
 			}
-			// Check if permission already exists
-			$stmt = $db->prepare('SELECT COUNT(*) as cnt FROM permission WHERE UId = :uid AND DomainId = :did AND ShardId = :sid');
-			$stmt->execute(array(':uid' => $targetUid, ':did' => $domainId, ':sid' => $shardId));
-			$row = $stmt->fetch();
-			if ($row['cnt'] > 0) {
-				$stmt = $db->prepare('UPDATE permission SET AccessPrivilege = :priv WHERE UId = :uid AND DomainId = :did AND ShardId = :sid');
-				$stmt->execute(array(':priv' => $accessPriv, ':uid' => $targetUid, ':did' => $domainId, ':sid' => $shardId));
-			} else {
-				$stmt = $db->prepare('INSERT INTO permission (UId, DomainId, ShardId, AccessPrivilege) VALUES (:uid, :did, :sid, :priv)');
-				$stmt->execute(array(':uid' => $targetUid, ':did' => $domainId, ':sid' => $shardId, ':priv' => $accessPriv));
+			// Domain must exist; shard 0 means all shards, otherwise it must
+			// exist (and preferably belong to the domain — still enforced as
+			// "known shard id" so we never invent orphan references).
+			$domainOk = false;
+			foreach ($domains as $d) {
+				if ((int)$d['domain_id'] === $domainId) {
+					$domainOk = true;
+					break;
+				}
 			}
-			$success = 'Permission added.';
+			$shardOk = ($shardId === 0);
+			if (!$shardOk) {
+				foreach ($shards as $s) {
+					if ((int)$s['ShardId'] === $shardId) {
+						$shardOk = true;
+						break;
+					}
+				}
+			}
+			if (!$domainOk || !$shardOk) {
+				$error = 'Unknown domain or shard.';
+			} else {
+				// Check if permission already exists
+				$stmt = $db->prepare('SELECT COUNT(*) as cnt FROM permission WHERE UId = :uid AND DomainId = :did AND ShardId = :sid');
+				$stmt->execute(array(':uid' => $targetUid, ':did' => $domainId, ':sid' => $shardId));
+				$row = $stmt->fetch();
+				if ($row['cnt'] > 0) {
+					$stmt = $db->prepare('UPDATE permission SET AccessPrivilege = :priv WHERE UId = :uid AND DomainId = :did AND ShardId = :sid');
+					$stmt->execute(array(':priv' => $accessPriv, ':uid' => $targetUid, ':did' => $domainId, ':sid' => $shardId));
+				} else {
+					$stmt = $db->prepare('INSERT INTO permission (UId, DomainId, ShardId, AccessPrivilege) VALUES (:uid, :did, :sid, :priv)');
+					$stmt->execute(array(':uid' => $targetUid, ':did' => $domainId, ':sid' => $shardId, ':priv' => $accessPriv));
+				}
+				$success = 'Permission added.';
+			}
 			}
 			$editUid = $targetUid;
 		}
@@ -394,14 +429,27 @@ ob_start();
 					<tr>
 						<td><?php echo (int)$u['UId']; ?></td>
 						<td style="color:#ecf0f1;"><?php echo h($u['Login']); ?></td>
-						<td><?php echo h($u['Email']); ?></td>
+						<td><?php
+							// Email and full privilege detail for equal/higher
+							// rank peers is not for browsing: manage is already
+							// blocked, so redact the list too.
+							if (canEditUser($u['Privilege'])):
+								echo h($u['Email']);
+							else:
+								echo '<span style="color:#8899a6;">&mdash;</span>';
+							endif;
+						?></td>
 						<td>
 							<?php
-							$privCodes = parsePrivileges($u['Privilege']);
-							if (!empty($privCodes)):
-								foreach ($privCodes as $pc): ?>
-									<span class="badge badge-blue" title="<?php echo h(privilegeLabel($pc)); ?>"><?php echo h($pc); ?></span>
-								<?php endforeach;
+							if (canEditUser($u['Privilege'])):
+								$privCodes = parsePrivileges($u['Privilege']);
+								if (!empty($privCodes)):
+									foreach ($privCodes as $pc): ?>
+										<span class="badge badge-blue" title="<?php echo h(privilegeLabel($pc)); ?>"><?php echo h($pc); ?></span>
+									<?php endforeach;
+								else: ?>
+									<span style="color:#8899a6;">&mdash;</span>
+								<?php endif;
 							else: ?>
 								<span style="color:#8899a6;">&mdash;</span>
 							<?php endif; ?>

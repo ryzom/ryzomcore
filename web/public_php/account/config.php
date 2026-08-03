@@ -47,12 +47,25 @@ function getNelDatabase()
 }
 
 /**
+ * True when $name is a safe MySQL database identifier for use in a DSN.
+ * domain.ring_db_name is operator-controlled; still refuse separators that
+ * would rewrite the PDO DSN (e.g. "x;host=evil").
+ */
+function isSafeDatabaseName($name)
+{
+	return is_string($name) && (bool)preg_match('/^[A-Za-z0-9_$]{1,64}$/', $name);
+}
+
+/**
  * Get a PDO connection to a ring domain database by name.
  */
 function getRingDatabase($ringDbName = null)
 {
 	global $ring_db_host, $ring_db_port, $ring_db_user, $ring_db_pass, $ring_db_name;
 	$name = $ringDbName ? $ringDbName : $ring_db_name;
+	if (!isSafeDatabaseName($name)) {
+		throw new PDOException('Invalid ring database name');
+	}
 	return getDatabase($ring_db_host, $ring_db_port, $ring_db_user, $ring_db_pass, $name);
 }
 
@@ -109,20 +122,23 @@ class AccountRSMCallback extends CRingSessionManagerWeb
  */
 function connectToRSM($sessionManagerAddress)
 {
-	if (empty($sessionManagerAddress)) {
+	if (empty($sessionManagerAddress) || !is_string($sessionManagerAddress)) {
 		return false;
 	}
-	$addr = explode(':', $sessionManagerAddress);
-	if (count($addr) < 2) {
+	// domain.session_manager_address is operator config, but this process
+	// opens a TCP socket to whatever is stored. Keep host:port forms that
+	// cannot smuggle path/control characters into fsockopen.
+	if (!preg_match('/^([A-Za-z0-9._-]+):([0-9]{1,5})$/', $sessionManagerAddress, $m)) {
+		return false;
+	}
+	$host = $m[1];
+	$port = (int)$m[2];
+	if ($port < 1 || $port > 65535) {
 		return false;
 	}
 	$rsm = new AccountRSMCallback();
 	$res = '';
-	$port = (int)$addr[1];
-	if ($port < 1 || $port > 65535) {
-		return false;
-	}
-	$rsm->connect($addr[0], $port, $res);
+	$rsm->connect($host, $port, $res);
 	if ($res !== '') {
 		return false;
 	}
@@ -143,6 +159,30 @@ function generateSalt()
 	return $salt;
 }
 
+/** Minimum accepted password length for this tool. */
+function accountPasswordMinLength()
+{
+	return 8;
+}
+
+/** Cap password length to bound crypt()/DoS cost. */
+function accountPasswordMaxLength()
+{
+	return 256;
+}
+
+/**
+ * True when a candidate password meets length policy (not complexity).
+ */
+function accountPasswordAcceptable($password)
+{
+	if (!is_string($password)) {
+		return false;
+	}
+	$len = strlen($password);
+	return $len >= accountPasswordMinLength() && $len <= accountPasswordMaxLength();
+}
+
 /**
  * Hash a password using crypt().
  */
@@ -156,15 +196,24 @@ function hashPassword($password)
  */
 function verifyPassword($password, $hash)
 {
+	$password = (string)$password;
 	$hash = (string)$hash;
 	// An account row with no password must never authenticate, and indexing
 	// an empty string is an error on php 8.
 	if (strlen($hash) < 2) {
 		return false;
 	}
+	// Bound work even on failure paths with absurdly long inputs.
+	if (strlen($password) > accountPasswordMaxLength()) {
+		return false;
+	}
 	if ($hash[0] === '$') {
 		// Modern crypt hash (SHA-256 or SHA-512)
-		$salt = substr($hash, 0, strrpos($hash, '$') + 1);
+		$last = strrpos($hash, '$');
+		if ($last === false || $last < 1) {
+			return false;
+		}
+		$salt = substr($hash, 0, $last + 1);
 	} else {
 		// Legacy DES-based crypt
 		$salt = substr($hash, 0, 2);
@@ -185,8 +234,24 @@ function verifyPassword($password, $hash)
  */
 function hasPriv($privileges, $priv)
 {
-	if (empty($privileges) || empty($priv)) {
+	if ($privileges === null || $privileges === '' || $priv === null || $priv === '') {
 		return false;
+	}
+	$privileges = (string)$privileges;
+	$priv = (string)$priv;
+	// Frame both sides as :CODE: so a check for :G: cannot match inside :SG:
+	// when storage is messy, and a bare CODE still matches a framed store.
+	if ($priv[0] !== ':') {
+		$priv = ':' . $priv;
+	}
+	if (substr($priv, -1) !== ':') {
+		$priv .= ':';
+	}
+	if ($privileges === '' || $privileges[0] !== ':') {
+		$privileges = ':' . $privileges;
+	}
+	if (substr($privileges, -1) !== ':') {
+		$privileges .= ':';
 	}
 	return strpos($privileges, $priv) !== false;
 }
@@ -209,39 +274,128 @@ function hasAnyPriv($privileges, $privList)
 }
 
 /**
- * Simple per-session throttle for password attempts on this tool.
+ * Simple per-session throttle for password / registration attempts.
  * Returns true when the caller should refuse the attempt.
+ *
+ * @param string $bucket  Session key suffix (login, register, password)
  */
-function accountLoginThrottled()
+function accountActionThrottled($bucket = 'login')
 {
+	$key = 'account_throttle_' . $bucket;
 	$now = time();
 	$window = 300; // 5 minutes
-	$maxAttempts = 10;
-	if (!isset($_SESSION['account_login_failures']) || !is_array($_SESSION['account_login_failures'])) {
-		$_SESSION['account_login_failures'] = array();
+	$maxAttempts = ($bucket === 'register') ? 5 : 10;
+	if (!isset($_SESSION[$key]) || !is_array($_SESSION[$key])) {
+		$_SESSION[$key] = array();
 	}
-	// Drop attempts outside the window
 	$kept = array();
-	foreach ($_SESSION['account_login_failures'] as $ts) {
+	foreach ($_SESSION[$key] as $ts) {
 		if (($now - (int)$ts) < $window) {
 			$kept[] = (int)$ts;
 		}
 	}
-	$_SESSION['account_login_failures'] = $kept;
+	$_SESSION[$key] = $kept;
 	return count($kept) >= $maxAttempts;
+}
+
+function accountActionRecordFailure($bucket = 'login')
+{
+	$key = 'account_throttle_' . $bucket;
+	if (!isset($_SESSION[$key]) || !is_array($_SESSION[$key])) {
+		$_SESSION[$key] = array();
+	}
+	$_SESSION[$key][] = time();
+}
+
+function accountActionClearFailures($bucket = 'login')
+{
+	unset($_SESSION['account_throttle_' . $bucket]);
+}
+
+/** @deprecated use accountActionThrottled('login') */
+function accountLoginThrottled()
+{
+	return accountActionThrottled('login');
 }
 
 function accountLoginRecordFailure()
 {
-	if (!isset($_SESSION['account_login_failures']) || !is_array($_SESSION['account_login_failures'])) {
-		$_SESSION['account_login_failures'] = array();
-	}
-	$_SESSION['account_login_failures'][] = time();
+	accountActionRecordFailure('login');
 }
 
 function accountLoginClearFailures()
 {
-	unset($_SESSION['account_login_failures']);
+	accountActionClearFailures('login');
+}
+
+/**
+ * Known privilege codes used by this tool and the shard.
+ */
+function knownPrivilegeCodes()
+{
+	return array('DEV', 'SGM', 'GM', 'VG', 'SG', 'G', 'EM', 'EG', 'CM', 'OBSERVER', 'PR');
+}
+
+/**
+ * Codes that must not be handed out as default_privileges for self-registration.
+ * Settings holders with :DEV: can still assign them through the admin page.
+ */
+function highRiskPrivilegeCodes()
+{
+	return array('DEV', 'SGM', 'GM', 'EM', 'EG', 'SG', 'VG');
+}
+
+/**
+ * Normalise a privilege string to :CODE:CODE: form, keeping only known codes.
+ * Returns empty string for empty input. Unknown tokens are dropped.
+ *
+ * @param string $privileges
+ * @param array|null $allowed  subset of known codes, or null for all known
+ * @return string
+ */
+function sanitizePrivilegeString($privileges, $allowed = null)
+{
+	if ($privileges === null || $privileges === '') {
+		return '';
+	}
+	$known = knownPrivilegeCodes();
+	if ($allowed === null) {
+		$allowed = $known;
+	}
+	$codes = parsePrivileges($privileges);
+	$valid = array();
+	foreach ($codes as $code) {
+		$up = strtoupper($code);
+		if (in_array($up, $known, true) && in_array($up, $allowed, true)) {
+			if (!in_array($up, $valid, true)) {
+				$valid[] = $up;
+			}
+		}
+	}
+	return !empty($valid) ? ':' . implode(':', $valid) . ':' : '';
+}
+
+/**
+ * True when a privilege string is empty or only known colon-delimited codes.
+ */
+function isValidPrivilegeSetting($value)
+{
+	if ($value === '' || $value === null) {
+		return true;
+	}
+	if (!is_string($value) || strlen($value) > 255) {
+		return false;
+	}
+	// Must look like :CODE:CODE: with only known codes
+	if (!preg_match('/^(:[A-Za-z0-9]+)+:$/', $value)) {
+		return false;
+	}
+	foreach (parsePrivileges($value) as $code) {
+		if (!in_array(strtoupper($code), knownPrivilegeCodes(), true)) {
+			return false;
+		}
+	}
+	return true;
 }
 
 /**
@@ -478,26 +632,35 @@ function stopImpersonation()
 	if (!isImpersonating()) {
 		return false;
 	}
-	// Restore admin identity
-	$_SESSION['account_uid'] = $_SESSION['impersonate_admin_uid'];
-	$_SESSION['account_login'] = $_SESSION['impersonate_admin_login'];
-	// Restore the admin's email from the database
+	$adminUid = (int)$_SESSION['impersonate_admin_uid'];
+	// Restore admin identity from the database so a demotion that landed
+	// while viewing-as is not undone by the cached privilege snapshot.
 	try {
 		$db = getNelDatabase();
-		$stmt = $db->prepare('SELECT Email FROM user WHERE UId = :uid');
-		$stmt->execute(array(':uid' => $_SESSION['impersonate_admin_uid']));
+		$stmt = $db->prepare('SELECT UId, Login, Email, Privilege FROM user WHERE UId = :uid');
+		$stmt->execute(array(':uid' => $adminUid));
 		$row = $stmt->fetch();
 		if ($row) {
+			$_SESSION['account_uid'] = (int)$row['UId'];
+			$_SESSION['account_login'] = $row['Login'];
 			$_SESSION['account_email'] = $row['Email'];
+			$_SESSION['account_privilege'] = isset($row['Privilege']) ? $row['Privilege'] : '';
+		} else {
+			// Admin account gone — clear session entirely
+			$_SESSION = array();
+			return false;
 		}
 	} catch (PDOException $e) {
-		// Non-fatal; email will be refreshed on next login
+		// Fall back to the snapshot if the database is briefly unavailable
+		$_SESSION['account_uid'] = $adminUid;
+		$_SESSION['account_login'] = $_SESSION['impersonate_admin_login'];
+		$_SESSION['account_privilege'] = $_SESSION['impersonate_admin_privilege'];
 	}
-	$_SESSION['account_privilege'] = $_SESSION['impersonate_admin_privilege'];
 	// Clear impersonation state
 	unset($_SESSION['impersonate_admin_uid']);
 	unset($_SESSION['impersonate_admin_login']);
 	unset($_SESSION['impersonate_admin_privilege']);
+	session_regenerate_id(true);
 	return true;
 }
 
