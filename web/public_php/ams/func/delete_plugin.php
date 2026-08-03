@@ -9,13 +9,13 @@
  */
 function delete_plugin() {
 
-    // if logged in
-    if ( WebUsers :: isLoggedIn() ) {
+    // only the staff that can reach the plugin page may act on plugins
+    if ( WebUsers :: isLoggedIn() && Ticket_User :: isMod( unserialize( $_SESSION['ticket_user'] ) ) ) {
 
         if ( isset( $_GET['id'] ) )
              {
             // id of plugin to delete after filtering
-            $id = filter_var( $_GET['id'], FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+            $id = intval( $_GET['id'] );
 
              $db = new DBLayer( 'lib' );
              $sth = $db -> selectWithParameter( "FileName", "plugins", array( 'id' => $id ), "Id=:id" );

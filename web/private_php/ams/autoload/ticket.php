@@ -601,19 +601,57 @@ class Ticket{
     }
 
     /**
+    * Reduce an uploaded file name to something that is safe to append to a
+    * path. The name arrives straight from the browser, so it may contain
+    * directory separators or "..", which would let an upload land anywhere on
+    * disk -- including next to the php files of the site itself.
+    * Extensions the web server might hand to an interpreter are neutralised as
+    * well, because the storage directory lives under the public web root.
+    * @param $filename the untrusted file name
+    * @return a file name consisting only of safe characters
+    */
+    private static function sanitize_Attachment_Name($filename){
+        // drop any directory part, whichever separator was used
+        $filename = str_replace("\\", "/", (string)$filename);
+        $filename = basename($filename);
+
+        // keep it to characters that have no meaning to a file system
+        $filename = preg_replace('/[^A-Za-z0-9._-]/', '_', $filename);
+
+        // no leading dots: neither ".." nor a hidden/"htaccess" style name
+        $filename = ltrim($filename, '.');
+
+        // defuse anything a web server may treat as a script, including the
+        // "shell.php.txt" style double extensions
+        $filename = preg_replace('/\.(php[0-9s]?|phtml|phar|cgi|pl|py|s?html?|jsp|asp[x]?)(?=$|\.)/i', '.txt', $filename);
+
+        if ($filename === '' || $filename === false) {
+            $filename = 'attachment';
+        }
+
+        // keep room for the storage directory in the resulting path
+        if (strlen($filename) > 100) {
+            $filename = substr($filename, 0, 100);
+        }
+
+        return $filename;
+    }
+
+    /**
     * function that creates a ticket Attachment.
     */
     public static function add_Attachment($TId,$filename,$author,$tempFile){
 
         global $FILE_STORAGE_PATH;
+        $filename = self::sanitize_Attachment_Name($filename);
         $length = mt_rand(20, 25);
-        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$-_.+!*\'(),';
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_';
         $randomString = '';
         for ($i = 0; $i < $length; $i++) {
-            $randomString .= $characters[rand(0, strlen($characters) - 1)];
+            $randomString .= $characters[random_int(0, strlen($characters) - 1)];
         }
         $targetFile = $FILE_STORAGE_PATH . $randomString . "/" . $filename;
-        
+
         if(file_exists($targetFile)) { return self::add_Attachment($TId,$filename,$author,$tempFile); }
         
         $ticket = new Ticket();

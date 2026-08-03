@@ -9,8 +9,9 @@
  */
 function update_plugin() {
 
-    // if logged in
-    if ( WebUsers :: isLoggedIn() ) {
+    // installing an update drops new code into the plugin directory, so this
+    // is staff only -- the same permission that guards the plugin page
+    if ( WebUsers :: isLoggedIn() && Ticket_User :: isMod( unserialize( $_SESSION['ticket_user'] ) ) ) {
 
         if ( isset( $_GET['id'] ) )
              {

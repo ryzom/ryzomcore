@@ -52,6 +52,28 @@ if ( isset( $_GET["cron"] ) ) {
 // Always try to sync on page load, ie "lazy" cron
 Sync :: syncdata( false );
 
+/**
+ * Resolve a request-supplied handler name to a script inside one of our own
+ * directories. Anything that is not a plain identifier, or that does not
+ * resolve to an existing file directly inside $dir, is rejected: without this
+ * the name is concatenated straight into require() and any file on disk (for
+ * instance an uploaded ticket attachment) can be executed.
+ *
+ * @param $name the untrusted handler/page name
+ * @param $dir the directory the script must live in, relative to this file
+ * @return the path to require, or false when the name is not acceptable
+ */
+function ams_resolve_script( $name, $dir ) {
+    if ( !is_string( $name ) || !preg_match( '/^[A-Za-z0-9_]+$/', $name ) ) {
+        return false;
+    }
+    $filename = $dir . '/' . $name . '.php';
+    if ( !is_file( $filename ) ) {
+        return false;
+    }
+    return $filename;
+}
+
 // Decide what page to load
 if ( ! isset( $_GET["page"] ) ) {
 
@@ -68,7 +90,9 @@ if ( ! isset( $_GET["page"] ) ) {
     } else {
 	// if the session exists load page with $_GET requests
     if ( isset( $_SESSION['user'] ) ) {
-        $page = $_GET["page"];
+        // $page ends up in the smarty template name, so only accept a plain
+        // identifier here -- otherwise it can be pointed at any file on disk
+        $page = is_string( $_GET["page"] ) && preg_match( '/^[A-Za-z0-9_]+$/', $_GET["page"] ) ? $_GET["page"] : 'error';
          } else {
         switch ( $_GET["page"] ) {
         case 'register':
@@ -100,15 +124,29 @@ if ( Helpers :: check_if_game_client() && ( $page == "register" ) ) {
 // perform an action in case one is specified
 // else check if a php page is included in the inc folder, else just set page to the get param
 if ( isset( $_POST["function"] ) ) {
-    require( "func/" . $_POST["function"] . ".php" );
+    $filename = ams_resolve_script( $_POST["function"], 'func' );
+     if ( $filename === false ) {
+        $_SESSION['error_code'] = "404";
+         header("Cache-Control: max-age=1");
+         header( "Location: index.php?page=error" );
+         throw new SystemExit();
+         }
+    require( $filename );
      $return = $_POST["function"]();
     } else if ( isset( $_GET["action"] ) ) {
-    require( "func/" . $_GET["action"] . ".php" );
+    $filename = ams_resolve_script( $_GET["action"], 'func' );
+     if ( $filename === false ) {
+        $_SESSION['error_code'] = "404";
+         header("Cache-Control: max-age=1");
+         header( "Location: index.php?page=error" );
+         throw new SystemExit();
+         }
+    require( $filename );
      $return = $_GET["action"]();
     } else {
-    $filename = 'inc/' . $page . '.php';
+    $filename = ams_resolve_script( $page, 'inc' );
      //check if this  is a file
-     if ( is_file( $filename ) ) {
+     if ( $filename !== false ) {
         require_once( $filename );
          $return = $page();
          }

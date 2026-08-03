@@ -24,10 +24,12 @@ class Pagination{
     * @param $params the parameters used by the query (optional)
     */
     function __construct($query, $db, $nrDisplayed, $resultClass, $params = array()) {
-        if (!(isset($_GET['pagenum']))){ 
-            $this->current= 1; 
+        if (!(isset($_GET['pagenum']))){
+            $this->current= 1;
         }else{
-            $this->current= $_GET['pagenum'];
+            // the page number is used to build the LIMIT clause below, so it
+            // has to be a number and nothing else
+            $this->current= max(1, intval($_GET['pagenum']));
         }
         
         //Here we count the number of results
