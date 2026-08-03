@@ -8,6 +8,7 @@
 
 	// where we can find the mysql database
 	$DBHost		= "localhost";
+	$DBPort		= 0;		// 0 means the default mysql port
 	$DBUserName	= "nel";
 	$DBPassword	= "";
 	$DBName		= "nel";

@@ -75,7 +75,7 @@ void ConnectionWS::cbWSConnection(const std::string &serviceName, TServiceId sid
 	MYSQL_ROW row;
 	sint32 nbrow;
 
-	string query = "select * from shard where WSAddr='"+sqlEscape(ia.ipAddress())+"'";
+	string query = "select ShardId from shard where WsAddr='"+sqlEscape(ia.ipAddress())+"'";
 	reason = sqlQuery(query, nbrow, row, result);
 	if (!reason.empty())
 	{
@@ -246,7 +246,7 @@ void ConnectionWS::cbWSIdentification (CMessage &msgin, const std::string &servi
 	CMysqlResult result;
 	MYSQL_ROW row;
 	sint32 nbrow;
-	string query = "select * from shard where ShardId="+toString(shardId);
+	string query = "select WsAddr, domain_id from shard where ShardId="+toString(shardId);
 	reason = sqlQuery(query, nbrow, row, result);
 	if (!reason.empty())
 	{
@@ -258,8 +258,55 @@ void ConnectionWS::cbWSIdentification (CMessage &msgin, const std::string &servi
 	{
 		if(IService::getInstance ()->ConfigFile.getVar("AcceptExternalShards").asInt () == 1)
 		{
-			// we accept new shard, add it
-			query = "insert into shard (ShardId, WsAddr, Online, Name, ClientApplication) values ("+toString(shardId)+", '"+sqlEscape(ia.ipAddress())+"', 1, '"+sqlEscape(ia.ipAddress())+"', '"+sqlEscape(application)+"')";
+			// the shard table hangs off the domain table now: resolve the
+			// domain from the application name the WS identified with
+			if (application.empty())
+			{
+				refuseShard (sid, "Bad shard identification, ShardId %d is not in the database and sent no application name to resolve its domain", shardId);
+				return;
+			}
+			string domainId;
+			{
+				CMysqlResult domainResult;
+				MYSQL_ROW domainRow;
+				sint32 nbDomainRow;
+				query = "select domain_id from domain where domain_name='"+sqlEscape(application)+"'";
+				reason = sqlQuery(query, nbDomainRow, domainRow, domainResult);
+				if (!reason.empty())
+				{
+					refuseShard (sid, "mysql_query (%s) failed: %s", query.c_str (),  mysql_error(DatabaseConnection));
+					return;
+				}
+				if (nbDomainRow == 0)
+				{
+					// dev convenience, same spirit as accepting the shard:
+					// create a minimal domain row for this application
+					query = "insert into domain (domain_name) values ('"+sqlEscape(application)+"')";
+					reason = sqlQuery(query);
+					if (!reason.empty())
+					{
+						refuseShard (sid, "mysql_query (%s) failed: %s", query.c_str (),  mysql_error(DatabaseConnection));
+						return;
+					}
+					nlinfo("The domain '%s' was inserted in the database for ShardId %d!", application.c_str (), shardId);
+					CMysqlResult createdResult;
+					query = "select domain_id from domain where domain_name='"+sqlEscape(application)+"'";
+					reason = sqlQuery(query, nbDomainRow, domainRow, createdResult);
+					if (!reason.empty() || nbDomainRow == 0)
+					{
+						refuseShard (sid, "Failed to read back the domain '%s' just created", application.c_str ());
+						return;
+					}
+					domainId = domainRow[0];
+				}
+				else
+				{
+					domainId = domainRow[0];
+				}
+			}
+
+			// we accept new shard, add it (MOTD has no default value)
+			query = "insert into shard (ShardId, domain_id, WsAddr, Online, Name, MOTD) values ("+toString(shardId)+", "+domainId+", '"+sqlEscape(ia.ipAddress())+"', 1, '"+sqlEscape(ia.ipAddress())+"', '')";
 			reason = sqlQuery(query, nbrow, row, result);
 			if (!reason.empty())
 			{
@@ -282,13 +329,30 @@ void ConnectionWS::cbWSIdentification (CMessage &msgin, const std::string &servi
 	{
 		// check that the ip is ok
 		CInetAddress iadb;
-		iadb.setNameAndPort (row[1]);
-		nlinfo ("check %s with %s (%s)", ia.ipAddress ().c_str(), iadb.ipAddress().c_str(), row[1]);
+		iadb.setNameAndPort (row[0] ? row[0] : "");
+		nlinfo ("check %s with %s (%s)", ia.ipAddress ().c_str(), iadb.ipAddress().c_str(), row[0] ? row[0] : "");
 		if (ia.ipAddress () != iadb.ipAddress())
 		{
 			// good shard id but from a bad computer address
-			refuseShard (sid, "Bad shard identification, ShardId %d should come from '%s' and come from '%s'", shardId, row[1], ia.ipAddress ().c_str ());
+			refuseShard (sid, "Bad shard identification, ShardId %d should come from '%s' and come from '%s'", shardId, row[0] ? row[0] : "", ia.ipAddress ().c_str ());
 			return;
+		}
+
+		// when the WS says which application it serves, make sure the shard
+		// row belongs to that domain: in a shared setup a wrong ShardId in a
+		// config would otherwise attach a shard to another domain's row
+		if (!application.empty())
+		{
+			CMysqlResult domainResult;
+			MYSQL_ROW domainRow;
+			sint32 nbDomainRow;
+			query = "select domain_id from domain where domain_name='"+sqlEscape(application)+"'";
+			string domainReason = sqlQuery(query, nbDomainRow, domainRow, domainResult);
+			if (domainReason.empty() && nbDomainRow == 1 && string(row[1] ? row[1] : "") != string(domainRow[0]))
+			{
+				refuseShard (sid, "Bad shard identification, ShardId %d belongs to domain %s, not to '%s'", shardId, row[1] ? row[1] : "?", application.c_str ());
+				return;
+			}
 		}
 
 		sint32 s = findShard (shardId);
@@ -349,7 +413,9 @@ void ConnectionWS::cbWSClientConnected (CMessage &msgin, const std::string &serv
 	MYSQL_ROW row;
 	sint32 nbrow;
 
-	string query = "select * from user where UId="+toString(Id);
+	// name the column instead of trusting the table layout: 'select *' with a
+	// positional index broke silently every time the schema gained a column
+	string query = "select State from user where UId="+toString(Id);
 	reason = sqlQuery(query, nbrow, row, result);
 	if(!reason.empty()) return;
 
@@ -365,17 +431,16 @@ void ConnectionWS::cbWSClientConnected (CMessage &msgin, const std::string &serv
 		return;
 	}
 
-	// row[4] = State
-	if (con == 1 && string(row[4]) != string("Waiting"))
+	if (con == 1 && string(row[0]) != string("Waiting"))
 	{
 		nlwarning("Id %d is not waiting", Id);
-		Output->displayNL("###: %3d User isn't waiting, his state is '%s'", Id, row[4]);
+		Output->displayNL("###: %3d User isn't waiting, his state is '%s'", Id, row[0]);
 		return;
 	}
-	else if (con == 0 && string(row[4]) != string ("Online"))
+	else if (con == 0 && string(row[0]) != string ("Online"))
 	{
 		nlwarning ("Id %d wasn't connected on a shard", Id);
-		Output->displayNL ("###: %3d User wasn't connected on a shard, his state is '%s'", Id, row[4]);
+		Output->displayNL ("###: %3d User wasn't connected on a shard, his state is '%s'", Id, row[0]);
 		return;
 	}
 
@@ -524,13 +589,10 @@ void ConnectionWS::cbWSReportFSState(CMessage &msgin, const std::string &service
 		}
 	}
 
-	string query = "UPDATE shard SET DynPatchURL='"+sqlEscape(dynPatchURL)+"' WHERE ShardId='"+toString(shard.ShardId)+"'";
-	sint ret = mysql_query (DatabaseConnection, query.c_str ());
-	if (ret != 0)
-	{
-		nlwarning ("mysql_query (%s) failed: %s", query.c_str (),  mysql_error(DatabaseConnection));
-		return;
-	}
+	// the shard table lost its DynPatchURL column (patch urls live on the
+	// domain row now); the per-frontend patch state is only kept in memory
+	if (!dynPatchURL.empty())
+		nlinfo("Shard %d dynamic patch URL: %s", shard.ShardId, dynPatchURL.c_str());
 }
 
 void ConnectionWS::cbWSReportNoPatch(CMessage &msgin, const std::string &serviceName, TServiceId sid)
@@ -550,14 +612,7 @@ void ConnectionWS::cbWSReportNoPatch(CMessage &msgin, const std::string &service
 	{
 		shard.FrontEnds[i].Patching = false;
 	}
-
-	string query = "UPDATE shard SET DynPatchURL='' WHERE ShardId='"+toString(shard.ShardId)+"'";
-	sint ret = mysql_query (DatabaseConnection, query.c_str ());
-	if (ret != 0)
-	{
-		nlwarning ("mysql_query (%s) failed: %s", query.c_str (),  mysql_error(DatabaseConnection));
-		return;
-	}
+	// DynPatchURL is gone from the shard table; nothing to clear in database
 }
 
 void ConnectionWS::cbWSSetShardOpen(CMessage &msgin, const std::string &serviceName, TServiceId sid)

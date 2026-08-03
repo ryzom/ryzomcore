@@ -17,18 +17,39 @@
 	function createSalt()
 	{
 		$chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-			
+
 		return substr($chars, random_int(0, strlen($chars)-1), 1).substr($chars, random_int(0, strlen($chars)-1), 1);
+	}
+
+	function connectDb($errPrefix)
+	{
+		global $DBHost, $DBPort, $DBUserName, $DBPassword, $DBName;
+		$port = isset($DBPort) ? (int)$DBPort : 0;
+		$link = mysqli_connect($DBHost, $DBUserName, $DBPassword, NULL, $port) or die ($errPrefix."Database unavailable");
+		mysqli_select_db ($link, $DBName) or die ($errPrefix."Database unavailable");
+		return $link;
+	}
+
+	// The permission and shard tables hang off the domain table now: the
+	// client application names the domain (domain.domain_name), same
+	// convention the ring login uses.
+	function resolveDomainId($link, $clientApplication, $errPrefix)
+	{
+		$app = mysqli_real_escape_string($link, $clientApplication);
+		$result = mysqli_query ($link, "SELECT domain_id FROM domain WHERE domain_name='$app'") or die ($errPrefix."Database error");
+		if (mysqli_num_rows($result) != 1)
+			die ($errPrefix."Unknown client application '".$clientApplication."' (error code 65)");
+		$row = mysqli_fetch_row($result);
+		return (int)$row[0];
 	}
 
 	// $reason contains the reason why the check failed or success
 	// return true if the check is ok
 	function checkUserValidity ($login, $password, $clientApplication, $cp, &$id, &$reason, &$priv, &$extended)
 	{
-		global $DBHost, $DBUserName, $DBPassword, $DBName, $AcceptUnknownUser;
+		global $AcceptUnknownUser;
 
-		$link = mysqli_connect($DBHost, $DBUserName, $DBPassword) or die ("Database unavailable");
-		mysqli_select_db ($link, $DBName) or die ("Database unavailable");
+		$link = connectDb("");
 		$login = mysqli_real_escape_string($link, $login);
 		$query = "SELECT * FROM user where Login='$login'";
 		$result = mysqli_query ($link, $query) or die ("Database error");
@@ -60,8 +81,10 @@
 					$priv = $row["Privilege"];
 					$extended = $row["ExtendedPrivilege"];
 
-					// add the default permission
-					$query = "INSERT INTO permission (UId,ClientApplication) VALUES ('$id', 'snowballs')";
+					// add the default permission for the domain the client
+					// asked for (ShardId -1 means any shard of the domain)
+					$domainId = resolveDomainId($link, $clientApplication, "");
+					$query = "INSERT INTO permission (UId,DomainId) VALUES ('$id', '$domainId')";
 					$result = mysqli_query ($link, $query) or die ("Database error");
 
 					$res = true;
@@ -88,8 +111,8 @@
 			{
 				// check if the user can use this application
 
-			$clientApplication = mysqli_real_escape_string($link, $clientApplication);
-				$query = "SELECT * FROM permission WHERE UId='".$row["UId"]."' AND ClientApplication='$clientApplication'";
+			$domainId = resolveDomainId($link, $clientApplication, "");
+				$query = "SELECT * FROM permission WHERE UId='".$row["UId"]."' AND DomainId='$domainId'";
 				$result = mysqli_query ($link, $query) or die ("Database error");
 				if (mysqli_num_rows ($result) == 0)
 				{
@@ -143,15 +166,13 @@
     function checkShardAccess($id, $clientApplication, $shardId)
     {
         global $PHP_SELF;
-        global $DBHost, $DBUserName, $DBPassword, $DBName;
 
-        $link = mysqli_connect($DBHost, $DBUserName, $DBPassword) or die ("0:Database unavailable");
-        mysqli_select_db ($link, $DBName) or die ("0:Database unavailable");
+        $link = connectDb("0:");
 
         $id = mysqli_real_escape_string($link, $id);
-        $clientApplication = mysqli_real_escape_string($link, $clientApplication);
+        $domainId = resolveDomainId($link, $clientApplication, "0:");
         $shardId = mysqli_real_escape_string($link, $shardId);
-        $query = "SELECT * FROM permission WHERE UId='".$id."' AND ClientApplication='".$clientApplication."' AND (ShardId='".$shardId."' OR ShardId='-1')";;
+        $query = "SELECT * FROM permission WHERE UId='".$id."' AND DomainId='".$domainId."' AND (ShardId='".$shardId."' OR ShardId='-1')";
         $result = mysqli_query ($link, $query) or die ("0:Database error");
 
         if (mysqli_num_rows ($result) > 0)
@@ -166,13 +187,11 @@
 	function displayAvailableShards($id, $clientApplication, $multiplePatchers)
 	{
 		global $PHP_SELF;
-		global $DBHost, $DBUserName, $DBPassword, $DBName;
 
-		$link = mysqli_connect($DBHost, $DBUserName, $DBPassword) or die ("0:Database unavailable");
-		mysqli_select_db ($link, $DBName) or die ("0:Database unavailable");
+		$link = connectDb("0:");
 
 		$id = mysqli_real_escape_string($link, $id);
-		$clientApplication = mysqli_real_escape_string($link, $clientApplication);
+		$domainId = resolveDomainId($link, $clientApplication, "0:");
 		$query = "SELECT * FROM user WHERE UId='".$id."'";
 		$result = mysqli_query ($link, $query) or die ("0:Database error");
 
@@ -186,7 +205,18 @@
 		else
 			$priv = '';
 
-		$query = "SELECT * FROM shard WHERE ClientApplication='".$clientApplication."'";
+		// the patch url moved from the shard row to the domain row
+		$result = mysqli_query ($link, "SELECT patch_urls, backup_patch_url FROM domain WHERE domain_id='".$domainId."'") or die ("0:Database error");
+		$domainRow = mysqli_fetch_assoc($result);
+		$patchURL = "";
+		if ($domainRow)
+		{
+			$patchURL = trim((string)$domainRow['patch_urls']);
+			if ($patchURL == "")
+				$patchURL = trim((string)$domainRow['backup_patch_url']);
+		}
+
+		$query = "SELECT * FROM shard WHERE domain_id='".$domainId."'";
 		$result = mysqli_query ($link, $query) or die ("0:Database error");
 
 		$nbs = 0;
@@ -196,7 +226,9 @@
 			//echo "<h1>Please, select a shard:</h1>\n";
 			while($row = mysqli_fetch_array($result))
 			{
-				$query2 = "SELECT * FROM permission WHERE UId='".$id."' AND ClientApplication='".$clientApplication."' AND ShardId='".$row["ShardId"]."'";
+				// same rule as checkShardAccess: a ShardId of -1 in the
+				// permission row grants every shard of the domain
+				$query2 = "SELECT * FROM permission WHERE UId='".$id."' AND DomainId='".$domainId."' AND (ShardId='".$row["ShardId"]."' OR ShardId='-1')";
 				$result2 = mysqli_query ($link, $query2) or die ("Database error");
 				
 				$online = $row["Online"];
@@ -231,9 +263,7 @@
 					$res = $res.$row["Name"]."|";
 					$res = $res."999999|";
 					$res = $res.$row["WsAddr"]."|";
-					$res = $res.$row["PatchURL"];
-					if (strlen($row["DynPatchURL"]) > 0 && $multiplePatchers)
-						$res = $res."|".$row["DynPatchURL"];
+					$res = $res.$patchURL;
 					$res = $res."\n";
 				}
 			}
@@ -248,10 +278,9 @@
 	function askSalt($login)
 	{
 		global $PHP_SELF;
-		global $DBHost, $DBUserName, $DBPassword, $DBName, $AcceptUnknownUser;
+		global $AcceptUnknownUser;
 
-		$link = mysqli_connect($DBHost, $DBUserName, $DBPassword) or die ("0:Database unavailable");
-		mysqli_select_db ($link, $DBName) or die ("0:Database unavailable");
+		$link = connectDb("0:");
 
 		$login = mysqli_real_escape_string($link, $login);
 		$query = "SELECT Password FROM user WHERE Login='$login'";

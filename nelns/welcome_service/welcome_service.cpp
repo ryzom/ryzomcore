@@ -1098,9 +1098,16 @@ void cbLSConnection (const std::string &serviceName, TServiceId  sid, void *arg)
 
 	CMessage	msgout ("WS_IDENT");
 	msgout.serial (shardId);
+	// also say which client application this shard serves: the login service
+	// resolves it to a domain row (shard.domain_id) in the shared database,
+	// and refuses the shard if its ShardId belongs to another domain
+	string application;
+	if (IService::getInstance()->ConfigFile.exists ("ClientApplication"))
+		application = IService::getInstance()->ConfigFile.getVar ("ClientApplication").asString();
+	msgout.serial (application);
 	CUnifiedNetwork::getInstance()->send (sid, msgout);
 
-	nlinfo ("Connected to %s-%hu and sent identification with shardId '%d'", serviceName.c_str(), sid.get(), shardId);
+	nlinfo ("Connected to %s-%hu and sent identification with shardId '%d' (application '%s')", serviceName.c_str(), sid.get(), shardId, application.c_str());
 
 	// send state to LS
 	setShardOpenState((TShardOpenState)(ShardOpen.get()), false);
