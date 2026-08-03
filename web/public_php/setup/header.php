@@ -1,6 +1,18 @@
 <?php
 
 $NEL_SETUP_SESSION = true;
+
+// This session is what stands between a visitor and the installer. Keep the
+// cookie out of reach of page script and off cross site posts, and ask for
+// the secure flag when the request arrived over tls.
+ini_set('session.cookie_httponly', '1');
+ini_set('session.use_only_cookies', '1');
+ini_set('session.cookie_samesite', 'Lax');
+if ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== '' && strtolower($_SERVER['HTTPS']) !== 'off')
+	|| (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443)) {
+	ini_set('session.cookie_secure', '1');
+}
+
 if (file_exists( '../config.php')) {
 	session_start();
 	if ((!isset($_SESSION['nelSetupAuthenticated'])) || $_SESSION['nelSetupAuthenticated'] != 1) {

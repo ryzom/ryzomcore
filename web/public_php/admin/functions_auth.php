@@ -137,6 +137,20 @@
 			return;
 		}
 
+		// Without httponly the session id is readable by any script that
+		// makes it onto a page; without a samesite policy the cookie rides
+		// along on cross site form posts. Only ask for the secure flag when
+		// the request itself arrived over tls, or a plain http install could
+		// never log in.
+		ini_set('session.cookie_httponly', '1');
+		ini_set('session.use_only_cookies', '1');
+		ini_set('session.cookie_samesite', 'Lax');
+		if ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== '' && strtolower($_SERVER['HTTPS']) !== 'off')
+			|| (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443))
+		{
+			ini_set('session.cookie_secure', '1');
+		}
+
 		session_name(NELTOOL_SESSIONID);
 		session_cache_limiter('nocache');
 		session_start();

@@ -100,9 +100,15 @@
 		{
 			$error = $error."Password is invalid (password confirmation failed)<br>\n";
 		}
-		else if (strspn($nulogin, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789") == 0)
+		// strspn() returns the length of the leading run of accepted
+		// characters, so "== 0" only rejected a login that *starts* with
+		// something else: "ab/../x" got through and became a row that
+		// validateId() then refuses to log in, and a file name in the user
+		// log directory. Require the whole name, which is what the login
+		// path checks for anyway.
+		else if (!preg_match('/^[a-zA-Z0-9]+$/', $nulogin))
 		{
-			$error = $error."Login '".htmlspecialchars($admlogin, ENT_QUOTES)."' contains other characters than alphabetic and digits<br>\n";
+			$error = $error."Login '".htmlspecialchars($nulogin, ENT_QUOTES)."' contains other characters than alphabetic and digits<br>\n";
 		}
 		else
 		{
