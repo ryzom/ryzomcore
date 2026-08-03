@@ -34,7 +34,10 @@ $AutoCreateRingInfo = $CREATE_RING;
 // If true, clients that request &dbg=1 (development builds always do)
 // receive the debug variant of the login error messages: the failing
 // query, database host and user, and raw service result codes. Keep it
-// off on any deployment reachable by players.
+// off on any deployment reachable by players. Accounts with the :DEV:
+// privilege get the debug detail without this switch for any error
+// after their password has been verified; the switch only adds the
+// pre-authentication errors, which anyone can trigger.
 if (!isset($LoginAllowDbg))
 	$LoginAllowDbg = false;
 

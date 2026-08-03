@@ -204,6 +204,9 @@
 	// database user, the failing query and the mysql error text. This
 	// endpoint is reachable by anyone, so the client does not get to ask
 	// for it: $LoginAllowDbg has to be turned on in the site config.
+	// Exception: once the password check passes for an account whose
+	// privilege contains :DEV:, checkUserValidity turns $DisplayDbg on
+	// for the rest of the request (permission, LS and join errors).
 	global $LoginAllowDbg;
 	$DisplayDbg = (isset($LoginAllowDbg) && $LoginAllowDbg)
 		&& isset($_GET['dbg']) && ($_GET['dbg'] == 1);
@@ -392,6 +395,15 @@
 			{
 				// Store the real login (with correct case)
 				$_GET['login'] = $row['Login'];
+
+				// The password is verified, so the privilege can be
+				// trusted now: a dev account asking for debug output
+				// gets it without the site-wide $LoginAllowDbg switch.
+				// Errors before this point stay gated by the switch.
+				global $DisplayDbg;
+				if (!$DisplayDbg && isset($_GET['dbg']) && $_GET['dbg'] == 1
+					&& strstr((string)$row['Privilege'], ':DEV:'))
+					$DisplayDbg = true;
 				// check if the user can use this application
 
 				$clientApplication = mysqli_real_escape_string($link, $clientApplication);
