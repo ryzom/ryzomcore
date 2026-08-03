@@ -150,7 +150,7 @@ class Ticket_Reply{
     */
     public function update(){
         $dbl = new DBLayer("lib");
-        $dbl->update("ticket", Array('Ticket' => $this->ticket, 'Content' => $this->content, 'Author' => $this->author, 'Timestamp' => $this->timestamp, 'Hidden' => $this->hidden), "TReplyId=$this->tReplyId, ");
+        $dbl->update("ticket_reply", Array('Ticket' => $this->ticket, 'Content' => $this->content, 'Author' => $this->author, 'Timestamp' => $this->timestamp, 'Hidden' => $this->hidden), "TReplyId = :TReplyId", array('TReplyId' => (int)$this->tReplyId));
     }
 
     ////////////////////////////////////////////Getters////////////////////////////////////////////////////

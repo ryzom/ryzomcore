@@ -193,9 +193,11 @@
 		global $db;
 		global $nel_user;
 
-		$log_user_name	= $nel_user['user_name'];
+		// addslashes is not charset-aware; user_name was not escaped at all.
+		// Same escape path as nt_common_add_log().
+		$log_user_name	= $db->sql_escape_string($nel_user['user_name']);
 		$log_date		= time();
-		$log_data		= addslashes(trim($data));
+		$log_data		= $db->sql_escape_string(trim($data));
 
 		$sql = "INSERT INTO ". NELDB_LOG_TABLE ." (`logs_user_name`,`logs_date`,`logs_data`) VALUES ('". $log_user_name ."','". $log_date ."','". $log_data ."')";
 		$db->sql_query($sql);

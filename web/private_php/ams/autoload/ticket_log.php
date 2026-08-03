@@ -162,7 +162,7 @@ class Ticket_Log{
         $dbl = new DBLayer("lib");
 
         $values = Array('timestamp' => $this->getTimestamp(), 'query' => $this->getQuery(), 'author' => $this->getAuthor(), 'ticket' => $this->getTicket() );
-        $dbl->update("ticket_log", $values, "TLogId = $this->getTLogId()");
+        $dbl->update("ticket_log", $values, "TLogId = :TLogId", array('TLogId' => (int)$this->getTLogId()));
 
     }
 

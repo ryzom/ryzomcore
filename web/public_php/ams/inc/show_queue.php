@@ -38,7 +38,7 @@ function show_queue(){
             }
 
             if(isset($_GET['pagenum'])){
-                $result['getURL'] = $result['getURL'] . "&pagenum=".$_GET['pagenum'];
+                $result['getURL'] = $result['getURL'] . "&pagenum=".intval($_GET['pagenum']);
             }
 
             if(isset($_GET['get']) && ($_GET['get'] == "create") && isset($_GET['userid']) && isset($_GET['groupid']) && isset($_GET['what']) && isset($_GET['how']) && isset($_GET['who'])){

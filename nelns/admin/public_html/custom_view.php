@@ -135,7 +135,10 @@
 		$result = sqlquery("SELECT * FROM view_table WHERE tid='".intval($tid)."'");
 		if ($result && ($arr = sqlfetch($result)))
 		{
-			sqlquery("INSERT INTO view_table SET uid='".intval($uid)."', name='CopyOf_".$arr["name"]."', ordering='127', filter='".$arr["filter"]."'");
+			// name/filter were escaped on write, but re-inserting the row
+			// without escaping them again is second-order SQLi once a quote
+			// is already in the table
+			sqlquery("INSERT INTO view_table SET uid='".intval($uid)."', name='CopyOf_".sqlescape($arr["name"])."', ordering='127', filter='".sqlescape($arr["filter"])."'");
 			$res2 = sqlquery("SELECT tid FROM view_table WHERE uid='".intval($uid)."' AND ordering='127'");
 			$arr=sqlfetch($res2);
 			$ntid = $arr["tid"];
@@ -143,7 +146,7 @@
 			$result = sqlquery("SELECT * FROM view_row WHERE tid='".intval($tid)."'");
 			while ($result && ($arr=sqlfetch($result)))
 			{
-				sqlquery("INSERT INTO view_row SET tid='".intval($ntid)."', vid='".$arr["vid"]."', name='".$arr["name"]."', ordering='".$arr["ordering"]."', filter='".$arr["filter"]."'");
+				sqlquery("INSERT INTO view_row SET tid='".intval($ntid)."', vid='".intval($arr["vid"])."', name='".sqlescape($arr["name"])."', ordering='".intval($arr["ordering"])."', filter='".sqlescape($arr["filter"])."'");
 			}
 			
 			reorderViews(intval($uid));
@@ -208,9 +211,9 @@
 			else
 			{
 				$resultt = mysql_fetch_array($resultt);
-				$result = sqlquery("INSERT INTO view_row SET tid='".intval($tid)."', vid='".intval($addToView)."', name='".$variableData[$addToView]["name"]."', ordering='255'");
+				$result = sqlquery("INSERT INTO view_row SET tid='".intval($tid)."', vid='".intval($addToView)."', name='".sqlescape($variableData[$addToView]["name"])."', ordering='255'");
 				if (!$result)
-					$error = $error."Couldn't add variable ".$variableData[addToView]["name"]." to view ".$resultt["name"].", query failed";
+					$error = $error."Couldn't add variable ".htmlspecialchars($variableData[$addToView]["name"], ENT_QUOTES)." to view ".htmlspecialchars($resultt["name"], ENT_QUOTES).", query failed";
 				else
 					reorderRows(intval($tid));
 			}
@@ -354,7 +357,7 @@
 	{
 		$selectedView = ($view["tid"]==$default_view);
 		$selected |= $selectedView;
-		echo "<option value='".$view["tid"]."'".($selectedView ? " selected" : "").">".$view["name"]."\n";
+		echo "<option value='".intval($view["tid"])."'".($selectedView ? " selected" : "").">".htmlspecialchars($view["name"], ENT_QUOTES)."\n";
 	}
 	echo "<option value='0'".(!$selected ? " selected" : "").">None\n";
 	echo "</select>\n";
@@ -364,21 +367,22 @@
 	echo "<table><tr valign=top><td>\n";
 	echo "<b>Your current views: </b>".help("View")."<br><font size=0>(click name to view/edit table, click radio to select as default view)</font><br>\n";
 	echo "<table border=1>\n";
-	echo "<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?tid=$tid&sel_vgid=$sel_vgid'>";
+	echo "<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?tid=".intval($tid)."&sel_vgid=".intval($sel_vgid)."'>";
 	echo "<tr><th>Index</th><th>[Default] View</th><th>Commands</th></tr>\n";
 	if (isset($userViews) && count($userViews)>0)
 	{
 		foreach ($userViews as $arr)
 		{
-			$_tname = $arr["name"];
-			$_tid = $arr["tid"];
+			$_tname = htmlspecialchars($arr["name"], ENT_QUOTES);
+			$_tid = intval($arr["tid"]);
 			$color = ($tid == $_tid ? " bgcolor=#eeeeee" : "");
-			echo "<tr><td$color>".$arr["ordering"]."</td>";
-			echo 		"<td$color><input type=radio name=default_view value='$_tid' onClick='submit()'".($_tid==$default_view ? " checked" : "")."><a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?tid=$_tid&sel_vgid=$sel_vgid'>$_tname</a></td>".
-						"<td$color><a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?removeView=$_tid&tid=$tid&sel_vgid=$sel_vgid' onClick=\"return confirm('You are about to delete a View')\">Delete</a> ".
-							 "<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?moveView=".$arr["ordering"]."&offs=+1&tid=$tid&sel_vgid=$sel_vgid'>-</a> ".
-							 "<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?moveView=".$arr["ordering"]."&offs=-1&tid=$tid&sel_vgid=$sel_vgid'>+</a> ".
-							 "<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?dupView=true&tid=$_tid&offs=-1&sel_vgid=$sel_vgid'>Duplicate</a></td></tr>\n";
+			$self = htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES);
+			echo "<tr><td$color>".intval($arr["ordering"])."</td>";
+			echo 		"<td$color><input type=radio name=default_view value='$_tid' onClick='submit()'".($_tid==$default_view ? " checked" : "")."><a href='$self?tid=$_tid&sel_vgid=".intval($sel_vgid)."'>$_tname</a></td>".
+						"<td$color><a href='$self?removeView=$_tid&tid=".intval($tid)."&sel_vgid=".intval($sel_vgid)."' onClick=\"return confirm('You are about to delete a View')\">Delete</a> ".
+							 "<a href='$self?moveView=".intval($arr["ordering"])."&offs=+1&tid=".intval($tid)."&sel_vgid=".intval($sel_vgid)."'>-</a> ".
+							 "<a href='$self?moveView=".intval($arr["ordering"])."&offs=-1&tid=".intval($tid)."&sel_vgid=".intval($sel_vgid)."'>+</a> ".
+							 "<a href='$self?dupView=true&tid=$_tid&offs=-1&sel_vgid=".intval($sel_vgid)."'>Duplicate</a></td></tr>\n";
 		}
 	}
 	echo "</form>\n";
@@ -434,14 +438,15 @@
 			$ownView = ($result["uid"] == $uid);
 
 			echo "<table border=1>\n";
-			echo "<tr><form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=$sel_vgid&tid=$tid'><td colspan=3><b>Content of ".($ownView ? "<input name=chViewName value='$viewName' size=32 maxlength=32>" : $viewName)."</b></td></form>";
+			$viewName_html = htmlspecialchars($viewName, ENT_QUOTES);
+			echo "<tr><form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=".intval($sel_vgid)."&tid=".intval($tid)."'><td colspan=3><b>Content of ".($ownView ? "<input name=chViewName value='$viewName_html' size=32 maxlength=32>" : $viewName_html)."</b></td></form>";
 			if ($ownView && ($admlogin == "root" || $admlogin == $group || $IsNevrax))
 			{
-				echo "<form method=post action='".$_SERVER['PHP_SEL']."?sel_vgid=$sel_vgid&tid=$tid'><td colspan=4>Give view to <select name='giveTo' onChange='submit()'>";
+				echo "<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=".intval($sel_vgid)."&tid=".intval($tid)."'><td colspan=4>Give view to <select name='giveTo' onChange='submit()'>";
 				$gresult = sqlquery("SELECT uid, login FROM user ORDER BY login");
 				while ($gresult && ($garr=sqlfetch($gresult)))
 				{
-					echo "<option value='".$garr["uid"]."'".($uid == $garr["uid"] ? " selected" : "").">".$garr["login"];
+					echo "<option value='".intval($garr["uid"])."'".($uid == $garr["uid"] ? " selected" : "").">".htmlspecialchars($garr["login"], ENT_QUOTES);
 				}
 				echo "</select>";
 			}
@@ -554,21 +559,24 @@
 			if ($ownView)
 			{
 				echo "<table>\n";
-				echo "<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=$sel_vgid&tid=$tid'><tr><th>Filter</th><td><input name=chViewFilter value='$viewFilter' size=64 maxlength=64></td></tr></form>";
-				echo "<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=$sel_vgid&tid=$tid'><tr><th>Display type</th><td><select name=chViewDisplay onChange='submit()'>";
+				$viewFilter_html = htmlspecialchars($viewFilter, ENT_QUOTES);
+				$self_view = htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=".intval($sel_vgid)."&tid=".intval($tid);
+				echo "<form method=post action='$self_view'><tr><th>Filter</th><td><input name=chViewFilter value='$viewFilter_html' size=64 maxlength=64></td></tr></form>";
+				echo "<form method=post action='$self_view'><tr><th>Display type</th><td><select name=chViewDisplay onChange='submit()'>";
 				echo "<option value='normal'".($viewDisplay=="normal" ? " selected" : "").">Normal display";
 				echo "<option value='condensed'".($viewDisplay=="condensed" ? " selected" : "").">Condensed display";
 				echo "</select></td></tr></form>\n";
-				echo "<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=$sel_vgid&tid=$tid'><tr><th>Display automation</th><td><select name=chViewAutoDisplay onChange='submit()'>";
+				echo "<form method=post action='$self_view'><tr><th>Display automation</th><td><select name=chViewAutoDisplay onChange='submit()'>";
 				echo "<option value='auto'".($viewAutoDisplay=="auto" ? " selected" : "").">Automatic display";
 				echo "<option value='manual'".($viewAutoDisplay=="manual" ? " selected" : "").">Manual display";
 				echo "</select></td></tr></form>\n";
-				echo "<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=$sel_vgid&tid=$tid'><tr><th>Refresh rate</th><td><input name=chViewRefreshRate value='$viewRefreshRate' size=5 maxlength=10> seconds</td></tr></form>\n";
+				echo "<form method=post action='$self_view'><tr><th>Refresh rate</th><td><input name=chViewRefreshRate value='".htmlspecialchars($viewRefreshRate, ENT_QUOTES)."' size=5 maxlength=10> seconds</td></tr></form>\n";
 				echo "</table>\n";
 			}
 			else
 			{
-				echo "<b>Filter ".($ownView ? "<input name=chViewFilter value='$viewFilter' size=64 maxlength=64>" : $viewFilter)."</b><br>";
+				$viewFilter_html = htmlspecialchars($viewFilter, ENT_QUOTES);
+				echo "<b>Filter ".($ownView ? "<input name=chViewFilter value='$viewFilter_html' size=64 maxlength=64>" : $viewFilter_html)."</b><br>";
 				echo ($viewDisplay == "condensed" ? "Condensed" : "Normal")." display, ";
 				echo ($viewAutoDisplay == "auto" ? "Automatic" : "Manual")." display";
 			}
@@ -580,13 +588,13 @@
 			
 			if ($ownView)
 			{
-				echo "<b>Available variables:</b><br><font size=0>(click a variable to add it to view $viewName)</font><br>\n";
+				echo "<b>Available variables:</b><br><font size=0>(click a variable to add it to view ".htmlspecialchars($viewName, ENT_QUOTES).")</font><br>\n";
 	
 				echo "<table border=1 cellspacing=1>\n";
 				echo "<tr><th>Variable</th>";
-				echo "<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?tid=$tid'><th><select name=sel_vgid onChange='submit()'>\n";
+				echo "<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?tid=".intval($tid)."'><th><select name=sel_vgid onChange='submit()'>\n";
 				foreach ($vargroups as $vargroup => $vgid)
-					echo "<option value='$vgid'".($sel_vgid == $vgid ? " selected" : "").">$vargroup\n";
+					echo "<option value='".intval($vgid)."'".($sel_vgid == $vgid ? " selected" : "").">".htmlspecialchars($vargroup, ENT_QUOTES)."\n";
 				echo "<option value='-1'".(!isset($sel_vgid) || $sel_vgid=='-1' ? " selected" : "").">All Groups\n";
 				echo "</select></th></form>\n";
 				echo "<th>Path</th><th>State</th><th>Privilege</th></tr>\n";
@@ -602,7 +610,7 @@
 	
 				while ($arr = mysql_fetch_array($result))
 				{
-					$vid = $arr["vid"];
+					$vid = intval($arr["vid"]);
 					
 					if (!hasAccessToVariable($vid))
 						continue;
@@ -624,11 +632,11 @@
 					$prevvgid = $arr["vgid"];
 					$prevvtype = $arr["command"];
 	
-					echo "<tr><td><b><a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?addToView=$vid&tid=$tid&sel_vgid=$sel_vgid'>".$arr["name"]."</a></b></td>".
-								"<td>".$arr["group_name"]."</td>".
-								"<td>".$arr["path"]."</td>".
-								"<td>".$arr["state"]."</td>".
-								"<td>$priv</td></tr>\n";
+					echo "<tr><td><b><a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?addToView=$vid&tid=".intval($tid)."&sel_vgid=".intval($sel_vgid)."'>".htmlspecialchars($arr["name"], ENT_QUOTES)."</a></b></td>".
+								"<td>".htmlspecialchars($arr["group_name"], ENT_QUOTES)."</td>".
+								"<td>".htmlspecialchars($arr["path"], ENT_QUOTES)."</td>".
+								"<td>".htmlspecialchars($arr["state"], ENT_QUOTES)."</td>".
+								"<td>".htmlspecialchars($priv, ENT_QUOTES)."</td></tr>\n";
 				}
 				echo "</table>\n";
 			}

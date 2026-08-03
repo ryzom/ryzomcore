@@ -403,7 +403,7 @@ class Ticket{
     */
     public function update(){
         $dbl = new DBLayer("lib");
-        $dbl->update("ticket", Array('Timestamp' => $this->timestamp, 'Title' => $this->title, 'Status' => $this->status, 'Queue' => $this->queue, 'Ticket_Category' => $this->ticket_category, 'Author' => $this->author, 'Priority' => $this->priority), "TId=$this->tId");
+        $dbl->update("ticket", Array('Timestamp' => $this->timestamp, 'Title' => $this->title, 'Status' => $this->status, 'Queue' => $this->queue, 'Ticket_Category' => $this->ticket_category, 'Author' => $this->author, 'Priority' => $this->priority), "TId = :TId", array('TId' => (int)$this->tId));
     }
 
 

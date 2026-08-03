@@ -303,7 +303,8 @@ class WebUsers extends Users{
                try {
                      //make connection with and put into shard db
                      $dbw = new DBLayer("web");
-                     $dbw->update("ams_user", $values,"Login = '$user'");
+                     // WHERE used to interpolate $user raw; bind it
+                     $dbw->update("ams_user", $values, "Login = :Login", array('Login' => $user));
                 }
                 catch (PDOException $e) {
                   //ERROR: the web DB is offline
@@ -325,7 +326,7 @@ class WebUsers extends Users{
            try {
                  //make connection with and put into shard db
                  $dbw = new DBLayer("web");
-                 $dbw->update("ams_user", $values, "Login = '$user'");
+                 $dbw->update("ams_user", $values, "Login = :Login", array('Login' => $user));
             }
             catch (PDOException $e) {
               //ERROR: the web DB is offline
@@ -345,7 +346,7 @@ class WebUsers extends Users{
               try {
                     //make connection with and put into shard db
                     $dbw = new DBLayer("web");
-                    $dbw->update("ams_user", $values, "UId = $user" );	
+                    $dbw->update("ams_user", $values, "UId = :UId", array('UId' => (int)$user));
               }
               catch (PDOException $e) {
                  //ERROR: the web DB is offline
@@ -364,7 +365,7 @@ class WebUsers extends Users{
               try {
                     //make connection with and put into shard db
                     $dbw = new DBLayer("web");
-                    $dbw->update("ams_user", $values, "UId = $user");
+                    $dbw->update("ams_user", $values, "UId = :UId", array('UId' => (int)$user));
                }
                catch (PDOException $e) {
                  //ERROR: the web DB is offline
