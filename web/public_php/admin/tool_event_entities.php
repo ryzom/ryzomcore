@@ -2,16 +2,16 @@
 
 
 // SoniX: yop
-// SoniX: pour récup les info de view, il faut utiliser la commande getView
-// SoniX: par ex, sur un AIS :  "getView (0x0000000001:15:83:83).NamedEntityState" récupère le state de l'entité specifier
-// SoniX: "getView *.NamedEntityName" récupère toutes les entité nommé de l'IA sur laquelle tu balance la commande
+// SoniX: pour rï¿½cup les info de view, il faut utiliser la commande getView
+// SoniX: par ex, sur un AIS :  "getView (0x0000000001:15:83:83).NamedEntityState" rï¿½cupï¿½re le state de l'entitï¿½ specifier
+// SoniX: "getView *.NamedEntityName" rï¿½cupï¿½re toutes les entitï¿½ nommï¿½ de l'IA sur laquelle tu balance la commande
 // SoniX: et pour setter une valuer :
-// SoniX: "getView (0x0000000001:15:83:83).NamedEntityState=1" met le truc à 1
-// SoniX: En gros, tu récupères les info dans la table variables, et tu vire les 3 premier morceaux (par ex, *.*.AIS.*.NamedEntityName deviens *.NamedEntityName).
+// SoniX: "getView (0x0000000001:15:83:83).NamedEntityState=1" met le truc ï¿½ 1
+// SoniX: En gros, tu rï¿½cupï¿½res les info dans la table variables, et tu vire les 3 premier morceaux (par ex, *.*.AIS.*.NamedEntityName deviens *.NamedEntityName).
 // SoniX: Par contre, c'est a toi de faire le dispatch sur chaque AIS si besoin.
 // YoGiN: hum, fun fun fun :D
 // YoGiN: oki merci beaucoup, je vais voir ca :)
-// SoniX: j'ai tester sur linuxshard8, d'jon mark a réactivé un morceau d'époside 2 dessus avec 1 variable
+// SoniX: j'ai tester sur linuxshard8, d'jon mark a rï¿½activï¿½ un morceau d'ï¿½poside 2 dessus avec 1 variable
 // YoGiN: d'accord
 
 	require_once('common.php');
@@ -55,7 +55,7 @@
 
 	if (isset($NELTOOL['GET_VARS']['refdata']))
 	{
-		$tmp_data = unserialize(base64_decode($NELTOOL['GET_VARS']['refdata']));
+		$tmp_data = nt_unpack_request_data($NELTOOL['GET_VARS']['refdata']);
 		if (is_array($tmp_data))
 		{
 			$NELTOOL['POST_VARS'] = $tmp_data;
@@ -103,14 +103,16 @@
 
 				if ($tool_services_ee)
 				{
-					$tpl->assign('tool_post_data',	base64_encode(serialize($NELTOOL['POST_VARS'])));
+					$tpl->assign('tool_post_data',	nt_pack_request_data($NELTOOL['POST_VARS']));
 
 					switch ($tool_services_ee)
 					{
 						case 'update entities':
 
 							$requested_service_list	= $NELTOOL['POST_VARS']['requested_service_list'];
-							$service_list = unserialize(base64_decode($requested_service_list));
+							$service_list = nt_unpack_request_data($requested_service_list);
+							if (!is_array($service_list))
+								$service_list = array();
 
 							//nt_common_add_debug($NELTOOL['POST_VARS']);
 							$update_entities = tool_ee_get_entities($NELTOOL['POST_VARS']);
@@ -233,7 +235,7 @@
 									$entity_data = tool_ee_parse_getview($command_return_data);
 									nt_common_add_debug($entity_data);
 									$tpl->assign('tool_entity_data',	$entity_data);
-									$tpl->assign('requested_service_list',	base64_encode(serialize($service_list)));
+									$tpl->assign('requested_service_list',	nt_pack_request_data($service_list));
 								}
 							}
 

@@ -41,7 +41,7 @@
 
 	if (isset($NELTOOL['GET_VARS']['refdata']))
 	{
-		$tmp_data = unserialize(base64_decode($NELTOOL['GET_VARS']['refdata']));
+		$tmp_data = nt_unpack_request_data($NELTOOL['GET_VARS']['refdata']);
 		if (is_array($tmp_data))
 		{
 			$NELTOOL['POST_VARS'] = $tmp_data;
@@ -113,7 +113,7 @@
 				if (isset($NELTOOL['POST_VARS']['services_pl']))
 				{
 					$tool_services_pl = $NELTOOL['POST_VARS']['services_pl'];
-					$tpl->assign('tool_post_data',	base64_encode(serialize($NELTOOL['POST_VARS'])));
+					$tpl->assign('tool_post_data',	nt_pack_request_data($NELTOOL['POST_VARS']));
 
 					switch ($tool_services_pl)
 					{

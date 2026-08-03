@@ -59,14 +59,16 @@ class BugReportGatherApp
 		$descr = "";
 		$email = "";
 
-		if( isset( $_POST[ 'report' ] ) )
-			$report = $_POST[ 'report' ];
+		// Cap sizes so an open endpoint cannot be used to fill the
+		// database with multi-megabyte posts.
+		if( isset( $_POST[ 'report' ] ) && is_string( $_POST[ 'report' ] ) )
+			$report = substr( $_POST[ 'report' ], 0, 512 * 1024 );
 
-		if( isset( $_POST[ 'descr' ] ) )
-			$descr = $_POST[ 'descr' ];
+		if( isset( $_POST[ 'descr' ] ) && is_string( $_POST[ 'descr' ] ) )
+			$descr = substr( $_POST[ 'descr' ], 0, 16 * 1024 );
 
-		if( isset( $_POST[ 'email' ] ) )
-			$email = $_POST[ 'email' ];
+		if( isset( $_POST[ 'email' ] ) && is_string( $_POST[ 'email' ] ) )
+			$email = substr( $_POST[ 'email' ], 0, 256 );
 
 		$report = $this->db->real_escape_string( $report );
 		$descr  = $this->db->real_escape_string( $descr );

@@ -227,4 +227,29 @@
 		}
 	}
 
+	/*
+	 * Pack an array so it can ride in a query string (refdata, hidden
+	 * fields). Uses JSON rather than serialize(): unserialize() of
+	 * request-supplied data is an object-injection RCE vector.
+	 */
+	function nt_pack_request_data($data)
+	{
+		return base64_encode(json_encode($data));
+	}
+
+	/*
+	 * Inverse of nt_pack_request_data(). Returns an array on success,
+	 * null when the payload is missing, malformed, or not an array.
+	 */
+	function nt_unpack_request_data($packed)
+	{
+		if (!is_string($packed) || $packed === '')
+			return null;
+		$json = base64_decode($packed, true);
+		if ($json === false || $json === '')
+			return null;
+		$data = json_decode($json, true);
+		return is_array($data) ? $data : null;
+	}
+
 ?>

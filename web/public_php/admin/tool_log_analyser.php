@@ -182,7 +182,7 @@
 					if (isset($NELTOOL['POST_VARS']['services_las']))
 					{
 						$tool_services_las = $NELTOOL['POST_VARS']['services_las'];
-						$tpl->assign('tool_post_data',	base64_encode(serialize($NELTOOL['POST_VARS'])));
+						$tpl->assign('tool_post_data',	nt_pack_request_data($NELTOOL['POST_VARS']));
 
 						$service_search_database	= $NELTOOL['POST_VARS']['service_search_database'];
 						$service_search_file_name	= $NELTOOL['POST_VARS']['service_search_file_name'];
