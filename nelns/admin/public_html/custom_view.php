@@ -523,10 +523,10 @@
 
 			echo "<table border=1>\n";
 			$viewName_html = htmlspecialchars($viewName, ENT_QUOTES);
-			echo "<tr><form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=".intval($sel_vgid)."&tid=".intval($tid)."'><td colspan=3><b>Content of ".($ownView ? "<input name=chViewName value='$viewName_html' size=32 maxlength=32>" : $viewName_html)."</b></td></form>";
+			echo "<tr><form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=".intval($sel_vgid)."&tid=".intval($tid)."$nelnsCsrfUrl'><td colspan=3><b>Content of ".($ownView ? "<input name=chViewName value='$viewName_html' size=32 maxlength=32>" : $viewName_html)."</b></td></form>";
 			if ($ownView && ($admlogin == "root" || $admlogin == $group || $IsNevrax))
 			{
-				echo "<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=".intval($sel_vgid)."&tid=".intval($tid)."'><td colspan=4>Give view to <select name='giveTo' onChange='submit()'>";
+				echo "<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=".intval($sel_vgid)."&tid=".intval($tid)."$nelnsCsrfUrl'><td colspan=4>Give view to <select name='giveTo' onChange='submit()'>";
 				$gresult = sqlquery("SELECT uid, login FROM user ORDER BY login");
 				while ($gresult && ($garr=sqlfetch($gresult)))
 				{
@@ -567,14 +567,14 @@
 				{
 					echo "<tr>".
 								"<td>".intval($arr["ordering"])."</td>".
-								"<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=".intval($sel_vgid)."&vid=".intval($vid)."&tid=".intval($tid)."'><td><input type=text name=changeVarName maxlength=128 size=16 value='".htmlspecialchars($arr["name"], ENT_QUOTES)."'></td></form>".
+								"<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=".intval($sel_vgid)."&vid=".intval($vid)."&tid=".intval($tid)."$nelnsCsrfUrl'><td><input type=text name=changeVarName maxlength=128 size=16 value='".htmlspecialchars($arr["name"], ENT_QUOTES)."'></td></form>".
 								"<td>".htmlspecialchars($arr["path"], ENT_QUOTES)."</td>".
 								"<td>".htmlspecialchars($priv, ENT_QUOTES)."</td>".
-								"<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=".intval($sel_vgid)."&vid=".intval($vid)."&tid=".intval($tid)."'><td><input type=text name=changeVarFilter maxlength=64 size=16 value='".htmlspecialchars($arr["filter"], ENT_QUOTES)."'></td></form>".
-								"<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=".intval($sel_vgid)."&changeVidGraph=".intval($vid)."&tid=".intval($tid)."'><td><input type=checkBox name=graphState".($arr["graph"] != 0 ? " checked" : "")." onClick='submit()'></td></form>".
+								"<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=".intval($sel_vgid)."&vid=".intval($vid)."&tid=".intval($tid)."$nelnsCsrfUrl'><td><input type=text name=changeVarFilter maxlength=64 size=16 value='".htmlspecialchars($arr["filter"], ENT_QUOTES)."'></td></form>".
+								"<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=".intval($sel_vgid)."&changeVidGraph=".intval($vid)."&tid=".intval($tid)."$nelnsCsrfUrl'><td><input type=checkBox name=graphState".($arr["graph"] != 0 ? " checked" : "")." onClick='submit()'></td></form>".
 								"<td><a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?removeRow=".intval($ordering)."$nelnsCsrfUrl&tid=".intval($tid)."&sel_vgid=".intval($sel_vgid)."' onClick=\"return confirm('You are about to delete a Variable from a View')\">Delete</a> ".
-									 "<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?moveRow=".intval($ordering)."&tid=".intval($tid)."&offs=+1&sel_vgid=".intval($sel_vgid)."'>-</a> ".
-									 "<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?moveRow=".intval($ordering)."&tid=".intval($tid)."&offs=-1&sel_vgid=".intval($sel_vgid)."'>+</a></td></tr>\n";
+									 "<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?moveRow=".intval($ordering)."$nelnsCsrfUrl&tid=".intval($tid)."&offs=+1&sel_vgid=".intval($sel_vgid)."'>-</a> ".
+									 "<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?moveRow=".intval($ordering)."$nelnsCsrfUrl&tid=".intval($tid)."&offs=-1&sel_vgid=".intval($sel_vgid)."'>+</a></td></tr>\n";
 				}
 				else
 				{
@@ -617,12 +617,12 @@
 				{
 					echo "<tr>".
 								"<td>".intval($arr["ordering"])."</td>".
-								"<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=".intval($sel_vgid)."&vid=".intval($vid)."&tid=".intval($tid)."'><td><input type=text name=changeVarName maxlength=128 size=16 value='".htmlspecialchars($arr["name"], ENT_QUOTES)."'></td></form>".
+								"<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=".intval($sel_vgid)."&vid=".intval($vid)."&tid=".intval($tid)."$nelnsCsrfUrl'><td><input type=text name=changeVarName maxlength=128 size=16 value='".htmlspecialchars($arr["name"], ENT_QUOTES)."'></td></form>".
 								"<td colspan=2>".htmlspecialchars($arr["path"], ENT_QUOTES)."</td>".
-								"<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=".intval($sel_vgid)."&vid=".intval($vid)."&tid=".intval($tid)."'><td colspan=2><input type=text name=changeVarFilter maxlength=64 size=16 value='".htmlspecialchars($arr["filter"], ENT_QUOTES)."'></td></form>".
+								"<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=".intval($sel_vgid)."&vid=".intval($vid)."&tid=".intval($tid)."$nelnsCsrfUrl'><td colspan=2><input type=text name=changeVarFilter maxlength=64 size=16 value='".htmlspecialchars($arr["filter"], ENT_QUOTES)."'></td></form>".
 								"<td><a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?removeRow=".intval($ordering)."$nelnsCsrfUrl&tid=".intval($tid)."&sel_vgid=".intval($sel_vgid)."' onClick=\"return confirm('You are about to delete a Variable from a View')\">Delete</a> ".
-									 "<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?moveRow=".intval($ordering)."&tid=".intval($tid)."&offs=+1&sel_vgid=".intval($sel_vgid)."'>-</a> ".
-									 "<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?moveRow=".intval($ordering)."&tid=".intval($tid)."&offs=-1&sel_vgid=".intval($sel_vgid)."'>+</a></td></tr>\n";
+									 "<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?moveRow=".intval($ordering)."$nelnsCsrfUrl&tid=".intval($tid)."&offs=+1&sel_vgid=".intval($sel_vgid)."'>-</a> ".
+									 "<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?moveRow=".intval($ordering)."$nelnsCsrfUrl&tid=".intval($tid)."&offs=-1&sel_vgid=".intval($sel_vgid)."'>+</a></td></tr>\n";
 				}
 				else
 				{
@@ -644,7 +644,7 @@
 			{
 				echo "<table>\n";
 				$viewFilter_html = htmlspecialchars($viewFilter, ENT_QUOTES);
-				$self_view = htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=".intval($sel_vgid)."&tid=".intval($tid);
+				$self_view = htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=".intval($sel_vgid)."&tid=".intval($tid).$nelnsCsrfUrl;
 				echo "<form method=post action='$self_view'><tr><th>Filter</th><td><input name=chViewFilter value='$viewFilter_html' size=64 maxlength=64></td></tr></form>";
 				echo "<form method=post action='$self_view'><tr><th>Display type</th><td><select name=chViewDisplay onChange='submit()'>";
 				echo "<option value='normal'".($viewDisplay=="normal" ? " selected" : "").">Normal display";
@@ -716,7 +716,7 @@
 					$prevvgid = $arr["vgid"];
 					$prevvtype = $arr["command"];
 	
-					echo "<tr><td><b><a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?addToView=$vid&tid=".intval($tid)."&sel_vgid=".intval($sel_vgid)."'>".htmlspecialchars($arr["name"], ENT_QUOTES)."</a></b></td>".
+					echo "<tr><td><b><a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?addToView=$vid$nelnsCsrfUrl&tid=".intval($tid)."&sel_vgid=".intval($sel_vgid)."'>".htmlspecialchars($arr["name"], ENT_QUOTES)."</a></b></td>".
 								"<td>".htmlspecialchars($arr["group_name"], ENT_QUOTES)."</td>".
 								"<td>".htmlspecialchars($arr["path"], ENT_QUOTES)."</td>".
 								"<td>".htmlspecialchars($arr["state"], ENT_QUOTES)."</td>".
