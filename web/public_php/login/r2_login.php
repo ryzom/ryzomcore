@@ -66,8 +66,22 @@
 				}
 				$row = mysqli_fetch_array($result);
 
-				// set the cookie
-				setcookie ( "ryzomId" , $cookie, 0, "/");
+				// Session token for ring/webig. Same flags as the admin
+				// session cookie: httponly so page script cannot lift it,
+				// samesite=Lax so it does not ride on cross-site posts.
+				// Secure only when this request itself arrived over tls.
+				$cookie_opts = array(
+					'expires' => 0,
+					'path' => '/',
+					'httponly' => true,
+					'samesite' => 'Lax',
+				);
+				if ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== '' && strtolower($_SERVER['HTTPS']) !== 'off')
+					|| (isset($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443))
+				{
+					$cookie_opts['secure'] = true;
+				}
+				setcookie('ryzomId', $cookie, $cookie_opts);
 				$_COOKIE["ryzomId"] = $cookie; // make it available immediately
 
 				// Auto-join an available mainland shard
@@ -134,8 +148,13 @@
 			$logPath = $this->getSafeLogDir();
 			if ($logPath !== false)
 			{
+				// The client still sends the password on the query string
+				// (cmd=login). Never write that URI into the log — scrub the
+				// password field and only record cmd/login for context.
+				$uri = isset($_SERVER['REQUEST_URI']) ? (string)$_SERVER['REQUEST_URI'] : '';
+				$uri = preg_replace('/([?&]password=)[^&]*/i', '$1***', $uri);
 				$fp = fopen($logPath.'/r2_login_'.date('Y-m-d').'.log', 'a');
-				fwrite($fp, date('Y-m-d H:i:s').' ('.$_SERVER['REMOTE_ADDR'].':'.$_SERVER['REQUEST_URI']."): $str\n");
+				fwrite($fp, date('Y-m-d H:i:s').' ('.$_SERVER['REMOTE_ADDR'].':'.$uri."): $str\n");
 				fclose($fp);
 			}
 		}
