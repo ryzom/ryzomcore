@@ -350,8 +350,10 @@
 			{
 				foreach ($as as $asHost)
 				{
+					// bare `pos` was an undefined constant: truthy on old
+					// php (so a portless address got mangled), fatal on 8
 					$pos = strpos($asHost, ':');
-					if (pos != FALSE)
+					if ($pos !== FALSE)
 					{
 						$asPort = substr($asHost, $pos+1);
 						$asHost = substr($asHost, 0, $pos);
@@ -372,7 +374,7 @@
 			{
 				$asPort = $ASPort;
 				$pos = strpos($asHost, ':');
-				if (pos != FALSE)
+				if ($pos !== FALSE)
 				{
 					$asPort = substr($asHost, $pos+1);
 					$asHost = substr($asHost, 0, $pos);
@@ -390,8 +392,8 @@
 			//print_r($resArray);echo '<br>';
 			$result = rebuildResult($resCols, $resArray);
 		}
-		
-		return res;
+
+		return $res;
 	}
 
 
@@ -440,13 +442,13 @@
 	
 	function	selectAllAS()
 	{
-		global	$ASHost, $ASPort;
+		global	$ASHost, $ASPort, $shardLockState;
 
 		$as[] = $ASHost.':'.$ASPort;
-		
+
 		foreach($shardLockState as $shard)
 			if ($shard['ASAddr'] != '')
-				$as[] = $shard[ASAddr];
+				$as[] = $shard['ASAddr'];
 
 		return array_unique($as);
 	}
@@ -458,7 +460,9 @@
 		if (count($shards) == 0)
 			return;
 
-		if (array_search('*', $shards) != FALSE)
+		// '*' is usually the first element, index 0: `!= FALSE` never saw it
+		// and a wildcard query silently went to the default AS only
+		if (array_search('*', $shards) !== FALSE)
 			return selectAllAS();
 
 		foreach($shards as $shard)

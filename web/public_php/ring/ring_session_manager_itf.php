@@ -743,8 +743,8 @@
 	$RSMGR_TShardFilter_EnumValues[1<<29] = "sf_shard29";
 	$RSMGR_TShardFilter_EnumValues[1<<30] = "sf_shard30";
 	$RSMGR_TShardFilter_EnumValues[1<<31] = "sf_shard31";
-	$RSMGR_TShardFilter_EnumValues[NaN] = "invalid";
-	$RSMGR_TShardFilter_InvalidValue = NaN;
+	$RSMGR_TShardFilter_EnumValues[-1] = "invalid";
+	$RSMGR_TShardFilter_InvalidValue = -1;
 
 	class RSMGR_TShardFilter
 	{

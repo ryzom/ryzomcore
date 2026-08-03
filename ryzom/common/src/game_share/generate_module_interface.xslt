@@ -601,6 +601,16 @@ namespace <xsl:value-of select="@name"/>
 	invalid entry mirrors the C++ invalid_val (last item value + 2, one
 	past end_of_enum). -->
 <xsl:variable name="lastValue"><xsl:call-template name="phpEnumItemValue"><xsl:with-param name="item" select="item[last()]"/></xsl:call-template></xsl:variable>
+<!-- Bitset enums carry expression values ("1&lt;&lt;31") that xslt arithmetic
+	turns into NaN, and NaN in the output is an undefined constant in php 8.
+	Those types have no C++ invalid_val either ; use -1, which no bit value
+	or counted enum value ever takes. -->
+<xsl:variable name="invalidValue">
+	<xsl:choose>
+		<xsl:when test="string(number($lastValue)) = 'NaN'">-1</xsl:when>
+		<xsl:otherwise><xsl:value-of select="$lastValue + 2"/></xsl:otherwise>
+	</xsl:choose>
+</xsl:variable>
 <xsl:text>&lt;?php
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
@@ -610,8 +620,8 @@ namespace <xsl:value-of select="@name"/>
 <xsl:for-each select="item">
 <xsl:text>	$</xsl:text><xsl:value-of select="//namespace/@name"/>_<xsl:value-of select="../@name"/>_EnumValues[<xsl:call-template name="phpEnumItemValue"><xsl:with-param name="item" select="."/></xsl:call-template>] = "<xsl:value-of select="@name"/><xsl:text>";
 </xsl:text></xsl:for-each>
-<xsl:text>	$</xsl:text><xsl:value-of select="//namespace/@name"/>_<xsl:value-of select="@name"/>_EnumValues[<xsl:value-of select="$lastValue + 2"/>] = "invalid";
-	$<xsl:value-of select="//namespace/@name"/>_<xsl:value-of select="@name"/>_InvalidValue = <xsl:value-of select="$lastValue + 2"/>;
+<xsl:text>	$</xsl:text><xsl:value-of select="//namespace/@name"/>_<xsl:value-of select="@name"/>_EnumValues[<xsl:value-of select="$invalidValue"/>] = "invalid";
+	$<xsl:value-of select="//namespace/@name"/>_<xsl:value-of select="@name"/>_InvalidValue = <xsl:value-of select="$invalidValue"/>;
 
 	class <xsl:value-of select="//namespace/@name"/>_<xsl:value-of select="@name"/>
 	{
