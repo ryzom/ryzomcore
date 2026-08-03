@@ -445,7 +445,9 @@ function redirect($page)
  */
 function h($str)
 {
-	return htmlspecialchars($str, ENT_QUOTES, 'UTF-8');
+	// Nullable columns reach this (MOTD, GroupName, a permission with no
+	// AccessPrivilege), and passing null is deprecated on php 8.1
+	return htmlspecialchars((string)$str, ENT_QUOTES, 'UTF-8');
 }
 
 /**

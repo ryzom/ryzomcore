@@ -26,6 +26,12 @@
 						$row['note_data'] = addslashes(htmlentities(html_entity_decode(str_replace("\r\n","<br>",$row['note_data']), ENT_QUOTES), ENT_COMPAT));
 						$row['note_title2'] = addslashes(htmlentities(html_entity_decode($row['note_title'], ENT_QUOTES), ENT_COMPAT));
 					}
+					// tool_notes_add/update filter this on the way in, but rows
+					// written before they did are still in the table, and the
+					// template hands the value to window.open(): escaping it for
+					// the javascript string does nothing about a javascript: url.
+					if (isset($row['note_popup_uri']))
+						$row['note_popup_uri'] = tool_notes_safe_popup_uri($row['note_popup_uri']);
 					$data[] = $row;
 				}
 
