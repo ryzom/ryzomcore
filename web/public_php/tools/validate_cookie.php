@@ -63,20 +63,25 @@
 		
 		$userId = $row["user_id"];
 		$domainId = $row["current_domain_id"];
-//		$charId = ($userId*16) + (getCharSlot()) & 0xf;
-		$charId = intval($userId*16 + getCharSlot());
-		
+		$charId = (intval($userId) << 4) | getCharSlot();
+
 		return true;
 	}
-	
+
+	// The character id is userId<<4 | charSlot, so the slot is a four bit
+	// field: in game it is 0..14, and 15 means "out of game, any character".
+	// The slot arrives with the request, so it has to be masked here -- a
+	// larger value carries into the user id part of the character id and
+	// addresses another account's characters.
 	function getCharSlot()
 	{
-		global $_GET, $_POST;		
 		if (isset($_GET["charSlot"]))
-			return intval($_GET["charSlot"]);
+			$slot = intval($_GET["charSlot"]);
 		else if (isset($_POST["charSlot"]))
-			return intval($_POST["charSlot"]);
+			$slot = intval($_POST["charSlot"]);
 		else
-			return 0; // temp dev: use 0 as the "ring character"
+			$slot = 0; // temp dev: use 0 as the "ring character"
+
+		return $slot & 0xf;
 	}
 

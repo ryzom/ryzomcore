@@ -129,8 +129,10 @@ function joinShardFromId( $userId, $domainId, $destSessionId )
 	$res = "";
 	$joinShard->connect($RSMHost, $RSMPort, $res);
 	$charSlot = getCharSlot(); // if ingame (!=15), the RSM can check if this character has the right to connect to the specified shard
-	$charId = ($userId<<4) + $charSlot;
-	echo "Requesting teleportation of $charId/$userId to shard session ".$destSessionId."...<br>";
+	$charId = (intval($userId)<<4) | $charSlot;
+	// the session id arrives with the request and is echoed back here
+	$destSessionId = intval($destSessionId);
+	echo "Requesting teleportation of ".htmlspecialchars($charId, ENT_QUOTES)."/".htmlspecialchars($userId, ENT_QUOTES)." to shard session ".$destSessionId."...<br>";
 	$joinShard->joinSession($charId, $destSessionId, $domainInfo["domain_name"]);
 
 	// wait the the return message
@@ -200,10 +202,10 @@ function displayAllShards(&$onlineShardsBySessionId)
 		$isOnline = isset($onlineShardsBySessionId[$mainlandSessionId]);
 		// Radio button not supported by Client's html component. Instead: one form (button) per shard.
 		//echo "<input type='radio' name='destSessionId' value='".$mainlandSessionId."' ".($isOnline?"":"disabled ")."/>".$rowShard['Name']." (".($isOnline?"online with $nbOnlinePlayers players":"offline").", version ".$rowShard['Version'].")<br>";
-		echo "<form name='far_tp_".$rowShard['ShardId']."' action='join_shard.php' method='post'>";
-		echo "<input type='hidden' name='destSessionId' value='".$mainlandSessionId."' />";
+		echo "<form name='far_tp_".htmlspecialchars($rowShard['ShardId'], ENT_QUOTES)."' action='join_shard.php' method='post'>";
+		echo "<input type='hidden' name='destSessionId' value='".htmlspecialchars($mainlandSessionId, ENT_QUOTES)."' />";
 		echo "<input type='hidden' name='charSlot' value='".getCharSlot()."'>";
-		echo " ".$rowShard['Name']." ".$rowShard['ShardId']." (".($isOnline ? $onlineShardsBySessionId[$mainlandSessionId]." online)" : "offline)");
+		echo " ".htmlspecialchars($rowShard['Name'], ENT_QUOTES)." ".htmlspecialchars($rowShard['ShardId'], ENT_QUOTES)." (".($isOnline ? htmlspecialchars($onlineShardsBySessionId[$mainlandSessionId], ENT_QUOTES)." online)" : "offline)");
 		if ($isOnline)
 			echo "<input type='submit' name='button' value='Teleport' />";
 		echo "</form><br>";

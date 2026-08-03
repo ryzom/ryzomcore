@@ -69,7 +69,14 @@
 //			$rsmProxy = new CRingSessionManagerWebProxy;
 
 			// TODO: not sure it works with a char slot > 0
-			$invitePioneer->inviteCharacter(($userId*16) + getCharSlot(), $_POST["sessionId"], $row[0], $_POST["mode"]);
+			// the session id and the role both arrive with the request; the
+			// session manager is the one that checks the caller owns the
+			// session, so at least keep the values to the shapes it expects
+			$sessionId = intval($_POST["sessionId"]);
+			$mode = isset($_POST["mode"]) ? $_POST["mode"] : "";
+			if ($mode != "sps_edit_invited" && $mode != "sps_anim_invited")
+				$mode = "sps_edit_invited";
+			$invitePioneer->inviteCharacter((intval($userId)*16) + getCharSlot(), $sessionId, $row[0], $mode);
 			
 			echo "wait result...";
 			// wait the the return message
