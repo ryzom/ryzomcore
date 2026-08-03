@@ -87,11 +87,19 @@ class BugReportGatherApp
 	{
 		//$this->logPOSTVars();
 
+		// Ship config still has user/password "bugs". Refuse that combination
+		// so a forgotten default cannot be an open write path into MySQL.
+		if (BugReportConfig::$dbuser === 'bugs' && BugReportConfig::$dbpw === 'bugs')
+		{
+			$this->logger->log( "Refusing default crash report database credentials" );
+			return;
+		}
+
 		$this->db = new mysqli( BugReportConfig::$dbhost, BugReportConfig::$dbuser, BugReportConfig::$dbpw, BugReportConfig::$dbdb, BugReportConfig::$dbport );
 		if( mysqli_connect_error() )
 		{
 			$this->logger->log( "Connection error :(" );
-			$this->logger->log( mysqli_connect_error() );
+			// do not log the mysql error text; it often quotes the host/user
 			return;
 		}
 
@@ -100,8 +108,7 @@ class BugReportGatherApp
 		if( $result !== TRUE )
 		{
 			$this->logger->log( "Query failed :(" );
-			$this->logger->log( 'Query: ' . $q );
-			$this->logPOSTVars();
+			// do not log the full query (it holds the report body)
 		}		
 
 		$this->db->close();
