@@ -540,11 +540,11 @@ void CItemSheet::build(const NLGEORGES::UFormElm &item)
 		uint	i;
 		char	keyTmp[256];
 		// ensure that if you modify RM_FABER_TYPE, you have to rebuild the item sheets.
-		nlctassert(RM_FABER_TYPE::NUM_FABER_TYPE == 26);
+		nlctassert((int)RM_FABER_TYPE::NUM_FABER_TYPE == 26);
 		// ensure that the bitfields are enough (nb: unknown can be stored)
 		nlctassert(ITEM_ORIGIN::NUM_ITEM_ORIGIN < 256);
 		// ensure that the bitfield for item part buildable for this MP is possible
-		nlctassert(RM_FABER_TYPE::NUM_FABER_TYPE <= 32);
+		nlctassert((int)RM_FABER_TYPE::NUM_FABER_TYPE <= 32);
 		// reset
 		Mp.ItemPartBF= 0;
 		MpItemParts.clear();

@@ -105,7 +105,7 @@ void	CBarManager::CBarDataEntry::connectDB(const std::string &baseDBin, const st
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
 	// can only manage 4 scores here
-	nlctassert(SCORES::NUM_SCORES==4);
+	nlctassert((int)SCORES::NUM_SCORES==4);
 
 	// try to connect each input entry (don't create)
 	if(!baseDBin.empty())
@@ -239,7 +239,7 @@ void		CBarManager::initInGame()
 
 	// *** init _EntryScoreFlags
 	nlctassert(MaxEntryType==4);
-	nlctassert(SCORES::NUM_SCORES==4);
+	nlctassert((int)SCORES::NUM_SCORES==4);
 	// For each entry type, tells what score they can affect (see DB connection above)
 	_EntryScoreFlags[EntityType]= HpFlag | SapFlag | StaFlag | FocusFlag;	// all
 	_EntryScoreFlags[TeamMemberType]= HpFlag | SapFlag | StaFlag;			// anything but focus
@@ -249,7 +249,7 @@ void		CBarManager::initInGame()
 
 	// *** create connection for User Bar mgt
 	// user now can only manage 4 scores
-	nlctassert(SCORES::NUM_SCORES==4);
+	nlctassert((int)SCORES::NUM_SCORES==4);
 	// Input max values
 	_UserScores[SCORES::hit_points].DBInMax= NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SCORES0:Max", false);
 	_UserScores[SCORES::sap].DBInMax= NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SCORES2:Max", false);
@@ -617,7 +617,7 @@ void	CBarManager::setupUserBarInfo(uint8 msgNumber, sint32 hp, sint32 sap, sint3
 		// bkup last
 		_LastUserBarMsgNumber= msgNumber;
 		// user now can only manage 4 scores
-		nlctassert(SCORES::NUM_SCORES==4);
+		nlctassert((int)SCORES::NUM_SCORES==4);
 		_UserScores[SCORES::hit_points].Score= hp;
 		_UserScores[SCORES::sap].Score= sap;
 		_UserScores[SCORES::stamina].Score= sta;
@@ -684,7 +684,7 @@ void	CBarManager::updateUserBars()
 			}
 
 			// update (user can only manage 4 scores for now)
-			nlctassert(SCORES::NUM_SCORES==4);
+			nlctassert((int)SCORES::NUM_SCORES==4);
 			updateBars(userDataSetId, _UserBarInfo, serverTick, HpFlag | SapFlag | StaFlag | FocusFlag);
 		}
 	}

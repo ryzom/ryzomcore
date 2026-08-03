@@ -111,7 +111,7 @@ void CSkillManager::initInGame()
 		vector<SKILLS::ESkills>		&children= _Tree->SkillsTree[i].ChildSkills;
 		for (sint32 j = 0; j < (sint32)children.size(); ++j)
 		{
-			if (children[j] >= SKILLS::NUM_SKILLS)
+			if (children[j] >= (int)SKILLS::NUM_SKILLS)
 			{
 				children.erase(children.begin()+j);
 				j--;
@@ -191,7 +191,7 @@ void CSkillManager::uninitInGame()
 bool CSkillManager::isUnknown (SKILLS::ESkills eSkill)
 {
 	nlassert(_Tree);
-	if ((eSkill < 0) || (eSkill >= SKILLS::NUM_SKILLS))
+	if ((eSkill < 0) || (eSkill >= (int)SKILLS::NUM_SKILLS))
 		return true;
 	return _Tree->SkillsTree[eSkill].Skill == SKILLS::unknown;
 }
@@ -200,10 +200,10 @@ bool CSkillManager::isUnknown (SKILLS::ESkills eSkill)
 ESkills CSkillManager::getParent (ESkills eSkill)
 {
 	nlassert(_Tree);
-	if ((eSkill < 0) || (eSkill >= SKILLS::NUM_SKILLS))
+	if ((eSkill < 0) || (eSkill >= (int)SKILLS::NUM_SKILLS))
 		return SKILLS::unknown;
 	if ((_Tree->SkillsTree[eSkill].ParentSkill < 0) ||
-		(_Tree->SkillsTree[eSkill].ParentSkill >= SKILLS::NUM_SKILLS))
+		(_Tree->SkillsTree[eSkill].ParentSkill >= (int)SKILLS::NUM_SKILLS))
 		return SKILLS::unknown;
 	return _Tree->SkillsTree[eSkill].ParentSkill;
 }
@@ -213,7 +213,7 @@ const std::vector<SKILLS::ESkills> &CSkillManager::getChildren(SKILLS::ESkills e
 {
 	nlassert(_Tree);
 	static	vector<SKILLS::ESkills>	emptyVect;
-	if ((eSkill < 0) || (eSkill >= SKILLS::NUM_SKILLS))
+	if ((eSkill < 0) || (eSkill >= (int)SKILLS::NUM_SKILLS))
 		return emptyVect;
 	return _Tree->SkillsTree[eSkill].ChildSkills;
 }
@@ -224,7 +224,7 @@ bool	CSkillManager::areSkillOnSameBranch(SKILLS::ESkills s0, SKILLS::ESkills s1)
 {
 	SKILLS::ESkills	parent;
 
-	if ((s0 < 0) || (s0 >= SKILLS::NUM_SKILLS) || (s1 < 0) || (s1 >= SKILLS::NUM_SKILLS))
+	if ((s0 < 0) || (s0 >= (int)SKILLS::NUM_SKILLS) || (s1 < 0) || (s1 >= (int)SKILLS::NUM_SKILLS))
 		return false;
 
 	// No if only one is unknown
@@ -265,7 +265,7 @@ bool	CSkillManager::isSkillAncestor(SKILLS::ESkills s0, SKILLS::ESkills s1)
 {
 	SKILLS::ESkills	parent;
 
-	if ((s0 < 0) || (s0 >= SKILLS::NUM_SKILLS) || (s1 < 0) || (s1 >= SKILLS::NUM_SKILLS))
+	if ((s0 < 0) || (s0 >= (int)SKILLS::NUM_SKILLS) || (s1 < 0) || (s1 >= (int)SKILLS::NUM_SKILLS))
 		return false;
 
 	// No if only one is unknown
@@ -293,7 +293,7 @@ bool	CSkillManager::isSkillAncestor(SKILLS::ESkills s0, SKILLS::ESkills s1)
 // ***************************************************************************
 uint32	CSkillManager::getMinSkillValue(SKILLS::ESkills eSkill)
 {
-	if ((eSkill < 0) || (eSkill >= SKILLS::NUM_SKILLS))
+	if ((eSkill < 0) || (eSkill >= (int)SKILLS::NUM_SKILLS))
 		return 0;
 	return _MinSkillValue[eSkill];
 }
@@ -302,7 +302,7 @@ uint32	CSkillManager::getMinSkillValue(SKILLS::ESkills eSkill)
 uint32	CSkillManager::getMaxSkillValue(SKILLS::ESkills eSkill)
 {
 	nlassert(_Tree);
-	if ((eSkill < 0) || (eSkill >= SKILLS::NUM_SKILLS))
+	if ((eSkill < 0) || (eSkill >= (int)SKILLS::NUM_SKILLS))
 		return 0;
 	return _Tree->SkillsTree[eSkill].MaxSkillValue;
 }
@@ -310,7 +310,7 @@ uint32	CSkillManager::getMaxSkillValue(SKILLS::ESkills eSkill)
 // ***************************************************************************
 uint32	CSkillManager::getSkillValue(SKILLS::ESkills eSkill)
 {
-	if ((eSkill < 0) || (eSkill >= SKILLS::NUM_SKILLS))
+	if ((eSkill < 0) || (eSkill >= (int)SKILLS::NUM_SKILLS))
 		return 0;
 
 	CCDBNodeLeaf	*node= _SkillValues[eSkill];
@@ -323,7 +323,7 @@ uint32	CSkillManager::getSkillValue(SKILLS::ESkills eSkill)
 // ***************************************************************************
 uint32	CSkillManager::getBaseSkillValue(SKILLS::ESkills eSkill)
 {
-	if ((eSkill < 0) || (eSkill >= SKILLS::NUM_SKILLS))
+	if ((eSkill < 0) || (eSkill >= (int)SKILLS::NUM_SKILLS))
 		return 0;
 
 	CCDBNodeLeaf	*node= _SkillBaseValues[eSkill];
@@ -376,7 +376,7 @@ uint32	CSkillManager::getBestSkillValue(SKILLS::ESkills eSkill)
 // ***************************************************************************
 uint32	CSkillManager::getBaseSkillValueMaxChildren(SKILLS::ESkills eSkill)
 {
-	if ((eSkill < 0) || (eSkill >= SKILLS::NUM_SKILLS))
+	if ((eSkill < 0) || (eSkill >= (int)SKILLS::NUM_SKILLS))
 		return 0;
 	return _MaxChildBaseSkillValue[eSkill];
 }

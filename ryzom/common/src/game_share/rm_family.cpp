@@ -318,8 +318,8 @@ namespace RM_FABER_STAT_TYPE
 	bool	isStatRelevant(RM_FABER_TYPE::TRMFType ft, TRMStatType fs)
 	{
 		// must change the setup below
-		nlctassert(NumRMStatType == 34 && RM_FABER_TYPE::NUM_FABER_TYPE == 26);
-		if(ft>=RM_FABER_TYPE::NUM_FABER_TYPE || fs>=NumRMStatType)
+		nlctassert(NumRMStatType == 34 && (int)RM_FABER_TYPE::NUM_FABER_TYPE == 26);
+		if(ft>=(int)RM_FABER_TYPE::NUM_FABER_TYPE || fs>=NumRMStatType)
 			return false;
 
 		// build
