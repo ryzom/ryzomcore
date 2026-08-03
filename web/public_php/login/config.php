@@ -31,4 +31,11 @@ $AcceptUnknownUser = $ALLOW_UNKNOWN;
 // If true, the login service automaticaly create a ring user and a editor character if needed
 $AutoCreateRingInfo = $CREATE_RING;
 
+// If true, clients that request &dbg=1 (development builds always do)
+// receive the debug variant of the login error messages: the failing
+// query, database host and user, and raw service result codes. Keep it
+// off on any deployment reachable by players.
+if (!isset($LoginAllowDbg))
+	$LoginAllowDbg = false;
+
 ?>
