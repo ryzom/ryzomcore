@@ -302,7 +302,9 @@
 		echo "	var pos = sURL.indexOf('.php');\n";
 		echo "	function refresh() { window.location.replace( sURL ); }\n";
 		echo "	if (pos >= 0) {\n";
-		echo "		sURL = sURL.substr(0, pos+4)+'?current_tid=$tid&form_refreshRate=$form_refreshRate';\n";
+		// these two go inside a javascript string literal, where html
+		// escaping would do nothing; both are numbers everywhere else
+		echo "		sURL = sURL.substr(0, pos+4)+'?current_tid=".intval($tid)."&form_refreshRate=".intval($form_refreshRate)."';\n";
 		echo "		setTimeout(\"refresh()\", ".($use_refreshRate*1000).");\n";
 		echo "	}\n";
 		echo "//--></script>\n";
@@ -327,12 +329,12 @@
 					if ($i>0)
 						echo "</table></td><td width=150 bgcolor=$bgcolor><table><tr><th>&nbsp;</th></tr>\n";
 					else
-						echo "<td width=150 bgcolor=$bgcolor><table><tr><th align=left>$owner views</th></tr>\n";
+						echo "<td width=150 bgcolor=$bgcolor><table><tr><th align=left>".htmlspecialchars($owner, ENT_QUOTES)." views</th></tr>\n";
 				}
 				if ($tname == $arr["name"])
-					echo "<tr><td nowrap><input type=submit name='selectTid_".$arr["tid"]."' value='View'> <b>".$arr["name"]."</b></td></tr>";
+					echo "<tr><td nowrap><input type=submit name='selectTid_".intval($arr["tid"])."' value='View'> <b>".htmlspecialchars($arr["name"], ENT_QUOTES)."</b></td></tr>";
 				else
-					echo "<tr><td nowrap><input type=submit name='selectTid_".$arr["tid"]."' value='View'> ".$arr["name"]."</td></tr>";
+					echo "<tr><td nowrap><input type=submit name='selectTid_".intval($arr["tid"])."' value='View'> ".htmlspecialchars($arr["name"], ENT_QUOTES)."</td></tr>";
 				
 				++$i;
 			}
@@ -410,10 +412,10 @@
 	echo "<td align=right><table><tr><th width=300>Selection</th></tr>\n";
 	if (count($sel) > 0)
 		foreach ($sel as $s)
-			echo "<tr><td>$s</td></tr>\n";
+			echo "<tr><td>".htmlspecialchars($s, ENT_QUOTES)."</td></tr>\n";
 	echo "</table></td>\n";
 	
-	echo "</tr></table><br>Content of view <font size=3><b>$tname</b></font><br><br>\n";
+	echo "</tr></table><br>Content of view <font size=3><b>".htmlspecialchars($tname, ENT_QUOTES)."</b></font><br><br>\n";
 
 	echo "<table><tr><td>\n";
 	
@@ -530,11 +532,11 @@
 		$queryResult = displayViewTable($uid, $gid, $tid, $sel);
 	}
 
-	echo "<input type=hidden name='current_tid' value='$tid'>\n";
+	echo "<input type=hidden name='current_tid' value='".htmlspecialchars($tid, ENT_QUOTES)."'>\n";
 	$i=0;
 	if (count($sel) > 0)
 		foreach ($sel as $selec)
-			echo "<input type=hidden name='current_select_".($i++)."' value='$selec'>\n";
+			echo "<input type=hidden name='current_select_".($i++)."' value='".htmlspecialchars($selec, ENT_QUOTES)."'>\n";
 
 	if (isset($tid) && $tid != "")
 	{
@@ -557,7 +559,7 @@
 				}
 				if ($arr["name"] != 'SEPARATOR')
 				{
-					echo "<tr><td><input type=submit name=execServCommand_".$arr["vid"]." value='".$arr["name"]."'></td></tr>\n";
+					echo "<tr><td><input type=submit name=execServCommand_".intval($arr["vid"])." value='".htmlspecialchars($arr["name"], ENT_QUOTES)."'></td></tr>\n";
 					++$numInCol;
 				}
 			}
@@ -567,7 +569,7 @@
 				$address = "[".join(",", $listPath)."]";
 				$address = factorizeQuery($address);
 
-				echo "<input type=hidden name=factPaths value='$address'>\n";
+				echo "<input type=hidden name=factPaths value='".htmlspecialchars($address, ENT_QUOTES)."'>\n";
 			}
 
 			echo "</table></td>\n";
@@ -575,9 +577,9 @@
 			
 			if (isset($cmdResult))
 			{
-				echo "<br>Result of command '$fullPath $execServParams':<br>\n";
+				echo "<br>Result of command '".htmlspecialchars($fullPath, ENT_QUOTES)." ".htmlspecialchars($execServParams, ENT_QUOTES)."':<br>\n";
 				echo "<table border=1><tr><td>\n";
-				echo "<pre>$cmdResult</pre>\n";
+				echo "<pre>".htmlspecialchars($cmdResult, ENT_QUOTES)."</pre>\n";
 				echo "</td></tr></table>\n";
 			}
 		}
@@ -587,7 +589,7 @@
 	{
 		echo "<br><font size=3><b>Execution errors:</b></font>\n";
 		foreach ($queryErrors as $error)
-			echo "<br><font size=3 color=#FF0000><b>$error</b></font>\n";
+			echo "<br><font size=3 color=#FF0000><b>".htmlspecialchars($error, ENT_QUOTES)."</b></font>\n";
 	}
 	echo "<br><br><font size=0>$queryResult</font>\n";
 	echo "</td></form></tr></table>\n";
@@ -671,7 +673,7 @@
 					$rrderr = $var["err"];
 					$rrdord = strtoupper($var["order"]);
 
-					echo "<tr><th>$rrdvar <font size=0>(using path $rrdpath)</font></th></tr>\n";
+					echo "<tr><th>".htmlspecialchars($rrdvar, ENT_QUOTES)." <font size=0>(using path ".htmlspecialchars($rrdpath, ENT_QUOTES).")</font></th></tr>\n";
 
 					// generate a temp filename
 					

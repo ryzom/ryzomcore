@@ -74,12 +74,14 @@
 			$tm = (int)(($aft-$bef)*1000.0);
 	
 			if (!$qstate)
-				echo "<b>$result</b>\n";
+				echo "<b>".htmlspecialchars($result, ENT_QUOTES)."</b>\n";
 		}
 		
 		displayResult($result, $vardisp, $bounds, $privilege, $condensed, $autoDisplay);
 
-		return "Executed query '$query'<br>$tm milliseconds computation time<br>\n";
+		// the caller prints this as html, and the query is built out of the
+		// variable paths and the selection that came in with the request
+		return "Executed query '".htmlspecialchars($query, ENT_QUOTES)."'<br>".intval($tm)." milliseconds computation time<br>\n";
 	}
 	
 	function buildVariableEnv($uid, $gid, $tid, &$vardisp, &$bounds, &$privilege, &$tree, &$condensed, &$autoDisplay)
@@ -114,7 +116,7 @@
 				$numsteps = count($address);
 			if	($numsteps != count($address))
 			{
-				echo "Invalid table <b>$tid</b>, contains different variable path length (typically, mixed shard/server/service variables with entity variables)\n";
+				echo "Invalid table <b>".htmlspecialchars($tid, ENT_QUOTES)."</b>, contains different variable path length (typically, mixed shard/server/service variables with entity variables)\n";
 				return;
 			}
 			addToNode($tree, $address, 0);
@@ -296,24 +298,25 @@
 
 					$hasColor = time()-strtotime($annotation['post_date'])< 120;
 					$lockState = $annotation['lock_state'];
-					echo "<tr".($hasColor ? ' bgcolor=#FFBB88' : '')."><td>&nbsp;$shard&nbsp;</td>";
+					$shard_html = htmlspecialchars($shard, ENT_QUOTES);
+					echo "<tr".($hasColor ? ' bgcolor=#FFBB88' : '')."><td>&nbsp;$shard_html&nbsp;</td>";
 	
 					if ($enablelock)
 					{
-						echo	"<td><font size=0>&nbsp;".($lockState != 0 ? ($usersData[$annotation['lock_user']]["login"]."/".$annotation['lock_ip']."&nbsp;<br>&nbsp;".$annotation['lock_date']) : "not locked")."&nbsp;</font></td>";
+						echo	"<td><font size=0>&nbsp;".($lockState != 0 ? (htmlspecialchars($usersData[$annotation['lock_user']]["login"], ENT_QUOTES)."/".htmlspecialchars($annotation['lock_ip'], ENT_QUOTES)."&nbsp;<br>&nbsp;".htmlspecialchars($annotation['lock_date'], ENT_QUOTES)) : "not locked")."&nbsp;</font></td>";
 						echo 	"<td>";
 						if ($lockState == 0)
-							echo "<input type=submit name='upd_lock_button_$shard' value='Lock'>";
+							echo "<input type=submit name='upd_lock_button_$shard_html' value='Lock'>";
 						else if ($lockState == 1)
-							echo "<input type=submit name='upd_unlock_button_$shard' value='Unlock'>";
+							echo "<input type=submit name='upd_unlock_button_$shard_html' value='Unlock'>";
 						else
-							echo "<input type=submit name='upd_lock_button_$shard' value='Force Lock'>";
+							echo "<input type=submit name='upd_lock_button_$shard_html' value='Force Lock'>";
 						echo 	"</td>";
 					}
 							
-					echo	"<td>&nbsp;".$usersData[$annotation['user_annot']]["login"]."&nbsp;/&nbsp;".$annotation['post_date']."&nbsp;</td>";
-					echo	"<td>&nbsp;".($lockState == 1 ? ("<input type=text name='upd_annot_text_$shard' value='".$annotation['annot']."' size=90 maxlength=255".($hasColor ? " style='background-color: #FFBB88;'" : "").">") : $annotation['annot'])."&nbsp;</td>";
-					echo	"<td>".($lockState == 1 ? ("<input type=submit name='upd_annot_button_$shard' value='Update'>") : (""))."</td>";
+					echo	"<td>&nbsp;".htmlspecialchars($usersData[$annotation['user_annot']]["login"], ENT_QUOTES)."&nbsp;/&nbsp;".htmlspecialchars($annotation['post_date'], ENT_QUOTES)."&nbsp;</td>";
+					echo	"<td>&nbsp;".($lockState == 1 ? ("<input type=text name='upd_annot_text_$shard_html' value='".$annotation['annot']."' size=90 maxlength=255".($hasColor ? " style='background-color: #FFBB88;'" : "").">") : $annotation['annot'])."&nbsp;</td>";
+					echo	"<td>".($lockState == 1 ? ("<input type=submit name='upd_annot_button_$shard_html' value='Update'>") : (""))."</td>";
 							
 					echo "</tr>\n";
 				}
@@ -324,7 +327,9 @@
 			echo "<tr valign=center>";
 			foreach ($vars as $var)
 			{
-				$display = (isset($vardisp[$var]) ? $vardisp[$var] : "<i>".$var."</i>");
+				// the heading is either a view row name the user typed or the raw
+				// variable name that came back from the service
+				$display = (isset($vardisp[$var]) ? htmlspecialchars($vardisp[$var], ENT_QUOTES) : "<i>".htmlspecialchars($var, ENT_QUOTES)."</i>");
 				if ($var == "shard" || $var == "server" || $var == "service"  || $var == "entity" || !$condensed)
 					echo "<th>$display</th>";
 				else
@@ -390,13 +395,18 @@
 						}
 
 						$vval = ($var == "service" ? $serviceName : $val);
-						if ($var == "shard")				$selects = "&filter_shard=$shard";
-						else if ($var == "server")			$selects = "&filter_shard=$shard&filter_server=$server";
-						else if ($var == "service")			$selects = "&filter_shard=$shard&filter_server=$server&filter_service=$service";
-						else if ($var == "entity")			$selects = "&filter_shard=$shard&filter_server=$server&filter_service=$service&filter_entity=$vval";
+						// these all end up in a url and in the page: they are values
+						// the service answered with, entity names included
+						$selects = "";
+						if ($var == "shard")				$selects = "&filter_shard=".rawurlencode($shard);
+						else if ($var == "server")			$selects = "&filter_shard=".rawurlencode($shard)."&filter_server=".rawurlencode($server);
+						else if ($var == "service")			$selects = "&filter_shard=".rawurlencode($shard)."&filter_server=".rawurlencode($server)."&filter_service=".rawurlencode($service);
+						else if ($var == "entity")			$selects = "&filter_shard=".rawurlencode($shard)."&filter_server=".rawurlencode($server)."&filter_service=".rawurlencode($service)."&filter_entity=".rawurlencode($vval);
 						$vval .= ",Default".ucfirst(strtolower($var == "entity" ? "player" : $var)).(isset($current_tname) ? ",$current_tname" : "");
 
-						echo "<td bgcolor=$bgcolor2 nowrap>&nbsp;<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?select_view=$vval$selects'>$val</a>".((($admlogin=="root" || $IsNevrax) && $var=="service") ? "&nbsp;<a href='commands.php?preselServ=$shard.$server.$serviceAlias'><font size=1>[cmd]</font></a>" : "")."</td>";
+						$href = htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?select_view=".htmlspecialchars(rawurlencode($vval).$selects, ENT_QUOTES);
+						$cmdhref = "commands.php?preselServ=".htmlspecialchars(rawurlencode($shard.".".$server.".".$serviceAlias), ENT_QUOTES);
+						echo "<td bgcolor=$bgcolor2 nowrap>&nbsp;<a href='$href'>".htmlspecialchars($val, ENT_QUOTES)."</a>".((($admlogin=="root" || $IsNevrax) && $var=="service") ? "&nbsp;<a href='$cmdhref'><font size=1>[cmd]</font></a>" : "")."</td>";
 					}
 
 					$numprev = $j;
@@ -448,15 +458,19 @@
 
 						if ($privilege[$var] == 'rw' && $shardLockState[$shard]['lock_state'] == 1)
 						{
-							$valdisp = "<input name='updvar_$shard|$server|$serviceAlias|".(isset($entity)?"$entity|":"")."$var' value='$val' size=16 maxlength=64 style='background-color: $btcolor;'><input type=hidden name='prevvar_$shard|$server|$serviceAlias|".(isset($entity)?"$entity|":"")."$var' value='$val'>";
+							// html escaping is transparent for the field name: the
+							// browser posts back the decoded value either way
+							$fieldkey = htmlspecialchars($shard."|".$server."|".$serviceAlias."|".(isset($entity)?$entity."|":"").$var, ENT_QUOTES);
+							$val_html = htmlspecialchars($val, ENT_QUOTES);
+							$valdisp = "<input name='updvar_$fieldkey' value='$val_html' size=16 maxlength=64 style='background-color: $btcolor;'><input type=hidden name='prevvar_$fieldkey' value='$val_html'>";
 							$dispUpdateButton = true;
 						}
 						else
 						{
-							$valdisp = "$val";
+							$valdisp = htmlspecialchars($val, ENT_QUOTES);
 						}
 
-						echo "<td>$var</td><td bgcolor=$btcolor nowrap>$valdisp</td></tr>\n";
+						echo "<td>".htmlspecialchars($var, ENT_QUOTES)."</td><td bgcolor=$btcolor nowrap>$valdisp</td></tr>\n";
 					}
 				}
 			}
@@ -548,24 +562,33 @@
 						if ($privilege[$var] == 'rw' && $shardLockState[$shard]['lock_state'] == 1)
 						{
 							$len = max(min($maxvarwidth[$var], 16), 4);
-							$valdisp = "<input name='updvar_$shard|$server|$serviceAlias|".(isset($entity)?"$entity|":"")."$var' value='$val' size=$len maxlength=64 style='background-color: $btcolor;'><input type=hidden name='prevvar_$shard|$server|$serviceAlias|".(isset($entity)?"$entity|":"")."$var' value='$val'>";
+							// html escaping is transparent for the field name: the
+							// browser posts back the decoded value either way
+							$fieldkey = htmlspecialchars($shard."|".$server."|".$serviceAlias."|".(isset($entity)?$entity."|":"").$var, ENT_QUOTES);
+							$val_html = htmlspecialchars($val, ENT_QUOTES);
+							$valdisp = "<input name='updvar_$fieldkey' value='$val_html' size=$len maxlength=64 style='background-color: $btcolor;'><input type=hidden name='prevvar_$fieldkey' value='$val_html'>";
 							$dispUpdateButton = true;
 						}
 						else
 						{
-							$valdisp = "$val";
+							$valdisp = htmlspecialchars($val, ENT_QUOTES);
 						}
 
 						if ($addlink)
 						{
 							$vval = ($var == "service" ? $serviceName : $val);
-							if ($var == "shard")				$selects = "&filter_shard=$shard";
-							else if ($var == "server")			$selects = "&filter_shard=$shard&filter_server=$server";
-							else if ($var == "service")			$selects = "&filter_shard=$shard&filter_server=$server&filter_service=$vval";
-							else if ($var == "entity")			$selects = "&filter_shard=$shard&filter_server=$server&filter_service=$service&filter_entity=$vval";
+							// these all end up in a url and in the page: they are
+							// values the service answered with, entity names included
+							$selects = "";
+							if ($var == "shard")				$selects = "&filter_shard=".rawurlencode($shard);
+							else if ($var == "server")			$selects = "&filter_shard=".rawurlencode($shard)."&filter_server=".rawurlencode($server);
+							else if ($var == "service")			$selects = "&filter_shard=".rawurlencode($shard)."&filter_server=".rawurlencode($server)."&filter_service=".rawurlencode($vval);
+							else if ($var == "entity")			$selects = "&filter_shard=".rawurlencode($shard)."&filter_server=".rawurlencode($server)."&filter_service=".rawurlencode($service)."&filter_entity=".rawurlencode($vval);
 							$vval .= ",Default".ucfirst(strtolower($var == "entity" ? "player" : $var)).(isset($current_tname) ? ",$current_tname" : "");
 
-							$line .= "<td bgcolor=$btcolor nowrap>&nbsp;<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?select_view=$vval$selects'>$valdisp</a>".((($admlogin=="root" || $IsNevrax) && $var=="service") ? "&nbsp;<a href='commands.php?preselServ=$shard.$server.$serviceAlias'><font size=1>[cmd]</font></a>" : "")."&nbsp;</td>";
+							$href = htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?select_view=".htmlspecialchars(rawurlencode($vval).$selects, ENT_QUOTES);
+							$cmdhref = "commands.php?preselServ=".htmlspecialchars(rawurlencode($shard.".".$server.".".$serviceAlias), ENT_QUOTES);
+							$line .= "<td bgcolor=$btcolor nowrap>&nbsp;<a href='$href'>$valdisp</a>".((($admlogin=="root" || $IsNevrax) && $var=="service") ? "&nbsp;<a href='$cmdhref'><font size=1>[cmd]</font></a>" : "")."&nbsp;</td>";
 						}
 						else
 						{
@@ -588,7 +611,7 @@
 				{
 					$len = max(min($maxvarwidth[$var], 16), 4);
 					if ($var != "shard" && $var != "server" && $var != "service" && $var != "entity" && $privilege[$var] == 'rw')
-						echo "<td>&nbsp;<input name='override_$var' size=$len maxlength=64>&nbsp;</td>";
+						echo "<td>&nbsp;<input name='override_".htmlspecialchars($var, ENT_QUOTES)."' size=$len maxlength=64>&nbsp;</td>";
 					else
 						echo "<td><i>&nbsp;All</i></td>";
 				}

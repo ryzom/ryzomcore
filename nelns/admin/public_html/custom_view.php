@@ -112,14 +112,14 @@
 		$result = sqlquery("SELECT tid FROM view_table WHERE uid='".intval($uid)."' AND name='".sqlescape($viewname)."'");
 		if ($result && mysql_num_rows($result) != 0)
 		{
-			$error = $error."Couldn't create view '$viewname', name already in use<br>\n";
+			$error = $error."Couldn't create view '".htmlspecialchars($viewname, ENT_QUOTES)."', name already in use<br>\n";
 		}
 		else
 		{
 			$result = sqlquery("INSERT INTO view_table SET uid='".intval($uid)."', name='".sqlescape($viewname)."', ordering='255'");
 			if (!$result)
 			{
-				$error = $error."Couldn't create view '$viewname', mySQL request failed<br>\n";
+				$error = $error."Couldn't create view '".htmlspecialchars($viewname, ENT_QUOTES)."', mySQL request failed<br>\n";
 			}
 			$result = sqlquery("SELECT tid FROM view_table WHERE uid='".intval($uid)."' AND name='".sqlescape($viewname)."'");
 			$result = mysql_fetch_array($result);
@@ -160,7 +160,7 @@
 		if (!($result = sqlquery("DELETE FROM view_table WHERE uid='".intval($uid)."' AND tid='".intval($removeView)."'"))
 			 || mysql_affected_rows() < 1)
 		{
-			$error = $error."Couldn't remove view $removeView, missing or user doesn't own it<br>\n";
+			$error = $error."Couldn't remove view ".htmlspecialchars($removeView, ENT_QUOTES).", missing or user doesn't own it<br>\n";
 		}
 		else
 		{
@@ -206,7 +206,7 @@
 			if (!($resultt = sqlquery("SELECT name FROM view_table WHERE uid='".intval($uid)."' AND tid='".intval($tid)."'"))
 						|| mysql_num_rows($resultt) != 1)
 			{
-				$error = $error."Couldn't add variable $addToView to view $tid, view is missing or user doesn't own it<br>\n";
+				$error = $error."Couldn't add variable ".htmlspecialchars($addToView, ENT_QUOTES)." to view ".htmlspecialchars($tid, ENT_QUOTES).", view is missing or user doesn't own it<br>\n";
 			}
 			else
 			{
@@ -228,7 +228,7 @@
 			if (!($result = sqlquery("DELETE FROM view_row WHERE tid='".intval($tid)."' AND ordering='".intval($removeRow)."'"))
 				 || mysql_affected_rows() < 1)
 			{
-				$error = $error."Couldn't remove row $removeRow, missing or user doesn't own it<br>\n";
+				$error = $error."Couldn't remove row ".htmlspecialchars($removeRow, ENT_QUOTES).", missing or user doesn't own it<br>\n";
 			}
 			else
 			{
@@ -397,18 +397,18 @@
 	if (isset($groupViews) && count($groupViews)>0)
 	{
 		echo "<td width=40></td><td>\n";
-		echo "<b>$group views: </b>".help("View")."<br><font size=0>(click name to view table, click radio to select as default view)</font><br>\n";
+		echo "<b>".htmlspecialchars($group, ENT_QUOTES)." views: </b>".help("View")."<br><font size=0>(click name to view table, click radio to select as default view)</font><br>\n";
 		echo "<table border=1>\n";
 		echo "<tr><th>Index</th><th>[Default] View</th><th>Commands</th></tr>\n";
-		echo "<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?tid=$tid&sel_vgid=$sel_vgid'>\n";
+		echo "<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?tid=".intval($tid)."&sel_vgid=".intval($sel_vgid)."'>\n";
 		foreach ($groupViews as $arr)
 		{
 			$_tname = $arr["name"];
 			$_tid = $arr["tid"];
 			$color = ($tid == $_tid ? " bgcolor=#eeeeee" : "");
-			echo "<tr><td$color>".$arr["ordering"]."</td>".
-						"<td$color><input type=radio name=default_view value='$_tid' onClick='submit()'".($_tid==$default_view ? " checked" : "")."><a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?tid=$_tid&sel_vgid=$sel_vgid'>$_tname</a></td>".
-						"<td$color><a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?dupView=true&tid=$_tid&offs=-1&sel_vgid=$sel_vgid'>Duplicate</a></td></tr>\n";
+			echo "<tr><td$color>".intval($arr["ordering"])."</td>".
+						"<td$color><input type=radio name=default_view value='".intval($_tid)."' onClick='submit()'".($_tid==$default_view ? " checked" : "")."><a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?tid=".intval($_tid)."&sel_vgid=".intval($sel_vgid)."'>".htmlspecialchars($_tname, ENT_QUOTES)."</a></td>".
+						"<td$color><a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?dupView=true&tid=".intval($_tid)."&offs=-1&sel_vgid=".intval($sel_vgid)."'>Duplicate</a></td></tr>\n";
 		}
 		echo "</form>\n";
 		echo "</table><br>\n";
@@ -422,7 +422,7 @@
 		$result = sqlquery("SELECT name, uid, filter, display, auto_display, refresh_rate FROM view_table WHERE (uid='".intval($uid)."' OR uid='".intval($gid)."') AND tid='".intval($tid)."'");
 		if (!$result || mysql_num_rows($result) == 0)
 		{
-			echo "<br><b>Can't display table $tid</b><br>\n";
+			echo "<br><b>Can't display table ".htmlspecialchars($tid, ENT_QUOTES)."</b><br>\n";
 		}
 		else
 		{
@@ -482,24 +482,24 @@
 				if ($ownView)
 				{
 					echo "<tr>".
-								"<td>".$arr["ordering"]."</td>".
-								"<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=$sel_vgid&vid=$vid&tid=$tid'><td><input type=text name=changeVarName maxlength=128 size=16 value='".$arr["name"]."'></td></form>".
-								"<td>".$arr["path"]."</td>".
-								"<td>$priv</td>".
-								"<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=$sel_vgid&vid=$vid&tid=$tid'><td><input type=text name=changeVarFilter maxlength=64 size=16 value='".$arr["filter"]."'></td></form>".
-								"<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=$sel_vgid&changeVidGraph=$vid&tid=$tid'><td><input type=checkBox name=graphState".($arr["graph"] != 0 ? " checked" : "")." onClick='submit()'></td></form>".
-								"<td><a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?removeRow=$ordering&tid=$tid&sel_vgid=$sel_vgid' onClick=\"return confirm('You are about to delete a Variable from a View')\">Delete</a> ".
-									 "<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?moveRow=$ordering&tid=$tid&offs=+1&sel_vgid=$sel_vgid'>-</a> ".
-									 "<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?moveRow=$ordering&tid=$tid&offs=-1&sel_vgid=$sel_vgid'>+</a></td></tr>\n";
+								"<td>".intval($arr["ordering"])."</td>".
+								"<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=".intval($sel_vgid)."&vid=".intval($vid)."&tid=".intval($tid)."'><td><input type=text name=changeVarName maxlength=128 size=16 value='".htmlspecialchars($arr["name"], ENT_QUOTES)."'></td></form>".
+								"<td>".htmlspecialchars($arr["path"], ENT_QUOTES)."</td>".
+								"<td>".htmlspecialchars($priv, ENT_QUOTES)."</td>".
+								"<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=".intval($sel_vgid)."&vid=".intval($vid)."&tid=".intval($tid)."'><td><input type=text name=changeVarFilter maxlength=64 size=16 value='".htmlspecialchars($arr["filter"], ENT_QUOTES)."'></td></form>".
+								"<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=".intval($sel_vgid)."&changeVidGraph=".intval($vid)."&tid=".intval($tid)."'><td><input type=checkBox name=graphState".($arr["graph"] != 0 ? " checked" : "")." onClick='submit()'></td></form>".
+								"<td><a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?removeRow=".intval($ordering)."&tid=".intval($tid)."&sel_vgid=".intval($sel_vgid)."' onClick=\"return confirm('You are about to delete a Variable from a View')\">Delete</a> ".
+									 "<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?moveRow=".intval($ordering)."&tid=".intval($tid)."&offs=+1&sel_vgid=".intval($sel_vgid)."'>-</a> ".
+									 "<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?moveRow=".intval($ordering)."&tid=".intval($tid)."&offs=-1&sel_vgid=".intval($sel_vgid)."'>+</a></td></tr>\n";
 				}
 				else
 				{
 					echo "<tr>".
-								"<td>".$arr["ordering"]."</td>".
-								"<td>".$arr["name"]."</td>".
-								"<td>".$arr["path"]."</td>".
-								"<td>$priv</td>".
-								"<td>".$arr["filter"]."</td>".
+								"<td>".intval($arr["ordering"])."</td>".
+								"<td>".htmlspecialchars($arr["name"], ENT_QUOTES)."</td>".
+								"<td>".htmlspecialchars($arr["path"], ENT_QUOTES)."</td>".
+								"<td>".htmlspecialchars($priv, ENT_QUOTES)."</td>".
+								"<td>".htmlspecialchars($arr["filter"], ENT_QUOTES)."</td>".
 								"<td>".($arr["graph"] != 0 ? "Yes" : "No")."</td>".
 								"<td></td></tr>\n";
 				}
@@ -532,22 +532,22 @@
 				if ($ownView)
 				{
 					echo "<tr>".
-								"<td>".$arr["ordering"]."</td>".
-								"<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=$sel_vgid&vid=$vid&tid=$tid'><td><input type=text name=changeVarName maxlength=128 size=16 value='".$arr["name"]."'></td></form>".
-								"<td colspan=2>".$arr["path"]."</td>".
-								"<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=$sel_vgid&vid=$vid&tid=$tid'><td colspan=2><input type=text name=changeVarFilter maxlength=64 size=16 value='".$arr["filter"]."'></td></form>".
-								"<td><a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?removeRow=$ordering&tid=$tid&sel_vgid=$sel_vgid' onClick=\"return confirm('You are about to delete a Variable from a View')\">Delete</a> ".
-									 "<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?moveRow=$ordering&tid=$tid&offs=+1&sel_vgid=$sel_vgid'>-</a> ".
-									 "<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?moveRow=$ordering&tid=$tid&offs=-1&sel_vgid=$sel_vgid'>+</a></td></tr>\n";
+								"<td>".intval($arr["ordering"])."</td>".
+								"<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=".intval($sel_vgid)."&vid=".intval($vid)."&tid=".intval($tid)."'><td><input type=text name=changeVarName maxlength=128 size=16 value='".htmlspecialchars($arr["name"], ENT_QUOTES)."'></td></form>".
+								"<td colspan=2>".htmlspecialchars($arr["path"], ENT_QUOTES)."</td>".
+								"<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?sel_vgid=".intval($sel_vgid)."&vid=".intval($vid)."&tid=".intval($tid)."'><td colspan=2><input type=text name=changeVarFilter maxlength=64 size=16 value='".htmlspecialchars($arr["filter"], ENT_QUOTES)."'></td></form>".
+								"<td><a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?removeRow=".intval($ordering)."&tid=".intval($tid)."&sel_vgid=".intval($sel_vgid)."' onClick=\"return confirm('You are about to delete a Variable from a View')\">Delete</a> ".
+									 "<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?moveRow=".intval($ordering)."&tid=".intval($tid)."&offs=+1&sel_vgid=".intval($sel_vgid)."'>-</a> ".
+									 "<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?moveRow=".intval($ordering)."&tid=".intval($tid)."&offs=-1&sel_vgid=".intval($sel_vgid)."'>+</a></td></tr>\n";
 				}
 				else
 				{
 					echo "<tr>".
-								"<td>".$arr["ordering"]."</td>".
-								"<td>".$arr["name"]."</td>".
-								"<td>".$arr["path"]."</td>".
-								"<td>$priv</td>".
-								"<td>".$arr["filter"]."</td>".
+								"<td>".intval($arr["ordering"])."</td>".
+								"<td>".htmlspecialchars($arr["name"], ENT_QUOTES)."</td>".
+								"<td>".htmlspecialchars($arr["path"], ENT_QUOTES)."</td>".
+								"<td>".htmlspecialchars($priv, ENT_QUOTES)."</td>".
+								"<td>".htmlspecialchars($arr["filter"], ENT_QUOTES)."</td>".
 								"<td>".($arr["graph"] != 0 ? "Yes" : "No")."</td>".
 								"<td></td></tr>\n";
 				}
