@@ -45,10 +45,10 @@ function connect_database($continue, $name) {
 			$cfg['db'][$name]['name'],
 			$cfg['db'][$name]['port']);
 		if (mysqli_connect_errno()) {
-			printalert("danger", "Failed to connect to the <em>" . $name . "</em> SQL server: " . mysqli_connect_error());
+			printalert("danger", "Failed to connect to the <em>" . htmlentities($name) . "</em> SQL server: " . htmlentities(mysqli_connect_error()));
 			$con = null;
 		} else {
-			printalert("success", "Connected to the <em>" . $name . "</em> SQL server");
+			printalert("success", "Connected to the <em>" . htmlentities($name) . "</em> SQL server");
 		}
 	}
 
@@ -58,7 +58,7 @@ function connect_database($continue, $name) {
 function disconnect_database($con, $name) {
 	if ($con) {
 		mysqli_close($con);
-		printalert("info", "Disconnected from the <em>" . $name . "</em> SQL server");
+		printalert("info", "Disconnected from the <em>" . htmlentities($name) . "</em> SQL server");
 	}
 }
 

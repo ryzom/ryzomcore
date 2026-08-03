@@ -64,18 +64,18 @@ function create_use_database($continue_r, $con, $database) {
 	if ($continue) {
 		$sql = "CREATE DATABASE `" . mysqli_real_escape_string($con, $database) . "` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;";
 		if (mysqli_query($con, $sql)) {
-			printalert("success", "Database <em>" . $database . "</em> created");
+			printalert("success", "Database <em>" . htmlentities($database) . "</em> created");
 		} else {
-			printalert("danger", "Error creating <em>" . $database . "</em> database: " . mysqli_error($con));
+			printalert("danger", "Error creating <em>" . htmlentities($database) . "</em> database: " . htmlentities(mysqli_error($con)));
 			$continue = false;
 		}
 	}
 	if ($continue) {
 		$sql = "USE `" . mysqli_real_escape_string($con, $database) . "`;";
 		if (mysqli_query($con, $sql)) {
-			printalert("success", "Database <em>" . $database . "</em> selected");
+			printalert("success", "Database <em>" . htmlentities($database) . "</em> selected");
 		} else {
-			printalert("danger", "Error selecting <em>" . $database . "</em> database: " . mysqli_error($con));
+			printalert("danger", "Error selecting <em>" . htmlentities($database) . "</em> database: " . htmlentities(mysqli_error($con)));
 			$continue = false;
 		}
 	}
@@ -87,17 +87,17 @@ function update_database_structure($continue_r, $con, $file) {
 	if ($continue) {
 		$sql = file_get_contents($PRIVATE_PHP_PATH . "/setup/sql/" . $file);
 		if (!$sql) {
-			printalert("danger", "Cannot read <em>" . $file . "</em>");
+			printalert("danger", "Cannot read <em>" . htmlentities($file) . "</em>");
 			$continue = false;
 		} else {
-			printalert("info", "Running script <em>" . $file . "</em>");
+			printalert("info", "Running script <em>" . htmlentities($file) . "</em>");
 			if (mysqli_multi_query($con, $sql)) {
-				printalert("success", "Database structure updated using <em>" . $file . "</em>");
+				printalert("success", "Database structure updated using <em>" . htmlentities($file) . "</em>");
 				while (mysqli_more_results($con) && mysqli_next_result($con)) {
 					// no-op
 				}
 			} else {
-				printalert("danger", "Error updating database using <em>" . $file . "</em>: " . mysqli_error($con));
+				printalert("danger", "Error updating database using <em>" . htmlentities($file) . "</em>: " . htmlentities(mysqli_error($con)));
 				$continue = false;
 			}
 		}
@@ -113,16 +113,16 @@ function update_database_configure($continue_r, $con, $file) {
 		$shardDevDir = str_replace('/www', '', str_replace('\\', '/', $_POST["domainUsersDir"]));
 		$sql = str_replace('%RC_SHARD_DEV%', mysqli_real_escape_string($con, $shardDevDir), $sql);
 		if (!$sql) {
-			printalert("danger", "Cannot read <em>" . $file . "</em>");
+			printalert("danger", "Cannot read <em>" . htmlentities($file) . "</em>");
 			$continue = false;
 		} else {
 			if (mysqli_multi_query($con, $sql)) {
-				printalert("success", "Database updated using <em>" . $file . "</em>");
+				printalert("success", "Database updated using <em>" . htmlentities($file) . "</em>");
 				while (mysqli_more_results($con) && mysqli_next_result($con)) {
 					// no-op
 				}
 			} else {
-				printalert("danger", "Error updating database using <em>" . $file . "</em>: " . mysqli_error($con));
+				printalert("danger", "Error updating database using <em>" . htmlentities($file) . "</em>: " . htmlentities(mysqli_error($con)));
 				$continue = false;
 			}
 		}
