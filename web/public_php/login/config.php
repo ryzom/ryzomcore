@@ -4,6 +4,14 @@
 
 require_once dirname(__DIR__).'/config.php';
 
+// php 8.1 turned exception reporting on by default for mysqli: every
+// `... or die(errorMsg...)` error path in this stack became unreachable,
+// a failed connect or query surfaced as an uncaught-exception fatal with
+// a stack trace instead of the intended protocol error line. This stack
+// checks its results by hand; keep the classic reporting mode.
+if (function_exists('mysqli_report'))
+	mysqli_report(MYSQLI_REPORT_OFF);
+
 // !! IMPORTANT !! keep these outside public webroot
 $LogRelativePath = '../../logs/';
 

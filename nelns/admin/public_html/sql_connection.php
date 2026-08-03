@@ -26,6 +26,10 @@
 	function connectToDatabase($dbhost, $dbname, $dblogin, $dbpasswd)
 	{
 		global	$sqlLink;
+		// php 8.1 defaults mysqli to exception reporting; the wrappers below
+		// check their results themselves, keep the classic mode
+		if (function_exists('mysqli_report'))
+			mysqli_report(MYSQLI_REPORT_OFF);
 		$sqlLink = @mysqli_connect($dbhost, $dblogin, $dbpasswd);
 		if (!$sqlLink)
 			return "Unable to connect to MySQL server";

@@ -31,6 +31,11 @@ if(!defined("SQL_LAYER"))
 
 define("SQL_LAYER","mysqli");
 
+// php 8.1 defaults mysqli to exception reporting; this class checks
+// return values itself, so keep the classic mode
+if (function_exists('mysqli_report'))
+	mysqli_report(MYSQLI_REPORT_OFF);
+
 class sql_db
 {
 

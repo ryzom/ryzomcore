@@ -95,6 +95,10 @@ class BugReportGatherApp
 			return;
 		}
 
+		// php 8.1 defaults mysqli to exception reporting; this class checks
+		// mysqli_connect_error() itself, keep the classic mode
+		if (function_exists('mysqli_report'))
+			mysqli_report(MYSQLI_REPORT_OFF);
 		$this->db = new mysqli( BugReportConfig::$dbhost, BugReportConfig::$dbuser, BugReportConfig::$dbpw, BugReportConfig::$dbdb, BugReportConfig::$dbport );
 		if( mysqli_connect_error() )
 		{

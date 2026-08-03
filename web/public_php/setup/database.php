@@ -1,5 +1,10 @@
 <?php
 
+// php 8.1 defaults mysqli to exception reporting; the helpers below check
+// mysqli_connect_errno()/return values themselves, keep the classic mode
+if (function_exists('mysqli_report'))
+	mysqli_report(MYSQLI_REPORT_OFF);
+
 // Service
 $db_nel = 7;
 $db_nel_tool = 3;

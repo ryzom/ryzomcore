@@ -10,7 +10,7 @@
 	if (!isset($NELTOOL['GET_VARS']['toolmode']))	$NELTOOL['GET_VARS']['toolmode'] = 'help';
 	$tool_menu_item = tool_admin_menu_get_item_from_key($NELTOOL['GET_VARS']['toolmode']);
 
-	$IE_CHECK = strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE');
+	$IE_CHECK = isset($_SERVER['HTTP_USER_AGENT']) ? strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') : false;
 
 	$tpl->assign('tool_title',		'Administration&nbsp;/&nbsp;'. $tool_menu_item['title']);
 	$tpl->assign('tool_menu',		tool_admin_menu_get_list($IE_CHECK)); //$tool_admin_menu); // defined in 'functions_tool_administration.php'

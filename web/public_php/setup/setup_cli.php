@@ -40,6 +40,11 @@ if (PHP_SAPI !== 'cli') {
 error_reporting(E_ALL);
 ini_set('display_errors', 'on');
 
+// php 8.1 defaults mysqli to exception reporting; this script and the
+// helpers it includes check their results by hand
+if (function_exists('mysqli_report'))
+	mysqli_report(MYSQLI_REPORT_OFF);
+
 // ANSI colors
 function cli_info($msg) { echo "\033[36m[INFO]\033[0m $msg\n"; }
 function cli_ok($msg) { echo "\033[32m[ OK ]\033[0m $msg\n"; }
